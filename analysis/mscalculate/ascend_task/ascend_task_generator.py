@@ -57,16 +57,16 @@ class AscendTaskGenerator:
     def _gen_top_down_task(self, dt: DeviceTask, ht: HostTask) -> TopDownTask:
         # wait time will calculate after this
         return TopDownTask(ht.model_id, self.iter_id, ht.stream_id, ht.task_id, dt.context_id, ht.batch_id,
-                           dt.start_time, dt.duration, ht.task_type, dt.task_type)
+                           dt.start_time, dt.duration, ht.task_type, dt.task_type, ht.connection_id)
 
     def _gen_top_down_task_by_device_task(self, dt: DeviceTask) -> TopDownTask:
         return TopDownTask(Constant.GE_OP_MODEL_ID, self.iter_id, dt.stream_id, dt.task_id, dt.context_id,
                            NumberConstant.DEFAULT_BATCH_ID, dt.start_time, dt.duration,
-                           Constant.TASK_TYPE_UNKNOWN, dt.task_type)
+                           Constant.TASK_TYPE_UNKNOWN, dt.task_type, Constant.DEFAULT_INVALID_VALUE)
 
     def _gen_top_down_task_by_host_task(self, ht: HostTask) -> TopDownTask:
         return TopDownTask(ht.model_id, self.iter_id, ht.stream_id, ht.task_id, NumberConstant.DEFAULT_GE_CONTEXT_ID,
-                           ht.batch_id, -1, -1, ht.task_type, Constant.TASK_TYPE_UNKNOWN)
+                           ht.batch_id, -1, -1, ht.task_type, Constant.TASK_TYPE_UNKNOWN, ht.connection_id)
 
     def _match_host_device_task_in_static_model(self, host_task: HostTask, device_tasks: List[DeviceTask]) \
             -> List[TopDownTask]:

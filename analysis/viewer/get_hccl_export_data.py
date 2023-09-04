@@ -129,7 +129,9 @@ class HCCLExport:
             _hccl_format_op_data = [
                 [
                     hccl_op.op_name, self.pid_value, self.hccl_groups.get(hccl_op.group_name).start_index,
-                    hccl_op.timestamp / NumberConstant.NS_TO_US, hccl_op.duration / NumberConstant.NS_TO_US
+                    hccl_op.timestamp / NumberConstant.NS_TO_US,
+                    hccl_op.duration / NumberConstant.NS_TO_US,
+                    {"connection_id": hccl_op.connection_id},
                 ]
                 for hccl_op in hccl_op_data
             ]
