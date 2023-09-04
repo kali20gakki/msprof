@@ -1,10 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
-
+import json
+import os
+import glob
+import logging
+from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from msmodel.interface.view_model import ViewModel
-from viewer.runtime_report import add_mem_bound
+from viewer.runtime_report import add_mem_bound, add_cube_usage
 
 
 class DataManager:
@@ -33,6 +37,53 @@ class DataManager:
             key = "{}-{}".format(sub[1], sub[2])  # key is task_id-stream_id
             task_op_dict[key] = sub[0]  # value is op_name
         return task_op_dict
+
+    @classmethod
+    def add_cube_usage(cls: any, project_path: str, headers: list, data: list) -> None:
+        """
+        add cube usage data
+        """
+        info_json_path = None
+        for file in glob.glob(os.path.join(project_path, 'info.json.*[0-9]')):
+            info_json_path = file
+        try:
+            with open(info_json_path, "r") as json_reader:
+                json_data = json_reader.readline(Constant.MAX_READ_LINE_BYTES)
+                json_data = json.loads(json_data)
+                device_info = json_data.get('DeviceInfo')[0]
+                ai_core_num = device_info.get('ai_core_num')
+                aic_frequency = float(device_info.get('aic_frequency'))
+
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            logging.error("Cube utilization: info_json data read fail")
+            return
+
+        try:
+            mac_ratio_index = -1
+            ratio_index_int8 = -1
+            ratio_index_fp16 = -1
+            for item in headers:
+                if item in ("mac_ratio", "aic_mac_ration"):
+                    mac_ratio_index = headers.index("mac_ratio") if "mac_ratio" in headers else headers.index(
+                        "aic_mac_ratio")
+                elif item == "mac_int8_ratio":
+                    ratio_index_int8 = headers.index("mac_int8_ratio")
+                elif item == "mac_fp16_ratio":
+                    ratio_index_fp16 = headers.index("mac_fp16_ratio")
+
+            total_cycles_index = headers.index("total_cycles") if "total_cycles" in headers else None
+            task_duration_index = headers.index("Task Duration(us)") if "Task Duration(us)" in headers else None
+            if task_duration_index:
+                headers.append("cube utilization")
+            for index, row in enumerate(data):
+                if task_duration_index and mac_ratio_index and total_cycles_index:
+                    data[index] = add_cube_usage(list(row), task_duration_index, mac_ratio_index, ratio_index_int8,
+                                                 ratio_index_fp16, total_cycles_index, aic_frequency, ai_core_num)
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            logging.error("Cube utilization: cube info not found")
+            return
 
     @classmethod
     def add_memory_bound(cls: any, headers: list, data: list) -> None:
