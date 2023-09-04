@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
 import json
+import logging
+import os
 from collections import OrderedDict
 from dataclasses import dataclass
 from typing import List
@@ -11,6 +13,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.path_manager import PathManager
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from msmodel.hccl.hccl_model import HcclViewModel
