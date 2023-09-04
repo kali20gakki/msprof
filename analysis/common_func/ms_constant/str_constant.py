@@ -105,6 +105,8 @@ class StrConstant:
     ASYNC_ACL_NPU = "async_acl_npu"
     ASYNC_NPU = "async_npu"
 
+    HOST_TO_DEVICE = "HostToDevice"
+
     # pmu task type
     CONTEXT_PMU_TYPE = 'context_task'
     BLOCK_PMU_TYPE = 'block_task'

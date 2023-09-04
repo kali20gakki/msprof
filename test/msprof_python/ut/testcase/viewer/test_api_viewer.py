@@ -68,4 +68,4 @@ class TestApiViewer(unittest.TestCase):
                              '{"name": "1", "pid": 100, "tid": 4, '
                              '"ts": 0.002, "dur": 0.003, "args": '
                              '{"Thread Id": 4, "Mode": 1, "level": 5, "id": 6, '
-                             '"item_id": 7}, "ph": "X"}]', ret)
+                             '"item_id": 7, "connection_id": 8}, "ph": "X"}]', ret)
