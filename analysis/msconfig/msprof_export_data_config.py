@@ -202,7 +202,7 @@ class MsProfExportDataConfig(MetaConfig):
             ('handler', '_get_bulk_data')
         ],
         'ffts_sub_task_time': [
-            ('handler', '_get_sub_task_time'),
+            ('handler', '_get_task_timeline'),
             ('db', 'soc_log.db'),
             ('table', 'FftsLog')
         ],

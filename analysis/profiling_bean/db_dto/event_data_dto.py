@@ -11,6 +11,7 @@ class EventDataDto:
         self._request_id = None
         self._timestamp = None
         self._item_id = None
+        self._connection_id = None
 
     @property
     def level(self: any) -> str:
@@ -36,6 +37,10 @@ class EventDataDto:
     def item_id(self: any) -> int:
         return self._item_id
 
+    @property
+    def connection_id(self) -> int:
+        return self._connection_id
+
     @level.setter
     def level(self: any, value: any) -> None:
         self._level = value
@@ -59,3 +64,7 @@ class EventDataDto:
     @item_id.setter
     def item_id(self: any, value: any) -> None:
         self._item_id = value
+
+    @connection_id.setter
+    def connection_id(self, value: int) -> None:
+        self._connection_id = value

@@ -135,7 +135,7 @@ class TestOpSummaryOpSceneCalculator(unittest.TestCase):
         check = OpSummaryOpSceneCalculator(file_list, CONFIG)
         self.assertEqual(check.get_task_time_data(), [])
         with mock.patch(NAMESPACE + '.AscendTaskModel.get_all_data',
-                        return_value=[[1, 1, 1, 1, 1, 1, 1000, 1000, 'AI_CORE', 'AI_CORE']]):
+                        return_value=[[1, 1, 1, 1, 1, 1, 1000, 1000, 'AI_CORE', 'AI_CORE', 0]]):
             self.assertEqual(check.get_task_time_data(), [[1, 1, 1000, 1000, 0, 'AI_CORE', 1, 1, 1, 1]])
 
     def test_create_task_time_table(self):

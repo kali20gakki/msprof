@@ -36,6 +36,7 @@ class HcclDto:
         self._notify_id = Constant.DEFAULT_INVALID_VALUE
         self._transport_type = Constant.NA
         self._size = Constant.DEFAULT_INVALID_VALUE
+        self._connection_id = Constant.DEFAULT_INVALID_VALUE
 
     @property
     def op_name(self: any) -> str:
@@ -137,6 +138,10 @@ class HcclDto:
     def op_type(self) -> int:
         return self._op_type
 
+    @property
+    def connection_id(self) -> int:
+        return self._connection_id
+
     @op_name.setter
     def op_name(self: any, value: str) -> None:
         self._op_name = value
@@ -192,3 +197,7 @@ class HcclDto:
     @op_type.setter
     def op_type(self, value: str):
         self._op_type = value
+
+    @connection_id.setter
+    def connection_id(self, value: int):
+        self._connection_id = value

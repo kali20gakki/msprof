@@ -19,11 +19,11 @@ class TestHcclCalculator(unittest.TestCase):
     DIR_PATH = os.path.join(os.path.dirname(__file__), 'DT_HcclCalculator')
 
     @staticmethod
-    def construct_hccl_dto(op_name, timestamp=123456, duration=0, op_type="HCCL_OP_TYPE"):
+    def construct_hccl_dto(op_name, timestamp=123456, duration=0, op_type="HCCL_OP_TYPE", connection_id=0):
         hccl_data = HcclDto()
         hccl_data.op_name, hccl_data.iteration, hccl_data.duration, hccl_data.first_timestamp, hccl_data.is_dynamic, \
-        hccl_data.model_id, hccl_data.index_id, hccl_data.task_type, hccl_data.op_type = \
-            (op_name, 1, duration, timestamp, 0, 1, 1, "HCCL", op_type)
+        hccl_data.model_id, hccl_data.index_id, hccl_data.task_type, hccl_data.op_type, hccl_data.connection_id = \
+            (op_name, 1, duration, timestamp, 0, 1, 1, "HCCL", op_type, connection_id)
         return hccl_data
 
     def setUp(self) -> None:
@@ -49,7 +49,7 @@ class TestHcclCalculator(unittest.TestCase):
             check.calculate()
             hccl_data = check._hccl_data
             hccl_op_report_data = check._hccl_op_report_data
-            self.assertEqual(14, len(hccl_data[0]))
+            self.assertEqual(15, len(hccl_data[0]))
             self.assertEqual([("all_reduce", 1.0, 1.0, 1.0, 1.0, 1.0, 100.0)], hccl_op_report_data)
 
     def test_calculate_should_return_only_hccl_data_not_valid_op_type(self):
@@ -60,14 +60,14 @@ class TestHcclCalculator(unittest.TestCase):
             check.calculate()
             hccl_data = check._hccl_data
             hccl_op_report_data = check._hccl_op_report_data
-            self.assertEqual(14, len(hccl_data[0]))
+            self.assertEqual(15, len(hccl_data[0]))
             self.assertEqual([], hccl_op_report_data)
 
     def test_generate_hccl_op_info_should_return_three_data_when_the_input_len_is_three(self):
         hccl_data = [
-            self.construct_hccl_dto("hccl_op1"),
-            self.construct_hccl_dto("hccl_op1", timestamp=123457),
-            self.construct_hccl_dto("hccl_op2", timestamp=123458)
+            self.construct_hccl_dto("hccl_op1", connection_id=0),
+            self.construct_hccl_dto("hccl_op1", timestamp=123457, connection_id=1),
+            self.construct_hccl_dto("hccl_op2", timestamp=123458, connection_id=2)
         ]
         check = HcclCalculator([], CONFIG)
         check._generate_hccl_op_info(hccl_data)
@@ -96,10 +96,10 @@ class TestHcclCalculator(unittest.TestCase):
 
     def test_get_hccl_op_data_should_return_dict_data_when_input_is_hccldto_list(self):
         hccl_data = [
-            self.construct_hccl_dto("hccl_op1", timestamp=1, duration=2, op_type="all_reduce"),
-            self.construct_hccl_dto("hccl_op2", timestamp=5, duration=3, op_type="all_reduce"),
-            self.construct_hccl_dto("hccl_op3", timestamp=10, duration=2, op_type="all_gather"),
-            self.construct_hccl_dto("hccl_op4", timestamp=15, duration=3, op_type="all_gather")
+            self.construct_hccl_dto("hccl_op1", timestamp=1, duration=2, op_type="all_reduce", connection_id=0),
+            self.construct_hccl_dto("hccl_op2", timestamp=5, duration=3, op_type="all_reduce", connection_id=1),
+            self.construct_hccl_dto("hccl_op3", timestamp=10, duration=2, op_type="all_gather", connection_id=2),
+            self.construct_hccl_dto("hccl_op4", timestamp=15, duration=3, op_type="all_gather", connection_id=3)
         ]
         check = HcclCalculator([], CONFIG)
         hccl_op_report_data = check._get_hccl_op_report_data(hccl_data)
