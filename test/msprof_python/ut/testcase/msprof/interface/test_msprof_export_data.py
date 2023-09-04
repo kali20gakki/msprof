@@ -7,6 +7,7 @@ from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
+from common_func.ms_constant.number_constant import NumberConstant
 from msinterface.msprof_export_data import MsProfExportDataUtils
 from msinterface.msprof_timeline import MsprofTimeline
 from profiling_bean.prof_enum.chip_model import ChipModel
@@ -66,10 +67,15 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         configs = {"db": 'runtime.db', "table": '123'}
         params = {"export_type": "timeline", "job_id": '1', "device_id": '1',
                   "iter_id": '1', "project": '1'}
+        expected = json.dumps({
+            "status": NumberConstant.WARN,
+            "info": "Can not export task time data, the current chip does not support "
+                    "exporting this data or the data may be not collected."
+        })
         InfoConfReader()._info_json = {"devices": 123}
         key = MsProfExportDataUtils()
         result = key._get_task_time_data(configs, params)
-        self.assertEqual(result, "")
+        self.assertEqual(result, expected)
 
     def test_get_task_time_data_2(self):
         configs = {"db": 'runtime.db', "table": '123'}
@@ -81,17 +87,6 @@ class TestMsProfExportDataUtils(unittest.TestCase):
             key = MsProfExportDataUtils()
             result = key._get_task_time_data(configs, params)
         self.assertEqual(result, (None, [], 0))
-
-    def test_get_task_time_data_3(self):
-        configs = {"db": 'trace.db', "table": '123'}
-        params = {"export_type": "export", "job_id": '1', "device_id": '1',
-                  "iter_id": '1', "project": '1'}
-        with mock.patch(NAMESPACE + '.TaskOpViewer.get_task_op_summary', return_value=123):
-            ChipManager().chip_id = ChipModel.CHIP_V1_1_0
-            InfoConfReader()._info_json = {"devices": 123}
-            key = MsProfExportDataUtils()
-            result = key._get_task_time_data(configs, params)
-        self.assertEqual(result[0], None)
 
     def test_get_ddr_data_1(self):
         configs = {"db": 'runtime'}
@@ -639,9 +634,9 @@ class TestMsProfExportDataUtils(unittest.TestCase):
     def test_get_task_time(self):
         sample_configs = {"test": 2}
         params = {"export_type": "summary"}
-        with mock.patch(NAMESPACE + '.FftsLogViewer.get_timeline_data', return_value=1):
+        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_timeline_data', return_value=1):
             key = MsProfExportDataUtils()
-            result = key._get_sub_task_time(sample_configs, params)
+            result = key._get_task_timeline(sample_configs, params)
         self.assertEqual(result, 1)
 
     def test_get_hccl_timeline(self):

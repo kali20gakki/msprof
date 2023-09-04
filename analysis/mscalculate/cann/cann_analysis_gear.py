@@ -474,15 +474,17 @@ class TaskGear(CANNGear):
     def add_host_task(self, call_stack: dict, task_track_dto: TaskTrackDto):
         model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
         model_dto: ApiDataDto = self.db.get_api(model_event)
+        node_event: Event = call_stack.get(Constant.NODE_LEVEL)
+        node_dto: ApiDataDto = self.db.get_api(node_event)
 
         model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
         context_ids = self.get_context_ids(call_stack)
 
         self.host_tasks.append(
-            [model_id, request_id, task_track_dto.stream_id,
-             task_track_dto.task_id, context_ids, task_track_dto.batch_id,
-             task_track_dto.task_type, task_track_dto.device_id, task_track_dto.timestamp]
+            [model_id, request_id, task_track_dto.stream_id, task_track_dto.task_id,
+             context_ids, task_track_dto.batch_id, task_track_dto.task_type,
+             task_track_dto.device_id, task_track_dto.timestamp, node_dto.connection_id]
         )
 
     def is_hccl_task(self, hccl_event: Event):
@@ -529,7 +531,7 @@ class TaskGear(CANNGear):
             self.hccl_op_info.append([task_track_dto.device_id, model_id, request_id,
                                       node_dto.thread_id, node_dto.item_id,
                                       self.HCCL_TASK_TYPE, "N/A", node_dto.start, node_dto.end,
-                                      "N/A"])
+                                      "N/A", node_dto.connection_id])
             return
 
         for record in node_event.additional_record:
@@ -537,7 +539,7 @@ class TaskGear(CANNGear):
                 self.hccl_op_info.append([task_track_dto.device_id, model_id, request_id,
                                           node_dto.thread_id, node_dto.item_id,
                                           record.dto.task_type, record.dto.op_type, node_dto.start, node_dto.end,
-                                          record.dto.is_dynamic])
+                                          record.dto.is_dynamic, node_dto.connection_id])
 
     def is_kernel_task(self, task_track_dto: TaskTrackDto, is_not_hccl_task: bool) -> bool:
         if task_track_dto.struct_type is None:

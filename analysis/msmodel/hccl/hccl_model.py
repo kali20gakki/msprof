@@ -79,11 +79,11 @@ class HcclViewModel(ViewModel):
               "t1.name as hccl_name, t1.group_name as group_name," \
               "t1.plane_id as plane_id, t1.args as args, t2.running as timestamp, " \
               "t2.complete-t2.running as duration, t1.is_dynamic as is_dynamic, t1.task_type as task_type, " \
-              "t1.op_type as op_type, t1.begin as first_timestamp " \
+              "t1.op_type as op_type, t1.begin as first_timestamp, t1.connection_id as connection_id " \
               "from (select {0}.op_name, {0}.task_type, {0}.op_type, {0}.model_id, " \
               "{0}.index_id, {1}.name, {1}.plane_id, {1}.args, {1}.context_id, " \
               "{1}.stream_id, {1}.task_id, {1}.batch_id, {1}.device_id,"\
-              "{0}.is_dynamic, {0}.begin, {1}.group_name from {0} " \
+              "{0}.is_dynamic, {0}.begin, {1}.group_name from {0}, {0}.connection_id " \
               "inner join {1} where {1}.timestamp >={0}.begin and {1}.timestamp <= {0}.end and "\
               "{0}.device_id={1}.device_id) t1 " \
               "inner join {task_time_sql} t2 " \
@@ -104,7 +104,7 @@ class HcclViewModel(ViewModel):
         get the real execution of the communication op
         """
         sql = f"select model_id, index_id, op_name, min(timestamp) as timestamp, " \
-              f"max(timestamp + duration) - min(timestamp) as duration, task_type, op_type " \
+              f"max(timestamp + duration) - min(timestamp) as duration, task_type, op_type, connection_id " \
               f"from {DBNameConstant.TABLE_HCCL_SINGLE_DEVICE} " \
               f"group by op_name, first_timestamp"
         return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclDto)
@@ -114,7 +114,7 @@ class HcclViewModel(ViewModel):
         get the real execution of the communication op
         """
         sql = f"select model_id, index_id, op_name, group_name, min(timestamp) as timestamp, " \
-              f"max(timestamp + duration) - min(timestamp) as duration, task_type, op_type " \
+              f"max(timestamp + duration) - min(timestamp) as duration, task_type, op_type, connection_id " \
               f"from {DBNameConstant.TABLE_HCCL_SINGLE_DEVICE} " \
               f"group by op_name, first_timestamp, group_name"
         return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclDto)

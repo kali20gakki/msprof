@@ -174,7 +174,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             self._hccl_data.append([data.model_id, data.index_id, data.op_name, data.iteration,
                                     data.hccl_name, data.group_name, data.first_timestamp, data.plane_id,
                                     data.timestamp, data.duration, data.is_dynamic,
-                                    data.task_type, data.op_type, str(data.args)])
+                                    data.task_type, data.op_type, data.connection_id, str(data.args)])
             if data.op_type != Constant.NA:
                 is_hccl_op_type_valid = True
         return is_hccl_op_type_valid
