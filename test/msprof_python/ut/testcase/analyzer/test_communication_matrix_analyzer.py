@@ -28,7 +28,7 @@ class HcclEvent:
         self.dst_rank = 1
 
 
-class TestCommunicationAnalyzer(unittest.TestCase):
+class TestCommunicationMatrixAnalyzer(unittest.TestCase):
     collection_path = 'test'
 
     def test_get_hccl_data_from_db_should_return_hccl_data_when_get_hccl_data_correct(self):
@@ -129,11 +129,11 @@ class TestCommunicationAnalyzer(unittest.TestCase):
         processed_data = analyzer._process_output(analyzed_data)
         self.assertEqual(processed_data, expected_data)
 
-    def test_generate_parser_should_raise_exception_when_no_rank_hccl_data_dict(self):
+    def test_generate_output_should_raise_exception_when_no_rank_hccl_data_dict(self):
         with mock.patch(NAMESPACE + ".CommunicationMatrixAnalyzer._get_hccl_data_from_db"),  \
                 pytest.raises(ProfException) as err:
             analyzer = CommunicationMatrixAnalyzer(self.collection_path)
-            analyzer._generate_parser(os.path.join(self.collection_path, "device_1"))
+            analyzer._generate_output(os.path.join(self.collection_path, "device_1"))
             self.assertEqual(ProfException.PROF_INVALID_DATA_ERROR, err.value.code)
 
     def test_get_hccl_data_from_db_should_raise_exception_when_no_hccl_data(self):

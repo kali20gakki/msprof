@@ -89,22 +89,18 @@ class CommunicationMatrixAnalyzer:
                 op_name = event.op_name + "@" + event.group_name
                 self.hccl_op_data[op_name].append(event)
 
-    def _generate_parser(self: any, rank_path) -> CommunicationMatrixParser:
+    def _generate_output(self, rank_path: str) -> None:
+        """
+        Generate output json file
+        """
         self._get_hccl_data_from_db(rank_path)
-
         if not self.hccl_op_data:
             message = f"fail to get hccl data"
             logging.error("Can't get hccl events!")
             raise ProfException(ProfException.PROF_INVALID_DATA_ERROR, message)
 
-        return CommunicationMatrixParser(self.hccl_op_data)
-
-    def _generate_output(self, rank_path: str) -> None:
-        """
-        Generate output json file
-        """
-        communication_parser = self._generate_parser(rank_path)
-        op_info = communication_parser.run()
+        communication_matrix_parser = CommunicationMatrixParser(self.hccl_op_data)
+        op_info = communication_matrix_parser.run()
         output_result = self._process_output(op_info)
         output_file_name = "communication_matrix.json"
         save_dir = os.path.dirname(os.path.realpath(rank_path))
