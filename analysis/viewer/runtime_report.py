@@ -249,23 +249,23 @@ def add_op_total(result: list, result_dir: str) -> list:
     return res
 
 
-def add_cube_usage(value: list, time_index: int, ratio_index: int, ratio_index_int8: int, ratio_index_fp16,
-                   cycles_index: int, freq: float, core_num: int) -> list:
+def add_cube_usage(config_dict: dict, value: list) -> list:
     """
     add cube usage column
     """
-    if ratio_index_fp16 != -1 and ratio_index_int8 != -1:
-        if value[ratio_index_fp16]:
-            ratio_index = ratio_index_fp16
+    if config_dict.get('ratio_index_fp16') != -1 and config_dict.get('ratio_index_int8') != -1:
+        if value[config_dict.get('ratio_index_fp16')]:
+            ratio_index = config_dict.get('ratio_index_fp16')
         else:
-            ratio_index = ratio_index_int8
+            ratio_index = config_dict.get('ratio_index_int8')
+    else:
+        ratio_index = config_dict.get('mac_ratio_index')
     if value[ratio_index] == Constant.NA:
         value.append(Constant.NA)
-    elif not NumberConstant.is_zero(min(value[ratio_index], value[cycles_index], value[time_index])):
-        if time_index == 9 or time_index == 20:
-            usage = value[cycles_index] / (freq * core_num * value[time_index])
-        else:
-            usage = value[ratio_index] * value[cycles_index] / (freq * core_num * value[time_index])
+    elif not NumberConstant.is_zero(min(value[ratio_index], value[config_dict.get('total_cycles_index')],
+                                        value[config_dict.get('task_duration_index')])):
+        usage = value[config_dict.get('total_cycles_index')] / (config_dict.get('aic_frequency') *
+                        config_dict.get('ai_core_num') * value[config_dict.get('task_duration_index')])
         value.append(usage)
     else:
         value.append(0)

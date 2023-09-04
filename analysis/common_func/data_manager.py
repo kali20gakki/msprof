@@ -44,6 +44,7 @@ class DataManager:
         add cube usage data
         """
         info_json_path = None
+        config_dict = dict()
         for file in glob.glob(os.path.join(project_path, 'info.json.*[0-9]')):
             info_json_path = file
         try:
@@ -51,35 +52,34 @@ class DataManager:
                 json_data = json_reader.readline(Constant.MAX_READ_LINE_BYTES)
                 json_data = json.loads(json_data)
                 device_info = json_data.get('DeviceInfo')[0]
-                ai_core_num = device_info.get('ai_core_num')
-                aic_frequency = float(device_info.get('aic_frequency'))
-
+                config_dict['ai_core_num'] = device_info.get('ai_core_num')
+                config_dict['aic_frequency'] = float(device_info.get('aic_frequency'))
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             logging.error("Cube utilization: info_json data read fail")
             return
 
         try:
-            mac_ratio_index = -1
-            ratio_index_int8 = -1
-            ratio_index_fp16 = -1
+            config_dict.setdefault('mac_ratio_index', -1)
+            config_dict.setdefault('ratio_index_int8', -1)
+            config_dict.setdefault('ratio_index_fp16', -1)
             for item in headers:
                 if item in ("mac_ratio", "aic_mac_ration"):
-                    mac_ratio_index = headers.index("mac_ratio") if "mac_ratio" in headers else headers.index(
-                        "aic_mac_ratio")
+                    config_dict['mac_ratio_index'] = headers.index("mac_ratio") if "mac_ratio" in headers else \
+                        headers.index("aic_mac_ratio")
                 elif item == "mac_int8_ratio":
-                    ratio_index_int8 = headers.index("mac_int8_ratio")
+                    config_dict['ratio_index_int8'] = headers.index("mac_int8_ratio")
                 elif item == "mac_fp16_ratio":
-                    ratio_index_fp16 = headers.index("mac_fp16_ratio")
+                    config_dict['ratio_index_fp16'] = headers.index("mac_fp16_ratio")
 
-            total_cycles_index = headers.index("total_cycles") if "total_cycles" in headers else None
-            task_duration_index = headers.index("Task Duration(us)") if "Task Duration(us)" in headers else None
-            if task_duration_index:
+            config_dict['total_cycles_index'] = headers.index("total_cycles") if "total_cycles" in headers else None
+            config_dict['task_duration_index'] = headers.index("Task Duration(us)") if "Task Duration(us)" in headers else None
+            if config_dict.get('task_duration_index'):
                 headers.append("cube utilization")
             for index, row in enumerate(data):
-                if task_duration_index and mac_ratio_index and total_cycles_index:
-                    data[index] = add_cube_usage(list(row), task_duration_index, mac_ratio_index, ratio_index_int8,
-                                                 ratio_index_fp16, total_cycles_index, aic_frequency, ai_core_num)
+                if config_dict['task_duration_index'] and config_dict['mac_ratio_index'] and \
+                        config_dict['total_cycles_index']:
+                    data[index] = add_cube_usage(config_dict, list(row))
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             logging.error("Cube utilization: cube info not found")
