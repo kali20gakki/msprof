@@ -177,7 +177,7 @@ class HcclAnalysisTool:
     @classmethod
     def is_valid_link(cls: any, event: HcclDto) -> bool:
         src_rank_valid = event.src_rank is not None and event.src_rank != int("0xffffffff", 16)
-        dst_rank_valid = event.dst_rank is not None and event.dst_rank != int("0xffffffff", 16)
+        dst_rank_valid = event.dst_rank is not None
         if src_rank_valid and dst_rank_valid:
             return True
         else:
@@ -200,6 +200,8 @@ class HcclAnalysisTool:
             return TransportType.PCIE
         if trans_type == StrConstant.RDMA:
             return TransportType.RDMA
+        if trans_type == StrConstant.LOCAL:
+            return TransportType.LOCAL
         logging.warning('trans_type is not normal, which is', trans_type)
         return -1
 
@@ -211,6 +213,8 @@ class HcclAnalysisTool:
             return StrConstant.PCIE
         if trans_data_type == TransportType.RDMA:
             return StrConstant.RDMA
+        if trans_data_type == TransportType.LOCAL:
+            return StrConstant.LOCAL
         logging.warning('trans_data_type is not normal, which is', trans_data_type)
         return 'Unknown transport type'
 

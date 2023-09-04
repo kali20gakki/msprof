@@ -313,6 +313,7 @@ int32_t MsprofilerInit()
         MSPROF_LOGE("Failed to register ctrl callback");
         return PROFILING_FAILED;
     }
+    MSPROF_EVENT("Started to register profiling hash id callback.");
     ret = ProfApiPlugin::instance()->MsprofProfRegProfilerCallback(PROFILE_REPORT_GET_HASH_ID_CALLBACK,
         reinterpret_cast<VOID_PTR>(MsprofGetHashIdImpl), sizeof(VOID_PTR));
     if (ret != ACL_SUCCESS) {
