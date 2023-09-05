@@ -44,7 +44,7 @@ class GeLogicStreamParser(DataParser, MsMultiProcess):
             self._ge_logic_stream_data = self.parse_bean_data(logic_stream_info_file, 
                                                               StructFmt.GE_LOGIC_STREAM_INFO_SIZE,
                                                               GeLogicStreamInfoBean, 
-                                                              self._get_ge_logic_stream_data)
+                                                              format_func=self._get_ge_logic_stream_data)
  
     def save(self: any) -> None:
         """
