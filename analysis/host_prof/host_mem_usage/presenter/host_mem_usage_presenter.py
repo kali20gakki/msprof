@@ -117,7 +117,6 @@ class HostMemUsagePresenter(HostProfPresenterBase):
                 self.mem_usage_info.append(item)
 
             last_timestamp = curr_timestamp
-            line = file.readline()
 
         self.cur_model.insert_mem_usage_data(self.mem_usage_info)
 
