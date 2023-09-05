@@ -17,13 +17,12 @@ class TestHostMemUsagePresenter(unittest.TestCase):
         check.init()
         self.assertEqual(check.cur_model.__class__.__name__, 'HostMemUsage')
 
-
     def test_parse_mem_data(self):
         data = ['191424758423535 2147716853',
-               '191424778902215 2147716853 27461 4653 14 0 213261 0',
-               '191424799235089 2147716853 27461 4653 14 0 213261 0\n',
-               '191424819600139 2147716853 27461 4653 14 0 213261 0\n',
-               '']
+                '191424778902215 2147716853 27461 4653 14 0 213261 0',
+                '191424799235089 2147716853 27461 4653 14 0 213261 0\n',
+                '191424819600139 2147716853 27461 4653 14 0 213261 0\n',
+                '']
         with mock.patch(NAMESPACE + '.logging.error'):
             check = HostMemUsagePresenter('test')
             check.cur_model = HostMemUsage(self.result_dir)
