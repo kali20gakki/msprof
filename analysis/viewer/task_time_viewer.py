@@ -22,11 +22,12 @@ from profiling_bean.db_dto.task_time_dto import TaskTimeDto
 from viewer.get_trace_timeline import TraceViewer
 from viewer.interface.base_viewer import BaseViewer
 from mscalculate.ascend_task.ascend_task import TopDownTask
+from viewer.memory_copy.memory_copy_viewer import MemoryCopyViewer
 
 
-class FftsLogViewer(BaseViewer):
+class TaskTimeViewer(BaseViewer):
     """
-    class for get ffts_log data
+    class for get task time data
     """
 
     TRACE_PID_MAP = {
@@ -63,14 +64,14 @@ class FftsLogViewer(BaseViewer):
 
     def get_ascend_task_data(self: any) -> Dict[str, List[TopDownTask]]:
         task_data = {
-            'acsq_task_list': [],
+            'task_data_list': [],
             'subtask_data_list': [],
         }
         with AscendTaskModel(self.project_dir, [DBNameConstant.TABLE_ASCEND_TASK]) as model:
             task_data_list = model.get_ascend_task_data_without_unknown()
         for data in task_data_list:
             if data.context_id == NumberConstant.DEFAULT_GE_CONTEXT_ID:
-                task_data['acsq_task_list'].append(data)
+                task_data['task_data_list'].append(data)
             else:
                 task_data['subtask_data_list'].append(data)
         return task_data
@@ -80,12 +81,20 @@ class FftsLogViewer(BaseViewer):
         get model list timeline data
         @return:timeline trace data
         """
+        result = []
+        result_dir = self.params.get(StrConstant.PARAM_RESULT_DIR)
+        # add memory copy data
+        memory_copy_viewer = MemoryCopyViewer(result_dir)
+        trace_data_memcpy = memory_copy_viewer.get_memory_copy_timeline()
+        result.extend(trace_data_memcpy)
+
         timeline_data = self.get_ascend_task_data()
-        result = self.get_trace_timeline(timeline_data)
+        trace_tasks = self.get_trace_timeline(timeline_data)
+        result.extend(trace_tasks)
         if not result:
             return json.dumps({
                 "status": NumberConstant.WARN,
-                "info": "Can not export ffts sub task time data, the current chip does not support "
+                "info": "Can not export task time data, the current chip does not support "
                         "exporting this data or the data may be not collected."
             })
         return TraceViewer("StarsViewer").format_trace_events(result)
@@ -118,8 +127,8 @@ class FftsLogViewer(BaseViewer):
                  data.device_task_type,
                  data.start_time / DBManager.NSTOUS,
                  data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
-                 {"Stream Id": data.stream_id, "Task Id": data.task_id,
-                  'Batch Id': data.batch_id, "Subtask Id": data.context_id}])
+                 {"Stream Id": data.stream_id, "Task Id": data.task_id, 'Batch Id': data.batch_id,
+                  "Subtask Id": data.context_id, "connection_id": data.connection_id, }])
         if not result_list:
             return []
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
@@ -138,8 +147,9 @@ class FftsLogViewer(BaseViewer):
                  "Thread {0}({1})".format(str(data.thread_id), data.device_task_type),
                  data.start_time / DBManager.NSTOUS,
                  data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
-                 {"Stream Id": data.stream_id, "Task Id": data.task_id,
-                  'Batch Id': data.batch_id, "Subtask Id": data.context_id, "Subtask Type": data.device_task_type}])
+                 {"Stream Id": data.stream_id, "Task Id": data.task_id, 'Batch Id': data.batch_id,
+                  "Subtask Id": data.context_id, "Subtask Type": data.device_task_type,
+                  "connection_id": data.connection_id, }])
         if not result_list:
             return []
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
@@ -158,17 +168,17 @@ class FftsLogViewer(BaseViewer):
                  data.stream_id,
                  data.start_time / DBManager.NSTOUS,
                  data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
-                 {"Task Type": data.device_task_type, "Stream Id": data.stream_id,
-                  "Task Id": data.task_id, 'Batch Id': data.batch_id, "Subtask Id": data.context_id}])
-        for data in data_list.get("acsq_task_list", []):
+                 {"Task Type": data.device_task_type, "Stream Id": data.stream_id, "Task Id": data.task_id,
+                  'Batch Id': data.batch_id, "Subtask Id": data.context_id, "connection_id": data.connection_id, }])
+        for data in data_list.get("task_data_list", []):
             result_list.append(
                 [data.op_name,
                  self.TRACE_PID_MAP.get("Task Scheduler", 0),
                  data.stream_id,
                  data.start_time / DBManager.NSTOUS,
                  data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
-                 {"Task Type": data.device_task_type, "Stream Id": data.stream_id,
-                  "Task Id": data.task_id, 'Batch Id': data.batch_id, "Subtask Id": data.context_id}])
+                 {"Task Type": data.device_task_type, "Stream Id": data.stream_id, "Task Id": data.task_id,
+                  'Batch Id': data.batch_id, "Subtask Id": data.context_id, "connection_id": data.connection_id, }])
         if not result_list:
             return []
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
@@ -200,13 +210,13 @@ class FftsLogViewer(BaseViewer):
             node_key = "{0}-{1}-{2}-{3}".format(data.task_id, data.stream_id, data.context_id, data.batch_id)
             setattr(data, 'op_name', node_name_dict.get(node_key, data.device_task_type))
         tradition_list = []
-        for data in data_dict.get("acsq_task_list", []):
+        for data in data_dict.get("task_data_list", []):
             node_key = "{0}-{1}-{2}-{3}".format(
                 data.task_id, data.stream_id, NumberConstant.DEFAULT_GE_CONTEXT_ID, data.batch_id)
             if node_key not in ffts_plus_set:
                 setattr(data, 'op_name', node_name_dict.get(node_key, data.device_task_type))
                 tradition_list.append(data)
-        data_dict["acsq_task_list"] = tradition_list
+        data_dict["task_data_list"] = tradition_list
 
     def get_ge_data_dict(self: any) -> tuple:
         node_dict, task_type_dict = {}, {}

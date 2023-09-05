@@ -29,7 +29,7 @@ class TestAscendTaskCalculator(unittest.TestCase):
         scene = ProfilingScene()
         scene._scene = Constant.STEP_INFO
         with mock.patch(NAMESPACE + ".AscendTaskGenerator.run",
-                        return_value=[TopDownTask(1, 1, 1, 1, 1, 1, 1000, 1000, "", "")]):
+                        return_value=[TopDownTask(1, 1, 1, 1, 1, 1, 1000, 1000, "", "", 0)]):
             self.assertEqual(len(self.calculator._collect_ascend_tasks()), 1)
         scene._scene = None
 
@@ -37,8 +37,8 @@ class TestAscendTaskCalculator(unittest.TestCase):
         scene = ProfilingScene()
         scene._scene = Constant.SINGLE_OP
         with mock.patch(NAMESPACE + ".AscendTaskGenerator.run",
-                        return_value=[TopDownTask(1, 1, 1, 1, 1, 1, 1000, 1000, "", ""),
-                                      TopDownTask(1, 2, 1, 1, 1, 1, 1000, 1000, "", "")]):
+                        return_value=[TopDownTask(1, 1, 1, 1, 1, 1, 1000, 1000, "", "", 0),
+                                      TopDownTask(1, 2, 1, 1, 1, 1, 1000, 1000, "", "", 1)]):
             self.assertEqual(len(self.calculator._collect_ascend_tasks()), 2)
         scene._scene = None
 
@@ -75,7 +75,7 @@ class TestAscendTaskCalculator(unittest.TestCase):
         chip_m.chip_id = ChipModel.CHIP_V1_1_0
 
     def test__save(self):
-        data = [TopDownTask(1, 1, 1, 1, 1, 1, 1000, 1000, "", "")]
+        data = [TopDownTask(1, 1, 1, 1, 1, 1, 1000, 1000, "", "", 0)]
         with mock.patch(NAMESPACE + ".AscendTaskModel.init"), \
                 mock.patch(NAMESPACE + ".AscendTaskModel.drop_table"), \
                 mock.patch(NAMESPACE + ".AscendTaskModel.create_table"), \

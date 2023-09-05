@@ -36,6 +36,9 @@ class EventDataModel(ParserModel):
         with GeHashViewModel(self.result_dir) as _model:
             hash_dict = _model.get_type_hash_data()
         return [
-            [self.update_hash_value(data, hash_dict), data.level, data.thread_id, data.item_id, data.request_id,
-             data.timestamp] for data in data_list
+            [
+                self.update_hash_value(data, hash_dict), data.level, data.thread_id,
+                data.item_id, data.request_id, data.timestamp, connection_id,
+            ]
+            for connection_id, data in data_list
         ]

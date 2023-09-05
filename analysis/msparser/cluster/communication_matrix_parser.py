@@ -59,7 +59,7 @@ class CommunicationMatrixParser(MetaParser):
             HcclAnalysisTool.divide(link_value[MatrixDataType.LARGE_PACKET_NUM], link_value[MatrixDataType.PACKET_NUM])
         return new_link_dict
 
-    def run(self: any) -> dict:
+    def run(self: any) -> list:
         self.parse()
         self.combine()
         self.convert()
@@ -84,15 +84,12 @@ class CommunicationMatrixParser(MetaParser):
             if not HcclAnalysisTool.is_valid_link(event):
                 idx += 1
                 continue
-            link_key = "{}-{}".format(event.src_rank, event.dst_rank)
+            dst_rank = event.src_rank if int(event.dst_rank) == int("0xffffffff", 16) else event.dst_rank
+            link_key = "{}-{}".format(event.src_rank, dst_rank)
             if event.transport_type == StrConstant.SDMA and event.hccl_name in StrConstant.SDMA_TRANSIT_ITEMS:
                 if link_key not in link_info:
                     link_info[link_key] = [0] * len(MatrixDataType.__members__)
                 trans_type = HcclAnalysisTool.get_transport_type(event.src_rank, event.dst_rank)
-                # do not consider local copy
-                if trans_type == StrConstant.LOCAL:
-                    idx += 1
-                    continue
                 link_info[link_key][MatrixDataType.TRANSPORT_TYPE] = HcclAnalysisTool.convert_to_enum(trans_type)
                 trans_size = HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.COMMUNICATION_B_to_MB
                 link_info[link_key][MatrixDataType.TRANS_SIZE] += trans_size
