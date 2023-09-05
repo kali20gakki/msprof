@@ -1,15 +1,10 @@
-import configparser
 import json
 import unittest
 from unittest import mock
 
-from common_func.profiling_scene import ProfilingScene
-from common_func.constant import Constant
-from common_func.info_conf_reader import InfoConfReader
-from common_func.platform.chip_manager import ChipManager
+from datetime import datetime
+from datetime import timezone
 from msinterface.msprof_data_storage import MsprofDataStorage
-from profiling_bean.prof_enum.chip_model import ChipModel
-from viewer.stars.stars_soc_view import StarsSocView
 
 NAMESPACE = 'msinterface.msprof_data_storage'
 
@@ -154,6 +149,14 @@ class TestMsprofDataStorage(unittest.TestCase):
             key.data_list = []
             key.tid_set = {i for i in range(10000000)}
             key.get_slice_times('a', 1)
+
+    def test_get_current_time_str_should_return_success_when_input_data_is_valid(self):
+        utc_time = datetime.now(tz=timezone.utc)
+        current_time = utc_time.replace(tzinfo=timezone.utc).astimezone(tz=None)
+        self.assertEqual(MsprofDataStorage.get_current_time_str(), current_time.strftime('%Y%m%d%H%M%S'))
+
+    def test_get_current_time_str_should_return_success_when_data_length_is_14(self):
+        self.assertEqual(len(MsprofDataStorage.get_current_time_str()), 14)
 
 if __name__ == '__main__':
     unittest.main()
