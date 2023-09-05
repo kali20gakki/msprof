@@ -61,14 +61,12 @@ class DataManager:
 
         try:
             config_dict.setdefault('mac_ratio_index', None)
-            for item in headers:
-                if item in ("mac_ratio", "aic_mac_ration"):
-                    config_dict['mac_ratio_index'] = headers.index("mac_ratio") if "mac_ratio" in headers else \
-                        headers.index("aic_mac_ratio")
-
+            config_dict['mac_ratio_index'] = headers.index("mac_ratio") if "mac_ratio" in headers else \
+                headers.index("aic_mac_ratio")
             config_dict['total_cycles_index'] = headers.index("total_cycles") if "total_cycles" in headers else None
-            config_dict['task_duration_index'] = headers.index("Task Duration(us)") if "Task Duration(us)" \
-                                                                                       in headers else None
+            config_dict['task_duration_index'] = headers.index("Task Duration(us)") if \
+                "Task Duration(us)" in headers else None
+
             if config_dict.get('task_duration_index') and config_dict.get('total_cycles_index') and \
                     config_dict.get("mac_ratio_index"):
                 headers.append("cube_utilization(%)")
