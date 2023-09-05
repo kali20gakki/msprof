@@ -56,8 +56,7 @@ TEST_F(PluginHandleUtest, OpenPlugin)
 
     MOCKER(dlopen)
         .stubs()
-        .will(returnValue(true));
-    pluginHandle.handle_ = nullptr;
+        .will(returnValue((void*)nullptr));
     EXPECT_EQ(PROFILING_FAILED, pluginHandle.OpenPlugin(envStr));
 }
 

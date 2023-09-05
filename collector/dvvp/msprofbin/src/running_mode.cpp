@@ -140,6 +140,10 @@ int RunningMode::GetOutputDirInfoFromRecord()
     std::string pidStr = std::to_string(Utils::GetPid());
     std::string recordFile = pidStr + MSVP_UNDERLINE + OUTPUT_RECORD;
     std::string outPut = resultDirTmp + recordFile;
+    if (Utils::IsSoftLink(outPut)) {
+        MSPROF_LOGE("File path is invalid: soft link is not allowed, filePath: %s.", outPut.c_str());
+        return PROFILING_FAILED;
+    }
     long long fileSize = Utils::GetFileSize(outPut);
     if (fileSize > MSVP_SMALL_FILE_MAX_LEN || fileSize <= 0) {
         MSPROF_LOGE("File size is invalid. fileName:%s, size:%lld.", recordFile.c_str(), fileSize);
@@ -909,6 +913,10 @@ int SystemMode::RecordOutPut() const
     std::string recordFile = pidStr + MSVP_UNDERLINE + OUTPUT_RECORD;
     std::string absolutePath = params_->result_dir + MSVP_SLASH + recordFile;
     std::ofstream file;
+    if (Utils::IsSoftLink(absolutePath)) {
+        MSPROF_LOGE("File path is invalid: soft link is not allowed, filePath: %s.", absolutePath.c_str());
+        return PROFILING_FAILED;
+    }
     file.open(absolutePath, std::ios::out | std::ios::app);
     if (!file.is_open()) {
         MSPROF_LOGE("Failed to open %s", Utils::BaseName(recordFile).c_str());
@@ -1125,7 +1133,10 @@ bool SystemMode::CreateSampleJsonFile(SHARED_PTR_ALIA<analysis::dvvp::message::P
 bool SystemMode::CreateDoneFile(const std::string &absolutePath, const std::string &fileSize) const
 {
     std::ofstream file;
-
+    if (Utils::IsSoftLink(absolutePath)) {
+        MSPROF_LOGE("File path is invalid: soft link is not allowed, filePath: %s.", absolutePath.c_str());
+        return false;
+    }
     file.open(absolutePath, std::ios::out);
     if (!file.is_open()) {
         MSPROF_LOGE("Failed to open %s", Utils::BaseName(absolutePath) .c_str());
@@ -1142,6 +1153,11 @@ int SystemMode::WriteCtrlDataToFile(const std::string &absolutePath, const std::
 {
     std::ofstream file;
 
+    if (Utils::IsSoftLink(absolutePath)) {
+        MSPROF_LOGE("File path is invalid: soft link is not allowed, filePath: %s.", absolutePath.c_str());
+        return PROFILING_FAILED;
+    }
+    
     if (Utils::IsFileExist(absolutePath)) {
         MSPROF_LOGI("file exist: %s", Utils::BaseName(absolutePath).c_str());
         return PROFILING_SUCCESS;
