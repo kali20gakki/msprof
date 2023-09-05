@@ -76,8 +76,7 @@ class DataManager:
             for index, row in enumerate(data):
                 data[index] = add_cube_usage(config_dict, list(row))
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            logging.error("Cube utilization: cube info not found")
+            logging.info("Cube utilization: cube info not found")
             return
 
     @classmethod
