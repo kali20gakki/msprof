@@ -8,8 +8,8 @@ import logging
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from msmodel.interface.view_model import ViewModel
-from viewer.runtime_report import add_mem_bound, add_cube_usage
-
+from viewer.runtime_report import add_mem_bound, cube_usage
+from common_func.info_conf_reader import InfoConfReader
 
 class DataManager:
     """
@@ -39,25 +39,13 @@ class DataManager:
         return task_op_dict
 
     @classmethod
-    def add_cube_usage(cls: any, project_path: str, headers: list, data: list) -> None:
+    def add_cube_usage(cls: any, headers: list, data: list) -> None:
         """
         add cube usage data
         """
-        info_json_path = None
         config_dict = dict()
-        for file in glob.glob(os.path.join(project_path, 'info.json.*[0-9]')):
-            info_json_path = file
-        try:
-            with open(info_json_path, "r") as json_reader:
-                json_data = json_reader.readline(Constant.MAX_READ_LINE_BYTES)
-                json_data = json.loads(json_data)
-                device_info = json_data.get('DeviceInfo')[0]
-                config_dict['ai_core_num'] = device_info.get('ai_core_num')
-                config_dict['aic_frequency'] = float(device_info.get('aic_frequency'))
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.info("Cube utilization: info_json data read fail")
-            return
-
+        config_dict['ai_core_num'] = InfoConfReader().get_data_under_device('ai_core_num')
+        config_dict['aic_frequency'] = float(InfoConfReader().get_data_under_device('aic_frequency'))
         try:
             config_dict.setdefault('mac_ratio_index', None)
             config_dict['mac_ratio_index'] = headers.index("mac_ratio") if "mac_ratio" in headers else \
@@ -73,7 +61,7 @@ class DataManager:
                 return
 
             for index, row in enumerate(data):
-                data[index] = add_cube_usage(config_dict, list(row))
+                data[index] = cube_usage(config_dict, list(row))
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.info("Cube utilization: cube info not found")
             return

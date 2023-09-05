@@ -249,7 +249,7 @@ def add_op_total(result: list, result_dir: str) -> list:
     return res
 
 
-def add_cube_usage(config_dict: dict, value: list) -> list:
+def cube_usage(config_dict: dict, value: list) -> list:
     """
     add cube usage column
     """

@@ -2,6 +2,7 @@ import unittest
 from collections import deque
 from unittest import mock
 
+from common_func.info_conf_reader import InfoConfReader
 from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.data_manager import DataManager
@@ -160,6 +161,13 @@ class TestAiCoreOpReport(unittest.TestCase):
         with mock.patch(NAMESPACE + ".read_cpu_cfg", return_value={1: "r1", 2: "r2_ratio"}):
             res = AiCoreOpReport._get_ai_core_float_cols(["r1", "r2_time"])
         self.assertEqual(res, ['round(r1, 6)', 'round(r2_time, 6)'])
+
+    def test_add_cube_usage(self):
+        InfoConfReader()._info_json = {'DeviceInfo': [{'ai_core_num': 2, 'aic_frequency': 50}]}
+        headers = ["id", "mac_ratio", "total_cycles", "Task Duration(us)"]
+        data = [[1, 0.2, 2, 3], [2, 0.3, 2, 4]]
+        DataManager.add_cube_usage(headers, data)
+        self.assertEqual(data, [[1, 0.2, 2, 3, 0.6667], [2, 0.3, 2, 4, 0.5]])
 
     def test_add_memory_bound(self):
         headers = ["mac_ratio", "vec_ratio", "mte2_ratio"]
