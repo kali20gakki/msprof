@@ -267,7 +267,7 @@ class StepTraceViewer:
                 " group by iteration_end, model_id);".format(DBNameConstant.TABLE_ALL_REDUCE),
                 (message["device_id"],)).fetchone()
             if reduce_data[0]:
-                headers += ["Reduce Start", "Reduce Duration(us)"] * \
+                headers += ["Reduce Start(us)", "Reduce Duration(us)"] * \
                            int(reduce_data[0])
 
     @staticmethod
