@@ -299,8 +299,8 @@ void ArgsManager::AddBasicArgs()
 void ArgsManager::AddDynProfArgs()
 {
     if (driverOnline_ &&
-        (platform_ != PlatformType::CLOUD_TYPE || platform_ != PlatformType::DC_TYPE ||
-         platform_ != PlatformType::CHIP_V4_1_0 || platform_ != PlatformType::CHIP_V4_2_0)) {
+        (platform_ != PlatformType::CLOUD_TYPE && platform_ != PlatformType::CHIP_V4_1_0 &&
+         platform_ != PlatformType::CHIP_V4_2_0)) {
         return;
     }
     Args dynamic = {"dynamic", "Dynamic profiling switch, the default value is off.(Ascend910)", OFF};
@@ -321,8 +321,8 @@ void ArgsManager::AddAnalysisArgs()
         {"analyze", "Switch for using msprof to analyze collecting data, the default value\n"
             "\t\t\t\t\t\t   is off.(full-platform)", OFF},
         {"rule", "Switch specified rule for using msprof to analyze collecting data, the default value\n"
-            "\t\t\t\t\t\t   is communication.(full-platform)\n"
-            "\t\t\t\t\t\t   The switch can be set in [communication]"},
+            "\t\t\t\t\t\t   is communication,communication_matrix.(full-platform)\n"
+            "\t\t\t\t\t\t   The switch can be set in [communication, communication_matrix]"},
         {"parse", "Switch for using msprof to parse collecting data, the default value\n"
             "\t\t\t\t\t\t   is off.(full-platform)", OFF},
         {"query", "Switch for using msprof to query collecting data, the default value\n"

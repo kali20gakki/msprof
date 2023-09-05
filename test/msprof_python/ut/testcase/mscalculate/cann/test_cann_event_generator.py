@@ -4,16 +4,50 @@
 function:
 Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
+import collections
 import unittest
 from unittest import mock
 
 from mscalculate.cann.cann_event_generator import CANNEventGenerator
-from sqlite.db_manager import DBManager
+from profiling_bean.db_dto.api_data_dto import ApiDataDto
+from profiling_bean.db_dto.ctx_id_dto import CtxIdDto
+from profiling_bean.db_dto.event_data_dto import EventDataDto
+from profiling_bean.db_dto.fusion_op_info_dto import FusionOpInfoDto
+from profiling_bean.db_dto.graph_id_map_dto import GraphIdMapDto
+from profiling_bean.db_dto.hccl_info_dto import HCCLInfoDto
+from profiling_bean.db_dto.mem_copy_info_dto import MemCopyInfoDto
+from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
+from profiling_bean.db_dto.task_track_dto import TaskTrackDto
+from profiling_bean.db_dto.tensor_info_dto import TensorInfoDto
 
 NAMESPACE = 'mscalculate.cann.cann_event_generator'
 
 
 class TestClusterLinkCalculate(unittest.TestCase):
+    api_col = collections.namedtuple('Api', 'level, thread_id, start, end, struct_type, item_id')
+    event_col = collections.namedtuple('Event', 'level, thread_id, timestamp, struct_type, request_id, item_id')
+
+    @staticmethod
+    def create_api_dto(api_c):
+        api = ApiDataDto()
+        api.level = api_c.level
+        api.thread_id = api_c.thread_id
+        api.start = api_c.start
+        api.end = api_c.end
+        api.struct_type = api_c.struct_type
+        api.item_id = api_c.item_id
+        return api
+
+    @staticmethod
+    def create_event_dto(event_c):
+        event = EventDataDto()
+        event.level = event_c.level
+        event.thread_id = event_c.thread_id
+        event.timestamp = event_c.timestamp
+        event.struct_type = event_c.struct_type
+        event.request_id = event_c.request_id
+        event.item_id = event_c.item_id
+        return event
 
     def test_run(self):
         with mock.patch(NAMESPACE + '.CANNEventGenerator.generate_api_event'), \
@@ -25,199 +59,247 @@ class TestClusterLinkCalculate(unittest.TestCase):
                 mock.patch(NAMESPACE + '.CANNEventGenerator.generate_fusion_op_info_event'), \
                 mock.patch(NAMESPACE + '.CANNEventGenerator.generate_ctx_id_event'), \
                 mock.patch(NAMESPACE + '.CANNEventGenerator.generate_hccl_info_event'):
-            ret = CANNEventGenerator(["test"], set()).run()
-            self.assertEqual(ret.queues, {})
+            ret = CANNEventGenerator(["test"]).run()
+            self.assertEqual(len(ret), 0)
 
-    def test_collect_time_period_data(self):
-        api_db_manager = DBManager()
-        api_sql = "create table if not exists ApiData (struct_type TEXT," \
-                  "id TEXT,level TEXT,thread_id INTEGER,item_id TEXT," \
-                  "start INTEGER,end INTEGER)"
-        insert_api_sql = "insert into {} values (?,?,?,?,?,?,?)".format('ApiData')
-        api_data = ((0, 0, 0, 0, 0, 0, 0),)
-        event_sql = "create table if not exists EventData (struct_type TEXT," \
-                    "level TEXT,thread_id INTEGER,item_id TEXT," \
-                    "request_id INTEGER,timestamp INTEGER)"
-        insert_event_sql = "insert into {} values (?,?,?,?,?,?)".format('EventData')
-        event_data = ((0, 0, 0, 0, 0, 10), (0, 0, 0, 0, 0, 10))
-        event_db_manager = DBManager()
-        api_conn, api_cur = api_db_manager.create_table('api.db', api_sql, insert_api_sql, api_data)
-        event_conn, event_cur = event_db_manager.create_table('event.db', event_sql, insert_event_sql, event_data)
-        conn_tuple = ((api_conn, api_cur), (event_conn, event_cur))
-        with mock.patch('msmodel.interface.base_model.DBManager.check_connect_db', side_effect=conn_tuple), \
-                mock.patch('msmodel.interface.base_model.DBManager.create_connect_db', side_effect=conn_tuple):
-            check = CANNEventGenerator("test", set())
-            check.generate_api_event()
-            self.assertEqual(len(check.event_queue.queues), 1)
-            self.assertEqual(check.thread_set, {0})
-        api_conn, api_cur = api_db_manager.create_table('api.db')
-        event_conn, event_cur = event_db_manager.create_table('event.db')
-        api_db_manager.destroy((api_conn, api_cur))
-        event_db_manager.destroy((event_conn, event_cur))
+    def test_generate_api_event_should_return_5_cann_event_when_3_api_and_4_matched_event_1_mismatched_event(self):
+        api1 = self.create_api_dto(self.api_col('model', 0, 10, 100, 'm', 0))
+        api2 = self.create_api_dto(self.api_col('node', 0, 12, 90, 'mm', 0))
+        api3 = self.create_api_dto(self.api_col('runtime', 0, 19, 80, 'mmm', 1))
+        event1 = self.create_event_dto(self.event_col('model', 0, 10, 'm', 0, 0))
+        event2 = self.create_event_dto(self.event_col('model', 0, 10, 'mm', 0, 0))
+        event3 = self.create_event_dto(self.event_col('node', 1, 13, 'm', 0, 1))
+        event4 = self.create_event_dto(self.event_col('node', 1, 13, 'm', 0, 1))
+        event5 = self.create_event_dto(self.event_col('model', 0, 10, 'm', 0, 0))
+        with mock.patch(NAMESPACE + '.CANNEventGenerator.collect_time_period_data',
+                        return_value=([api1, api2, api3], [event1, event2, event3, event4, event5])):
+            generator = CANNEventGenerator("test")
+            generator.generate_api_event()
+            self.assertEqual(generator.event_queues.get(0).size, 4)
+            self.assertEqual(generator.event_queues.get(1).size, 1)
 
-    def test_generate_node_basic_info_event(self):
-        node_db_manager = DBManager()
-        node_sql = "create table if not exists NodeBasicInfo (level TEXT," \
-                   "struct_type TEXT,thread_id TEXT,timestamp INTEGER,op_name TEXT," \
-                   "task_type INTEGER,op_type INTEGER,block_dim INTEGER," \
-                   "mix_block_dim INTEGER,op_flag INTEGER,is_dynamic INTEGER)"
-        insert_node_sql = "insert into {} values (?,?,?,?,?,?,?,?,?,?,?)".format('NodeBasicInfo')
-        node_data = ((0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),)
-        node_conn, node_cur = node_db_manager.create_table('node_basic_info.db', node_sql, insert_node_sql, node_data)
-        with mock.patch('msmodel.interface.base_model.DBManager.check_connect_db',
-                        return_value=(node_conn, node_cur)), \
-                mock.patch('msmodel.interface.base_model.DBManager.create_connect_db',
-                           return_value=(node_conn, node_cur)):
-            check = CANNEventGenerator("test", set())
-            check.generate_node_basic_info_event()
-            self.assertEqual(len(check.event_queue.queues), 1)
-            self.assertEqual(check.thread_set, {'0'})
-        node_conn, node_cur = node_db_manager.create_table('node_basic_info.db')
-        node_db_manager.destroy((node_conn, node_cur))
+    def test_collect_time_period_data_should_return_0_api_when_check_api_db_error(self):
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.ApiDataModel.check_db',
+                        return_value=False):
+            api, event = generator.collect_time_period_data()
+            self.assertEqual(len(api), 0)
+            self.assertEqual(len(event), 0)
 
-    def test_generate_tensor_info_event(self):
-        tensor_db_manager = DBManager()
-        tensor_sql = "create table if not exists TensorInfoV2 (level TEXT," \
-                     "struct_type TEXT,thread_id TEXT,timestamp INTEGER,op_name TEXT," \
-                     "tensor_num INTEGER,input_formats INTEGER,input_data_types INTEGER," \
-                     "input_shapes INTEGER,output_formats INTEGER,output_data_types INTEGER,output_shapes INTEGER)"
-        insert_tensor_sql = "insert into {} values (?,?,?,?,?,?,?,?,?,?,?,?)".format('TensorInfoV2')
-        tensor_data = ((0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),)
-        tensor_conn, tensor_cur = tensor_db_manager.create_table('tensor_info.db', tensor_sql, insert_tensor_sql,
-                                                                 tensor_data)
-        with mock.patch('msmodel.interface.base_model.DBManager.check_connect_db',
-                        return_value=(tensor_conn, tensor_cur)), \
-                mock.patch('msmodel.interface.base_model.DBManager.create_connect_db',
-                           return_value=(tensor_conn, tensor_cur)):
-            check = CANNEventGenerator("test", set())
-            check.generate_tensor_info_event()
-            self.assertEqual(len(check.event_queue.queues), 1)
-            self.assertEqual(check.thread_set, {'0'})
-        tensor_conn, tensor_cur = tensor_db_manager.create_table('tensor_info.db')
-        tensor_db_manager.destroy((tensor_conn, tensor_cur))
+    def test_collect_time_period_data_should_return_0_event_when_check_event_db_error(self):
+        generator = CANNEventGenerator("test")
+        dto1 = ApiDataDto()
+        dto1.thread_id = 0
+        with mock.patch(NAMESPACE + '.ApiDataModel.check_db',
+                        return_value=True), \
+                mock.patch(NAMESPACE + '.ApiDataModel.get_all_data', return_value=[dto1]), \
+                mock.patch(NAMESPACE + '.EventDataModel.check_db',
+                           return_value=False):
+            api, event = generator.collect_time_period_data()
+            self.assertEqual(len(api), 1)
+            self.assertEqual(len(event), 0)
 
-    def test_generate_task_track_event(self):
-        track_db_manager = DBManager()
-        track_sql = "create table if not exists TaskTrack (device_id TEXT," \
-                    "timestamp TEXT,task_type TEXT,stream_id INTEGER,task_id TEXT," \
-                    "thread_id INTEGER,batch_id INTEGER,struct_type INTEGER," \
-                    "level INTEGER,data_len INTEGER)"
-        insert_track_sql = "insert into {} values (?,?,?,?,?,?,?,?,?,?)".format('TaskTrack')
-        track_data = ((0, 0, 0, 0, 0, 0, 0, 0, 0, 0),)
-        track_conn, track_cur = track_db_manager.create_table('rts_track.db', track_sql, insert_track_sql,
-                                                              track_data)
-        with mock.patch('msmodel.interface.base_model.DBManager.check_connect_db',
-                        return_value=(track_conn, track_cur)), \
-                mock.patch('msmodel.interface.base_model.DBManager.create_connect_db',
-                           return_value=(track_conn, track_cur)):
-            check = CANNEventGenerator("test", set())
-            check.generate_task_track_event()
-            self.assertEqual(len(check.event_queue.queues), 1)
-            self.assertEqual(check.thread_set, {0})
-        track_conn, track_cur = track_db_manager.create_table('rts_track.db')
-        track_db_manager.destroy((track_conn, track_cur))
+    def test_collect_time_period_data_should_should_return_1_api_and_1_event_when_1_and_1_in_db(self):
+        dto1 = ApiDataDto()
+        dto1.thread_id = 0
+        dto2 = EventDataDto()
+        dto2.thread_id = 1
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.ApiDataModel.check_db',
+                        return_value=True), \
+                mock.patch(NAMESPACE + '.ApiDataModel.get_all_data',
+                           return_value=[dto1]), \
+                mock.patch(NAMESPACE + '.EventDataModel.check_db',
+                           return_value=True), \
+                mock.patch(NAMESPACE + '.EventDataModel.get_all_data',
+                           return_value=[dto2]):
+            api, event = generator.collect_time_period_data()
+            self.assertEqual(len(api), 1)
+            self.assertEqual(len(event), 1)
 
-    def test_generate_mem_copy_info_event(self):
-        mem_db_manager = DBManager()
-        mem_sql = "create table if not exists MemcpyInfo (struct_type TEXT," \
-                  "level TEXT,thread_id TEXT,data_len INTEGER,timestamp TEXT," \
-                  "data_size INTEGER,memcpy_direction INTEGER)"
-        insert_mem_sql = "insert into {} values (?,?,?,?,?,?,?)".format('MemcpyInfo')
-        mem_data = ((0, 0, 0, 0, 0, 0, 0),)
-        mem_conn, mem_cur = mem_db_manager.create_table('runtime.db', mem_sql, insert_mem_sql,
-                                                        mem_data)
-        with mock.patch('msmodel.interface.base_model.DBManager.check_connect_db',
-                        return_value=(mem_conn, mem_cur)), \
-                mock.patch('msmodel.interface.base_model.DBManager.create_connect_db',
-                           return_value=(mem_conn, mem_cur)):
-            check = CANNEventGenerator("test", set())
-            check.generate_mem_copy_info_event()
-            self.assertEqual(len(check.event_queue.queues), 1)
-            self.assertEqual(check.thread_set, {'0'})
-        mem_conn, mem_cur = mem_db_manager.create_table('runtime.db')
-        mem_db_manager.destroy((mem_conn, mem_cur))
+    def test_generate_node_basic_info_event_should_record_0_event_when_check_db_error(self):
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.NodeBasicInfoModel.check_db',
+                        return_value=False):
+            generator.generate_node_basic_info_event()
+            self.assertEqual(len(generator.event_queues), 0)
 
-    def test_generate_ctx_id_event(self):
-        mem_db_manager = DBManager()
-        mem_sql = "create table if not exists CtxId (struct_type TEXT," \
-                  "level TEXT,thread_id TEXT,op_name INTEGER,timestamp TEXT," \
-                  "ctx_id_num INTEGER,ctx_id INTEGER)"
-        insert_mem_sql = "insert into {} values (?,?,?,?,?,?,?)".format('CtxId')
-        mem_data = ((0, 0, 0, 0, 0, 0, 0),)
-        mem_conn, mem_cur = mem_db_manager.create_table('ctx_id.db', mem_sql, insert_mem_sql,
-                                                        mem_data)
-        with mock.patch('msmodel.interface.base_model.DBManager.check_connect_db',
-                        return_value=(mem_conn, mem_cur)), \
-                mock.patch('msmodel.interface.base_model.DBManager.create_connect_db',
-                           return_value=(mem_conn, mem_cur)):
-            check = CANNEventGenerator("test", set())
-            check.generate_ctx_id_event()
-            self.assertEqual(len(check.event_queue.queues), 1)
-            self.assertEqual(check.thread_set, {'0'})
-        mem_conn, mem_cur = mem_db_manager.create_table('ctx_id.db')
-        mem_db_manager.destroy((mem_conn, mem_cur))
+    def test_generate_node_basic_info_event_should_record_2_event_when_2_node_in_2_thread_in_db(self):
+        dto1 = NodeBasicInfoDto()
+        dto1.thread_id = 0
+        dto2 = NodeBasicInfoDto()
+        dto2.thread_id = 1
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.NodeBasicInfoModel.check_db',
+                        return_value=True), \
+                mock.patch(NAMESPACE + '.NodeBasicInfoModel.get_all_data',
+                           return_value=[dto1, dto2]):
+            generator.generate_node_basic_info_event()
+            self.assertEqual(len(generator.event_queues), 2)
+            self.assertEqual(len(generator.record_databases), 2)
+            self.assertEqual(generator.event_queues.get(0).size, 1)
+            self.assertEqual(generator.event_queues.get(1).size, 1)
 
-    def test_generate_hccl_info_event(self):
-        mem_db_manager = DBManager()
-        mem_sql = "create table if not exists HcclInfoData (struct_type TEXT," \
-                  "level TEXT,thread_id TEXT,op_name INTEGER,timestamp TEXT," \
-                  "ctx_id_num INTEGER,ctx_id INTEGER)"
-        insert_mem_sql = "insert into {} values (?,?,?,?,?,?,?)".format('HcclInfoData')
-        mem_data = ((0, 0, 0, 0, 0, 0, 0),)
-        mem_conn, mem_cur = mem_db_manager.create_table('hccl_info.db', mem_sql, insert_mem_sql,
-                                                        mem_data)
-        with mock.patch('msmodel.interface.base_model.DBManager.check_connect_db',
-                        return_value=(mem_conn, mem_cur)), \
-                mock.patch('msmodel.interface.base_model.DBManager.create_connect_db',
-                           return_value=(mem_conn, mem_cur)):
-            check = CANNEventGenerator("test", set())
-            check.generate_hccl_info_event()
-            self.assertEqual(len(check.event_queue.queues), 1)
-            self.assertEqual(check.thread_set, {'0'})
-        mem_conn, mem_cur = mem_db_manager.create_table('hccl_info.db')
-        mem_db_manager.destroy((mem_conn, mem_cur))
+    def test_generate_tensor_info_event_should_record_0_event_when_check_db_error(self):
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.TensorAddInfoModel.check_db',
+                        return_value=False):
+            generator.generate_tensor_info_event()
+            self.assertEqual(len(generator.event_queues), 0)
 
-    def test_generate_graph_id_map_event(self):
-        mem_db_manager = DBManager()
-        mem_sql = "create table if not exists GraphIdMap (struct_type TEXT," \
-                  "level TEXT,thread_id TEXT,op_name INTEGER,timestamp TEXT," \
-                  "model_name INTEGER,graph_id INTEGER)"
-        insert_mem_sql = "insert into {} values (?,?,?,?,?,?,?)".format('GraphIdMap')
-        mem_data = ((0, 0, 0, 0, 0, 0, 0),)
-        mem_conn, mem_cur = mem_db_manager.create_table('graph_id_map.db', mem_sql, insert_mem_sql,
-                                                        mem_data)
-        with mock.patch('msmodel.interface.base_model.DBManager.check_connect_db',
-                        return_value=(mem_conn, mem_cur)), \
-                mock.patch('msmodel.interface.base_model.DBManager.create_connect_db',
-                           return_value=(mem_conn, mem_cur)):
-            check = CANNEventGenerator("test", set())
-            check.generate_graph_id_map_event()
-            self.assertEqual(len(check.event_queue.queues), 1)
-            self.assertEqual(check.thread_set, {'0'})
-        mem_conn, mem_cur = mem_db_manager.create_table('graph_id_map.db')
-        mem_db_manager.destroy((mem_conn, mem_cur))
+    def test_generate_tensor_info_event_should_record_2_event_when_2_tensor_info_in_2_thread_in_db(self):
+        dto1 = TensorInfoDto()
+        dto1.thread_id = 0
+        dto2 = TensorInfoDto()
+        dto2.thread_id = 1
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.TensorAddInfoModel.check_db',
+                        return_value=True), \
+                mock.patch(NAMESPACE + '.TensorAddInfoModel.get_all_data',
+                           return_value=[dto1, dto2]):
+            generator.generate_tensor_info_event()
+            self.assertEqual(len(generator.event_queues), 2)
+            self.assertEqual(len(generator.record_databases), 2)
+            self.assertEqual(generator.event_queues.get(0).size, 1)
+            self.assertEqual(generator.event_queues.get(1).size, 1)
 
-    def test_generate_fusion_op_info_event(self):
-        mem_db_manager = DBManager()
-        mem_sql = "create table if not exists FusionOPInfo (struct_type TEXT," \
-                  "level TEXT,thread_id TEXT,op_name INTEGER,timestamp TEXT," \
-                  "fusion_op_num INTEGER,memory_input INTEGER,memory_output INTEGER," \
-                  "memory_weight INTEGER,memory_workspace INTEGER,memory_total INTEGER," \
-                  "fusion_op_names INTEGER)"
-        insert_mem_sql = "insert into {} values (?,?,?,?,?,?,?,?,?,?,?,?)".format('FusionOPInfo')
-        mem_data = ((0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),)
-        mem_conn, mem_cur = mem_db_manager.create_table('fusion_op_info.db', mem_sql, insert_mem_sql,
-                                                        mem_data)
-        with mock.patch('msmodel.interface.base_model.DBManager.check_connect_db',
-                        return_value=(mem_conn, mem_cur)), \
-                mock.patch('msmodel.interface.base_model.DBManager.create_connect_db',
-                           return_value=(mem_conn, mem_cur)):
-            check = CANNEventGenerator("test", set())
-            check.generate_fusion_op_info_event()
-            self.assertEqual(len(check.event_queue.queues), 1)
-            self.assertEqual(check.thread_set, {'0'})
-        mem_conn, mem_cur = mem_db_manager.create_table('fusion_op_info.db')
-        mem_db_manager.destroy((mem_conn, mem_cur))
+    def test_generate_task_track_event_should_record_0_event_when_check_db_error(self):
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.TaskTrackModel.check_db',
+                        return_value=False):
+            generator.generate_task_track_event()
+            self.assertEqual(len(generator.event_queues), 0)
+
+    def test_generate_task_track_event_should_record_2_event_when_2_mem_copy_in_2_thread_in_db(self):
+        dto1 = TaskTrackDto()
+        dto1.thread_id = 0
+        dto2 = TaskTrackDto()
+        dto2.thread_id = 1
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.TaskTrackModel.check_db',
+                        return_value=True), \
+                mock.patch(NAMESPACE + '.TaskTrackModel.get_all_data',
+                           return_value=[dto1, dto2]):
+            generator.generate_task_track_event()
+            self.assertEqual(len(generator.event_queues), 2)
+            self.assertEqual(len(generator.record_databases), 2)
+            self.assertEqual(generator.event_queues.get(0).size, 1)
+            self.assertEqual(generator.event_queues.get(1).size, 1)
+
+    def test_generate_mem_copy_info_event_should_record_0_event_when_check_db_error(self):
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.MemcpyInfoModel.check_db',
+                        return_value=False):
+            generator.generate_mem_copy_info_event()
+            self.assertEqual(len(generator.event_queues), 0)
+
+    def test_generate_mem_copy_info_should_record_2_event_when_2_mem_copy_in_2_thread_in_db(self):
+        dto1 = MemCopyInfoDto()
+        dto1.thread_id = 0
+        dto2 = MemCopyInfoDto()
+        dto2.thread_id = 1
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.MemcpyInfoModel.check_db',
+                        return_value=True), \
+                mock.patch(NAMESPACE + '.MemcpyInfoModel.get_all_data',
+                           return_value=[dto1, dto2]):
+            generator.generate_mem_copy_info_event()
+            self.assertEqual(len(generator.event_queues), 2)
+            self.assertEqual(len(generator.record_databases), 2)
+            self.assertEqual(generator.event_queues.get(0).size, 1)
+            self.assertEqual(generator.event_queues.get(1).size, 1)
+
+    def test_generate_ctx_id_event_should_record_0_event_when_check_db_error(self):
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.CtxIdModel.check_db',
+                        return_value=False):
+            generator.generate_ctx_id_event()
+            self.assertEqual(len(generator.event_queues), 0)
+
+    def test_generate_ctx_id_event_should_record_2_event_when_2_ctx_id_in_2_thread_in_db(self):
+        dto1 = CtxIdDto()
+        dto1.thread_id = 0
+        dto2 = CtxIdDto()
+        dto2.thread_id = 1
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.CtxIdModel.check_db',
+                        return_value=True), \
+                mock.patch(NAMESPACE + '.CtxIdModel.get_all_data',
+                           return_value=[dto1, dto2]):
+            generator.generate_ctx_id_event()
+            self.assertEqual(len(generator.event_queues), 2)
+            self.assertEqual(len(generator.record_databases), 2)
+            self.assertEqual(generator.event_queues.get(0).size, 1)
+            self.assertEqual(generator.event_queues.get(1).size, 1)
+
+    def test_generate_hccl_info_event_should_record_0_event_when_check_db_error(self):
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.HcclInfoModel.check_db',
+                        return_value=False):
+            generator.generate_hccl_info_event()
+            self.assertEqual(len(generator.event_queues), 0)
+
+    def test_generate_hccl_info_event_should_record_2_event_when_2_hccl_info_in_2_thread_in_db(self):
+        dto1 = HCCLInfoDto()
+        dto1.thread_id = 0
+        dto2 = HCCLInfoDto()
+        dto2.thread_id = 1
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.HcclInfoModel.check_db',
+                        return_value=True), \
+                mock.patch(NAMESPACE + '.HcclInfoModel.get_all_data',
+                           return_value=[dto1, dto2]):
+            generator.generate_hccl_info_event()
+            self.assertEqual(len(generator.event_queues), 2)
+            self.assertEqual(len(generator.record_databases), 2)
+            self.assertEqual(generator.event_queues.get(0).size, 1)
+            self.assertEqual(generator.event_queues.get(1).size, 1)
+
+    def test_generate_graph_id_map_event_should_record_0_event_when_check_db_error(self):
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.GraphAddInfoModel.check_db',
+                        return_value=False):
+            generator.generate_graph_id_map_event()
+            self.assertEqual(len(generator.event_queues), 0)
+
+    def test_generate_graph_id_map_event_should_record_2_event_when_2_graph_id_map_in_2_thread_in_db(self):
+        dto1 = GraphIdMapDto()
+        dto1.thread_id = 0
+        dto2 = GraphIdMapDto()
+        dto2.thread_id = 1
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.GraphAddInfoModel.check_db',
+                        return_value=True), \
+                mock.patch(NAMESPACE + '.GraphAddInfoModel.get_all_data',
+                           return_value=[dto1, dto2]):
+            generator.generate_graph_id_map_event()
+            self.assertEqual(len(generator.event_queues), 2)
+            self.assertEqual(len(generator.record_databases), 2)
+            self.assertEqual(generator.event_queues.get(0).size, 1)
+            self.assertEqual(generator.event_queues.get(1).size, 1)
+
+    def test_generate_fusion_op_info_event_should_record_0_event_when_check_db_error(self):
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.FusionAddInfoModel.check_db',
+                        return_value=False):
+            generator.generate_fusion_op_info_event()
+            self.assertEqual(len(generator.event_queues), 0)
+
+    def test_generate_fusion_op_info_event_should_record_2_event_when_2_fusion_info_in_2_thread_in_db(self):
+        dto1 = FusionOpInfoDto()
+        dto1.thread_id = 0
+        dto2 = FusionOpInfoDto()
+        dto2.thread_id = 1
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.FusionAddInfoModel.check_db',
+                        return_value=True), \
+                mock.patch(NAMESPACE + '.FusionAddInfoModel.get_all_data',
+                           return_value=[dto1, dto2]):
+            generator.generate_fusion_op_info_event()
+            self.assertEqual(len(generator.event_queues), 2)
+            self.assertEqual(len(generator.record_databases), 2)
+            self.assertEqual(generator.event_queues.get(0).size, 1)
+            self.assertEqual(generator.event_queues.get(1).size, 1)
 
 
 if __name__ == '__main__':
