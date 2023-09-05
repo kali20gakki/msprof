@@ -43,6 +43,11 @@ int main(int argc, const char **argv, const char **envp)
         parser.MsprofCmdUsage("msprof needs input parameter.");
         return PROFILING_FAILED;
     }
+    MsoprofTask msopprof_task = MsoprofTask();
+    auto msopprof_ret = msopprof_task.MsopprofProcess(argc, argv);
+    if (msopprof_ret) {
+        return PROFILING_SUCCESS;
+    }
     auto params = parser.MsprofGetOpts(argc, argv);
     if (params == nullptr) {
         return PROFILING_FAILED;
