@@ -95,14 +95,13 @@ class HostMemUsagePresenter(HostProfPresenterBase):
                     return [tuple([mem_total, *res])]
         return MsvpConstant.EMPTY_LIST
 
-    def _parse_mem_data(self: any, file: any, mem_total: str) -> None:
+    def _parse_mem_data(self: any, file: any, mem_total) -> None:
         if not mem_total or not is_number(mem_total):
             logging.error("mem_total is invalid, please check file info.json...")
             return
         last_timestamp = None
 
-        line = file.readline()
-        while line:
+        for line in file:
             usage_detail = line.split()
             # parse data from usage_detail
             if len(usage_detail) < 3:
@@ -118,7 +117,6 @@ class HostMemUsagePresenter(HostProfPresenterBase):
                 self.mem_usage_info.append(item)
 
             last_timestamp = curr_timestamp
-            line = file.readline()
 
         self.cur_model.insert_mem_usage_data(self.mem_usage_info)
 
