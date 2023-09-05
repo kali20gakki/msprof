@@ -45,7 +45,8 @@ class NpuMemViewer:
                 summary_data = [[self._npu_mem_events.get(datum.event),
                                  datum.ddr / NumberConstant.KILOBYTE,
                                  datum.hbm / NumberConstant.KILOBYTE,
-                                 datum.memory / NumberConstant.KILOBYTE, datum.timestamp]
+                                 datum.memory / NumberConstant.KILOBYTE,
+                                 InfoConfReader().get_host_time_by_sampling_timestamp(datum.timestamp)]
                                 for datum in summary_data]
                 return self._configs.get(StrConstant.CONFIG_HEADERS), summary_data, len(summary_data)
             return MsvpConstant.MSVP_EMPTY_DATA
