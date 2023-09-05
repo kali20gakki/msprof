@@ -485,25 +485,18 @@ bool Utils::IsSoftLink(const std::string &path)
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
     return false;   // not soft-link
 #else
-    struct stat buf1;
-    int ret = stat(path.c_str(), &buf1);
-    if (ret != 0) {
-        MSPROF_LOGE("stat %s fail, ret=%d errno=%u", BaseName(path).c_str(), ret, errno);
-        return true;
+    if (path.empty()) {
+        return false;
     }
-
-    struct stat buf2;
-    ret = lstat(path.c_str(), &buf2);
-    if (ret != 0) {
-        MSPROF_LOGE("lstat %s fail, ret=%d errno=%u", BaseName(path).c_str(), ret, errno);
-        return true;
+    struct stat fileStat;
+    (void)memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat));
+    if (lstat(path.c_str(), &fileStat) != 0) {
+        return false;
     }
-
-    if (buf1.st_ino != buf2.st_ino) {
-        return true;     // soft-link
+    if (!S_ISLNK(fileStat.st_mode)) {
+        return false;
     }
-
-    return false;   // not soft-link
+    return true;
 #endif
 }
 
