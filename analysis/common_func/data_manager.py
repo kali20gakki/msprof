@@ -73,7 +73,8 @@ class DataManager:
                     config_dict['ratio_index_fp16'] = headers.index("mac_fp16_ratio")
 
             config_dict['total_cycles_index'] = headers.index("total_cycles") if "total_cycles" in headers else None
-            config_dict['task_duration_index'] = headers.index("Task Duration(us)") if "Task Duration(us)" in headers else None
+            config_dict['task_duration_index'] = headers.index("Task Duration(us)") if "Task Duration(us)" \
+                                                                                       in headers else None
             if config_dict.get('task_duration_index'):
                 headers.append("cube utilization")
             for index, row in enumerate(data):
