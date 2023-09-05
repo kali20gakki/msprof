@@ -83,9 +83,7 @@ int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len)
         return Msprofiler::Api::ProfAclMgr::instance()->MsprofFinalizeHandle();
     }
 
-    MSPROF_LOGI("Dynamic profiling MsprofCtrlCallbackImpl() before judge.");
     if (Utils::IsDynProfMode()) {
-        MSPROF_LOGI("Dynamic profiling MsprofCtrlCallbackImpl() in judge.");
         if (DynProfMngSrv::instance()->IsStarted()) {
             return MSPROF_ERROR_NONE;
         }
@@ -95,7 +93,6 @@ int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len)
         }
         return DynProfMngSrv::instance()->StartDynProfSrv();
     }
-    // return DynProfMngSrv::instance()->StartDynProfSrv();
     if ((type == MSPROF_CTRL_INIT_DYNA) &&
         (Utils::GetEnvString(PROFILER_SAMPLE_CONFIG_ENV).empty() ||
         !Msprofiler::Api::ProfAclMgr::instance()->IsModeOff())) {
@@ -316,6 +313,7 @@ int32_t MsprofilerInit()
         MSPROF_LOGE("Failed to register ctrl callback");
         return PROFILING_FAILED;
     }
+    MSPROF_EVENT("Started to register profiling hash id callback.");
     ret = ProfApiPlugin::instance()->MsprofProfRegProfilerCallback(PROFILE_REPORT_GET_HASH_ID_CALLBACK,
         reinterpret_cast<VOID_PTR>(MsprofGetHashIdImpl), sizeof(VOID_PTR));
     if (ret != ACL_SUCCESS) {
