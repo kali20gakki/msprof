@@ -61,23 +61,16 @@ class DataManager:
 
         try:
             config_dict.setdefault('mac_ratio_index', None)
-            config_dict.setdefault('ratio_index_int8', None)
-            config_dict.setdefault('ratio_index_fp16', None)
             for item in headers:
                 if item in ("mac_ratio", "aic_mac_ration"):
                     config_dict['mac_ratio_index'] = headers.index("mac_ratio") if "mac_ratio" in headers else \
                         headers.index("aic_mac_ratio")
-                elif item == "mac_int8_ratio":
-                    config_dict['ratio_index_int8'] = headers.index("mac_int8_ratio")
-                elif item == "mac_fp16_ratio":
-                    config_dict['ratio_index_fp16'] = headers.index("mac_fp16_ratio")
 
             config_dict['total_cycles_index'] = headers.index("total_cycles") if "total_cycles" in headers else None
             config_dict['task_duration_index'] = headers.index("Task Duration(us)") if "Task Duration(us)" \
                                                                                        in headers else None
-            is_ratio_valid = config_dict.get("mac_ratio_index") or config_dict.get('ratio_index_int8') or \
-                             config_dict.get('ratio_index_fp16')
-            if config_dict.get('task_duration_index') and config_dict.get('total_cycles_index') and is_ratio_valid:
+            if config_dict.get('task_duration_index') and config_dict.get('total_cycles_index') and \
+                    config_dict.get("mac_ratio_index"):
                 headers.append("cube_utilization(%)")
             else:
                 return
