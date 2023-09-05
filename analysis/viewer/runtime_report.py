@@ -253,13 +253,7 @@ def add_cube_usage(config_dict: dict, value: list) -> list:
     """
     add cube usage column
     """
-    if config_dict.get('ratio_index_fp16') and config_dict.get('ratio_index_int8'):
-        if value[config_dict.get('ratio_index_fp16')]:
-            ratio_index = config_dict.get('ratio_index_fp16')
-        else:
-            ratio_index = config_dict.get('ratio_index_int8')
-    else:
-        ratio_index = config_dict.get('mac_ratio_index')
+    ratio_index = config_dict.get('mac_ratio_index')
     if value[ratio_index] == Constant.NA:
         value.append(Constant.NA)
     elif not NumberConstant.is_zero(min(value[ratio_index], value[config_dict.get('total_cycles_index')],
