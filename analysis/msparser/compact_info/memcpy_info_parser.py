@@ -67,7 +67,7 @@ class MemcpyInfoParser(DataParser, MsMultiProcess):
                 files,
                 StructFmt.MEMCPY_INFO_DATA_SIZE,
                 MemcpyInfoBean,
-                lambda x: x,
+                format_func=lambda x: x,
                 check_func=self.check_magic_num,
             )
         self._memcpy_info_data = self.reformat_data(bean_data)
