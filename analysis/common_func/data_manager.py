@@ -55,8 +55,7 @@ class DataManager:
                 config_dict['ai_core_num'] = device_info.get('ai_core_num')
                 config_dict['aic_frequency'] = float(device_info.get('aic_frequency'))
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            logging.error("Cube utilization: info_json data read fail")
+            logging.info("Cube utilization: info_json data read fail")
             return
 
         try:
