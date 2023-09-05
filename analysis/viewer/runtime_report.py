@@ -253,7 +253,7 @@ def add_cube_usage(config_dict: dict, value: list) -> list:
     """
     add cube usage column
     """
-    if config_dict.get('ratio_index_fp16') != -1 and config_dict.get('ratio_index_int8') != -1:
+    if config_dict.get('ratio_index_fp16') and config_dict.get('ratio_index_int8'):
         if value[config_dict.get('ratio_index_fp16')]:
             ratio_index = config_dict.get('ratio_index_fp16')
         else:
@@ -266,6 +266,7 @@ def add_cube_usage(config_dict: dict, value: list) -> list:
                                         value[config_dict.get('task_duration_index')])):
         usage = value[config_dict.get('total_cycles_index')] / (config_dict.get('aic_frequency') *
                         config_dict.get('ai_core_num') * value[config_dict.get('task_duration_index')])
+        usage = round(usage * 100, 4)
         value.append(usage)
     else:
         value.append(0)

@@ -60,9 +60,9 @@ class DataManager:
             return
 
         try:
-            config_dict.setdefault('mac_ratio_index', -1)
-            config_dict.setdefault('ratio_index_int8', -1)
-            config_dict.setdefault('ratio_index_fp16', -1)
+            config_dict.setdefault('mac_ratio_index', None)
+            config_dict.setdefault('ratio_index_int8', None)
+            config_dict.setdefault('ratio_index_fp16', None)
             for item in headers:
                 if item in ("mac_ratio", "aic_mac_ration"):
                     config_dict['mac_ratio_index'] = headers.index("mac_ratio") if "mac_ratio" in headers else \
@@ -75,12 +75,14 @@ class DataManager:
             config_dict['total_cycles_index'] = headers.index("total_cycles") if "total_cycles" in headers else None
             config_dict['task_duration_index'] = headers.index("Task Duration(us)") if "Task Duration(us)" \
                                                                                        in headers else None
-            if config_dict.get('task_duration_index'):
-                headers.append("cube utilization")
+            if config_dict.get('task_duration_index') and config_dict.get('total_cycles_index') and \
+                    (config_dict.get("mac_ratio_index") or config_dict.get('ratio_index_int8') or
+                     config_dict.get('ratio_index_fp16')):
+                headers.append("cube_utilization(%)")
+            else:
+                return
             for index, row in enumerate(data):
-                if config_dict['task_duration_index'] and config_dict['mac_ratio_index'] and \
-                        config_dict['total_cycles_index']:
-                    data[index] = add_cube_usage(config_dict, list(row))
+                data[index] = add_cube_usage(config_dict, list(row))
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             logging.error("Cube utilization: cube info not found")
