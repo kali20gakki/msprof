@@ -75,12 +75,13 @@ class DataManager:
             config_dict['total_cycles_index'] = headers.index("total_cycles") if "total_cycles" in headers else None
             config_dict['task_duration_index'] = headers.index("Task Duration(us)") if "Task Duration(us)" \
                                                                                        in headers else None
-            if config_dict.get('task_duration_index') and config_dict.get('total_cycles_index') and \
-                    (config_dict.get("mac_ratio_index") or config_dict.get('ratio_index_int8') or
-                     config_dict.get('ratio_index_fp16')):
+            is_ratio_valid = config_dict.get("mac_ratio_index") or config_dict.get('ratio_index_int8') or \
+                             config_dict.get('ratio_index_fp16')
+            if config_dict.get('task_duration_index') and config_dict.get('total_cycles_index') and is_ratio_valid:
                 headers.append("cube_utilization(%)")
             else:
                 return
+
             for index, row in enumerate(data):
                 data[index] = add_cube_usage(config_dict, list(row))
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
