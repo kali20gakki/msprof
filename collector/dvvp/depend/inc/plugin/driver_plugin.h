@@ -22,6 +22,7 @@ using DrvHdcSetSessionReferenceFunc = std::function<drvError_t(HDC_SESSION)>;
 using HalHdcGetSessionAttrFunc = std::function<drvError_t(HDC_SESSION, int, int *)>;
 using HalGetChipInfoFunc = std::function<drvError_t(unsigned int, halChipInfo *)>;
 using HalGetDeviceInfoFunc = std::function<drvError_t(uint32_t, int32_t, int32_t, int64_t *)>;
+using HalGetApiVersionFunc = std::function<drvError_t(int32_t *)>;
 using HalProfDataFlushFunc = std::function<int(unsigned int, unsigned int, unsigned int *)>;
 using ProfDrvGetChannelsFunc = std::function<int(unsigned int, channel_list_t *)>;
 using ProfDrvStartFunc = std::function<int(unsigned int, unsigned int, struct prof_start_para *)>;
@@ -73,6 +74,8 @@ public:
 
     // halGetDeviceInfo
     drvError_t MsprofHalGetDeviceInfo(uint32_t devId, int32_t moduleType, int32_t infoType, int64_t *value);
+
+    drvError_t MsprofHalGetApiVersion(int32_t *value);
 
     // halProfDataFlush
     int MsprofHalProfDataFlush(unsigned int device_id, unsigned int channel_id, unsigned int *data_len);
@@ -157,6 +160,7 @@ private:
     HalHdcGetSessionAttrFunc halHdcGetSessionAttr_ = nullptr;
     HalGetChipInfoFunc halGetChipInfo_ = nullptr;
     HalGetDeviceInfoFunc halGetDeviceInfo_ = nullptr;
+    HalGetApiVersionFunc halGetApiVersion_ = nullptr;
     HalProfDataFlushFunc halProfDataFlush_ = nullptr;
     ProfDrvGetChannelsFunc profDrvGetChannels_ = nullptr;
     ProfDrvStartFunc profDrvStart_ = nullptr;

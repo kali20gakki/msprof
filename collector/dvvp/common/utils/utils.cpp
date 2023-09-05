@@ -17,6 +17,7 @@
 #include <ctime>
 #include "config/config.h"
 #include "config/config_manager.h"
+#include "platform/platform.h"
 #include "errno/error_code.h"
 #include "msprof_dlog.h"
 #include "securec.h"
@@ -32,6 +33,7 @@ namespace utils {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Config;
+using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 using FuncIntPtr = int(*)(int);
@@ -80,6 +82,12 @@ unsigned long long Utils::GetCPUCycleCounter()
     cycles = 0;
 #endif
     return cycles;
+}
+
+unsigned long long Utils::GetClockRealtimeOrCPUCycleCounter()
+{
+    static const bool IS_SUPPORTED_SYS_COUNTER = Platform::instance()->PlatformHostFreqIsEnable();
+    return IS_SUPPORTED_SYS_COUNTER ? GetCPUCycleCounter() : GetClockMonotonicRaw();
 }
 
 double Utils::StatCpuRealFreq()

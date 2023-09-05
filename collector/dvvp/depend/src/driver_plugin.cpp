@@ -26,6 +26,8 @@ void DriverPlugin::GetAllFunction()
     pluginHandle_->GetFunction<drvError_t, unsigned int, halChipInfo *>("halGetChipInfo", halGetChipInfo_);
     pluginHandle_->GetFunction<drvError_t, uint32_t, int32_t, int32_t, int64_t *>(
         "halGetDeviceInfo", halGetDeviceInfo_);
+    pluginHandle_->GetFunction<drvError_t, int32_t *>(
+        "halGetAPIVersion", halGetApiVersion_);
     pluginHandle_->GetFunction<int, unsigned int, unsigned int, unsigned int *>("halProfDataFlush", halProfDataFlush_);
     pluginHandle_->GetFunction<int, unsigned int, channel_list_t *>("prof_drv_get_channels", profDrvGetChannels_);
     pluginHandle_->GetFunction<int, unsigned int, unsigned int, struct prof_start_para *>(
@@ -152,6 +154,16 @@ drvError_t DriverPlugin::MsprofHalGetDeviceInfo(uint32_t devId, int32_t moduleTy
         return DRV_ERROR_INVALID_HANDLE;
     }
     return halGetDeviceInfo_(devId, moduleType, infoType, value);
+}
+
+drvError_t DriverPlugin::MsprofHalGetApiVersion(int32_t *value)
+{
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (halGetApiVersion_ == nullptr) {
+        MSPROF_LOGE("DriverPlugin halGetApiVersion function is null.");
+        return DRV_ERROR_INVALID_HANDLE;
+    }
+    return halGetApiVersion_(value);
 }
 
 // halProfDataFlush
