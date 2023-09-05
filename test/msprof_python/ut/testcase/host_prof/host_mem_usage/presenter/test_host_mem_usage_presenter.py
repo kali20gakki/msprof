@@ -18,9 +18,16 @@ class TestHostMemUsagePresenter(unittest.TestCase):
         self.assertEqual(check.cur_model.__class__.__name__, 'HostMemUsage')
 
     def test_parse_mem_data(self):
+        data = [
+            '191424758423535 2147716853', '191424778902215 2147716853 27461 4653 14 0 213261 0',
+            '191424799235089 2147716853 27461 4653 14 0 213261 0\n',
+            '191424819600139 2147716853 27461 4653 14 0 213261 0\n', ''
+        ]
         with mock.patch(NAMESPACE + '.logging.error'):
             check = HostMemUsagePresenter('test')
-            result = check._parse_mem_data('test', 'a')
+            check.cur_model = HostMemUsage(self.result_dir)
+            result = check._parse_mem_data(data, 197510316)
+            result = check._parse_mem_data(data, "a")
         self.assertEqual(result, None)
 
     def test_parse_pro_data(self):
@@ -96,10 +103,10 @@ class TestHostMemUsagePresenter(unittest.TestCase):
 
     def test_get_summary_data(self):
         with mock.patch('host_prof.host_mem_usage.model.host_mem_usage.HostMemUsage.check_db', return_value=True), \
-             mock.patch('host_prof.host_mem_usage.model.host_mem_usage.HostMemUsage.has_mem_usage_data',
-                        return_value=True), \
-             mock.patch('host_prof.host_mem_usage.model.host_mem_usage.HostMemUsage.get_recommend_value',
-                        return_value=[12, 15]):
+                mock.patch('host_prof.host_mem_usage.model.host_mem_usage.HostMemUsage.has_mem_usage_data',
+                           return_value=True), \
+                mock.patch('host_prof.host_mem_usage.model.host_mem_usage.HostMemUsage.get_recommend_value',
+                           return_value=[12, 15]):
             check = HostMemUsagePresenter(self.result_dir, self.file_name)
             check.cur_model = HostMemUsage('test')
             InfoConfReader()._info_json = {"memoryTotal": 197510316}
@@ -107,6 +114,7 @@ class TestHostMemUsagePresenter(unittest.TestCase):
             self.assertEqual(result[0][0], 197510316)
             self.assertEqual(result[0][1], 12 * 197510316 / 100)
             self.assertEqual(result[0][2], 15 * 197510316 / 100)
+
 
 if __name__ == '__main__':
     unittest.main()
