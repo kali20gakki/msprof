@@ -81,7 +81,7 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
         if not DBManager.check_tables_in_db(
                 PathManager.get_db_path(self._project_path, DBNameConstant.DB_RUNTIME),
                 DBNameConstant.TABLE_EVENT_COUNTER):
-            logging.warning("unable to create metrics db, because it can’t find the event_counter table")
+            logging.warning("unable to create metrics db, because it can't find the event_counter table")
             return
         config = generate_config(PathManager.get_sample_json_path(self._project_path))
         if config.get('ai_core_profiling_mode') == StrConstant.AIC_SAMPLE_BASED_MODE:
@@ -109,17 +109,18 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
         conn, curs = DBManager.check_connect_db_path(PathManager.get_db_path(self._project_path,
                                                                              DBNameConstant.DB_RUNTIME))
         if not conn or not curs or not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_EVENT_COUNT):
-            logging.warning("unable to get metrics data, because it can’t find the event_count table")
+            logging.warning("unable to get metrics data, because it can't find the event_count table")
             return []
 
         sql = self.get_metric_summary_sql(freq, have_step_info)
+        device_id = InfoConfReader().get_device_id()
         if have_step_info:
             limit_and_offset = get_limit_and_offset(self._project_path, iter_range)
             if not limit_and_offset:
                 return []
-            metric_results = DBManager.fetch_all_data(curs, sql, (limit_and_offset[0], limit_and_offset[1]))
+            metric_results = DBManager.fetch_all_data(curs, sql, (device_id, limit_and_offset[0], limit_and_offset[1]))
         else:
-            metric_results = DBManager.fetch_all_data(curs, sql)
+            metric_results = DBManager.fetch_all_data(curs, sql, (device_id,))
         if not metric_results:
             return []
         return metric_results
@@ -140,11 +141,11 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
             algos.append(algo)
         algo_lst = Utils.generator_to_list("cast(" + algo + " as decimal(8,2)) " for algo in algos)
         sql = "SELECT " + ",".join(algo_lst) \
-              + ", task_id, stream_id, '0' FROM EventCount"
+              + ", task_id, stream_id, '0' FROM EventCount where device_id=?"
         if have_step_info:
             sql = "SELECT " + ",".join(algo_lst) \
                   + ", task_id, stream_id, '0' " \
-                    "FROM EventCount limit ? offset ?"
+                    "FROM EventCount where device_id=? limit ? offset ?"
         return sql
 
     def _parse_ai_core_pmu_event(self: any) -> None:
