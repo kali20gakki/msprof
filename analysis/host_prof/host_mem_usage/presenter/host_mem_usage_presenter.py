@@ -95,7 +95,7 @@ class HostMemUsagePresenter(HostProfPresenterBase):
                     return [tuple([mem_total, *res])]
         return MsvpConstant.EMPTY_LIST
 
-    def _parse_mem_data(self: any, file: any, mem_total: str) -> None:
+    def _parse_mem_data(self: any, file: any, mem_total) -> None:
         if not mem_total or not is_number(mem_total):
             logging.error("mem_total is invalid, please check file info.json...")
             return
