@@ -195,7 +195,7 @@ class FileNameManagerConstant:
     MSPROFTX_TORCH_FILE_PATTERN = r"^Msprof\.torch_op\.slice_\d+"
     MSPROFTX_CANN_FILE_PATTERN = r"^Msprof\.torch_cann_op\.slice_\d+"
     MSPROFTX_PIPELINE_FILE_PATTERN = f"^Msprof\.torch_pipeline\.slice_\d+"
-    MSPROF_JSON_FILE_PATTERN = r"^msprof(_\d+)?(_\d+)?(_\d+)?(_slice_\d+)?.json"
+    MSPROF_JSON_FILE_PATTERN = r"^msprof(_\d+)?(_\d+)?(_\d+)?(_\d+)?(_slice_\d+)?.json"
     MSPROFTX_JSON_FILE_PATTERN = r"^msprof_tx_?\d?_?\d?.json"
 
     # helper
