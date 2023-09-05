@@ -45,7 +45,8 @@ class GraphAddInfoParser(DataParser, MsMultiProcess):
         graph_info_files = self.group_aging_file(graph_info_files)
         for file_list in graph_info_files.values():
             self._graph_info_data.extend(self.parse_bean_data(file_list, StructFmt.GRAPH_ADD_INFO_SIZE,
-                                                              GraphAddInfoBean, self._get_graph_info_data,
+                                                              GraphAddInfoBean,
+                                                              format_func=self._get_graph_info_data,
                                                               check_func=self.check_magic_num,
                                                               ))
 
@@ -53,7 +54,7 @@ class GraphAddInfoParser(DataParser, MsMultiProcess):
         nano_exeom_info_files = self.group_aging_file(nano_exeom_info_files)
         for file_list in nano_exeom_info_files.values():
             self._graph_info_data.extend(self.parse_bean_data(file_list, StructFmt.NANO_MODEL_EXEOM_SIZE,
-                                                              NanoExeomBean, self._get_graph_info_data))
+                                                              NanoExeomBean, format_func=self._get_graph_info_data))
 
     def save(self: any) -> None:
         """
