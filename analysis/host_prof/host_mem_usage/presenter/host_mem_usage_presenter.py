@@ -47,7 +47,7 @@ class HostMemUsagePresenter(HostProfPresenterBase):
                 self._parse_mem_usage(file)
                 logging.info(
                     "Finish parsing host mem usage data file: %s", os.path.basename(self.file_name))
-        except (FileNotFoundError, ValueError, IOError) as parse_file_except:
+        except (FileNotFoundError, ValueError, IOError, TypeError) as parse_file_except:
             logging.error("Error in parsing host mem usage data:%s", str(parse_file_except),
                           exc_info=Constant.TRACE_BACK_SWITCH)
         finally:
@@ -105,6 +105,9 @@ class HostMemUsagePresenter(HostProfPresenterBase):
         while line:
             usage_detail = line.split()
             # parse data from usage_detail
+            if len(usage_detail) < 3:
+                logging.error("parse usage detail failed, line: %s", line)
+                continue
             curr_timestamp = usage_detail[0]
             # The used memory is four times the physical memory
             usage_data = Decimal(usage_detail[2]) * 4 / mem_total * NumberConstant.PERCENTAGE
