@@ -290,7 +290,7 @@ class InfoConfReader:
         """
         return self._info_json.get(StrConstant.NET_CARD_NUMS), self._info_json.get(StrConstant.NET_CARD)
 
-    def get_mem_total(self: any) -> str:
+    def get_mem_total(self: any) -> int:
         """
         get net info
         """
