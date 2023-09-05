@@ -101,8 +101,7 @@ class HostMemUsagePresenter(HostProfPresenterBase):
             return
         last_timestamp = None
 
-        line = file.readline()
-        while line:
+        for line in file:
             usage_detail = line.split()
             # parse data from usage_detail
             if len(usage_detail) < 3:
