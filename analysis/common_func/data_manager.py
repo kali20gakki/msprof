@@ -11,6 +11,7 @@ from msmodel.interface.view_model import ViewModel
 from viewer.runtime_report import add_mem_bound, cube_usage
 from common_func.info_conf_reader import InfoConfReader
 
+
 class DataManager:
     """
     class to manage or modify data
