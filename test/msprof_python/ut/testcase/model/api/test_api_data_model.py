@@ -27,10 +27,11 @@ class TestApiDataModel(unittest.TestCase):
                                23130, 5000, 1113, 94827, 0, 3095879082697020, 3095879082697020, 0,
                                23130, 20000, 458759, 94815, 0, 0, 3095879086912038, 0,
                                23130, 5000, 1002, 94815, 0, 3095879519081144, 3095879519087172, 0)
+        connection_ids = [0, 1, 2]
         data_list = [
-            ApiDataBean.decode(bin_data[:40]),
-            ApiDataBean.decode(bin_data[40:80]),
-            ApiDataBean.decode(bin_data[80:])
+            (connection_ids[0], ApiDataBean.decode(bin_data[:40])),
+            (connection_ids[1], ApiDataBean.decode(bin_data[40:80])),
+            (connection_ids[2], ApiDataBean.decode(bin_data[80:])),
         ]
         HashDictData('test')._type_hash_dict = {'runtime': {}, 'acl': {}}
         HashDictData('test')._ge_hash_dict = {}

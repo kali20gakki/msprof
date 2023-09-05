@@ -687,6 +687,7 @@ class TablesConfig(MetaConfig):
             ('is_dynamic', 'REAL, null'),
             ('task_type', 'TEXT, null'),
             ('op_type', 'TEXT, null'),
+            ('connection_id', 'INTEGER, null'),
             ('args', 'TEXT, null')
         ],
         'HCCLOPMap': [
@@ -699,7 +700,8 @@ class TablesConfig(MetaConfig):
             ('op_type', 'TEXT, null'),
             ('begin', 'REAL, null'),
             ('end', 'REAL, null'),
-            ('is_dynamic', 'INTEGER, null')
+            ('is_dynamic', 'INTEGER, null'),
+            ('connection_id', 'INTEGER, null'),
         ],
         'HCCLTaskMap': [
             ('model_id', 'INTEGER, null'),
@@ -1042,7 +1044,8 @@ class TablesConfig(MetaConfig):
             ('thread_id', 'INTEGER,null'),
             ('item_id', 'TEXT,null'),
             ('start', 'INTEGER,null'),
-            ('end', 'INTEGER,null')
+            ('end', 'INTEGER,null'),
+            ('connection_id', 'INTEGER,null'),
         ],
         'EventDataMap': [
             ('struct_type', 'TEXT,null'),
@@ -1050,7 +1053,8 @@ class TablesConfig(MetaConfig):
             ('thread_id', 'INTEGER,null'),
             ('item_id', 'INTEGER,null'),
             ('request_id', 'INTEGER,null'),
-            ('timestamp', 'NUMERIC,null')
+            ('timestamp', 'NUMERIC,null'),
+            ('connection_id', 'INTEGER,null'),
         ],
         'TaskTrackMap': [
             ('device_id', 'INTEGER,null'),
@@ -1190,7 +1194,8 @@ class TablesConfig(MetaConfig):
             ('batch_id', 'INTEGER,null'),
             ('task_type', 'TEXT,null'),
             ('device_id', 'INTEGER,null'),
-            ('timestamp', 'NUMERIC,null')
+            ('timestamp', 'NUMERIC,null'),
+            ('connection_id', 'INTEGER,null'),
         ],
         'AscendTaskMap': [
             ('model_id', 'INTEGER,null'),
@@ -1203,6 +1208,7 @@ class TablesConfig(MetaConfig):
             ('duration', 'NUMERIC,null'),
             ('host_task_type', 'TEXT,null'),
             ('device_task_type', 'TEXT,null'),
+            ('connection_id', 'INTEGER,null'),
         ],
         'NpuOpMemRawMap': [
             ('operator', 'TEXT,null'),

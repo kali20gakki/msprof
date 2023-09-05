@@ -26,6 +26,7 @@ class ApiEventParser(DataParser, MsMultiProcess):
     api_event data parser
     """
     CHECK_RESERVE = 18446744073709551615  # 0xFFFF FFFF FFFF FFFF
+    connection_id = 0
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
@@ -96,6 +97,7 @@ class ApiEventParser(DataParser, MsMultiProcess):
                 data = _all_data[_index * struct_size:(_index + 1) * struct_size]
                 self.check_magic_num(data)
                 if self._check_reserve_num(data):
-                    self._event_data.append(EventDataBean.decode(data))
+                    self._event_data.append((self.connection_id, EventDataBean.decode(data)))
                 else:
-                    self._api_data.append(ApiDataBean.decode(data))
+                    self._api_data.append((self.connection_id, ApiDataBean.decode(data)))
+                self.connection_id += 1

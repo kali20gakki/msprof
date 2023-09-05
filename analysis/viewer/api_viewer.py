@@ -49,7 +49,7 @@ class ApiViewer:
             (
                 data[0], InfoConfReader().time_from_host_syscnt(data[1]),
                 InfoConfReader().get_host_duration(data[2]),
-                data[3], data[4], data[5], data[6]
+                *data[3:],
             ) for data in timeline_data
         ]
 
@@ -74,6 +74,7 @@ class ApiViewer:
             args.setdefault("level", sql_data[4])
             args.setdefault("id", sql_data[5])
             args.setdefault("item_id", sql_data[6])
+            args.setdefault("connection_id", sql_data[7])
             trace_data.append(
                 (ApiViewer._get_data_api_name(sql_data), pid,
                  sql_data[3], sql_data[1] / NumberConstant.CONVERSION_TIME,

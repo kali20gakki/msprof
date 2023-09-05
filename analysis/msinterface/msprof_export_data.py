@@ -68,12 +68,11 @@ from viewer.peripheral_report import get_peripheral_nic_data
 from viewer.pipeline_overlap_viewer import PipelineOverlapViewer
 from viewer.runtime_report import get_task_scheduler_data
 from viewer.stars.acc_pmu_viewer import AccPmuViewer
-from viewer.stars.ffts_log_viewer import FftsLogViewer
 from viewer.stars.low_power_viewer import LowPowerViewer
 from viewer.stars.stars_chip_trans_view import StarsChipTransView
 from viewer.stars.stars_soc_view import StarsSocView
 from viewer.task_queue_viewer import TaskQueueViewer
-from viewer.training.core_cpu_reduce_viewer import CoreCpuReduceViewer
+from viewer.task_time_viewer import TaskTimeViewer
 from viewer.training.step_trace_viewer import StepTraceViewer
 from viewer.training.task_op_viewer import TaskOpViewer
 from viewer.ts_cpu_report import TsCpuReport
@@ -96,15 +95,7 @@ class MsProfExportDataUtils:
         get task scheduler data
         """
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
-            message = {
-                "host_id": MsProfCommonConstant.DEFAULT_IP,
-                "device_id": params.get(StrConstant.PARAM_DEVICE_ID),
-                "iter_id": params.get(StrConstant.PARAM_ITER_ID),
-                "result_dir": params.get(StrConstant.PARAM_RESULT_DIR)
-            }
-            if ChipManager().is_stars_chip():
-                return MsProfExportDataUtils._get_sub_task_time(configs, params)
-            return CoreCpuReduceViewer.get_task_time_data(message)
+            return MsProfExportDataUtils._get_task_timeline(configs, params)
         if ChipManager().is_chip_v1():
             db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR),
                                               configs.get(StrConstant.CONFIG_DB))
@@ -528,11 +519,11 @@ class MsProfExportDataUtils:
 
 
     @staticmethod
-    def _get_sub_task_time(configs: dict, params: dict) -> str:
+    def _get_task_timeline(configs: dict, params: dict) -> str:
         """
         get ffts task time data
         """
-        return FftsLogViewer(configs, params).get_timeline_data()
+        return TaskTimeViewer(configs, params).get_timeline_data()
 
     @staticmethod
     def _get_hccl_timeline(configs: dict, params: dict) -> str:
