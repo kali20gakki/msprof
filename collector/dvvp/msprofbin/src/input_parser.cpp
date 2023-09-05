@@ -647,7 +647,7 @@ int MsoprofTask::ExecMsopprof(CONST_CHAR_PTR path, std::vector<std::string> args
         return PROFILING_FAILED;
     }
     bool isExited = false;
-    ret = analysis::dvvp::common::utils::Utils::WaitProcess(opProcess, isExited, exitCode, false);
+    ret = analysis::dvvp::common::utils::Utils::WaitProcess(opProcess, isExited, exitCode, true);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to wait msopprof: %s", cmd.c_str());
         return PROFILING_FAILED;
