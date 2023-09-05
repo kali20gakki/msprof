@@ -47,25 +47,21 @@ class DataManager:
         config_dict = dict()
         config_dict['ai_core_num'] = InfoConfReader().get_data_under_device('ai_core_num')
         config_dict['aic_frequency'] = float(InfoConfReader().get_data_under_device('aic_frequency'))
-        try:
-            config_dict.setdefault('mac_ratio_index', None)
+
+        config_dict.setdefault('mac_ratio_index', None)
+        if "mac_ratio" in headers or "aic_mac_ratio" in headers:
             config_dict['mac_ratio_index'] = headers.index("mac_ratio") if "mac_ratio" in headers else \
                 headers.index("aic_mac_ratio")
-            config_dict['total_cycles_index'] = headers.index("total_cycles") if "total_cycles" in headers else None
-            config_dict['task_duration_index'] = headers.index("Task Duration(us)") if \
-                "Task Duration(us)" in headers else None
-
-            if config_dict.get('task_duration_index') and config_dict.get('total_cycles_index') and \
-                    config_dict.get("mac_ratio_index"):
-                headers.append("cube_utilization(%)")
-            else:
-                return
-
+        else:
+            return 
+        config_dict['total_cycles_index'] = headers.index("total_cycles") if "total_cycles" in headers else None
+        config_dict['task_duration_index'] = headers.index("Task Duration(us)") if "Task Duration(us)" in \
+                                                                                   headers else None
+        if config_dict.get('task_duration_index') and config_dict.get('total_cycles_index') and \
+                config_dict.get("mac_ratio_index"):
+            headers.append("cube_utilization(%)")
             for index, row in enumerate(data):
                 data[index] = cube_usage(config_dict, list(row))
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.info("Cube utilization: cube info not found")
-            return
 
     @classmethod
     def add_memory_bound(cls: any, headers: list, data: list) -> None:
