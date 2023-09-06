@@ -53,7 +53,8 @@ class EventViewer:
             args.setdefault("request_id", timeline_data_dto.request_id)
             trace_data.append(
                 (struct_type, pid, timeline_data_dto.thread_id,
-                 InfoConfReader().time_from_host_syscnt(timeline_data_dto.start, NumberConstant.MICRO_SECOND),
+                 InfoConfReader().trans_into_local_time(
+                     InfoConfReader().time_from_host_syscnt(timeline_data_dto.start, NumberConstant.MICRO_SECOND)),
                  InfoConfReader().get_host_duration((timeline_data_dto.end - timeline_data_dto.start),
                                                     NumberConstant.MICRO_SECOND),
                  args))

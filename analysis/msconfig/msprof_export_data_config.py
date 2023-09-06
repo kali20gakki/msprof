@@ -58,7 +58,6 @@ class MsProfExportDataConfig(MetaConfig):
             ('db', 'l2cache.db'),
             ('table', 'L2CacheSummary'),
             ('unused_cols', 'device_id,task_type'),
-            ('headers', 'Read,Write,Victim,Allocate,Timestamp(ns)')
         ],
         'step_trace': [
             ('handler', '_get_step_trace_data'),

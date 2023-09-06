@@ -12,6 +12,7 @@ from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.db_manager import DBManager
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.memcpy_constant import MemoryCopyConstant
+from common_func.info_conf_reader import InfoConfReader
 
 
 class MemoryCopyViewer:
@@ -94,13 +95,15 @@ class MemoryCopyViewer:
 
             for datum in export_data:
                 export_datum = []
+                task_start = InfoConfReader().trans_into_local_time(int(datum[5]), NumberConstant.NANO_SECOND)
+                task_stop = InfoConfReader().trans_into_local_time(int(datum[6]), NumberConstant.NANO_SECOND)
                 export_datum.append(datum[0])
                 export_datum.append(datum[1])
                 export_datum.append(datum[2])
                 export_datum.append(datum[3])
                 export_datum.append(datum[4])
-                export_datum.append("\"" + str(int(datum[5] * DBManager.NSTOUS)) + "\"")
-                export_datum.append("\"" + str(int(datum[6] * DBManager.NSTOUS)) + "\"")
+                export_datum.append("\"" + str(task_start) + "\"")
+                export_datum.append("\"" + str(task_stop) + "\"")
                 summary_data.append(tuple(export_datum))
 
         return summary_data
@@ -116,16 +119,19 @@ class MemoryCopyViewer:
             export_data = self._model.return_task_scheduler_timeline(
                 DBNameConstant.TABLE_TS_MEMCPY_CALCULATION)
             for datum in export_data:
+                start_time = InfoConfReader().trans_into_local_time(datum[3])
+                end_time = InfoConfReader().trans_into_local_time(datum[4])
+                receive_time = InfoConfReader().trans_into_local_time(datum[2])
                 args = OrderedDict([("Task Type", datum[1]),
                                     ("Stream Id", datum[6]),
                                     ("Task Id", datum[7]),
-                                    ("Receive Time", datum[2]),
-                                    ("Start Time", datum[3]),
-                                    ("End Time", datum[4])])
+                                    ("Receive Time", receive_time),
+                                    ("Start Time", start_time),
+                                    ("End Time", end_time)])
 
                 timeline_datum = [
                     datum[0], NumberConstant.TASK_TIME_PID, datum[6],
-                    datum[3], datum[5], args
+                    start_time, datum[5], args
                 ]
                 timeline_data.append(timeline_datum)
 

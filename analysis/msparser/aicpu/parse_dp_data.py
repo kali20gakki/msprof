@@ -7,6 +7,7 @@ import os
 import struct
 
 from common_func.common import warn
+from common_func.info_conf_reader import InfoConfReader
 from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
 from common_func.file_name_manager import get_data_preprocess_compiles
@@ -60,7 +61,7 @@ class ParseDpData:
         split dp data into dp_tuple
         """
         dp_data_length = index * ParseDpData.DP_TUPLE_LENGTH
-        timestamp = dp_data[dp_data_length + 3] / NumberConstant.NS_TO_US
+        timestamp = InfoConfReader().trans_into_local_time(dp_data[dp_data_length + 3] / NumberConstant.NS_TO_US)
         action = dp_data[dp_data_length + 4].partition(b'\x00')[0].decode('utf-8', 'ignore')
         source = dp_data[dp_data_length + 5].partition(b'\x00')[0].decode('utf-8', 'ignore')
         size = dp_data[dp_data_length + 7]
@@ -118,7 +119,8 @@ class ParseDpData:
             if len(info_split) > Constant.LINE_LEN:
                 # info are in the following format
                 # [13135969231] Last queue dequeue, source:iterator_default, index:1, size:131
-                timestamp = float(info_split[0].split("]")[0].strip("[")) / NumberConstant.NS_TO_US
+                timestamp = InfoConfReader().trans_into_local_time(
+                    float(info_split[0].split("]")[0].strip("[")) / NumberConstant.NS_TO_US)
                 action = info_split[0].split("]")[-1].strip()
                 source = info_split[-3].split(":")[-1]
                 size = info_split[-1].split(":")[-1]

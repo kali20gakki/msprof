@@ -52,8 +52,10 @@ class HostNetworkUsage(HostProfDataBase):
         result = []
         for network_item in network_info_list:
             time_network = {
-                "start": InfoConfReader().time_from_host_syscnt(network_item[0], NumberConstant.MICRO_SECOND),
-                "end": InfoConfReader().time_from_host_syscnt(network_item[1], NumberConstant.MICRO_SECOND),
+                "start": InfoConfReader().trans_into_local_time(
+                            InfoConfReader().time_from_host_syscnt(network_item[0], NumberConstant.MICRO_SECOND)),
+                "end": InfoConfReader().trans_into_local_time(
+                            InfoConfReader().time_from_host_syscnt(network_item[1], NumberConstant.MICRO_SECOND)),
                 "usage": network_item[2]
             }
             result.append(time_network)
