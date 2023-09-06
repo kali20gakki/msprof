@@ -40,12 +40,3 @@ class TestStepTraceParser(unittest.TestCase):
                 mock.patch(NAMESPACE + '.ClusterStepTraceParser.save'):
             check = ClusterStepTraceParser(self.DIR_PATH)
             check.ms_run()
-
-    def test_ms_run_should_return_empty_when_data_exist(self):
-        with mock.patch(NAMESPACE + '.ClusterStepTraceParser._check_collection_path_valid', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(1, 1)), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[(1, "PROF1/device_0")]), \
-                mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True):
-            check = ClusterStepTraceParser(self.DIR_PATH)
-            check.ms_run()

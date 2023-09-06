@@ -373,6 +373,22 @@ class InfoConfReader:
     def get_ai_core_profiling_mode(self):
         return self._sample_json.get("ai_core_profiling_mode")
 
+    def trans_into_local_time(self: any, raw_timestamp: float, time_fmt: float = NumberConstant.MICRO_SECOND) -> float:
+        """
+        transfer raw time into local time
+        time_fmt: the time format of input raw time
+        :return: local time(us)
+        """
+        return raw_timestamp / time_fmt * NumberConstant.MICRO_SECOND + self._local_time_offset
+
+    def get_local_time_offset(self: any) -> float:
+        """
+        get the offset between local time and monotonic raw
+        add the offset to monotonic raw to get the local time
+        return: offset(us)
+        """
+        return self._local_time_offset
+    
     def _load_json(self: any, result_path: str) -> None:
         """
         load info.json once
@@ -457,20 +473,5 @@ class InfoConfReader:
         if collect_time_begin and collect_raw_time:
             self._local_time_offset = float(collect_time_begin) - float(collect_raw_time) / NumberConstant.NS_TO_US
             return
-        logging.warning("No start info, or start info is invalid.")
-
-    def trans_into_local_time(self: any, raw_timestamp: float, time_fmt: float = NumberConstant.MICRO_SECOND) -> float:
-        """
-        transfer raw time into local time
-        time_fmt: the time format of input raw time
-        :return: local time(us)
-        """
-        return raw_timestamp / time_fmt * NumberConstant.MICRO_SECOND + self._local_time_offset
-
-    def get_local_time_offset(self: any) -> float:
-        """
-        get the offset between local time and monotonic raw
-        add the offset to monotonic raw to get the local time
-        return: offset(us)
-        """
-        return self._local_time_offset
+        logging.error("No start info, or start info is invalid.")
+        raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)

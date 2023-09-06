@@ -73,66 +73,47 @@ class LowPowerViewer(BaseViewer, ABC):
         result = []
         for data in datas:
             result.append(["VF Sampling cnt", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                           self.pid, self.VF_SAMPLEING_TIMES,
-                           {'Value': data[self.VF_SAMPLEING_TIMES]}])
+                           self.pid, self.VF_SAMPLEING_TIMES, {'Value': data[self.VF_SAMPLEING_TIMES]}])
             result.append(["Pwr Sampling cnt", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                           self.pid, self.PWR_SAMPLEING_TIMES,
-                           {'Value': data[self.PWR_SAMPLEING_TIMES]}])
+                           self.pid, self.PWR_SAMPLEING_TIMES, {'Value': data[self.PWR_SAMPLEING_TIMES]}])
             result.append(["Temp Sampling cnt", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                           self.pid, self.TEMP_SAMPLEING_TIMES,
-                           {'Value': data[self.TEMP_SAMPLEING_TIMES]}])
+                           self.pid, self.TEMP_SAMPLEING_TIMES, {'Value': data[self.TEMP_SAMPLEING_TIMES]}])
             result.append(["AIC TEMP (℃)", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                           self.pid, self.TEM_OF_AI_CORE,
-                           {'Value': data[self.TEM_OF_AI_CORE]}])
+                           self.pid, self.TEM_OF_AI_CORE, {'Value': data[self.TEM_OF_AI_CORE]}])
             result.append(
                 ["HBM Controller TEMP (℃)", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                 self.pid, self.TEM_OF_HBM,
-                 {'Value': data[self.TEM_OF_HBM]}])
+                 self.pid, self.TEM_OF_HBM, {'Value': data[self.TEM_OF_HBM]}])
             result.append(["HBM TEMP (℃)", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                           self.pid, self.TEM_OF_HBM,
-                           {'Value': data[self.TEM_OF_HBM_GRANULARITY]}])
+                           self.pid, self.TEM_OF_HBM, {'Value': data[self.TEM_OF_HBM_GRANULARITY]}])
             result.append(
                 ["CPU TEMP (℃)", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                 self.pid, self.TEM_OF_CPU,
-                 {'Value': data[self.TEM_OF_CPU]}])
+                 self.pid, self.TEM_OF_CPU, {'Value': data[self.TEM_OF_CPU]}])
             result.append(["Peripherals TEMP (℃)", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                           self.pid, self.TEM_OF_PERIPHERALS,
-                           {'Value': data[self.TEM_OF_PERIPHERALS]}])
+                           self.pid, self.TEM_OF_PERIPHERALS, {'Value': data[self.TEM_OF_PERIPHERALS]}])
             result.append(["L2 Buffer TEMP (℃)", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                           self.pid, self.TEM_OF_L2_BUFF,
-                           {'Value': data[self.TEM_OF_L2_BUFF]}])
+                           self.pid, self.TEM_OF_L2_BUFF, {'Value': data[self.TEM_OF_L2_BUFF]}])
             result.append(["DPM AIC Current (A)", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                           self.pid, self.AIC_CURRENT_DPM,
-                           {'Value': data[self.AIC_CURRENT_DPM]}])
+                           self.pid, self.AIC_CURRENT_DPM, {'Value': data[self.AIC_CURRENT_DPM]}])
             result.append(["DPM Power (W)", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                           self.pid, self.POWER_COS_DPM,
-                           {'Value': data[self.POWER_COS_DPM]}])
+                           self.pid, self.POWER_COS_DPM, {'Value': data[self.POWER_COS_DPM]}])
             result.append(["AIC Current (A)", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                           self.pid, self.AIC_CURRENT_SD5003,
-                           {'Value': data[self.AIC_CURRENT_SD5003]}])
+                           self.pid, self.AIC_CURRENT_SD5003, {'Value': data[self.AIC_CURRENT_SD5003]}])
             result.append(["AIC Power (W)", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                           self.pid, self.POWER_COS_SD5003,
-                           {'Value': data[self.POWER_COS_SD5003]}])
-            result.append(
-                ["AIC Voltage (V)", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                 self.pid, self.VOLTAGE, {'Value': data[self.VOLTAGE]}])
+                           self.pid, self.POWER_COS_SD5003, {'Value': data[self.POWER_COS_SD5003]}])
+            result.append(["AIC Voltage (V)", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
+                           self.pid, self.VOLTAGE, {'Value': data[self.VOLTAGE]}])
             result.append(["AIC Frequency (MHz)", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                           self.pid, self.AIC_FREQUENCY,
-                           {'Value': data[self.AIC_FREQUENCY]}])
+                           self.pid, self.AIC_FREQUENCY, {'Value': data[self.AIC_FREQUENCY]}])
             result.append(["Imon", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
                            self.pid, self.IMON, {'Value': data[self.IMON]}])
             result.append(["TEMP Warning 0", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                           self.pid, self.WARN_CNT0,
-                           {'Value': data[self.WARN_CNT0]}])
+                           self.pid, self.WARN_CNT0, {'Value': data[self.WARN_CNT0]}])
             result.append(["TEMP Warning 1", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                           self.pid, self.WARN_CNT1,
-                           {'Value': data[self.WARN_CNT1]}])
+                           self.pid, self.WARN_CNT1, {'Value': data[self.WARN_CNT1]}])
             result.append(["TEMP Warning 2", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                           self.pid, self.WARN_CNT2,
-                           {'Value': data[self.WARN_CNT2]}])
+                           self.pid, self.WARN_CNT2, {'Value': data[self.WARN_CNT2]}])
             result.append(["TEMP Warning 3", InfoConfReader().trans_into_local_time(data[self.TIME_STAMP]),
-                           self.pid, self.WARN_CNT3,
-                           {'Value': data[self.WARN_CNT3]}])
+                           self.pid, self.WARN_CNT3, {'Value': data[self.WARN_CNT3]}])
         _trace = TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, result)
         result = TraceViewManager.metadata_event(self.get_timeline_header())
         result.extend(_trace)

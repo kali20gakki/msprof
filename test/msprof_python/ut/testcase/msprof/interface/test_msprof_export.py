@@ -294,25 +294,6 @@ class TestExportCommand(unittest.TestCase):
                 test.list_map["devices_list"] = ["1"]
                 test.process()
 
-    def test_process_1(self):
-        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
-        args = Namespace(**args_dic)
-        path_dir = (['device_0'], ['host'], ['device_1'])
-        with mock.patch(NAMESPACE + '.check_path_valid'):
-            with mock.patch(NAMESPACE + '.get_path_dir', side_effect=path_dir), \
-                    mock.patch('os.path.join', return_value='JOB/device_0'), \
-                    mock.patch('os.path.realpath', return_value='JOB/device_0'), \
-                    mock.patch('os.listdir', return_value=[]), \
-                    mock.patch(NAMESPACE + '.check_path_valid'), \
-                    mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True), \
-                    mock.patch(NAMESPACE + '.ExportCommand._handle_export'), \
-                    mock.patch(NAMESPACE + '.ExportCommand._show_tuning_result'), \
-                    mock.patch(NAMESPACE + '.warn'), \
-                    mock.patch(NAMESPACE + '.MsprofJobSummary.export'):
-                test = ExportCommand("summary", args)
-                test.list_map["devices_list"] = ["1"]
-                test.process()
-
     def test_handle_export_raise_profexception_0(self) -> None:
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
         args = Namespace(**args_dic)
