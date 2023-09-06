@@ -90,6 +90,16 @@ public:
         return pmuEventsConfig;
     }
 
+    void GetHostTime()
+    {
+        auto t1 = Utils::GetCPUCycleCounter();
+        hostMonotonicStart_ = Utils::GetClockMonotonicRaw();
+        auto t2 = Utils::GetCPUCycleCounter();
+        // Taking the average time of pre and post,
+        // It is assumed that the timeline obtained by the api is at the same time
+        hostCntvctStart_ = (t2 + t1) >> 1;
+    }
+
     void GetHostAndDeviceTime(int devIndexId)
     {
         static const int MULTIPLE = 4;
@@ -161,12 +171,22 @@ public:
 
     void GetAndStoreStartTime(int hostProfiling, std::string jobId, int devIndexId, std::string jobDeviceType)
     {
-        if (hostProfiling) {
-            return;
-        }
         jobId_ = jobId;
         devIndexId_ = devIndexId;
         jobDeviceType_ = jobDeviceType;
+        if (hostProfiling) {
+            GetHostTime();
+            std::string startTime = GenerateHostStartTime();
+            std::string fileName = "host_start.log";
+            std::stringstream timeData;
+            timeData << "[Host]" << std::endl;
+            timeData << startTime;
+            int ret = StoreTime(fileName, timeData.str());
+            if (ret != PROFILING_SUCCESS) {
+                MSPROF_LOGE("[%s]Failed to upload data for %s", jobDeviceType_.c_str(), fileName.c_str());
+            }
+            return;
+        }
         GetHostAndDeviceTime(devIndexId_);
         MSPROF_LOGI("devId:%d, hostMonotonicStart=%llu ns, hostCntvctStart=%llu ns, hostCntvctDiff=%llu, "
                     "devCntvct=%llu ns", hostMonotonicStart_, hostCntvctStart_, hostCntvctDiff_, devCntvct_);

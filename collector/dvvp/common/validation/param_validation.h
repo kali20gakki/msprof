@@ -87,6 +87,7 @@ public:
     bool CheckHostSysToolsExit(const std::string &hostSysParam, const std::string &resultDir,
         const std::string &appDir) const;
     int CustomHexCharConfig(std::string &aicoreEvents, const std::string &pattern);
+    int CheckMsopprofBinValid(const std::string &binPath) const;
 
 private:
     bool CheckTsSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);

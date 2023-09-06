@@ -78,7 +78,8 @@ class TensorAddInfoParser(DataParser, MsMultiProcess):
         tensor_info_files = self.group_aging_file(tensor_info_files)
         for file_list in tensor_info_files.values():
             self._ge_tensor_info_data.extend(self.parse_bean_data(file_list, StructFmt.TENSOR_ADD_INFO_SIZE,
-                                                                  TensorAddInfoBean, self._get_tensor_info_data,
+                                                                  TensorAddInfoBean,
+                                                                  format_func=self._get_tensor_info_data,
                                                                   check_func=self.check_magic_num,
                                                                   ))
         self._update_tensor_data()

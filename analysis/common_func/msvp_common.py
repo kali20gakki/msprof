@@ -16,6 +16,8 @@ from operator import mul
 from operator import sub
 from operator import truediv
 
+from typing.io import TextIO
+
 from common_func.common import error
 from common_func.constant import Constant
 from common_func.file_manager import check_path_valid
@@ -168,33 +170,55 @@ def files_chmod(file_path: str) -> None:
         pass
 
 
-def create_csv(csv_file: str, headers: list, data: list, save_old_file: bool = True) -> str:
+def create_csv(csv_file: str, headers: list, data: list, save_old_file: bool = True, use_dict=False) -> str:
     """
     create csv table
     :param csv_file: csv file path
     :param headers: data header for csv file
     :param data: data for csv file
     :param save_old_file: save old file or not
+    :param use_dict: csv use DictWriter or not
     :return: result for creating csv file
     """
     if not bak_and_make_dir(csv_file, save_old_file):
         return json.dumps({'status': NumberConstant.ERROR, 'info': str('bak or mkdir json dir failed'), 'data': ''})
     try:
-        with os.fdopen(os.open(csv_file, Constant.WRITE_FLAGS,
-                               Constant.WRITE_MODES), 'w', newline='') as _csv_file:
-            os.chmod(csv_file, NumberConstant.FILE_AUTHORITY)
-            f_csv = csv.writer(_csv_file)
-            if headers:
-                f_csv.writerow(headers)
-            while NumberConstant.DATA_NUM < len(data):
-                f_csv.writerows(data[:NumberConstant.DATA_NUM])
-                data = data[NumberConstant.DATA_NUM:]
-            f_csv.writerows(data)
+        if use_dict:
+            create_csv_dict_writer(csv_file, headers, data)
+        else:
+            create_csv_writer(csv_file, headers, data)
         return json.dumps({'status': NumberConstant.SUCCESS, 'info': '', 'data': csv_file})
     except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
         return json.dumps({'status': NumberConstant.ERROR, 'info': str(err), 'data': ''})
-    finally:
-        pass
+
+
+def create_csv_writer(csv_file: str, headers: list, data: list):
+    with os.fdopen(os.open(csv_file, Constant.WRITE_FLAGS,
+                           Constant.WRITE_MODES), 'w', newline='') as _csv_file:
+        os.chmod(csv_file, NumberConstant.FILE_AUTHORITY)
+        writer = csv.writer(_csv_file)
+        if headers:
+            writer.writerow(headers)
+        slice_count = len(data) // NumberConstant.DATA_NUM
+        for index in range(slice_count):
+            writer.writerows(data[index * NumberConstant.DATA_NUM:
+                                  (index + 1) * NumberConstant.DATA_NUM])
+        writer.writerows(data[slice_count * NumberConstant.DATA_NUM:])
+
+
+def create_csv_dict_writer(csv_file: str, headers: list, data: list):
+    with os.fdopen(os.open(csv_file, Constant.WRITE_FLAGS,
+                           Constant.WRITE_MODES), 'w', newline='') as _csv_file:
+        os.chmod(csv_file, NumberConstant.FILE_AUTHORITY)
+        if not headers:
+            return
+        writer = csv.DictWriter(_csv_file, fieldnames=headers)
+        writer.writeheader()
+        slice_count = len(data) // NumberConstant.DATA_NUM
+        for index in range(slice_count):
+            writer.writerows(data[index * NumberConstant.DATA_NUM:
+                                  (index + 1) * NumberConstant.DATA_NUM])
+        writer.writerows(data[slice_count * NumberConstant.DATA_NUM:])
 
 
 def create_json(json_file: str, headers: list, data: list, save_old_file: bool = True) -> str:

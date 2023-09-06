@@ -5,6 +5,7 @@
 import json
 import logging
 import os
+import shutil
 
 from common_func.profiling_scene import ProfilingScene
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
@@ -28,6 +29,7 @@ from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
 from common_func.msprof_common import prepare_for_parse
 from common_func.msprof_exception import ProfException
+from common_func.msvp_common import check_dir_writable
 from common_func.path_manager import PathManager
 from common_func.system_data_check_manager import SystemDataCheckManager
 from common_func.utils import Utils
@@ -35,7 +37,7 @@ from framework.file_dispatch import FileDispatch
 from framework.load_info_manager import LoadInfoManager
 from msinterface.msprof_export_data import MsProfExportDataUtils
 from msinterface.msprof_job_summary import MsprofJobSummary
-from msinterface.msprof_mindstudio_profiler import MsprofMindStudioProfiler
+from msinterface.msprof_output_summary import MsprofOutputSummary
 from msinterface.msprof_timeline import MsprofTimeline
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from msmodel.step_trace.ts_track_model import TsTrackModel
@@ -219,6 +221,7 @@ class ExportCommand:
         }
         self.iteration_range = None
         self._cluster_params = {'is_cluster_scene': False, 'cluster_path': []}
+        self.clear_mode = getattr(args, "clear_mode", False)
 
     @staticmethod
     def _is_host_export(result_dir: str) -> bool:
@@ -492,6 +495,18 @@ class ExportCommand:
                                                           data)
         print_info(self.FILE_NAME, export_info)
 
+    def _clear_dir(self, result_dir: str, clear_ori_data_flag: bool) -> None:
+        if not self.clear_mode:
+            return
+        if not os.path.exists(result_dir):
+            return
+        clear_dir_list = ['sqlite'] if not clear_ori_data_flag else ['data', 'sqlite']
+        for clear_dir in clear_dir_list:
+            dir_name = os.path.join(result_dir, clear_dir)
+            if os.path.exists(dir_name):
+                check_dir_writable(dir_name)
+                shutil.rmtree(dir_name)
+
     def _handle_export(self: any, result_dir: str) -> None:
         try:
             self._prepare_export(result_dir)
@@ -502,6 +517,7 @@ class ExportCommand:
                 warn(MsProfCommonConstant.COMMON_FILE_NAME,
                      'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
             return
+        clear_ori_data_flag = True
         try:
             for event in self.list_map.get('export_type_list', []):
                 if not self.list_map.get('devices_list', []):
@@ -515,6 +531,8 @@ class ExportCommand:
             else:
                 warn(MsProfCommonConstant.COMMON_FILE_NAME,
                      'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
+            clear_ori_data_flag = False
+        self._clear_dir(result_dir, clear_ori_data_flag)
 
     def _prepare_export(self: any, result_dir: str) -> None:
         prepare_for_parse(result_dir)
@@ -589,5 +607,5 @@ class ExportCommand:
         job_summary = MsprofJobSummary(collect_path)
         job_summary.export()
 
-        profier = MsprofMindStudioProfiler(collect_path)
+        profier = MsprofOutputSummary(collect_path)
         profier.export()

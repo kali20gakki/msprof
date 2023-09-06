@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 import json
 import unittest
 from unittest import mock
@@ -15,22 +18,34 @@ NAMESPACE = 'msinterface.msprof_data_storage'
 class TestMsprofDataStorage(unittest.TestCase):
 
     def test_slice_data_list(self):
-        data_list = [{'name': 'process_name', 'pid': 21532, 'tid': 0, 'args': {'name': 'AscendCL'}, 'ph': 'M'},
-                     {'name': 'thread_name', 'pid': 21532, 'tid': 26964, 'args': {'name': 'Thread 26964'}, 'ph': 'M'},
-                     {'name': 'aclrtMalloc', 'pid': 21532, 'tid': 21532, 'ts': 661374107216.124, 'dur': 94.977,
-                      'args': {'Mode': 'ACL_RTS', 'Process Id': 21532, 'Thread Id': 21532}, 'ph': 'X'},
-                     {'name': 'aclrtSetDevice', 'pid': 21532, 'tid': 21591, 'ts': 661374107249.786, 'dur': 19.988,
-                      'args': {'Mode': 'ACL_RTS', 'Process Id': 21532, 'Thread Id': 21591}, 'ph': 'X'}]
+        data_list = [
+            {'name': 'process_name', 'pid': 21532, 'tid': 0, 'args': {'name': 'AscendCL'}, 'ph': 'M'},
+            {'name': 'thread_name', 'pid': 21532, 'tid': 26964, 'args': {'name': 'Thread 26964'}, 'ph': 'M'},
+            {
+                'name': 'aclrtMalloc', 'pid': 21532, 'tid': 21532, 'ts': 661374107216.124, 'dur': 94.977,
+                'args': {'Mode': 'ACL_RTS', 'Process Id': 21532, 'Thread Id': 21532}, 'ph': 'X'
+            },
+            {
+                'name': 'aclrtSetDevice', 'pid': 21532, 'tid': 21591, 'ts': 661374107249.786, 'dur': 19.988,
+                'args': {'Mode': 'ACL_RTS', 'Process Id': 21532, 'Thread Id': 21591}, 'ph': 'X'
+            }
+        ]
         with mock.patch(NAMESPACE + '.MsprofDataStorage.read_slice_config', return_value=('on', 0, 0)):
             key = MsprofDataStorage()
             result = key.slice_data_list(data_list)
         self.assertEqual(len(result[1][0]), 4)
-        data_list = [{'name': 'process_name', 'pid': 21532, 'tid': 0, 'args': {'name': 'AscendCL'}, 'ph': 'M'},
-                     {'name': 'thread_name', 'pid': 21532, 'tid': 26964, 'args': {'name': 'Thread 26964'}, 'ph': 'M'},
-                     {'name': 'aclrtMalloc', 'pid': 21532, 'tid': 21532, 'ts': 661374107216.124, 'dur': 94.977,
-                      'args': {'Mode': 'ACL_RTS', 'Process Id': 21532, 'Thread Id': 21532}, 'ph': 'X'},
-                     {'name': 'aclrtSetDevice', 'pid': 21532, 'tid': 21591, 'ts': 661374107249.786, 'dur': 19.988,
-                      'args': {'Mode': 'ACL_RTS', 'Process Id': 21532, 'Thread Id': 21591}, 'ph': 'X'}]
+        data_list = [
+            {'name': 'process_name', 'pid': 21532, 'tid': 0, 'args': {'name': 'AscendCL'}, 'ph': 'M'},
+            {'name': 'thread_name', 'pid': 21532, 'tid': 26964, 'args': {'name': 'Thread 26964'}, 'ph': 'M'},
+            {
+                'name': 'aclrtMalloc', 'pid': 21532, 'tid': 21532, 'ts': 661374107216.124, 'dur': 94.977,
+                'args': {'Mode': 'ACL_RTS', 'Process Id': 21532, 'Thread Id': 21532}, 'ph': 'X'
+            },
+            {
+                'name': 'aclrtSetDevice', 'pid': 21532, 'tid': 21591, 'ts': 661374107249.786, 'dur': 19.988,
+                'args': {'Mode': 'ACL_RTS', 'Process Id': 21532, 'Thread Id': 21591}, 'ph': 'X'
+            }
+        ]
         with mock.patch(NAMESPACE + '.MsprofDataStorage.read_slice_config', return_value=('on', 0, 0)), \
                 mock.patch(NAMESPACE + '.MsprofDataStorage.get_slice_times', return_value=2):
             key = MsprofDataStorage()
@@ -87,8 +102,10 @@ class TestMsprofDataStorage(unittest.TestCase):
                 mock.patch('os.fdopen', mock.mock_open(read_data='123')):
             key = MsprofDataStorage()
             res = key.export_timeline_data_to_json(result, params)
-        params = {"data_type": 'str', "device_id": 1, "model_id": 1, "iter_id": 1,
-                  "export_type": "summary", "export_format": "json", "project": 123}
+        params = {
+            "data_type": 'str', "device_id": 1, "model_id": 1, "iter_id": 1,
+            "export_type": "summary", "export_format": "json", "project": 123
+        }
         with mock.patch(NAMESPACE + '.check_file_writable'), \
                 mock.patch('os.path.exists', return_value=True), \
                 mock.patch('os.remove', return_value=True), \
@@ -170,24 +187,30 @@ class TestMsprofDataStorage(unittest.TestCase):
                              "abc_0_1_1_slice_0_20230905200300")
 
     def test_make_export_file_name_should_return_json_name_when_give_timeline_json(self):
-        params = {"data_type": "abc", "device_id": "0", "model_id": "1", "iter_id": "1",
-                  "export_type": "timeline"}
+        params = {
+            "data_type": "abc", "device_id": "0", "model_id": "1", "iter_id": "1",
+            "export_type": "timeline"
+        }
         with mock.patch(NAMESPACE + '.MsprofDataStorage.get_export_prefix_file_name',
                         return_value="abc_0_1_1_slice_0_20230905200300"):
             self.assertEqual(MsprofDataStorage._make_export_file_name(params),
                              "abc_0_1_1_slice_0_20230905200300.json")
 
     def test_make_export_file_name_should_return_json_name_when_give_summary_json(self):
-        params = {"data_type": "abc", "device_id": "0", "model_id": "1", "iter_id": "1",
-                  "export_type": "summary", "export_format": "json"}
+        params = {
+            "data_type": "abc", "device_id": "0", "model_id": "1", "iter_id": "1",
+            "export_type": "summary", "export_format": "json"
+        }
         with mock.patch(NAMESPACE + '.MsprofDataStorage.get_export_prefix_file_name',
                         return_value="abc_0_1_1_slice_0_20230905200300"):
             self.assertEqual(MsprofDataStorage._make_export_file_name(params),
                              "abc_0_1_1_slice_0_20230905200300.json")
 
     def test_make_export_file_name_should_return_csv_name_when_give_summary_csv(self):
-        params = {"data_type": "abc", "device_id": "0", "model_id": "1", "iter_id": "1",
-                  "export_type": "summary", "export_format": "csv"}
+        params = {
+            "data_type": "abc", "device_id": "0", "model_id": "1", "iter_id": "1",
+            "export_type": "summary", "export_format": "csv"
+        }
         with mock.patch(NAMESPACE + '.MsprofDataStorage.get_export_prefix_file_name',
                         return_value="abc_0_1_1_slice_0_20230905200300"):
             self.assertEqual(MsprofDataStorage._make_export_file_name(params),

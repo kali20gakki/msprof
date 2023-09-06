@@ -139,14 +139,14 @@ class TraceViewManager:
         :param pid: int, index_id: int
         :return: format_pid: int
         """
-        decimal_radix = 10
-        index_decimal_len = 3
+        pid_offset = 10000
+        index_id_offset = 100
         if is_number(InfoConfReader().get_device_id()):
             device_id = int(InfoConfReader().get_device_id())
         else:
-            device_id = 8
-        format_pid = pid * decimal_radix ** index_decimal_len + \
-                     index_id * decimal_radix + device_id
+            # max device_id is 63
+            device_id = 64
+        format_pid = pid * pid_offset + index_id * index_id_offset + device_id
         return format_pid
     
     @staticmethod

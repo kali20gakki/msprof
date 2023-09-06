@@ -6,6 +6,8 @@ add_executable(stub_file_utest
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp    
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
     test/main.cpp
     test/hdc_api_utest.cpp
     ../stub/profile_drv_user_stub.cpp

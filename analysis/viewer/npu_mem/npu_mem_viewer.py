@@ -45,7 +45,10 @@ class NpuMemViewer:
                 summary_data = [[self._npu_mem_events.get(datum.event),
                                  datum.ddr / NumberConstant.KILOBYTE,
                                  datum.hbm / NumberConstant.KILOBYTE,
-                                 datum.memory / NumberConstant.KILOBYTE, datum.timestamp]
+                                 datum.memory / NumberConstant.KILOBYTE,
+                                 InfoConfReader().trans_into_local_time(
+                                     InfoConfReader().get_host_time_by_sampling_timestamp(datum.timestamp))
+                                 ]
                                 for datum in summary_data]
                 return self._configs.get(StrConstant.CONFIG_HEADERS), summary_data, len(summary_data)
             return MsvpConstant.MSVP_EMPTY_DATA
@@ -67,7 +70,8 @@ class NpuMemViewer:
             _result = TraceViewManager.metadata_event(meta_data)
             column_trace_data = []
             for datum in timeline_data:
-                datum.timestamp = InfoConfReader().get_host_time_by_sampling_timestamp(datum.timestamp)
+                datum.timestamp = InfoConfReader().trans_into_local_time(
+                                    InfoConfReader().get_host_time_by_sampling_timestamp(datum.timestamp))
                 column_trace_data.append(['{}/DDR'.format(self._npu_mem_events.get(datum.event)), datum.timestamp,
                                           pid, tid, OrderedDict([("KB", datum.ddr / NumberConstant.KILOBYTE)])])
                 column_trace_data.append(['{}/HBM'.format(self._npu_mem_events.get(datum.event)), datum.timestamp,

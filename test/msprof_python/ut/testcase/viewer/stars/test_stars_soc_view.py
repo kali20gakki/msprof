@@ -15,6 +15,7 @@ class TestStarsSocView(unittest.TestCase):
 
     def test_get_timeline_data(self):
         InfoConfReader()._info_json = {"pid": 123}
+        InfoConfReader()._local_time_offset = 10.0
         with mock.patch(NAMESPACE + '.ViewModel.init', return_value=True), \
              mock.patch(NAMESPACE + '.ViewModel.check_table', return_value=True), \
              mock.patch(NAMESPACE + '.ViewModel.get_sql_data', return_value=[[0, 1, 2, 3]]):

@@ -88,8 +88,7 @@ class DataParser(IParser):
                 result_data.extend(format_func(data_lines))
         return result_data
 
-    def parse_bean_data(self: any, file_list: list, format_size: int, bean_class: any, format_func: any,
-                        check_func: any = lambda x: None) -> list:
+    def parse_bean_data(self: any, file_list: list, format_size: int, bean_class: any, **kwargs: any) -> list:
         """
         parse bean file
         :param file_list:
@@ -98,6 +97,8 @@ class DataParser(IParser):
         :param format_func:
         :return:
         """
+        format_func = kwargs.get('format_func', lambda x: x)
+        check_func = kwargs.get('check_func', lambda x: None)
         result_data = []
         _offset_calculator = OffsetCalculator(file_list, format_size, self._project_path)
         for file_name in file_list:

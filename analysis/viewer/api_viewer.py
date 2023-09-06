@@ -47,8 +47,10 @@ class ApiViewer:
     def _timeline_reformat(timeline_data: list) -> list:
         return [
             (
-                data[0], InfoConfReader().time_from_host_syscnt(data[1]),
-                InfoConfReader().get_host_duration(data[2]),
+                data[0],
+                InfoConfReader().trans_into_local_time(
+                    InfoConfReader().time_from_host_syscnt(data[1], NumberConstant.MICRO_SECOND)),
+                InfoConfReader().get_host_duration(data[2], NumberConstant.MICRO_SECOND),
                 *data[3:],
             ) for data in timeline_data
         ]
@@ -77,9 +79,7 @@ class ApiViewer:
             args.setdefault("connection_id", sql_data[7])
             trace_data.append(
                 (ApiViewer._get_data_api_name(sql_data), pid,
-                 sql_data[3], sql_data[1] / NumberConstant.CONVERSION_TIME,
-                 sql_data[2] / NumberConstant.CONVERSION_TIME,
-                 args))
+                 sql_data[3], sql_data[1], sql_data[2], args))
         return trace_data
 
     def get_timeline_data(self: any) -> str:
