@@ -78,6 +78,10 @@ class AiCoreOpReport:
                 logging.debug("No ai core data of stream %d, task %d", datum[2], datum[1])
                 union_data.append(datum + (Constant.NA,) * ai_core_data_len)
                 continue
+            if datum[5] in AiCoreOpReport().HARDWARE_OP_LIST:
+                logging.debug("Found %s op of stream %d, task %d", datum[5], datum[2], datum[1])
+                union_data.append(datum + (Constant.NA,) * ai_core_data_len)
+
             ai_core_datum = ai_core_queue.popleft()
             union_data.append(datum + ai_core_datum)
 
