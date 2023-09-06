@@ -46,8 +46,10 @@ class HostDiskUsage(HostProfDataBase):
         result = []
         for disk_item in disk_info_list:
             time_mem = {
-                "start": InfoConfReader().time_from_host_syscnt(disk_item[0], NumberConstant.MICRO_SECOND),
-                "end": InfoConfReader().time_from_host_syscnt(disk_item[1], NumberConstant.MICRO_SECOND),
+                "start": InfoConfReader().trans_into_local_time(
+                            InfoConfReader().time_from_host_syscnt(disk_item[0], NumberConstant.MICRO_SECOND)),
+                "end": InfoConfReader().trans_into_local_time(
+                            InfoConfReader().time_from_host_syscnt(disk_item[1], NumberConstant.MICRO_SECOND)),
                 "usage": disk_item[5]
             }
             result.append(time_mem)

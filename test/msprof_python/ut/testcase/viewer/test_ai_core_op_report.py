@@ -8,6 +8,7 @@ from common_func.constant import Constant
 from common_func.data_manager import DataManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_constant import MsvpConstant
+from common_func.info_conf_reader import InfoConfReader
 from constant.ut_db_name_constant import DB_AICORE_OP_SUMMARY
 from constant.ut_db_name_constant import DB_OP_COUNTER
 from constant.ut_db_name_constant import TABLE_AI_CPU
@@ -178,8 +179,9 @@ class TestAiCoreOpReport(unittest.TestCase):
         DataManager.add_memory_bound(headers, data)
 
     def test_get_table_sql_and_headers_without_ge(self):
+        InfoConfReader()._local_time_offset = 10.0
         res_data = (
-            "select -1,  task_id, stream_id,  'N/A', 'N/A', task_type, start_time/1000.0, duration_time/1000.0, "
+            "select -1,  task_id, stream_id,  'N/A', 'N/A', task_type, start_time/1000.0+10.0, duration_time/1000.0, "
             "wait_time/1000.0 ,'N/A' "
             "from task_time where task_type!=? and task_type!=? order by start_time",
             ['Op Name', 'stream_id']

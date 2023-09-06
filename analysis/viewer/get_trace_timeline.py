@@ -52,8 +52,8 @@ class TraceViewer:
             return _result
         for key in list(trace_data.keys()):
             column_trace_data = Utils.generator_to_list(
-                [key, TraceViewer._cal_sys_time_us(delta_dev, item), pid, tid,
-                 OrderedDict(list(zip(legend[key], item[1:])))] for item in trace_data[key])
+                [key, InfoConfReader().trans_into_local_time(TraceViewer._cal_sys_time_us(delta_dev, item)),
+                 pid, tid, OrderedDict(list(zip(legend[key], item[1:])))] for item in trace_data[key])
             _result += \
                 TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, column_trace_data)
         return _result
@@ -107,10 +107,12 @@ def _get_hccs_result(hccs_data: list, trace_parser: any) -> list:
         [["process_name", json_data[0], json_data[1], trace_parser.scope]])
     for _data_item in hccs_data:
         _trace.extend(
-            [['Tx', int(float(_data_item[0]) + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS,
+            [['Tx', int(InfoConfReader().trans_into_local_time(
+                float(_data_item[0]) + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.NS_TO_US),
               json_data[0], json_data[1],
               OrderedDict([('Tx(MB/s)', _data_item[1])])],
-             ['Rx', int(float(_data_item[0]) + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS,
+             ['Rx', int(InfoConfReader().trans_into_local_time(
+                float(_data_item[0]) + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.NS_TO_US),
               json_data[0], json_data[1],
               OrderedDict([('Rx(MB/s)', _data_item[2])])]]
         )
@@ -156,23 +158,23 @@ def _get_pcie_data(pcie_data: list, trace_parser: any) -> list:
         if len(data_item) >= 23:
             # check whether the tmp_data has at least 23 domains.
             trace_data.append(trace_parser.format_trace_data(
-                data_item, "PCIe_post",
-                int(data_item[0] + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS,
+                data_item, "PCIe_post", InfoConfReader().trans_into_local_time(
+                int(data_item[0] + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS),
                 pid,
                 tid))
             trace_data.append(trace_parser.format_trace_data(
-                data_item, "PCIe_nonpost",
-                int(data_item[0] + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS,
+                data_item, "PCIe_nonpost", InfoConfReader().trans_into_local_time(
+                int(data_item[0] + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS),
                 pid,
                 tid))
             trace_data.append(trace_parser.format_trace_data(
-                data_item, "PCIe_cpl",
-                int(data_item[0] + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS,
+                data_item, "PCIe_cpl", InfoConfReader().trans_into_local_time(
+                int(data_item[0] + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS),
                 pid,
                 tid))
             trace_data.append(trace_parser.format_trace_data(
-                data_item, "PCIe_nonpost_latency",
-                int(data_item[0] + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS,
+                data_item, "PCIe_nonpost_latency", InfoConfReader().trans_into_local_time(
+                int(data_item[0] + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS),
                 pid,
                 tid))
 
@@ -331,7 +333,9 @@ def _get_aicore_utilization_data(aicore_result: dict, pid: str, tid: str) -> lis
             else:
                 trace_name = 'Core {}'.format(aicore_name)
             trace_data.append(
-                (trace_name, round(float(result_value[0]) * NumberConstant.MS_TIME_RATE, CommonConstant.ROUND_SIX),
+                (trace_name,
+                 round(InfoConfReader().trans_into_local_time(float(result_value[0]) * NumberConstant.MS_TIME_RATE),
+                       CommonConstant.ROUND_SIX),
                  pid,
                  tid,
                  OrderedDict([('Utilization(%)', result_value[1])])))

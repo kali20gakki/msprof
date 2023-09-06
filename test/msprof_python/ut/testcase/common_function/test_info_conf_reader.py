@@ -13,6 +13,8 @@ class TestInfoConfReader(unittest.TestCase):
         info_reader = InfoConfReader()
         info_reader._info_json = {}
         info_reader._host_freq = None
+        info_reader._local_time_offset = 0
+        info_reader._start_info = {}
 
     def test_time_from_host_syscnt_should_return_original_time_when_host_freq_is_default(self):
         InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
@@ -55,6 +57,12 @@ class TestInfoConfReader(unittest.TestCase):
     def test_get_host_freq_should_return_host_freq_when_host_freq_is_normal(self):
         InfoConfReader()._info_json = {'CPU': [{'Frequency': "3000"}]}
         self.assertEqual(InfoConfReader().get_host_freq(), 3000000000.0)
+
+    def test_trans_into_local_time_should_return_local_time_when_time_fmt_is_not_default(self):
+        InfoConfReader()._local_time_offset = 3000.0
+        self.assertEqual(InfoConfReader().trans_into_local_time(3000000000.0, 1000000000.0), 3003000.0)
+
+
 
 
 if __name__ == '__main__':
