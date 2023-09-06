@@ -144,4 +144,5 @@ class CommunicationMatrixAnalyzer:
         if os.path.exists(PathManager.get_db_path(sub_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
             self._generate_output(sub_path)
         else:
-            logging.warning('There is not hccl_single_device.db in %s', sub_path)
+            logging.warning('There is not hccl.db in %s, '
+                            'maybe this data was export in clear mode or incomplete', sub_path)
