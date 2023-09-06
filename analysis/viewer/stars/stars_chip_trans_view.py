@@ -105,9 +105,9 @@ class StarsChipTransView:
             #               pa_link_id,pa_link_traffic_monit_rx,pa_link_traffic_monit_tx,sys_time
             # stars_cons: pa rx/ pcie read name, pa tx/ pcie write name, id
             _res.extend(
-                [[stars_cons[0], _data[3], self._pid, stars_type,
+                [[stars_cons[0], InfoConfReader().trans_into_local_time(_data[3]), self._pid, stars_type,
                   OrderedDict([(stars_cons[0], _data[1]), (stars_cons[2], _data[0])])],
-                 [stars_cons[1], _data[3], self._pid, stars_type,
+                 [stars_cons[1], InfoConfReader().trans_into_local_time(_data[3]), self._pid, stars_type,
                   OrderedDict([(stars_cons[1], _data[2]), (stars_cons[2], _data[0])])]
                  ])
         self._timeline_data.extend(TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST,

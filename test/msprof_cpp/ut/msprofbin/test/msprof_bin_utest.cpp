@@ -46,13 +46,15 @@ TEST_F(MSPROF_BIN_UTEST, LltMain) {
     char* envp[2];
     envp[0] = "test=a";
     envp[1] = "a=b";
-    
+    CHAR_PTR opargv[2];
+    opargv[0] = "msopprof";
+    opargv[1] = "--op=on";
     MOCKER(&EnvManager::SetEnvList)
         .stubs()
         .will(returnValue(false));
     EXPECT_EQ(PROFILING_FAILED, LltMain(1, (const char**)argv, (const char**)envp));
     EXPECT_EQ(PROFILING_FAILED, LltMain(2, (const char**)argv, (const char**)envp));
-
+    EXPECT_EQ(PROFILING_SUCCESS, LltMain(2, (const char**)opargv, (const char**)envp));
     std::ofstream test_file("prof_bin_test");
     test_file << "echo test" << std::endl;
     test_file.close();

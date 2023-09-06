@@ -35,8 +35,9 @@ class NpuOpMemViewer:
             if self._table_name == DBNameConstant.TABLE_NPU_OP_MEM:
                 summary_data = [[datum.name,
                                  datum.size / NumberConstant.KILOBYTE,
-                                 InfoConfReader().time_from_host_syscnt(int(datum.allocation_time),
-                                                                        NumberConstant.MICRO_SECOND),
+                                 InfoConfReader().trans_into_local_time(
+                                     InfoConfReader().time_from_host_syscnt(int(datum.allocation_time),
+                                                                            NumberConstant.MICRO_SECOND)),
                                  InfoConfReader().get_host_duration(int(datum.duration),
                                                                     NumberConstant.MICRO_SECOND),
                                  datum.allocation_total_allocated / NumberConstant.KILOBYTE,
@@ -47,8 +48,9 @@ class NpuOpMemViewer:
                                 for datum in summary_data]
             elif self._table_name == DBNameConstant.TABLE_NPU_OP_MEM_REC:
                 summary_data = [[datum.component,
-                                 InfoConfReader().time_from_host_syscnt(int(datum.timestamp),
-                                                                        NumberConstant.MICRO_SECOND),
+                                 InfoConfReader().trans_into_local_time(
+                                     InfoConfReader().time_from_host_syscnt(int(datum.timestamp),
+                                                                            NumberConstant.MICRO_SECOND)),
                                  datum.total_allocate_memory / NumberConstant.KILOBYTE,
                                  datum.total_reserve_memory / NumberConstant.KILOBYTE,
                                  datum.device_type]

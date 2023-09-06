@@ -63,6 +63,7 @@ class TsetHostCpuUsage(unittest.TestCase):
     def test_get_cpu_usage_data(self):
         InfoConfReader()._host_freq = None
         InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
+        InfoConfReader()._local_time_offset = 10.0
         create_sql = "create table if not exists CpuUsage (start_time numeric,end_time numeric,cpu_no text,usage REAL)"
         insert_sql = "insert into {} values (?,?,?,?)".format('CpuUsage')
         data = ((10000, 20000, 20, 100),)
@@ -72,7 +73,7 @@ class TsetHostCpuUsage(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=per_cpu_usage):
             check = HostCpuUsage(self.result_dir)
             result_1 = check.get_cpu_usage_data()
-        self.assertEqual(result_1, [['CPU 20', 10.0, {'Usage(%)': 100.0}]])
+        self.assertEqual(result_1, [['CPU 20', 20.0, {'Usage(%)': 100.0}]])
         res[1].execute("drop table CpuUsage")
         db_manager.destroy(res)
 

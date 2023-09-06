@@ -81,7 +81,8 @@ class MsprofTimeline:
                 f'{process_name}({value.get(StrConstant.TRACE_HEADER_ARGS, {}).get(StrConstant.TRACE_HEADER_NAME, "")})'
 
         if cls.is_cann_ai_stack_data(layer_info, value):
-            value[StrConstant.TRACE_HEADER_PID] = format_pid // 10
+            # if is cann data, remove device_id
+            value[StrConstant.TRACE_HEADER_PID] = format_pid // 100
             level = value.get(StrConstant.TRACE_HEADER_ARGS, {}).get(StrConstant.API_EVENT_HEADER_LEVEL)
             if not level:
                 prefix = process_name
@@ -190,6 +191,8 @@ class MsprofTimeline:
         if not self._iteration_time:
             return True
         start_time, end_time = self._iteration_time
+        start_time = InfoConfReader().trans_into_local_time(start_time)
+        end_time = InfoConfReader().trans_into_local_time(end_time)
         time_start = json_value.get(TraceViewHeaderConstant.TRACE_HEADER_TS, NumberConstant.DEFAULT_START_TIME)
         time_end = time_start + json_value.get(TraceViewHeaderConstant.TRACE_HEADER_DURATION,
                                                NumberConstant.DEFAULT_START_TIME)

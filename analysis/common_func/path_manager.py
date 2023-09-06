@@ -69,7 +69,8 @@ class PathManager:
         """
         get log directory in result directory
         """
-        return os.path.realpath(cls.get_path_under_result_dir(result_dir, "..", cls.MINDSTUDIO_PROFILER_LOG))
+        return os.path.realpath(cls.get_path_under_result_dir(
+            os.path.dirname(result_dir), cls.MINDSTUDIO_PROFILER_LOG))
 
     @classmethod
     def get_sql_dir(cls: any, result_dir: str) -> str:
@@ -111,8 +112,8 @@ class PathManager:
         get collection log path
         """
         base_name = os.path.basename(result_dir)
-        log_dir = os.path.realpath(cls.get_path_under_result_dir(result_dir, "..", cls.MINDSTUDIO_PROFILER_LOG))
-        return cls.get_path_under_result_dir(log_dir, cls.COLLECTION_LOG + base_name + cls.LOG)
+        return cls.get_path_under_result_dir(cls.get_log_dir(result_dir),
+                                             cls.COLLECTION_LOG + base_name + cls.LOG)
 
     @classmethod
     def get_dispatch_dir(cls: any, result_dir: str) -> str:

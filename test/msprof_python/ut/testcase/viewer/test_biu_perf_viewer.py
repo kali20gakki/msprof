@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 from collections import OrderedDict
 from viewer.biu_perf_viewer import BiuPerfViewer
+from common_func.info_conf_reader import InfoConfReader
 
 NAMESPACE = 'viewer.biu_perf_viewer.'
 
@@ -47,12 +48,13 @@ class TestBiuPerfViewer(unittest.TestCase):
 
     def test_get_biu_flow_timeline(self) -> None:
         expect_res = [OrderedDict([('name', 'bandawith'),
-                      ('ts', 20),
+                      ('ts', 30.0),
                       ('pid', 3),
                       ('tid', 4),
                       ('args', OrderedDict([('flow', 50)])),
                       ('ph', 'C')])]
 
+        InfoConfReader()._local_time_offset = 10.0
         biu_flow_data = [["bandawith", 20, 3, 4, 50]]
         with mock.patch(NAMESPACE + "BiuPerfModel.get_biu_flow_data", return_value=biu_flow_data):
             res = self.biu_perf_viewer.get_biu_flow_timeline()
@@ -62,11 +64,12 @@ class TestBiuPerfViewer(unittest.TestCase):
         expect_res = [OrderedDict([('name', ''),
                       ('pid', 1),
                       ('tid', 2),
-                      ('ts', 300),
+                      ('ts', 310.0),
                       ('dur', 100),
                       ('args', OrderedDict([('cycle_num', 50), ("ratio", 0.5)])),
                       ('ph', 'X')])]
 
+        InfoConfReader()._local_time_offset = 10.0
         biu_flow_data = [[1, 2, 300, 100, 50, 0.5]]
         with mock.patch(NAMESPACE + "BiuPerfModel.get_biu_cycles_data", return_value=biu_flow_data):
             res = self.biu_perf_viewer.get_biu_cycles_timeline()

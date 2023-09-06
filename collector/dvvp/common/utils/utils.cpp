@@ -15,8 +15,10 @@
 #include <iomanip>
 #include <string>
 #include <ctime>
+#include <set>
 #include "config/config.h"
 #include "config/config_manager.h"
+#include "platform/platform.h"
 #include "errno/error_code.h"
 #include "msprof_dlog.h"
 #include "securec.h"
@@ -32,6 +34,7 @@ namespace utils {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Config;
+using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 using FuncIntPtr = int(*)(int);
@@ -80,6 +83,12 @@ unsigned long long Utils::GetCPUCycleCounter()
     cycles = 0;
 #endif
     return cycles;
+}
+
+unsigned long long Utils::GetClockRealtimeOrCPUCycleCounter()
+{
+    static const bool IS_SUPPORTED_SYS_COUNTER = Platform::instance()->PlatformHostFreqIsEnable();
+    return IS_SUPPORTED_SYS_COUNTER ? GetCPUCycleCounter() : GetClockMonotonicRaw();
 }
 
 double Utils::StatCpuRealFreq()
@@ -1443,7 +1452,11 @@ bool Utils::IsPythonOrBash(const std::string paramsName)
 
 bool Utils::IsDynProfMode()
 {
-    if (ConfigManager::instance()->GetPlatformType() != PlatformType::CLOUD_TYPE) {
+    PlatformType platformType = ConfigManager::instance()->GetPlatformType();
+    std::set<PlatformType> platformTypeSet = {PlatformType::CLOUD_TYPE,
+                                              PlatformType::CHIP_V4_1_0,
+                                              PlatformType::CHIP_V4_2_0};
+    if (platformTypeSet.find(platformType) == platformTypeSet.end()) {
         return false;
     }
     if (GetEnvString(PROFILING_MODE_ENV) != DAYNAMIC_PROFILING_VALUE) {
