@@ -402,7 +402,7 @@ class AiCoreOpReport:
                     DBNameConstant.TABLE_SUMMARY_GE,
                     NumberConstant.INVALID_TASK_TIME,
                     NS_TO_US=NumberConstant.NS_TO_US,
-                    local_time_offset=InfoConfReader.get_local_time_offset(),
+                    local_time_offset=InfoConfReader().get_local_time_offset(),
                     context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
                     index_info=cls._get_index_id_sql_condition())
         headers += cls.TENSOR_HEADERS

@@ -189,6 +189,8 @@ class MsprofTimeline:
         if not self._iteration_time:
             return True
         start_time, end_time = self._iteration_time
+        start_time = InfoConfReader().trans_into_local_time(start_time)
+        end_time = InfoConfReader().trans_into_local_time(end_time)
         time_start = json_value.get(TraceViewHeaderConstant.TRACE_HEADER_TS, NumberConstant.DEFAULT_START_TIME)
         time_end = time_start + json_value.get(TraceViewHeaderConstant.TRACE_HEADER_DURATION,
                                                NumberConstant.DEFAULT_START_TIME)
