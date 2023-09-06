@@ -1,10 +1,15 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
-
+import json
+import os
+import glob
+import logging
+from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from msmodel.interface.view_model import ViewModel
-from viewer.runtime_report import add_mem_bound
+from viewer.runtime_report import add_mem_bound, cube_usage
+from common_func.info_conf_reader import InfoConfReader
 
 
 class DataManager:
@@ -33,6 +38,30 @@ class DataManager:
             key = "{}-{}".format(sub[1], sub[2])  # key is task_id-stream_id
             task_op_dict[key] = sub[0]  # value is op_name
         return task_op_dict
+
+    @classmethod
+    def add_cube_usage(cls: any, headers: list, data: list) -> None:
+        """
+        add cube usage data
+        """
+        config_dict = dict()
+        config_dict['ai_core_num'] = InfoConfReader().get_data_under_device('ai_core_num')
+        config_dict['aic_frequency'] = float(InfoConfReader().get_data_under_device('aic_frequency'))
+
+        config_dict.setdefault('mac_ratio_index', None)
+        if "mac_ratio" in headers or "aic_mac_ratio" in headers:
+            config_dict['mac_ratio_index'] = headers.index("mac_ratio") if "mac_ratio" in headers else \
+                headers.index("aic_mac_ratio")
+        else:
+            return 
+        config_dict['total_cycles_index'] = headers.index("total_cycles") if "total_cycles" in headers else None
+        config_dict['task_duration_index'] = headers.index("Task Duration(us)") if "Task Duration(us)" in \
+                                                                                   headers else None
+        if config_dict.get('task_duration_index') and config_dict.get('total_cycles_index') and \
+                config_dict.get("mac_ratio_index"):
+            headers.append("cube_utilization(%)")
+            for index, row in enumerate(data):
+                data[index] = cube_usage(config_dict, list(row))
 
     @classmethod
     def add_memory_bound(cls: any, headers: list, data: list) -> None:

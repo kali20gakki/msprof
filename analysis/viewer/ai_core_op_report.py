@@ -328,6 +328,7 @@ class AiCoreOpReport:
         if not ProfilingScene().is_operator():
             data = cls._update_model_name_and_infer_id(project_path, data)
         DataManager.add_memory_bound(headers, data)
+        DataManager.add_cube_usage(headers, data)
         return data
 
     @classmethod
