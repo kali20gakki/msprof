@@ -140,6 +140,7 @@ class TestHostSyscallPresenter(unittest.TestCase):
                         return_value=[]):
             InfoConfReader()._host_freq = None
             InfoConfReader()._info_json = {'pid': 1, 'tid': 0, 'CPU': [{'Frequency': "1000"}]}
+            InfoConfReader()._local_time_offset = 10.0
             check = HostSyscallPresenter(self.result_dir, self.file_name)
             result = check.get_timeline_data()
         self.assertEqual(result, [])
@@ -150,7 +151,7 @@ class TestHostSyscallPresenter(unittest.TestCase):
             InfoConfReader()._info_json = {'pid': 1, 'tid': 0, 'CPU': [{'Frequency': "1000"}]}
             check = HostSyscallPresenter(self.result_dir, self.file_name)
             result = check.get_timeline_data()
-        self.assertEqual(result, [['nanosleep', 18070, 18072, 191454818.891872, 1.057]])
+        self.assertEqual(result, [['nanosleep', 18070, 18072, 191454828.891872, 1.057]])
 
     def test_get_timeline_header(self):
         with mock.patch(NAMESPACE + '.HostSyscallPresenter._get_tid_list',

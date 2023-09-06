@@ -24,12 +24,13 @@ class TsetHostDiskUsage(unittest.TestCase):
     def test_get_disk_usage_data(self):
         InfoConfReader()._host_freq = None
         InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
+        InfoConfReader()._local_time_offset = 10.0
         disk_info_list = ((0, 1, 2, 3, 4, 5, 6),)
         with mock.patch(NAMESPACE + '.DBManager.fetch_all_data',
                         return_value=disk_info_list):
             check = HostDiskUsage(self.result_dir)
             result = check.get_disk_usage_data()
-        self.assertEqual(result, {'data': [{'end': 0.001, 'start': 0.0, 'usage': 5}]})
+        self.assertEqual(result, {'data': [{'end': 10.001, 'start': 10.0, 'usage': 5}]})
 
 
 if __name__ == '__main__':

@@ -83,9 +83,9 @@ class MsprofTxViewer:
         return [
             (
                 data[0], data[1], data[2], data[3], data[4], data[5],
-                InfoConfReader.trans_into_local_time(
+                InfoConfReader().trans_into_local_time(
                     InfoConfReader().time_from_host_syscnt(data[6], NumberConstant.MICRO_SECOND)),
-                InfoConfReader.trans_into_local_time(
+                InfoConfReader().trans_into_local_time(
                     InfoConfReader().time_from_host_syscnt(data[7], NumberConstant.MICRO_SECOND)),
                 data[8], data[9]
             ) for data in summary_data
