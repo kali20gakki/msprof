@@ -137,8 +137,8 @@ class TestAiCoreOpReport(unittest.TestCase):
             self.assertEqual(res, [])
 
     def test_union_task_ge_ai_core_data(self):
-        expect_res = [(1, 2, 3, 4, 10), (4, 5, 6, 7, 40), (7, 8, 9, 10, 'N/A')]
-        data = [(1, 2, 3, 4), (4, 5, 6, 7), (7, 8, 9, 10)]
+        expect_res = [(1, 2, 3, 11, 16, 4, 10), (4, 5, 6, 11, 16, 7, 40), (7, 8, 9, 11, 16, 10, 'N/A')]
+        data = [(1, 2, 3, 11, 16, 4), (4, 5, 6, 11, 16, 7), (7, 8, 9, 11, 16, 10)]
         ai_core_group_dict = {(2, 3, 4): deque([(10,)]), (5, 6, 7): deque([(40,)]), (10, 11, 12): deque([(20,)])}
         res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
         self.assertEqual(res, expect_res)
