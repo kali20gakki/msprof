@@ -249,6 +249,24 @@ def add_op_total(result: list, result_dir: str) -> list:
     return res
 
 
+def cube_usage(config_dict: dict, value: list) -> list:
+    """
+    add cube usage column
+    """
+    ratio_index = config_dict.get('mac_ratio_index')
+    if value[ratio_index] == Constant.NA:
+        value.append(Constant.NA)
+    elif not NumberConstant.is_zero(min(value[ratio_index], value[config_dict.get('total_cycles_index')],
+                                        value[config_dict.get('task_duration_index')])):
+        usage = value[config_dict.get('total_cycles_index')] / (config_dict.get('aic_frequency') *
+                        config_dict.get('ai_core_num') * value[config_dict.get('task_duration_index')])
+        usage = round(usage * 100, 4)
+        value.append(usage)
+    else:
+        value.append(0)
+    return value
+
+
 def add_mem_bound(value: list, vec_index: int, mac_index: int, mte2_index: int) -> list:
     """
     add memory bound column
