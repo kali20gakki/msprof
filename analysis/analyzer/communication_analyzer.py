@@ -145,4 +145,5 @@ class CommunicationAnalyzer:
             self._generate_output(sub_path)
         else:
             host_dir = PathManager.get_host_result_dir(sub_path)
-            logging.warning('There is not hccl.db in %s', host_dir)
+            logging.warning('There is not hccl.db in %s, '
+                            'maybe this data was export in clear mode or incomplete', host_dir)
