@@ -95,8 +95,8 @@ class MemoryCopyViewer:
 
             for datum in export_data:
                 export_datum = []
-                task_start = InfoConfReader().trans_into_local_time(int(datum[5]), NumberConstant.NANO_SECOND)
-                task_stop = InfoConfReader().trans_into_local_time(int(datum[6]), NumberConstant.NANO_SECOND)
+                task_start = InfoConfReader().trans_into_local_time(int(datum[5] * NumberConstant.MILLI_SECOND))
+                task_stop = InfoConfReader().trans_into_local_time(int(datum[6] * NumberConstant.MILLI_SECOND))
                 export_datum.append(datum[0])
                 export_datum.append(datum[1])
                 export_datum.append(datum[2])
