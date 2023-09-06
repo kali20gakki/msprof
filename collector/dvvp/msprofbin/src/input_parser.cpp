@@ -584,8 +584,7 @@ MsoprofTask::MsoprofTask()
         path_ = "";
     } else {
         std::string pathStr = ascend_toolkit_home;
-        std::string msopprofPath = pathStr + "/tools/msopt/bin/msopprof";
-        path_ = msopprofPath.c_str();
+        path_ = pathStr + "/tools/msopt/bin/msopprof";
     }
 }
 
