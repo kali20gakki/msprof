@@ -637,19 +637,13 @@ void MsoprofTask::PrintHelp()
 int MsoprofTask::ExecMsopprof(CONST_CHAR_PTR path, std::vector<std::string> argsVec)
 {
     std::string cmd = path;
-    ExecCmdParams execCmdParams(cmd, true, "");
+    ExecCmdParams execCmdParams(cmd, false, "");
     std::vector<std::string> envsVec = Analysis::Dvvp::App::EnvManager::instance()->GetGlobalEnv();
     int exitCode = analysis::dvvp::common::utils::INVALID_EXIT_CODE;
     auto opProcess = MSVP_MMPROCESS;
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsVec, envsVec, exitCode, opProcess);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to launch msopprof: %s", cmd.c_str());
-        return PROFILING_FAILED;
-    }
-    bool isExited = false;
-    ret = analysis::dvvp::common::utils::Utils::WaitProcess(opProcess, isExited, exitCode, false);
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Failed to wait msopprof: %s", cmd.c_str());
         return PROFILING_FAILED;
     }
     return ret;
