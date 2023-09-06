@@ -332,6 +332,8 @@ void ArgsManager::AddAnalysisArgs()
             "\t\t\t\t\t\t   is off.(full-platform)", OFF},
         {"export", "Switch for using msprof to export collecting data, the default value\n"
             "\t\t\t\t\t\t   is off.(full-platform)", OFF},
+        {"clear", "Swith for using msprof to analyze or export data in clear mode, the default value\n"
+            "\t\t\t\t\t\t   is off.(full-platform)", OFF},
         {"iteration-id", "The export iteration id, only uesd when argument export is on,\n"
             "\t\t\t\t\t\t   the default value is 1", "1"},
         {"model-id", "The export model id, only uesd when argument export is on, msprof will\n"

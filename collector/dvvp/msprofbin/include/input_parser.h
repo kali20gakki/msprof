@@ -71,6 +71,7 @@ enum MsprofArgsType {
     ARGS_PARSE,
     ARGS_QUERY,
     ARGS_EXPORT,
+    ARGS_CLEAR,
     ARGS_DYNAMIC_PROF,
     ARGS_MSOPPROF,
     // number
@@ -142,6 +143,7 @@ const MmStructOption longOptions[] = {
     {"parse", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_PARSE},
     {"query", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_QUERY},
     {"export", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_EXPORT},
+    {"clear", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_CLEAR},
     {"dynamic", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_DYNAMIC_PROF},
     {"op", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_MSOPPROF},
     // number

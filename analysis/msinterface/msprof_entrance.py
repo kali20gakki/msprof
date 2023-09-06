@@ -15,8 +15,7 @@ from msinterface.msprof_import import ImportCommand
 from msinterface.msprof_monitor import monitor
 from msinterface.msprof_query import QueryCommand
 from msinterface.msprof_query_summary_manager import QueryDataType
-from analyzer.communication_analyzer import CommunicationAnalyzer
-from analyzer.communication_matrix_analyzer import CommunicationMatrixAnalyzer
+from msinterface.msprof_analyze import AnalyzeCommand
 
 
 class MsprofEntrance:
@@ -61,14 +60,8 @@ class MsprofEntrance:
     @staticmethod
     def _handle_analyze_command(parser: any, args: any) -> None:
         _ = parser
-        analyze_handler = {
-            'communication': CommunicationAnalyzer,
-            'communication_matrix': CommunicationMatrixAnalyzer
-        }
-        rules = set(args.rule.split(','))
-        for rule in rules:
-            analyze_command = analyze_handler.get(rule)(args.collection_path)
-            analyze_command.process()
+        analyze_command = AnalyzeCommand(args)
+        analyze_command.process()
 
     def main(self: any) -> None:
         """
@@ -171,7 +164,10 @@ class MsprofEntrance:
         parser.add_argument(
             '--iteration-count', dest='iteration_count', default=1,
             metavar='<iteration_count>',
-            type=int, help='<Optional> The number of iterations exported')
+            type=int, help='<Optional> the number of iterations exported')
+        parser.add_argument(
+            '--clear', dest='clear_mode', action='store_true',
+            default=False, help='<Optional> the clear mode flag')
 
     def _export_parser(self: any, export_parser: any) -> None:
         subparsers = export_parser.add_subparsers()
@@ -199,3 +195,6 @@ class MsprofEntrance:
         self._add_collect_path_argument(analyze_parser)
         analyze_parser.add_argument(
             '--rule', '-r', type=str, help='Specify the rule that is used for analyzing prased profiling data')
+        analyze_parser.add_argument(
+            '--clear', dest='clear_mode', action='store_true',
+            default=False, help='<Optional> the clear mode flag')
