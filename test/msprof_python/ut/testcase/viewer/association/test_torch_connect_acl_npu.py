@@ -5,6 +5,7 @@
 import unittest
 from unittest import mock
 
+from common_func.info_conf_reader import InfoConfReader
 from profiling_bean.db_dto.torch_npu_dto import TorchNpuDto
 from viewer.association.torch_connect_acl_npu import TorchToAclNpu
 
@@ -31,15 +32,16 @@ class TestTorchToAclNpu(unittest.TestCase):
         {'name': 'Mul', 'pid': 3, 'tid': 5, 'ts': 3, 'dur': 3.4,
          'args': {'Task Type': 'AI_CORE', 'Stream Id': 5, 'Task Id': 3, "Batch Id": 0, 'Aicore Time(ms)': 2681},
          'ph': 'X'},
-        {'name': 'torch_to_acl', 'ph': 's', 'id': 1.5, 'pid': 100, 'tid': 1, 'ts': 1.0, 'cat': 'async_acl_npu'},
+        {'name': 'torch_to_acl', 'ph': 's', 'id': 1.5, 'pid': 1000, 'tid': 1, 'ts': 1.0, 'cat': 'async_acl_npu'},
         {'name': 'torch_to_acl', 'ph': 'f', 'id': 1.5, 'pid': 107153202, 'tid': 1071819, 'ts': 1.5, 'bp': 'e',
          'cat': 'async_acl_npu'},
-        {'name': 'torch_to_npu', 'ph': 's', 'id': 21475033088, 'pid': 100, 'tid': 1, 'ts': 1.0, 'cat': 'async_npu'},
+        {'name': 'torch_to_npu', 'ph': 's', 'id': 21475033088, 'pid': 1000, 'tid': 1, 'ts': 1.0, 'cat': 'async_npu'},
         {'name': 'torch_to_npu', 'ph': 'f', 'id': 21475033088, 'pid': 3, 'tid': 5, 'ts': 3, 'bp': 'e',
          'cat': 'async_npu'}
     ]
 
     def test_add_connect_line_1(self):
+        InfoConfReader()._info_json = {"devices": '0'}
         with mock.patch(NAMESPACE + '.SyncAclNpuViewModel.get_torch_acl_relation_data', return_value=[self.data1]), \
                 mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value='test'), \
                 mock.patch(NAMESPACE + '.SyncAclNpuViewModel.check_table', return_value=True), \
@@ -47,3 +49,8 @@ class TestTorchToAclNpu(unittest.TestCase):
             check = TorchToAclNpu("")
             check.add_connect_line(self.json_data)
             self.assertEqual(self.json_data, self.check_data)
+
+    def tearDown(self) -> None:
+        info_reader = InfoConfReader()
+        info_reader._info_json = {}
+        info_reader._host_freq = None

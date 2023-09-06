@@ -150,6 +150,20 @@ class MsprofDataStorage:
 
     @staticmethod
     def _make_export_file_name(params: dict, slice_times: int = 0, slice_switch=False) -> str:
+        file_name = MsprofDataStorage.get_export_prefix_file_name(params, slice_times, slice_switch)
+        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.SUMMARY:
+            file_suffix = StrConstant.FILE_SUFFIX_CSV
+            if params.get(StrConstant.PARAM_EXPORT_FORMAT) == StrConstant.EXPORT_JSON:
+                file_suffix = StrConstant.FILE_SUFFIX_JSON
+            return os.path.join(
+                PathManager.get_summary_dir(params.get(StrConstant.PARAM_RESULT_DIR)),
+                file_name + file_suffix)
+        return os.path.join(
+            PathManager.get_timeline_dir(params.get(StrConstant.PARAM_RESULT_DIR)),
+            file_name + StrConstant.FILE_SUFFIX_JSON)
+
+    @staticmethod
+    def get_export_prefix_file_name(params: dict, slice_times: int = 0, slice_switch=False) -> str:
         file_name = params.get(StrConstant.PARAM_DATA_TYPE)
         if params.get(StrConstant.PARAM_DEVICE_ID) is not None and \
                 params.get(StrConstant.PARAM_DEVICE_ID) != NumberConstant.HOST_ID:
@@ -162,17 +176,7 @@ class MsprofDataStorage:
             file_name += "_slice_{}".format(str(slice_times))
         date_str = MsprofDataStorage.get_current_time_str()
         file_name += "_" + date_str
-
-        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.SUMMARY:
-            file_suffix = StrConstant.FILE_SUFFIX_CSV
-            if params.get(StrConstant.PARAM_EXPORT_FORMAT) == StrConstant.EXPORT_JSON:
-                file_suffix = StrConstant.FILE_SUFFIX_JSON
-            return os.path.join(
-                PathManager.get_summary_dir(params.get(StrConstant.PARAM_RESULT_DIR)),
-                file_name + file_suffix)
-        return os.path.join(
-            PathManager.get_timeline_dir(params.get(StrConstant.PARAM_RESULT_DIR)),
-            file_name + StrConstant.FILE_SUFFIX_JSON)
+        return file_name
 
     @staticmethod
     def _get_time_level(line_level: float) -> int:

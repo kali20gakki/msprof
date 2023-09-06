@@ -308,7 +308,8 @@ class TestExportCommand(unittest.TestCase):
                     mock.patch(NAMESPACE + '.ExportCommand._handle_export'), \
                     mock.patch(NAMESPACE + '.ExportCommand._show_tuning_result'), \
                     mock.patch(NAMESPACE + '.warn'), \
-                    mock.patch(NAMESPACE + '.MsprofJobSummary.export'):
+                    mock.patch(NAMESPACE + '.MsprofJobSummary.export'), \
+                    mock.patch(NAMESPACE + '.MsprofMindStudioProfiler.export'):
                 test = ExportCommand("summary", args)
                 test.list_map["devices_list"] = ["1"]
                 test.process()

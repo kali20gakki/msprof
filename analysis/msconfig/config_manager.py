@@ -3,6 +3,8 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
 import logging
+
+from msconfig.filename_introduction_config import FilenameIntroductionConfig
 from msconfig.meta_config import MetaConfig
 from msconfig.nano_ai_core_config import NanoAICoreConfig
 from msconfig.prof_condition_config import ProfConditionConfig
@@ -41,6 +43,7 @@ class ConfigManager:
     CONSTANT = "ConstantConfig"
     L2_CACHE = "L2CacheConfig"
     NANO_AI_CORE = "NanoAICoreConfig"
+    FILENAME_INTRODUCTION = "FilenameIntroductionConfig"
 
     CONFIG_MAP = {
         PROF_CONDITION: ProfConditionConfig,
@@ -60,6 +63,7 @@ class ConfigManager:
         CONSTANT: ConstantConfig,
         L2_CACHE: L2CacheConfig,
         NANO_AI_CORE: NanoAICoreConfig,
+        FILENAME_INTRODUCTION: FilenameIntroductionConfig,
     }
 
     @classmethod

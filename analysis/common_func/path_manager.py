@@ -14,10 +14,10 @@ class PathManager:
     file path manager
     """
     DATA = "data"
-    LOG = "log"
+    LOG = ".log"
     SQLITE = "sqlite"
     HOST = "host"
-    COLLECTION_LOG = "collection.log"
+    COLLECTION_LOG = "collection_"
     DISPATCH = "dispatch"
     TIMELINE = 'timeline'
     SUMMARY = 'summary'
@@ -26,6 +26,8 @@ class PathManager:
     HCCL = "hccl"
     QUERY_CLUSTER = "query"
     ANALYZE = 'analyze'
+    MINDSTUDIO_PROFILER_LOG = "mindstudio_profiler_log"
+    MINDSTUDIO_PROFILER_OUTPUT = "mindstudio_profiler_output"
 
     @staticmethod
     def get_path_under_result_dir(result_dir: str, *paths: str) -> str:
@@ -67,7 +69,7 @@ class PathManager:
         """
         get log directory in result directory
         """
-        return cls.get_path_under_result_dir(result_dir, cls.LOG)
+        return os.path.realpath(cls.get_path_under_result_dir(result_dir, "..", cls.MINDSTUDIO_PROFILER_LOG))
 
     @classmethod
     def get_sql_dir(cls: any, result_dir: str) -> str:
@@ -108,7 +110,9 @@ class PathManager:
         """
         get collection log path
         """
-        return cls.get_path_under_result_dir(result_dir, cls.LOG, cls.COLLECTION_LOG)
+        base_name = os.path.basename(result_dir)
+        log_dir = os.path.realpath(cls.get_path_under_result_dir(result_dir, "..", cls.MINDSTUDIO_PROFILER_LOG))
+        return cls.get_path_under_result_dir(log_dir, cls.COLLECTION_LOG + base_name + cls.LOG)
 
     @classmethod
     def get_dispatch_dir(cls: any, result_dir: str) -> str:
