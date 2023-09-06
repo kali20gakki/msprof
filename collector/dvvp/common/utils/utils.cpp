@@ -15,6 +15,7 @@
 #include <iomanip>
 #include <string>
 #include <ctime>
+#include <set>
 #include "config/config.h"
 #include "config/config_manager.h"
 #include "platform/platform.h"
@@ -1451,7 +1452,11 @@ bool Utils::IsPythonOrBash(const std::string paramsName)
 
 bool Utils::IsDynProfMode()
 {
-    if (ConfigManager::instance()->GetPlatformType() != PlatformType::CLOUD_TYPE) {
+    PlatformType platformType = ConfigManager::instance()->GetPlatformType();
+    std::set<PlatformType> platformTypeSet = {PlatformType::CLOUD_TYPE,
+                                              PlatformType::CHIP_V4_1_0,
+                                              PlatformType::CHIP_V4_2_0};
+    if (platformTypeSet.find(platformType) == platformTypeSet.end()) {
         return false;
     }
     if (GetEnvString(PROFILING_MODE_ENV) != DAYNAMIC_PROFILING_VALUE) {

@@ -166,6 +166,7 @@ int ParamsAdapterMsprof::ParamsCheckDynProf() const
     // --pid is non-empty, save pid to DynProfMngCli
     if (!paramContainer_[INPUT_CFG_MSPROF_DYNAMIC_PID].empty()) {
         int32_t pid = std::stoi(paramContainer_[INPUT_CFG_MSPROF_DYNAMIC_PID]);
+        MSPROF_LOGI("SetAppPid in ParamsCheckDynProf , pid = ld%", pid);
         DynProfMngCli::instance()->SetAppPid(pid);
     }
     DynProfMngCli::instance()->EnableMode();
