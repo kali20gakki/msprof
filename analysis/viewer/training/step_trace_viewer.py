@@ -379,6 +379,7 @@ class StepTraceViewer:
         for i in range(1, 4):
             if trace[i] != "N/A":
                 trace[i] = InfoConfReader().time_from_syscnt(trace[i], NumberConstant.MICRO_SECOND)
+                trace[i] = InfoConfReader().trans_into_local_time(trace[i])
 
     @staticmethod
     def get_trace_timeline_data(cnn: any, values: list) -> any:
@@ -396,19 +397,20 @@ class StepTraceViewer:
                     'training_trace': list(line),
                 }
                 getnext = StepTraceViewer.__select_getnext(cnn, trace.get('training_trace', []))
-                getnext = Utils.generator_to_list(list(map(StepTraceViewer.__time_from_syscnt, data))
+                getnext = Utils.generator_to_list(list(map(StepTraceViewer.__local_time_from_syscnt, data))
                                                   for data in getnext)
                 trace['get_next'] = getnext
 
                 all_reduce = StepTraceViewer.__select_reduce(cnn, trace.get('training_trace', []))
-                all_reduce = Utils.generator_to_list(list(map(StepTraceViewer.__time_from_syscnt, data))
+                all_reduce = Utils.generator_to_list(list(map(StepTraceViewer.__local_time_from_syscnt, data))
                                                      for data in all_reduce)
                 trace['all_reduce'] = all_reduce
                 StepTraceViewer.transfer_trace_unit(trace.get('training_trace', []))  # syscnt to time
                 data[step] = trace
                 # Cursor step moved 1 step
                 step = step + 1
-            return StepTraceViewer.__format_trace_json(data)
+            result = StepTraceViewer.__format_trace_json(data)
+            return result
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) \
                 as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
@@ -426,9 +428,9 @@ class StepTraceViewer:
                 reduce_data = StepTraceViewer.__select_reduce(conn,
                                                               trace)
                 for item in reduce_data:
-                    trace += [StepTraceViewer.__time_from_syscnt(item[0]),
+                    trace += [StepTraceViewer.__local_time_from_syscnt(item[0]),
                               (item[1] - item[0]) * StepTraceConstant.syscnt_to_micro()]
-            trace[1:4] = map(lambda x: StepTraceViewer.__time_from_syscnt(x), trace[1:4])
+            trace[1:4] = map(lambda x: StepTraceViewer.__local_time_from_syscnt(x), trace[1:4])
             merge_data.append(trace)
         return merge_data
 
@@ -572,7 +574,8 @@ class StepTraceViewer:
         return DBManager.fetch_all_data(curs, sql, (iter_range.model_id, *iter_range.get_iteration_range()))
 
     @staticmethod
-    def __time_from_syscnt(cnt):
+    def __local_time_from_syscnt(cnt):
         if not is_number(cnt):
             return cnt
-        return InfoConfReader().time_from_syscnt(cnt, NumberConstant.MICRO_SECOND)
+        return InfoConfReader().trans_into_local_time(
+            InfoConfReader().time_from_syscnt(cnt, NumberConstant.MICRO_SECOND))

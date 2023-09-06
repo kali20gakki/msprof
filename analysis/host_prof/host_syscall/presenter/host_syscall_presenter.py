@@ -312,7 +312,8 @@ class HostSyscallPresenter(HostProfPresenterBase):
             # 'name', 'tid', 'ts', 'dur'
             temp_data = [
                 data_item[3], int(data_item[1]), int(data_item[2]),
-                InfoConfReader().time_from_host_syscnt(data_item[7], NumberConstant.MICRO_SECOND),
+                InfoConfReader().trans_into_local_time(
+                    InfoConfReader().time_from_host_syscnt(data_item[7], NumberConstant.MICRO_SECOND)),
                 InfoConfReader().get_host_duration(float(data_item[8]) - float(data_item[7]),
                                                    NumberConstant.MICRO_SECOND)
             ]

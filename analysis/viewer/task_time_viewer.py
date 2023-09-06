@@ -125,7 +125,7 @@ class TaskTimeViewer(BaseViewer):
                 [data.op_name,
                  self.TRACE_PID_MAP.get("Subtask Time", 1),
                  data.device_task_type,
-                 data.start_time / DBManager.NSTOUS,
+                 InfoConfReader().trans_into_local_time(data.start_time, NumberConstant.NANO_SECOND),
                  data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
                  {"Stream Id": data.stream_id, "Task Id": data.task_id, 'Batch Id': data.batch_id,
                   "Subtask Id": data.context_id, "connection_id": data.connection_id, }])
@@ -145,7 +145,7 @@ class TaskTimeViewer(BaseViewer):
                 [data.op_name,
                  self.TRACE_PID_MAP.get("Thread Task Time", 2),
                  "Thread {0}({1})".format(str(data.thread_id), data.device_task_type),
-                 data.start_time / DBManager.NSTOUS,
+                 InfoConfReader().trans_into_local_time(data.start_time, NumberConstant.NANO_SECOND),
                  data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
                  {"Stream Id": data.stream_id, "Task Id": data.task_id, 'Batch Id': data.batch_id,
                   "Subtask Id": data.context_id, "Subtask Type": data.device_task_type,
@@ -166,7 +166,7 @@ class TaskTimeViewer(BaseViewer):
                 [data.op_name,
                  self.TRACE_PID_MAP.get("Task Scheduler", 0),
                  data.stream_id,
-                 data.start_time / DBManager.NSTOUS,
+                 InfoConfReader().trans_into_local_time(data.start_time, NumberConstant.NANO_SECOND),
                  data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
                  {"Task Type": data.device_task_type, "Stream Id": data.stream_id, "Task Id": data.task_id,
                   'Batch Id': data.batch_id, "Subtask Id": data.context_id, "connection_id": data.connection_id, }])
@@ -175,7 +175,7 @@ class TaskTimeViewer(BaseViewer):
                 [data.op_name,
                  self.TRACE_PID_MAP.get("Task Scheduler", 0),
                  data.stream_id,
-                 data.start_time / DBManager.NSTOUS,
+                 InfoConfReader().trans_into_local_time(data.start_time, NumberConstant.NANO_SECOND),
                  data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
                  {"Task Type": data.device_task_type, "Stream Id": data.stream_id, "Task Id": data.task_id,
                   'Batch Id': data.batch_id, "Subtask Id": data.context_id, "connection_id": data.connection_id, }])

@@ -47,14 +47,14 @@ class AccPmuViewer(BaseViewer, ABC):
             return []
         result = []
         for data in datas:
-            result.append(["read_bandwidth", data.timestamp, {'value': data.read_bandwidth,
-                                                              'acc_id': data.acc_id}])
-            result.append(["write_band_width", data.timestamp, {'value': data.write_bandwidth,
-                                                                'acc_id': data.acc_id}])
-            result.append(["read_ost", data.timestamp, {'value': data.read_ost,
-                                                        'acc_id': data.acc_id}])
-            result.append(["write_ost", data.timestamp, {'value': data.write_ost,
-                                                         'acc_id': data.acc_id}])
+            result.append(["read_bandwidth", InfoConfReader().trans_into_local_time(data.timestamp),
+                           {'value': data.read_bandwidth, 'acc_id': data.acc_id}])
+            result.append(["write_band_width", InfoConfReader().trans_into_local_time(data.timestamp),
+                           {'value': data.write_bandwidth, 'acc_id': data.acc_id}])
+            result.append(["read_ost", InfoConfReader().trans_into_local_time(data.timestamp),
+                           {'value': data.read_ost, 'acc_id': data.acc_id}])
+            result.append(["write_ost", InfoConfReader().trans_into_local_time(data.timestamp),
+                           {'value': data.write_ost, 'acc_id': data.acc_id}])
         pid = self.pid
         for item in result:
             item[2:2] = [pid, InfoConfReader().get_json_tid_data()]
