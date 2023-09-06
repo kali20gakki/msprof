@@ -583,11 +583,10 @@ MsoprofTask::MsoprofTask()
 {
     auto ascend_toolkit_home = getenv("ASCEND_TOOLKIT_HOME");
     if (ascend_toolkit_home == nullptr) {
-        path_ = nullptr;
+        path_ = "";
     } else {
         std::string pathStr = ascend_toolkit_home;
-        std::string msopprofPath = pathStr + "/tools/msopt/bin/msopprof";
-        path_ = msopprofPath.c_str();
+        path_ = pathStr + "/tools/msopt/bin/msopprof";
     }
 }
 
@@ -597,7 +596,7 @@ bool MsoprofTask::MsopprofProcess(int argc, CONST_CHAR_PTR argv[])
     int valid_ret;
     std::vector<std::string> op_argv;
     ret = CheckMsopprof(argc, argv, op_argv);
-    if (ret && (path_ != nullptr) && (ParamValidation::instance()->CheckMsopprofBinValid(path_) == 0)) {
+    if (ret && !path_.empty() && (ParamValidation::instance()->CheckMsopprofBinValid(path_) == PROFILING_SUCCESS)) {
         ExecMsopprof(path_, op_argv);
     }
     return ret;
@@ -613,10 +612,10 @@ bool MsoprofTask::CheckMsopprof(int argc, CONST_CHAR_PTR argv[], std::vector<std
             op_argv.push_back(argv[i]);
         }
     }
-    if (path_ == nullptr && ret == true) {
+    if (path_.empty() && ret == true) {
         CmdLog::instance()->CmdErrorLog("cannot find msopprof,"
             "because not set environment variable ASCEND_TOOLKIT_HOME,"
-            "Maybe you should run setenv.sh.");
+            "Maybe you should set setenv.sh.");
     }
     return ret;
 }
@@ -625,7 +624,7 @@ void MsoprofTask::PrintHelp()
 {
     std::vector<std::string> op_args;
     op_args.push_back("--help");
-    if (path_ != nullptr) {
+    if (!path_.empty()) {
         std::cout << "If you activate the --op option with '--op=on',"
             "the following options are available ." << std::endl;
         ExecMsopprof(path_, op_args);
@@ -636,16 +635,22 @@ void MsoprofTask::PrintHelp()
     }
 }
 
-int MsoprofTask::ExecMsopprof(CONST_CHAR_PTR path, std::vector<std::string> argsVec)
+int MsoprofTask::ExecMsopprof(std::string path, std::vector<std::string> argsVec)
 {
     std::string cmd = path;
-    ExecCmdParams execCmdParams(cmd, false, "");
+    ExecCmdParams execCmdParams(cmd, true, "");
     std::vector<std::string> envsVec = Analysis::Dvvp::App::EnvManager::instance()->GetGlobalEnv();
     int exitCode = analysis::dvvp::common::utils::INVALID_EXIT_CODE;
     auto opProcess = MSVP_MMPROCESS;
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsVec, envsVec, exitCode, opProcess);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to launch msopprof: %s", cmd.c_str());
+        return PROFILING_FAILED;
+    }
+    bool isExited = false;
+    ret = analysis::dvvp::common::utils::Utils::WaitProcess(opProcess, isExited, exitCode, true);
+    if (ret != PROFILING_SUCCESS) {
+        CMD_LOGE("Failed to wait msopprof: %s", cmd.c_str());
         return PROFILING_FAILED;
     }
     return ret;

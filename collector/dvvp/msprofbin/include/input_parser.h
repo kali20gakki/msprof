@@ -241,11 +241,10 @@ public:
     bool MsopprofProcess(int argc, CONST_CHAR_PTR argv[]);
     bool CheckMsopprof(int, CONST_CHAR_PTR argv[], std::vector<std::string> &op_argv);
     void PrintHelp();
-    int ExecMsopprof(CONST_CHAR_PTR path, std::vector<std::string> argsVec);
+    int ExecMsopprof(std::string path, std::vector<std::string> argsVec);
 
 private:
-    CONST_CHAR_PTR path_;
-    CONST_CHAR_PTR filename_ = "msopprof";
+    std::string path_;
 };
 }
 }
