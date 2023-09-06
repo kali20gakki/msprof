@@ -7,6 +7,7 @@ from collections import OrderedDict
 from common_func.db_manager import DBManager
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.msvp_common import is_number
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 
 
@@ -139,8 +140,13 @@ class TraceViewManager:
         :return: format_pid: int
         """
         decimal_radix = 10
-        index_decimal_len = 2
-        format_pid = pid * decimal_radix ** index_decimal_len + index_id
+        index_decimal_len = 3
+        if is_number(InfoConfReader().get_device_id()):
+            device_id = int(InfoConfReader().get_device_id())
+        else:
+            device_id = 8
+        format_pid = pid * decimal_radix ** index_decimal_len + \
+                     index_id * decimal_radix + device_id
         return format_pid
     
     @staticmethod
