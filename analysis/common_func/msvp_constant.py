@@ -14,7 +14,7 @@ class MsvpConstant:
     MSVP_EMPTY_DATA = ([], [], 0)
     EMPTY_DICT = {}
     EMPTY_LIST = []
-    EMPTY_TUPLE = []
+    EMPTY_TUPLE = ()
 
     @property
     def msvp_empty_data(self: any) -> tuple:
