@@ -4,6 +4,7 @@
 
 from common_func.db_manager import DBManager
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.info_conf_reader import InfoConfReader
 
 
 class GetTableData:
@@ -18,10 +19,12 @@ class GetTableData:
         """
         if not cursor:
             return []
-        search_data_sql = "select duration / {NS_TO_US}, bandwidth, rxBandwidth, rxPacket, rxErrorRate, " \
+        search_data_sql = "select duration / {NS_TO_US}+{local_time_offset}, bandwidth, " \
+                          "rxBandwidth, rxPacket, rxErrorRate, " \
                           "rxDroppedRate, txBandwidth, txPacket, txErrorRate, txDroppedRate, funcId " \
-                          "from {0} where device_id={1} order by rowid".format(table_name, device_id,
-                                                                               NS_TO_US=NumberConstant.NS_TO_US)
+                          "from {0} where device_id={1} order by rowid"\
+                          .format(table_name, device_id, local_time_offset=InfoConfReader().get_local_time_offset(),
+                                  NS_TO_US=NumberConstant.NS_TO_US)
         result = DBManager.fetch_all_data(cursor, search_data_sql)
         if result:
             return result

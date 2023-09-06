@@ -9,6 +9,7 @@ from msmodel.biu_perf.biu_perf_model import BiuPerfModel
 from common_func.trace_view_manager import TraceViewManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
+from common_func.info_conf_reader import InfoConfReader
 
 
 class BiuPerfViewer:
@@ -45,7 +46,7 @@ class BiuPerfViewer:
             trace_datum = []
             # 0 flow_type; 1 interval_start; 2 pid; 3 tid; 4 flow
             trace_datum.append(biu_flow_datum[0])
-            trace_datum.append(biu_flow_datum[1])
+            trace_datum.append(InfoConfReader.trans_into_local_time(biu_flow_datum[1]))
             trace_datum.append(biu_flow_datum[2])
             trace_datum.append(biu_flow_datum[3])
             trace_datum.append(OrderedDict([("flow", biu_flow_datum[4])]))
@@ -62,7 +63,7 @@ class BiuPerfViewer:
             trace_datum.append("")
             trace_datum.append(biu_cycles_datum[0])
             trace_datum.append(biu_cycles_datum[1])
-            trace_datum.append(biu_cycles_datum[2])
+            trace_datum.append(InfoConfReader().trans_into_local_time(biu_cycles_datum[2]))
             trace_datum.append(biu_cycles_datum[3])
             trace_datum.append(OrderedDict([("cycle_num", biu_cycles_datum[4]),
                                             ("ratio", biu_cycles_datum[5])]))
