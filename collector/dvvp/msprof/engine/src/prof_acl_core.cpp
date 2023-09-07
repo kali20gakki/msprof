@@ -55,6 +55,7 @@ static aclError aclprofInitPreCheck()
 
 aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
 {
+    Platform::instance()->Init();
     int ret = aclprofInitPreCheck();
     if (ret != ACL_SUCCESS) {
         return ret;
