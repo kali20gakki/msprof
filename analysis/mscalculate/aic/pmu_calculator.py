@@ -103,15 +103,17 @@ class PmuCalculator(ICalculator):
                 self._block_dims.get('mix_block_dim', {}).setdefault(_key, []).append(int(data.mix_block_dim))
 
     def __get_block_dim_data(self: any, ge_curs: any) -> list:
+        device_id = InfoConfReader().get_device_id()
         if ProfilingScene().is_operator():
             sql = "select task_id, stream_id, context_id, task_type, block_dim, mix_block_dim from {0} " \
-                  "order by timestamp".format(DBNameConstant.TABLE_GE_TASK)
+                  "where device_id={1} " \
+                  "order by timestamp".format(DBNameConstant.TABLE_GE_TASK, device_id)
             return DBManager.fetch_all_data(ge_curs, sql, dto_class=GeTaskDto)
         ge_data = []
         iter_list = MsprofIteration(self._project_path).get_index_id_list_with_index_and_model(self._iter_range)
         sql = "select task_id, stream_id, context_id, task_type, block_dim, mix_block_dim from {0} " \
-              "where model_id=? and (index_id=0 or index_id=?) " \
-              " order by timestamp".format(DBNameConstant.TABLE_GE_TASK)
+              "where model_id=? and (index_id=0 or index_id=?) and device_id={1} " \
+              " order by timestamp".format(DBNameConstant.TABLE_GE_TASK, device_id)
         for iter_id, model_id in iter_list:
             ge_data.extend(DBManager.fetch_all_data(ge_curs, sql, (model_id, iter_id), dto_class=GeTaskDto))
         return ge_data
