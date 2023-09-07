@@ -67,6 +67,7 @@ void MsprofManager::StopNoWait() const
         return;
     }
     CmdLog::instance()->CmdWarningLog("Receive stop singal.");
+    rMode_->StopRunningTasks();
     rMode_->UpdateOutputDirInfo();
     rMode_->isQuit_ = true;
 }

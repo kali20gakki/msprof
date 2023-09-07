@@ -56,6 +56,7 @@ int main(int argc, const char **argv, const char **envp)
         return PROFILING_FAILED;
     }
     signal(SIGINT, [](int signum) {
+        Collector::Dvvp::Mmpa::MmSleep(5000);    // 3000ms，主进程等待3s再stop.让子进程落盘数据
         MsprofManager::instance()->StopNoWait();
     });
     if (!DynProfMngCli::instance()->IsEnableMode()) {
