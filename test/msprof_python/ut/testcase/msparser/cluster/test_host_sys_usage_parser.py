@@ -41,7 +41,8 @@ class TestHostSysUsageParser(unittest.TestCase):
             mock.patch('msmodel.hardware.sys_usage_model.SysUsageModel.get_sys_cpu_data', return_value=sys_cpu_data), \
             mock.patch('msmodel.hardware.sys_usage_model.SysUsageModel.get_pid_cpu_data', return_value=pid_cpu_data),\
             mock.patch('msmodel.hardware.sys_mem_model.SysMemModel.get_sys_mem_data', return_value=sys_mem_data),\
-            mock.patch('msmodel.hardware.sys_mem_model.SysMemModel.get_pid_mem_data', return_value=pid_mem_data):
+            mock.patch('msmodel.hardware.sys_mem_model.SysMemModel.get_pid_mem_data', return_value=pid_mem_data), \
+             mock.patch('common_func.file_manager.check_path_valid'):
             check = HostSysUsageParser(self.params)
             check.process()
 
@@ -77,7 +78,8 @@ class TestHostSysUsageParser(unittest.TestCase):
             mock.patch('msmodel.hardware.sys_usage_model.SysUsageModel.get_sys_cpu_data', return_value=sys_cpu_data),\
             mock.patch('msmodel.hardware.sys_usage_model.SysUsageModel.get_pid_cpu_data', return_value=pid_cpu_data),\
             mock.patch('msmodel.hardware.sys_mem_model.SysMemModel.get_sys_mem_data', return_value=sys_mem_data),\
-            mock.patch('msmodel.hardware.sys_mem_model.SysMemModel.get_pid_mem_data', return_value=pid_mem_data):
+            mock.patch('msmodel.hardware.sys_mem_model.SysMemModel.get_pid_mem_data', return_value=pid_mem_data), \
+             mock.patch('common_func.file_manager.check_path_valid'):
             check = HostSysUsageParser(self.params)
             check.process()
 

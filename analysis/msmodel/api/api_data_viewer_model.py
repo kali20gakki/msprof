@@ -26,7 +26,7 @@ class ApiDataViewModel(ViewModel):
     def get_timeline_data(self: any) -> list:
         sql = "select struct_type, start, (end - start), " \
               "thread_id, level, id," \
-              "item_id " \
+              "item_id, connection_id " \
               "from (select* from {} where start > 0) " \
               "{where_condition}".format(DBNameConstant.TABLE_API_DATA,
                                          where_condition=self._get_where_condition())
@@ -43,30 +43,10 @@ class ApiDataViewModel(ViewModel):
         if not (total_time and total_time[0]):
             return []
 
-        search_data_sql = "select " \
-                          "CASE WHEN level = 'acl' THEN id " \
-                          "WHEN level IN ('runtime', 'model','node') THEN struct_type " \
-                          "ELSE item_id END AS api_name,  " \
-                          "round({percent}*sum(end-start)/{0}, {accuracy}), " \
-                          "sum((end-start)), count(*), sum((end-start))/count(*), " \
-                          "min((end-start)), max((end-start)), level " \
-                          "from {1} {where_condition} " \
-                          "group by level, api_name".format(total_time[0],
-                                                            DBNameConstant.TABLE_API_DATA,
-                                                            percent=NumberConstant.PERCENTAGE,
-                                                            accuracy=NumberConstant.DECIMAL_ACCURACY,
-                                                            where_condition=self._get_where_condition())
-        return DBManager.fetch_all_data(self.cur, search_data_sql)
-
-    def get_api_statistic_data_for_variance(self):
-        total_time = self.get_api_total_time()
-        if not (total_time and total_time[0]):
-            return []
-
         search_data_sql = "select CASE WHEN level = 'acl' THEN id " \
                           "WHEN level IN ('runtime', 'model','node') THEN struct_type " \
                           "ELSE item_id END AS api_name, " \
-                          "(end-start) as duration  " \
+                          "(end-start) as duration, level   " \
                           "from {1} {where_condition} " \
                           "ORDER BY api_name, level".format(total_time[0],
                                                             DBNameConstant.TABLE_API_DATA,

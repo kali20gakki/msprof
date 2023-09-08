@@ -18,6 +18,7 @@ class HostTask:
     task_type: str
     device_id: int
     host_timestamp: int
+    connection_id: int
 
 
 @dataclass
@@ -51,3 +52,4 @@ class TopDownTask:
     duration: int
     host_task_type: str
     device_task_type: str
+    connection_id: int

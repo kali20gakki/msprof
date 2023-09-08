@@ -195,7 +195,7 @@ class FileNameManagerConstant:
     MSPROFTX_TORCH_FILE_PATTERN = r"^Msprof\.torch_op\.slice_\d+"
     MSPROFTX_CANN_FILE_PATTERN = r"^Msprof\.torch_cann_op\.slice_\d+"
     MSPROFTX_PIPELINE_FILE_PATTERN = f"^Msprof\.torch_pipeline\.slice_\d+"
-    MSPROF_JSON_FILE_PATTERN = r"^msprof(_\d+)?(_\d+)?(_\d+)?(_slice_\d+)?.json"
+    MSPROF_JSON_FILE_PATTERN = r"^msprof(_\d+)?(_\d+)?(_\d+)?(_\d+)?(_slice_\d+)?.json"
     MSPROFTX_JSON_FILE_PATTERN = r"^msprof_tx_?\d?_?\d?.json"
 
     # helper
@@ -227,6 +227,13 @@ class FileNameManagerConstant:
     FUSION_ADD_INFO_PATTERN = r"^(unaging|aging)\.additional\.fusion_op_info\.slice_\d+"
     MEMORY_APPLICATION_FILE_PATTERN = r"^(unaging|aging)\.additional\.memory_application\.slice_\d+"
     CTX_ID_FILE_PATTERN = r"^(unaging|aging)\.additional\.context_id_info\.slice_\d+"
+
+    # nano
+    NANO_MODEL_EXEOM_PATTERN = r"^unaging\.additional\.model_exeom\.slice_\d+"
+    NANO_STARS_PROFILE_PATTERN = r"^nano_stars_profile\.data.\d+\.slice_\d+"
+
+    # dbg
+    DBG_PATTERN = r".+\.dbg$"
 
     def get_file_name_manager_class_name(self: any) -> any:
         """
@@ -967,3 +974,27 @@ def get_ge_ctx_id_info_compiles() -> tuple:
     :return: ge ctx id info files regex
     """
     return (re.compile(FileNameManagerConstant.CTX_ID_FILE_PATTERN),)
+
+
+def get_nano_model_exeom_compiles() -> tuple:
+    """
+    get nano host info files regex compiles
+    :return: nano host info files regex
+    """
+    return (re.compile(FileNameManagerConstant.NANO_MODEL_EXEOM_PATTERN),)
+
+
+def get_nano_stars_profile_compiles() -> tuple:
+    """
+    get nano device info files regex compiles
+    :return: nano device info files regex
+    """
+    return (re.compile(FileNameManagerConstant.NANO_STARS_PROFILE_PATTERN),)
+
+
+def get_dbg_file_compiles() -> tuple:
+    """
+    get nano host info files regex compiles
+    :return: nano host info files regex
+    """
+    return (re.compile(FileNameManagerConstant.DBG_PATTERN),)

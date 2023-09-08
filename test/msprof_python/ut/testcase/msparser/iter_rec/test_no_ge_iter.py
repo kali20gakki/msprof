@@ -12,6 +12,7 @@ from unittest import mock
 import pytest
 from common_func.msprof_exception import ProfException
 from msparser.iter_rec.iter_rec_parser import NoGeIterRecParser
+from msparser.iter_rec.iter_info_updater.iter_info import IterInfo
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from constant.constant import CONFIG
@@ -56,11 +57,9 @@ class TestNoGeIterRecParser(unittest.TestCase):
                            1, 2, 3, 4, 5, 0, 7, 8, 9, 7, 8, 9, 5, 3, 2, 5, 4, 6,
                            1, 2, 3, 4, 5, 2, 7, 8, 9, 7, 8, 9, 5, 3, 2, 5, 4, 6)
 
-        with mock.patch("common_func.iter_recorder.IterRecorder.check_task_in_iteration", return_value=True), \
+        with mock.patch("common_func.iter_recorder.IterRecorder.check_task_before_max_iter", return_value=True), \
                 mock.patch("common_func.iter_recorder.IterRecorder.set_current_iter_id"), \
                 mock.patch(NAMESPACE + ".IterParser._create_hwts_task_time_data"), \
-                mock.patch(
-                    "msparser.iter_rec.iter_info_updater.iter_info_updater.IterInfoUpdater.update_count_and_offset"), \
                 mock.patch(
                     "msparser.iter_rec.iter_info_updater.iter_info_updater.IterInfoUpdater.update_count_and_offset"), \
                 mock.patch("msmodel.step_trace.ts_track_model.TsTrackModel.get_step_trace_data",
@@ -69,15 +68,31 @@ class TestNoGeIterRecParser(unittest.TestCase):
             check = NoGeIterRecParser(self.file_list, CONFIG)
             check._read_hwts_data(bytes(data))
 
-        with mock.patch("common_func.iter_recorder.IterRecorder.check_task_in_iteration", return_value=True), \
+        with mock.patch("common_func.iter_recorder.IterRecorder.check_task_before_max_iter", return_value=True), \
                 mock.patch("common_func.iter_recorder.IterRecorder.set_current_iter_id"), \
                 mock.patch(NAMESPACE + ".IterParser._create_hwts_task_time_data"), \
                 mock.patch(
                     "msparser.iter_rec.iter_info_updater.iter_info_updater.IterInfoUpdater.update_count_and_offset"), \
-                mock.patch(
-                    "msparser.iter_rec.iter_info_updater.iter_info_updater.IterInfoUpdater.update_count_and_offset"), \
                 mock.patch(NAMESPACE + ".IterRecorder.check_task_in_iter", return_value=True):
             check._read_hwts_data(bytes(data))
+
+    def test_read_hwts_data_should_not_count_tasks_when_exceeding_max_iter(self):
+        data = struct.pack("=BBHHHQ12IBBHHHQ12IBBHHHQ12IBBHHHQ12I",
+                           0, 2, 3, 4, 5, 0, 7, 8, 9, 7, 8, 9, 5, 3, 2, 5, 4, 6,  # syscnt 0, not in iter
+                           0, 2, 3, 4, 5, 1, 7, 8, 9, 7, 8, 9, 5, 3, 2, 5, 4, 6,  # syscnt 1, in iter
+                           1, 2, 3, 4, 5, 2, 7, 8, 9, 7, 8, 9, 5, 3, 2, 5, 4, 6,  # syscnt 2, in iter
+                           0, 2, 3, 4, 5, 4, 7, 8, 9, 7, 8, 9, 5, 3, 2, 5, 4, 6)  # syscnt 4, exceeds max iter
+
+        with mock.patch("msmodel.step_trace.ts_track_model.TsTrackModel.get_step_trace_data",
+                           return_value=[get_step_trace_data()]), \
+                mock.patch('common_func.utils.Utils.is_step_scene', return_value=True):
+            check = NoGeIterRecParser(self.file_list, CONFIG)
+            iter_info = \
+                check._iter_info_updater.iteration_manager.iter_to_iter_info.setdefault(1, IterInfo(1, 1, 1, 0, 3))
+            iter_info.behind_parallel_iter.add(1)
+            check._read_hwts_data(bytes(data))
+            self.assertEqual(iter_info.hwts_count, 2)
+            self.assertEqual(check._task_cnt_not_in_iter, {1: 1})  # count syscnt 0, not count syscnt 4
 
     def test_read_ai_core_data(self):
         data = struct.pack("=BBHHHII10Q8I", 1, 2, 3, 4, 5, 6, 7, 8, 9, 7, 8, 9, 5, 3, 2, 5, 4, 6, 1, 2, 3, 4, 5, 6,

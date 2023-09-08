@@ -58,7 +58,7 @@ class CommunicationAnalyzer:
         """
         with CommunicationModel(rank_path) as _model:
             if not _model.check_table():
-                logging.error("Fail to connect %s, hccl parser is interrupted", DBNameConstant.DB_HCCL)
+                logging.error("Fail to connect %s, hccl parser is interrupted", DBNameConstant.DB_HCCL_SINGLE_DEVICE)
                 raise ProfException(ProfException.PROF_INVALID_CONNECT_ERROR)
             conditions = {
                 'iter_start': NumberConstant.DEFAULT_START_TIME,
@@ -145,4 +145,5 @@ class CommunicationAnalyzer:
             self._generate_output(sub_path)
         else:
             host_dir = PathManager.get_host_result_dir(sub_path)
-            logging.warning('There is not hccl.db in %s', host_dir)
+            logging.warning('There is not hccl.db in %s, '
+                            'maybe this data was export in clear mode or incomplete', host_dir)

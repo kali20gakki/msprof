@@ -184,13 +184,8 @@ void HashData::FillPbData(const std::string &module, int32_t upDevId,
     fileChunk->set_chunkendtime(reportTime);
 }
 
-void HashData::SaveHashData(int32_t devId)
+void HashData::SaveHashData()
 {
-    if (devId < 0 || devId >= MSVP_MAX_DEV_NUM) {
-        MSPROF_LOGI("HashData devId %d is invalid", devId);
-        return;
-    }
-
     if (!inited_) {
         MSPROF_LOGW("HashData not inited");
         return;

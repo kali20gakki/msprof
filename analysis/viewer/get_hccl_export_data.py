@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
 import json
+import logging
+import os
 from collections import OrderedDict
 from dataclasses import dataclass
 from typing import List
@@ -11,6 +13,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.path_manager import PathManager
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from msmodel.hccl.hccl_model import HcclViewModel
@@ -45,8 +48,8 @@ class HCCLExport:
         """
         get data for hccl timeline
         """
-        with HcclViewModel(self.project_path, DBNameConstant.DB_HCCL,
-                           [DBNameConstant.TABLE_HCCL_ALL_REDUCE]) as hccl_model:
+        with HcclViewModel(self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                           [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE]) as hccl_model:
             if not hccl_model.check_table():
                 return json.dumps({
                     'status': NumberConstant.ERROR,
@@ -54,7 +57,7 @@ class HCCLExport:
                             " please check data file."
                 })
 
-            hccl_data = hccl_model.get_all_data(DBNameConstant.TABLE_HCCL_ALL_REDUCE, dto_class=HcclDto)
+            hccl_data = hccl_model.get_all_data(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE, dto_class=HcclDto)
             if not hccl_data:
                 return json.dumps({
                     'status': NumberConstant.WARN,
@@ -123,13 +126,15 @@ class HCCLExport:
             TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, _hccl_format_data + _hccl_format_op_data))
 
     def _format_hccl_op_data(self):
-        with HcclViewModel(self.project_path, DBNameConstant.DB_HCCL,
-                           DBNameConstant.TABLE_HCCL_ALL_REDUCE) as hccl_model:
+        with HcclViewModel(self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                           DBNameConstant.TABLE_HCCL_SINGLE_DEVICE) as hccl_model:
             hccl_op_data = hccl_model.get_hccl_op_data_by_group()
             _hccl_format_op_data = [
                 [
                     hccl_op.op_name, self.pid_value, self.hccl_groups.get(hccl_op.group_name).start_index,
-                    hccl_op.timestamp / NumberConstant.NS_TO_US, hccl_op.duration / NumberConstant.NS_TO_US
+                    InfoConfReader().trans_into_local_time(hccl_op.timestamp / NumberConstant.NS_TO_US),
+                    hccl_op.duration / NumberConstant.NS_TO_US,
+                    {"connection_id": hccl_op.connection_id},
                 ]
                 for hccl_op in hccl_op_data
             ]
@@ -145,7 +150,8 @@ class HCCLExport:
             thread_id = self.hccl_groups.get(_hccl_data.group_name).start_index + _hccl_data.plane_id + 1
             _hccl_data_pice = [
                 _hccl_data.hccl_name, self.pid_value, thread_id,
-                _hccl_data.timestamp / NumberConstant.NS_TO_US, _hccl_data.duration / NumberConstant.NS_TO_US, hccl_args
+                InfoConfReader().trans_into_local_time(_hccl_data.timestamp / NumberConstant.NS_TO_US),
+                _hccl_data.duration / NumberConstant.NS_TO_US, hccl_args
             ]
             _hccl_format_data[index] = _hccl_data_pice
         return _hccl_format_data

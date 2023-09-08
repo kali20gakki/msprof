@@ -57,7 +57,7 @@ class IterRecorder:
                 self._iter_end_dict[step_trace.iter_id] = step_trace.step_end
                 self._iter_time.append([step_trace.step_start, step_trace.step_end])
 
-    def check_task_in_iteration(self: any, sys_cnt: int) -> bool:
+    def check_task_before_max_iter(self: any, sys_cnt: int) -> bool:
         if self._max_iter_time == self.DEFAULT_ITER_TIME:
             return True
         return self._max_iter_time >= sys_cnt

@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 
+import os
+
 from common_func import file_name_manager
 from common_func.config_mgr import ConfigMgr
 from common_func.data_check_manager import DataCheckManager
@@ -17,39 +19,47 @@ class AiStackDataCheckManager(DataCheckManager):
     The ai stack data check manager
     """
 
+    @staticmethod
+    def _is_device_exist(result_dir: str) -> bool:
+        parent_dir = os.path.dirname(result_dir)
+        subdir_names = os.listdir(parent_dir)
+        for subdir_name in subdir_names:
+            if not subdir_name.startswith('device_'):
+                continue
+            return True
+        return False
+
+    @staticmethod
+    def _check_output(result_dir: str, device_id: any = None) -> bool:
+        if device_id != NumberConstant.HOST_ID or \
+                (result_dir.endswith("host") and not AiStackDataCheckManager._is_device_exist(result_dir)):
+            return True
+        return False
+
     @classmethod
     def contain_acl_data(cls: any, result_dir: str, device_id: any = None) -> bool:
         """
         The data path contain acl data or not
         """
-        return device_id != NumberConstant.HOST_ID and \
-               DBManager.check_item_in_table(PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT),
-                                             DBNameConstant.TABLE_API_DATA, 'level', 'acl')
-
-    @classmethod
-    def contain_runtime_api_data(cls: any, result_dir: str, device_id: any = None) -> bool:
-        """
-        The data path contain runtime.api. data or not
-        """
-        return device_id != NumberConstant.HOST_ID and \
-               DBManager.check_item_in_table(PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT),
-                                             DBNameConstant.TABLE_API_DATA, 'level', 'runtime')
+        return AiStackDataCheckManager._check_output(result_dir, device_id) and \
+            DBManager.check_item_in_table(PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT),
+                                          DBNameConstant.TABLE_API_DATA, 'level', 'acl')
 
     @classmethod
     def contain_ge_model_load_data(cls: any, result_dir: str, device_id: any = None) -> bool:
         """
         The data path contain Framework.model_load_info data or not
         """
-        return device_id != NumberConstant.HOST_ID and \
-               DBManager.check_connect_db(result_dir, DBNameConstant.DB_GE_MODEL_INFO)[0]
+        return AiStackDataCheckManager._check_output(result_dir, device_id) and \
+            DBManager.check_connect_db(result_dir, DBNameConstant.DB_GE_MODEL_INFO)[0]
 
     @classmethod
     def contain_ge_fusion_op_data(cls: any, result_dir: str, device_id: any = None) -> bool:
         """
         The data path contain Framework.model_load_info data or not
         """
-        return device_id != NumberConstant.HOST_ID and \
-               DBManager.check_connect_db(result_dir, DBNameConstant.DB_FUSION_ADD_INFO)[0]
+        return AiStackDataCheckManager._check_output(result_dir, device_id) and \
+            DBManager.check_connect_db(result_dir, DBNameConstant.DB_FUSION_ADD_INFO)[0]
 
     @classmethod
     def contain_fusion_op_data(cls: any, result_dir: str, device_id: any = None) -> bool:
@@ -57,15 +67,7 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain Framework.model_load_info data or not
         """
         return cls.contain_ge_model_load_data(result_dir, device_id=device_id) and \
-               cls.contain_ge_fusion_op_data(result_dir, device_id=device_id)
-
-    @classmethod
-    def contain_ge_model_time_data(cls: any, result_dir: str, device_id: any = None) -> bool:
-        """
-        The data path contain Framework.model_time_info data or not
-        """
-        return device_id != NumberConstant.HOST_ID and \
-               DBManager.check_connect_db(result_dir, DBNameConstant.DB_GE_MODEL_TIME)[0]
+            cls.contain_ge_fusion_op_data(result_dir, device_id=device_id)
 
     @classmethod
     def contain_l2_cache_data(cls: any, result_dir: str, device_id: any = None) -> bool:
@@ -81,8 +83,8 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain ai core data or not
         """
         return bool(path_check(PathManager.get_db_path(result_dir, 'aicore_{}.db'.format(str(device_id))))) or \
-               (cls.check_data_exist(result_dir, file_name_manager.get_ai_core_compiles(),
-                                     device_id=device_id) and ConfigMgr.is_ai_core_sample_based(result_dir))
+            (cls.check_data_exist(result_dir, file_name_manager.get_ai_core_compiles(),
+                                  device_id=device_id) and ConfigMgr.is_ai_core_sample_based(result_dir))
 
     @classmethod
     def contain_aiv_core_sample_based(cls: any, result_dir: str, device_id: any = None) -> bool:
@@ -90,8 +92,8 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain ai core data or not
         """
         return bool(path_check(PathManager.get_db_path(result_dir, 'ai_vector_core_{}.db'.format(str(device_id))))) or \
-               cls.check_data_exist(result_dir, file_name_manager.get_aiv_compiles(),
-                                    device_id=device_id) and ConfigMgr.is_aiv_sample_based(result_dir)
+            cls.check_data_exist(result_dir, file_name_manager.get_aiv_compiles(),
+                                 device_id=device_id) and ConfigMgr.is_aiv_sample_based(result_dir)
 
     @classmethod
     def contain_training_trace_data(cls: any, result_dir: str, device_id: any = None) -> bool:
@@ -123,12 +125,13 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain task_time data or not
         """
-        return device_id != NumberConstant.HOST_ID and \
+        return AiStackDataCheckManager._check_output(result_dir, device_id) and \
                (cls._contain_ts_track_data(result_dir, device_id=device_id) or \
                 cls._contain_hwts_data(result_dir, device_id=device_id) or \
                 cls.contain_stars_soc_data(result_dir, device_id=device_id) or \
                 (cls._contain_hwts_aiv_data(result_dir, device_id=device_id) or
-                 cls._contain_ts_track_aiv_data(result_dir, device_id=device_id)))
+                 cls._contain_ts_track_aiv_data(result_dir, device_id=device_id)) or
+                cls._contain_nano_data(result_dir, device_id=device_id))
 
     @classmethod
     def contain_task_time_task(cls: any, result_dir: str, device_id: any = None) -> bool:
@@ -136,15 +139,15 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain step_trace data or not
         """
         return cls.contain_task_time_data(result_dir, device_id) or \
-               AiStackDataCheckManager.contain_stars_soc_data(result_dir, device_id)
+            AiStackDataCheckManager.contain_stars_soc_data(result_dir, device_id)
 
     @classmethod
     def contain_op_summary_data(cls: any, result_dir: str, device_id: any = None) -> bool:
         """
         The data path contain op summary data or not
         """
-        return device_id != NumberConstant.HOST_ID and \
-               DBManager.check_connect_db(result_dir, DBNameConstant.DB_AICORE_OP_SUMMARY)[0]
+        return AiStackDataCheckManager._check_output(result_dir, device_id) and \
+            DBManager.check_connect_db(result_dir, DBNameConstant.DB_AICORE_OP_SUMMARY)[0]
 
     @classmethod
     def contain_op_summary_without_ge_data(cls: any, result_dir: str, device_id: any = None) -> bool:
@@ -152,22 +155,23 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain op summary data or not
         """
         return not cls._contain_ge_task_data(result_dir, device_id=device_id) and \
-               cls.contain_task_time_data(result_dir, device_id=device_id)
+            cls.contain_task_time_data(result_dir, device_id=device_id)
 
     @classmethod
     def contain_op_statistic_data(cls: any, result_dir: str, device_id: any = None) -> bool:
         """
         The data path contain op summary data or not
         """
-        return device_id != NumberConstant.HOST_ID and \
-               DBManager.check_connect_db(result_dir, DBNameConstant.DB_OP_COUNTER)[0]
+        return AiStackDataCheckManager._check_output(result_dir, device_id) and \
+            DBManager.check_connect_db(result_dir, DBNameConstant.DB_OP_COUNTER)[0]
 
     @classmethod
     def contain_api_statistic_data(cls: any, result_dir: str, device_id: any = None) -> bool:
         """
         The data path contain api data or not
         """
-        return device_id != NumberConstant.HOST_ID and DBManager.check_tables_in_db(
+        return AiStackDataCheckManager._check_output(result_dir, device_id) \
+            and DBManager.check_tables_in_db(
             PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT), DBNameConstant.TABLE_API_DATA)
 
     @classmethod
@@ -176,7 +180,7 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain step_trace data or not
         """
         return cls.contain_task_time_data(result_dir, device_id=device_id) or \
-               cls.contain_training_trace_data(result_dir)
+            cls.contain_training_trace_data(result_dir)
 
     @classmethod
     def contain_stars_soc_data(cls: any, result_dir: str, device_id: int = None) -> bool:
@@ -191,7 +195,8 @@ class AiStackDataCheckManager(DataCheckManager):
 
     @classmethod
     def contain_sub_task_data(cls: any, result_dir: str, device_id: int = None) -> bool:
-        return device_id != NumberConstant.HOST_ID and DBManager.check_tables_in_db(
+        return AiStackDataCheckManager._check_output(result_dir, device_id) \
+            and DBManager.check_tables_in_db(
             PathManager.get_db_path(result_dir, DBNameConstant.DB_SOC_LOG), DBNameConstant.TABLE_FFTS_LOG)
 
     @classmethod
@@ -202,9 +207,10 @@ class AiStackDataCheckManager(DataCheckManager):
         :param device_id: device id
         :return: if contained hccl hcom data, true or false
         """
-        return device_id != NumberConstant.HOST_ID and \
-               DBManager.check_tables_in_db(
-                   PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL), DBNameConstant.TABLE_HCCL_ALL_REDUCE)
+        return AiStackDataCheckManager._check_output(result_dir, device_id)\
+            and DBManager.check_tables_in_db(
+                   PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL_SINGLE_DEVICE),
+                   DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
 
     @classmethod
     def contain_training_trace_data_or_step(cls: any, result_dir: str, device_id: int = None) -> bool:
@@ -236,7 +242,7 @@ class AiStackDataCheckManager(DataCheckManager):
         :return: if contained msproftx data, true or false
         """
         return cls._contain_stars_profiler_data(result_dir, device_id=device_id) \
-               and path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_STARS_SOC))
+            and path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_STARS_SOC))
 
     @classmethod
     def contain_stars_chip_trans_data(cls: any, result_dir: str, device_id: int = None) -> bool:
@@ -247,7 +253,7 @@ class AiStackDataCheckManager(DataCheckManager):
         :return: if contained msproftx data, true or false
         """
         return cls._contain_stars_profiler_data(result_dir, device_id=device_id) \
-               and path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_STARS_CHIP_TRANS))
+            and path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_STARS_CHIP_TRANS))
 
     @classmethod
     def contain_acc_pmu_data(cls: any, result_dir: str, device_id: int = None) -> bool:
@@ -258,7 +264,7 @@ class AiStackDataCheckManager(DataCheckManager):
         :return: if contained accpmu data, true or false
         """
         return cls._contain_stars_profiler_data(result_dir, device_id=device_id) \
-               and bool(path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_ACC_PMU)))
+            and bool(path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_ACC_PMU)))
 
     @classmethod
     def contain_stars_low_power_data(cls: any, result_dir: str, device_id: int = None) -> bool:
@@ -269,7 +275,7 @@ class AiStackDataCheckManager(DataCheckManager):
         :return: if contained lowpower sample data, true or false
         """
         return cls._contain_stars_profiler_data(result_dir, device_id) \
-               and path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_LOW_POWER))
+            and path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_LOW_POWER))
 
     @classmethod
     def contain_biu_perf_data(cls: any, result_dir: str, device_id: int = None) -> bool:
@@ -357,25 +363,26 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain npu op mem data or not
         """
-        return device_id != NumberConstant.HOST_ID and \
-               DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_MEMORY_OP),
-                                            DBNameConstant.TABLE_NPU_OP_MEM)
+        return AiStackDataCheckManager._check_output(result_dir, device_id) and \
+            DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_MEMORY_OP),
+                                         DBNameConstant.TABLE_NPU_OP_MEM)
 
     @classmethod
     def contain_npu_op_mem_rec_data(cls: any, result_dir: str, device_id: int = None) -> bool:
         """
         The data path contain npu op mem data or not
         """
-        return device_id != NumberConstant.HOST_ID and \
-               DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_MEMORY_OP),
-                                            DBNameConstant.TABLE_NPU_OP_MEM_REC)
+        return AiStackDataCheckManager._check_output(result_dir, device_id) and \
+            DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_MEMORY_OP),
+                                         DBNameConstant.TABLE_NPU_OP_MEM_REC)
 
     @classmethod
     def contain_event_data(cls: any, result_dir: str, device_id: int = None) -> bool:
         """
         The data path contain event data or not
         """
-        return device_id != NumberConstant.HOST_ID and DBManager.check_tables_in_db(
+        return AiStackDataCheckManager._check_output(result_dir, device_id) \
+            and DBManager.check_tables_in_db(
             PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT), DBNameConstant.TABLE_EVENT_DATA)
 
     @classmethod
@@ -383,7 +390,8 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain api data or not
         """
-        return device_id != NumberConstant.HOST_ID and DBManager.check_tables_in_db(
+        return AiStackDataCheckManager._check_output(result_dir, device_id) \
+            and DBManager.check_tables_in_db(
             PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT), DBNameConstant.TABLE_API_DATA)
 
     @classmethod
@@ -391,5 +399,14 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain hccl statistic data or not
         """
-        return device_id != NumberConstant.HOST_ID and DBManager.check_tables_in_db(
-            PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL), DBNameConstant.TABLE_HCCL_OP_REPORT)
+        return AiStackDataCheckManager._check_output(result_dir, device_id) and DBManager.check_tables_in_db(
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL_SINGLE_DEVICE),
+            DBNameConstant.TABLE_HCCL_OP_REPORT)
+
+    @classmethod
+    def _contain_nano_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        """
+        The data path contain nano_device data or not
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_nano_stars_profile_compiles(),
+                                    device_id=device_id)

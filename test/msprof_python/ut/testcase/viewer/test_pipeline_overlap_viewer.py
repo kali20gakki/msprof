@@ -6,6 +6,7 @@ import unittest
 from unittest import mock
 
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.info_conf_reader import InfoConfReader
 from constant.constant import clear_dt_project
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
@@ -42,6 +43,7 @@ class TestPipelineOverlapViewer(unittest.TestCase):
 
     def test_get_timeline_data_with_data(self):
         InfoJsonReaderManager(info_json=InfoJson(pid=1000)).process()
+        InfoConfReader()._local_time_offset = 10.0
         with mock.patch('os.path.exists', return_value=True), \
                 mock.patch(NAMESPACE + '.OpSummaryModel.get_operator_data_by_task_type',
                            return_value=[self.construct_time_section(1000, 1100),
@@ -53,7 +55,7 @@ class TestPipelineOverlapViewer(unittest.TestCase):
             check = PipelineOverlapViewer({}, {
                 StrConstant.PARAM_RESULT_DIR: os.path.join(self.DIR_PATH, 'PROF1', 'device_0')})
             ret = check.get_timeline_data()
-            self.assertEqual(903, len(ret))
+            self.assertEqual(908, len(ret))
 
     def test_format_timeline_data(self):
         time_section = TimeSectionDto()

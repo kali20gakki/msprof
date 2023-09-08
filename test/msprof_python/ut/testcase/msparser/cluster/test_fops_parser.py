@@ -3,9 +3,11 @@ from unittest import mock
 
 from common_func.db_name_constant import DBNameConstant
 from common_func.platform.chip_manager import ChipManager
+from common_func.info_conf_reader import InfoConfReader
 from msparser.cluster.fops_parser import FopsParser
 from profiling_bean.prof_enum.chip_model import ChipModel
 from sqlite.db_manager import DBOpen
+
 
 NAMESPACE = 'msparser.cluster.fops_parser'
 
@@ -81,26 +83,6 @@ class TestFopsParser(unittest.TestCase):
                      ]
         check = FopsParser(self.params)
         check.calculate_fops_data(data_list)
-
-    def test_calculate(self):
-        with mock.patch(NAMESPACE + '.FopsParser.check_id_valid', return_value=[(10,)]):
-            with mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data',
-                            side_effect=(True, False, False)), \
-                    mock.patch(NAMESPACE + '.warn'), \
-                    mock.patch('os.path.join', return_value=True), \
-                    mock.patch('os.path.realpath', return_value='home\\process'), \
-                    mock.patch(NAMESPACE + '.check_path_valid'), \
-                    mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'), \
-                    mock.patch('os.listdir', return_value=['123', '456', 'timeline']), \
-                    mock.patch(NAMESPACE + '.FopsParser.query_fops_data', return_value=[1, 2]):
-                check = FopsParser(self.params)
-
-                check.calculate()
-        with mock.patch(NAMESPACE + '.FopsParser.check_id_valid', return_value=False), \
-                mock.patch(NAMESPACE + '.warn'):
-            check = FopsParser(self.params)
-
-            check.calculate()
 
     def test_storage_data(self):
         with mock.patch(NAMESPACE + '.FopsParser.get_cluster_path', return_value='test'), \

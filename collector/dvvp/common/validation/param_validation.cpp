@@ -691,10 +691,10 @@ bool ParamValidation::IsValidAnalyzeRuleSwitch(const std::string &switchName, co
         analysis::dvvp::common::utils::Utils::Split(switchVal, false, "", ",");
     
     for (size_t i = 0; i < ruleVal.size(); ++i) {
-        if (ruleVal[i].compare("communication") != 0 && ruleVal[i].compare("max_step_time") != 0) {
-            MSPROF_LOGE("The switch %s should be set to communication or max_step_time.", switchName.c_str());
+        if (ruleVal[i].compare("communication") != 0 && ruleVal[i].compare("communication_matrix") != 0) {
+            MSPROF_LOGE("The switch %s should be set to communication or communication_matrix.", switchName.c_str());
             CMD_LOGE("Argument --%s=%s is invalid."
-                "Should be set to communication or max_step_time.", switchName.c_str(), switchVal.c_str());
+                "Should be set to communication or communication_matrix.", switchName.c_str(), switchVal.c_str());
             return false;
         }
     }
@@ -1646,6 +1646,38 @@ int ParamValidation::UninitCheckHostSysCmd(const MmProcess checkProcess) const
         }
     }
     return ret;
+}
+
+int ParamValidation::CheckMsopprofBinValid(const std::string &binPath) const
+{
+    if (Utils::CanonicalizePath(binPath).empty()) {
+        MSPROF_LOGE("The file %s does not exist or permission denied.", binPath.c_str());
+        CMD_LOGE("The file %s does not exist or permission denied.", binPath.c_str());
+        return PROFILING_FAILED;
+    }
+    if (Utils::IsSoftLink(binPath)) {
+        MSPROF_LOGE("The file %s is soft link, not support!", binPath.c_str());
+        CMD_LOGE("The file %s is soft link, not support!", binPath.c_str());
+        return PROFILING_FAILED;
+    }
+    if (Utils::IsDir(binPath)) {
+        MSPROF_LOGE("The file %s is a directory, "
+            "please enter the executable file path.", Utils::RealPath(binPath).c_str());
+        CMD_LOGE("The file %s is a directory, "
+            "please enter the executable file path.", Utils::RealPath(binPath).c_str());
+        return PROFILING_FAILED;
+    }
+    if (MmAccess2(binPath, M_X_OK) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("The file %s has no executable permission.", Utils::RealPath(binPath).c_str());
+        CMD_LOGE("The file %s has no executable permission.", Utils::RealPath(binPath).c_str());
+        return PROFILING_FAILED;
+    }
+    if (CheckParamPermission(binPath) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to check the permission of %s.",  Utils::RealPath(binPath).c_str());
+        CMD_LOGE("Failed to check the permission of %s.",  Utils::RealPath(binPath).c_str());
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
 }
 }
 }

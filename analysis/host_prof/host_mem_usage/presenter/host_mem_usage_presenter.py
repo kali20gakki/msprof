@@ -47,7 +47,7 @@ class HostMemUsagePresenter(HostProfPresenterBase):
                 self._parse_mem_usage(file)
                 logging.info(
                     "Finish parsing host mem usage data file: %s", os.path.basename(self.file_name))
-        except (FileNotFoundError, ValueError, IOError) as parse_file_except:
+        except (FileNotFoundError, ValueError, IOError, TypeError) as parse_file_except:
             logging.error("Error in parsing host mem usage data:%s", str(parse_file_except),
                           exc_info=Constant.TRACE_BACK_SWITCH)
         finally:
@@ -95,16 +95,18 @@ class HostMemUsagePresenter(HostProfPresenterBase):
                     return [tuple([mem_total, *res])]
         return MsvpConstant.EMPTY_LIST
 
-    def _parse_mem_data(self: any, file: any, mem_total: str) -> None:
+    def _parse_mem_data(self: any, file: any, mem_total) -> None:
         if not mem_total or not is_number(mem_total):
             logging.error("mem_total is invalid, please check file info.json...")
             return
         last_timestamp = None
 
-        line = file.readline()
-        while line:
+        for line in file:
             usage_detail = line.split()
             # parse data from usage_detail
+            if len(usage_detail) < 3:
+                logging.error("parse usage detail failed, line: %s", line)
+                continue
             curr_timestamp = usage_detail[0]
             # The used memory is four times the physical memory
             usage_data = Decimal(usage_detail[2]) * 4 / mem_total * NumberConstant.PERCENTAGE
@@ -115,7 +117,6 @@ class HostMemUsagePresenter(HostProfPresenterBase):
                 self.mem_usage_info.append(item)
 
             last_timestamp = curr_timestamp
-            line = file.readline()
 
         self.cur_model.insert_mem_usage_data(self.mem_usage_info)
 

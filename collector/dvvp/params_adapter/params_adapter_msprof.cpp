@@ -166,6 +166,7 @@ int ParamsAdapterMsprof::ParamsCheckDynProf() const
     // --pid is non-empty, save pid to DynProfMngCli
     if (!paramContainer_[INPUT_CFG_MSPROF_DYNAMIC_PID].empty()) {
         int32_t pid = std::stoi(paramContainer_[INPUT_CFG_MSPROF_DYNAMIC_PID]);
+        MSPROF_LOGI("SetAppPid in ParamsCheckDynProf , pid = ld%", pid);
         DynProfMngCli::instance()->SetAppPid(pid);
     }
     DynProfMngCli::instance()->EnableMode();
@@ -223,8 +224,9 @@ int ParamsAdapterMsprof::CheckMsprofMode(const std::unordered_map<int, std::pair
             return PROFILING_SUCCESS;
         }
     }
-    CmdLog::instance()->CmdErrorLog("No valid argument found in --dynamic --application "
-        "--sys-devices --host-sys --host-sys-usage --parse --query --export");
+    CmdLog::instance()->CmdErrorLog("No valid argument, one of [--dynamic --application "
+        "--sys-devices --host-sys --host-sys-usage --parse --query --export --analyze] should be set.");
+    ArgsManager::instance()->PrintHelp();
     return PROFILING_FAILED;
 }
 
@@ -304,6 +306,8 @@ void ParamsAdapterMsprof::SetParamsSelf()
         params_->exportSwitch : paramContainer_[INPUT_CFG_EXPORT];
     params_->exportSummaryFormat = paramContainer_[INPUT_CFG_SUMMARY_FORMAT].empty() ?
         params_->exportSummaryFormat : paramContainer_[INPUT_CFG_SUMMARY_FORMAT];
+    params_->clearSwitch = paramContainer_[INPUT_CFG_CLEAR].empty() ?
+        params_->clearSwitch : paramContainer_[INPUT_CFG_CLEAR];
     params_->exportIterationId = paramContainer_[INPUT_CFG_ITERATION_ID].empty() ?
         params_->exportIterationId : paramContainer_[INPUT_CFG_ITERATION_ID];
     params_->exportModelId = paramContainer_[INPUT_CFG_MODEL_ID].empty() ?
@@ -351,12 +355,12 @@ int ParamsAdapterMsprof::AnalysisParamsAdapt(
     paramContainer_.fill("");
     bool ret = false;
     std::set<MsprofArgsType> analysisArgs = {
-        ARGS_OUTPUT, ARGS_PYTHON_PATH, ARGS_SUMMARY_FORMAT, ARGS_PARSE, ARGS_QUERY, ARGS_EXPORT,
+        ARGS_OUTPUT, ARGS_PYTHON_PATH, ARGS_SUMMARY_FORMAT, ARGS_PARSE, ARGS_QUERY, ARGS_EXPORT, ARGS_CLEAR,
         ARGS_ANALYZE, ARGS_RULE, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID};
     std::unordered_map<int, InputCfg> argsTransMap = {
         {ARGS_OUTPUT, INPUT_CFG_COM_OUTPUT}, {ARGS_PYTHON_PATH, INPUT_CFG_PYTHON_PATH},
         {ARGS_SUMMARY_FORMAT, INPUT_CFG_SUMMARY_FORMAT}, {ARGS_PARSE, INPUT_CFG_PARSE},
-        {ARGS_QUERY, INPUT_CFG_QUERY}, {ARGS_EXPORT, INPUT_CFG_EXPORT},
+        {ARGS_QUERY, INPUT_CFG_QUERY}, {ARGS_EXPORT, INPUT_CFG_EXPORT}, {ARGS_CLEAR, INPUT_CFG_CLEAR},
         {ARGS_EXPORT_ITERATION_ID, INPUT_CFG_ITERATION_ID}, {ARGS_EXPORT_MODEL_ID, INPUT_CFG_MODEL_ID},
         {ARGS_ANALYZE, INPUT_CFG_ANALYZE}, {ARGS_RULE, INPUT_CFG_RULE}
     };
@@ -407,6 +411,9 @@ bool ParamsAdapterMsprof::CheckAnalysisConfig(MsprofArgsType arg, const std::str
             break;
         case ARGS_EXPORT:
             ret = ParamValidation::instance()->IsValidInputCfgSwitch("export", argsValue);
+            break;
+        case ARGS_CLEAR:
+            ret = ParamValidation::instance()->IsValidInputCfgSwitch("clear", argsValue);
             break;
         case ARGS_EXPORT_ITERATION_ID:
             ret = ParamValidation::instance()->CheckExportIdIsValid(argsValue, "iteration-id");
@@ -540,7 +547,7 @@ void ParamsAdapterMsprof::CreateCfgMap()
         {ARGS_DVPP_PROFILING, INPUT_CFG_COM_DVPP}, {ARGS_POWER, INPUT_CFG_COM_POWER},
         {ARGS_HCCL, INPUT_CFG_COM_HCCL}, {ARGS_INSTR_PROFILING, INPUT_CFG_COM_INSTR_PROFILING},
         {ARGS_L2_PROFILING, INPUT_CFG_COM_L2}, {ARGS_PARSE, INPUT_CFG_PARSE}, {ARGS_QUERY, INPUT_CFG_QUERY},
-        {ARGS_EXPORT, INPUT_CFG_EXPORT}, {ARGS_AIC_FREQ, INPUT_CFG_COM_AIC_FREQ},
+        {ARGS_EXPORT, INPUT_CFG_EXPORT}, {ARGS_CLEAR, INPUT_CFG_CLEAR}, {ARGS_AIC_FREQ, INPUT_CFG_COM_AIC_FREQ},
         {ARGS_AIV_FREQ, INPUT_CFG_COM_AIV_FREQ}, {ARGS_INSTR_PROFILING_FREQ, INPUT_CFG_COM_INSTR_PROFILING_FREQ},
         {ARGS_SYS_PERIOD, INPUT_CFG_COM_SYS_PERIOD}, {ARGS_ANALYZE, INPUT_CFG_ANALYZE}, {ARGS_RULE, INPUT_CFG_RULE},
         {ARGS_SYS_SAMPLING_FREQ, INPUT_CFG_COM_SYS_USAGE_FREQ},

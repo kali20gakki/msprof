@@ -9,6 +9,7 @@ from typing import List, Tuple
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from viewer.memory_copy.memory_copy_viewer import MemoryCopyViewer
 
@@ -27,7 +28,7 @@ class TaskOpViewer:
         """
         headers = [
             "kernel_name", "kernel_type", "stream_id", "task_id",
-            "task_time(us)", "task_start(ns)", "task_stop(ns)"
+            "task_time(us)", "task_start(us)", "task_stop(us)"
         ]
         if not message:
             logging.error("get_task_op_summary message empty")
@@ -54,7 +55,6 @@ class TaskOpViewer:
         if not DBManager.judge_table_exist(ascend_curs, DBNameConstant.TABLE_ASCEND_TASK):
             logging.warning("table AscendTask not exists, can't export device tasks.")
             return [], 0
-
         # select device & non-ffts-plus task only
         sql = (
             f"SELECT stream_id, task_id, batch_id, host_task_type, start_time, duration "
@@ -97,8 +97,10 @@ class TaskOpViewer:
             op_name: str = op_name_dict.get((stream_id, task_id, batch_id), "N/A")
             task_type: str = host_task_type if host_task_type != f'{Constant.TASK_TYPE_UNKNOWN}' else 'Other'
             task_time: float = duration / DBManager.NSTOUS
+            task_start = f'"{InfoConfReader().trans_into_local_time(start_time / DBManager.NSTOUS)}"'
+            task_stop = f'"{InfoConfReader().trans_into_local_time((start_time + duration) / DBManager.NSTOUS)}"'
             task_info.append((
                 op_name, task_type, stream_id, task_id,
-                task_time, f'"{start_time}"', f'"{start_time + duration}"',
+                task_time, task_start, task_stop,
             ))
         return task_info

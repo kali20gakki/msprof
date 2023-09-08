@@ -54,7 +54,10 @@ class FusionAddInfoParser(DataParser, MsMultiProcess):
         fusion_info_files = self.group_aging_file(fusion_info_files)
         for file_list in fusion_info_files.values():
             self._ge_fusion_info_data.extend(self.parse_bean_data(file_list, StructFmt.FUSION_ADD_INFO_SIZE,
-                                                                  FusionAddInfoBean, self._get_fusion_info_data))
+                                                                  FusionAddInfoBean,
+                                                                  format_func=self._get_fusion_info_data,
+                                                                  check_func=self.check_magic_num,
+                                                                  ))
 
     def save(self: any) -> None:
         """

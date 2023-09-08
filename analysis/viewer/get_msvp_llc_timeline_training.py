@@ -114,14 +114,16 @@ def _format_llc_trace_data(bandwidth_data: list, delta_dev: float) -> list:
             return []
 
         trace_data.extend([["LLC/Read",
-                            (delta_dev + _bandwidth_data[0]) * NumberConstant.MICRO_SECOND,
+                            InfoConfReader().trans_into_local_time(
+                                (delta_dev + _bandwidth_data[0]) * NumberConstant.MICRO_SECOND),
                             InfoConfReader().get_json_pid_data(),
                             InfoConfReader().get_json_tid_data(),
                             OrderedDict([("BandWidth(MB/s)", bandwidth_data_value[0]),
                                          ("Hit Rate(%)", bandwidth_data_value[1]),
                                          ("Hit BandWidth(MB/s)", bandwidth_data_value[2])])],
                            ["LLC/Write",
-                            (delta_dev + _bandwidth_data[0]) * NumberConstant.MICRO_SECOND,
+                            InfoConfReader().trans_into_local_time(
+                                (delta_dev + _bandwidth_data[0]) * NumberConstant.MICRO_SECOND),
                             InfoConfReader().get_json_pid_data(),
                             InfoConfReader().get_json_tid_data(),
                             OrderedDict([("BandWidth(MB/s)", bandwidth_data_value[3]),
@@ -166,7 +168,8 @@ def _format_llc_capacity(dsid_sql_data: list) -> list:
     delta_dev = InfoConfReader().get_delta_time()
     for disid_data in dsid_sql_data:
         trace_data.extend(Utils.generator_to_list(["Core {}".format(i),
-                                                   (delta_dev + disid_data[4]) * NumberConstant.MICRO_SECOND,
+                                                   InfoConfReader().trans_into_local_time(
+                                                       (delta_dev + disid_data[4]) * NumberConstant.MICRO_SECOND),
                                                    InfoConfReader().get_json_pid_data(),
                                                    InfoConfReader().get_json_tid_data(),
                                                    OrderedDict([("Capacity(MB)",

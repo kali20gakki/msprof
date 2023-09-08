@@ -104,10 +104,10 @@ def _get_task_based_core_data(params: dict, curs: any, result_dir: str) -> tuple
     data = []
     table_name = ""
     if params.get(StrConstant.DATA_TYPE) == StrConstant.AI_CORE_PMU_EVENTS:
-        table_name = DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY
+        table_name = DBNameConstant.TABLE_METRIC_SUMMARY
         data = _get_output_event_counter(curs,
                                          result_dir,
-                                         DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY
+                                         DBNameConstant.TABLE_METRIC_SUMMARY
                                          )
     elif params.get(StrConstant.DATA_TYPE) == StrConstant.AI_VECTOR_CORE_PMU_EVENTS:
         table_name = DBNameConstant.TABLE_AIV_METRIC_SUMMARY
@@ -166,7 +166,7 @@ def get_output_event_counter(cursor: any, result_dir: str) -> list:
     """
     get ai core event count data
     """
-    return _get_output_event_counter(cursor, result_dir, DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY)
+    return _get_output_event_counter(cursor, result_dir, DBNameConstant.TABLE_METRIC_SUMMARY)
 
 
 def _get_event_counter_metric_res(cursor: any, result_dir: str, table_name: str) -> list:
@@ -247,6 +247,24 @@ def add_op_total(result: list, result_dir: str) -> list:
             res.append(tuple([op_name] + list(task)))
     DBManager.destroy_db_connect(conn_ge, curs_ge)
     return res
+
+
+def cube_usage(config_dict: dict, value: list) -> list:
+    """
+    add cube usage column
+    """
+    ratio_index = config_dict.get('mac_ratio_index')
+    if value[ratio_index] == Constant.NA:
+        value.append(Constant.NA)
+    elif not NumberConstant.is_zero(min(value[ratio_index], value[config_dict.get('total_cycles_index')],
+                                        value[config_dict.get('task_duration_index')])):
+        usage = value[config_dict.get('total_cycles_index')] / (config_dict.get('aic_frequency') *
+                        config_dict.get('ai_core_num') * value[config_dict.get('task_duration_index')])
+        usage = round(usage * 100, 4)
+        value.append(usage)
+    else:
+        value.append(0)
+    return value
 
 
 def add_mem_bound(value: list, vec_index: int, mac_index: int, mte2_index: int) -> list:

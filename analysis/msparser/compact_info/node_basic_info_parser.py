@@ -46,7 +46,9 @@ class NodeBasicInfoParser(DataParser, MsMultiProcess):
         for mode, file_list in basic_info_files.items():
             self._node_basic_info_data[mode] = self.parse_bean_data(file_list, StructFmt.NODE_BASIC_INFO_SIZE,
                                                                     NodeBasicInfoBean,
-                                                                    self._get_node_basic_data)
+                                                                    format_func=self._get_node_basic_data,
+                                                                    check_func=self.check_magic_num,
+                                                                    )
 
     def save(self: any) -> None:
         """

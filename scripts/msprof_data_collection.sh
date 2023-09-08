@@ -18,6 +18,28 @@ function get_version(){
     fi
 }
 
+function kill_prof_cmd(){
+    if [[ ${command_param} =~ ${reg_int} ]]; then
+        ppid=`ps -o ppid= -p ${command_param}`
+        ppid_user=$(ps -o uid -e -o pid | awk -va="${ppid}" '$2==a {print $1}')
+        shell_user=`id -u ${SUDO_USER}`
+        if [ "${ppid_user}" != "${shell_user}" ]; then
+            echo "UID of ${ppid} is:${ppid_user}, UID running this script is:${shell_user}"
+            exit 1
+        fi
+        pidLine=`pstree -p ${command_param}`
+        pidLine=`echo $pidLine | awk 'BEGIN{ FS="(" ; RS=")" } NF>1 { print $NF }'`
+        for pid in $pidLine
+            do 
+                kill -2 ${pid}
+            done     
+        exit 1
+    else
+        echo "Input pid:${command_param} error"
+        exit 1
+    fi
+}
+
 #当前跑这个脚本的用户和pid进程所属的用户要一致
 function check_pid(){
     if [[ ! ${command_param} =~ ${reg_int} ]]; then
@@ -39,17 +61,6 @@ function check_pid(){
         echo "UID of ${command_param} is:${pid_user}, UID running this script is:${shell_user}"
         exit 1
     fi
-}
-
-function kill_prof_cmd(){
-    check_pid
-    pidLine=`pstree -p ${command_param}`
-    pidLine=`echo $pidLine | awk 'BEGIN{ FS="(" ; RS=")" } NF>1 { print $NF }'`
-    for pid in $pidLine
-        do 
-            kill -2 ${pid}
-        done     
-    exit 1
 }
 
 function run_prof_trace_cmd(){

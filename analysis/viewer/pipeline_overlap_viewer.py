@@ -54,14 +54,14 @@ class PipelineOverlapViewer:
             compute_data = SectionCalculator.merge_continuous_intervals(_model.get_operator_data_by_task_type())
         result.extend(self._format_timeline_data(OverlapType.COMPUTE_TIME, data) for data in compute_data)
 
-        if not os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL)):
-            logging.warning("HCCL data not found, no need to calculate the overlap.")
+        if not os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
+            logging.warning("HCCLSingledevice data not found, no need to calculate the overlap.")
             return ""
-        with HcclViewModel(self._project_path, DBNameConstant.DB_HCCL,
-                           [DBNameConstant.TABLE_HCCL_ALL_REDUCE]) as _model:
+        with HcclViewModel(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                           [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE]) as _model:
             if not _model.check_table():
-                logging.warning("HCCL table %s not found, no need to calculate the overlap.",
-                                DBNameConstant.TABLE_HCCL_ALL_REDUCE)
+                logging.warning("HCCLSingledevice table %s not found, no need to calculate the overlap.",
+                                DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
                 return ""
             communication_data = SectionCalculator.merge_continuous_intervals(_model.get_hccl_op_time_section())
             result.extend(
@@ -88,5 +88,6 @@ class PipelineOverlapViewer:
         return json.dumps(_trace)
 
     def _format_timeline_data(self, overlap_type, data):
-        return [self.OVERLAP_TYPE_NAME.get(overlap_type.name), self._pid, overlap_type.value, data.start_time /
-                NumberConstant.NS_TO_US, (data.end_time - data.start_time) / NumberConstant.NS_TO_US]
+        return [self.OVERLAP_TYPE_NAME.get(overlap_type.name), self._pid, overlap_type.value,
+                InfoConfReader().trans_into_local_time(data.start_time / NumberConstant.NS_TO_US),
+                (data.end_time - data.start_time) / NumberConstant.NS_TO_US]

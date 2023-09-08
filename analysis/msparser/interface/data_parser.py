@@ -57,6 +57,7 @@ class DataParser(IParser):
     def check_magic_num(data: bytes):
         magic_num, level = struct.unpack("=HH", data[:4])
         if magic_num != NumberConstant.MAGIC_NUM or not LevelDataType(level):
+            logging.error("'5A5A' check Failed when parsing data.")
             raise ValueError("An exception occurred when parsing the format data. Some data may be lost.")
 
     @abstractmethod
@@ -87,7 +88,7 @@ class DataParser(IParser):
                 result_data.extend(format_func(data_lines))
         return result_data
 
-    def parse_bean_data(self: any, file_list: list, format_size: int, bean_class: any, format_func: any) -> list:
+    def parse_bean_data(self: any, file_list: list, format_size: int, bean_class: any, **kwargs: any) -> list:
         """
         parse bean file
         :param file_list:
@@ -96,6 +97,8 @@ class DataParser(IParser):
         :param format_func:
         :return:
         """
+        format_func = kwargs.get('format_func', lambda x: x)
+        check_func = kwargs.get('check_func', lambda x: None)
         result_data = []
         _offset_calculator = OffsetCalculator(file_list, format_size, self._project_path)
         for file_name in file_list:
@@ -107,6 +110,7 @@ class DataParser(IParser):
             with FileOpen(file_path, "rb") as file:
                 all_log_bytes = _offset_calculator.pre_process(file.file_reader, os.path.getsize(file_path))
                 for bean_data in Utils.chunks(all_log_bytes, format_size):
+                    check_func(bean_data)
                     _fusion_bean_data = self.read_binary_data(bean_class, bean_data)
                     result_data.append(format_func(_fusion_bean_data))
         return result_data

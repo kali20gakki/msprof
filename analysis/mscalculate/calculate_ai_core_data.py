@@ -41,10 +41,7 @@ class CalculateAiCoreData:
         if metrics_type not in {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT, Constant.PMU_PIPE_EXECUT}:
             return pmu_dict
         res_dict = {}
-        pipe_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE).split(",")[:-1]
-        pipe_execut_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE_EXECUT).split(",")
-        pipe_exct_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE_EXCT).split(",")[:-1]
-        valid_metrics_set = set(pipe_pmu_list + pipe_exct_pmu_list + pipe_execut_pmu_list)
+        valid_metrics_set = CalculateAiCoreData.get_pmu_valid_metrics_set_by_chip()
         for pmu_key, pmu_value in pmu_dict.items():
             if pmu_key in valid_metrics_set and len(pmu_key) > NumberConstant.RATIO_NAME_LEN:
                 res_dict["{}time".format(pmu_key[:-NumberConstant.RATIO_NAME_LEN])] = [total_time * pmu_value[0]]
@@ -52,6 +49,19 @@ class CalculateAiCoreData:
             else:
                 res_dict[pmu_key] = pmu_value
         return res_dict
+
+    @staticmethod
+    def get_pmu_valid_metrics_set_by_chip() -> set:
+        if ChipManager().is_chip_v5_1_0():
+            pipe_pmu_list = Constant.NANO_AICORE_METRICS_LIST.get(Constant.PMU_PIPE).split(",")[:-1]
+            scalar_list = Constant.NANO_AICORE_METRICS_LIST.get(Constant.PMU_SCALAR_RATIO).split(",")[:-1]
+            valid_metrics_set = set(pipe_pmu_list + scalar_list)
+        else:
+            pipe_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE).split(",")[:-1]
+            pipe_execut_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE_EXECUT).split(",")
+            pipe_exct_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE_EXCT).split(",")[:-1]
+            valid_metrics_set = set(pipe_pmu_list + pipe_exct_pmu_list + pipe_execut_pmu_list)
+        return valid_metrics_set
 
     @staticmethod
     def update_fops_data(field: str, algo: str) -> str:
@@ -88,6 +98,108 @@ class CalculateAiCoreData:
                         Constant.AI_CORE_CALCULATION_FORMULA.get(pmu_name)(pmu_value, task_cyc))
             else:
                 ai_core_profiling_events.setdefault(pmu_name, []).append(pmu_value)
+
+
+    @classmethod
+    def _calculate_vec_fp16_ratio(cls, events_name_list: list, ai_core_profiling_events: dict):
+        names = ["vec_fp16_128lane_ratio", "vec_fp16_64lane_ratio"]
+        if all(map(lambda name: name in events_name_list, names)):
+            vec_fp16_ratio = ai_core_profiling_events["vec_fp16_128lane_ratio"][-1] + \
+                             ai_core_profiling_events["vec_fp16_64lane_ratio"][-1]
+            ai_core_profiling_events.setdefault("vec_fp16_ratio",
+                                                []).append(vec_fp16_ratio)
+
+    @classmethod
+    def _calculate_cube_fops(cls, events_name_list: list, ai_core_profiling_events: dict, task_cyc: int):
+        names = ["mac_fp16_ratio", "mac_int8_ratio"]
+        if all(map(lambda name: name in events_name_list, names)):
+            cube_fops = ai_core_profiling_events["mac_fp16_ratio"][-1] * task_cyc * 16 * 16 * 16 * 2 + \
+                        ai_core_profiling_events["mac_int8_ratio"][-1] * task_cyc * 16 * 16 * 32 * 2
+            ai_core_profiling_events.setdefault("cube_fops", []).append(cube_fops)
+
+    @classmethod
+    def _calculate_mac_ratio_extra(cls, events_name_list: list, ai_core_profiling_events: dict):
+        names = ["mac_fp16_ratio", "mac_int8_ratio", "fixpipe_ratio"]
+        if all(map(lambda name: name in events_name_list, names)):
+            mac_ratio = ai_core_profiling_events["mac_fp16_ratio"][-1] + ai_core_profiling_events["mac_int8_ratio"][-1]
+            ai_core_profiling_events.pop("cube_fops")
+            ai_core_profiling_events.pop("mac_fp16_ratio")
+            ai_core_profiling_events.pop("mac_int8_ratio")
+            if "vec_exe_ratio" in events_name_list:
+                vec_exe_ratio = ai_core_profiling_events.pop("vec_exe_ratio")
+                ai_core_profiling_events.update({
+                    "vec_exe_ratio": vec_exe_ratio, "mac_ratio_extra": [mac_ratio], **ai_core_profiling_events
+                })
+            else:
+                ai_core_profiling_events.setdefault("mac_ratio_extra", []).append(mac_ratio)
+
+        names = ["mac_fp_ratio", "mac_int_ratio"]
+        if all(map(lambda name: name in events_name_list, names)):
+            mac_ratio = ai_core_profiling_events["mac_fp_ratio"][-1] + ai_core_profiling_events["mac_int_ratio"][-1]
+            ai_core_profiling_events.pop("mac_fp_ratio")
+            ai_core_profiling_events.pop("mac_int_ratio")
+            ai_core_profiling_events.setdefault("mac_ratio_extra", []).append(mac_ratio)
+
+    @classmethod
+    def _calculate_iq_full_ratio(cls, events_name_list: list, ai_core_profiling_events: dict):
+        names = [
+            "mte1_iq_full_ratio", "mte2_iq_full_ratio", "mte3_iq_full_ratio",
+            "cube_iq_full_ratio", "vec_iq_full_ratio"
+        ]
+        if all(map(lambda name: name in events_name_list, names)):
+            iq_full_ratio = ai_core_profiling_events["mte1_iq_full_ratio"][-1] + \
+                            ai_core_profiling_events["mte2_iq_full_ratio"][-1] + \
+                            ai_core_profiling_events["mte3_iq_full_ratio"][-1] + \
+                            ai_core_profiling_events["cube_iq_full_ratio"][-1] + \
+                            ai_core_profiling_events["vec_iq_full_ratio"][-1]
+            ai_core_profiling_events.setdefault("iq_full_ratio", []).append(iq_full_ratio)
+
+    @classmethod
+    def _calculate_icache_miss_rate(cls, events_name_list: list, ai_core_profiling_events: dict):
+        names = ["icache_miss_rate", "icache_req_ratio"]
+        if all(map(lambda name: name in events_name_list, names)):
+            if ai_core_profiling_events["icache_req_ratio"][-1] != 0:
+                icache_miss_rate = ai_core_profiling_events["icache_miss_rate"][-1] \
+                                   / ai_core_profiling_events["icache_req_ratio"][-1]
+
+                ai_core_profiling_events.get("icache_miss_rate").pop()
+                ai_core_profiling_events.setdefault("icache_miss_rate",
+                                                    []).append(icache_miss_rate)
+
+    @classmethod
+    def _calculate_memory_bandwidth(cls, events_name_list: list, ai_core_profiling_events: dict):
+        names = ["main_mem_read_bw(GB/s)", "main_mem_write_bw(GB/s)", "mte2_ratio", "mte3_ratio"]
+        if all(map(lambda name: name in events_name_list, names)):
+            if ai_core_profiling_events["mte2_ratio"][-1] == 0 or \
+                    ai_core_profiling_events["mte3_ratio"][-1] == 0:
+                logging.error("mte_cyc is 0, please check the data!")
+                return
+
+            main_mem_read_bw = ai_core_profiling_events["main_mem_read_bw(GB/s)"][-1] \
+                               / ai_core_profiling_events["mte2_ratio"][-1]
+            del ai_core_profiling_events["mte2_ratio"]
+            ai_core_profiling_events.get("main_mem_read_bw(GB/s)").pop()
+            ai_core_profiling_events.setdefault("main_mem_read_bw(GB/s)",
+                                                []).append(main_mem_read_bw)
+
+            main_mem_write_bw = ai_core_profiling_events["main_mem_write_bw(GB/s)"][-1] \
+                                / ai_core_profiling_events["mte3_ratio"][-1]
+            del ai_core_profiling_events["mte3_ratio"]
+            ai_core_profiling_events.get("main_mem_write_bw(GB/s)").pop()
+            ai_core_profiling_events.setdefault("main_mem_write_bw(GB/s)",
+                                                []).append(main_mem_write_bw)
+
+    @classmethod
+    def _calculate_control_flow_mis_prediction_rate(cls, events_name_list: list, ai_core_profiling_events: dict):
+        names = ["control_flow_prediction_ratio", "control_flow_mis_prediction_rate"]
+        if all(map(lambda name: name in events_name_list, names)):
+            if ai_core_profiling_events["control_flow_prediction_ratio"][-1] != 0:
+                miss_rate = ai_core_profiling_events["control_flow_mis_prediction_rate"][-1] \
+                            / ai_core_profiling_events["control_flow_prediction_ratio"][-1]
+
+                ai_core_profiling_events.get("control_flow_mis_prediction_rate").pop()
+                ai_core_profiling_events.setdefault("control_flow_mis_prediction_rate",
+                                                    []).append(miss_rate)
 
     def add_fops_header(self: any, metric_key: str, metrics: list) -> None:
         """
@@ -140,60 +252,14 @@ class CalculateAiCoreData:
         calculate additional ai core metrics
         :return:
         """
-        names = ["vec_fp16_128lane_ratio", "vec_fp16_64lane_ratio"]
-        if all(map(lambda name: name in events_name_list, names)):
-            vec_fp16_ratio = ai_core_profiling_events["vec_fp16_128lane_ratio"][-1] + \
-                             ai_core_profiling_events["vec_fp16_64lane_ratio"][-1]
-            ai_core_profiling_events.setdefault("vec_fp16_ratio",
-                                                []).append(vec_fp16_ratio)
+        self._calculate_vec_fp16_ratio(events_name_list, ai_core_profiling_events)
+        self._calculate_cube_fops(events_name_list, ai_core_profiling_events, task_cyc)
+        self._calculate_mac_ratio_extra(events_name_list, ai_core_profiling_events)
+        self._calculate_iq_full_ratio(events_name_list, ai_core_profiling_events)
+        self._calculate_icache_miss_rate(events_name_list, ai_core_profiling_events)
+        self._calculate_memory_bandwidth(events_name_list, ai_core_profiling_events)
+        self._calculate_control_flow_mis_prediction_rate(events_name_list, ai_core_profiling_events)
 
-        names = ["mac_fp16_ratio", "mac_int8_ratio"]
-        if all(map(lambda name: name in events_name_list, names)):
-            cube_fops = ai_core_profiling_events["mac_fp16_ratio"][-1] * task_cyc * 16 * 16 * 16 * 2 + \
-                        ai_core_profiling_events["mac_int8_ratio"][-1] * task_cyc * 16 * 16 * 32 * 2
-            ai_core_profiling_events.setdefault("cube_fops", []).append(cube_fops)
-
-        names = ["mac_fp16_ratio", "mac_int8_ratio", "fixpipe_ratio"]
-        if all(map(lambda name: name in events_name_list, names)):
-            mac_ratio = ai_core_profiling_events["mac_fp16_ratio"][-1] + ai_core_profiling_events["mac_int8_ratio"][-1]
-            ai_core_profiling_events.pop("cube_fops")
-            ai_core_profiling_events.pop("mac_fp16_ratio")
-            ai_core_profiling_events.pop("mac_int8_ratio")
-            if "vec_exe_ratio" in events_name_list:
-                vec_exe_ratio = ai_core_profiling_events.pop("vec_exe_ratio")
-                ai_core_profiling_events = {
-                    "vec_exe_ratio": vec_exe_ratio, "mac_ratio_extra": [mac_ratio], **ai_core_profiling_events
-                }
-            else:
-                ai_core_profiling_events = {"mac_ratio_extra": [mac_ratio], **ai_core_profiling_events}
-
-        names = ["mac_fp_ratio", "mac_int_ratio"]
-        if all(map(lambda name: name in events_name_list, names)):
-            mac_ratio = ai_core_profiling_events["mac_fp_ratio"][-1] + ai_core_profiling_events["mac_int_ratio"][-1]
-            ai_core_profiling_events.pop("mac_fp_ratio")
-            ai_core_profiling_events.pop("mac_int_ratio")
-            ai_core_profiling_events = {"mac_ratio_extra": [mac_ratio], **ai_core_profiling_events}
-
-        names = [
-            "mte1_iq_full_ratio", "mte2_iq_full_ratio", "mte3_iq_full_ratio",
-            "cube_iq_full_ratio", "vec_iq_full_ratio"
-        ]
-        if all(map(lambda name: name in events_name_list, names)):
-            iq_full_ratio = ai_core_profiling_events["mte1_iq_full_ratio"][-1] + \
-                            ai_core_profiling_events["mte2_iq_full_ratio"][-1] + \
-                            ai_core_profiling_events["mte3_iq_full_ratio"][-1] + \
-                            ai_core_profiling_events["cube_iq_full_ratio"][-1] + \
-                            ai_core_profiling_events["vec_iq_full_ratio"][-1]
-            ai_core_profiling_events.setdefault("iq_full_ratio", []).append(iq_full_ratio)
-
-        names = ["icache_miss_rate", "icache_req_ratio"]
-        if all(map(lambda name: name in events_name_list, names)):
-            if ai_core_profiling_events["icache_req_ratio"][-1] != 0:
-                icache_miss_rate = ai_core_profiling_events["icache_miss_rate"][-1] \
-                                   / ai_core_profiling_events["icache_req_ratio"][-1]
-
-                ai_core_profiling_events.get("icache_miss_rate").pop()
-                ai_core_profiling_events.setdefault("icache_miss_rate",
-                                                    []).append(icache_miss_rate)
         self.add_vector_data(events_name_list, ai_core_profiling_events, task_cyc)
         return ai_core_profiling_events
+

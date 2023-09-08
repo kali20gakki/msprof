@@ -72,9 +72,11 @@ class TestOpCounterOpSceneCalculator(unittest.TestCase):
                 self.assertEqual(result, True)
 
     def test_get_ge_sql(self):
+        InfoConfReader()._info_json = {'devices': '0'}
         check = OpCounterOpSceneCalculator(file_list, CONFIG)
         result = getattr(check, "_get_ge_sql")()
-        sql = "select model_id, op_name, op_type, task_type, task_id, stream_id, batch_id,context_id from TaskInfo"
+        sql = "select model_id, op_name, op_type, task_type, task_id, stream_id,"\
+              " batch_id,context_id from TaskInfo where device_id=0"
         self.assertEqual(sql, result)
 
     def test_create_ge_merge(self):
@@ -155,7 +157,7 @@ class TestOpCounterOpSceneCalculator(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
             check.create_task()
             with mock.patch(NAMESPACE + '.AscendTaskModel.get_all_data',
-                            return_value=[[1, 1, 1, 1, 1, 1, 1000, 1000, 'AI_CORE', 'AI_CORE']]):
+                            return_value=[[1, 1, 1, 1, 1, 1, 1000, 1000, 'AI_CORE', 'AI_CORE', 0]]):
                 check.create_task()
 
     def test_get_op_report_sql(self):

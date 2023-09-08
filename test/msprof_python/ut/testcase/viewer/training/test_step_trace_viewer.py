@@ -161,9 +161,10 @@ class TestStepTraceViewer(unittest.TestCase):
         data_list = [
             (1, 4223700155120, 4223701928137, 4223701928704, 35557.520000000004, 35460.340000000004, 11.34, 'N/A', 1)
         ]
+        InfoConfReader()._local_time_offset = 10.0
         with mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__select_reduce',
                         return_value=[(4248168266400, 4248177564931)]), \
-                mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__time_from_syscnt',
+                mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__local_time_from_syscnt',
                            return_value=0), \
                 mock.patch(NAMESPACE + '.StepTraceConstant.syscnt_to_micro',
                            return_value=0):
@@ -183,10 +184,11 @@ class TestStepTraceViewer(unittest.TestCase):
             (189746300646091,),
         ]
         InfoConfReader()._info_json = {"pid": 0}
+        InfoConfReader()._local_time_offset = 10.0
         with mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__select_getnext', return_value=get_next_value), \
                 mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__select_reduce',
                            return_value=all_reduce_value), \
-                mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__time_from_syscnt',
+                mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__local_time_from_syscnt',
                            return_value=189746300646091), \
                 mock.patch(NAMESPACE + '.StepTraceViewer.transfer_trace_unit'), \
                 mock.patch(NAMESPACE + '.StepTraceConstant.syscnt_to_micro', return_value=1):

@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from sqlite.db_manager import DBManager
 from viewer.training.task_op_viewer import TaskOpViewer
 
@@ -30,7 +31,7 @@ class TestTaskOpViewer(unittest.TestCase):
 
         expect_headers = [
             "kernel_name", "kernel_type", "stream_id", "task_id",
-            "task_time(us)", "task_start(ns)", "task_stop(ns)",
+            "task_time(us)", "task_start(us)", "task_stop(us)",
         ]
         expect_data = [
             ('trans_TransData_0', 'AI_CORE', 148, 3, '"7.62"', '"155149754006240"', '"155149754013860"'),
@@ -77,9 +78,10 @@ class TestTaskOpViewer(unittest.TestCase):
             (1, 0, 4, 1, 4294967295, 0, 18870605628870, 35.5, "AICORE", "AICORE"),
         )
         expect_data = [
-            ('N/A', 'AICORE', 4, 0, 2.310, '"18870605628550"', '"18870605630860"'),
-            ('Cast', 'AICORE', 4, 1, 0.0355, '"18870605628870"', '"18870605628905.5"'),
+            ('N/A', 'AICORE', 4, 0, 2.310, '"18870605638.55"', '"18870605640.86"'),
+            ('Cast', 'AICORE', 4, 1, 0.0355, '"18870605638.87"', '"18870605638.9055"'),
         ]
+        InfoConfReader()._local_time_offset = 10.0
 
         insert_ascend_sql = "insert into {0} values ({value})".format(
             DBNameConstant.TABLE_ASCEND_TASK, value="?," * (len(ascend_data[0]) - 1) + "?")

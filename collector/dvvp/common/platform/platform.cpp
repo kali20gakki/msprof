@@ -23,7 +23,9 @@ Platform::Platform()
       runSide_(SysPlatformType::INVALID),
       callFlags_(0),
       isHelperHostSide_(false),
-      driverAvailable_(false)
+      driverAvailable_(false),
+      enableHostOscFreq_(false),
+      hostOscFreq_(analysis::dvvp::driver::NOT_SUPPORT_FREQUENCY)
 {
 }
 
@@ -34,6 +36,9 @@ Platform::~Platform()
 void Platform::Init()
 {
     uint32_t platformType;
+    if (analysis::dvvp::driver::DrvGetApiVersion() >= analysis::dvvp::driver::SUPPORT_OSC_FREQ_API_VERSION) {
+        enableHostOscFreq_ = analysis::dvvp::driver::DrvGetDeviceFreq(analysis::dvvp::driver::HOST_ID, hostOscFreq_);
+    }
     driverAvailable_ = (analysis::dvvp::driver::DrvGetPlatformInfo(platformType) == PROFILING_SUCCESS) ? true : false;
     if (driverAvailable_) {
         runSide_ = platformType;
@@ -102,6 +107,27 @@ int Platform::PlatformInitByDriver()
     }
     runSide_ = platformType_;
     return PROFILING_SUCCESS;
+}
+
+std::string Platform::PlatformGetHostOscFreq() const
+{
+    return hostOscFreq_;
+}
+
+bool Platform::PlatformHostFreqIsEnable() const
+{
+    return enableHostOscFreq_;
+}
+
+std::string Platform::PlatformGetDeviceOscFreq(uint32_t deviceId, const std::string &freq) const
+{
+    std::string deviceOscFreq;
+    bool enableDeviceOscFreq = false;
+    if (enableHostOscFreq_) {
+        enableDeviceOscFreq = analysis::dvvp::driver::DrvGetDeviceFreq(deviceId, deviceOscFreq);
+    }
+
+    return enableDeviceOscFreq ? deviceOscFreq : freq;
 }
 }
 }
