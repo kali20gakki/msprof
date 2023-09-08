@@ -20,6 +20,7 @@ from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
+from common_func.info_conf_reader import InfoConfReader
 from msmodel.hccl.hccl_model import HcclViewModel
 from viewer.ge_info_report import get_ge_hash_dict
 from viewer.ge_info_report import get_ge_model_name_dict
@@ -76,6 +77,10 @@ class AiCoreOpReport:
             ai_core_queue = ai_core_group_dict.get(datum[1:3] + (datum[-1],), deque([]))
             if not ai_core_queue:
                 logging.debug("No ai core data of stream %d, task %d", datum[2], datum[1])
+                union_data.append(datum + (Constant.NA,) * ai_core_data_len)
+                continue
+            if datum[5] in AiCoreOpReport().HARDWARE_OP_LIST:
+                logging.debug("Found %s op of stream %d, task %d", datum[5], datum[2], datum[1])
                 union_data.append(datum + (Constant.NA,) * ai_core_data_len)
                 continue
             ai_core_datum = ai_core_queue.popleft()
@@ -193,9 +198,10 @@ class AiCoreOpReport:
         """
         get hccl op summary data
         """
-        if not os.path.exists(PathManager.get_db_path(project_path, DBNameConstant.DB_HCCL)):
+        if not os.path.exists(PathManager.get_db_path(project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
             return []
-        with HcclViewModel(project_path, DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_ALL_REDUCE]) as hccl_model:
+        with HcclViewModel(project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                           [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE]) as hccl_model:
             if not hccl_model.check_table():
                 return []
             hccl_comunication_data = hccl_model.get_hccl_op_data()
@@ -215,7 +221,8 @@ class AiCoreOpReport:
             hccl_data[index] = model_name + [_hccl_op.model_id, Constant.NA, Constant.NA] + index_id + \
                                [
                                    _hccl_op.op_name, _hccl_op.op_type, _hccl_op.task_type,
-                                   _hccl_op.timestamp / NumberConstant.NS_TO_US,
+                                   InfoConfReader().trans_into_local_time(_hccl_op.timestamp,
+                                                                          NumberConstant.NANO_SECOND),
                                    _hccl_op.duration / NumberConstant.NS_TO_US,
                                    Constant.DEFAULT_VALUE, Constant.DEFAULT_VALUE
                                ]
@@ -327,6 +334,7 @@ class AiCoreOpReport:
         if not ProfilingScene().is_operator():
             data = cls._update_model_name_and_infer_id(project_path, data)
         DataManager.add_memory_bound(headers, data)
+        DataManager.add_cube_usage(headers, data)
         return data
 
     @classmethod
@@ -381,8 +389,8 @@ class AiCoreOpReport:
         # ge or subtask need modify the context_id or subtask_id so that it should be same.
         sql = "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info}" \
               "{1}.op_name, {1}.op_type, {1}.task_type, " \
-              "{0}.start_time/{NS_TO_US}, {0}.duration_time/{NS_TO_US}, {0}.wait_time/{NS_TO_US}, {1}.block_dim, " \
-              "{1}.mix_block_dim, " \
+              "{0}.start_time/{NS_TO_US}+{local_time_offset}, {0}.duration_time/{NS_TO_US}," \
+              " {0}.wait_time/{NS_TO_US}, {1}.block_dim, {1}.mix_block_dim, " \
               "(case when {1}.input_shapes is NULL then 'N/A' else {1}.input_shapes end), " \
               "(case when {1}.input_data_types is NULL then 'N/A' else {1}.input_data_types end), " \
               "(case when {1}.input_formats is NULL then 'N/A' else {1}.input_formats end), " \
@@ -399,6 +407,7 @@ class AiCoreOpReport:
                     DBNameConstant.TABLE_SUMMARY_GE,
                     NumberConstant.INVALID_TASK_TIME,
                     NS_TO_US=NumberConstant.NS_TO_US,
+                    local_time_offset=InfoConfReader().get_local_time_offset(),
                     context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
                     index_info=cls._get_index_id_sql_condition())
         headers += cls.TENSOR_HEADERS
@@ -419,12 +428,13 @@ class AiCoreOpReport:
         cls.clear_no_ge_data_headers(headers)
         model_id = "{0}, ".format(NumberConstant.DEFAULT_MODEL_ID) if ProfilingScene().is_operator() else 'model_id, '
         subtask_id = ",subtask_id " if ChipManager().is_chip_v4() else ",'N/A'"
-        sql = "select {model_id} task_id, stream_id, {index_info} 'N/A', 'N/A', task_type, start_time/{NS_TO_US}, " \
-              "duration_time/{NS_TO_US}, wait_time/{NS_TO_US} {subtask_id} from {0} where " \
-              "task_type!=? and task_type!=? order by start_time" \
+        sql = "select {model_id} task_id, stream_id, {index_info} 'N/A', 'N/A', task_type, " \
+              "start_time/{NS_TO_US}+{local_time_offset}, duration_time/{NS_TO_US}," \
+              " wait_time/{NS_TO_US} {subtask_id} from {0} where task_type!=? and task_type!=? order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                     NS_TO_US=NumberConstant.NS_TO_US,
                     index_info=cls._get_index_id_sql_condition(),
+                    local_time_offset=InfoConfReader().get_local_time_offset(),
                     subtask_id=subtask_id,
                     model_id=model_id)
         return sql, headers

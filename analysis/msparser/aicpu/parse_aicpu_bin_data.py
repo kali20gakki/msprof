@@ -67,7 +67,7 @@ class ParseAiCpuBinData(MsMultiProcess):
                 cpu_f[index * StructFmt.AI_CPU_FMT_SIZE: (index + 1) * StructFmt.AI_CPU_FMT_SIZE])
             if ai_cpu.ai_cpu_time_consuming.ai_cpu_task_start_time != 0 and \
                     ai_cpu.ai_cpu_time_consuming.ai_cpu_task_end_time:
-                if self._iter_recorder.check_task_in_iteration(ai_cpu.ai_cpu_time_consuming.ai_cpu_task_end_syscnt):
+                if self._iter_recorder.check_task_before_max_iter(ai_cpu.ai_cpu_time_consuming.ai_cpu_task_end_syscnt):
                     self.ai_cpu_datas.append(
                         [ai_cpu.stream_id,
                          ai_cpu.task_id,

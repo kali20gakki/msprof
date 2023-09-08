@@ -46,7 +46,9 @@ class MemoryApplicationParser(DataParser, MsMultiProcess):
         for file_list in memory_application_files.values():
             self._memory_application_data.extend(self.parse_bean_data(file_list, StructFmt.MEMORY_APPLICATION_SIZE,
                                                                       MemoryApplicationBean,
-                                                                      self._get_memory_application_data))
+                                                                      format_func=self._get_memory_application_data,
+                                                                      check_func=self.check_magic_num,
+                                                                      ))
 
     def save(self: any) -> None:
         """

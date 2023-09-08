@@ -4,6 +4,7 @@ from unittest import mock
 
 from msparser.aicpu.parse_dp_data import ParseDpData
 from common_func.file_manager import FileOpen
+from common_func.info_conf_reader import InfoConfReader
 
 sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs'}
 NAMESPACE = 'msparser.aicpu.parse_dp_data'
@@ -26,10 +27,11 @@ def test_get_files():
 
 
 def test_analyse_dp():
+    InfoConfReader()._local_time_offset = 10.0
     dp_path = 'home\\parse_dp'
     device_id = 123
     data = bytes("[16953839403] Last queue dequeue, source:IteratorV2, index:0, size:111 ", "UTF-8")
-    check = [('16953839403', 'Last queue dequeue', 'IteratorV2', '111 ')]
+    check = [(16953849.403, 'Last queue dequeue', 'IteratorV2', '111 ')]
     bin_data = struct.pack('=HH', 23130, 100)
     with mock.patch(NAMESPACE + '.ParseDpData.get_files', return_value=['test.slice_0']), \
             mock.patch('builtins.open', mock.mock_open(read_data=bin_data)), \
@@ -81,7 +83,7 @@ def test_read_bin_data():
     with mock.patch('os.path.getsize', return_value=128), \
             mock.patch('builtins.open', mock.mock_open(read_data=data)):
         result = ParseDpData.read_bin_data('test')
-        unittest.TestCase().assertEqual(result, [(2, 'test', 'test', 0)])
+        unittest.TestCase().assertEqual(result, [(10.002, 'test', 'test', 0)])
     with mock.patch('os.path.getsize', return_value=128), \
             mock.patch('builtins.open', side_effect=OSError), \
             mock.patch(NAMESPACE + '.logging.error'):

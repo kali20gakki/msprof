@@ -48,6 +48,7 @@ class InfoConfReader:
         self._host_cnt = 0
         self._host_freq = None
         self._dev_cnt = 0
+        self._local_time_offset = 0
 
     @staticmethod
     def __get_json_data(info_json_path: str) -> dict:
@@ -116,6 +117,7 @@ class InfoConfReader:
         self._load_json(result_path)
         self._load_dev_start_time(result_path)
         self._load_host_start_time(result_path)
+        self._load_local_time_offset()
 
     def get_start_timestamp(self: any) -> int:
         """
@@ -262,7 +264,7 @@ class InfoConfReader:
         host_freq = self.get_host_freq()
         if host_freq != self.HOST_DEFAULT_FREQ:
             return (dev_timestamp - self._host_mon * NumberConstant.NANO_SECOND) / NumberConstant.NANO_SECOND * \
-                    host_freq + self._host_cnt * NumberConstant.NANO_SECOND
+                host_freq + self._host_cnt * NumberConstant.NANO_SECOND
         return dev_timestamp
 
     def get_json_pid_data(self: any) -> int:
@@ -290,7 +292,7 @@ class InfoConfReader:
         """
         return self._info_json.get(StrConstant.NET_CARD_NUMS), self._info_json.get(StrConstant.NET_CARD)
 
-    def get_mem_total(self: any) -> str:
+    def get_mem_total(self: any) -> int:
         """
         get net info
         """
@@ -366,11 +368,27 @@ class InfoConfReader:
         :return: int
         """
         return int(timestamp * NumberConstant.USTONS + self.get_start_timestamp() +
-                   self.get_delta_time() * NumberConstant.NANO_SECOND) / NumberConstant.USTONS
+                   self.get_delta_time() * NumberConstant.NANO_SECOND) / NumberConstant.NS_TO_US
 
     def get_ai_core_profiling_mode(self):
         return self._sample_json.get("ai_core_profiling_mode")
 
+    def trans_into_local_time(self: any, raw_timestamp: float, time_fmt: float = NumberConstant.MICRO_SECOND) -> float:
+        """
+        transfer raw time into local time
+        time_fmt: the time format of input raw time
+        :return: local time(us)
+        """
+        return raw_timestamp / time_fmt * NumberConstant.MICRO_SECOND + self._local_time_offset
+
+    def get_local_time_offset(self: any) -> float:
+        """
+        get the offset between local time and monotonic raw
+        add the offset to monotonic raw to get the local time
+        return: offset(us)
+        """
+        return self._local_time_offset
+    
     def _load_json(self: any, result_path: str) -> None:
         """
         load info.json once
@@ -408,6 +426,7 @@ class InfoConfReader:
         dev_start_path = self.get_conf_file_path(result_path, get_dev_start_compiles())
         if not os.path.exists(dev_start_path):
             return
+        check_path_valid(dev_start_path, True)
         try:
             with open(dev_start_path, "r") as log_file:
                 self._load_dev_start_path_line_by_line(log_file)
@@ -444,3 +463,15 @@ class InfoConfReader:
             logging.error("The monotonic time %s, dev_cntvct %s or host_cntvct %s is unusual, "
                           "maybe get data from driver failed", self._host_mon, self._dev_cnt, self._host_cnt)
 
+    def _load_local_time_offset(self: any) -> None:
+        """
+        load local time offset(us) from start info
+        :return: None
+        """
+        collect_time_begin, _ = self.get_collect_time()
+        collect_raw_time, _ = self.get_collect_raw_time()
+        if collect_time_begin and collect_raw_time:
+            self._local_time_offset = float(collect_time_begin) - float(collect_raw_time) / NumberConstant.NS_TO_US
+            return
+        logging.error("No start info, or start info is invalid.")
+        raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)

@@ -17,6 +17,10 @@
 namespace analysis {
 namespace dvvp {
 namespace driver {
+constexpr char NOT_SUPPORT_FREQUENCY[] = "";
+constexpr uint32_t HOST_ID = 64; // host id
+constexpr uint32_t FREQUENCY_KHZ_TO_MHZ = 1000; // KHz to MHz
+constexpr uint32_t SUPPORT_OSC_FREQ_API_VERSION = 0x071905;
 int DrvGetDevNum();
 int DrvGetHostPhyIdByDeviceIndex(int index);
 int DrvGetDevIds(int numDevices, std::vector<int> &devIds);
@@ -35,6 +39,8 @@ int DrvGetPlatformInfo(uint32_t &platformInfo);
 int DrvGetDeviceTime(uint32_t deviceId, unsigned long long &startMono, unsigned long long &cntvct);
 std::string DrvGetDevIdsStr();
 bool DrvCheckIfHelperHost();
+bool DrvGetDeviceFreq(uint32_t deviceId, std::string &freq);
+uint32_t DrvGetApiVersion();
 }  // namespace driver
 }  // namespace dvvp
 }  // namespace analysis

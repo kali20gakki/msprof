@@ -8,6 +8,8 @@ import math
 import os
 import re
 
+from datetime import datetime
+from datetime import timezone
 from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.file_manager import FileOpen
@@ -129,6 +131,12 @@ class MsprofDataStorage:
                 os.remove(os.path.join(timeline_dir, file))
 
     @staticmethod
+    def get_current_time_str() -> str:
+        utc_time = datetime.now(tz=timezone.utc)
+        current_time = utc_time.replace(tzinfo=timezone.utc).astimezone(tz=None)
+        return current_time.strftime('%Y%m%d%H%M%S')
+
+    @staticmethod
     def _calculate_loading_time(row_line_level: int, count_line_level: int) -> float:
         """
         Calculate the approximate time
@@ -152,6 +160,8 @@ class MsprofDataStorage:
                 file_name += "_" + str(params.get(StrConstant.PARAM_ITER_ID))
         if slice_switch:
             file_name += "_slice_{}".format(str(slice_times))
+        date_str = MsprofDataStorage.get_current_time_str()
+        file_name += "_" + date_str
 
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.SUMMARY:
             file_suffix = StrConstant.FILE_SUFFIX_CSV

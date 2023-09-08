@@ -3,6 +3,7 @@ import unittest
 from unittest import mock
 
 from common_func.empty_class import EmptyClass
+from common_func.info_conf_reader import InfoConfReader
 from constant.constant import ITER_RANGE
 from msinterface.msprof_timeline import MsprofTimeline
 
@@ -60,7 +61,8 @@ class TestMsprofTimeline(unittest.TestCase):
 
     def test_is_in_iteration_2(self):
         from msinterface.msprof_timeline import MsprofTimeline
-        time_stamp = {'ts': 1, 'dur': 1}
+        InfoConfReader()._local_time_offset = 10.0
+        time_stamp = {'ts': 11, 'dur': 1}
         key = MsprofTimeline()
         key._iteration_time = [1, 3]
         result = key.is_in_iteration(time_stamp)

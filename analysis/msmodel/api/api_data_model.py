@@ -48,7 +48,9 @@ class ApiDataModel(ParserModel):
         type_dict = hash_dict_data.get_type_hash_dict()
         ge_dict = hash_dict_data.get_ge_hash_dict()
         return [
-            [*self.update_type_hash_value(data, type_dict), data.level, data.thread_id,
-             ge_dict.get(data.item_id, data.item_id), data.start, data.end]
-            for data in data_list
+            [
+                *self.update_type_hash_value(data, type_dict), data.level, data.thread_id,
+                ge_dict.get(data.item_id, data.item_id), data.start, data.end, connection_id,
+            ]
+            for connection_id, data in data_list
         ]

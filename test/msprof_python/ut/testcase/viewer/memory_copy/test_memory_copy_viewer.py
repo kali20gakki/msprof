@@ -3,6 +3,7 @@ from unittest import mock
 from viewer.memory_copy.memory_copy_viewer import MemoryCopyViewer
 from common_func.memcpy_constant import MemoryCopyConstant
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.info_conf_reader import InfoConfReader
 
 NAMESPACE = 'msmodel.memory_copy.memcpy_model.MemcpyModel'
 
@@ -35,10 +36,11 @@ class TestMemoryCopyViewer(unittest.TestCase):
         self.assertEqual(expect_res, res)
 
     def test_get_memory_copy_non_chip0_summary_1(self):
-        expect_res = [("MemcopyAsync", "other", 11, 12, 100, '"2200"', '"2300"')]
+        expect_res = [("MemcopyAsync", "other", 11, 12, 100, '"2210.0"', '"2310.0"')]
 
         export_data = [(MemoryCopyConstant.ASYNC_MEMCPY_NAME, MemoryCopyConstant.TYPE, 11,
                         12, 100, 2.2, 2.3)]
+        InfoConfReader()._local_time_offset = 10.0
         with mock.patch(NAMESPACE + '.check_db', return_value=True), \
                 mock.patch(NAMESPACE + '.return_not_chip0_summary', return_value=export_data):
             res = self.memcopy_viewer.get_memory_copy_non_chip0_summary()

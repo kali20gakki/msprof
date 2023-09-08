@@ -17,7 +17,7 @@ namespace Analysis {
 namespace Dvvp {
 namespace Common {
 namespace Platform {
-
+const std::string PROF_VERSION_INFO = "1.0";
 inline void PthreadOnce(pthread_once_t *flag, void (*func)(void))
 {
     (void)pthread_once(flag, func);
@@ -45,6 +45,9 @@ public:
     void SetPlatformSoc();
     uint32_t GetPlatform(void);
     int PlatformInitByDriver();
+    std::string PlatformGetHostOscFreq() const;
+    std::string PlatformGetDeviceOscFreq(uint32_t deviceId, const std::string &freq) const;
+    bool PlatformHostFreqIsEnable() const;
 
 private:
     pthread_once_t callFlags_;
@@ -52,6 +55,8 @@ private:
     bool driverAvailable_;
     uint32_t platformType_;
     uint32_t runSide_;
+    bool enableHostOscFreq_;
+    std::string hostOscFreq_;
 };
 }
 }

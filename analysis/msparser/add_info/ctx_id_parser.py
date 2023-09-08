@@ -44,7 +44,9 @@ class CtxIdParser(DataParser, MsMultiProcess):
         ctx_id_files = self.group_aging_file(ctx_id_files)
         for file_list in ctx_id_files.values():
             self._ctx_id_data.extend(self.parse_bean_data(file_list, StructFmt.CTX_ID_SIZE, CtxIdBean,
-                                                          self._get_ctx_id_data))
+                                                          format_func=self._get_ctx_id_data,
+                                                          check_func=self.check_magic_num,
+                                                          ))
 
     def save(self: any) -> None:
         """

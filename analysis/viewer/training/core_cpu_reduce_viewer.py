@@ -104,9 +104,9 @@ class CoreCpuReduceViewer:
         total_cycle_data = {}
         total_time_data = {}
         conn_ge, cur_ge = DBManager.check_connect_db_path(
-            PathManager.get_db_path(result_dir, DBNameConstant.DB_RUNTIME))
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_METRICS_SUMMARY))
         if conn_ge and cur_ge:
-            if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_METRICS_SUMMARY):
+            if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_METRIC_SUMMARY):
                 return total_cycle_data, total_time_data
             total_cycles = DBManager.fetch_all_data(cur_ge, CoreCpuReduceViewer._get_aicore_sql(result_dir))
             total_cycles = OpCommonFunc.deal_batch_id(stream_index=0, task_index=1, merge_data=total_cycles)
@@ -124,10 +124,10 @@ class CoreCpuReduceViewer:
         if ChipManager().is_chip_v4():
             total_cycles = 'aic_total_time, aic_total_cycles, aiv_total_time, aiv_total_cycles'
         sql = "SELECT stream_id, task_id, {total_cycles} FROM {} ".format(
-            DBNameConstant.TABLE_METRICS_SUMMARY, total_cycles=total_cycles)
+            DBNameConstant.TABLE_METRIC_SUMMARY, total_cycles=total_cycles)
         if not os.path.exists(PathManager.get_db_path(result_dir, DBNameConstant.DB_GE_INFO)):
             sql = "SELECT stream_id, task_id, {total_cycles} FROM {} ".format(
-                DBNameConstant.TABLE_METRICS_SUMMARY, total_cycles=total_cycles)
+                DBNameConstant.TABLE_METRIC_SUMMARY, total_cycles=total_cycles)
         return sql
 
     @staticmethod
@@ -269,7 +269,7 @@ class CoreCpuReduceViewer:
                         _key_for_ops, rts_task_type, Constant.TASK_TYPE_OTHER)),
                 NumberConstant.TASK_TIME_PID,
                 sql_data[0],
-                float(sql_data[2]) / DBManager.NSTOUS,
+                InfoConfReader().trans_into_local_time(float(sql_data[2]), NumberConstant.NANO_SECOND),
                 int(sql_data[3]) / DBManager.NSTOUS if sql_data[3] > 0 else 0,
                 trace_data_args
             ]
@@ -298,7 +298,7 @@ class CoreCpuReduceViewer:
                     (cls._get_task_trace_value(_key_for_ops, op_names),
                      cls.TRACE_PID_MAP.get(TraceViewHeaderConstant.PROCESS_AI_CPU, 0),
                      InfoConfReader().get_json_tid_data(),
-                     float(sys_start) * NumberConstant.MS_TO_US,
+                     InfoConfReader().trans_into_local_time(float(sys_start), NumberConstant.MILLI_SECOND),
                      duration,
                      OrderedDict([("Task Type", "AI_CPU"),
                                   ("Task Time(us)", duration)])))
@@ -351,7 +351,8 @@ class CoreCpuReduceViewer:
                 all_reduce_datas.append(
                     ("AR {}".format(index), cls.TRACE_PID_MAP.get(TraceViewHeaderConstant.PROCESS_ALL_REDUCE, ""),
                      InfoConfReader().get_json_tid_data(),
-                     InfoConfReader().time_from_syscnt(all_reduce[0], time_fmt=NumberConstant.MICRO_SECOND),
+                     InfoConfReader().trans_into_local_time(
+                     InfoConfReader().time_from_syscnt(all_reduce[0], time_fmt=NumberConstant.MICRO_SECOND)),
                      all_reduce_time,
                      OrderedDict([("Reduce Duration(us)", all_reduce_time)])))
         return all_reduce_datas

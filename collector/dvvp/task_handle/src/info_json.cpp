@@ -91,7 +91,7 @@ int InfoJson::InitDeviceIds()
     auto devicesVec = analysis::dvvp::common::utils::Utils::Split(devices_, false, "", ",");
     for (size_t i = 0; i < devicesVec.size(); i++) {
         try {
-            int devIndexId = std::stoi(devicesVec.at(i));
+            int32_t devIndexId = std::stoi(devicesVec.at(i));
             if (devIndexId < 0 || devIndexId >= MSVP_MAX_DEV_NUM) {
                 continue;
             }
@@ -260,10 +260,6 @@ void InfoJson::SetRankId(SHARED_PTR_ALIA<InfoMain> infoMain)
 
 int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
 {
-    if (Platform::instance()->RunSocSide()) {
-        // host info is not availible on soc
-        return PROFILING_SUCCESS;
-    }
     // fetch and set OS
     MSPROF_LOGI("Begin to AddHostInfo in info.json, devices: %s.", devices_.c_str());
     char str[MMPA_MAX_PATH] = {0};
@@ -305,7 +301,7 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
         infoCpu->set_id(i);
         infoCpu->set_name(cpuInfo[i].manufacturer);
         infoCpu->set_type(cpuInfo[i].version);
-        infoCpu->set_frequency(GetCpuFrequency());
+        infoCpu->set_frequency(GetHostOscFrequency());
         infoCpu->set_logical_cpu_count(cpuInfo[i].nthreads == 0 ? cpuInfo[i].ncounts : cpuInfo[i].nthreads);
     }
     MmCpuInfoFree(cpuInfo, cpuNum);
@@ -313,10 +309,14 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
     return PROFILING_SUCCESS;
 }
 
-uint32_t InfoJson::GetCpuFrequency() const
+std::string InfoJson::GetHostOscFrequency() const
 {
-    const uint32_t FREQUENCY_GHZ_TO_MHZ = 1000;
-    return FREQUENCY_GHZ_TO_MHZ;
+    return Analysis::Dvvp::Common::Platform::Platform::instance()->PlatformGetHostOscFreq();
+}
+
+std::string InfoJson::GetDeviceOscFrequency(uint32_t deviceId, const std::string &freq)
+{
+    return Analysis::Dvvp::Common::Platform::Platform::instance()->PlatformGetDeviceOscFreq(deviceId, freq);
 }
 
 int InfoJson::GetCtrlCpuInfo(uint32_t devId, struct DeviceInfo &devInfo)
@@ -429,7 +429,7 @@ int InfoJson::AddDeviceInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
                 std::to_string(devInfo.ai_cpu_core_id) : ("," + std::to_string(i)));
         }
         infoDevice->set_ai_cpu(aiCpu);
-        SetHwtsFrequency(*infoDevice);
+        SetHwtsFrequency(static_cast<uint32_t>(devIndexId), *infoDevice);
         std::string freq = Analysis::Dvvp::Driver::DrvGeAicFrq(devIndexId);
         infoDevice->set_aic_frequency(freq);
         infoDevice->set_aiv_frequency(freq);
@@ -456,9 +456,9 @@ void InfoJson::SetCtrlCpuId(analysis::dvvp::proto::InfoDeviceInfo &infoDeviceInf
     }
 }
 
-void InfoJson::SetHwtsFrequency(analysis::dvvp::proto::InfoDeviceInfo &infoDeviceInfo)
+void InfoJson::SetHwtsFrequency(uint32_t deviceId, analysis::dvvp::proto::InfoDeviceInfo &infoDeviceInfo)
 {
-    std::string hwtsFrq = Analysis::Dvvp::Common::Config::ConfigManager::instance()->GetFrequency();
+    std::string hwtsFrq = GetDeviceOscFrequency(deviceId, ConfigManager::instance()->GetFrequency());
     MSPROF_LOGD("hwtsFrq:%s", hwtsFrq.c_str());
     infoDeviceInfo.set_hwts_frequency(hwtsFrq);
 }
@@ -520,7 +520,7 @@ void InfoJson::SetPlatFormVersion(SHARED_PTR_ALIA<InfoMain> infoMain)
 
 void InfoJson::SetVersionInfo(SHARED_PTR_ALIA<InfoMain> infoMain) const
 {
-    infoMain->set_version(PROF_VERSION_INFO);
+    infoMain->set_version(Analysis::Dvvp::Common::Platform::PROF_VERSION_INFO);
 }
 
 InfoJson::~InfoJson()

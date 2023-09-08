@@ -55,7 +55,7 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         self._result_dir = self.sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._iter_model = HwtsIterModel(self._result_dir)
         self._iter_range = self.sample_config.get(StrConstant.PARAM_ITER_ID)
-        self._model = FftsPmuModel(self._result_dir, DBNameConstant.DB_RUNTIME, [])
+        self._model = FftsPmuModel(self._result_dir, DBNameConstant.DB_METRICS_SUMMARY, [])
         self._data_list = {}
         self._sample_json = ConfigMgr.read_sample_config(self._result_dir)
         self._file_list = file_list.get(DataTag.FFTS_PMU, [])
@@ -155,9 +155,10 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
             task_type = 0 if data.is_aic_data() else 1
 
             aic_pmu_value, aiv_pmu_value, aic_total_cycle, aiv_total_cycle = self.get_total_cycle_info(data, task_type)
-
-            aic_total_time = self.calculate_total_time(aic_total_cycle, data)
-            aiv_total_time = self.calculate_total_time(aiv_total_cycle, data, data_type='aiv')
+            block_dim = self._get_current_block('block_dim', data)
+            mix_block_dim = self._get_current_block('mix_block_dim', data)
+            aic_total_time = self.calculate_total_time(data, block_dim, mix_block_dim)
+            aiv_total_time = self.calculate_total_time(data, block_dim, mix_block_dim, data_type='aiv')
             aic_calculator = CalculateAiCoreData(self._project_path)
             aic_pmu_value = aic_calculator.add_pipe_time(
                 aic_pmu_value, aic_total_time, self._sample_json.get('ai_core_metrics'))
@@ -191,7 +192,9 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
                 pmu_events = AicPmuUtils.get_custom_pmu_events(self._sample_json.get('ai_core_profiling_events'))
             else:
                 pmu_events = AicPmuUtils.get_pmu_events(self._sample_json.get('ai_core_profiling_events'))
-            total_time = self.calculate_total_time(data.total_cycle, data)
+            block_dim = self._get_current_block('block_dim', data)
+            mix_block_dim = self._get_current_block('mix_block_dim', data)
+            total_time = self.calculate_total_time(data, block_dim, mix_block_dim)
             aic_calculator = CalculateAiCoreData(self._project_path)
             _, pmu_list = aic_calculator.compute_ai_core_data(
                 Utils.generator_to_list(pmu_events), pmu_list, data.total_cycle, data.pmu_list)
@@ -203,16 +206,14 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
             ]
             pmu_data_list.append(pmu_data)
 
-    def calculate_total_time(self: any, total_cycle: int, data: any, data_type: str = 'aic') -> float:
+    def calculate_total_time(self: any, data: any, block_dim: int, mix_block_dim: int, data_type: str = 'aic') -> float:
         core_num = self._core_num_dict.get(data_type)
-        block_dim = self._get_current_block('block_dim', data)
-        mix_block_dim = self._get_current_block('mix_block_dim', data)
         if self._is_not_mix_main_core(data, data_type):
             block_dim = mix_block_dim
         freq = self._freq
         if self.freq_data and len(data.time_list) >= 2:
             freq = self._get_current_freq(data.time_list[1])
-        total_time = Utils.cal_total_time(total_cycle, int(freq), block_dim, core_num)
+        total_time = Utils.cal_total_time(data.total_cycle, int(freq), block_dim, core_num)
         return total_time
 
     def get_total_cycle_info(self, data: any, task_type: int) -> tuple:
@@ -297,10 +298,10 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
 
     def _parse_by_iter(self) -> None:
-        runtime_db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_RUNTIME)
+        runtime_db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_METRICS_SUMMARY)
         if os.path.exists(runtime_db_path):
             with self._model as model:
-                model.drop_table(DBNameConstant.TABLE_METRICS_SUMMARY)
+                model.drop_table(DBNameConstant.TABLE_METRIC_SUMMARY)
         with self._iter_model as iter_model:
             if not iter_model.check_db() or not iter_model.check_table():
                 return
@@ -363,10 +364,10 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
             logging.debug('Func type error, data may have been lost. Func type: %s', func_type)
 
     def _need_to_analyse(self: any) -> bool:
-        db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_RUNTIME)
+        db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_METRICS_SUMMARY)
         if not os.path.exists(db_path):
             return True
-        if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_METRICS_SUMMARY):
+        if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_METRIC_SUMMARY):
             return False
         return True
 

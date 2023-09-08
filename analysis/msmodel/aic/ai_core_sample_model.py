@@ -189,9 +189,9 @@ class AiCoreSampleModel(BaseModel):
         clear ai core table
         :return: None
         """
-        db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_RUNTIME)
-        if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY):
-            DBManager.drop_table(self.conn, DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY)
+        db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_METRICS_SUMMARY)
+        if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_METRIC_SUMMARY):
+            DBManager.drop_table(self.conn, DBNameConstant.TABLE_METRIC_SUMMARY)
 
     def _create_event_count_table(self: any, events: list) -> None:
         sql = "CREATE TABLE IF NOT EXISTS EventCount (" + \

@@ -15,8 +15,10 @@
 #include <iomanip>
 #include <string>
 #include <ctime>
+#include <set>
 #include "config/config.h"
 #include "config/config_manager.h"
+#include "platform/platform.h"
 #include "errno/error_code.h"
 #include "msprof_dlog.h"
 #include "securec.h"
@@ -32,6 +34,7 @@ namespace utils {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Config;
+using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 using FuncIntPtr = int(*)(int);
@@ -82,6 +85,12 @@ unsigned long long Utils::GetCPUCycleCounter()
     return cycles;
 }
 
+unsigned long long Utils::GetClockRealtimeOrCPUCycleCounter()
+{
+    static const bool IS_SUPPORTED_SYS_COUNTER = Platform::instance()->PlatformHostFreqIsEnable();
+    return IS_SUPPORTED_SYS_COUNTER ? GetCPUCycleCounter() : GetClockMonotonicRaw();
+}
+
 double Utils::StatCpuRealFreq()
 {
     const int sampleTimes = 500;    // sample 500 copies of data
@@ -97,6 +106,9 @@ double Utils::StatCpuRealFreq()
 
     double freqSum = 0;
     for (int i = 0; i < sampleTimes; i++) {
+        if (monotonicRaws[i + 1] == monotonicRaws[i]) {
+            continue;
+        }
         freqSum += static_cast<double>(cycleCnts[i + 1] - cycleCnts[i]) / (monotonicRaws[i + 1] - monotonicRaws[i]);
     }
     return freqSum / sampleTimes;
@@ -894,6 +906,10 @@ void Utils::GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::
             if ((fileName.compare(".") == 0) || (fileName.compare("..") == 0)) {
                 continue;
             }
+            if (childDirs.size() >= MAX_FILES_NUM) {
+                MSPROF_LOGW("Get dirs num exceeds maximum value: %d, stop get dirs", MAX_FILES_NUM);
+                break;
+            }
             childDirs.push_back(childPath);
             if (!isRecur) {
                 continue;
@@ -925,6 +941,10 @@ void Utils::GetChildFilenames(const std::string &dir, std::vector<std::string> &
         std::string fileName = dirNameList[j]->d_name;
         if ((fileName.compare(".") == 0) || (fileName.compare("..") == 0)) {
             continue;
+        }
+        if (files.size() >= MAX_FILES_NUM) {
+            MSPROF_LOGW("Get files num exceeds maximum value: %d, stop get files", MAX_FILES_NUM);
+            break;
         }
         files.push_back(fileName);
     }
@@ -1432,7 +1452,11 @@ bool Utils::IsPythonOrBash(const std::string paramsName)
 
 bool Utils::IsDynProfMode()
 {
-    if (ConfigManager::instance()->GetPlatformType() != PlatformType::CLOUD_TYPE) {
+    PlatformType platformType = ConfigManager::instance()->GetPlatformType();
+    std::set<PlatformType> platformTypeSet = {PlatformType::CLOUD_TYPE,
+                                              PlatformType::CHIP_V4_1_0,
+                                              PlatformType::CHIP_V4_2_0};
+    if (platformTypeSet.find(platformType) == platformTypeSet.end()) {
         return false;
     }
     if (GetEnvString(PROFILING_MODE_ENV) != DAYNAMIC_PROFILING_VALUE) {

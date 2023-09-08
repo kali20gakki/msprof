@@ -7,6 +7,7 @@ Copyright Huawei Technologies Co., Ltd. 2023. All rights reserved.
 import unittest
 from unittest import mock
 
+from common_func.info_conf_reader import InfoConfReader
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
 from profiling_bean.db_dto.api_data_dto import ApiDataDto
@@ -46,7 +47,7 @@ class TestEventViewer(unittest.TestCase):
             self.assertEqual('{"status": 2, '
                              '"info": "Unable to get event data."}', ret)
 
-    def test_get_timeline_data_should_return_empty_when_data_exist(self):
+    def test_get_timeline_data_should_return_timeline_when_data_exist(self):
         config = {"headers": []}
         params = {
             "project": "test_event_view",
@@ -66,6 +67,7 @@ class TestEventViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + '.EventDataViewModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + ".EventDataViewModel.get_timeline_data", return_value=[matched_event_dto]):
             InfoJsonReaderManager(InfoJson(pid=100)).process()
+            InfoConfReader()._local_time_offset = 10.0
             check = EventViewer(config, params)
             ret = check.get_timeline_data()
             self.assertEqual('[{"name": "process_name", '
@@ -78,7 +80,7 @@ class TestEventViewer(unittest.TestCase):
                              '"pid": 100, "tid": 5, '
                              '"args": {"sort_index": 5}, "ph": "M"}, '
                              '{"name": "1", "pid": 100, "tid": 5, '
-                             '"ts": 0.003, "dur": 0.001, '
+                             '"ts": 10.003, "dur": 0.001, '
                              '"args": {"Thread Id": 5, "level": "7", '
                              '"id": "2", "item_id": 6, "request_id": 8}, '
                              '"ph": "X"}]', ret)

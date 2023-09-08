@@ -3,6 +3,8 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 
 from common_func.db_manager import DBManager
+from common_func.ms_constant.number_constant import NumberConstant
+from common_func.info_conf_reader import InfoConfReader
 
 
 class GetTableData:
@@ -11,15 +13,18 @@ class GetTableData:
     """
 
     @staticmethod
-    def get_table_data_for_device(cursor: any, table_name: str, device_id: str, cols: str) -> list:
+    def get_table_data_for_device(cursor: any, table_name: str, device_id: str) -> list:
         """
         get table data for certain device
         """
         if not cursor:
             return []
-        search_data_sql = "select {} from {} where device_id={} order by rowid".format(cols,
-                                                                                       table_name,
-                                                                                       device_id)
+        search_data_sql = "select duration / {NS_TO_US}+{local_time_offset}, bandwidth, " \
+                          "rxBandwidth, rxPacket, rxErrorRate, " \
+                          "rxDroppedRate, txBandwidth, txPacket, txErrorRate, txDroppedRate, funcId " \
+                          "from {0} where device_id={1} order by rowid"\
+                          .format(table_name, device_id, local_time_offset=InfoConfReader().get_local_time_offset(),
+                                  NS_TO_US=NumberConstant.NS_TO_US)
         result = DBManager.fetch_all_data(cursor, search_data_sql)
         if result:
             return result

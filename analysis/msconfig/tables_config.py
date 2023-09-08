@@ -139,7 +139,7 @@ class TablesConfig(MetaConfig):
             ('stream_id', 'INTEGER,null'),
             ('overflow', 'INTEGER,null'),
             ('overflowcycle', 'INTEGER,null'),
-            ('timestamp', 'INTEGER,null'),
+            ('timestamp', 'NUMERIC,null'),
             ('event1', 'TEXT,null'),
             ('event2', 'TEXT,null'),
             ('event3', 'TEXT,null'),
@@ -238,7 +238,7 @@ class TablesConfig(MetaConfig):
         'NicOriginalDataMap': [
             ('device_id', 'INTEGER,null'),
             ('replayid', 'INTEGER,null'),
-            ('timestamp', 'REAL,null'),
+            ('timestamp', 'NUMERIC,null'),
             ('bandwidth', 'INTEGER,null'),
             ('rxpacket', 'REAL,null'),
             ('rxbyte', 'REAL,null'),
@@ -673,7 +673,7 @@ class TablesConfig(MetaConfig):
             ('hit_rate', 'REAL'),
             ('victim_rate', 'REAL')
         ],
-        'HCCLAllReduceMap': [
+        'HCCLSingleDeviceMap': [
             ('model_id', 'INTEGER, null'),
             ('index_id', 'INTEGER, null'),
             ('op_name', 'TEXT, null'),
@@ -687,9 +687,11 @@ class TablesConfig(MetaConfig):
             ('is_dynamic', 'REAL, null'),
             ('task_type', 'TEXT, null'),
             ('op_type', 'TEXT, null'),
+            ('connection_id', 'INTEGER, null'),
             ('args', 'TEXT, null')
         ],
         'HCCLOPMap': [
+            ('device_id', 'INTEGER, null'),
             ('model_id', 'INTEGER, null'),
             ('index_id', 'INTEGER, null'),
             ('thread_id', 'INTEGER, null'),
@@ -698,7 +700,8 @@ class TablesConfig(MetaConfig):
             ('op_type', 'TEXT, null'),
             ('begin', 'REAL, null'),
             ('end', 'REAL, null'),
-            ('is_dynamic', 'INTEGER, null')
+            ('is_dynamic', 'INTEGER, null'),
+            ('connection_id', 'INTEGER, null'),
         ],
         'HCCLTaskMap': [
             ('model_id', 'INTEGER, null'),
@@ -712,6 +715,7 @@ class TablesConfig(MetaConfig):
             ('task_id', 'INTEGER, null'),
             ('context_id', 'INTEGER, null'),
             ('batch_id', 'INTEGER, null'),
+            ('device_id', 'INTEGER, null'),
             ('args', 'TEXT, null')
         ],
         'MsprofTxMap': [
@@ -1040,7 +1044,8 @@ class TablesConfig(MetaConfig):
             ('thread_id', 'INTEGER,null'),
             ('item_id', 'TEXT,null'),
             ('start', 'INTEGER,null'),
-            ('end', 'INTEGER,null')
+            ('end', 'INTEGER,null'),
+            ('connection_id', 'INTEGER,null'),
         ],
         'EventDataMap': [
             ('struct_type', 'TEXT,null'),
@@ -1048,7 +1053,8 @@ class TablesConfig(MetaConfig):
             ('thread_id', 'INTEGER,null'),
             ('item_id', 'INTEGER,null'),
             ('request_id', 'INTEGER,null'),
-            ('timestamp', 'NUMERIC,null')
+            ('timestamp', 'NUMERIC,null'),
+            ('connection_id', 'INTEGER,null'),
         ],
         'TaskTrackMap': [
             ('device_id', 'INTEGER,null'),
@@ -1188,7 +1194,8 @@ class TablesConfig(MetaConfig):
             ('batch_id', 'INTEGER,null'),
             ('task_type', 'TEXT,null'),
             ('device_id', 'INTEGER,null'),
-            ('timestamp', 'NUMERIC,null')
+            ('timestamp', 'NUMERIC,null'),
+            ('connection_id', 'INTEGER,null'),
         ],
         'AscendTaskMap': [
             ('model_id', 'INTEGER,null'),
@@ -1201,6 +1208,7 @@ class TablesConfig(MetaConfig):
             ('duration', 'NUMERIC,null'),
             ('host_task_type', 'TEXT,null'),
             ('device_task_type', 'TEXT,null'),
+            ('connection_id', 'INTEGER,null'),
         ],
         'NpuOpMemRawMap': [
             ('operator', 'TEXT,null'),
@@ -1242,5 +1250,26 @@ class TablesConfig(MetaConfig):
             ('avg', 'NUMERIC,null'),
             ('max', 'NUMERIC,null'),
             ('ratio', 'TEXT,null')
+        ],
+        'NanoTaskMap': [
+            ('model_id', 'INTEGER,null'),
+            ('stream_id', 'INTEGER,null'),
+            ('task_id', 'INTEGER,null'),
+            ('task_type', 'TEXT,null'),
+            ('start_time', 'NUMERIC,null'),
+            ('end_time', 'NUMERIC,null'),
+            ('duration', 'NUMERIC,null'),
+            ('total_cycle', 'NUMERIC,null'),
+            ('block_dim', 'INTEGER,null'),
+            ('pmu0', 'NUMERIC,null'),
+            ('pmu1', 'NUMERIC,null'),
+            ('pmu2', 'NUMERIC,null'),
+            ('pmu3', 'NUMERIC,null'),
+            ('pmu4', 'NUMERIC,null'),
+            ('pmu5', 'NUMERIC,null'),
+            ('pmu6', 'NUMERIC,null'),
+            ('pmu7', 'NUMERIC,null'),
+            ('pmu8', 'NUMERIC,null'),
+            ('pmu9', 'NUMERIC,null')
         ],
     }

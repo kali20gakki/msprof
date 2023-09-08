@@ -24,6 +24,7 @@
 #include "transport/hash_data.h"
 #include "profapi_plugin.h"
 #include "platform/platform.h"
+#include "runtime_plugin.h"
 
 using namespace Analysis::Dvvp::Analyze;
 using namespace analysis::dvvp::common::error;
@@ -54,6 +55,7 @@ static aclError aclprofInitPreCheck()
 
 aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
 {
+    Platform::instance()->Init();
     int ret = aclprofInitPreCheck();
     if (ret != ACL_SUCCESS) {
         return ret;
@@ -175,11 +177,8 @@ bool IsValidProfConfigPreCheck(CONST_UINT32_T_PTR deviceIdList, uint32_t deviceN
     return true;
 }
 
-bool IsValidProfConfig(CONST_UINT32_T_PTR deviceIdList, uint32_t deviceNums, ACL_PROF_AICORE_EVENTS_PTR aicoreEvents)
+static bool IsValidDevId(CONST_UINT32_T_PTR deviceIdList, const uint32_t deviceNums)
 {
-    if (!IsValidProfConfigPreCheck(deviceIdList, deviceNums, aicoreEvents)) {
-        return false;
-    }
     int32_t devCount = analysis::dvvp::driver::DrvGetDevNum();
     if (devCount == PROFILING_FAILED) {
         MSPROF_LOGE("Get the Device count fail.");
@@ -217,11 +216,50 @@ bool IsValidProfConfig(CONST_UINT32_T_PTR deviceIdList, uint32_t deviceNums, ACL
     return true;
 }
 
+bool IsValidProfConfig(CONST_UINT32_T_PTR deviceIdList, uint32_t deviceNums, ACL_PROF_AICORE_EVENTS_PTR aicoreEvents)
+{
+    if (!IsValidProfConfigPreCheck(deviceIdList, deviceNums, aicoreEvents)) {
+        return false;
+    }
+    if (!IsValidDevId(deviceIdList, deviceNums)) {
+        return false;
+    }
+    return true;
+}
+
+
 struct aclprofConfig {
     ProfConfig config;
 };
 using ACL_PROF_CONFIG_PTR = aclprofConfig *;
 using ACL_PROF_CONFIG_CONST_PTR = const aclprofConfig *;
+
+static bool GetVisibleDevIdListByLogicId(UINT32_T_PTR deviceIdList, const uint32_t deviceNums,
+    ACL_PROF_CONFIG_PTR profCfg)
+{
+    for (uint32_t i = 0; i < deviceNums; i++) {
+        int32_t visibleDevId = 0;
+        int32_t ret = RuntimePlugin::instance()->MsprofRtGetVisibleDeviceIdByLogicDeviceId(static_cast<int32_t>(
+            deviceIdList[i]), &visibleDevId);
+        if (ret == PROFILING_NOTSUPPORT) {
+            MSPROF_LOGI("RtGetVisibleDeviceIdByLogicDeviceId not support, use logic devId");
+            if (memcpy_s(profCfg->config.devIdList, sizeof(profCfg->config.devIdList), deviceIdList,
+                deviceNums * sizeof(uint32_t)) != EOK) {
+                MSPROF_LOGE("copy devID failed. size = %u", deviceNums);
+                return false;
+            }
+            return true;
+        } else if (ret != PROFILING_SUCCESS) {
+            MSPROF_LOGE("get visible devId failed, logic devId = %d", deviceIdList[i]);
+            return false;
+        }
+        profCfg->config.devIdList[i] = static_cast<uint32_t>(visibleDevId);
+    }
+    if (!IsValidDevId(profCfg->config.devIdList, deviceNums)) {
+        return false;
+    }
+    return true;
+}
 
 ACL_PROF_CONFIG_PTR aclprofCreateConfig(UINT32_T_PTR deviceIdList, uint32_t deviceNums,
     aclprofAicoreMetrics aicoreMetrics, ACL_PROF_AICORE_EVENTS_PTR aicoreEvents, uint64_t dataTypeConfig)
@@ -251,9 +289,8 @@ ACL_PROF_CONFIG_PTR aclprofCreateConfig(UINT32_T_PTR deviceIdList, uint32_t devi
 
     profConfig->config.devNums = deviceNums;
     if (deviceNums != 0) {
-        if (memcpy_s(profConfig->config.devIdList, sizeof(profConfig->config.devIdList),
-            deviceIdList, deviceNums * sizeof(uint32_t)) != EOK) {
-            MSPROF_LOGE("copy devID failed. size = %u", deviceNums);
+        if (!GetVisibleDevIdListByLogicId(deviceIdList, deviceNums, profConfig)) {
+            MSPROF_LOGE("get visible devID failed");
             delete profConfig;
             return nullptr;
         }

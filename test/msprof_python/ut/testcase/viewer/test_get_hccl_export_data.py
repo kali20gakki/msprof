@@ -28,7 +28,7 @@ class TestHCCLExport(unittest.TestCase):
 
     def test_get_hccl_timeline_data(self):
         db_manager = DBManager()
-        table_name = 'HCCLAllReduce'
+        table_name = 'HCCLSingleDevice'
         create_sql = "CREATE TABLE IF NOT EXISTS {0} (model_id int, index_id int, _iteration int)".format(table_name)
 
         data = ((1, 1, 1),)
@@ -56,8 +56,8 @@ class TestHCCLExport(unittest.TestCase):
                                         'timestamp', 'args', "group_name"])
         hccl_data = [hccl_data(1, 2, 3, 0, 0, 0, 0, 0, {}, "1"), hccl_data(2, 3, 4, 0, 0, 0, 0, 0, {}, "1")]
 
-        op_data = namedtuple('model', ['op_name', 'timestamp', 'args', 'duration', "group_name"])
-        op_data = [op_data('test_1', 0, [1, 2, 3], 0, "1")]
+        op_data = namedtuple('model', ['op_name', 'timestamp', 'args', 'duration', "group_name", "connection_id"])
+        op_data = [op_data('test_1', 0, [1, 2, 3], 0, "1", 0)]
         InfoConfReader()._info_json = {"pid": 1}
         with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_data_by_group', return_value=op_data):
             hccl = HCCLExport(PARAMS)

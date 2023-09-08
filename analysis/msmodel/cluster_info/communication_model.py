@@ -14,7 +14,8 @@ class CommunicationModel(ViewModel):
     """
 
     def __init__(self, collection_path):
-        super().__init__(collection_path, DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_ALL_REDUCE])
+        super().__init__(collection_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                         [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
 
     def get_all_events_from_db(self: any, conditions: dict, top_hccl_ops: tuple = None) -> list:
         """
@@ -27,10 +28,10 @@ class CommunicationModel(ViewModel):
             else:
                 condition = "op_name IN {}".format(top_hccl_ops)
             sql = "select * from {0} where timestamp < ? and timestamp >= ? " \
-                  "and {1}".format(DBNameConstant.TABLE_HCCL_ALL_REDUCE, condition)
+                  "and {1}".format(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE, condition)
         else:
             sql = "select * from {0} where timestamp < ? and timestamp >= ?" \
-                .format(DBNameConstant.TABLE_HCCL_ALL_REDUCE)
+                .format(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
         data = DBManager.fetch_all_data(self.cur, sql,
                                         (conditions.get('iter_end', 0) * NumberConstant.NS_TO_US,
                                          conditions.get('iter_start', float('inf')) * NumberConstant.NS_TO_US),

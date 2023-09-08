@@ -52,6 +52,7 @@ set(localSrcFiles
     test/param_validation_utest.cpp
     test/platform_adapter_utest.cpp
     test/mmpa_utest.cpp
+    test/platform_utest.cpp
 )
 
 add_executable(common_utest

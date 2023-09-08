@@ -5,6 +5,7 @@ import logging
 import os
 from typing import List
 from collections import defaultdict
+from collections import deque
 
 from common_func.profiling_scene import ProfilingScene
 from common_func.db_manager import DBManager
@@ -15,9 +16,12 @@ from common_func.path_manager import PathManager
 from mscalculate.interface.icalculator import ICalculator
 from msmodel.hccl.hccl_model import HcclViewModel
 from profiling_bean.db_dto.hccl_dto import HcclDto
+from mscalculate.hccl.hccl_task import HcclOps
+from mscalculate.hccl.hccl_task import HcclTask
 from msconfig.config_manager import ConfigManager
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.constant import Constant
+from profiling_bean.db_dto.step_trace_dto import IterationRange
 
 
 class HcclCalculator(ICalculator, MsMultiProcess):
@@ -30,12 +34,10 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         super().__init__(sample_config)
         self._file_list = file_list
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
-        self._model = HcclViewModel(self._project_path, DBNameConstant.DB_HCCL,
-                                    [DBNameConstant.TABLE_HCCL_OP, DBNameConstant.TABLE_HCCL_TASK])
+        self._model = HcclViewModel(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                                    [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE, DBNameConstant.TABLE_HCCL_OP_REPORT])
         self._hccl_data = []
         self._hccl_op_report_data = []
-        self.conn = None
-        self.curs = None
 
     @staticmethod
     def update_bandwidth(communication_data: List[HcclDto]):
@@ -108,12 +110,20 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         calculate hccl communication data and hccl op report data
         """
         with self._model as hccl_model:
-            if not hccl_model.check_table():
+            if not DBManager.check_tables_in_db(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL),
+                                                DBNameConstant.TABLE_HCCL_OP, DBNameConstant.TABLE_HCCL_TASK):
                 logging.warning("The HCCL table does not exist, so there is no need to continue associating operators.")
                 return
-            communication_data = hccl_model.get_hccl_communication_data()
+
+            iter_range: IterationRange = self.sample_config.get(StrConstant.PARAM_ITER_ID)
+            hccl_tasks = hccl_model.get_hccl_task_data()
+            hccl_ops = hccl_model.get_hccl_ops(model_id=iter_range.model_id, index_id=iter_range.iteration_id)
+            communication_data = self._merge_hccl_ops_and_tasks(hccl_ops, hccl_tasks)
+
             if not communication_data:
+                logging.error("communication data is empty")
                 return
+
             self.update_bandwidth(communication_data)
             self.update_op_name_by_group_name(communication_data)
             is_hccl_op_type_valid = self._generate_hccl_op_info(communication_data)
@@ -128,7 +138,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             if not self._hccl_data:
                 return
             hccl_model.rebuild_hccl_table()
-            hccl_model.insert_data_to_db(DBNameConstant.TABLE_HCCL_ALL_REDUCE, self._hccl_data)
+            hccl_model.insert_data_to_db(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE, self._hccl_data)
             if not self._hccl_op_report_data:
                 return
             hccl_model.rebuild_hccl_op_report_table()
@@ -143,22 +153,28 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             return
         if not self._judge_calculate_again():
             return
+        self._drop_table()
         self.calculate()
         self.save()
 
+    def _drop_table(self):
+        with self._model as hccl_model:
+            hccl_model.drop_table(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
+            hccl_model.drop_table(DBNameConstant.TABLE_HCCL_OP_REPORT)
+
     def _judge_calculate_again(self):
         if not ProfilingScene().is_operator():
-            logging.info("In graph scene, to generate table %s and %s", DBNameConstant.TABLE_HCCL_ALL_REDUCE,
+            logging.info("In graph scene, to generate table %s and %s", DBNameConstant.TABLE_HCCL_SINGLE_DEVICE,
                          DBNameConstant.TABLE_HCCL_OP_REPORT)
             return True
         else:
-            hccl_db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL)
-            if DBManager.check_tables_in_db(hccl_db_path, DBNameConstant.TABLE_HCCL_ALL_REDUCE,
+            hccl_db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)
+            if DBManager.check_tables_in_db(hccl_db_path, DBNameConstant.TABLE_HCCL_SINGLE_DEVICE,
                                             DBNameConstant.TABLE_HCCL_OP_REPORT):
                 logging.info("Found table %s and %s in operator scene, no need to generate again",
-                             DBNameConstant.TABLE_HCCL_ALL_REDUCE, DBNameConstant.TABLE_HCCL_OP_REPORT)
+                             DBNameConstant.TABLE_HCCL_SINGLE_DEVICE, DBNameConstant.TABLE_HCCL_OP_REPORT)
                 return False
-            logging.info("No table %s or %s found, to generate it", DBNameConstant.TABLE_HCCL_ALL_REDUCE,
+            logging.info("No table %s or %s found, to generate it", DBNameConstant.TABLE_HCCL_SINGLE_DEVICE,
                          DBNameConstant.TABLE_HCCL_OP_REPORT)
             return True
 
@@ -168,7 +184,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             self._hccl_data.append([data.model_id, data.index_id, data.op_name, data.iteration,
                                     data.hccl_name, data.group_name, data.first_timestamp, data.plane_id,
                                     data.timestamp, data.duration, data.is_dynamic,
-                                    data.task_type, data.op_type, str(data.args)])
+                                    data.task_type, data.op_type, data.connection_id, str(data.args)])
             if data.op_type != Constant.NA:
                 is_hccl_op_type_valid = True
         return is_hccl_op_type_valid
@@ -207,3 +223,44 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             self._hccl_op_report_data = sorted(total_data, key=lambda x: x[5], reverse=True)
         else:
             logging.warning("There is no hccl op report data. Maybe an error occurs during the calculation")
+
+    def _merge_hccl_ops_and_tasks(self, hccl_ops: List[HcclOps], hccl_tasks: List[HcclTask]) -> List[HcclTask]:
+        def update_task_desc_with_hccl_op(op_desc: HcclOps, task_desc: HcclTask) -> HcclTask:
+            task_desc.op_name = op_desc.op_name
+            task_desc.task_type = op_desc.task_type
+            task_desc.op_type = op_desc.op_type
+            task_desc.first_timestamp = op_desc.timestamp
+            task_desc.is_dynamic = op_desc.is_dynamic
+            task_desc.model_id = op_desc.model_id
+            task_desc.connection_id = op_desc.connection_id
+            return task_desc
+
+        if not hccl_ops or not hccl_tasks:
+            logging.error("No Hccl ops or Hccl tasks found")
+            return []
+
+        idx = 0
+        res = [None] * len(hccl_tasks)
+        ops_queue = deque(hccl_ops)
+        task_queue = deque(hccl_tasks)
+        while ops_queue and task_queue:
+            op = ops_queue.popleft()
+            # check corner case: task time between last op end time and next op start time
+            if task_queue and task_queue[0].host_timestamp < op.timestamp:
+                logging.error('Hccl Task (context_id=%d, stream_id=%d, task_id=%d) timestamp not in Ops time range',
+                              task_queue[0].context_id, task_queue[0].stream_id, task_queue[0].task_id)
+
+            while task_queue and task_queue[0].host_timestamp <= (op.timestamp + op.duration):
+                task = task_queue.popleft()
+                task = update_task_desc_with_hccl_op(op, task)
+                res[idx] = task
+                idx += 1
+
+        if ops_queue:
+            logging.error('ops_queue is not empty (len=%d)', len(ops_queue))
+        if task_queue:
+            logging.error('task_queue is not empty (len=%d)', len(task_queue))
+
+        return res[:idx]
+
+

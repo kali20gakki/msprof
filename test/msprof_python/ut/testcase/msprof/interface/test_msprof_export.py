@@ -72,6 +72,81 @@ class TestExportCommand(unittest.TestCase):
             test.sample_config = {'devices': '0'}
             test._add_export_type("")
 
+    def test_add_export_type_should_return_timeline_list_map_when_current_dir_is_host_and_device_exists(self):
+        result_dir = "./msprof/test/"
+        args_dic = {'collection_path': 'test', 'iteration_id': 1, 'model_id': None}
+        args = Namespace(**args_dic)
+        sample_config = {'helper_profiling': ''}
+        with mock.patch(NAMESPACE + '.DataCheckManager.check_data_exist', return_value=True), \
+             mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=sample_config), \
+             mock.patch(NAMESPACE + '.ExportCommand._is_host_export', return_value=True), \
+             mock.patch(NAMESPACE + '.AiStackDataCheckManager._is_device_exist', return_value=True), \
+             mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
+            test = ExportCommand('timeline', args)
+            test.sample_config = {'devices': '64'}
+            test._add_export_type(result_dir + "host")
+            self.assertGreater(len(test.list_map['export_type_list']), 0)
+
+    def test_add_export_type_should_return_summary_list_map_when_current_dir_is_host_and_device_exists(self):
+        result_dir = "./msprof/test/"
+        args_dic = {'collection_path': 'test', 'iteration_id': 1, 'model_id': None}
+        args = Namespace(**args_dic)
+        sample_config = {'helper_profiling': ''}
+        with mock.patch(NAMESPACE + '.DataCheckManager.check_data_exist', return_value=True), \
+             mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=sample_config), \
+             mock.patch(NAMESPACE + '.ExportCommand._is_host_export', return_value=True), \
+             mock.patch(NAMESPACE + '.AiStackDataCheckManager._is_device_exist', return_value=True), \
+             mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
+            test = ExportCommand('summary', args)
+            test.sample_config = {'devices': '64'}
+            test._add_export_type(result_dir + "host")
+            self.assertGreater(len(test.list_map['export_type_list']), 0)
+
+    def test_add_export_type_should_return_timeline_list_map_when_current_dir_is_device_and_host_exist(self):
+        result_dir = "./msprof/test/"
+        args_dic = {'collection_path': 'test', 'iteration_id': 1, 'model_id': None}
+        args = Namespace(**args_dic)
+        sample_config = {'helper_profiling': ''}
+        with mock.patch(NAMESPACE + '.DataCheckManager.check_data_exist', return_value=True), \
+             mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=sample_config), \
+             mock.patch(NAMESPACE + '.ExportCommand._is_host_export', return_value=False), \
+             mock.patch(NAMESPACE + '.AiStackDataCheckManager._is_device_exist', return_value=True), \
+             mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
+            test = ExportCommand('timeline', args)
+            test.sample_config = {'devices': '0'}
+            test._add_export_type(result_dir + "device_0")
+            self.assertGreater(len(test.list_map['export_type_list']), 0)
+
+    def test_add_export_type_should_return_timeline_list_map_when_current_dir_is_host_but_device_vacant(self):
+        result_dir = "./msprof/test/"
+        args_dic = {'collection_path': 'test', 'iteration_id': 1, 'model_id': None}
+        args = Namespace(**args_dic)
+        sample_config = {'helper_profiling': ''}
+        with mock.patch(NAMESPACE + '.DataCheckManager.check_data_exist', return_value=True), \
+             mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=sample_config), \
+             mock.patch(NAMESPACE + '.ExportCommand._is_host_export', return_value=True), \
+             mock.patch(NAMESPACE + '.AiStackDataCheckManager._is_device_exist', return_value=False), \
+             mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
+            test = ExportCommand('timeline', args)
+            test.sample_config = {'devices': '64'}
+            test._add_export_type(result_dir + "host")
+            self.assertGreater(len(test.list_map['export_type_list']), 0)
+
+    def test_add_export_type_should_return_summary_list_map_when_current_dir_is_host_but_device_vacant(self):
+        result_dir = "./msprof/test/"
+        args_dic = {'collection_path': 'test', 'iteration_id': 1, 'model_id': None}
+        args = Namespace(**args_dic)
+        sample_config = {'helper_profiling': ''}
+        with mock.patch(NAMESPACE + '.DataCheckManager.check_data_exist', return_value=True), \
+             mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=sample_config), \
+             mock.patch(NAMESPACE + '.ExportCommand._is_host_export', return_value=True), \
+             mock.patch(NAMESPACE + '.AiStackDataCheckManager._is_device_exist', return_value=False), \
+             mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
+            test = ExportCommand('summary', args)
+            test.sample_config = {'devices': '64'}
+            test._add_export_type(result_dir + "host")
+            self.assertGreater(len(test.list_map['export_type_list']), 0)
+
     def test_check_model_id_1(self):
         args_dic = {"collection_path": "test", "iteration_id": 2, "model_id": 1}
         args = Namespace(**args_dic)
@@ -93,7 +168,8 @@ class TestExportCommand(unittest.TestCase):
             test._check_model_id(db_manager.db_path + "/../")
 
     def test_check_model_id_should_return_error_without_model_ids_hccl(self):
-        args_dic = {'collection_path': 'test', 'iteration_id': 2, 'model_id': 1}
+        db_manager = create_trace_db()
+        args_dic = {'collection_path': 'test', 'iteration_id': 2, 'model_id': 3}
         args = Namespace(**args_dic)
         model_ids_ge = {1}
         model_ids_step = {1}
@@ -105,9 +181,10 @@ class TestExportCommand(unittest.TestCase):
             ProfilingScene().init('')
             test = ExportCommand('timeline', args)
             with self.assertRaises(ProfException):
-                test._check_model_id('2')
+                test._check_model_id(db_manager.db_path + "/../")
 
     def test_check_model_id_should_return_2_with_model_ids_hccl(self):
+        db_manager = create_trace_db()
         args_dic = {'collection_path': 'test', 'iteration_id': 2, 'model_id': 2}
         args = Namespace(**args_dic)
         model_ids_ge = {1}
@@ -119,28 +196,14 @@ class TestExportCommand(unittest.TestCase):
                 mock.patch('common_func.profiling_scene.Utils.get_scene', return_value='step_info'):
             ProfilingScene().init('')
             test = ExportCommand('timeline', args)
-            test._check_model_id('2')
+            test._check_model_id(db_manager.db_path + "/../")
             self.assertEqual(test.list_map[test.MODEL_ID], 2)
 
-    def test_check_model_id_should_return_1_without_model_ids_step(self):
-        args_dic = {'collection_path': 'test', 'iteration_id': 2, 'model_id': 1}
+    def test_check_model_id_should_return_error_with_unexpected_model_id(self):
+        db_manager = create_trace_db()
+        args_dic = {'collection_path': 'test', 'iteration_id': 2, 'model_id': 4}
         args = Namespace(**args_dic)
         model_ids_ge = {1}
-        model_ids_step = set()
-        model_ids_hccl = {1}
-        with mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_ge), \
-                mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_step), \
-                mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_hccl), \
-                mock.patch('common_func.profiling_scene.Utils.get_scene', return_value='step_info'):
-            ProfilingScene().init('')
-            test = ExportCommand('timeline', args)
-            test._check_model_id('1')
-            self.assertEqual(test.list_map[test.MODEL_ID], 1)
-
-    def test_check_model_id_should_return_1_without_model_ids_ge(self):
-        args_dic = {'collection_path': 'test', 'iteration_id': 2, 'model_id': 1}
-        args = Namespace(**args_dic)
-        model_ids_ge = set()
         model_ids_step = {1}
         model_ids_hccl = {1}
         with mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_ge), \
@@ -149,7 +212,23 @@ class TestExportCommand(unittest.TestCase):
                 mock.patch('common_func.profiling_scene.Utils.get_scene', return_value='step_info'):
             ProfilingScene().init('')
             test = ExportCommand('timeline', args)
-            test._check_model_id('1')
+            with self.assertRaises(ProfException):
+                test._check_model_id(db_manager.db_path + "/../")
+
+    def test_check_model_id_should_return_1_with_expected_model_id(self):
+        db_manager = create_trace_db()
+        args_dic = {'collection_path': 'test', 'iteration_id': 2, 'model_id': 1}
+        args = Namespace(**args_dic)
+        model_ids_ge = {1}
+        model_ids_step = {1}
+        model_ids_hccl = {1}
+        with mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_ge), \
+                mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_step), \
+                mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_hccl), \
+                mock.patch('common_func.profiling_scene.Utils.get_scene', return_value='step_info'):
+            ProfilingScene().init('')
+            test = ExportCommand('timeline', args)
+            test._check_model_id(db_manager.db_path + "/../")
             self.assertEqual(test.list_map[test.MODEL_ID], 1)
 
     def test_analyse_sample_config(self):
@@ -251,7 +330,7 @@ class TestExportCommand(unittest.TestCase):
             test = ExportCommand("timeline", args)
             test._print_export_info(params, [])
 
-    def test_handle_export(self):
+    def test_handle_export_without_set_clear_mode(self):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + ".prepare_for_parse"), \
@@ -262,6 +341,51 @@ class TestExportCommand(unittest.TestCase):
             test._handle_export("")
             test.list_map = {'export_type_list': ['acl'], 'devices_list': [1]}
             test._handle_export("")
+
+    def test_handle_export_set_clear_mode_false(self):
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "clear_mode": False}
+        args = Namespace(**args_dic)
+        with mock.patch(NAMESPACE + ".prepare_for_parse"), \
+                mock.patch(NAMESPACE + ".ExportCommand._export_data"), \
+                mock.patch(NAMESPACE + ".ExportCommand._prepare_for_export"):
+            test = ExportCommand("timeline", args)
+            test.list_map = {'export_type_list': ['acl'], 'devices_list': []}
+            test._handle_export("")
+            test.list_map = {'export_type_list': ['acl'], 'devices_list': [1]}
+            test._handle_export("")
+
+    def test_handle_export_set_clear_mode_true_clear_data_and_sqlite(self):
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "clear_mode": True}
+        args = Namespace(**args_dic)
+        with mock.patch(NAMESPACE + ".prepare_for_parse"), \
+                mock.patch(NAMESPACE + ".ExportCommand._export_data"), \
+                mock.patch(NAMESPACE + ".ExportCommand._prepare_for_export"), \
+                mock.patch('os.path.exists', return_value=True), \
+                mock.patch('os.path.join', return_value='JOB/device_0'), \
+                mock.patch(NAMESPACE + '.check_dir_writable'), \
+                mock.patch('shutil.rmtree'):
+            test = ExportCommand("timeline", args)
+            test.list_map = {'export_type_list': ['acl'], 'devices_list': []}
+            test._handle_export("")
+            test.list_map = {'export_type_list': ['acl'], 'devices_list': [1]}
+            test._handle_export("")
+
+    def test_handle_export_set_clear_mode_true_clear_sqlite(self):
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "clear_mode": True}
+        args = Namespace(**args_dic)
+        with mock.patch(NAMESPACE + ".prepare_for_parse"), \
+                mock.patch(NAMESPACE + ".ExportCommand._prepare_for_export"), \
+                mock.patch(NAMESPACE + ".ExportCommand._export_data", side_effect=ProfException(2, 'test', error)), \
+                mock.patch('os.path.exists', return_value=True), \
+                mock.patch('os.path.join', return_value='JOB/device_0'), \
+                mock.patch(NAMESPACE + '.check_dir_writable'), \
+                mock.patch('shutil.rmtree'):
+            test = ExportCommand("timeline", args)
+            test.list_map = {'export_type_list': ['acl'], 'devices_list': []}
+            test._handle_export("")
+            test.list_map = {'export_type_list': ['acl'], 'devices_list': [1]}
+            test._handle_export("")
+
 
     def test_show_tuning_result(self):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
@@ -290,25 +414,6 @@ class TestExportCommand(unittest.TestCase):
                 test.list_map["devices_list"] = ["1"]
                 test.process()
             with mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', retrun_value=False):
-                test = ExportCommand("summary", args)
-                test.list_map["devices_list"] = ["1"]
-                test.process()
-
-    def test_process_1(self):
-        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
-        args = Namespace(**args_dic)
-        path_dir = (['device_0'], ['host'], ['device_1'])
-        with mock.patch(NAMESPACE + '.check_path_valid'):
-            with mock.patch(NAMESPACE + '.get_path_dir', side_effect=path_dir), \
-                    mock.patch('os.path.join', return_value='JOB/device_0'), \
-                    mock.patch('os.path.realpath', return_value='JOB/device_0'), \
-                    mock.patch('os.listdir', return_value=[]), \
-                    mock.patch(NAMESPACE + '.check_path_valid'), \
-                    mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True), \
-                    mock.patch(NAMESPACE + '.ExportCommand._handle_export'), \
-                    mock.patch(NAMESPACE + '.ExportCommand._show_tuning_result'), \
-                    mock.patch(NAMESPACE + '.warn'), \
-                    mock.patch(NAMESPACE + '.MsprofJobSummary.export'):
                 test = ExportCommand("summary", args)
                 test.list_map["devices_list"] = ["1"]
                 test.process()

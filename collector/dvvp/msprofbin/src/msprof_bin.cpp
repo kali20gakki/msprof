@@ -43,6 +43,11 @@ int main(int argc, const char **argv, const char **envp)
         parser.MsprofCmdUsage("msprof needs input parameter.");
         return PROFILING_FAILED;
     }
+    MsoprofTask msopprof_task = MsoprofTask();
+    auto msopprof_ret = msopprof_task.MsopprofProcess(argc, argv);
+    if (msopprof_ret) {
+        return PROFILING_SUCCESS;
+    }
     auto params = parser.MsprofGetOpts(argc, argv);
     if (params == nullptr) {
         return PROFILING_FAILED;
@@ -56,6 +61,7 @@ int main(int argc, const char **argv, const char **envp)
         return PROFILING_FAILED;
     }
     signal(SIGINT, [](int signum) {
+        Collector::Dvvp::Mmpa::MmSleep(5000);    // 5000ms，主进程等待5s再stop.让子进程落盘数据
         MsprofManager::instance()->StopNoWait();
     });
     if (!DynProfMngCli::instance()->IsEnableMode()) {

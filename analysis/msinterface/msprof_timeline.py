@@ -15,7 +15,7 @@ from common_func.singleton import singleton
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from profiling_bean.db_dto.step_trace_dto import IterationRange
-from viewer.association.acl_connect_hwts import AclToHwts
+from viewer.association.host_connect_device import HostToDevice
 from viewer.training.step_trace_viewer import StepTraceViewer
 
 
@@ -24,7 +24,7 @@ class MsprofTimeline:
     """
     This class is used to export a summary timeline json file.
     """
-    CONNECT_LIST = [AclToHwts]
+    CONNECT_LIST = [HostToDevice]
     FILE_NAME = os.path.basename(__file__)
 
     def __init__(self: any) -> None:
@@ -189,6 +189,8 @@ class MsprofTimeline:
         if not self._iteration_time:
             return True
         start_time, end_time = self._iteration_time
+        start_time = InfoConfReader().trans_into_local_time(start_time)
+        end_time = InfoConfReader().trans_into_local_time(end_time)
         time_start = json_value.get(TraceViewHeaderConstant.TRACE_HEADER_TS, NumberConstant.DEFAULT_START_TIME)
         time_end = time_start + json_value.get(TraceViewHeaderConstant.TRACE_HEADER_DURATION,
                                                NumberConstant.DEFAULT_START_TIME)

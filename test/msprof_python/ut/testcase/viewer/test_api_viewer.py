@@ -7,6 +7,7 @@ Copyright Huawei Technologies Co., Ltd. 2023. All rights reserved.
 import unittest
 from unittest import mock
 
+from common_func.info_conf_reader import InfoConfReader
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
 from viewer.api_viewer import ApiViewer
@@ -43,7 +44,7 @@ class TestApiViewer(unittest.TestCase):
             self.assertEqual('{"status": 2, '
                              '"info": "Unable to get api data."}', ret)
 
-    def test_get_timeline_data_should_return_empty_when_data_exist(self):
+    def test_get_timeline_data_should_return_timeline_when_data_exist(self):
         config = {"headers": []}
         params = {
             "project": "test_api_view",
@@ -55,6 +56,7 @@ class TestApiViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + ".ApiDataViewModel.get_timeline_data",
                            return_value=[(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)]):
             InfoJsonReaderManager(InfoJson(pid=100)).process()
+            InfoConfReader()._local_time_offset = 10.0
             check = ApiViewer(config, params)
             ret = check.get_timeline_data()
             self.assertEqual('[{"name": "process_name", '
@@ -66,6 +68,6 @@ class TestApiViewer(unittest.TestCase):
                              '{"name": "thread_sort_index", "pid": 100,'
                              ' "tid": 4, "args": {"sort_index": 4}, "ph": "M"}, '
                              '{"name": "1", "pid": 100, "tid": 4, '
-                             '"ts": 0.002, "dur": 0.003, "args": '
+                             '"ts": 10.002, "dur": 0.003, "args": '
                              '{"Thread Id": 4, "Mode": 1, "level": 5, "id": 6, '
-                             '"item_id": 7}, "ph": "X"}]', ret)
+                             '"item_id": 7, "connection_id": 8}, "ph": "X"}]', ret)

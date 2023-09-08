@@ -324,8 +324,10 @@ int RunningMode::StartAnalyzeTask()
         "analyze",
         "-dir=" + jobResultDir_,
         "-r=" +  params_->analyzeRuleSwitch
-        
     };
+    if (params_->clearSwitch == "on") {
+        argsV.push_back("--clear");
+    }
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsV, envsV, exitCode, taskPid_);
     if (ret == PROFILING_FAILED) {
         MSPROF_LOGE("Failed to launch analyze task, data path: %s", Utils::BaseName(jobResultDir_).c_str());
@@ -473,6 +475,9 @@ int RunningMode::RunExportTimelineTask(const ExecCmdParams &execCmdParams,
         "-dir=" + jobResultDir_,
         "--iteration-id=" + params_->exportIterationId
     };
+    if (params_->clearSwitch == "on") {
+        argsTimelineV.emplace_back("--clear");
+    }
     if (params_->exportModelId != DEFAULT_MODEL_ID) {
         argsTimelineV.emplace_back("--model-id=" + params_->exportModelId);
     }
@@ -1243,7 +1248,7 @@ ParseMode::ParseMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams> 
 {
     whiteSet_ = {ARGS_OUTPUT, ARGS_PARSE, ARGS_PYTHON_PATH};
     neccessarySet_ = {ARGS_OUTPUT, ARGS_PARSE};
-    blackSet_ = {ARGS_QUERY, ARGS_EXPORT, ARGS_ANALYZE, ARGS_RULE};
+    blackSet_ = {ARGS_QUERY, ARGS_EXPORT, ARGS_ANALYZE, ARGS_RULE, ARGS_CLEAR};
 }
 
 ParseMode::~ParseMode() {}
@@ -1296,7 +1301,7 @@ int ParseMode::RunModeTasks()
 AnalyzeMode::AnalyzeMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams> params)
     : RunningMode(preCheckParams, "analyze", params)
 {
-    whiteSet_ = {ARGS_OUTPUT, ARGS_ANALYZE, ARGS_PYTHON_PATH, ARGS_RULE};
+    whiteSet_ = {ARGS_OUTPUT, ARGS_ANALYZE, ARGS_PYTHON_PATH, ARGS_RULE, ARGS_CLEAR};
     neccessarySet_ = {ARGS_OUTPUT, ARGS_ANALYZE};
     blackSet_ = {ARGS_QUERY, ARGS_EXPORT, ARGS_PARSE};
 }
@@ -1350,7 +1355,7 @@ QueryMode::QueryMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams> 
 {
     whiteSet_ = {ARGS_OUTPUT, ARGS_QUERY, ARGS_PYTHON_PATH};
     neccessarySet_ = {ARGS_OUTPUT, ARGS_QUERY};
-    blackSet_ = {ARGS_PARSE, ARGS_EXPORT, ARGS_ANALYZE, ARGS_RULE};
+    blackSet_ = {ARGS_PARSE, ARGS_EXPORT, ARGS_ANALYZE, ARGS_RULE, ARGS_CLEAR};
 }
 
 QueryMode::~QueryMode() {}
@@ -1401,7 +1406,7 @@ ExportMode::ExportMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams
 {
     whiteSet_ = {
         ARGS_OUTPUT, ARGS_EXPORT, ARGS_EXPORT_ITERATION_ID,
-        ARGS_EXPORT_MODEL_ID, ARGS_SUMMARY_FORMAT, ARGS_PYTHON_PATH
+        ARGS_EXPORT_MODEL_ID, ARGS_SUMMARY_FORMAT, ARGS_PYTHON_PATH, ARGS_CLEAR
     };
     neccessarySet_ = {ARGS_OUTPUT, ARGS_EXPORT};
     blackSet_ = {ARGS_QUERY, ARGS_PARSE, ARGS_ANALYZE, ARGS_RULE};
