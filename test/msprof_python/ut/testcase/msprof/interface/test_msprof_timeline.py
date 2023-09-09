@@ -22,9 +22,8 @@ class TestMsprofTimeline(unittest.TestCase):
               'args': {'Stream Id': 1, 'Task Id': 1}, 'ph': 'X'}])
 
         with mock.patch(
-                    'common_func.ai_stack_data_check_manager.AiStackDataCheckManager.contain_core_cpu_reduce_data',
-                    return_value=True):
-
+                'common_func.ai_stack_data_check_manager.AiStackDataCheckManager.contain_core_cpu_reduce_data',
+                return_value=True):
             key.add_export_data(data1, 'task_time')
             with mock.patch('common_func.db_manager.DBManager.fetch_all_data',
                             return_value=(
@@ -46,6 +45,7 @@ class TestMsprofTimeline(unittest.TestCase):
         data = json.dumps([
             {'name': 'process_name', 'pid': 0, 'tid': 0, 'args': {'name': 'Step Trace'}, 'ph': 'M'},
             {'name': 'Reduce', 'pid': 0, 'ph': 'X', 'ts': 1210122}])
+        InfoConfReader()._info_json = {"devices": '0'}
         with mock.patch(NAMESPACE + '.StepTraceViewer.get_one_iter_timeline_data',
                         return_value=data):
             key = MsprofTimeline()
@@ -77,6 +77,11 @@ class TestMsprofTimeline(unittest.TestCase):
     def test_init_export_data(self):
         MsprofTimeline().init_export_data()
         self.assertEqual(MsprofTimeline()._export_data_list, [])
+
+    def tearDown(self) -> None:
+        info_reader = InfoConfReader()
+        info_reader._info_json = {}
+        info_reader._host_freq = None
 
 
 if __name__ == '__main__':

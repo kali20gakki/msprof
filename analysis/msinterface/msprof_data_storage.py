@@ -19,10 +19,11 @@ from common_func.msprof_common import MsProfCommonConstant
 from common_func.msvp_common import create_csv
 from common_func.msvp_common import create_json
 from common_func.msvp_constant import MsvpConstant
-from common_func.os_manager import check_file_writable, check_file_readable
+from common_func.os_manager import check_file_writable
+from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
-from common_func.utils import Utils
-from profiling_bean.prof_enum.timeline_slice_strategy import LoadingTimeLevel, TimeLineSliceStrategy
+from profiling_bean.prof_enum.timeline_slice_strategy import LoadingTimeLevel
+from profiling_bean.prof_enum.timeline_slice_strategy import TimeLineSliceStrategy
 
 
 class MsprofDataStorage:
@@ -137,6 +138,22 @@ class MsprofDataStorage:
         return current_time.strftime('%Y%m%d%H%M%S')
 
     @staticmethod
+    def get_export_prefix_file_name(params: dict, slice_times: int = 0, slice_switch=False) -> str:
+        file_name = params.get(StrConstant.PARAM_DATA_TYPE)
+        if params.get(StrConstant.PARAM_DEVICE_ID) is not None and \
+                params.get(StrConstant.PARAM_DEVICE_ID) != NumberConstant.HOST_ID:
+            file_name += "_" + str(params.get(StrConstant.PARAM_DEVICE_ID))
+            if ProfilingScene().is_step_trace():
+                file_name += "_" + str(params.get(StrConstant.PARAM_MODEL_ID))
+            if params.get(StrConstant.PARAM_ITER_ID) is not None:
+                file_name += "_" + str(params.get(StrConstant.PARAM_ITER_ID))
+        if slice_switch:
+            file_name += "_slice_{}".format(str(slice_times))
+        date_str = MsprofDataStorage.get_current_time_str()
+        file_name += "_" + date_str
+        return file_name
+
+    @staticmethod
     def _calculate_loading_time(row_line_level: int, count_line_level: int) -> float:
         """
         Calculate the approximate time
@@ -150,19 +167,7 @@ class MsprofDataStorage:
 
     @staticmethod
     def _make_export_file_name(params: dict, slice_times: int = 0, slice_switch=False) -> str:
-        file_name = params.get(StrConstant.PARAM_DATA_TYPE)
-        if params.get(StrConstant.PARAM_DEVICE_ID) is not None and \
-                params.get(StrConstant.PARAM_DEVICE_ID) != NumberConstant.HOST_ID:
-            file_name += "_" + str(params.get(StrConstant.PARAM_DEVICE_ID))
-            if ProfilingScene().is_step_trace():
-                file_name += "_" + str(params.get(StrConstant.PARAM_MODEL_ID))
-            if params.get(StrConstant.PARAM_ITER_ID) is not None:
-                file_name += "_" + str(params.get(StrConstant.PARAM_ITER_ID))
-        if slice_switch:
-            file_name += "_slice_{}".format(str(slice_times))
-        date_str = MsprofDataStorage.get_current_time_str()
-        file_name += "_" + date_str
-
+        file_name = MsprofDataStorage.get_export_prefix_file_name(params, slice_times, slice_switch)
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.SUMMARY:
             file_suffix = StrConstant.FILE_SUFFIX_CSV
             if params.get(StrConstant.PARAM_EXPORT_FORMAT) == StrConstant.EXPORT_JSON:
