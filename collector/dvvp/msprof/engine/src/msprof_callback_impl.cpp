@@ -77,7 +77,7 @@ int32_t MsprofCtrlCallbackImplHandle(uint32_t type, VOID_PTR data, uint32_t len)
 int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len)
 {
     MSPROF_EVENT("MsprofCtrlCallback called, type: %u", type);
-
+    Platform::instance()->Init();
     if (type == MSPROF_CTRL_FINALIZE) {
         DynProfMngSrv::instance()->StopDynProfSrv();
         return Msprofiler::Api::ProfAclMgr::instance()->MsprofFinalizeHandle();
@@ -238,7 +238,6 @@ int32_t RegisterNewReporterCallback()
         {PROFILE_REPORT_COMPACT_INFO_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofCompactInfoReporterCallbackImpl)},
         {PROFILE_REPORT_ADDITIONAL_INFO_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofAddiInfoReporterCallbackImpl)},
         {PROFILE_REPORT_REG_TYPE_INFO_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofRegReportTypeInfoImpl)},
-        {PROFILE_HOST_FREQ_IS_ENABLE_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofHostFreqIsEnableImpl)}
     };
     for (auto iter : CALLBACK_FUNC_LIST) {
         aclError ret = ProfApiPlugin::instance()->MsprofProfRegProfilerCallback(iter.first, iter.second,
@@ -324,6 +323,13 @@ int32_t MsprofilerInit()
         reinterpret_cast<VOID_PTR>(MsprofGetHashIdImpl), sizeof(VOID_PTR));
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("Failed to register get hash id callback");
+        return PROFILING_FAILED;
+    }
+    MSPROF_EVENT("Started to register profiling enable host freq callback.");
+    ret = ProfApiPlugin::instance()->MsprofProfRegProfilerCallback(PROFILE_HOST_FREQ_IS_ENABLE_CALLBACK,
+        reinterpret_cast<VOID_PTR>(MsprofHostFreqIsEnableImpl), sizeof(VOID_PTR));
+    if (ret != ACL_SUCCESS) {
+        MSPROF_LOGE("Failed to register enable host freq callback");
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
