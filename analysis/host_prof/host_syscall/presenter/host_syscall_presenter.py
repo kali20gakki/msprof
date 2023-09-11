@@ -206,11 +206,11 @@ class HostSyscallPresenter(HostProfPresenterBase):
         return [
             (
                 data[0], data[1], data[2], data[3],
-                InfoConfReader().get_host_duration(data[4], NumberConstant.MICRO_SECOND),
+                data[4] / NumberConstant.CONVERSION_TIME,
                 data[5],
-                InfoConfReader().get_host_duration(data[6], NumberConstant.MICRO_SECOND),
-                InfoConfReader().get_host_duration(data[7], NumberConstant.MICRO_SECOND),
-                InfoConfReader().get_host_duration(data[8], NumberConstant.MICRO_SECOND)
+                data[6] / NumberConstant.CONVERSION_TIME,
+                data[7] / NumberConstant.CONVERSION_TIME,
+                data[8] / NumberConstant.CONVERSION_TIME
             ) for data in summary_data
         ]
 
