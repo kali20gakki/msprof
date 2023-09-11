@@ -26,7 +26,6 @@ from msconfig.config_manager import ConfigManager
 from msinterface.msprof_data_storage import MsprofDataStorage
 from msinterface.msprof_timeline import MsprofTimeline
 from msparser.aicpu.parse_dp_data import ParseDpData
-from viewer.acl.acl_viewer import AclViewer
 from viewer.ai_core_op_report import AiCoreOpReport
 from viewer.ai_core_op_report import ReportOPCounter
 from viewer.hccl_op_report import ReportHcclStatisticData
@@ -38,7 +37,6 @@ from viewer.cpu_data_report import get_cpu_hot_function
 from viewer.cpu_data_report import get_ts_pmu_events
 from viewer.cpu_usage_report import get_process_cpu_usage
 from viewer.cpu_usage_report import get_sys_cpu_usage_data
-from viewer.ge.ge_op_execute_viewer import GeOpExecuteViewer
 from viewer.ge_info_report import get_ge_model_data
 from viewer.get_hccl_export_data import HCCLExport
 from viewer.get_l2_cache_data import add_op_name, process_hit_rate
@@ -51,7 +49,6 @@ from viewer.get_msvp_summary_mem import get_sys_mem_data
 from viewer.get_msvp_summary_training import get_hbm_summary_data
 from viewer.get_trace_timeline import get_aicore_utilization_timeline
 from viewer.get_trace_timeline import get_dvpp_timeline
-from viewer.get_trace_timeline import get_ge_timeline_data
 from viewer.get_trace_timeline import get_hccs_timeline
 from viewer.get_trace_timeline import get_network_timeline
 from viewer.get_trace_timeline import get_pcie_timeline

@@ -37,15 +37,6 @@ class AiStackDataCheckManager(DataCheckManager):
         return False
 
     @classmethod
-    def contain_acl_data(cls: any, result_dir: str, device_id: any = None) -> bool:
-        """
-        The data path contain acl data or not
-        """
-        return AiStackDataCheckManager._check_output(result_dir, device_id) and \
-            DBManager.check_item_in_table(PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT),
-                                          DBNameConstant.TABLE_API_DATA, 'level', 'acl')
-
-    @classmethod
     def contain_ge_model_load_data(cls: any, result_dir: str, device_id: any = None) -> bool:
         """
         The data path contain Framework.model_load_info data or not
