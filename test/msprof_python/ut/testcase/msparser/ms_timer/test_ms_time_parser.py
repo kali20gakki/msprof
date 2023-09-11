@@ -2,6 +2,7 @@ import configparser
 import unittest
 from unittest import mock
 
+from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
 from msparser.ms_timer.ms_time_parser import MsTimeParser
 
@@ -67,9 +68,15 @@ class TestMsTimeParser(unittest.TestCase):
     def test_parse_host_start(self):
         times = [('clock_realtime', '1616557556918975294'), ('clock_monotonic_raw', '117891403077'),
                  ('cntvct', '7049897983722348')]
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         config = configparser.ConfigParser()
         with mock.patch('configparser.ConfigParser.items', return_value=times), \
                 mock.patch('configparser.ConfigParser.has_section', return_value=True):
             check = MsTimeParser(self.file_list, CONFIG)
             result = check.parse_host_start(config, 0)
         self.assertEqual(result, ('1616557556918975294', '117891403077'))
+
+    def tearDown(self) -> None:
+        info_reader = InfoConfReader()
+        info_reader._info_json = {}
+        info_reader._host_freq = None
