@@ -151,7 +151,7 @@ class TestHostSyscallPresenter(unittest.TestCase):
             InfoConfReader()._info_json = {'pid': 1, 'tid': 0, 'CPU': [{'Frequency': "1000"}]}
             check = HostSyscallPresenter(self.result_dir, self.file_name)
             result = check.get_timeline_data()
-        self.assertEqual(result, [['nanosleep', 18070, 18072, 191454828.891872, 1.057]])
+        self.assertEqual(result, [['nanosleep', 18070, 18072, 191454828.89187202, 1.057]])
 
     def test_get_timeline_header(self):
         with mock.patch(NAMESPACE + '.HostSyscallPresenter._get_tid_list',
@@ -191,6 +191,11 @@ class TestHostSyscallPresenter(unittest.TestCase):
             check.cur_model = HostSyscall('test')
             result = check._get_tid_list()
             self.assertEqual(result, 123)
+
+    def tearDown(self) -> None:
+        info_reader = InfoConfReader()
+        info_reader._info_json = {}
+        info_reader._host_freq = None
 
 
 if __name__ == '__main__':
