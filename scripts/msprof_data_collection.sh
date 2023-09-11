@@ -20,6 +20,13 @@ function get_version(){
 
 function kill_prof_cmd(){
     if [[ ${command_param} =~ ${reg_int} ]]; then
+        ppid=`ps -o ppid= -p ${command_param}`
+        ppid_user=$(ps -o uid -e -o pid | awk -va="${ppid}" '$2==a {print $1}')
+        shell_user=`id -u ${SUDO_USER}`
+        if [ "${ppid_user}" != "${shell_user}" ]; then
+            echo "UID of ${ppid} is:${ppid_user}, UID running this script is:${shell_user}"
+            exit 1
+        fi
         pidLine=`pstree -p ${command_param}`
         pidLine=`echo $pidLine | awk 'BEGIN{ FS="(" ; RS=")" } NF>1 { print $NF }'`
         for pid in $pidLine
