@@ -65,6 +65,7 @@ public:
     bool CheckCoreIdSizeIsValid(const int eventSize) const;
     bool CheckNameContainsDangerCharacter(const std::string &cmd) const;
     bool CheckDeviceIdIsValid(const std::string &devId) const;
+    bool CheckProfilingMetricsLength(const std::string &metricsVal);
     bool CheckProfilingMetricsIsValid(const std::string &metricsName, const std::string &metricsVal);
     int CheckEventsSize(const std::string &events) const;
     bool IsValidSleepPeriod(const int period) const;
