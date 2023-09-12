@@ -177,6 +177,7 @@ public:
     virtual ~InputParser();
 
     void MsprofCmdUsage(const std::string msg);
+    bool CheckInputDataValidity(int argc, CONST_CHAR_PTR argv[]);
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> MsprofGetOpts(int argc, MsprofString argv[]);
     bool HasHelpParamOnly();
 private:
