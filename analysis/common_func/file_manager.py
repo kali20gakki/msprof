@@ -127,18 +127,20 @@ class FileOpen:
     open and read file
     """
 
-    def __init__(self: any, file_path: str, mode: str = "r") -> None:
+    def __init__(self: any, file_path: str, mode: str = "r", max_size: int = Constant.MAX_READ_FILE_BYTES) -> None:
         self.file_path = file_path
         self.file_reader = None
         self.mode = mode
+        self.max_size = max_size
 
     def __enter__(self: any) -> any:
-        check_path_valid(self.file_path, True)
+        check_path_valid(self.file_path, True, max_size=self.max_size)
         self.file_reader = open(self.file_path, self.mode)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.file_reader.close()
+        if self.file_reader:
+            self.file_reader.close()
 
 
 def check_path_valid(path: str, is_file: bool, max_size: int = Constant.MAX_READ_FILE_BYTES) -> None:
@@ -146,6 +148,7 @@ def check_path_valid(path: str, is_file: bool, max_size: int = Constant.MAX_READ
     check the path is valid or not
     :param path: file path
     :param is_file: file or not
+    :param max_size: file's max size
     :return: None
     """
     if path == "":
