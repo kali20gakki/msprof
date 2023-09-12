@@ -120,15 +120,23 @@ bool InputParser::CheckInstrAndTaskParamBothSet(std::unordered_map<int, std::pai
     return false;
 }
 
+bool InputParser::CheckInputDataValidity(int argc, CONST_CHAR_PTR argv[])
+{
+    if (argc > INPUT_MAX_LENTH || argv == nullptr || strnlen(*argv, INPUT_MAX_LENTH) >= INPUT_MAX_LENTH) {
+        CmdLog::instance()->CmdErrorLog("input data is invalid",
+            "please input argc less than 512 and argv is not null and the len of argv less than 512");
+        return false;
+    }
+    return true;
+}
+
 SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOpts(int argc, CONST_CHAR_PTR argv[])
 {
     if (params_ == nullptr) {
         MSPROF_LOGE("params_ is null in InputParser.");
         return nullptr;
     }
-    if (argc > INPUT_MAX_LENTH || argv == nullptr || strnlen(*argv, INPUT_MAX_LENTH) >= INPUT_MAX_LENTH) {
-        CmdLog::instance()->CmdErrorLog("input data is invalid,"
-            "please input argc less than 512 and argv is not null and the len of argv less than 512");
+    if (!CheckInputDataValidity(argc, argv)) {
         return nullptr;
     }
     int opt = 0;
@@ -149,9 +157,8 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
             MsprofCmdUsage("");
             return params_;
         }
-        cmdInfo.args[opt] = MmGetOptArg();
         argvStr = std::string(argv[MmGetOptInd() - 1]);
-        if (cmdInfo.args[opt] == nullptr) {
+        if (cmdInfo.args[opt] = MmGetOptArg(); cmdInfo.args[opt] == nullptr) {
             CmdLog::instance()->CmdErrorLog("Argument %s empty value.", argvStr.c_str());
             MsprofCmdUsage("");
             return nullptr;
