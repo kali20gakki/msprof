@@ -146,6 +146,9 @@ class NumberConstant:
 
     STATIC_GRAPH_INDEX = 0
 
+    RDMA_NO_BARRIER_TASK_NUM = 3
+    RDMA_WITH_BARRIER_TASK_NUM = 5
+
     @property
     def conversion_time(self: any) -> float:
         """
