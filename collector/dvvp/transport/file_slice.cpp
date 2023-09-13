@@ -218,6 +218,10 @@ int FileSlice::WriteCtrlDataToFile(const std::string &absolutePath, const std::s
     std::ofstream file;
     std::unique_lock<std::mutex> lk(sliceFileMtx_);
 
+    if (Utils::IsSoftLink(absolutePath)) {
+        MSPROF_LOGE("File path is invalid: soft link is not allowed, filePath: %s.", absolutePath.c_str());
+        return PROFILING_FAILED;
+    }
     if (analysis::dvvp::common::utils::Utils::IsFileExist(absolutePath)) {
         MSPROF_LOGI("file exist: %s", Utils::BaseName(absolutePath).c_str());
         return PROFILING_SUCCESS;
@@ -305,6 +309,10 @@ bool FileSlice::CreateDoneFile(const std::string &absolutePath, const std::strin
     }
     std::string tempPath = absolutePath + ".done";
     std::ofstream file;
+    if (Utils::IsSoftLink(absolutePath)) {
+        MSPROF_LOGE("File path is invalid: soft link is not allowed, filePath: %s.", absolutePath.c_str());
+        return false;
+    }
     file.open(tempPath);
     if (!file.is_open()) {
         int errorNo = MmGetErrorCode();
