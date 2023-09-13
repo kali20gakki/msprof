@@ -4,8 +4,9 @@
 
 import unittest
 from unittest import mock
-from msmodel.compact_info.memcpy_info_model import MemcpyInfoModel
+
 from common_func.db_name_constant import DBNameConstant
+from msmodel.compact_info.memcpy_info_model import MemcpyInfoModel
 
 NAMESPACE = 'msmodel.compact_info.memcpy_info_model'
 

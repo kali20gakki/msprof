@@ -2,10 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
-from abc import abstractmethod
-
-from msmodel.interface.base_model import BaseModel
 from common_func.db_name_constant import DBNameConstant
+from msmodel.interface.base_model import BaseModel
 
 
 class L2CacheCalculatorModel(BaseModel):

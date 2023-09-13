@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-import re
+
 import logging
 import os
+import re
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant

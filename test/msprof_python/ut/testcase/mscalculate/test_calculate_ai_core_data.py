@@ -1,9 +1,9 @@
 import unittest
 from unittest import mock
 
+from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
-from common_func.info_conf_reader import InfoConfReader
 from profiling_bean.prof_enum.chip_model import ChipModel
 
 sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs',

@@ -2,15 +2,15 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
-from common_func.profiling_scene import ProfilingScene
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.memcpy_constant import MemoryCopyConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_iteration import MsprofIteration
-from msmodel.memory_copy.memcpy_model import MemcpyModel
+from common_func.profiling_scene import ProfilingScene
 from mscalculate.interface.icalculator import ICalculator
+from msmodel.memory_copy.memcpy_model import MemcpyModel
 from profiling_bean.struct_info.memcpy_state_machine import MemcpyRecorder
 
 

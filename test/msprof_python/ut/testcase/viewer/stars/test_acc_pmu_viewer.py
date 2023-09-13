@@ -1,5 +1,4 @@
 import unittest
-from collections import OrderedDict
 
 from viewer.stars.acc_pmu_viewer import AccPmuViewer
 

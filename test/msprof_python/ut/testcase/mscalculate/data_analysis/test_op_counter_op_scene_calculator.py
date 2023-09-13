@@ -2,15 +2,13 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 
-import sqlite3
 import unittest
 from unittest import mock
 
-from common_func.profiling_scene import ProfilingScene
-from mscalculate.data_analysis.op_counter_op_scene_calculator import OpCounterOpSceneCalculator
 from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
 from constant.constant import CONFIG
+from mscalculate.data_analysis.op_counter_op_scene_calculator import OpCounterOpSceneCalculator
 from profiling_bean.prof_enum.chip_model import ChipModel
 from sqlite.db_manager import DBManager
 

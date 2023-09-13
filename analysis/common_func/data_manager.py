@@ -1,15 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
-import json
-import os
-import glob
-import logging
-from common_func.constant import Constant
+
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from msmodel.interface.view_model import ViewModel
 from viewer.runtime_report import add_mem_bound, cube_usage
-from common_func.info_conf_reader import InfoConfReader
 
 
 class DataManager:

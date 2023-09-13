@@ -7,12 +7,12 @@ import logging
 import sqlite3
 from abc import ABC
 
-from msconfig.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.path_manager import PathManager
+from msconfig.config_manager import ConfigManager
 from msmodel.interface.base_model import BaseModel
 
 

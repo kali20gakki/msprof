@@ -3,11 +3,10 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
 
 import logging
-import os
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
-from common_func.file_manager import FileManager, check_path_valid, FileOpen
+from common_func.file_manager import FileManager, FileOpen
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager

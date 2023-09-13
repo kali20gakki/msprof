@@ -14,8 +14,8 @@ from common_func.file_name_manager import get_aiv_compiles
 from common_func.file_name_manager import get_api_event_compiles
 from common_func.file_name_manager import get_biu_compiles
 from common_func.file_name_manager import get_ctrl_cpu_compiles
-from common_func.file_name_manager import get_dbg_file_compiles
 from common_func.file_name_manager import get_data_preprocess_compiles
+from common_func.file_name_manager import get_dbg_file_compiles
 from common_func.file_name_manager import get_ddr_compiles
 from common_func.file_name_manager import get_dvpp_compiles
 from common_func.file_name_manager import get_ffts_pmu_compiles
@@ -27,6 +27,7 @@ from common_func.file_name_manager import get_ge_fusion_op_compiles
 from common_func.file_name_manager import get_ge_graph_add_info_compiles
 from common_func.file_name_manager import get_ge_hash_compiles
 from common_func.file_name_manager import get_ge_host_compiles
+from common_func.file_name_manager import get_ge_logic_stream_info_compiles
 from common_func.file_name_manager import get_ge_memory_application_info_compiles
 from common_func.file_name_manager import get_ge_model_load_compiles
 from common_func.file_name_manager import get_ge_model_time_compiles
@@ -36,7 +37,6 @@ from common_func.file_name_manager import get_ge_step_info_compiles
 from common_func.file_name_manager import get_ge_task_compiles
 from common_func.file_name_manager import get_ge_tensor_add_info_compiles
 from common_func.file_name_manager import get_ge_tensor_info_compiles
-from common_func.file_name_manager import get_ge_logic_stream_info_compiles
 from common_func.file_name_manager import get_hash_data_compiles
 from common_func.file_name_manager import get_hbm_compiles
 from common_func.file_name_manager import get_hccl_hcom_compiles

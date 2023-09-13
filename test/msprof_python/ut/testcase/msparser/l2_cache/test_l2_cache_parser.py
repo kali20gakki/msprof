@@ -9,12 +9,8 @@ import unittest
 from unittest import mock
 
 from msparser.l2_cache.l2_cache_parser import L2CacheParser
-from profiling_bean.struct_info.l2_cache import L2CacheDataBean
-from common_func.info_conf_reader import InfoConfReader
-from common_func.file_manager import FileOpen
 from profiling_bean.prof_enum.data_tag import DataTag
-
-from constant.constant import CONFIG
+from profiling_bean.struct_info.l2_cache import L2CacheDataBean
 
 NAMESPACE = 'msparser.l2_cache.l2_cache_parser'
 MODEL_NAMESPACE = 'msmodel.l2_cache.l2_cache_parser_model'

@@ -9,7 +9,6 @@ from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.utils import Utils
 from msmodel.ge.ge_hash_model import GeHashModel
 from msparser.interface.data_parser import DataParser
 from profiling_bean.prof_enum.data_tag import DataTag

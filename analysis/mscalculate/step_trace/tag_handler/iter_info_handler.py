@@ -3,8 +3,9 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 from collections import defaultdict
-from mscalculate.interface.step_trace_tag_handler import StepTraceTagHandler
+
 from common_func.step_trace_constant import StepTraceConstant
+from mscalculate.interface.step_trace_tag_handler import StepTraceTagHandler
 
 
 class AllReduceStreamHandler(StepTraceTagHandler):

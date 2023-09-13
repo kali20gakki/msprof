@@ -1,20 +1,21 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+
 import logging
 
+from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.profiling_scene import ProfilingScene
+from mscalculate.hccl.hccl_task import HcclOps
+from mscalculate.hccl.hccl_task import HcclTask
 from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.view_model import ViewModel
 from profiling_bean.db_dto.hccl_dto import HcclDto
-from mscalculate.hccl.hccl_task import HcclOps
-from mscalculate.hccl.hccl_task import HcclTask
 from profiling_bean.db_dto.time_section_dto import CommunicationTimeSection
-from common_func.constant import Constant
 
 
 class HCCLModel(ParserModel):

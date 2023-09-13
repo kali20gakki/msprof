@@ -1,10 +1,12 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+
 import logging
 import os
 from enum import Enum
 
+from common_func.common import error
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileOpen
@@ -16,13 +18,13 @@ from msmodel.nano.nano_exeom_model import NanoExeomModel
 from msmodel.nano.nano_exeom_model import NanoGraphAddInfoViewModel
 from msmodel.runtime.runtime_host_task_model import RuntimeHostTaskModel
 from msparser.interface.data_parser import DataParser
-from msparser.nano.nano_dbg_bean import TypeHeadBean, MagicHeadBean
 from msparser.nano.nano_dbg_bean import L1OpDescBean
-from msparser.nano.nano_dbg_bean import NameBean
-from msparser.nano.nano_dbg_bean import NumBean
 from msparser.nano.nano_dbg_bean import L2InputDescBean
 from msparser.nano.nano_dbg_bean import L2OutputDescBean
+from msparser.nano.nano_dbg_bean import NameBean
+from msparser.nano.nano_dbg_bean import NumBean
 from msparser.nano.nano_dbg_bean import ShapeBean
+from msparser.nano.nano_dbg_bean import TypeHeadBean, MagicHeadBean
 from profiling_bean.prof_enum.data_tag import DataTag
 
 
@@ -73,6 +75,9 @@ class NanoDbgParser(DataParser, MsMultiProcess):
 
     # 0x5a5a5a5a is 1515870810
     MAGIC_NUM = 1515870810
+
+    # 1G
+    DBG_MAX_SIZE = 1024 * 1024 * 1024
 
     SEMICOLON_CHAR = ";"
 
@@ -222,7 +227,9 @@ class NanoDbgParser(DataParser, MsMultiProcess):
     def _read_data(self: any, file_path: str, model_id: int) -> None:
         file_size = os.path.getsize(file_path)
         data_offset = 0
-        if not file_size:
+        if not file_size or file_size > self.DBG_MAX_SIZE:
+            logging.error("The dbg file's size is invalid, is %d", file_size)
+            error("The dbg file's size is invalid!")
             return
         with FileOpen(file_path, 'rb') as _open_file:
             _all_data = _open_file.file_reader.read(file_size)

@@ -8,9 +8,8 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 import unittest
 from unittest import mock
 
-from mscalculate.acl.acl_calculator import AclCalculator
-
 from constant.constant import CONFIG
+from mscalculate.acl.acl_calculator import AclCalculator
 
 NAMESPACE = 'mscalculate.acl.acl_calculator'
 

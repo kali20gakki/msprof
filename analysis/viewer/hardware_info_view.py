@@ -3,15 +3,14 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2018-2020. All rights reserved.
 
 import json
-import os
 import sqlite3
 from collections import OrderedDict
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.msvp_common import float_calculate
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.msvp_common import float_calculate
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 

@@ -5,14 +5,14 @@ import os
 import unittest
 from unittest import mock
 
-from constant.constant import clear_dt_project
-from common_func.profiling_scene import ProfilingScene
-from mscalculate.hccl.hccl_calculator import HcclCalculator
-from profiling_bean.db_dto.hccl_dto import HcclDto
-from constant.constant import CONFIG
 from common_func.constant import Constant
+from common_func.profiling_scene import ProfilingScene
+from constant.constant import CONFIG
+from constant.constant import clear_dt_project
+from mscalculate.hccl.hccl_calculator import HcclCalculator
 from mscalculate.hccl.hccl_task import HcclOps
 from mscalculate.hccl.hccl_task import HcclTask
+from profiling_bean.db_dto.hccl_dto import HcclDto
 
 NAMESPACE = 'mscalculate.hccl.hccl_calculator'
 

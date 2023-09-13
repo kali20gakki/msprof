@@ -5,16 +5,16 @@
 import logging
 from abc import ABC
 
-from msconfig.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
-from common_func.platform.chip_manager import ChipManager
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.msvp_common import float_calculate
-from common_func.utils import Utils
 from common_func.msprof_exception import ProfException
+from common_func.msvp_common import float_calculate
+from common_func.platform.chip_manager import ChipManager
+from common_func.utils import Utils
+from msconfig.config_manager import ConfigManager
 from msmodel.interface.base_model import BaseModel
 
 

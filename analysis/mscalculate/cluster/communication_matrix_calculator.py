@@ -1,14 +1,16 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+
 import logging
 from collections import defaultdict
+
 from common_func.common import print_msg
-from common_func.msprof_exception import ProfException
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.str_constant import CommunicationMatrixInfo
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.str_constant import TransportType
+from common_func.msprof_exception import ProfException
 from mscalculate.cluster.meta_calculator import MetaCalculator
 from mscalculate.cluster.slow_link_calculator import SlowLinkCalculator
 from msparser.cluster.meta_parser import HcclAnalysisTool

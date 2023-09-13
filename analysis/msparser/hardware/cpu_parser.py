@@ -10,7 +10,6 @@ import traceback
 from functools import reduce
 from operator import add
 
-from msconfig.config_manager import ConfigManager
 from common_func import multi_process_cb
 from common_func.common import CommonConstant
 from common_func.common import call_sys_exit
@@ -28,6 +27,7 @@ from common_func.msvp_common import error
 from common_func.msvp_common import get_cpu_event_chunk
 from common_func.msvp_common import is_valid_original_data
 from common_func.utils import Utils
+from msconfig.config_manager import ConfigManager
 
 
 def create_originaldatatable(curs: any, table_name: str) -> int:

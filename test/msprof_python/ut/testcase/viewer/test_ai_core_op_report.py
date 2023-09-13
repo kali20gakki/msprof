@@ -2,18 +2,15 @@ import unittest
 from collections import deque
 from unittest import mock
 
-from common_func.info_conf_reader import InfoConfReader
-from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.data_manager import DataManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.msvp_constant import MsvpConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.msvp_constant import MsvpConstant
+from common_func.profiling_scene import ProfilingScene
 from constant.ut_db_name_constant import DB_AICORE_OP_SUMMARY
 from constant.ut_db_name_constant import DB_OP_COUNTER
-from constant.ut_db_name_constant import TABLE_AI_CPU
 from constant.ut_db_name_constant import TABLE_OP_COUNTER_OP_REPORT
-from sqlite.db_manager import DBManager
 from sqlite.db_manager import DBOpen
 from viewer.ai_core_op_report import AiCoreOpReport
 from viewer.ai_core_op_report import ReportOPCounter

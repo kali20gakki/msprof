@@ -7,11 +7,11 @@ import unittest
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
-from msparser.freq.freq_parser import FreqParser
-from msparser.data_struct_size_constant import StructFmt
-from profiling_bean.prof_enum.data_tag import DataTag
-from framework.offset_calculator import OffsetCalculator
 from constant.constant import CONFIG
+from framework.offset_calculator import OffsetCalculator
+from msparser.data_struct_size_constant import StructFmt
+from msparser.freq.freq_parser import FreqParser
+from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = 'msparser.freq.freq_parser'
 

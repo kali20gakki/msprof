@@ -1,7 +1,6 @@
 import unittest
 
 from profiling_bean.ge.ge_task_bean import GeTaskBean
-from common_func.empty_class import EmptyClass
 
 NAMESPACE = 'profiling_bean.struct_info.ge.ge_fusion_op_info_bean'
 

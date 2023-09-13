@@ -7,8 +7,9 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import unittest
 from unittest import mock
-from msmodel.l2_cache.l2_cache_calculator_model import L2CacheCalculatorModel
+
 from common_func.db_name_constant import DBNameConstant
+from msmodel.l2_cache.l2_cache_calculator_model import L2CacheCalculatorModel
 
 NAMESPACE = 'msmodel.l2_cache.l2_cache_calculator_model'
 

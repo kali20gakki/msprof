@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
-from collections import OrderedDict
 import logging
 import os
+from collections import OrderedDict
 
 from common_func.config_mgr import ConfigMgr
 from common_func.db_name_constant import DBNameConstant

@@ -2,12 +2,12 @@ import unittest
 from unittest import mock
 
 from constant.constant import CONFIG
-from msparser.biu_perf.biu_perf_parser import BiuPerfParser
 from msparser.biu_perf.biu_core_parser import BiuCoreParser
 from msparser.biu_perf.biu_core_parser import BiuCubeParser
-from profiling_bean.prof_enum.data_tag import DataTag
+from msparser.biu_perf.biu_perf_parser import BiuPerfParser
 from profiling_bean.biu_perf.core_info_bean import CoreInfo
 from profiling_bean.biu_perf.flow_bean import FlowBean
+from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = 'msparser.biu_perf.biu_perf_parser'
 

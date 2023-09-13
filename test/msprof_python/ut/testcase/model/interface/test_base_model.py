@@ -1,6 +1,6 @@
-import sqlite3
 import unittest
 from unittest import mock
+
 from msmodel.interface.base_model import BaseModel
 
 NAMESPACE = 'msmodel.interface.base_model'

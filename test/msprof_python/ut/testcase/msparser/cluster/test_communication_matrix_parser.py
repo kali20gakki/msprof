@@ -3,15 +3,15 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
 import unittest
-import os
 from unittest import mock
+
 import pytest
+
+from common_func.ms_constant.str_constant import CommunicationMatrixInfo
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.msprof_exception import ProfException
 from msparser.cluster.communication_matrix_parser import CommunicationMatrixParser
 from msparser.cluster.communication_matrix_parser import MatrixDataType
-from msparser.cluster.meta_parser import HcclAnalysisTool
-from common_func.ms_constant.str_constant import StrConstant
-from common_func.ms_constant.str_constant import CommunicationMatrixInfo
-from common_func.msprof_exception import ProfException
 
 NAMESPACE = 'msparser.cluster.communication_matrix_parser'
 

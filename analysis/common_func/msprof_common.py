@@ -5,24 +5,24 @@
 import logging
 import os
 import re
-
 from functools import partial
-from common_func.common import init_log
+
 from common_func.common import check_free_memory
 from common_func.common import error
-from common_func.common import warn
+from common_func.common import init_log
 from common_func.common import print_info
+from common_func.common import warn
 from common_func.constant import Constant
+from common_func.file_manager import FileManager
+from common_func.file_name_manager import FileNameManagerConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import files_chmod
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.os_manager import check_dir_readable
 from common_func.os_manager import check_dir_writable
 from common_func.os_manager import check_file_writable
 from common_func.path_manager import PathManager
-from common_func.file_manager import FileManager
-from common_func.file_name_manager import FileNameManagerConstant
 from framework.collection_engine import AI
 from framework.file_dispatch import FileDispatch
 

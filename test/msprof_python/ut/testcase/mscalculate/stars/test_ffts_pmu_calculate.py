@@ -7,9 +7,9 @@ Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
 from unittest import TestCase
 from unittest import mock
 
-from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.profiling_scene import ProfilingScene
 from constant.constant import CONFIG
 from mscalculate.stars.ffts_pmu_calculate import FftsPmuCalculate
 from profiling_bean.prof_enum.data_tag import DataTag

@@ -13,8 +13,8 @@ from common_func.info_conf_reader import InfoConfReader
 from constant.constant import clear_dt_project
 from mscalculate.stars.sub_task_calculate import SubTaskCalculator
 from msmodel.stars.ffts_log_model import FftsLogModel
-from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.db_dto.task_time_dto import TaskTimeDto
+from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = 'mscalculate.stars.sub_task_calculate'
 MODELNAMESPACE = 'msmodel.stars.ffts_log_model'

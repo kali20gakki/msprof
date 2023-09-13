@@ -1,9 +1,10 @@
 import unittest
 from unittest import mock
-from viewer.memory_copy.memory_copy_viewer import MemoryCopyViewer
+
+from common_func.info_conf_reader import InfoConfReader
 from common_func.memcpy_constant import MemoryCopyConstant
 from common_func.ms_constant.str_constant import StrConstant
-from common_func.info_conf_reader import InfoConfReader
+from viewer.memory_copy.memory_copy_viewer import MemoryCopyViewer
 
 NAMESPACE = 'msmodel.memory_copy.memcpy_model.MemcpyModel'
 

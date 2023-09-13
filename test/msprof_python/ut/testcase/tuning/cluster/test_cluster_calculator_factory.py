@@ -3,8 +3,9 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
 import unittest
-from tuning.cluster.cluster_calculator_factory import SlowRankCalculatorFactory
+
 from tuning.cluster.cluster_calculator_factory import SlowLinkCalculatorFactory
+from tuning.cluster.cluster_calculator_factory import SlowRankCalculatorFactory
 
 NAMESPACE = 'tuning.cluster.cluster_calculator_factory'
 

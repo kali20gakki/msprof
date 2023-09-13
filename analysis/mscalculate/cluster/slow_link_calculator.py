@@ -3,8 +3,8 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.str_constant import OpBandWidthType
+from common_func.ms_constant.str_constant import StrConstant
 from mscalculate.cluster.meta_calculator import MetaCalculator
 
 

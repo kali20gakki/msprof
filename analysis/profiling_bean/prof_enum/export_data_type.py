@@ -14,11 +14,6 @@ class ExportDataType(Enum):
     INVALID = -1
     MSPROF_TX = 0
     STEP_TRACE = 1
-    ACL = 2
-    ACL_STATISTIC = 3
-    GE = 4
-    GE_OP_EXECUTE = 5
-    RUNTIME_API = 6
     TASK_TIME = 7
     HBM = 8
     DDR = 9

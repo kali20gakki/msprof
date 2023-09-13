@@ -4,8 +4,9 @@
 
 import unittest
 from unittest import mock
-from mscalculate.step_trace.create_step_table import StepTableBuilder
+
 from mscalculate.step_trace.create_step_table import GetNextCreator
+from mscalculate.step_trace.create_step_table import StepTableBuilder
 from profiling_bean.db_dto.step_trace_dto import StepTraceOriginDto
 
 NAMESPACE = 'mscalculate.step_trace.create_step_table'

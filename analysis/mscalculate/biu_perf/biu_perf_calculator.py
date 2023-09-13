@@ -4,11 +4,11 @@
 
 import logging
 
+from common_func.constant import Constant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
-from common_func.constant import Constant
-from mscalculate.biu_perf.biu_monitor_calculator import MonitorFlowCalculator
 from mscalculate.biu_perf.biu_monitor_calculator import MonitorCyclesCalculator
+from mscalculate.biu_perf.biu_monitor_calculator import MonitorFlowCalculator
 
 
 class BiuPerfCalculator(MsMultiProcess):

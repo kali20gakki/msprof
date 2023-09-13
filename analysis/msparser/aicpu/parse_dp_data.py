@@ -7,14 +7,14 @@ import os
 import struct
 
 from common_func.common import warn
-from common_func.info_conf_reader import InfoConfReader
 from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
+from common_func.file_manager import FileOpen
 from common_func.file_name_manager import get_data_preprocess_compiles
 from common_func.file_name_manager import get_file_name_pattern_match
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_valid_original_data
-from common_func.file_manager import FileOpen
 
 
 class ParseDpData:

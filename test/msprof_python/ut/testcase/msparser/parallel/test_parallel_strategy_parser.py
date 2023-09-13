@@ -6,10 +6,7 @@ import os
 import unittest
 from unittest import mock
 
-import pytest
-
 from common_func.constant import Constant
-from common_func.msprof_exception import ProfException
 from constant.constant import clear_dt_project
 from msmodel.parallel.parallel_model import ParallelViewModel
 from msparser.parallel.parallel_strategy_parser import ParallelStrategyParser

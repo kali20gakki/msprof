@@ -1,7 +1,6 @@
 import struct
 import unittest
 from unittest import mock
-from collections import namedtuple
 
 from common_func.hash_dict_constant import HashDictData
 from msmodel.api.api_data_model import ApiDataModel

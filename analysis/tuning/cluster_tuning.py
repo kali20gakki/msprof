@@ -4,8 +4,8 @@
 
 from common_func.common import print_msg
 from common_func.common_prof_rule import CommonProfRule
-from mscalculate.cluster.trailing_calculator import TrailingCalculator
 from mscalculate.cluster.cluster_link_calculate import ClusterLinkCalculator
+from mscalculate.cluster.trailing_calculator import TrailingCalculator
 from tuning.base_tuning_view import BaseTuningView
 
 

@@ -8,8 +8,8 @@ from collections import OrderedDict
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.msvp_common import float_calculate
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msvp_common import float_calculate
 from common_func.utils import Utils
 
 

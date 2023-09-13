@@ -1,6 +1,6 @@
 import unittest
-from unittest import mock
 from collections import OrderedDict
+from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
 from viewer.msproftx_viewer import MsprofTxViewer

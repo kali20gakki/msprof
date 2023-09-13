@@ -7,9 +7,8 @@ Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
 import unittest
 from unittest import mock
 
-from msparser.iter_rec.iter_info_updater.iter_info_updater import IterInfoUpdater
 from msparser.iter_rec.iter_info_updater.iter_info import IterInfo
-from mock_tools import ClassMock
+from msparser.iter_rec.iter_info_updater.iter_info_updater import IterInfoUpdater
 
 
 class TestIterInfoUpdater(unittest.TestCase):

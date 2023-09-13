@@ -2,16 +2,14 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
-import datetime
-import logging
 import os
 import shutil
 
-from common_func.msprof_common import get_path_dir
-from common_func.ms_constant.str_constant import StrConstant
-from common_func.msvp_common import check_dir_writable
 from analyzer.communication_analyzer import CommunicationAnalyzer
 from analyzer.communication_matrix_analyzer import CommunicationMatrixAnalyzer
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.msprof_common import get_path_dir
+from common_func.msvp_common import check_dir_writable
 
 
 class AnalyzeCommand:

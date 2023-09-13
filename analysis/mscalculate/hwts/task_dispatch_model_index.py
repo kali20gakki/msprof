@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022. All rights reserved.
-from common_func.profiling_scene import ProfilingScene
-from common_func.msprof_iteration import MsprofIteration
+
 from common_func.constant import Constant
+from common_func.msprof_iteration import MsprofIteration
+from common_func.profiling_scene import ProfilingScene
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 
 

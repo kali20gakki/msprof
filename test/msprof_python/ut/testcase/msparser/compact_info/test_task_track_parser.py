@@ -5,10 +5,10 @@
 import unittest
 from unittest import mock
 
-from msparser.compact_info.task_track_parser import TaskTrackParser
-from msparser.compact_info.task_track_bean import TaskTrackBean
-from profiling_bean.prof_enum.data_tag import DataTag
 from constant.constant import CONFIG
+from msparser.compact_info.task_track_bean import TaskTrackBean
+from msparser.compact_info.task_track_parser import TaskTrackParser
+from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = 'msparser.compact_info.task_track_parser'
 MODEL_NAMESPACE = 'msmodel.compact_info.task_track_model'

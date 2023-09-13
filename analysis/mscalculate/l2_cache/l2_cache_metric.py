@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
-from mscalculate.interface.imetrics import IMetrics
 from common_func.ms_constant.number_constant import NumberConstant
+from mscalculate.interface.imetrics import IMetrics
 
 
 class HitRateMetric(IMetrics):
