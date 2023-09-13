@@ -64,7 +64,10 @@ int ProfManager::AclUinit()
 bool ProfManager::CreateDoneFile(const std::string &absolutePath, const std::string &fileSize) const
 {
     std::ofstream file;
-
+    if (Utils::IsSoftLink(absolutePath)) {
+        MSPROF_LOGE("File path is invalid: soft link is not allowed, filePath: %s.", absolutePath.c_str());
+        return false;
+    }
     file.open(absolutePath, std::ios::out);
     if (!file.is_open()) {
         MSPROF_LOGE("[CreateDoneFile]Failed to open %s", Utils::BaseName(absolutePath).c_str());
@@ -82,6 +85,10 @@ int ProfManager::WriteCtrlDataToFile(const std::string &absolutePath, const std:
 {
     std::ofstream file;
 
+    if (Utils::IsSoftLink(absolutePath)) {
+        MSPROF_LOGE("File path is invalid: soft link is not allowed, filePath: %s.", absolutePath.c_str());
+        return PROFILING_FAILED;
+    }
     if (Utils::IsFileExist(absolutePath)) {
         MSPROF_LOGI("[WriteCtrlDataToFile]file exist: %s", Utils::BaseName(absolutePath).c_str());
         return PROFILING_SUCCESS;
