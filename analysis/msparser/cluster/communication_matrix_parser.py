@@ -78,7 +78,9 @@ class CommunicationMatrixParser(MetaParser):
             raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
         link_info = {}
         idx = 0
-        rdma_transit_op_num = 3 if HcclAnalysisTool.is_send_or_recv_op(events, idx) else 5
+        rdma_transit_op_num = NumberConstant.RDMA_NO_BARRIER_TASK_NUM \
+            if HcclAnalysisTool.is_send_or_recv_op(events, idx) \
+            else NumberConstant.RDMA_WITH_BARRIER_TASK_NUM
         while idx < len(events):
             event = events[idx]
             if not HcclAnalysisTool.is_valid_link(event):
