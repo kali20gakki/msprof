@@ -3,17 +3,14 @@ import json
 import unittest
 from unittest import mock
 
-from common_func.profiling_scene import ProfilingScene
-from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
-from common_func.platform.chip_manager import ChipManager
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.msprof_common import MsProfCommonConstant
+from common_func.platform.chip_manager import ChipManager
 from msinterface.msprof_export_data import MsProfExportDataUtils
 from msinterface.msprof_timeline import MsprofTimeline
 from profiling_bean.prof_enum.chip_model import ChipModel
-from common_func.ms_constant.str_constant import StrConstant
-from common_func.msprof_common import MsProfCommonConstant
-from viewer.stars.stars_soc_view import StarsSocView
 
 NAMESPACE = 'msinterface.msprof_export_data'
 

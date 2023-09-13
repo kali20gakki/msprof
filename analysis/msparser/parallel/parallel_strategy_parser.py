@@ -8,7 +8,6 @@ import os
 from json import JSONDecodeError
 
 from common_func.common import error
-from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileOpen
 from common_func.ms_constant.str_constant import StrConstant

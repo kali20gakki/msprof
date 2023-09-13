@@ -1,19 +1,20 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+
 import logging
- 
 from collections import OrderedDict
-from common_func.profiling_scene import ProfilingScene
+
 from common_func.common import generate_config
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.path_manager import PathManager
-from common_func.utils import Utils
 from common_func.msvp_common import read_cpu_cfg
+from common_func.path_manager import PathManager
+from common_func.profiling_scene import ProfilingScene
+from common_func.utils import Utils
 from mscalculate.aic.aic_utils import AicPmuUtils
 from mscalculate.aic.pmu_calculator import PmuCalculator
 from profiling_bean.db_dto.step_trace_dto import IterationRange

@@ -6,26 +6,26 @@ import logging
 import os
 import re
 
-from msconfig.config_manager import ConfigManager
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
+from common_func.batch_counter import BatchCounter
 from common_func.common import get_data_dir_sorted_files
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager
+from common_func.file_manager import FileOpen
 from common_func.file_name_manager import get_data_preprocess_compiles
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.info_conf_reader import InfoConfReader
+from common_func.iter_recorder import IterRecorder
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
-from common_func.batch_counter import BatchCounter
-from common_func.iter_recorder import IterRecorder
-from common_func.file_manager import FileOpen
 from common_func.profiling_scene import ProfilingScene
+from msconfig.config_manager import ConfigManager
 
 
 class ParseAiCpuData(MsMultiProcess):

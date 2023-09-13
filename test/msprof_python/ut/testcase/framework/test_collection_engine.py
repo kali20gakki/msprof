@@ -4,14 +4,13 @@
 function:
 Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
+import multiprocessing
 import unittest
 from unittest import mock
-import multiprocessing
 
 from common_func.info_conf_reader import InfoConfReader
-from framework.collection_engine import AI
-
 from constant.constant import CONFIG, INFO_JSON
+from framework.collection_engine import AI
 
 NAMESPACE = 'framework.collection_engine'
 

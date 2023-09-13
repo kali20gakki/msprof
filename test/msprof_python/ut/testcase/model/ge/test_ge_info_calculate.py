@@ -1,11 +1,11 @@
-import unittest
 import os
+import unittest
 from unittest import mock
 
-from sqlite.db_manager import DBManager
-from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from common_func.constant import Constant
+from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
+from sqlite.db_manager import DBManager
 
 NAMESPACE = 'msmodel.ge.ge_info_calculate_model'
 

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
+
 import configparser
 import json
 import logging
@@ -395,13 +396,22 @@ class InfoConfReader:
         """
         self._info_json = self.__get_json_data(
             self.get_conf_file_path(result_path, get_info_json_compiles()))
+        self._sample_json = self.__get_json_data(
+            self.get_conf_file_path(result_path, get_sample_json_compiles()))
+
+        host_result_path = os.path.join(os.path.dirname(result_path), 'host')
+        if os.path.exists(host_result_path) and os.path.isdir(host_result_path):
+            host_result_path = os.path.realpath(host_result_path)
+            self._start_info = self.__get_json_data(
+                self.get_conf_file_path(host_result_path, get_start_info_compiles()))
+            self._end_info = self.__get_json_data(
+                self.get_conf_file_path(host_result_path, get_end_info_compiles()))
+            return
         self._start_info = self.__get_json_data(
             self.get_conf_file_path(result_path, get_start_info_compiles()))
         self._end_info = self.__get_json_data(
             self.get_conf_file_path(result_path, get_end_info_compiles()))
-        self._sample_json = self.__get_json_data(
-            self.get_conf_file_path(result_path, get_sample_json_compiles()))
-
+        
     def _load_dev_start_path_line_by_line(self: any, log_file: any) -> None:
         self._dev_cnt = 0
         self._start_log_time = 0

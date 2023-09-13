@@ -1,8 +1,9 @@
 import unittest
-from unittest import mock
 from collections import OrderedDict
-from viewer.biu_perf_viewer import BiuPerfViewer
+from unittest import mock
+
 from common_func.info_conf_reader import InfoConfReader
+from viewer.biu_perf_viewer import BiuPerfViewer
 
 NAMESPACE = 'viewer.biu_perf_viewer.'
 

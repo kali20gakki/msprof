@@ -4,7 +4,6 @@
 
 import json
 
-from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from framework.load_info_manager import LoadInfoManager
 from profiling_bean.basic_info.collect_info import CollectInfo

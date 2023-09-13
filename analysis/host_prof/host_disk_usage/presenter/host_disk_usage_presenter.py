@@ -8,9 +8,9 @@ import os
 from common_func.common import error
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
+from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_common import is_number
 from common_func.msvp_constant import MsvpConstant
 from host_prof.host_disk_usage.model.host_disk_usage import HostDiskUsage

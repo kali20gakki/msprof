@@ -7,7 +7,6 @@ import logging
 import os
 
 from common_func.common import print_msg
-from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException

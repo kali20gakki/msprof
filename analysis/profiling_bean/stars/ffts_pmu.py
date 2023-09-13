@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+
 import logging
 
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.utils import Utils
 from profiling_bean.struct_info.struct_decoder import StructDecoder
-from common_func.ms_constant.number_constant import NumberConstant
 
 
 class FftsPmuBean(StructDecoder):

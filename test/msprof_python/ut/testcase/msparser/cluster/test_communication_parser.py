@@ -3,15 +3,16 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
 import unittest
-import os
 from collections import defaultdict
 from unittest import mock
+
 import pytest
-from msparser.cluster.communication_parser import CommunicationParser
-from msparser.cluster.meta_parser import HcclAnalysisTool
+
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_exception import ProfException
 from common_func.platform.chip_manager import ChipManager
+from msparser.cluster.communication_parser import CommunicationParser
+from msparser.cluster.meta_parser import HcclAnalysisTool
 from profiling_bean.prof_enum.chip_model import ChipModel
 
 NAMESPACE = 'msparser.cluster.communication_parser'

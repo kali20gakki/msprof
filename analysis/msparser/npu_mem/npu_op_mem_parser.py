@@ -12,11 +12,11 @@ from common_func.file_manager import FileOpen
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
 from framework.offset_calculator import OffsetCalculator
+from msmodel.npu_mem.npu_op_mem_model import NpuOpMemModel
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.data_parser import DataParser
-from msmodel.npu_mem.npu_op_mem_model import NpuOpMemModel
-from profiling_bean.prof_enum.data_tag import DataTag
 from msparser.npu_mem.npu_op_mem_bean import NpuOpMemDataBean
+from profiling_bean.prof_enum.data_tag import DataTag
 
 
 class NpuOpMemParser(DataParser, MsMultiProcess):

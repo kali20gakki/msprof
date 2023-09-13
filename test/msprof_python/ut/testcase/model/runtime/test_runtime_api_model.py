@@ -3,7 +3,6 @@ from unittest import mock
 
 from msmodel.runtime.runtime_api_model import RuntimeApiModel
 
-
 NAMESPACE = 'msmodel.runtime.runtime_api_model'
 
 

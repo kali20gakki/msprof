@@ -6,10 +6,9 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_iteration import MsprofIteration
-from msmodel.interface.ianalysis_model import IAnalysisModel
 from msmodel.interface.view_model import ViewModel
-from profiling_bean.db_dto.event_data_dto import EventDataDto
 from profiling_bean.db_dto.api_data_dto import ApiDataDto
+from profiling_bean.db_dto.event_data_dto import EventDataDto
 
 
 class EventDataViewModel(ViewModel):

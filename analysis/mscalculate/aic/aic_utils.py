@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-import logging
 
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import read_cpu_cfg

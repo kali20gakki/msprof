@@ -1,12 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
-from collections import deque
 
-from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from msmodel.ge.ge_hash_model import GeHashViewModel
 from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.view_model import ViewModel
 

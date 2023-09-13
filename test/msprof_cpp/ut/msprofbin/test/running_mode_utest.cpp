@@ -978,6 +978,9 @@ TEST_F(RUNNING_MODE_UTEST, WriteCtrlDataToFile) {
         .stubs()
         .will(returnValue(true))
         .then(returnValue(false));
+    MOCKER(Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(false));
     std::string s = "{\"result_dir\":\"/tmp/\", \"devices\":\"1\", \"job_id\":\"1\"}";
     int len = s.size();
     EXPECT_EQ(PROFILING_SUCCESS, rMode.WriteCtrlDataToFile(output + "/sample.json", s, len));

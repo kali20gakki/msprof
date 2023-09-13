@@ -1,4 +1,5 @@
 import unittest
+
 import pytest
 
 from viewer.calculate_rts_data import check_aicore_events

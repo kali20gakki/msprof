@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
-from common_func.ms_constant.number_constant import NumberConstant
-from profiling_bean.db_dto.hccl_dto import HcclDto
-from msmodel.interface.view_model import ViewModel
-from common_func.db_name_constant import DBNameConstant
+
 from common_func.db_manager import DBManager
+from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.number_constant import NumberConstant
+from msmodel.interface.view_model import ViewModel
+from profiling_bean.db_dto.hccl_dto import HcclDto
 
 
 class CommunicationModel(ViewModel):

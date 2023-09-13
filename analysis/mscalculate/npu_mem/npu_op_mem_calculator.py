@@ -1,18 +1,19 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+
 import logging
 from collections import namedtuple
 
-from common_func.path_manager import PathManager
 from common_func.db_manager import DBManager
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.db_name_constant import DBNameConstant
+from common_func.hash_dict_constant import HashDictData
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.hash_dict_constant import HashDictData
-from msmodel.npu_mem.npu_op_mem_model import NpuOpMemModel
+from common_func.path_manager import PathManager
 from mscalculate.interface.icalculator import ICalculator
+from msmodel.npu_mem.npu_op_mem_model import NpuOpMemModel
 
 
 class NpuOpMemCalculator(ICalculator, MsMultiProcess):

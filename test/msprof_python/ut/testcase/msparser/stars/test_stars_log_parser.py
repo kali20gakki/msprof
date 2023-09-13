@@ -2,8 +2,8 @@ import struct
 import unittest
 from unittest import mock
 
-from common_func.profiling_scene import ProfilingScene
 from common_func.file_manager import FileOpen
+from common_func.profiling_scene import ProfilingScene
 from msparser.stars.parser_dispatcher import ParserDispatcher
 from msparser.stars.stars_log_parser import StarsLogCalCulator
 from profiling_bean.prof_enum.data_tag import DataTag

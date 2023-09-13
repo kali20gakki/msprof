@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+
 import logging
 from typing import List
-from typing import Tuple
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant

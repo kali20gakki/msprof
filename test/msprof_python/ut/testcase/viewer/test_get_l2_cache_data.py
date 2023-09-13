@@ -1,11 +1,11 @@
 import unittest
 from unittest import mock
+
 from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_constant import MsvpConstant
-from sqlite.db_manager import DBManager
-
 from common_func.platform.chip_manager import ChipManager
 from profiling_bean.prof_enum.chip_model import ChipModel
+from sqlite.db_manager import DBManager
 from viewer.get_l2_cache_data import get_l2_cache_data, modify_l2_cache_headers, add_op_name, process_hit_rate
 
 NAMESPACE = 'viewer.get_l2_cache_data'

@@ -1,11 +1,8 @@
-import sqlite3
 import unittest
-from unittest import mock
 
+from common_func.constant import Constant
 from common_func.op_common_function import OpCommonFunc
 from common_func.profiling_scene import ProfilingScene
-from common_func.constant import Constant
-from common_func.batch_counter import BatchCounter
 
 NAMESPACE = 'analyzer.op_common_function'
 CONFIG = {'result_dir': '', 'device_id': '0', 'iter_id': 1, 'model_id': -1}

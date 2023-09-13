@@ -7,7 +7,6 @@ import logging
 import os
 import shutil
 
-from common_func.profiling_scene import ProfilingScene
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.common import error
 from common_func.common import print_info
@@ -24,23 +23,24 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_common import analyze_collect_data
-from common_func.msprof_common import check_collection_dir
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
 from common_func.msprof_common import prepare_for_parse
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import check_dir_writable
 from common_func.path_manager import PathManager
+from common_func.profiling_scene import ProfilingScene
 from common_func.system_data_check_manager import SystemDataCheckManager
 from common_func.utils import Utils
 from framework.file_dispatch import FileDispatch
 from framework.load_info_manager import LoadInfoManager
 from msinterface.msprof_export_data import MsProfExportDataUtils
 from msinterface.msprof_job_summary import MsprofJobSummary
+from msinterface.msprof_output_summary import MsprofOutputSummary
 from msinterface.msprof_timeline import MsprofTimeline
-from profiling_bean.db_dto.step_trace_dto import IterationRange
 from msmodel.step_trace.ts_track_model import TsTrackModel
 from profiling_bean.db_dto.hwts_rec_dto import HwtsRecDto
+from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from profiling_bean.prof_enum.export_data_type import ExportDataType
 from tuning.cluster.cluster_tuning_facade import ClusterTuningFacade
@@ -605,3 +605,6 @@ class ExportCommand:
                 self.list_map['devices_list'] = ''
         job_summary = MsprofJobSummary(collect_path)
         job_summary.export()
+
+        profier = MsprofOutputSummary(collect_path)
+        profier.export()

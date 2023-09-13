@@ -4,13 +4,12 @@
 function:
 Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
-import sqlite3
+
 import unittest
 from unittest import mock
 
-from mscalculate.acl.acl_sql_calculator import AclSqlCalculator
-
 from constant.ut_db_name_constant import TABLE_ACL_DATA, TABLE_HASH_ACL
+from mscalculate.acl.acl_sql_calculator import AclSqlCalculator
 
 NAMESPACE = 'mscalculate.acl.acl_sql_calculator'
 

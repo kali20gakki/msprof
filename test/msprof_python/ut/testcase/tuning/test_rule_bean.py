@@ -1,5 +1,5 @@
 import unittest
-from unittest import mock
+
 from tuning.rule_bean import RuleBean
 
 args = {'Rule Id': 'rule_memory_workspace_1', 'Rule Description': 'check and count the number of memory workspace.',

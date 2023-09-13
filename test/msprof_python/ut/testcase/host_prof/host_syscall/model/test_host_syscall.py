@@ -1,5 +1,6 @@
 import unittest
 from unittest import mock
+
 from host_prof.host_syscall.model.host_syscall import HostSyscall
 
 NAMESPACE = 'host_prof.host_syscall.model.host_syscall'

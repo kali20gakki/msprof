@@ -5,7 +5,6 @@ function:
 Copyright Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 """
 import collections
-
 import os
 import unittest
 from unittest import mock
@@ -28,12 +27,12 @@ from mscalculate.cann.event import Event
 from profiling_bean.db_dto.api_data_dto import ApiDataDto
 from profiling_bean.db_dto.ctx_id_dto import CtxIdDto
 from profiling_bean.db_dto.fusion_op_info_dto import FusionOpInfoDto
+from profiling_bean.db_dto.ge_time_dto import GeTimeDto
 from profiling_bean.db_dto.hccl_info_dto import HCCLInfoDto
 from profiling_bean.db_dto.mem_copy_info_dto import MemCopyInfoDto
 from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
 from profiling_bean.db_dto.task_track_dto import TaskTrackDto
 from profiling_bean.db_dto.tensor_info_dto import TensorInfoDto
-from profiling_bean.db_dto.ge_time_dto import GeTimeDto
 
 NAMESPACE = 'mscalculate.cann.cann_analysis_gear'
 

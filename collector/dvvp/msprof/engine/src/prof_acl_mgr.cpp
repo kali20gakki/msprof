@@ -80,11 +80,7 @@ uint64_t ProfGetOpExecutionTime(CONST_VOID_PTR data, uint32_t len, uint32_t inde
 void SigHandler(int sig)
 {
     if (sig == SIGINT) {
-        MSPROF_LOGI("Received ctrl+c signal, Starting the finalize operation.");
         ProfAclMgr::instance()->MsprofFinalizeHandle();
-        MSPROF_LOGI("finished finalize.");
-        pid_t pid = analysis::dvvp::common::utils::Utils::GetPid(); // 获取当前进程的PID
-        kill(pid, SIGTERM); // 发送SIGTERM信号杀死进程
     }
 }
 

@@ -246,6 +246,16 @@ int ParamValidation::CustomHexCharConfig(std::string &aicoreEvents, const std::s
     return PROFILING_SUCCESS;
 }
 
+bool ParamValidation::CheckProfilingMetricsLength(const std::string &metricsVal)
+{
+    if (metricsVal.length() > MAX_CUSTOM_METRICS_LEN) {
+        MSPROF_LOGE("The Custom metric parameter length exceeds max length value of %d.", MAX_CUSTOM_METRICS_LEN);
+        CMD_LOGE("The Custom metric parameter length exceeds max length value of %d.", MAX_CUSTOM_METRICS_LEN);
+        return false;
+    }
+    return true;
+}
+
 bool ParamValidation::CheckProfilingMetricsIsValid(const std::string &metricsName, const std::string &metricsVal)
 {
     if (metricsVal.empty()) {
@@ -270,9 +280,7 @@ bool ParamValidation::CheckProfilingMetricsIsValid(const std::string &metricsNam
     if (ConfigManager::instance()->GetPlatformType() == PlatformType::CHIP_V4_1_0) {
         metricsWhiteList.push_back(PIPE_UTILIZATION_EXCT);
     }
-    if (metricsVal.length() > MAX_CUSTOM_METRICS_LEN) {
-        MSPROF_LOGE("The Custom metric parameter length exceeds max length value of %d.", MAX_CUSTOM_METRICS_LEN);
-        CMD_LOGE("The Custom metric parameter length exceeds max length value of %d.", MAX_CUSTOM_METRICS_LEN);
+    if (!CheckProfilingMetricsLength(metricsVal)) {
         return false;
     }
     if (metricsVal.compare(0, CUSTOM_METRICS_VALID_HEADER.length(), CUSTOM_METRICS_VALID_HEADER) == 0) {

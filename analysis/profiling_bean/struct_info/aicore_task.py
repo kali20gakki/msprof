@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
+
 class TaskExecuteBean:
     def __init__(self: any, *args: any) -> None:
         self._stream_id = args[0]

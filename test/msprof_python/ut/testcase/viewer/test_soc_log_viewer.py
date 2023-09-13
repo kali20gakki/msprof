@@ -2,13 +2,13 @@ import json
 import unittest
 from unittest import mock
 
+from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
-from common_func.trace_view_header_constant import TraceViewHeaderConstant
-from viewer.task_time_viewer import TaskTimeViewer
 from mscalculate.ascend_task.ascend_task import TopDownTask
 from profiling_bean.db_dto.task_time_dto import TaskTimeDto
+from viewer.task_time_viewer import TaskTimeViewer
 
 NAMESPACE = 'viewer.task_time_viewer'
 
@@ -36,15 +36,15 @@ class TestData:
 class TestTaskTimeViewer(unittest.TestCase):
 
     def test_get_time_timeline_header(self):
-        data = (['thread', 2, "3", 4, 5],)
+        data = (['thread', 2, 3, 4, 5],)
         configs, params = {}, {}
         InfoJsonReaderManager(info_json=InfoJson(devices='0', DeviceInfo=[
             DeviceInfo(pid='1', tid='0').device_info])).process()
         check = TaskTimeViewer(configs, params)
         ret = check.get_time_timeline_header(data)
         self.assertEqual(ret, [['process_name', 0, 0, 'Task Scheduler'],
-                               ['thread_name', 2, '3', 'Stream 3'],
-                               ['thread_sort_index', 2, '3', '3']])
+                               ['thread_name', 2, 3, 'Stream Notify Wait'],
+                               ['thread_sort_index', 2, 3, 3]])
 
     def test_get_timeline_data(self):
         configs, params = {}, {"project": ""}
@@ -167,15 +167,15 @@ class TestTaskTimeViewer(unittest.TestCase):
             self.assertEqual(data.get("subtask_data_list")[0].thread_id, 10)
 
     def test_get_time_timeline_header_should_have_thread_name_when_thread_task_time(self):
-        data = (['thread', 2, "Thread 0(AIV)", 4, 5],)
+        data = (['thread', 2, 1, 4, 5],)
         configs, params = {}, {}
         InfoJsonReaderManager(info_json=InfoJson(devices='0', DeviceInfo=[
             DeviceInfo(pid='1', tid='0').device_info])).process()
         check = TaskTimeViewer(configs, params)
         ret = check.get_time_timeline_header(data, TraceViewHeaderConstant.PROCESS_THREAD_TASK)
         self.assertEqual(ret, [['process_name', 2, 0, 'Thread Task Time'],
-                               ['thread_name', 2, 'Thread 0(AIV)', 'Thread 0(AIV)'],
-                               ['thread_sort_index', 2, 'Thread 0(AIV)', 'Thread 0(AIV)']])
+                               ['thread_name', 2, 1, 'Thread 0(AIV)'],
+                               ['thread_sort_index', 2, 1, 1]])
 
 
 if __name__ == '__main__':

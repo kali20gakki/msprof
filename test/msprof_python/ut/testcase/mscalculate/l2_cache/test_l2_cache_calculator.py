@@ -8,11 +8,8 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 import unittest
 from unittest import mock
 
-import common_func.common
-from mscalculate.l2_cache.l2_cache_calculator import L2CacheCalculator
 from common_func.info_conf_reader import InfoConfReader
-
-from constant.constant import CONFIG
+from mscalculate.l2_cache.l2_cache_calculator import L2CacheCalculator
 from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = 'mscalculate.l2_cache.l2_cache_calculator'

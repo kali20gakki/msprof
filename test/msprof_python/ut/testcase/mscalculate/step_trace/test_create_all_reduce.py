@@ -5,7 +5,9 @@ function:
 Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
 """
 import unittest
+
 from mscalculate.step_trace.create_step_table import CreateAllReduce
+
 
 def get_data():
 

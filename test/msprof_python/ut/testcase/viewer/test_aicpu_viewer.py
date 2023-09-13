@@ -1,17 +1,11 @@
-import sqlite3
-import struct
 import unittest
-from collections import OrderedDict
 from unittest import mock
 
+from common_func.constant import Constant
+from common_func.profiling_scene import ProfilingScene
 from constant.constant import ITER_RANGE
-from profiling_bean.db_dto.step_trace_dto import IterationRange
 from sqlite.db_manager import DBOpen
 from viewer.aicpu_viewer import ParseAiCpuData
-from common_func.profiling_scene import ProfilingScene
-from common_func.constant import Constant
-from common_func.ms_constant.number_constant import NumberConstant
-
 
 sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs'}
 NAMESPACE = 'viewer.aicpu_viewer'

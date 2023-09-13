@@ -2,18 +2,15 @@ import unittest
 from collections import deque
 from unittest import mock
 
-from common_func.info_conf_reader import InfoConfReader
-from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.data_manager import DataManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.msvp_constant import MsvpConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.msvp_constant import MsvpConstant
+from common_func.profiling_scene import ProfilingScene
 from constant.ut_db_name_constant import DB_AICORE_OP_SUMMARY
 from constant.ut_db_name_constant import DB_OP_COUNTER
-from constant.ut_db_name_constant import TABLE_AI_CPU
 from constant.ut_db_name_constant import TABLE_OP_COUNTER_OP_REPORT
-from sqlite.db_manager import DBManager
 from sqlite.db_manager import DBOpen
 from viewer.ai_core_op_report import AiCoreOpReport
 from viewer.ai_core_op_report import ReportOPCounter
@@ -139,9 +136,20 @@ class TestAiCoreOpReport(unittest.TestCase):
             self.assertEqual(res, [])
 
     def test_union_task_ge_ai_core_data(self):
-        expect_res = [(1, 2, 3, 4, 10), (4, 5, 6, 7, 40), (7, 8, 9, 10, 'N/A')]
-        data = [(1, 2, 3, 4), (4, 5, 6, 7), (7, 8, 9, 10)]
+        expect_res = [(1, 2, 3, 11, 16, 4, 10), (4, 5, 6, 11, 16, 7, 40), (7, 8, 9, 11, 16, 10, 'N/A')]
+        data = [(1, 2, 3, 11, 16, 4), (4, 5, 6, 11, 16, 7), (7, 8, 9, 11, 16, 10)]
         ai_core_group_dict = {(2, 3, 4): deque([(10,)]), (5, 6, 7): deque([(40,)]), (10, 11, 12): deque([(20,)])}
+        res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
+        self.assertEqual(res, expect_res)
+
+    def test_union_task_ge_ai_core_data_success_when_exist_hardware_op_list(self):
+        expect_res = [
+            (1, 2, 3, 11, 16, "AI_CPU", 'N/A'), (4, 5, 6, 11, 16, "AI_CPU", 'N/A'), (7, 8, 9, 11, 16, 10, 'N/A')
+        ]
+        data = [(1, 2, 3, 11, 16, "AI_CPU"), (4, 5, 6, 11, 16, "AI_CPU"), (7, 8, 9, 11, 16, 10)]
+        ai_core_group_dict = {
+            (2, 3, "AI_CPU"): deque([(10,)]), (5, 6, "AI_CPU"): deque([(40,)]), (10, 11, 12): deque([(20,)])
+        }
         res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
         self.assertEqual(res, expect_res)
 

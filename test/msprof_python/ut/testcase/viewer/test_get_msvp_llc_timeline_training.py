@@ -2,6 +2,7 @@ import json
 import sqlite3
 import unittest
 from unittest import mock
+
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
@@ -9,7 +10,6 @@ from common_func.platform.chip_manager import ChipManager
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
 from profiling_bean.prof_enum.chip_model import ChipModel
-
 from sqlite.db_manager import DBManager
 from sqlite.db_manager import DBOpen
 from viewer.get_msvp_llc_timeline_training import get_llc_nomini_data, get_llc_timeline, pre_check_llc, \

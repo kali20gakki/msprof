@@ -1,6 +1,4 @@
 import unittest
-import struct
-from unittest import mock
 
 from msparser.ge.ge_logic_stream_info_bean import GeLogicStreamInfoBean
 

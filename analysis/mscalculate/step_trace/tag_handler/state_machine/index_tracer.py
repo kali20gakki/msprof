@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-from mscalculate.step_trace.tag_handler.state_machine.iter_state import ModelStart
-from mscalculate.step_trace.tag_handler.state_machine.iter_state import ModelEnd
-from mscalculate.step_trace.tag_handler.state_machine.iter_state import IterEnd
 from common_func.step_trace_constant import StepTraceConstant
+from mscalculate.step_trace.tag_handler.state_machine.iter_state import IterEnd
+from mscalculate.step_trace.tag_handler.state_machine.iter_state import ModelEnd
+from mscalculate.step_trace.tag_handler.state_machine.iter_state import ModelStart
 
 
 class IndexTracker:

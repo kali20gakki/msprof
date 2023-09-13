@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+
 import logging
 from typing import List
 
@@ -15,11 +16,11 @@ from msmodel.add_info.ctx_id_model import CtxIdModel
 from msmodel.add_info.fusion_add_info_model import FusionAddInfoModel
 from msmodel.add_info.graph_add_info_model import GraphAddInfoModel
 from msmodel.add_info.hccl_info_model import HcclInfoModel
-from msmodel.compact_info.node_basic_info_model import NodeBasicInfoModel
-from msmodel.compact_info.memcpy_info_model import MemcpyInfoModel
-from msmodel.compact_info.task_track_model import TaskTrackModel
 from msmodel.add_info.tensor_add_info_model import TensorAddInfoModel
 from msmodel.api.api_data_model import ApiDataModel
+from msmodel.compact_info.memcpy_info_model import MemcpyInfoModel
+from msmodel.compact_info.node_basic_info_model import NodeBasicInfoModel
+from msmodel.compact_info.task_track_model import TaskTrackModel
 from msmodel.event.event_data_model import EventDataModel
 from profiling_bean.db_dto.api_data_dto import ApiDataDto
 from profiling_bean.db_dto.ctx_id_dto import CtxIdDto

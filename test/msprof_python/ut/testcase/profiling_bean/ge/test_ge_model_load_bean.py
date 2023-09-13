@@ -1,5 +1,5 @@
 import unittest
-from unittest import mock
+
 from profiling_bean.ge.ge_model_load_bean import GeModelLoadBean
 
 NAMESPACE = 'profiling_bean.struct_info.ge.ge_fusion_op_info_bean'

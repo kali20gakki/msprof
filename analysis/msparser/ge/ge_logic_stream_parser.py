@@ -4,18 +4,17 @@
  
 import logging
 import sqlite3
- 
+
 from common_func.constant import Constant
-from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
+from msmodel.ge.ge_logic_stream_model import GeLogicStreamInfoModel
 from msparser.data_struct_size_constant import StructFmt
 from msparser.ge.ge_logic_stream_info_bean import GeLogicStreamInfoBean
 from msparser.interface.data_parser import DataParser
-from msmodel.ge.ge_logic_stream_model import GeLogicStreamInfoModel
 from profiling_bean.prof_enum.data_tag import DataTag
- 
- 
+
+
 class GeLogicStreamParser(DataParser, MsMultiProcess):
     """
     ge logic stream data parser

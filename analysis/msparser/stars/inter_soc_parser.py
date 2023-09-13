@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 
-from abc import abstractmethod
-
 from msmodel.stars.inter_soc_model import InterSocModel
 from msparser.interface.istars_parser import IStarsParser
 from profiling_bean.stars.inter_soc import InterSoc

@@ -3,20 +3,20 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
 import logging
-from typing import List
 from dataclasses import astuple
+from typing import List
 
-from common_func.info_conf_reader import InfoConfReader
-from common_func.ms_constant.number_constant import NumberConstant
-from common_func.ms_multi_process import MsMultiProcess
-from common_func.ms_constant.str_constant import StrConstant
-from common_func.profiling_scene import ProfilingScene
-from common_func.platform.chip_manager import ChipManager
-from mscalculate.ascend_task.ascend_task import TopDownTask
-from mscalculate.ascend_task.ascend_task_generator import AscendTaskGenerator
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
+from common_func.platform.chip_manager import ChipManager
+from common_func.profiling_scene import ProfilingScene
+from mscalculate.ascend_task.ascend_task import TopDownTask
+from mscalculate.ascend_task.ascend_task_generator import AscendTaskGenerator
 from msmodel.task_time.ascend_task_model import AscendTaskModel
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 

@@ -3,9 +3,9 @@ import unittest
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
+from constant.constant import CONFIG
 from msparser.runtime.rts_parser import RtsTrackParser
 from profiling_bean.prof_enum.data_tag import DataTag
-from constant.constant import CONFIG
 
 NAMESPACE = 'msparser.runtime.rts_parser'
 

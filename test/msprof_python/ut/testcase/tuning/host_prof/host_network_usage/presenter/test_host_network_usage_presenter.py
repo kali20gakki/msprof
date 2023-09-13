@@ -1,10 +1,11 @@
 import unittest
 from unittest import mock
-from sqlite.db_manager import DBManager
+
 from common_func.info_conf_reader import InfoConfReader
+from host_prof.host_network_usage.model.host_network_usage import HostNetworkUsage
 from host_prof.host_network_usage.presenter.host_network_usage_presenter import HostNetworkUsagePresenter, \
     parse_net_stats
-from host_prof.host_network_usage.model.host_network_usage import HostNetworkUsage
+from sqlite.db_manager import DBManager
 
 NAMESPACE = 'host_prof.host_network_usage.presenter.host_network_usage_presenter'
 

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+
 import logging
 import os
 from enum import Enum
@@ -16,13 +17,13 @@ from msmodel.nano.nano_exeom_model import NanoExeomModel
 from msmodel.nano.nano_exeom_model import NanoGraphAddInfoViewModel
 from msmodel.runtime.runtime_host_task_model import RuntimeHostTaskModel
 from msparser.interface.data_parser import DataParser
-from msparser.nano.nano_dbg_bean import TypeHeadBean, MagicHeadBean
 from msparser.nano.nano_dbg_bean import L1OpDescBean
-from msparser.nano.nano_dbg_bean import NameBean
-from msparser.nano.nano_dbg_bean import NumBean
 from msparser.nano.nano_dbg_bean import L2InputDescBean
 from msparser.nano.nano_dbg_bean import L2OutputDescBean
+from msparser.nano.nano_dbg_bean import NameBean
+from msparser.nano.nano_dbg_bean import NumBean
 from msparser.nano.nano_dbg_bean import ShapeBean
+from msparser.nano.nano_dbg_bean import TypeHeadBean, MagicHeadBean
 from profiling_bean.prof_enum.data_tag import DataTag
 
 

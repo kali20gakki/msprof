@@ -1,19 +1,19 @@
 import os
+import shutil
 import unittest
 from unittest import mock
-import shutil
 
 import pytest
+
 from common_func.info_conf_reader import InfoConfReader
+from common_func.msprof_common import add_all_file_complete
 from common_func.msprof_common import analyze_collect_data
+from common_func.msprof_common import check_collection_dir
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_info_by_key
 from common_func.msprof_common import get_path_dir
 from common_func.msprof_common import prepare_for_parse
-from common_func.msprof_common import add_all_file_complete
-from common_func.msprof_common import check_collection_dir
 from common_func.msprof_exception import ProfException
-
 from constant.constant import INFO_JSON
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager

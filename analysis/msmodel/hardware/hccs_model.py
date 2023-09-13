@@ -5,11 +5,11 @@
 import logging
 from abc import ABC
 
-from msconfig.config_manager import ConfigManager
 from common_func.constant import Constant
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_common import float_calculate
-from common_func.db_manager import DBManager
+from msconfig.config_manager import ConfigManager
 from msmodel.interface.base_model import BaseModel
 
 

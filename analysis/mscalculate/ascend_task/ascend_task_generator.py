@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+
 import logging
-import time
 from collections import deque
 from typing import List
 from typing import Tuple
@@ -11,9 +11,9 @@ from typing import Union
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
-from mscalculate.ascend_task.ascend_task import TopDownTask
 from mscalculate.ascend_task.ascend_task import DeviceTask
 from mscalculate.ascend_task.ascend_task import HostTask
+from mscalculate.ascend_task.ascend_task import TopDownTask
 from mscalculate.ascend_task.device_task_collector import DeviceTaskCollector
 from mscalculate.ascend_task.host_task_collector import HostTaskCollector
 

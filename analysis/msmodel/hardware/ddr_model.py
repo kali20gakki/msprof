@@ -4,17 +4,14 @@
 
 import logging
 import os
-import sqlite3
 from abc import ABC
 
-from common_func.common import error
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.utils import Utils
 from msmodel.interface.base_model import BaseModel
 
 

@@ -1,6 +1,5 @@
 import unittest
 
-from profiling_bean.db_dto.acc_pmu_dto import AccPmuOriDto
 from profiling_bean.db_dto.hccl_dto import HcclDto
 
 NAMESPACE = 'profiling_bean.db_dto.acc_pmu_dto'

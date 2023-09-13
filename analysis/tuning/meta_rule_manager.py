@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.common_prof_rule import CommonProfRule
+from common_func.ms_constant.str_constant import StrConstant
 from msconfig.config_manager import ConfigManager
 from tuning.data_manager import DataManager
-from tuning.rule_bean import RuleBean
 from tuning.meta_condition_manager import NetConditionManager
+from tuning.rule_bean import RuleBean
 from tuning.tuning_control import TuningControl
 
 

@@ -1,4 +1,3 @@
-import sqlite3
 import unittest
 from collections import OrderedDict
 from unittest import mock

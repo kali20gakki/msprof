@@ -6,8 +6,6 @@ import sqlite3
 
 from common_func.db_manager import DBManager
 from common_func.get_table_data import GetTableData
-from common_func.ms_constant.number_constant import NumberConstant
-from common_func.msvp_common import is_number
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
 

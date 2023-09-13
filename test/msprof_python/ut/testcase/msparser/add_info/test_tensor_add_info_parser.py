@@ -11,8 +11,8 @@ from unittest import mock
 
 from common_func.hash_dict_constant import HashDictData
 from constant.constant import CONFIG
-from msparser.add_info.tensor_add_info_parser import TensorAddInfoParser
 from msparser.add_info.tensor_add_info_bean import TensorAddInfoBean
+from msparser.add_info.tensor_add_info_parser import TensorAddInfoParser
 from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = 'msparser.add_info.tensor_add_info_parser'

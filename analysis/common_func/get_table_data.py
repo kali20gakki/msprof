@@ -3,8 +3,8 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 
 from common_func.db_manager import DBManager
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
 
 
 class GetTableData:

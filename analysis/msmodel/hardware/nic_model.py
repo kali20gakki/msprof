@@ -2,14 +2,12 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-import collections
 import logging
 import sqlite3
 from abc import ABC
 
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
-from common_func.db_manager import ClassRowType
 from common_func.db_name_constant import DBNameConstant
 from common_func.empty_class import EmptyClass
 from common_func.info_conf_reader import InfoConfReader
