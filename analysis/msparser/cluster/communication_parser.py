@@ -59,7 +59,7 @@ class CommunicationParser(MetaParser):
         idx = 0
         op_name = main_events[0].op_name
         rdma_transit_op_num = NumberConstant.RDMA_NO_BARRIER_TASK_NUM
-        if HcclAnalysisTool.is_send_or_recv_op(main_events, idx):
+        if not HcclAnalysisTool.is_send_or_recv_op(main_events, idx):
             rdma_transit_op_num = NumberConstant.RDMA_WITH_BARRIER_TASK_NUM
         while idx < len(main_events):
             event = main_events[idx]
@@ -97,7 +97,7 @@ class CommunicationParser(MetaParser):
         op_bandwidth_dict = HcclAnalysisTool.init_bandwidth_dict()
         idx = 0
         rdma_transit_op_num = NumberConstant.RDMA_NO_BARRIER_TASK_NUM
-        if HcclAnalysisTool.is_send_or_recv_op(events, idx):
+        if not HcclAnalysisTool.is_send_or_recv_op(events, idx):
             rdma_transit_op_num = NumberConstant.RDMA_WITH_BARRIER_TASK_NUM
         while idx < len(events):
             event = events[idx]
