@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
-from copy import deepcopy
+
 from typing import List
 
 from mscalculate.cann.additional_record import AdditionalRecord

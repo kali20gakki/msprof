@@ -1,9 +1,9 @@
 import unittest
-import numpy
 from unittest import mock
-from sqlite.db_manager import DBManager
+
 from common_func.constant import Constant
 from host_prof.host_prof_base.host_prof_data_base import HostProfDataBase
+from sqlite.db_manager import DBManager
 
 NAMESPACE = 'host_prof.host_prof_base.host_prof_data_base'
 
@@ -51,7 +51,7 @@ class TsetHostProfDataBase(unittest.TestCase):
         with mock.patch(NAMESPACE + '.HostProfDataBase.flush_data', side_effect=OSError), \
                 mock.patch(NAMESPACE + '.logging.exception'):
             check = HostProfDataBase(self.result_dir, 'host_cpu_usage.db', ['CpuInfo'])
-            check.cache_data = list(numpy.arange(10001))
+            check.cache_data = list(range(10001))
             check.insert_single_data(data)
         self.assertEqual(check.cache_data, [])
 

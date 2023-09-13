@@ -1,19 +1,20 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+
 import logging
 import os
 
-from common_func.profiling_scene import ProfilingScene
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileOpen
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
+from common_func.profiling_scene import ProfilingScene
 from common_func.utils import Utils
 from framework.offset_calculator import FileCalculator, OffsetCalculator
-from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from mscalculate.interface.icalculator import ICalculator
+from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msparser.stars.parser_dispatcher import ParserDispatcher
 from profiling_bean.prof_enum.data_tag import DataTag
 

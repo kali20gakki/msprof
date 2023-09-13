@@ -2,16 +2,16 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
-import os
 import logging
+import os
 
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
-from common_func.info_conf_reader import InfoConfReader
 from msmodel.interface.base_model import BaseModel
 from msmodel.step_trace.ts_track_model import TsTrackModel
 

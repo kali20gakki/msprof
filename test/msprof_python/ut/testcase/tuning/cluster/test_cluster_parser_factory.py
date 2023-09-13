@@ -3,16 +3,16 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 
 import os
-from collections import defaultdict
-
 import unittest
+from collections import defaultdict
 from unittest import mock
+
 import pytest
 
-from tuning.cluster.cluster_parser_factory import ClusterCommunicationParserFactory
-from tuning.cluster.cluster_parser_factory import CriticalPathAnalysisParserFactory
-from tuning.cluster.cluster_parser_factory import CommunicationMatrixParserFactory
 from common_func.msprof_exception import ProfException
+from tuning.cluster.cluster_parser_factory import ClusterCommunicationParserFactory
+from tuning.cluster.cluster_parser_factory import CommunicationMatrixParserFactory
+from tuning.cluster.cluster_parser_factory import CriticalPathAnalysisParserFactory
 
 NAMESPACE = 'tuning.cluster.cluster_parser_factory'
 

@@ -6,8 +6,8 @@ from collections import OrderedDict
 
 from common_func.data_manager import DataManager
 from common_func.db_manager import DBManager
-from common_func.msvp_common import is_number
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.msvp_common import is_number
 from common_func.msvp_constant import MsvpConstant
 from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils

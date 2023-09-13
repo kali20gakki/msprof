@@ -1,21 +1,17 @@
-import sqlite3
 import unittest
 from unittest import mock
 
 import pytest
 
-from mscalculate.ascend_task.ascend_task import TopDownTask
-from mscalculate.data_analysis.merge_op_counter_calculator import MergeOpCounterCalculator
-from common_func.profiling_scene import ProfilingScene
-from common_func.constant import Constant
-from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
 from common_func.platform.chip_manager import ChipManager
+from common_func.profiling_scene import ProfilingScene
 from constant.constant import CONFIG
 from constant.ut_db_name_constant import DB_OP_COUNTER
 from constant.ut_db_name_constant import TABLE_OP_COUNTER_GE_MERGE
 from constant.ut_db_name_constant import TABLE_OP_COUNTER_OP_REPORT
 from constant.ut_db_name_constant import TABLE_OP_COUNTER_RTS_TASK
+from mscalculate.data_analysis.merge_op_counter_calculator import MergeOpCounterCalculator
 from profiling_bean.prof_enum.chip_model import ChipModel
 from sqlite.db_manager import DBManager
 from sqlite.db_manager import DBOpen

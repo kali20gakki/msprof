@@ -1,11 +1,9 @@
-import sqlite3
 import unittest
 from unittest import mock
 
 from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_constant import MsvpConstant
 from viewer.ge_info_report import get_ge_model_data
-
 
 NAMESPACE = 'viewer.ge_info_report'
 configs = {'handler': '_get_acl_data',

@@ -8,7 +8,6 @@ import os
 import sqlite3
 import struct
 
-from common_func.profiling_scene import ProfilingScene
 from common_func.common import generate_config
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
@@ -24,6 +23,7 @@ from common_func.msprof_exception import ProfException
 from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
+from common_func.profiling_scene import ProfilingScene
 from common_func.utils import Utils
 from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import OffsetCalculator

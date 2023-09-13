@@ -1,9 +1,6 @@
 import os
-import pathlib
 import unittest
 from unittest import mock
-
-import pytest
 
 from constant.constant import clear_dt_project
 from msparser.cluster.host_sys_usage_parser import HostSysUsageParser

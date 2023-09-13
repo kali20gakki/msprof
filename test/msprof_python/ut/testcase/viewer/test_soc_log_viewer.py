@@ -2,13 +2,13 @@ import json
 import unittest
 from unittest import mock
 
+from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
-from common_func.trace_view_header_constant import TraceViewHeaderConstant
-from viewer.task_time_viewer import TaskTimeViewer
 from mscalculate.ascend_task.ascend_task import TopDownTask
 from profiling_bean.db_dto.task_time_dto import TaskTimeDto
+from viewer.task_time_viewer import TaskTimeViewer
 
 NAMESPACE = 'viewer.task_time_viewer'
 

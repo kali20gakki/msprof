@@ -3,14 +3,15 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 import logging
-import math
 from abc import abstractmethod
 
-from msconfig.config_manager import ConfigManager
+import math
+
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
+from msconfig.config_manager import ConfigManager
 
 
 class HostProfDataBase:

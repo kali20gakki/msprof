@@ -9,9 +9,6 @@ import unittest
 from unittest import mock
 from unittest.mock import PropertyMock
 
-import pytest
-
-from common_func.msprof_exception import ProfException
 from constant.constant import clear_dt_project
 from msmodel.cluster_info.cluster_info_model import ClusterInfoViewModel
 from msparser.cluster.cluster_info_parser import ClusterInfoParser, ClusterBasicInfo

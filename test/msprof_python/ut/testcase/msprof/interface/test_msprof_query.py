@@ -1,11 +1,11 @@
 import unittest
 from argparse import Namespace
 from unittest import mock
+
 from common_func.info_conf_reader import InfoConfReader
+from constant.constant import INFO_JSON
 from msinterface.msprof_query import QueryCommand
 from profiling_bean.basic_info.query_data_bean import QueryDataBean
-
-from constant.constant import INFO_JSON
 
 NAMESPACE = 'msinterface.msprof_query'
 

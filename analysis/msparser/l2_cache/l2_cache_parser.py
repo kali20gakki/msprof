@@ -8,10 +8,10 @@ import os
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager
+from common_func.file_manager import FileOpen
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
-from common_func.file_manager import FileOpen
 from msmodel.l2_cache.l2_cache_parser_model import L2CacheParserModel
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.iparser import IParser

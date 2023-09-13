@@ -1,5 +1,7 @@
 import unittest
+
 from mscalculate.step_trace.create_step_table import CreateTrainingTrace
+
 
 def get_data():
 

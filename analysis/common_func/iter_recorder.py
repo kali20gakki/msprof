@@ -4,9 +4,9 @@
 
 import logging
 
-from common_func.utils import Utils
-from common_func.msprof_exception import ProfException
 from common_func.db_name_constant import DBNameConstant
+from common_func.msprof_exception import ProfException
+from common_func.utils import Utils
 from msmodel.step_trace.ts_track_model import TsTrackModel
 
 

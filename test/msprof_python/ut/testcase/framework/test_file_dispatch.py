@@ -7,9 +7,9 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 import unittest
 from unittest import mock
 
-from framework.file_dispatch import FileDispatch
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
+from framework.file_dispatch import FileDispatch
 
 NAMESPACE = 'framework.file_dispatch'
 

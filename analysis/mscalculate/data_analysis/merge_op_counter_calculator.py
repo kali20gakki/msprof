@@ -5,26 +5,26 @@
 import logging
 import os
 import sqlite3
-
 from collections import defaultdict
-from common_func.ms_multi_process import MsMultiProcess
-from common_func.ms_constant.str_constant import StrConstant
-from mscalculate.ascend_task.ascend_task import TopDownTask
-from msconfig.config_manager import ConfigManager
-from common_func.profiling_scene import ProfilingScene
+
 from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
-from common_func.info_conf_reader import InfoConfReader
+from common_func.profiling_scene import ProfilingScene
+from mscalculate.ascend_task.ascend_task import TopDownTask
+from msconfig.config_manager import ConfigManager
 from msmodel.task_time.ascend_task_model import AscendTaskModel
-from viewer.ge_info_report import get_ge_model_name_dict
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
+from viewer.ge_info_report import get_ge_model_name_dict
 
 
 class MergeOpCounterCalculator(MsMultiProcess):

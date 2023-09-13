@@ -5,7 +5,6 @@ from constant.constant import ITER_RANGE
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from sqlite.db_manager import DBManager
-from sqlite.db_manager import CursorDemo
 
 NAMESPACE = 'msmodel.iter_rec.iter_rec_model'
 

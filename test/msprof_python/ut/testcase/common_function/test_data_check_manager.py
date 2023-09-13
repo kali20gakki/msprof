@@ -1,5 +1,6 @@
 import unittest
 from unittest import mock
+
 from common_func.data_check_manager import DataCheckManager
 
 NAMESPACE = 'common_func.data_check_manager'

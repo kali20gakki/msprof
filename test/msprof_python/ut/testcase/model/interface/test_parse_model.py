@@ -1,5 +1,6 @@
 import unittest
 from unittest import mock
+
 from msmodel.interface.parser_model import ParserModel
 
 NAMESPACE = 'msmodel.interface.parser_model'

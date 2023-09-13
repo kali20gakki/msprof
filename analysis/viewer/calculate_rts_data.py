@@ -6,7 +6,6 @@ import logging
 import multiprocessing
 import os
 import sqlite3
-from collections import OrderedDict
 from functools import reduce
 from operator import add
 
@@ -20,11 +19,9 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_common import config_file_obj
 from common_func.msvp_common import error
-from common_func.msvp_common import read_cpu_cfg
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from framework.load_info_manager import LoadInfoManager
-from mscalculate.aic.aic_utils import AicPmuUtils
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 

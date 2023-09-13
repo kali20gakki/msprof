@@ -12,10 +12,9 @@ from unittest import mock
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
 from mscalculate.biu_perf.biu_monitor_calculator import BiuMonitorCalculator
-from mscalculate.biu_perf.biu_monitor_calculator import MonitorFlowCalculator
 from mscalculate.biu_perf.biu_monitor_calculator import MonitorCyclesCalculator
+from mscalculate.biu_perf.biu_monitor_calculator import MonitorFlowCalculator
 from profiling_bean.prof_enum.data_tag import DataTag
-
 
 NAMESPACE = 'mscalculate.biu_perf.biu_monitor_calculator'
 

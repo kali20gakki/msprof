@@ -4,7 +4,6 @@
 
 import os
 
-from common_func.common import error
 from common_func.constant import Constant
 from common_func.msprof_exception import ProfException
 

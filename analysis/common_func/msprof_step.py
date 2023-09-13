@@ -2,10 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
-from collections import OrderedDict
-
 from common_func.constant import Constant
-from common_func.db_manager import DBManager, ClassRowType
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.empty_class import EmptyClass
 from common_func.utils import Utils

@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+
 import logging
 
-from common_func.utils import Utils
 from common_func.ms_constant.ge_enum_constant import GeDataFormat
 from common_func.ms_constant.ge_enum_constant import GeDataType
+from common_func.utils import Utils
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 

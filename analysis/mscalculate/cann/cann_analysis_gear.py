@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
-from abc import abstractmethod
 
 import logging
+from abc import abstractmethod
 from collections import OrderedDict
 from typing import List
 from typing import Union
@@ -28,8 +28,8 @@ from profiling_bean.db_dto.fusion_op_info_dto import FusionOpInfoDto
 from profiling_bean.db_dto.ge_time_dto import GeTimeDto
 from profiling_bean.db_dto.graph_id_map_dto import GraphIdMapDto
 from profiling_bean.db_dto.hccl_info_dto import HCCLInfoDto
-from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
 from profiling_bean.db_dto.mem_copy_info_dto import MemCopyInfoDto
+from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
 from profiling_bean.db_dto.task_track_dto import TaskTrackDto
 from profiling_bean.db_dto.tensor_info_dto import TensorInfoDto
 

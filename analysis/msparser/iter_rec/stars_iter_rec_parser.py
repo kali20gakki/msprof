@@ -6,25 +6,25 @@ import logging
 import os
 import sqlite3
 
-from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.iter_recorder import IterRecorder
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
+from common_func.profiling_scene import ProfilingScene
 from common_func.utils import Utils
-from common_func.iter_recorder import IterRecorder
 from framework.offset_calculator import OffsetCalculator
-from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
+from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msparser.interface.iparser import IParser
 from msparser.iter_rec.iter_info_updater.iter_info import IterInfo
 from profiling_bean.prof_enum.data_tag import DataTag
-from profiling_bean.stars.ffts_pmu import FftsPmuBean
 from profiling_bean.stars.ffts_block_pmu import FftsBlockPmuBean
+from profiling_bean.stars.ffts_pmu import FftsPmuBean
 
 
 class StarsIterRecParser(IParser, MsMultiProcess):

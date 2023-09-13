@@ -1,9 +1,10 @@
 import unittest
 from unittest import mock
-from sqlite.db_manager import DBManager
+
 from common_func.info_conf_reader import InfoConfReader
-from host_prof.host_disk_usage.presenter.host_disk_usage_presenter import HostDiskUsagePresenter
 from host_prof.host_disk_usage.model.host_disk_usage import HostDiskUsage
+from host_prof.host_disk_usage.presenter.host_disk_usage_presenter import HostDiskUsagePresenter
+from sqlite.db_manager import DBManager
 
 NAMESPACE = 'host_prof.host_disk_usage.presenter.host_disk_usage_presenter'
 

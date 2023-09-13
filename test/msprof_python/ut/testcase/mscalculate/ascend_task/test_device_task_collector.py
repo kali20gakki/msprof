@@ -5,9 +5,9 @@ import os
 import unittest
 from unittest import mock
 
+from common_func.info_conf_reader import InfoConfReader
 from mscalculate.ascend_task.ascend_task import DeviceTask
 from mscalculate.ascend_task.device_task_collector import DeviceTaskCollector
-from common_func.info_conf_reader import InfoConfReader
 
 file_list = {}
 NAMESPACE = 'mscalculate.ascend_task.device_task_collector'

@@ -3,8 +3,8 @@ from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
 from msmodel.hardware.nic_model import NicModel
-from sqlite.db_manager import DBManager
 from profiling_bean.db_dto.nic_dto import NicDto
+from sqlite.db_manager import DBManager
 
 NAMESPACE = 'msmodel.hardware.nic_model'
 

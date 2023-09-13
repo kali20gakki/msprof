@@ -1,10 +1,11 @@
 import json
 import unittest
 from unittest import mock
+
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
 from host_prof.host_prof_presenter_manager import get_host_prof_timeline, get_time_data, \
     get_column_data, HostExportType
-from common_func.ms_constant.number_constant import NumberConstant
 
 NAMESPACE = 'host_prof.host_prof_presenter_manager'
 CPUPRESENTSPACE = 'host_prof.host_cpu_usage.presenter.host_cpu_usage_presenter.' \

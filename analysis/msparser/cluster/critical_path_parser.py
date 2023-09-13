@@ -5,10 +5,10 @@
 import logging
 from typing import Tuple
 
-from msparser.cluster.meta_parser import MetaParser
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.constant import Constant
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
+from msparser.cluster.meta_parser import MetaParser
 
 
 class CriticalPathParser(MetaParser):

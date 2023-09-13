@@ -3,8 +3,8 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
 from common_func.db_name_constant import DBNameConstant
-from msmodel.task_time.ascend_task_model import AscendTaskModel
 from model.test_dir_cr_base_model import TestDirCRBaseModel
+from msmodel.task_time.ascend_task_model import AscendTaskModel
 
 
 class TestAscendTaskModel(TestDirCRBaseModel):

@@ -3,21 +3,19 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 import logging
-import os
 
-from common_func.ms_multi_process import MsMultiProcess
-from common_func.profiling_scene import ProfilingScene
-from common_func.ms_constant.str_constant import StrConstant
-from msconfig.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.path_manager import PathManager
-from common_func.platform.chip_manager import ChipManager
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.ms_multi_process import MsMultiProcess
+from common_func.path_manager import PathManager
+from common_func.profiling_scene import ProfilingScene
+from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
+from msconfig.config_manager import ConfigManager
 from viewer.calculate_rts_data import calculate_task_schedule_data
 from viewer.calculate_rts_data import multi_calculate_task_cost_time
-from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
 
 
 class OpTaskSchedulerCalculator(MsMultiProcess):

@@ -4,11 +4,10 @@ from unittest import mock
 
 import pytest
 
-from mscalculate.data_analysis.parse_aicore_op_summary_calculator import ParseAiCoreOpSummaryCalculator
-from common_func.profiling_scene import ProfilingScene
-from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
+from common_func.profiling_scene import ProfilingScene
 from constant.constant import CONFIG
+from mscalculate.data_analysis.parse_aicore_op_summary_calculator import ParseAiCoreOpSummaryCalculator
 from sqlite.db_manager import DBManager
 
 file_list = {}

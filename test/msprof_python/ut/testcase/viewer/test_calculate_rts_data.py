@@ -1,8 +1,9 @@
 import sqlite3
 import unittest
 from unittest import mock
-import logging
+
 import pytest
+
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import ITER_RANGE
@@ -15,7 +16,6 @@ from viewer.calculate_rts_data import calculate_task_schedule_data, \
     create_ai_event_tables, create_metric_table, get_limit_and_offset, \
     get_metrics_from_sample_config, calculate_timeline_task_time, \
     _get_pmu_data, _get_stream_and_task_id, insert_event_value
-
 
 NAMESPACE = 'viewer.calculate_rts_data'
 sample_config = {'ai_core_profiling_events': '0x8,0x9',

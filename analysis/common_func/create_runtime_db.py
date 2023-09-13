@@ -7,12 +7,12 @@ import os
 import sqlite3
 import struct
 
-from msconfig.config_manager import ConfigManager
 from common_func.common import get_data_dir_sorted_files
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager
+from common_func.file_manager import FileOpen
 from common_func.file_name_manager import FileNameManagerConstant
 from common_func.file_name_manager import get_ai_core_compiles
 from common_func.file_name_manager import get_file_name_pattern_match
@@ -26,8 +26,8 @@ from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
-from common_func.file_manager import FileOpen
 from mscalculate.step_trace.create_step_table import StepTableBuilder
+from msconfig.config_manager import ConfigManager
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.struct_info.event_counter import AiCoreTaskInfo
 from profiling_bean.struct_info.step_trace import StepTrace

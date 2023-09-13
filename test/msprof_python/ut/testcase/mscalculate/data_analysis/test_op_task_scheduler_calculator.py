@@ -2,15 +2,13 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 
-import sqlite3
 import unittest
 from unittest import mock
 
-from mscalculate.data_analysis.op_task_scheduler_calculator import OpTaskSchedulerCalculator
 from common_func.platform.chip_manager import ChipManager
-from profiling_bean.prof_enum.chip_model import ChipModel
 from constant.constant import CONFIG
-
+from mscalculate.data_analysis.op_task_scheduler_calculator import OpTaskSchedulerCalculator
+from profiling_bean.prof_enum.chip_model import ChipModel
 from sqlite.db_manager import DBManager
 
 file_list = {}

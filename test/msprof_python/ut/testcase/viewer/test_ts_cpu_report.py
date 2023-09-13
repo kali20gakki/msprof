@@ -1,10 +1,10 @@
 import sqlite3
 import unittest
 from unittest import mock
-from common_func.msvp_constant import MsvpConstant
-from viewer.ts_cpu_report import TsCpuReport
 
+from common_func.msvp_constant import MsvpConstant
 from sqlite.db_manager import DBManager
+from viewer.ts_cpu_report import TsCpuReport
 
 NAMESPACE = 'viewer.ts_cpu_report'
 

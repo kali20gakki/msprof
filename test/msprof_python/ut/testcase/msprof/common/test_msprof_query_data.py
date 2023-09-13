@@ -1,12 +1,10 @@
+import sqlite3
 import unittest
 from unittest import mock
 
-from common_func.info_conf_reader import InfoConfReader
 from common_func.db_name_constant import DBNameConstant
 from common_func.msprof_query_data import MsprofQueryData
-
 from sqlite.db_manager import DBManager
-import sqlite3
 
 NAMESPACE = 'common_func.msprof_query_data'
 

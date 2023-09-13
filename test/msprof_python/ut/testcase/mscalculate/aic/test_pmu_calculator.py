@@ -1,16 +1,10 @@
 import collections
-import sqlite3
 import unittest
 from unittest import mock
 
-from common_func.profiling_scene import ProfilingScene
 from common_func.info_conf_reader import InfoConfReader
-from constant.constant import CONFIG
-from constant.info_json_construct import DeviceInfo
-from constant.info_json_construct import InfoJson
-from constant.info_json_construct import InfoJsonReaderManager
+from common_func.profiling_scene import ProfilingScene
 from mscalculate.aic.pmu_calculator import PmuCalculator
-from sqlite.db_manager import DBManager
 
 sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs'}
 NAMESPACE = 'mscalculate.aic.pmu_calculator'

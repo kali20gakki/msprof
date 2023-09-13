@@ -4,8 +4,9 @@
 
 import unittest
 from unittest import mock
-from msmodel.compact_info.task_track_model import TaskTrackModel
+
 from common_func.db_name_constant import DBNameConstant
+from msmodel.compact_info.task_track_model import TaskTrackModel
 
 NAMESPACE = 'msmodel.compact_info.task_track_model'
 

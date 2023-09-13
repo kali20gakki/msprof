@@ -5,12 +5,11 @@
 import logging
 import sqlite3
 
-from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.path_manager import PathManager
 from common_func.info_conf_reader import InfoConfReader
+from common_func.path_manager import PathManager
 from msmodel.interface.ianalysis_model import IAnalysisModel
 from msmodel.interface.view_model import ViewModel
 from msmodel.stars.acsq_task_model import AcsqTaskModel

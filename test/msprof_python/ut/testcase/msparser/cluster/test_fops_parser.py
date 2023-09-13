@@ -3,11 +3,9 @@ from unittest import mock
 
 from common_func.db_name_constant import DBNameConstant
 from common_func.platform.chip_manager import ChipManager
-from common_func.info_conf_reader import InfoConfReader
 from msparser.cluster.fops_parser import FopsParser
 from profiling_bean.prof_enum.chip_model import ChipModel
 from sqlite.db_manager import DBOpen
-
 
 NAMESPACE = 'msparser.cluster.fops_parser'
 

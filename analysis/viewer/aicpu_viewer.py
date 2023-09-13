@@ -1,17 +1,18 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+
 import logging
 import os
 
-from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
-from common_func.info_conf_reader import InfoConfReader
+from common_func.profiling_scene import ProfilingScene
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 

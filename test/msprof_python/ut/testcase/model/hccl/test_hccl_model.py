@@ -1,21 +1,20 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023. All rights reserved.
-import unittest
-from unittest import mock
-import os
 
-from common_func.profiling_scene import ProfilingScene
+import os
+from unittest import mock
+
 from common_func.constant import Constant
-from common_func.info_conf_reader import InfoConfReader
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
+from common_func.profiling_scene import ProfilingScene
+from model.test_dir_cr_base_model import TestDirCRBaseModel
 from msmodel.hccl.hccl_model import HCCLModel
 from msmodel.hccl.hccl_model import HcclViewModel
 from profiling_bean.db_dto.hccl_dto import HcclDto
 from profiling_bean.prof_enum.data_tag import DataTag
 from sqlite.db_manager import DBOpen
-from model.test_dir_cr_base_model import TestDirCRBaseModel
-
 
 NAMESPACE = 'msmodel.hccl.hccl_model'
 

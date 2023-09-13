@@ -1,5 +1,6 @@
 import unittest
 from unittest import mock
+
 from common_func.info_conf_reader import InfoConfReader
 from profiling_bean.basic_info.collect_info import CollectInfo
 

@@ -6,11 +6,9 @@ import unittest
 from unittest import mock
 
 from common_func.db_name_constant import DBNameConstant
-from common_func.info_conf_reader import InfoConfReader
 from common_func.msvp_constant import MsvpConstant
-from profiling_bean.db_dto.op_mem_dto import OpMemDto
-from profiling_bean.db_dto.npu_op_mem_dto import NpuOpMemDto
 from profiling_bean.db_dto.npu_op_mem_rec_dto import NpuOpMemRecDto
+from profiling_bean.db_dto.op_mem_dto import OpMemDto
 from viewer.npu_mem.npu_op_mem_viewer import NpuOpMemViewer
 
 NAMESPACE = 'viewer.npu_mem.npu_op_mem_viewer'

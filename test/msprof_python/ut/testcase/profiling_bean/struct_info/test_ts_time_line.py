@@ -1,4 +1,5 @@
 import unittest
+
 from profiling_bean.struct_info.ts_time_line import TimeLineData
 
 NAMESPACE = 'profiling_bean.struct_info.step_trace'

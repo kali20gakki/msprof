@@ -4,10 +4,9 @@ from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
-from profiling_bean.prof_enum.chip_model import ChipModel
-
 from constant.constant import CONFIG
 from msparser.hardware.llc_parser import NonMiniLLCParser
+from profiling_bean.prof_enum.chip_model import ChipModel
 from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = 'msparser.hardware.llc_parser'
