@@ -2,10 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-import logging
 import sqlite3
 
-from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.path_manager import PathManager
 from msmodel.interface.base_model import BaseModel

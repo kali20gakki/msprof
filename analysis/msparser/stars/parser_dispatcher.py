@@ -6,9 +6,9 @@ import importlib
 import logging
 import os
 
-from msconfig.config_manager import ConfigManager
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
+from msconfig.config_manager import ConfigManager
 
 
 class ParserDispatcher:

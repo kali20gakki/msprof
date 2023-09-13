@@ -7,7 +7,6 @@ import os
 import re
 import time
 
-import msmodel.runtime.runtime_api_model
 from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
 from common_func.file_name_manager import get_file_name_pattern_match
@@ -206,11 +205,11 @@ class HostSyscallPresenter(HostProfPresenterBase):
         return [
             (
                 data[0], data[1], data[2], data[3],
-                InfoConfReader().get_host_duration(data[4], NumberConstant.MICRO_SECOND),
+                data[4] / NumberConstant.CONVERSION_TIME,
                 data[5],
-                InfoConfReader().get_host_duration(data[6], NumberConstant.MICRO_SECOND),
-                InfoConfReader().get_host_duration(data[7], NumberConstant.MICRO_SECOND),
-                InfoConfReader().get_host_duration(data[8], NumberConstant.MICRO_SECOND)
+                data[6] / NumberConstant.CONVERSION_TIME,
+                data[7] / NumberConstant.CONVERSION_TIME,
+                data[8] / NumberConstant.CONVERSION_TIME
             ) for data in summary_data
         ]
 
@@ -312,10 +311,8 @@ class HostSyscallPresenter(HostProfPresenterBase):
             # 'name', 'tid', 'ts', 'dur'
             temp_data = [
                 data_item[3], int(data_item[1]), int(data_item[2]),
-                InfoConfReader().trans_into_local_time(
-                    InfoConfReader().time_from_host_syscnt(data_item[7], NumberConstant.MICRO_SECOND)),
-                InfoConfReader().get_host_duration(float(data_item[8]) - float(data_item[7]),
-                                                   NumberConstant.MICRO_SECOND)
+                InfoConfReader().trans_into_local_time(data_item[7], NumberConstant.NANO_SECOND),
+                (float(data_item[8]) - float(data_item[7])) / NumberConstant.CONVERSION_TIME
             ]
             result.append(temp_data)
         return result

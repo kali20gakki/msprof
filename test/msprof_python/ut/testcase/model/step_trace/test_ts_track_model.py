@@ -1,10 +1,7 @@
-import sqlite3
 import unittest
 from unittest import mock
 
-from common_func.info_conf_reader import InfoConfReader
 from msmodel.step_trace.ts_track_model import TsTrackModel
-from sqlite.db_manager import DBManager
 
 NAMESPACE = 'msmodel.step_trace.ts_track_model'
 

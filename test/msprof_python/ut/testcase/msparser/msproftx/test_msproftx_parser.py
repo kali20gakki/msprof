@@ -11,10 +11,10 @@ from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
-from msparser.msproftx.msproftx_parser import MsprofTxParser
-from profiling_bean.struct_info.msproftx_decoder import MsprofTxDecoder
 from msparser.data_struct_size_constant import StructFmt
+from msparser.msproftx.msproftx_parser import MsprofTxParser
 from profiling_bean.prof_enum.data_tag import DataTag
+from profiling_bean.struct_info.msproftx_decoder import MsprofTxDecoder
 
 NAMESPACE = 'msparser.msproftx.msproftx_parser'
 

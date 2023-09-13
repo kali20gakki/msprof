@@ -5,13 +5,13 @@
 import logging
 from typing import List
 
+from common_func.hash_dict_constant import HashDictData
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.hash_dict_constant import HashDictData
+from msmodel.compact_info.memcpy_info_model import MemcpyInfoModel
+from msparser.compact_info.memcpy_info_bean import MemcpyInfoBean
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.data_parser import DataParser
-from msparser.compact_info.memcpy_info_bean import MemcpyInfoBean
-from msmodel.compact_info.memcpy_info_model import MemcpyInfoModel
 from profiling_bean.prof_enum.data_tag import DataTag
 
 

@@ -2,29 +2,27 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
-import os
-import logging
 import json
+import logging
+import os
 from collections import defaultdict
 
-from msmodel.cluster_info.communication_model import CommunicationModel
-from common_func.msprof_common import prepare_for_analyze
-from common_func.db_name_constant import DBNameConstant
-from common_func.msprof_exception import ProfException
-from common_func.ms_constant.number_constant import NumberConstant
-from common_func.ms_constant.str_constant import OpBandWidthType
-from common_func.common import error, warn
 from common_func.common import print_msg
-from common_func.path_manager import PathManager
-from common_func.msprof_common import get_path_dir
-from common_func.msprof_common import check_path_valid
+from common_func.common import warn
 from common_func.data_check_manager import DataCheckManager
-from common_func.ms_constant.str_constant import StrConstant
-from common_func.constant import Constant
+from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import CommunicationMatrixInfo
-from msparser.cluster.communication_matrix_parser import CommunicationMatrixParser
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.msprof_common import check_path_valid
+from common_func.msprof_common import get_path_dir
+from common_func.msprof_common import prepare_for_analyze
+from common_func.msprof_exception import ProfException
 from common_func.msvp_common import create_json_for_dict
+from common_func.path_manager import PathManager
 from framework.load_info_manager import LoadInfoManager
+from msmodel.cluster_info.communication_model import CommunicationModel
+from msparser.cluster.communication_matrix_parser import CommunicationMatrixParser
 
 
 class CommunicationMatrixAnalyzer:

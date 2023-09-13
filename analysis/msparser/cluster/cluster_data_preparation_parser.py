@@ -4,12 +4,12 @@
 
 import json
 import logging
-import math
 import os
+
+import math
 
 from common_func.common import error
 from common_func.common import print_msg
-from common_func.common import warn
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
 from common_func.db_manager import DBManager

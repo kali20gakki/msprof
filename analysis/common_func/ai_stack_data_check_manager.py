@@ -7,11 +7,11 @@ import os
 from common_func import file_name_manager
 from common_func.config_mgr import ConfigMgr
 from common_func.data_check_manager import DataCheckManager
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import path_check
 from common_func.path_manager import PathManager
-from common_func.db_manager import DBManager
 
 
 class AiStackDataCheckManager(DataCheckManager):
@@ -35,15 +35,6 @@ class AiStackDataCheckManager(DataCheckManager):
                 (result_dir.endswith("host") and not AiStackDataCheckManager._is_device_exist(result_dir)):
             return True
         return False
-
-    @classmethod
-    def contain_acl_data(cls: any, result_dir: str, device_id: any = None) -> bool:
-        """
-        The data path contain acl data or not
-        """
-        return AiStackDataCheckManager._check_output(result_dir, device_id) and \
-            DBManager.check_item_in_table(PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT),
-                                          DBNameConstant.TABLE_API_DATA, 'level', 'acl')
 
     @classmethod
     def contain_ge_model_load_data(cls: any, result_dir: str, device_id: any = None) -> bool:

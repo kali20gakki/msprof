@@ -3,7 +3,6 @@ from unittest import mock
 
 from common_func.db_name_constant import DBNameConstant
 from mscalculate.cluster.trailing_calculator import TrailingCalculator
-
 from sqlite.db_manager import DBManager
 
 NAMESPACE = 'mscalculate.cluster.trailing_calculator'

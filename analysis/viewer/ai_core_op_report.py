@@ -6,12 +6,12 @@ import logging
 import os
 from collections import deque
 
-from common_func.profiling_scene import ProfilingScene
 from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.data_manager import DataManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_common import add_aicore_units
@@ -19,8 +19,8 @@ from common_func.msvp_common import read_cpu_cfg
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
+from common_func.profiling_scene import ProfilingScene
 from common_func.utils import Utils
-from common_func.info_conf_reader import InfoConfReader
 from msmodel.hccl.hccl_model import HcclViewModel
 from viewer.ge_info_report import get_ge_hash_dict
 from viewer.ge_info_report import get_ge_model_name_dict
@@ -77,6 +77,10 @@ class AiCoreOpReport:
             ai_core_queue = ai_core_group_dict.get(datum[1:3] + (datum[-1],), deque([]))
             if not ai_core_queue:
                 logging.debug("No ai core data of stream %d, task %d", datum[2], datum[1])
+                union_data.append(datum + (Constant.NA,) * ai_core_data_len)
+                continue
+            if datum[5] in AiCoreOpReport().HARDWARE_OP_LIST:
+                logging.debug("Found %s op of stream %d, task %d", datum[5], datum[2], datum[1])
                 union_data.append(datum + (Constant.NA,) * ai_core_data_len)
                 continue
             ai_core_datum = ai_core_queue.popleft()

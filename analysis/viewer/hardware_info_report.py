@@ -5,13 +5,13 @@
 import os
 import sqlite3
 
-from common_func.db_name_constant import DBNameConstant
 from common_func.common import CommonConstant
 from common_func.common import generate_config
 from common_func.db_manager import DBManager
+from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.utils import Utils
 from msmodel.hardware.mini_llc_model import cal_core2cpu
 

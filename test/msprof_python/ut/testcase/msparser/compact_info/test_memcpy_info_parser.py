@@ -5,10 +5,10 @@
 import unittest
 from unittest import mock
 
-from msparser.compact_info.memcpy_info_parser import MemcpyInfoParser
-from msparser.compact_info.memcpy_info_bean import MemcpyInfoBean
-from profiling_bean.prof_enum.data_tag import DataTag
 from constant.constant import CONFIG
+from msparser.compact_info.memcpy_info_bean import MemcpyInfoBean
+from msparser.compact_info.memcpy_info_parser import MemcpyInfoParser
+from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = 'msparser.compact_info.memcpy_info_parser'
 MODEL_NAMESPACE = 'msmodel.compact_info.memcpy_info_model'

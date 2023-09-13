@@ -14,10 +14,10 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
 from framework.offset_calculator import OffsetCalculator
 from msmodel.add_info.multi_thread_model import MultiThreadModel
+from msparser.add_info.multi_thread_bean import MultiThreadBean
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.data_parser import DataParser
 from profiling_bean.prof_enum.data_tag import DataTag
-from msparser.add_info.multi_thread_bean import MultiThreadBean
 
 
 class MultiThreadParser(DataParser, MsMultiProcess):

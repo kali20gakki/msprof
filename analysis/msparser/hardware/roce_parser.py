@@ -5,7 +5,6 @@
 import logging
 import os
 
-from msconfig.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
@@ -15,6 +14,7 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
+from msconfig.config_manager import ConfigManager
 from msmodel.hardware.roce_model import RoceModel
 from profiling_bean.prof_enum.data_tag import DataTag
 

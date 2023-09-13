@@ -17,7 +17,6 @@ from mscalculate.interface.icalculator import ICalculator
 from msmodel.acl.acl_model import AclModel
 from msmodel.msproftx.msproftx_model import MsprofTxModel
 from msmodel.sync_acl_npu.sync_acl_npu_model import SyncAclNpuModel
-from profiling_bean.prof_enum.data_tag import DataTag
 
 
 class TorchAclRelationCalculator(ICalculator, MsMultiProcess):

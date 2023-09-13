@@ -1,6 +1,6 @@
 import unittest
-import pytest
 from unittest import mock
+
 from host_prof.host_disk_usage.disk_usage_analysis import DiskUsageAnalysis
 
 NAMESPACE = 'host_prof.host_disk_usage.disk_usage_analysis'

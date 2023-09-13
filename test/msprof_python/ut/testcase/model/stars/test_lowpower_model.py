@@ -1,5 +1,6 @@
 import unittest
 from unittest import mock
+
 from msmodel.stars.lowpower_model import LowPowerModel
 
 NAMESPACE = 'msmodel.stars.lowpower_model'

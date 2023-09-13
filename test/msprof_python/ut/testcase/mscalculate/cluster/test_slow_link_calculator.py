@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
 import unittest
+
 from mscalculate.cluster.slow_link_calculator import SlowLinkCalculator
 
 NAMESPACE = 'mscalculate.cluster.slow_link_calculator'

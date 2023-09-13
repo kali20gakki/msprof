@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-import os
 import logging
+import os
 
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.platform.chip_manager import ChipManager

@@ -1,14 +1,14 @@
 #  Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
+import sqlite3
 import unittest
 from unittest import mock
-import sqlite3
-from sqlite.db_manager import DBOpen
-from sqlite.db_manager import DBManager
 
+from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
-from common_func.constant import Constant
+from sqlite.db_manager import DBManager
+from sqlite.db_manager import DBOpen
 from tuning.data_manager import DataManager, OpSummaryTuningDataHandle
 from tuning.data_manager import ModelSummaryTuningDataHandle
 

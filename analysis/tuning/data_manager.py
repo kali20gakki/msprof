@@ -5,23 +5,23 @@
 import logging
 import os
 import sqlite3
-from collections import defaultdict
 from abc import ABC, abstractmethod
+from collections import defaultdict
 
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
-from common_func.constant import Constant
-from common_func.section_calculator import SectionCalculator
-from msconfig.config_manager import ConfigManager
-from common_func.common_prof_rule import CommonProfRule
 from common_func.common import CommonConstant
 from common_func.common import generate_config
-from common_func.msvp_common import is_number
+from common_func.common_prof_rule import CommonProfRule
+from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.msvp_common import is_number
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
+from common_func.section_calculator import SectionCalculator
+from msconfig.config_manager import ConfigManager
 from msmodel.stars.op_summary_model import OpSummaryModel
 from viewer.ai_core_op_report import AiCoreOpReport
 from viewer.ai_core_report import get_core_sample_data

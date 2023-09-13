@@ -1,12 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-from common_func.db_manager import DBManager
-from common_func.db_name_constant import DBNameConstant
+
 from common_func.msprof_exception import ProfException
-from common_func.path_manager import PathManager
-from msmodel.interface.view_model import ViewModel
-from profiling_bean.db_dto.time_section_dto import TimeSectionDto
 
 
 class TaskTime:

@@ -4,7 +4,6 @@
 
 import json
 import logging
-import os
 import sqlite3
 from collections import OrderedDict
 from functools import wraps

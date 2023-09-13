@@ -3,7 +3,6 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import logging
-import sqlite3
 from collections import OrderedDict
 
 from common_func.constant import Constant

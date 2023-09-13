@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
-import json
 import logging
 
 from common_func.db_name_constant import DBNameConstant

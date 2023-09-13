@@ -6,9 +6,6 @@ import os
 import unittest
 from unittest import mock
 
-import pytest
-
-from common_func.msprof_exception import ProfException
 from constant.constant import clear_dt_project
 from msmodel.parallel.cluster_hccl_model import ClusterHCCLViewModel
 from msparser.parallel.hccl_operator_parser import HCCLOperatiorParser

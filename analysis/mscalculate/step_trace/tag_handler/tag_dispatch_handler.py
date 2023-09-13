@@ -4,12 +4,12 @@
 
 import collections
 
-from mscalculate.step_trace.tag_handler.iter_info_handler import AllReduceStreamHandler
-from mscalculate.step_trace.tag_handler.iter_info_handler import TrainingTraceTagHandler
-from mscalculate.step_trace.tag_handler.iter_info_handler import GetNextTagHandler
-from mscalculate.step_trace.tag_handler.state_machine.index_tracer import IndexTracker
-from mscalculate.interface.step_trace_tag_handler import StepTraceTagHandler
 from common_func.step_trace_constant import StepTraceConstant
+from mscalculate.interface.step_trace_tag_handler import StepTraceTagHandler
+from mscalculate.step_trace.tag_handler.iter_info_handler import AllReduceStreamHandler
+from mscalculate.step_trace.tag_handler.iter_info_handler import GetNextTagHandler
+from mscalculate.step_trace.tag_handler.iter_info_handler import TrainingTraceTagHandler
+from mscalculate.step_trace.tag_handler.state_machine.index_tracer import IndexTracker
 
 
 class DispatchModelHandler(StepTraceTagHandler):

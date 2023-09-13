@@ -4,7 +4,6 @@
 
 import os
 import unittest
-from unittest import mock
 
 from constant.constant import clear_dt_project
 

@@ -7,8 +7,8 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 import unittest
 
 from common_func.info_conf_reader import InfoConfReader
-from msconfig.config_manager import ConfigManager
 from framework.config_data_parsers import ConfigDataParsers
+from msconfig.config_manager import ConfigManager
 from profiling_bean.prof_enum.chip_model import ChipModel
 
 

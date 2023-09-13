@@ -7,9 +7,9 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 import unittest
 from unittest import mock
 
-from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.profiling_scene import ProfilingScene
 from constant.constant import CONFIG
 from mscalculate.hwts.hwts_calculator import HwtsCalculator
 from msmodel.interface.base_model import BaseModel

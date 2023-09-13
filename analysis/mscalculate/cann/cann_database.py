@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
+from common_func.constant import Constant
 from mscalculate.cann.additional_record import AdditionalRecord
 from mscalculate.cann.event import Event
-from common_func.constant import Constant
 from profiling_bean.db_dto.api_data_dto import ApiDataDto
 
 

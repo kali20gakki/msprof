@@ -59,3 +59,9 @@ class StarsConstant:
         :return: dict
         """
         return self.FFTS_TYPE
+
+    def find_key_by_value(self: any, value: str) -> int:
+        for key, val in self.SUBTASK_TYPE.items():
+            if val == value:
+                return key
+        return max(self.SUBTASK_TYPE) + 1

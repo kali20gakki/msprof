@@ -1,6 +1,5 @@
 import unittest
 
-from common_func.info_conf_reader import InfoConfReader
 from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager

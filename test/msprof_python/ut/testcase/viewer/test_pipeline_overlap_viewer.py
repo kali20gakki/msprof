@@ -5,8 +5,8 @@ import os
 import unittest
 from unittest import mock
 
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.str_constant import StrConstant
 from constant.constant import clear_dt_project
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager

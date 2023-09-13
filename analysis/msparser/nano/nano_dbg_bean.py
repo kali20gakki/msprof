@@ -1,14 +1,15 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+
 import logging
 import struct
 
-from common_func.ms_constant.ge_enum_constant import GeDataType
 from common_func.ms_constant.ge_enum_constant import GeDataFormat
+from common_func.ms_constant.ge_enum_constant import GeDataType
 from common_func.ms_constant.ge_enum_constant import GeTaskType
-from profiling_bean.struct_info.struct_decoder import StructDecoder
 from msparser.data_struct_size_constant import StructFmt
+from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 HEAD_FMT = "=II"
 NAME_FMT = "s"

@@ -1,5 +1,5 @@
 import unittest
-from profiling_bean.basic_info.cpu_info import CpuInfo
+
 from profiling_bean.basic_info.query_data_bean import QueryDataBean
 
 NAMESPACE = 'profiling_bean.basic_info.query_data_bean'

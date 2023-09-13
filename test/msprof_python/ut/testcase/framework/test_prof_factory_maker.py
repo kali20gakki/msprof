@@ -9,12 +9,10 @@ from unittest import mock
 
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
-from common_func.platform.chip_manager import ChipManager
+from constant.constant import CONFIG
 from framework.prof_factory_maker import ProfFactoryMaker
 from profiling_bean.prof_enum.chip_model import ChipModel
 from profiling_bean.prof_enum.data_tag import DataTag
-
-from constant.constant import CONFIG
 
 NAMESPACE = 'framework.prof_factory_maker'
 

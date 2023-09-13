@@ -5,8 +5,8 @@ import unittest
 from unittest import mock
 
 from common_func.msvp_constant import MsvpConstant
-from viewer.hccl_op_report import ReportHcclStatisticData
 from sqlite.db_manager import DBOpen
+from viewer.hccl_op_report import ReportHcclStatisticData
 
 NAMESPACE = 'viewer.hccl_op_report'
 

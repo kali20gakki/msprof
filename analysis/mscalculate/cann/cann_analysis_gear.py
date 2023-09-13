@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
-from abc import abstractmethod
 
 import logging
+from abc import abstractmethod
 from collections import OrderedDict
 from typing import List
 from typing import Union
@@ -28,8 +28,8 @@ from profiling_bean.db_dto.fusion_op_info_dto import FusionOpInfoDto
 from profiling_bean.db_dto.ge_time_dto import GeTimeDto
 from profiling_bean.db_dto.graph_id_map_dto import GraphIdMapDto
 from profiling_bean.db_dto.hccl_info_dto import HCCLInfoDto
-from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
 from profiling_bean.db_dto.mem_copy_info_dto import MemCopyInfoDto
+from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
 from profiling_bean.db_dto.task_track_dto import TaskTrackDto
 from profiling_bean.db_dto.tensor_info_dto import TensorInfoDto
 
@@ -480,11 +480,12 @@ class TaskGear(CANNGear):
         model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
         context_ids = self.get_context_ids(call_stack)
+        connection_id = node_dto.connection_id if node_dto.connection_id is not None else Constant.DEFAULT_INVALID_VALUE
 
         self.host_tasks.append(
             [model_id, request_id, task_track_dto.stream_id, task_track_dto.task_id,
              context_ids, task_track_dto.batch_id, task_track_dto.task_type,
-             task_track_dto.device_id, task_track_dto.timestamp, node_dto.connection_id]
+             task_track_dto.device_id, task_track_dto.timestamp, connection_id]
         )
 
     def is_hccl_task(self, hccl_event: Event):
@@ -527,11 +528,12 @@ class TaskGear(CANNGear):
         model_dto: ApiDataDto = self.db.get_api(model_event)
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
         model_id = NumberConstant.INVALID_MODEL_ID if model_dto.item_id is None else model_dto.item_id
+        connection_id = node_dto.connection_id if node_dto.connection_id is not None else Constant.DEFAULT_INVALID_VALUE
         if not node_event.additional_record:
             self.hccl_op_info.append([task_track_dto.device_id, model_id, request_id,
                                       node_dto.thread_id, node_dto.item_id,
                                       self.HCCL_TASK_TYPE, "N/A", node_dto.start, node_dto.end,
-                                      "N/A", node_dto.connection_id])
+                                      "N/A", connection_id])
             return
 
         for record in node_event.additional_record:
@@ -539,7 +541,7 @@ class TaskGear(CANNGear):
                 self.hccl_op_info.append([task_track_dto.device_id, model_id, request_id,
                                           node_dto.thread_id, node_dto.item_id,
                                           record.dto.task_type, record.dto.op_type, node_dto.start, node_dto.end,
-                                          record.dto.is_dynamic, node_dto.connection_id])
+                                          record.dto.is_dynamic, connection_id])
 
     def is_kernel_task(self, task_track_dto: TaskTrackDto, is_not_hccl_task: bool) -> bool:
         if task_track_dto.struct_type is None:

@@ -1,6 +1,6 @@
 import unittest
-import pytest
 from unittest import mock
+
 from host_prof.host_cpu_usage.cpu_usage_analysis import CpuUsageAnalysis
 
 NAMESPACE = 'host_prof.host_cpu_usage.cpu_usage_analysis'

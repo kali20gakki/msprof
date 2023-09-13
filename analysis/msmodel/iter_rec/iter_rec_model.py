@@ -7,8 +7,8 @@ import sqlite3
 
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
-from common_func.empty_class import EmptyClass
 from common_func.db_name_constant import DBNameConstant
+from common_func.empty_class import EmptyClass
 from common_func.ms_constant.number_constant import NumberConstant
 from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.view_model import ViewModel

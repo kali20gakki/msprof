@@ -2,13 +2,13 @@ import struct
 import unittest
 from unittest import mock
 
-from common_func.profiling_scene import ProfilingScene
-from common_func.info_conf_reader import InfoConfReader
 from common_func.constant import Constant
+from common_func.info_conf_reader import InfoConfReader
+from common_func.profiling_scene import ProfilingScene
 from constant.constant import CONFIG
 from msparser.aicpu.parse_aicpu_bin_data import ParseAiCpuBinData
-from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
+from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = 'msparser.aicpu.parse_aicpu_bin_data'
 

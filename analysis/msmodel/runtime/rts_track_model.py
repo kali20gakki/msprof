@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-from msconfig.config_manager import ConfigManager
 from common_func.db_name_constant import DBNameConstant
+from msconfig.config_manager import ConfigManager
 from msmodel.interface.base_model import BaseModel
 
 

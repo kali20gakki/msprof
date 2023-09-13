@@ -865,7 +865,7 @@ static int32_t LocalLookup(char *buf, uint32_t bufLen, const char *pattern, char
 
     *(pBuf - 1) = '\0';
     uint32_t pValueLen = strnlen(pValue, valueLen);
-    if (pValueLen == valueLen) {
+    if (pValueLen >= valueLen) {
         return PROFILING_FAILED;
     }
     ret = memcpy_s(value, valueLen, pValue, pValueLen);

@@ -1,6 +1,6 @@
 import unittest
-import pytest
 from unittest import mock
+
 from host_prof.host_network_usage.network_usage_analysis import NetworkUsageAnalysis
 
 NAMESPACE = 'host_prof.host_network_usage.network_usage_analysis'

@@ -1,13 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+
 from typing import List
 
-from common_func.db_name_constant import DBNameConstant
-from common_func.db_manager import DBManager
 from common_func.constant import Constant
-from msmodel.interface.base_model import BaseModel
+from common_func.db_manager import DBManager
+from common_func.db_name_constant import DBNameConstant
 from mscalculate.ascend_task.ascend_task import TopDownTask
+from msmodel.interface.base_model import BaseModel
 
 
 class AscendTaskModel(BaseModel):

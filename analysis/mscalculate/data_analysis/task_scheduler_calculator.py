@@ -4,7 +4,6 @@
 
 import logging
 
-from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
@@ -14,6 +13,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
+from common_func.profiling_scene import ProfilingScene
 from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
 from msconfig.config_manager import ConfigManager
 from msmodel.step_trace.ts_track_model import TsTrackModel

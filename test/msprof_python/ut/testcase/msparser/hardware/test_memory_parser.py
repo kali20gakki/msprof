@@ -1,8 +1,6 @@
 import unittest
 from unittest import mock
 
-import pytest
-
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
 from msparser.hardware.sys_mem_parser import ParsingMemoryData

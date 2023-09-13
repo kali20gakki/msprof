@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2023. All rights reserved.
 
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.profiling_scene import ProfilingScene
 from common_func.utils import Utils
-from common_func.ms_constant.number_constant import NumberConstant
 
 
 class OpCommonFunc:

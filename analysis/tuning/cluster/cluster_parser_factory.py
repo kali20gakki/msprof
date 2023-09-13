@@ -2,25 +2,26 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 
-import os
 import logging
-from collections import defaultdict
+import os
 from abc import abstractmethod
-from msmodel.stars.op_summary_model import OpSummaryModel
-from msmodel.step_trace.cluster_step_trace_model import ClusterStepTraceViewModel
-from msmodel.cluster_info.cluster_info_model import ClusterInfoViewModel
-from msmodel.cluster_info.communication_model import CommunicationModel
-from msparser.cluster.critical_path_parser import CriticalPathParser
-from msparser.cluster.communication_parser import CommunicationParser
-from msparser.cluster.communication_matrix_parser import CommunicationMatrixParser
-from msparser.cluster.meta_parser import MetaParser
-from common_func.db_name_constant import DBNameConstant
-from common_func.msprof_exception import ProfException
+from collections import defaultdict
+
 from common_func.common import print_msg
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.constant import Constant
+from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from framework.load_info_manager import LoadInfoManager
+from msmodel.cluster_info.cluster_info_model import ClusterInfoViewModel
+from msmodel.cluster_info.communication_model import CommunicationModel
+from msmodel.stars.op_summary_model import OpSummaryModel
+from msmodel.step_trace.cluster_step_trace_model import ClusterStepTraceViewModel
+from msparser.cluster.communication_matrix_parser import CommunicationMatrixParser
+from msparser.cluster.communication_parser import CommunicationParser
+from msparser.cluster.critical_path_parser import CriticalPathParser
+from msparser.cluster.meta_parser import MetaParser
 
 
 class ClusterParserFactory:
