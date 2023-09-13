@@ -165,7 +165,7 @@ class InfoConfReader:
         :return: device id
         """
         device_id = self._info_json.get("devices", Constant.NA)
-        if not device_id.isdigit():
+        if device_id and not device_id.isdigit():
             logging.error("Device id : %s is not a digit!", device_id)
             return Constant.NA
         return device_id
