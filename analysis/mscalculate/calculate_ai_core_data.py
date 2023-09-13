@@ -99,26 +99,27 @@ class CalculateAiCoreData:
             else:
                 ai_core_profiling_events.setdefault(pmu_name, []).append(pmu_value)
 
-
     @classmethod
-    def _calculate_vec_fp16_ratio(cls, events_name_list: list, ai_core_profiling_events: dict):
+    def _calculate_vec_fp16_ratio(cls, events_name_list: list, ai_core_profiling_events: dict) -> dict:
         names = ["vec_fp16_128lane_ratio", "vec_fp16_64lane_ratio"]
         if all(map(lambda name: name in events_name_list, names)):
             vec_fp16_ratio = ai_core_profiling_events["vec_fp16_128lane_ratio"][-1] + \
                              ai_core_profiling_events["vec_fp16_64lane_ratio"][-1]
             ai_core_profiling_events.setdefault("vec_fp16_ratio",
                                                 []).append(vec_fp16_ratio)
+        return ai_core_profiling_events
 
     @classmethod
-    def _calculate_cube_fops(cls, events_name_list: list, ai_core_profiling_events: dict, task_cyc: int):
+    def _calculate_cube_fops(cls, events_name_list: list, ai_core_profiling_events: dict, task_cyc: int) -> dict:
         names = ["mac_fp16_ratio", "mac_int8_ratio"]
         if all(map(lambda name: name in events_name_list, names)):
             cube_fops = ai_core_profiling_events["mac_fp16_ratio"][-1] * task_cyc * 16 * 16 * 16 * 2 + \
                         ai_core_profiling_events["mac_int8_ratio"][-1] * task_cyc * 16 * 16 * 32 * 2
             ai_core_profiling_events.setdefault("cube_fops", []).append(cube_fops)
+        return ai_core_profiling_events
 
     @classmethod
-    def _calculate_mac_ratio_extra(cls, events_name_list: list, ai_core_profiling_events: dict):
+    def _calculate_mac_ratio_extra(cls, events_name_list: list, ai_core_profiling_events: dict) -> dict:
         names = ["mac_fp16_ratio", "mac_int8_ratio", "fixpipe_ratio"]
         if all(map(lambda name: name in events_name_list, names)):
             mac_ratio = ai_core_profiling_events["mac_fp16_ratio"][-1] + ai_core_profiling_events["mac_int8_ratio"][-1]
@@ -127,21 +128,22 @@ class CalculateAiCoreData:
             ai_core_profiling_events.pop("mac_int8_ratio")
             if "vec_exe_ratio" in events_name_list:
                 vec_exe_ratio = ai_core_profiling_events.pop("vec_exe_ratio")
-                ai_core_profiling_events.update({
+                ai_core_profiling_events = {
                     "vec_exe_ratio": vec_exe_ratio, "mac_ratio_extra": [mac_ratio], **ai_core_profiling_events
-                })
+                }
             else:
-                ai_core_profiling_events.setdefault("mac_ratio_extra", []).append(mac_ratio)
+                ai_core_profiling_events = {"mac_ratio_extra": [mac_ratio], **ai_core_profiling_events}
 
         names = ["mac_fp_ratio", "mac_int_ratio"]
         if all(map(lambda name: name in events_name_list, names)):
             mac_ratio = ai_core_profiling_events["mac_fp_ratio"][-1] + ai_core_profiling_events["mac_int_ratio"][-1]
             ai_core_profiling_events.pop("mac_fp_ratio")
             ai_core_profiling_events.pop("mac_int_ratio")
-            ai_core_profiling_events.setdefault("mac_ratio_extra", []).append(mac_ratio)
+            ai_core_profiling_events = {"mac_ratio_extra": [mac_ratio], **ai_core_profiling_events}
+        return ai_core_profiling_events
 
     @classmethod
-    def _calculate_iq_full_ratio(cls, events_name_list: list, ai_core_profiling_events: dict):
+    def _calculate_iq_full_ratio(cls, events_name_list: list, ai_core_profiling_events: dict) -> dict:
         names = [
             "mte1_iq_full_ratio", "mte2_iq_full_ratio", "mte3_iq_full_ratio",
             "cube_iq_full_ratio", "vec_iq_full_ratio"
@@ -153,9 +155,10 @@ class CalculateAiCoreData:
                             ai_core_profiling_events["cube_iq_full_ratio"][-1] + \
                             ai_core_profiling_events["vec_iq_full_ratio"][-1]
             ai_core_profiling_events.setdefault("iq_full_ratio", []).append(iq_full_ratio)
+        return ai_core_profiling_events
 
     @classmethod
-    def _calculate_icache_miss_rate(cls, events_name_list: list, ai_core_profiling_events: dict):
+    def _calculate_icache_miss_rate(cls, events_name_list: list, ai_core_profiling_events: dict) -> dict:
         names = ["icache_miss_rate", "icache_req_ratio"]
         if all(map(lambda name: name in events_name_list, names)):
             if ai_core_profiling_events["icache_req_ratio"][-1] != 0:
@@ -165,15 +168,16 @@ class CalculateAiCoreData:
                 ai_core_profiling_events.get("icache_miss_rate").pop()
                 ai_core_profiling_events.setdefault("icache_miss_rate",
                                                     []).append(icache_miss_rate)
+        return ai_core_profiling_events
 
     @classmethod
-    def _calculate_memory_bandwidth(cls, events_name_list: list, ai_core_profiling_events: dict):
+    def _calculate_memory_bandwidth(cls, events_name_list: list, ai_core_profiling_events: dict) -> dict:
         names = ["main_mem_read_bw(GB/s)", "main_mem_write_bw(GB/s)", "mte2_ratio", "mte3_ratio"]
         if all(map(lambda name: name in events_name_list, names)):
             if ai_core_profiling_events["mte2_ratio"][-1] == 0 or \
                     ai_core_profiling_events["mte3_ratio"][-1] == 0:
                 logging.error("mte_cyc is 0, please check the data!")
-                return
+                return ai_core_profiling_events
 
             main_mem_read_bw = ai_core_profiling_events["main_mem_read_bw(GB/s)"][-1] \
                                / ai_core_profiling_events["mte2_ratio"][-1]
@@ -188,9 +192,11 @@ class CalculateAiCoreData:
             ai_core_profiling_events.get("main_mem_write_bw(GB/s)").pop()
             ai_core_profiling_events.setdefault("main_mem_write_bw(GB/s)",
                                                 []).append(main_mem_write_bw)
+        return ai_core_profiling_events
 
     @classmethod
-    def _calculate_control_flow_mis_prediction_rate(cls, events_name_list: list, ai_core_profiling_events: dict):
+    def _calculate_control_flow_mis_prediction_rate(
+            cls, events_name_list: list, ai_core_profiling_events: dict) -> dict:
         names = ["control_flow_prediction_ratio", "control_flow_mis_prediction_rate"]
         if all(map(lambda name: name in events_name_list, names)):
             if ai_core_profiling_events["control_flow_prediction_ratio"][-1] != 0:
@@ -200,6 +206,7 @@ class CalculateAiCoreData:
                 ai_core_profiling_events.get("control_flow_mis_prediction_rate").pop()
                 ai_core_profiling_events.setdefault("control_flow_mis_prediction_rate",
                                                     []).append(miss_rate)
+        return ai_core_profiling_events
 
     def add_fops_header(self: any, metric_key: str, metrics: list) -> None:
         """
@@ -252,14 +259,14 @@ class CalculateAiCoreData:
         calculate additional ai core metrics
         :return:
         """
-        self._calculate_vec_fp16_ratio(events_name_list, ai_core_profiling_events)
-        self._calculate_cube_fops(events_name_list, ai_core_profiling_events, task_cyc)
-        self._calculate_mac_ratio_extra(events_name_list, ai_core_profiling_events)
-        self._calculate_iq_full_ratio(events_name_list, ai_core_profiling_events)
-        self._calculate_icache_miss_rate(events_name_list, ai_core_profiling_events)
-        self._calculate_memory_bandwidth(events_name_list, ai_core_profiling_events)
-        self._calculate_control_flow_mis_prediction_rate(events_name_list, ai_core_profiling_events)
+        ai_core_profiling_events = self._calculate_vec_fp16_ratio(events_name_list, ai_core_profiling_events)
+        ai_core_profiling_events = self._calculate_cube_fops(events_name_list, ai_core_profiling_events, task_cyc)
+        ai_core_profiling_events = self._calculate_mac_ratio_extra(events_name_list, ai_core_profiling_events)
+        ai_core_profiling_events = self._calculate_iq_full_ratio(events_name_list, ai_core_profiling_events)
+        ai_core_profiling_events = self._calculate_icache_miss_rate(events_name_list, ai_core_profiling_events)
+        ai_core_profiling_events = self._calculate_memory_bandwidth(events_name_list, ai_core_profiling_events)
+        ai_core_profiling_events = self._calculate_control_flow_mis_prediction_rate(events_name_list,
+                                                                                    ai_core_profiling_events)
 
         self.add_vector_data(events_name_list, ai_core_profiling_events, task_cyc)
         return ai_core_profiling_events
-
