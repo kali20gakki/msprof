@@ -86,6 +86,39 @@ class TestFftsPmuCalculate(TestCase):
             check.calculate()
             check.save()
 
+    def test_save_should_be_success_when__is_mix_needed_is_true(self):
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.Utils.get_scene', return_value=Constant.STEP_INFO), \
+                mock.patch("os.path.exists", return_value=True), \
+                mock.patch("os.remove"), \
+                mock.patch("msmodel.interface.base_model.BaseModel.init"), \
+                mock.patch("msmodel.interface.base_model.BaseModel.finalize"), \
+                mock.patch("msmodel.interface.base_model.BaseModel.create_table"), \
+                mock.patch(NAMESPACE + '.HwtsIterModel.check_db', return_value=True), \
+                mock.patch(NAMESPACE + '.HwtsIterModel.check_table', return_value=True), \
+                mock.patch(NAMESPACE + '.HwtsIterModel.get_task_offset_and_sum', return_value=[0, 100]), \
+                mock.patch(NAMESPACE + '.PathManager.get_data_file_path'), \
+                mock.patch('os.path.getsize', return_value=1280), \
+                mock.patch(NAMESPACE + '.HwtsIterModel.get_aic_sum_count', return_value=50), \
+                mock.patch(NAMESPACE + '.FileCalculator.prepare_process',
+                           return_value=b'\xe8\x01\xd3k\x0b\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00'
+                                        b'\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x1ek1\x00\x00\x00\x00'
+                                        b'\x00\xff\xff\xff\xff\xff\xff\xff\xff\x97+\x00\x00\x00\x00\x00\x00\x00\x00'
+                                        b'\x00\x00\x00\x00\x00\x00\x16\x8a\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+                                        b'\x00\x00\x00\x00`\x00\x00\x00\x00\x00\x00\x00\x95Z.\x00\x00\x00\x00\x00'
+                                        b'\x976\x00\x00\x00\x00\x00\x00\xb4\n\x00\x00\x00\x00\x00\x00\x05\x19+'
+                                        b'\xafH\x03\x00\x00\xe9"+\xafH\x03\x00\x00'), \
+                mock.patch(NAMESPACE + ".FftsPmuModel.create_table"), \
+                mock.patch(NAMESPACE + '.FftsPmuModel.flush'):
+            mixCalcute = FftsPmuCalculate(self.file_list, CONFIG)
+            InfoConfReader()._info_json = {'DeviceInfo': [{'aic_frequency': 1500, 'hwts_frequency': 1000}]}
+            mixCalcute._core_num_dict = {'aic': 30, 'aiv': 0}
+            mixCalcute._block_dims = {'2-2': [22, 22]}
+            mixCalcute._freq = 1500
+            mixCalcute.calculate()
+            mixCalcute._is_mix_needed = True
+            mixCalcute.save()
+
     def test_calculate_all_file(self):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.Utils.get_scene', return_value=Constant.SINGLE_OP), \

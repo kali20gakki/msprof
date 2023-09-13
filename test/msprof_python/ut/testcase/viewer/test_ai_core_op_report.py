@@ -142,6 +142,17 @@ class TestAiCoreOpReport(unittest.TestCase):
         res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
         self.assertEqual(res, expect_res)
 
+    def test_union_task_ge_ai_core_data_success_when_exist_hardware_op_list(self):
+        expect_res = [
+            (1, 2, 3, 11, 16, "AI_CPU", 'N/A'), (4, 5, 6, 11, 16, "AI_CPU", 'N/A'), (7, 8, 9, 11, 16, 10, 'N/A')
+        ]
+        data = [(1, 2, 3, 11, 16, "AI_CPU"), (4, 5, 6, 11, 16, "AI_CPU"), (7, 8, 9, 11, 16, 10)]
+        ai_core_group_dict = {
+            (2, 3, "AI_CPU"): deque([(10,)]), (5, 6, "AI_CPU"): deque([(40,)]), (10, 11, 12): deque([(20,)])
+        }
+        res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
+        self.assertEqual(res, expect_res)
+
     def test_count_num(self):
         curs = mock.Mock()
         curs.execute.return_value = mock.Mock()
