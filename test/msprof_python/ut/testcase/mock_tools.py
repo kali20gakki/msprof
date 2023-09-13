@@ -4,7 +4,6 @@
 function:
 Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
 """
-from unittest import mock
 
 
 class ClassMock:

@@ -4,7 +4,6 @@
 
 import logging
 
-from common_func.profiling_scene import ProfilingScene
 from common_func.batch_counter import BatchCounter
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -14,6 +13,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
+from common_func.profiling_scene import ProfilingScene
 from mscalculate.interface.icalculator import ICalculator
 from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel

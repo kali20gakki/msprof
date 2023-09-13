@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-from msconfig.config_manager import ConfigManager
 from common_func.common import CommonConstant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.path_manager import PathManager
+from msconfig.config_manager import ConfigManager
 
 
 class AclSqlParser:

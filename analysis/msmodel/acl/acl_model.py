@@ -2,15 +2,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-from common_func.common import CommonConstant
-from common_func.common import CommonConstant
-from common_func.db_manager import DBManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.ms_constant.number_constant import NumberConstant
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
-from common_func.msprof_iteration import MsprofIteration
 from msmodel.interface.ianalysis_model import IAnalysisModel
 from msmodel.interface.view_model import ViewModel
 from profiling_bean.db_dto.acl_dto import AclDto
@@ -38,29 +32,6 @@ class AclModel(ViewModel, IAnalysisModel):
               "as output_duration, process_id, thread_id " \
               "from {0} order by start_time asc".format(DBNameConstant.TABLE_ACL_DATA)
         return DBManager.fetch_all_data(self.cur, sql)
-
-    def get_acl_total_time(self):
-        search_data_sql = f"select sum(end_time-start_time) " \
-                          f"from {DBNameConstant.TABLE_ACL_DATA}"
-        return self.cur.execute(search_data_sql).fetchone()[0]
-
-    def get_acl_statistic_data(self):
-        total_time = self.get_acl_total_time()
-        if not total_time:
-            return []
-
-        search_data_sql = "select api_name, api_type, " \
-                          "round({percent}*sum(end_time-start_time)/{total_time}, {accuracy}), " \
-                          "sum((end_time-start_time)), count(*), " \
-                          "sum((end_time-start_time))/count(*), " \
-                          "min((end_time-start_time)), " \
-                          "max((end_time-start_time)), " \
-                          "process_id, thread_id from {0} " \
-                          "group by api_name".format(DBNameConstant.TABLE_ACL_DATA,
-                                                     percent=CommonConstant.PERCENT,
-                                                     total_time=total_time,
-                                                     accuracy=CommonConstant.ROUND_SIX)
-        return DBManager.fetch_all_data(self.cur, search_data_sql)
 
     def get_acl_op_execute_data(self):
         sql = f"select start_time, end_time, thread_id from {DBNameConstant.TABLE_ACL_DATA} where " \

@@ -1,13 +1,10 @@
 import json
-import sqlite3
 import unittest
 from unittest import mock
 
-from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
-from sqlite.db_manager import DBManager
-from constant.info_json_construct import InfoJson
 from constant.info_json_construct import DeviceInfo
+from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
 from sqlite.db_manager import DBOpen
 from viewer.get_msvp_summary import get_aicore_utilization

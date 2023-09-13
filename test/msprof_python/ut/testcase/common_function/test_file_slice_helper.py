@@ -4,8 +4,8 @@
 import unittest
 from unittest import mock
 
-from common_func.file_slice_helper import make_export_file_name
 from common_func.file_slice_helper import FileSliceHelper
+from common_func.file_slice_helper import make_export_file_name
 
 NAMESPACE = 'common_func.file_slice_helper'
 

@@ -4,7 +4,6 @@ import unittest
 from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
-
 from msparser.stars.low_power_parser import LowPowerParser
 
 NAMESPACE = 'msparser.stars.low_power_parser'

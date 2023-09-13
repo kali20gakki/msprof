@@ -4,12 +4,13 @@
 
 import logging
 from enum import IntEnum
+
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.str_constant import CommunicationMatrixInfo
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_exception import ProfException
-from msparser.cluster.meta_parser import MetaParser
 from msparser.cluster.meta_parser import HcclAnalysisTool
+from msparser.cluster.meta_parser import MetaParser
 
 
 class MatrixDataType(IntEnum):

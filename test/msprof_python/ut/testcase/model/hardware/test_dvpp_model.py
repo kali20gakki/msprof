@@ -1,17 +1,8 @@
-import sqlite3
-import unittest
-from unittest import mock
-
-import pytest
-
-from sqlite.db_manager import DBManager
-from msmodel.hardware.dvpp_model import DvppModel
-from constant.constant import CONFIG
 import unittest
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
-
+from msmodel.hardware.dvpp_model import DvppModel
 from sqlite.db_manager import DBManager
 
 NAMESPACE = 'msmodel.hardware.dvpp_model'

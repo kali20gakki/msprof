@@ -4,13 +4,13 @@
 
 import json
 import logging
-import math
 import os
 import re
-
 from datetime import datetime
 from datetime import timezone
-from common_func.profiling_scene import ProfilingScene
+
+import math
+
 from common_func.constant import Constant
 from common_func.file_manager import FileOpen
 from common_func.ms_constant.number_constant import NumberConstant
@@ -19,9 +19,10 @@ from common_func.msprof_common import MsProfCommonConstant
 from common_func.msvp_common import create_csv
 from common_func.msvp_common import create_json
 from common_func.msvp_constant import MsvpConstant
-from common_func.os_manager import check_file_writable
 from common_func.os_manager import check_file_readable
+from common_func.os_manager import check_file_writable
 from common_func.path_manager import PathManager
+from common_func.profiling_scene import ProfilingScene
 from profiling_bean.prof_enum.timeline_slice_strategy import LoadingTimeLevel
 from profiling_bean.prof_enum.timeline_slice_strategy import TimeLineSliceStrategy
 

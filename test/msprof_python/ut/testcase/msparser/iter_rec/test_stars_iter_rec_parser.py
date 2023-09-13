@@ -3,14 +3,12 @@ import struct
 import unittest
 from unittest import mock
 
-import pytest
-
 from common_func.msprof_exception import ProfException
-from msparser.iter_rec.stars_iter_rec_parser import StarsIterRecParser
 from msparser.iter_rec.iter_info_updater.iter_info import IterInfo
+from msparser.iter_rec.stars_iter_rec_parser import StarsIterRecParser
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.stars.ffts_pmu import FftsPmuBean
-from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 
 NAMESPACE = 'msparser.iter_rec.stars_iter_rec_parser'
 sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs',

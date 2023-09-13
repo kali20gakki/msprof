@@ -3,12 +3,11 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import os
-import sqlite3
 
 from common_func.common import pre_check_sample
 from common_func.db_manager import DBManager
-from common_func.msvp_common import error
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msvp_common import error
 from common_func.msvp_constant import MsvpConstant
 
 

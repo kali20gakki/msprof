@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2023. All rights reserved.
+
 import logging
 
 from common_func.db_manager import DBManager

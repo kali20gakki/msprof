@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 import unittest
-from unittest import mock
 
 from model.test_dir_cr_base_model import TestDirCRBaseModel
 from msmodel.nano.nano_stars_model import NanoStarsModel, NanoStarsViewModel

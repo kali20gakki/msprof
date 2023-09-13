@@ -5,14 +5,14 @@
 import logging
 from abc import abstractmethod
 from collections import defaultdict
-from common_func.common import warn
-from common_func.platform.chip_manager import ChipManager
+
+from common_func.constant import Constant
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.str_constant import OpAnalysisType
 from common_func.ms_constant.str_constant import OpBandWidthType
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.str_constant import TransportType
-from common_func.constant import Constant
+from common_func.platform.chip_manager import ChipManager
 from profiling_bean.db_dto.hccl_dto import HcclDto
 from profiling_bean.prof_enum.chip_model import ChipModel
 

@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
-from common_func.ms_constant.number_constant import NumberConstant
-from msconfig.config_manager import ConfigManager
+
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.number_constant import NumberConstant
+from msconfig.config_manager import ConfigManager
 from msmodel.interface.parser_model import ParserModel
 from profiling_bean.db_dto.acc_pmu_dto import AccPmuOriDto
 

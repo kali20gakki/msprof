@@ -2,25 +2,23 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
-import os
 import configparser
 import logging
 
 from common_func.common import generate_config
+from common_func.constant import Constant
+from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
-from common_func.db_name_constant import DBNameConstant
-from common_func.ms_constant.str_constant import StrConstant
-from common_func.constant import Constant
-from common_func.ms_multi_process import MsMultiProcess
-from common_func.msvp_common import MsvpCommonConst
-from msmodel.l2_cache.l2_cache_calculator_model import L2CacheCalculatorModel
 from mscalculate.interface.icalculator import ICalculator
 from mscalculate.l2_cache.l2_cache_metric import HitRateMetric
 from mscalculate.l2_cache.l2_cache_metric import VictimRateMetric
-from profiling_bean.prof_enum.data_tag import DataTag
 from msconfig.config_manager import ConfigManager
+from msmodel.l2_cache.l2_cache_calculator_model import L2CacheCalculatorModel
+from profiling_bean.prof_enum.data_tag import DataTag
 
 
 class L2CacheCalculator(ICalculator, MsMultiProcess):

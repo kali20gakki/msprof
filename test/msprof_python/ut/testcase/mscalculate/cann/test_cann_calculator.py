@@ -8,9 +8,8 @@ import unittest
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
-from mscalculate.cann.cann_calculator import CANNCalculator
-from sqlite.db_manager import DBManager
 from constant.constant import CONFIG
+from mscalculate.cann.cann_calculator import CANNCalculator
 
 NAMESPACE = 'mscalculate.cann.cann_calculator'
 

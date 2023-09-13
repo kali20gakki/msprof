@@ -4,9 +4,9 @@
 
 import logging
 
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.path_manager import PathManager
-from common_func.db_manager import DBManager
 from msmodel.interface.parser_model import ParserModel
 
 

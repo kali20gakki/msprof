@@ -4,12 +4,10 @@
 
 import logging
 import os
-import sys
 
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.file_name_manager import get_host_network_usage_compiles
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.msprof_exception import ProfException
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from host_prof.host_network_usage.presenter.host_network_usage_presenter import \

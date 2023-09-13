@@ -1,13 +1,10 @@
-import struct
 import unittest
 from unittest import mock
 
-from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
-from msparser.step_trace.helper.model_with_q_parser import ModelWithQParser
+from msparser.data_struct_size_constant import StructFmt
 from msparser.step_trace.ts_track_parser import TstrackParser
 from profiling_bean.prof_enum.data_tag import DataTag
-from msparser.data_struct_size_constant import StructFmt
 
 NAMESPACE = "msparser.step_trace.ts_track_parser"
 

@@ -1,6 +1,7 @@
 import sqlite3
 import unittest
 from unittest import mock
+
 from common_func.msvp_constant import MsvpConstant
 from sqlite.db_manager import DBManager
 from viewer.cpu_usage_report import get_sys_cpu_usage_data, get_process_cpu_usage

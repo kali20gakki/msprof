@@ -1,11 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
- 
-import struct
- 
-from common_func.constant import Constant
-from msparser.data_struct_size_constant import StructFmt
+
 from profiling_bean.struct_info.struct_decoder import StructDecoder
  
  

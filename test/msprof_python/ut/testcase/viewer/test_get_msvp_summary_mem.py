@@ -1,8 +1,8 @@
 import sqlite3
 import unittest
 from unittest import mock
+
 from common_func.msvp_constant import MsvpConstant
-from sqlite.db_manager import DBManager
 from sqlite.db_manager import DBOpen
 from viewer.get_msvp_summary_mem import get_sys_mem_data, get_process_mem_data
 

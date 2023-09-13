@@ -2,13 +2,12 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
-
-import logging
 from abc import abstractmethod
+
 from common_func.ms_constant.str_constant import StrConstant
-from mscalculate.cluster.slow_rank_calculator import SlowRankCalculator
-from mscalculate.cluster.slow_link_calculator import SlowLinkCalculator
 from mscalculate.cluster.communication_matrix_calculator import CommunicationMatrixCalculator
+from mscalculate.cluster.slow_link_calculator import SlowLinkCalculator
+from mscalculate.cluster.slow_rank_calculator import SlowRankCalculator
 
 
 class ClusterCalculatorFactory:

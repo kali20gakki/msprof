@@ -1,5 +1,6 @@
 import unittest
 from unittest import mock
+
 from msmodel.stars.inter_soc_model import InterSocModel
 
 NAMESPACE = 'msmodel.stars.inter_soc_model'

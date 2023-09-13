@@ -5,8 +5,8 @@
 import logging
 from abc import abstractmethod
 
-from common_func.memcpy_constant import MemoryCopyConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.memcpy_constant import MemoryCopyConstant
 from common_func.ms_constant.number_constant import NumberConstant
 
 

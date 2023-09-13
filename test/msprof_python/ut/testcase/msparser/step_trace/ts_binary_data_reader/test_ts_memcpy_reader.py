@@ -1,5 +1,6 @@
 import struct
 import unittest
+
 from msparser.step_trace.ts_binary_data_reader.ts_memcpy_reader import TsMemcpyReader
 
 

@@ -4,7 +4,7 @@
 function:
 Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
-import sqlite3
+
 import unittest
 from unittest import mock
 

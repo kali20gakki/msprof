@@ -69,7 +69,7 @@ class TestStepTraceSummary(unittest.TestCase):
         case_param.update({"npu_id": -1})
         with mock.patch(NAMESPACE + '.StepTraceSummay._check_step_trace_db', return_value=True), \
                 mock.patch('os.path.exists', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False):
+                mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=False):
             check = StepTraceSummay(case_param)
             check.process()
 
@@ -79,7 +79,7 @@ class TestStepTraceSummary(unittest.TestCase):
         case_param.update({"npu_id": -1})
         with mock.patch(NAMESPACE + '.StepTraceSummay._check_step_trace_db', return_value=True), \
                 mock.patch('os.path.exists', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \
                 mock.patch(NAMESPACE + '.ClusterInfoViewModel.get_device_and_rank_ids',
                            return_value=[(1, 11), (2, 12), (3, 13)]):
             check = StepTraceSummay(case_param)
@@ -91,7 +91,7 @@ class TestStepTraceSummary(unittest.TestCase):
         case_param.update({"npu_id": -1})
         with mock.patch(NAMESPACE + '.StepTraceSummay._check_step_trace_db', return_value=True), \
                 mock.patch('os.path.exists', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \
                 mock.patch(NAMESPACE + '.ClusterInfoViewModel.get_device_and_rank_ids', return_value=[]):
             check = StepTraceSummay(case_param)
             check.process()
@@ -113,8 +113,8 @@ class TestStepTraceSummary(unittest.TestCase):
         with mock.patch(NAMESPACE + '.StepTraceSummay._check_iteration_id_valid'), \
                 mock.patch(NAMESPACE + '.StepTraceSummay._check_step_trace_db', return_value=True), \
                 mock.patch(NAMESPACE + '.StepTraceSummay._get_rank_or_device_ids', return_value=set([1])), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]):
+                mock.patch('common_func.db_manager.DBManager.judge_table_exist', return_value=True), \
+                mock.patch('common_func.db_manager.DBManager.fetch_all_data', return_value=[]):
             check = StepTraceSummay(case_param)
             check.process()
 
@@ -125,7 +125,7 @@ class TestStepTraceSummary(unittest.TestCase):
         with mock.patch(NAMESPACE + '.StepTraceSummay._check_iteration_id_valid'), \
                 mock.patch(NAMESPACE + '.StepTraceSummay._check_step_trace_db', return_value=True), \
                 mock.patch(NAMESPACE + '.StepTraceSummay._get_rank_or_device_ids', return_value=set([1])), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
+                mock.patch('common_func.db_manager.DBManager.judge_table_exist', return_value=True), \
                 mock.patch(NAMESPACE + '.ClusterStepTraceViewModel.get_sql_data', return_value=[[1]]), \
                 mock.patch(NAMESPACE + '.StepTraceSummay._storage_summary_data'):
             check = StepTraceSummay(case_param)
@@ -138,7 +138,7 @@ class TestStepTraceSummary(unittest.TestCase):
         with mock.patch(NAMESPACE + '.StepTraceSummay._check_iteration_id_valid'), \
                 mock.patch(NAMESPACE + '.StepTraceSummay._check_step_trace_db', return_value=True), \
                 mock.patch(NAMESPACE + '.StepTraceSummay._get_rank_or_device_ids', return_value=set([1])), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]):
+                mock.patch('common_func.db_manager.DBManager.judge_table_exist', return_value=True), \
+                mock.patch('common_func.db_manager.DBManager.fetch_all_data', return_value=[]):
             check = StepTraceSummay(case_param)
             check.process()

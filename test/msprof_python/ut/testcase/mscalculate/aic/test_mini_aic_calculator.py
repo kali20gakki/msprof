@@ -4,20 +4,18 @@
 function:
 Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
-import struct
+
 import unittest
 from unittest import mock
 
-from common_func.profiling_scene import ProfilingScene
-from common_func.info_conf_reader import InfoConfReader
 from common_func.db_name_constant import DBNameConstant
-from sqlite.db_manager import DBManager
+from common_func.info_conf_reader import InfoConfReader
+from common_func.profiling_scene import ProfilingScene
 from constant.constant import CONFIG
-from constant.constant import ITER_RANGE
-from sqlite.db_manager import DBOpen
 from mscalculate.aic.mini_aic_calculator import MiniAicCalculator
 from profiling_bean.prof_enum.data_tag import DataTag
-
+from sqlite.db_manager import DBManager
+from sqlite.db_manager import DBOpen
 
 NAMESPACE = 'mscalculate.aic.mini_aic_calculator'
 

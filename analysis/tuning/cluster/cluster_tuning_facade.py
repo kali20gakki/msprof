@@ -1,26 +1,26 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
+
+import json
 import logging
 import os
 from enum import IntEnum
-import json
 
 from common_func.common import print_msg
-from common_func.ms_constant.number_constant import NumberConstant
-from common_func.common import error
 from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_exception import ProfException
-from common_func.path_manager import PathManager
 from common_func.msprof_query_data import QueryArgumentCheck
 from common_func.msvp_common import create_json_for_dict
-from common_func.ms_constant.str_constant import StrConstant
+from common_func.path_manager import PathManager
+from tuning.cluster.cluster_calculator_factory import MatrixCalculatorFactory
+from tuning.cluster.cluster_calculator_factory import SlowLinkCalculatorFactory
+from tuning.cluster.cluster_calculator_factory import SlowRankCalculatorFactory
 from tuning.cluster.cluster_parser_factory import ClusterCommunicationParserFactory
 from tuning.cluster.cluster_parser_factory import CommunicationMatrixParserFactory
 from tuning.cluster.cluster_parser_factory import CriticalPathAnalysisParserFactory
-from tuning.cluster.cluster_calculator_factory import SlowRankCalculatorFactory
-from tuning.cluster.cluster_calculator_factory import SlowLinkCalculatorFactory
-from tuning.cluster.cluster_calculator_factory import MatrixCalculatorFactory
 
 
 class QueryDataType(IntEnum):

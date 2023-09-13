@@ -13,9 +13,9 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
-from profiling_bean.prof_enum.data_tag import DataTag
 from msmodel.stars.ffts_log_model import FftsLogModel
 from msmodel.stars.sub_task_model import SubTaskTimeModel
+from profiling_bean.prof_enum.data_tag import DataTag
 
 
 class SubTaskCalculator(MsMultiProcess):

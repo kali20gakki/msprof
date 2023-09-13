@@ -5,13 +5,11 @@
 import json
 import os
 
-from common_func.common import error
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
-from common_func.msvp_constant import MsvpConstant
-from common_func.os_manager import check_file_readable
 from common_func.msprof_exception import ProfException
+from common_func.os_manager import check_file_readable
 
 
 class ConfigMgr:

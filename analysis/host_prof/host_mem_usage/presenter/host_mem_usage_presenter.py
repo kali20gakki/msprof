@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
-import os
 import logging
+import os
 from decimal import Decimal
-from common_func.db_name_constant import DBNameConstant
+
 from common_func.constant import Constant
+from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_number

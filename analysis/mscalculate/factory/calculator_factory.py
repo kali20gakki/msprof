@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-from msconfig.config_manager import ConfigManager
 from framework.config_data_parsers import ConfigDataParsers
 from framework.iprof_factory import IProfFactory
+from msconfig.config_manager import ConfigManager
 
 
 class CalculatorFactory(IProfFactory):

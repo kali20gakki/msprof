@@ -7,9 +7,9 @@ import importlib
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
-from msconfig.config_manager import ConfigManager
 from common_func.os_manager import check_file_readable
 from common_func.utils import Utils
+from msconfig.config_manager import ConfigManager
 
 
 class ConfigDataParsers:

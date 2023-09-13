@@ -2,16 +2,16 @@ import os
 import unittest
 from unittest import mock
 
-from msconfig.config_manager import ConfigManager
-from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.profiling_scene import ProfilingScene
 from constant.constant import clear_dt_project
 from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
 from mscalculate.memory_copy.memcpy_calculator import MemcpyCalculator
+from msconfig.config_manager import ConfigManager
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 
 NAMESAPCE = "common_func.msprof_iteration"

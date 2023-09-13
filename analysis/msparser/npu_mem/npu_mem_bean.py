@@ -5,9 +5,9 @@
 import logging
 import struct
 
-from profiling_bean.struct_info.struct_decoder import StructDecoder
 from common_func.constant import Constant
 from msparser.data_struct_size_constant import StructFmt
+from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 
 class NpuMemDataBean(StructDecoder):

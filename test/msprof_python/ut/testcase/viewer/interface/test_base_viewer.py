@@ -1,7 +1,8 @@
 import unittest
 from unittest import mock
-from viewer.interface.base_viewer import BaseViewer
+
 from msmodel.stars.ffts_log_model import FftsLogModel
+from viewer.interface.base_viewer import BaseViewer
 
 NAMESPACE = 'viewer.interface.base_viewer'
 

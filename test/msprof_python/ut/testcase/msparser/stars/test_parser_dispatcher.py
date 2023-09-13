@@ -2,8 +2,8 @@ import configparser
 import unittest
 from unittest import mock
 
-from msparser.stars.parser_dispatcher import ParserDispatcher
 from msparser.interface.istars_parser import IStarsParser
+from msparser.stars.parser_dispatcher import ParserDispatcher
 
 NAMESPACE = 'msparser.stars.parser_dispatcher'
 

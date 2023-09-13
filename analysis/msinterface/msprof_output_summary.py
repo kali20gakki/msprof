@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+
 import csv
 import json
 import logging
@@ -13,8 +14,8 @@ from typing.io import TextIO
 from common_func.common import print_info, error
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
-from common_func.file_manager import check_path_valid
 from common_func.file_manager import FileOpen
+from common_func.file_manager import check_path_valid
 from common_func.file_slice_helper import FileSliceHelper
 from common_func.file_slice_helper import make_export_file_name
 from common_func.ms_constant.number_constant import NumberConstant

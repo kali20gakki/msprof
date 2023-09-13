@@ -3,7 +3,6 @@ from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
 from host_prof.host_disk_usage.model.host_disk_usage import HostDiskUsage
-from common_func.constant import Constant
 
 NAMESPACE = 'host_prof.host_disk_usage.model.host_disk_usage'
 

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+
 import os
 
 from common_func.db_manager import DBManager

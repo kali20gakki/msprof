@@ -4,15 +4,11 @@
 
 import logging
 import os
-import shutil
 
-from common_func.constant import Constant
-from common_func.file_manager import check_path_valid
-from common_func.info_conf_reader import InfoConfReader
 from common_func.common import error
+from common_func.constant import Constant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_common import MsProfCommonConstant
-from common_func.msprof_exception import ProfException
-from common_func.path_manager import PathManager
 from msmodel.cluster_info.cluster_info_model import ClusterInfoModel
 from msparser.interface.iparser import IParser
 

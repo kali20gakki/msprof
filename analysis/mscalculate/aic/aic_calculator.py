@@ -6,12 +6,12 @@ import itertools
 import logging
 import os
 
-from common_func.profiling_scene import ProfilingScene
 from common_func.config_mgr import ConfigMgr
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
+from common_func.profiling_scene import ProfilingScene
 from common_func.utils import Utils
 from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import FileReverseCalculator

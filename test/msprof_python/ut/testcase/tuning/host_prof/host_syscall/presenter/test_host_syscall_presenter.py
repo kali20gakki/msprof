@@ -1,9 +1,10 @@
 import unittest
 from unittest import mock
-from sqlite.db_manager import DBManager
+
 from common_func.info_conf_reader import InfoConfReader
-from host_prof.host_syscall.presenter.host_syscall_presenter import HostSyscallPresenter
 from host_prof.host_syscall.model.host_syscall import HostSyscall
+from host_prof.host_syscall.presenter.host_syscall_presenter import HostSyscallPresenter
+from sqlite.db_manager import DBManager
 
 NAMESPACE = 'host_prof.host_syscall.presenter.host_syscall_presenter'
 

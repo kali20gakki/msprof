@@ -10,9 +10,9 @@ from common_func.hash_dict_constant import HashDictData
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from msmodel.add_info.tensor_add_info_model import TensorAddInfoModel
+from msparser.add_info.tensor_add_info_bean import TensorAddInfoBean
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.data_parser import DataParser
-from msparser.add_info.tensor_add_info_bean import TensorAddInfoBean
 from profiling_bean.prof_enum.data_tag import DataTag
 
 

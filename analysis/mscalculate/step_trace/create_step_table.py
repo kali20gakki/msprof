@@ -3,18 +3,16 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import logging
-import sqlite3
 import typing
 from collections import deque
 
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.constant import Constant
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from common_func.step_trace_constant import StepTraceConstant
-from common_func.msprof_exception import ProfException
 from mscalculate.step_trace.tag_handler.tag_dispatch_handler import DispatchModelHandler
 from profiling_bean.db_dto.step_trace_dto import StepTraceOriginDto
 

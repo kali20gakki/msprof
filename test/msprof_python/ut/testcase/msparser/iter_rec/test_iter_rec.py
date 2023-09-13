@@ -6,10 +6,8 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
 import os
 import unittest
-from unittest import mock
 
 from constant.constant import clear_dt_project
-from msparser.iter_rec.iter_rec_parser import IterRecParser
 from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = 'msparser.iter_rec.iter_rec_parser'

@@ -3,7 +3,6 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
 import json
-import logging
 from collections import OrderedDict
 
 from common_func.constant import Constant
@@ -14,7 +13,6 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from msmodel.event.event_data_viewer_model import EventDataViewModel
-from profiling_bean.db_dto.api_data_dto import ApiDataDto
 
 
 class EventViewer:

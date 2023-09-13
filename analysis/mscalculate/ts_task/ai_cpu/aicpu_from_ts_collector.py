@@ -1,17 +1,18 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+
 import logging
 
-from common_func.profiling_scene import ProfilingScene
-from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from common_func.batch_counter import BatchCounter
-from common_func.db_name_constant import DBNameConstant
 from common_func.constant import Constant
+from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.iter_recorder import IterRecorder
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.platform.chip_manager import ChipManager
-from common_func.info_conf_reader import InfoConfReader
+from common_func.profiling_scene import ProfilingScene
+from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 
 
 class AICpuFromTsCollector:

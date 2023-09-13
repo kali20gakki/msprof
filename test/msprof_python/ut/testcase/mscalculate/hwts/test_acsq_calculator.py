@@ -1,8 +1,8 @@
 import unittest
 from unittest import mock
 
-from common_func.profiling_scene import ProfilingScene
 from common_func.batch_counter import BatchCounter
+from common_func.profiling_scene import ProfilingScene
 from mock_tools import ClassMock
 from mscalculate.hwts.acsq_calculator import AcsqCalculator
 from profiling_bean.db_dto.step_trace_dto import IterationRange

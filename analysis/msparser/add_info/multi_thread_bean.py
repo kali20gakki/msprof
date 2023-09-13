@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
-from profiling_bean.struct_info.struct_decoder import StructDecoder
 from common_func.ms_constant.level_type_constant import LevelDataType
+from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 
 class MultiThreadBean(StructDecoder):

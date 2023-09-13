@@ -1,4 +1,5 @@
 import unittest
+
 from profiling_bean.struct_info.event_counter import CounterInfo, AiCoreTaskInfo
 
 NAMESPACE = 'profiling_bean.struct_info.event_counter'

@@ -5,15 +5,16 @@
 import os
 import unittest
 from unittest import mock
-from tuning.cluster.cluster_tuning_facade import ClusterTuningFacade
-from common_func.msprof_exception import ProfException
-from common_func.ms_constant.str_constant import StrConstant
-from constant.constant import clear_dt_project
-from msparser.cluster.communication_parser import CommunicationParser
-from msparser.cluster.communication_matrix_parser import CommunicationMatrixParser
-from msparser.cluster.critical_path_parser import CriticalPathParser
+
 import pytest
 
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.msprof_exception import ProfException
+from constant.constant import clear_dt_project
+from msparser.cluster.communication_matrix_parser import CommunicationMatrixParser
+from msparser.cluster.communication_parser import CommunicationParser
+from msparser.cluster.critical_path_parser import CriticalPathParser
+from tuning.cluster.cluster_tuning_facade import ClusterTuningFacade
 
 NAMESPACE = 'tuning.cluster.cluster_tuning_facade'
 

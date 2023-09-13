@@ -1,10 +1,10 @@
 import unittest
 from unittest import mock
 
-from common_func.profiling_scene import ProfilingScene
-from mscalculate.data_analysis.op_summary_op_scene_calculator import OpSummaryOpSceneCalculator
 from common_func.info_conf_reader import InfoConfReader
+from common_func.profiling_scene import ProfilingScene
 from constant.constant import CONFIG
+from mscalculate.data_analysis.op_summary_op_scene_calculator import OpSummaryOpSceneCalculator
 from sqlite.db_manager import DBManager
 
 file_list = {}

@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
 import json
-import sqlite3
 import unittest
 from collections import OrderedDict
 from collections import namedtuple

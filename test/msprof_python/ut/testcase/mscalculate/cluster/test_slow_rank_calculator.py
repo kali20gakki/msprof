@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
 import unittest
+
 from mscalculate.cluster.slow_rank_calculator import SlowRankCalculator
 
 NAMESPACE = 'mscalculate.cluster.slow_rank_calculator'
