@@ -1,6 +1,6 @@
 import unittest
-import pytest
 from unittest import mock
+
 from common_func.info_conf_reader import InfoConfReader
 from host_prof.host_syscall.host_syscall_analysis import HostSyscallAnalysis
 

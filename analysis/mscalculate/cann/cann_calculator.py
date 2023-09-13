@@ -5,8 +5,8 @@
 import logging
 from typing import List
 
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.constant import Constant
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from mscalculate.cann.cann_analysis_chain import CANNAnalysisChain
 from mscalculate.cann.cann_analysis_gear import HCCLGear, ACLGear

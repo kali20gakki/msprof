@@ -1,8 +1,8 @@
 import sqlite3
 import unittest
 from collections import OrderedDict
-from unittest import mock
 from collections import namedtuple
+from unittest import mock
 
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader

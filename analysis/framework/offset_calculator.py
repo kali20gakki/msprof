@@ -6,8 +6,8 @@ import logging
 import os
 
 from common_func.constant import Constant
-from common_func.path_manager import PathManager
 from common_func.file_manager import FileOpen
+from common_func.path_manager import PathManager
 from profiling_bean.struct_info.aic_pmu import AicPmuBean
 
 

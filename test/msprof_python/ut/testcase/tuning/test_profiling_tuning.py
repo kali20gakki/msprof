@@ -2,8 +2,8 @@ import os
 import unittest
 from unittest import mock
 
-from tuning.profiling_tuning import ProfilingTuning
 from common_func.info_conf_reader import InfoConfReader
+from tuning.profiling_tuning import ProfilingTuning
 
 NAMESPACE = 'tuning.profiling_tuning'
 

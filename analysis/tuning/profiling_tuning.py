@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.str_constant import StrConstant
 from tuning.meta_rule_manager import RuleManager
 
 

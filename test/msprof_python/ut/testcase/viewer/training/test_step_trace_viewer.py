@@ -2,17 +2,17 @@ import os
 import unittest
 from unittest import mock
 
-from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.empty_class import EmptyClass
 from common_func.info_conf_reader import InfoConfReader
+from common_func.profiling_scene import ProfilingScene
 from constant.constant import ITER_RANGE
-from sqlite.db_manager import DBManager
-from viewer.training.step_trace_viewer import StepTraceViewer
-from constant.info_json_construct import InfoJsonReaderManager
 from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
+from constant.info_json_construct import InfoJsonReaderManager
+from sqlite.db_manager import DBManager
+from viewer.training.step_trace_viewer import StepTraceViewer
 
 NAMESPACE = 'viewer.training.step_trace_viewer'
 message = {"project_path": '',

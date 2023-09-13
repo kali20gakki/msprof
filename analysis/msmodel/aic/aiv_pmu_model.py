@@ -2,14 +2,12 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-from abc import abstractmethod
-
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
-from msmodel.interface.parser_model import ParserModel
 from mscalculate.aic.aic_utils import AicPmuUtils
+from msmodel.interface.parser_model import ParserModel
 from viewer.calculate_rts_data import create_metric_table
 from viewer.calculate_rts_data import get_metrics_from_sample_config
 

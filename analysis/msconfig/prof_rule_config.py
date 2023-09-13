@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 #  Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
-from msconfig.meta_config import MetaConfig
 from common_func.common_prof_rule import CommonProfRule
+from msconfig.meta_config import MetaConfig
 
 
 class ProfRuleConfig(MetaConfig):

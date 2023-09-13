@@ -6,7 +6,6 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
 
 import unittest
-from unittest import mock
 
 from mscalculate.interface.imetrics import IMetrics
 

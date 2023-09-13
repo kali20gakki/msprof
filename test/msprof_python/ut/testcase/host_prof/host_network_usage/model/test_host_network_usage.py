@@ -3,7 +3,7 @@ from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
 from host_prof.host_network_usage.model.host_network_usage import HostNetworkUsage
-from common_func.constant import Constant
+
 NAMESPACE = 'host_prof.host_network_usage.model.host_network_usage'
 
 

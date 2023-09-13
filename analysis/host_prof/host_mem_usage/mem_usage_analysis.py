@@ -4,7 +4,6 @@
 
 import logging
 import os
-import sys
 
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.file_name_manager import get_host_mem_usage_compiles

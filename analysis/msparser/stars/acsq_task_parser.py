@@ -6,10 +6,10 @@ import logging
 from collections import deque
 from typing import Tuple
 
+from common_func.ms_constant.stars_constant import StarsConstant
 from msmodel.sqe_type_map import SqeType
 from msmodel.stars.acsq_task_model import AcsqTaskModel
 from msparser.interface.istars_parser import IStarsParser
-from common_func.ms_constant.stars_constant import StarsConstant
 from profiling_bean.stars.acsq_task import AcsqTask
 
 

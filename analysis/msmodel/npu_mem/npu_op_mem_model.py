@@ -7,8 +7,8 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.path_manager import PathManager
 from msmodel.interface.parser_model import ParserModel
 from profiling_bean.db_dto.npu_op_mem_dto import NpuOpMemDto
-from profiling_bean.db_dto.op_mem_dto import OpMemDto
 from profiling_bean.db_dto.npu_op_mem_rec_dto import NpuOpMemRecDto
+from profiling_bean.db_dto.op_mem_dto import OpMemDto
 
 
 class NpuOpMemTableSelector:

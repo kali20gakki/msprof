@@ -5,7 +5,6 @@ function:
 Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
 import unittest
-from unittest import mock
 
 from common_func.platform.chip_manager import ChipManager
 from mscalculate.aic.aic_utils import AicPmuUtils

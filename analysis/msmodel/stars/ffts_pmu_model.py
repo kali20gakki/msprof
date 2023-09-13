@@ -4,13 +4,11 @@
 
 import logging
 import sqlite3
-import os
 
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
-from common_func.path_manager import PathManager
 from mscalculate.aic.aic_utils import AicPmuUtils
 from msmodel.interface.parser_model import ParserModel
 from viewer.calculate_rts_data import get_metrics_from_sample_config

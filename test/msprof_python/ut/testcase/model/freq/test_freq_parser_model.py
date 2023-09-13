@@ -4,8 +4,9 @@
 
 import unittest
 from unittest import mock
-from msmodel.freq.freq_parser_model import FreqParserModel
+
 from common_func.db_name_constant import DBNameConstant
+from msmodel.freq.freq_parser_model import FreqParserModel
 
 NAMESPACE = 'msmodel.freq.freq_parser_model'
 PATH_NAMESPACE = 'common_func.path_manager'

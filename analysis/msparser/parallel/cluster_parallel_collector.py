@@ -4,7 +4,6 @@
 
 import logging
 import os
-import threading
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
@@ -15,7 +14,6 @@ from msmodel.cluster_info.cluster_info_model import ClusterInfoViewModel
 from msmodel.parallel.cluster_parallel_model import ClusterParallelModel
 from msmodel.parallel.parallel_model import ParallelViewModel
 from msparser.interface.iparser import IParser
-from profiling_bean.db_dto.cluster_rank_dto import ClusterRankDto
 
 
 class ClusterParallelCollector(IParser):

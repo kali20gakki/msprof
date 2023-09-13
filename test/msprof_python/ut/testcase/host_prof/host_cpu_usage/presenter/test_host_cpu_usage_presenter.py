@@ -1,9 +1,10 @@
 import unittest
 from unittest import mock
-from sqlite.db_manager import DBManager
+
 from common_func.info_conf_reader import InfoConfReader
-from host_prof.host_cpu_usage.presenter.host_cpu_usage_presenter import HostCpuUsagePresenter
 from host_prof.host_cpu_usage.model.host_cpu_usage import HostCpuUsage
+from host_prof.host_cpu_usage.presenter.host_cpu_usage_presenter import HostCpuUsagePresenter
+from sqlite.db_manager import DBManager
 
 NAMESPACE = 'host_prof.host_cpu_usage.presenter.host_cpu_usage_presenter'
 

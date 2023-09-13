@@ -2,17 +2,17 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
-import os
 import logging
+import os
 from abc import abstractmethod
 
-from framework.offset_calculator import OffsetCalculator
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
-from profiling_bean.biu_perf.flow_bean import FlowBean
-from profiling_bean.biu_perf.cycles_bean import CyclesBean
+from framework.offset_calculator import OffsetCalculator
 from profiling_bean.biu_perf.core_info_bean import CoreInfo
+from profiling_bean.biu_perf.cycles_bean import CyclesBean
+from profiling_bean.biu_perf.flow_bean import FlowBean
 
 
 class BiuCoreParser:

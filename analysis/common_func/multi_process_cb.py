@@ -5,7 +5,6 @@
 import logging
 import os
 import re
-import sqlite3
 
 from common_func.constant import Constant
 from common_func.db_manager import DBManager

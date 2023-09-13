@@ -5,11 +5,11 @@
 import json
 from collections import OrderedDict
 
-from msmodel.biu_perf.biu_perf_model import BiuPerfModel
-from common_func.trace_view_manager import TraceViewManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.trace_view_header_constant import TraceViewHeaderConstant
+from common_func.trace_view_manager import TraceViewManager
+from msmodel.biu_perf.biu_perf_model import BiuPerfModel
 
 
 class BiuPerfViewer:

@@ -3,10 +3,8 @@ from unittest import mock
 
 import pytest
 
-from sqlite.db_manager import DBManager
-from common_func.info_conf_reader import InfoConfReader
-from host_prof.host_prof_base.host_prof_presenter_base import HostProfPresenterBase
 from host_prof.host_network_usage.model.host_network_usage import HostNetworkUsage
+from host_prof.host_prof_base.host_prof_presenter_base import HostProfPresenterBase
 
 NAMESPACE = 'host_prof.host_prof_base.host_prof_presenter_base'
 

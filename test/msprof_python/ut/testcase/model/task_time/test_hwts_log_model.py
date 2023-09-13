@@ -1,4 +1,3 @@
-import os
 from unittest import mock
 
 from common_func.db_name_constant import DBNameConstant

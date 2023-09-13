@@ -1,5 +1,6 @@
 import unittest
 from unittest import mock
+
 from profiling_bean.struct_info.l2_cache import L2CacheDataBean
 
 NAMESPACE = 'profiling_bean.struct_info.l2_cache'

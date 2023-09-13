@@ -3,9 +3,9 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2022. All rights reserved.
 
 from common_func.constant import Constant
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.path_manager import PathManager
-from common_func.db_manager import DBManager
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from msmodel.step_trace.ts_track_model import TsTrackModel
 from msparser.iter_rec.iter_info_updater.iter_info import IterInfo

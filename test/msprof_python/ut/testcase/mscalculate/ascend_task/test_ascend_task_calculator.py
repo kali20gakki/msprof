@@ -5,11 +5,11 @@ import os
 import unittest
 from unittest import mock
 
-from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.platform.chip_manager import ChipManager
+from common_func.profiling_scene import ProfilingScene
 from mscalculate.ascend_task.ascend_task import TopDownTask
 from mscalculate.ascend_task.ascend_task_calculator import AscendTaskCalculator
 from profiling_bean.db_dto.step_trace_dto import IterationRange

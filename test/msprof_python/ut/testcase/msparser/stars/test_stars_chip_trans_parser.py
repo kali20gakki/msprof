@@ -1,7 +1,6 @@
 import struct
 import unittest
 
-from common_func.info_conf_reader import InfoConfReader
 from msparser.stars import StarsChipTransParser
 from profiling_bean.stars.stars_chip_trans_bean import StarsChipTransBean
 

@@ -6,12 +6,8 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
 
 import unittest
-from unittest import mock
 
-from mscalculate.l2_cache.l2_cache_metric import HitRateMetric, VictimRateMetric
-from common_func.info_conf_reader import InfoConfReader
-
-from constant.constant import CONFIG
+from mscalculate.l2_cache.l2_cache_metric import HitRateMetric
 
 NAMESPACE = 'mscalculate.l2_cache.l2_cache_metric'
 

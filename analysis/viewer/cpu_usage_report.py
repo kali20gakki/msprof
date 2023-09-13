@@ -1,16 +1,16 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
+
 import logging
 import sqlite3
 
-from common_func.db_manager import DBManager
-from common_func.msvp_common import is_number
-from common_func.ms_constant.str_constant import StrConstant
-from common_func.msvp_constant import MsvpConstant
-from common_func.ms_constant.number_constant import NumberConstant
-
 from common_func.constant import Constant
+from common_func.db_manager import DBManager
+from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.msvp_common import is_number
+from common_func.msvp_constant import MsvpConstant
 
 
 def get_sys_cpu_usage_data(db_path: str, table_name: str, configs: dict) -> tuple:

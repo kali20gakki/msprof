@@ -1,14 +1,14 @@
 import unittest
 from unittest import mock
+
+from common_func.ms_constant.str_constant import CommunicationMatrixInfo
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.ms_constant.str_constant import TransportType
 from mscalculate.cluster.communication_matrix_calculator import CommunicationMatrixCalculator
 from mscalculate.cluster.communication_matrix_calculator import MatrixProf
-from msparser.cluster.meta_parser import HcclAnalysisTool
-from common_func.ms_constant.str_constant import StrConstant
-from common_func.ms_constant.str_constant import CommunicationMatrixInfo
-from common_func.ms_constant.str_constant import TransportType
 from mscalculate.cluster.slow_link_calculator import SlowLinkProf
+from msparser.cluster.meta_parser import HcclAnalysisTool
 from profiling_bean.prof_enum.chip_model import ChipModel
-
 
 NAMESPACE = 'mscalculate.cluster.communication_matrix_calculator'
 

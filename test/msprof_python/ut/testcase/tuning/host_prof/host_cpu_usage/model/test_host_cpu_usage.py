@@ -2,8 +2,8 @@ import unittest
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
-from sqlite.db_manager import DBManager
 from host_prof.host_cpu_usage.model.host_cpu_usage import HostCpuUsage
+from sqlite.db_manager import DBManager
 
 NAMESPACE = 'host_prof.host_cpu_usage.model.host_cpu_usage'
 

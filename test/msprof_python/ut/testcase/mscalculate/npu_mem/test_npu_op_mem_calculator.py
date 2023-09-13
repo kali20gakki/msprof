@@ -1,26 +1,13 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
-import logging
-import os
+
 import unittest
 from unittest import mock
 
 from constant.constant import CONFIG
-from msconfig.config_manager import ConfigManager
-from common_func.profiling_scene import ProfilingScene
-from common_func.constant import Constant
-from common_func.db_manager import DBManager
-from common_func.db_name_constant import DBNameConstant
-from constant.constant import clear_dt_project
-from common_func.db_manager import DBManager
-from common_func.db_name_constant import DBNameConstant
-from common_func.ms_constant.str_constant import StrConstant
-from common_func.ms_multi_process import MsMultiProcess
-from common_func.hash_dict_constant import HashDictData
-from profiling_bean.db_dto.npu_op_mem_dto import NpuOpMemDto
 from mscalculate.npu_mem.npu_op_mem_calculator import NpuOpMemCalculator
-from mscalculate.interface.icalculator import ICalculator
+from profiling_bean.db_dto.npu_op_mem_dto import NpuOpMemDto
 
 NAMESPACE = 'mscalculate.npu_mem.npu_op_mem_calculator'
 

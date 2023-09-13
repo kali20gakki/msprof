@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-from msmodel.interface.base_model import BaseModel
 from common_func.db_manager import DBManager
+from msmodel.interface.base_model import BaseModel
 
 
 class MemcpyModel(BaseModel):

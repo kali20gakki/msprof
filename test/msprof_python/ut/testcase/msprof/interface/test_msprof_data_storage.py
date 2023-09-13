@@ -3,10 +3,9 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 import json
 import unittest
-from unittest import mock
-
 from datetime import datetime
 from datetime import timezone
+from unittest import mock
 
 from common_func.constant import Constant
 from common_func.profiling_scene import ProfilingScene

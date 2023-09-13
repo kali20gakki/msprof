@@ -2,14 +2,13 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-import logging
 import json
+import logging
 import threading
 
 from common_func.config_mgr import ConfigMgr
 from common_func.data_manager import DataManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.empty_class import EmptyClass
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
@@ -28,15 +27,17 @@ from msinterface.msprof_timeline import MsprofTimeline
 from msparser.aicpu.parse_dp_data import ParseDpData
 from viewer.ai_core_op_report import AiCoreOpReport
 from viewer.ai_core_op_report import ReportOPCounter
-from viewer.hccl_op_report import ReportHcclStatisticData
 from viewer.ai_core_report import get_core_sample_data
 from viewer.aicpu_viewer import ParseAiCpuData
+from viewer.api_statistic_viewer import ApiStatisticViewer
+from viewer.api_viewer import ApiViewer
 from viewer.biu_perf_viewer import BiuPerfViewer
 from viewer.cpu_data_report import get_aictrl_pmu_events
 from viewer.cpu_data_report import get_cpu_hot_function
 from viewer.cpu_data_report import get_ts_pmu_events
 from viewer.cpu_usage_report import get_process_cpu_usage
 from viewer.cpu_usage_report import get_sys_cpu_usage_data
+from viewer.event_viewer import EventViewer
 from viewer.ge_info_report import get_ge_model_data
 from viewer.get_hccl_export_data import HCCLExport
 from viewer.get_l2_cache_data import add_op_name, process_hit_rate
@@ -56,10 +57,11 @@ from viewer.hardware_info_report import get_ddr_data
 from viewer.hardware_info_report import get_llc_bandwidth
 from viewer.hardware_info_report import llc_capacity_data
 from viewer.hardware_info_view import get_llc_train_summary
+from viewer.hccl_op_report import ReportHcclStatisticData
 from viewer.interconnection_view import InterConnectionView
-from viewer.api_statistic_viewer import ApiStatisticViewer
 from viewer.msproftx_viewer import MsprofTxViewer
 from viewer.npu_mem.npu_mem_viewer import NpuMemViewer
+from viewer.npu_mem.npu_op_mem_viewer import NpuOpMemViewer
 from viewer.peripheral_report import get_peripheral_dvpp_data
 from viewer.peripheral_report import get_peripheral_nic_data
 from viewer.pipeline_overlap_viewer import PipelineOverlapViewer
@@ -73,9 +75,6 @@ from viewer.task_time_viewer import TaskTimeViewer
 from viewer.training.step_trace_viewer import StepTraceViewer
 from viewer.training.task_op_viewer import TaskOpViewer
 from viewer.ts_cpu_report import TsCpuReport
-from viewer.npu_mem.npu_op_mem_viewer import NpuOpMemViewer
-from viewer.api_viewer import ApiViewer
-from viewer.event_viewer import EventViewer
 
 
 class MsProfExportDataUtils:

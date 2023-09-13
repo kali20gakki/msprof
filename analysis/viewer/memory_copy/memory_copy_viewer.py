@@ -4,15 +4,14 @@
 
 from collections import OrderedDict
 
-from msmodel.memory_copy.memcpy_model import MemcpyModel
 from common_func.db_name_constant import DBNameConstant
-from common_func.ms_constant.number_constant import NumberConstant
-from common_func.trace_view_manager import TraceViewManager
-from common_func.trace_view_header_constant import TraceViewHeaderConstant
-from common_func.db_manager import DBManager
-from common_func.ms_constant.str_constant import StrConstant
-from common_func.memcpy_constant import MemoryCopyConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.memcpy_constant import MemoryCopyConstant
+from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.trace_view_header_constant import TraceViewHeaderConstant
+from common_func.trace_view_manager import TraceViewManager
+from msmodel.memory_copy.memcpy_model import MemcpyModel
 
 
 class MemoryCopyViewer:

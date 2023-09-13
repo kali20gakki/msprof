@@ -1,14 +1,12 @@
 import os
-from collections import defaultdict
-
 import unittest
 from unittest import mock
+
 import pytest
 
-from common_func.ms_constant.str_constant import StrConstant
 from analyzer.communication_analyzer import CommunicationAnalyzer
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_exception import ProfException
-
 
 NAMESPACE = 'analyzer.communication_analyzer'
 

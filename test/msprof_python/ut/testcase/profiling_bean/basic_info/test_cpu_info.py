@@ -1,4 +1,5 @@
 import unittest
+
 from profiling_bean.basic_info.cpu_info import CpuInfo
 
 NAMESPACE = 'profiling_bean.basic_info.cpu_info'

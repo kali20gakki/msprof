@@ -1,5 +1,6 @@
 import unittest
 from unittest import mock
+
 from common_func.msvp_constant import MsvpConstant
 from viewer.ai_core_report import get_core_sample_data, get_output_event_counter, _get_output_event_counter
 

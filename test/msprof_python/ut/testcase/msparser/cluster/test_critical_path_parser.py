@@ -4,6 +4,7 @@
 
 import unittest
 from unittest import mock
+
 from msparser.cluster.critical_path_parser import CriticalPathParser
 
 NAMESPACE = 'msparser.cluster.critical_path_parser'

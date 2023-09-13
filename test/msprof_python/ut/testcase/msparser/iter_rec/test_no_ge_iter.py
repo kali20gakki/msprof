@@ -10,12 +10,13 @@ import unittest
 from unittest import mock
 
 import pytest
+
 from common_func.msprof_exception import ProfException
-from msparser.iter_rec.iter_rec_parser import NoGeIterRecParser
-from msparser.iter_rec.iter_info_updater.iter_info import IterInfo
-from profiling_bean.prof_enum.data_tag import DataTag
-from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from constant.constant import CONFIG
+from msparser.iter_rec.iter_info_updater.iter_info import IterInfo
+from msparser.iter_rec.iter_rec_parser import NoGeIterRecParser
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
+from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = 'msparser.iter_rec.iter_rec_parser'
 

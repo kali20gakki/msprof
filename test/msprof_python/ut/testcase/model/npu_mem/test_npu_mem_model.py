@@ -6,7 +6,6 @@ import unittest
 from unittest import mock
 
 from msmodel.npu_mem.npu_mem_model import NpuMemModel
-from common_func.info_conf_reader import InfoConfReader
 
 NAMESPACE = 'msmodel.npu_mem.npu_mem_model'
 

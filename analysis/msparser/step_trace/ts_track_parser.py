@@ -16,14 +16,14 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
 from common_func.utils import Utils
 from framework.offset_calculator import OffsetCalculator
-from msmodel.step_trace.ts_track_model import TsTrackModel
 from mscalculate.step_trace.create_step_table import StepTableBuilder
+from msmodel.step_trace.ts_track_model import TsTrackModel
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.data_parser import DataParser
 from msparser.step_trace.helper.model_with_q_parser import ModelWithQParser
 from msparser.step_trace.ts_binary_data_reader.step_trace_reader import StepTraceReader
-from msparser.step_trace.ts_binary_data_reader.ts_memcpy_reader import TsMemcpyReader
 from msparser.step_trace.ts_binary_data_reader.task_type_reader import TaskTypeReader
+from msparser.step_trace.ts_binary_data_reader.ts_memcpy_reader import TsMemcpyReader
 from profiling_bean.prof_enum.data_tag import DataTag
 
 

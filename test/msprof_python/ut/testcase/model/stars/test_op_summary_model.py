@@ -1,7 +1,6 @@
 import sqlite3
 from unittest import mock
 
-from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from model.test_dir_cr_base_model import TestDirCRBaseModel
 from msmodel.stars.op_summary_model import OpSummaryModel

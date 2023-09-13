@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-import datetime
-import logging
 import os
 import shutil
 
@@ -11,9 +9,8 @@ from common_func.common import warn, print_info
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
-from common_func.msprof_common import analyze_collect_data, prepare_for_parse
-from common_func.common import error
 from common_func.msprof_common import MsProfCommonConstant
+from common_func.msprof_common import analyze_collect_data, prepare_for_parse
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
 from common_func.msprof_exception import ProfException

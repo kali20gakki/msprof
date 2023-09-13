@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+
 from collections import namedtuple
 
 from common_func.info_conf_reader import InfoConfReader

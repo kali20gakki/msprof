@@ -7,11 +7,11 @@ import os
 from common_func import file_name_manager
 from common_func.config_mgr import ConfigMgr
 from common_func.data_check_manager import DataCheckManager
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import path_check
 from common_func.path_manager import PathManager
-from common_func.db_manager import DBManager
 
 
 class AiStackDataCheckManager(DataCheckManager):

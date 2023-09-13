@@ -2,7 +2,6 @@ import json
 import unittest
 from unittest import mock
 
-from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager

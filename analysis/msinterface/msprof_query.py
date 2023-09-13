@@ -5,20 +5,20 @@
 import os
 from operator import itemgetter
 
+from common_func.common import error
 from common_func.common import print_msg
 from common_func.common import warn
 from common_func.data_check_manager import DataCheckManager
-from common_func.common import error
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
 from common_func.msprof_exception import ProfException
-from msinterface.msprof_query_summary_manager import MsprofQuerySummaryManager
 from common_func.msprof_query_data import MsprofQueryData
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from framework.load_info_manager import LoadInfoManager
+from msinterface.msprof_query_summary_manager import MsprofQuerySummaryManager
 from msmodel.cluster_info.cluster_info_model import ClusterInfoModel
 
 

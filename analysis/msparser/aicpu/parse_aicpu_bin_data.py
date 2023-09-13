@@ -7,23 +7,23 @@ import logging
 import os
 import sqlite3
 
-from msconfig.config_manager import ConfigManager
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
+from common_func.batch_counter import BatchCounter
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager
+from common_func.iter_recorder import IterRecorder
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
-from common_func.batch_counter import BatchCounter
-from common_func.iter_recorder import IterRecorder
+from common_func.profiling_scene import ProfilingScene
 from framework.offset_calculator import OffsetCalculator
+from msconfig.config_manager import ConfigManager
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.ai_cpu_data import AiCpuData
-from common_func.profiling_scene import ProfilingScene
 
 
 class ParseAiCpuBinData(MsMultiProcess):

@@ -6,7 +6,7 @@ import json
 import os
 from enum import IntEnum
 
-from common_func.common import error, print_msg
+from common_func.common import print_msg
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
 from common_func.db_name_constant import DBNameConstant
@@ -17,11 +17,11 @@ from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from msmodel.cluster_info.cluster_info_model import ClusterInfoViewModel
 from msparser.cluster.cluster_data_preparation_parser import ClusterDataPreparationParser
+from msparser.cluster.fops_parser import FopsParser
+from msparser.cluster.host_sys_usage_parser import HostSysUsageParser
+from msparser.cluster.step_trace_summary import StepTraceSummay
 from msparser.parallel.parallel_query.cluster_parallel_analysis_parser import ClusterParallelAnalysisParser
 from msparser.parallel.parallel_query.cluster_parallel_analysis_tuning import ClusterParallelAnalysisTuning
-from msparser.cluster.fops_parser import FopsParser
-from msparser.cluster.step_trace_summary import StepTraceSummay
-from msparser.cluster.host_sys_usage_parser import HostSysUsageParser
 from tuning.cluster.cluster_tuning_facade import ClusterTuningFacade
 
 

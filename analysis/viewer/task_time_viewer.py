@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+
 import json
 from typing import Dict
 from typing import List
@@ -12,16 +13,16 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
+from mscalculate.ascend_task.ascend_task import TopDownTask
 from msmodel.interface.view_model import ViewModel
 from msmodel.stars.ffts_log_model import FftsLogModel
-from msmodel.task_time.ascend_task_model import AscendTaskModel
 from msmodel.stars.sub_task_model import SubTaskTimeModel
+from msmodel.task_time.ascend_task_model import AscendTaskModel
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
-from profiling_bean.prof_enum.export_data_type import ExportDataType
 from profiling_bean.db_dto.task_time_dto import TaskTimeDto
+from profiling_bean.prof_enum.export_data_type import ExportDataType
 from viewer.get_trace_timeline import TraceViewer
 from viewer.interface.base_viewer import BaseViewer
-from mscalculate.ascend_task.ascend_task import TopDownTask
 from viewer.memory_copy.memory_copy_viewer import MemoryCopyViewer
 
 

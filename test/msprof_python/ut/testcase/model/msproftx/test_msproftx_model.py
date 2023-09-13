@@ -3,7 +3,6 @@ from unittest import mock
 
 from msmodel.msproftx.msproftx_model import MsprofTxModel
 
-
 NAMESPACE = 'msmodel.msproftx.msproftx_model'
 
 
