@@ -346,6 +346,13 @@ int ParamsAdapterMsprof::GenMsprofContainer(
         paramContainer_[cfgType] = std::string(kv.second.first.args[argsType]);
         setConfig_.insert(cfgType);
     }
+    if (paramContainer_[INPUT_CFG_COM_OUTPUT].empty()) {
+        std::string envWorkPath = Utils::GetEnvString(ASCEND_WORK_PATH_ENV);
+        if (!envWorkPath.empty()) {
+            std::string ascendWorkPathDir = envWorkPath + ASCEND_MSPROF_WORK_PATH;
+            paramContainer_[INPUT_CFG_COM_OUTPUT] = ascendWorkPathDir;
+        }
+    }
     return PROFILING_SUCCESS;
 }
 

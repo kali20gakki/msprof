@@ -135,6 +135,13 @@ int ParamsAdapterAclJson::ParamsCheckAclJson() const
 void ParamsAdapterAclJson::GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> aclCfg)
 {
     paramContainer_[INPUT_CFG_COM_OUTPUT] = aclCfg->output();
+    if (paramContainer_[INPUT_CFG_COM_OUTPUT].empty()) {
+        std::string envWorkPath = Utils::GetEnvString(ASCEND_WORK_PATH_ENV);
+        if (!envWorkPath.empty()) {
+            std::string ascendWorkPathDir = envWorkPath + ASCEND_MSPROF_WORK_PATH;
+            paramContainer_[INPUT_CFG_COM_OUTPUT] = ascendWorkPathDir;
+        }
+    }
     paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = aclCfg->storage_limit();
     paramContainer_[INPUT_CFG_COM_MSPROFTX] = aclCfg->msproftx();
     paramContainer_[INPUT_CFG_COM_TASK_TIME] = aclCfg->task_time();
