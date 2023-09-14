@@ -43,7 +43,7 @@ class TestTaskTimeViewer(unittest.TestCase):
         check = TaskTimeViewer(configs, params)
         ret = check.get_time_timeline_header(data)
         self.assertEqual(ret, [['process_name', 0, 0, 'Task Scheduler'],
-                               ['thread_name', 2, 3, 'Stream Notify Wait'],
+                               ['thread_name', 2, 3, 'Stream 3'],
                                ['thread_sort_index', 2, 3, 3]])
 
     def test_get_timeline_data(self):

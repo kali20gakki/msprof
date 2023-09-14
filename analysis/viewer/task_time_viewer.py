@@ -60,8 +60,10 @@ class TaskTimeViewer(BaseViewer):
                 thread_id = int(item[1] / (max(StarsConstant.SUBTASK_TYPE) + 1))
                 device_task_type = StarsConstant.SUBTASK_TYPE.get(item[1] % (max(StarsConstant.SUBTASK_TYPE) + 1))
                 subtask.append(["thread_name", item[0], item[1], f'Thread {thread_id}({device_task_type})'])
-            else:
+            elif pid_header == TraceViewHeaderConstant.PROCESS_SUBTASK:
                 subtask.append(["thread_name", item[0], item[1], f'Stream {StarsConstant.SUBTASK_TYPE.get(item[1])}'])
+            else:
+                subtask.append(["thread_name", item[0], item[1], f'Stream {item[1]}'])
             subtask.append(["thread_sort_index", item[0], item[1], item[1]])
         header.extend(subtask)
         return header
