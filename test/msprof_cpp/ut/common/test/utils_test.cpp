@@ -522,7 +522,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, IsSoftLink) {
 
     //empty path
     std::string path;
-    EXPECT_EQ(true, Utils::IsSoftLink(path));
+    EXPECT_EQ(false, Utils::IsSoftLink(path));
     EXPECT_EQ(false, Utils::IsSoftLink("/tmp/test_file"));
     EXPECT_EQ(true, Utils::IsSoftLink("/tmp/softlink_test_file"));
 

@@ -54,7 +54,7 @@ log_info "begin run cpp llt target:${LLT_TARGET_BASENAME}"
 if [ "${RUN_ENV_FILE}" != "" ]; then
     if [ -f "${RUN_ENV_FILE}" ]; then
         log_info "source ${RUN_ENV_FILE}"
-        # ${RUN_ENV_PARAMS} 不可以加引号，因为它可能有多个参数
+        # ${RUN_ENV_PARAMS}不可以加引号，因为它可能有多个参数
         source "${RUN_ENV_FILE}"
     else
         log_info "WARNING: RUN_ENV_FILE ${RUN_ENV_FILE} does not exist, skip source."
@@ -77,10 +77,6 @@ log_info "LLT_KILL_TIME is ${LLT_KILL_TIME}"
 log_info "LLT_TARGET_BASENAME is ${LLT_TARGET_BASENAME}"
 log_info "LLT_RUN_MOD is ${LLT_RUN_MOD}"
 
-#echo "run OPTION is ${RUN_OPTION}"
-
-# CUR_DIR=$(dirname $(readlink -f $0))
-# prefix=${CUR_DIR%%/build*}
 
 if [ "${use_hi_sudo}" = "true" ]; then
     hisudo="${HI_SUDO}"
@@ -161,15 +157,6 @@ then
     log_error "Address Sanitizer error in ${LLT_REPORT_OUT}/run_${LLT_TARGET_BASENAME}.log"
     exit "${FAIL}"
 fi
-
-# #check  all testcase pass result.if all passed,test case ran.
-# if grep -nw 'test cases ran' ${LLT_REPORT_OUT}/run_${LLT_TARGET_BASENAME}.log >/dev/null
-# then
-#     echo "run result normal.all testcase passed"
-# else
-#     echo "NO passed.not all testcase passed"
-#     exit ${FAIL}
-# fi
 
 log_info "llt run task succ."
 log_info "llt run time consuming (module=${LLT_TARGET_BASENAME}):$SECONDS seconds"

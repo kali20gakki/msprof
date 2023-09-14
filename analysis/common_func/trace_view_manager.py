@@ -95,8 +95,8 @@ class TraceViewManager:
         start_time = float(data_dict.get('ts', '0'))
         end_time = start_time + float(data_dict.get('dur', '0'))
         while data_list:
-            if start_time < float(InfoConfReader().time_from_host_syscnt(data_list[0].get('timestamp', 0))
-                                  / DBManager.NSTOUS) < end_time:
+            ts = float(InfoConfReader().time_from_host_syscnt(data_list[0].get('timestamp', 0)) / DBManager.NSTOUS)
+            if start_time <= ts <= end_time:
                 connect_dict = {
                     'name': 'acl_to_npu', 'ph': 's', 'cat': StrConstant.ASYNC_ACL_NPU,
                     'id': TraceViewManager.get_line_format_pid(data_list[0].get('stream_id'),
@@ -104,8 +104,7 @@ class TraceViewManager:
                     'pid': data_dict.get('pid'), 'tid': data_dict.get('tid'), 'ts': start_time
                 }
                 connect_list.append(connect_dict)
-            elif float(InfoConfReader().time_from_host_syscnt(data_list[0].get('timestamp', 0))
-                       / DBManager.NSTOUS) > end_time:
+            elif ts > end_time:
                 break
             data_list.pop(0)
         return connect_list
