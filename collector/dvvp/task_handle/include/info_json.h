@@ -10,6 +10,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include "errno/error_code.h"
 #include "ai_drv_dsmi_api.h"
 #include "ai_drv_dev_api.h"
 #include "mmpa_api.h"

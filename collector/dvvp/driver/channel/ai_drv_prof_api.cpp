@@ -36,7 +36,10 @@ int DrvGetChannels(struct DrvProfChannelsInfo &channels)
     }
 
     channel_list_t channelList;
-    (void)memset_s(&channelList, sizeof(channel_list_t), 0, sizeof(channel_list_t));
+    if (memset_s(&channelList, sizeof(channel_list_t), 0, sizeof(channel_list_t)) != EOK) {
+        MSPROF_LOGE("DrvGetChannels, memset failed");
+        return PROFILING_FAILED;
+    }
     int ret = DriverPlugin::instance()->MsprofDrvGetChannels(channels.deviceId, &channelList);
     if (ret != PROF_OK) {
         MSPROF_LOGE("DrvGetChannels get channels failed, deviceId=%d", channels.deviceId);
@@ -156,7 +159,10 @@ int DoProfTsCpuStart(const DrvPeripheralProfileCfg &peripheralCfg,
     AI_DRV_CHANNEL profChannel = peripheralCfg.profChannel;
     uint32_t profSamplePeriod = (uint32_t)peripheralCfg.profSamplePeriod;
 
-    (void)memset_s(configP, configSize, 0, configSize);
+    if (memset_s(configP, configSize, 0, configSize) != EOK) {
+        MSPROF_LOGE("DoProfTsCpuStart, memset failed");
+        return PROF_ERROR;
+    }
     configP->period = (uint32_t)profSamplePeriod;
     configP->event_num = (uint32_t)profEvents.size();
     std::string eventStr;
@@ -221,10 +227,11 @@ int DrvAicoreStart(const DrvPeripheralProfileCfg &peripheralCfg, const std::vect
     uint32_t configSize = sizeof(TsAiCoreProfileConfigT);
 
     auto configP = static_cast<TsAiCoreProfileConfigT *>(malloc(configSize));
-    if (configP == nullptr) {
+    FUNRET_CHECK_EQUAL_RET_VALUE(configP == nullptr, true, PROFILING_FAILED);
+    if (memset_s(configP, configSize, 0, configSize) != EOK) {
+        MSPROF_LOGE("DrvAicoreStart, memset failed");
         return PROFILING_FAILED;
     }
-    (void)memset_s(configP, configSize, 0, configSize);
     configP->tag = (Utils::IsDynProfMode()) ? (1) : (0);
     configP->type = (uint32_t)TS_PROF_TYPE_SAMPLE_BASE;
     configP->almost_full_threshold = AI_CORE_SAMPLE_FULL_THRESHOLD;
@@ -253,8 +260,7 @@ int DrvAicoreStart(const DrvPeripheralProfileCfg &peripheralCfg, const std::vect
     configP = nullptr;
     if (ret != PROF_OK) {
         MSPROF_LOGE("Failed to start profiling DrvAicoreStart, profDeviceId=%d, profChannel=%d,"
-            " profSamplePeriod=%d, ret=%d",
-            profDeviceId, static_cast<int>(profChannel), profSamplePeriod, ret);
+            " profSamplePeriod=%d, ret=%d", profDeviceId, static_cast<int>(profChannel), profSamplePeriod, ret);
         return PROFILING_FAILED;
     }
     MSPROF_EVENT("Succeeded to start profiling DrvAicoreStart, profDeviceId=%d, profChannel=%d, profSamplePeriod=%d",
@@ -275,7 +281,10 @@ int DrvAicoreTaskBasedStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const 
         return PROFILING_FAILED;
     }
 
-    (void)memset_s(configP, configSize, 0, configSize);
+    if (memset_s(configP, configSize, 0, configSize) != EOK) {
+        MSPROF_LOGE("DrvAicoreTaskBasedStart, memset failed");
+        return PROFILING_FAILED;
+    }
     configP->tag = (Utils::IsDynProfMode()) ? (1) : (0);
     configP->type = (uint32_t)TS_PROF_TYPE_TASK_BASE;
     configP->event_num = (uint32_t)profEvents.size();
@@ -320,7 +329,10 @@ int DrvL2CacheTaskStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const std:
         return PROFILING_FAILED;
     }
 
-    (void)memset_s(configP, configSize, 0, configSize);
+    if (memset_s(configP, configSize, 0, configSize) != EOK) {
+        MSPROF_LOGE("DrvL2CacheTaskStart, memset failed");
+        return PROFILING_FAILED;
+    }
     configP->eventNum = (uint32_t)profEvents.size();
     std::string eventStr;
     for (uint32_t i = 0; i < (uint32_t)profEvents.size(); i++) {
@@ -381,7 +393,10 @@ int DrvTsFwStart(const DrvPeripheralProfileCfg &peripheralCfg,
     AI_DRV_CHANNEL profChannel = peripheralCfg.profChannel;
     uint32_t profSamplePeriod = (uint32_t)peripheralCfg.profSamplePeriod;
     TsTsFwProfileConfigT configP;
-    (void)memset_s(&configP, sizeof(TsTsFwProfileConfigT), 0, sizeof(TsTsFwProfileConfigT));
+    if (memset_s(&configP, sizeof(TsTsFwProfileConfigT), 0, sizeof(TsTsFwProfileConfigT)) != EOK) {
+        MSPROF_LOGE("memset failed");
+        return PROFILING_FAILED;
+    }
     configP.period = (uint32_t)profSamplePeriod;
     int ret = DrvSetTsCommandType(configP, profileParams);
     if (ret != PROFILING_SUCCESS) {
@@ -419,7 +434,10 @@ int DrvStarsSocLogStart(const DrvPeripheralProfileCfg &peripheralCfg,
     int32_t profDeviceId = peripheralCfg.profDeviceId;
     AI_DRV_CHANNEL profChannel = peripheralCfg.profChannel;
     StarsSocLogConfigT configP;
-    (void)memset_s(&configP, sizeof(StarsSocLogConfigT), 0, sizeof(StarsSocLogConfigT));
+    if (memset_s(&configP, sizeof(StarsSocLogConfigT), 0, sizeof(StarsSocLogConfigT)) != EOK) {
+        MSPROF_LOGE("memset failed");
+        return PROFILING_FAILED;
+    }
 
     if (profileParams->stars_acsq_task.compare(analysis::dvvp::common::config::MSVP_PROF_ON) == 0) {
         configP.acsq_task = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
@@ -482,7 +500,10 @@ int DrvFftsProfileStart(const DrvPeripheralProfileCfg &peripheralCfg, const std:
     if (configP == nullptr) {
         return PROFILING_FAILED;
     }
-    (void)memset_s(configP, configSize, 0, configSize);
+    if (memset_s(configP, configSize, 0, configSize) != EOK) {
+        MSPROF_LOGE("memset failed");
+        return PROFILING_FAILED;
+    }
     configP->cfgMode = peripheralCfg.cfgMode; // 0-none,1-aic,2-aiv,3-aic&aiv
 
     DrvPackPmuParam(FFTS_PROF_MODE_AIC, *configP, peripheralCfg, aicCores, aicEvents);
@@ -536,7 +557,10 @@ int DrvHwtsLogStart(int profDeviceId, AI_DRV_CHANNEL profChannel)
 {
     unsigned int configSize = sizeof(TsHwtsProfileConfigT);
     TsHwtsProfileConfigT configP;
-    (void)memset_s(&configP, configSize, 0, configSize);
+    if (memset_s(&configP, configSize, 0, configSize) != EOK) {
+        MSPROF_LOGE("memset failed");
+        return PROFILING_FAILED;
+    }
     configP.tag = (Utils::IsDynProfMode()) ? (1) : (0);
     MSPROF_EVENT("Begin to start profiling DrvHwtsLogStart, profDeviceId=%d, profChannel=%d",
         profDeviceId, static_cast<int>(profChannel));
@@ -564,7 +588,10 @@ int DrvFmkDataStart(int devId, AI_DRV_CHANNEL profChannel)
     unsigned int configSize = sizeof(TsHwtsProfileConfigT);
 
     TsHwtsProfileConfigT configP;
-    (void)memset_s(&configP, configSize, 0, configSize);
+    if (memset_s(&configP, configSize, 0, configSize) != EOK) {
+        MSPROF_LOGE("memset failed");
+        return PROFILING_FAILED;
+    }
     MSPROF_EVENT("Begin to start profiling DrvFmkDataStart, devId=%d, profChannel=%d",
         devId, static_cast<int>(profChannel));
     prof_start_para_t profStartPara;

@@ -190,7 +190,10 @@ std::string ProfTask::GetHostTime()
     std::string hostTime;
     MmTimeval tv;
 
-    (void)memset_s(&tv, sizeof(tv), 0, sizeof(tv));
+    if (memset_s(&tv, sizeof(tv), 0, sizeof(tv)) != EOK) {
+        MSPROF_LOGE("memset failed");
+        return "";
+    }
     int ret = MmGetTimeOfDay(&tv, nullptr);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[GetHostTime]gettimeofday failed");

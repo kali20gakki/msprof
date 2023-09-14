@@ -246,7 +246,7 @@ int32_t MmCreateTaskWithThreadAttr(MmThread *threadHandle, const MmUserBlockT *f
     const MmThreadAttr *threadAttr);
 int32_t MmJoinTask(const MmThread *threadHandle);
 int32_t MmSetCurrentThreadName(const std::string &name);
-MmTimespec MmGetTickCount();
+int32_t MmGetTickCount(MmTimespec &rts);
 int32_t MmGetFileSize(const std::string &fileName, unsigned long long *length);
 int32_t MmGetDiskFreeSpace(const std::string &path, MmDiskSize *diskSize);
 int32_t MmIsDir(const std::string &fileName);

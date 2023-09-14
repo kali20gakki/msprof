@@ -406,8 +406,11 @@ void ChannelPoll::Run(const struct error_message::Context &errorContext)
     static const uint64_t DEFAULT_FLUSH_TIMEOUT_NSEC = 10000000000; // flush data every 10 seconds
 
     struct prof_poll_info channels[CHANNEL_POOL_NUM];
-    (void)memset_s(channels, CHANNEL_POOL_NUM * sizeof(struct prof_poll_info), 0,
-                   CHANNEL_POOL_NUM * sizeof(struct prof_poll_info));
+    if (memset_s(channels, CHANNEL_POOL_NUM * sizeof(struct prof_poll_info), 0,
+                 CHANNEL_POOL_NUM * sizeof(struct prof_poll_info)) != EOK) {
+        MSPROF_LOGE("memset failed");
+        return;
+    }
 
     uint64_t start = analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw();
     while (isStarted_) {

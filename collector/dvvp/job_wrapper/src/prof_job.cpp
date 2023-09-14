@@ -1725,7 +1725,10 @@ void PerfExtraTask::StoreData(const std::string &fileName)
     }
 
     while (ifs.good()) {
-        (void)memset_s(buf, bufSize, 0, bufSize);
+        if (memset_s(buf, bufSize, 0, bufSize) != EOK) {
+            MSPROF_LOGE("memset failed");
+            break;
+        }
         ifs.read(reinterpret_cast<CHAR_PTR>(buf), bufSize > 0 ? (bufSize - 1) : 0);
 
         fileChunk->set_filename(PERF_RET_NAME);

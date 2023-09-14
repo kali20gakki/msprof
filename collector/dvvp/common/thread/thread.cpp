@@ -44,9 +44,15 @@ int Thread::Start()
     }
 
     MmUserBlockT funcBlock;
-    (void)memset_s(&funcBlock, sizeof(MmUserBlockT), 0, sizeof(MmUserBlockT));
+    if (memset_s(&funcBlock, sizeof(MmUserBlockT), 0, sizeof(MmUserBlockT)) != EOK) {
+        MSPROF_LOGE("memset failed");
+        return PROFILING_FAILED;
+    }
     MmThreadAttr threadAttr;
-    (void)memset_s(&threadAttr, sizeof(MmThreadAttr), 0, sizeof(MmThreadAttr));
+    if (memset_s(&threadAttr, sizeof(MmThreadAttr), 0, sizeof(MmThreadAttr)) != EOK) {
+        MSPROF_LOGE("memset failed");
+        return PROFILING_FAILED;
+    }
 
     funcBlock.procFunc = Thread::ThrProcess;
     funcBlock.pulArg = this;

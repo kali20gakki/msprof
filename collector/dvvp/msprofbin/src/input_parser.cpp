@@ -158,7 +158,8 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
             return params_;
         }
         argvStr = std::string(argv[MmGetOptInd() - 1]);
-        if (cmdInfo.args[opt] = MmGetOptArg(); cmdInfo.args[opt] == nullptr) {
+        cmdInfo.args[opt] = MmGetOptArg();
+        if (cmdInfo.args[opt] == nullptr) {
             CmdLog::instance()->CmdErrorLog("Argument %s empty value.", argvStr.c_str());
             MsprofCmdUsage("");
             return nullptr;

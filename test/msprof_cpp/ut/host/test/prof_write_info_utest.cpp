@@ -37,6 +37,11 @@ public:
 TEST_F(INFO_JSON_TEST, InfoXml_init) {
     GlobalMockObject::verify();
 
+    MOCKER_CPP(&InfoJson::InitDeviceIds)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+
     MOCKER_CPP(&InfoJson::AddHostInfo)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
@@ -54,6 +59,9 @@ TEST_F(INFO_JSON_TEST, InfoXml_init) {
 
     InfoJson infoJson(start_time, end_time, devices);
     std::string cont;
+
+    // init device ids failed
+    EXPECT_EQ(PROFILING_FAILED, infoJson.Generate(cont));
 
     // add host info failed
     EXPECT_EQ(PROFILING_FAILED, infoJson.Generate(cont));
@@ -186,45 +194,55 @@ TEST_F(INFO_JSON_TEST, SetPlatFormVersion) {
 
 TEST_F(INFO_JSON_TEST, GetDevInfo) {
     GlobalMockObject::verify();
-
-    int device_id = 0;
-    analysis::dvvp::host::DeviceInfo dev_info;
-
-    MOCKER(halGetDeviceInfo)
-        .stubs()
-        .will(returnValue(DRV_ERROR_NO_DEVICE))
-        .then(repeat(DRV_ERROR_NONE, 1))
-        .then(returnValue(DRV_ERROR_NO_DEVICE))
-        .then(repeat(DRV_ERROR_NONE, 2))
-        .then(returnValue(DRV_ERROR_NO_DEVICE))
-        .then(repeat(DRV_ERROR_NONE, 3))
-        .then(returnValue(DRV_ERROR_NO_DEVICE))
-        .then(repeat(DRV_ERROR_NONE, 4))
-        .then(returnValue(DRV_ERROR_NO_DEVICE))
-        .then(repeat(DRV_ERROR_NONE, 5))
-        .then(returnValue(DRV_ERROR_NO_DEVICE))
-        .then(repeat(DRV_ERROR_NONE, 6))
-        .then(returnValue(DRV_ERROR_NO_DEVICE))
-        .then(repeat(DRV_ERROR_NONE, 7))
-        .then(returnValue(DRV_ERROR_NO_DEVICE))
-        .then(repeat(DRV_ERROR_NONE, 8))
-        .then(returnValue(DRV_ERROR_NO_DEVICE))
-        .then(repeat(DRV_ERROR_NONE, 9))
-        .then(returnValue(DRV_ERROR_NO_DEVICE))
-        .then(returnValue(DRV_ERROR_NONE));
-
     InfoJson infoJson(start_time, end_time, devices);
 
-    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(device_id, dev_info));
-    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(device_id, dev_info));
-    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(device_id, dev_info));
-    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(device_id, dev_info));
-    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(device_id, dev_info));
-    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(device_id, dev_info));
-    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(device_id, dev_info));
-    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(device_id, dev_info));
-    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(device_id, dev_info));
-    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(device_id, dev_info));
-    EXPECT_EQ(PROFILING_SUCCESS, infoJson.GetDevInfo(device_id, dev_info));
+    analysis::dvvp::host::DeviceInfo dev_info;
+
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetEnvType)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&InfoJson::GetCtrlCpuInfo)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetAiCpuCoreNum)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetAivNum)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetAiCpuCoreId)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetAiCpuOccupyBitmap)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetTsCpuCoreNum)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetAiCoreId)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetAiCoreNum)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
+    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
+    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
+    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
+    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
+    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
+    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
+    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
+    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
+    EXPECT_EQ(PROFILING_SUCCESS, infoJson.GetDevInfo(0, dev_info));
 }
 

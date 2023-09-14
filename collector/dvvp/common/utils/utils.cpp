@@ -47,12 +47,20 @@ unsigned long long Utils::GetClockRealtime()
 {
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
     MmTimespec now;
-    (void)memset_s(&now, sizeof(now), 0, sizeof(now));
-    now = MmGetTickCount();
+    if (memset_s(&now, sizeof(now), 0, sizeof(now)) != EOK) {
+        MSPROF_LOGE("memset failed");
+        return 0;
+    }
+    if (MmGetTickCount(now) != PROFILING_SUCCESS) {
+        return 0;
+    }
     return ((unsigned long long)(now.tvSec) * CHANGE_FROM_S_TO_NS) + (unsigned long long)(now.tvNsec);
 #else
     struct timespec now;
-    (void)memset_s(&now, sizeof(now), 0, sizeof(now));
+    if (memset_s(&now, sizeof(now), 0, sizeof(now)) != EOK) {
+        MSPROF_LOGE("memset failed");
+        return 0;
+    }
     (void)clock_gettime(CLOCK_REALTIME, &now);
     return (static_cast<unsigned long long>(now.tv_sec) * CHANGE_FROM_S_TO_NS) +
         static_cast<unsigned long long>(now.tv_nsec);
@@ -62,8 +70,13 @@ unsigned long long Utils::GetClockRealtime()
 unsigned long long Utils::GetClockMonotonicRaw()
 {
     MmTimespec now;
-    (void)memset_s(&now, sizeof(now), 0, sizeof(now));
-    now = MmGetTickCount();
+    if (memset_s(&now, sizeof(now), 0, sizeof(now)) != EOK) {
+        MSPROF_LOGE("memset failed");
+        return 0;
+    }
+    if (MmGetTickCount(now) != PROFILING_SUCCESS) {
+        return 0;
+    }
     return (static_cast<unsigned long long>(now.tvSec) * CHANGE_FROM_S_TO_NS) +
         static_cast<unsigned long long>(now.tvNsec);
 }
@@ -490,7 +503,10 @@ bool Utils::IsSoftLink(const std::string &path)
         return false;
     }
     struct stat fileStat;
-    (void)memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat));
+    if (memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat)) != EOK) {
+        MSPROF_LOGE("memset failed");
+        return false;
+    }
     if (lstat(path.c_str(), &fileStat) != 0) {
         return false;
     }
@@ -615,20 +631,25 @@ int Utils::ChangeWorkDir(const std::string &fileName)
     return PROFILING_SUCCESS;
 }
 
-void Utils::SetArgEnv(CHAR_PTR_CONST argv[],
+bool Utils::SetArgEnv(CHAR_PTR_CONST argv[],
                       const int argvCount,
                       CHAR_PTR_CONST envp[],
                       const int envCount,
                       MmArgvEnv &argvEnv)
 {
     if (argv != nullptr && envp != nullptr) {
-        (void)memset_s(&argvEnv, sizeof(MmArgvEnv), 0, sizeof(MmArgvEnv));
+        if (memset_s(&argvEnv, sizeof(MmArgvEnv), 0, sizeof(MmArgvEnv)) != EOK) {
+            MSPROF_LOGE("memset failed");
+            return false;
+        }
 
         argvEnv.argv = const_cast<CHAR_PTR_PTR>(argv);
         argvEnv.argvCount = argvCount;
         argvEnv.envp = const_cast<CHAR_PTR_PTR>(envp);
         argvEnv.envpCount = envCount;
+        return true;
     }
+    return false;
 }
 
 int Utils::DoCreateCmdProcess(const std::string &stdoutRedirectFile,
@@ -658,7 +679,9 @@ int Utils::ExecCmdC(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmd
 
     MmArgvEnv argvEnv;
     MmProcess tid = 0;
-    SetArgEnv(argv, argvCount, envp, envCount, argvEnv);
+    if (!SetArgEnv(argv, argvCount, envp, envCount, argvEnv)) {
+        return PROFILING_FAILED;
+    }
 
     if (ChangeWorkDir(filename) == PROFILING_FAILED) {
         return PROFILING_FAILED;
@@ -695,7 +718,10 @@ int Utils::ExecCmdCAsync(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &ex
     }
     MmProcess tid = 0;
     MmArgvEnv argvEnv;
-    SetArgEnv(argv, argvCount, envp, envCount, argvEnv);
+    if (!SetArgEnv(argv, argvCount, envp, envCount, argvEnv)) {
+        return PROFILING_FAILED;
+    }
+
     int ret = DoCreateCmdProcess(stdoutRedirectFile, filename, argvEnv, tid);
     if (ret == PROFILING_FAILED) {
         return PROFILING_FAILED;
@@ -1004,7 +1030,10 @@ std::string Utils::TimestampToTime(const std::string &timestamp, int unit /* = 1
 
     std::string timeString("0-0-0 0:0:0.0");
     struct tm ttime;
-    (void)memset_s(&ttime, sizeof(tm), 0, sizeof(ttime));
+    if (memset_s(&ttime, sizeof(tm), 0, sizeof(ttime)) != EOK) {
+        MSPROF_LOGE("memset failed");
+        return "0";
+    }
 #if (defined(linux) || defined(__linux__))
     if (localtime_r(&secTime, &ttime) == nullptr) {
         return timeString;
@@ -1019,7 +1048,10 @@ std::string Utils::TimestampToTime(const std::string &timestamp, int unit /* = 1
     strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", &ttime);
     timeString = std::string(timeStr);
 
-    (void)memset_s(timeStr, sizeof(timeStr), 0, sizeof(timeStr));
+    if (memset_s(timeStr, sizeof(timeStr), 0, sizeof(timeStr)) != EOK) {
+        MSPROF_LOGE("memset failed");
+        return "0";
+    }
     int ret = sprintf_s(timeStr, sizeof(timeStr), "%06u", microTime);
     if (ret == -1) {
         return "0";
@@ -1078,7 +1110,6 @@ std::string Utils::GetCwdString(void)
 {
     constexpr int cwdValMaxLen = 1024 * 8; // 1024 * 8 : 8k
     char val[cwdValMaxLen + 1] = { 0 };
-    (void)memset_s(val, cwdValMaxLen + 1, 0, cwdValMaxLen + 1);
     int ret = MmGetCwd(val, cwdValMaxLen);
     if (ret == PROFILING_SUCCESS) {
         return std::string(val);
@@ -1204,6 +1235,7 @@ void* Utils::ProfMalloc(size_t size)
 
     err = memset_s(val, size, 0, size);
     if (err != EOK) {
+        MSPROF_LOGE("memset failed");
         free(val);
         val = nullptr;
         return nullptr;
