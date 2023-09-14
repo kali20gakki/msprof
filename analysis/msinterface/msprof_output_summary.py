@@ -9,8 +9,6 @@ import os
 import re
 import shutil
 
-from typing.io import TextIO
-
 from common_func.common import print_info, error
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
@@ -37,6 +35,7 @@ class MsprofOutputSummary:
     DEVICE_ID = "Device_id"
     DEVICE_ID_PREFIX_LEN = 7
     README = "README.txt"
+    FILE_MAX_SIZE = 1024 * 1024 * 1024
     JSON_LIST = [
         "msprof", "step_trace", "msprof_tx"
     ]
@@ -126,17 +125,16 @@ class MsprofOutputSummary:
         return NumberConstant.SUCCESS, data_path
 
     @staticmethod
-    def _append_readme(writer: TextIO, file_set: set, file_dict: dict, suffix: str):
-        context = ""
-        desc = file_dict.get("begin", "")
-        context += desc + "\n"
+    def _get_readme_info(file_set: set, file_dict: dict, suffix: str) -> str:
+        context = file_dict.get("begin", "")
         for index, filename in enumerate(file_set):
             desc = file_dict.get(filename)
             if not desc:
                 desc = "Here is no description about this file: " + filename + \
-                       ", please check in 'Profiling Instructions'!"
-            context += str(index + 1) + "." + filename + suffix + ": " + desc + "\n"
-        writer.write(context + "\n")
+                       ", please check in 'Profiling Instructions'!\n"
+            context += f"{str(index + 1)}.{filename}{suffix}:{desc}"
+        context += "\n"
+        return context
 
     def export(self: any) -> None:
         """
@@ -232,7 +230,7 @@ class MsprofOutputSummary:
                 continue
             all_data = []
             file_name_path = os.path.join(summary_path, file_name)
-            with FileOpen(file_name_path, 'r') as _csv_file:
+            with FileOpen(file_name_path, mode='r', max_size=self.FILE_MAX_SIZE) as _csv_file:
                 reader = csv.DictReader(_csv_file.file_reader)
                 if reader.fieldnames and helper.check_header_is_empty():
                     csv_header = [self.DEVICE_ID, *reader.fieldnames]
@@ -306,7 +304,8 @@ class MsprofOutputSummary:
 
         with os.fdopen(os.open(os.path.join(self._output_dir, self.README), Constant.WRITE_FLAGS,
                                Constant.WRITE_MODES), 'w') as readme:
-            MsprofOutputSummary._append_readme(readme, timeline_set, timeline_dict,
-                                               StrConstant.FILE_SUFFIX_JSON)
-            MsprofOutputSummary._append_readme(readme, summary_set, summary_dict,
-                                               StrConstant.FILE_SUFFIX_CSV)
+            context = self._get_readme_info(timeline_set, timeline_dict,
+                                            StrConstant.FILE_SUFFIX_JSON)
+            context += self._get_readme_info(summary_set, summary_dict,
+                                             StrConstant.FILE_SUFFIX_CSV)
+            readme.write(context)
