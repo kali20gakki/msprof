@@ -90,5 +90,5 @@ class PipelineOverlapViewer:
 
     def _format_timeline_data(self, overlap_type, data):
         return [self.OVERLAP_TYPE_NAME.get(overlap_type.name), self._pid, overlap_type.value,
-                InfoConfReader().trans_into_local_time(data.start_time / NumberConstant.NS_TO_US),
+                InfoConfReader().trans_into_local_time(data.start_time / NumberConstant.NS_TO_US, use_decimal=True),
                 (data.end_time - data.start_time) / NumberConstant.NS_TO_US]

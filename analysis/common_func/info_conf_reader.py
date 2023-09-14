@@ -7,6 +7,7 @@ import json
 import logging
 import os
 from typing import Dict
+from decimal import Decimal
 
 from common_func.constant import Constant
 from common_func.file_manager import check_path_valid
@@ -378,12 +379,18 @@ class InfoConfReader:
     def get_ai_core_profiling_mode(self):
         return self._sample_json.get("ai_core_profiling_mode")
 
-    def trans_into_local_time(self: any, raw_timestamp: float, time_fmt: float = NumberConstant.MICRO_SECOND) -> float:
+    def trans_into_local_time(self: any, raw_timestamp: float, time_fmt: float = NumberConstant.MICRO_SECOND,
+                              use_decimal: bool = False) -> float:
         """
         transfer raw time into local time
         time_fmt: the time format of input raw time
         :return: local time(us)
         """
+        if use_decimal:
+            res = Decimal(str(raw_timestamp)) / Decimal(str(time_fmt)) * Decimal(str(NumberConstant.MICRO_SECOND)) + \
+                  Decimal(str(self._local_time_offset))
+            return str(res)
+
         return raw_timestamp / time_fmt * NumberConstant.MICRO_SECOND + self._local_time_offset
 
     def get_local_time_offset(self: any) -> float:
