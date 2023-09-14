@@ -43,8 +43,10 @@ class BiuPerfViewer:
         with self._model as _model:
             biu_flow_data = self._model.get_biu_flow_data()
         for biu_flow_datum in biu_flow_data:
-            trace_datum = [biu_flow_datum[0], InfoConfReader().trans_into_local_time(biu_flow_datum[1]),
-                           biu_flow_datum[2], biu_flow_datum[3], OrderedDict([("flow", biu_flow_datum[4])])]
+            trace_datum = [
+                biu_flow_datum[0], InfoConfReader().trans_into_local_time(biu_flow_datum[1]),
+                biu_flow_datum[2], biu_flow_datum[3], OrderedDict([("flow", biu_flow_datum[4])])
+            ]
             # 0 flow_type; 1 interval_start; 2 pid; 3 tid; 4 flow
             trace_data.append(trace_datum)
         return TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, trace_data)
@@ -54,10 +56,12 @@ class BiuPerfViewer:
         with self._model as _model:
             biu_cycles_data = self._model.get_biu_cycles_data()
         for biu_cycles_datum in biu_cycles_data:
-            trace_datum = ["", biu_cycles_datum[0], biu_cycles_datum[1],
-                           InfoConfReader().trans_into_local_time(biu_cycles_datum[2]), biu_cycles_datum[3],
-                           OrderedDict([("cycle_num", biu_cycles_datum[4]),
-                                        ("ratio", biu_cycles_datum[5])])]
+            trace_datum = [
+                "", biu_cycles_datum[0], biu_cycles_datum[1],
+                InfoConfReader().trans_into_local_time(biu_cycles_datum[2]), biu_cycles_datum[3],
+                OrderedDict([("cycle_num", biu_cycles_datum[4]),
+                             ("ratio", biu_cycles_datum[5])])
+            ]
             # 0 pid; 1 tid; 2 interval_start; 3 duration; 4 cycle_num; 5 ratio
             trace_data.append(trace_datum)
         return TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, trace_data)
