@@ -36,6 +36,16 @@ class L2CacheConfig(MetaConfig):
             ('request_events', '0xfb,0xfc'),
             ('hit_events', '0x90,0x91'),
             ('victim_events', '0x9c')
+        ],
+        '8': [
+            ('request_events', '0xfb,0xfc'),
+            ('hit_events', '0x90,0x91'),
+            ('victim_events', '0x9c')
+        ],
+        '10': [
+            ('request_events', '0xfb,0xfc'),
+            ('hit_events', '0x90,0x91'),
+            ('victim_events', '0x9c')
         ]
     }
 

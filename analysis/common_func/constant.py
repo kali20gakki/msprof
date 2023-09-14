@@ -431,8 +431,7 @@ class Constant:
                               "cube_mte2_cflt_stall_cycles,cube_mte3_cflt_stall_cycles,"
                               "cube_mte1_cflt_stall_cycles,vec_mte2_cflt_stall_cycles,"
                               "vec_mte3_cflt_stall_cycles,vec_mte1_cflt_stall_cycles,"
-                              "mte1_mte2_stall_cycles,mte1_mte3_stall_cycles,"
-                              "mte2_mte3_stall_cycles,su_stall_cycles",
+                              "mte1_mte2_stall_cycles,mte1_mte3_stall_cycles",
         PMU_SCALAR_RATIO: "acess_stack_ratio,control_flow_mis_prediction_rate",
     }
 
