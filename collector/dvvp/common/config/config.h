@@ -26,6 +26,9 @@ const std::string PROF_MSPROF_BIN_NAME = "msprof";
 
 const std::string CONTAINER_NO_SUPPORT_MESSAGE = "MESSAGE_CONTAINER_NO_SUPPORT";
 
+const std::string ASCEND_WORK_PATH_ENV = "ASCEND_WORK_PATH";
+const std::string ASCEND_MSPROF_WORK_PATH = "/profiling_data";
+
 const char * const HOST_TAG_KEY = "Host";
 const char * const DEVICE_TAG_KEY = "Device";
 const char * const CLOCK_REALTIME_KEY = "clock_realtime";
