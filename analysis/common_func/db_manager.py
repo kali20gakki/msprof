@@ -426,6 +426,8 @@ class DBManager:
         insert data into certain table
         """
         index = 0
+        if not data:
+            return
         sql = "insert into {table_name} values({value_form})" \
             .format(table_name=table_name, value_form="?," * (len(data[0]) - 1) + "?")
         while index < len(data):
