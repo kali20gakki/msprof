@@ -66,9 +66,7 @@ if [ ! -n "$THRESHOLD" ]; then
 fi
 echo "final THRESHOLD is ${THRESHOLD}"
 
-#lcov_result_path=${RES_OUT}/coverage_result
 ut_info_path="${OUTDIR}/llt/coverage.info"
-#src_prefix=${prefix%%/vendor*}
 SCRIPT_DIR="${prefix}/vendor/hisi/llt/ci/script/genaddcov"
 
 #get inc coverage

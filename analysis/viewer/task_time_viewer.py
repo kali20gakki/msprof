@@ -11,6 +11,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.ms_constant.stars_constant import StarsConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from mscalculate.ascend_task.ascend_task import TopDownTask
@@ -56,9 +57,11 @@ class TaskTimeViewer(BaseViewer):
         tid_set = set((item[1], item[2]) for item in data)
         for item in tid_set:
             if pid_header == TraceViewHeaderConstant.PROCESS_THREAD_TASK:
-                subtask.append(["thread_name", item[0], item[1], f'{item[1]}'])
+                thread_id = int(item[1] / (max(StarsConstant.SUBTASK_TYPE) + 1))
+                device_task_type = StarsConstant.SUBTASK_TYPE.get(item[1] % (max(StarsConstant.SUBTASK_TYPE) + 1))
+                subtask.append(["thread_name", item[0], item[1], f'Thread {thread_id}({device_task_type})'])
             else:
-                subtask.append(["thread_name", item[0], item[1], f'Stream {item[1]}'])
+                subtask.append(["thread_name", item[0], item[1], f'Stream {StarsConstant.SUBTASK_TYPE.get(item[1])}'])
             subtask.append(["thread_sort_index", item[0], item[1], item[1]])
         header.extend(subtask)
         return header
@@ -125,7 +128,7 @@ class TaskTimeViewer(BaseViewer):
             result_list.append(
                 [data.op_name,
                  self.TRACE_PID_MAP.get("Subtask Time", 1),
-                 data.device_task_type,
+                 StarsConstant().find_key_by_value(data.device_task_type),
                  InfoConfReader().trans_into_local_time(data.start_time, NumberConstant.NANO_SECOND),
                  data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
                  {"Stream Id": data.stream_id, "Task Id": data.task_id, 'Batch Id': data.batch_id,
@@ -145,7 +148,8 @@ class TaskTimeViewer(BaseViewer):
             result_list.append(
                 [data.op_name,
                  self.TRACE_PID_MAP.get("Thread Task Time", 2),
-                 "Thread {0}({1})".format(str(data.thread_id), data.device_task_type),
+                 data.thread_id * (max(StarsConstant.SUBTASK_TYPE) + 1) + \
+                 StarsConstant().find_key_by_value(data.device_task_type),
                  InfoConfReader().trans_into_local_time(data.start_time, NumberConstant.NANO_SECOND),
                  data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
                  {"Stream Id": data.stream_id, "Task Id": data.task_id, 'Batch Id': data.batch_id,
