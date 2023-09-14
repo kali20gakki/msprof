@@ -872,6 +872,91 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_json) {
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_FINALIZE, nullptr, 0));
 }
 
+TEST_F(MSPROF_ACL_CORE_UTEST, MsprofGetHashIdImpl)
+{
+    GlobalMockObject::verify();
+    uint64_t hashId = 0;
+    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::GetHashId)
+        .stubs()
+        .will(returnValue(hashId));
+    std::string hashInfo = "xx";
+    EXPECT_EQ(hashId, Analysis::Dvvp::ProfilerCommon::MsprofGetHashIdImpl(hashInfo));
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, MsprofHostFreqIsEnableImpl)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Platform::PlatformHostFreqIsEnable)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(true, Analysis::Dvvp::ProfilerCommon::MsprofHostFreqIsEnableImpl());
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, RegisterNewReporterCallback)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&ProfApiPlugin::MsprofProfRegProfilerCallback)
+        .stubs()
+        .will(returnValue(ACL_ERROR_PROFILING_FAILURE))
+        .then(returnValue(ACL_SUCCESS));
+    EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, Analysis::Dvvp::ProfilerCommon::RegisterNewReporterCallback());
+    EXPECT_EQ(ACL_SUCCESS, Analysis::Dvvp::ProfilerCommon::RegisterNewReporterCallback());
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, MsprofSetDeviceCallbackForDynProf)
+{
+    GlobalMockObject::verify();
+    ProfSetDevPara data;
+    data.chipId = 0;
+    data.deviceId = 0;
+    data.isOpen = true;
+    MOCKER_CPP(&RegisterReporterCallback)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::CommandHandleProfInit)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProf((VOID_PTR)&data, 0));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProf((VOID_PTR)&data, 0));
+    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProf((VOID_PTR)&data, 0));
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, MsprofSetDeviceCallbackImpl)
+{
+    GlobalMockObject::verify();
+    ProfSetDevPara data;
+    data.chipId = 0;
+    data.deviceId = 0;
+    data.isOpen = false;
+    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data, 0));
+
+    data.isOpen = true;
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsCmdMode)
+        .stubs()
+        .will(returnValue(false))
+        .then(returnValue(true));
+    MOCKER_CPP(&analysis::dvvp::host::ProfManager::CheckIfDevicesOnline)
+        .stubs()
+        .will(returnValue(false))
+        .then(returnValue(true));
+    MOCKER_CPP(&RegisterReporterCallback)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ge::GeOpenDeviceHandle)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data, 0));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data, 0));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data, 0));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data, 0));
+    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data, 0));
+}
+
 TEST_F(MSPROF_ACL_CORE_UTEST, mode_protect) {
     GlobalMockObject::verify();
 

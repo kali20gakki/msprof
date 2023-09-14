@@ -271,7 +271,10 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
     infoMain->set_os(os);
 
     // fetch and set hostname
-    (void)memset_s(str, MMPA_MAX_PATH, 0, MMPA_MAX_PATH);
+    if (memset_s(str, MMPA_MAX_PATH, 0, MMPA_MAX_PATH) != EOK) {
+        MSPROF_LOGE("memset failed");
+        return PROFILING_FAILED;
+    }
     ret = MmGetOsName(str, MMPA_MAX_PATH);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGW("mmGetOsName failed");

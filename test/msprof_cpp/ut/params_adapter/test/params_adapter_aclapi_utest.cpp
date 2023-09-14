@@ -78,12 +78,15 @@ TEST_F(ParamsAdapterAclapiUtest, ParamsCheckAclApi)
     std::shared_ptr<ParamsAdapterAclApi> AclApiParamAdapterMgr;
     MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, ParamsAdapterAclApi);
     
-    std::vector<std::pair<InputCfg, std::string>> cfgList;
     AclApiParamAdapterMgr->Init();
+    AclApiParamAdapterMgr->setConfig_ = {INPUT_CFG_COM_TRAINING_TRACE, INPUT_CFG_COM_SYS_DEVICES, INPUT_CFG_HOST_SYS};
     MOCKER_CPP(&ParamValidation::IsValidSwitch)
         .stubs()
         .will(returnValue(true));
     MOCKER_CPP(&ParamValidation::MsprofCheckSysDeviceValid)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&ParamsAdapterAclApi::CheckHostSysAclApiValid)
         .stubs()
         .will(returnValue(true));
     int ret = AclApiParamAdapterMgr->ParamsCheckAclApi();

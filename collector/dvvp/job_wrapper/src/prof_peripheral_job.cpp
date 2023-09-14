@@ -936,7 +936,10 @@ void ProfLlcJob::SendData()
     MSVP_MAKE_SHARED_ARRAY_VOID(buf, char, PERF_DATA_BUF_SIZE_M);
 
     while (ifs.good()) {
-        (void)memset_s(buf.get(), PERF_DATA_BUF_SIZE_M, 0, PERF_DATA_BUF_SIZE_M);
+        if (memset_s(buf.get(), PERF_DATA_BUF_SIZE_M, 0, PERF_DATA_BUF_SIZE_M) != EOK) {
+            MSPROF_LOGE("memset failed");
+            break;
+        }
         ifs.read(buf.get(), PERF_DATA_BUF_SIZE_M - 1);
 
         fileChunk->set_filename(PERF_RET_NAME);

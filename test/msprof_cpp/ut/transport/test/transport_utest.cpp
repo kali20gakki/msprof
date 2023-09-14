@@ -188,6 +188,7 @@ TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, RecvPacket) {
     struct tlv_req * packet = NULL;
 
     std::shared_ptr<HDCTransport> trans(new HDCTransport(session));
+    EXPECT_EQ(PROFILING_FAILED, trans->RecvPacket(nullptr));
 
     char containerNotSupport[] = "MESSAGE_CONTAINER_NO_SUPPORT";
     CONST_CHAR_PTR containerPtr = &containerNotSupport[0];
@@ -198,10 +199,12 @@ TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, RecvPacket) {
         .stubs()
         .with(any(), outBoundP((void **)&invalidMsgPtr), outBoundP(&buf_len))
         .will(returnValue(IDE_DAEMON_ERROR))
-        .then(returnValue(IDE_DAEMON_OK));
+        .then(returnValue(IDE_DAEMON_OK))
+        .then(returnValue(IDE_DAEMON_SOCK_CLOSE));
 
     EXPECT_EQ(PROFILING_FAILED, trans->RecvPacket(&packet));
     EXPECT_EQ(buf_len, trans->RecvPacket(&packet));
+    EXPECT_EQ(IDE_DAEMON_SOCK_CLOSE, trans->RecvPacket(&packet));
 }
 
 TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, DestroyPacket) {
@@ -424,3 +427,4 @@ TEST_F(TRANSPORT_TRANSPORT_ITRANSPORT_TEST, AdxHalHdcSessionConnect) {
 
     EXPECT_EQ(DRV_ERROR_NONE, AdxHalHdcSessionConnect(0, 0, 0, nullptr, nullptr));
 }
+

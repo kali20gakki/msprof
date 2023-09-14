@@ -57,7 +57,9 @@ static int32_t LocalSetSchedAttr(pthread_attr_t *attr, const MmThreadAttr *threa
             return PROFILING_INVALID_PARAM;
         }
         struct sched_param param;
-        (void)memset_s(&param, sizeof(param), 0, sizeof(param)); /* unsafe_function_ignore: memset */
+        if (memset_s(&param, sizeof(param), 0, sizeof(param)) != EOK) {
+            return PROFILING_FAILED;
+        }
         param.sched_priority = threadAttr->priority;
         if (pthread_attr_setschedparam(attr, &param) != PROFILING_SUCCESS) {
             return PROFILING_FAILED;
@@ -98,7 +100,9 @@ int32_t MmCreateTaskWithThreadAttr(MmThread *threadHandle, const MmUserBlockT *f
     }
 
     pthread_attr_t attr;
-    (void)memset_s(&attr, sizeof(attr), 0, sizeof(attr)); /* unsafe_function_ignore: memset */
+    if (memset_s(&attr, sizeof(attr), 0, sizeof(attr)) != EOK) {
+        return PROFILING_FAILED;
+    }
 
     int32_t ret = pthread_attr_init(&attr);
     if (ret != PROFILING_SUCCESS) {
@@ -144,16 +148,16 @@ int32_t MmSetCurrentThreadName(const std::string &name)
     return PROFILING_SUCCESS;
 }
 
-MmTimespec MmGetTickCount()
+int32_t MmGetTickCount(MmTimespec &rts)
 {
-    MmTimespec rts;
-    memset_s(&rts, sizeof(rts), 0, sizeof(rts));
     struct timespec ts;
-    memset_s(&ts, sizeof(ts), 0, sizeof(ts));
+    if (memset_s(&ts, sizeof(ts), 0, sizeof(ts)) != EOK) {
+        return PROFILING_FAILED;
+    }
     (void)clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
     rts.tvSec = ts.tv_sec;
     rts.tvNsec = ts.tv_nsec;
-    return rts;
+    return PROFILING_SUCCESS;
 }
 
 int32_t MmGetFileSize(const std::string &fileName, unsigned long long *length)
@@ -162,7 +166,9 @@ int32_t MmGetFileSize(const std::string &fileName, unsigned long long *length)
         return PROFILING_INVALID_PARAM;
     }
     struct stat fileStat;
-    (void)memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat));
+    if (memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat)) != EOK) {
+        return PROFILING_FAILED;
+    }
     int32_t ret = lstat(fileName.c_str(), &fileStat);
     if (ret < 0) {
         return PROFILING_FAILED;
@@ -178,7 +184,9 @@ int32_t MmGetDiskFreeSpace(const std::string &path, MmDiskSize *diskSize)
     }
 
     struct statvfs buf;
-    (void)memset_s(&buf, sizeof(buf), 0, sizeof(buf));
+    if (memset_s(&buf, sizeof(buf), 0, sizeof(buf)) != EOK) {
+        return PROFILING_FAILED;
+    }
 
     int32_t ret = statvfs(path.c_str(), &buf);
     if (ret == 0) {
@@ -199,7 +207,9 @@ int32_t MmIsDir(const std::string &fileName)
         return PROFILING_INVALID_PARAM;
     }
     struct stat fileStat;
-    (void)memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat));
+    if (memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat)) != EOK) {
+        return PROFILING_FAILED;
+    }
     int32_t ret = lstat(fileName.c_str(), &fileStat);
     if (ret < 0) {
         return PROFILING_FAILED;
@@ -571,7 +581,9 @@ int32_t MmGetMac(MmMacInfo **list, int32_t *count)
         (void)close(sock);
         return PROFILING_FAILED;
     }
-    (void)memset_s(macInfo, needSize, 0, needSize); /* unsafe_function_ignore: memset */
+    if (memset_s(macInfo, needSize, 0, needSize) != EOK) {
+        return PROFILING_FAILED;
+    }
     ret = LocalGetMacInfo(sock, ifc, macInfo, count);
     if (ret != PROFILING_SUCCESS) {
         close(sock);
@@ -645,7 +657,9 @@ int32_t MmGetLocalTime(MmSystemTimeT *sysTimePtr)
     }
 
     struct timeval timeVal;
-    (void)memset_s(&timeVal, sizeof(timeVal), 0, sizeof(timeVal)); /* unsafe_function_ignore: memset */
+    if (memset_s(&timeVal, sizeof(timeVal), 0, sizeof(timeVal)) != EOK) {
+        return PROFILING_FAILED;
+    }
 
     int32_t ret = gettimeofday(&timeVal, nullptr);
     if (ret != PROFILING_SUCCESS) {
@@ -653,7 +667,9 @@ int32_t MmGetLocalTime(MmSystemTimeT *sysTimePtr)
     }
 
     struct tm nowTime;
-    (void)memset_s(&nowTime, sizeof(nowTime), 0, sizeof(nowTime)); /* unsafe_function_ignore: memset */
+    if (memset_s(&nowTime, sizeof(nowTime), 0, sizeof(nowTime)) != EOK) {
+        return PROFILING_FAILED;
+    }
  
     const struct tm *tmp = localtime_r(&timeVal.tv_sec, &nowTime);
     if (tmp == nullptr) {
@@ -791,7 +807,9 @@ int32_t MmGetOsVersion(char *versionInfo, int32_t versionLength)
     }
     int32_t ret = 0;
     struct utsname sysInfo;
-    (void)memset_s(&sysInfo, sizeof(sysInfo), 0, sizeof(sysInfo)); /* unsafe_function_ignore: memset */
+    if (memset_s(&sysInfo, sizeof(sysInfo), 0, sizeof(sysInfo)) != EOK) {
+        return PROFILING_FAILED;
+    }
     uint32_t length = static_cast<uint32_t>(versionLength);
     size_t len = static_cast<size_t>(length);
     int32_t fb = uname(&sysInfo);
@@ -1033,20 +1051,21 @@ static void LocalGetCpuProc(MmCpuDesc *cpuInfo, int32_t *physicalCount)
 
 int32_t MmGetCpuInfo(MmCpuDesc **cpuInfo, int32_t *count)
 {
-    if (count == nullptr) {
-        return PROFILING_INVALID_PARAM;
-    }
-    if (cpuInfo == nullptr) {
+    if (count == nullptr || cpuInfo == nullptr) {
         return PROFILING_INVALID_PARAM;
     }
     int32_t i = 0;
     int32_t ret = 0;
     MmCpuDesc cpuDest;
-    (void)memset_s(&cpuDest, sizeof(cpuDest), 0, sizeof(cpuDest)); /* unsafe_function_ignore: memset */
+    if (memset_s(&cpuDest, sizeof(cpuDest), 0, sizeof(cpuDest)) != EOK) {
+        return PROFILING_FAILED;
+    }
     int32_t physicalCount = 1;
     MmCpuDesc *pCpuDesc = nullptr;
     struct utsname sysInfo;
-    (void)memset_s(&sysInfo, sizeof(sysInfo), 0, sizeof(sysInfo)); /* unsafe_function_ignore: memset */
+    if (memset_s(&sysInfo, sizeof(sysInfo), 0, sizeof(sysInfo)) != EOK) {
+        return PROFILING_FAILED;
+    }
 
     LocalGetCpuProc(&cpuDest, &physicalCount);
 
@@ -1060,7 +1079,9 @@ int32_t MmGetCpuInfo(MmCpuDesc **cpuInfo, int32_t *count)
         return PROFILING_FAILED;
     }
 
-    (void)memset_s(pCpuDesc, needSize, 0, needSize); /* unsafe_function_ignore: memset */
+    if (memset_s(pCpuDesc, needSize, 0, needSize) != EOK) {
+        return PROFILING_FAILED;
+    }
 
     if (uname(&sysInfo) == PROFILING_SUCCESS) {
         uint32_t sysMachineLen = strnlen(sysInfo.machine, sizeof(cpuDest.arch));

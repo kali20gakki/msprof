@@ -462,7 +462,7 @@ public:
     static int ExecCmdCAsync(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams,
                              MmProcess &childProcess);
     static int ChangeWorkDir(const std::string &fileName);
-    static void SetArgEnv(CHAR_PTR_CONST argv[], const int argvCount, CHAR_PTR_CONST envp[],
+    static bool SetArgEnv(CHAR_PTR_CONST argv[], const int argvCount, CHAR_PTR_CONST envp[],
                           const int envCount, MmArgvEnv &argvEnv);
     static int DoCreateCmdProcess(const std::string &stdoutRedirectFile, const std::string &fileName,
                                   MmArgvEnv &argvEnv, MmProcess &tid);

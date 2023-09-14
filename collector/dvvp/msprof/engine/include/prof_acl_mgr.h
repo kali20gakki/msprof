@@ -168,7 +168,6 @@ private:
                             PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
     int StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t devId,
                                  PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
-    void ProfDataTypeConfigHandle(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     std::string MsprofCheckAndGetChar(CHAR_PTR data, uint32_t dataLen);
     void CloseSubscribeFd(const uint32_t devId);
     void CloseSubscribeFd(const uint32_t devId, const uint32_t modelId);

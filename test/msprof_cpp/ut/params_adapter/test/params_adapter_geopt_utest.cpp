@@ -53,6 +53,7 @@ TEST_F(ParamsAdapterGeoptUtest, GeOptParamAdapterModule)
     SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> geCfg;
     MSVP_MAKE_SHARED0_VOID(geCfg, analysis::dvvp::proto::ProfGeOptionsConfig);
     geCfg->set_storage_limit("200MB");
+    geCfg->set_instr_profiling_freq(1);
     GeOptParamAdapterMgr->GenGeOptionsContainer(geCfg);
 }
 
@@ -114,6 +115,20 @@ TEST_F(ParamsAdapterGeoptUtest, GeOptionsSetOutputDir)
     EXPECT_EQ(PROFILING_FAILED, ret);
 }
 
+TEST_F(ParamsAdapterGeoptUtest, CheckInstrAndTaskParamBothSet)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapterGeOpt> GeOptParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, ParamsAdapterGeOpt);
+    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> geCfg = nullptr;
+    MSVP_MAKE_SHARED0_VOID(geCfg, analysis::dvvp::proto::ProfGeOptionsConfig);
+    geCfg->set_instr_profiling_freq(1);
+    geCfg->set_task_time("on");
+    EXPECT_EQ(true, GeOptParamAdapterMgr->CheckInstrAndTaskParamBothSet(geCfg));
+    geCfg->set_task_time("off");
+    EXPECT_EQ(false, GeOptParamAdapterMgr->CheckInstrAndTaskParamBothSet(geCfg));
+}
+
 TEST_F(ParamsAdapterGeoptUtest, GeGetParamFromInputCfg)
 {
     GlobalMockObject::verify();
@@ -123,18 +138,44 @@ TEST_F(ParamsAdapterGeoptUtest, GeGetParamFromInputCfg)
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params = nullptr;
     int ret = GeOptParamAdapterMgr->GetParamFromInputCfg(geCfg, params);
     EXPECT_EQ(PROFILING_FAILED, ret);
-    MSVP_MAKE_SHARED0_VOID(geCfg, analysis::dvvp::proto::ProfGeOptionsConfig);
     MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::SetGeOptionsContainerDefaultValue)
-        .stubs()
-        .will(returnValue(true));
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::SetGeOptionsContainerDefaultValue)
-        .stubs()
-        .will(returnValue(true));
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::SetGeOptionsContainerDefaultValue)
-        .stubs()
-        .will(returnValue(true));
+    ret = GeOptParamAdapterMgr->GetParamFromInputCfg(geCfg, params);
     EXPECT_EQ(PROFILING_FAILED, ret);
+    MSVP_MAKE_SHARED0_VOID(geCfg, analysis::dvvp::proto::ProfGeOptionsConfig);
+
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::Init)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::CheckInstrAndTaskParamBothSet)
+        .stubs()
+        .will(returnValue(true))
+        .then(returnValue(false));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::PlatformAdapterInit)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::ComCfgCheck)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::SetGeOptionsContainerDefaultValue)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::TransToParam)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    
+    EXPECT_EQ(PROFILING_FAILED, GeOptParamAdapterMgr->GetParamFromInputCfg(geCfg, params));
+    EXPECT_EQ(PROFILING_FAILED, GeOptParamAdapterMgr->GetParamFromInputCfg(geCfg, params));
+    EXPECT_EQ(PROFILING_FAILED, GeOptParamAdapterMgr->GetParamFromInputCfg(geCfg, params));
+    EXPECT_EQ(PROFILING_FAILED, GeOptParamAdapterMgr->GetParamFromInputCfg(geCfg, params));
+    EXPECT_EQ(PROFILING_FAILED, GeOptParamAdapterMgr->GetParamFromInputCfg(geCfg, params));
+    EXPECT_EQ(PROFILING_FAILED, GeOptParamAdapterMgr->GetParamFromInputCfg(geCfg, params));
+    EXPECT_EQ(PROFILING_SUCCESS, GeOptParamAdapterMgr->GetParamFromInputCfg(geCfg, params));
 }
 
 TEST_F(ParamsAdapterGeoptUtest, CheckHostSysGeOptValid)

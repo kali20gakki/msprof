@@ -1156,14 +1156,11 @@ int ProfAclMgr::StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t 
     return ACL_SUCCESS;
 }
 
-void ProfAclMgr::ProfDataTypeConfigHandle(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
-{
-    dataTypeConfig_ = params->dataTypeConfig;
-    MSPROF_EVENT("ProfDataTypeConfigHandle dataTypeConfig:0x%llx", dataTypeConfig_);
-}
-
 std::string ProfAclMgr::MsprofCheckAndGetChar(CHAR_PTR data, uint32_t dataLen)
 {
+    if (data == nullptr) {
+        return "";
+    }
     uint32_t i;
     for (i = 0; i < dataLen; i++) {
         if (data[i] != '\0') {
@@ -1226,7 +1223,8 @@ int32_t ProfAclMgr::MsprofInitAclJson(VOID_PTR data, uint32_t len)
     params_->job_id = Utils::ProfCreateId(0);
     params_->host_sys_pid = analysis::dvvp::common::utils::Utils::GetPid();
     MsprofSetMemberValue();
-    ProfDataTypeConfigHandle(params_);
+    dataTypeConfig_ = params_->dataTypeConfig;
+    MSPROF_EVENT("dataTypeConfig:0x%llx", dataTypeConfig_);
     SetModeToCmd();
     return MSPROF_ERROR_NONE;
 }
@@ -1298,7 +1296,8 @@ int32_t ProfAclMgr::MsprofInitGeOptions(VOID_PTR data, uint32_t len)
     params_->jobInfo = jobInfo;
     params_->host_sys_pid = analysis::dvvp::common::utils::Utils::GetPid();
     MsprofSetMemberValue();
-    ProfDataTypeConfigHandle(params_);
+    dataTypeConfig_ = params_->dataTypeConfig;
+    MSPROF_EVENT("dataTypeConfig:0x%llx", dataTypeConfig_);
     SetModeToCmd();
     return MSPROF_ERROR_NONE;
 }
@@ -1330,10 +1329,9 @@ int32_t ProfAclMgr::MsprofInitAclEnv(const std::string &envValue)
         MSPROF_INNER_ERROR("EK9999", "storage_limit para is invalid");
         return MSPROF_ERROR_CONFIG_INVALID;
     }
-    ProfDataTypeConfigHandle(params_);
+    dataTypeConfig_ = params_->dataTypeConfig;
+    MSPROF_EVENT("dataTypeConfig:0x%llx", dataTypeConfig_);
     SetModeToCmd();
-    MSPROF_LOGI("MsprofInitAclEnv, mode:%d, dataTypeConfig:0x%lx, baseDir:%s",
-                mode_, dataTypeConfig_, Utils::BaseName(baseDir_).c_str());
     return MSPROF_ERROR_NONE;
 }
 
@@ -1383,7 +1381,8 @@ int32_t ProfAclMgr::MsprofInitHelper(VOID_PTR data, uint32_t len)
     if (ret != MSPROF_ERROR_NONE) {
         return ret;
     }
-    ProfDataTypeConfigHandle(params_);
+    dataTypeConfig_ = params_->dataTypeConfig;
+    MSPROF_EVENT("dataTypeConfig:0x%llx", dataTypeConfig_);
     SetModeToCmd();
     return MSPROF_ERROR_NONE;
 }
