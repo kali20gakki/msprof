@@ -164,19 +164,14 @@ function main(){
         echo "Run set-sudoers cmd"
         handle_sudoers
     elif [ "${command_type}" = "get-version" ]; then
-        #echo "Run get-version cmd"
         get_version
     elif [ "${command_type}" = "kill" ]; then
-        #echo "kill cmd"
         kill_prof_cmd
     elif [ "${command_type}" = "perf" ]; then
-        #echo "run perf trace cmd"
         run_prof_trace_cmd
     elif [ "${command_type}" = "ltrace" ] ; then
-        #echo "run ltrace cmd"
         run_ltrace_cmd
     elif [ "${command_type}" = "iotop" ]; then
-        #echo "run iotop cmd"
         run_iotop_cmd
     else
         printf "The value of the first parameter is incorrect, please enter the correct parameter, "

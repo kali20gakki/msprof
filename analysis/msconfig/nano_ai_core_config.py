@@ -21,8 +21,6 @@ class NanoAICoreConfig(MetaConfig):
             ('vec_mte1_cflt_stall_cycles', ''),
             ('mte1_mte2_stall_cycles', ''),
             ('mte1_mte3_stall_cycles', ''),
-            ('mte2_mte3_stall_cycles', ''),
-            ('su_stall_cycles', ''),
             ('scalar_ratio', ''),
             ('mte1_ratio', ''),
             ('mte2_ratio', ''),
@@ -83,8 +81,6 @@ class NanoAICoreConfig(MetaConfig):
             ('0x605', 'vec_mte1_cflt_stall_cycles'),
             ('0x606', 'mte1_mte2_stall_cycles'),
             ('0x607', 'mte1_mte3_stall_cycles'),
-            ('0x608', 'mte2_mte3_stall_cycles'),
-            ('0x609', 'su_stall_cycles'),
         ],
         'custom': [
 

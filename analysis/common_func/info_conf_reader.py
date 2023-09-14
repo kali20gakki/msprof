@@ -164,7 +164,11 @@ class InfoConfReader:
         get device_id
         :return: device id
         """
-        return self._info_json.get("devices", Constant.NA)
+        device_id = self._info_json.get("devices", Constant.NA)
+        if device_id and not device_id.isdigit():
+            logging.error("Device id : %s is not a digit!", device_id)
+            return Constant.NA
+        return device_id
 
     def get_job_info(self: any) -> str:
         """
