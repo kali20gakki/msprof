@@ -130,8 +130,7 @@ class MsprofEntrance:
         self._monitor_parser(monitor_parser)
         self._import_parser(import_parser)
         self._analyze_parser(analyzer_parser)
-        parser_tuple = (parser, export_parser, import_parser, monitor_parser, query_parser, analyzer_parser)
-        return parser_tuple
+        return parser, export_parser, import_parser, monitor_parser, query_parser, analyzer_parser
 
     def _query_parser(self: any, query_parser: any) -> None:
         data_type_values = list(map(int, QueryDataType))

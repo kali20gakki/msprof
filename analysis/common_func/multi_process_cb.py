@@ -137,11 +137,10 @@ def multiprocess_callback(args: any) -> None:
     """
     insert data into
     """
-    info = {'end_pos': args["end_pos"], 'replayid': args["replayid"]}
-    info["pmu_mode"] = MultiProcessCbConstant.PMU_MODE_INVALID
-    info["query"] = 'INSERT INTO OriginalData VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)'
-    info["sample_count"] = MultiProcessCbConstant.SAMPLE_COUNT
-    info['cpu_id'] = args['id']
+    info = {'end_pos': args["end_pos"], 'replayid': args["replayid"],
+            "pmu_mode": MultiProcessCbConstant.PMU_MODE_INVALID,
+            "query": 'INSERT INTO OriginalData VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            "sample_count": MultiProcessCbConstant.SAMPLE_COUNT, 'cpu_id': args['id']}
     lock = args['lock']
     conn, curs = DBManager.create_connect_db(args["dbname"] + '.db')
     try:
