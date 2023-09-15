@@ -351,6 +351,7 @@ int ParamsAdapterMsprof::GenMsprofContainer(
         if (!envWorkPath.empty()) {
             std::string ascendWorkPathDir = envWorkPath + ASCEND_MSPROF_WORK_PATH;
             paramContainer_[INPUT_CFG_COM_OUTPUT] = ascendWorkPathDir;
+            setConfig_.insert(INPUT_CFG_COM_OUTPUT);
         }
     }
     return PROFILING_SUCCESS;
