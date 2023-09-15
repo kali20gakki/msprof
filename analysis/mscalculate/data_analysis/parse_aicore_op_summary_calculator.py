@@ -218,7 +218,7 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
         ge_sql = f"SELECT model_id, batch_id, task_id, stream_id, " \
                  f"op_name, op_type, block_dim, mix_block_dim, task_type, tensor_num, input_formats," \
                  f" input_data_types, input_shapes, output_formats, output_data_types," \
-                 f" output_shapes, timestamp, index_id, context_id " \
+                 f" output_shapes, timestamp, index_id, context_id, op_flag " \
                  f"from {DBNameConstant.TABLE_GE_TASK} where index_id=? and model_id=? and device_id=?"
         for index_and_model in iter_list:
             index_and_model_list = list(index_and_model)

@@ -39,7 +39,7 @@ class OpSummaryOpSceneCalculator(MsMultiProcess):
         ge_sql = "SELECT model_id, task_id, stream_id, " \
                  "op_name, op_type, block_dim, mix_block_dim, task_type, " \
                  "tensor_num, input_formats, input_data_types, input_shapes, output_formats, output_data_types," \
-                 "output_shapes, index_id, timestamp, batch_id, context_id from {0} where device_id = {1}" \
+                 "output_shapes, index_id, timestamp, batch_id, context_id, op_flag from {0} where device_id = {1}" \
             .format(DBNameConstant.TABLE_GE_TASK, device_id)
         return ge_sql
 

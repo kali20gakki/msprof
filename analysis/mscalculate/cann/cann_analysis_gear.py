@@ -577,7 +577,7 @@ class TaskGear(CANNGear):
             self.task_info.append([model_id, node_dto.item_id, add_dto.stream_id, add_dto.task_id,
                                    0, 0, 'N/A', 'N/A', 'N/A', request_id, add_dto.thread_id,
                                    add_dto.timestamp, add_dto.batch_id, None, None, None, None, None, None, None,
-                                   add_dto.device_id, self.INVALID_CONTEXT_ID])
+                                   add_dto.device_id, self.INVALID_CONTEXT_ID, "N/A"])
             return
 
         for node_desc in node_descs.values():
@@ -592,7 +592,8 @@ class TaskGear(CANNGear):
                     self.task_info.append([model_id, op_name, add_dto.stream_id, add_dto.task_id,
                                            0, 0, 'N/A', 'N/A', 'N/A', request_id, add_dto.thread_id,
                                            add_dto.timestamp, add_dto.batch_id,
-                                           None, None, None, None, None, None, None, add_dto.device_id, int(cxt_id)])
+                                           None, None, None, None, None, None, None, add_dto.device_id, int(cxt_id),
+                                           "N/A"])
                 continue
             if node_basic_info_dto.task_type is None or node_basic_info_dto.task_type == self.FFTS_PLUS_TASK_TYPE:
                 continue
@@ -610,7 +611,8 @@ class TaskGear(CANNGear):
                                        tensor_info_dto.tensor_num, tensor_info_dto.input_formats,
                                        tensor_info_dto.input_data_types, tensor_info_dto.input_shapes,
                                        tensor_info_dto.output_formats, tensor_info_dto.output_data_types,
-                                       tensor_info_dto.output_shapes, add_dto.device_id, int(cxt_id)])
+                                       tensor_info_dto.output_shapes, add_dto.device_id, int(cxt_id),
+                                       "YES" if node_basic_info_dto.op_flag else "NO"])
 
     def run(self, event: Event, call_stack: dict):
         dto: ApiDataDto = self.db.get_api(event)
