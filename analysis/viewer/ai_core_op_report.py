@@ -183,6 +183,7 @@ class AiCoreOpReport:
                 if i == 0:
                     task[task_wait_time_index] = 0
                     continue
+                logging.warning(f"{headers}  {len(headers)} {task} {len(task)} {task_start_index} {task[task_start_index]}")
                 task[task_wait_time_index] = max(task[task_start_index] - device_tasks[i - 1][task_start_index] \
                                                  - device_tasks[i - 1][task_duration_index], 0)
         return device_tasks
@@ -388,9 +389,9 @@ class AiCoreOpReport:
     def _get_tensor_table_sql_and_headers(cls: any, headers: list) -> tuple:
         # ge or subtask need modify the context_id or subtask_id so that it should be same.
         sql = "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info}" \
-              "{1}.op_name, {1}.op_type, {1}.task_type, {1}.op_flag," \
+              "{1}.op_name, {1}.op_type, {1}.task_type," \
               "{0}.start_time/{NS_TO_US}+{local_time_offset}, {0}.duration_time/{NS_TO_US}," \
-              " {0}.wait_time/{NS_TO_US}, {1}.block_dim, {1}.mix_block_dim, " \
+              " {0}.wait_time/{NS_TO_US}, {1}.block_dim, {1}.mix_block_dim, {1}.op_flag," \
               "(case when {1}.input_shapes is NULL then 'N/A' else {1}.input_shapes end), " \
               "(case when {1}.input_data_types is NULL then 'N/A' else {1}.input_data_types end), " \
               "(case when {1}.input_formats is NULL then 'N/A' else {1}.input_formats end), " \

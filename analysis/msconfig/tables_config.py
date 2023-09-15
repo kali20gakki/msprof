@@ -30,7 +30,7 @@ class TablesConfig(MetaConfig):
             ('output_shapes', 'TEXT,null'),
             ('device_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null'),
-            ('op_flag', 'INTEGER,null')
+            ('op_flag', 'TEXT,null')
         ],
         'GeHashInfoMap': [
             ('hash_key', 'TEXT,null'),
@@ -873,7 +873,7 @@ class TablesConfig(MetaConfig):
             ('timestamp', 'NUMERIC,null'),
             ('index_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null'),
-            ('op_flag', 'INTEGER,null')
+            ('op_flag', 'TEXT,null')
         ],
         'TimeMap': [
             ('device_id', 'INTEGER,null'),
