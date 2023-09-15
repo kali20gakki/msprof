@@ -159,7 +159,7 @@ class DvppModel(BaseModel, ABC):
                 utilization = DBManager.fetchone(self.cur, utilization_sql,
                                                  (engine_type[0], engine_id[0], device_id[0], dvpp_id[0]))
 
-                all_utilization = str(utilization[0]) if utilization else '0'
+                all_utilization = str(utilization[0]).strip('%') if utilization else '0'
                 target_data.append(
                     (dvpp_id[0],
                      device_id[0],
