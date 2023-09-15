@@ -13,6 +13,7 @@
 #include "input_parser.h"
 #include "application.h"
 #include "platform/platform.h"
+#include "validation/param_validation.h"
 #include <fstream>
 #include <memory>
 #include "mmpa_api.h"
@@ -498,6 +499,16 @@ TEST_F(RUNNING_MODE_UTEST, CheckAnalysisEnv){
         .then(returnValue(true));
     EXPECT_EQ(PROFILING_FAILED, rMode.CheckAnalysisEnv());
     rMode.analysisPath_="msprof.py";
+    MOCKER(Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(true))
+        .then(returnValue(false));
+    EXPECT_EQ(PROFILING_FAILED, rMode.CheckAnalysisEnv());
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckParamPermission)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_FAILED, rMode.CheckAnalysisEnv());
     MOCKER(Utils::IsFileExist)
         .stubs()
         .will(returnValue(false))

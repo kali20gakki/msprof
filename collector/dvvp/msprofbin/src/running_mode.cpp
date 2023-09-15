@@ -35,6 +35,7 @@ using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 using namespace Collector::Dvvp::DynProf;
+using namespace analysis::dvvp::common::validation;
 
 RunningMode::RunningMode(std::string preCheckParams, std::string modeName, SHARED_PTR_ALIA<ProfileParams> params)
     : isQuit_(false), modeName_(modeName), taskPid_(MSVP_MMPROCESS), preCheckParams_(preCheckParams),
@@ -584,6 +585,16 @@ int RunningMode::CheckAnalysisEnv()
     }
     if (!Utils::AnalysisEnvReady(analysisPath_) || analysisPath_.empty()) {
         CmdLog::instance()->CmdWarningLog("Get msprof.py path failed.");
+        return PROFILING_FAILED;
+    }
+    if (Utils::IsSoftLink(analysisPath_)) {
+        MSPROF_LOGE("Argument %s is soft link, not support!", analysisPath_.c_str());
+        CmdLog::instance()->CmdErrorLog("Argument %s is soft link, not support!", analysisPath_.c_str());
+        return PROFILING_FAILED;
+    }
+    if (ParamValidation::instance()->CheckParamPermission(analysisPath_) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to check the permission of argument %s.",  analysisPath_.c_str());
+        CmdLog::instance()->CmdErrorLog("Failed to check the permission of argument %s.",  analysisPath_.c_str());
         return PROFILING_FAILED;
     }
     if (!Utils::IsFileExist(analysisPath_)) {

@@ -807,13 +807,23 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysToolsIsExist)
     EXPECT_EQ(PROFILING_FAILED, entry->CheckHostSysToolsIsExist(tool, resultDir, appDir));
     tool = "iotop";
     EXPECT_EQ(PROFILING_FAILED, entry->CheckHostSysToolsIsExist(tool, resultDir, appDir));
+    resultDir = "./";
+    MOCKER(Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(true))
+        .then(returnValue(false));
+    EXPECT_EQ(PROFILING_FAILED, entry->CheckHostSysToolsIsExist(tool, resultDir, appDir));
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckParamPermission)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_FAILED, entry->CheckHostSysToolsIsExist(tool, resultDir, appDir));
     MOCKER_CPP(&analysis::dvvp::common::utils::Utils::ExecCmd)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckHostSysCmdOutIsExist)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
-    resultDir = "./";
     EXPECT_EQ(PROFILING_SUCCESS, entry->CheckHostSysToolsIsExist(tool, resultDir, appDir));
 }
 
