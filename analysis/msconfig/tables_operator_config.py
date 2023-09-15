@@ -103,6 +103,6 @@ class TablesOperatorConfig(MetaConfig):
             ('timestamp', 'TEXT,null'),
             ('batch_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null'),
-            ('op_flag', 'INTEGER,null')
+            ('op_flag', 'TEXT,null')
         ],
     }
