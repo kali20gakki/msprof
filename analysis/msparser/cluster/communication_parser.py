@@ -9,6 +9,7 @@ from common_func.ms_constant.str_constant import OpAnalysisType
 from common_func.ms_constant.str_constant import OpBandWidthType
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_exception import ProfException
+from common_func.info_conf_reader import InfoConfReader
 from msparser.cluster.meta_parser import HcclAnalysisTool
 from msparser.cluster.meta_parser import MetaParser
 from profiling_bean.db_dto.hccl_dto import HcclDto
@@ -157,7 +158,8 @@ class CommunicationParser(MetaParser):
             if main_events:
                 self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO] = self.op_time_parser(main_events)
                 self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO][OpAnalysisType.START_TIME] = \
-                    min(events, key=lambda x: x.timestamp).timestamp / NumberConstant.NS_TO_US
+                   InfoConfReader().trans_into_local_time(
+                       min(events, key=lambda x: x.timestamp).timestamp, NumberConstant.NANO_SECOND)
             else:
                 logging.error("Fail to get no.%s rank main events info,"
                               " communication parser is interrupted", str(rank_id))
