@@ -1536,6 +1536,18 @@ int ParamValidation::CheckHostSysToolsIsExist(const std::string toolName, const 
     argsV.push_back(PROF_SCRIPT_FILE_PATH);
     argsV.push_back("get-version");
     argsV.push_back(toolName);
+    if (Utils::IsSoftLink(PROF_SCRIPT_FILE_PATH)) {
+        MSPROF_LOGE("Argument %s is soft link, not support!", PROF_SCRIPT_FILE_PATH.c_str());
+        CMD_LOGE("Argument %s is soft link, not support!", PROF_SCRIPT_FILE_PATH.c_str());
+        return PROFILING_FAILED;
+    }
+    if (CheckParamPermission(PROF_SCRIPT_FILE_PATH) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to check the permission of "
+                    "argument %s.",  PROF_SCRIPT_FILE_PATH.c_str());
+        CMD_LOGE("Failed to check the permission of "
+                    "argument %s.",  PROF_SCRIPT_FILE_PATH.c_str());
+        return PROFILING_FAILED;
+    }
     unsigned long long startRealtime = analysis::dvvp::common::utils::Utils::GetClockRealtime();
     tmpDir += "/tmpPrint" + std::to_string(startRealtime);
     int exitCode = analysis::dvvp::common::utils::INVALID_EXIT_CODE;
