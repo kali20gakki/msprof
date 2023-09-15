@@ -183,7 +183,6 @@ class AiCoreOpReport:
                 if i == 0:
                     task[task_wait_time_index] = 0
                     continue
-                logging.warning(f"{headers}  {len(headers)} {task} {len(task)} {task_start_index} {task[task_start_index]}")
                 task[task_wait_time_index] = max(task[task_start_index] - device_tasks[i - 1][task_start_index] \
                                                  - device_tasks[i - 1][task_duration_index], 0)
         return device_tasks
