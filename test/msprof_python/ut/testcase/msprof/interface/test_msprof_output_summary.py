@@ -179,5 +179,5 @@ class TestMsprofOutputSummary(unittest.TestCase):
                 mock.patch('os.open'), \
                 mock.patch('os.fdopen'), \
                 mock.patch('os.fdopen.write'), \
-                mock.patch(NAMESPACE + '.MsprofOutputSummary._append_readme'):
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._get_readme_info'):
             MsprofOutputSummary('test')._export_readme_file()
