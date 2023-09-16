@@ -6,9 +6,8 @@ import json
 import logging
 import os
 
-from common_func.common import CommonConstant
 from common_func.common_prof_rule import CommonProfRule
-from common_func.constant import Constant
+from common_func.file_manager import FdOpen
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_exception import ProfException
@@ -54,9 +53,7 @@ class TuningControl:
             logging.error("write tuning result file failed: %s", file_name)
             raise ProfException(ProfException.PROF_SYSTEM_EXIT) from ex
 
-        with os.fdopen(os.open(result_file, Constant.WRITE_FLAGS,
-                               Constant.WRITE_MODES), 'w') as f_write:
-            os.chmod(result_file, CommonConstant.FILE_AUTHORITY)
+        with FdOpen(result_file) as f_write:
             json.dump({"status": NumberConstant.SUCCESS, "data": self.data}, f_write)
 
     def _init_tuning_data(self: any) -> None:

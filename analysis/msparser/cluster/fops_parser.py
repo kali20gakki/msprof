@@ -15,10 +15,10 @@ from common_func.db_manager import ClassRowType
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import check_path_valid
+from common_func.file_manager import FdOpen
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_query_data import QueryArgumentCheck
-from common_func.msvp_common import check_file_writable
 from common_func.path_manager import PathManager
 from profiling_bean.db_dto.cluster_rank_dto import ClusterRankDto
 from profiling_bean.db_dto.fops_dto import FopsDto
@@ -122,13 +122,10 @@ class FopsParser:
         file_name = 'fops_{0}_{1}_{2}.json'.format(self.rank_id,
                                                    self.model_id, self.iter_id)
         file_path = self.get_cluster_path(file_name)
-        check_file_writable(file_path)
         if os.path.exists(file_path):
             os.remove(file_path)
         try:
-            with os.fdopen(os.open(file_path, Constant.WRITE_FLAGS,
-                                   Constant.WRITE_MODES), "w") as _file:
-                os.chmod(file_path, NumberConstant.FILE_AUTHORITY)
+            with FdOpen(file_path) as _file:
                 _file.write(json.dumps(json_data))
         except (OSError, SystemError, RuntimeError, TypeError) as err:
             error(self.FILE_NAME,

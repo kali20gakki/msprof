@@ -18,6 +18,7 @@ from operator import truediv
 
 from common_func.common import error
 from common_func.constant import Constant
+from common_func.file_manager import FdOpen
 from common_func.file_manager import check_path_valid
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
@@ -189,9 +190,7 @@ def create_csv(csv_file: str, headers: list, data: list, save_old_file: bool = T
 
 
 def create_csv_writer(csv_file: str, headers: list, data: list):
-    with os.fdopen(os.open(csv_file, Constant.WRITE_FLAGS,
-                           Constant.WRITE_MODES), 'w', newline='') as _csv_file:
-        os.chmod(csv_file, NumberConstant.FILE_AUTHORITY)
+    with FdOpen(csv_file) as _csv_file:
         writer = csv.writer(_csv_file)
         if headers:
             writer.writerow(headers)
@@ -203,9 +202,7 @@ def create_csv_writer(csv_file: str, headers: list, data: list):
 
 
 def create_csv_dict_writer(csv_file: str, headers: list, data: list):
-    with os.fdopen(os.open(csv_file, Constant.WRITE_FLAGS,
-                           Constant.WRITE_MODES), 'w', newline='') as _csv_file:
-        os.chmod(csv_file, NumberConstant.FILE_AUTHORITY)
+    with FdOpen(csv_file) as _csv_file:
         if not headers:
             return
         writer = csv.DictWriter(_csv_file, fieldnames=headers)
@@ -232,9 +229,7 @@ def create_json(json_file: str, headers: list, data: list, save_old_file: bool =
     if not bak_and_make_dir(json_file, save_old_file):
         return json.dumps({'status': NumberConstant.ERROR, 'info': str('bak or mkdir csv dir failed'), 'data': ''})
     try:
-        with os.fdopen(os.open(json_file, Constant.WRITE_FLAGS,
-                               Constant.WRITE_MODES), 'w') as _json_file:
-            os.chmod(json_file, NumberConstant.FILE_AUTHORITY)
+        with FdOpen(json_file) as _json_file:
             json.dump(json_result, _json_file)
         return json.dumps({'status': NumberConstant.SUCCESS, 'info': '', 'data': json_file})
     except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
@@ -251,9 +246,7 @@ def create_json_for_dict(json_file: str, dict_result: dict) -> str:
     if not bak_and_make_dir(json_file, False):
         return json.dumps({'status': NumberConstant.ERROR, 'info': str('bak or mkdir csv dir failed'), 'data': ''})
     try:
-        with os.fdopen(os.open(json_file, Constant.WRITE_FLAGS,
-                               Constant.WRITE_MODES), 'w') as _json_file:
-            os.chmod(json_file, NumberConstant.FILE_AUTHORITY)
+        with FdOpen(json_file) as _json_file:
             json.dump(dict_result, _json_file)
         return json.dumps({'status': NumberConstant.SUCCESS, 'info': '', 'data': json_file})
     except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:

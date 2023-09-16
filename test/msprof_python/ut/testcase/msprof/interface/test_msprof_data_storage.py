@@ -98,6 +98,8 @@ class TestMsprofDataStorage(unittest.TestCase):
                 mock.patch('os.open', return_value=True), \
                 mock.patch(NAMESPACE + '.MsprofDataStorage.clear_timeline_dir'), \
                 mock.patch(NAMESPACE + '.MsprofDataStorage.slice_data_list', return_value=(1, [1])), \
+                mock.patch(NAMESPACE + '.FdOpen.__enter__', mock.mock_open(read_data='123')), \
+                mock.patch(NAMESPACE + '.FdOpen.__exit__'), \
                 mock.patch('os.fdopen', mock.mock_open(read_data='123')):
             key = MsprofDataStorage()
             res = key.export_timeline_data_to_json(result, params)
@@ -111,6 +113,8 @@ class TestMsprofDataStorage(unittest.TestCase):
                 mock.patch('os.open', return_value=True), \
                 mock.patch(NAMESPACE + '.MsprofDataStorage.clear_timeline_dir'), \
                 mock.patch(NAMESPACE + '.MsprofDataStorage.slice_data_list', return_value=(1, [1])), \
+                mock.patch(NAMESPACE + '.FdOpen.__enter__', mock.mock_open(read_data='123')), \
+                mock.patch(NAMESPACE + '.FdOpen.__exit__'), \
                 mock.patch('os.fdopen', mock.mock_open(read_data='123')):
             with mock.patch(NAMESPACE + '.PathManager.get_summary_dir', return_value="train"), \
                     mock.patch('os.path.join', return_value=True), \

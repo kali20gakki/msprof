@@ -4,9 +4,8 @@
 
 import json
 import logging
-import os
-
 import math
+import os
 
 from common_func.common import error
 from common_func.common import print_msg
@@ -14,6 +13,7 @@ from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.file_manager import FdOpen
 from common_func.file_manager import FileManager
 from common_func.file_manager import check_path_valid
 from common_func.ms_constant.number_constant import NumberConstant
@@ -211,8 +211,7 @@ class ClusterDataPreparationParser:
         if os.path.exists(file_path) and (not FileManager.remove_file(file_path)):
             raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
         try:
-            with os.fdopen(os.open(file_path, Constant.WRITE_FLAGS,
-                                   Constant.WRITE_MODES), 'w') as _file:
+            with FdOpen(file_path) as _file:
                 _file.write(json.dumps(self._data))
         except (OSError, SystemError, RuntimeError, TypeError) as err:
             message = "Storing data failed, you may not have the permission to write files in the current path."

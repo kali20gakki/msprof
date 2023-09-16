@@ -166,9 +166,8 @@ class TestMsprofOutputSummary(unittest.TestCase):
 
     def test_write_json_files_when_normal_then_pass(self):
         with mock.patch(NAMESPACE + '.make_export_file_name', return_value="test"), \
-                mock.patch('os.open'), \
-                mock.patch('os.fdopen'), \
-                mock.patch('os.fdopen.write'):
+                mock.patch(NAMESPACE + '.FdOpen.__enter__', mock.mock_open(read_data='123')), \
+                mock.patch(NAMESPACE + '.FdOpen.__exit__'):
             MsprofOutputSummary('test')._write_json_files((0, [1, 2]), {})
 
     def test_export_readme_file_normal_then_pass(self):
@@ -179,5 +178,7 @@ class TestMsprofOutputSummary(unittest.TestCase):
                 mock.patch('os.open'), \
                 mock.patch('os.fdopen'), \
                 mock.patch('os.fdopen.write'), \
+                mock.patch(NAMESPACE + '.FdOpen.__enter__', mock.mock_open(read_data='123')), \
+                mock.patch(NAMESPACE + '.FdOpen.__exit__'), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._get_readme_info'):
             MsprofOutputSummary('test')._export_readme_file()

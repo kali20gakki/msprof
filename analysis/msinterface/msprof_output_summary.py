@@ -12,6 +12,7 @@ import shutil
 from common_func.common import print_info, error
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
+from common_func.file_manager import FdOpen
 from common_func.file_manager import FileOpen
 from common_func.file_manager import check_path_valid
 from common_func.file_slice_helper import FileSliceHelper
@@ -114,8 +115,7 @@ class MsprofOutputSummary:
         for slice_time in range(len(json_data[1])):
             timeline_file_path = make_export_file_name(params, slice_time, json_data[0])
             try:
-                with os.fdopen(os.open(timeline_file_path, Constant.WRITE_FLAGS,
-                                       Constant.WRITE_MODES), 'w') as trace_file:
+                with FdOpen(timeline_file_path) as trace_file:
                     trace_file.write(json.dumps(json_data[1][slice_time]))
                     data_path.append(timeline_file_path)
             except (OSError, SystemError, ValueError, TypeError,
@@ -302,8 +302,8 @@ class MsprofOutputSummary:
             elif ori_filename.endswith(StrConstant.FILE_SUFFIX_JSON):
                 timeline_set.add(self._get_file_name(ori_filename))
 
-        with os.fdopen(os.open(os.path.join(self._output_dir, self.README), Constant.WRITE_FLAGS,
-                               Constant.WRITE_MODES), 'w') as readme:
+        file_path = os.path.join(self._output_dir, self.README)
+        with FdOpen(file_path) as readme:
             context = self._get_readme_info(timeline_set, timeline_dict,
                                             StrConstant.FILE_SUFFIX_JSON)
             context += self._get_readme_info(summary_set, summary_dict,

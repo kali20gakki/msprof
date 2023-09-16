@@ -13,6 +13,7 @@ from common_func.common import init_log
 from common_func.common import print_info
 from common_func.common import warn
 from common_func.constant import Constant
+from common_func.file_manager import FdOpen
 from common_func.file_manager import FileManager
 from common_func.file_name_manager import FileNameManagerConstant
 from common_func.info_conf_reader import InfoConfReader
@@ -165,14 +166,14 @@ def add_all_file_complete(collect_path: str) -> None:
     add all file complete when parse finished
     :param collect_path: the collect path
     """
-    file_path = PathManager.get_data_dir(collect_path)
-    if not os.path.exists(file_path):
+    file_dir = PathManager.get_data_dir(collect_path)
+    if not os.path.exists(file_dir):
         logging.error("No data dir found, add all complete file error")
         return
     try:
-        with os.fdopen(os.open(os.path.join(file_path, FileNameManagerConstant.ALL_FILE_TAG), Constant.WRITE_FLAGS,
-                               Constant.WRITE_MODES), "w"):
-            os.chmod(os.path.join(file_path, FileNameManagerConstant.ALL_FILE_TAG), FileManager.FILE_AUTHORITY)
+        file_path = os.path.join(file_dir, FileNameManagerConstant.ALL_FILE_TAG)
+        with FdOpen(file_path):
+            os.chmod(file_path, FileManager.FILE_AUTHORITY)
     except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
         error(os.path.basename(__file__), err)
     finally:
