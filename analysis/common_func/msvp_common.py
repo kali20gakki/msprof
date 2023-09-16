@@ -190,7 +190,7 @@ def create_csv(csv_file: str, headers: list, data: list, save_old_file: bool = T
 
 
 def create_csv_writer(csv_file: str, headers: list, data: list):
-    with FdOpen(csv_file) as _csv_file:
+    with FdOpen(csv_file, newline='') as _csv_file:
         writer = csv.writer(_csv_file)
         if headers:
             writer.writerow(headers)
@@ -202,7 +202,7 @@ def create_csv_writer(csv_file: str, headers: list, data: list):
 
 
 def create_csv_dict_writer(csv_file: str, headers: list, data: list):
-    with FdOpen(csv_file) as _csv_file:
+    with FdOpen(csv_file, newline='') as _csv_file:
         if not headers:
             return
         writer = csv.DictWriter(_csv_file, fieldnames=headers)
