@@ -4,14 +4,14 @@
 
 import json
 import logging
+import math
 import os
 import re
 from datetime import datetime
 from datetime import timezone
 
-import math
-
 from common_func.constant import Constant
+from common_func.file_manager import FdOpen
 from common_func.file_manager import FileOpen
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
@@ -79,12 +79,10 @@ class MsprofDataStorage:
         data_path = []
         for slice_time in range(len(json_data[1])):
             timeline_file_path = MsprofDataStorage._make_export_file_name(params, slice_time, json_data[0])
-            check_file_writable(timeline_file_path)
             if os.path.exists(timeline_file_path):
                 os.remove(timeline_file_path)
             try:
-                with os.fdopen(os.open(timeline_file_path, Constant.WRITE_FLAGS,
-                                       Constant.WRITE_MODES), 'w') as trace_file:
+                with FdOpen(timeline_file_path) as trace_file:
                     trace_file.write(json.dumps(json_data[1][slice_time]))
                     data_path.append(timeline_file_path)
             except (OSError, SystemError, ValueError, TypeError,

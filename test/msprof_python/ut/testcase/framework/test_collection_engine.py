@@ -54,5 +54,7 @@ class TestCollectionEngine(unittest.TestCase):
         with mock.patch(NAMESPACE + '.check_dir_writable'), \
              mock.patch(NAMESPACE + '.PathManager.get_log_dir'), \
              mock.patch('builtins.open', side_effect=OSError), \
+             mock.patch(NAMESPACE + '.FdOpen.__enter__', mock.mock_open(read_data='123')), \
+             mock.patch(NAMESPACE + '.FdOpen.__exit__'), \
              mock.patch(NAMESPACE + '.error'):
             AI._create_collection_log(project_dir)

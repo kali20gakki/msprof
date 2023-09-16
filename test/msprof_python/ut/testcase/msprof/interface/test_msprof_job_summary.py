@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 
 from msinterface.msprof_job_summary import MsprofJobSummary
+from common_func.info_conf_reader import InfoConfReader
 
 NAMESPACE = 'msinterface.msprof_job_summary'
 
@@ -34,7 +35,8 @@ class TestMsprofJobSummary(unittest.TestCase):
             result = MsprofJobSummary('test')._get_host_timeline_data()
         self.assertEqual(result, [1])
 
-    def test_generate_json_file(self):
+    def test_generate_json_file_success_when_write_json_files_OK(self):
+        InfoConfReader()._info_json = {'device_id': 1}
         with mock.patch('os.path.join', return_value='test'), \
                 mock.patch(NAMESPACE + '.MsprofJobSummary.get_msprof_json_file', return_value=[{}]), \
                 mock.patch(NAMESPACE + '.MsprofDataStorage.write_json_files', return_value=(0, [])):
@@ -49,10 +51,12 @@ class TestMsprofJobSummary(unittest.TestCase):
                 check = MsprofJobSummary('test')
                 check._host_data = [{'ts': 1}]
                 check._generate_json_file('test')
+
+    def test_generate_json_file_failed_when_write_json_files_error(self):
+        InfoConfReader()._info_json = {'device_id': 1}
         with mock.patch('os.path.join', return_value='test'), \
                 mock.patch(NAMESPACE + '.MsprofJobSummary.get_msprof_json_file', return_value=[{}]):
-            with mock.patch(NAMESPACE + '.MsprofJobSummary.get_msprof_json_file', return_value=[{}]), \
-                mock.patch(NAMESPACE + '.MsprofDataStorage.write_json_files', return_value=(1, 'test')),\
+            with mock.patch(NAMESPACE + '.MsprofDataStorage.write_json_files', return_value=(1, 'test')),\
                     mock.patch('os.fdopen', mock.mock_open(read_data='')),\
                     mock.patch('common_func.utils.logging.error'):
                 check = MsprofJobSummary('test')

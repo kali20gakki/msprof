@@ -84,8 +84,9 @@ class TestFopsParser(unittest.TestCase):
 
     def test_storage_data(self):
         with mock.patch(NAMESPACE + '.FopsParser.get_cluster_path', return_value='test'), \
-                mock.patch(NAMESPACE + '.check_file_writable'), \
                 mock.patch('builtins.open', mock.mock_open(read_data='')), \
+                mock.patch(NAMESPACE + '.FdOpen.__enter__', mock.mock_open(read_data='123')), \
+                mock.patch(NAMESPACE + '.FdOpen.__exit__'), \
                 mock.patch('os.fdopen', side_effect=OSError), \
                 mock.patch('os.chmod'),\
                 mock.patch('os.remove'):

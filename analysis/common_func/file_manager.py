@@ -12,6 +12,7 @@ from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
 from common_func.file_name_manager import FileNameManagerConstant
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.os_manager import check_dir_writable
 from common_func.path_manager import PathManager
 from common_func.return_code_checker import ReturnCodeCheck
 
@@ -85,13 +86,13 @@ class FileManager:
         """
         add complete file
         """
-        file_path = PathManager.get_data_dir(project_path)
+        file_dir = PathManager.get_data_dir(project_path)
         try:
-            if os.path.exists(os.path.join(file_path, file_name)) and \
+            if os.path.exists(os.path.join(file_dir, file_name)) and \
                     not file_name.endswith(Constant.COMPLETE_TAG):
-                with os.fdopen(os.open(os.path.join(file_path, file_name + Constant.COMPLETE_TAG), Constant.WRITE_FLAGS,
-                                       Constant.WRITE_MODES), "w"):
-                    os.chmod(os.path.join(file_path, file_name), cls.FILE_AUTHORITY)
+                file_path = os.path.join(file_dir, file_name + Constant.COMPLETE_TAG)
+                with FdOpen(file_path):
+                    os.chmod(file_path, cls.FILE_AUTHORITY)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             error(os.path.basename(__file__), err)
 
@@ -111,9 +112,7 @@ class FileManager:
         output_file_path = PathManager.get_query_result_path(collection_path, file_name)
         check_path_valid(output_file_path, True)
         try:
-            with os.fdopen(os.open(output_file_path, Constant.WRITE_FLAGS,
-                                   Constant.WRITE_MODES), 'w') as file:
-                os.chmod(output_file_path, NumberConstant.FILE_AUTHORITY)
+            with FdOpen(output_file_path) as file:
                 json.dump(result_data, file)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             error(os.path.basename(__file__), err)
@@ -141,6 +140,38 @@ class FileOpen:
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.file_reader:
             self.file_reader.close()
+
+
+class FdOpen:
+    """
+    creat and write file
+    """
+
+    def __init__(self: any, file_path: str, flags: int = Constant.WRITE_FLAGS, mode: int = Constant.WRITE_MODES,
+                 operate: str = "w", newline: str = None) -> None:
+        self.file_path = file_path
+        self.flags = flags
+        self.newline = newline
+        self.mode = mode
+        self.operate = operate
+        self.fd = None
+        self.file_open = None
+
+    def __enter__(self: any) -> any:
+        file_dir = os.path.dirname(self.file_path)
+        check_dir_writable(file_dir)
+        self.fd = os.open(self.file_path, self.flags, self.mode)
+        if self.newline is None:
+            self.file_open = os.fdopen(self.fd, self.operate)
+        else:
+            self.file_open = os.fdopen(self.fd, self.operate, newline=self.newline)
+        return self.file_open
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.file_open:
+            self.file_open.close()
+        elif self.fd:
+            os.close(self.fd)
 
 
 def check_path_valid(path: str, is_file: bool, max_size: int = Constant.MAX_READ_FILE_BYTES) -> None:

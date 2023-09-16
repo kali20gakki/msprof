@@ -10,11 +10,10 @@ import sys
 import traceback
 
 from common_func.common import print_msg
-from common_func.constant import Constant
+from common_func.file_manager import FdOpen
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import check_dir_writable
-from common_func.msvp_common import check_file_writable
 from common_func.msvp_common import clear_project_dirs
 from common_func.msvp_common import error
 from common_func.path_manager import PathManager
@@ -67,10 +66,9 @@ class AI:
         try:
             if os.path.exists(PathManager.get_log_dir(project_dir)) and \
                     not os.path.exists(PathManager.get_collection_log_path(project_dir)):
-                check_file_writable(PathManager.get_collection_log_path(project_dir))
-                with os.fdopen(os.open(PathManager.get_collection_log_path(project_dir), Constant.WRITE_FLAGS,
-                                       Constant.WRITE_MODES), 'w'):
-                    os.chmod(PathManager.get_collection_log_path(project_dir), NumberConstant.FILE_AUTHORITY)
+                file_path = PathManager.get_collection_log_path(project_dir)
+                with FdOpen(file_path):
+                    os.chmod(file_path, NumberConstant.FILE_AUTHORITY)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             error(cls.FILE_NAME, err)
 
