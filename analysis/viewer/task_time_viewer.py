@@ -10,8 +10,8 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.stars_constant import StarsConstant
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from mscalculate.ascend_task.ascend_task import TopDownTask
