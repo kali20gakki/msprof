@@ -128,9 +128,6 @@ class TestStepTraceViewer(unittest.TestCase):
         self.assertEqual(res[2], 0)
 
     def test_step_trace_timeline(self):
-        res = StepTraceViewer.get_trace_timeline_data(0, [0])
-        self.assertTrue(isinstance(res, EmptyClass))
-
         message1 = {'job_id': 'job_default', 'device_id': '4', 'project_path': ''}
         db_manager, conn, curs = create_trace_db()
         conn.close()

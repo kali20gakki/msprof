@@ -390,33 +390,25 @@ class StepTraceViewer:
         """
         step = 0
         data = list(range(len(values)))
-        try:
-            for line in values:
-                trace = {
-                    'training_trace': list(line),
-                }
-                getnext = StepTraceViewer.__select_getnext(cnn, trace.get('training_trace', []))
-                getnext = Utils.generator_to_list(list(map(StepTraceViewer.__local_time_from_syscnt, data))
-                                                  for data in getnext)
-                trace['get_next'] = getnext
-
-                all_reduce = StepTraceViewer.__select_reduce(cnn, trace.get('training_trace', []))
-                all_reduce = Utils.generator_to_list(list(map(StepTraceViewer.__local_time_from_syscnt, data))
-                                                     for data in all_reduce)
-                trace['all_reduce'] = all_reduce
-                StepTraceViewer.transfer_trace_unit(trace.get('training_trace', []))  # syscnt to time
-                data[step] = trace
-                # Cursor step moved 1 step
-                step = step + 1
-            result = StepTraceViewer.__format_trace_json(data)
-            return result
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) \
-                as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            if cnn:
-                DBManager.destroy_db_connect(cnn, cnn.cursor())
-        return EmptyClass("no trace timeline data")
+        for line in values:
+            trace = {
+                'training_trace': list(line),
+            }
+            getnext = StepTraceViewer.__select_getnext(cnn, trace.get('training_trace', []))
+            getnext = Utils.generator_to_list(list(map(StepTraceViewer.__local_time_from_syscnt, data))
+                                              for data in getnext)
+            trace['get_next'] = getnext
+            all_reduce = StepTraceViewer.__select_reduce(cnn, trace.get('training_trace', []))
+            all_reduce = Utils.generator_to_list(list(map(StepTraceViewer.__local_time_from_syscnt, data))
+                                                 for data in all_reduce)
+            trace['all_reduce'] = all_reduce
+            StepTraceViewer.transfer_trace_unit(trace.get('training_trace', []))  # syscnt to time
+            data[step] = trace
+            # Cursor step moved 1 step
+            step = step + 1
+        if cnn:
+            DBManager.destroy_db_connect(cnn, cnn.cursor())
+        return StepTraceViewer.__format_trace_json(data)
 
     @staticmethod
     def _reformat_step_trace_data(data: list, conn: any) -> list:

@@ -6,8 +6,8 @@ import configparser
 import json
 import logging
 import os
-from typing import Dict
 from decimal import Decimal
+from typing import Dict
 
 from common_func.constant import Constant
 from common_func.file_manager import check_path_valid
