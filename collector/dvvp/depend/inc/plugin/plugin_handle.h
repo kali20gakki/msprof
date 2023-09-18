@@ -18,6 +18,7 @@
 namespace Collector {
 namespace Dvvp {
 namespace Plugin {
+using namespace analysis::dvvp::common::utils;
 using HandleType = void*;
 using analysis::dvvp::common::error::PROFILING_SUCCESS;
 using analysis::dvvp::common::error::PROFILING_FAILED;
@@ -30,7 +31,8 @@ public:
     explicit PluginHandle(const std::string &name) : soName_(name), handle_(nullptr), load_(false) {}
     ~PluginHandle();
     const std::string GetSoName() const;
-    int32_t OpenPlugin(const std::string envValue);
+    int32_t OpenPluginFromEnv(const std::string envValue);
+    int32_t OpenPluginFromLdcfg();
     void CloseHandle();
     template <typename R, typename... Types>
     void GetFunction(const std::string& funcName, std::function<R(Types... args)>& func) const
@@ -44,8 +46,14 @@ public:
     bool HasLoad();
     bool IsFuncExist(const std::string funcName) const;
 
+protected:
+    std::vector<std::string> soPaths_;
+
 private:
+    void GetSoPaths(std::vector<std::string> &soPaths);
     std::string GetSoPath(const std::string &envValue) const;
+    bool CheckSoValid(CONST_CHAR_PTR soPath) const;
+    int32_t DlopenSo(CONST_CHAR_PTR soPath);
     std::string GetAscendHalPath() const;
     std::string soName_;
     HandleType handle_;

@@ -30,11 +30,10 @@ void ProfApiPlugin::LoadProfApiSo()
     if (pluginHandle_ == nullptr) {
         MSVP_MAKE_SHARED1_VOID(pluginHandle_, PluginHandle, soName_);
     }
-    int32_t ret = PROFILING_SUCCESS;
     if (!pluginHandle_->HasLoad()) {
-        ret = pluginHandle_->OpenPlugin("LD_LIBRARY_PATH");
-        if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("[ProfApiPlugin]LoadProfApiSo OpenPlugin for LD_LIBRARY_PATH failed");
+        if (pluginHandle_->OpenPluginFromEnv("LD_LIBRARY_PATH") != PROFILING_SUCCESS &&
+            pluginHandle_->OpenPluginFromLdcfg() != PROFILING_SUCCESS) {
+            MSPROF_LOGE("ProfApiPlugin failed to load profapi so");
             return;
         }
     }

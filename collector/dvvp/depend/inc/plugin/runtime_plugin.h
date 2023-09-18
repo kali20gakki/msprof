@@ -26,7 +26,7 @@ private:
     PTHREAD_ONCE_T loadFlag_;
     RtGetVisibleDeviceIdByLogicDeviceIdFunc rtGetVisibleDeviceIdByLogicDeviceIdFunc_ = nullptr;
 private:
-    void LoadDriverSo();
+    void LoadRuntimeSo();
 };
 }
 }
