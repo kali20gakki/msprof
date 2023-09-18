@@ -7,20 +7,12 @@ from msconfig.meta_config import MetaConfig
 
 class DataParsersConfig(MetaConfig):
     DATA = {
-        'GeHashParser': [
-            ('path', 'msparser.ge.ge_hash_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10')
-        ],
         'GeLogicStreamParser': [
             ('path', 'msparser.ge.ge_logic_stream_parser'),
             ('chip_model', '0,1,2,3,4,5,7,8,10')
         ],
         'ParsingRuntimeData': [
             ('path', 'common_func.create_runtime_db'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10')
-        ],
-        'AclParser': [
-            ('path', 'msparser.acl.acl_parser'),
             ('chip_model', '0,1,2,3,4,5,7,8,10')
         ],
         'L2CacheParser': [
@@ -94,10 +86,6 @@ class DataParsersConfig(MetaConfig):
             ('level', '2'),
             ('position', 'D'),
         ],
-        'RtsTrackParser': [
-            ('path', 'msparser.runtime.rts_parser'),
-            ('chip_model', '0,1,2,3,4')
-        ],
         'ParsingAICoreSampleData': [
             ('path', 'msparser.aic_sample.ai_core_sample_parser'),
             ('chip_model', '0,1,2,3,4')
@@ -106,19 +94,9 @@ class DataParsersConfig(MetaConfig):
             ('path', 'msparser.aic_sample.ai_core_sample_parser'),
             ('chip_model', '2,3,4')
         ],
-        'HCCLParser': [
-            ('path', 'msparser.hccl.hccl_parser'),
-            ('chip_model', '0,1,2,3,4,5'),
-            ('level', '3')
-        ],
         'MsprofTxParser': [
             ('path', 'msparser.msproftx.msproftx_parser'),
             ('chip_model', '0,1,2,3,4,5,7,8,10')
-        ],
-        'RunTimeApiParser': [
-            ('path', 'msparser.runtime.runtime_api_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10'),
-            ('level', '2')
         ],
         'ParseAiCpuDataAdapter': [
             ('path', 'msparser.aicpu.parse_aicpu_data_adapter'),

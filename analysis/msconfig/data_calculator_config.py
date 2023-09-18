@@ -7,11 +7,6 @@ from msconfig.meta_config import MetaConfig
 
 class DataCalculatorConfig(MetaConfig):
     DATA = {
-        'AclCalculator': [
-            ('path', 'mscalculate.acl.acl_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10'),
-            ('position', 'H')
-        ],
         'SubTaskCalculator': [
             ('path', 'mscalculate.stars.sub_task_calculate'),
             ('chip_model', '5'),
