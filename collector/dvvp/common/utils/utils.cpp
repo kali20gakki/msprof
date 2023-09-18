@@ -1343,7 +1343,7 @@ std::string Utils::CreateTaskId(uint64_t index)
     taskId << std::setw(fillLen) << ((index % maxLen) + 1);
     std::string result = "PROF_" + taskId.str() + "_";
 
-    MmSystemTimeT sysTime;
+    MmSystemTimeT sysTime = {0};
     int ret = MmGetLocalTime(&sysTime);
     if (ret == -1) {
         MSPROF_LOGW("Get time failed");
