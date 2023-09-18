@@ -170,8 +170,8 @@ def add_all_file_complete(collect_path: str) -> None:
     if not os.path.exists(file_dir):
         logging.error("No data dir found, add all complete file error")
         return
+    file_path = os.path.join(file_dir, FileNameManagerConstant.ALL_FILE_TAG)
     try:
-        file_path = os.path.join(file_dir, FileNameManagerConstant.ALL_FILE_TAG)
         with FdOpen(file_path):
             os.chmod(file_path, FileManager.FILE_AUTHORITY)
     except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
