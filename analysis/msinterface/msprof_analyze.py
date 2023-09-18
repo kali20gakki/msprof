@@ -39,8 +39,6 @@ class AnalyzeCommand:
         sub_dirs = sorted(get_path_dir(result_dir), reverse=True)
         clear_dir_list = ['data', 'sqlite']
         for sub_dir in sub_dirs:  # result_dir
-            if sub_dir == StrConstant.TIMELINE_PATH:
-                continue
             for clear_dir in clear_dir_list:
                 dir_name = os.path.join(result_dir, sub_dir, clear_dir)
                 if os.path.exists(dir_name):

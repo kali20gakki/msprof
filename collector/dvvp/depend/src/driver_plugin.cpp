@@ -62,10 +62,10 @@ void DriverPlugin::LoadDriverSo()
     if (pluginHandle_ == nullptr) {
         MSVP_MAKE_SHARED1_VOID(pluginHandle_, PluginHandle, soName_);
     }
-    int32_t ret = PROFILING_SUCCESS;
     if (!pluginHandle_->HasLoad()) {
-        ret = pluginHandle_->OpenPlugin("LD_LIBRARY_PATH");
-        if (ret != PROFILING_SUCCESS) {
+        if (pluginHandle_->OpenPluginFromEnv("LD_LIBRARY_PATH") != PROFILING_SUCCESS &&
+            pluginHandle_->OpenPluginFromLdcfg() != PROFILING_SUCCESS) {
+            MSPROF_LOGE("DriverPlugin failed to load driver so");
             return;
         }
     }

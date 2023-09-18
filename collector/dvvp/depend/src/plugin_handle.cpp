@@ -6,10 +6,12 @@
  */
 #include "plugin_handle.h"
 
+#include <iostream>
+#include <cstdio>
+#include <sys/stat.h>
 #include "config.h"
 #include "mmpa/mmpa_api.h"
 #include "securec.h"
-#include "utils/utils.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -17,6 +19,10 @@ namespace Plugin {
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Mmpa;
+
+const int MAX_BUF_SIZE = 1024;
+const int READ_CMD_RESULT_WAIT_US = 500000;
+
 PluginHandle::~PluginHandle()
 {
 }
@@ -26,7 +32,39 @@ const std::string PluginHandle::GetSoName() const
     return soName_;
 }
 
-int32_t PluginHandle::OpenPlugin(const std::string envValue)
+int32_t PluginHandle::DlopenSo(CONST_CHAR_PTR soPath)
+{
+    if (soPath == nullptr) {
+        return PROFILING_FAILED;
+    }
+    handle_ = dlopen(soPath, RTLD_NOW | RTLD_GLOBAL);
+    if (!handle_) {
+        return PROFILING_FAILED;
+    }
+    load_ = true;
+    return PROFILING_SUCCESS;
+}
+
+bool PluginHandle::CheckSoValid(CONST_CHAR_PTR soPath) const
+{
+    if (soPath == nullptr) {
+        return false;
+    }
+    struct stat fileStat;
+    if (stat(soPath, &fileStat) == 0) {
+        if (fileStat.st_mode & S_IWOTH) {
+            return false;
+        } else {
+            if (fileStat.st_uid == 0 || fileStat.st_uid == static_cast<uint32_t>(MmGetUid())) {
+                return true;
+            }
+            return false;
+        }
+    }
+    return false;
+}
+
+int32_t PluginHandle::OpenPluginFromEnv(const std::string envValue)
 {
     if (envValue.empty() || envValue.size() >= MAX_PATH_LENGTH) {
         return PROFILING_FAILED;
@@ -35,12 +73,91 @@ int32_t PluginHandle::OpenPlugin(const std::string envValue)
     if (soPath.empty()) {
         return PROFILING_FAILED;
     }
-    char trustedPath[MMPA_MAX_PATH] = {'\0'};
-    int32_t ret = MmRealPath(soPath.c_str(), trustedPath, sizeof(trustedPath));
-    if (ret != PROFILING_SUCCESS || Utils::IsSoftLink(std::string(trustedPath))) {
+    char realPath[MMPA_MAX_PATH] = {'\0'};
+    int32_t ret = MmRealPath(soPath.c_str(), realPath, sizeof(realPath));
+    if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
-    handle_ = dlopen(trustedPath, RTLD_NOW | RTLD_GLOBAL);
+    std::string path = std::string(realPath, sizeof(realPath));
+    if (path.empty() || Utils::IsSoftLink(path)) {
+        return PROFILING_FAILED;
+    }
+    if (!CheckSoValid(realPath)) {
+        return PROFILING_FAILED;
+    }
+    return DlopenSo(realPath);
+}
+
+void PluginHandle::GetSoPaths(std::vector<std::string> &soPaths)
+{
+    std::string cmd = "ldconfig -p | grep " + soName_;
+    FILE* fp = popen(cmd.c_str(), "r");
+    if (fp == nullptr) {
+        return;
+    }
+    int32_t fd = fileno(fp);
+    if (fd < 0) {
+        pclose(fp);
+        fp = nullptr;
+        return;
+    }
+    char pathBuff[MAX_BUF_SIZE] = {0};
+    struct timeval timeout = {0, READ_CMD_RESULT_WAIT_US};
+    fd_set readfds;
+    FD_ZERO(&readfds);
+    FD_SET(fd, &readfds);
+    if (select(fd + 1, &readfds, nullptr, nullptr, &timeout) <= 0) {
+        pclose(fp);
+        fp = nullptr;
+        MmClose(fd);
+        return;
+    }
+    size_t recvNum = fread(pathBuff, sizeof(char), MAX_BUF_SIZE, fp);
+    if (ferror(fp) || (recvNum != MAX_BUF_SIZE && !feof(fp))) { // read err
+        pclose(fp);
+        fp = nullptr;
+        MmClose(fd);
+        return;
+    }
+    std::vector<std::string> paths = Utils::Split(std::string(pathBuff, recvNum), false, "", "\n");
+    for (auto &path : paths) {
+        size_t pos = path.find("=> ");
+        if (pos == std::string::npos) {
+            continue;
+        }
+        std::string soPath = path.substr(pos + 3); // 3 : start pos for so path
+        if (MmAccess2(soPath, M_R_OK) != PROFILING_SUCCESS) {
+            continue;
+        }
+        soPaths.push_back(soPath);
+    }
+    pclose(fp);
+    fp = nullptr;
+    MmClose(fd);
+    return;
+}
+
+int32_t PluginHandle::OpenPluginFromLdcfg()
+{
+    GetSoPaths(soPaths_);
+    if (soPaths_.empty()) {
+        return PROFILING_FAILED;
+    }
+    for (size_t i = 0; i < soPaths_.size(); i++) {
+        char realPath[MMPA_MAX_PATH] = {'\0'};
+        int32_t ret = MmRealPath(soPaths_[i].c_str(), realPath, sizeof(realPath));
+        if (ret != PROFILING_SUCCESS) {
+            return PROFILING_FAILED;
+        }
+        std::string path = std::string(realPath, sizeof(realPath));
+        if (path.empty() || Utils::IsSoftLink(path)) {
+            return PROFILING_FAILED;
+        }
+        if (!CheckSoValid(realPath)) {
+            return PROFILING_FAILED;
+        }
+    }
+    handle_ = dlopen(soName_.c_str(), RTLD_NOW | RTLD_GLOBAL);
     if (!handle_) {
         return PROFILING_FAILED;
     }

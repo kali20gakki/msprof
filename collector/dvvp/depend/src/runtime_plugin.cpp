@@ -20,15 +20,16 @@ void RuntimePlugin::GetAllFunction()
         rtGetVisibleDeviceIdByLogicDeviceIdFunc_);
 }
 
-void RuntimePlugin::LoadDriverSo()
+void RuntimePlugin::LoadRuntimeSo()
 {
     if (pluginHandle_ == nullptr) {
         MSVP_MAKE_SHARED1_VOID(pluginHandle_, PluginHandle, soName_);
     }
     int32_t ret = PROFILING_SUCCESS;
     if (!pluginHandle_->HasLoad()) {
-        ret = pluginHandle_->OpenPlugin("LD_LIBRARY_PATH");
-        if (ret != PROFILING_SUCCESS) {
+        if (pluginHandle_->OpenPluginFromEnv("LD_LIBRARY_PATH") != PROFILING_SUCCESS &&
+            pluginHandle_->OpenPluginFromLdcfg() != PROFILING_SUCCESS) {
+            MSPROF_LOGE("RuntimePlugin failed to load runtime so");
             return;
         }
     }
@@ -43,7 +44,7 @@ bool RuntimePlugin::IsFuncExist(const std::string &funcName) const
 int32_t RuntimePlugin::MsprofRtGetVisibleDeviceIdByLogicDeviceId(int32_t logicDeviceId,
     int32_t* visibleDeviceId)
 {
-    PthreadOnce(&loadFlag_, []()->void {RuntimePlugin::instance()->LoadDriverSo();});
+    PthreadOnce(&loadFlag_, []()->void {RuntimePlugin::instance()->LoadRuntimeSo();});
     if (rtGetVisibleDeviceIdByLogicDeviceIdFunc_ == nullptr) {
         MSPROF_LOGW("RuntimePlugin rtGetVisibleDeviceIdByLogicDeviceId function is null.");
         return PROFILING_NOTSUPPORT;

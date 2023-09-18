@@ -6,6 +6,9 @@ protobuf_generate(profiler
 )
 set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/profapi_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/runtime_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
@@ -18,6 +21,9 @@ set(localSrcFiles
     test/main.cpp 
     test/driver_plugin_utest.cpp
     test/plugin_handle_utest.cpp
+    test/profapi_plugin_utest.cpp
+    test/runtime_plugin_utest.cpp
+    test/slog_plugin_utest.cpp
 )
 
 add_executable(plugin_utest 
@@ -30,6 +36,7 @@ target_include_directories(plugin_utest PRIVATE
     ${MOCKCPP_INCLUDE_DIR}
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
     ${MSPROF_SOURCE_DIR}/dvvp/common
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
