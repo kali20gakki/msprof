@@ -3,9 +3,12 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 import json
+import logging
 import os
+from decimal import Decimal
 
 from common_func.common import error
+from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
@@ -133,6 +136,7 @@ class MsprofTimeline:
                     export_data)
                 self._export_data_list.extend(export_data)
         except (TypeError, ValueError) as err:
+            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
             error(self.FILE_NAME, err)
 
     def add_connect_json_line(self: any, json_list: list, data_type: str) -> None:
@@ -191,11 +195,14 @@ class MsprofTimeline:
         if not self._iteration_time:
             return True
         start_time, end_time = self._iteration_time
-        start_time = InfoConfReader().trans_into_local_time(start_time)
-        end_time = InfoConfReader().trans_into_local_time(end_time)
-        time_start = json_value.get(TraceViewHeaderConstant.TRACE_HEADER_TS, NumberConstant.DEFAULT_START_TIME)
-        time_end = time_start + json_value.get(TraceViewHeaderConstant.TRACE_HEADER_DURATION,
-                                               NumberConstant.DEFAULT_START_TIME)
+        start_time = Decimal(InfoConfReader().trans_into_local_time(start_time, use_decimal=True))
+        end_time = Decimal(InfoConfReader().trans_into_local_time(end_time, use_decimal=True))
+        time_start = Decimal(str(json_value.get(TraceViewHeaderConstant.TRACE_HEADER_TS,
+                                                NumberConstant.DEFAULT_START_TIME)))
+        time_dur = Decimal(str(json_value.get(TraceViewHeaderConstant.TRACE_HEADER_DURATION,
+                                              NumberConstant.DEFAULT_START_TIME)))
+        time_end = time_start + time_dur
+
         return start_time <= time_start < end_time or time_start < start_time < time_end
 
     def set_iteration_info(self: any, result_dir: str, iter_range: IterationRange) -> None:
