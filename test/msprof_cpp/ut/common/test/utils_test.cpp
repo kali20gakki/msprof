@@ -1126,7 +1126,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, RemoveEndCharacter){
 int GetDiskFreeSpaceStub(const char *path, MmDiskSize *diskSize) {
     std::string paths(path);
     try {
-        diskSize->availSize = std::stoi(paths);
+        diskSize->availSize = Utils::StrToInt(paths);
     } catch(...) {
         return -1;
     }

@@ -1022,8 +1022,8 @@ std::string Utils::TimestampToTime(const std::string &timestamp, int unit /* = 1
     time_t secTime;
     uint32_t microTime;
     try {
-        secTime = std::stoll(timestamp) / unit;
-        microTime = static_cast<uint32_t>(std::stoll(timestamp) % unit);
+        secTime = Utils::StrToLongLong(timestamp) / unit;
+        microTime = static_cast<uint32_t>(Utils::StrToLongLong(timestamp) % unit);
     } catch (...) {
         return "0";
     }
@@ -1512,7 +1512,7 @@ int32_t Utils::GetRankId()
     std::string rankStr = Utils::GetEnvString(RANK_ENV);
     if (!rankStr.empty() && CheckStringIsValidNatureNum(rankStr)) {
         MSPROF_LOGI("Environment variable RANK = %s", rankStr.c_str());
-        return std::stoi(rankStr);
+        return Utils::StrToInt(rankStr);
     }
     if (!IsClusterRunEnv()) {
         return invalidRankId;
@@ -1522,7 +1522,7 @@ int32_t Utils::GetRankId()
     if (!CheckStringIsValidNatureNum(rankIdStr)) {
         return invalidRankId;
     }
-    return std::stoi(rankIdStr);
+    return Utils::StrToInt(rankIdStr);
 }
 
 std::vector<std::string> Utils::GenEnvPairVec(const std::vector<std::string> &envVec)
@@ -1634,6 +1634,48 @@ std::string Utils::RealPath(const std::string &path)
         return "";
     }
     return std::string(realPath);
+}
+
+int Utils::StrToInt(const std::string &numStr)
+{
+    if (numStr.empty()) {
+        MSPROF_LOGE("StrToInt failed, the input string is empty.");
+        return 0;
+    }
+    size_t pos = 0;
+    int res = 0;
+    try {
+        res = std::stoi(numStr, &pos);
+    } catch (...) {
+        MSPROF_LOGE("StrToInt failed, the input string is '%s'.", numStr.c_str());
+        return 0;
+    }
+    if (pos != numStr.size()) {
+        MSPROF_LOGE("StrToInt failed, the input string is '%s'.", numStr.c_str());
+        return 0;
+    }
+    return res;
+}
+
+long long Utils::StrToLongLong(const std::string &numStr)
+{
+    if (numStr.empty()) {
+        MSPROF_LOGE("StrToLongLong failed, the input string is empty.");
+        return 0;
+    }
+    size_t pos = 0;
+    long long res = 0;
+    try {
+        res = std::stoll(numStr, &pos);
+    } catch (...) {
+        MSPROF_LOGE("StrToLongLong failed, the input string is '%s'.", numStr.c_str());
+        return 0;
+    }
+    if (pos != numStr.size()) {
+        MSPROF_LOGE("StrToLongLong failed, the input string is '%s'.", numStr.c_str());
+        return 0;
+    }
+    return res;
 }
 
 int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile, const std::string &profName)

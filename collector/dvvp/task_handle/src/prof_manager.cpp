@@ -186,7 +186,7 @@ int ProfManager::ProcessHandleFailed(SHARED_PTR_ALIA<analysis::dvvp::message::Pr
     for (size_t ii = 0; ii < devices.size(); ++ii) {
         MSPROF_LOGE("handle task failed, devid:%s, jobid:%s", devices[ii].c_str(), jobId.c_str());
         MSPROF_INNER_ERROR("EK9999", "handle task failed, devid:%s, jobid:%s", devices[ii].c_str(), jobId.c_str());
-        Msprofiler::Api::DeviceResponse(std::stoi(devices[ii]));
+        Msprofiler::Api::DeviceResponse(Utils::StrToInt(devices[ii]));
     }
     return PROFILING_SUCCESS;
 }
@@ -454,7 +454,7 @@ bool ProfManager::CheckIfDevicesOnline(const std::string paramsDevices, std::str
             MSPROF_INNER_ERROR("EK9999", "devId(%s) is not valid.", devices[i].c_str());
             return false;
         }
-        int devId = std::stoi(devices[i]);
+        int devId = Utils::StrToInt(devices[i]);
         if (devId == DEFAULT_HOST_ID) {
             MSPROF_LOGI("devId(%s) is host device", devices[i].c_str());
             continue;
