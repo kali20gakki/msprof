@@ -73,7 +73,7 @@ void AnalyzerBase::EraseRtMapByStreamId(uint16_t streamId, std::map<std::string,
 {
     for (auto iter = rtOpInfo.begin(); iter != rtOpInfo.end();) {
         auto pos = iter->first.find(KEY_SEPARATOR);
-        uint16_t iterStreamId = static_cast<uint16_t>(std::stoi(iter->first.substr(pos + 1)));
+        uint16_t iterStreamId = static_cast<uint16_t>(Utils::StrToInt(iter->first.substr(pos + 1)));
         if (iterStreamId != streamId) {
             iter++;
             continue;
