@@ -162,7 +162,7 @@ void ConfigManager::InitFrequency()
     std::string frequency;
     std::string aicFrq;
     std::string type = configMap_[TYPE_CONFIG];
-    auto platType  = static_cast<PlatformType>(std::stoi(type));
+    auto platType  = static_cast<PlatformType>(Utils::StrToInt(type));
     auto iterator = FREQUENCY_TYPE.find(platType);
     if (iterator != FREQUENCY_TYPE.end()) {
         frequency = iterator->second;
@@ -188,7 +188,7 @@ PlatformType ConfigManager::GetPlatformType() const
 {
     auto iter =  configMap_.find(TYPE_CONFIG);
     if (iter != configMap_.end()) {
-        auto type = (PlatformType)(std::stoi(iter->second));
+        auto type = (PlatformType)(Utils::StrToInt(iter->second));
         return type;
     }
     return PlatformType::MINI_TYPE;

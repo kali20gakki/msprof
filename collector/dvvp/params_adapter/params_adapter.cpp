@@ -247,11 +247,11 @@ void ParamsAdapter::SetCommonParams(std::array<std::string, INPUT_CFG_MAX> param
     commonParams.storageLimit = paramContainer[INPUT_CFG_COM_STORAGE_LIMIT];
     commonParams.msproftx = paramContainer[INPUT_CFG_COM_MSPROFTX];
     commonParams.hostSysPid = (paramContainer[INPUT_CFG_HOST_SYS_PID].empty()) ?
-        -1 : std::stoi(paramContainer[INPUT_CFG_HOST_SYS_PID]);
+        -1 : Utils::StrToInt(paramContainer[INPUT_CFG_HOST_SYS_PID]);
     commonParams.device = (paramContainer[INPUT_CFG_COM_SYS_DEVICES].compare("all") == 0) ?
         DrvGetDevIdsStr() : paramContainer[INPUT_CFG_COM_SYS_DEVICES];
     commonParams.profilingPeriod = (paramContainer[INPUT_CFG_COM_SYS_PERIOD].empty()) ?
-        -1 : std::stoi(paramContainer[INPUT_CFG_COM_SYS_PERIOD]);
+        -1 : Utils::StrToInt(paramContainer[INPUT_CFG_COM_SYS_PERIOD]);
     platformAdapter_->SetParamsForGlobal(commonParams);
     platformAdapter_->SetParamsForStorageLimit(commonParams);
 }
@@ -299,13 +299,13 @@ void ParamsAdapter::SetAiMetricsParams(std::array<std::string, INPUT_CFG_MAX> pa
     int samplingInterval = 0;
     if (paramContainer[INPUT_CFG_COM_AI_CORE].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = paramContainer[INPUT_CFG_COM_AIC_FREQ].empty() ?
-            DEFAULT_PROFILING_INTERVAL_10MS : (THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_AIC_FREQ]));
+            DEFAULT_PROFILING_INTERVAL_10MS : (THOUSAND / Utils::StrToInt(paramContainer[INPUT_CFG_COM_AIC_FREQ]));
         platformAdapter_->SetParamsForAicMetrics(paramContainer[INPUT_CFG_COM_AIC_MODE],
             paramContainer[INPUT_CFG_COM_AIC_METRICS], samplingInterval);
     }
     if (paramContainer[INPUT_CFG_COM_AI_VECTOR].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = paramContainer[INPUT_CFG_COM_AIV_FREQ].empty() ?
-            DEFAULT_PROFILING_INTERVAL_10MS : (THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_AIV_FREQ]));
+            DEFAULT_PROFILING_INTERVAL_10MS : (THOUSAND / Utils::StrToInt(paramContainer[INPUT_CFG_COM_AIV_FREQ]));
         platformAdapter_->SetParamsForAivMetrics(paramContainer[INPUT_CFG_COM_AIV_MODE],
             paramContainer[INPUT_CFG_COM_AIV_METRICS], samplingInterval);
     }
@@ -316,40 +316,40 @@ void ParamsAdapter::SetDeviceSysParams(std::array<std::string, INPUT_CFG_MAX> pa
 {
     int samplingInterval = 0;
     if (paramContainer[INPUT_CFG_COM_SYS_USAGE].compare(MSVP_PROF_ON) == 0) {
-        samplingInterval = paramContainer[INPUT_CFG_COM_SYS_USAGE_FREQ].empty() ?
-            DEFAULT_PROFILING_INTERVAL_100MS : (THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_SYS_USAGE_FREQ]));
+        samplingInterval = paramContainer[INPUT_CFG_COM_SYS_USAGE_FREQ].empty() ? DEFAULT_PROFILING_INTERVAL_100MS :
+            (THOUSAND / Utils::StrToInt(paramContainer[INPUT_CFG_COM_SYS_USAGE_FREQ]));
         platformAdapter_->SetParamsForDeviceSysCpuMemUsage(samplingInterval);
     }
     if (paramContainer[INPUT_CFG_COM_SYS_PID_USAGE].compare(MSVP_PROF_ON) == 0) {
-        samplingInterval = paramContainer[INPUT_CFG_COM_SYS_PID_USAGE_FREQ].empty() ?
-            DEFAULT_PROFILING_INTERVAL_100MS : (THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_SYS_PID_USAGE_FREQ]));
+        samplingInterval = paramContainer[INPUT_CFG_COM_SYS_PID_USAGE_FREQ].empty() ? DEFAULT_PROFILING_INTERVAL_100MS :
+            (THOUSAND / Utils::StrToInt(paramContainer[INPUT_CFG_COM_SYS_PID_USAGE_FREQ]));
         platformAdapter_->SetParamsForDeviceAllPidCpuMemUsage(samplingInterval);
     }
     if (paramContainer[INPUT_CFG_COM_SYS_CPU].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = paramContainer[INPUT_CFG_COM_SYS_CPU_FREQ].empty() ?
-            DEFAULT_PROFILING_INTERVAL_20MS : (THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_SYS_CPU_FREQ]));
+            DEFAULT_PROFILING_INTERVAL_20MS : (THOUSAND / Utils::StrToInt(paramContainer[INPUT_CFG_COM_SYS_CPU_FREQ]));
         platformAdapter_->SetParamsForDeviceAiCpuCtrlCpuTSCpuHotFuncPMU(samplingInterval);
     }
     if (paramContainer[INPUT_CFG_COM_SYS_HARDWARE_MEM].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = paramContainer[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ].empty() ?
             DEFAULT_PROFILING_INTERVAL_20MS :
-            (THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ]));
+            (THOUSAND / Utils::StrToInt(paramContainer[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ]));
         platformAdapter_->SetParamsForDeviceHardwareMem(samplingInterval, paramContainer[INPUT_CFG_COM_LLC_MODE]);
     }
     if (paramContainer[INPUT_CFG_COM_SYS_IO].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = paramContainer[INPUT_CFG_COM_SYS_IO_FREQ].empty() ?
-            DEFAULT_PROFILING_INTERVAL_10MS : (THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_SYS_IO_FREQ]));
+            DEFAULT_PROFILING_INTERVAL_10MS : (THOUSAND / Utils::StrToInt(paramContainer[INPUT_CFG_COM_SYS_IO_FREQ]));
         platformAdapter_->SetParamsForDeviceIO(samplingInterval);
     }
     if (paramContainer[INPUT_CFG_COM_SYS_INTERCONNECTION].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = paramContainer[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ].empty() ?
             DEFAULT_PROFILING_INTERVAL_20MS :
-            (THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ]));
+            (THOUSAND / Utils::StrToInt(paramContainer[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ]));
         platformAdapter_->SetParamsForDeviceIntercommection(samplingInterval);
     }
     if (paramContainer[INPUT_CFG_COM_DVPP].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = paramContainer[INPUT_CFG_COM_DVPP_FREQ].empty() ?
-            DEFAULT_PROFILING_INTERVAL_20MS : (THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_DVPP_FREQ]));
+            DEFAULT_PROFILING_INTERVAL_20MS : (THOUSAND / Utils::StrToInt(paramContainer[INPUT_CFG_COM_DVPP_FREQ]));
         platformAdapter_->SetParamsForDeviceDVPP(samplingInterval);
     }
     if (paramContainer[INPUT_CFG_COM_POWER].compare(MSVP_PROF_ON) == 0) {
@@ -357,11 +357,10 @@ void ParamsAdapter::SetDeviceSysParams(std::array<std::string, INPUT_CFG_MAX> pa
     }
     if (paramContainer[INPUT_CFG_COM_INSTR_PROFILING].compare(MSVP_PROF_ON) == 0) {
         int instrFreq = paramContainer[INPUT_CFG_COM_INSTR_PROFILING_FREQ].empty() ?
-            DEFAULT_PROFILING_INSTR_PROFILING_FREQ : std::stoi(paramContainer[INPUT_CFG_COM_INSTR_PROFILING_FREQ]);
+            DEFAULT_PROFILING_INSTR_PROFILING_FREQ :
+            Utils::StrToInt(paramContainer[INPUT_CFG_COM_INSTR_PROFILING_FREQ]);
         platformAdapter_->SetParamsForDeviceInstr(instrFreq);
     }
-
-    return;
 }
 
 void ParamsAdapter::SetHostSysParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const
@@ -387,7 +386,8 @@ void ParamsAdapter::SetHostSysUsageParams(std::array<std::string, INPUT_CFG_MAX>
 {
     std::vector<std::string> hostSysUsageList = Utils::Split(paramContainer[INPUT_CFG_HOST_SYS_USAGE], false, "", ",");
     int samplingInterval = paramContainer[INPUT_CFG_HOST_SYS_USAGE_FREQ].empty() ?
-            DEFAULT_PROFILING_INTERVAL_20MS : (THOUSAND / std::stoi(paramContainer[INPUT_CFG_HOST_SYS_USAGE_FREQ]));
+            DEFAULT_PROFILING_INTERVAL_20MS :
+            (THOUSAND / Utils::StrToInt(paramContainer[INPUT_CFG_HOST_SYS_USAGE_FREQ]));
     if (paramContainer[INPUT_CFG_HOST_SYS_PID].empty()) {
         for (auto entry : hostSysUsageList) {
             if (entry.compare(HOST_SYS_CPU) == 0) {

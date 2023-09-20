@@ -788,7 +788,7 @@ int SystemMode::CheckIfDeviceOnline() const
             CmdLog::instance()->CmdErrorLog("The device (%s) is not valid, please check it!", devId.c_str());
             return PROFILING_FAILED;
         }
-        auto it = find(devices.begin(), devices.end(), std::stoi(devId));
+        auto it = find(devices.begin(), devices.end(), Utils::StrToInt(devId));
         if (it == devices.end()) {
             invalidIds.push_back(devId);
         } else {
@@ -952,7 +952,7 @@ int SystemMode::StartHostTask(const std::string resultDir, const std::string dev
         return PROFILING_FAILED;
     }
     params->devices = device;
-    if (std::stoi(device) == DEFAULT_HOST_ID) {
+    if (Utils::StrToInt(device) == DEFAULT_HOST_ID) {
         params->host_profiling = TRUE;
     }
     bool retu = CreateSampleJsonFile(params, resultDir);
@@ -967,7 +967,7 @@ int SystemMode::StartHostTask(const std::string resultDir, const std::string dev
         return PROFILING_FAILED;
     }
     SHARED_PTR_ALIA<ProfSocTask> task = nullptr;
-    MSVP_MAKE_SHARED2_RET(task, ProfSocTask, std::stoi(device), params, PROFILING_FAILED);
+    MSVP_MAKE_SHARED2_RET(task, ProfSocTask, Utils::StrToInt(device), params, PROFILING_FAILED);
     ret = task->Init();
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("DeviceTask init failed, deviceId:%s", device.c_str());
@@ -996,7 +996,7 @@ int SystemMode::StartDeviceTask(const std::string resultDir, const std::string d
         return PROFILING_FAILED;
     }
     SHARED_PTR_ALIA<ProfRpcTask> task = nullptr;
-    MSVP_MAKE_SHARED2_RET(task, ProfRpcTask, std::stoi(device), params, PROFILING_FAILED);
+    MSVP_MAKE_SHARED2_RET(task, ProfRpcTask, Utils::StrToInt(device), params, PROFILING_FAILED);
     ret = task->Init();
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[StartDeviceTask]DeviceTask init failed, deviceId:%s", device.c_str());
