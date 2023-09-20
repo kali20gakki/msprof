@@ -10,7 +10,6 @@ from sqlite.db_manager import DBManager
 from viewer.get_trace_timeline import TraceViewer
 from viewer.get_trace_timeline import get_aicore_utilization_timeline
 from viewer.get_trace_timeline import get_dvpp_timeline
-from viewer.get_trace_timeline import get_ge_timeline_data
 from viewer.get_trace_timeline import get_hccs_timeline
 from viewer.get_trace_timeline import get_network_timeline
 from viewer.get_trace_timeline import get_pcie_timeline
@@ -171,40 +170,6 @@ class TestTraceViewer(unittest.TestCase):
             InfoConfReader()._info_json = {"pid": 0}
             res = get_aicore_utilization_timeline(param)
         self.assertEqual(len(json.loads(res)), 3)
-
-    def test_get_ge_timeline_data_1(self):
-        with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', side_effect=TypeError):
-            res = get_ge_timeline_data('')
-        self.assertEqual(len(json.loads(res)), 2)
-
-        with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(None, None)):
-            res = get_ge_timeline_data('')
-        self.assertEqual(len(json.loads(res)), 2)
-
-        with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
-            res = get_ge_timeline_data('')
-        self.assertEqual(len(json.loads(res)), 2)
-
-    def test_get_ge_timeline_data_2(self):
-        create_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_GE_MODEL_TIME + \
-                     " (model_name, model_id, data_index, req_id, device_id, replayid, input_start, input_end, " \
-                     "infer_start, infer_end, output_start, output_end, thread_id)"
-        data = (("resnet50", 1, 0, 0, 0, 0, 118562117947, 118562181945, 118562246461, 118571674723, 118571718683,
-                 118571732153, 2246),
-                ("resnet50", 1, 0, 0, 0, 0, 118573770781, 118573835615, 118573876331, 118583372166, 118583414463,
-                 118583420359, 2246))
-        db_manager = DBManager()
-        insert_sql = db_manager.insert_sql(DBNameConstant.TABLE_GE_MODEL_TIME, data)
-        test_sql = db_manager.create_table(DBNameConstant.DB_GE_MODEL_TIME, create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-            InfoConfReader()._info_json = {"pid": 0}
-            res = get_ge_timeline_data('')
-        (test_sql[1]).execute("drop Table {}".format(DBNameConstant.TABLE_GE_MODEL_TIME))
-        db_manager.destroy(test_sql)
-        self.assertEqual(len(json.loads(res)), 9)
 
 
 if __name__ == '__main__':

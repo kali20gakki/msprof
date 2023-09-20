@@ -265,37 +265,6 @@ namespace utils {
         }                                                                                       \
     } while (0)
 
-#define MSVP_MAKE_SHARED8_VOID(instance, Type,                                                  \
-    arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)                                             \
-    do {                                                                                        \
-        try {                                                                                   \
-            instance = std::make_shared<Type>(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);  \
-        } catch (...) {                                                                         \
-            return;                                                                             \
-        }                                                                                       \
-    } while (0)
-
-#define MSVP_MAKE_SHARED8_RET(instance, Type,                                                       \
-        arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, errCode)                                    \
-        do {                                                                                        \
-            try {                                                                                   \
-                instance = std::make_shared<Type>(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);  \
-            } catch (...) {                                                                         \
-                return errCode;                                                                     \
-            }                                                                                       \
-        } while (0)
-
-
-#define MSVP_MAKE_SHARED9_VOID(instance, Type,                                                       \
-    arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)                                            \
-    do {                                                                                             \
-        try {                                                                                        \
-            instance = std::make_shared<Type>(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8); \
-        } catch (...) {                                                                              \
-            return;                                                                                  \
-        }                                                                                            \
-    } while (0)
-
 #define MSVP_MAKE_SHARED9_RET(instance, Type,                                                            \
         arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, errCode)                                   \
         do {                                                                                             \
@@ -530,6 +499,8 @@ public:
     static bool AnalysisEnvReady(std::string &msprofPyPath);
     static int CloudAnalyze(const std::string &jobDir);
     static std::string RealPath(const std::string &path);
+    static int StrToInt(const std::string &numStr);
+    static long long StrToLongLong(const std::string &numStr);
 };
 
 template<class T> class UtilsStringBuilder {

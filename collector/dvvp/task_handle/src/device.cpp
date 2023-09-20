@@ -79,7 +79,7 @@ int Device::Init()
 
 int Device::InitJobAdapter()
 {
-    indexId_ = std::stoi(indexIdStr_);
+    indexId_ = Utils::StrToInt(indexIdStr_);
     status_->dev_id = indexIdStr_;
 
     if (Platform::instance()->PlatformIsSocSide()) {  // soc scene

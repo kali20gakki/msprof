@@ -34,8 +34,6 @@ class StructDecoder:
         "MdcTscpuDecoder": StructFmt.MDC_TSCPU_FMT,
         "HwtsLogBean": StructFmt.HWTS_LOG_FMT,
         "AicPmuBean": StructFmt.AIC_PMU_FMT,
-        "RunTimeApiBean": StructFmt.RUNTIME_API_FMT,
-        "RtsDataBean": StructFmt.RTS_TRACK_FMT,
         "MsprofTxDecoder": StructFmt.MSPROFTX_FMT,
         "GeStepBean": StructFmt.GE_STEP_FMT,
         "GeSessionInfoBean": StructFmt.GE_SESSION_FMT,

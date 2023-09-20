@@ -68,7 +68,7 @@ class CommonConstant:
         return self.__dict__
 
 
-def error(file_name: str, msg: str) -> None:
+def error(file_name: str, msg: Exception) -> None:
     """
     print error message
     """

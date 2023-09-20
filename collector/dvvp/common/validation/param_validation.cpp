@@ -192,7 +192,7 @@ bool ParamValidation::CovertMetricToHex(std::string &events, const size_t mode) 
             return false;
         }
         std::stringstream hexStream;
-        hexStream << std::hex << std::stoi(events);
+        hexStream << std::hex << Utils::StrToInt(events);
         hexStream >> events;
     }
     events = pattern + events;
@@ -347,7 +347,7 @@ bool ParamValidation::CheckFreqIsValid(const std::string &cfgName, const std::st
     std::string errReason = cfgName + " should be in range [" + std::to_string(rangeMin) + "," +
         std::to_string(rangeMax) + "].";
     if (Utils::CheckStringIsNonNegativeIntNum(freq)) {
-        int optRet = std::stoi(freq);
+        int optRet = Utils::StrToInt(freq);
         if ((optRet >= rangeMin) && (optRet <= rangeMax)) {
             return true;
         } else {
@@ -374,7 +374,7 @@ bool ParamValidation::CheckHostSysPidValid(const std::string &hostSysPid) const
     }
     std::string errReason = "host_sys_pid should be a valid integer pid number, min value is 0.";
     if (Utils::CheckStringIsNonNegativeIntNum(hostSysPid)) {
-        auto hostSysRet = std::stoi(hostSysPid);
+        auto hostSysRet = Utils::StrToInt(hostSysPid);
         if (!CheckHostSysPidIsValid(hostSysRet)) {
             MSPROF_LOGE("Argument --host-sys-pid=%d is invalid."
                 "The process cannot be found, please enter a correct host-sys-pid.", hostSysRet);
@@ -762,7 +762,7 @@ bool ParamValidation::CheckDeviceIdIsValid(const std::string &devId) const
         CMD_LOGE("device id(%s) in --sys-devices is invalid.", devId.c_str());
         return false;
     }
-    if (std::stoi(devId) >= 64) { // 64 : devIdMaxNum
+    if (Utils::StrToInt(devId) >= 64) { // 64 : devIdMaxNum
         MSPROF_LOGE("devId(%s) is over limited. The max devId is 64.", devId.c_str());
         CMD_LOGE("device id(%s) in --sys-devices is over limited. The max devId is 64.", devId.c_str());
         return false;
@@ -1391,7 +1391,7 @@ bool ParamValidation::MsprofCheckSysPeriodValid(const std::string &sysPeriodPara
         return false;
     }
     if (Utils::CheckStringIsNonNegativeIntNum(sysPeriodParam)) {
-        auto syspeRet = std::stoi(sysPeriodParam);
+        auto syspeRet = Utils::StrToInt(sysPeriodParam);
         if (!IsValidSleepPeriod(syspeRet)) {
             MSPROF_LOGE("Argument --sys-period: invalid int value: %d."
                 "The max period is 30 days.", syspeRet);
