@@ -236,19 +236,6 @@ private:
     PlatformType platform_;
     std::vector<Args> argsList_;
 };
-
-class MsoprofTask : public analysis::dvvp::common::singleton::Singleton<MsoprofTask> {
-public:
-    MsoprofTask();
-public:
-    bool MsopprofProcess(int argc, CONST_CHAR_PTR argv[]);
-    bool CheckMsopprof(int, CONST_CHAR_PTR argv[], std::vector<std::string> &op_argv);
-    void PrintHelp();
-    int ExecMsopprof(std::string path, std::vector<std::string> argsVec);
-
-private:
-    std::string path_;
-};
 }
 }
 }

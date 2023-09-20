@@ -164,7 +164,6 @@ public:
     int RunModeTasks() override;
     void UpdateOutputDirInfo() override;
 };
-
 }
 }
 }
