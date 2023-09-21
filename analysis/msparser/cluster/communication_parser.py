@@ -129,6 +129,16 @@ class CommunicationParser(MetaParser):
                 HcclAnalysisTool.analyze_bandwidth_info(op_bandwidth_dict, transport_type)
         return op_bandwidth_dict
 
+    @staticmethod
+    def get_main_plane_id(events: list) -> int:
+        """
+        hccl数据取主流plane_id，适配ffts+模式; 后续随hccl侧算法变动，可能需要更改
+        """
+        plane_id_set = sorted(set([event.plane_id for event in events if event.plane_id != -1]))
+        if len(plane_id_set) == 1:
+            return plane_id_set[0]
+        return 0 if any([event.transport_type == StrConstant.RDMA for event in events if event.plane_id == 0]) else 1
+
     def run(self: any) -> dict:
         self.parse()
         self.combine()
@@ -153,8 +163,9 @@ class CommunicationParser(MetaParser):
                 raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
             events = op_events.get(rank_id)
             # only choose main stream for op time analysis parser
+            main_plane_id = self.get_main_plane_id(events)
             main_events = \
-                [event for event in events if event.plane_id == min(events, key=lambda x: x.plane_id).plane_id]
+                [event for event in events if event.plane_id == main_plane_id]
             if main_events:
                 self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO] = self.op_time_parser(main_events)
                 self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO][OpAnalysisType.START_TIME] = \
