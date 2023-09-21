@@ -188,3 +188,15 @@ class TestFftsPmuCalculate(TestCase):
             self.assertEqual(check._get_current_freq(1500), 1600000000)
             self.assertEqual(check._get_current_freq(2200), 1500000000)
             self.assertEqual(check._get_current_freq(4600), 800000000)
+
+    def test_calculate_total_time_when_get_total_cycle_then_return_total_time(self):
+        data = [1, 2, 3, 4, 5, 6, 7, 89, 9, 1, 4, 5, 6, 789, 9, 5, 5, 5, 6, 7, 9, 54, 1, 55, 5]
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculate._is_not_mix_main_core', side_effect=[True, False]), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculate._get_current_freq', return_value=40), \
+                mock.patch(NAMESPACE + '.Utils.cal_total_time', return_value=100):
+            check = FftsPmuCalculate(self.file_list, CONFIG)
+            check._core_num_dict = {"aic": 20}
+            check._freq = 1800
+            check.freq_data = [[1000, 1800], [2000, 800], [4000, 1800]]
+            self.assertEqual(check.calculate_total_time(FftsPmuBean(data), 200, (20, 40)), 100)

@@ -157,8 +157,9 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
             aic_pmu_value, aiv_pmu_value, aic_total_cycle, aiv_total_cycle = self.get_total_cycle_info(data, task_type)
             block_dim = self._get_current_block('block_dim', data)
             mix_block_dim = self._get_current_block('mix_block_dim', data)
-            aic_total_time = self.calculate_total_time(data, block_dim, mix_block_dim)
-            aiv_total_time = self.calculate_total_time(data, block_dim, mix_block_dim, data_type='aiv')
+            aic_total_time = self.calculate_total_time(data, aic_total_cycle, (block_dim, mix_block_dim))
+            aiv_total_time = self.calculate_total_time(data, aiv_total_cycle,
+                                                       (block_dim, mix_block_dim), data_type='aiv')
             aic_calculator = CalculateAiCoreData(self._project_path)
             aic_pmu_value = aic_calculator.add_pipe_time(
                 aic_pmu_value, aic_total_time, self._sample_json.get('ai_core_metrics'))
@@ -194,7 +195,7 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
                 pmu_events = AicPmuUtils.get_pmu_events(self._sample_json.get('ai_core_profiling_events'))
             block_dim = self._get_current_block('block_dim', data)
             mix_block_dim = self._get_current_block('mix_block_dim', data)
-            total_time = self.calculate_total_time(data, block_dim, mix_block_dim)
+            total_time = self.calculate_total_time(data, data.total_cycle, (block_dim, mix_block_dim))
             aic_calculator = CalculateAiCoreData(self._project_path)
             _, pmu_list = aic_calculator.compute_ai_core_data(
                 Utils.generator_to_list(pmu_events), pmu_list, data.total_cycle, data.pmu_list)
@@ -206,14 +207,16 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
             ]
             pmu_data_list.append(pmu_data)
 
-    def calculate_total_time(self: any, data: any, block_dim: int, mix_block_dim: int, data_type: str = 'aic') -> float:
+    def calculate_total_time(self: any, data: any, total_cycle: int,
+                             block_dim_tuple: tuple, data_type: str = 'aic') -> float:
         core_num = self._core_num_dict.get(data_type)
+        block_dim = block_dim_tuple[0]
         if self._is_not_mix_main_core(data, data_type):
-            block_dim = mix_block_dim
+            block_dim = block_dim_tuple[1]
         freq = self._freq
         if self.freq_data and len(data.time_list) >= 2:
             freq = self._get_current_freq(data.time_list[1])
-        total_time = Utils.cal_total_time(data.total_cycle, int(freq), block_dim, core_num)
+        total_time = Utils.cal_total_time(total_cycle, int(freq), block_dim, core_num)
         return total_time
 
     def get_total_cycle_info(self, data: any, task_type: int) -> tuple:
