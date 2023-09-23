@@ -132,7 +132,8 @@ class CommunicationParser(MetaParser):
     @staticmethod
     def get_main_plane_id(events: list) -> int:
         """
-        hccl数据取主流plane_id，适配ffts+模式; 后续随hccl侧算法变动，可能需要更改
+        hccl data use master's plane_id for ffts+;
+        Should be changed with hccl's algorithms!
         """
         plane_id_set = sorted(set([event.plane_id for event in events if event.plane_id != -1]))
         if len(plane_id_set) == 1:
