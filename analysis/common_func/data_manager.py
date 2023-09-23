@@ -46,14 +46,14 @@ class DataManager:
 
         config_dict.setdefault('mac_ratio_index', None)
         if "mac_ratio" in headers or "aic_mac_ratio" in headers:
-            config_dict['mac_ratio_index'] = headers.index("mac_ratio") if "mac_ratio" in headers else \
-                headers.index("aic_mac_ratio")
+            config_dict['mac_ratio_index'] = \
+                headers.index("mac_ratio") if "mac_ratio" in headers else headers.index("aic_mac_ratio")
         config_dict.setdefault('total_cycles_index', None)
         if "total_cycles" in headers or "aic_total_cycles" in headers:
-            config_dict['total_cycles_index'] = headers.index("total_cycles") if "total_cycles" in headers else \
-                headers.index("aic_total_cycles")
-        config_dict['task_duration_index'] = headers.index("Task Duration(us)") if "Task Duration(us)" in \
-                                                                                   headers else None
+            config_dict['total_cycles_index'] = \
+                headers.index("total_cycles") if "total_cycles" in headers else headers.index("aic_total_cycles")
+        config_dict['task_duration_index'] = \
+            headers.index("Task Duration(us)") if "Task Duration(us)" in headers else None
         if config_dict.get('task_duration_index') and config_dict.get('total_cycles_index') and \
                 config_dict.get("mac_ratio_index"):
             headers.append("cube_utilization(%)")
