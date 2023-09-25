@@ -174,3 +174,12 @@ class PathManager:
         get query result path in result directory
         """
         return cls.get_path_under_result_dir(result_dir, cls.ANALYZE, file_name)
+
+    @classmethod
+    def get_device_count(cls: any, result_dir: str) -> int:
+        device_count = 0
+        file_list = os.listdir(os.path.dirname(result_dir))
+        for file_name in file_list:
+            if file_name.startswith("device_"):
+                device_count += 1
+        return device_count

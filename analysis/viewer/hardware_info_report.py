@@ -155,7 +155,8 @@ def _get_llc_capacity_data(curs: any, project_path: str, device_id: str, types: 
     core2cpu = cal_core2cpu(project_path, device_id)
     dsid_name = core2cpu[types]
     dsid_name = Utils.generator_to_list(
-        f"sum({i})*{NumberConstant.LLC_CAPACITY}/({NumberConstant.BYTES_TO_KB})" for i in dsid_name)
+        f"sum({i})*{NumberConstant.LLC_CAPACITY}/({NumberConstant.BYTES_TO_KB})"
+        for i in dsid_name)
     sql = "select {column} from LLCDsidData " \
           "where device_id = ?".format(column=",".join(dsid_name))
     dsid_data = DBManager.fetch_all_data(curs, sql, (device_id,))

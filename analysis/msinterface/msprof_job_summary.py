@@ -11,10 +11,12 @@ from common_func.data_check_manager import DataCheckManager
 from common_func.file_manager import check_path_valid
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.file_name_manager import get_msprof_json_compiles
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_common import get_path_dir
 from common_func.utils import Utils
 from msinterface.msprof_data_storage import MsprofDataStorage
+from msinterface.msprof_output_summary import MsprofOutputSummary
 from viewer.association.torch_connect_acl_npu import TorchToAclNpu
 
 
@@ -49,7 +51,8 @@ class MsprofJobSummary:
         if not os.path.exists(timeline_path):
             return msprof_json_data
         file_list = os.listdir(timeline_path)
-        for file_name in file_list:
+        for file_name in MsprofOutputSummary.get_newest_file_list(
+                file_list, StrConstant.FILE_SUFFIX_JSON):
             json_result = get_file_name_pattern_match(file_name, *(get_msprof_json_compiles()))
             if json_result:
                 msprof_json_data.extend(Utils.get_json_data(os.path.join(timeline_path, file_name)))
