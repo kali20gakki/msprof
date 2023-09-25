@@ -1,15 +1,15 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
-
 import os
 import shutil
 
 from analyzer.communication_analyzer import CommunicationAnalyzer
 from analyzer.communication_matrix_analyzer import CommunicationMatrixAnalyzer
-from common_func.ms_constant.str_constant import StrConstant
+from common_func.data_check_manager import DataCheckManager
 from common_func.msprof_common import get_path_dir
 from common_func.msvp_common import check_dir_writable
+from common_func.common import warn
 
 
 class AnalyzeCommand:
@@ -17,12 +17,17 @@ class AnalyzeCommand:
     The class for handle analyze command.
     """
 
+    FILE_NAME = os.path.basename(__file__)
+
     def __init__(self: any, args: any) -> None:
         self.collection_path = os.path.realpath(args.collection_path)
         self.rule = args.rule
         self.clear_mode = getattr(args, "clear_mode", False)
 
     def process(self: any) -> None:
+        if DataCheckManager.check_prof_level0(self.collection_path):
+            warn(self.FILE_NAME, "Analyze will do nothing in prof level 0.")
+            return
         analyze_handler = {
             'communication': CommunicationAnalyzer,
             'communication_matrix': CommunicationMatrixAnalyzer

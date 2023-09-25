@@ -1364,6 +1364,10 @@ int AnalyzeMode::RunModeTasks()
         MSPROF_LOGE("[Analyze Mode] Invalid params!");
         return PROFILING_FAILED;
     }
+    if (params_->profLevel == MSVP_PROF_L0) {
+        MSPROF_LOGW("[Analyze Mode] Analyze will do nothing in prof level 0.");
+        return PROFILING_SUCCESS;
+    }
     if (CheckAnalysisEnv() != PROFILING_SUCCESS) {
         MSPROF_LOGW("[Analyze Mode] Analysis environment is not OK, parse will not start.");
         return PROFILING_FAILED;

@@ -89,6 +89,7 @@ void PlatformAdapterInterface::SetParamsForStorageLimit(struct CommonParams &com
 void PlatformAdapterInterface::SetParamsForTaskTimeL0()
 {
     bool ret = false;
+    params_->profLevel = MSVP_PROF_L0;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_KEYPOINT) != supportSwitch_.end()) {
         params_->ts_keypoint = MSVP_PROF_ON;
         params_->dataTypeConfig |= PROF_KEYPOINT_TRACE | PROF_KEYPOINT_TRACE_HELPER;
@@ -133,6 +134,7 @@ void PlatformAdapterInterface::SetParamsForTaskTimeL1()
 {
     SetParamsForTaskTimeL0();
     params_->dataTypeConfig |= PROF_TASK_TIME_L1;
+    params_->profLevel = MSVP_PROF_L1;
     SetParamsForGEL0();
 }
 
