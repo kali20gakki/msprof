@@ -72,6 +72,7 @@ class NanoDbgParser(DataParser, MsMultiProcess):
     INVALID_BATCH_ID = 0
     INVALID_OP_STATE = "0"
     DBG_NAME_LEN = 4
+    OP_FLAG = "NO"
 
     # 0x5a5a5a5a is 1515870810
     MAGIC_NUM = 1515870810
@@ -261,7 +262,7 @@ class NanoDbgParser(DataParser, MsMultiProcess):
                 data.get("input_format", Constant.NA), data.get("input_data_type", Constant.NA),
                 data.get("input_shape", Constant.NA), data.get("output_format", Constant.NA),
                 data.get("output_data_type", Constant.NA), data.get("output_shape", Constant.NA),
-                self.INVALID_DEVICE_ID, self.INVALID_CONTEXT_ID
+                self.INVALID_DEVICE_ID, self.INVALID_CONTEXT_ID, self.OP_FLAG
             ] for data in data_list
         ]
 

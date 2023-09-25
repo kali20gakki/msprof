@@ -199,4 +199,5 @@ class TestFftsPmuCalculate(TestCase):
             check._core_num_dict = {"aic": 20}
             check._freq = 1800
             check.freq_data = [[1000, 1800], [2000, 800], [4000, 1800]]
-            self.assertEqual(check.calculate_total_time(FftsPmuBean(data), 200, (20, 40)), 100)
+            block_dim_dict = {False: 20, True: 40}
+            self.assertEqual(check.calculate_total_time(FftsPmuBean(data), 200, block_dim_dict), 100)
