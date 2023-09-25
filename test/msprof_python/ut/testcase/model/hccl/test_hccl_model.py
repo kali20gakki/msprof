@@ -203,12 +203,12 @@ class TestHCCLModel(TestDirCRBaseModel):
 
     def test_get_task_time_sql(self):
         with mock.patch(NAMESPACE + '.DBManager.fetch_all_data'):
-            check = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
+            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
             check.get_task_time_sql()
 
     def test_get_hccl_op_data_by_group_sql(self):
         with mock.patch(NAMESPACE + '.DBManager.fetch_all_data'):
-            check = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
+            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
             check.get_hccl_op_data_by_group()
 
     def test_get_hccl_op_time_section_sql(self):
@@ -218,11 +218,11 @@ class TestHCCLModel(TestDirCRBaseModel):
 
     def test_create_table_by_name_should_drop_table_when_tabel_exist(self):
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
-            check = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
+            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
             check.create_table_by_name(table_name='test_name')
 
     def test_create_table_by_name_should_not_drop_table_when_tabel_not_exist(self):
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False), \
                 mock.patch(NAMESPACE + '.DBManager.sql_create_general_table'):
-            check = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
+            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
             check.create_table_by_name(table_name='test_name')

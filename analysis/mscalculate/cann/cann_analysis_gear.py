@@ -507,7 +507,7 @@ class TaskGear(CANNGear):
                 hccl_info_dto.plane_id, task_track_dto.timestamp, hccl_info_dto.duration_estimated,
                 task_track_dto.stream_id, task_track_dto.task_id, context_id,
                 task_track_dto.batch_id, task_track_dto.device_id,
-                hccl_info_dto.to_args_json(task_track_dto.stream_id, task_track_dto.task_id)
+                hccl_info_dto.to_args_json(task_track_dto.stream_id, task_track_dto.task_id, hccl_event.struct_type)
             ]
         self.hccl_task_info.extend(hccl_tasks)
 
