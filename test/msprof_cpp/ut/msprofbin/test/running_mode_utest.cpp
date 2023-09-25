@@ -1099,6 +1099,7 @@ TEST_F(RUNNING_MODE_UTEST, AnalyzeModeRunModeTasks)
     Collector::Dvvp::Msprofbin::AnalyzeMode rMode("analyze", nullptr);
     EXPECT_EQ(PROFILING_FAILED, rMode.RunModeTasks());
     rMode.params_ = params;
+    rMode.params_->profLevel = MSVP_PROF_L1;
     MOCKER_CPP(&SystemMode::CheckAnalysisEnv)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
@@ -1109,6 +1110,8 @@ TEST_F(RUNNING_MODE_UTEST, AnalyzeModeRunModeTasks)
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(PROFILING_FAILED, rMode.RunModeTasks());
+    EXPECT_EQ(PROFILING_SUCCESS, rMode.RunModeTasks());
+    rMode.params_->profLevel = MSVP_PROF_L0;
     EXPECT_EQ(PROFILING_SUCCESS, rMode.RunModeTasks());
 }
 
