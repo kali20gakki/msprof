@@ -689,6 +689,7 @@ class TablesConfig(MetaConfig):
             ('task_type', 'TEXT, null'),
             ('op_type', 'TEXT, null'),
             ('connection_id', 'INTEGER, null'),
+            ('is_master', 'TEXT, null'),
             ('args', 'TEXT, null')
         ],
         'HCCLOPMap': [
