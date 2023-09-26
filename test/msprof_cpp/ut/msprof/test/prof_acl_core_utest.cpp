@@ -930,7 +930,12 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofSetDeviceCallbackImpl)
     data.chipId = 0;
     data.deviceId = 0;
     data.isOpen = false;
-    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data, 0));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
+        sizeof(ProfSetDevPara) - 1));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl(nullptr,
+        sizeof(ProfSetDevPara)));
+    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
+        sizeof(ProfSetDevPara)));
 
     data.isOpen = true;
     MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsCmdMode)
@@ -950,11 +955,16 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofSetDeviceCallbackImpl)
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
     
-    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data, 0));
-    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data, 0));
-    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data, 0));
-    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data, 0));
-    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data, 0));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
+        sizeof(ProfSetDevPara)));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
+        sizeof(ProfSetDevPara)));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
+        sizeof(ProfSetDevPara)));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
+        sizeof(ProfSetDevPara)));
+    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
+        sizeof(ProfSetDevPara)));
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, mode_protect) {

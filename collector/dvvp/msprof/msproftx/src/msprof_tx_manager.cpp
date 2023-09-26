@@ -325,6 +325,12 @@ int MsprofTxManager::RangeStart(ACL_PROF_STAMP_PTR stamp, uint32_t *rangeId) con
             std::vector<std::string>({"nullptr", "stamp", "stamp can not be nullptr when RangeStart"}));
         return PROFILING_FAILED;
     }
+    if (rangeId == nullptr) {
+        MSPROF_LOGE("[RangeStart] rangeId pointer is nullptr!");
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "rangeId", "rangeId can not be nullptr when RangeStart"}));
+        return PROFILING_FAILED;
+    }
     auto &stampInfo = stamp->stampInfo;
     stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
     *rangeId = stampPool_->GetIdByStamp(stamp);

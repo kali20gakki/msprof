@@ -202,6 +202,10 @@ int MsprofCallbackHandler::GetDataMaxLen(VOID_PTR data, uint32_t len)
         MSPROF_LOGE("reporter is not started, module: %s", module_.c_str());
         return PROFILING_FAILED;
     }
+    if (data == nullptr) {
+        MSPROF_LOGE("data pointer for get data max len is null, module: %s", module_.c_str());
+        return PROFILING_FAILED;
+    }
     if (len < sizeof(uint32_t)) {
         MSPROF_LOGE("len:%d is so less", len);
         return PROFILING_FAILED;

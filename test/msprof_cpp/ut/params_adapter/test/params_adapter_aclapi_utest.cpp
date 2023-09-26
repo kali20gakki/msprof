@@ -149,3 +149,45 @@ TEST_F(ParamsAdapterAclapiUtest, CheckHostSysAclApiValid)
     cfg = "cpu,mem";
     EXPECT_EQ(true, AclApiParamAdapterMgr->CheckHostSysAclApiValid(cfg));
 }
+
+TEST_F(ParamsAdapterAclapiUtest, GetParamFromInputCfg)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapterAclApi> AclApiParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, ParamsAdapterAclApi);
+    ProfConfig cfg;
+    std::array<std::string, ACL_PROF_ARGS_MAX> argsArr;
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    EXPECT_EQ(PROFILING_FAILED, AclApiParamAdapterMgr->GetParamFromInputCfg(nullptr, argsArr, params));
+    EXPECT_EQ(PROFILING_FAILED, AclApiParamAdapterMgr->GetParamFromInputCfg(&cfg, argsArr, nullptr));
+    params->result_dir = "/tmp/test";
+    MOCKER_CPP(&ParamsAdapterAclApi::ProfCfgToContainer)
+        .stubs();
+    MOCKER_CPP(&ParamsAdapterAclApi::Init)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ParamsAdapter::PlatformAdapterInit)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ParamsAdapterAclApi::ParamsCheckAclApi)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ParamsAdapter::ComCfgCheck)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ParamsAdapter::TransToParam)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_FAILED, AclApiParamAdapterMgr->GetParamFromInputCfg(&cfg, argsArr, params));
+    EXPECT_EQ(PROFILING_FAILED, AclApiParamAdapterMgr->GetParamFromInputCfg(&cfg, argsArr, params));
+    EXPECT_EQ(PROFILING_FAILED, AclApiParamAdapterMgr->GetParamFromInputCfg(&cfg, argsArr, params));
+    EXPECT_EQ(PROFILING_FAILED, AclApiParamAdapterMgr->GetParamFromInputCfg(&cfg, argsArr, params));
+    EXPECT_EQ(PROFILING_FAILED, AclApiParamAdapterMgr->GetParamFromInputCfg(&cfg, argsArr, params));
+    EXPECT_EQ(PROFILING_SUCCESS, AclApiParamAdapterMgr->GetParamFromInputCfg(&cfg, argsArr, params));
+}

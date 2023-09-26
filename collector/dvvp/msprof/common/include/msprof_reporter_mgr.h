@@ -24,11 +24,12 @@ const std::map<uint16_t, std::map<uint32_t, std::string>> DEFAULT_TYPE_INFO = {
         {MSPROF_REPORT_NODE_FUSION_OP_INFO_TYPE, "fusion_op_info"},
         {MSPROF_REPORT_NODE_CONTEXT_ID_INFO_TYPE, "context_id_info"},
         {MSPROF_REPORT_NODE_LAUNCH_TYPE, "launch"},
-        {MSPROF_REPORT_NODE_TASK_MEMORY_TYPE, "task_memory_info"},
-        {MSPROF_REPORT_NODE_LOGIC_STREAM_TYPE, "logic_stream_info"}
+        {MSPROF_REPORT_NODE_TASK_MEMORY_TYPE, "task_memory_info"}
     }},
     { MSPROF_REPORT_MODEL_LEVEL, {
-        {MSPROF_REPORT_MODEL_GRAPH_ID_MAP_TYPE, "graph_id_map"}
+        {MSPROF_REPORT_MODEL_GRAPH_ID_MAP_TYPE, "graph_id_map"},
+        {MSPROF_REPORT_MODEL_EXEOM_TYPE, "model_exeom"},
+        {MSPROF_REPORT_MODEL_LOGIC_STREAM_TYPE, "logic_stream_info"}
     }},
     { MSPROF_REPORT_HCCL_NODE_LEVEL, {
         {MSPROF_REPORT_HCCL_MASTER_TYPE, "master"},
