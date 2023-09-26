@@ -466,7 +466,7 @@ class ReportOPCounter:
     def _get_op_report_sql_operator_scene() -> str:
         sql = "select op_type, core_type, occurrences, total_time/{NS_TO_US}, " \
               "min/{NS_TO_US}, avg/{NS_TO_US}, max/{NS_TO_US}, ratio from {0} " \
-              "where op_type != 'N/A' order by total_time desc" \
+              "where op_type != 'N/A' and core_type!=? and core_type!=? order by total_time desc" \
              .format(CommonConstant.OP_REPORT_TABLE, NS_TO_US=NumberConstant.NS_TO_US)
         return sql
 
@@ -474,7 +474,7 @@ class ReportOPCounter:
     def _get_op_report_sql_network_scene() -> str:
         sql = "select model_name, op_type, core_type, occurrences, total_time/{NS_TO_US}, " \
               "min/{NS_TO_US}, avg/{NS_TO_US}, max/{NS_TO_US}, ratio from {0} " \
-              "where op_type != 'N/A' order by model_name asc, " \
+              "where op_type != 'N/A' and core_type!=? and core_type!=? order by model_name asc, " \
               "total_time desc".format(CommonConstant.OP_REPORT_TABLE, NS_TO_US=NumberConstant.NS_TO_US)
         return sql
 
@@ -493,7 +493,10 @@ class ReportOPCounter:
         if ProfilingScene().is_operator():
             sql = cls._get_op_report_sql_operator_scene()
             cls._clear_unused_headers(headers)
-        data = DBManager.fetch_all_data(curs, sql)
+        filter_params = (
+            Constant.TASK_TYPE_WRITE_BACK, Constant.TASK_TYPE_INVALID
+        )
+        data = DBManager.fetch_all_data(curs, sql, filter_params)
         DBManager.destroy_db_connect(conn, curs)
         return headers, data, len(data)
 
