@@ -132,3 +132,51 @@ TEST_F(ParamsAdapterAcljsonUtest, CheckHostSysAclJsonValid)
     cfg = "cpu,mem";
     EXPECT_EQ(true, AclJsonParamAdapterMgr->CheckHostSysAclJsonValid(cfg));
 }
+
+TEST_F(ParamsAdapterAcljsonUtest, GetParamFromInputCfg)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapterAclJson> AclJsonParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, ParamsAdapterAclJson);
+    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfAclConfig> inputCfgPb;
+    MSVP_MAKE_SHARED0_VOID(inputCfgPb, analysis::dvvp::proto::ProfAclConfig);
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    EXPECT_EQ(PROFILING_FAILED, AclJsonParamAdapterMgr->GetParamFromInputCfg(nullptr, params));
+    EXPECT_EQ(PROFILING_FAILED, AclJsonParamAdapterMgr->GetParamFromInputCfg(inputCfgPb, nullptr));
+    MOCKER_CPP(&ParamsAdapterAclJson::Init)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ParamsAdapterAclJson::CheckInstrAndTaskParamBothSet)
+        .stubs()
+        .will(returnValue(true))
+        .then(returnValue(false));
+    MOCKER_CPP(&ParamsAdapterAclJson::GenAclJsonContainer)
+        .stubs();
+    MOCKER_CPP(&ParamsAdapter::PlatformAdapterInit)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ParamsAdapterAclJson::ParamsCheckAclJson)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ParamsAdapter::ComCfgCheck)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ParamsAdapterAclJson::SetAclJsonContainerDefaultValue)
+        .stubs();
+    MOCKER_CPP(&ParamsAdapter::TransToParam)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_FAILED, AclJsonParamAdapterMgr->GetParamFromInputCfg(inputCfgPb, params));
+    EXPECT_EQ(PROFILING_FAILED, AclJsonParamAdapterMgr->GetParamFromInputCfg(inputCfgPb, params));
+    EXPECT_EQ(PROFILING_FAILED, AclJsonParamAdapterMgr->GetParamFromInputCfg(inputCfgPb, params));
+    EXPECT_EQ(PROFILING_FAILED, AclJsonParamAdapterMgr->GetParamFromInputCfg(inputCfgPb, params));
+    EXPECT_EQ(PROFILING_FAILED, AclJsonParamAdapterMgr->GetParamFromInputCfg(inputCfgPb, params));
+    EXPECT_EQ(PROFILING_FAILED, AclJsonParamAdapterMgr->GetParamFromInputCfg(inputCfgPb, params));
+    EXPECT_EQ(PROFILING_SUCCESS, AclJsonParamAdapterMgr->GetParamFromInputCfg(inputCfgPb, params));
+}

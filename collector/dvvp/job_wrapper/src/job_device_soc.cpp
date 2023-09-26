@@ -122,6 +122,9 @@ int JobDeviceSoc::StartProf(SHARED_PTR_ALIA<analysis::dvvp::message::ProfilePara
 
 int JobDeviceSoc::ParsePmuConfig(SHARED_PTR_ALIA<PMUEventsConfig> cfg)
 {
+    if (cfg == nullptr) {
+        return PROFILING_FAILED;
+    }
     int ret = ParseTsCpuConfig(cfg);
     if (ret != PROFILING_SUCCESS) {
         return ret;

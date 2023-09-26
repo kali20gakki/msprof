@@ -215,6 +215,14 @@ int ParamsAdapterAclApi::GetParamFromInputCfg(const ProfConfig *apiCfg,
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
+    if (!params) {
+        MSPROF_LOGE("memory for params is empty.");
+        return PROFILING_FAILED;
+    }
+    if (!apiCfg) {
+        MSPROF_LOGE("memory for aclapi config is empty.");
+        return PROFILING_FAILED;
+    }
     params_ = params;
     int ret = Init();
     if (ret != PROFILING_SUCCESS) {
