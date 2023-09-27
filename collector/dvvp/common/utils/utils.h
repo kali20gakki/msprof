@@ -499,8 +499,8 @@ public:
     static bool AnalysisEnvReady(std::string &msprofPyPath);
     static int CloudAnalyze(const std::string &jobDir);
     static std::string RealPath(const std::string &path);
-    static int StrToInt(const std::string &numStr);
-    static long long StrToLongLong(const std::string &numStr);
+    static int StrToInt(int &dest, const std::string &numStr);
+    static int StrToLongLong(long long &dest, const std::string &numStr);
 };
 
 template<class T> class UtilsStringBuilder {
