@@ -270,6 +270,13 @@ def byte_per_us2_mb_pers(byte_perus: any) -> any:
     return round(byte_perus * Constant.BYTE_US_TO_MB_S, NumberConstant.DECIMAL_ACCURACY)
 
 
+def ns2_us(ns: any) -> any:
+    """
+    transform ns to us
+    """
+    return round(ns / NumberConstant.NS_TO_US, NumberConstant.DECIMAL_ACCURACY)
+
+
 def init_log(output_path: str) -> None:
     """
     create data and corresponding directories
