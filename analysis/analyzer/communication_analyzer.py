@@ -18,6 +18,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
 from common_func.msprof_common import prepare_for_analyze
+from common_func.msprof_common import prepare_log
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import create_json_for_dict
 from common_func.path_manager import PathManager
@@ -137,13 +138,14 @@ class CommunicationAnalyzer:
                 else:
                     self._process_sub_dirs(sub_dir, is_cluster=True)
 
-    def _communication_analyze(self, sub_path):
-        LoadInfoManager.load_info(sub_path)
+    def _communication_analyze(self, sub_path: str) -> None:
         # communication analyzer
+        if not os.path.exists(PathManager.get_db_path(sub_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
+            prepare_log(PathManager.get_analyze_dir(os.path.join(sub_path, '..')))
+            logging.warning('There is no hccl data to analyze communication. '
+                            'Please export first or check whether single device.')
+            return
+        LoadInfoManager.load_info(sub_path)
         prepare_for_analyze(os.path.join(sub_path, '..'))
-        if os.path.exists(PathManager.get_db_path(sub_path, DBNameConstant.DB_HCCL)):
-            self._generate_output(sub_path)
-        else:
-            host_dir = PathManager.get_host_result_dir(sub_path)
-            logging.warning('There is not hccl.db in %s, '
-                            'maybe this data was export in clear mode or incomplete', host_dir)
+        self._generate_output(sub_path)
+

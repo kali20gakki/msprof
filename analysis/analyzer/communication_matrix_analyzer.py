@@ -17,6 +17,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
 from common_func.msprof_common import prepare_for_analyze
+from common_func.msprof_common import prepare_log
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import create_json_for_dict
 from common_func.path_manager import PathManager
@@ -138,9 +139,10 @@ class CommunicationMatrixAnalyzer:
 
     def _communication_matrix_analyze(self, sub_path: str) -> None:
         """ communication matrix analyzer"""
+        if not os.path.exists(PathManager.get_db_path(sub_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
+            prepare_log(PathManager.get_analyze_dir(os.path.join(sub_path, '..')))
+            logging.warning('There is no hccl data to analyze communication matrix. '
+                            'Please export first or check whether single device.')
+            return
         prepare_for_analyze(os.path.join(sub_path, '..'))
-        if os.path.exists(PathManager.get_db_path(sub_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
-            self._generate_output(sub_path)
-        else:
-            logging.warning('There is not hccl.db in %s, '
-                            'maybe this data was export in clear mode or incomplete', sub_path)
+        self._generate_output(sub_path)
