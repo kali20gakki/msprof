@@ -11,7 +11,7 @@ from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.batch_counter import BatchCounter
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
-from common_func.file_manager import FileManager
+from common_func.file_manager import FileManager, FileOpen
 from common_func.iter_recorder import IterRecorder
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
@@ -60,8 +60,8 @@ class ParseAiCpuBinData(MsMultiProcess):
         struct_nums = file_size // StructFmt.AI_CPU_FMT_SIZE
         offset_calculator = OffsetCalculator(self._file_list, StructFmt.AI_CPU_FMT_SIZE,
                                              self.project_path)
-        with open(ai_cpu_file, 'rb') as cpu_f:
-            cpu_f = offset_calculator.pre_process(cpu_f, file_size)
+        with FileOpen(ai_cpu_file, 'rb') as cpu_f:
+            cpu_f = offset_calculator.pre_process(cpu_f.file_reader, file_size)
         for index in range(struct_nums):
             ai_cpu = AiCpuData().ai_cpu_decode(
                 cpu_f[index * StructFmt.AI_CPU_FMT_SIZE: (index + 1) * StructFmt.AI_CPU_FMT_SIZE])

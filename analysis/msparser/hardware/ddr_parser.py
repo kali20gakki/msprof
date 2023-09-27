@@ -8,7 +8,7 @@ import struct
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
-from common_func.file_manager import FileManager
+from common_func.file_manager import FileManager, FileOpen
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_multi_process import MsMultiProcess
@@ -51,11 +51,9 @@ class ParsingDDRData(MsMultiProcess):
         parsing ddr data and insert into ddr.db
         """
         ddr_file = os.path.join(self.sample_config.get("result_dir", ""), 'data', file_name)
-        check_file_readable(ddr_file)
-        _file_size = os.path.getsize(ddr_file)
         try:
-            with open(ddr_file, 'rb') as ddr_f:
-                ddr_data = self.calculate.pre_process(ddr_f, _file_size)
+            with FileOpen(ddr_file, 'rb') as ddr_f:
+                ddr_data = self.calculate.pre_process(ddr_f.file_reader, os.path.getsize(ddr_file))
                 struct_nums = len(ddr_data) // StructFmt.DDR_FMT_SIZE
                 struct_data = struct.unpack(StructFmt.BYTE_ORDER_CHAR + StructFmt.DDR_FMT * struct_nums,
                                             ddr_data)

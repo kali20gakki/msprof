@@ -4,7 +4,7 @@
 
 import sqlite3
 
-from common_func.common import pre_check_sample
+from common_func.config_mgr import ConfigMgr
 from common_func.db_manager import DBManager
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import read_cpu_cfg
@@ -76,7 +76,7 @@ def get_ts_pmu_events(project_path: str, db_name: str, table_name: str, headers:
     conn, curs = DBManager.check_connect_db(project_path, db_name)
     if not (conn and curs):
         return MsvpConstant.MSVP_EMPTY_DATA
-    sample_config = pre_check_sample(project_path, 'ts_cpu_profiling_events')
+    sample_config = ConfigMgr.pre_check_sample(project_path, 'ts_cpu_profiling_events')
     try:
         if not sample_config or not DBManager.judge_table_exist(curs, table_name):
             return MsvpConstant.MSVP_EMPTY_DATA

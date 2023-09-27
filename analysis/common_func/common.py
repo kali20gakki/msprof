@@ -3,7 +3,6 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
 
 import ctypes
-import json
 import logging
 import os
 import platform
@@ -106,25 +105,6 @@ def print_msg(*args: any, **kwargs: any) -> None:
     execute print
     """
     print(*args, **kwargs)
-
-
-def generate_config(sample_path: str) -> dict:
-    """
-    generate configuration
-    """
-    if not os.path.exists(sample_path):
-        return {}
-    if os.path.splitext(sample_path)[-1] == ".json":
-        try:
-            with open(sample_path, "r") as file_reader:
-                tmp = file_reader.readline(Constant.MAX_READ_LINE_BYTES)
-            return json.loads(tmp.strip("\n"))
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-            return {}
-        finally:
-            pass
-    return {}
 
 
 def check_exist_zip(file_path: str) -> bool:
@@ -230,27 +210,6 @@ def get_platform_info() -> tuple:
     """
     info = platform.uname()
     return info[0], info[4]
-
-
-def pre_check_sample(result_dir: str, event: any) -> dict:
-    """
-    pre check sample configuration file
-    """
-    sample_path = os.path.join(result_dir, CommonConstant.SAMPLE_JSON)
-    sample_config = generate_config(sample_path)
-    if not sample_config:
-        error(CommonConstant.FILE_NAME, 'Failed to generate sample configuration table.')
-        return {}
-    profiling_events = sample_config.get(event, '')
-    for i in profiling_events.split(','):
-        try:
-            int(i, Constant.HEX_NUMBER)
-        except ValueError:
-            error(CommonConstant.FILE_NAME, 'Failed to verify configuration file parameters.')
-            return {}
-        finally:
-            pass
-    return sample_config
 
 
 def get_data_dir_sorted_files(data_path: str) -> list:

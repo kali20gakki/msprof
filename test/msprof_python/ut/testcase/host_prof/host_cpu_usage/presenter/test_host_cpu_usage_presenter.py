@@ -54,6 +54,7 @@ class TestHostCpuUsagePresenter(unittest.TestCase):
         with mock.patch('host_prof.host_cpu_usage.model.host_cpu_usage.'
                         'HostCpuUsage.insert_cpu_info_data'), \
                 mock.patch('builtins.open', mock.mock_open(read_data=data)), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.info'):
             check = HostCpuUsagePresenter(self.result_dir, self.file_name)
             InfoConfReader()._info_json = {"cpuNums": 8, "sysClockFreq": 100}
@@ -62,6 +63,7 @@ class TestHostCpuUsagePresenter(unittest.TestCase):
             check.parse_prof_data()
         self.assertEqual(check.cpu_info, [8, 100])
         with mock.patch('builtins.open', side_effect=ValueError), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.error'):
             check = HostCpuUsagePresenter(self.result_dir, self.file_name)
             check.parse_prof_data()

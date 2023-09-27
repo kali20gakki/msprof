@@ -35,6 +35,7 @@ class TestHostMemUsagePresenter(unittest.TestCase):
         res[1].execute("create table if not exists MemUsage(start_time text,end_time text,"
                        "usage REAL)")
         with mock.patch('builtins.open', mock.mock_open(read_data=data)), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.info'):
             check = HostMemUsagePresenter(self.result_dir, self.file_name)
             InfoConfReader()._info_json = {"memoryTotal": 197510316}
@@ -45,6 +46,7 @@ class TestHostMemUsagePresenter(unittest.TestCase):
                                                 ['191424778902215', '191424799235089', '0.055614'],
                                                 ['191424799235089', '191424819600139', '0.055614']])
         with mock.patch('builtins.open', side_effect=ValueError), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.error'):
             check = HostMemUsagePresenter(self.result_dir, self.file_name)
             check.parse_prof_data()

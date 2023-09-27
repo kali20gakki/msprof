@@ -35,6 +35,7 @@ class TestHostDiskUsagePresenter(unittest.TestCase):
                        "disk_read text,disk_write text,swap_in text,usage REAL)")
         with mock.patch('builtins.open', mock.mock_open(read_data=data)), \
                 mock.patch(NAMESPACE + '.ConfigMgr.get_disk_freq', return_value=50), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.info'):
             check = HostDiskUsagePresenter(self.result_dir, self.file_name)
             InfoConfReader()._host_freq = None
@@ -46,6 +47,7 @@ class TestHostDiskUsagePresenter(unittest.TestCase):
 
         with mock.patch('builtins.open', mock.mock_open(read_data=data)), \
                 mock.patch(NAMESPACE + '.ConfigMgr.get_disk_freq', return_value=0), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.error'):
             check = HostDiskUsagePresenter(self.result_dir, self.file_name)
             InfoConfReader()._info_json = {"cpuNums": 8, "sysClockFreq": 100}
@@ -53,6 +55,7 @@ class TestHostDiskUsagePresenter(unittest.TestCase):
             check.cur_model.conn = res[0]
             check.parse_prof_data()
         with mock.patch('builtins.open', side_effect=ValueError), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.error'):
             check = HostDiskUsagePresenter(self.result_dir, self.file_name)
             check.parse_prof_data()
@@ -103,12 +106,12 @@ class TestHostDiskUsagePresenter(unittest.TestCase):
 
     def test_get_summary_data(self):
         with mock.patch('host_prof.host_disk_usage.model.host_disk_usage.HostDiskUsage.check_db', return_value=True), \
-             mock.patch('host_prof.host_disk_usage.model.host_disk_usage.HostDiskUsage.has_disk_usage_data',
-                        return_value=True), \
-             mock.patch('host_prof.host_disk_usage.model.host_disk_usage.HostDiskUsage.get_recommend_value',
-                        return_value=[10, 5]), \
-            mock.patch('host_prof.host_disk_usage.model.host_disk_usage.HostDiskUsage.get_recommend_value',
-                       return_value=[10, 5]):
+                mock.patch('host_prof.host_disk_usage.model.host_disk_usage.HostDiskUsage.has_disk_usage_data',
+                           return_value=True), \
+                mock.patch('host_prof.host_disk_usage.model.host_disk_usage.HostDiskUsage.get_recommend_value',
+                           return_value=[10, 5]), \
+                mock.patch('host_prof.host_disk_usage.model.host_disk_usage.HostDiskUsage.get_recommend_value',
+                           return_value=[10, 5]):
             check = HostDiskUsagePresenter(self.result_dir, self.file_name)
             check.cur_model = HostDiskUsage('test')
             result = check.get_summary_data()

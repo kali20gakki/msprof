@@ -10,6 +10,7 @@ from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import check_path_valid
+from common_func.file_manager import FileOpen
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_common import is_number
@@ -149,9 +150,8 @@ class Utils:
             return []
         if os.path.getsize(info_json_path) > 1024 * 1024 * 1024:
             return []
-        check_path_valid(info_json_path, is_file=True, max_size=1024 * 1024 * 1024)
-        with open(info_json_path, "r") as json_reader:
-            json_data = json_reader.read()
+        with FileOpen(info_json_path, "r", 1024 * 1024 * 1024) as json_reader:
+            json_data = json_reader.file_reader.read()
             json_data = json.loads(json_data)
             return json_data
 

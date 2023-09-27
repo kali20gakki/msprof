@@ -49,14 +49,14 @@ class TestMiniLLCParser(unittest.TestCase):
         with mock.patch('os.path.join', return_value='test\\data'):
             with mock.patch('builtins.open', side_effect=OSError), \
                     mock.patch(NAMESPACE + '.logging.error'), \
-                    mock.patch(NAMESPACE + '.check_file_readable'):
+                    mock.patch("common_func.file_manager.check_path_valid"):
                 InfoConfReader()._info_json = {"devices": '0'}
                 check = MiniLLCParser(self.file_list, CONFIG)
                 InfoConfReader()._start_log_time = 1466685625065
 
                 check.read_binary_data('llc.data.0.slice_0', 0, 0)
             with mock.patch('builtins.open', mock.mock_open(read_data=data)), \
-                    mock.patch(NAMESPACE + '.check_file_readable'):
+                    mock.patch("common_func.file_manager.check_path_valid"):
                 InfoConfReader()._info_json = {"devices": '0'}
                 check = MiniLLCParser(self.file_list, CONFIG)
                 InfoConfReader()._start_log_time = 1466685625065
@@ -66,7 +66,7 @@ class TestMiniLLCParser(unittest.TestCase):
 
     def test_read_binary_data_when_data_empty_after_filter_then_get_zero(self):
         with mock.patch('builtins.open', mock.mock_open(read_data="()")), \
-                mock.patch(NAMESPACE + '.check_file_readable'):
+                mock.patch("common_func.file_manager.check_path_valid"):
             InfoConfReader()._info_json = {"devices": '0'}
             check = MiniLLCParser(self.file_list, CONFIG)
             InfoConfReader()._start_log_time = 1466685625065

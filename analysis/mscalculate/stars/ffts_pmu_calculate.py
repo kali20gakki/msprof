@@ -8,7 +8,6 @@ import os
 import sqlite3
 import struct
 
-from common_func.common import generate_config
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -101,7 +100,7 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         return ''
 
     def ms_run(self: any) -> None:
-        config = generate_config(PathManager.get_sample_json_path(self._result_dir))
+        config = ConfigMgr.read_sample_config(self._result_dir)
         if not self._file_list or config.get(StrConstant.AICORE_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE \
                 or config.get(StrConstant.AIV_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE:
             return
@@ -343,7 +342,6 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         :param file_path:
         :return:
         """
-        check_file_readable(file_path)
         offset_calculator = OffsetCalculator(self._file_list, self.FFTS_PMU_SIZE, self._result_dir)
         with FileOpen(file_path, 'rb') as _pmu_file:
             _file_size = os.path.getsize(file_path)

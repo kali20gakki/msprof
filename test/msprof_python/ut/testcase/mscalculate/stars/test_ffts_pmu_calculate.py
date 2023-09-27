@@ -25,10 +25,9 @@ class TestFftsPmuCalculate(TestCase):
         ProfilingScene().init('')
 
     def test_ms_run_sample_based(self):
-        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
-                mock.patch(NAMESPACE + '.generate_config',
-                           return_value={"ai_core_profiling_mode": "sample-based",
-                                         "aiv_profiling_mode": "sample-based"}):
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config",
+                        return_value={"ai_core_profiling_mode": "sample-based",
+                                      "aiv_profiling_mode": "sample-based"}):
             check = FftsPmuCalculate(self.file_list, CONFIG)
             check.ms_run()
 

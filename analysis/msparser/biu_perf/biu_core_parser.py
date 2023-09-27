@@ -9,6 +9,7 @@ from abc import abstractmethod
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
+from common_func.file_manager import FileOpen
 from framework.offset_calculator import OffsetCalculator
 from profiling_bean.biu_perf.core_info_bean import CoreInfo
 from profiling_bean.biu_perf.cycles_bean import CyclesBean
@@ -117,8 +118,8 @@ class BiuCubeParser(BiuCoreParser):
         """
         parse binary file
         """
-        with open(file_path, 'rb') as file_reader:
-            all_bytes = self._offset_calculator.pre_process(file_reader, os.path.getsize(file_path))
+        with FileOpen(file_path, 'rb') as file_reader:
+            all_bytes = self._offset_calculator.pre_process(file_reader.file_reader, os.path.getsize(file_path))
 
         for chunk in Utils.chunks(all_bytes, self.CUBE_SIZE):
             cycles_chunk, flow_chunk = self.split_monitor_data(chunk)
@@ -168,8 +169,8 @@ class BiuVectorParser(BiuCoreParser):
         """
         parse binary file
         """
-        with open(file_path, 'rb') as file_reader:
-            all_bytes = self._offset_calculator.pre_process(file_reader, os.path.getsize(file_path))
+        with FileOpen(file_path, 'rb') as file_reader:
+            all_bytes = self._offset_calculator.pre_process(file_reader.file_reader, os.path.getsize(file_path))
 
         for chunk in Utils.chunks(all_bytes, self.VECTOR_SIZE):
             cycles_chunk = chunk[self.VECTOR_CYCLES_INDEX_RANGE[0]:self.VECTOR_CYCLES_INDEX_RANGE[1]]

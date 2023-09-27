@@ -24,7 +24,8 @@ class TestHostMemUsagePresenter(unittest.TestCase):
             '191424799235089 2147716853 27461 4653 14 0 213261 0\n',
             '191424819600139 2147716853 27461 4653 14 0 213261 0\n', ''
         ]
-        with mock.patch(NAMESPACE + '.logging.error'):
+        with mock.patch(NAMESPACE + '.logging.error'), \
+                mock.patch("common_func.file_manager.check_path_valid"):
             check = HostMemUsagePresenter('test')
             check.cur_model = HostMemUsage(self.result_dir)
             result = check._parse_mem_data(data, 197510316)
@@ -42,6 +43,7 @@ class TestHostMemUsagePresenter(unittest.TestCase):
         res[1].execute("create table if not exists MemUsage(start_time text,end_time text,"
                        "usage REAL)")
         with mock.patch('builtins.open', mock.mock_open(read_data=data)), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.info'):
             check = HostMemUsagePresenter(self.result_dir, self.file_name)
             InfoConfReader()._info_json = {"memoryTotal": 197510316}
@@ -52,6 +54,7 @@ class TestHostMemUsagePresenter(unittest.TestCase):
                                                 ['191424778902215', '191424799235089', '0.055614'],
                                                 ['191424799235089', '191424819600139', '0.055614']])
         with mock.patch('builtins.open', side_effect=ValueError), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.error'):
             check = HostMemUsagePresenter(self.result_dir, self.file_name)
             check.parse_prof_data()
@@ -65,6 +68,7 @@ class TestHostMemUsagePresenter(unittest.TestCase):
         self.assertEqual(result, {})
         with mock.patch('host_prof.host_mem_usage.model.host_mem_usage.'
                         'HostMemUsage.check_db', return_value=True), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch('host_prof.host_mem_usage.model.host_mem_usage.'
                            'HostMemUsage.has_mem_usage_data', return_value=False):
             check = HostMemUsagePresenter(self.result_dir, self.file_name)
@@ -73,6 +77,7 @@ class TestHostMemUsagePresenter(unittest.TestCase):
             self.assertEqual(result, {})
         with mock.patch('host_prof.host_mem_usage.model.host_mem_usage.'
                         'HostMemUsage.check_db', return_value=True), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch('host_prof.host_mem_usage.model.host_mem_usage.'
                            'HostMemUsage.has_mem_usage_data', return_value=True), \
                 mock.patch('host_prof.host_mem_usage.model.host_mem_usage.'
@@ -86,12 +91,14 @@ class TestHostMemUsagePresenter(unittest.TestCase):
         InfoConfReader()._host_freq = None
         InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         with mock.patch(NAMESPACE + '.HostMemUsagePresenter.get_mem_usage_data',
-                        return_value=None):
+                        return_value=None), \
+                mock.patch("common_func.file_manager.check_path_valid"):
             check = HostMemUsagePresenter(self.result_dir, self.file_name)
             result = check.get_timeline_data()
         self.assertEqual(result, [])
         with mock.patch(NAMESPACE + '.HostMemUsagePresenter.get_mem_usage_data',
-                        return_value={'data': [{'start': 100, 'usage': 10000}]}):
+                        return_value={'data': [{'start': 100, 'usage': 10000}]}), \
+                mock.patch("common_func.file_manager.check_path_valid"):
             check = HostMemUsagePresenter(self.result_dir, self.file_name)
             result = check.get_timeline_data()
         self.assertEqual(result, [['Memory Usage', 100.0, {'Usage(%)': 10000}]])
@@ -106,6 +113,7 @@ class TestHostMemUsagePresenter(unittest.TestCase):
         with mock.patch('host_prof.host_mem_usage.model.host_mem_usage.HostMemUsage.check_db', return_value=True), \
                 mock.patch('host_prof.host_mem_usage.model.host_mem_usage.HostMemUsage.has_mem_usage_data',
                            return_value=True), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch('host_prof.host_mem_usage.model.host_mem_usage.HostMemUsage.get_recommend_value',
                            return_value=[12, 15]):
             check = HostMemUsagePresenter(self.result_dir, self.file_name)

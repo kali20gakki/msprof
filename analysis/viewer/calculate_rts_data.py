@@ -10,7 +10,7 @@ from functools import reduce
 from operator import add
 
 from common_func.common import call_sys_exit
-from common_func.common import generate_config
+from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
@@ -439,7 +439,7 @@ def get_metrics_from_sample_config(project_path: str,
     """
     get ai core metric from sample json.
     """
-    sample_config = generate_config(PathManager.get_sample_json_path(project_path))
+    sample_config = ConfigMgr.read_sample_config(project_path)
     metrics = ['total_time(ms)', 'total_cycles']
     if judge_custom_pmu_scene(sample_config, metrics_type=metrics_type):
         metrics.extend(sample_config.get('ai_core_profiling_events').replace('0x', 'r').split(','))

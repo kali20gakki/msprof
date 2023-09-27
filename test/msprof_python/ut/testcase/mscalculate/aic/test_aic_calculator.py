@@ -63,6 +63,7 @@ class TestAicCalculator(unittest.TestCase):
                                  7, 4)
         with mock.patch(NAMESPACE + '.PathManager.get_data_file_path', return_value='test'), \
                 mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.info'), \
                 mock.patch(NAMESPACE + '.AicCalculator._parse'), \
                 mock.patch('builtins.open', mock.mock_open(read_data=aic_reader)), \

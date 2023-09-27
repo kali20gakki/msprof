@@ -12,6 +12,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
+from common_func.file_manager import FileOpen
 from msparser.aicpu.parse_aicpu_bin_data import ParseAiCpuBinData
 from msparser.aicpu.parse_aicpu_data import ParseAiCpuData
 from msparser.data_struct_size_constant import StructFmt
@@ -45,11 +46,12 @@ class ParseAiCpuDataAdapter(MsMultiProcess):
         if StructFmt.AI_CPU_FMT_SIZE - offset < struct.calcsize(self.READ_BINARY_HEADER_FMT):
             offset -= StructFmt.AI_CPU_FMT_SIZE
         try:
-            with open(judge_file_path, 'rb') as cpu_f:
+            with FileOpen(judge_file_path, 'rb') as cpu_f:
                 file_size = os.path.getsize(judge_file_path)
-                _ = cpu_f.read(file_size + offset - StructFmt.AI_CPU_FMT_SIZE)
-                magic_num, data_tag = struct.unpack(self.BYTE_ORDER_CHAR + self.READ_BINARY_HEADER_FMT, cpu_f.read(
-                    struct.calcsize(self.BYTE_ORDER_CHAR + self.READ_BINARY_HEADER_FMT)))
+                _ = cpu_f.file_reader.read(file_size + offset - StructFmt.AI_CPU_FMT_SIZE)
+                magic_num, data_tag = \
+                    struct.unpack(self.BYTE_ORDER_CHAR + self.READ_BINARY_HEADER_FMT, cpu_f.file_reader.read(
+                        struct.calcsize(self.BYTE_ORDER_CHAR + self.READ_BINARY_HEADER_FMT)))
                 if magic_num == NumberConstant.MAGIC_NUM and data_tag == self.AI_CPU_TAG:
                     return ParseAiCpuBinData(self._file_list, self.sample_config)
                 return ParseAiCpuData(self._file_list, self.sample_config)
