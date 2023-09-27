@@ -52,8 +52,8 @@ protected:
 private:
     void GetSoPaths(std::vector<std::string> &soPaths);
     std::string GetSoPath(const std::string &envValue) const;
-    bool CheckSoValid(CONST_CHAR_PTR soPath) const;
-    int32_t DlopenSo(CONST_CHAR_PTR soPath);
+    bool CheckSoValid(const std::string& soPath) const;
+    int32_t DlopenSo(const std::string& soPath);
     std::string GetAscendHalPath() const;
     std::string soName_;
     HandleType handle_;
