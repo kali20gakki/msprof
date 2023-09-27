@@ -77,13 +77,6 @@ uint64_t ProfGetOpExecutionTime(CONST_VOID_PTR data, uint32_t len, uint32_t inde
     return 0;
 }
 
-void SigHandler(int sig)
-{
-    if (sig == SIGINT) {
-        ProfAclMgr::instance()->MsprofFinalizeHandle();
-    }
-}
-
 ProfAclMgr::ProfAclMgr() : isReady_(false), mode_(WORK_MODE_OFF), params_(nullptr), dataTypeConfig_(0),
                            profStratCfg_(nullptr), startIndex_(0) {}
 
@@ -234,11 +227,6 @@ bool ProfAclMgr::IsModeOff()
  */
 int ProfAclMgr::Init()
 {
-    std::string envValue = Utils::GetEnvString(PROFILER_SAMPLE_CONFIG_ENV);
-    if (!envValue.empty()) {
-        signal(SIGINT, SigHandler);
-    }
-
     MSPROF_LOGI("ProfAclMgr Init");
     if (isReady_) {
         return PROFILING_SUCCESS;
