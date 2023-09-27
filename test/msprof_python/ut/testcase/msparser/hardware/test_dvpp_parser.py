@@ -25,12 +25,14 @@ class TestParsingPeripheralData(unittest.TestCase):
                                '176167:889901260 8 0 3 0 0 0% 0 0 0% 0 0\n'
         with mock.patch('os.path.join', return_value='test\\db'), \
                 mock.patch('builtins.open', side_effect=OSError), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.error'):
             InfoConfReader()._info_json = {'devices': '0'}
             check = ParsingPeripheralData(self.file_list, CONFIG)
             check.dvpp_data_parsing('test\\dvpp.data.5.slice_0')
         with mock.patch('os.path.join', return_value='test\\dvpp.data.5.slice_0'), \
                 mock.patch('builtins.open', mock.mock_open(read_data='')), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.warning'):
             InfoConfReader()._info_json = {'devices': '0'}
             check = ParsingPeripheralData(self.file_list, CONFIG)
@@ -38,6 +40,7 @@ class TestParsingPeripheralData(unittest.TestCase):
         self.assertEqual(result, None)
         with mock.patch('os.path.join', return_value='test\\dvpp.data.5.slice_0'), \
                 mock.patch('builtins.open', mock.mock_open(read_data=null_data)), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.warning'):
             InfoConfReader()._info_json = {'devices': '0'}
             check = ParsingPeripheralData(self.file_list, CONFIG)
@@ -45,11 +48,13 @@ class TestParsingPeripheralData(unittest.TestCase):
         self.assertEqual(result, None)
         with mock.patch('os.path.join', return_value='test\\dvpp.data.5.slice_0'), \
                 mock.patch('builtins.open', mock.mock_open(read_data=data)), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.warning'):
             InfoConfReader()._info_json = {'devices': '0'}
             check = ParsingPeripheralData(self.file_list, CONFIG)
             check.dvpp_data_parsing('test\\dvpp.data.5.slice_0')
         with mock.patch('os.path.join', return_value='test\\dvpp.data.5.slice_0'), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch('builtins.open', mock.mock_open(read_data=data_with_no_dvpp_id)):
             InfoConfReader()._info_json = {'devices': '0'}
             check = ParsingPeripheralData(self.file_list, CONFIG)
@@ -57,12 +62,14 @@ class TestParsingPeripheralData(unittest.TestCase):
 
     def test_start_parsing_data_file(self):
         with mock.patch(NAMESPACE + '.is_valid_original_data', side_effect=RuntimeError), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.error'):
             InfoConfReader()._info_json = {'devices': '0'}
             check = ParsingPeripheralData(self.file_list, CONFIG)
             check.start_parsing_data_file()
         with mock.patch(NAMESPACE + '.is_valid_original_data', return_value=True), \
                 mock.patch(NAMESPACE + '.logging.info'), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.FileManager.add_complete_file'):
             InfoConfReader()._info_json = {'devices': '0'}
             check = ParsingPeripheralData(self.file_list, CONFIG)

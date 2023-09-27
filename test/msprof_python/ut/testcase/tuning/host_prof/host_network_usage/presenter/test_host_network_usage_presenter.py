@@ -37,6 +37,7 @@ class TestHostNetworkUsage(unittest.TestCase):
         res = db_manager.create_table('host_network_usage.db')
         res[1].execute("create table if not exists NetworkUsage(start_time text,end_time text,usage REAL)")
         with mock.patch('builtins.open', mock.mock_open(read_data=data)), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.info'):
             check = HostNetworkUsagePresenter(self.result_dir, self.file_name)
             InfoConfReader()._info_json = {"netCardNums": 8, "netCard": netcard}
@@ -45,6 +46,7 @@ class TestHostNetworkUsage(unittest.TestCase):
             check.parse_prof_data()
         self.assertEqual(check.speeds, {'enp2s0f0': 125000000})
         with mock.patch('builtins.open', side_effect=ValueError), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.error'):
             check = HostNetworkUsagePresenter(self.result_dir, self.file_name)
             check.parse_prof_data()

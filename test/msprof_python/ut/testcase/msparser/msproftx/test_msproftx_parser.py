@@ -35,8 +35,8 @@ class TestMsprofTxParser(unittest.TestCase):
                            b's', b's', b's', b's', b's', b's', b's', b's', 0, 0, 0, 0, 0, 0, 0, 0, 0)
         with mock.patch('os.path.join', return_value='test\\test'), \
                 mock.patch('builtins.open', side_effect=OSError), \
-                mock.patch(NAMESPACE + '.check_file_readable', return_value=True), \
                 mock.patch('os.path.getsize', return_value=256), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.error'):
             InfoConfReader()._info_json = {'devices': '0'}
             check = MsprofTxParser(self.file_list, CONFIG)
@@ -44,7 +44,7 @@ class TestMsprofTxParser(unittest.TestCase):
         self.assertEqual(result, 1)
         with mock.patch('os.path.join', return_value='test\\test'), \
                 mock.patch('builtins.open', mock.mock_open(read_data=data)), \
-                mock.patch(NAMESPACE + '.check_file_readable', return_value=True), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch('os.path.getsize', return_value=256):
             InfoConfReader()._info_json = {'devices': '0'}
             check = MsprofTxParser(self.file_list, CONFIG)

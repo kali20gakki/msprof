@@ -14,6 +14,7 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
 from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
+from common_func.file_manager import FileOpen
 from common_func.utils import Utils
 from msmodel.hardware.mini_llc_model import MiniLlcModel
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -95,11 +96,10 @@ class MiniLLCParser(MsMultiProcess):
         self.init_tmp_data()
         headers = [device_id, replay_id]
         file_path = PathManager.get_data_file_path(self.project_path, file_name)
-        check_file_readable(file_path)
         start_time = InfoConfReader().get_start_timestamp() / NumberConstant.NANO_SECOND
         try:
-            with open(file_path, 'r') as llc_file:
-                self._read_binary_helper(llc_file, start_time, headers)
+            with FileOpen(file_path, 'r') as llc_file:
+                self._read_binary_helper(llc_file.file_reader, start_time, headers)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error("%s: %s", file_name, err, exc_info=Constant.TRACE_BACK_SWITCH)
             return

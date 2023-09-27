@@ -22,9 +22,10 @@ class TestFftsPmuModel(unittest.TestCase):
                          'scalar_time', 'scalar_ratio', 'mte1_time', 'mte1_ratio', 'mte2_time', 'mte2_ratio',
                          'mte3_time', 'mte3_ratio', 'icache_miss_rate']), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.FftsPmuModel._creat_metric_table_by_head'):
             check = FftsPmuModel('test', 'test', ['test'])
-        check.create_table()
+            check.create_table()
 
     def test_creat_metric_table(self):
         with DBOpen(DB_FFTS_PMU) as db_open:

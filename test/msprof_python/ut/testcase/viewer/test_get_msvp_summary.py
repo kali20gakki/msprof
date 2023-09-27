@@ -52,23 +52,23 @@ class TestMsvpSummary(unittest.TestCase):
         self.assertEqual(res[0], NumberConstant.ERROR)
 
         with mock.patch(NAMESPACE + '.path_check', return_value="a"), \
-                mock.patch(NAMESPACE + '.generate_config', return_value=None):
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=None):
             res = pre_check_pmu_events_interface("", 0, "ai_core_profiling")
         self.assertEqual(res[0], NumberConstant.ERROR)
 
         with mock.patch(NAMESPACE + '.path_check', return_value="a"), \
-                mock.patch(NAMESPACE + '.generate_config', return_value=info_json):
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=info_json):
             res = pre_check_pmu_events_interface("", 0, "ai_core_profiling")
         self.assertEqual(res[0], NumberConstant.SUCCESS)
 
         with mock.patch(NAMESPACE + '.path_check', return_value="a"), \
-                mock.patch(NAMESPACE + '.generate_config', return_value=info_json), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=info_json), \
                 mock.patch(NAMESPACE + '.get_type_db_correspondences', return_value=None):
             res = pre_check_pmu_events_interface("", 0, "ai_core_profiling")
         self.assertEqual(res[0], NumberConstant.ERROR)
 
         with mock.patch(NAMESPACE + '.path_check', return_value="a"), \
-                mock.patch(NAMESPACE + '.generate_config', return_value=sample_config), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=sample_config), \
                 mock.patch(NAMESPACE + '.get_type_db_correspondences', return_value=None):
             res = pre_check_pmu_events_interface("", 0, "ai_core_profiling")
         self.assertEqual(res[0], NumberConstant.ERROR)

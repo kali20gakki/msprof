@@ -17,6 +17,7 @@ from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
 from common_func.utils import Utils
+from common_func.file_manager import FileOpen
 from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import OffsetCalculator
 from mscalculate.hwts.task_dispatch_model_index import TaskDispatchModelIndex
@@ -134,8 +135,8 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         _offset_calculator = OffsetCalculator(self._file_list, self.HWTS_LOG_SIZE, self._project_path)
         for _file in self._file_list:
             _file = PathManager.get_data_file_path(self._project_path, _file)
-            with open(_file, 'rb') as _hwts_log_reader:
-                self._parse(_offset_calculator.pre_process(_hwts_log_reader, os.path.getsize(_file)))
+            with FileOpen(_file, 'rb') as _hwts_log_reader:
+                self._parse(_offset_calculator.pre_process(_hwts_log_reader.file_reader, os.path.getsize(_file)))
 
     def _add_batch_id(self: any, prep_data_res: list) -> list:
         if self.is_need_parse_all_file():

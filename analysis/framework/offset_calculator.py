@@ -113,9 +113,9 @@ class FileCalculator(OffsetCalculator):
         return 0
 
     def _read_binary_file(self: any, _file: str, left_offset: int, right_offset: int) -> any:
-        with open(_file, 'rb') as _file_reader:
-            _file_reader.seek(left_offset)
-            self._file_cache += _file_reader.read(right_offset - left_offset)
+        with FileOpen(_file, 'rb') as _file_reader:
+            _file_reader.file_reader.seek(left_offset)
+            self._file_cache += _file_reader.file_reader.read(right_offset - left_offset)
 
 
 class FileReverseCalculator:

@@ -10,6 +10,7 @@ from decimal import Decimal
 from typing import Dict
 
 from common_func.constant import Constant
+from common_func.file_manager import FileOpen
 from common_func.file_manager import check_path_valid
 from common_func.file_name_manager import get_dev_start_compiles
 from common_func.file_name_manager import get_end_info_compiles
@@ -62,10 +63,9 @@ class InfoConfReader:
         if not info_json_path or not os.path.exists(info_json_path) or not os.path.isfile(
                 info_json_path):
             return {}
-        check_path_valid(info_json_path, is_file=True)
         try:
-            with open(info_json_path, "r") as json_reader:
-                json_data = json_reader.readline(Constant.MAX_READ_LINE_BYTES)
+            with FileOpen(info_json_path, "r") as json_reader:
+                json_data = json_reader.file_reader.readline(Constant.MAX_READ_LINE_BYTES)
                 json_data = json.loads(json_data)
                 return json_data
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
@@ -447,10 +447,9 @@ class InfoConfReader:
         dev_start_path = self.get_conf_file_path(result_path, get_dev_start_compiles())
         if not os.path.exists(dev_start_path):
             return
-        check_path_valid(dev_start_path, True)
         try:
-            with open(dev_start_path, "r") as log_file:
-                self._load_dev_start_path_line_by_line(log_file)
+            with FileOpen(dev_start_path, "r") as log_file:
+                self._load_dev_start_path_line_by_line(log_file.file_reader)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
 

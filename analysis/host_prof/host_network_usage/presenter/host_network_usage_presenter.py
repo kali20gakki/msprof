@@ -14,6 +14,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_number
 from common_func.msvp_constant import MsvpConstant
 from common_func.utils import Utils
+from common_func.file_manager import FileOpen
 from host_prof.host_network_usage.model.host_network_usage import HostNetworkUsage
 from host_prof.host_prof_base.host_prof_presenter_base import HostProfPresenterBase
 
@@ -102,8 +103,8 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
         implement interface
         """
         try:
-            with open(self.file_name, "r") as file:
-                self._parse_network_usage(file)
+            with FileOpen(self.file_name, "r") as file:
+                self._parse_network_usage(file.file_reader)
                 logging.info(
                     "Finish parsing network usage data file: %s", os.path.basename(self.file_name))
         except (FileNotFoundError, ValueError, IOError) as parse_file_except:

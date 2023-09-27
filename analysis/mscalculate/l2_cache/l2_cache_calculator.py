@@ -5,7 +5,7 @@
 import configparser
 import logging
 
-from common_func.common import generate_config
+from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
@@ -96,7 +96,7 @@ class L2CacheCalculator(ICalculator, MsMultiProcess):
             self.save()
 
     def _read_job_l2_cache_events_info(self: any) -> list:
-        config = generate_config(PathManager.get_sample_json_path(self._project_path))
+        config = ConfigMgr.read_sample_config(self._project_path)
         events_from_config = config.get("l2CacheTaskProfilingEvents", "").split(",")
         l2_cache_events = \
             Utils.generator_to_list(event.strip().lower() for event in events_from_config)

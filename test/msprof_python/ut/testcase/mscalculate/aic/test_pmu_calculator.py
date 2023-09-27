@@ -28,6 +28,7 @@ class TestPmuCalculator(unittest.TestCase):
                 mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]), \
                 mock.patch('common_func.utils.Utils.get_scene', return_value="single_op"), \
                 mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(1, 1)):
+            InfoConfReader()._info_json = {'devices': '0'}
             key = PmuCalculator()
             key._core_num_dict = {'aic': 30, 'aiv': 0}
             key._block_dims = {'block_dim': {'0-0': [20]}}
@@ -44,6 +45,7 @@ class TestPmuCalculator(unittest.TestCase):
                            return_value=[[1, 1]]), \
                 mock.patch('common_func.utils.Utils.get_scene', return_value="step_info"), \
                 mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(1, 1)):
+            InfoConfReader()._info_json = {'devices': '0'}
             key = PmuCalculator()
             key._block_dims = {'block_dim': {'0-0': [20]}, 'mix_block_dim': {'0-0': [20]}}
             key._core_num_dict = {'aic': 30, 'aiv': 0}
