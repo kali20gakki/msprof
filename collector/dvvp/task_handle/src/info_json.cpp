@@ -91,7 +91,10 @@ int InfoJson::InitDeviceIds()
     auto devicesVec = analysis::dvvp::common::utils::Utils::Split(devices_, false, "", ",");
     for (size_t i = 0; i < devicesVec.size(); i++) {
         try {
-            int32_t devIndexId = Utils::StrToInt(devicesVec.at(i));
+            int32_t devIndexId;
+            if (Utils::StrToInt(devIndexId, devicesVec.at(i)) == PROFILING_FAILED) {
+                return PROFILING_FAILED;
+            }
             if (devIndexId < 0 || devIndexId >= MSVP_MAX_DEV_NUM) {
                 continue;
             }
@@ -192,7 +195,7 @@ void InfoJson::AddMemTotal(SHARED_PTR_ALIA<InfoMain> infoMain)
         }
         std::string result = line.substr(start, end - start + 1);
         if (Utils::CheckStringIsNonNegativeIntNum(result)) {
-            infoMain->set_memorytotal(Utils::StrToInt(result));
+            infoMain->set_memorytotal(std::stoi(result));
         }
         break;
     }
@@ -230,7 +233,7 @@ void InfoJson::AddNetCardInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
                 && Utils::CheckStringIsNonNegativeIntNum(line)) {
             auto netCardInfo = infoMain->add_netcard();
             netCardInfo->set_netcardname(*it);
-            netCardInfo->set_speed(Utils::StrToInt(line));
+            netCardInfo->set_speed(std::stoi(line));
         }
         fin.close();
     }

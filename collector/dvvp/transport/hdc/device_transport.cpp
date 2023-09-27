@@ -172,7 +172,9 @@ int DeviceTransport::Init()
         MSPROF_INNER_ERROR("EK9999", "devId %s is not valid!", devIndexIdStr_.c_str());
         return PROFILING_FAILED;
     }
-    devIndexId_ = Utils::StrToInt(devIndexIdStr_);
+    if (Utils::StrToInt(devIndexId_, devIndexIdStr_) == PROFILING_FAILED) {
+        return PROFILING_FAILED;
+    }
     MSPROF_LOGI("Try to shake hand with Device %d", devIndexId_);
     ctrlMessage->set_devid(devIndexId_);
     ctrlMessage->set_jobid(jobId_);

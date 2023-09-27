@@ -79,7 +79,9 @@ int Device::Init()
 
 int Device::InitJobAdapter()
 {
-    indexId_ = Utils::StrToInt(indexIdStr_);
+    if (Utils::StrToInt(indexId_, indexIdStr_) == PROFILING_FAILED) {
+        return PROFILING_FAILED;
+    }
     status_->dev_id = indexIdStr_;
 
     if (Platform::instance()->PlatformIsSocSide()) {  // soc scene

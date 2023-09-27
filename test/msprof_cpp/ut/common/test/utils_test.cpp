@@ -1123,16 +1123,6 @@ TEST_F(COMMON_UTILS_UTILS_TEST, RemoveEndCharacter){
     EXPECT_EQ(input, "mm");
 }
 
-int GetDiskFreeSpaceStub(const char *path, MmDiskSize *diskSize) {
-    std::string paths(path);
-    try {
-        diskSize->availSize = Utils::StrToInt(paths);
-    } catch(...) {
-        return -1;
-    }
-    return PROFILING_SUCCESS;
-}
-
 TEST_F(COMMON_UTILS_UTILS_TEST, IsClusterRunEnv)
 {
     GlobalMockObject::verify();
@@ -1392,4 +1382,38 @@ TEST_F(COMMON_UTILS_UTILS_TEST, CheckStringIsNonNegativeIntNum)
     GlobalMockObject::verify();
     std::string num1 = "";
     analysis::dvvp::common::utils::Utils::CheckStringIsNonNegativeIntNum(num1);
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, StrToInt)
+{
+    GlobalMockObject::verify();
+    int retValue;
+    EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::common::utils::Utils::StrToInt(retValue, "1234"));
+    int testValue = 1234;
+    EXPECT_EQ(testValue, retValue);
+    EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::common::utils::Utils::StrToInt(retValue, "-1234"));
+    int testNegValue = -1234;
+    EXPECT_EQ(testNegValue, retValue);
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::StrToInt(retValue, ""));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::StrToInt(retValue, "ff1234"));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::StrToInt(retValue, "1234ff"));
+    EXPECT_EQ(PROFILING_FAILED,
+              analysis::dvvp::common::utils::Utils::StrToInt(retValue, "9999999999999999999999999999999"));
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, StrToLongLong)
+{
+    GlobalMockObject::verify();
+    long long retValue;
+    EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::common::utils::Utils::StrToLongLong(retValue, "1234"));
+    long long testValue = 1234;
+    EXPECT_EQ(testValue, retValue);
+    EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::common::utils::Utils::StrToLongLong(retValue, "-1234"));
+    long long testNegValue = -1234;
+    EXPECT_EQ(testNegValue, retValue);
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::StrToLongLong(retValue, ""));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::StrToLongLong(retValue, "ff1234"));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::StrToLongLong(retValue, "1234ff"));
+    EXPECT_EQ(PROFILING_FAILED,
+              analysis::dvvp::common::utils::Utils::StrToLongLong(retValue, "9999999999999999999999999999999"));
 }
