@@ -285,7 +285,7 @@ void HashData::SaveNewHashData(bool isLastChunk)
     }
     // combined hash map data
     std::string saveHashData;
-    int currentHashSize = hashVector_.size();
+    size_t currentHashSize = hashVector_.size();
     for (size_t i = readIndex_; i < currentHashSize; i++) {
         saveHashData.append(std::to_string(hashVector_[i].first) + HASH_DIC_DELIMITER + hashVector_[i].second + "\n");
     }
