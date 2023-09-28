@@ -20,11 +20,71 @@ using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::transport;
 MsprofReporterMgr::MsprofReporterMgr() : isStarted_(false)
 {
+    indexMap_ = {
+        {MSPROF_REPORT_ACL_LEVEL, 0},
+        {MSPROF_REPORT_MODEL_LEVEL, 0},
+        {MSPROF_REPORT_NODE_LEVEL, 0},
+        {MSPROF_REPORT_HCCL_NODE_LEVEL, 0},
+        {MSPROF_REPORT_RUNTIME_LEVEL, 0}
+    };
+    reportTypeInfoMapVec_ = {
+        {MSPROF_REPORT_ACL_LEVEL, std::vector<std::pair<uint32_t, std::string>>()},
+        {MSPROF_REPORT_MODEL_LEVEL, std::vector<std::pair<uint32_t, std::string>>()},
+        {MSPROF_REPORT_NODE_LEVEL, std::vector<std::pair<uint32_t, std::string>>()},
+        {MSPROF_REPORT_HCCL_NODE_LEVEL, std::vector<std::pair<uint32_t, std::string>>()},
+        {MSPROF_REPORT_RUNTIME_LEVEL, std::vector<std::pair<uint32_t, std::string>>()}
+    };
 }
 MsprofReporterMgr::~MsprofReporterMgr()
 {
     reportTypeInfoMap_.clear();
     reporters_.clear();
+}
+
+int MsprofReporterMgr::Start()
+{
+    if (isUploadStarted_) {
+        MSPROF_LOGW("type info upload has been started!");
+        return PROFILING_SUCCESS;
+    }
+
+    Thread::SetThreadName(analysis::dvvp::common::config::MSVP_TYPE_INFO_UPLOAD_THREAD_NAME);
+    int ret = Thread::Start();
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to start the upload in MsprofReporterMgr::Start().");
+        return PROFILING_FAILED;
+    } else {
+        MSPROF_LOGI("Succeeded in starting the upload in MsprofReporterMgr::Start().");
+    }
+    isUploadStarted_ = true;
+    return PROFILING_SUCCESS;
+}
+
+void MsprofReporterMgr::Run(const struct error_message::Context &errorContext)
+{
+    while (!IsQuit()) {
+        Collector::Dvvp::Mmpa::MmSleep(1000);    // 1000 表示 1s，等待1s再重新检测落盘.防止少量数据频繁落盘
+        SaveTypeInfo(false);
+    }
+}
+
+int MsprofReporterMgr::Stop()
+{
+    MSPROF_LOGI("Stop type info upload thread begin");
+    if (!isUploadStarted_) {
+        MSPROF_LOGE("type info upload thread not started");
+        return PROFILING_FAILED;
+    }
+    isUploadStarted_ = false;
+
+    int ret = analysis::dvvp::common::thread::Thread::Stop();
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("type info upload Thread stop failed");
+        return PROFILING_FAILED;
+    }
+
+    MSPROF_LOGI("Stop type info upload Thread success");
+    return PROFILING_SUCCESS;
 }
 
 int32_t MsprofReporterMgr::StartReporters()
@@ -53,6 +113,7 @@ int32_t MsprofReporterMgr::StartReporters()
             RegReportTypeInfo(level.first, type.first, type.second);
         }
     }
+    Start();
     isStarted_ = true;
     return PROFILING_SUCCESS;
 }
@@ -115,6 +176,7 @@ int32_t MsprofReporterMgr::RegReportTypeInfo(uint16_t level, uint32_t typeId, co
                         reportTypeInfoMap_[level][typeId].c_str(), typeName.c_str());
         }
     reportTypeInfoMap_[level][typeId] = typeName;
+    reportTypeInfoMapVec_[level].emplace_back(std::pair<uint32_t, std::string>(typeId, typeName));
     return PROFILING_SUCCESS;
 }
 
@@ -131,11 +193,11 @@ std::string& MsprofReporterMgr::GetRegReportTypeInfo(uint16_t level, uint32_t ty
 }
 
 void MsprofReporterMgr::FillFileChunkData(const std::string &saveHashData,
-    SHARED_PTR_ALIA<FileChunkReq> fileChunk) const
+    SHARED_PTR_ALIA<FileChunkReq> fileChunk, bool isLastChunk) const
 {
     fileChunk->set_filename("unaging.additional");
     fileChunk->set_offset(-1);
-    fileChunk->set_islastchunk(true);
+    fileChunk->set_islastchunk(isLastChunk);
     fileChunk->set_needack(false);
     fileChunk->set_tag("type_info_dic");
     fileChunk->set_tagsuffix(std::to_string(DEFAULT_HOST_ID));
@@ -151,34 +213,42 @@ void MsprofReporterMgr::FillFileChunkData(const std::string &saveHashData,
     fileChunk->set_chunkendtime(reportTime);
 }
 
-void MsprofReporterMgr::SaveTypeInfo()
+void MsprofReporterMgr::SaveTypeInfo(bool isLastChunk)
 {
     std::lock_guard<std::mutex> lk(regTypeInfoMtx_);
-    for (auto &level : reportTypeInfoMap_) {
-        if (level.second.empty()) {
-            MSPROF_LOGI("Type info is empty, level %u", level.first);
-            continue;
-        }
+
+    SHARED_PTR_ALIA<Uploader> uploader = nullptr;
+    UploaderMgr::instance()->GetUploader(std::to_string(DEFAULT_HOST_ID), uploader);
+    if (uploader == nullptr) {
+        return;
+    }
+
+    for (auto &typeInfo  : reportTypeInfoMapVec_) {
         // combined hash map data
         std::string saveHashData;
-        for (auto &data : level.second) {
-            saveHashData.append(std::to_string(level.first) + "_" + std::to_string(data.first) +
-                HASH_DIC_DELIMITER + data.second + "\n");
+        size_t currentHashSize = typeInfo.second.size();
+        for (size_t i = indexMap_[typeInfo.first]; i < currentHashSize; i++) {
+            saveHashData.append(std::to_string(typeInfo.first) + "_" + std::to_string(typeInfo.second[i].first) +
+                                HASH_DIC_DELIMITER + typeInfo.second[i].second + "\n");
         }
+        if (saveHashData.empty()) {
+            return;
+        }
+        indexMap_[typeInfo.first] = currentHashSize;
         // construct FileChunkReq data
         SHARED_PTR_ALIA<FileChunkReq> fileChunk = nullptr;
         MSVP_MAKE_SHARED0_BREAK(fileChunk, FileChunkReq);
-        FillFileChunkData(saveHashData, fileChunk);
+        FillFileChunkData(saveHashData, fileChunk, isLastChunk);
         // upload FileChunkReq data
         std::string encoded = analysis::dvvp::message::EncodeMessage(fileChunk);
         int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadData(
             std::to_string(DEFAULT_HOST_ID), encoded.c_str(), encoded.size());
         if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("Type info upload data failed, level: %u, dataLen:%u", level.first, saveHashData.size());
+            MSPROF_LOGE("Type info upload data failed, level: %u, dataLen:%u", typeInfo.first, saveHashData.size());
             continue;
         }
         MSPROF_EVENT("total_size_type_info[%u], save type info length: %llu, type info size: %llu",
-            level.first, saveHashData.size(), level.second.size());
+            typeInfo.first, saveHashData.size(), typeInfo.second.size());
     }
 }
 
@@ -191,7 +261,7 @@ int32_t MsprofReporterMgr::StopReporters()
     }
     MSPROF_LOGI("ProfReporterMgr stop reporters");
     isStarted_ = false;
-    SaveTypeInfo();
+    SaveTypeInfo(true);
     for (auto &report : reporters_) {
         if (report.StopReporter() != PROFILING_SUCCESS) {
             return PROFILING_FAILED;
@@ -199,6 +269,7 @@ int32_t MsprofReporterMgr::StopReporters()
     }
     reportTypeInfoMap_.clear();
     reporters_.clear();
+    Stop();
     return PROFILING_SUCCESS;
 }
 }

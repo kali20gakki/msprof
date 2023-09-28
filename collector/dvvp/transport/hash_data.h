@@ -56,7 +56,7 @@ private:
     std::mutex initMutex_;
     std::mutex hashMutex_;
     bool isStarted_ = false;
-    int32_t readIndex_ = 0;
+    size_t readIndex_ = 0;
     std::vector<std::pair<uint64_t, std::string>> hashVector_;
     std::unordered_map<std::string, uint64_t> hashInfoMap_;   // <hashInfo, hashId>
     std::unordered_map<uint64_t, std::string> hashIdMap_;     // <hashId, hashInfo>
