@@ -532,6 +532,28 @@ class TestTaskGear(TestCANNAnalysisGear):
         task_track.task_type = "MM"
         self.assertFalse(gear.is_kernel_task(task_track, True))
 
+    def test_is_hccl_task_should_return_false_when_hccl_invalid(self):
+        gear = TaskGear("")
+        task_track = TaskTrackDto()
+        hccl_event = Event.invalid_event()
+        self.assertFalse(gear.is_hccl_task(hccl_event, task_track))
+
+    def test_is_hccl_task_should_return_false_when_task_track_invalid(self):
+        gear = TaskGear("")
+        task_track = TaskTrackDto()
+        task_track.struct_type = None
+        hccl_event = Event.invalid_event()
+        hccl_event.struct_type = "2"
+        self.assertFalse(gear.is_hccl_task(hccl_event, task_track))
+
+    def test_is_hccl_task_should_return_true_when_correct_call_stack(self):
+        gear = TaskGear("")
+        task_track = TaskTrackDto()
+        task_track.struct_type = "1"
+        hccl_event = Event.invalid_event()
+        hccl_event.struct_type = "2"
+        self.assertTrue(gear.is_hccl_task(hccl_event, task_track))
+
 
 class TestFindModelNameInModelLoad(unittest.TestCase):
     DIR_PATH = os.path.join(os.path.dirname(__file__), "DT_CANNAnalysisGear")
