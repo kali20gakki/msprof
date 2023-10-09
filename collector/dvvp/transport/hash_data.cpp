@@ -60,8 +60,8 @@ int32_t HashData::Uninit()
     hashMapMutex_.clear();
     hashInfoMap_.clear();
     hashIdMap_.clear();
-    inited_ = false;
     Stop();
+    inited_ = false;
     MSPROF_LOGI("HashData uninitialize success");
     return PROFILING_SUCCESS;
 }
@@ -100,6 +100,9 @@ void HashData::Run(const struct error_message::Context &errorContext)
 
 int HashData::Stop()
 {
+    if (!inited_) {
+        return PROFILING_SUCCESS;
+    }
     MSPROF_LOGI("Stop hash read thread begin");
     if (!isStarted_) {
         MSPROF_LOGE("Hash read thread not started");
