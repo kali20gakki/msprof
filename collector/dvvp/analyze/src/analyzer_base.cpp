@@ -76,6 +76,7 @@ void AnalyzerBase::EraseRtMapByStreamId(uint16_t streamId, std::map<std::string,
         int iterStreamId;
         if (pos == std::string::npos ||
             Utils::StrToInt(iterStreamId, iter->first.substr(pos + 1)) == PROFILING_FAILED) {
+            iter++;
             continue;
         }
         if (static_cast<uint16_t>(iterStreamId) != streamId) {

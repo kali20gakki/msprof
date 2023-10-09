@@ -13,18 +13,18 @@ class TestMsProfBasicInfo(unittest.TestCase):
         args = ["get_msprof_info.py", "-dir", "test"]
         collection_path = {"collection_path": "test"}
         args_co = Namespace(**collection_path)
-        with mock.patch(NAMESPACE + '.MsprofInfoConstruct.construct_argument_parser'), \
-             mock.patch('sys.argv', args), \
+        with mock.patch('sys.argv', args), \
              mock.patch('argparse.ArgumentParser.parse_args', return_value=args_co), \
-             mock.patch(NAMESPACE + '.MsprofInfoConstruct.load_basic_info_model'):
+             mock.patch(NAMESPACE + '.MsprofInfoConstruct.load_basic_info_model'),\
+             mock.patch('sys.exit'):
             check = MsprofInfoConstruct()
             result = check.main()
         self.assertEqual(result, None)
 
         args = ["get_msprof_info.py"]
-        with mock.patch(NAMESPACE + '.MsprofInfoConstruct.construct_argument_parser'), \
-             mock.patch('sys.argv', args), \
-             mock.patch('argparse.ArgumentParser.print_help'):
+        with mock.patch('sys.argv', args), \
+             mock.patch('argparse.ArgumentParser.print_help'),\
+             mock.patch('sys.exit'):
             check = MsprofInfoConstruct()
             result = check.main()
             self.assertEqual(result, None)
