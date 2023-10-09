@@ -985,6 +985,10 @@ std::vector<int> Utils::GetChildPid(int pid)
     for (auto &tdir : threadDirs) {
         std::string lineBuf;
         ifs.open(tdir + "/children", std::ifstream::in);
+        if (!ifs.is_open()) {
+            MSPROF_LOGW("Open file %s/children failed", tdir.c_str());
+            continue;
+        }
         std::getline(ifs, lineBuf);
         ifs.close();
 
