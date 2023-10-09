@@ -66,7 +66,7 @@ class NumberConstant:
     USTONS = 1000
     DEFAULT_STREAM_ID = 65535
     DEFAULT_TASK_ID = 65535
-    PROF_PATH_MAX_LEN = 300
+    PROF_PATH_MAX_LEN = 1024
 
     # memory units transfer
     BYTES_TO_KB = 1024.0

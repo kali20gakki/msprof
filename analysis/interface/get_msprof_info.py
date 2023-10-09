@@ -17,6 +17,7 @@ class MsprofInfoConstruct:
     BASIC_INFO_CLASS_NAME = "MsProfBasicInfo"
     CLUSTER_INFO_MODEL_PATH = "profiling_bean.basic_info.msprof_cluster_info"
     CLUSTER_INFO_CLASS_NAME = "MsProfClusterInfo"
+    PROF_PATH_MAX_LEN = 1024
 
     @staticmethod
     def construct_argument_parser() -> argparse.ArgumentParser:
@@ -66,12 +67,20 @@ class MsprofInfoConstruct:
         interface entry for basic info
         :return:None
         """
+        from common_func.common import error
         parser = self.construct_argument_parser()
         if len(sys.argv) < 2:
             parser.print_help()
             return
 
         args = parser.parse_args(sys.argv[1:])
+        if hasattr(args, "collection_path"):
+            path_len = len(os.path.realpath(args.collection_path))
+            if path_len > self.PROF_PATH_MAX_LEN:
+                error(self.FILE_NAME,
+                      "Please ensure the length of input dir absolute path(%s) less than %s" %
+                      (path_len, self.PROF_PATH_MAX_LEN))
+                return
         try:
             self.load_basic_info_model(args)
         except Exception as err:
