@@ -124,15 +124,24 @@ int DyncProfMsgProcCli::TryReadInputCmd(std::string &inputCmd)
 bool DyncProfMsgProcCli::IsServerDisconnect(std::string &echoTips)
 {
     DynProfRspMsg rspMsg;
-    ssize_t recvLen = recv(cliSockFd_, reinterpret_cast<VOID_PTR>(&rspMsg), sizeof(rspMsg), MSG_DONTWAIT);
-    if (static_cast<size_t>(recvLen) == sizeof(rspMsg) &&
-        rspMsg.msgType == DynProfMsgType::DISCONN_RSP &&
-        rspMsg.msgDataLen < DYN_PROF_RSP_MSG_MAX_LEN) {
-        echoTips = "Server disconnected, " + std::string(rspMsg.msgData, rspMsg.msgDataLen);
-        MSPROF_LOGI("Dynamic profiling client receive disconnet from server.");
-        return true;
+    errno_t err = memset_s(rspMsg.msgData, sizeof(rspMsg.msgData), 0, sizeof(rspMsg.msgData));
+    if (err != EOK) {
+        MSPROF_LOGE("Dynamic profiling client clear rspMsg failed, err: %d", err);
+        return false;
     }
-    return false;
+    ssize_t recvLen = recv(cliSockFd_, reinterpret_cast<VOID_PTR>(&rspMsg), sizeof(rspMsg), MSG_DONTWAIT);
+    if (static_cast<size_t>(recvLen) != sizeof(rspMsg) || rspMsg.msgType != DynProfMsgType::DISCONN_RSP ||
+        rspMsg.msgDataLen >= DYN_PROF_RSP_MSG_MAX_LEN) {
+        return false;
+    }
+    if (strnlen(rspMsg.msgData, rspMsg.msgDataLen) != rspMsg.msgDataLen) {
+        MSPROF_LOGE("invalid server data, msgData size %zu not equal to msgDataLen %lu",
+            sizeof(rspMsg.msgData), rspMsg.msgDataLen);
+        return false;
+    }
+    echoTips = "Server disconnected, " + std::string(rspMsg.msgData, rspMsg.msgDataLen);
+    MSPROF_LOGI("Dynamic profiling client receive disconnet from server.");
+    return true;
 }
 
 int DyncProfMsgProcCli::SetParams(const std::string &params)
@@ -284,19 +293,27 @@ int DyncProfMsgProcCli::SendMsgToServer(DynProfMsgType reqMsgtype, DynProfMsgTyp
     }
     // receive message
     DynProfRspMsg rspMsg;
+    err = memset_s(rspMsg.msgData, sizeof(rspMsg.msgData), 0, sizeof(rspMsg.msgData));
+    if (err != EOK) {
+        MSPROF_LOGE("Dynamic profiling client clear rspMsg failed, err: %d", err);
+        return PROFILING_FAILED;
+    }
     ssize_t recvLen = recv(cliSockFd_, reinterpret_cast<VOID_PTR>(&rspMsg), sizeof(rspMsg), 0);
     if (static_cast<size_t>(recvLen) != sizeof(rspMsg)) {
         MSPROF_LOGE("cliSockFd_=%d recv msg fail, recvLen=%d, errno=%u", cliSockFd_, recvLen, errno);
         return PROFILING_FAILED;
     }
-    if (rspMsg.msgType != rspMsgtype ||
-        rspMsg.statusCode > DynProfMsgProcRes::EXE_FAIL ||
+    if (rspMsg.msgType != rspMsgtype || rspMsg.statusCode > DynProfMsgProcRes::EXE_FAIL ||
         rspMsg.msgDataLen >= DYN_PROF_RSP_MSG_MAX_LEN) {
         MSPROF_LOGE("server msg error, rspMsgtype=%d statusCode=%d msgDataLen=%u",
                     rspMsg.msgType, rspMsg.statusCode, rspMsg.msgDataLen);
         return PROFILING_FAILED;
     }
-
+    if (strnlen(rspMsg.msgData, rspMsg.msgDataLen) != rspMsg.msgDataLen) {
+        MSPROF_LOGE("invalid server data, msgData size %zu not equal to msgDataLen %lu",
+            sizeof(rspMsg.msgData), rspMsg.msgDataLen);
+        return PROFILING_FAILED;
+    }
     // encapsulate tips.
     std::string detail = (rspMsg.msgDataLen == 0) ? (".") : (", " + std::string(rspMsg.msgData, rspMsg.msgDataLen));
     if (rspMsg.statusCode != DynProfMsgProcRes::EXE_SUCC) {

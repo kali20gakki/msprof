@@ -127,7 +127,7 @@ int32_t OpDescParser::GetOpTypeLen(CONST_VOID_PTR data, uint32_t len, SIZE_T_PTR
     return ACL_SUCCESS;
 }
 
-int32_t OpDescParser::GetOpType(CONST_VOID_PTR data, uint32_t len, CHAR_PTR opType, uint32_t opTypeLen, uint32_t index)
+int32_t OpDescParser::GetOpType(CONST_VOID_PTR data, uint32_t len, CHAR_PTR opType, size_t opTypeLen, uint32_t index)
 {
     if (data == nullptr || opType == nullptr || opTypeLen == 0) {
         MSPROF_LOGE("Invalid param of GetOpType");
@@ -146,6 +146,10 @@ int32_t OpDescParser::GetOpType(CONST_VOID_PTR data, uint32_t len, CHAR_PTR opTy
     auto iter = opTypes_.find(opDesc->opIndex);
     if (iter == opTypes_.end()) {
         MSPROF_LOGE("Failed to get op type of %llu, maybe it has been got already", opDesc->opIndex);
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    if (iter->second.size() >= opTypeLen) {
+        MSPROF_LOGE("Input opTypeLen %lu shuold be larger than current optype len %zu", opTypeLen, iter->second.size());
         return ACL_ERROR_INVALID_PARAM;
     }
     errno_t err = memcpy_s(opType, opTypeLen, iter->second.c_str(), iter->second.size());
@@ -182,7 +186,7 @@ int32_t OpDescParser::GetOpNameLen(CONST_VOID_PTR data, uint32_t len, SIZE_T_PTR
     return ACL_SUCCESS;
 }
 
-int32_t OpDescParser::GetOpName(CONST_VOID_PTR data, uint32_t len, CHAR_PTR opName, uint32_t opNameLen, uint32_t index)
+int32_t OpDescParser::GetOpName(CONST_VOID_PTR data, uint32_t len, CHAR_PTR opName, size_t opNameLen, uint32_t index)
 {
     if (data == nullptr || opName == nullptr || opNameLen == 0) {
         MSPROF_LOGE("Invalid param of GetOpName");
@@ -201,6 +205,10 @@ int32_t OpDescParser::GetOpName(CONST_VOID_PTR data, uint32_t len, CHAR_PTR opNa
     auto iter = opNames_.find(opDesc->opIndex);
     if (iter == opNames_.end()) {
         MSPROF_LOGE("Failed to get op name of %llu, maybe it has been got already", opDesc->opIndex);
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    if (iter->second.size() >= opNameLen) {
+        MSPROF_LOGE("Input opNameLen %zu shuold be larger than current opname len %zu", opNameLen, iter->second.size());
         return ACL_ERROR_INVALID_PARAM;
     }
     errno_t err = memcpy_s(opName, opNameLen, iter->second.c_str(), iter->second.size());
