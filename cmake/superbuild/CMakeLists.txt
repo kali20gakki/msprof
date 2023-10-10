@@ -54,7 +54,7 @@ ExternalProject_Add(msprof
     SOURCE_DIR ${TOP_DIR}
     CONFIGURE_COMMAND ${CMAKE_COMMAND}
                 -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-                -DCMAKE_BUILD_TYPE=Debug
+                -DCMAKE_BUILD_TYPE=${MSPROF_BUILD_TYPE}
                 -DCMAKE_EXPORT_COMPILE_COMMANDS=1
                 -DSECUREC_LIB_DIR=${CMAKE_INSTALL_PREFIX}/securec_shared
                 -DHITEST=${HITEST}
