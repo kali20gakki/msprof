@@ -103,12 +103,11 @@ class FileManager:
         query_path = os.path.join(collection_path, PathManager.QUERY_CLUSTER)
         if not os.path.exists(query_path):
             try:
-                os.makedirs(query_path)
+                os.makedirs(query_path, mode=NumberConstant.DIR_AUTHORITY)
             except OSError:
                 error(os.path.basename(__file__),
                       "Storing data failed, you may not have the permission to write files in the current path.")
                 return
-            os.chmod(query_path, NumberConstant.DIR_AUTHORITY)
         output_file_path = PathManager.get_query_result_path(collection_path, file_name)
         check_path_valid(output_file_path, True)
         try:

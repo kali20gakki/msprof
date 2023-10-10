@@ -223,7 +223,7 @@ class ClusterDataPreparationParser:
         query_path = os.path.realpath(os.path.join(self._collection_path, self.QUERY_FILE_NAME))
         if not os.path.exists(query_path):
             try:
-                os.makedirs(query_path)
+                os.makedirs(query_path, mode=NumberConstant.DIR_AUTHORITY)
             except OSError as err:
                 message = f"Storing data failed, you may not have the permission to write files in the current path."
                 raise ProfException(ProfException.PROF_INVALID_PATH_ERROR, message) from err
