@@ -86,7 +86,8 @@ class HcclViewModel(ViewModel):
             return []
 
         sql = "SELECT a.model_id as model_id, a.index_id as index_id, a.name as hccl_name, a.plane_id as plane_id, " \
-              "a.args as args, a.timestamp as host_timestamp, a.group_name as group_name, b.start_time as timestamp, " \
+              "a.args as args, a.timestamp as host_timestamp, " \
+              "a.group_name as group_name, b.start_time as timestamp, " \
               "b.connection_id as connection_id, b.duration as duration from {0} as a inner join " \
               "{1} as b on " \
               "a.stream_id = b.stream_id " \
@@ -125,12 +126,14 @@ class HcclViewModel(ViewModel):
         sql = f"select model_id, index_id, op_name, group_name, min(timestamp) as timestamp, " \
               f"max(timestamp + duration) - min(timestamp) as duration, task_type, op_type, connection_id " \
               f"from {DBNameConstant.TABLE_HCCL_SINGLE_DEVICE} " \
+              f"WHERE is_master = '1' " \
               f"group by op_name, first_timestamp, group_name"
         return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclDto)
 
     def get_hccl_op_time_section(self):
         sql = f'select min(timestamp) as start_time, max(timestamp + duration) as end_time ' \
               f'from {DBNameConstant.TABLE_HCCL_SINGLE_DEVICE} ' \
+              f"WHERE is_master = '1' " \
               f'group by op_name, first_timestamp'
         return DBManager.fetch_all_data(self.cur, sql, dto_class=CommunicationTimeSection)
 

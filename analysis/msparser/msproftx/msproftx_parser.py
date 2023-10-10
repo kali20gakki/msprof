@@ -8,7 +8,7 @@ import re
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
-from common_func.file_manager import FileManager
+from common_func.file_manager import FileManager, FileOpen
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
@@ -60,11 +60,9 @@ class MsprofTxParser(IParser, MsMultiProcess):
         calculate = OffsetCalculator(self._cur_file_list, StructFmt.MSPROFTX_FMT_SIZE,
                                      self._project_path)
         msproftx_file = PathManager.get_data_file_path(self._project_path, file_name)
-        check_file_readable(msproftx_file)
-        _file_size = os.path.getsize(msproftx_file)
         try:
-            with open(msproftx_file, 'rb') as msproftx_f:
-                msproftx_data = calculate.pre_process(msproftx_f, _file_size)
+            with FileOpen(msproftx_file, 'rb') as msproftx_f:
+                msproftx_data = calculate.pre_process(msproftx_f.file_reader, os.path.getsize(msproftx_file))
                 for chunk in Utils.chunks(msproftx_data, StructFmt.MSPROFTX_FMT_SIZE):
                     data_object = MsprofTxDecoder.decode(chunk)
                     self.dispatch_msproftx_data(data_object)

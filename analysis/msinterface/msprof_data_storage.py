@@ -59,7 +59,8 @@ class MsprofDataStorage:
 
         if 'status' in timeline_data:
             return json.dumps(timeline_data)
-        sliced_timeline_data = MsprofDataStorage().slice_data_list(timeline_data)
+        device_count = PathManager.get_device_count(params.get(StrConstant.PARAM_RESULT_DIR))
+        sliced_timeline_data = MsprofDataStorage().slice_data_list(timeline_data, device_count)
         error_code, data_path = MsprofDataStorage.write_json_files(sliced_timeline_data, params)
         if error_code:
             return json.dumps({"status": NumberConstant.ERROR,
@@ -200,7 +201,7 @@ class MsprofDataStorage:
         self.set_tid()
         self._update_timeline_head()
 
-    def slice_data_list(self: any, data_list: list) -> tuple:
+    def slice_data_list(self: any, data_list: list, device_count: int = 1) -> tuple:
         """
         split data to slices
         return: tuple (slice count, slice data)
@@ -215,7 +216,7 @@ class MsprofDataStorage:
         slice_switch, limit_size, method = MsprofDataStorage.SETTING
         if slice_switch == 'off':
             return False, [self.timeline_head + data_list]
-        slice_count = self.get_slice_times(limit_size, method)
+        slice_count = self.get_slice_times(limit_size, method, device_count)
         if not slice_count:
             return False, [self.timeline_head + data_list]
         slice_point = len(data_list) // slice_count
@@ -262,7 +263,7 @@ class MsprofDataStorage:
             return self.DEFAULT_SETTING
         return slice_switch, limit_size, method
 
-    def get_slice_times(self: any, limit_size: int = 0, method: int = 0) -> int:
+    def get_slice_times(self: any, limit_size: int = 0, method: int = 0, device_count: int = 1) -> int:
         """
         read the configuration file
         :return: slice times: int
@@ -295,7 +296,9 @@ class MsprofDataStorage:
         except ZeroDivisionError as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
             return 0
-        return slice_time - 1 if slice_time > 2 else 0
+        slice_time = slice_time - 1 if slice_time > 2 else 0
+        # if only host or one device dir
+        return slice_time * (1 + device_count // 2)
 
     def _update_timeline_head(self: any) -> None:
         while self.data_list:

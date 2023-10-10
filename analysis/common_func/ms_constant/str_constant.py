@@ -412,6 +412,9 @@ class StrConstant:
     SCALAR_UTILIZATION = "Scalar Utilization"
     MTE_UTILIZATION = "MTE Utilization"
 
+    # prof level
+    PROF_LEVEL_0 = "l0"
+
     @property
     def accuracy(self: any) -> str:
         """

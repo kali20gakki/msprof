@@ -164,6 +164,8 @@ struct ProfileParams : BaseInfo {
     std::set<int> usedParams;
     // AI STACK
     uint64_t dataTypeConfig;
+    // prof level
+    std::string profLevel;
 
     ProfileParams()
         : msprofBinPid(MSVP_MMPROCESS), is_cancel(FALSE), profiling_period(-1),
@@ -362,6 +364,7 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, stars_acsq_task);
         SET_VALUE(object, low_power);
         SET_VALUE(object, msprofBinPid);
+        SET_VALUE(object, profLevel);
         SetUint64Value(object, MSG_STR(dataTypeConfig), dataTypeConfig);
     }
 
@@ -487,6 +490,8 @@ struct ProfileParams : BaseInfo {
         FROM_STRING_VALUE(object, host_network_profiling);
         FROM_STRING_VALUE(object, host_sys_cpu_profiling);
         FROM_STRING_VALUE(object, host_sys_mem_profiling);
+        // prof level
+        FROM_STRING_VALUE(object, profLevel);
         GetUint64Value(object, MSG_STR(dataTypeConfig), dataTypeConfig, 0);
     }
 

@@ -6,7 +6,7 @@ import logging
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
-from common_func.file_manager import FileManager
+from common_func.file_manager import FileManager, FileOpen
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
@@ -43,8 +43,8 @@ class ParsingPeripheralData(MsMultiProcess):
         parsing dvpp data file
         """
         try:
-            with open(PathManager.get_data_file_path(self.project_path, binary_data_path), 'r') as dvpp_file:
-                first_line_data = dvpp_file.readline(Constant.MAX_READ_LINE_BYTES)
+            with FileOpen(PathManager.get_data_file_path(self.project_path, binary_data_path), 'r') as dvpp_file:
+                first_line_data = dvpp_file.file_reader.readline(Constant.MAX_READ_LINE_BYTES)
                 if not first_line_data:
                     logging.warning("No dvpp data Found!")
                     return
@@ -52,7 +52,7 @@ class ParsingPeripheralData(MsMultiProcess):
                 first_line_data_lst = list(first_line_data.split())
                 if self.DVPP_HEADER_TAG in first_line_data_lst:
                     has_header = True
-                lines = dvpp_file.readlines(Constant.MAX_READ_FILE_BYTES)
+                lines = dvpp_file.file_reader.readlines(Constant.MAX_READ_FILE_BYTES)
                 if not has_header:
                     lines.insert(0, first_line_data)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:

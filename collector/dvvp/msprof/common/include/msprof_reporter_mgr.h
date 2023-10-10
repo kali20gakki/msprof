@@ -24,11 +24,12 @@ const std::map<uint16_t, std::map<uint32_t, std::string>> DEFAULT_TYPE_INFO = {
         {MSPROF_REPORT_NODE_FUSION_OP_INFO_TYPE, "fusion_op_info"},
         {MSPROF_REPORT_NODE_CONTEXT_ID_INFO_TYPE, "context_id_info"},
         {MSPROF_REPORT_NODE_LAUNCH_TYPE, "launch"},
-        {MSPROF_REPORT_NODE_TASK_MEMORY_TYPE, "task_memory_info"},
-        {MSPROF_REPORT_NODE_LOGIC_STREAM_TYPE, "logic_stream_info"}
+        {MSPROF_REPORT_NODE_TASK_MEMORY_TYPE, "task_memory_info"}
     }},
     { MSPROF_REPORT_MODEL_LEVEL, {
-        {MSPROF_REPORT_MODEL_GRAPH_ID_MAP_TYPE, "graph_id_map"}
+        {MSPROF_REPORT_MODEL_GRAPH_ID_MAP_TYPE, "graph_id_map"},
+        {MSPROF_REPORT_MODEL_EXEOM_TYPE, "model_exeom"},
+        {MSPROF_REPORT_MODEL_LOGIC_STREAM_TYPE, "logic_stream_info"}
     }},
     { MSPROF_REPORT_HCCL_NODE_LEVEL, {
         {MSPROF_REPORT_HCCL_MASTER_TYPE, "master"},
@@ -36,11 +37,16 @@ const std::map<uint16_t, std::map<uint32_t, std::string>> DEFAULT_TYPE_INFO = {
     }}
 };
 
-class MsprofReporterMgr : public analysis::dvvp::common::singleton::Singleton<MsprofReporterMgr> {
+class MsprofReporterMgr : public analysis::dvvp::common::singleton::Singleton<MsprofReporterMgr>,
+                          public analysis::dvvp::common::thread::Thread {
 public:
     MsprofReporterMgr();
     ~MsprofReporterMgr();
 public:
+    int Start() override;
+    int Stop() override;
+    void Run(const struct error_message::Context &errorContext) override;
+
     int32_t StartReporters();
     int32_t StopReporters();
     void FlushAllReporter(const std::string &devId = "");
@@ -55,15 +61,19 @@ public:
     int32_t SendAdditionalInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk);
 
 private:
-    void FillFileChunkData(const std::string &saveHashData, SHARED_PTR_ALIA<FileChunkReq> fileChunk) const;
-    void SaveTypeInfo();
+    void FillFileChunkData(const std::string &saveHashData, SHARED_PTR_ALIA<FileChunkReq> fileChunk,
+                           bool isLastChunk) const;
+    void SaveTypeInfo(bool isLastChunk);
 
 private:
     std::unordered_map<uint16_t, std::unordered_map<uint32_t, std::string>> reportTypeInfoMap_;
+    std::unordered_map<uint16_t, std::vector<std::pair<uint32_t, std::string>>> reportTypeInfoMapVec_;
+    std::unordered_map<uint16_t, uint32_t> indexMap_;
     std::vector<MsprofCallbackHandler> reporters_;
     std::mutex regTypeInfoMtx_;
     std::mutex startMtx_;
     bool isStarted_;
+    bool isUploadStarted_;
 };
 }
 }

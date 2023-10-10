@@ -47,6 +47,7 @@ int32_t HashData::Init()
         std::map<uint64_t, std::string> hashIdMap;
         hashIdKeyMap_.insert(std::make_pair(module.name, hashIdMap));
     }
+    Start();
     inited_ = true;
     MSPROF_LOGI("HashData initialize success");
     return PROFILING_SUCCESS;
@@ -59,6 +60,7 @@ int32_t HashData::Uninit()
     hashMapMutex_.clear();
     hashInfoMap_.clear();
     hashIdMap_.clear();
+    Stop();
     inited_ = false;
     MSPROF_LOGI("HashData uninitialize success");
     return PROFILING_SUCCESS;
@@ -67,6 +69,55 @@ int32_t HashData::Uninit()
 bool HashData::IsInit() const
 {
     return inited_;
+}
+
+int HashData::Start()
+{
+    if (isStarted_) {
+        MSPROF_LOGW("hash upload has been started!");
+        return PROFILING_SUCCESS;
+    }
+
+    Thread::SetThreadName(analysis::dvvp::common::config::MSVP_HASH_DATA_UPLOAD_THREAD_NAME);
+    int ret = Thread::Start();
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to start the upload in HashData::Start().");
+        return PROFILING_FAILED;
+    } else {
+        MSPROF_LOGI("Succeeded in starting the upload in HashData::Start().");
+    }
+    isStarted_ = true;
+    return PROFILING_SUCCESS;
+}
+
+void HashData::Run(const struct error_message::Context &errorContext)
+{
+    while (!IsQuit()) {
+        Collector::Dvvp::Mmpa::MmSleep(1000);    // 1000 表示 1s，等待1s再重新检测落盘.防止少量数据频繁落盘
+        SaveNewHashData(false);
+    }
+}
+
+int HashData::Stop()
+{
+    if (!inited_) {
+        return PROFILING_SUCCESS;
+    }
+    MSPROF_LOGI("Stop hash read thread begin");
+    if (!isStarted_) {
+        MSPROF_LOGE("Hash read thread not started");
+        return PROFILING_FAILED;
+    }
+    isStarted_ = false;
+
+    int ret = analysis::dvvp::common::thread::Thread::Stop();
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Hash read Thread stop failed");
+        return PROFILING_FAILED;
+    }
+
+    MSPROF_LOGI("Stop hash read Thread success");
+    return PROFILING_SUCCESS;
 }
 
 uint64_t HashData::DoubleHash(const std::string &data) const
@@ -139,6 +190,8 @@ uint64_t HashData::GenHashId(const std::string &hashInfo)
     } else {
         uint64_t hashId = DoubleHash(hashInfo);
         hashInfoMap_[hashInfo] = hashId;
+        std::pair<uint64_t, std::string> tmpHashInfo(hashId, hashInfo);
+        hashVector_.emplace_back(tmpHashInfo);
         if (hashIdMap_.find(hashId) != hashIdMap_.end()) {
             MSPROF_LOGW("HashData GenHashId conflict, hashId:%llu oldStr:%s newStr:%s",
                         hashId, hashIdMap_[hashId].c_str(), hashInfo.c_str());
@@ -164,11 +217,11 @@ std::string &HashData::GetHashInfo(uint64_t hashId)
 }
 
 void HashData::FillPbData(const std::string &module, int32_t upDevId,
-    const std::string &saveHashData, SHARED_PTR_ALIA<FileChunkReq> fileChunk)
+    const std::string &saveHashData, SHARED_PTR_ALIA<FileChunkReq> fileChunk, bool isLastChunk)
 {
     fileChunk->set_filename(module);
     fileChunk->set_offset(-1);
-    fileChunk->set_islastchunk(true);
+    fileChunk->set_islastchunk(isLastChunk);
     fileChunk->set_needack(false);
     fileChunk->set_tag(HASH_TAG, strlen(HASH_TAG));
     fileChunk->set_tagsuffix(std::to_string(upDevId));
@@ -204,7 +257,7 @@ void HashData::SaveHashData()
         // construct FileChunkReq data
         SHARED_PTR_ALIA<FileChunkReq> fileChunk = nullptr;
         MSVP_MAKE_SHARED0_BREAK(fileChunk, FileChunkReq);
-        FillPbData(module.name, DEFAULT_HOST_ID, saveHashData, fileChunk);
+        FillPbData(module.name, DEFAULT_HOST_ID, saveHashData, fileChunk, true);
         // upload FileChunkReq data
         std::string encoded = analysis::dvvp::message::EncodeMessage(fileChunk);
         int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadData(
@@ -218,26 +271,33 @@ void HashData::SaveHashData()
             module.name.c_str(), saveHashData.size(),
             hashDataKeyMap_[module.name].size(), hashIdKeyMap_[module.name].size());
     }
-    SaveNewHashData();
+    SaveNewHashData(true);
 }
 
-void HashData::SaveNewHashData()
+void HashData::SaveNewHashData(bool isLastChunk)
 {
     if (!inited_) {
         MSPROF_LOGW("HashData not inited");
         return;
     }
     std::unique_lock<std::mutex> lock(hashMutex_);
+    SHARED_PTR_ALIA<Uploader> uploader = nullptr;
+    UploaderMgr::instance()->GetUploader(std::to_string(DEFAULT_HOST_ID), uploader);
+    if (uploader == nullptr || readIndex_ == hashVector_.size()) {
+        return;
+    }
     // combined hash map data
     std::string saveHashData;
-    for (auto &data : hashIdMap_) {
-        saveHashData.append(std::to_string(data.first) + HASH_DIC_DELIMITER + data.second + "\n");
+    size_t currentHashSize = hashVector_.size();
+    for (size_t i = readIndex_; i < currentHashSize; i++) {
+        saveHashData.append(std::to_string(hashVector_[i].first) + HASH_DIC_DELIMITER + hashVector_[i].second + "\n");
     }
+    readIndex_ = currentHashSize;
     lock.unlock();
     // construct FileChunkReq data
     SHARED_PTR_ALIA<FileChunkReq> fileChunk = nullptr;
     MSVP_MAKE_SHARED0_VOID(fileChunk, FileChunkReq);
-    FillPbData("unaging.additional", DEFAULT_HOST_ID, saveHashData, fileChunk);
+    FillPbData("unaging.additional", DEFAULT_HOST_ID, saveHashData, fileChunk, isLastChunk);
     // upload FileChunkReq data
     std::string encoded = analysis::dvvp::message::EncodeMessage(fileChunk);
     int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadData(

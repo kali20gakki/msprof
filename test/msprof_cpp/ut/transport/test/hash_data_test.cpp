@@ -138,7 +138,7 @@ TEST_F(COMMON_HASH_DATA_TEST, GenHashId_NewDataStruct)
 TEST_F(COMMON_HASH_DATA_TEST, SaveNewHashData)
 {
     GlobalMockObject::verify();
-    HashData::instance()->SaveNewHashData();
+    HashData::instance()->SaveNewHashData(true);
  
     HashData::instance()->Init();
     HashData::instance()->GenHashId("Test1");
@@ -147,6 +147,6 @@ TEST_F(COMMON_HASH_DATA_TEST, SaveNewHashData)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    HashData::instance()->SaveNewHashData();
-    HashData::instance()->SaveNewHashData();
+    HashData::instance()->SaveNewHashData(true);
+    HashData::instance()->SaveNewHashData(true);
 }

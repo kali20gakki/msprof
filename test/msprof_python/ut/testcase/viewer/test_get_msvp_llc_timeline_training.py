@@ -167,8 +167,8 @@ class TestLLCTimelineTrain(unittest.TestCase):
         db_manager = DBManager()
         test_sql = db_manager.create_table(DBNameConstant.DB_LLC)
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
-             mock.patch(NAMESPACE + '.generate_config', return_value=sample_config), \
-             mock.patch(NAMESPACE + '.get_llc_db_table', return_value=''), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=sample_config), \
+                mock.patch(NAMESPACE + '.get_llc_db_table', return_value=''), \
                 mock.patch(NAMESPACE + '.pre_check_llc', return_value=[]), \
                 mock.patch(NAMESPACE + '.get_llc_mini_data', side_effect=OSError):
             ChipManager().chip_id = ChipModel.CHIP_V1_1_0
@@ -176,7 +176,7 @@ class TestLLCTimelineTrain(unittest.TestCase):
         self.assertEqual(len(json.loads(res)), 2)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
-             mock.patch(NAMESPACE + '.generate_config', return_value=sample_config), \
+             mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=sample_config), \
              mock.patch(NAMESPACE + '.get_llc_db_table', return_value=''), \
              mock.patch(NAMESPACE + '.pre_check_llc', return_value=[1]):
             res = get_llc_timeline(param)
@@ -187,7 +187,7 @@ class TestLLCTimelineTrain(unittest.TestCase):
         db_manager = DBManager()
         test_sql = db_manager.create_table(DBNameConstant.DB_LLC)
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
-             mock.patch(NAMESPACE + '.generate_config', return_value=sample_config), \
+             mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=sample_config), \
              mock.patch(NAMESPACE + '.get_llc_db_table', return_value=''), \
              mock.patch(NAMESPACE + '.pre_check_llc', return_value=[]), \
              mock.patch(NAMESPACE + '.get_llc_mini_data', return_value=[]):
@@ -196,7 +196,7 @@ class TestLLCTimelineTrain(unittest.TestCase):
         self.assertEqual(res, [])
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
-             mock.patch(NAMESPACE + '.generate_config', return_value=sample_config), \
+             mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=sample_config), \
              mock.patch(NAMESPACE + '.get_llc_db_table', return_value=''), \
              mock.patch(NAMESPACE + '.pre_check_llc', return_value=[]), \
              mock.patch(NAMESPACE + '.get_llc_nomini_data', return_value=[]):

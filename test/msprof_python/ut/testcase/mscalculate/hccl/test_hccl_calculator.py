@@ -21,11 +21,13 @@ class TestHcclCalculator(unittest.TestCase):
     DIR_PATH = os.path.join(os.path.dirname(__file__), 'DT_HcclCalculator')
 
     @staticmethod
-    def construct_hccl_dto(op_name, timestamp=123456, duration=0, op_type="HCCL_OP_TYPE"):
+    def construct_hccl_dto(op_name, args, timestamp=123456, duration=0, op_type="HCCL_OP_TYPE"):
         hccl_data = HcclDto()
         hccl_data.op_name, hccl_data.iteration, hccl_data.duration, hccl_data.first_timestamp, hccl_data.is_dynamic, \
-        hccl_data.model_id, hccl_data.index_id, hccl_data.task_type, hccl_data.op_type = \
+            hccl_data.model_id, hccl_data.index_id, hccl_data.task_type, hccl_data.op_type = \
             (op_name, 1, duration, timestamp, 0, 1, 1, "HCCL", op_type)
+        is_master = args.get('is_master')
+        hccl_data.is_master = is_master
         return hccl_data
 
     def setUp(self) -> None:
@@ -42,31 +44,31 @@ class TestHcclCalculator(unittest.TestCase):
 
     def test_calculate_should_update_both_hccl_data_and_hccl_op_report_data_when_op_type_valid(self):
         with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True), \
-             mock.patch(NAMESPACE + '.HcclCalculator._merge_hccl_ops_and_tasks', return_value=[
-                 HcclTask(op_name="hccl_op", timestamp=1, duration=1, op_type="all_reduce")]):
+                mock.patch(NAMESPACE + '.HcclCalculator._merge_hccl_ops_and_tasks', return_value=[
+                    HcclTask(op_name="hccl_op", timestamp=1, duration=1, op_type="all_reduce")]):
             check = HcclCalculator([], CONFIG)
             check.calculate()
             hccl_data = check._hccl_data
             hccl_op_report_data = check._hccl_op_report_data
-            self.assertEqual(15, len(hccl_data[0]))
+            self.assertEqual(16, len(hccl_data[0]))
             self.assertEqual([("all_reduce", 1.0, 1.0, 1.0, 1.0, 1.0, 100.0)], hccl_op_report_data)
 
     def test_calculate_should_update_both_hccl_data_and_hccl_op_report_data_when_op_type_invalid(self):
         with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True), \
-             mock.patch(NAMESPACE + '.HcclCalculator._merge_hccl_ops_and_tasks', return_value=[
-                 HcclTask(op_name="hccl_op", timestamp=1, duration=1, op_type=Constant.NA)]):
+                mock.patch(NAMESPACE + '.HcclCalculator._merge_hccl_ops_and_tasks', return_value=[
+                    HcclTask(op_name="hccl_op", timestamp=1, duration=1, op_type=Constant.NA)]):
             check = HcclCalculator([], CONFIG)
             check.calculate()
             hccl_data = check._hccl_data
             hccl_op_report_data = check._hccl_op_report_data
-            self.assertEqual(15, len(hccl_data[0]))
+            self.assertEqual(16, len(hccl_data[0]))
             self.assertEqual([], hccl_op_report_data)
 
     def test_generate_hccl_op_info_should_return_three_data_when_the_input_len_is_three(self):
         hccl_data = [
-            self.construct_hccl_dto("hccl_op1"),
-            self.construct_hccl_dto("hccl_op1", timestamp=123457),
-            self.construct_hccl_dto("hccl_op2", timestamp=123458)
+            self.construct_hccl_dto("hccl_op1", args={'is_master': '1'}),
+            self.construct_hccl_dto("hccl_op1", timestamp=123457, args={'is_master': '0'}),
+            self.construct_hccl_dto("hccl_op2", timestamp=123458, args={'is_master': '0'})
         ]
         check = HcclCalculator([], CONFIG)
         check._generate_hccl_op_info(hccl_data)
@@ -94,11 +96,12 @@ class TestHcclCalculator(unittest.TestCase):
                                                ("2", 1, 1.0, 1.0, 1.0, 1.0, 20.0)])
 
     def test_get_hccl_op_report_data_should_return_dict_data_when_input_is_hccldto_list(self):
+        args = {'stream id': 2, 'task id': 0, 'context id': 4294967295, 'is_master': '1'}
         hccl_data = [
-            self.construct_hccl_dto("hccl_op1", timestamp=1, duration=2, op_type="all_reduce"),
-            self.construct_hccl_dto("hccl_op2", timestamp=5, duration=3, op_type="all_reduce"),
-            self.construct_hccl_dto("hccl_op3", timestamp=10, duration=2, op_type="all_gather"),
-            self.construct_hccl_dto("hccl_op4", timestamp=15, duration=3, op_type="all_gather")
+            self.construct_hccl_dto("hccl_op1", args, timestamp=1, duration=2, op_type="all_reduce"),
+            self.construct_hccl_dto("hccl_op2", args, timestamp=5, duration=3, op_type="all_reduce"),
+            self.construct_hccl_dto("hccl_op3", args, timestamp=10, duration=2, op_type="all_gather"),
+            self.construct_hccl_dto("hccl_op4", args, timestamp=15, duration=3, op_type="all_gather")
         ]
         check = HcclCalculator([], CONFIG)
         hccl_op_report_data = check._get_hccl_op_report_data(hccl_data)

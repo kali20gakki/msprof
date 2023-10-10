@@ -6,7 +6,7 @@ import logging
 import os
 import sqlite3
 
-from common_func.common import pre_check_sample
+from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
@@ -187,7 +187,7 @@ def _get_output_event_counter(cursor: any, result_dir: str, table_name: str) -> 
     """
     get ai core event count data by table name
     """
-    sample_config = pre_check_sample(result_dir, 'ai_core_profiling_events')
+    sample_config = ConfigMgr.pre_check_sample(result_dir, 'ai_core_profiling_events')
     if not sample_config:
         return []
     if not DBManager.judge_table_exist(cursor, table_name):

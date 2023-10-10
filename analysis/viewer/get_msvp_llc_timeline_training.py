@@ -8,7 +8,7 @@ import sqlite3
 from collections import OrderedDict
 
 from common_func.common import CommonConstant
-from common_func.common import generate_config
+from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
@@ -282,7 +282,7 @@ def get_llc_timeline(param: dict) -> str:
     get llc time series data
     """
     conn, curs = DBManager.check_connect_db(param[StrConstant.PARAM_RESULT_DIR], DBNameConstant.DB_LLC)
-    sample_config = generate_config(os.path.join(param[StrConstant.PARAM_RESULT_DIR], CommonConstant.SAMPLE_JSON))
+    sample_config = ConfigMgr.read_sample_config(param[StrConstant.PARAM_RESULT_DIR])
     table_name = get_llc_db_table(sample_config)
 
     llc_check_result = pre_check_llc(conn, curs, sample_config, table_name)

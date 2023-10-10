@@ -12,6 +12,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_number
 from common_func.msvp_constant import MsvpConstant
+from common_func.file_manager import FileOpen
 from host_prof.host_mem_usage.model.host_mem_usage import HostMemUsage
 from host_prof.host_prof_base.host_prof_presenter_base import HostProfPresenterBase
 
@@ -44,8 +45,8 @@ class HostMemUsagePresenter(HostProfPresenterBase):
         parse prof data
         """
         try:
-            with open(self.file_name, "r") as file:
-                self._parse_mem_usage(file)
+            with FileOpen(self.file_name, "r") as file:
+                self._parse_mem_usage(file.file_reader)
                 logging.info(
                     "Finish parsing host mem usage data file: %s", os.path.basename(self.file_name))
         except (FileNotFoundError, ValueError, IOError, TypeError) as parse_file_except:

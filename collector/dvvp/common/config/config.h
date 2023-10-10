@@ -111,6 +111,8 @@ const char * const MSVP_HDC_DUMPER_THREAD_NAME = "MSVP_HdcDumper";
 const char * const MSVP_RPC_DUMPER_THREAD_NAME = "MSVP_RpcDumper";
 const char * const MSVP_DYN_PROF_SERVER_THREAD_NAME = "MSVP_DynProfServer";
 const char * const MSVP_DYN_PROF_CLIENT_THREAD_NAME = "MSVP_DynProfClient";
+const char * const MSVP_HASH_DATA_UPLOAD_THREAD_NAME = "MSVP_hashDataUpload";
+const char * const MSVP_TYPE_INFO_UPLOAD_THREAD_NAME = "MSVP_typeInfoUpload";
 
 // cloud prof config
 const std::string SAMPLE_KEY = "sample";

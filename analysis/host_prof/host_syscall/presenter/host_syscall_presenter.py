@@ -11,6 +11,7 @@ from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.file_name_manager import get_host_syscall_compiles
+from common_func.file_manager import FileOpen
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
@@ -273,13 +274,13 @@ class HostSyscallPresenter(HostProfPresenterBase):
         :return: None
         """
         try:
-            with open(self.file_name, "r") as file:
+            with FileOpen(self.file_name, "r") as file:
                 host_syscall_file_patterns = get_host_syscall_compiles()
                 if get_file_name_pattern_match(os.path.basename(self.file_name),
                                                *host_syscall_file_patterns):
-                    self._parse_syscall_api(file)
+                    self._parse_syscall_api(file.file_reader)
                 else:
-                    self._parse_pthread_api(file)
+                    self._parse_pthread_api(file.file_reader)
                 logging.info(
                     "Finish parsing os runtime api data file: %s", os.path.basename(self.file_name))
         except (FileNotFoundError, ValueError, IOError) as parse_file_except:

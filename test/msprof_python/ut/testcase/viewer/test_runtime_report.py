@@ -119,7 +119,7 @@ class TestRuntimeReport(unittest.TestCase):
 
         test_sql = db_manager.create_table(DBNameConstant.DB_RUNTIME, create_sql, insert_sql, data)
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
-                mock.patch(NAMESPACE + '.pre_check_sample', return_value=configs), \
+                mock.patch("common_func.config_mgr.ConfigMgr.pre_check_sample", return_value=configs), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
                 mock.patch(NAMESPACE + '.add_op_total', return_value=[]), \
                 mock.patch(NAMESPACE + '.cal_metrics', return_value=[1, 2]):
@@ -164,15 +164,16 @@ class TestRuntimeReport(unittest.TestCase):
         self.assertEqual(res, [])
 
     def test_get_output_event_counter_1(self):
-        with mock.patch(NAMESPACE + '.pre_check_sample', return_value=None):
+        with mock.patch("common_func.config_mgr.ConfigMgr.pre_check_sample", return_value=None):
             res = _get_output_event_counter(None, "", "")
         self.assertEqual(res, [])
 
-        with mock.patch(NAMESPACE + '._get_event_counter_metric_res', side_effect=TypeError):
+        with mock.patch(NAMESPACE + '._get_event_counter_metric_res', side_effect=TypeError), \
+                mock.patch("common_func.config_mgr.ConfigMgr.pre_check_sample", return_value=None):
             res = _get_output_event_counter(None, "", "")
         self.assertEqual(res, [])
 
-        with mock.patch(NAMESPACE + '.pre_check_sample', return_value=configs), \
+        with mock.patch("common_func.config_mgr.ConfigMgr.pre_check_sample", return_value=configs), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
             res = _get_output_event_counter(None, "", "")
         self.assertEqual(res, [])

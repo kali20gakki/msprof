@@ -20,6 +20,7 @@ class HcclDto:
         self._iteration = Constant.DEFAULT_VALUE
         self._hccl_name = Constant.NA
         self._group_name = Constant.NA
+        self._is_master = Constant.NA
         self._first_timestamp = Constant.DEFAULT_VALUE
         self._plane_id = Constant.DEFAULT_VALUE
         self._timestamp = Constant.DEFAULT_VALUE
@@ -84,6 +85,10 @@ class HcclDto:
     @property
     def stream_id(self: any) -> any:
         return self._args.get('stream id', self._stream_id)
+
+    @property
+    def is_master(self: any) -> any:
+        return self._is_master
 
     @property
     def task_id(self: any) -> any:
@@ -202,3 +207,8 @@ class HcclDto:
     @connection_id.setter
     def connection_id(self, value: int):
         self._connection_id = value
+
+    @is_master.setter
+    def is_master(self, value: int):
+        self._is_master = value
+

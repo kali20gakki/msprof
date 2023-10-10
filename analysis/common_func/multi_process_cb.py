@@ -8,6 +8,7 @@ import re
 
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
+from common_func.file_manager import FileOpen
 
 
 class MultiProcessCbConstant:
@@ -146,8 +147,8 @@ def multiprocess_callback(args: any) -> None:
     lock = args['lock']
     conn, curs = DBManager.create_connect_db(args["dbname"] + '.db')
     try:
-        with open(args["filename"], 'r') as file_obj:
-            _multiprocess_callback_helper(args, file_obj, info, conn, curs, lock)
+        with FileOpen(args["filename"], 'r') as file_obj:
+            _multiprocess_callback_helper(args, file_obj.file_reader, info, conn, curs, lock)
     except (OSError, SystemError, ValueError, TypeError, RuntimeError, StopIteration) as reason:
         logging.exception("Exception occurred: %s", reason)
     finally:

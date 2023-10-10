@@ -42,6 +42,7 @@ class TestHostSyscallPresenter(unittest.TestCase):
                        "runtime_duration REAL,runtime_end_time REAL,runtime_trans_start REAL,"
                        "runtime_trans_end REAL)")
         with mock.patch('builtins.open', mock.mock_open(read_data=pthreadgap_data)), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.info'):
             InfoConfReader()._info_json = {"cpuNums": 8, "sysClockFreq": 100, 'pid': 1}
             InfoConfReader()._start_info = {"clockMonotonicRaw": 191424756318872}
@@ -53,6 +54,7 @@ class TestHostSyscallPresenter(unittest.TestCase):
             check.parse_prof_data()
         self.assertEqual(check.pid, 1)
         with mock.patch('builtins.open', mock.mock_open(read_data=syscall_data)), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.info'):
             InfoConfReader()._info_json = {'pid': 1}
             InfoConfReader()._start_info = {"clockMonotonicRaw": 191424756318872}
@@ -64,6 +66,7 @@ class TestHostSyscallPresenter(unittest.TestCase):
             check.parse_prof_data()
         self.assertEqual(check.pid, 1)
         with mock.patch('builtins.open', side_effect=ValueError), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.logging.error'):
             check = HostSyscallPresenter(self.result_dir, self.file_name)
             check.parse_prof_data()

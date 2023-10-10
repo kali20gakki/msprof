@@ -6,7 +6,7 @@ import logging
 import os
 
 from common_func.db_name_constant import DBNameConstant
-from common_func.file_manager import FileManager
+from common_func.file_manager import FileManager, FileOpen
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
@@ -67,8 +67,8 @@ class FreqParser(IParser, MsMultiProcess):
 
     def _read_file(self: any, _file_path: str, _file_size: int, offset_calculator: OffsetCalculator) -> None:
         freq_data_bean = FreqLpmConvBean()
-        with open(_file_path, 'rb') as file_reader:
-            _all_freq_data = offset_calculator.pre_process(file_reader, _file_size)
+        with FileOpen(_file_path, 'rb') as file_reader:
+            _all_freq_data = offset_calculator.pre_process(file_reader.file_reader, _file_size)
             freq_data_chunks = Utils.chunks(_all_freq_data, StructFmt.FREQ_DATA_SIZE)
             for freq_data in freq_data_chunks:
                 freq_data_bean.decode(freq_data)

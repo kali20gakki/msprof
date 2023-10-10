@@ -47,19 +47,19 @@ class TestHardwareInfo(unittest.TestCase):
 
     def test_get_llc_bandwidth_1(self):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(None, None)), \
-                mock.patch(NAMESPACE + '.generate_config', return_value=configs):
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=configs):
             res = get_llc_bandwidth('', 0)
         self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-                mock.patch(NAMESPACE + '.generate_config', return_value=configs), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=configs), \
                 mock.patch(NAMESPACE + '._get_bandwidth_res', side_effect=OSError), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             res = get_llc_bandwidth('', 0)
         self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-                mock.patch(NAMESPACE + '.generate_config', return_value=configs), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=configs), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
             res = get_llc_bandwidth('', 0)
         self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
@@ -75,7 +75,7 @@ class TestHardwareInfo(unittest.TestCase):
 
         test_sql = db_manager.create_table("llc.db", create_sql, insert_sql, data)
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
-                mock.patch(NAMESPACE + '.generate_config', return_value=configs), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=configs), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             configs[StrConstant.LLC_PROF] = StrConstant.LLC_BAND_ITEM
             InfoConfReader()._info_json = {"pid": 0}
@@ -87,18 +87,18 @@ class TestHardwareInfo(unittest.TestCase):
 
     def test_llc_capacity_data_1(self):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(None, None)), \
-                mock.patch(NAMESPACE + '.generate_config', return_value=configs):
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=configs):
             res = llc_capacity_data('', 0, "ctrlcpu")
         self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-                mock.patch(NAMESPACE + '.generate_config', return_value=configs), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=configs), \
                 mock.patch(NAMESPACE + '._get_llc_capacity_data', side_effect=TypeError):
             res = llc_capacity_data('', 0, "ctrlcpu")
         self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-                mock.patch(NAMESPACE + '.generate_config', return_value=configs), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=configs), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
             res = llc_capacity_data('', 0, "ctrlcpu")
         self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
@@ -113,14 +113,14 @@ class TestHardwareInfo(unittest.TestCase):
 
         test_sql = db_manager.create_table("llc.db", create_sql, insert_sql, data)
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
-                mock.patch(NAMESPACE + '.generate_config', return_value=configs), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=configs), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             configs[StrConstant.LLC_PROF] = StrConstant.LLC_CAPACITY_ITEM
             InfoConfReader()._info_json = {"pid": 0}
             res = llc_capacity_data('', 0, "ctrlcpu")
         test_sql = db_manager.create_table("llc.db", create_sql, insert_sql, data)
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
-                mock.patch(NAMESPACE + '.generate_config', return_value=configs), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=configs), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             configs[StrConstant.LLC_PROF] = StrConstant.LLC_CAPACITY_ITEM
             InfoConfReader()._info_json = {"pid": 0}

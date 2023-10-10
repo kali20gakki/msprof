@@ -17,6 +17,7 @@ class TestParseAiCpuData(unittest.TestCase):
                         return_value='test\\data'), \
                 mock.patch(NAMESPACE + '.logging.error'), \
                 mock.patch('os.path.getsize', return_value=128), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={1: 10}):
             check = ParseAiCpuDataAdapter(self.file_list, CONFIG)
             result = check.get_ai_cpu_analysis_engine(self.file_list.get(DataTag.AI_CPU))
@@ -30,6 +31,7 @@ class TestParseAiCpuData(unittest.TestCase):
                 mock.patch(NAMESPACE + '.PathManager.get_data_file_path',
                            return_value='test\\data\\DATA_PREPROCESS.AICPU.7.slice_0'), \
                 mock.patch('os.path.getsize', return_value=132), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={1: 10}):
             with mock.patch('builtins.open', side_effect=SystemError), \
                     mock.patch(NAMESPACE + '.logging.error'), \

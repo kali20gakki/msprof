@@ -97,7 +97,10 @@ int HdcTransportDataHandle::ProcessStreamFileChunk(SHARED_PTR_ALIA<google::proto
             MSPROF_LOGE("[ProcessStreamFileChunk]jobCtx.dev_id: %s is not valid!", jobCtx.dev_id.c_str());
             return PROFILING_FAILED;
         }
-        int devId = Utils::StrToInt(jobCtx.dev_id);
+        int devId;
+        if (Utils::StrToInt(devId, jobCtx.dev_id) == PROFILING_FAILED) {
+            return PROFILING_FAILED;
+        }
         jobId = UploaderMgr::instance()->GetJobId(devId, analysis::dvvp::message::PROFILING_MODE_DEF);
         fileChunkReq->set_datamodule(FileChunkDataModule::PROFILING_IS_FROM_MSPROF_DEVICE);
     }

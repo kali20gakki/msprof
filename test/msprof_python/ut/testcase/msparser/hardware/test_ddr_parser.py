@@ -24,7 +24,7 @@ class TestParsingDDRData(unittest.TestCase):
                 mock.patch(NAMESPACE + '.struct.calcsize', return_value=1280), \
                 mock.patch('builtins.open', mock.mock_open(read_data=data)), \
                 mock.patch('os.path.getsize', return_value=len(data)), \
-                mock.patch(NAMESPACE + '.check_file_readable'):
+                mock.patch("common_func.file_manager.check_path_valid"):
             InfoConfReader()._info_json = INFO_JSON
             key = ParsingDDRData(self.file_list, sample_config)
             result = key.read_binary_data(file_name, device_id, replayid)
@@ -34,7 +34,7 @@ class TestParsingDDRData(unittest.TestCase):
                 mock.patch('builtins.open', side_effect=OSError), \
                 mock.patch('os.path.getsize', return_value=len(data)), \
                 mock.patch(NAMESPACE + '.logging.error'), \
-                mock.patch(NAMESPACE + '.check_file_readable'):
+                mock.patch("common_func.file_manager.check_path_valid"):
             InfoConfReader()._info_json = {'devices': '0'}
             key = ParsingDDRData(self.file_list, sample_config)
             result = key.read_binary_data(file_name, device_id, replayid)

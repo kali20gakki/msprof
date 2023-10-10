@@ -17,6 +17,7 @@ from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
 from common_func.utils import Utils
+from common_func.file_manager import FileOpen
 from framework.offset_calculator import OffsetCalculator
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
@@ -143,8 +144,8 @@ class StarsIterRecParser(IParser, MsMultiProcess):
         for log_file in log_file_list:
             log_file = PathManager.get_data_file_path(self._project_path, log_file)
             logging.info("Begin to process stars log data file: %s", os.path.basename(log_file))
-            with open(log_file, 'rb') as log_reader:
-                all_bytes = _offset_calculator.pre_process(log_reader, os.path.getsize(log_file))
+            with FileOpen(log_file, 'rb') as log_reader:
+                all_bytes = _offset_calculator.pre_process(log_reader.file_reader, os.path.getsize(log_file))
                 self._process_log_data(all_bytes)
 
     def _process_log_data(self, all_bytes: bytes) -> None:
@@ -164,8 +165,9 @@ class StarsIterRecParser(IParser, MsMultiProcess):
         for _ffts_profile_file in pmu_file_list:
             _ffts_profile_file = PathManager.get_data_file_path(self._project_path, _ffts_profile_file)
             logging.info("Begin to process ffts profile data file: %s", os.path.basename(_ffts_profile_file))
-            with open(_ffts_profile_file, 'rb') as fft_pmu_reader:
-                all_bytes = _offset_calculator.pre_process(fft_pmu_reader, os.path.getsize(_ffts_profile_file))
+            with FileOpen(_ffts_profile_file, 'rb') as fft_pmu_reader:
+                all_bytes = _offset_calculator.pre_process(fft_pmu_reader.file_reader,
+                                                           os.path.getsize(_ffts_profile_file))
                 self._process_pmu_data(all_bytes)
 
     def _process_pmu_data(self: any, all_bytes: bytes) -> None:

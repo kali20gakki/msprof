@@ -8,7 +8,6 @@ import os
 import sqlite3
 import struct
 
-from common_func.common import generate_config
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -101,7 +100,7 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         return ''
 
     def ms_run(self: any) -> None:
-        config = generate_config(PathManager.get_sample_json_path(self._result_dir))
+        config = ConfigMgr.read_sample_config(self._result_dir)
         if not self._file_list or config.get(StrConstant.AICORE_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE \
                 or config.get(StrConstant.AIV_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE:
             return
@@ -155,10 +154,11 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
             task_type = 0 if data.is_aic_data() else 1
 
             aic_pmu_value, aiv_pmu_value, aic_total_cycle, aiv_total_cycle = self.get_total_cycle_info(data, task_type)
-            block_dim = self._get_current_block('block_dim', data)
-            mix_block_dim = self._get_current_block('mix_block_dim', data)
-            aic_total_time = self.calculate_total_time(data, block_dim, mix_block_dim)
-            aiv_total_time = self.calculate_total_time(data, block_dim, mix_block_dim, data_type='aiv')
+            block_dim_dict = {}
+            block_dim_dict.setdefault(False, self._get_current_block('block_dim', data))
+            block_dim_dict.setdefault(True, self._get_current_block('mix_block_dim', data))
+            aic_total_time = self.calculate_total_time(data, aic_total_cycle, block_dim_dict)
+            aiv_total_time = self.calculate_total_time(data, aiv_total_cycle, block_dim_dict, data_type='aiv')
             aic_calculator = CalculateAiCoreData(self._project_path)
             aic_pmu_value = aic_calculator.add_pipe_time(
                 aic_pmu_value, aic_total_time, self._sample_json.get('ai_core_metrics'))
@@ -192,9 +192,10 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
                 pmu_events = AicPmuUtils.get_custom_pmu_events(self._sample_json.get('ai_core_profiling_events'))
             else:
                 pmu_events = AicPmuUtils.get_pmu_events(self._sample_json.get('ai_core_profiling_events'))
-            block_dim = self._get_current_block('block_dim', data)
-            mix_block_dim = self._get_current_block('mix_block_dim', data)
-            total_time = self.calculate_total_time(data, block_dim, mix_block_dim)
+            block_dim_dict = {}
+            block_dim_dict.setdefault(False, self._get_current_block('block_dim', data))
+            block_dim_dict.setdefault(True, self._get_current_block('mix_block_dim', data))
+            total_time = self.calculate_total_time(data, data.total_cycle, block_dim_dict)
             aic_calculator = CalculateAiCoreData(self._project_path)
             _, pmu_list = aic_calculator.compute_ai_core_data(
                 Utils.generator_to_list(pmu_events), pmu_list, data.total_cycle, data.pmu_list)
@@ -206,14 +207,14 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
             ]
             pmu_data_list.append(pmu_data)
 
-    def calculate_total_time(self: any, data: any, block_dim: int, mix_block_dim: int, data_type: str = 'aic') -> float:
+    def calculate_total_time(self: any, data: any, total_cycle: int,
+                             block_dim_dict: dict, data_type: str = 'aic') -> float:
         core_num = self._core_num_dict.get(data_type)
-        if self._is_not_mix_main_core(data, data_type):
-            block_dim = mix_block_dim
+        block_dim = block_dim_dict.get(self._is_not_mix_main_core(data, data_type))
         freq = self._freq
         if self.freq_data and len(data.time_list) >= 2:
             freq = self._get_current_freq(data.time_list[1])
-        total_time = Utils.cal_total_time(data.total_cycle, int(freq), block_dim, core_num)
+        total_time = Utils.cal_total_time(total_cycle, int(freq), block_dim, core_num)
         return total_time
 
     def get_total_cycle_info(self, data: any, task_type: int) -> tuple:
@@ -341,7 +342,6 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         :param file_path:
         :return:
         """
-        check_file_readable(file_path)
         offset_calculator = OffsetCalculator(self._file_list, self.FFTS_PMU_SIZE, self._result_dir)
         with FileOpen(file_path, 'rb') as _pmu_file:
             _file_size = os.path.getsize(file_path)

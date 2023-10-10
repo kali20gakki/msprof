@@ -77,7 +77,7 @@ class PmuCalculateFunc:
 
     @staticmethod
     def vec_fp16_ratio(pmu1, pmu2, task_cyc):
-        return 1.0 * (pmu1 + pmu2) / task_cyc
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu1 + pmu2, task_cyc)
 
     @staticmethod
     def vec_int32_ratio(pmu, task_cyc):

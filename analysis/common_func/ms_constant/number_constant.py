@@ -38,6 +38,7 @@ class NumberConstant:
     PERCENTAGE = 100
     DECIMAL_ACCURACY = 6
     ROUND_FOUR_DECIMAL = 4
+    ROUND_THREE_DECIMAL = 3
     ROUND_TWO_DECIMAL = 2
     LLC_CAPACITY = 64.0
     CPU_FREQ = 680000
@@ -65,7 +66,7 @@ class NumberConstant:
     USTONS = 1000
     DEFAULT_STREAM_ID = 65535
     DEFAULT_TASK_ID = 65535
-    PROF_PATH_MAX_LEN = 300
+    PROF_PATH_MAX_LEN = 1024
 
     # memory units transfer
     BYTES_TO_KB = 1024.0

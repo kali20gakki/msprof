@@ -131,6 +131,16 @@ int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len)
 // set device callback
 int32_t MsprofSetDeviceCallbackImpl(VOID_PTR data, uint32_t len)
 {
+    if (len != sizeof(ProfSetDevPara)) {
+        MSPROF_LOGE("MsprofSetDeviceCallbackImpl, len:%u is invalid", len);
+        MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceCallbackImpl, len:%u is invalid", len);
+        return MSPROF_ERROR;
+    }
+    if (data == nullptr) {
+        MSPROF_LOGE("MsprofSetDeviceCallbackImpl, data is null");
+        MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceCallbackImpl, data is null");
+        return MSPROF_ERROR;
+    }
     ProfSetDevPara *setCfg = (struct ProfSetDevPara *)data;
     MSPROF_EVENT("MsprofSetDeviceCallback called, is open: %d", setCfg->isOpen);
     if (setCfg->isOpen) {

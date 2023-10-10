@@ -11,6 +11,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
+from common_func.file_manager import FileOpen
 from common_func.profiling_scene import ProfilingScene
 from common_func.utils import Utils
 from framework.offset_calculator import FileCalculator
@@ -198,8 +199,8 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
         for _file in self._file_list:
             _file = PathManager.get_data_file_path(self._project_path, _file)
             logging.info("start parsing ai core data file: %s", os.path.basename(_file))
-            with open(_file, 'rb') as _aic_reader:
-                self._parse(_offset_calculator.pre_process(_aic_reader, os.path.getsize(_file)))
+            with FileOpen(_file, 'rb') as _aic_reader:
+                self._parse(_offset_calculator.pre_process(_aic_reader.file_reader, os.path.getsize(_file)))
 
     def _parse(self: any, all_log_bytes: bytes) -> None:
         if judge_custom_pmu_scene(self._sample_json):

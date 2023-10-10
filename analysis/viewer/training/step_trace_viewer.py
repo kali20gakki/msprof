@@ -11,7 +11,6 @@ from functools import wraps
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.empty_class import EmptyClass
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_number
@@ -146,13 +145,13 @@ class TimeLineJsonMaker:
         :param tid: tid
         :return: dict
         """
-        return OrderedDict([("name", "Data_aug Bound {}".format(trace_parm[StepTraceConstant.ITER_ID])),
+        return OrderedDict([("name", "Data_aug Bound {}".format(trace_parm[StepTraceConstant.ITER_ID] - 1)),
                             ("cat", "Data_aug Bound"),
-                            ("ph", "s"),
-                            ("ts", trace_parm[StepTraceConstant.STEP_END]),
+                            ("ph", "t"),
+                            ("ts", trace_parm[StepTraceConstant.FORWARD_PROPAGATION]),
                             ("pid", pid),
                             ("tid", tid),
-                            ("id", "Data_aug Bound {}".format(trace_parm[StepTraceConstant.ITER_ID])),
+                            ("id", "Data_aug Bound {}_{}".format(pid, tid)),
                             ("args", OrderedDict([("Iteration ID", trace_parm[StepTraceConstant.ITER_ID])]))])
 
     @staticmethod
@@ -166,14 +165,17 @@ class TimeLineJsonMaker:
         """
         data_aug_bound = round(trace_parm[StepTraceConstant.DATA_AUGMENTATION],
                                NumberConstant.ROUND_TWO_DECIMAL)
+        refresh_dur = round(trace_parm[StepTraceConstant.STEP_END] - trace_parm[StepTraceConstant.BACK_PROPAGATION],
+                            NumberConstant.ROUND_THREE_DECIMAL)
+        ts = trace_parm[StepTraceConstant.BACK_PROPAGATION] + refresh_dur * 0.5
+
         return OrderedDict([("name", "Data_aug Bound {}".format(trace_parm[StepTraceConstant.ITER_ID])),
                             ("cat", "Data_aug Bound"),
-                            ("ph", "t"),
-                            ("ts", (trace_parm[StepTraceConstant.STEP_END] + trace_parm[
-                                StepTraceConstant.DATA_AUGMENTATION])),
+                            ("ph", "s"),
+                            ("ts", ts),
                             ("pid", pid),
                             ("tid", tid),
-                            ("id", "Data_aug Bound {}".format(trace_parm[StepTraceConstant.ITER_ID])),
+                            ("id", "Data_aug Bound {}_{}".format(pid, tid)),
                             ("args", OrderedDict([("Data_aug Bound(us)",
                                                    data_aug_bound)]))])
 

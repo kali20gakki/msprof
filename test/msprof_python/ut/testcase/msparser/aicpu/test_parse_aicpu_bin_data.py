@@ -34,6 +34,7 @@ class TestParseAiCpuBinData(unittest.TestCase):
                     mock.patch(NAMESPACE + '.logging.error'), \
                     mock.patch('common_func.msprof_iteration.Utils.is_step_scene', return_value=True), \
                     mock.patch('common_func.utils.Utils.get_scene', return_value=''), \
+                    mock.patch("common_func.file_manager.check_path_valid"), \
                     mock.patch('msmodel.step_trace.ts_track_model.TsTrackModel.get_step_trace_data',
                                return_value=[get_step_trace_data()]), \
                     mock.patch('common_func.utils.Utils.is_step_scene', return_value=True):

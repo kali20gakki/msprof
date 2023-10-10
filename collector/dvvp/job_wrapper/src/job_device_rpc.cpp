@@ -63,6 +63,11 @@ int JobDeviceRpc::StartProf(SHARED_PTR_ALIA<analysis::dvvp::message::ProfilePara
             break;
         }
         pmuCfg_ = CreatePmuEventConfig(params, indexId_);
+        if (pmuCfg_ == nullptr) {
+            MSPROF_LOGE("Failed to get pmu cfg, devId:%d", indexId_);
+            ret = PROFILING_FAILED;
+            break;
+        }
         MSPROF_LOGI("Starting, devId:%d", indexId_);
         SHARED_PTR_ALIA<analysis::dvvp::proto::ReplayStartReq> startReplayMessage = nullptr;
         MSVP_MAKE_SHARED0_BREAK(startReplayMessage, analysis::dvvp::proto::ReplayStartReq);

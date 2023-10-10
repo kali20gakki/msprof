@@ -112,7 +112,7 @@ TEST_F(PluginHandleUtest, DlopenSo)
     GlobalMockObject::verify();
     std::string soName = "libascend_hal.so";
     PluginHandle pluginHandle(soName);
-    EXPECT_EQ(PROFILING_FAILED, pluginHandle.DlopenSo(nullptr));
+    EXPECT_EQ(PROFILING_FAILED, pluginHandle.DlopenSo(""));
     std::string path = "/usr/local/Ascend/driver/lib64";
     int openfd = 0;
     MOCKER(dlopen)
@@ -129,7 +129,7 @@ TEST_F(PluginHandleUtest, CheckSoValid_if_null_sopath_return_failed)
     GlobalMockObject::verify();
     std::string soName = "libascend_hal.so";
     PluginHandle pluginHandle(soName);
-    EXPECT_EQ(false, pluginHandle.CheckSoValid(nullptr));
+    EXPECT_EQ(false, pluginHandle.CheckSoValid(""));
 }
 
 TEST_F(PluginHandleUtest, GetSoPaths_select_fail)
