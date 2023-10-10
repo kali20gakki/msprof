@@ -137,7 +137,7 @@ class FopsParser:
         query_path = os.path.realpath(os.path.join(self.collection_path, '..', '..', self.QUERY_FILE_NAME))
         if not os.path.exists(query_path):
             try:
-                os.makedirs(query_path)
+                os.makedirs(query_path, mode=NumberConstant.DIR_AUTHORITY)
             except OSError:
                 error(self.FILE_NAME,
                       "Storing data failed, you may not have the permission to write files in the current path.")
