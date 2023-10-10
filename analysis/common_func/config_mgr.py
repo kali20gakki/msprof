@@ -5,11 +5,12 @@
 import json
 import os
 
+from common_func.common import CommonConstant, error
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_exception import ProfException
-from common_func.os_manager import check_file_readable
+from common_func.file_manager import FileOpen
 
 
 class ConfigMgr:
@@ -93,12 +94,26 @@ class ConfigMgr:
         :return: the sample config
         """
         sample_file = os.path.join(collection_path, Constant.SAMPLE_FILE)
-        check_file_readable(sample_file)
         try:
-            with open(sample_file, "r") as json_file:
-                return json.load(json_file)
+            with FileOpen(sample_file, "r") as json_file:
+                return json.load(json_file.file_reader)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             message = f"Failed to load {sample_file}. {err}"
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message) from err
-        finally:
-            pass
+
+
+    @staticmethod
+    def pre_check_sample(result_dir: str, event: any) -> dict:
+        sample_config = ConfigMgr.read_sample_config(result_dir)
+        if not sample_config:
+            error(CommonConstant.FILE_NAME, 'Failed to generate sample configuration table.')
+            return {}
+        profiling_events = sample_config.get(event, '')
+        for i in profiling_events.split(','):
+            try:
+                int(i, Constant.HEX_NUMBER)
+            except ValueError:
+                error(CommonConstant.FILE_NAME, 'Failed to verify configuration file parameters.')
+                return {}
+        return sample_config
+

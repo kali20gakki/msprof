@@ -784,11 +784,12 @@ int SystemMode::CheckIfDeviceOnline() const
     std::set<std::string> validIds;
     std::vector<std::string> invalidIds;
     for (auto devId : devIds) {
-        if (!Utils::CheckStringIsNonNegativeIntNum(devId)) {
+        int dev;
+        if (!Utils::CheckStringIsNonNegativeIntNum(devId) || Utils::StrToInt(dev, devId) == PROFILING_FAILED) {
             CmdLog::instance()->CmdErrorLog("The device (%s) is not valid, please check it!", devId.c_str());
             return PROFILING_FAILED;
         }
-        auto it = find(devices.begin(), devices.end(), Utils::StrToInt(devId));
+        auto it = find(devices.begin(), devices.end(), dev);
         if (it == devices.end()) {
             invalidIds.push_back(devId);
         } else {
@@ -952,7 +953,11 @@ int SystemMode::StartHostTask(const std::string resultDir, const std::string dev
         return PROFILING_FAILED;
     }
     params->devices = device;
-    if (Utils::StrToInt(device) == DEFAULT_HOST_ID) {
+    int devId;
+    if (Utils::StrToInt(devId, device) == PROFILING_FAILED) {
+        return PROFILING_FAILED;
+    }
+    if (devId == DEFAULT_HOST_ID) {
         params->host_profiling = TRUE;
     }
     bool retu = CreateSampleJsonFile(params, resultDir);
@@ -967,7 +972,7 @@ int SystemMode::StartHostTask(const std::string resultDir, const std::string dev
         return PROFILING_FAILED;
     }
     SHARED_PTR_ALIA<ProfSocTask> task = nullptr;
-    MSVP_MAKE_SHARED2_RET(task, ProfSocTask, Utils::StrToInt(device), params, PROFILING_FAILED);
+    MSVP_MAKE_SHARED2_RET(task, ProfSocTask, devId, params, PROFILING_FAILED);
     ret = task->Init();
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("DeviceTask init failed, deviceId:%s", device.c_str());
@@ -996,7 +1001,11 @@ int SystemMode::StartDeviceTask(const std::string resultDir, const std::string d
         return PROFILING_FAILED;
     }
     SHARED_PTR_ALIA<ProfRpcTask> task = nullptr;
-    MSVP_MAKE_SHARED2_RET(task, ProfRpcTask, Utils::StrToInt(device), params, PROFILING_FAILED);
+    int devId;
+    if (Utils::StrToInt(devId, device) == PROFILING_FAILED) {
+        return PROFILING_FAILED;
+    }
+    MSVP_MAKE_SHARED2_RET(task, ProfRpcTask, devId, params, PROFILING_FAILED);
     ret = task->Init();
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[StartDeviceTask]DeviceTask init failed, deviceId:%s", device.c_str());
@@ -1363,6 +1372,10 @@ int AnalyzeMode::RunModeTasks()
     if (params_ == nullptr) {
         MSPROF_LOGE("[Analyze Mode] Invalid params!");
         return PROFILING_FAILED;
+    }
+    if (params_->profLevel == MSVP_PROF_L0) {
+        MSPROF_LOGW("[Analyze Mode] Analyze will do nothing in prof level 0.");
+        return PROFILING_SUCCESS;
     }
     if (CheckAnalysisEnv() != PROFILING_SUCCESS) {
         MSPROF_LOGW("[Analyze Mode] Analysis environment is not OK, parse will not start.");

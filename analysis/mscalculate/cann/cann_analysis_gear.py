@@ -488,8 +488,12 @@ class TaskGear(CANNGear):
              task_track_dto.device_id, task_track_dto.timestamp, connection_id]
         )
 
-    def is_hccl_task(self, hccl_event: Event):
-        return not hccl_event.is_invalid()
+    def is_hccl_task(self, hccl_event: Event, task_track_dto: TaskTrackDto):
+        if hccl_event.is_invalid():
+            return False
+        if task_track_dto.struct_type is None:
+            return False
+        return True
 
     def add_hccl_task(self, model_event: Event, hccl_event: Event, task_track_dto: TaskTrackDto):
         hccl_descs = self.get_hccl_descs(hccl_event)
@@ -507,7 +511,7 @@ class TaskGear(CANNGear):
                 hccl_info_dto.plane_id, task_track_dto.timestamp, hccl_info_dto.duration_estimated,
                 task_track_dto.stream_id, task_track_dto.task_id, context_id,
                 task_track_dto.batch_id, task_track_dto.device_id,
-                hccl_info_dto.to_args_json(task_track_dto.stream_id, task_track_dto.task_id)
+                hccl_info_dto.to_args_json(task_track_dto.stream_id, task_track_dto.task_id, hccl_event.struct_type)
             ]
         self.hccl_task_info.extend(hccl_tasks)
 
@@ -639,7 +643,7 @@ class TaskGear(CANNGear):
             self.api_call_info.append(api.to_list())
 
         hccl_event: Event = call_stack.get(Constant.HCCL_LEVEL)
-        if self.is_hccl_task(hccl_event):
+        if self.is_hccl_task(hccl_event, task_track_dto):
             self.add_hccl_task(call_stack.get(Constant.MODEL_LEVEL), hccl_event, task_track_dto)
             self.add_hccl_op(call_stack, task_track_dto)
         if self.is_kernel_task(task_track_dto, hccl_event.is_invalid()):

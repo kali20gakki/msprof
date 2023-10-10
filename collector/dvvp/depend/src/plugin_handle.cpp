@@ -32,12 +32,12 @@ const std::string PluginHandle::GetSoName() const
     return soName_;
 }
 
-int32_t PluginHandle::DlopenSo(CONST_CHAR_PTR soPath)
+int32_t PluginHandle::DlopenSo(const std::string& soPath)
 {
-    if (soPath == nullptr) {
+    if (soPath.empty()) {
         return PROFILING_FAILED;
     }
-    handle_ = dlopen(soPath, RTLD_NOW | RTLD_GLOBAL);
+    handle_ = dlopen(soPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
     if (!handle_) {
         return PROFILING_FAILED;
     }
@@ -45,13 +45,13 @@ int32_t PluginHandle::DlopenSo(CONST_CHAR_PTR soPath)
     return PROFILING_SUCCESS;
 }
 
-bool PluginHandle::CheckSoValid(CONST_CHAR_PTR soPath) const
+bool PluginHandle::CheckSoValid(const std::string& soPath) const
 {
-    if (soPath == nullptr) {
+    if (soPath.empty()) {
         return false;
     }
     struct stat fileStat;
-    if (stat(soPath, &fileStat) == 0) {
+    if (stat(soPath.c_str(), &fileStat) == 0) {
         if (fileStat.st_mode & S_IWOTH) {
             return false;
         } else {

@@ -157,7 +157,8 @@ class IterParser(IParser, MsMultiProcess):
             _hwts_file = PathManager.get_data_file_path(self._project_path, _hwts_file)
             logging.info("Begin to process hwts data file: %s", os.path.basename(_hwts_file))
             with FileOpen(_hwts_file, 'rb') as _hwts_file_reader:
-                all_bytes = _offset_calculator.pre_process(_hwts_file_reader.file_reader, os.path.getsize(_hwts_file))
+                all_bytes = _offset_calculator.pre_process(_hwts_file_reader.file_reader,
+                                                           os.path.getsize(_hwts_file))
                 self._read_hwts_data(all_bytes)
         for iter_num, task_offset in self._task_cnt_not_in_iter.items():
             self._iter_info_updater.calibrate_iter_info_offset(task_offset=task_offset, iter_offset=iter_num)

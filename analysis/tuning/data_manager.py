@@ -10,7 +10,7 @@ from collections import defaultdict
 
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.common import CommonConstant
-from common_func.common import generate_config
+from common_func.config_mgr import ConfigMgr
 from common_func.common_prof_rule import CommonProfRule
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -225,7 +225,7 @@ class OpSummaryTuningDataHandle(BaseTuningDataHandle):
         else:
             param = {}
             headers, data, _ = MsvpConstant.MSVP_EMPTY_DATA
-            sample_config = generate_config(os.path.join(project_path, CommonConstant.SAMPLE_JSON))
+            sample_config = ConfigMgr.read_sample_config(project_path)
 
             param[StrConstant.DATA_TYPE] = StrConstant.AI_CORE_PMU_EVENTS
             if sample_config.get(StrConstant.AICORE_PROFILING_MODE) == StrConstant.AIC_TASK_BASED_MODE:

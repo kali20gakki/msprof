@@ -4,7 +4,7 @@
 
 import os
 
-from common_func.common import pre_check_sample
+from common_func.config_mgr import ConfigMgr
 from common_func.db_manager import DBManager
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import error
@@ -48,7 +48,7 @@ class TsCpuReport:
         """
         get cpu top function data
         """
-        sample_config = pre_check_sample(result_dir, 'ts_cpu_profiling_events')
+        sample_config = ConfigMgr.pre_check_sample(result_dir, 'ts_cpu_profiling_events')
         if not sample_config:
             error(self.FILE_NAME, 'Failed to get sample configuration file.')
             return MsvpConstant.MSVP_EMPTY_DATA

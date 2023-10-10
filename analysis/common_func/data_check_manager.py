@@ -8,6 +8,9 @@ from common_func import file_name_manager
 from common_func.constant import Constant
 from common_func.os_manager import check_dir_readable
 from common_func.path_manager import PathManager
+from common_func.config_mgr import ConfigMgr
+from common_func.msprof_common import get_path_dir
+from common_func.ms_constant.str_constant import StrConstant
 
 
 class DataCheckManager:
@@ -18,6 +21,17 @@ class DataCheckManager:
     DATA_NAME_LENGTH = 4
     HOST_DATA_NAME_LENGTH = 3
     DEVICE_ID_INDEX = 2
+
+    @staticmethod
+    def check_prof_level0(result_dir: str) -> bool:
+        sub_dirs = sorted(get_path_dir(result_dir), reverse=True)
+        sample_config = {}
+        for sub_dir in sub_dirs:
+            sub_path = os.path.realpath(os.path.join(result_dir, sub_dir))
+            if os.path.exists(os.path.join(sub_path, Constant.SAMPLE_FILE)):
+                sample_config = ConfigMgr.read_sample_config(sub_path)
+                break
+        return sample_config.get("profLevel", "") == StrConstant.PROF_LEVEL_0
 
     @classmethod
     def check_data_exist(cls: any, result_dir: str, file_patterns: any, device_id: any = None) -> bool:

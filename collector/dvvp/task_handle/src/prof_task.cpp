@@ -56,6 +56,11 @@ int ProfTask::Init()
 {
     MSPROF_LOGI("Init ProfTask");
     MSVP_MAKE_SHARED0_RET(taskStatus_, analysis::dvvp::message::Status, PROFILING_FAILED);
+    if (params_ == nullptr) {
+        MSPROF_LOGE("Params for prof task is null");
+        MSPROF_INNER_ERROR("EK9999", "Params for prof task is null");
+        return PROFILING_FAILED;
+    }
 
     analysis::dvvp::transport::UploaderMgr::instance()->GetUploader(params_->job_id, uploader_);
     if (uploader_ == nullptr) {

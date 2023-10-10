@@ -88,6 +88,7 @@ set(src_file
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/input_parser.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/prof_task.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/running_mode.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/msopprof_manager.cpp
 )
 
 add_executable(msprof_bin_utest
@@ -101,6 +102,7 @@ add_executable(msprof_bin_utest
     test/prof_task_utest.cpp
     test/prof_device_transport_utest.cpp
     test/running_mode_utest.cpp
+    test/msopprof_manager_utest.cpp
     ../stub/profile_drv_user_stub.cpp
     ../stub/hdc-api-stub.cpp
     ../stub/hdc-log-stub.cpp

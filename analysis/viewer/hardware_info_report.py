@@ -6,7 +6,7 @@ import os
 import sqlite3
 
 from common_func.common import CommonConstant
-from common_func.common import generate_config
+from common_func.config_mgr import ConfigMgr
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
@@ -137,7 +137,7 @@ def get_llc_bandwidth(project_path: str, device_id: str) -> tuple:
     get llc bandwidth original data
     """
     conn, curs = DBManager.check_connect_db(project_path, DBNameConstant.DB_LLC)
-    sample_config = generate_config(os.path.join(project_path, CommonConstant.SAMPLE_JSON))
+    sample_config = ConfigMgr.read_sample_config(project_path)
     if not (conn and curs):
         return MsvpConstant.MSVP_EMPTY_DATA
     try:
@@ -155,7 +155,8 @@ def _get_llc_capacity_data(curs: any, project_path: str, device_id: str, types: 
     core2cpu = cal_core2cpu(project_path, device_id)
     dsid_name = core2cpu[types]
     dsid_name = Utils.generator_to_list(
-        f"sum({i})*{NumberConstant.LLC_CAPACITY}/({NumberConstant.BYTES_TO_KB})" for i in dsid_name)
+        f"sum({i})*{NumberConstant.LLC_CAPACITY}/({NumberConstant.BYTES_TO_KB})"
+        for i in dsid_name)
     sql = "select {column} from LLCDsidData " \
           "where device_id = ?".format(column=",".join(dsid_name))
     dsid_data = DBManager.fetch_all_data(curs, sql, (device_id,))
@@ -175,7 +176,7 @@ def llc_capacity_data(project_path: str, device_id: str, types: str) -> tuple:
     get llc capacity data
     """
     conn, curs = DBManager.check_connect_db(project_path, 'llc.db')
-    sample_config = generate_config(os.path.join(project_path, CommonConstant.SAMPLE_JSON))
+    sample_config = ConfigMgr.read_sample_config(project_path)
     if not (conn and curs):
         return MsvpConstant.MSVP_EMPTY_DATA
     counter_exist = DBManager.judge_table_exist(curs, "LLCOriginalData")

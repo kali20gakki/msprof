@@ -7,7 +7,7 @@ import os
 import sqlite3
 
 from common_func.common import CommonConstant
-from common_func.common import generate_config
+from common_func.config_mgr import ConfigMgr
 from common_func.db_manager import DBManager
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
@@ -37,7 +37,7 @@ def _pre_check_pmu_events(project_path: str) -> tuple:
     sample_path = path_check(os.path.join(project_path, CommonConstant.SAMPLE_JSON))
     if not sample_path:
         return NumberConstant.ERROR, "Configuration file doesn't exist.", {}
-    sample_config = generate_config(sample_path)
+    sample_config = ConfigMgr.read_sample_config(project_path)
     if not sample_config:
         return NumberConstant.ERROR, "Failed to generate sample configuration table.", {}
     if sample_config.get('ai_core_profiling_mode', '') not in \

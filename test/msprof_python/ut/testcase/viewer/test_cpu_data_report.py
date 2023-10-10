@@ -14,12 +14,12 @@ sample_config = {"ts_cpu_profiling_events": "0x0,0x1,0x2"}
 class TestCPUDataReport(unittest.TestCase):
     def test_get_aictrl_pmu_events_1(self):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-             mock.patch(NAMESPACE + '.DBManager.judge_table_exist', side_effect=sqlite3.Error):
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', side_effect=sqlite3.Error):
             res = get_aictrl_pmu_events('', 'aicpu_0.db', 'OriginalData', headers)
             self.assertEqual(MsvpConstant.MSVP_EMPTY_DATA, res)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-             mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
             res = get_aictrl_pmu_events('', 'aicpu_0.db', 'OriginalData', headers)
         self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
 
@@ -34,14 +34,14 @@ class TestCPUDataReport(unittest.TestCase):
         test_sql = db_manager.create_table("aicpu_0.db", create_sql, insert_sql, data)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
-             mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             res = get_aictrl_pmu_events('', 'aicpu_0.db', 'OriginalData', headers)
         self.assertEqual(res[2], 1)
 
         test_sql = db_manager.connect_db('aicpu_0.db')
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
-             mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
-             mock.patch(NAMESPACE + '.read_cpu_cfg', return_value=None):
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
+                mock.patch(NAMESPACE + '.read_cpu_cfg', return_value=None):
             res = get_aictrl_pmu_events('', 'aicpu_0.db', 'OriginalData', headers)
         self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
         test_sql = db_manager.connect_db('aicpu_0.db')
@@ -50,17 +50,19 @@ class TestCPUDataReport(unittest.TestCase):
 
     def test_get_ts_pmu_events_1(self):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-             mock.patch(NAMESPACE + '.pre_check_sample', return_value=sample_config), \
-             mock.patch(NAMESPACE + '.DBManager.judge_table_exist', side_effect=sqlite3.Error):
+                mock.patch("common_func.config_mgr.ConfigMgr.pre_check_sample", return_value=sample_config), \
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', side_effect=sqlite3.Error):
             res = get_ts_pmu_events('', 'tscpu_0.db', 'OriginalData', headers)
         self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
 
-        with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(None, None)):
+        with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(None, None)), \
+                mock.patch("common_func.config_mgr.ConfigMgr.pre_check_sample", return_value=sample_config):
             res = get_ts_pmu_events('', 'tscpu_0.db', 'OriginalData', headers)
         self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-             mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
+                mock.patch("common_func.config_mgr.ConfigMgr.pre_check_sample", return_value=sample_config), \
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
             res = get_ts_pmu_events('', 'tscpu_0.db', 'OriginalData', headers)
         self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
 
@@ -73,16 +75,16 @@ class TestCPUDataReport(unittest.TestCase):
         test_sql = db_manager.create_table("tscpu_0.db", create_sql, insert_sql, data)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
-             mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
-             mock.patch(NAMESPACE + '.pre_check_sample', return_value=sample_config):
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
+                mock.patch("common_func.config_mgr.ConfigMgr.pre_check_sample", return_value=sample_config):
             res = get_ts_pmu_events('', 'tscpu_0.db', 'OriginalData', headers)
         self.assertEqual(res[2], 1)
 
         test_sql = db_manager.connect_db('tscpu_0.db')
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
-             mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
-             mock.patch(NAMESPACE + '.pre_check_sample', return_value=sample_config), \
-             mock.patch(NAMESPACE + '.read_cpu_cfg', return_value=None):
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
+                mock.patch("common_func.config_mgr.ConfigMgr.pre_check_sample", return_value=sample_config), \
+                mock.patch(NAMESPACE + '.read_cpu_cfg', return_value=None):
             res = get_ts_pmu_events('', 'tscpu_0.db', 'OriginalData', headers)
         self.assertEqual(res[2], 1)
         test_sql = db_manager.connect_db('tscpu_0.db')
@@ -91,12 +93,12 @@ class TestCPUDataReport(unittest.TestCase):
 
     def test_get_cpu_hot_function_1(self):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-             mock.patch(NAMESPACE + '.DBManager.judge_table_exist', side_effect=sqlite3.Error):
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', side_effect=sqlite3.Error):
             res = get_cpu_hot_function('', 'aicpu_0.db', 'OriginalData', headers)
         self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-             mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
             res = get_cpu_hot_function('', 'aicpu_0.db', 'OriginalData', headers)
         self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
 
@@ -116,14 +118,14 @@ class TestCPUDataReport(unittest.TestCase):
         test_sql = db_manager.create_table("aicpu_0.db", create_sql, insert_sql, data)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
-             mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             res = get_cpu_hot_function('', 'aicpu_0.db', 'OriginalData', headers)
         self.assertEqual(res[2], 1)
 
         test_sql = db_manager.connect_db('aicpu_0.db')
         (test_sql[1]).execute("delete from OriginalData")
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
-             mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             res = get_cpu_hot_function('', 'aicpu_0.db', 'OriginalData', headers)
         self.assertEqual(res[2], 0)
         test_sql = db_manager.connect_db('aicpu_0.db')

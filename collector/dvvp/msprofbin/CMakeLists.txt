@@ -60,6 +60,7 @@ add_executable(msprofbin
     ${TOP_DIR}/collector/dvvp/msprof/dynamic_profiling/src/dyn_prof_client.cpp
     src/msprof_bin.cpp
     src/msprof_manager.cpp
+    src/msopprof_manager.cpp
     src/prof_task.cpp
     src/data_handle.cpp
     src/input_parser.cpp

@@ -163,16 +163,14 @@ class TestCalculateRts(unittest.TestCase):
         self.assertEqual(res[1], 0)
 
     def test_get_metrics_from_sample_config_1(self):
-        with mock.patch(NAMESPACE + ".PathManager.get_sample_json_path", return_value=True), \
-                mock.patch(NAMESPACE + ".CalculateAiCoreData.add_fops_header"), \
-                mock.patch(NAMESPACE + ".generate_config", return_value=sample_config):
+        with mock.patch(NAMESPACE + ".CalculateAiCoreData.add_fops_header"), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=sample_config):
             res_1 = get_metrics_from_sample_config('')
         self.assertEqual(len(res_1), 13)
 
     def test_get_metrics_from_sample_config_2(self):
         sample_config["ai_core_metrics"] = "a"
-        with mock.patch(NAMESPACE + ".PathManager.get_sample_json_path", return_value=True), \
-                mock.patch(NAMESPACE + ".generate_config", return_value=sample_config):
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=sample_config):
             res = get_metrics_from_sample_config('')
         self.assertEqual(res, [])
         sample_config["ai_core_metrics"] = "PipeUtilization"

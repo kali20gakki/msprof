@@ -11,7 +11,7 @@ import time
 from common_func.common import CommonConstant
 from common_func.common import LogFactory
 from common_func.common import call_sys_exit
-from common_func.common import generate_config
+from common_func.config_mgr import ConfigMgr
 from common_func.common import print_info
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
@@ -181,7 +181,7 @@ class JobMonitor:
                           job_tag)
             return
         if not FileManager.is_analyzed_data(job_path):
-            sample_config = generate_config(sample_file)
+            sample_config = ConfigMgr.read_sample_config(sample_file)
             check_path_valid(PathManager.get_sql_dir(job_path), True)
             clear_project_dirs(job_path)
             self._launch_parsing_job_data(job_path, sample_config, job_tag)

@@ -101,8 +101,7 @@ class TestJobDispatcher(unittest.TestCase):
     def test_analysis_job_profiling(self):
         job_path = 'home\\job'
         job_tag = 'job_files'
-        with mock.patch(NAMESPACE + '.PathManager.get_sample_json_path', return_value='sample'), \
-             mock.patch(NAMESPACE + '.LogFactory.get_logger', return_value=123):
+        with mock.patch(NAMESPACE + '.LogFactory.get_logger', return_value=123):
             with mock.patch('os.path.exists', return_value=False), \
                  mock.patch(NAMESPACE + '.logging.error'):
                 key = JobMonitor('123')
@@ -114,7 +113,7 @@ class TestJobDispatcher(unittest.TestCase):
                  mock.patch('os.listdir', return_value=['test.complete']), \
                  mock.patch('os.path.join', return_value='test/test'), \
                  mock.patch('os.remove', return_value=True), \
-                 mock.patch(NAMESPACE + '.generate_config', return_value={'device_info': 1}), \
+                 mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={'device_info': 1}), \
                  mock.patch(NAMESPACE + '.PathManager.get_sql_dir', return_value=True), \
                  mock.patch(NAMESPACE + '.check_path_valid'), \
                  mock.patch(NAMESPACE + '.JobMonitor._launch_parsing_job_data'):

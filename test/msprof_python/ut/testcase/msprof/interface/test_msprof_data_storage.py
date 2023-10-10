@@ -97,6 +97,7 @@ class TestMsprofDataStorage(unittest.TestCase):
                 mock.patch('os.remove', return_value=True), \
                 mock.patch('os.open', return_value=True), \
                 mock.patch(NAMESPACE + '.MsprofDataStorage.clear_timeline_dir'), \
+                mock.patch('common_func.path_manager.PathManager.get_device_count', return_value=2), \
                 mock.patch(NAMESPACE + '.MsprofDataStorage.slice_data_list', return_value=(1, [1])), \
                 mock.patch(NAMESPACE + '.FdOpen.__enter__', mock.mock_open(read_data='123')), \
                 mock.patch(NAMESPACE + '.FdOpen.__exit__'), \
@@ -112,6 +113,7 @@ class TestMsprofDataStorage(unittest.TestCase):
                 mock.patch('os.remove', return_value=True), \
                 mock.patch('os.open', return_value=True), \
                 mock.patch(NAMESPACE + '.MsprofDataStorage.clear_timeline_dir'), \
+                mock.patch('common_func.path_manager.PathManager.get_device_count', return_value=2), \
                 mock.patch(NAMESPACE + '.MsprofDataStorage.slice_data_list', return_value=(1, [1])), \
                 mock.patch(NAMESPACE + '.FdOpen.__enter__', mock.mock_open(read_data='123')), \
                 mock.patch(NAMESPACE + '.FdOpen.__exit__'), \

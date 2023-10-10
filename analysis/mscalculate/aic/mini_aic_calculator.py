@@ -5,7 +5,7 @@
 import logging
 from collections import OrderedDict
 
-from common_func.common import generate_config
+from common_func.config_mgr import ConfigMgr
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
@@ -84,7 +84,7 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
                 DBNameConstant.TABLE_EVENT_COUNTER):
             logging.warning("unable to create metrics db, because it can't find the event_counter table")
             return
-        config = generate_config(PathManager.get_sample_json_path(self._project_path))
+        config = ConfigMgr.read_sample_config(self._project_path)
         if config.get('ai_core_profiling_mode') == StrConstant.AIC_SAMPLE_BASED_MODE:
             return
         self.calculate()
@@ -154,7 +154,7 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
         get ai_core_profiling_events from sample.json
         :return:None
         """
-        config = generate_config(PathManager.get_sample_json_path(self._project_path))
+        config = ConfigMgr.read_sample_config(self._project_path)
         ai_core_profiling_events = config.get('ai_core_profiling_events', '')
         if ai_core_profiling_events:
             self.events_name_list = Utils.generator_to_list(AicPmuUtils.get_pmu_event_name(pmu_event)

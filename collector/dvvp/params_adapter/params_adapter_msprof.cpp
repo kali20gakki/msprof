@@ -165,7 +165,10 @@ int ParamsAdapterMsprof::ParamsCheckDynProf() const
     }
     // --pid is non-empty, save pid to DynProfMngCli
     if (!paramContainer_[INPUT_CFG_MSPROF_DYNAMIC_PID].empty()) {
-        int32_t pid = Utils::StrToInt(paramContainer_[INPUT_CFG_MSPROF_DYNAMIC_PID]);
+        int32_t pid;
+        if (Utils::StrToInt(pid, paramContainer_[INPUT_CFG_MSPROF_DYNAMIC_PID]) == PROFILING_FAILED) {
+            return PROFILING_FAILED;
+        }
         MSPROF_LOGI("SetAppPid in ParamsCheckDynProf , pid = ld%", pid);
         DynProfMngCli::instance()->SetAppPid(pid);
     }

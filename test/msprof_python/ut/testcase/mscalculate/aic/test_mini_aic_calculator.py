@@ -24,24 +24,20 @@ class TestMiniMiniAicCalculator(unittest.TestCase):
     file_list = {DataTag.AI_CORE: ['aicore.data.0.slice_0']}
 
     def test_parse_ai_core_pmu_event(self):
-        with mock.patch(NAMESPACE + '.generate_config',
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config",
                         return_value={'ai_core_profiling_events': '0x64,0x65,0x66'}), \
-                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
-                mock.patch(NAMESPACE + '.AicPmuUtils.get_pmu_event_name'),\
-                mock.patch(NAMESPACE + '.PathManager.get_sample_json_path', return_value='test'):
+                mock.patch(NAMESPACE + '.AicPmuUtils.get_pmu_event_name'):
             check = MiniAicCalculator(self.file_list, CONFIG)
             check._parse_ai_core_pmu_event()
 
     def test_ms_run(self):
-        with mock.patch(NAMESPACE + '.generate_config', return_value={'ai_core_profiling_mode': 'sample-based'}), \
-                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}),\
-                mock.patch(NAMESPACE + '.PathManager.get_sample_json_path', return_value='test'):
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config",
+                        return_value={'ai_core_profiling_mode': 'sample-based'}):
             check = MiniAicCalculator(self.file_list, CONFIG)
             check.ms_run()
         ProfilingScene()._scene = "step_info"
-        with mock.patch(NAMESPACE + '.generate_config', return_value={'ai_core_profiling_mode': 'task-based'}), \
-                mock.patch(NAMESPACE + '.PathManager.get_sample_json_path', return_value='test'), \
-                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}),\
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config",
+                        return_value={'ai_core_profiling_mode': 'task-based'}),\
                 mock.patch(NAMESPACE + '.MiniAicCalculator.save', return_value='test'):
             check = MiniAicCalculator(self.file_list, CONFIG)
             check.ms_run()
@@ -70,6 +66,7 @@ class TestMiniMiniAicCalculator(unittest.TestCase):
                     mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"), \
                     mock.patch(NAMESPACE + '.DBManager.create_connect_db',
                                return_value=(db_open.db_conn, db_open.db_curs)), \
+                    mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                     mock.patch(NAMESPACE + ".get_metrics_from_sample_config", return_value=metrics):
                 check = MiniAicCalculator(self.file_list, CONFIG)
                 check.ms_run()
@@ -98,6 +95,7 @@ class TestMiniMiniAicCalculator(unittest.TestCase):
                     mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=True), \
                     mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=test_sql), \
                     mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"), \
+                    mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                     mock.patch(NAMESPACE + '.DBManager.create_connect_db',
                                return_value=(db_open.db_conn, db_open.db_curs)), \
                     mock.patch(NAMESPACE + '.get_limit_and_offset',

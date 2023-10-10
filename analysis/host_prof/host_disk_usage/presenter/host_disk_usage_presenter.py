@@ -13,6 +13,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_number
 from common_func.msvp_constant import MsvpConstant
+from common_func.file_manager import FileOpen
 from host_prof.host_disk_usage.model.host_disk_usage import HostDiskUsage
 from host_prof.host_prof_base.host_prof_presenter_base import HostProfPresenterBase
 
@@ -54,8 +55,8 @@ class HostDiskUsagePresenter(HostProfPresenterBase):
         parse disk usage data
         """
         try:
-            with open(self.file_name, "r") as file:
-                self._parse_disk_usage(file)
+            with FileOpen(self.file_name, "r") as file:
+                self._parse_disk_usage(file.file_reader)
                 logging.info(
                     "Finish parsing host disk usage data file: %s", os.path.basename(self.file_name))
         except (FileNotFoundError, ValueError, IOError) as parse_file_except:
