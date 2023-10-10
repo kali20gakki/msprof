@@ -54,7 +54,7 @@ class HcclAnalysisTool:
 
     @classmethod
     def get_standard_bandwidth(cls):
-        return cls.StandardBandWidth.get(ChipManager().get_chip_id())
+        return cls.StandardBandWidth.get(ChipManager().get_chip_id(), {})
 
     @classmethod
     def get_value(cls: any, value: any, value_msg: str) -> float:
