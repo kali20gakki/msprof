@@ -146,8 +146,10 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
             return
 
         avg_bytes = Decimal(total_bytes) / intf_num
-        speed = avg_bytes / Decimal(float(curr_timestamp) - float(last_timestamp))
-        usage = (speed * NumberConstant.PERCENTAGE / self.speeds.get(intf)).quantize(NumberConstant.USAGE_PLACES)
+        speed = avg_bytes / Decimal(float(curr_timestamp) - float(last_timestamp)) if float(curr_timestamp) - float(
+            last_timestamp) else 0
+        usage = (speed * NumberConstant.PERCENTAGE / self.speeds.get(intf)).quantize(
+            NumberConstant.USAGE_PLACES) if intf else 0
         transit_speed = float(speed) * intf_num / NumberConstant.KILOBYTE
         self.cur_model.insert_single_data(
             [last_timestamp * HostNetworkUsagePresenter.NS_TO_S,

@@ -96,7 +96,8 @@ class OpParallelTuningDataHandle(BaseTuningDataHandle):
 
     @staticmethod
     def print_format(data: any):
-        ai_cpu_ratio = data.get("AI CPU Execution Time(us)", 0.0) / sum(data.values())
+        cpu_time_in_total = sum(data.values())
+        ai_cpu_ratio = data.get("AI CPU Execution Time(us)", 0.0) / cpu_time_in_total if cpu_time_in_total else 0
         return f"Percentage of AI CPU Execution Time is {ai_cpu_ratio:.2%}, Exceed the experience threshold 5%."
 
 
