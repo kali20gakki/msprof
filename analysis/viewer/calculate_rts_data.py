@@ -119,7 +119,7 @@ def calculate_task_schedule_data(curs: any, device: str) -> list:
                  api,
                  task_id, stream_id, device, batch_id))
         return sorted(total_data, key=lambda x: float(x[0].replace('%', '')), reverse=True)
-    except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+    except (OSError, SystemError, ValueError, TypeError, RuntimeError, ZeroDivisionError) as err:
         logging.error(err.__repr__(), exc_info=Constant.TRACE_BACK_SWITCH)
         return []
 
