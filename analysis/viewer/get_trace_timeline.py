@@ -107,11 +107,11 @@ def _get_hccs_result(hccs_data: list, trace_parser: any) -> list:
         [["process_name", json_data[0], json_data[1], trace_parser.scope]])
     for _data_item in hccs_data:
         _trace.extend(
-            [['Tx', int(InfoConfReader().trans_into_local_time(
+            [['Tx', InfoConfReader().trans_into_local_time(int(
                 float(_data_item[0]) + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.NS_TO_US),
               json_data[0], json_data[1],
               OrderedDict([('Tx(MB/s)', _data_item[1])])],
-             ['Rx', int(InfoConfReader().trans_into_local_time(
+             ['Rx', InfoConfReader().trans_into_local_time(int(
                 float(_data_item[0]) + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.NS_TO_US),
               json_data[0], json_data[1],
               OrderedDict([('Rx(MB/s)', _data_item[2])])]]
