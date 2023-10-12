@@ -11,6 +11,7 @@ from common_func.empty_class import EmptyClass
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import path_check
+from common_func.file_manager import check_db_path_valid
 from common_func.path_manager import PathManager
 from msconfig.config_manager import ConfigManager
 from profiling_bean.db_dto.database_to_object import DataBaseToObject
@@ -73,6 +74,7 @@ class DBManager:
         """
         create and connect database
         """
+        check_db_path_valid(db_path, True)
         try:
             conn = sqlite3.connect(db_path)
         except sqlite3.Error as err:
@@ -558,5 +560,6 @@ class DBManager:
         check whether we are able to connect to the desired DB
         """
         if path_check(db_path):
+            check_db_path_valid(db_path)
             return cls.create_connect_db(db_path)
         return EmptyClass("empty conn"), EmptyClass("empty curs")

@@ -49,6 +49,7 @@ class TestMsprofQuerySummaryManager(unittest.TestCase):
                     "iteration_id": 1}
         args = Namespace(**args_dic)
         with mock.patch("os.path.exists", return_value=True), \
+            mock.patch("os.path.getsize", return_value=0), \
                 pytest.raises(ProfException) as err:
             check = MsprofQuerySummaryManager(args)
             check.process()
