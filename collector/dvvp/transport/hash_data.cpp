@@ -105,7 +105,7 @@ int HashData::Stop()
     }
     MSPROF_LOGI("Stop hash read thread begin");
     if (!isStarted_) {
-        MSPROF_LOGE("Hash read thread not started");
+        MSPROF_LOGW("Hash read thread not started");
         return PROFILING_FAILED;
     }
     isStarted_ = false;
@@ -243,6 +243,7 @@ void HashData::SaveHashData()
         MSPROF_LOGW("HashData not inited");
         return;
     }
+    Stop();
     for (auto &module : MSPROF_MODULE_ID_NAME_MAP) {
         std::lock_guard<std::mutex> lock(*hashMapMutex_[module.name]);
         if (hashDataKeyMap_[module.name].empty()) {
@@ -272,6 +273,7 @@ void HashData::SaveHashData()
             hashDataKeyMap_[module.name].size(), hashIdKeyMap_[module.name].size());
     }
     SaveNewHashData(true);
+    readIndex_ = 0;
 }
 
 void HashData::SaveNewHashData(bool isLastChunk)
