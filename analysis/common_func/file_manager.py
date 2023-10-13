@@ -103,12 +103,11 @@ class FileManager:
         query_path = os.path.join(collection_path, PathManager.QUERY_CLUSTER)
         if not os.path.exists(query_path):
             try:
-                os.makedirs(query_path)
+                os.makedirs(query_path, mode=NumberConstant.DIR_AUTHORITY)
             except OSError:
                 error(os.path.basename(__file__),
                       "Storing data failed, you may not have the permission to write files in the current path.")
                 return
-            os.chmod(query_path, NumberConstant.DIR_AUTHORITY)
         output_file_path = PathManager.get_query_result_path(collection_path, file_name)
         check_path_valid(output_file_path, True)
         try:
@@ -218,3 +217,17 @@ def check_path_valid(path: str, is_file: bool, max_size: int = Constant.MAX_READ
             {'status': NumberConstant.ERROR,
              'info': "The path '%s' does not have permission to read. Please "
                      'check that the path is readable.' % path}))
+
+
+def check_db_path_valid(path: str, is_create: bool = False, max_size: int = Constant.MAX_READ_FILE_BYTES) -> None:
+    if os.path.islink(path):
+        ReturnCodeCheck.print_and_return_status(json.dumps(
+            {'status': NumberConstant.ERROR,
+             'info': "The db file '%s' is link. Please check the "
+                     'path.' % path}))
+
+    if not is_create and os.path.exists(path) and os.path.getsize(path) > max_size:
+        ReturnCodeCheck.print_and_return_status(json.dumps(
+            {'status': NumberConstant.ERROR,
+             'info': "The db file '%s' is too large to read. Please check the "
+                     'path.' % path}))

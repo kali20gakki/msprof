@@ -6,6 +6,7 @@ import json
 from typing import Dict
 from typing import List
 
+from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
@@ -215,13 +216,17 @@ class TaskTimeViewer(BaseViewer):
             ffts_plus_set.add("{0}-{1}-{2}-{3}".format(
                 data.task_id, data.stream_id, NumberConstant.DEFAULT_GE_CONTEXT_ID, data.batch_id))
             node_key = "{0}-{1}-{2}-{3}".format(data.task_id, data.stream_id, data.context_id, data.batch_id)
-            setattr(data, 'op_name', node_name_dict.get(node_key, data.device_task_type))
+            if data.host_task_type == Constant.TASK_TYPE_UNKNOWN or Constant.TASK_TYPE_FFTS_PLUS:
+                setattr(data, 'op_name', node_name_dict.get(node_key, data.device_task_type))
+            setattr(data, 'op_name', node_name_dict.get(node_key, data.host_task_type))
         tradition_list = []
         for data in data_dict.get("task_data_list", []):
             node_key = "{0}-{1}-{2}-{3}".format(
                 data.task_id, data.stream_id, NumberConstant.DEFAULT_GE_CONTEXT_ID, data.batch_id)
             if node_key not in ffts_plus_set:
-                setattr(data, 'op_name', node_name_dict.get(node_key, data.device_task_type))
+                if data.host_task_type == Constant.TASK_TYPE_UNKNOWN or Constant.TASK_TYPE_FFTS_PLUS:
+                    setattr(data, 'op_name', node_name_dict.get(node_key, data.device_task_type))
+                setattr(data, 'op_name', node_name_dict.get(node_key, data.host_task_type))
                 tradition_list.append(data)
         data_dict["task_data_list"] = tradition_list
 

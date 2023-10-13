@@ -688,6 +688,12 @@ aclError aclprofSetCategoryName(uint32_t category, const char *categoryName)
             std::vector<std::string>({"aclprofSetCategoryName", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
+    if (categoryName == nullptr) {
+        MSPROF_LOGE("categoryName is nullptr");
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "categoryName", "categoryName can not be nullptr."}));
+        return ACL_ERROR_INVALID_PARAM;
+    }
     return MsprofTxManager::instance()->SetCategoryName(category, categoryName);
 }
 
