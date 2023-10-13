@@ -1015,6 +1015,10 @@ void ProfHostService::PrintFileContent(const std::string filePath) const
 {
     std::string context;
     std::ifstream psFile;
+    if (Utils::IsSoftLink(filePath)) {
+        MSPROF_LOGE("File path is invalid: soft link is not allowed, filePath: %s.", filePath.c_str());
+        return;
+    }
     psFile.open(filePath, std::ifstream::in);
     if (psFile.is_open()) {
         while (getline(psFile, context)) {
@@ -1059,13 +1063,17 @@ int ProfHostService::CollectToolIsRun()
         MSPROF_INNER_ERROR("EK9999", "The file:%s is not exist", redirectionPath.c_str());
         return PROFILING_FAILED;
     }
-    PrintFileContent(redirectionPath);
     long long len = Utils::GetFileSize(redirectionPath);
-    MmUnlink(redirectionPath);
-    if (len > 0) {
+    if (len > MSVP_SMALL_FILE_MAX_LEN) {
+        MSPROF_LOGE("File size is invalid. filePath:%s, size:%lld.", redirectionPath.c_str(), len);
+    } else if (len <= 0) {
+        MSPROF_LOGI("The tool:%s is not running", toolName_.c_str());
+    } else {
+        PrintFileContent(redirectionPath);
+        MmUnlink(redirectionPath);
         return PROFILING_SUCCESS;
     }
-    MSPROF_LOGI("The tool:%s is not running", toolName_.c_str());
+    MmUnlink(redirectionPath);
     return PROFILING_FAILED;
 }
 

@@ -69,6 +69,7 @@ class TestStepTraceSummary(unittest.TestCase):
         case_param.update({"npu_id": -1})
         with mock.patch(NAMESPACE + '.StepTraceSummay._check_step_trace_db', return_value=True), \
                 mock.patch('os.path.exists', return_value=True), \
+                mock.patch("os.path.getsize", return_value=0), \
                 mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=False):
             check = StepTraceSummay(case_param)
             check.process()
@@ -79,6 +80,7 @@ class TestStepTraceSummary(unittest.TestCase):
         case_param.update({"npu_id": -1})
         with mock.patch(NAMESPACE + '.StepTraceSummay._check_step_trace_db', return_value=True), \
                 mock.patch('os.path.exists', return_value=True), \
+                mock.patch("os.path.getsize", return_value=0), \
                 mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \
                 mock.patch(NAMESPACE + '.ClusterInfoViewModel.get_device_and_rank_ids',
                            return_value=[(1, 11), (2, 12), (3, 13)]):
@@ -91,6 +93,7 @@ class TestStepTraceSummary(unittest.TestCase):
         case_param.update({"npu_id": -1})
         with mock.patch(NAMESPACE + '.StepTraceSummay._check_step_trace_db', return_value=True), \
                 mock.patch('os.path.exists', return_value=True), \
+                mock.patch("os.path.getsize", return_value=0), \
                 mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \
                 mock.patch(NAMESPACE + '.ClusterInfoViewModel.get_device_and_rank_ids', return_value=[]):
             check = StepTraceSummay(case_param)

@@ -41,9 +41,9 @@ public:
         aclprofSubscribeOpAttri attri);
     uint64_t SetOpTypeAndOpName(const std::string &opType, const std::string &opName);
     int32_t GetOpTypeLen(CONST_VOID_PTR data, uint32_t len, SIZE_T_PTR opTypeLen, uint32_t index);
-    int32_t GetOpType(CONST_VOID_PTR data, uint32_t len, CHAR_PTR opType, uint32_t opTypeLen, uint32_t index);
+    int32_t GetOpType(CONST_VOID_PTR data, uint32_t len, CHAR_PTR opType, size_t opTypeLen, uint32_t index);
     int32_t GetOpNameLen(CONST_VOID_PTR data, uint32_t len, SIZE_T_PTR opNameLen, uint32_t index);
-    int32_t GetOpName(CONST_VOID_PTR data, uint32_t len, CHAR_PTR opName, uint32_t opNameLen, uint32_t index);
+    int32_t GetOpName(CONST_VOID_PTR data, uint32_t len, CHAR_PTR opName, size_t opNameLen, uint32_t index);
 
 private:
     static int32_t CheckData(CONST_VOID_PTR data, uint32_t len);

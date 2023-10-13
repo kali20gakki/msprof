@@ -24,6 +24,7 @@ class TestAcsqTaskViewer(unittest.TestCase):
     def test_get_summary_data(self):
         config = {"headers": [1], 'result_dir': 'test'}
         with mock.patch("os.path.exists", return_value=True), \
+                mock.patch("os.path.getsize", return_value=0), \
                 mock.patch('msmodel.stars.acsq_task_model.AcsqTaskModel.get_summary_data',
                            return_value=[TestTaskData(1, 5, 6, 4, 6, 8, 0), TestTaskData(2, 3, 4, 5, 6, 7, 0)]):
             check = AcsqTaskViewer(config)
