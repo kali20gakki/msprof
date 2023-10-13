@@ -219,7 +219,7 @@ def check_path_valid(path: str, is_file: bool, max_size: int = Constant.MAX_READ
                      'check that the path is readable.' % path}))
 
 
-def check_db_path_valid(path: str, is_create: bool = False, max_size: int = Constant.MAX_READ_FILE_BYTES) -> None:
+def check_db_path_valid(path: str, is_create: bool = False, max_size: int = Constant.MAX_READ_DB_FILE_BYTES) -> None:
     if os.path.islink(path):
         ReturnCodeCheck.print_and_return_status(json.dumps(
             {'status': NumberConstant.ERROR,

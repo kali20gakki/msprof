@@ -438,6 +438,7 @@ class Constant:
     # add default limit for reader buffer size ->8196  * 1024 Byte
     MAX_READ_LINE_BYTES = 8196 * 1024
     MAX_READ_FILE_BYTES = 64 * 1024 * 1024
+    MAX_READ_DB_FILE_BYTES = 8 * 1024 * 1024 * 1024
     MAX_HWTS_FILE_PARSE_BYTES = 650 * 1024 * 1024
 
     DEFAULT_START = 1
