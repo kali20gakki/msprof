@@ -140,6 +140,13 @@ class TestFopsParser(unittest.TestCase):
                 result = check.check_id_valid()
                 self.assertTrue(result)
 
+    def test_get_cluster_path(self):
+        with mock.patch('os.path.realpath', return_value=""), \
+                mock.patch('os.path.exists', return_value=False), \
+                mock.patch('os.makedirs'):
+            check = FopsParser(self.params)
+            check.get_cluster_path("test.bin")
+
 
 if __name__ == '__main__':
     unittest.main()
