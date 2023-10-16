@@ -133,6 +133,7 @@ class TestDataLoader(unittest.TestCase):
         self.assertEqual(formatted_print,
                          "Percentage of AI CPU Execution Time is 2.50%, Exceed the experience threshold 5%.")
 
+
 class TestModelSummaryTuningDataHandle(unittest.TestCase):
     def test_load_data_incorrect_metrics(self):
         param = {
