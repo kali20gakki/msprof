@@ -9,7 +9,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from sqlite.db_manager import DBManager
 from sqlite.db_manager import DBOpen
-from tuning.data_manager import DataManager, OpSummaryTuningDataHandle
+from tuning.data_manager import DataManager, OpSummaryTuningDataHandle, OpParallelTuningDataHandle
 from tuning.data_manager import ModelSummaryTuningDataHandle
 
 sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs',
@@ -118,6 +118,20 @@ class TestDataLoader(unittest.TestCase):
             with mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
                 OpSummaryTuningDataHandle.is_network(project, device_id)
 
+    def test_print_format(self):
+        data = {
+            "AI CPU Execution Time(us)": 0
+        }
+        formatted_print = OpParallelTuningDataHandle.print_format(data)
+        self.assertEqual(formatted_print,
+                         "Percentage of AI CPU Execution Time is 0.00%, Exceed the experience threshold 5%.")
+        data = {
+            "AI CPU Execution Time(us)": 2.5,
+            "others": 97.5
+        }
+        formatted_print = OpParallelTuningDataHandle.print_format(data)
+        self.assertEqual(formatted_print,
+                         "Percentage of AI CPU Execution Time is 2.50%, Exceed the experience threshold 5%.")
 
 class TestModelSummaryTuningDataHandle(unittest.TestCase):
     def test_load_data_incorrect_metrics(self):
@@ -126,7 +140,7 @@ class TestModelSummaryTuningDataHandle(unittest.TestCase):
                 {
                     StrConstant.AI_CORE_PROFILING_METRICS: 'xxx'
                 }
-            }
+        }
         handler = ModelSummaryTuningDataHandle()
         ret = handler.load_data(param)
         self.assertEqual(ret, [])
@@ -137,7 +151,7 @@ class TestModelSummaryTuningDataHandle(unittest.TestCase):
                 {
                     StrConstant.AI_CORE_PROFILING_METRICS: Constant.PMU_PIPE
                 }
-            }
+        }
         handler = ModelSummaryTuningDataHandle()
         with mock.patch(NAMESPACE + '.ModelSummaryTuningDataHandle.get_data_by_infer_id', return_value=[]):
             ret = handler.load_data(param)
@@ -149,7 +163,7 @@ class TestModelSummaryTuningDataHandle(unittest.TestCase):
                 {
                     StrConstant.AI_CORE_PROFILING_METRICS: Constant.PMU_PIPE
                 }
-            }
+        }
         op1 = {
             StrConstant.MAC_RATIO: 0.3,
             StrConstant.VEC_RATIO: 0.24,
