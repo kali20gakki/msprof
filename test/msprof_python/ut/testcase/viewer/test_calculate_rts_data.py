@@ -47,19 +47,6 @@ class TestCalculateRts(unittest.TestCase):
         self.assertEqual(len(res), 1)
         (test_sql[1]).execute("drop Table TaskTime")
         db_manager.destroy(test_sql)
-    def test_calculate_task_schedule_data_3(self):
-        create_sql = "CREATE TABLE IF NOT EXISTS TaskTime(replayid, device_id, api, apirowid, tasktype, " \
-                     "task_id, stream_id, waittime, pendingtime, running, complete, index_id, model_id, batch_id)"
-        data = ((0, 0, 0, 430, 4, 2, 5, 0, 0, 118562436328.0, 118562436328.0, 1, 1, 0),)
-        insert_sql = "insert into {0} values ({value})".format(
-            "TaskTime", value="?," * (len(data[0]) - 1) + "?")
-        db_manager = DBManager()
-        test_sql = db_manager.create_table(DBNameConstant.DB_RUNTIME, create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
-            res = calculate_task_schedule_data(test_sql[1], 0)
-        self.assertEqual(len(res), 0)
-        (test_sql[1]).execute("drop Table TaskTime")
-        db_manager.destroy(test_sql)
 
     def test_calculate_task_schedule_data_3(self):
         create_sql = "CREATE TABLE IF NOT EXISTS TaskTime(replayid, device_id, api, apirowid, tasktype, " \
