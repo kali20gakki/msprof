@@ -9,13 +9,15 @@ output_dir="${script_dir}/../test/build_llt/output/python_coverage"
 src_code="${script_dir}/../analysis"
 test_code="${script_dir}/../test/msprof_python/ut/testcase"
 export PYTHONPATH=${src_code}:${test_code}:${PYTHONPATH}
-mkdir -p ${output_dir}
-cd ${output_dir}
+mkdir -p "${output_dir}"
+cd "${output_dir}"
 rm -f .coverage
-coverage run --branch --source=${src_code} -m pytest -s "${test_code}" --junit-xml=./final.xml
+coverage run --branch --source="${src_code}" -m pytest -s "${test_code}" --junit-xml=./final.xml
 coverage xml -o coverage.xml
 coverage report > python_coverage_report.log
-# diff-cover coverage.xml --compare-branch="origin/master" --html-report inc_coverage_result.html
+if [[ -n "$1" && "$1" == "diff" ]];then
+  diff-cover coverage.xml --compare-branch="origin/${targetBranch}"  --html-report inc_coverage_result.html --fail-under=80
+fi
 echo "report: ${output_dir}"
-find ${script_dir}/.. -name "__pycache__" | xargs rm -r
+find "${script_dir}/.." -name "__pycache__" | xargs rm -r
 
