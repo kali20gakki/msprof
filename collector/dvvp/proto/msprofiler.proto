@@ -263,6 +263,7 @@ message InfoMain {
     int32 rank_id = 20;
     repeated CycleToTimeInfo cycleToTime = 21;
     string pid_name = 22;
+    uint32 drvVersion = 23;
 }
 // for generating info.json _________END
 

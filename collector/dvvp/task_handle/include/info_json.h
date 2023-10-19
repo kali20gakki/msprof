@@ -65,6 +65,7 @@ private:
     void AddCycleToTimeInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
     void SetRankId(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
     void SetVersionInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain) const;
+    void SetDrvVersion(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain) const;
     std::string GetHostOscFrequency() const;
     std::string GetDeviceOscFrequency(uint32_t deviceId, const std::string &freq);
 

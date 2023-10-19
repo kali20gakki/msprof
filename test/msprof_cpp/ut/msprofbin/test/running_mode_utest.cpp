@@ -358,13 +358,12 @@ TEST_F(RUNNING_MODE_UTEST, StartExportTask){
     rMode.jobResultDir_ = "123";
     rMode.analysisPath_ = "path_test";
     params->exportModelId = "1";
-    MOCKER_CPP(&RunningMode::RunExportSummaryTask)
-        .stubs()
+    params->exportIterationId = "1";
+    MOCKER_CPP(&RunningMode::RunExportSummaryTask).stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(PROFILING_FAILED, rMode.StartExportTask());
-    MOCKER_CPP(&RunningMode::RunExportTimelineTask)
-        .stubs()
+    MOCKER_CPP(&RunningMode::RunExportTimelineTask).stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(PROFILING_FAILED, rMode.StartExportTask());
