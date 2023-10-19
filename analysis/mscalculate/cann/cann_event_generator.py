@@ -32,6 +32,7 @@ from profiling_bean.db_dto.mem_copy_info_dto import MemCopyInfoDto
 from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
 from profiling_bean.db_dto.task_track_dto import TaskTrackDto
 from profiling_bean.db_dto.tensor_info_dto import TensorInfoDto
+from viewer.api_viewer import ApiViewer
 
 
 class CANNThreadDB:
@@ -79,6 +80,16 @@ class CANNEventGenerator:
         self.graph_id_map_model = GraphAddInfoModel(self._project_path)
         self.fusion_op_info_model = FusionAddInfoModel(self._project_path)
 
+    @staticmethod
+    def is_kernel_api(api_data_dto: ApiDataDto) -> bool:
+        if api_data_dto.struct_type == "StreamSyncTaskFinish":
+            return False
+        if api_data_dto.start <= 0 or api_data_dto.start == api_data_dto.end:
+            return False
+        if api_data_dto.level == ApiViewer.ACL_LEVEL:
+            return False
+        return True
+
     def record_additional_info(self, infos):
         for info in infos:
             record = AdditionalRecord(info, info.timestamp, info.struct_type)
@@ -104,8 +115,7 @@ class CANNEventGenerator:
         api_data, event_data = self.collect_time_period_data()
         for api_data_dto in api_data:
             # special api start equal end, abandon
-            if api_data_dto.struct_type == "StreamSyncTaskFinish" \
-                    or api_data_dto.start <= 0 or api_data_dto.start == api_data_dto.end:
+            if not self.is_kernel_api(api_data_dto):
                 continue
             event = self.api_databases.set_default_call_obj_later(
                 api_data_dto.thread_id, ApiDataDatabase, api_data_dto.thread_id).put(api_data_dto)
