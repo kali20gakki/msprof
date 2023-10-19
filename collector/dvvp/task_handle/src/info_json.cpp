@@ -483,6 +483,7 @@ int InfoJson::AddOtherInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
     infoMain->set_mac(mac);
     SetPlatFormVersion(infoMain);
     SetVersionInfo(infoMain);
+    SetDrvVersion(infoMain);
     return PROFILING_SUCCESS;
 }
 
@@ -527,6 +528,11 @@ void InfoJson::SetPlatFormVersion(SHARED_PTR_ALIA<InfoMain> infoMain)
 void InfoJson::SetVersionInfo(SHARED_PTR_ALIA<InfoMain> infoMain) const
 {
     infoMain->set_version(Analysis::Dvvp::Common::Platform::PROF_VERSION_INFO);
+}
+
+void InfoJson::SetDrvVersion(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain) const
+{
+    infoMain->set_drvversion(analysis::dvvp::driver::DrvGetApiVersion());
 }
 
 InfoJson::~InfoJson()
