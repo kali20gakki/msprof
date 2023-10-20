@@ -77,14 +77,16 @@ class TestStarsIterRecParser(unittest.TestCase):
                 mock.patch(NAMESPACE + '.IterRecorder.check_task_in_iter', return_value=True):
             StarsIterRecParser(self.stars_file_list, sample_config)._process_log_data(data)
 
-    def test_parse_pmu_data(self):
-        data = struct.pack("=4HQ4HQ12Q", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-        with mock.patch(NAMESPACE + '.PathManager.get_data_file_path', return_value='test'), \
-                mock.patch(NAMESPACE + '.logging.info'), \
-                mock.patch('os.path.getsize', return_value=128), \
-                mock.patch('builtins.open', mock.mock_open(read_data=data)), \
-                mock.patch(NAMESPACE + '.StarsIterRecParser._process_pmu_data'):
-            StarsIterRecParser(self.ffts_file_list, sample_config)._parse_pmu_data()
+    def test_process_pmu_data_when_iter_in_step_iter_then_update(self):
+        data = b'0' * 128
+        with mock.patch(NAMESPACE + '.IterRecorder.check_task_in_iter', return_value=True), \
+                mock.patch(NAMESPACE + '.StarsIterRecParser._update_iter_info'):
+            StarsIterRecParser(self.stars_file_list, sample_config)._process_pmu_data(data)
+
+    def test_process_pmu_data_when_iter_not_in_step_iter_then_continue(self):
+        data = b'0' * 128
+        with mock.patch(NAMESPACE + '.IterRecorder.check_task_in_iter', return_value=False):
+            StarsIterRecParser(self.stars_file_list, sample_config)._process_pmu_data(data)
 
     def test_process_pmu_data(self):
         data = b'0' * 128
@@ -95,3 +97,21 @@ class TestStarsIterRecParser(unittest.TestCase):
         with mock.patch(NAMESPACE + '.IterRecorder.set_current_iter_id'):
             check = StarsIterRecParser(self.ffts_file_list, sample_config)
             check._update_iter_info(100, 200)
+
+    def test_refactor_iter_info_dict_when_normal_then_refactor_iter_info(self):
+        check = StarsIterRecParser(self.ffts_file_list, sample_config)
+        step = StepTraceDto()
+        step.iter_id = 1
+        step.model_id = 2
+        step.index_id = 3
+        step.step_start = 0
+        step.step_end = 150
+        iter_info = IterInfo(2, 3, 1, 0, 100)
+        iter_info.hwts_count = 10
+        iter_info.aic_count = 20
+        check._iter_info_dict = {1: iter_info}
+        check._task_cnt_not_in_iter = {0: 2}
+        check._aic_cnt_not_in_iter = {0: 5}
+        with mock.patch(NAMESPACE + '.GeInfoModel.get_step_trace_data', return_value=[step]):
+            res = check.refactor_iter_info_dict()
+            self.assertEqual(res, [[1, 2, 3, 10, 2, 20, 5, 150]])
