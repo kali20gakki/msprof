@@ -12,7 +12,9 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
+from common_func.info_conf_reader import InfoConfReader
 from mscalculate.ascend_task.ascend_task import DeviceTask
+from mscalculate.flip.flip_calculator import FlipCalculator
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from msmodel.nano.nano_stars_model import NanoStarsViewModel
 from msmodel.stars.acsq_task_model import AcsqTaskModel
@@ -20,6 +22,7 @@ from msmodel.stars.ffts_log_model import FftsLogModel
 from msmodel.task_time.hwts_aiv_model import HwtsAivModel
 from msmodel.task_time.hwts_log_model import HwtsLogModel
 from msmodel.task_time.runtime_task_time_model import RuntimeTaskTimeModel
+from msmodel.step_trace.ts_track_model import TsTrackModel
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.prof_enum.chip_model import ChipModel
 
@@ -61,7 +64,10 @@ class DeviceTaskCollector:
     def get_all_device_tasks(self: any) -> List[DeviceTask]:
         if not self._check_device_data_db_exists():
             return []
-        return self.collectors.get(self.chip)(float('-inf'), float('inf'))
+        device_tasks = self.collectors.get(self.chip)(float('-inf'), float('inf'))
+        if InfoConfReader().is_all_export_version():
+            self.set_batch_id_by_flip(device_tasks)
+        return device_tasks
 
     def get_device_tasks_by_model_and_iter(self, model_id, iter_id) -> List[DeviceTask]:
         if not self._check_device_data_db_exists():
@@ -73,7 +79,17 @@ class DeviceTaskCollector:
             return []
         iter_start, iter_end = time_range
         chip = ChipManager().get_chip_id()
-        return self.collectors.get(chip)(iter_start * NumberConstant.NS_TO_US, iter_end * NumberConstant.NS_TO_US)
+        device_tasks = \
+            self.collectors.get(chip)(iter_start * NumberConstant.NS_TO_US, iter_end * NumberConstant.NS_TO_US)
+        if InfoConfReader().is_all_export_version():
+            self.set_batch_id_by_flip(device_tasks)
+        return device_tasks
+
+    def set_batch_id_by_flip(self: any, device_tasks: list) -> None:
+        with TsTrackModel(self.result_dir,
+                          DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_DEVICE_TASK_FLIP]) as model:
+            task_flip = model.get_task_flip_data()
+        FlipCalculator.compute_batch_id(device_tasks, task_flip)
 
     def get_sub_tasks_by_time_range(self: any, start_time: float, end_time: float) -> List[DeviceTask]:
         return self._gather_device_ffts_plus_sub_tasks_from_stars(start_time, end_time)

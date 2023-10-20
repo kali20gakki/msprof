@@ -101,12 +101,10 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
         get_metric_summary_data
         :return: []
         """
-        if ProfilingScene().is_step_trace():
-            have_step_info = True
-        elif ProfilingScene().is_operator():
+        if ProfilingScene().is_all_export():
             have_step_info = False
         else:
-            return []
+            have_step_info = True
         conn, curs = DBManager.check_connect_db_path(PathManager.get_db_path(self._project_path,
                                                                              DBNameConstant.DB_RUNTIME))
         if not conn or not curs or not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_EVENT_COUNT):

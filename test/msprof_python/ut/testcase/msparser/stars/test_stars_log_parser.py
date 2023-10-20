@@ -21,6 +21,7 @@ class TestStarsLogCalCulator(unittest.TestCase):
             check.init_dispatcher()
 
     def test_calculate(self):
+        ProfilingScene().set_all_export(False)
         with mock.patch(NAMESPACE + '.StarsLogCalCulator.init_dispatcher'), \
                 mock.patch(NAMESPACE + '.PathManager.get_data_file_path', return_value='123'), \
                 mock.patch('common_func.utils.Utils.get_scene', return_value='step_info'), \
@@ -28,6 +29,7 @@ class TestStarsLogCalCulator(unittest.TestCase):
             key = StarsLogCalCulator(file_list={DataTag.STARS_LOG: ['a_2']}, sample_config={'1': 'ada'})
             key.calculate()
         ProfilingScene().init(sample_config.get('result_dir'))
+        ProfilingScene().set_all_export(True)
         with mock.patch(NAMESPACE + '.StarsLogCalCulator.init_dispatcher'), \
                 mock.patch(NAMESPACE + '.PathManager.get_data_file_path', return_value='123'), \
                 mock.patch('common_func.utils.Utils.get_scene', return_value='single_op'), \
@@ -48,6 +50,7 @@ class TestStarsLogCalCulator(unittest.TestCase):
             key.ms_run()
 
     def test_parse_all_file(self):
+        ProfilingScene().set_all_export(True)
         data = struct.pack('=4HQ4HQ12Q', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         with mock.patch(NAMESPACE + '.PathManager.get_data_file_path'), \
                 mock.patch('builtins.open', mock.mock_open(read_data=data)), \
@@ -64,6 +67,7 @@ class TestStarsLogCalCulator(unittest.TestCase):
 
     def test_parse_by_iter(self):
         ProfilingScene().init("")
+        ProfilingScene().set_all_export(False)
         with mock.patch('common_func.utils.Utils.get_scene', return_value='step_info'), \
                 mock.patch('msparser.stars.parser_dispatcher.ParserDispatcher.init'), \
                 mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.init'), \

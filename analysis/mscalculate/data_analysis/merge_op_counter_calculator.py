@@ -81,7 +81,7 @@ class MergeOpCounterCalculator(MsMultiProcess):
         entry
         :return: None
         """
-        if not ProfilingScene().is_operator():
+        if not ProfilingScene().is_all_export():
             self.process()
 
     def process(self: any) -> None:
@@ -101,9 +101,7 @@ class MergeOpCounterCalculator(MsMultiProcess):
             logging.warning("No need to create db for op counter, "
                             "maybe the data of framework or task is not collected.")
             return
-        map_path = \
-            self.TABLE_PATH if ProfilingScene().is_step_trace() else ConfigManager.TABLES_TRAINING
-        self.create_db(map_path)
+        self.create_db(self.TABLE_PATH)
         self._create_ge_merge()
         self._create_task()
         self._create_report()

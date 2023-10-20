@@ -11,8 +11,8 @@ class TaskTrackModel(ParserModel):
     db operator for task track
     """
 
-    def __init__(self: any, result_dir: str):
-        super().__init__(result_dir, DBNameConstant.DB_RTS_TRACK, [DBNameConstant.TABLE_TASK_TRACK])
+    def __init__(self: any, result_dir: str, table_list: list):
+        super().__init__(result_dir, DBNameConstant.DB_RTS_TRACK, table_list)
 
     def flush(self: any, data_list: list) -> None:
         """

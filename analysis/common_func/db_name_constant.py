@@ -292,6 +292,10 @@ class DBNameConstant(metaclass=ABCMeta):
     # nano
     TABLE_NANO_TASK = "NanoTask"
 
+    # flip
+    TABLE_HOST_TASK_FLIP = "HostTaskFlip"
+    TABLE_DEVICE_TASK_FLIP = "DeviceTaskFlip"
+
     @abstractmethod
     def get_db_name(self: any) -> str:
         """

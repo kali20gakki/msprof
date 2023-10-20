@@ -180,6 +180,7 @@ class TestHCCLModel(TestDirCRBaseModel):
         with mock.patch(NAMESPACE + '.HcclViewModel.attach_to_db', return_value=True):
             scene = ProfilingScene()
             scene._scene = Constant.STEP_INFO
+            ProfilingScene().set_all_export(False)
 
             # test on device_0 matched case
             InfoConfReader()._info_json = {"devices": "0"}

@@ -109,7 +109,7 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         self.save()
 
     def calculate(self: any) -> None:
-        if ProfilingScene().is_operator():
+        if ProfilingScene().is_all_export():
             self._parse_all_file()
         else:
             self._parse_by_iter()

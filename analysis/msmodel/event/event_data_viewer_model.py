@@ -30,7 +30,7 @@ class EventDataViewModel(ViewModel):
         if not DBManager.judge_table_exist(self.cur, table_name):
             return []
         sql = "select struct_type, request_id, (timestamp), " \
-              "thread_id, level," \
+              "thread_id, level, connection_id, " \
               "item_id from {} {where_condition}".format(DBNameConstant.TABLE_EVENT_DATA,
                                                          where_condition=self._get_where_condition())
         return DBManager.fetch_all_data(self.cur, sql, dto_class=dto_class)

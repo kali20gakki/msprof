@@ -48,11 +48,6 @@ class CommonConstant:
     LOG_LEVEL = logging.INFO
     MINIMUM_DISK_MEMORY = 512
     MEMORY_BUFFER_NUM = 3
-    # Tag of ts_track
-    STEP_TRACE_TAG = 10
-    TS_MEMCPY_TAG = 11
-    TS_TASK_TYPE_TAG = 12
-    MODEL_WITH_Q_TAG = 61
 
     def get_common_class_name(self: any) -> any:
         """

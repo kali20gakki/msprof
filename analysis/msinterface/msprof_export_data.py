@@ -17,6 +17,7 @@ from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
+from common_func.profiling_scene import ProfilingScene
 from host_prof.host_prof_presenter_manager import HostExportType
 from host_prof.host_prof_presenter_manager import get_host_prof_summary
 from host_prof.host_prof_presenter_manager import get_host_prof_timeline
@@ -641,9 +642,10 @@ class MsProfExportDataUtils:
         :return:
         """
         filter_list = [
-            "msprof", "step_trace", "thread_group",
-            "ffts_sub_task_time", "acl", "runtime_api", "ge_op_execute"
+            "msprof", "ffts_sub_task_time",
         ]
+        if not ProfilingScene().is_all_export():
+            filter_list.append("step_trace")
         if params.get(StrConstant.PARAM_DATA_TYPE) not in filter_list:
             MsprofTimeline().add_export_data(data, params.get(StrConstant.PARAM_DATA_TYPE))
 
