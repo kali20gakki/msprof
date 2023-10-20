@@ -17,6 +17,7 @@ from common_func.msprof_iteration import MsprofIteration
 from common_func.singleton import singleton
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
+from common_func.profiling_scene import ProfilingScene
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from viewer.association.host_connect_device import HostToDevice
 from viewer.training.step_trace_viewer import StepTraceViewer
@@ -131,9 +132,10 @@ class MsprofTimeline:
             if isinstance(export_data, list):
                 self.add_sort_index(export_data)
                 self.add_connect_json_line(export_data, data_type)
-                export_data = filter(
-                    lambda value: value["ph"] == "M" or self.is_in_iteration(value),
-                    export_data)
+                if not ProfilingScene().is_all_export():
+                    export_data = filter(
+                        lambda value: value["ph"] == "M" or self.is_in_iteration(value),
+                        export_data)
                 self._export_data_list.extend(export_data)
         except (TypeError, ValueError) as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
@@ -176,7 +178,9 @@ class MsprofTimeline:
         get bulk data
         :return: json for timeline
         """
-        data = StepTraceViewer.get_one_iter_timeline_data(self._result_dir, self._iter_range)
+        data = EmptyClass()
+        if not ProfilingScene().is_all_export():
+            data = StepTraceViewer.get_one_iter_timeline_data(self._result_dir, self._iter_range)
         if not isinstance(data, EmptyClass):
             data_list = json.loads(data)
             if isinstance(data_list, list) and data_list:

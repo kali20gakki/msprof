@@ -32,6 +32,8 @@ from common_func.path_manager import PathManager
 from common_func.profiling_scene import ProfilingScene
 from common_func.system_data_check_manager import SystemDataCheckManager
 from common_func.utils import Utils
+from common_func.common import call_sys_exit
+from common_func.platform.chip_manager import ChipManager
 from framework.file_dispatch import FileDispatch
 from framework.load_info_manager import LoadInfoManager
 from msinterface.msprof_export_data import MsProfExportDataUtils
@@ -47,6 +49,8 @@ from tuning.cluster.cluster_tuning_facade import ClusterTuningFacade
 from tuning.cluster_tuning import ClusterTuning
 from tuning.profiling_tuning import ProfilingTuning
 from viewer.tuning_view import TuningView
+from msmodel.compact_info.task_track_model import TaskTrackModel
+from msparser.step_trace.ts_binary_data_reader.task_flip_bean import TaskFlip
 
 
 class ExportCommand:
@@ -209,8 +213,10 @@ class ExportCommand:
         self.command_type = command_type
         self.collection_path = os.path.realpath(args.collection_path)
         self.iteration_id = getattr(args, "iteration_id", NumberConstant.DEFAULT_ITER_ID)
+        if self.iteration_id is None:
+            self.iteration_id = NumberConstant.DEFAULT_ITER_ID
         self.iteration_count = getattr(args, "iteration_count", NumberConstant.DEFAULT_ITER_COUNT)
-        self.sample_config = None
+        self.sample_config = {}
         self.export_format = getattr(args, "export_format", None)
         self.list_map = {
             'export_type_list': [],
@@ -276,6 +282,42 @@ class ExportCommand:
         if self._cluster_params.get('is_cluster_scene', False):
             self._show_cluster_tuning()
 
+    def _check_all_report(self, result_dir: str) -> None:
+        """
+        check all report
+        """
+        if not ProfilingScene().is_all_export():
+            if ProfilingScene().is_operator():
+                error(self.FILE_NAME,
+                      "Please do not set 'model-id' and 'iteration-id' in single op mode.")
+                call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
+            return
+        if ChipManager().is_chip_v1() or not InfoConfReader().is_all_export_version():
+            ProfilingScene().set_all_export(ProfilingScene().is_operator())
+            self.sample_config[StrConstant.ALL_EXPORT] = ProfilingScene().is_all_export()
+            return
+        print_info(self.FILE_NAME, "All collect data will be exported.")
+        host_flip_model = TaskTrackModel(result_dir, [DBNameConstant.TABLE_HOST_TASK_FLIP])
+        device_flip_model = TsTrackModel(result_dir, DBNameConstant.DB_STEP_TRACE,
+                                         [DBNameConstant.TABLE_DEVICE_TASK_FLIP])
+        host_flip = host_flip_model.get_all_data(DBNameConstant.TABLE_HOST_TASK_FLIP, TaskFlip)
+        device_flip = device_flip_model.get_task_flip_data()
+        host_flip_model.finalize()
+        device_flip_model.finalize()
+        if not self._check_flip_data(host_flip, device_flip):
+            call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
+
+    def _check_flip_data(self: any, host_flip: list, device_flip: list) -> bool:
+        if len(host_flip) != len(device_flip):
+            error(self.FILE_NAME,
+                  "Different flip numbers, {} host flips and {} device flips.".format(len(host_flip), len(device_flip)))
+            return False
+        for host_f, device_f in zip(host_flip, device_flip):
+            if host_f.flip_num != device_f.flip_num:
+                error(self.FILE_NAME, "The flip is not consistent between host and device")
+                return False
+        return True
+
     def _set_default_model_id(self, result_dir, model_match_set, ge_data_set):
         conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_STEP_TRACE)
         if not (conn and curs):
@@ -334,9 +376,9 @@ class ExportCommand:
         :return: void
         """
         ProfilingScene().init(project_path)
-        if not ProfilingScene().is_step_trace() and self.iteration_count > NumberConstant.DEFAULT_ITER_COUNT:
+        if ProfilingScene().is_all_export() and self.iteration_count > NumberConstant.DEFAULT_ITER_COUNT:
             warn(self.FILE_NAME, f'Param of "iteration-count" is {self.iteration_count}, '
-                                 f'but it is unnecessary without step trace data.')
+                                 f'but it is unnecessary in all export mode.')
             self.iteration_count = NumberConstant.DEFAULT_ITER_COUNT
             return
 
@@ -351,6 +393,7 @@ class ExportCommand:
 
     def _analyse_sample_config(self: any, result_dir: str) -> None:
         self.sample_config = ConfigMgr.read_sample_config(result_dir)
+        self.sample_config[StrConstant.ALL_EXPORT] = ProfilingScene().is_all_export()
 
     def _analyse_data(self: any, result_dir: str) -> None:
         is_data_analyzed = FileManager.is_analyzed_data(result_dir)
@@ -369,7 +412,7 @@ class ExportCommand:
         profiling_scene = ProfilingScene()
         profiling_scene.init(result_dir)
 
-        if not profiling_scene.is_step_trace():
+        if profiling_scene.is_operator():
             self.list_map[self.MODEL_ID] = Constant.GE_OP_MODEL_ID
             return
 
@@ -429,6 +472,7 @@ class ExportCommand:
             sample_json = {
                 StrConstant.SAMPLE_CONFIG_PROJECT_PATH: result_dir,
             }
+        sample_json[StrConstant.ALL_EXPORT] = ProfilingScene().is_all_export()
         return sample_json
 
     def _has_data_to_export(self):
@@ -442,6 +486,7 @@ class ExportCommand:
         self._analyse_data(result_dir)
         if not self._is_host_export(result_dir):
             self._check_model_id(result_dir)
+            self._check_all_report(result_dir)
             self._check_index_id(result_dir)
             self._set_iteration_info(result_dir)
             self._update_device_list()

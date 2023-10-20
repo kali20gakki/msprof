@@ -78,27 +78,27 @@ class TestClusterLinkCalculate(unittest.TestCase):
             self.assertEqual(generator.event_queues.get(0).size, 4)
             self.assertEqual(generator.event_queues.get(1).size, 1)
 
-    def test_if_ignore_api_when_api_struct_type_invalid_then_return_True(self):
+    def test_is_kernel_api_when_api_struct_type_invalid_then_return_False(self):
         api = self.create_api_dto(self.api_col('model', 0, 10, 100, 'StreamSyncTaskFinish', 0))
         check = CANNEventGenerator("test")
-        self.assertTrue(check.if_ignore_api(api))
+        self.assertFalse(check.is_kernel_api(api))
 
-    def test_if_ignore_api_when_api_time_invalid_then_return_True(self):
+    def test_is_kernel_api_when_api_time_invalid_then_return_False(self):
         api1 = self.create_api_dto(self.api_col('model', 0, -1, 100, 'm', 0))
         api2 = self.create_api_dto(self.api_col('model', 0, 100, 100, 'm', 0))
         check = CANNEventGenerator("test")
-        self.assertTrue(check.if_ignore_api(api1))
-        self.assertTrue(check.if_ignore_api(api2))
+        self.assertFalse(check.is_kernel_api(api1))
+        self.assertFalse(check.is_kernel_api(api2))
 
-    def test_if_ignore_api_when_api_level_invalid_then_return_True(self):
+    def test_is_kernel_api_when_api_level_invalid_then_return_False(self):
         api = self.create_api_dto(self.api_col('acl', 0, 10, 100, 'm', 0))
         check = CANNEventGenerator("test")
-        self.assertTrue(check.if_ignore_api(api))
+        self.assertFalse(check.is_kernel_api(api))
 
-    def test_if_ignore_api_when_api_struct_type_invalid_then_return_False(self):
+    def test_is_kernel_api_when_api_struct_type_invalid_then_return_True(self):
         api = self.create_api_dto(self.api_col('model', 0, 10, 100, 'm', 0))
         check = CANNEventGenerator("test")
-        self.assertFalse(check.if_ignore_api(api))
+        self.assertTrue(check.is_kernel_api(api))
 
     def test_collect_time_period_data_should_return_0_api_when_check_api_db_error(self):
         generator = CANNEventGenerator("test")

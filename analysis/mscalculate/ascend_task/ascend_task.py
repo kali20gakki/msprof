@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
 from dataclasses import dataclass
+from common_func.ms_constant.number_constant import NumberConstant
 
 
 @dataclass
@@ -30,9 +31,10 @@ class DeviceTask:
     stream_id: int
     task_id: int
     context_id: int
-    start_time: int
+    timestamp: int
     duration: int
     task_type: str
+    batch_id: int = NumberConstant.DEFAULT_BATCH_ID
 
 
 @dataclass

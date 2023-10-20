@@ -35,7 +35,7 @@ class TestTstrackParser(unittest.TestCase):
             data_parser.parse()
 
     def test_parse_binary_data(self):
-        data = b'\x01\x03 \x00\x00\x00\x00\x00\x02\x00\x01\x00\x00\x00\x03\x00\xf2\xf8\xb2\xeb\x01\x00\x00\x00(w\x00\x00\x00\x00\x00\x00'
+        data = b'\x01\x03\x0e\x00\x00\x00\x00\x02\x00\x01\x00\x00\x00\x03\x00\xf2\xf8\xb2\xeb\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00'
         with mock.patch(NAMESPACE + '.is_valid_original_data', return_value=True), \
                 mock.patch(NAMESPACE + '.FileManager.add_complete_file'), \
                 mock.patch(NAMESPACE + '.TstrackParser.get_file_path_and_check', return_value=""), \
@@ -43,7 +43,8 @@ class TestTstrackParser(unittest.TestCase):
                 mock.patch('builtins.open', mock.mock_open(read_data="")), \
                 mock.patch('common_func.file_manager.check_path_valid'), \
                 mock.patch(NAMESPACE + '.OffsetCalculator.pre_process', return_value=data), \
-                mock.patch(NAMESPACE + '.logging.info'):
+                mock.patch(NAMESPACE + '.logging.info'), \
+                mock.patch(NAMESPACE + '.TaskFlipReader.read_binary_data'):
             data_parser = TstrackParser(file_list, sample_config)
             data_parser.parse_binary_data(file_list.get(DataTag.TS_TRACK, []), StructFmt.HELPER_MODEL_WITH_Q_FMT_SIZE,
                                           StructFmt.HELPER_HEADER_FMT)

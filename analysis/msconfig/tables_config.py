@@ -1275,4 +1275,16 @@ class TablesConfig(MetaConfig):
             ('pmu8', 'NUMERIC,null'),
             ('pmu9', 'NUMERIC,null')
         ],
+        'HostTaskFlipMap': [
+            ('stream_id', 'INTEGER,null'),
+            ('timestamp', 'NUMERIC,null'),
+            ('task_id', 'INTEGER,null'),
+            ('flip_num', 'INTEGER,null'),
+        ],
+        'DeviceTaskFlipMap': [
+            ('stream_id', 'INTEGER,null'),
+            ('timestamp', 'NUMERIC,null'),
+            ('task_id', 'INTEGER,null'),
+            ('flip_num', 'INTEGER,null'),
+        ],
     }

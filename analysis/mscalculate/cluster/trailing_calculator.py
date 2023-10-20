@@ -40,7 +40,7 @@ class TrailingCalculator:
         """
         for data_path in self._cluster_list:
             ProfilingScene().init(data_path)
-            if not ProfilingScene().is_step_trace():
+            if ProfilingScene().is_operator():
                 continue
             self.calculate(data_path)
         return self.calculate_slow_node()

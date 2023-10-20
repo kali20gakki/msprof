@@ -10,6 +10,7 @@ from common_func.common import call_sys_exit
 from common_func.common import error
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
+from common_func.profiling_scene import ProfilingScene
 from msinterface.msprof_analyze import AnalyzeCommand
 from msinterface.msprof_export import ExportCommand
 from msinterface.msprof_import import ImportCommand
@@ -81,6 +82,16 @@ class MsprofEntrance:
                 error(self.FILE_NAME,
                       "Please ensure the length of input dir absolute path(%s) less than %s" %
                       (path_len, NumberConstant.PROF_PATH_MAX_LEN))
+                call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
+        # when setting 'iteration-id' and 'model-id' args, export one iteration in one model
+        if sys.argv[1] == 'export' and hasattr(args, "model_id") and hasattr(args, "iteration_id"):
+            if args.model_id is not None and args.iteration_id is not None:
+                ProfilingScene().set_all_export(False)
+            # 'iteration-id' and 'model-id' must be set simultaneously
+            if (args.model_id is None) ^ (args.iteration_id is None):
+                error(self.FILE_NAME,
+                      "Please set 'model-id' and 'iteration-id' simultaneously "
+                      "(recommend using 'query' to obtain proper 'model-id' and 'iteration-id' values).")
                 call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
 
         command_handler = {
@@ -154,7 +165,7 @@ class MsprofEntrance:
     def _add_export_argument(self: any, parser: any) -> None:
         self._add_collect_path_argument(parser)
         parser.add_argument(
-            '--iteration-id', dest='iteration_id', default=1,
+            '--iteration-id', dest='iteration_id', default=None,
             metavar='<iteration_id>',
             type=int, help='<Optional> the iteration ID')
         parser.add_argument(

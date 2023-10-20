@@ -56,7 +56,7 @@ class StarsLogCalCulator(ICalculator, MsMultiProcess):
         :return: NA
         """
         self.init_dispatcher()
-        if ProfilingScene().is_step_trace():
+        if not ProfilingScene().is_all_export():
             if not os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HWTS_REC)):
                 logging.warning("No %s db found", DBNameConstant.DB_HWTS_REC)
                 return

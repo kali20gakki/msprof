@@ -65,7 +65,7 @@ class MemcpyCalculator(ICalculator, MsMultiProcess):
         :return: void
         """
         if self._has_table:
-            if ProfilingScene().is_operator():
+            if ProfilingScene().is_all_export():
                 sql = "select stream_id, task_id, timestamp, " \
                       "task_state from {0} order by timestamp".format(
                     DBNameConstant.TABLE_TS_MEMCPY)

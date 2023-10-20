@@ -122,7 +122,7 @@ class MsprofDataStorage:
             file_suffix = ''
             if params.get(StrConstant.PARAM_DEVICE_ID) is not None:
                 file_suffix += "_" + str(params.get(StrConstant.PARAM_DEVICE_ID))
-                if ProfilingScene().is_step_trace():
+                if not ProfilingScene().is_all_export():
                     file_suffix += "_" + str(params.get(StrConstant.PARAM_MODEL_ID))
                 if params.get(StrConstant.PARAM_ITER_ID) is not None:
                     file_suffix += "_" + str(params.get(StrConstant.PARAM_ITER_ID))
@@ -143,7 +143,7 @@ class MsprofDataStorage:
         if params.get(StrConstant.PARAM_DEVICE_ID) is not None and \
                 params.get(StrConstant.PARAM_DEVICE_ID) != NumberConstant.HOST_ID:
             file_name += "_" + str(params.get(StrConstant.PARAM_DEVICE_ID))
-            if ProfilingScene().is_step_trace():
+            if not ProfilingScene().is_all_export():
                 file_name += "_" + str(params.get(StrConstant.PARAM_MODEL_ID))
             if params.get(StrConstant.PARAM_ITER_ID) is not None:
                 file_name += "_" + str(params.get(StrConstant.PARAM_ITER_ID))

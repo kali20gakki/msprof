@@ -56,7 +56,7 @@ class OpSummaryOpSceneCalculator(MsMultiProcess):
         process
         :return: None
         """
-        if ProfilingScene().is_operator():
+        if ProfilingScene().is_all_export():
             self.process()
 
     def process(self: any) -> None:

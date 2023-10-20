@@ -50,7 +50,7 @@ class BaseModel(metaclass=ABCMeta):
             return False
         return True
 
-    def check_table(self: any) -> object:
+    def check_table(self: any) -> bool:
         """
         check db exist
         """
