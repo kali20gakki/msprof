@@ -8,7 +8,6 @@ import unittest
 from unittest import mock
 
 from common_func.constant import Constant
-from common_func.empty_class import EmptyClass
 from common_func.file_manager import FileManager
 from common_func.file_manager import check_db_path_valid
 from common_func.file_name_manager import FileNameManagerConstant
@@ -36,14 +35,12 @@ class TestFileManager(unittest.TestCase):
                 mock.patch("os.path.exists", return_value=False), \
                 mock.patch("os.path.isfile", return_value=False), \
                 mock.patch("os.path.getsize", return_value=2), \
-                mock.patch("os.path.isdir", return_value=False), \
-                mock.patch("os.path.islink", return_value=True):
+                mock.patch("os.path.isdir", return_value=False):
 
             check_path_valid("test.txt", True, max_size=1)
 
     def test_check_db_path_vaild(self):
         with mock.patch("common_func.return_code_checker.ReturnCodeCheck.print_and_return_status"), \
-                mock.patch("os.path.islink", return_value=True), \
                 mock.patch("os.path.exists", return_value=True), \
                 mock.patch("os.path.getsize", return_value=2):
 

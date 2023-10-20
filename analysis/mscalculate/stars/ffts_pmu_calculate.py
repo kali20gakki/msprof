@@ -326,15 +326,7 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         :param iteration:
         :return: offset count and total aic count
         """
-        offset_count, total_count = self._iter_model.get_task_offset_and_sum(iteration, HwtsIterModel.AI_CORE_TYPE)
-        _total_aic_count = self._get_total_aic_count()
-        _sql_aic_count = self._iter_model.get_aic_sum_count()
-        # get offset by all aic count and sql record count
-        offset_count = _total_aic_count - _sql_aic_count + offset_count
-        if offset_count < 0:
-            total_count += offset_count
-            offset_count = 0
-        return offset_count, total_count
+        return self._iter_model.get_task_offset_and_sum(iteration, HwtsIterModel.AI_CORE_TYPE)
 
     def _parse_binary_file(self: any, file_path: str) -> None:
         """
