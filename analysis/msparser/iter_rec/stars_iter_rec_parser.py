@@ -47,6 +47,7 @@ class StarsIterRecParser(IParser, MsMultiProcess):
         self._iter_info_dict = {}
         self._file_list = file_list
         self._task_cnt_not_in_iter = dict()
+        self._aic_cnt_not_in_iter = dict()
 
     @staticmethod
     def _get_log_syscnt(chunk):
@@ -116,6 +117,8 @@ class StarsIterRecParser(IParser, MsMultiProcess):
             if step_dto.iter_id not in self._iter_info_dict:
                 continue
             iter_info = self._iter_info_dict.get(step_dto.iter_id)
+            aic_offset += self._aic_cnt_not_in_iter.get(step_dto.iter_id, 0)
+            hwts_offset += self._task_cnt_not_in_iter.get(step_dto.iter_id, 0)
             iter_info_list.append([step_dto.iter_id,
                                    step_dto.model_id,
                                    step_dto.index_id,
@@ -126,10 +129,6 @@ class StarsIterRecParser(IParser, MsMultiProcess):
                                    step_dto.step_end])
             aic_offset += iter_info.aic_count
             hwts_offset += iter_info.hwts_count
-        for iter_num, task_offset in self._task_cnt_not_in_iter.items():
-            for iter_info in iter_info_list:
-                if iter_info[0] >= iter_num:
-                    iter_info[4] += task_offset
         return iter_info_list
 
     def _is_need_to_calculate(self):
@@ -173,6 +172,12 @@ class StarsIterRecParser(IParser, MsMultiProcess):
     def _process_pmu_data(self: any, all_bytes: bytes) -> None:
         for chunk in Utils.chunks(all_bytes, self.PMU_LOG_SIZE):
             pmu_data = FftsPmuBean.decode(chunk)
+            if not self._iter_recorder.check_task_in_iter(pmu_data.time_list[0]):
+                curr_iter = self._iter_recorder.current_iter_id if self._iter_recorder.current_iter_id >= 0 else 0
+                aic_offset = self._aic_cnt_not_in_iter.get(curr_iter, 0)
+                self._aic_cnt_not_in_iter.setdefault(curr_iter + 1, aic_offset)
+                self._aic_cnt_not_in_iter[curr_iter + 1] += 1
+                continue
             self._update_iter_info(pmu_data.time_list[0], self.PMU_LOG_TYPE)
 
     def _update_iter_info(self, sys_cnt: int, log_type: int):
