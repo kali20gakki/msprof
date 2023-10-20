@@ -6,6 +6,7 @@ from common_func.empty_class import EmptyClass
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import ITER_RANGE
 from msinterface.msprof_timeline import MsprofTimeline
+from common_func.profiling_scene import ProfilingScene
 
 NAMESPACE = 'msinterface.msprof_timeline'
 
@@ -34,6 +35,20 @@ class TestMsprofTimeline(unittest.TestCase):
                       'args': {'Mode': 'ACL_OP'}, 'ph': 'X'}])
                 key = MsprofTimeline()
                 key.add_export_data(data2, 'acl')
+
+                ProfilingScene().set_all_export(False)
+                data = [
+                    {
+                        'name': 'process_name', 'pid': 1, 'tid': 1,
+                        'args': {'name': 'AscendCL'}, 'ph': 'M'
+                    },
+                    {
+                        'name': 'aclopExecuteV2', 'pid': 1, 'tid': 1,
+                        'ts': 545235234.236, 'dur': 652.544, 'args': {'Mode': 'ACL_OP'}, 'ph': 'X'
+                    }
+                ]
+                key.add_export_data(data, 'acl')
+
 
     def test_export_all_data(self):
         with mock.patch(NAMESPACE + '.StepTraceViewer.get_one_iter_timeline_data',

@@ -52,3 +52,10 @@ class TaskTrackBean(CompactInfoBean):
         task track task_type
         """
         return str(self._task_type)
+
+    @batch_id.setter
+    def batch_id(self: any, batch_id) -> None:
+        """
+        task track batch_id
+        """
+        self._batch_id = batch_id

@@ -74,6 +74,7 @@ class TestMemcpyModel(unittest.TestCase):
         expect_res = [(1, 2, 2.5, 2.6, 2.7, 0.10000000000000009, 'MemcopyAsync', 'other')]
         memcpy_calculator = MemcpyCalculator({}, {"result_dir": self.DIR_PATH, "iter_id": IterationRange(2, 1, 1),
                                                   "model_id": 2})
+        ProfilingScene().set_all_export(False)
 
         with mock.patch('common_func.utils.Utils.get_scene', return_value=Constant.STEP_INFO):
             ProfilingScene().init("")
@@ -88,6 +89,7 @@ class TestMemcpyModel(unittest.TestCase):
                       (1, 2, 2.5, 2.6, 2.7, 0.10000000000000009, 'MemcopyAsync', 'other')]
         memcpy_calculator = MemcpyCalculator({}, {"result_dir": self.DIR_PATH, "iter_id": IterationRange(2, 1, 1),
                                                   "model_id": 2})
+        ProfilingScene().set_all_export(True)
 
         with mock.patch('common_func.utils.Utils.get_scene', return_value=Constant.SINGLE_OP):
             ProfilingScene().init("")

@@ -140,7 +140,7 @@ class CoreCpuReduceViewer:
         """
         result = []
         if trace_curs:
-            if ProfilingScene().is_step_trace():
+            if not ProfilingScene().is_all_export():
                 sql = "select iteration_id, FP_start, BP_end, iteration_end, iteration_time, " \
                       "fp_bp_time, grad_refresh_bound, data_aug_bound from {0} " \
                       "where device_id=? and iteration_id>=? and iteration_id<=? " \

@@ -63,6 +63,7 @@ class TestEventViewer(unittest.TestCase):
         matched_event_dto.item_id = 6
         matched_event_dto.level = "7"
         matched_event_dto.request_id = 8
+        matched_event_dto.connection_id = 0
         with mock.patch(NAMESPACE + '.EventDataViewModel.check_db', return_value=True), \
                 mock.patch(NAMESPACE + '.EventDataViewModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + ".EventDataViewModel.get_timeline_data", return_value=[matched_event_dto]):
@@ -82,5 +83,5 @@ class TestEventViewer(unittest.TestCase):
                              '{"name": "1", "pid": 100, "tid": 5, '
                              '"ts": 10.003, "dur": 0.001, '
                              '"args": {"Thread Id": 5, "level": "7", '
-                             '"id": "2", "item_id": 6, "request_id": 8}, '
+                             '"id": "2", "item_id": 6, "request_id": 8, "connection_id": 0}, '
                              '"ph": "X"}]', ret)

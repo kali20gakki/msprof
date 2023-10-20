@@ -72,7 +72,7 @@ class CANNEventGenerator:
         self.event_data_model = EventDataModel(self._project_path)
         self.node_basic_info_model = NodeBasicInfoModel(self._project_path)
         self.tensor_info_model = TensorAddInfoModel(self._project_path)
-        self.task_track_model = TaskTrackModel(self._project_path)
+        self.task_track_model = TaskTrackModel(self._project_path, [DBNameConstant.TABLE_TASK_TRACK])
         self.mem_copy_model = MemcpyInfoModel(self._project_path)
         self.ctx_id_model = CtxIdModel(self._project_path)
         self.hccl_info_model = HcclInfoModel(self._project_path)

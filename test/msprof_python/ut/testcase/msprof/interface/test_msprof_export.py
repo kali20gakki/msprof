@@ -11,7 +11,9 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
 from common_func.profiling_scene import ProfilingScene
+from common_func.platform.chip_manager import ChipManager
 from msinterface.msprof_export import ExportCommand
+from msparser.step_trace.ts_binary_data_reader.task_flip_bean import TaskFlip
 from sqlite.db_manager import DBManager
 
 NAMESPACE = 'msinterface.msprof_export'
@@ -31,9 +33,9 @@ def create_trace_db():
     res = db_manager.create_table("ge_info.db", create_ge_sql, insert_ge_sql, data)
     res[0].close()
 
-    create_sql = "CREATE TABLE IF NOT EXISTS StepTrace (index_id INT,model_id INT,step_start REAL," \
+    create_sql = "CREATE TABLE IF NOT EXISTS step_trace_data (index_id INT,model_id INT,step_start REAL," \
                  " step_end INT,iter_id INT,ai_core_num INT)"
-    insert_sql = "insert into {} values (?,?,?,?,?,?)".format('StepTrace')
+    insert_sql = "insert into {} values (?,?,?,?,?,?)".format('step_trace_data')
     data = ((1, 1, 2, 3, 4, 5),)
     db_manager = DBManager()
     res = db_manager.create_table("step_trace.db", create_sql, insert_sql, data)
@@ -151,6 +153,7 @@ class TestExportCommand(unittest.TestCase):
     def test_check_model_id_1(self):
         args_dic = {"collection_path": "test", "iteration_id": 2, "model_id": 1}
         args = Namespace(**args_dic)
+        ProfilingScene().set_all_export(False)
         with mock.patch(NAMESPACE + ".ExportCommand.get_model_id_set", return_value={1}), \
                 mock.patch('common_func.profiling_scene.Utils.get_scene',
                            return_value="step_info"):
@@ -235,10 +238,11 @@ class TestExportCommand(unittest.TestCase):
     def test_analyse_sample_config(self):
         args_dic = {"collection_path": "test", "iteration_id": 1, "model_id": 3}
         args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=1):
+        ProfilingScene().set_all_export(True)
+        with mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}):
             test = ExportCommand("timeline", args)
             test._analyse_sample_config("")
-        self.assertEqual(test.sample_config, 1)
+        self.assertEqual(test.sample_config, {"all_export": True})
 
     def test_analyse_data(self):
         args_dic = {"collection_path": "test", "iteration_id": 1, "model_id": 3}
@@ -476,6 +480,87 @@ class TestExportCommand(unittest.TestCase):
             test = ExportCommand("summary", args)
             test.list_map = {'export_type_list': [1]}
             test._handle_export('test')
+
+    def test__check_all_report_should_exit_when_chip_v1_1(self) -> None:
+        args_dic = {"collection_path": "test", "iteration_id": None, "model_id": None, "iteration_count": None}
+        args = Namespace(**args_dic)
+        with mock.patch('common_func.common.error'), \
+                mock.patch('sys.exit'), \
+                mock.patch('msmodel.interface.base_model.BaseModel.check_table', return_value=True):
+            test = ExportCommand("summary", args)
+            test._check_all_report("./")
+
+    def test__check_all_report_should_sys_exit_when_not_all_export_but_single_op_mode(self):
+        ProfilingScene().set_all_export(False)
+        ProfilingScene()._scene = "single_op"
+        ChipManager().chip_id = 2
+        args_dic = {"collection_path": "test", "iteration_id": None, "model_id": None, "iteration_count": None}
+        args = Namespace(**args_dic)
+        with mock.patch('common_func.common.error'), \
+                mock.patch('sys.exit'):
+            test = ExportCommand("summary", args)
+            test._check_all_report("./")
+
+    def test__check_all_report_should_pass_check_when_host_flip_and_device_flip_are_empty(self):
+        InfoConfReader()._info_json = {"drvVersion": InfoConfReader().ALL_EXPORT_VERSION}
+        ProfilingScene().set_all_export(True)
+        ChipManager().chip_id = 2
+        args_dic = {"collection_path": "test", "iteration_id": None, "model_id": None, "iteration_count": None}
+        args = Namespace(**args_dic)
+        test = ExportCommand("summary", args)
+        test._check_all_report("./")
+
+    def test__check_all_report_should_sys_exit_when_host_flip_and_device_flip_is_not_consistent(self):
+        host_flip = [
+            TaskFlip(1, 413412444, 2, 1),
+            TaskFlip(1, 413412445, 2, 2),
+            TaskFlip(1, 413412446, 2, 3),
+            TaskFlip(1, 413412447, 2, 65535),
+        ]
+        device_flip = [
+            TaskFlip(1, 413412444, 2, 1),
+            TaskFlip(1, 413412445, 2, 2),
+            TaskFlip(1, 413412446, 2, 4),
+            TaskFlip(1, 413412447, 2, 65535),
+        ]
+        InfoConfReader()._info_json = {"drvVersion": InfoConfReader().ALL_EXPORT_VERSION}
+        ProfilingScene().set_all_export(True)
+        ChipManager().chip_id = 2
+        args_dic = {"collection_path": "test", "iteration_id": None, "model_id": None, "iteration_count": None}
+        args = Namespace(**args_dic)
+        with mock.patch('common_func.common.error'), \
+                mock.patch('sys.exit'), \
+                mock.patch('msmodel.interface.base_model.BaseModel.get_all_data', return_value=host_flip), \
+                mock.patch('msmodel.step_trace.ts_track_model.TsTrackModel.get_task_flip_data',
+                           return_value=device_flip):
+            test = ExportCommand("summary", args)
+            test._check_all_report("./")
+
+    def test__check_all_report_should_sys_exit_when_host_flip_and_device_flip_num_is_not_same(self):
+        host_flip = [
+            TaskFlip(1, 413412444, 2, 1),
+            TaskFlip(1, 413412445, 2, 2),
+            TaskFlip(1, 413412446, 2, 3),
+            TaskFlip(1, 413412447, 2, 65535),
+        ]
+        device_flip = [
+            TaskFlip(1, 413412444, 2, 1),
+            TaskFlip(1, 413412445, 2, 2),
+            TaskFlip(1, 413412446, 2, 3),
+        ]
+        InfoConfReader()._info_json = {"drvVersion": InfoConfReader().ALL_EXPORT_VERSION}
+        ProfilingScene().set_all_export(True)
+        ChipManager().chip_id = 2
+        args_dic = {"collection_path": "test", "iteration_id": None, "model_id": None, "iteration_count": None}
+        args = Namespace(**args_dic)
+        with mock.patch('common_func.common.error'), \
+                mock.patch('sys.exit'), \
+                mock.patch('msmodel.interface.base_model.BaseModel.get_all_data', return_value=host_flip), \
+                mock.patch('msmodel.step_trace.ts_track_model.TsTrackModel.get_task_flip_data',
+                           return_value=device_flip):
+            test = ExportCommand("summary", args)
+            test._check_all_report("./")
+        InfoConfReader()._info_json = {}
 
 
 if __name__ == '__main__':

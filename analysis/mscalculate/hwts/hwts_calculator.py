@@ -56,7 +56,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
 
     def is_need_parse_all_file(self):
-        return ProfilingScene().is_operator() or not \
+        return ProfilingScene().is_all_export() or not \
                 os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HWTS_REC))
 
     def calculate(self: any) -> None:

@@ -46,7 +46,7 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
         entry
         :return:
         """
-        if not ProfilingScene().is_operator():
+        if not ProfilingScene().is_all_export():
             self.process()
 
     def process(self: any) -> None:

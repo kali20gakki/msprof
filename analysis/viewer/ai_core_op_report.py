@@ -215,7 +215,7 @@ class AiCoreOpReport:
         hccl_data = [0] * len(hccl_comunication_data)
         # hccl data for op summary
         for index, _hccl_op in enumerate(hccl_comunication_data):
-            if not ProfilingScene().is_operator():
+            if not ProfilingScene().is_all_export():
                 model_name = [model_name_and_id_dict.get(_hccl_op.model_id, Constant.NA)]
                 index_id = [_hccl_op.index_id]
             hccl_data[index] = model_name + [_hccl_op.model_id, Constant.NA, Constant.NA] + index_id + \
@@ -237,7 +237,7 @@ class AiCoreOpReport:
         :return: headers
         """
         headers = configs.get(StrConstant.CONFIG_HEADERS)
-        if not ProfilingScene().is_operator():
+        if not ProfilingScene().is_all_export():
             return headers
         for head in cls.OPERATOR_UNUSED_HEADERS:
             if head in headers:
@@ -331,7 +331,7 @@ class AiCoreOpReport:
             return []
         data = cls._union_task_ge_ai_core_data(data, ai_core_group_dict)
         data = cls._update_op_name_from_hash(project_path, data)
-        if not ProfilingScene().is_operator():
+        if not ProfilingScene().is_all_export():
             data = cls._update_model_name_and_infer_id(project_path, data)
         DataManager.add_memory_bound(headers, data)
         DataManager.add_cube_usage(headers, data)
@@ -419,14 +419,14 @@ class AiCoreOpReport:
         whether to append the condition for index id.
         """
         index_info = "{0}.index_id,".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME)
-        if ProfilingScene().is_operator():
+        if ProfilingScene().is_all_export():
             index_info = ''
         return index_info
 
     @classmethod
     def _get_table_sql_and_headers_without_ge(cls: any, headers: list) -> tuple:
         cls.clear_no_ge_data_headers(headers)
-        model_id = "{0}, ".format(NumberConstant.DEFAULT_MODEL_ID) if ProfilingScene().is_operator() else 'model_id, '
+        model_id = "{0}, ".format(NumberConstant.DEFAULT_MODEL_ID) if ProfilingScene().is_all_export() else 'model_id, '
         subtask_id = ",subtask_id " if ChipManager().is_chip_v4() else ",'N/A'"
         sql = "select {model_id} task_id, stream_id, {index_info} 'N/A', 'N/A', task_type, " \
               "start_time/{NS_TO_US}+{local_time_offset}, duration_time/{NS_TO_US}," \
@@ -490,7 +490,7 @@ class ReportOPCounter:
         if not cls.check_param(conn, curs):
             return MsvpConstant.MSVP_EMPTY_DATA
         sql = cls._get_op_report_sql_network_scene()
-        if ProfilingScene().is_operator():
+        if ProfilingScene().is_all_export():
             sql = cls._get_op_report_sql_operator_scene()
             cls._clear_unused_headers(headers)
         filter_params = (

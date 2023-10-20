@@ -18,6 +18,10 @@ class ProfilingScene:
     def __init__(self: any) -> None:
         self.project_path = None
         self._scene = None
+        self._all_export = True
+
+    def set_all_export(self: any, value: bool) -> None:
+        self._all_export = value
 
     def init(self: any, project_path: str) -> None:
         """
@@ -38,12 +42,12 @@ class ProfilingScene:
             logging.info("Current scene of data is based on %s", self._scene)
         return self._scene
 
-    def is_step_trace(self: any) -> bool:
+    def is_all_export(self: any) -> bool:
         """
-        check whether step trace
+        check whether all export
         :return: True or False
         """
-        return self.get_scene() == Constant.STEP_INFO or self.get_scene() == Constant.MIX_OP_AND_GRAPH
+        return self._all_export
 
     def is_operator(self: any) -> bool:
         """

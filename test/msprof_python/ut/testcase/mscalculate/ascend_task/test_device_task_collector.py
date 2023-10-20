@@ -19,7 +19,7 @@ class TestDeviceTaskCollector(unittest.TestCase):
 
     def setUp(self) -> None:
         info_reader = InfoConfReader()
-        info_reader._info_json = {'platform_version': "5"}
+        info_reader._info_json = {'platform_version': "5", "drvVersion": InfoConfReader().ALL_EXPORT_VERSION}
 
     def tearDown(self) -> None:
         info_reader = InfoConfReader()
