@@ -46,7 +46,7 @@ class AscendTaskCalculator(MsMultiProcess):
 
     def _collect_ascend_tasks(self):
         iter_range: IterationRange = self.sample_config.get(StrConstant.PARAM_ITER_ID)
-        if not ProfilingScene().is_operator():
+        if not ProfilingScene().is_all_export():
             return AscendTaskGenerator(self.project_path).run(iter_range.model_id,
                                                               iter_range.iteration_start, iter_range.iteration_end)
         else:

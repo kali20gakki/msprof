@@ -22,6 +22,7 @@ class TestPmuCalculator(unittest.TestCase):
             check.init_params()
 
     def test_get_block_dim_from_ge(self):
+        ProfilingScene().set_all_export(True)
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
                 mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=''), \
@@ -35,6 +36,7 @@ class TestPmuCalculator(unittest.TestCase):
             key._freq = 1500
             key.get_block_dim_from_ge()
         ProfilingScene().init('test')
+        ProfilingScene().set_all_export(False)
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
                 mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=''), \

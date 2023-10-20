@@ -142,6 +142,8 @@ class StrConstant:
 
     TASK_START_TIME = 'Task Start Time(us)'
 
+    ALL_EXPORT = "all_export"
+
     #prefix for api and event
     LEVEL_MAP = {
         "acl": "AscendCL",

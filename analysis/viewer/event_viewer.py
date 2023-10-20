@@ -49,6 +49,7 @@ class EventViewer:
             args.setdefault("id", timeline_data_dto.id)
             args.setdefault("item_id", timeline_data_dto.item_id)
             args.setdefault("request_id", timeline_data_dto.request_id)
+            args.setdefault("connection_id", timeline_data_dto.connection_id)
             trace_data.append(
                 (struct_type, pid, timeline_data_dto.thread_id,
                  InfoConfReader().trans_into_local_time(

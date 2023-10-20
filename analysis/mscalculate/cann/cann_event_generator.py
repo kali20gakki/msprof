@@ -73,7 +73,7 @@ class CANNEventGenerator:
         self.event_data_model = EventDataModel(self._project_path)
         self.node_basic_info_model = NodeBasicInfoModel(self._project_path)
         self.tensor_info_model = TensorAddInfoModel(self._project_path)
-        self.task_track_model = TaskTrackModel(self._project_path)
+        self.task_track_model = TaskTrackModel(self._project_path, [DBNameConstant.TABLE_TASK_TRACK])
         self.mem_copy_model = MemcpyInfoModel(self._project_path)
         self.ctx_id_model = CtxIdModel(self._project_path)
         self.hccl_info_model = HcclInfoModel(self._project_path)
@@ -81,14 +81,14 @@ class CANNEventGenerator:
         self.fusion_op_info_model = FusionAddInfoModel(self._project_path)
 
     @staticmethod
-    def if_ignore_api(api_data_dto: ApiDataDto) -> bool:
+    def is_kernel_api(api_data_dto: ApiDataDto) -> bool:
         if api_data_dto.struct_type == "StreamSyncTaskFinish":
-            return True
+            return False
         if api_data_dto.start <= 0 or api_data_dto.start == api_data_dto.end:
-            return True
+            return False
         if api_data_dto.level == ApiViewer.ACL_LEVEL:
-            return True
-        return False
+            return False
+        return True
 
     def record_additional_info(self, infos):
         for info in infos:
@@ -115,7 +115,7 @@ class CANNEventGenerator:
         api_data, event_data = self.collect_time_period_data()
         for api_data_dto in api_data:
             # special api start equal end, abandon
-            if self.if_ignore_api(api_data_dto):
+            if not self.is_kernel_api(api_data_dto):
                 continue
             event = self.api_databases.set_default_call_obj_later(
                 api_data_dto.thread_id, ApiDataDatabase, api_data_dto.thread_id).put(api_data_dto)

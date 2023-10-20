@@ -41,6 +41,7 @@ class TestFftsPmuCalculate(TestCase):
             check.ms_run()
 
     def test_calculate_by_iter_no_table(self):
+        ProfilingScene().set_all_export(False)
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.Utils.get_scene', return_value=Constant.STEP_INFO), \
                 mock.patch("os.path.exists", return_value=True), \
@@ -54,6 +55,7 @@ class TestFftsPmuCalculate(TestCase):
             check.calculate()
 
     def test_calculate_by_iter_table_exist_and_save(self):
+        ProfilingScene().set_all_export(False)
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.Utils.get_scene', return_value=Constant.STEP_INFO), \
                 mock.patch("os.path.exists", return_value=True), \
@@ -119,6 +121,7 @@ class TestFftsPmuCalculate(TestCase):
             mixCalcute.save()
 
     def test_calculate_all_file(self):
+        ProfilingScene().set_all_export(True)
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.Utils.get_scene', return_value=Constant.SINGLE_OP), \
                 mock.patch(NAMESPACE + '.PathManager.get_data_file_path'), \

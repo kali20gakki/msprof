@@ -104,7 +104,7 @@ class PmuCalculator(ICalculator):
 
     def __get_block_dim_data(self: any, ge_curs: any) -> list:
         device_id = InfoConfReader().get_device_id()
-        if ProfilingScene().is_operator():
+        if ProfilingScene().is_all_export():
             sql = "select task_id, stream_id, context_id, task_type, block_dim, mix_block_dim from {0} " \
                   "where device_id={1} " \
                   "order by timestamp".format(DBNameConstant.TABLE_GE_TASK, device_id)

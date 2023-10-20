@@ -11,12 +11,14 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.empty_class import EmptyClass
 from common_func.info_conf_reader import InfoConfReader
 from common_func.path_manager import PathManager
+from common_func.profiling_scene import ProfilingScene
 from msmodel.interface.base_model import BaseModel
 from msmodel.interface.view_model import ViewModel
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from profiling_bean.db_dto.step_trace_ge_dto import StepTraceGeDto
 from profiling_bean.db_dto.time_section_dto import TimeSectionDto
+from msparser.step_trace.ts_binary_data_reader.task_flip_bean import TaskFlip
 
 
 class TsTrackModel(BaseModel, ABC):
@@ -66,7 +68,7 @@ class TsTrackModel(BaseModel, ABC):
             # index 2 is timestamp
             ai_cpu_with_state[index][2] = int(datum[2])
 
-        if iter_time_range:
+        if not ProfilingScene().is_all_export() and iter_time_range:
             min_timestamp = min(iter_time_range)
             max_timestamp = max(iter_time_range)
 
@@ -121,6 +123,12 @@ class TsTrackModel(BaseModel, ABC):
               f"where model_id=? and index_id>=? and index_id<=? order by step_end"
         return DBManager.fetch_all_data(self.cur, sql, (iteration.model_id, *iteration.get_iteration_range()),
                                         dto_class=StepTraceDto)
+
+    def get_task_flip_data(self: any) -> list:
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_DEVICE_TASK_FLIP):
+            return []
+        sql = "select stream_id, timestamp, task_id, flip_num from {0}".format(DBNameConstant.TABLE_DEVICE_TASK_FLIP)
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=TaskFlip)
 
 
 class TsTrackViewModel(ViewModel):

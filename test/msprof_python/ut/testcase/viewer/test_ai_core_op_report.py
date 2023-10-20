@@ -196,6 +196,7 @@ class TestAiCoreOpReport(unittest.TestCase):
         )
         ProfilingScene().init('')
         ProfilingScene()._scene = Constant.SINGLE_OP
+        ProfilingScene().set_all_export(True)
         res = AiCoreOpReport._get_table_sql_and_headers_without_ge(["Op Name", "stream_id", "Block Dim"])
         self.assertEqual(res, res_data)
 

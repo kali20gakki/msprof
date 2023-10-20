@@ -9,6 +9,8 @@ from abc import abstractmethod
 
 from common_func.common import init_log
 from common_func.constant import Constant
+from common_func.profiling_scene import ProfilingScene
+from common_func.ms_constant.str_constant import StrConstant
 from framework.load_info_manager import LoadInfoManager
 
 
@@ -27,6 +29,7 @@ class MsMultiProcess(multiprocessing.Process):
         """
         init_log(self.sample_config.get("result_dir"))
         LoadInfoManager.load_info(self.sample_config.get("result_dir"))
+        ProfilingScene().set_all_export(self.sample_config.get(StrConstant.ALL_EXPORT, True))
 
     @abstractmethod
     def ms_run(self: any) -> None:

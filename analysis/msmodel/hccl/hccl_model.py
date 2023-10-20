@@ -108,7 +108,7 @@ class HcclViewModel(ViewModel):
             return []
 
         where_condition = ""
-        if not ProfilingScene().is_operator():
+        if not ProfilingScene().is_all_export():
             where_condition = f'and model_id={model_id} and (index_id={index_id} or index_id=0)'
 
         sql = "SELECT model_id, index_id, op_name, task_type, op_type, connection_id, begin as timestamp, " \

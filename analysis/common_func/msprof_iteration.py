@@ -214,6 +214,8 @@ class MsprofIteration:
         """
         get the condition for sql that data should be within iteration_id.
         """
+        if ProfilingScene().is_all_export():
+            return ""
         iter_time_range = self.get_iteration_time(iter_range, time_fmt=NumberConstant.NANO_SECOND)
         if not iter_time_range:
             return ''

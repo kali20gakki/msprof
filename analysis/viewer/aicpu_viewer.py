@@ -197,7 +197,7 @@ class ParseAiCpuData:
     @staticmethod
     def _get_aicpu_data(ai_cpu_conn, iter_range, project_path):
         where_condition = ""
-        if not ProfilingScene().is_operator():
+        if not ProfilingScene().is_all_export():
             iter_time = MsprofIteration(project_path).get_iter_interval(iter_range)
             if iter_time:
                 where_condition = "where sys_start>={0} " \

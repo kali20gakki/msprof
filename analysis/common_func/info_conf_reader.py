@@ -40,6 +40,7 @@ class InfoConfReader:
     HOST_PROFILING_TYPE = "host_profiling"
     HOST_DEFAULT_FREQ = NumberConstant.NANO_SECOND
     ANALYSIS_VERSION = "1.0"
+    ALL_EXPORT_VERSION = 0xFFFFFFFF
 
     def __init__(self: any) -> None:
         self._info_json = None
@@ -159,6 +160,12 @@ class InfoConfReader:
         check the version between data-collection and the data-analysis
         """
         return self._info_json.get("version", Constant.NA) == self.ANALYSIS_VERSION
+
+    def is_all_export_version(self):
+        """
+        check the version wheher support all data export
+        """
+        return self._info_json is not None and self._info_json.get("drvVersion", 0) >= self.ALL_EXPORT_VERSION
 
     def get_device_id(self: any) -> str:
         """

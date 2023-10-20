@@ -56,7 +56,7 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
         calculate the ai core
         :return: None
         """
-        if ProfilingScene().is_operator():
+        if ProfilingScene().is_all_export():
             self._parse_all_file()
         else:
             self.pre_parse()

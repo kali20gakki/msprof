@@ -5,8 +5,8 @@
 import logging
 import os
 import struct
+from enum import Enum
 
-from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager
@@ -24,7 +24,16 @@ from msparser.step_trace.helper.model_with_q_parser import ModelWithQParser
 from msparser.step_trace.ts_binary_data_reader.step_trace_reader import StepTraceReader
 from msparser.step_trace.ts_binary_data_reader.task_type_reader import TaskTypeReader
 from msparser.step_trace.ts_binary_data_reader.ts_memcpy_reader import TsMemcpyReader
+from msparser.step_trace.ts_binary_data_reader.task_flip_reader import TaskFlipReader
 from profiling_bean.prof_enum.data_tag import DataTag
+
+
+class TsTrackTag(Enum):
+    STEP_TRACE = 10
+    TS_MEMCPY = 11
+    TS_TASK_TYPE = 12
+    TS_TASK_FLIP = 14
+    MODEL_WITH_Q = 61
 
 
 class TstrackParser(DataParser, MsMultiProcess):
@@ -43,12 +52,15 @@ class TstrackParser(DataParser, MsMultiProcess):
                                    [DBNameConstant.TABLE_STEP_TRACE,
                                     DBNameConstant.TABLE_TS_MEMCPY,
                                     DBNameConstant.TABLE_MODEL_WITH_Q,
-                                    DBNameConstant.TABLE_TASK_TYPE])
+                                    DBNameConstant.TABLE_TASK_TYPE,
+                                    DBNameConstant.TABLE_DEVICE_TASK_FLIP,
+                                    ])
         self.tag_reader = {
-            CommonConstant.STEP_TRACE_TAG: StepTraceReader(),
-            CommonConstant.TS_MEMCPY_TAG: TsMemcpyReader(),
-            CommonConstant.MODEL_WITH_Q_TAG: ModelWithQParser(),
-            CommonConstant.TS_TASK_TYPE_TAG: TaskTypeReader()
+            TsTrackTag.STEP_TRACE: StepTraceReader(),
+            TsTrackTag.TS_MEMCPY: TsMemcpyReader(),
+            TsTrackTag.MODEL_WITH_Q: ModelWithQParser(),
+            TsTrackTag.TS_TASK_TYPE: TaskTypeReader(),
+            TsTrackTag.TS_TASK_FLIP: TaskFlipReader(),
         }
 
     def parse_binary_data(self: any, file_list: list, format_size: int, tag_fmt: str) -> None:
@@ -68,7 +80,7 @@ class TstrackParser(DataParser, MsMultiProcess):
                 all_log_bytes = _offset_calculator.pre_process(file.file_reader, file_size)
                 for bean_data in Utils.chunks(all_log_bytes, format_size):
                     _, tag = struct.unpack_from(tag_fmt, bean_data)
-                    reader = self.tag_reader.get(tag)
+                    reader = self.tag_reader.get(TsTrackTag(tag))
                     if reader:
                         reader.read_binary_data(bean_data)
 
