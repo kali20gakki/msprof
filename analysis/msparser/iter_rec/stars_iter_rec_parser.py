@@ -116,6 +116,7 @@ class StarsIterRecParser(IParser, MsMultiProcess):
             if step_dto.iter_id not in self._iter_info_dict:
                 continue
             iter_info = self._iter_info_dict.get(step_dto.iter_id)
+            hwts_offset += self._task_cnt_not_in_iter.get(step_dto.iter_id, 0)
             iter_info_list.append([step_dto.iter_id,
                                    step_dto.model_id,
                                    step_dto.index_id,
@@ -126,10 +127,6 @@ class StarsIterRecParser(IParser, MsMultiProcess):
                                    step_dto.step_end])
             aic_offset += iter_info.aic_count
             hwts_offset += iter_info.hwts_count
-        for iter_num, task_offset in self._task_cnt_not_in_iter.items():
-            for iter_info in iter_info_list:
-                if iter_info[0] >= iter_num:
-                    iter_info[4] += task_offset
         return iter_info_list
 
     def _is_need_to_calculate(self):

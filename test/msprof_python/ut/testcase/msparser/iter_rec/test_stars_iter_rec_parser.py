@@ -95,3 +95,20 @@ class TestStarsIterRecParser(unittest.TestCase):
         with mock.patch(NAMESPACE + '.IterRecorder.set_current_iter_id'):
             check = StarsIterRecParser(self.ffts_file_list, sample_config)
             check._update_iter_info(100, 200)
+
+    def test_refactor_iter_info_dict_when_normal_then_refactor_iter_info(self):
+        check = StarsIterRecParser(self.ffts_file_list, sample_config)
+        step = StepTraceDto()
+        step.iter_id = 1
+        step.model_id = 2
+        step.index_id = 3
+        step.step_start = 0
+        step.step_end = 150
+        iter_info = IterInfo(2, 3, 1, 0, 100)
+        iter_info.hwts_count = 10
+        iter_info.aic_count = 20
+        setattr(check, '_iter_info_dict', {1: iter_info})
+        setattr(check, '_task_cnt_not_in_iter', {0: 2})
+        with mock.patch(NAMESPACE + '.GeInfoModel.get_step_trace_data', return_value=[step]):
+            res = check.refactor_iter_info_dict()
+            self.assertEqual(res, [[1, 2, 3, 10, 0, 20, 0, 150]])
