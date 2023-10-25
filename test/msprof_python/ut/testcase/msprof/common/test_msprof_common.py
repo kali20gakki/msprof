@@ -69,7 +69,6 @@ def test_analyze_collect_data():
                 mock.patch(NAMESPACE + '.AI.project_preparation'), \
                 mock.patch(NAMESPACE + '.AI.import_control_flow'), \
                 mock.patch(NAMESPACE + '.FileDispatch.dispatch_parser'), \
-                mock.patch(NAMESPACE + '.files_chmod'), \
                 mock.patch(NAMESPACE + '.add_all_file_complete'):
             analyze_collect_data(collect_path, sample_config)
 
