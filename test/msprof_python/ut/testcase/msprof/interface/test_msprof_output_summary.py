@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 import unittest
 from unittest import mock
+from unittest.mock import MagicMock
 
 from common_func.file_slice_helper import FileSliceHelper
 from common_func.ms_constant.str_constant import StrConstant
@@ -86,10 +87,23 @@ class TestMsprofOutputSummary(unittest.TestCase):
                 mock.patch('os.path.basename', return_value="0"), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary.get_newest_file_list',
                            return_value=["op_summary_0_1_1_20230905213000.csv"]), \
-                mock.patch(NAMESPACE + '.FileOpen'), \
-                mock.patch('common_func.file_manager.check_path_valid'), \
-                mock.patch('common_func.file_slice_helper.FileSliceHelper.insert_data'):
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._insert_summary_data'):
             MsprofOutputSummary('test')._save_summary_data("op_summary", "test", helper)
+
+    def test_insert_summary_data_when_more_than_1000000_then_insert_data(self):
+        helper = FileSliceHelper("test", "op_summary", "summary")
+        mock_iterator = MagicMock()
+        mock_iterator.__iter__.return_value = iter([{11: 1, 12: 2, 13: 3}, ] * 1000001)
+        mock_iterator.fieldnames = [11, 12, 13]
+        with mock.patch(NAMESPACE + '.FileOpen'), \
+                mock.patch('common_func.file_manager.check_path_valid'), \
+                mock.patch('csv.DictReader', return_value=mock_iterator), \
+                mock.patch('common_func.file_slice_helper.FileSliceHelper.check_header_is_empty',
+                           return_value=True), \
+                mock.patch('common_func.file_slice_helper.FileSliceHelper.dump_csv_data'):
+            check = MsprofOutputSummary('test')
+            check._insert_summary_data("op_summary", "test", helper)
+            self.assertEqual(len(helper.data_list), 1000001)
 
     def test_get_newest_file_list_when_csv_normal_filename_then_pass(self):
         _file_list = [

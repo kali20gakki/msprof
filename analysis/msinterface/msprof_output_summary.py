@@ -213,16 +213,23 @@ class MsprofOutputSummary:
             if not file_name.startswith(targe_name):
                 continue
             file_name_path = os.path.join(summary_path, file_name)
-            with FileOpen(file_name_path, mode='r', max_size=self.FILE_MAX_SIZE) as _csv_file:
-                reader = csv.DictReader(_csv_file.file_reader)
-                if reader.fieldnames and helper.check_header_is_empty():
-                    csv_header = [self.DEVICE_ID, *reader.fieldnames]
-                    helper.set_header(csv_header)
-                all_data = [[]] * FileSliceHelper.CSV_LIMIT * 2
-                for i, row in enumerate(reader):
-                    row[self.DEVICE_ID] = device_id
-                    all_data[i] = row
-                helper.insert_data(all_data[:reader.line_num - 1])
+            self._insert_summary_data(file_name_path, device_id, helper)
+
+    def _insert_summary_data(self, file_name_path: str, device_id: str,
+                             helper: FileSliceHelper):
+        with FileOpen(file_name_path, mode='r', max_size=self.FILE_MAX_SIZE) as _csv_file:
+            reader = csv.DictReader(_csv_file.file_reader)
+            if reader.fieldnames and helper.check_header_is_empty():
+                csv_header = [self.DEVICE_ID, *reader.fieldnames]
+                helper.set_header(csv_header)
+            all_data = [[]] * FileSliceHelper.CSV_LIMIT
+            for i, row in enumerate(reader):
+                remainder = i % FileSliceHelper.CSV_LIMIT
+                if i and not remainder:
+                    helper.insert_data(all_data)
+                row[self.DEVICE_ID] = device_id
+                all_data[remainder] = row
+            helper.insert_data(all_data[:(reader.line_num - 1) % FileSliceHelper.CSV_LIMIT])
 
     def _export_msprof_timeline(self: any) -> None:
         self._export_all_timeline_data()
