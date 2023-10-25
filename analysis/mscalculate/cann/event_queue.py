@@ -20,6 +20,7 @@ class EventQueue:
         self.queue = [0] * init_len
         self.size = 0
         self.index = 0
+        self._max_bound = -1
         self._lock = False
 
     def malloc_new_size(self, size: int):
@@ -35,6 +36,7 @@ class EventQueue:
         if self.size >= len(self.queue):
             self.malloc_new_size(2 * len(self.queue))
         self.queue[self.size] = event
+        self._max_bound = max(event.bound, self._max_bound)
         self.size += 1
 
     def lock(self):
@@ -61,3 +63,6 @@ class EventQueue:
 
     def empty(self):
         return self.index == self.size
+
+    def get_max_bound(self):
+        return self._max_bound

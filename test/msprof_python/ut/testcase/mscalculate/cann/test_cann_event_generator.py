@@ -149,8 +149,10 @@ class TestClusterLinkCalculate(unittest.TestCase):
     def test_generate_node_basic_info_event_should_record_2_event_when_2_node_in_2_thread_in_db(self):
         dto1 = NodeBasicInfoDto()
         dto1.thread_id = 0
+        dto1.timestamp = 100
         dto2 = NodeBasicInfoDto()
         dto2.thread_id = 1
+        dto2.timestamp = 200
         generator = CANNEventGenerator("test")
         with mock.patch(NAMESPACE + '.NodeBasicInfoModel.check_db',
                         return_value=True), \
@@ -172,8 +174,10 @@ class TestClusterLinkCalculate(unittest.TestCase):
     def test_generate_tensor_info_event_should_record_2_event_when_2_tensor_info_in_2_thread_in_db(self):
         dto1 = TensorInfoDto()
         dto1.thread_id = 0
+        dto1.timestamp = 100
         dto2 = TensorInfoDto()
         dto2.thread_id = 1
+        dto2.timestamp = 200
         generator = CANNEventGenerator("test")
         with mock.patch(NAMESPACE + '.TensorAddInfoModel.check_db',
                         return_value=True), \
@@ -195,8 +199,10 @@ class TestClusterLinkCalculate(unittest.TestCase):
     def test_generate_task_track_event_should_record_2_event_when_2_mem_copy_in_2_thread_in_db(self):
         dto1 = TaskTrackDto()
         dto1.thread_id = 0
+        dto1.timestamp = 100
         dto2 = TaskTrackDto()
         dto2.thread_id = 1
+        dto2.timestamp = 200
         generator = CANNEventGenerator("test")
         with mock.patch(NAMESPACE + '.TaskTrackModel.check_db',
                         return_value=True), \
@@ -218,8 +224,10 @@ class TestClusterLinkCalculate(unittest.TestCase):
     def test_generate_mem_copy_info_should_record_2_event_when_2_mem_copy_in_2_thread_in_db(self):
         dto1 = MemCopyInfoDto()
         dto1.thread_id = 0
+        dto1.timestamp = 100
         dto2 = MemCopyInfoDto()
         dto2.thread_id = 1
+        dto2.timestamp = 200
         generator = CANNEventGenerator("test")
         with mock.patch(NAMESPACE + '.MemcpyInfoModel.check_db',
                         return_value=True), \
@@ -241,8 +249,10 @@ class TestClusterLinkCalculate(unittest.TestCase):
     def test_generate_ctx_id_event_should_record_2_event_when_2_ctx_id_in_2_thread_in_db(self):
         dto1 = CtxIdDto()
         dto1.thread_id = 0
+        dto1.timestamp = 100
         dto2 = CtxIdDto()
         dto2.thread_id = 1
+        dto2.timestamp = 200
         generator = CANNEventGenerator("test")
         with mock.patch(NAMESPACE + '.CtxIdModel.check_db',
                         return_value=True), \
@@ -287,8 +297,10 @@ class TestClusterLinkCalculate(unittest.TestCase):
     def test_generate_graph_id_map_event_should_record_2_event_when_2_graph_id_map_in_2_thread_in_db(self):
         dto1 = GraphIdMapDto()
         dto1.thread_id = 0
+        dto1.timestamp = 100
         dto2 = GraphIdMapDto()
         dto2.thread_id = 1
+        dto2.timestamp = 200
         generator = CANNEventGenerator("test")
         with mock.patch(NAMESPACE + '.GraphAddInfoModel.check_db',
                         return_value=True), \
@@ -310,8 +322,10 @@ class TestClusterLinkCalculate(unittest.TestCase):
     def test_generate_fusion_op_info_event_should_record_2_event_when_2_fusion_info_in_2_thread_in_db(self):
         dto1 = FusionOpInfoDto()
         dto1.thread_id = 0
+        dto1.timestamp = 100
         dto2 = FusionOpInfoDto()
         dto2.thread_id = 1
+        dto2.timestamp = 200
         generator = CANNEventGenerator("test")
         with mock.patch(NAMESPACE + '.FusionAddInfoModel.check_db',
                         return_value=True), \
