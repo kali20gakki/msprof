@@ -55,7 +55,7 @@ class CANNThreadDB:
         return self.api_db.put(api_dto)
 
     def get_time_bound(self) -> int:
-        return self.api_db.get_max_bound()
+        return self.event_q.get_max_bound()
 
 
 class CANNEventGenerator:

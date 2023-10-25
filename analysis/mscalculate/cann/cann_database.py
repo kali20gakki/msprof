@@ -25,22 +25,17 @@ class CANNDatabase:
 class ApiDataDatabase(CANNDatabase):
     def __init__(self, thread_id):
         super().__init__(thread_id)
-        self._max_bound = -1
         self._data = dict()
 
     def put(self, data: ApiDataDto) -> Event:
         event = Event(
             self.LEVELS_MAP.get(data.level, data.level), data.thread_id, data.start, data.end, data.struct_type)
-        self._max_bound = max(data.end, self._max_bound)
 
         self._data[event] = data
         return event
 
     def get(self, event: Event) -> ApiDataDto:
         return self._data.get(event, ApiDataDto())
-
-    def get_max_bound(self):
-        return self._max_bound
 
 
 class AdditionalRecordDatabase(CANNDatabase):
