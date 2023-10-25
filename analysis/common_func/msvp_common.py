@@ -142,7 +142,7 @@ def _do_change_file_mod(file_path: str) -> None:
     for lists in os.listdir(file_path):
         path = os.path.join(file_path, lists)
         files_list.append(path)
-        if os.path.isdir(path):
+        if not os.path.islink(path) and os.path.isdir(path):
             files_chmod(path)
     for data_file in files_list:
         if not os.path.isdir(data_file):
