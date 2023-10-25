@@ -233,4 +233,5 @@ def get_path_dir(path: str) -> list:
 
 
 def _path_dir_filter_func(sub_path, root_dir):
-    return sub_path not in Constant.FILTER_DIRS and os.path.isdir(os.path.realpath(os.path.join(root_dir, sub_path)))
+    return sub_path not in Constant.FILTER_DIRS and not os.path.islink(
+        os.path.join(root_dir, sub_path)) and os.path.isdir(os.path.realpath(os.path.join(root_dir, sub_path)))
