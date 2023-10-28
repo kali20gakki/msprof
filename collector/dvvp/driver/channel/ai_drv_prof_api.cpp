@@ -230,6 +230,8 @@ int DrvAicoreStart(const DrvPeripheralProfileCfg &peripheralCfg, const std::vect
     FUNRET_CHECK_EQUAL_RET_VALUE(configP == nullptr, true, PROFILING_FAILED);
     if (memset_s(configP, configSize, 0, configSize) != EOK) {
         MSPROF_LOGE("DrvAicoreStart, memset failed");
+        free(configP);
+        configP = nullptr;
         return PROFILING_FAILED;
     }
     configP->tag = (Utils::IsDynProfMode()) ? (1) : (0);
@@ -283,6 +285,8 @@ int DrvAicoreTaskBasedStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const 
 
     if (memset_s(configP, configSize, 0, configSize) != EOK) {
         MSPROF_LOGE("DrvAicoreTaskBasedStart, memset failed");
+        free(configP);
+        configP = nullptr;
         return PROFILING_FAILED;
     }
     configP->tag = (Utils::IsDynProfMode()) ? (1) : (0);
@@ -331,6 +335,8 @@ int DrvL2CacheTaskStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const std:
 
     if (memset_s(configP, configSize, 0, configSize) != EOK) {
         MSPROF_LOGE("DrvL2CacheTaskStart, memset failed");
+        free(configP);
+        configP = nullptr;
         return PROFILING_FAILED;
     }
     configP->eventNum = (uint32_t)profEvents.size();
@@ -502,6 +508,8 @@ int DrvFftsProfileStart(const DrvPeripheralProfileCfg &peripheralCfg, const std:
     }
     if (memset_s(configP, configSize, 0, configSize) != EOK) {
         MSPROF_LOGE("memset failed");
+        free(configP);
+        configP = nullptr;
         return PROFILING_FAILED;
     }
     configP->cfgMode = peripheralCfg.cfgMode; // 0-none,1-aic,2-aiv,3-aic&aiv
