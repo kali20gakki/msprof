@@ -13,15 +13,18 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.stars_constant import StarsConstant
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.platform.chip_manager import ChipManager
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from mscalculate.ascend_task.ascend_task import TopDownTask
 from msmodel.interface.view_model import ViewModel
+from msmodel.sqe_type_map import SqeType
 from msmodel.stars.ffts_log_model import FftsLogModel
 from msmodel.stars.sub_task_model import SubTaskTimeModel
 from msmodel.task_time.ascend_task_model import AscendTaskModel
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from profiling_bean.db_dto.task_time_dto import TaskTimeDto
+from profiling_bean.prof_enum.chip_model import ChipModel
 from profiling_bean.prof_enum.export_data_type import ExportDataType
 from viewer.get_trace_timeline import TraceViewer
 from viewer.interface.base_viewer import BaseViewer
@@ -42,6 +45,25 @@ class TaskTimeViewer(BaseViewer):
     def __init__(self: any, configs: dict, params: dict) -> None:
         super().__init__(configs, params)
         self.project_dir = self.params.get(StrConstant.PARAM_RESULT_DIR)
+
+    @staticmethod
+    def get_task_type(host_task_type: str, device_task_type: str) -> str:
+        if host_task_type == Constant.TASK_TYPE_FFTS_PLUS:
+            return device_task_type
+        elif host_task_type == Constant.TASK_TYPE_UNKNOWN:
+            if not device_task_type.isdigit():
+                return device_task_type
+            elif ChipManager().chip_id != ChipModel.CHIP_V2_1_0 and \
+                    int(device_task_type) in [enum.value for enum in SqeType]:
+                return SqeType(int(device_task_type)).name
+            else:
+                return Constant.TASK_TYPE_OTHER
+        return host_task_type
+
+    @staticmethod
+    def _update_op_name(data, node_name_dict, node_key) -> None:
+        task_type = TaskTimeViewer.get_task_type(data.host_task_type, data.device_task_type)
+        setattr(data, 'op_name', node_name_dict.get(node_key, task_type))
 
     def get_time_timeline_header(self: any, data: list, pid_header=TraceViewHeaderConstant.PROCESS_TASK) -> list:
         """
@@ -216,17 +238,13 @@ class TaskTimeViewer(BaseViewer):
             ffts_plus_set.add("{0}-{1}-{2}-{3}".format(
                 data.task_id, data.stream_id, NumberConstant.DEFAULT_GE_CONTEXT_ID, data.batch_id))
             node_key = "{0}-{1}-{2}-{3}".format(data.task_id, data.stream_id, data.context_id, data.batch_id)
-            if data.host_task_type == Constant.TASK_TYPE_UNKNOWN or Constant.TASK_TYPE_FFTS_PLUS:
-                setattr(data, 'op_name', node_name_dict.get(node_key, data.device_task_type))
-            setattr(data, 'op_name', node_name_dict.get(node_key, data.host_task_type))
+            self._update_op_name(data, node_name_dict, node_key)
         tradition_list = []
         for data in data_dict.get("task_data_list", []):
             node_key = "{0}-{1}-{2}-{3}".format(
                 data.task_id, data.stream_id, NumberConstant.DEFAULT_GE_CONTEXT_ID, data.batch_id)
             if node_key not in ffts_plus_set:
-                if data.host_task_type == Constant.TASK_TYPE_UNKNOWN or Constant.TASK_TYPE_FFTS_PLUS:
-                    setattr(data, 'op_name', node_name_dict.get(node_key, data.device_task_type))
-                setattr(data, 'op_name', node_name_dict.get(node_key, data.host_task_type))
+                self._update_op_name(data, node_name_dict, node_key)
                 tradition_list.append(data)
         data_dict["task_data_list"] = tradition_list
 

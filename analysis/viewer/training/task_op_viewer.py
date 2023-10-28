@@ -12,6 +12,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from viewer.memory_copy.memory_copy_viewer import MemoryCopyViewer
+from viewer.task_time_viewer import TaskTimeViewer
 
 
 class TaskOpViewer:
@@ -57,7 +58,7 @@ class TaskOpViewer:
             return [], 0
         # select device & non-ffts-plus task only
         sql = (
-            f"SELECT stream_id, task_id, batch_id, host_task_type, start_time, duration "
+            f"SELECT stream_id, task_id, batch_id, host_task_type, start_time, duration, device_task_type "
             f"from {DBNameConstant.TABLE_ASCEND_TASK} "
             f"where device_task_type != '{Constant.TASK_TYPE_UNKNOWN}'"
             f" and context_id = {TaskOpViewer.INVALID_CONTEXT_ID}"
@@ -85,17 +86,15 @@ class TaskOpViewer:
     @staticmethod
     def _reformat_task_info(task_data: List, ge_curs: sqlite3.Cursor) -> List:
         ge_sql = f"SELECT op_name, stream_id, task_id, batch_id from {DBNameConstant.TABLE_GE_TASK}"
-
         op_name_list = DBManager.fetch_all_data(ge_curs, ge_sql, dto_class=GeTaskDto)
         op_name_dict = {
             (row.stream_id, row.task_id, row.batch_id): row.op_name
             for row in op_name_list
         }
-
         task_info = []
-        for stream_id, task_id, batch_id, host_task_type, start_time, duration in task_data:
+        for stream_id, task_id, batch_id, host_task_type, start_time, duration, device_task_type in task_data:
             op_name: str = op_name_dict.get((stream_id, task_id, batch_id), "N/A")
-            task_type: str = host_task_type if host_task_type != f'{Constant.TASK_TYPE_UNKNOWN}' else 'Other'
+            task_type: str = TaskTimeViewer.get_task_type(host_task_type, device_task_type)
             task_time: float = duration / DBManager.NSTOUS
             task_start = f'"{InfoConfReader().trans_into_local_time(start_time / DBManager.NSTOUS)}"'
             task_stop = f'"{InfoConfReader().trans_into_local_time((start_time + duration) / DBManager.NSTOUS)}"'
