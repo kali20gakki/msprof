@@ -26,7 +26,7 @@ class TestTsTrackModel(TestDirCRBaseModel):
             check = TsTrackModel('test', 'step_trace.db', ['StepTrace', 'TsMemcpy'])
             check.create_table('StepTrace')
 
-    def test_get_task_flip_data_should_return(self):
+    def test_get_task_flip_data_should_return_1_data_when_1_data_in_table(self):
         data = [
             [1, 4367981467, 2, 0],
         ]

@@ -52,11 +52,12 @@ class TestHCCLExport(unittest.TestCase):
 
     def test_format_hccl_data(self):
         hccl_data = namedtuple('hccl', ['plane_id', 'task_id', 'stream_id', 'hccl_name', 'step', 'stage', 'duration',
-                                        'timestamp', 'args', "group_name"])
-        hccl_data = [hccl_data(1, 2, 3, 0, 0, 0, 0, 0, {}, "1"), hccl_data(2, 3, 4, 0, 0, 0, 0, 0, {}, "1")]
+                                        'timestamp', 'args', "group_name", 'model_id'])
+        hccl_data = [hccl_data(1, 2, 3, 0, 0, 0, 0, 0, {}, "1", 1), hccl_data(2, 3, 4, 0, 0, 0, 0, 0, {}, "1", 1)]
 
-        op_data = namedtuple('model', ['op_name', 'timestamp', 'args', 'duration', "group_name", "connection_id"])
-        op_data = [op_data('test_1', 0, [1, 2, 3], 0, "1", 0)]
+        op_data = namedtuple('model',
+                             ['op_name', 'timestamp', 'args', 'duration', "group_name", "connection_id", "model_id"])
+        op_data = [op_data('test_1', 0, [1, 2, 3], 0, "1", 0, 1)]
         InfoConfReader()._info_json = {"pid": 1}
         with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_data_by_group', return_value=op_data):
             hccl = HCCLExport(PARAMS)

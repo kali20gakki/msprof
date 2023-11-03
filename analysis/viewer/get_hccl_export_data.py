@@ -132,7 +132,10 @@ class HCCLExport:
                     hccl_op.op_name, self.pid_value, self.hccl_groups.get(hccl_op.group_name).start_index,
                     InfoConfReader().trans_into_local_time(hccl_op.timestamp / NumberConstant.NS_TO_US),
                     hccl_op.duration / NumberConstant.NS_TO_US,
-                    {"connection_id": hccl_op.connection_id},
+                    {
+                        "connection_id": hccl_op.connection_id,
+                        "model id": hccl_op.model_id,
+                    },
                 ]
                 for hccl_op in hccl_op_data
             ]
@@ -145,6 +148,7 @@ class HCCLExport:
         _hccl_format_data = [0] * len(hccl_data)
         for index, _hccl_data in enumerate(hccl_data):
             hccl_args = OrderedDict(_hccl_data.args)
+            hccl_args["model id"] = _hccl_data.model_id
             thread_id = self.hccl_groups.get(_hccl_data.group_name).start_index + _hccl_data.plane_id + 1
             _hccl_data_pice = [
                 _hccl_data.hccl_name, self.pid_value, thread_id,

@@ -11,6 +11,7 @@ from typing import Union
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.platform.chip_manager import ChipManager
 from mscalculate.ascend_task.ascend_task import DeviceTask
 from mscalculate.ascend_task.ascend_task import HostTask
 from mscalculate.ascend_task.ascend_task import TopDownTask
@@ -206,7 +207,7 @@ class AscendTaskGenerator:
             return []
         host_tasks = self.host_task_collector.get_host_tasks(int(device_id))
         device_tasks = self.device_task_collector.get_all_device_tasks()
-        if InfoConfReader().is_all_export_version():
+        if InfoConfReader().is_all_export_version() and not ChipManager().is_chip_v1():
             top_down_tasks = self._generate_top_down_tasks_by_batch_id(host_tasks, device_tasks)
         else:
             top_down_tasks = self._generate_top_down_tasks(host_tasks, device_tasks)
@@ -219,7 +220,7 @@ class AscendTaskGenerator:
             return []
         host_tasks = self.host_task_collector.get_host_tasks_by_model_and_iter(model_id, iter_id, int(device_id))
         device_tasks = self.device_task_collector.get_device_tasks_by_model_and_iter(model_id, iter_id)
-        if InfoConfReader().is_all_export_version():
+        if InfoConfReader().is_all_export_version() and not ChipManager().is_chip_v1():
             top_down_tasks = self._generate_top_down_tasks_by_batch_id(host_tasks, device_tasks)
         else:
             top_down_tasks = self._generate_top_down_tasks(host_tasks, device_tasks)
