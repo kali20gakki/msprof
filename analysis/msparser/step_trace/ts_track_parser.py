@@ -35,6 +35,14 @@ class TsTrackTag(Enum):
     TS_TASK_FLIP = 14
     MODEL_WITH_Q = 61
 
+    @classmethod
+    def member_map(cls: any) -> dict:
+        """
+        enum map for DataFormat value and data format member
+        :return:
+        """
+        return cls._value2member_map_
+
 
 class TstrackParser(DataParser, MsMultiProcess):
     """
@@ -80,6 +88,8 @@ class TstrackParser(DataParser, MsMultiProcess):
                 all_log_bytes = _offset_calculator.pre_process(file.file_reader, file_size)
                 for bean_data in Utils.chunks(all_log_bytes, format_size):
                     _, tag = struct.unpack_from(tag_fmt, bean_data)
+                    if tag not in TsTrackTag.member_map():
+                        continue
                     reader = self.tag_reader.get(TsTrackTag(tag))
                     if reader:
                         reader.read_binary_data(bean_data)

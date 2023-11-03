@@ -65,7 +65,7 @@ class DeviceTaskCollector:
         if not self._check_device_data_db_exists():
             return []
         device_tasks = self.collectors.get(self.chip)(float('-inf'), float('inf'))
-        if InfoConfReader().is_all_export_version():
+        if InfoConfReader().is_all_export_version() and not ChipManager().is_chip_v1():
             self.set_batch_id_by_flip(device_tasks)
         return device_tasks
 
@@ -81,7 +81,7 @@ class DeviceTaskCollector:
         chip = ChipManager().get_chip_id()
         device_tasks = \
             self.collectors.get(chip)(iter_start * NumberConstant.NS_TO_US, iter_end * NumberConstant.NS_TO_US)
-        if InfoConfReader().is_all_export_version():
+        if InfoConfReader().is_all_export_version() and not ChipManager().is_chip_v1():
             self.set_batch_id_by_flip(device_tasks)
         return device_tasks
 

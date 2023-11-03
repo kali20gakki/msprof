@@ -40,7 +40,7 @@ class InfoConfReader:
     HOST_PROFILING_TYPE = "host_profiling"
     HOST_DEFAULT_FREQ = NumberConstant.NANO_SECOND
     ANALYSIS_VERSION = "1.0"
-    ALL_EXPORT_VERSION = 0xFFFFFFFF
+    ALL_EXPORT_VERSION = 0x072211
 
     def __init__(self: any) -> None:
         self._info_json = None

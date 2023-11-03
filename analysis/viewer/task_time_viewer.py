@@ -191,24 +191,27 @@ class TaskTimeViewer(BaseViewer):
 
     def format_task_scheduler(self, data_list):
         result_list = []
-        for data in data_list.get("subtask_data_list", []):
-            result_list.append(
-                [data.op_name,
-                 self.TRACE_PID_MAP.get("Task Scheduler", 0),
-                 data.stream_id,
-                 InfoConfReader().trans_into_local_time(data.start_time, NumberConstant.NANO_SECOND),
-                 data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
-                 {"Task Type": data.device_task_type, "Stream Id": data.stream_id, "Task Id": data.task_id,
-                  'Batch Id': data.batch_id, "Subtask Id": data.context_id, "connection_id": data.connection_id, }])
-        for data in data_list.get("task_data_list", []):
-            result_list.append(
-                [data.op_name,
-                 self.TRACE_PID_MAP.get("Task Scheduler", 0),
-                 data.stream_id,
-                 InfoConfReader().trans_into_local_time(data.start_time, NumberConstant.NANO_SECOND),
-                 data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
-                 {"Task Type": data.device_task_type, "Stream Id": data.stream_id, "Task Id": data.task_id,
-                  'Batch Id': data.batch_id, "Subtask Id": data.context_id, "connection_id": data.connection_id, }])
+        keys = ["subtask_data_list", "task_data_list"]
+        for key in keys:
+            for data in data_list.get(key, []):
+                result_list.append(
+                    [
+                        data.op_name,
+                        self.TRACE_PID_MAP.get("Task Scheduler", 0),
+                        data.stream_id,
+                        InfoConfReader().trans_into_local_time(data.start_time, NumberConstant.NANO_SECOND),
+                        data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
+                        {
+                            "Model Id": data.model_id,
+                            "Task Type": data.device_task_type,
+                            "Stream Id": data.stream_id,
+                            "Task Id": data.task_id,
+                            'Batch Id': data.batch_id,
+                            "Subtask Id": data.context_id,
+                            "connection_id": data.connection_id,
+                        }
+                    ]
+                )
         if not result_list:
             return []
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
