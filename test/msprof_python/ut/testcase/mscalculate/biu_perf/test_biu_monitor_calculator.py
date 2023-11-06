@@ -68,9 +68,9 @@ class TestMonitorCyclesCalculator(unittest.TestCase):
             vector_cycles = 1
             scalar_cycles = 2
             cube_cycles = 3
-            lsu0_cycles = 4
-            lsu1_cycles = 5
-            lsu2_cycles = 6
+            lsu1_cycles = 4
+            lsu2_cycles = 5
+            lsu3_cycles = 6
             timestamp = 5
             core_id = 6
             group_id = 7

@@ -170,9 +170,9 @@ class MonitorCyclesCalculator(BiuMonitorCalculator):
             "Vector": monitor_datum.vector_cycles,
             "Scalar": monitor_datum.scalar_cycles,
             "Cube": monitor_datum.cube_cycles,
-            "Mte0": monitor_datum.lsu0_cycles,
             "Mte1": monitor_datum.lsu1_cycles,
-            "Mte2": monitor_datum.lsu2_cycles
+            "Mte2": monitor_datum.lsu2_cycles,
+            "Mte3": monitor_datum.lsu3_cycles
         }
 
         for tid, cycle_type in enumerate(cycles_type_dict):

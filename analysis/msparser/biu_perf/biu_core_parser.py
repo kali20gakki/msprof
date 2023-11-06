@@ -81,11 +81,11 @@ class BiuCoreParser:
                                        cycles_bean.scalar_cycles, self.last_cycles_datum.scalar_cycles),
                                  delta_cube_cycles,
                                  self.calculate_delta_cycles(
-                                       cycles_bean.lsu0_cycles, self.last_cycles_datum.lsu0_cycles),
-                                 self.calculate_delta_cycles(
                                        cycles_bean.lsu1_cycles, self.last_cycles_datum.lsu1_cycles),
                                  self.calculate_delta_cycles(
                                        cycles_bean.lsu2_cycles, self.last_cycles_datum.lsu2_cycles),
+                                 self.calculate_delta_cycles(
+                                       cycles_bean.lsu3_cycles, self.last_cycles_datum.lsu3_cycles),
                                  cycles_bean.timestamp, self.core_info.core_id,
                                  self.core_info.group_id, self.core_info.core_type])
         self.last_cycles_datum = cycles_bean
