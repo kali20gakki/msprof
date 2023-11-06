@@ -41,7 +41,7 @@ from profiling_bean.stars.ffts_pmu import FftsPmuBean
 from viewer.calculate_rts_data import judge_custom_pmu_scene
 
 
-class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
+class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
     """
     class used to parse ffts pmu data
     """
@@ -79,7 +79,7 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         """
         default value for pmu cycle list can be set to zero.
         """
-        return (data.total_cycle, data.pmu_list) if is_true else (0, [0] * FftsPmuCalculate.PMU_LENGTH)
+        return (data.total_cycle, data.pmu_list) if is_true else (0, [0] * FftsPmuCalculator.PMU_LENGTH)
 
     @staticmethod
     def _is_not_mix_main_core(core_data, data_type) -> bool:
@@ -110,6 +110,11 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
 
     def calculate(self: any) -> None:
         if ProfilingScene().is_all_export():
+            db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_METRICS_SUMMARY)
+            if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_METRIC_SUMMARY):
+                logging.info("The Table %s already exists in the %s, and won't be calculate again.",
+                             DBNameConstant.TABLE_METRIC_SUMMARY, DBNameConstant.DB_METRICS_SUMMARY)
+                return
             self._parse_all_file()
         else:
             self._parse_by_iter()

@@ -7,6 +7,7 @@ import os
 
 from common_func.batch_counter import BatchCounter
 from common_func.constant import Constant
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
@@ -65,6 +66,13 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         :return: None
         """
         if self.is_need_parse_all_file():
+            db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_HWTS)
+            if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_HWTS_TASK,
+                                            DBNameConstant.TABLE_HWTS_TASK_TIME):
+                logging.info("The Table %s or %s already exists in the %s, and won't be calculate again.",
+                             DBNameConstant.TABLE_HWTS_TASK, DBNameConstant.TABLE_HWTS_TASK_TIME,
+                             DBNameConstant.DB_HWTS)
+                return
             self._parse_all_file()
         else:
             self._parse_by_iter()
@@ -74,7 +82,6 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         save hwts data
         :return: None
         """
-        self._hwts_log_model.clear()
         if self._log_data:
             self._hwts_log_model.init()
             self._hwts_log_model.flush(Utils.obj_list_to_list(self._log_data), DBNameConstant.TABLE_HWTS_TASK)
@@ -121,6 +128,8 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         Parse the specified iteration data
         :return: None
         """
+        # if parse by iter, the table should be cleared before
+        self._hwts_log_model.clear()
         if self._iter_model.check_db() and self._iter_model.check_table():
             task_offset, task_count = self._iter_model.get_task_offset_and_sum(self._iter_range,
                                                                                HwtsIterModel.TASK_TYPE)

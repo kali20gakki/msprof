@@ -8,7 +8,7 @@ from msconfig.meta_config import MetaConfig
 class DataCalculatorConfig(MetaConfig):
     DATA = {
         'SubTaskCalculator': [
-            ('path', 'mscalculate.stars.sub_task_calculate'),
+            ('path', 'mscalculate.stars.sub_task_calculator'),
             ('chip_model', '5'),
             ('level', '5'),
             ('position', 'D')
@@ -58,11 +58,6 @@ class DataCalculatorConfig(MetaConfig):
             ('chip_model', '0,1,2,3,4,5'),
             ('position', 'D')
         ],
-        'GeHashCalculator': [
-            ('path', 'mscalculate.ge.ge_hash_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10'),
-            ('position', 'H')
-        ],
         'StarsLogCalCulator': [
             ('path', 'msparser.stars.stars_log_parser'),
             ('chip_model', '5,7,8,10'),
@@ -80,8 +75,8 @@ class DataCalculatorConfig(MetaConfig):
             ('level', '4'),
             ('position', 'D')
         ],
-        'FftsPmuCalculate': [
-            ('path', 'mscalculate.stars.ffts_pmu_calculate'),
+        'FftsPmuCalculator': [
+            ('path', 'mscalculate.stars.ffts_pmu_calculator'),
             ('chip_model', '5,7,8,10'),
             ('level', '3'),
             ('position', 'D')

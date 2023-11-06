@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 import unittest
 from unittest import mock
+from unittest.mock import MagicMock
 
 from common_func.file_slice_helper import FileSliceHelper
 from common_func.file_slice_helper import make_export_file_name
@@ -30,8 +31,7 @@ class TestFileSliceHelper(unittest.TestCase):
             check.insert_data(["1"])
 
     def test_insert_data_when_timeline_then_pass(self):
-        with mock.patch(NAMESPACE + '.FileSliceHelper._pretreat_json_data'), \
-                mock.patch(NAMESPACE + '.FileSliceHelper.dump_json_data'):
+        with mock.patch(NAMESPACE + '.FileSliceHelper._pretreat_json_data'):
             check = FileSliceHelper('test', "file", "timeline")
             check.insert_data(["1"])
 
@@ -94,7 +94,7 @@ class TestFileSliceHelper(unittest.TestCase):
                 mock.patch(NAMESPACE + '.FileSliceHelper._create_json'):
             check = FileSliceHelper('test', "file", "timeline")
             check.data_list = [{"1": 0}] * 3000000
-            check.dump_json_data()
+            check.dump_json_data(0, is_need_slice=False)
 
     def test_create_json_when_normal_then_pass(self):
         with mock.patch(NAMESPACE + '.FdOpen.__enter__', mock.mock_open(read_data='123')), \

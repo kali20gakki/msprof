@@ -46,7 +46,7 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
         self._parse_ai_core_pmu_event()
         freq = InfoConfReader().get_freq(StrConstant.AIC)
         self.metrics_head = get_metrics_from_sample_config(self._project_path)
-        self.metrics_datas = self.get_metric_summary_data(freq, iter_range=self._iter_range)
+        self.metrics_datas = self.get_metric_summary_data(freq)
         if not self.metrics_datas or not self.metrics_head:
             logging.warning("metrics data or head is empty, please check the query conditions.")
             return
@@ -87,6 +87,12 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
         config = ConfigMgr.read_sample_config(self._project_path)
         if config.get('ai_core_profiling_mode') == StrConstant.AIC_SAMPLE_BASED_MODE:
             return
+        db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_METRICS_SUMMARY)
+        if ProfilingScene().is_all_export() and \
+                DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_METRIC_SUMMARY):
+            logging.info("The Table %s already exists in the %s, and won't be calculate again.",
+                         DBNameConstant.TABLE_METRIC_SUMMARY, DBNameConstant.DB_METRICS_SUMMARY)
+            return
         self.calculate()
         self.save()
 
@@ -96,7 +102,7 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
         if not self.conn or not self.cur:
             raise ValueError
  
-    def get_metric_summary_data(self, freq: float, iter_range: IterationRange) -> []:
+    def get_metric_summary_data(self, freq: float) -> []:
         """
         get_metric_summary_data
         :return: []
@@ -114,7 +120,7 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
         sql = self.get_metric_summary_sql(freq, have_step_info)
         device_id = InfoConfReader().get_device_id()
         if have_step_info:
-            limit_and_offset = get_limit_and_offset(self._project_path, iter_range)
+            limit_and_offset = get_limit_and_offset(self._project_path, self._iter_range)
             if not limit_and_offset:
                 return []
             metric_results = DBManager.fetch_all_data(curs, sql, (device_id, limit_and_offset[0], limit_and_offset[1]))

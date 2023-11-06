@@ -58,7 +58,7 @@ class MergeOpCounterCalculator(MsMultiProcess):
               "and {0}.context_id={1}.subtask_id " \
               "and {1}.start_time != {2} " \
               "group by op_type,{0}.task_type" \
-            .format(CommonConstant.GE_TASK_MEGED_TABLE, CommonConstant.RTS_TASK_TABLE,
+            .format(DBNameConstant.TABLE_OP_COUNTER_GE_MERGE, DBNameConstant.TABLE_OP_COUNTER_RTS_TASK,
                     NumberConstant.INVALID_TASK_TIME)
         return sql
 
@@ -182,7 +182,7 @@ class MergeOpCounterCalculator(MsMultiProcess):
         if ge_conn and ge_curs and DBManager.judge_table_exist(ge_curs, DBNameConstant.TABLE_GE_TASK):
             ge_data = self._get_ge_data(ge_curs)
             if ge_data:
-                insert_sql = "insert into {} values({value})".format(CommonConstant.GE_TASK_MEGED_TABLE,
+                insert_sql = "insert into {} values({value})".format(DBNameConstant.TABLE_OP_COUNTER_GE_MERGE,
                                                                      value='?,' * (len(ge_data[0]) - 1) + '?')
                 DBManager.executemany_sql(self.conn, insert_sql, ge_data)
         DBManager.destroy_db_connect(ge_conn, ge_curs)
@@ -207,7 +207,7 @@ class MergeOpCounterCalculator(MsMultiProcess):
             rts_data = [[task.task_id, task.stream_id, task.start_time, task.duration, task.device_task_type,
                          task.index_id, task.model_id, task.batch_id, task.context_id] for task in ascend_tasks]
             try:
-                DBManager.insert_data_into_table(self.conn, CommonConstant.RTS_TASK_TABLE, rts_data)
+                DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_OP_COUNTER_RTS_TASK, rts_data)
             except sqlite3.Error as err:
                 logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
 
@@ -262,6 +262,6 @@ class MergeOpCounterCalculator(MsMultiProcess):
                      task_duration))
         if total_data:
             sorted_total_data = sorted(total_data, key=lambda x: x[7], reverse=True)
-            sql = 'insert into {} values({})'.format(CommonConstant.OP_REPORT_TABLE,
+            sql = 'insert into {} values({})'.format(DBNameConstant.TABLE_OP_COUNTER_OP_REPORT,
                                                      '?,' * (len(sorted_total_data[0]) - 1) + '?')
             DBManager.executemany_sql(self.conn, sql, sorted_total_data)

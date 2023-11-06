@@ -23,9 +23,6 @@ class CommonConstant:
     """
     CLIENT_NUM = 16
     SAMPLE_JSON = "sample.json"
-    GE_TASK_MEGED_TABLE = "ge_task_merge"
-    OP_REPORT_TABLE = "op_report"
-    RTS_TASK_TABLE = "rts_task"
     INFO_JSON_PATTERN = re.compile(r"info.json.(\d+)$")
     GE_TABLE_NUM = 2
     ACL_TABLE_MAP = "AclDataMap"

@@ -168,7 +168,8 @@ class TestCalculateOpTaskScheduler(unittest.TestCase):
 
     def test_op_generate_report_data(self):
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=True):
-            with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
+            with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
+                    mock.patch("logging.info"):
                 check = OpTaskSchedulerCalculator(file_list, CONFIG)
                 result = check.op_generate_report_data()
             self.assertEqual(result, None)

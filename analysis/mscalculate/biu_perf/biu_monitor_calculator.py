@@ -5,8 +5,10 @@
 import logging
 from abc import abstractmethod
 
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.path_manager import PathManager
 from msmodel.biu_perf.biu_perf_model import BiuPerfModel
 
 
@@ -105,6 +107,11 @@ class BiuMonitorCalculator:
         calculate for biu perf
         :return: None
         """
+        db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_BIU_PERF)
+        if DBManager.check_tables_in_db(db_path, self.table_name):
+            logging.info("The Table %s already exists in the %s, and won't be calculate again.",
+                         self.table_name, DBNameConstant.DB_BIU_PERF)
+            return
         self.calculate()
         self.save()
 

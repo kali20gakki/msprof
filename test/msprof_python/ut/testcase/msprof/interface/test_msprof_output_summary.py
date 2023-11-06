@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 
 from common_func.file_slice_helper import FileSliceHelper
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.msprof_common import MsProfCommonConstant
 from msinterface.msprof_output_summary import MsprofOutputSummary
 
 NAMESPACE = 'msinterface.msprof_output_summary'
@@ -15,16 +16,79 @@ NAMESPACE = 'msinterface.msprof_output_summary'
 class TestMsprofOutputSummary(unittest.TestCase):
 
     def test_export_when_not_in_prof_file_then_pass(self):
-        with mock.patch(NAMESPACE + '.MsprofOutputSummary._is_in_prof_file', return_value=False):
-            MsprofOutputSummary('test').export()
+        with mock.patch('common_func.common.print_info'), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._is_in_prof_file', return_value=False):
+            MsprofOutputSummary('test').export(MsProfCommonConstant.SUMMARY)
 
-    def test_export_when_in_prof_file_then_pass(self):
-        with mock.patch(NAMESPACE + '.MsprofOutputSummary._is_in_prof_file', return_value=True), \
-                mock.patch(NAMESPACE + '.MsprofOutputSummary._make_new_folder'), \
-                mock.patch(NAMESPACE + '.MsprofOutputSummary._export_msprof_summary'), \
-                mock.patch(NAMESPACE + '.MsprofOutputSummary._export_msprof_timeline'), \
-                mock.patch(NAMESPACE + '.MsprofOutputSummary._export_readme_file'):
-            MsprofOutputSummary('test').export()
+    def test_export_when_in_prof_file_but_can_not_clear_file_then_return(self):
+        with mock.patch('common_func.common.print_info'), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._is_in_prof_file', return_value=True), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._get_file_suffix'), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._clear_output_folder', return_value=False), \
+                mock.patch('logging.error'):
+            MsprofOutputSummary('test').export(MsProfCommonConstant.SUMMARY)
+
+    def test_export_when_in_prof_file_and_export_summary_then_pass(self):
+        with mock.patch('common_func.common.print_info'), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._is_in_prof_file', return_value=True), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._get_file_suffix'), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._clear_output_folder', return_value=True):
+            check = MsprofOutputSummary('test')
+            check._export_msprof_summary = mock.Mock()
+            check._export_readme_file = mock.Mock()
+            check.export(MsProfCommonConstant.SUMMARY)
+            check._export_msprof_summary.assert_called_once()
+            check._export_readme_file.assert_called_once()
+
+    def test_export_when_in_prof_file_and_export_timeline_then_pass(self):
+        with mock.patch('common_func.common.print_info'), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._is_in_prof_file', return_value=True), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._get_file_suffix'), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._clear_output_folder', return_value=True):
+            check = MsprofOutputSummary('test')
+            check._export_msprof_timeline = mock.Mock()
+            check._export_readme_file = mock.Mock()
+            check.export(MsProfCommonConstant.TIMELINE)
+            check._export_msprof_timeline.assert_called_once()
+            check._export_readme_file.assert_called_once()
+
+    def test_get_file_suffix_when_summary_then_return_csv_suffix(self):
+        check = MsprofOutputSummary('test')
+        self.assertEqual(check._get_file_suffix(MsProfCommonConstant.SUMMARY), StrConstant.FILE_SUFFIX_CSV)
+
+    def test_get_file_suffix_when_timeline_then_return_json_suffix(self):
+        check = MsprofOutputSummary('test')
+        self.assertEqual(check._get_file_suffix(MsProfCommonConstant.TIMELINE), StrConstant.FILE_SUFFIX_JSON)
+
+    def test_get_file_suffix_when_invalid_then_return_csv_suffix(self):
+        with mock.patch('logging.error'), \
+                mock.patch('sys.exit'):
+            check = MsprofOutputSummary('test')
+            self.assertEqual(check._get_file_suffix("abc"), check.INVALID_SUFFIX)
+
+    def test_clear_output_folder_when_suffix_invalid_then_return_False(self):
+        check = MsprofOutputSummary('test')
+        self.assertFalse(check._clear_output_folder(check.INVALID_SUFFIX))
+
+    def test_clear_output_folder_when_path_not_exist_then_mkdir_return_True(self):
+        with mock.patch('os.path.join', return_value="test"), \
+                mock.patch('os.path.exists', return_value=False), \
+                mock.patch('os.makedirs'):
+            check = MsprofOutputSummary('test')
+            self.assertTrue(check._clear_output_folder(StrConstant.FILE_SUFFIX_CSV))
+
+    def test_clear_output_folder_when_path_exist_then_move_file_succes_return_True(self):
+        with mock.patch('os.path.join', return_value="readme.txt"), \
+                mock.patch('os.path.exists', return_value=True), \
+                mock.patch('os.listdir', return_value=["readme.txt", "msprof.json", "op_summary.csv"]), \
+                mock.patch('common_func.msvp_common.check_dir_writable', ), \
+                mock.patch('common_func.msvp_common.check_path_valid'), \
+                mock.patch('os.path.isfile', return_value=True), \
+                mock.patch('os.path.getsize', return_value=1000), \
+                mock.patch('os.access', return_value=True), \
+                mock.patch('os.remove'):
+            check = MsprofOutputSummary('test')
+            self.assertTrue(check._clear_output_folder(StrConstant.FILE_SUFFIX_CSV))
 
     def test_is_in_prof_file_when_in_prof_file_then_return_True(self):
         with mock.patch('os.listdir', return_value=["host", "123"]):
@@ -41,9 +105,12 @@ class TestMsprofOutputSummary(unittest.TestCase):
             self.assertFalse(check._is_in_prof_file())
 
     def test_export_msprof_summary_when_normal_then_pass(self):
-        with mock.patch(NAMESPACE + '.MsprofOutputSummary._copy_host_summary'), \
-                mock.patch(NAMESPACE + '.MsprofOutputSummary._merge_device_summary'):
-            MsprofOutputSummary('test')._export_msprof_summary()
+        check = MsprofOutputSummary('test')
+        check._copy_host_summary = mock.Mock()
+        check._merge_device_summary = mock.Mock()
+        check._export_msprof_summary()
+        check._copy_host_summary.assert_called_once()
+        check._merge_device_summary.assert_called_once()
 
     def test_copy_host_summary_when_normal_then_pass(self):
         with mock.patch('os.path.join', return_value="test"), \
@@ -63,8 +130,11 @@ class TestMsprofOutputSummary(unittest.TestCase):
                 mock.patch('os.path.realpath', return_value="test"), \
                 mock.patch(NAMESPACE + '.check_path_valid'), \
                 mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True), \
-                mock.patch(NAMESPACE + '.MsprofOutputSummary._get_summary_file_name'), \
-                mock.patch(NAMESPACE + '.MsprofOutputSummary._save_summary_data'):
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._get_summary_file_name',
+                           return_value=set({"op_summary.csv"})), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._save_summary_data'), \
+                mock.patch('multiprocessing.Process.start'), \
+                mock.patch('multiprocessing.Process.join'):
             MsprofOutputSummary('test')._merge_device_summary()
 
     def test_get_summary_file_name_when_normal_then_pass(self):
@@ -79,16 +149,18 @@ class TestMsprofOutputSummary(unittest.TestCase):
             self.assertEqual(len(file_set), 1)
 
     def test_save_summary_data_when_normal_then_pass(self):
-        helper = FileSliceHelper("test", "op_summary", "summary")
         with mock.patch('os.path.join', return_value="test"), \
                 mock.patch('os.path.realpath', return_value="test"), \
+                mock.patch(NAMESPACE + '.check_path_valid'), \
+                mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True), \
                 mock.patch('os.path.exists', return_value=True), \
                 mock.patch('os.listdir', return_value=["op_summary.csv", "npu_mem.csv"]), \
                 mock.patch('os.path.basename', return_value="0"), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary.get_newest_file_list',
                            return_value=["op_summary_0_1_1_20230905213000.csv"]), \
-                mock.patch(NAMESPACE + '.MsprofOutputSummary._insert_summary_data'):
-            MsprofOutputSummary('test')._save_summary_data("op_summary", "test", helper)
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._insert_summary_data'), \
+                mock.patch('common_func.file_slice_helper.FileSliceHelper.dump_csv_data'):
+            MsprofOutputSummary('test')._save_summary_data("op_summary", ['host', 'device_0', 'device_1'])
 
     def test_insert_summary_data_when_more_than_1000000_then_insert_data(self):
         helper = FileSliceHelper("test", "op_summary", "summary")
@@ -151,16 +223,31 @@ class TestMsprofOutputSummary(unittest.TestCase):
 
     def test_export_all_timeline_data_when_normal_then_pass(self):
         with mock.patch(NAMESPACE + '.get_path_dir', return_value=['device']), \
-                mock.patch('os.path.realpath', return_value='test'), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._save_timeline_data'), \
+                mock.patch('multiprocessing.Process.start'), \
+                mock.patch('multiprocessing.Process.join'):
+            MsprofOutputSummary('test')._export_all_timeline_data()
+
+    def test_save_timeline_data_when_normal_then_pass(self):
+        with mock.patch('os.path.realpath', return_value='test'), \
                 mock.patch('os.path.join', return_value='test'), \
                 mock.patch(NAMESPACE + '.check_path_valid'), \
+                mock.patch('os.path.exists', return_value=True), \
                 mock.patch('common_func.data_check_manager.DataCheckManager.contain_info_json_data',
                            return_value=True), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._get_timeline_file_with_slice',
                            return_value=({}, 2)), \
                 mock.patch('common_func.utils.Utils.get_json_data'), \
+                mock.patch('common_func.file_slice_helper.FileSliceHelper.dump_json_data'), \
+                mock.patch('multiprocessing.Process.start'), \
+                mock.patch('multiprocessing.Process.join'):
+            MsprofOutputSummary('test')._save_timeline_data("msprof", ["test"])
+
+    def test_insert_json_data_when_normal_then_pass(self):
+        with mock.patch('common_func.file_slice_helper.FileSliceHelper.insert_data'), \
                 mock.patch('common_func.file_slice_helper.FileSliceHelper.dump_json_data'):
-            MsprofOutputSummary('test')._export_all_timeline_data()
+            helper = FileSliceHelper("test", "msprof", "timeline")
+            MsprofOutputSummary('test')._insert_json_data(["msprof_1.json"], helper, True, 1)
 
     def test_get_timeline_file_with_slice_when_not_exist_path_then_return_empty(self):
         with mock.patch('os.path.realpath', return_value='test'), \

@@ -1,11 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2023. All rights reserved.
+import logging
 
 from common_func.batch_counter import BatchCounter
 from common_func.constant import Constant
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from mscalculate.hwts.hwts_calculator import HwtsCalculator
 from msmodel.task_time.hwts_aiv_model import HwtsAivModel
@@ -38,6 +41,13 @@ class HwtsAivCalculator(HwtsCalculator):
         :return: None
         """
         if self.is_need_parse_all_file():
+            db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_HWTS)
+            if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_HWTS_TASK,
+                                            DBNameConstant.TABLE_HWTS_TASK_TIME):
+                logging.info("The Table %s or %s already exists in the %s, and won't be calculate again.",
+                             DBNameConstant.TABLE_HWTS_TASK, DBNameConstant.TABLE_HWTS_TASK_TIME,
+                             DBNameConstant.DB_HWTS)
+                return
             self._parse_all_file()
             self.save()
 

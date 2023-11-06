@@ -170,10 +170,9 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             return True
         else:
             hccl_db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)
-            if DBManager.check_tables_in_db(hccl_db_path, DBNameConstant.TABLE_HCCL_SINGLE_DEVICE,
-                                            DBNameConstant.TABLE_HCCL_OP_REPORT):
-                logging.info("Found table %s and %s in operator scene, no need to generate again",
-                             DBNameConstant.TABLE_HCCL_SINGLE_DEVICE, DBNameConstant.TABLE_HCCL_OP_REPORT)
+            if DBManager.check_tables_in_db(hccl_db_path, DBNameConstant.TABLE_HCCL_SINGLE_DEVICE):
+                logging.info("Found table %s in operator scene, no need to generate again",
+                             DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
                 return False
             logging.info("No table %s or %s found, to generate it", DBNameConstant.TABLE_HCCL_SINGLE_DEVICE,
                          DBNameConstant.TABLE_HCCL_OP_REPORT)
