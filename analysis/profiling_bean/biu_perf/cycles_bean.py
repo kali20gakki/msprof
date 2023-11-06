@@ -16,9 +16,9 @@ class CyclesBean(StructDecoder):
         self._vector_cycles = filed[0]
         self._scalar_cycles = filed[1]
         self._cube_cycles = filed[2]
-        self._lsu0_cycles = filed[3]
-        self._lsu1_cycles = filed[4]
-        self._lsu2_cycles = filed[5]
+        self._lsu1_cycles = filed[3]
+        self._lsu2_cycles = filed[4]
+        self._lsu3_cycles = filed[5]
         self._timestamp_lsb0 = filed[7]
         self._timestamp_lsb1 = filed[8]
         self._timestamp_msb0 = filed[14]
@@ -55,14 +55,6 @@ class CyclesBean(StructDecoder):
         return self._cube_cycles
 
     @property
-    def lsu0_cycles(self: any) -> int:
-        """
-        get lsu0 cycles
-        :return: lsu0 cycles
-        """
-        return self._lsu0_cycles
-
-    @property
     def lsu1_cycles(self: any) -> int:
         """
         get lsu1 cycles
@@ -77,6 +69,14 @@ class CyclesBean(StructDecoder):
         :return: lsu2 cycles
         """
         return self._lsu2_cycles
+
+    @property
+    def lsu3_cycles(self: any) -> int:
+        """
+        get lsu3 cycles
+        :return: lsu3 cycles
+        """
+        return self._lsu3_cycles
 
     @classmethod
     def decode(cls: any, binary_data: bytes, additional_fmt: str = "") -> any:
