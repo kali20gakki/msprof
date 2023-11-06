@@ -506,12 +506,13 @@ class TaskGear(CANNGear):
         for i, hccl_desc in enumerate(hccl_descs.values()):
             hccl_info_dto = hccl_desc.hccl_info
             context_id = int(hccl_desc.ctx_info.ctx_id)
+            is_master = 1 if hccl_event.struct_type == 'master' else 0
             hccl_tasks[i] = [
                 model_id, request_id, hccl_info_dto.op_name, hccl_info_dto.group_name,
                 hccl_info_dto.plane_id, task_track_dto.timestamp, hccl_info_dto.duration_estimated,
                 task_track_dto.stream_id, task_track_dto.task_id, context_id,
-                task_track_dto.batch_id, task_track_dto.device_id,
-                hccl_info_dto.to_args_json(task_track_dto.stream_id, task_track_dto.task_id, hccl_event.struct_type)
+                task_track_dto.batch_id, task_track_dto.device_id, is_master,
+                hccl_info_dto.to_args_json(task_track_dto.stream_id, task_track_dto.task_id)
             ]
         self.hccl_task_info.extend(hccl_tasks)
 

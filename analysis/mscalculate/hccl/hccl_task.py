@@ -62,6 +62,7 @@ class HcclTask:
     device_id: int = Constant.DEFAULT_VALUE
     args: DictConversionDescriptor = DictConversionDescriptor(default="{}")
     is_dynamic: int = Constant.DEFAULT_INVALID_VALUE
+    is_master: int = Constant.DEFAULT_INVALID_VALUE
     op_name: str = Constant.NA
     op_type: str = Constant.NA
     task_type: str = Constant.NA

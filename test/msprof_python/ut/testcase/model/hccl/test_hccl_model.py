@@ -73,14 +73,14 @@ class TestHCCLModel(TestDirCRBaseModel):
 
     def test_get_hccl_task_data_should_return_diff_result_when_query_diff_deviceid(self):
         # model_id, index_id, name, group_name, plane_id, timestamp, duration,
-        # stream_id, task_id, context_id, batch_id, device_id, args
+        # stream_id, task_id, context_id, batch_id, device_id, is_master, args
         hccl_task_data = [
-            (1, -1, "Memcpy", "1", 1, 1, 1, 100, 200, 300, 0, 0, "{}"),
-            (1, -1, "Notify_Wait", "1", 1, 1, 1, 102, 202, 302, 0, 0, "{}"),
-            (1, -1, "Notify_Record", "1", 1, 1, 1, 103, 203, 303, 0, 0, "{}"),
-            (1, -1, "Memcpy", "1", 1, 1, 1, 999, 204, 304, 0, 0, "{}"),
-            (1, -1, "Memcpy", "1", 1, 1, 1, 105, 205, 305, 0, 1, "{}"),
-            (1, -1, "Memcpy", "1", 1, 1, 1, 999, 206, 306, 0, 2, "{}"),
+            (1, -1, "Memcpy", "1", 1, 1, 1, 100, 200, 300, 0, 0, 1, "{}"),
+            (1, -1, "Notify_Wait", "1", 1, 1, 1, 102, 202, 302, 0, 0, 1, "{}"),
+            (1, -1, "Notify_Record", "1", 1, 1, 1, 103, 203, 303, 0, 0, 1, "{}"),
+            (1, -1, "Memcpy", "1", 1, 1, 1, 999, 204, 304, 0, 0, 1, "{}"),
+            (1, -1, "Memcpy", "1", 1, 1, 1, 105, 205, 305, 0, 1, 1, "{}"),
+            (1, -1, "Memcpy", "1", 1, 1, 1, 999, 206, 306, 0, 2, 1, "{}"),
         ]
 
         # model_id, index_id, stream_id, task_id, context_id, batch_id, start_time,
@@ -211,6 +211,27 @@ class TestHCCLModel(TestDirCRBaseModel):
         with mock.patch(NAMESPACE + '.DBManager.fetch_all_data'):
             check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
             check.get_hccl_op_data_by_group()
+
+    def test_get_hccl_op_data_by_group_sql_should_return_empty_when_no_master(self):
+        # model_id, index_id, op_name, iteration, hccl_name,
+        # group_name, first_timestamp, plane_id, timestamp, duration,
+        # is_dynamic, task_type, op_type, connection_id, is_master
+        hccl_op_data = [
+            (4294967295, -1, "hcom_allReduce__111_5939", 0, "Notify_Wait",
+             9402293354310575111, 642053765422, 1, 6286049445495.44, 1324686.46679688,
+             1, "HCCL", "hcom_allReduce_", 733589, 0),
+            (4294967295, -1, "hcom_allReduce__111_5939", 0, "Notify_Wait",
+             9402293354310575111, 642070508282, 2, 6286050773361.97, 1409648.16503906,
+             1, "HCCL", "hcom_allReduce_", 733589, 0),
+        ]
+        model = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
+        model.init()
+        model.create_table()
+        model.insert_data_to_db(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE, hccl_op_data)
+        with mock.patch(NAMESPACE + '.HcclViewModel.attach_to_db', return_value=True):
+            hccl_result = model.get_hccl_op_data_by_group()
+            self.assertEqual(len(hccl_result), 0)
+        model.finalize()
 
     def test_get_hccl_op_time_section_sql(self):
         with mock.patch(NAMESPACE + '.DBManager.fetch_all_data'):

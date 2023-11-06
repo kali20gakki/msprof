@@ -243,8 +243,7 @@ class HCCLInfoDto:
     def rdma_type(self, value):
         self._rdma_type = value
 
-    def to_args_json(self, stream_id, task_id, struct_type):
-        is_master = '1' if struct_type == 'master' else '0'
+    def to_args_json(self, stream_id, task_id):
         json = {
             'notify_id': self.notify_id,
             'duration estimated(us)': self.duration_estimated,
@@ -258,6 +257,5 @@ class HCCLInfoDto:
             'size(Byte)': self.size,
             'data type': self.data_type,
             'link type': self.link_type,
-            'is_master': is_master,
         }
         return str(json)
