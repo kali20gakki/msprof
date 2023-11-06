@@ -18,10 +18,23 @@ NAMESPACE = 'mscalculate.hwts.hwts_aiv_calculator'
 class TestHwtsAivCalculator(unittest.TestCase):
     file_list = {DataTag.AIV: ['aiVectorCore.data.0.slice_0']}
 
-    def test_ms_run(self):
-
-        with mock.patch(NAMESPACE + '.HwtsAivCalculator._parse_all_file'), \
-             mock.patch(NAMESPACE + '.HwtsAivCalculator.save'):
+    def test_ms_run_when_table_not_exist_then_parse_and_save(self):
+        with mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=False):
             ProfilingScene()._scene = "single_op"
             check = HwtsAivCalculator(self.file_list, CONFIG)
+            check._parse_all_file = mock.Mock()
+            check.save = mock.Mock()
             check.ms_run()
+            check._parse_all_file.assert_called_once()
+            check.save.assert_called_once()
+
+    def test_ms_run_when_table_exist_then_do_not_execute(self):
+        with mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch('logging.info'):
+            ProfilingScene()._scene = "single_op"
+            check = HwtsAivCalculator(self.file_list, CONFIG)
+            check._parse_all_file = mock.Mock()
+            check.save = mock.Mock()
+            check.ms_run()
+            check._parse_all_file.assert_not_called()
+            check.save.assert_not_called()

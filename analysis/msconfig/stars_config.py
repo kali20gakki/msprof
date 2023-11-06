@@ -10,14 +10,12 @@ class StarsConfig(MetaConfig):
         'AcsqTaskParser': [
             ('fmt', '000000, 000001'),
             ('db', 'soc_log.db'),
-            ('table', 'AcsqTask'),
-            ('is_db_needed_clear', '1')
+            ('table', 'AcsqTask')
         ],
         'FftsLogParser': [
             ('fmt', '100010, 100011'),
             ('db', 'soc_log.db'),
-            ('table', 'FftsLog'),
-            ('is_db_needed_clear', '1')
+            ('table', 'FftsLog')
         ],
         'AccPmuParser': [
             ('fmt', '011010'),

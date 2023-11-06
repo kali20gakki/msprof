@@ -27,6 +27,16 @@ class TestBiuMonitorCalculator(unittest.TestCase):
                 mock.patch(NAMESPACE + '.BiuMonitorCalculator.save'):
             BiuMonitorCalculator(CONFIG).ms_run()
 
+    def test_ms_run_when_table_exist_then_do_not_execute(self):
+        with mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch('logging.info'):
+            check = BiuMonitorCalculator(CONFIG)
+            check.calculate = mock.Mock()
+            check.save = mock.Mock()
+            check.ms_run()
+            check.calculate.assert_not_called()
+            check.save.assert_not_called()
+
 
 class TestMonitorFlowCalculator(unittest.TestCase):
 

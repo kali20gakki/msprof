@@ -7,6 +7,7 @@ import logging
 
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
@@ -76,7 +77,6 @@ class L2CacheCalculator(ICalculator, MsMultiProcess):
         """
         if self._l2_cache_cal_data and self._model:
             logging.info("calculating l2 cache data finished, and starting to store result in db.")
-            self._model.drop_table(DBNameConstant.TABLE_L2CACHE_SUMMARY)
             self._model.create_table()
             self._model.flush(self._l2_cache_cal_data)
             self._model.finalize()
@@ -87,6 +87,11 @@ class L2CacheCalculator(ICalculator, MsMultiProcess):
         :return: None
         """
         if not self._file_list:
+            return
+        db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_L2CACHE)
+        if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_L2CACHE_SUMMARY):
+            logging.info("The Table %s already exists in the %s, and won't be calculate again.",
+                         DBNameConstant.TABLE_L2CACHE_SUMMARY, DBNameConstant.DB_L2CACHE)
             return
         logging.info("start to calculate the data of l2 cache")
         if not self._pre_check():

@@ -63,6 +63,12 @@ class AcsqCalculator(ICalculator, MsMultiProcess):
         :return: None
         """
         if self._file_list.get(DataTag.STARS_LOG):
+            db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_SOC_LOG)
+            if ProfilingScene().is_all_export() and \
+                    DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_ACSQ_TASK_TIME):
+                logging.info("The Table %s already exists in the %s, and won't be calculate again.",
+                             DBNameConstant.TABLE_ACSQ_TASK_TIME, DBNameConstant.DB_SOC_LOG)
+                return
             self.calculate()
             self.save()
 
