@@ -689,7 +689,7 @@ class TablesConfig(MetaConfig):
             ('task_type', 'TEXT, null'),
             ('op_type', 'TEXT, null'),
             ('connection_id', 'INTEGER, null'),
-            ('is_master', 'TEXT, null'),
+            ('is_master', 'INTEGER, null'),
             ('args', 'TEXT, null')
         ],
         'HCCLOPMap': [
@@ -718,6 +718,7 @@ class TablesConfig(MetaConfig):
             ('context_id', 'INTEGER, null'),
             ('batch_id', 'INTEGER, null'),
             ('device_id', 'INTEGER, null'),
+            ('is_master', 'INTEGER, null'),
             ('args', 'TEXT, null')
         ],
         'MsprofTxMap': [

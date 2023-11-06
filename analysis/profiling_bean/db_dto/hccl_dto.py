@@ -20,7 +20,7 @@ class HcclDto:
         self._iteration = Constant.DEFAULT_VALUE
         self._hccl_name = Constant.NA
         self._group_name = Constant.NA
-        self._is_master = Constant.NA
+        self._is_master = Constant.DEFAULT_INVALID_VALUE
         self._first_timestamp = Constant.DEFAULT_VALUE
         self._plane_id = Constant.DEFAULT_VALUE
         self._timestamp = Constant.DEFAULT_VALUE

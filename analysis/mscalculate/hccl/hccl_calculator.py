@@ -182,13 +182,11 @@ class HcclCalculator(ICalculator, MsMultiProcess):
     def _generate_hccl_op_info(self, hccl_data: List[HcclDto]) -> bool:
         is_hccl_op_type_valid = False
         for data in hccl_data:
-            is_master_flag = data.args.get('is_master')
-            args = {hccl_info: value for hccl_info, value in data.args.items() if hccl_info != 'is_master'}
             self._hccl_data.append([data.model_id, data.index_id, data.op_name, data.iteration,
                                     data.hccl_name, data.group_name, data.first_timestamp, data.plane_id,
                                     data.timestamp, data.duration, data.is_dynamic,
                                     data.task_type, data.op_type, data.connection_id,
-                                    is_master_flag, str(args)])
+                                    data.is_master, str(data.args)])
             if data.op_type != Constant.NA:
                 is_hccl_op_type_valid = True
         return is_hccl_op_type_valid
