@@ -78,6 +78,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_MEMORY_APPLICATION = "memory_application.db"
     DB_MEMORY_OP = "task_memory.db"
     DB_ASCEND_TASK = "ascend_task.db"
+    DB_NPU_MODULE_MEM = "npu_module_mem.db"
 
     # DB tables
     TABLE_ACL_DATA = "AclData"
@@ -258,6 +259,9 @@ class DBNameConstant(metaclass=ABCMeta):
 
     # npu mem of process and device
     TABLE_NPU_MEM = "NpuMem"
+
+    # npu module mem
+    TABLE_NPU_MODULE_MEM = "NpuModuleMem"
 
     # npu operator mem
     TABLE_NPU_OP_MEM_RAW = "NpuOpMemRaw"

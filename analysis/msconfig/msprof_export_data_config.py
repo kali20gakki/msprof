@@ -262,13 +262,11 @@ class MsProfExportDataConfig(MetaConfig):
             ('table', 'NpuMem')
         ],
         'memory_record': [
-            ('handler', '_get_npu_op_mem_record'),
+            ('handler', '_get_mem_record_data'),
             ('headers', 'Component,Timestamp(us),Total Allocated(KB),Total Reserved(KB),Device'),
-            ('db', 'memory_application.db'),
-            ('table', 'NpuOpMemRec')
         ],
         'operator_memory': [
-            ('handler', '_get_npu_op_mem'),
+            ('handler', '_get_operator_memory_data'),
             ('headers', 'Name,Size(KB),Allocation Time(us),Duration(us),'
                         'Allocation Total Allocated(KB),Allocation Total Reserved(KB),'
                         'Release Total Allocated(KB),Release Total Reserved(KB),Device'),

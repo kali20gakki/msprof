@@ -7,7 +7,9 @@ from unittest import mock
 
 from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_constant import MsvpConstant
+from common_func.info_conf_reader import InfoConfReader
 from profiling_bean.db_dto.npu_op_mem_rec_dto import NpuOpMemRecDto
+from profiling_bean.db_dto.npu_module_mem_dto import NpuModuleMemDto
 from profiling_bean.db_dto.op_mem_dto import OpMemDto
 from viewer.npu_mem.npu_op_mem_viewer import NpuOpMemViewer
 
@@ -16,47 +18,38 @@ NAMESPACE = 'viewer.npu_mem.npu_op_mem_viewer'
 
 class TestNpuOpMemViewer(unittest.TestCase):
 
-    def test_get_summary_data_should_return_empty_when_model_init_fail(self):
+    def test_get_table_data_should_return_empty_when_model_init_fail(self):
         config = {"headers": ["component", "timestamp", "total_reserve_memory", "total_allocate_memory", "device_type"]}
         params = {
             "project": "test_npu_mem_view",
             "model_id": 1,
             "iter_id": 1
         }
-        check = NpuOpMemViewer(config, params, DBNameConstant.TABLE_NPU_OP_MEM_REC)
+        check = NpuOpMemViewer(config, params)
         ret = check.get_summary_data()
         self.assertEqual(MsvpConstant.MSVP_EMPTY_DATA, ret)
 
-    def test_get_summary_data_should_return_success_when_get_rec_data(self):
-        config = {"headers": ["component", "timestamp", "total_reserve_memory", "total_allocate_memory", "device_type"]}
-        params = {
-            "project": "test_npu_op_mem_view",
-            "model_id": 1,
-            "iter_id": 1
-        }
-        rec_dto = NpuOpMemRecDto()
-        rec_dto.component = 'GE'
-        rec_dto.timestamp = 0
-        rec_dto.total_reserve_memory = 0
-        rec_dto.total_allocate_memory = 0
-        rec_dto.device_type = 'NPU:5'
-        with mock.patch(NAMESPACE + '.NpuOpMemModel.check_db', return_value=True), \
-                mock.patch(NAMESPACE + '.NpuOpMemModel.check_table', return_value=True), \
-                mock.patch(NAMESPACE + '.NpuOpMemModel.get_summary_data', return_value=[rec_dto]):
-            check = NpuOpMemViewer(config, params, '2')
-            ret = check.get_summary_data()
 
     def test_get_summary_data_should_return_success_when_get_mem_data(self):
         config = {
             "headers": ["operator", "size", "allocation_time", "release_time", "duration",
-                              "allocation_total_allocated", "allocation_total_reserved", "release_total_allocated",
-                              "release_total_reserved", "device_type", "name"]
+                        "allocation_total_allocated", "allocation_total_reserved", "release_total_allocated",
+                        "release_total_reserved", "device_type", "name"]
         }
         params = {
             "project": "test_npu_op_mem_view",
             "model_id": 1,
             "iter_id": 1
         }
+        expected_headers = [
+            'operator', 'size', 'allocation_time', 'release_time', 'duration', 'allocation_total_allocated',
+            'allocation_total_reserved', 'release_total_allocated', 'release_total_reserved', 'device_type', 'name'
+        ]
+        expected_data = [['123', 0.0, 10.0, 0.001, 0.0, 0.0, 0.0, 0.0, 'NPU:5']]
+        InfoConfReader()._info_json = {
+            'CPU': [{'Frequency': "1000"}]
+        }
+        InfoConfReader()._local_time_offset = 10.0
         mem_dto = OpMemDto()
         mem_dto.operator = '123'
         mem_dto.size = 0
@@ -70,8 +63,10 @@ class TestNpuOpMemViewer(unittest.TestCase):
         mem_dto.device_type = 'NPU:5'
         mem_dto.name = '123'
 
-        with mock.patch(NAMESPACE + '.NpuOpMemModel.check_db', return_value=True), \
-                mock.patch(NAMESPACE + '.NpuOpMemModel.check_table', return_value=True), \
-                mock.patch(NAMESPACE + '.NpuOpMemModel.get_summary_data', return_value=[mem_dto]):
-            check = NpuOpMemViewer(config, params, '2')
-            ret = check.get_summary_data()
+        with mock.patch(NAMESPACE + '.NpuAiStackMemModel.check_db', return_value=True), \
+                mock.patch(NAMESPACE + '.NpuAiStackMemModel.check_table', return_value=True), \
+                mock.patch(NAMESPACE + '.NpuAiStackMemModel.get_table_data', return_value=[mem_dto]):
+            check = NpuOpMemViewer(config, params)
+            headers, data, _ = check.get_summary_data()
+            self.assertEqual(headers, expected_headers)
+            self.assertEqual(data, expected_data)

@@ -63,6 +63,7 @@ class StructDecoder:
         "NanoExeomBean": StructFmt.NANO_MODEL_EXEOM_FMT,
         "NanoStarsBean": StructFmt.NANO_STARS_PROFILE_FMT,
         "TaskFlipBean": StructFmt.DEVICE_TASK_FLIP,
+        "NpuModuleMemDataBean": StructFmt.NPU_MODULE_MEM_FMT,
     }
 
     @classmethod

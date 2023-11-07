@@ -13,7 +13,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
 from mscalculate.interface.icalculator import ICalculator
-from msmodel.npu_mem.npu_op_mem_model import NpuOpMemModel
+from msmodel.npu_mem.npu_ai_stack_mem_model import NpuAiStackMemModel
 
 
 class NpuOpMemCalculator(ICalculator, MsMultiProcess):
@@ -30,15 +30,17 @@ class NpuOpMemCalculator(ICalculator, MsMultiProcess):
         self._curs = None
 
         self._op_data = []
-        self._model_raw = NpuOpMemModel(self._project_path, [DBNameConstant.TABLE_NPU_OP_MEM_RAW])
-        self._model_mem = NpuOpMemModel(self._project_path, [DBNameConstant.TABLE_NPU_OP_MEM])
-        self._model_rec = NpuOpMemModel(self._project_path, [DBNameConstant.TABLE_NPU_OP_MEM_REC])
+        self._model = NpuAiStackMemModel(self._project_path,
+                                         DBNameConstant.DB_MEMORY_OP,
+                                         [DBNameConstant.TABLE_NPU_OP_MEM_RAW,
+                                          DBNameConstant.TABLE_NPU_OP_MEM,
+                                          DBNameConstant.TABLE_NPU_OP_MEM_REC])
         self._memory_record = []
         self._opeartor_memory = []
 
-
     def calculate(self: any) -> None:
-        self._op_data = self._model_raw.get_table_data(DBNameConstant.TABLE_NPU_OP_MEM_RAW)
+        with self._model as _model:
+            self._op_data = _model.get_table_data(DBNameConstant.TABLE_NPU_OP_MEM_RAW)
         self._calc_memory_record()
         self._calc_operator_memory()
 
@@ -46,37 +48,35 @@ class NpuOpMemCalculator(ICalculator, MsMultiProcess):
         """
         save data
         """
-        if self._memory_record:
-            self._model_rec.clear(DBNameConstant.TABLE_NPU_OP_MEM_REC)
-            self._model_rec.init()
-            self._model_rec.flush(DBNameConstant.TABLE_NPU_OP_MEM_REC, self._memory_record)
-            self._model_rec.finalize()
-        if self._opeartor_memory:
-            self._model_mem.clear(DBNameConstant.TABLE_NPU_OP_MEM)
-            self._model_mem.init()
-            self._model_mem.flush(DBNameConstant.TABLE_NPU_OP_MEM, self._opeartor_memory)
-            self._model_mem.finalize()
+        if not self._memory_record or not self._opeartor_memory:
+            return
+        with self._model as _model:
+            _model.flush(DBNameConstant.TABLE_NPU_OP_MEM_REC, self._memory_record)
+            _model.flush(DBNameConstant.TABLE_NPU_OP_MEM, self._opeartor_memory)
+            return
 
     def ms_run(self: any) -> None:
         """
         calculate for task scheduler
         :return:
         """
-        if self._connect_db():
-            self.calculate()
-            self.save()
-        else:
-            logging.debug("npu op memory data is null.")
+        if not self._judge_should_calculate():
+            return
+        self.calculate()
+        self.save()
 
-    def _connect_db(self: any) -> None:
-        conn, curs = DBManager.check_connect_db_path(PathManager.get_db_path(self._sample_config['result_dir'],
-                                                                             DBNameConstant.DB_MEMORY_OP))
-        if conn and curs:
-            self._model_raw.init()
-            self._model_mem.init()
-            self._model_rec.init()
-            return True
-        return False
+    def _judge_should_calculate(self):
+        npu_op_mem_db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_MEMORY_OP)
+        conn, curs = DBManager.check_connect_db_path(npu_op_mem_db_path)
+        if not conn or not curs:
+            return False
+        if DBManager.check_tables_in_db(npu_op_mem_db_path,
+                                        [DBNameConstant.TABLE_NPU_OP_MEM,
+                                         DBNameConstant.TABLE_NPU_OP_MEM_REC]):
+            logging.info("Found table %s and %s, no need to generate again",
+                         DBNameConstant.TABLE_NPU_OP_MEM, DBNameConstant.TABLE_NPU_OP_MEM_REC)
+            return False
+        return True
 
     def _calc_operator_memory(self: any) -> None:
         allocated_data = {}

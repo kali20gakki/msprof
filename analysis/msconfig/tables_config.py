@@ -92,7 +92,7 @@ class TablesConfig(MetaConfig):
             ('end_time', 'INTEGER,null'),
             ('op_name', 'TEXT,null')
         ],
-        'GeLogicStreamInfoMap' : [
+        'GeLogicStreamInfoMap': [
             ('logic_stream', 'TEXT,null'),
             ('physic_stream', 'TEXT,null')
         ],
@@ -1287,5 +1287,11 @@ class TablesConfig(MetaConfig):
             ('timestamp', 'NUMERIC,null'),
             ('task_id', 'INTEGER,null'),
             ('flip_num', 'INTEGER,null'),
+        ],
+        'NpuModuleMemMap': [
+            ('module_id', 'INTEGER,null'),
+            ('syscnt', 'NUMERIC,null'),  # syscnt: cycle count from host cpu
+            ('total_size', 'INTEGER,null'),
+            ('device_type', 'TEXT,null')
         ],
     }
