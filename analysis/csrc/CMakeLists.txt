@@ -2,9 +2,7 @@ cmake_minimum_required (VERSION 3.16)
 
 project(msprof_analysis VERSION 0.1.0)
 
-set(PROJECT_ROOT ${PROJECT_SOURCE_DIR})
-set(CSRC ${PROJECT_SOURCE_DIR}/csrc)
-set(OPENSOURCE ${PROJECT_ROOT}/opensource)
+set(CSRC ${PROJECT_SOURCE_DIR})
 
 add_compile_options("-std=c++17")
 # 保持编译和运行python版本兼容性
@@ -35,6 +33,7 @@ include_directories(${CSRC}/parser)
 include_directories(${CSRC}/py_interface)
 include_directories(${CSRC}/utils)
 include_directories(${CSRC}/viewer)
+include_directories(${CSRC}/viewer/database)
 include_directories(${CSRC}/worker)
 
 include_directories(/usr/local/include/)
@@ -46,6 +45,7 @@ aux_source_directory(${CSRC}/parser SOURCES)
 aux_source_directory(${CSRC}/py_interface SOURCES)
 aux_source_directory(${CSRC}/utils SOURCES)
 aux_source_directory(${CSRC}/viewer SOURCES)
+aux_source_directory(${CSRC}/viewer/database SOURCES)
 aux_source_directory(${CSRC}/worker SOURCES)
 aux_source_directory(${CSRC}/backends SOURCES)
 

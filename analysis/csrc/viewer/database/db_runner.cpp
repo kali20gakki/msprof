@@ -1,0 +1,25 @@
+/* ******************************************************************************
+            版权所有 (c) 华为技术有限公司 2023-
+            Copyright, 2023, Huawei Tech. Co., Ltd.
+****************************************************************************** */
+/* ******************************************************************************
+ * File Name          : db_runner.cpp
+ * Description        : 数据库模块对外接口
+ * Author             : msprof team
+ * Creation Date      : 2023/11/2
+ * *****************************************************************************
+ */
+#include "db_runner.h"
+namespace Analysis {
+namespace Viewer {
+namespace Database {
+DBRunner::DBRunner(const std::string &dbPath)
+{}
+
+int DBRunner::CreateTable(const std::string &tableName, const std::vector<TableColumn> &cols)
+{
+    return 0;
+}
+}
+}
+}
