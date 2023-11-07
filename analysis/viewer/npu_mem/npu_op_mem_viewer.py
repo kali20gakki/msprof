@@ -9,16 +9,18 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
-from msmodel.npu_mem.npu_op_mem_model import NpuOpMemModel
+from msmodel.npu_mem.npu_ai_stack_mem_model import NpuAiStackMemModel
 
 
 class NpuOpMemViewer:
-    def __init__(self: any, configs: dict, params: dict, table_name: str) -> None:
+    def __init__(self: any, configs: dict, params: dict) -> None:
         self._configs = configs
         self._params = params
         self._project_path = params.get(StrConstant.PARAM_RESULT_DIR)
-        self._table_name = table_name
-        self._model = NpuOpMemModel(self._project_path, [table_name])
+        self._data = []
+        self._model = NpuAiStackMemModel(self._project_path,
+                                         DBNameConstant.DB_MEMORY_OP,
+                                         [DBNameConstant.TABLE_NPU_OP_MEM])
 
     def get_summary_data(self: any) -> tuple:
         """
@@ -27,31 +29,23 @@ class NpuOpMemViewer:
         """
 
         if not self._model.check_db() or not self._model.check_table():
-            logging.error("Maybe npu op mem data parse failed, please check the data parsing log.")
+            logging.warning("operator memory data not found, maybe it failed to parse, "
+                            "please check the data parsing log.")
             return MsvpConstant.MSVP_EMPTY_DATA
-        summary_data = self._model.get_summary_data(self._table_name)
-        if summary_data:
-            if self._table_name == DBNameConstant.TABLE_NPU_OP_MEM:
-                summary_data = [[datum.name,
-                                 datum.size / NumberConstant.KILOBYTE,
-                                 InfoConfReader().trans_into_local_time(
-                                     InfoConfReader().time_from_host_syscnt(int(datum.allocation_time),
-                                                                            NumberConstant.MICRO_SECOND)),
-                                 InfoConfReader().get_host_duration(int(datum.duration),
-                                                                    NumberConstant.MICRO_SECOND),
-                                 datum.allocation_total_allocated / NumberConstant.KILOBYTE,
-                                 datum.allocation_total_reserved / NumberConstant.KILOBYTE,
-                                 datum.release_total_allocated / NumberConstant.KILOBYTE,
-                                 datum.release_total_reserved / NumberConstant.KILOBYTE,
-                                 datum.device_type]
-                                for datum in summary_data]
-            elif self._table_name == DBNameConstant.TABLE_NPU_OP_MEM_REC:
-                summary_data = [[datum.component,
-                                 InfoConfReader().trans_into_local_time(
-                                     InfoConfReader().time_from_host_syscnt(int(datum.timestamp),
-                                                                            NumberConstant.MICRO_SECOND)),
-                                 datum.total_allocate_memory / NumberConstant.KILOBYTE,
-                                 datum.total_reserve_memory / NumberConstant.KILOBYTE,
-                                 datum.device_type]
-                                for datum in summary_data]
-        return self._configs.get(StrConstant.CONFIG_HEADERS), summary_data, len(summary_data)
+        origin_summary_data = self._model.get_table_data(DBNameConstant.TABLE_NPU_OP_MEM)
+        if origin_summary_data:
+            self._data = [[datum.name,
+                           datum.size / NumberConstant.KILOBYTE,
+                           InfoConfReader().trans_into_local_time(
+                               InfoConfReader().time_from_host_syscnt(int(datum.allocation_time),
+                                                                      NumberConstant.MICRO_SECOND)),
+                           InfoConfReader().get_host_duration(int(datum.duration),
+                                                              NumberConstant.MICRO_SECOND),
+                           datum.allocation_total_allocated / NumberConstant.KILOBYTE,
+                           datum.allocation_total_reserved / NumberConstant.KILOBYTE,
+                           datum.release_total_allocated / NumberConstant.KILOBYTE,
+                           datum.release_total_reserved / NumberConstant.KILOBYTE,
+                           datum.device_type]
+                          for datum in origin_summary_data]
+        return self._configs.get(StrConstant.CONFIG_HEADERS), self._data, len(self._data)
+

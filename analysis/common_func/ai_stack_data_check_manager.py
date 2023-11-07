@@ -350,7 +350,7 @@ class AiStackDataCheckManager(DataCheckManager):
                                     device_id=device_id)
 
     @classmethod
-    def contain_npu_op_mem_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+    def contain_op_mem_data(cls: any, result_dir: str, device_id: int = None) -> bool:
         """
         The data path contain npu op mem data or not
         """
@@ -359,13 +359,15 @@ class AiStackDataCheckManager(DataCheckManager):
                                          DBNameConstant.TABLE_NPU_OP_MEM)
 
     @classmethod
-    def contain_npu_op_mem_rec_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+    def contain_mem_rec_data(cls: any, result_dir: str, device_id: int = None) -> bool:
         """
-        The data path contain npu op mem data or not
+        The data path contain npu op or/and module mem data or not
         """
         return AiStackDataCheckManager._check_output(result_dir, device_id) and \
-            DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_MEMORY_OP),
-                                         DBNameConstant.TABLE_NPU_OP_MEM_REC)
+            (DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_MEMORY_OP),
+                                         DBNameConstant.TABLE_NPU_OP_MEM_REC) or \
+             DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_NPU_MODULE_MEM),
+                                          DBNameConstant.TABLE_NPU_MODULE_MEM))
 
     @classmethod
     def contain_event_data(cls: any, result_dir: str, device_id: int = None) -> bool:

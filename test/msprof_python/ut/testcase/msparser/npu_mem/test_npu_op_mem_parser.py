@@ -27,16 +27,15 @@ class TestNpuOpMemParser(unittest.TestCase):
             check.ms_run()
 
     def test_save(self):
-        with mock.patch(NAMESPACE + '.NpuOpMemModel.clear'), \
-                mock.patch(NAMESPACE + '.NpuOpMemModel.init'), \
-                mock.patch(NAMESPACE + '.NpuOpMemModel.flush'), \
-                mock.patch(NAMESPACE + '.NpuOpMemModel.finalize'):
+        with mock.patch(NAMESPACE + '.NpuAiStackMemModel.init'), \
+                mock.patch(NAMESPACE + '.NpuAiStackMemModel.flush'), \
+                mock.patch(NAMESPACE + '.NpuAiStackMemModel.finalize'):
             check = NpuOpMemParser(self.file_list, CONFIG)
             setattr(check, "_npu_op_mem_data", ['123', '1', 1, '123', 1, 1000, 1000, 1, 0, 'NPU:0'])
             result = check.save()
-        with mock.patch(NAMESPACE + '.NpuOpMemModel.init'), \
-                mock.patch(NAMESPACE + '.NpuOpMemModel.flush'), \
-                mock.patch(NAMESPACE + '.NpuOpMemModel.finalize'):
+        with mock.patch(NAMESPACE + '.NpuAiStackMemModel.init'), \
+                mock.patch(NAMESPACE + '.NpuAiStackMemModel.flush'), \
+                mock.patch(NAMESPACE + '.NpuAiStackMemModel.finalize'):
             check = NpuOpMemParser(self.file_list, CONFIG)
             setattr(check, "_npu_op_mem_data", [])
             result = check.save()

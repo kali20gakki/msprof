@@ -12,7 +12,7 @@ from common_func.file_manager import FileOpen
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
 from framework.offset_calculator import OffsetCalculator
-from msmodel.npu_mem.npu_op_mem_model import NpuOpMemModel
+from msmodel.npu_mem.npu_ai_stack_mem_model import NpuAiStackMemModel
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.data_parser import DataParser
 from msparser.npu_mem.npu_op_mem_bean import NpuOpMemDataBean
@@ -30,7 +30,9 @@ class NpuOpMemParser(DataParser, MsMultiProcess):
         self._file_list = file_list
 
         self._npu_op_mem_data = []
-        self._npu_op_mem_model = NpuOpMemModel(self._project_path, [DBNameConstant.TABLE_NPU_OP_MEM_RAW])
+        self._npu_op_mem_model = NpuAiStackMemModel(self._project_path,
+                                                    DBNameConstant.DB_MEMORY_OP,
+                                                    [DBNameConstant.TABLE_NPU_OP_MEM_RAW])
 
     def parse(self: any) -> None:
         """
@@ -41,7 +43,6 @@ class NpuOpMemParser(DataParser, MsMultiProcess):
             return
         for _file in num_op_mem_files:
             _file_path = PathManager.get_data_file_path(self._project_path, _file)
-
             _file_size = os.path.getsize(_file_path)
             if not _file_size:
                 logging.warning(
@@ -57,10 +58,8 @@ class NpuOpMemParser(DataParser, MsMultiProcess):
         save npu op mem data
         """
         if self._npu_op_mem_data:
-            self._npu_op_mem_model.clear(DBNameConstant.TABLE_NPU_OP_MEM_RAW)
-            self._npu_op_mem_model.init()
-            self._npu_op_mem_model.flush(DBNameConstant.TABLE_NPU_OP_MEM_RAW, self._npu_op_mem_data)
-            self._npu_op_mem_model.finalize()
+            with self._npu_op_mem_model as _model:
+                _model.flush(DBNameConstant.TABLE_NPU_OP_MEM_RAW, self._npu_op_mem_data)
 
     def ms_run(self: any) -> None:
         """

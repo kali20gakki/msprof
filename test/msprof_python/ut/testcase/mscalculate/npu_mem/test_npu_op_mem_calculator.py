@@ -14,34 +14,22 @@ NAMESPACE = 'mscalculate.npu_mem.npu_op_mem_calculator'
 
 class TestNpuOpMemCalculator(unittest.TestCase):
 
-    def test_connect_db(self):
-        check = NpuOpMemCalculator({}, CONFIG)
-        check._connect_db()
-
-    def test_calculate(self):
-        with mock.patch(NAMESPACE + '.NpuOpMemCalculator._calc_memory_record'), \
-                mock.patch(NAMESPACE + '.NpuOpMemCalculator._calc_operator_memory'), \
-                mock.patch(NAMESPACE + '.NpuOpMemModel.get_table_data'):
-            check = NpuOpMemCalculator({}, CONFIG)
-
     def test_save(self):
-        with mock.patch(NAMESPACE + '.NpuOpMemModel.clear'), \
-                mock.patch(NAMESPACE + '.NpuOpMemModel.init'), \
-                mock.patch(NAMESPACE + '.NpuOpMemModel.flush'), \
-                mock.patch(NAMESPACE + '.NpuOpMemModel.finalize'):
+        with mock.patch(NAMESPACE + '.NpuAiStackMemModel.init'), \
+                mock.patch(NAMESPACE + '.NpuAiStackMemModel.flush'), \
+                mock.patch(NAMESPACE + '.NpuAiStackMemModel.finalize'):
             check = NpuOpMemCalculator({}, CONFIG)
             setattr(check, "_memory_record", ['GE', '1', 0, 1, 'NPU:0'])
             result = check.save()
-        with mock.patch(NAMESPACE + '.NpuOpMemModel.clear'), \
-                mock.patch(NAMESPACE + '.NpuOpMemModel.init'), \
-                mock.patch(NAMESPACE + '.NpuOpMemModel.flush'), \
-                mock.patch(NAMESPACE + '.NpuOpMemModel.finalize'):
+        with mock.patch(NAMESPACE + '.NpuAiStackMemModel.init'), \
+                mock.patch(NAMESPACE + '.NpuAiStackMemModel.flush'), \
+                mock.patch(NAMESPACE + '.NpuAiStackMemModel.finalize'):
             check = NpuOpMemCalculator({}, CONFIG)
             setattr(check, "_opeartor_memory", ['a', 1, '0', '1', '1', 0, 1, 0, 1, "NPU:0", "a"])
             result = check.save()
 
     def test_ms_run(self):
-        with mock.patch(NAMESPACE + '.NpuOpMemCalculator._connect_db'), \
+        with mock.patch(NAMESPACE + '.NpuOpMemCalculator._judge_should_calculate'), \
                 mock.patch(NAMESPACE + '.NpuOpMemCalculator.calculate'), \
                 mock.patch(NAMESPACE + '.NpuOpMemCalculator.save'):
             check = NpuOpMemCalculator({}, CONFIG)
@@ -110,3 +98,21 @@ class TestNpuOpMemCalculator(unittest.TestCase):
         setattr(check, "_memory_record", [[]])
         check._calc_memory_record()
         self.assertEqual(check._memory_record, [['GE', 111, 1, 0, "NPU:0"], ['GE', 112, 1, 0, "NPU:0"]])
+
+    def test__judge_should_calculate_should_return_true_when_no_calculated_table_exist_in_task_memory_db(self):
+        with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=False), \
+                mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=['test', 'test']):
+            check = NpuOpMemCalculator({}, CONFIG)
+            self.assertTrue(check._judge_should_calculate())
+
+    def test__judge_should_calculate_should_return_false_when_calculated_table_exist_in_task_memory_db(self):
+        with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True), \
+                mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=['test', 'test']):
+            check = NpuOpMemCalculator({}, CONFIG)
+            self.assertFalse(check._judge_should_calculate())
+
+    def test__judge_should_calculate_should_return_false_when_task_memory_db_not_exist(self):
+        with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=False), \
+                mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=[None, None]):
+            check = NpuOpMemCalculator({}, CONFIG)
+            self.assertFalse(check._judge_should_calculate())

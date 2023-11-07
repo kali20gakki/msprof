@@ -137,6 +137,8 @@ class StructFmt:
     MEMORY_APPLICATION_SIZE = struct.calcsize(BYTE_ORDER_CHAR + MEMORY_APPLICATION_FMT)
     MEMORY_OP_FMT = "HHIIIQQqQQQII184B"
     MEMORY_OP_SIZE = struct.calcsize(MEMORY_OP_FMT)
+    NPU_MODULE_MEM_FMT = "IIQQ"
+    NPU_MODULE_MEM_SIZE = struct.calcsize(NPU_MODULE_MEM_FMT)
 
     # compact runtime
     TASK_TRACK_RESIDUAL_SIZE = 24

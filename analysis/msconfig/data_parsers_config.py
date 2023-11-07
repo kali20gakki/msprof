@@ -141,6 +141,10 @@ class DataParsersConfig(MetaConfig):
             ('path', 'msparser.npu_mem.npu_mem_parser'),
             ('chip_model', '0,1,3,4,5,7,8,10')
         ],
+        'NpuModuleMemParser': [
+            ('path', 'msparser.npu_mem.npu_module_mem_parser'),
+            ('chip_model', '1,2,3,4,5,7,8,10')
+        ],
         'NpuOpMemParser': [
             ('path', 'msparser.npu_mem.npu_op_mem_parser'),
             ('chip_model', '0,1,2,3,4,5,7,8,10')

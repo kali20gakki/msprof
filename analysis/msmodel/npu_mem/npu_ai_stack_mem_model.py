@@ -8,10 +8,11 @@ from common_func.path_manager import PathManager
 from msmodel.interface.parser_model import ParserModel
 from profiling_bean.db_dto.npu_op_mem_dto import NpuOpMemDto
 from profiling_bean.db_dto.npu_op_mem_rec_dto import NpuOpMemRecDto
+from profiling_bean.db_dto.npu_module_mem_dto import NpuModuleMemDto
 from profiling_bean.db_dto.op_mem_dto import OpMemDto
 
 
-class NpuOpMemTableSelector:
+class NpuAiStackMemTableSelector:
     TableDict = {
         DBNameConstant.TABLE_NPU_OP_MEM_RAW : {
             'dto' : NpuOpMemDto,
@@ -30,6 +31,11 @@ class NpuOpMemTableSelector:
             'dto': NpuOpMemRecDto,
             'sql': "select component, timestamp, total_reserve_memory, total_allocate_memory, device_type from {0} " \
                     .format(DBNameConstant.TABLE_NPU_OP_MEM_REC)
+        },
+        DBNameConstant.TABLE_NPU_MODULE_MEM : {
+            'dto': NpuModuleMemDto,
+            'sql': "select module_id, syscnt, total_size, device_type from {0} order by module_id asc, syscnt asc " \
+                    .format(DBNameConstant.TABLE_NPU_MODULE_MEM)
         }
     }
 
@@ -42,34 +48,21 @@ class NpuOpMemTableSelector:
         return cls.TableDict.get(table_name).get('dto')
 
 
-class NpuOpMemModel(ParserModel):
+class NpuAiStackMemModel(ParserModel):
     """
     npu op mem model class
     """
 
-    def __init__(self: any, result_dir: str, table_list: list) -> None:
-        super().__init__(result_dir, DBNameConstant.DB_MEMORY_OP, table_list)
+    def __init__(self: any, result_dir: str, db_name: str, table_list: list) -> None:
+        super().__init__(result_dir, db_name, table_list)
 
-    def flush(self: any, table_name: str, npu_op_mem_data: list) -> None:
+    def flush(self: any, table_name: str, data_list: list) -> None:
         """
         save npu op mem data to db
         :return:
         """
-        self.insert_data_to_db(table_name, npu_op_mem_data)
+        self.insert_data_to_db(table_name, data_list)
 
     def get_table_data(self: any, table_name: str) -> list:
-        return DBManager.fetch_all_data(self.cur, NpuOpMemTableSelector.get_sql(table_name),
-                                        dto_class=NpuOpMemTableSelector.get_dto(table_name))
-
-    def get_summary_data(self: any, table_name: str) -> list:
-        return DBManager.fetch_all_data(self.cur, NpuOpMemTableSelector.get_sql(table_name),
-                                        dto_class=NpuOpMemTableSelector.get_dto(table_name))
-
-    def clear(self: any, table_name: str) -> None:
-        """
-        clear npu table
-        :return: None
-        """
-        db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_MEMORY_OP)
-        if DBManager.check_tables_in_db(db_path, table_name):
-            DBManager.drop_table(self.conn, table_name)
+        return DBManager.fetch_all_data(self.cur, NpuAiStackMemTableSelector.get_sql(table_name),
+                                        dto_class=NpuAiStackMemTableSelector.get_dto(table_name))

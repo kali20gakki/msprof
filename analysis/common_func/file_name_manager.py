@@ -210,7 +210,7 @@ class FileNameManagerConstant:
     # npu mem
     NPU_MEM_FILE_PATTERN = r"^npu_mem\.data\.(\d+)\.slice_\d+"
     NPU_APP_MEM_FILE_PATTERN = r"^npu_mem\.app\.(\d+)\.slice_\d+"
-
+    NPU_MODULE_MEM_FILE_PATTERN = r"^npu_module_mem\.data\.(\d+)\.slice_\d+"
     NPU_OP_MEM_FILE_PATTERN = r"^(aging|unaging)\.additional\.task_memory_info\.slice_\d+"
 
     # freq
@@ -858,6 +858,15 @@ def get_npu_mem_compiles() -> tuple:
     """
     return (re.compile(FileNameManagerConstant.NPU_MEM_FILE_PATTERN),
             re.compile(FileNameManagerConstant.NPU_APP_MEM_FILE_PATTERN))
+
+
+def get_npu_module_mem_compiles() -> tuple:
+    """
+    get npu module mem files regex compiles
+    :return: npu module mem files regex
+    """
+    return (re.compile(FileNameManagerConstant.NPU_MODULE_MEM_FILE_PATTERN),
+            )
 
 
 def get_npu_op_mem_compiles() -> tuple:
