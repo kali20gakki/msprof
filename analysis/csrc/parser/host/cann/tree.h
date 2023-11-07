@@ -1,0 +1,52 @@
+/* ******************************************************************************
+            版权所有 (c) 华为技术有限公司 2023-2023
+            Copyright, 2023, Huawei Tech. Co., Ltd.
+****************************************************************************** */
+/* ******************************************************************************
+ * File Name          : tree.h
+ * Description        : Tree模块：包括TreeNode数据结构和Tree数据结构
+ * Author             : msprof team
+ * Creation Date      : 2023/11/2
+ * *****************************************************************************
+ */
+
+#ifndef ANALYSIS_PARSER_HOST_CANN_TREE_H
+#define ANALYSIS_PARSER_HOST_CANN_TREE_H
+
+#include <memory>
+#include <utility>
+#include <map>
+#include "event_queue.h"
+
+namespace Analysis {
+namespace Parser {
+namespace Host {
+namespace Cann {
+
+// Event树节点数据结构，用于重建调用树
+struct TreeNode {
+    explicit TreeNode(std::shared_ptr<Event> eventPtr) : event(eventPtr)
+    {}
+    std::shared_ptr<TreeNode> parent;
+    std::vector<std::shared_ptr<TreeNode>> children;
+    std::shared_ptr<Event> event;                  // 表示该节点的对应的api
+    std::vector<std::shared_ptr<Event>> records;   // 表示节点时间范围内的补充记录信息
+};
+
+// Event树 一个threadId一棵树
+class Tree {
+public:
+    explicit Tree(const std::shared_ptr<TreeNode> &rootNode) : root_(rootNode)
+    {}
+    // 获取根节点
+    std::shared_ptr<TreeNode> &GetRoot();
+    // 层序遍历打印Tree结构便于问题定位
+    void Show();
+private:
+    std::shared_ptr<TreeNode> root_;
+};
+} // namespace Cann
+} // namespace Host
+} // namespace Parser
+} // namespace Analysis
+#endif // ANALYSIS_PARSER_HOST_CANN_TREE_H
