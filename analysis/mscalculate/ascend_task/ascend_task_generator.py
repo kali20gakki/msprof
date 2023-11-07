@@ -185,17 +185,16 @@ class AscendTaskGenerator:
                 top_down_tasks.extend(self._match_host_device_task_in_static_model(host_t[0], device_t))
                 matched_top_down_task_num += len(device_t)
                 continue
-            if len(host_t) > 1 or len(device_t) > 1:  # host_t or device_t has more than one task
-                task = host_t[0] if len(host_t) >= 1 else device_t[0]
-                logging.error("%d host tasks and %d device mismatch tasks for "
-                              "stream_id: %d, task_id: %d, batch_id: %d, ctx_id: %d.", len(host_t), len(device_t),
-                              task.stream_id, task.task_id, task.batch_id, task.context_id)
+            if not device_t:  # device task is empty
+                top_down_tasks.extend([self._gen_top_down_task_by_host_task(task) for task in host_t])
                 continue
-            if device_t:  # host task is empty and len(device_t) == 1
-                top_down_tasks.append(self._gen_top_down_task_by_device_task(device_t[0]))
-            if host_t:  # device task is empty and len(host_t) == 1
-                top_down_tasks.append(self._gen_top_down_task_by_host_task(host_t[0]))
-
+            if not host_t:  # host task is empty
+                top_down_tasks.extend([self._gen_top_down_task_by_device_task(task) for task in device_t])
+                continue
+            # host_t or device_t have more than one tasks, and both host_t and device_t are not empty
+            logging.error("%d host tasks and %d device mismatch tasks for "
+                          "stream_id: %d, task_id: %d, batch_id: %d, ctx_id: %d.", len(host_t), len(device_t),
+                          host_t[0].stream_id, host_t[0].task_id, host_t[0].batch_id, host_t[0].context_id)
         logging.info("Found %d host device matched task, %d top down task",
                      matched_top_down_task_num, len(top_down_tasks))
         return top_down_tasks

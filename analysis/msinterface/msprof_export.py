@@ -297,13 +297,17 @@ class ExportCommand:
             self.sample_config[StrConstant.ALL_EXPORT] = ProfilingScene().is_all_export()
             return
         print_info(self.FILE_NAME, "All collect data will be exported.")
-        host_flip_model = TaskTrackModel(result_dir, [DBNameConstant.TABLE_HOST_TASK_FLIP])
-        device_flip_model = TsTrackModel(result_dir, DBNameConstant.DB_STEP_TRACE,
-                                         [DBNameConstant.TABLE_DEVICE_TASK_FLIP])
-        host_flip = host_flip_model.get_all_data(DBNameConstant.TABLE_HOST_TASK_FLIP, TaskFlip)
-        device_flip = device_flip_model.get_task_flip_data()
-        host_flip_model.finalize()
-        device_flip_model.finalize()
+        host_flip_da_path = PathManager.get_db_path(result_dir, DBNameConstant.DB_RTS_TRACK)
+        device_flip_da_path = PathManager.get_db_path(result_dir, DBNameConstant.DB_STEP_TRACE)
+        if not os.path.exists(host_flip_da_path) or not os.path.exists(device_flip_da_path):
+            return
+        with TaskTrackModel(result_dir, [DBNameConstant.TABLE_HOST_TASK_FLIP]) as host_flip_model:
+            host_flip = host_flip_model.get_all_data(DBNameConstant.TABLE_HOST_TASK_FLIP, TaskFlip)
+        with TsTrackModel(result_dir, DBNameConstant.DB_STEP_TRACE,
+                          [DBNameConstant.TABLE_DEVICE_TASK_FLIP]) as device_flip_model:
+            device_flip = device_flip_model.get_task_flip_data()
+        host_flip = [task for task in host_flip if task.stream_id != 0]
+        device_flip = [task for task in device_flip if task.stream_id != 0]
         if not self._check_flip_data(host_flip, device_flip):
             call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
 

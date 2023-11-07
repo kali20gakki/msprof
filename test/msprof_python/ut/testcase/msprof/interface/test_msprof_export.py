@@ -530,6 +530,7 @@ class TestExportCommand(unittest.TestCase):
         args = Namespace(**args_dic)
         with mock.patch('common_func.common.error'), \
                 mock.patch('sys.exit'), \
+                mock.patch('os.path.exists', return_value=True), \
                 mock.patch('msmodel.interface.base_model.BaseModel.get_all_data', return_value=host_flip), \
                 mock.patch('msmodel.step_trace.ts_track_model.TsTrackModel.get_task_flip_data',
                            return_value=device_flip):
@@ -555,6 +556,7 @@ class TestExportCommand(unittest.TestCase):
         args = Namespace(**args_dic)
         with mock.patch('common_func.common.error'), \
                 mock.patch('sys.exit'), \
+                mock.patch('os.path.exists', return_value=True), \
                 mock.patch('msmodel.interface.base_model.BaseModel.get_all_data', return_value=host_flip), \
                 mock.patch('msmodel.step_trace.ts_track_model.TsTrackModel.get_task_flip_data',
                            return_value=device_flip):
