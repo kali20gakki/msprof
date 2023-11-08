@@ -125,7 +125,7 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         if self._wrong_func_type_count:
             logging.warning("Some PMU data fails to be parsed, err count: %s", self._wrong_func_type_count)
 
-        pmu_data = []
+        pmu_data = [None] * len(self._data_list.get(StrConstant.CONTEXT_PMU_TYPE, []))
         for data in self._data_list.get(StrConstant.BLOCK_PMU_TYPE, []):
             self.calculate_block_pmu_list(data)
         self.add_block_pmu_list()
@@ -150,7 +150,8 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         :param pmu_data_list: out args
         :return:
         """
-        for data in self._data_list.get(StrConstant.CONTEXT_PMU_TYPE, []):
+        enumerate_data_list = self._data_list.get(StrConstant.CONTEXT_PMU_TYPE, [])
+        for index, data in enumerate(enumerate_data_list):
             task_type = 0 if data.is_aic_data() else 1
 
             aic_pmu_value, aiv_pmu_value, aic_total_cycle, aiv_total_cycle = self.get_total_cycle_info(data, task_type)
@@ -169,14 +170,14 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
                 itertools.chain.from_iterable(PmuMetrics(aic_pmu_value).get_pmu_by_event_name(aic_pmu_value)))
             aiv_pmu_value_list = list(
                 itertools.chain.from_iterable(PmuMetrics(aiv_pmu_value).get_pmu_by_event_name(aiv_pmu_value)))
-            pmu_data = [
+            pmu_data = (
                 aic_total_time, aic_total_cycle, *aic_pmu_value_list,
                 aiv_total_time, aiv_total_cycle, *aiv_pmu_value_list,
                 data.task_id, data.stream_id, data.subtask_id, data.subtask_type,
                 InfoConfReader().time_from_syscnt(data.time_list[0]),
                 InfoConfReader().time_from_syscnt(data.time_list[1]), data.ffts_type, task_type
-            ]
-            pmu_data_list.append(pmu_data)
+            )
+            pmu_data_list[index] = pmu_data
 
     def calculate_pmu_list(self: any, pmu_data_list: list) -> None:
         """
@@ -185,7 +186,8 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         :return:
         """
         self.__update_model_instance()
-        for data in self._data_list.get(StrConstant.CONTEXT_PMU_TYPE, []):
+        enumerate_data_list = self._data_list.get(StrConstant.CONTEXT_PMU_TYPE, [])
+        for index, data in enumerate(enumerate_data_list):
             task_type = 0 if data.is_aic_data() else 1
             pmu_list = {}
             if judge_custom_pmu_scene(self._sample_json):
@@ -201,11 +203,11 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
                 Utils.generator_to_list(pmu_events), pmu_list, data.total_cycle, data.pmu_list)
             pmu_list = aic_calculator.add_pipe_time(pmu_list, total_time, self._sample_json.get('ai_core_metrics'))
             AicPmuUtils.remove_redundant(pmu_list)
-            pmu_data = [
+            pmu_data = (
                 total_time, data.total_cycle, *list(itertools.chain.from_iterable(pmu_list.values())), data.task_id,
                 data.stream_id, task_type
-            ]
-            pmu_data_list.append(pmu_data)
+            )
+            pmu_data_list[index] = pmu_data
 
     def calculate_total_time(self: any, data: any, total_cycle: int,
                              block_dim_dict: dict, data_type: str = 'aic') -> float:
