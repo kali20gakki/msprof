@@ -453,6 +453,9 @@ int RunningMode::RunExportSummaryTask(const ExecCmdParams &execCmdParams,
         "-dir=" + jobResultDir_,
         "--format=" + params_->exportSummaryFormat
     };
+    if (params_->clearSwitch == "on") {
+        argsSummaryV.emplace_back("--clear");
+    }
     if (params_->exportModelId != DEFAULT_MODEL_ID) {
         argsSummaryV.emplace_back("--model-id=" + params_->exportModelId);
     }
@@ -481,9 +484,6 @@ int RunningMode::RunExportTimelineTask(const ExecCmdParams &execCmdParams,
         "export", "timeline",
         "-dir=" + jobResultDir_
     };
-    if (params_->clearSwitch == "on") {
-        argsTimelineV.emplace_back("--clear");
-    }
     if (params_->exportModelId != DEFAULT_MODEL_ID) {
         argsTimelineV.emplace_back("--model-id=" + params_->exportModelId);
     }
@@ -528,12 +528,12 @@ int RunningMode::StartExportTask()
     std::vector<std::string> envsV;
     int exitCode = INVALID_EXIT_CODE;
     SetEnvList(envsV);
-    if (RunExportSummaryTask(execCmdParams, envsV, exitCode) != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Export summary failed in %s.", Utils::BaseName(jobResultDir_).c_str());
-        return PROFILING_FAILED;
-    }
     if (RunExportTimelineTask(execCmdParams, envsV, exitCode) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Export timeline failed in %s.", Utils::BaseName(jobResultDir_).c_str());
+        return PROFILING_FAILED;
+    }
+    if (RunExportSummaryTask(execCmdParams, envsV, exitCode) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Export summary failed in %s.", Utils::BaseName(jobResultDir_).c_str());
         return PROFILING_FAILED;
     }
     CmdLog::instance()->CmdInfoLog("Export all data in %s done.", Utils::BaseName(jobResultDir_).c_str());
