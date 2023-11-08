@@ -10,4 +10,3 @@ add_subdirectory(msprofbin)
 add_subdirectory(stub_utest)
 add_subdirectory(plugin)
 add_subdirectory(params_adapter)
-

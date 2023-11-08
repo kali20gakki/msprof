@@ -22,6 +22,7 @@ ExternalProject_Add(msprof_llt
                 -DPACKAGE=${PACKAGE}
                 -DFULL_COVERAGE=true
                 -DCOVERAGE_RC_CONFIG=true
+                -DMODE=${MODE}
                 <SOURCE_DIR>
     BUILD_COMMAND $(MAKE)
     INSTALL_COMMAND "" # llt install
