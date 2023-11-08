@@ -10,6 +10,7 @@ from common_func.hash_dict_constant import HashDictData
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.info_conf_reader import InfoConfReader
+from common_func.platform.chip_manager import ChipManager
 from msmodel.compact_info.task_track_model import TaskTrackModel
 from msparser.compact_info.task_track_bean import TaskTrackBean
 from msparser.data_struct_size_constant import StructFmt
@@ -47,7 +48,7 @@ class TaskTrackParser(DataParser, MsMultiProcess):
             if type_hash_dict.get(data.level, {}).get(data.task_type, data.task_type) == self.TASK_MAINTENANCE:
                 continue
             self._task_track_data.append(data)
-        if InfoConfReader().is_all_export_version():
+        if ChipManager().is_chip_all_data_export() and InfoConfReader().is_all_export_version():
             FlipCalculator.compute_batch_id(self._task_track_data, self._task_flip_data)
         self._task_track_data = [
             [

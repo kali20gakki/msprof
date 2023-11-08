@@ -272,6 +272,15 @@ class ExportCommand:
                 result[trace_data_dict.get(data.iter_id, 0)] = model_id_times + 1
         return list(zip(result.keys(), result.values()))
 
+    @staticmethod
+    def _check_flip_data(host_flip: list, device_flip: list) -> None:
+        if len(host_flip) != len(device_flip):
+            logging.warning("Different flip numbers, %d host flips and %d device flips.",
+                            len(host_flip), len(device_flip))
+        for host_f, device_f in zip(host_flip, device_flip):
+            if host_f.flip_num != device_f.flip_num:
+                logging.warning("The flip is not consistent between host and device")
+
     def process(self: any) -> None:
         """
         handle export command
@@ -292,7 +301,7 @@ class ExportCommand:
                       "Please do not set 'model-id' and 'iteration-id' in single op mode.")
                 call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
             return
-        if ChipManager().is_chip_v1() or not InfoConfReader().is_all_export_version():
+        if not (ChipManager().is_chip_all_data_export() and InfoConfReader().is_all_export_version()):
             ProfilingScene().set_all_export(ProfilingScene().is_operator())
             self.sample_config[StrConstant.ALL_EXPORT] = ProfilingScene().is_all_export()
             return
@@ -306,21 +315,7 @@ class ExportCommand:
         with TsTrackModel(result_dir, DBNameConstant.DB_STEP_TRACE,
                           [DBNameConstant.TABLE_DEVICE_TASK_FLIP]) as device_flip_model:
             device_flip = device_flip_model.get_task_flip_data()
-        host_flip = [task for task in host_flip if task.stream_id != 0]
-        device_flip = [task for task in device_flip if task.stream_id != 0]
-        if not self._check_flip_data(host_flip, device_flip):
-            call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
-
-    def _check_flip_data(self: any, host_flip: list, device_flip: list) -> bool:
-        if len(host_flip) != len(device_flip):
-            error(self.FILE_NAME,
-                  "Different flip numbers, {} host flips and {} device flips.".format(len(host_flip), len(device_flip)))
-            return False
-        for host_f, device_f in zip(host_flip, device_flip):
-            if host_f.flip_num != device_f.flip_num:
-                error(self.FILE_NAME, "The flip is not consistent between host and device")
-                return False
-        return True
+        self._check_flip_data(host_flip, device_flip)
 
     def _set_default_model_id(self, result_dir, model_match_set, ge_data_set):
         conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_STEP_TRACE)
