@@ -14,11 +14,7 @@
 #include "event_queue.h"
 
 namespace Analysis {
-namespace Parser {
-namespace Host {
-namespace Cann {
+namespace Entities {
 
-} // namespace Cann
-} // namespace Host
-} // namespace Parser
+} // namespace Entities
 } // namespace Analysis

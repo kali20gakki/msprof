@@ -10,8 +10,8 @@
  * *****************************************************************************
  */
 
-#ifndef ANALYSIS_PARSER_HOST_CANN_TREE_H
-#define ANALYSIS_PARSER_HOST_CANN_TREE_H
+#ifndef ANALYSIS_ENTITIES_TREE_H
+#define ANALYSIS_ENTITIES_TREE_H
 
 #include <memory>
 #include <utility>
@@ -19,9 +19,7 @@
 #include "event_queue.h"
 
 namespace Analysis {
-namespace Parser {
-namespace Host {
-namespace Cann {
+namespace Entities {
 
 // Event树节点数据结构，用于重建调用树
 struct TreeNode {
@@ -45,8 +43,7 @@ public:
 private:
     std::shared_ptr<TreeNode> root_;
 };
-} // namespace Cann
-} // namespace Host
-} // namespace Parser
+
+} // namespace Entities
 } // namespace Analysis
-#endif // ANALYSIS_PARSER_HOST_CANN_TREE_H
+#endif // ANALYSIS_ENTITIES_TREE_H

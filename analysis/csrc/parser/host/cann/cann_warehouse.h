@@ -24,6 +24,8 @@ namespace Parser {
 namespace Host {
 namespace Cann {
 
+using EventQueue = Analysis::Entities::EventQueue;
+
 // CANN数据仓，包含按照EventType分好类的Event数据
 struct CANNWarehouse {
     std::shared_ptr<EventQueue> kernelEvents;

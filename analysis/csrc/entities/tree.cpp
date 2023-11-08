@@ -3,20 +3,16 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : event.cpp
- * Description        : Event模块：定义Event数据结构
+ * File Name          : tree.cpp
+ * Description        : Tree模块：包括TreeNode数据结构和Tree
  * Author             : msprof team
  * Creation Date      : 2023/11/2
  * *****************************************************************************
  */
 
-#include "event.h"
+#include "tree.h"
 namespace Analysis {
-namespace Parser {
-namespace Host {
-namespace Cann {
+namespace Entities {
 
-} // namespace Cann
-} // namespace Host
-} // namespace Parser
+} // namespace Entities
 } // namespace Analysis

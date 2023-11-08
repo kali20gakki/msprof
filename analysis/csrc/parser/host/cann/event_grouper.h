@@ -19,11 +19,14 @@
 #include "event.h"
 #include "event_queue.h"
 #include "cann_warehouse.h"
+#include "safe_unordered_map.h"
 
 namespace Analysis {
 namespace Parser {
 namespace Host {
 namespace Cann {
+
+using SafeUnorderedMap = Analysis::Utils::SafeUnorderedMap<uint32_t, std::shared_ptr<CANNWarehouse>>;
 
 class EventGrouper {
 public:
@@ -38,7 +41,7 @@ public:
 
 private:
     std::string hostPath_;
-    std::unordered_map<uint32_t, std::shared_ptr<CANNWarehouse>> cannWarehouses_; // 所有threadId的数据
+    SafeUnorderedMap cannWarehouses_; // 所有threadId的数据
 };
 
 } // namespace Cann

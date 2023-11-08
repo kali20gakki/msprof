@@ -10,17 +10,15 @@
  * *****************************************************************************
  */
 
-#ifndef ANALYSIS_PARSER_HOST_CANN_QUEUE_H
-#define ANALYSIS_PARSER_HOST_CANN_QUEUE_H
+#ifndef ANALYSIS_ENTITIES_EVENT_QUEUE_H
+#define ANALYSIS_ENTITIES_EVENT_QUEUE_H
 
 #include <cstdint>
 #include <vector>
 #include "event.h"
 
 namespace Analysis {
-namespace Parser {
-namespace Host {
-namespace Cann {
+namespace Entities {
 
 // Event队列, 为了性能随使用vector模拟EventQueue, 队列中每个元素为Event的指针
 // 每一个threadId对应一个EventQueue
@@ -49,8 +47,6 @@ private:
     std::vector<std::shared_ptr<Event>> data_;
 };
 
-} // namespace Cann
-} // namespace Host
-} // namespace Parser
+} // namespace Entities
 } // namespace Analysis
-#endif // ANALYSIS_PARSER_HOST_CANN_EVENT_QUEUE_H
+#endif // ANALYSIS_ENTITIES_EVENT_QUEUE_H

@@ -5,11 +5,10 @@
  * Create: 2023/11/6
  */
 
-#ifndef ANALYSIS_PARSER_OBJECT_ASCEND_OBJ_H
-#define ANALYSIS_PARSER_OBJECT_ASCEND_OBJ_H
+#ifndef ANALYSIS_ENTITIES_ASCEND_OBJ_H
+#define ANALYSIS_ENTITIES_ASCEND_OBJ_H
 namespace Analysis {
-namespace Parser {
-namespace Object {
+namespace Entities {
 
 #include <cstdint>
 #include <memory>
@@ -45,7 +44,6 @@ struct HostTask {
     std::shared_ptr<Operator> op;
 };
 
-} // namespace Object
-} // namespace Parser
+} // namespace Entities
 } // namespace Analysis
-#endif // ANALYSIS_PARSER_OBJECT_ASCEND_OBJ_H
+#endif // ANALYSIS_ENTITIES_ASCEND_OBJ_H
