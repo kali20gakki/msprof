@@ -7,6 +7,11 @@ CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
 mkdir -p ${TOP_DIR}/test/build_llt
 cd ${TOP_DIR}/test/build_llt
-cmake ../ -DPACKAGE=ut
+if [[ -n "$1" && "$1" == "analysis" ]]; then
+    cmake ../ -DPACKAGE=ut -DMODE=analysis
+elif [[ -n "$1" && "$1" == "collector" ]]; then
+    cmake ../ -DPACKAGE=ut -DMODE=collector
+else
+    cmake ../ -DPACKAGE=ut -DMODE=all
+fi
 make -j64
-
