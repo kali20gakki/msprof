@@ -35,6 +35,12 @@ class ChipManager:
         ChipModel.CHIP_V1_1_3: ChipCoreNum.CHIP_V1_1_3
     }
 
+    ALL_DATA_EXPORT_CHIP_BLACKLIST = [
+        ChipModel.CHIP_V1_1_0,
+        ChipModel.CHIP_V3_1_0,
+        ChipModel.CHIP_V1_1_3,
+    ]
+
     FILE_NAME = os.path.basename(__file__)
 
     def __init__(self: any) -> None:
@@ -144,6 +150,13 @@ class ChipManager:
         :return: True or False
         """
         return self.chip_id == ChipModel.CHIP_V5_1_0
+
+    def is_chip_all_data_export(self: any) -> bool:
+        """
+        check the all data export scene of chip
+        :return: True or False
+        """
+        return self.chip_id not in self.ALL_DATA_EXPORT_CHIP_BLACKLIST
 
     def get_max_core_id(self) -> ChipCoreNum:
         if self.chip_id not in self.CHIP_CORE_NUM_MAP:

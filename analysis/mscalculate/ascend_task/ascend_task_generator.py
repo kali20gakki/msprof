@@ -180,7 +180,7 @@ class AscendTaskGenerator:
                 top_down_tasks.append(self._gen_top_down_task(device_t[0], host_t[0]))
                 matched_top_down_task_num += 1
                 continue
-            if len(host_t) == 1 and device_t and self._is_task_in_static_model(host_t[0]):
+            if len(host_t) == 1 and device_t:
                 # task in static model, there may be a one-to-many relationship between host tasks and device tasks.
                 top_down_tasks.extend(self._match_host_device_task_in_static_model(host_t[0], device_t))
                 matched_top_down_task_num += len(device_t)
@@ -206,7 +206,7 @@ class AscendTaskGenerator:
             return []
         host_tasks = self.host_task_collector.get_host_tasks(int(device_id))
         device_tasks = self.device_task_collector.get_all_device_tasks()
-        if InfoConfReader().is_all_export_version() and not ChipManager().is_chip_v1():
+        if ChipManager().is_chip_all_data_export() and InfoConfReader().is_all_export_version():
             top_down_tasks = self._generate_top_down_tasks_by_batch_id(host_tasks, device_tasks)
         else:
             top_down_tasks = self._generate_top_down_tasks(host_tasks, device_tasks)
@@ -219,7 +219,7 @@ class AscendTaskGenerator:
             return []
         host_tasks = self.host_task_collector.get_host_tasks_by_model_and_iter(model_id, iter_id, int(device_id))
         device_tasks = self.device_task_collector.get_device_tasks_by_model_and_iter(model_id, iter_id)
-        if InfoConfReader().is_all_export_version() and not ChipManager().is_chip_v1():
+        if ChipManager().is_chip_all_data_export() and InfoConfReader().is_all_export_version():
             top_down_tasks = self._generate_top_down_tasks_by_batch_id(host_tasks, device_tasks)
         else:
             top_down_tasks = self._generate_top_down_tasks(host_tasks, device_tasks)
