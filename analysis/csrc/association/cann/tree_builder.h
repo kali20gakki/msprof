@@ -18,13 +18,15 @@
 #include <cstdint>
 #include <vector>
 #include <map>
-#include <unordered_map>
 #include "event_queue.h"
 #include "tree.h"
 
 namespace Analysis {
 namespace Association {
 namespace Cann {
+
+using EventQueue = Analysis::Entities::EventQueue;
+using TreeNode = Analysis::Entities::TreeNode;
 
 // 一个TreeBuilder对象负责将一个threadId的Event数据建成一棵树
 class TreeBuilder {

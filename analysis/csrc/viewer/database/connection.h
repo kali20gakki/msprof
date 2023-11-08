@@ -13,6 +13,8 @@
 #define ANALYSIS_VIEWER_DATABASE_CONNECTION_H
 
 #include <sqlite3.h>
+#include <vector>
+#include <string>
 
 namespace Analysis {
 namespace Viewer {

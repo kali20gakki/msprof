@@ -18,10 +18,16 @@
 #include <map>
 #include <unordered_map>
 #include "tree.h"
+#include "ascend_obj.h"
 
 namespace Analysis {
 namespace Association {
 namespace Cann {
+
+using HostTask = Analysis::Entities::HostTask;
+using Operator = Analysis::Entities::Operator;
+using Tree = Analysis::Entities::Tree;
+using TreeNode = Analysis::Entities::TreeNode;
 
 using HostTasks = std::vector<std::shared_ptr<HostTask>>;
 using HCCLBigOps = std::vector<std::shared_ptr<Operator>>;

@@ -10,8 +10,8 @@
  * *****************************************************************************
  */
 
-#ifndef ANALYSIS_PARSER_HOST_CANN_EVENT_H
-#define ANALYSIS_PARSER_HOST_CANN_EVENT_H
+#ifndef ANALYSIS_ENTITIES_EVENT_H
+#define ANALYSIS_ENTITIES_EVENT_H
 
 #include <cstdint>
 #include <string>
@@ -20,9 +20,7 @@
 #include <atomic>
 
 namespace Analysis {
-namespace Parser {
-namespace Host {
-namespace Cann {
+namespace Entities {
 
 /*
  Profiling在CANN软件栈分为ACL、Model、Node、Hccl、Runtime 5层
@@ -101,9 +99,8 @@ private:
     std::shared_ptr<char> event_;
 };
 
-} // namespace Cann
-} // namespace Host
-} // namespace Parser
+
+} // namespace Entities
 } // namespace Analysis
 
-#endif // ANALYSIS_PARSER_HOST_CANN_EVENT_H
+#endif // ANALYSIS_ENTITIES_EVENT_H
