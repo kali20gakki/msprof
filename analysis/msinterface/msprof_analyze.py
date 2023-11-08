@@ -42,10 +42,9 @@ class AnalyzeCommand:
         if not self.clear_mode:
             return
         sub_dirs = sorted(get_path_dir(result_dir), reverse=True)
-        clear_dir_list = ['data', 'sqlite']
+        clear_dir = 'sqlite'
         for sub_dir in sub_dirs:  # result_dir
-            for clear_dir in clear_dir_list:
-                dir_name = os.path.join(result_dir, sub_dir, clear_dir)
-                if os.path.exists(dir_name):
-                    check_dir_writable(dir_name)
-                    shutil.rmtree(dir_name)
+            dir_name = os.path.join(result_dir, sub_dir, clear_dir)
+            if os.path.exists(dir_name):
+                check_dir_writable(dir_name)
+                shutil.rmtree(dir_name)

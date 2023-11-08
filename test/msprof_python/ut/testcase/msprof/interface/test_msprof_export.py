@@ -335,6 +335,40 @@ class TestExportCommand(unittest.TestCase):
             test = ExportCommand("timeline", args)
             test._print_export_info(params, [])
 
+    def test_clear_dir_with_unset_clear_mode(self):
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
+        args = Namespace(**args_dic)
+        test = ExportCommand("timeline", args)
+        test._clear_dir("")
+
+    def test_clear_dir_with_set_clear_mode_false(self):
+        args_dic = {
+            "collection_path": "test",
+            "iteration_id": 3,
+            "model_id": 1,
+            "iteration_count": 1,
+            "clear_mode": False,
+        }
+        args = Namespace(**args_dic)
+        test = ExportCommand("timeline", args)
+        test._clear_dir("")
+
+    def test_clear_dir_with_set_clear_mode_True(self):
+        args_dic = {
+            "collection_path": "test",
+            "iteration_id": 3,
+            "model_id": 1,
+            "iteration_count": 1,
+            "clear_mode": True,
+        }
+        args = Namespace(**args_dic)
+        test = ExportCommand("timeline", args)
+        with mock.patch('os.path.exists', return_value=True), \
+                mock.patch('os.path.exists', return_value=True), \
+                mock.patch(NAMESPACE + '.check_dir_writable'), \
+                mock.patch('shutil.rmtree'):
+            test._clear_dir("")
+
     def test_handle_export_without_set_clear_mode(self):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1}
         args = Namespace(**args_dic)
@@ -374,23 +408,6 @@ class TestExportCommand(unittest.TestCase):
             test._handle_export("")
             test.list_map = {'export_type_list': ['acl'], 'devices_list': [1]}
             test._handle_export("")
-
-    def test_handle_export_set_clear_mode_true_clear_sqlite(self):
-        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "clear_mode": True}
-        args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + ".prepare_for_parse"), \
-                mock.patch(NAMESPACE + ".ExportCommand._prepare_for_export"), \
-                mock.patch(NAMESPACE + ".ExportCommand._export_data", side_effect=ProfException(2, 'test', error)), \
-                mock.patch('os.path.exists', return_value=True), \
-                mock.patch('os.path.join', return_value='JOB/device_0'), \
-                mock.patch(NAMESPACE + '.check_dir_writable'), \
-                mock.patch('shutil.rmtree'):
-            test = ExportCommand("timeline", args)
-            test.list_map = {'export_type_list': ['acl'], 'devices_list': []}
-            test._handle_export("")
-            test.list_map = {'export_type_list': ['acl'], 'devices_list': [1]}
-            test._handle_export("")
-
 
     def test_show_tuning_result(self):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
