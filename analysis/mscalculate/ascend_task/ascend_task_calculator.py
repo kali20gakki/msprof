@@ -57,7 +57,7 @@ class AscendTaskCalculator(MsMultiProcess):
     def _save(self, ascend_tasks: List[TopDownTask]):
         if not ascend_tasks:
             return
-        tasks_data = [astuple(task) for task in ascend_tasks]
+        tasks_data = [task for task in ascend_tasks]
         self.model.init()
         self.model.drop_table(DBNameConstant.TABLE_ASCEND_TASK)
         self.model.create_table()

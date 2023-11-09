@@ -10,6 +10,7 @@ from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
+from common_func.msprof_object import CustomizedNamedtupleFactory
 from common_func.msvp_common import path_check
 from common_func.file_manager import check_db_path_valid
 from common_func.path_manager import PathManager
@@ -444,22 +445,25 @@ class DBManager:
         if not isinstance(curs, sqlite3.Cursor):
             return []
         data = []
-        if dto_class:
-            curs.row_factory = ClassRowType.class_row(dto_class)
         try:
             if param:
-                curs.execute(sql, param)
+                res = curs.execute(sql, param)
             else:
-                curs.execute(sql)
+                res = curs.execute(sql)
         except sqlite3.Error as _err:
             logging.error("%s", str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
             logging.debug("%s, sql: %s", str(_err), sql, exc_info=Constant.TRACE_BACK_SWITCH)
             curs.row_factory = None
             return []
         try:
+            if dto_class:
+                tuple_dto = CustomizedNamedtupleFactory.generate_named_tuple_from_dto(dto_class, res.description)
             while True:
                 res = curs.fetchmany(cls.FETCH_SIZE)
-                data += res
+                if dto_class:
+                    data += [tuple_dto(*i) for i in res]
+                else:
+                    data += res
                 if len(data) > cls.MAX_ROW_COUNT:
                     logging.error("Please check the record counts in %s's table",
                                   os.path.basename(curs.execute("PRAGMA database_list;").fetchone()[-1]))

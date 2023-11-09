@@ -134,7 +134,7 @@ class ClusterSingleLinkCalculator(MsMultiProcess):
         for hccl_data in self.hccl_data:
             if not is_number(hccl_data.bandwidth):
                 continue
-            if hccl_data.src_rank == hccl_data.dst_rank or hccl_data.src_rank == Constant.ILLEGAL_RANK:
+            if hccl_data.local_rank == hccl_data.remote_rank or hccl_data.local_rank == Constant.ILLEGAL_RANK:
                 continue
             if hccl_data.transport_type in Constant.LINK_TYPE_LIST:
                 self.link_dict.setdefault(hccl_data.transport_type, []). \

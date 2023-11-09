@@ -6,6 +6,18 @@ from common_func.constant import Constant
 
 
 class StepTraceGeDto:
+    DEFAULT_REFLECTOR = {
+        "fusion_data": (),
+        "model_id": Constant.DEFAULT_INVALID_VALUE,
+        "index_id": Constant.DEFAULT_INVALID_VALUE,
+        "stream_id": Constant.DEFAULT_INVALID_VALUE,
+        "task_id": Constant.DEFAULT_INVALID_VALUE,
+        "timestamp": Constant.DEFAULT_INVALID_VALUE,
+        "tag_id": Constant.DEFAULT_INVALID_VALUE,
+        "op_name": Constant.NA,
+        "op_type": Constant.NA
+    }
+
     def __init__(self: any) -> None:
         self._fusion_data = ()
         self._model_id = Constant.DEFAULT_INVALID_VALUE

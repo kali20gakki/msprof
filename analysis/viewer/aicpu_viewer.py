@@ -98,10 +98,11 @@ class ParseAiCpuData:
             ge_summary_dic.setdefault((dto.stream_id, dto.task_id, dto.batch_id), dto.op_name)
         res = [0, ] * len(ai_cpu_data)
         for i, dto in enumerate(ai_cpu_data):
+            node_name = dto.node_name
             if (dto.stream_id, dto.task_id, dto.batch_id) in ge_summary_dic:
-                dto.node_name = ge_summary_dic[(dto.stream_id, dto.task_id, dto.batch_id)]
+                node_name = ge_summary_dic[(dto.stream_id, dto.task_id, dto.batch_id)]
             res[i] = [
-                dto.sys_start, dto.node_name, dto.compute_time, dto.memcpy_time,
+                dto.sys_start, node_name, dto.compute_time, dto.memcpy_time,
                 dto.task_time, dto.dispatch_time, dto.total_time, dto.stream_id, dto.task_id
             ]
         return res
@@ -177,8 +178,8 @@ class ParseAiCpuData:
             return []
         ai_cpu_queue = deque(ai_cpu_data)
         ascend_task_queue = deque(ascend_task_data)
-        for ai_cpu in ai_cpu_queue:
-            ai_cpu.batch_id = ascend_task_queue.popleft().batch_id
+        for index, ai_cpu in enumerate(ai_cpu_queue):
+            ai_cpu_queue[index] = ai_cpu.replace(batch_id=ascend_task_queue.popleft().batch_id)
         return list(ai_cpu_queue)
 
     @staticmethod

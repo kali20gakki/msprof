@@ -43,10 +43,10 @@ class CommunicationMatrixParser(MetaParser):
     @staticmethod
     def convert_link_info(link_key: str, link_value: list) -> dict:
         new_link_dict = dict()
-        src_rank, dst_rank = link_key.split("-")
-        new_link_dict['Src Rank'] = src_rank
-        new_link_dict[CommunicationMatrixInfo.SRC_RANK] = src_rank
-        new_link_dict[CommunicationMatrixInfo.DST_RANK] = dst_rank
+        local_rank, remote_rank = link_key.split("-")
+        new_link_dict['Src Rank'] = local_rank
+        new_link_dict[CommunicationMatrixInfo.SRC_RANK] = local_rank
+        new_link_dict[CommunicationMatrixInfo.DST_RANK] = remote_rank
         new_link_dict[CommunicationMatrixInfo.TRANSPORT_TYPE] = link_value[MatrixDataType.TRANSPORT_TYPE]
         new_link_dict[CommunicationMatrixInfo.TRANSIT_SIZE_MB] = link_value[MatrixDataType.TRANS_SIZE]
         new_link_dict[CommunicationMatrixInfo.TRANSIT_TIME_MS] = link_value[MatrixDataType.TRANS_TIME]
@@ -87,12 +87,12 @@ class CommunicationMatrixParser(MetaParser):
             if not HcclAnalysisTool.is_valid_link(event):
                 idx += 1
                 continue
-            dst_rank = event.src_rank if int(event.dst_rank) == int("0xffffffff", 16) else event.dst_rank
-            link_key = "{}-{}".format(event.src_rank, dst_rank)
+            remote_rank = event.local_rank if int(event.remote_rank) == int("0xffffffff", 16) else event.remote_rank
+            link_key = "{}-{}".format(event.local_rank, remote_rank)
             if event.transport_type == StrConstant.SDMA and event.hccl_name in StrConstant.SDMA_TRANSIT_ITEMS:
                 if link_key not in link_info:
                     link_info[link_key] = [0] * len(MatrixDataType.__members__)
-                trans_type = HcclAnalysisTool.get_transport_type(event.src_rank, event.dst_rank)
+                trans_type = HcclAnalysisTool.get_transport_type(event.local_rank, event.remote_rank)
                 link_info[link_key][MatrixDataType.TRANSPORT_TYPE] = HcclAnalysisTool.convert_to_enum(trans_type)
                 trans_size = HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.COMMUNICATION_B_to_MB
                 link_info[link_key][MatrixDataType.TRANS_SIZE] += trans_size

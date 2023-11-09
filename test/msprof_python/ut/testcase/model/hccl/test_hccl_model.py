@@ -12,7 +12,7 @@ from common_func.profiling_scene import ProfilingScene
 from model.test_dir_cr_base_model import TestDirCRBaseModel
 from msmodel.hccl.hccl_model import HCCLModel
 from msmodel.hccl.hccl_model import HcclViewModel
-from profiling_bean.db_dto.hccl_dto import HcclDto
+from mscalculate.hccl.hccl_task import HcclTask
 from profiling_bean.prof_enum.data_tag import DataTag
 from sqlite.db_manager import DBOpen
 
@@ -47,7 +47,7 @@ class TestHCCLModel(TestDirCRBaseModel):
                      "timestamp REAL, " \
                      "duration REAL, " \
                      "args TEXT)".format(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
-        test = HcclDto()
+        test = HcclTask()
         for index, i in enumerate(data):
             if hasattr(test, col[index]):
                 setattr(test, col[index], i)
@@ -73,14 +73,14 @@ class TestHCCLModel(TestDirCRBaseModel):
 
     def test_get_hccl_task_data_should_return_diff_result_when_query_diff_deviceid(self):
         # model_id, index_id, name, group_name, plane_id, timestamp, duration,
-        # stream_id, task_id, context_id, batch_id, device_id, is_master, args
+        # stream_id, task_id, context_id, batch_id, device_id, args
         hccl_task_data = [
-            (1, -1, "Memcpy", "1", 1, 1, 1, 100, 200, 300, 0, 0, 1, "{}"),
-            (1, -1, "Notify_Wait", "1", 1, 1, 1, 102, 202, 302, 0, 0, 1, "{}"),
-            (1, -1, "Notify_Record", "1", 1, 1, 1, 103, 203, 303, 0, 0, 1, "{}"),
-            (1, -1, "Memcpy", "1", 1, 1, 1, 999, 204, 304, 0, 0, 1, "{}"),
-            (1, -1, "Memcpy", "1", 1, 1, 1, 105, 205, 305, 0, 1, 1, "{}"),
-            (1, -1, "Memcpy", "1", 1, 1, 1, 999, 206, 306, 0, 2, 1, "{}"),
+            (1, -1, "Memcpy", "1", 1, 1, 1, 100, 200, 300, 0, 0, 0, "1", 1, 1, "1", 20, "a", "b", "2"),
+            (1, -1, "Notify_Wait", "1", 1, 1, 1, 102, 202, 302, 0, 0, 0, "1", 1, 1, "1", 20, "a", "b", "2"),
+            (1, -1, "Notify_Record", "1", 1, 1, 1, 103, 203, 303, 0, 0, 0, "1", 1, 1, "1", 20, "a", "b", "2"),
+            (1, -1, "Memcpy", "1", 1, 1, 1, 999, 204, 304, 0, 0, 0, "1", 1, 1, "1", 20, "a", "b", "2"),
+            (1, -1, "Memcpy", "1", 1, 1, 1, 105, 205, 305, 0, 1, 0, "1", 1, 1, "1", 20, "a", "b", "2"),
+            (1, -1, "Memcpy", "1", 1, 1, 1, 999, 206, 306, 0, 2, 0, "1", 1, 1, "1", 20, "a", "b", "2"),
         ]
 
         # model_id, index_id, stream_id, task_id, context_id, batch_id, start_time,
@@ -103,23 +103,25 @@ class TestHCCLModel(TestDirCRBaseModel):
         model.insert_data_to_db(DBNameConstant.TABLE_ASCEND_TASK, ascend_task_data)
 
         with mock.patch(NAMESPACE + '.HcclViewModel.attach_to_db', return_value=True):
+            try:
             # test on device_0 matched case
-            InfoConfReader()._info_json = {"devices": "0"}
-            ret = model.get_hccl_task_data()
-            self.assertEqual(len(ret), 3)
+                InfoConfReader()._info_json = {"devices": "0"}
+                ret = model.get_hccl_task_data()
+                self.assertEqual(len(ret), 3)
 
-            # test on device_1 matched case
-            InfoConfReader()._info_json = {"devices": "1"}
-            ret = model.get_hccl_task_data()
-            self.assertEqual(len(ret), 1)
+                # test on device_1 matched case
+                InfoConfReader()._info_json = {"devices": "1"}
+                ret = model.get_hccl_task_data()
+                self.assertEqual(len(ret), 1)
 
-            # test on device_2 matched case
-            InfoConfReader()._info_json = {"devices": "2"}
-            ret = model.get_hccl_task_data()
-            self.assertEqual(len(ret), 0)
-            InfoConfReader()._info_json = {}
+                # test on device_2 matched case
+                InfoConfReader()._info_json = {"devices": "2"}
+                ret = model.get_hccl_task_data()
+                self.assertEqual(len(ret), 0)
+                InfoConfReader()._info_json = {}
+            finally:
+                model.finalize()
 
-        model.finalize()
 
     def test_get_hccl_ops_should_return_empty_when_device_id_na(self):
         with mock.patch(NAMESPACE + '.HcclViewModel.attach_to_db', return_value=True):
