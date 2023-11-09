@@ -7,6 +7,7 @@ from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msvp_constant import MsvpConstant
+from common_func.msprof_object import CustomizedNamedtupleFactory
 from msparser.npu_mem.npu_mem_dto import NpuMemDto
 from viewer.npu_mem.npu_mem_viewer import NpuMemViewer
 
@@ -85,12 +86,8 @@ class TestNpuMemViewer(unittest.TestCase):
             "model_id": 1,
             "iter_id": 1
         }
-        npu_mem_dto = NpuMemDto()
-        npu_mem_dto.event = '0'
-        npu_mem_dto.hbm = 0
-        npu_mem_dto.ddr = 0
-        npu_mem_dto.memory = 0
-        npu_mem_dto.timestamp = 6
+        NpuMemDtoTuple = CustomizedNamedtupleFactory.generate_named_tuple_from_dto(NpuMemDto, [])
+        npu_mem_dto = NpuMemDtoTuple(0, "0", 0, 0, 6)
         with mock.patch(NAMESPACE + '.NpuMemModel.check_db', return_value=True), \
                 mock.patch(NAMESPACE + '.NpuMemModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + '.NpuMemModel.get_timeline_data', return_value=[npu_mem_dto]):

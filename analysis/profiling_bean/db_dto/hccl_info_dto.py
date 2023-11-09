@@ -4,9 +4,39 @@
 
 from common_func.constant import Constant
 from common_func.ms_constant.number_constant import NumberConstant
+from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 
-class HCCLInfoDto:
+class HCCLInfoDto(metaclass=InstanceCheckMeta):
+    DEFAULT_REFLECTOR = {
+        "level": Constant.NA,
+        "struct_type": Constant.NA,
+        "thread_id": Constant.DEFAULT_INVALID_VALUE,
+        "data_len": Constant.DEFAULT_INVALID_VALUE,
+        "timestamp": Constant.DEFAULT_INVALID_VALUE,
+        "op_name": Constant.NA,
+        "ccl_tag": Constant.NA,
+        "group_name": Constant.NA,
+        "local_rank": Constant.DEFAULT_INVALID_VALUE,
+        "remote_rank": Constant.DEFAULT_INVALID_VALUE,
+        "rank_size": Constant.DEFAULT_INVALID_VALUE,
+        "work_flow_mode": Constant.NA,
+        "plane_id": Constant.DEFAULT_INVALID_VALUE,
+        "context_id": NumberConstant.DEFAULT_GE_CONTEXT_ID,
+        "notify_id": Constant.DEFAULT_INVALID_VALUE,
+        "stage": Constant.DEFAULT_INVALID_VALUE,
+        "role": Constant.NA,
+        "duration_estimated": Constant.DEFAULT_INVALID_VALUE,
+        "src_addr": Constant.DEFAULT_INVALID_VALUE,
+        "dst_addr": Constant.DEFAULT_INVALID_VALUE,
+        "size": Constant.DEFAULT_INVALID_VALUE,
+        "op_type": Constant.NA,
+        "data_type": Constant.NA,
+        "link_type": Constant.NA,
+        "transport_type": Constant.NA,
+        "rdma_type": Constant.NA
+    }
+
     def __init__(self: any) -> None:
         self._level = Constant.NA
         self._struct_type = Constant.NA
@@ -243,19 +273,3 @@ class HCCLInfoDto:
     def rdma_type(self, value):
         self._rdma_type = value
 
-    def to_args_json(self, stream_id, task_id):
-        json = {
-            'notify_id': self.notify_id,
-            'duration estimated(us)': self.duration_estimated,
-            'stream id': stream_id,
-            'task id': task_id,
-            'context id': self.context_id,
-            'task type': self.op_name,
-            'src rank': self.local_rank,
-            'dst rank': self.remote_rank,
-            'transport type': self.transport_type,
-            'size(Byte)': self.size,
-            'data type': self.data_type,
-            'link type': self.link_type,
-        }
-        return str(json)

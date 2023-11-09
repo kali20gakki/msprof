@@ -6,6 +6,17 @@ from common_func.constant import Constant
 
 
 class HCCLOperatorDto:
+    DEFAULT_REFLECTOR = {
+        "fusion_data": (),
+        "model_id": Constant.DEFAULT_INVALID_VALUE,
+        "index_id": Constant.DEFAULT_INVALID_VALUE,
+        "op_name": Constant.NA,
+        "op_type": Constant.NA,
+        "start_time": Constant.DEFAULT_INVALID_VALUE,
+        "end_time": Constant.DEFAULT_INVALID_VALUE,
+        "overlap_time": Constant.DEFAULT_INVALID_VALUE
+    }
+
     def __init__(self: any) -> None:
         self._fusion_data = ()
         self._model_id = Constant.DEFAULT_INVALID_VALUE

@@ -18,8 +18,8 @@ NAMESPACE = 'msparser.cluster.communication_matrix_parser'
 
 class Event:
     def __init__(self, transport_type: str, hccl_name: str):
-        self.src_rank = 0
-        self.dst_rank = 1
+        self.local_rank = 0
+        self.remote_rank = 1
         self.op_name = 'hcom_allReduce_1'
         self.hccl_name = hccl_name
         self.size = 1000 ** 2

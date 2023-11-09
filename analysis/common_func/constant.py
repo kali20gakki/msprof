@@ -296,7 +296,7 @@ class Constant:
     """
     constant class
     """
-    TRACE_BACK_SWITCH = True
+    TRACE_BACK_SWITCH = False
     L2_CACHE_EVENTS = [
         "0x59", "0x5b", "0x5c", "0x62", "0x6a", "0x6c", "0x71",
         "0x74", "0x77", "0x78", "0x79", "0x7c", "0x7d", "0x7e",

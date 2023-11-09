@@ -1,10 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 
-class CtxIdDto:
+class CtxIdDto(metaclass=InstanceCheckMeta):
     INVALID_CONTEXT_ID = "4294967295"
+    DEFAULT_REFLECTOR = {
+        "ctx_id": INVALID_CONTEXT_ID
+    }
 
     def __init__(self: any) -> None:
         self._level = None

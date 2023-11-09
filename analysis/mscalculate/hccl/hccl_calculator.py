@@ -21,7 +21,6 @@ from mscalculate.hccl.hccl_task import HcclTask
 from mscalculate.interface.icalculator import ICalculator
 from msconfig.config_manager import ConfigManager
 from msmodel.hccl.hccl_model import HcclViewModel
-from profiling_bean.db_dto.hccl_dto import HcclDto
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 
 
@@ -41,21 +40,18 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         self._hccl_op_report_data = []
 
     @staticmethod
-    def update_bandwidth(communication_data: List[HcclDto]):
-        size_key = 'size(Byte)'
-        for data in communication_data:
-            size = data.args.get(size_key, 0)
-            time = data.duration
-            if time == 0:
+    def update_bandwidth(communication_data: List[HcclTask]):
+        for index, data in enumerate(communication_data):
+            if data.duration == 0:
                 bandwidth = 0
             else:
-                bandwidth = size / time  # 10^9 / 10^9 = 1 scale(GB/s)
-            data.args['bandwidth(GB/s)'] = bandwidth
-    
+                bandwidth = data.size / data.duration  # 10^9 / 10^9 = 1 scale(GB/s)
+            communication_data[index] = data.replace(bandwidth=bandwidth)
+
     @staticmethod
-    def update_op_name_by_group_name(communication_data: List[HcclDto]):
+    def update_op_name_by_group_name(communication_data: List[HcclTask]):
         group_dict = defaultdict(lambda: {"first_timestamp": 0, "count": 0})
-        for data in communication_data:
+        for num, data in enumerate(communication_data):
             if data.group_name in group_dict:
                 if data.first_timestamp > group_dict[data.group_name]["first_timestamp"]:
                     group_dict[data.group_name]["first_timestamp"] = data.first_timestamp
@@ -64,7 +60,8 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                 group_dict[data.group_name]["first_timestamp"] = data.first_timestamp
                 group_dict[data.group_name]["count"] = 0
             index = group_dict[data.group_name]["count"]
-            data.op_name = data.op_name + "_" + data.group_name[-3:] + "_" + str(index)
+            communication_data[num] = data.replace(
+                op_name=data.op_name + "_" + data.group_name[-3:] + "_" + str(index))
 
     @staticmethod
     def _cal_total(type_time: dict) -> int:
@@ -79,7 +76,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         return total_time
 
     @staticmethod
-    def _get_hccl_op_report_data(communication_data: List[HcclDto]) -> any:
+    def _get_hccl_op_report_data(communication_data: List[HcclTask]) -> any:
         """
         Calculate the hccl op report data by communication data
         return：{"op_type":{'count': 0,'duration': 0, min': 0,'avg': 0,max': 0}}
@@ -179,14 +176,17 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                          DBNameConstant.TABLE_HCCL_OP_REPORT)
             return True
 
-    def _generate_hccl_op_info(self, hccl_data: List[HcclDto]) -> bool:
+    def _generate_hccl_op_info(self, hccl_data: List[HcclTask]) -> bool:
         is_hccl_op_type_valid = False
         for data in hccl_data:
             self._hccl_data.append([data.model_id, data.index_id, data.op_name, data.iteration,
                                     data.hccl_name, data.group_name, data.first_timestamp, data.plane_id,
                                     data.timestamp, data.duration, data.is_dynamic,
                                     data.task_type, data.op_type, data.connection_id,
-                                    data.is_master, str(data.args)])
+                                    data.is_master, data.stream_id, data.task_id, data.struct_type,
+                                    data.duration_estimated, data.local_rank, data.remote_rank, data.transport_type,
+                                    data.size, data.data_type, data.link_type, data.bandwidth, data.context_id,
+                                    data.notify_id])
             if data.op_type != Constant.NA:
                 is_hccl_op_type_valid = True
         return is_hccl_op_type_valid
@@ -227,15 +227,14 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             logging.warning("There is no hccl op report data. Maybe an error occurs during the calculation")
 
     def _merge_hccl_ops_and_tasks(self, hccl_ops: List[HcclOps], hccl_tasks: List[HcclTask]) -> List[HcclTask]:
-        def update_task_desc_with_hccl_op(op_desc: HcclOps, task_desc: HcclTask) -> HcclTask:
-            task_desc.op_name = op_desc.op_name
-            task_desc.task_type = op_desc.task_type
-            task_desc.op_type = op_desc.op_type
-            task_desc.first_timestamp = op_desc.timestamp
-            task_desc.is_dynamic = op_desc.is_dynamic
-            task_desc.model_id = op_desc.model_id
-            task_desc.connection_id = op_desc.connection_id
-            return task_desc
+        def update_task_desc_with_hccl_op(op_desc: HcclOps, task_desc: any) -> HcclTask:
+            return task_desc.replace(op_name=op_desc.op_name,
+                                     task_type=op_desc.task_type,
+                                     op_type=op_desc.op_type,
+                                     first_timestamp=op_desc.timestamp,
+                                     is_dynamic=op_desc.is_dynamic,
+                                     model_id=op_desc.model_id,
+                                     connection_id=op_desc.connection_id)
 
         if not hccl_ops or not hccl_tasks:
             logging.error("No Hccl ops or Hccl tasks found")

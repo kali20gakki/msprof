@@ -4,6 +4,7 @@
 
 import logging
 from collections import deque
+from collections import namedtuple
 from typing import List
 from typing import Tuple
 from typing import Union
@@ -14,9 +15,12 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.platform.chip_manager import ChipManager
 from mscalculate.ascend_task.ascend_task import DeviceTask
 from mscalculate.ascend_task.ascend_task import HostTask
-from mscalculate.ascend_task.ascend_task import TopDownTask
 from mscalculate.ascend_task.device_task_collector import DeviceTaskCollector
 from mscalculate.ascend_task.host_task_collector import HostTaskCollector
+
+TopDownTask = namedtuple("TopDownTask", ["model_id", "index_id", "stream_id", "task_id", "context_id",
+                                         "batch_id", "start_time", "duration", "host_task_type", "device_task_type",
+                                         "connection_id"])
 
 
 class AscendTaskGenerator:

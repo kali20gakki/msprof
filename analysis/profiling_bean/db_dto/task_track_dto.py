@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 
-class TaskTrackDto:
+class TaskTrackDto(metaclass=InstanceCheckMeta):
     def __init__(self: any):
         self._struct_type = None
         self._level = None

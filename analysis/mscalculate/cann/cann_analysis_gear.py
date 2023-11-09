@@ -12,6 +12,7 @@ from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_object import HighPerfDict
+from common_func.msprof_object import CustomizedNamedtupleFactory
 from mscalculate.cann.additional_record import AdditionalRecord
 from mscalculate.cann.cann_event_generator import CANNThreadDB
 from mscalculate.cann.event import Event
@@ -390,6 +391,7 @@ class TaskGear(CANNGear):
             elif isinstance(record.dto, TaskTrackDto) and task_track_dto.struct_type is None:
                 # RUNTIME sometimes report multiple task tracks in one api call,
                 # in which case, only the first task track is valid
+                tmp = isinstance(record.dto, TaskTrackDto)
                 task_track_dto = record.dto
         return mem_cpy_info_dto, task_track_dto
 
@@ -512,7 +514,9 @@ class TaskGear(CANNGear):
                 hccl_info_dto.plane_id, task_track_dto.timestamp, hccl_info_dto.duration_estimated,
                 task_track_dto.stream_id, task_track_dto.task_id, context_id,
                 task_track_dto.batch_id, task_track_dto.device_id, is_master,
-                hccl_info_dto.to_args_json(task_track_dto.stream_id, task_track_dto.task_id)
+                hccl_event.struct_type,
+                hccl_info_dto.local_rank, hccl_info_dto.remote_rank, hccl_info_dto.transport_type, hccl_info_dto.size,
+                hccl_info_dto.data_type, hccl_info_dto.link_type, hccl_info_dto.notify_id
             ]
         self.hccl_task_info.extend(hccl_tasks)
 

@@ -30,3 +30,4 @@ class SqlWhereCondition:
         condition = f"where model_id={model_id} and (index_id={iter_id} or" \
                     f" index_id={NumberConstant.STATIC_GRAPH_INDEX}) and device_id={device_id}"
         return condition
+

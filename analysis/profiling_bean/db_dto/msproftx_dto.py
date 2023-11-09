@@ -10,6 +10,21 @@ class MsprofTxDto:
     class used to decode binary data
     """
     CHAR_LIST_SIZE = 128
+    DEFAULT_REFLECTOR = {
+        "pid": 0,
+        "tid": 0,
+        "category": 0,
+        "event_type": 0,
+        "payload_type": 0,
+        "payload_value": 0,
+        "start_time": 0,
+        "end_time": 0,
+        "message_type": 0,
+        "message": Constant.NA,
+        "call_stack": Constant.NA,
+        "dur_time": 0,
+        "file_tag": Constant.DEFAULT_INVALID_VALUE
+    }
 
     def __init__(self: any, *args: list) -> None:
         self._pid = 0

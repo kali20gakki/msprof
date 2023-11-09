@@ -11,27 +11,21 @@ from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from sqlite.db_manager import DBOpen
 from viewer.aicpu_viewer import AiCpuData
 from viewer.aicpu_viewer import ParseAiCpuData
+from common_func.msprof_object import CustomizedNamedtupleFactory
 
 sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs'}
 NAMESPACE = 'viewer.aicpu_viewer'
+
+AiCpuDataTuple = CustomizedNamedtupleFactory.generate_named_tuple_from_dto(AiCpuData, [])
 
 
 class TestAicpuViewer(unittest.TestCase):
     def get_aicpu_dto(self, aicpu: list) -> list:
         aicpu_dto = []
         for data in aicpu:
-            data_dto = AiCpuData()
-            data_dto.stream_id = data[0]
-            data_dto.task_id = data[1]
-            data_dto.sys_start = data[2]
-            data_dto.sys_end = data[3]
-            data_dto.node_name = data[4]
-            data_dto.compute_time = data[5]
-            data_dto.memcpy_time = data[6]
-            data_dto.task_time = data[7]
-            data_dto.dispatch_time = data[8]
-            data_dto.total_time = data[9]
-            data_dto.batch_id = data[10]
+            data_dto = AiCpuDataTuple(stream_id=data[0], task_id=data[1], sys_start=data[2], sys_end=data[3],
+                                      node_name=data[4], compute_time=data[5], memcpy_time=data[6], task_time=data[7],
+                                      dispatch_time=data[8], total_time=data[9], batch_id=data[10])
             aicpu_dto.append(data_dto)
         return aicpu_dto
 
