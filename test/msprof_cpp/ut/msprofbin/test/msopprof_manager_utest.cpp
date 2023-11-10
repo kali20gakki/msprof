@@ -30,7 +30,7 @@ TEST_F(MsopprofManagerUtest, MsopprofManagerCheckInputDataValidity)
     opargv[1] = "--op=on";
     std::vector<std::string> argsVec;
     EXPECT_EQ(true, MsopprofManager::instance()->CheckInputDataValidity(2, (const char**)opargv));
-    EXPECT_EQ(false, MsopprofManager::instance()->CheckInputDataValidity(513, (const char**)opargv));
+    EXPECT_EQ(false, MsopprofManager::instance()->CheckInputDataValidity(1025, (const char**)opargv));
 }
 
 TEST_F(MsopprofManagerUtest, MsopprofManagerCheckMsopprofIfExist)

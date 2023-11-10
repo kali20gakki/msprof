@@ -25,8 +25,6 @@ using namespace Analysis::Dvvp::App;
 using namespace analysis::dvvp::common::config;
 using namespace Collector::Dvvp::Msprofbin;
 
-const int INPUT_MAX_LENTH = 512;
-
 void SigHandler(int sig)
 {
     if (sig == SIGINT) {
