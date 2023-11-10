@@ -41,7 +41,6 @@ using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 using namespace Collector::Dvvp::ParamsAdapter;
 
-const int INPUT_MAX_LENTH           = 512; // 512 : max length
 const int MSPROF_DAEMON_ERROR       = -1;
 const int MSPROF_DAEMON_OK          = 0;
 const int FILE_FIND_REPLAY          = 100;

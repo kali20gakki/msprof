@@ -362,7 +362,7 @@ using CONST_UINT32_T_PTR = const uint32_t *;
 using UINT32_T_PTR = uint32_t *;
 using SIZE_T_PTR = size_t *;
 
-
+constexpr int INPUT_MAX_LENTH = 1024; // 1024 : arg max length
 constexpr int INVALID_EXIT_CODE = -1;
 constexpr int VALID_EXIT_CODE = 0;
 constexpr int MSVP_MAX_DEV_NUM = 64; // 64 : dev max number
