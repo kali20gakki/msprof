@@ -138,7 +138,7 @@ class TestStepTraceViewer(unittest.TestCase):
 
         if os.path.exists(db_manager.db_name):
             os.remove(db_manager.db_name)
-        self.assertEqual(len(res), 73)
+        self.assertEqual(len(res), 2)
 
     def test_get_one_iter_timeline_data(self):
         db_manager, conn, curs = create_trace_db()
@@ -152,7 +152,7 @@ class TestStepTraceViewer(unittest.TestCase):
 
         db_manager.conn.close()
 
-        self.assertEqual(len(res), 73)
+        self.assertEqual(len(res), 2)
 
     def test_reformat_step_trace_data(self):
         data_list = [

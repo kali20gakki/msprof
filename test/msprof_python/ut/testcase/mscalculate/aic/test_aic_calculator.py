@@ -74,17 +74,35 @@ class TestAicCalculator(unittest.TestCase):
     def test_calculate(self):
         with mock.patch(NAMESPACE + '.AicCalculator._parse_all_file'), \
                 mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
-                mock.patch('common_func.utils.Utils.get_scene', return_value='single_op'), \
-                mock.patch(NAMESPACE + '.AicCalculator._parse_by_iter'):
+                mock.patch('common_func.utils.Utils.get_scene', return_value='single_op'):
             check = AicCalculator(self.file_list, CONFIG)
             check.calculate()
         ProfilingScene().init('test')
         with mock.patch(NAMESPACE + '.AicCalculator._parse_all_file'), \
                 mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
-                mock.patch('common_func.utils.Utils.get_scene', return_value='train'), \
-                mock.patch(NAMESPACE + '.AicCalculator._parse_by_iter'):
+                mock.patch('common_func.utils.Utils.get_scene', return_value='train'):
             check = AicCalculator(self.file_list, CONFIG)
             check.calculate()
+
+    def test_calculate_when_table_exist_then_do_not_execute(self):
+        ProfilingScene().set_all_export(True)
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch('logging.info'):
+            check = AicCalculator(self.file_list, CONFIG)
+            check._parse_all_file = mock.Mock()
+            check.calculate()
+            check._parse_all_file.assert_not_called()
+
+    def test_calculate_when_not_all_export_then_parse_by_iter(self):
+        ProfilingScene().set_all_export(False)
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.AicCalculator.pre_parse'):
+            check = AicCalculator(self.file_list, CONFIG)
+            check._parse_by_iter = mock.Mock(return_value=None)
+            check.calculate()
+            check._parse_by_iter.assert_called_once()
+        ProfilingScene().set_all_export(True)
 
     def test_parse(self):
         aic_reader = struct.pack("=BBHHHII10Q8I", 1, 2, 3, 4, 5, 6, 78, 9, 1, 0, 1, 2, 3, 4, 6, 5, 2, 4, 5, 6, 7, 89, 9,
@@ -144,6 +162,16 @@ class TestNanoAicCalculator(unittest.TestCase):
             check = NanoAicCalculator({}, CONFIG)
             check._aic_data_list = [123]
             check.calculate()
+
+    def test_calculate_when_table_exist_then_do_not_execute(self):
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch('logging.info'):
+            check = NanoAicCalculator({}, CONFIG)
+            check._aic_data_list = [123]
+            check._parse_without_decode = mock.Mock()
+            check.calculate()
+            check._parse_without_decode.assert_not_called()
 
     def test_save_when_nomal_then_pass(self):
         with mock.patch('msmodel.aic.aic_pmu_model.NanoAicPmuModel.init'), \

@@ -648,4 +648,4 @@ class ExportCommand:
         job_summary.export()
 
         profier = MsprofOutputSummary(collect_path)
-        profier.export()
+        profier.export(self.command_type)

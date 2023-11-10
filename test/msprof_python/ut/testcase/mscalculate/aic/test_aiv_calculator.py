@@ -76,3 +76,14 @@ class TestAivCalculator(unittest.TestCase):
                 mock.patch(NAMESPACE + '.AivCalculator.save', return_value='test'):
             check = AivCalculator(self.file_list, CONFIG)
             check.ms_run()
+
+    def test_ms_run_when_table_exist_then_no_calculate(self):
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config",
+                        return_value={}), \
+                mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch('logging.info'):
+            check = AivCalculator({}, CONFIG)
+            check.init_params = mock.Mock()
+            check.ms_run()
+            check.init_params.assert_not_called()
+

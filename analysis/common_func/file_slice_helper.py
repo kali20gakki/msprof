@@ -54,22 +54,11 @@ class FileSliceHelper:
             self.dump_csv_data()
         elif self.params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
             self._pretreat_json_data(data_list)
-            self.dump_json_data()
 
-    def dump_json_data(self, force: bool = False):
-        if force and self.data_list:
-            json_file = make_export_file_name(self.params, self.file_name_slice,
-                                              slice_switch=(self.file_name_slice != self.COUNT_INIT))
+    def dump_json_data(self, slice_index: int, is_need_slice: bool = False):
+        if self.data_list:
+            json_file = make_export_file_name(self.params, slice_index, slice_switch=is_need_slice)
             self._create_json(json_file)
-            return
-
-        if len(self.data_list) >= self.JSON_LIMIT:
-            json_file = make_export_file_name(self.params, self.file_name_slice, slice_switch=True)
-            self._create_json(json_file)
-            self.file_name_slice += 1
-            self.header = []
-            self.data_list = []
-            self.connection_id_set.clear()
 
     def dump_csv_data(self, force: bool = False):
         if force and self.data_list:
@@ -101,8 +90,8 @@ class FileSliceHelper:
                 self.header.append(data)
                 continue
             if "@" in data.get("name"):
-                connection_id = data.get("args").get("connection_id")
-                if connection_id in self.connection_id_set:
+                connection_id = data.get("args", {"connection_id": None}).get("connection_id")
+                if connection_id and connection_id in self.connection_id_set:
                     continue
                 self.connection_id_set.add(connection_id)
             self.data_list.append(data)
