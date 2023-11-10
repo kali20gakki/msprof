@@ -13,6 +13,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
+from common_func.profiling_scene import ProfilingScene
 from msmodel.stars.ffts_log_model import FftsLogModel
 from msmodel.stars.sub_task_model import SubTaskTimeModel
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -109,6 +110,12 @@ class SubTaskCalculator(MsMultiProcess):
         :return: None
         """
         if not self.file_list.get(DataTag.STARS_LOG) or not ChipManager().is_ffts_plus_type():
+            return
+        db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_SOC_LOG)
+        if ProfilingScene().is_all_export() and \
+                DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_THREAD_TASK):
+            logging.info("The Table %s already exists in the %s, and won't be calculate again.",
+                         DBNameConstant.TABLE_THREAD_TASK, DBNameConstant.DB_SOC_LOG)
             return
         self.calculate()
 

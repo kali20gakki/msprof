@@ -54,7 +54,7 @@ class OpCounterOpSceneCalculator(MsMultiProcess):
               "and {0}.context_id={1}.subtask_id " \
               "and {1}.start_time != {2} " \
               "group by op_type,{0}.task_type" \
-            .format(CommonConstant.GE_TASK_MEGED_TABLE, DBNameConstant.TABLE_OP_COUNTER_RTS_TASK,
+            .format(DBNameConstant.TABLE_OP_COUNTER_GE_MERGE, DBNameConstant.TABLE_OP_COUNTER_RTS_TASK,
                     NumberConstant.INVALID_TASK_TIME)
         return sql
 
@@ -111,7 +111,7 @@ class OpCounterOpSceneCalculator(MsMultiProcess):
         ge_conn, ge_curs = DBManager.check_connect_db_path(db_path)
         if ge_conn and ge_curs and DBManager.judge_table_exist(ge_curs, DBNameConstant.TABLE_GE_TASK):
             ge_data = DBManager.fetch_all_data(ge_curs, self._get_ge_sql())
-            DBManager.insert_data_into_table(self.conn, CommonConstant.GE_TASK_MEGED_TABLE, ge_data)
+            DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_OP_COUNTER_GE_MERGE, ge_data)
         DBManager.destroy_db_connect(ge_conn, ge_curs)
 
     def create_task(self: any) -> None:
@@ -134,7 +134,7 @@ class OpCounterOpSceneCalculator(MsMultiProcess):
             rts_data = [[task.task_id, task.stream_id, task.start_time, task.duration, task.device_task_type,
                          task.index_id, task.model_id, task.batch_id, task.context_id] for task in ascend_tasks]
             try:
-                DBManager.insert_data_into_table(self.conn, CommonConstant.RTS_TASK_TABLE, rts_data)
+                DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_OP_COUNTER_RTS_TASK, rts_data)
             except sqlite3.Error as err:
                 logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
 

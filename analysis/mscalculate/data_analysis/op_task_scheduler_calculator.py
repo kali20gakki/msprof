@@ -159,6 +159,8 @@ class OpTaskSchedulerCalculator(MsMultiProcess):
         """
         if DBManager.check_tables_in_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_RUNTIME),
                                         DBNameConstant.TABLE_RUNTIME_REPORT_TASK):
+            logging.info("The Table %s already exists in the %s, and won't be calculate again.",
+                         DBNameConstant.TABLE_RUNTIME_REPORT_TASK, DBNameConstant.DB_RUNTIME)
             return
         self.op_pre_mini_task_data(self.project_path, self.device_id)
         self.op_insert_report_data(self.project_path, self.device_id)

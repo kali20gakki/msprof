@@ -23,12 +23,27 @@ class TestOpSummaryOpSceneCalculator(unittest.TestCase):
             key.ms_run()
         profiling_scene.is_operator = is_operator_func
 
-    def test_process(self):
-        with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='test.text'), \
-                mock.patch('os.path.exists', return_value=False), \
-                mock.patch(NAMESPACE + '.OpSummaryOpSceneCalculator.create_summary_table'):
+    def test_process_when_table_exist_then_do_not_execute(self):
+        with mock.patch('os.path.exists', return_value=True), \
+                mock.patch('logging.info'):
             check = OpSummaryOpSceneCalculator(file_list, CONFIG)
+            check.create_summary_table = mock.Mock()
             check.process()
+            check.create_summary_table.assert_not_called()
+
+        with mock.patch('os.path.exists', return_value=False), \
+                mock.patch('logging.warning'):
+            check = OpSummaryOpSceneCalculator(file_list, CONFIG)
+            check.create_summary_table = mock.Mock()
+            check.process()
+            check.create_summary_table.assert_not_called()
+
+    def test_process_when_normal_then_create_table(self):
+        with mock.patch('os.path.exists', side_effect=[False, True]):
+            check = OpSummaryOpSceneCalculator(file_list, CONFIG)
+            check.create_summary_table = mock.Mock()
+            check.process()
+            check.create_summary_table.assert_called_once()
 
     def test_get_ge_sql(self):
         check = OpSummaryOpSceneCalculator(file_list, CONFIG)
