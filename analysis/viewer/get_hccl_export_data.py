@@ -27,6 +27,21 @@ class HCCLExport:
     DEFAULT_PLANE = 0
     INVALID_GROUP = 'N/A'
 
+    @dataclass
+    class HcclGroup:
+        group_name: str
+        planes: Set[int]
+        id: int
+        start_index: int
+
+    def __init__(self: any, param: dict) -> None:
+        self.project_path = param.get(StrConstant.PARAM_RESULT_DIR)
+        self.result = []
+        self.err_message = {}
+        self.iter_range = param.get(StrConstant.PARAM_ITER_ID)
+        self.pid_value = InfoConfReader().get_json_pid_data()
+        self.hccl_groups = dict()
+
     @staticmethod
     def get_hccl_arg(hccl_task):
         return OrderedDict({
@@ -44,20 +59,6 @@ class HCCLExport:
             'link type': hccl_task.link_type,
             "bandwidth(GB/s)": hccl_task.bandwidth
         })
-    @dataclass
-    class HcclGroup:
-        group_name: str
-        planes: Set[int]
-        id: int
-        start_index: int
-
-    def __init__(self: any, param: dict) -> None:
-        self.project_path = param.get(StrConstant.PARAM_RESULT_DIR)
-        self.result = []
-        self.err_message = {}
-        self.iter_range = param.get(StrConstant.PARAM_ITER_ID)
-        self.pid_value = InfoConfReader().get_json_pid_data()
-        self.hccl_groups = dict()
 
     def get_hccl_timeline_data(self: any) -> str:
         """
