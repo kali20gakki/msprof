@@ -34,6 +34,20 @@ class TestCalculateAiCoreData(unittest.TestCase):
         result = key.add_pipe_time(pmu_dict, 1000, 'PipeUtilization')
         self.assertEqual(len(result.values()), 14)
 
+    def test_add_pipe_time_should_return_data_endswith_time_when_data_endswith_ratio_or_ratio_extra(self):
+        pmu_dict = {
+            'mac_ratio_extra': [0.33], 'scalar_ratio': [0.8], 'mte1_ratio_extra': [0.11], 'mte2_ratio': [0.21],
+            'fixpipe_ratio': [10], 'icache_miss_rate': [0.08]
+        }
+        target_dict = {
+            'mac_ratio_extra': [0.33], 'mac_time': [330], 'scalar_ratio': [0.8], 'scalar_time': [800.0],
+            'mte1_ratio_extra': [0.11], 'mte1_time': [110.0], 'mte2_ratio': [0.21], 'mte2_time': [210],
+            'fixpipe_ratio': [10], 'fixpipe_time': [10000], 'icache_miss_rate': [0.08]
+        }
+        check = CalculateAiCoreData('')
+        result = check.add_pipe_time(pmu_dict, 1000, 'PipeUtilization')
+        self.assertEqual(result, target_dict)
+
     def test_update_fops_data_1(self):
         field = "vector_fops"
         algo = "r4b_num, r4e_num, r4f_num"
@@ -124,6 +138,105 @@ class TestCalculateAiCoreData(unittest.TestCase):
         with mock.patch(NAMESPACE + '.CalculateAiCoreData.get_vector_num', return_value=[1, 1, 1]):
             key = CalculateAiCoreData('123')
             key.add_vector_data(events_name_list, ai_core_profiling_events, task_cyc)
+
+    def test_calculate_vec_fp16_ratio_should_return_with_vec_fp16_ratio_when_exist_vec_fp16_data(self):
+        events_name_list = ["vec_fp16_128lane_ratio", "vec_fp16_64lane_ratio"]
+        ai_core_profiling_events = {"vec_fp16_128lane_ratio": [0.36], "vec_fp16_64lane_ratio": [0.55]}
+        target_res = {
+            "vec_fp16_128lane_ratio": [0.36], "vec_fp16_64lane_ratio": [0.55],
+            "vec_fp16_ratio": [0.91]
+        }
+        check = CalculateAiCoreData('123')
+        res = check._calculate_vec_fp16_ratio(events_name_list, ai_core_profiling_events)
+        self.assertEqual(res, target_res)
+
+    def test_calculate_cube_fops_should_return_with_cube_fops_when_exist_mac_ratio_data(self):
+        events_name_list = ["mac_fp16_ratio", "mac_int8_ratio"]
+        ai_core_profiling_events = {"mac_fp16_ratio": [0.4], "mac_int8_ratio": [0.5]}
+        target_res = {
+            "mac_fp16_ratio": [0.4], "mac_int8_ratio": [0.5],
+            "cube_fops": [11468.8]
+        }
+        task_cyc = 1
+        check = CalculateAiCoreData('123')
+        res = check._calculate_cube_fops(events_name_list, ai_core_profiling_events, task_cyc)
+        self.assertEqual(res, target_res)
+
+    def test_calculate_mac_ratio_extra_should_return_with_mac_ratio_extra_when_exist_mac_ratio_data(self):
+        events_no_vec = ["mac_fp16_ratio", "mac_int8_ratio", "fixpipe_ratio"]
+        events_data_no_vec = {
+            "mac_fp16_ratio": [0.4], "mac_int8_ratio": [0.5], "cube_fops": [11468.8]
+        }
+        target_res_no_vec = {"mac_ratio_extra": [0.9]}
+        check = CalculateAiCoreData('123')
+        res = check._calculate_mac_ratio_extra(events_no_vec, events_data_no_vec)
+        self.assertEqual(res, target_res_no_vec)
+
+        events_exist_vec = ["vec_exe_ratio", "mac_fp16_ratio", "mac_int8_ratio", "fixpipe_ratio"]
+        events_data_exist_vec = {
+            "vec_exe_ratio": [0.3], "mac_fp16_ratio": [0.4],
+            "mac_int8_ratio": [0.5], "cube_fops": [11468.8]
+        }
+        target_res_exist_vec = {"vec_exe_ratio": [0.3], "mac_ratio_extra": [0.9]}
+        check = CalculateAiCoreData('123')
+        res = check._calculate_mac_ratio_extra(events_exist_vec, events_data_exist_vec)
+        self.assertEqual(res, target_res_exist_vec)
+
+        events = ["mac_fp_ratio", "mac_int_ratio"]
+        events_data = {"mac_fp_ratio": [0.3], "mac_int_ratio": [0.4]}
+        target_res = {"mac_ratio_extra": [0.7]}
+        check = CalculateAiCoreData('123')
+        res = check._calculate_mac_ratio_extra(events, events_data)
+        self.assertEqual(res, target_res)
+
+    def test_calculate_iq_full_ratio_should_return_with_iq_full_ratio_when_exist_iq_full_ratio_data(self):
+        events_name_list = [
+            "mte1_iq_full_ratio", "mte2_iq_full_ratio", "mte3_iq_full_ratio",
+            "cube_iq_full_ratio", "vec_iq_full_ratio"
+        ]
+        ai_core_profiling_events = {
+            "mte1_iq_full_ratio": [0.15], "mte2_iq_full_ratio": [0.1], "mte3_iq_full_ratio": [0.2],
+            "cube_iq_full_ratio": [0.1], "vec_iq_full_ratio": [0.1],
+        }
+        target_res = {
+            "mte1_iq_full_ratio": [0.15], "mte2_iq_full_ratio": [0.1], "mte3_iq_full_ratio": [0.2],
+            "cube_iq_full_ratio": [0.1], "vec_iq_full_ratio": [0.1], "iq_full_ratio": [0.65]
+        }
+        check = CalculateAiCoreData('123')
+        res = check._calculate_iq_full_ratio(events_name_list, ai_core_profiling_events)
+        self.assertEqual(res, target_res)
+
+    def test_calculate_icache_miss_rate_should_return_with_icache_miss_rate_when_exist_icache_data(self):
+        events_name_list = ["icache_miss_rate", "icache_req_ratio"]
+        ai_core_profiling_events = {"icache_miss_rate": [2000], "icache_req_ratio": [5000]}
+        target_res = {"icache_miss_rate": [0.4], "icache_req_ratio": [5000]}
+        check = CalculateAiCoreData('123')
+        res = check._calculate_icache_miss_rate(events_name_list, ai_core_profiling_events)
+        self.assertEqual(res, target_res)
+
+    def test_calculate_memory_bandwidth_should_return_bandwidth_when_exist_bandwidth_data(self):
+        events_name_list = [
+            "main_mem_read_bw(GB/s)", "main_mem_write_bw(GB/s)",
+            "mte2_ratio", "mte3_ratio"
+        ]
+        ai_core_profiling_events = {
+            "main_mem_read_bw(GB/s)": [2000], "main_mem_write_bw(GB/s)": [1500],
+            "mte2_ratio": [4], "mte3_ratio": [6]
+        }
+        target_res = {"main_mem_read_bw(GB/s)": [500], "main_mem_write_bw(GB/s)": [250]}
+        check = CalculateAiCoreData('123')
+        res = check._calculate_memory_bandwidth(events_name_list, ai_core_profiling_events)
+        self.assertEqual(res, target_res)
+
+    def test_calculate_control_flow_mis_prediction_rate_should_return_rate_when_exist_prediction_data(self):
+        events_name_list = ["control_flow_prediction_ratio", "control_flow_mis_prediction_rate"]
+        ai_core_profiling_events = {
+            "control_flow_prediction_ratio": [400], "control_flow_mis_prediction_rate": [300]
+        }
+        target_res = {"control_flow_prediction_ratio": [400], "control_flow_mis_prediction_rate": [0.75]}
+        check = CalculateAiCoreData('123')
+        res = check._calculate_control_flow_mis_prediction_rate(events_name_list, ai_core_profiling_events)
+        self.assertEqual(res, target_res)
 
 
 if __name__ == '__main__':
