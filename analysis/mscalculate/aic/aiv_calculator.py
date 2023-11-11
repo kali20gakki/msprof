@@ -7,6 +7,7 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
+from common_func.msvp_common import MsvpCommonConst
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from mscalculate.aic.aic_calculator import AicCalculator
@@ -29,6 +30,8 @@ class AivCalculator(AicCalculator, MsMultiProcess):
         self._aiv_data_list = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
         self.core_type = 1
+        self.metrics_type = StrConstant.AIV_PROFILING_METRICS
+        self.cfg_type = MsvpCommonConst.AI_CORE
 
     def aiv_calculate(self: any) -> None:
         """

@@ -3,7 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 from common_func.msprof_exception import ProfException
-from common_func.msvp_common import read_cpu_cfg
+from common_func.msvp_common import read_cpu_cfg, MsvpCommonConst
 from common_func.utils import Utils
 
 
@@ -14,7 +14,7 @@ class AicPmuUtils:
     HEX = 16
 
     @staticmethod
-    def get_pmu_event_name(pmu_event: str, cfg_name: str = "ai_core") -> str:
+    def get_pmu_event_name(pmu_event: str, cfg_name: str = MsvpCommonConst.AI_CORE) -> str:
         """
         return pmu event name by pmu_event
         :param pmu_event:
@@ -28,7 +28,7 @@ class AicPmuUtils:
         return pmu_name
 
     @staticmethod
-    def get_pmu_events(aic_pmu_events: str, cfg_name: str = "ai_core") -> list:
+    def get_pmu_events(aic_pmu_events: str, cfg_name: str = MsvpCommonConst.AI_CORE) -> list:
         """
         get pmu events
         :param aic_pmu_events:
