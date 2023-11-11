@@ -6,3 +6,4 @@ class InstanceCheckMeta(type):
     def __instancecheck__(cls, obj):
         if obj is not None:
             return obj.__class__.__name__ == cls.__name__
+        return False
