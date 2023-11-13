@@ -64,7 +64,7 @@ class NpuMemRecViewer:
                                        InfoConfReader().trans_into_local_time(
                                            InfoConfReader().time_from_host_syscnt(int(datum.syscnt),
                                                                                   NumberConstant.MICRO_SECOND)),
-                                       Constant.NA,
+                                       None,
                                        datum.total_size,
                                        datum.device_type
                                        ])
