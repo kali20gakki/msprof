@@ -32,12 +32,13 @@ class MsprofJobSummary:
         self._host_data = []
         self.param = {'project': self._output, 'data_type': 'msprof'}
 
-    def export(self: any) -> None:
+    def export(self: any, command_type: str) -> None:
         """
-        export tx summary data
+        export timeline data
         :return:
         """
-        self._export_msprof_timeline()
+        if command_type == MsProfCommonConstant.TIMELINE:
+            self._export_msprof_timeline()
 
     def get_msprof_json_file(self: any, sub_dir: str) -> list:
         """
