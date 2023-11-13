@@ -24,9 +24,9 @@ class ApiDataDto(metaclass=InstanceCheckMeta):
 
 
 ApiDataDtoTuple = namedtuple("ApiDataDto",
-                             ["connection_id", "end", "item_id", "level", "request_id", "start", "struct_type",
+                             ["connection_id", "end", "id","item_id", "level", "request_id", "start", "struct_type",
                               "thread_id"],
-                             defaults=[None, None, None, None, None, None, None, None])
+                             defaults=[None, None, None, None, None, None, None, None,None])
 
 
 def invalid_dto(level=INVALID_LEVEL, thread=INVALID_THREAD, start=-1, end=-1, struct_type="", ):
