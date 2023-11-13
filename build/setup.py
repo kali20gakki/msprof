@@ -12,7 +12,7 @@ root_path = os.path.join(cur_path, "../")
 
 def generate_path_list_of_whl_package(prefix_dir: str = ""):
     path_list = [
-        "analysis.mscalculate.ge", "analysis.msconfig", "analysis.msmodel.hardware", "analysis.msmodel.hccl", \
+        "analysis.msconfig", "analysis.msmodel.hardware", "analysis.msmodel.hccl", \
         "analysis.msmodel.msproftx", "analysis.msmodel.runtime", "analysis.msparser.step_trace.helper", \
         "analysis.profiling_bean.ge", "analysis.profiling_bean.hardware", "analysis.profiling_bean.helper", \
         "analysis.viewer.association"
