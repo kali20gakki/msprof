@@ -3,232 +3,53 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
 from collections import namedtuple
+from dataclasses import dataclass
 
-from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
+from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 
-class StepTraceOriginDto:
+@dataclass
+class StepTraceOriginDto(metaclass=InstanceCheckMeta):
     """
     step trace origin DATA dto
     """
-
-    def __init__(self: any) -> None:
-        self._index_id = None
-        self._model_id = None
-        self._timestamp = None
-        self._tag_id = None
-        self._stream_id = None
-        self._task_id = None
-
-    @property
-    def index_id(self: any) -> any:
-        return self._index_id
-
-    @property
-    def model_id(self: any) -> any:
-        return self._model_id
-
-    @property
-    def timestamp(self: any) -> any:
-        return self._timestamp
-
-    @property
-    def tag_id(self: any) -> any:
-        return self._tag_id
-
-    @property
-    def task_id(self: any) -> any:
-        return self._task_id
-
-    @property
-    def stream_id(self: any) -> any:
-        return self._stream_id
-
-    @index_id.setter
-    def index_id(self: any, value: any) -> None:
-        self._index_id = value
-
-    @model_id.setter
-    def model_id(self: any, value: any) -> None:
-        self._model_id = value
-
-    @timestamp.setter
-    def timestamp(self: any, value: any) -> None:
-        self._timestamp = value
-
-    @tag_id.setter
-    def tag_id(self: any, value: any) -> None:
-        self._tag_id = value
-
-    @stream_id.setter
-    def stream_id(self: any, value: any) -> None:
-        self._stream_id = value
-
-    @task_id.setter
-    def task_id(self: any, value: any) -> None:
-        self._task_id = value
+    index_id = None
+    model_id = None
+    stream_id = None
+    tag_id = None
+    task_id = None
+    timestamp = None
 
 
-class StepTraceDto:
+@dataclass
+class StepTraceDto(metaclass=InstanceCheckMeta):
     """
     step trace dto
     """
     DEFAULT_ITER_ID = -1
-
-    def __init__(self: any) -> None:
-        self._index_id = None
-        self._model_id = None
-        self._step_start = None
-        self._step_end = None
-        self._iter_id = None
-
-    @property
-    def index_id(self: any) -> any:
-        return self._index_id
-
-    @property
-    def model_id(self: any) -> any:
-        return self._model_id
-
-    @property
-    def step_start(self: any) -> any:
-        return self._step_start
-
-    @property
-    def step_end(self: any) -> any:
-        return self._step_end
-
-    @property
-    def iter_id(self: any) -> any:
-        return self._iter_id
-
-    @index_id.setter
-    def index_id(self: any, value: any) -> None:
-        self._index_id = value
-
-    @model_id.setter
-    def model_id(self: any, value: any) -> None:
-        self._model_id = value
-
-    @step_start.setter
-    def step_start(self: any, value: any) -> None:
-        self._step_start = value
-
-    @step_end.setter
-    def step_end(self: any, value: any) -> None:
-        self._step_end = value
-
-    @iter_id.setter
-    def iter_id(self: any, value: any) -> None:
-        self._iter_id = value
+    index_id = None
+    iter_id = None
+    model_id = None
+    step_end = None
+    step_start = None
 
 
-class TrainingTraceDto:
+@dataclass
+class TrainingTraceDto(metaclass=InstanceCheckMeta):
     """
     Training trace dto
     """
-
-    def __init__(self: any) -> None:
-        self._device_id = None
-        self._model_id = None
-        self._iteration_id = None
-        self._fp_start = None
-        self._bp_end = None
-        self._iteration_end = None
-        self._iteration_time = None
-        self._fp_bp_time = None
-        self._grad_refresh_bound = None
-        self._data_aug_bound = None
-
-    @property
-    def device_id(self: any) -> any:
-        return self._device_id
-
-    @property
-    def model_id(self: any) -> any:
-        return self._model_id
-
-    @property
-    def iteration_id(self: any) -> any:
-        return self._iteration_id
-
-    @property
-    def fp_start(self: any) -> any:
-        return self._fp_start
-
-    @property
-    def bp_end(self: any) -> any:
-        return self._bp_end
-
-    @property
-    def iteration_end(self: any) -> any:
-        return self._iteration_end
-
-    @property
-    def iteration_time(self: any) -> any:
-        return self._iteration_time
-
-    @property
-    def fp_bp_time(self: any) -> any:
-        return self._fp_bp_time
-
-    @property
-    def grad_refresh_bound(self: any) -> any:
-        return self._grad_refresh_bound
-
-    @property
-    def data_aug_bound(self: any) -> any:
-        return self._data_aug_bound
-
-    @device_id.setter
-    def device_id(self: any, value: any) -> None:
-        self._device_id = value
-
-    @model_id.setter
-    def model_id(self: any, value: any) -> None:
-        self._model_id = value
-
-    @iteration_id.setter
-    def iteration_id(self: any, value: any) -> None:
-        self._iteration_id = value
-
-    @fp_start.setter
-    def fp_start(self: any, value: any) -> None:
-        if value == NumberConstant.NULL_NUMBER:
-            self._fp_start = value
-        else:
-            self._fp_start = InfoConfReader().time_from_syscnt(value, NumberConstant.MICRO_SECOND)
-
-    @bp_end.setter
-    def bp_end(self: any, value: any) -> None:
-        if value == NumberConstant.NULL_NUMBER:
-            self._bp_end = value
-        else:
-            self._bp_end = InfoConfReader().time_from_syscnt(value, NumberConstant.MICRO_SECOND)
-
-    @iteration_end.setter
-    def iteration_end(self: any, value: any) -> None:
-        if value == NumberConstant.NULL_NUMBER:
-            self._iteration_end = value
-        else:
-            self._iteration_end = InfoConfReader().time_from_syscnt(value, NumberConstant.MICRO_SECOND)
-
-    @iteration_time.setter
-    def iteration_time(self: any, value: any) -> None:
-        self._iteration_time = value
-
-    @fp_bp_time.setter
-    def fp_bp_time(self: any, value: any) -> None:
-        self._fp_bp_time = value
-
-    @grad_refresh_bound.setter
-    def grad_refresh_bound(self: any, value: any) -> None:
-        self._grad_refresh_bound = value
-
-    @data_aug_bound.setter
-    def data_aug_bound(self: any, value: any) -> None:
-        self._data_aug_bound = value
+    bp_end = None
+    data_aug_bound = None
+    device_id = None
+    fp_bp_time = None
+    fp_start = None
+    grad_refresh_bound = None
+    iteration_end = None
+    iteration_id = None
+    iteration_time = None
+    model_id = None
 
 
 Iteration = namedtuple("Iteration", ["model_id", "iteration_id", "iteration_count"])

@@ -2,59 +2,35 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
+from dataclasses import dataclass
 from profiling_bean.db_dto.event_data_dto import EventDataDto
+from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 
-class ApiDataDto:
+@dataclass
+class ApiDataDto(metaclass=InstanceCheckMeta):
     INVALID_LEVEL = -1
     INVALID_THREAD = -1
+    connection_id = None
+    end = None
+    id = None
+    item_id = None
+    level = None
+    request_id = None
+    start = None
+    struct_type = None
+    thread_id = None
 
     def __init__(self: any, begin_time=None, end_event_data_dto: EventDataDto = EventDataDto()) -> None:
         self.struct_type = end_event_data_dto.struct_type
-        self._id = None
-        self._level = end_event_data_dto.level
-        self._thread_id = end_event_data_dto.thread_id
-        self._start = begin_time
-        self._end = end_event_data_dto.timestamp
-        self._item_id = end_event_data_dto.item_id
-        self._request_id = end_event_data_dto.request_id
-        self._connection_id = end_event_data_dto.connection_id
-
-    @property
-    def struct_type(self: any) -> str:
-        return self._struct_type
-
-    @property
-    def id(self: any) -> str:
-        return str(self._id)
-
-    @property
-    def start(self: any) -> int:
-        return self._start
-
-    @property
-    def end(self: any) -> int:
-        return self._end
-
-    @property
-    def thread_id(self: any) -> int:
-        return self._thread_id
-
-    @property
-    def item_id(self: any) -> int:
-        return self._item_id
-
-    @property
-    def level(self: any) -> str:
-        return self._level
-
-    @property
-    def request_id(self: any) -> int:
-        return self._request_id
-
-    @property
-    def connection_id(self) -> int:
-        return self._connection_id
+        self.id = None
+        self.level = end_event_data_dto.level
+        self.thread_id = end_event_data_dto.thread_id
+        self.start = begin_time
+        self.end = end_event_data_dto.timestamp
+        self.item_id = end_event_data_dto.item_id
+        self.request_id = end_event_data_dto.request_id
+        self.connection_id = end_event_data_dto.connection_id
 
     @staticmethod
     def invalid_dto(level=INVALID_LEVEL, thread=INVALID_THREAD, start=-1, end=-1, struct_type=""):
@@ -67,39 +43,3 @@ class ApiDataDto:
         dto.item_id = ""
         dto.connection_id = None
         return dto
-
-    @struct_type.setter
-    def struct_type(self: any, value: any) -> None:
-        self._struct_type = value
-
-    @id.setter
-    def id(self: any, value: any) -> None:
-        self._id = value
-
-    @start.setter
-    def start(self: any, value: any) -> None:
-        self._start = value
-
-    @end.setter
-    def end(self: any, value: any) -> None:
-        self._end = value
-
-    @thread_id.setter
-    def thread_id(self: any, value: any) -> None:
-        self._thread_id = value
-
-    @item_id.setter
-    def item_id(self: any, value: any) -> None:
-        self._item_id = value
-
-    @level.setter
-    def level(self: any, value: any) -> None:
-        self._level = value
-
-    @request_id.setter
-    def request_id(self: any, value: any) -> None:
-        self._request_id = value
-
-    @connection_id.setter
-    def connection_id(self, value: int) -> None:
-        self._connection_id = value

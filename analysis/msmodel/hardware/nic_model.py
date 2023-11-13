@@ -170,12 +170,12 @@ class NicModel(BaseModel, ABC):
                                     nic_obj.timestamp,
                                     rx_eff,
                                     nic_obj.rx_packet,
-                                    nic_obj.rx_error_rate,
-                                    nic_obj.rx_dropped_rate,
+                                    nic_obj.rx_error_rate if nic_obj.rx_error_rate else Constant.DEFAULT_COUNT,
+                                    nic_obj.rx_dropped_rate if nic_obj.rx_dropped_rate else Constant.DEFAULT_COUNT,
                                     tx_eff,
-                                    nic_obj.tx_packet,
-                                    nic_obj.tx_error_rate,
-                                    nic_obj.tx_dropped_rate,
+                                    nic_obj.tx_packet if nic_obj.tx_packet else Constant.DEFAULT_COUNT,
+                                    nic_obj.tx_error_rate if nic_obj.tx_error_rate else Constant.DEFAULT_COUNT,
+                                    nic_obj.tx_dropped_rate if nic_obj.tx_dropped_rate else Constant.DEFAULT_COUNT,
                                     func_id])
 
         self.create_receivesend_db(target_data)
