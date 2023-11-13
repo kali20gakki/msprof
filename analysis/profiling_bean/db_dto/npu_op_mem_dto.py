@@ -20,4 +20,4 @@ class NpuOpMemDto(metaclass=InstanceCheckMeta):
     timestamp = None
     total_allocate_memory = None
     total_reserve_memory = None
-    type = None
+    type_ = None

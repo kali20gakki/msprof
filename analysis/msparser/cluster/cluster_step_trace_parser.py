@@ -89,9 +89,12 @@ class ClusterStepTraceParser(IParser):
         for idx, single_dto in enumerate(step_trace_data):
             step_trace_data[idx] = (
                 single_dto.device_id, single_dto.model_id, single_dto.iteration_id,
-                InfoConfReader().time_from_syscnt(single_dto.fp_start, NumberConstant.MICRO_SECOND),
-                InfoConfReader().time_from_syscnt(single_dto.bp_end, NumberConstant.MICRO_SECOND),
-                InfoConfReader().time_from_syscnt(single_dto.iteration_end, NumberConstant.MICRO_SECOND),
+                InfoConfReader().time_from_syscnt(single_dto.fp_start, NumberConstant.MICRO_SECOND)
+                if single_dto.fp_start != NumberConstant.NULL_NUMBER else single_dto.fp_start,
+                InfoConfReader().time_from_syscnt(single_dto.bp_end, NumberConstant.MICRO_SECOND)
+                if single_dto.bp_end != NumberConstant.NULL_NUMBER else single_dto.bp_end,
+                InfoConfReader().time_from_syscnt(single_dto.iteration_end, NumberConstant.MICRO_SECOND)
+                if single_dto.iteration_end != NumberConstant.NULL_NUMBER else single_dto.iteration_end,
                 single_dto.iteration_time, single_dto.fp_bp_time, single_dto.grad_refresh_bound,
                 single_dto.data_aug_bound
             )

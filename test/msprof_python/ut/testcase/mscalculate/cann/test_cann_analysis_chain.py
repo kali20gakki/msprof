@@ -18,7 +18,7 @@ from mscalculate.cann.cann_event_generator import CANNThreadDB
 from mscalculate.cann.event import Event
 from mscalculate.cann.event_queue import EventQueue
 from mscalculate.cann.tree import TreeNode
-from profiling_bean.db_dto.api_data_dto import ApiDataDto
+from profiling_bean.db_dto.api_data_dto import ApiDataDto, invalid_dto
 from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
 from profiling_bean.db_dto.task_track_dto import TaskTrackDto
 
@@ -90,7 +90,7 @@ class TestCANNAnalysisChain(unittest.TestCase):
         event_q, api_db, record_db = build_event_q()
         event_q.lock()
         chain = CANNAnalysisChain(1, CANNThreadDB(1, event_q, api_db, record_db), {})
-        root_api = ApiDataDto.invalid_dto('root', 1, 0, 300, 'root')
+        root_api = invalid_dto('root', 1, 0, 300, 'root')
         root_event = chain.db.add_api(root_api)
         root_node = TreeNode(root_event)
         tree = chain.build_tree(root_node)

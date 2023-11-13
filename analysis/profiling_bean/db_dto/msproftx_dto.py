@@ -9,7 +9,6 @@ from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 @dataclass
 class MsprofTxDto(metaclass=InstanceCheckMeta):
-    CHAR_LIST_SIZE = 128
     call_stack = Constant.NA
     category = 0
     dur_time = 0
