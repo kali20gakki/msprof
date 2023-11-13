@@ -10,16 +10,6 @@ cur_path = os.path.abspath(os.path.dirname(__file__))
 root_path = os.path.join(cur_path, "../")
 
 
-def generate_path_list_of_whl_package(prefix_dir: str = ""):
-    path_list = [
-        "analysis.msconfig", "analysis.msmodel.hardware", "analysis.msmodel.hccl", \
-        "analysis.msmodel.msproftx", "analysis.msmodel.runtime", "analysis.msparser.step_trace.helper", \
-        "analysis.profiling_bean.ge", "analysis.profiling_bean.hardware", "analysis.profiling_bean.helper", \
-        "analysis.viewer.association"
-    ]
-    return find_packages(prefix_dir) + path_list
-
-
 setup(
     name="msprof",
     version=__version__,
@@ -29,7 +19,7 @@ setup(
     author_email="",
     license="",
     package_dir={"": root_path},
-    packages=generate_path_list_of_whl_package(root_path),
+    packages=find_packages(root_path),
     include_package_data=False,
     package_data={
         "": ["*.json"]
