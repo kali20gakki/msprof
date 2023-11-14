@@ -5,12 +5,9 @@
 """
 This file used for basic python type modification
 """
-import sys
-
 from typing import OrderedDict
 from collections import namedtuple
 from collections import OrderedDict as _OrderedDict
-from operator import itemgetter
 
 
 class HighPerfDict(OrderedDict):
@@ -48,7 +45,7 @@ class CustomizedNamedtupleFactory:
             if not item.startswith("_") and item not in description_set and not item.isupper():
                 default_value = getattr(dto_class, item)
                 # whether the attribute is a function
-                if hasattr(default_value, "__call__"):
+                if callable(default_value):
                     continue
                 extend_columns[item] = default_value if default_value else None
         filed_names = [i[0] for i in description]
