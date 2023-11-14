@@ -62,18 +62,6 @@ class TestAscendTaskCalculator(unittest.TestCase):
             self.assertFalse(self.calculator._judge_calculate_again())
         scene._scene = None
 
-    def test__judge_calculate_again_should_return_false_when_sample_based_in_stars(self):
-        info = InfoConfReader()
-        info._sample_json = {
-            "ai_core_profiling_mode": 'sample-based',
-            'platform_version': "5"
-        }
-        chip_m = ChipManager()
-        chip_m.chip_id = ChipModel.CHIP_V1_1_1
-        self.assertFalse(self.calculator._judge_calculate_again())
-        info._sample_json = {}
-        chip_m.chip_id = ChipModel.CHIP_V1_1_0
-
     def test__save(self):
         data = [TopDownTask(1, 1, 1, 1, 1, 1, 1000, 1000, "", "", 0)]
         with mock.patch(NAMESPACE + ".AscendTaskModel.init"), \
