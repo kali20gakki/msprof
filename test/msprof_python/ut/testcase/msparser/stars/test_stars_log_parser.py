@@ -20,22 +20,28 @@ class TestStarsLogCalCulator(unittest.TestCase):
             check = StarsLogCalCulator({}, sample_config)
             check.init_dispatcher()
 
-    def test_calculate(self):
+    def test_calculate_when_db_exist_then_do_not_execute(self):
         ProfilingScene().set_all_export(False)
         with mock.patch(NAMESPACE + '.StarsLogCalCulator.init_dispatcher'), \
                 mock.patch(NAMESPACE + '.PathManager.get_data_file_path', return_value='123'), \
                 mock.patch('common_func.utils.Utils.get_scene', return_value='step_info'), \
-                mock.patch(NAMESPACE + '.StarsLogCalCulator._parse_by_iter'):
+                mock.patch('os.path.exists', return_value=False), \
+                mock.patch('logging.warning'):
             key = StarsLogCalCulator(file_list={DataTag.STARS_LOG: ['a_2']}, sample_config={'1': 'ada'})
+            key._parse_by_iter = mock.Mock()
             key.calculate()
+            key._parse_by_iter.assert_not_called()
         ProfilingScene().init(sample_config.get('result_dir'))
         ProfilingScene().set_all_export(True)
         with mock.patch(NAMESPACE + '.StarsLogCalCulator.init_dispatcher'), \
                 mock.patch(NAMESPACE + '.PathManager.get_data_file_path', return_value='123'), \
                 mock.patch('common_func.utils.Utils.get_scene', return_value='single_op'), \
-                mock.patch(NAMESPACE + '.StarsLogCalCulator._parse_all_file'):
+                mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch('logging.info'):
             key = StarsLogCalCulator(file_list={DataTag.STARS_LOG: ['a_2']}, sample_config={'1': 'ada'})
+            key._parse_all_file = mock.Mock()
             key.calculate()
+            key._parse_all_file.assert_not_called()
 
     def test_save(self):
         with mock.patch('msparser.stars.parser_dispatcher.ParserDispatcher.flush_all_parser'):
@@ -53,6 +59,7 @@ class TestStarsLogCalCulator(unittest.TestCase):
         ProfilingScene().set_all_export(True)
         data = struct.pack('=4HQ4HQ12Q', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         with mock.patch(NAMESPACE + '.PathManager.get_data_file_path'), \
+                mock.patch('os.path.exists', return_value=False), \
                 mock.patch('builtins.open', mock.mock_open(read_data=data)), \
                 mock.patch('os.path.getsize', return_value=128), \
                 mock.patch(NAMESPACE + '.FileOpen', return_value=FileOpen('a_2', 'rb')), \
@@ -71,12 +78,14 @@ class TestStarsLogCalCulator(unittest.TestCase):
         with mock.patch('common_func.utils.Utils.get_scene', return_value='step_info'), \
                 mock.patch('msparser.stars.parser_dispatcher.ParserDispatcher.init'), \
                 mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.init'), \
+                mock.patch('os.path.exists', return_value=True), \
                 mock.patch(NAMESPACE + '.HwtsIterModel.get_task_offset_and_sum', return_value=(0, 0)):
             key = StarsLogCalCulator(file_list={DataTag.STARS_LOG: ['a_2', 'b_1']},
                                      sample_config={'1': 'ada', 'result_dir': '11'})
             key.calculate()
         with mock.patch('msparser.stars.parser_dispatcher.ParserDispatcher.init'), \
                 mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.init'), \
+                mock.patch('os.path.exists', return_value=True), \
                 mock.patch(NAMESPACE + '.HwtsIterModel.get_task_offset_and_sum', return_value=(63, 63)), \
                 mock.patch(NAMESPACE + '.FileCalculator.prepare_process', return_value=(63, 63)):
             key = StarsLogCalCulator(file_list={DataTag.STARS_LOG: ['a_2', 'b_1']},

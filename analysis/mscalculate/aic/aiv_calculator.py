@@ -1,9 +1,13 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+import logging
 
+from common_func.db_manager import DBManager
+from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
+from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from mscalculate.aic.aic_calculator import AicCalculator
 from mscalculate.aic.aic_utils import AicPmuUtils
@@ -46,6 +50,11 @@ class AivCalculator(AicCalculator, MsMultiProcess):
         :return:
         """
         if self._sample_json.get('aiv_profiling_mode') == StrConstant.AIC_SAMPLE_BASED_MODE:
+            return
+        db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_METRICS_SUMMARY)
+        if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_METRIC_SUMMARY):
+            logging.info("The Table %s already exists in the %s, and won't be calculate again.",
+                         DBNameConstant.TABLE_METRIC_SUMMARY, DBNameConstant.DB_METRICS_SUMMARY)
             return
         self.init_params()
         if self._file_list:

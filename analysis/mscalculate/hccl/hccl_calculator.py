@@ -61,7 +61,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                 group_dict[data.group_name]["count"] = 0
             index = group_dict[data.group_name]["count"]
             communication_data[num] = data.replace(
-                op_name=data.op_name + "_" + data.group_name[-3:] + "_" + str(index))
+                op_name=f"{data.op_name}_ {data.group_name[-3:]}_{str(index)}_{str(data.iter_id)}")
 
     @staticmethod
     def _cal_total(type_time: dict) -> int:
@@ -167,10 +167,9 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             return True
         else:
             hccl_db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)
-            if DBManager.check_tables_in_db(hccl_db_path, DBNameConstant.TABLE_HCCL_SINGLE_DEVICE,
-                                            DBNameConstant.TABLE_HCCL_OP_REPORT):
-                logging.info("Found table %s and %s in operator scene, no need to generate again",
-                             DBNameConstant.TABLE_HCCL_SINGLE_DEVICE, DBNameConstant.TABLE_HCCL_OP_REPORT)
+            if DBManager.check_tables_in_db(hccl_db_path, DBNameConstant.TABLE_HCCL_SINGLE_DEVICE):
+                logging.info("Found table %s in operator scene, no need to generate again",
+                             DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
                 return False
             logging.info("No table %s or %s found, to generate it", DBNameConstant.TABLE_HCCL_SINGLE_DEVICE,
                          DBNameConstant.TABLE_HCCL_OP_REPORT)
@@ -227,11 +226,12 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             logging.warning("There is no hccl op report data. Maybe an error occurs during the calculation")
 
     def _merge_hccl_ops_and_tasks(self, hccl_ops: List[HcclOps], hccl_tasks: List[HcclTask]) -> List[HcclTask]:
-        def update_task_desc_with_hccl_op(op_desc: HcclOps, task_desc: any) -> HcclTask:
+        def update_task_desc_with_hccl_op(op_desc: HcclOps, task_desc: any, times_for_hccl_op: int) -> HcclTask:
             return task_desc.replace(op_name=op_desc.op_name,
                                      task_type=op_desc.task_type,
                                      op_type=op_desc.op_type,
                                      first_timestamp=op_desc.timestamp,
+                                     iter_id=times_for_hccl_op,
                                      is_dynamic=op_desc.is_dynamic,
                                      model_id=op_desc.model_id,
                                      connection_id=op_desc.connection_id)
@@ -244,6 +244,8 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         res = [None] * len(hccl_tasks)
         ops_queue = deque(hccl_ops)
         task_queue = deque(hccl_tasks)
+        hccl_op_with_task = set()
+        hccl_op_with_task_index = {}
         while ops_queue and task_queue:
             op = ops_queue.popleft()
             # check corner case: task time between last op end time and next op start time
@@ -253,7 +255,13 @@ class HcclCalculator(ICalculator, MsMultiProcess):
 
             while task_queue and task_queue[0].host_timestamp <= (op.timestamp + op.duration):
                 task = task_queue.popleft()
-                task = update_task_desc_with_hccl_op(op, task)
+                key = f'{task.stream_id}-{task.task_id}-{task.context_id}'
+                count = 1
+                if key in hccl_op_with_task:
+                    count = hccl_op_with_task_index.get(key, 1) + 1
+                    hccl_op_with_task_index[key] = count
+                hccl_op_with_task.add(key)
+                task = update_task_desc_with_hccl_op(op, task, count)
                 res[idx] = task
                 idx += 1
 
@@ -263,5 +271,3 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             logging.error('task_queue is not empty (len=%d)', len(task_queue))
 
         return res[:idx]
-
-

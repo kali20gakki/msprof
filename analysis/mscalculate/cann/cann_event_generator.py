@@ -22,7 +22,7 @@ from msmodel.compact_info.memcpy_info_model import MemcpyInfoModel
 from msmodel.compact_info.node_basic_info_model import NodeBasicInfoModel
 from msmodel.compact_info.task_track_model import TaskTrackModel
 from msmodel.event.event_data_model import EventDataModel
-from profiling_bean.db_dto.api_data_dto import ApiDataDto
+from profiling_bean.db_dto.api_data_dto import ApiDataDto, generate_api_data_from_event
 from profiling_bean.db_dto.ctx_id_dto import CtxIdDto
 from profiling_bean.db_dto.event_data_dto import EventDataDto
 from profiling_bean.db_dto.fusion_op_info_dto import FusionOpInfoDto
@@ -137,7 +137,7 @@ class CANNEventGenerator:
                 continue
             else:
                 # represent 2 event with an api
-                equal_api = ApiDataDto(friend_timestamp, event_data_dto)
+                equal_api = generate_api_data_from_event(friend_timestamp, event_data_dto)
                 event = self.api_databases.set_default_call_obj_later(
                     equal_api.thread_id, ApiDataDatabase, equal_api.thread_id).put(equal_api)
                 self.event_queues.set_default_call_obj_later(event.thread_id, EventQueue, event.thread_id).add(event)

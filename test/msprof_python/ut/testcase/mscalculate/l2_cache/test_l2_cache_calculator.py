@@ -196,6 +196,15 @@ class TestL2CacheCalculator(unittest.TestCase):
             check._l2_cache_events = ['0x5b', '0x59', '0x5c', '0x7d', '0x7e', '0x71', '0x79', '0x7c']
             check.ms_run()
 
+    def test_ms_run_when_table_exist_then_do_not_execute(self: any):
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=self.sample_config), \
+                mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch('logging.info'):
+            check = L2CacheCalculator(self.file_list, self.sample_config)
+            check.calculate = mock.Mock()
+            check.ms_run()
+            check.calculate.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -45,6 +45,18 @@ class TestMiniMiniAicCalculator(unittest.TestCase):
             ProfilingScene()._scene = "single_op"
             check.ms_run()
 
+    def test_ms_run_when_table_exist_then_do_not_execute(self):
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config",
+                        return_value={'ai_core_profiling_mode': 'task-based'}), \
+                mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch('logging.info'):
+            check = MiniAicCalculator(self.file_list, CONFIG)
+            check.calculate = mock.Mock()
+            check.save = mock.Mock()
+            check.ms_run()
+            check.calculate.assert_not_called()
+            check.save.assert_not_called()
+
     def test_ms_run_should_return_ok_when_EventCount_exist(self):
         metrics = [
             'total_time(ms)', 'total_cycles', 'vec_ratio', 'mac_ratio', 'scalar_ratio',

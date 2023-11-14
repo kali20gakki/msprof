@@ -27,6 +27,7 @@ class AnalyzeCommand:
     def process(self: any) -> None:
         if DataCheckManager.check_prof_level0(self.collection_path):
             warn(self.FILE_NAME, "Analyze will do nothing in prof level 0.")
+            self._clear_dir(self.collection_path)
             return
         analyze_handler = {
             'communication': CommunicationAnalyzer,

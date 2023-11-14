@@ -2,105 +2,17 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
+from dataclasses import dataclass
 from common_func.constant import Constant
+from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 
-class HCCLOperatorDto:
-    DEFAULT_REFLECTOR = {
-        "fusion_data": (),
-        "model_id": Constant.DEFAULT_INVALID_VALUE,
-        "index_id": Constant.DEFAULT_INVALID_VALUE,
-        "op_name": Constant.NA,
-        "op_type": Constant.NA,
-        "start_time": Constant.DEFAULT_INVALID_VALUE,
-        "end_time": Constant.DEFAULT_INVALID_VALUE,
-        "overlap_time": Constant.DEFAULT_INVALID_VALUE
-    }
-
-    def __init__(self: any) -> None:
-        self._fusion_data = ()
-        self._model_id = Constant.DEFAULT_INVALID_VALUE
-        self._index_id = Constant.DEFAULT_INVALID_VALUE
-        self._op_name = Constant.NA
-        self._op_type = Constant.NA
-        self._start_time = Constant.DEFAULT_INVALID_VALUE
-        self._end_time = Constant.DEFAULT_INVALID_VALUE
-        self._overlap_time = Constant.DEFAULT_INVALID_VALUE
-
-    @property
-    def model_id(self: any) -> any:
-        """
-        for model id
-        """
-        return self._model_id
-
-    @property
-    def index_id(self: any) -> any:
-        """
-        for index id
-        """
-        return self._index_id
-
-    @property
-    def op_name(self: any) -> any:
-        """
-        for op name
-        """
-        return self._op_name
-
-    @property
-    def op_type(self: any) -> any:
-        """
-        for op type
-        """
-        return self._op_type
-
-    @property
-    def start_time(self: any) -> any:
-        """
-        for start time
-        """
-        return self._start_time
-
-    @property
-    def end_time(self: any) -> any:
-        """
-        for duration
-        """
-        return self._end_time
-
-
-    @property
-    def overlap_time(self: any) -> any:
-        """
-        for overlap time
-        """
-        return self._overlap_time
-
-    @model_id.setter
-    def model_id(self: any, value: any) -> None:
-        self._model_id = value
-
-    @index_id.setter
-    def index_id(self: any, value: any) -> None:
-        self._index_id = value
-
-    @op_name.setter
-    def op_name(self: any, value: any) -> None:
-        self._op_name = value
-
-    @op_type.setter
-    def op_type(self: any, value: any) -> None:
-        self._op_type = value
-
-    @start_time.setter
-    def start_time(self: any, value: any) -> None:
-        self._start_time = value
-
-    @end_time.setter
-    def end_time(self: any, value: any) -> None:
-        self._end_time = value
-
-    @overlap_time.setter
-    def overlap_time(self: any, value: any) -> None:
-        self._overlap_time = value
+@dataclass
+class HCCLOperatorDto(metaclass=InstanceCheckMeta):
+    end_time = Constant.DEFAULT_INVALID_VALUE
+    index_id = Constant.DEFAULT_INVALID_VALUE
+    model_id = Constant.DEFAULT_INVALID_VALUE
+    op_name = Constant.NA
+    op_type = Constant.NA
+    overlap_time = Constant.DEFAULT_INVALID_VALUE
+    start_time = Constant.DEFAULT_INVALID_VALUE

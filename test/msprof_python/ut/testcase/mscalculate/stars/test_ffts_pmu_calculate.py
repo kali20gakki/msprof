@@ -11,14 +11,14 @@ from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.profiling_scene import ProfilingScene
 from constant.constant import CONFIG
-from mscalculate.stars.ffts_pmu_calculate import FftsPmuCalculate
+from mscalculate.stars.ffts_pmu_calculator import FftsPmuCalculator
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.stars.ffts_pmu import FftsPmuBean
 
-NAMESPACE = 'mscalculate.stars.ffts_pmu_calculate'
+NAMESPACE = 'mscalculate.stars.ffts_pmu_calculator'
 
 
-class TestFftsPmuCalculate(TestCase):
+class TestFftsPmuCalculator(TestCase):
     file_list = {DataTag.FFTS_PMU: ['ffts_profile.data.0.slice_0']}
 
     def setUp(self):
@@ -28,16 +28,16 @@ class TestFftsPmuCalculate(TestCase):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config",
                         return_value={"ai_core_profiling_mode": "sample-based",
                                       "aiv_profiling_mode": "sample-based"}):
-            check = FftsPmuCalculate(self.file_list, CONFIG)
+            check = FftsPmuCalculator(self.file_list, CONFIG)
             check.ms_run()
 
     def test_ms_run_task_based(self):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config",
                         return_value={"ai_core_profiling_mode": "task-based", "aiv_profiling_mode": "task-based"}), \
-                mock.patch(NAMESPACE + '.FftsPmuCalculate.calculate'), \
-                mock.patch(NAMESPACE + '.FftsPmuCalculate.init_params'), \
-                mock.patch(NAMESPACE + '.FftsPmuCalculate.save'):
-            check = FftsPmuCalculate(self.file_list, CONFIG)
+                mock.patch(NAMESPACE + '.FftsPmuCalculator.calculate'), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator.init_params'), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator.save'):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
             check.ms_run()
 
     def test_calculate_by_iter_no_table(self):
@@ -51,7 +51,7 @@ class TestFftsPmuCalculate(TestCase):
                 mock.patch("msmodel.interface.base_model.BaseModel.create_table"), \
                 mock.patch(NAMESPACE + '.HwtsIterModel.check_db', return_value=True), \
                 mock.patch(NAMESPACE + '.HwtsIterModel.check_table', return_value=False):
-            check = FftsPmuCalculate(self.file_list, CONFIG)
+            check = FftsPmuCalculator(self.file_list, CONFIG)
             check.calculate()
 
     def test_calculate_by_iter_table_exist_and_save(self):
@@ -79,7 +79,7 @@ class TestFftsPmuCalculate(TestCase):
                                         b'\xafH\x03\x00\x00\xe9"+\xafH\x03\x00\x00'), \
                 mock.patch(NAMESPACE + ".FftsPmuModel.create_table"), \
                 mock.patch(NAMESPACE + '.FftsPmuModel.flush'):
-            check = FftsPmuCalculate(self.file_list, CONFIG)
+            check = FftsPmuCalculator(self.file_list, CONFIG)
             InfoConfReader()._info_json = {'DeviceInfo': [{'aic_frequency': 1500, 'hwts_frequency': 1000}]}
             check._core_num_dict = {'aic': 30, 'aiv': 0}
             check._block_dims = {'2-2': [22, 22]}
@@ -99,6 +99,9 @@ class TestFftsPmuCalculate(TestCase):
                 mock.patch(NAMESPACE + '.HwtsIterModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + '.HwtsIterModel.get_task_offset_and_sum', return_value=[0, 100]), \
                 mock.patch(NAMESPACE + '.PathManager.get_data_file_path'), \
+                mock.patch(NAMESPACE + ".FileOpen"), \
+                mock.patch(NAMESPACE + ".FileOpen.file_reader.read"), \
+                mock.patch('common_func.file_manager.check_path_valid'), \
                 mock.patch('os.path.getsize', return_value=1280), \
                 mock.patch(NAMESPACE + '.HwtsIterModel.get_aic_sum_count', return_value=50), \
                 mock.patch(NAMESPACE + '.FileCalculator.prepare_process',
@@ -111,7 +114,7 @@ class TestFftsPmuCalculate(TestCase):
                                         b'\xafH\x03\x00\x00\xe9"+\xafH\x03\x00\x00'), \
                 mock.patch(NAMESPACE + ".FftsPmuModel.create_table"), \
                 mock.patch(NAMESPACE + '.FftsPmuModel.flush'):
-            mixCalcute = FftsPmuCalculate(self.file_list, CONFIG)
+            mixCalcute = FftsPmuCalculator(self.file_list, CONFIG)
             InfoConfReader()._info_json = {'DeviceInfo': [{'aic_frequency': 1500, 'hwts_frequency': 1000}]}
             mixCalcute._core_num_dict = {'aic': 30, 'aiv': 0}
             mixCalcute._block_dims = {'2-2': [22, 22]}
@@ -136,13 +139,24 @@ class TestFftsPmuCalculate(TestCase):
                                         b'\x00\x00\x00\x00`\x00\x00\x00\x00\x00\x00\x00\x95Z.\x00\x00\x00\x00\x00'
                                         b'\x976\x00\x00\x00\x00\x00\x00\xb4\n\x00\x00\x00\x00\x00\x00\x05\x19+\xafH'
                                         b'\x03\x00\x00\xe9"+\xafH\x03\x00\x00'):
-            check = FftsPmuCalculate(self.file_list, CONFIG)
+            check = FftsPmuCalculator(self.file_list, CONFIG)
             check.calculate()
+
+    def test_calculate_when_table_exist_then_do_not_execute(self):
+        ProfilingScene().set_all_export(True)
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.Utils.get_scene', return_value=Constant.SINGLE_OP), \
+                mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch('logging.info'):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            check._parse_all_file = mock.Mock()
+            check.calculate()
+            check._parse_all_file.assert_not_called()
 
     def test_save_no_data(self):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.logging.warning'):
-            check = FftsPmuCalculate(self.file_list, CONFIG)
+            check = FftsPmuCalculator(self.file_list, CONFIG)
             check.save()
 
     def test_calculate_block_pmu_list(self):
@@ -155,8 +169,8 @@ class TestFftsPmuCalculate(TestCase):
                            return_value=['vec_ratio', 'mac_ratio', 'scalar_ratio',
                                          'mte1_ratio', 'mte2_ratio', 'mte3_ratio',
                                          'icache_req_ratio', 'icache_miss_rate']), \
-                mock.patch(NAMESPACE + '.FftsPmuCalculate._get_pmu_value'):
-            check = FftsPmuCalculate(self.file_list, CONFIG)
+                mock.patch(NAMESPACE + '.FftsPmuCalculator._get_pmu_value'):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
             check.calculate_block_pmu_list(pmu_data_list[1])
             check.calculate_block_pmu_list(pmu_data_list[0])
 
@@ -171,14 +185,14 @@ class TestFftsPmuCalculate(TestCase):
                            return_value=['vec_ratio', 'mac_ratio', 'scalar_ratio',
                                          'mte1_ratio', 'mte2_ratio', 'mte3_ratio',
                                          'icache_req_ratio', 'icache_miss_rate']), \
-                mock.patch(NAMESPACE + '.FftsPmuCalculate._get_pmu_value'):
-            check = FftsPmuCalculate(self.file_list, CONFIG)
+                mock.patch(NAMESPACE + '.FftsPmuCalculator._get_pmu_value'):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
             check.block_dict = block_dict
             check.add_block_pmu_list()
 
     def test_get_current_freq(self):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}):
-            check = FftsPmuCalculate(self.file_list, CONFIG)
+            check = FftsPmuCalculator(self.file_list, CONFIG)
             check._freq = 1850000000
             check.freq_data = []
             self.assertEqual(check._get_current_freq(1500), 1850000000)
@@ -194,10 +208,10 @@ class TestFftsPmuCalculate(TestCase):
     def test_calculate_total_time_when_get_total_cycle_then_return_total_time(self):
         data = [1, 2, 3, 4, 5, 6, 7, 89, 9, 1, 4, 5, 6, 789, 9, 5, 5, 5, 6, 7, 9, 54, 1, 55, 5]
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
-                mock.patch(NAMESPACE + '.FftsPmuCalculate._is_not_mix_main_core', side_effect=[True, False]), \
-                mock.patch(NAMESPACE + '.FftsPmuCalculate._get_current_freq', return_value=40), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator._is_not_mix_main_core', side_effect=[True, False]), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator._get_current_freq', return_value=40), \
                 mock.patch(NAMESPACE + '.Utils.cal_total_time', return_value=100):
-            check = FftsPmuCalculate(self.file_list, CONFIG)
+            check = FftsPmuCalculator(self.file_list, CONFIG)
             check._core_num_dict = {"aic": 20}
             check._freq = 1800
             check.freq_data = [[1000, 1800], [2000, 800], [4000, 1800]]

@@ -8,9 +8,12 @@ NAMESPACE = 'msinterface.msprof_job_summary'
 
 
 class TestMsprofJobSummary(unittest.TestCase):
-    def test_export(self):
+    def test_export_success_when_command_type_is_timeline(self):
         with mock.patch(NAMESPACE + '.MsprofJobSummary._export_msprof_timeline'):
-            MsprofJobSummary('test').export()
+            MsprofJobSummary('test').export('timeline')
+            
+    def test_export_success_when_command_type_is_summary(self):
+        MsprofJobSummary('test').export('summary')
 
     def test_export_msprof_timeline(self):
         with mock.patch(NAMESPACE + '.MsprofJobSummary._get_host_timeline_data', return_value=[]), \
