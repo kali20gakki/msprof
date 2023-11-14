@@ -65,8 +65,6 @@ class AscendTaskCalculator(MsMultiProcess):
         self.model.finalize()
 
     def _judge_calculate_again(self):
-        if ChipManager().is_stars_chip() and InfoConfReader().get_ai_core_profiling_mode() == 'sample-based':
-            return False
         if not ProfilingScene().is_operator():
             logging.info("In graph scene, to generate table %s", DBNameConstant.TABLE_ASCEND_TASK)
             return True
