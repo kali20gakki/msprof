@@ -88,8 +88,8 @@ class HcclViewModel(ViewModel):
         sql = "SELECT a.model_id as model_id, a.index_id as index_id, a.name as hccl_name, a.plane_id as plane_id, " \
               "a.args as args, a.timestamp as host_timestamp, " \
               "a.group_name as group_name, b.start_time as timestamp, a.is_master as is_master, " \
-              "b.connection_id as connection_id, b.duration as duration from {0} as a inner join " \
-              "{1} as b on " \
+              "b.connection_id as connection_id, b.duration as duration, a.stream_id, a.task_id, a.context_id" \
+              " from {0} as a inner join {1} as b on " \
               "a.stream_id = b.stream_id " \
               "and a.task_id = b.task_id " \
               "and a.batch_id = b.batch_id " \
