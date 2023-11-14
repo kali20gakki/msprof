@@ -71,8 +71,8 @@ class NpuOpMemCalculator(ICalculator, MsMultiProcess):
         if not conn or not curs:
             return False
         if DBManager.check_tables_in_db(npu_op_mem_db_path,
-                                        [DBNameConstant.TABLE_NPU_OP_MEM,
-                                         DBNameConstant.TABLE_NPU_OP_MEM_REC]):
+                                        DBNameConstant.TABLE_NPU_OP_MEM,
+                                        DBNameConstant.TABLE_NPU_OP_MEM_REC):
             logging.info("Found table %s and %s, no need to generate again",
                          DBNameConstant.TABLE_NPU_OP_MEM, DBNameConstant.TABLE_NPU_OP_MEM_REC)
             return False

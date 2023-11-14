@@ -35,3 +35,6 @@ function(run_test test_case)
         TASK_NUM 1
     )
 endfunction()
+add_subdirectory(entities)
+add_subdirectory(utils)
+add_subdirectory(dfx)
