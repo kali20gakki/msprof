@@ -37,7 +37,7 @@ public:
     explicit Tree(const std::shared_ptr<TreeNode> &rootNode) : root_(rootNode)
     {}
     // 获取根节点
-    std::shared_ptr<TreeNode> &GetRoot();
+    std::shared_ptr<TreeNode> GetRoot() const;
     // 层序遍历打印Tree结构便于问题定位
     void Show();
 private:

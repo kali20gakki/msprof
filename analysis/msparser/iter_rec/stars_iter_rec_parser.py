@@ -64,10 +64,6 @@ class StarsIterRecParser(IParser, MsMultiProcess):
         multiprocess to parse hwts data
         :return: None
         """
-        if (ChipManager().is_chip_v1_1() or ChipManager().is_chip_v4()) and \
-                InfoConfReader().get_ai_core_profiling_mode() == 'sample-based':
-            logging.warning("Stars parse is not supported in this chip with sample-based scene")
-            return
         try:
             if self._file_list and not ProfilingScene().is_operator() and self._is_need_to_calculate():
                 self.parse()
