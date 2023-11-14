@@ -9,6 +9,6 @@ from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 @dataclass
 class GeHashDto(metaclass=InstanceCheckMeta):
-    hash_key = None
-    hash_value = None
-    level = None
+    hash_key: str = None
+    hash_value: str = None
+    level: str = None

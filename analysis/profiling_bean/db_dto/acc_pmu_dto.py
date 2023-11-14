@@ -10,12 +10,12 @@ class AccPmuOriDto(metaclass=InstanceCheckMeta):
     """
     Dto for acc pmu data
     """
-    acc_id = None
-    block_id = None
-    read_bandwidth = None
-    read_ost = None
-    stream_id = None
-    task_id = None
-    timestamp = None
-    write_bandwidth = None
-    write_ost = None
+    acc_id: int = None
+    block_id: int = None
+    read_bandwidth: int = None
+    read_ost: int = None
+    stream_id: int = None
+    task_id: int = None
+    timestamp: float = None
+    write_bandwidth: int = None
+    write_ost: int = None

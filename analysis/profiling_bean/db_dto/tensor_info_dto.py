@@ -8,16 +8,16 @@ from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 @dataclass
 class TensorInfoDto(metaclass=InstanceCheckMeta):
-    data_len = None
-    input_data_types = None
-    input_formats = None
-    input_shapes = None
-    level = None
-    op_name = None
-    output_data_types = None
-    output_formats = None
-    output_shapes = None
-    struct_type = None
-    tensor_num = None
-    thread_id = None
-    timestamp = None
+    data_len: int = None
+    input_data_types: str = None
+    input_formats: str = None
+    input_shapes: str = None
+    level: str = None
+    op_name: str = None
+    output_data_types: str = None
+    output_formats: str = None
+    output_shapes: str = None
+    struct_type: str = None
+    tensor_num: int = None
+    thread_id: int = None
+    timestamp: float = None

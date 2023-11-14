@@ -9,10 +9,10 @@ from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 @dataclass
 class HCCLOperatorDto(metaclass=InstanceCheckMeta):
-    end_time = Constant.DEFAULT_INVALID_VALUE
-    index_id = Constant.DEFAULT_INVALID_VALUE
-    model_id = Constant.DEFAULT_INVALID_VALUE
-    op_name = Constant.NA
-    op_type = Constant.NA
-    overlap_time = Constant.DEFAULT_INVALID_VALUE
-    start_time = Constant.DEFAULT_INVALID_VALUE
+    end_time: float = Constant.DEFAULT_INVALID_VALUE
+    index_id: int = Constant.DEFAULT_INVALID_VALUE
+    model_id: int = Constant.DEFAULT_INVALID_VALUE
+    op_name: str = Constant.NA
+    op_type: str = Constant.NA
+    overlap_time: float = Constant.DEFAULT_INVALID_VALUE
+    start_time: float = Constant.DEFAULT_INVALID_VALUE

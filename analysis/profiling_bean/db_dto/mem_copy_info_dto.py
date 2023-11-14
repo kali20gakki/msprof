@@ -9,10 +9,10 @@ from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 @dataclass
 class MemCopyInfoDto(metaclass=InstanceCheckMeta):
-    data_len = None
-    data_size = None
-    level = None
-    memcpy_direction = None
-    struct_type = None
-    thread_id = None
-    timestamp = None
+    data_len: int = None
+    data_size: int = None
+    level: str = None
+    memcpy_direction: str = None
+    struct_type: str = None
+    thread_id: int = None
+    timestamp: float = None

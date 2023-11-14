@@ -9,17 +9,17 @@ from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 @dataclass
 class GeTaskDto(metaclass=InstanceCheckMeta):
-    batch_id = None
-    block_dim = None
-    context_id = None
-    index_id = None
-    mix_block_dim = None
-    model_id = None
-    op_name = None
-    op_state = None
-    op_type = None
-    stream_id = None
-    task_id = None
-    task_type = None
-    thread_id = None
-    timestamp = None
+    batch_id: int = None
+    block_dim: int = None
+    context_id: int = None
+    index_id: int = None
+    mix_block_dim: int = None
+    model_id: int = None
+    op_name: str = None
+    op_state: str = None
+    op_type: str = None
+    stream_id: int = None
+    task_id: str = None
+    task_type: int = None
+    thread_id: int = None
+    timestamp: float = None
