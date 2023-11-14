@@ -27,6 +27,6 @@ class NanoPmuDto:
 
     @property
     def pmu_list(self: any) -> any:
-        return [self._pmu0, self._pmu1, self._pmu2, self._pmu3,
-                self._pmu4, self._pmu5, self._pmu6, self._pmu7,
-                self._pmu8, self._pmu9]
+        return [self.pmu0, self.pmu1, self.pmu2, self.pmu3,
+                self.pmu4, self.pmu5, self.pmu6, self.pmu7,
+                self.pmu8, self.pmu9]
