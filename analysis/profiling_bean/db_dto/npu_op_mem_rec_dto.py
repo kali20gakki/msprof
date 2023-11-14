@@ -11,8 +11,8 @@ class NpuOpMemRecDto(metaclass=InstanceCheckMeta):
     """
     Dto for npu op mem data
     """
-    component = None
-    device_type = None
-    timestamp = None
-    total_allocate_memory = None
-    total_reserve_memory = None
+    component: str = None
+    device_type: str = None
+    timestamp: float = None
+    total_allocate_memory: int = None
+    total_reserve_memory: int = None

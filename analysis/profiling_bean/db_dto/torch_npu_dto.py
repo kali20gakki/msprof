@@ -10,15 +10,15 @@ class TorchNpuDto(metaclass=InstanceCheckMeta):
     """
     Dto for relationship between torch op and npu kernel
     """
-    acl_compile_time = None
-    acl_end_time = None
-    acl_start_time = None
-    acl_tid = None
-    batch_id = None
-    context_id = None
-    op_name = None
-    stream_id = None
-    task_id = None
-    torch_op_pid = None
-    torch_op_start_time = None
-    torch_op_tid = None
+    acl_compile_time: int = None
+    acl_end_time: int = None
+    acl_start_time: int = None
+    acl_tid: int = None
+    batch_id: int = None
+    context_id: int = None
+    op_name: str = None
+    stream_id: int = None
+    task_id: int = None
+    torch_op_pid: int = None
+    torch_op_start_time: int = None
+    torch_op_tid: int = None

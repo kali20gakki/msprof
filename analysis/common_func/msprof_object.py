@@ -8,6 +8,7 @@ This file used for basic python type modification
 from typing import OrderedDict
 from collections import namedtuple
 from collections import OrderedDict as _OrderedDict
+from dataclasses import fields
 
 
 class HighPerfDict(OrderedDict):
@@ -39,15 +40,10 @@ class CustomizedNamedtupleFactory:
         """
         description_set = {i[0] for i in description}
         extend_columns = _OrderedDict()
-        # get all attribute of dto class by dir()
-        for item in dir(dto_class):
-            # filter magic methods which start with "_"
-            if not item.startswith("_") and item not in description_set and not item.isupper():
-                default_value = getattr(dto_class, item)
-                # whether the attribute is a function
-                if callable(default_value):
-                    continue
-                extend_columns[item] = default_value if default_value else None
+        # get all attribute of dataclass by fields()
+        for item in fields(dto_class):
+            if item.name not in description_set:
+                extend_columns[item.name] = item.default
         filed_names = [i[0] for i in description]
         # place name that in dto and not in sql at the end, use extend slightly improve efficiency
         filed_names.extend(extend_columns.keys())
