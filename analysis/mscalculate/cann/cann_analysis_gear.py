@@ -391,7 +391,6 @@ class TaskGear(CANNGear):
             elif isinstance(record.dto, TaskTrackDto) and task_track_dto.struct_type is None:
                 # RUNTIME sometimes report multiple task tracks in one api call,
                 # in which case, only the first task track is valid
-                tmp = isinstance(record.dto, TaskTrackDto)
                 task_track_dto = record.dto
         return mem_cpy_info_dto, task_track_dto
 

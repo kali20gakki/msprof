@@ -42,7 +42,10 @@ class FlipCalculator:
                     batch_id += 1  # next flip
                     FlipCalculator.calibrate_when_flip_task_id_not_zero(data, flip, task_index, batch_id)
                     continue
-                task.batch_id = batch_id
+                if isinstance(task, tuple):
+                    data[task_index] = task.replace(batch_id=batch_id)
+                else:
+                    task.batch_id = batch_id
                 task_index += 1  # next task
 
     @staticmethod

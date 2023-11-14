@@ -8,7 +8,7 @@ This file used for basic python type modification
 from typing import OrderedDict
 from collections import namedtuple
 from collections import OrderedDict as _OrderedDict
-from dataclasses import fields
+from dataclasses import fields, MISSING
 
 
 class HighPerfDict(OrderedDict):
@@ -43,7 +43,12 @@ class CustomizedNamedtupleFactory:
         # get all attribute of dataclass by fields()
         for item in fields(dto_class):
             if item.name not in description_set:
-                extend_columns[item.name] = item.default
+                # dataclass use an object to represent default value if not defined, should be replaced by None,
+                # otherwise it may throw error when insert the tuple into db
+                if item.default == MISSING:
+                    extend_columns[item.name] = None
+                else:
+                    extend_columns[item.name] = item.default
         filed_names = [i[0] for i in description]
         # place name that in dto and not in sql at the end, use extend slightly improve efficiency
         filed_names.extend(extend_columns.keys())
@@ -51,7 +56,12 @@ class CustomizedNamedtupleFactory:
         defaults.extend(extend_columns.values())
         # use the same name as the dto, when call isinstance compare __name__
         base_tuple = namedtuple(dto_class.__name__, filed_names, defaults=defaults)
-        return CustomizedNamedtupleFactory._enhance_namedtuple(base_tuple, {})
+        # get all reserved functions
+        extra_properties = {}
+        for name in dir(dto_class):
+            if isinstance(getattr(dto_class, name), property):
+                extra_properties[name] = getattr(dto_class, name)
+        return CustomizedNamedtupleFactory._enhance_namedtuple(base_tuple, extra_properties)
 
     @staticmethod
     def _enhance_namedtuple(tuple_type: type, function_dict: dict):

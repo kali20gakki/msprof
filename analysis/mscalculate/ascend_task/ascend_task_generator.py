@@ -13,14 +13,12 @@ from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.platform.chip_manager import ChipManager
+from common_func.msprof_object import CustomizedNamedtupleFactory
 from mscalculate.ascend_task.ascend_task import DeviceTask
 from mscalculate.ascend_task.ascend_task import HostTask
 from mscalculate.ascend_task.device_task_collector import DeviceTaskCollector
 from mscalculate.ascend_task.host_task_collector import HostTaskCollector
-
-TopDownTask = namedtuple("TopDownTask", ["model_id", "index_id", "stream_id", "task_id", "context_id",
-                                         "batch_id", "start_time", "duration", "host_task_type", "device_task_type",
-                                         "connection_id"])
+from mscalculate.ascend_task.ascend_task import TopDownTask
 
 
 class AscendTaskGenerator:
@@ -30,6 +28,7 @@ class AscendTaskGenerator:
         self.device_task_collector = DeviceTaskCollector(result_dir)
         self.host_task_collector = HostTaskCollector(result_dir)
         self.iter_id = -1
+        self.top_down_task_tuple_type = CustomizedNamedtupleFactory.generate_named_tuple_from_dto(TopDownTask, [])
 
     @classmethod
     def _sep_task_by_stream_task_ctx(cls, tasks: Union[List[DeviceTask], List[HostTask]]) -> dict:
@@ -68,17 +67,19 @@ class AscendTaskGenerator:
 
     def _gen_top_down_task(self, dt: DeviceTask, ht: HostTask) -> TopDownTask:
         # wait time will calculate after this
-        return TopDownTask(ht.model_id, self.iter_id, ht.stream_id, ht.task_id, dt.context_id, ht.batch_id,
-                           dt.timestamp, dt.duration, ht.task_type, dt.task_type, ht.connection_id)
+        return self.top_down_task_tuple_type(ht.model_id, self.iter_id, ht.stream_id, ht.task_id, dt.context_id,
+                                             ht.batch_id,
+                                             dt.timestamp, dt.duration, ht.task_type, dt.task_type, ht.connection_id)
 
     def _gen_top_down_task_by_device_task(self, dt: DeviceTask) -> TopDownTask:
-        return TopDownTask(Constant.GE_OP_MODEL_ID, self.iter_id, dt.stream_id, dt.task_id, dt.context_id,
-                           dt.batch_id, dt.timestamp, dt.duration,
-                           Constant.TASK_TYPE_UNKNOWN, dt.task_type, Constant.DEFAULT_INVALID_VALUE)
+        return self.top_down_task_tuple_type(Constant.GE_OP_MODEL_ID, self.iter_id, dt.stream_id, dt.task_id,
+                                             dt.context_id, dt.batch_id, dt.timestamp, dt.duration,
+                                             Constant.TASK_TYPE_UNKNOWN, dt.task_type, Constant.DEFAULT_INVALID_VALUE)
 
     def _gen_top_down_task_by_host_task(self, ht: HostTask) -> TopDownTask:
-        return TopDownTask(ht.model_id, self.iter_id, ht.stream_id, ht.task_id, ht.context_id,
-                           ht.batch_id, -1, -1, ht.task_type, Constant.TASK_TYPE_UNKNOWN, ht.connection_id)
+        return self.top_down_task_tuple_type(ht.model_id, self.iter_id, ht.stream_id, ht.task_id, ht.context_id,
+                                             ht.batch_id, -1, -1, ht.task_type, Constant.TASK_TYPE_UNKNOWN,
+                                             ht.connection_id)
 
     def _match_host_device_task_in_static_model(self, host_task: HostTask, device_tasks: List[DeviceTask]) \
             -> List[TopDownTask]:

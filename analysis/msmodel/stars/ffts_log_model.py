@@ -12,6 +12,7 @@ from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.sql_helper import SqlWhereCondition
 from msmodel.sqe_type_map import SqeType
 from profiling_bean.db_dto.task_time_dto import TaskTimeDto
+from mscalculate.ascend_task.ascend_task import DeviceTask
 
 
 class FftsLogModel(ParserModel):
@@ -82,13 +83,13 @@ class FftsLogModel(ParserModel):
 
     def get_ffts_plus_sub_task_data_within_time_range(self: any, start_time: float, end_time: float) -> list:
         # ffts+ task subtask_id is stored in db
-        sql = "select {0}.stream_id, {0}.task_id, {0}.subtask_id, {0}.start_time, " \
-              "({0}.end_time - {0}.start_time) as duration_time, {0}.subtask_type as task_type from {0} " \
-              "{1} order by start_time" \
+        sql = "select {0}.stream_id, {0}.task_id, {0}.subtask_id as context_id, {0}.start_time as timestamp, " \
+              "({0}.end_time - {0}.start_time) as duration, {0}.subtask_type as task_type from {0} " \
+              "{1} order by timestamp" \
             .format(DBNameConstant.TABLE_SUBTASK_TIME,
                     SqlWhereCondition.get_interval_intersection_condition(
                         start_time, end_time, DBNameConstant.TABLE_SUBTASK_TIME, "start_time", "end_time"))
-        device_tasks = DBManager.fetch_all_data(self.cur, sql)
+        device_tasks = DBManager.fetch_all_data(self.cur, sql, dto_class=DeviceTask)
         if not device_tasks:
             logging.error("get device ffts plus sub task from %s.%s error",
                           DBNameConstant.DB_SOC_LOG, DBNameConstant.TABLE_SUBTASK_TIME)
