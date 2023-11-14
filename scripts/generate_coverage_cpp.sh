@@ -27,7 +27,7 @@ generate_coverage(){
 #----------------------------------------------------------
 test_obj=(
     job_wrapper_utest
-    driver_utest    
+    driver_utest
     common_utest
     msprof_bin_utest
     streamio_common_utest
@@ -37,6 +37,7 @@ test_obj=(
     msprofiler_utest
     transport_utest
     params_adapter_utest
+    entities_utest
 )
 
 str_test=""
