@@ -9,8 +9,8 @@ from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 @dataclass
 class DataQueueDto(metaclass=InstanceCheckMeta):
-    duration = None
-    end_time = None
-    node_name = None
-    queue_size = None
-    start_time = None
+    duration: float = None
+    end_time: float = None
+    node_name: str = None
+    queue_size: int = None
+    start_time: float = None

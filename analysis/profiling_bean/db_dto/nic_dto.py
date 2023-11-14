@@ -11,13 +11,13 @@ class NicDto(metaclass=InstanceCheckMeta):
     """
     Dto for ge model time data
     """
-    bandwidth = None
-    rx_dropped_rate = None
-    rx_error_rate = None
-    rx_packet = None
-    rxbyte = None
-    timestamp = None
-    tx_dropped_rate = None
-    tx_error_rate = None
-    tx_packet = None
-    txbyte = None
+    bandwidth: float = None
+    rx_dropped_rate: float = None
+    rx_error_rate: float = None
+    rx_packet: float = None
+    rxbyte: float = None
+    timestamp: float = None
+    tx_dropped_rate: float = None
+    tx_error_rate: float = None
+    tx_packet: float = None
+    txbyte: float = None

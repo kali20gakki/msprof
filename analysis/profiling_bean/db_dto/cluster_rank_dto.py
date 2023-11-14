@@ -9,7 +9,7 @@ from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 @dataclass
 class ClusterRankDto(metaclass=InstanceCheckMeta):
-    device_id = None
-    dir_name = None
-    job_info = None
-    rank_id = None
+    device_id: int = None
+    dir_name: str = None
+    job_info: str = None
+    rank_id: str = None

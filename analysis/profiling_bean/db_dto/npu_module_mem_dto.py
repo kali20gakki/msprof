@@ -12,7 +12,7 @@ class NpuModuleMemDto(metaclass=InstanceCheckMeta):
     """
     Dto for npu module mem data
     """
-    device_type = None
-    module_id = None
-    syscnt = None
-    total_size = None
+    device_type: str = None
+    module_id: int = None
+    syscnt: int = None
+    total_size: int = None

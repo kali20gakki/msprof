@@ -9,16 +9,16 @@ from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 @dataclass
 class FusionOpInfoDto(metaclass=InstanceCheckMeta):
-    data_len = None
-    fusion_op_names = None
-    fusion_op_num = None
-    level = None
-    memory_input = None
-    memory_output = None
-    memory_total = None
-    memory_weight = None
-    memory_workspace = None
-    op_name = None
-    struct_type = None
-    thread_id = None
-    timestamp = None
+    data_len: int = None
+    fusion_op_names: str = None
+    fusion_op_num: int = None
+    level: str = None
+    memory_input: str = None
+    memory_output: str = None
+    memory_total: str = None
+    memory_weight: str = None
+    memory_workspace: str = None
+    op_name: str = None
+    struct_type: str = None
+    thread_id: int = None
+    timestamp: float = None

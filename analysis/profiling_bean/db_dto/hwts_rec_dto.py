@@ -11,7 +11,7 @@ class HwtsRecDto(metaclass=InstanceCheckMeta):
     """
     hwts rec dto
     """
-    ai_core_num = None
-    iter_id = None
-    sys_cnt = None
-    task_count = None
+    ai_core_num: int = None
+    iter_id: int = None
+    sys_cnt: int = None
+    task_count: int = None

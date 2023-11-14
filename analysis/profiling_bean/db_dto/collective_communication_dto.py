@@ -9,7 +9,7 @@ from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 @dataclass
 class CollectiveCommunicationDto(metaclass=InstanceCheckMeta):
-    communication_time = None
-    compute_time = None
-    rank_id = None
-    stage_time = None
+    communication_time :float= None
+    compute_time: float = None
+    rank_id: int = None
+    stage_time: int = None
