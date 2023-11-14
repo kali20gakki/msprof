@@ -9,7 +9,7 @@ from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 @dataclass
 class FopsDto(metaclass=InstanceCheckMeta):
-    cube_fops = None
-    op_type = None
-    total_fops = None
-    total_time = None
+    cube_fops: int = None
+    op_type: str = None
+    total_fops: int = None
+    total_time: float = None

@@ -9,11 +9,11 @@ from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 @dataclass
 class StepTraceGeDto(metaclass=InstanceCheckMeta):
-    index_id = Constant.DEFAULT_INVALID_VALUE
-    model_id = Constant.DEFAULT_INVALID_VALUE
-    op_name = Constant.NA
-    op_type = Constant.NA
-    stream_id = Constant.DEFAULT_INVALID_VALUE
-    tag_id = Constant.DEFAULT_INVALID_VALUE
-    task_id = Constant.DEFAULT_INVALID_VALUE
-    timestamp = Constant.DEFAULT_INVALID_VALUE
+    index_id: int = Constant.DEFAULT_INVALID_VALUE
+    model_id: int = Constant.DEFAULT_INVALID_VALUE
+    op_name: str = Constant.NA
+    op_type: str = Constant.NA
+    stream_id: int = Constant.DEFAULT_INVALID_VALUE
+    tag_id: int = Constant.DEFAULT_INVALID_VALUE
+    task_id: int = Constant.DEFAULT_INVALID_VALUE
+    timestamp: float = Constant.DEFAULT_INVALID_VALUE
