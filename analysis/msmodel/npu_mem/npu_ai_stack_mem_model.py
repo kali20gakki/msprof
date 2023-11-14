@@ -17,7 +17,7 @@ class NpuAiStackMemTableSelector:
         DBNameConstant.TABLE_NPU_OP_MEM_RAW : {
             'dto' : NpuOpMemDto,
             'sql' : "select operator, addr, size, timestamp, thread_id, " \
-            "total_allocate_memory, total_reserve_memory, level, type, device_type from {0} " \
+            "total_allocate_memory, total_reserve_memory, level, type as type_, device_type from {0} " \
             .format(DBNameConstant.TABLE_NPU_OP_MEM_RAW)
         },
         DBNameConstant.TABLE_NPU_OP_MEM : {
