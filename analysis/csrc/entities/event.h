@@ -41,6 +41,12 @@ context_id, graph_id_map, fusion_op_info, task_track, mem_cpy
 
  */
 
+const uint16_t EVENT_LEVEL_ACL = 20000;
+const uint16_t EVENT_LEVEL_MODEL = 15000;
+const uint16_t EVENT_LEVEL_NODE = 10000;
+const uint16_t EVENT_LEVEL_HCCL = 5500;
+const uint16_t EVENT_LEVEL_RUNTIME = 5000;
+
 enum class EventType {
     EVENT_TYPE_API = 0,
     EVENT_TYPE_EVENT,  // 两个EVENT_TYPE_EVENT可以拼出一个EVENT_TYPE_API
@@ -55,28 +61,6 @@ enum class EventType {
     EVENT_TYPE_INVALID
 };
 
-// 单例模式实现EventID生成，保证ID唯一
-class EventIDGenerator {
-public:
-    static EventIDGenerator &GetInstance()
-    {
-        static EventIDGenerator instance;
-        return instance;
-    }
-
-    uint32_t GetID()
-    {
-        return ++idCnt;
-    }
-
-private:
-    EventIDGenerator() = default;
-    ~EventIDGenerator() = default;
-    EventIDGenerator(const EventIDGenerator &) = delete;
-    EventIDGenerator &operator=(const EventIDGenerator &) = delete;
-    std::atomic<uint32_t> idCnt{0};
-};
-
 // Event关键信息
 struct EventInfo {
     EventType type = EventType::EVENT_TYPE_INVALID; // 类型
@@ -85,20 +69,15 @@ struct EventInfo {
     uint64_t end = 0;                               // 结束时间 对于addtional Event start == end
 };
 
-// Event为本工程对硬件上报的各类信息(Trace)的抽象, 表示一个时间点或时间片发生的事件
-class Event {
-public:
-    Event(std::shared_ptr<char> eventPtr, const std::string &eventDesc, EventInfo &eventInfo)
-        : event_(eventPtr), desc_(eventDesc), info_(eventInfo), id_(EventIDGenerator::GetInstance().GetID())
-    {}
-
-private:
-    uint32_t id_ = 0;    // 全局唯一ID
-    EventInfo info_;
-    std::string desc_;
-    std::shared_ptr<char> event_;
+// Event为本工程对软硬件上报的各类信息(Trace)的抽象, 表示一个时间点或时间片发生的事件
+struct Event {
+    Event(std::shared_ptr<char> eventPtr, std::string eventDesc, EventInfo &eventInfo);
+    
+    std::shared_ptr<char> event;
+    std::string desc;
+    EventInfo info;
+    uint32_t id = 0;    // 全局唯一ID
 };
-
 
 } // namespace Entities
 } // namespace Analysis

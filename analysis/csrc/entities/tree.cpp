@@ -14,5 +14,9 @@
 namespace Analysis {
 namespace Entities {
 
+std::shared_ptr<TreeNode> Tree::GetRoot() const
+{
+    return root_;
+}
 } // namespace Entities
 } // namespace Analysis

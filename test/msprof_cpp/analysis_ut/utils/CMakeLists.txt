@@ -1,14 +1,15 @@
 add_executable(
-    xxx_utest
-    test/main.cpp
-    test/xxx_utest.cpp
-    ${TOP_DIR}/analysis/csrc/xxx/xxx.cpp
+        utils_utest
+        test/main.cpp
+        test/safe_unordered_map_utest.cpp
+        ${TOP_DIR}/analysis/csrc/entities/event.cpp
+        ${TOP_DIR}/analysis/csrc/utils/safe_unordered_map.h
 )
 
-target_include_directories(add_utest PRIVATE
-    ${GTEST_INCLUDE_DIR}
-    ${MOCKCPP_INCLUDE_DIR}
-    ${TOP_DIR}/analysis/csrc/xxx
+target_include_directories(utils_utest PRIVATE
+        ${GTEST_INCLUDE_DIR}
+        ${MOCKCPP_INCLUDE_DIR}
+        ${TOP_DIR}/analysis/csrc/utils
 )
 
-run_test(xxx_utest)
+run_test(utils_utest)
