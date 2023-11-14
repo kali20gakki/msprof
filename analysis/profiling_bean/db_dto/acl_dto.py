@@ -12,8 +12,8 @@ class AclDto(metaclass=InstanceCheckMeta):
     """
     Dto for acl data
     """
-    api_name = None
-    api_type = None
-    end_time = None
-    start_time = None
-    thread_id = None
+    api_name: str = None
+    api_type: str = None
+    end_time: int = None
+    start_time: int = None
+    thread_id: int = None

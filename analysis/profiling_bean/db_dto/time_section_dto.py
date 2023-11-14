@@ -9,16 +9,16 @@ from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 @dataclass
 class TimeSectionDto(metaclass=InstanceCheckMeta):
-    duration_time = -Constant.DEFAULT_INVALID_VALUE
-    end_time = Constant.DEFAULT_INVALID_VALUE
-    index_id = Constant.DEFAULT_INVALID_VALUE
-    model_id = Constant.DEFAULT_INVALID_VALUE
-    op_name = None
-    overlap_time = Constant.DEFAULT_INVALID_VALUE
-    start_time = Constant.DEFAULT_INVALID_VALUE
-    stream_id = Constant.DEFAULT_INVALID_VALUE
-    task_id = Constant.DEFAULT_INVALID_VALUE
-    task_type = None
+    duration_time: int = Constant.DEFAULT_INVALID_VALUE
+    end_time: int = Constant.DEFAULT_INVALID_VALUE
+    index_id: int = Constant.DEFAULT_INVALID_VALUE
+    model_id: int = Constant.DEFAULT_INVALID_VALUE
+    op_name: str = None
+    overlap_time: int = Constant.DEFAULT_INVALID_VALUE
+    start_time: int = Constant.DEFAULT_INVALID_VALUE
+    stream_id: int = Constant.DEFAULT_INVALID_VALUE
+    task_id: int = Constant.DEFAULT_INVALID_VALUE
+    task_type: str = None
 
 
 class CommunicationTimeSection(TimeSectionDto):

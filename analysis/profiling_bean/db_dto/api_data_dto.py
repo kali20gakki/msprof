@@ -12,15 +12,15 @@ INVALID_THREAD = -1
 
 @dataclass
 class ApiDataDto(metaclass=InstanceCheckMeta):
-    connection_id = None
-    end = None
-    id = None
-    item_id = None
-    level = None
-    request_id = None
-    start = None
-    struct_type = None
-    thread_id = None
+    connection_id: int = None
+    end: int = None
+    id: str = None
+    item_id: str = None
+    level: str = None
+    request_id: int = None
+    start: int = None
+    struct_type: str = None
+    thread_id: int = None
 
 
 ApiDataDtoTuple = namedtuple("ApiDataDto",

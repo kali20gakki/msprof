@@ -14,12 +14,12 @@ class StepTraceOriginDto(metaclass=InstanceCheckMeta):
     """
     step trace origin DATA dto
     """
-    index_id = None
-    model_id = None
-    stream_id = None
-    tag_id = None
-    task_id = None
-    timestamp = None
+    index_id: int = None
+    model_id: int = None
+    stream_id: int = None
+    tag_id: int = None
+    task_id: int = None
+    timestamp: float = None
 
 
 @dataclass
@@ -28,11 +28,11 @@ class StepTraceDto(metaclass=InstanceCheckMeta):
     step trace dto
     """
     DEFAULT_ITER_ID = -1
-    index_id = None
-    iter_id = None
-    model_id = None
-    step_end = None
-    step_start = None
+    index_id: int = None
+    iter_id: int = None
+    model_id: int = None
+    step_end: int = None
+    step_start: int = None
 
 
 @dataclass
@@ -40,16 +40,16 @@ class TrainingTraceDto(metaclass=InstanceCheckMeta):
     """
     Training trace dto
     """
-    bp_end = None
-    data_aug_bound = None
-    device_id = None
-    fp_bp_time = None
-    fp_start = None
-    grad_refresh_bound = None
-    iteration_end = None
-    iteration_id = None
-    iteration_time = None
-    model_id = None
+    bp_end: float = None
+    data_aug_bound: str = None
+    device_id: int = None
+    fp_bp_time: float = None
+    fp_start: float = None
+    grad_refresh_bound: str = None
+    iteration_end: float = None
+    iteration_id: int = None
+    iteration_time: float = None
+    model_id: int = None
 
 
 Iteration = namedtuple("Iteration", ["model_id", "iteration_id", "iteration_count"])

@@ -11,13 +11,13 @@ class NpuOpMemDto(metaclass=InstanceCheckMeta):
     """
     Dto for npu op mem data
     """
-    addr = None
-    device_type = None
-    level = None
-    operator = None
-    size = None
-    thread_id = None
-    timestamp = None
-    total_allocate_memory = None
-    total_reserve_memory = None
-    type_ = None
+    addr: str = None
+    device_type: str = None
+    level: str = None
+    operator: str = None
+    size: int = None
+    thread_id: int = None
+    timestamp: float = None
+    total_allocate_memory: int = None
+    total_reserve_memory: int = None
+    type_: str = None
