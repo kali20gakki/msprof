@@ -7,7 +7,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_iteration import MsprofIteration
 from msmodel.interface.view_model import ViewModel
-from profiling_bean.db_dto.api_data_dto import ApiDataDto
+from profiling_bean.db_dto.api_data_dto import ApiDataDto, generate_api_data_from_event
 from profiling_bean.db_dto.event_data_dto import EventDataDto
 
 
@@ -58,7 +58,7 @@ class EventDataViewModel(ViewModel):
                 continue
             else:
                 # represent 2 event with an api
-                equal_api = ApiDataDto(friend_timestamp, event_data_dto)
+                equal_api = generate_api_data_from_event(friend_timestamp, event_data_dto)
                 timeline_data.append(equal_api)
                 # for sub graph scene
                 event_logger.pop((event_data_dto.level, event_data_dto.thread_id, event_data_dto.struct_type,

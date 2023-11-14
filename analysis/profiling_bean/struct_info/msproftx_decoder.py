@@ -11,7 +11,6 @@ class MsprofTxDecoder(StructDecoder):
     """
     class used to decode binary data
     """
-    CHAR_LIST_SIZE = 128
 
     def __init__(self: any, *args: list) -> None:
         filed = args[0]

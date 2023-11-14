@@ -8,7 +8,7 @@ from common_func.constant import Constant
 from mscalculate.cann.cann_event_generator import CANNThreadDB
 from mscalculate.cann.event import Event
 from mscalculate.cann.tree import TreeNode
-from profiling_bean.db_dto.api_data_dto import ApiDataDto
+from profiling_bean.db_dto.api_data_dto import ApiDataDto, invalid_dto
 
 
 class CANNAnalysisChain:
@@ -40,7 +40,7 @@ class CANNAnalysisChain:
         }
 
     def start(self):
-        root_dto = ApiDataDto.invalid_dto(Constant.ROOT_LEVEL, self.thread_id, 0,
+        root_dto = invalid_dto(Constant.ROOT_LEVEL, self.thread_id, 0,
                                           self.db.get_time_bound() + 1, "root")
         root_event = self.db.add_api(root_dto)
         # Associate the upper-level and lower-level relationships of events
@@ -86,7 +86,7 @@ class CANNAnalysisChain:
                     # reported. Hanging on a tree as an empty node
                     # 1. Start and end tasks of runtime
                     # 2 ....
-                    empty_dto = ApiDataDto().invalid_dto(event.cann_level, event.thread_id)
+                    empty_dto = invalid_dto(event.cann_level, event.thread_id)
                     empty_event: Event = self.db.add_api(empty_dto)
                     empty_event.add_additional_record(self.db.get_record(event))
                     parent.add_child(TreeNode(empty_event))
