@@ -11,6 +11,7 @@ from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.sql_helper import SqlWhereCondition
 from msmodel.sqe_type_map import SqeType
 from profiling_bean.db_dto.task_time_dto import TaskTimeDto
+from mscalculate.ascend_task.ascend_task import DeviceTask
 
 
 class AcsqTaskModel(ParserModel):
@@ -71,13 +72,13 @@ class AcsqTaskModel(ParserModel):
 
     def get_acsq_data_within_time_range(self: any, start_time: float, end_time: float) -> list:
         # acsq task subtask_id is always 0xffffffff
-        sql = "select {1}.stream_id, {1}.task_id, {0}, {1}.start_time, " \
-              "task_time as duration_time,  {1}.task_type from {1} " \
+        sql = "select {1}.stream_id, {1}.task_id, {0} as context_id, {1}.start_time as timestamp, " \
+              "task_time as duration,  {1}.task_type from {1} " \
               "{2}" \
             .format(NumberConstant.DEFAULT_GE_CONTEXT_ID, DBNameConstant.TABLE_ACSQ_TASK,
                     SqlWhereCondition.get_interval_intersection_condition(
                         start_time, end_time, DBNameConstant.TABLE_ACSQ_TASK, "start_time", "end_time"))
-        device_tasks = DBManager.fetch_all_data(self.cur, sql)
+        device_tasks = DBManager.fetch_all_data(self.cur, sql, dto_class=DeviceTask)
         if not device_tasks:
             logging.error("get device acsq task from %s.%s error",
                           DBNameConstant.DB_SOC_LOG, DBNameConstant.TABLE_ACSQ_TASK)

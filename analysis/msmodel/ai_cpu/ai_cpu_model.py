@@ -10,6 +10,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.sql_helper import SqlWhereCondition
+from mscalculate.ascend_task.ascend_task import DeviceTask
 
 
 class AiCpuModel(ParserModel):
@@ -53,15 +54,15 @@ class AiCpuModel(ParserModel):
         return DBManager.fetch_all_data(self.cur, all_data_sql)
 
     def get_ai_cpu_data_within_time_range(self: any, start_time: float, end_time: float) -> list:
-        ai_cpu_sql = "select {1}.stream_id, {1}.task_id, {0}, {1}.sys_start * {3} as start_time, " \
-                     "({1}.sys_end - {1}.sys_start) * {3} as duration_time, '{2}' from {1} " \
+        ai_cpu_sql = "select {1}.stream_id, {1}.task_id, {0} as context_id, {1}.sys_start * {3} as timestamp, " \
+                     "({1}.sys_end - {1}.sys_start) * {3} as duration, '{2}' as task_type from {1} " \
                      "{4}" \
             .format(NumberConstant.DEFAULT_GE_CONTEXT_ID, DBNameConstant.TABLE_AI_CPU_FROM_TS,
                     Constant.TASK_TYPE_AI_CPU, NumberConstant.MS_TO_NS,
                     SqlWhereCondition.get_interval_intersection_condition(
                         start_time / NumberConstant.MS_TO_NS, end_time / NumberConstant.MS_TO_NS,
                         DBNameConstant.TABLE_AI_CPU_FROM_TS, "sys_start", "sys_end"))
-        ai_cpu_device_tasks = DBManager.fetch_all_data(self.cur, ai_cpu_sql)
+        ai_cpu_device_tasks = DBManager.fetch_all_data(self.cur, ai_cpu_sql, dto_class=DeviceTask)
         if not ai_cpu_device_tasks:
             logging.error("no aicpu device task get from %s.%s",
                           DBNameConstant.DB_AI_CPU, DBNameConstant.TABLE_AI_CPU_FROM_TS)

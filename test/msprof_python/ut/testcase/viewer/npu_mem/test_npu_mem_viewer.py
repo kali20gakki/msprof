@@ -87,7 +87,7 @@ class TestNpuMemViewer(unittest.TestCase):
             "iter_id": 1
         }
         NpuMemDtoTuple = CustomizedNamedtupleFactory.generate_named_tuple_from_dto(NpuMemDto, [])
-        npu_mem_dto = NpuMemDtoTuple( "0",0, 0, 0, 6)
+        npu_mem_dto = NpuMemDtoTuple("0", 0, 0, 0, 6)
         with mock.patch(NAMESPACE + '.NpuMemModel.check_db', return_value=True), \
                 mock.patch(NAMESPACE + '.NpuMemModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + '.NpuMemModel.get_timeline_data', return_value=[npu_mem_dto]):
