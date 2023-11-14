@@ -5,6 +5,7 @@
 import logging
 import os
 
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileOpen
 from common_func.ms_constant.str_constant import StrConstant
@@ -62,6 +63,11 @@ class StarsLogCalCulator(ICalculator, MsMultiProcess):
                 return
             self._parse_by_iter()
         else:
+            db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_SOC_LOG)
+            if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_ACSQ_TASK):
+                logging.info("The Table %s already exists in the %s, and won't be calculate again.",
+                             DBNameConstant.TABLE_ACSQ_TASK, DBNameConstant.DB_SOC_LOG)
+                return
             self._parse_all_file()
 
     def save(self: any) -> None:

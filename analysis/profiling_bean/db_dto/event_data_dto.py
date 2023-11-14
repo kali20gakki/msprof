@@ -3,68 +3,16 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
 
-class EventDataDto:
-    def __init__(self: any) -> None:
-        self._level = None
-        self._struct_type = None
-        self._thread_id = None
-        self._request_id = None
-        self._timestamp = None
-        self._item_id = None
-        self._connection_id = None
+from dataclasses import dataclass
+from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
-    @property
-    def level(self: any) -> str:
-        return self._level
 
-    @property
-    def struct_type(self: any) -> str:
-        return str(self._struct_type)
-
-    @property
-    def request_id(self):
-        return self._request_id
-
-    @property
-    def timestamp(self: any) -> int:
-        return self._timestamp
-
-    @property
-    def thread_id(self: any) -> int:
-        return self._thread_id
-
-    @property
-    def item_id(self: any) -> int:
-        return self._item_id
-
-    @property
-    def connection_id(self) -> int:
-        return self._connection_id
-
-    @level.setter
-    def level(self: any, value: any) -> None:
-        self._level = value
-
-    @struct_type.setter
-    def struct_type(self: any, value: any) -> None:
-        self._struct_type = value
-
-    @thread_id.setter
-    def thread_id(self: any, value: any) -> None:
-        self._thread_id = value
-
-    @request_id.setter
-    def request_id(self, value):
-        self._request_id = value
-
-    @timestamp.setter
-    def timestamp(self: any, value: any) -> None:
-        self._timestamp = value
-
-    @item_id.setter
-    def item_id(self: any, value: any) -> None:
-        self._item_id = value
-
-    @connection_id.setter
-    def connection_id(self, value: int) -> None:
-        self._connection_id = value
+@dataclass
+class EventDataDto(metaclass=InstanceCheckMeta):
+    connection_id = None
+    item_id = None
+    level = None
+    request_id = None
+    struct_type = None
+    thread_id = None
+    timestamp = None

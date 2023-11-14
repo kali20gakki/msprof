@@ -36,21 +36,21 @@ class CustomizedNamedtupleFactory:
         2. If an attribute in dto has a default value and not in sql, it should be in the namedtuple
         3. Attribute that come from sql, should be placed ahead with the same order in sql
         4. A default value should be defined for all attributes
+        5. dto should be in form of dataclass
         dto_class: dto class
         description: description from sql, each line describe a name from db
         """
-
-        # DEFAULT_REFLECTOR is defined in dtos to indicate default values for each name, if an attribute is not in
-        # keys of DEFAULT_REFLECTOR, the default value of the attribute should be None
-        default_reflector = dto_class.DEFAULT_REFLECTOR if hasattr(dto_class, "DEFAULT_REFLECTOR") else None
         description_set = {i[0] for i in description}
         extend_columns = _OrderedDict()
         # get all attribute of dto class by dir()
         for item in dir(dto_class):
             # filter magic methods which start with "_"
-            if not item.startswith("_") and item not in description_set and item != "DEFAULT_REFLECTOR":
-                extend_columns[item] = default_reflector[
-                    item] if default_reflector and item in default_reflector else None
+            if not item.startswith("_") and item not in description_set and not item.isupper():
+                default_value = getattr(dto_class, item)
+                # whether the attribute is a function
+                if hasattr(default_value, "__call__"):
+                    continue
+                extend_columns[item] = default_value if default_value else None
         filed_names = [i[0] for i in description]
         # place name that in dto and not in sql at the end, use extend slightly improve efficiency
         filed_names.extend(extend_columns.keys())

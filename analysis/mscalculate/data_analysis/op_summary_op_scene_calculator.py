@@ -64,6 +64,8 @@ class OpSummaryOpSceneCalculator(MsMultiProcess):
         run for op summary
         """
         if os.path.exists(PathManager.get_db_path(self.project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)):
+            logging.info("The db %s already exists, and won't create again.",
+                         DBNameConstant.DB_AICORE_OP_SUMMARY)
             return
         if not os.path.exists(PathManager.get_db_path(self.project_path, DBNameConstant.DB_ASCEND_TASK)):
             logging.warning("No %s found, no need to create %s",

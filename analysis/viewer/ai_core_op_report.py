@@ -458,7 +458,8 @@ class ReportOPCounter:
         """
         check exist of db table
         """
-        if not (conn and curs) or not DBManager.judge_table_exist(curs, CommonConstant.OP_REPORT_TABLE):
+        if not (conn and curs) or \
+                not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_OP_COUNTER_OP_REPORT):
             return False
         return True
 
@@ -467,7 +468,7 @@ class ReportOPCounter:
         sql = "select op_type, core_type, occurrences, total_time/{NS_TO_US}, " \
               "min/{NS_TO_US}, avg/{NS_TO_US}, max/{NS_TO_US}, ratio from {0} " \
               "where op_type != 'N/A' and core_type!=? and core_type!=? order by total_time desc" \
-             .format(CommonConstant.OP_REPORT_TABLE, NS_TO_US=NumberConstant.NS_TO_US)
+             .format(DBNameConstant.TABLE_OP_COUNTER_OP_REPORT, NS_TO_US=NumberConstant.NS_TO_US)
         return sql
 
     @staticmethod
@@ -475,7 +476,7 @@ class ReportOPCounter:
         sql = "select model_name, op_type, core_type, occurrences, total_time/{NS_TO_US}, " \
               "min/{NS_TO_US}, avg/{NS_TO_US}, max/{NS_TO_US}, ratio from {0} " \
               "where op_type != 'N/A' and core_type!=? and core_type!=? order by model_name asc, " \
-              "total_time desc".format(CommonConstant.OP_REPORT_TABLE, NS_TO_US=NumberConstant.NS_TO_US)
+              "total_time desc".format(DBNameConstant.TABLE_OP_COUNTER_OP_REPORT, NS_TO_US=NumberConstant.NS_TO_US)
         return sql
 
     @classmethod

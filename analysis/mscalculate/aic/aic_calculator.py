@@ -7,6 +7,7 @@ import logging
 import os
 
 from common_func.config_mgr import ConfigMgr
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
@@ -57,6 +58,11 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
         :return: None
         """
         if ProfilingScene().is_all_export():
+            db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_METRICS_SUMMARY)
+            if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_METRIC_SUMMARY):
+                logging.info("The Table {0} already exists in the {1}, and won't be calculate again."
+                             .format(DBNameConstant.TABLE_METRIC_SUMMARY, DBNameConstant.DB_METRICS_SUMMARY))
+                return
             self._parse_all_file()
         else:
             self.pre_parse()
@@ -226,6 +232,11 @@ class NanoAicCalculator(AicCalculator):
         calculate the ai core
         :return: None
         """
+        db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_METRICS_SUMMARY)
+        if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_METRIC_SUMMARY):
+            logging.info("The Table %s already exists in the %s, and won't be calculate again.",
+                         DBNameConstant.TABLE_METRIC_SUMMARY, DBNameConstant.DB_METRICS_SUMMARY)
+            return
         self._parse_without_decode()
 
     def save(self: any) -> None:

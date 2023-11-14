@@ -29,6 +29,30 @@ class TestHwtsCalculator(unittest.TestCase):
             check = HwtsCalculator(self.file_list, CONFIG)
             check.ms_run()
 
+    def test_calculate_when_parse_all_file_then_parse(self):
+        with mock.patch(NAMESPACE + '.HwtsCalculator.is_need_parse_all_file', return_value=True), \
+                mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=False):
+            check = HwtsCalculator(self.file_list, CONFIG)
+            check._parse_all_file = mock.Mock()
+            check.calculate()
+            check._parse_all_file.assert_called_once()
+
+    def test_calculate_when_table_exist_then_do_not_execute(self):
+        with mock.patch(NAMESPACE + '.HwtsCalculator.is_need_parse_all_file', return_value=True), \
+                mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch('logging.info'):
+            check = HwtsCalculator(self.file_list, CONFIG)
+            check._parse_all_file = mock.Mock()
+            check.calculate()
+            check._parse_all_file.assert_not_called()
+
+    def test_calculate_when_parse_by_iter_then_parse(self):
+        with mock.patch(NAMESPACE + '.HwtsCalculator.is_need_parse_all_file', return_value=False):
+            check = HwtsCalculator(self.file_list, CONFIG)
+            check._parse_by_iter = mock.Mock()
+            check.calculate()
+            check._parse_by_iter.assert_called_once()
+
     def test_prep_data(self):
         start_3_2 = b'\x00\x00\xd3k\x00\x00\x02\x00\xc9o\x91\x06\x0c\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00' \
                     b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' \

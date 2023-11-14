@@ -11,12 +11,12 @@ import pytest
 
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import clear_dt_project
-from mscalculate.stars.sub_task_calculate import SubTaskCalculator
+from mscalculate.stars.sub_task_calculator import SubTaskCalculator
 from msmodel.stars.ffts_log_model import FftsLogModel
 from profiling_bean.db_dto.task_time_dto import TaskTimeDto
 from profiling_bean.prof_enum.data_tag import DataTag
 
-NAMESPACE = 'mscalculate.stars.sub_task_calculate'
+NAMESPACE = 'mscalculate.stars.sub_task_calculator'
 MODELNAMESPACE = 'msmodel.stars.ffts_log_model'
 
 
@@ -85,6 +85,16 @@ class TestSubTaskCalculator(unittest.TestCase):
             check.ms_run()
             check = SubTaskCalculator({}, self.sample_config)
             check.ms_run()
+
+    def test_ms_run_when_table_exist_then_do_not_execute(self):
+        file_list = {DataTag.STARS_LOG: ['stars_soc.data.0.slice_0', 'stars_soc.data.0.slice_1']}
+        with mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch('logging.info'):
+            check = SubTaskCalculator(file_list, self.sample_config)
+            check.calculate = mock.Mock()
+            check.ms_run()
+            check.calculate.assert_not_called()
+
 
     def test_get_subtask_time_data(self):
         with mock.patch(MODELNAMESPACE + '.FftsLogModel.get_all_data', return_value=1):
