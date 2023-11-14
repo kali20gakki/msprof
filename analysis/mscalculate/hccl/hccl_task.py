@@ -59,6 +59,7 @@ class HcclTask:
     hccl_name: str = Constant.NA
     first_timestamp: int = Constant.DEFAULT_VALUE
     host_timestamp: int = Constant.DEFAULT_INVALID_VALUE
+    iter_id: int = Constant.DEFAULT_VALUE
     device_id: int = Constant.DEFAULT_VALUE
     args: DictConversionDescriptor = DictConversionDescriptor(default="{}")
     is_dynamic: int = Constant.DEFAULT_INVALID_VALUE
