@@ -8,15 +8,15 @@ from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 @dataclass
 class NodeBasicInfoDto(metaclass=InstanceCheckMeta):
-    block_dim = None
-    data_len = None
-    is_dynamic = None
-    level = None
-    mix_block_dim = None
-    op_flag = None
-    op_name = None
-    op_type = None
-    struct_type = None
-    task_type = None
-    thread_id = None
-    timestamp = None
+    block_dim: int = None
+    data_len: int = None
+    is_dynamic: int = None
+    level: str = None
+    mix_block_dim: int = None
+    op_flag: str = None
+    op_name: str = None
+    op_type: str = None
+    struct_type: str = None
+    task_type: str = None
+    thread_id: int = None
+    timestamp: float = None

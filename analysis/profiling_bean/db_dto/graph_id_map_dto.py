@@ -9,10 +9,10 @@ from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
 @dataclass
 class GraphIdMapDto(metaclass=InstanceCheckMeta):
-    data_len = None
-    graph_id = None
-    level = None
-    model_name = None
-    struct_type = None
-    thread_id = None
-    timestamp = None
+    data_len: int = None
+    graph_id: int = None
+    level: str = None
+    model_name: str = None
+    struct_type: str = None
+    thread_id: int = None
+    timestamp: float = None

@@ -10,11 +10,11 @@ from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 @dataclass
 class CtxIdDto(metaclass=InstanceCheckMeta):
     INVALID_CONTEXT_ID = "4294967295"
-    ctx_id = INVALID_CONTEXT_ID
-    ctx_id_num = None
-    data_len = None
-    level = None
-    op_name = None
-    struct_type = None
-    thread_id = None
-    timestamp = None
+    ctx_id: str = INVALID_CONTEXT_ID
+    ctx_id_num: int = None
+    data_len: int = None
+    level: str = None
+    op_name: str = None
+    struct_type: str = None
+    thread_id: int = None
+    timestamp: float = None
