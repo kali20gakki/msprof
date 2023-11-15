@@ -246,3 +246,42 @@ TEST_F(INFO_JSON_TEST, GetDevInfo) {
     EXPECT_EQ(PROFILING_SUCCESS, infoJson.GetDevInfo(0, dev_info));
 }
 
+TEST_F(INFO_JSON_TEST, GetDevInfoCheckAiCpuCoreNum)
+{
+    GlobalMockObject::verify();
+    InfoJson infoJson(start_time, end_time, devices);
+
+    analysis::dvvp::host::DeviceInfo dev_info;
+
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetEnvType)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&InfoJson::GetCtrlCpuInfo)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetAiCpuCoreNum)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetAivNum)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetAiCpuCoreId)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetAiCpuOccupyBitmap)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetTsCpuCoreNum)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetAiCoreId)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetAiCoreNum)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    dev_info.ai_cpu_core_num = 1;
+    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
+    dev_info.ai_cpu_core_num = 0;
+    EXPECT_EQ(PROFILING_SUCCESS, infoJson.GetDevInfo(0, dev_info));
+}
