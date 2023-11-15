@@ -2,27 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
-import ast
 from dataclasses import dataclass
-
 from common_func.constant import Constant
-
-
-class DictConversionDescriptor:
-    def __init__(self, *, default):
-        self._default = default
-        self._name = ""
-
-    def __set_name__(self, owner, name):
-        self._name = "_" + name
-
-    def __get__(self, obj, obj_type):
-        if obj is None:
-            return self._default
-        return getattr(obj, self._name, self._default)
-
-    def __set__(self, obj, value):
-        setattr(obj, self._name, ast.literal_eval(value))
 
 
 @dataclass
@@ -61,11 +42,20 @@ class HcclTask:
     host_timestamp: int = Constant.DEFAULT_INVALID_VALUE
     iter_id: int = Constant.DEFAULT_VALUE
     device_id: int = Constant.DEFAULT_VALUE
-    args: DictConversionDescriptor = DictConversionDescriptor(default="{}")
     is_dynamic: int = Constant.DEFAULT_INVALID_VALUE
     is_master: int = Constant.DEFAULT_INVALID_VALUE
     op_name: str = Constant.NA
     op_type: str = Constant.NA
     task_type: str = Constant.NA
     connection_id: int = Constant.DEFAULT_INVALID_VALUE
-
+    is_master: int = Constant.DEFAULT_INVALID_VALUE
+    struct_type: int = Constant.DEFAULT_INVALID_VALUE
+    duration_estimated: int = Constant.DEFAULT_INVALID_VALUE
+    local_rank: int = Constant.DEFAULT_INVALID_VALUE
+    remote_rank: int = Constant.DEFAULT_INVALID_VALUE
+    transport_type: str = Constant.NA
+    data_type: str = Constant.NA
+    link_type: str = Constant.NA
+    size: int = Constant.DEFAULT_INVALID_VALUE
+    bandwidth: int = Constant.DEFAULT_INVALID_VALUE
+    notify_id: int = Constant.DEFAULT_INVALID_VALUE

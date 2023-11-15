@@ -6,15 +6,17 @@ import unittest
 from unittest import mock
 
 from common_func.constant import Constant
+from common_func.msprof_object import CustomizedNamedtupleFactory
 from common_func.profiling_scene import ProfilingScene
 from constant.constant import CONFIG
 from constant.constant import clear_dt_project
 from mscalculate.hccl.hccl_calculator import HcclCalculator
 from mscalculate.hccl.hccl_task import HcclOps
 from mscalculate.hccl.hccl_task import HcclTask
-from profiling_bean.db_dto.hccl_dto import HcclDto
 
 NAMESPACE = 'mscalculate.hccl.hccl_calculator'
+
+HcclTask = CustomizedNamedtupleFactory.generate_named_tuple_from_dto(HcclTask, [])
 
 
 class TestHcclCalculator(unittest.TestCase):
@@ -22,7 +24,7 @@ class TestHcclCalculator(unittest.TestCase):
 
     @staticmethod
     def construct_hccl_dto(op_name, is_master, timestamp=123456, duration=0, op_type="HCCL_OP_TYPE"):
-        hccl_data = HcclDto()
+        hccl_data = HcclTask()
         hccl_data.op_name, hccl_data.iteration, hccl_data.duration, hccl_data.first_timestamp, hccl_data.is_dynamic, \
             hccl_data.model_id, hccl_data.index_id, hccl_data.task_type, hccl_data.op_type, hccl_data.is_master = \
             (op_name, 1, duration, timestamp, 0, 1, 1, "HCCL", op_type, is_master)
@@ -48,7 +50,7 @@ class TestHcclCalculator(unittest.TestCase):
             check.calculate()
             hccl_data = check._hccl_data
             hccl_op_report_data = check._hccl_op_report_data
-            self.assertEqual(16, len(hccl_data[0]))
+            self.assertEqual(28, len(hccl_data[0]))
             self.assertEqual([("all_reduce", 1.0, 1.0, 1.0, 1.0, 1.0, 100.0)], hccl_op_report_data)
 
     def test_calculate_should_update_both_hccl_data_and_hccl_op_report_data_when_op_type_invalid(self):
@@ -59,14 +61,14 @@ class TestHcclCalculator(unittest.TestCase):
             check.calculate()
             hccl_data = check._hccl_data
             hccl_op_report_data = check._hccl_op_report_data
-            self.assertEqual(16, len(hccl_data[0]))
+            self.assertEqual(28, len(hccl_data[0]))
             self.assertEqual([], hccl_op_report_data)
 
     def test_generate_hccl_op_info_should_return_three_data_when_the_input_len_is_three(self):
         hccl_data = [
-            self.construct_hccl_dto("hccl_op1", is_master=1),
-            self.construct_hccl_dto("hccl_op1", timestamp=123457, is_master=1),
-            self.construct_hccl_dto("hccl_op2", timestamp=123458, is_master=1)
+            HcclTask(op_name="hccl_op1", is_master=1),
+            HcclTask(op_name="hccl_op1", timestamp=123457, is_master=1),
+            HcclTask(op_name="hccl_op2", timestamp=123458, is_master=1)
         ]
         check = HcclCalculator([], CONFIG)
         check._generate_hccl_op_info(hccl_data)
@@ -94,11 +96,12 @@ class TestHcclCalculator(unittest.TestCase):
                                                ("2", 1, 1.0, 1.0, 1.0, 1.0, 20.0)])
 
     def test_get_hccl_op_report_data_should_return_dict_data_when_input_is_hccldto_list(self):
+        args = {'stream id': 2, 'task id': 0, 'context id': 4294967295, 'is_master': '1'}
         hccl_data = [
-            self.construct_hccl_dto("hccl_op1", is_master=1, timestamp=1, duration=2, op_type="all_reduce"),
-            self.construct_hccl_dto("hccl_op2", is_master=1, timestamp=5, duration=3, op_type="all_reduce"),
-            self.construct_hccl_dto("hccl_op3", is_master=1, timestamp=10, duration=2, op_type="all_gather"),
-            self.construct_hccl_dto("hccl_op4", is_master=1, timestamp=15, duration=3, op_type="all_gather")
+            HcclTask(op_name="hccl_op1", is_master=1, timestamp=1, duration=2, op_type="all_reduce"),
+            HcclTask(op_name="hccl_op2", is_master=1, timestamp=5, duration=3, op_type="all_reduce"),
+            HcclTask(op_name="hccl_op3", is_master=1, timestamp=10, duration=2, op_type="all_gather"),
+            HcclTask(op_name="hccl_op4", is_master=1, timestamp=15, duration=3, op_type="all_gather")
         ]
         check = HcclCalculator([], CONFIG)
         hccl_op_report_data = check._get_hccl_op_report_data(hccl_data)

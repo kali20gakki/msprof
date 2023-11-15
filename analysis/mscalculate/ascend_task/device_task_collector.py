@@ -57,10 +57,6 @@ class DeviceTaskCollector:
             ChipModel.CHIP_V5_1_0: [DBNameConstant.DB_SOC_LOG],
         }
 
-    @classmethod
-    def _generate_device_task_objs(cls: any, raw_data: list) -> List[DeviceTask]:
-        return [DeviceTask(*data) for data in raw_data]
-
     def get_all_device_tasks(self: any) -> List[DeviceTask]:
         if not self._check_device_data_db_exists():
             return []
@@ -104,8 +100,7 @@ class DeviceTaskCollector:
             return []
 
         with HwtsLogModel(self.result_dir) as model:
-            device_tasks = model.get_hwts_data_within_time_range(start_time, end_time)
-            return self._generate_device_task_objs(device_tasks)
+            return model.get_hwts_data_within_time_range(start_time, end_time)
 
     def _gather_device_tasks_from_hwts_aiv(self: any, start_time: float, end_time: float) -> List[DeviceTask]:
         """
@@ -117,8 +112,7 @@ class DeviceTaskCollector:
             return []
 
         with HwtsAivModel(self.result_dir, [DBNameConstant.TABLE_HWTS_TASK_TIME]) as model:
-            device_tasks = model.get_hwts_aiv_data_within_time_range(start_time, end_time)
-            return self._generate_device_task_objs(device_tasks)
+            return model.get_hwts_aiv_data_within_time_range(start_time, end_time)
 
     def _gather_ai_cpu_device_tasks_from_ts(self: any, start_time: float, end_time: float) -> List[DeviceTask]:
         db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_AI_CPU)
@@ -127,8 +121,7 @@ class DeviceTaskCollector:
             return []
 
         with AiCpuModel(self.result_dir) as model:
-            ai_cpu_device_tasks = model.get_ai_cpu_data_within_time_range(start_time, end_time)
-            return self._generate_device_task_objs(ai_cpu_device_tasks)
+            return model.get_ai_cpu_data_within_time_range(start_time, end_time)
 
     def _gather_device_acsq_tasks_from_stars(self: any, start_time: float, end_time: float) -> List[DeviceTask]:
         db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_SOC_LOG)
@@ -137,8 +130,7 @@ class DeviceTaskCollector:
             return []
 
         with AcsqTaskModel(self.result_dir, DBNameConstant.DB_SOC_LOG, [DBNameConstant.TABLE_ACSQ_TASK]) as model:
-            device_tasks = model.get_acsq_data_within_time_range(start_time, end_time)
-            return self._generate_device_task_objs(device_tasks)
+            return model.get_acsq_data_within_time_range(start_time, end_time)
 
     def _gather_device_ffts_plus_sub_tasks_from_stars(self: any, start_time: float,
                                                       end_time: float) -> List[DeviceTask]:
@@ -148,8 +140,7 @@ class DeviceTaskCollector:
             return []
 
         with FftsLogModel(self.result_dir, DBNameConstant.DB_SOC_LOG, [DBNameConstant.TABLE_SUBTASK_TIME]) as model:
-            device_tasks = model.get_ffts_plus_sub_task_data_within_time_range(start_time, end_time)
-            return self._generate_device_task_objs(device_tasks)
+            return model.get_ffts_plus_sub_task_data_within_time_range(start_time, end_time)
 
     def _gather_device_nano_tasks_from_stars(self: any, start_time: float,
                                              end_time: float) -> List[DeviceTask]:
@@ -159,8 +150,7 @@ class DeviceTaskCollector:
             return []
 
         with NanoStarsViewModel(self.result_dir) as model:
-            device_tasks = model.get_nano_data_within_time_range(start_time, end_time)
-            return self._generate_device_task_objs(device_tasks)
+            return model.get_nano_data_within_time_range(start_time, end_time)
 
     def _gather_device_tasks_from_runtime(self: any, start_time: float,
                                           end_time: float) -> List[DeviceTask]:
@@ -170,8 +160,7 @@ class DeviceTaskCollector:
             return []
 
         with RuntimeTaskTimeModel(self.result_dir) as model:
-            device_tasks = model.get_runtime_task_data_within_time_range(start_time, end_time)
-            return self._generate_device_task_objs(device_tasks)
+            return model.get_runtime_task_data_within_time_range(start_time, end_time)
 
     def _gather_chip_v1_1_0_device_tasks(self: any, start_time: float, end_time: float) -> List[DeviceTask]:
         device_tasks = self._gather_device_tasks_from_runtime(start_time, end_time)

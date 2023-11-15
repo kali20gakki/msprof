@@ -9,7 +9,7 @@ from unittest import mock
 
 from mscalculate.cluster.cluster_link_calculate import ClusterLinkCalculator
 from mscalculate.cluster.cluster_link_calculate import ClusterSingleLinkCalculator
-from profiling_bean.db_dto.hccl_dto import HcclDto
+from mscalculate.hccl.hccl_task import HcclTask
 
 NAMESPACE = 'mscalculate.cluster.cluster_link_calculate'
 
@@ -29,7 +29,7 @@ def construct_hccl_dto():
             "'step': 4294967385, 'bandwidth': 'NULL', 'stream id': 8, 'task id': 34, 'task type': 'Notify Record', "
             "'src rank': 2, 'dst rank': 1, 'transport type': 'SDMA', 'size': None, 'tag': 'all2allvc_1_5'}"]
     col = ["hccl_name", "plane_id", "timestamp", "duration", "args"]
-    hccl_dto = HcclDto()
+    hccl_dto = HcclTask()
     for index, i in enumerate(data):
         if hasattr(hccl_dto, col[index]):
             setattr(hccl_dto, col[index], i)
