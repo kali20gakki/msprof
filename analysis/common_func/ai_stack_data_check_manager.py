@@ -280,54 +280,6 @@ class AiStackDataCheckManager(DataCheckManager):
                                     device_id=device_id)
 
     @classmethod
-    def _contain_stars_profiler_data(cls: any, result_dir: str, device_id: int = None) -> bool:
-        """
-        The data path contain stars_soc_profiler data or not
-        """
-        return cls.check_data_exist(result_dir, file_name_manager.get_soc_profiler_compiles(),
-                                    device_id=device_id)
-
-    @classmethod
-    def _contain_ge_task_data(cls: any, result_dir: str, device_id: any = None) -> bool:
-        """
-        The data path contain Framework.task_desc_info data or not
-        """
-        return DBManager.check_tables_in_db(
-            PathManager.get_db_path(result_dir, DBNameConstant.DB_RTS_TRACK), DBNameConstant.TABLE_TASK_TRACK)
-
-    @classmethod
-    def _contain_hwts_data(cls: any, result_dir: str, device_id: any = None) -> bool:
-        """
-        The data path contain hwts_log data or not
-        """
-        return cls.check_data_exist(result_dir, file_name_manager.get_hwts_compiles(),
-                                    device_id=device_id)
-
-    @classmethod
-    def _contain_hwts_aiv_data(cls: any, result_dir: str, device_id: any = None) -> bool:
-        """
-        The data path contain hwts_log data or not
-        """
-        return cls.check_data_exist(result_dir, file_name_manager.get_hwts_vector_compiles(),
-                                    device_id=device_id)
-
-    @classmethod
-    def _contain_ts_track_aiv_data(cls: any, result_dir: str, device_id: any = None) -> bool:
-        """
-        The data path contain step_trace data or not
-        """
-        return cls.check_data_exist(result_dir, file_name_manager.get_ts_track_aiv_compiles(),
-                                    device_id=device_id)
-
-    @classmethod
-    def _contain_ts_track_data(cls: any, result_dir: str, device_id: any = None) -> bool:
-        """
-        The data path contain step_trace data or not
-        """
-        return cls.check_data_exist(result_dir, file_name_manager.get_ts_track_compiles(),
-                                    device_id=device_id)
-
-    @classmethod
     def contain_pytorch_operator_profiler_data(cls: any, result_dir: str, device_id: int = None) -> bool:
         """
         The data path contain stars msproftx torch data
@@ -402,4 +354,52 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain nano_device data or not
         """
         return cls.check_data_exist(result_dir, file_name_manager.get_nano_stars_profile_compiles(),
+                                    device_id=device_id)
+
+    @classmethod
+    def _contain_stars_profiler_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+        """
+        The data path contain stars_soc_profiler data or not
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_soc_profiler_compiles(),
+                                    device_id=device_id)
+
+    @classmethod
+    def _contain_ge_task_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        """
+        The data path contain Framework.task_desc_info data or not
+        """
+        return DBManager.check_tables_in_db(
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_RTS_TRACK), DBNameConstant.TABLE_TASK_TRACK)
+
+    @classmethod
+    def _contain_hwts_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        """
+        The data path contain hwts_log data or not
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_hwts_compiles(),
+                                    device_id=device_id)
+
+    @classmethod
+    def _contain_hwts_aiv_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        """
+        The data path contain hwts_log data or not
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_hwts_vector_compiles(),
+                                    device_id=device_id)
+
+    @classmethod
+    def _contain_ts_track_aiv_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        """
+        The data path contain step_trace data or not
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_ts_track_aiv_compiles(),
+                                    device_id=device_id)
+
+    @classmethod
+    def _contain_ts_track_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        """
+        The data path contain step_trace data or not
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_ts_track_compiles(),
                                     device_id=device_id)

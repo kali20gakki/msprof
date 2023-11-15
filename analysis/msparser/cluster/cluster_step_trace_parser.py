@@ -172,14 +172,15 @@ class ClusterStepTraceParser(IParser):
             if InfoConfReader().is_host_profiling():
                 continue
 
-            logging.debug(f"Start to process the table of step trace,table_name: {self.id_with_table_map.get(rank_id)}")
+            logging.debug("Start to process the table of step trace,table_name: %s",
+                           self.id_with_table_map.get(rank_id))
             step_trace_data = self._collect_step_trace_data(project_path)
             if not step_trace_data:
                 continue
             cluster_model.insert_data_to_db(self.id_with_table_map.get(rank_id), step_trace_data)
 
-            logging.debug(f"Start to process the table of all reduce, "
-                          f"table_name: {self.id_with_all_reduce_map.get(rank_id)}")
+            logging.debug("Start to process the table of all reduce, table_name: %s",
+                          self.id_with_all_reduce_map.get(rank_id))
             all_reduce_data = self._collect_all_reduce_data(project_path)
             if not all_reduce_data:
                 continue

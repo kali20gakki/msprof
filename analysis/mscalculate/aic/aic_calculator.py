@@ -65,8 +65,8 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
         if ProfilingScene().is_all_export():
             db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_METRICS_SUMMARY)
             if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_METRIC_SUMMARY):
-                logging.info("The Table {0} already exists in the {1}, and won't be calculate again."
-                             .format(DBNameConstant.TABLE_METRIC_SUMMARY, DBNameConstant.DB_METRICS_SUMMARY))
+                logging.info("The Table %s already exists in the %s, and won't be calculate again.",
+                             DBNameConstant.TABLE_METRIC_SUMMARY, DBNameConstant.DB_METRICS_SUMMARY)
                 return
             self._parse_all_file()
         else:
@@ -87,12 +87,12 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
             file_rev_calculator.read_file_from_tail()
             if file_rev_calculator.is_find:
                 self.aic_discard_num_from_tail = file_rev_calculator.tail_aic_cnt
-                logging.info(f"aic_discard_num_from_tail is {self.aic_discard_num_from_tail}")
+                logging.info("aic_discard_num_from_tail is %d", self.aic_discard_num_from_tail)
             else:
                 logging.warning(f"Can not find any ai core log match stream and task id with hwts's last ai core task!"
                                 f"Probably lose some ai core task!")
         else:
-            logging.warning(f"Can not connect table hwts batch!!")
+            logging.warning("Can not connect table hwts batch!!")
 
     def get_aic_repeat_times_in_last_iter(self: any, aic_with_stream_task: tuple) -> int:
         """
@@ -116,7 +116,7 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
                     model_id, max_index, aic_with_stream_task)
                 repeat_times += len(repeat_aic_info)
         if repeat_times > 0:
-            logging.info(f'There exists {repeat_times} aicore datum having same task and stream id in last iteration!')
+            logging.info("There exists %d aicore datum having same task and stream id in last iteration!", repeat_times)
         return repeat_times
 
     def calculate_pmu_list(self: any, data: any, profiling_events: list, data_list: list, total_time: float) -> None:

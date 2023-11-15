@@ -129,7 +129,7 @@ class HostDiskUsagePresenter(HostProfPresenterBase):
         if speed_type in self.TYPE_CONVERSION_DICT:
             return self.TYPE_CONVERSION_DICT.get(speed_type, 1.0)
         else:
-            logging.warning(f'Unknown speed type appear! Unknown type: {speed_type}')
+            logging.warning("Unknown speed type appears! Unknown type: %s", speed_type)
             return 1.0
 
     def _get_disk_usage_items(self: any, file: any) -> tuple:

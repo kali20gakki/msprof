@@ -413,68 +413,6 @@ class StepTraceViewer:
         return StepTraceViewer.__format_trace_json(data)
 
     @staticmethod
-    def _reformat_step_trace_data(data: list, conn: any) -> list:
-        merge_data = []
-        for line in data:
-            trace = list(line)
-            if len(trace) >= 4:  # trace[3] refers to iteration end
-                reduce_data = StepTraceViewer.__select_reduce(conn,
-                                                              trace)
-                for item in reduce_data:
-                    trace += [StepTraceViewer.__local_time_from_syscnt(item[0]),
-                              (item[1] - item[0]) * StepTraceConstant.syscnt_to_micro()]
-            trace[1:4] = map(lambda x: StepTraceViewer.__local_time_from_syscnt(x), trace[1:4])
-            merge_data.append(trace)
-        return merge_data
-
-    @staticmethod
-    @catch_exception
-    def __format_trace_json(trace_data: list) -> any:
-        """
-        Parse hwts protobuf message to json format
-        trace_parm//100: Convert 10ns-level timestamp to us-level timestamp
-        tid=0:Iteration Time
-        tid=1:FP_BP Time;Grad_refresh Bound
-        tid=2:Reduce time
-        """
-        result_data = []
-        trace_parm = {}
-        result_dict = {}
-        StepTraceViewer.make_model_meta(result_data, trace_data)
-        pid = InfoConfReader().get_json_pid_data()
-        for _, trace_item in enumerate(trace_data):
-            data = trace_item.get('training_trace', [])
-            trace_view_data = []
-            TimeLineJsonMaker.create_trace_parm(trace_parm, data)
-
-            tid = StepTraceViewer.get_model_pid(data)
-
-            iter_time_data = TimeLineJsonMaker.make_iter_time(trace_parm, pid, tid)
-
-            if data[1] == "N/A" or data[2] == "N/A":
-                trace_view_data.append(iter_time_data)
-                result_data.extend(
-                    TraceViewManager.time_graph_trace(TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, trace_view_data))
-
-            else:
-                fp_bp_data = TimeLineJsonMaker.make_fp_bp_data(trace_parm, pid, tid)
-                grad_refresh_data = TimeLineJsonMaker.make_grad_refresh_data(trace_parm, pid, tid)
-                result_dict["data_aug_dict0"] = TimeLineJsonMaker.make_data_aug_dict0(trace_parm, pid, tid)
-                result_dict["data_aug_dict1"] = TimeLineJsonMaker.make_data_aug_dict1(trace_parm, pid, tid)
-
-                trace_view_data.append(iter_time_data)
-                trace_view_data.append(fp_bp_data)
-                trace_view_data.append(grad_refresh_data)
-                result_data.extend(
-                    TraceViewManager.time_graph_trace(TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, trace_view_data))
-                result_data.extend([result_dict.get("data_aug_dict0", {}), result_dict.get("data_aug_dict1", {})])
-
-            StepTraceViewer.format_reduce_json(trace_item.get("all_reduce", []), trace_parm, pid, tid, result_data)
-            StepTraceViewer.format_get_next_json(trace_item.get("get_next", []), pid, tid, result_data)
-
-        return json.dumps(result_data)
-
-    @staticmethod
     def format_get_next_json(data: list, pid: int, tid: int, result_data: list) -> None:
         get_next_trace_data = []
         for get_next_data in data:
@@ -501,6 +439,21 @@ class StepTraceViewer:
             get_next_trace_data.append(refresh_data)
         result_data.extend(TraceViewManager.time_graph_trace(
             TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, get_next_trace_data))
+
+    @staticmethod
+    def _reformat_step_trace_data(data: list, conn: any) -> list:
+        merge_data = []
+        for line in data:
+            trace = list(line)
+            if len(trace) >= 4:  # trace[3] refers to iteration end
+                reduce_data = StepTraceViewer.__select_reduce(conn,
+                                                              trace)
+                for item in reduce_data:
+                    trace += [StepTraceViewer.__local_time_from_syscnt(item[0]),
+                              (item[1] - item[0]) * StepTraceConstant.syscnt_to_micro()]
+            trace[1:4] = map(lambda x: StepTraceViewer.__local_time_from_syscnt(x), trace[1:4])
+            merge_data.append(trace)
+        return merge_data
 
     @staticmethod
     def __select_reduce(conn: any, trace: list) -> list:
@@ -572,3 +525,50 @@ class StepTraceViewer:
             return cnt
         return InfoConfReader().trans_into_local_time(
             InfoConfReader().time_from_syscnt(cnt, NumberConstant.MICRO_SECOND))
+
+    @staticmethod
+    @catch_exception
+    def __format_trace_json(trace_data: list) -> any:
+        """
+        Parse hwts protobuf message to json format
+        trace_parm//100: Convert 10ns-level timestamp to us-level timestamp
+        tid=0:Iteration Time
+        tid=1:FP_BP Time;Grad_refresh Bound
+        tid=2:Reduce time
+        """
+        result_data = []
+        trace_parm = {}
+        result_dict = {}
+        StepTraceViewer.make_model_meta(result_data, trace_data)
+        pid = InfoConfReader().get_json_pid_data()
+        for _, trace_item in enumerate(trace_data):
+            data = trace_item.get('training_trace', [])
+            trace_view_data = []
+            TimeLineJsonMaker.create_trace_parm(trace_parm, data)
+
+            tid = StepTraceViewer.get_model_pid(data)
+
+            iter_time_data = TimeLineJsonMaker.make_iter_time(trace_parm, pid, tid)
+
+            if data[1] == "N/A" or data[2] == "N/A":
+                trace_view_data.append(iter_time_data)
+                result_data.extend(
+                    TraceViewManager.time_graph_trace(TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, trace_view_data))
+
+            else:
+                fp_bp_data = TimeLineJsonMaker.make_fp_bp_data(trace_parm, pid, tid)
+                grad_refresh_data = TimeLineJsonMaker.make_grad_refresh_data(trace_parm, pid, tid)
+                result_dict["data_aug_dict0"] = TimeLineJsonMaker.make_data_aug_dict0(trace_parm, pid, tid)
+                result_dict["data_aug_dict1"] = TimeLineJsonMaker.make_data_aug_dict1(trace_parm, pid, tid)
+
+                trace_view_data.append(iter_time_data)
+                trace_view_data.append(fp_bp_data)
+                trace_view_data.append(grad_refresh_data)
+                result_data.extend(
+                    TraceViewManager.time_graph_trace(TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, trace_view_data))
+                result_data.extend([result_dict.get("data_aug_dict0", {}), result_dict.get("data_aug_dict1", {})])
+
+            StepTraceViewer.format_reduce_json(trace_item.get("all_reduce", []), trace_parm, pid, tid, result_data)
+            StepTraceViewer.format_get_next_json(trace_item.get("get_next", []), pid, tid, result_data)
+
+        return json.dumps(result_data)
