@@ -31,15 +31,23 @@ class MsvpCommonConst:
     """
     msvp common
     """
+    # cpu_config_type
+    TS_CPU = "ts_cpu"
+    AI_CPU = "ai_cpu"
+    AI_CORE = "ai_core"
+    CTRL_CPU = "ctrl_cpu"
+    CONSTANT = "constant"
+    NANO_AI_CORE = "nano_ai_core"
+
     CONFIG_PATH = os.path.join(os.path.realpath(os.path.dirname(__file__)), "..", "msconfig")
     FILE_NAME = os.path.basename(__file__)
     CPU_CONFIG_TYPE = {
-        "ts_cpu": ConfigManager.get("TsCPUConfig"),
-        "ai_cpu": ConfigManager.get("AICPUConfig"),
-        "ai_core": ConfigManager.get("AICoreConfig"),
-        "ctrl_cpu": ConfigManager.get("CtrlCPUConfig"),
-        "constant": ConfigManager.get("ConstantConfig"),
-        "nano_ai_core": ConfigManager.get("NanoAICoreConfig"),
+        TS_CPU: ConfigManager.get("TsCPUConfig"),
+        AI_CPU: ConfigManager.get("AICPUConfig"),
+        AI_CORE: ConfigManager.get("AICoreConfig"),
+        CTRL_CPU: ConfigManager.get("CtrlCPUConfig"),
+        CONSTANT: ConfigManager.get("ConstantConfig"),
+        NANO_AI_CORE: ConfigManager.get("NanoAICoreConfig"),
     }
 
     @staticmethod

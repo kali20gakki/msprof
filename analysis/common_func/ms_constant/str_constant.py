@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2023. All rights reserved.
 
 import re
 from enum import IntEnum
@@ -111,6 +111,8 @@ class StrConstant:
     CONTEXT_PMU_TYPE = 'context_task'
     BLOCK_PMU_TYPE = 'block_task'
 
+    RATIO_NAME = "ratio"
+    RATIO_EXTRA_NAME = "ratio_extra"
     MAC_RATIO = "mac_ratio"
     AIC_MAC_RATIO = "aic_mac_ratio"
     VEC_RATIO = "vec_ratio"
