@@ -47,5 +47,5 @@ class MsMultiProcess(multiprocessing.Process):
             self.ms_run()
         except Exception as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-        logging.info(f'{self.__class__.__name__} process data finished, '
-                     f'execute time is {(time.time() - start_time):.3f}s')
+        logging.info("%s process data finished, execute time is %.3f s",
+                      self.__class__.__name__, (time.time() - start_time))

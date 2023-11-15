@@ -34,17 +34,17 @@ class HostSysUsageParser:
         self.mem_usage_model = None
 
     @staticmethod
-    def _get_host_common_info(host_path: str) -> tuple:
+    def _get_host_common_info(host_path: str) -> dict:
         try:
             sample_config = ConfigMgr.read_sample_config(host_path)
         except ProfException as err:
             logging.error("Get common info fail. %s", str(err))
-            return ()
+            return {}
         cpu_sampling_interval = sample_config.get(StrConstant.HOST_CPU_SAMPLING_INTV, 0)
         mem_sampling_interval = sample_config.get(StrConstant.HOST_MEM_SAMPLING_INTV, 0)
         if cpu_sampling_interval == 0 or mem_sampling_interval == 0:
             logging.error("Get sampling interval fail.")
-            return ()
+            return {}
 
         InfoConfReader().load_info(host_path)
         pid = InfoConfReader().get_json_pid_data()
@@ -180,7 +180,7 @@ class HostSysUsageParser:
         for data in datas:
             if data[0] == 0:
                 logging.error("The mem data is all zero.")
-                return []
+                return {}
             mem_usage = round((data[0] - data[1]) / data[0] * NumberConstant.PERCENTAGE,
                               NumberConstant.ROUND_TWO_DECIMAL)
             relative_time = round((data[-1] - start_time) / self.NS_TO_S, NumberConstant.ROUND_TWO_DECIMAL)

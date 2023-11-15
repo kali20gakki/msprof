@@ -210,7 +210,7 @@ class ParsingFftsAICoreSampleData(ParsingCoreSampleData):
             metrics_type = data_dict.get('metric_type')
             check_aicore_events(event, is_custom=judge_custom_pmu_scene(self.sample_config, metrics_type=metrics_type))
             if not all([db_name, data_list, event, metrics_key]):
-                logging.info(f"No need to create db for {data_type} pmu_events")
+                logging.info("No need to create db for %s pmu_events", data_type)
                 continue
             model = AiCoreSampleModel(self.result_dir, db_name, [DBNameConstant.TABLE_EVENT_COUNT], metrics_type)
             if model and data_list:

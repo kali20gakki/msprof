@@ -89,7 +89,7 @@ class ClusterParserFactory:
             }
             events_all = _model.get_all_events_from_db(conditions, top_hccl_ops)
             if not events_all:
-                logging.warning(f"Fail to get no.{rank_id}'s hccl events, please check hccl.db")
+                logging.warning("Fail to get no.%d's hccl events, please check hccl.db", rank_id)
                 print_msg(f"Fail to get no.{rank_id}'s hccl events, "
                           f"please check hccl.db from {PathManager.get_host_result_dir(rank_path)}")
             op_name_dict = defaultdict(list)
@@ -130,7 +130,7 @@ class ClusterParserFactory:
     def _check_rank_info(self, rank_id: any, dirname: any) -> None:
         if rank_id not in self.rank_dir_dict:
             message = "The query id is wrong. Please enter a valid value."
-            logging.error(f"--id %s is invalid, valid id: %s", str(rank_id), str(list(self.rank_dir_dict.keys())))
+            logging.error("--id %s is invalid, valid id: %s", str(rank_id), str(list(self.rank_dir_dict.keys())))
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
 
         if rank_id is None or dirname is None:

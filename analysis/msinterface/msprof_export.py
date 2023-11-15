@@ -229,10 +229,6 @@ class ExportCommand:
         self.clear_mode = getattr(args, "clear_mode", False)
 
     @staticmethod
-    def _is_host_export(result_dir: str) -> bool:
-        return result_dir.endswith("host")
-
-    @staticmethod
     def get_model_id_set(result_dir: str, db_name: str, table_name: str) -> any:
         """
         get model id set
@@ -257,6 +253,20 @@ class ExportCommand:
 
         return model_ids_set
 
+    def process(self: any) -> None:
+        """
+        handle export command
+        :return: None
+        """
+        check_path_valid(self.collection_path, False)
+        self._process_sub_dirs()
+        if self._cluster_params.get('is_cluster_scene', False):
+            self._show_cluster_tuning()
+
+    @staticmethod
+    def _is_host_export(result_dir: str) -> bool:
+        return result_dir.endswith("host")
+
     @staticmethod
     def _update_model_and_index(result_dir: str, trace_data_dict: dict) -> list:
         conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_HWTS_REC)
@@ -280,16 +290,6 @@ class ExportCommand:
         for host_f, device_f in zip(host_flip, device_flip):
             if host_f.flip_num != device_f.flip_num:
                 logging.warning("The flip is not consistent between host and device")
-
-    def process(self: any) -> None:
-        """
-        handle export command
-        :return: None
-        """
-        check_path_valid(self.collection_path, False)
-        self._process_sub_dirs()
-        if self._cluster_params.get('is_cluster_scene', False):
-            self._show_cluster_tuning()
 
     def _check_all_report(self, result_dir: str) -> None:
         """
