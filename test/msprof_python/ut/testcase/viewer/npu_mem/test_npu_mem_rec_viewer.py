@@ -64,7 +64,7 @@ class TestNpuMemRecViewer(TestDirCRBaseModel):
         }
         InfoConfReader()._local_time_offset = 10.0
         invalid_module_mem_data = [
-            [72, 0, 4096, 'NPU:0']
+            [73, 0, 4096, 'NPU:0']
         ]
         invalid_module_mem_dto = self.get_module_mem_dto(invalid_module_mem_data)
         with mock.patch(NAMESPACE + '.NpuAiStackMemModel.check_db', side_effect=[False, True]), \
