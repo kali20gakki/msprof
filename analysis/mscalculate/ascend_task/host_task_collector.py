@@ -11,10 +11,12 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from mscalculate.ascend_task.ascend_task import HostTask
 from msmodel.runtime.runtime_host_task_model import RuntimeHostTaskModel
+from common_func.msprof_object import CustomizedNamedtupleFactory
 
 
 class HostTaskCollector:
     CONTEXT_ID_INDEX = 4
+    HOST_TASK_TUPLE_TYPE = CustomizedNamedtupleFactory.generate_named_tuple_from_dto(HostTask, [])
 
     def __init__(self: any, result_dir: str):
         self.result_dir = result_dir
@@ -24,12 +26,14 @@ class HostTaskCollector:
         objs = []
         for data in raw_data:
             if data[cls.CONTEXT_ID_INDEX] == str(NumberConstant.DEFAULT_GE_CONTEXT_ID):
-                objs.append(HostTask(*data[:cls.CONTEXT_ID_INDEX],
-                                     NumberConstant.DEFAULT_GE_CONTEXT_ID, *data[cls.CONTEXT_ID_INDEX + 1:]))
+                objs.append(cls.HOST_TASK_TUPLE_TYPE(*data[:cls.CONTEXT_ID_INDEX],
+                                                     NumberConstant.DEFAULT_GE_CONTEXT_ID,
+                                                     *data[cls.CONTEXT_ID_INDEX + 1:]))
             else:
                 context_ids = data[cls.CONTEXT_ID_INDEX].split(",")
                 for _id in context_ids:
-                    objs.append(HostTask(*data[:cls.CONTEXT_ID_INDEX], int(_id), *data[cls.CONTEXT_ID_INDEX + 1:]))
+                    objs.append(cls.HOST_TASK_TUPLE_TYPE(*data[:cls.CONTEXT_ID_INDEX], int(_id),
+                                                         *data[cls.CONTEXT_ID_INDEX + 1:]))
         return objs
 
     def get_host_tasks_by_model_and_iter(self: any, model_id: int, iter_id: int, device_id: int) -> List[HostTask]:

@@ -7,6 +7,7 @@ from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.msprof_object import CustomizedNamedtupleFactory
 from constant.constant import clear_dt_project
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
@@ -23,9 +24,8 @@ class TestPipelineOverlapViewer(unittest.TestCase):
 
     @staticmethod
     def construct_time_section(start, end, class_bean=TimeSectionDto):
-        time_section = class_bean()
-        time_section.start_time, time_section.end_time = start, end
-        return time_section
+        class_bean_tuple = CustomizedNamedtupleFactory.generate_named_tuple_from_dto(class_bean, [])
+        return class_bean_tuple(start_time=start, end_time=end)
 
     def setUp(self) -> None:
         os.makedirs(os.path.join(self.DIR_PATH, 'PROF1', 'device_0'))

@@ -36,20 +36,3 @@ class HCCLInfoDto(metaclass=InstanceCheckMeta):
     timestamp: float = Constant.DEFAULT_INVALID_VALUE
     transport_type: str = Constant.NA
     work_flow_mode: str = Constant.NA
-
-    def to_args_json(self, stream_id, task_id):
-        json = {
-            'notify_id': self.notify_id,
-            'duration estimated(us)': self.duration_estimated,
-            'stream id': stream_id,
-            'task id': task_id,
-            'context id': self.context_id,
-            'task type': self.op_name,
-            'src rank': self.local_rank,
-            'dst rank': self.remote_rank,
-            'transport type': self.transport_type,
-            'size(Byte)': self.size,
-            'data type': self.data_type,
-            'link type': self.link_type,
-        }
-        return str(json)

@@ -14,8 +14,8 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
+from mscalculate.hccl.hccl_task import HcclTask
 from msmodel.hccl.hccl_model import HcclViewModel
-from profiling_bean.db_dto.hccl_dto import HcclDto
 
 
 class HCCLExport:
@@ -42,6 +42,24 @@ class HCCLExport:
         self.pid_value = InfoConfReader().get_json_pid_data()
         self.hccl_groups = dict()
 
+    @staticmethod
+    def get_hccl_arg(hccl_task):
+        return OrderedDict({
+            'notify_id': hccl_task.notify_id,
+            'duration estimated(us)': hccl_task.duration_estimated,
+            'stream id': hccl_task.stream_id,
+            'task id': hccl_task.task_id,
+            'context id': hccl_task.context_id,
+            'task type': hccl_task.hccl_name,
+            'src rank': hccl_task.local_rank,
+            'dst rank': hccl_task.remote_rank,
+            'transport type': hccl_task.transport_type,
+            'size(Byte)': hccl_task.size,
+            'data type': hccl_task.data_type,
+            'link type': hccl_task.link_type,
+            "bandwidth(GB/s)": hccl_task.bandwidth
+        })
+
     def get_hccl_timeline_data(self: any) -> str:
         """
         get data for hccl timeline
@@ -55,7 +73,7 @@ class HCCLExport:
                             " please check data file."
                 })
 
-            hccl_data = hccl_model.get_all_data(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE, dto_class=HcclDto)
+            hccl_data = hccl_model.get_all_data(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE, dto_class=HcclTask)
             if not hccl_data:
                 return json.dumps({
                     'status': NumberConstant.WARN,
@@ -94,7 +112,7 @@ class HCCLExport:
         index_now += 1
         return index_now
 
-    def _init_hccl_group(self, hccl_data: List[HcclDto]) -> dict:
+    def _init_hccl_group(self, hccl_data: List[HcclTask]) -> dict:
         name_planes_table: OrderedDict[str, Set[int]] = OrderedDict()
         hccl_groups = dict()
         for data in hccl_data:
@@ -107,7 +125,7 @@ class HCCLExport:
             hccl_groups[group_name] = hccl_group
         return hccl_groups
 
-    def _get_meta_data(self: any, hccl_data: List[HcclDto]) -> None:
+    def _get_meta_data(self: any, hccl_data: List[HcclTask]) -> None:
         self.hccl_groups = self._init_hccl_group(hccl_data)
 
         self._add_hccl_bar()
@@ -141,13 +159,13 @@ class HCCLExport:
             ]
         return _hccl_format_op_data
 
-    def _format_hccl_communication_data(self, hccl_data: List[HcclDto]):
+    def _format_hccl_communication_data(self, hccl_data: List[HcclTask]):
         # for L0 collect, plane id will be filled -1
         if not hccl_data or hccl_data[0].group_name == self.INVALID_GROUP:
             return []
         _hccl_format_data = [0] * len(hccl_data)
         for index, _hccl_data in enumerate(hccl_data):
-            hccl_args = OrderedDict(_hccl_data.args)
+            hccl_args = HCCLExport.get_hccl_arg(_hccl_data)
             hccl_args["model id"] = _hccl_data.model_id
             thread_id = self.hccl_groups.get(_hccl_data.group_name).start_index + _hccl_data.plane_id + 1
             _hccl_data_pice = [

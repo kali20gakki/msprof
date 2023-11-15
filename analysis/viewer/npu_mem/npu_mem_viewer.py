@@ -70,13 +70,13 @@ class NpuMemViewer:
             _result = TraceViewManager.metadata_event(meta_data)
             column_trace_data = []
             for datum in timeline_data:
-                datum.timestamp = InfoConfReader().trans_into_local_time(
+                timestamp = InfoConfReader().trans_into_local_time(
                                     InfoConfReader().get_host_time_by_sampling_timestamp(datum.timestamp))
-                column_trace_data.append(['{}/DDR'.format(self._npu_mem_events.get(datum.event)), datum.timestamp,
+                column_trace_data.append(['{}/DDR'.format(self._npu_mem_events.get(datum.event)), timestamp,
                                           pid, tid, OrderedDict([("KB", datum.ddr / NumberConstant.KILOBYTE)])])
-                column_trace_data.append(['{}/HBM'.format(self._npu_mem_events.get(datum.event)), datum.timestamp,
+                column_trace_data.append(['{}/HBM'.format(self._npu_mem_events.get(datum.event)), timestamp,
                                           pid, tid, OrderedDict([("KB", datum.hbm / NumberConstant.KILOBYTE)])])
-                column_trace_data.append(['{}/Memory'.format(self._npu_mem_events.get(datum.event)), datum.timestamp,
+                column_trace_data.append(['{}/Memory'.format(self._npu_mem_events.get(datum.event)), timestamp,
                                           pid, tid, OrderedDict([("KB", datum.memory / NumberConstant.KILOBYTE)])])
             _result += \
                 TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST,

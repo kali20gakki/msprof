@@ -6,7 +6,7 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from msmodel.interface.view_model import ViewModel
-from profiling_bean.db_dto.hccl_dto import HcclDto
+from mscalculate.hccl.hccl_task import HcclTask
 
 
 class CommunicationModel(ViewModel):
@@ -36,5 +36,5 @@ class CommunicationModel(ViewModel):
         data = DBManager.fetch_all_data(self.cur, sql,
                                         (conditions.get('iter_end', 0) * NumberConstant.NS_TO_US,
                                          conditions.get('iter_start', float('inf')) * NumberConstant.NS_TO_US),
-                                        dto_class=HcclDto)
+                                        dto_class=HcclTask)
         return data

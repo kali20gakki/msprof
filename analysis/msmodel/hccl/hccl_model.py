@@ -14,7 +14,6 @@ from mscalculate.hccl.hccl_task import HcclOps
 from mscalculate.hccl.hccl_task import HcclTask
 from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.view_model import ViewModel
-from profiling_bean.db_dto.hccl_dto import HcclDto
 from profiling_bean.db_dto.time_section_dto import CommunicationTimeSection
 
 
@@ -40,7 +39,7 @@ class HCCLModel(ParserModel):
         :return:
         """
         sql = "select * from {}".format(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
-        data = DBManager.fetch_all_data(self.cur, sql, dto_class=HcclDto)
+        data = DBManager.fetch_all_data(self.cur, sql, dto_class=HcclTask)
         return data
 
 
@@ -69,7 +68,7 @@ class HcclViewModel(ViewModel):
               f"max(timestamp + duration) - min(timestamp) as duration, task_type, op_type, connection_id " \
               f"from {DBNameConstant.TABLE_HCCL_SINGLE_DEVICE} " \
               f"group by op_name, first_timestamp"
-        return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclDto)
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclTask)
 
     def get_hccl_task_data(self):
         if not self.attach_to_db(DBNameConstant.DB_ASCEND_TASK):
@@ -86,10 +85,15 @@ class HcclViewModel(ViewModel):
             return []
 
         sql = "SELECT a.model_id as model_id, a.index_id as index_id, a.name as hccl_name, a.plane_id as plane_id, " \
-              "a.args as args, a.timestamp as host_timestamp, " \
-              "a.group_name as group_name, b.start_time as timestamp, a.is_master as is_master, " \
-              "b.connection_id as connection_id, b.duration as duration, a.stream_id, a.task_id, a.context_id" \
-              " from {0} as a inner join {1} as b on " \
+              "a.timestamp as host_timestamp,a.group_name as group_name, b.start_time as timestamp, " \
+              "a.is_master as is_master, a.stream_id as stream_id, a.task_id as task_id, " \
+              "a.struct_type as struct_type," \
+              "a.duration as duration_estimated, a.local_rank as local_rank, a.remote_rank as remote_rank," \
+              "a.transport_type as transport_type, a.size as size, a.data_type as data_type," \
+              " a.link_type as link_type," \
+              "a.context_id as context_id, a.notify_id as notify_id," \
+              "b.connection_id as connection_id, b.duration as duration from {0} as a inner join " \
+              "{1} as b on " \
               "a.stream_id = b.stream_id " \
               "and a.task_id = b.task_id " \
               "and a.batch_id = b.batch_id " \
@@ -128,7 +132,7 @@ class HcclViewModel(ViewModel):
               f"from {DBNameConstant.TABLE_HCCL_SINGLE_DEVICE} " \
               f"WHERE is_master = 1 " \
               f"group by op_name, first_timestamp, group_name"
-        return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclDto)
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclTask)
 
     def get_hccl_op_time_section(self):
         sql = f'select min(timestamp) as start_time, max(timestamp + duration) as end_time ' \
