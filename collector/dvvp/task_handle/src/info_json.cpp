@@ -368,8 +368,8 @@ int InfoJson::GetDevInfo(int deviceId, struct DeviceInfo &devInfo)
         MSPROF_LOGE("Failed to DrvGetAivNum, deviceId=%d", deviceId);
         return PROFILING_FAILED;
     }
-    ret = analysis::dvvp::driver::DrvGetAiCpuCoreId(devId, devInfo.ai_cpu_core_id);
-    if (ret != PROFILING_SUCCESS) {
+    if (devInfo.ai_cpu_core_num != 0 &&
+        analysis::dvvp::driver::DrvGetAiCpuCoreId(devId, devInfo.ai_cpu_core_id) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to DrvGetAiCpuCoreId, deviceId=%d", deviceId);
         return PROFILING_FAILED;
     }
