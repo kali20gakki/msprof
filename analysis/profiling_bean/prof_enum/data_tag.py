@@ -177,4 +177,5 @@ class ModuleName(Enum):
     ASCENDCKERNEL = 69
     MBUFF = 70
     CUSTOM = 71
-    MAX_MOUDLE_ID = 72
+    ASYS = 72
+    MAX_MOUDLE_ID = 73
