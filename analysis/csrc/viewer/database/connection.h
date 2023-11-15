@@ -29,7 +29,7 @@ struct TableColumn {
     std::string name;
     std::string type;
     bool isPrimary = false;
-    TableColumn(std::string &name, std::string &type) : name(name), type(type)
+    TableColumn(std::string &name, std::string &type) noexcept: name(name), type(type)
     {}
     std::string ToString() const
     {
@@ -52,8 +52,7 @@ public:
 
     // 数据插入接口，支持不同类型数据的插入
     template<typename... Args>
-    int InsertData(const std::string &table, const std::vector<std::tuple<Args...>> &data)
-    {}
+    int InsertData(const std::string &table, const std::vector<std::tuple<Args...>> &data);
 
 private:
     sqlite3 *db_ = nullptr;

@@ -36,8 +36,7 @@ public:
 
     // 数据插入接口，支持不同类型数据的插入
     template<typename... Args>
-    int InsertData(const std::string &table, const std::vector<std::tuple<Args...>> &data)
-    {}
+    int InsertData(const std::string &table, const std::vector<std::tuple<Args...>> &data);
 
 private:
     std::shared_ptr<Connection> conn_ = nullptr;

@@ -13,10 +13,8 @@
 #ifndef ANALYSIS_ENTITIES_EVENT_H
 #define ANALYSIS_ENTITIES_EVENT_H
 
-#include <cstdint>
 #include <string>
 #include <memory>
-#include <utility>
 #include <atomic>
 
 namespace Analysis {

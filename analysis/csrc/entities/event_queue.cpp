@@ -25,8 +25,8 @@ void EventQueue::Sort()
 {
     auto comp = [](const std::shared_ptr<Event> &event1,
                    const std::shared_ptr<Event> &event2) {
-        return event1->info.start < event2->info.start
-            || (event1->info.start == event2->info.start && event1->info.level > event2->info.level);
+        return event1->info.start < event2->info.start ||
+            (event1->info.start == event2->info.start && event1->info.level > event2->info.level);
     };
     std::sort(data_.begin(), data_.begin() + tail_, comp);
 }
