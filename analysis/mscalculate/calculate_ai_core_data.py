@@ -38,7 +38,8 @@ class CalculateAiCoreData:
         calculate pipe time data
         :return: pmu dict
         """
-        if metrics_type not in {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT, Constant.PMU_PIPE_EXECUT}:
+        if metrics_type not in {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT,
+                                Constant.PMU_PIPE_EXECUT, Constant.PMU_SCALAR_RATIO}:
             return pmu_dict
         res_dict = {}
         valid_metrics_set = CalculateAiCoreData.get_pmu_valid_metrics_set_by_chip()
