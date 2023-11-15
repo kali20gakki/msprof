@@ -11,6 +11,7 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
+from common_func.msvp_common import MsvpCommonConst
 from common_func.path_manager import PathManager
 from common_func.file_manager import FileOpen
 from common_func.profiling_scene import ProfilingScene
@@ -30,6 +31,7 @@ from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aic_pmu import AicPmuBean
 from viewer.calculate_rts_data import judge_custom_pmu_scene
+from viewer.calculate_rts_data import get_metrics_from_sample_config
 
 
 class AicCalculator(PmuCalculator, MsMultiProcess):
@@ -51,6 +53,9 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
         self.core_type = 0
         self.aic_discard_num_from_tail = 0
         self.repeat_aic_times = 0
+        self.aic_calculator = CalculateAiCoreData(self._project_path)
+        self.metrics_type = StrConstant.AI_CORE_PROFILING_METRICS
+        self.cfg_type = MsvpCommonConst.AI_CORE
 
     def calculate(self: any) -> None:
         """
@@ -124,11 +129,15 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
         :return:
         """
         pmu_list = {}
-        aic_calculator = CalculateAiCoreData(self._project_path)
-        _, pmu_list = aic_calculator.compute_ai_core_data(
+        _, pmu_list = self.aic_calculator.compute_ai_core_data(
             Utils.generator_to_list(profiling_events), pmu_list, data.total_cycle, data.pmu_list)
 
-        pmu_list = aic_calculator.add_pipe_time(pmu_list, total_time, self._sample_json.get('ai_core_metrics'))
+        pmu_list = self.aic_calculator.add_pipe_time(pmu_list, total_time,
+                                                     self._sample_json.get('ai_core_metrics'))
+        table_name_list = get_metrics_from_sample_config(self._project_path, self.metrics_type,
+                                                         self.cfg_type)
+        # table_name_list[:2]:'total_time(ms)', 'total_cycles', unused
+        pmu_list = {key: pmu_list[key] for key in table_name_list[2:]}
         AicPmuUtils.remove_redundant(pmu_list)
         data_list.append([
             total_time, data.total_cycle, *list(itertools.chain.from_iterable(pmu_list.values())), data.task_id,
@@ -226,6 +235,8 @@ class NanoAicCalculator(AicCalculator):
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(file_list, sample_config)
+        self.metrics_type = StrConstant.AI_CORE_PROFILING_METRICS
+        self.cfg_type = MsvpCommonConst.NANO_AI_CORE
 
     def calculate(self: any) -> None:
         """
@@ -265,7 +276,7 @@ class NanoAicCalculator(AicCalculator):
         with NanoStarsViewModel(self._project_path) as _model:
             pmu_data = _model.get_nano_pmu_details()
             aic_pmu_events = AicPmuUtils.get_pmu_events(self._sample_json.get("ai_core_profiling_events"),
-                                                        "nano_ai_core")
+                                                        MsvpCommonConst.NANO_AI_CORE)
         for data in pmu_data:
             core_num = self._core_num_dict.get("aic")
             total_time = Utils.cal_total_time(data.total_cycle, int(self._freq), data.block_dim, core_num)

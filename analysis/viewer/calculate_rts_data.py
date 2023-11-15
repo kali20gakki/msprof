@@ -18,6 +18,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_common import config_file_obj
+from common_func.msvp_common import MsvpCommonConst
 from common_func.msvp_common import error
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
@@ -270,7 +271,7 @@ def check_aicore_events(events: list, is_custom: bool = False) -> None:
     if not events:
         error(CalculateRtsDataConst.FILE_NAME, 'Insert data error, aicore event list is empty. ')
         call_sys_exit(NumberConstant.ERROR)
-    ai_core_config = config_file_obj(file_name='ai_core')
+    ai_core_config = config_file_obj(file_name=MsvpCommonConst.AI_CORE)
     formula_key = Utils.generator_to_list(item[0] for item in ai_core_config.items('events'))
     if is_custom:
         formula_key = Utils.generator_to_list(item[0] for item in ai_core_config.items('custom'))
@@ -435,7 +436,7 @@ def get_limit_and_offset(result_dir: str, iter_range: IterationRange) -> list:
 
 def get_metrics_from_sample_config(project_path: str,
                                    metrics_type: str = StrConstant.AI_CORE_PROFILING_METRICS,
-                                   cfg_name: str = "ai_core") -> list:
+                                   cfg_name: str = MsvpCommonConst.AI_CORE) -> list:
     """
     get ai core metric from sample json.
     """
@@ -446,9 +447,9 @@ def get_metrics_from_sample_config(project_path: str,
         return metrics
 
     metrics_list = []
-    if cfg_name == "ai_core":
+    if cfg_name == MsvpCommonConst.AI_CORE:
         metrics_list = Constant.AICORE_METRICS_LIST
-    elif cfg_name == "nano_ai_core":
+    elif cfg_name == MsvpCommonConst.NANO_AI_CORE:
         metrics_list = Constant.NANO_AICORE_METRICS_LIST
 
     if sample_config.get(metrics_type) not in metrics_list:
@@ -462,9 +463,9 @@ def get_metrics_from_sample_config(project_path: str,
     if sample_config.get(metrics_type) in {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT, Constant.PMU_PIPE_EXECUT,
                                            Constant.PMU_SCALAR_RATIO, Constant.PMU_PIPE_STALL_CYCLE}:
         for metric in sample_metrics[:-1]:
-            if metric.endswith('extra'):
+            if metric.endswith(StrConstant.RATIO_EXTRA_NAME):
                 new_metrics.append(metric[:-NumberConstant.EXTRA_RATIO_NAME_LEN] + "time")
-            elif metric.endswith('ratio'):
+            elif metric.endswith(StrConstant.RATIO_NAME):
                 new_metrics.append(metric[:-NumberConstant.RATIO_NAME_LEN] + "time")
             new_metrics.append(metric)
         if sample_config.get(metrics_type) == Constant.PMU_PIPE_EXECUT:

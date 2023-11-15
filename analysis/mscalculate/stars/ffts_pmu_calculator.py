@@ -39,6 +39,7 @@ from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.stars.ffts_block_pmu import FftsBlockPmuBean
 from profiling_bean.stars.ffts_pmu import FftsPmuBean
 from viewer.calculate_rts_data import judge_custom_pmu_scene
+from viewer.calculate_rts_data import get_metrics_from_sample_config
 
 
 class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
@@ -73,6 +74,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         self.block_dict = {}
         self.mix_pmu_dict = {}
         self.freq_data = []
+        self.aic_calculator = CalculateAiCoreData(self._result_dir)
 
     @staticmethod
     def _get_total_cycle_and_pmu_data(data: any, is_true: bool) -> tuple:
@@ -165,11 +167,17 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
             block_dim_dict.setdefault(True, self._get_current_block('mix_block_dim', data))
             aic_total_time = self.calculate_total_time(data, aic_total_cycle, block_dim_dict)
             aiv_total_time = self.calculate_total_time(data, aiv_total_cycle, block_dim_dict, data_type='aiv')
-            aic_calculator = CalculateAiCoreData(self._project_path)
-            aic_pmu_value = aic_calculator.add_pipe_time(
+            aic_pmu_value = self.aic_calculator.add_pipe_time(
                 aic_pmu_value, aic_total_time, self._sample_json.get('ai_core_metrics'))
-            aiv_pmu_value = aic_calculator.add_pipe_time(
+            aiv_pmu_value = self.aic_calculator.add_pipe_time(
                 aiv_pmu_value, aiv_total_time, self._sample_json.get('ai_core_metrics'))
+
+            aic_table_name_list = get_metrics_from_sample_config(self._project_path)
+            aiv_table_name_list = get_metrics_from_sample_config(self._project_path,
+                                                                 StrConstant.AIV_PROFILING_METRICS)
+            # table_name_list[:2]:'total_time(ms)', 'total_cycles', unused
+            aic_pmu_value = {key: aic_pmu_value[key] for key in aic_table_name_list[2:]}
+            aiv_pmu_value = {key: aiv_pmu_value[key] for key in aiv_table_name_list[2:]}
 
             aic_pmu_value_list = list(
                 itertools.chain.from_iterable(PmuMetrics(aic_pmu_value).get_pmu_by_event_name(aic_pmu_value)))
@@ -203,10 +211,13 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
             block_dim_dict.setdefault(False, self._get_current_block('block_dim', data))
             block_dim_dict.setdefault(True, self._get_current_block('mix_block_dim', data))
             total_time = self.calculate_total_time(data, data.total_cycle, block_dim_dict)
-            aic_calculator = CalculateAiCoreData(self._project_path)
-            _, pmu_list = aic_calculator.compute_ai_core_data(
+            _, pmu_list = self.aic_calculator.compute_ai_core_data(
                 Utils.generator_to_list(pmu_events), pmu_list, data.total_cycle, data.pmu_list)
-            pmu_list = aic_calculator.add_pipe_time(pmu_list, total_time, self._sample_json.get('ai_core_metrics'))
+            pmu_list = self.aic_calculator.add_pipe_time(pmu_list, total_time,
+                                                         self._sample_json.get('ai_core_metrics'))
+            table_name_list = get_metrics_from_sample_config(self._project_path)
+            # table_name_list[:2]:'total_time(ms)', 'total_cycles', unused
+            pmu_list = {key: pmu_list[key] for key in table_name_list[2:]}
             AicPmuUtils.remove_redundant(pmu_list)
             pmu_data = (
                 total_time, data.total_cycle, *list(itertools.chain.from_iterable(pmu_list.values())), data.task_id,
@@ -379,7 +390,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         return True
 
     def _get_pmu_value(self, total_cycle, pmu_list, pmu_metrics) -> list:
-        _, pmu_list = CalculateAiCoreData(self._result_dir).compute_ai_core_data(pmu_metrics, {}, total_cycle, pmu_list)
+        _, pmu_list = self.aic_calculator.compute_ai_core_data(pmu_metrics, {}, total_cycle, pmu_list)
         return pmu_list
 
     def _get_current_block(self: any, block_type: str, ai_core_data: any) -> any:

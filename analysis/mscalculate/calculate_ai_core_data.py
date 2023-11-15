@@ -43,11 +43,15 @@ class CalculateAiCoreData:
         res_dict = {}
         valid_metrics_set = CalculateAiCoreData.get_pmu_valid_metrics_set_by_chip()
         for pmu_key, pmu_value in pmu_dict.items():
-            if pmu_key in valid_metrics_set and len(pmu_key) > NumberConstant.RATIO_NAME_LEN:
-                res_dict["{}time".format(pmu_key[:-NumberConstant.RATIO_NAME_LEN])] = [total_time * pmu_value[0]]
-                res_dict[pmu_key] = pmu_value
-            else:
-                res_dict[pmu_key] = pmu_value
+            res_dict[pmu_key] = pmu_value
+            if pmu_key not in valid_metrics_set:
+                continue
+            if pmu_key.endswith(StrConstant.RATIO_NAME):
+                res_dict["{}time".format(
+                    pmu_key[:-NumberConstant.RATIO_NAME_LEN])] = [total_time * pmu_value[0]]
+            elif pmu_key.endswith(StrConstant.RATIO_EXTRA_NAME):
+                res_dict["{}time".format(
+                    pmu_key[:-NumberConstant.EXTRA_RATIO_NAME_LEN])] = [total_time * pmu_value[0]]
         return res_dict
 
     @staticmethod
@@ -126,20 +130,14 @@ class CalculateAiCoreData:
             ai_core_profiling_events.pop("cube_fops")
             ai_core_profiling_events.pop("mac_fp16_ratio")
             ai_core_profiling_events.pop("mac_int8_ratio")
-            if "vec_exe_ratio" in events_name_list:
-                vec_exe_ratio = ai_core_profiling_events.pop("vec_exe_ratio")
-                ai_core_profiling_events = {
-                    "vec_exe_ratio": vec_exe_ratio, "mac_ratio_extra": [mac_ratio], **ai_core_profiling_events
-                }
-            else:
-                ai_core_profiling_events = {"mac_ratio_extra": [mac_ratio], **ai_core_profiling_events}
+            ai_core_profiling_events.setdefault("mac_ratio_extra", []).append(mac_ratio)
 
         names = ["mac_fp_ratio", "mac_int_ratio"]
         if all(map(lambda name: name in events_name_list, names)):
             mac_ratio = ai_core_profiling_events["mac_fp_ratio"][-1] + ai_core_profiling_events["mac_int_ratio"][-1]
             ai_core_profiling_events.pop("mac_fp_ratio")
             ai_core_profiling_events.pop("mac_int_ratio")
-            ai_core_profiling_events = {"mac_ratio_extra": [mac_ratio], **ai_core_profiling_events}
+            ai_core_profiling_events.setdefault("mac_ratio_extra", []).append(mac_ratio)
         return ai_core_profiling_events
 
     @classmethod
