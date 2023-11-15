@@ -13,7 +13,6 @@
 #ifndef ANALYSIS_ENTITIES_EVENT_QUEUE_H
 #define ANALYSIS_ENTITIES_EVENT_QUEUE_H
 
-#include <cstdint>
 #include <vector>
 #include "event.h"
 

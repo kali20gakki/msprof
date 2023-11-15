@@ -13,13 +13,7 @@
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-DBRunner::DBRunner(const std::string &dbPath)
-{}
 
-int DBRunner::CreateTable(const std::string &tableName, const std::vector<TableColumn> &cols)
-{
-    return 0;
-}
 }
 }
 }
