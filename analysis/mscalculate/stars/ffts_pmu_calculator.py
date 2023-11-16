@@ -19,6 +19,7 @@ from common_func.ms_constant.stars_constant import StarsConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
+from common_func.msvp_common import MsvpCommonConst
 from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
@@ -75,6 +76,8 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         self.mix_pmu_dict = {}
         self.freq_data = []
         self.aic_calculator = CalculateAiCoreData(self._result_dir)
+        self.aic_table_name_list = []
+        self.aiv_table_name_list = []
 
     @staticmethod
     def _get_total_cycle_and_pmu_data(data: any, is_true: bool) -> tuple:
@@ -140,6 +143,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         if any(freq == 0 for _, freq in self.freq_data):
             logging.error("The sampled frequency is 0Hz, using default frequency %sHz.", self._freq)
             self.freq_data = []
+        self._set_ffts_table_name_list()
         if self._is_mix_needed:
             self.calculate_mix_pmu_list(pmu_data)
         else:
@@ -172,12 +176,8 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
             aiv_pmu_value = self.aic_calculator.add_pipe_time(
                 aiv_pmu_value, aiv_total_time, self._sample_json.get('ai_core_metrics'))
 
-            aic_table_name_list = get_metrics_from_sample_config(self._project_path)
-            aiv_table_name_list = get_metrics_from_sample_config(self._project_path,
-                                                                 StrConstant.AIV_PROFILING_METRICS)
-            # table_name_list[:2]:'total_time(ms)', 'total_cycles', unused
-            aic_pmu_value = {key: aic_pmu_value[key] for key in aic_table_name_list[2:]}
-            aiv_pmu_value = {key: aiv_pmu_value[key] for key in aiv_table_name_list[2:]}
+            aic_pmu_value = {k: v for (k, v) in aic_pmu_value.items() if k in self.aic_table_name_list}
+            aiv_pmu_value = {k: v for (k, v) in aiv_pmu_value.items() if k in self.aiv_table_name_list}
 
             aic_pmu_value_list = list(
                 itertools.chain.from_iterable(PmuMetrics(aic_pmu_value).get_pmu_by_event_name(aic_pmu_value)))
@@ -215,9 +215,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
                 Utils.generator_to_list(pmu_events), pmu_list, data.total_cycle, data.pmu_list)
             pmu_list = self.aic_calculator.add_pipe_time(pmu_list, total_time,
                                                          self._sample_json.get('ai_core_metrics'))
-            table_name_list = get_metrics_from_sample_config(self._project_path)
-            # table_name_list[:2]:'total_time(ms)', 'total_cycles', unused
-            pmu_list = {key: pmu_list[key] for key in table_name_list[2:]}
+            pmu_list = {k: v for (k, v) in pmu_list.items() if k in self.aic_table_name_list}
             AicPmuUtils.remove_redundant(pmu_list)
             pmu_data = (
                 total_time, data.total_cycle, *list(itertools.chain.from_iterable(pmu_list.values())), data.task_id,
@@ -430,6 +428,18 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
                 break
             freq_curr = freq * 1000000  # 1000000：convert MHz to Hz
         return freq_curr if freq_curr != 0 else self._freq
+
+    def _set_ffts_table_name_list(self):
+        """
+        table_name_list[:2]:'total_time(ms)', 'total_cycles', unused
+        """
+        self.aic_table_name_list = get_metrics_from_sample_config(self._project_path,
+                                                                  StrConstant.AI_CORE_PROFILING_METRICS,
+                                                                  MsvpCommonConst.AI_CORE)[2:]
+        if self._is_mix_needed:
+            self.aiv_table_name_list = get_metrics_from_sample_config(self._project_path,
+                                                                      StrConstant.AIV_PROFILING_METRICS,
+                                                                      MsvpCommonConst.AI_CORE)[2:]
 
 
 class PmuMetrics:
