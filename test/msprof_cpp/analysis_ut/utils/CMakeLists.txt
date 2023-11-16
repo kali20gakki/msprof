@@ -2,8 +2,10 @@ add_executable(
         utils_utest
         test/main.cpp
         test/safe_unordered_map_utest.cpp
+        test/thread_pool_utest.cpp
         ${TOP_DIR}/analysis/csrc/entities/event.cpp
         ${TOP_DIR}/analysis/csrc/utils/safe_unordered_map.h
+        ${TOP_DIR}/analysis/csrc/utils/thread_pool.cpp
 )
 
 target_include_directories(utils_utest PRIVATE
