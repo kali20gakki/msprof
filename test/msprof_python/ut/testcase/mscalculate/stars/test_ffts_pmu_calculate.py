@@ -217,3 +217,33 @@ class TestFftsPmuCalculator(TestCase):
             check.freq_data = [[1000, 1800], [2000, 800], [4000, 1800]]
             block_dim_dict = {False: 20, True: 40}
             self.assertEqual(check.calculate_total_time(FftsPmuBean(data), 200, block_dim_dict), 100)
+
+    def test_set_ffts_table_name_list_should_set_table_aic_and_aiv_name_when_mix_needed_is_True(self):
+        table_name_list = [
+            "total_time(ms)", "total_cycles", "ub_read_bw(GB/s)", "ub_write_bw(GB/s)", "l1_read_bw(GB/s)",
+            "l1_write_bw(GB/s)", "l2_read_bw(GB/s)", "l2_write_bw(GB/s)", "main_mem_read_bw(GB/s)",
+            "main_mem_write_bw(GB/s)"
+        ]
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.get_metrics_from_sample_config',
+                           side_effect=[table_name_list, table_name_list]):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            check._is_mix_needed = True
+            check._set_ffts_table_name_list()
+            self.assertEqual(check.aic_table_name_list, table_name_list[2:])
+            self.assertEqual(check.aiv_table_name_list, table_name_list[2:])
+
+    def test_set_ffts_table_name_list_should_set_table_aic_name_when_mix_needed_is_False(self):
+        table_name_list = [
+            "total_time(ms)", "total_cycles", "ub_read_bw(GB/s)", "ub_write_bw(GB/s)", "l1_read_bw(GB/s)",
+            "l1_write_bw(GB/s)", "l2_read_bw(GB/s)", "l2_write_bw(GB/s)", "main_mem_read_bw(GB/s)",
+            "main_mem_write_bw(GB/s)"
+        ]
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.get_metrics_from_sample_config',
+                           side_effect=[table_name_list, table_name_list]):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            check._is_mix_needed = False
+            check._set_ffts_table_name_list()
+            self.assertEqual(check.aic_table_name_list, table_name_list[2:])
+            self.assertEqual(check.aiv_table_name_list, [])
