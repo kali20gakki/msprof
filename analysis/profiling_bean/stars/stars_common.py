@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 
+from common_func.utils import Utils
 from common_func.info_conf_reader import InfoConfReader
 
 
@@ -11,8 +12,8 @@ class StarsCommon:
     """
 
     def __init__(self: any, task_id: int, stream_id: int, timestamp: int or float) -> None:
-        self._task_id = task_id
-        self._stream_id = stream_id
+        self._stream_id = Utils.get_stream_id(stream_id)
+        self._task_id = self.set_task_id(stream_id, task_id)
         self._timestamp = timestamp
 
     @property
@@ -38,3 +39,10 @@ class StarsCommon:
         :return: timestamp
         """
         return InfoConfReader().time_from_syscnt(self._timestamp)
+
+    @staticmethod
+    def set_task_id(stream_id, task_id):
+        if stream_id & 0x1000 != 0:
+            task_id = task_id & 0x1FFFF
+            task_id |= (stream_id & 0xE000)
+        return task_id
