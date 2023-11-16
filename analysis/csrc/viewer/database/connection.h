@@ -20,16 +20,12 @@ namespace Analysis {
 namespace Viewer {
 namespace Database {
 
-const std::string SQL_TEXT_TYPE = "TEXT";
-const std::string SQL_INTEGER_TYPE = "INTEGER";
-const std::string SQL_NUMERIC_TYPE = "NUMERIC";
-
 // 表列
 struct TableColumn {
     std::string name;
     std::string type;
     bool isPrimary = false;
-    TableColumn(std::string &name, std::string &type) noexcept: name(name), type(type)
+    TableColumn(std::string &name, std::string &type) : name(name), type(type)
     {}
     std::string ToString() const
     {
