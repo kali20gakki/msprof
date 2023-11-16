@@ -64,6 +64,7 @@ from viewer.msproftx_viewer import MsprofTxViewer
 from viewer.npu_mem.npu_mem_viewer import NpuMemViewer
 from viewer.npu_mem.npu_op_mem_viewer import NpuOpMemViewer
 from viewer.npu_mem.npu_mem_rec_viewer import NpuMemRecViewer
+from viewer.npu_mem.npu_module_mem_viewer import NpuModuleMemViewer
 from viewer.peripheral_report import get_peripheral_dvpp_data
 from viewer.peripheral_report import get_peripheral_nic_data
 from viewer.pipeline_overlap_viewer import PipelineOverlapViewer
@@ -584,6 +585,10 @@ class MsProfExportDataUtils:
     @staticmethod
     def _get_mem_record_data(configs: dict, params: dict) -> any:
         return NpuMemRecViewer(configs, params).get_summary_data()
+
+    @staticmethod
+    def _get_npu_module_mem_data(configs: dict, params: dict) -> any:
+        return NpuModuleMemViewer(configs, params).get_summary_data()
 
     @staticmethod
     def _get_event_data(configs: dict, params: dict) -> any:

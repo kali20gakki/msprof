@@ -265,6 +265,10 @@ class MsProfExportDataConfig(MetaConfig):
             ('handler', '_get_mem_record_data'),
             ('headers', 'Component,Timestamp(us),Total Allocated(KB),Total Reserved(KB),Device'),
         ],
+        'npu_module_mem': [
+            ('handler', '_get_npu_module_mem_data'),
+            ('headers', 'Component,Timestamp(us),Total Reserved(KB),Device'),
+        ],
         'operator_memory': [
             ('handler', '_get_operator_memory_data'),
             ('headers', 'Name,Size(KB),Allocation Time(us),Duration(us),'

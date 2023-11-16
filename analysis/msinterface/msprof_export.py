@@ -204,6 +204,8 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_hccl_statistic_data},
             {'export_type': ExportDataType.API_STATISTIC,
              'handler': AiStackDataCheckManager.contain_api_statistic_data},
+            {'export_type': ExportDataType.NPU_MODULE_MEM,
+             'handler': AiStackDataCheckManager.contain_npu_module_mem_data},
         ]
     }
     MODEL_ID = "model_id"
