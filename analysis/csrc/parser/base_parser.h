@@ -59,7 +59,7 @@ public:
         return data;
     }
 
-private:
+protected:
     virtual int ProduceChunk();
     virtual int ConsumeChunk(std::shared_ptr<void> &chunk, const std::shared_ptr<ChunkGenerator> &chunkConsumer);
 
