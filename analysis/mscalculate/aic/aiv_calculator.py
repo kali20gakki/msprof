@@ -16,6 +16,7 @@ from msmodel.aic.aiv_pmu_model import AivPmuModel
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aiv_pmu import AivPmuBean
 from viewer.calculate_rts_data import judge_custom_pmu_scene
+from viewer.calculate_rts_data import get_metrics_from_sample_config
 
 
 class AivCalculator(AicCalculator, MsMultiProcess):
@@ -30,8 +31,10 @@ class AivCalculator(AicCalculator, MsMultiProcess):
         self._aiv_data_list = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
         self.core_type = 1
-        self.metrics_type = StrConstant.AIV_PROFILING_METRICS
-        self.cfg_type = MsvpCommonConst.AI_CORE
+        # table_name_list[:2]:'total_time(ms)', 'total_cycles', unused
+        self.table_name_list = get_metrics_from_sample_config(self._project_path,
+                                                              StrConstant.AIV_PROFILING_METRICS,
+                                                              MsvpCommonConst.AI_CORE)[2:]
 
     def aiv_calculate(self: any) -> None:
         """

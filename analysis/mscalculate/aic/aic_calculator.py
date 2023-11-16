@@ -54,8 +54,10 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
         self.aic_discard_num_from_tail = 0
         self.repeat_aic_times = 0
         self.aic_calculator = CalculateAiCoreData(self._project_path)
-        self.metrics_type = StrConstant.AI_CORE_PROFILING_METRICS
-        self.cfg_type = MsvpCommonConst.AI_CORE
+        # table_name_list[:2]:'total_time(ms)', 'total_cycles', unused
+        self.table_name_list = get_metrics_from_sample_config(self._project_path,
+                                                              StrConstant.AI_CORE_PROFILING_METRICS,
+                                                              MsvpCommonConst.AI_CORE)[2:]
 
     def calculate(self: any) -> None:
         """
@@ -134,10 +136,7 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
 
         pmu_list = self.aic_calculator.add_pipe_time(pmu_list, total_time,
                                                      self._sample_json.get('ai_core_metrics'))
-        table_name_list = get_metrics_from_sample_config(self._project_path, self.metrics_type,
-                                                         self.cfg_type)
-        # table_name_list[:2]:'total_time(ms)', 'total_cycles', unused
-        pmu_list = {key: pmu_list[key] for key in table_name_list[2:]}
+        pmu_list = {key: pmu_list[key] for key in self.table_name_list}
         AicPmuUtils.remove_redundant(pmu_list)
         data_list.append([
             total_time, data.total_cycle, *list(itertools.chain.from_iterable(pmu_list.values())), data.task_id,
@@ -235,8 +234,10 @@ class NanoAicCalculator(AicCalculator):
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(file_list, sample_config)
-        self.metrics_type = StrConstant.AI_CORE_PROFILING_METRICS
-        self.cfg_type = MsvpCommonConst.NANO_AI_CORE
+        # table_name_list[:2]:'total_time(ms)', 'total_cycles', unused
+        self.table_name_list = get_metrics_from_sample_config(self._project_path,
+                                                              StrConstant.AI_CORE_PROFILING_METRICS,
+                                                              MsvpCommonConst.NANO_AI_CORE)[2:]
 
     def calculate(self: any) -> None:
         """
