@@ -253,16 +253,6 @@ class ExportCommand:
 
         return model_ids_set
 
-    def process(self: any) -> None:
-        """
-        handle export command
-        :return: None
-        """
-        check_path_valid(self.collection_path, False)
-        self._process_sub_dirs()
-        if self._cluster_params.get('is_cluster_scene', False):
-            self._show_cluster_tuning()
-
     @staticmethod
     def _is_host_export(result_dir: str) -> bool:
         return result_dir.endswith("host")
@@ -290,6 +280,16 @@ class ExportCommand:
         for host_f, device_f in zip(host_flip, device_flip):
             if host_f.flip_num != device_f.flip_num:
                 logging.warning("The flip is not consistent between host and device")
+
+    def process(self: any) -> None:
+        """
+        handle export command
+        :return: None
+        """
+        check_path_valid(self.collection_path, False)
+        self._process_sub_dirs()
+        if self._cluster_params.get('is_cluster_scene', False):
+            self._show_cluster_tuning()
 
     def _check_all_report(self, result_dir: str) -> None:
         """
