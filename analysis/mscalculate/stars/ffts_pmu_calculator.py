@@ -176,8 +176,8 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
             aiv_pmu_value = self.aic_calculator.add_pipe_time(
                 aiv_pmu_value, aiv_total_time, self._sample_json.get('ai_core_metrics'))
 
-            aic_pmu_value = {key: aic_pmu_value[key] for key in self.aic_table_name_list}
-            aiv_pmu_value = {key: aiv_pmu_value[key] for key in self.aiv_table_name_list}
+            aic_pmu_value = {k: v for (k, v) in aic_pmu_value.items() if k in self.aic_table_name_list}
+            aiv_pmu_value = {k: v for (k, v) in aiv_pmu_value.items() if k in self.aiv_table_name_list}
 
             aic_pmu_value_list = list(
                 itertools.chain.from_iterable(PmuMetrics(aic_pmu_value).get_pmu_by_event_name(aic_pmu_value)))
@@ -215,7 +215,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
                 Utils.generator_to_list(pmu_events), pmu_list, data.total_cycle, data.pmu_list)
             pmu_list = self.aic_calculator.add_pipe_time(pmu_list, total_time,
                                                          self._sample_json.get('ai_core_metrics'))
-            pmu_list = {key: pmu_list[key] for key in self.aic_table_name_list}
+            pmu_list = {k: v for (k, v) in pmu_list.items() if k in self.aic_table_name_list}
             AicPmuUtils.remove_redundant(pmu_list)
             pmu_data = (
                 total_time, data.total_cycle, *list(itertools.chain.from_iterable(pmu_list.values())), data.task_id,

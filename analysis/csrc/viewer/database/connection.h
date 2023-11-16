@@ -20,10 +20,6 @@ namespace Analysis {
 namespace Viewer {
 namespace Database {
 
-const std::string SQL_TEXT_TYPE = "TEXT";
-const std::string SQL_INTEGER_TYPE = "INTEGER";
-const std::string SQL_NUMERIC_TYPE = "NUMERIC";
-
 // 表列
 struct TableColumn {
     std::string name;
@@ -52,8 +48,7 @@ public:
 
     // 数据插入接口，支持不同类型数据的插入
     template<typename... Args>
-    int InsertData(const std::string &table, const std::vector<std::tuple<Args...>> &data)
-    {}
+    int InsertData(const std::string &table, const std::vector<std::tuple<Args...>> &data);
 
 private:
     sqlite3 *db_ = nullptr;
