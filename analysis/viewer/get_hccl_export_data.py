@@ -118,7 +118,7 @@ class HCCLExport:
         for data in hccl_data:
             # L0 scene or something get error
             if data.plane_id == self.INVALID_PLANE:
-                data.plane_id = self.DEFAULT_PLANE
+                data = data.replace(plane_id=self.DEFAULT_PLANE)
             name_planes_table.setdefault(data.group_name, set()).add(data.plane_id)
         for _id, (group_name, planes) in enumerate(name_planes_table.items()):
             hccl_group = self.HcclGroup(group_name, planes, _id, -1)

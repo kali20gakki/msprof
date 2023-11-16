@@ -6,6 +6,7 @@ from collections import OrderedDict
 from collections import namedtuple
 from unittest import mock
 
+from common_func.msprof_object import CustomizedNamedtupleFactory
 from mscalculate.hccl.hccl_task import HcclTask
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import ITER_RANGE
@@ -16,6 +17,7 @@ NAMESPACE = 'viewer.get_hccl_export_data'
 PARAMS = {'data_type': 'hccl', 'project': '',
           'device_id': '1', 'job_id': 'job_default', 'export_type': 'timeline',
           'iter_id': ITER_RANGE, 'export_format': None, 'model_id': -1}
+HcclTaskTuple = CustomizedNamedtupleFactory.generate_named_tuple_from_dto(HcclTask, [])
 
 
 class TestHCCLExport(unittest.TestCase):
@@ -87,9 +89,9 @@ class TestHCCLExport(unittest.TestCase):
 
     def test__init_hccl_group_should_return_3_group_when_5_hccl_op_in_three_comm_domain(self):
         hccl_data = [
-            HcclTask(group_name="1", plane_id=0), HcclTask(group_name="1", plane_id=1),
-            HcclTask(group_name="2", plane_id=1), HcclTask(group_name="3", plane_id=0),
-            HcclTask(group_name="2", plane_id=0)
+            HcclTaskTuple(group_name="1", plane_id=0), HcclTaskTuple(group_name="1", plane_id=1),
+            HcclTaskTuple(group_name="2", plane_id=1), HcclTaskTuple(group_name="3", plane_id=0),
+            HcclTaskTuple(group_name="2", plane_id=0), HcclTaskTuple(group_name="3", plane_id=-1)
         ]
 
         hccl = HCCLExport(PARAMS)
