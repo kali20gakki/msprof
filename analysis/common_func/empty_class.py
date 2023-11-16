@@ -11,6 +11,14 @@ class EmptyClass:
     def __init__(self: any, info: str = "") -> None:
         self._info = info
 
+    @classmethod
+    def __bool__(cls: any) -> bool:
+        return False
+
+    @classmethod
+    def __str__(cls: any) -> str:
+        return ""
+
     @property
     def info(self: any) -> str:
         """
@@ -25,11 +33,3 @@ class EmptyClass:
         return this is a empty class
         """
         return True
-
-    @classmethod
-    def __bool__(cls: any) -> bool:
-        return False
-
-    @classmethod
-    def __str__(cls: any) -> str:
-        return ""
