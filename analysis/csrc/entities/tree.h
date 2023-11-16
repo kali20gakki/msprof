@@ -14,7 +14,6 @@
 #define ANALYSIS_ENTITIES_TREE_H
 
 #include <memory>
-#include <utility>
 #include <map>
 #include "event_queue.h"
 

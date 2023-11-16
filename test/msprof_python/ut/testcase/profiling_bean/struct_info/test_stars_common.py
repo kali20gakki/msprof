@@ -15,11 +15,23 @@ class TestStarsCommon(unittest.TestCase):
         check = StarsCommon(task_id, stream_id, timestamp)
         self.assertEqual(check._stream_id, 2)
 
-    def test_task_id(self):
+    def test_task_id_when_stream_id_flag_is_false(self):
         task_id, stream_id, timestamp = 1, 2, 3
         check = StarsCommon(task_id, stream_id, timestamp)
         ret = check.task_id
         self.assertEqual(ret, 1)
+
+    def test_task_id_when_stream_id_flag_is_true_and_task_id_no_changed(self):
+        task_id, stream_id, timestamp = 1, 4100, 3
+        check = StarsCommon(task_id, stream_id, timestamp)
+        ret = check.task_id
+        self.assertEqual(ret, 1)
+
+    def test_task_id_when_stream_id_flag_is_true_and_task_id_is_changed(self):
+        task_id, stream_id, timestamp = 1, 53248, 3
+        check = StarsCommon(task_id, stream_id, timestamp)
+        ret = check.task_id
+        self.assertEqual(ret, 49153)
 
     def test_stream_id(self):
         task_id, stream_id, timestamp = 1, 2, 3
