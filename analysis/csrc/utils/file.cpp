@@ -45,13 +45,13 @@ bool File::Access(const std::string &path, const int &mode)
     return access(path.c_str(), mode) == 0;
 }
 
-bool File::DeleteFile(const std::string &file)
+bool File::DeleteFile(const std::string &filePath)
 {
-    if (file.empty()) {
+    if (filePath.empty()) {
         ERROR("The file path is empty.");
         return false;
     }
-    return unlink(file.c_str()) == 0;
+    return unlink(filePath.c_str()) == 0;
 }
 
 bool File::Exist(const std::string &path)
@@ -87,14 +87,14 @@ bool File::IsFile(const std::string &path)
     return fileStat.st_mode & S_IFREG;
 }
 
-uint64_t File::Size(const std::string &file)
+uint64_t File::Size(const std::string &filePath)
 {
-    if (file.empty()) {
+    if (filePath.empty()) {
         ERROR("The file path is empty.");
         return 0;
     }
     struct stat fileStat;
-    if (lstat(file.c_str(), &fileStat) != 0) {
+    if (lstat(filePath.c_str(), &fileStat) != 0) {
         ERROR("The file lstat failed.");
         return 0;
     }
@@ -203,7 +203,7 @@ bool File::Check(const std::string &path)
         return false;
     }
     if (File::Size(path) > MAX_READ_FILE_BYTES) {
-        ERROR("The read file '%' size > %.", path, MAX_READ_FILE_BYTES);
+        ERROR("The file '%' size > %.", path, MAX_READ_FILE_BYTES);
         return false;
     }
     return true;

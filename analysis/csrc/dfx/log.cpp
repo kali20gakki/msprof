@@ -19,8 +19,6 @@ namespace Analysis {
 using namespace Analysis::Utils;
 
 namespace {
-std::string g_logFile;
-const std::string LOG_FILE_FORMAT = "msprof_analysis_%.log";
 const mode_t LOG_DIR_MODE = 0750;
 const size_t TIME_SIZE = 20;
 }
@@ -35,8 +33,8 @@ int Log::Init(const std::string &logDir)
         PRINT_ERROR("Create log dir failed.");
         return ANALYSIS_ERROR;
     }
-    g_logFile = File::PathJoin({logDir, Format(LOG_FILE_FORMAT, pid_)});
-    logWriter_.Open(g_logFile, std::ios::out | std::ios::app);
+    std::string logFile = File::PathJoin({logDir, Format("msprof_analysis_%.log", pid_)});
+    logWriter_.Open(logFile, std::ios::out | std::ios::app);
     if (!logWriter_.IsOpen()) {
         PRINT_ERROR("Log file open failed.");
         return ANALYSIS_ERROR;

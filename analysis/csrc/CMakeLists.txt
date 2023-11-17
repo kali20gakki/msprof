@@ -5,6 +5,7 @@ project(msprof_analysis VERSION 0.1.0)
 set(PROJECT_ROOT ${PROJECT_SOURCE_DIR}/../..)
 set(CSRC ${PROJECT_SOURCE_DIR})
 set(OPENSOURCE ${PROJECT_ROOT}/opensource)
+set(COLLECTOR ${PROJECT_ROOT}/collector)
 
 add_compile_options("-std=c++17")
 # 保持编译和运行python版本兼容性
@@ -40,6 +41,7 @@ include_directories(${CSRC}/viewer)
 include_directories(${CSRC}/viewer/database)
 include_directories(${CSRC}/worker)
 include_directories(${CSRC}/dfx)
+include_directories(${COLLECTOR}/inc/toolchain)
 include_directories(${OPENSOURCE}/json/include)
 
 include_directories(/usr/local/include/)

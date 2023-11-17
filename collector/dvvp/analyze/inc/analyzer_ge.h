@@ -31,7 +31,6 @@ public:
     bool IsGeGraphIdMapData(const std::string &tag) const;
     bool IsGeContextData(const std::string &tag) const;
 
-    void Parse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
     void GeCompactParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
     void GeApiAndEventParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
     void GeGraphIdMapParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
@@ -54,11 +53,6 @@ struct GeOpInfo {
 };
 
 private:
-    void ParseIdMap(CONST_CHAR_PTR data, uint32_t len);
-    void ParseTaskDesc(CONST_CHAR_PTR data, uint32_t len);
-    int32_t ParseOpData(CONST_CHAR_PTR data);
-    void ParseOpName(const MsprofGeProfTaskData &data, struct GeOpInfo &opInfo) const;
-    void ParseOpType(const MsprofGeProfTaskData &data, struct GeOpInfo &opInfo) const;
     void PrintStats() const;
 
     void ParseNodeBasicInfo(CONST_CHAR_PTR data, uint32_t len);
