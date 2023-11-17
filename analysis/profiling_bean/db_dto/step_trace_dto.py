@@ -27,7 +27,6 @@ class StepTraceDto(metaclass=InstanceCheckMeta):
     """
     step trace dto
     """
-    DEFAULT_ITER_ID = -1
     index_id: int = None
     iter_id: int = None
     model_id: int = None

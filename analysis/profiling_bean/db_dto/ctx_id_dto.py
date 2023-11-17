@@ -6,10 +6,11 @@
 from dataclasses import dataclass
 from profiling_bean.db_dto.dto_meta_class import InstanceCheckMeta
 
+INVALID_CONTEXT_ID = "4294967295"
+
 
 @dataclass
 class CtxIdDto(metaclass=InstanceCheckMeta):
-    INVALID_CONTEXT_ID = "4294967295"
     ctx_id: str = INVALID_CONTEXT_ID
     ctx_id_num: int = None
     data_len: int = None
