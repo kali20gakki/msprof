@@ -247,3 +247,20 @@ class TestFftsPmuCalculator(TestCase):
             check._set_ffts_table_name_list()
             self.assertEqual(check.aic_table_name_list, table_name_list[2:])
             self.assertEqual(check.aiv_table_name_list, [])
+
+    def test_set_ffts_table_name_list_should_set_new_aic_name_when_metric_is_pipelineExecuteUtilization(self):
+        table_name_list = [
+            "total_time(ms)", "total_cycles", "vec_exe_time", "vec_exe_ratio",
+            "mac_time", "mac_ratio_extra", "scalar_time", "scalar_ratio",
+            "mte1_time", "mte1_ratio_extra", "mte2_time", "mte2_ratio",
+            "mte3_time", "mte3_ratio", "fixpipe_time", "fixpipe_ratio"
+        ]
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config",
+                        return_value={"ai_core_metrics": Constant.PMU_PIPE_EXECUT}), \
+                mock.patch(NAMESPACE + '.get_metrics_from_sample_config',
+                           side_effect=[table_name_list, table_name_list]):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            check._is_mix_needed = False
+            check._set_ffts_table_name_list()
+            self.assertEqual(check.aic_table_name_list, table_name_list[2:])
+            self.assertEqual(check.aiv_table_name_list, [])

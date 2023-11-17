@@ -440,6 +440,13 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
             self.aiv_table_name_list = get_metrics_from_sample_config(self._project_path,
                                                                       StrConstant.AIV_PROFILING_METRICS,
                                                                       MsvpCommonConst.AI_CORE)[2:]
+        if self._sample_json.get(StrConstant.AI_CORE_PROFILING_METRICS, "") == Constant.PMU_PIPE_EXECUT:
+            self.aic_table_name_list = [
+                "vec_exe_time", "vec_exe_ratio", "mac_time", "mac_ratio_extra",
+                "scalar_time", "scalar_ratio", "mte1_time", "mte1_ratio_extra",
+                "mte2_time", "mte2_ratio", "mte3_time", "mte3_ratio",
+                "fixpipe_time", "fixpipe_ratio"
+            ]
 
 
 class PmuMetrics:
