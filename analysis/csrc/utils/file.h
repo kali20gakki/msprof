@@ -18,7 +18,6 @@
 #include <vector>
 
 #include "nlohmann/json.hpp"
-#include "error_code.h"
 
 namespace Analysis {
 namespace Utils {
@@ -34,16 +33,17 @@ public:
     virtual ~File() = default;
     static bool Check(const std::string &path);
     static bool CreateDir(const std::string& path, const uint32_t &mode = 0750);
-    static void Chmod(const std::string &path, const uint32_t &mode);
+    static bool Chmod(const std::string &path, const uint32_t &mode);
     static std::string PathJoin(const std::vector<std::string>& paths);
     static std::vector<std::string> GetFilesWithPrefix(const std::string &path, const std::string &prefix);
     static std::vector<std::string> FilterFileWithSuffix(const std::vector<std::string> &files,
                                                          const std::string &suffix);
-    static bool FileAccess(const std::string &path, const int &mode);
-    static bool FileExist(const std::string &path);
+    static bool Access(const std::string &path, const int &mode);
+    static bool Exist(const std::string &path);
     static bool IsSoftLink(const std::string &path);
     static bool IsFile(const std::string &path);
-    static uint64_t FileSize(const std::string &file);
+    static bool DeleteFile(const std::string &path);
+    static uint64_t Size(const std::string &file);
 };  // class File
 
 // 该类主要用于文件安全读取
@@ -67,13 +67,13 @@ public:
     int ReadBinary(std::stringstream &content);
     int ReadText(std::vector<std::string> &content);
     int ReadJson(nlohmann::json &content);
-    size_t GetSize() const;
+
+private:
     static bool Check(const std::string &path);
 
 private:
     std::string path_;
     std::ifstream inStream_;
-    size_t readSize_ = 0;  // 读取的字节数
 };  // class FileReader
 
 // 该类主要用于文件安全写入
@@ -98,6 +98,8 @@ public:
     void Close();
     bool IsOpen() const;
     void WriteText(const std::string& content);
+
+private:
     static bool Check(const std::string &path);
 
 private:

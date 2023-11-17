@@ -63,7 +63,7 @@ public:
     void LogMsg(const std::string& message, const std::string &level,
                 const std::string &fileName, const uint32_t &line);
     void PrintMsg(const std::string& message, const std::string &level, const std::string &fileName) const;
-    int Init(const std::string &logFile);
+    int Init(const std::string &logDir);
     static std::string GetTime();
     static std::string GetFileName(const std::string &path);
 
