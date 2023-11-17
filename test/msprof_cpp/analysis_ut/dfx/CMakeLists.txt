@@ -2,6 +2,8 @@ add_executable(
     dfx_utest
     test/main.cpp
     test/log_utest.cpp
+    ${TOP_DIR}/analysis/csrc/dfx/log.cpp
+    ${TOP_DIR}/analysis/csrc/utils/file.cpp
 )
 
 target_include_directories(dfx_utest PRIVATE

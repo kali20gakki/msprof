@@ -18,7 +18,7 @@
 
 namespace Analysis {
 namespace Utils {
-std::string Join(std::vector<std::string> &str, const std::string &delimiter);
+std::string Join(const std::vector<std::string> &str, const std::string &delimiter);
 std::vector<std::string> Split(const std::string &str, const std::string &delimiter);
 }  // namespace Utils
 }  // namespace Analysis
