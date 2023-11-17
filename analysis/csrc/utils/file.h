@@ -32,8 +32,8 @@ public:
     File() = default;
     virtual ~File() = default;
     static bool Check(const std::string &path);
-    static bool CreateDir(const std::string& path, const uint32_t &mode = 0750);
-    static bool Chmod(const std::string &path, const uint32_t &mode);
+    static bool CreateDir(const std::string& path, const mode_t &mode = 0750);
+    static bool Chmod(const std::string &path, const mode_t &mode);
     static std::string PathJoin(const std::vector<std::string>& paths);
     static std::vector<std::string> GetFilesWithPrefix(const std::string &path, const std::string &prefix);
     static std::vector<std::string> FilterFileWithSuffix(const std::vector<std::string> &files,
@@ -42,8 +42,8 @@ public:
     static bool Exist(const std::string &path);
     static bool IsSoftLink(const std::string &path);
     static bool IsFile(const std::string &path);
-    static bool DeleteFile(const std::string &path);
-    static uint64_t Size(const std::string &file);
+    static bool DeleteFile(const std::string &filePath);
+    static uint64_t Size(const std::string &filePath);
 };  // class File
 
 // 该类主要用于文件安全读取
@@ -64,8 +64,8 @@ public:
     void Open(const std::string &path, const std::ios_base::openmode &mode = std::ios::in);
     void Close();
     bool IsOpen() const;
-    int ReadBinary(std::stringstream &content);
-    int ReadText(std::vector<std::string> &content);
+    int ReadBinary(std::stringstream &ss);
+    int ReadText(std::vector<std::string> &text);
     int ReadJson(nlohmann::json &content);
 
 private:
