@@ -26,8 +26,9 @@ namespace Cann {
 
 using EventQueue = Analysis::Entities::EventQueue;
 
-// CANN数据仓，包含按照EventType分好类的Event数据
+// CANN数据仓，用于存储各个Type的Events
 struct CANNWarehouse {
+    // API Type只在Model、Node、HCCL Level的Event
     std::shared_ptr<EventQueue> kernelEvents;
     std::shared_ptr<EventQueue> graphIdMapEvents;
     std::shared_ptr<EventQueue> fusionOpInfoEvents;
@@ -35,6 +36,7 @@ struct CANNWarehouse {
     std::shared_ptr<EventQueue> tensorInfoEvents;
     std::shared_ptr<EventQueue> contextIdEvents;
     std::shared_ptr<EventQueue> hcclInfoEvents;
+    std::shared_ptr<EventQueue> taskTrackEvents;
 };
 
 } // namespace Cann

@@ -38,8 +38,9 @@ public:
     // 获取根节点
     std::shared_ptr<TreeNode> GetRoot() const;
     // 层序遍历打印Tree结构便于问题定位
-    void Show();
+    std::vector<std::string> Show();
 private:
+    std::string GetTreeLevelStr(std::shared_ptr<TreeNode> &node);
     std::shared_ptr<TreeNode> root_;
 };
 
