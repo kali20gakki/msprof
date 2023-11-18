@@ -39,6 +39,7 @@ MsprofReporterMgr::~MsprofReporterMgr()
 {
     reportTypeInfoMap_.clear();
     reporters_.clear();
+    reportTypeInfoMapVec_.clear();
 }
 
 int MsprofReporterMgr::Start()
@@ -222,7 +223,6 @@ void MsprofReporterMgr::SaveTypeInfo(bool isLastChunk)
     if (uploader == nullptr) {
         return;
     }
-
     for (auto &typeInfo  : reportTypeInfoMapVec_) {
         // combined hash map data
         std::string saveHashData;
@@ -232,7 +232,7 @@ void MsprofReporterMgr::SaveTypeInfo(bool isLastChunk)
                                 HASH_DIC_DELIMITER + typeInfo.second[i].second + "\n");
         }
         if (saveHashData.empty()) {
-            return;
+            continue;
         }
         indexMap_[typeInfo.first] = currentHashSize;
         // construct FileChunkReq data
@@ -259,6 +259,7 @@ int32_t MsprofReporterMgr::StopReporters()
         MSPROF_LOGI("The reporter isn't started, don't need to be stopped.");
         return PROFILING_SUCCESS;
     }
+    Stop();
     MSPROF_LOGI("ProfReporterMgr stop reporters");
     isStarted_ = false;
     SaveTypeInfo(true);
@@ -267,9 +268,10 @@ int32_t MsprofReporterMgr::StopReporters()
             return PROFILING_FAILED;
         }
     }
-    reportTypeInfoMap_.clear();
+    for (auto &index : indexMap_) { // 为了同一进程里多次采集，每次读地址要从0开始
+        index.second = 0;
+    }
     reporters_.clear();
-    Stop();
     return PROFILING_SUCCESS;
 }
 }
