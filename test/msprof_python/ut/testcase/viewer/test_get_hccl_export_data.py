@@ -37,18 +37,18 @@ class TestHCCLExport(unittest.TestCase):
         conn, curs = db_manager.create_table('hccl.db', create_sql, insert_sql, data)
         with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_data', return_value=[]):
             res = HCCLExport(PARAMS).get_hccl_timeline_data()
-        self.assertEqual(json.loads(res).get('status'), 1)
+        self.assertEqual(res, [])
         with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_all_data', return_value=[]), \
                 mock.patch('msmodel.interface.view_model.DBManager.create_connect_db', return_value=(conn, curs)), \
                 mock.patch('msmodel.hccl.hccl_model.HcclViewModel.check_table', return_value=True):
             res = HCCLExport(PARAMS).get_hccl_timeline_data()
-        self.assertEqual(json.loads(res).get('status'), 2)
+        self.assertEqual(res, [])
         conn, curs = db_manager.create_table('hccl.db')
         with mock.patch(NAMESPACE + '.HCCLExport._format_hccl_data'), \
                 mock.patch('msmodel.interface.view_model.DBManager.create_connect_db', return_value=(conn, curs)), \
                 mock.patch('msmodel.hccl.hccl_model.HcclViewModel.check_table', return_value=True):
             res = HCCLExport(PARAMS).get_hccl_timeline_data()
-        self.assertEqual(json.loads(res), [])
+        self.assertEqual(res, [])
         conn, curs = db_manager.create_table('hccl.db')
         db_manager.destroy((conn, curs))
 

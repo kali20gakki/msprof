@@ -22,7 +22,7 @@ def test_get_host_prof_timeline():
         with mock.patch(CPUPRESENTSPACE + '.get_timeline_data',
                         return_value=None):
             result = get_host_prof_timeline(result_dir, export_type)
-        unittest.TestCase().assertEqual(json.loads(result).get("status"), NumberConstant.WARN)
+        unittest.TestCase().assertEqual(result, [])
         with mock.patch(CPUPRESENTSPACE + '.get_timeline_data',
                         return_value=123), \
                 mock.patch(NAMESPACE + '.get_column_data', return_value=123):
@@ -57,7 +57,7 @@ def test_get_time_data():
                        {"name": "nanosleep", "pid": 18070, "tid": 18072,
                         "ts": 191454818891.872, "dur": 1057.0, "ph": "X"}]
     check = get_time_data(data_list, header)
-    unittest.TestCase().assertEqual(json.loads(check), expected_result)
+    unittest.TestCase().assertEqual(check, expected_result)
 
 
 def test_get_column_data():
@@ -67,4 +67,4 @@ def test_get_column_data():
               ['thread_sort_index', 18070, 0, 0]]
     InfoConfReader()._info_json = {'pid': 0}
     check = get_column_data(data_list, header)
-    unittest.TestCase().assertEqual(len(json.loads(check)), 5)
+    unittest.TestCase().assertEqual(len(check), 5)

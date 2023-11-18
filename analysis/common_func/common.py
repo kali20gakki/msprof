@@ -59,14 +59,14 @@ class CommonConstant:
         return self.__dict__
 
 
-def error(file_name: str, msg: Exception) -> None:
+def error(file_name: str, msg: str) -> None:
     """
     print error message
     """
     if file_name is None or msg is None:
         return
     print_msg(time.strftime("%a %d %b %Y %H:%M:%S ", time.localtime())
-              + "[ERROR] [MSVP] [{0}] {1}: {2}".format(str(os.getpid()), file_name, str(msg)),
+              + f"[ERROR] [MSVP] [{str(os.getpid())}] {file_name}: {msg}",
               flush=True)
 
 

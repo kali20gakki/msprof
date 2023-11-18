@@ -20,5 +20,5 @@ class TestStarsChipTransView(unittest.TestCase):
              mock.patch(NAMESPACE + '.ViewModel.check_table', return_value=True), \
              mock.patch(NAMESPACE + '.ViewModel.get_sql_data', return_value=[[0, 1, 2, 3]]):
             res = StarsChipTransView(CONFIG, CONFIG).get_timeline_data()
-        self.assertEqual(len(json.loads(res)), 7)
+        self.assertEqual(len(res), 7)
 

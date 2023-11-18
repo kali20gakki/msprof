@@ -86,7 +86,7 @@ class PipelineOverlapViewer:
                  for overlap_type in OverlapType]
             )
         )
-        return json.dumps(_trace)
+        return _trace
 
     def _format_timeline_data(self, overlap_type, data):
         return [self.OVERLAP_TYPE_NAME.get(overlap_type.name), self._pid, overlap_type.value,

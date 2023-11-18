@@ -86,15 +86,6 @@ class TraceViewer:
         return tmp_trace_data
 
     @staticmethod
-    def format_trace_events(trace_evnets: list) -> str:
-        """
-        Format traceEvents
-        :param trace_evnets:trace events
-        :return: result
-        """
-        return json.dumps(trace_evnets)
-
-    @staticmethod
     def _cal_sys_time_us(delta_dev: any, item: list) -> int:
         return int(float(item[0]) + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS
 
@@ -133,18 +124,19 @@ def _get_hcc_events_data(start: int, end: int, devid: str, curs: any) -> list:
     return _data
 
 
-def get_hccs_timeline(result_dir: str, devid: str, start: int, end: int) -> str:
+def get_hccs_timeline(result_dir: str, devid: str, start: int, end: int) -> any:
     """
     Report hccs timeline
     """
     conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_HCCS)
     if not conn or not curs:
-        return json.dumps({"status": NumberConstant.ERROR, "info": "Failed to connect hccs.db."})
+        logging.error("Failed to connect hccs.db.")
+        return []
     _data = _get_hcc_events_data(start, end, devid, curs)
     trace_parser = TraceViewer('HCCS')
     _result = _get_hccs_result(_data, trace_parser)
     DBManager.destroy_db_connect(conn, curs)
-    return trace_parser.format_trace_events(_result)
+    return _result
 
 
 def _get_pcie_data(pcie_data: list, trace_parser: any) -> list:
@@ -182,13 +174,14 @@ def _get_pcie_data(pcie_data: list, trace_parser: any) -> list:
     return _trace
 
 
-def get_pcie_timeline(param: dict) -> str:
+def get_pcie_timeline(param: dict) -> any:
     """
     Report PCIe timeline
     """
     conn, curs = DBManager.check_connect_db(param.get("project_path"), DBNameConstant.DB_PCIE)
     if not (conn and curs):
-        return json.dumps({"info": "Failed to connect pcie database. "})
+        logging.error("Failed to connect pcie database. ")
+        return []
     sql = "select * from {} where device_id=? and timestamp between ? " \
           "and ? and tx_p_bandwidth_max >= tx_p_bandwidth_min;".format(DBNameConstant.TABLE_PCIE)
     data = DBManager.fetch_all_data(curs, sql, (param['device_id'],
@@ -197,10 +190,10 @@ def get_pcie_timeline(param: dict) -> str:
     trace_parser = TraceViewer('PCIe')
     _trace = _get_pcie_data(data, trace_parser)
     DBManager.destroy_db_connect(conn, curs)
-    return trace_parser.format_trace_events(_trace)
+    return _trace
 
 
-def get_dvpp_timeline(param: dict) -> str:
+def get_dvpp_timeline(param: dict) -> any:
     """
     function that provides dvpp data searched from peripheral.db
     :param param: get dvpp timeline params
@@ -209,17 +202,20 @@ def get_dvpp_timeline(param: dict) -> str:
     conn, curs = DBManager.check_connect_db(param['project_path'], 'peripheral.db')
     _result = []
     if not (conn and curs):
-        return json.dumps({'status': NumberConstant.ERROR, "info": "The db doesn't exist!"})
+        logging.error("The db doesn't exist!")
+        return []
     try:
         if not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_DVPP_ORIGIN):
-            return json.dumps({'status': NumberConstant.ERROR, "info": "The table doesn't exist."})
+            logging.error("The table doesn't exist.")
+            return []
     except sqlite3.Error:
-        return json.dumps({"status": NumberConstant.ERROR, "info": "No data is collected."})
+        logging.error("No data is collected.")
+        return []
     else:
         dict_engine_id = get_dvpp_engine_id(Constant.DVPP_TYPE_NAME, conn)
         dvpp_list = get_dvpp_ids(conn) if "all" in param['dvppid'] else param['dvppid']
         _process_dvpp_timeline_data(_result, conn, dvpp_list, dict_engine_id, param)
-        return TraceViewer.format_trace_events(_result)
+        return _result
     finally:
         DBManager.destroy_db_connect(conn, curs)
 
@@ -284,7 +280,7 @@ def _get_network_data(table: dict, sql_: dict, curs: any, *param: any) -> dict:
     return dump_data
 
 
-def get_network_timeline(result_dir: str, devid: str, start: int, end: int, collect_type: str) -> str:
+def get_network_timeline(result_dir: str, devid: str, start: int, end: int, collect_type: str) -> any:
     """
     Return trace-viewer json format RoCE/NIC timeline
     """
@@ -298,12 +294,12 @@ def get_network_timeline(result_dir: str, devid: str, start: int, end: int, coll
         table['_table'] = DBNameConstant.TABLE_NIC_RECEIVE
         table['_header'] = 'NIC'
     else:
-        return json.dumps(
-            {"status": NumberConstant.ERROR, "info": "Failed to get collection type."})
+        logging.error("Failed to get collection type.")
+        return []
     conn, curs = DBManager.check_connect_db(result_dir, table.get('_db', ""))
     if not conn or not curs:
-        return json.dumps(
-            {"status": NumberConstant.ERROR, "info": "Failed to connect {0}.".format(table.get('_db'))})
+        logging.error("Failed to connect {%s}.", table.get('_db'))
+        return []
 
     table['delta_dev'] = InfoConfReader().get_delta_time()
     sql_ = {
@@ -321,7 +317,7 @@ def get_network_timeline(result_dir: str, devid: str, start: int, end: int, coll
                                                InfoConfReader().get_json_pid_data(),
                                                InfoConfReader().get_json_tid_data())
     DBManager.destroy_db_connect(conn, curs)
-    return trace_parser.format_trace_events(_result)
+    return _result
 
 
 def _get_aicore_utilization_data(aicore_result: dict, pid: str, tid: str) -> list:
@@ -342,7 +338,7 @@ def _get_aicore_utilization_data(aicore_result: dict, pid: str, tid: str) -> lis
     return trace_data
 
 
-def get_aicore_utilization_timeline(param: dict) -> str:
+def get_aicore_utilization_timeline(param: dict) -> any:
     """
     get ai core utilization trace view data
     """
@@ -352,7 +348,7 @@ def get_aicore_utilization_timeline(param: dict) -> str:
                                                NumberConstant.DEFAULT_END_TIME)
     except sqlite3.Error as error:
         logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
-        return json.dumps({"status": NumberConstant.ERROR, "info": "Failed to get ai core utilization data."})
+        return []
 
     if len(aicore_result) >= NumberConstant.MAX_STR_LENGTH:
         warn(os.path.basename(__file__),
@@ -361,7 +357,8 @@ def get_aicore_utilization_timeline(param: dict) -> str:
 
     aicore_result = JsonManager.loads(aicore_result)
     if not aicore_result:
-        return json.dumps({"status": NumberConstant.ERROR, "info": "Failed to get ai core utilization data."})
+        logging.error("Failed to get ai core utilization data.")
+        return []
 
     pid = InfoConfReader().get_json_pid_data()
     tid = InfoConfReader().get_json_tid_data()
@@ -372,6 +369,6 @@ def get_aicore_utilization_timeline(param: dict) -> str:
         trace_data = _get_aicore_utilization_data(aicore_result, pid, tid)
     except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
         logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
-        return json.dumps({"status": NumberConstant.ERROR, "info": "Failed to get ai core utilization data."})
+        return []
     result_data += TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, trace_data)
-    return TraceViewer.format_trace_events(result_data)
+    return result_data

@@ -121,7 +121,7 @@ class MsprofTxViewer:
         finally:
             self.model.finalize()
 
-    def get_timeline_data(self: any) -> str:
+    def get_timeline_data(self: any) -> any:
         """
         to get timeline data
         :return:timeline data
@@ -139,7 +139,7 @@ class MsprofTxViewer:
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, trace_data)
         result = TraceViewManager.metadata_event(self.get_time_timeline_header(msproftx_data))
         result.extend(_trace)
-        return TraceViewer("MsprofTxViewer").format_trace_events(result)
+        return result
 
     def init_model(self: any) -> None:
         """

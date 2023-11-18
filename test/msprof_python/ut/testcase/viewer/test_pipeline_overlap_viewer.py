@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023. All rights reserved.
+import json
 import os
 import unittest
 from unittest import mock
@@ -55,7 +56,7 @@ class TestPipelineOverlapViewer(unittest.TestCase):
             check = PipelineOverlapViewer({}, {
                 StrConstant.PARAM_RESULT_DIR: os.path.join(self.DIR_PATH, 'PROF1', 'device_0')})
             ret = check.get_timeline_data()
-            self.assertEqual(952, len(ret))
+            self.assertEqual(952, len(json.dumps(ret)))
 
     def test_format_timeline_data(self):
         time_section = TimeSectionDto()

@@ -45,7 +45,7 @@ class StarsSocView:
 
         return self._model.get_sql_data(sql)
 
-    def get_timeline_data(self: any) -> str:
+    def get_timeline_data(self: any) -> list:
         """
         get timeline data of stars soc
         :return:
@@ -53,8 +53,8 @@ class StarsSocView:
         soc_data = self.get_soc_data()
         soc_res = []
         if not soc_data:
-            return json.dumps({"status": NumberConstant.ERROR,
-                               "info": "Failed to get stars soc data, please check the data parsing log."})
+            logging.error("Failed to get stars soc data, please check the data parsing log.")
+            return []
         self._timeline_data = TraceViewManager.metadata_event(
             [["process_name", self._pid, self._tid, "Stars Soc Info"]])
 
@@ -68,4 +68,4 @@ class StarsSocView:
                  ])
         self._timeline_data.extend(TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST,
                                                                        soc_res))
-        return json.dumps(self._timeline_data)
+        return self._timeline_data

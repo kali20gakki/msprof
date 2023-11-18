@@ -500,20 +500,11 @@ class MsProfExportDataUtils:
     @staticmethod
     def _get_bulk_data(configs: dict, params: dict) -> any:
         if params.get(StrConstant.PARAM_EXPORT_TYPE) != MsProfCommonConstant.TIMELINE:
-            return json.dumps({
-                "status": NumberConstant.WARN,
-                "info": "Please check params, "
-                        "Currently bulk data export params should be timeline."
-            })
-        timeline = {}
+            logging.warning("Please check params, currently bulk data export params should be timeline.")
+            return []
         row_timeline = PipelineOverlapViewer(configs, params).get_timeline_data()
-        if row_timeline:
-            try:
-                timeline = json.loads(row_timeline)
-            except (TypeError, ValueError) as err:
-                logging.error("timeline data is not json format.")
-                return ""
-        MsprofTimeline().add_export_data(timeline, params.get(StrConstant.PARAM_DATA_TYPE))
+
+        MsprofTimeline().add_export_data(row_timeline, params.get(StrConstant.PARAM_DATA_TYPE))
         return MsprofTimeline().export_all_data()
 
 
@@ -525,7 +516,7 @@ class MsProfExportDataUtils:
         return TaskTimeViewer(configs, params).get_timeline_data()
 
     @staticmethod
-    def _get_hccl_timeline(configs: dict, params: dict) -> str:
+    def _get_hccl_timeline(configs: dict, params: dict) -> list:
         """
         get hccl timeline data
         :param configs:
@@ -535,11 +526,9 @@ class MsProfExportDataUtils:
         _ = configs
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
             return HCCLExport(params).get_hccl_timeline_data()
-        return json.dumps({
-            "status": NumberConstant.WARN,
-            "info": "Please check params, "
-                    "Currently hccl data does not support exporting files other than timeline."
-        })
+        logging.warning("Please check params, currently hccl data does not support exporting files "
+                        "other than timeline.")
+        return []
 
     @staticmethod
     def _get_msproftx_data(configs: dict, params: dict) -> any:
@@ -620,15 +609,7 @@ class MsProfExportDataUtils:
                 headers, data, _ = handler(configs, params)
                 return MsprofDataStorage().export_summary_data(headers, Utils.data_processing_with_decimals(data),
                                                                params)
-            data = handler(configs, params)
-            timeline_data = []
-            if data:
-                try:
-                    timeline_data = json.loads(data)
-                except (TypeError, ValueError) as err:
-                    logging.error("timeline data is not json format.")
-                    return json.dumps({"status": NumberConstant.WARN,
-                                       "info": "timeline data is not json format."})
+            timeline_data = handler(configs, params)
             cls.add_timeline_data(params, timeline_data)
             skip_list = ["event", "api"]
             if params.get(StrConstant.PARAM_DATA_TYPE) in skip_list:

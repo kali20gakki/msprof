@@ -28,7 +28,7 @@ class TestTraceViewer(unittest.TestCase):
     def test_get_hccs_timeline_1(self):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(None, None)):
             res = get_hccs_timeline('', 0, 0, 0)
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
 
     def test_get_hccs_timeline_2(self):
         create_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_HCCS_EVENTS + \
@@ -46,7 +46,7 @@ class TestTraceViewer(unittest.TestCase):
         test_sql = db_manager.connect_db("hccs.db")
         (test_sql[1]).execute("drop Table {}".format(DBNameConstant.TABLE_HCCS_EVENTS))
         db_manager.destroy(test_sql)
-        self.assertEqual(len(json.loads(res)), 3)
+        self.assertEqual(len(res), 3)
 
     def test_get_hccs_timeline_3(self):
         create_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_HCCS_EVENTS \
@@ -63,12 +63,12 @@ class TestTraceViewer(unittest.TestCase):
         test_sql = db_manager.connect_db("hccs.db")
         (test_sql[1]).execute("drop Table {}".format(DBNameConstant.TABLE_HCCS_EVENTS))
         db_manager.destroy(test_sql)
-        self.assertEqual(len(json.loads(res_1)), 3)
+        self.assertEqual(len(res_1), 3)
 
     def test_get_pcie_timeline_1(self):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(None, None)):
             res = get_pcie_timeline(param)
-        self.assertEqual(len(json.loads(res)), 1)
+        self.assertEqual(len(res), 0)
 
     def test_get_pcie_timeline_2(self):
         create_sql = "CREATE TABLE IF NOT EXISTS PcieOriginalData" \
@@ -91,23 +91,23 @@ class TestTraceViewer(unittest.TestCase):
         test_sql = db_manager.connect_db("pcie.db")
         (test_sql[1]).execute("drop Table PcieOriginalData")
         db_manager.destroy(test_sql)
-        self.assertEqual(len(json.loads(res)), 5)
+        self.assertEqual(len(res), 5)
 
     def test_get_dvpp_timeline_1(self):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(None, None)), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             res = get_dvpp_timeline(param)
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', side_effect=sqlite3.Error):
             res = get_dvpp_timeline(param)
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
             res = get_dvpp_timeline(param)
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
 
     def test_get_dvpp_timeline_2(self):
         create_sql = "CREATE TABLE IF NOT EXISTS DvppOriginalData" \
@@ -125,14 +125,14 @@ class TestTraceViewer(unittest.TestCase):
         test_sql = db_manager.connect_db("peripheral.db")
         (test_sql[1]).execute("drop Table DvppOriginalData")
         db_manager.destroy(test_sql)
-        self.assertEqual(len(json.loads(res)), 12)
+        self.assertEqual(len(res), 12)
 
     def test_get_network_timeline_1(self):
         res = get_network_timeline("", 0, 0, NumberConstant.DEFAULT_END_TIME, "")
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
 
         res = get_network_timeline("", 0, 0, NumberConstant.DEFAULT_END_TIME, "roce")
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
 
     def test_get_network_timeline_2(self):
         create_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_NIC_RECEIVE + \
@@ -146,7 +146,7 @@ class TestTraceViewer(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql):
             InfoConfReader()._info_json = {"pid": 0}
             res = get_network_timeline("", 0, 0, NumberConstant.DEFAULT_END_TIME, "nic")
-        self.assertEqual(len(json.loads(res)), 3)
+        self.assertEqual(len(res), 3)
         test_sql = db_manager.connect_db(DBNameConstant.DB_NIC_RECEIVE)
         (test_sql[1]).execute("drop Table {}".format(DBNameConstant.TABLE_NIC_RECEIVE))
         db_manager.destroy(test_sql)
@@ -155,12 +155,12 @@ class TestTraceViewer(unittest.TestCase):
         with mock.patch(NAMESPACE + '.get_aicore_utilization', side_effect=sqlite3.Error):
             InfoConfReader()._info_json = {"pid": 0}
             res = get_aicore_utilization_timeline(param)
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
 
         with mock.patch(NAMESPACE + '.JsonManager.loads', return_value=None):
             InfoConfReader()._info_json = {"pid": 0}
             res = get_aicore_utilization_timeline(param)
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
 
         aicore_data = {"status": 0,
                        "data": {"maxTime": "0.00", "minTime": 0,
@@ -169,7 +169,7 @@ class TestTraceViewer(unittest.TestCase):
         with mock.patch(NAMESPACE + '.get_aicore_utilization', return_value=json.dumps(aicore_data)):
             InfoConfReader()._info_json = {"pid": 0}
             res = get_aicore_utilization_timeline(param)
-        self.assertEqual(len(json.loads(res)), 3)
+        self.assertEqual(len(res), 3)
 
 
 if __name__ == '__main__':

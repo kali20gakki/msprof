@@ -126,7 +126,7 @@ class TaskTimeViewer(BaseViewer):
                 "info": "Can not export task time data, the current chip does not support "
                         "exporting this data or the data may be not collected."
             })
-        return TraceViewer("StarsViewer").format_trace_events(result)
+        return result
 
     def get_model_instance(self: any) -> any:
         """

@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 import json
+import logging
 from enum import Enum
 
 from common_func.info_conf_reader import InfoConfReader
@@ -42,7 +43,7 @@ def init_presenter(result_dir: str, export_type: int) -> any:
     return presenter
 
 
-def get_host_prof_timeline(result_dir: str, export_type: int) -> str:
+def get_host_prof_timeline(result_dir: str, export_type: int) -> list:
     """
     Return trace-viewer json format host prof data timeline
     """
@@ -50,9 +51,8 @@ def get_host_prof_timeline(result_dir: str, export_type: int) -> str:
     header = presenter.get_timeline_header()
     data_list = presenter.get_timeline_data()
     if not data_list:
-        return json.dumps(
-                    {"status": NumberConstant.WARN, "info": "failed to get os runtime data, may be the pid"
-                                                            " set is invalid, please check."})
+        logging.warning("failed to get os runtime data, may be the pid set is invalid, please check.")
+        return []
     if export_type == HostExportType.HOST_RUNTIME_API:
         return get_time_data(data_list, header)
     return get_column_data(data_list, header)
@@ -68,7 +68,7 @@ def get_host_prof_summary(result_dir: str, export_type: int, configs: dict) -> t
     return headers, data, len(data)
 
 
-def get_time_data(data_list: list, header: list) -> str:
+def get_time_data(data_list: list, header: list) -> list:
     """
     get time timeline
     """
@@ -76,10 +76,10 @@ def get_time_data(data_list: list, header: list) -> str:
     _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TASK_TIME_GRAPH_HEAD, data_list)
     result = TraceViewManager.metadata_event(header)
     result.extend(_trace)
-    return trace_parser.format_trace_events(result)
+    return result
 
 
-def get_column_data(data_list: list, header: list) -> str:
+def get_column_data(data_list: list, header: list) -> list:
     """
     usage timeline
     """
@@ -94,4 +94,4 @@ def get_column_data(data_list: list, header: list) -> str:
     _trace = TraceViewManager.column_graph_trace(json_header, data_list)
     result = TraceViewManager.metadata_event(header)
     result.extend(_trace)
-    return trace_parser.format_trace_events(result)
+    return result

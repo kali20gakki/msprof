@@ -173,7 +173,7 @@ class MsprofTimeline:
                 json_list.extend(json_data)
                 json_list.extend(self.get_layer_label_and_sort(format_pid, layer_info))
 
-    def export_all_data(self: any) -> str:
+    def export_all_data(self: any) -> list:
         """
         get bulk data
         :return: json for timeline
@@ -182,14 +182,14 @@ class MsprofTimeline:
         if not ProfilingScene().is_all_export():
             data = StepTraceViewer.get_one_iter_timeline_data(self._result_dir, self._iter_range)
         if not isinstance(data, EmptyClass):
-            data_list = json.loads(data)
+            data_list = data
             if isinstance(data_list, list) and data_list:
                 self.add_sort_index(data_list)
                 data_list.extend(self._export_data_list)
-                return json.dumps(data_list)
+                return data_list
         if not self._export_data_list:
-            return ""
-        return json.dumps(self._export_data_list)
+            return []
+        return self._export_data_list
 
     def is_in_iteration(self: any, json_value: dict) -> bool:
         """
