@@ -53,7 +53,7 @@ class NpuMemViewer:
                 return self._configs.get(StrConstant.CONFIG_HEADERS), summary_data, len(summary_data)
             return MsvpConstant.MSVP_EMPTY_DATA
 
-    def get_timeline_data(self: any) -> str:
+    def get_timeline_data(self: any) -> any:
         with self._model as _model:
             if not _model.check_db() or not _model.check_table():
                 return json.dumps(
@@ -82,5 +82,5 @@ class NpuMemViewer:
                 TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST,
                                                     column_trace_data)
             if _result:
-                return trace_parser.format_trace_events(_result)
+                return _result
             return json.dumps({"status": NumberConstant.ERROR, "info": "No data is collected."})

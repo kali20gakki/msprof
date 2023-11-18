@@ -93,8 +93,8 @@ class TestNpuMemViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + '.NpuMemModel.get_timeline_data', return_value=[npu_mem_dto]):
             check = NpuMemViewer(config, params)
             ret = check.get_timeline_data()
-            self.assertEqual('[{"name": "process_name", "pid": 0, "tid": 0, "args": {"name": "NPU_MEM"}, '
-                             '"ph": "M"}, {"name": "APP/DDR", "ts": 16.0, "pid": 0, "tid": 0, "args": '
-                             '{"KB": 0.0}, "ph": "C"}, {"name": "APP/HBM", "ts": 16.0, "pid": 0, "tid": 0, '
-                             '"args": {"KB": 0.0}, "ph": "C"}, {"name": "APP/Memory", "ts": 16.0, "pid": 0, '
-                             '"tid": 0, "args": {"KB": 0.0}, "ph": "C"}]', ret)
+            self.assertEqual([{"name": "process_name", "pid": 0, "tid": 0, "args": {"name": "NPU_MEM"}, "ph": "M"},
+                              {"name": "APP/DDR", "ts": 16.0, "pid": 0, "tid": 0, "args":
+                              {"KB": 0.0}, "ph": "C"}, {"name": "APP/HBM", "ts": 16.0, "pid": 0, "tid": 0,
+                              "args": {"KB": 0.0}, "ph": "C"}, {"name": "APP/Memory", "ts": 16.0, "pid": 0,
+                              "tid": 0, "args": {"KB": 0.0}, "ph": "C"}], ret)

@@ -335,7 +335,7 @@ class StepTraceViewer:
         return headers, merge_data, len(merge_data)
 
     @staticmethod
-    def get_step_trace_timeline(message: dict) -> str:
+    def get_step_trace_timeline(message: dict) -> list:
         """
         @param message
         Rewrite gRPC get_training_trace method.
@@ -345,7 +345,7 @@ class StepTraceViewer:
         conn_path = PathManager.get_db_path(message.get("project_path"), DBNameConstant.DB_TRACE)
 
         if not DBManager.check_tables_in_db(conn_path, DBNameConstant.TABLE_TRAINING_TRACE):
-            return json.dumps(MsvpConstant.EMPTY_LIST)
+            return MsvpConstant.EMPTY_LIST
 
         conn, curs = DBManager.check_connect_db_path(conn_path)
         data = StepTraceViewer.get_step_trace_data(curs, message)
@@ -364,7 +364,7 @@ class StepTraceViewer:
         conn_path = PathManager.get_db_path(result_dir, DBNameConstant.DB_TRACE)
 
         if not DBManager.check_tables_in_db(conn_path, DBNameConstant.TABLE_TRAINING_TRACE):
-            return json.dumps(MsvpConstant.EMPTY_LIST)
+            return MsvpConstant.EMPTY_LIST
         conn, curs = DBManager.check_connect_db_path(conn_path)
         values = StepTraceViewer.__select_trace_one_iter(curs, iter_range)
 
@@ -571,4 +571,4 @@ class StepTraceViewer:
             StepTraceViewer.format_reduce_json(trace_item.get("all_reduce", []), trace_parm, pid, tid, result_data)
             StepTraceViewer.format_get_next_json(trace_item.get("get_next", []), pid, tid, result_data)
 
-        return json.dumps(result_data)
+        return result_data

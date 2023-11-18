@@ -41,7 +41,7 @@ class StarsChipTransView:
         self._pid = InfoConfReader().get_json_pid_data()
         self._tid = InfoConfReader().get_json_tid_data()
 
-    def get_timeline_data(self: any) -> str:
+    def get_timeline_data(self: any) -> list:
         """
         get timeline data of stars chip trans
         :return:
@@ -49,11 +49,11 @@ class StarsChipTransView:
         self.get_pa_data()
         self.get_pcie_data()
         if not self._timeline_data:
-            return json.dumps({"status": NumberConstant.ERROR,
-                               "info": "Failed to get stars chip trans data, please check the data parsing log."})
+            logging.error("Failed to get stars chip trans data, please check the data parsing log.")
+            return []
         self._timeline_data.extend(TraceViewManager.metadata_event(
             [["process_name", self._pid, self._tid, "Stars Chip Trans"]]))
-        return json.dumps(self._timeline_data)
+        return self._timeline_data
 
     def get_pa_data(self: any) -> None:
         """

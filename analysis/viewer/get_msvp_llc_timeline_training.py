@@ -3,8 +3,8 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
 
 import json
-import os
 import sqlite3
+import logging
 from collections import OrderedDict
 
 from common_func.common import CommonConstant
@@ -43,7 +43,7 @@ def _fill_llc_nomini(param: dict, results: dict, legends: dict, sample_config: d
                                               _direct)] = llc_event.get(_direct, 0)
 
 
-def get_llc_nomini_data(param: dict, sample_config: dict, curs: any) -> str:
+def get_llc_nomini_data(param: dict, sample_config: dict, curs: any) -> list:
     """
     get llc time series data
     """
@@ -53,8 +53,8 @@ def get_llc_nomini_data(param: dict, sample_config: dict, curs: any) -> str:
     try:
         _fill_llc_nomini(param, results, legends, sample_config, curs)
     except sqlite3.Error:
-        return json.dumps({"status": NumberConstant.ERROR,
-                           "info": "Failed to get data of llc."})
+        logging.error("Failed to get data of llc.")
+        return []
     trace_parser = TraceViewer("LLC")
     _trace_results = TraceViewManager.metadata_event(
         [["process_name", InfoConfReader().get_json_pid_data(),
@@ -65,30 +65,31 @@ def get_llc_nomini_data(param: dict, sample_config: dict, curs: any) -> str:
                 results, legends, delta_dev,
                 InfoConfReader().get_json_pid_data(),
                 InfoConfReader().get_json_tid_data())
-        return trace_parser.format_trace_events(_trace_results)
-    return json.dumps({"status": NumberConstant.ERROR, "info": "No data is collected."})
+        return _trace_results
+    logging.error("No data is collected.")
+    return []
 
 
-def pre_check_llc(conn: any, curs: any, sample_config: dict, table_name: str) -> str:
+def pre_check_llc(conn: any, curs: any, sample_config: dict, table_name: str) -> list:
     """
     Check LLC events
     """
     if not (conn and curs):
-        return json.dumps({'status': NumberConstant.ERROR, "info": "The db doesn't exist."})
+        logging.error("The db doesn't exist.")
+        return []
     if not sample_config or not sample_config.get('llc_profiling'):
-        return json.dumps(
-            {'status': NumberConstant.ERROR,
-             "info": "Failed to load llc profiling events from {}".format(CommonConstant.SAMPLE_JSON)})
+        logging.error("Failed to load llc profiling events from %s", CommonConstant.SAMPLE_JSON)
+        return []
     if sample_config.get('llc_profiling') not in ['read', 'write', 'bandwidth', 'capacity']:
-        return json.dumps(
-            {'status': NumberConstant.ERROR,
-             "info": "Invalid llc profiling events."})
+        logging.error("Invalid llc profiling events.")
+        return []
     if not DBManager.judge_table_exist(curs, table_name):
-        return json.dumps({'status': NumberConstant.ERROR, "info": "The table doesn't exist."})
-    return ""
+        logging.error("The table doesn't exist.")
+        return []
+    return []
 
 
-def get_llc_mini_data(param: dict, sample_config: dict, curs: any) -> str:
+def get_llc_mini_data(param: dict, sample_config: dict, curs: any) -> list:
     """
     get llc time series data
     """
@@ -96,8 +97,8 @@ def get_llc_mini_data(param: dict, sample_config: dict, curs: any) -> str:
         return get_llc_bandwidth(curs)
     if sample_config.get(StrConstant.LLC_PROF) == StrConstant.LLC_CAPACITY_ITEM:
         return get_llc_capacity(param, curs)
-    return json.dumps({"status": NumberConstant.ERROR,
-                       "info": "Failed to get data of llc."})
+    logging.error("Failed to get data of llc.")
+    return []
 
 
 def _format_llc_trace_data(bandwidth_data: list, delta_dev: float) -> list:
@@ -132,7 +133,7 @@ def _format_llc_trace_data(bandwidth_data: list, delta_dev: float) -> list:
     return trace_data
 
 
-def get_llc_bandwidth(curs: any) -> str:
+def get_llc_bandwidth(curs: any) -> list:
     """
     get trace view data of llc bandwith
     """
@@ -151,16 +152,16 @@ def get_llc_bandwidth(curs: any) -> str:
     bandwidth_data = DBManager.fetch_all_data(curs, sql)
     bandwidth_data = Utils.generator_to_list(list(i) for i in bandwidth_data)
     if not bandwidth_data:
-        return json.dumps({"status": NumberConstant.ERROR,
-                           "info": "Failed to get read and write of llc_bandwidth."})
+        logging.error("Failed to get read and write of llc_bandwidth.")
+        return []
 
     trace_data = _format_llc_trace_data(bandwidth_data, delta_dev)
     if not trace_data:
-        return json.dumps({"status": NumberConstant.ERROR,
-                           "info": "Failed to get read and write of llc_bandwidth."})
+        logging.error("Failed to get read and write of llc_bandwidth.")
+        return []
     result_data.extend(
         TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, trace_data))
-    return json.dumps(result_data)
+    return result_data
 
 
 def _format_llc_capacity(dsid_sql_data: list) -> list:
@@ -191,7 +192,7 @@ def _get_dsid_sql_data(params: dict, types: str, curs: any) -> list:
     return dsid_sql_data
 
 
-def get_llc_capacity(params: dict, curs: any) -> str:
+def get_llc_capacity(params: dict, curs: any) -> list:
     """
     get trace view data of llc capacity
     """
@@ -200,12 +201,12 @@ def get_llc_capacity(params: dict, curs: any) -> str:
     try:
         dsid_sql_data = _get_dsid_sql_data(params, types, curs)
     except sqlite3.Error:
-        return json.dumps({"status": NumberConstant.ERROR,
-                           "info": "Failed to get data of llc_capacity."})
+        logging.error("Failed to get data of llc_capacity.")
+        return []
     else:
         if not dsid_sql_data:
-            return json.dumps({"status": NumberConstant.ERROR,
-                               "info": "Failed to get read and write of llc_capacity."})
+            logging.error("Failed to get read and write of llc_capacity.")
+            return []
         dsid_sql_data = Utils.generator_to_list(list(i) for i in dsid_sql_data)
         trace_data = _format_llc_capacity(dsid_sql_data)
         meta_data = [
@@ -217,7 +218,7 @@ def get_llc_capacity(params: dict, curs: any) -> str:
         result_data = TraceViewManager.metadata_event(meta_data)
         result_data.extend(
             TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, trace_data))
-        return json.dumps(result_data)
+        return result_data
     finally:
         pass
 
@@ -277,7 +278,7 @@ def get_llc_db_table(sample_config: dict) -> str:
     return table_name
 
 
-def get_llc_timeline(param: dict) -> str:
+def get_llc_timeline(param: dict) -> list:
     """
     get llc time series data
     """
@@ -294,8 +295,8 @@ def get_llc_timeline(param: dict) -> str:
             return get_llc_mini_data(param, sample_config, curs)
         return get_llc_nomini_data(param, sample_config, curs)
     except (OSError, SystemError, ValueError, TypeError, RuntimeError):
-        return json.dumps({"status": NumberConstant.ERROR,
-                           "info": "Failed to get data of llc."})
+        logging.error("Failed to get data of llc.")
+        return []
     finally:
         DBManager.destroy_db_connect(curs, conn)
 
@@ -341,27 +342,24 @@ def _reformat_ddr_data(trace_parser: any, data_total: dict) -> list:
     return _result
 
 
-def get_ddr_timeline(param: dict) -> str:
+def get_ddr_timeline(param: dict) -> list:
     """
     get ddr time series data
     """
     conn, curs = DBManager.check_connect_db(param['project_path'], 'ddr.db')
     if not (conn and curs):
-        return json.dumps({'status': NumberConstant.ERROR, "info": "The db doesn't exist."})
+        logging.error("The db doesn't exist.")
+        return []
     if not DBManager.judge_table_exist(curs, "DDROriginalData"):
-        return json.dumps({'status': NumberConstant.ERROR, "info": "The table doesn't exist."})
+        logging.error("The table doesn't exist.")
+        return []
     data_total = get_ddr_metric_data(param, curs)
     if not data_total:
-        return json.dumps({"status": NumberConstant.ERROR, "info": "No data is collected."})
+        logging.error("No data is collected.")
+        return []
     trace_parser = TraceViewer("DDR")
-    try:
-        _result = _reformat_ddr_data(trace_parser, data_total)
-        return trace_parser.format_trace_events(_result)
-    except (OSError, SystemError, ValueError, TypeError, RuntimeError):
-        return json.dumps({"status": NumberConstant.ERROR,
-                           "info": "Failed to get data of ddr."})
-    finally:
-        DBManager.destroy_db_connect(conn, curs)
+    DBManager.destroy_db_connect(conn, curs)
+    return _reformat_ddr_data(trace_parser, data_total)
 
 
 def get_ddr_metric_data(param: dict, curs: any) -> dict:
@@ -424,25 +422,28 @@ def _reformat_hbm_data(trace_parser: any, param: dict, curs: any) -> list:
     return _result
 
 
-def get_hbm_timeline(param: dict) -> str:
+def get_hbm_timeline(param: dict) -> list:
     """
     get hbm time series data
     """
     conn, curs = DBManager.check_connect_db(param['project_path'], 'hbm.db')
     if not (conn and curs):
-        return json.dumps({'status': NumberConstant.ERROR, "info": "The db doesn't exist."})
+        logging.error("The db doesn't exist.")
+        return []
     if not DBManager.judge_table_exist(curs, "HBMOriginalData"):
-        return json.dumps({'status': NumberConstant.ERROR, "info": "The table doesn't exist."})
+        logging.error("The table doesn't exist.")
+        return []
     trace_parser = TraceViewer("HBM")
     try:
         _result = _reformat_hbm_data(trace_parser, param, curs)
     except (OSError, SystemError, ValueError, TypeError, RuntimeError):
-        return json.dumps({"status": NumberConstant.ERROR,
-                           "info": "Failed to get data of hbm."})
+        logging.error("Failed to get data of hbm.")
+        return []
     else:
         if _result:
-            return trace_parser.format_trace_events(_result)
-        return json.dumps({"status": NumberConstant.ERROR, "info": "No data is collected."})
+            return _result
+        logging.error("No data is collected.")
+        return []
     finally:
         DBManager.destroy_db_connect(conn, curs)
 
@@ -473,5 +474,5 @@ def get_hbm_bw_data(param: dict, curs: any) -> dict:
                                                                           param['end_time']))
         return result_data
     except (OSError, SystemError, ValueError, TypeError, RuntimeError):
-        json.dumps({"status": NumberConstant.ERROR, "info": "Get HBM data failed."})
+        logging.error("Get HBM data failed.")
         return {}

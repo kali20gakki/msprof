@@ -18,8 +18,6 @@ NAMESPACE = 'viewer.event_viewer'
 
 class TestEventViewer(unittest.TestCase):
 
-
-
     def test_get_timeline_data_should_return_empty_when_model_init_fail(self):
         config = {"headers": []}
         params = {
@@ -71,17 +69,17 @@ class TestEventViewer(unittest.TestCase):
             InfoConfReader()._local_time_offset = 10.0
             check = EventViewer(config, params)
             ret = check.get_timeline_data()
-            self.assertEqual('[{"name": "process_name", '
-                             '"pid": 100, "tid": 0, '
-                             '"args": {"name": "Event"}, "ph": "M"}, '
-                             '{"name": "thread_name", '
-                             '"pid": 100, "tid": 5, '
-                             '"args": {"name": "Thread 5"}, "ph": "M"}, '
-                             '{"name": "thread_sort_index", '
-                             '"pid": 100, "tid": 5, '
-                             '"args": {"sort_index": 5}, "ph": "M"}, '
-                             '{"name": "1", "pid": 100, "tid": 5, '
-                             '"ts": 10.003, "dur": 0.001, '
-                             '"args": {"Thread Id": 5, "level": "7", '
-                             '"id": "2", "item_id": 6, "request_id": 8, "connection_id": 0}, '
-                             '"ph": "X"}]', ret)
+            self.assertEqual([{"name": "process_name",
+                               "pid": 100, "tid": 0,
+                               "args": {"name": "Event"}, "ph": "M"},
+                              {"name": "thread_name",
+                               "pid": 100, "tid": 5,
+                               "args": {"name": "Thread 5"}, "ph": "M"},
+                              {"name": "thread_sort_index",
+                               "pid": 100, "tid": 5,
+                               "args": {"sort_index": 5}, "ph": "M"},
+                              {"name": "1", "pid": 100, "tid": 5,
+                               "ts": 10.003, "dur": 0.001,
+                               "args": {"Thread Id": 5, "level": "7",
+                                        "id": "2", "item_id": 6, "request_id": 8, "connection_id": 0},
+                               "ph": "X"}], ret)

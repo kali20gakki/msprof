@@ -1,3 +1,4 @@
+import json
 import os
 import unittest
 from unittest import mock
@@ -138,7 +139,7 @@ class TestStepTraceViewer(unittest.TestCase):
 
         if os.path.exists(db_manager.db_name):
             os.remove(db_manager.db_name)
-        self.assertEqual(len(res), 2)
+        self.assertEqual(len(res), 0)
 
     def test_get_one_iter_timeline_data(self):
         db_manager, conn, curs = create_trace_db()
@@ -152,7 +153,7 @@ class TestStepTraceViewer(unittest.TestCase):
 
         db_manager.conn.close()
 
-        self.assertEqual(len(res), 2)
+        self.assertEqual(len(res), 0)
 
     def test_reformat_step_trace_data(self):
         data_list = [
@@ -190,7 +191,7 @@ class TestStepTraceViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + '.StepTraceViewer.transfer_trace_unit'), \
                 mock.patch(NAMESPACE + '.StepTraceConstant.syscnt_to_micro', return_value=1):
             res = StepTraceViewer.get_trace_timeline_data(EmptyClass(""), values)
-            self.assertEqual(len(res), 1741)
+            self.assertEqual(len(json.dumps(res)), 1741)
 
 
 if __name__ == '__main__':

@@ -6,7 +6,6 @@ from abc import abstractmethod
 
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import MsProfCommonConstant
-from viewer.get_trace_timeline import TraceViewer
 
 
 class BaseViewer:
@@ -27,7 +26,7 @@ class BaseViewer:
         """
         timeline_data = self.get_data_from_db()
         result = self.get_trace_timeline(timeline_data)
-        return TraceViewer("StarsViewer").format_trace_events(result)
+        return result
 
     def get_summary_data(self: any) -> tuple:
         """

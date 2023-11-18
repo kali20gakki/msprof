@@ -78,4 +78,4 @@ class EventViewer:
             trace_data = self._get_event_data(timeline_data, pid)
             result_data.extend(
                 TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, trace_data))
-            return json.dumps(result_data)
+            return result_data

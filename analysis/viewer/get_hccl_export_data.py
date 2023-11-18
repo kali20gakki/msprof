@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
 
-import json
+import logging
 from collections import OrderedDict
 from dataclasses import dataclass
 from typing import List
@@ -60,28 +60,24 @@ class HCCLExport:
             "bandwidth(GB/s)": hccl_task.bandwidth
         })
 
-    def get_hccl_timeline_data(self: any) -> str:
+    def get_hccl_timeline_data(self: any) -> list:
         """
         get data for hccl timeline
         """
         with HcclViewModel(self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
                            [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE]) as hccl_model:
             if not hccl_model.check_table():
-                return json.dumps({
-                    'status': NumberConstant.ERROR,
-                    "info": "get hccl data failed, may be the hccl file not completed or hccl parser failed."
-                            " please check data file."
-                })
+                logging.error("get hccl data failed, may be the hccl file not completed or hccl parser "
+                              "failed. please check data file.")
+                return []
 
             hccl_data = hccl_model.get_all_data(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE, dto_class=HcclTask)
             if not hccl_data:
-                return json.dumps({
-                    'status': NumberConstant.WARN,
-                    "info": f"get hccl data failed, "
-                            f"may be lack of hccl files containing iteration {self.iter_range.iteration_id}."
-                })
+                logging.error("get hccl data failed, may be lack of hccl files containing iteration %s",
+                              self.iter_range.iteration_id)
+                return []
         self._format_hccl_data(hccl_data)
-        return json.dumps(self.result)
+        return self.result
 
     def _add_hccl_bar(self):
         self.result = TraceViewManager.metadata_event(

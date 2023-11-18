@@ -24,7 +24,7 @@ class TaskQueueViewer:
         task_queue_data = self._get_timeline_data(task_queue_origin_data)
         meta_data = self._get_meta_data(tid_meta_data)
         task_queue_data.extend(meta_data)
-        return TraceViewer("TaskQueueViewer").format_trace_events(task_queue_data)
+        return task_queue_data
 
     def _get_timeline_data(self: any, origin_data: list):
         result = []

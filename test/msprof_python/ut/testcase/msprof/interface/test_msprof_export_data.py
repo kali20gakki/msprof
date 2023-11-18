@@ -41,9 +41,10 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         with mock.patch(NAMESPACE + '.MsProfExportDataUtils._load_export_data_config'), \
                 mock.patch(NAMESPACE + '.MsProfExportDataUtils._get_configs_with_data_type',
                            return_value={"handler": '_get_step_trace_data'}), \
-                mock.patch(NAMESPACE + '.MsProfExportDataUtils._get_step_trace_data', return_value="invalid_data"):
+                mock.patch(NAMESPACE + '.MsProfExportDataUtils._get_step_trace_data', return_value=[]):
             key = MsProfExportDataUtils()
-            expected = '{"status": 2, "info": "timeline data is not json format."}'
+            expected = '{"status": 2, "info": "Unable to get step_trace data. Maybe the data is not collected, ' \
+                       'or the data may fail to be analyzed."}'
             self.assertEqual(expected, key.export_data(params))
 
     def test_add_timeline_data(self):
@@ -606,7 +607,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
             InfoConfReader()._info_json = {"pid": 123}
             key = MsProfExportDataUtils()
             result = key._get_bulk_data(sample_configs, params)
-        self.assertEqual(result, '')
+        self.assertEqual(result, [])
 
     def test_get_bulk_data_2(self):
         sample_configs = {"test": 2}
@@ -614,8 +615,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         InfoConfReader()._info_json = {"pid": 123}
         key = MsProfExportDataUtils()
         result = key._get_bulk_data(sample_configs, params)
-        self.assertEqual(result, '{"status": 2, "info": "Please check params, '
-                                 'Currently bulk data export params should be timeline."}')
+        self.assertEqual(result, [])
 
     def test_get_bulk_data_should_return_empty_when_input_invalid_data(self):
         sample_configs = {"test": 1}
@@ -626,7 +626,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
             InfoConfReader()._info_json = {"pid": 123}
             key = MsProfExportDataUtils()
             InfoConfReader()._info_json = {}
-            self.assertEqual("", key._get_bulk_data(sample_configs, params))
+            self.assertEqual([], key._get_bulk_data(sample_configs, params))
 
     def test_get_task_time(self):
         sample_configs = {"test": 2}
@@ -646,8 +646,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
             result = key._get_hccl_timeline(sample_configs, timeline_params)
         self.assertEqual(result, 1)
         result = key._get_hccl_timeline(sample_configs, summary_params)
-        self.assertEqual(result,
-                         '{"status": 2, "info": "Please check params, Currently hccl data does not support exporting files other than timeline."}')
+        self.assertEqual(result, [])
 
     def test_get_msproftx_data(self):
         sample_configs = {"test": 2}

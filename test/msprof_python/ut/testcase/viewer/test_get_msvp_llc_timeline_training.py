@@ -27,12 +27,12 @@ class TestLLCTimelineTrain(unittest.TestCase):
         with DBOpen(DBNameConstant.DB_LLC) as db_open:
             with mock.patch(NAMESPACE + '.get_llc_metric_data', side_effect=sqlite3.Error):
                 res = get_llc_nomini_data(param, sample_config, db_open.db_curs)
-            self.assertEqual(len(json.loads(res)), 2)
+            self.assertEqual(len(res), 0)
 
             with mock.patch(NAMESPACE + '.get_llc_metric_data', return_value=[]):
                 InfoConfReader()._info_json = {'pid': "0"}
                 res = get_llc_nomini_data(param, sample_config, db_open.db_curs)
-            self.assertEqual(len(json.loads(res)), 2)
+            self.assertEqual(len(res), 0)
 
     def test_get_llc_nomini_data_2(self):
         param['llc_id'] = '0'
@@ -45,7 +45,7 @@ class TestLLCTimelineTrain(unittest.TestCase):
         test_sql = db_manager.create_table(DBNameConstant.DB_LLC, create_sql, insert_sql, data)
         InfoConfReader()._info_json = {'pid': "0"}
         res = get_llc_nomini_data(param, sample_config, test_sql[1])
-        self.assertEqual(len(json.loads(res)), 3)
+        self.assertEqual(len(res), 3)
         (test_sql[1]).execute("drop Table {}".format(StrConstant.LLC_METRICS_TABLE))
         db_manager.destroy(test_sql)
 
@@ -53,10 +53,10 @@ class TestLLCTimelineTrain(unittest.TestCase):
         db_manager = DBManager()
         test_sql = db_manager.create_table(DBNameConstant.DB_LLC)
         res_1 = pre_check_llc(None, None, sample_config, "")
-        self.assertEqual(len(json.loads(res_1)), 2)
+        self.assertEqual(len(res_1), 0)
 
         res_2 = pre_check_llc(test_sql[0], test_sql[1], None, "")
-        self.assertEqual(len(json.loads(res_2)), 2)
+        self.assertEqual(len(res_2), 0)
         db_manager.destroy(test_sql)
 
     def test_pre_check_llc_2(self):
@@ -64,16 +64,16 @@ class TestLLCTimelineTrain(unittest.TestCase):
         db_manager = DBManager()
         test_sql = db_manager.create_table(DBNameConstant.DB_LLC)
         res_1 = pre_check_llc([0], test_sql[1], sample_config, "")
-        self.assertEqual(len(json.loads(res_1)), 2)
+        self.assertEqual(len(res_1), 0)
 
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
             res_2 = pre_check_llc(test_sql[0], test_sql[1], sample_config, "")
-        self.assertEqual(len(json.loads(res_2)), 2)
+        self.assertEqual(len(res_2), 0)
         sample_config[StrConstant.LLC_PROF] = "bandwidth"
 
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             res_3 = pre_check_llc(test_sql[0], test_sql[1], sample_config, "")
-        self.assertEqual(res_3, "")
+        self.assertEqual(res_3, [])
         db_manager.destroy(test_sql)
 
     def test_get_llc_mini_data_1(self):
@@ -90,7 +90,7 @@ class TestLLCTimelineTrain(unittest.TestCase):
             sample_config[StrConstant.LLC_PROF] = "read"
             with mock.patch(NAMESPACE + '.get_llc_capacity', return_value=[]):
                 res = get_llc_mini_data(param, sample_config, db_open.db_curs)
-            self.assertEqual(len(json.loads(res)), 2)
+            self.assertEqual(len(res), 0)
             sample_config[StrConstant.LLC_PROF] = "bandwidth"
 
     def test_get_llc_bandwidth_1(self):
@@ -106,20 +106,20 @@ class TestLLCTimelineTrain(unittest.TestCase):
             res = get_llc_bandwidth(db_open.db_curs)
             with mock.patch(NAMESPACE + '.get_bandwidth_value', return_value=[]):
                 res_1 = get_llc_bandwidth(db_open.db_curs)
-            self.assertEqual(len(json.loads(res)), 5)
-            self.assertEqual(len(json.loads(res_1)), 2)
+            self.assertEqual(len(res), 5)
+            self.assertEqual(len(res_1), 0)
 
             with mock.patch(NAMESPACE + '.get_bandwidth_value', return_value=[]), \
                  mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]):
                 res_1 = get_llc_bandwidth(db_open.db_curs)
-            self.assertEqual(len(json.loads(res)), 5)
-            self.assertEqual(len(json.loads(res_1)), 2)
+            self.assertEqual(len(res), 5)
+            self.assertEqual(len(res_1), 0)
 
             with mock.patch(NAMESPACE + '.get_bandwidth_value', return_value=[]), \
                  mock.patch(NAMESPACE + '._format_llc_trace_data', return_value=[]):
                 res_1 = get_llc_bandwidth(db_open.db_curs)
-            self.assertEqual(len(json.loads(res)), 5)
-            self.assertEqual(len(json.loads(res_1)), 2)
+            self.assertEqual(len(res), 5)
+            self.assertEqual(len(res_1), 0)
 
     def test_get_llc_capacity_1(self):
         db_manager = DBManager()
@@ -127,7 +127,7 @@ class TestLLCTimelineTrain(unittest.TestCase):
         with mock.patch(NAMESPACE + '.TraceViewManager.metadata_event', side_effect=OSError):
             InfoConfReader()._info_json = {'pid': "0"}
             res = get_llc_capacity(param, test_sql[1])
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
         db_manager.destroy(test_sql)
 
     def test_get_llc_capacity_2(self):
@@ -141,14 +141,14 @@ class TestLLCTimelineTrain(unittest.TestCase):
         test_sql = db_manager.create_table(DBNameConstant.DB_LLC, create_sql, insert_sql, data)
         InfoConfReader()._info_json = {'pid': "0"}
         res = get_llc_capacity(param, test_sql[1])
-        self.assertEqual(len(json.loads(res)), 5)
+        self.assertEqual(len(res), 5)
         (test_sql[1]).execute("drop Table {}".format(DBNameConstant.TABLE_LLC_DSID))
         db_manager.destroy(test_sql)
 
         with mock.patch(NAMESPACE + '._get_dsid_sql_data', return_value=[]):
             InfoConfReader()._info_json = {'pid': "0"}
             res = get_llc_capacity(param, test_sql[1])
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
 
     def test_get_llc_db_table(self):
         sample_config[StrConstant.LLC_PROF] = ""
@@ -173,7 +173,7 @@ class TestLLCTimelineTrain(unittest.TestCase):
                 mock.patch(NAMESPACE + '.get_llc_mini_data', side_effect=OSError):
             ChipManager().chip_id = ChipModel.CHIP_V1_1_0
             res = get_llc_timeline(param)
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
              mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=sample_config), \
@@ -213,14 +213,14 @@ class TestLLCTimelineTrain(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True),\
                 mock.patch(NAMESPACE + '.get_ddr_metric_data', return_value=[1]),\
-                mock.patch(NAMESPACE + '._reformat_ddr_data', side_effect=TypeError):
+                mock.patch(NAMESPACE + '._reformat_ddr_data', return_value=[]):
             res = get_ddr_timeline(param)
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(None, None)), \
              mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             res = get_ddr_timeline(param)
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
 
         test_sql = db_manager.create_table("ddr.db")
         db_manager.destroy(test_sql)
@@ -228,7 +228,7 @@ class TestLLCTimelineTrain(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
              mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             res = get_ddr_timeline(param)
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
 
         db_manager.destroy(test_sql)
         test_sql = db_manager.create_table("ddr.db")
@@ -237,7 +237,7 @@ class TestLLCTimelineTrain(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
              mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
             res = get_ddr_timeline(param)
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
         db_manager.destroy(test_sql)
 
     def test_get_hbm_timeline_2(self):
@@ -253,7 +253,7 @@ class TestLLCTimelineTrain(unittest.TestCase):
              mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             InfoConfReader()._info_json = {'pid': "0"}
             res = get_ddr_timeline(param)
-        self.assertEqual(len(json.loads(res)), 4)
+        self.assertEqual(len(res), 4)
         test_sql = db_manager.connect_db("ddr.db")
         (test_sql[1]).execute("drop Table DDRMetricData")
         db_manager.destroy(test_sql)
@@ -267,7 +267,7 @@ class TestLLCTimelineTrain(unittest.TestCase):
              mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
              mock.patch(NAMESPACE + '._reformat_hbm_data', side_effect=OSError):
             res = get_hbm_timeline(param)
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
 
         test_sql = db_manager.create_table("hbm.db")
         db_manager.destroy(test_sql)
@@ -275,7 +275,7 @@ class TestLLCTimelineTrain(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(None, None)), \
              mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             res = get_hbm_timeline(param)
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
 
         test_sql = db_manager.create_table("hbm.db")
         db_manager.destroy(test_sql)
@@ -285,7 +285,7 @@ class TestLLCTimelineTrain(unittest.TestCase):
              mock.patch(NAMESPACE + '._reformat_hbm_data', return_value=[]):
             InfoJsonReaderManager(InfoJson(pid="0")).process()
             res = get_hbm_timeline(param)
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
 
         test_sql = db_manager.create_table("hbm.db")
         db_manager.destroy(test_sql)
@@ -293,7 +293,7 @@ class TestLLCTimelineTrain(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
              mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
             res = get_hbm_timeline(param)
-        self.assertEqual(len(json.loads(res)), 2)
+        self.assertEqual(len(res), 0)
         db_manager.destroy(test_sql)
 
     def test_get_hbm_timeline_3(self):
@@ -310,7 +310,7 @@ class TestLLCTimelineTrain(unittest.TestCase):
              mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             InfoConfReader()._info_json = {'pid': "0"}
             res = get_hbm_timeline(param)
-        self.assertEqual(len(json.loads(res)), 3)
+        self.assertEqual(len(res), 3)
         test_sql = db_manager.connect_db("hbm.db")
         (test_sql[1]).execute("drop Table HBMbwData")
         db_manager.destroy(test_sql)
