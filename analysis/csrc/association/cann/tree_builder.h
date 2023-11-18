@@ -14,12 +14,13 @@
 #define ANALYSIS_ASSOCIATION_CANN_TREE_BUILDER_H
 
 #include <memory>
-#include <utility>
-#include <cstdint>
 #include <vector>
 #include <map>
-#include "event_queue.h"
+#include "event.h"
 #include "tree.h"
+#include "cann_warehouse.h"
+#include "event_queue.h"
+#include "thread_pool.h"
 
 namespace Analysis {
 namespace Association {
@@ -27,30 +28,54 @@ namespace Cann {
 
 using EventQueue = Analysis::Entities::EventQueue;
 using TreeNode = Analysis::Entities::TreeNode;
+using Event = Analysis::Entities::Event;
+using EventType = Analysis::Entities::EventType;
+using EventInfo = Analysis::Entities::EventInfo;
+using CANNWarehouse = Analysis::Parser::Host::Cann::CANNWarehouse;
+using ThreadPool = Analysis::Utils::ThreadPool;
+
+using EventQueuePair = std::pair<std::shared_ptr<EventQueue>, std::shared_ptr<EventQueue>>;
 
 // 一个TreeBuilder对象负责将一个threadId的Event数据建成一棵树
 class TreeBuilder {
 public:
+    TreeBuilder(std::shared_ptr <CANNWarehouse> &cannWarehouse, const uint32_t threadId)
+        : cannWarehouse_(cannWarehouse), threadId_(threadId)
+    {}
     // 用api和task_track建核心树
-    std::shared_ptr<TreeNode> Build(std::shared_ptr<EventQueue> &kernelEvents);
+    std::shared_ptr <TreeNode> Build();
 
-    // 向核心树的Model, Node, Hccl, Runtime 层节点添加附加Event
-    bool AddModelLevelEvents(std::shared_ptr<EventQueue> &events);
-    bool AddNodeLevelEvents(std::shared_ptr<EventQueue> &events);
-    bool AddHcclLevelEvents(std::shared_ptr<EventQueue> &events);
-    bool AddRuntimeLevelEvents(std::shared_ptr<EventQueue> &events);
+    // 向核心树的Model, Node, Hccl 层节点添加附加Event
+    bool AddLevelEvents(std::shared_ptr <EventQueue> &events,
+                        std::vector <std::shared_ptr<TreeNode>> &levelNodes) const;
+    // 向叶子节点添加Runtime层的event
+    bool AddTaskTrackEvents(std::shared_ptr <TreeNode> &rootNode,
+                            std::shared_ptr <EventQueue> &events,
+                            std::vector <std::shared_ptr<TreeNode>> &leafNodes) const;
 
 private:
-    std::shared_ptr<TreeNode> BuildTree(std::shared_ptr<TreeNode> parent); // 建树逻辑
-    std::shared_ptr<EventQueue> events_; // 某个threadId对应的EventQueue
-    std::map<uint16_t, std::shared_ptr<TreeNode>> path_; // 建树路径记录，key为Event的层级
+    // 建树核心逻辑
+    std::shared_ptr <TreeNode> BuildTree(std::shared_ptr <TreeNode> parent);
+    // 将ctxIdEvents按Level分为Node和HCCL层
+    EventQueuePair GroupCtxIdEvents(std::shared_ptr <EventQueue> &ctxIdEvents);
+    // 建树时记录各个Level的TreeNode
+    void RecordTreeNode(const std::shared_ptr <TreeNode> &treeNode, const uint16_t &eventLevel);
 
-    uint32_t threadId_ = 0; // 此对象处理的threadId
+private:
+    // 建树时记录叶子节点，用于在其上添加TaskTrack
+    std::vector<std::shared_ptr<TreeNode>> leafNodes_;
+    // 用于建树的Model、Node、HCCL Level的Api Type Events
+    std::shared_ptr<EventQueue> kernelEvents_;
+    // 包含各个类型的events
+    std::shared_ptr<CANNWarehouse> cannWarehouse_;
+    // 此对象处理的threadId
+    uint32_t threadId_ = 0;
+
     // 建树时Model, Node, Hccl, Runtime 层节点记录
-    std::vector<std::shared_ptr<TreeNode>> modelLevelNodes_;
-    std::vector<std::shared_ptr<TreeNode>> nodeLevelNodes_;
-    std::vector<std::shared_ptr<TreeNode>> hcclLevelNodes_;
-    std::vector<std::shared_ptr<TreeNode>> runtimeLevelNodes_;
+    std::vector <std::shared_ptr<TreeNode>> modelLevelNodes_;
+    std::vector <std::shared_ptr<TreeNode>> nodeLevelNodes_;
+    std::vector <std::shared_ptr<TreeNode>> hcclLevelNodes_;
+    std::vector <std::shared_ptr<TreeNode>> runtimeLevelNodes_;
 };
 } // namespace Cann
 } // namespace Association

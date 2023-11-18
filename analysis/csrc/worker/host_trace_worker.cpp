@@ -4,7 +4,7 @@
 ****************************************************************************** */
 /* ******************************************************************************
  * File Name          : host_trace_worker.cpp
- * Description        : HostTraceThread模块：
+ * Description        : HostTraceWorker模块：
  *                      负责拉起数据解析->EventQueue->建树->分析树->Dump 流程
  * Author             : msprof team
  * Creation Date      : 2023/11/2

@@ -9,7 +9,8 @@
  * Creation Date      : 2023/11/2
  * *****************************************************************************
  */
-
+#include <queue>
+#include <string>
 #include "tree.h"
 namespace Analysis {
 namespace Entities {
@@ -18,5 +19,42 @@ std::shared_ptr<TreeNode> Tree::GetRoot() const
 {
     return root_;
 }
+
+std::string Tree::GetTreeLevelStr(std::shared_ptr <TreeNode> &node)
+{
+    std::string lstr;
+    if (!node->records.empty()) {
+        for (const auto &r: node->records) {
+            lstr += "[" + r->desc + "] ";
+        }
+    }
+    return lstr;
+}
+
+std::vector<std::string> Tree::Show()
+{
+    if (!root_) {
+        return {};
+    }
+    std::vector<std::string> levelStr;
+    std::queue<std::shared_ptr<TreeNode>> q;
+    q.push(root_);
+    while (!q.empty()) {
+        auto level_size = q.size();
+        std::string lstr{};
+        for (int i = 0; i < level_size; ++i) {
+            std::shared_ptr<TreeNode> node = q.front();
+            q.pop();
+            lstr += node->event->desc + " ";
+            lstr += GetTreeLevelStr(node);
+            for (const auto &child: node->children) {
+                q.push(child);
+            }
+        }
+        levelStr.emplace_back(lstr);
+    }
+    return levelStr;
+}
+
 } // namespace Entities
 } // namespace Analysis

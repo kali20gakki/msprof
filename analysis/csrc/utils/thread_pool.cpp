@@ -11,6 +11,7 @@
  */
 
 #include <thread>
+#include "log.h"
 #include "thread_pool.h"
 
 namespace Analysis {
@@ -31,10 +32,12 @@ bool ThreadPool::Start()
 {
     // 避免多次调用
     if (running_) {
+        ERROR("Do not call Start multiple times");
         return false; // 补充log
     }
 
     if (threadsNum_ <= 0) {
+        ERROR("ThreadPool thread number is less than 0");
         return false; // 补充log
     }
 
@@ -50,6 +53,7 @@ bool ThreadPool::Stop()
 {
     // 防止多次调用
     if (!running_) {
+        ERROR("Do not call Stop multiple times");
         return false;
     }
 
@@ -75,9 +79,9 @@ void ThreadPool::AddTask(const Task &task)
         try {
             task();
         } catch (const std::exception &ex) {
-            // 补充log
+            ERROR("Thread[%] in Pool caught exception: %", std::this_thread::get_id(), ex.what());
         } catch (...) {
-            // 补充log
+            ERROR("Thread[%] in Pool caught unknown exception");
         }
     });
     // 释放一个阻塞在FetchTask的线程

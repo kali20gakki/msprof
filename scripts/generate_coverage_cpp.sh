@@ -38,8 +38,9 @@ test_obj=(
     transport_utest
     params_adapter_utest
     entities_utest
-    dfx_utest
     utils_utest
+    dfx_utest
+    association_utest
 )
 
 str_test=""

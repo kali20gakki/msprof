@@ -11,6 +11,7 @@
  */
 
 #include <algorithm>
+#include "log.h"
 #include "event_queue.h"
 
 namespace Analysis {
@@ -34,11 +35,13 @@ void EventQueue::Sort()
 void EventQueue::Push(const std::shared_ptr<Event> &event)
 {
     if (!event) {
-        return; // 补充log
+        ERROR("Event pointer is nullptr");
+        return;
     }
 
     if (tail_ == initSize_) {
-        return; // 补充log
+        ERROR("The number of added events exceeds the maximum EventQueue capacity");
+        return;
     }
     data_.emplace_back(event);
     tail_ += 1;
@@ -48,7 +51,8 @@ void EventQueue::Push(const std::shared_ptr<Event> &event)
 std::shared_ptr<Event> EventQueue::Pop()
 {
     if (Empty()) {
-        return nullptr; // 补充log
+        ERROR("Can not Pop when EventQueue is empty");
+        return nullptr;
     }
     auto event = data_[head_];
     head_ += 1;
@@ -58,7 +62,8 @@ std::shared_ptr<Event> EventQueue::Pop()
 std::shared_ptr<Event> EventQueue::Top()
 {
     if (Empty()) {
-        return nullptr; // 补充log
+        ERROR("Can not get top event when EventQueue is empty");
+        return nullptr;
     }
     return data_[head_];
 }
@@ -76,7 +81,7 @@ uint64_t EventQueue::GetBound() const
 uint64_t EventQueue::GetSize() const
 {
     if (Empty()) {
-        return 0; // 补充log
+        return 0;
     }
     return tail_ - head_;
 }

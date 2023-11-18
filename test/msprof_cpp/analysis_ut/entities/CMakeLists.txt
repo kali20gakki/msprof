@@ -6,12 +6,17 @@ add_executable(
         ${TOP_DIR}/analysis/csrc/entities/event.cpp
         ${TOP_DIR}/analysis/csrc/entities/event_queue.cpp
         ${TOP_DIR}/analysis/csrc/entities/tree.cpp
+        ${TOP_DIR}/analysis/csrc/dfx/log.cpp
+        ${TOP_DIR}/analysis/csrc/utils/file.cpp
 )
 
 target_include_directories(entities_utest PRIVATE
         ${GTEST_INCLUDE_DIR}
         ${MOCKCPP_INCLUDE_DIR}
         ${TOP_DIR}/analysis/csrc/entities
+        ${TOP_DIR}/analysis/csrc/utils
+        ${TOP_DIR}/analysis/csrc/dfx
+        ${TOP_DIR}/opensource/json/include
 )
 
 run_test(entities_utest)
