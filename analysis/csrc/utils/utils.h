@@ -20,6 +20,8 @@ namespace Analysis {
 namespace Utils {
 std::string Join(const std::vector<std::string> &str, const std::string &delimiter);
 std::vector<std::string> Split(const std::string &str, const std::string &delimiter);
+int StrToU16(uint16_t &dest, const std::string &numStr);
+int StrToU64(uint64_t &dest, const std::string &numStr);
 }  // namespace Utils
 }  // namespace Analysis
 

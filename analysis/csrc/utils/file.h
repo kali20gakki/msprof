@@ -32,12 +32,21 @@ public:
     File() = default;
     virtual ~File() = default;
     static bool Check(const std::string &path);
-    static bool CreateDir(const std::string& path, const mode_t &mode = 0750);
+    static bool CreateDir(const std::string &path, const mode_t &mode = 0750);
     static bool Chmod(const std::string &path, const mode_t &mode);
-    static std::string PathJoin(const std::vector<std::string>& paths);
+    static std::string PathJoin(const std::vector<std::string> &paths);
     static std::vector<std::string> GetFilesWithPrefix(const std::string &path, const std::string &prefix);
     static std::vector<std::string> FilterFileWithSuffix(const std::vector<std::string> &files,
                                                          const std::string &suffix);
+    /*!
+     * 从data目录下筛选文件
+     * @param path data目录
+     * @param prePatterns 用于匹配的前缀列表
+     * @param sufFilters 用于筛选的后缀列表
+     * @return 筛选后的文件列表
+     */
+    static std::vector<std::string> GetOriginData(const std::string &path, const std::vector<std::string> &prePatterns,
+                                                  const std::vector<std::string> &sufFilters);
     static bool Access(const std::string &path, const int &mode);
     static bool Exist(const std::string &path);
     static bool IsSoftLink(const std::string &path);
@@ -97,7 +106,7 @@ public:
     void Open(const std::string &path, const std::ios_base::openmode &mode = std::ios::out);
     void Close();
     bool IsOpen() const;
-    void WriteText(const std::string& content);
+    void WriteText(const std::string &content);
 
 private:
     static bool Check(const std::string &path);

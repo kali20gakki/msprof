@@ -306,3 +306,25 @@ TEST_F(FileUTest, TestWriteText)
     ASSERT_TRUE(fd.IsOpen());
     fd.WriteText("test");
 }
+
+TEST_F(FileUTest, TestGetOriginDataShouldReturn2ValidFileWhen2ValidAnd2Invalid)
+{
+    // 创建test_file文件
+    FileWriter fw0("/tmp/prefix_test_slice_0");
+    FileWriter fw1("/tmp/prefix2_test_slice_1");
+    FileWriter fw2("/tmp/prefix_test_slice_0.done");
+    FileWriter fw3("/tmp/prefix_test_slice_0.complete");
+    fw0.Close();
+    fw1.Close();
+    fw2.Close();
+    fw3.Close();
+
+    int expectRes = 2;
+    auto files = File::GetOriginData("/tmp", {"prefix_test_slice", "prefix2_test_slice"}, {"done", "complete"});
+    EXPECT_EQ(expectRes, files.size());
+
+    File::DeleteFile("/tmp/prefix_test_slice_0");
+    File::DeleteFile("/tmp/prefix2_test_slice_1");
+    File::DeleteFile("/tmp/prefix_test_slice_0.done");
+    File::DeleteFile("/tmp/prefix_test_slice_0.complete");
+}

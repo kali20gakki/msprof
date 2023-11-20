@@ -27,14 +27,20 @@ namespace Cann {
 class HashData : public Utils::Singleton<HashData> {
 public:
     bool Load(const std::string &path);
+    void Clear();
     std::string Get(uint64_t hash);
     std::unordered_map<uint64_t, std::string>& GetAll();
 
 private:
+    bool ReadFiles(const std::vector<std::string>& files);
     std::unordered_map<uint64_t, std::string> hashData_;
     std::vector<std::string> filePrefix_ = {
         "unaging.additional.hash_dic.slice",
         "aging.additional.hash_dic.slice",
+    };
+    std::vector<std::string> fileFilter_ = {
+        "complete",
+        "done",
     };
 };  // class HashData
 }  // namespace Cann

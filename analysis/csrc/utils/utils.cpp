@@ -11,6 +11,8 @@
  */
 
 #include "utils.h"
+#include "log.h"
+#include "error_code.h"
 
 #include <sstream>
 
@@ -44,5 +46,47 @@ std::vector<std::string> Split(const std::string &str, const std::string &delimi
     res.emplace_back(str.substr(start));
     return res;
 }
+
+int StrToU16(uint16_t &dest, const std::string &numStr)
+{
+    if (numStr.empty()) {
+        ERROR("StrToU16 failed, the input string is empty.");
+        return ANALYSIS_ERROR;
+    }
+    size_t pos = 0;
+    try {
+        dest = std::stoi(numStr, &pos);
+    } catch (...) {
+        ERROR("StrToU16 failed, the input string is '%'.", numStr.c_str());
+        return ANALYSIS_ERROR;
+    }
+    if (pos != numStr.size()) {
+        ERROR("StrToU16 failed, the input string is '%s'.", numStr.c_str());
+        return ANALYSIS_ERROR;
+    }
+    return ANALYSIS_OK;
+}
+
+int StrToU64(uint64_t &dest, const std::string &numStr)
+{
+    if (numStr.empty()) {
+        ERROR("StrToU64 failed, the input string is empty.");
+        return ANALYSIS_ERROR;
+    }
+    size_t pos = 0;
+    try {
+        dest = std::stoull(numStr, &pos);
+    } catch (...) {
+        ERROR("StrToU64 failed, the input string is '%'.", numStr.c_str());
+        return ANALYSIS_ERROR;
+    }
+    if (pos != numStr.size()) {
+        ERROR("StrToU64 failed, the input string is '%s'.", numStr.c_str());
+        return ANALYSIS_ERROR;
+    }
+    return ANALYSIS_OK;
+}
+
+
 }  // namespace Utils
 }  // namespace Analysis
