@@ -45,12 +45,15 @@ class TestAscendTaskCalculator(unittest.TestCase):
     def test__judge_calculate_again_should_return_true_when_in_graph_scene(self):
         scene = ProfilingScene()
         scene._scene = Constant.STEP_INFO
+        ProfilingScene().set_all_export(False)
         self.assertTrue(self.calculator._judge_calculate_again())
         scene._scene = None
+        ProfilingScene().set_all_export(True)
 
     def test__judge_calculate_again_should_return_true_when_no_ascend_task_db_in_op_scene(self):
         scene = ProfilingScene()
         scene._scene = Constant.SINGLE_OP
+        ProfilingScene().set_all_export(True)
         with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=False):
             self.assertTrue(self.calculator._judge_calculate_again())
         scene._scene = None
@@ -58,6 +61,7 @@ class TestAscendTaskCalculator(unittest.TestCase):
     def test__judge_calculate_again_should_return_false_when_exist_ascend_task_db_in_op_scene(self):
         scene = ProfilingScene()
         scene._scene = Constant.SINGLE_OP
+        ProfilingScene().set_all_export(True)
         with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True):
             self.assertFalse(self.calculator._judge_calculate_again())
         scene._scene = None

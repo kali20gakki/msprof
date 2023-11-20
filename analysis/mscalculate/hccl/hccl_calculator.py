@@ -161,7 +161,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             hccl_model.drop_table(DBNameConstant.TABLE_HCCL_OP_REPORT)
 
     def _judge_calculate_again(self):
-        if not ProfilingScene().is_operator():
+        if not ProfilingScene().is_all_export():
             logging.info("In graph scene, to generate table %s and %s", DBNameConstant.TABLE_HCCL_SINGLE_DEVICE,
                          DBNameConstant.TABLE_HCCL_OP_REPORT)
             return True
