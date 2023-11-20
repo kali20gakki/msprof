@@ -61,6 +61,8 @@ class StarsLogCalCulator(ICalculator, MsMultiProcess):
             if not os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HWTS_REC)):
                 logging.warning("No %s db found", DBNameConstant.DB_HWTS_REC)
                 return
+            if os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_SOC_LOG)):
+                os.remove(PathManager.get_db_path(self._project_path, DBNameConstant.DB_SOC_LOG))
             self._parse_by_iter()
         else:
             db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_SOC_LOG)

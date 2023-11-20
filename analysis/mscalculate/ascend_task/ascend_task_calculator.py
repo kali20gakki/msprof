@@ -64,7 +64,7 @@ class AscendTaskCalculator(MsMultiProcess):
         self.model.finalize()
 
     def _judge_calculate_again(self):
-        if not ProfilingScene().is_operator():
+        if not ProfilingScene().is_all_export():
             logging.info("In graph scene, to generate table %s", DBNameConstant.TABLE_ASCEND_TASK)
             return True
         else:

@@ -79,6 +79,7 @@ class TestStarsLogCalCulator(unittest.TestCase):
                 mock.patch('msparser.stars.parser_dispatcher.ParserDispatcher.init'), \
                 mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.init'), \
                 mock.patch('os.path.exists', return_value=True), \
+                mock.patch('os.remove'), \
                 mock.patch(NAMESPACE + '.HwtsIterModel.get_task_offset_and_sum', return_value=(0, 0)):
             key = StarsLogCalCulator(file_list={DataTag.STARS_LOG: ['a_2', 'b_1']},
                                      sample_config={'1': 'ada', 'result_dir': '11'})
@@ -86,6 +87,7 @@ class TestStarsLogCalCulator(unittest.TestCase):
         with mock.patch('msparser.stars.parser_dispatcher.ParserDispatcher.init'), \
                 mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.init'), \
                 mock.patch('os.path.exists', return_value=True), \
+                mock.patch('os.remove'), \
                 mock.patch(NAMESPACE + '.HwtsIterModel.get_task_offset_and_sum', return_value=(63, 63)), \
                 mock.patch(NAMESPACE + '.FileCalculator.prepare_process', return_value=(63, 63)):
             key = StarsLogCalCulator(file_list={DataTag.STARS_LOG: ['a_2', 'b_1']},
