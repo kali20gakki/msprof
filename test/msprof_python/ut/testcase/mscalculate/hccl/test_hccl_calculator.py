@@ -169,6 +169,7 @@ class TestHcclCalculator(unittest.TestCase):
         scene = ProfilingScene()
         scene._scene = Constant.SINGLE_OP
         check = HcclCalculator([], CONFIG)
+        ProfilingScene().set_all_export(True)
         self.assertTrue(check._judge_calculate_again())
         scene._scene = None
 
@@ -176,6 +177,7 @@ class TestHcclCalculator(unittest.TestCase):
         scene = ProfilingScene()
         scene._scene = Constant.SINGLE_OP
         check = HcclCalculator([], CONFIG)
+        ProfilingScene().set_all_export(True)
         with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True):
             self.assertFalse(check._judge_calculate_again())
         scene._scene = None
@@ -184,9 +186,11 @@ class TestHcclCalculator(unittest.TestCase):
         scene = ProfilingScene()
         scene._scene = Constant.STEP_INFO
         check = HcclCalculator([], CONFIG)
+        ProfilingScene().set_all_export(False)
         with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=False):
             self.assertTrue(check._judge_calculate_again())
         scene._scene = None
+        ProfilingScene().set_all_export(True)
 
     def test_ms_run(self):
         with mock.patch("os.path.exists", return_value=True), \
