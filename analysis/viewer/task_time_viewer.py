@@ -47,17 +47,21 @@ class TaskTimeViewer(BaseViewer):
         self.project_dir = self.params.get(StrConstant.PARAM_RESULT_DIR)
 
     @staticmethod
+    def get_device_task_type(device_task_type: str) -> str:
+        if not device_task_type.isdigit():
+            return device_task_type
+        elif ChipManager().chip_id != ChipModel.CHIP_V2_1_0 and \
+                int(device_task_type) in [enum.value for enum in SqeType]:
+            return SqeType(int(device_task_type)).name
+        else:
+            return Constant.TASK_TYPE_OTHER
+
+    @staticmethod
     def get_task_type(host_task_type: str, device_task_type: str) -> str:
         if host_task_type == Constant.TASK_TYPE_FFTS_PLUS:
             return device_task_type
         elif host_task_type == Constant.TASK_TYPE_UNKNOWN:
-            if not device_task_type.isdigit():
-                return device_task_type
-            elif ChipManager().chip_id != ChipModel.CHIP_V2_1_0 and \
-                    int(device_task_type) in [enum.value for enum in SqeType]:
-                return SqeType(int(device_task_type)).name
-            else:
-                return Constant.TASK_TYPE_OTHER
+            return TaskTimeViewer.get_device_task_type(device_task_type)
         return host_task_type
 
     @staticmethod
@@ -178,7 +182,8 @@ class TaskTimeViewer(BaseViewer):
                  InfoConfReader().trans_into_local_time(data.start_time, NumberConstant.NANO_SECOND),
                  data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
                  {"Stream Id": data.stream_id, "Task Id": data.task_id, 'Batch Id': data.batch_id,
-                  "Subtask Id": data.context_id, "Subtask Type": data.device_task_type,
+                  "Subtask Id": data.context_id,
+                  "Subtask Type": TaskTimeViewer.get_device_task_type(data.device_task_type),
                   "connection_id": data.connection_id, }])
         if not result_list:
             return []
@@ -203,7 +208,7 @@ class TaskTimeViewer(BaseViewer):
                         data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
                         {
                             "Model Id": data.model_id,
-                            "Task Type": data.device_task_type,
+                            "Task Type": TaskTimeViewer.get_device_task_type(data.device_task_type),
                             "Stream Id": data.stream_id,
                             "Task Id": data.task_id,
                             'Batch Id': data.batch_id,

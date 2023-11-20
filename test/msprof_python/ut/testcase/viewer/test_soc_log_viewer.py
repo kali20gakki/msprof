@@ -113,6 +113,34 @@ class TestTaskTimeViewer(unittest.TestCase):
             ret = check.get_ge_data_dict()
             self.assertEqual(ret, ({'0-1-3-0': 4}, {}))
 
+    def test_get_device_task_type_should_return_device_type_when_device_is_not_number(self):
+        configs, params = {}, {'data_type': 'ffts_sub_task_time'}
+        check = TaskTimeViewer(configs, params)
+        ChipManager().chip_id = ChipModel.CHIP_V3_1_0
+        result = check.get_device_task_type("AI_CPU")
+        self.assertEqual(result, "AI_CPU")
+
+    def test_get_device_task_type_should_return_other_when_v3_1_0_and_device_belongs_to_sqetype(self):
+        configs, params = {}, {'data_type': 'ffts_sub_task_time'}
+        check = TaskTimeViewer(configs, params)
+        ChipManager().chip_id = ChipModel.CHIP_V3_1_0
+        result = check.get_device_task_type("0")
+        self.assertEqual(result, "AI_CORE")
+
+    def test_get_device_task_type_should_return_other_when_v3_1_0_and_device_not_belongs_to_sqetype(self):
+        configs, params = {}, {'data_type': 'ffts_sub_task_time'}
+        check = TaskTimeViewer(configs, params)
+        ChipManager().chip_id = ChipModel.CHIP_V3_1_0
+        result = check.get_device_task_type("25")
+        self.assertEqual(result, "Other")
+
+    def test_get_device_task_type_should_return_other_when_v2_1_0_and_device_is_number(self):
+        configs, params = {}, {'data_type': 'ffts_sub_task_time'}
+        check = TaskTimeViewer(configs, params)
+        ChipManager().chip_id = ChipModel.CHIP_V2_1_0
+        result = check.get_device_task_type("0")
+        self.assertEqual(result, "Other")
+
     def test_add_node_name(self):
         configs, params = {}, {}
         node_dict = {
@@ -173,7 +201,7 @@ class TestTaskTimeViewer(unittest.TestCase):
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'MatMul_1_lxslice1')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'MatMul/v2_MemSet')
 
-    def test_add_node_name_should_return_other_when_host_is_unknown_and_device_not_belongs_to_SqeType(self):
+    def test_add_node_name_should_return_other_when_host_is_unknown_and_device_not_belongs_to_sqetype(self):
         configs, params = {}, {}
         node_dict = {
             '3-36-47-0': 'MatMul/v2_MemSet',
@@ -194,7 +222,7 @@ class TestTaskTimeViewer(unittest.TestCase):
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'Other')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'KERNEL_AICORE')
 
-    def test_add_node_name_should_return_SqeType_when_host_is_unknown_and_device_belongs_to_SqeType(self):
+    def test_add_node_name_should_return_sqetype_when_host_is_unknown_and_device_belongs_to_sqetype(self):
         configs, params = {}, {}
         node_dict = {
             '3-36-47-0': 'MatMul/v2_MemSet',
@@ -215,7 +243,7 @@ class TestTaskTimeViewer(unittest.TestCase):
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'C_CORE_SQE')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'AI_CPU')
 
-    def test_add_node_name_should_return_device_when_V2_1_0_and_host_is_unknown_and_device_is_not_number(self):
+    def test_add_node_name_should_return_device_when_v2_1_0_and_host_is_unknown_and_device_is_not_number(self):
         configs, params = {}, {}
         node_dict = {
             '3-36-47-0': 'MatMul_1_lxslice1',
@@ -236,7 +264,7 @@ class TestTaskTimeViewer(unittest.TestCase):
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'AIV')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'AI_CPU')
 
-    def test_add_node_name_should_return_device_when_CHIP_V1_1_0_and_host_is_unknown_and_device_is_not_number(self):
+    def test_add_node_name_should_return_device_when_chip_v1_1_0_and_host_is_unknown_and_device_is_not_number(self):
         configs, params = {}, {}
         node_dict = {
             '3-36-47-0': 'MatMul/v2_MemSet',
@@ -257,7 +285,7 @@ class TestTaskTimeViewer(unittest.TestCase):
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'SDMA')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'AI_CPU')
 
-    def test_add_node_name_should_return_device_when_CHIP_V1_1_0_and_host_is_unknown_and_device_is_not_number(self):
+    def test_add_node_name_should_return_device_when_chip_v1_1_0_and_host_is_unknown_and_device_is_not_number(self):
         configs, params = {}, {}
         node_dict = {
             '3-36-47-0': 'MatMul_1_lxslice1',
@@ -278,7 +306,7 @@ class TestTaskTimeViewer(unittest.TestCase):
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'C_CORE_SQE')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'KERNEL_AICPU')
 
-    def test_add_node_name_should_return_other_when_V2_1_0_and_host_is_unknown_and_device_belongs_to_SqeType(self):
+    def test_add_node_name_should_return_other_when_v2_1_0_and_host_is_unknown_and_device_belongs_to_sqetype(self):
         configs, params = {}, {}
         node_dict = {
             '3-36-47-0': 'aclnnAny_ReduceAny_MemSet',
@@ -299,7 +327,7 @@ class TestTaskTimeViewer(unittest.TestCase):
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'Other')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'KERNEL_AICPU')
 
-    def test_add_node_name_should_return_other_when_V2_1_0_and_host_is_unknown_and_device_not_belongs_to_SqeType(self):
+    def test_add_node_name_should_return_other_when_v2_1_0_and_host_is_unknown_and_device_not_belongs_to_sqetype(self):
         configs, params = {}, {}
         node_dict = {
             '3-36-47-0': 'aclnnAdd_AddAiCore_Add',
