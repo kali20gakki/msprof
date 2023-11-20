@@ -36,7 +36,7 @@ class BaseTuningDataHandle(ABC):
 
     @staticmethod
     @abstractmethod
-    def load_data(param: dict):
+    def load_data(*args):
         pass
 
     @staticmethod
@@ -57,7 +57,8 @@ class OpParallelTuningDataHandle(BaseTuningDataHandle):
     TAG_KEY = "AI CPU Execution Time(us)"
 
     @staticmethod
-    def load_data(param: dict) -> list:
+    def load_data(*args) -> list:
+        param, = args
         op_parallel_data = []
         project_path = param.get(StrConstant.PARAM_RESULT_DIR, '')
         sample_config = {
@@ -154,8 +155,8 @@ class OpSummaryTuningDataHandle(BaseTuningDataHandle):
         return result_headers
 
     @classmethod
-    def load_data(cls: any, param: dict) -> list:
-        return cls.get_data_by_infer_id(param)
+    def load_data(cls: any, *args) -> list:
+        pass
 
     @classmethod
     def get_data_by_infer_id(cls: any, para: dict) -> list:
@@ -306,17 +307,17 @@ class ModelSummaryTuningDataHandle(OpSummaryTuningDataHandle):
                f"\t\td. MTE utilization rate in the model is {model_mte_ratio}. \n"
 
     @classmethod
-    def load_data(cls: any, param: dict) -> list:
+    def load_data(cls: any, *args) -> list:
         """
         first load data as opSummaryDataHandle does
         then process every op_dict, finding bound type for every opR
         then summary task duration time by different bound type
         """
+        param, op_data = args
         ai_core_metrics_set = {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT}
         sample_config = param.get(StrConstant.SAMPLE_CONFIG, {})
         if sample_config.get(StrConstant.AI_CORE_PROFILING_METRICS, '') not in ai_core_metrics_set:
             return []
-        op_data = cls.get_data_by_infer_id(param)
         if not op_data:
             return []
         bound_dur_dict = defaultdict(float)
@@ -370,5 +371,7 @@ class DataManager:
         return self.data.get(data_type, [])
 
     def _load_data(self: any, param: dict):
-        for tuning_type, tuning_data_handle_class in self.HANDLE_MAP.items():
-            self.data[tuning_type] = tuning_data_handle_class.load_data(param)
+        op_data = OpSummaryTuningDataHandle.get_data_by_infer_id(param)
+        self.data[CommonProfRule.TUNING_OPERATOR] = op_data
+        self.data[CommonProfRule.TUNING_OP_PARALLEL] = OpParallelTuningDataHandle.load_data(param)
+        self.data[CommonProfRule.TUNING_MODEL] = ModelSummaryTuningDataHandle.load_data(param, op_data)

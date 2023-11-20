@@ -143,7 +143,7 @@ class TestModelSummaryTuningDataHandle(unittest.TestCase):
                 }
         }
         handler = ModelSummaryTuningDataHandle()
-        ret = handler.load_data(param)
+        ret = handler.load_data(param, [])
         self.assertEqual(ret, [])
 
     def test_load_data_correct_metrics_no_ops(self):
@@ -155,7 +155,7 @@ class TestModelSummaryTuningDataHandle(unittest.TestCase):
         }
         handler = ModelSummaryTuningDataHandle()
         with mock.patch(NAMESPACE + '.ModelSummaryTuningDataHandle.get_data_by_infer_id', return_value=[]):
-            ret = handler.load_data(param)
+            ret = handler.load_data(param, [])
             self.assertEqual(ret, [])
 
     def test_load_data_correct_metrics_with_ops(self):
@@ -183,7 +183,7 @@ class TestModelSummaryTuningDataHandle(unittest.TestCase):
         }
         handler = ModelSummaryTuningDataHandle()
         with mock.patch(NAMESPACE + '.ModelSummaryTuningDataHandle.get_data_by_infer_id', return_value=[op1, op2]):
-            ret = handler.load_data(param)[0]
+            ret = handler.load_data(param, [op1, op2])[0]
             self.assertEqual(ret.get(StrConstant.CUBE_UTILIZATION), 30)
             self.assertEqual(ret.get(StrConstant.VECTOR_UTILIZATION), 10)
             self.assertEqual(ret.get(StrConstant.MTE_UTILIZATION), 0)
