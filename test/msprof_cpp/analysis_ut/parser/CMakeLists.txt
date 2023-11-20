@@ -1,14 +1,19 @@
+include_directories(${TOP_DIR}/analysis/csrc/parser/host/cann)
+include_directories(${TOP_DIR}/analysis/csrc/dfx)
+include_directories(${TOP_DIR}/analysis/csrc/utils)
+include_directories(${TOP_DIR}/analysis/csrc/entities)
+include_directories(${TOP_DIR}/opensource/json/include)
+include_directories(${GTEST_INCLUDE_DIR})
+
+aux_source_directory(${TOP_DIR}/analysis/csrc/parser/host/cann PARSER_SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/dfx PARSER_SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/utils PARSER_SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/entities PARSER_SOURCES)
+
+aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/parser/test PARSER_SOURCES)
 add_executable(
-    xxx_utest
-    test/main.cpp
-    test/xxx_utest.cpp
-    ${TOP_DIR}/analysis/csrc/xxx/xxx.cpp
+        parser_utest
+        ${PARSER_SOURCES}
 )
 
-target_include_directories(add_utest PRIVATE
-    ${GTEST_INCLUDE_DIR}
-    ${MOCKCPP_INCLUDE_DIR}
-    ${TOP_DIR}/analysis/csrc/xxx
-)
-
-run_test(xxx_utest)
+run_test(parser_utest)

@@ -354,5 +354,27 @@ void FileWriter::Close()
         outStream_.close();
     }
 }
+
+std::vector<std::string> File::GetOriginData(const std::string &path,
+                                             const std::vector<std::string> &prePatterns,
+                                             const std::vector<std::string> &sufFilters)
+{
+    std::vector<std::string> files;
+    for (const auto &prefix : prePatterns) {
+        auto matchedFiles = File::GetFilesWithPrefix(path, prefix);
+        for (const auto &filter : sufFilters) {
+            matchedFiles = File::FilterFileWithSuffix(matchedFiles, filter);
+        }
+
+        std::sort(matchedFiles.begin(), matchedFiles.end());
+        std::move(
+            matchedFiles.begin(),
+            matchedFiles.end(),
+            back_inserter(files)
+        );
+    }
+    return files;
+}
+
 }  // namespace Utils
 }  // namespace Analysis
