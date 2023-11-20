@@ -136,7 +136,7 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
 
         pmu_list = self.aic_calculator.add_pipe_time(pmu_list, total_time,
                                                      self._sample_json.get('ai_core_metrics'))
-        pmu_list = {k: v for (k, v) in pmu_list.items() if k in self.table_name_list}
+        pmu_list = {k: pmu_list[k] for k in self.table_name_list if k in pmu_list}
         AicPmuUtils.remove_redundant(pmu_list)
         data_list.append([
             total_time, data.total_cycle, *list(itertools.chain.from_iterable(pmu_list.values())), data.task_id,

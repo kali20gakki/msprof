@@ -89,7 +89,7 @@ class TestFftsPmuCalculator(TestCase):
 
     def test_save_should_be_success_when__is_mix_needed_is_true(self):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
-                mock.patch(NAMESPACE + '.Utils.get_scene', return_value=Constant.STEP_INFO), \
+                mock.patch(NAMESPACE + '.Utils.get_scene', return_value=Constant.SINGLE_OP), \
                 mock.patch("os.path.exists", return_value=True), \
                 mock.patch("os.remove"), \
                 mock.patch("msmodel.interface.base_model.BaseModel.init"), \
@@ -104,7 +104,7 @@ class TestFftsPmuCalculator(TestCase):
                 mock.patch('common_func.file_manager.check_path_valid'), \
                 mock.patch('os.path.getsize', return_value=1280), \
                 mock.patch(NAMESPACE + '.HwtsIterModel.get_aic_sum_count', return_value=50), \
-                mock.patch(NAMESPACE + '.FileCalculator.prepare_process',
+                mock.patch('framework.offset_calculator.OffsetCalculator.pre_process',
                            return_value=b'\xe8\x01\xd3k\x0b\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00'
                                         b'\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x1ek1\x00\x00\x00\x00'
                                         b'\x00\xff\xff\xff\xff\xff\xff\xff\xff\x97+\x00\x00\x00\x00\x00\x00\x00\x00'
