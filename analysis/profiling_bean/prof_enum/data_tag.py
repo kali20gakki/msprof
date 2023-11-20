@@ -175,7 +175,7 @@ class ModuleName(Enum):
     AUDIO = 67
     TPRT = 68
     ASCENDCKERNEL = 69
-    MBUFF = 70
-    CUSTOM = 71
-    ASYS = 72
-    MAX_MOUDLE_ID = 73
+    ASYS = 70
+    ATRACE = 71
+    MBUFF = 72
+    CUSTOM = 73

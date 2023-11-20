@@ -39,10 +39,12 @@ class NpuModuleMemViewer:
                           self._table)
             return MsvpConstant.MSVP_EMPTY_DATA
         for datum in origin_summary_data:
-            if datum.module_id == ModuleName.MAX_MOUDLE_ID.value:
-                logging.error("Invalid module id, please check.")
-                return MsvpConstant.MSVP_EMPTY_DATA
-            self._data.append([ModuleName(datum.module_id).name,
+            try:
+                module_name = ModuleName(datum.module_id).name
+            except ValueError:
+                logging.warning("Invalid module id, please check!")
+                module_name = datum.module_id
+            self._data.append([module_name,
                                InfoConfReader().trans_into_local_time(
                                    InfoConfReader().time_from_host_syscnt(int(datum.syscnt),
                                                                           NumberConstant.MICRO_SECOND)),

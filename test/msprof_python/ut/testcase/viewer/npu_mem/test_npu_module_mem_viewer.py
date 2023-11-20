@@ -38,36 +38,41 @@ class TestNpuModuleMemViewer(TestDirCRBaseModel):
         ret = check.get_summary_data()
         self.assertEqual(MsvpConstant.MSVP_EMPTY_DATA, ret)
 
-    def test_get_summary_data_should_return_empty_when_invalid_module_id_is_included(self):
+    def test_get_summary_data_should_return_number_when_invalid_module_id_is_included(self):
         config = {"headers": ["component", "timestamp", "total_reserve_memory", "device_type"]}
         params = {
             "project": "test_npu_module_mem_view",
             "model_id": 1,
             "iter_id": 1
         }
+        expected_headers = ['component', 'timestamp', 'total_reserve_memory', 'device_type']
+        expected_data = [
+            [200, 10.0, 4096, 'NPU:0']
+        ]
         InfoConfReader()._info_json = {
             'CPU': [{'Frequency': "1000"}]
         }
         InfoConfReader()._local_time_offset = 10.0
         invalid_module_mem_data = [
-            [73, 0, 4096, 'NPU:0']
+            [200, 0, 4096, 'NPU:0']
         ]
         invalid_module_mem_dto = self.get_module_mem_dto(invalid_module_mem_data)
         with mock.patch(NAMESPACE + '.NpuAiStackMemModel.check_db', return_value=True), \
                 mock.patch(NAMESPACE + '.NpuAiStackMemModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + '.NpuAiStackMemModel.get_table_data', return_value=invalid_module_mem_dto):
             check = NpuModuleMemViewer(config, params)
-            ret = check.get_summary_data()
-            self.assertEqual(ret, MsvpConstant.MSVP_EMPTY_DATA)
+            headers, data, _ = check.get_summary_data()
+            self.assertEqual(headers, expected_headers)
+            self.assertEqual(data, expected_data)
 
     def test_get_summary_data_should_return_module_men_data_when_get_module_mem_data(self):
-        config = {"headers": ["component", "timestamp", "total_reserve_memory", "total_allocate_memory", "device_type"]}
+        config = {"headers": ["component", "timestamp", "total_reserve_memory", "device_type"]}
         params = {
             "project": "test_npu_module_mem_view",
             "model_id": 1,
             "iter_id": 1
         }
-        expected_headers = ['component', 'timestamp', 'total_reserve_memory', 'total_allocate_memory', 'device_type']
+        expected_headers = ['component', 'timestamp', 'total_reserve_memory', 'device_type']
         expected_data = [
             ['RUNTIME', 10.0, 4096, 'NPU:0'],
             ['HDC', 11.0, 2048, 'NPU:0']
