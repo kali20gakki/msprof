@@ -26,16 +26,50 @@ using TABLE_COLS = std::vector<std::pair<std::string, std::string>>;
 // DB中Table映射基类
 class Database {
 public:
-    Database();
+    Database() = default;
     // 获取该DB实际落盘的文件名
     std::string GetDBName() const;
     // 获取该DB指定表中字段名
-    TABLE_COLS &GetTableCols(const std::string tableName);
-private:
+    TABLE_COLS GetTableCols(const std::string &tableName);
+
+protected:
     std::string dbName_;
     std::unordered_map<std::string, TABLE_COLS> tableColNames_;
+    const std::string sqlTextType = "TEXT";
+    const std::string sqlIntegerType = "INTEGER";
+    const std::string sqlNumericType = "NUMERIC";
+    const std::string sqlRealType = "REAL";
 };
 
+class ApiEventDB : public Database {
+public:
+    ApiEventDB();
+};
+
+class RuntimeDB : public Database {
+public:
+    RuntimeDB();
+};
+
+class GEInfoDB : public Database {
+public:
+    GEInfoDB();
+};
+
+class HashDB : public Database {
+public:
+    HashDB();
+};
+
+class HCCLDB : public Database {
+public:
+    HCCLDB();
+};
+
+class RtsTrackDB : public Database {
+public:
+    RtsTrackDB();
+};
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis
