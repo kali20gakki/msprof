@@ -42,7 +42,6 @@ class AICpuFromTsCollector:
             start_ms = InfoConfReader().time_from_syscnt(start)
             end_ms = InfoConfReader().time_from_syscnt(end)
             if not ChipManager().is_chip_v1():
-                batch_id = self.calculate_batch_id(stream_id, task_id, end)
                 start_ms = InfoConfReader().time_from_syscnt(start) / NumberConstant.MS_TO_NS
                 end_ms = InfoConfReader().time_from_syscnt(end) / NumberConstant.MS_TO_NS
 
