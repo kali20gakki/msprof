@@ -21,26 +21,60 @@
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-
+using namespace Analysis;
 // 该类用于定义数据库模块的对外接口
 // 主要包括以下特性：
 // 1. 提供统一的增删改查接口
 // 2. 屏蔽db选型
 class DBRunner {
 public:
-    explicit DBRunner(const std::string &dbPath);
-
-    int CreateTable(const std::string &tableName, const std::vector<TableColumn> &cols);
-
-    int DropTable(const std::string &tableName);
-
+    explicit DBRunner(const std::string &dbPath): path_(dbPath) {};
+    bool CreateTable(const std::string &tableName, const std::vector<TableColumn> &cols) const;
+    bool DropTable(const std::string &tableName) const;
     // 数据插入接口，支持不同类型数据的插入
     template<typename... Args>
-    int InsertData(const std::string &table, const std::vector<std::tuple<Args...>> &data);
-
+    bool InsertData(const std::string &table, const std::vector<std::tuple<Args...>> &data) const;
+    bool DeleteData(const std::string &sql) const;
+    template<typename... Args>
+    bool QueryData(const std::string &sql, std::vector<std::tuple<Args...>> &result) const;
+    bool UpdateData(const std::string &sql) const;
 private:
-    std::shared_ptr<Connection> conn_ = nullptr;
+    std::string path_;
 };
+
+template<typename... Args>
+bool DBRunner::InsertData(const std::string &table, const std::vector<std::tuple<Args...>> &data) const
+{
+    INFO("Start insert data to %", table);
+    auto conn = std::make_shared<Connection>(path_);
+    if (!conn) {
+        ERROR("Connection init failed");
+        return false;
+    }
+    if (!conn->ExecuteInsert(table, data)) {
+        ERROR("Insert data to % failed", table);
+        return false;
+    }
+    INFO("insert data to % success", table);
+    return true;
+}
+
+template<typename... Args>
+bool DBRunner::QueryData(const std::string &sql, std::vector<std::tuple<Args...>> &result) const
+{
+    INFO("Start query data");
+    auto conn = std::make_shared<Connection>(path_);
+    if (!conn) {
+        ERROR("Connection init failed");
+        return false;
+    }
+    if (!conn->ExecuteQuery(sql, result)) {
+        ERROR("Query data failed: %", sql);
+        return false;
+    }
+    INFO("Query data success: %", sql);
+    return true;
+}
 } // Database
 } // Viewer
 } // Analysis

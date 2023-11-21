@@ -1,14 +1,27 @@
+aux_source_directory(${TOP_DIR}/analysis/csrc/utils SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/viewer/database SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/dfx SOURCES)
+
 add_executable(
-    xxx_utest
+    viewer_utest
     test/main.cpp
-    test/xxx_utest.cpp
-    ${TOP_DIR}/analysis/csrc/xxx/xxx.cpp
+    test/connection_utest.cpp
+    test/db_runner_utest.cpp
+    ${SOURCES}
 )
 
-target_include_directories(add_utest PRIVATE
+find_library(SQLITEPATH libsqlite3.so)
+target_link_libraries(viewer_utest PRIVATE
+    sqlite3 ${SQLITEPATH}
+)
+
+target_include_directories(viewer_utest PRIVATE
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
-    ${TOP_DIR}/analysis/csrc/xxx
+    ${TOP_DIR}/analysis/csrc/utils
+    ${TOP_DIR}/analysis/csrc/viewer/database
+    ${TOP_DIR}/analysis/csrc/dfx
+    ${TOP_DIR}/opensource/json/include
 )
 
-run_test(xxx_utest)
+run_test(viewer_utest)

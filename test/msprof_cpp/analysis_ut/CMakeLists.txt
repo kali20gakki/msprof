@@ -3,7 +3,7 @@ function(run_test test_case)
         -g
         -pipe
         -Wall
-        -std=c++17
+        -std=c++11
         -fno-access-control
         -Wfloat-equal
         -Wextra
@@ -40,3 +40,4 @@ add_subdirectory(utils)
 add_subdirectory(dfx)
 add_subdirectory(association)
 add_subdirectory(parser)
+add_subdirectory(viewer)

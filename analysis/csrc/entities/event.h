@@ -61,6 +61,9 @@ enum class EventType {
 
 // Event关键信息
 struct EventInfo {
+    EventInfo(EventType type, uint16_t level, uint64_t start, uint64_t end)
+        : type(type), level(level), start(start), end(end)
+    {}
     EventType type = EventType::EVENT_TYPE_INVALID; // 类型
     uint16_t level = 0;                             // 层级
     uint64_t start = 0;                             // 开始时间
@@ -70,7 +73,6 @@ struct EventInfo {
 // Event为本工程对软硬件上报的各类信息(Trace)的抽象, 表示一个时间点或时间片发生的事件
 struct Event {
     Event(std::shared_ptr<char> eventPtr, std::string eventDesc, EventInfo &eventInfo);
-    
     std::shared_ptr<char> event;
     std::string desc;
     EventInfo info;
