@@ -37,6 +37,7 @@ public:
     bool FileEmpty() const;
     bool ChunkEmpty() const;
     size_t Size() const;
+    std::streamsize GetChunkSize() const;
 
     template<typename T>
     static std::shared_ptr<T> ToObj(std::shared_ptr<void> chunk)
@@ -53,8 +54,8 @@ public:
 private:
     std::stringstream ss_;
     std::deque<std::string> readFiles_;
-    size_t chunkSize_ = 0;  // one data chunk bytes
-    size_t remainSize_ = 0;  // remain bytes in ss_
+    std::streamsize chunkSize_ = 0;  // one data chunk bytes
+    size_t remainSize_ = 0;  // remain chunk number in ss_
 };  // class ChunkGenerator
 }  // namespace Parser
 }  // namespace Analysis

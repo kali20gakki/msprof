@@ -36,10 +36,9 @@ public:
             ERROR("The chunk producer is null");
             return {};
         }
-        while (!chunkProducer_->FileEmpty()) {
-            if (ProduceChunk() != ANALYSIS_OK) {
-                return {};
-            }
+        if (ProduceChunk() != ANALYSIS_OK) {
+            ERROR("Producer chunk error.");
+            return {};
         }
         auto iter = chunkConsumers_.find(typeid(T).hash_code());
         if (iter == chunkConsumers_.end() || !iter->second) {
@@ -52,6 +51,7 @@ public:
         while (!chunkConsumer->ChunkEmpty()) {
             std::shared_ptr<void> chunk;
             if (ConsumeChunk(chunk, chunkConsumer) != ANALYSIS_OK) {
+                ERROR("Consume chunk error.");
                 return {};
             }
             data.emplace_back(ChunkGenerator::ToObj<T>(chunk));

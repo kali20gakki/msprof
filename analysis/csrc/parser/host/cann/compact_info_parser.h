@@ -21,20 +21,24 @@ namespace Analysis {
 namespace Parser {
 namespace Host {
 namespace Cann {
+
 // 该类的作用是Compact数据的解析
 class CompactInfoParser : public BaseParser {
 public:
-    explicit CompactInfoParser(const std::string &path);
+    explicit CompactInfoParser(const std::string &path) : BaseParser(path) {}
+    void Init(const std::vector<std::string> &filePrefix);
 
 private:
-    int ProduceChunk() override;
     int ConsumeChunk(std::shared_ptr<void> &chunk, const std::shared_ptr<ChunkGenerator> &chunkConsumer) override;
 };  // class CompactInfoParser
 
 // 该类的作用是node basic info数据的解析
 class NodeBasicInfoParser final : public CompactInfoParser {
 public:
-    explicit NodeBasicInfoParser(const std::string &path);
+    explicit NodeBasicInfoParser(const std::string &path) : CompactInfoParser(path)
+    {
+        Init(filePrefix_);
+    }
 
 private:
     std::vector<std::string> filePrefix_ = {
@@ -46,7 +50,10 @@ private:
 // 该类的作用是memcpy info数据的解析
 class MemcpyInfoParser final : public CompactInfoParser {
 public:
-    explicit MemcpyInfoParser(const std::string &path);
+    explicit MemcpyInfoParser(const std::string &path) : CompactInfoParser(path)
+    {
+        Init(filePrefix_);
+    }
 
 private:
     std::vector<std::string> filePrefix_ = {
@@ -62,7 +69,6 @@ public:
 
 private:
     int ProduceChunk() override;
-    int ConsumeChunk(std::shared_ptr<void> &chunk, const std::shared_ptr<ChunkGenerator> &chunkConsumer) override;
 
 private:
     std::vector<std::string> filePrefix_ = {

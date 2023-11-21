@@ -297,6 +297,18 @@ struct MsprofAdditionalInfo {  // for MsprofReportAdditionalInfo buffer data
     uint8_t  data[MSPROF_ADDTIONAL_INFO_DATA_LENGTH];
 };
 
+const uint16_t TENSOR_DATA_MAX_NUM = 20;
+struct ConcatTensorInfo {
+    uint16_t magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
+    uint16_t level = 0;
+    uint32_t type = 0;
+    uint32_t threadId = 0;
+    uint32_t dataLen = 0;
+    uint64_t timeStamp = 0;
+    uint64_t opName = 0;
+    uint32_t tensorNum = 0;
+    MsrofTensorData tensorData[TENSOR_DATA_MAX_NUM] {};
+};
 #ifdef __cplusplus
 }
 #endif
