@@ -14,8 +14,10 @@
 #define ANALYSIS_PARSER_HOST_CANN_ADDITION_INFO_PARSER_H
 
 #include <string>
+#include <vector>
 
 #include "base_parser.h"
+#include "prof_common.h"
 
 namespace Analysis {
 namespace Parser {
@@ -24,17 +26,20 @@ namespace Cann {
 // 该类的作用是Addition数据的解析
 class AdditionInfoParser : public BaseParser {
 public:
-    explicit AdditionInfoParser(const std::string &path);
+    explicit AdditionInfoParser(const std::string &path) : BaseParser(path) {}
+    void Init(const std::vector<std::string> &filePrefix);
 
 private:
-    int ProduceChunk() override;
     int ConsumeChunk(std::shared_ptr<void> &chunk, const std::shared_ptr<ChunkGenerator> &chunkConsumer) override;
 };  // class AdditionInfoParser
 
 // 该类的作用是CtxId数据的解析
 class CtxIdParser final : public AdditionInfoParser {
 public:
-    explicit CtxIdParser(const std::string &path);
+    explicit CtxIdParser(const std::string &path) : AdditionInfoParser(path)
+    {
+        Init(filePrefix_);
+    }
 
 private:
     std::vector<std::string> filePrefix_ = {
@@ -46,7 +51,10 @@ private:
 // 该类的作用是fusion op数据的解析
 class FusionOpInfoParser final : public AdditionInfoParser {
 public:
-    explicit FusionOpInfoParser(const std::string &path);
+    explicit FusionOpInfoParser(const std::string &path) : AdditionInfoParser(path)
+    {
+        Init(filePrefix_);
+    }
 
 private:
     std::vector<std::string> filePrefix_ = {
@@ -58,7 +66,10 @@ private:
 // 该类的作用是fusion op数据的解析
 class GraphIdParser final : public AdditionInfoParser {
 public:
-    explicit GraphIdParser(const std::string &path);
+    explicit GraphIdParser(const std::string &path) : AdditionInfoParser(path)
+    {
+        Init(filePrefix_);
+    }
 
 private:
     std::vector<std::string> filePrefix_ = {
@@ -74,7 +85,8 @@ public:
 
 private:
     int ProduceChunk() override;
-    int ConsumeChunk(std::shared_ptr<void> &chunk, const std::shared_ptr<ChunkGenerator> &chunkConsumer) override;
+    static std::shared_ptr<ConcatTensorInfo> CreateConcatTensorInfo(
+        const std::shared_ptr<MsprofAdditionalInfo> &additionalInfo);
 
 private:
     std::vector<std::string> filePrefix_ = {
@@ -86,7 +98,10 @@ private:
 // 该类的作用是hccl info数据的解析
 class HcclInfoParser final : public AdditionInfoParser {
 public:
-    explicit HcclInfoParser(const std::string &path);
+    explicit HcclInfoParser(const std::string &path) : AdditionInfoParser(path)
+    {
+        Init(filePrefix_);
+    }
 
 private:
     std::vector<std::string> filePrefix_ = {
@@ -98,7 +113,10 @@ private:
 // 该类的作用是memory application数据的解析
 class MemoryApplicationParser final : public AdditionInfoParser {
 public:
-    explicit MemoryApplicationParser(const std::string &path);
+    explicit MemoryApplicationParser(const std::string &path) : AdditionInfoParser(path)
+    {
+        Init(filePrefix_);
+    }
 
 private:
     std::vector<std::string> filePrefix_ = {
@@ -110,7 +128,10 @@ private:
 // 该类的作用是multi thread数据的解析
 class MultiThreadParser final : public AdditionInfoParser {
 public:
-    explicit MultiThreadParser(const std::string &path);
+    explicit MultiThreadParser(const std::string &path) : AdditionInfoParser(path)
+    {
+        Init(filePrefix_);
+    }
 
 private:
     std::vector<std::string> filePrefix_ = {

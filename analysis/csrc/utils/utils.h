@@ -15,6 +15,9 @@
 
 #include <string>
 #include <vector>
+#include <memory>
+
+#include "log.h"
 
 namespace Analysis {
 namespace Utils {
@@ -22,6 +25,25 @@ std::string Join(const std::vector<std::string> &str, const std::string &delimit
 std::vector<std::string> Split(const std::string &str, const std::string &delimiter);
 int StrToU16(uint16_t &dest, const std::string &numStr);
 int StrToU64(uint64_t &dest, const std::string &numStr);
+
+template <class T, class ...Args>
+std::shared_ptr<T> MakeShared(const Args& ...args)
+{
+    std::shared_ptr<T> sp;
+    try {
+        sp = std::make_shared<T>(args...);
+    } catch (...) {
+        ERROR("make_shared failed");
+        return nullptr;
+    }
+    return sp;
+}
+
+template<typename T, typename V>
+static T ReinterpretConvert(V ptr)
+{
+    return reinterpret_cast<T>(ptr);
+}
 }  // namespace Utils
 }  // namespace Analysis
 
