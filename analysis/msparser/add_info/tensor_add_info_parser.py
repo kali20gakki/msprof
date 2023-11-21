@@ -134,9 +134,12 @@ class TensorAddInfoParser(DataParser, MsMultiProcess):
             self._ge_tensor_info_data.append(
                 [
                     value['level'], value['add_info_type'], thread_id, timestamp, node_id, value['tensor_num'],
-                    ";".join(value['input_format']), ";".join(value['input_data_type']),
-                    "\"" + ";".join(value['input_shape']) + "\"", ";".join(value['output_format']),
-                    ";".join(value['output_data_type']), "\"" + ";".join(value['output_shape']) + "\""
+                    ";".join(value['input_format']) if value['input_format'] else "N/A",
+                    ";".join(value['input_data_type']) if value['input_data_type'] else "N/A",
+                    "\"" + ";".join(value['input_shape']) + "\"" if value['input_shape'] else "N/A",
+                    ";".join(value['output_format']) if value['output_format'] else "N/A",
+                    ";".join(value['output_data_type']) if value['output_data_type'] else "N/A",
+                    "\"" + ";".join(value['output_shape']) + "\"" if value['output_shape'] else "N/A"
                 ]
             )
 
