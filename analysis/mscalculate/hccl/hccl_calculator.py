@@ -61,7 +61,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                 group_dict[data.group_name]["count"] = 0
             index = group_dict[data.group_name]["count"]
             communication_data[num] = data.replace(
-                op_name=f"{data.op_name}_ {data.group_name[-3:]}_{str(index)}_{str(data.iter_id)}")
+                op_name=f"{data.op_name}_{data.group_name[-3:]}_{str(index)}_{str(data.iter_id)}")
 
     @staticmethod
     def _cal_total(type_time: dict) -> int:
