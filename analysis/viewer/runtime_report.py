@@ -139,8 +139,9 @@ def get_output_tasktype(cursor: any, param: dict) -> list:
     exist = DBManager.judge_table_exist(cursor, "ReportTask")
     if not exist:
         return []
-    sql = 'select TimeRatio,Time,Count,Avg,Min,Max,Waiting,Running,Pending,' \
-          'Type,API,task_id,stream_id,batch_id from ReportTask where device_id=?'
+    sql = "select ROUND(TimeRatio, {0}),ROUND(Time, {0}),Count,ROUND(Avg, {0}),ROUND(Min, {0}),ROUND(Max, {0})," \
+          "ROUND(Waiting, {0}),ROUND(Running, {0}),ROUND(Pending, {0}), Type,API,task_id,stream_id," \
+          "batch_id from ReportTask where device_id=?".format(NumberConstant.ROUND_THREE_DECIMAL)
     report_task_data = DBManager.fetch_all_data(cursor, sql, (param.get(StrConstant.PARAM_DEVICE_ID),))
     return report_task_data
 
@@ -260,7 +261,7 @@ def cube_usage(config_dict: dict, value: list) -> list:
                                         value[config_dict.get('task_duration_index')])):
         usage = value[config_dict.get('total_cycles_index')] / (config_dict.get('aic_frequency') *
                         config_dict.get('ai_core_num') * value[config_dict.get('task_duration_index')])
-        usage = round(usage * 100, 4)
+        usage = round(usage * 100, NumberConstant.ROUND_THREE_DECIMAL)
         value.append(usage)
     else:
         value.append(0)
@@ -279,8 +280,8 @@ def add_mem_bound(value: list, vec_index: int, mac_index: int, mte2_index: int) 
     if value[vec_index] == Constant.NA:
         value.append(Constant.NA)
     elif not NumberConstant.is_zero(max(value[vec_index], value[mac_index])):
-        value.append(StrConstant.ACCURACY % float(value[mte2_index] /
-                                                  max(value[vec_index], value[mac_index])))
+        value.append(round(float(value[mte2_index] / max(value[vec_index], value[mac_index])),
+                           NumberConstant.ROUND_THREE_DECIMAL))
     else:
         value.append(0)
     return value

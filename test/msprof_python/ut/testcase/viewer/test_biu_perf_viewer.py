@@ -49,7 +49,7 @@ class TestBiuPerfViewer(unittest.TestCase):
 
     def test_get_biu_flow_timeline(self) -> None:
         expect_res = [OrderedDict([('name', 'bandawith'),
-                      ('ts', 30.0),
+                      ('ts', '30.000'),
                       ('pid', 3),
                       ('tid', 4),
                       ('args', OrderedDict([('flow', 50)])),
@@ -65,7 +65,7 @@ class TestBiuPerfViewer(unittest.TestCase):
         expect_res = [OrderedDict([('name', ''),
                       ('pid', 1),
                       ('tid', 2),
-                      ('ts', 310.0),
+                      ('ts', '310.000'),
                       ('dur', 100),
                       ('args', OrderedDict([('cycle_num', 50), ("ratio", 0.5)])),
                       ('ph', 'X')])]

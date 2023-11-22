@@ -41,7 +41,7 @@ class InterConnectionView:
               "round(MAX(rxThroughput),{accuracy}), round(MIN(rxThroughput), {accuracy}), " \
               "round(AVG(rxThroughput), {accuracy}) FROM {0} " \
               "WHERE device_id IS ?".format(DBNameConstant.TABLE_HCCS_EVENTS,
-                                            accuracy=NumberConstant.DECIMAL_ACCURACY)
+                                            accuracy=NumberConstant.ROUND_THREE_DECIMAL)
         return sql
 
     @staticmethod

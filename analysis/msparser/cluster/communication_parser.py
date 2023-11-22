@@ -169,8 +169,8 @@ class CommunicationParser(MetaParser):
             if main_events:
                 self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO] = self.op_time_parser(main_events)
                 self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO][OpAnalysisType.START_TIME] = \
-                   InfoConfReader().trans_into_local_time(
-                       min(events, key=lambda x: x.timestamp).timestamp, NumberConstant.NANO_SECOND)
+                    float(InfoConfReader().trans_into_local_time(
+                       min(events, key=lambda x: x.timestamp).timestamp))
             else:
                 logging.error("Fail to get no.%s rank main events info,"
                               " communication parser is interrupted", str(rank_id))

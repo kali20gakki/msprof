@@ -15,6 +15,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_iteration import MsprofIteration
+from common_func.msvp_common import format_high_precision_for_csv
 from common_func.path_manager import PathManager
 from common_func.profiling_scene import ProfilingScene
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
@@ -96,14 +97,21 @@ class ParseAiCpuData:
                               "batch_id: %d", dto.stream_id, dto.task_id, dto.batch_id)
                 continue
             ge_summary_dic.setdefault((dto.stream_id, dto.task_id, dto.batch_id), dto.op_name)
-        res = [0, ] * len(ai_cpu_data)
+        res = [[] for _ in range(len(ai_cpu_data))]
         for i, dto in enumerate(ai_cpu_data):
             node_name = dto.node_name
+            sys_start = format_high_precision_for_csv(
+                InfoConfReader().trans_into_local_time(dto.sys_start, use_us=True))
+            compute_time = round(dto.compute_time, NumberConstant.ROUND_THREE_DECIMAL)
+            memcpy_time = round(dto.memcpy_time, NumberConstant.ROUND_THREE_DECIMAL)
+            task_time = round(dto.task_time, NumberConstant.ROUND_THREE_DECIMAL)
+            dispatch_time = round(dto.dispatch_time, NumberConstant.ROUND_THREE_DECIMAL)
+            total_time = round(dto.total_time, NumberConstant.ROUND_THREE_DECIMAL)
             if (dto.stream_id, dto.task_id, dto.batch_id) in ge_summary_dic:
                 node_name = ge_summary_dic[(dto.stream_id, dto.task_id, dto.batch_id)]
             res[i] = [
-                dto.sys_start, node_name, dto.compute_time, dto.memcpy_time,
-                dto.task_time, dto.dispatch_time, dto.total_time, dto.stream_id, dto.task_id
+                sys_start, node_name, compute_time, memcpy_time,
+                task_time, dispatch_time, total_time, dto.stream_id, dto.task_id
             ]
         return res
 
@@ -204,7 +212,7 @@ class ParseAiCpuData:
                 where_condition = "where sys_start>={0} " \
                                   "and sys_end<={1}".format(iter_time[0] / NumberConstant.MS_TO_NS,
                                                             iter_time[1] / NumberConstant.MS_TO_NS)
-        sql = "select sys_start*{MS_TO_US}+{local_time_offset} as sys_start,'{node_name}' as node_name," \
+        sql = "select sys_start*{MS_TO_US} as sys_start,'{node_name}' as node_name," \
               "compute_time*{MS_TO_US} as compute_time, memcpy_time*{MS_TO_US} as memcpy_time," \
               "task_time*{MS_TO_US} as task_time,dispatch_time*{MS_TO_US} as dispatch_time," \
               "total_time*{MS_TO_US} as total_time, stream_id, task_id from {0} {where_condition} " \

@@ -73,7 +73,7 @@ class TsetHostCpuUsage(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=per_cpu_usage):
             check = HostCpuUsage(self.result_dir)
             result_1 = check.get_cpu_usage_data()
-        self.assertEqual(result_1, [['CPU 20', 20.0, {'Usage(%)': 100.0}]])
+        self.assertEqual(result_1, [['CPU 20', '20.000', {'Usage(%)': 100.0}]])
         res[1].execute("drop table CpuUsage")
         db_manager.destroy(res)
 

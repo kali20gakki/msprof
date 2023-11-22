@@ -607,8 +607,7 @@ class MsProfExportDataUtils:
             handler = getattr(cls, configs.get(StrConstant.CONFIG_HANDLER))
             if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.SUMMARY:
                 headers, data, _ = handler(configs, params)
-                return MsprofDataStorage().export_summary_data(headers, Utils.data_processing_with_decimals(data),
-                                                               params)
+                return MsprofDataStorage().export_summary_data(headers, data, params)
             timeline_data = handler(configs, params)
             cls.add_timeline_data(params, timeline_data)
             skip_list = ["event", "api"]

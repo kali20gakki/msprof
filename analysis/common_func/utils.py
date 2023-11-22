@@ -156,24 +156,6 @@ class Utils:
             return json_data
 
     @staticmethod
-    def data_processing_with_decimals(origin_data: list, accuracy=NumberConstant.ROUND_FOUR_DECIMAL):
-        """
-        read json data from file
-        :param origin_data: two-dimensional array
-        :param accuracy: preserve decimal
-        """
-        if not origin_data:
-            return origin_data
-
-        processed_data = [0] * len(origin_data)
-        for index, data in enumerate(origin_data):
-            if not isinstance(data, list) and not isinstance(data, tuple):
-                logging.warning("The format of the origin data is invalid, two-dimensional array needed.")
-                return origin_data
-            processed_data[index] = [Utils.__handle_invalid_zero(_data, accuracy) for _data in data]
-        return processed_data
-
-    @staticmethod
     def is_valid_num(data: float) -> bool:
         """check if a num is valid"""
         if data is None or (not isinstance(data, (int, float)) and not data.isdigit()):

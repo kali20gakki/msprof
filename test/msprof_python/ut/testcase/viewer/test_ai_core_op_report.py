@@ -127,7 +127,8 @@ class TestAiCoreOpReport(unittest.TestCase):
                     mock.patch(NAMESPACE + '.AiCoreOpReport._get_aicore_data', return_value=([], [])), \
                     mock.patch(NAMESPACE + '.AiCoreOpReport._union_task_ge_ai_core_data', return_value=[]), \
                     mock.patch(NAMESPACE + '.AiCoreOpReport._update_model_name_and_infer_id', return_value=[]), \
-                    mock.patch(NAMESPACE + '.AiCoreOpReport._update_op_name_from_hash', return_value=[]), \
+                    mock.patch(NAMESPACE + '.AiCoreOpReport._update_op_name_from_hash',
+                               return_value=[]), \
                     mock.patch(NAMESPACE + '.add_aicore_units', return_value=[]):
                 headers = config.get("headers")
                 ProfilingScene().init('')
@@ -141,6 +142,20 @@ class TestAiCoreOpReport(unittest.TestCase):
         ai_core_group_dict = {(2, 3, 4): deque([(10,)]), (5, 6, 7): deque([(40,)]), (10, 11, 12): deque([(20,)])}
         res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
         self.assertEqual(res, expect_res)
+
+    def test_format_summary_data(self):
+        headers = ['Task Start Time(us)', 'Task Duration(us)', 'Task Wait Time(us)']
+        data = [
+            [68962865935627, 205464.1015620, 0], [68962866127471.1, 2679357453.55469, 0],
+            [68962866128490.1, 2662291832.59375, 0]
+        ]
+        expect = [
+            ['68962865945.627\t', 205.464, 0], ['68962866137.471\t', 2679357.454, 0.0],
+            ['68962866138.490\t', 2662291.833, 0.0]
+        ]
+        check = AiCoreOpReport()
+        res = check._format_summary_data(headers, data)
+        self.assertEqual(res, expect)
 
     def test_union_task_ge_ai_core_data_success_when_exist_hardware_op_list(self):
         expect_res = [
@@ -169,14 +184,14 @@ class TestAiCoreOpReport(unittest.TestCase):
     def test_get_ai_core_float_cols(self):
         with mock.patch(NAMESPACE + ".read_cpu_cfg", return_value={1: "r1", 2: "r2_ratio"}):
             res = AiCoreOpReport._get_ai_core_float_cols(["r1", "r2_time"])
-        self.assertEqual(res, ['round(r1, 6)', 'round(r2_time, 6)'])
+        self.assertEqual(res, ['round(r1, 3)', 'round(r2_time, 3)'])
 
     def test_add_cube_usage(self):
         InfoConfReader()._info_json = {'DeviceInfo': [{'ai_core_num': 2, 'aic_frequency': 50}]}
         headers = ["id", "mac_ratio", "total_cycles", "Task Duration(us)"]
         data = [[1, 0.2, 2, 3], [2, 0.3, 2, 4]]
         DataManager.add_cube_usage(headers, data)
-        self.assertEqual(data, [[1, 0.2, 2, 3, 0.6667], [2, 0.3, 2, 4, 0.5]])
+        self.assertEqual(data, [[1, 0.2, 2, 3, 0.667], [2, 0.3, 2, 4, 0.5]])
 
     def test_add_memory_bound(self):
         headers = ["mac_ratio", "vec_ratio", "mte2_ratio"]
@@ -189,9 +204,8 @@ class TestAiCoreOpReport(unittest.TestCase):
     def test_get_table_sql_and_headers_without_ge(self):
         InfoConfReader()._local_time_offset = 10.0
         res_data = (
-            "select -1,  task_id, stream_id,  'N/A', 'N/A', task_type, start_time/1000.0+10.0, duration_time/1000.0, "
-            "wait_time/1000.0 ,'N/A' "
-            "from task_time where task_type!=? and task_type!=? order by start_time",
+            "select -1,  task_id, stream_id,  'N/A', 'N/A', task_type, start_time, duration_time, "
+            "wait_time ,'N/A' from task_time where task_type!=? and task_type!=? order by start_time",
             ['Op Name', 'stream_id']
         )
         ProfilingScene().init('')
@@ -239,6 +253,18 @@ class TestReportOPCounter(unittest.TestCase):
                 ProfilingScene()._scene = Constant.SINGLE_OP
                 res = check.report_op('', config.get("headers"))
             self.assertEqual(res[2], 1)
+
+    def test_format_statistic_data(self):
+        headers = ['Total Time(us)', 'Min Time(us)', 'Avg Time(us)', 'Max Time(us)', 'Ratio(%)']
+        data = [[192421, 11452, 22321, 82532, 1], [321346, 34324, 88135, 180900, 1]]
+        expect = [[192.421, 11.452, 22.321, 82.532, 1], [321.346, 34.324, 88.135, 180.9, 1]]
+        check = ReportOPCounter()
+        res = check._format_statistic_data(data, headers)
+        self.assertEqual(res, expect)
+
+        headers = ['Total Time(us)', 'Min Time(us)', 'Avg Time(us)']
+        res = check._format_statistic_data(data, headers)
+        self.assertEqual(res, expect)
 
 
 if __name__ == '__main__':

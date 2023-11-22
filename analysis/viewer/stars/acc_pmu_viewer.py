@@ -47,13 +47,14 @@ class AccPmuViewer(BaseViewer, ABC):
             return []
         result = []
         for data in datas:
-            result.append(["read_bandwidth", InfoConfReader().trans_into_local_time(data.timestamp),
+            local_time = InfoConfReader().trans_into_local_time(raw_timestamp=data.timestamp, use_us=True)
+            result.append(["read_bandwidth", local_time,
                            {'value': data.read_bandwidth, 'acc_id': data.acc_id}])
-            result.append(["write_band_width", InfoConfReader().trans_into_local_time(data.timestamp),
+            result.append(["write_band_width", local_time,
                            {'value': data.write_bandwidth, 'acc_id': data.acc_id}])
-            result.append(["read_ost", InfoConfReader().trans_into_local_time(data.timestamp),
+            result.append(["read_ost", local_time,
                            {'value': data.read_ost, 'acc_id': data.acc_id}])
-            result.append(["write_ost", InfoConfReader().trans_into_local_time(data.timestamp),
+            result.append(["write_ost", local_time,
                            {'value': data.write_ost, 'acc_id': data.acc_id}])
         pid = self.pid
         for item in result:

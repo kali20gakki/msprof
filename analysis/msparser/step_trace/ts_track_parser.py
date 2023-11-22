@@ -32,6 +32,7 @@ class TsTrackTag(Enum):
     STEP_TRACE = 10
     TS_MEMCPY = 11
     TS_TASK_TYPE = 12
+    TS_TASK_FLIP_OLD = 13
     TS_TASK_FLIP = 14
     MODEL_WITH_Q = 61
 

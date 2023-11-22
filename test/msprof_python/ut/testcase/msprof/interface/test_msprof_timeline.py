@@ -1,3 +1,4 @@
+import decimal
 import json
 import unittest
 from unittest import mock
@@ -71,7 +72,7 @@ class TestMsprofTimeline(unittest.TestCase):
         time_stamp = {'ts': 111, 'dur': 2}
         key = MsprofTimeline()
         key._iteration_time = [1, 4]
-        result = key.is_in_iteration(time_stamp)
+        result = key.is_in_iteration(time_stamp, decimal.Decimal(1), decimal.Decimal(4))
         self.assertEqual(result, False)
 
     def test_is_in_iteration_2(self):
@@ -79,8 +80,8 @@ class TestMsprofTimeline(unittest.TestCase):
         InfoConfReader()._local_time_offset = 10.0
         time_stamp = {'ts': 11, 'dur': 1}
         key = MsprofTimeline()
-        key._iteration_time = [1, 3]
-        result = key.is_in_iteration(time_stamp)
+        key._iteration_time = [1, 13]
+        result = key.is_in_iteration(time_stamp, decimal.Decimal(1), decimal.Decimal(13))
         self.assertEqual(result, True)
 
     def test_set_iteration_info(self):
@@ -97,6 +98,17 @@ class TestMsprofTimeline(unittest.TestCase):
         info_reader = InfoConfReader()
         info_reader._info_json = {}
         info_reader._host_freq = None
+
+    def test_get_start_end_time(self):
+        key = MsprofTimeline()
+        key._iteration_time = [1, 13]
+        res = key.get_start_end_time()
+        self.assertEqual(len(res), 2)
+
+        key._iteration_time = []
+        res = key.get_start_end_time()
+        expect = (0, 0)
+        self.assertEqual(res, expect)
 
 
 if __name__ == '__main__':

@@ -34,8 +34,8 @@ def _get_ddr_data_from_db(curs: any, device_id: str) -> list:
         write_avg = write_sum * 1.0 / len(ddr_data)
     data = [
         [
-            'Average', round(read_avg, NumberConstant.DECIMAL_ACCURACY),
-            round(write_avg, NumberConstant.DECIMAL_ACCURACY)
+            'Average', round(read_avg, NumberConstant.ROUND_THREE_DECIMAL),
+            round(write_avg, NumberConstant.ROUND_THREE_DECIMAL)
         ]
     ]
     return data
@@ -79,7 +79,12 @@ def cal_llc_band_res(llc_data: list, max_time: float) -> tuple:
     if not NumberConstant.is_zero(llc_data[3] + llc_data[4]):
         write_hit = round(llc_data[5] / (llc_data[3] + llc_data[4]), NumberConstant.DECIMAL_ACCURACY)
 
-    hit_rate = [["Hit_Rate(%)", read_hit * NumberConstant.PERCENTAGE, write_hit * NumberConstant.PERCENTAGE]]
+    hit_rate = [
+        [
+            "Hit_Rate(%)", round(read_hit * NumberConstant.PERCENTAGE, NumberConstant.ROUND_THREE_DECIMAL),
+            round(write_hit * NumberConstant.PERCENTAGE, NumberConstant.ROUND_THREE_DECIMAL)
+        ]
+    ]
     if NumberConstant.is_zero(max_time):
         bandwidth = [["BandWidth(MB/s)", 0.0, 0.0]]
         hit_bandwidth = [["Hit_BandWidth(MB/s)", 0.0, 0.0]]
@@ -89,10 +94,10 @@ def cal_llc_band_res(llc_data: list, max_time: float) -> tuple:
                 "BandWidth(MB/s)",
                 round((llc_data[0] + llc_data[1]) * NumberConstant.LLC_CAPACITY
                       / max_time / (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE),
-                      NumberConstant.DECIMAL_ACCURACY),
+                      NumberConstant.ROUND_THREE_DECIMAL),
                 round((llc_data[3] + llc_data[4]) * NumberConstant.LLC_CAPACITY
                       / max_time / (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE),
-                      NumberConstant.DECIMAL_ACCURACY)
+                      NumberConstant.ROUND_THREE_DECIMAL)
             ]
         ]
         hit_bandwidth = [
@@ -100,10 +105,10 @@ def cal_llc_band_res(llc_data: list, max_time: float) -> tuple:
                 "Hit_BandWidth(MB/s)",
                 round(llc_data[2] * NumberConstant.LLC_CAPACITY
                       / max_time / (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE),
-                      NumberConstant.DECIMAL_ACCURACY),
+                      NumberConstant.ROUND_THREE_DECIMAL),
                 round(llc_data[5] * NumberConstant.LLC_CAPACITY
                       / max_time / (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE),
-                      NumberConstant.DECIMAL_ACCURACY)
+                      NumberConstant.ROUND_THREE_DECIMAL)
             ]
         ]
     result_data = bandwidth + hit_rate + hit_bandwidth
@@ -162,9 +167,9 @@ def _get_llc_capacity_data(curs: any, project_path: str, device_id: str, types: 
     dsid_data = DBManager.fetch_all_data(curs, sql, (device_id,))
     dsid_data = Utils.generator_to_list(list(i) for i in dsid_data)
     for index, value in enumerate(dsid_data):
-        dsid_data[index] = Utils.generator_to_list(round(i, NumberConstant.DECIMAL_ACCURACY) for i in value)
-    dsid_data = Utils.generator_to_list(['Used Capacity of LLC'] + i + [round(sum(i), NumberConstant.DECIMAL_ACCURACY)]
-                                        for i in dsid_data)
+        dsid_data[index] = Utils.generator_to_list(round(i, NumberConstant.ROUND_THREE_DECIMAL) for i in value)
+    dsid_data = Utils.generator_to_list(['Used Capacity of LLC'] + i +
+                                        [round(sum(i), NumberConstant.ROUND_THREE_DECIMAL)] for i in dsid_data)
     cpu_list = Utils.generator_to_list('CPU{}(KB)'.format(value)
                                        for value in range(len(core2cpu[types])))
     headers = ['Metric'] + cpu_list + ['Total(KB)']

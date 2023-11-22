@@ -40,7 +40,7 @@ class HostToDevice:
         :param task_info_reversed: reversed task info list
         :return: start point
         """
-        start_time = float(api_trace.get('ts', '0'))
+        start_time = api_trace.get('ts', '0')
         connection_id = api_trace.get("args", {}).get("connection_id", Constant.DEFAULT_INVALID_VALUE)
         context_ids = conn_to_ctxes.get(connection_id, [Constant.DEFAULT_INVALID_VALUE])
         return [

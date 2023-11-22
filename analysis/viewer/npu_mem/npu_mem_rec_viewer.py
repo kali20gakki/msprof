@@ -9,6 +9,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
+from common_func.msvp_common import format_high_precision_for_csv
 from msmodel.npu_mem.npu_ai_stack_mem_model import NpuAiStackMemModel
 
 
@@ -25,7 +26,7 @@ class NpuMemRecViewer:
 
     def get_summary_data(self: any) -> tuple:
         """
-        get summary data from npu mem data
+        get summary data from npu mem data and format data for csv output
         :return: summary data
         """
         if not self._model.check_db() or not self._model.check_table():
@@ -39,10 +40,13 @@ class NpuMemRecViewer:
             return MsvpConstant.MSVP_EMPTY_DATA
         for datum in origin_summary_data:
             self._data.append([datum.component,
-                               InfoConfReader().trans_into_local_time(
+                               format_high_precision_for_csv(
+                                   InfoConfReader().trans_into_local_time(
                                    InfoConfReader().time_from_host_syscnt(int(datum.timestamp),
-                                                                          NumberConstant.MICRO_SECOND)),
-                               datum.total_allocate_memory / NumberConstant.KILOBYTE,
-                               datum.total_reserve_memory / NumberConstant.KILOBYTE,
+                                                                          NumberConstant.MICRO_SECOND), use_us=True)),
+                               round(datum.total_allocate_memory / NumberConstant.KILOBYTE,
+                                     NumberConstant.ROUND_THREE_DECIMAL),
+                               round(datum.total_reserve_memory / NumberConstant.KILOBYTE,
+                                     NumberConstant.ROUND_THREE_DECIMAL),
                                datum.device_type])
         return self._configs.get(StrConstant.CONFIG_HEADERS), self._data, len(self._data)

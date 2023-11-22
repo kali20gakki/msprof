@@ -158,8 +158,10 @@ class GeInfoModel(BaseModel):
         device_id = InfoConfReader().get_device_id()
         stream_id = aic_with_stream_task[0]
         task_id = aic_with_stream_task[1]
-        sql = f"select * from {DBNameConstant.TABLE_GE_TASK} " \
+        sql = f"select count(*) from {DBNameConstant.TABLE_GE_TASK} " \
               f"where task_type = 'AI_CORE' and model_id = ? and stream_id = ? and " \
               "task_id = ? and index_id = ? and device_id = ?"
         ge_data = DBManager.fetch_all_data(self.cur, sql, (model_id, stream_id, task_id, max_index, device_id))
-        return ge_data
+        if ge_data:
+            return ge_data[0]
+        return 0

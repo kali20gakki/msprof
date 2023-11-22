@@ -6,6 +6,7 @@ Copyright Huawei Technologies Co., Ltd. 2023. All rights reserved.
 """
 import unittest
 from unittest import mock
+from collections import OrderedDict
 
 from common_func.info_conf_reader import InfoConfReader
 from constant.info_json_construct import InfoJson
@@ -62,6 +63,20 @@ class TestEventViewer(unittest.TestCase):
         matched_event_dto.level = "7"
         matched_event_dto.request_id = 8
         matched_event_dto.connection_id = 0
+        InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}]}
+        InfoConfReader()._host_freq = 100
+        expect = [
+            OrderedDict([('name', 'process_name'), ('pid', 100), ('tid', 0), ('args', OrderedDict([('name', 'Event')])),
+                         ('ph', 'M')]),
+            OrderedDict([('name', 'thread_name'), ('pid', 100), ('tid', 5),
+                         ('args', OrderedDict([('name', 'Thread 5')])), ('ph', 'M')]),
+            OrderedDict([('name', 'thread_sort_index'), ('pid', 100), ('tid', 5),
+                         ('args', OrderedDict([('sort_index', 5)])), ('ph', 'M')]),
+            OrderedDict([('name', '1'), ('pid', 100), ('tid', 5), ('ts', '30010.000'), ('dur', 10000.0),
+                         ('args', OrderedDict([('Thread Id', 5), ('level', '7'), ('id', '2'), ('item_id', 6),
+                                               ('request_id', 8), ('connection_id', 0)])), ('ph', 'X')])
+        ]
+
         with mock.patch(NAMESPACE + '.EventDataViewModel.check_db', return_value=True), \
                 mock.patch(NAMESPACE + '.EventDataViewModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + ".EventDataViewModel.get_timeline_data", return_value=[matched_event_dto]):
@@ -69,17 +84,4 @@ class TestEventViewer(unittest.TestCase):
             InfoConfReader()._local_time_offset = 10.0
             check = EventViewer(config, params)
             ret = check.get_timeline_data()
-            self.assertEqual([{"name": "process_name",
-                               "pid": 100, "tid": 0,
-                               "args": {"name": "Event"}, "ph": "M"},
-                              {"name": "thread_name",
-                               "pid": 100, "tid": 5,
-                               "args": {"name": "Thread 5"}, "ph": "M"},
-                              {"name": "thread_sort_index",
-                               "pid": 100, "tid": 5,
-                               "args": {"sort_index": 5}, "ph": "M"},
-                              {"name": "1", "pid": 100, "tid": 5,
-                               "ts": 10.003, "dur": 0.001,
-                               "args": {"Thread Id": 5, "level": "7",
-                                        "id": "2", "item_id": 6, "request_id": 8, "connection_id": 0},
-                               "ph": "X"}], ret)
+            self.assertEqual(expect, ret)

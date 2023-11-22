@@ -133,8 +133,9 @@ class MsprofTimeline:
                 self.add_sort_index(export_data)
                 self.add_connect_json_line(export_data, data_type)
                 if not ProfilingScene().is_all_export():
+                    start_time, end_time = self.get_start_end_time()
                     export_data = filter(
-                        lambda value: value["ph"] == "M" or self.is_in_iteration(value),
+                        lambda value: value["ph"] == "M" or self.is_in_iteration(value, start_time, end_time),
                         export_data)
                 self._export_data_list.extend(export_data)
         except (TypeError, ValueError) as err:
@@ -191,16 +192,13 @@ class MsprofTimeline:
             return []
         return self._export_data_list
 
-    def is_in_iteration(self: any, json_value: dict) -> bool:
+    def is_in_iteration(self: any, json_value: dict, start_time: Decimal, end_time: Decimal) -> bool:
         """
         check if in iteration
         """
         # Show all data without iteration time
         if not self._iteration_time:
             return True
-        start_time, end_time = self._iteration_time
-        start_time = Decimal(InfoConfReader().trans_into_local_time(start_time, use_decimal=True))
-        end_time = Decimal(InfoConfReader().trans_into_local_time(end_time, use_decimal=True))
         time_start = Decimal(str(json_value.get(TraceViewHeaderConstant.TRACE_HEADER_TS,
                                                 NumberConstant.DEFAULT_START_TIME)))
         time_dur = Decimal(str(json_value.get(TraceViewHeaderConstant.TRACE_HEADER_DURATION,
@@ -229,3 +227,11 @@ class MsprofTimeline:
             self._default_sort_index += 1
             return TraceViewHeaderConstant.LayerInfo(process_name, TraceViewHeaderConstant.GENERAL_LAYER_NPU,
                                                      self._default_sort_index)
+
+    def get_start_end_time(self: any):
+        if not self._iteration_time:
+            return 0, 0
+        start_time, end_time = self._iteration_time
+        start_time = Decimal(InfoConfReader().trans_into_local_time(start_time, use_us=True))
+        end_time = Decimal(InfoConfReader().trans_into_local_time(end_time, use_us=True))
+        return start_time, end_time

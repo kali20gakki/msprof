@@ -37,7 +37,6 @@ class NumberConstant:
     EXTRA_RATIO_NAME_LEN = 11
     PERCENTAGE = 100
     DECIMAL_ACCURACY = 6
-    ROUND_FOUR_DECIMAL = 4
     ROUND_THREE_DECIMAL = 3
     ROUND_TWO_DECIMAL = 2
     LLC_CAPACITY = 64.0
@@ -149,6 +148,9 @@ class NumberConstant:
 
     RDMA_NO_BARRIER_TASK_NUM = 3
     RDMA_WITH_BARRIER_TASK_NUM = 5
+
+    # high-precision data threshold
+    CSV_MAX_PRECISION = 15
 
     @property
     def conversion_time(self: any) -> float:

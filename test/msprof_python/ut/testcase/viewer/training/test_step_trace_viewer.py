@@ -160,14 +160,15 @@ class TestStepTraceViewer(unittest.TestCase):
             (1, 4223700155120, 4223701928137, 4223701928704, 35557.520000000004, 35460.340000000004, 11.34, 'N/A', 1)
         ]
         InfoConfReader()._local_time_offset = 10.0
+        InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}]}
         with mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__select_reduce',
                         return_value=[(4248168266400, 4248177564931)]), \
-                mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__local_time_from_syscnt',
-                           return_value=0), \
                 mock.patch(NAMESPACE + '.StepTraceConstant.syscnt_to_micro',
                            return_value=0):
             res = StepTraceViewer._reformat_step_trace_data(data_list, ITER_RANGE)
-            self.assertEqual(res, [[1, 0, 0, 0, 35557.520000000004, 35460.340000000004, 11.34, 'N/A', 1, 0, 0]])
+            self.assertEqual(res,
+                             [[1, '42237001561.200\t', '42237019291.370\t', '42237019297.040\t',
+                               35557.520000000004, 35460.340000000004, 11.34, 'N/A', 1, '42481682674.000\t', 0]])
 
     def test_get_trace_timeline_data(self):
         values = [
@@ -183,15 +184,14 @@ class TestStepTraceViewer(unittest.TestCase):
         ]
         InfoConfReader()._info_json = {"pid": 0}
         InfoConfReader()._local_time_offset = 10.0
+        InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}]}
         with mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__select_getnext', return_value=get_next_value), \
                 mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__select_reduce',
                            return_value=all_reduce_value), \
-                mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__local_time_from_syscnt',
-                           return_value=189746300646091), \
                 mock.patch(NAMESPACE + '.StepTraceViewer.transfer_trace_unit'), \
                 mock.patch(NAMESPACE + '.StepTraceConstant.syscnt_to_micro', return_value=1):
             res = StepTraceViewer.get_trace_timeline_data(EmptyClass(""), values)
-            self.assertEqual(len(json.dumps(res)), 1741)
+            self.assertEqual(len(json.dumps(res)), 1830)
 
 
 if __name__ == '__main__':

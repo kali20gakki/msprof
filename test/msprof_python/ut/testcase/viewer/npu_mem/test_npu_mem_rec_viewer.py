@@ -48,8 +48,8 @@ class TestNpuMemRecViewer(TestDirCRBaseModel):
         }
         expected_headers = ['component', 'timestamp', 'total_allocate_memory', 'total_reserve_memory', 'device_type']
         expected_data = [
-            ['GE', 10.0, 0.0, 0.0, 'NPU:5'],
-            ['GE', 11.0, 1.0, 1.0, 'NPU:5']
+            ['GE', '10.000\t', 0.0, 0.0, 'NPU:5'],
+            ['GE', '11.000\t', 1.0, 1.0, 'NPU:5']
         ]
         InfoConfReader()._info_json = {
             'CPU': [{'Frequency': "1000"}]

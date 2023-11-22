@@ -13,7 +13,8 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.msvp_common import is_number
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.msvp_common import is_number, format_high_precision_for_csv
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.step_trace_constant import StepTraceConstant
@@ -89,9 +90,7 @@ class TimeLineJsonMaker:
                              ("FP Start", trace_parm[StepTraceConstant.FORWARD_PROPAGATION]),
                              ("BP End", trace_parm[StepTraceConstant.BACK_PROPAGATION]),
                              ("Iteration End", trace_parm[StepTraceConstant.STEP_END]),
-                             ("Iteration Time(ns)",
-                              round(trace_parm.get(StepTraceConstant.ITER_TIME) * NumberConstant.NS_TO_US,
-                                    NumberConstant.ROUND_TWO_DECIMAL))]),
+                             ("Iteration Time(us)", trace_parm.get(StepTraceConstant.ITER_TIME))]),
                 "Iteration Time"]
 
     @staticmethod
@@ -110,9 +109,7 @@ class TimeLineJsonMaker:
                 OrderedDict([("Iteration ID", trace_parm[StepTraceConstant.ITER_ID]),
                              ("FP Start", trace_parm[StepTraceConstant.FORWARD_PROPAGATION]),
                              ("BP End", trace_parm[StepTraceConstant.BACK_PROPAGATION]),
-                             ("FP_BP Time(ns)",
-                              round(trace_parm.get(StepTraceConstant.FORWARD_TO_BACK) * NumberConstant.NS_TO_US,
-                                    NumberConstant.ROUND_TWO_DECIMAL))]),
+                             ("FP_BP Time(us)", trace_parm.get(StepTraceConstant.FORWARD_TO_BACK))]),
                 "FP_BP Time"]
 
     @staticmethod
@@ -131,9 +128,7 @@ class TimeLineJsonMaker:
                 OrderedDict([("Iteration ID", trace_parm[StepTraceConstant.ITER_ID]),
                              ("BP End", trace_parm[StepTraceConstant.BACK_PROPAGATION]),
                              ("Iteration End", trace_parm[StepTraceConstant.STEP_END]),
-                             ("Iteration Refresh(ns)",
-                              round(trace_parm.get(StepTraceConstant.ITERATION_REFRESH) * NumberConstant.NS_TO_US,
-                                    NumberConstant.ROUND_TWO_DECIMAL))]),
+                             ("Iteration Refresh(us)", trace_parm.get(StepTraceConstant.ITERATION_REFRESH))]),
                 "Iteration Refresh"]
 
     @staticmethod
@@ -148,7 +143,10 @@ class TimeLineJsonMaker:
         return OrderedDict([("name", "Data_aug Bound {}".format(trace_parm[StepTraceConstant.ITER_ID] - 1)),
                             ("cat", "Data_aug Bound"),
                             ("ph", "t"),
-                            ("ts", trace_parm[StepTraceConstant.FORWARD_PROPAGATION]),
+                            ("ts", InfoConfReader().trans_into_local_time(
+                                raw_timestamp=InfoConfReader().time_from_syscnt(
+                                    trace_parm[StepTraceConstant.FORWARD_PROPAGATION],
+                                    NumberConstant.MICRO_SECOND), use_us=True)),
                             ("pid", pid),
                             ("tid", tid),
                             ("id", "Data_aug Bound {}_{}".format(pid, tid)),
@@ -163,11 +161,13 @@ class TimeLineJsonMaker:
         :param tid: tid
         :return: dict
         """
-        data_aug_bound = round(trace_parm[StepTraceConstant.DATA_AUGMENTATION],
-                               NumberConstant.ROUND_TWO_DECIMAL)
-        refresh_dur = round(trace_parm[StepTraceConstant.STEP_END] - trace_parm[StepTraceConstant.BACK_PROPAGATION],
-                            NumberConstant.ROUND_THREE_DECIMAL)
+        data_aug_bound = trace_parm[StepTraceConstant.DATA_AUGMENTATION]
+        refresh_dur = trace_parm[StepTraceConstant.STEP_END] - trace_parm[StepTraceConstant.BACK_PROPAGATION]
         ts = trace_parm[StepTraceConstant.BACK_PROPAGATION] + refresh_dur * 0.5
+
+        data_aug_bound = data_aug_bound * NumberConstant.MICRO_SECOND / InfoConfReader().get_freq(StrConstant.HWTS)
+        ts = InfoConfReader().trans_into_local_time(
+            raw_timestamp=InfoConfReader().time_from_syscnt(ts, NumberConstant.MICRO_SECOND), use_us=True)
 
         return OrderedDict([("name", "Data_aug Bound {}".format(trace_parm[StepTraceConstant.ITER_ID])),
                             ("cat", "Data_aug Bound"),
@@ -199,10 +199,10 @@ class StepTraceViewer:
               "(case when FP_start={2} then 'N/A' else FP_start end), " \
               "(case when BP_end={2} then 'N/A' else BP_end end), " \
               "iteration_end, " \
-              "(case when iteration_time={2} then 'N/A' else iteration_time*{0} end), " \
-              "(case when fp_bp_time={2} then 'N/A' else fp_bp_time*{0} end), " \
-              "(case when grad_refresh_bound={2} then 'N/A' else grad_refresh_bound*{0} end), " \
-              "(case when data_aug_bound={2} then 'N/A' else data_aug_bound*{0} end), " \
+              "(case when iteration_time={2} then 'N/A' else iteration_time end), " \
+              "(case when fp_bp_time={2} then 'N/A' else fp_bp_time end), " \
+              "(case when grad_refresh_bound={2} then 'N/A' else grad_refresh_bound end), " \
+              "(case when data_aug_bound={2} then 'N/A' else data_aug_bound end), " \
               "(case when model_id={3} then 'N/A' else model_id end) " \
               " from {1} where device_id=?".format(
             StepTraceConstant.syscnt_to_micro(),
@@ -292,8 +292,7 @@ class StepTraceViewer:
             grad_refresh_data = [
                 "Reduce_{}_{}".format(trace_parm[StepTraceConstant.ITER_ID], i), pid, tid,
                 trace_parm[StepTraceConstant.REDUCE_START],
-                (trace_parm[StepTraceConstant.REDUCE_END] -
-                 trace_parm[StepTraceConstant.REDUCE_START]),
+                (trace_parm[StepTraceConstant.REDUCE_END] - trace_parm[StepTraceConstant.REDUCE_START]),
                 OrderedDict([
                     ("Iteration ID", trace_parm[StepTraceConstant.ITER_ID]),
                     ("Reduce Start {}".format(i), trace_parm[StepTraceConstant.REDUCE_START]),
@@ -301,6 +300,7 @@ class StepTraceViewer:
                 ]),
                 "Reduce"
             ]
+            StepTraceViewer.update_reduce(TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, grad_refresh_data, i)
             reduce_trace_data.append(grad_refresh_data)
             result_data.extend(TraceViewManager.time_graph_trace(
                 TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, reduce_trace_data))
@@ -375,12 +375,12 @@ class StepTraceViewer:
         """
         transfer trace unit
         :param trace: trace
+        :param use_decimal: high-precision calculation switch
         :return: void
         """
         for i in range(1, 4):
             if trace[i] != "N/A":
-                trace[i] = InfoConfReader().time_from_syscnt(trace[i], NumberConstant.MICRO_SECOND)
-                trace[i] = InfoConfReader().trans_into_local_time(trace[i])
+                trace[i] = InfoConfReader().trans_syscnt_into_local_time(trace[i])
 
     @staticmethod
     def get_trace_timeline_data(cnn: any, values: list) -> any:
@@ -397,14 +397,11 @@ class StepTraceViewer:
                 'training_trace': list(line),
             }
             getnext = StepTraceViewer.__select_getnext(cnn, trace.get('training_trace', []))
-            getnext = Utils.generator_to_list(list(map(StepTraceViewer.__local_time_from_syscnt, data))
-                                              for data in getnext)
+            getnext = Utils.generator_to_list(list(data) for data in getnext)
             trace['get_next'] = getnext
             all_reduce = StepTraceViewer.__select_reduce(cnn, trace.get('training_trace', []))
-            all_reduce = Utils.generator_to_list(list(map(StepTraceViewer.__local_time_from_syscnt, data))
-                                                 for data in all_reduce)
+            all_reduce = Utils.generator_to_list(list(data) for data in all_reduce)
             trace['all_reduce'] = all_reduce
-            StepTraceViewer.transfer_trace_unit(trace.get('training_trace', []))  # syscnt to time
             data[step] = trace
             # Cursor step moved 1 step
             step = step + 1
@@ -430,15 +427,84 @@ class StepTraceViewer:
                 OrderedDict([
                     ("GetNext Start", get_next_start),
                     ("GetNext End", get_next_end),
-                    ("GetNext Time(ns)",
-                     round((get_next_end - get_next_start) * NumberConstant.USTONS, NumberConstant.ROUND_TWO_DECIMAL)
+                    ("GetNext Time(us)",
+                     get_next_end - get_next_start
                      ),
                 ]),
                 "GetNext Time"
             ]
+            StepTraceViewer.update_get_next_data(TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, refresh_data)
             get_next_trace_data.append(refresh_data)
         result_data.extend(TraceViewManager.time_graph_trace(
             TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, get_next_trace_data))
+
+    @staticmethod
+    def update_iteration(headers: list, data: list) -> None:
+        StepTraceViewer.update_ts_and_dur(headers, data)
+        data[headers.index('args')]['FP Start'] = StepTraceViewer.calculate_localtime(
+            data[headers.index('args')]['FP Start'])
+        data[headers.index('args')]['BP End'] = StepTraceViewer.calculate_localtime(
+            data[headers.index('args')]['BP End'])
+        data[headers.index('args')]['Iteration End'] = StepTraceViewer.calculate_localtime(
+            data[headers.index('args')]['Iteration End'])
+        data[headers.index('args')]['Iteration Time(us)'] = StepTraceViewer.calculate_duration(
+            data[headers.index('args')]['Iteration Time(us)'])
+
+    @staticmethod
+    def update_fp_bp_time(headers: list, data: list) -> None:
+        StepTraceViewer.update_ts_and_dur(headers, data)
+        data[headers.index('args')]['FP_BP Time(us)'] = StepTraceViewer.calculate_duration(
+            data[headers.index('args')]['FP_BP Time(us)'])
+        data[headers.index('args')]['FP Start'] = StepTraceViewer.calculate_localtime(
+            data[headers.index('args')]['FP Start'])
+        data[headers.index('args')]['BP End'] = StepTraceViewer.calculate_localtime(
+            data[headers.index('args')]['BP End'])
+
+    @staticmethod
+    def update_reduce(headers: list, data: list, index: int) -> None:
+        StepTraceViewer.update_ts_and_dur(headers, data)
+        data[headers.index('args')]['Reduce Start ' + str(index)] = StepTraceViewer.calculate_localtime(
+            data[headers.index('args')]['Reduce Start ' + str(index)])
+        data[headers.index('args')]['Reduce End ' + str(index)] = StepTraceViewer.calculate_localtime(
+            data[headers.index('args')]['Reduce End ' + str(index)])
+
+    @staticmethod
+    def update_get_next_data(headers: list, data: list) -> None:
+        StepTraceViewer.update_ts_and_dur(headers, data)
+        data[headers.index('args')]['GetNext Start'] = StepTraceViewer.calculate_localtime(
+            data[headers.index('args')]['GetNext Start'])
+        data[headers.index('args')]['GetNext End'] = StepTraceViewer.calculate_localtime(
+            data[headers.index('args')]['GetNext End'])
+        data[headers.index('args')]['GetNext Time(us)'] = StepTraceViewer.calculate_duration(
+            data[headers.index('args')]['GetNext Time(us)'])
+
+    @staticmethod
+    def update_grad_refresh_data(headers: list, data: list) -> list:
+        StepTraceViewer.update_ts_and_dur(headers, data)
+        data[headers.index('args')]['BP End'] = StepTraceViewer.calculate_localtime(
+            data[headers.index('args')]['BP End'])
+        data[headers.index('args')]['Iteration End'] = StepTraceViewer.calculate_localtime(
+            data[headers.index('args')]['Iteration End'])
+        data[headers.index('args')]['Iteration Refresh(us)'] = StepTraceViewer.calculate_duration(
+            data[headers.index('args')]['Iteration Refresh(us)'])
+        return data
+
+    @staticmethod
+    def update_ts_and_dur(headers: list, data: list) -> None:
+        data[headers.index('ts')] = StepTraceViewer.calculate_localtime(data[headers.index('ts')])
+        data[headers.index('dur')] = StepTraceViewer.calculate_duration(data[headers.index('dur')])
+
+    @staticmethod
+    def calculate_localtime(data: any) -> str:
+        if not is_number(data):
+            return data
+        return InfoConfReader().trans_syscnt_into_local_time(data)
+
+    @staticmethod
+    def calculate_duration(data: any) -> str:
+        if not is_number(data):
+            return data
+        return data * NumberConstant.MICRO_SECOND / InfoConfReader().get_freq(StrConstant.HWTS)
 
     @staticmethod
     def _reformat_step_trace_data(data: list, conn: any) -> list:
@@ -449,9 +515,13 @@ class StepTraceViewer:
                 reduce_data = StepTraceViewer.__select_reduce(conn,
                                                               trace)
                 for item in reduce_data:
-                    trace += [StepTraceViewer.__local_time_from_syscnt(item[0]),
-                              (item[1] - item[0]) * StepTraceConstant.syscnt_to_micro()]
-            trace[1:4] = map(lambda x: StepTraceViewer.__local_time_from_syscnt(x), trace[1:4])
+                    trace += [
+                        format_high_precision_for_csv(
+                            InfoConfReader().trans_syscnt_into_local_time(item[0])),
+                        round((item[1] - item[0]) * StepTraceConstant.syscnt_to_micro(),
+                              NumberConstant.ROUND_THREE_DECIMAL)
+                    ]
+            trace[1:4] = map(lambda x: format_high_precision_summary_data(x), trace[1:4])
             merge_data.append(trace)
         return merge_data
 
@@ -520,13 +590,6 @@ class StepTraceViewer:
         return DBManager.fetch_all_data(curs, sql, (iter_range.model_id, *iter_range.get_iteration_range()))
 
     @staticmethod
-    def __local_time_from_syscnt(cnt):
-        if not is_number(cnt):
-            return cnt
-        return InfoConfReader().trans_into_local_time(
-            InfoConfReader().time_from_syscnt(cnt, NumberConstant.MICRO_SECOND))
-
-    @staticmethod
     @catch_exception
     def __format_trace_json(trace_data: list) -> any:
         """
@@ -549,15 +612,18 @@ class StepTraceViewer:
             tid = StepTraceViewer.get_model_pid(data)
 
             iter_time_data = TimeLineJsonMaker.make_iter_time(trace_parm, pid, tid)
+            StepTraceViewer.update_iteration(TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, iter_time_data)
 
             if data[1] == "N/A" or data[2] == "N/A":
                 trace_view_data.append(iter_time_data)
                 result_data.extend(
                     TraceViewManager.time_graph_trace(TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, trace_view_data))
-
             else:
                 fp_bp_data = TimeLineJsonMaker.make_fp_bp_data(trace_parm, pid, tid)
+                StepTraceViewer.update_fp_bp_time(TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, fp_bp_data)
                 grad_refresh_data = TimeLineJsonMaker.make_grad_refresh_data(trace_parm, pid, tid)
+                grad_refresh_data = StepTraceViewer.update_grad_refresh_data(
+                    TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, grad_refresh_data)
                 result_dict["data_aug_dict0"] = TimeLineJsonMaker.make_data_aug_dict0(trace_parm, pid, tid)
                 result_dict["data_aug_dict1"] = TimeLineJsonMaker.make_data_aug_dict1(trace_parm, pid, tid)
 
@@ -572,3 +638,10 @@ class StepTraceViewer:
             StepTraceViewer.format_get_next_json(trace_item.get("get_next", []), pid, tid, result_data)
 
         return result_data
+
+
+def format_high_precision_summary_data(data: int) -> str:
+    if not data or data == 'N/A':
+        return data
+    local_time = InfoConfReader().trans_syscnt_into_local_time(data)
+    return format_high_precision_for_csv(local_time)

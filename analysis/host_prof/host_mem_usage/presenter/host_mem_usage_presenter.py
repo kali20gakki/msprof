@@ -77,8 +77,8 @@ class HostMemUsagePresenter(HostProfPresenterBase):
         for data_item in mem_usage_data.get("data"):
             if is_number(data_item["start"]):
                 temp_data = [
-                    "Memory Usage", float(data_item["start"]),
-                    {"Usage(%)": data_item["usage"]}
+                    "Memory Usage", data_item["start"],
+                    {"Usage(%)": round(data_item["usage"], NumberConstant.ROUND_THREE_DECIMAL)}
                 ]
                 result.append(temp_data)
         return result
@@ -92,8 +92,8 @@ class HostMemUsagePresenter(HostProfPresenterBase):
                 res = model.get_recommend_value('usage', DBNameConstant.TABLE_HOST_MEM_USAGE)
                 mem_total = InfoConfReader().get_mem_total()
                 if res and mem_total:
-                    res[0] = res[0] * mem_total / NumberConstant.PERCENTAGE
-                    res[1] = res[1] * mem_total / NumberConstant.PERCENTAGE
+                    res[0] = round(res[0] * mem_total / NumberConstant.PERCENTAGE, NumberConstant.ROUND_THREE_DECIMAL)
+                    res[1] = round(res[1] * mem_total / NumberConstant.PERCENTAGE, NumberConstant.ROUND_THREE_DECIMAL)
                     return [tuple([mem_total, *res])]
         return MsvpConstant.EMPTY_LIST
 

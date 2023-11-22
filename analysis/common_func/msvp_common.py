@@ -388,6 +388,7 @@ def float_calculate(input_list: list, operator: str = '+') -> str:
     input_list = new_input_list
     try:
         result = reduce(operator_dict.get(operator), input_list)
+        result = result.quantize(Decimal('0.000'))
         return str(result)
     except (OSError, SystemError, ValueError, TypeError, RuntimeError, ArithmeticError):
         return str(0)
@@ -428,3 +429,8 @@ def clear_project_dirs(project_dir: str) -> None:
     for file_name in os.listdir(PathManager.get_data_dir(project_dir)):
         if file_name.endswith(Constant.COMPLETE_TAG):
             os.remove(os.path.join(PathManager.get_data_dir(project_dir), file_name))
+
+
+def format_high_precision_for_csv(data: str) -> str:
+    return data + '\t'
+

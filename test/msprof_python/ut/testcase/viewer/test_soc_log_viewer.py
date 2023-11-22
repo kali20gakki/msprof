@@ -54,9 +54,7 @@ class TestTaskTimeViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + '.TaskTimeViewer.get_trace_timeline', return_value=[]):
             check = TaskTimeViewer(configs, params)
             ret = check.get_timeline_data()
-            self.assertEqual(ret, json.dumps(
-                {"status": 2, "info": "Can not export task time data, the current chip does not support "
-                                      "exporting this data or the data may be not collected."}))
+            self.assertEqual(ret, [])
 
     def test_get_trace_timeline(self):
         configs, params = {}, {}
@@ -111,7 +109,7 @@ class TestTaskTimeViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + '.ViewModel.get_all_data', return_value=data):
             check = TaskTimeViewer(configs, params)
             ret = check.get_ge_data_dict()
-            self.assertEqual(ret, ({'0-1-3-0': 4}, {}))
+            self.assertEqual(ret, {'0-1-3-0': 4})
 
     def test_get_device_task_type_should_return_device_type_when_device_is_not_number(self):
         configs, params = {}, {'data_type': 'ffts_sub_task_time'}
@@ -155,7 +153,7 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "FFTS_PLUS", "AIV", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=(node_dict, {})):
+        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             check.add_node_name(data)
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'MatMul_1_lxslice1')
@@ -175,7 +173,7 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "FFTS_PLUS", "AIV", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=(node_dict, {})):
+        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             check.add_node_name(data)
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'AIV')
@@ -195,7 +193,7 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "AIV", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=(node_dict, {})):
+        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             check.add_node_name(data)
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'MatMul_1_lxslice1')
@@ -215,7 +213,7 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "25", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=(node_dict, {})):
+        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V3_1_0
             check.add_node_name(data)
@@ -236,7 +234,7 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "20", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=(node_dict, {})):
+        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V1_1_0
             check.add_node_name(data)
@@ -257,7 +255,7 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "AIV", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=(node_dict, {})):
+        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V2_1_0
             check.add_node_name(data)
@@ -278,7 +276,7 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "SDMA", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=(node_dict, {})):
+        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V1_1_0
             check.add_node_name(data)
@@ -299,7 +297,7 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "20", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=(node_dict, {})):
+        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V1_1_0
             check.add_node_name(data)
@@ -320,7 +318,7 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "15", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=(node_dict, {})):
+        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V2_1_0
             check.add_node_name(data)
@@ -341,7 +339,7 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "25", 1),
             ],
         }
-        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=(node_dict, {})):
+        with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V2_1_0
             check.add_node_name(data)

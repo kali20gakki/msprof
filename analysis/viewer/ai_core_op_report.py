@@ -16,6 +16,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_common import add_aicore_units
 from common_func.msvp_common import read_cpu_cfg
+from common_func.msvp_common import format_high_precision_for_csv
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
@@ -147,7 +148,7 @@ class AiCoreOpReport:
             for index, col in enumerate(columns):
                 if col in all_float_cols:
                     # keep six decimal places for ai core float data
-                    ai_core_float_cols[index] = "round({0}, {1})".format(col, NumberConstant.DECIMAL_ACCURACY)
+                    ai_core_float_cols[index] = "round({0}, {1})".format(col, NumberConstant.ROUND_THREE_DECIMAL)
 
         return ai_core_float_cols
 
@@ -165,33 +166,15 @@ class AiCoreOpReport:
         headers = configs.get('headers')
         cls.delete_useless_cols(headers, data)
         cls.sort_summary_data(headers, data)
-        task_data = cls.update_device_task_wait_time(headers, data)
+        task_data = cls._format_summary_data(headers, data)
         add_aicore_units(headers)
         return headers, task_data, len(task_data)
-
-    @classmethod
-    def update_device_task_wait_time(cls, headers: list, device_tasks: list) -> list:
-        result = filter(lambda x: x not in headers,
-                        [StrConstant.TASK_START_TIME, cls.TASK_DURATION, cls.TASK_WAIT_TIME])
-        if list(result):
-            logging.error("Op_summary_data don't have start time or duration")
-        else:
-            task_start_index = headers.index(StrConstant.TASK_START_TIME)
-            task_duration_index = headers.index(cls.TASK_DURATION)
-            task_wait_time_index = headers.index(cls.TASK_WAIT_TIME)
-            for i, task in enumerate(device_tasks):
-                if i == 0:
-                    task[task_wait_time_index] = 0
-                    continue
-                task[task_wait_time_index] = max(task[task_start_index] - device_tasks[i - 1][task_start_index] \
-                                                 - device_tasks[i - 1][task_duration_index], 0)
-        return device_tasks
 
     @classmethod
     def sort_summary_data(cls, headers, data):
         if StrConstant.TASK_START_TIME in headers:
             task_start_index = headers.index(StrConstant.TASK_START_TIME)
-            data.sort(key=lambda x: x[task_start_index])
+            data.sort(key=lambda x: float(x[task_start_index]))
 
     @classmethod
     def get_hccl_op_data(cls, project_path: str, configs: dict) -> list:
@@ -221,9 +204,7 @@ class AiCoreOpReport:
             hccl_data[index] = model_name + [_hccl_op.model_id, Constant.NA, Constant.NA] + index_id + \
                                [
                                    _hccl_op.op_name, _hccl_op.op_type, _hccl_op.task_type,
-                                   InfoConfReader().trans_into_local_time(_hccl_op.timestamp,
-                                                                          NumberConstant.NANO_SECOND),
-                                   _hccl_op.duration / NumberConstant.NS_TO_US,
+                                   int(_hccl_op.timestamp), int(_hccl_op.duration),
                                    Constant.DEFAULT_VALUE, Constant.DEFAULT_VALUE
                                ]
             hccl_data[index].extend([Constant.NA] * (header_length - len(hccl_data[index])))
@@ -297,6 +278,35 @@ class AiCoreOpReport:
             for sp_header in AiCoreOpReport.SPECIAL_AI_CORE_HEAD:
                 ai_core_head_list[index] = header.replace(sp_header, "")
         return ai_core_head_list
+
+    @classmethod
+    def _format_summary_data(cls, headers: list, device_tasks: list) -> list:
+        result = filter(lambda x: x not in headers,
+                        [StrConstant.TASK_START_TIME, cls.TASK_DURATION, cls.TASK_WAIT_TIME])
+        if list(result):
+            logging.error("Op_summary_data don't have start time or duration")
+        else:
+            task_start_index = headers.index(StrConstant.TASK_START_TIME)
+            task_duration_index = headers.index(cls.TASK_DURATION)
+            task_wait_time_index = headers.index(cls.TASK_WAIT_TIME)
+            prev_start_time = 0
+            prev_duration = 0
+            for i, task in enumerate(device_tasks):
+                if i == 0:
+                    task[task_wait_time_index] = 0
+                    prev_start_time = task[task_start_index]
+                    prev_duration = task[task_duration_index]
+                else:
+                    task[task_wait_time_index] = max(task[task_start_index] - prev_start_time - prev_duration, 0)
+                    task[task_wait_time_index] = round(task[task_wait_time_index] / NumberConstant.NS_TO_US,
+                                                       NumberConstant.ROUND_THREE_DECIMAL)
+                    prev_start_time = task[task_start_index]
+                    prev_duration = task[task_duration_index]
+                task[task_start_index] = format_high_precision_for_csv(
+                    InfoConfReader().trans_into_local_time(task[task_start_index]))
+                task[task_duration_index] = round(task[task_duration_index] / NumberConstant.NS_TO_US,
+                                                  NumberConstant.ROUND_THREE_DECIMAL)
+        return device_tasks
 
     @classmethod
     def _check_ai_cpu_data(cls: any, conn: any, curs: any) -> bool:
@@ -389,8 +399,8 @@ class AiCoreOpReport:
         # ge or subtask need modify the context_id or subtask_id so that it should be same.
         sql = "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info}" \
               "{1}.op_name, {1}.op_type, {1}.task_type," \
-              "{0}.start_time/{NS_TO_US}+{local_time_offset}, {0}.duration_time/{NS_TO_US}," \
-              " {0}.wait_time/{NS_TO_US}, {1}.block_dim, {1}.mix_block_dim, {1}.op_flag," \
+              "CAST({0}.start_time AS INTEGER), CAST({0}.duration_time AS INTEGER)," \
+              "CAST({0}.wait_time AS INTEGER), {1}.block_dim, {1}.mix_block_dim, {1}.op_flag," \
               "(case when {1}.input_shapes is NULL then 'N/A' else {1}.input_shapes end), " \
               "(case when {1}.input_data_types is NULL then 'N/A' else {1}.input_data_types end), " \
               "(case when {1}.input_formats is NULL then 'N/A' else {1}.input_formats end), " \
@@ -406,8 +416,6 @@ class AiCoreOpReport:
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                     DBNameConstant.TABLE_SUMMARY_GE,
                     NumberConstant.INVALID_TASK_TIME,
-                    NS_TO_US=NumberConstant.NS_TO_US,
-                    local_time_offset=InfoConfReader().get_local_time_offset(),
                     context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
                     index_info=cls._get_index_id_sql_condition())
         headers += cls.TENSOR_HEADERS
@@ -429,8 +437,8 @@ class AiCoreOpReport:
         model_id = "{0}, ".format(NumberConstant.DEFAULT_MODEL_ID) if ProfilingScene().is_all_export() else 'model_id, '
         subtask_id = ",subtask_id " if ChipManager().is_chip_v4() else ",'N/A'"
         sql = "select {model_id} task_id, stream_id, {index_info} 'N/A', 'N/A', task_type, " \
-              "start_time/{NS_TO_US}+{local_time_offset}, duration_time/{NS_TO_US}," \
-              " wait_time/{NS_TO_US} {subtask_id} from {0} where task_type!=? and task_type!=? order by start_time" \
+              "start_time, duration_time, wait_time {subtask_id} from {0} where task_type!=? " \
+              "and task_type!=? order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                     NS_TO_US=NumberConstant.NS_TO_US,
                     index_info=cls._get_index_id_sql_condition(),
@@ -465,18 +473,18 @@ class ReportOPCounter:
 
     @staticmethod
     def _get_op_report_sql_operator_scene() -> str:
-        sql = "select op_type, core_type, occurrences, total_time/{NS_TO_US}, " \
-              "min/{NS_TO_US}, avg/{NS_TO_US}, max/{NS_TO_US}, ratio from {0} " \
+        sql = "select op_type, core_type, occurrences, total_time, " \
+              "min, avg, max, ratio from {0} " \
               "where op_type != 'N/A' and core_type!=? and core_type!=? order by total_time desc" \
-             .format(DBNameConstant.TABLE_OP_COUNTER_OP_REPORT, NS_TO_US=NumberConstant.NS_TO_US)
+            .format(DBNameConstant.TABLE_OP_COUNTER_OP_REPORT, NS_TO_US=NumberConstant.NS_TO_US)
         return sql
 
     @staticmethod
     def _get_op_report_sql_network_scene() -> str:
-        sql = "select model_name, op_type, core_type, occurrences, total_time/{NS_TO_US}, " \
-              "min/{NS_TO_US}, avg/{NS_TO_US}, max/{NS_TO_US}, ratio from {0} " \
+        sql = "select model_name, op_type, core_type, occurrences, total_time, " \
+              "min, avg, max, ratio from {0} " \
               "where op_type != 'N/A' and core_type!=? and core_type!=? order by model_name asc, " \
-              "total_time desc".format(DBNameConstant.TABLE_OP_COUNTER_OP_REPORT, NS_TO_US=NumberConstant.NS_TO_US)
+              "total_time desc".format(DBNameConstant.TABLE_OP_COUNTER_OP_REPORT)
         return sql
 
     @classmethod
@@ -498,6 +506,7 @@ class ReportOPCounter:
             Constant.TASK_TYPE_WRITE_BACK, Constant.TASK_TYPE_INVALID
         )
         data = DBManager.fetch_all_data(curs, sql, filter_params)
+        data = cls._format_statistic_data(data, headers)
         DBManager.destroy_db_connect(conn, curs)
         return headers, data, len(data)
 
@@ -506,3 +515,28 @@ class ReportOPCounter:
         for head in cls.OPERATOR_UNUSED_HEADERS:
             if head in headers:
                 headers.remove(head)
+
+    @classmethod
+    def _format_statistic_data(cls: any, statistic_data: list, headers: list) -> list:
+        headers_dict = {value: index for index, value in enumerate(headers)}
+        total_time_index = headers_dict.get('Total Time(us)')
+        min_time_index = headers_dict.get('Min Time(us)')
+        avg_time_index = headers_dict.get('Avg Time(us)')
+        max_time_index = headers_dict.get('Max Time(us)')
+        ratio_index = headers_dict.get('Ratio(%)')
+        check_list = [total_time_index, min_time_index, avg_time_index, max_time_index, ratio_index]
+        if any(item is None for item in check_list):
+            return statistic_data
+        for i, data in enumerate(statistic_data):
+            data = list(data)
+            data[total_time_index] = round(data[total_time_index] / NumberConstant.NS_TO_US,
+                                           NumberConstant.ROUND_THREE_DECIMAL)
+            data[min_time_index] = round(data[min_time_index] / NumberConstant.NS_TO_US,
+                                         NumberConstant.ROUND_THREE_DECIMAL)
+            data[avg_time_index] = round(data[avg_time_index] / NumberConstant.NS_TO_US,
+                                         NumberConstant.ROUND_THREE_DECIMAL)
+            data[max_time_index] = round(data[max_time_index] / NumberConstant.NS_TO_US,
+                                         NumberConstant.ROUND_THREE_DECIMAL)
+            data[ratio_index] = round(float(data[ratio_index]), NumberConstant.ROUND_THREE_DECIMAL)
+            statistic_data[i] = data
+        return statistic_data

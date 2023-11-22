@@ -38,7 +38,7 @@ def _do_divide(val: int, total_size) -> float:
     """
     ratio = 0.0
     try:
-        ratio = StrConstant.ACCURACY % (val / total_size * NumberConstant.PERCENTAGE)
+        ratio = round(val / total_size * NumberConstant.PERCENTAGE, NumberConstant.ROUND_THREE_DECIMAL)
     except ZeroDivisionError as err:
         logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
     return ratio
@@ -54,7 +54,7 @@ def _sys_usage_data(curs: any, table_name: str) -> list:
     result_data = DBManager.fetch_all_data(curs, sql)
     data_list = []
     for data in result_data:
-        total_size = data[7]
+        total_size = round(data[7], NumberConstant.ROUND_THREE_DECIMAL)
         cpu_type = data[0]
         user_ratio = _do_divide(data[1], total_size)
         sys_ratio = _do_divide(data[2], total_size)
@@ -106,6 +106,6 @@ def _format_cpu_usage_data(result_data: list) -> list:
     for i, data in enumerate(result_data):
         result_list_data = list(data)
         if is_number(str(result_list_data[-1])):
-            result_list_data[-1] = StrConstant.ACCURACY % result_list_data[-1]
+            result_list_data[-1] = round(result_list_data[-1], NumberConstant.ROUND_THREE_DECIMAL)
         result_data[i] = tuple(result_list_data)
     return result_data

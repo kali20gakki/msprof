@@ -11,6 +11,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
+from common_func.msvp_common import format_high_precision_for_csv
 from msmodel.memory_copy.memcpy_model import MemcpyModel
 
 
@@ -94,20 +95,22 @@ class MemoryCopyViewer:
 
             for datum in export_data:
                 export_datum = []
-                task_start = InfoConfReader().trans_into_local_time(int(datum[5] * NumberConstant.MILLI_SECOND))
-                task_stop = InfoConfReader().trans_into_local_time(int(datum[6] * NumberConstant.MILLI_SECOND))
+                task_start = format_high_precision_for_csv(
+                    InfoConfReader().trans_into_local_time(datum[5], True))
+                task_stop = format_high_precision_for_csv(
+                    InfoConfReader().trans_into_local_time(datum[6], True))
                 export_datum.append(datum[0])
                 export_datum.append(datum[1])
                 export_datum.append(datum[2])
                 export_datum.append(datum[3])
-                export_datum.append(datum[4])
-                export_datum.append("\"" + str(task_start) + "\"")
-                export_datum.append("\"" + str(task_stop) + "\"")
+                export_datum.append(round(datum[4], NumberConstant.ROUND_THREE_DECIMAL))
+                export_datum.append(task_start)
+                export_datum.append(task_stop)
                 summary_data.append(tuple(export_datum))
 
         return summary_data
 
-    def get_memory_copy_timeline(self: any) -> str:
+    def get_memory_copy_timeline(self: any) -> list:
         """
         get memory copy timeline
         datum index: 0 name; 1 type; 2 receive time;
@@ -118,9 +121,9 @@ class MemoryCopyViewer:
             export_data = self._model.return_task_scheduler_timeline(
                 DBNameConstant.TABLE_TS_MEMCPY_CALCULATION)
             for datum in export_data:
-                start_time = InfoConfReader().trans_into_local_time(datum[3])
-                end_time = InfoConfReader().trans_into_local_time(datum[4])
-                receive_time = InfoConfReader().trans_into_local_time(datum[2])
+                start_time = InfoConfReader().trans_into_local_time(raw_timestamp=datum[3], use_us=True)
+                end_time = InfoConfReader().trans_into_local_time(raw_timestamp=datum[4], use_us=True)
+                receive_time = InfoConfReader().trans_into_local_time(raw_timestamp=datum[2], use_us=True)
                 args = OrderedDict([("Task Type", datum[1]),
                                     ("Stream Id", datum[6]),
                                     ("Task Id", datum[7]),

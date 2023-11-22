@@ -2,7 +2,7 @@ import json
 import sqlite3
 import unittest
 from unittest import mock
-
+import decimal
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
@@ -140,6 +140,8 @@ class TestLLCTimelineTrain(unittest.TestCase):
         db_manager = DBManager()
         test_sql = db_manager.create_table(DBNameConstant.DB_LLC, create_sql, insert_sql, data)
         InfoConfReader()._info_json = {'pid': "0"}
+        InfoConfReader()._local_time_offset = 0
+        decimal.getcontext().prec = 40
         res = get_llc_capacity(param, test_sql[1])
         self.assertEqual(len(res), 5)
         (test_sql[1]).execute("drop Table {}".format(DBNameConstant.TABLE_LLC_DSID))

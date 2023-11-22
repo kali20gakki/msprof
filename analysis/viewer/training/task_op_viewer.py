@@ -10,6 +10,8 @@ from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.msvp_common import format_high_precision_for_csv
+from common_func.ms_constant.number_constant import NumberConstant
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from viewer.memory_copy.memory_copy_viewer import MemoryCopyViewer
 from viewer.task_time_viewer import TaskTimeViewer
@@ -58,7 +60,8 @@ class TaskOpViewer:
             return [], 0
         # select device & non-ffts-plus task only
         sql = (
-            f"SELECT stream_id, task_id, batch_id, host_task_type, start_time, duration, device_task_type "
+            f"SELECT stream_id, task_id, batch_id, host_task_type, CAST(start_time AS INTEGER), " 
+            f"CAST(duration AS INTEGER), device_task_type "
             f"from {DBNameConstant.TABLE_ASCEND_TASK} "
             f"where device_task_type != '{Constant.TASK_TYPE_UNKNOWN}'"
             f" and context_id = {TaskOpViewer.INVALID_CONTEXT_ID}"
@@ -95,9 +98,11 @@ class TaskOpViewer:
         for stream_id, task_id, batch_id, host_task_type, start_time, duration, device_task_type in task_data:
             op_name: str = op_name_dict.get((stream_id, task_id, batch_id), "N/A")
             task_type: str = TaskTimeViewer.get_task_type(host_task_type, device_task_type)
-            task_time: float = duration / DBManager.NSTOUS
-            task_start = f'"{InfoConfReader().trans_into_local_time(start_time / DBManager.NSTOUS)}"'
-            task_stop = f'"{InfoConfReader().trans_into_local_time((start_time + duration) / DBManager.NSTOUS)}"'
+            task_time: float = round(duration / DBManager.NSTOUS, NumberConstant.ROUND_THREE_DECIMAL)
+            task_start = format_high_precision_for_csv(
+                InfoConfReader().trans_into_local_time(start_time))
+            task_stop = format_high_precision_for_csv(
+                InfoConfReader().trans_into_local_time(start_time + duration))
             task_info.append((
                 op_name, task_type, stream_id, task_id,
                 task_time, task_start, task_stop,

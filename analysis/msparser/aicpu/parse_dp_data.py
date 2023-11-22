@@ -61,11 +61,11 @@ class ParseDpData:
         split dp data into dp_tuple
         """
         dp_data_length = index * ParseDpData.DP_TUPLE_LENGTH
-        timestamp = InfoConfReader().trans_into_local_time(dp_data[dp_data_length + 3] / NumberConstant.NS_TO_US)
+        timestamp = InfoConfReader().trans_into_local_time(dp_data[dp_data_length + 3])
         action = dp_data[dp_data_length + 4].partition(b'\x00')[0].decode('utf-8', 'ignore')
         source = dp_data[dp_data_length + 5].partition(b'\x00')[0].decode('utf-8', 'ignore')
         size = dp_data[dp_data_length + 7]
-        dp_data_msaasge = (timestamp, action, source, size)
+        dp_data_msaasge = (float(timestamp), action, source, size)
         return dp_data_msaasge
 
     @classmethod
@@ -120,11 +120,11 @@ class ParseDpData:
                 # info are in the following format
                 # [13135969231] Last queue dequeue, source:iterator_default, index:1, size:131
                 timestamp = InfoConfReader().trans_into_local_time(
-                    float(info_split[0].split("]")[0].strip("[")) / NumberConstant.NS_TO_US)
+                    float(info_split[0].split("]")[0].strip("[")))
                 action = info_split[0].split("]")[-1].strip()
                 source = info_split[-3].split(":")[-1]
                 size = info_split[-1].split(":")[-1]
-                data.append((timestamp, action, source, size))
+                data.append((float(timestamp), action, source, size))
         return data
 
     @classmethod

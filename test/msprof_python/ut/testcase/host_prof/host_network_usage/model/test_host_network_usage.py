@@ -24,12 +24,13 @@ class TsetHostNetworkUsage(unittest.TestCase):
     def test_get_network_usage_data(self):
         InfoConfReader()._host_freq = None
         InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
+        InfoConfReader()._local_time_offset = 1698809492.41
         disk_info_list = ((0, 1, 2, 3, 4, 5, 6),)
         with mock.patch(NAMESPACE + '.DBManager.fetch_all_data',
                         return_value=disk_info_list):
             check = HostNetworkUsage(self.result_dir)
             result = check.get_network_usage_data()
-        self.assertEqual(result, {'data': [{'end': 0.001, 'start': 0.0, 'usage': 2}]})
+        self.assertEqual(result, {'data': [{'end': '1698809492.411', 'start': '1698809492.410', 'usage': 2}]})
 
 
 if __name__ == '__main__':
