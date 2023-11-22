@@ -142,7 +142,7 @@ class MsprofOutputSummary:
         export all data
         :return:
         """
-        print_info(MsProfCommonConstant.COMMON_FILE_NAME, f"Strat exporting {command_type} output_file.")
+        print_info(MsProfCommonConstant.COMMON_FILE_NAME, f"Start exporting {command_type} output_file.")
         if not self._is_in_prof_file():
             return
         if not self._clear_output_folder(self._get_file_suffix(command_type)):
