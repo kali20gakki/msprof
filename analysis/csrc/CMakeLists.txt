@@ -7,27 +7,11 @@ set(CSRC ${PROJECT_SOURCE_DIR})
 set(OPENSOURCE ${PROJECT_ROOT}/opensource)
 set(COLLECTOR ${PROJECT_ROOT}/collector)
 
-add_compile_options("-std=c++17")
 # 保持编译和运行python版本兼容性
 add_definitions(-DASCEND_CI_LIMITED_PY37)
 if (CMAKE_BUILD_TYPE STREQUAL DEBUG)
     add_definitions(-DDEBUG)
 endif()
-
-# 安全规范编译命令
-add_compile_options("-fPIE")
-add_compile_options("-fPIC")
-add_compile_options("-fstack-protector-all")
-add_compile_options("-Wall")
-add_compile_options("-D_FORTIFY_SOURCE=2")
-add_compile_options("-fno-strict-aliasing")
-add_compile_options("-O2")
-
-add_link_options("-Wl,-z,now")
-add_link_options("-Wl,-z,relro")
-add_link_options("-Wl,-z,noexecstack")
-add_link_options("-pie")
-add_link_options("-s") #strip
 
 include_directories(${CSRC}/association)
 include_directories(${CSRC}/association/cann)
@@ -66,5 +50,34 @@ aux_source_directory(${CSRC}/backends SOURCES)
 aux_source_directory(${CSRC}/dfx SOURCES)
 
 add_library(msprof_analysis SHARED ${SOURCES})
+
+target_compile_options(msprof_analysis PRIVATE
+        -std=c++11
+        -fPIC
+        -fstack-protector-all
+        -fno-strict-aliasing
+        -fno-common
+        -fvisibility=hidden
+        -fvisibility-inlines-hidden
+        -Wfloat-equal
+        -Wextra
+        -D_GLIBCXX_USE_CXX11_ABI=0
+        -D_FORTIFY_SOURCE=2
+        $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-O2>
+        -fstack-check
+        -ftrapv
+)
+
+target_link_options(msprof_analysis PRIVATE
+        -Wl,-z,relro,-z,now,-z,noexecstack
+        -Wl,-Bsymbolic
+        -Wl,--exclude-libs=ALL
+        $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-s>
+)
+
+find_library(SQLITEPATH libsqlite3.so)
+target_link_libraries(msprof_analysis PRIVATE
+        sqlite3 ${SQLITEPATH}
+)
 # 去掉lib前缀
 set_target_properties(msprof_analysis PROPERTIES PREFIX  "")
