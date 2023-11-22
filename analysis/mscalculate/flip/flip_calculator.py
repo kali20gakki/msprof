@@ -23,11 +23,13 @@ class FlipCalculator:
 
     @staticmethod
     def compute_batch_id(task_data: List[Union[TaskTrackBean, DeviceTask]],
-                         flip_data: List[Union[TaskTrackBean, TaskFlip]]) -> None:
+                         flip_data: List[Union[TaskTrackBean, TaskFlip]]) -> List:
         if not task_data:
-            return
+            return []
         task_data_bin = FlipCalculator.sep_data_by_stream_id(task_data)
         flip_data = FlipCalculator.sep_data_by_stream_id(flip_data)
+        new_task_data = [None] * len(task_data)
+        new_task_index = 0
         for stream_id, data in task_data_bin.items():
             flip_data_stream = flip_data.get(stream_id, [])
             data.sort(key=lambda x: x.timestamp)
@@ -46,7 +48,10 @@ class FlipCalculator:
                     data[task_index] = task.replace(batch_id=batch_id)
                 else:
                     task.batch_id = batch_id
+                new_task_data[new_task_index] = data[task_index]
                 task_index += 1  # next task
+                new_task_index += 1
+        return new_task_data
 
     @staticmethod
     def calibrate_when_flip_task_id_not_zero(
