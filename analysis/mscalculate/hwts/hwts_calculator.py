@@ -85,7 +85,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         if self._log_data:
             self._hwts_log_model.init()
             self._hwts_log_model.flush(Utils.obj_list_to_list(self._log_data), DBNameConstant.TABLE_HWTS_TASK)
-            self._hwts_log_model.flush(self._add_batch_id(self._prep_data()), DBNameConstant.TABLE_HWTS_TASK_TIME)
+            self._hwts_log_model.flush(self._reform_data(self._prep_data()), DBNameConstant.TABLE_HWTS_TASK_TIME)
             self._hwts_log_model.finalize()
 
     def ms_run(self: any) -> None:
@@ -147,48 +147,31 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
             with FileOpen(_file, 'rb') as _hwts_log_reader:
                 self._parse(_offset_calculator.pre_process(_hwts_log_reader.file_reader, os.path.getsize(_file)))
 
-    def _add_batch_id(self: any, prep_data_res: list) -> list:
+    def _reform_data(self: any, prep_data_res: list) -> list:
         if self.is_need_parse_all_file():
-            batch_counter = BatchCounter(self._project_path)
-            batch_counter.init(Constant.TASK_TYPE_AI_CORE)
             for index, datum in enumerate(prep_data_res):
                 # index 0 stream id, index 1 task id
-                batch_id = batch_counter.calculate_batch(datum[0], datum[1])
                 prep_data_res[index] = list(datum[:2]) + [
                     InfoConfReader().time_from_syscnt(datum[2]),
                     InfoConfReader().time_from_syscnt(datum[3]),
                     datum[-1],
                     self._iter_range.iteration_id,
-                    self._iter_range.model_id,
-                    batch_id]
+                    self._iter_range.model_id]
             return prep_data_res
-
-        iter_range = MsprofIteration(self._project_path).get_parallel_iter_range(self._iter_range)
-
-        if IterInfoManager.check_parallel(self._project_path):
-            batch_list = len(prep_data_res) * [[NumberConstant.DEFAULT_BATCH_ID]]
-        else:
-            with self._iter_model:
-                batch_list = self._iter_model.get_batch_list(DBNameConstant.TABLE_HWTS_BATCH, iter_range)
-        if len(batch_list) != len(prep_data_res):
-            logging.warning("hwts data can not match with batch id list.")
-
         task_dispatcher = TaskDispatchModelIndex(self._iter_range, self._project_path)
-
         result_data = []
-        for index in range(min(len(batch_list), len(prep_data_res))):
-            batch = batch_list[index]
+        for index, datum in enumerate(prep_data_res):
             # type of batch is tuple
             # 3 is end time
             if prep_data_res[index][2] == NumberConstant.INVALID_OP_EXE_TIME:
                 continue
 
-            model_id, index_id = task_dispatcher.dispatch(prep_data_res[index][3])
+            model_id, index_id = task_dispatcher.dispatch(datum[3])
             result_data.append(
-                list(prep_data_res[index][:2]) + [InfoConfReader().time_from_syscnt(prep_data_res[index][2]),
-                                                  InfoConfReader().time_from_syscnt(prep_data_res[index][3]),
-                                                  prep_data_res[index][-1],
-                                                  index_id, model_id, batch[0]])
+                list(datum[:2]) + [InfoConfReader().time_from_syscnt(datum[2]),
+                                   InfoConfReader().time_from_syscnt(datum[3]),
+                                   datum[-1],
+                                   index_id, model_id])
         return result_data
 
     def _parse(self: any, all_log_bytes: bytes) -> None:

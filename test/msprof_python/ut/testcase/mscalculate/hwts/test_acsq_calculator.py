@@ -15,35 +15,6 @@ class TestAcsqCalculator(unittest.TestCase):
     file_list = {DataTag.STARS_LOG: ['stars_soc.data.0.slice_0']}
     sample_config = {"result_dir": ""}
 
-    def test_add_batch_id(self: any) -> None:
-        expect_res = [(1, 2, 3, 4, 5, 6, 7, 1)]
-        test_func = getattr(AcsqCalculator, "_add_batch_id")
-
-        test_object = mock.Mock()
-        setattr(test_object, "_sample_config", {"model_id": 1, "iter_id": 2})
-        setattr(test_object, "_project_path", "")
-        test_object.PREP_DATA_LENGTH = 7
-        test_object._aicpu_collector.aicpu_list = []
-
-        profiling_scene = ProfilingScene()
-        is_operator_func = profiling_scene.is_operator
-        profiling_scene.is_operator = mock.Mock()
-        profiling_scene.is_operator.return_value = False
-
-        msprof_iteration = mock.Mock()
-        msprof_iteration.get_parallel_iter_range = mock.Mock()
-        msprof_iteration.get_parallel_iter_range.return_value = [1, 2]
-
-        with mock.patch("common_func.msprof_iteration.MsprofIteration.get_parallel_iter_range", return_value=[1, 2]):
-            with ClassMock(BatchCounter, mock.Mock()):
-                ProfilingScene().init("")
-                batch_counter = BatchCounter('test')
-                batch_counter.calculate_batch.return_value = 1
-                res = test_func(test_object, [(1, 2, 3, 4, 5, 6, 7)])
-
-        profiling_scene.is_operator = is_operator_func
-        self.assertEqual(expect_res, res)
-
     def test_ms_run_when_no_table_exist_then_create_table_and_calculate(self):
         ProfilingScene()._scene = "single_op"
         with mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=False), \
@@ -76,13 +47,3 @@ class TestAcsqCalculator(unittest.TestCase):
 
         with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
             AcsqCalculator(self.file_list, self.sample_config)._get_data_from_task_table()
-
-    def test_filter_aicpu(self):
-        ProfilingScene()._scene = "single_op"
-        prep_data = [
-            (13, 0, 16764098231950, 16764098231970, 'PLACE_HOLDER_SQE', 1, 4294967295),
-            (39716, 2, 16764420628930, 16764422893830, 'AI_CPU', 1, 4294967295)
-        ]
-        with mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict',
-                        return_value={}):
-            AcsqCalculator(self.file_list, self.sample_config)._add_batch_id(prep_data)

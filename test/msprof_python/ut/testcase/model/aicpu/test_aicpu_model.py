@@ -22,9 +22,9 @@ class TestAiCpuModel(TestDirCRBaseModel):
 
     def test_get_ai_cpu_data_within_time_range_by_different_time_staggered_situation(self):
         ai_cpu_data = [
-            [2, 23, 1000, 2000, 1],
-            [2, 24, 3000, 4000, 1],
-            [2, 25, 5000, 6000, 1],
+            [2, 23, 1000, 2000],
+            [2, 24, 3000, 4000],
+            [2, 25, 5000, 6000],
         ]
         model = AiCpuModel(self.PROF_DEVICE_DIR, [DBNameConstant.TABLE_AI_CPU_FROM_TS])
         model.init()

@@ -9,9 +9,9 @@ from msmodel.task_time.hwts_aiv_model import HwtsAivModel
 class TestHwtsAivModel(TestDirCRBaseModel):
     def test_get_hwts_aiv_data_within_time_range_by_different_time_staggered_situation(self):
         hwts_data = [
-            [2, 23, 1000, 2000, "AI_CORE", 1, 1, 1],
-            [2, 24, 3000, 4000, "AI_CORE", 1, 1, 1],
-            [2, 25, 5000, 6000, "AI_CORE", 1, 1, 1],
+            [2, 23, 1000, 2000, "AI_CORE", 1, 1],
+            [2, 24, 3000, 4000, "AI_CORE", 1, 1],
+            [2, 25, 5000, 6000, "AI_CORE", 1, 1],
         ]
         model = HwtsAivModel(self.PROF_DEVICE_DIR, [DBNameConstant.TABLE_HWTS_TASK_TIME])
         model.init()
