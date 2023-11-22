@@ -485,15 +485,13 @@ class TablesConfig(MetaConfig):
             ('memcpy_time', 'REAL, null'),
             ('task_time', 'REAL, null'),
             ('dispatch_time', 'REAL, null'),
-            ('total_time', 'REAL, null'),
-            ('batch_id', 'INTEGER,null')
+            ('total_time', 'REAL, null')
         ],
         'AiCpuFromTsMap': [
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('sys_start', 'INTEGER, null'),
-            ('sys_end', 'INTEGER, null'),
-            ('batch_id', 'INTEGER,null')
+            ('sys_end', 'INTEGER, null')
         ],
         'CpuInfoMap': [
             ('cpu_num', 'INTEGER, null'),
@@ -559,7 +557,6 @@ class TablesConfig(MetaConfig):
             ('task_type', 'text,null'),
             ('index_id', 'INTEGER,null'),
             ('model_id', 'INTEGER,null'),
-            ('batch_id', 'INTEGER,null')
         ],
         'HwtsIterMap': [
             ('iter_id', 'INTEGER,null'),
@@ -628,8 +625,7 @@ class TablesConfig(MetaConfig):
             ('task_time', 'INTEGER,null'),
             ('task_type', 'TEXT,null'),
             ('index_id', 'INTEGER,null'),
-            ('model_id', 'INTEGER,null'),
-            ('batch_id', 'INTEGER,null')
+            ('model_id', 'INTEGER,null')
         ],
         'FftsLogMap': [
             ('stream_id', 'INTEGER,null'),

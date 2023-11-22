@@ -156,9 +156,6 @@ class ParseAiCpuData(MsMultiProcess):
         ai_cpu_data[8] = float(dispatch_time.split(" ")[0]) / NumberConstant.MS_TO_US
         ai_cpu_data[9] = float(total_time.split(" ")[0]) / NumberConstant.MS_TO_US
 
-        # timers -1 is end timestamp syscnt; ai cpu data 0 is stream; ai cpu data 1 is task
-        ai_cpu_data.append(self.__calculate_batch_id(ai_cpu_data[0], ai_cpu_data[1], timers[-1]))
-
         return ai_cpu_data
 
     def __insert_data(self: any) -> None:
@@ -238,11 +235,3 @@ class ParseAiCpuData(MsMultiProcess):
 
         ai_cpu_data = self._calculate_ai_cpu_data(ai_cpu_datas, timers)
         self.ai_cpu_datas.append(ai_cpu_data)
-
-    def __calculate_batch_id(self: any, stream_id: int, task_id: int, syscnt: int) -> int:
-        if not ProfilingScene().is_operator():
-            self._iter_recorder.set_current_iter_id(syscnt)
-            batch_id = self._batch_counter.calculate_batch(stream_id, task_id, self._iter_recorder.current_iter_id)
-        else:
-            batch_id = self._batch_counter.calculate_batch(stream_id, task_id)
-        return batch_id

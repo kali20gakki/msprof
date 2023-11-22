@@ -38,7 +38,6 @@ class AICpuFromTsCollector:
         """
         stream_id, task_id, start, end, task_type = aicpu_feature
         if task_type == self.AI_CPU_TYPE:
-            batch_id = NumberConstant.DEFAULT_BATCH_ID
             start_ms = InfoConfReader().time_from_syscnt(start)
             end_ms = InfoConfReader().time_from_syscnt(end)
             if not ChipManager().is_chip_v1():
@@ -48,18 +47,7 @@ class AICpuFromTsCollector:
             self.aicpu_list.append([int(stream_id),
                                     int(task_id),
                                     start_ms,
-                                    end_ms,
-                                    batch_id])
-
-    def filter_aicpu_for_stars(self: any, aicpu_feature: tuple, iter_id: int = NumberConstant.INVALID_ITER_ID) -> None:
-        """
-        filter ai cpu for stars chip
-        :param aicpu_feature: aicpu feature
-        :param iter_id: current iter id
-        """
-        task_id, stream_id, *args = aicpu_feature
-        batch_id = self._batch_counter.calculate_batch(stream_id, task_id, iter_id)
-        self.aicpu_list.append(aicpu_feature + (batch_id,))
+                                    end_ms])
 
     def save_aicpu(self: any) -> None:
         """
@@ -70,18 +58,3 @@ class AICpuFromTsCollector:
             return
         with self._aicpu_model:
             self._aicpu_model.flush(self.aicpu_list, DBNameConstant.TABLE_AI_CPU_FROM_TS)
-
-    def calculate_batch_id(self: any, stream_id: int, task_id: int, syscnt: int) -> int:
-        """
-        calculate batch id
-        :param stream_id: stream id
-        :param task_id: task id
-        :param syscnt: syscnt
-        :return: batch id
-        """
-        if ProfilingScene().is_operator():
-            batch_id = self._batch_counter.calculate_batch(stream_id, task_id)
-        else:
-            self._iter_recorder.set_current_iter_id(syscnt)
-            batch_id = self._batch_counter.calculate_batch(stream_id, task_id, self._iter_recorder.current_iter_id)
-        return batch_id

@@ -60,20 +60,15 @@ class HwtsAivCalculator(HwtsCalculator):
         if self._log_data:
             self._hwts_aiv_model.init()
             self._hwts_aiv_model.flush_data(Utils.obj_list_to_list(self._log_data), DBNameConstant.TABLE_HWTS_TASK)
-            self._hwts_aiv_model.flush_data(self._add_batch_id(self._prep_data()), DBNameConstant.TABLE_HWTS_TASK_TIME)
+            self._hwts_aiv_model.flush_data(self._reform_data(self._prep_data()), DBNameConstant.TABLE_HWTS_TASK_TIME)
             self._hwts_aiv_model.finalize()
 
-    def _add_batch_id(self: any, prep_data_res: list) -> list:
-        batch_counter = BatchCounter(self._project_path)
-        batch_counter.init(Constant.TASK_TYPE_AIV)
+    def _reform_data(self: any, prep_data_res: list) -> list:
         for index, datum in enumerate(prep_data_res):
-            # index 0 stream id, index 1 task id
-            batch_id = batch_counter.calculate_batch(datum[0], datum[1])
             prep_data_res[index] = list(datum[:2]) + [
                 InfoConfReader().time_from_syscnt(datum[2]),
                 InfoConfReader().time_from_syscnt(datum[3]),
                 datum[-1],
                 self._iter_range.iteration_id,
-                self._iter_range.model_id,
-                batch_id]
+                self._iter_range.model_id]
         return prep_data_res

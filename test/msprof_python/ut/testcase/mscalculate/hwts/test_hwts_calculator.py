@@ -91,7 +91,7 @@ class TestHwtsCalculator(unittest.TestCase):
             check._log_data.append(HwtsLogBean.decode(end_3_5))
             check._prep_data()
 
-    def test_add_batch_id(self):
+    def test__reform_data(self):
         prep_data_res = [[1, 2, 1, 2], [3, 4, 3, 4]]
         InfoConfReader()._info_json = {'pid': 1, "DeviceInfo": [{'hwts_frequency': 1000}]}
 
@@ -110,7 +110,7 @@ class TestHwtsCalculator(unittest.TestCase):
             check = HwtsCalculator(self.file_list, CONFIG)
 
             ProfilingScene()._scene = Constant.SINGLE_OP
-            res = check._add_batch_id(prep_data_res)
+            res = check._reform_data(prep_data_res)
             self.assertEqual(len(res), 2)
 
             model_mock = mock.Mock
@@ -120,6 +120,17 @@ class TestHwtsCalculator(unittest.TestCase):
             hwts_iter_model.init = mock.Mock(return_value=None)
             hwts_iter_model.get_batch_list = mock.Mock(return_value=[[0], [0]])
             check._iter_model = hwts_iter_model
-            ProfilingScene()._scene = Constant.STEP_INFO
-            res = check._add_batch_id(prep_data_res)
+            with mock.patch(NAMESPACE + '.HwtsCalculator.is_need_parse_all_file', return_value=False):
+                res = check._reform_data(prep_data_res)
         self.assertEqual(len(res), 2)
+
+    def test_save(self):
+        check = HwtsCalculator(self.file_list, CONFIG)
+        check._log_data = [[1, 2, 1, 2], [3, 4, 3, 4]]
+        with mock.patch("msmodel.task_time.hwts_log_model.HwtsLogModel.init"), \
+                mock.patch("msmodel.task_time.hwts_log_model.HwtsLogModel.flush"), \
+                mock.patch("msmodel.task_time.hwts_log_model.HwtsLogModel.finalize"), \
+                mock.patch("common_func.utils.Utils.obj_list_to_list"), \
+                mock.patch(NAMESPACE + ".HwtsCalculator._reform_data"), \
+                mock.patch(NAMESPACE + ".HwtsCalculator._prep_data"):
+            check.save()

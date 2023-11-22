@@ -54,7 +54,7 @@ class AcsqCalculator(ICalculator, MsMultiProcess):
         """
         if self._log_data:
             self._acsq_model.init()
-            self._acsq_model.flush_task_time(self._add_batch_id(self._prep_data()))
+            self._acsq_model.flush_task_time(self._prep_data())
             self._acsq_model.finalize()
 
     def ms_run(self: any) -> None:
@@ -104,25 +104,3 @@ class AcsqCalculator(ICalculator, MsMultiProcess):
         with self._acsq_model as model:
             acsq_data = DBManager.fetch_all_data(model.cur, sql)
         self._log_data.extend(acsq_data)
-
-    def _add_batch_id(self: any, prep_data_res: list) -> list:
-        if ProfilingScene().is_operator():
-            current_iter_id = NumberConstant.INVALID_ITER_ID
-        else:
-            iter_range = MsprofIteration(self._project_path).get_parallel_iter_range(self._iter_range)
-            current_iter_id = min(iter_range)
-
-        batch_counter = BatchCounter(self._project_path)
-        batch_counter.init(Constant.TASK_TYPE_AI_CORE)
-        res_data = []
-        for datum in prep_data_res:
-            if len(datum) != self.PREP_DATA_LENGTH:
-                return []
-            stream_id = datum[1]
-            task_id = datum[0]
-            if datum[4] == Constant.TASK_TYPE_AI_CPU:
-                self._aicpu_collector.filter_aicpu_for_stars(datum, current_iter_id)
-                continue
-            batch_id = batch_counter.calculate_batch(stream_id, task_id, current_iter_id)
-            res_data.append(datum + (batch_id,))
-        return res_data + self._aicpu_collector.aicpu_list

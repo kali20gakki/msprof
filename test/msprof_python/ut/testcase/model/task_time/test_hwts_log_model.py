@@ -22,9 +22,9 @@ class TestHwtsLogModel(TestDirCRBaseModel):
 
     def test_get_hwts_data_within_time_range_by_different_time_staggered_situation(self):
         hwts_data = [
-            [2, 23, 1000, 2000, "AI_CORE", 1, 1, 1],
-            [2, 24, 3000, 4000, "AI_CORE", 1, 1, 1],
-            [2, 25, 5000, 6000, "AI_CORE", 1, 1, 1],
+            [2, 23, 1000, 2000, "AI_CORE", 1, 1],
+            [2, 24, 3000, 4000, "AI_CORE", 1, 1],
+            [2, 25, 5000, 6000, "AI_CORE", 1, 1],
         ]
         model = HwtsLogModel(self.PROF_DEVICE_DIR)
         model.init()

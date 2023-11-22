@@ -78,10 +78,7 @@ class ParseAiCpuBinData(MsMultiProcess):
                          ai_cpu.ai_cpu_time_consuming.memory_copy_time,
                          ai_cpu.ai_cpu_time_consuming.ai_cpu_task_time,
                          ai_cpu.ai_cpu_time_consuming.dispatch_time,
-                         ai_cpu.ai_cpu_time_consuming.total_time,
-                         self.__calculate_batch_id(
-                             ai_cpu.stream_id, ai_cpu.task_id,
-                             ai_cpu.ai_cpu_time_consuming.ai_cpu_task_end_syscnt)])
+                         ai_cpu.ai_cpu_time_consuming.total_time])
                 else:
                     self._overstep_task_cnt = self._overstep_task_cnt + 1
             struct_nums -= 1
@@ -128,11 +125,3 @@ class ParseAiCpuBinData(MsMultiProcess):
             self.save()
         except sqlite3.Error as task_rec_err:
             logging.error(str(task_rec_err), exc_info=Constant.TRACE_BACK_SWITCH)
-
-    def __calculate_batch_id(self: any, stream_id: int, task_id: int, syscnt: int) -> int:
-        if ProfilingScene().is_operator():
-            batch_id = self._batch_counter.calculate_batch(stream_id, task_id)
-        else:
-            self._iter_recorder.set_current_iter_id(syscnt)
-            batch_id = self._batch_counter.calculate_batch(stream_id, task_id, self._iter_recorder.current_iter_id)
-        return batch_id
