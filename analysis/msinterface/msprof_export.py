@@ -4,11 +4,14 @@
 
 import json
 import logging
+import multiprocessing
 import os
 import shutil
 
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
+from common_func.common import call_sys_exit
 from common_func.common import error
+from common_func.common import init_log
 from common_func.common import print_info
 from common_func.common import warn
 from common_func.config_mgr import ConfigMgr
@@ -29,18 +32,19 @@ from common_func.msprof_common import prepare_for_parse
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import check_dir_writable
 from common_func.path_manager import PathManager
+from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
 from common_func.system_data_check_manager import SystemDataCheckManager
 from common_func.utils import Utils
-from common_func.common import call_sys_exit
-from common_func.platform.chip_manager import ChipManager
 from framework.file_dispatch import FileDispatch
 from framework.load_info_manager import LoadInfoManager
 from msinterface.msprof_export_data import MsProfExportDataUtils
 from msinterface.msprof_job_summary import MsprofJobSummary
 from msinterface.msprof_output_summary import MsprofOutputSummary
 from msinterface.msprof_timeline import MsprofTimeline
+from msmodel.compact_info.task_track_model import TaskTrackModel
 from msmodel.step_trace.ts_track_model import TsTrackModel
+from msparser.step_trace.ts_binary_data_reader.task_flip_bean import TaskFlip
 from profiling_bean.db_dto.hwts_rec_dto import HwtsRecDto
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
@@ -49,8 +53,6 @@ from tuning.cluster.cluster_tuning_facade import ClusterTuningFacade
 from tuning.cluster_tuning import ClusterTuning
 from tuning.profiling_tuning import ProfilingTuning
 from viewer.tuning_view import TuningView
-from msmodel.compact_info.task_track_model import TaskTrackModel
-from msparser.step_trace.ts_binary_data_reader.task_flip_bean import TaskFlip
 
 
 class ExportCommand:
@@ -282,6 +284,12 @@ class ExportCommand:
         for host_f, device_f in zip(host_flip, device_flip):
             if host_f.flip_num != device_f.flip_num:
                 logging.warning("The flip is not consistent between host and device")
+
+    @staticmethod
+    def _process_init(result_dir, is_all_export):
+        init_log(result_dir)
+        LoadInfoManager.load_info(result_dir)
+        ProfilingScene().set_all_export(is_all_export)
 
     def process(self: any) -> None:
         """
@@ -551,6 +559,17 @@ class ExportCommand:
             check_dir_writable(dir_name)
             shutil.rmtree(dir_name)
 
+    def _multiprocessing_handle_export_data(self: any, event, result_dir, is_all_export):
+        ExportCommand._process_init(result_dir, is_all_export)
+        self._handle_export_output_data(event, result_dir)
+
+    def _handle_export_output_data(self: any, event, result_dir):
+        if not self.list_map.get('devices_list', []):
+            self._export_data(event, None, result_dir)
+            return
+        for device_id in self.list_map.get('devices_list', []):
+            self._export_data(event, int(device_id), result_dir)
+
     def _handle_export(self: any, result_dir: str) -> None:
         try:
             self._prepare_export(result_dir)
@@ -561,13 +580,19 @@ class ExportCommand:
                 warn(MsProfCommonConstant.COMMON_FILE_NAME,
                      'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
             return
+        processes = []
+        is_all_export = ProfilingScene().is_all_export()
         try:
             for event in self.list_map.get('export_type_list', []):
-                if not self.list_map.get('devices_list', []):
-                    self._export_data(event, None, result_dir)
+                if self.command_type == MsProfCommonConstant.TIMELINE:
+                    self._handle_export_output_data(event, result_dir)
                     continue
-                for device_id in self.list_map.get('devices_list', []):
-                    self._export_data(event, int(device_id), result_dir)
+                process = multiprocessing.Process(target=self._multiprocessing_handle_export_data,
+                                                      args=(event, result_dir, is_all_export))
+                process.start()
+                processes.append(process)
+                for process in processes:
+                    process.join()
         except ProfException as err:
             if err.message:
                 err.callback(MsProfCommonConstant.COMMON_FILE_NAME, err.message)
