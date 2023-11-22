@@ -422,6 +422,65 @@ int32_t ProfNpuMemJob::SetPeripheralConfig()
 }
 
 /*
+ * @berif  : Collect Npu Module Memory profiling data
+ */
+ProfNpuModuleMemJob::ProfNpuModuleMemJob()
+{
+    channelId_ = PROF_CHANNEL_NPU_MODULE_MEM;
+}
+
+ProfNpuModuleMemJob::~ProfNpuModuleMemJob() {}
+
+/*
+ * @berif  : Npu Module Memory Peripheral Init profiling
+ * @param  : cfg : Collect data config infomation
+ * @return : PROFILING_FAILED(-1) :failed
+ *       : PROFILING_SUCCESS(0) : success
+ */
+int ProfNpuModuleMemJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    if (cfg->comParams->params->host_profiling) {
+        return PROFILING_FAILED;
+    }
+    collectionJobCfg_ = cfg;
+    if (collectionJobCfg_->comParams->params->npuModuleMemProfiling.compare(MSVP_PROF_ON) != 0 ||
+        collectionJobCfg_->comParams->params->hardware_mem.compare(MSVP_PROF_ON) != 0) {
+        MSPROF_LOGI("Npu Module Memory not enabled.");
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
+}
+
+/*
+ * @berif  : Npu Module Memory Peripheral Set Config to Driver
+ * @param  : None
+ * @return : PROFILING_FAILED(-1) : failed
+ *         : PROFILING_SUCCESS(0) : success
+ */
+int32_t ProfNpuModuleMemJob::SetPeripheralConfig()
+{
+    samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->hardware_mem_sampling_interval);
+    uint32_t configSize = sizeof(TagMemProfileConfig);
+    TagMemProfileConfig *configP = reinterpret_cast<TagMemProfileConfig *>(Utils::ProfMalloc(configSize));
+    if (configP == nullptr) {
+        MSPROF_LOGE("ProfNpuModuleMemJob ProfMalloc TagMemProfileConfig failed");
+        return PROFILING_FAILED;
+    }
+
+    configP->period = samplePeriod_;
+    configP->res1 = 0;
+    configP->res2 = 0;
+    configP->event = 0;
+
+    peripheralCfg_.configP = configP;
+    peripheralCfg_.configSize = configSize;
+    return PROFILING_SUCCESS;
+}
+
+    /*
  * @berif  : Collect milan frequency conversion data
  */
 ProfLpmFreqConvJob::ProfLpmFreqConvJob()

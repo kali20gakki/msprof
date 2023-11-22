@@ -156,6 +156,7 @@ extern "C" {
 #define CHANNEL_DVPP_VPC (139)   /* add for ascend610 */
 #define CHANNEL_DVPP_PNG (140)   /* add for ascend610 */
 #define CHANNEL_DVPP_SCD (141)   /* add for ascend610 */
+#define CHANNEL_NPU_MODULE_MEM (142)
 #define CHANNEL_IDS_MAX CHANNEL_NUM
 
 #define PROF_NON_REAL 0

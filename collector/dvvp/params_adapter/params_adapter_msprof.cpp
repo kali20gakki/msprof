@@ -317,6 +317,7 @@ void ParamsAdapterMsprof::SetParamsSelf()
         params_->exportModelId : paramContainer_[INPUT_CFG_MODEL_ID];
     params_->msprofBinPid = Utils::GetPid();
     params_->npuAppMemProfiling = (msprofMode_ == MsprofMode::MSPROF_MODE_SYSTEM) ? "off" : "on";
+    params_->npuModuleMemProfiling = (msprofMode_ == MsprofMode::MSPROF_MODE_SYSTEM) ? "off" : "on";
 }
 
 int ParamsAdapterMsprof::SystemToolsIsExist() const

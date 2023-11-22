@@ -419,6 +419,50 @@ TEST_F(JOB_WRAPPER_PROF_NPU_MEM_JOB_TEST, SetPeripheralConfig)
     EXPECT_EQ(PROFILING_SUCCESS, proNpuAppJob->SetPeripheralConfig());
 }
 
+class JOB_WRAPPER_PROF_NPU_MODULE_MEM_JOB_TEST : public testing::Test {
+public:
+    std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
+protected:
+    virtual void SetUp()
+    {
+        collectionJobCfg_ = std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCfg>();
+        std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
+            new analysis::dvvp::message::ProfileParams);
+        std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx(
+            new analysis::dvvp::message::JobContext);
+        auto comParams = std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCommonParams>();
+        comParams->params = params;
+        comParams->jobCtx = jobCtx;
+        collectionJobCfg_->comParams = comParams;
+        collectionJobCfg_->jobParams.events = std::make_shared<std::vector<std::string> >(0);
+    }
+    virtual void TearDown()
+    {
+        collectionJobCfg_.reset();
+    }
+};
+
+TEST_F(JOB_WRAPPER_PROF_NPU_MODULE_MEM_JOB_TEST, Init)
+{
+    GlobalMockObject::verify();
+
+    auto profNpuModuleJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfNpuModuleMemJob>();
+    profNpuModuleJob->Init(collectionJobCfg_);
+    EXPECT_EQ(PROFILING_FAILED, profNpuModuleJob->Init(collectionJobCfg_));
+    collectionJobCfg_->comParams->params->hardware_mem = "on";
+    EXPECT_EQ(PROFILING_SUCCESS, profNpuModuleJob->Init(collectionJobCfg_));
+    collectionJobCfg_->comParams->params->host_profiling = true;
+    EXPECT_EQ(PROFILING_FAILED, profNpuModuleJob->Init(collectionJobCfg_));
+}
+
+TEST_F(JOB_WRAPPER_PROF_NPU_MODULE_MEM_JOB_TEST, SetPeripheralConfig)
+{
+    GlobalMockObject::verify();
+    auto profNpuModuleJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfNpuModuleMemJob>();
+    profNpuModuleJob->Init(collectionJobCfg_);
+    EXPECT_EQ(PROFILING_SUCCESS, profNpuModuleJob->SetPeripheralConfig());
+}
+
 class JOB_WRAPPER_PROF_LLC_JOB_TEST: public testing::Test {
 protected:
     virtual void SetUp() {
