@@ -138,7 +138,7 @@ class ClusterSingleLinkCalculator(MsMultiProcess):
                 continue
             if hccl_data.transport_type in Constant.LINK_TYPE_LIST:
                 self.link_dict.setdefault(hccl_data.transport_type, []). \
-                    append([float(hccl_data.bandwidth), hccl_data.src_rank, hccl_data.dst_rank])
+                    append([float(hccl_data.bandwidth), hccl_data.local_rank, hccl_data.remote_rank])
 
     def calculate(self: any) -> None:
         """
