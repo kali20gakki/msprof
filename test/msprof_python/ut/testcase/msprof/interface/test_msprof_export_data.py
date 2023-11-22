@@ -65,11 +65,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         configs = {"db": 'runtime.db', "table": '123'}
         params = {"export_type": "timeline", "job_id": '1', "device_id": '1',
                   "iter_id": '1', "project": '1'}
-        expected = json.dumps({
-            "status": NumberConstant.WARN,
-            "info": "Can not export task time data, the current chip does not support "
-                    "exporting this data or the data may be not collected."
-        })
+        expected = []
         InfoConfReader()._info_json = {"devices": 123}
         key = MsProfExportDataUtils()
         result = key._get_task_time_data(configs, params)

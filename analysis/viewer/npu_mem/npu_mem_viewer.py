@@ -11,6 +11,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
+from common_func.msvp_common import format_high_precision_for_csv
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from msmodel.npu_mem.npu_mem_model import NpuMemModel
@@ -43,11 +44,14 @@ class NpuMemViewer:
             summary_data = self._model.get_summary_data()
             if summary_data:
                 summary_data = [[self._npu_mem_events.get(datum.event),
-                                 datum.ddr / NumberConstant.KILOBYTE,
-                                 datum.hbm / NumberConstant.KILOBYTE,
-                                 datum.memory / NumberConstant.KILOBYTE,
-                                 InfoConfReader().trans_into_local_time(
-                                     InfoConfReader().get_host_time_by_sampling_timestamp(datum.timestamp))
+                                 round(datum.ddr / NumberConstant.KILOBYTE, NumberConstant.ROUND_THREE_DECIMAL),
+                                 round(datum.hbm / NumberConstant.KILOBYTE, NumberConstant.ROUND_THREE_DECIMAL),
+                                 round(datum.memory / NumberConstant.KILOBYTE, NumberConstant.ROUND_THREE_DECIMAL),
+                                 format_high_precision_for_csv(
+                                     InfoConfReader().trans_into_local_time(
+                                         raw_timestamp=InfoConfReader().get_host_time_by_sampling_timestamp(
+                                             datum.timestamp), use_us=True))
+
                                  ]
                                 for datum in summary_data]
                 return self._configs.get(StrConstant.CONFIG_HEADERS), summary_data, len(summary_data)
@@ -71,7 +75,8 @@ class NpuMemViewer:
             column_trace_data = []
             for datum in timeline_data:
                 timestamp = InfoConfReader().trans_into_local_time(
-                                    InfoConfReader().get_host_time_by_sampling_timestamp(datum.timestamp))
+                    raw_timestamp=InfoConfReader().get_host_time_by_sampling_timestamp(datum.timestamp),
+                    use_us=True)
                 column_trace_data.append(['{}/DDR'.format(self._npu_mem_events.get(datum.event)), timestamp,
                                           pid, tid, OrderedDict([("KB", datum.ddr / NumberConstant.KILOBYTE)])])
                 column_trace_data.append(['{}/HBM'.format(self._npu_mem_events.get(datum.event)), timestamp,

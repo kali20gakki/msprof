@@ -16,10 +16,11 @@ class ReportHcclStatisticData:
 
     @staticmethod
     def _get_hccl_op_report_sql() -> str:
-        sql = "select op_type,  occurrences, total_time/{NS_TO_US}, " \
-              "min/{NS_TO_US}, avg/{NS_TO_US}, max/{NS_TO_US}, ratio from {0} " \
-              "order by total_time desc " \
-            .format(DBNameConstant.TABLE_HCCL_OP_REPORT, NS_TO_US=NumberConstant.NS_TO_US)
+        sql = "select op_type,  occurrences, round(total_time/{NS_TO_US}, {accuracy}), " \
+              "round(min/{NS_TO_US}, {accuracy}), round(avg/{NS_TO_US}, {accuracy}), round(max/{NS_TO_US}, " \
+              "{accuracy}), round(ratio, {accuracy}) from {0} order by total_time desc " \
+            .format(DBNameConstant.TABLE_HCCL_OP_REPORT, NS_TO_US=NumberConstant.NS_TO_US,
+                    accuracy=NumberConstant.ROUND_THREE_DECIMAL)
         return sql
 
     @classmethod
@@ -40,4 +41,3 @@ class ReportHcclStatisticData:
         data = DBManager.fetch_all_data(curs, sql)
         DBManager.destroy_db_connect(conn, curs)
         return headers, data, len(data)
-

@@ -268,7 +268,7 @@ class CoreCpuReduceViewer:
                         _key_for_ops, rts_task_type, Constant.TASK_TYPE_OTHER)),
                 NumberConstant.TASK_TIME_PID,
                 sql_data[0],
-                InfoConfReader().trans_into_local_time(float(sql_data[2]), NumberConstant.NANO_SECOND),
+                InfoConfReader().trans_into_local_time(float(sql_data[2])),
                 int(sql_data[3]) / DBManager.NSTOUS if sql_data[3] > 0 else 0,
                 trace_data_args
             ]
@@ -297,7 +297,8 @@ class CoreCpuReduceViewer:
                     (cls._get_task_trace_value(_key_for_ops, op_names),
                      cls.TRACE_PID_MAP.get(TraceViewHeaderConstant.PROCESS_AI_CPU, 0),
                      InfoConfReader().get_json_tid_data(),
-                     InfoConfReader().trans_into_local_time(float(sys_start), NumberConstant.MILLI_SECOND),
+                     InfoConfReader().trans_into_local_time(float(sys_start) * NumberConstant.MILLI_SECOND,
+                                                            use_us=True),
                      duration,
                      OrderedDict([("Task Type", "AI_CPU"),
                                   ("Task Time(us)", duration)])))
@@ -351,7 +352,8 @@ class CoreCpuReduceViewer:
                     ("AR {}".format(index), cls.TRACE_PID_MAP.get(TraceViewHeaderConstant.PROCESS_ALL_REDUCE, ""),
                      InfoConfReader().get_json_tid_data(),
                      InfoConfReader().trans_into_local_time(
-                     InfoConfReader().time_from_syscnt(all_reduce[0], time_fmt=NumberConstant.MICRO_SECOND)),
+                     InfoConfReader().time_from_syscnt(all_reduce[0], time_fmt=NumberConstant.MICRO_SECOND),
+                         use_us=True),
                      all_reduce_time,
                      OrderedDict([("Reduce Duration(us)", all_reduce_time)])))
         return all_reduce_datas

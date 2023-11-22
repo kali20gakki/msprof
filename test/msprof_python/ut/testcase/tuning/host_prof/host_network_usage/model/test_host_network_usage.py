@@ -30,7 +30,7 @@ class TsetHostNetworkUsage(unittest.TestCase):
                         return_value=disk_info_list):
             check = HostNetworkUsage(self.result_dir)
             result = check.get_network_usage_data()
-        self.assertEqual(result, {'data': [{'end': 10.001, 'start': 10.0, 'usage': 2}]})
+        self.assertEqual(result, {'data': [{'end': '10.001', 'start': '10.000', 'usage': 2}]})
 
 
 if __name__ == '__main__':

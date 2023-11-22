@@ -114,9 +114,9 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
                 if len(max_iter_tag_list) != 1:
                     continue
                 max_index = max_iter_tag_list[0][0]
-                repeat_aic_info = self.ge_info_model.get_repeat_times_for_target_aic_in_target_index(
+                repeat_time = self.ge_info_model.get_repeat_times_for_target_aic_in_target_index(
                     model_id, max_index, aic_with_stream_task)
-                repeat_times += len(repeat_aic_info)
+                repeat_times += repeat_time
         if repeat_times > 0:
             logging.info("There exists %d aicore datum having same task and stream id in last iteration!", repeat_times)
         return repeat_times

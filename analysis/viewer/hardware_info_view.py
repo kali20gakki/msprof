@@ -15,7 +15,7 @@ from common_func.path_manager import PathManager
 from common_func.utils import Utils
 
 
-def _get_llc_result_data(llc_data: list, sample_config: dict, llc_data_list: list) -> dict:
+def _get_llc_result_data(llc_data: list, sample_config: dict, llc_data_list: int) -> dict:
     result_data = OrderedDict()
     llc_profiling_mode = sample_config.get("llc_profiling")
     result_data['mode'] = llc_profiling_mode
@@ -25,15 +25,17 @@ def _get_llc_result_data(llc_data: list, sample_config: dict, llc_data_list: lis
     llc_data_two = Utils.generator_to_list(i[2] for i in llc_data)
     result_data['table'].append(OrderedDict([("Mode", result_data.get("mode")),
                                              ("Task", "Average"),
-                                             ("Hit Rate(%)", float_calculate(
-                                                 [float_calculate(llc_data_one), llc_data_list], '/')),
-                                             ("Throughput(MB/s)", float_calculate(
-                                                 [float_calculate(llc_data_two), llc_data_list], '/'))]))
+                                             ("Hit Rate(%)", round(sum(llc_data_one) / llc_data_list,
+                                                                   NumberConstant.ROUND_THREE_DECIMAL)),
+                                             ("Throughput(MB/s)", round(sum(llc_data_two) / llc_data_list,
+                                                                        NumberConstant.ROUND_THREE_DECIMAL))]))
     for llc_slice in llc_data:
         result_data['table'].append(OrderedDict([("Mode", result_data.get("mode")),
                                                  ("Task", llc_slice[0]),
-                                                 ("Hit Rate(%)", llc_slice[1] * 100),
-                                                 ("Throughput(MB/s)", llc_slice[2])]))
+                                                 ("Hit Rate(%)", round(llc_slice[1] * 100,
+                                                                       NumberConstant.ROUND_THREE_DECIMAL)),
+                                                 ("Throughput(MB/s)", round(llc_slice[2],
+                                                                            NumberConstant.ROUND_THREE_DECIMAL))]))
     return result_data
 
 

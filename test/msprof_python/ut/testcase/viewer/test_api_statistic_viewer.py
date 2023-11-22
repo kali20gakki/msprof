@@ -143,8 +143,7 @@ class TestApiStatisticViewer(unittest.TestCase):
             ret = check.get_api_statistic_data()
             self.assertEqual((["Level", "API Name", "Time(us)", "Count",
                               "Avg(us)", "Min(us)", "Max(us)", "Variance"],
-                              [(2, 0, 0.014, 2, 0.007, 0.006, 0.008, 1e-06)],
-                              1), ret)
+                              [(2, 0, 0.014, 2, 0.007, 0.006, 0.008, 0)], 1), ret)
 
     def test_get_api_statistic_data_should_return_success_when_data_contains_single_level_and_two_api_name(self):
         config = {

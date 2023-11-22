@@ -6,6 +6,7 @@ Copyright Huawei Technologies Co., Ltd. 2023. All rights reserved.
 """
 import unittest
 from unittest import mock
+from collections import OrderedDict
 
 from common_func.info_conf_reader import InfoConfReader
 from constant.info_json_construct import InfoJson
@@ -49,6 +50,20 @@ class TestApiViewer(unittest.TestCase):
             "model_id": 1,
             "iter_id": 1
         }
+        expect = [
+            OrderedDict([('name', 'process_name'), ('pid', 100), ('tid', 0),
+                         ('args', OrderedDict([('name', 'Api')])), ('ph', 'M')]),
+            OrderedDict([('name', 'thread_name'), ('pid', 100), ('tid', 4),
+                         ('args', OrderedDict([('name', 'Thread 4')])), ('ph', 'M')]),
+            OrderedDict([('name', 'thread_sort_index'), ('pid', 100), ('tid', 4),
+                         ('args', OrderedDict([('sort_index', 4)])), ('ph', 'M')]),
+            OrderedDict([('name', '1'), ('pid', 100), ('tid', 4), ('ts', '20010.000'), ('dur', 30000.0),
+                         ('args', OrderedDict([('Thread Id', 4), ('Mode', 1), ('level', 5), ('id', 6),
+                                               ('item_id', 7), ('connection_id', 8)])), ('ph', 'X')])
+        ]
+
+        InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}]}
+        InfoConfReader()._host_freq = 100
         with mock.patch(NAMESPACE + '.ApiDataViewModel.check_db', return_value=True), \
                 mock.patch(NAMESPACE + '.ApiDataViewModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + ".ApiDataViewModel.get_timeline_data",
@@ -57,15 +72,4 @@ class TestApiViewer(unittest.TestCase):
             InfoConfReader()._local_time_offset = 10.0
             check = ApiViewer(config, params)
             ret = check.get_timeline_data()
-            self.assertEqual([{"name": "process_name",
-                             "pid": 100, "tid": 0,
-                             "args": {"name": "Api"}, "ph": "M"},
-                             {"name": "thread_name",
-                             "pid": 100, "tid": 4,
-                             "args": {"name": "Thread 4"}, "ph": "M"},
-                             {"name": "thread_sort_index", "pid": 100,
-                              "tid": 4, "args": {"sort_index": 4}, "ph": "M"},
-                             {"name": "1", "pid": 100, "tid": 4,
-                             "ts": 10.002, "dur": 0.003, "args":
-                             {"Thread Id": 4, "Mode": 1, "level": 5, "id": 6,
-                             "item_id": 7, "connection_id": 8}, "ph": "X"}], ret)
+            self.assertEqual(expect, ret)

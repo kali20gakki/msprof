@@ -103,7 +103,7 @@ class ClusterDataPreparationParser:
         total_info["empty_queue"] = empty_queue
         total_info["total_time"] = total_time
         total_info["avg_time"] = round(total_time / step_count,
-                                       NumberConstant.ROUND_FOUR_DECIMAL)
+                                       NumberConstant.ROUND_THREE_DECIMAL)
         self._data.setdefault("total_info", total_info)
         self._data.setdefault("data_list", data_list)
 
@@ -159,11 +159,11 @@ class ClusterDataPreparationParser:
         host_total_info.setdefault("step_count", self._host_queue_step_count)
         host_total_info.setdefault("empty_queue", empty_queue_count)
         host_total_info.setdefault("avg_get_time", round(get_time / self._host_queue_step_count,
-                                                         NumberConstant.ROUND_FOUR_DECIMAL))
+                                                         NumberConstant.ROUND_THREE_DECIMAL))
         host_total_info.setdefault("avg_send_time", round(send_time / self._host_queue_step_count,
-                                                          NumberConstant.ROUND_FOUR_DECIMAL))
+                                                          NumberConstant.ROUND_THREE_DECIMAL))
         host_total_info.setdefault("avg_total_time", round((get_time + send_time) / self._host_queue_step_count,
-                                                           NumberConstant.ROUND_FOUR_DECIMAL))
+                                                           NumberConstant.ROUND_THREE_DECIMAL))
         host_total_info.setdefault("mode", self._host_queue_mode)
         self._data.setdefault("host_total_info", host_total_info)
         self._data.setdefault("host_data_list", host_data_list)

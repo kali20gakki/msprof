@@ -7,6 +7,7 @@ from collections import OrderedDict
 from common_func.data_manager import DataManager
 from common_func.db_manager import DBManager
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_number
 from common_func.msvp_constant import MsvpConstant
 from common_func.platform.chip_manager import ChipManager
@@ -34,15 +35,17 @@ def _get_output_event_counter(result: list, core_id: str) -> list:
     tmp = OrderedDict()
     for i in result:
         if i[0] in tmp:
-            tmp[i[0]].append(float(StrConstant.ACCURACY % i[-1]) if is_number(str(i[-1])) else i[-1])
+            tmp[i[0]].append(round(float(i[-1]), NumberConstant.ROUND_THREE_DECIMAL)
+                             if is_number(str(i[-1])) else i[-1])
         else:
-            tmp[i[0]] = [float(StrConstant.ACCURACY % i[-1]) if is_number(str(i[-1])) else i[-1]]
+            tmp[i[0]] = [round(float(i[-1]), NumberConstant.ROUND_THREE_DECIMAL) if is_number(str(i[-1])) else i[-1]]
     remove_redundant(tmp)
     headers = ["Core ID"] + list(tmp.keys())
     headers = AiCoreOpReport.delete_special_tag(headers)
     result = [Utils.generator_to_list("Core{}".format(i[0]) for i in core_id) + ["Average"]]
     try:
-        result.extend((value + [float(StrConstant.ACCURACY % (sum(value) / len(value)))]) for value in tmp.values())
+        result.extend((value + [round(float(sum(value) / len(value)), NumberConstant.ROUND_THREE_DECIMAL)])
+                      for value in tmp.values())
     except ZeroDivisionError:
         return [], []
     else:

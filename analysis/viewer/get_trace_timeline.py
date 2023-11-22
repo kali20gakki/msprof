@@ -52,7 +52,8 @@ class TraceViewer:
             return _result
         for key in list(trace_data.keys()):
             column_trace_data = Utils.generator_to_list(
-                [key, InfoConfReader().trans_into_local_time(TraceViewer._cal_sys_time_us(delta_dev, item)),
+                [key, InfoConfReader().trans_into_local_time(raw_timestamp=TraceViewer._cal_sys_time_us(
+                    delta_dev, item), use_us=True),
                  pid, tid, OrderedDict(list(zip(legend[key], item[1:])))] for item in trace_data[key])
             _result += \
                 TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, column_trace_data)
@@ -99,11 +100,11 @@ def _get_hccs_result(hccs_data: list, trace_parser: any) -> list:
     for _data_item in hccs_data:
         _trace.extend(
             [['Tx', InfoConfReader().trans_into_local_time(int(
-                float(_data_item[0]) + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.NS_TO_US),
+                float(_data_item[0]) + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.NS_TO_US, use_us=True),
               json_data[0], json_data[1],
               OrderedDict([('Tx(MB/s)', _data_item[1])])],
              ['Rx', InfoConfReader().trans_into_local_time(int(
-                float(_data_item[0]) + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.NS_TO_US),
+                float(_data_item[0]) + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.NS_TO_US, use_us=True),
               json_data[0], json_data[1],
               OrderedDict([('Rx(MB/s)', _data_item[2])])]]
         )
@@ -151,22 +152,22 @@ def _get_pcie_data(pcie_data: list, trace_parser: any) -> list:
             # check whether the tmp_data has at least 23 domains.
             trace_data.append(trace_parser.format_trace_data(
                 data_item, "PCIe_post", InfoConfReader().trans_into_local_time(
-                int(data_item[0] + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS),
+                    int(data_item[0] + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS, use_us=True),
                 pid,
                 tid))
             trace_data.append(trace_parser.format_trace_data(
                 data_item, "PCIe_nonpost", InfoConfReader().trans_into_local_time(
-                int(data_item[0] + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS),
+                    int(data_item[0] + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS, use_us=True),
                 pid,
                 tid))
             trace_data.append(trace_parser.format_trace_data(
                 data_item, "PCIe_cpl", InfoConfReader().trans_into_local_time(
-                int(data_item[0] + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS),
+                    int(data_item[0] + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS, use_us=True),
                 pid,
                 tid))
             trace_data.append(trace_parser.format_trace_data(
                 data_item, "PCIe_nonpost_latency", InfoConfReader().trans_into_local_time(
-                int(data_item[0] + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS),
+                    int(data_item[0] + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS, use_us=True),
                 pid,
                 tid))
 
@@ -329,9 +330,8 @@ def _get_aicore_utilization_data(aicore_result: dict, pid: str, tid: str) -> lis
             else:
                 trace_name = 'Core {}'.format(aicore_name)
             trace_data.append(
-                (trace_name,
-                 round(InfoConfReader().trans_into_local_time(float(result_value[0]) * NumberConstant.MS_TIME_RATE),
-                       CommonConstant.ROUND_SIX),
+                (trace_name, InfoConfReader().trans_into_local_time(float(result_value[0]) *
+                                                                    NumberConstant.MS_TIME_RATE, use_us=True),
                  pid,
                  tid,
                  OrderedDict([('Utilization(%)', result_value[1])])))

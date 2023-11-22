@@ -4,6 +4,7 @@
 
 import unittest
 from unittest import mock
+from collections import OrderedDict
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msvp_constant import MsvpConstant
@@ -47,7 +48,7 @@ class TestNpuMemViewer(unittest.TestCase):
             check = NpuMemViewer(config, params)
             ret = check.get_summary_data()
             self.assertEqual((["event", "ddr", "hbm", "timestamp", "memory"],
-                              [['Device', 0.0, 0.0, 0.0, 15.0]],
+                              [['Device', 0.0, 0.0, 0.0, '15.000\t']],
                               1), ret)
 
     def test_get_timeline_data_should_return_empty_when_db_check_fail(self):
@@ -88,13 +89,20 @@ class TestNpuMemViewer(unittest.TestCase):
         }
         NpuMemDtoTuple = CustomizedNamedtupleFactory.generate_named_tuple_from_dto(NpuMemDto, [])
         npu_mem_dto = NpuMemDtoTuple("0", 0, 0, 0, 6)
+        expect = [
+            OrderedDict([('name', 'process_name'), ('pid', 0), ('tid', 0), ('args', OrderedDict([('name', 'NPU_MEM')])),
+                         ('ph', 'M')]),
+            OrderedDict([('name', 'APP/DDR'), ('ts', '16.000'), ('pid', 0), ('tid', 0),
+                         ('args', OrderedDict([('KB', 0.0)])), ('ph', 'C')]),
+            OrderedDict([('name', 'APP/HBM'), ('ts', '16.000'), ('pid', 0), ('tid', 0),
+                         ('args', OrderedDict([('KB', 0.0)])), ('ph', 'C')]),
+            OrderedDict([('name', 'APP/Memory'), ('ts', '16.000'), ('pid', 0), ('tid', 0),
+                         ('args', OrderedDict([('KB', 0.0)])), ('ph', 'C')])
+        ]
+
         with mock.patch(NAMESPACE + '.NpuMemModel.check_db', return_value=True), \
                 mock.patch(NAMESPACE + '.NpuMemModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + '.NpuMemModel.get_timeline_data', return_value=[npu_mem_dto]):
             check = NpuMemViewer(config, params)
             ret = check.get_timeline_data()
-            self.assertEqual([{"name": "process_name", "pid": 0, "tid": 0, "args": {"name": "NPU_MEM"}, "ph": "M"},
-                              {"name": "APP/DDR", "ts": 16.0, "pid": 0, "tid": 0, "args":
-                              {"KB": 0.0}, "ph": "C"}, {"name": "APP/HBM", "ts": 16.0, "pid": 0, "tid": 0,
-                              "args": {"KB": 0.0}, "ph": "C"}, {"name": "APP/Memory", "ts": 16.0, "pid": 0,
-                              "tid": 0, "args": {"KB": 0.0}, "ph": "C"}], ret)
+            self.assertEqual(expect, ret)

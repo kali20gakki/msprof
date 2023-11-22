@@ -30,7 +30,7 @@ class TsetHostDiskUsage(unittest.TestCase):
                         return_value=disk_info_list):
             check = HostDiskUsage(self.result_dir)
             result = check.get_disk_usage_data()
-        self.assertEqual(result, {'data': [{'end': 10.001, 'start': 10.0, 'usage': 5}]})
+        self.assertEqual(result, {'data': [{'end': '10.001', 'start': '10.000', 'usage': 5}]})
 
 
 if __name__ == '__main__':

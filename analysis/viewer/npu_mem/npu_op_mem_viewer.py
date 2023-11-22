@@ -9,6 +9,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
+from common_func.msvp_common import format_high_precision_for_csv
 from msmodel.npu_mem.npu_ai_stack_mem_model import NpuAiStackMemModel
 
 
@@ -24,7 +25,7 @@ class NpuOpMemViewer:
 
     def get_summary_data(self: any) -> tuple:
         """
-        get summary data from npu mem data
+        get summary data from npu mem data and format data for csv output
         :return: summary data
         """
 
@@ -34,17 +35,20 @@ class NpuOpMemViewer:
             return MsvpConstant.MSVP_EMPTY_DATA
         origin_summary_data = self._model.get_table_data(DBNameConstant.TABLE_NPU_OP_MEM)
         if origin_summary_data:
-            self._data = [[datum.name,
-                           datum.size / NumberConstant.KILOBYTE,
-                           InfoConfReader().trans_into_local_time(
-                               InfoConfReader().time_from_host_syscnt(int(datum.allocation_time),
-                                                                      NumberConstant.MICRO_SECOND)),
-                           InfoConfReader().get_host_duration(int(datum.duration),
-                                                              NumberConstant.MICRO_SECOND),
-                           datum.allocation_total_allocated / NumberConstant.KILOBYTE,
-                           datum.allocation_total_reserved / NumberConstant.KILOBYTE,
-                           datum.release_total_allocated / NumberConstant.KILOBYTE,
-                           datum.release_total_reserved / NumberConstant.KILOBYTE,
+            self._data = [[datum.name, round(datum.size / NumberConstant.KILOBYTE, NumberConstant.ROUND_THREE_DECIMAL),
+                           format_high_precision_for_csv(
+                               InfoConfReader().trans_into_local_time(InfoConfReader().time_from_host_syscnt(
+                                   int(datum.allocation_time), NumberConstant.MICRO_SECOND), use_us=True)),
+                           round(InfoConfReader().get_host_duration(int(datum.duration), NumberConstant.MICRO_SECOND),
+                                 NumberConstant.ROUND_THREE_DECIMAL),
+                           round(datum.allocation_total_allocated / NumberConstant.KILOBYTE,
+                                 NumberConstant.ROUND_THREE_DECIMAL),
+                           round(datum.allocation_total_reserved / NumberConstant.KILOBYTE,
+                                 NumberConstant.ROUND_THREE_DECIMAL),
+                           round(datum.release_total_allocated / NumberConstant.KILOBYTE,
+                                 NumberConstant.ROUND_THREE_DECIMAL),
+                           round(datum.release_total_reserved / NumberConstant.KILOBYTE,
+                                 NumberConstant.ROUND_THREE_DECIMAL),
                            datum.device_type]
                           for datum in origin_summary_data]
         return self._configs.get(StrConstant.CONFIG_HEADERS), self._data, len(self._data)

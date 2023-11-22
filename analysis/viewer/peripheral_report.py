@@ -7,7 +7,10 @@ import sqlite3
 from common_func.db_manager import DBManager
 from common_func.get_table_data import GetTableData
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msvp_common import format_high_precision_for_csv
 from common_func.msvp_constant import MsvpConstant
+from common_func.info_conf_reader import InfoConfReader
 
 
 def get_peripheral_dvpp_data(db_path: str, table_name: str, device_id: str, configs: dict) -> tuple:
@@ -50,8 +53,24 @@ def get_peripheral_nic_data(db_path: str, table_name: str, device_id: str, confi
     data = GetTableData.get_table_data_for_device(curs, table_name, device_id)
     try:
         count = GetTableData.get_data_count_for_device(curs, table_name, device_id)
+        data = format_nic_summary(data, configs.get(StrConstant.CONFIG_HEADERS))
         return configs.get(StrConstant.CONFIG_HEADERS), data, count
     except sqlite3.Error:
         return MsvpConstant.MSVP_EMPTY_DATA
     finally:
         DBManager.destroy_db_connect(conn, curs)
+
+
+def format_nic_summary(data: list, headers: list) -> list:
+    round_index_start = headers.index('Bandwidth(MB/s)')
+    round_index_end = headers.index('txDropped rate(%)')
+    timestamp_index = headers.index('Timestamp(us)')
+    format_data = [[] for _ in range(len(data))]
+    for index, line in enumerate(data):
+        line = list(line)
+        line[timestamp_index] = format_high_precision_for_csv(
+            InfoConfReader().trans_into_local_time(line[0]))
+        for i in range(round_index_start, round_index_end + 1):
+            line[i] = round(float(line[i]), NumberConstant.ROUND_THREE_DECIMAL)
+        format_data[index] = line
+    return format_data

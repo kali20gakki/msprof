@@ -7,6 +7,7 @@ from common_func.msvp_constant import MsvpConstant
 from sqlite.db_manager import DBOpen
 from viewer.peripheral_report import get_peripheral_dvpp_data
 from viewer.peripheral_report import get_peripheral_nic_data
+from viewer.peripheral_report import format_nic_summary
 
 NAMESPACE = 'viewer.peripheral_report'
 configs = {"headers": "Dvpp Id,Engine Type,Engine ID,All Time(us),All Frame,All Utilization(%)",
@@ -37,7 +38,8 @@ class TestHardwareInfoView(unittest.TestCase):
             _db_open.insert_data("DvppReportData", data)
             with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path',
                             return_value=(_db_open.db_conn, _db_open.db_curs)), \
-                    mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
+                    mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
+                    mock.patch(NAMESPACE + '.format_nic_summary', return_value=0):
                 res = get_peripheral_dvpp_data('', "DvppReportData", 0, configs)
             self.assertEqual(res[2], 1)
 
@@ -66,9 +68,27 @@ class TestHardwareInfoView(unittest.TestCase):
             _db_open.insert_data("NicReportData", data)
             with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path',
                             return_value=(_db_open.db_conn, _db_open.db_curs)), \
-                    mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
+                    mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
+                    mock.patch(NAMESPACE + '.format_nic_summary', return_value=0):
                 res = get_peripheral_nic_data('', "NicReportData", 0, configs)
             self.assertEqual(res[2], 1)
+
+    def test_format_nic_summary(self):
+        data = [
+            [
+                15082097764880, '8.2', '4.9', '93.2', '44.23465', '34.111234', '34.624',
+                '23.2352415', '77.00000', '28.4212', 1
+            ]
+        ]
+        headers = [
+            'Timestamp(us)', 'Bandwidth(MB/s)', 'Rx Bandwidth efficiency(%)', 'rxPacket/s', 'rxError rate(%)',
+            'rxDropped rate(%)', 'Tx Bandwidth efficiency(%)', 'txPacket/s', 'txError rate(%)', 'txDropped rate(%)',
+            'funcId'
+        ]
+        expect = [['15082097774.880\t', 8.2, 4.9, 93.2, 44.235, 34.111, 34.624, 23.235, 77.0, 28.421, 1]]
+        res = format_nic_summary(data, headers)
+        self.assertEqual(res, expect)
+
 
 
 if __name__ == '__main__':

@@ -26,8 +26,8 @@ class TestMsprofTxViewer(unittest.TestCase):
             result = MsprofTxViewer(self.configs, self.params).get_summary_data()
             self.assertEqual(result, (['pid', ' tid', ' category', ' event_type', ' payload_type',
                                        ' payload_value', ' Start_time', ' End_time', ' message_type', ' message'],
-                                      [(0, 0, 0, 0, 0, 0, 10.0, 10.005, 0, 'test'),
-                                       (0, 1, 0, 0, 1, 0, 10.001, 10.007, 0, 'test')],
+                                      [(0, 0, 0, 0, 0, 0, '10.000', '10.005', 0, 'test'),
+                                       (0, 1, 0, 0, 1, 0, '10.001', '10.007', 0, 'test')],
                                       2))
 
     def test_get_timeline_data(self):
@@ -55,7 +55,7 @@ class TestMsprofTxViewer(unittest.TestCase):
             ("call_stack", 6)
         ])
 
-        trace_data_msproftx = [[7, 8, 9, 10.0, 0.0, expect_res_dict]]
+        trace_data_msproftx = [[7, 8, 9, '10.000', 0.0, expect_res_dict]]
 
         result = MsprofTxViewer.format_data(msproftx_data)
         self.assertEqual(result, trace_data_msproftx)

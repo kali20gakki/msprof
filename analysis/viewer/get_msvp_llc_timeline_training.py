@@ -116,7 +116,8 @@ def _format_llc_trace_data(bandwidth_data: list, delta_dev: float) -> list:
 
         trace_data.extend([["LLC/Read",
                             InfoConfReader().trans_into_local_time(
-                                (delta_dev + _bandwidth_data[0]) * NumberConstant.MICRO_SECOND),
+                                raw_timestamp=(delta_dev + _bandwidth_data[0]) * NumberConstant.MICRO_SECOND,
+                                use_us=True),
                             InfoConfReader().get_json_pid_data(),
                             InfoConfReader().get_json_tid_data(),
                             OrderedDict([("BandWidth(MB/s)", bandwidth_data_value[0]),
@@ -124,7 +125,8 @@ def _format_llc_trace_data(bandwidth_data: list, delta_dev: float) -> list:
                                          ("Hit BandWidth(MB/s)", bandwidth_data_value[2])])],
                            ["LLC/Write",
                             InfoConfReader().trans_into_local_time(
-                                (delta_dev + _bandwidth_data[0]) * NumberConstant.MICRO_SECOND),
+                                raw_timestamp=(delta_dev + _bandwidth_data[0]) * NumberConstant.MICRO_SECOND,
+                                use_us=True),
                             InfoConfReader().get_json_pid_data(),
                             InfoConfReader().get_json_tid_data(),
                             OrderedDict([("BandWidth(MB/s)", bandwidth_data_value[3]),
@@ -170,7 +172,8 @@ def _format_llc_capacity(dsid_sql_data: list) -> list:
     for disid_data in dsid_sql_data:
         trace_data.extend(Utils.generator_to_list(["Core {}".format(i),
                                                    InfoConfReader().trans_into_local_time(
-                                                       (delta_dev + disid_data[4]) * NumberConstant.MICRO_SECOND),
+                                                       raw_timestamp=(delta_dev + disid_data[4]) *
+                                                                     NumberConstant.MICRO_SECOND, use_us=True),
                                                    InfoConfReader().get_json_pid_data(),
                                                    InfoConfReader().get_json_tid_data(),
                                                    OrderedDict([("Capacity(MB)",

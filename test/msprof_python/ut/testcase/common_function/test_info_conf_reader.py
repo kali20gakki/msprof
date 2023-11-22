@@ -60,7 +60,7 @@ class TestInfoConfReader(unittest.TestCase):
 
     def test_trans_into_local_time_should_return_local_time_when_time_fmt_is_not_default(self):
         InfoConfReader()._local_time_offset = 3000.0
-        self.assertEqual(InfoConfReader().trans_into_local_time(3000000000.0, 1000000000.0), 3003000.0)
+        self.assertEqual(InfoConfReader().trans_into_local_time(3000000000.0, use_us=True), '3000003000.000')
 
 
 

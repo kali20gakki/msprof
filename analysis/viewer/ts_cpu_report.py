@@ -39,7 +39,7 @@ class TsCpuReport:
             tmp_res = []
             for key, value in list(top_function.items()):
                 rate = round(float(value) * NumberConstant.PERCENTAGE / total_count,
-                             NumberConstant.DECIMAL_ACCURACY)
+                             NumberConstant.ROUND_THREE_DECIMAL)
                 tmp_res.append((key, value, rate))
             total_data = sorted(tmp_res, key=lambda x: x[1], reverse=True)
         return total_data

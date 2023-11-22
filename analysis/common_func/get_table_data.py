@@ -19,12 +19,11 @@ class GetTableData:
         """
         if not cursor:
             return []
-        search_data_sql = "select duration / {NS_TO_US}+{local_time_offset}, bandwidth, " \
+        search_data_sql = "select duration, bandwidth, " \
                           "rxBandwidth, rxPacket, rxErrorRate, " \
                           "rxDroppedRate, txBandwidth, txPacket, txErrorRate, txDroppedRate, funcId " \
                           "from {0} where device_id={1} order by rowid"\
-                          .format(table_name, device_id, local_time_offset=InfoConfReader().get_local_time_offset(),
-                                  NS_TO_US=NumberConstant.NS_TO_US)
+                          .format(table_name, device_id)
         result = DBManager.fetch_all_data(cursor, search_data_sql)
         if result:
             return result

@@ -47,7 +47,7 @@ class TestNpuModuleMemViewer(TestDirCRBaseModel):
         }
         expected_headers = ['component', 'timestamp', 'total_reserve_memory', 'device_type']
         expected_data = [
-            [200, 10.0, 4096, 'NPU:0']
+            [200, '10.000\t', 4096, 'NPU:0']
         ]
         InfoConfReader()._info_json = {
             'CPU': [{'Frequency': "1000"}]
@@ -74,8 +74,8 @@ class TestNpuModuleMemViewer(TestDirCRBaseModel):
         }
         expected_headers = ['component', 'timestamp', 'total_reserve_memory', 'device_type']
         expected_data = [
-            ['RUNTIME', 10.0, 4096, 'NPU:0'],
-            ['HDC', 11.0, 2048, 'NPU:0']
+            ['RUNTIME', '10.000\t', 4096, 'NPU:0'],
+            ['HDC', '11.000\t', 2048, 'NPU:0']
         ]
         InfoConfReader()._info_json = {
             'CPU': [{'Frequency': "1000"}]

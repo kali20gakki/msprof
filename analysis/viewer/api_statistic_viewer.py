@@ -30,13 +30,13 @@ class ApiStatisticViewer:
         for api_data, duration in data_dict.items():
             api_name = api_data[0]
             level = api_data[1]
-            sum_value = sum(duration)
+            sum_value = round(sum(duration), NumberConstant.ROUND_THREE_DECIMAL)
             count = len(duration)
-            average_value = sum_value / count
-            max_value = max(duration)
-            min_value = min(duration)
-            deviations = [(x - average_value) ** 2 for x in duration]
-            variance = sum(deviations) / count
+            average_value = round(sum_value / count, NumberConstant.ROUND_THREE_DECIMAL)
+            max_value = round(max(duration), NumberConstant.ROUND_THREE_DECIMAL)
+            min_value = round(min(duration), NumberConstant.ROUND_THREE_DECIMAL)
+            deviations = [round((x - average_value) ** 2, NumberConstant.ROUND_THREE_DECIMAL) for x in duration]
+            variance = round(sum(deviations) / count, NumberConstant.ROUND_THREE_DECIMAL)
             reformat_result.append(
                 (
                     level, api_name, sum_value, count, average_value, min_value, max_value, variance

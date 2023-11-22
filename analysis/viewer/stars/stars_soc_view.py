@@ -61,10 +61,12 @@ class StarsSocView:
         for _soc_data in soc_data:
             # _soc_data format: mata_bw_level,l2_buffer_bw_level,sys_time
             soc_res.extend(
-                [[self.MATA_BW_LEVEL, InfoConfReader().trans_into_local_time(_soc_data[2]), self._pid, self._tid,
-                  OrderedDict([(self.MATA_BW_LEVEL, _soc_data[0])])],
-                 [self.L2_BUFFER_BW_LEVEL, InfoConfReader().trans_into_local_time(_soc_data[2]), self._pid, self._tid,
-                  OrderedDict([(self.L2_BUFFER_BW_LEVEL, _soc_data[1])])]
+                [[self.MATA_BW_LEVEL, InfoConfReader().trans_into_local_time(raw_timestamp=_soc_data[2],
+                                                                             use_us=True),
+                  self._pid, self._tid, OrderedDict([(self.MATA_BW_LEVEL, _soc_data[0])])],
+                 [self.L2_BUFFER_BW_LEVEL, InfoConfReader().trans_into_local_time(raw_timestamp=_soc_data[2],
+                                                                                  use_us=True),
+                  self._pid, self._tid, OrderedDict([(self.L2_BUFFER_BW_LEVEL, _soc_data[1])])]
                  ])
         self._timeline_data.extend(TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST,
                                                                        soc_res))

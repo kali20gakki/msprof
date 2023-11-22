@@ -43,7 +43,7 @@ class BiuPerfViewer:
             biu_flow_data = self._model.get_biu_flow_data()
         trace_data = [
             [
-                biu_flow_datum[0], InfoConfReader().trans_into_local_time(biu_flow_datum[1]),
+                biu_flow_datum[0], InfoConfReader().trans_into_local_time(biu_flow_datum[1], use_us=True),
                 biu_flow_datum[2], biu_flow_datum[3], OrderedDict([("flow", biu_flow_datum[4])])
             ] for biu_flow_datum in biu_flow_data
         ]
@@ -55,7 +55,7 @@ class BiuPerfViewer:
         trace_data = [
             [
                 "", biu_cycles_datum[0], biu_cycles_datum[1],
-                InfoConfReader().trans_into_local_time(biu_cycles_datum[2]), biu_cycles_datum[3],
+                InfoConfReader().trans_into_local_time(biu_cycles_datum[2], use_us=True), biu_cycles_datum[3],
                 OrderedDict([("cycle_num", biu_cycles_datum[4]),
                              ("ratio", biu_cycles_datum[5])])
             ]

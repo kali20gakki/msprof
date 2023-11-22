@@ -9,7 +9,7 @@ from collections import OrderedDict
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.msvp_common import float_calculate
+from common_func.msvp_common import float_calculate, format_high_precision_for_csv
 from common_func.utils import Utils
 
 
@@ -93,6 +93,7 @@ def get_hbm_summary_data(project_path: str, device_id: str) -> any:
               ' FROM "HBMbwData"  WHERE device_id = ? GROUP BY hbmid'.format(accuracy=NumberConstant.DECIMAL_ACCURACY)
         data = DBManager.fetch_all_data(curs, sql, (device_id,))
         _insert_hbm_data(data, hbm_id_count)
+        data = _format_hbm_data(data)
         return data
     finally:
         DBManager.destroy_db_connect(conn, curs)
@@ -107,3 +108,17 @@ def _reformat_hbm_data(calculate_value: any) -> any:
         # replace E with e in Scientific counting.
         format_result = format_result.replace("E", "e")
     return format_result
+
+
+def _format_hbm_data(data: list) -> list:
+    hbm_data = [[] for _ in range(len(data))]
+    for index, item in enumerate(data):
+        if not index:
+            hbm_data[index] = list(item)
+            hbm_data[index][1] = format_high_precision_for_csv(item[1]) if item[1] else item[1]
+            hbm_data[index][2] = format_high_precision_for_csv(item[2]) if item[2] else item[2]
+        else:
+            hbm_data[index] = list(item)
+            hbm_data[index][1] = round(item[1], NumberConstant.ROUND_THREE_DECIMAL) if item[1] else item[2]
+            hbm_data[index][2] = round(item[2], NumberConstant.ROUND_THREE_DECIMAL) if item[2] else item[2]
+    return hbm_data

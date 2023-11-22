@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 
 import json
+import logging
 from typing import Dict
 from typing import List
 
@@ -109,7 +110,7 @@ class TaskTimeViewer(BaseViewer):
                 task_data['subtask_data_list'].append(data)
         return task_data
 
-    def get_timeline_data(self: any) -> str:
+    def get_timeline_data(self: any) -> list:
         """
         get model list timeline data
         @return:timeline trace data
@@ -125,11 +126,9 @@ class TaskTimeViewer(BaseViewer):
         trace_tasks = self.get_trace_timeline(timeline_data)
         result.extend(trace_tasks)
         if not result:
-            return json.dumps({
-                "status": NumberConstant.WARN,
-                "info": "Can not export task time data, the current chip does not support "
-                        "exporting this data or the data may be not collected."
-            })
+            logging.warning("Can not export task time data, the current chip does not support "
+                            "exporting this data or the data may be not collected.")
+            return []
         return result
 
     def get_model_instance(self: any) -> any:
@@ -158,7 +157,7 @@ class TaskTimeViewer(BaseViewer):
                 [data.op_name,
                  self.TRACE_PID_MAP.get("Subtask Time", 1),
                  StarsConstant().find_key_by_value(data.device_task_type),
-                 InfoConfReader().trans_into_local_time(data.start_time, NumberConstant.NANO_SECOND),
+                 InfoConfReader().trans_into_local_time(data.start_time),
                  data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
                  {"Stream Id": data.stream_id, "Task Id": data.task_id, 'Batch Id': data.batch_id,
                   "Subtask Id": data.context_id, "connection_id": data.connection_id, }])
@@ -179,7 +178,7 @@ class TaskTimeViewer(BaseViewer):
                  self.TRACE_PID_MAP.get("Thread Task Time", 2),
                  data.thread_id * (max(StarsConstant.SUBTASK_TYPE) + 1) + \
                  StarsConstant().find_key_by_value(data.device_task_type),
-                 InfoConfReader().trans_into_local_time(data.start_time, NumberConstant.NANO_SECOND),
+                 InfoConfReader().trans_into_local_time(data.start_time),
                  data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
                  {"Stream Id": data.stream_id, "Task Id": data.task_id, 'Batch Id': data.batch_id,
                   "Subtask Id": data.context_id,
@@ -204,7 +203,7 @@ class TaskTimeViewer(BaseViewer):
                         data.op_name,
                         self.TRACE_PID_MAP.get("Task Scheduler", 0),
                         data.stream_id,
-                        InfoConfReader().trans_into_local_time(data.start_time, NumberConstant.NANO_SECOND),
+                        InfoConfReader().trans_into_local_time(data.start_time),
                         data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
                         {
                             "Model Id": data.model_id,
@@ -240,7 +239,7 @@ class TaskTimeViewer(BaseViewer):
             setattr(data, 'thread_id', thread_id_dict.get(thread_id_key))
 
     def add_node_name(self: any, data_dict: dict) -> None:
-        node_name_dict, task_type_dict = self.get_ge_data_dict()
+        node_name_dict = self.get_ge_data_dict()
         ffts_plus_set = set()
         for data in data_dict.get("subtask_data_list", []):
             ffts_plus_set.add("{0}-{1}-{2}-{3}".format(
@@ -256,8 +255,8 @@ class TaskTimeViewer(BaseViewer):
                 tradition_list.append(data)
         data_dict["task_data_list"] = tradition_list
 
-    def get_ge_data_dict(self: any) -> tuple:
-        node_dict, task_type_dict = {}, {}
+    def get_ge_data_dict(self: any) -> dict:
+        node_dict = {}
         view_model = ViewModel(self.params.get("project"), DBNameConstant.DB_AICORE_OP_SUMMARY,
                                DBNameConstant.TABLE_GE_TASK)
         view_model.init()
@@ -265,6 +264,4 @@ class TaskTimeViewer(BaseViewer):
         for data in ge_data:
             node_key = "{0}-{1}-{2}-{3}".format(data.task_id, data.stream_id, data.context_id, data.batch_id)
             node_dict[node_key] = data.op_name
-            if data.context_id == NumberConstant.DEFAULT_GE_CONTEXT_ID:
-                task_type_dict[node_key] = data.task_type
-        return node_dict, task_type_dict
+        return node_dict

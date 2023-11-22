@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
 
 import configparser
+import decimal
 import json
 import logging
 import os
@@ -53,6 +54,12 @@ class InfoConfReader:
         self._host_freq = None
         self._dev_cnt = 0
         self._local_time_offset = 0
+
+    @staticmethod
+    def trans_syscnt_into_local_time(raw_timestamp: int) -> str:
+        time_stamp = InfoConfReader().time_from_syscnt(raw_timestamp, NumberConstant.MICRO_SECOND)
+        local_time = InfoConfReader().trans_into_local_time(raw_timestamp=time_stamp, use_us=True)
+        return local_time
 
     @staticmethod
     def __get_json_data(info_json_path: str) -> dict:
@@ -386,19 +393,17 @@ class InfoConfReader:
     def get_ai_core_profiling_mode(self):
         return self._sample_json.get("ai_core_profiling_mode")
 
-    def trans_into_local_time(self: any, raw_timestamp: float, time_fmt: float = NumberConstant.MICRO_SECOND,
-                              use_decimal: bool = False) -> float:
+    def trans_into_local_time(self: any, raw_timestamp: float, use_us: bool = False) -> str:
         """
-        transfer raw time into local time
-        time_fmt: the time format of input raw time
-        :return: local time(us)
+        transfer raw time(ns or us) into local time
+        return: local time(str)
         """
-        if use_decimal:
-            res = Decimal(str(raw_timestamp)) / Decimal(str(time_fmt)) * Decimal(str(NumberConstant.MICRO_SECOND)) + \
-                  Decimal(str(self._local_time_offset))
-            return str(res)
-
-        return raw_timestamp / time_fmt * NumberConstant.MICRO_SECOND + self._local_time_offset
+        if use_us:
+            res = Decimal(str(raw_timestamp)) + Decimal(str(self._local_time_offset))
+        else:
+            res = Decimal(str(raw_timestamp)) / Decimal(NumberConstant.USTONS) + Decimal(str(self._local_time_offset))
+        res = res.quantize(decimal.Decimal('0.000'))
+        return str(res)
 
     def get_local_time_offset(self: any) -> float:
         """

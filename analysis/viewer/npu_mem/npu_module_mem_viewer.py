@@ -9,6 +9,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
+from common_func.msvp_common import format_high_precision_for_csv
 from msmodel.npu_mem.npu_ai_stack_mem_model import NpuAiStackMemModel
 from profiling_bean.prof_enum.data_tag import ModuleName
 
@@ -38,17 +39,23 @@ class NpuModuleMemViewer:
             logging.error("get %s summary data failed in npu module memory viewer, please check.",
                           self._table)
             return MsvpConstant.MSVP_EMPTY_DATA
-        for datum in origin_summary_data:
+        return self._npu_module_mem_reformat(origin_summary_data)
+
+    def _npu_module_mem_reformat(self, data_dict: dict) -> tuple:
+        for datum in data_dict:
             try:
                 module_name = ModuleName(datum.module_id).name
             except ValueError:
                 logging.warning("Invalid module id, please check!")
                 module_name = datum.module_id
             self._data.append([module_name,
-                               InfoConfReader().trans_into_local_time(
-                                   InfoConfReader().time_from_host_syscnt(int(datum.syscnt),
-                                                                          NumberConstant.MICRO_SECOND)),
+                               format_high_precision_for_csv(
+                                   InfoConfReader().trans_into_local_time(
+                                       InfoConfReader().time_from_host_syscnt(int(datum.syscnt),
+                                                                              NumberConstant.MICRO_SECOND),
+                                       use_us=True)),
                                datum.total_size,
                                datum.device_type
                                ])
         return self._configs.get(StrConstant.CONFIG_HEADERS), self._data, len(self._data)
+

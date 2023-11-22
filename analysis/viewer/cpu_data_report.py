@@ -112,7 +112,7 @@ def get_cpu_hot_function(project_path: str, db_name: str, table_name: str, heade
                            "FROM {} where r11 != 0 GROUP BY func,module " \
                            "ORDER BY cycles DESC;".format(NumberConstant.DECIMAL_ACCURACY, table_name)
         cpu_data = DBManager.fetch_all_data(curs, cpu_hot_func_sql, (total_cycles,))
-        data = [rec[:3] + (str(round(rec[3], NumberConstant.DECIMAL_ACCURACY)),) for rec in cpu_data]
+        data = [rec[:3] + (str(round(rec[3], NumberConstant.ROUND_THREE_DECIMAL)),) for rec in cpu_data]
         return headers, data, len(data)
     finally:
         DBManager.destroy_db_connect(conn, curs)

@@ -259,14 +259,14 @@ def byte_per_us2_mb_pers(byte_perus: any) -> any:
     """
     transform byte/us to mb/s
     """
-    return round(byte_perus * Constant.BYTE_US_TO_MB_S, NumberConstant.DECIMAL_ACCURACY)
+    return round(byte_perus * Constant.BYTE_US_TO_MB_S, NumberConstant.ROUND_THREE_DECIMAL)
 
 
 def ns2_us(ns: any) -> any:
     """
     transform ns to us
     """
-    return round(ns / NumberConstant.NS_TO_US, NumberConstant.DECIMAL_ACCURACY)
+    return round(ns / NumberConstant.NS_TO_US, NumberConstant.ROUND_THREE_DECIMAL)
 
 
 def init_log(output_path: str) -> None:

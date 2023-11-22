@@ -45,7 +45,7 @@ class TestNpuOpMemViewer(unittest.TestCase):
             'operator', 'size', 'allocation_time', 'release_time', 'duration', 'allocation_total_allocated',
             'allocation_total_reserved', 'release_total_allocated', 'release_total_reserved', 'device_type', 'name'
         ]
-        expected_data = [['123', 0.0, 10.0, 0.001, 0.0, 0.0, 0.0, 0.0, 'NPU:5']]
+        expected_data = [['123', 0.0, '10.000\t', 0.001, 0.0, 0.0, 0.0, 0.0, 'NPU:5']]
         InfoConfReader()._info_json = {
             'CPU': [{'Frequency': "1000"}]
         }
