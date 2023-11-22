@@ -591,8 +591,8 @@ class ExportCommand:
                                                       args=(event, result_dir, is_all_export))
                 process.start()
                 processes.append(process)
-                for process in processes:
-                    process.join()
+            for process in processes:
+                process.join()
         except ProfException as err:
             if err.message:
                 err.callback(MsProfCommonConstant.COMMON_FILE_NAME, err.message)
