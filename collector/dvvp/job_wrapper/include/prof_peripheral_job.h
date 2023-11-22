@@ -59,6 +59,14 @@ public:
     int SetPeripheralConfig() override;
 };
 
+class ProfNpuModuleMemJob : public ProfPeripheralJob {
+public:
+    ProfNpuModuleMemJob();
+    ~ProfNpuModuleMemJob() override;
+    int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
+    int SetPeripheralConfig() override;
+};
+
 class ProfLpmFreqConvJob : public ProfPeripheralJob {
 public:
     ProfLpmFreqConvJob();
