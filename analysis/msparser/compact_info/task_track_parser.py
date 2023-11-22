@@ -49,7 +49,7 @@ class TaskTrackParser(DataParser, MsMultiProcess):
                 continue
             self._task_track_data.append(data)
         if ChipManager().is_chip_all_data_export() and InfoConfReader().is_all_export_version():
-            FlipCalculator.compute_batch_id(self._task_track_data, self._task_flip_data)
+            self._task_track_data = FlipCalculator.compute_batch_id(self._task_track_data, self._task_flip_data)
         self._task_track_data = [
             [
                 bean.device_id,

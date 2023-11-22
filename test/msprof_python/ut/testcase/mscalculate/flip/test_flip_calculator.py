@@ -15,7 +15,7 @@ class TestFlipCalculator(unittest.TestCase):
     def test_compute_batch_id_should_do_nothing_when_task_data_is_empty(self):
         task_data = []
         flip_data = []
-        FlipCalculator.compute_batch_id(task_data, flip_data)
+        task_data = FlipCalculator.compute_batch_id(task_data, flip_data)
         self.assertEqual(task_data, [])
 
     def test_compute_batch_id_should_set_batch_id_0_when_flip_data_is_empty(self):
@@ -24,7 +24,7 @@ class TestFlipCalculator(unittest.TestCase):
             TaskTrackBean([0, '0', '0', 0, 0, 111111, 0, 1, 2, 1, 1]),
         ]
         flip_data = []
-        FlipCalculator.compute_batch_id(task_data, flip_data)
+        task_data = FlipCalculator.compute_batch_id(task_data, flip_data)
         self.assertEqual(len(task_data), 2)
         self.assertEqual(task_data[0].batch_id, 0)
         self.assertEqual(task_data[1].batch_id, 0)
@@ -51,7 +51,7 @@ class TestFlipCalculator(unittest.TestCase):
             TaskFlip(2, 111132, 0, 1),
             TaskFlip(2, 111141, 3, 65535),  # stream destroy, flip_num=65535
         ]
-        FlipCalculator.compute_batch_id(task_data, flip_data)
+        task_data = FlipCalculator.compute_batch_id(task_data, flip_data)
         self.assertEqual(len(task_data), 10)
         self.assertEqual([data.batch_id for data in task_data[:3]], [0, 0, 0])
         self.assertEqual([data.batch_id for data in task_data[3:5]], [1, 1])
@@ -84,7 +84,7 @@ class TestFlipCalculator(unittest.TestCase):
             TaskFlip(1, 111165, 6, 1),  # report flip 2
             TaskFlip(1, 111175, 10, 65535),  # stream destroy, flip_num=65535
         ]
-        FlipCalculator.compute_batch_id(task_data, flip_data)
+        task_data = FlipCalculator.compute_batch_id(task_data, flip_data)
         self.assertEqual(len(task_data), 13)
         self.assertEqual([data.batch_id for data in task_data[:3]], [0, 0, 0])
         self.assertEqual([data.batch_id for data in task_data[3:9]], [1] * 6)
