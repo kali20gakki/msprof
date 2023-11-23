@@ -146,10 +146,8 @@ class AiCoreOpReport:
             all_float_cols.append("aic_total_time")
             all_float_cols.append("aiv_total_time")
             for index, col in enumerate(columns):
-                if col in all_float_cols:
-                    # keep six decimal places for ai core float data
-                    ai_core_float_cols[index] = "round({0}, {1})".format(col, NumberConstant.ROUND_THREE_DECIMAL)
-
+                # keep three decimal places for ai core float data
+                ai_core_float_cols[index] = "round({0}, {1})".format(col, NumberConstant.ROUND_THREE_DECIMAL)
         return ai_core_float_cols
 
     @classmethod
