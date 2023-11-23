@@ -34,11 +34,13 @@ def get_core_sample_data(result_dir: str, db_name: str, device_id: str, params: 
 def _get_output_event_counter(result: list, core_id: str) -> list:
     tmp = OrderedDict()
     for i in result:
+        i_data = i[-1]
+        if is_number(str(i[-1])):
+            i_data = round(float(i[-1]), NumberConstant.ROUND_THREE_DECIMAL)
         if i[0] in tmp:
-            tmp[i[0]].append(round(float(i[-1]), NumberConstant.ROUND_THREE_DECIMAL)
-                             if is_number(str(i[-1])) else i[-1])
+            tmp[i[0]].append(i_data)
         else:
-            tmp[i[0]] = [round(float(i[-1]), NumberConstant.ROUND_THREE_DECIMAL) if is_number(str(i[-1])) else i[-1]]
+            tmp[i[0]] = [i_data]
     remove_redundant(tmp)
     headers = ["Core ID"] + list(tmp.keys())
     headers = AiCoreOpReport.delete_special_tag(headers)
