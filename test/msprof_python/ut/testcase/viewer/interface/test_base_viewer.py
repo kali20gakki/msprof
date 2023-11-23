@@ -8,25 +8,6 @@ NAMESPACE = 'viewer.interface.base_viewer'
 
 
 class TestBaseViewer(unittest.TestCase):
-
-    def test_get_timeline_data(self):
-        configs = {}
-        params = {'data_type': 'ffts_thread_log', 'export_type': 'timeline'}
-        with mock.patch('msmodel.stars.ffts_log_model.FftsLogModel.check_db', return_value=1),\
-                mock.patch('msmodel.stars.ffts_log_model.FftsLogModel.get_timeline_data',
-                           return_value=[1]), \
-                mock.patch('msmodel.stars.ffts_log_model.FftsLogModel.finalize'), \
-                mock.patch(NAMESPACE + '.BaseViewer.get_trace_timeline', return_value=1):
-            check = BaseViewer(configs, params)
-            check.model_list = {'ffts_thread_log': FftsLogModel}
-            ret = check.get_timeline_data()
-            self.assertEqual(ret, 1)
-        with mock.patch(NAMESPACE + '.BaseViewer.get_model_instance', return_value=None):
-            check = BaseViewer(configs, params)
-            check.model_list = {'ffts_thread_log': FftsLogModel}
-            ret = check.get_timeline_data()
-            self.assertEqual(ret, None)
-
     def test_get_summary_data(self):
         configs = {'headers': [1]}
         params = {'data_type': 'ffts_thread_log'}

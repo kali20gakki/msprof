@@ -27,14 +27,6 @@ class AcsqTaskModel(ParserModel):
         """
         self.insert_data_to_db(DBNameConstant.TABLE_ACSQ_TASK, data_list)
 
-    def flush_task_time(self: any, data_list: list) -> None:
-        """
-        flush acsq task data to db
-        :param data_list:acsq task data list
-        :return: None
-        """
-        self.insert_data_to_db(DBNameConstant.TABLE_ACSQ_TASK_TIME, data_list)
-
     def get_summary_data(self: any) -> list:
         """
         get op_summary data from table

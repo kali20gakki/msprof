@@ -131,12 +131,6 @@ class TaskTimeViewer(BaseViewer):
             return []
         return result
 
-    def get_model_instance(self: any) -> any:
-        """
-        get model instance from list
-        """
-        return FftsLogModel(self.params.get(StrConstant.PARAM_RESULT_DIR), DBNameConstant.DB_SOC_LOG, [])
-
     def get_trace_timeline(self: any, data_list: dict) -> list:
         """
         to format data to chrome trace json

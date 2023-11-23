@@ -42,21 +42,6 @@ class FftsLogModel(ParserModel):
         """
         self.insert_log_data(data_list)
 
-    def get_timeline_data(self: any) -> list:
-        """
-        to get timeline data from database
-        :return: result list
-        """
-        acsq_task_list, thread_data_list, subtask_data_list = [], [], []
-        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_ACSQ_TASK_TIME):
-            return []
-        acsq_task_list = self._get_task_time_data()
-        if DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_FFTS_LOG):
-            thread_data_list = self._get_thread_time_data()
-            subtask_data_list = self._get_subtask_time_data()
-        return [{'acsq_task_list': acsq_task_list, 'thread_data_list': thread_data_list,
-                 'subtask_data_list': subtask_data_list}]
-
     def get_summary_data(self: any) -> list:
         """
         to get timeline data from database
@@ -94,11 +79,6 @@ class FftsLogModel(ParserModel):
             logging.error("get device ffts plus sub task from %s.%s error",
                           DBNameConstant.DB_SOC_LOG, DBNameConstant.TABLE_SUBTASK_TIME)
         return device_tasks
-
-    def _get_task_time_data(self: any) -> list:
-        task_data = self.get_all_data(DBNameConstant.TABLE_ACSQ_TASK_TIME, dto_class=TaskTimeDto)
-        # task_type: place_holder is an invalid type
-        return [task for task in task_data if task.task_type != SqeType.PLACE_HOLDER_SQE.name]
 
     def _get_thread_time_data(self: any) -> list:
         return self.get_all_data(DBNameConstant.TABLE_THREAD_TASK, dto_class=TaskTimeDto)
