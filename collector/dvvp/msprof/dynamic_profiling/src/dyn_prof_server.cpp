@@ -25,15 +25,16 @@ using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Mmpa;
 using namespace analysis::dvvp::common::error;
 
-DyncProfMsgProcSrv::DyncProfMsgProcSrv() : srvStarted_(false), srvSockFd_(-1), cliSockFd_(-1), profHasStarted_(false)
+DynProfServer::DynProfServer() : srvStarted_(false), srvSockFd_(-1), cliSockFd_(-1),
+    profHasStarted_(false), startTimes_(0)
 {
 }
 
-DyncProfMsgProcSrv::~DyncProfMsgProcSrv()
+DynProfServer::~DynProfServer()
 {
 }
 
-int DyncProfMsgProcSrv::Start()
+int DynProfServer::Start()
 {
     MSPROF_LOGI("Dynamic profiling begin to init server.");
     if (srvStarted_) {
@@ -56,7 +57,7 @@ int DyncProfMsgProcSrv::Start()
     return PROFILING_SUCCESS;
 }
 
-int DyncProfMsgProcSrv::Stop()
+int DynProfServer::Stop()
 {
     MSPROF_LOGI("Dynamic profiling begin to stop server.");
     if (!srvStarted_) {
@@ -78,7 +79,7 @@ int DyncProfMsgProcSrv::Stop()
     return PROFILING_SUCCESS;
 }
 
-void DyncProfMsgProcSrv::Run(const struct error_message::Context &errorContext)
+void DynProfServer::Run(const struct error_message::Context &errorContext)
 {
     timeval timeout = {DYN_PROF_SERVER_ACCEPT_WAIT_TIME, 0};
     (void)setsockopt(srvSockFd_, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<CHAR_PTR>(&timeout), sizeof(struct timeval));
@@ -110,7 +111,7 @@ void DyncProfMsgProcSrv::Run(const struct error_message::Context &errorContext)
     }
 }
 
-int DyncProfMsgProcSrv::DynProfServerCreateSock()
+int DynProfServer::DynProfServerCreateSock()
 {
     int sockFd = socket(PF_LOCAL, SOCK_STREAM, 0);
     if (sockFd < 0) {
@@ -149,7 +150,7 @@ int DyncProfMsgProcSrv::DynProfServerCreateSock()
     return PROFILING_SUCCESS;
 }
 
-bool DyncProfMsgProcSrv::IdleConnectOverTime(uint32_t &recvIdleTimes) const
+bool DynProfServer::IdleConnectOverTime(uint32_t &recvIdleTimes) const
 {
     if (profHasStarted_) {
         return false;
@@ -160,7 +161,7 @@ bool DyncProfMsgProcSrv::IdleConnectOverTime(uint32_t &recvIdleTimes) const
     return true;
 }
 
-void DyncProfMsgProcSrv::DynProfServerProcMsg()
+void DynProfServer::DynProfServerProcMsg()
 {
     std::string disconnTips;
     DynProfReqMsg recvMsg;
@@ -212,7 +213,7 @@ void DyncProfMsgProcSrv::DynProfServerProcMsg()
     NotifyClientDisconnet(disconnTips);
 }
 
-void DyncProfMsgProcSrv::DynProfSrvProcStart()
+void DynProfServer::DynProfSrvProcStart()
 {
     if (profHasStarted_) {
         MSPROF_LOGW("Dynamic profiling repeat start.");
@@ -220,7 +221,7 @@ void DyncProfMsgProcSrv::DynProfSrvProcStart()
         return;
     }
 
-    if (DynProfMngSrv::instance()->startTimes_ > DYN_PROF_MAX_STARTABLE_TIMES) {
+    if (startTimes_ > DYN_PROF_MAX_STARTABLE_TIMES) {
         MSPROF_LOGE("Dynamic profiling start over %d times.", DYN_PROF_MAX_STARTABLE_TIMES);
         DynProfServerRsqMsg(DynProfMsgType::START_RSP, DynProfMsgProcRes::EXE_FAIL, "Start times over max limit.");
         return;
@@ -242,9 +243,8 @@ void DyncProfMsgProcSrv::DynProfSrvProcStart()
     Msprofiler::Api::ProfAclMgr::instance()->MsprofHostHandle();
     std::string startDevId;
     std::string startSuccDevId;
-    DynProfMngSrv::instance()->startTimes_ += 1;
-    std::vector<ProfSetDevPara> devsInfo = DynProfMngSrv::instance()->GetDeviceInfo();
-    for (auto &devInfo : devsInfo) {
+    startTimes_ += 1;
+    for (auto &devInfo : devicesInfo_) {
         startDevId = startDevId + std::to_string(devInfo.deviceId) + " ";
         if (MsprofSetDeviceCallbackImpl(reinterpret_cast<VOID_PTR>(&devInfo), sizeof(devInfo)) != MSPROF_ERROR_NONE) {
             continue;
@@ -256,7 +256,7 @@ void DyncProfMsgProcSrv::DynProfSrvProcStart()
         MSPROF_LOGE("Dynamic profiling start device failed, allDevId=%s, succDevId=%s.",
             startDevId.c_str(), startSuccDevId.c_str());
         DynProfServerRsqMsg(DynProfMsgType::START_RSP, DynProfMsgProcRes::EXE_FAIL, detailInfo);
-        DynProfMngSrv::instance()->startTimes_ -= 1;
+        startTimes_ -= 1;
         return;
     }
 
@@ -265,7 +265,7 @@ void DyncProfMsgProcSrv::DynProfSrvProcStart()
     DynProfServerRsqMsg(DynProfMsgType::START_RSP, DynProfMsgProcRes::EXE_SUCC, detailInfo);
 }
 
-void DyncProfMsgProcSrv::DynProfSrvProcStop()
+void DynProfServer::DynProfSrvProcStop()
 {
     if (!profHasStarted_) {
         MSPROF_LOGW("Dynamic profiling repeat stop.");
@@ -284,7 +284,7 @@ void DyncProfMsgProcSrv::DynProfSrvProcStop()
     DynProfServerRsqMsg(DynProfMsgType::STOP_RSP, DynProfMsgProcRes::EXE_SUCC, "");
 }
 
-void DyncProfMsgProcSrv::DynProfSrvProcQuit()
+void DynProfServer::DynProfSrvProcQuit()
 {
     std::string detailInfo;
     DynProfMsgProcRes rsqCode = DynProfMsgProcRes::EXE_SUCC;
@@ -301,7 +301,7 @@ void DyncProfMsgProcSrv::DynProfSrvProcQuit()
     profHasStarted_ = false;
 }
 
-int DyncProfMsgProcSrv::DynProfServerRsqMsg(DynProfMsgType msgType, DynProfMsgProcRes rsqCode,
+int DynProfServer::DynProfServerRsqMsg(DynProfMsgType msgType, DynProfMsgProcRes rsqCode,
     const std::string &msgData)
 {
     if (msgData.size() >= DYN_PROF_RSP_MSG_MAX_LEN) {
@@ -326,64 +326,15 @@ int DyncProfMsgProcSrv::DynProfServerRsqMsg(DynProfMsgType msgType, DynProfMsgPr
     return PROFILING_SUCCESS;
 }
 
-void DyncProfMsgProcSrv::NotifyClientDisconnet(const std::string &detailInfo)
+void DynProfServer::NotifyClientDisconnet(const std::string &detailInfo)
 {
     (void)DynProfServerRsqMsg(DynProfMsgType::DISCONN_RSP, DynProfMsgProcRes::EXE_SUCC, detailInfo);
     DynProfSrvProcQuit();
 }
 
-DynProfMngSrv::DynProfMngSrv() : startTimes_(0), started_(false)
+void DynProfServer::SaveDevicesInfo(ProfSetDevPara data)
 {
-}
-
-DynProfMngSrv::~DynProfMngSrv()
-{
-}
-
-int DynProfMngSrv::StartDynProfSrv()
-{
-    if (started_) {
-        MSPROF_LOGI("Dynamic profiling server has been started.");
-        return PROFILING_SUCCESS;
-    }
-    MSVP_MAKE_SHARED0_RET(dynProfSrv_, DyncProfMsgProcSrv, PROFILING_FAILED);
-    if (dynProfSrv_->Start() != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Dynamic profiling start server fail.");
-        return PROFILING_FAILED;
-    }
-    started_ = true;
-    MSPROF_LOGI("Dynamic profiling start server success.");
-    return PROFILING_SUCCESS;
-}
-
-void DynProfMngSrv::StopDynProfSrv()
-{
-    if (!started_) {
-        MSPROF_LOGI("Dynamic profiling server has been stoped.");
-        return;
-    }
-    // notify client
-    if (dynProfSrv_ != nullptr) {
-        dynProfSrv_->NotifyClientDisconnet("Server process exit.");
-        (void)dynProfSrv_->Stop();
-    }
-    started_ = false;
-    MSPROF_LOGI("Dynamic profiling stop server.");
-}
-
-void DynProfMngSrv::SetDeviceInfo(ProfSetDevPara *data)
-{
-    devicesInfo_.push_back(*data);
-}
-
-std::vector<ProfSetDevPara> &DynProfMngSrv::GetDeviceInfo()
-{
-    return devicesInfo_;
-}
-
-bool DynProfMngSrv::IsStarted()
-{
-    return started_;
+    devicesInfo_.push_back(data);
 }
 }
 }

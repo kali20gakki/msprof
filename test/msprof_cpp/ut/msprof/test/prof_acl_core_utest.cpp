@@ -1198,28 +1198,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, UploaderDumperDumpModelLoadDataTest) {
     dumper->DumpModelLoadData("0");
 }
 
-TEST_F(MSPROF_ACL_CORE_UTEST, DumpDynProfCachedMsg)
-{
-    GlobalMockObject::verify();
-    std::shared_ptr<Msprof::Engine::UploaderDumper> dumper(new Msprof::Engine::UploaderDumper("Framework"));
-
-    MOCKER_CPP(&Msprof::Engine::UploaderDumper::AddToUploader)
-        .stubs();
-    dumper->needCache_ = false;
-    dumper->DumpDynProfCachedMsg("0");
-    dumper->SaveDynProfCachedMsg(nullptr);
-
-    std::map<uint32_t, SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>> markMsg;
-    markMsg.insert(std::make_pair(1, nullptr));
-    std::list<std::map<uint32_t, SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>>> data;
-    data.push_back(markMsg);
-    dumper->cachedMsg_["0"] = data;
-    
-    dumper->needCache_ = false;
-    dumper->DumpDynProfCachedMsg("1");
-    dumper->DumpDynProfCachedMsg("0");
-}
-
 TEST_F(MSPROF_ACL_CORE_UTEST, AddToUploaderGetUploaderFailed) {
     GlobalMockObject::verify();
     std::shared_ptr<Msprof::Engine::UploaderDumper> dumper(new Msprof::Engine::UploaderDumper("Framework"));

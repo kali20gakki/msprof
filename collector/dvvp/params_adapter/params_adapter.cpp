@@ -83,7 +83,8 @@ void ParamsAdapter::SetMiniBlackSwitch()
         INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ,
         INPUT_CFG_COM_L2, INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ,
         INPUT_CFG_COM_AIV_MODE, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_POWER,
-        INPUT_CFG_COM_INSTR_PROFILING, INPUT_CFG_COM_INSTR_PROFILING_FREQ
+        INPUT_CFG_COM_INSTR_PROFILING, INPUT_CFG_COM_INSTR_PROFILING_FREQ, INPUT_CFG_MSPROF_DELAY,
+        INPUT_CFG_MSPROF_DURATION
         }).swap(blackSwitch_);
     return;
 }
@@ -105,7 +106,7 @@ void ParamsAdapter::SetMdcBlackSwitch()
         INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, INPUT_CFG_COM_AICPU, INPUT_CFG_PYTHON_PATH,
         INPUT_CFG_SUMMARY_FORMAT, INPUT_CFG_PARSE, INPUT_CFG_QUERY, INPUT_CFG_EXPORT,
         INPUT_CFG_ITERATION_ID, INPUT_CFG_MODEL_ID, INPUT_CFG_COM_POWER, INPUT_CFG_COM_INSTR_PROFILING,
-        INPUT_CFG_COM_INSTR_PROFILING_FREQ
+        INPUT_CFG_COM_INSTR_PROFILING_FREQ, INPUT_CFG_MSPROF_DELAY, INPUT_CFG_MSPROF_DURATION
         }).swap(blackSwitch_);
     return;
 }
@@ -121,7 +122,8 @@ void ParamsAdapter::SetLhisiBlackSwitch()
         INPUT_CFG_COM_SYS_CPU, INPUT_CFG_COM_SYS_CPU_FREQ, INPUT_CFG_COM_L2,
         INPUT_CFG_PYTHON_PATH, INPUT_CFG_SUMMARY_FORMAT, INPUT_CFG_PARSE,
         INPUT_CFG_QUERY, INPUT_CFG_EXPORT, INPUT_CFG_ITERATION_ID, INPUT_CFG_MODEL_ID,
-        INPUT_CFG_COM_POWER, INPUT_CFG_COM_INSTR_PROFILING, INPUT_CFG_COM_INSTR_PROFILING_FREQ
+        INPUT_CFG_COM_POWER, INPUT_CFG_COM_INSTR_PROFILING, INPUT_CFG_COM_INSTR_PROFILING_FREQ,
+        INPUT_CFG_MSPROF_DELAY, INPUT_CFG_MSPROF_DURATION
         }).swap(blackSwitch_);
     return;
 }
@@ -131,7 +133,8 @@ void ParamsAdapter::SetDcBlackSwitch()
     std::vector<InputCfg>({
         INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ, INPUT_CFG_COM_AIV_MODE,
         INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_SYS_IO, INPUT_CFG_COM_SYS_IO_FREQ,
-        INPUT_CFG_COM_POWER, INPUT_CFG_COM_INSTR_PROFILING, INPUT_CFG_COM_INSTR_PROFILING_FREQ
+        INPUT_CFG_COM_POWER, INPUT_CFG_COM_INSTR_PROFILING, INPUT_CFG_COM_INSTR_PROFILING_FREQ,
+        INPUT_CFG_MSPROF_DELAY, INPUT_CFG_MSPROF_DURATION
         }).swap(blackSwitch_);
     return;
 }
@@ -249,6 +252,8 @@ int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramCont
     SetHostSysParams(paramContainer);
 
     SetHostSysUsageParams(paramContainer);
+
+    SetDelayAndDurationParams(paramContainer);
 
     return PROFILING_SUCCESS;
 }
@@ -413,6 +418,16 @@ void ParamsAdapter::SetHostSysUsageParams(std::array<std::string, INPUT_CFG_MAX>
                 platformAdapter_->SetParamsForHostOnePidMem(samplingInterval);
             }
         }
+    }
+}
+
+void ParamsAdapter::SetDelayAndDurationParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const
+{
+    if (!paramContainer[INPUT_CFG_MSPROF_DELAY].empty()) {
+        platformAdapter_->SetParamsForDelayTime(paramContainer[INPUT_CFG_MSPROF_DELAY]);
+    }
+    if (!paramContainer[INPUT_CFG_MSPROF_DURATION].empty()) {
+        platformAdapter_->SetParamsForDurationTime(paramContainer[INPUT_CFG_MSPROF_DURATION]);
     }
 }
 

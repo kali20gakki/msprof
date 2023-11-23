@@ -177,6 +177,9 @@ void Application::SetAppEnv(SHARED_PTR_ALIA<analysis::dvvp::message::ProfilePara
     paramEnv.append(params->ToString());
     envsV.push_back(paramEnv);
     envsV.push_back(DynProfMngCli::instance()->ConstructEnv());
+    if (!params->delayTime.empty() || !params->durationTime.empty()) {
+        envsV.push_back(PROFILING_MODE_ENV + "=" + DELAY_DURARION_PROFILING_VALUE);
+    }
 }
 }  // namespace app
 }  // namespace dvvp

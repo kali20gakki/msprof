@@ -66,8 +66,6 @@ public:
     */
     int SendData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk) override;
 
-    void DumpDynProfCachedMsg(const std::string &devId);
-
 protected:
     void WriteDone() override;
     /**
@@ -83,8 +81,6 @@ private:
     virtual int Dump(std::vector<SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>> &message);
     void TimedTask() override;
     void AddToUploader(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
-    void SaveModelLoadData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
-    void SaveDynProfCachedMsg(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
 
 private:
     std::string module_; // the module name

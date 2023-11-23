@@ -72,7 +72,7 @@ void PlatformAdapterInterface::SetParamsForStorageLimit(struct CommonParams &com
         dirAvailSize = static_cast<unsigned long long>(static_cast<double>(dirAvailSize) * 0.9); // 0.9的可用空间
         dirAvailSize >>= moveBit;
         if (dirAvailSize < 20 || dirAvailSize > UINT32_MAX) { // 判断范围为20~UINT32_MAX MB
-            // 外部输入的storageLimit有效区间为200~4294967296(UINT32_MAX).
+            // 外部输入的storageLimit有效区间为200~4294967295(UINT32_MAX).
             // 若可用空间小于200M，仍然支持老化，不小于20M是为保证storageVolumeUpThd_不小于0
             dirAvailSize = 0;
             params_->storageLimit = "";
@@ -585,6 +585,15 @@ std::vector<std::string> PlatformAdapterInterface::GetMetricsList()
     return metricsList;
 }
 
+void PlatformAdapterInterface::SetParamsForDelayTime(const std::string &delayTime)
+{
+    params_->delayTime = delayTime;
+}
+ 
+void PlatformAdapterInterface::SetParamsForDurationTime(const std::string &durationTime)
+{
+    params_->durationTime = durationTime;
+}
 }
 }
 }

@@ -51,7 +51,7 @@ int ParamsAdapterMsprof::Init()
         INPUT_CFG_COM_SYS_CPU, INPUT_CFG_COM_SYS_HARDWARE_MEM, INPUT_CFG_COM_SYS_IO,
         INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_DVPP, INPUT_CFG_COM_POWER,
         INPUT_CFG_COM_INSTR_PROFILING, INPUT_CFG_COM_INSTR_PROFILING_FREQ, INPUT_CFG_HOST_SYS, INPUT_CFG_HOST_SYS_PID,
-        INPUT_CFG_MSPROF_DYNAMIC, INPUT_CFG_MSPROF_DYNAMIC_PID
+        INPUT_CFG_MSPROF_DYNAMIC, INPUT_CFG_MSPROF_DYNAMIC_PID, INPUT_CFG_MSPROF_DELAY, INPUT_CFG_MSPROF_DURATION
         }).swap(msprofConfig_);
     return PROFILING_SUCCESS;
 }
@@ -137,6 +137,12 @@ bool ParamsAdapterMsprof::ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfg
         case INPUT_CFG_HOST_SYS_PID:
             ret = ParamValidation::instance()->CheckHostSysPidValid(cfgValue);
             break;
+        case INPUT_CFG_MSPROF_DELAY:
+            ret = ParamValidation::instance()->CheckDelayAndDurationValid(cfgValue, "delay");
+            break;
+        case INPUT_CFG_MSPROF_DURATION:
+            ret = ParamValidation::instance()->CheckDelayAndDurationValid(cfgValue, "duration");
+            break;
         default:
             break;
     }
@@ -149,18 +155,20 @@ int ParamsAdapterMsprof::ParamsCheckDynProf() const
     if (paramContainer_[INPUT_CFG_MSPROF_DYNAMIC] != MSVP_PROF_ON) {
         return PROFILING_SUCCESS;
     }
+    if (!paramContainer_[INPUT_CFG_MSPROF_DELAY].empty() || !paramContainer_[INPUT_CFG_MSPROF_DURATION].empty()) {
+        CmdLog::instance()->CmdErrorLog("Argument --dynamic=on, can not set --delay/--duration at the same time.");
+        return PROFILING_FAILED;
+    }
     // --pid and --application is both empty
     if (paramContainer_[INPUT_CFG_MSPROF_DYNAMIC_PID].empty() &&
         paramContainer_[INPUT_CFG_MSPROF_APPLICATION].empty()) {
         CmdLog::instance()->CmdErrorLog("Argument --dynamic=on, but --application/--pid is all empty.");
-        MSPROF_LOGE("Argument --dynamic=on, but --application/--pid is all empty.");
         return PROFILING_FAILED;
     }
     // --pid and --application is both non-empty
     if (!paramContainer_[INPUT_CFG_MSPROF_DYNAMIC_PID].empty() &&
         !paramContainer_[INPUT_CFG_MSPROF_APPLICATION].empty()) {
         CmdLog::instance()->CmdErrorLog("Argument --dynamic=on, can not set --application/--pid at the same time.");
-        MSPROF_LOGE("Argument --dynamic=on, can not set --application/--pid at the same time.");
         return PROFILING_FAILED;
     }
     // --pid is non-empty, save pid to DynProfMngCli
@@ -542,7 +550,7 @@ int ParamsAdapterMsprof::SetModeDefaultParams(MsprofMode modeType)
 
 void ParamsAdapterMsprof::CreateCfgMap()
 {
-    std::unordered_map<int, InputCfg>({
+    std::unordered_map<MsprofArgsType, InputCfg>({
         {ARGS_OUTPUT, INPUT_CFG_COM_OUTPUT}, {ARGS_STORAGE_LIMIT, INPUT_CFG_COM_STORAGE_LIMIT},
         {ARGS_APPLICATION, INPUT_CFG_MSPROF_APPLICATION}, {ARGS_ENVIRONMENT, INPUT_CFG_MSPROF_ENVIRONMENT},
         {ARGS_AIC_MODE, INPUT_CFG_COM_AIC_MODE}, {ARGS_AIC_METRICE, INPUT_CFG_COM_AIC_METRICS},
@@ -572,10 +580,8 @@ void ParamsAdapterMsprof::CreateCfgMap()
         {ARGS_HOST_SYS, INPUT_CFG_HOST_SYS}, {ARGS_HOST_SYS_PID, INPUT_CFG_HOST_SYS_PID},
         {ARGS_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE}, {ARGS_HOST_SYS_USAGE_FREQ, INPUT_CFG_HOST_SYS_USAGE_FREQ},
         {ARGS_DYNAMIC_PROF, INPUT_CFG_MSPROF_DYNAMIC}, {ARGS_DYNAMIC_PROF_PID, INPUT_CFG_MSPROF_DYNAMIC_PID},
+        {ARGS_PROFILING_DELAY, INPUT_CFG_MSPROF_DELAY}, {ARGS_PROFILING_DURATION, INPUT_CFG_MSPROF_DURATION},
         }).swap(cfgMap_);
-    for (auto index : cfgMap_) {
-        reCfgMap_.insert({index.second, static_cast<MsprofArgsType>(index.first)});
-    }
 }
 } // ParamsAdapter
 } // Dvvp

@@ -167,6 +167,9 @@ struct ProfileParams : BaseInfo {
     uint64_t dataTypeConfig;
     // prof level
     std::string profLevel;
+    // delay and duration time
+    std::string delayTime;
+    std::string durationTime;
 
     ProfileParams()
         : msprofBinPid(MSVP_MMPROCESS), is_cancel(FALSE), profiling_period(-1),
@@ -201,7 +204,7 @@ struct ProfileParams : BaseInfo {
           pythonPath(""), parseSwitch("off"), querySwitch("off"), exportSwitch("off"), clearSwitch("off"),
           exportSummaryFormat(PROFILING_SUMMARY_FORMAT), exportIterationId(DEFAULT_INTERATION_ID),
           exportModelId(DEFAULT_MODEL_ID), usedParams(), dataTypeConfig(0), npuAppMemProfiling("on"),
-          npuModuleMemProfiling("on"), analyzeSwitch("off"),
+          npuModuleMemProfiling("on"), analyzeSwitch("off"), delayTime(""), durationTime(""),
           analyzeRuleSwitch("communication,communication_matrix")
     {
     }
@@ -369,6 +372,8 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, msprofBinPid);
         SET_VALUE(object, profLevel);
         SetUint64Value(object, MSG_STR(dataTypeConfig), dataTypeConfig);
+        SET_VALUE(object, delayTime);
+        SET_VALUE(object, durationTime);
     }
 
     void ToObject(nlohmann::json &object)
@@ -497,6 +502,8 @@ struct ProfileParams : BaseInfo {
         // prof level
         FROM_STRING_VALUE(object, profLevel);
         GetUint64Value(object, MSG_STR(dataTypeConfig), dataTypeConfig, 0);
+        FROM_STRING_VALUE(object, delayTime);
+        FROM_STRING_VALUE(object, durationTime);
     }
 
     void FromObject(const nlohmann::json &object)

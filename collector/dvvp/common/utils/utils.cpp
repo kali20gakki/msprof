@@ -1158,16 +1158,32 @@ bool Utils::CheckStringIsNonNegativeIntNum(const std::string &numberStr)
 
 bool Utils::CheckStringIsValidNatureNum(const std::string &numberStr)
 {
-    // length of nature number [1, 10]
-    if (numberStr.empty() || numberStr.length() > std::to_string(UINT32_MAX).length()) {
+    if (numberStr.empty()) {
+        return false;
+    }
+    const std::string maxUintValStr = std::to_string(UINT32_MAX);  // max uint string
+    if (numberStr.size() > maxUintValStr.size()) {
         MSPROF_LOGE("[Utils::CheckStringIsValidNatureNum]numberStr(%s) is too empty or too long", numberStr.c_str());
         return false;
     }
-
-    for (unsigned int i = 0; i < numberStr.length(); ++i) {
+ 
+    for (size_t i = 0; i < numberStr.size(); ++i) {
         if (numberStr[i] < '0' || numberStr[i] > '9') {  // numberStr must be pure number
             MSPROF_LOGE("[Utils::CheckStringIsValidNatureNum]numberStr(%s) is not a number", numberStr.c_str());
             return false;
+        }
+    }
+    if (numberStr.size() == maxUintValStr.size()) {
+        for (size_t i = 0; i < numberStr.size(); ++i) {
+            if (numberStr[i] > maxUintValStr[i]) {
+                MSPROF_LOGE("[Utils::CheckStringIsValidNatureNum]numberStr(%s) is over than %s",
+                    numberStr.c_str(), maxUintValStr.c_str());
+                return false;
+            } else if (numberStr[i] == maxUintValStr[i]) {
+                continue;
+            } else {
+                break;
+            }
         }
     }
     return true;
@@ -1488,7 +1504,9 @@ bool Utils::IsDynProfMode()
     if (platformTypeSet.find(platformType) == platformTypeSet.end()) {
         return false;
     }
-    if (GetEnvString(PROFILING_MODE_ENV) != DAYNAMIC_PROFILING_VALUE) {
+    std::string profModeValue = GetEnvString(PROFILING_MODE_ENV);
+    if (profModeValue != DAYNAMIC_PROFILING_VALUE &&
+        profModeValue != DELAY_DURARION_PROFILING_VALUE) {
         return false;
     }
     return true;
@@ -1655,6 +1673,26 @@ int Utils::StrToInt(int &dest, const std::string &numStr)
     }
     if (pos != numStr.size()) {
         MSPROF_LOGE("StrToInt failed, the input string is '%s'.", numStr.c_str());
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
+}
+
+int Utils::StrToUnsignedLong(uint32_t &dest, const std::string &numStr)
+{
+    if (numStr.empty()) {
+        MSPROF_LOGE("StrToUnsignedLong failed, the input string is empty.");
+        return PROFILING_FAILED;
+    }
+    size_t pos = 0;
+    try {
+        dest = static_cast<uint32_t>(std::stoul(numStr, &pos));
+    } catch (...) {
+        MSPROF_LOGE("StrToUnsignedLong failed, the input string is '%s'.", numStr.c_str());
+        return PROFILING_FAILED;
+    }
+    if (pos != numStr.size()) {
+        MSPROF_LOGE("StrToUnsignedLong failed, the input string is '%s'.", numStr.c_str());
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;

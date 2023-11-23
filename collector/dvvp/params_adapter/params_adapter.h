@@ -55,6 +55,8 @@ enum InputCfg {
     INPUT_CFG_MSPROF_ENVIRONMENT,
     INPUT_CFG_MSPROF_DYNAMIC,
     INPUT_CFG_MSPROF_DYNAMIC_PID,
+    INPUT_CFG_MSPROF_DELAY,
+    INPUT_CFG_MSPROF_DURATION,
     // other
     INPUT_CFG_COM_OUTPUT = 10,
     INPUT_CFG_COM_STORAGE_LIMIT,
@@ -155,6 +157,7 @@ private:
     void SetDeviceSysParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;
     void SetHostSysParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;
     void SetHostSysUsageParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;
+    void SetDelayAndDurationParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;
     bool ComCfgCheck1(const InputCfg inputCfg, const std::string &cfgValue) const;
     bool ComCfgCheck2(const InputCfg inputCfg, const std::string &cfgValue) const;
 
