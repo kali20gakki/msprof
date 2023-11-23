@@ -23,7 +23,6 @@
 #include "msprof_dlog.h"
 #include "mmpa_api.h"
 #include "params_adapter_msprof.h"
-#include "msopprof_manager.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -34,7 +33,6 @@ using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Common::Config;
 using namespace Analysis::Dvvp::Common::Platform;
-using namespace Analysis::Dvvp::Msopprof;
 using namespace analysis::dvvp::common::config;
 using namespace Collector::Dvvp::Msprofbin;
 using namespace Collector::Dvvp::Plugin;
@@ -74,7 +72,6 @@ void InputParser::MsprofCmdUsage(const std::string msg)
         CmdLog::instance()->CmdErrorLog("%s", msg.c_str());
     }
     ArgsManager::instance()->PrintHelp();
-    MsopprofManager::instance()->PrintHelp();
 }
 
 bool InputParser::CheckInstrAndTaskParamBothSet(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap)
@@ -264,7 +261,6 @@ void ArgsManager::Init()
     AddInstrArgs();
     AddHostArgs();
     AddStarsArgs();
-    AddMsopprofArgs();
     Args help = {"help", "help message.(full-platform)"};
     argsList_.push_back(help);
 }
@@ -558,10 +554,13 @@ void ArgsManager::AddL2Args()
     argsList_.push_back(l2);
 }
 
-void ArgsManager::AddMsopprofArgs()
+static void PrintOp()
 {
-    Args op = {"op", "Enable the binary file msopprof. The default value is off.(Ascend910, Ascend910B)", OFF};
-    argsList_.push_back(op);
+    std::cout << "This is subcommand for operator optimization situation:" << std::endl;
+    const int optionSpace = 34;
+    std::cout << "      "; // 6 space
+    std::cout << std::left << std::setw(optionSpace) << "op";
+    std::cout << "Use binary msopprof to operator optimization (msprof op ...)" << std::endl << std::endl;
 }
 
 void ArgsManager::PrintHelp()
@@ -569,6 +568,7 @@ void ArgsManager::PrintHelp()
     Init();
     std::cout << std::endl << "Usage:" << std::endl;
     std::cout << "      ./msprof [--options]" << std::endl << std::endl;
+    PrintOp();
     std::cout << "Options:" << std::endl;
     for (auto args : argsList_) {
         args.PrintHelp();

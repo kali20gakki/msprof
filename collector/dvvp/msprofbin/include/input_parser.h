@@ -75,7 +75,6 @@ enum MsprofArgsType {
     ARGS_DYNAMIC_PROF,
     ARGS_PROFILING_DELAY,
     ARGS_PROFILING_DURATION,
-    ARGS_MSOPPROF,
     // number
     ARGS_AIC_FREQ, // 10 10-1000
     ARGS_AIV_FREQ, // 10 10-1000
@@ -149,7 +148,6 @@ const MmStructOption longOptions[] = {
     {"dynamic", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_DYNAMIC_PROF},
     {"delay", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_PROFILING_DELAY},
     {"duration", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_PROFILING_DURATION},
-    {"op", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_MSOPPROF},
     // number
     {"aic-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIC_FREQ},
     {"aiv-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIV_FREQ},

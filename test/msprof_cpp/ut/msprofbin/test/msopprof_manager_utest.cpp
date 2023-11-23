@@ -27,7 +27,7 @@ TEST_F(MsopprofManagerUtest, MsopprofManagerCheckInputDataValidity)
     GlobalMockObject::verify();
     CHAR_PTR opargv[2];
     opargv[0] = "msprof";
-    opargv[1] = "--op=on";
+    opargv[1] = "op";
     std::vector<std::string> argsVec;
     EXPECT_EQ(true, MsopprofManager::instance()->CheckInputDataValidity(2, (const char**)opargv));
     EXPECT_EQ(false, MsopprofManager::instance()->CheckInputDataValidity(1025, (const char**)opargv));
@@ -38,29 +38,12 @@ TEST_F(MsopprofManagerUtest, MsopprofManagerCheckMsopprofIfExist)
     GlobalMockObject::verify();
     std::vector<std::string> op_argv;
     CHAR_PTR opargv[3];
-    const int index = 2;
     opargv[0] = "msprof";
     opargv[1] = "--mode=onboard";
     EXPECT_EQ(false, MsopprofManager::instance()->CheckMsopprofIfExist(2, (const char**)opargv, op_argv));
-    opargv[index] = "--op=on";
+    opargv[1] = "op";
     op_argv.clear();
-    EXPECT_EQ(true, MsopprofManager::instance()->CheckMsopprofIfExist(3, (const char**)opargv, op_argv));
-}
-
-TEST_F(MsopprofManagerUtest, MsopprofManagerPrintHelp)
-{
-    GlobalMockObject::verify();
-    std::string path = "/home";
-    MOCKER_CPP(&ParamValidation::CheckMsopprofBinValid)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&MsopprofManager::ExecMsopprof)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    MsopprofManager::instance()->path_ = "";
-    MsopprofManager::instance()->PrintHelp();
-    MsopprofManager::instance()->path_ = path;
-    MsopprofManager::instance()->PrintHelp();
+    EXPECT_EQ(true, MsopprofManager::instance()->CheckMsopprofIfExist(2, (const char**)opargv, op_argv));
 }
 
 TEST_F(MsopprofManagerUtest, MsopprofManagerExecMsopprof)

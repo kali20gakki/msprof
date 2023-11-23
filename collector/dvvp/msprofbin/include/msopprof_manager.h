@@ -23,7 +23,6 @@ class MsopprofManager : public analysis::dvvp::common::singleton::Singleton<Msop
 public:
     MsopprofManager();
     ~MsopprofManager() {};
-    void PrintHelp();
     int MsopprofProcess(int argc, CONST_CHAR_PTR argv[]);
     MmProcess GetMsopprofPid() { return opProcess_; }
 
