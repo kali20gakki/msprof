@@ -60,8 +60,7 @@ class TestNpuMemViewer(unittest.TestCase):
         }
         check = NpuMemViewer(config, params)
         ret = check.get_timeline_data()
-        self.assertEqual('{"status": 1, '
-                         '"info": "Failed to connect npu_mem.db"}', ret)
+        self.assertEqual([], ret)
 
     def test_get_timeline_data_should_return_empty_when_db_check_ok(self):
         config = {"headers": ["event", "ddr", "hbm", "timestamp", "memory"]}
@@ -75,8 +74,7 @@ class TestNpuMemViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + '.NpuMemModel.get_timeline_data', return_value=[]):
             check = NpuMemViewer(config, params)
             ret = check.get_timeline_data()
-            self.assertEqual('{"status": 1, '
-                             '"info": "Unable to get npu mem data."}', ret)
+            self.assertEqual([], ret)
 
     def test_get_timeline_data_should_return_empty_when_data_exist(self):
         InfoConfReader()._info_json = {"devices": '0'}

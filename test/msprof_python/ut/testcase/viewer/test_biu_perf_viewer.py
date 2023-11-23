@@ -15,7 +15,7 @@ class TestBiuPerfViewer(unittest.TestCase):
         self.biu_perf_viewer = BiuPerfViewer(profect_path)
 
     def test_get_timeline(self) -> None:
-        expect_res = '"meta_timeline biu_flow_timeline biu_cycles_timeline "'
+        expect_res = 'meta_timeline biu_flow_timeline biu_cycles_timeline '
 
         meta_timeline = "meta_timeline "
         biu_flow_timeline = "biu_flow_timeline "

@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
 import json
+import logging
 from collections import OrderedDict
 
 from common_func.constant import Constant
@@ -60,19 +61,19 @@ class EventViewer:
                  args))
         return trace_data
 
-    def get_timeline_data(self: any) -> str:
+    def get_timeline_data(self: any) -> list:
         """
         get timeline data from event data
         :return:
         """
         with self._model as _model:
             if not _model.check_db() or not _model.check_table():
-                return json.dumps({"status": NumberConstant.ERROR,
-                                    "info": f"Failed to connect {DBNameConstant.DB_API_EVENT}"})
+                logging.error(f"Failed to connect %s", DBNameConstant.DB_API_EVENT)
+                return []
             timeline_data = _model.get_timeline_data()
             if not timeline_data:
-                return json.dumps(
-                    {"status": NumberConstant.WARN, "info": f"Unable to get event data."})
+                logging.warning(f"Unable to get event data.")
+                return []
             pid = InfoConfReader().get_json_pid_data()
             tid = InfoConfReader().get_json_tid_data()
             result_data = self._get_event_result_data(timeline_data, pid, tid)
