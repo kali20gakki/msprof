@@ -7,11 +7,13 @@ import os
 from enum import Enum
 
 from common_func.common import error
+from common_func.common import print_info
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileOpen
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
+from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import is_valid_original_data
 from msmodel.nano.nano_exeom_model import NanoExeomModel
@@ -66,6 +68,7 @@ class NanoDbgParser(DataParser, MsMultiProcess):
     INVALID_TENSOR_NUM = -1
     INVALID_INDEX_ID = -1
     INVALID_TIMESTAMP = -1
+    INVALID_CONNECTION_ID = -1
     INVALID_BLOCK_DIM = 0
     INVALID_DEVICE_ID = 0
     INVALID_REQUEST_ID = 0
@@ -110,6 +113,8 @@ class NanoDbgParser(DataParser, MsMultiProcess):
         """
         dbg_tag_files = self._file_list.get(DataTag.DBG_FILE, [])
         model_filename_dict = self._get_nano_model_filename_with_id_data()
+        print_info(MsProfCommonConstant.COMMON_FILE_NAME,
+                   "The correct dbg named %s." % str(list(model_filename_dict)))
         for _file in dbg_tag_files:
             if not is_valid_original_data(_file, self._project_path) \
                     or _file[:-self.DBG_NAME_LEN] not in model_filename_dict:
@@ -272,6 +277,6 @@ class NanoDbgParser(DataParser, MsMultiProcess):
                 data.get("model_id", self.INVALID_ID), self.INVALID_REQUEST_ID,
                 data.get("stream_id", self.INVALID_VALUE), data.get("task_id", self.INVALID_ID),
                 str(self.INVALID_CONTEXT_ID), self.INVALID_BATCH_ID, data.get("task_type", Constant.NA),
-                self.INVALID_DEVICE_ID, self.INVALID_TIMESTAMP
+                self.INVALID_DEVICE_ID, self.INVALID_TIMESTAMP, self.INVALID_CONNECTION_ID
             ] for data in data_list
         ]
