@@ -43,33 +43,33 @@ class PipelineOverlapViewer:
 
     def get_timeline_data(self):
         result = []
-        if not os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)):
-            logging.warning("Op summary data not found, no need to calculate the overlap.")
-            return ""
-        sample_config = {
-            'result_dir': self._project_path,
-            'iter_id': Constant.DEFAULT_INVALID_VALUE,
-            'model_id': Constant.DEFAULT_INVALID_VALUE
-        }
-        with OpSummaryModel(sample_config) as _model:
-            compute_data = SectionCalculator.merge_continuous_intervals(_model.get_operator_data_by_task_type())
+        compute_data = []
+        if os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)):
+            sample_config = {
+                'result_dir': self._project_path,
+                'iter_id': Constant.DEFAULT_INVALID_VALUE,
+                'model_id': Constant.DEFAULT_INVALID_VALUE
+            }
+            with OpSummaryModel(sample_config) as _model:
+                compute_data = _model.get_operator_data_by_task_type()
+        compute_data = SectionCalculator.merge_continuous_intervals(compute_data)
         result.extend(self._format_timeline_data(OverlapType.COMPUTE_TIME, data) for data in compute_data)
 
-        if not os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
-            logging.warning("HCCLSingledevice data not found, no need to calculate the overlap.")
-            return ""
-        with HcclViewModel(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
-                           [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE]) as _model:
-            if not _model.check_table():
-                logging.warning("HCCLSingledevice table %s not found, no need to calculate the overlap.",
-                                DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
-                return ""
-            communication_data = SectionCalculator.merge_continuous_intervals(_model.get_hccl_op_time_section())
-            result.extend(
-                self._format_timeline_data(OverlapType.COMMUNICATION_TIME, data)
-                for data in communication_data
-            )
+        communication_data = []
+        if os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
+            with HcclViewModel(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                               [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE]) as _model:
+                if _model.check_table():
+                    communication_data = _model.get_hccl_op_time_section()
+        communication_data = SectionCalculator.merge_continuous_intervals(communication_data)
+        result.extend(
+            self._format_timeline_data(OverlapType.COMMUNICATION_TIME, data)
+            for data in communication_data
+        )
 
+        if not compute_data and not communication_data:
+            logging.warning("Both task data and hccl data are missing, no need to calculate the overlap.")
+            return ""
         pure_communication_section, free_time_section = SectionCalculator.compute_pipeline_overlap(communication_data,
                                                                                                    compute_data)
         result.extend(
