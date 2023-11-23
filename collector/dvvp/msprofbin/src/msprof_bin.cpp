@@ -29,6 +29,19 @@ using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Msprofbin;
 using namespace Collector::Dvvp::DynProf;
 
+void PrintStartLogInfo(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
+{
+    std::string logInfo = "Start profiling";
+    if (DynProfMngCli::instance()->IsEnableMode()) {
+        logInfo += " in dynamic mode";
+    } else {
+        logInfo += !params->delayTime.empty() ? (" after " + params->delayTime + "s") : "";
+        logInfo += !params->durationTime.empty() ? (" for " + params->durationTime + "s") : "";
+    }
+    logInfo += "...";
+    CmdLog::instance()->CmdInfoLog(logInfo.c_str());
+}
+
 #ifdef __PROF_UT
 int LltMain(int argc, const char **argv, const char **envp)
 #else
@@ -64,9 +77,7 @@ int main(int argc, const char **argv, const char **envp)
     signal(SIGINT, [](int signum) {
         MsprofManager::instance()->StopNoWait();
     });
-    if (!DynProfMngCli::instance()->IsEnableMode()) {
-        CmdLog::instance()->CmdInfoLog("Start profiling....");
-    }
+    PrintStartLogInfo(params);
     ret = MsprofManager::instance()->MsProcessCmd();
     if (ret != PROFILING_SUCCESS) {
         CmdLog::instance()->CmdErrorLog("Running profiling failed.Please check log for more info.");

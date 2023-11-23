@@ -13,12 +13,14 @@
 #include "prof_api_common.h"
 #include "uploader_dumper.h"
 #include "transport/hash_data.h"
+#include "dyn_prof_mgr.h"
 
 namespace Msprof {
 namespace Engine {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::queue;
 using namespace analysis::dvvp::transport;
+using namespace Collector::Dvvp::DynProf;
 // init map
 std::map<uint32_t, MsprofCallbackHandler> MsprofCallbackHandler::reporters_;
 
@@ -65,15 +67,6 @@ void MsprofCallbackHandler::ForceFlush(const std::string &devId)
         }
         profReport->Flush();
     }
-}
-
-void MsprofCallbackHandler::FlushDynProfCachedMsg(const std::string &devId)
-{
-    if (reporter_ == nullptr) {
-        return;
-    }
-    MSPROF_LOGI("FlushDynProfCachedMsg, module: %s", module_.c_str());
-    reporter_->DumpDynProfCachedMsg(devId);
 }
 
 int MsprofCallbackHandler::SendData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk)
@@ -153,7 +146,7 @@ int MsprofCallbackHandler::StartReporter()
         return PROFILING_SUCCESS;
     }
     // In dynamic profiling mode, initializing ge before initializing profiling.
-    if (!Msprofiler::Api::ProfAclMgr::instance()->IsInited() && !Utils::IsDynProfMode()) {
+    if (!Msprofiler::Api::ProfAclMgr::instance()->IsInited() && !DynProfMgr::instance()->IsDynProfStarted()) {
         MSPROF_LOGE("Profiling is not started, reporter can not be inited");
         return PROFILING_FAILED;
     }
@@ -185,7 +178,7 @@ int MsprofCallbackHandler::StopReporter()
         return PROFILING_FAILED;
     }
     profReport->Flush();
-    if (Utils::IsDynProfMode()) {
+    if (DynProfMgr::instance()->IsDynProfStarted()) {
         return PROFILING_SUCCESS;
     }
     int ret = reporter_->Stop();
@@ -247,16 +240,6 @@ void FlushAllModule(const std::string &devId)
     auto iter = MsprofCallbackHandler::reporters_.begin();
     for (; iter != MsprofCallbackHandler::reporters_.end(); iter++) {
         iter->second.ForceFlush(devId);
-    }
-}
-
-void FlushAllModuleForDynProf(const std::string &devId)
-{
-    if (!Utils::IsDynProfMode()) {
-        return;
-    }
-    for (auto &iter : MsprofCallbackHandler::reporters_) {
-        iter.second.FlushDynProfCachedMsg(devId);
     }
 }
 

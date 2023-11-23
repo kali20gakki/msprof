@@ -90,6 +90,7 @@ public:
     int CustomHexCharConfig(std::string &aicoreEvents, const std::string &pattern);
     int CheckMsopprofBinValid(const std::string &binPath) const;
     int CheckParamPermission(const std::string &paramPath) const;
+    bool CheckDelayAndDurationValid(const std::string &timeValue, const std::string &timeType) const;
 
 private:
     bool CheckTsSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);

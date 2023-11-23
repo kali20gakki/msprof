@@ -538,9 +538,6 @@ void GeFinalizeHandle()
         MSPROF_LOGE("Failed to CommandHandleProfFinalize");
         MSPROF_INNER_ERROR("EK9999", "Failed to CommandHandleProfFinalize");
     }
-    for (uint32_t devId : devIds) {
-        Msprof::Engine::FlushAllModuleForDynProf(std::to_string(devId));
-    }
     Msprof::Engine::FlushAllModule();
 }
 } // namespace ge

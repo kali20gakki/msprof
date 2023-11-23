@@ -1186,9 +1186,9 @@ bool ParamValidation::CheckStorageLimit(const std::string &storageLimit) const
         MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
             std::vector<std::string>({"storage_limit", storageLimit, errReason}));
         return false;
-    } else if (digitStr.size() > 10) { // digitStr range is 0 ~ 4294967296, max length is 10
-        MSPROF_LOGE("storage_limit:%s, valid range is 200~4294967296", storageLimit.c_str());
-        CMD_LOGE("Argument --storage-limit=%s, valid range is 200~4294967296", storageLimit.c_str());
+    } else if (digitStr.size() > 10) { // digitStr range is 0 ~ 4294967295, max length is 10
+        MSPROF_LOGE("storage_limit:%s, valid range is 200~4294967295", storageLimit.c_str());
+        CMD_LOGE("Argument --storage-limit=%s, valid range is 200~4294967295", storageLimit.c_str());
         MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
             std::vector<std::string>({"storage_limit", storageLimit, errReason}));
         return false;
@@ -1715,6 +1715,23 @@ int ParamValidation::CheckMsopprofBinValid(const std::string &binPath) const
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
+}
+
+bool ParamValidation::CheckDelayAndDurationValid(const std::string &timeValue, const std::string &timeType) const
+{
+    if (!Utils::CheckStringIsValidNatureNum(timeValue)) {
+        MSPROF_LOGE("Argument --%s=%s is invalid. Please input an natural number", timeType.c_str(), timeValue.c_str());
+        CMD_LOGE("Argument --%s=%s is invalid. Please input an natural number", timeType.c_str(), timeValue.c_str());
+        return false;
+    }
+    if (timeValue == "0") {
+        MSPROF_LOGE("Argument --%s=%s is invalid. Please input an natural number greater than 0",
+            timeType.c_str(), timeValue.c_str());
+        CMD_LOGE("Argument --%s=%s is invalid. Please input an natural number greater than 0",
+            timeType.c_str(), timeValue.c_str());
+        return false;
+    }
+    return true;
 }
 }
 }

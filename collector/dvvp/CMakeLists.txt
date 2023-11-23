@@ -145,6 +145,7 @@ set(msprofilerCpp
     msprof/msproftx/src/msprof_tx_reporter.cpp
     msprof/msproftx/src/msprof_stamp_pool.cpp
     msprof/dynamic_profiling/src/dyn_prof_server.cpp
+    msprof/dynamic_profiling/src/dyn_prof_mgr.cpp
     task_handle/src/device.cpp
     task_handle/src/info_json.cpp
     task_handle/src/prof_manager.cpp

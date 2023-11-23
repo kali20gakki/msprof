@@ -132,6 +132,8 @@ public:
     virtual void SetParamsForHostAllPidMem(int samplingInterval);
     virtual void SetParamsForHostSysMem(int samplingInterval);
     virtual void SetParamsForHostSysCpu(int samplingInterval);
+    virtual void SetParamsForDelayTime(const std::string &delayTime);
+    virtual void SetParamsForDurationTime(const std::string &durationTime);
     virtual std::vector<std::string> GetMetricsList();
 
 protected:

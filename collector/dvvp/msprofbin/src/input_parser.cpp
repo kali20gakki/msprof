@@ -273,7 +273,7 @@ void ArgsManager::AddBasicArgs()
 {
     argsList_ = {
         {"output", "Specify the directory that is used for storing data results.(full-platform)"},
-        {"storage-limit", "Specify the output directory volume. range 200MB ~ 4294967296MB.(full-platform)"},
+        {"storage-limit", "Specify the output directory volume. range 200MB ~ 4294967295MB.(full-platform)"},
         {"application", "Specify application path, considering the risk of privilege escalation,\n"
             "\t\t\t\t\t\t   please pay attention to the group of the application and \n"
             "\t\t\t\t\t\t   confirm whether it is the same as the user currently.(full-platform)"},
@@ -321,10 +321,17 @@ void ArgsManager::AddDynProfArgs()
          platform_ != PlatformType::CHIP_V4_2_0)) {
         return;
     }
-    Args dynamic = {"dynamic", "Dynamic profiling switch, the default value is off.(Ascend910)", OFF};
-    Args pid = {"pid", "Dynamic profiling pid of the target process.(Ascend910)", "0"};
+    Args dynamic = {"dynamic",
+                    "Dynamic profiling switch, the default value is off.(Ascend910, Ascend910B, Ascend310B)", OFF};
+    Args pid = {"pid", "Dynamic profiling pid of the target process.(Ascend910, Ascend910B, Ascend310B)", "0"};
+    Args delay = {"delay",
+                  "Collect start delay time in seconds, range 1 ~ 4294967295s.(Ascend910, Ascend910B, Ascend310B)"};
+    Args duration = {"duration",
+                     "Collection duration in seconds, range 1 ~ 4294967295s.(Ascend910, Ascend910B, Ascend310B)"};
     argsList_.push_back(dynamic);
     argsList_.push_back(pid);
+    argsList_.push_back(delay);
+    argsList_.push_back(duration);
 }
 
 void ArgsManager::AddAnalysisArgs()
@@ -336,10 +343,10 @@ void ArgsManager::AddAnalysisArgs()
     argsList = {
         {"python-path", "Specify the python interpreter path that is used for analysis, please\n"
             "\t\t\t\t\t\t   ensure the python version is 3.7.5 or later.(full-platform)"},
-        {"analyze", "Switch for using msprof to analyze collecting data, the default value\n"
-            "\t\t\t\t\t\t   is off.(full-platform)", OFF},
-        {"rule", "Switch specified rule for using msprof to analyze collecting data, the default value\n"
-            "\t\t\t\t\t\t   is communication,communication_matrix.(full-platform)\n"
+        {"analyze", "Switch for using msprof to analyze collecting data,\n"
+            "\t\t\t\t\t\t   the default value is off.(full-platform)", OFF},
+        {"rule", "Switch specified rule for using msprof to analyze collecting data,\n"
+            "\t\t\t\t\t\t   the default value is communication,communication_matrix.(full-platform)\n"
             "\t\t\t\t\t\t   The switch can be set in [communication, communication_matrix]"},
         {"parse", "Switch for using msprof to parse collecting data, the default value\n"
             "\t\t\t\t\t\t   is off.(full-platform)", OFF},
@@ -442,8 +449,8 @@ void ArgsManager::AddHardWareMemArgs()
     hardwareMemFreq.SetDetail("LLC, DDR, HBM acquisition frequency, range 1 ~ 100, the default value is 50 Hz");
     llcMode.SetDetail("The llc profiling groups.\n"
                             "\t\t\t\t\t\t   include capacity, bandwidth. the default value is capacity.(Ascend310)\n"
-                            "\t\t\t\t\t\t   include read, write. the default value is read."
-                            "(Ascend310P, Ascend910, Ascend310B, Ascend910B)");
+                            "\t\t\t\t\t\t   include read, write. the default value is read.\n"
+                            "\t\t\t\t\t\t   (Ascend310P, Ascend910, Ascend310B, Ascend910B)");
     argsList_.push_back(hardwareMem);
     argsList_.push_back(hardwareMemFreq);
     argsList_.push_back(llcMode);
@@ -545,7 +552,8 @@ void ArgsManager::AddL2Args()
         return;
     }
     Args l2 = {"l2",
-               "L2 Cache acquisition switch. the default value is off.(Ascend310P, Ascend910, Ascend310B, Ascend910B)",
+               "L2 Cache acquisition switch. the default value is off.\n"
+                   "\t\t\t\t\t\t   (Ascend310P, Ascend910, Ascend310B, Ascend910B)",
                OFF};
     argsList_.push_back(l2);
 }

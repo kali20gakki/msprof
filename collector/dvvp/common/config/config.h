@@ -207,6 +207,7 @@ const std::string RANK_ID_ENV = "RANK_ID";
 const std::string RANK_ENV = "RANK";
 const std::string PROFILING_MODE_ENV = "PROFILING_MODE";
 const std::string DAYNAMIC_PROFILING_VALUE = "dynamic";
+const std::string DELAY_DURARION_PROFILING_VALUE = "delay_or_duration";
 
 // llc  profiling events type
 const std::string LLC_PROFILING_CAPACITY = "capacity";

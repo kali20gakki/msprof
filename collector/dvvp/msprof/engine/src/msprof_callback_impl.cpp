@@ -15,6 +15,7 @@
 #include "msprof_tx_manager.h"
 #include "command_handle.h"
 #include "platform/platform.h"
+#include "dyn_prof_mgr.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -26,6 +27,15 @@ using namespace analysis::dvvp::host;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::DynProf;
 using namespace Msprof::Engine;
+
+inline int32_t InternalErrorCodeToExternal(int32_t internalErrorCode)
+{
+    if (internalErrorCode == PROFILING_NOTSUPPORT) {
+        return MSPROF_ERROR_UNINITIALIZE;
+    } else {
+        return (internalErrorCode == PROFILING_SUCCESS ? MSPROF_ERROR_NONE : MSPROF_ERROR);
+    }
+}
 
 bool CheckMsprofBin(std::string &envValue)
 {
@@ -79,19 +89,19 @@ int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len)
     MSPROF_EVENT("MsprofCtrlCallback called, type: %u", type);
     Platform::instance()->Init();
     if (type == MSPROF_CTRL_FINALIZE) {
-        DynProfMngSrv::instance()->StopDynProfSrv();
+        DynProfMgr::instance()->StopDynProf();
         return Msprofiler::Api::ProfAclMgr::instance()->MsprofFinalizeHandle();
     }
 
     if (Utils::IsDynProfMode()) {
-        if (DynProfMngSrv::instance()->IsStarted()) {
+        if (DynProfMgr::instance()->IsDynProfStarted()) {
             return MSPROF_ERROR_NONE;
         }
         if (ProfApiPlugin::instance()->MsprofProfRegDeviceStateCallback(MsprofSetDeviceCallbackForDynProf) != 0) {
             MSPROF_LOGE("Dynamic profiling failed to register device state callback.");
             return MSPROF_ERROR;
         }
-        return DynProfMngSrv::instance()->StartDynProfSrv();
+        return InternalErrorCodeToExternal(DynProfMgr::instance()->StartDynProf());
     }
     if ((type == MSPROF_CTRL_INIT_DYNA) &&
         (Utils::GetEnvString(PROFILER_SAMPLE_CONFIG_ENV).empty() ||
@@ -177,7 +187,7 @@ int32_t MsprofSetDeviceCallbackImpl(VOID_PTR data, uint32_t len)
 int32_t MsprofSetDeviceCallbackForDynProf(VOID_PTR data, uint32_t len)
 {
     ProfSetDevPara *setCfg = reinterpret_cast<ProfSetDevPara *>(data);
-    DynProfMngSrv::instance()->SetDeviceInfo(setCfg);
+    DynProfMgr::instance()->SetDeviceInfo(setCfg);
 
     int32_t ret = RegisterReporterCallback();
     if (ret != PROFILING_SUCCESS) {
@@ -192,15 +202,6 @@ int32_t MsprofSetDeviceCallbackForDynProf(VOID_PTR data, uint32_t len)
     }
 
     return MSPROF_ERROR_NONE;
-}
-
-inline int32_t InternalErrorCodeToExternal(int32_t internalErrorCode)
-{
-    if (internalErrorCode == PROFILING_NOTSUPPORT) {
-        return MSPROF_ERROR_UNINITIALIZE;
-    } else {
-        return (internalErrorCode == PROFILING_SUCCESS ? MSPROF_ERROR_NONE : MSPROF_ERROR);
-    }
 }
 
 // reporter callback
@@ -227,16 +228,16 @@ int32_t RegisterReporterCallback()
     if (Msprof::Engine::MsprofCallbackHandler::reporters_.empty()) {
         MSPROF_LOGI("MsprofCallbackHandler InitReporters");
         Msprof::Engine::MsprofCallbackHandler::InitReporters();
+        MSPROF_LOGI("Call profRegReporterCallback");
+        aclError ret = ProfApiPlugin::instance()->MsprofProfRegReporterCallback(MsprofReporterCallbackImpl);
+        if (ret != ACL_SUCCESS) {
+            MSPROF_LOGE("Failed to register reporter callback");
+            MSPROF_CALL_ERROR("EK9999", "Failed to register reporter callback");
+            return ret;
+        }
+        return RegisterNewReporterCallback();
     }
-    
-    MSPROF_LOGI("Call profRegReporterCallback");
-    aclError ret = ProfApiPlugin::instance()->MsprofProfRegReporterCallback(MsprofReporterCallbackImpl);
-    if (ret != ACL_SUCCESS) {
-        MSPROF_LOGE("Failed to register reporter callback");
-        MSPROF_CALL_ERROR("EK9999", "Failed to register reporter callback");
-        return ret;
-    }
-    return RegisterNewReporterCallback();
+    return ACL_SUCCESS;
 }
 
 int32_t RegisterNewReporterCallback()

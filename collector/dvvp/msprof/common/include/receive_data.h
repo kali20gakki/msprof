@@ -98,11 +98,6 @@ public:
         MSPROF_LOGI("ReceiveData::DumpModelLoadData, devId is %s", devId.c_str());
     }
     virtual int SendData(SHARED_PTR_ALIA<FileChunkReq> fileChunk);
-    virtual void DumpDynProfCachedMsg(const std::string &devId)
-    {
-        UNUSED(devId);
-        MSPROF_LOGI("ReceiveData::DumpDynProfCachedMsg, devId is %s", devId.c_str());
-    }
     int32_t DoReportData(const MsprofApi &dataChunk);
     int32_t DoReportData(const MsprofCompactInfo &dataChunk);
     int32_t DoReportData(const MsprofAdditionalInfo &dataChunk);

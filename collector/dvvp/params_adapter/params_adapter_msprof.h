@@ -63,8 +63,7 @@ private:
     std::string app_;
     SHARED_PTR_ALIA<ProfileParams> params_;
     std::array<std::string, INPUT_CFG_MAX> paramContainer_;
-    std::unordered_map<int, InputCfg> cfgMap_;
-    std::unordered_map<int, MsprofArgsType> reCfgMap_;
+    std::unordered_map<MsprofArgsType, InputCfg> cfgMap_;
     std::vector<InputCfg> msprofConfig_;
     std::set<InputCfg> setConfig_;
     MsprofMode msprofMode_;
