@@ -27,7 +27,7 @@ class BiuPerfViewer:
         meta_timeline = self.get_meta_timeline()
         biu_flow_timeline = self.get_biu_flow_timeline()
         biu_cycles_timeline = self.get_biu_cycles_timeline()
-        return json.dumps(meta_timeline + biu_flow_timeline + biu_cycles_timeline)
+        return meta_timeline + biu_flow_timeline + biu_cycles_timeline
 
     def get_meta_timeline(self: any) -> list:
         meta_timeline = []

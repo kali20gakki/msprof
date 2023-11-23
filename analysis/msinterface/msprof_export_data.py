@@ -229,20 +229,13 @@ class MsProfExportDataUtils:
             'host_id': MsProfCommonConstant.DEFAULT_IP,
             'project_path': params.get(StrConstant.PARAM_RESULT_DIR)
         }
-        try:
-            if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
-                return StepTraceViewer.get_step_trace_timeline(message)
-            else:
-                reduce_headers, data, count = StepTraceViewer \
-                    .get_step_trace_summary(message)
-                headers = configs[StrConstant.CONFIG_HEADERS] + reduce_headers
-                return headers, data, count
-        except (OSError, SystemError, ValueError, TypeError,
-                RuntimeError) as err:
-            return json.dumps({
-                "data": "", "status": NumberConstant.ERROR,
-                "info": "message error: {}".format(err)
-            })
+        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
+            return StepTraceViewer.get_step_trace_timeline(message)
+        else:
+            reduce_headers, data, count = StepTraceViewer \
+                .get_step_trace_summary(message)
+            headers = configs[StrConstant.CONFIG_HEADERS] + reduce_headers
+            return headers, data, count
 
     @staticmethod
     def _get_api_statistic_data(configs: dict, params: dict) -> any:

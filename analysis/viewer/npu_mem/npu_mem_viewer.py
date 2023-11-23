@@ -60,13 +60,13 @@ class NpuMemViewer:
     def get_timeline_data(self: any) -> any:
         with self._model as _model:
             if not _model.check_db() or not _model.check_table():
-                return json.dumps(
-                    {"status": NumberConstant.ERROR, "info": f"Failed to connect {DBNameConstant.DB_NPU_MEM}"})
+                logging.error(f"Failed to connect %s", DBNameConstant.DB_NPU_MEM)
+                return []
 
             timeline_data = _model.get_timeline_data()
             if not timeline_data:
-                return json.dumps(
-                    {"status": NumberConstant.ERROR, "info": f"Unable to get npu mem data."})
+                logging.error("Unable to get npu mem data.")
+                return []
             pid = InfoConfReader().get_json_pid_data()
             tid = InfoConfReader().get_json_tid_data()
             trace_parser = TraceViewer("NPU_MEM")
@@ -88,4 +88,5 @@ class NpuMemViewer:
                                                     column_trace_data)
             if _result:
                 return _result
-            return json.dumps({"status": NumberConstant.ERROR, "info": "No data is collected."})
+            logging.error("No data is collected.")
+            return []

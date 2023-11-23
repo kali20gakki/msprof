@@ -28,8 +28,7 @@ class TestEventViewer(unittest.TestCase):
         }
         check = EventViewer(config, params)
         ret = check.get_timeline_data()
-        self.assertEqual('{"status": 1, '
-                         '"info": "Failed to connect api_event.db"}', ret)
+        self.assertEqual([], ret)
 
     def test_get_timeline_data_should_return_empty_when_model_init_ok(self):
         config = {"headers": []}
@@ -43,8 +42,7 @@ class TestEventViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + ".EventDataViewModel.get_timeline_data", return_value=[]):
             check = EventViewer(config, params)
             ret = check.get_timeline_data()
-            self.assertEqual('{"status": 2, '
-                             '"info": "Unable to get event data."}', ret)
+            self.assertEqual([], ret)
 
     def test_get_timeline_data_should_return_timeline_when_data_exist(self):
         config = {"headers": []}

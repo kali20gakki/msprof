@@ -225,10 +225,6 @@ class TestMsProfExportDataUtils(unittest.TestCase):
             key = MsProfExportDataUtils()
             result = key._get_step_trace_data(configs, params)
         self.assertEqual(result, ('123123', 1, 2))
-        with mock.patch(NAMESPACE + '.StepTraceViewer.get_step_trace_summary', side_effect=OSError):
-            key = MsProfExportDataUtils()
-            result = key._get_step_trace_data(configs, params)
-        self.assertEqual(result, '{"data": "", "status": 1, "info": "message error: "}')
 
     def test_get_op_statistic_data(self):
         configs = {"db": 'hwts', "headers": '123'}
