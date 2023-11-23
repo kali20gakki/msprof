@@ -35,6 +35,7 @@ class MsprofDataStorage:
     DATA_TO_FILE = 1024 * 1024
     DEFAULT_SETTING = ('on', 0, 0)
     SETTING = None
+    AVERAGE_DATA_SIZE = 300  # bytes
 
     def __init__(self: any) -> None:
         self.tid_set = set()
@@ -269,8 +270,9 @@ class MsprofDataStorage:
         :return: slice times: int
         """
         list_length = len(self.data_list)
-        str_length = len(json.dumps(self.data_list))
-        coefficient = math.ceil(str_length / (list_length * 80)) if list_length else 0
+        str_length = list_length * self.AVERAGE_DATA_SIZE
+        # str_length / (list_length * 80) simplify formula
+        coefficient = math.ceil(self.AVERAGE_DATA_SIZE / 80) if list_length else 0
         # If an exception occurs, continue the calculation logic.
         try:
             if isinstance(limit_size, int) and limit_size >= 200:
