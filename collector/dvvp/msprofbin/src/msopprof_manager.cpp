@@ -82,34 +82,21 @@ int MsopprofManager::MsopprofProcess(int argc, CONST_CHAR_PTR argv[])
 bool MsopprofManager::CheckMsopprofIfExist(int argc, CONST_CHAR_PTR argv[], std::vector<std::string> &op_argv) const
 {
     bool ret = false;
-    for (int i = 1; i < argc; i++) {
-        if (strncmp(argv[i], "--op=on", INPUT_MAX_LENTH) == 0) {
-            ret = true;
-        } else {
-            op_argv.push_back(argv[i]);
-        }
+    if (argc > 1 && strncmp(argv[1], "op", INPUT_MAX_LENTH) == 0) {
+        ret = true;
     }
-    if (path_.empty() && ret) {
-        CmdLog::instance()->CmdErrorLog("cannot find msopprof,"
+    if (ret) {
+        if (path_.empty()) {
+            CmdLog::instance()->CmdErrorLog("cannot find msopprof,"
             "because not set environment variable ASCEND_TOOLKIT_HOME,"
             "Maybe you should set setenv.sh.");
+        } else {
+            for (int i = 2; i < argc; i++) {
+                op_argv.push_back(argv[i]);
+            }
+        }
     }
     return ret;
-}
-
-void MsopprofManager::PrintHelp()
-{
-    std::vector<std::string> op_args;
-    op_args.push_back("--help");
-    if (!path_.empty() && (ParamValidation::instance()->CheckMsopprofBinValid(path_) == PROFILING_SUCCESS)) {
-        CmdLog::instance()->CmdInfoLog("If you activate the --op option with '--op=on',"
-            "the following options are available .");
-        ExecMsopprof(path_, op_args);
-    } else {
-        CmdLog::instance()->CmdInfoLog("no msopprof help message,"
-            "because not set environment variable ASCEND_TOOLKIT_HOME,"
-            "Maybe you should run setenv.sh.");
-    }
 }
 
 int MsopprofManager::ExecMsopprof(std::string path, std::vector<std::string> argsVec)

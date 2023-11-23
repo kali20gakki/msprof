@@ -48,7 +48,7 @@ TEST_F(MSPROF_BIN_UTEST, LltMain) {
     envp[1] = "a=b";
     CHAR_PTR opargv[2];
     opargv[0] = "msopprof";
-    opargv[1] = "--op=on";
+    opargv[1] = "op";
     MOCKER(&EnvManager::SetEnvList)
         .stubs()
         .will(returnValue(false));
