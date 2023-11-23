@@ -69,12 +69,6 @@ class DataCalculatorConfig(MetaConfig):
             ('chip_model', '5,7,8,10'),
             ('position', 'D')
         ],
-        'AcsqCalculator': [
-            ('path', 'mscalculate.hwts.acsq_calculator'),
-            ('chip_model', '5,7,8,10'),
-            ('level', '4'),
-            ('position', 'D')
-        ],
         'FftsPmuCalculator': [
             ('path', 'mscalculate.stars.ffts_pmu_calculator'),
             ('chip_model', '5,7,8,10'),
