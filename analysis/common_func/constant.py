@@ -453,7 +453,7 @@ class Constant:
     CHIP_V1_1_1 = "7"
     CHIP_V1_1_2 = "8"
     CHIP_V5_1_0 = "9"
-    CHIP_V1_1_3 = "10"
+    CHIP_V1_1_3 = "11"
 
     MIX_OP_AND_GRAPH = "mix_operator_and_graph"
     STEP_INFO = "step_info"

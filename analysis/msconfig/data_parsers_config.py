@@ -9,15 +9,15 @@ class DataParsersConfig(MetaConfig):
     DATA = {
         'GeLogicStreamParser': [
             ('path', 'msparser.ge.ge_logic_stream_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10')
+            ('chip_model', '0,1,2,3,4,5,7,8,11')
         ],
         'ParsingRuntimeData': [
             ('path', 'common_func.create_runtime_db'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10')
+            ('chip_model', '0,1,2,3,4,5,7,8,11')
         ],
         'L2CacheParser': [
             ('path', 'msparser.l2_cache.l2_cache_parser'),
-            ('chip_model', '1,2,3,4,5,7,8,10')
+            ('chip_model', '1,2,3,4,5,7,8,11')
         ],
         'TsTimelineRecParser': [
             ('path', 'msparser.iter_rec.ts_timeline_parser'),
@@ -26,15 +26,15 @@ class DataParsersConfig(MetaConfig):
         ],
         'ParsingDDRData': [
             ('path', 'msparser.hardware.ddr_parser'),
-            ('chip_model', '0,1,2,3,4,7,8,10')
+            ('chip_model', '0,1,2,3,4,7,8,11')
         ],
         'ParsingPeripheralData': [
             ('path', 'msparser.hardware.dvpp_parser'),
-            ('chip_model', '0,1,5,7,8,10')
+            ('chip_model', '0,1,5,7,8,11')
         ],
         'ParsingNicData': [
             ('path', 'msparser.hardware.nic_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10')
+            ('chip_model', '0,1,2,3,4,5,7,8,11')
         ],
         'ParsingRoceData': [
             ('path', 'msparser.hardware.roce_parser'),
@@ -42,23 +42,23 @@ class DataParsersConfig(MetaConfig):
         ],
         'ParsingTSData': [
             ('path', 'msparser.hardware.tscpu_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10')
+            ('chip_model', '0,1,2,3,4,5,7,8,11')
         ],
         'ParsingAICPUData': [
             ('path', 'msparser.hardware.ai_cpu_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10')
+            ('chip_model', '0,1,2,3,4,5,7,8,11')
         ],
         'ParsingCtrlCPUData': [
             ('path', 'msparser.hardware.ctrl_cpu_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10')
+            ('chip_model', '0,1,2,3,4,5,7,8,11')
         ],
         'ParsingMemoryData': [
             ('path', 'msparser.hardware.sys_mem_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10')
+            ('chip_model', '0,1,2,3,4,5,7,8,11')
         ],
         'ParsingCpuUsageData': [
             ('path', 'msparser.hardware.sys_usage_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10')
+            ('chip_model', '0,1,2,3,4,5,7,8,11')
         ],
         'ParsingPcieData': [
             ('path', 'msparser.hardware.pcie_parser'),
@@ -66,11 +66,11 @@ class DataParsersConfig(MetaConfig):
         ],
         'ParsingHBMData': [
             ('path', 'msparser.hardware.hbm_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10')
+            ('chip_model', '0,1,2,3,4,5,7,8,11')
         ],
         'NonMiniLLCParser': [
             ('path', 'msparser.hardware.llc_parser'),
-            ('chip_model', '1,2,3,4,5,7,8,10')
+            ('chip_model', '1,2,3,4,5,7,8,11')
         ],
         'MiniLLCParser': [
             ('path', 'msparser.hardware.mini_llc_parser'),
@@ -82,7 +82,7 @@ class DataParsersConfig(MetaConfig):
         ],
         'TstrackParser': [
             ('path', 'msparser.step_trace.ts_track_parser'),
-            ('chip_model', '1,2,3,4,5,7,8,10'),
+            ('chip_model', '1,2,3,4,5,7,8,11'),
             ('level', '2'),
             ('position', 'D'),
         ],
@@ -96,24 +96,24 @@ class DataParsersConfig(MetaConfig):
         ],
         'MsprofTxParser': [
             ('path', 'msparser.msproftx.msproftx_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10')
+            ('chip_model', '0,1,2,3,4,5,7,8,11')
         ],
         'ParseAiCpuDataAdapter': [
             ('path', 'msparser.aicpu.parse_aicpu_data_adapter'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('level', '3')
         ],
         'ParsingFftsAICoreSampleData': [
             ('path', 'msparser.aic_sample.ai_core_sample_parser'),
-            ('chip_model', '5,7,8,10')
+            ('chip_model', '5,7,8,11')
         ],
         'BiuPerfParser': [
             ('path', 'msparser.biu_perf.biu_perf_parser'),
-            ('chip_model', '5,7,8,10')
+            ('chip_model', '5,7,8,11')
         ],
         'SocProfilerParser': [
             ('path', 'msparser.stars.soc_profiler_parser'),
-            ('chip_model', '5,7,8,10')
+            ('chip_model', '5,7,8,11')
         ],
         'MsTimeParser': [
             ('path', 'msparser.ms_timer.ms_time_parser'),
@@ -139,15 +139,15 @@ class DataParsersConfig(MetaConfig):
         ],
         'NpuMemParser': [
             ('path', 'msparser.npu_mem.npu_mem_parser'),
-            ('chip_model', '0,1,3,4,5,7,8,10')
+            ('chip_model', '0,1,3,4,5,7,8,11')
         ],
         'NpuModuleMemParser': [
             ('path', 'msparser.npu_mem.npu_module_mem_parser'),
-            ('chip_model', '1,2,3,4,5,7,8,10')
+            ('chip_model', '1,2,3,4,5,7,8,11')
         ],
         'NpuOpMemParser': [
             ('path', 'msparser.npu_mem.npu_op_mem_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10')
+            ('chip_model', '0,1,2,3,4,5,7,8,11')
         ],
         'FreqParser': [
             ('path', 'msparser.freq.freq_parser'),
@@ -155,66 +155,66 @@ class DataParsersConfig(MetaConfig):
         ],
         'ApiEventParser': [
             ('path', 'msparser.api_event.api_event_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('level', '2')
         ],
         'HashDicParser': [
             ('path', 'msparser.hash_dic.hash_dic_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10,9')
+            ('chip_model', '0,1,2,3,4,5,7,8,9,11')
         ],
         'TaskTrackParser': [
             ('path', 'msparser.compact_info.task_track_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('level', '2'),
         ],
         'MemcpyInfoParser': [
             ('path', 'msparser.compact_info.memcpy_info_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('level', '2'),
         ],
         'HcclInfoParser': [
             ('path', 'msparser.add_info.hccl_info_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('level', '2')
         ],
         'MultiThreadParser': [
             ('path', 'msparser.add_info.multi_thread_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('level', '2')
         ],
         'TensorAddInfoParser': [
             ('path', 'msparser.add_info.tensor_add_info_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('level', '2'),
         ],
         'FusionAddInfoParser': [
             ('path', 'msparser.add_info.fusion_add_info_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('level', '2'),
         ],
         'GraphAddInfoParser': [
             ('path', 'msparser.add_info.graph_add_info_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,9,10'),
+            ('chip_model', '0,1,2,3,4,5,7,8,9,11'),
             ('level', '2'),
         ],
         'NodeBasicInfoParser': [
             ('path', 'msparser.compact_info.node_basic_info_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('level', '2'),
         ],
         'MemoryApplicationParser': [
             ('path', 'msparser.add_info.memory_application_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('level', '2'),
         ],
         'CtxIdParser': [
             ('path', 'msparser.add_info.ctx_id_parser'),
-            ('chip_model', '5,7,8,10'),
+            ('chip_model', '5,7,8,11'),
             ('level', '2'),
         ],
         'CANNCalculator': [
             ('path', 'mscalculate.cann.cann_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7,8,10'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('level', '3'),
             ('position', 'H')
         ],
@@ -232,7 +232,7 @@ class DataParsersConfig(MetaConfig):
         ],
         'StarsIterRecParser': [
             ('path', 'msparser.iter_rec.stars_iter_rec_parser'),
-            ('chip_model', '5,7,8,10'),
+            ('chip_model', '5,7,8,11'),
             ('level', '4'),
             ('position', 'D')
         ],
