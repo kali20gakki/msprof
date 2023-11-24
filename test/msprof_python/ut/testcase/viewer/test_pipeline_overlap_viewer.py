@@ -40,7 +40,7 @@ class TestPipelineOverlapViewer(unittest.TestCase):
             check = PipelineOverlapViewer({}, {
                 StrConstant.SAMPLE_CONFIG_PROJECT_PATH: os.path.join(self.DIR_PATH, 'PROF1', 'device_0')})
             ret = check.get_timeline_data()
-            self.assertEqual("", ret)
+            self.assertEqual([], ret)
 
     def test_get_timeline_data_should_return_only_task_data_when_hccl_db_not_exist(self):
         InfoJsonReaderManager(info_json=InfoJson(pid=1000)).process()
