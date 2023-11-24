@@ -168,7 +168,7 @@ class TestStepTraceViewer(unittest.TestCase):
             res = StepTraceViewer._reformat_step_trace_data(data_list, ITER_RANGE)
             self.assertEqual(res,
                              [[1, '42237001561.200\t', '42237019291.370\t', '42237019297.040\t',
-                               35557.520000000004, 35460.340000000004, 11.34, 'N/A', 1, '42481682674.000\t', 0]])
+                               355.57520000000005, 354.6034, 0.1134, 'N/A', 1, '42481682674.000\t', 0]])
 
     def test_get_trace_timeline_data(self):
         values = [

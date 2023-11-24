@@ -522,6 +522,7 @@ class StepTraceViewer:
                               NumberConstant.ROUND_THREE_DECIMAL)
                     ]
             trace[1:4] = map(lambda x: format_high_precision_summary_data(x), trace[1:4])
+            trace[4:8] = map(lambda x: StepTraceViewer.calculate_duration(x), trace[4:8])
             merge_data.append(trace)
         return merge_data
 
