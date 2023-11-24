@@ -67,9 +67,9 @@ class PipelineOverlapViewer:
             for data in communication_data
         )
 
-        if not compute_data and not communication_data:
+        if not result:
             logging.warning("Both task data and hccl data are missing, no need to calculate the overlap.")
-            return ""
+            return []
         pure_communication_section, free_time_section = SectionCalculator.compute_pipeline_overlap(communication_data,
                                                                                                    compute_data)
         result.extend(
