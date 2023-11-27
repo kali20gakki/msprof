@@ -398,8 +398,8 @@ class AiCoreOpReport:
         # ge or subtask need modify the context_id or subtask_id so that it should be same.
         sql = "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info}" \
               "{1}.op_name, {1}.op_type, {1}.task_type," \
-              "CAST({0}.start_time AS INTEGER), CAST({0}.duration_time AS INTEGER)," \
-              "CAST({0}.wait_time AS INTEGER), {1}.block_dim, {1}.mix_block_dim, {1}.op_flag," \
+              "{0}.start_time, {0}.duration_time," \
+              "{0}.wait_time, {1}.block_dim, {1}.mix_block_dim, {1}.op_flag," \
               "(case when {1}.input_shapes is NULL then 'N/A' else {1}.input_shapes end), " \
               "(case when {1}.input_data_types is NULL then 'N/A' else {1}.input_data_types end), " \
               "(case when {1}.input_formats is NULL then 'N/A' else {1}.input_formats end), " \
