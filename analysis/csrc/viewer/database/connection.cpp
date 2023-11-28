@@ -41,6 +41,7 @@ Connection::~Connection()
 bool Connection::ExecuteCreateTable(const std::string &sql)
 {
     CHAR_PTR errMsg = nullptr;
+    sqlite3_busy_timeout(db_, TIMEOUT);
     int rc = sqlite3_exec(db_, sql.c_str(), nullptr, nullptr, &errMsg);
     if (rc != SQLITE_OK) {
         std::string errorMsg = "Failed to create table: " + std::string(errMsg);
@@ -54,6 +55,7 @@ bool Connection::ExecuteCreateTable(const std::string &sql)
 bool Connection::ExecuteDropTable(const std::string &sql)
 {
     CHAR_PTR errMsg = nullptr;
+    sqlite3_busy_timeout(db_, TIMEOUT);
     int rc = sqlite3_exec(db_, sql.c_str(), nullptr, nullptr, &errMsg);
     if (rc != SQLITE_OK) {
         std::string errorMsg = "Failed to drop table: " + std::string(errMsg);
@@ -67,6 +69,7 @@ bool Connection::ExecuteDropTable(const std::string &sql)
 bool Connection::ExecuteDelete(const std::string &sql)
 {
     CHAR_PTR errMsg = nullptr;
+    sqlite3_busy_timeout(db_, TIMEOUT);
     int rc = sqlite3_exec(db_, sql.c_str(), nullptr, nullptr, &errMsg);
     if (rc != SQLITE_OK) {
         std::string errorMsg = "Failed to delete: " + std::string(errMsg);
@@ -80,6 +83,7 @@ bool Connection::ExecuteDelete(const std::string &sql)
 bool Connection::ExecuteUpdate(const std::string &sql)
 {
     CHAR_PTR errMsg = nullptr;
+    sqlite3_busy_timeout(db_, TIMEOUT);
     int rc = sqlite3_exec(db_, sql.c_str(), nullptr, nullptr, &errMsg);
     if (rc != SQLITE_OK) {
         std::string errorMsg = "Failed to update table: " + std::string(errMsg);
@@ -98,6 +102,7 @@ bool Connection::InsertCmd(const std::string &tableName, const int &colNum)
     }
     valueStr = "(" + valueStr + "?)";
     std::string sql = "INSERT INTO " + tableName + " VALUES" + valueStr;
+    sqlite3_busy_timeout(db_, TIMEOUT);
     bool rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt_, nullptr);
     if (rc != SQLITE_OK) {
         std::string errorMsg = std::string(sqlite3_errmsg(db_));

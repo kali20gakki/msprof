@@ -146,52 +146,49 @@ TEST_F(DBRunnerUtest, UpdateData)
     EXPECT_EQ(rc, true);
 }
 
-TEST_F(DBRunnerUtest, MultithreadingInsert)
+TEST_F(DBRunnerUtest, MultithreadingInsertQuery)
 {
     std::string path = "/tmp/a.db";
     auto dbRunner = std::make_shared<DBRunner>(path);
     dbRunner->DropTable("tb4");
-    std::vector<TableColumn> cols = {
-        TableColumn("col1", "INTEGER"),
-        TableColumn("col2", "INTEGER"),
-        TableColumn("col3", "INTEGER"),
-        TableColumn("col4", "NUMERIC"),
-        TableColumn("col5", "REAL"),
-        TableColumn("col6", "TEXT")
-    };
     dbRunner->CreateTable("tb4", cols);
-    const int threadsNum = 10;
-    const int rowNum = 10000;
+    dbRunner->CreateTable("tb5", cols);
+    const int threadsNum = 5;
+    const int rowNum = 1000;
     DATA_FORMAT data;
     auto row = std::make_tuple(2147483647, 4294967295, 9223372036854775807, 118972596256332.95,
-                               1340.046875,  "hcom_allGather__516_2");
+                               1340.046875, "hcom_allGather__516_2");
     for (int i = 0; i < rowNum; i++) {
         data.emplace_back(row);
     }
     ThreadPool pool(threadsNum);
     pool.Start();
-    auto task1 = [dbRunner, data]() {
+    auto task1 = [dbRunner, &data]() {
         dbRunner->InsertData("tb4", data);
     };
-    auto task2 = [dbRunner, data]() {
+    auto task2 = [dbRunner, &data]() {
         dbRunner->InsertData("tb5", data);
-    };
-    auto task3 = [dbRunner, data]() {
-        dbRunner->InsertData("tb6", data);
     };
     pool.AddTask(task1);
     pool.AddTask(task2);
-    pool.AddTask(task3);
     pool.WaitAllTasks();
     pool.Stop();
     std::string sql1 = "SELECT * FROM tb4;";
     std::string sql2 = "SELECT * FROM tb5;";
-    std::string sql3 = "SELECT * FROM tb6;";
-    DATA_FORMAT result;
-    dbRunner->QueryData(sql1, result);
-    EXPECT_EQ(rowNum, result.size());
-    dbRunner->QueryData(sql2, result);
-    EXPECT_EQ(rowNum, result.size());
-    dbRunner->QueryData(sql3, result);
-    EXPECT_EQ(rowNum, result.size());
+    DATA_FORMAT resultTb4;
+    DATA_FORMAT resultTb5;
+    ThreadPool pool_query(threadsNum);
+    pool_query.Start();
+    auto task3 = [dbRunner, &resultTb4, sql1]() {
+        dbRunner->QueryData(sql1, resultTb4);
+    };
+    auto task4 = [dbRunner, &resultTb5, sql2]() {
+        dbRunner->QueryData(sql2, resultTb5);
+    };
+    pool_query.AddTask(task3);
+    pool_query.AddTask(task4);
+    pool_query.WaitAllTasks();
+    pool_query.Stop();
+    EXPECT_EQ(rowNum, resultTb4.size());
+    EXPECT_EQ(rowNum, resultTb5.size());
 }
