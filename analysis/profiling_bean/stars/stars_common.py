@@ -43,6 +43,6 @@ class StarsCommon:
     @staticmethod
     def set_task_id(stream_id, task_id):
         if stream_id & 0x1000 != 0:
-            task_id = task_id & 0x1FFFF
+            task_id = task_id & 0x1FFF
             task_id |= (stream_id & 0xE000)
         return task_id
