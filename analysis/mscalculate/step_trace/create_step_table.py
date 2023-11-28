@@ -414,7 +414,7 @@ class StepTableBuilder:
         # iteration range table
         if is_helper:
             select_sql = "select DISTINCT index_id, model_id, " \
-                         "timestamp, tag_id, 0 from {}".format(table_name)
+                         "timestamp, tag_id, 0 as stream_id from {}".format(table_name)
         else:
             select_sql = "select DISTINCT index_id, model_id, " \
                          "timestamp, tag_id, stream_id from {}".format(table_name)
