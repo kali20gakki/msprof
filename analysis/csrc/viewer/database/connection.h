@@ -27,6 +27,7 @@ namespace Viewer {
 namespace Database {
 using namespace Analysis;
 using CHAR_PTR = char *;
+const int TIMEOUT = 2147483647;
 struct TableColumn {
     std::string name;
     std::string type;
@@ -149,7 +150,7 @@ bool Connection::ExecuteInsert(const std::string &tableName, const std::vector<s
 {
     int colNum = sizeof...(Args);
     // 开启事务
-    sqlite3_exec(db_, "BEGIN EXCLUSIVE", nullptr, nullptr, nullptr);
+    sqlite3_exec(db_, "BEGIN", nullptr, nullptr, nullptr);
     if (!InsertCmd(tableName, colNum)) {
         return false;
     }
