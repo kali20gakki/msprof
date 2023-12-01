@@ -29,7 +29,7 @@ using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Msprofbin;
 using namespace Collector::Dvvp::DynProf;
 
-void PrintStartLogInfo(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
+static void PrintStartLogInfo(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
 {
     std::string logInfo = "Start profiling";
     if (DynProfMngCli::instance()->IsEnableMode()) {
