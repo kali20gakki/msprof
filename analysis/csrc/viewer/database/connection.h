@@ -106,9 +106,9 @@ private:
 };
 
 template<typename T>
-int Connection::ExecuteInsertHelperHelper(T value)
+int Connection::ExecuteInsertHelperHelper(T t)
 {
-    BindParameters(value);
+    BindParameters(t);
     return 0;
 }
 

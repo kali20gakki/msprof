@@ -40,7 +40,7 @@ std::shared_ptr<T> MakeShared(const Args& ...args)
 }
 
 template<typename T, typename V>
-static T ReinterpretConvert(V ptr)
+T ReinterpretConvert(V ptr)
 {
     return reinterpret_cast<T>(ptr);
 }
