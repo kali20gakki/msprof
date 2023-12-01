@@ -15,16 +15,17 @@
 
 #include <string>
 #include <sstream>
-#include <memory>
 #include <queue>
+
+#include "utils.h"
 
 namespace Analysis {
 namespace Parser {
 // 该类是数据chunk生成类
 // 主要包括以下特性：
-// 1. 根据正则表达式，获取要读取的文件路径
-// 2. Push从文件读取二进制数据，保存在std::stringstream对象中
-// 3. Pop从std::stringstream对象Pop出固定大小的二进制数据chunk
+// 1. 根据文件名的前后缀，获取要读取的文件路径
+// 2. ReadChunk：从文件读取二进制数据，保存在std::stringstream对象中
+// 3. Pop：从std::stringstream对象Pop出chunkSize_大小的二进制数据
 class ChunkGenerator {
 public:
     explicit ChunkGenerator(uint32_t chunkSize) : chunkSize_(chunkSize) {}
@@ -32,24 +33,9 @@ public:
     virtual ~ChunkGenerator();
 
     int ReadChunk();
-    int Push(const std::shared_ptr<void> &chunk);
-    std::shared_ptr<void> Pop();
-    bool FileEmpty() const;
-    bool ChunkEmpty() const;
+    Utils::CHAR_PTR Pop();
+    bool Empty() const;
     size_t Size() const;
-    std::streamsize GetChunkSize() const;
-
-    template<typename T>
-    static std::shared_ptr<T> ToObj(std::shared_ptr<void> chunk)
-    {
-        return std::static_pointer_cast<T>(chunk);
-    }
-
-    template<typename T>
-    static std::shared_ptr<void> ToChunk(std::shared_ptr<T> obj)
-    {
-        return std::static_pointer_cast<void>(obj);
-    }
 
 private:
     std::stringstream ss_;

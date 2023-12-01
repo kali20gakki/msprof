@@ -12,43 +12,51 @@
 
 #include "flip.h"
 
-#include <algorithm>
+#include "log.h"
 #include "utils.h"
 
 namespace Analysis {
 namespace Parser {
 namespace Adapter {
+using namespace Analysis::Utils;
+
 namespace {
 const uint16_t STREAM_DESTROY_FLIP = 65535;
 const uint32_t TASK_ID_BIT = 0x0000FFFF;
-const uint16_t TASK_ID_BIT_NUM = 16;
+const uint16_t BIT_NUM = 16;
+}  // namespace
+
+uint16_t Flip::GetTaskId(const MsprofCompactInfo &task)
+{
+    return task.data.runtimeTrack.taskId & TASK_ID_BIT;  // taskId是低16位
 }
 
-uint16_t Flip::GetTaskId(const std::shared_ptr<MsprofCompactInfo> &task)
+uint16_t Flip::GetBatchId(const MsprofCompactInfo &task)
 {
-    return task->data.runtimeTrack.taskId & TASK_ID_BIT;  // taskId是低16位
+    return task.data.runtimeTrack.taskId >> BIT_NUM;  // batchId/filpNum是高16位
 }
 
-uint16_t Flip::GetBatchId(const std::shared_ptr<MsprofCompactInfo> &task)
+void Flip::SetBatchId(MsprofCompactInfo &task, uint32_t batchId)
 {
-    return task->data.runtimeTrack.taskId >> TASK_ID_BIT_NUM;  // batchId/filpNum是高16位
+    task.data.runtimeTrack.taskId = (task.data.runtimeTrack.taskId & TASK_ID_BIT) + (batchId << BIT_NUM);
 }
 
-void Flip::SetBatchId(std::shared_ptr<MsprofCompactInfo> &task, uint32_t batchId)
+std::shared_ptr<FlipTask> Flip::CreateFlipTask(MsprofCompactInfo *taskTrack)
 {
-    task->data.runtimeTrack.taskId = (task->data.runtimeTrack.taskId & TASK_ID_BIT) + (batchId << TASK_ID_BIT_NUM);
-}
-
-std::shared_ptr<FlipTask> Flip::CreateFlipTask(const std::shared_ptr<MsprofCompactInfo> &taskTrack)
-{
-    std::shared_ptr<FlipTask> flipTask = Utils::MakeShared<FlipTask>();
-    if (!flipTask || !taskTrack) {
+    if (!taskTrack) {
+        ERROR("Task track is null.");
         return nullptr;
     }
+    auto flipTask = MakeShared<FlipTask>();
+    if (!flipTask) {
+        ERROR("New flipTask failed.");
+        return nullptr;
+    }
+    flipTask->deviceId = taskTrack->data.runtimeTrack.deviceId;
     flipTask->streamId = taskTrack->data.runtimeTrack.streamId;
-    flipTask->taskId = GetTaskId(taskTrack);
+    flipTask->taskId = GetTaskId(*taskTrack);
     flipTask->timeStamp = taskTrack->timeStamp;
-    flipTask->flipNum = GetBatchId(taskTrack);
+    flipTask->flipNum = GetBatchId(*taskTrack);
     return flipTask;
 }
 
@@ -56,43 +64,36 @@ void Flip::ComputeBatchId(std::vector<std::shared_ptr<MsprofCompactInfo>> &taskT
                           std::vector<std::shared_ptr<FlipTask>> &flipTask)
 {
     if (taskTrack.empty()) {
+        WARN("Task tracks is empty.");
         return;
     }
-    std::sort(taskTrack.begin(), taskTrack.end(),
-              [&](const std::shared_ptr<MsprofCompactInfo> &l, const std::shared_ptr<MsprofCompactInfo> &r) {
-                  return l->timeStamp < r->timeStamp;
-              });
-    std::sort(flipTask.begin(), flipTask.end(),
-              [&](const std::shared_ptr<FlipTask> &l, const std::shared_ptr<FlipTask> &r) {
-                  return l->timeStamp < r->timeStamp;
-              });
     auto taskTrackBin = SepTaskTrack(taskTrack);
     auto flipTaskBin = SepFlipTask(flipTask);
+    auto maxFlip = MakeShared<FlipTask>();
+    if (!maxFlip) {
+        ERROR("Make share flip task failed.");
+        return;
+    }
     for (auto &item : taskTrackBin) {
-        auto streamId = item.first;
-        std::vector<std::shared_ptr<MsprofCompactInfo>> &taskTrackInStream = item.second;
+        const auto &key = item.first;
+        auto &taskTrackInStream = item.second;
         std::vector<std::shared_ptr<FlipTask>> flipTaskInStream;
-        auto iter = flipTaskBin.find(streamId);
+        auto iter = flipTaskBin.find(key);
         if (iter != flipTaskBin.end()) {
             flipTaskInStream = iter->second;
-        }
-        std::shared_ptr<FlipTask> maxFlip = Utils::MakeShared<FlipTask>();
-        if (!maxFlip) {
-            ERROR("Max flip make_shared failed");
-            return;
         }
         flipTaskInStream.emplace_back(maxFlip);
         uint32_t batchId = 0;
         uint32_t taskIdx = 0;
-        while (taskIdx < taskTrackInStream.size()) {
+        while (taskIdx < taskTrackInStream.size() && batchId < flipTaskInStream.size()) {
             auto &task = taskTrackInStream[taskIdx];
-            auto flip = flipTaskInStream[batchId];
+            const auto &flip = flipTaskInStream[batchId];
             if (task->timeStamp > flip->timeStamp) {
                 ++batchId;  // next flip
                 CalibrateFlipTaskIdNotZero(taskTrackInStream, flip, taskIdx, batchId);
                 continue;
             }
-            SetBatchId(task, batchId);
+            SetBatchId(*task, batchId);
             ++taskIdx; // next task
         }
     }
@@ -100,18 +101,28 @@ void Flip::ComputeBatchId(std::vector<std::shared_ptr<MsprofCompactInfo>> &taskT
 
 Flip::CompactInfoMap Flip::SepTaskTrack(const std::vector<std::shared_ptr<MsprofCompactInfo>> &taskTrack)
 {
-    Flip::CompactInfoMap data;
+    CompactInfoMap data;
     for (const auto &task : taskTrack) {
-        data[task->data.runtimeTrack.streamId].emplace_back(task);
+        if (!task) {
+            ERROR("Task track is null.");
+            continue;
+        }
+        uint32_t key = (task->data.runtimeTrack.deviceId << BIT_NUM) + task->data.runtimeTrack.streamId;
+        data[key].emplace_back(task);
     }
     return data;
 }
 
 Flip::FlipTaskMap Flip::SepFlipTask(const std::vector<std::shared_ptr<FlipTask>> &flipTask)
 {
-    Flip::FlipTaskMap data;
+    FlipTaskMap data;
     for (const auto &flip : flipTask) {
-        data[flip->streamId].emplace_back(flip);
+        if (!flip) {
+            ERROR("Flip task is null.");
+            continue;
+        }
+        uint32_t key = (flip->deviceId << BIT_NUM) + flip->streamId;
+        data[key].emplace_back(flip);
     }
     return data;
 }
@@ -125,10 +136,9 @@ void Flip::CalibrateFlipTaskIdNotZero(std::vector<std::shared_ptr<MsprofCompactI
     // Because tasks in multi-threads will apply for task id 0 simultaneously,
     // the flip may not get the task_id 0, we should search backward to calibrate the task
     // which task id is less than flip's task_id, and set these tasks the next batch id.
-    uint32_t taskIdxBackward = taskIdx - 1;
-    while (taskIdxBackward >= 0 && GetTaskId(taskTrack[taskIdxBackward]) < flip->taskId) {
-        SetBatchId(taskTrack[taskIdxBackward], batchId);
-        --taskIdxBackward;
+    while (taskIdx >= 1 && GetTaskId(*taskTrack[taskIdx - 1]) < flip->taskId) {
+        SetBatchId(*taskTrack[taskIdx - 1], batchId);
+        --taskIdx;
     }
 }
 }  // namespace Adapter

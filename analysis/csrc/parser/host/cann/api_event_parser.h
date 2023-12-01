@@ -14,23 +14,27 @@
 #define ANALYSIS_PARSER_HOST_CANN_API_EVENT_PARSER_H
 
 #include <string>
+#include <vector>
 
 #include "base_parser.h"
+#include "prof_common.h"
 
 namespace Analysis {
 namespace Parser {
 namespace Host {
 namespace Cann {
 // 该类的作用是Api和Event数据的解析
-class ApiEventParser final : public BaseParser {
+class ApiEventParser final : public BaseParser<ApiEventParser> {
 public:
     explicit ApiEventParser(const std::string &path);
+    template<typename T> std::vector<std::shared_ptr<T>> GetData();
 
 private:
-    int ProduceChunk() override;
-    int ConsumeChunk(std::shared_ptr<void> &chunk, const std::shared_ptr<ChunkGenerator> &chunkConsumer) override;
+    int ProduceData() override;
 
 private:
+    std::vector<std::shared_ptr<MsprofApi>> apiData_;  // not owned
+    std::vector<std::shared_ptr<MsprofEvent>> eventData_;  // not owned
     std::vector<std::string> filePrefix_ = {
         "unaging.api_event.data.slice",
         "aging.api_event.data.slice",

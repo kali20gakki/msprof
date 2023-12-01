@@ -12,11 +12,8 @@
 
 #include "compact_info_parser.h"
 
-#include "prof_common.h"
 #include "chunk_generator.h"
 #include "log.h"
-#include "flip.h"
-#include "type_data.h"
 #include "context.h"
 #include "utils.h"
 
@@ -31,77 +28,119 @@ using namespace Analysis::Utils;
 void CompactInfoParser::Init(const std::vector<std::string> &filePrefix)
 {
     chunkProducer_ = MakeShared<ChunkGenerator>(sizeof(MsprofCompactInfo), path_, filePrefix);
-    chunkConsumers_ = {
-        {typeid(MsprofCompactInfo).hash_code(), chunkProducer_},
-    };
 }
 
-int CompactInfoParser::ConsumeChunk(std::shared_ptr<void> &chunk, const std::shared_ptr<ChunkGenerator> &chunkConsumer)
+template<>
+std::vector<std::shared_ptr<MsprofCompactInfo>> CompactInfoParser::GetData()
 {
-    chunk = chunkConsumer->Pop();
-    if (!chunk) {
-        ERROR("chunk is null.");
+    return compactData_;
+}
+
+template<>
+std::vector<std::shared_ptr<FlipTask>> CompactInfoParser::GetData()
+{
+    return flipTaskData_;
+}
+
+int CompactInfoParser::ProduceData()
+{
+    if (!Reserve(compactData_, chunkProducer_->Size())) {
+        ERROR("%: Reserve data failed", parserName_);
         return ANALYSIS_ERROR;
     }
-    // 避免FlipTask数据进行5A5A校验
-    if (chunkConsumer->GetChunkSize() == sizeof(FlipTask)) {
-        return ANALYSIS_OK;
-    }
-    auto data = ChunkGenerator::ToObj<MsprofCompactInfo>(chunk);
-    if (data->magicNumber != MSPROF_DATA_HEAD_MAGIC_NUM) {
-        ERROR("Check 5A5A failed in place &.", chunkConsumer->Size());
-        return ANALYSIS_ERROR;
+    while (!chunkProducer_->Empty()) {
+        auto compactInfo = ReinterpretConvert<MsprofCompactInfo*>(chunkProducer_->Pop());
+        if (!compactInfo) {
+            ERROR("%: Pop chunk failed.", parserName_);
+            return ANALYSIS_ERROR;
+        }
+        if (compactInfo->magicNumber != MSPROF_DATA_HEAD_MAGIC_NUM) {
+            ERROR("%: The last %th data check failed.", parserName_, chunkProducer_->Size());
+            delete compactInfo;
+            continue;
+        }
+        compactData_.emplace_back(std::shared_ptr<MsprofCompactInfo>(compactInfo));
     }
     return ANALYSIS_OK;
 }
 
-TaskTrackParser::TaskTrackParser(const std::string &path) : CompactInfoParser(path)
+int NodeBasicInfoParser::ProduceData()
 {
-    chunkProducer_ = MakeShared<ChunkGenerator>(sizeof(MsprofCompactInfo), path_, filePrefix_);
-    chunkConsumers_ = {
-        {typeid(MsprofCompactInfo).hash_code(), MakeShared<ChunkGenerator>(sizeof(MsprofCompactInfo))},
-        {typeid(FlipTask).hash_code(), MakeShared<ChunkGenerator>(sizeof(FlipTask))},
-    };
-}
-
-int TaskTrackParser::ProduceChunk()
-{
-    if (chunkProducer_->ReadChunk() != ANALYSIS_OK) {
-        ERROR("Read Chunk failed.");
+    auto staticChunkProducer = MakeShared<ChunkGenerator>(sizeof(MsprofCompactInfo), path_, staticFilePrefix_);
+    if (!staticChunkProducer || staticChunkProducer->ReadChunk() != ANALYSIS_OK) {
+        ERROR("%: Read Chunk failed.", parserName_);
         return ANALYSIS_ERROR;
     }
-    const std::string taskFlip = "FLIP_TASK";
-    const std::string taskMaintenance = "MAINTENANCE";
-    auto &taskTrackConsumer = chunkConsumers_[typeid(MsprofCompactInfo).hash_code()];
-    auto &flipTaskConsumer = chunkConsumers_[typeid(FlipTask).hash_code()];
-    std::vector<std::shared_ptr<MsprofCompactInfo>> taskTracks;
-    std::vector<std::shared_ptr<FlipTask>> flipTasks;
-    while (!chunkProducer_->ChunkEmpty()) {
-        auto chunk = ChunkGenerator::ToObj<MsprofCompactInfo>(chunkProducer_->Pop());
-        if (!chunk) {
-            ERROR("Chunk is null.");
-            continue;
-        }
-        if (TypeData::GetInstance().Get(chunk->level, chunk->data.runtimeTrack.taskType) == taskFlip) {
-            std::shared_ptr<FlipTask> flipTask = Flip::CreateFlipTask(chunk);
-            if (!flipTask) {
-                ERROR("FlipTask make_shared failed.");
+    if (!Reserve(compactData_, chunkProducer_->Size() + staticChunkProducer->Size())) {
+        ERROR("%: Reserve data failed", parserName_);
+        return ANALYSIS_ERROR;
+    }
+    std::unordered_map<OpType, std::shared_ptr<ChunkGenerator>> producerMap = {
+        {OpType::STATIC_OP, staticChunkProducer},
+        {OpType::DYNAMIC_OP, chunkProducer_},
+    };
+    for (const auto &item : producerMap) {
+        const auto &opState = static_cast<uint8_t>(item.first);
+        auto &producer = item.second;
+        while (!producer->Empty()) {
+            auto compactInfo = ReinterpretConvert<MsprofCompactInfo*>(producer->Pop());
+            if (!compactInfo) {
+                ERROR("%: Pop chunk failed.", parserName_);
                 return ANALYSIS_ERROR;
             }
-            flipTasks.emplace_back(flipTask);
-            flipTaskConsumer->Push(ChunkGenerator::ToChunk<FlipTask>(flipTask));
-            continue;
+            if (compactInfo->magicNumber != MSPROF_DATA_HEAD_MAGIC_NUM) {
+                ERROR("%: The last %th data check failed with opState %.", parserName_, producer->Size(), opState);
+                delete compactInfo;
+                continue;
+            }
+            compactInfo->data.nodeBasicInfo.opState = opState;
+            compactData_.emplace_back(std::shared_ptr<MsprofCompactInfo>(compactInfo));
         }
-        if (TypeData::GetInstance().Get(chunk->level, chunk->data.runtimeTrack.taskType) == taskMaintenance) {
-            continue;
-        }
-        taskTracks.emplace_back(chunk);
     }
+    return ANALYSIS_OK;
+}
+
+int TaskTrackParser::ProduceData()
+{
+    const uint64_t flipTaskType = 98;
+    const uint64_t maintenanceTaskType = 6;
+    if (!Reserve(compactData_, chunkProducer_->Size())) {
+        ERROR("%: Reserve data failed", parserName_);
+        return ANALYSIS_ERROR;
+    }
+    while (!chunkProducer_->Empty()) {
+        auto compactInfo = ReinterpretConvert<MsprofCompactInfo*>(chunkProducer_->Pop());
+        if (!compactInfo) {
+            ERROR("%: Pop chunk failed.", parserName_);
+            return ANALYSIS_ERROR;
+        }
+        if (compactInfo->magicNumber != MSPROF_DATA_HEAD_MAGIC_NUM) {
+            ERROR("%: The last %th data check failed.", parserName_, chunkProducer_->Size());
+            delete compactInfo;
+            continue;
+        }
+        if (compactInfo->data.runtimeTrack.taskType == flipTaskType) {
+            auto flipTask = Flip::CreateFlipTask(compactInfo);
+            delete compactInfo;
+            if (!flipTask) {
+                ERROR("FlipTask is null.");
+                return ANALYSIS_ERROR;
+            }
+            flipTaskData_.emplace_back(flipTask);
+            continue;
+        }
+        // 因为Maintenance task标记流销毁，device侧并不会上报，也没有更多的含义，所以无需关联和展示
+        // 同时Maintenance task可能会在流销毁的flip task后面，影响batch id的计算，所以过滤掉
+        if (compactInfo->data.runtimeTrack.taskType == maintenanceTaskType) {
+            delete compactInfo;
+            continue;
+        }
+        compactData_.emplace_back(std::shared_ptr<MsprofCompactInfo>(compactInfo));
+    }
+    Sort<MsprofCompactInfo, uint64_t, &MsprofCompactInfo::timeStamp>(compactData_);
+    Sort<FlipTask, uint64_t, &FlipTask::timeStamp>(flipTaskData_);
     if (Context::GetInstance().IsAllExport()) {
-        Flip::ComputeBatchId(taskTracks, flipTasks);
-    }
-    for (const auto &task : taskTracks) {
-        taskTrackConsumer->Push(ChunkGenerator::ToChunk<MsprofCompactInfo>(task));
+        Flip::ComputeBatchId(compactData_, flipTaskData_);
     }
     return ANALYSIS_OK;
 }
