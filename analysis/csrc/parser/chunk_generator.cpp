@@ -33,6 +33,8 @@ ChunkGenerator::ChunkGenerator(uint32_t chunkSize, const std::string &path, cons
 
 ChunkGenerator::~ChunkGenerator()
 {
+    readFiles_.clear();
+    remainSize_ = 0;
     ss_.clear();
     ss_.str("");
 }
@@ -61,39 +63,23 @@ int ChunkGenerator::ReadChunk()
     return ANALYSIS_OK;
 }
 
-std::shared_ptr<void> ChunkGenerator::Pop()
+CHAR_PTR ChunkGenerator::Pop()
 {
     if (remainSize_ == 0) {
+        WARN("Nothing remain to Pop.");
         return nullptr;
     }
-    std::shared_ptr<void> chunk;
-    chunk.reset(new char[chunkSize_], std::default_delete<char[]>());
-    ss_.read(std::static_pointer_cast<char>(chunk).get(), chunkSize_);
+    auto chunk = new (std::nothrow) char[chunkSize_];
+    if (!chunk) {
+        ERROR("New chunk failed.");
+        return nullptr;
+    }
+    ss_.read(chunk, chunkSize_);
     --remainSize_;
     return chunk;
 }
 
-int ChunkGenerator::Push(const std::shared_ptr<void> &chunk)
-{
-    if (!chunk) {
-        ERROR("Push chunk is null.");
-        return ANALYSIS_ERROR;
-    }
-    if (chunkSize_ == 0) {
-        ERROR("Chunk size is invalid");
-        return ANALYSIS_ERROR;
-    }
-    ++remainSize_;
-    ss_.write(std::static_pointer_cast<char>(chunk).get(), chunkSize_);
-    return ANALYSIS_OK;
-}
-
-bool ChunkGenerator::FileEmpty() const
-{
-    return readFiles_.empty();
-}
-
-bool ChunkGenerator::ChunkEmpty() const
+bool ChunkGenerator::Empty() const
 {
     return remainSize_ == 0;
 }
@@ -101,11 +87,6 @@ bool ChunkGenerator::ChunkEmpty() const
 size_t ChunkGenerator::Size() const
 {
     return remainSize_;
-}
-
-std::streamsize ChunkGenerator::GetChunkSize() const
-{
-    return chunkSize_;
 }
 }  // namespace Parser
 }  // namespace Analysis

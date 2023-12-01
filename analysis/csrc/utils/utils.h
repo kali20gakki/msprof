@@ -21,6 +21,7 @@
 
 namespace Analysis {
 namespace Utils {
+using CHAR_PTR = char *;
 std::string Join(const std::vector<std::string> &str, const std::string &delimiter);
 std::vector<std::string> Split(const std::string &str, const std::string &delimiter);
 int StrToU16(uint16_t &dest, const std::string &numStr);
@@ -37,6 +38,27 @@ std::shared_ptr<T> MakeShared(const Args& ...args)
         return nullptr;
     }
     return sp;
+}
+
+template <class T>
+bool Reserve(std::vector<T> &vec, size_t s)
+{
+    try {
+        vec.reserve(s);
+    } catch (...) {
+        ERROR("Reserve vector failed");
+        return false;
+    }
+    return true;
+}
+
+template<typename T, typename U, U T::*element>
+void Sort(std::vector<std::shared_ptr<T>> &items)
+{
+    std::stable_sort(items.begin(), items.end(),
+                     [&](const std::shared_ptr<T> &lhs, const std::shared_ptr<T> &rhs) {
+                         return lhs && rhs && (*lhs).*element < (*rhs).*element;
+                     });
 }
 
 template<typename T, typename V>

@@ -340,6 +340,7 @@ void FileWriter::WriteText(const std::string& content)
 {
     if (IsOpen()) {
         outStream_ << content;
+        outStream_.flush();
     }
 }
 

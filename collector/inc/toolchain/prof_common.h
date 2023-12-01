@@ -71,6 +71,7 @@ struct MsprofNodeBasicInfo {
     uint64_t opType;
     uint32_t blockDim;
     uint32_t opFlag;
+    uint8_t opState;
 };
 
 struct MsrofTensorData {

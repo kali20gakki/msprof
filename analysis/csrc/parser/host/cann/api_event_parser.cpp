@@ -13,7 +13,6 @@
 #include "api_event_parser.h"
 
 #include "chunk_generator.h"
-#include "prof_common.h"
 #include "log.h"
 #include "utils.h"
 
@@ -22,48 +21,89 @@ namespace Parser {
 namespace Host {
 namespace Cann {
 using namespace Analysis::Utils;
+namespace {
+std::shared_ptr<MsprofApi> CreateMsprofApi(const MsprofEvent *startEvent, const MsprofEvent *endEvent)
+{
+    if (!startEvent || !endEvent) {
+        ERROR("Event data is null.");
+        return nullptr;
+    }
+    auto apiData = MakeShared<MsprofApi>();
+    if (!apiData) {
+        ERROR("New api data failed.");
+        return nullptr;
+    }
+    apiData->level = startEvent->level;
+    apiData->type = startEvent->type;
+    apiData->threadId = startEvent->threadId;
+    apiData->reserve = startEvent->requestId;
+    apiData->beginTime = startEvent->timeStamp;
+    apiData->endTime = endEvent->timeStamp;
+    apiData->itemId = startEvent->itemId;
+    return apiData;
+}
+}  // namespace
 
-ApiEventParser::ApiEventParser(const std::string &path) : BaseParser(path)
+ApiEventParser::ApiEventParser(const std::string &path) : BaseParser(path, "ApiEventParser")
 {
     chunkProducer_ = MakeShared<ChunkGenerator>(sizeof(MsprofApi), path_, filePrefix_);
-    chunkConsumers_ = {
-        {typeid(MsprofApi).hash_code(), MakeShared<ChunkGenerator>(sizeof(MsprofApi))},
-        {typeid(MsprofEvent).hash_code(), MakeShared<ChunkGenerator>(sizeof(MsprofEvent))},
-    };
 }
 
-int ApiEventParser::ProduceChunk()
+template<>
+std::vector<std::shared_ptr<MsprofApi>> ApiEventParser::GetData()
 {
-    if (chunkProducer_->ReadChunk() != ANALYSIS_OK) {
-        ERROR("Read Chunk failed.");
+    return apiData_;
+}
+
+template<>
+std::vector<std::shared_ptr<MsprofEvent>> ApiEventParser::GetData()
+{
+    return eventData_;
+}
+
+int ApiEventParser::ProduceData()
+{
+    std::map<std::tuple<uint16_t, uint32_t, uint32_t, uint32_t, uint64_t>, MsprofEvent*> startEventMap;
+    if (!Reserve(apiData_, chunkProducer_->Size())) {
+        ERROR("%: Reserve data failed", parserName_);
         return ANALYSIS_ERROR;
     }
-    while (!chunkProducer_->ChunkEmpty()) {
-        auto chunk = ChunkGenerator::ToObj<MsprofEvent>(chunkProducer_->Pop());
-        if (!chunk) {
-            ERROR("Chunk is null.");
+    while (!chunkProducer_->Empty()) {
+        auto event = ReinterpretConvert<MsprofEvent*>(chunkProducer_->Pop());
+        if (!event) {
+            ERROR("%: Pop chunk failed.", parserName_);
+            return ANALYSIS_ERROR;
+        }
+        if (event->magicNumber != MSPROF_DATA_HEAD_MAGIC_NUM) {
+            ERROR("%: The last %th data check failed.", parserName_, chunkProducer_->Size());
+            delete event;
             continue;
         }
-        if (chunk->reserve == MSPROF_EVENT_FLAG) {
-            chunkConsumers_[typeid(MsprofEvent).hash_code()]->Push(ChunkGenerator::ToChunk<MsprofEvent>(chunk));
-        } else {
-            chunkConsumers_[typeid(MsprofApi).hash_code()]->Push(ChunkGenerator::ToChunk<MsprofEvent>(chunk));
+        if (event->reserve != MSPROF_EVENT_FLAG) {
+            // api data
+            apiData_.emplace_back(std::shared_ptr<MsprofApi>(ReinterpretConvert<MsprofApi*>(event)));
+            continue;
         }
+        // event data，根据level, type, threadId, requestId, itemId合并start event和end event
+        auto key = std::make_tuple(event->level, event->type, event->threadId, event->requestId, event->itemId);
+        auto iter = startEventMap.find(key);
+        if (iter == startEventMap.end()) {
+            startEventMap[key] = event;
+            continue;
+        }
+        auto startEvent = iter->second;
+        auto apiData = CreateMsprofApi(startEvent, event);
+        startEventMap.erase(iter);
+        delete startEvent;
+        delete event;
+        if (!apiData) {
+            ERROR("Api data is null.");
+            return ANALYSIS_ERROR;
+        }
+        apiData_.emplace_back(apiData);
     }
-    return ANALYSIS_OK;
-}
-
-int ApiEventParser::ConsumeChunk(std::shared_ptr<void> &chunk, const std::shared_ptr<ChunkGenerator> &chunkConsumer)
-{
-    chunk = chunkConsumer->Pop();
-    if (!chunk) {
-        ERROR("chunk is null.");
-        return ANALYSIS_ERROR;
-    }
-    auto data = ChunkGenerator::ToObj<MsprofApi>(chunk);
-    if (data->magicNumber != MSPROF_DATA_HEAD_MAGIC_NUM) {
-        ERROR("Check 5A5A failed in place &.", chunkConsumer->Size());
-        return ANALYSIS_ERROR;
+    if (!startEventMap.empty()) {
+        ERROR("There is remaining start event.");
     }
     return ANALYSIS_OK;
 }
