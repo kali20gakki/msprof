@@ -10,6 +10,7 @@ from profiling_bean.basic_info.collect_info import CollectInfo
 from profiling_bean.basic_info.device_info import DeviceInfo
 from profiling_bean.basic_info.host_info import HostInfo
 from profiling_bean.basic_info.model_info import ModelInfo
+from profiling_bean.basic_info.version_info import VersionInfo
 
 
 class BasicInfo:
@@ -17,15 +18,12 @@ class BasicInfo:
     basic info contain collect, device and host info
     """
 
-    def __init__(self: any,
-                 collection_info: CollectInfo,
-                 device_info: DeviceInfo,
-                 host_info: HostInfo,
-                 model_info: ModelInfo) -> None:
-        self.collection_info = collection_info
-        self.device_info = device_info
-        self.host_info = host_info
-        self.model_info = model_info
+    def __init__(self: any) -> None:
+        self.collection_info = CollectInfo()
+        self.device_info = DeviceInfo()
+        self.host_info = HostInfo()
+        self.model_info = ModelInfo()
+        self.version_info = VersionInfo()
 
     def fresh_data(self: any, project_path: str) -> None:
         """
@@ -37,6 +35,7 @@ class BasicInfo:
         self.device_info.run(project_path)
         self.host_info.run(project_path)
         self.model_info.run(project_path)
+        self.version_info.run(project_path)
 
     def run(self: any, project_path: str) -> None:
         """
@@ -85,11 +84,7 @@ class MsProfBasicInfo:
         :return: None
         """
         LoadInfoManager().load_info(self.project_path)
-        collection_info = CollectInfo()
-        device_info = DeviceInfo()
-        host_info = HostInfo()
-        model_info = ModelInfo()
-        self.basic_info = BasicInfo(collection_info, device_info, host_info, model_info)
+        self.basic_info = BasicInfo()
 
     def run(self: any) -> str:
         """
