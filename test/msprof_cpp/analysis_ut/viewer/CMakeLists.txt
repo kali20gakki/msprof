@@ -10,9 +10,8 @@ add_executable(
     ${SOURCES}
 )
 
-find_library(SQLITEPATH libsqlite3.so)
 target_link_libraries(viewer_utest PRIVATE
-    sqlite3 ${SQLITEPATH}
+    -lsqlite3
 )
 
 target_include_directories(viewer_utest PRIVATE
