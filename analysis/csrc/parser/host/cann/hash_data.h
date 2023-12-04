@@ -15,6 +15,7 @@
 
 #include <vector>
 #include <cstdint>
+#include <string>
 #include <unordered_map>
 
 #include "singleton.h"
