@@ -294,8 +294,8 @@ TEST_F(RUNNING_MODE_UTEST, StartAnalyzeTask)
     rMode.taskPid_ = 1111;
     EXPECT_EQ(PROFILING_FAILED, rMode.StartAnalyzeTask());
     rMode.taskPid_ = MSVP_MMPROCESS;
-    EXPECT_EQ(PROFILING_FAILED, rMode.StartAnalyzeTask());
     rMode.jobResultDir_ = "123";
+    EXPECT_EQ(PROFILING_FAILED, rMode.StartAnalyzeTask());
     rMode.analysisPath_ = "path_test";
     MOCKER_CPP(&RunningMode::GetParseDataType)
         .stubs()
@@ -531,7 +531,8 @@ TEST_F(RUNNING_MODE_UTEST, AppModeModeParamsCheck){
     EXPECT_EQ(PROFILING_SUCCESS, rMode.ModeParamsCheck());
 }
 
-TEST_F(RUNNING_MODE_UTEST, AppModeRunModeTasks){
+TEST_F(RUNNING_MODE_UTEST, AppModeRunModeTasks_WithProfDir)
+{
     GlobalMockObject::verify();
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
     new analysis::dvvp::message::ProfileParams);
@@ -539,6 +540,14 @@ TEST_F(RUNNING_MODE_UTEST, AppModeRunModeTasks){
     EXPECT_EQ(PROFILING_FAILED, rMode.RunModeTasks());
     rMode.params_ = params;
     rMode.jobResultDirList_.insert("PROF");
+    MOCKER_CPP(&Collector::Dvvp::DynProf::DynProfMngCli::IsEnableMode)
+        .stubs()
+        .will(returnValue(true))
+        .then(returnValue(false));
+    MOCKER_CPP(&AppMode::StartAppTaskForDynProf)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_SUCCESS, rMode.RunModeTasks());
     MOCKER_CPP(&AppMode::StartAppTask)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
@@ -560,6 +569,21 @@ TEST_F(RUNNING_MODE_UTEST, AppModeRunModeTasks){
     EXPECT_EQ(PROFILING_SUCCESS, rMode.RunModeTasks());
     EXPECT_EQ(PROFILING_SUCCESS, rMode.RunModeTasks());
     EXPECT_EQ(PROFILING_SUCCESS, rMode.RunModeTasks());
+}
+
+TEST_F(RUNNING_MODE_UTEST, AppModeRunModeTasks_WithEmptyProfDir_WithoutSetDelaySwitch)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
+    new analysis::dvvp::message::ProfileParams);
+    Collector::Dvvp::Msprofbin::AppMode rMode("app", params);
+    MOCKER_CPP(&Collector::Dvvp::DynProf::DynProfMngCli::IsEnableMode)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&AppMode::StartAppTask)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_FAILED, rMode.RunModeTasks());
 }
 
 TEST_F(RUNNING_MODE_UTEST, AppModeStartAppTask){
@@ -1179,7 +1203,7 @@ TEST_F(RUNNING_MODE_UTEST, QueryModeUpdateOutputDirInfo)
 TEST_F(RUNNING_MODE_UTEST, QueryModeModeParamsCheck) {
     GlobalMockObject::verify();
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
-    new analysis::dvvp::message::ProfileParams);
+        new analysis::dvvp::message::ProfileParams);
     Collector::Dvvp::Msprofbin::QueryMode rMode("query", nullptr);
     EXPECT_EQ(PROFILING_FAILED, rMode.ModeParamsCheck());
     rMode.params_ = params;
