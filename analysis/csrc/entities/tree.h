@@ -40,7 +40,7 @@ public:
     // 层序遍历打印Tree结构便于问题定位
     std::vector<std::string> Show();
 private:
-    std::string GetTreeLevelStr(const std::shared_ptr<TreeNode> &node);
+    std::string GetTreeLevelStr(const std::shared_ptr<TreeNode> &node) const;
     std::shared_ptr<TreeNode> root_;
 };
 

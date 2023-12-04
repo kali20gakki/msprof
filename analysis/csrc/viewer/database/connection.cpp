@@ -9,13 +9,15 @@
  * Creation Date      : 2023/11/3
  * *****************************************************************************
  */
+#include "connection.h"
 #include <sqlite3.h>
 #include <iostream>
-#include "connection.h"
+#include "utils.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
+using namespace Analysis::Utils;
 using namespace Analysis;
 
 Connection::Connection(const std::string &path)
@@ -181,7 +183,7 @@ void Connection::GetColumn(double &value)
 void Connection::GetColumn(std::string &value)
 {
     auto valueStr = const_cast<unsigned char*>(sqlite3_column_text(stmt_, ++index_));
-    value = std::string(reinterpret_cast<CHAR_PTR>(valueStr));
+    value = std::string(ReinterpretConvert<CHAR_PTR>(valueStr));
 }
 } // Database
 } // Viewer
