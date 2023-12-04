@@ -20,7 +20,7 @@ std::shared_ptr<TreeNode> Tree::GetRoot() const
     return root_;
 }
 
-std::string Tree::GetTreeLevelStr(const std::shared_ptr <TreeNode> &node)
+std::string Tree::GetTreeLevelStr(const std::shared_ptr<TreeNode> &node) const
 {
     std::string lstr;
     if (!node->records.empty()) {
