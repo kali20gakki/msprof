@@ -78,6 +78,7 @@ set(profilerSrcList
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_client.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_server.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_mgr.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_thread.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/command_handle.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/msprof_callback_impl.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_acl_mgr.cpp
@@ -106,7 +107,8 @@ set(profilerSrcList
 
 set(profilerSrcFile
     test/main.cpp
-    test/msprof_callback_handler_utest.cpp
+    test/dyn_prof_utest.cpp
+	test/msprof_callback_handler_utest.cpp
     test/msprof_reporter_mgr_utest.cpp
     test/prof_acl_core_utest.cpp
     test/aicpu_plugin_utest.cpp

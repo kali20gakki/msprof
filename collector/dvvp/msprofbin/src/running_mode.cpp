@@ -6,6 +6,7 @@
  */
 
 #include "running_mode.h"
+#include <chrono>
 #include "dyn_prof_client.h"
 #include "errno/error_code.h"
 #include "input_parser.h"
@@ -654,15 +655,21 @@ int AppMode::RunModeTasks()
     if (DynProfMngCli::instance()->IsEnableMode()) {
         return StartAppTaskForDynProf();
     }
-
+    auto start_time = std::chrono::high_resolution_clock::now();
     if (StartAppTask() != PROFILING_SUCCESS) {
         MSPROF_LOGE("[App Mode] Run application task failed.");
         return PROFILING_FAILED;
     }
+    auto end_time = std::chrono::high_resolution_clock::now();
     UpdateOutputDirInfo();
 
     if (jobResultDirList_.empty()) {
-        MSPROF_LOGE("[App Mode] Invalid collection result.");
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
+        if (!params_->delayTime.empty() && duration.count() <= std::stoul(params_->delayTime)) {
+            MSPROF_LOGW("[App Mode] Before delay time, the app process has exited.");
+            return PROFILING_SUCCESS;
+        }
+        MSPROF_LOGE("[App Mode] Invalid collection result, please check if profiling start.");
         return PROFILING_FAILED;
     }
 

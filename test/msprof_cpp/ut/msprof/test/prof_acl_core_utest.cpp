@@ -757,13 +757,15 @@ TEST_F(MSPROF_ACL_CORE_UTEST, RegisterNewReporterCallback)
     EXPECT_EQ(ACL_SUCCESS, Analysis::Dvvp::ProfilerCommon::RegisterNewReporterCallback());
 }
 
-TEST_F(MSPROF_ACL_CORE_UTEST, MsprofSetDeviceCallbackForDynProf)
+TEST_F(MSPROF_ACL_CORE_UTEST, MsprofSetDeviceCallbackForDynProfImpl)
 {
     GlobalMockObject::verify();
     ProfSetDevPara data;
     data.chipId = 0;
     data.deviceId = 0;
     data.isOpen = true;
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProfImpl(nullptr, 0));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProfImpl((VOID_PTR)&data, 0));
     MOCKER_CPP(&RegisterReporterCallback)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
@@ -772,9 +774,12 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofSetDeviceCallbackForDynProf)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProf((VOID_PTR)&data, 0));
-    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProf((VOID_PTR)&data, 0));
-    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProf((VOID_PTR)&data, 0));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProfImpl((VOID_PTR)&data,
+        sizeof(ProfSetDevPara)));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProfImpl((VOID_PTR)&data,
+        sizeof(ProfSetDevPara)));
+    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProfImpl((VOID_PTR)&data,
+        sizeof(ProfSetDevPara)));
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, MsprofSetDeviceCallbackImpl)
