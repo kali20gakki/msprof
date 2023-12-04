@@ -166,13 +166,19 @@ class InfoConfReader:
         """
         check the version between data-collection and the data-analysis
         """
-        return self._info_json.get("version", Constant.NA) == self.ANALYSIS_VERSION
+        return self.get_collection_version() == self.ANALYSIS_VERSION
+
+    def get_collection_version(self):
+        return self._info_json.get("version", Constant.NA)
 
     def is_all_export_version(self):
         """
         check the version wheher support all data export
         """
-        return self._info_json is not None and self._info_json.get("drvVersion", 0) >= self.ALL_EXPORT_VERSION
+        return self._info_json is not None and self.get_drv_version() >= self.ALL_EXPORT_VERSION
+
+    def get_drv_version(self):
+        return self._info_json.get("drvVersion", 0)
 
     def get_device_id(self: any) -> str:
         """

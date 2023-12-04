@@ -59,5 +59,5 @@ class HostInfo(BaseInfo):
                                    cpu_item.get(self.LOGICAL_CPU_COUNT),
                                    cpu_item.get(self.CPU_NAME),
                                    cpu_item.get(self.CPU_TYPE))
-                self.cpu_num += cpu_item.get(self.LOGICAL_CPU_COUNT)
+                self.cpu_num += int(cpu_item.get(self.LOGICAL_CPU_COUNT))
                 self.cpu_info.append(cpu_info)
