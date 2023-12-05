@@ -7,11 +7,15 @@
 
 #ifndef ANALYSIS_ENTITIES_ASCEND_OBJ_H
 #define ANALYSIS_ENTITIES_ASCEND_OBJ_H
-namespace Analysis {
-namespace Entities {
 
 #include <cstdint>
 #include <memory>
+#include "prof_common.h"
+
+namespace Analysis {
+namespace Entities {
+
+#define DEFAULT_CONTEXT_ID 0xffffffff
 
 enum class OpType {
     OPTYPE_HCCL_BIG = 0,
@@ -22,10 +26,35 @@ enum class OpType {
     OPTYPE_INVALID
 };
 
+struct TimeRange {
+    uint64_t start;
+    uint64_t end;
+    TimeRange(uint64_t start_, uint64_t end_):start(start_), end(end_) {}
+};
+
+struct OpDesc {
+    std::shared_ptr<MsprofCompactInfo> nodeDesc;
+    std::shared_ptr<ConcatTensorInfo> tensorDesc;
+    std::shared_ptr<MsprofAdditionalInfo> ctxId;
+};
+
+struct HcclMiniOpDesc {
+    std::shared_ptr<MsprofAdditionalInfo> hcclInfo;
+    uint32_t ctxId = DEFAULT_CONTEXT_ID;
+};
+
+struct HcclBigOpDesc {
+    std::shared_ptr<TimeRange> hostTime;
+    std::shared_ptr<MsprofCompactInfo> nodeDesc;
+};
+
 struct Operator {
     uint64_t name = 0;
     OpType type = OpType::OPTYPE_INVALID;
     std::shared_ptr<char> desc;
+
+    Operator(uint64_t name, OpType type) : name(name), type(type)
+    {}
 };
 
 struct HostTask {
