@@ -36,25 +36,6 @@ class TaskSchedulerCalculator(MsMultiProcess):
         self.iter_range = sample_config.get(StrConstant.PARAM_ITER_ID)
 
     @staticmethod
-    def update(api_data: list) -> list:
-        """
-        api update data
-        :param api_data: api data
-        :return:
-        """
-        api_down_task = []
-        for api in api_data:
-            # API data is in the format of api,rowid,stream_id,task_id,batch_id for step scene
-            task_id = api[3].split(',')
-            batch_id = api[4].split(',')
-            if len(task_id) != len(batch_id):
-                logging.error("The num of task id is not equal to batch id")
-                return []
-            for task, batch in zip(task_id, batch_id):
-                api_down_task.append(api[0:3] + (task, batch,))
-        return api_down_task
-
-    @staticmethod
     def _insert_report_task_data(runtime_conn: any, runtime_curs: any, device_id: str) -> None:
         report_data = calculate_task_schedule_data(runtime_curs, device_id)
         if not report_data:
@@ -106,31 +87,6 @@ class TaskSchedulerCalculator(MsMultiProcess):
         self._collect_aicpu(task_time)
         self._insert_task_time_data(task_time, runtime_conn)
         logging.info('create task time table end')
-
-    def update_timeline_api(self: any, runtime_conn: any) -> None:
-        """
-        updates timeline api
-        :param runtime_conn: connection for runtime
-        :return: None
-        """
-        logging.info('Start to update TaskTime API.')
-        runtime_curs = runtime_conn.cursor()
-        if not (DBManager.judge_table_exist(runtime_curs, DBNameConstant.TABLE_RUNTIME_TASK_TIME)
-                and DBManager.judge_table_exist(runtime_curs, DBNameConstant.TABLE_API_CALL)):
-            logging.warning("No need to update task time data, runtime "
-                            "api data or ts timeline data had not been collected.")
-            return
-        select_api_sql = 'select api,rowid,stream_id,task_id,batch_id from ApiCall ' \
-                         'order by entry_time;'
-        api_thread = DBManager.fetch_all_data(runtime_curs, select_api_sql)
-        try:
-            api_down_data = self.update(api_thread)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-            return
-        sql = 'update TaskTime set api=?, apiRowId=? where stream_id=? and task_id=? and batch_id=?'
-        DBManager.executemany_sql(runtime_conn, sql, api_down_data)
-        logging.info('Update TimeLine API finished.')
 
     def insert_report_data(self: any, project_path: str, device_id: str) -> None:
         """
@@ -197,10 +153,8 @@ class TaskSchedulerCalculator(MsMultiProcess):
             return
         try:
             self.create_task_time(runtime_conn, device_id, iter_time_range)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+        except Exception as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-        else:
-            self.update_timeline_api(runtime_conn)
         finally:
             DBManager.destroy_db_connect(runtime_conn, runtime_curs)
 

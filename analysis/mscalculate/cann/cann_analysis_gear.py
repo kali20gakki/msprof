@@ -19,9 +19,7 @@ from mscalculate.cann.event import Event
 from msmodel.ge.ge_host_parser_model import GeHostParserModel
 from msmodel.ge.ge_info_model import GeModel
 from msmodel.ge.ge_model_load_model import GeFusionModel
-from msmodel.ge.ge_model_time_load import GeModelTimeModel
 from msmodel.hccl.hccl_host_model import HCCLHostModel
-from msmodel.runtime.runtime_api_model import RuntimeApiModel
 from msmodel.runtime.runtime_host_task_model import RuntimeHostTaskModel
 from profiling_bean.db_dto.api_data_dto import ApiDataDto
 from profiling_bean.db_dto.ctx_id_dto import CtxIdDto
@@ -94,9 +92,7 @@ class ModelGear(CANNGear):
         super().__init__(project_path)
         self.cann_level = Constant.MODEL_LEVEL
         self.model_id_name_table = {}
-        self.model_load_data = []
-        self.model_time_data_table = HighPerfDict()
-        self.model_time_data = []
+        self.model_name_data = []
 
     @classmethod
     def get_graph_id_map_dto(cls, event: Event) -> GraphIdMapDto:
@@ -105,110 +101,36 @@ class ModelGear(CANNGear):
                 return record.dto
         return GraphIdMapDto()
 
-    def add_model_load(self, data: ApiDataDto, event: Event):
+    def add_model_name(self, data: ApiDataDto, event: Event):
         graph_id_map_dto: GraphIdMapDto = self.get_graph_id_map_dto(event)
-        model_name = graph_id_map_dto.model_name if graph_id_map_dto.struct_type else ""
-
-        item = [data.item_id, model_name, data.start, data.end]
-        self.model_load_data.append(item)
-
-    def find_model_name(self, model_id) -> str:
-        for mdl_id, model_name, *_ in self.model_load_data:
-            if mdl_id == model_id:
-                return model_name
-        return ""
-
-    def add_model_time_item_from_table(self, model_time: GeTimeDto) -> None:
-        # In helper scene, there is no ModelExecute, so return
-        if model_time.model_id == 0 and model_time.thread_id == 0:
-            return
-
-        if model_time.model_name is None:
-            model_id = model_time.model_id
-            model_time.model_name = self.find_model_name(model_id)
-
-        self.model_time_data.append(
-            [model_time.model_name, model_time.model_id, model_time.request_id, model_time.thread_id,
-             model_time.input_start, model_time.input_end, model_time.infer_start, model_time.infer_end,
-             model_time.output_start, model_time.output_end])
-        self.model_time_data_table.pop((int(model_time.model_id), model_time.thread_id))
-
-    def add_model_time(self, data: ApiDataDto, event):
-        model_time = self.model_time_data_table.set_default_call_obj_later(
-            (int(data.item_id), data.thread_id), GeTimeDto)
-        if model_time.model_id and data.struct_type == "ModelExecute":
-            # dynamic scene do not have input and output stage
-            self.add_model_time_item_from_table(model_time)
-            model_time = self.model_time_data_table.set_default_call_obj_later(
-                (int(data.item_id), data.thread_id), GeTimeDto)
-        if data.struct_type == "InputCopy":
-            model_time.input_start = data.start
-            model_time.input_end = data.end
-            model_time.stage_num += 1
-        elif data.struct_type == "ModelExecute":
-            model_time.model_id = data.item_id
-            model_time.thread_id = data.thread_id
-            model_time.infer_start = data.start
-            model_time.infer_end = data.end
-            model_time.request_id = data.request_id
-            graph_id_map_dto: GraphIdMapDto = self.get_graph_id_map_dto(event)
-            model_name = graph_id_map_dto.model_name if graph_id_map_dto.struct_type else ""
-            model_time.model_name = model_name
-            model_time.stage_num += 1
-        elif data.struct_type == "OutputCopy":
-            model_time.output_start = data.start
-            model_time.output_end = data.end
-            model_time.stage_num += 1
-        else:
-            logging.error("Found illegal api: %s", data.struct_type)
-            return
-
-        if model_time.stage_num == self.MODEL_TIME_STAGE:
-            self.add_model_time_item_from_table(model_time)
+        if graph_id_map_dto.struct_type:
+            model_name = graph_id_map_dto.model_name
+            self.model_name_data.append([data.item_id, model_name])
 
     def run(self, event: Event, call_stack: dict):
         dto: ApiDataDto = self.db.get_api(event)
         # these two table can be merged in the feature
-        if dto.struct_type == "ModelLoad":
-            self.add_model_load(dto, event)
-        elif dto.struct_type:
-            self.add_model_time(dto, event)
-        else:
+        if dto.struct_type == "ModelLoad" or dto.struct_type == "ModelExecute":
+            self.add_model_name(dto, event)
+        if not dto.struct_type:
             # lose some data
             for record in event.additional_record:
                 if isinstance(record, GraphIdMapDto):
                     logging.warning("Lose model info for graph_id: %s, model_name: %s",
                                     record.graph_id, record.model_name)
 
-    def save_model_load(self: any) -> None:
-        if not self.model_load_data:
+    def save_model_name(self: any) -> None:
+        if not self.model_name_data:
             return
-        model = GeFusionModel(self._project_path, [DBNameConstant.TABLE_GE_MODEL_LOAD])
+        model = GeFusionModel(self._project_path, [DBNameConstant.TABLE_MODEL_NAME])
         model.init()
-        model.drop_table(DBNameConstant.TABLE_GE_MODEL_LOAD)
+        model.drop_table(DBNameConstant.TABLE_MODEL_NAME)
         model.create_table()
-        model.flush_all({DBNameConstant.TABLE_GE_MODEL_LOAD: self.model_load_data})
-        model.finalize()
-
-    def save_model_time(self: any) -> None:
-        if not self.model_time_data and not self.model_time_data_table:
-            return
-        if self.model_time_data_table:
-            for model_time_data in list(self.model_time_data_table.values()):
-                self.add_model_time_item_from_table(model_time_data)
-        if not self.model_time_data:
-            return
-
-        model = GeModelTimeModel(self._project_path, [DBNameConstant.TABLE_GE_MODEL_TIME])
-        model.init()
-        model.drop_table(DBNameConstant.TABLE_GE_MODEL_TIME)
-        model.create_table()
-        model.flush(self.model_time_data)
+        model.flush_all({DBNameConstant.TABLE_MODEL_NAME: self.model_name_data})
         model.finalize()
 
     def flush_data(self):
-        self.save_model_load()
-        self.save_model_time()
+        self.save_model_name()
 
 
 class NodeGear(CANNGear):
@@ -371,7 +293,6 @@ class TaskGear(CANNGear):
     def __init__(self, project_path):
         super().__init__(project_path)
         self.cann_level = Constant.TASK_LEVEL
-        self.api_call_info = []
         self.task_info = []
         self.tensor_info = []
         self.hccl_task_info = []
@@ -627,24 +548,11 @@ class TaskGear(CANNGear):
 
         # pure runtime api
         if not event.is_invalid() and not event.additional_record:
-            self.api_call_info.append([dto.start, dto.end, dto.struct_type, dto.thread_id, self.INVALID_STREAM,
-                                       self.INVALID_ID, self.INVALID_ID, 0, self.INVALID_DIRECT])
             return
 
         mem_cpy_dto, task_track_dto = self.get_task_level_additional_dto(event)
         if task_track_dto.struct_type is not None:
             self.add_host_task(call_stack, task_track_dto)
-        if not event.is_invalid():
-            api = self.RuntimeApi(dto.start, dto.end, dto.struct_type, dto.thread_id)
-
-            if mem_cpy_dto.struct_type is not None:
-                api.data_size = mem_cpy_dto.data_size
-                api.memcpy_direction = mem_cpy_dto.memcpy_direction
-            if task_track_dto.struct_type is not None:
-                api.stream_id = task_track_dto.stream_id
-                api.task_id = task_track_dto.task_id
-                api.batch_id = task_track_dto.batch_id
-            self.api_call_info.append(api.to_list())
 
         hccl_event: Event = call_stack.get(Constant.HCCL_LEVEL)
         if self.is_hccl_task(hccl_event, task_track_dto):
@@ -652,17 +560,6 @@ class TaskGear(CANNGear):
             self.add_hccl_op(call_stack, task_track_dto)
         if self.is_kernel_task(task_track_dto, hccl_event.is_invalid()):
             self.add_kernel_task(call_stack, task_track_dto)
-
-    def save_api_call_info(self):
-        if not self.api_call_info:
-            return
-
-        model = RuntimeApiModel(self._project_path, DBNameConstant.DB_RUNTIME, [DBNameConstant.TABLE_API_CALL])
-        model.init()
-        model.drop_table(DBNameConstant.TABLE_API_CALL)
-        model.create_table()
-        model.insert_data_to_db(DBNameConstant.TABLE_API_CALL, self.api_call_info)
-        model.finalize()
 
     def save_task_info(self):
         if not self.task_info:
@@ -705,7 +602,6 @@ class TaskGear(CANNGear):
             model.flush(self.host_tasks)
 
     def flush_data(self):
-        self.save_api_call_info()
         self.save_task_info()
         self.save_hccl_task_info()
         self.save_hccl_op_info()

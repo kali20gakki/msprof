@@ -33,6 +33,7 @@ from profiling_bean.db_dto.mem_copy_info_dto import MemCopyInfoDto
 from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
 from profiling_bean.db_dto.task_track_dto import TaskTrackDto
 from profiling_bean.db_dto.tensor_info_dto import TensorInfoDto
+from profiling_bean.db_dto.graph_id_map_dto import GraphIdMapDto
 
 NAMESPACE = 'mscalculate.cann.cann_analysis_gear'
 
@@ -83,6 +84,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
     def test_model_gear(self):
         gear = ModelGear(self.PROF_HOST_DIR)
         api_db = ApiDataDatabase(1)
+        record_db = AdditionalRecordDatabase(1)
         db = CANNThreadDB(1, api_db=api_db)
         gear.set_db(db)
         event1 = self.create_api_event(self.event_col(Constant.MODEL_LEVEL, 1, 0, 100, "ModelLoad", 0), api_db)
@@ -90,22 +92,31 @@ class TestCANNAnalysisGear(unittest.TestCase):
         event3 = self.create_api_event(self.event_col(Constant.MODEL_LEVEL, 1, 201, 300, "ModelExecute", 0), api_db)
         event4 = self.create_api_event(self.event_col(Constant.MODEL_LEVEL, 1, 301, 400, "OutputCopy", 0), api_db)
 
+        graph_id_map_dto_1 = GraphIdMapDto()
+        graph_id_map_dto_1.struct_type = "graph_id_map"
+        graph_id_map_dto_1.model_name = "resnet50"
+        graph_id_map_dto_1.timestamp = 50
+        event1.additional_record = [
+            self.create_addition_record(graph_id_map_dto_1, 50, record_db),
+        ]
+        graph_id_map_dto_2 = GraphIdMapDto()
+        graph_id_map_dto_2.struct_type = "graph_id_map"
+        graph_id_map_dto_2.model_name = "resnet50_1"
+        graph_id_map_dto_2.timestamp = 250
+        event3.additional_record = [
+            self.create_addition_record(graph_id_map_dto_2, 50, record_db),
+        ]
         gear.run(event1, {})
         gear.run(event2, {})
         gear.run(event3, {})
         gear.run(event4, {})
         gear.flush_data()
-
         self.assertTrue(
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_MODEL_INFO),
-                                          DBNameConstant.TABLE_GE_MODEL_LOAD, 'end_time', 100))
+                                          DBNameConstant.TABLE_MODEL_NAME, 'model_name', "resnet50"))
         self.assertTrue(
-            DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_MODEL_TIME),
-                                          DBNameConstant.TABLE_GE_MODEL_TIME, 'infer_start', 201))
-
-        gear = ModelGear(self.PROF_HOST_DIR)
-        gear.add_model_time_item_from_table(GeTimeDto())
-        self.assertEqual(gear.model_time_data, [])
+            DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_MODEL_INFO),
+                                          DBNameConstant.TABLE_MODEL_NAME, 'model_name', "resnet50_1"))
 
     def test_node_gear(self):
         gear = NodeGear(self.PROF_HOST_DIR)
@@ -246,10 +257,6 @@ class TestCANNAnalysisGear(unittest.TestCase):
         gear.run(event10, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event8,
                            Constant.HCCL_LEVEL: event9})
         gear.flush_data()
-
-        self.assertEqual(
-            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_RUNTIME),
-                                           DBNameConstant.TABLE_API_CALL), 5)
 
         self.assertEqual(
             DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
@@ -553,17 +560,6 @@ class TestTaskGear(TestCANNAnalysisGear):
         hccl_event = Event.invalid_event()
         hccl_event.struct_type = "2"
         self.assertTrue(gear.is_hccl_task(hccl_event, task_track))
-
-
-class TestFindModelNameInModelLoad(unittest.TestCase):
-    DIR_PATH = os.path.join(os.path.dirname(__file__), "DT_CANNAnalysisGear")
-    PROF_HOST_DIR = os.path.join(DIR_PATH, 'PROF1', 'host')
-
-    def test_find_model_name_in_model_load(self):
-        gear = ModelGear(self.PROF_HOST_DIR)
-        gear.model_load_data = [(0, "test", 1, 1), (1, "test2", 2, 3)]
-        self.assertEqual(gear.find_model_name(0), "test")
-        self.assertEqual(gear.find_model_name(1), "test2")
 
 
 if __name__ == '__main__':

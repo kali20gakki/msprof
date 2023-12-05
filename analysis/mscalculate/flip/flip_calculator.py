@@ -26,12 +26,12 @@ class FlipCalculator:
                          flip_data: List[Union[TaskTrackBean, TaskFlip]]) -> List:
         if not task_data:
             return []
-        task_data_bin = FlipCalculator.sep_data_by_stream_id(task_data)
-        flip_data = FlipCalculator.sep_data_by_stream_id(flip_data)
+        task_data_bin = FlipCalculator.sep_data_by_device_stream(task_data)
+        flip_data = FlipCalculator.sep_data_by_device_stream(flip_data)
         new_task_data = [None] * len(task_data)
         new_task_index = 0
-        for stream_id, data in task_data_bin.items():
-            flip_data_stream = flip_data.get(stream_id, [])
+        for key, data in task_data_bin.items():
+            flip_data_stream = flip_data.get(key, [])
             data.sort(key=lambda x: x.timestamp)
             flip_data_stream.sort(key=lambda x: x.timestamp)
             flip_data_stream.append(InfDataHelper())  # avoid overflow
@@ -71,8 +71,11 @@ class FlipCalculator:
             task_index_backward -= 1
 
     @staticmethod
-    def sep_data_by_stream_id(raw_data: List[Union[TaskTrackBean, DeviceTask, TaskFlip]]) -> dict:
+    def sep_data_by_device_stream(raw_data: List[Union[TaskTrackBean, DeviceTask, TaskFlip]]) -> dict:
         sep_data = {}
         for data in raw_data:
-            sep_data.setdefault(data.stream_id, []).append(data)
+            # Host task has device_id,
+            # but device task data has no device_id attribution because device data loaded is seperated by device_id
+            key = "{}-{}".format(getattr(data, "device_id", 0), data.stream_id)
+            sep_data.setdefault(key, []).append(data)
         return sep_data
