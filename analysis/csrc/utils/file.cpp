@@ -25,6 +25,7 @@ const uint32_t MAX_READ_FILE_BYTES = 64 * 1024 * 1024;
 const uint16_t MAX_PATH_SIZE = 1024;
 const uint32_t MAX_SUB_FILES_SIZE = 100000;
 const int DIR_CHECK_MODE = R_OK | W_OK | X_OK; // rwx
+const int MAX_DEPTH = 20;
 }
 
 bool File::Chmod(const std::string &path, const mode_t &mode)
@@ -120,6 +121,54 @@ bool File::CreateDir(const std::string& path, const mode_t &mode)
     }
     if (mkdir(path.c_str(), mode) != 0) {
         ERROR("Create directory '%' failed.", path);
+        return false;
+    }
+    return true;
+}
+
+bool File::RemoveDir(const std::string &path, int depth)
+{
+    if (depth >= MAX_DEPTH) {
+        ERROR("The maximum recursion depth is exceeded");
+        return false;
+    }
+    if (!File::Check(path)) {
+        ERROR("Remove dir failed, check path error.");
+        return false;
+    }
+    DIR *dir = opendir(path.c_str()); // 打开目录
+    if (dir == nullptr) { // 打开目录失败
+        ERROR("Remove dir failed, open dir error.");
+        return false;
+    }
+    const struct dirent *entry = nullptr;
+    while ((entry = readdir(dir)) != nullptr) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) { // 跳过当前目录和父目录
+            continue;
+        }
+        auto absPath = path + "/" + entry->d_name;
+        struct stat st;
+        if (lstat(absPath.c_str(), &st) == -1) { // 获取文件/文件夹的属性
+            closedir(dir);
+            ERROR("Remove dir failed, lstat error.");
+            return false;
+        }
+        if (S_ISDIR(st.st_mode)) { // 如果是文件夹，递归删除
+            if (!RemoveDir(absPath, depth + 1)) {
+                closedir(dir);
+                ERROR("Remove dir failed, rm child dir error.");
+                return false;
+            }
+            rmdir(absPath.c_str()); // 删除文件夹
+        } else { // 如果是文件，直接删除
+            remove(absPath.c_str());
+        }
+    }
+    // 关闭目录流
+    closedir(dir);
+    // 删除当前目录
+    if (rmdir(path.c_str()) != 0) {
+        ERROR("Remove dir failed.");
         return false;
     }
     return true;

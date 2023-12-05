@@ -27,8 +27,8 @@ std::vector<std::string> Split(const std::string &str, const std::string &delimi
 int StrToU16(uint16_t &dest, const std::string &numStr);
 int StrToU64(uint64_t &dest, const std::string &numStr);
 
-template <class T, class ...Args>
-std::shared_ptr<T> MakeShared(const Args& ...args)
+template<class T, class ...Args>
+std::shared_ptr<T> MakeShared(const Args &...args)
 {
     std::shared_ptr<T> sp;
     try {
@@ -40,7 +40,7 @@ std::shared_ptr<T> MakeShared(const Args& ...args)
     return sp;
 }
 
-template <class T>
+template<class T>
 bool Reserve(std::vector<T> &vec, size_t s)
 {
     try {
@@ -65,6 +65,12 @@ template<typename T, typename V>
 T ReinterpretConvert(V ptr)
 {
     return reinterpret_cast<T>(ptr);
+}
+
+template<typename T, typename U>
+inline std::shared_ptr<T> ReinterpretPointerCast(const std::shared_ptr<U> &r) noexcept
+{
+    return std::shared_ptr<T>(r, reinterpret_cast<typename std::shared_ptr<T>::element_type *>(r.get()));
 }
 }  // namespace Utils
 }  // namespace Analysis

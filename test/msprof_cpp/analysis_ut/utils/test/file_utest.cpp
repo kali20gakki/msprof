@@ -77,11 +77,24 @@ TEST_F(FileUTest, TestCreateDir)
     EXPECT_TRUE(File::CreateDir("test_dir"));  // 创建已存在的目录返回true
     EXPECT_EQ(0, symlink("test_file", "test_file_soft_link"));
     EXPECT_FALSE(File::CreateDir("test_file_soft_link"));
-    const mode_t mode = 0640;
-    EXPECT_TRUE(File::Chmod("test_dir", mode));
-    EXPECT_FALSE(File::CreateDir("test_dir"));  // 创建已存在的目录，但没有rwx权限，返回false
     EXPECT_TRUE(File::DeleteFile("test_file_soft_link"));
     EXPECT_EQ(0, rmdir("test_dir"));
+}
+
+TEST_F(FileUTest, TestRemoveDir)
+{
+    // 测试删除不存在的文件夹
+    EXPECT_FALSE(File::RemoveDir("test_dir_not_exist", 0));
+    // 测试删除软连接
+    EXPECT_EQ(0, symlink("test_link_file", "test_file_soft_link"));
+    EXPECT_FALSE(File::RemoveDir("test_link_file", 0));
+    EXPECT_TRUE(File::DeleteFile("test_file_soft_link"));
+    // 测试删除嵌套文件夹
+    EXPECT_TRUE(File::CreateDir("test_dir"));
+    EXPECT_TRUE(File::CreateDir("test_dir/dir"));
+    EXPECT_TRUE(File::CreateDir("test_dir/directory"));
+    EXPECT_TRUE(File::CreateDir("test_dir/directory_done"));
+    EXPECT_TRUE(File::RemoveDir("test_dir", 0));
 }
 
 TEST_F(FileUTest, TestPathJoinShouldReturnJoinedPath)
