@@ -55,12 +55,6 @@ class TablesConfig(MetaConfig):
             ('mod', 'INTEGER,null'),
             ('timestamp', 'NUMERIC,null')
         ],
-        'GeModelLoadMap': [
-            ('model_id', 'INTEGER,null'),
-            ('model_name', 'TEXT,null'),
-            ('start_time', 'REAL,null'),
-            ('end_time', 'REAL,null')
-        ],
         'GeFusionOpInfoMap': [
             ('model_id', 'INTEGER,null'),
             ('fusion_name', 'TEXT,null'),
@@ -71,18 +65,6 @@ class TablesConfig(MetaConfig):
             ('memory_weight', 'TEXT,null'),
             ('memory_workspace', 'TEXT,null'),
             ('memory_total', 'TEXT,null')
-        ],
-        'GeModelTimeMap': [
-            ('model_name', 'TEXT,null'),
-            ('model_id', 'INTEGER,null'),
-            ('request_id', 'INTEGER,null'),
-            ('thread_id', 'INTEGER,null'),
-            ('input_start', 'REAL,null`'),
-            ('input_end', 'REAL,null'),
-            ('infer_start', 'REAL,null'),
-            ('infer_end', 'REAL,null'),
-            ('output_start', 'REAL,null'),
-            ('output_end', 'REAL,null')
         ],
         'GEHostInfoMap': [
             ('thread_id', 'INTEGER,null'),
@@ -1308,5 +1290,9 @@ class TablesConfig(MetaConfig):
             ('syscnt', 'NUMERIC,null'),  # syscnt: cycle count from host cpu
             ('total_size', 'INTEGER,null'),
             ('device_type', 'TEXT,null')
+        ],
+        'ModelNameMap': [
+            ('model_id', 'INTEGER,null'),
+            ('model_name', 'TEXT,null'),
         ],
     }

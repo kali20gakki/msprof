@@ -15,7 +15,6 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_AICORE_OP_SUMMARY = "ai_core_op_summary.db"
     DB_RUNTIME = "runtime.db"
     DB_GE_MODEL_INFO = "ge_model_info.db"
-    DB_GE_MODEL_TIME = "ge_model_time.db"
     DB_GE_HOST_INFO = "ge_host_info.db"
     DB_GE_LOGIC_STREAM_INFO = "ge_logic_stream_info.db"
     DB_AI_CPU = "ai_cpu.db"
@@ -87,7 +86,6 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_AI_CPU = "AiCpuData"
     TABLE_AI_CPU_FROM_TS = "AiCpuFromTs"
     TABLE_ALL_REDUCE = "all_reduce"
-    TABLE_API_CALL = "ApiCall"
     TABLE_CLUSTER_STEP_TRACE = "ClusterStepTrace_{}"
     TABLE_CLUSTER_ALL_REDUCE = "AllReduce_{}"
     TABLE_EVENT_COUNTER = "EventCounter"
@@ -232,11 +230,8 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_TYPE_HASH = "TypeHashInfo"
 
     # ge model
-    TABLE_GE_MODEL_LOAD = "GeModelLoad"
     TABLE_GE_FUSION_OP_INFO = "GeFusionOpInfo"
-
-    # ge model time
-    TABLE_GE_MODEL_TIME = "GeModelTime"
+    TABLE_MODEL_NAME = "ModelName"
 
     # biu perf
     TABLE_FLOW_MONITOR = "MonitorFlow"
