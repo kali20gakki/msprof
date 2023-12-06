@@ -42,11 +42,10 @@ std::vector<std::shared_ptr<Adapter::FlipTask>> &EventGrouper::GetFlipTasks()
 
 bool EventGrouper::Group()
 {
+    Utils::TimeLogger t{"Group all events"};
     const uint32_t poolSize = 8;
     ThreadPool pool(poolSize);
     pool.Start();
-    INFO("Start group all events");
-    auto t1 = std::chrono::high_resolution_clock::now();
 
     // 每个Parser一个线程
     pool.AddTask([this]() {
@@ -84,9 +83,6 @@ bool EventGrouper::Group()
 
     pool.WaitAllTasks();
     pool.Stop();
-    auto t2 = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-    INFO("Group all events done, cost total time = % ms", duration.count());
     return true;
 }
 
@@ -113,7 +109,7 @@ void EventGrouper::GroupEvents<ApiEventParser, MsprofApi, &CANNWarehouse::kernel
     const std::string &typeName, EventType eventType)
 {
     // 1. 解析bin
-    auto t1 = std::chrono::high_resolution_clock::now();
+    Utils::TimeLogger t{"Group " + typeName};
     auto parser = MakeShared<ApiEventParser>(hostPath_);
     if (!parser) {
         ERROR("ApiEventParser make shared ptr failed");
@@ -171,7 +167,7 @@ void EventGrouper::GroupEvents<TaskTrackParser, MsprofCompactInfo, &CANNWarehous
     const std::string &typeName, EventType eventType)
 {
     // 1. 解析bin
-    auto t1 = std::chrono::high_resolution_clock::now();
+    Utils::TimeLogger t{"Group " + typeName};
     auto parser = MakeShared<TaskTrackParser>(hostPath_);
     if (!parser) {
         ERROR("TaskTrackEvent make shared ptr failed");

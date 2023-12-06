@@ -28,6 +28,7 @@
 #include "compact_info_parser.h"
 #include "log.h"
 #include "utils.h"
+#include "time_logger.h"
 
 namespace Analysis {
 namespace Parser {
@@ -65,6 +66,7 @@ private:
     void GroupEvents(const std::string &typeName, EventType eventType)
     {
         // 1. 解析bin
+        Utils::TimeLogger t{"Group " + typeName};
         auto parser = Utils::MakeShared<P>(hostPath_);
         if (!parser) {
             ERROR("EventParser make shared ptr failed");
