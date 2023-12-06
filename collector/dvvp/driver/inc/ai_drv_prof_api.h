@@ -136,6 +136,7 @@ enum AI_DRV_CHANNEL {
     PROF_CHANNEL_DVPP_PNG = CHANNEL_DVPP_PNG, // 140
     PROF_CHANNEL_DVPP_SCD = CHANNEL_DVPP_SCD, // 141
     PROF_CHANNEL_NPU_MODULE_MEM = CHANNEL_NPU_MODULE_MEM, // 142
+    PROF_CHANNEL_AICPU       = 143,       // 143 CHANNEL_AICPU
     PROF_CHANNEL_MAX      = CHANNEL_NUM, // 160
 };
 
@@ -368,6 +369,8 @@ int DrvStarsSocLogStart(const DrvPeripheralProfileCfg &peripheralCfg,
 int DrvFftsProfileStart(const DrvPeripheralProfileCfg &peripheralCfg, const std::vector<int> &aicCores,
                         const std::vector<std::string> &aicEvents, const std::vector<int> &aivCores,
                         const std::vector<std::string> &aivEvents);
+
+int DrvAicpuStart(int profDeviceId, AI_DRV_CHANNEL profChannel);
 
 int DrvInstrProfileStart(const uint32_t devId, const AI_DRV_CHANNEL channelId, const uint32_t sampleCycle);
 

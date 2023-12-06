@@ -333,6 +333,18 @@ public:
     int Uninit() override;
 };
 
+class ProfAicpuJob : public ProfDrvJob {
+public:
+    ProfAicpuJob();
+    ~ProfAicpuJob() override;
+    int  Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
+    int  Process() override;
+    int  Uninit() override;
+
+protected:
+    analysis::dvvp::driver::AI_DRV_CHANNEL channelId_;
+};
+
 constexpr int INSTR_GROUP_MAX_NUM = 25;       // instr profiling group id 0 ~ 24
 constexpr int INSTR_GROUP_CHANNEL_NUM = 3;    // instr profiling group contains 3 channel
 class ProfInstrPerfJob : public ProfDrvJob {

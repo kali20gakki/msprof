@@ -325,6 +325,25 @@ int DrvAicoreTaskBasedStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const 
     return PROFILING_SUCCESS;
 }
 
+int DrvAicpuStart(int profDeviceId, AI_DRV_CHANNEL profChannel)
+{
+    struct prof_start_para profStartPara;
+    profStartPara.channel_type = PROF_PERIPHERAL_TYPE;
+    profStartPara.sample_period = 0;
+    profStartPara.real_time = PROFILE_REAL_TIME;
+    profStartPara.user_data = nullptr;
+    profStartPara.user_data_size = 0;
+    int ret = DriverPlugin::instance()->MsprofDrvStart((uint32_t)profDeviceId, profChannel, &profStartPara);
+    if (ret != PROF_OK) {
+        MSPROF_LOGE("Failed to start profiling DrvAicpuStart, profDeviceId=%d, profChannel=%d, ret=%d",
+            profDeviceId, static_cast<int>(profChannel), ret);
+        return PROFILING_FAILED;
+    }
+    MSPROF_EVENT("Succeeded to start profiling DrvAicpuStart, profDeviceId=%d, profChannel=%d",
+        profDeviceId, static_cast<int>(profChannel));
+    return PROFILING_SUCCESS;
+}
+
 int DrvL2CacheTaskStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const std::vector<std::string> &profEvents)
 {
     uint32_t configSize = sizeof(TagTsL2CacheProfileConfig) + profEvents.size() * sizeof(uint32_t);
