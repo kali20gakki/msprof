@@ -20,6 +20,7 @@
 #include "msprof_callback_handler.h"
 #include "op_desc_parser.h"
 #include "platform/platform.h"
+#include "platform/platform_adapter.h"
 #include "prof_manager.h"
 #include "prof_params_adapter.h"
 #include "proto/msprofiler.pb.h"
@@ -53,6 +54,7 @@ using namespace analysis::dvvp::transport;
 using namespace analysis::dvvp::common::validation;
 using namespace Analysis::Dvvp::Common::Config;
 using namespace Analysis::Dvvp::Common::Platform;
+using namespace Collector::Dvvp::Common::PlatformAdapter;
 using namespace Analysis::Dvvp::JobWrapper;
 using namespace Analysis::Dvvp::MsprofErrMgr;
 using namespace Msprof::MsprofTx;
@@ -467,6 +469,7 @@ int ProfAclMgr::ProfAclFinalize()
     }
     UploaderMgr::instance()->DelAllUploader();
     MsprofTxManager::instance()->UnInit();
+    PlatformAdapter::instance()->Uninit();
     devTasks_.clear();
 
     mode_ = WORK_MODE_OFF;
