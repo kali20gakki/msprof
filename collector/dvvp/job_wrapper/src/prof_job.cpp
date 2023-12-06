@@ -1557,6 +1557,73 @@ int ProfL2CacheTaskJob::Uninit()
     return PROFILING_SUCCESS;
 }
 
+ProfAicpuJob::ProfAicpuJob() : channelId_(PROF_CHANNEL_AICPU)
+{
+}
+ 
+ProfAicpuJob::~ProfAicpuJob()
+{
+}
+ 
+int ProfAicpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    if (cfg->comParams->params->host_profiling) {
+        return PROFILING_FAILED;
+    }
+ 
+    collectionJobCfg_ = cfg;
+    if (!collectionJobCfg_->comParams->params->dataTypeConfig & PROF_AICPU_TRACE) {
+        MSPROF_LOGI("AICPU not enable, devId:%d", collectionJobCfg_->comParams->devId);
+        return PROFILING_FAILED;
+    }
+ 
+    if (analysis::dvvp::driver::DrvGetApiVersion() < analysis::dvvp::driver::SUPPORT_ADPROF_VERSION) {
+        MSPROF_LOGI("Collect Aicpu data by HDC");
+        return PROFILING_FAILED;
+    }
+ 
+    if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
+        MSPROF_LOGW("Channel is invalid, devId:%d, channelId_:%d", collectionJobCfg_->comParams->devId, channelId_);
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
+}
+ 
+int ProfAicpuJob::Process()
+{
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    MSPROF_LOGI("Begin to start profiling aicpu");
+ 
+    std::string filePath = BindFileWithChannel(collectionJobCfg_->jobParams.dataPath);
+    AddReader(collectionJobCfg_->comParams->params->job_id, collectionJobCfg_->comParams->devId, channelId_, filePath);
+ 
+    int ret = DrvAicpuStart(collectionJobCfg_->comParams->devId, channelId_);
+    MSPROF_LOGI("start profiling aicpu, ret=%d", ret);
+    
+    FUNRET_CHECK_RET_VALUE(ret, PROFILING_SUCCESS, PROFILING_SUCCESS, ret);
+}
+ 
+int ProfAicpuJob::Uninit()
+{
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_SUCCESS;
+    }
+    if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
+        MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
+            channelId_);
+        return PROFILING_SUCCESS;
+    }
+    int ret = DrvStop(collectionJobCfg_->comParams->devId, channelId_);
+    MSPROF_LOGI("stop profiling Channel %d data, ret=%d", static_cast<int>(channelId_), ret);
+    RemoveReader(collectionJobCfg_->comParams->params->job_id, collectionJobCfg_->comParams->devId, channelId_);
+    return ret;
+}
+
 PerfExtraTask::PerfExtraTask(unsigned int bufSize, const std::string& retDir,
     SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx,
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> param)
