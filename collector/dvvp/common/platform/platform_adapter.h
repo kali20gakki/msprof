@@ -34,7 +34,7 @@ public:
     
     int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params, PlatformType platformType);
     int Uninit();
-    PlatformAdapterInterface* GetAdapter() const;
+    PlatformAdapterInterface* GetAdapter();
 private:
     std::mutex mtx_;
     PlatformAdapterInterface* platformAdapter_;

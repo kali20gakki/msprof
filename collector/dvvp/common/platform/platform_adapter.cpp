@@ -61,11 +61,13 @@ int PlatformAdapter::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams
 
 int PlatformAdapter::Uninit()
 {
+    platformAdapter_ = nullptr;
     return PROFILING_SUCCESS;
 }
 
-PlatformAdapterInterface* PlatformAdapter::GetAdapter() const
+PlatformAdapterInterface* PlatformAdapter::GetAdapter()
 {
+    std::lock_guard<std::mutex> lk(mtx_);
     return platformAdapter_;
 }
 
