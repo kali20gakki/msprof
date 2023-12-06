@@ -10,6 +10,7 @@
 #ifndef COLLECTOR_DVVP_COMMON_PLATFORM_ADAPTER_H
 #define COLLECTOR_DVVP_COMMON_PLATFORM_ADAPTER_H
 
+#include <mutex>
 #include "message/prof_params.h"
 #include "config/config_manager.h"
 #include "platform_adapter_interface.h"
@@ -35,6 +36,7 @@ public:
     int Uninit();
     PlatformAdapterInterface* GetAdapter() const;
 private:
+    std::mutex mtx_;
     PlatformAdapterInterface* platformAdapter_;
 };
 }
