@@ -20,8 +20,8 @@ namespace Entities {
 enum class OpType {
     OPTYPE_HCCL_BIG = 0,
     OPTYPE_HCCL_SMALL,
-    OPTYPE_KERNEL,
-    OPTYPE_KERNEKL_HCCL,
+    OPTYPE_COMPUTE,
+    OPTYPE_COMPUTE_HCCL,
     OPTYPE_RESERVED,
     OPTYPE_INVALID
 };
@@ -29,7 +29,8 @@ enum class OpType {
 struct TimeRange {
     uint64_t start;
     uint64_t end;
-    TimeRange(uint64_t start_, uint64_t end_):start(start_), end(end_) {}
+    TimeRange(uint64_t start_, uint64_t end_) : start(start_), end(end_)
+    {}
 };
 
 struct OpDesc {
@@ -38,7 +39,7 @@ struct OpDesc {
     std::shared_ptr<MsprofAdditionalInfo> ctxId;
 };
 
-struct HcclMiniOpDesc {
+struct HcclSmallOpDesc {
     std::shared_ptr<MsprofAdditionalInfo> hcclInfo;
     uint32_t ctxId = DEFAULT_CONTEXT_ID;
 };
@@ -49,12 +50,37 @@ struct HcclBigOpDesc {
 };
 
 struct Operator {
+    Operator(std::shared_ptr<OpDesc> desc, const uint64_t &name, const OpType &type)
+        : opDesc(std::move(desc)), name(name), type(type)
+    {}
+
+    Operator(std::shared_ptr<HcclSmallOpDesc> desc, const uint64_t &name, const OpType &type)
+        : hcclSmallOpDesc(std::move(desc)), name(name), type(type)
+    {}
+
+    Operator(std::shared_ptr<HcclBigOpDesc> desc, const uint64_t &name, const OpType &type)
+        : hcclBigOpDesc(std::move(desc)), name(name), type(type)
+    {}
+
+    union {
+        std::shared_ptr<OpDesc> opDesc;
+        std::shared_ptr<HcclSmallOpDesc> hcclSmallOpDesc;
+        std::shared_ptr<HcclBigOpDesc> hcclBigOpDesc;
+    };
+
     uint64_t name = 0;
     OpType type = OpType::OPTYPE_INVALID;
-    std::shared_ptr<char> desc;
 
-    Operator(uint64_t name, OpType type) : name(name), type(type)
-    {}
+    ~Operator()
+    {
+        if (opDesc) {
+            opDesc.~shared_ptr();
+        } else if (hcclSmallOpDesc) {
+            hcclSmallOpDesc.~shared_ptr();
+        } else if (hcclBigOpDesc) {
+            hcclBigOpDesc.~shared_ptr();
+        }
+    }
 };
 
 struct HostTask {

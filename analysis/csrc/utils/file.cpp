@@ -21,10 +21,10 @@ namespace Analysis {
 namespace Utils {
 
 namespace {
-const uint32_t MAX_READ_FILE_BYTES = 64 * 1024 * 1024;
+constexpr uint32_t MAX_READ_FILE_BYTES = 64 * 1024 * 1024;
 const uint16_t MAX_PATH_SIZE = 1024;
 const uint32_t MAX_SUB_FILES_SIZE = 100000;
-const int DIR_CHECK_MODE = R_OK | W_OK | X_OK; // rwx
+constexpr int DIR_CHECK_MODE = R_OK | W_OK | X_OK; // rwx
 const int MAX_DEPTH = 20;
 }
 
