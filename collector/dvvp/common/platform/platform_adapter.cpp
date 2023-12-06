@@ -35,6 +35,7 @@ PlatformAdapter::~PlatformAdapter()
 
 int PlatformAdapter::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params, PlatformType platformType)
 {
+    std::lock_guard<std::mutex> lk(mtx_);
     const std::map<PlatformType, PlatformAdapterInterface*> ADAPTER_LIST = {
         {PlatformType::MINI_TYPE, PlatformAdapterMini::instance()},
         {PlatformType::CLOUD_TYPE, PlatformAdapterCloud::instance()},
@@ -47,6 +48,9 @@ int PlatformAdapter::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams
     auto iter = ADAPTER_LIST.find(platformType);
     if (iter == ADAPTER_LIST.end()) {
         return PROFILING_FAILED;
+    }
+    if (platformAdapter_ != nullptr) {
+        return PROFILING_SUCCESS;
     }
     if (iter->second->Init(params, platformType) == PROFILING_SUCCESS) {
         platformAdapter_ = iter->second;
