@@ -12,7 +12,6 @@
 #include "acl_prof.h"
 #include "message/codec.h"
 #include "msprof_dlog.h"
-#include "proto/msprofiler.pb.h"
 #include "prof_common.h"
 #include "prof_api.h"
  
@@ -35,15 +34,15 @@ bool AnalyzerRt::IsRtCompactData(const std::string &tag) const
  * @param  : None
  * @return : None
  */
-void AnalyzerRt::RtCompactParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+void AnalyzerRt::RtCompactParse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
 {
-    if (message == nullptr) {
+    if (fileChunkReq == nullptr) {
         return;
     }
- 
-    totalBytes_ += message->chunksizeinbytes();
-    if (message->filename().find("unaging") != std::string::npos) {
-        ParseRuntimeTrackData(message->chunk().c_str(), message->chunksizeinbytes(), false);
+
+    totalBytes_ += fileChunkReq->chunkSize;
+    if (fileChunkReq->fileName.find("unaging") != std::string::npos) {
+        ParseRuntimeTrackData(fileChunkReq->chunk.c_str(), fileChunkReq->chunkSize, false);
         return;
     }
 }

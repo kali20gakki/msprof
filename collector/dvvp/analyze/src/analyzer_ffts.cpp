@@ -7,9 +7,7 @@
 #include "analyzer_ffts.h"
 #include "data_struct.h"
 #include "errno/error_code.h"
-#include "message/codec.h"
 #include "msprof_dlog.h"
-#include "proto/msprofiler.pb.h"
 #include "toolchain/prof_acl_api.h"
 
 namespace Analysis {
@@ -24,13 +22,13 @@ bool AnalyzerFfts::IsFftsData(const std::string &fileName) const
     return false;
 }
 
-void AnalyzerFfts::Parse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+void AnalyzerFfts::Parse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
 {
-    if (message == nullptr) {
+    if (fileChunkReq == nullptr) {
         return;
     }
-    totalBytes_ += static_cast<uint64_t>(message->chunksizeinbytes());
-    ParseData(message->chunk().c_str(), message->chunksizeinbytes());
+    totalBytes_ += fileChunkReq->chunkSize;
+    ParseData(fileChunkReq->chunk.c_str(), fileChunkReq->chunkSize);
 }
 
 void AnalyzerFfts::ParseData(CONST_CHAR_PTR data, uint32_t len)
@@ -142,13 +140,13 @@ void AnalyzerFfts::PrintStats() const
                  analyzedBytes_, totalBytes_, totalFftsTimes_, totalFftsMerges_);
 }
 
-void AnalyzerFfts::FftsParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+void AnalyzerFfts::FftsParse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
 {
-    if (message == nullptr) {
+    if (fileChunkReq == nullptr) {
         return;
     }
-    totalBytes_ += message->chunksizeinbytes();
-    ParseOptimizeFftsData(message->chunk().c_str(), message->chunksizeinbytes());
+    totalBytes_ += fileChunkReq->chunkSize;
+    ParseOptimizeFftsData(fileChunkReq->chunk.c_str(), fileChunkReq->chunkSize);
 }
 
 void AnalyzerFfts::ParseOptimizeFftsData(CONST_CHAR_PTR data, uint32_t len)

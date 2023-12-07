@@ -16,7 +16,7 @@
 
 namespace Msprof {
 namespace Engine {
-using namespace analysis::dvvp::proto;
+using namespace analysis::dvvp::common::utils;
 const std::map<uint16_t, std::map<uint32_t, std::string>> DEFAULT_TYPE_INFO = {
     { MSPROF_REPORT_NODE_LEVEL, {
         {MSPROF_REPORT_NODE_BASIC_INFO_TYPE, "node_basic_info"},
@@ -54,14 +54,14 @@ public:
     int32_t ReportData(uint32_t agingFlag, const MsprofEvent &data);
     int32_t ReportData(uint32_t agingFlag, const MsprofCompactInfo &data);
     int32_t ReportData(uint32_t agingFlag, const MsprofAdditionalInfo &data);
-    int32_t SendAdditinalData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk);
+    int32_t SendAdditinalData(SHARED_PTR_ALIA<ProfileFileChunk> fileChunk);
     int32_t RegReportTypeInfo(uint16_t level, uint32_t typeId, const std::string &typeName);
     std::string& GetRegReportTypeInfo(uint16_t level, uint32_t typeId);
     uint64_t GetHashId(const std::string &info);
-    int32_t SendAdditionalInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk);
+    int32_t SendAdditionalInfo(SHARED_PTR_ALIA<ProfileFileChunk> fileChunk);
 
 private:
-    void FillFileChunkData(const std::string &saveHashData, SHARED_PTR_ALIA<FileChunkReq> fileChunk,
+    void FillFileChunkData(const std::string &saveHashData, SHARED_PTR_ALIA<ProfileFileChunk> fileChunk,
                            bool isLastChunk) const;
     void SaveTypeInfo(bool isLastChunk);
 

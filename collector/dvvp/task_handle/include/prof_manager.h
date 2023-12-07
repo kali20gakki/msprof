@@ -11,8 +11,6 @@
 #include "message/prof_params.h"
 #include "prof_task.h"
 #include "singleton/singleton.h"
-#include "transport/transport.h"
-#include "transport/hdc/device_transport.h"
 #include "transport/prof_channel.h"
 #include "app/application.h"
 #include "utils/utils.h"

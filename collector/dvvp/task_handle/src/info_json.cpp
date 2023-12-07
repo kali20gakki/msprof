@@ -16,7 +16,6 @@
 #include "config/config.h"
 #include "config/config_manager.h"
 #include "errno/error_code.h"
-#include "message/codec.h"
 #include "msprof_dlog.h"
 #include "prof_manager.h"
 #include "securec.h"

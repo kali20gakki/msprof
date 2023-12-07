@@ -65,11 +65,28 @@ int Uploader::UploadData(CONST_VOID_PTR data, int len)
         MSPROF_INNER_ERROR("EK9999", "data is nullptr.");
         return PROFILING_FAILED;
     }
+    SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq;
+    MSVP_MAKE_SHARED0_RET(fileChunkReq, analysis::dvvp::ProfileFileChunk, PROFILING_FAILED);
+    fileChunkReq->chunk = std::string(reinterpret_cast<CHAR_PTR>(const_cast<VOID_PTR>(data)), len);
+    fileChunkReq->chunkSize = static_cast<size_t>(len);
+    fileChunkReq->chunkModule = FileChunkDataModule::PROFILING_IS_FROM_INNER;
+    return UploadData(fileChunkReq);
+}
 
-    void *charPtr = const_cast<void *>(data);
-    SHARED_PTR_ALIA<std::string> buffer;
-    MSVP_MAKE_SHARED2_RET(buffer, std::string, reinterpret_cast<CONST_CHAR_PTR>(charPtr), len, PROFILING_FAILED);
-    bool ret = queue_->Push(buffer);
+int Uploader::UploadData(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
+{
+    if (!isInited_) {
+        MSPROF_LOGE("Uploader was not inited.");
+        MSPROF_INNER_ERROR("EK9999", "Uploader was not inited.");
+        return PROFILING_FAILED;
+    }
+
+    if (fileChunkReq == nullptr) {
+        MSPROF_LOGE("[Uploader::UploadData]data is nullptr.");
+        MSPROF_INNER_ERROR("EK9999", "data is nullptr.");
+        return PROFILING_FAILED;
+    }
+    bool ret = queue_->Push(fileChunkReq);
     if (!ret) {
         MSPROF_LOGE("[Uploader::UploadData]Push data failed.");
         MSPROF_INNER_ERROR("EK9999", "Push data failed.");
@@ -89,31 +106,35 @@ void Uploader::Run(const struct error_message::Context &errorContext)
     }
 
     do {
-        SHARED_PTR_ALIA<std::string> data = nullptr;
-        if (!queue_->TryPop(data) &&
-            Thread::IsQuit()) {
+        SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq = nullptr;
+        if (!queue_->TryPop(fileChunkReq) && Thread::IsQuit()) {
             break;
         }
 
-        if (data == nullptr) {
-            (void)queue_->Pop(data);
+        if (fileChunkReq == nullptr) {
+            (void)queue_->Pop(fileChunkReq);
         }
-
+        if (fileChunkReq == nullptr) {
+            continue;
+        }
         // send the data
-        if (data != nullptr) {
-            int sentLen = transport_->SendBuffer(reinterpret_cast<const void *>(data->c_str()),
-                                                 static_cast<int>(data->size()));
-            if (sentLen != static_cast<int>(data->size())) {
-                MSPROF_LOGE("Failed to upload data, data_len=%d, sent len=%d",
-                    static_cast<int>(data->size()), sentLen);
-                MSPROF_INNER_ERROR("EK9999", "Failed to upload data, data_len=%d, sent len=%d",
-                    static_cast<int>(data->size()), sentLen);
+        if (fileChunkReq->chunkModule == FileChunkDataModule::PROFILING_IS_FROM_INNER) {
+            int sentLen = transport_->SendBuffer(fileChunkReq->chunk.c_str(), fileChunkReq->chunkSize);
+            if (sentLen != static_cast<int>(fileChunkReq->chunkSize)) {
+                MSPROF_LOGE("Failed to upload data, data_len=%zu, sent len=%d", fileChunkReq->chunkSize, sentLen);
+                MSPROF_INNER_ERROR("EK9999", "Failed to upload data, data_len=%zu, sent len=%d",
+                    fileChunkReq->chunkSize, sentLen);
+            }
+        } else {
+            auto ret = transport_->SendBuffer(fileChunkReq);
+            if (ret != PROFILING_SUCCESS) {
+                MSPROF_LOGE("Failed to upload data, data_len=%zu.", fileChunkReq->chunkSize);
+                MSPROF_INNER_ERROR("EK9999", "Failed to upload data, data_len=%zu.", fileChunkReq->chunkSize);
             }
         }
     } while (!forceQuit_);
 
-    MSPROF_LOGI("queue size remaining: %d, force_quit:%d",
-        static_cast<int>(queue_->size()), (forceQuit_ ? 1 : 0));
+    MSPROF_LOGI("queue size remaining: %zu, force_quit:%d", queue_->size(), (forceQuit_ ? 1 : 0));
 }
 
 // Before you invoke stop, all data should already been enqueued
@@ -149,10 +170,6 @@ SHARED_PTR_ALIA<analysis::dvvp::transport::ITransport> Uploader::GetTransport()
     return transport_;
 }
 
-int Uploader::GetQueueSize() const
-{
-    return queue_->size();
-}
 }  // namespace transport
 }  // namespace dvvp
 }  // namespace analysis

@@ -25,8 +25,9 @@ public:
 
 public:
     bool IsHwtsData(const std::string &fileName);
-    void Parse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
-    void HwtsParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
+
+    void Parse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
+    void HwtsParse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
 
 private:
     void ParseHwtsData(CONST_CHAR_PTR data, uint32_t len);

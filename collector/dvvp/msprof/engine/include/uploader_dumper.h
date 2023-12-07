@@ -64,7 +64,7 @@ public:
     /**
     * @brief SendData: use interface dump to send data
     */
-    int SendData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk) override;
+    int SendData(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk) override;
 
 protected:
     void WriteDone() override;
@@ -74,26 +74,26 @@ protected:
     void Run(const struct error_message::Context &errorContext) override;
 private:
     /**
-    * @brief Dump: transfer FileChunkReq
-    * @param [in] message: the user data to be send to remote host
+    * @brief Dump: transfer ProfileFileChunk
+    * @param [in] dataChunk: the user data to be send to remote host
     * @return : success return PROFILING_SUCCESS, failed return PROFIING_FAILED
     */
-    virtual int Dump(std::vector<SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>> &message);
+    virtual int Dump(std::vector<SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk>> &dataChunk);
     void TimedTask() override;
-    void AddToUploader(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
+    void AddToUploader(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> dataChunk);
 
 private:
     std::string module_; // the module name
     bool needCache_;
-    static const size_t MAX_CACHE_SIZE = 1024; // cached 1024 messages at most
+    static const size_t MAX_CACHE_SIZE = 1024; // cached 1024 dataChunks at most
     std::mutex mtx_;
     // model load data of Framework
-    std::map<std::string, std::list<SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> > > modelLoadData_;
+    std::map<std::string, std::list<SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> > > modelLoadData_;
     // model load data cached
-    std::map<std::string, std::list<SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> > > modelLoadDataCached_;
+    std::map<std::string, std::list<SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> > > modelLoadDataCached_;
     // dynamic profiling cached message {deviceId: [dynProf_1th:FileChunkReq1, ...]}}
     std::map<std::string, std::list<std::map<uint32_t,
-        SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>>>> cachedMsg_;
+        SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk>>>> cachedMsg_;
 };
 }}
 #endif

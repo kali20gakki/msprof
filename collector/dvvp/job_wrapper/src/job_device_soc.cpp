@@ -17,7 +17,6 @@
 #include "prof_channel_manager.h"
 #include "prof_peripheral_job.h"
 #include "prof_host_job.h"
-#include "proto/msprofiler.pb.h"
 #include "utils/utils.h"
 
 namespace Analysis {
@@ -502,7 +501,7 @@ int JobDeviceSoc::SendData(const std::string &fileName, const std::string &data)
 
     analysis::dvvp::transport::FileDataParams fileDataParams(fileName, true,
             analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_CTRL_DATA);
-    int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadFileData(params_->job_id, data,
+    int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadCtrlFileData(params_->job_id, data,
         fileDataParams, jobCtx);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to upload data for %s", fileName.c_str());

@@ -11,6 +11,7 @@
 #include <cstdint>
 #include "transport.h"
 #include "utils/utils.h"
+#include "message/codec.h"
 
 namespace analysis {
 namespace dvvp {
@@ -22,6 +23,7 @@ public:
 
 public:
     int SendBuffer(CONST_VOID_PTR buffer, int length) override;
+    int SendBuffer(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq) override;
     int RecvPacket(TLV_REQ_2PTR packet) override;
     void DestroyPacket(TLV_REQ_PTR packet) override;
     int CloseSession() override;

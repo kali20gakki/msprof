@@ -87,32 +87,40 @@ int AicpuPlugin::ReceiveStreamData(CONST_VOID_PTR data, unsigned int dataLen)
             ((data == nullptr) ? 0 : 1), dataLen);
         return PROFILING_FAILED;
     }
-    auto message = analysis::dvvp::message::DecodeMessage(std::string((CONST_CHAR_PTR)data, dataLen));
-    if (message == nullptr) {
+    auto decodeMsg = analysis::dvvp::message::DecodeMessage(std::string(static_cast<CONST_CHAR_PTR>(data), dataLen));
+    if (decodeMsg == nullptr) {
         MSPROF_LOGE("receive stream data, message = nullptr");
         MSPROF_INNER_ERROR("EK9999", "receive stream data, message = nullptr");
         return PROFILING_FAILED;
     }
-    auto fileChunkReq = std::dynamic_pointer_cast<analysis::dvvp::proto::FileChunkReq>(message);
-    if (fileChunkReq == nullptr) {
+    auto message = std::dynamic_pointer_cast<analysis::dvvp::proto::FileChunkReq>(decodeMsg);
+    if (message == nullptr) {
         MSPROF_LOGE("Failed to call dynamic_pointer_cast.");
         return PROFILING_FAILED;
     }
-    if (fileChunkReq->islastchunk() && fileChunkReq->chunksizeinbytes() == 0) {
+    if (message->islastchunk() && message->chunksizeinbytes() == 0) {
         Msprof::Engine::FlushModule(logicDevIdStr_);
         return PROFILING_SUCCESS;
     }
-    fileChunkReq->set_tagsuffix(logicDevIdStr_);
+    message->set_tagsuffix(logicDevIdStr_);
     analysis::dvvp::message::JobContext jobCtx;
-    if (!jobCtx.FromString(fileChunkReq->hdr().job_ctx())) {
-        MSPROF_LOGE("Failed to parse jobCtx:%s, devId:%d", fileChunkReq->hdr().job_ctx().c_str(), logicDevId_);
+    if (!jobCtx.FromString(message->hdr().job_ctx())) {
+        MSPROF_LOGE("Failed to parse jobCtx:%s, devId:%d", message->hdr().job_ctx().c_str(), logicDevId_);
         MSPROF_INNER_ERROR("EK9999", "Failed to parse jobCtx:%s, devId:%d",
-            fileChunkReq->hdr().job_ctx().c_str(), logicDevId_);
+            message->hdr().job_ctx().c_str(), logicDevId_);
         return PROFILING_FAILED;
     }
-    jobCtx.dev_id = logicDevIdStr_;
-    fileChunkReq->mutable_hdr()->clear_job_ctx();
-    fileChunkReq->mutable_hdr()->set_job_ctx(jobCtx.ToString());
+    SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq;
+    MSVP_MAKE_SHARED0_RET(fileChunkReq, analysis::dvvp::ProfileFileChunk, PROFILING_FAILED);
+    fileChunkReq->fileName = Utils::PackDotInfo(message->filename(), jobCtx.tag);
+    fileChunkReq->chunk = std::move(std::string(message->chunk().c_str(), message->chunksizeinbytes()));
+    fileChunkReq->chunkSize = message->chunksizeinbytes();
+    fileChunkReq->isLastChunk = message->islastchunk();
+    fileChunkReq->chunkModule = message->datamodule();
+    fileChunkReq->offset = message->offset();
+    fileChunkReq->extraInfo = Utils::PackDotInfo(jobCtx.job_id, logicDevIdStr_);
+    fileChunkReq->chunkStartTime = 0U;
+    fileChunkReq->chunkEndTime = 0U;
     return Msprof::Engine::SendAiCpuData(fileChunkReq);
 }
 

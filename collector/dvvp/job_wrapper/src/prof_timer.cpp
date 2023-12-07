@@ -18,7 +18,6 @@
 #include "config/config.h"
 #include "errno/error_code.h"
 #include "msprof_dlog.h"
-#include "proto/msprofiler.pb.h"
 #include "utils/utils.h"
 
 namespace Analysis {
@@ -236,30 +235,28 @@ void ProcTimerHandler::SendData(CONST_UNSIGNED_CHAR_PTR buf, unsigned int size)
         return;
     }
     TimerHandlerTag tag = GetTag();
-    SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk;
-    MSVP_MAKE_SHARED0_VOID(fileChunk, analysis::dvvp::proto::FileChunkReq);
+    SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk;
+    MSVP_MAKE_SHARED0_VOID(fileChunk, analysis::dvvp::ProfileFileChunk);
 
-    fileChunk->set_filename(retFileName_);
-    fileChunk->set_offset(-1);
-    fileChunk->set_chunk(buf, size);
-    fileChunk->set_chunksizeinbytes(size);
-    fileChunk->set_islastchunk(false);
-    fileChunk->set_needack(false);
-    fileChunk->mutable_hdr()->set_job_ctx(jobCtx_->ToString());
+    fileChunk->fileName = Utils::PackDotInfo(retFileName_, jobCtx_->tag);
+    fileChunk->offset = -1;
+    fileChunk->chunk = std::move(std::string(reinterpret_cast<CONST_CHAR_PTR>(buf), size));
+    fileChunk->chunkSize = size;
+    fileChunk->isLastChunk = false;
+    fileChunk->extraInfo = Utils::PackDotInfo(jobCtx_->job_id, jobCtx_->dev_id);
+    fileChunk->chunkStartTime = 0U;
+    fileChunk->chunkEndTime = 0U;
     if (tag >= PROF_HOST_PID_CPU && tag <= PROF_HOST_SYS_NETWORK) {
-        fileChunk->set_datamodule(analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST);
+        fileChunk->chunkModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST;
     } else {
-        fileChunk->set_datamodule(analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_DEVICE);
+        fileChunk->chunkModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_DEVICE;
     }
-
-    std::string encoded = analysis::dvvp::message::EncodeMessage(fileChunk);
     if (upLoader_ == nullptr) {
         MSPROF_LOGE("[ProcTimerHandler::SendData] upLoader_ is null");
         MSPROF_INNER_ERROR("EK9999", "upLoader_ is null");
         return;
     }
-    int ret = upLoader_->UploadData(static_cast<void *>(const_cast<CHAR_PTR>(encoded.c_str())),
-        (uint32_t)encoded.size());
+    int ret = upLoader_->UploadData(fileChunk);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[ProcTimerHandler::SendData] Upload Data Failed");
         MSPROF_INNER_ERROR("EK9999", "Upload Data Failed");

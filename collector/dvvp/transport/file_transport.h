@@ -22,13 +22,15 @@ public:
 
 public:
     int SendBuffer(CONST_VOID_PTR buffer, int length) override;
+    int SendBuffer(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq) override;
     int CloseSession() override;
     void WriteDone() override;
     int Init();
     void SetAbility(bool needSlice);
 
 private:
-    int UpdateFileName(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunkReq);
+    int UpdateFileName(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq,
+        const std::string &devId) const;
 
 private:
     SHARED_PTR_ALIA<FileSlice> fileSlice_;

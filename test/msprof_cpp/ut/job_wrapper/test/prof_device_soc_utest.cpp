@@ -165,7 +165,7 @@ TEST_F(PROF_DEVICE_SOC_UTEST, StopProf)
 TEST_F(PROF_DEVICE_SOC_UTEST, SendData) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::UploadFileData)
+    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::UploadCtrlFileData)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -299,7 +299,7 @@ TEST_F(PROF_DEVICE_SOC_UTEST, StoreTime) {
     auto jobDeviceSoc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceSoc>(0);
     MSVP_MAKE_SHARED0_VOID(jobDeviceSoc->collectionjobComnCfg_, CollectionJobCommonParams);
 
-    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::UploadFileData)
+    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::UploadCtrlFileData)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(

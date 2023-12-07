@@ -105,11 +105,21 @@ int HdcTransportDataHandle::ProcessStreamFileChunk(SHARED_PTR_ALIA<google::proto
         fileChunkReq->set_datamodule(FileChunkDataModule::PROFILING_IS_FROM_MSPROF_DEVICE);
     }
 
-    std::string encode = analysis::dvvp::message::EncodeMessage(fileChunkReq);
-    int ret = UploaderMgr::instance()->UploadData(jobId, encode.c_str(), (unsigned int)encode.size());
+    SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk;
+    MSVP_MAKE_SHARED0_RET(fileChunk, analysis::dvvp::ProfileFileChunk, PROFILING_FAILED);
+    fileChunk->fileName = Utils::PackDotInfo(fileChunkReq->filename(), jobCtx.tag);
+    fileChunk->chunk = std::move(std::string(fileChunkReq->chunk().c_str(), fileChunkReq->chunksizeinbytes()));
+    fileChunk->chunkSize = fileChunkReq->chunksizeinbytes();
+    fileChunk->isLastChunk = fileChunkReq->islastchunk();
+    fileChunk->chunkModule = fileChunkReq->datamodule();
+    fileChunk->offset = fileChunkReq->offset();
+    fileChunk->extraInfo = Utils::PackDotInfo(jobCtx.job_id, jobCtx.dev_id);
+    fileChunk->chunkStartTime = 0U;
+    fileChunk->chunkEndTime = 0U;
+    int ret = UploaderMgr::instance()->UploadData(jobId, fileChunk);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("ProcessStreamFileChunk failed jobid:%s, datamode:%d, name:%s", jobId.c_str(),
-            fileChunkReq->datamodule(), name.c_str());
+            fileChunk->chunkModule, name.c_str());
     }
     return ret;
 }

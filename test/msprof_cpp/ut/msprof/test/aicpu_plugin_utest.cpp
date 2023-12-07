@@ -30,7 +30,6 @@ TEST_F(AICPU_PLUGIN_UTEST, ReceiveStreamData) {
 
     std::shared_ptr<analysis::dvvp::proto::FileChunkReq> req(
         new analysis::dvvp::proto::FileChunkReq());
-
     std::string encode = analysis::dvvp::message::EncodeMessage(req); 
     EXPECT_EQ(PROFILING_FAILED, aicpu->ReceiveStreamData(encode.c_str(), encode.size()));
     req->set_islastchunk(true);

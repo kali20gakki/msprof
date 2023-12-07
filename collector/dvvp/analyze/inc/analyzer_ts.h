@@ -25,7 +25,7 @@ public:
 
 public:
     bool IsTsData(const std::string &fileName);
-    void Parse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
+    void Parse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
 
 private:
     void ParseTsTrackData(CONST_CHAR_PTR data, uint32_t len);

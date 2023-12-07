@@ -679,7 +679,9 @@ TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, run) {
 TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, StoreData) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&analysis::dvvp::transport::Uploader::UploadData)
+    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::UploadData,
+        int(analysis::dvvp::transport::UploaderMgr::*)
+        (const std::string&, SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk>))
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     auto jobCtx = std::make_shared<analysis::dvvp::message::JobContext>();
