@@ -153,11 +153,25 @@ int UploaderMgr::UploadData(const std::string &id, CONST_VOID_PTR data, uint32_t
     return PROFILING_FAILED;
 }
 
-int UploaderMgr::UploadFileData(const std::string &id,
+int UploaderMgr::UploadData(const std::string &id, SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
+{
+    SHARED_PTR_ALIA<Uploader> uploader = nullptr;
+    GetUploader(id, uploader);
+    if (uploader != nullptr) {
+        return uploader->UploadData(fileChunkReq);
+    }
+
+    MSPROF_LOGE("Get id[%s] uploader failed", id.c_str());
+    MSPROF_INNER_ERROR("EK9999", "Get id[%s] uploader failed", id.c_str());
+    return PROFILING_FAILED;
+}
+
+int UploaderMgr::UploadCtrlFileData(const std::string &id,
     const std::string &data,
     const struct FileDataParams &fileDataParams,
     SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx)
 {
+    MSPROF_LOGI("UploadCtrlFileData id[%s] uploader start", id.c_str());
     if (data.empty()) {
         MSPROF_LOGE("data is empty");
         MSPROF_INNER_ERROR("EK9999", "data is empty");
@@ -170,26 +184,19 @@ int UploaderMgr::UploadFileData(const std::string &id,
         return PROFILING_FAILED;
     }
 
-    SHARED_PTR_ALIA<FileChunkReq> fileChunk;
-    MSVP_MAKE_SHARED0_RET(fileChunk, FileChunkReq, PROFILING_FAILED);
+    SHARED_PTR_ALIA<ProfileFileChunk> fileChunk;
+    MSVP_MAKE_SHARED0_RET(fileChunk, ProfileFileChunk, PROFILING_FAILED);
 
-    fileChunk->set_filename(fileDataParams.fileName);
-    fileChunk->set_offset(-1);
-    fileChunk->set_chunk(data.c_str(), data.size());
-    fileChunk->set_chunksizeinbytes(data.size());
-    fileChunk->set_islastchunk(fileDataParams.isLastChunk);
-    fileChunk->set_needack(false);
-    fileChunk->mutable_hdr()->set_job_ctx(jobCtx->ToString());
-    fileChunk->set_datamodule(fileDataParams.mode);
-    auto enc = analysis::dvvp::message::EncodeMessageShared(fileChunk);
-    if (enc == nullptr) {
-        MSPROF_LOGE("fileChunk encode failed. fileName:%s", fileDataParams.fileName.c_str());
-        MSPROF_INNER_ERROR("EK9999", "fileChunk encode failed. fileName:%s", fileDataParams.fileName.c_str());
-        return PROFILING_FAILED;
-    }
-    return analysis::dvvp::transport::UploaderMgr::instance()->UploadData(id,
-        static_cast<CONST_VOID_PTR>(const_cast<CHAR_PTR>(enc->c_str())),
-        (uint32_t)enc->size());
+    fileChunk->fileName = fileDataParams.fileName;
+    fileChunk->offset = -1;
+    fileChunk->chunk = std::move(data);
+    fileChunk->chunkSize = data.size();
+    fileChunk->isLastChunk = fileDataParams.isLastChunk;
+    fileChunk->chunkModule = fileDataParams.mode;
+    fileChunk->extraInfo = Utils::PackDotInfo(jobCtx->job_id, jobCtx->dev_id);
+    fileChunk->chunkStartTime = 0U;
+    fileChunk->chunkEndTime = 0U;
+    return analysis::dvvp::transport::UploaderMgr::instance()->UploadData(id, fileChunk);
 }
 }
 }

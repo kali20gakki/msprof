@@ -22,6 +22,10 @@ public:
     virtual int SendBuffer(const void * buffer, int length) {
         return length;
     }
+    virtual int SendBuffer(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
+    {
+        return PROFILING_SUCCESS;
+    }
     virtual int RecvPacket(struct tlv_req ** packet) {
         return PROFILING_FAILED;
     }
@@ -107,30 +111,6 @@ TEST_F(TRANSPORT_TRANSPORT_ITRANSPORT_TEST, SendFile) {
     EXPECT_EQ(PROFILING_SUCCESS, trans->SendFile(path, "TRANSPORT_TRANSPORT_ITRANSPORT_TEST-SendFile-file_existing", ""));
 }
 
-TEST_F(TRANSPORT_TRANSPORT_ITRANSPORT_TEST, SendFileChunk) {
-    GlobalMockObject::verify();
-
-    std::shared_ptr<ITransport> trans(new MyTransport());
-    MOCKER_CPP_VIRTUAL(trans.get() , &ITransport::SendBuffer)
-              .stubs()
-              .will(returnValue(PROFILING_FAILED));
-
-    FileChunk chunk;
-    chunk.relativeFileName = "my_file.txt";
-    chunk.dataBuf = new unsigned char[4096];
-    chunk.bufLen = 4096;
-    chunk.offset = 0;
-    chunk.isLastChunk = 0;
-
-    //Failed
-    EXPECT_EQ(PROFILING_FAILED, trans->SendFileChunk("1231", chunk));
-
-    GlobalMockObject::verify();
-    EXPECT_EQ(PROFILING_SUCCESS, trans->SendFileChunk("12313", chunk));
-
-    delete [] chunk.dataBuf;
-}
-
 ///////////////////////////////////////////////////////////////////
 class TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST: public testing::Test {
 protected:
@@ -178,6 +158,32 @@ TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, SendBuffer) {
     EXPECT_EQ(PROFILING_FAILED, trans->SendBuffer(buff, length));
     EXPECT_EQ(PROFILING_FAILED, trans->SendBuffer(buff, length));
     EXPECT_EQ(length, trans->SendBuffer(buff, length));
+}
+
+TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, SendBufferForProfileFileChunk)
+{
+    GlobalMockObject::verify();
+
+    HDC_SESSION session = (HDC_SESSION)0x12345678;
+
+    std::shared_ptr<ITransport> trans = std::make_shared<HDCTransport>(session);
+    std::shared_ptr<PerfCount> perfCount = std::make_shared<PerfCount>("test");
+    trans->perfCount_ = perfCount;
+    MOCKER(IdeCreatePacket)
+        .stubs()
+        .with(any(), any(), any(), any(), any())
+        .will(returnValue(IDE_DAEMON_ERROR))
+        .then(returnValue(IDE_DAEMON_OK));
+
+    MOCKER(HdcWrite)
+        .stubs()
+        .will(returnValue(IDE_DAEMON_ERROR))
+        .then(returnValue(IDE_DAEMON_OK));
+
+    SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq;
+    fileChunkReq = std::make_shared<analysis::dvvp::ProfileFileChunk>();
+    fileChunkReq->chunkSize = 1;
+    EXPECT_EQ(PROFILING_SUCCESS, trans->SendBuffer(fileChunkReq));
 }
 
 TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, RecvPacket) {
@@ -312,6 +318,36 @@ TEST_F(TRANSPORT_TRANSPORT_ITRANSPORT_TEST, FILETransport) {
     EXPECT_EQ(PROFILING_SUCCESS, trans->CloseSession());
 }
 
+TEST_F(TRANSPORT_TRANSPORT_ITRANSPORT_TEST, SendBuffer_without_protobuf) {
+    GlobalMockObject::verify();
+
+    std::shared_ptr<FILETransport> trans;
+    trans = std::make_shared<FILETransport>("/tmp", "200MB");
+    std::shared_ptr<PerfCount> perfCount;
+    perfCount = std::make_shared<PerfCount>("test");
+    trans->perfCount_ = perfCount;
+    trans->Init();
+
+    // test the normal procests, fileChunkReq datamodule is PROFILING_IS_FROM_DEVICE
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> message(
+        new analysis::dvvp::ProfileFileChunk());
+    message->extraInfo = "null.64";
+    message->chunkModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_MSPROF_DEVICE;
+
+    MOCKER_CPP(&FileSlice::SaveDataToLocalFiles)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+
+    EXPECT_EQ(PROFILING_FAILED, trans->SendBuffer(nullptr));
+    EXPECT_EQ(PROFILING_FAILED, trans->SendBuffer(message));
+    message->extraInfo = "null.0";
+    EXPECT_EQ(PROFILING_SUCCESS, trans->SendBuffer(message));
+
+    // test fileChunkReq datamodule is PROFILING_DEFAULT_DATA_MODULE
+    message->chunkModule  = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_DEFAULT_DATA_MODULE;
+    EXPECT_EQ(PROFILING_SUCCESS, trans->SendBuffer(message));
+}
+
 TEST_F(TRANSPORT_TRANSPORT_ITRANSPORT_TEST, SendBuffer) {
     GlobalMockObject::verify();
 
@@ -325,48 +361,48 @@ TEST_F(TRANSPORT_TRANSPORT_ITRANSPORT_TEST, SendBuffer) {
     EXPECT_EQ(0, trans->SendBuffer(buff.c_str(), 0));
 
     // test the normal procests, fileChunkReq datamodule is PROFILING_IS_FROM_DEVICE
-    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> message(
-        new analysis::dvvp::proto::FileChunkReq());
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> message(
+        new analysis::dvvp::ProfileFileChunk());
     analysis::dvvp::message::JobContext job_ctx;
     job_ctx.dev_id = "0";
     job_ctx.job_id = "123456789";
-    message->mutable_hdr()->set_job_ctx(job_ctx.ToString());
-    message->set_datamodule(analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_DEVICE);
-    buff = analysis::dvvp::message::EncodeMessage(message);
+    message->extraInfo = Utils::PackDotInfo("123456789", "0");
+    message->chunkModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_DEVICE;
 
     MOCKER_CPP(&analysis::dvvp::transport::FileSlice::SaveDataToLocalFiles)
         .stubs()
-        .will(returnValue(PROFILING_SUCCESS))
-        .then(returnValue(PROFILING_FAILED));
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_FAILED, trans->SendBuffer(nullptr));
+    EXPECT_EQ(PROFILING_SUCCESS, trans->SendBuffer(message));
 
-    EXPECT_EQ(0, trans->SendBuffer(nullptr, buff.size()));
-    EXPECT_EQ(buff.size(), trans->SendBuffer(buff.c_str(), buff.size()));
-
-    message->set_datamodule(analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_MSPROF);
-    buff = analysis::dvvp::message::EncodeMessage(message);
+    message->chunkModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_MSPROF;
 
     // test fileChunkReq datamodule is PROFILING_IS_FROM_DEVICE
+    MOCKER_CPP(&FILETransport::UpdateFileName)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    
     MOCKER(analysis::dvvp::common::utils::Utils::CheckStringIsNonNegativeIntNum)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
 
-    EXPECT_EQ(0, trans->SendBuffer(buff.c_str(), buff.size()));
+    EXPECT_EQ(0, trans->SendBuffer(message));
 
     // test FromString
     MOCKER_CPP(&analysis::dvvp::message::ProfileParams::FromString)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
-    EXPECT_EQ(0, trans->SendBuffer(buff.c_str(), buff.size()));
+
+    EXPECT_EQ(0, trans->SendBuffer(message));
 
     // test fileChunkReq is nullptr, retLengthError = 0;
     std::shared_ptr<google::protobuf::Message> fake_message = nullptr;
     MOCKER(analysis::dvvp::message::DecodeMessage)
         .stubs()
         .will(returnValue(fake_message));
-
-    EXPECT_EQ(0, trans->SendBuffer(buff.c_str(), buff.size()));
+    EXPECT_EQ(0, trans->SendBuffer(message));
 }
 
 TEST_F(TRANSPORT_TRANSPORT_TRANSPORTFACTORY_TEST, CreateFileTransport) {
@@ -391,23 +427,25 @@ TEST_F(TRANSPORT_TRANSPORT_ITRANSPORT_TEST, SendBufferForMsprof) {
     trans->SetAbility(true);
     trans->Init();
 
-    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> message(
-        new analysis::dvvp::proto::FileChunkReq());
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> message(
+        new analysis::dvvp::ProfileFileChunk());
     analysis::dvvp::message::JobContext job_ctx;
     job_ctx.dev_id = "0";
     job_ctx.job_id = "123456789";
-    message->mutable_hdr()->set_job_ctx(job_ctx.ToString());
-    message->set_datamodule(analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_MSPROF);
-    message->set_filename("data/test");
-    std::string buff = analysis::dvvp::message::EncodeMessage(message);
+    message->fileName = Utils::PackDotInfo("data/test", "");
+    message->extraInfo = Utils::PackDotInfo("123456789", "0");
+    message->chunkModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_MSPROF;
+    // std::string buff = analysis::dvvp::message::EncodeMessage(message);
 
     // test fileChunkReq datamodule is PROFILING_IS_FROM_DEVICE
     MOCKER(analysis::dvvp::common::utils::Utils::CheckStringIsNonNegativeIntNum)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(true));
-
-    EXPECT_EQ(0, trans->SendBuffer(buff.c_str(), buff.size()));
+    MOCKER_CPP(&FileSlice::SaveDataToLocalFiles)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(0, trans->SendBuffer(message));
 }
 
 TEST_F(TRANSPORT_TRANSPORT_ITRANSPORT_TEST, AdxHdcServerAccept) {

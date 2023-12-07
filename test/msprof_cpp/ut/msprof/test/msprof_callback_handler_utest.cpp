@@ -73,7 +73,7 @@ TEST_F(MSPROF_CALLBACK_HANDLER_UTEST, SendDataTest) {
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk(new analysis::dvvp::proto::FileChunkReq());
+    SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk(new analysis::dvvp::ProfileFileChunk());
     EXPECT_EQ(PROFILING_FAILED, handler.SendData(fileChunk));
 
     handler.StartReporter();

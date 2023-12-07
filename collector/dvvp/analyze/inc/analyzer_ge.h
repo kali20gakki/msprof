@@ -31,10 +31,10 @@ public:
     bool IsGeGraphIdMapData(const std::string &tag) const;
     bool IsGeContextData(const std::string &tag) const;
 
-    void GeCompactParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
-    void GeApiAndEventParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
-    void GeGraphIdMapParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
-    void GeContextParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
+    void GeCompactParse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
+    void GeApiAndEventParse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
+    void GeContextParse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
+    void GeGraphIdMapParse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
 
     bool IsOpInfoCompleted(const std::string &opId);
     uint32_t GetModelId(const std::string &opId) const;

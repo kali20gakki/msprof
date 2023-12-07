@@ -161,7 +161,7 @@ public:
         analysis::dvvp::transport::FileDataParams fileDataParams(fileName, true,
             analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_CTRL_DATA);
         MSPROF_LOGI("[%s]storeTime.id: %s,fileName: %s", jobDeviceType_.c_str(), jobId_.c_str(), fileName.c_str());
-        int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadFileData(jobId_,
+        int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadCtrlFileData(jobId_,
             startTime, fileDataParams, jobCtx);
         if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("[%s]Failed to upload data for %s", jobDeviceType_.c_str(), fileName.c_str());

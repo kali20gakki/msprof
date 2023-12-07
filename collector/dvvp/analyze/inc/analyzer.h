@@ -30,13 +30,13 @@ public:
 
 public:
     int Init();
-    void OnOptimizeData(CONST_VOID_PTR data, uint32_t len);
+    void OnOptimizeData(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
     void Flush();
     void SetDevId(const std::string &devIdStr);
     void PrintStats();
 
 private:
-    void DispatchOptimizeData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
+    void DispatchOptimizeData(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
     void ConstructAndUploadData(const std::string &opId, OpTime &opTime);
     void TsDataPostProc();
     void UploadAppOp(std::multimap<std::string, OpTime> &opTimes);

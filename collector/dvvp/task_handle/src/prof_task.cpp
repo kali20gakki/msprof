@@ -5,9 +5,9 @@
  * Create: 2018-06-13
  */
 #include "prof_task.h"
+#include <algorithm>
 #include "config/config.h"
 #include "errno/error_code.h"
-#include "message/codec.h"
 #include "msprof_dlog.h"
 #include "prof_acl_mgr.h"
 #include "prof_manager.h"
@@ -55,7 +55,6 @@ ProfTask::~ProfTask()
 int ProfTask::Init()
 {
     MSPROF_LOGI("Init ProfTask");
-    MSVP_MAKE_SHARED0_RET(taskStatus_, analysis::dvvp::message::Status, PROFILING_FAILED);
     if (params_ == nullptr) {
         MSPROF_LOGE("Params for prof task is null");
         MSPROF_INNER_ERROR("EK9999", "Params for prof task is null");
@@ -139,7 +138,7 @@ int ProfTask::CreateCollectionTimeInfo(std::string collectionTime, bool isStartT
     analysis::dvvp::transport::FileDataParams fileDataParams(fileName, true,
         FileChunkDataModule::PROFILING_IS_CTRL_DATA);
     MSPROF_LOGI("[CreateCollectionTimeInfo]job_id: %s,fileName: %s", params_->job_id.c_str(), fileName.c_str());
-    int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadFileData(
+    int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadCtrlFileData(
         params_->job_id, content, fileDataParams, jobCtx);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to upload data for %s", fileName.c_str());
@@ -180,7 +179,7 @@ int ProfTask::GetHostAndDeviceInfo()
     analysis::dvvp::transport::FileDataParams fileDataParams(fileName, true,
         FileChunkDataModule::PROFILING_IS_CTRL_DATA);
     MSPROF_LOGI("[GetHostAndDeviceInfo]storeStartTime.id: %s,fileName: %s", params_->job_id.c_str(), fileName.c_str());
-    int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadFileData(params_->job_id, content,
+    int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadCtrlFileData(params_->job_id, content,
         fileDataParams, jobCtx);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[GetHostAndDeviceInfo]Failed to upload data for %s", fileName.c_str());
@@ -273,41 +272,25 @@ void ProfTask::ProcessDefMode()
     MSPROF_EVENT("ProfTask %s finished waiting for task stop cv", params_->job_id.c_str());
 }
 
-void ProfTask::StoreResultStatus()
-{
-    // store result status
-    for (auto iter = devicesMap_.begin(); iter != devicesMap_.end(); iter++) {
-        auto statusInfo = iter->second->GetStatus();
-        analysis::dvvp::message::StatusInfo dev_info;
-        dev_info.dev_id = statusInfo->dev_id;
-        dev_info.status = statusInfo->status;
-        dev_info.info = statusInfo->info;
-
-        if (dev_info.status == analysis::dvvp::message::SUCCESS) {
-            taskStatus_->status = analysis::dvvp::message::SUCCESS;
-        }
-        taskStatus_->AddStatusInfo(dev_info);
-    }
-}
-
 int ProfTask::NotifyFileDoneForDevice(const std::string &fileName, const std::string &devId) const
 {
-    SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk;
-    MSVP_MAKE_SHARED0_RET(fileChunk, analysis::dvvp::proto::FileChunkReq, PROFILING_FAILED);
+    SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk;
+    MSVP_MAKE_SHARED0_RET(fileChunk, analysis::dvvp::ProfileFileChunk, PROFILING_FAILED);
 
     analysis::dvvp::message::JobContext jobCtx;
     jobCtx.job_id = params_->job_id;
     jobCtx.dev_id = devId;
 
-    fileChunk->set_filename(fileName);
-    fileChunk->set_offset(-1);
-    fileChunk->set_chunksizeinbytes(0);
-    fileChunk->set_islastchunk(true);
-    fileChunk->set_needack(false);
-    fileChunk->mutable_hdr()->set_job_ctx(jobCtx.ToString());
-    std::string encode = analysis::dvvp::message::EncodeMessage(fileChunk);
-
-    int ret = WriteStreamData(encode.c_str(), (unsigned int)encode.size());
+    fileChunk->fileName = Utils::PackDotInfo(fileName, jobCtx.tag);
+    fileChunk->offset = -1;
+    fileChunk->chunkSize = 0U;
+    fileChunk->isLastChunk = true;
+    fileChunk->extraInfo = Utils::PackDotInfo(jobCtx.job_id, jobCtx.dev_id);
+    fileChunk->chunkStartTime = 0U;
+    fileChunk->chunkEndTime = 0U;
+    fileChunk->chunk.assign("");
+    fileChunk->chunkModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_DEFAULT_DATA_MODULE;
+    int ret = WriteStreamData(fileChunk);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGW("NotifyFileDoneForDevice failed, jobId:%s, filename:%s, devId:%s", jobCtx.job_id.c_str(),
             fileName.c_str(), devId.c_str());
@@ -321,8 +304,6 @@ void ProfTask::Run(const struct error_message::Context &errorContext)
     // process prepare
     MSPROF_LOGI("Task %s begins to run", params_->job_id.c_str());
 
-    analysis::dvvp::message::StatusInfo statusInfo;
-    taskStatus_->status = analysis::dvvp::message::ERR;
     int ret = CreateCollectionTimeInfo(GetHostTime(), true);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("ProcessDefMode CreateCollectionTimeInfo failed");
@@ -330,7 +311,6 @@ void ProfTask::Run(const struct error_message::Context &errorContext)
     }
     ProcessDefMode();
 
-    StoreResultStatus();
     // wait all device thread stop
     for (auto iter = devicesMap_.begin(); iter != devicesMap_.end(); iter++) {
         iter->second->PostStopReplay();
@@ -339,8 +319,6 @@ void ProfTask::Run(const struct error_message::Context &errorContext)
     }
     MSPROF_LOGI("Prof task begins to finish");
     (void)CreateCollectionTimeInfo(GetHostTime(), false);
-    (void)uploader_->GetTransport()->SendFiles(params_->job_id, params_->result_dir);
-    FinishJobRsp(taskStatus_);
     (void)uploader_->Flush();
     uploader_ = nullptr;
 
@@ -379,29 +357,15 @@ void ProfTask::WriteDone()
     uploader = nullptr;
 }
 
-void ProfTask::FinishJobRsp(SHARED_PTR_ALIA<analysis::dvvp::message::Status> taskStatus)
-{
-    SHARED_PTR_ALIA<analysis::dvvp::proto::FinishJobRsp> finishJobRes;
-    MSVP_MAKE_SHARED0_VOID(finishJobRes, analysis::dvvp::proto::FinishJobRsp);
-
-    finishJobRes->set_jobid(params_->job_id);
-    finishJobRes->set_status(taskStatus->status == analysis::dvvp::message::SUCCESS ?
-                                analysis::dvvp::proto::SUCCESS : analysis::dvvp::proto::FAILED);
-    finishJobRes->set_message(taskStatus->ToString());
-
-    std::string encoded = analysis::dvvp::message::EncodeMessage(finishJobRes);
-    (void)uploader_->GetTransport()->SendBuffer(encoded.c_str(), static_cast<int>(encoded.size()));
-}
-
-int ProfTask::WriteStreamData(CONST_VOID_PTR data, unsigned int dataLen) const
+int ProfTask::WriteStreamData(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk) const
 {
     if (GetIsFinished()) {
         MSPROF_LOGW("Profiling is already finished, jobId: %s", params_->job_id.c_str());
         return PROFILING_SUCCESS;
     }
 
-    if (uploader_ != nullptr && data != nullptr) {
-        return uploader_->UploadData(data, dataLen);
+    if (uploader_ != nullptr && fileChunk != nullptr) {
+        return uploader_->UploadData(fileChunk);
     }
     return PROFILING_FAILED;
 }

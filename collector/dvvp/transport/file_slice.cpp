@@ -11,7 +11,6 @@
 #include "file_ageing.h"
 #include "mmpa_api.h"
 #include "msprof_dlog.h"
-#include "proto/msprofiler.pb.h"
 #include "utils/utils.h"
 
 using namespace Analysis::Dvvp::Common::Statistics;
@@ -176,32 +175,24 @@ int FileSlice::WriteToLocalFiles(const std::string &key, CONST_CHAR_PTR data, in
     return PROFILING_SUCCESS;
 }
 
-int FileSlice::CheckDirAndMessage(analysis::dvvp::message::JobContext &jobCtx,
-                                  SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> &fileChunkReq)
+int FileSlice::CheckDirAndMessage(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
 {
-    if (fileChunkReq ==  nullptr) {
+    if (fileChunkReq == nullptr) {
         MSPROF_LOGE("para err!");
         return PROFILING_FAILED;
     }
-    if (!jobCtx.FromString(fileChunkReq->hdr().job_ctx())) {
-        MSPROF_LOGE("Failed to parse jobCtx json %s. fileName:%s",
-                    fileChunkReq->hdr().job_ctx().c_str(), Utils::BaseName(fileChunkReq->filename()).c_str());
-        return PROFILING_FAILED;
-    }
-    if (fileChunkReq->islastchunk() && fileChunkReq->chunksizeinbytes() == 0) {
+    if (fileChunkReq->isLastChunk && fileChunkReq->chunkSize == 0) {
         return PROFILING_SUCCESS;
     }
 
-    if (fileChunkReq->filename().length() == 0 || fileChunkReq->hdr().job_ctx().length() == 0 ||
-        (!(fileChunkReq->islastchunk()) && fileChunkReq->chunksizeinbytes() == 0)) {
-        MSPROF_LOGE("para err! filename.length:%d,jobCtx.length:%d,chunksizeinbytes:%d",
-            fileChunkReq->filename().length(),
-            fileChunkReq->hdr().job_ctx().length(), fileChunkReq->chunksizeinbytes());
+    if (fileChunkReq->fileName.length() == 0 || (!(fileChunkReq->isLastChunk) && fileChunkReq->chunkSize == 0)) {
+        MSPROF_LOGE("para err! filename.length:%d, chunksizeinbytes:%d",
+            fileChunkReq->fileName.length(), fileChunkReq->chunkSize);
 
         return PROFILING_FAILED;
     }
 
-    std::string dir = analysis::dvvp::common::utils::Utils::DirName(storageDir_ + fileChunkReq->filename());
+    std::string dir = analysis::dvvp::common::utils::Utils::DirName(storageDir_ + fileChunkReq->fileName);
     if (dir.empty()) {
         MSPROF_LOGE("Failed to get dirname of filechunk");
         return PROFILING_FAILED;
@@ -248,27 +239,24 @@ int FileSlice::WriteCtrlDataToFile(const std::string &absolutePath, const std::s
     return PROFILING_SUCCESS;
 }
 
-int FileSlice::SaveDataToLocalFiles(SHARED_PTR_ALIA<google::protobuf::Message> message)
+int FileSlice::SaveDataToLocalFiles(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
 {
     int ret = PROFILING_FAILED;
-    SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunkReq = nullptr;
-    fileChunkReq = std::dynamic_pointer_cast<analysis::dvvp::proto::FileChunkReq>(message);
     if (fileChunkReq == nullptr) {
         MSPROF_LOGE("failed to cast to FileTrunkReq");
         return ret;
     }
-    analysis::dvvp::message::JobContext jobCtx;
-    std::string fileName = fileChunkReq->filename();
-
-    if (CheckDirAndMessage(jobCtx, fileChunkReq) == PROFILING_FAILED) {
+    std::string fileName = fileChunkReq->fileName;
+    std::string devId = Utils::GetInfoSuffix(fileChunkReq->extraInfo);
+    if (CheckDirAndMessage(fileChunkReq) == PROFILING_FAILED) {
         return PROFILING_FAILED;
     }
-    if (fileChunkReq->chunksizeinbytes() == 0 && fileChunkReq->islastchunk()) {
-        return FileSliceFlushByJobID(storageDir_ + fileName, jobCtx.dev_id);
+    if (fileChunkReq->chunkSize == 0 && fileChunkReq->isLastChunk) {
+        return FileSliceFlushByJobID(storageDir_ + fileName, devId);
     }
-    if (fileChunkReq->datamodule() == FileChunkDataModule::PROFILING_IS_CTRL_DATA) {
+    if (fileChunkReq->chunkModule == FileChunkDataModule::PROFILING_IS_CTRL_DATA) {
         return WriteCtrlDataToFile(storageDir_ + fileName,
-                                   fileChunkReq->chunk(), fileChunkReq->chunksizeinbytes());
+                                   fileChunkReq->chunk, fileChunkReq->chunkSize);
     }
 
     std::unique_lock<std::mutex> lk(sliceFileMtx_);
@@ -277,22 +265,21 @@ int FileSlice::SaveDataToLocalFiles(SHARED_PTR_ALIA<google::protobuf::Message> m
         MSPROF_LOGE("get key err");
         return PROFILING_FAILED;
     }
-    if (fileChunkReq->chunksizeinbytes() > 0 && fileChunkReq->chunk().c_str() != nullptr) {
-        ret = SetChunkTime(key, fileChunkReq->chunkstarttime(), fileChunkReq->chunkendtime());
+    if (fileChunkReq->chunkSize > 0 && fileChunkReq->chunk.c_str() != nullptr) {
+        ret = SetChunkTime(key, fileChunkReq->chunkStartTime, fileChunkReq->chunkEndTime);
         if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("Failed to set chunk time, chunkstarttime: %llu, chunkendtime: %llu ns",
-                        fileChunkReq->chunkstarttime(), fileChunkReq->chunkendtime());
+            MSPROF_LOGE("Failed to set chunk time");
             return PROFILING_FAILED;
         }
     }
-    if (fileChunkReq->datamodule() == FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST) {
+    if (fileChunkReq->chunkModule == FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST) {
         long long fileSize = analysis::dvvp::common::utils::Utils::GetFileSize(key);
         if (fileSize != PROFILING_FAILED) {
-            fileChunkReq->set_offset(fileSize);
+            fileChunkReq->offset = fileSize;
         }
     }
-    ret = WriteToLocalFiles(key, fileChunkReq->chunk().c_str(), fileChunkReq->chunksizeinbytes(),
-        fileChunkReq->offset(), fileChunkReq->islastchunk());
+    ret = WriteToLocalFiles(key, fileChunkReq->chunk.c_str(), fileChunkReq->chunkSize,
+        fileChunkReq->offset, fileChunkReq->isLastChunk);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to write local files, fileName: %s", Utils::BaseName(fileName).c_str());
         return PROFILING_FAILED;

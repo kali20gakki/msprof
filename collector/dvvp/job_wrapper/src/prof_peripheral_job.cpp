@@ -12,7 +12,6 @@
 #include "securec.h"
 #include "utils/utils.h"
 #include "platform/platform.h"
-#include "proto/msprofiler.pb.h"
 #include "uploader_mgr.h"
 
 namespace Analysis {
@@ -986,11 +985,11 @@ void ProfLlcJob::SendData()
     if (!ifs.is_open()) {
         return;
     }
-    SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk;
-    MSVP_MAKE_SHARED0_VOID(fileChunk, analysis::dvvp::proto::FileChunkReq);
+    SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk;
+    MSVP_MAKE_SHARED0_VOID(fileChunk, analysis::dvvp::ProfileFileChunk);
 
     static const unsigned int PERF_DATA_BUF_SIZE_M = 262144 + 1; // 262144 + 1, 256K Byte + '\0'
-    static const char * const PERF_RET_NAME = "data/llc.data";
+    static const std::string PERF_RET_NAME = "data/llc.data";
     SHARED_PTR_ALIA<char> buf;
     MSVP_MAKE_SHARED_ARRAY_VOID(buf, char, PERF_DATA_BUF_SIZE_M);
 
@@ -1001,19 +1000,18 @@ void ProfLlcJob::SendData()
         }
         ifs.read(buf.get(), PERF_DATA_BUF_SIZE_M - 1);
 
-        fileChunk->set_filename(PERF_RET_NAME);
-        fileChunk->set_offset(-1);
-        fileChunk->set_chunk(buf.get(), ifs.gcount());
-        fileChunk->set_chunksizeinbytes(ifs.gcount());
-        fileChunk->set_islastchunk(false);
-        fileChunk->set_needack(false);
-        fileChunk->mutable_hdr()->set_job_ctx(collectionJobCfg_->comParams->jobCtx->ToString());
-        fileChunk->set_datamodule(analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_DEVICE);
-
-        std::string encoded = analysis::dvvp::message::EncodeMessage(fileChunk);
+        fileChunk->fileName = Utils::PackDotInfo(PERF_RET_NAME, collectionJobCfg_->comParams->jobCtx->tag);
+        fileChunk->offset = -1;
+        fileChunk->chunk = std::move(std::string(reinterpret_cast<CONST_CHAR_PTR>(buf.get()), ifs.gcount()));
+        fileChunk->chunkSize = static_cast<size_t>(ifs.gcount());
+        fileChunk->isLastChunk = false;
+        fileChunk->extraInfo = Utils::PackDotInfo(collectionJobCfg_->comParams->jobCtx->job_id,
+            collectionJobCfg_->comParams->jobCtx->dev_id);
+        fileChunk->chunkModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_DEVICE;
+        fileChunk->chunkStartTime = 0U;
+        fileChunk->chunkEndTime = 0U;
         int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadData(
-            collectionJobCfg_->comParams->params->job_id,
-            static_cast<void *>(const_cast<CHAR_PTR>(encoded.c_str())), (uint32_t)encoded.size());
+            collectionJobCfg_->comParams->params->job_id, fileChunk);
         if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("Upload llc data failed , jobId: %s", collectionJobCfg_->comParams->params->job_id.c_str());
         }

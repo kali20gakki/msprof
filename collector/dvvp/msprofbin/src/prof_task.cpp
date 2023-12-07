@@ -157,7 +157,7 @@ int ProfTask::CreateCollectionTimeInfo(std::string collectionTime, bool isStartT
         analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_CTRL_DATA);
 
     MSPROF_LOGI("job_id: %s,fileName: %s", params_->job_id.c_str(), fileName.c_str());
-    int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadFileData(params_->job_id,
+    int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadCtrlFileData(params_->job_id,
         content, fileDataParams, jobCtx);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to upload data for %s", fileName.c_str());
@@ -193,7 +193,7 @@ int ProfTask::GetHostAndDeviceInfo()
         analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_CTRL_DATA);
 
     MSPROF_LOGI("storeStartTime.id: %s,fileName: %s", params_->job_id.c_str(), fileName.c_str());
-    int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadFileData(params_->job_id,
+    int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadCtrlFileData(params_->job_id,
         content, fileDataParams, jobCtx);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to upload data for %s", fileName.c_str());

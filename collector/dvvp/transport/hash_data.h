@@ -7,6 +7,7 @@
 #ifndef ANALYSIS_DVVP_TRANSPORT_HASH_DATA_H
 #define ANALYSIS_DVVP_TRANSPORT_HASH_DATA_H
 #include <map>
+#include <unordered_map>
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -15,14 +16,12 @@
 #include "singleton/singleton.h"
 #include "utils/utils.h"
 #include "thread/thread.h"
-#include "proto/msprofiler.pb.h"
 #include "prof_callback.h"
 
 namespace analysis {
 namespace dvvp {
 namespace transport {
 using namespace analysis::dvvp::common::utils;
-using namespace analysis::dvvp::proto;
 
 class HashData : public analysis::dvvp::common::singleton::Singleton<HashData>,
                  public analysis::dvvp::common::thread::Thread {
@@ -50,7 +49,7 @@ public:
 private:
     uint64_t DoubleHash(const std::string &data) const;
     void FillPbData(const std::string &module, int32_t upDevId, const std::string &saveHashData,
-                    SHARED_PTR_ALIA<FileChunkReq> fileChunk, bool isLastChunk);
+                    SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk, bool isLastChunk);
 private:
     bool inited_;
     std::mutex initMutex_;

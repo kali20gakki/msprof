@@ -16,7 +16,6 @@ namespace transport {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::validation;
-
 HDCTransport::HDCTransport(HDC_SESSION session, bool isClient, HDC_CLIENT client)
     : session_(session), isClient_(isClient), client_(client)
 {
@@ -41,6 +40,12 @@ int HDCTransport::SendAdxBuffer(IdeBuffT out, int outLen)
 int HDCTransport::SendBuffer(CONST_VOID_PTR buffer, int length)
 {
     return SendBufferWithFixedLength(*this, buffer, length);
+}
+
+int HDCTransport::SendBuffer(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
+{
+    MSPROF_LOGI("HDCTransport SendBuffer is null.");
+    return 0;
 }
 
 int HDCTransport::RecvPacket(TLV_REQ_2PTR packet)

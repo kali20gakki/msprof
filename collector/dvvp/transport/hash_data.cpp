@@ -217,24 +217,18 @@ std::string &HashData::GetHashInfo(uint64_t hashId)
 }
 
 void HashData::FillPbData(const std::string &module, int32_t upDevId,
-    const std::string &saveHashData, SHARED_PTR_ALIA<FileChunkReq> fileChunk, bool isLastChunk)
+    const std::string &saveHashData, SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk, bool isLastChunk)
 {
-    fileChunk->set_filename(module);
-    fileChunk->set_offset(-1);
-    fileChunk->set_islastchunk(isLastChunk);
-    fileChunk->set_needack(false);
-    fileChunk->set_tag(HASH_TAG, strlen(HASH_TAG));
-    fileChunk->set_tagsuffix(std::to_string(upDevId));
-    fileChunk->set_chunk(saveHashData);
-    fileChunk->set_chunksizeinbytes(saveHashData.size());
-    fileChunk->set_datamodule(FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST);
-    analysis::dvvp::message::JobContext jobCtx;
-    jobCtx.dev_id = std::to_string(upDevId);
-    jobCtx.job_id = std::to_string(upDevId);
-    fileChunk->mutable_hdr()->set_job_ctx(jobCtx.ToString());
+    fileChunk->fileName = Utils::PackDotInfo(module, HASH_TAG);
+    fileChunk->offset = -1;
+    fileChunk->isLastChunk = isLastChunk;
+    fileChunk->chunk = saveHashData;
+    fileChunk->chunkSize = saveHashData.size();
+    fileChunk->chunkModule = FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST;
+    fileChunk->extraInfo = Utils::PackDotInfo(std::to_string(upDevId), std::to_string(upDevId));
     uint64_t reportTime = Utils::GetClockMonotonicRaw();
-    fileChunk->set_chunkstarttime(reportTime);
-    fileChunk->set_chunkendtime(reportTime);
+    fileChunk->chunkStartTime = reportTime;
+    fileChunk->chunkEndTime = reportTime;
 }
 
 void HashData::SaveHashData()
@@ -255,14 +249,13 @@ void HashData::SaveHashData()
         for (auto &data : hashDataKeyMap_[module.name]) {
             saveHashData.append(std::to_string(data.second) + HASH_DIC_DELIMITER + data.first + "\n");
         }
-        // construct FileChunkReq data
-        SHARED_PTR_ALIA<FileChunkReq> fileChunk = nullptr;
-        MSVP_MAKE_SHARED0_BREAK(fileChunk, FileChunkReq);
+        // construct ProfileFileChunk data
+        SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk = nullptr;
+        MSVP_MAKE_SHARED0_BREAK(fileChunk, analysis::dvvp::ProfileFileChunk);
         FillPbData(module.name, DEFAULT_HOST_ID, saveHashData, fileChunk, true);
-        // upload FileChunkReq data
-        std::string encoded = analysis::dvvp::message::EncodeMessage(fileChunk);
+        // upload ProfileFileChunk data
         int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadData(
-            std::to_string(DEFAULT_HOST_ID), encoded.c_str(), encoded.size());
+            std::to_string(DEFAULT_HOST_ID), fileChunk);
         if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("HashData upload data failed, module:%s, dataLen:%u",
                         module.name.c_str(), saveHashData.size());
@@ -296,14 +289,13 @@ void HashData::SaveNewHashData(bool isLastChunk)
     }
     readIndex_ = currentHashSize;
     lock.unlock();
-    // construct FileChunkReq data
-    SHARED_PTR_ALIA<FileChunkReq> fileChunk = nullptr;
-    MSVP_MAKE_SHARED0_VOID(fileChunk, FileChunkReq);
+    // construct ProfileFileChunk data
+    SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk = nullptr;
+    MSVP_MAKE_SHARED0_VOID(fileChunk, analysis::dvvp::ProfileFileChunk);
     FillPbData("unaging.additional", DEFAULT_HOST_ID, saveHashData, fileChunk, isLastChunk);
-    // upload FileChunkReq data
-    std::string encoded = analysis::dvvp::message::EncodeMessage(fileChunk);
+    // upload ProfileFileChunk data
     int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadData(
-        std::to_string(DEFAULT_HOST_ID), encoded.c_str(), encoded.size());
+        std::to_string(DEFAULT_HOST_ID), fileChunk);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("HashData upload data failed, dataLen:%u", saveHashData.size());
     }

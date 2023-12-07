@@ -7,9 +7,7 @@
 #include "analyzer_ts.h"
 
 #include "errno/error_code.h"
-#include "message/codec.h"
 #include "msprof_dlog.h"
-#include "proto/msprofiler.pb.h"
 #include "toolchain/prof_acl_api.h"
 
 namespace Analysis {
@@ -24,14 +22,14 @@ bool AnalyzerTs::IsTsData(const std::string &fileName)
     return false;
 }
 
-void AnalyzerTs::Parse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+void AnalyzerTs::Parse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
 {
-    if (message == nullptr) {
+    if (fileChunkReq == nullptr) {
         return;
     }
 
-    totalBytes_ += static_cast<uint64_t>(message->chunksizeinbytes());
-    ParseTsTrackData(message->chunk().c_str(), message->chunksizeinbytes());
+    totalBytes_ += fileChunkReq->chunkSize;
+    ParseTsTrackData(fileChunkReq->chunk.c_str(), fileChunkReq->chunkSize);
 }
 
 void AnalyzerTs::ParseTsTrackData(CONST_CHAR_PTR data, uint32_t len)

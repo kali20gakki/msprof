@@ -25,8 +25,8 @@ public:
 
 public:
     bool IsFftsData(const std::string &fileName) const;
-    void Parse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
-    void FftsParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
+    void Parse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
+    void FftsParse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
 
 private:
     void ParseData(CONST_CHAR_PTR data, uint32_t len);
