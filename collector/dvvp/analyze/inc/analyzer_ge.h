@@ -25,7 +25,6 @@ public:
     ~AnalyzerGe() {}
 
 public:
-    bool IsGeData(const std::string &fileName) const;
     bool IsGeApiOrEventData(const std::string &fileName) const;
     bool IsGeCompactData(const std::string &tag) const;
     bool IsGeGraphIdMapData(const std::string &tag) const;
