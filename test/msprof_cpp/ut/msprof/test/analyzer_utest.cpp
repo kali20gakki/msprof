@@ -9,6 +9,7 @@
 #include "mockcpp/mockcpp.hpp"
 #include "analyzer.h"
 #include "config/config.h"
+#include "errno/error_code.h"
 #include "data_struct.h"
 #include "errno/error_code.h"
 #include "op_desc_parser.h"
@@ -54,6 +55,17 @@ TEST_F(AnalyzerUtest, PrintHostStats)
 
     analyzer->Init();
     analyzer->PrintHostStats();
+}
+
+TEST_F(AnalyzerUtest, InitFailedWhenInitFrenqueryFailed)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<Analyzer> analyzer;
+    MSVP_MAKE_SHARED1_BREAK(analyzer, Analyzer, nullptr);
+    MOCKER_CPP(&AnalyzerHwts::InitFrequency)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, analyzer->Init());
 }
 
 TEST_F(AnalyzerUtest, DispatchOptimizeUnagingApiData)
@@ -193,6 +205,27 @@ TEST_F(AnalyzerUtest, DispatchOptimizeModelInfoData)
     analyzer->DispatchOptimizeData(geModelLoad);
 }
 
+TEST_F(AnalyzerUtest, DispatchOptimizeBodeBasicInfoData)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<Analyzer> analyzer;
+    MSVP_MAKE_SHARED1_BREAK(analyzer, Analyzer, nullptr);
+
+    analyzer->Init();
+    // node basic info
+    struct MsprofNodeBasicInfo nodeBasicInfoData;
+    struct MsprofAdditionalInfo geAddChunk;
+    geAddChunk.level = MSPROF_REPORT_NODE_LEVEL;
+    geAddChunk.type = MSPROF_REPORT_NODE_BASIC_INFO_TYPE;
+    std::string geAddData((CHAR_PTR)&nodeBasicInfoData, sizeof(nodeBasicInfoData));
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> geAddDesc;
+    MSVP_MAKE_SHARED0_BREAK(geAddDesc, analysis::dvvp::ProfileFileChunk);
+    geAddDesc->fileName = Utils::PackDotInfo("Additional", "node_basic_info");
+    geAddDesc->chunk = geAddData;
+    geAddDesc->chunkSize = sizeof(geAddData);
+    analyzer->DispatchOptimizeData(geAddDesc);
+}
+
 TEST_F(AnalyzerUtest, UploadProfOpDescProc_nullUploader)
 {
     GlobalMockObject::verify();
@@ -225,6 +258,25 @@ TEST_F(AnalyzerUtest, UploadProfOpDescProc_validUploader)
     ProfOpDesc opDescData;
     analyzerBase->opDescInfos_.push_back(opDescData);
     analyzer->UploadProfOpDescProc();
+}
+
+TEST_F(AnalyzerUtest, OnOptimizeData)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<Analyzer> analyzer;
+    MSVP_MAKE_SHARED1_BREAK(analyzer, Analyzer, nullptr);
+    
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> profData;
+    MSVP_MAKE_SHARED0_BREAK(profData, analysis::dvvp::ProfileFileChunk);
+    // return if not inited
+    analyzer->OnOptimizeData(profData);
+    // receive null ptr or empty filename
+    analyzer->Init();
+    analyzer->OnOptimizeData(nullptr);
+    analyzer->OnOptimizeData(profData);
+    // ClearAnalyzerData
+    profData->fileName = "end_info";
+    analyzer->OnOptimizeData(profData);
 }
 
 class AnalyzerBaseUtest : public testing::Test {
@@ -284,6 +336,27 @@ TEST_F(AnalyzerBaseUtest, HandleDeviceData)
     analyzerBase->HandleDeviceData(key1, devData, time);
 }
 
+TEST_F(AnalyzerBaseUtest, EraseRtMapByStreamId)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AnalyzerBase> analyzerBase;
+    MSVP_MAKE_SHARED0_BREAK(analyzerBase, AnalyzerBase);
+
+    struct RtOpInfo opInfo = {1, 0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP, UINT16_MAX};
+    std::map<std::string, RtOpInfo> rtOpInfos;
+    // invalid key
+    rtOpInfos.insert(std::make_pair("", opInfo));
+    // valid key with no stream 0
+    rtOpInfos.insert(std::make_pair("0-1", opInfo));
+    analyzerBase->EraseRtMapByStreamId(0, rtOpInfos);
+    EXPECT_EQ(2, rtOpInfos.size()); // 2 info size
+    // valid key with stream 0
+    std::string key = "0-0"; // task 0 stream 0
+    rtOpInfos.insert(std::make_pair(key, opInfo));
+    analyzerBase->EraseRtMapByStreamId(0, rtOpInfos);
+    EXPECT_EQ(2, rtOpInfos.size()); // 2 info size
+}
+
 class AnalyzerFftsUtest : public testing::Test {
 protected:
     virtual void SetUp()
@@ -293,6 +366,15 @@ protected:
     {
     }
 };
+
+TEST_F(AnalyzerFftsUtest, IsFftsData)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AnalyzerFfts> analyzerFfts;
+    MSVP_MAKE_SHARED0_BREAK(analyzerFfts, AnalyzerFfts);
+    EXPECT_EQ(true, analyzerFfts->IsFftsData("stars_soc.data"));
+    EXPECT_EQ(false, analyzerFfts->IsFftsData("invalid.data"));
+}
 
 TEST_F(AnalyzerFftsUtest, FftsParse)
 {
@@ -464,6 +546,26 @@ TEST_F(AnalyzerGeUtest, IsGeContextData)
     EXPECT_EQ(false, analyzerGe->IsGeContextData("aging.additional.context_info"));
 }
 
+TEST_F(AnalyzerGeUtest, GeGraphIdMapParse)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AnalyzerGe> analyzerGe;
+    MSVP_MAKE_SHARED0_BREAK(analyzerGe, AnalyzerGe);
+    
+    analyzerGe->GeGraphIdMapParse(nullptr);
+
+    struct MsprofAdditionalInfo geAddChunk;
+    geAddChunk.level = MSPROF_REPORT_MODEL_LEVEL;
+    geAddChunk.type = MSPROF_REPORT_MODEL_GRAPH_ID_MAP_TYPE;
+    std::string geAddData((CHAR_PTR)&geAddChunk, sizeof(geAddChunk));
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> geAddDesc;
+    MSVP_MAKE_SHARED0_BREAK(geAddDesc, analysis::dvvp::ProfileFileChunk);
+    geAddDesc->fileName = Utils::PackDotInfo("unaging.Additional", "node_basic_info");
+    geAddDesc->chunk = geAddData;
+    geAddDesc->chunkSize = sizeof(geAddData);
+    analyzerGe->GeGraphIdMapParse(geAddDesc);
+}
+
 class AnalyzerHwtsUtest : public testing::Test {
 protected:
     virtual void SetUp()
@@ -559,5 +661,24 @@ TEST_F(AnalyzerRtUtest, RtCompactParse)
     rtAgingTaskDesc->chunk = rtAgingData;
     rtAgingTaskDesc->chunkSize = sizeof(rtDataAgingChunk);
     analyzerRt->RtCompactParse(rtAgingTaskDesc);
+}
+
+class AnalyzerTsUtest : public testing::Test {
+protected:
+    virtual void SetUp()
+    {
+    }
+    virtual void TearDown()
+    {
+    }
+};
+
+TEST_F(AnalyzerTsUtest, IsTsData)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AnalyzerTs> analyzerTs;
+    MSVP_MAKE_SHARED0_BREAK(analyzerTs, AnalyzerTs);
+    EXPECT_EQ(true, analyzerTs->IsTsData("aging.compact.ts_track.data"));
+    EXPECT_EQ(false, analyzerTs->IsTsData("aging.compact.invalid"));
 }
 

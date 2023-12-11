@@ -21,38 +21,6 @@ bool AnalyzerHwts::IsHwtsData(const std::string &fileName)
     return false;
 }
 
-void AnalyzerHwts::Parse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
-{
-    if (fileChunkReq == nullptr) {
-        return;
-    }
-    totalBytes_ += fileChunkReq->chunkSize;
-    ParseHwtsData(fileChunkReq->chunk.c_str(), fileChunkReq->chunkSize);
-}
-
-void AnalyzerHwts::ParseHwtsData(CONST_CHAR_PTR data, uint32_t len)
-{
-    AppendToBufferedData(data, len);
-    uint32_t offset = 0;
-    while (dataPtr_ != nullptr && offset < dataLen_) {
-        uint32_t remainingLen = dataLen_ - offset;
-        uint8_t rptType = GetRptType(dataPtr_ + offset, remainingLen);
-        if (remainingLen < HWTS_DATA_SIZE) {
-            // remaining is less then HWTS_DATA_SIZE, cache it to buffer
-            MSPROF_LOGI("Hwts remains %u bytes unparsed, cache it", remainingLen);
-            break;
-        }
-        if (rptType == HWTS_TASK_START_TYPE || rptType == HWTS_TASK_END_TYPE) {
-            ParseTaskStartEndData(dataPtr_ + offset, dataLen_ - offset, rptType);
-        }
-        offset += HWTS_DATA_SIZE;
-    }
-    MSPROF_LOGI("Finish parsing hwts data, offset: %u, total len: %u, from buffered len: %u, "
-                "op time collected %u, draft %u",
-                offset, dataLen_, dataLen_ - len, opTimes_.size(), opTimeDrafts_.size());
-    BufferRemainingData(offset);
-}
-
 uint8_t AnalyzerHwts::GetRptType(CONST_CHAR_PTR data, uint32_t len)
 {
     if (len >= sizeof(uint8_t)) {

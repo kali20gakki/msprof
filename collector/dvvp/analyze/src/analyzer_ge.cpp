@@ -25,15 +25,6 @@ static const int32_t ADDITIONAL_INFO_SIZE = sizeof(MsprofAdditionalInfo);
 static const int32_t GE_EVENT_SIZE = sizeof(MsprofEvent);
 static const int32_t GE_API_SIZE = sizeof(MsprofApi);
 
-bool AnalyzerGe::IsGeData(const std::string &fileName) const
-{
-    // Ge data starts with "Framework"
-    if (fileName.find("Framework") != std::string::npos) {
-        return true;
-    }
-    return false;
-}
-
 bool AnalyzerGe::IsGeApiOrEventData(const std::string &fileName) const
 {
     // Ge api data

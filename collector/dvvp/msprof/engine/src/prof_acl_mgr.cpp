@@ -682,6 +682,7 @@ int ProfAclMgr::ProfAclModelUnSubscribe(const uint32_t modelId)
         UploaderMgr::instance()->DelAllUploader();
         mode_ = WORK_MODE_OFF;
     }
+    PlatformAdapter::instance()->Uninit();
 
     return ret;
 }
