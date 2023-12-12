@@ -22,6 +22,7 @@ using namespace Analysis::Utils;
 
 const auto DATA_DIR = "./PROF";
 const uint16_t DATA_NUM = 30;
+const uint16_t TENSOR_DATA_NUM = 18000;
 const uint32_t TENSOR_NUM_TO_CONCAT = 3;
 
 class AdditionInfoParserUTest : public testing::Test {
@@ -102,20 +103,20 @@ protected:
         const uint32_t dataLen = 8;
         std::vector<MsprofAdditionalInfo> agingTraces;
         std::vector<MsprofAdditionalInfo> unAgingTraces;
-        for (uint32_t i = 0; i < DATA_NUM; ++i) {
+        for (uint32_t i = 0; i < TENSOR_DATA_NUM; ++i) {
             MsprofAdditionalInfo info;
             info.level = level;
             info.type = static_cast<uint32_t>(EventType::EVENT_TYPE_TENSOR_INFO);
             info.threadId = i / concatTensorNum;
             info.dataLen = dataLen;
-            info.timeStamp = DATA_NUM + i / concatTensorNum;
-            if (i >= DATA_NUM - invalidDataNum) {
+            info.timeStamp = TENSOR_DATA_NUM + i / concatTensorNum;
+            if (i >= TENSOR_DATA_NUM - invalidDataNum) {
                 info.magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM + 1;
             }
             auto tensorInfo = ReinterpretConvert<MsprofTensorInfo*>(info.data);
             tensorInfo->opName = i / concatTensorNum + 1;
             tensorInfo->tensorNum = MSPROF_GE_TENSOR_DATA_NUM;
-            if (i * 2 < DATA_NUM) {  // agingTraces和unAgingTraces各生成DATA_NUM / 2个数据
+            if (i * 2 < TENSOR_DATA_NUM) {  // agingTraces和unAgingTraces各生成TENSOR_DATA_NUM / 2个数据
                 unAgingTraces.emplace_back(info);
             } else {
                 agingTraces.emplace_back(info);
@@ -197,12 +198,12 @@ TEST_F(AdditionInfoParserUTest, TestHcclInfoParserShouldReturn30DataWhenParseSuc
     Check(data, EventType::EVENT_TYPE_HCCL_INFO, MSPROF_REPORT_NODE_LEVEL, DATA_NUM);
 }
 
-TEST_F(AdditionInfoParserUTest, TestTensorInfoParserShouldReturn10ConcatTensorInfoDataWhenParseSuccess)
+TEST_F(AdditionInfoParserUTest, TestTensorInfoParserShouldReturn6000ConcatTensorInfoDataWhenParseSuccess)
 {
     auto parser = std::make_shared<TensorInfoParser>(File::PathJoin({DATA_DIR, "host", "data"}));
     auto concatTensorInfo = parser->ParseData<ConcatTensorInfo>();
     const uint32_t dataLen = 8;
-    const uint32_t dataNum = DATA_NUM / TENSOR_NUM_TO_CONCAT;
+    const uint32_t dataNum = TENSOR_DATA_NUM / TENSOR_NUM_TO_CONCAT;
     ASSERT_EQ(dataNum, concatTensorInfo.size());
     for (size_t i = 0; i < dataNum; ++i) {
         EXPECT_EQ(MSPROF_DATA_HEAD_MAGIC_NUM, concatTensorInfo[i]->magicNumber);
@@ -210,7 +211,7 @@ TEST_F(AdditionInfoParserUTest, TestTensorInfoParserShouldReturn10ConcatTensorIn
         EXPECT_EQ(static_cast<uint32_t>(EventType::EVENT_TYPE_TENSOR_INFO), concatTensorInfo[i]->type);
         EXPECT_EQ(i, concatTensorInfo[i]->threadId);
         EXPECT_EQ(dataLen, concatTensorInfo[i]->dataLen);
-        EXPECT_EQ(DATA_NUM + i, concatTensorInfo[i]->timeStamp);
+        EXPECT_EQ(TENSOR_DATA_NUM + i, concatTensorInfo[i]->timeStamp);
         EXPECT_EQ(i + 1, concatTensorInfo[i]->opName);
         EXPECT_EQ(MSPROF_GE_TENSOR_DATA_NUM * TENSOR_NUM_TO_CONCAT, concatTensorInfo[i]->tensorNum);
     }
@@ -243,13 +244,13 @@ TEST_F(AdditionInfoParserUTest, TestTensorInfoParserProduceDataShouldReturnEmpty
     EXPECT_EQ(0, data.size());
 }
 
-TEST_F(AdditionInfoParserUTest, TestTensorInfoParserProduceDataShouldReturn10DataWhen1DataIsInvalid)
+TEST_F(AdditionInfoParserUTest, TestTensorInfoParserProduceDataShouldReturn6000DataWhen1DataIsInvalid)
 {
     GenTensorData(MSPROF_REPORT_NODE_LEVEL, TENSOR_NUM_TO_CONCAT, 1);
     auto parser = std::make_shared<TensorInfoParser>(File::PathJoin({DATA_DIR, "host", "data"}));
     auto data = parser->ParseData<ConcatTensorInfo>();
     const uint32_t dataLen = 8;
-    const uint32_t dataNum = DATA_NUM / TENSOR_NUM_TO_CONCAT;
+    const uint32_t dataNum = TENSOR_DATA_NUM / TENSOR_NUM_TO_CONCAT;
     ASSERT_EQ(dataNum, data.size());
     for (size_t i = 0; i < dataNum; ++i) {
         EXPECT_EQ(MSPROF_DATA_HEAD_MAGIC_NUM, data[i]->magicNumber);
@@ -257,7 +258,7 @@ TEST_F(AdditionInfoParserUTest, TestTensorInfoParserProduceDataShouldReturn10Dat
         EXPECT_EQ(static_cast<uint32_t>(EventType::EVENT_TYPE_TENSOR_INFO), data[i]->type);
         EXPECT_EQ(i, data[i]->threadId);
         EXPECT_EQ(dataLen, data[i]->dataLen);
-        EXPECT_EQ(DATA_NUM + i, data[i]->timeStamp);
+        EXPECT_EQ(TENSOR_DATA_NUM + i, data[i]->timeStamp);
         EXPECT_EQ(i + 1, data[i]->opName);
         if (i == dataNum -1) {
             EXPECT_EQ(MSPROF_GE_TENSOR_DATA_NUM * (TENSOR_NUM_TO_CONCAT - 1), data[i]->tensorNum);
@@ -267,14 +268,14 @@ TEST_F(AdditionInfoParserUTest, TestTensorInfoParserProduceDataShouldReturn10Dat
     }
 }
 
-TEST_F(AdditionInfoParserUTest, TestTensorInfoParserProduceDataShouldReturn6DataWhenAllConcatTensorNumExceed20)
+TEST_F(AdditionInfoParserUTest, TestTensorInfoParserProduceDataShouldReturn3600DataWhenAllConcatTensorNumExceed20)
 {
     uint32_t concatTensorNum = 5;
     GenTensorData(MSPROF_REPORT_NODE_LEVEL, concatTensorNum);
     auto parser = std::make_shared<TensorInfoParser>(File::PathJoin({DATA_DIR, "host", "data"}));
     auto data = parser->ParseData<ConcatTensorInfo>();
     const uint32_t dataLen = 8;
-    const uint16_t dataNum = 6;
+    const uint16_t dataNum = TENSOR_DATA_NUM / concatTensorNum;
     const uint32_t maxTensorNum = 20;
     ASSERT_EQ(dataNum, data.size());
     for (size_t i = 0; i < dataNum; ++i) {
@@ -283,7 +284,7 @@ TEST_F(AdditionInfoParserUTest, TestTensorInfoParserProduceDataShouldReturn6Data
         EXPECT_EQ(static_cast<uint32_t>(EventType::EVENT_TYPE_TENSOR_INFO), data[i]->type);
         EXPECT_EQ(i, data[i]->threadId);
         EXPECT_EQ(dataLen, data[i]->dataLen);
-        EXPECT_EQ(DATA_NUM + i, data[i]->timeStamp);
+        EXPECT_EQ(TENSOR_DATA_NUM + i, data[i]->timeStamp);
         EXPECT_EQ(i + 1, data[i]->opName);
         EXPECT_EQ(maxTensorNum, data[i]->tensorNum);
     }
