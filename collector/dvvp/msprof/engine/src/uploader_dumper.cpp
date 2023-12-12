@@ -11,7 +11,6 @@
 #include "prof_params.h"
 #include "msprof_dlog.h"
 #include "prof_acl_mgr.h"
-#include "proto/msprofiler.pb.h"
 #include "transport/transport.h"
 #include "transport/uploader.h"
 #include "transport/uploader_mgr.h"
@@ -190,68 +189,71 @@ void UploaderDumper::TimedTask()
 {
 }
 
-int UploaderDumper::SendData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk)
+int UploaderDumper::SendData(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> dataChunk)
 {
     MSPROF_LOGI("UploaderDumper::SendData");
-    if (fileChunk == nullptr) {
-        MSPROF_LOGE("fileChunk is nullptr");
-        MSPROF_INNER_ERROR("EK9999", "fileChunk is nullptr");
+    if (dataChunk == nullptr) {
+        MSPROF_LOGE("dataChunk is nullptr");
+        MSPROF_INNER_ERROR("EK9999", "dataChunk is nullptr");
         return PROFILING_FAILED;
     }
-    std::vector<SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> > fileChunks;
-    fileChunks.clear();
-    fileChunks.push_back(fileChunk); // insert the data into the new vector
-    return Dump(fileChunks);
+    std::vector<SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> > dataChunks;
+    dataChunks.clear();
+    dataChunks.push_back(dataChunk); // insert the data into the new vector
+    return Dump(dataChunks);
 }
 
 /**
 * @brief Dump: write the user datas in messages into local files
-* @param [in] messages: the vector saved the user datas to be write to local files
+* @param [in] dataChunk: the vector saved the user datas to be write to local files
 * @return : success return PROFILING_SUCCESS, failed return PROFIING_FAILED
 */
-int UploaderDumper::Dump(std::vector<SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>> &messages)
+int UploaderDumper::Dump(std::vector<SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk>> &dataChunk)
 {
-    for (size_t i = 0; i < messages.size(); i++) {
-        if (messages[i] == nullptr) {
+    for (size_t i = 0; i < dataChunk.size(); i++) {
+        if (dataChunk[i] == nullptr) {
             continue;
         }
-        if (!ParamValidation::instance()->CheckDataTagIsValid(messages[i]->tag())) {
+        if (dataChunk[i]->extraInfo.empty()) {
+            MSPROF_LOGE("FileChunk info is empty in Dump, skip message");
+            continue;
+        }
+        std::string tag = Utils::GetInfoSuffix(dataChunk[i]->fileName);
+        if (!ParamValidation::instance()->CheckDataTagIsValid(tag)) {
             MSPROF_LOGE("UploaderDumper::Dump, Check tag failed, module:%s, tag:%s",
-                module_.c_str(), messages[i]->tag().c_str());
+                module_.c_str(), tag.c_str());
             MSPROF_INNER_ERROR("EK9999", "UploaderDumper::Dump, Check tag failed, module:%s, tag:%s",
-                module_.c_str(), messages[i]->tag().c_str());
+                module_.c_str(), tag.c_str());
             continue;
         }
-        AddToUploader(messages[i]);
+        AddToUploader(dataChunk[i]);
     }
     return PROFILING_SUCCESS;
 }
 
-void UploaderDumper::AddToUploader(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+void UploaderDumper::AddToUploader(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> dataChunk)
 {
-    std::string devId = message->tagsuffix();
+    std::string devId = Utils::GetInfoSuffix(dataChunk->extraInfo);
     if (devId == std::to_string(DEFAULT_HOST_ID)) {
-        message->set_datamodule(FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST);
+        dataChunk->chunkModule = FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST;
     } else {
-        message->set_datamodule(FileChunkDataModule::PROFILING_IS_FROM_MSPROF);
+        dataChunk->chunkModule = FileChunkDataModule::PROFILING_IS_FROM_MSPROF;
     }
 
-    std::string encoded = analysis::dvvp::message::EncodeMessage(message);
     SHARED_PTR_ALIA<Uploader> uploader = nullptr;
     analysis::dvvp::transport::UploaderMgr::instance()->GetUploader(devId, uploader);
     if (uploader == nullptr) {
-        MSPROF_LOGW("UploaderDumper::AddToUploader, get uploader failed, fileName:%s, chunkLen:%d",
-            module_.c_str(), message->chunksizeinbytes());
+        MSPROF_LOGW("UploaderDumper::AddToUploader, get uploader failed, fileName:%s, chunkLen:%zu",
+            module_.c_str(), dataChunk->chunkSize);
         return;
     }
-    int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadData(devId, encoded.c_str(), encoded.size());
+    int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadData(devId, dataChunk);
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("UploaderDumper::AddToUploader, UploadData failed, fileName:%s, chunkLen:%d",
-                    module_.c_str(), message->chunksizeinbytes());
-        MSPROF_INNER_ERROR("EK9999", "UploaderDumper::AddToUploader, UploadData failed, fileName:%s, chunkLen:%d",
-            module_.c_str(), message->chunksizeinbytes());
+        MSPROF_LOGE("UploaderDumper::AddToUploader, UploadData failed, fileName:%s, chunkLen:%zu",
+                    module_.c_str(), dataChunk->chunkSize);
+        MSPROF_INNER_ERROR("EK9999", "UploaderDumper::AddToUploader, UploadData failed, fileName:%s, chunkLen:%zu",
+            module_.c_str(), dataChunk->chunkSize);
     }
 }
-
 }
 }

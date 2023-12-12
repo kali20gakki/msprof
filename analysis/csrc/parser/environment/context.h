@@ -40,7 +40,7 @@ private:
         CHIP_V1_1_1 = 7,
         CHIP_V1_1_2 = 8,
         CHIP_V5_1_0 = 9,
-        CHIP_V1_1_3 = 10,
+        CHIP_V1_1_3 = 11,
     };
 
 private:

@@ -24,6 +24,7 @@ public:
 public:
     int Init(SHARED_PTR_ALIA<Uploader> uploader);
     int SendBuffer(CONST_VOID_PTR buffer, int length) override;
+    int SendBuffer(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq) override;
     int CloseSession() override;
     void WriteDone() override;
     void SetDevIdToAnalyzer(const std::string &devIdStr) const;
@@ -36,6 +37,7 @@ private:
 class PipeTransport : public ITransport {
 public:
     int SendBuffer(CONST_VOID_PTR buffer, int length) override;
+    int SendBuffer(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq) override;
     int CloseSession() override;
     void WriteDone() override {}
 };

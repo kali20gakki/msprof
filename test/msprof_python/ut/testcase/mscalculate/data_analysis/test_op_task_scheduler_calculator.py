@@ -36,18 +36,6 @@ class TestCalculateOpTaskScheduler(unittest.TestCase):
                 check = OpTaskSchedulerCalculator(file_list, CONFIG)
                 check.process()
 
-    def test_update(self):
-        api_data = [(25, 1, 65535, '0,0', '0,0'), (6, 2, 4, '0,0', '0,0'), (6, 6, 5, '0,0', '0,0')]
-        expect_result = [(25, 1, 65535, '0', '0'),
-                         (25, 1, 65535, '0', '0'),
-                         (6, 2, 4, '0', '0'),
-                         (6, 2, 4, '0', '0'),
-                         (6, 6, 5, '0', '0'),
-                         (6, 6, 5, '0', '0')]
-        check = OpTaskSchedulerCalculator(file_list, CONFIG)
-        result = getattr(check, "_update")(api_data)
-        self.assertEqual(result, expect_result)
-
     def test_op_create_task_time(self):
         create_sql = "CREATE TABLE IF NOT EXISTS TimeLine (replayid INTEGER,tasktype INTEGER,task_id INTEGER," \
                      "stream_id INTEGER,taskstate INTEGER,timestamp INTEGER,thread INTEGER,device_id INTEGER," \
@@ -78,39 +66,6 @@ class TestCalculateOpTaskScheduler(unittest.TestCase):
         res[0].execute("drop table TaskTime")
         db_manager.destroy(res)
 
-    def test_op_update_timeline_api(self):
-        create_sql = "CREATE TABLE IF NOT EXISTS ApiCall(replayid INTEGER,entry_time INTEGER,exit_time INTEGER," \
-                     "api INTEGER,retcode INTEGER,thread INTEGER,device_id INTEGER,stream_id INTEGER," \
-                     "tasknum INTEGER,task_id TEXT,detail TEXT,mode INTEGER)"
-        insert_sql = "insert into {} values (?,?,?,?,?,?,?,?,?,?,?,?)".format('ApiCall')
-        data = ((0, 1, 2, 3, 4, 5, 6, 0, 8, 9, 10, 11),)
-        create_task_time_sql = "CREATE TABLE IF NOT EXISTS TaskTime(replayid INTEGER,device_id INTEGER," \
-                               "api INTEGER,apirowid INTEGER,tasktype INTEGER,task_id INTEGER,stream_id INTEGER," \
-                               "waittime TEXT,pendingtime Text,runtime TEXT,completetime TEXT,index_id INTEGER," \
-                               "model_id INTEGER)"
-        insert_task_time_sql = "insert into {} values (?,?,?,?,?,?,?,?,?,?,?,?,?)".format('TaskTime')
-        task_time_data = ((0, 1, 2, 3, 4, 5, 6, 0, 8, 9, 10, 11, 12),)
-        db_manager = DBManager()
-        db_manager.create_table("runtime.db", create_sql, insert_sql, data)
-        res = db_manager.create_table("runtime.db", create_task_time_sql, insert_task_time_sql, task_time_data)
-        runtime_conn = res[0]
-        with mock.patch(NAMESPACE + '.logging.info'), \
-                mock.patch(NAMESPACE + '.logging.error'), \
-                mock.patch(NAMESPACE + '.logging.warning'):
-            with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
-                check = OpTaskSchedulerCalculator(file_list, CONFIG)
-                result = check.op_update_timeline_api(runtime_conn)
-            self.assertEqual(result, None)
-            with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
-                check = OpTaskSchedulerCalculator(file_list, CONFIG)
-                check.op_update_timeline_api(runtime_conn)
-                with mock.patch(NAMESPACE + '.OpTaskSchedulerCalculator._update', side_effect=OSError):
-                    check = OpTaskSchedulerCalculator(file_list, CONFIG)
-                    check.op_update_timeline_api(runtime_conn)
-        res[1].execute("drop table ApiCall")
-        res[1].execute("drop table TaskTime")
-        db_manager.destroy(res)
-
     def test_op_pre_mini_task_data(self):
         project_path = 'test\\test'
         device_id = 0
@@ -124,8 +79,7 @@ class TestCalculateOpTaskScheduler(unittest.TestCase):
             self.assertEqual(result, None)
             with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path',
                             return_value=(True, True)), \
-                    mock.patch(NAMESPACE + '.OpTaskSchedulerCalculator.op_create_task_time'), \
-                    mock.patch(NAMESPACE + '.OpTaskSchedulerCalculator.op_update_timeline_api'):
+                    mock.patch(NAMESPACE + '.OpTaskSchedulerCalculator.op_create_task_time'):
                 check = OpTaskSchedulerCalculator(file_list, CONFIG)
                 check.op_pre_mini_task_data(project_path, device_id)
 

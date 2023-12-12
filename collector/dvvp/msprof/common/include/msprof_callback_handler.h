@@ -15,6 +15,7 @@
 
 namespace Msprof {
 namespace Engine {
+using namespace analysis::dvvp::common::utils;
 class MsprofCallbackHandler {
 public:
     MsprofCallbackHandler();
@@ -24,7 +25,8 @@ public:
 public:
     int HandleMsprofRequest(uint32_t type, VOID_PTR data, uint32_t len);
     void ForceFlush(const std::string &devId);
-    int SendData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk);
+    void FlushDynProfCachedMsg(const std::string &devId);
+    int SendData(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk);
     template <typename T> int ReportData(const T &data) const;
 
 public:
@@ -48,7 +50,7 @@ private:
 
 void FlushAllModule(const std::string &devId = "");
 void FlushModule(const std::string &devId);
-int SendAiCpuData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk);
+int SendAiCpuData(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk);
 }  // namespace Engine
 }  // namespace Msprof
 

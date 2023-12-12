@@ -757,13 +757,15 @@ TEST_F(MSPROF_ACL_CORE_UTEST, RegisterNewReporterCallback)
     EXPECT_EQ(ACL_SUCCESS, Analysis::Dvvp::ProfilerCommon::RegisterNewReporterCallback());
 }
 
-TEST_F(MSPROF_ACL_CORE_UTEST, MsprofSetDeviceCallbackForDynProf)
+TEST_F(MSPROF_ACL_CORE_UTEST, MsprofSetDeviceCallbackForDynProfImpl)
 {
     GlobalMockObject::verify();
     ProfSetDevPara data;
     data.chipId = 0;
     data.deviceId = 0;
     data.isOpen = true;
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProfImpl(nullptr, 0));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProfImpl((VOID_PTR)&data, 0));
     MOCKER_CPP(&RegisterReporterCallback)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
@@ -772,9 +774,12 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofSetDeviceCallbackForDynProf)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProf((VOID_PTR)&data, 0));
-    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProf((VOID_PTR)&data, 0));
-    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProf((VOID_PTR)&data, 0));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProfImpl((VOID_PTR)&data,
+        sizeof(ProfSetDevPara)));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProfImpl((VOID_PTR)&data,
+        sizeof(ProfSetDevPara)));
+    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackForDynProfImpl((VOID_PTR)&data,
+        sizeof(ProfSetDevPara)));
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, MsprofSetDeviceCallbackImpl)
@@ -1190,7 +1195,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, UploaderDumperDumpModelLoadDataTest) {
     MOCKER_CPP(&Msprof::Engine::UploaderDumper::AddToUploader)
         .stubs();
 
-    std::list<SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> > data;
+    std::list<SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> > data;
     data.push_back(nullptr);
     dumper->modelLoadDataCached_["0"] = data;
     dumper->DumpModelLoadData("0");
@@ -1207,11 +1212,10 @@ TEST_F(MSPROF_ACL_CORE_UTEST, AddToUploaderGetUploaderFailed) {
     hwtsChunk.streamId = 100;
     hwtsChunk.cntRes0Type = HWTS_TASK_START_TYPE;
     hwtsChunk.syscnt = 1000000;
-    SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> hwts(new analysis::dvvp::proto::FileChunkReq());
-    hwts->set_filename("hwts.data");
-    hwts->set_chunk(reinterpret_cast<char *>(&hwtsChunk), sizeof(HwtsProfileType01));
-    hwts->set_chunksizeinbytes(sizeof(HwtsProfileType01));
-
+    SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> hwts(new analysis::dvvp::ProfileFileChunk());
+    hwts->fileName = Utils::PackDotInfo("hwts", "data");
+    hwts->chunk = reinterpret_cast<char *>(&hwtsChunk);
+    hwts->chunkSize = sizeof(HwtsProfileType01);
     MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::GetUploader)
         .stubs()
         .will(returnValue(nullptr));

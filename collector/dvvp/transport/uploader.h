@@ -10,7 +10,6 @@
 #include <cstddef>
 #include "config/config.h"
 #include "message/codec.h"
-#include "message/dispatcher.h"
 #include "queue/bound_queue.h"
 #include "thread/thread.h"
 #include "transport/transport.h"
@@ -18,7 +17,7 @@
 namespace analysis {
 namespace dvvp {
 namespace transport {
-using UploaderQueue = analysis::dvvp::common::queue::BoundQueue<SHARED_PTR_ALIA<std::string> >;
+using UploaderQueue = analysis::dvvp::common::queue::BoundQueue<SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> >;
 class Uploader : public analysis::dvvp::common::thread::Thread {
 using analysis::dvvp::common::thread::Thread::Stop;
 public:
@@ -30,11 +29,11 @@ public:
     int Init(size_t size = analysis::dvvp::common::config::UPLOADER_QUEUE_CAPACITY);
     int Uinit();
     int UploadData(CONST_VOID_PTR data, int len);
+    int UploadData(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
     int Stop(bool force);
     void Flush() const;
     void CloseTransport();
     SHARED_PTR_ALIA<ITransport> GetTransport();
-    int GetQueueSize() const;
 
 protected:
     void Run(const struct error_message::Context &errorContext) override;

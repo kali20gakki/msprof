@@ -93,6 +93,29 @@ public:
         return false;
     }
 
+    // 查找safeMap_中是否存在Key
+    bool Find(const K &key)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        auto it = safeMap_.find(key);
+        if (it != safeMap_.end()) {
+            return true;
+        }
+        return false;
+    }
+
+    // 查找safeMap_中是否存在Key，如果不存在则插入K，V
+    bool FindAndInsertIfNotExist(const K &key)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        auto it = safeMap_.find(key);
+        if (it != safeMap_.end()) {
+            return true;
+        }
+        safeMap_.insert(std::pair<K, V>(key, V{}));
+        return false;
+    }
+
     // 删除safeMap_中存储的所有键值对
     void Clear()
     {

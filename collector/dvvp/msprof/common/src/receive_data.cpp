@@ -9,7 +9,6 @@
 #include "error_code.h"
 #include "prof_params.h"
 #include "msprof_dlog.h"
-#include "proto/msprofiler.pb.h"
 #include "queue/ring_buffer.h"
 #include "utils.h"
 #include "msprof_reporter_mgr.h"
@@ -18,6 +17,7 @@ namespace Msprof {
 namespace Engine {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
+using namespace analysis::dvvp::common::utils;
 static const ReporterDataChunk DEFAULT_DATA_CHUNK = {0, 0, 0, {0}, {0}};
 
 ReceiveData::ReceiveData()
@@ -43,11 +43,11 @@ ReceiveData::~ReceiveData()
 }
 
 /**
-* @brief Run: read datas from ring buffer to build FileChunkReq,
+* @brief RunDefaultProfileData: read datas from ring buffer to build ProfileFileChunk,
 *             the read data times is MAX_LOOP_TIMES
 * @param [out] fileChunks: data from user to write to local file or send to remote host
 */
-void ReceiveData::Run(std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks)
+void ReceiveData::RunDefaultProfileData(std::vector<SHARED_PTR_ALIA<ProfileFileChunk>>& fileChunks)
 {
     std::map<std::string, std::vector<ReporterDataChunk>> dataMap; // data binding with tag
     uint64_t batchSizeMax = 0;
@@ -74,8 +74,8 @@ void ReceiveData::Run(std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks)
     }
     for (auto iter = dataMap.begin(); iter != dataMap.end(); ++iter) {
         if (iter->second.size() > 0) {
-            SHARED_PTR_ALIA<FileChunkReq> fileChunk = nullptr;
-            MSVP_MAKE_SHARED0_BREAK(fileChunk, FileChunkReq);
+            SHARED_PTR_ALIA<ProfileFileChunk> fileChunk = nullptr;
+            MSVP_MAKE_SHARED0_BREAK(fileChunk, ProfileFileChunk);
             MSPROF_LOGD("Dump data, module:%s, key:%s, data.size:%llu, data[0].len:%llu",
                 moduleName_.c_str(), iter->first.c_str(), iter->second.size(), iter->second[0].dataLen);
             if (DumpData(iter->second, fileChunk) == PROFILING_SUCCESS) {
@@ -88,10 +88,10 @@ void ReceiveData::Run(std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks)
 }
 
 /**
-* @brief RunProfileData: read datas from new struct data ring buffer to build FileChunkReq
+* @brief RunProfileData: read datas from new struct data ring buffer to build ProfileFileChunk
 * @param [out] fileChunks: data from user to write to local file or send to remote host
 */
-void ReceiveData::RunProfileData(std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks)
+void ReceiveData::RunProfileData(std::vector<SHARED_PTR_ALIA<ProfileFileChunk>>& fileChunks)
 {
     switch (profileDataType_) {
         case MSPROF_API_AND_EVENT_PROFILE_DATA_TYPE:
@@ -110,12 +110,12 @@ void ReceiveData::RunProfileData(std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fil
 }
  
 /**
-* @brief RunNoTagData: read api/event datas from new struct data ring buffer to build FileChunkReq
+* @brief RunNoTagData: read api/event datas from new struct data ring buffer to build ProfileFileChunk
 * @param [out] fileChunks: data from user to write to local file or send to remote host
 */
 template<typename T>
 void ReceiveData::RunNoTagData(analysis::dvvp::common::queue::RingBuffer<T> &dataBuffer,
-    std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks)
+    std::vector<SHARED_PTR_ALIA<ProfileFileChunk>>& fileChunks)
 {
     std::vector<T> dataVec; // data binding without tag
     uint64_t batchSizeMax = 0;
@@ -131,8 +131,8 @@ void ReceiveData::RunNoTagData(analysis::dvvp::common::queue::RingBuffer<T> &dat
         dataVec.push_back(data);
     }
     if (!dataVec.empty()) {
-        SHARED_PTR_ALIA<FileChunkReq> fileChunk = nullptr;
-        MSVP_MAKE_SHARED0_BREAK(fileChunk, FileChunkReq);
+        SHARED_PTR_ALIA<ProfileFileChunk> fileChunk = nullptr;
+        MSVP_MAKE_SHARED0_BREAK(fileChunk, ProfileFileChunk);
         MSPROF_LOGD("Dump data, module:%s, data.size:%llu, data[0].len:%llu",
             moduleName_.c_str(), dataVec.size(), sizeof(T));
         if (DumpData(dataVec, fileChunk) == PROFILING_SUCCESS) {
@@ -144,12 +144,12 @@ void ReceiveData::RunNoTagData(analysis::dvvp::common::queue::RingBuffer<T> &dat
 }
  
 /**
-* @brief RunNoTagData: read compact/additional datas from new struct data ring buffer to build FileChunkReq
+* @brief RunNoTagData: read compact/additional datas from new struct data ring buffer to build ProfileFileChunk
 * @param [out] fileChunks: data from user to write to local file or send to remote host
 */
 template<typename T>
 void ReceiveData::RunTagData(analysis::dvvp::common::queue::RingBuffer<T> &dataBuffer,
-    std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks)
+    std::vector<SHARED_PTR_ALIA<ProfileFileChunk>>& fileChunks)
 {
     std::map<std::string, std::vector<T>> dataMap; // data binding with tag
     uint64_t batchSizeMax = 0;
@@ -169,8 +169,8 @@ void ReceiveData::RunTagData(analysis::dvvp::common::queue::RingBuffer<T> &dataB
     }
     for (auto iter = dataMap.begin(); iter != dataMap.end(); ++iter) {
         if (iter->second.size() > 0) {
-            SHARED_PTR_ALIA<FileChunkReq> fileChunk = nullptr;
-            MSVP_MAKE_SHARED0_BREAK(fileChunk, FileChunkReq);
+            SHARED_PTR_ALIA<ProfileFileChunk> fileChunk = nullptr;
+            MSVP_MAKE_SHARED0_BREAK(fileChunk, ProfileFileChunk);
             MSPROF_LOGD("Dump data, module:%s, key:%s, data.size:%llu, data[0].len:%llu",
                 moduleName_.c_str(), iter->first.c_str(), iter->second.size(), sizeof(T));
             if (DumpData(iter->second, fileChunk) == PROFILING_SUCCESS) {
@@ -196,7 +196,7 @@ void ReceiveData::TimedTask()
 {
 }
 
-int ReceiveData::SendData(SHARED_PTR_ALIA<FileChunkReq> fileChunk /* = nullptr */)
+int ReceiveData::SendData(SHARED_PTR_ALIA<ProfileFileChunk> fileChunk /* = nullptr */)
 {
     UNUSED(fileChunk);
     MSPROF_LOGI("ReceiveData::SendData");
@@ -276,10 +276,6 @@ int ReceiveData::Init(size_t capacity)
 
 int ReceiveData::DoReport(CONST_REPORT_DATA_PTR rData)
 {
-    ReporterDataChunk dataChunk;
-    auto ret = memset_s(&dataChunk, sizeof(dataChunk), 0, sizeof(dataChunk));
-    FUNRET_CHECK_FAIL_RET_VALUE(ret == EOK, true, PROFILING_FAILED);
-
     if (!started_ || rData == nullptr) {
         MSPROF_LOGE("module:%s, report failed! started %llu", moduleName_.c_str(), started_);
         return PROFILING_FAILED;
@@ -292,6 +288,10 @@ int ReceiveData::DoReport(CONST_REPORT_DATA_PTR rData)
         MSPROF_LOGW("module:%s, invalid device id:%d", moduleName_.c_str(), rData->deviceId);
         return PROFILING_SUCCESS;
     }
+
+    ReporterDataChunk dataChunk;
+    auto ret = memset_s(&dataChunk, sizeof(dataChunk), 0, sizeof(dataChunk));
+    FUNRET_CHECK_FAIL_RET_VALUE(ret == EOK, true, PROFILING_FAILED);
     dataChunk.reportTime = 0;
     dataChunk.deviceId = rData->deviceId;
     dataChunk.dataLen = rData->dataLen;
@@ -312,16 +312,16 @@ int ReceiveData::DoReport(CONST_REPORT_DATA_PTR rData)
 
 void ReceiveData::DoReportRun()
 {
-    std::vector<SHARED_PTR_ALIA<FileChunkReq> > fileChunks;
-    unsigned long sleepIntevalNs = 50000000; // 50000000 : 50ms
+    std::vector<SHARED_PTR_ALIA<ProfileFileChunk> > fileChunks;
+    unsigned long sleepIntevalNs = 50000000; // 50,000,000 : 50ms
     timeStamp_ = analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw();
 
     for (;;) {
         fileChunks.clear();
-        if (profileDataType_ != MSPROF_DEFAULT_PROFILE_DATA_TYPE) {
-            RunProfileData(fileChunks);
+        if (profileDataType_ == MSPROF_DEFAULT_PROFILE_DATA_TYPE) {
+            RunDefaultProfileData(fileChunks);
         } else {
-            Run(fileChunks);
+            RunProfileData(fileChunks);
         }
         size_t size = fileChunks.size();
         if (size == 0) {
@@ -449,7 +449,7 @@ int ReceiveData::DoReportData(const MsprofAdditionalInfo& dataChunk)
     return PROFILING_SUCCESS;
 }
 
-int ReceiveData::Dump(std::vector<SHARED_PTR_ALIA<FileChunkReq> > &message)
+int32_t ReceiveData::Dump(std::vector<SHARED_PTR_ALIA<ProfileFileChunk> > &message)
 {
     UNUSED(message);
     MSPROF_LOGD("message size is : %u", message.size());
@@ -457,19 +457,17 @@ int ReceiveData::Dump(std::vector<SHARED_PTR_ALIA<FileChunkReq> > &message)
 }
 
 /**
-* @brief DumpData: deal with the data from user to build FileChunkReq struct for store or send
+* @brief DumpData: deal with the data from user to build ProfileFileChunk struct for store or send
 * @param [in] message: data saved in the ring buffer
 * @param [out] fileChunk: data build from message for store or send
 * @return : success return PROFILING_SUCCESS, failed return PROFILING_FAILED
 */
-int ReceiveData::DumpData(std::vector<ReporterDataChunk> &message, SHARED_PTR_ALIA<FileChunkReq> fileChunk)
+int32_t ReceiveData::DumpData(std::vector<ReporterDataChunk> &message, SHARED_PTR_ALIA<ProfileFileChunk> fileChunk)
 {
     if (fileChunk == nullptr) {
         MSPROF_LOGE("fileChunk or dataPool is nullptr");
         return PROFILING_FAILED;
     }
-    SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx = nullptr;
-    MSVP_MAKE_SHARED0_RET(jobCtx, analysis::dvvp::message::JobContext, PROFILING_FAILED);
     size_t chunkLen = 0;
     std::string chunk = "";
     bool isFirstMessage = true;
@@ -480,33 +478,25 @@ int ReceiveData::DumpData(std::vector<ReporterDataChunk> &message, SHARED_PTR_AL
             return PROFILING_FAILED;
         }
         if (isFirstMessage) { // deal with the data only need to init once
-            jobCtx->dev_id = std::to_string(DEFAULT_HOST_ID);
-            jobCtx->tag = std::string(message[i].tag.tag, strlen(message[i].tag.tag));
-            fileChunk->set_filename(moduleName_);
-            fileChunk->set_offset(-1);
+            fileChunk->fileName = Utils::PackDotInfo(moduleName_,
+                std::string(message[i].tag.tag, strlen(message[i].tag.tag)));
+            fileChunk->offset = -1;
             chunkLen = messageLen;
             chunk = std::string(dataPtr, chunkLen);
-            fileChunk->set_islastchunk(false);
-            fileChunk->set_needack(false);
-            fileChunk->set_tag(std::string(message[i].tag.tag, strlen(message[i].tag.tag)));
-            fileChunk->set_tagsuffix(jobCtx->dev_id);
-            fileChunk->set_chunkstarttime(message[i].reportTime);
-            fileChunk->set_chunkendtime(message[i].reportTime);
+            fileChunk->isLastChunk = false;
+            fileChunk->extraInfo = Utils::PackDotInfo(NULL_CHUNK, std::to_string(DEFAULT_HOST_ID));
+            fileChunk->chunkStartTime = message[i].reportTime;
+            fileChunk->chunkEndTime = message[i].reportTime;
             isFirstMessage = false;
-            devIds_.insert(jobCtx->dev_id);
+            devIds_.insert(std::to_string(DEFAULT_HOST_ID));
         } else { // deal with the data need to update according every message
             chunk.insert(chunkLen, std::string(dataPtr, messageLen));
             chunkLen += messageLen;
-            fileChunk->set_chunkendtime(message[i].reportTime);
         }
     }
-    jobCtx->module = moduleName_;
-    jobCtx->chunkStartTime = fileChunk->chunkstarttime();
-    jobCtx->chunkEndTime = fileChunk->chunkendtime();
-    jobCtx->dataModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST;
-    fileChunk->mutable_hdr()->set_job_ctx(jobCtx->ToString());
-    fileChunk->set_chunk(chunk);
-    fileChunk->set_chunksizeinbytes(chunkLen);
+    fileChunk->chunkModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST;
+    fileChunk->chunk = std::move(chunk);
+    fileChunk->chunkSize = chunkLen;
     return PROFILING_SUCCESS;
 }
 
@@ -526,73 +516,67 @@ void ReceiveData::SetDataChunkTag(uint16_t level, uint32_t typeId, std::string &
             break;
     }
 }
- 
-/**
-* @brief DumpData: deal with the data from user to build FileChunkReq struct for store or send
-* @param [in] message: data saved in the ring buffer
-* @param [out] fileChunk: data build from message for store or send
-* @return : success return PROFILING_SUCCESS, failed return PROFILING_FAILED
-*/
+
 template<typename T>
-int ReceiveData::DumpData(std::vector<T> &message, SHARED_PTR_ALIA<FileChunkReq> fileChunk)
+int32_t ReceiveData::DumpData(std::vector<T> &message, SHARED_PTR_ALIA<ProfileFileChunk> fileChunk)
 {
     if (fileChunk == nullptr) {
         MSPROF_LOGE("fileChunk or dataPool is nullptr");
         return PROFILING_FAILED;
     }
-    SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx = nullptr;
-    MSVP_MAKE_SHARED0_RET(jobCtx, analysis::dvvp::message::JobContext, PROFILING_FAILED);
+
     size_t chunkLen = 0;
-    std::string chunk = "";
+    bool needTypeInfo = true;
+    if (typeid(MsprofApi) == typeid(T)) {
+        needTypeInfo = false;
+    }
     bool isFirstMessage = true;
     for (size_t i = 0; i < message.size(); i++) {
-        int messageLen = sizeof(T);
+        int32_t messageLen = sizeof(T);
         CHAR_PTR dataPtr = reinterpret_cast<CHAR_PTR>(&message[i]);
         if (dataPtr == nullptr) {
             return PROFILING_FAILED;
         }
         if (isFirstMessage) { // deal with the data only need to init once
-            jobCtx->dev_id = std::to_string(DEFAULT_HOST_ID);
-            SetDataChunkTag(message[i].level, message[i].type, jobCtx->tag);
-            fileChunk->set_filename(moduleName_);
-            fileChunk->set_offset(-1);
+            std::string tag = needTypeInfo ? MsprofReporterMgr::instance()->GetRegReportTypeInfo(
+                message[i].level, message[i].type) : "data";
+            if (tag.empty()) {
+                MSPROF_LOGW("This dump data cann't found message level[%u], type[%u].",
+                    message[i].level, message[i].type);
+                tag = "invalid";
+            }
+            fileChunk->fileName = Utils::PackDotInfo(moduleName_, tag);
+            fileChunk->offset = -1;
             chunkLen = messageLen;
-            chunk = std::string(dataPtr, chunkLen);
-            fileChunk->set_islastchunk(false);
-            fileChunk->set_needack(false);
-            fileChunk->set_tag(jobCtx->tag);
-            fileChunk->set_tagsuffix(jobCtx->dev_id);
-            fileChunk->set_chunkstarttime(0);
-            fileChunk->set_chunkendtime(0);
+            fileChunk->chunk = std::move(std::string(dataPtr, chunkLen));
+            fileChunk->isLastChunk = false;
+            fileChunk->extraInfo = Utils::PackDotInfo(NULL_CHUNK, std::to_string(DEFAULT_HOST_ID));
             isFirstMessage = false;
-            devIds_.insert(jobCtx->dev_id);
+            fileChunk->chunkStartTime = 0U;
+            fileChunk->chunkEndTime = 0U;
+            devIds_.insert(std::to_string(DEFAULT_HOST_ID));
         } else { // deal with the data need to update according every message
-            chunk.insert(chunkLen, std::string(dataPtr, messageLen));
+            fileChunk->chunk.insert(chunkLen, std::string(dataPtr, messageLen));
             chunkLen += messageLen;
-            fileChunk->set_chunkendtime(0);
+            fileChunk->chunkEndTime = 0U;
         }
     }
-    jobCtx->module = moduleName_;
-    jobCtx->chunkStartTime = fileChunk->chunkstarttime();
-    jobCtx->chunkEndTime = fileChunk->chunkendtime();
-    jobCtx->dataModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST;
-    fileChunk->mutable_hdr()->set_job_ctx(jobCtx->ToString());
-    fileChunk->set_chunk(chunk);
-    fileChunk->set_chunksizeinbytes(chunkLen);
+    fileChunk->chunkModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST;
+    fileChunk->chunkSize = chunkLen;
     return PROFILING_SUCCESS;
 }
- 
-template int ReceiveData::DumpData(std::vector<MsprofApi> &message, SHARED_PTR_ALIA<FileChunkReq> fileChunk);
-template int ReceiveData::DumpData(std::vector<MsprofEvent> &message, SHARED_PTR_ALIA<FileChunkReq> fileChunk);
+
+template int ReceiveData::DumpData(std::vector<MsprofApi> &message, SHARED_PTR_ALIA<ProfileFileChunk> fileChunk);
+template int ReceiveData::DumpData(std::vector<MsprofEvent> &message, SHARED_PTR_ALIA<ProfileFileChunk> fileChunk);
 template int ReceiveData::DumpData(std::vector<MsprofCompactInfo> &message,
-                                   SHARED_PTR_ALIA<FileChunkReq> fileChunk);
+                                   SHARED_PTR_ALIA<ProfileFileChunk> fileChunk);
 template int ReceiveData::DumpData(std::vector<MsprofAdditionalInfo> &message,
-                                   SHARED_PTR_ALIA<FileChunkReq> fileChunk);
+                                   SHARED_PTR_ALIA<ProfileFileChunk> fileChunk);
  
 template void ReceiveData::RunNoTagData(analysis::dvvp::common::queue::RingBuffer<MsprofApi> &dataBuffer,
-    std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks);
+    std::vector<SHARED_PTR_ALIA<ProfileFileChunk>>& fileChunks);
 template void ReceiveData::RunTagData(analysis::dvvp::common::queue::RingBuffer<MsprofCompactInfo> &dataBuffer,
-    std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks);
+    std::vector<SHARED_PTR_ALIA<ProfileFileChunk>>& fileChunks);
 template void ReceiveData::RunTagData(analysis::dvvp::common::queue::RingBuffer<MsprofAdditionalInfo> &dataBuffer,
-    std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks);
+    std::vector<SHARED_PTR_ALIA<ProfileFileChunk>>& fileChunks);
 }}

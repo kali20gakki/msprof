@@ -33,7 +33,8 @@ protected:
 TEST_F(TreeUTest, GetRootNullptrAndNotNullptr)
 {
     EventInfo testInfo{EventType::EVENT_TYPE_API, 0, 0, 0};
-    auto eventPtr = std::make_shared<Event>(nullptr, "test", testInfo);
+    auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofApi>{},
+                                            "test", testInfo);
     auto treeNode = std::make_shared<TreeNode>(eventPtr);
 
     auto treeNull = std::make_shared<Tree>(nullptr);

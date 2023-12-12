@@ -39,12 +39,18 @@ int ParserTransport::Init(SHARED_PTR_ALIA<Uploader> uploader)
 
 int ParserTransport::SendBuffer(CONST_VOID_PTR buffer, int length)
 {
+    MSPROF_LOGW("No need to send buffer.");
+    return length;
+}
+
+int ParserTransport::SendBuffer(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
+{
     if (analyzer_ != nullptr) {
-        analyzer_->OnOptimizeData(buffer, length);
-        return length;
+        analyzer_->OnOptimizeData(fileChunkReq);
+        return PROFILING_SUCCESS;
     }
     MSPROF_LOGE("Analyzer is already closed");
-    return 0;
+    return PROFILING_FAILED;
 }
 
 int ParserTransport::CloseSession()
@@ -72,6 +78,12 @@ void ParserTransport::SetDevIdToAnalyzer(const std::string &devIdStr) const
     if (analyzer_ != nullptr) {
         analyzer_->SetDevId(devIdStr);
     }
+}
+
+int PipeTransport::SendBuffer(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> /* fileChunkReq */)
+{
+    MSPROF_LOGE("SendBuffer failed");
+    return 0;
 }
 
 int PipeTransport::SendBuffer(CONST_VOID_PTR buffer, int length)

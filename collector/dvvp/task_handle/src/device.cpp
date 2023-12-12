@@ -9,7 +9,6 @@
 #include "config/config.h"
 #include "errno/error_code.h"
 #include "job_factory.h"
-#include "message/codec.h"
 #include "msprof_dlog.h"
 #include "param_validation.h"
 #include "prof_manager.h"

@@ -12,10 +12,10 @@
 #include <sstream>
 #include <cctype>
 #include <sys/stat.h>
+#include <algorithm>
 #include "config/config.h"
 #include "errno/error_code.h"
 #include "message/prof_params.h"
-#include "message/codec.h"
 #include "mmpa_api.h"
 #include "platform/platform.h"
 #include "msprof_error_manager.h"

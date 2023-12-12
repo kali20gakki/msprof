@@ -10,7 +10,6 @@
 #include <map>
 #include "file_ageing.h"
 #include "message/prof_params.h"
-#include "proto/msprofiler.pb.h"
 #include "queue/bound_queue.h"
 #include "statistics/perf_count.h"
 #include "thread/thread.h"
@@ -29,7 +28,7 @@ public:
 public:
     int Init(bool needSlice = true);
     int FileSliceFlush();
-    int SaveDataToLocalFiles(SHARED_PTR_ALIA<google::protobuf::Message> message);
+    int SaveDataToLocalFiles(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
 
 private:
     int FileSliceFlushByJobID(const std::string &jobIDRelative, const std::string &devID);
@@ -39,8 +38,7 @@ private:
     std::string GetSliceKey(const std::string &dir, std::string &fileName);
     int SetChunkTime(const std::string &key, uint64_t startTime, uint64_t endTime);
     int WriteToLocalFiles(const std::string &key, CONST_CHAR_PTR data, int dataLen, int offset, bool isLastChunk);
-    int CheckDirAndMessage(analysis::dvvp::message::JobContext &jobCtx,
-                           SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> &fileChunkReq);
+    int CheckDirAndMessage(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
     int WriteCtrlDataToFile(const std::string &absolutePath, const std::string &data, int dataLen);
 
 private:

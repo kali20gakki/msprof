@@ -30,6 +30,18 @@ using MmProcess = Collector::Dvvp::Mmpa::MmProcess;
 using MmArgvEnv = Collector::Dvvp::Mmpa::MmArgvEnv;
 namespace analysis {
 namespace dvvp {
+struct ProfileFileChunk {
+    bool isLastChunk;
+    int32_t chunkModule;              // form FileChunkType
+    size_t chunkSize;                 // chunk size
+    size_t offset;                    // flush chunk to file by offset
+    uint64_t chunkStartTime;
+    uint64_t chunkEndTime;
+    std::string chunk;                // chunk data
+    std::string fileName;             // fulsh chunk to disks by "fileName.tag"
+    std::string extraInfo;            // report data fill suffix enum "jobId.devId"
+};
+
 namespace common {
 namespace utils {
 
@@ -501,7 +513,10 @@ public:
     static std::string RealPath(const std::string &path);
     static int StrToInt(int &dest, const std::string &numStr);
     static int StrToLongLong(long long &dest, const std::string &numStr);
-    static int StrToUnsignedLong(uint32_t &dest, const std::string &numStr);
+    static int StrToUint32(uint32_t &dest, const std::string &numStr);
+    static std::string GetInfoPrefix(const std::string &fileName);
+    static std::string GetInfoSuffix(const std::string &fileName);
+    static std::string PackDotInfo(const std::string &leftPattern, const std::string &rightPattern);
 };
 
 template<class T> class UtilsStringBuilder {

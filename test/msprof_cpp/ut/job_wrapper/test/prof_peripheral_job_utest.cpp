@@ -527,7 +527,12 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, SendData) {
     collectionJobCfg_->comParams->params->llc_profiling = "on";
     profLlcJob->collectionJobCfg_ = collectionJobCfg_;
     profLlcJob->collectionJobCfg_->jobParams.dataPath = "./llc.data";
-    MOCKER_CPP(&analysis::dvvp::transport::Uploader::UploadData)
+    MOCKER_CPP(&analysis::dvvp::transport::Uploader::UploadData,
+        int(analysis::dvvp::transport::Uploader::*)(CONST_VOID_PTR, int))
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));;
+    MOCKER_CPP(&analysis::dvvp::transport::Uploader::UploadData,
+        int(analysis::dvvp::transport::Uploader::*)(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk>))
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     profLlcJob->SendData();

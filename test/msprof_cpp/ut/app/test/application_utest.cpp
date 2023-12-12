@@ -177,8 +177,8 @@ TEST_F(PROF_APPLICATION_TEST, SetAppEnv) {
 	std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
 		new analysis::dvvp::message::ProfileParams());
 	std::vector<std::string> envs;
-	std::string cmd = "asda/";
 	params->app_env = "LD_LIBRARY_PATH=123;asd=1;PATH=123";
+	params->delayTime = "1";
 	analysis::dvvp::app::Application::SetAppEnv(params, envs);
 }
 

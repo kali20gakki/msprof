@@ -699,7 +699,6 @@ int Utils::ExecCmdC(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmd
             exitCodeP = exitedCode;
         }
     }
-
     return ret;
 }
 
@@ -1678,21 +1677,21 @@ int Utils::StrToInt(int &dest, const std::string &numStr)
     return PROFILING_SUCCESS;
 }
 
-int Utils::StrToUnsignedLong(uint32_t &dest, const std::string &numStr)
+int Utils::StrToUint32(uint32_t &dest, const std::string &numStr)
 {
     if (numStr.empty()) {
-        MSPROF_LOGE("StrToUnsignedLong failed, the input string is empty.");
+        MSPROF_LOGE("StrToUint32 failed, the input string is empty.");
         return PROFILING_FAILED;
     }
     size_t pos = 0;
     try {
         dest = static_cast<uint32_t>(std::stoul(numStr, &pos));
     } catch (...) {
-        MSPROF_LOGE("StrToUnsignedLong failed, the input string is '%s'.", numStr.c_str());
+        MSPROF_LOGE("StrToUint32 failed, the input string is '%s'.", numStr.c_str());
         return PROFILING_FAILED;
     }
     if (pos != numStr.size()) {
-        MSPROF_LOGE("StrToUnsignedLong failed, the input string is '%s'.", numStr.c_str());
+        MSPROF_LOGE("StrToUint32 failed, the input string is '%s'.", numStr.c_str());
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
@@ -1776,6 +1775,30 @@ int32_t UnFileLock(FILE *file)
     return analysis::dvvp::common::error::PROFILING_FAILED;
 #endif
 }
+
+std::string Utils::GetInfoSuffix(const std::string &fileName)
+{
+    size_t pos = fileName.find_last_of(".");
+    if (pos != std::string::npos) {
+        return fileName.substr(pos + 1, fileName.length());
+    }
+    return "";
+}
+
+std::string Utils::GetInfoPrefix(const std::string &fileName)
+{
+    size_t pos = fileName.find_last_of(".");
+    if (pos != std::string::npos) {
+        return fileName.substr(0, pos);
+    }
+    return "";
+}
+
+std::string Utils::PackDotInfo(const std::string &leftPattern, const std::string &rightPattern)
+{
+    return leftPattern + "." + rightPattern;
+}
+
 }  // namespace utils
 }  // namespace common
 }  // namespace dvvp

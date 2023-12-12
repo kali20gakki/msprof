@@ -14,7 +14,6 @@
  
 namespace Msprof {
 namespace Engine {
-using namespace analysis::dvvp::proto;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::transport;
@@ -153,7 +152,7 @@ int32_t MsprofReporterMgr::ReportData(uint32_t agingFlag, const MsprofAdditional
     return reporters_[agingFlag ?  AGING_ADDITIONAL_INFO : UNAGING_ADDITIONAL_INFO].ReportData(data);
 }
 
-int32_t MsprofReporterMgr::SendAdditionalInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk)
+int32_t MsprofReporterMgr::SendAdditionalInfo(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk)
 {
     if (!isStarted_) {
         MSPROF_LOGE("The reporter has not been started.");
@@ -194,24 +193,18 @@ std::string& MsprofReporterMgr::GetRegReportTypeInfo(uint16_t level, uint32_t ty
 }
 
 void MsprofReporterMgr::FillFileChunkData(const std::string &saveHashData,
-    SHARED_PTR_ALIA<FileChunkReq> fileChunk, bool isLastChunk) const
+    SHARED_PTR_ALIA<ProfileFileChunk> fileChunk, bool isLastChunk) const
 {
-    fileChunk->set_filename("unaging.additional");
-    fileChunk->set_offset(-1);
-    fileChunk->set_islastchunk(isLastChunk);
-    fileChunk->set_needack(false);
-    fileChunk->set_tag("type_info_dic");
-    fileChunk->set_tagsuffix(std::to_string(DEFAULT_HOST_ID));
-    fileChunk->set_chunk(saveHashData);
-    fileChunk->set_chunksizeinbytes(saveHashData.size());
-    fileChunk->set_datamodule(FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST);
-    analysis::dvvp::message::JobContext jobCtx;
-    jobCtx.dev_id = std::to_string(DEFAULT_HOST_ID);
-    jobCtx.job_id = std::to_string(DEFAULT_HOST_ID);
-    fileChunk->mutable_hdr()->set_job_ctx(jobCtx.ToString());
+    fileChunk->fileName = Utils::PackDotInfo("unaging.additional", "type_info_dic");
+    fileChunk->offset = -1;
+    fileChunk->isLastChunk = isLastChunk;
+    fileChunk->chunk = saveHashData;
+    fileChunk->chunkSize = saveHashData.size();
+    fileChunk->chunkModule = FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST;
+    fileChunk->extraInfo = Utils::PackDotInfo(std::to_string(DEFAULT_HOST_ID), std::to_string(DEFAULT_HOST_ID));
     uint64_t reportTime = Utils::GetClockMonotonicRaw();
-    fileChunk->set_chunkstarttime(reportTime);
-    fileChunk->set_chunkendtime(reportTime);
+    fileChunk->chunkStartTime = reportTime;
+    fileChunk->chunkEndTime = reportTime;
 }
 
 void MsprofReporterMgr::SaveTypeInfo(bool isLastChunk)
@@ -235,14 +228,13 @@ void MsprofReporterMgr::SaveTypeInfo(bool isLastChunk)
             continue;
         }
         indexMap_[typeInfo.first] = currentHashSize;
-        // construct FileChunkReq data
-        SHARED_PTR_ALIA<FileChunkReq> fileChunk = nullptr;
-        MSVP_MAKE_SHARED0_BREAK(fileChunk, FileChunkReq);
+        // construct ProfileFileChunk data
+        SHARED_PTR_ALIA<ProfileFileChunk> fileChunk = nullptr;
+        MSVP_MAKE_SHARED0_BREAK(fileChunk, ProfileFileChunk);
         FillFileChunkData(saveHashData, fileChunk, isLastChunk);
-        // upload FileChunkReq data
-        std::string encoded = analysis::dvvp::message::EncodeMessage(fileChunk);
+        // upload ProfileFileChunk data
         int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadData(
-            std::to_string(DEFAULT_HOST_ID), encoded.c_str(), encoded.size());
+            std::to_string(DEFAULT_HOST_ID), fileChunk);
         if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("Type info upload data failed, level: %u, dataLen:%u", typeInfo.first, saveHashData.size());
             continue;

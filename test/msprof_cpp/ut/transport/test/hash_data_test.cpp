@@ -102,11 +102,12 @@ TEST_F(COMMON_HASH_DATA_TEST, GetHashData) {
 
 TEST_F(COMMON_HASH_DATA_TEST, SaveHashData) {
     GlobalMockObject::verify();
-    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::UploadData)
+    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::UploadData,
+        int(analysis::dvvp::transport::UploaderMgr::*)
+        (const std::string&, SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk>))
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-
     HashData::instance()->SaveHashData();
     HashData::instance()->Init();
     const char *data = "ABCDEFGHIJK";
@@ -143,7 +144,9 @@ TEST_F(COMMON_HASH_DATA_TEST, SaveNewHashData)
     HashData::instance()->Init();
     HashData::instance()->GenHashId("Test1");
     HashData::instance()->GenHashId("Test2");
-    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::UploadData)
+    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::UploadData,
+        int(analysis::dvvp::transport::UploaderMgr::*)
+        (const std::string&, SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk>))
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));

@@ -45,25 +45,6 @@ class OpTaskSchedulerCalculator(MsMultiProcess):
         DBManager.execute_sql(runtime_conn, sql)
 
     @staticmethod
-    def _update(api_data: list) -> list:
-        """
-        api update data for op scene
-        :param api_data: runtime api data
-        :return: api data
-        """
-        api_down_task_op = []
-        for api in api_data:
-            # API data is in the format of api,rowid,stream_id,task_id,batch_id for single op scene
-            task_id_op = api[3].split(',')
-            batch_id_op = api[4].split(',')
-            if len(task_id_op) != len(batch_id_op):
-                logging.error("The num of task id is not equal to batch id")
-                return []
-            for task, batch in zip(task_id_op, batch_id_op):
-                api_down_task_op.append(api[0:3] + (task, batch,))
-        return api_down_task_op
-
-    @staticmethod
     def _insert_report_task_data(runtime_conn: any, runtime_curs: any, device_id: int) -> None:
         report_data = calculate_task_schedule_data(runtime_curs, device_id)
         if not report_data:
@@ -127,10 +108,8 @@ class OpTaskSchedulerCalculator(MsMultiProcess):
             return
         try:
             self.op_create_task_time(runtime_conn, device_id)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+        except Exception as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-        else:
-            self.op_update_timeline_api(runtime_conn)
         finally:
             DBManager.destroy_db_connect(runtime_conn, runtime_curs)
 
@@ -164,31 +143,6 @@ class OpTaskSchedulerCalculator(MsMultiProcess):
             return
         self.op_pre_mini_task_data(self.project_path, self.device_id)
         self.op_insert_report_data(self.project_path, self.device_id)
-
-    def op_update_timeline_api(self: any, runtime_conn: any) -> None:
-        """
-        updates timeline api
-        :param runtime_conn: connect of runtime
-        :return: NA
-        """
-        logging.info('Start to update TaskTime API.')
-        runtime_curs = runtime_conn.cursor()
-        if not (DBManager.judge_table_exist(runtime_curs, DBNameConstant.TABLE_RUNTIME_TASK_TIME)
-                and DBManager.judge_table_exist(runtime_curs, DBNameConstant.TABLE_API_CALL)):
-            logging.warning("No need to update task time data, runtime "
-                            "api data or ts timeline data had not been collected.")
-            return
-        select_api_sql = 'select api,rowid,stream_id,task_id,batch_id from {0} ' \
-                         'order by entry_time;'.format(DBNameConstant.TABLE_API_CALL)
-        api_thread = DBManager.fetch_all_data(runtime_curs, select_api_sql)
-        try:
-            api_down_data = self._update(api_thread)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-            return
-        sql = 'update TaskTime set api=?, apiRowId=? where stream_id=? and task_id=? and batch_id=?'
-        DBManager.executemany_sql(runtime_conn, sql, api_down_data)
-        logging.info('Update TimeLine API finished.')
 
     def _add_info(self: any, cal_task_data: list) -> list:
         # 0 is default batch id

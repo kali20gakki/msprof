@@ -8,7 +8,6 @@
 #include "config/config.h"
 #include "param_validation.h"
 #include "prof_channel_manager.h"
-#include "proto/msprofiler.pb.h"
 #include "securec.h"
 #include "uploader_mgr.h"
 #include "utils/utils.h"
@@ -1557,6 +1556,73 @@ int ProfL2CacheTaskJob::Uninit()
     return PROFILING_SUCCESS;
 }
 
+ProfAicpuJob::ProfAicpuJob() : channelId_(PROF_CHANNEL_AICPU)
+{
+}
+ 
+ProfAicpuJob::~ProfAicpuJob()
+{
+}
+ 
+int ProfAicpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    if (cfg->comParams->params->host_profiling) {
+        return PROFILING_FAILED;
+    }
+ 
+    collectionJobCfg_ = cfg;
+    if (!collectionJobCfg_->comParams->params->dataTypeConfig & PROF_AICPU_TRACE) {
+        MSPROF_LOGI("AICPU not enable, devId:%d", collectionJobCfg_->comParams->devId);
+        return PROFILING_FAILED;
+    }
+ 
+    if (analysis::dvvp::driver::DrvGetApiVersion() < analysis::dvvp::driver::SUPPORT_ADPROF_VERSION) {
+        MSPROF_LOGI("Collect Aicpu data by HDC");
+        return PROFILING_FAILED;
+    }
+ 
+    if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
+        MSPROF_LOGW("Channel is invalid, devId:%d, channelId_:%d", collectionJobCfg_->comParams->devId, channelId_);
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
+}
+ 
+int ProfAicpuJob::Process()
+{
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    MSPROF_LOGI("Begin to start profiling aicpu");
+ 
+    std::string filePath = BindFileWithChannel(collectionJobCfg_->jobParams.dataPath);
+    AddReader(collectionJobCfg_->comParams->params->job_id, collectionJobCfg_->comParams->devId, channelId_, filePath);
+ 
+    int ret = DrvAicpuStart(collectionJobCfg_->comParams->devId, channelId_);
+    MSPROF_LOGI("start profiling aicpu, ret=%d", ret);
+    
+    FUNRET_CHECK_RET_VALUE(ret, PROFILING_SUCCESS, PROFILING_SUCCESS, ret);
+}
+ 
+int ProfAicpuJob::Uninit()
+{
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_SUCCESS;
+    }
+    if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
+        MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
+            channelId_);
+        return PROFILING_SUCCESS;
+    }
+    int ret = DrvStop(collectionJobCfg_->comParams->devId, channelId_);
+    MSPROF_LOGI("stop profiling Channel %d data, ret=%d", static_cast<int>(channelId_), ret);
+    RemoveReader(collectionJobCfg_->comParams->params->job_id, collectionJobCfg_->comParams->devId, channelId_);
+    return ret;
+}
+
 PerfExtraTask::PerfExtraTask(unsigned int bufSize, const std::string& retDir,
     SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx,
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> param)
@@ -1710,15 +1776,12 @@ void PerfExtraTask::StoreData(const std::string &fileName)
         return;
     }
 
-    static const char * const PERF_RET_NAME = "data/ai_ctrl_cpu.data";
+    static const std::string PERF_RET_NAME = "data/ai_ctrl_cpu.data";
 
     UNSIGNED_CHAR_PTR buf = const_cast<UNSIGNED_CHAR_PTR>(buf_.GetBuffer());
     size_t bufSize = buf_.GetBufferSize();
 
     std::ifstream ifs(fileName, std::ifstream::in);
-
-    SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk;
-    MSVP_MAKE_SHARED0_VOID(fileChunk, analysis::dvvp::proto::FileChunkReq);
 
     if (!ifs.is_open() || buf == nullptr) {
         return;
@@ -1731,18 +1794,18 @@ void PerfExtraTask::StoreData(const std::string &fileName)
         }
         ifs.read(reinterpret_cast<CHAR_PTR>(buf), bufSize > 0 ? (bufSize - 1) : 0);
 
-        fileChunk->set_filename(PERF_RET_NAME);
-        fileChunk->set_offset(-1);
-        fileChunk->set_chunk(buf, ifs.gcount());
-        fileChunk->set_chunksizeinbytes(ifs.gcount());
-        fileChunk->set_islastchunk(false);
-        fileChunk->set_needack(false);
-        fileChunk->mutable_hdr()->set_job_ctx(jobCtx_->ToString());
-        fileChunk->set_datamodule(analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_DEVICE);
-
-        std::string encoded = analysis::dvvp::message::EncodeMessage(fileChunk);
-        int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadData(param_->job_id,
-            static_cast<void *>(const_cast<CHAR_PTR>(encoded.c_str())), (uint32_t)encoded.size());
+        SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk;
+        MSVP_MAKE_SHARED0_VOID(fileChunk, analysis::dvvp::ProfileFileChunk);
+        fileChunk->fileName = Utils::PackDotInfo(PERF_RET_NAME, jobCtx_->tag);
+        fileChunk->offset = -1;
+        fileChunk->chunk = std::move(std::string(reinterpret_cast<CONST_CHAR_PTR>(buf), ifs.gcount()));
+        fileChunk->chunkSize = static_cast<size_t>(ifs.gcount());
+        fileChunk->isLastChunk = false;
+        fileChunk->chunkModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_DEVICE;
+        fileChunk->extraInfo = Utils::PackDotInfo(jobCtx_->job_id, jobCtx_->dev_id);
+        fileChunk->chunkStartTime = 0U;
+        fileChunk->chunkEndTime = 0U;
+        int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadData(param_->job_id, fileChunk);
         if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("Upload cpu data failed , jobId: %s", param_->job_id.c_str());
             MSPROF_INNER_ERROR("EK9999", "Upload cpu data failed , jobId: %s", param_->job_id.c_str());

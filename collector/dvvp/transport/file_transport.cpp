@@ -7,11 +7,8 @@
 #include "file_transport.h"
 #include "config/config.h"
 #include "errno/error_code.h"
-#include "message/codec.h"
-#include "message/prof_params.h"
 #include "mmpa_api.h"
 #include "msprof_dlog.h"
-#include "proto/msprofiler.pb.h"
 #include "securec.h"
 #include "param_validation.h"
 
@@ -52,36 +49,43 @@ void FILETransport::WriteDone()
     fileSlice_->FileSliceFlush();
 }
 
-int FILETransport::SendBuffer(CONST_VOID_PTR buffer, int length)
+int FILETransport::SendBuffer(CONST_VOID_PTR /* buffer */, int /* length */)
 {
-    int retLengthError = 0;
-    if (buffer == nullptr || length <= 0) {
-        MSPROF_LOGE("buffer to be sent is nullptr, or data len:%d is invalid!", length);
-        return retLengthError;
-    }
+    MSPROF_LOGW("No need to send buffer");
+    return PROFILING_SUCCESS;
+}
 
-    auto message = analysis::dvvp::message::DecodeMessage(std::string((CONST_CHAR_PTR)buffer, length));
-    auto fileChunkReq = std::dynamic_pointer_cast<analysis::dvvp::proto::FileChunkReq>(message);
+int FILETransport::SendBuffer(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
+{
     if (fileChunkReq == nullptr) {
         MSPROF_LOGW("Failed to parse fileChunkReq");
-        return retLengthError;
+        return PROFILING_FAILED;
     }
 
-    if (fileChunkReq->datamodule() == FileChunkDataModule::PROFILING_IS_FROM_DEVICE ||
-        fileChunkReq->datamodule() == FileChunkDataModule::PROFILING_IS_FROM_MSPROF ||
-        fileChunkReq->datamodule() == FileChunkDataModule::PROFILING_IS_FROM_MSPROF_DEVICE ||
-        fileChunkReq->datamodule() == FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST) {
-        if (UpdateFileName(fileChunkReq) != PROFILING_SUCCESS) {
+    if (fileChunkReq->chunkModule == FileChunkDataModule::PROFILING_IS_FROM_DEVICE ||
+        fileChunkReq->chunkModule == FileChunkDataModule::PROFILING_IS_FROM_MSPROF ||
+        fileChunkReq->chunkModule == FileChunkDataModule::PROFILING_IS_FROM_MSPROF_DEVICE ||
+        fileChunkReq->chunkModule == FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST) {
+        if (fileChunkReq->extraInfo.empty()) {
+            MSPROF_LOGE("FileChunk info is empty in SendBuffer.");
+            return PROFILING_FAILED;
+        }
+        std::string devId = Utils::GetInfoSuffix(fileChunkReq->extraInfo);
+        std::string jobId = Utils::GetInfoPrefix(fileChunkReq->extraInfo);
+        if (UpdateFileName(fileChunkReq, devId) != PROFILING_SUCCESS) {
+            if (jobId.compare("64") == 0) {
+                return PROFILING_SUCCESS;
+            }
             MSPROF_LOGE("Failed to update file name");
-            return retLengthError;
+            return PROFILING_FAILED;
         }
     }
-    if (fileSlice_->SaveDataToLocalFiles(message) != PROFILING_SUCCESS) {
-        MSPROF_LOGE("write data to local files failed, fileName: %s", fileChunkReq->filename().c_str());
-        return retLengthError;
+    if (fileSlice_->SaveDataToLocalFiles(fileChunkReq) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("write data to local files failed, fileName: %s", fileChunkReq->fileName.c_str());
+        return PROFILING_FAILED;
     }
 
-    return length;
+    return PROFILING_SUCCESS;
 }
 
 int FILETransport::CloseSession()
@@ -89,36 +93,32 @@ int FILETransport::CloseSession()
     return PROFILING_SUCCESS;
 }
 
-int FILETransport::UpdateFileName(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunkReq)
+int FILETransport::UpdateFileName(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq,
+    const std::string &devId) const
 {
-    std::string fileName = fileChunkReq->filename();
+    std::string fileName = fileChunkReq->fileName;
     size_t pos = fileName.find_last_of("/\\");
     if (pos != std::string::npos && pos + 1 < fileName.length()) {
         fileName = fileName.substr(pos + 1, fileName.length());
     }
-    if (fileChunkReq->datamodule() != FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST) {
-        analysis::dvvp::message::JobContext jobCtx;
-        if (!jobCtx.FromString(fileChunkReq->hdr().job_ctx())) {
-            MSPROF_LOGE("Failed to parse jobCtx json %s. fileName:%s",
-                fileChunkReq->hdr().job_ctx().c_str(), fileName.c_str());
+    std::string tag = Utils::GetInfoSuffix(fileName);
+    std::string fileNameOri = Utils::GetInfoPrefix(fileName);
+    if (fileChunkReq->chunkModule != FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST) {
+        if (!ParamValidation::instance()->CheckDeviceIdIsValid(devId)) {
+            MSPROF_LOGW("dev_id is not valid!");
             return PROFILING_FAILED;
         }
-        if (!ParamValidation::instance()->CheckDeviceIdIsValid(jobCtx.dev_id)) {
-            MSPROF_LOGE("jobCtx.dev_id is not valid!");
-            return PROFILING_FAILED;
-        }
-        if (fileChunkReq->tag().length() == 0) {
-            fileName.append(".").append(jobCtx.dev_id);
+        if (tag.length() == 0 || tag == "null") {
+            fileName = fileNameOri.append(".").append(devId);
         } else {
-            fileName.append(".").append(fileChunkReq->tag()).append(".").append(jobCtx.dev_id);
+            fileName = fileName.append(".").append(devId);
         }
     } else {
-        if (fileChunkReq->tag().length() != 0) {
-            fileName.append(".").append(fileChunkReq->tag());
+        if (tag.length() == 0 || tag == "null") {
+            fileName = fileNameOri;
         }
     }
-    fileName = "data" + std::string(MSVP_SLASH) + fileName;
-    fileChunkReq->set_filename(fileName);
+    fileChunkReq->fileName = "data" + std::string(MSVP_SLASH) + fileName;
     return PROFILING_SUCCESS;
 }
 

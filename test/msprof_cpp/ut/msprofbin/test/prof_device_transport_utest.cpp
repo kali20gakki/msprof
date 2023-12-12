@@ -208,10 +208,10 @@ TEST_F(HOST_PROF_DEVICE_TRANSPORT_UTEST, SendMsgAndRecvResponse)
     auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
         new analysis::dvvp::transport::HDCTransport(session));
 
-    MOCKER_CPP_VIRTUAL(transport.get(), &analysis::dvvp::transport::HDCTransport::SendBuffer)
+    MOCKER_CPP_VIRTUAL(*transport.get(), &HDCTransport::SendBuffer, int(HDCTransport::*)(const void *, int))
         .stubs()
-        .will(returnValue(-1))
-        .then(returnValue(0));
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
 
     ctrl_tran = std::make_shared<HDCTransport>(client);
     dev_tran->ctrlTran_ = ctrl_tran;
