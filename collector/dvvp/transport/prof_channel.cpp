@@ -10,7 +10,6 @@
 #include <string>
 #include "config/config.h"
 #include "errno/error_code.h"
-#include "message/codec.h"
 #include "msprof_dlog.h"
 #include "ascend_hal.h"
 #include "proto/msprofiler.pb.h"
@@ -171,21 +170,18 @@ void ChannelReader::UploadData()
         return;
     }
     // file chunk
-    SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunkReq;
-    MSVP_MAKE_SHARED0_VOID(fileChunkReq, analysis::dvvp::proto::FileChunkReq);
-
-    fileChunkReq->set_filename(relativeFileName_);
-    fileChunkReq->set_offset(-1);
-    fileChunkReq->set_chunk(buffer_.get(), dataSize_);
-    fileChunkReq->set_chunksizeinbytes(dataSize_);
-    fileChunkReq->set_islastchunk(false);
-    fileChunkReq->set_needack(false);
-    fileChunkReq->mutable_hdr()->set_job_ctx(jobCtx_->ToString());
-    fileChunkReq->set_datamodule(analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_DEVICE);
-
-    std::string encoded = analysis::dvvp::message::EncodeMessage(fileChunkReq);
-    int ret = UploaderMgr::instance()->UploadData(jobCtx_->job_id,
-        reinterpret_cast<const void *>(encoded.c_str()), (uint32_t)encoded.size());
+    SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk;
+    MSVP_MAKE_SHARED0_VOID(fileChunk, analysis::dvvp::ProfileFileChunk);
+    fileChunk->isLastChunk = false;
+    fileChunk->chunkModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_DEVICE;
+    fileChunk->chunkSize = dataSize_;
+    fileChunk->offset = -1;
+    fileChunk->fileName = Utils::PackDotInfo(relativeFileName_, NULL_CHUNK);
+    fileChunk->chunk.append(reinterpret_cast<CHAR_PTR>(buffer_.get()), dataSize_);
+    fileChunk->extraInfo = Utils::PackDotInfo(jobCtx_->job_id, jobCtx_->dev_id);
+    fileChunk->chunkStartTime = 0U;
+    fileChunk->chunkEndTime = 0U;
+    int ret = UploaderMgr::instance()->UploadData(jobCtx_->job_id, fileChunk);
     if (ret == PROFILING_FAILED) {
         MSPROF_LOGE("Upload data failed, jobId: %s", jobCtx_->job_id.c_str());
         MSPROF_INNER_ERROR("EK9999", "Upload data failed, jobId: %s", jobCtx_->job_id.c_str());

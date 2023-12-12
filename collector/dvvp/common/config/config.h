@@ -70,6 +70,7 @@ const int MAX_CUSTOM_METRICS_LEN = 70;
 const int HEX_MODE = 16;
 const int DEC_MODE = 10;
 const std::string CUSTOM_METRICS_VALID_HEADER = "Custom:";
+const std::string NULL_CHUNK = "null";
 
 const int MAX_ASCEND_INSTALL_INFO_FILE_SIZE = 1024; // 1024 Byte
 
@@ -188,6 +189,7 @@ const std::string MSVP_PROF_ON = "on";
 const std::string MSVP_PROF_OFF = "off";
 const std::string MSVP_PROF_L0 = "l0";
 const std::string MSVP_PROF_L1 = "l1";
+const char * const MSVP_PROF_EMPTY_STRING = "";
 
 // ai core metrics type
 const std::string ARITHMETIC_UTILIZATION = "ArithmeticUtilization";
@@ -229,7 +231,7 @@ const char * const KEYPOINT_OP_NAME = "keypoint_op";
 const char * const KEYPOINT_OP_TYPE = "na";
 
 // hash data file tag
-const char * const HASH_TAG = "hash_dic";
+const std::string HASH_TAG = "hash_dic";
 const char * const HASH_DIC_DELIMITER = ":";
 
 // need paired ageing file
@@ -256,7 +258,8 @@ enum FileChunkDataModule {
     PROFILING_IS_CTRL_DATA,
     PROFILING_IS_FROM_DEVICE,
     PROFILING_IS_FROM_MSPROF_DEVICE,
-    PROFILING_IS_FROM_MSPROF_HOST
+    PROFILING_IS_FROM_MSPROF_HOST,
+    PROFILING_IS_FROM_INNER
 };
 
 // device-sys

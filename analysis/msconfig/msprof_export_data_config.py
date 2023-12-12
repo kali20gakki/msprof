@@ -91,7 +91,7 @@ class MsProfExportDataConfig(MetaConfig):
              'Model Name,Model ID,Fusion Op,Original Ops,Memory Input(KB),Memory Output(KB),'
              'Memory Weight(KB),Memory Workspace(KB),Memory Total(KB)'),
             ('db', 'ge_model_info.db'),
-            ('table', 'GeModelLoad')
+            ('table', 'ModelName')
         ],
         'ai_core_utilization': [
             ('handler', '_get_ai_core_sample_based_data'),

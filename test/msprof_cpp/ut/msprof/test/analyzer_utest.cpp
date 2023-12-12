@@ -9,6 +9,7 @@
 #include "mockcpp/mockcpp.hpp"
 #include "analyzer.h"
 #include "config/config.h"
+#include "errno/error_code.h"
 #include "data_struct.h"
 #include "errno/error_code.h"
 #include "op_desc_parser.h"
@@ -56,6 +57,17 @@ TEST_F(AnalyzerUtest, PrintHostStats)
     analyzer->PrintHostStats();
 }
 
+TEST_F(AnalyzerUtest, InitFailedWhenInitFrenqueryFailed)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<Analyzer> analyzer;
+    MSVP_MAKE_SHARED1_BREAK(analyzer, Analyzer, nullptr);
+    MOCKER_CPP(&AnalyzerHwts::InitFrequency)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, analyzer->Init());
+}
+
 TEST_F(AnalyzerUtest, DispatchOptimizeUnagingApiData)
 {
     GlobalMockObject::verify();
@@ -70,11 +82,11 @@ TEST_F(AnalyzerUtest, DispatchOptimizeUnagingApiData)
     geUnAgingTaskDescChunk.endTime = 60; // 60 end time
     geUnAgingTaskDescChunk.threadId = 1;
     std::string geUnAgingOriData((CHAR_PTR)&geUnAgingTaskDescChunk, sizeof(geUnAgingTaskDescChunk));
-    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> geUnAgingTaskDesc;
-    MSVP_MAKE_SHARED0_BREAK(geUnAgingTaskDesc, analysis::dvvp::proto::FileChunkReq);
-    geUnAgingTaskDesc->set_filename("unaging.api_event");
-    geUnAgingTaskDesc->set_chunk(geUnAgingOriData);
-    geUnAgingTaskDesc->set_chunksizeinbytes(sizeof(geUnAgingTaskDescChunk));
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> geUnAgingTaskDesc;
+    MSVP_MAKE_SHARED0_BREAK(geUnAgingTaskDesc, analysis::dvvp::ProfileFileChunk);
+    geUnAgingTaskDesc->fileName = Utils::PackDotInfo("unaging", "api_event");
+    geUnAgingTaskDesc->chunk = std::string(geUnAgingOriData, sizeof(geUnAgingOriData));
+    geUnAgingTaskDesc->chunkSize = sizeof(geUnAgingTaskDescChunk);
     analyzer->DispatchOptimizeData(geUnAgingTaskDesc);
 }
 
@@ -89,11 +101,11 @@ TEST_F(AnalyzerUtest, DispatchOptimizeAgingApiData)
     struct MsprofApi geAgingTaskDescChunk;
     geAgingTaskDescChunk.type = MSPROF_REPORT_NODE_LAUNCH_TYPE;
     std::string geUnAgingOriData((CHAR_PTR)&geAgingTaskDescChunk, sizeof(geAgingTaskDescChunk));
-    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> geAgingTaskDesc;
-    MSVP_MAKE_SHARED0_BREAK(geAgingTaskDesc, analysis::dvvp::proto::FileChunkReq);
-    geAgingTaskDesc->set_filename("aging.api_event");
-    geAgingTaskDesc->set_chunk(geUnAgingOriData);
-    geAgingTaskDesc->set_chunksizeinbytes(sizeof(geAgingTaskDescChunk));
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> geAgingTaskDesc;
+    MSVP_MAKE_SHARED0_BREAK(geAgingTaskDesc, analysis::dvvp::ProfileFileChunk);
+    geAgingTaskDesc->fileName = Utils::PackDotInfo("aging", "api_event");
+    geAgingTaskDesc->chunk = geUnAgingOriData;
+    geAgingTaskDesc->chunkSize = sizeof(geAgingTaskDescChunk);
     analyzer->DispatchOptimizeData(geAgingTaskDesc);
 }
 
@@ -114,12 +126,11 @@ TEST_F(AnalyzerUtest, DispatchOptimizeNodeBasicInfoData)
     geTaskDescChunk.threadId = 1;
     geTaskDescChunk.timeStamp = 0;
     std::string geOriData((CHAR_PTR)&geTaskDescChunk, sizeof(geTaskDescChunk));
-    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> geTaskDesc;
-    MSVP_MAKE_SHARED0_BREAK(geTaskDesc, analysis::dvvp::proto::FileChunkReq);
-    geTaskDesc->set_filename("unaging.compact");
-    geTaskDesc->set_tag("node_basic_info");
-    geTaskDesc->set_chunk(geOriData);
-    geTaskDesc->set_chunksizeinbytes(sizeof(geTaskDescChunk));
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> geTaskDesc;
+    MSVP_MAKE_SHARED0_BREAK(geTaskDesc, analysis::dvvp::ProfileFileChunk);
+    geTaskDesc->fileName = Utils::PackDotInfo("unaging", "compact");
+    geTaskDesc->chunk = geOriData;
+    geTaskDesc->chunkSize = sizeof(geTaskDescChunk);
     analyzer->DispatchOptimizeData(geTaskDesc);
 }
 
@@ -135,12 +146,11 @@ TEST_F(AnalyzerUtest, DispatchOptimizeGraphIdInfoData)
     struct MsprofAdditionalInfo geAddChunk;
     geAddChunk.level = MSPROF_REPORT_MODEL_LEVEL;
     std::string geAddData((CHAR_PTR)&geAddChunk, sizeof(geAddChunk));
-    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> geAddDesc;
-    MSVP_MAKE_SHARED0_BREAK(geAddDesc, analysis::dvvp::proto::FileChunkReq);
-    geAddDesc->set_filename("Additional");
-    geAddDesc->set_tag("graph_id_map");
-    geAddDesc->set_chunk(geAddData);
-    geAddDesc->set_chunksizeinbytes(sizeof(geAddChunk));
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> geAddDesc;
+    MSVP_MAKE_SHARED0_BREAK(geAddDesc, analysis::dvvp::ProfileFileChunk);
+    geAddDesc->fileName = Utils::PackDotInfo("Additional", "graph_id_map");
+    geAddDesc->chunk = geAddData;
+    geAddDesc->chunkSize = sizeof(geAddChunk);
     analyzer->DispatchOptimizeData(geAddDesc);
 }
 
@@ -157,12 +167,11 @@ TEST_F(AnalyzerUtest, DispatchOptimizeContextIdInfoData)
     geAddChunk.level = MSPROF_REPORT_NODE_LEVEL;
     geAddChunk.type = MSPROF_REPORT_NODE_CONTEXT_ID_INFO_TYPE;
     std::string geAddData((CHAR_PTR)&geAddChunk, sizeof(geAddChunk));
-    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> geAddDesc;
-    MSVP_MAKE_SHARED0_BREAK(geAddDesc, analysis::dvvp::proto::FileChunkReq);
-    geAddDesc->set_filename("Additional");
-    geAddDesc->set_tag("context_id_info");
-    geAddDesc->set_chunk(geAddData);
-    geAddDesc->set_chunksizeinbytes(sizeof(geAddChunk));
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> geAddDesc;
+    MSVP_MAKE_SHARED0_BREAK(geAddDesc, analysis::dvvp::ProfileFileChunk);
+    geAddDesc->fileName = Utils::PackDotInfo("Additional", "context_id_info");
+    geAddDesc->chunk = geAddData;
+    geAddDesc->chunkSize = sizeof(geAddChunk);
     analyzer->DispatchOptimizeData(geAddDesc);
 }
 
@@ -181,19 +190,40 @@ TEST_F(AnalyzerUtest, DispatchOptimizeModelInfoData)
     geUnAgingEventChunk.itemId = 1;
     geUnAgingEventChunk.timeStamp = 0;
     std::string geUnAgingStartOriData((CHAR_PTR)&geUnAgingEventChunk, sizeof(geUnAgingEventChunk));
-    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> geModelLoad;
-    MSVP_MAKE_SHARED0_BREAK(geModelLoad, analysis::dvvp::proto::FileChunkReq);
-    geModelLoad->set_filename("unaging.api_event");
-    geModelLoad->set_chunk(geUnAgingStartOriData);
-    geModelLoad->set_chunksizeinbytes(sizeof(geUnAgingEventChunk));
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> geModelLoad;
+    MSVP_MAKE_SHARED0_BREAK(geModelLoad, analysis::dvvp::ProfileFileChunk);
+    geModelLoad->fileName = Utils::PackDotInfo("unaging", "api_event");
+    geModelLoad->chunk = geUnAgingStartOriData;
+    geModelLoad->chunkSize = sizeof(geUnAgingEventChunk);
     analyzer->DispatchOptimizeData(geModelLoad);
 
     geUnAgingEventChunk.timeStamp = 1;
     std::string geUnAgingEndOriData((CHAR_PTR)&geUnAgingEventChunk, sizeof(geUnAgingEventChunk));
-    geModelLoad->set_filename("unaging.api_event");
-    geModelLoad->set_chunk(geUnAgingEndOriData);
-    geModelLoad->set_chunksizeinbytes(sizeof(geUnAgingEventChunk));
+    geModelLoad->fileName = Utils::PackDotInfo("unaging", "api_event");
+    geModelLoad->chunk = geUnAgingEndOriData;
+    geModelLoad->chunkSize = sizeof(geUnAgingEventChunk);
     analyzer->DispatchOptimizeData(geModelLoad);
+}
+
+TEST_F(AnalyzerUtest, DispatchOptimizeBodeBasicInfoData)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<Analyzer> analyzer;
+    MSVP_MAKE_SHARED1_BREAK(analyzer, Analyzer, nullptr);
+
+    analyzer->Init();
+    // node basic info
+    struct MsprofNodeBasicInfo nodeBasicInfoData;
+    struct MsprofAdditionalInfo geAddChunk;
+    geAddChunk.level = MSPROF_REPORT_NODE_LEVEL;
+    geAddChunk.type = MSPROF_REPORT_NODE_BASIC_INFO_TYPE;
+    std::string geAddData((CHAR_PTR)&nodeBasicInfoData, sizeof(nodeBasicInfoData));
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> geAddDesc;
+    MSVP_MAKE_SHARED0_BREAK(geAddDesc, analysis::dvvp::ProfileFileChunk);
+    geAddDesc->fileName = Utils::PackDotInfo("Additional", "node_basic_info");
+    geAddDesc->chunk = geAddData;
+    geAddDesc->chunkSize = sizeof(geAddData);
+    analyzer->DispatchOptimizeData(geAddDesc);
 }
 
 TEST_F(AnalyzerUtest, UploadProfOpDescProc_nullUploader)
@@ -228,6 +258,25 @@ TEST_F(AnalyzerUtest, UploadProfOpDescProc_validUploader)
     ProfOpDesc opDescData;
     analyzerBase->opDescInfos_.push_back(opDescData);
     analyzer->UploadProfOpDescProc();
+}
+
+TEST_F(AnalyzerUtest, OnOptimizeData)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<Analyzer> analyzer;
+    MSVP_MAKE_SHARED1_BREAK(analyzer, Analyzer, nullptr);
+    
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> profData;
+    MSVP_MAKE_SHARED0_BREAK(profData, analysis::dvvp::ProfileFileChunk);
+    // return if not inited
+    analyzer->OnOptimizeData(profData);
+    // receive null ptr or empty filename
+    analyzer->Init();
+    analyzer->OnOptimizeData(nullptr);
+    analyzer->OnOptimizeData(profData);
+    // ClearAnalyzerData
+    profData->fileName = "end_info";
+    analyzer->OnOptimizeData(profData);
 }
 
 class AnalyzerBaseUtest : public testing::Test {
@@ -287,6 +336,27 @@ TEST_F(AnalyzerBaseUtest, HandleDeviceData)
     analyzerBase->HandleDeviceData(key1, devData, time);
 }
 
+TEST_F(AnalyzerBaseUtest, EraseRtMapByStreamId)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AnalyzerBase> analyzerBase;
+    MSVP_MAKE_SHARED0_BREAK(analyzerBase, AnalyzerBase);
+
+    struct RtOpInfo opInfo = {1, 0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP, UINT16_MAX};
+    std::map<std::string, RtOpInfo> rtOpInfos;
+    // invalid key
+    rtOpInfos.insert(std::make_pair("", opInfo));
+    // valid key with no stream 0
+    rtOpInfos.insert(std::make_pair("0-1", opInfo));
+    analyzerBase->EraseRtMapByStreamId(0, rtOpInfos);
+    EXPECT_EQ(2, rtOpInfos.size()); // 2 info size
+    // valid key with stream 0
+    std::string key = "0-0"; // task 0 stream 0
+    rtOpInfos.insert(std::make_pair(key, opInfo));
+    analyzerBase->EraseRtMapByStreamId(0, rtOpInfos);
+    EXPECT_EQ(2, rtOpInfos.size()); // 2 info size
+}
+
 class AnalyzerFftsUtest : public testing::Test {
 protected:
     virtual void SetUp()
@@ -296,6 +366,15 @@ protected:
     {
     }
 };
+
+TEST_F(AnalyzerFftsUtest, IsFftsData)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AnalyzerFfts> analyzerFfts;
+    MSVP_MAKE_SHARED0_BREAK(analyzerFfts, AnalyzerFfts);
+    EXPECT_EQ(true, analyzerFfts->IsFftsData("stars_soc.data"));
+    EXPECT_EQ(false, analyzerFfts->IsFftsData("invalid.data"));
+}
 
 TEST_F(AnalyzerFftsUtest, FftsParse)
 {
@@ -310,16 +389,16 @@ TEST_F(AnalyzerFftsUtest, FftsParse)
     fftsCxtLog.sysCountHigh = 0;
     fftsCxtLog.cxtId = 0;
     fftsCxtLog.threadId = 0;
-    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> ffts;
-    MSVP_MAKE_SHARED0_BREAK(ffts, analysis::dvvp::proto::FileChunkReq);
-    ffts->set_filename("stars_soc.data");
-    ffts->set_chunk(reinterpret_cast<CHAR_PTR>(&fftsCxtLog), sizeof(fftsCxtLog));
-    ffts->set_chunksizeinbytes(sizeof(fftsCxtLog));
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> ffts;
+    MSVP_MAKE_SHARED0_BREAK(ffts, analysis::dvvp::ProfileFileChunk);
+    ffts->fileName = Utils::PackDotInfo("stars_soc", "data");
+    ffts->chunk = reinterpret_cast<CHAR_PTR>(&fftsCxtLog);
+    ffts->chunkSize = sizeof(fftsCxtLog);
     analyzerFfts->FftsParse(ffts);
     fftsCxtLog.head.logType = FFTS_SUBTASK_THREAD_END_FUNC_TYPE;
     fftsCxtLog.sysCountLow = 2000; // 2000 count high
     fftsCxtLog.sysCountHigh = 0;
-    ffts->set_chunk(reinterpret_cast<CHAR_PTR>(&fftsCxtLog), sizeof(fftsCxtLog));
+    ffts->chunk = reinterpret_cast<CHAR_PTR>(&fftsCxtLog);
     analyzerFfts->FftsParse(ffts);
 
     FftsAcsqLog fftsAcsqLog;
@@ -327,11 +406,11 @@ TEST_F(AnalyzerFftsUtest, FftsParse)
     fftsAcsqLog.streamId = 1;
     fftsAcsqLog.taskId = 1;
     fftsAcsqLog.sysCountLow = 10000; // 10000 count low
-    ffts->set_chunk(reinterpret_cast<CHAR_PTR>(&fftsAcsqLog), sizeof(fftsAcsqLog));
+    ffts->chunk = reinterpret_cast<CHAR_PTR>(&fftsAcsqLog);
     analyzerFfts->FftsParse(ffts);
     fftsAcsqLog.head.logType = ACSQ_TASK_END_FUNC_TYPE;
     fftsAcsqLog.sysCountLow = 20000; // 20000 count high
-    ffts->set_chunk(reinterpret_cast<CHAR_PTR>(&fftsAcsqLog), sizeof(fftsAcsqLog));
+    ffts->chunk = reinterpret_cast<CHAR_PTR>(&fftsAcsqLog);
     analyzerFfts->FftsParse(ffts);
 }
 
@@ -411,6 +490,32 @@ TEST_F(AnalyzerGeUtest, IsGeApiOrEventData)
     EXPECT_EQ(true, analyzerGe->IsGeApiOrEventData("aging.api_event"));
 }
 
+TEST_F(AnalyzerGeUtest, GeCompactParse)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AnalyzerGe> analyzerGe;
+    MSVP_MAKE_SHARED0_BREAK(analyzerGe, AnalyzerGe);
+
+    analyzerGe->GeCompactParse(nullptr);
+
+    struct MsprofNodeBasicInfo nodeData;
+    struct MsprofCompactInfo geUnAgingNodeBasicChunk;
+    nodeData.opName = 0;
+    nodeData.opType = 0;
+    geUnAgingNodeBasicChunk.level = MSPROF_REPORT_NODE_LEVEL;
+    geUnAgingNodeBasicChunk.data.nodeBasicInfo = nodeData;
+    geUnAgingNodeBasicChunk.threadId = 1;
+    geUnAgingNodeBasicChunk.timeStamp = 0;
+    std::string geOriData((CHAR_PTR)&geUnAgingNodeBasicChunk, sizeof(geUnAgingNodeBasicChunk));
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> geTaskDesc;
+    MSVP_MAKE_SHARED0_BREAK(geTaskDesc, analysis::dvvp::ProfileFileChunk);
+    geTaskDesc->fileName = Utils::PackDotInfo("compact", "node_basic_info");
+    geTaskDesc->chunk = geOriData;
+    geTaskDesc->chunkSize = sizeof(geUnAgingNodeBasicChunk);
+
+    analyzerGe->GeCompactParse(geTaskDesc);
+}
+
 TEST_F(AnalyzerGeUtest, IsGeCompactData)
 {
     GlobalMockObject::verify();
@@ -439,6 +544,26 @@ TEST_F(AnalyzerGeUtest, IsGeContextData)
 
     EXPECT_EQ(true, analyzerGe->IsGeContextData("aging.additional.context_id_info"));
     EXPECT_EQ(false, analyzerGe->IsGeContextData("aging.additional.context_info"));
+}
+
+TEST_F(AnalyzerGeUtest, GeGraphIdMapParse)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AnalyzerGe> analyzerGe;
+    MSVP_MAKE_SHARED0_BREAK(analyzerGe, AnalyzerGe);
+    
+    analyzerGe->GeGraphIdMapParse(nullptr);
+
+    struct MsprofAdditionalInfo geAddChunk;
+    geAddChunk.level = MSPROF_REPORT_MODEL_LEVEL;
+    geAddChunk.type = MSPROF_REPORT_MODEL_GRAPH_ID_MAP_TYPE;
+    std::string geAddData((CHAR_PTR)&geAddChunk, sizeof(geAddChunk));
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> geAddDesc;
+    MSVP_MAKE_SHARED0_BREAK(geAddDesc, analysis::dvvp::ProfileFileChunk);
+    geAddDesc->fileName = Utils::PackDotInfo("unaging.Additional", "node_basic_info");
+    geAddDesc->chunk = geAddData;
+    geAddDesc->chunkSize = sizeof(geAddData);
+    analyzerGe->GeGraphIdMapParse(geAddDesc);
 }
 
 class AnalyzerHwtsUtest : public testing::Test {
@@ -513,12 +638,11 @@ TEST_F(AnalyzerRtUtest, RtCompactParse)
     rtDataChunk.timeStamp = 1;
     rtDataChunk.threadId = 1;
     std::string rtData((CHAR_PTR)&rtDataChunk, sizeof(rtDataChunk));
-    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> rtTaskDesc;
-    MSVP_MAKE_SHARED0_BREAK(rtTaskDesc, analysis::dvvp::proto::FileChunkReq);
-    rtTaskDesc->set_filename("unaging.compact");
-    rtTaskDesc->set_tag("task_track");
-    rtTaskDesc->set_chunk(rtData);
-    rtTaskDesc->set_chunksizeinbytes(sizeof(rtDataChunk));
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> rtTaskDesc;
+    MSVP_MAKE_SHARED0_BREAK(rtTaskDesc, analysis::dvvp::ProfileFileChunk);
+    rtTaskDesc->fileName = Utils::PackDotInfo("unaging.compact", "task_track");
+    rtTaskDesc->chunk = rtData;
+    rtTaskDesc->chunkSize = sizeof(rtDataChunk);
     analyzerRt->RtCompactParse(rtTaskDesc);
 
     // rt aging
@@ -531,12 +655,30 @@ TEST_F(AnalyzerRtUtest, RtCompactParse)
     rtDataAgingChunk.timeStamp = 1;
     rtDataAgingChunk.threadId = 1;
     std::string rtAgingData((CHAR_PTR)&rtDataAgingChunk, sizeof(rtDataChunk));
-    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> rtAgingTaskDesc;
-    MSVP_MAKE_SHARED0_BREAK(rtAgingTaskDesc, analysis::dvvp::proto::FileChunkReq);
-    rtAgingTaskDesc->set_filename("aging.compact");
-    rtAgingTaskDesc->set_tag("task_track");
-    rtAgingTaskDesc->set_chunk(rtAgingData);
-    rtAgingTaskDesc->set_chunksizeinbytes(sizeof(rtDataAgingChunk));
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> rtAgingTaskDesc;
+    MSVP_MAKE_SHARED0_BREAK(rtAgingTaskDesc, analysis::dvvp::ProfileFileChunk);
+    rtAgingTaskDesc->fileName = Utils::PackDotInfo("aging.compact", "task_track");
+    rtAgingTaskDesc->chunk = rtAgingData;
+    rtAgingTaskDesc->chunkSize = sizeof(rtDataAgingChunk);
     analyzerRt->RtCompactParse(rtAgingTaskDesc);
+}
+
+class AnalyzerTsUtest : public testing::Test {
+protected:
+    virtual void SetUp()
+    {
+    }
+    virtual void TearDown()
+    {
+    }
+};
+
+TEST_F(AnalyzerTsUtest, IsTsData)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AnalyzerTs> analyzerTs;
+    MSVP_MAKE_SHARED0_BREAK(analyzerTs, AnalyzerTs);
+    EXPECT_EQ(true, analyzerTs->IsTsData("aging.compact.ts_track.data"));
+    EXPECT_EQ(false, analyzerTs->IsTsData("aging.compact.invalid"));
 }
 

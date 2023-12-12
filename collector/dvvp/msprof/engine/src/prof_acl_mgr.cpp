@@ -15,14 +15,13 @@
 #include "config/config_manager.h"
 #include "errno/error_code.h"
 #include "msprof_dlog.h"
-#include "message/codec.h"
 #include "message/prof_params.h"
 #include "msprof_callback_handler.h"
 #include "op_desc_parser.h"
 #include "platform/platform.h"
+#include "platform/platform_adapter.h"
 #include "prof_manager.h"
 #include "prof_params_adapter.h"
-#include "proto/msprofiler.pb.h"
 #include "proto/msprofiler_ext.pb.h"
 #include "transport/parser_transport.h"
 #include "transport/transport.h"
@@ -53,6 +52,7 @@ using namespace analysis::dvvp::transport;
 using namespace analysis::dvvp::common::validation;
 using namespace Analysis::Dvvp::Common::Config;
 using namespace Analysis::Dvvp::Common::Platform;
+using namespace Collector::Dvvp::Common::PlatformAdapter;
 using namespace Analysis::Dvvp::JobWrapper;
 using namespace Analysis::Dvvp::MsprofErrMgr;
 using namespace Msprof::MsprofTx;
@@ -467,6 +467,7 @@ int ProfAclMgr::ProfAclFinalize()
     }
     UploaderMgr::instance()->DelAllUploader();
     MsprofTxManager::instance()->UnInit();
+    PlatformAdapter::instance()->Uninit();
     devTasks_.clear();
 
     mode_ = WORK_MODE_OFF;
@@ -681,6 +682,7 @@ int ProfAclMgr::ProfAclModelUnSubscribe(const uint32_t modelId)
         UploaderMgr::instance()->DelAllUploader();
         mode_ = WORK_MODE_OFF;
     }
+    PlatformAdapter::instance()->Uninit();
 
     return ret;
 }
@@ -944,6 +946,9 @@ int ProfAclMgr::ProfStartAiCpuTrace(const uint64_t dataTypeConfig, const uint32_
     }
     // aicpu trace
     if (!(dataTypeConfig & PROF_AICPU_TRACE_MASK)) {
+        return PROFILING_SUCCESS;
+    }
+    if (analysis::dvvp::driver::DrvGetApiVersion() == analysis::dvvp::driver::SUPPORT_ADPROF_VERSION) {
         return PROFILING_SUCCESS;
     }
     for (uint32_t i = 0; i < devNums; i++) {

@@ -6,6 +6,7 @@
  */
 #include "prof_manager.h"
 
+#include <algorithm>
 #include "ai_drv_dev_api.h"
 #include "config/config.h"
 #include "config/config_manager.h"
@@ -472,7 +473,7 @@ bool ProfManager::CheckIfDevicesOnline(const std::string paramsDevices, std::str
             checkId = DrvGetHostPhyIdByDeviceIndex(devId);
             MSPROF_LOGI("SOC scene, devId input: %d, devId to check: %d", devId, checkId);
         }
-        auto it = find(devIds.begin(), devIds.end(), checkId);
+        auto it = std::find(devIds.begin(), devIds.end(), checkId);
         if (it == devIds.end()) {
             MSPROF_LOGE("device:%d is not online!", devId);
             MSPROF_INNER_ERROR("EK9999", "device:%d is not online!", devId);

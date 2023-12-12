@@ -30,12 +30,12 @@ TEST_F(DATA_HANDLE_TEST, Msprof_ProcessStreamFileChunk) {
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> req(new analysis::dvvp::proto::FileChunkReq);
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> req(new analysis::dvvp::ProfileFileChunk);
     analysis::dvvp::message::JobContext jobCtx;
     jobCtx.dev_id = "0";
     jobCtx.job_id = "jobId";
-    req->mutable_hdr()->set_job_ctx(jobCtx.ToString());
-    req->set_filename("Framework");
+    req->extraInfo = Utils::PackDotInfo("jobId", "0");
+    req->fileName = Utils::PackDotInfo("Framework", "");
     // UPLOAD FAILED
     EXPECT_EQ(PROFILING_FAILED, MsprofDataHandle::ProcessStreamFileChunk(req));
     // OK

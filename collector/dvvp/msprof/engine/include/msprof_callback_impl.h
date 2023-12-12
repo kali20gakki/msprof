@@ -26,7 +26,7 @@ int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len);
 int32_t MsprofSetDeviceCallbackImpl(VOID_PTR data, uint32_t len);
 
 // set device callback in dynamic profiling mode
-int32_t MsprofSetDeviceCallbackForDynProf(VOID_PTR data, uint32_t len);
+int32_t MsprofSetDeviceCallbackForDynProfImpl(VOID_PTR data, uint32_t len);
 
 // defination of MsprofReporterCallback, see prof_callback.h
 int32_t MsprofReporterCallbackImpl(uint32_t moduleId, uint32_t type, VOID_PTR data, uint32_t len);

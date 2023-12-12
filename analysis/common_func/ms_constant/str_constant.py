@@ -384,7 +384,6 @@ class StrConstant:
     ]
 
     # hccl str constant
-    SDMA_TRANSIT_ITEMS = ["Memcpy", "Reduce Inline"]
     TRANSIT_TYPE = ["RDMA", "HCCS", "PCIE", "SDMA"]
     TOTAL = "Total HCCL Operators"
     HCCS = "HCCS"
@@ -395,7 +394,7 @@ class StrConstant:
     NOTIFY_WAIT = "Notify_Wait"
     REDUCE_TBE = "Reduce TBE"
     RDMA_SEND = "RDMASend"
-    SDMA_TRANSIT_ITEMS = ["Memcpy", "Reduce Inline"]
+    SDMA_TRANSIT_ITEMS = ["Memcpy", "Reduce_Inline"]
     COMMUNICATION_TIME_INFO = "Communication Time Info"
     COMMNUNICATION_BANDWIDTH_INFO = "Communication Bandwidth Info"
     SLOW_RANK_SUGGESTION = "Slow Rank Suggestion"

@@ -11,8 +11,8 @@ TEST_F(HOST_PROF_MANAGER_TEST, ProcessStreamFileChunk)
         .will(returnValue(std::string("test")))
         .then(returnValue(std::string("def_mode")));
     
-    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> message(
-        new analysis::dvvp::proto::FileChunkReq());
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> message(
+        new analysis::dvvp::ProfileFileChunk());
     //fileChunkReq empty
     EXPECT_EQ(PROFILING_FAILED, ProfManager::ProcessStreamFileChunk(NULL, std::shared_ptr<google::protobuf::Message>()));
 
@@ -22,7 +22,7 @@ TEST_F(HOST_PROF_MANAGER_TEST, ProcessStreamFileChunk)
     analysis::dvvp::message::JobContext job_ctx;
     job_ctx.dev_id = dev_id;
     job_ctx.job_id = job_id;
-    message->mutable_hdr()->set_job_ctx(job_ctx.ToString());
+    message->extraInfo = Utils::PackDotInfo(job_id, dev_id);
     //GetTask empty
     EXPECT_EQ(PROFILING_FAILED, ProfManager::ProcessStreamFileChunk(NULL, message));
 
@@ -44,39 +44,39 @@ TEST_F(HOST_PROF_MANAGER_TEST, ProcessStreamFileChunk)
     //WriteStreamData success
     EXPECT_EQ(PROFILING_SUCCESS, ProfManager::ProcessStreamFileChunk(NULL, message));
 
-    job_ctx.dev_id = "";
-    job_ctx.job_id = job_id;
-    message->mutable_hdr()->set_job_ctx(job_ctx.ToString());
+    dev_id = "";
+    job_id = job_id;
+    message->extraInfo = Utils::PackDotInfo(job_id, dev_id);
     //GetTask empty
     EXPECT_EQ(PROFILING_FAILED, ProfManager::ProcessStreamFileChunk(NULL, message));
 
-    job_ctx.dev_id = "11111111111";
-    job_ctx.job_id = job_id;
-    message->mutable_hdr()->set_job_ctx(job_ctx.ToString());
+    dev_id = "11111111111";
+    job_id = job_id;
+    message->extraInfo = Utils::PackDotInfo(job_id, dev_id);
     //GetTask empty
     EXPECT_EQ(PROFILING_FAILED, ProfManager::ProcessStreamFileChunk(NULL, message));
 
-    job_ctx.dev_id = "-1";
-    job_ctx.job_id = job_id;
-    message->mutable_hdr()->set_job_ctx(job_ctx.ToString());
+    dev_id = "-1";
+    job_id = job_id;
+    message->extraInfo = Utils::PackDotInfo(job_id, dev_id);
     //GetTask empty
     EXPECT_EQ(PROFILING_FAILED, ProfManager::ProcessStreamFileChunk(NULL, message));
 
-    job_ctx.dev_id = "3147483647";
-    job_ctx.job_id = job_id;
-    message->mutable_hdr()->set_job_ctx(job_ctx.ToString());
+    dev_id = "3147483647";
+    job_id = job_id;
+    message->extraInfo = Utils::PackDotInfo(job_id, dev_id);
     //GetTask empty
     EXPECT_EQ(PROFILING_FAILED, ProfManager::ProcessStreamFileChunk(NULL, message));
 
-    job_ctx.dev_id = "2";
-    job_ctx.job_id = job_id;
-    message->mutable_hdr()->set_job_ctx(job_ctx.ToString());
+    dev_id = "2";
+    job_id = job_id;
+    message->extraInfo = Utils::PackDotInfo(job_id, dev_id);
     //GetTask empty
     EXPECT_EQ(PROFILING_SUCCESS, ProfManager::ProcessStreamFileChunk(NULL, message));
 
-    job_ctx.dev_id = "64";
-    job_ctx.job_id = job_id;
-    message->mutable_hdr()->set_job_ctx(job_ctx.ToString());
+    dev_id = "64";
+    job_id = job_id;
+    message->extraInfo = Utils::PackDotInfo(job_id, dev_id);
     //GetTask empty
     EXPECT_EQ(PROFILING_SUCCESS, ProfManager::ProcessStreamFileChunk(NULL, message));
 
@@ -88,11 +88,11 @@ TEST_F(HOST_PROF_MANAGER_TEST, ProcessStreamFileChunk)
         .will(returnValue(invalidJobId))
         .then(returnValue(invalidJobId))
         .then(returnValue(JobId));
-    message->mutable_hdr()->set_job_ctx(job_ctx.ToString());
+    message->extraInfo = Utils::PackDotInfo(JobId, invalidJobId);
     EXPECT_EQ(PROFILING_SUCCESS, ProfManager::ProcessStreamFileChunk(NULL, message));
 
-    message->set_datamodule(analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_MSPROF);
-    message->mutable_hdr()->set_job_ctx(job_ctx.ToString());
+    message->chunkModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_MSPROF;
+    message->extraInfo = Utils::PackDotInfo(job_id, dev_id);
     
     //ReadDevJobIDMap empty
     EXPECT_EQ(PROFILING_FAILED, ProfManager::ProcessStreamFileChunk(NULL, message));
@@ -109,8 +109,8 @@ TEST_F(HOST_PROF_MANAGER_TEST, ProcessStreamFileChunk)
     //SaveDataToLocalFiles success
     EXPECT_EQ(PROFILING_SUCCESS, ProfManager::ProcessStreamFileChunk(NULL, message));
 
-    message->set_datamodule(analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_CTRL_DATA);
-    message->mutable_hdr()->set_job_ctx(job_ctx.ToString());
+    message->chunkModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_CTRL_DATA;
+    message->extraInfo = Utils::PackDotInfo(job_id, dev_id);
     MOCKER_CPP(&analysis::dvvp::host::ProfManager::WriteCtrlDataToFile)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
@@ -130,12 +130,12 @@ TEST_F(HOST_PROF_MANAGER_TEST, ProcessStreamFileChunkSystemWide)
     MOCKER_CPP(&analysis::dvvp::host::ProfTask::GetTaskProfilingMode)
         .stubs()
         .will(returnValue(std::string(analysis::dvvp::message::PROFILING_MODE_SYSTEM_WIDE)));
-    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> message(
-        new analysis::dvvp::proto::FileChunkReq());
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> message(
+        new analysis::dvvp::ProfileFileChunk());
     analysis::dvvp::message::JobContext job_ctx;
     job_ctx.dev_id = dev_id;
     job_ctx.job_id = job_id;
-    message->mutable_hdr()->set_job_ctx(job_ctx.ToString());
+    message->extraInfo = Utils::PackDotInfo(job_id, dev_id);
     MOCKER_CPP(&analysis::dvvp::transport::FileSlice::SaveDataToLocalFiles)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));

@@ -29,7 +29,7 @@ public:
 public:
     bool IsRtCompactData(const std::string &tag) const;
     void PrintStats() const;
-    void RtCompactParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
+    void RtCompactParse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
  
 private:
     void ParseRuntimeTrackData(CONST_CHAR_PTR data, uint32_t len, bool ageFlag);

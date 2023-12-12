@@ -14,8 +14,11 @@
 #define ANALYSIS_PARSER_HOST_CANN_COMPACT_INFO_PARSER_H
 
 #include <string>
+#include <vector>
 
 #include "base_parser.h"
+#include "prof_common.h"
+#include "flip.h"
 
 namespace Analysis {
 namespace Parser {
@@ -23,34 +26,49 @@ namespace Host {
 namespace Cann {
 
 // 该类的作用是Compact数据的解析
-class CompactInfoParser : public BaseParser {
+class CompactInfoParser : public BaseParser<CompactInfoParser> {
 public:
-    explicit CompactInfoParser(const std::string &path) : BaseParser(path) {}
+    explicit CompactInfoParser(const std::string &path, const std::string &parserName)
+        : BaseParser(path, parserName) {}
     void Init(const std::vector<std::string> &filePrefix);
+    template<typename T> std::vector<std::shared_ptr<T>> GetData();
 
-private:
-    int ConsumeChunk(std::shared_ptr<void> &chunk, const std::shared_ptr<ChunkGenerator> &chunkConsumer) override;
+protected:
+    int ProduceData() override;
+
+protected:
+    std::vector<std::shared_ptr<MsprofCompactInfo>> compactData_;  // not owned
+    std::vector<std::shared_ptr<Adapter::FlipTask>> flipTaskData_;  // not owned
 };  // class CompactInfoParser
 
 // 该类的作用是node basic info数据的解析
 class NodeBasicInfoParser final : public CompactInfoParser {
 public:
-    explicit NodeBasicInfoParser(const std::string &path) : CompactInfoParser(path)
+    explicit NodeBasicInfoParser(const std::string &path) : CompactInfoParser(path, "NodeBasicInfoParser")
     {
         Init(filePrefix_);
     }
 
 private:
+    int ProduceData() override;
+
+private:
+    enum class OpType : uint8_t {
+        STATIC_OP = 0,
+        DYNAMIC_OP = 1,
+    };
     std::vector<std::string> filePrefix_ = {
-        "unaging.compact.node_basic_info.slice",
         "aging.compact.node_basic_info.slice",
+    };
+    std::vector<std::string> staticFilePrefix_ = {
+        "unaging.compact.node_basic_info.slice",
     };
 };  // class NodeBasicInfoParser
 
 // 该类的作用是memcpy info数据的解析
 class MemcpyInfoParser final : public CompactInfoParser {
 public:
-    explicit MemcpyInfoParser(const std::string &path) : CompactInfoParser(path)
+    explicit MemcpyInfoParser(const std::string &path) : CompactInfoParser(path, "MemcpyInfoParser")
     {
         Init(filePrefix_);
     }
@@ -65,10 +83,13 @@ private:
 // 该类的作用是task track数据的解析
 class TaskTrackParser final : public CompactInfoParser {
 public:
-    explicit TaskTrackParser(const std::string &path);
+    explicit TaskTrackParser(const std::string &path) : CompactInfoParser(path, "TaskTrackParser")
+    {
+        Init(filePrefix_);
+    }
 
 private:
-    int ProduceChunk() override;
+    int ProduceData() override;
 
 private:
     std::vector<std::string> filePrefix_ = {

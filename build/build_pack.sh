@@ -53,7 +53,23 @@ function bep_env_init() {
 
 bep_env_init
 
-cd ${TOP_DIR}/build
-cmake ../cmake/superbuild/ -DMSPROF_BUILD_TYPE=${BUILD_TYPE}
-make -j64
+function collector_compile() {
+    cd ${TOP_DIR}/build
+    cmake ../cmake/superbuild/ -DMSPROF_BUILD_TYPE=${BUILD_TYPE}
+    make -j64
+}
+
+function analysis_compile() {
+    mkdir -p ${TOP_DIR}/analysis/csrc/build
+    cd ${TOP_DIR}/analysis/csrc/build
+    cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${TOP_DIR}/analysis
+    make -j64 && make clean
+    if [ $? -ne 0 ]; then
+        echo "analysis_compile failed"
+        exit 1
+    fi
+}
+
+collector_compile
 bash ${TOP_DIR}/scripts/create_run_package.sh ${VERSION} ${PACKAGE_TYPE}
+analysis_compile

@@ -13,6 +13,7 @@
 #include "log.h"
 
 #include <iostream>
+#include <sys/syscall.h>
 #include "error_code.h"
 
 namespace Analysis {
@@ -61,7 +62,8 @@ void Log::LogMsg(const std::string& message, const std::string &level,
                  const std::string &fileName, const uint32_t &line)
 {
     std::ostringstream oss;
-    oss << GetTime() << " " << level << " [" << pid_ << "]" << " [" << gettid() << "]";
+    auto tid = syscall(SYS_gettid);
+    oss << GetTime() << " " << level << " [" << pid_ << "]" << " [" << tid << "]";
     oss << " [" << fileName << ":" << line << "] " << message << "\n";
     std::lock_guard<std::mutex> lock(logMutex_);
     logWriter_.WriteText(oss.str());

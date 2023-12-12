@@ -7,9 +7,7 @@
 #include "analyzer_hwts.h"
 #include "data_struct.h"
 #include "errno/error_code.h"
-#include "message/codec.h"
 #include "msprof_dlog.h"
-#include "proto/msprofiler.pb.h"
 #include "toolchain/prof_acl_api.h"
 namespace Analysis {
 namespace Dvvp {
@@ -21,38 +19,6 @@ bool AnalyzerHwts::IsHwtsData(const std::string &fileName)
         return true;
     }
     return false;
-}
-
-void AnalyzerHwts::Parse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
-{
-    if (message == nullptr) {
-        return;
-    }
-    totalBytes_ += static_cast<uint64_t>(message->chunksizeinbytes());
-    ParseHwtsData(message->chunk().c_str(), message->chunksizeinbytes());
-}
-
-void AnalyzerHwts::ParseHwtsData(CONST_CHAR_PTR data, uint32_t len)
-{
-    AppendToBufferedData(data, len);
-    uint32_t offset = 0;
-    while (dataPtr_ != nullptr && offset < dataLen_) {
-        uint32_t remainingLen = dataLen_ - offset;
-        uint8_t rptType = GetRptType(dataPtr_ + offset, remainingLen);
-        if (remainingLen < HWTS_DATA_SIZE) {
-            // remaining is less then HWTS_DATA_SIZE, cache it to buffer
-            MSPROF_LOGI("Hwts remains %u bytes unparsed, cache it", remainingLen);
-            break;
-        }
-        if (rptType == HWTS_TASK_START_TYPE || rptType == HWTS_TASK_END_TYPE) {
-            ParseTaskStartEndData(dataPtr_ + offset, dataLen_ - offset, rptType);
-        }
-        offset += HWTS_DATA_SIZE;
-    }
-    MSPROF_LOGI("Finish parsing hwts data, offset: %u, total len: %u, from buffered len: %u, "
-                "op time collected %u, draft %u",
-                offset, dataLen_, dataLen_ - len, opTimes_.size(), opTimeDrafts_.size());
-    BufferRemainingData(offset);
 }
 
 uint8_t AnalyzerHwts::GetRptType(CONST_CHAR_PTR data, uint32_t len)
@@ -139,13 +105,13 @@ void AnalyzerHwts::PrintStats() const
                  analyzedBytes_, totalBytes_, totalHwtsTimes_, totalHwtsMerges_);
 }
 
-void AnalyzerHwts::HwtsParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+void AnalyzerHwts::HwtsParse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
 {
-    if (message == nullptr) {
+    if (fileChunkReq == nullptr) {
         return;
     }
-    totalBytes_ += message->chunksizeinbytes();
-    ParseOptimizeHwtsData(message->chunk().c_str(), message->chunksizeinbytes());
+    totalBytes_ += fileChunkReq->chunkSize;
+    ParseOptimizeHwtsData(fileChunkReq->chunk.c_str(), fileChunkReq->chunkSize);
 }
 
 void AnalyzerHwts::ParseOptimizeHwtsData(CONST_CHAR_PTR data, uint32_t len)

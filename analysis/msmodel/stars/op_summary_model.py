@@ -10,6 +10,7 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.path_manager import PathManager
+from common_func.profiling_scene import ProfilingScene
 from msmodel.interface.ianalysis_model import IAnalysisModel
 from msmodel.interface.view_model import ViewModel
 from msmodel.stars.acsq_task_model import AcsqTaskModel
@@ -131,7 +132,10 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
         if "model_id" in ge_summary_headers and "model_id" in task_time_headers:
             inner_join_condition += " and a.model_id=b.model_id"
         if "index_id" in ge_summary_headers and "index_id" in task_time_headers:
-            inner_join_condition += " and (a.index_id=b.index_id or b.index_id=0)"
+            if not ProfilingScene().is_all_export():
+                inner_join_condition += " and (a.index_id=b.index_id or b.index_id=0)"
+            else:
+                inner_join_condition += " "
         sql = "SELECT a.stream_id, op_name, b.task_type, start_time, duration_time, " \
               "start_time+duration_time as end_time FROM {0} a INNER JOIN {1} b " \
               "on a.stream_id=b.stream_id and a.task_id=b.task_id and a.batch_id=b.batch_id " \

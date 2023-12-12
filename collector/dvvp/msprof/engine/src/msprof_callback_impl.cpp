@@ -97,7 +97,7 @@ int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len)
         if (DynProfMgr::instance()->IsDynProfStarted()) {
             return MSPROF_ERROR_NONE;
         }
-        if (ProfApiPlugin::instance()->MsprofProfRegDeviceStateCallback(MsprofSetDeviceCallbackForDynProf) != 0) {
+        if (ProfApiPlugin::instance()->MsprofProfRegDeviceStateCallback(MsprofSetDeviceCallbackForDynProfImpl) != 0) {
             MSPROF_LOGE("Dynamic profiling failed to register device state callback.");
             return MSPROF_ERROR;
         }
@@ -184,11 +184,18 @@ int32_t MsprofSetDeviceCallbackImpl(VOID_PTR data, uint32_t len)
 }
 
 // set device callback for dynamic profiling
-int32_t MsprofSetDeviceCallbackForDynProf(VOID_PTR data, uint32_t len)
+int32_t MsprofSetDeviceCallbackForDynProfImpl(VOID_PTR data, uint32_t len)
 {
-    ProfSetDevPara *setCfg = reinterpret_cast<ProfSetDevPara *>(data);
-    DynProfMgr::instance()->SetDeviceInfo(setCfg);
-
+    if (len != sizeof(ProfSetDevPara)) {
+        MSPROF_LOGE("MsprofSetDeviceCallbackForDynProfImpl, len:%u is invalid", len);
+        MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceCallbackForDynProfImpl, len:%u is invalid", len);
+        return MSPROF_ERROR;
+    }
+    if (data == nullptr) {
+        MSPROF_LOGE("MsprofSetDeviceCallbackForDynProfImpl, data is null");
+        MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceCallbackForDynProfImpl, data is null");
+        return MSPROF_ERROR;
+    }
     int32_t ret = RegisterReporterCallback();
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("MsprofSetDeviceCallbackImpl, RegisterReporterCallback failed, ret=%d", ret);
@@ -200,6 +207,8 @@ int32_t MsprofSetDeviceCallbackForDynProf(VOID_PTR data, uint32_t len)
         MSPROF_LOGE("Dynamic profiling CommandHandleProfInit failed, ret=%d", ret);
         return MSPROF_ERROR;
     }
+    ProfSetDevPara *setCfg = reinterpret_cast<ProfSetDevPara *>(data);
+    DynProfMgr::instance()->SaveDevicesInfo(*setCfg);
 
     return MSPROF_ERROR_NONE;
 }

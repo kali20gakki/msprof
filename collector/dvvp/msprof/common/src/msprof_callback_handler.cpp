@@ -69,7 +69,16 @@ void MsprofCallbackHandler::ForceFlush(const std::string &devId)
     }
 }
 
-int MsprofCallbackHandler::SendData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk)
+void MsprofCallbackHandler::FlushDynProfCachedMsg(const std::string &devId)
+{
+    if (reporter_ == nullptr) {
+        return;
+    }
+    MSPROF_LOGI("FlushDynProfCachedMsg, module: %s", module_.c_str());
+    reporter_->DumpDynProfCachedMsg(devId);
+}
+
+int MsprofCallbackHandler::SendData(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk)
 {
     int ret = HandleMsprofRequest(MSPROF_REPORTER_INIT, nullptr, 0);
     if (ret == PROFILING_SUCCESS) {
@@ -146,7 +155,7 @@ int MsprofCallbackHandler::StartReporter()
         return PROFILING_SUCCESS;
     }
     // In dynamic profiling mode, initializing ge before initializing profiling.
-    if (!Msprofiler::Api::ProfAclMgr::instance()->IsInited() && !DynProfMgr::instance()->IsDynProfStarted()) {
+    if (!Msprofiler::Api::ProfAclMgr::instance()->IsInited() && !Utils::IsDynProfMode()) {
         MSPROF_LOGE("Profiling is not started, reporter can not be inited");
         return PROFILING_FAILED;
     }
@@ -178,7 +187,7 @@ int MsprofCallbackHandler::StopReporter()
         return PROFILING_FAILED;
     }
     profReport->Flush();
-    if (DynProfMgr::instance()->IsDynProfStarted()) {
+    if (Utils::IsDynProfMode()) {
         return PROFILING_SUCCESS;
     }
     int ret = reporter_->Stop();
@@ -248,7 +257,7 @@ void FlushModule(const std::string &devId)
     MsprofCallbackHandler::reporters_[MSPROF_MODULE_DATA_PREPROCESS].ForceFlush(devId);
 }
 
-int SendAiCpuData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk)
+int SendAiCpuData(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk)
 {
     return MsprofCallbackHandler::reporters_[MSPROF_MODULE_DATA_PREPROCESS].SendData(fileChunk);
 }

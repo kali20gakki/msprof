@@ -142,10 +142,10 @@ TEST_F(PROF_STAT_FILE_HANDLER_TEST, SendData) {
     EXPECT_EQ(PROFILING_FAILED, statHandler.Init());
     EXPECT_EQ(PROFILING_SUCCESS, statHandler.Init());
 
-    MOCKER_CPP(&analysis::dvvp::transport::Uploader::UploadData)
+    MOCKER_CPP(&analysis::dvvp::transport::Uploader::UploadData,
+        int(analysis::dvvp::transport::Uploader::*)(const void *, int))
         .stubs()
-        .will(returnValue(0));
-
+        .will(returnValue(PROFILING_SUCCESS));
     std::string buf("test");
 
     statHandler.SendData(nullptr, 0);

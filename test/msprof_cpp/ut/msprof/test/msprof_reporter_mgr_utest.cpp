@@ -130,7 +130,9 @@ TEST_F(MsprofReporterMgrUtest, StopReporters)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&UploaderMgr::UploadData)
+    MOCKER_CPP(&UploaderMgr::UploadData,
+        int(analysis::dvvp::transport::UploaderMgr::*)
+        (const std::string&, SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk>))
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));

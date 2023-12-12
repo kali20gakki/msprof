@@ -83,7 +83,8 @@ TEST_F(UPLOADER_TEST, run_no_data) {
     std::shared_ptr<analysis::dvvp::transport::Uploader> uploader(
         new analysis::dvvp::transport::Uploader(_transport));
 
-    MOCKER_CPP_VIRTUAL(_transport.get(), &analysis::dvvp::transport::HDCTransport::SendBuffer)
+    MOCKER_CPP_VIRTUAL(*_transport.get(), &analysis::dvvp::transport::HDCTransport::SendBuffer,
+    int(analysis::dvvp::transport::HDCTransport::*)(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk>))
         .stubs()
         .will(returnValue(PROFILING_FAILED));
 
@@ -102,12 +103,12 @@ TEST_F(UPLOADER_TEST, run) {
     std::shared_ptr<analysis::dvvp::transport::Uploader> uploader(
         new analysis::dvvp::transport::Uploader(_transport));
 
-    MOCKER_CPP_VIRTUAL(_transport.get(), &analysis::dvvp::transport::HDCTransport::SendBuffer)
+    MOCKER_CPP_VIRTUAL(*_transport.get(), &analysis::dvvp::transport::HDCTransport::SendBuffer,
+    int(analysis::dvvp::transport::HDCTransport::*)(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk>))
         .stubs()
         .will(returnValue(PROFILING_FAILED));
-
-    std::shared_ptr<std::string> buffer_p(new std::string("123456"));
-
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> buffer_p(
+        new analysis::dvvp::ProfileFileChunk());
     EXPECT_EQ(PROFILING_SUCCESS, uploader->Init());
     uploader->queue_->Push(buffer_p);
     uploader->queue_->Push(buffer_p);

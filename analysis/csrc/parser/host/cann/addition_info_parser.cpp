@@ -21,43 +21,16 @@ namespace Parser {
 namespace Host {
 namespace Cann {
 using namespace Analysis::Utils;
-
-void AdditionInfoParser::Init(const std::vector<std::string> &filePrefix)
+namespace {
+std::shared_ptr<ConcatTensorInfo> CreateConcatTensorInfo(MsprofAdditionalInfo *additionalInfo)
 {
-    chunkProducer_ = MakeShared<ChunkGenerator>(sizeof(MsprofAdditionalInfo), path_, filePrefix);
-    chunkConsumers_ = {
-        {typeid(MsprofAdditionalInfo).hash_code(), chunkProducer_},
-    };
-}
-
-int AdditionInfoParser::ConsumeChunk(std::shared_ptr<void> &chunk, const std::shared_ptr<ChunkGenerator> &chunkConsumer)
-{
-    chunk = chunkConsumer->Pop();
-    if (!chunk) {
-        ERROR("chunk is null.");
-        return ANALYSIS_ERROR;
+    if (!additionalInfo) {
+        ERROR("Additional info is null.");
+        return nullptr;
     }
-    auto data = ChunkGenerator::ToObj<MsprofAdditionalInfo>(chunk);
-    if (data->magicNumber != MSPROF_DATA_HEAD_MAGIC_NUM) {
-        ERROR("Check 5A5A failed in place &.", chunkConsumer->Size());
-        return ANALYSIS_ERROR;
-    }
-    return ANALYSIS_OK;
-}
-
-TensorInfoParser::TensorInfoParser(const std::string &path) : AdditionInfoParser(path)
-{
-    chunkProducer_ = MakeShared<ChunkGenerator>(sizeof(MsprofAdditionalInfo), path_, filePrefix_);
-    chunkConsumers_ = {
-        {typeid(ConcatTensorInfo).hash_code(), MakeShared<ChunkGenerator>(sizeof(ConcatTensorInfo))},
-    };
-}
-
-std::shared_ptr<ConcatTensorInfo> TensorInfoParser::CreateConcatTensorInfo(
-    const std::shared_ptr<MsprofAdditionalInfo> &additionalInfo)
-{
-    std::shared_ptr<ConcatTensorInfo> concatTensorInfo = MakeShared<ConcatTensorInfo>();
-    if (!concatTensorInfo || !additionalInfo) {
+    auto concatTensorInfo = MakeShared<ConcatTensorInfo>();
+    if (!concatTensorInfo) {
+        ERROR("New concat tensor failed.");
         return nullptr;
     }
     concatTensorInfo->level = additionalInfo->level;
@@ -65,7 +38,7 @@ std::shared_ptr<ConcatTensorInfo> TensorInfoParser::CreateConcatTensorInfo(
     concatTensorInfo->threadId = additionalInfo->threadId;
     concatTensorInfo->dataLen = additionalInfo->dataLen;
     concatTensorInfo->timeStamp = additionalInfo->timeStamp;
-    auto tensorInfo = ReinterpretConvert<MsprofTensorInfo*, uint8_t*>(additionalInfo->data);
+    auto tensorInfo = ReinterpretConvert<MsprofTensorInfo*>(additionalInfo->data);
     concatTensorInfo->opName = tensorInfo->opName;
     concatTensorInfo->tensorNum = tensorInfo->tensorNum;
     for (uint32_t i = 0; i < tensorInfo->tensorNum; ++i) {
@@ -73,44 +46,95 @@ std::shared_ptr<ConcatTensorInfo> TensorInfoParser::CreateConcatTensorInfo(
     }
     return concatTensorInfo;
 }
+}  // namespace
 
-int TensorInfoParser::ProduceChunk()
+void AdditionInfoParser::Init(const std::vector<std::string> &filePrefix)
 {
-    if (chunkProducer_->ReadChunk() != ANALYSIS_OK) {
-        ERROR("Read Chunk failed.");
+    chunkProducer_ = MakeShared<ChunkGenerator>(sizeof(MsprofAdditionalInfo), path_, filePrefix);
+}
+
+template<>
+std::vector<std::shared_ptr<MsprofAdditionalInfo>> AdditionInfoParser::GetData()
+{
+    return additionalData_;
+}
+
+template<>
+std::vector<std::shared_ptr<ConcatTensorInfo>> AdditionInfoParser::GetData()
+{
+    return concatTensorData_;
+}
+
+int AdditionInfoParser::ProduceData()
+{
+    if (!Reserve(additionalData_, chunkProducer_->Size())) {
+        ERROR("%: Reserve data failed", parserName_);
         return ANALYSIS_ERROR;
     }
-    auto &chunkConsumer = chunkConsumers_[typeid(ConcatTensorInfo).hash_code()];
-    auto currTensorInfo = ChunkGenerator::ToObj<MsprofAdditionalInfo>(chunkProducer_->Pop());
-    while (currTensorInfo) {
-        std::shared_ptr<ConcatTensorInfo> concatTensor = CreateConcatTensorInfo(currTensorInfo);
-        if (!concatTensor) {
-            ERROR("ConcatTensorInfo make_shared failed.");
+    while (!chunkProducer_->Empty()) {
+        auto additionalInfo = ReinterpretConvert<MsprofAdditionalInfo*>(chunkProducer_->Pop());
+        if (!additionalInfo) {
+            ERROR("%: Pop chunk failed.", parserName_);
             return ANALYSIS_ERROR;
         }
-        while (currTensorInfo) {
-            auto nextTensorInfo = ChunkGenerator::ToObj<MsprofAdditionalInfo>(chunkProducer_->Pop());
-            currTensorInfo = nextTensorInfo;
-            if (!nextTensorInfo) {
-                break;
-            }
-            auto nextTensor = ReinterpretConvert<MsprofTensorInfo*, uint8_t*>(nextTensorInfo->data);
-            if (nextTensor->opName != concatTensor->opName ||
-                    nextTensorInfo->timeStamp != concatTensor->timeStamp ||
-                    nextTensorInfo->threadId != concatTensor->threadId) {
-                break;
-            }
-            // tensor info拼接
-            if (concatTensor->tensorNum + nextTensor->tensorNum > TENSOR_DATA_MAX_NUM) {
-                ERROR("Concat tensor info length > %", TENSOR_DATA_MAX_NUM);
-                continue;
-            }
-            for (uint32_t i = 0; i < nextTensor->tensorNum; ++i) {
-                concatTensor->tensorData[concatTensor->tensorNum] = nextTensor->tensorData[i];
-                concatTensor->tensorNum += 1;
-            }
+        if (additionalInfo->magicNumber != MSPROF_DATA_HEAD_MAGIC_NUM) {
+            ERROR("%: The last %th data check failed.", parserName_, chunkProducer_->Size());
+            delete additionalInfo;
+            continue;
         }
-        chunkConsumer->Push(ChunkGenerator::ToChunk<ConcatTensorInfo>(concatTensor));
+        additionalData_.emplace_back(std::shared_ptr<MsprofAdditionalInfo>(additionalInfo));
+    }
+    return ANALYSIS_OK;
+}
+
+int TensorInfoParser::ProduceData()
+{
+    if (!Reserve(concatTensorData_, chunkProducer_->Size())) {
+        ERROR("%: Reserve data failed", parserName_);
+        return ANALYSIS_ERROR;
+    }
+    std::shared_ptr<ConcatTensorInfo> concatTensor = nullptr;
+    while (!chunkProducer_->Empty()) {
+        auto currTensorInfo = ReinterpretConvert<MsprofAdditionalInfo*>(chunkProducer_->Pop());
+        if (!currTensorInfo) {
+            ERROR("%: Pop chunk failed.", parserName_);
+            return ANALYSIS_ERROR;
+        }
+        if (currTensorInfo->magicNumber != MSPROF_DATA_HEAD_MAGIC_NUM) {
+            ERROR("%: The last %th data check failed.", parserName_, chunkProducer_->Size());
+            delete currTensorInfo;
+            continue;
+        }
+        auto currTensor = ReinterpretConvert<MsprofTensorInfo*>(currTensorInfo->data);
+        if (!concatTensor ||
+                currTensor->opName != concatTensor->opName ||
+                currTensorInfo->timeStamp != concatTensor->timeStamp ||
+                currTensorInfo->threadId != concatTensor->threadId) {
+            if (concatTensor) {
+                concatTensorData_.emplace_back(concatTensor);
+            }
+            concatTensor = CreateConcatTensorInfo(currTensorInfo);
+            delete currTensorInfo;
+            if (!concatTensor) {
+                ERROR("%: Create concat tensor failed.");
+                return ANALYSIS_ERROR;
+            }
+            continue;
+        }
+        // tensor info拼接
+        if (concatTensor->tensorNum + currTensor->tensorNum > TENSOR_DATA_MAX_NUM) {
+            ERROR("Concat tensor info length > %", TENSOR_DATA_MAX_NUM);
+            delete currTensorInfo;
+            continue;
+        }
+        for (uint32_t i = 0; i < currTensor->tensorNum; ++i) {
+            concatTensor->tensorData[concatTensor->tensorNum] = currTensor->tensorData[i];
+            concatTensor->tensorNum += 1;
+        }
+        delete currTensorInfo;
+    }
+    if (concatTensor) {
+        concatTensorData_.emplace_back(concatTensor);
     }
     return ANALYSIS_OK;
 }

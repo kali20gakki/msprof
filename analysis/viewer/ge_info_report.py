@@ -63,7 +63,7 @@ def get_ge_model_name_dict(project_path: str) -> dict:
     """
     get ge model name dict
     """
-    model_view = ViewModel(project_path, DBNameConstant.DB_GE_MODEL_INFO, [DBNameConstant.TABLE_GE_MODEL_LOAD])
+    model_view = ViewModel(project_path, DBNameConstant.DB_GE_MODEL_INFO, [DBNameConstant.TABLE_MODEL_NAME])
     try:
         if not model_view.check_table():
             model_view.finalize()
@@ -71,7 +71,7 @@ def get_ge_model_name_dict(project_path: str) -> dict:
     except sqlite3.Error as err:
         logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
         return {}
-    sql = "select model_id, model_name from {}".format(DBNameConstant.TABLE_GE_MODEL_LOAD)
+    sql = "select model_id, model_name from {}".format(DBNameConstant.TABLE_MODEL_NAME)
     data = model_view.get_sql_data(sql)
     hash_dict = get_ge_hash_dict(project_path)
     model_name_list = []

@@ -39,13 +39,12 @@ public:
 
 public:
     int NotifyFileDoneForDevice(const std::string &fileName, const std::string &devId) const;
-    int WriteStreamData(CONST_VOID_PTR data, unsigned int dataLen) const;
+    int WriteStreamData(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk) const;
     void SetIsFinished(bool finished);
     bool GetIsFinished() const;
     int SendMsgAndHandleResponse(int devId, SHARED_PTR_ALIA<google::protobuf::Message> msg);
 
 private:
-    void StoreResultStatus();
     void WriteDone();
 
 private:
@@ -58,8 +57,6 @@ private:
     std::condition_variable cv_;
     std::mutex devicesMtx_;
     std::map<std::string, SHARED_PTR_ALIA<Device> > devicesMap_;
-
-    SHARED_PTR_ALIA<analysis::dvvp::message::Status> taskStatus_;
 
     bool isInited_;
     std::string startTime_;
@@ -75,7 +72,6 @@ private:
     int CreateCollectionTimeInfo(std::string collectionTime, bool isStartTime);
     void StartDevices(const std::vector<std::string> &devicesVec);
     void ProcessDefMode();
-    void FinishJobRsp(SHARED_PTR_ALIA<analysis::dvvp::message::Status> taskStatus);
     std::string GetDevicesStr(const std::vector<std::string> &events);
     void Process(analysis::dvvp::message::StatusInfo &statusInfo);
 };

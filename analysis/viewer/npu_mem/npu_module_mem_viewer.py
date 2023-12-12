@@ -54,7 +54,7 @@ class NpuModuleMemViewer:
                                        InfoConfReader().time_from_host_syscnt(int(datum.syscnt),
                                                                               NumberConstant.MICRO_SECOND),
                                        use_us=True)),
-                               datum.total_size,
+                               round(datum.total_size / NumberConstant.KILOBYTE, NumberConstant.ROUND_THREE_DECIMAL),
                                datum.device_type
                                ])
         return self._configs.get(StrConstant.CONFIG_HEADERS), self._data, len(self._data)

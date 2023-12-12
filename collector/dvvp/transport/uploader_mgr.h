@@ -45,7 +45,8 @@ public:
     void DelAllUploader();
 
     int UploadData(const std::string &id, CONST_VOID_PTR data, uint32_t dataLen);
-    int UploadFileData(const std::string &id,
+    int UploadData(const std::string &id, SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
+    int UploadCtrlFileData(const std::string &id,
                        const std::string &data,
                        const struct FileDataParams &fileDataParams,
                        SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx);

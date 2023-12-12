@@ -7,7 +7,7 @@ TOP_DIR=${CUR_DIR}/..
 TEMP_OUTPUT=${TOP_DIR}/build/output
 MSPROF_TEMP_DIR=${TOP_DIR}/../output/msprof
 COMMON_DIR="common_script"
-mkdir ${MSPROF_TEMP_DIR}
+mkdir -p ${MSPROF_TEMP_DIR}
 mkdir ${MSPROF_TEMP_DIR}/${COMMON_DIR}
 
 # makeself is tool for compiling run package

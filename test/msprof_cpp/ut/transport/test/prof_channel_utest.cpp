@@ -39,7 +39,9 @@ TEST_F(TRANSPORT_PROF_CHANNELREADER_UTEST, Execute) {
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(64));
 
-    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::UploadData)
+    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::UploadData,
+        int(analysis::dvvp::transport::UploaderMgr::*)
+        (const std::string&, SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk>))
         .stubs()
         .will(returnValue(PROFILING_FAILED));
 

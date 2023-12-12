@@ -145,17 +145,14 @@ TEST_F(COMMON_FILE_SLICE_TEST, SaveDataToLocalFiles) {
     std::string dir = "/home/test";
     std::string limit = "500MB";
     
-    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> message(
-        new analysis::dvvp::proto::FileChunkReq());
-    std::shared_ptr<google::protobuf::Message> fileChunkReq = message;
+    std::shared_ptr<analysis::dvvp::ProfileFileChunk> message(
+        new analysis::dvvp::ProfileFileChunk());
   
-    message->mutable_hdr()->set_job_ctx("fake_job_ctx_json");
-    message->set_filename("");
-    message->set_offset(-1); 
-    message->set_chunk("123", 3);
-    message->set_chunksizeinbytes(3);
-    message->set_islastchunk(false);
-    message->set_needack(false);
+    message->fileName = "";
+    message->offset = -1;
+    message->chunk = std::string("123", 3);
+    message->chunkSize = 3;
+    message->isLastChunk = false;
 
     std::string invalidHomeDir = "";
     std::string homeDir = "/home/test";
@@ -177,7 +174,7 @@ TEST_F(COMMON_FILE_SLICE_TEST, SaveDataToLocalFiles) {
     EXPECT_EQ(PROFILING_FAILED, ret);
     
     //ide_replace_wave_with_home is invalid
-    message->set_filename("__PROFILER_HOST_ST__");
+    message->fileName = Utils::PackDotInfo("__PROFILER_HOST_ST__", "");
     ret = wfTransport.SaveDataToLocalFiles(message);
     EXPECT_EQ(PROFILING_FAILED, ret);
 
@@ -186,7 +183,6 @@ TEST_F(COMMON_FILE_SLICE_TEST, SaveDataToLocalFiles) {
     EXPECT_EQ(PROFILING_FAILED, ret);
 
     //fake job_ctx_json
-    message->mutable_hdr()->set_job_ctx("fake_job_ctx_json");
     ret = wfTransport.SaveDataToLocalFiles(message);
     EXPECT_EQ(PROFILING_FAILED, ret);
 
@@ -211,12 +207,12 @@ TEST_F(COMMON_FILE_SLICE_TEST, SaveDataToLocalFiles) {
     analysis::dvvp::message::JobContext job_ctx;
     job_ctx.job_id = "2";
     job_ctx.dev_id = "1";
-    message->mutable_hdr()->set_job_ctx(job_ctx.ToString());
+    message->extraInfo = Utils::PackDotInfo("2", "1");
     ret = wfTransport.SaveDataToLocalFiles(message);
     EXPECT_EQ(PROFILING_FAILED, ret);
 
     //SetChunkTime return Failed
-    message->set_filename("/home/test/test.log");
+    message->fileName = Utils::PackDotInfo("/home/test/test.log", "");
     ret = wfTransport.SaveDataToLocalFiles(message);
     EXPECT_EQ(PROFILING_FAILED, ret);    
 

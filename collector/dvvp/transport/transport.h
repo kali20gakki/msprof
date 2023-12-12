@@ -49,6 +49,7 @@ public:
                          const std::string &destDir = "");
     virtual int SendFileChunk(const std::string &jobCtx, FileChunk &chunk);
     virtual int SendBuffer(CONST_VOID_PTR buffer, int length) = 0;
+    virtual int SendBuffer(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq) = 0;
     virtual int CloseSession() = 0;
     virtual void WriteDone() = 0;
 
@@ -59,6 +60,7 @@ public:
 class AdxTransport : public ITransport {
 public:
     int SendBuffer(CONST_VOID_PTR buffer, int length) override = 0;
+    int SendBuffer(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq) override = 0;
     int CloseSession() override = 0;
     void WriteDone() override {}
     virtual int SendAdxBuffer(IdeBuffT out, int outLen) = 0;

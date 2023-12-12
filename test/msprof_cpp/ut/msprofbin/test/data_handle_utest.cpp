@@ -43,19 +43,6 @@ TEST_F(DATA_HANDLE_UTEST, ReceiveStreamData) {
     //success
     EXPECT_EQ(PROFILING_FAILED, Analysis::Dvvp::Msprof::HdcTransportDataHandle::ReceiveStreamData((void*)encoded.c_str(), encoded.size()));
 
-    // filechunk meessage
-    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> fileChunkMessage(
-    new analysis::dvvp::proto::FileChunkReq());
-    std::string fileChunkEncoded = analysis::dvvp::message::EncodeMessage(fileChunkMessage);
-
-    EXPECT_EQ(PROFILING_FAILED, Analysis::Dvvp::Msprof::HdcTransportDataHandle::ReceiveStreamData((void*)fileChunkEncoded.c_str(), fileChunkEncoded.size()));
-
-                                                               
-    fileChunkMessage->mutable_hdr()->set_job_ctx(jobCtx->ToString());    
-    fileChunkMessage->set_datamodule(FileChunkDataModule::PROFILING_IS_FROM_MSPROF);
-    fileChunkEncoded = analysis::dvvp::message::EncodeMessage(fileChunkMessage);
-    EXPECT_EQ(PROFILING_FAILED, Analysis::Dvvp::Msprof::HdcTransportDataHandle::ReceiveStreamData((void*)fileChunkEncoded.c_str(), fileChunkEncoded.size()));
-
     // FinishJobRsp messsage 
     std::shared_ptr<analysis::dvvp::proto::FinishJobRsp> finishJobRsp(
     new analysis::dvvp::proto::FinishJobRsp());

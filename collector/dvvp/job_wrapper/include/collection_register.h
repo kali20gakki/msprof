@@ -33,6 +33,7 @@ enum ProfCollectionJobE {
     NPU_MEM_COLLECTION_JOB,
     NPU_MODULE_MEM_COLLECTION_JOB,
     LPM_FREQ_COLLECTION_JOB,
+    AICPU_COLLECTION_JOB,
     // ts
     TS_CPU_DRV_COLLECTION_JOB,
     TS_TRACK_DRV_COLLECTION_JOB,
@@ -83,6 +84,7 @@ static const std::string COLLECTION_JOB_FILENAME[NR_MAX_COLLECTION_JOB] = {
     "data/npu_mem.data",
     "data/npu_module_mem.data",
     "data/lpmFreqConv.data",
+    "data/aging.additional.data_preprocess",
     "data/tscpu.data",
     "data/ts_track.data",
     "data/ts_track.aiv_data",

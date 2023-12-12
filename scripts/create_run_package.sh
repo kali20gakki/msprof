@@ -80,6 +80,7 @@ function create_temp_dir() {
 			cp -r ${TEMP_OUTPUT}/stub ${temp_dir}
 			cp ${TEMP_OUTPUT}/bin/msprof ${temp_dir}
 			cp -r ${TOP_DIR}/analysis ${temp_dir}
+			rm -rf ${temp_dir}/analysis/csrc
 
 			copy_script ${MAIN_SPC} ${temp_dir}
 			copy_script ${BACKUP} ${temp_dir}
@@ -97,6 +98,7 @@ function create_temp_dir() {
 			cp -r ${TEMP_OUTPUT}/stub ${temp_dir}
 			cp ${TEMP_OUTPUT}/bin/msprof ${temp_dir}
 			cp -r ${TOP_DIR}/analysis ${temp_dir}
+			rm -rf ${temp_dir}/analysis/csrc
 	fi
 	copy_script ${INSTALL_SCRIPT} ${temp_dir}
 	copy_script ${UTILS_SCRIPT} ${temp_dir}

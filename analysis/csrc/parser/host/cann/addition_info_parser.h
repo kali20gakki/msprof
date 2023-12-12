@@ -24,19 +24,25 @@ namespace Parser {
 namespace Host {
 namespace Cann {
 // 该类的作用是Addition数据的解析
-class AdditionInfoParser : public BaseParser {
+class AdditionInfoParser : public BaseParser<AdditionInfoParser> {
 public:
-    explicit AdditionInfoParser(const std::string &path) : BaseParser(path) {}
+    explicit AdditionInfoParser(const std::string &path, const std::string &parserName)
+        : BaseParser(path, parserName) {}
     void Init(const std::vector<std::string> &filePrefix);
+    template<typename T> std::vector<std::shared_ptr<T>> GetData();
 
-private:
-    int ConsumeChunk(std::shared_ptr<void> &chunk, const std::shared_ptr<ChunkGenerator> &chunkConsumer) override;
+protected:
+    int ProduceData() override;
+
+protected:
+    std::vector<std::shared_ptr<MsprofAdditionalInfo>> additionalData_;  // not owned
+    std::vector<std::shared_ptr<ConcatTensorInfo>> concatTensorData_;  // not owned
 };  // class AdditionInfoParser
 
 // 该类的作用是CtxId数据的解析
 class CtxIdParser final : public AdditionInfoParser {
 public:
-    explicit CtxIdParser(const std::string &path) : AdditionInfoParser(path)
+    explicit CtxIdParser(const std::string &path) : AdditionInfoParser(path, "CtxIdParser")
     {
         Init(filePrefix_);
     }
@@ -51,7 +57,7 @@ private:
 // 该类的作用是fusion op数据的解析
 class FusionOpInfoParser final : public AdditionInfoParser {
 public:
-    explicit FusionOpInfoParser(const std::string &path) : AdditionInfoParser(path)
+    explicit FusionOpInfoParser(const std::string &path) : AdditionInfoParser(path, "FusionOpInfoParser")
     {
         Init(filePrefix_);
     }
@@ -66,7 +72,7 @@ private:
 // 该类的作用是fusion op数据的解析
 class GraphIdParser final : public AdditionInfoParser {
 public:
-    explicit GraphIdParser(const std::string &path) : AdditionInfoParser(path)
+    explicit GraphIdParser(const std::string &path) : AdditionInfoParser(path, "GraphIdParser")
     {
         Init(filePrefix_);
     }
@@ -81,12 +87,13 @@ private:
 // 该类的作用是tensor info数据的解析
 class TensorInfoParser final : public AdditionInfoParser {
 public:
-    explicit TensorInfoParser(const std::string &path);
+    explicit TensorInfoParser(const std::string &path) : AdditionInfoParser(path, "TensorInfoParser")
+    {
+        Init(filePrefix_);
+    }
 
 private:
-    int ProduceChunk() override;
-    static std::shared_ptr<ConcatTensorInfo> CreateConcatTensorInfo(
-        const std::shared_ptr<MsprofAdditionalInfo> &additionalInfo);
+    int ProduceData() override;
 
 private:
     std::vector<std::string> filePrefix_ = {
@@ -98,7 +105,7 @@ private:
 // 该类的作用是hccl info数据的解析
 class HcclInfoParser final : public AdditionInfoParser {
 public:
-    explicit HcclInfoParser(const std::string &path) : AdditionInfoParser(path)
+    explicit HcclInfoParser(const std::string &path) : AdditionInfoParser(path, "HcclInfoParser")
     {
         Init(filePrefix_);
     }
@@ -113,7 +120,7 @@ private:
 // 该类的作用是memory application数据的解析
 class MemoryApplicationParser final : public AdditionInfoParser {
 public:
-    explicit MemoryApplicationParser(const std::string &path) : AdditionInfoParser(path)
+    explicit MemoryApplicationParser(const std::string &path) : AdditionInfoParser(path, "MemoryApplicationParser")
     {
         Init(filePrefix_);
     }
@@ -128,7 +135,7 @@ private:
 // 该类的作用是multi thread数据的解析
 class MultiThreadParser final : public AdditionInfoParser {
 public:
-    explicit MultiThreadParser(const std::string &path) : AdditionInfoParser(path)
+    explicit MultiThreadParser(const std::string &path) : AdditionInfoParser(path, "MultiThreadParser")
     {
         Init(filePrefix_);
     }

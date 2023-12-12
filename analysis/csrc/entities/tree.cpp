@@ -20,7 +20,7 @@ std::shared_ptr<TreeNode> Tree::GetRoot() const
     return root_;
 }
 
-std::string Tree::GetTreeLevelStr(std::shared_ptr <TreeNode> &node)
+std::string Tree::GetTreeLevelStr(const std::shared_ptr<TreeNode> &node) const
 {
     std::string lstr;
     if (!node->records.empty()) {
@@ -40,9 +40,9 @@ std::vector<std::string> Tree::Show()
     std::queue<std::shared_ptr<TreeNode>> q;
     q.push(root_);
     while (!q.empty()) {
-        auto level_size = q.size();
+        auto levelSize = q.size();
         std::string lstr{};
-        for (int i = 0; i < level_size; ++i) {
+        for (int i = 0; i < levelSize; ++i) {
             std::shared_ptr<TreeNode> node = q.front();
             q.pop();
             lstr += node->event->desc + " ";

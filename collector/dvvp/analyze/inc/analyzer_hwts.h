@@ -25,11 +25,10 @@ public:
 
 public:
     bool IsHwtsData(const std::string &fileName);
-    void Parse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
-    void HwtsParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
+
+    void HwtsParse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
 
 private:
-    void ParseHwtsData(CONST_CHAR_PTR data, uint32_t len);
     void ParseOptimizeHwtsData(CONST_CHAR_PTR data, uint32_t len);
     uint8_t GetRptType(CONST_CHAR_PTR data, uint32_t len);
     void ParseTaskStartEndData(CONST_CHAR_PTR data, uint32_t len, uint8_t rptType);

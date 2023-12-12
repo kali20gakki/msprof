@@ -10,9 +10,7 @@
 
 #include "data_struct.h"
 #include "errno/error_code.h"
-#include "message/codec.h"
 #include "msprof_dlog.h"
-#include "proto/msprofiler.pb.h"
 #include "transport/hash_data.h"
 #include "config/config_manager.h"
 
@@ -26,15 +24,6 @@ static const int32_t GE_COMPACT_INFO_SIZE = sizeof(MsprofCompactInfo);
 static const int32_t ADDITIONAL_INFO_SIZE = sizeof(MsprofAdditionalInfo);
 static const int32_t GE_EVENT_SIZE = sizeof(MsprofEvent);
 static const int32_t GE_API_SIZE = sizeof(MsprofApi);
-
-bool AnalyzerGe::IsGeData(const std::string &fileName) const
-{
-    // Ge data starts with "Framework"
-    if (fileName.find("Framework") != std::string::npos) {
-        return true;
-    }
-    return false;
-}
 
 bool AnalyzerGe::IsGeApiOrEventData(const std::string &fileName) const
 {
@@ -112,20 +101,20 @@ void AnalyzerGe::PrintStats() const
                  analyzedBytes_, totalBytes_, totalApiTimes_, totalNodeTimes_, totalEventTimes_, totalGeMerges_);
 }
 
-void AnalyzerGe::GeApiAndEventParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+void AnalyzerGe::GeApiAndEventParse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
 {
-    if (message == nullptr) {
+    if (fileChunkReq == nullptr) {
         MSPROF_LOGE("ge api and event parse message is null");
         return;
     }
 
-    if (message->filename().find("unaging") != std::string::npos) {
-        totalBytes_ += message->chunksizeinbytes();
-        ParseApiAndEventInfo(message->chunk().c_str(), message->chunksizeinbytes(), false);
+    if (fileChunkReq->fileName.find("unaging") != std::string::npos) {
+        totalBytes_ += fileChunkReq->chunkSize;
+        ParseApiAndEventInfo(fileChunkReq->chunk.c_str(), fileChunkReq->chunkSize, false);
         return;
     }
 
-    MSPROF_LOGD("Dropped ge data, tag: %s", message->tag().c_str());
+    MSPROF_LOGD("Dropped ge data, fileName: %s", fileChunkReq->fileName.c_str());
 }
 
 void AnalyzerGe::ParseApiAndEventInfo(CONST_CHAR_PTR data, uint32_t len, bool ageFlag)
@@ -209,20 +198,20 @@ void AnalyzerGe::HandleModelInfo(CONST_CHAR_PTR data, bool ageFlag) const
     }
 }
 
-void AnalyzerGe::GeCompactParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+void AnalyzerGe::GeCompactParse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
 {
-    if (message == nullptr) {
+    if (fileChunkReq == nullptr) {
         MSPROF_LOGE("ge compact parse message is null");
         return;
     }
 
-    if (message->tag().find("node_basic_info") != std::string::npos) {
-        totalBytes_ += message->chunksizeinbytes();
-        ParseNodeBasicInfo(message->chunk().c_str(), message->chunksizeinbytes());
+    if (fileChunkReq->fileName.find("node_basic_info") != std::string::npos) {
+        totalBytes_ += fileChunkReq->chunkSize;
+        ParseNodeBasicInfo(fileChunkReq->chunk.c_str(), fileChunkReq->chunkSize);
         return;
     }
 
-    MSPROF_LOGD("Dropped ge data, tag: %s", message->tag().c_str());
+    MSPROF_LOGD("Dropped ge data, fileName: %s", fileChunkReq->fileName.c_str());
 }
 
 void AnalyzerGe::ParseNodeBasicInfo(CONST_CHAR_PTR data, uint32_t len)
@@ -272,15 +261,19 @@ void AnalyzerGe::HandleNodeBasicInfo(CONST_CHAR_PTR data) const
                 timeStamp, nodeName.c_str(), nodeType.c_str());
 }
 
-void AnalyzerGe::GeGraphIdMapParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+void AnalyzerGe::GeGraphIdMapParse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
 {
-    if (message == nullptr) {
+    if (fileChunkReq == nullptr) {
         MSPROF_LOGE("ge compact parse message is null");
         return;
     }
 
-    totalBytes_ += message->chunksizeinbytes();
-    ParseGraphIdMap(message->chunk().c_str(), message->chunksizeinbytes());
+    if (fileChunkReq->fileName.find("unaging") != std::string::npos) {
+        totalBytes_ += fileChunkReq->chunkSize;
+        ParseGraphIdMap(fileChunkReq->chunk.c_str(), fileChunkReq->chunkSize);
+        return;
+    }
+    MSPROF_LOGD("Dropped ge data, fileName: %s", fileChunkReq->fileName.c_str());
 }
 
 void AnalyzerGe::ParseGraphIdMap(CONST_CHAR_PTR data, uint32_t len)
@@ -306,15 +299,15 @@ void AnalyzerGe::ParseGraphIdMap(CONST_CHAR_PTR data, uint32_t len)
     BufferRemainingData(offset);
 }
 
-void AnalyzerGe::GeContextParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+void AnalyzerGe::GeContextParse(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
 {
-    if (message == nullptr) {
+    if (fileChunkReq == nullptr) {
         MSPROF_LOGE("ge context parse message is null");
         return;
     }
 
-    totalBytes_ += message->chunksizeinbytes();
-    ParseContextIdInfo(message->chunk().c_str(), message->chunksizeinbytes());
+    totalBytes_ += fileChunkReq->chunkSize;
+    ParseContextIdInfo(fileChunkReq->chunk.c_str(), fileChunkReq->chunkSize);
 }
 
 void AnalyzerGe::ParseContextIdInfo(CONST_CHAR_PTR data, uint32_t len)

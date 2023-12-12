@@ -9,9 +9,7 @@
 #include "data_struct.h"
 #include "errno/error_code.h"
 #include "op_desc_parser.h"
-#include "message/codec.h"
 #include "prof_channel_manager.h"
-#include "proto/msprofiler.pb.h"
 #include "uploader.h"
 #include "uploader_mgr.h"
 #include "toolchain/prof_acl_api.h"
@@ -372,51 +370,48 @@ void Analyzer::ConstructAndUploadData(const std::string &opId, OpTime &opTime)
     resultCount_++;
 }
 
-void Analyzer::OnOptimizeData(CONST_VOID_PTR data, uint32_t len)
+void Analyzer::OnOptimizeData(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
 {
     if (!inited_) {
         MSPROF_LOGE("Analyzer is not been inited!");
         return;
     }
-
-    auto decoded = analysis::dvvp::message::DecodeMessage2(data, len);
-    auto message = std::dynamic_pointer_cast<analysis::dvvp::proto::FileChunkReq>(decoded);
-    if (message == nullptr || message->filename().empty()) {
+    if (fileChunkReq == nullptr || fileChunkReq->fileName.empty()) {
         MSPROF_LOGW("Analyzer OnOptimizeData is not data for analyzing.");
         return;
     }
-    if (message->datamodule() == FileChunkDataModule::PROFILING_IS_CTRL_DATA) {
-        if (message->filename() == "end_info") {
+    if (fileChunkReq->chunkModule == FileChunkDataModule::PROFILING_IS_CTRL_DATA) {
+        if (fileChunkReq->fileName == "end_info") {
             ClearAnalyzerData();
         }
         return;
     }
 
-    DispatchOptimizeData(message);
+    DispatchOptimizeData(fileChunkReq);
 }
 
-void Analyzer::DispatchOptimizeData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+void Analyzer::DispatchOptimizeData(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
 {
-    MSPROF_LOGD("Start to analyze file: %s, tag: %s", message->filename().c_str(), message->tag().c_str());
-    if (analyzerGe_->IsGeApiOrEventData(message->filename())) {
-        analyzerGe_->GeApiAndEventParse(message);
-    } else if (analyzerGe_->IsGeCompactData(message->tag())) {
-        analyzerGe_->GeCompactParse(message);
-    } else if (analyzerGe_->IsGeGraphIdMapData(message->tag())) {
-        analyzerGe_->GeGraphIdMapParse(message);
-    } else if (analyzerGe_->IsGeContextData(message->tag())) {
-        analyzerGe_->GeContextParse(message);
-    } else if (analyzerRt_->IsRtCompactData(message->tag())) {
-        analyzerRt_->RtCompactParse(message);
-    } else if (analyzerHwts_->IsHwtsData(message->filename())) {
-        analyzerHwts_->HwtsParse(message);
-    } else if (analyzerFfts_->IsFftsData(message->filename())) {
-        analyzerFfts_->FftsParse(message);
-    } else if (analyzerTs_->IsTsData(message->filename())) {
-        analyzerTs_->Parse(message);
+    MSPROF_LOGD("Start to analyze file: %s", fileChunkReq->fileName.c_str());
+    if (analyzerGe_->IsGeApiOrEventData(fileChunkReq->fileName)) {
+        analyzerGe_->GeApiAndEventParse(fileChunkReq);
+    } else if (analyzerGe_->IsGeCompactData(fileChunkReq->fileName)) {
+        analyzerGe_->GeCompactParse(fileChunkReq);
+    } else if (analyzerGe_->IsGeGraphIdMapData(fileChunkReq->fileName)) {
+        analyzerGe_->GeGraphIdMapParse(fileChunkReq);
+    } else if (analyzerGe_->IsGeContextData(fileChunkReq->fileName)) {
+        analyzerGe_->GeContextParse(fileChunkReq);
+    } else if (analyzerRt_->IsRtCompactData(fileChunkReq->fileName)) {
+        analyzerRt_->RtCompactParse(fileChunkReq);
+    } else if (analyzerHwts_->IsHwtsData(fileChunkReq->fileName)) {
+        analyzerHwts_->HwtsParse(fileChunkReq);
+    } else if (analyzerFfts_->IsFftsData(fileChunkReq->fileName)) {
+        analyzerFfts_->FftsParse(fileChunkReq);
+    } else if (analyzerTs_->IsTsData(fileChunkReq->fileName)) {
+        analyzerTs_->Parse(fileChunkReq);
         TsDataPostProc();
     } else {
-        MSPROF_LOGD("Analyzer drop data, fileName: %s.", message->filename().c_str());
+        MSPROF_LOGD("Analyzer drop data, fileName: %s.", fileChunkReq->fileName.c_str());
         return;
     }
     UploadProfOpDescProc();
