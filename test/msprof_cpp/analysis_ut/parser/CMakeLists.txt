@@ -9,6 +9,7 @@ include_directories(${TOP_DIR}/collector/inc/toolchain)
 include_directories(${TOP_DIR}/opensource/json/include)
 include_directories(${TOP_DIR}/test/msprof_cpp/analysis_ut/fake)
 include_directories(${GTEST_INCLUDE_DIR})
+include_directories(${MOCKCPP_INCLUDE_DIR})
 
 aux_source_directory(${TOP_DIR}/analysis/csrc/parser PARSER_SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/parser/adapter PARSER_SOURCES)

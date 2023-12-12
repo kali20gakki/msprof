@@ -74,6 +74,7 @@ void Flip::ComputeBatchId(std::vector<std::shared_ptr<MsprofCompactInfo>> &taskT
         ERROR("Make share flip task failed.");
         return;
     }
+    maxFlip->timeStamp = std::numeric_limits<uint64_t>::max();
     for (auto &item : taskTrackBin) {
         const auto &key = item.first;
         auto &taskTrackInStream = item.second;

@@ -22,6 +22,7 @@
 namespace Analysis {
 namespace Parser {
 namespace Environment {
+const uint16_t HOST_ID = 64;
 // 该类是Context信息单例类，读取info.json和sample.json环境信息
 class Context : public Utils::Singleton<Context> {
 public:

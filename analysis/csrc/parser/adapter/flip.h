@@ -15,7 +15,6 @@
 
 #include <vector>
 #include <unordered_map>
-#include <limits>
 #include <memory>
 
 #include "prof_common.h"
@@ -24,11 +23,11 @@ namespace Analysis {
 namespace Parser {
 namespace Adapter {
 struct FlipTask {
-    uint16_t deviceId = 0;
-    uint16_t streamId = 0;
-    uint16_t taskId = 0;
-    uint16_t flipNum = 0;
-    uint64_t timeStamp = std::numeric_limits<uint64_t>::max();
+    uint16_t deviceId;
+    uint16_t streamId;
+    uint16_t taskId;
+    uint16_t flipNum;
+    uint64_t timeStamp;
 };
 
 // 该类作用是根据FlipTask计算每个task的batch id

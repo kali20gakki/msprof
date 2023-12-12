@@ -75,7 +75,7 @@ int NodeBasicInfoParser::ProduceData()
         ERROR("%: Reserve data failed", parserName_);
         return ANALYSIS_ERROR;
     }
-    std::unordered_map<OpType, std::shared_ptr<ChunkGenerator>> producerMap = {
+    std::map<OpType, std::shared_ptr<ChunkGenerator>> producerMap = {
         {OpType::STATIC_OP, staticChunkProducer},
         {OpType::DYNAMIC_OP, chunkProducer_},
     };
