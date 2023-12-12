@@ -4,12 +4,10 @@
 
 import itertools
 import logging
-import multiprocessing
 import os
 import sqlite3
 import struct
 
-from common_func.common import init_log
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -27,7 +25,6 @@ from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
 from common_func.utils import Utils
-from framework.load_info_manager import LoadInfoManager
 from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import OffsetCalculator
 from mscalculate.aic.aic_utils import AicPmuUtils
@@ -138,6 +135,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         if self._wrong_func_type_count:
             logging.warning("Some PMU data fails to be parsed, err count: %s", self._wrong_func_type_count)
 
+        pmu_data = [None] * len(self._data_list.get(StrConstant.CONTEXT_PMU_TYPE, []))
         for data in self._data_list.get(StrConstant.BLOCK_PMU_TYPE, []):
             self.calculate_block_pmu_list(data)
         self.add_block_pmu_list()
@@ -146,37 +144,25 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
             logging.error("The sampled frequency is 0Hz, using default frequency %sHz.", self._freq)
             self.freq_data = []
         self._set_ffts_table_name_list()
-        data_list = self._data_list.get(StrConstant.CONTEXT_PMU_TYPE, [])
-        processes = []
-        limit_count = 50000
-        length = len(data_list) // limit_count + 1
-        if length > 20:
-            length = 20
-            limit_count = len(data_list) // length + 1
-        lock = multiprocessing.Lock()
-        for i in range(length):
-            left = i * limit_count
-            right = min((i + 1) * limit_count, len(data_list))
-            pmu_data = [None] * (right - left)
-            try:
-                process = multiprocessing.Process(target=self._calculate_and_save,
-                                                  args=(pmu_data, data_list[left:right], lock))
-                process.start()
-                processes.append(process)
-            except ProfException as err:
-                logging.error("Output: An exception occurs when multiple processes process the timeline file. "
-                              "The error is %s", err)
-                return
-        for process in processes:
-            process.join()
+        if self._is_mix_needed:
+            self.calculate_mix_pmu_list(pmu_data)
+        else:
+            self.calculate_pmu_list(pmu_data)
+        pmu_data.sort(key=lambda x: x[-3])
+        try:
+            with self._model as _model:
+                _model.flush(pmu_data)
+        except sqlite3.Error as err:
+            logging.error("Save ffts pmu data failed! %s", err)
 
-    def calculate_mix_pmu_list(self: any, pmu_data_list: list, data_list: list) -> None:
+    def calculate_mix_pmu_list(self: any, pmu_data_list: list) -> None:
         """
         calculate pmu
         :param pmu_data_list: out args
         :return:
         """
-        for index, data in enumerate(data_list):
+        enumerate_data_list = self._data_list.get(StrConstant.CONTEXT_PMU_TYPE, [])
+        for index, data in enumerate(enumerate_data_list):
             task_type = 0 if data.is_aic_data() else 1
 
             aic_pmu_value, aiv_pmu_value, aic_total_cycle, aiv_total_cycle = self.get_total_cycle_info(data, task_type)
@@ -206,14 +192,15 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
             )
             pmu_data_list[index] = pmu_data
 
-    def calculate_pmu_list(self: any, pmu_data_list: list, data_list: list) -> None:
+    def calculate_pmu_list(self: any, pmu_data_list: list) -> None:
         """
         calculate pmu
         :param pmu_data_list: pmu events list
         :return:
         """
         self.__update_model_instance()
-        for index, data in enumerate(data_list):
+        enumerate_data_list = self._data_list.get(StrConstant.CONTEXT_PMU_TYPE, [])
+        for index, data in enumerate(enumerate_data_list):
             task_type = 0 if data.is_aic_data() else 1
             pmu_list = {}
             if judge_custom_pmu_scene(self._sample_json):
@@ -460,24 +447,6 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
                 "mte2_time", "mte2_ratio", "mte3_time", "mte3_ratio",
                 "fixpipe_time", "fixpipe_ratio"
             ]
-
-    def _calculate_and_save(self, pmu_data: list, data_list: list, lock: multiprocessing.Lock):
-        init_log(self.sample_config.get("result_dir"))
-        LoadInfoManager.load_info(self.sample_config.get("result_dir"))
-        ProfilingScene().set_all_export(self.sample_config.get(StrConstant.ALL_EXPORT, True))
-        if self._is_mix_needed:
-            self.calculate_mix_pmu_list(pmu_data, data_list)
-        else:
-            self.calculate_pmu_list(pmu_data, data_list)
-        pmu_data.sort(key=lambda x: x[-3])
-        try:
-            lock.acquire()
-            with self._model as _model:
-                _model.flush(pmu_data)
-        except sqlite3.Error as err:
-            logging.error("Save ffts pmu data failed! %s", err)
-        finally:
-            lock.release()
 
 
 class PmuMetrics:
