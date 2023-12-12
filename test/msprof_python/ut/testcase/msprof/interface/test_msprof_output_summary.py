@@ -133,8 +133,10 @@ class TestMsprofOutputSummary(unittest.TestCase):
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._get_summary_file_name',
                            return_value=set({"op_summary.csv"})), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._save_summary_data'), \
-                mock.patch('multiprocessing.Process.start'), \
-                mock.patch('multiprocessing.Process.join'):
+                mock.patch('multiprocessing.Pool'), \
+                mock.patch('multiprocessing.pool.Pool.apply_async'), \
+                mock.patch('multiprocessing.pool.Pool.close'), \
+                mock.patch('multiprocessing.pool.Pool.join'):
             MsprofOutputSummary('test')._merge_device_summary()
 
     def test_get_summary_file_name_when_normal_then_pass(self):
@@ -239,8 +241,10 @@ class TestMsprofOutputSummary(unittest.TestCase):
                            return_value=({}, 2)), \
                 mock.patch('common_func.utils.Utils.get_json_data'), \
                 mock.patch('common_func.file_slice_helper.FileSliceHelper.dump_json_data'), \
-                mock.patch('multiprocessing.Process.start'), \
-                mock.patch('multiprocessing.Process.join'):
+                mock.patch('multiprocessing.Pool'), \
+                mock.patch('multiprocessing.pool.Pool.apply_async'), \
+                mock.patch('multiprocessing.pool.Pool.close'), \
+                mock.patch('multiprocessing.pool.Pool.join'):
             MsprofOutputSummary('test')._save_timeline_data("msprof", ["test"])
 
     def test_insert_json_data_when_normal_then_pass(self):
