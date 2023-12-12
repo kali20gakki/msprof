@@ -26,8 +26,10 @@
 #include "log.h"
 #include "file.h"
 #include "event.h"
+#include "context.h"
 
 using namespace Analysis::Utils;
+using namespace Analysis::Parser::Environment;
 using EventType = Analysis::Entities::EventType;
 
 class FakeTraceGenerator {
@@ -43,7 +45,7 @@ public:
     }
 
     template<typename T>
-    void WriteBin(std::vector<T> &traces, EventType eventType, bool isAging, const int deviceId)
+    void WriteBin(std::vector<T> &traces, EventType eventType, bool isAging, const int deviceId = HOST_ID)
     {
         auto saveDir = CreateFakeDataDir(eventType, deviceId); // 创建PROF_XXX/host or device_<deviceId>/data
         if (saveDir.empty()) {
@@ -113,6 +115,7 @@ private:
     std::unordered_map<EventType, std::string> deviceBinNames_;
     std::unordered_map<EventType, std::string> hostBinNames_{
         {EventType::EVENT_TYPE_API, "api_event.data.slice_"},
+        {EventType::EVENT_TYPE_EVENT, "api_event.data.slice_"},
         {EventType::EVENT_TYPE_FUSION_OP_INFO, "additional.fusion_op_info.slice_"},
         {EventType::EVENT_TYPE_GRAPH_ID_MAP, "additional.graph_id_map.slice_"},
         {EventType::EVENT_TYPE_NODE_BASIC_INFO, "compact.node_basic_info.slice_"},
@@ -120,6 +123,7 @@ private:
         {EventType::EVENT_TYPE_HCCL_INFO, "additional.hccl_info.slice_"},
         {EventType::EVENT_TYPE_TASK_TRACK, "compact.task_track.slice_"},
         {EventType::EVENT_TYPE_TENSOR_INFO, "additional.tensor_info.slice_"},
+        {EventType::EVENT_TYPE_MEM_CPY, "compact.memcpy_info.slice_"},
     };
 };
 

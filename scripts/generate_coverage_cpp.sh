@@ -42,6 +42,7 @@ test_obj=(
     dfx_utest
     association_utest
     viewer_utest
+    parser_utest
 )
 
 str_test=""
