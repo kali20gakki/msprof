@@ -141,7 +141,7 @@ uint64_t g_getCannEventsNum(std::set<uint32_t> &tids, CANNWarehouses &cwhs, cons
 // 测试输入空文件夹
 TEST_F(EventGrouperUTest, TestGroupShouldReturnEmptyWhenDataDirEmpty)
 {
-    const std::string fakeDataDir = "/tmp/fakeDataEmpty/";
+    const std::string fakeDataDir = "./fakeDataEmpty";
     File::CreateDir(fakeDataDir);
 
     auto grouper = std::make_shared<EventGrouper>(fakeDataDir);
@@ -154,7 +154,7 @@ TEST_F(EventGrouperUTest, TestGroupShouldReturnEmptyWhenDataDirEmpty)
 // 测试文件夹中只有Api类型数据
 TEST_F(EventGrouperUTest, TestGroupShouldReturnEmptyWhenDataOnlyHasApiBin)
 {
-    const std::string fakeDataDir = "/tmp/fakeDataApi";
+    const std::string fakeDataDir = "./fakeDataApi";
     File::RemoveDir(fakeDataDir, 0);
 
     const std::string hostDataDir = fakeDataDir + "/host/data";
@@ -172,7 +172,7 @@ TEST_F(EventGrouperUTest, TestGroupShouldReturnEmptyWhenDataOnlyHasApiBin)
 // 测试输入所有类别二进制文件
 TEST_F(EventGrouperUTest, TestGroupShouldGroupCorrespondingEventsWhenDataDirHasAllTypeBin)
 {
-    const std::string fakeDataDir = "/tmp/fakeData";
+    const std::string fakeDataDir = "./fakeData";
     File::RemoveDir(fakeDataDir, 0);
     const int MaxNum = 10000;
     const std::string hostDataDir = fakeDataDir + "/host/data";

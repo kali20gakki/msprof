@@ -72,6 +72,30 @@ inline std::shared_ptr<T> ReinterpretPointerCast(const std::shared_ptr<U> &r) no
 {
     return std::shared_ptr<T>(r, reinterpret_cast<typename std::shared_ptr<T>::element_type *>(r.get()));
 }
+
+// 元素数量等于1时，模板特例
+template<typename T>
+void ConvertToString(std::ostringstream &oss, T t)
+{
+    oss << t;
+}
+
+// 元素数量大于1时，递归展开可变参数模板
+template<typename T, typename... Args>
+void ConvertToString(std::ostringstream &oss, T t, Args... args)
+{
+    oss << t << "_";
+    ConvertToString(oss, args...);
+}
+
+// 调用可变参数模板，返回字符串
+template<typename... Args>
+std::string ConvertToString(Args... args)
+{
+    std::ostringstream oss;
+    ConvertToString(oss, args...);
+    return oss.str();
+}
 }  // namespace Utils
 }  // namespace Analysis
 
