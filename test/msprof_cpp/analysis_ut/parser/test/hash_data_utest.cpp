@@ -17,7 +17,7 @@
 using namespace Analysis::Utils;
 using namespace Analysis::Parser::Host::Cann;
 
-const std::string TEST_FILE = "/tmp/unaging.additional.hash_dic.slice_0";
+const std::string TEST_FILE = "./unaging.additional.hash_dic.slice_0";
 
 class HashDataUTest : public testing::Test {
 protected:
@@ -50,7 +50,7 @@ TEST_F(HashDataUTest, LoadShouldReturnFalseWhenFileNotExist)
 
 TEST_F(HashDataUTest, LoadShouldReturnTrueWhenFileIsOK)
 {
-    auto status = HashData::GetInstance().Load("/tmp");
+    auto status = HashData::GetInstance().Load("./");
     EXPECT_TRUE(status);
     HashData::GetInstance().Clear();
 }
@@ -64,7 +64,7 @@ TEST_F(HashDataUTest, GetShouldReturnNumWhenNoHashInDict)
 
 TEST_F(HashDataUTest, GetShouldReturnStrWhenHashInDict)
 {
-    HashData::GetInstance().Load("/tmp");
+    HashData::GetInstance().Load("./");
     std::string expectRes = "AssignAdd";
     auto str = HashData::GetInstance().Get(836640106292564866);
     EXPECT_STREQ(str.c_str(), expectRes.c_str());
@@ -73,7 +73,7 @@ TEST_F(HashDataUTest, GetShouldReturnStrWhenHashInDict)
 
 TEST_F(HashDataUTest, GetAllShouldReturn2ValidResInFile)
 {
-    HashData::GetInstance().Load("/tmp");
+    HashData::GetInstance().Load("./");
     int expectResSize = 2;
     EXPECT_EQ(expectResSize, HashData::GetInstance().GetAll().size());
     HashData::GetInstance().Clear();

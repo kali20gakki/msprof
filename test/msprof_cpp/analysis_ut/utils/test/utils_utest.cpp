@@ -95,3 +95,19 @@ TEST_F(UtilsUTest, TestStrToU64ShouldReturnERRORWhenStrIsBeyondThreshold)
     EXPECT_EQ(StrToU64(dest, errorStr), ANALYSIS_ERROR);
 }
 
+TEST_F(UtilsUTest, TestConvertToStringShouldReturnCorrectStrWhenInputVariousTypeItems)
+{
+    uint32_t testNum1 = 1000000;
+    uint64_t testNum2 = 90000000000;
+    double testNum3 = 3.14;
+    uint64_t testNum4 = 70000000000;
+    std::string testStr1 = "Mind";
+    std::string testStr2 = "Studio";
+    std::string expectStr = "1000000_90000000000_3.14_70000000000_Mind_Studio";
+
+    // 测试拼接正确性 & 嵌套调用正确性(函数参数超过5个可以嵌套调用)
+    auto ret = ConvertToString(ConvertToString(testNum1, testNum2, testNum3, testNum4),
+                               testStr1, testStr2);
+
+    EXPECT_EQ(expectStr, ret);
+}

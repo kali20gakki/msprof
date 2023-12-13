@@ -16,6 +16,7 @@
 
 #include <unordered_map>
 #include <shared_mutex>
+#include <functional>
 #include <mutex>
 
 namespace Analysis {
@@ -24,6 +25,8 @@ namespace Utils {
 template<typename K, typename V>
 class SafeUnorderedMap {
 public:
+    using Iterator = typename std::unordered_map<K, V>::iterator;
+
     SafeUnorderedMap()
     {}
 
@@ -121,6 +124,18 @@ public:
     {
         std::lock_guard<std::mutex> lock(mutex_);
         safeMap_.clear();
+    }
+
+    Iterator Begin() noexcept
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return safeMap_.begin();
+    }
+
+    Iterator End() noexcept
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return safeMap_.end();
     }
 
 private:

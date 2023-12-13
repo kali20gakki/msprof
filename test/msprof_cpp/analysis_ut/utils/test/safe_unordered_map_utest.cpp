@@ -32,6 +32,31 @@ protected:
     }
 };
 
+/* 验证 SafeUnorderedMap Iterate遍历正确性 */
+TEST_F(SafeUnorderedMapUTest, TestIterateShouldTraverseAllItermsCorrectlyWhenMultiThreadCall)
+{
+    SafeUnorderedMap<std::string, int> testMap;
+    const int insertNum = 10;
+    for (int i = 0; i < insertNum; ++i) {
+        testMap.Insert(std::to_string(i), i);
+    }
+
+    // 10个线程遍历，验证多线程下遍历map的正确性
+    const int threadsNum = 10;
+    std::thread threads[threadsNum];
+    for (int i = 0; i < threadsNum; ++i) {
+        threads[i] = std::thread([&testMap]() {
+            for (auto it = testMap.Begin(); it != testMap.End(); it++) {
+                EXPECT_EQ((*it).first, std::to_string((*it).second));
+            }
+        });
+    }
+
+    for (auto &t: threads) {
+        t.join();
+    }
+}
+
 /* 单线程验证 SafeUnorderedMap 增删查改 */
 TEST_F(SafeUnorderedMapUTest, SingleThreadTestCUID)
 {
