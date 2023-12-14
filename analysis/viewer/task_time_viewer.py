@@ -37,15 +37,14 @@ class TaskTimeViewer(BaseViewer):
     class for get task time data
     """
 
-    TRACE_PID_MAP = {
-        TraceViewHeaderConstant.PROCESS_TASK: 0,
-        TraceViewHeaderConstant.PROCESS_SUBTASK: 1,
-        TraceViewHeaderConstant.PROCESS_THREAD_TASK: 2
-    }
-
     def __init__(self: any, configs: dict, params: dict) -> None:
         super().__init__(configs, params)
         self.project_dir = self.params.get(StrConstant.PARAM_RESULT_DIR)
+        self.trace_pid_map = {
+            TraceViewHeaderConstant.PROCESS_TASK: InfoConfReader().get_json_pid_data(),
+            TraceViewHeaderConstant.PROCESS_SUBTASK: 1,
+            TraceViewHeaderConstant.PROCESS_THREAD_TASK: 2
+        }
 
     @staticmethod
     def get_device_task_type(device_task_type: str) -> str:
@@ -77,7 +76,7 @@ class TaskTimeViewer(BaseViewer):
         """
         header = [
             [
-                "process_name", self.TRACE_PID_MAP.get(pid_header, 0),
+                "process_name", self.trace_pid_map.get(pid_header, 0),
                 InfoConfReader().get_json_tid_data(), pid_header
             ]
         ]
@@ -149,7 +148,7 @@ class TaskTimeViewer(BaseViewer):
         for data in data_list.get("subtask_data_list", []):
             result_list.append(
                 [data.op_name,
-                 self.TRACE_PID_MAP.get("Subtask Time", 1),
+                 self.trace_pid_map.get("Subtask Time", 1),
                  StarsConstant().find_key_by_value(data.device_task_type),
                  InfoConfReader().trans_into_local_time(data.start_time),
                  data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
@@ -169,7 +168,7 @@ class TaskTimeViewer(BaseViewer):
         for data in data_list.get("subtask_data_list", []):
             result_list.append(
                 [data.op_name,
-                 self.TRACE_PID_MAP.get("Thread Task Time", 2),
+                 self.trace_pid_map.get("Thread Task Time", 2),
                  data.thread_id * (max(StarsConstant.SUBTASK_TYPE) + 1) + \
                  StarsConstant().find_key_by_value(data.device_task_type),
                  InfoConfReader().trans_into_local_time(data.start_time),
@@ -195,7 +194,7 @@ class TaskTimeViewer(BaseViewer):
                 result_list.append(
                     [
                         data.op_name,
-                        self.TRACE_PID_MAP.get("Task Scheduler", 0),
+                        self.trace_pid_map.get("Task Scheduler", 0),
                         data.stream_id,
                         InfoConfReader().trans_into_local_time(data.start_time),
                         data.duration / DBManager.NSTOUS if data.duration > 0 else 0,

@@ -32,10 +32,10 @@ class TestTorchToAclNpu(unittest.TestCase):
         {'name': 'Mul', 'pid': 8, 'tid': 5, 'ts': 3, 'dur': 3.4,
          'args': {'Task Type': 'AI_CORE', 'Stream Id': 5, 'Task Id': 3, "Batch Id": 0, 'Aicore Time(ms)': 2681},
          'ph': 'X'},
-        {'name': 'torch_to_acl', 'ph': 's', 'id': 1.5, 'pid': 10000, 'tid': 1, 'ts': 1.0, 'cat': 'async_acl_npu'},
+        {'name': 'torch_to_acl', 'ph': 's', 'id': 1.5, 'pid': 1024, 'tid': 1, 'ts': 1.0, 'cat': 'async_acl_npu'},
         {'name': 'torch_to_acl', 'ph': 'f', 'id': 1.5, 'pid': 107153208, 'tid': 1071819, 'ts': 1.5, 'bp': 'e',
          'cat': 'async_acl_npu'},
-        {'name': 'torch_to_npu', 'ph': 's', 'id': 21475033088, 'pid': 10000, 'tid': 1, 'ts': 1.0, 'cat': 'async_npu'},
+        {'name': 'torch_to_npu', 'ph': 's', 'id': 21475033088, 'pid': 1024, 'tid': 1, 'ts': 1.0, 'cat': 'async_npu'},
         {'name': 'torch_to_npu', 'ph': 'f', 'id': 21475033088, 'pid': 8, 'tid': 5, 'ts': 3, 'bp': 'e',
          'cat': 'async_npu'}
     ]
