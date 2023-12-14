@@ -82,6 +82,7 @@ class DataTag(Enum):
     NANO_STARS_PROFILE = 69
     DBG_FILE = 70
     NPU_MODULE_MEM = 71
+    AICPU_ADD_INFO = 72
 
 
 @unique

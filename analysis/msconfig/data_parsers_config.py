@@ -98,8 +98,8 @@ class DataParsersConfig(MetaConfig):
             ('path', 'msparser.msproftx.msproftx_parser'),
             ('chip_model', '0,1,2,3,4,5,7,8,11')
         ],
-        'ParseAiCpuDataAdapter': [
-            ('path', 'msparser.aicpu.parse_aicpu_data_adapter'),
+        'AicpuBinDataParser': [
+            ('path', 'msparser.aicpu.aicpu_bin_data_parser'),
             ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('level', '3')
         ],
@@ -181,6 +181,11 @@ class DataParsersConfig(MetaConfig):
             ('path', 'msparser.add_info.multi_thread_parser'),
             ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('level', '2')
+        ],
+        'AicpuAddInfoParser': [
+            ('path', 'msparser.add_info.aicpu_add_info_parser'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
+            ('level', '3')
         ],
         'TensorAddInfoParser': [
             ('path', 'msparser.add_info.tensor_add_info_parser'),

@@ -26,7 +26,7 @@ from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.ai_cpu_data import AiCpuData
 
 
-class ParseAiCpuBinData(MsMultiProcess):
+class AicpuBinDataParser(MsMultiProcess):
     """
     parse ai cpu data by dp channel
     """

@@ -6,11 +6,11 @@ from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.profiling_scene import ProfilingScene
 from constant.constant import CONFIG
-from msparser.aicpu.parse_aicpu_bin_data import ParseAiCpuBinData
+from msparser.aicpu.aicpu_bin_data_parser import AicpuBinDataParser
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from profiling_bean.prof_enum.data_tag import DataTag
 
-NAMESPACE = 'msparser.aicpu.parse_aicpu_bin_data'
+NAMESPACE = 'msparser.aicpu.aicpu_bin_data_parser'
 
 
 def get_step_trace_data():
@@ -21,7 +21,7 @@ def get_step_trace_data():
     return step_trace_dto
 
 
-class TestParseAiCpuBinData(unittest.TestCase):
+class TestAicpuBinDataParser(unittest.TestCase):
     file_list = {DataTag.AI_CPU: ['.data.0.slice_0']}
 
     def test_read_binary_data(self):
@@ -38,7 +38,7 @@ class TestParseAiCpuBinData(unittest.TestCase):
                     mock.patch('msmodel.step_trace.ts_track_model.TsTrackModel.get_step_trace_data',
                                return_value=[get_step_trace_data()]), \
                     mock.patch('common_func.utils.Utils.is_step_scene', return_value=True):
-                check = ParseAiCpuBinData(self.file_list, CONFIG)
+                check = AicpuBinDataParser(self.file_list, CONFIG)
                 InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}]}
                 check.read_binary_data('DATA_PREPROCESS.AICPU.7.slice_0')
             self.assertEqual(check.ai_cpu_datas,
@@ -49,19 +49,19 @@ class TestParseAiCpuBinData(unittest.TestCase):
                         return_value=True), \
                 mock.patch(NAMESPACE + '.is_valid_original_data',
                            return_value=True), \
-                mock.patch(NAMESPACE + '.ParseAiCpuBinData.read_binary_data',
+                mock.patch(NAMESPACE + '.AicpuBinDataParser.read_binary_data',
                            return_value=True), \
                 mock.patch(NAMESPACE + '.PathManager.get_data_dir',
                            return_value='test'), \
                 mock.patch(NAMESPACE + '.logging.info'), \
                 mock.patch(NAMESPACE + '.FileManager.add_complete_file'), \
                 mock.patch('common_func.msprof_iteration.Utils.is_step_scene', return_value=True):
-            check = ParseAiCpuBinData(self.file_list, CONFIG)
+            check = AicpuBinDataParser(self.file_list, CONFIG)
             check.parse_ai_cpu()
         with mock.patch(NAMESPACE + '.AiStackDataCheckManager.contain_dp_aicpu_data',
                         return_value=False), \
              mock.patch('common_func.msprof_iteration.Utils.is_step_scene', return_value=True):
-            check = ParseAiCpuBinData(self.file_list, CONFIG)
+            check = AicpuBinDataParser(self.file_list, CONFIG)
             result = check.parse_ai_cpu()
         self.assertEqual(result, None)
 
@@ -72,15 +72,15 @@ class TestParseAiCpuBinData(unittest.TestCase):
                 mock.patch('msmodel.ai_cpu.ai_cpu_model.AiCpuModel.finalize'), \
                 mock.patch('common_func.msprof_iteration.Utils.is_step_scene', return_value=True):
             InfoConfReader()._info_json = {"devices": '0'}
-            check = ParseAiCpuBinData(self.file_list, CONFIG)
+            check = AicpuBinDataParser(self.file_list, CONFIG)
             check.ai_cpu_datas = [123]
             check.save()
 
     def test_ms_run(self):
         ProfilingScene().init("")
         ProfilingScene()._scene = Constant.STEP_INFO
-        with mock.patch(NAMESPACE + '.ParseAiCpuBinData.parse_ai_cpu', side_effect=ValueError), \
+        with mock.patch(NAMESPACE + '.AicpuBinDataParser.parse_ai_cpu', side_effect=ValueError), \
                 mock.patch(NAMESPACE + '.logging.error'), \
                 mock.patch('common_func.msprof_iteration.Utils.is_step_scene', return_value=True):
-            check = ParseAiCpuBinData(self.file_list, CONFIG)
+            check = AicpuBinDataParser(self.file_list, CONFIG)
             check.ms_run()
