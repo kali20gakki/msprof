@@ -10,30 +10,30 @@
  * *****************************************************************************
  */
 
-#ifndef ANALYSIS_VIEWER_DATABASE_FINALS_UNIFIED_DB_MANAGER_H
-#define ANALYSIS_VIEWER_DATABASE_FINALS_UNIFIED_DB_MANAGER_H
+#ifndef ANALYSIS_VIEWER_DATABASE_UNIFIED_DB_MANAGER_H
+#define ANALYSIS_VIEWER_DATABASE_UNIFIED_DB_MANAGER_H
+
+#include <string>
+#include <vector>
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-namespace Finals {
 
 class UnifiedDBManager {
 public:
-    explict UnifiedDBManager(const std::string &outputDir,
-                             const std::vector<std::string> &profPath): outputDir_(outputDir)
-                                                                        profPath_(profPath) {};
-
+    UnifiedDBManager(const std::string &reportDBPath, const std::vector<std::string> &profPaths)
+        : reportDBPath_(reportDBPath), profPaths_(profPaths) {};
     bool Run();
 private:
     bool Init();
-    std::string outputDir_;
-    std::vector<std::string> profPath_;
-}
+    std::string reportDBPath_;
+    std::vector<std::string> profPaths_;
+};
 
-}  // Finals
 }  // Database
 }  // Viewer
 }  // Analysis
-#endif // #define ANALYSIS_VIEWER_DATABASE_FINALS_UNIFIED_DB_MANAGER_H
+
+#endif // #define ANALYSIS_VIEWER_DATABASE_UNIFIED_DB_MANAGER_H
 

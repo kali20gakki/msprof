@@ -22,6 +22,10 @@ namespace Viewer {
 namespace Database {
 
 using TABLE_COLS = std::vector<std::pair<std::string, std::string>>;
+const std::string SQL_TEXT_TYPE = "TEXT";
+const std::string SQL_INTEGER_TYPE = "INTEGER";
+const std::string SQL_NUMERIC_TYPE = "NUMERIC";
+const std::string SQL_REAL_TYPE = "REAL";
 
 // DB中Table映射基类
 class Database {
@@ -35,10 +39,6 @@ public:
 protected:
     std::string dbName_;
     std::unordered_map<std::string, TABLE_COLS> tableColNames_;
-    const std::string sqlTextType = "TEXT";
-    const std::string sqlIntegerType = "INTEGER";
-    const std::string sqlNumericType = "NUMERIC";
-    const std::string sqlRealType = "REAL";
 };
 
 class ApiEventDB : public Database {
@@ -70,6 +70,17 @@ class RtsTrackDB : public Database {
 public:
     RtsTrackDB();
 };
+
+class AscendTaskDB : public Database {
+public:
+    AscendTaskDB();
+};
+
+class HCCLSingleDeviceDB : public Database {
+public:
+    HCCLSingleDeviceDB();
+};
+
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis

@@ -26,6 +26,8 @@ std::string Join(const std::vector<std::string> &str, const std::string &delimit
 std::vector<std::string> Split(const std::string &str, const std::string &delimiter);
 int StrToU16(uint16_t &dest, const std::string &numStr);
 int StrToU64(uint64_t &dest, const std::string &numStr);
+// 返回本地时间戳，格式： 年月日时分秒（20231215172810）
+std::string GetLocalTime();
 
 template<class T, class ...Args>
 std::shared_ptr<T> MakeShared(const Args &...args)
