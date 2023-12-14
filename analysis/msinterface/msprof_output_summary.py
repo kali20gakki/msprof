@@ -240,19 +240,17 @@ class MsprofOutputSummary:
                 continue
             summary_file_set.update(self._get_summary_file_name(sub_path))
 
-        processes = []
+        pool = multiprocessing.Pool(processes=2)
         for summary_file in summary_file_set:
             try:
-                process = multiprocessing.Process(target=self._save_summary_data,
-                                                  args=(summary_file, sub_dirs))
-                process.start()
-                processes.append(process)
+                pool.apply_async(func=self._save_summary_data,
+                                 args=(summary_file, sub_dirs))
             except ProfException as err:
                 logging.error("Output: An exception occurs when multiple processes process the summary file. "
                               "The error is %s", err)
                 return
-        for process in processes:
-            process.join()
+        pool.close()
+        pool.join()
 
     def _get_summary_file_name(self, device_path: str) -> set:
         """
@@ -343,22 +341,20 @@ class MsprofOutputSummary:
                 self._get_timeline_file_with_slice(targe_name, sub_path, timeline_file_dict)
             slice_max_count = max(slice_count, slice_max_count)
 
-        processes = []
+        pool = multiprocessing.Pool(processes=2)
         is_need_slice = True if slice_max_count else False
         for index in range(slice_max_count + 1):
             helper = FileSliceHelper(self._output_dir, targe_name, MsProfCommonConstant.TIMELINE)
             try:
-                process = multiprocessing.Process(target=self._insert_json_data,
-                                                  args=(timeline_file_dict.get(index, []), helper,
-                                                        is_need_slice, index))
-                process.start()
-                processes.append(process)
+                pool.apply_async(func=self._insert_json_data,
+                                 args=(timeline_file_dict.get(index, []), helper,
+                                       is_need_slice, index))
             except ProfException as err:
                 logging.error("Output: An exception occurs when multiple processes process the timeline file. "
                               "The error is %s", err)
                 return
-        for process in processes:
-            process.join()
+        pool.close()
+        pool.join()
 
     def _get_timeline_file_with_slice(self, target_name: str, dir_path: str, timeline_file_dict: dict) -> tuple:
         """

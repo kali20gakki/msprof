@@ -282,7 +282,8 @@ class MsprofDataStorage:
             logging.warning(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
         row_line_level = len(self.tid_set)
         formula = MsprofDataStorage._calculate_loading_time(row_line_level, list_length * coefficient)
-        time_level = self._get_time_level(formula)
+        # if only host or one device dir
+        time_level = self._get_time_level(formula * (1 + device_count // 2))
         slice_time = 2
         slice_method = LoadingTimeLevel.BAD_LEVEL.value
         if method == TimeLineSliceStrategy.LOADING_TIME_PRIORITY.value:
@@ -293,14 +294,12 @@ class MsprofDataStorage:
                     return 0
                 slice_length = math.ceil(list_length / slice_time)
                 formula = MsprofDataStorage._calculate_loading_time(row_line_level, slice_length * coefficient)
-                time_level = self._get_time_level(formula)
+                time_level = self._get_time_level(formula * (1 + device_count // 2))
                 slice_time += 1
         except ZeroDivisionError as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
             return 0
-        slice_time = slice_time - 1 if slice_time > 2 else 0
-        # if only host or one device dir
-        return slice_time * (1 + device_count // 2)
+        return slice_time - 1 if slice_time > 2 else 0
 
     def _update_timeline_head(self: any) -> None:
         while self.data_list:
