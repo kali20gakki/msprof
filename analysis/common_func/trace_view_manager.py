@@ -137,19 +137,16 @@ class TraceViewManager:
         """
         get format_pid
         :param pid: int, index_id: int
-        :return: format_pid: int
+        :return: format_pid: Uint32: pid use high 22bit, index_id use middle 5bit, device_id use low 5bit
+        ps: pid_max is 10^22 - 1
         """
-        left_offset = 100
-        format_pid = pid * left_offset + index_id
-        if index_id == TraceViewHeaderConstant.LAYER_CANN_SORT:
-            return format_pid
-
         if is_number(InfoConfReader().get_device_id()):
             device_id = int(InfoConfReader().get_device_id())
         else:
-            # max device_id is 63
-            device_id = 64
-        format_pid = format_pid * left_offset + device_id
+            # host device_id is 31, we cannot use NumberConstant.HOST_ID,
+            # cause this value is alse been used in record time.
+            device_id = 31
+        format_pid = (pid << 10) | (index_id << 5) | device_id
         return format_pid
     
     @staticmethod
