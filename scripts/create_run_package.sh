@@ -7,8 +7,7 @@ TOP_DIR=${CUR_DIR}/..
 TEMP_OUTPUT=${TOP_DIR}/build/output
 MSPROF_TEMP_DIR=${TOP_DIR}/build/msprof_tmp
 COMMON_DIR="common_script"
-mkdir ${MSPROF_TEMP_DIR}
-mkdir ${MSPROF_TEMP_DIR}/${COMMON_DIR}
+mkdir -p "${MSPROF_TEMP_DIR}/${COMMON_DIR}"
 
 # makeself is tool for compiling run package
 MAKESELF_DIR=${TOP_DIR}/opensource/makeself
@@ -21,7 +20,7 @@ CONTROL_PARAM_SCRIPT=${MAKESELF_DIR}/makeself-header.sh
 
 # store run package
 OUTPUT_DIR=${TOP_DIR}/output
-mkdir ${OUTPUT_DIR}
+mkdir -p "${OUTPUT_DIR}"
 
 RUN_SCRIPT_DIR=${TOP_DIR}/scripts/run_script
 FILTER_PARAM_SCRIPT=${RUN_SCRIPT_DIR}/help.conf
@@ -109,8 +108,12 @@ function copy_script() {
 	local script_name=${1}
 	local temp_dir=${2}
 
+    if [ -f "${temp_dir}/${script_name}" ]; then
+		rm -f "${temp_dir}/${script_name}"
+	fi
+
 	cp ${RUN_SCRIPT_DIR}/${script_name} ${temp_dir}/${script_name}
-	chmod 500 ${temp_dir}/${script_name}
+	chmod 500 "${temp_dir}/${script_name}"
 }
 
 function version() {
