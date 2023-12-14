@@ -22,6 +22,7 @@ from common_func.file_name_manager import get_ffts_pmu_compiles
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.file_name_manager import get_freq_compiles
 from common_func.file_name_manager import get_ge_ctx_id_info_compiles
+from common_func.file_name_manager import get_aicpu_compiles
 from common_func.file_name_manager import get_ge_fusion_add_info_compiles
 from common_func.file_name_manager import get_ge_fusion_op_compiles
 from common_func.file_name_manager import get_ge_graph_add_info_compiles
@@ -154,6 +155,7 @@ class FileDispatch:
         DataTag.FUSION_ADD_INFO: get_ge_fusion_add_info_compiles(),
         DataTag.MEMORY_APPLICATION: get_ge_memory_application_info_compiles(),
         DataTag.CTX_ID: get_ge_ctx_id_info_compiles(),
+        DataTag.AICPU_ADD_INFO:get_aicpu_compiles(),
         DataTag.NANO_MODEL_EXEOM: get_nano_model_exeom_compiles(),
         DataTag.NANO_STARS_PROFILE: get_nano_stars_profile_compiles(),
         DataTag.DBG_FILE: get_dbg_file_compiles(),

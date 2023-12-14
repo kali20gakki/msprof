@@ -227,6 +227,7 @@ class FileNameManagerConstant:
     FUSION_ADD_INFO_PATTERN = r"^(unaging|aging)\.additional\.fusion_op_info\.slice_\d+"
     MEMORY_APPLICATION_FILE_PATTERN = r"^(unaging|aging)\.additional\.memory_application\.slice_\d+"
     CTX_ID_FILE_PATTERN = r"^(unaging|aging)\.additional\.context_id_info\.slice_\d+"
+    AICPU_FILE_PATTERN = r"^aging\.additional\.data_preprocess\.slice_\d+"
 
     # nano
     NANO_MODEL_EXEOM_PATTERN = r"^unaging\.additional\.model_exeom\.slice_\d+"
@@ -983,6 +984,14 @@ def get_ge_ctx_id_info_compiles() -> tuple:
     :return: ge ctx id info files regex
     """
     return (re.compile(FileNameManagerConstant.CTX_ID_FILE_PATTERN),)
+
+
+def get_aicpu_compiles() -> tuple:
+    """
+    get aicpu files regex compiles
+    :return: aicpu files regex
+    """
+    return (re.compile(FileNameManagerConstant.AICPU_FILE_PATTERN),)
 
 
 def get_nano_model_exeom_compiles() -> tuple:
