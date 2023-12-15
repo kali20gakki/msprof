@@ -9,7 +9,6 @@ from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.msprof_exception import ProfException
-from common_func.msvp_common import float_calculate
 from msconfig.config_manager import ConfigManager
 from msmodel.interface.base_model import BaseModel
 
@@ -18,9 +17,7 @@ class HbmModel(BaseModel, ABC):
     """
     acsq task model class
     """
-    HBMC = 256
-    KILOBYTE = 1024.0
-    HBM_EVENT = 8
+    SCALE = 0.000030517578125  # equal to HBMC(256) / HBM_EVENT(8) / KILOBYTE(1024.0) / KILOBYTE(1024.0)
 
     def __init__(self: any, result_dir: str, db_name: str, table_list: list) -> None:
         super().__init__(result_dir, db_name, table_list)
@@ -85,13 +82,11 @@ class HbmModel(BaseModel, ABC):
             pass
 
     def _get_hbm_data(self: any, bw_data: list, check_len: int) -> list:
-        formula_result = float(float_calculate([self.HBMC, self.HBM_EVENT,
-                                                self.KILOBYTE, self.KILOBYTE], '/'))
         data = []
         for i, _ in enumerate(bw_data):
             if bw_data[i][1] - bw_data[i - check_len][1]:
                 dur_time = bw_data[i][1] - bw_data[i - check_len][1]
-                tmp_counts = bw_data[i][2] * formula_result / dur_time * Constant.TIME_RATE
+                tmp_counts = bw_data[i][2] * self.SCALE / dur_time * Constant.TIME_RATE
                 sys_counts = max((tmp_counts, 0))
                 item = (bw_data[i][0], bw_data[i][1], sys_counts, bw_data[i][3], bw_data[i][4])
             else:
