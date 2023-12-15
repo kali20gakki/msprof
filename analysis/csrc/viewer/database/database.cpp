@@ -18,6 +18,167 @@ namespace Analysis {
 namespace Viewer {
 namespace Database {
 
+namespace {
+    const TABLE_COLS ApiEventData = {
+        {"struct_type", SQL_TEXT_TYPE},
+        {"id", SQL_TEXT_TYPE},
+        {"level", SQL_TEXT_TYPE},
+        {"thread_id", SQL_INTEGER_TYPE},
+        {"item_id", SQL_TEXT_TYPE},
+        {"start", SQL_INTEGER_TYPE},
+        {"end", SQL_INTEGER_TYPE},
+        {"connection_id", SQL_INTEGER_TYPE}
+    };
+
+    const TABLE_COLS HostTask = {
+        {"model_id", SQL_INTEGER_TYPE},
+        {"request_id", SQL_INTEGER_TYPE},
+        {"stream_id", SQL_INTEGER_TYPE},
+        {"task_id", SQL_INTEGER_TYPE},
+        {"context_ids", SQL_TEXT_TYPE},
+        {"batch_id", SQL_INTEGER_TYPE},
+        {"task_type", SQL_TEXT_TYPE},
+        {"device_id", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"connection_id", SQL_INTEGER_TYPE}
+    };
+
+    const TABLE_COLS TaskInfo = {
+        {"model_id", SQL_INTEGER_TYPE},
+        {"op_name", SQL_TEXT_TYPE},
+        {"stream_id", SQL_INTEGER_TYPE},
+        {"task_id", SQL_INTEGER_TYPE},
+        {"block_dim", SQL_INTEGER_TYPE},
+        {"mix_block_dim", SQL_INTEGER_TYPE},
+        {"op_state", SQL_TEXT_TYPE},
+        {"task_type", SQL_TEXT_TYPE},
+        {"op_type", SQL_TEXT_TYPE},
+        {"index_id", SQL_INTEGER_TYPE},
+        {"thread_id", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"batch_id", SQL_INTEGER_TYPE},
+        {"tensor_num", SQL_INTEGER_TYPE},
+        {"input_formats", SQL_TEXT_TYPE},
+        {"input_data_types", SQL_TEXT_TYPE},
+        {"input_shapes", SQL_TEXT_TYPE},
+        {"output_formats", SQL_TEXT_TYPE},
+        {"output_data_types", SQL_TEXT_TYPE},
+        {"output_shapes", SQL_TEXT_TYPE},
+        {"device_id", SQL_INTEGER_TYPE},
+        {"context_id", SQL_INTEGER_TYPE},
+        {"op_flag", SQL_TEXT_TYPE}
+    };
+
+    const TABLE_COLS StepInfo = {
+        {"model_id", SQL_INTEGER_TYPE},
+        {"thread_id", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"cur_iter_num", SQL_INTEGER_TYPE},
+        {"tag", SQL_TEXT_TYPE}
+    };
+
+    const TABLE_COLS GeHashInfo = {
+        {"hash_key", SQL_TEXT_TYPE},
+        {"hash_value", SQL_TEXT_TYPE}
+    };
+
+    const TABLE_COLS TypeHashInfo = {
+        {"hash_key", SQL_TEXT_TYPE},
+        {"hash_value", SQL_TEXT_TYPE},
+        {"level", SQL_TEXT_TYPE}
+    };
+
+    const TABLE_COLS HCCLTask = {
+        {"model_id", SQL_INTEGER_TYPE},
+        {"index_id", SQL_INTEGER_TYPE},
+        {"name", SQL_TEXT_TYPE},
+        {"group_name", SQL_TEXT_TYPE},
+        {"plane_id", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"duration", SQL_REAL_TYPE},
+        {"stream_id", SQL_INTEGER_TYPE},
+        {"task_id", SQL_INTEGER_TYPE},
+        {"context_id", SQL_INTEGER_TYPE},
+        {"batch_id", SQL_INTEGER_TYPE},
+        {"device_id", SQL_INTEGER_TYPE},
+        {"is_master", SQL_INTEGER_TYPE},
+        {"struct_type", SQL_TEXT_TYPE},
+        {"local_rank", SQL_INTEGER_TYPE},
+        {"remote_rank", SQL_INTEGER_TYPE},
+        {"transport_type", SQL_TEXT_TYPE},
+        {"size", SQL_REAL_TYPE},
+        {"data_type", SQL_TEXT_TYPE},
+        {"link_type", SQL_TEXT_TYPE},
+        {"notify_id", SQL_INTEGER_TYPE}
+    };
+
+    const TABLE_COLS HCCLOP = {
+        {"device_id", SQL_INTEGER_TYPE},
+        {"model_id", SQL_INTEGER_TYPE},
+        {"index_id", SQL_INTEGER_TYPE},
+        {"thread_id", SQL_INTEGER_TYPE},
+        {"op_name", SQL_TEXT_TYPE},
+        {"task_type", SQL_TEXT_TYPE},
+        {"op_type", SQL_TEXT_TYPE},
+        {"begin", SQL_TEXT_TYPE},
+        {"end", SQL_REAL_TYPE},
+        {"is_dynamic", SQL_INTEGER_TYPE},
+        {"connection_id", SQL_INTEGER_TYPE}
+    };
+
+    const TABLE_COLS HostTaskFlip = {
+        {"stream_id", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"task_id", SQL_INTEGER_TYPE},
+        {"flip_num", SQL_INTEGER_TYPE}
+    };
+
+    const TABLE_COLS AscendTask = {
+        {"model_id", SQL_INTEGER_TYPE},
+        {"index_id", SQL_INTEGER_TYPE},
+        {"stream_id", SQL_INTEGER_TYPE},
+        {"task_id", SQL_INTEGER_TYPE},
+        {"context_id", SQL_INTEGER_TYPE},
+        {"batch_id", SQL_INTEGER_TYPE},
+        {"start_time", SQL_NUMERIC_TYPE},
+        {"duration", SQL_NUMERIC_TYPE},
+        {"host_task_type", SQL_TEXT_TYPE},
+        {"device_task_type", SQL_TEXT_TYPE},
+        {"connection_id", SQL_INTEGER_TYPE}
+    };
+
+    const TABLE_COLS HCCLSingleDevice = {
+        {"model_id", SQL_INTEGER_TYPE},
+        {"index_id", SQL_INTEGER_TYPE},
+        {"op_name", SQL_TEXT_TYPE},
+        {"iteration", SQL_INTEGER_TYPE},
+        {"hccl_name", SQL_TEXT_TYPE},
+        {"group_name", SQL_TEXT_TYPE},
+        {"first_timestamp", SQL_NUMERIC_TYPE},
+        {"plane_id", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"duration", SQL_REAL_TYPE},
+        {"is_dynamic", SQL_REAL_TYPE},
+        {"task_type", SQL_TEXT_TYPE},
+        {"op_type", SQL_TEXT_TYPE},
+        {"connection_id", SQL_INTEGER_TYPE},
+        {"is_master", SQL_INTEGER_TYPE},
+        {"stream_id", SQL_INTEGER_TYPE},
+        {"task_id", SQL_INTEGER_TYPE},
+        {"struct_type", SQL_TEXT_TYPE},
+        {"duration_estimated", SQL_INTEGER_TYPE},
+        {"local_rank", SQL_INTEGER_TYPE},
+        {"remote_rank", SQL_INTEGER_TYPE},
+        {"transport_type", SQL_TEXT_TYPE},
+        {"size", SQL_INTEGER_TYPE},
+        {"data_type", SQL_TEXT_TYPE},
+        {"link_type", SQL_TEXT_TYPE},
+        {"bandwidth", SQL_REAL_TYPE},
+        {"context_id", SQL_INTEGER_TYPE},
+        {"notify_id", SQL_INTEGER_TYPE}
+    };
+}
+
 std::string Database::GetDBName() const
 {
     return dbName_;
@@ -36,136 +197,52 @@ TABLE_COLS Database::GetTableCols(const std::string &tableName)
 ApiEventDB::ApiEventDB()
 {
     dbName_ = "api_event.db";
-    tableColNames_["ApiEventData"] = {
-        {"struct_type", sqlTextType},
-        {"id", sqlTextType},
-        {"level", sqlTextType},
-        {"thread_id", sqlIntegerType},
-        {"item_id", sqlTextType},
-        {"start", sqlIntegerType},
-        {"end", sqlIntegerType},
-        {"connection_id", sqlIntegerType}
-    };
+    tableColNames_["ApiEventData"] = ApiEventData;
 }
 
 RuntimeDB::RuntimeDB()
 {
     dbName_ = "runtime.db";
-    tableColNames_["HostTask"] = {
-        {"model_id", sqlIntegerType},
-        {"request_id", sqlIntegerType},
-        {"stream_id", sqlIntegerType},
-        {"task_id", sqlIntegerType},
-        {"context_ids", sqlTextType},
-        {"batch_id", sqlIntegerType},
-        {"task_type", sqlTextType},
-        {"device_id", sqlIntegerType},
-        {"timestamp", sqlNumericType},
-        {"connection_id", sqlIntegerType}
-    };
+    tableColNames_["HostTask"] = HostTask;
 }
 
 GEInfoDB::GEInfoDB()
 {
     dbName_ = "ge_info.db";
-    tableColNames_["TaskInfo"] = {
-        {"model_id", sqlIntegerType},
-        {"op_name", sqlTextType},
-        {"stream_id", sqlIntegerType},
-        {"task_id", sqlIntegerType},
-        {"block_dim", sqlIntegerType},
-        {"mix_block_dim", sqlIntegerType},
-        {"op_state", sqlTextType},
-        {"task_type", sqlTextType},
-        {"op_type", sqlTextType},
-        {"index_id", sqlIntegerType},
-        {"thread_id", sqlIntegerType},
-        {"timestamp", sqlNumericType},
-        {"batch_id", sqlIntegerType},
-        {"tensor_num", sqlIntegerType},
-        {"input_formats", sqlTextType},
-        {"input_data_types", sqlTextType},
-        {"input_shapes", sqlTextType},
-        {"output_formats", sqlTextType},
-        {"output_data_types", sqlTextType},
-        {"output_shapes", sqlTextType},
-        {"device_id", sqlIntegerType},
-        {"context_id", sqlIntegerType},
-        {"op_flag", sqlTextType}
-    };
-    tableColNames_["StepInfo"] = {
-        {"model_id", sqlIntegerType},
-        {"thread_id", sqlIntegerType},
-        {"timestamp", sqlNumericType},
-        {"cur_iter_num", sqlIntegerType},
-        {"tag", sqlTextType}
-    };
+    tableColNames_["TaskInfo"] = TaskInfo;
+    tableColNames_["StepInfo"] = StepInfo;
 }
 
 HashDB::HashDB()
 {
     dbName_ = "ge_hash.db";
-    tableColNames_["GeHashInfo"] = {
-        {"hash_key", sqlTextType},
-        {"hash_value", sqlTextType}
-    };
-    tableColNames_["TypeHashInfo"] = {
-        {"hash_key", sqlTextType},
-        {"hash_value", sqlTextType},
-        {"level", sqlTextType}
-    };
+    tableColNames_["GeHashInfo"] = GeHashInfo;
+    tableColNames_["TypeHashInfo"] = TypeHashInfo;
 }
 
 HCCLDB::HCCLDB()
 {
     dbName_ = "hccl.db";
-    tableColNames_["HCCLTask"] = {
-        {"model_id", sqlIntegerType},
-        {"index_id", sqlIntegerType},
-        {"name", sqlTextType},
-        {"group_name", sqlTextType},
-        {"plane_id", sqlIntegerType},
-        {"timestamp", sqlNumericType},
-        {"duration", sqlRealType},
-        {"stream_id", sqlIntegerType},
-        {"task_id", sqlIntegerType},
-        {"context_id", sqlIntegerType},
-        {"batch_id", sqlIntegerType},
-        {"device_id", sqlIntegerType},
-        {"is_master", sqlIntegerType},
-        {"struct_type", sqlTextType},
-        {"local_rank", sqlIntegerType},
-        {"remote_rank", sqlIntegerType},
-        {"transport_type", sqlTextType},
-        {"size", sqlRealType},
-        {"data_type", sqlTextType},
-        {"link_type", sqlTextType},
-        {"notify_id", sqlIntegerType}
-    };
-    tableColNames_["HCCLOP"] = {
-        {"device_id", sqlIntegerType},
-        {"model_id", sqlIntegerType},
-        {"index_id", sqlIntegerType},
-        {"thread_id", sqlIntegerType},
-        {"op_name", sqlTextType},
-        {"task_type", sqlTextType},
-        {"op_type", sqlTextType},
-        {"begin", sqlTextType},
-        {"end", sqlRealType},
-        {"is_dynamic", sqlIntegerType},
-        {"connection_id", sqlIntegerType}
-    };
+    tableColNames_["HCCLTask"] = HCCLTask;
+    tableColNames_["HCCLOP"] = HCCLOP;
 }
 
 RtsTrackDB::RtsTrackDB()
 {
     dbName_ = "rts_track.db";
-    tableColNames_["HostTaskFlip"] = {
-        {"stream_id", sqlIntegerType},
-        {"timestamp", sqlNumericType},
-        {"task_id", sqlIntegerType},
-        {"flip_num", sqlIntegerType}
-    };
+    tableColNames_["HostTaskFlip"] = HostTaskFlip;
+}
+
+AscendTaskDB::AscendTaskDB()
+{
+    dbName_ = "ascend_task.db";
+    tableColNames_["AscendTask"] = AscendTask;
+}
+
+HCCLSingleDeviceDB::HCCLSingleDeviceDB()
+{
+    dbName_ = "hccl_single_device.db";
+    tableColNames_["HCCLSingleDevice"] = HCCLSingleDevice;
 }
 } // namespace Database
 } // namespace Viewer
