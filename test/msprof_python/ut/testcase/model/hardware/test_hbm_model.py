@@ -43,7 +43,7 @@ class TestHbmModel(unittest.TestCase):
                        "timestamp REAL,counts INT,event_type TEXT,hbmid INT)"
         insert_sql = "insert into {} values (?,?,?,?,?,?)".format('HBMOriginalData')
         data = ((5, 0, 2, 3, 4, 5), (5, 0, 0, 0, 0, 0),
-                (5, 0, 1, 1, 1, 1), (5, 0, 3, 3, 3, 3))
+                (5, 0, 1, 1, 1, 1), (5, 0, 3, 3, 3, 3), (5, 0, 1, 2, 3, 3))
         db_manager = DBManager()
         res = db_manager.create_table('hbm.db', original_sql, insert_sql, data)
         check = HbmModel('test', 'hbm.db', ['HBMbwData', 'HBMOriginalData'])
