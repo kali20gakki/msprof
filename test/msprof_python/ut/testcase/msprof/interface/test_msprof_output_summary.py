@@ -247,11 +247,24 @@ class TestMsprofOutputSummary(unittest.TestCase):
                 mock.patch('multiprocessing.pool.Pool.join'):
             MsprofOutputSummary('test')._save_timeline_data("msprof", ["test"])
 
-    def test_insert_json_data_when_normal_then_pass(self):
-        with mock.patch('common_func.file_slice_helper.FileSliceHelper.insert_data'), \
-                mock.patch('common_func.file_slice_helper.FileSliceHelper.dump_json_data'):
+    def test_insert_json_data_when_device_is_1_then_copy(self):
+        with mock.patch('shutil.copy'):
             helper = FileSliceHelper("test", "msprof", "timeline")
-            MsprofOutputSummary('test')._insert_json_data(["msprof_1.json"], helper, True, 1)
+            check = MsprofOutputSummary('test')
+            helper.insert_data = mock.Mock()
+            helper.dump_json_data = mock.Mock()
+            check._insert_json_data(["msprof_slice_0_20231216.json"], helper, True, 1)
+            helper.insert_data.assert_not_called()
+            helper.dump_json_data.assert_not_called()
+
+    def test_insert_json_data_when_device_more_than_1_then_merge_json(self):
+        helper = FileSliceHelper("test", "msprof", "timeline")
+        check = MsprofOutputSummary('test')
+        helper.insert_data = mock.Mock()
+        helper.dump_json_data = mock.Mock()
+        check._insert_json_data(["msprof_slice_0_20231216.json", "msprof_slice_0_20231216.json"], helper, True, 1)
+        helper.insert_data.assert_called()
+        helper.dump_json_data.assert_called_once()
 
     def test_get_timeline_file_with_slice_when_not_exist_path_then_return_empty(self):
         with mock.patch('os.path.realpath', return_value='test'), \
