@@ -106,13 +106,6 @@ class MsprofOutputSummary:
         context += "\n"
         return context
 
-    @staticmethod
-    def _insert_json_data(file_list: list, helper: FileSliceHelper,
-                          is_need_slice: bool, slice_index: int):
-        for _file_name in file_list:
-            helper.insert_data(Utils.get_json_data(_file_name))
-        helper.dump_json_data(slice_index, is_need_slice=is_need_slice)
-
     @classmethod
     def get_newest_file_list(cls, file_list, data_type: str) -> list:
         """
@@ -240,7 +233,7 @@ class MsprofOutputSummary:
                 continue
             summary_file_set.update(self._get_summary_file_name(sub_path))
 
-        pool = multiprocessing.Pool(processes=2)
+        pool = multiprocessing.Pool(processes=4)
         for summary_file in summary_file_set:
             try:
                 pool.apply_async(func=self._save_summary_data,
@@ -341,7 +334,7 @@ class MsprofOutputSummary:
                 self._get_timeline_file_with_slice(targe_name, sub_path, timeline_file_dict)
             slice_max_count = max(slice_count, slice_max_count)
 
-        pool = multiprocessing.Pool(processes=2)
+        pool = multiprocessing.Pool(processes=4)
         is_need_slice = True if slice_max_count else False
         for index in range(slice_max_count + 1):
             helper = FileSliceHelper(self._output_dir, targe_name, MsProfCommonConstant.TIMELINE)
@@ -355,6 +348,24 @@ class MsprofOutputSummary:
                 return
         pool.close()
         pool.join()
+
+    def _insert_json_data(self, file_list: list, helper: FileSliceHelper,
+                          is_need_slice: bool, slice_index: int):
+        """
+        1 one device only have one "slice_0"
+        2 if only one device, then no need to merge file, copy will be better.
+        """
+        if len(file_list) == 1:
+            params = {
+                StrConstant.PARAM_RESULT_DIR: self._output_dir,
+                StrConstant.PARAM_DATA_TYPE: self._get_file_name(os.path.basename(file_list[0])),
+                StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.TIMELINE
+            }
+            shutil.copy(file_list[0], make_export_file_name(params, slice_index, slice_switch=is_need_slice))
+            return
+        for _file_name in file_list:
+            helper.insert_data(Utils.get_json_data(_file_name))
+        helper.dump_json_data(slice_index, is_need_slice=is_need_slice)
 
     def _get_timeline_file_with_slice(self, target_name: str, dir_path: str, timeline_file_dict: dict) -> tuple:
         """
