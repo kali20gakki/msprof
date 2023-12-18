@@ -23,6 +23,7 @@ namespace Viewer {
 namespace Database {
 
 using TableColumn = Analysis::Viewer::Database::TableColumn;
+using TableColumns = std::vector<TableColumn>;
 const std::string SQL_TEXT_TYPE = "TEXT";
 const std::string SQL_INTEGER_TYPE = "INTEGER";
 const std::string SQL_NUMERIC_TYPE = "NUMERIC";
@@ -35,11 +36,11 @@ public:
     // 获取该DB实际落盘的文件名
     std::string GetDBName() const;
     // 获取该DB指定表中字段名
-    std::vector<TableColumn> GetTableCols(const std::string &tableName);
+    TableColumns GetTableCols(const std::string &tableName);
 
 protected:
     std::string dbName_;
-    std::unordered_map<std::string, std::vector<TableColumn>> tableColNames_;
+    std::unordered_map<std::string, TableColumns> tableColNames_;
 };
 
 class ApiEventDB : public Database {
