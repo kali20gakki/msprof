@@ -30,7 +30,7 @@ using Tree = Analysis::Entities::Tree;
 using TreeNode = Analysis::Entities::TreeNode;
 
 using HostTasks = std::vector<std::shared_ptr<HostTask>>;
-using HCCLBigOps = std::vector<std::shared_ptr<Operator>>;
+using HCCLBigOps = std::unordered_map<uint32_t, std::vector<std::shared_ptr<Operator>>>;
 
 class TreeAnalyzer {
 public:

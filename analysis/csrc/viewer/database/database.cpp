@@ -19,7 +19,7 @@ namespace Viewer {
 namespace Database {
 
 namespace {
-    const TABLE_COLS ApiEventData = {
+    const TableColumns ApiEventData = {
         {"struct_type", SQL_TEXT_TYPE},
         {"id", SQL_TEXT_TYPE},
         {"level", SQL_TEXT_TYPE},
@@ -30,7 +30,7 @@ namespace {
         {"connection_id", SQL_INTEGER_TYPE}
     };
 
-    const TABLE_COLS HostTask = {
+    const TableColumns HostTask = {
         {"model_id", SQL_INTEGER_TYPE},
         {"request_id", SQL_INTEGER_TYPE},
         {"stream_id", SQL_INTEGER_TYPE},
@@ -43,7 +43,7 @@ namespace {
         {"connection_id", SQL_INTEGER_TYPE}
     };
 
-    const TABLE_COLS TaskInfo = {
+    const TableColumns TaskInfo = {
         {"model_id", SQL_INTEGER_TYPE},
         {"op_name", SQL_TEXT_TYPE},
         {"stream_id", SQL_INTEGER_TYPE},
@@ -69,7 +69,7 @@ namespace {
         {"op_flag", SQL_TEXT_TYPE}
     };
 
-    const TABLE_COLS StepInfo = {
+    const TableColumns StepInfo = {
         {"model_id", SQL_INTEGER_TYPE},
         {"thread_id", SQL_INTEGER_TYPE},
         {"timestamp", SQL_NUMERIC_TYPE},
@@ -77,18 +77,18 @@ namespace {
         {"tag", SQL_TEXT_TYPE}
     };
 
-    const TABLE_COLS GeHashInfo = {
+    const TableColumns GeHashInfo = {
         {"hash_key", SQL_TEXT_TYPE},
         {"hash_value", SQL_TEXT_TYPE}
     };
 
-    const TABLE_COLS TypeHashInfo = {
+    const TableColumns TypeHashInfo = {
         {"hash_key", SQL_TEXT_TYPE},
         {"hash_value", SQL_TEXT_TYPE},
         {"level", SQL_TEXT_TYPE}
     };
 
-    const TABLE_COLS HCCLTask = {
+    const TableColumns HCCLTask = {
         {"model_id", SQL_INTEGER_TYPE},
         {"index_id", SQL_INTEGER_TYPE},
         {"name", SQL_TEXT_TYPE},
@@ -112,7 +112,7 @@ namespace {
         {"notify_id", SQL_INTEGER_TYPE}
     };
 
-    const TABLE_COLS HCCLOP = {
+    const TableColumns HCCLOP = {
         {"device_id", SQL_INTEGER_TYPE},
         {"model_id", SQL_INTEGER_TYPE},
         {"index_id", SQL_INTEGER_TYPE},
@@ -126,14 +126,14 @@ namespace {
         {"connection_id", SQL_INTEGER_TYPE}
     };
 
-    const TABLE_COLS HostTaskFlip = {
+    const TableColumns HostTaskFlip = {
         {"stream_id", SQL_INTEGER_TYPE},
         {"timestamp", SQL_NUMERIC_TYPE},
         {"task_id", SQL_INTEGER_TYPE},
         {"flip_num", SQL_INTEGER_TYPE}
     };
 
-    const TABLE_COLS AscendTask = {
+    const TableColumns AscendTask = {
         {"model_id", SQL_INTEGER_TYPE},
         {"index_id", SQL_INTEGER_TYPE},
         {"stream_id", SQL_INTEGER_TYPE},
@@ -147,7 +147,7 @@ namespace {
         {"connection_id", SQL_INTEGER_TYPE}
     };
 
-    const TABLE_COLS HCCLSingleDevice = {
+    const TableColumns HCCLSingleDevice = {
         {"model_id", SQL_INTEGER_TYPE},
         {"index_id", SQL_INTEGER_TYPE},
         {"op_name", SQL_TEXT_TYPE},
@@ -184,7 +184,7 @@ std::string Database::GetDBName() const
     return dbName_;
 }
 
-TABLE_COLS Database::GetTableCols(const std::string &tableName)
+TableColumns Database::GetTableCols(const std::string &tableName)
 {
     auto iter = tableColNames_.find(tableName);
     if (iter == tableColNames_.end()) {
