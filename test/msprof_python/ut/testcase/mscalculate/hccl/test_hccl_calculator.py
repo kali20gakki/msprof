@@ -50,7 +50,7 @@ class TestHcclCalculator(unittest.TestCase):
             check.calculate()
             hccl_data = check._hccl_data
             hccl_op_report_data = check._hccl_op_report_data
-            self.assertEqual(28, len(hccl_data[0]))
+            self.assertEqual(29, len(hccl_data[0]))
             self.assertEqual([("all_reduce", 1.0, 1.0, 1.0, 1.0, 1.0, 100.0)], hccl_op_report_data)
 
     def test_calculate_should_update_both_hccl_data_and_hccl_op_report_data_when_op_type_invalid(self):
@@ -61,7 +61,7 @@ class TestHcclCalculator(unittest.TestCase):
             check.calculate()
             hccl_data = check._hccl_data
             hccl_op_report_data = check._hccl_op_report_data
-            self.assertEqual(28, len(hccl_data[0]))
+            self.assertEqual(29, len(hccl_data[0]))
             self.assertEqual([], hccl_op_report_data)
 
     def test_generate_hccl_op_info_should_return_three_data_when_the_input_len_is_three(self):
