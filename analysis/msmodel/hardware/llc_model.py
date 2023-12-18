@@ -159,8 +159,7 @@ class LlcModel(BaseModel, ABC):
         :param time_stop: stop timestamp
         :return:
         """
-        return float_calculate([float_calculate([time_start, time_stop], '-'),
-                                self.LLC_CACHE_SIZE, self.LLC_TO_SECOND], '/')
+        return (time_start - time_stop) / self.LLC_CACHE_SIZE / self.LLC_TO_SECOND
 
     def calculate_metrics(self: any) -> None:
         """

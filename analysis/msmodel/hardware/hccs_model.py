@@ -61,7 +61,7 @@ class HccsModel(BaseModel, ABC):
     def _insert_metrics_data(self: any, device_id: str, original_data: list) -> None:
         for item in zip(original_data[1:] + original_data[:1], original_data):
             _timestamp = item[0][0]
-            time_diff = float_calculate([(item[0][0] - item[1][0]), Constant.BYTE_NS_TO_MB_S], "/")
+            time_diff = (item[0][0] - item[1][0]) / Constant.BYTE_NS_TO_MB_S
 
             if item[0][1] >= item[1][1]:
                 _tx_throughout = item[0][1] - item[1][1]
