@@ -91,7 +91,7 @@ class HcclViewModel(ViewModel):
               "a.duration as duration_estimated, a.local_rank as local_rank, a.remote_rank as remote_rank," \
               "a.transport_type as transport_type, a.size as size, a.data_type as data_type," \
               " a.link_type as link_type," \
-              "a.context_id as context_id, a.notify_id as notify_id," \
+              "a.context_id as context_id, a.notify_id as notify_id, a.batch_id as batch_id," \
               "b.connection_id as connection_id, b.duration as duration from {0} as a inner join " \
               "{1} as b on " \
               "a.stream_id = b.stream_id " \

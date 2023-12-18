@@ -681,6 +681,7 @@ class TablesConfig(MetaConfig):
             ('bandwidth', 'REAL,null'),
             ('context_id', 'INTEGER, null'),
             ('notify_id', 'INTEGER, null'),
+            ('batch_id', 'INTEGER, null'),
         ],
         'HCCLOPMap': [
             ('device_id', 'INTEGER, null'),
