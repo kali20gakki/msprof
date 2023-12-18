@@ -16,29 +16,33 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include "connection.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
+namespace Drafts {
 
-using TABLE_COLS = std::vector<std::pair<std::string, std::string>>;
-const std::string SQL_TEXT_TYPE = "TEXT";
-const std::string SQL_INTEGER_TYPE = "INTEGER";
-const std::string SQL_NUMERIC_TYPE = "NUMERIC";
-const std::string SQL_REAL_TYPE = "REAL";
+using TableColumn = Analysis::Viewer::Database::TableColumn;
 
 // DB中Table映射基类
 class Database {
 public:
     Database() = default;
+
     // 获取该DB实际落盘的文件名
     std::string GetDBName() const;
+
     // 获取该DB指定表中字段名
-    TABLE_COLS GetTableCols(const std::string &tableName);
+    std::vector<TableColumn> GetTableCols(const std::string &tableName);
 
 protected:
     std::string dbName_;
-    std::unordered_map<std::string, TABLE_COLS> tableColNames_;
+    std::unordered_map<std::string, std::vector<TableColumn>> tableColNames_;
+    const std::string sqlTextType = "TEXT";
+    const std::string sqlIntegerType = "INTEGER";
+    const std::string sqlNumericType = "NUMERIC";
+    const std::string sqlRealType = "REAL";
 };
 
 class ApiEventDB : public Database {
@@ -70,17 +74,7 @@ class RtsTrackDB : public Database {
 public:
     RtsTrackDB();
 };
-
-class AscendTaskDB : public Database {
-public:
-    AscendTaskDB();
-};
-
-class HCCLSingleDeviceDB : public Database {
-public:
-    HCCLSingleDeviceDB();
-};
-
+} // namespace Drafts
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis

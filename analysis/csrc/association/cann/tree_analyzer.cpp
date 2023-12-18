@@ -14,7 +14,17 @@
 namespace Analysis {
 namespace Association {
 namespace Cann {
+TreeAnalyzer::TreeAnalyzer(const std::shared_ptr<Tree> &tree) {}
 
+HCCLBigOps &TreeAnalyzer::GetHcclBigOps() {}
+
+HostTasks &TreeAnalyzer::GetTasks() {}
+
+HostTasks &TreeAnalyzer::GetComputeTasks() {}
+
+HostTasks &TreeAnalyzer::GetHCCLTasks() {}
+
+void TreeAnalyzer::Analyze() {}
 } // namespace Cann
 } // namespace Association
 } // namespace Analysis
