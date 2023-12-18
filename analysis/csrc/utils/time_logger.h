@@ -24,14 +24,14 @@ public:
     TimeLogger(const std::string tag)
         : tag_(tag), startTime_(std::chrono::high_resolution_clock::now())
     {
-        INFO("% start", tag_);
+        PRINT_INFO("% start", tag_);
     }
 
     ~TimeLogger()
     {
         auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::high_resolution_clock::now() - startTime_).count();
-        INFO("% end, cost time = % ms", tag_, dur);
+        PRINT_INFO("% end, cost time = % ms", tag_, dur);
     }
 private:
     std::chrono::time_point<std::chrono::high_resolution_clock> startTime_;

@@ -18,27 +18,27 @@ namespace Viewer {
 namespace Database {
 
 namespace {
-    const TABLE_COLS STRING_IDS = {
+    const TableColumns STRING_IDS = {
         {"id", SQL_INTEGER_TYPE},
         {"value", SQL_TEXT_TYPE}
     };
 
-    const TABLE_COLS TARGET_INFO_SESSION_START_TIME = {
+    const TableColumns TARGET_INFO_SESSION_START_TIME = {
         {"startTimeNs", SQL_INTEGER_TYPE},
         {"baseTimeNs", SQL_INTEGER_TYPE}
     };
 
-    const TABLE_COLS TARGET_INFO_GPU = {
+    const TableColumns TARGET_INFO_GPU = {
         {"id", SQL_INTEGER_TYPE},
         {"name", SQL_TEXT_TYPE}
     };
 
-    const TABLE_COLS ENUM_API_LEVEL = {
+    const TableColumns ENUM_API_LEVEL = {
         {"id", SQL_INTEGER_TYPE},
         {"name", SQL_TEXT_TYPE}
     };
 
-    const TABLE_COLS TASK = {
+    const TableColumns TASK = {
         {"start", SQL_INTEGER_TYPE},
         {"end", SQL_INTEGER_TYPE},
         {"name", SQL_INTEGER_TYPE},
@@ -53,7 +53,7 @@ namespace {
         {"modelId", SQL_INTEGER_TYPE}
     };
 
-    const TABLE_COLS COMPUTE_TASK_INFO = {
+    const TableColumns COMPUTE_TASK_INFO = {
         {"name", SQL_INTEGER_TYPE},
         {"correlationId", SQL_INTEGER_TYPE},
         {"block_dim", SQL_INTEGER_TYPE},
@@ -68,7 +68,7 @@ namespace {
         {"outputShapes", SQL_INTEGER_TYPE}
     };
 
-    const TABLE_COLS COMMUNICATION_TASK_INFO = {
+    const TableColumns COMMUNICATION_TASK_INFO = {
         {"name", SQL_INTEGER_TYPE},
         {"correlationId", SQL_INTEGER_TYPE},
         {"taskType", SQL_INTEGER_TYPE},
@@ -84,7 +84,7 @@ namespace {
         {"linkType", SQL_INTEGER_TYPE}
     };
 
-    const TABLE_COLS API = {
+    const TableColumns API = {
         {"start", SQL_INTEGER_TYPE},
         {"end", SQL_INTEGER_TYPE},
         {"level", SQL_INTEGER_TYPE},
