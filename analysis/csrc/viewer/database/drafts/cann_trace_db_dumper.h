@@ -53,7 +53,7 @@ private:
     void DumpHostTasks(const HostTasks &hostTasks);
 
     // 落盘TaskInfo
-    void DumpOpDesc(const HostTasks &kernelTasks);
+    void DumpOpDesc(const HostTasks &computeTasks);
 
     // 落盘HCCLTask
     void DumpHcclTasks(const HostTasks &hcclTasks);
