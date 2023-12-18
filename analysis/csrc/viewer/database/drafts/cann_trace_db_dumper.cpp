@@ -143,9 +143,9 @@ void CANNTraceDBDumper::DumpHostTasks(const HostTasks &hostTasks)
     }
 }
 
-void CANNTraceDBDumper::DumpOpDesc(const HostTasks &kernelTasks)
+void CANNTraceDBDumper::DumpOpDesc(const HostTasks &computeTasks)
 {
-    if (kernelTasks.empty()) {
+    if (computeTasks.empty()) {
         INFO("Empty kernel tasks");
         return;
     }
@@ -159,11 +159,11 @@ void CANNTraceDBDumper::DumpOpDesc(const HostTasks &kernelTasks)
         return;
     }
     TaskInfoData data;
-    if (!Utils::Reserve(data, kernelTasks.size())) {
+    if (!Utils::Reserve(data, computeTasks.size())) {
         result_ = false;
         return;
     }
-    for (const auto &task: kernelTasks) {
+    for (const auto &task: computeTasks) {
         AddTaskInfo(task, data);
     }
     if (!opDescDBRunner.InsertData("TaskInfo", data)) {
@@ -177,12 +177,12 @@ void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInf
                                            const std::shared_ptr<HostTask> &task)
 {
     auto tensorNum = tensorDesc->tensorNum;
-    auto inputFormat = std::vector<std::string>();
-    auto inputDataType = std::vector<std::string>();
-    auto inputShape = std::vector<std::string>();
-    auto outputFormat = std::vector<std::string>();
-    auto outputDataType = std::vector<std::string>();
-    auto outputShape = std::vector<std::string>();
+    std::vector<std::string> inputFormat;
+    std::vector<std::string> inputDataType;
+    std::vector<std::string> inputShape;
+    std::vector<std::string> outputFormat;
+    std::vector<std::string> outputDataType;
+    std::vector<std::string> outputShape;
     for (uint32_t i = 0; i < tensorNum; i++) {
         std::vector<std::string> shapes;
         auto tenosrData = tensorDesc->tensorData[i];
