@@ -95,7 +95,7 @@ void CANNTraceDBDumper::DumpHcclOps(const HCCLBigOps &hcclOps)
                               msprofCompactInfo == nullptr ? -1 : msprofCompactInfo->threadId,
                               HashData::GetInstance().Get(op->name),
                               msprofCompactInfo == nullptr ? "HCCL" : std::to_string(
-                                                               msprofCompactInfo->data.nodeBasicInfo.taskType),
+                                  msprofCompactInfo->data.nodeBasicInfo.taskType),
                               msprofCompactInfo == nullptr ? NA : std::to_string(
                                   msprofCompactInfo->data.nodeBasicInfo.opType),
                               desc->hostTime->start, desc->hostTime->end, isDynamic,
