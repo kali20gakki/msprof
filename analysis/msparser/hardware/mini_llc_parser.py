@@ -89,6 +89,19 @@ class MiniLLCParser(MsMultiProcess):
         self.dsid_tmp["dsid6"] = 0
         self.dsid_tmp["dsid7"] = 0
 
+    def format_metric_data(self) -> OrderedDict:
+        metric_tmp = OrderedDict()
+        metric_tmp["device_id"] = self.metric_tmp["device_id"]
+        metric_tmp["replayid"] = self.metric_tmp["replayid"]
+        metric_tmp["timestamp"] = self.metric_tmp["timestamp"]
+        metric_tmp["read_allocate"] = self.metric_tmp["read_allocate"]
+        metric_tmp["read_noallocate"] = self.metric_tmp["read_noallocate"]
+        metric_tmp["read_hit"] = self.metric_tmp["read_hit"]
+        metric_tmp["write_allocate"] = self.metric_tmp["write_allocate"]
+        metric_tmp["write_noallocate"] = self.metric_tmp["write_noallocate"]
+        metric_tmp["write_hit"] = self.metric_tmp["write_hit"]
+        return metric_tmp
+
     def read_binary_data(self: any, file_name: str, device_id: str, replay_id: str) -> None:
         """
         parsing llc data and insert into llc.db
@@ -103,8 +116,9 @@ class MiniLLCParser(MsMultiProcess):
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error("%s: %s", file_name, err, exc_info=Constant.TRACE_BACK_SWITCH)
             return
-
-        self.llc_data.setdefault('metric', []).append(list(self.metric_tmp.values()))
+        
+        metric_tmp = self.format_metric_data()
+        self.llc_data.setdefault('metric', []).append(list(metric_tmp.values()))
         self.llc_data.setdefault('dsid', []).append(list(self.dsid_tmp.values()))
 
     def start_parsing_data_file(self: any) -> None:
