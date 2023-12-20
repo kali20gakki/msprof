@@ -48,7 +48,7 @@ public:
         reportDB_.database = Utils::MakeShared<ReportDB>();
         reportDB_.dbRunner = Utils::MakeShared<DBRunner>(reportDBPath_);
     };
-    bool Run();
+    virtual bool Run();
     virtual ~TableProcesser() = default;
 protected:
     virtual void Process(const std::string &fileDir) = 0;
