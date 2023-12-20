@@ -175,7 +175,8 @@ namespace {
         {"link_type", SQL_TEXT_TYPE},
         {"bandwidth", SQL_REAL_TYPE},
         {"context_id", SQL_INTEGER_TYPE},
-        {"notify_id", SQL_INTEGER_TYPE}
+        {"notify_id", SQL_INTEGER_TYPE},
+        {"batch_id", SQL_INTEGER_TYPE}
     };
 }
 
