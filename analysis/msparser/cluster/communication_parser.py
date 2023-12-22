@@ -163,9 +163,7 @@ class CommunicationParser(MetaParser):
                 raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
             events = op_events.get(rank_id)
             # only choose main stream for op time analysis parser
-            main_plane_id = self.get_main_plane_id(events)
-            main_events = \
-                [event for event in events if event.plane_id == main_plane_id]
+            main_events = [event for event in events if event.is_master == 1]
             if main_events:
                 self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO] = self.op_time_parser(main_events)
                 self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO][OpAnalysisType.START_TIME] = \

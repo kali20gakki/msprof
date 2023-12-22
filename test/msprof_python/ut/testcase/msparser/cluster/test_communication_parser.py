@@ -11,6 +11,7 @@ import pytest
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_exception import ProfException
 from common_func.platform.chip_manager import ChipManager
+from mscalculate.hccl.hccl_task import HcclTask
 from msparser.cluster.communication_parser import CommunicationParser
 from msparser.cluster.meta_parser import HcclAnalysisTool
 from profiling_bean.prof_enum.chip_model import ChipModel
@@ -94,7 +95,11 @@ class TestCommunicationParser(unittest.TestCase):
 
     def test_parse_ops(self):
         with pytest.raises(ProfException) as err:
-            CommunicationParser({}).parse_ops({1: {}}, 'name')
+            hccl_data_ffts = [
+                HcclTask(plane_id=1, task_id=2, stream_id=3, hccl_name="0", duration=0, timestamp=0,
+                         context_id=5, group_name="1")
+            ]
+            CommunicationParser({}).parse_ops({-1: hccl_data_ffts}, 'hcom_broadcast__752_0_1@9577302986659220752')
             self.assertEqual(ProfException.PROF_INVALID_DATA_ERROR, err.value.code)
 
     def test_op_time_parser(self):
