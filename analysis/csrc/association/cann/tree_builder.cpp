@@ -285,10 +285,10 @@ std::shared_ptr<TreeNode> TreeBuilder::BuildTree(std::shared_ptr<TreeNode> paren
         RecordTreeNode(childNode, event->info.level);
 
         auto childTree = BuildTree(childNode, depth + 1);
-        if (!childTree) {
+        if (childTree != nullptr) {
             childTree->parent = parent;
+            parent->children.emplace_back(childTree);
         }
-        parent->children.emplace_back(childTree);
     }
     return parent;
 }
