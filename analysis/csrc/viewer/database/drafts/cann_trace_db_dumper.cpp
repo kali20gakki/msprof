@@ -100,7 +100,7 @@ void CANNTraceDBDumper::DumpHcclOps(const HCCLBigOps &hcclOps)
                                   msprofCompactInfo->data.nodeBasicInfo.taskType),
                               msprofCompactInfo == nullptr ? NA : std::to_string(
                                   msprofCompactInfo->data.nodeBasicInfo.opType),
-                              desc->hostTime->start, desc->hostTime->end, isDynamic,
+                              desc->beginTime, desc->endTime, isDynamic,
                               connection_id);
         }
     }
