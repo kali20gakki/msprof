@@ -171,8 +171,10 @@ SHARED_PTR_ALIA<AdxTransport> HDCTransportFactory::CreateHdcTransport(HDC_CLIENT
     SHARED_PTR_ALIA<HDCTransport> hdcTransport;
     do {
         MSVP_MAKE_SHARED2_BREAK(hdcTransport, HDCTransport, session, true);
-        std::string moduleName = HDC_PERFCOUNT_MODULE_NAME + "_" + std::to_string(devId);
-        MSVP_MAKE_SHARED2_BREAK(hdcTransport->perfCount_, PerfCount, moduleName, TRANSPORT_PRI_FREQ);
+        if (hdcTransport != nullptr) {
+            std::string moduleName = HDC_PERFCOUNT_MODULE_NAME + "_" + std::to_string(devId);
+            MSVP_MAKE_SHARED2_BREAK(hdcTransport->perfCount_, PerfCount, moduleName, TRANSPORT_PRI_FREQ);
+        }
     } while (0);
 
     if (hdcTransport == nullptr || hdcTransport->perfCount_ == nullptr) {
@@ -198,8 +200,10 @@ SHARED_PTR_ALIA<AdxTransport> HDCTransportFactory::CreateHdcClientTransport(int3
     SHARED_PTR_ALIA<HDCTransport> hdcTransport;
     do {
         MSVP_MAKE_SHARED3_BREAK(hdcTransport, HDCTransport, session, true, client);
-        std::string moduleName = HDC_PERFCOUNT_MODULE_NAME + "_" + std::to_string(hostPid);
-        MSVP_MAKE_SHARED2_BREAK(hdcTransport->perfCount_, PerfCount, moduleName, TRANSPORT_PRI_FREQ);
+        if (hdcTransport != nullptr) {
+            std::string moduleName = HDC_PERFCOUNT_MODULE_NAME + "_" + std::to_string(hostPid);
+            MSVP_MAKE_SHARED2_BREAK(hdcTransport->perfCount_, PerfCount, moduleName, TRANSPORT_PRI_FREQ);
+        }
     } while (0);
 
     if (hdcTransport == nullptr || hdcTransport->perfCount_ == nullptr) {

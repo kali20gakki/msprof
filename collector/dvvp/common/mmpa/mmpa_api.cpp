@@ -6,6 +6,7 @@
  */
  
 #include "mmpa_api.h"
+#include "msprof_dlog.h"
 #include "errno/error_code.h"
 
 namespace Collector {
@@ -501,9 +502,10 @@ int32_t MmWaitPid(MmProcess pid, int32_t *status, int32_t options)
 
 static int32_t LocalGetIfConf(int32_t sock, struct ifconf *ifc)
 {
-    char buf[MMPA_MAX_IF_SIZE] = {0};
-    ifc->ifc_buf = buf;
-    ifc->ifc_len = static_cast<int>(sizeof(buf));
+    if (ifc == nullptr) {
+        MSPROF_LOGE("input conf is nullptr");
+        return PROFILING_FAILED;
+    }
     int32_t ret = ioctl(sock, SIOCGIFCONF, ifc);
     if (ret == PROFILING_FAILED) {
         return PROFILING_FAILED;
@@ -563,7 +565,10 @@ int32_t MmGetMac(MmMacInfo **list, int32_t *count)
     if (sock == PROFILING_FAILED) {
         return PROFILING_FAILED;
     }
+    char buf[MMPA_MAX_IF_SIZE] = {0};
     struct ifconf ifc;
+    ifc.ifc_buf = buf;
+    ifc.ifc_len = static_cast<int>(sizeof(buf));
     int32_t ret = LocalGetIfConf(sock, &ifc);
     if (ret != PROFILING_SUCCESS) {
         close(sock);
@@ -582,6 +587,8 @@ int32_t MmGetMac(MmMacInfo **list, int32_t *count)
         return PROFILING_FAILED;
     }
     if (memset_s(macInfo, needSize, 0, needSize) != EOK) {
+        close(sock);
+        free(macInfo);
         return PROFILING_FAILED;
     }
     ret = LocalGetMacInfo(sock, ifc, macInfo, count);
@@ -1080,6 +1087,7 @@ int32_t MmGetCpuInfo(MmCpuDesc **cpuInfo, int32_t *count)
     }
 
     if (memset_s(pCpuDesc, needSize, 0, needSize) != EOK) {
+        free(pCpuDesc);
         return PROFILING_FAILED;
     }
 
