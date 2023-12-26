@@ -59,3 +59,4 @@ class HcclTask:
     size: int = Constant.DEFAULT_INVALID_VALUE
     bandwidth: int = Constant.DEFAULT_INVALID_VALUE
     notify_id: int = Constant.DEFAULT_INVALID_VALUE
+    rdma_type: str = Constant.NA
