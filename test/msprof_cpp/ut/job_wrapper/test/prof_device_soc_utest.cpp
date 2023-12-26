@@ -344,6 +344,12 @@ TEST_F(PROF_DEVICE_SOC_UTEST, StartProfFailed)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
+
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::ParsePmuConfig)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    
     EXPECT_EQ(PROFILING_FAILED,jobDeviceSoc->StartProf(params));
     EXPECT_EQ(PROFILING_FAILED,jobDeviceSoc->StartProf(params));
     jobDeviceSoc->params_->host_profiling = false;

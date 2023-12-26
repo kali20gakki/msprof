@@ -216,16 +216,14 @@ int JobDeviceSoc::ParseAiCoreConfig(SHARED_PTR_ALIA<PMUEventsConfig> cfg)
         CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.cores = cores;
     }
 
-    if (CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg != nullptr &&
-        CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.cores == nullptr) {
-            MSVP_MAKE_SHARED0_RET(CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.cores,
-                std::vector<int>, PROFILING_FAILED);
+    if (CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.cores == nullptr) {
+        MSVP_MAKE_SHARED0_RET(CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.cores,
+            std::vector<int>, PROFILING_FAILED);
     }
 
-    if (CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg != nullptr &&
-        CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.events == nullptr) {
-            MSVP_MAKE_SHARED0_RET(CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.events,
-                std::vector<std::string>, PROFILING_FAILED);
+    if (CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.events == nullptr) {
+        MSVP_MAKE_SHARED0_RET(CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.events,
+            std::vector<std::string>, PROFILING_FAILED);
     }
     return PROFILING_SUCCESS;
 }
@@ -257,16 +255,14 @@ int JobDeviceSoc::ParseAivConfig(SHARED_PTR_ALIA<PMUEventsConfig> cfg)
         CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.aivCores = cores;
     }
 
-    if (CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg != nullptr &&
-        CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.aivCores == nullptr) {
-            MSVP_MAKE_SHARED0_RET(CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.aivCores,
-                std::vector<int>, PROFILING_FAILED);
+    if (CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.aivCores == nullptr) {
+        MSVP_MAKE_SHARED0_RET(CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.aivCores,
+            std::vector<int>, PROFILING_FAILED);
     }
 
-    if (CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg != nullptr &&
-        CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.aivEvents == nullptr) {
-            MSVP_MAKE_SHARED0_RET(CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.aivEvents,
-                std::vector<std::string>, PROFILING_FAILED);
+    if (CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.aivEvents == nullptr) {
+        MSVP_MAKE_SHARED0_RET(CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].jobCfg->jobParams.aivEvents,
+            std::vector<std::string>, PROFILING_FAILED);
     }
     return PROFILING_SUCCESS;
 }
