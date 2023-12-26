@@ -436,7 +436,7 @@ class TaskGear(CANNGear):
                 task_track_dto.batch_id, task_track_dto.device_id, is_master,
                 hccl_event.struct_type,
                 hccl_info_dto.local_rank, hccl_info_dto.remote_rank, hccl_info_dto.transport_type, hccl_info_dto.size,
-                hccl_info_dto.data_type, hccl_info_dto.link_type, hccl_info_dto.notify_id
+                hccl_info_dto.data_type, hccl_info_dto.link_type, hccl_info_dto.notify_id, hccl_info_dto.rdma_type
             ]
         self.hccl_task_info.extend(hccl_tasks)
 

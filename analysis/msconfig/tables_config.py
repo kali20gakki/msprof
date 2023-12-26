@@ -682,6 +682,7 @@ class TablesConfig(MetaConfig):
             ('context_id', 'INTEGER, null'),
             ('notify_id', 'INTEGER, null'),
             ('batch_id', 'INTEGER, null'),
+            ('rdma_type', 'TEXT', 'null'),
         ],
         'HCCLOPMap': [
             ('device_id', 'INTEGER, null'),
@@ -718,6 +719,7 @@ class TablesConfig(MetaConfig):
             ('data_type', 'TEXT, null'),
             ('link_type', 'TEXT, null'),
             ('notify_id', 'INTEGER, null'),
+            ('rdma_type', 'TEXT', 'null'),
         ],
         'MsprofTxMap': [
             ('pid', 'INTEGER, null'),
