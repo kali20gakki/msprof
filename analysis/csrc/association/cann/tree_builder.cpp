@@ -54,8 +54,7 @@ std::shared_ptr<TreeNode> TreeBuilder::Build()
 
     // rootNode的时间片应该覆盖整个EventQueue
     EventInfo rootInfo{EventType::EVENT_TYPE_API, 0, 0, kernelEvents_->GetBound() + 1};
-    auto rootEvent = Utils::MakeShared<Event>(Utils::MakeShared<MsprofApi>(),
-                                              "RootEvent", rootInfo);
+    auto rootEvent = Utils::MakeShared<Event>(Utils::MakeShared<MsprofApi>(), rootInfo);
     auto rootNode = Utils::MakeShared<TreeNode>(rootEvent);
     // 1. 用Api和TaskTrack Event建立核心树
     auto tree = BuildTree(rootNode, 0);
@@ -189,30 +188,29 @@ bool TreeBuilder::AddTaskTrackEvents(std::shared_ptr<TreeNode> &rootNode,
     auto it = leafNodes.begin();
     while (!events->Empty() && it != leafNodes.end()) {
         auto event = events->Top();
-        // 建立虚拟节点
-        EventInfo virInfo{EventType::EVENT_TYPE_API, MSPROF_REPORT_RUNTIME_LEVEL,
-                          event->info.start, event->info.end};
-        auto virEvent = Utils::MakeShared<Event>(Utils::MakeShared<MsprofApi>(),
-                                                 "VirtualEvent", virInfo);
-        auto virNode = Utils::MakeShared<TreeNode>(virEvent);
-        virNode->records.emplace_back(event);
+        // 建立dummy节点
+        EventInfo dummyInfo{EventType::EVENT_TYPE_DUMMY, MSPROF_REPORT_RUNTIME_LEVEL,
+                            event->info.start, event->info.end};
+        auto dummyEvent = Utils::MakeShared<Event>(Utils::MakeShared<MsprofApi>(), dummyInfo);
+        auto dummyNode = Utils::MakeShared<TreeNode>(dummyEvent);
+        dummyNode->records.emplace_back(event);
 
         if (event->info.start > (*it)->event->info.start && event->info.start <= (*it)->event->info.end) {
-            (*it)->children.emplace_back(virNode);
+            (*it)->children.emplace_back(dummyNode);
             events->Pop();
             matchCnt++;
         } else if (event->info.start > (*it)->event->info.end) {
             // event超过TreeNode的结束时间，需要检查是否在下一个TreeNode的开始之前
             if (std::next(it) != leafNodes.end() && event->info.start < (*std::next(it))->event->info.start) {
                 // 挂到rootNode
-                rootNode->children.emplace_back(virNode);
+                rootNode->children.emplace_back(dummyNode);
                 events->Pop();
                 mismatchCnt++;
             }
             it++; // 可能在下一个TreeNode的时间片内，跳过当前TreeNode
         } else {
             // event小于TreeNode的开始时间，挂到rootNode
-            rootNode->children.emplace_back(virNode);
+            rootNode->children.emplace_back(dummyNode);
             events->Pop();
             mismatchCnt++;
         }
@@ -232,16 +230,15 @@ void TreeBuilder::AddRemainTaskTrackEvents(std::shared_ptr<TreeNode> &rootNode,
 {
     while (!events->Empty()) {
         auto event = events->Top();
-        // 建立虚拟节点
-        EventInfo virInfo{EventType::EVENT_TYPE_API, MSPROF_REPORT_RUNTIME_LEVEL,
-                          event->info.start, event->info.end};
-        auto virEvent = Utils::MakeShared<Event>(Utils::MakeShared<MsprofApi>(),
-                                                 "VirtualEvent", virInfo);
-        auto virNode = Utils::MakeShared<TreeNode>(virEvent);
-        virNode->records.emplace_back(event);
+        // 建立dummy节点
+        EventInfo dummyInfo{EventType::EVENT_TYPE_DUMMY, MSPROF_REPORT_RUNTIME_LEVEL,
+                            event->info.start, event->info.end};
+        auto dummyEvent = Utils::MakeShared<Event>(Utils::MakeShared<MsprofApi>(), dummyInfo);
+        auto dummyNode = Utils::MakeShared<TreeNode>(dummyEvent);
+        dummyNode->records.emplace_back(event);
 
         // 直接挂到rootNode
-        rootNode->children.emplace_back(virNode);
+        rootNode->children.emplace_back(dummyNode);
         events->Pop();
     }
 }

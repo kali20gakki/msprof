@@ -20,17 +20,118 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <vector>
+#include <unordered_map>
 #include <string>
 #include <fstream>
 #include "utils.h"
+#include "event_queue.h"
 #include "log.h"
 #include "file.h"
 #include "event.h"
 #include "context.h"
 
-using namespace Analysis::Utils;
-using namespace Analysis::Parser::Environment;
 using EventType = Analysis::Entities::EventType;
+using EventInfo = Analysis::Entities::EventInfo;
+using Event = Analysis::Entities::Event;
+using EventQueue = Analysis::Entities::EventQueue;
+
+// 伪造生成EventQueue相关公用函数
+class FakeEventGenerator {
+public:
+    static void AddApiEvent(std::shared_ptr<EventQueue> &eventQueue, uint16_t level, uint64_t start, uint64_t end)
+    {
+        EventInfo testInfo{EventType::EVENT_TYPE_API, level, start, end};
+        auto api = std::make_shared<MsprofApi>();
+        api->magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
+        api->level = level;
+        api->type = static_cast<uint32_t>(EventType::EVENT_TYPE_API);
+        api->threadId = 0;
+        api->reserve = 0;
+        api->beginTime = static_cast<uint64_t>(start);
+        api->endTime = static_cast<uint64_t>(end);
+        api->itemId = 0;
+        auto eventPtr = std::make_shared<Event>(api, testInfo);
+        eventQueue->Push(eventPtr);
+    }
+
+    static void AddTaskTrackEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot, uint64_t taskType)
+    {
+        const int size = 8;
+        EventInfo testInfo{EventType::EVENT_TYPE_TASK_TRACK, MSPROF_REPORT_RUNTIME_LEVEL,
+                           dot, dot};
+        auto taskTrack = std::make_shared<MsprofCompactInfo>();
+        taskTrack->magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
+        taskTrack->level = MSPROF_REPORT_RUNTIME_LEVEL;
+        taskTrack->type = static_cast<uint32_t>(EventType::EVENT_TYPE_TASK_TRACK);
+        taskTrack->threadId = 0;
+        taskTrack->dataLen = size;
+        taskTrack->timeStamp = static_cast<uint64_t>(dot);
+
+        MsprofRuntimeTrack track;
+        track.taskType = taskType;
+        taskTrack->data.runtimeTrack = track;
+        auto eventPtr = std::make_shared<Event>(taskTrack, testInfo);
+        eventQueue->Push(eventPtr);
+    }
+
+    static void AddNodeBasicEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot)
+    {
+        EventInfo testInfo{EventType::EVENT_TYPE_NODE_BASIC_INFO, MSPROF_REPORT_NODE_LEVEL, dot, dot};
+        auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofCompactInfo>{},
+                                                testInfo);
+        eventQueue->Push(eventPtr);
+    }
+
+    static void AddTensorInfoEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot)
+    {
+        EventInfo testInfo{EventType::EVENT_TYPE_TENSOR_INFO, MSPROF_REPORT_NODE_LEVEL, dot, dot};
+        auto eventPtr = std::make_shared<Event>(std::shared_ptr<ConcatTensorInfo>{},
+                                                testInfo);
+        eventQueue->Push(eventPtr);
+    }
+
+    static void AddCtxIdEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot, uint16_t level)
+    {
+        EventInfo testInfo{EventType::EVENT_TYPE_CONTEXT_ID, level, dot, dot};
+        auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofAdditionalInfo>{},
+                                                testInfo);
+        eventQueue->Push(eventPtr);
+    }
+
+    static void AddGraphIdMapEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot)
+    {
+        EventInfo testInfo{EventType::EVENT_TYPE_GRAPH_ID_MAP, MSPROF_REPORT_MODEL_LEVEL, dot, dot};
+        auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofAdditionalInfo>{},
+                                                testInfo);
+        eventQueue->Push(eventPtr);
+    }
+
+    static void AddFusionOpInfoEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot)
+    {
+        EventInfo testInfo{EventType::EVENT_TYPE_FUSION_OP_INFO, MSPROF_REPORT_MODEL_LEVEL, dot, dot};
+        auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofAdditionalInfo>{},
+                                                testInfo);
+        eventQueue->Push(eventPtr);
+    }
+
+    static void AddHcclInfoEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot)
+    {
+        static uint32_t cnt_ = 0;
+        EventInfo testInfo{EventType::EVENT_TYPE_HCCL_INFO, MSPROF_REPORT_HCCL_NODE_LEVEL, dot, dot};
+        auto hcclInfo = std::make_shared<MsprofAdditionalInfo>();
+        hcclInfo->magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
+        hcclInfo->level = MSPROF_REPORT_HCCL_NODE_LEVEL;
+        hcclInfo->type = static_cast<uint32_t>(EventType::EVENT_TYPE_HCCL_INFO);
+        hcclInfo->timeStamp = static_cast<uint64_t>(dot);
+        auto hcclTrace = MsprofHcclInfo{};
+        hcclTrace.reserve1 = cnt_;
+
+        std::memcpy(hcclInfo->data, &hcclTrace, sizeof(hcclTrace));
+        auto eventPtr = std::make_shared<Event>(hcclInfo, testInfo);
+        eventQueue->Push(eventPtr);
+        cnt_++;
+    }
+};
 
 class FakeTraceGenerator {
 public:
@@ -38,14 +139,15 @@ public:
     explicit FakeTraceGenerator(std::string fakeDataDir, const uint32_t &sliceSize = 2048 * 1024)
         : fakeDataDir_(std::move(fakeDataDir)), sliceSize_(sliceSize)
     {
-        auto err = File::CreateDir(fakeDataDir_);
+        auto err = Analysis::Utils::File::CreateDir(fakeDataDir_);
         if (!err) {
             std::cout << "CreateDir Error" << std::endl;
         }
     }
 
     template<typename T>
-    void WriteBin(std::vector<T> &traces, EventType eventType, bool isAging, const int deviceId = HOST_ID)
+    void WriteBin(std::vector<T> &traces, EventType eventType, bool isAging,
+                  const int deviceId = Analysis::Parser::Environment::HOST_ID)
     {
         auto saveDir = CreateFakeDataDir(eventType, deviceId); // 创建PROF_XXX/host or device_<deviceId>/data
         if (saveDir.empty()) {
@@ -65,7 +167,7 @@ public:
                     sizeCnt = 0;
                     break;
                 }
-                outFile.write((CHAR_PTR) &(*it), sizeof(T));
+                outFile.write((Analysis::Utils::CHAR_PTR) &(*it), sizeof(T));
                 sizeCnt += sizeof(T);
                 it++;
             }
@@ -86,21 +188,21 @@ private:
     {
         std::string saveDir;
         if (hostBinNames_.find(type) != hostBinNames_.end()) {
-            saveDir = File::PathJoin(std::vector<std::string> {
+            saveDir = Analysis::Utils::File::PathJoin(std::vector<std::string>{
                 fakeDataDir_, hostDir_
             });
         } else if (deviceBinNames_.find(type) != deviceBinNames_.end()) {
-            saveDir = File::PathJoin(std::vector<std::string> {
+            saveDir = Analysis::Utils::File::PathJoin(std::vector<std::string>{
                 fakeDataDir_, deviceDir_, std::to_string(deviceId)
             });
         } else {
             return "";
         }
-        if (!File::CreateDir(saveDir)) {
+        if (!Analysis::Utils::File::CreateDir(saveDir)) {
             std::cout << "CreateDir fail : " << saveDir << std::endl;
             return "";
         }
-        if (!File::CreateDir(saveDir + "/data")) {
+        if (!Analysis::Utils::File::CreateDir(saveDir + "/data")) {
             std::cout << "CreateDir fail : " << saveDir + "/data" << std::endl;
             return "";
         }

@@ -11,9 +11,30 @@
  */
 #include <queue>
 #include <string>
+#include "utils.h"
 #include "tree.h"
+
 namespace Analysis {
 namespace Entities {
+
+namespace {
+// EventType类型对应字符串的映射关系
+// EventType和EventTypeString一一对应
+std::vector<std::string> EventTypeString{
+    "Api",
+    "Event",
+    "NodeBasicInfo",
+    "TensorInfo",
+    "HcclInfo",
+    "ContextId",
+    "GraphIdMap",
+    "FusionOpInfo",
+    "TaskTrack",
+    "MemoryCopy",
+    "Dummy",
+    "Invalid"
+};
+}
 
 std::shared_ptr<TreeNode> Tree::GetRoot() const
 {
@@ -23,10 +44,9 @@ std::shared_ptr<TreeNode> Tree::GetRoot() const
 std::string Tree::GetTreeLevelStr(const std::shared_ptr<TreeNode> &node) const
 {
     std::string lstr;
-    if (!node->records.empty()) {
-        for (const auto &r: node->records) {
-            lstr += "[" + r->desc + "] ";
-        }
+    for (const auto &r: node->records) {
+        lstr += "[" + EventTypeString[static_cast<unsigned long>(r->info.type)] +
+            Utils::ConvertToString(r->info.start, r->info.end) + "] ";
     }
     return lstr;
 }
@@ -42,10 +62,12 @@ std::vector<std::string> Tree::Show()
     while (!q.empty()) {
         auto levelSize = q.size();
         std::string lstr{};
-        for (int i = 0; i < levelSize; ++i) {
+        for (size_t i = 0; i < levelSize; ++i) {
             std::shared_ptr<TreeNode> node = q.front();
             q.pop();
-            lstr += node->event->desc + " ";
+            lstr += EventTypeString[static_cast<unsigned long>(
+                node->event->info.type)] + Utils::ConvertToString(node->event->info.start,
+                                                                  node->event->info.end) + " ";
             lstr += GetTreeLevelStr(node);
             for (const auto &child: node->children) {
                 q.push(child);

@@ -84,7 +84,7 @@ private:
 
         for (const auto &trace: traces) {
             EventInfo info{eventType, trace->level, trace->timeStamp, trace->timeStamp};
-            auto event = Utils::MakeShared<Event>(trace, typeName, info);
+            auto event = Utils::MakeShared<Event>(trace, info);
             if (!parser) {
                 ERROR("Event make shared ptr failed");
                 return;

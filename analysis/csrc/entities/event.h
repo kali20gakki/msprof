@@ -16,6 +16,7 @@
 #include <string>
 #include <memory>
 #include <atomic>
+#include <vector>
 #include "prof_common.h"
 
 namespace Analysis {
@@ -51,6 +52,7 @@ enum class EventType {
     EVENT_TYPE_FUSION_OP_INFO,
     EVENT_TYPE_TASK_TRACK,
     EVENT_TYPE_MEM_CPY,
+    EVENT_TYPE_DUMMY, // 虚拟类型，用于建树时标志虚拟节点
     EVENT_TYPE_INVALID
 };
 
@@ -67,17 +69,16 @@ struct EventInfo {
 
 // Event为本工程对软硬件上报的各类信息(Trace)的抽象, 表示一个时间点或时间片发生的事件
 struct Event {
-    Event(std::shared_ptr<MsprofApi> eventPtr, std::string eventDesc, const EventInfo &eventInfo);
-    Event(std::shared_ptr<MsprofAdditionalInfo> eventPtr, std::string eventDesc, const EventInfo &eventInfo);
-    Event(std::shared_ptr<MsprofCompactInfo> eventPtr, std::string eventDesc, const EventInfo &eventInfo);
-    Event(std::shared_ptr<ConcatTensorInfo> eventPtr, std::string eventDesc, const EventInfo &eventInfo);
+    Event(std::shared_ptr<MsprofApi> eventPtr, const EventInfo &eventInfo);
+    Event(std::shared_ptr<MsprofAdditionalInfo> eventPtr, const EventInfo &eventInfo);
+    Event(std::shared_ptr<MsprofCompactInfo> eventPtr, const EventInfo &eventInfo);
+    Event(std::shared_ptr<ConcatTensorInfo> eventPtr, const EventInfo &eventInfo);
     union {
         std::shared_ptr<MsprofApi> apiPtr;
         std::shared_ptr<MsprofAdditionalInfo> additionPtr;
         std::shared_ptr<MsprofCompactInfo> compactPtr;
         std::shared_ptr<ConcatTensorInfo> tensorPtr;
     };
-    std::string desc;
     EventInfo info;
     uint32_t id = 0;    // 全局唯一ID
 

@@ -17,6 +17,7 @@
 #include "error_code.h"
 
 using namespace Analysis::Parser;
+using namespace Analysis::Utils;
 using namespace Analysis::Parser::Host::Cann;
 
 const auto DATA_DIR = "./PROF";
