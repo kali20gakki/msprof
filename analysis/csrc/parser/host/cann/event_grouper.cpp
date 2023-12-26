@@ -138,7 +138,7 @@ void EventGrouper::GroupEvents<ApiEventParser, MsprofApi, &CANNWarehouse::kernel
         }
         EventInfo info{eventType, trace->level,
                        trace->beginTime, trace->endTime};
-        auto event = MakeShared<Event>(trace, typeName, info);
+        auto event = MakeShared<Event>(trace, info);
         if (!event) {
             ERROR("ApiEvent make shared ptr failed");
             break;
@@ -186,7 +186,7 @@ void EventGrouper::GroupEvents<TaskTrackParser, MsprofCompactInfo, &CANNWarehous
 
     for (const auto &trace: traces) {
         EventInfo info{eventType, trace->level, trace->timeStamp, trace->timeStamp};
-        auto event = MakeShared<Event>(trace, typeName, info);
+        auto event = MakeShared<Event>(trace, info);
         if (!event) {
             ERROR("TaskTrackEvent make shared ptr failed");
             break;

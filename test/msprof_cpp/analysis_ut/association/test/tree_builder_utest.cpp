@@ -17,6 +17,7 @@
 #include "event.h"
 #include "tree.h"
 #include "cann_warehouse.h"
+#include "fake_trace_generator.h"
 #include "tree_builder.h"
 #include "prof_common.h"
 
@@ -34,80 +35,6 @@ protected:
     }
 };
 
-void AddApiEvent(std::shared_ptr<EventQueue> &eventQueue,
-                 uint16_t level,
-                 uint64_t start,
-                 uint64_t end, const std::string &desc)
-{
-    EventInfo testInfo{EventType::EVENT_TYPE_API, level, start, end};
-    auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofApi>{},
-                                            desc, testInfo);
-    eventQueue->Push(eventPtr);
-}
-
-void AddTaskTrackEvent(std::shared_ptr<EventQueue> &eventQueue,
-                       uint64_t dot, const std::string &desc)
-{
-    EventInfo testInfo{EventType::EVENT_TYPE_TASK_TRACK, MSPROF_REPORT_RUNTIME_LEVEL, dot, dot};
-    auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofCompactInfo>{},
-                                            desc, testInfo);
-    eventQueue->Push(eventPtr);
-}
-
-void AddNodeBasicEvent(std::shared_ptr<EventQueue> &eventQueue,
-                       uint64_t dot, const std::string &desc)
-{
-    EventInfo testInfo{EventType::EVENT_TYPE_NODE_BASIC_INFO, MSPROF_REPORT_NODE_LEVEL, dot, dot};
-    auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofCompactInfo>{},
-                                            desc, testInfo);
-    eventQueue->Push(eventPtr);
-}
-
-void AddTensorInfoEvent(std::shared_ptr<EventQueue> &eventQueue,
-                        uint64_t dot, const std::string &desc)
-{
-    EventInfo testInfo{EventType::EVENT_TYPE_TENSOR_INFO, MSPROF_REPORT_NODE_LEVEL, dot, dot};
-    auto eventPtr = std::make_shared<Event>(std::shared_ptr<ConcatTensorInfo>{},
-                                            desc, testInfo);
-    eventQueue->Push(eventPtr);
-}
-
-void AddCtxIdEvent(std::shared_ptr<EventQueue> &eventQueue,
-                   uint64_t dot, uint16_t level, const std::string &desc)
-{
-    EventInfo testInfo{EventType::EVENT_TYPE_CONTEXT_ID, level, dot, dot};
-    auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofAdditionalInfo>{},
-                                            desc, testInfo);
-    eventQueue->Push(eventPtr);
-}
-
-void AddGraphIdMapEvent(std::shared_ptr<EventQueue> &eventQueue,
-                        uint64_t dot, const std::string &desc)
-{
-    EventInfo testInfo{EventType::EVENT_TYPE_GRAPH_ID_MAP, MSPROF_REPORT_MODEL_LEVEL, dot, dot};
-    auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofAdditionalInfo>{},
-                                            desc, testInfo);
-    eventQueue->Push(eventPtr);
-}
-
-void AddFusionOpInfoEvent(std::shared_ptr<EventQueue> &eventQueue,
-                          uint64_t dot, const std::string &desc)
-{
-    EventInfo testInfo{EventType::EVENT_TYPE_FUSION_OP_INFO, MSPROF_REPORT_MODEL_LEVEL, dot, dot};
-    auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofAdditionalInfo>{},
-                                            desc, testInfo);
-    eventQueue->Push(eventPtr);
-}
-
-void AddHcclInfoEvent(std::shared_ptr<EventQueue> &eventQueue,
-                      uint64_t dot, const std::string &desc)
-{
-    EventInfo testInfo{EventType::EVENT_TYPE_HCCL_INFO, MSPROF_REPORT_HCCL_NODE_LEVEL, dot, dot};
-    auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofAdditionalInfo>{},
-                                            desc, testInfo);
-    eventQueue->Push(eventPtr);
-}
-
 std::shared_ptr<EventQueue> GenNodeBasicInfoEvents()
 {
     auto nodeBasicInfoEvents = std::make_shared<EventQueue>(1, 10);
@@ -118,7 +45,7 @@ std::shared_ptr<EventQueue> GenNodeBasicInfoEvents()
     };
     int cnt = 0;
     for (auto dot: Events["Node"]) {
-        AddNodeBasicEvent(nodeBasicInfoEvents, dot, "NodeBasicInfo" + std::to_string(cnt));
+        FakeEventGenerator::AddNodeBasicEvent(nodeBasicInfoEvents, dot);
         cnt++;
     }
     nodeBasicInfoEvents->Sort();
@@ -135,7 +62,7 @@ std::shared_ptr<EventQueue> GenTensorInfoEvents()
     };
     int cnt = 0;
     for (auto dot: Events["Node"]) {
-        AddTensorInfoEvent(tensorInfoEvents, dot, "TensorInfo" + std::to_string(cnt));
+        FakeEventGenerator::AddTensorInfoEvent(tensorInfoEvents, dot);
         cnt++;
     }
     tensorInfoEvents->Sort();
@@ -159,13 +86,13 @@ std::shared_ptr<EventQueue> GenCtxIdEvents()
 
     int nodeCnt = 0;
     for (auto dot: nodelLevelEvents["Node"]) {
-        AddCtxIdEvent(contextIdEvents, dot, MSPROF_REPORT_NODE_LEVEL, "CtxId" + std::to_string(nodeCnt));
+        FakeEventGenerator::AddCtxIdEvent(contextIdEvents, dot, MSPROF_REPORT_NODE_LEVEL);
         nodeCnt++;
     }
 
     int hcclCnt = 0;
     for (auto dot: hcclLevelEvents["Hccl"]) {
-        AddCtxIdEvent(contextIdEvents, dot, MSPROF_REPORT_HCCL_NODE_LEVEL, "CtxId" + std::to_string(hcclCnt));
+        FakeEventGenerator::AddCtxIdEvent(contextIdEvents, dot, MSPROF_REPORT_HCCL_NODE_LEVEL);
         hcclCnt++;
     }
     contextIdEvents->Sort();
@@ -182,7 +109,7 @@ std::shared_ptr<EventQueue> GenGraphIdMapEvents()
     };
     int cnt = 0;
     for (auto dot: Events["Model"]) {
-        AddGraphIdMapEvent(graphIdMapEvents, dot, "GraphIdMap" + std::to_string(cnt));
+        FakeEventGenerator::AddGraphIdMapEvent(graphIdMapEvents, dot);
         cnt++;
     }
     graphIdMapEvents->Sort();
@@ -199,7 +126,7 @@ std::shared_ptr<EventQueue> GenFusionOpInfoEvents()
     };
     int cnt = 0;
     for (auto dot: Events["Model"]) {
-        AddFusionOpInfoEvent(fusioOpInfoEvents, dot, "FusionOpInfo" + std::to_string(cnt));
+        FakeEventGenerator::AddFusionOpInfoEvent(fusioOpInfoEvents, dot);
         cnt++;
     }
     fusioOpInfoEvents->Sort();
@@ -216,7 +143,7 @@ std::shared_ptr<EventQueue> GenHcclInfoEvents()
     };
     int cnt = 0;
     for (auto dot: Events["Hccl"]) {
-        AddHcclInfoEvent(hcclInfoEvents, dot, "HcclInfo" + std::to_string(cnt));
+        FakeEventGenerator::AddHcclInfoEvent(hcclInfoEvents, dot);
         cnt++;
     }
     hcclInfoEvents->Sort();
@@ -248,7 +175,7 @@ std::shared_ptr<EventQueue> GenKernelEvents()
     for (const auto &le: levels) {
         int cnt = 0;
         for (auto range: apiEvents[le]) {
-            AddApiEvent(kernelEvents, levelNum[le], range.first, range.second, le + std::to_string(cnt));
+            FakeEventGenerator::AddApiEvent(kernelEvents, levelNum[le], range.first, range.second);
             cnt++;
         }
     }
@@ -265,7 +192,7 @@ std::shared_ptr<EventQueue> GenTaskTrackEvents()
     };
     int cnt = 0;
     for (auto dot: ttEvents["Runtime"]) {
-        AddTaskTrackEvent(taskTrackEvents, dot, "TaskTrack" + std::to_string(cnt));
+        FakeEventGenerator::AddTaskTrackEvent(taskTrackEvents, dot, 0);
         cnt++;
     }
     taskTrackEvents->Sort();
@@ -306,7 +233,7 @@ TEST_F(TreeBuilderUTest, TestAddLevelEventsShouldMatchCorrectNodeWhenInputNotEmp
     for (auto range: nodesTimes) {
         EventInfo info{EventType::EVENT_TYPE_API, 0, range.first, range.second};
         auto event = std::make_shared<Event>(std::shared_ptr<MsprofApi>{},
-                                             "test", info);
+                                             info);
         levelNodes.emplace_back(std::make_shared<TreeNode>(event));
     }
 
@@ -316,7 +243,7 @@ TEST_F(TreeBuilderUTest, TestAddLevelEventsShouldMatchCorrectNodeWhenInputNotEmp
     for (auto dot: eventDots) {
         EventInfo info{EventType::EVENT_TYPE_NODE_BASIC_INFO, 0, dot, dot};
         auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofCompactInfo>{},
-                                                "test", info);
+                                                info);
         eventQueue->Push(eventPtr);
     }
 
@@ -371,20 +298,30 @@ TEST_F(TreeBuilderUTest, TestBuildTreeShouldBuildCorrectTreeWhenCANNWarehouseNot
     cannWarehouse->hcclInfoEvents = hcclInfoEvents;
     cannWarehouse->taskTrackEvents = taskTrackEvents;
 
-    /* 期望生成的Tree每一层的字符串 */
+    /* 期望生成的Tree每一层的字符串
+     * Event格式: 类型 + start + _ + end, []标识其为additional类型Event，挂在左边最近的节点上
+     * eg: Node层一个api节点(start = 1, end = 10)上挂了GraphIdMap(start = 2, end = 2)和
+     * GraphIdMap(start = 5, end = 5)可表示为: Api1_10 [GraphIdMap2_2] [GraphIdMap5_5]
+     * */
     std::vector<std::string> ans{
-        "RootEvent ", // Root Level
-        "Model0 [GraphIdMap2] [GraphIdMap3] [FusionOpInfo2] [FusionOpInfo3] "  // Model Level
-        "VirtualEvent [TaskTrack0] VirtualEvent [TaskTrack1] VirtualEvent [TaskTrack4] "
-        "VirtualEvent [TaskTrack5] VirtualEvent [TaskTrack8] VirtualEvent [TaskTrack9] "
-        "VirtualEvent [TaskTrack11] VirtualEvent [TaskTrack12] ",
-        "Node0 [NodeBasicInfo2] [NodeBasicInfo3] [NodeBasicInfo4] [TensorInfo2] [TensorInfo3] " // Node Level
-        "[CtxId2] Node1 [NodeBasicInfo7] [NodeBasicInfo8] [NodeBasicInfo9] [TensorInfo6] "
-        "[TensorInfo7] [TensorInfo8] [CtxId5] [CtxId6] Node2 ",
-        "Hccl0 [CtxId1] [CtxId2] [HcclInfo3] [HcclInfo4] Hccl1 [CtxId4] [HcclInfo7] " // HCCL Level
-        "[HcclInfo8] VirtualEvent [TaskTrack10] ",
-        "VirtualEvent [TaskTrack2] VirtualEvent [TaskTrack3] VirtualEvent [TaskTrack6] " // Virtual(Runtime) Level
-        "VirtualEvent [TaskTrack7] ",
+        "Api0_201 ", // Root Level
+        "Api110_200 [GraphIdMap115_115] [GraphIdMap200_200] [FusionOpInfo116_116] "
+        "[FusionOpInfo200_200] Dummy114_114 [TaskTrack114_114] "
+        "Dummy115_115 [TaskTrack115_115] Dummy130_130 [TaskTrack130_130] "
+        "Dummy155_155 [TaskTrack155_155] Dummy170_170 [TaskTrack170_170] "
+        "Dummy175_175 [TaskTrack175_175] Dummy190_190 [TaskTrack190_190] "
+        "Dummy210_210 [TaskTrack210_210] ",  // Model Level
+        "Api110_130 [NodeBasicInfo115_115] [NodeBasicInfo115_115] "
+        "[NodeBasicInfo130_130] [TensorInfo113_113] [TensorInfo130_130] "
+        "[ContextId130_130] Api150_170 [NodeBasicInfo155_155] "
+        "[NodeBasicInfo160_160] [NodeBasicInfo170_170] [TensorInfo151_151] "
+        "[TensorInfo152_152] [TensorInfo170_170] [ContextId151_151] "
+        "[ContextId170_170] Api175_180 ", // Node Level
+        "Api115_125 [ContextId117_117] [ContextId125_125] [HcclInfo120_120] "
+        "[HcclInfo125_125] Api155_165 [ContextId160_160] [HcclInfo160_160] "
+        "[HcclInfo165_165] Dummy180_180 [TaskTrack180_180] ", // HCCL Level
+        "Dummy120_120 [TaskTrack120_120] Dummy125_125 [TaskTrack125_125] "
+        "Dummy160_160 [TaskTrack160_160] Dummy165_165 [TaskTrack165_165] " // Dummy(Runtime) Level
     };
 
     /* 建树 */

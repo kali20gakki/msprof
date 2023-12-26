@@ -67,9 +67,9 @@ private:
     // 建树时记录叶子节点，用于在其上添加TaskTrack
     std::vector<std::shared_ptr<TreeNode>> leafNodes_;
     // 用于建树的Model、Node、HCCL Level的Api Type Events
-    std::shared_ptr<EventQueue> kernelEvents_;
+    std::shared_ptr<EventQueue> kernelEvents_ = nullptr;
     // 包含各个类型的events
-    std::shared_ptr<CANNWarehouse> cannWarehouse_;
+    std::shared_ptr<CANNWarehouse> cannWarehouse_ = nullptr;
     // 此对象处理的threadId
     uint32_t threadId_ = 0;
 

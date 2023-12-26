@@ -15,6 +15,7 @@
 
 #include <memory>
 #include <map>
+#include <utility>
 #include "event_queue.h"
 
 namespace Analysis {
@@ -22,11 +23,11 @@ namespace Entities {
 
 // Event树节点数据结构，用于重建调用树
 struct TreeNode {
-    explicit TreeNode(std::shared_ptr<Event> eventPtr) : event(eventPtr)
+    explicit TreeNode(std::shared_ptr<Event> eventPtr) : event(std::move(eventPtr))
     {}
-    std::shared_ptr<TreeNode> parent;
+    std::shared_ptr<TreeNode> parent = nullptr;
     std::vector<std::shared_ptr<TreeNode>> children;
-    std::shared_ptr<Event> event;                  // 表示该节点的对应的api
+    std::shared_ptr<Event> event = nullptr;        // 表示该节点的对应的api
     std::vector<std::shared_ptr<Event>> records;   // 表示节点时间范围内的补充记录信息
 };
 
@@ -41,7 +42,7 @@ public:
     std::vector<std::string> Show();
 private:
     std::string GetTreeLevelStr(const std::shared_ptr<TreeNode> &node) const;
-    std::shared_ptr<TreeNode> root_;
+    std::shared_ptr<TreeNode> root_ = nullptr;
 };
 
 } // namespace Entities

@@ -17,8 +17,11 @@
 #include <queue>
 #include <map>
 #include <unordered_map>
+#include "event.h"
 #include "tree.h"
 #include "ascend_obj.h"
+#include "utils.h"
+#include "type_data.h"
 
 namespace Analysis {
 namespace Association {
@@ -26,7 +29,6 @@ namespace Cann {
 
 using HostTask = Analysis::Entities::HostTask;
 using Operator = Analysis::Entities::Operator;
-using Tree = Analysis::Entities::Tree;
 using TreeNode = Analysis::Entities::TreeNode;
 
 using HostTasks = std::vector<std::shared_ptr<HostTask>>;
@@ -34,7 +36,9 @@ using HCCLBigOps = std::unordered_map<uint32_t, std::vector<std::shared_ptr<Oper
 
 class TreeAnalyzer {
 public:
-    explicit TreeAnalyzer(const std::shared_ptr<Tree> &tree);
+    TreeAnalyzer(std::shared_ptr<TreeNode> &node, uint32_t threadId)
+        : root_(node), threadId_(threadId)
+    {}
     // 入口函数
     void Analyze();
     // 获取HCCL相关Tasks数据
@@ -47,14 +51,22 @@ public:
     HCCLBigOps &GetHcclBigOps();
 
 private:
-    uint32_t threadId_ = 0; // 此对象处理的threadId
-    std::shared_ptr<Tree> tree_;
-    std::map<uint16_t, std::shared_ptr<TreeNode>> path_; // 路径记录
+    // 树的root节点
+    std::shared_ptr<TreeNode> root_;
+    // 此对象处理的threadId
+    uint32_t threadId_ = 0;
+    // 路径记录
+    std::map<uint16_t, std::shared_ptr<TreeNode>> path_;
+    // 所有Task信息
     HostTasks tasks_;
+    // HCCL相关Task信息s
     HostTasks hcclTasks_;
-    HostTasks kernelTasks_;
+    // 计算类Task信息
+    HostTasks computeTasks_;
+    // HCCL大算子信息
     HCCLBigOps hcclBigOps_;
 };
+
 } // namespace Cann
 } // namespace Association
 } // namespace Analysis

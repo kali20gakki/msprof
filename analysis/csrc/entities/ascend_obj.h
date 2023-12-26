@@ -17,6 +17,7 @@ namespace Entities {
 
 #define DEFAULT_CONTEXT_ID 0xffffffff
 
+// 算子类型枚举
 enum class OpType {
     OPTYPE_HCCL_BIG = 0,
     OPTYPE_HCCL_SMALL,
@@ -26,29 +27,31 @@ enum class OpType {
     OPTYPE_INVALID
 };
 
-struct TimeRange {
-    uint64_t start;
-    uint64_t end;
-    TimeRange(uint64_t start_, uint64_t end_) : start(start_), end(end_)
-    {}
-};
-
+// 计算算子描述信息
 struct OpDesc {
-    std::shared_ptr<MsprofCompactInfo> nodeDesc;
-    std::shared_ptr<ConcatTensorInfo> tensorDesc;
-    std::shared_ptr<MsprofAdditionalInfo> ctxId;
+    std::shared_ptr<MsprofCompactInfo> nodeDesc = nullptr;
+    std::shared_ptr<ConcatTensorInfo> tensorDesc = nullptr;
+    std::shared_ptr<MsprofAdditionalInfo> ctxId = nullptr;
 };
 
+// 通信小算子描述信息
 struct HcclSmallOpDesc {
-    std::shared_ptr<MsprofAdditionalInfo> hcclInfo;
+    std::shared_ptr<MsprofAdditionalInfo> hcclInfo = nullptr;
     uint32_t ctxId = DEFAULT_CONTEXT_ID;
 };
 
+// 通信大算子描述信息
 struct HcclBigOpDesc {
-    std::shared_ptr<TimeRange> hostTime;
-    std::shared_ptr<MsprofCompactInfo> nodeDesc;
+    uint64_t beginTime = 0;
+    uint64_t endTime = 0;
+    std::shared_ptr<MsprofCompactInfo> nodeDesc = nullptr;
+
+    HcclBigOpDesc(uint64_t begin, uint64_t end, const std::shared_ptr<MsprofCompactInfo> &node)
+        : beginTime(begin), endTime(end), nodeDesc(node)
+    {}
 };
 
+// 算子统一对外结构体
 struct Operator {
     Operator(std::shared_ptr<OpDesc> desc, const uint64_t &name, const OpType &type)
         : opDesc(std::move(desc)), name(name), type(type)
@@ -68,7 +71,7 @@ struct Operator {
         std::shared_ptr<HcclBigOpDesc> hcclBigOpDesc;
     };
 
-    uint64_t name = 0;
+    uint64_t name = 0; // aka item_id
     OpType type = OpType::OPTYPE_INVALID;
 
     ~Operator()
@@ -83,6 +86,7 @@ struct Operator {
     }
 };
 
+// 用于存储分析树结果，DBDumper将此信息落盘
 struct HostTask {
     uint32_t modelId = 0;
     uint32_t requestId = 0;
@@ -96,7 +100,7 @@ struct HostTask {
     uint64_t taskType = 0;
     uint64_t timeStamp = 0;
     // nullptr when no op
-    std::shared_ptr<Operator> op;
+    std::shared_ptr<Operator> op = nullptr;
 };
 
 } // namespace Entities

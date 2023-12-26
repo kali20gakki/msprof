@@ -46,7 +46,7 @@ TEST_F(EventQueueUTest, TestPushCheckBound)
     for (int i = 0; i < pushNum; ++i) {
         EventInfo testInfo{EventType::EVENT_TYPE_API, 0, (uint64_t) i, (uint64_t) (2 * i)};
         auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofApi>{},
-                                                "test", testInfo);
+                                                testInfo);
         eventQueue->Push(eventPtr);
     }
 
@@ -80,7 +80,7 @@ TEST_F(EventQueueUTest, PopWhenQueueNotEmpty)
     for (int i = 0; i < pushNum; ++i) {
         EventInfo testInfo{EventType::EVENT_TYPE_API, 0, (uint64_t) i, (uint64_t) (2 * i)};
         auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofApi>{},
-                                                "test", testInfo);
+                                                testInfo);
         eventQueue->Push(eventPtr);
     }
 
@@ -101,7 +101,6 @@ TEST_F(EventQueueUTest, PopWhenQueueEmpty)
     EXPECT_EQ(nullptr, checkPop);
 }
 
-
 TEST_F(EventQueueUTest, SortWhenStartEqualOrLevelEqual)
 {
     auto eventQueue = std::make_shared<EventQueue>(1, 30);
@@ -110,16 +109,16 @@ TEST_F(EventQueueUTest, SortWhenStartEqualOrLevelEqual)
     for (int i = pushStartNum; i > 0; --i) {
         EventInfo testInfo{EventType::EVENT_TYPE_API, 0, (uint64_t) i, (uint64_t) (2 * i)};
         auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofApi>{},
-                                                "test", testInfo);
+                                                testInfo);
         eventQueue->Push(eventPtr);
     }
 
     const int pushLevelNum = 11;
-    /* 测试Sort函数 start 相同时按照level排序的正确性 */
+/* 测试Sort函数 start 相同时按照level排序的正确性 */
     for (int i = 1; i < pushLevelNum; ++i) {
         EventInfo testInfo{EventType::EVENT_TYPE_API, (uint16_t) i, (uint64_t) 1, (uint64_t) 1};
         auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofApi>{},
-                                                "test", testInfo);
+                                                testInfo);
         eventQueue->Push(eventPtr);
     }
 
@@ -152,7 +151,7 @@ TEST_F(EventQueueUTest, TopShouldTopValueSmallest)
     for (int i = 0; i < pushStartNum; ++i) {
         EventInfo testInfo{EventType::EVENT_TYPE_API, 0, (uint64_t) i, (uint64_t) (2 * i)};
         auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofApi>{},
-                                                "test", testInfo);
+                                                testInfo);
         eventQueue->Push(eventPtr);
     }
 

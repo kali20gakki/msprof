@@ -27,6 +27,7 @@ using namespace Analysis::Association::Cann;
 const std::string TEST_DB_FILE_PATH = "./sqlite";
 const uint32_t INPUT_DATA_TYPE_POSITION = 15;
 const uint32_t GROUP_NAME_POSITION = 3;
+const uint32_t THREAD_ID = 1;
 
 class CannDBDumperUtest : public testing::Test {
 protected:
@@ -101,9 +102,7 @@ protected:
         trace->data.nodeBasicInfo = *nodeBasicInfo;
         trace->data.runtimeTrack = *runtime;
 
-        auto desc = std::make_shared<HcclBigOpDesc>();
-        desc->nodeDesc = std::shared_ptr<MsprofCompactInfo>(trace);
-        desc->hostTime = std::make_shared<Entities::TimeRange>(1, 1);
+        auto desc = std::make_shared<HcclBigOpDesc>(1, 1, std::shared_ptr<MsprofCompactInfo>(trace));
         auto op = std::make_shared<Operator>(desc, 0, Entities::OpType::OPTYPE_HCCL_BIG);
         std::vector<std::shared_ptr<Operator>> opVector{op};
         auto hcclBigOps = std::make_shared<HCCLBigOps>();
@@ -122,8 +121,7 @@ TEST_F(CannDBDumperUtest,
 
     CANNTraceDBDumper cannTraceDbDumper(".");
     auto treeNode = std::make_shared<TreeNode>(nullptr);
-    auto tree = std::make_shared<Tree>(treeNode);
-    TreeAnalyzer treeAnalyzer(tree);
+    TreeAnalyzer treeAnalyzer(treeNode, THREAD_ID);
     bool ret = cannTraceDbDumper.DumpData(treeAnalyzer);
     EXPECT_TRUE(ret);
     HCCLDB hcclDB;
@@ -173,8 +171,7 @@ TEST_F(CannDBDumperUtest,
 
     CANNTraceDBDumper cannTraceDbDumper(".");
     auto treeNode = std::make_shared<TreeNode>(nullptr);
-    auto tree = std::make_shared<Tree>(treeNode);
-    TreeAnalyzer treeAnalyzer(tree);
+    TreeAnalyzer treeAnalyzer(treeNode, THREAD_ID);
     auto computeTasks = treeAnalyzer.GetComputeTasks();
     computeTasks[0]->op->opDesc->tensorDesc = nullptr;
     auto hcclTasks = treeAnalyzer.GetHCCLTasks();
@@ -227,8 +224,7 @@ TEST_F(CannDBDumperUtest, TestCANNDumperShouldReturnFalseWhenInsertDataToDBFaile
     MOCKER_CPP(&DBRunner::CreateTable).stubs().will(returnValue(true));
     CANNTraceDBDumper cannTraceDbDumper(TEST_DB_FILE_PATH);
     auto treeNode = std::make_shared<TreeNode>(nullptr);
-    auto tree = std::make_shared<Tree>(treeNode);
-    TreeAnalyzer treeAnalyzer(tree);
+    TreeAnalyzer treeAnalyzer(treeNode, THREAD_ID);
     bool ret = cannTraceDbDumper.DumpData(treeAnalyzer);
     EXPECT_FALSE(ret);
 }
@@ -242,8 +238,7 @@ TEST_F(CannDBDumperUtest, TestCANNDumperShouldRetrunTrueWhenDataIsEmpty)
     MOCKER_CPP(&TreeAnalyzer::GetHcclBigOps).stubs().will(returnValue(*std::make_shared<HCCLBigOps>()));
     CANNTraceDBDumper cannTraceDbDumper(TEST_DB_FILE_PATH);
     auto treeNode = std::make_shared<TreeNode>(nullptr);
-    auto tree = std::make_shared<Tree>(treeNode);
-    TreeAnalyzer treeAnalyzer(tree);
+    TreeAnalyzer treeAnalyzer(treeNode, THREAD_ID);
     bool ret = cannTraceDbDumper.DumpData(treeAnalyzer);
     EXPECT_TRUE(ret);
 }
@@ -257,8 +252,7 @@ TEST_F(CannDBDumperUtest, TestCANNDumperShouldReturnFalseWhenCreateTableFailed)
     MOCKER_CPP(&DBRunner::CreateTable).stubs().will(returnValue(false));
     CANNTraceDBDumper cannTraceDbDumper(TEST_DB_FILE_PATH);
     auto treeNode = std::make_shared<TreeNode>(nullptr);
-    auto tree = std::make_shared<Tree>(treeNode);
-    TreeAnalyzer treeAnalyzer(tree);
+    TreeAnalyzer treeAnalyzer(treeNode, THREAD_ID);
     bool ret = cannTraceDbDumper.DumpData(treeAnalyzer);
     EXPECT_FALSE(ret);
 }

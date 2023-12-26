@@ -98,7 +98,7 @@ void CANNTraceDBDumper::DumpHcclOps(const HCCLBigOps &hcclOps)
                                   msprofCompactInfo->data.nodeBasicInfo.taskType),
                               msprofCompactInfo == nullptr ? NA : std::to_string(
                                   msprofCompactInfo->data.nodeBasicInfo.opType),
-                              desc->hostTime->start, desc->hostTime->end, isDynamic,
+                              desc->beginTime, desc->endTime, isDynamic,
                               connection_id);
         }
     }
@@ -305,7 +305,6 @@ void CANNTraceDBDumper::DumpHcclTasks(const HostTasks &hcclTasks)
         result_ = false;
         ERROR("DumpHcclTasks: Insert into db failed");
     }
-    PRINT_INFO("Done");
 }
 } // Drafts
 } // Database
