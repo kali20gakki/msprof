@@ -143,6 +143,11 @@ class AICoreConfig(MetaConfig):
             ('0x85', 'outstanding_histogram3'),
             ('0x86', 'outstanding_histogram4'),
             ('0x12c', 'vec_exe_ratio'),
+            ('0x17f', 'ub_read_bw_vector(GB/s)'),
+            ('0x180', 'ub_read_bw_vector(GB/s)'),
+            ('0x191', 'ub_write_bw_vector(GB/s)'),
+            ('0x1a5', 'ub_read_bw_mte(GB/s)'),
+            ('0x1a6', 'ub_write_bw_mte(GB/s)'),
             ('0x302', 'mte1_cycles_extra'),
             ('0x303', 'fixpipe_cycles'),
             ('0x416', 'mac_fp_ratio'),
@@ -465,6 +470,11 @@ class AICoreConfig(MetaConfig):
             ('0x6e', 'cube_iq_full_ratio'),
             ('0x6f', 'vec_iq_full_ratio'),
             ('0x12c', 'vec_exe_ratio'),
+            ('0x17f', 'ub_read_bw_vector(GB/s)'),
+            ('0x180', 'ub_read_bw_vector(GB/s)'),
+            ('0x191', 'ub_write_bw_vector(GB/s)'),
+            ('0x1a5', 'ub_read_bw_mte(GB/s)'),
+            ('0x1a6', 'ub_write_bw_mte(GB/s)'),
             ('0x302', 'mte1_ratio_extra'),
             ('0x303', 'fixpipe_ratio'),
             ('0x416', 'mac_fp_ratio'),
@@ -586,7 +596,12 @@ class AICoreConfig(MetaConfig):
             ('0x6b', 'mte1_iq_full_cycles'),
             ('0x6c', 'mte2_iq_full_cycles'),
             ('0x6d', 'mte3_iq_full_cycles'),
-            ('0x6e', 'cube_iq_full_cycles')
+            ('0x6e', 'cube_iq_full_cycles'),
+            ('0x17f', 'ub_read_bw_vector(GB/s)'),
+            ('0x180', 'ub_read_bw_vector(GB/s)'),
+            ('0x191', 'ub_write_bw_vector(GB/s)'),
+            ('0x1a5', 'ub_read_bw_mte(GB/s)'),
+            ('0x1a6', 'ub_write_bw_mte(GB/s)')
         ]
     }
 
