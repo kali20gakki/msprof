@@ -165,6 +165,29 @@ class TestAiCoreSampleModel(unittest.TestCase):
             check = AiCoreSampleModel('test', 'nic.db', ['NicOriginalData'], 'ai_core_metrics')
             check.clear()
 
+    def test_adapt_register_change(self):
+        sql = "SELECT cast(SUM((task_cyc*1000000/(1224000000.0))) as decimal(8,2))," \
+              "cast(1.0*SUM(r3d)*128.0*1.0/((task_cyc*1000/(1224000000.0*1000.0)))/(8589934592.0) as decimal(8,2))," \
+              "cast(1.0*SUM(r3e)*128.0*1.0/((task_cyc*1000/(1224000000.0*1000.0)))/(8589934592.0) as decimal(8,2))," \
+              "cast(1.0*SUM(r43)*128.0*2.0/((task_cyc*1000/(1224000000.0*1000.0)))/(8589934592.0) as decimal(8,2))," \
+              "cast(1.0*SUM(r44)*128.0*1.0/((task_cyc*1000/(1224000000.0*1000.0)))/(8589934592.0) as decimal(8,2))," \
+              "cast(1.0*SUM(r37)*128.0*1.0/((task_cyc*1000/(1224000000.0*1000.0)))/(8589934592.0) as decimal(8,2))," \
+              "cast(1.0*SUM(r38)*128.0*1.0/((task_cyc*1000/(1224000000.0*1000.0)))/(8589934592.0) as decimal(8,2))" \
+              " FROM EventCount where coreid = ?"
+        sql1 = "SELECT cast(SUM((task_cyc*1000000/(1224000000.0))) as decimal(8,2))," \
+               "cast(1.0*SUM(r1a5)*128.0*1.0/((task_cyc*1000/(1224000000.0*1000.0)))/(8589934592.0) as decimal(8,2))," \
+               "cast(1.0*SUM(r1a6)*128.0*1.0/((task_cyc*1000/(1224000000.0*1000.0)))/(8589934592.0) as decimal(8,2))," \
+               "cast(1.0*(SUM(r17f)+SUM(r180))*128.0*2.0/((task_cyc*1000/(1224000000.0*1000.0)))/(8589934592.0) " \
+               "as decimal(8,2))," \
+               "cast(1.0*SUM(r191)*128.0*1.0/((task_cyc*1000/(1224000000.0*1000.0)))/(8589934592.0) as decimal(8,2))," \
+               "cast(1.0*SUM(r37)*128.0*1.0/((task_cyc*1000/(1224000000.0*1000.0)))/(8589934592.0) as decimal(8,2))," \
+               "cast(1.0*SUM(r38)*128.0*1.0/((task_cyc*1000/(1224000000.0*1000.0)))/(8589934592.0) as decimal(8,2)) " \
+               "FROM EventCount where coreid = ?"
+        with mock.patch(NAMESPACE + '.PathManager.get_db_path'), \
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}):
+            check = AiCoreSampleModel('test', 'aicore.db', ['EventCount'], 'ai_core_metrics')
+            result = check._adapt_register_change(sql)
+        self.assertEqual(result, sql1)
 
 if __name__ == '__main__':
     unittest.main()

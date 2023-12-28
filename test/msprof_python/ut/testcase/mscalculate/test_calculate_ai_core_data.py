@@ -238,6 +238,14 @@ class TestCalculateAiCoreData(unittest.TestCase):
         res = check._calculate_control_flow_mis_prediction_rate(events_name_list, ai_core_profiling_events)
         self.assertEqual(res, target_res)
 
+    def test_calculate_ub_read_bw_vector_should_add_vector(self):
+        events_name_list = ["ub_read_bw_vector(GB/s)"]
+        ChipManager().chip_id = ChipModel.CHIP_V1_1_1
+        ai_core_profiling_events = {"ub_read_bw_vector(GB/s)": [2.4, 5.7]}
+        check = CalculateAiCoreData('123')
+        res = check._calculate_ub_read_bw_vector(events_name_list, ai_core_profiling_events)
+        res = res.get("ub_read_bw_vector(GB/s)")[0]
+        self.assertLess(abs(res - 8.1), 1e-10)
 
 if __name__ == '__main__':
     unittest.main()

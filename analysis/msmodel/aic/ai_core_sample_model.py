@@ -16,6 +16,7 @@ from common_func.msvp_common import config_file_obj
 from common_func.msvp_common import error
 from common_func.msvp_common import read_cpu_cfg
 from common_func.path_manager import PathManager
+from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
 from mscalculate.aic.aic_utils import AicPmuUtils
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
@@ -169,6 +170,8 @@ class AiCoreSampleModel(BaseModel):
 
         sql = "SELECT " + ",".join("cast(" + algo + " as decimal(8,2))"
                                    for algo in algos) + " FROM EventCount where coreid = ?"
+        if ChipManager().is_chip_v1_1():
+            sql = self._adapt_register_change(sql)
         return sql
 
     def flush(self: any, data_list: list) -> None:
@@ -290,3 +293,13 @@ class AiCoreSampleModel(BaseModel):
                 raise ProfException(ProfException.PROF_SYSTEM_EXIT, message)
         metrics.extend(sample_metrics_lst)
         return metrics
+
+    def _adapt_register_change(self, sql: str) -> str:
+        """
+        1911 register is changed
+        """
+        sql = sql.replace("r3e", "r1a6")
+        sql = sql.replace("r3d", "r1a5")
+        sql = sql.replace("r44", "r191")
+        sql = sql.replace("SUM(r43)", "(SUM(r17f)+SUM(r180))")
+        return sql

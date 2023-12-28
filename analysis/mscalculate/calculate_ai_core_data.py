@@ -207,6 +207,14 @@ class CalculateAiCoreData:
                                                     []).append(miss_rate)
         return ai_core_profiling_events
 
+    @classmethod
+    def _calculate_ub_read_bw_vector(cls, events_name_list: list, ai_core_profiling_events: dict) -> dict:
+        if ChipManager().is_chip_v1_1() and "ub_read_bw_vector(GB/s)" in events_name_list:
+            ai_core_profiling_events["ub_read_bw_vector(GB/s)"] = [
+                sum(ai_core_profiling_events["ub_read_bw_vector(GB/s)"])
+            ]
+        return ai_core_profiling_events
+
     def add_fops_header(self: any, metric_key: str, metrics: list) -> None:
         """
         add fops index item to metrics in ArithmeticUtilization
@@ -258,6 +266,7 @@ class CalculateAiCoreData:
         calculate additional ai core metrics
         :return:
         """
+        ai_core_profiling_events = self._calculate_ub_read_bw_vector(events_name_list, ai_core_profiling_events)
         ai_core_profiling_events = self._calculate_vec_fp16_ratio(events_name_list, ai_core_profiling_events)
         ai_core_profiling_events = self._calculate_cube_fops(events_name_list, ai_core_profiling_events, task_cyc)
         ai_core_profiling_events = self._calculate_mac_ratio_extra(events_name_list, ai_core_profiling_events)
