@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023. All rights reserved.
-
+import decimal
 import json
 import logging
 import os
@@ -89,6 +89,7 @@ class PipelineOverlapViewer:
         return _trace
 
     def _format_timeline_data(self, overlap_type, data):
+        start = InfoConfReader().trans_into_local_time(data.start_time)
+        end = InfoConfReader().trans_into_local_time(data.end_time)
         return [self.OVERLAP_TYPE_NAME.get(overlap_type.name), self._pid, overlap_type.value,
-                InfoConfReader().trans_into_local_time(data.start_time),
-                (data.end_time - data.start_time) / NumberConstant.NS_TO_US]
+                start, float(decimal.Decimal(end) - decimal.Decimal(start))]
