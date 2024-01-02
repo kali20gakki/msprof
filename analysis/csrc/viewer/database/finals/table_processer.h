@@ -58,15 +58,6 @@ protected:
 }; // class TableProcesser
 
 
-class TableProcesserFactory {
-public:
-    static std::shared_ptr<TableProcesser> CreateTableProcessor(const std::string &dbName,
-                                                                const std::string &outputDir,
-                                                                const std::vector<std::string> &profPaths);
-    ~TableProcesserFactory() {};
-};  // class TableProcesserFactory
-
-
 }  // Database
 }  // Viewer
 }  // Analysis

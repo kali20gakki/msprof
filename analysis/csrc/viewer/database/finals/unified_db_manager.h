@@ -22,12 +22,13 @@ namespace Database {
 
 class UnifiedDBManager {
 public:
-    UnifiedDBManager(const std::string &reportDBPath, const std::vector<std::string> &profPaths)
-        : reportDBPath_(reportDBPath), profPaths_(profPaths) {};
+    UnifiedDBManager(const std::string &output, const std::vector<std::string> &profPaths)
+        : output_(output), profPaths_(profPaths) {};
     bool Run();
 private:
-    bool Init();
+    void Init();
     std::string reportDBPath_;
+    std::string output_;
     std::vector<std::string> profPaths_;
 };
 
