@@ -16,6 +16,8 @@ add_executable(
     test/connection_utest.cpp
     test/db_runner_utest.cpp
     test/cann_db_dumper_utest.cpp
+    test/hash_db_dumper_utest.cpp
+    test/type_info_dumper_utest.cpp
     ${TOP_DIR}/analysis/csrc/association/cann/tree_analyzer.cpp
     ${SOURCES}
 )
