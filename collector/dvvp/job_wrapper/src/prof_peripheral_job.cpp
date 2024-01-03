@@ -470,7 +470,8 @@ int32_t ProfNpuModuleMemJob::SetPeripheralConfig()
     }
 
     configP->period = samplePeriod_;
-    configP->res1 = 0;
+    // if true: driver reports cpu cycle counter; if false: driver reports clock monotonic raw(ns)
+    configP->res1 = static_cast<uint32_t>(Platform::instance()->PlatformHostFreqIsEnable());
     configP->res2 = 0;
     configP->event = 0;
 
