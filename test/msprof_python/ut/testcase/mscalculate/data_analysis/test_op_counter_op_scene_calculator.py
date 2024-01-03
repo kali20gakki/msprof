@@ -74,7 +74,7 @@ class TestOpCounterOpSceneCalculator(unittest.TestCase):
         check = OpCounterOpSceneCalculator(file_list, CONFIG)
         result = getattr(check, "_get_ge_sql")()
         sql = "select model_id, op_name, op_type, task_type, task_id, stream_id,"\
-              " batch_id,context_id from TaskInfo where device_id=0"
+              " batch_id,context_id from TaskInfo where device_id=0 and task_type != 'HCCL'"
         self.assertEqual(sql, result)
 
     def test_create_ge_merge(self):

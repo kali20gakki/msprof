@@ -26,8 +26,6 @@ class AICpuFromTsCollector:
     def __init__(self: any, project_path: str) -> None:
         self._project_path = project_path
         self._aicpu_model = AiCpuModel(self._project_path, [DBNameConstant.TABLE_AI_CPU_FROM_TS])
-        self._batch_counter = BatchCounter(self._project_path)
-        self._batch_counter.init(Constant.TASK_TYPE_AI_CPU)
         self._iter_recorder = IterRecorder(self._project_path)
         self.aicpu_list = []
 

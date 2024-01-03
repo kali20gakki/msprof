@@ -31,8 +31,6 @@ class AiCoreOpReport:
     """
     report ai core op data
     """
-    TASK_TIME_TABLE = "task_time"
-    GE_SUMMARY_TABLE = "ge_summary"
     AI_CORE_UNUSED_COLS = [
         "job_id", "host_id", "device_id", "task_id", "stream_id", "index_id",
         "model_id", "overflow", "overflowed_cycles", "device_id", "batch_id",
@@ -72,6 +70,8 @@ class AiCoreOpReport:
         if not ai_core_group_dict or not data:
             return data
         ai_core_data_len = len(ai_core_group_dict.get(next(iter(ai_core_group_dict)))[0])
+        # 全导情况下，task type的索引是5，非全导情况下，task type的索引是6
+        task_type_idx = 5 if ProfilingScene().is_all_export() else 6
         for datum in data:
             # 2 stream id; 1 task id of datum
 
@@ -80,11 +80,14 @@ class AiCoreOpReport:
                 logging.debug("No ai core data of stream %d, task %d", datum[2], datum[1])
                 union_data.append(datum + (Constant.NA,) * ai_core_data_len)
                 continue
-            if datum[5] in AiCoreOpReport().HARDWARE_OP_LIST:
+            if datum[task_type_idx] in AiCoreOpReport().HARDWARE_OP_LIST:
                 logging.debug("Found %s op of stream %d, task %d", datum[5], datum[2], datum[1])
                 union_data.append(datum + (Constant.NA,) * ai_core_data_len)
                 continue
             ai_core_datum = ai_core_queue.popleft()
+            if datum[task_type_idx] == Constant.TASK_TYPE_HCCL:
+                logging.info("Found ai core hccl small op of stream %d, task %d", datum[2], datum[1])
+                continue
             union_data.append(datum + ai_core_datum)
 
         for stream_task, data_queue in ai_core_group_dict.items():

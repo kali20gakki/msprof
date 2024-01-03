@@ -189,7 +189,7 @@ class IterRecParser(IterParser):
                     self._project_path, DBNameConstant.DB_GE_INFO), DBNameConstant.TABLE_GE_TASK):
             return
 
-        self._batch_counter.init(Constant.TASK_TYPE_AI_CORE)
+        self._batch_counter.init()
         self._iter_info_updater.iteration_manager.initial_iter_to_info()
         self._parse_hwts_data()
 
