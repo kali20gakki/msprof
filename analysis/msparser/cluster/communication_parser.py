@@ -49,7 +49,7 @@ class CommunicationParser(MetaParser):
             return False
 
     @staticmethod
-    def op_time_parser(main_events: list) -> dict:
+    def op_time_parser(events: list) -> dict:
         """
         time info parser
         """
@@ -58,20 +58,26 @@ class CommunicationParser(MetaParser):
         op_time_dict = HcclAnalysisTool.init_dict(values)
         wait_flag = True
         idx = 0
-        op_name = main_events[0].op_name
+        # only choose master stream for op time analysis parser
+        master_plane_id = CommunicationParser.get_master_plane_id(events)
+        master_events = [event for event in events if event.plane_id == master_plane_id]
+        if not master_events:
+            logging.error("Fail to get master events info, communication parser is interrupted")
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+        op_name = master_events[0].op_name
         rdma_transit_op_num = NumberConstant.RDMA_NO_BARRIER_TASK_NUM
-        if not HcclAnalysisTool.is_send_or_recv_op(main_events, idx):
+        if not HcclAnalysisTool.is_send_or_recv_op(master_events, idx):
             rdma_transit_op_num = NumberConstant.RDMA_WITH_BARRIER_TASK_NUM
-        while idx < len(main_events):
-            event = main_events[idx]
+        while idx < len(master_events):
+            event = master_events[idx]
             if CommunicationParser.is_transit_sdma_event(event):
                 wait_flag = False
                 op_time_dict[OpAnalysisType.TRANSIT_TIME] += \
                     HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS
             if event.transport_type == StrConstant.RDMA and \
-                    HcclAnalysisTool.determine_rdma(main_events, idx, rdma_transit_op_num):
+                    HcclAnalysisTool.determine_rdma(master_events, idx, rdma_transit_op_num):
                 wait_flag = False
-                rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(main_events, idx, rdma_transit_op_num)
+                rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(master_events, idx, rdma_transit_op_num)
                 op_time_dict[OpAnalysisType.TRANSIT_TIME] += rdma_transit_result[0]
                 idx += rdma_transit_op_num
                 continue
@@ -81,8 +87,11 @@ class CommunicationParser(MetaParser):
                     op_time_dict[OpAnalysisType.SYNCHRONIZATION_TIME] += wait_time
                 op_time_dict[OpAnalysisType.WAIT_TIME] += wait_time
             idx += 1
+        latest_event = max(events, key=lambda x: x.timestamp + x.duration)
+        earliest_event = min(events, key=lambda x: x.timestamp)
         op_time_dict[OpAnalysisType.ELAPSE_TIME] = \
-            (main_events[-1].timestamp + main_events[-1].duration - main_events[0].timestamp) / NumberConstant.NS_TO_MS
+            (latest_event.timestamp + latest_event.duration -
+             earliest_event.timestamp) / NumberConstant.NS_TO_MS
         op_time_dict[OpAnalysisType.IDLE_TIME] = \
             op_time_dict[OpAnalysisType.ELAPSE_TIME] - \
             op_time_dict[OpAnalysisType.TRANSIT_TIME] - \
@@ -129,7 +138,7 @@ class CommunicationParser(MetaParser):
         return op_bandwidth_dict
 
     @staticmethod
-    def get_main_plane_id(events: list) -> int:
+    def get_master_plane_id(events: list) -> int:
         """
         hccl data use master's plane_id for ffts+;
         Should be changed with hccl's algorithms!
@@ -162,19 +171,13 @@ class CommunicationParser(MetaParser):
                 logging.error("Fail to get no.%s rank events info, communication parser is interrupted", str(rank_id))
                 raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
             events = op_events.get(rank_id)
-            # only choose main stream for op time analysis parser
-            main_events = [event for event in events if event.is_master == 1]
-            if main_events:
-                self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO] = self.op_time_parser(main_events)
+            if events:
+                logging.info("Start to get no.%s rank events info", str(rank_id))
+                self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO] = self.op_time_parser(events)
                 self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO][OpAnalysisType.START_TIME] = \
                     float(InfoConfReader().trans_into_local_time(
                        min(events, key=lambda x: x.timestamp).timestamp))
-            else:
-                logging.error("Fail to get no.%s rank main events info,"
-                              " communication parser is interrupted", str(rank_id))
-                raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
-            # choose all stream for Bandwidth analysis parser
-            if events:
+                # choose all stream for Bandwidth analysis parser
                 self.op_info[hccl_name][rank_id][StrConstant.COMMNUNICATION_BANDWIDTH_INFO] \
                     = self.op_bandwidth_parser(events)
             else:
