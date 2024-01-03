@@ -168,6 +168,14 @@ class TestCANNAnalysisGear(unittest.TestCase):
                                            DBNameConstant.TABLE_GE_FUSION_OP_INFO), 1)
 
     def test_task_gear(self):
+        '''
+        Node(thread 1):                   event3 event6 event8 event11
+                                            |      |      |       |
+        Hccl(thread 1):                   event4   |    event9 event12
+                                            |      |      |       |
+        Runtime(thread 1): event1 event2 event5 event7 event10    |
+        Runtime(thread 2):                                     event13
+        '''
         gear = TaskGear(self.PROF_HOST_DIR)
         api_db = ApiDataDatabase(1)
         record_db = AdditionalRecordDatabase(1)
@@ -183,6 +191,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
         task_dto.struct_type = "1"
         task_dto.task_id = 10
         task_dto.task_type = "KERNEL_AICORE"
+        task_dto.timestamp = 12345
         event2.additional_record = [
             self.create_addition_record(mem_dto, 210, record_db),
             self.create_addition_record(task_dto, 220, record_db)
@@ -247,6 +256,19 @@ class TestCANNAnalysisGear(unittest.TestCase):
         task_dto4.task_type = "KERNEL_AICORE"
         event10.additional_record = [self.create_addition_record(task_dto4, 377, record_db)]
 
+        event11: Event = self.create_api_event(
+            self.event_col(Constant.NODE_LEVEL, 1, 400, 430, "launch", "hcom_allreduce"), api_db)
+        event12 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 405, 420, "ReduceTBE", 1), api_db)
+        event13 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 2, 410, 415, "api6", 0), api_db)
+        task_dto5 = TaskTrackDto()
+        task_dto5.struct_type = "1"
+        task_dto5.task_id = 16
+        task_dto5.task_type = "KERNEL_AICORE"
+        task_dto5.timestamp = 415
+        event13.additional_record = [
+            self.create_addition_record(task_dto5, 415, record_db)
+        ]
+
         gear.run(event1, {})
         gear.run(event2, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: Event.invalid_event(),
                           Constant.HCCL_LEVEL: Event.invalid_event()})
@@ -256,11 +278,13 @@ class TestCANNAnalysisGear(unittest.TestCase):
                           Constant.HCCL_LEVEL: Event.invalid_event()})
         gear.run(event10, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event8,
                            Constant.HCCL_LEVEL: event9})
+        gear.run(event13, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: Event.invalid_event(),
+                          Constant.HCCL_LEVEL: event12})
         gear.flush_data()
 
         self.assertEqual(
             DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
-                                           DBNameConstant.TABLE_GE_TASK), 2)
+                                           DBNameConstant.TABLE_GE_TASK), 3)
         self.assertTrue(
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
                                           DBNameConstant.TABLE_GE_TASK, 'op_type', "1"))
@@ -271,7 +295,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
 
         self.assertEqual(
             DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
-                                           DBNameConstant.TABLE_HCCL_TASK), 2)
+                                           DBNameConstant.TABLE_HCCL_TASK), 3)
 
         self.assertTrue(
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),

@@ -56,10 +56,8 @@ class IterInfoManager:
                                             DBNameConstant.TABLE_GE_TASK):
             return
         with self._ge_model:
-            static_task_dict = self._ge_model.get_ge_task_data(
-                Constant.TASK_TYPE_AI_CORE, Constant.GE_STATIC_SHAPE)
-            dynamic_task_dict = self._ge_model.get_ge_task_data(
-                Constant.TASK_TYPE_AI_CORE, Constant.GE_DYNAMIC_SHAPE)
+            static_task_dict = self._ge_model.get_ge_task_data(Constant.GE_STATIC_SHAPE)
+            dynamic_task_dict = self._ge_model.get_ge_task_data(Constant.GE_DYNAMIC_SHAPE)
         self.regist_aicore_set(static_task_dict, dynamic_task_dict)
 
     def regist_parallel_set(self: any, step_trace_data: list) -> None:

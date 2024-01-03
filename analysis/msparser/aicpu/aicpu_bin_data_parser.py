@@ -44,8 +44,6 @@ class AicpuBinDataParser(MsMultiProcess):
         self.project_path = self.sample_config.get("result_dir")
         self.ai_cpu_datas = []
         self._model = AiCpuModel(self.project_path, [DBNameConstant.TABLE_AI_CPU])
-        self._batch_counter = BatchCounter(self.project_path)
-        self._batch_counter.init(Constant.TASK_TYPE_AI_CPU)
         self._iter_recorder = IterRecorder(self.project_path)
         self._overstep_task_cnt = 0
 
