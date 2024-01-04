@@ -11,10 +11,10 @@
  */
 
 #include "utils.h"
+
 #include "log.h"
 #include "error_code.h"
-
-#include <sstream>
+#include "context.h"
 
 namespace Analysis {
 namespace Utils {
@@ -85,6 +85,45 @@ int StrToU64(uint64_t &dest, const std::string &numStr)
         return ANALYSIS_ERROR;
     }
     return ANALYSIS_OK;
+}
+
+int StrToDouble(double &dest, const std::string &numStr)
+{
+    if (numStr.empty()) {
+        ERROR("StrToDouble failed, the input string is empty.");
+        return ANALYSIS_ERROR;
+    }
+    size_t pos = 0;
+    try {
+        dest = std::stod(numStr, &pos);
+    } catch (...) {
+        ERROR("StrToDouble failed, the input string is '%'.", numStr.c_str());
+        return ANALYSIS_ERROR;
+    }
+    if (pos != numStr.size()) {
+        ERROR("StrToDouble failed, the input string is '%s'.", numStr.c_str());
+        return ANALYSIS_ERROR;
+    }
+    return ANALYSIS_OK;
+}
+
+uint16_t GetDeviceIdByDevicePath(const std::string &filePath)
+{
+    auto tempStr = filePath;
+    while (tempStr.back() == '/') {
+        tempStr.pop_back();
+    }
+    // 默认host的deviceId为64
+    uint16_t deviceId = Parser::Environment::HOST_ID;
+    auto dirName = Split(tempStr, "/").back();
+    if (dirName == "host") {
+        return deviceId;
+    }
+    if (StrToU16(deviceId, Split(dirName, "_").back()) != ANALYSIS_OK) {
+        ERROR("DeviceId to uint16_t failed.");
+        return deviceId;
+    }
+    return deviceId;
 }
 
 

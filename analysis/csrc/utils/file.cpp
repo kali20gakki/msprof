@@ -21,7 +21,6 @@ namespace Analysis {
 namespace Utils {
 
 namespace {
-constexpr uint32_t MAX_READ_FILE_BYTES = 64 * 1024 * 1024;
 const uint16_t MAX_PATH_SIZE = 1024;
 const uint32_t MAX_SUB_FILES_SIZE = 100000;
 constexpr int DIR_CHECK_MODE = R_OK | W_OK | X_OK; // rwx
@@ -237,7 +236,7 @@ std::vector<std::string> File::FilterFileWithSuffix(const std::vector<std::strin
     return res;
 }
 
-bool File::Check(const std::string &path)
+bool File::Check(const std::string &path, uint64_t maxReadFileBytes)
 {
     if (path.empty()) {
         ERROR("The file path is empty.");
@@ -251,8 +250,8 @@ bool File::Check(const std::string &path)
         ERROR("The path '%' is soft link.", path);
         return false;
     }
-    if (File::Size(path) > MAX_READ_FILE_BYTES) {
-        ERROR("The file '%' size > %.", path, MAX_READ_FILE_BYTES);
+    if (File::Size(path) > maxReadFileBytes) {
+        ERROR("The file '%' size > %.", path, maxReadFileBytes);
         return false;
     }
     return true;
@@ -316,9 +315,9 @@ int FileReader::ReadJson(nlohmann::json &content)
     return ANALYSIS_OK;
 }
 
-bool FileReader::Check(const std::string &path)
+bool FileReader::Check(const std::string &path, uint64_t maxReadFileBytes)
 {
-    if (!File::Check(path)) {
+    if (!File::Check(path, maxReadFileBytes)) {
         ERROR("The FileReader check failed: '%'.", path);
         return false;
     }
@@ -345,9 +344,9 @@ void FileReader::Close()
     }
 }
 
-bool FileWriter::Check(const std::string &path)
+bool FileWriter::Check(const std::string &path, uint64_t maxReadFileBytes)
 {
-    if (!File::Check(path)) {
+    if (!File::Check(path, maxReadFileBytes)) {
         ERROR("The FileWriter check failed: '%'.", path);
         return false;
     }
