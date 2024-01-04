@@ -212,6 +212,11 @@ def check_path_valid(path: str, is_file: bool, max_size: int = Constant.MAX_READ
                 {'status': NumberConstant.ERROR,
                  'info': "The path '%s' is not a directory. Please check the "
                          'path.' % path}))
+        if os.path.islink(path):
+            ReturnCodeCheck.print_and_return_status(json.dumps(
+            {'status': NumberConstant.ERROR,
+            'info': "The path '%s' is link. Please check the "
+                    'path.' % path}))
     if not os.access(path, os.R_OK):
         ReturnCodeCheck.print_and_return_status(json.dumps(
             {'status': NumberConstant.ERROR,
