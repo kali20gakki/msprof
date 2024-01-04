@@ -190,11 +190,11 @@ class TestAiCoreOpReport(unittest.TestCase):
         self.assertEqual(res, ['round(r1, 3)', 'round(r2_time, 3)'])
 
     def test_add_cube_usage(self):
-        InfoConfReader()._info_json = {'DeviceInfo': [{'ai_core_num': 2, 'aic_frequency': 50}]}
+        InfoConfReader()._info_json = {'DeviceInfo': [{'ai_core_num': 20, 'aic_frequency': 1800}]}
         headers = ["id", "mac_ratio", "total_cycles", "Task Duration(us)"]
-        data = [[1, 0.2, 2, 3], [2, 0.3, 2, 4]]
+        data = [[1, 0.668, 401282788, 11437780], [2, 0.624, 341282228, 10237240]]
         DataManager.add_cube_usage(headers, data)
-        self.assertEqual(data, [[1, 0.2, 2, 3, 0.667], [2, 0.3, 2, 4, 0.5]])
+        self.assertEqual(data, [[1, 0.668, 401282788, 11437780, 97.455], [2, 0.624, 341282228, 10237240, 92.604]])
 
     def test_add_memory_bound(self):
         headers = ["mac_ratio", "vec_ratio", "mte2_ratio"]
