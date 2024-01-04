@@ -253,14 +253,17 @@ def add_op_total(result: list, result_dir: str) -> list:
 def cube_usage(config_dict: dict, value: list) -> list:
     """
     add cube usage column
+    Numeric unit: aic_frequency: MHz, task_duration: ns
     """
     ratio_index = config_dict.get('mac_ratio_index')
     if value[ratio_index] == Constant.NA:
         value.append(Constant.NA)
     elif not NumberConstant.is_zero(min(value[ratio_index], value[config_dict.get('total_cycles_index')],
                                         value[config_dict.get('task_duration_index')])):
-        usage = value[config_dict.get('total_cycles_index')] / (config_dict.get('aic_frequency') *
-                        config_dict.get('ai_core_num') * value[config_dict.get('task_duration_index')])
+        # Calculation formula: aic_total_cycles/ (aic_frequency * ai_core_num * task_duration)
+        usage = value[config_dict.get('total_cycles_index')] \
+                / (config_dict.get('aic_frequency') * config_dict.get('ai_core_num') *
+                   value[config_dict.get('task_duration_index')]) * NumberConstant.NS_TO_US
         usage = round(usage * 100, NumberConstant.ROUND_THREE_DECIMAL)
         value.append(usage)
     else:
