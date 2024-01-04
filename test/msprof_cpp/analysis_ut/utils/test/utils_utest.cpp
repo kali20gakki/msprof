@@ -111,3 +111,56 @@ TEST_F(UtilsUTest, TestConvertToStringShouldReturnCorrectStrWhenInputVariousType
 
     EXPECT_EQ(expectStr, ret);
 }
+
+TEST_F(UtilsUTest, TestStrToDoubleShouldReturnOKWhenStrIsNumber)
+{
+    double dest;
+    double expectRes = 12345678.123;
+    EXPECT_EQ(StrToDouble(dest, "12345678.123"), ANALYSIS_OK);
+    ASSERT_EQ(dest, expectRes);
+}
+
+TEST_F(UtilsUTest, TestStrToDoubleShouldReturnERRORWhenStrIsNotNumber)
+{
+    uint64_t dest;
+    EXPECT_EQ(StrToU64(dest, "11tt.1"), ANALYSIS_ERROR);
+}
+
+TEST_F(UtilsUTest, TestStrToDoubleShouldReturnERRORWhenStrIsEmpty)
+{
+    uint64_t dest;
+    EXPECT_EQ(StrToU64(dest, ""), ANALYSIS_ERROR);
+}
+
+TEST_F(UtilsUTest, TestStrToDoubleShouldReturnERRORWhenStrIsBeyondThreshold)
+{
+    uint64_t dest;
+    std::string errorStr = "99999999999999999999999999999999999999999999988888888.111111111111111111111111";
+    EXPECT_EQ(StrToU64(dest, errorStr), ANALYSIS_ERROR);
+}
+
+TEST_F(UtilsUTest, TestGetDeviceIdByDevicePathShouldReturnHostIdWhenPathIsHostOrNoDevice)
+{
+    uint16_t hostId = 64;
+    std::string hostPath = "abc_123/efg_789/PROF_XXX/host";
+    EXPECT_EQ(GetDeviceIdByDevicePath(hostPath), hostId);
+
+    std::string errorPath = "abc_123/efg_789/PROF_XXX/jkl";
+    EXPECT_EQ(GetDeviceIdByDevicePath(errorPath), hostId);
+
+    std::string hostSlash = "abc_123/efg_789/PROF_XXX/host/////";
+    EXPECT_EQ(GetDeviceIdByDevicePath(hostSlash), hostId);
+
+    std::string strToU16FailPath = "abc_123/efg_789/PROF_XXX/device_a";
+    EXPECT_EQ(GetDeviceIdByDevicePath(strToU16FailPath), hostId);
+}
+
+TEST_F(UtilsUTest, TestGetDeviceIdByDevicePathShouldReturnDeviceIdWhenPathIsDevice)
+{
+    uint16_t expectId = 5;
+    std::string devPath = "abc_123/efg_789/PROF_XXX/device_5";
+    EXPECT_EQ(GetDeviceIdByDevicePath(devPath), expectId);
+
+    std::string deviceSlash = "abc_123/efg_789/PROF_XXX/device_5/////";
+    EXPECT_EQ(GetDeviceIdByDevicePath(deviceSlash), expectId);
+}

@@ -15,6 +15,8 @@
 #include <ctime>
 #include <sstream>
 
+#include "log.h"
+
 namespace Analysis {
 namespace Utils {
 
@@ -31,6 +33,22 @@ std::string GetFormatLocalTime()
     
     // 格式：20231129134509  年月日时分秒的拼接字符串
     return sstr.str();
+}
+
+double GetTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params)
+{
+    if (syscnt < params.sysCnt) {
+        ERROR("The syscnt's value greater than the base syscnt's value.");
+        return double(syscnt);
+    }
+    double res = (syscnt - params.sysCnt) / params.freq * 1000 + params.hostMonotonic;
+    return res;
+}
+
+double GetLocalTime(double timestamp, const ProfTimeRecord &record)
+{
+    double res = timestamp + (record.startTimeNs - record.baseTimeNs - TIME_BASE_OFFSET_NS);
+    return res;
 }
 
 }  // namespace Utils

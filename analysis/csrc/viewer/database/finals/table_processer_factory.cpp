@@ -28,7 +28,7 @@ std::shared_ptr<TableProcesser> TableProcesserFactory::CreateTableProcessor(
 {
     std::shared_ptr<TableProcesser> processer = nullptr;
     if (tableName == "api_processer") {
-        processer = std::make_shared<ApiProcesser>(reportDBPath, profPaths);
+        // 工厂类生成ApiProcesser
     }
     return processer;
 }

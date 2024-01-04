@@ -26,6 +26,7 @@ target_include_directories(association_utest PRIVATE
         ${TOP_DIR}/analysis/csrc/entities
         ${TOP_DIR}/analysis/csrc/parser/host/cann
         ${TOP_DIR}/analysis/csrc/utils
+        ${TOP_DIR}/analysis/csrc/viewer/database/finals
         ${TOP_DIR}/analysis/csrc/dfx
         ${TOP_DIR}/opensource/json/include
         ${TOP_DIR}/collector/inc/toolchain
