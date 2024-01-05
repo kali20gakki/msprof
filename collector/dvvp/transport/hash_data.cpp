@@ -47,7 +47,6 @@ int32_t HashData::Init()
         std::map<uint64_t, std::string> hashIdMap;
         hashIdKeyMap_.insert(std::make_pair(module.name, hashIdMap));
     }
-    Start();
     inited_ = true;
     MSPROF_LOGI("HashData initialize success");
     return PROFILING_SUCCESS;
@@ -60,7 +59,6 @@ int32_t HashData::Uninit()
     hashMapMutex_.clear();
     hashInfoMap_.clear();
     hashIdMap_.clear();
-    Stop();
     inited_ = false;
     MSPROF_LOGI("HashData uninitialize success");
     return PROFILING_SUCCESS;
@@ -69,55 +67,6 @@ int32_t HashData::Uninit()
 bool HashData::IsInit() const
 {
     return inited_;
-}
-
-int HashData::Start()
-{
-    if (isStarted_) {
-        MSPROF_LOGW("hash upload has been started!");
-        return PROFILING_SUCCESS;
-    }
-
-    Thread::SetThreadName(analysis::dvvp::common::config::MSVP_HASH_DATA_UPLOAD_THREAD_NAME);
-    int ret = Thread::Start();
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Failed to start the upload in HashData::Start().");
-        return PROFILING_FAILED;
-    } else {
-        MSPROF_LOGI("Succeeded in starting the upload in HashData::Start().");
-    }
-    isStarted_ = true;
-    return PROFILING_SUCCESS;
-}
-
-void HashData::Run(const struct error_message::Context &errorContext)
-{
-    while (!IsQuit()) {
-        Collector::Dvvp::Mmpa::MmSleep(1000);    // 1000 表示 1s，等待1s再重新检测落盘.防止少量数据频繁落盘
-        SaveNewHashData(false);
-    }
-}
-
-int HashData::Stop()
-{
-    if (!inited_) {
-        return PROFILING_SUCCESS;
-    }
-    MSPROF_LOGI("Stop hash read thread begin");
-    if (!isStarted_) {
-        MSPROF_LOGW("Hash read thread not started");
-        return PROFILING_FAILED;
-    }
-    isStarted_ = false;
-
-    int ret = analysis::dvvp::common::thread::Thread::Stop();
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Hash read Thread stop failed");
-        return PROFILING_FAILED;
-    }
-
-    MSPROF_LOGI("Stop hash read Thread success");
-    return PROFILING_SUCCESS;
 }
 
 uint64_t HashData::DoubleHash(const std::string &data) const
@@ -237,7 +186,6 @@ void HashData::SaveHashData()
         MSPROF_LOGW("HashData not inited");
         return;
     }
-    Stop();
     for (auto &module : MSPROF_MODULE_ID_NAME_MAP) {
         std::lock_guard<std::mutex> lock(*hashMapMutex_[module.name]);
         if (hashDataKeyMap_[module.name].empty()) {

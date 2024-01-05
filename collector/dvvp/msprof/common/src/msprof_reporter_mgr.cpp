@@ -17,7 +17,7 @@ namespace Engine {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::transport;
-MsprofReporterMgr::MsprofReporterMgr() : isStarted_(false)
+MsprofReporterMgr::MsprofReporterMgr() : isStarted_(false), isSyncReporter_(false)
 {
     indexMap_ = {
         {MSPROF_REPORT_ACL_LEVEL, 0},
@@ -39,6 +39,7 @@ MsprofReporterMgr::~MsprofReporterMgr()
     reportTypeInfoMap_.clear();
     reporters_.clear();
     reportTypeInfoMapVec_.clear();
+    StopReporters();
 }
 
 int MsprofReporterMgr::Start()
@@ -63,8 +64,11 @@ int MsprofReporterMgr::Start()
 void MsprofReporterMgr::Run(const struct error_message::Context &errorContext)
 {
     while (!IsQuit()) {
-        Collector::Dvvp::Mmpa::MmSleep(1000);    // 1000 表示 1s，等待1s再重新检测落盘.防止少量数据频繁落盘
+        // Collector::Dvvp::Mmpa::MmSleep(1000);    // 1000 表示 1s，等待1s再重新检测落盘.防止少量数据频繁落盘
+        std::unique_lock<std::mutex> lk(notifyMtx_);
+        cv_.wait_for(lk, std::chrono::seconds(1), [this] { return this->IsQuit(); });
         SaveTypeInfo(false);
+        HashData::instance()->SaveNewHashData(false);
     }
 }
 
@@ -85,6 +89,12 @@ int MsprofReporterMgr::Stop()
 
     MSPROF_LOGI("Stop type info upload Thread success");
     return PROFILING_SUCCESS;
+}
+
+void MsprofReporterMgr::SetSyncReporter()
+{
+    // set Sync Reporter. This will not start thread.
+    isSyncReporter_ = true;
 }
 
 int32_t MsprofReporterMgr::StartReporters()
@@ -113,7 +123,9 @@ int32_t MsprofReporterMgr::StartReporters()
             RegReportTypeInfo(level.first, type.first, type.second);
         }
     }
-    Start();
+    if (!isSyncReporter_) {
+        Start();
+    }
     isStarted_ = true;
     return PROFILING_SUCCESS;
 }
@@ -244,6 +256,13 @@ void MsprofReporterMgr::SaveTypeInfo(bool isLastChunk)
     }
 }
 
+void MsprofReporterMgr::NotifyQuit()
+{
+    std::lock_guard<std::mutex> lk(notifyMtx_);
+    StopNoWait();
+    cv_.notify_one();
+}
+
 int32_t MsprofReporterMgr::StopReporters()
 {
     std::lock_guard<std::mutex> lk(startMtx_);
@@ -251,7 +270,10 @@ int32_t MsprofReporterMgr::StopReporters()
         MSPROF_LOGI("The reporter isn't started, don't need to be stopped.");
         return PROFILING_SUCCESS;
     }
-    Stop();
+    if (!isSyncReporter_) {
+        NotifyQuit();
+        Stop();
+    }
     MSPROF_LOGI("ProfReporterMgr stop reporters");
     isStarted_ = false;
     SaveTypeInfo(true);
@@ -260,6 +282,7 @@ int32_t MsprofReporterMgr::StopReporters()
             return PROFILING_FAILED;
         }
     }
+    isSyncReporter_ = false;
     for (auto &index : indexMap_) { // 为了同一进程里多次采集，每次读地址要从0开始
         index.second = 0;
     }

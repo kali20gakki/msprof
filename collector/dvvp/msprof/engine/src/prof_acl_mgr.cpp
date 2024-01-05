@@ -606,6 +606,7 @@ int ProfAclMgr::ProfAclModelSubscribe(const uint32_t modelId, const uint32_t dev
         FUNRET_CHECK_FAIL_RET_VALUE(LaunchSubscribeDevTask(id, modelId, profSubscribeConfig), ACL_SUCCESS,
             ACL_ERROR_PROFILING_FAILURE);
     }
+    Msprof::Engine::MsprofReporterMgr::instance()->SetSyncReporter();
     if (Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback() != ACL_SUCCESS) {
         MSPROF_LOGE("RegisterReporterCallback failed, Model:%u", modelId);
         MSPROF_INNER_ERROR("EK9999", "RegisterReporterCallback failed, Model:%u", modelId);
