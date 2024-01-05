@@ -232,6 +232,18 @@ def get_path_dir(path: str) -> list:
     return sub_dirs
 
 
+def get_valid_sub_path(collect_path: str, sub_dir: str, is_file: bool) -> str:
+    """
+    join collect_path and sub_dir to form joined_path
+    check joined_path is valid
+    get sub_path
+    """
+    joined_path = os.path.join(collect_path, sub_dir)
+    sub_path = os.path.realpath(joined_path)
+    check_path_valid(joined_path, is_file)
+    return sub_path
+
+
 def _path_dir_filter_func(sub_path, root_dir):
     return sub_path not in Constant.FILTER_DIRS and not os.path.islink(
         os.path.join(root_dir, sub_path)) and os.path.isdir(os.path.realpath(os.path.join(root_dir, sub_path)))

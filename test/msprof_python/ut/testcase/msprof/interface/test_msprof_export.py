@@ -10,8 +10,8 @@ from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
-from common_func.profiling_scene import ProfilingScene
 from common_func.platform.chip_manager import ChipManager
+from common_func.profiling_scene import ProfilingScene
 from msinterface.msprof_export import ExportCommand
 from msparser.step_trace.ts_binary_data_reader.task_flip_bean import TaskFlip
 from sqlite.db_manager import DBManager
@@ -430,6 +430,7 @@ class TestExportCommand(unittest.TestCase):
                 mock.patch(NAMESPACE + '.check_path_valid'), \
                 mock.patch(NAMESPACE + '.ExportCommand._handle_export'), \
                 mock.patch(NAMESPACE + '.ExportCommand._show_tuning_result'), \
+                mock.patch(NAMESPACE + '.get_valid_sub_path'), \
                 mock.patch(NAMESPACE + '.ExportCommand._process_sub_dirs'):
             with mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', retrun_value=True):
                 test = ExportCommand("summary", args)

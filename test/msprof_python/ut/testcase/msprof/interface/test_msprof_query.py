@@ -92,7 +92,7 @@ class TestQueryCommand(unittest.TestCase):
              mock.patch(NAMESPACE + '.get_path_dir', return_value=[1, 2]), \
              mock.patch('os.path.join', return_value=True), \
              mock.patch('os.path.realpath', return_value='home\\process'), \
-             mock.patch(NAMESPACE + '.check_path_valid'), \
+             mock.patch(NAMESPACE + '.get_valid_sub_path'), \
              mock.patch('os.listdir', return_value=['123']), \
              mock.patch(NAMESPACE + '.QueryCommand._do_get_query_data', return_value=[1, 2]):
             key = QueryCommand(args)

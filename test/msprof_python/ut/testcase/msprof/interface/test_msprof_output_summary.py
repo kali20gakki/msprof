@@ -128,7 +128,7 @@ class TestMsprofOutputSummary(unittest.TestCase):
     def test_merge_device_summary_when_normal_then_pass(self):
         with mock.patch(NAMESPACE + '.get_path_dir', return_value=['host', 'device_0', 'device_1']), \
                 mock.patch('os.path.realpath', return_value="test"), \
-                mock.patch(NAMESPACE + '.check_path_valid'), \
+                mock.patch(NAMESPACE + '.get_valid_sub_path'), \
                 mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._get_summary_file_name',
                            return_value=set({"op_summary.csv"})), \
@@ -153,7 +153,7 @@ class TestMsprofOutputSummary(unittest.TestCase):
     def test_save_summary_data_when_normal_then_pass(self):
         with mock.patch('os.path.join', return_value="test"), \
                 mock.patch('os.path.realpath', return_value="test"), \
-                mock.patch(NAMESPACE + '.check_path_valid'), \
+                mock.patch(NAMESPACE + '.get_valid_sub_path'), \
                 mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True), \
                 mock.patch('os.path.exists', return_value=True), \
                 mock.patch('os.listdir', return_value=["op_summary.csv", "npu_mem.csv"]), \
@@ -233,7 +233,7 @@ class TestMsprofOutputSummary(unittest.TestCase):
     def test_save_timeline_data_when_normal_then_pass(self):
         with mock.patch('os.path.realpath', return_value='test'), \
                 mock.patch('os.path.join', return_value='test'), \
-                mock.patch(NAMESPACE + '.check_path_valid'), \
+                mock.patch(NAMESPACE + '.get_valid_sub_path'), \
                 mock.patch('os.path.exists', return_value=True), \
                 mock.patch('common_func.data_check_manager.DataCheckManager.contain_info_json_data',
                            return_value=True), \
