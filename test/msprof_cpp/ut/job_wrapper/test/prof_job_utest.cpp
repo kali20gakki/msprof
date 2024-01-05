@@ -1235,6 +1235,23 @@ TEST_F(JOB_WRAPPER_PROF_AICPU_JOB_TEST, Init)
     EXPECT_EQ(PROFILING_FAILED, profAicpuJob->Init(collectionJobCfg_));
 }
 
+TEST_F(JOB_WRAPPER_PROF_AICPU_JOB_TEST, Init_dataTypeConfig_check)
+{
+    GlobalMockObject::verify();
+    auto profAicpuJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfAicpuJob>();
+    collectionJobCfg_->comParams->params->host_profiling = false;
+
+    MOCKER(analysis::dvvp::driver::DrvGetApiVersion)
+            .stubs()
+            .will(returnValue(SUPPORT_ADPROF_VERSION));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(PROFILING_FAILED, profAicpuJob->Init(collectionJobCfg_));
+    collectionJobCfg_->comParams->params->dataTypeConfig |= PROF_AICPU_TRACE;
+    EXPECT_EQ(PROFILING_SUCCESS, profAicpuJob->Init(collectionJobCfg_));
+}
+
 TEST_F(JOB_WRAPPER_PROF_AICPU_JOB_TEST, Process)
 {
     GlobalMockObject::verify();
