@@ -13,6 +13,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
+from common_func.msprof_common import get_valid_sub_path
 from common_func.msprof_exception import ProfException
 from common_func.msprof_query_data import MsprofQueryData
 from common_func.path_manager import PathManager
@@ -135,9 +136,7 @@ class QueryCommand:
         sub_dirs = get_path_dir(path)
         for sub_dir in sub_dirs:  # result_dir
             if sub_dir != StrConstant.TIMELINE_PATH:
-                sub_path = os.path.realpath(
-                    os.path.join(path, sub_dir))
-                check_path_valid(sub_path, False)
+                sub_path = get_valid_sub_path(path, sub_dir, False)
                 if DataCheckManager.contain_info_json_data(sub_path):  # find profiling data dir
                     result = self._do_get_query_data(sub_path)
                     result_data.extend(result)

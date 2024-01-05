@@ -32,8 +32,8 @@ import os
 import re
 import shutil
 
-from common_func.common import warn
 from common_func.common import print_info
+from common_func.common import warn
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
 from common_func.file_manager import FdOpen
@@ -44,9 +44,10 @@ from common_func.file_slice_helper import make_export_file_name
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_common import get_path_dir
+from common_func.msprof_common import get_valid_sub_path
 from common_func.msprof_exception import ProfException
-from common_func.msvp_common import is_number
 from common_func.msvp_common import check_dir_writable
+from common_func.msvp_common import is_number
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from msconfig.config_manager import ConfigManager
@@ -227,8 +228,7 @@ class MsprofOutputSummary:
         for sub_dir in sub_dirs:
             if sub_dir == self.MSPROF_HOST_DIR:
                 continue
-            sub_path = os.path.realpath(os.path.join(self._output, sub_dir))
-            check_path_valid(sub_path, is_file=False)
+            sub_path = get_valid_sub_path(self._output, sub_dir, False)
             if not DataCheckManager.contain_info_json_data(sub_path):
                 continue
             summary_file_set.update(self._get_summary_file_name(sub_path))
@@ -267,8 +267,7 @@ class MsprofOutputSummary:
         for sub_dir in sub_dirs:
             if sub_dir == self.MSPROF_HOST_DIR:
                 continue
-            sub_path = os.path.realpath(os.path.join(self._output, sub_dir))
-            check_path_valid(sub_path, is_file=False)
+            sub_path = get_valid_sub_path(self._output, sub_dir, False)
             if not DataCheckManager.contain_info_json_data(sub_path):
                 continue
             summary_path = os.path.realpath(
@@ -326,8 +325,7 @@ class MsprofOutputSummary:
         timeline_file_dict = {}
         slice_max_count = 0
         for sub_dir in sub_dirs:
-            sub_path = os.path.realpath(os.path.join(self._output, sub_dir))
-            check_path_valid(sub_path, is_file=False)
+            sub_path = get_valid_sub_path(self._output, sub_dir, False)
             if not DataCheckManager.contain_info_json_data(sub_path):
                 continue
             timeline_file_dict, slice_count = \

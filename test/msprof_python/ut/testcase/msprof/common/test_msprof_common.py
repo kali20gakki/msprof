@@ -12,6 +12,7 @@ from common_func.msprof_common import check_collection_dir
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_info_by_key
 from common_func.msprof_common import get_path_dir
+from common_func.msprof_common import get_valid_sub_path
 from common_func.msprof_common import prepare_for_parse
 from common_func.msprof_exception import ProfException
 from constant.constant import INFO_JSON
@@ -115,6 +116,18 @@ def test_get_path_dir():
             pytest.raises(ProfException) as err:
         get_path_dir(path)
         unittest.TestCase().assertEqual(err.value.args, (2,))
+
+
+def test_get_valid_sub_path_should_return_real_path_when_collect_path_and_sub_dir_exist():
+    collect_path = '/host/host'
+    sub_dir = 'msprof_export_folder'
+    expected_path = '/host/host/msprof_export_folder'
+    is_file = False
+    with mock.patch('os.path.exists', return_value=True), \
+         mock.patch('os.access', return_value=True), \
+         mock.patch('os.path.isdir', return_value=True):
+        unittest.TestCase().assertEqual(get_valid_sub_path(collect_path, sub_dir, is_file),
+                                        os.path.realpath(expected_path))
 
 
 def test_check_collection_dir():
