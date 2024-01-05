@@ -296,10 +296,13 @@ class AiCoreSampleModel(BaseModel):
 
     def _adapt_register_change(self, sql: str) -> str:
         """
-        1911 register is changed
+        1911 register is changed when the pmu type is MemoryUB, 0x1a5 is one of new register.
+        In the above scene, special adaptation is required.
         """
-        sql = sql.replace("r3e", "r1a6")
-        sql = sql.replace("r3d", "r1a5")
-        sql = sql.replace("r44", "r191")
-        sql = sql.replace("SUM(r43)", "(SUM(r17f)+SUM(r180))")
+        if self.sample_config.get("ai_core_metrics") == "MemoryUB" and \
+                "0x1a5" in self.sample_config.get("ai_core_profiling_events"):
+            sql = sql.replace("r3e", "r1a6")
+            sql = sql.replace("r3d", "r1a5")
+            sql = sql.replace("r44", "r191")
+            sql = sql.replace("SUM(r43)", "(SUM(r17f)+SUM(r180))")
         return sql
