@@ -186,8 +186,13 @@ class TestAiCoreSampleModel(unittest.TestCase):
         with mock.patch(NAMESPACE + '.PathManager.get_db_path'), \
                 mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}):
             check = AiCoreSampleModel('test', 'aicore.db', ['EventCount'], 'ai_core_metrics')
+            check.sample_config['ai_core_metrics'] = "MemoryUB"
+            check.sample_config['ai_core_profiling_events'] = '0x10,0x13,0x37,0x38,0x3d,0x3e,0x43,0x44'
             result = check._adapt_register_change(sql)
-        self.assertEqual(result, sql1)
+            self.assertEqual(result, sql)
+            check.sample_config['ai_core_profiling_events'] = '0x37,0x38,0x1a5,0x1a6,0x17f,0x180,0x191'
+            result = check._adapt_register_change(sql)
+            self.assertEqual(result, sql1)
 
 if __name__ == '__main__':
     unittest.main()
