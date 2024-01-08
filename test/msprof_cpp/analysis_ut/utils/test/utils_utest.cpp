@@ -9,10 +9,12 @@
  * Creation Date      : 2023/11/16
  * *****************************************************************************
  */
+#include "analysis/csrc/utils/utils.h"
 
 #include "gtest/gtest.h"
-#include "utils.h"
-#include "error_code.h"
+#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/parser/environment/context.h"
+
 
 using namespace Analysis::Utils;
 using namespace Analysis;
@@ -110,4 +112,50 @@ TEST_F(UtilsUTest, TestConvertToStringShouldReturnCorrectStrWhenInputVariousType
                                testStr1, testStr2);
 
     EXPECT_EQ(expectStr, ret);
+}
+
+TEST_F(UtilsUTest, TestStrToDoubleShouldReturnOKWhenStrIsNumber)
+{
+    double dest;
+    double expectRes = 12345678.123;
+    EXPECT_EQ(StrToDouble(dest, "12345678.123"), ANALYSIS_OK);
+    ASSERT_EQ(dest, expectRes);
+}
+
+TEST_F(UtilsUTest, TestStrToDoubleShouldReturnERRORWhenStrIsNotNumber)
+{
+    double dest;
+    EXPECT_EQ(StrToDouble(dest, "11tt.1"), ANALYSIS_ERROR);
+}
+
+TEST_F(UtilsUTest, TestStrToDoubleShouldReturnERRORWhenStrIsEmpty)
+{
+    double dest;
+    EXPECT_EQ(StrToDouble(dest, ""), ANALYSIS_ERROR);
+}
+
+TEST_F(UtilsUTest, TestGetDeviceIdByDevicePathShouldReturnHostIdWhenPathIsHostOrNoDevice)
+{
+    uint16_t hostId = Parser::Environment::HOST_ID;
+    std::string hostPath = "abc_123/efg_789/PROF_XXX/host";
+    EXPECT_EQ(GetDeviceIdByDevicePath(hostPath), hostId);
+
+    std::string errorPath = "abc_123/efg_789/PROF_XXX/jkl";
+    EXPECT_EQ(GetDeviceIdByDevicePath(errorPath), hostId);
+
+    std::string hostSlash = "abc_123/efg_789/PROF_XXX/host/////";
+    EXPECT_EQ(GetDeviceIdByDevicePath(hostSlash), hostId);
+
+    std::string strToU16FailPath = "abc_123/efg_789/PROF_XXX/device_a";
+    EXPECT_EQ(GetDeviceIdByDevicePath(strToU16FailPath), hostId);
+}
+
+TEST_F(UtilsUTest, TestGetDeviceIdByDevicePathShouldReturnDeviceIdWhenPathIsDevice)
+{
+    uint16_t expectId = 5;
+    std::string devPath = "abc_123/efg_789/PROF_XXX/device_5";
+    EXPECT_EQ(GetDeviceIdByDevicePath(devPath), expectId);
+
+    std::string deviceSlash = "abc_123/efg_789/PROF_XXX/device_5/////";
+    EXPECT_EQ(GetDeviceIdByDevicePath(deviceSlash), expectId);
 }

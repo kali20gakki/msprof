@@ -13,22 +13,36 @@
 #ifndef ANALYSIS_PARSER_ENVIRONMENT_CONTEXT_H
 #define ANALYSIS_PARSER_ENVIRONMENT_CONTEXT_H
 
-#include <vector>
 #include <map>
+#include <string>
+#include <set>
 
 #include "opensource/json/include/nlohmann/json.hpp"
 
 #include "analysis/csrc/utils/singleton.h"
+#include "analysis/csrc/utils/time_utils.h"
 
 namespace Analysis {
 namespace Parser {
 namespace Environment {
 const uint16_t HOST_ID = 64;
-// 该类是Context信息单例类，读取info.json和sample.json环境信息
+// 该类是Context信息单例类，读取device(host)路径下json/log文件及环境信息
+// 通过 std::unordered_map<std::string, std::unordered_map<uint16_t, nlohmann::json>> 结构的成员变量context_
+// 以prof, deviceId两层进行数据路径分割，将该device目录下的对应json和log进行key值合并，统一整合为一份json对象
+// 数据查询以prof（无prof则默认为begin()）和deviceId（必选）进行查找
 class Context : public Utils::Singleton<Context> {
 public:
-    bool Load(const std::string &path, uint16_t deviceId);
+    bool Load(const std::set<std::string> &profPaths);
     bool IsAllExport();
+    // 获取对应device的芯片型号
+    uint16_t GetPlatformVersion(uint16_t deviceId, const std::string &profPath = "");
+    // 获取start_info end_info中的时间
+    bool GetProfTimeRecordInfo(Utils::ProfTimeRecord &record, const std::string &profPath = "");
+    // 返回info.json 中的pid
+    uint64_t GetPidFromInfoJson(uint16_t deviceId, const std::string &profPath = "");
+    // 获取start_log中的相关时间
+    bool GetSyscntConversionParams(Utils::SyscntConversionParams &params, uint16_t deviceId,
+                                   const std::string &profPath = "");
     void Clear();
 
 private:
@@ -46,11 +60,11 @@ private:
     };
 
 private:
-    std::map<uint16_t, nlohmann::json> context_;
-    std::vector<std::string> filePrefix_ = {
-        "info.json",
-        "sample.json",
-    };
+    nlohmann::json GetInfoByDeviceId(uint16_t deviceId, const std::string &profPath = "");
+    bool LoadJsonData(const std::string &profPath, const std::string &deviceDir, uint16_t deviceId);
+    bool LoadLogData(const std::string &profPath, const std::string &deviceDir, uint16_t deviceId);
+    bool CheckInfoValueIsValid(const std::string &profPath, uint16_t deviceId);
+    std::unordered_map<std::string, std::unordered_map<uint16_t, nlohmann::json>> context_;
 };  // class Context
 }  // namespace Environment
 }  // namespace Parser
