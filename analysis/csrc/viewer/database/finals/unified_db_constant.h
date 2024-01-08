@@ -15,7 +15,7 @@
 
 #include <string>
 
-#include "prof_common.h"
+#include "collector/inc/toolchain/prof_common.h"
 
 namespace Analysis {
 namespace Viewer {

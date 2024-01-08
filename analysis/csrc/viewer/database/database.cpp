@@ -10,9 +10,9 @@
  * *****************************************************************************
  */
 
-#include "database.h"
+#include "analysis/csrc/viewer/database/database.h"
 
-#include "log.h"
+#include "analysis/csrc/dfx/log.h"
 
 namespace Analysis {
 namespace Viewer {

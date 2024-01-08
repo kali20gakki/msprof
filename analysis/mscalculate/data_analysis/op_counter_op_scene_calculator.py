@@ -40,9 +40,9 @@ class OpCounterOpSceneCalculator(MsMultiProcess):
     @staticmethod
     def _get_ge_sql() -> str:
         device_id = InfoConfReader().get_device_id()
-        ge_sql = 'select model_id, op_name, op_type, task_type, ' \
-                 'task_id, stream_id, batch_id,context_id from {0} where device_id={1}' \
-                .format(DBNameConstant.TABLE_GE_TASK, device_id)
+        ge_sql = "select model_id, op_name, op_type, task_type, " \
+                 "task_id, stream_id, batch_id,context_id from {0} where device_id={1} and task_type != '{2}'" \
+                .format(DBNameConstant.TABLE_GE_TASK, device_id, Constant.TASK_TYPE_HCCL)
         return ge_sql
 
     @staticmethod

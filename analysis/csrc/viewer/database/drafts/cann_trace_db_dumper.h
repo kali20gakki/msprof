@@ -17,11 +17,12 @@
 #include <vector>
 #include <thread>
 #include <mutex>
-#include "db_runner.h"
-#include "tree.h"
-#include "tree_analyzer.h"
-#include "utils.h"
-#include "database.h"
+
+#include "analysis/csrc/association/cann/tree_analyzer.h"
+#include "analysis/csrc/entities/tree.h"
+#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/viewer/database/database.h"
+#include "analysis/csrc/viewer/database/db_runner.h"
 
 namespace Analysis {
 namespace Viewer {

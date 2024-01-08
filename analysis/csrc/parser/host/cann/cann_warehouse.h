@@ -16,8 +16,9 @@
 #include <cstdint>
 #include <memory>
 #include <unordered_map>
-#include "event.h"
-#include "event_queue.h"
+
+#include "analysis/csrc/entities/event.h"
+#include "analysis/csrc/entities/event_queue.h"
 
 namespace Analysis {
 namespace Parser {

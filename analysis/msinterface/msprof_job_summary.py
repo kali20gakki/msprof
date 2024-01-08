@@ -14,6 +14,7 @@ from common_func.file_name_manager import get_msprof_json_compiles
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_common import get_path_dir
+from common_func.msprof_common import get_valid_sub_path
 from common_func.utils import Utils
 from msinterface.msprof_data_storage import MsprofDataStorage
 from msinterface.msprof_output_summary import MsprofOutputSummary
@@ -70,8 +71,7 @@ class MsprofJobSummary:
         sub_dirs = get_path_dir(self._output)
         for sub_dir in sub_dirs:  # result_dir
             if sub_dir != self.MSPROF_HOST_DIR:
-                sub_path = os.path.realpath(os.path.join(self._output, sub_dir))
-                check_path_valid(sub_path, False)
+                sub_path = get_valid_sub_path(self._output, sub_dir, False)
                 if DataCheckManager.contain_info_json_data(sub_path):
                     self._generate_json_file(sub_path)
 

@@ -17,9 +17,9 @@
 #include <vector>
 #include <memory>
 
-#include "report_db.h"
-#include "utils.h"
-#include "table_processer.h"
+#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/viewer/database/finals/report_db.h"
+#include "analysis/csrc/viewer/database/finals/table_processer.h"
 
 namespace Analysis {
 namespace Viewer {

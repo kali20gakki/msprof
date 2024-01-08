@@ -9,7 +9,6 @@ import os
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.file_manager import check_path_valid
 from common_func.file_manager import FileOpen
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant

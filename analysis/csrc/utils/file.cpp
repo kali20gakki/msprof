@@ -10,12 +10,13 @@
  * *****************************************************************************
  */
 
-#include "file.h"
+#include "analysis/csrc/utils/file.h"
 
 #include <dirent.h>
 #include <sys/stat.h>
-#include "log.h"
-#include "error_code.h"
+
+#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/dfx/log.h"
 
 namespace Analysis {
 namespace Utils {

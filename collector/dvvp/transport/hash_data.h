@@ -23,8 +23,7 @@ namespace dvvp {
 namespace transport {
 using namespace analysis::dvvp::common::utils;
 
-class HashData : public analysis::dvvp::common::singleton::Singleton<HashData>,
-                 public analysis::dvvp::common::thread::Thread {
+class HashData : public analysis::dvvp::common::singleton::Singleton<HashData> {
 public:
     HashData();
     ~HashData();
@@ -41,10 +40,6 @@ public:
     // for new struct data
     uint64_t GenHashId(const std::string &hashInfo);
     std::string &GetHashInfo(uint64_t hashId);
-
-    int Start() override;
-    int Stop() override;
-    void Run(const struct error_message::Context &errorContext) override;
 
 private:
     uint64_t DoubleHash(const std::string &data) const;

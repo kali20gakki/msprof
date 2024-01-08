@@ -10,9 +10,11 @@
  * *****************************************************************************
  */
 
+#include "analysis/csrc/utils/thread_pool.h"
+
 #include <thread>
-#include "log.h"
-#include "thread_pool.h"
+
+#include "analysis/csrc/dfx/log.h"
 
 namespace Analysis {
 namespace Utils {

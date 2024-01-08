@@ -161,9 +161,12 @@ class TestAiCoreOpReport(unittest.TestCase):
         expect_res = [
             (1, 2, 3, 11, 16, "AI_CPU", 'N/A'), (4, 5, 6, 11, 16, "AI_CPU", 'N/A'), (7, 8, 9, 11, 16, 10, 'N/A')
         ]
-        data = [(1, 2, 3, 11, 16, "AI_CPU"), (4, 5, 6, 11, 16, "AI_CPU"), (7, 8, 9, 11, 16, 10)]
+        data = [
+            (1, 2, 3, 11, 16, "AI_CPU"), (4, 5, 6, 11, 16, "AI_CPU"), (7, 8, 9, 11, 16, 10), (1, 2, 3, 11, 16, "HCCL")
+        ]
         ai_core_group_dict = {
-            (2, 3, "AI_CPU"): deque([(10,)]), (5, 6, "AI_CPU"): deque([(40,)]), (10, 11, 12): deque([(20,)])
+            (2, 3, "AI_CPU"): deque([(10,)]), (5, 6, "AI_CPU"): deque([(40,)]),
+            (10, 11, 12): deque([(20,)]), (2, 3, "HCCL"): deque([(50,)])
         }
         res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
         self.assertEqual(res, expect_res)
@@ -187,11 +190,11 @@ class TestAiCoreOpReport(unittest.TestCase):
         self.assertEqual(res, ['round(r1, 3)', 'round(r2_time, 3)'])
 
     def test_add_cube_usage(self):
-        InfoConfReader()._info_json = {'DeviceInfo': [{'ai_core_num': 2, 'aic_frequency': 50}]}
+        InfoConfReader()._info_json = {'DeviceInfo': [{'ai_core_num': 20, 'aic_frequency': 1800}]}
         headers = ["id", "mac_ratio", "total_cycles", "Task Duration(us)"]
-        data = [[1, 0.2, 2, 3], [2, 0.3, 2, 4]]
+        data = [[1, 0.668, 401282788, 11437780], [2, 0.624, 341282228, 10237240]]
         DataManager.add_cube_usage(headers, data)
-        self.assertEqual(data, [[1, 0.2, 2, 3, 0.667], [2, 0.3, 2, 4, 0.5]])
+        self.assertEqual(data, [[1, 0.668, 401282788, 11437780, 97.455], [2, 0.624, 341282228, 10237240, 92.604]])
 
     def test_add_memory_bound(self):
         headers = ["mac_ratio", "vec_ratio", "mte2_ratio"]

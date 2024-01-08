@@ -17,9 +17,10 @@
 #include <string>
 #include <set>
 
-#include "nlohmann/json.hpp"
-#include "singleton.h"
-#include "time_utils.h"
+#include "opensource/json/include/nlohmann/json.hpp"
+
+#include "analysis/csrc/utils/singleton.h"
+#include "analysis/csrc/utils/time_utils.h"
 
 namespace Analysis {
 namespace Parser {

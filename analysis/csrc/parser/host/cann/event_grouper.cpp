@@ -11,7 +11,7 @@
  */
 
 
-#include "event_grouper.h"
+#include "analysis/csrc/parser/host/cann/event_grouper.h"
 
 using namespace Analysis::Utils;
 

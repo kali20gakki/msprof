@@ -10,8 +10,10 @@
  * *****************************************************************************
  */
 
-#include "id_pool.h"
-#include "utils.h"
+#include "analysis/csrc/association/credential/id_pool.h"
+
+#include "analysis/csrc/utils/utils.h"
+
 namespace Analysis {
 namespace Association {
 namespace Credential {

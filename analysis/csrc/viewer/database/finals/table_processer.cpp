@@ -10,8 +10,8 @@
  * *****************************************************************************
  */
 
-#include "table_processer.h"
-#include "thread_pool.h"
+#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/viewer/database/finals/table_processer.h"
 
 namespace Analysis {
 namespace Viewer {

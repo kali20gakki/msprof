@@ -10,10 +10,10 @@
  * *****************************************************************************
  */
 
-#include "table_processer_factory.h"
+#include "analysis/csrc/viewer/database/finals/table_processer_factory.h"
 
-#include "thread_pool.h"
-#include "api_processer.h"
+#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/viewer/database/finals/api_processer.h"
 
 namespace Analysis {
 namespace Viewer {
