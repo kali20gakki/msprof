@@ -16,8 +16,9 @@
 #include <vector>
 #include <map>
 
-#include "nlohmann/json.hpp"
-#include "singleton.h"
+#include "opensource/json/include/nlohmann/json.hpp"
+
+#include "analysis/csrc/utils/singleton.h"
 
 namespace Analysis {
 namespace Parser {

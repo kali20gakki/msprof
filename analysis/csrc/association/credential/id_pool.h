@@ -12,9 +12,11 @@
 
 #ifndef ANALYSIS_ASSOCIATION_CREDENTIAL_ID_POOL_H
 #define ANALYSIS_ASSOCIATION_CREDENTIAL_ID_POOL_H
+
 #include <unordered_map>
 #include <mutex>
-#include "singleton.h"
+
+#include "analysis/csrc/utils/singleton.h"
 
 namespace Analysis {
 namespace Association {

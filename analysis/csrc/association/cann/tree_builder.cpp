@@ -10,10 +10,10 @@
  * *****************************************************************************
  */
 
-#include "tree_builder.h"
-#include "event.h"
-#include "log.h"
-#include "utils.h"
+#include "analysis/csrc/association/cann/tree_builder.h"
+#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/entities/event.h"
+#include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
 namespace Association {

@@ -12,11 +12,14 @@
 
 #ifndef ANALYSIS_VIEWER_DATABASE_DRAFTS_NUMBER_MAPPING_H
 #define ANALYSIS_VIEWER_DATABASE_DRAFTS_NUMBER_MAPPING_H
+
 #include <unordered_map>
 #include <cstdint>
 #include <string>
 #include <vector>
-#include "singleton.h"
+
+#include "analysis/csrc/utils/singleton.h"
+
 namespace Analysis {
 namespace Viewer {
 namespace Database {

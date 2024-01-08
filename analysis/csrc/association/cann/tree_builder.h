@@ -16,12 +16,13 @@
 #include <memory>
 #include <vector>
 #include <map>
-#include "event.h"
-#include "tree.h"
-#include "cann_warehouse.h"
-#include "event_queue.h"
-#include "thread_pool.h"
-#include "prof_common.h"
+
+#include "analysis/csrc/entities/event.h"
+#include "analysis/csrc/entities/event_queue.h"
+#include "analysis/csrc/entities/tree.h"
+#include "analysis/csrc/parser/host/cann/cann_warehouse.h"
+#include "collector/inc/toolchain/prof_common.h"
+#include "analysis/csrc/utils/thread_pool.h"
 
 namespace Analysis {
 namespace Association {

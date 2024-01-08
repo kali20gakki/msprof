@@ -16,7 +16,8 @@
 #include <memory>
 #include <map>
 #include <utility>
-#include "event_queue.h"
+
+#include "analysis/csrc/entities/event_queue.h"
 
 namespace Analysis {
 namespace Entities {

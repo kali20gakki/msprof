@@ -1,4 +1,6 @@
 function(run_test test_case)
+    include_directories(${TOP_DIR}/)
+
     target_compile_options(${test_case} PRIVATE
         -g
         -pipe

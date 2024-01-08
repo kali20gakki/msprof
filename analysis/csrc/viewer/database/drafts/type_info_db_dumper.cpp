@@ -10,9 +10,10 @@
 * *****************************************************************************
 */
 
-#include "type_info_db_dumper.h"
-#include "number_mapping.h"
-#include "file.h"
+#include "analysis/csrc/viewer/database/drafts/type_info_db_dumper.h"
+
+#include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/viewer/database/drafts/number_mapping.h"
 
 namespace Analysis {
 namespace Viewer {

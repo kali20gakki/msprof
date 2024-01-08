@@ -17,18 +17,19 @@
 #include <memory>
 #include <unordered_map>
 #include <set>
-#include "event.h"
-#include "event_queue.h"
-#include "cann_warehouse.h"
-#include "safe_unordered_map.h"
-#include "thread_pool.h"
-#include "prof_common.h"
-#include "addition_info_parser.h"
-#include "api_event_parser.h"
-#include "compact_info_parser.h"
-#include "log.h"
-#include "utils.h"
-#include "time_logger.h"
+
+#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/entities/event.h"
+#include "analysis/csrc/entities/event_queue.h"
+#include "analysis/csrc/parser/host/cann/addition_info_parser.h"
+#include "analysis/csrc/parser/host/cann/api_event_parser.h"
+#include "analysis/csrc/parser/host/cann/cann_warehouse.h"
+#include "analysis/csrc/parser/host/cann/compact_info_parser.h"
+#include "collector/inc/toolchain/prof_common.h"
+#include "analysis/csrc/utils/safe_unordered_map.h"
+#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/utils/time_logger.h"
+#include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
 namespace Parser {

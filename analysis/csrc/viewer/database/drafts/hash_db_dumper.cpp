@@ -10,8 +10,9 @@
  * *****************************************************************************
  */
 
-#include "file.h"
-#include "hash_db_dumper.h"
+#include "analysis/csrc/viewer/database/drafts/hash_db_dumper.h"
+
+#include "analysis/csrc/utils/file.h"
 
 namespace Analysis {
 namespace Viewer {

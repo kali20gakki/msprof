@@ -10,12 +10,12 @@
  * *****************************************************************************
  */
 
-#include "context.h"
+#include "analysis/csrc/parser/environment/context.h"
 
-#include "file.h"
-#include "error_code.h"
-#include "log.h"
-#include "utils.h"
+#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
 namespace Parser {

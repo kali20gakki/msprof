@@ -16,7 +16,8 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
-#include "connection.h"
+
+#include "analysis/csrc/viewer/database/connection.h"
 
 namespace Analysis {
 namespace Viewer {

@@ -10,11 +10,12 @@
  * *****************************************************************************
  */
 
-#include "log.h"
+#include "analysis/csrc/dfx/log.h"
 
 #include <iostream>
 #include <sys/syscall.h>
-#include "error_code.h"
+
+#include "analysis/csrc/dfx/error_code.h"
 
 namespace Analysis {
 using namespace Analysis::Utils;

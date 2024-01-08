@@ -17,11 +17,12 @@
 #include <queue>
 #include <map>
 #include <unordered_map>
-#include "event.h"
-#include "tree.h"
-#include "ascend_obj.h"
-#include "utils.h"
-#include "type_data.h"
+
+#include "analysis/csrc/entities/ascend_obj.h"
+#include "analysis/csrc/entities/event.h"
+#include "analysis/csrc/entities/tree.h"
+#include "analysis/csrc/parser/host/cann/type_data.h"
+#include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
 namespace Association {

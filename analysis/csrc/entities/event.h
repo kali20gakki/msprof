@@ -17,7 +17,8 @@
 #include <memory>
 #include <atomic>
 #include <vector>
-#include "prof_common.h"
+
+#include "collector/inc/toolchain/prof_common.h"
 
 namespace Analysis {
 namespace Entities {

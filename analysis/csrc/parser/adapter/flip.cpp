@@ -10,10 +10,10 @@
  * *****************************************************************************
  */
 
-#include "flip.h"
+#include "analysis/csrc/parser/adapter/flip.h"
 
-#include "log.h"
-#include "utils.h"
+#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
 namespace Parser {
