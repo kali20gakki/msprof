@@ -10,28 +10,15 @@ set(COLLECTOR ${PROJECT_ROOT}/collector)
 # 保持编译和运行python版本兼容性
 add_definitions(-DASCEND_CI_LIMITED_PY37)
 
-include_directories(${CSRC}/association)
-include_directories(${CSRC}/association/cann)
-include_directories(${CSRC}/external)
-include_directories(${CSRC}/parser)
-include_directories(${CSRC}/parser/adapter)
-include_directories(${CSRC}/parser/environment)
-include_directories(${CSRC}/parser/host/cann)
-include_directories(${CSRC}/association/credential)
-include_directories(${CSRC}/py_interface)
-include_directories(${CSRC}/entities)
-include_directories(${CSRC}/utils)
-include_directories(${CSRC}/viewer)
-include_directories(${CSRC}/viewer/database)
-include_directories(${CSRC}/viewer/database/finals)
-include_directories(${CSRC}/worker)
-include_directories(${CSRC}/dfx)
+include_directories(${PROJECT_ROOT}/)
+
 include_directories(${COLLECTOR}/inc/toolchain)
 include_directories(${OPENSOURCE}/json/include)
 
 include_directories(/usr/local/include/)
 include_directories(/opt/buildtools/python-3.9.11/include/python3.9)
 
+# 严格控制so中源文件范围，所有源文件精细到最末端文件夹
 aux_source_directory(${CSRC}/association SOURCES)
 aux_source_directory(${CSRC}/association/cann SOURCES)
 aux_source_directory(${CSRC}/external SOURCES)

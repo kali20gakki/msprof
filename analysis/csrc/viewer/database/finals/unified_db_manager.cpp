@@ -10,13 +10,13 @@
  * *****************************************************************************
  */
 
-#include "unified_db_manager.h"
+#include "analysis/csrc/viewer/database/finals/unified_db_manager.h"
 
-#include "log.h"
-#include "thread_pool.h"
-#include "id_pool.h"
-#include "time_utils.h"
-#include "table_processer_factory.h"
+#include "analysis/csrc/association/credential/id_pool.h"
+#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/utils/time_utils.h"
+#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/viewer/database/finals/table_processer_factory.h"
 
 namespace Analysis {
 namespace Viewer {

@@ -11,7 +11,7 @@ Copyright, 2023, Huawei Tech. Co., Ltd.
  */
 
 
-#include "report_db.h"
+#include "analysis/csrc/viewer/database/finals/report_db.h"
 
 namespace Analysis {
 namespace Viewer {

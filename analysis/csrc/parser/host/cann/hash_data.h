@@ -18,7 +18,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "singleton.h"
+#include "analysis/csrc/utils/singleton.h"
 
 namespace Analysis {
 namespace Parser {

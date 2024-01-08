@@ -10,12 +10,13 @@
  * *****************************************************************************
  */
 
-#include "cann_trace_db_dumper.h"
-#include "thread_pool.h"
-#include "hash_data.h"
-#include "type_data.h"
-#include "time_logger.h"
-#include "number_mapping.h"
+#include "analysis/csrc/viewer/database/drafts/cann_trace_db_dumper.h"
+
+#include "analysis/csrc/parser/host/cann/hash_data.h"
+#include "analysis/csrc/parser/host/cann/type_data.h"
+#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/utils/time_logger.h"
+#include "analysis/csrc/viewer/database/drafts/number_mapping.h"
 
 namespace Analysis {
 namespace Viewer {

@@ -10,7 +10,8 @@
  * *****************************************************************************
  */
 
-#include "tree_analyzer.h"
+#include "analysis/csrc/association/cann/tree_analyzer.h"
+
 namespace Analysis {
 namespace Association {
 namespace Cann {

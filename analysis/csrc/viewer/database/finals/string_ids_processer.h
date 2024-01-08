@@ -13,7 +13,7 @@
 #ifndef ANALYSIS_VIEWER_DATABASE_FINALS_STRINGIDS_PROCESSER_H
 #define ANALYSIS_VIEWER_DATABASE_FINALS_STRINGIDS_PROCESSER_H
 
-#include "table_processer.h"
+#include "analysis/csrc/viewer/database/finals/table_processer.h"
 
 namespace Analysis {
 namespace Viewer {

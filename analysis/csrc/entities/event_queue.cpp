@@ -11,8 +11,9 @@
  */
 
 #include <algorithm>
-#include "log.h"
-#include "event_queue.h"
+
+#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/entities/event_queue.h"
 
 namespace Analysis {
 namespace Entities {

@@ -13,12 +13,12 @@
 #ifndef ANALYSIS_VIEWER_DATABASE_TABLE_PROSSER_H
 #define ANALYSIS_VIEWER_DATABASE_TABLE_PROSSER_H
 
-#include "db_runner.h"
-#include "report_db.h"
-#include "utils.h"
-
 #include <string>
 #include <vector>
+
+#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/viewer/database/db_runner.h"
+#include "analysis/csrc/viewer/database/finals/report_db.h"
 
 namespace Analysis {
 namespace Viewer {

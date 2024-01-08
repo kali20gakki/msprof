@@ -10,12 +10,12 @@
  * *****************************************************************************
  */
 
-#include "compact_info_parser.h"
+#include "analysis/csrc/parser/host/cann/compact_info_parser.h"
 
-#include "chunk_generator.h"
-#include "log.h"
-#include "context.h"
-#include "utils.h"
+#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/parser/chunk_generator.h"
+#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
 namespace Parser {

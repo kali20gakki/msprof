@@ -10,11 +10,12 @@
  * *****************************************************************************
  */
 
-#include "hash_data.h"
-#include "file.h"
-#include "utils.h"
-#include "error_code.h"
-#include "log.h"
+#include "analysis/csrc/parser/host/cann/hash_data.h"
+
+#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
 namespace Parser {

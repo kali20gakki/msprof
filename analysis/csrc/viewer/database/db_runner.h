@@ -16,7 +16,8 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include "connection.h"
+
+#include "analysis/csrc/viewer/database/connection.h"
 
 namespace Analysis {
 namespace Viewer {

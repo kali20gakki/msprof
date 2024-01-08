@@ -17,7 +17,7 @@
 #include <vector>
 #include <memory>
 
-#include "log.h"
+#include "analysis/csrc/dfx/log.h"
 
 namespace Analysis {
 namespace Utils {

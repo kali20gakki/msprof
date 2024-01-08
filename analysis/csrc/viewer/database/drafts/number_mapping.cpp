@@ -10,8 +10,10 @@
 * *****************************************************************************
 */
 
-#include "number_mapping.h"
-#include "log.h"
+#include "analysis/csrc/viewer/database/drafts/number_mapping.h"
+
+#include "analysis/csrc/dfx/log.h"
+
 namespace Analysis {
 namespace Viewer {
 namespace Database {
