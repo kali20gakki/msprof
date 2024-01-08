@@ -9,16 +9,13 @@
  * Creation Date      : 2023/12/07
  * *****************************************************************************
  */
-#include "context.h"
-
-#include <iostream>
+#include "analysis/csrc/parser/environment/context.h"
 
 #include "gtest/gtest.h"
-#include "error_code.h"
-#include "file.h"
 #include "mockcpp/mockcpp.hpp"
-#include "time_utils.h"
-#include "unified_db_constant.h"
+#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 using namespace Analysis::Utils;
 using namespace Analysis::Parser::Environment;

@@ -14,7 +14,8 @@
 #define ANALYSIS_ENTITIES_EVENT_QUEUE_H
 
 #include <vector>
-#include "event.h"
+
+#include "analysis/csrc/entities/event.h"
 
 namespace Analysis {
 namespace Entities {

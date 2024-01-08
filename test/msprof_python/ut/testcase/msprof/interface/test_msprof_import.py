@@ -27,6 +27,7 @@ class TestImportCommand(unittest.TestCase):
             args = Namespace(**args_dic)
             with mock.patch(NAMESPACE + '.LoadInfoManager.load_info'), \
                     mock.patch(NAMESPACE + '.get_path_dir', return_value=[1, 2, 3]), \
+                    mock.patch(NAMESPACE + '.get_valid_sub_path'), \
                     mock.patch('os.path.join', return_value=True), \
                     mock.patch('os.path.realpath', return_value='home\\process'), \
                     mock.patch(NAMESPACE + '.ImportCommand.do_import'), \
@@ -39,6 +40,16 @@ class TestImportCommand(unittest.TestCase):
                     key = ImportCommand(args)
                     key.process()
 
+    def test_parse_unresolved_dirs(self):
+        unresolved_dirs = {'pro_dir': ['result_dir']}
+        args_dic = {"collection_path": "test", "cluster_flag": False}
+        args = Namespace(**args_dic)
+        with mock.patch(NAMESPACE + '.LoadInfoManager.load_info'), \
+                mock.patch(NAMESPACE + '.get_path_dir', return_value=[1, 2, 3]), \
+                mock.patch(NAMESPACE + '.get_valid_sub_path'), \
+                mock.patch(NAMESPACE + '.ImportCommand.do_import'):
+            key = ImportCommand(args)
+            key._parse_unresolved_dirs(unresolved_dirs)
 
 if __name__ == '__main__':
     unittest.main()

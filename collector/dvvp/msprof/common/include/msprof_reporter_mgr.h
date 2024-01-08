@@ -59,6 +59,8 @@ public:
     std::string& GetRegReportTypeInfo(uint16_t level, uint32_t typeId);
     uint64_t GetHashId(const std::string &info);
     int32_t SendAdditionalInfo(SHARED_PTR_ALIA<ProfileFileChunk> fileChunk);
+    void NotifyQuit();
+    void SetSyncReporter();
 
 private:
     void FillFileChunkData(const std::string &saveHashData, SHARED_PTR_ALIA<ProfileFileChunk> fileChunk,
@@ -72,8 +74,11 @@ private:
     std::vector<MsprofCallbackHandler> reporters_;
     std::mutex regTypeInfoMtx_;
     std::mutex startMtx_;
+    std::mutex notifyMtx_;
+    std::condition_variable cv_;
     bool isStarted_;
     bool isUploadStarted_;
+    bool isSyncReporter_;
 };
 }
 }

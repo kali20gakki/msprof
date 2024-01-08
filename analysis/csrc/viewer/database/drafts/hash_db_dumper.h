@@ -16,9 +16,10 @@
 
 #include <thread>
 #include <unordered_map>
-#include "db_runner.h"
-#include "database.h"
-#include "base_dumper.h"
+
+#include "analysis/csrc/viewer/database/database.h"
+#include "analysis/csrc/viewer/database/db_runner.h"
+#include "analysis/csrc/viewer/database/drafts/base_dumper.h"
 
 namespace Analysis {
 namespace Viewer {

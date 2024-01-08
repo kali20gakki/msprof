@@ -11,7 +11,8 @@
  * *****************************************************************************
  */
 
-#include "host_trace_worker.h"
+#include "analysis/csrc/worker/host_trace_worker.h"
+
 namespace Analysis {
 namespace Worker {
 

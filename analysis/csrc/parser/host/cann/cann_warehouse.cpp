@@ -9,7 +9,9 @@
  * Creation Date      : 2023/11/2
  * *****************************************************************************
  */
-#include "cann_warehouse.h"
+
+#include "analysis/csrc/parser/host/cann/cann_warehouse.h"
+
 namespace Analysis {
 namespace Parser {
 namespace Host {

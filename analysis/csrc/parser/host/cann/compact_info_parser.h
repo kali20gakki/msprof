@@ -16,9 +16,9 @@
 #include <string>
 #include <vector>
 
-#include "base_parser.h"
-#include "prof_common.h"
-#include "flip.h"
+#include "analysis/csrc/parser/adapter/flip.h"
+#include "analysis/csrc/parser/base_parser.h"
+#include "collector/inc/toolchain/prof_common.h"
 
 namespace Analysis {
 namespace Parser {

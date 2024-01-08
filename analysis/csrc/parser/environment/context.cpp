@@ -9,13 +9,13 @@
  * Creation Date      : 2023/11/20
  * *****************************************************************************
  */
-#include "context.h"
 
-#include "file.h"
-#include "error_code.h"
-#include "log.h"
-#include "utils.h"
-#include "unified_db_constant.h"
+#include "analysis/csrc/parser/environment/context.h"
+
+#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 namespace Analysis {
 namespace Parser {
@@ -25,7 +25,7 @@ using namespace Analysis::Utils;
 using namespace Viewer::Database;
 
 namespace {
-const uint32_t ALL_EXPORT_VERSION = 0x072211;  // 2023年10月30号之后的驱动版本号
+const uint32_t ALL_EXPORT_VERSION = 0x072211;  // 2023年10月30号之后支持全导的驱动版本号
 // 需要用到的json 和 log的文件名（前缀）
 const std::string INFO_JSON = "info.json";
 const std::string SAMPLE_JSON = "sample.json";
@@ -130,6 +130,8 @@ bool Context::CheckInfoValueIsValid(const std::string &profPath, uint16_t device
         }
         if (deviceId == HOST_ID) {
             if (!info.at("CPU").is_array() || (info.at("CPU").size() != 1)) {
+                ERROR("CPU's value is invalid, "
+                      "the ProfPath is %, DeviceId is %.", profPath, deviceId);
                 return false;
             }
             if (!info.at("CPU").back().contains("Frequency")) {
@@ -139,6 +141,8 @@ bool Context::CheckInfoValueIsValid(const std::string &profPath, uint16_t device
             }
         } else {
             if (!info.at("DeviceInfo").is_array() || (info.at("DeviceInfo").size() != 1)) {
+                ERROR("DeviceInfo's value is invalid, "
+                      "the ProfPath is %, DeviceId is %.", profPath, deviceId);
                 return false;
             }
             auto freqArr = info.at("DeviceInfo").back();

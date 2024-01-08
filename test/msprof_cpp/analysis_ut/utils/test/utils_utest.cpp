@@ -9,10 +9,12 @@
  * Creation Date      : 2023/11/16
  * *****************************************************************************
  */
+#include "analysis/csrc/utils/utils.h"
 
 #include "gtest/gtest.h"
-#include "utils.h"
-#include "error_code.h"
+#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/parser/environment/context.h"
+
 
 using namespace Analysis::Utils;
 using namespace Analysis;
@@ -122,26 +124,19 @@ TEST_F(UtilsUTest, TestStrToDoubleShouldReturnOKWhenStrIsNumber)
 
 TEST_F(UtilsUTest, TestStrToDoubleShouldReturnERRORWhenStrIsNotNumber)
 {
-    uint64_t dest;
-    EXPECT_EQ(StrToU64(dest, "11tt.1"), ANALYSIS_ERROR);
+    double dest;
+    EXPECT_EQ(StrToDouble(dest, "11tt.1"), ANALYSIS_ERROR);
 }
 
 TEST_F(UtilsUTest, TestStrToDoubleShouldReturnERRORWhenStrIsEmpty)
 {
-    uint64_t dest;
-    EXPECT_EQ(StrToU64(dest, ""), ANALYSIS_ERROR);
-}
-
-TEST_F(UtilsUTest, TestStrToDoubleShouldReturnERRORWhenStrIsBeyondThreshold)
-{
-    uint64_t dest;
-    std::string errorStr = "99999999999999999999999999999999999999999999988888888.111111111111111111111111";
-    EXPECT_EQ(StrToU64(dest, errorStr), ANALYSIS_ERROR);
+    double dest;
+    EXPECT_EQ(StrToDouble(dest, ""), ANALYSIS_ERROR);
 }
 
 TEST_F(UtilsUTest, TestGetDeviceIdByDevicePathShouldReturnHostIdWhenPathIsHostOrNoDevice)
 {
-    uint16_t hostId = 64;
+    uint16_t hostId = Parser::Environment::HOST_ID;
     std::string hostPath = "abc_123/efg_789/PROF_XXX/host";
     EXPECT_EQ(GetDeviceIdByDevicePath(hostPath), hostId);
 

@@ -10,11 +10,10 @@
  * *****************************************************************************
  */
 
-#include "utils.h"
+#include "analysis/csrc/utils/utils.h"
 
-#include "log.h"
-#include "error_code.h"
-#include "context.h"
+#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/parser/environment/context.h"
 
 namespace Analysis {
 namespace Utils {

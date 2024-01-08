@@ -17,7 +17,7 @@
 #include <fstream>
 #include <vector>
 
-#include "nlohmann/json.hpp"
+#include "opensource/json/include/nlohmann/json.hpp"
 
 namespace Analysis {
 namespace Utils {

@@ -10,11 +10,11 @@
  * *****************************************************************************
  */
 
-#include "chunk_generator.h"
+#include "analysis/csrc/parser/chunk_generator.h"
 
-#include "file.h"
-#include "log.h"
-#include "error_code.h"
+#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/utils/file.h"
 
 namespace Analysis {
 namespace Parser {

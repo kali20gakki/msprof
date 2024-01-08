@@ -18,8 +18,8 @@
 #include <sstream>
 #include <unistd.h>
 
-#include "file.h"
-#include "singleton.h"
+#include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/utils/singleton.h"
 
 namespace Analysis {
 #define DEBUG(format, ...)                                                                                          \

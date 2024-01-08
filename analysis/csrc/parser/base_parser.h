@@ -17,9 +17,9 @@
 #include <string>
 #include <memory>
 
-#include "chunk_generator.h"
-#include "error_code.h"
-#include "log.h"
+#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/parser/chunk_generator.h"
 
 namespace Analysis {
 namespace Parser {

@@ -1574,7 +1574,7 @@ int ProfAicpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     }
  
     collectionJobCfg_ = cfg;
-    if (!collectionJobCfg_->comParams->params->dataTypeConfig & PROF_AICPU_TRACE) {
+    if (!(collectionJobCfg_->comParams->params->dataTypeConfig & PROF_AICPU_TRACE)) {
         MSPROF_LOGI("AICPU not enable, devId:%d", collectionJobCfg_->comParams->devId);
         return PROFILING_FAILED;
     }

@@ -17,7 +17,7 @@
 #include <vector>
 #include <memory>
 
-#include "log.h"
+#include "analysis/csrc/dfx/log.h"
 
 namespace Analysis {
 namespace Utils {
@@ -27,8 +27,8 @@ std::vector<std::string> Split(const std::string &str, const std::string &delimi
 int StrToU16(uint16_t &dest, const std::string &numStr);
 int StrToU64(uint64_t &dest, const std::string &numStr);
 int StrToDouble(double &dest, const std::string &numStr);
-// 根据所给的device路径获取对应的deviceId test/PROF_1234/device_x 返回x对应的数值
-// 对于传入的 test/PROF_1234/host, 也返回host对应的id（64）
+// 根据所给的device路径获取对应的deviceId {local_path}/PROF_xxx/device_{id} 返回id对应的数值
+// 对于传入的 {local_path}/PROF_xxx/host, 也返回host对应的id（64）
 uint16_t GetDeviceIdByDevicePath(const std::string &filePath);
 
 template<class T, class ...Args>

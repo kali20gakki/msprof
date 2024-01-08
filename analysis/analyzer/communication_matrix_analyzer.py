@@ -14,10 +14,10 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import CommunicationMatrixInfo
 from common_func.ms_constant.str_constant import StrConstant
-from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
 from common_func.msprof_common import prepare_for_analyze
 from common_func.msprof_common import prepare_log
+from common_func.msprof_common import get_valid_sub_path
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import create_json_for_dict
 from common_func.path_manager import PathManager
@@ -42,6 +42,7 @@ class CommunicationMatrixAnalyzer:
     def __init__(self: any, collection_path: any) -> None:
         self.collection_path = collection_path
         self.hccl_op_data = defaultdict(list)
+
 
     def process(self):
         """Analyzing Communication Data"""
@@ -124,10 +125,7 @@ class CommunicationMatrixAnalyzer:
             if sub_dir == StrConstant.TIMELINE_PATH or sub_dir == self.HOST_PATH:
                 continue
 
-            sub_path = os.path.realpath(
-                os.path.join(collect_path, sub_dir))
-            check_path_valid(sub_path, False)
-
+            sub_path = get_valid_sub_path(collect_path, sub_dir, False)
             if DataCheckManager.contain_info_json_data(sub_path):
                 LoadInfoManager.load_info(sub_path)
                 self._communication_matrix_analyze(sub_path)

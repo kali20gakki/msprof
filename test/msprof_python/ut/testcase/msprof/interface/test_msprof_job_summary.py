@@ -27,7 +27,7 @@ class TestMsprofJobSummary(unittest.TestCase):
         with mock.patch(NAMESPACE + '.get_path_dir', return_value=['device']), \
                 mock.patch('os.path.join', return_value='test'), \
                 mock.patch('os.path.realpath', return_value='test'), \
-                mock.patch(NAMESPACE + '.check_path_valid'), \
+                mock.patch(NAMESPACE + '.get_valid_sub_path'), \
                 mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True), \
                 mock.patch(NAMESPACE + '.MsprofJobSummary._generate_json_file'):
             MsprofJobSummary('test')._export_all_device_data()

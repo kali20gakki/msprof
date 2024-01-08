@@ -58,19 +58,18 @@ class GeInfoModel(BaseModel):
             model_to_iter_dict.setdefault((map_datum[0], map_datum[1]), map_datum[2])
         return model_to_iter_dict
 
-    def get_batch_dict(self: any, datatype: str) -> dict:
+    def get_batch_dict(self: any) -> dict:
         """
         get batch data
-        :params: datatype
         :return: dict of iter id, stream id, task_id, batch id
         """
         ge_sql = "select model_id, index_id, stream_id, task_id, batch_id " \
                  "from {0} inner join( " \
                  "select min(timestamp) as timestamp " \
-                 "from {0} where index_id != 0 and task_type = '{1}' " \
+                 "from {0} where index_id != 0 and (task_type = '{1}' or task_type = '{2}') " \
                  "group by model_id, index_id, stream_id) as min_time_table " \
                  "on {0}.timestamp = min_time_table.timestamp".format(
-            DBNameConstant.TABLE_GE_TASK, datatype)
+            DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_AI_CORE, Constant.TASK_TYPE_HCCL)
         ge_data = DBManager.fetch_all_data(self.cur, ge_sql)
 
         if Utils.is_single_op_scene(self.result_dir):
@@ -86,12 +85,12 @@ class GeInfoModel(BaseModel):
                     batch_dict.setdefault((iter_id, stream_id), (task_id, batch_id))
             return batch_dict
 
-    def get_ge_data(self: any, datatype: str, is_static_shape: str) -> any:
+    def get_ge_data(self: any, is_static_shape: str) -> any:
         result_data = [{}, {}] if is_static_shape == Constant.GE_STATIC_SHAPE else {}
         if not Utils.is_step_scene(self.result_dir):
             return result_data
         step_trace_data = self.get_step_trace_data()
-        task_data = self.get_ge_task_data(datatype, is_static_shape)
+        task_data = self.get_ge_task_data(is_static_shape)
         if not step_trace_data or not task_data:
             return result_data
 
@@ -120,16 +119,19 @@ class GeInfoModel(BaseModel):
             step_trace_data = ts_model.get_step_trace_data()
         return step_trace_data
 
-    def get_ge_task_data(self: any, datatype: str, is_static_shape: str) -> dict:
+    def get_ge_task_data(self: any, is_static_shape: str) -> dict:
+        # ge task ai core data contains AI_CORE and HCCL type
         if is_static_shape == Constant.GE_STATIC_SHAPE:
             sql = "select model_id, GROUP_CONCAT(stream_id||'-'||task_id||'-'||batch_id) from {0} " \
-                  "where index_id=0 and task_type='{1}' " \
-                  "group by model_id".format(DBNameConstant.TABLE_GE_TASK, datatype)
+                  "where index_id=0 and (task_type = '{1}' or task_type = '{2}') " \
+                  "group by model_id".format(DBNameConstant.TABLE_GE_TASK,
+                                             Constant.TASK_TYPE_AI_CORE, Constant.TASK_TYPE_HCCL)
         else:
             sql = "select model_id||'-'||index_id, " \
                   "GROUP_CONCAT(stream_id||'-'||task_id||'-'||batch_id) from {0} " \
-                  "where index_id<>0 and task_type='{1}' " \
-                  "group by model_id||'-'||index_id".format(DBNameConstant.TABLE_GE_TASK, datatype)
+                  "where index_id<>0 and (task_type = '{1}' or task_type = '{2}') " \
+                  "group by model_id||'-'||index_id".format(DBNameConstant.TABLE_GE_TASK,
+                                                            Constant.TASK_TYPE_AI_CORE, Constant.TASK_TYPE_HCCL)
         task_data = DBManager.fetch_all_data(self.cur, sql)
         task_data_dict = {}
         if task_data:

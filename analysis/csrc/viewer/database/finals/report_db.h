@@ -13,7 +13,7 @@ Copyright, 2023, Huawei Tech. Co., Ltd.
 #ifndef ANALYSIS_VIEWER_DATABASE_REPORT_DB_H
 #define ANALYSIS_VIEWER_DATABASE_REPORT_DB_H
 
-#include "database.h"
+#include "analysis/csrc/viewer/database/database.h"
 
 
 namespace Analysis {

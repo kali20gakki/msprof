@@ -10,11 +10,11 @@
  * *****************************************************************************
  */
 
-#include "api_event_parser.h"
+#include "analysis/csrc/parser/host/cann/api_event_parser.h"
 
-#include "chunk_generator.h"
-#include "log.h"
-#include "utils.h"
+#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/parser/chunk_generator.h"
+#include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
 namespace Parser {

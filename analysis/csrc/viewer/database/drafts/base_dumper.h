@@ -13,10 +13,12 @@
 #define ANALYSIS_VIEWER_DATABASE_DRAFTS_BASE_DUMPER_H
 
 #include <vector>
-#include "database.h"
-#include "db_runner.h"
-#include "utils.h"
-#include "file.h"
+
+#include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/viewer/database/database.h"
+#include "analysis/csrc/viewer/database/db_runner.h"
+
 namespace Analysis {
 namespace Viewer {
 namespace Database {

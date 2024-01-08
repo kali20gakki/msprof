@@ -41,10 +41,9 @@ class BatchCounter:
             return int(stream_id), int(task_id)
         return NumberConstant.INVALID_STREAM_ID, NumberConstant.INVALID_TASK_ID
 
-    def init(self: any, datatype: str) -> None:
+    def init(self: any) -> None:
         """
         get dict whose key is iter_id, value is list of stream and task from ge info.
-        :param datatype: AI_CORE or AI_CPU
         :return: None
         """
         if IterInfoManager.check_parallel(self._project_path):
@@ -53,8 +52,8 @@ class BatchCounter:
         ge_info_model = GeInfoModel(self._project_path)
         if ge_info_model.check_db() and ge_info_model.check_table():
             self._ge_static_shape_iter_model_dict, self._ge_static_shape_model_task_dict = \
-                ge_info_model.get_ge_data(datatype, Constant.GE_STATIC_SHAPE)
-            self._ge_task_batch_dict = ge_info_model.get_batch_dict(datatype)
+                ge_info_model.get_ge_data(Constant.GE_STATIC_SHAPE)
+            self._ge_task_batch_dict = ge_info_model.get_batch_dict()
         ge_info_model.finalize()
 
     def calculate_batch(self: any, stream_id: int, task_id: int, current_iter_id=NumberConstant.INVALID_ITER_ID) -> int:

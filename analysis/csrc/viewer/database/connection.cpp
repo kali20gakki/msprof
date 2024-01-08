@@ -9,10 +9,13 @@
  * Creation Date      : 2023/11/3
  * *****************************************************************************
  */
-#include "connection.h"
+ 
+#include "analysis/csrc/viewer/database/connection.h"
+
 #include <sqlite3.h>
 #include <iostream>
-#include "utils.h"
+
+#include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
 namespace Viewer {

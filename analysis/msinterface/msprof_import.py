@@ -13,6 +13,7 @@ from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_common import analyze_collect_data, prepare_for_parse
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
+from common_func.msprof_common import get_valid_sub_path
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from framework.load_info_manager import LoadInfoManager
@@ -82,9 +83,7 @@ class ImportCommand:
             collect_path = os.path.join(self.collection_path, subdir)
         sub_dirs = sorted(get_path_dir(collect_path), reverse=True)
         for sub_dir in sub_dirs:  # result_dir
-            sub_path = os.path.realpath(
-                os.path.join(collect_path, sub_dir))
-            check_path_valid(sub_path, False)
+            sub_path = get_valid_sub_path(collect_path, sub_dir, False)
             if DataCheckManager.contain_info_json_data(sub_path):
                 LoadInfoManager.load_info(sub_path)
                 self.do_import(sub_path)
@@ -172,9 +171,7 @@ class ImportCommand:
         for pro_dir, result_dir_list in unresolved_dirs.items():
             prof_path = os.path.join(self.collection_path, pro_dir)
             for result_dir in result_dir_list:
-                result_path = os.path.realpath(
-                    os.path.join(prof_path, result_dir))
-                check_path_valid(result_path, False)
+                result_path = get_valid_sub_path(prof_path, result_dir, False)
                 LoadInfoManager.load_info(result_path)
                 self.do_import(result_path)
         print_info(MsProfCommonConstant.COMMON_FILE_NAME,
