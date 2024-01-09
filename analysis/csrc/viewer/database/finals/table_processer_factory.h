@@ -14,7 +14,6 @@
 #define ANALYSIS_VIEWER_DATABASE_TABLE_PROSSER_FACTORY_H
 
 #include <string>
-#include <vector>
 #include <memory>
 
 #include "analysis/csrc/utils/utils.h"
@@ -30,7 +29,7 @@ class TableProcesserFactory {
 public:
     static std::shared_ptr<TableProcesser> CreateTableProcessor(const std::string &tableName,
                                                                 const std::string &reportDBPath,
-                                                                const std::vector<std::string> &profPaths);
+                                                                const std::set<std::string> &profPaths);
     ~TableProcesserFactory() = default;
 };  // class TableProcesserFactory
 

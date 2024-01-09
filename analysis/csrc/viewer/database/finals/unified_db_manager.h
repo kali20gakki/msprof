@@ -14,7 +14,7 @@
 #define ANALYSIS_VIEWER_DATABASE_UNIFIED_DB_MANAGER_H
 
 #include <string>
-#include <vector>
+#include <set>
 
 namespace Analysis {
 namespace Viewer {
@@ -22,14 +22,14 @@ namespace Database {
 
 class UnifiedDBManager {
 public:
-    UnifiedDBManager(const std::string &output, const std::vector<std::string> &profPaths)
+    UnifiedDBManager(const std::string &output, const std::set<std::string> &profPaths)
         : output_(output), profPaths_(profPaths) {};
     bool Run();
 private:
     void Init();
     std::string reportDBPath_;
     std::string output_;
-    std::vector<std::string> profPaths_;
+    std::set<std::string> profPaths_;
 };
 
 }  // Database
