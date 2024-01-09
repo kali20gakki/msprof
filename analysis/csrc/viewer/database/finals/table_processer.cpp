@@ -9,9 +9,12 @@
  * Creation Date      : 2023/12/14
  * *****************************************************************************
  */
+#include <utility>
+#include <atomic>
+
+#include "analysis/csrc/viewer/database/finals/table_processer.h"
 
 #include "analysis/csrc/utils/thread_pool.h"
-#include "analysis/csrc/viewer/database/finals/table_processer.h"
 
 namespace Analysis {
 namespace Viewer {
@@ -19,17 +22,26 @@ namespace Database {
 
 const uint32_t POOLNUM = 2;
 
+TableProcesser::TableProcesser(std::string reportDBPath, const std::set<std::string> &profPaths)
+    : reportDBPath_(std::move(reportDBPath)), profPaths_(profPaths)
+{
+    reportDB_.database = Utils::MakeShared<ReportDB>();
+    reportDB_.dbRunner = Utils::MakeShared<DBRunner>(reportDBPath_);
+}
+
 bool TableProcesser::Run()
 {
+    std::atomic<bool> retFlag(true);
     Analysis::Utils::ThreadPool pool(POOLNUM);
     pool.Start();
-    for (auto fileDir : profPaths_) {
-        pool.AddTask([this, &fileDir]() {
-            Process(fileDir);
+    for (const auto& fileDir : profPaths_) {
+        pool.AddTask([this, fileDir, &retFlag]() {
+            retFlag = retFlag && Process(fileDir);
         });
     }
     pool.WaitAllTasks();
     pool.Stop();
+    return retFlag;
 }
 
 

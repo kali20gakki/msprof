@@ -15,6 +15,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 
 #include "analysis/csrc/utils/utils.h"
 #include "analysis/csrc/viewer/database/db_runner.h"
@@ -23,10 +24,6 @@
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-const std::string HOST = "host";
-const std::string DEVICE_PREFIX = "device_";
-const std::string SQLITE = "sqlite";
-
 // 该结构体用于区分原始db和report db 所需的对象和属性
 // 规定了 db名字， table名字，和对应的database和dbRunner对象
 struct DBInfo {
@@ -42,21 +39,43 @@ struct DBInfo {
 class TableProcesser {
 public:
     TableProcesser() = default;
-    TableProcesser(const std::string &reportDBPath, const std::vector<std::string> &profPaths)
-        : reportDBPath_(reportDBPath), profPaths_(profPaths)
-    {
-        reportDB_.database = Utils::MakeShared<ReportDB>();
-        reportDB_.dbRunner = Utils::MakeShared<DBRunner>(reportDBPath_);
-    };
+    TableProcesser(std::string reportDBPath, const std::set<std::string> &profPaths);
     virtual bool Run();
     virtual ~TableProcesser() = default;
 protected:
-    virtual void Process(const std::string &fileDir) = 0;
+    virtual bool Process(const std::string &fileDir) = 0;
+    template<typename... Args>
+    bool SaveData(const std::vector<std::tuple<Args...>> &data) const;
     std::string reportDBPath_;
-    std::vector<std::string> profPaths_;
+    std::set<std::string> profPaths_;
     DBInfo reportDB_;
 }; // class TableProcesser
 
+template<typename... Args>
+bool TableProcesser::SaveData(const std::vector<std::tuple<Args...>> &data) const
+{
+    if (data.empty()) {
+        ERROR("% is empty.", reportDB_.tableName);
+        return false;
+    }
+    if (reportDB_.database == nullptr) {
+        ERROR("Report db database is nullptr.");
+        return false;
+    }
+    if (reportDB_.dbRunner == nullptr) {
+        ERROR("Report db runner is nullptr.");
+        return false;
+    }
+    if (!reportDB_.dbRunner->CreateTable(reportDB_.tableName, reportDB_.database->GetTableCols(reportDB_.tableName))) {
+        ERROR("Create table: % failed", reportDB_.tableName);
+        return false;
+    }
+    if (!reportDB_.dbRunner->InsertData(reportDB_.tableName, data)) {
+        ERROR("Insert data into % failed", reportDBPath_);
+        return false;
+    }
+    return true;
+}
 
 }  // Database
 }  // Viewer
