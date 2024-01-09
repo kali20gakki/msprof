@@ -17,7 +17,7 @@ namespace Engine {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::transport;
-MsprofReporterMgr::MsprofReporterMgr() : isStarted_(false), isSyncReporter_(false)
+MsprofReporterMgr::MsprofReporterMgr() : isStarted_(false), isUploadStarted_(false), isSyncReporter_(false)
 {
     indexMap_ = {
         {MSPROF_REPORT_ACL_LEVEL, 0},
@@ -64,7 +64,6 @@ int MsprofReporterMgr::Start()
 void MsprofReporterMgr::Run(const struct error_message::Context &errorContext)
 {
     while (!IsQuit()) {
-        // Collector::Dvvp::Mmpa::MmSleep(1000);    // 1000 表示 1s，等待1s再重新检测落盘.防止少量数据频繁落盘
         std::unique_lock<std::mutex> lk(notifyMtx_);
         cv_.wait_for(lk, std::chrono::seconds(1), [this] { return this->IsQuit(); });
         SaveTypeInfo(false);
