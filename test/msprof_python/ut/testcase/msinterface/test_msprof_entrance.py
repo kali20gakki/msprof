@@ -23,12 +23,14 @@ class TestMsprofEntrance(unittest.TestCase):
         with mock.patch('sys.argv', args), \
                 mock.patch('argparse.ArgumentParser.parse_args', return_value=args_co), \
                 mock.patch(NAMESPACE + '.QueryCommand.process'), \
+                mock.patch(NAMESPACE + '.check_path_valid'), \
                 mock.patch('sys.exit'):
             MsprofEntrance().main()
 
     def test_main_should_set_all_export_false_when_set_model_id_and_iteration_id(self):
         args = ["msprof.py", "export", "summary", "-dir", "test", "--model-id", "1", "--iteration-id", "2"]
         with mock.patch('sys.argv', args), \
+                mock.patch(NAMESPACE + '.check_path_valid'), \
                 mock.patch(NAMESPACE + '.ExportCommand.process'), \
                 mock.patch('sys.exit'):
             MsprofEntrance().main()
@@ -38,6 +40,7 @@ class TestMsprofEntrance(unittest.TestCase):
         args = ["msprof.py", "export", "summary", "-dir", "test", "--model-id", "1"]
         with mock.patch('sys.argv', args), \
                 mock.patch('common_func.common.error'), \
+                mock.patch(NAMESPACE + '.check_path_valid'), \
                 mock.patch(NAMESPACE + '.ExportCommand.process'), \
                 mock.patch('sys.exit'):
             MsprofEntrance().main()

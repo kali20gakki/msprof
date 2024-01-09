@@ -8,6 +8,7 @@ import sys
 
 from common_func.common import call_sys_exit
 from common_func.common import error
+from common_func.msprof_common import check_path_valid
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
 from common_func.profiling_scene import ProfilingScene
@@ -72,6 +73,7 @@ class MsprofEntrance:
         parser, export_parser, import_parser, monitor_parser, query_parser, analyze_parser = self.construct_arg_parser()
 
         args = parser.parse_args(sys.argv[1:])
+        check_path_valid(args.collection_path, False)
         if len(sys.argv) < 2:
             parser.print_help()
             call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
