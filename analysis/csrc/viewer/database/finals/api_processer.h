@@ -12,6 +12,7 @@
 #ifndef ANALYSIS_VIEWER_DATABASE_API_PROCESSER_H
 #define ANALYSIS_VIEWER_DATABASE_API_PROCESSER_H
 
+#include "analysis/csrc/utils/time_utils.h"
 #include "analysis/csrc/viewer/database/finals/table_processer.h"
 
 namespace Analysis {
@@ -19,27 +20,24 @@ namespace Viewer {
 namespace Database {
 // 该类用于定义处理ApiEvent DB
 class ApiProcesser : public TableProcesser {
-using ORI_DATA_FORMAT = std::vector<std::tuple<std::string, std::string, std::string, uint32_t,
+// struct_type, id, level, thread_id, item_id, start, end, connection_id
+using ApiDataFormat = std::vector<std::tuple<std::string, std::string, std::string, uint32_t,
         std::string, uint64_t, uint64_t, uint32_t>>;
-using PROCESSED_DATA_FORMAT = std::vector<std::tuple<uint64_t, uint64_t, uint16_t,
-        uint64_t, uint32_t, uint64_t>>;
+// start, end, level, globalTid, connectionId, name
+using ProcessedDataFormat = std::vector<std::tuple<double, double, uint16_t,
+        uint64_t, uint64_t, uint32_t>>;
 public:
     ApiProcesser() = default;
-    ApiProcesser(const std::string &reportDBPath, const std::vector<std::string> &profPaths)
-        : TableProcesser(reportDBPath, profPaths)
-{
-        apieventDB_.dbName = "api_event.db";
-        apieventDB_.tableName = "ApiData";
-        reportDB_.tableName = "API";
-};
-    virtual ~ApiProcesser() = default;
+    ApiProcesser(std::string reportDBPath, const std::set<std::string> &profPaths);
 protected:
-    void Process(const std::string &fileDir) override;
+    bool Process(const std::string &fileDir) override;
 private:
-    bool GetData(const std::string &dbPath, ORI_DATA_FORMAT &oriData);
-    bool FormatData(const ORI_DATA_FORMAT &oriData, PROCESSED_DATA_FORMAT &processedData);
-    bool SaveData(const PROCESSED_DATA_FORMAT &processedData);
+    ApiDataFormat GetData(const std::string &dbPath);
+    bool FormatData(const uint64_t &pid, const ApiDataFormat &oriData, ProcessedDataFormat &processedData);
+    static uint16_t GetLevelValue(const std::string &key);
     DBInfo apieventDB_;
+    Utils::SyscntConversionParams params_;
+    Utils::ProfTimeRecord record_;
 };
 
 

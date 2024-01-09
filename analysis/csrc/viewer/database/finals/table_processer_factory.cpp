@@ -24,7 +24,7 @@ const uint32_t POOLNUM = 2;
 std::shared_ptr<TableProcesser> TableProcesserFactory::CreateTableProcessor(
     const std::string &tableName,
     const std::string &reportDBPath,
-    const std::vector<std::string> &profPaths)
+    const std::set<std::string> &profPaths)
 {
     std::shared_ptr<TableProcesser> processer = nullptr;
     if (tableName == "api_processer") {
