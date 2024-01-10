@@ -54,6 +54,10 @@ int FileAgeing::Init()
                     Utils::BaseName(storageLimit_).c_str(), totalVolume);
         return PROFILING_SUCCESS;
     }
+    if (limit < STORAGE_RESERVED_VOLUME) {
+        MSPROF_LOGE("init storage_limit failed, limit:%llu", limit);
+        return PROFILING_FAILED;
+    }
     storageVolumeUpThd_ = limit - STORAGE_RESERVED_VOLUME;
     storageVolumeDownThd_ = STORAGE_RESERVED_VOLUME;
     MSPROF_LOGI("init storage_limit success, limit:%llu (%lluMB), storageVolumeUpThd_:%llu (%lluMB), "
