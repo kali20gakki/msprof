@@ -30,6 +30,7 @@ int StrToDouble(double &dest, const std::string &numStr);
 // 根据所给的device路径获取对应的deviceId {local_path}/PROF_xxx/device_{id} 返回id对应的数值
 // 对于传入的 {local_path}/PROF_xxx/host, 也返回host对应的id（64）
 uint16_t GetDeviceIdByDevicePath(const std::string &filePath);
+bool IsNumber(const std::string& s);
 
 template<class T, class ...Args>
 std::shared_ptr<T> MakeShared(const Args &...args)
