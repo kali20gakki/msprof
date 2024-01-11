@@ -21,18 +21,15 @@ namespace Database {
 
 // 该类用于生成StringIds表
 class StringIdsProcesser : public TableProcesser {
-    using ORI_DATA_FORMAT = std::unordered_map<std::string, uint64_t>;
-    using PROCESSED_DATA_FORMAT = std::vector<std::tuple<uint64_t, std::string>>;
+    using OriDataFormat = std::unordered_map<std::string, uint64_t>;
+    using ProcessedDataFormat = std::vector<std::tuple<uint64_t, std::string>>;
 public:
     StringIdsProcesser() = default;
     explicit StringIdsProcesser(const std::string &reportDBPath);
     virtual ~StringIdsProcesser() = default;
     bool Run() override;
-protected:
-    void Process(const std::string &fileDir) override;
 private:
-    PROCESSED_DATA_FORMAT FormatData(const ORI_DATA_FORMAT &oriData);
-    bool SaveData(const PROCESSED_DATA_FORMAT &processedData);
+    ProcessedDataFormat FormatData(const OriDataFormat &oriData);
 };
 
 } // Database

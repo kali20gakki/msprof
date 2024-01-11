@@ -19,29 +19,26 @@ namespace Viewer {
 namespace Database {
 // 该类用于生成COMMUNICATION_TASK_INFO表
 class CommunicationTaskInfoProcesser : public TableProcesser {
-    // model_id, index_id, op_name, iteration, hccl_name, group_name, first_timestamp, plane_id, timestamp, duration,
-    // is_dynamic, task_type, op_type, connection_id, is_master, stream_id, task_id, struct_type, duration_estimated,
-    // local_rank, remote_rank, transport_type, size, data_type, link_type, bandwidth, context_id, notify_id, batch_id
-    using ORI_DATA_FORMAT = std::vector<std::tuple<uint32_t, int32_t, std::string, uint32_t, std::string, std::string,
-                                                   double, uint32_t, double, double, int32_t, std::string, std::string,
-                                                   int32_t, int32_t, uint32_t, uint32_t, std::string, double, int32_t,
-                                                   int32_t, std::string, uint64_t, std::string, std::string, uint64_t,
-                                                   uint32_t, uint64_t, uint32_t>>;
+    // model_id, op_name, hccl_name, group_name, plane_id, stream_id, task_id, local_rank, remote_rank,
+    // transport_type, size, data_type, link_type, context_id, notify_id, batch_id, rdma_type
+    using OriDataFormat = std::vector<std::tuple<uint32_t, std::string, std::string, std::string, int32_t,
+                                                   uint64_t, uint32_t, uint32_t, uint32_t, std::string, uint64_t,
+                                                   std::string, std::string, uint32_t, uint64_t, uint32_t,
+                                                   std::string>>;
     // name, correlationId, taskType, planeId, groupName, notifyId, rdmaType, srcRank, dstRank, transportType,
     // size, dataType, linkType
-    using PROCESSED_DATA_FORMAT = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t, uint64_t,
+    using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t, uint64_t,
                                                          uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t,
                                                          uint64_t>>;
 public:
     CommunicationTaskInfoProcesser() = default;
-    CommunicationTaskInfoProcesser(const std::string &reportDBPath, const std::vector<std::string> &profPaths);
+    CommunicationTaskInfoProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths);
     virtual ~CommunicationTaskInfoProcesser() = default;
 protected:
-    void Process(const std::string &fileDir) override;
+    bool Process(const std::string &fileDir) override;
 private:
-    ORI_DATA_FORMAT GetData(const std::string &dbPath);
-    PROCESSED_DATA_FORMAT FormatData(const ORI_DATA_FORMAT &oriData);
-    bool SaveData(const PROCESSED_DATA_FORMAT &processedData);
+    OriDataFormat GetData();
+    ProcessedDataFormat FormatData(const OriDataFormat &oriData);
     DBInfo hcclSingleDeviceDB_;
 };
 

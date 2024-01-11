@@ -21,22 +21,23 @@ namespace Database {
 class TaskProcesser : public TableProcesser {
     // model_id, index_id, stream_id, task_id, context_id, batch_id, start_time, duration, host_task_type,
     // device_task_type, connection_id
-    using ORI_DATA_FORMAT = std::vector<std::tuple<uint32_t, int32_t, int32_t, uint32_t, uint32_t, uint32_t, double,
-                                                   double, std::string, std::string, int32_t>>;
-    // start, end, name, deviceId, connectionId, correlationId, globalPid, taskType, contextId, streamId, taskId,
+    using OriDataFormat = std::vector<std::tuple<uint32_t, int32_t, int32_t, uint32_t, uint32_t, uint32_t, double,
+                                                   double, std::string, std::string, int64_t>>;
+    // start, end, deviceId, connectionId, correlationId, globalPid, taskType, contextId, streamId, taskId,
     // modelId
-    using PROCESSED_DATA_FORMAT = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, int32_t, uint64_t,
-                                                         uint32_t, uint32_t, uint32_t, int32_t, uint32_t, uint32_t>>;
+    using ProcessedDataFormat = std::vector<std::tuple<double, double, uint32_t, int64_t, uint64_t,
+                                                         uint64_t, uint32_t, uint32_t, int32_t, uint32_t, uint32_t>>;
 public:
     TaskProcesser() = default;
-    TaskProcesser(const std::string &reportDBPath, const std::vector<std::string> &profPaths);
+    TaskProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths);
     virtual ~TaskProcesser() = default;
 protected:
-    void Process(const std::string &fileDir) override;
+    bool Process(const std::string &fileDir) override;
 private:
-    ORI_DATA_FORMAT GetData(const std::string &dbPath);
-    PROCESSED_DATA_FORMAT FormatData(const ORI_DATA_FORMAT &oriData);
-    bool SaveData(const PROCESSED_DATA_FORMAT &processedData);
+    OriDataFormat GetData();
+    ProcessedDataFormat FormatData(const OriDataFormat &oriData);
+    uint64_t GetTaskType(const std::string &hostType, const std::string &deviceType);
+    uint64_t GetConnectionId(uint64_t high, uint64_t low);
     DBInfo ascendTaskDB_;
 };
 
