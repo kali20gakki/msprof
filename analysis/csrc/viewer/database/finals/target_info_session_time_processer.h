@@ -26,12 +26,11 @@ class TargetInfoSessionTimeProcesser : public TableProcesser {
 using TimeDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t>>;
 public:
     TargetInfoSessionTimeProcesser() = default;
-    TargetInfoSessionTimeProcesser(std::string reportDBPath, const std::set<std::string> &profPaths);
+    TargetInfoSessionTimeProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths);
     bool Run() override;
 protected:
     bool Process(const std::string &fileDir = "") override;
 private:
-    static bool UpdateTimeInfo(const std::string &fileDir, Utils::ProfTimeRecord &tbo);
     Utils::ProfTimeRecord record_;
 };
 

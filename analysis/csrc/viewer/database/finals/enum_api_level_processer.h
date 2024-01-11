@@ -25,7 +25,7 @@ class EnumApiLevelProcesser : public TableProcesser {
 using EnumApiLevelDataFormat = std::vector<std::tuple<uint16_t, std::string>>;
 public:
     EnumApiLevelProcesser() = default;
-    EnumApiLevelProcesser(std::string reportDBPath, const std::set<std::string> &profPaths);
+    EnumApiLevelProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths);
     bool Run() override;
 protected:
     bool Process(const std::string &fileDir = "") override;
