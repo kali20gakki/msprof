@@ -193,12 +193,14 @@ def line_match(line: str, info: dict) -> tuple:
     line match branch
     """
     pmu_pat = re.compile(
-        r'^(.+?) +(\d+)/(\d+) +\[(00[{}])\]'
-        r' +(\d+\.\d+): +(\d+) +(\S+?):'.format(
+        r'^(.{{1,50}}) +(\d{{1,20}})/(\d{{1,20}}) +\[(00[{}])\]'
+        r' +(\d{{1,20}}\.\d{{1,20}}): +(\d{{1,20}}) +(\S{{1,50}}?):'.format(
             info['cpu_id']))
+
     pmu_pat_raw = re.compile(
-        r'^(.+?) +(\d+)/(\d+) +\[(00[{}])\] +(\d+\.\d+): +(\d+)'
-        r' +raw +(\S+?):'.format(info['cpu_id']))
+        r'^(.{{1,50}}) +(\d{{1,20}})/(\d{{1,20}}) +\[(00[{}])\] +(\d{{1,20}}\.\d{{1,20}}): +(\d{{1,20}})'
+        r' +raw +(\S{{1,50}}):'.format(info['cpu_id']))
+
     matched = pmu_pat.search(line)
     pmu_mode = MultiProcessCbConstant.PMU_MODE_CORE
     if not matched:
