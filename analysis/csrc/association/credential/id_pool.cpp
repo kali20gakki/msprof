@@ -51,7 +51,7 @@ uint64_t IdPool::GetId(const std::string& key)
 uint64_t IdPool::GetId(const CorrelationTuple& key)
 {
     std::lock_guard<std::mutex> lock(correlationMutex_);
-    std::string stringKey = Utils::ConvertToString(Utils::ConvertToString(
+    std::string stringKey = Utils::Join("_", Utils::Join("_",
         std::get<DEVICE_ID>(key), std::get<MODEL_ID>(key), std::get<STREAM_ID>(key)),
         std::get<TASK_ID>(key), std::get<CONTEXT_ID>(key), std::get<BATCH_ID>(key));
     if (correlationIds_.find(stringKey) == correlationIds_.end()) {

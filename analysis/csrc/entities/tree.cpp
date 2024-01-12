@@ -49,7 +49,7 @@ std::string Tree::GetTreeLevelStr(const std::shared_ptr<TreeNode> &node) const
     std::string lstr;
     for (const auto &r: node->records) {
         lstr += "[" + EventTypeString[static_cast<unsigned long>(r->info.type)] +
-            Utils::ConvertToString(r->info.start, r->info.end) + "] ";
+            Utils::Join("_", r->info.start, r->info.end) + "] ";
     }
     return lstr;
 }
@@ -68,9 +68,8 @@ std::vector<std::string> Tree::Show()
         for (size_t i = 0; i < levelSize; ++i) {
             std::shared_ptr<TreeNode> node = q.front();
             q.pop();
-            lstr += EventTypeString[static_cast<unsigned long>(
-                node->event->info.type)] + Utils::ConvertToString(node->event->info.start,
-                                                                  node->event->info.end) + " ";
+            lstr += EventTypeString[static_cast<unsigned long>(node->event->info.type)] +
+                Utils::Join("_", node->event->info.start, node->event->info.end) + " ";
             lstr += GetTreeLevelStr(node);
             for (const auto &child: node->children) {
                 q.push(child);
