@@ -1650,6 +1650,15 @@ TEST_F(MSPROF_ACL_CORE_UTEST, IsModeOff)
     EXPECT_EQ(false, Msprofiler::Api::ProfAclMgr::instance()->IsModeOff());
 }
 
+TEST_F(MSPROF_ACL_CORE_UTEST, IsSubscribeMode)
+{
+    Msprofiler::Api::ProfAclMgr::instance()->mode_  = Msprofiler::Api::WORK_MODE_OFF;
+    EXPECT_EQ(false, Msprofiler::Api::ProfAclMgr::instance()->IsSubscribeMode());
+
+    Msprofiler::Api::ProfAclMgr::instance()->mode_  = Msprofiler::Api::WORK_MODE_SUBSCRIBE;
+    EXPECT_EQ(true, Msprofiler::Api::ProfAclMgr::instance()->IsSubscribeMode());
+}
+
 TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclStart_failed)
 {
     EXPECT_EQ(ACL_ERROR_INVALID_PARAM, Msprofiler::Api::ProfAclMgr::instance()->ProfAclStart(nullptr));

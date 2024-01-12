@@ -222,6 +222,12 @@ bool ProfAclMgr::IsModeOff()
     return false;
 }
 
+// ge and runtime will not report cached data
+bool ProfAclMgr::IsSubscribeMode() const
+{
+    return mode_ == WORK_MODE_SUBSCRIBE;
+}
+
 /**
  * Init resources for acl api call
  */

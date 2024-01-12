@@ -76,6 +76,8 @@ int32_t CommandHandleProfStart(const uint32_t devIdList[], uint32_t devNums, uin
     command.type = PROF_COMMANDHANDLE_TYPE_START;
     command.devNums = devNums;
     command.modelId = PROF_INVALID_MODE_ID;
+    // Set 1 to enable clean event to ge and runtime to clear cache after report once
+    command.cacheFlag = (Msprofiler::Api::ProfAclMgr::instance()->IsSubscribeMode()) ? 1 : 0;
     ProcessDeviceList(command, devIdList, devNums);
     if (command.devNums == 0) {
         if (!Platform::instance()->PlatformIsHelperHostSide()) {
