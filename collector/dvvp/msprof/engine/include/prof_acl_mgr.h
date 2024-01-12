@@ -77,6 +77,7 @@ public:
     void SetModeToOff();
     bool IsCmdMode();
     bool IsModeOff();
+    bool IsSubscribeMode() const;
 
     // api ctrl
     int ProfAclInit(const std::string& profResultPath);
