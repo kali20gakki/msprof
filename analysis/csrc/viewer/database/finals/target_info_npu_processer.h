@@ -24,11 +24,11 @@ class TargetInfoNpuProcesser : public TableProcesser {
 using NpuInfoDataFormat = std::vector<std::tuple<uint16_t, std::string>>;
 public:
     TargetInfoNpuProcesser() = default;
-    TargetInfoNpuProcesser(std::string reportDBPath, const std::set<std::string> &profPaths);
+    TargetInfoNpuProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths);
 protected:
     bool Process(const std::string &fileDir) override;
 private:
-    static void UpdateGpuData(const std::string &fileDir, const std::string &deviceDir,
+    static void UpdateNpuData(const std::string &fileDir, const std::string &deviceDir,
                               NpuInfoDataFormat &npuInfoData);
 };
 
