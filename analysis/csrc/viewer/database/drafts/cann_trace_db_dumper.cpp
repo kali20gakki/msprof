@@ -28,23 +28,26 @@ using TypeData = Analysis::Parser::Host::Cann::TypeData;
 
 using HCCLOpsDumpData = std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, std::string, std::string,
         std::string, uint64_t, uint64_t, uint32_t, uint32_t>>;
+
 using HostTasksDumpData = std::vector<std::tuple<uint32_t,
         uint32_t, uint32_t, uint32_t, std::string, uint32_t, std::string, uint32_t, std::string, std::string>>;
 
 using HcclTasksDumpData = std::vector<std::tuple<uint32_t, uint32_t, std::string, std::string, uint32_t, std::string,
         double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, std::string, uint32_t, uint32_t,
         std::string, double, std::string, std::string, uint64_t>>;
+
 const uint32_t UNDEFINED_INT_VALUE = 4294967295;
 const std::string NA = "N/A";
 const uint32_t INPUT_FORMAT_INDEX = 0;
 const uint32_t OUTPUT_FORMAT_INDEX = 1;
 CANNTraceDBDumper::CANNTraceDBDumper(std::string hostFilePath) : hostFilePath_(std::move(hostFilePath)),
-                                                                 result_(true) {}
+                                                                 result_(true)
+{}
 
 bool CANNTraceDBDumper::DumpData(TreeAnalyzer analyzer)
 {
     Utils::TimeLogger t{"Dump CANN data"};
-    HCCLBigOps hcclBigOps = analyzer.GetHcclBigOps();
+    HCCLBigOpDescs hcclBigOps = analyzer.GetHcclBigOps();
     HostTasks hostTasks = analyzer.GetTasks();
     HostTasks computeTasks = analyzer.GetComputeTasks();
     HostTasks hcclTasks = analyzer.GetHCCLTasks();
@@ -59,7 +62,7 @@ bool CANNTraceDBDumper::DumpData(TreeAnalyzer analyzer)
     return true;
 }
 
-void CANNTraceDBDumper::DumpHcclOps(const HCCLBigOps &hcclOps)
+void CANNTraceDBDumper::DumpHcclOps(const HCCLBigOpDescs &hcclOps)
 {
     if (hcclOps.empty()) {
         INFO("Empty hccl OPs");
@@ -79,31 +82,29 @@ void CANNTraceDBDumper::DumpHcclOps(const HCCLBigOps &hcclOps)
         result_ = false;
         return;
     }
-    for (const auto &pair: hcclOps) {
-        auto deviceId = pair.first;
-        auto ops = pair.second;
-        for (const auto &op: ops) {
-            if (op == nullptr || op->hcclBigOpDesc == nullptr) {
-                ERROR("DumpHcclOps: Empty op or desc");
-                continue;
-            }
-            auto desc = op->hcclBigOpDesc;
-            // several attributes can not get currently, use default value
-            uint32_t modelId = UNDEFINED_INT_VALUE;
-            uint32_t indexId = UNDEFINED_INT_VALUE;
-            uint32_t isDynamic = UNDEFINED_INT_VALUE;
-            uint32_t connection_id = -1;
-            auto msprofCompactInfo = desc->nodeDesc;
-            data.emplace_back(deviceId, modelId, indexId,
-                              msprofCompactInfo == nullptr ? -1 : msprofCompactInfo->threadId,
-                              HashData::GetInstance().Get(op->name),
-                              msprofCompactInfo == nullptr ? "HCCL" : std::to_string(
-                                  msprofCompactInfo->data.nodeBasicInfo.taskType),
-                              msprofCompactInfo == nullptr ? NA : std::to_string(
-                                  msprofCompactInfo->data.nodeBasicInfo.opType),
-                              desc->beginTime, desc->endTime, isDynamic,
-                              connection_id);
+    for (const auto &op: hcclOps) {
+        auto deviceId = op->hcclBigOpDesc->deviceId;
+
+        if (op == nullptr || op->hcclBigOpDesc == nullptr) {
+            ERROR("DumpHcclOps: Empty op or desc");
+            continue;
         }
+        auto desc = op->hcclBigOpDesc;
+        // several attributes can not get currently, use default value
+        uint32_t modelId = UNDEFINED_INT_VALUE;
+        uint32_t indexId = UNDEFINED_INT_VALUE;
+        uint32_t isDynamic = UNDEFINED_INT_VALUE;
+        uint32_t connection_id = -1;
+        auto msprofCompactInfo = desc->nodeDesc;
+        data.emplace_back(deviceId, modelId, indexId,
+                          msprofCompactInfo == nullptr ? -1 : msprofCompactInfo->threadId,
+                          HashData::GetInstance().Get(op->name),
+                          msprofCompactInfo == nullptr ? "HCCL" : std::to_string(
+                              msprofCompactInfo->data.nodeBasicInfo.taskType),
+                          msprofCompactInfo == nullptr ? NA : std::to_string(
+                              msprofCompactInfo->data.nodeBasicInfo.opType),
+                          desc->beginTime, desc->endTime, isDynamic,
+                          connection_id);
     }
     if (!hcclOpDBRunner.InsertData("HCCLOP", data)) {
         ERROR("DumpHcclOps: Insert into db failed");
@@ -175,7 +176,7 @@ void CANNTraceDBDumper::DumpOpDesc(const HostTasks &computeTasks)
     }
 }
 
-void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInfo>& tensorDesc,
+void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInfo> &tensorDesc,
                                            MsprofNodeBasicInfo nodeBasicInfo, TaskInfoData &data,
                                            const std::shared_ptr<HostTask> &task)
 {

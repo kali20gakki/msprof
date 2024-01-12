@@ -38,7 +38,7 @@ using HostTasks = std::vector<std::shared_ptr<HostTask>>;
 using TaskInfoData = std::vector<std::tuple<uint32_t, std::string, uint32_t, uint32_t, uint32_t, uint32_t, std::string,
         std::string, std::string, uint32_t, uint32_t, double, uint32_t, uint32_t, std::string, std::string, std::string,
         std::string, std::string, std::string, uint32_t, uint32_t, std::string>>;
-using HCCLBigOps = Analysis::Association::Cann::HCCLBigOps;
+using HCCLBigOpDescs = Analysis::Association::Cann::HCCLBigOpDescs;
 public:
     // 创建时传入host路径
     explicit CANNTraceDBDumper(std::string hostFilePath);
@@ -48,7 +48,7 @@ public:
 
 private:
     // 落盘HCCLOP
-    void DumpHcclOps(const HCCLBigOps &hcclOps);
+    void DumpHcclOps(const HCCLBigOpDescs &hcclOps);
 
     // 落盘HostTask
     void DumpHostTasks(const HostTasks &hostTasks);

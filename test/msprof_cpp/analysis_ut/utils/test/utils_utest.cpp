@@ -108,7 +108,7 @@ TEST_F(UtilsUTest, TestConvertToStringShouldReturnCorrectStrWhenInputVariousType
     std::string expectStr = "1000000_90000000000_3.14_70000000000_Mind_Studio";
 
     // 测试拼接正确性 & 嵌套调用正确性(函数参数超过5个可以嵌套调用)
-    auto ret = ConvertToString(ConvertToString(testNum1, testNum2, testNum3, testNum4),
+    auto ret = Join("_", Join("_", testNum1, testNum2, testNum3, testNum4),
                                testStr1, testStr2);
 
     EXPECT_EQ(expectStr, ret);

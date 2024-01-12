@@ -16,7 +16,7 @@
 #include <memory>
 #include <map>
 #include <utility>
-
+#include "analysis/csrc/dfx/log.h"
 #include "analysis/csrc/entities/event_queue.h"
 
 namespace Analysis {
@@ -24,8 +24,15 @@ namespace Entities {
 
 // Event树节点数据结构，用于重建调用树
 struct TreeNode {
-    explicit TreeNode(std::shared_ptr<Event> eventPtr) : event(std::move(eventPtr))
-    {}
+    explicit TreeNode(std::shared_ptr<Event> eventPtr)
+    {
+        if (!eventPtr) {
+            ERROR("TreeNode construct point is nullptr");
+        } else {
+            event = std::move(eventPtr);
+        }
+    }
+
     std::shared_ptr<TreeNode> parent = nullptr;
     std::vector<std::shared_ptr<TreeNode>> children;
     std::shared_ptr<Event> event = nullptr;        // 表示该节点的对应的api

@@ -23,12 +23,12 @@
 #include <unordered_map>
 #include <string>
 #include <fstream>
-#include "utils.h"
-#include "event_queue.h"
-#include "log.h"
-#include "file.h"
-#include "event.h"
-#include "context.h"
+#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/entities/event_queue.h"
+#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/entities/event.h"
+#include "analysis/csrc/parser/environment/context.h"
 
 using EventType = Analysis::Entities::EventType;
 using EventInfo = Analysis::Entities::EventInfo;
@@ -77,8 +77,14 @@ public:
     static void AddNodeBasicEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot)
     {
         EventInfo testInfo{EventType::EVENT_TYPE_NODE_BASIC_INFO, MSPROF_REPORT_NODE_LEVEL, dot, dot};
-        auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofCompactInfo>{},
-                                                testInfo);
+        auto nodeBasic = std::make_shared<MsprofCompactInfo>();
+        nodeBasic->level = MSPROF_REPORT_NODE_LEVEL;
+        nodeBasic->timeStamp = dot;
+
+        MsprofNodeBasicInfo node;
+        node.opName = dot;
+        nodeBasic->data.nodeBasicInfo = node;
+        auto eventPtr = std::make_shared<Event>(nodeBasic, testInfo);
         eventQueue->Push(eventPtr);
     }
 
@@ -93,8 +99,19 @@ public:
     static void AddCtxIdEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot, uint16_t level)
     {
         EventInfo testInfo{EventType::EVENT_TYPE_CONTEXT_ID, level, dot, dot};
-        auto eventPtr = std::make_shared<Event>(std::shared_ptr<MsprofAdditionalInfo>{},
-                                                testInfo);
+        auto addtionInfo = std::make_shared<MsprofAdditionalInfo>();
+        uint32_t num = 2;
+        addtionInfo->timeStamp = dot;
+        addtionInfo->dataLen = num;
+
+        MsprofContextIdInfo ctxId;
+        ctxId.opName = dot;
+        ctxId.ctxIdNum = num;
+        uint32_t ids[2] = {0, 1};
+        std::memcpy(ctxId.ctxIds, &ids, sizeof(ids));
+        std::memcpy(addtionInfo->data, &ctxId, sizeof(ctxId));
+
+        auto eventPtr = std::make_shared<Event>(addtionInfo, testInfo);
         eventQueue->Push(eventPtr);
     }
 
@@ -124,8 +141,8 @@ public:
         hcclInfo->type = static_cast<uint32_t>(EventType::EVENT_TYPE_HCCL_INFO);
         hcclInfo->timeStamp = static_cast<uint64_t>(dot);
         auto hcclTrace = MsprofHcclInfo{};
-        hcclTrace.reserve1 = cnt_;
-
+        hcclTrace.ctxID = cnt_;
+        hcclTrace.itemId = dot;
         std::memcpy(hcclInfo->data, &hcclTrace, sizeof(hcclTrace));
         auto eventPtr = std::make_shared<Event>(hcclInfo, testInfo);
         eventQueue->Push(eventPtr);

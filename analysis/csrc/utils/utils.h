@@ -80,26 +80,37 @@ inline std::shared_ptr<T> ReinterpretPointerCast(const std::shared_ptr<U> &r) no
 
 // 元素数量等于1时，模板特例
 template<typename T>
-void ConvertToString(std::ostringstream &oss, T t)
+void Join(std::ostringstream &oss, T t)
 {
     oss << t;
 }
 
 // 元素数量大于1时，递归展开可变参数模板
 template<typename T, typename... Args>
-void ConvertToString(std::ostringstream &oss, T t, Args... args)
+void Join(std::ostringstream &oss, const std::string &delimiter, T t, Args... args)
 {
-    oss << t << "_";
-    ConvertToString(oss, args...);
+    oss << t << delimiter;
+    Join(oss, delimiter, args...);
 }
 
 // 调用可变参数模板，返回字符串
 template<typename... Args>
-std::string ConvertToString(Args... args)
+std::string Join(const std::string &delimiter, Args... args)
 {
+    const int repeat = 2 * delimiter.size();
+    constexpr int count = sizeof...(args);
+    // args的长度应该至少为1
+    if (!count) {
+        WARN("The number of inputs to the function should be greater than 1");
+        return "";
+    }
+
     std::ostringstream oss;
-    ConvertToString(oss, args...);
-    return oss.str();
+    Join(oss, delimiter, args...);
+    auto res = oss.str();
+
+    // 去除字符串结尾两次重复的delimiter
+    return res.substr(0, res.size() - repeat);
 }
 }  // namespace Utils
 }  // namespace Analysis

@@ -45,10 +45,11 @@ struct HcclSmallOpDesc {
 struct HcclBigOpDesc {
     uint64_t beginTime = 0;
     uint64_t endTime = 0;
+    uint16_t deviceId = 0;
     std::shared_ptr<MsprofCompactInfo> nodeDesc = nullptr;
 
-    HcclBigOpDesc(uint64_t begin, uint64_t end, const std::shared_ptr<MsprofCompactInfo> &node)
-        : beginTime(begin), endTime(end), nodeDesc(node)
+    HcclBigOpDesc(uint64_t begin, uint64_t end, uint16_t deviceId, const std::shared_ptr<MsprofCompactInfo> &node)
+        : beginTime(begin), endTime(end), deviceId(deviceId), nodeDesc(node)
     {}
 };
 
@@ -89,18 +90,16 @@ struct Operator {
 
 // 用于存储分析树结果，DBDumper将此信息落盘
 struct HostTask {
-    uint32_t modelId = 0;
-    uint32_t requestId = 0;
+    uint64_t modelId = 0;
+    uint64_t nodeTraceId = 0;
+    uint64_t taskType = 0;
+    uint64_t timeStamp = 0;
     uint32_t streamId = 0;
     uint32_t taskId = 0;
     uint32_t contextId = 0;
     uint16_t batchId = 0;
     uint16_t deviceId = 0;
-    // node层API对应的trace编号(id<<32+contextId)
-    uint64_t nodeTraceId = 0;
-    uint64_t taskType = 0;
-    uint64_t timeStamp = 0;
-    // nullptr when no op
+    int64_t requestId = 0;
     std::shared_ptr<Operator> op = nullptr;
 };
 

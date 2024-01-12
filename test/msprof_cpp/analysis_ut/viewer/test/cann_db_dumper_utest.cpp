@@ -102,11 +102,10 @@ protected:
         trace->data.nodeBasicInfo = *nodeBasicInfo;
         trace->data.runtimeTrack = *runtime;
 
-        auto desc = std::make_shared<HcclBigOpDesc>(1, 1, std::shared_ptr<MsprofCompactInfo>(trace));
+        auto desc = std::make_shared<HcclBigOpDesc>(1, 1, 1, std::shared_ptr<MsprofCompactInfo>(trace));
         auto op = std::make_shared<Operator>(desc, 0, Entities::OpType::OPTYPE_HCCL_BIG);
-        std::vector<std::shared_ptr<Operator>> opVector{op};
-        auto hcclBigOps = std::make_shared<HCCLBigOps>();
-        hcclBigOps->emplace(1, opVector);
+        auto hcclBigOps = std::make_shared<HCCLBigOpDescs>();
+        hcclBigOps->emplace_back(op);
         MOCKER_CPP(&TreeAnalyzer::GetHcclBigOps).stubs().will(returnValue(*hcclBigOps));
     }
 };
@@ -235,7 +234,7 @@ TEST_F(CannDBDumperUtest, TestCANNDumperShouldRetrunTrueWhenDataIsEmpty)
     MOCKER_CPP(&TreeAnalyzer::GetHCCLTasks).stubs().will(returnValue(*std::make_shared<HostTasks>()));
     MOCKER_CPP(&TreeAnalyzer::GetComputeTasks).stubs().will(returnValue(*std::make_shared<HostTasks>()));
     MOCKER_CPP(&TreeAnalyzer::GetTasks).stubs().will(returnValue(*std::make_shared<HostTasks>()));
-    MOCKER_CPP(&TreeAnalyzer::GetHcclBigOps).stubs().will(returnValue(*std::make_shared<HCCLBigOps>()));
+    MOCKER_CPP(&TreeAnalyzer::GetHcclBigOps).stubs().will(returnValue(*std::make_shared<HCCLBigOpDescs>()));
     CANNTraceDBDumper cannTraceDbDumper(TEST_DB_FILE_PATH);
     auto treeNode = std::make_shared<TreeNode>(nullptr);
     TreeAnalyzer treeAnalyzer(treeNode, THREAD_ID);

@@ -15,6 +15,7 @@
 #include <thread>
 
 #include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
 namespace Utils {
@@ -35,16 +36,21 @@ bool ThreadPool::Start()
     // 避免多次调用
     if (running_) {
         ERROR("Do not call Start multiple times");
-        return false; // 补充log
+        return false;
     }
 
     if (threadsNum_ <= 0) {
         ERROR("ThreadPool thread number is less than 0");
-        return false; // 补充log
+        return false;
     }
 
     running_ = true;
-    for (int i = 0; i < threadsNum_; ++i) {
+    auto ret = Utils::Reserve(threads_, threadsNum_);
+    if (!ret) {
+        ERROR("Reserve threads vector failed");
+        return false;
+    }
+    for (uint32_t i = 0; i < threadsNum_; ++i) {
         std::thread t(&ThreadPool::Loop, this);
         threads_.emplace_back(std::move(t));
     }

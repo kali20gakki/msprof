@@ -3,7 +3,9 @@ add_executable(
         test/main.cpp
         test/tree_builder_utest.cpp
         test/id_pool_utest.cpp
+        test/tree_analyzer_utest.cpp
         ${TOP_DIR}/analysis/csrc/association/cann/tree_builder.cpp
+        ${TOP_DIR}/analysis/csrc/association/cann/tree_analyzer.cpp
         ${TOP_DIR}/analysis/csrc/parser/host/cann/type_data.cpp
         ${TOP_DIR}/analysis/csrc/association/credential/id_pool.cpp
         ${TOP_DIR}/analysis/csrc/entities/event_queue.cpp
