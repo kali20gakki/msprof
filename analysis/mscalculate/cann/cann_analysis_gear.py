@@ -227,6 +227,7 @@ class TaskGear(CANNGear):
     FFTS_PLUS_TASK_TYPE = "FFTS_PLUS"
     KERNEL_FFTS_PLUS_TASK_TYPE = "FFTS_PLUS"
     KERNEL_STARS_COMMON_TASK_TYPE = "STARS_COMMON"
+    KERNEL_AICPU = "KERNEL_AICPU"
 
     class RuntimeApi:
         def __init__(self, start, end, struct_type, thread_id):
@@ -490,7 +491,7 @@ class TaskGear(CANNGear):
             if node_basic_info_dto.task_type == self.FFTS_PLUS_TASK_TYPE:
                 continue
 
-            self.add_kernel_task_l1([node_dto, node_desc], add_dto, hccl_dto, [model_id, request_id])
+            self.add_kernel_task_l1([node_dto, node_desc], add_dto, [hccl_event, hccl_dto], [model_id, request_id])
 
     def add_kernel_task_l0(self, node_info: list, add_dto: TaskTrackDto, hccl_info: list, model_info: list):
         node_dto = node_info[0]
@@ -506,15 +507,20 @@ class TaskGear(CANNGear):
         if self.is_hccl_task(hccl_event, add_dto):
             op_name = hccl_dto.item_id
             task_type = Constant.TASK_TYPE_HCCL
+        if add_dto.task_type == self.KERNEL_AICPU:
+            # helper场景: HCCL算子运行在AI_CPU上, 但api没有HCCL层数据
+            task_type = Constant.TASK_TYPE_AI_CPU
         for cxt_id in cxt_ids:
             self.task_info.append([model_id, op_name, add_dto.stream_id, add_dto.task_id, 0, 0,
                                    'N/A', task_type, 'N/A', request_id, add_dto.thread_id, add_dto.timestamp,
                                    add_dto.batch_id, None, None, None, None, None, None, None,
                                    add_dto.device_id, int(cxt_id), "N/A"])
 
-    def add_kernel_task_l1(self, node_info: list, add_dto: TaskTrackDto, hccl_dto: ApiDataDto, model_info: list):
+    def add_kernel_task_l1(self, node_info: list, add_dto: TaskTrackDto, hccl_info: list, model_info: list):
         node_dto = node_info[0]
         node_desc = node_info[1]
+        hccl_event = hccl_info[0]
+        hccl_dto = hccl_info[1]
         model_id = model_info[0]
         request_id = model_info[1]
         node_basic_info_dto: NodeBasicInfoDto = node_desc.node_basic_info
@@ -523,9 +529,12 @@ class TaskGear(CANNGear):
         cxt_ids = str(ctx_id_dto.ctx_id).split(',')
         op_name = ctx_id_dto.op_name if ctx_id_dto.op_name else node_dto.item_id
         task_type = node_basic_info_dto.task_type
-        if task_type == self.HCCL_TASK_TYPE:
+        if self.is_hccl_task(hccl_event, add_dto):
             # notice: reduce TBE op
             op_name = hccl_dto.item_id
+        if add_dto.task_type == self.KERNEL_AICPU and task_type == Constant.TASK_TYPE_HCCL:
+            # helper场景: HCCL算子运行在AI_CPU上, 但api没有HCCL层数据
+            task_type = Constant.TASK_TYPE_AI_CPU
         for cxt_id in cxt_ids:
             self.task_info.append([model_id, op_name, add_dto.stream_id, add_dto.task_id,
                                    node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,
