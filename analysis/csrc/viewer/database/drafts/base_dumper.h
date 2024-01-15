@@ -23,6 +23,7 @@ namespace Analysis {
 namespace Viewer {
 namespace Database {
 namespace Drafts {
+const uint32_t UNDEFINED_INT_VALUE = 4294967295;
 const std::string SQLITE = "sqlite";
 template<typename DumperType>
 class BaseDumper {
