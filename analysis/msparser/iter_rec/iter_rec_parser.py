@@ -5,6 +5,7 @@
 import logging
 import os
 import sqlite3
+from collections import OrderedDict
 
 from common_func.batch_counter import BatchCounter
 from common_func.constant import Constant
@@ -20,19 +21,24 @@ from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from common_func.profiling_scene import ProfilingScene
 from common_func.utils import Utils
+from common_func.info_conf_reader import InfoConfReader
+from common_func.platform.chip_manager import ChipManager
 from framework.offset_calculator import OffsetCalculator
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
+from msmodel.step_trace.ts_track_model import TsTrackModel
 from msparser.interface.iparser import IParser
 from msparser.iter_rec.iter_info_updater.iter_info import IterInfo
 from msparser.iter_rec.iter_info_updater.iter_info_updater import IterInfoUpdater
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aic_pmu import AicPmuBean
 from profiling_bean.struct_info.hwts_log import HwtsLogBean
+from mscalculate.flip.flip_calculator import FlipCalculator
 
 
 class IterParser(IParser, MsMultiProcess):
     HWTS_LOG_SIZE = 64
+    AICORE_LOG_SIZE = 128
     STREAM_TASK_KEY_FMT = "{0}-{1}"
     STREAM_TASK_BATCH_KEY_FMT = "{0}-{1}-{2}"
     STATIC_ITER_ID = 0
@@ -57,6 +63,9 @@ class IterParser(IParser, MsMultiProcess):
         self.hwts_iter_model = HwtsIterModel(self._project_path)
         self.ai_core_task = set()
         self._task_cnt_not_in_iter = dict()
+        # len(self._iter_recorder.iter_end_dict) + 1 means pmu cnt after last iteration
+        self._pmu_cnt_not_in_iter = OrderedDict()
+        self._task_flip = dict()
 
     def save(self: any) -> None:
         """
@@ -104,7 +113,7 @@ class IterParser(IParser, MsMultiProcess):
     def _read_hwts_data(self: any, all_bytes: bytes) -> None:
         for _chunk in Utils.chunks(all_bytes, self.HWTS_LOG_SIZE):
             _task_log = HwtsLogBean.decode(_chunk)
-            if not _task_log.is_log_type() or not self._iter_recorder.check_task_before_max_iter(_task_log.sys_cnt):
+            if not _task_log.is_log_type():
                 continue
             stream_task_id = self.STREAM_TASK_KEY_FMT.format(_task_log.stream_id, _task_log.task_id)
             if stream_task_id not in self._iter_op_set:
@@ -114,8 +123,7 @@ class IterParser(IParser, MsMultiProcess):
             # Because of cache in runtime to be reported, the hwts may contain tasks which are not in iteration.
             # we should filter out these tasks.
             if not self._iter_recorder.check_task_in_iter(_task_log.sys_cnt, list(iter_info.behind_parallel_iter)):
-                self._task_cnt_not_in_iter.setdefault(curr_iter, 0)
-                self._task_cnt_not_in_iter[curr_iter] += 1
+                self._add_cnt_not_in_iter(curr_iter, _task_log)
                 continue
             if _task_log.sys_tag == self.HWTS_TASK_END:
                 self._calculate_batch_list(_task_log)
@@ -125,7 +133,22 @@ class IterParser(IParser, MsMultiProcess):
             self._iter_info_updater.update_parallel_iter_info_pool(self._iter_recorder.current_iter_id)
             self._iter_info_updater.update_count_and_offset(_task_log)
 
+    def _add_cnt_not_in_iter(self: any, curr_iter: int, task_log: HwtsLogBean):
+        self._task_cnt_not_in_iter.setdefault(curr_iter, 0)
+        self._task_cnt_not_in_iter[curr_iter] += 1
+        if task_log.sys_tag == self.HWTS_TASK_END:
+            self._calculate_batch_list(task_log)
+            if self._iter_info_updater.judge_ai_core(task_log, self.ai_core_task):
+                self._pmu_cnt_not_in_iter.setdefault(curr_iter, 0)
+                self._pmu_cnt_not_in_iter[curr_iter] += 1
+
     def _calculate_batch_list(self: any, task_log: HwtsLogBean) -> None:
+        if ChipManager().is_chip_all_data_export() and InfoConfReader().is_all_export_version():
+            setattr(task_log, "batch_id", 0)
+            setattr(task_log, "timestamp", InfoConfReader().time_from_syscnt(task_log.sys_cnt))
+            [task_log] = FlipCalculator.compute_batch_id([task_log], self._task_flip)
+            return
+        # not all export
         setattr(task_log, "batch_id", self._batch_counter.calculate_batch(
             task_log.stream_id, task_log.task_id, self._iter_recorder.current_iter_id))
 
@@ -148,6 +171,10 @@ class IterParser(IParser, MsMultiProcess):
         self.default_index = self.default_index + 1
 
     def _parse_hwts_data(self: any) -> None:
+        if ChipManager().is_chip_all_data_export() and InfoConfReader().is_all_export_version():
+            with TsTrackModel(self._project_path,
+                              DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_DEVICE_TASK_FLIP]) as model:
+                self._task_flip = model.get_task_flip_data()
         hwts_files = self._file_list.get(DataTag.HWTS, [])
         hwts_files.sort(key=lambda x: int(x.split("_")[-1]))
         _offset_calculator = OffsetCalculator(hwts_files, self.HWTS_LOG_SIZE, self._project_path)
@@ -162,10 +189,19 @@ class IterParser(IParser, MsMultiProcess):
                 self._read_hwts_data(all_bytes)
         for iter_num, task_offset in self._task_cnt_not_in_iter.items():
             self._iter_info_updater.calibrate_iter_info_offset(task_offset=task_offset, iter_offset=iter_num)
+        # len(self._iter_recorder.iter_end_dict) + 1 means pmu cnt after last iteration
+        self._pmu_cnt_not_in_iter.setdefault(len(self._iter_recorder.iter_end_dict) + 1, 0)
+        self._iter_info_updater.calibrate_aic_offset(self._pmu_cnt_not_in_iter, self._get_aic_count_in_file())
         if self.default_index > 0:
             del self._hwts_task_time_data[self.default_index:]
             self.hwts_iter_model.flush(self._hwts_task_time_data,
                                        DBNameConstant.TABLE_HWTS_BATCH)
+
+    def _get_aic_count_in_file(self: any) -> int:
+        sum_file_size = 0
+        for file in self._file_list.get(DataTag.AI_CORE, []):
+            sum_file_size += os.path.getsize(PathManager.get_data_file_path(self._project_path, file))
+        return sum_file_size // self.AICORE_LOG_SIZE
 
 
 class IterRecParser(IterParser):

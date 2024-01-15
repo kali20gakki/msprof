@@ -20,7 +20,6 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import MsvpCommonConst
-from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
@@ -35,7 +34,6 @@ from msmodel.freq.freq_parser_model import FreqParserModel
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msmodel.stars.ffts_pmu_model import FftsPmuModel
 from msparser.data_struct_size_constant import StructFmt
-from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.stars.ffts_block_pmu import FftsBlockPmuBean
 from profiling_bean.stars.ffts_pmu import FftsPmuBean
@@ -322,35 +320,15 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         with self._iter_model as iter_model:
             if not iter_model.check_db() or not iter_model.check_table():
                 return
-            offset_count, total_count = self._get_offset_and_total(self._iter_range)
-            if total_count <= 0:
+            pmu_offset, pmu_count = self._iter_model.get_task_offset_and_sum(self._iter_range,
+                                                                             HwtsIterModel.AI_CORE_TYPE)
+            if pmu_count <= 0:
                 logging.warning("The ffts pmu data that is not satisfied by the specified iteration!")
                 return
             _file_calculator = FileCalculator(self._file_list, self.FFTS_PMU_SIZE, self._result_dir,
-                                              offset_count, total_count)
+                                              pmu_offset, pmu_count)
             for chunk in Utils.chunks(_file_calculator.prepare_process(), self.FFTS_PMU_SIZE):
                 self._get_pmu_decode_data(chunk)
-
-    def _get_total_aic_count(self: any) -> int:
-        sum_file_size = 0
-        for file in self._file_list:
-            sum_file_size += os.path.getsize(PathManager.get_data_file_path(self._result_dir, file))
-        return sum_file_size // self.FFTS_PMU_SIZE
-
-    def _get_offset_and_total(self: any, iteration: IterationRange) -> (int, int):
-        """
-        :param iteration:
-        :return: offset count and total aic count
-        """
-        offset_count, total_count = self._iter_model.get_task_offset_and_sum(iteration, HwtsIterModel.AI_CORE_TYPE)
-        _total_aic_count = self._get_total_aic_count()
-        _sql_aic_count = self._iter_model.get_aic_sum_count()
-        # get offset by all aic count and sql record count
-        offset_count = _total_aic_count - _sql_aic_count + offset_count
-        if offset_count < 0:
-            total_count += offset_count
-            offset_count = 0
-        return offset_count, total_count
 
     def _parse_binary_file(self: any, file_path: str) -> None:
         """

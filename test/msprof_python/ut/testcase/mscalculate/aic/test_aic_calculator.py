@@ -24,36 +24,17 @@ NAMESPACE = 'mscalculate.aic.aic_calculator'
 class TestAicCalculator(unittest.TestCase):
     file_list = {DataTag.AI_CORE: ['aicore.data.0.slice_0']}
 
-    def test_get_total_aic_count(self):
-        with mock.patch(NAMESPACE + '.PathManager.get_data_file_path', return_value='test'), \
-                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
-                mock.patch("os.path.getsize", return_value=1000):
-            check = AicCalculator(self.file_list, CONFIG)
-            result = check._get_total_aic_count()
-            self.assertEqual(result, 7)
-
-    def test_get_offset_and_total(self):
-        with mock.patch(NAMESPACE + '.AicCalculator._get_total_aic_count', return_value=7), \
-                mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.get_task_offset_and_sum',
-                           return_value=(0, 0)), \
-                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
-                mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.get_aic_sum_count',
-                           return_value=8):
-            check = AicCalculator(self.file_list, CONFIG)
-            result = check._get_offset_and_total(ITER_RANGE)
-            self.assertEqual(result, (0, -1))
-
     def test_parse_by_iter(self):
         with mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.check_db', return_value=True), \
                 mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.check_table', return_value=True):
-            with mock.patch(NAMESPACE + '.AicCalculator._get_offset_and_total', return_value=(127, 1280)), \
+            with mock.patch(NAMESPACE + '.HwtsIterModel.get_task_offset_and_sum', return_value=(127, 1280)), \
                     mock.patch(NAMESPACE + '.AicCalculator._parse'), \
                     mock.patch('framework.offset_calculator.FileCalculator.prepare_process'), \
                     mock.patch('msmodel.aic.aic_pmu_model.AicPmuModel.finalize'):
                 check = AicCalculator(self.file_list, CONFIG)
                 check._parse_by_iter()
-            with mock.patch(NAMESPACE + '.AicCalculator._get_offset_and_total', return_value=(128, 0)), \
+            with mock.patch(NAMESPACE + '.HwtsIterModel.get_task_offset_and_sum', return_value=(128, 0)), \
                     mock.patch(NAMESPACE + '.logging.warning'):
                 check = AicCalculator(self.file_list, CONFIG)
                 check._parse_by_iter()
@@ -96,8 +77,7 @@ class TestAicCalculator(unittest.TestCase):
 
     def test_calculate_when_not_all_export_then_parse_by_iter(self):
         ProfilingScene().set_all_export(False)
-        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
-                mock.patch(NAMESPACE + '.AicCalculator.pre_parse'):
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}):
             check = AicCalculator(self.file_list, CONFIG)
             check._parse_by_iter = mock.Mock(return_value=None)
             check.calculate()

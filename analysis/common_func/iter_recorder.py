@@ -87,9 +87,6 @@ class IterRecorder:
             logging.error("Data cannot be found in any iteration.")
             raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
 
-        if sys_cnt > self._max_iter_time:
-            return
-
         while self._check_current_iter_id(sys_cnt):
             self._current_iter_id += 1
 

@@ -141,7 +141,6 @@ class NodeGear(CANNGear):
         self.cann_level = Constant.NODE_LEVEL
         self.node_name_type_table = {}
         self.ge_host_info = []
-        self.step_info = []
         self.hccl_op_info = []
         self.fusion_op_info = []
 
@@ -172,18 +171,7 @@ class NodeGear(CANNGear):
                     self.record_fusion_op_info(record.dto, call_stack)
             return
 
-        if dto.struct_type == self.GE_STEP_INFO_API_TYPE:
-            # add step_info
-            model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
-            model_dto: ApiDataDto = self.db.get_api(model_event)
-            # tag 0 represents iter begin, tag 1 represents iter end
-            timestamp = dto.end if int(dto.item_id) == 1 else dto.start
-            # notice: different from old struct, delete stream_id task_id batch_id in step info
-            request_id = model_dto.request_id if model_dto.request_id is not None else -1
-
-            item_id = 1 if int(dto.item_id) == 1 else 0
-            self.step_info.append([model_dto.item_id, dto.thread_id, timestamp, request_id, item_id])
-        else:
+        if dto.struct_type != self.GE_STEP_INFO_API_TYPE:
             # add ge host info
             op_type = self.get_op_type_by_addition(event.additional_record)
             if op_type:
@@ -211,16 +199,6 @@ class NodeGear(CANNGear):
         model.insert_data_to_db(DBNameConstant.TABLE_GE_HOST, self.ge_host_info)
         model.finalize()
 
-    def save_step_info(self):
-        if not self.ge_host_info:
-            return
-        model = GeModel(self._project_path, [DBNameConstant.TABLE_GE_STEP])
-        model.init()
-        model.drop_table(DBNameConstant.TABLE_GE_STEP)
-        model.create_table()
-        model.insert_data_to_db(DBNameConstant.TABLE_GE_STEP, self.step_info)
-        model.finalize()
-
     def save_fusion_op_info(self):
         if not self.fusion_op_info:
             return
@@ -234,7 +212,6 @@ class NodeGear(CANNGear):
 
     def flush_data(self):
         self.save_ge_host_info()
-        self.save_step_info()
         self.save_fusion_op_info()
 
 

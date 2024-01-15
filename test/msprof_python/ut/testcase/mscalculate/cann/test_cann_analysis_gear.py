@@ -124,8 +124,6 @@ class TestCANNAnalysisGear(unittest.TestCase):
         record_db = AdditionalRecordDatabase(1)
         db = CANNThreadDB(1, api_db=api_db, record_db=record_db)
         gear.set_db(db)
-        event1 = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 100, 101, "step_info", 0), api_db)
-        event2 = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 200, 201, "step_info", 1), api_db)
         event3: Event = self.create_api_event(
             self.event_col(Constant.NODE_LEVEL, 1, 102, 140, "launch", "conv"), api_db)
         event3.additional_record = [
@@ -142,8 +140,6 @@ class TestCANNAnalysisGear(unittest.TestCase):
         hccl_node_basic_info.task_type = "HCCL"
         event5.additional_record = [self.create_addition_record(hccl_node_basic_info, 150, record_db)]
 
-        gear.run(event1, {})
-        gear.run(event2, {})
         gear.run(event3, {})
         gear.run(event4, {})
         gear.run(event5, {})
@@ -155,14 +151,6 @@ class TestCANNAnalysisGear(unittest.TestCase):
         self.assertTrue(
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_HOST_INFO),
                                           DBNameConstant.TABLE_GE_HOST, 'end_time', 140))
-
-        self.assertEqual(
-            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
-                                           DBNameConstant.TABLE_GE_STEP_INFO), 2)
-        self.assertTrue(
-            DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
-                                          DBNameConstant.TABLE_GE_STEP_INFO, 'tag', 0))
-
         self.assertEqual(
             DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_MODEL_INFO),
                                            DBNameConstant.TABLE_GE_FUSION_OP_INFO), 1)

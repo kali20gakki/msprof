@@ -68,7 +68,6 @@ class TestFftsPmuCalculator(TestCase):
                 mock.patch(NAMESPACE + '.HwtsIterModel.get_task_offset_and_sum', return_value=[0, 100]), \
                 mock.patch(NAMESPACE + '.PathManager.get_data_file_path'), \
                 mock.patch('os.path.getsize', return_value=1280), \
-                mock.patch(NAMESPACE + '.HwtsIterModel.get_aic_sum_count', return_value=50), \
                 mock.patch(NAMESPACE + '.FileCalculator.prepare_process',
                            return_value=b'\xe8\x01\xd3k\x0b\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00'
                                         b'\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x1ek1\x00\x00\x00\x00'
@@ -103,7 +102,6 @@ class TestFftsPmuCalculator(TestCase):
                 mock.patch(NAMESPACE + ".FileOpen.file_reader.read"), \
                 mock.patch('common_func.file_manager.check_path_valid'), \
                 mock.patch('os.path.getsize', return_value=1280), \
-                mock.patch(NAMESPACE + '.HwtsIterModel.get_aic_sum_count', return_value=50), \
                 mock.patch('framework.offset_calculator.OffsetCalculator.pre_process',
                            return_value=b'\xe8\x01\xd3k\x0b\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00'
                                         b'\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x1ek1\x00\x00\x00\x00'
@@ -128,7 +126,6 @@ class TestFftsPmuCalculator(TestCase):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.Utils.get_scene', return_value=Constant.SINGLE_OP), \
                 mock.patch(NAMESPACE + '.PathManager.get_data_file_path'), \
-                mock.patch(NAMESPACE + '.check_file_readable'), \
                 mock.patch(NAMESPACE + '.FileOpen'), \
                 mock.patch('os.path.getsize', return_value=128), \
                 mock.patch(NAMESPACE + '.OffsetCalculator.pre_process',

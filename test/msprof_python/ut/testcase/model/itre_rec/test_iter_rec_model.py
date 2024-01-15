@@ -54,28 +54,6 @@ class TestHwtsIterModel(unittest.TestCase):
             self.assertEqual(result, (0, 0))
         db_manager.destroy(res)
 
-    def test_get_aic_sum_count(self):
-        db_manager = DBManager()
-        create_sql = "CREATE TABLE if not exists HwtsIter(ai_core_num INTEGER, " \
-                     "ai_core_offset INTEGER, " \
-                     "task_count INTEGER, " \
-                     "task_offset INTEGER, " \
-                     "iter_id INTEGER)"
-        data = [(1, 0, 3, 0, 1), (1, 1, 4, 3, 2)]
-        insert_sql = "insert into HwtsIter values({value})".format(value="?," * (len(data[0]) - 1) + "?")
-        res = db_manager.create_table('hwts.db', create_sql, insert_sql, data)
-        check = HwtsIterModel('test')
-        check.conn, check.cur = res[0], res[1]
-        result = check.get_aic_sum_count()
-        self.assertEqual(result, 2)
-        res[1].execute('drop table if exists HwtsIter')
-        with mock.patch('common_func.db_manager' + '.logging.error'):
-            check = HwtsIterModel('test')
-            check.conn, check.cur = res[0], res[1]
-            result = check.get_aic_sum_count()
-            self.assertEqual(result, 0)
-        db_manager.destroy(res)
-
     def test_get_batch_list(self: any):
         table_name = "HwtsBatch"
         check = HwtsIterModel('test')

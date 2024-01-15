@@ -96,3 +96,23 @@ class IterInfoUpdater:
         for iter_id, iter_info in self.iteration_manager.iter_to_iter_info.items():
             if iter_id >= iter_offset:
                 iter_info.hwts_offset += task_offset
+
+    def calibrate_aic_offset(self: any, pmu_cnt_not_in_iter: dict, remain_aic_count: int) -> None:
+        # Reverse traverse to calculate aic offset considering data aging
+        #   if the last aic data is consistent with hwts.data.
+        max_iter = max(pmu_cnt_not_in_iter.keys()) - 1
+        for iter_id in range(max_iter, 0, -1):
+            aic_count_after_iter = pmu_cnt_not_in_iter.get(iter_id + 1, 0)
+            iter_info: IterInfo = self.iteration_manager.iter_to_iter_info[iter_id]  # current iter info
+            # aic offset before current iter
+            aic_offset = remain_aic_count - aic_count_after_iter - iter_info.aic_count
+            if aic_offset < 0:
+                # 处理老化场景，分两种情况：
+                #   1. 迭代内所有ai_core数据都被老化，iter_info.aic_count = 0
+                #   2. 迭代内部分ai_core数据都被老化，iter_info.aic_count = iter_info.aic_count + aic_offset
+                iter_info.aic_offset = 0
+                iter_info.aic_count = iter_info.aic_count + aic_offset if iter_info.aic_count + aic_offset > 0 else 0
+                remain_aic_count = aic_offset
+                continue
+            iter_info.aic_offset = aic_offset
+            remain_aic_count = aic_offset
