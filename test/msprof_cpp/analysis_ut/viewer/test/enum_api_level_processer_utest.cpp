@@ -14,9 +14,11 @@
 
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
+#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Utils;
+using EnumApiLevelDataFormat = std::vector<std::tuple<uint32_t, std::string>>;
 
 const std::string ENUM_API_LEVEL_DIR = "./enum_api_level";
 const std::string REPORT = "report.db";
@@ -50,6 +52,20 @@ TEST_F(EnumApiLevelProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSucces
 {
     auto processer = EnumApiLevelProcesser(DB_PATH, {""});
     EXPECT_TRUE(processer.Run());
+
+    auto dbRunner = MakeShared<DBRunner>(DB_PATH);
+    EnumApiLevelDataFormat checkData;
+    std::string sqlStr = "SELECT id, name FROM " + TABLE_NAME_ENUM_API_LEVEL;
+    const uint32_t ID_INDEX = 0;
+    const uint32_t NAME_INDEX = 1;
+    const uint16_t expectNum = 7;
+    if (dbRunner != nullptr) {
+        EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkData));
+        EXPECT_EQ(expectNum, checkData.size());
+        for (auto record : checkData) {
+            EXPECT_EQ(std::get<ID_INDEX>(record), API_LEVEL_TABLE.find(std::get<NAME_INDEX>(record))->second);
+        }
+    }
 }
 
 TEST_F(EnumApiLevelProcesserUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)

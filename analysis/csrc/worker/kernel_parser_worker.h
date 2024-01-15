@@ -13,21 +13,29 @@
 #ifndef ANALYSIS_WORKER_KERNEL_PARSER_WORKER_H
 #define ANALYSIS_WORKER_KERNEL_PARSER_WORKER_H
 #include <string>
+#include <atomic>
+#include <vector>
+
 namespace Analysis {
 namespace Worker {
 // 解析流程控制类，传入host data所在路径，启动采集流程并返回结果
 class KernelParserWorker {
 public:
-    explicit KernelParserWorker(const std::string& hostFilePath);
+    // 初始化传入host路径
+    explicit KernelParserWorker(std::string  hostFilePath);
     // 启动流程
     int Run();
 
 private:
-    std::string _hostFilePath;
-    // 启动hash数据解析
-    int LaunchHashParser();
+    // hashData解析落盘
+    void DumpHashData();
+    // typeInfo解析落盘
+    void DumpTypeInfoData();
     // 启动CANN侧数据解析及分析流程
-    int LaunchTraceParser();
+    void LaunchTraceParser();
+    std::string hostFilePath_;
+    // 用于子线程上报执行结果
+    std::atomic<bool> result_;
 };
 } // Worker
 } // Analysis
