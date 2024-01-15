@@ -12,8 +12,8 @@
 #include <memory>
 #include <string>
 #include "gtest/gtest.h"
-#include "db_runner.h"
-#include "thread_pool.h"
+#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/viewer/database/db_runner.h"
 
 using DATA_FORMAT = std::vector<std::tuple<int32_t, uint32_t, int64_t, double, double, std::string>>;
 using namespace Analysis::Viewer::Database;

@@ -7,10 +7,9 @@ add_executable(
 )
 
 target_include_directories(dfx_utest PRIVATE
+    ${TOP_DIR}/
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
-    ${TOP_DIR}/analysis/csrc/dfx
-    ${TOP_DIR}/analysis/csrc/utils
     ${TOP_DIR}/opensource/json/include
 )
 

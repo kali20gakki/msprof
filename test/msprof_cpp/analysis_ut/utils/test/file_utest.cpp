@@ -12,8 +12,9 @@
 
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "file.h"
-#include "error_code.h"
+
+#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/utils/file.h"
 
 using namespace Analysis;
 using namespace Analysis::Utils;

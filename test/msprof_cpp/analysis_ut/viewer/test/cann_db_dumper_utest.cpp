@@ -15,8 +15,9 @@
 #include <dirent.h>
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "thread_pool.h"
-#include "cann_trace_db_dumper.h"
+
+#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/viewer/database/drafts/cann_trace_db_dumper.h"
 
 
 using namespace Analysis::Utils;

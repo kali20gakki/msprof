@@ -11,7 +11,7 @@
  */
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "flip_task_db_dumper.h"
+#include "analysis/csrc/viewer/database/drafts/flip_task_db_dumper.h"
 
 using namespace Analysis::Utils;
 using namespace Analysis::Viewer::Database::Drafts;

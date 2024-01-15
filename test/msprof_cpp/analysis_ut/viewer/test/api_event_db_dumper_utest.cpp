@@ -11,7 +11,7 @@
  */
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "api_event_db_dumper.h"
+#include "analysis/csrc/viewer/database/drafts/api_event_db_dumper.h"
 
 using namespace Analysis::Utils;
 using namespace Analysis::Viewer::Database::Drafts;

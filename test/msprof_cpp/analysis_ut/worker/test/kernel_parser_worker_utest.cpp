@@ -11,12 +11,13 @@
  */
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "kernel_parser_worker.h"
-#include "hash_db_dumper.h"
-#include "type_info_db_dumper.h"
-#include "hash_data.h"
-#include "type_data.h"
-#include "host_trace_worker.h"
+
+#include "analysis/csrc/worker/kernel_parser_worker.h"
+#include "analysis/csrc/viewer/database/drafts/hash_db_dumper.h"
+#include "analysis/csrc/viewer/database/drafts/type_info_db_dumper.h"
+#include "analysis/csrc/parser/host/cann/hash_data.h"
+#include "analysis/csrc/parser/host/cann/type_data.h"
+#include "analysis/csrc/worker/host_trace_worker.h"
 
 
 using namespace Analysis::Worker;

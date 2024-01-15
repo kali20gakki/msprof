@@ -19,8 +19,8 @@
 #include <iostream>
 #include <algorithm>
 #include "gtest/gtest.h"
-#include "safe_unordered_map.h"
-#include "thread_pool.h"
+#include "analysis/csrc/utils/safe_unordered_map.h"
+#include "analysis/csrc/utils/thread_pool.h"
 
 using namespace Analysis::Utils;
 

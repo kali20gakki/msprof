@@ -18,12 +18,13 @@
 #include <memory>
 #include <fstream>
 #include "gtest/gtest.h"
-#include "utils.h"
-#include "log.h"
-#include "file.h"
-#include "event_grouper.h"
-#include "prof_common.h"
-#include "fake_trace_generator.h"
+
+#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/parser/host/cann/event_grouper.h"
+#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/utils/file.h"
+#include "collector/inc/toolchain/prof_common.h"
+#include "test/msprof_cpp/analysis_ut/fake/fake_trace_generator.h"
 
 using namespace Analysis::Utils;
 using namespace Analysis::Parser::Host::Cann;

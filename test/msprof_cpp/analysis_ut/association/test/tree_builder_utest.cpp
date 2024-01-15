@@ -14,12 +14,13 @@
 #include <vector>
 #include <queue>
 #include "gtest/gtest.h"
-#include "event.h"
-#include "tree.h"
-#include "cann_warehouse.h"
-#include "fake_trace_generator.h"
-#include "tree_builder.h"
-#include "prof_common.h"
+
+#include "analysis/csrc/association/cann/tree_builder.h"
+#include "analysis/csrc/entities/event.h"
+#include "analysis/csrc/entities/tree.h"
+#include "analysis/csrc/parser/host/cann/cann_warehouse.h"
+#include "collector/inc/toolchain/prof_common.h"
+#include "test/msprof_cpp/analysis_ut/fake/fake_trace_generator.h"
 
 using namespace Analysis::Parser::Host::Cann;
 using namespace Analysis::Association::Cann;

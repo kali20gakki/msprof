@@ -13,8 +13,8 @@
 #include <vector>
 #include <unordered_map>
 #include "gtest/gtest.h"
-#include "id_pool.h"
-#include "thread_pool.h"
+#include "analysis/csrc/association/credential/id_pool.h"
+#include "analysis/csrc/utils/thread_pool.h"
 
 using namespace Analysis::Association::Credential;
 using namespace Analysis::Utils;

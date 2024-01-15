@@ -11,9 +11,10 @@
  */
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "type_info_db_dumper.h"
-#include "utils.h"
-#include "error_code.h"
+
+#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/viewer/database/drafts/type_info_db_dumper.h"
 
 using namespace Analysis::Utils;
 using namespace Analysis::Viewer::Database;
