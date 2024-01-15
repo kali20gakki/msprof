@@ -21,7 +21,7 @@ namespace Drafts {
 FlipTaskDBDumper::FlipTaskDBDumper(const std::string& hostFilePath) : BaseDumper<FlipTaskDBDumper>(hostFilePath,
                                                                                             "HostTaskFlip")
 {
-    database_ = Utils::MakeShared<RtsTrackDB>();
+    MAKE_SHARED0_NO_OPERATION(database_, RtsTrackDB);
 }
 
 FlipTaskData FlipTaskDBDumper::GenerateData(const FlipTasks &flipTasks)

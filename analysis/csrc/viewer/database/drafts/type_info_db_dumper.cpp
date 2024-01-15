@@ -22,8 +22,8 @@ namespace Drafts {
 
 TypeInfoDBDumper::TypeInfoDBDumper(const std::string &hostFilePath) : BaseDumper<TypeInfoDBDumper>(hostFilePath,
                                                                                                    "TypeHashInfo")
-                                                                                                   {
-    database_ = Utils::MakeShared<HashDB>();
+{
+    MAKE_SHARED0_NO_OPERATION(database_, HashDB);
 }
 
 std::vector<std::tuple<std::string, std::string, std::string>> TypeInfoDBDumper::GenerateData(

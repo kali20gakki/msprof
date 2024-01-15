@@ -18,9 +18,9 @@ namespace Analysis {
 namespace Viewer {
 namespace Database {
 namespace Drafts {
-HashDBDumper::HashDBDumper(const std::string& hostFilePath) : BaseDumper<HashDBDumper>(hostFilePath, "GeHashInfo")
-        {
-    database_ = Utils::MakeShared<HashDB>();
+HashDBDumper::HashDBDumper(const std::string &hostFilePath) : BaseDumper<HashDBDumper>(hostFilePath, "GeHashInfo")
+{
+    MAKE_SHARED0_NO_OPERATION(database_, HashDB);
 }
 
 std::vector<std::tuple<std::string, std::string>> HashDBDumper::GenerateData(const HashDataMap &hashData)

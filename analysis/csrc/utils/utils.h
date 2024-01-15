@@ -32,18 +32,80 @@ int StrToDouble(double &dest, const std::string &numStr);
 uint16_t GetDeviceIdByDevicePath(const std::string &filePath);
 bool IsNumber(const std::string& s);
 
-template<class T, class ...Args>
-std::shared_ptr<T> MakeShared(const Args &...args)
-{
-    std::shared_ptr<T> sp;
-    try {
-        sp = std::make_shared<T>(args...);
-    } catch (...) {
-        ERROR("make_shared failed");
-        return nullptr;
-    }
-    return sp;
-}
+// make_shared参数个数为0，异常操作为return void
+#define MAKE_SHARED0_RETURN_VOID(instance, type) \
+    do {                                         \
+        try {                                    \
+            instance = std::make_shared<type>(); \
+        } catch (...) {                          \
+            ERROR("Make shared ptr failed");     \
+            return;                              \
+        }                                        \
+    } while (0)
+
+// make_shared参数个数为0，异常操作为return value
+#define MAKE_SHARED0_RETURN_VALUE(instance, type, value) \
+    do {                                                 \
+        try {                                            \
+            instance = std::make_shared<type>();         \
+        } catch (...) {                                  \
+            ERROR("Make shared ptr failed");             \
+            return value;                                \
+        }                                                \
+    } while (0)
+
+// make_shared参数个数不定，异常操作为return void
+#define MAKE_SHARED_RETURN_VOID(instance, type, ...)        \
+    do {                                                    \
+        try {                                               \
+            instance = std::make_shared<type>(__VA_ARGS__); \
+        } catch (...) {                                     \
+            ERROR("Make shared ptr failed");                \
+            return;                                         \
+        }                                                   \
+    } while (0)
+
+// make_shared参数个数不定，异常操作为return value
+#define MAKE_SHARED_RETURN_VALUE(instance, type, value, ...)  \
+    do {                                                      \
+        try {                                                 \
+            instance = std::make_shared<type>(__VA_ARGS__);   \
+        } catch (...) {                                       \
+            ERROR("Make shared ptr failed");                  \
+            return value;                                     \
+        }                                                     \
+    } while (0)
+
+// make_shared参数个数不定，异常操作为break
+#define MAKE_SHARED_BREAK(instance, type, ...)              \
+    do {                                                    \
+        try {                                               \
+            instance = std::make_shared<type>(__VA_ARGS__); \
+        } catch (...) {                                     \
+            ERROR("Make shared ptr failed");                \
+            break;                                          \
+        }                                                   \
+    } while (0)
+
+// make_shared参数个数0，异常操作无，常用于构造函数
+#define MAKE_SHARED0_NO_OPERATION(instance, type, ...)      \
+    do {                                                    \
+        try {                                               \
+            instance = std::make_shared<type>(__VA_ARGS__); \
+        } catch (...) {                                     \
+            ERROR("Make shared ptr failed");                \
+        }                                                   \
+    } while (0)
+
+// make_shared参数个数不定，异常操作无，常用于构造函数
+#define MAKE_SHARED_NO_OPERATION(instance, type, ...)       \
+    do {                                                    \
+        try {                                               \
+            instance = std::make_shared<type>(__VA_ARGS__); \
+        } catch (...) {                                     \
+            ERROR("Make shared ptr failed");                \
+        }                                                   \
+    } while (0)
 
 template<class T>
 bool Reserve(std::vector<T> &vec, size_t s)

@@ -66,18 +66,12 @@ private:
     {
         std::string key = Utils::Join("_", opName, trace->timeStamp);
         if (opDescs.find(key) == opDescs.end()) {
-            auto desc = Utils::MakeShared<Entities::OpDesc>();
-            if (!desc) {
-                ERROR("MakeShared desc ptr failed");
-                return;
-            }
+            std::shared_ptr<Entities::OpDesc> desc;
+            MAKE_SHARED0_RETURN_VOID(desc, Entities::OpDesc);
             (*desc).*element = trace;
-            auto op = Utils::MakeShared<Operator>(desc, opName,
-                                                  Entities::OpType::OPTYPE_COMPUTE);
-            if (!op) {
-                ERROR("MakeShared op ptr failed");
-                return;
-            }
+            std::shared_ptr<Operator> op;
+            MAKE_SHARED_RETURN_VOID(op, Operator, desc, opName,
+                                    Entities::OpType::OPTYPE_COMPUTE);
             opDescs.insert({key, op});
         } else {
             auto desc = opDescs[key]->opDesc;

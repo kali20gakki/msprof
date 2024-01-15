@@ -75,7 +75,8 @@ TEST_F(TargetInfoNpuProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSucce
     EXPECT_TRUE(processer.Run());
     MOCKER_CPP(&File::GetFilesWithPrefix).reset();
     MOCKER_CPP(&Context::GetPlatformVersion).reset();
-    auto dbRunner = MakeShared<DBRunner>(DB_PATH);
+    std::shared_ptr<DBRunner> dbRunner;
+    MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
     NpuInfoDataFormat checkData;
     NpuInfoDataFormat expectData = {
         {0, "Ascend310"},

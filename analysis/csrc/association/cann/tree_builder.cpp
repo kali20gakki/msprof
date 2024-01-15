@@ -22,6 +22,8 @@ namespace Cann {
 namespace {
 const int MAX_DEPTH = 20;
 }
+
+using namespace Analysis::Utils;
 /*
  EventLevel      此Level包含的EventType
 |- ACL
@@ -54,8 +56,12 @@ std::shared_ptr<TreeNode> TreeBuilder::Build()
 
     // rootNode的时间片应该覆盖整个EventQueue
     EventInfo rootInfo{EventType::EVENT_TYPE_API, 0, 0, kernelEvents_->GetBound() + 1};
-    auto rootEvent = Utils::MakeShared<Event>(Utils::MakeShared<MsprofApi>(), rootInfo);
-    auto rootNode = Utils::MakeShared<TreeNode>(rootEvent);
+    std::shared_ptr<MsprofApi> api;
+    MAKE_SHARED0_RETURN_VALUE(api, MsprofApi, nullptr);
+    std::shared_ptr<Event> rootEvent;
+    MAKE_SHARED_RETURN_VALUE(rootEvent, Event, nullptr, api, rootInfo);
+    std::shared_ptr<TreeNode> rootNode;
+    MAKE_SHARED_RETURN_VALUE(rootNode, TreeNode, nullptr, rootEvent);
     // 1. 用Api和TaskTrack Event建立核心树
     auto tree = BuildTree(rootNode, 0);
 
@@ -103,8 +109,11 @@ EventQueuePair TreeBuilder::GroupCtxIdEvents(std::shared_ptr<EventQueue> &ctxIdE
     if (ctxIdEvents) {
         ctxIdSize = ctxIdEvents->GetSize();
     }
-    auto nodeCtxIdEvent = Utils::MakeShared<EventQueue>(threadId_, ctxIdSize);
-    auto hcclCtxIdEvent = Utils::MakeShared<EventQueue>(threadId_, ctxIdSize);
+    std::shared_ptr<EventQueue> nodeCtxIdEvent;
+    MAKE_SHARED_RETURN_VALUE(nodeCtxIdEvent, EventQueue, {}, threadId_, ctxIdSize);
+    std::shared_ptr<EventQueue> hcclCtxIdEvent;
+    MAKE_SHARED_RETURN_VALUE(hcclCtxIdEvent, EventQueue, {}, threadId_, ctxIdSize);
+
     while (ctxIdEvents && !ctxIdEvents->Empty()) {
         auto ctxId = ctxIdEvents->Pop();
         if (ctxId->info.level == MSPROF_REPORT_NODE_LEVEL) {
@@ -191,8 +200,12 @@ bool TreeBuilder::AddTaskTrackEvents(std::shared_ptr<TreeNode> &rootNode,
         // 建立dummy节点
         EventInfo dummyInfo{EventType::EVENT_TYPE_DUMMY, MSPROF_REPORT_RUNTIME_LEVEL,
                             event->info.start, event->info.end};
-        auto dummyEvent = Utils::MakeShared<Event>(Utils::MakeShared<MsprofApi>(), dummyInfo);
-        auto dummyNode = Utils::MakeShared<TreeNode>(dummyEvent);
+        std::shared_ptr<MsprofApi> api;
+        MAKE_SHARED0_RETURN_VALUE(api, MsprofApi, false);
+        std::shared_ptr<Event> dummyEvent;
+        MAKE_SHARED_RETURN_VALUE(dummyEvent, Event, false, api, dummyInfo);
+        std::shared_ptr<TreeNode> dummyNode;
+        MAKE_SHARED_RETURN_VALUE(dummyNode, TreeNode, false, dummyEvent);
         dummyNode->records.emplace_back(event);
 
         if (event->info.start > (*it)->event->info.start && event->info.start <= (*it)->event->info.end) {
@@ -233,8 +246,12 @@ void TreeBuilder::AddRemainTaskTrackEvents(std::shared_ptr<TreeNode> &rootNode,
         // 建立dummy节点
         EventInfo dummyInfo{EventType::EVENT_TYPE_DUMMY, MSPROF_REPORT_RUNTIME_LEVEL,
                             event->info.start, event->info.end};
-        auto dummyEvent = Utils::MakeShared<Event>(Utils::MakeShared<MsprofApi>(), dummyInfo);
-        auto dummyNode = Utils::MakeShared<TreeNode>(dummyEvent);
+        std::shared_ptr<MsprofApi> api;
+        MAKE_SHARED0_RETURN_VOID(api, MsprofApi);
+        std::shared_ptr<Event> dummyEvent;
+        MAKE_SHARED_RETURN_VOID(dummyEvent, Event, api, dummyInfo);
+        std::shared_ptr<TreeNode> dummyNode;
+        MAKE_SHARED_RETURN_VOID(dummyNode, TreeNode, dummyEvent);
         dummyNode->records.emplace_back(event);
 
         // 直接挂到rootNode
@@ -277,7 +294,8 @@ std::shared_ptr<TreeNode> TreeBuilder::BuildTree(std::shared_ptr<TreeNode> paren
             break;
         }
         auto event = kernelEvents_->Pop();
-        auto childNode = Utils::MakeShared<TreeNode>(event);
+        std::shared_ptr<TreeNode> childNode;
+        MAKE_SHARED_RETURN_VALUE(childNode, TreeNode, nullptr, event);
         // 记录除了Api和TaskTrack类型的TreeNode，按照level记录
         RecordTreeNode(childNode, event->info.level);
 

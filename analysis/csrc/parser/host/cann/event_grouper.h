@@ -68,11 +68,8 @@ private:
     {
         // 1. 解析bin
         Utils::TimeLogger t{"Group " + typeName};
-        auto parser = Utils::MakeShared<P>(hostPath_);
-        if (!parser) {
-            ERROR("EventParser make shared ptr failed");
-            return;
-        }
+        std::shared_ptr<P> parser;
+        MAKE_SHARED_RETURN_VOID(parser, P, hostPath_);
         auto traces = parser->template ParseData<M>();
 
         // 统计各个threadId元素个数，用于EventQueue分配精确的内存大小，避免大量内存浪费
@@ -85,16 +82,14 @@ private:
 
         for (const auto &trace: traces) {
             EventInfo info{eventType, trace->level, trace->timeStamp, trace->timeStamp};
-            auto event = Utils::MakeShared<Event>(trace, info);
-            if (!parser) {
-                ERROR("Event make shared ptr failed");
-                return;
-            }
+            std::shared_ptr<Event> event;
+            MAKE_SHARED_BREAK(event, Event, trace, info);
             // 新建
             if (!cannWarehouses_.FindAndInsertIfNotExist(trace->threadId) ||
                 !(cannWarehouses_[trace->threadId].*element)) {
-                cannWarehouses_[trace->threadId].*element =
-                    Utils::MakeShared<EventQueue>(trace->threadId, threadIdNum[trace->threadId]);
+                std::shared_ptr<EventQueue> que;
+                MAKE_SHARED_BREAK(que, EventQueue, trace->threadId, threadIdNum[trace->threadId]);
+                cannWarehouses_[trace->threadId].*element = que;
             }
 
             // 插入

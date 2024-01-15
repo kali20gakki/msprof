@@ -156,17 +156,11 @@ void TreeAnalyzer::UpdateHcclBigOpDescs(const std::shared_ptr<TreeNode> &node)
     auto nodeRecords = GetNodeRecordsByType(nodeNode, EventType::EVENT_TYPE_NODE_BASIC_INFO);
     if (nodeRecords.empty()) {
         auto nodeApi = nodeNode->event->apiPtr;
-        auto desc = Utils::MakeShared<HcclBigOpDesc>(nodeApi->beginTime,
-                                                     nodeApi->endTime, deviceId, nullptr);
-        if (!desc) {
-            ERROR("Make hccl big op desc shared pointer failed, threadId = %", threadId_);
-            return;
-        }
-        auto op = Utils::MakeShared<Operator>(desc, nodeApi->itemId, OpType::OPTYPE_HCCL_BIG);
-        if (!op) {
-            ERROR("Make hccl big op shared pointer failed, threadId = %", threadId_);
-            return;
-        }
+        std::shared_ptr<HcclBigOpDesc> desc;
+        MAKE_SHARED_RETURN_VOID(desc, HcclBigOpDesc, nodeApi->beginTime,
+                                nodeApi->endTime, deviceId, nullptr);
+        std::shared_ptr<Operator> op;
+        MAKE_SHARED_RETURN_VOID(op, Operator, desc, nodeApi->itemId, OpType::OPTYPE_HCCL_BIG);
         hcclBigOpDescs_.emplace_back(op);
         return;
     }
@@ -174,17 +168,11 @@ void TreeAnalyzer::UpdateHcclBigOpDescs(const std::shared_ptr<TreeNode> &node)
     for (const auto &nodeRecord: nodeRecords) {
         auto nodeApi = nodeNode->event->apiPtr;
         auto nodeDesc = (nodeRecord == nullptr) ? nullptr : nodeRecord->compactPtr;
-        auto desc = Utils::MakeShared<HcclBigOpDesc>(
-            nodeApi->beginTime, nodeApi->endTime, deviceId, nodeDesc);
-        if (!desc) {
-            ERROR("Make hccl big op desc shared pointer failed, threadId = %", threadId_);
-            return;
-        }
-        auto op = Utils::MakeShared<Operator>(desc, nodeApi->itemId, OpType::OPTYPE_HCCL_BIG);
-        if (!op) {
-            ERROR("Make hccl big op shared pointer failed, threadId = %", threadId_);
-            return;
-        }
+        std::shared_ptr<HcclBigOpDesc> desc;
+        MAKE_SHARED_RETURN_VOID(desc, HcclBigOpDesc, nodeApi->beginTime,
+                                nodeApi->endTime, deviceId, nodeDesc);
+        std::shared_ptr<Operator> op;
+        MAKE_SHARED_RETURN_VOID(op, Operator, desc, nodeApi->itemId, OpType::OPTYPE_HCCL_BIG);
         hcclBigOpDescs_.emplace_back(op);
     }
 }
@@ -206,11 +194,8 @@ std::shared_ptr<HostTask> TreeAnalyzer::GenHostTask(const std::shared_ptr<Msprof
                                                     const std::shared_ptr<Operator> &opPtr,
                                                     uint32_t ctxId, uint16_t taskType)
 {
-    auto task = Utils::MakeShared<HostTask>();
-    if (!task) {
-        ERROR("Make shared ptr failed when generate host task, threadId = %", threadId_);
-        return nullptr;
-    }
+    std::shared_ptr<HostTask> task;
+    MAKE_SHARED0_RETURN_VALUE(task, HostTask, nullptr);
 
     task->streamId = track->data.runtimeTrack.streamId;
     task->taskId = track->data.runtimeTrack.taskId;
@@ -402,16 +387,10 @@ HCCLSmallOpDescs TreeAnalyzer::GetHcclSmallOpDescs(const std::shared_ptr<TreeNod
             ERROR("Update hccl small op descs failed by hcclInfo");
         }
     } else {
-        auto desc = Utils::MakeShared<HcclSmallOpDesc>();
-        if (!desc) {
-            ERROR("Make hccl small op desc shared pointer failed, threadId = %", threadId_);
-            return opDescs;
-        }
-        auto op = Utils::MakeShared<Operator>(desc, 0, OpType::OPTYPE_HCCL_SMALL);
-        if (!op) {
-            ERROR("Make Operator shared pointer failed, threadId = %", threadId_);
-            return opDescs;
-        }
+        std::shared_ptr<HcclSmallOpDesc> desc;
+        MAKE_SHARED0_RETURN_VALUE(desc, HcclSmallOpDesc, opDescs);
+        std::shared_ptr<Operator> op;
+        MAKE_SHARED_RETURN_VALUE(op, Operator, opDescs, desc, 0, OpType::OPTYPE_HCCL_SMALL);
         opDescs.insert({DEFAULT_CONTEXT_ID, op});
     }
 
@@ -431,18 +410,11 @@ bool TreeAnalyzer::UpdateHcclSmallOpDescs(HCCLSmallOpDescs &descs,
             return false;
         }
         for (uint32_t id = ctxIdTrace->ctxIds[0]; id <= ctxIdTrace->ctxIds[1]; ++id) {
-            auto desc = Utils::MakeShared<HcclSmallOpDesc>();
-            if (!desc) {
-                ERROR("MakeShared desc ptr failed, threadId = %", threadId_);
-                return false;
-            }
+            std::shared_ptr<HcclSmallOpDesc> desc;
+            MAKE_SHARED0_RETURN_VALUE(desc, HcclSmallOpDesc, false);
             desc->ctxId = id;
-            auto op = Utils::MakeShared<Operator>(desc,
-                                                  ctxIdTrace->opName, OpType::OPTYPE_HCCL_SMALL);
-            if (!op) {
-                ERROR("MakeShared op ptr failed, threadId = %", threadId_);
-                return false;
-            }
+            std::shared_ptr<Operator> op;
+            MAKE_SHARED_RETURN_VALUE(op, Operator, false, desc, ctxIdTrace->opName, OpType::OPTYPE_HCCL_SMALL);
             descs.insert({id, op});
         }
     }
@@ -470,20 +442,13 @@ bool TreeAnalyzer::UpdateHcclSmallOpDescs(HCCLSmallOpDescs &descs,
         auto hcclTrace = ReinterpretConvert<MsprofHcclInfo *>(trace->data);
         auto key = hcclTrace->ctxID;
 
-        auto desc = Utils::MakeShared<HcclSmallOpDesc>();
-        if (!desc) {
-            ERROR("MakeShared desc ptr failed, threadId = %", threadId_);
-            return false;
-        }
+        std::shared_ptr<HcclSmallOpDesc> desc;
+        MAKE_SHARED0_RETURN_VALUE(desc, HcclSmallOpDesc, false);
         desc->hcclInfo = trace;
-        auto op = Utils::MakeShared<Operator>(desc,
-                                              hcclTrace->itemId, OpType::OPTYPE_HCCL_SMALL);
-        if (!op) {
-            ERROR("MakeShared op ptr failed, threadId = %", threadId_);
-            return false;
-        }
-        descs.insert({key, op});
+        std::shared_ptr<Operator> op;
+        MAKE_SHARED_RETURN_VALUE(op, Operator, false, desc, hcclTrace->itemId, OpType::OPTYPE_HCCL_SMALL);
 
+        descs.insert({key, op});
         auto hcclPtr = descs[key]->hcclSmallOpDesc;
         hcclPtr->hcclInfo = trace;
     }
