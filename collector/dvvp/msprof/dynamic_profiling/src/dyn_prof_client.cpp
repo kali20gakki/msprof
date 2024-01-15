@@ -229,7 +229,7 @@ int DyncProfMsgProcCli::CreateDynProfClientSock()
     MSPROF_LOGI("Dynamic profiling client socket domain: %s.", sockPath.c_str());
     sockaddr_un sockAddr;
     sockAddr.sun_family = AF_UNIX;
-    errno_t err = strncpy_s(sockAddr.sun_path, sizeof(sockAddr.sun_path) - 1, sockPath.c_str(), sockPath.size());
+    errno_t err = strncpy_s(sockAddr.sun_path, sizeof(sockAddr.sun_path), sockPath.c_str(), sockPath.size());
     if (err != EOK) {
         MSPROF_LOGE("Dynamic profiling client sockPath copy failed, err: %d, sockPath: %s", err, sockPath.c_str());
         return PROFILING_FAILED;
