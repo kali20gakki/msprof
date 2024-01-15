@@ -21,6 +21,7 @@ add_executable(
     test/type_info_dumper_utest.cpp
     test/enum_api_level_processer_utest.cpp
     test/target_info_npu_processer_utest.cpp
+    test/target_info_session_time_utest.cpp
     ${TOP_DIR}/analysis/csrc/association/cann/tree_analyzer.cpp
     ${SOURCES}
 )

@@ -15,12 +15,12 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 
-const std::string ENUM_API_LEVEL_DIR = "./enum_api_level";
-const std::string REPORT = "report.db";
-
-
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Utils;
+
+const std::string ENUM_API_LEVEL_DIR = "./enum_api_level";
+const std::string REPORT = "report.db";
+const std::string DB_PATH = File::PathJoin({ENUM_API_LEVEL_DIR, REPORT});
 
 class EnumApiLevelProcesserUTest : public testing::Test {
 protected:
@@ -40,15 +40,15 @@ protected:
 
     virtual void TearDown()
     {
-        if (File::Exist(File::PathJoin({ENUM_API_LEVEL_DIR, REPORT}))) {
-            EXPECT_TRUE(File::DeleteFile(File::PathJoin({ENUM_API_LEVEL_DIR, REPORT})));
+        if (File::Exist(DB_PATH)) {
+            EXPECT_TRUE(File::DeleteFile(DB_PATH));
         }
     }
 };
 
 TEST_F(EnumApiLevelProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSuccess)
 {
-    auto processer = EnumApiLevelProcesser(File::PathJoin({ENUM_API_LEVEL_DIR, REPORT}), {""});
+    auto processer = EnumApiLevelProcesser(DB_PATH, {""});
     EXPECT_TRUE(processer.Run());
 }
 
@@ -56,7 +56,7 @@ TEST_F(EnumApiLevelProcesserUTest, TestRunShouldReturnFalseWhenReserveFailedThen
 {
     using TempT = std::tuple<uint16_t, std::string>;
     MOCKER_CPP(&std::vector<TempT>::reserve).stubs().will(throws(std::bad_alloc()));
-    auto processer = EnumApiLevelProcesser(File::PathJoin({ENUM_API_LEVEL_DIR, REPORT}), {""});
+    auto processer = EnumApiLevelProcesser(DB_PATH, {""});
     EXPECT_FALSE(processer.Run());
     MOCKER_CPP(&std::vector<TempT>::reserve).reset();
 }
@@ -64,7 +64,7 @@ TEST_F(EnumApiLevelProcesserUTest, TestRunShouldReturnFalseWhenReserveFailedThen
 TEST_F(EnumApiLevelProcesserUTest, TestRunShouldReturnFalseWhenMakeSharedFailedThenPtrIsNullptr)
 {
     MOCKER_CPP(&std::make_shared<ReportDB>).stubs().will(throws(std::bad_alloc()));
-    auto processer = EnumApiLevelProcesser(File::PathJoin({ENUM_API_LEVEL_DIR, REPORT}), {""});
+    auto processer = EnumApiLevelProcesser(DB_PATH, {""});
     EXPECT_FALSE(processer.Run());
     MOCKER_CPP(&std::make_shared<ReportDB>).reset();
 }
@@ -72,7 +72,7 @@ TEST_F(EnumApiLevelProcesserUTest, TestRunShouldReturnFalseWhenMakeSharedFailedT
 TEST_F(EnumApiLevelProcesserUTest, TestRunShouldReturnFalseWhenCreateTableFailed)
 {
     MOCKER_CPP(&DBRunner::CreateTable).stubs().will(returnValue(false));
-    auto processer = EnumApiLevelProcesser(File::PathJoin({ENUM_API_LEVEL_DIR, REPORT}), {""});
+    auto processer = EnumApiLevelProcesser(DB_PATH, {""});
     EXPECT_FALSE(processer.Run());
     MOCKER_CPP(&DBRunner::CreateTable).reset();
 }
