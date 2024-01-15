@@ -91,20 +91,7 @@ set(src_file
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/msopprof_manager.cpp
 )
 
-aux_source_directory(${TOP_DIR}/analysis/csrc/viewer/database/finals ANALYSIS_SOURCES)
-aux_source_directory(${TOP_DIR}/analysis/csrc/viewer/database/ ANALYSIS_SOURCES)
-set(ANALYSIS_SOURCES
-    ${ANALYSIS_SOURCES}
-    ${TOP_DIR}/analysis/csrc/dfx/log.cpp
-    ${TOP_DIR}/analysis/csrc/utils/thread_pool.cpp
-    ${TOP_DIR}/analysis/csrc/utils/file.cpp
-    ${TOP_DIR}/analysis/csrc/utils/time_utils.cpp
-    ${TOP_DIR}/analysis/csrc/utils/utils.cpp
-    ${TOP_DIR}/analysis/csrc/parser/environment/context.cpp
-)
-
 add_executable(msprof_bin_utest
-    ${ANALYSIS_SOURCES}
     ${common_file}
     ${src_file}
     test/main.cpp
@@ -128,7 +115,6 @@ add_executable(msprof_bin_utest
 target_include_directories(msprof_bin_utest PRIVATE
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
-    ${TOP_DIR}/
     ${TOP_DIR}/collector/inc/toolchain
     ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/collector/inc/external/acl
@@ -198,7 +184,6 @@ target_link_libraries(msprof_bin_utest PRIVATE
     ascend_protobuf_static
     c_sec_static
     pthread
-    -lsqlite3
     ${GTEST_STATIC_LIBRARY}
     ${MOCKCPP_STATIC_LIBRARY}
     dl
