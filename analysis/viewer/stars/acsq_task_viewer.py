@@ -31,7 +31,7 @@ class AcsqTaskViewer:
         pid = InfoConfReader().get_json_pid_data()
         result = [["process_name", pid, InfoConfReader().get_json_tid_data(), "AcsqTask"]]
 
-        for sqe in SqeType:
+        for sqe in SqeType().instance:
             result.append(["thread_name", pid, sqe.value, sqe.name])
             result.append(["thread_sort_index", pid, sqe.value, sqe.value])
         return result
@@ -48,7 +48,7 @@ class AcsqTaskViewer:
             start_time = InfoConfReader().time_from_syscnt(data[4], NumberConstant.MICRO_SECOND)
             task_dur = InfoConfReader().time_from_syscnt(data[5], NumberConstant.MICRO_SECOND) - start_time
             task_name = "{} {}".format(str(data[1]), str(data[0]))
-            result.append([task_name, pid, SqeType[data[3]].value, start_time, task_dur])
+            result.append([task_name, pid, SqeType().instance[data[3]].value, start_time, task_dur])
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TASK_TIME_GRAPH_HEAD, result)
         result = TraceViewManager.metadata_event(AcsqTaskViewer.get_timeline_header())
         result.extend(_trace)
