@@ -12,9 +12,10 @@
 
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "addition_info_parser.h"
-#include "fake_trace_generator.h"
-#include "file.h"
+
+#include "analysis/csrc/parser/host/cann/addition_info_parser.h"
+#include "analysis/csrc/utils/file.h"
+#include "test/msprof_cpp/analysis_ut/fake/fake_trace_generator.h"
 
 using namespace Analysis::Parser;
 using namespace Analysis::Parser::Host::Cann;

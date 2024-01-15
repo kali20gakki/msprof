@@ -8,7 +8,7 @@ add_executable(
 target_include_directories(add_utest PRIVATE
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
-    ${TOP_DIR}/analysis/csrc/xxx
+    ${TOP_DIR}/
 )
 
 run_test(xxx_utest)

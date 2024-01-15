@@ -16,7 +16,7 @@
 
 #include <thread>
 #include <unordered_map>
-#include "prof_common.h"
+#include "collector/inc/toolchain/prof_common.h"
 #include "analysis/csrc/viewer/database/db_runner.h"
 #include "analysis/csrc/viewer/database/database.h"
 #include "analysis/csrc/viewer/database/drafts/base_dumper.h"

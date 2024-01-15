@@ -11,13 +11,10 @@ add_executable(
 )
 
 target_include_directories(entities_utest PRIVATE
+        ${TOP_DIR}/
         ${GTEST_INCLUDE_DIR}
         ${MOCKCPP_INCLUDE_DIR}
-        ${TOP_DIR}/analysis/csrc/entities
-        ${TOP_DIR}/analysis/csrc/utils
-        ${TOP_DIR}/analysis/csrc/dfx
         ${TOP_DIR}/opensource/json/include
-        ${TOP_DIR}/collector/inc/toolchain
 )
 
 run_test(entities_utest)

@@ -11,8 +11,9 @@
  */
 
 #include "gtest/gtest.h"
-#include "file.h"
-#include "hash_data.h"
+
+#include "analysis/csrc/parser/host/cann/hash_data.h"
+#include "analysis/csrc/utils/file.h"
 
 using namespace Analysis::Utils;
 using namespace Analysis::Parser::Host::Cann;

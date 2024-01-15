@@ -15,9 +15,9 @@
 #include <vector>
 #include <random>
 #include "gtest/gtest.h"
-#include "event.h"
-#include "event_queue.h"
-#include "prof_common.h"
+#include "analysis/csrc/entities/event.h"
+#include "analysis/csrc/entities/event_queue.h"
+#include "collector/inc/toolchain/prof_common.h"
 
 using namespace Analysis::Entities;
 

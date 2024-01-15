@@ -15,8 +15,8 @@
 #include <vector>
 #include <random>
 #include "gtest/gtest.h"
-#include "event.h"
-#include "tree.h"
+#include "analysis/csrc/entities/event.h"
+#include "analysis/csrc/entities/tree.h"
 
 using namespace Analysis::Entities;
 

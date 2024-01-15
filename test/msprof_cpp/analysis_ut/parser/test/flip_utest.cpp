@@ -12,7 +12,7 @@
 
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "flip.h"
+#include "analysis/csrc/parser/adapter/flip.h"
 
 using namespace Analysis::Parser::Adapter;
 

@@ -12,8 +12,8 @@
 
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "log.h"
-#include "error_code.h"
+#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/dfx/log.h"
 
 using namespace Analysis;
 using namespace Analysis::Utils;

@@ -12,9 +12,10 @@
 
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "api_event_parser.h"
-#include "fake_trace_generator.h"
-#include "error_code.h"
+
+#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/parser/host/cann/api_event_parser.h"
+#include "test/msprof_cpp/analysis_ut/fake/fake_trace_generator.h"
 
 using namespace Analysis::Parser;
 using namespace Analysis::Utils;

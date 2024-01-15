@@ -23,12 +23,13 @@
 #include <unordered_map>
 #include <string>
 #include <fstream>
-#include "analysis/csrc/utils/utils.h"
-#include "analysis/csrc/entities/event_queue.h"
+
 #include "analysis/csrc/dfx/log.h"
-#include "analysis/csrc/utils/file.h"
 #include "analysis/csrc/entities/event.h"
+#include "analysis/csrc/entities/event_queue.h"
 #include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/utils/utils.h"
 
 using EventType = Analysis::Entities::EventType;
 using EventInfo = Analysis::Entities::EventInfo;
