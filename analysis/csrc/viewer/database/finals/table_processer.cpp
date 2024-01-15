@@ -25,8 +25,8 @@ const uint32_t POOLNUM = 2;
 TableProcesser::TableProcesser(std::string reportDBPath, const std::set<std::string> &profPaths)
     : reportDBPath_(std::move(reportDBPath)), profPaths_(profPaths)
 {
-    reportDB_.database = Utils::MakeShared<ReportDB>();
-    reportDB_.dbRunner = Utils::MakeShared<DBRunner>(reportDBPath_);
+    MAKE_SHARED0_NO_OPERATION(reportDB_.database, ReportDB);
+    MAKE_SHARED_NO_OPERATION(reportDB_.dbRunner, DBRunner, reportDBPath_);
 }
 
 bool TableProcesser::Run()

@@ -53,7 +53,8 @@ TEST_F(EnumApiLevelProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSucces
     auto processer = EnumApiLevelProcesser(DB_PATH, {""});
     EXPECT_TRUE(processer.Run());
 
-    auto dbRunner = MakeShared<DBRunner>(DB_PATH);
+    std::shared_ptr<DBRunner> dbRunner;
+    MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
     EnumApiLevelDataFormat checkData;
     std::string sqlStr = "SELECT id, name FROM " + TABLE_NAME_ENUM_API_LEVEL;
     const uint32_t ID_INDEX = 0;

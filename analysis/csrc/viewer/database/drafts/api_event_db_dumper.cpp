@@ -30,7 +30,7 @@ using TypeData = Analysis::Parser::Host::Cann::TypeData;
 ApiEventDBDumper::ApiEventDBDumper(const std::string &hostFilePath) : BaseDumper<ApiEventDBDumper>(
         hostFilePath, "ApiEventData")
 {
-    database_ = Utils::MakeShared<ApiEventDB>();
+    MAKE_SHARED0_NO_OPERATION(database_, ApiEventDB);
 }
 
 EventData ApiEventDBDumper::GenerateData(const ApiData &apiEvent)

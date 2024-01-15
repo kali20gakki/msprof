@@ -47,11 +47,9 @@ std::shared_ptr<FlipTask> Flip::CreateFlipTask(MsprofCompactInfo *taskTrack)
         ERROR("Task track is null.");
         return nullptr;
     }
-    auto flipTask = MakeShared<FlipTask>();
-    if (!flipTask) {
-        ERROR("New flipTask failed.");
-        return nullptr;
-    }
+    std::shared_ptr<FlipTask> flipTask;
+    MAKE_SHARED0_RETURN_VALUE(flipTask, FlipTask, nullptr);
+
     flipTask->deviceId = taskTrack->data.runtimeTrack.deviceId;
     flipTask->streamId = taskTrack->data.runtimeTrack.streamId;
     flipTask->taskId = GetTaskId(*taskTrack);
@@ -69,11 +67,9 @@ void Flip::ComputeBatchId(std::vector<std::shared_ptr<MsprofCompactInfo>> &taskT
     }
     auto taskTrackBin = SepTaskTrack(taskTrack);
     auto flipTaskBin = SepFlipTask(flipTask);
-    auto maxFlip = MakeShared<FlipTask>();
-    if (!maxFlip) {
-        ERROR("Make share flip task failed.");
-        return;
-    }
+    std::shared_ptr<FlipTask> maxFlip;
+    MAKE_SHARED0_RETURN_VOID(maxFlip, FlipTask);
+
     maxFlip->timeStamp = std::numeric_limits<uint64_t>::max();
     for (auto &item : taskTrackBin) {
         const auto &key = item.first;

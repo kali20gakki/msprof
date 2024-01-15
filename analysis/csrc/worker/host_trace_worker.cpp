@@ -15,7 +15,8 @@
 
 namespace Analysis {
 namespace Worker {
-    bool HostTraceWorker::Run() {
-    }
+bool HostTraceWorker::Run()
+{
+}
 } // namespace Worker
 } // namespace Analysis

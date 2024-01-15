@@ -28,11 +28,9 @@ std::shared_ptr<MsprofApi> CreateMsprofApi(const MsprofEvent *startEvent, const 
         ERROR("Event data is null.");
         return nullptr;
     }
-    auto apiData = MakeShared<MsprofApi>();
-    if (!apiData) {
-        ERROR("New api data failed.");
-        return nullptr;
-    }
+    std::shared_ptr<MsprofApi> apiData;
+    MAKE_SHARED0_RETURN_VALUE(apiData, MsprofApi, nullptr);
+
     apiData->level = startEvent->level;
     apiData->type = startEvent->type;
     apiData->threadId = startEvent->threadId;
@@ -46,7 +44,7 @@ std::shared_ptr<MsprofApi> CreateMsprofApi(const MsprofEvent *startEvent, const 
 
 ApiEventParser::ApiEventParser(const std::string &path) : BaseParser(path, "ApiEventParser")
 {
-    chunkProducer_ = MakeShared<ChunkGenerator>(sizeof(MsprofApi), path_, filePrefix_);
+    MAKE_SHARED_NO_OPERATION(chunkProducer_, ChunkGenerator, sizeof(MsprofApi), path_, filePrefix_);
 }
 
 template<>

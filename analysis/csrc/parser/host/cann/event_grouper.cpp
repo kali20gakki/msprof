@@ -110,11 +110,9 @@ void EventGrouper::GroupEvents<ApiEventParser, MsprofApi, &CANNWarehouse::kernel
 {
     // 1. 解析bin
     Utils::TimeLogger t{"Group " + typeName};
-    auto parser = MakeShared<ApiEventParser>(hostPath_);
-    if (!parser) {
-        ERROR("ApiEventParser make shared ptr failed");
-        return;
-    }
+    std::shared_ptr<ApiEventParser> parser;
+    MAKE_SHARED_RETURN_VOID(parser, ApiEventParser, hostPath_);
+
     auto traces = parser->ParseData<MsprofApi>();
     apiTraces_ = traces; // 保存一份全量api
 
@@ -138,15 +136,13 @@ void EventGrouper::GroupEvents<ApiEventParser, MsprofApi, &CANNWarehouse::kernel
         }
         EventInfo info{eventType, trace->level,
                        trace->beginTime, trace->endTime};
-        auto event = MakeShared<Event>(trace, info);
-        if (!event) {
-            ERROR("ApiEvent make shared ptr failed");
-            break;
-        }
+        std::shared_ptr<Event> event;
+        MAKE_SHARED_BREAK(event, Event, trace, info);
         // 新建
         if (!kernelWarehouses.FindAndInsertIfNotExist(trace->threadId)) {
-            kernelWarehouses[trace->threadId].kernelEvents =
-                MakeShared<EventQueue>(trace->threadId, threadIdNum[trace->threadId]);
+            std::shared_ptr<EventQueue> que;
+            MAKE_SHARED_BREAK(que, EventQueue, trace->threadId, threadIdNum[trace->threadId]);
+            kernelWarehouses[trace->threadId].kernelEvents = que;
         }
         // 插入
         kernelWarehouses[trace->threadId].kernelEvents->Push(event);
@@ -168,11 +164,9 @@ void EventGrouper::GroupEvents<TaskTrackParser, MsprofCompactInfo, &CANNWarehous
 {
     // 1. 解析bin
     Utils::TimeLogger t{"Group " + typeName};
-    auto parser = MakeShared<TaskTrackParser>(hostPath_);
-    if (!parser) {
-        ERROR("TaskTrackEvent make shared ptr failed");
-        return;
-    }
+    std::shared_ptr<TaskTrackParser> parser;
+    MAKE_SHARED_RETURN_VOID(parser, TaskTrackParser, hostPath_);
+
     auto traces = parser->ParseData<MsprofCompactInfo>();
     flipTasks_ = parser->ParseData<Adapter::FlipTask>();
 
@@ -186,16 +180,14 @@ void EventGrouper::GroupEvents<TaskTrackParser, MsprofCompactInfo, &CANNWarehous
 
     for (const auto &trace: traces) {
         EventInfo info{eventType, trace->level, trace->timeStamp, trace->timeStamp};
-        auto event = MakeShared<Event>(trace, info);
-        if (!event) {
-            ERROR("TaskTrackEvent make shared ptr failed");
-            break;
-        }
+        std::shared_ptr<Event> event;
+        MAKE_SHARED_BREAK(event, Event, trace, info);
         // 新建
         if (!cannWarehouses_.FindAndInsertIfNotExist(trace->threadId) ||
             !(cannWarehouses_[trace->threadId].taskTrackEvents)) {
-            cannWarehouses_[trace->threadId].taskTrackEvents =
-                MakeShared<EventQueue>(trace->threadId, threadIdNum[trace->threadId]);
+            std::shared_ptr<EventQueue> que;
+            MAKE_SHARED_BREAK(que, EventQueue, trace->threadId, threadIdNum[trace->threadId]);
+            cannWarehouses_[trace->threadId].taskTrackEvents = que;
         }
 
         // 插入

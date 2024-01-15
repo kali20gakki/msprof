@@ -86,7 +86,8 @@ TEST_F(TargetInfoSessionTimeProcesserUTest, TestRunShouldReturnTrueWhenProcesser
     EXPECT_EQ(expectRecord.startTimeNs, processer.record_.startTimeNs);
     EXPECT_EQ(expectRecord.endTimeNs, processer.record_.endTimeNs);
     MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
-    auto dbRunner = MakeShared<DBRunner>(DB_PATH);
+    std::shared_ptr<DBRunner> dbRunner;
+    MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
     TimeDataFormat checkData;
     TimeDataFormat expectData = {
         {expectRecord.startTimeNs, expectRecord.endTimeNs, Analysis::Utils::TIME_BASE_OFFSET_NS},

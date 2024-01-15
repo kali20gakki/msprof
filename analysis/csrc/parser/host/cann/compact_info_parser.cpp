@@ -27,7 +27,7 @@ using namespace Analysis::Utils;
 
 void CompactInfoParser::Init(const std::vector<std::string> &filePrefix)
 {
-    chunkProducer_ = MakeShared<ChunkGenerator>(sizeof(MsprofCompactInfo), path_, filePrefix);
+    MAKE_SHARED_NO_OPERATION(chunkProducer_, ChunkGenerator, sizeof(MsprofCompactInfo), path_, filePrefix);
 }
 
 template<>
@@ -66,8 +66,10 @@ int CompactInfoParser::ProduceData()
 
 int NodeBasicInfoParser::ProduceData()
 {
-    auto staticChunkProducer = MakeShared<ChunkGenerator>(sizeof(MsprofCompactInfo), path_, staticFilePrefix_);
-    if (!staticChunkProducer || staticChunkProducer->ReadChunk() != ANALYSIS_OK) {
+    std::shared_ptr<ChunkGenerator> staticChunkProducer;
+    MAKE_SHARED_RETURN_VALUE(staticChunkProducer, ChunkGenerator,
+                             ANALYSIS_ERROR, sizeof(MsprofCompactInfo), path_, staticFilePrefix_);
+    if (staticChunkProducer->ReadChunk() != ANALYSIS_OK) {
         ERROR("%: Read Chunk failed.", parserName_);
         return ANALYSIS_ERROR;
     }

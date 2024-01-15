@@ -39,8 +39,8 @@ public:
             WARN("Input data is empty, pass dump");
             return true;
         }
-        dbRunner_ = Utils::MakeShared<DBRunner>(Utils::File::PathJoin({dbPath_, database_->GetDBName()}));
-        if (!dbRunner_ || !dbRunner_->CreateTable(tableName_, database_->GetTableCols(tableName_))) {
+        MAKE_SHARED_RETURN_VALUE(dbRunner_, DBRunner, false, Utils::File::PathJoin({dbPath_, database_->GetDBName()}));
+        if (!dbRunner_->CreateTable(tableName_, database_->GetTableCols(tableName_))) {
             ERROR("Create table: % failed", tableName_);
             return false;
         }

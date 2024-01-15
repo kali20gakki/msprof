@@ -28,11 +28,9 @@ std::shared_ptr<ConcatTensorInfo> CreateConcatTensorInfo(MsprofAdditionalInfo *a
         ERROR("Additional info is null.");
         return nullptr;
     }
-    auto concatTensorInfo = MakeShared<ConcatTensorInfo>();
-    if (!concatTensorInfo) {
-        ERROR("New concat tensor failed.");
-        return nullptr;
-    }
+    std::shared_ptr<ConcatTensorInfo> concatTensorInfo;
+    MAKE_SHARED0_RETURN_VALUE(concatTensorInfo, ConcatTensorInfo, nullptr);
+
     concatTensorInfo->level = additionalInfo->level;
     concatTensorInfo->type = additionalInfo->type;
     concatTensorInfo->threadId = additionalInfo->threadId;
@@ -50,7 +48,7 @@ std::shared_ptr<ConcatTensorInfo> CreateConcatTensorInfo(MsprofAdditionalInfo *a
 
 void AdditionInfoParser::Init(const std::vector<std::string> &filePrefix)
 {
-    chunkProducer_ = MakeShared<ChunkGenerator>(sizeof(MsprofAdditionalInfo), path_, filePrefix);
+    MAKE_SHARED_RETURN_VOID(chunkProducer_, ChunkGenerator, sizeof(MsprofAdditionalInfo), path_, filePrefix);
 }
 
 template<>
