@@ -41,13 +41,6 @@ class TablesConfig(MetaConfig):
             ('hash_value', 'TEXT,null'),
             ('level', 'TEXT,null')
         ],
-        'StepInfoMap': [
-            ('model_id', 'INTEGER,null'),
-            ('thread_id', 'INTEGER,null'),
-            ('timestamp', 'NUMERIC,null'),
-            ('cur_iter_num', 'INTEGER,null'),
-            ('tag', 'TEXT,null'),
-        ],
         'SessionInfoMap': [
             ('model_id', 'INTEGER,null'),
             ('graph_id', 'INTEGER,null'),

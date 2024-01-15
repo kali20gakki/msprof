@@ -9,7 +9,6 @@ import shutil
 import unittest
 
 from framework.offset_calculator import FileCalculator
-from framework.offset_calculator import FileReverseCalculator
 
 NAMESPACE = 'framework.file_dispatch'
 
@@ -124,22 +123,3 @@ class TestFileReverseCalculator(unittest.TestCase):
     def teardown_class(self):
         if os.path.exists(self.CURRENT_PATH):
             shutil.rmtree(self.CURRENT_PATH)
-
-    def test_read_file_from_tail(self):
-        file_rev_calculator = FileReverseCalculator(
-            self.CURRENT_PATH, [self.FILE_0, self.FILE_1], 128, 0, (4, 123))
-        file_rev_calculator.read_file_from_tail()
-        self.assertEqual(file_rev_calculator.is_find, False)
-
-    def test_read_file_from_tail_find(self):
-        file_rev_calculator = FileReverseCalculator(
-            self.CURRENT_PATH, [self.FILE_0, self.FILE_1], 128, 0, (126, 81))
-        file_rev_calculator.read_file_from_tail()
-        self.assertEqual(file_rev_calculator.is_find, True)
-        self.assertEqual(file_rev_calculator.tail_aic_cnt, 5)
-
-    def test_read_file_from_tail_no_find(self):
-        file_rev_calculator = FileReverseCalculator(
-            self.CURRENT_PATH, [self.FILE_0, self.FILE_1], 128, 1, (126, 81))
-        file_rev_calculator.read_file_from_tail()
-        self.assertEqual(file_rev_calculator.is_find, False)

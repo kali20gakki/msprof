@@ -20,13 +20,6 @@ NAMESPACE = 'mscalculate.aic.aiv_calculator'
 class TestAivCalculator(unittest.TestCase):
     file_list = {DataTag.AIV: ['aiVectorCore.data.0.slice_0']}
 
-    def test_get_total_aic_count(self):
-        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
-                mock.patch("os.path.getsize", return_value=1000):
-            check = AivCalculator(self.file_list, CONFIG)
-            result = check._get_total_aic_count()
-            self.assertEqual(result, 7)
-
     def test_calculate(self):
         with mock.patch(NAMESPACE + '.AivCalculator._parse_all_file'), \
                 mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \

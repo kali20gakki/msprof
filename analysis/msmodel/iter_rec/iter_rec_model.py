@@ -81,36 +81,6 @@ class HwtsIterModel(ParserModel):
             return False
         return True
 
-    def get_aic_sum_count(self: any) -> int:
-        """
-        get all aic count
-        :return: sum of aic count
-        """
-        sql = "select max(ai_core_num+ai_core_offset) from {0}".format(
-            DBNameConstant.TABLE_HWTS_ITER_SYS)
-        try:
-            all_aic_num = self.cur.execute(sql).fetchone()[0]
-        except sqlite3.Error as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return Constant.DEFAULT_COUNT
-        if all_aic_num is None:
-            return Constant.DEFAULT_COUNT
-        return all_aic_num
-
-    def get_last_aic(self: any) -> tuple:
-        """
-        get all aic count
-        :return: sum of aic count
-        """
-        sql = f"select stream_id, task_id from {DBNameConstant.TABLE_HWTS_BATCH}" \
-              f" where is_ai_core = 1 order by end_time desc"
-        try:
-            aic_with_stream_task = DBManager.fetchone(self.cur, sql)
-        except sqlite3.Error as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return EmptyClass()
-        return aic_with_stream_task
-
     def get_batch_list(self: any, table_name, iter_range: list) -> list:
         """
         get batch list from hwts batch table

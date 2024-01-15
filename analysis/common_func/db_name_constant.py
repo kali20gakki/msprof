@@ -93,7 +93,6 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_GE_LOAD_TABLE = "GELoad"
     TABLE_GE_GRAPH = "ge_graph_data"
     TABLE_GE_INFER = "GEInfer"
-    TABLE_GE_STEP_INFO = "StepInfo"
     TABLE_GE_STEP_INFO_DATA = "step_info_data"
     TABLE_GE_HOST = "GEHostInfo"
     TABLE_GE_LOGIC_STREAM_INFO = "GeLogicStreamInfo"
@@ -224,7 +223,6 @@ class DBNameConstant(metaclass=ABCMeta):
 
     # ge
     TABLE_GE_TASK = "TaskInfo"
-    TABLE_GE_STEP = "StepInfo"
     TABLE_GE_SESSION = "SessionInfo"
     TABLE_GE_HASH = "GeHashInfo"
     TABLE_TYPE_HASH = "TypeHashInfo"

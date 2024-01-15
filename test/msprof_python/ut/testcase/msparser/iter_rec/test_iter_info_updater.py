@@ -101,3 +101,50 @@ class TestIterInfoUpdater(unittest.TestCase):
         }
         iter_info_updater.calibrate_iter_info_offset(1, 1)
         self.assertEqual(iter_info.hwts_offset, 1)
+
+    def test_calibrate_aic_offset_should_no_change_when_there_is_zero_task_not_in_iter(self: any):
+        iter_info_updater = IterInfoUpdater('./')
+        iter_info1 = IterInfo()
+        iter_info1.aic_count = 25
+        iter_info2 = IterInfo()
+        iter_info2.aic_offset = 25
+        iter_info2.aic_count = 35
+        iter_info_updater.iteration_manager.iter_to_iter_info = {
+            1: iter_info1,
+            2: iter_info2,
+        }
+        pmu_cnt_not_in_iter = {
+            3: 0,  # 0 pmu data after iter 2
+        }
+        remain_aic_count = 60
+        iter_info_updater.calibrate_aic_offset(pmu_cnt_not_in_iter, remain_aic_count)
+        self.assertEqual(0, iter_info_updater.iteration_manager.iter_to_iter_info[1].aic_offset)
+        self.assertEqual(25, iter_info_updater.iteration_manager.iter_to_iter_info[1].aic_count)
+        self.assertEqual(25, iter_info_updater.iteration_manager.iter_to_iter_info[2].aic_offset)
+        self.assertEqual(35, iter_info_updater.iteration_manager.iter_to_iter_info[2].aic_count)
+
+    def test_calibrate_aic_offset_should_return_aic_offset_11_and_aic_count_35_when_aging_10_pmu_data(self: any):
+        # there is 70 ai_core tasks in hwts.data, but just 50 pmu data because of data aging.
+        # | aging pmu before iter 1 | aging pmu iter 1 | iter 1 | pmu between iter 1 and 2 | iter 2 | pmu after iter 2 |
+        #             1                      19             6                5                 35           4
+        iter_info_updater = IterInfoUpdater('./')
+        iter_info1 = IterInfo()
+        iter_info1.aic_count = 25
+        iter_info2 = IterInfo()
+        iter_info2.aic_offset = 25
+        iter_info2.aic_count = 35
+        iter_info_updater.iteration_manager.iter_to_iter_info = {
+            1: iter_info1,
+            2: iter_info2,
+        }
+        pmu_cnt_not_in_iter = {
+            1: 1,  # 1 pmu before iter 1
+            2: 5,  # 5 pmu between iter 1 and 2
+            3: 4,  # 4 pmu after iter 2
+        }
+        remain_aic_count = 50
+        iter_info_updater.calibrate_aic_offset(pmu_cnt_not_in_iter, remain_aic_count)
+        self.assertEqual(0, iter_info_updater.iteration_manager.iter_to_iter_info[1].aic_offset)
+        self.assertEqual(6, iter_info_updater.iteration_manager.iter_to_iter_info[1].aic_count)
+        self.assertEqual(11, iter_info_updater.iteration_manager.iter_to_iter_info[2].aic_offset)
+        self.assertEqual(35, iter_info_updater.iteration_manager.iter_to_iter_info[2].aic_count)

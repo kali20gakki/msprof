@@ -138,32 +138,3 @@ class GeInfoModel(BaseModel):
             for task in task_data:
                 task_data_dict[task[0]] = set(task[1].split(','))
         return task_data_dict
-
-    def get_model_ids(self):
-        sql = f"select model_id from {DBNameConstant.TABLE_GE_STEP} group by model_id"
-        model_ids = DBManager.fetch_all_data(self.cur, sql)
-        return model_ids
-
-    def get_max_iter_with_tag(self: any, model_id: int) -> list:
-        """
-        get all aic count
-        :return: sum of aic count
-        """
-        sql = f"select cur_iter_num, tag from {DBNameConstant.TABLE_GE_STEP} " \
-              f"where model_id = ? and cur_iter_num = " \
-              f"(select MAX(cur_iter_num) from {DBNameConstant.TABLE_GE_STEP} where model_id = ?)"
-        model_ids = DBManager.fetch_all_data(self.cur, sql, (model_id, model_id))
-        return model_ids
-
-    def get_repeat_times_for_target_aic_in_target_index(self: any, model_id: int,
-                                                        max_index: int, aic_with_stream_task: list):
-        device_id = InfoConfReader().get_device_id()
-        stream_id = aic_with_stream_task[0]
-        task_id = aic_with_stream_task[1]
-        sql = f"select count(*) from {DBNameConstant.TABLE_GE_TASK} " \
-              f"where task_type = 'AI_CORE' and model_id = ? and stream_id = ? and " \
-              "task_id = ? and index_id = ? and device_id = ?"
-        ge_data = DBManager.fetch_all_data(self.cur, sql, (model_id, stream_id, task_id, max_index, device_id))
-        if ge_data:
-            return ge_data[0]
-        return 0
