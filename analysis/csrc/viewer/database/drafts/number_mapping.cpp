@@ -19,7 +19,7 @@ namespace Viewer {
 namespace Database {
 namespace Drafts {
 namespace {
-    std::unordered_map<uint32_t, std::string> geDataTypeMap = {
+    const std::unordered_map<uint32_t, std::string> geDataTypeMap {
         {0,   "FLOAT"},
         {1,   "FLOAT16"},
         {2,   "INT8"},
@@ -73,7 +73,7 @@ namespace {
         {246, "NUMBER_TYPE_END_"},
     };
 
-    std::unordered_map<uint32_t, std::string> geFormatMap = {
+    const std::unordered_map<uint32_t, std::string> geFormatMap {
         {0,    "NCHW"},
         {1,    "NHWC"},
         {2,    "FORMAT_ND"},
@@ -145,7 +145,7 @@ namespace {
         {220,  "DHWNC_"},
         {221,  "DHWCN_"},
     };
-    std::unordered_map<uint32_t, std::string> geTaskTypeMap = {
+    const std::unordered_map<uint32_t, std::string> geTaskTypeMap {
         {0,  "AI_CORE"},
         {1,  "AI_CPU"},
         {2,  "AI_VECTOR_CORE"},
@@ -158,7 +158,7 @@ namespace {
         {9,  "HCCL"},
         {10, "INVALID"},
     };
-    std::unordered_map<uint32_t, std::string> hcclDataTypeMap = {
+    const std::unordered_map<uint32_t, std::string> hcclDataTypeMap {
         {0,          "INT8"},
         {1,          "INT16"},
         {2,          "INT32"},
@@ -168,28 +168,28 @@ namespace {
         {6,          "UINT64"},
         {4294967295, "INVALID_TYPE"},
     };
-    std::unordered_map<uint32_t, std::string> hcclLinkTypeMap = {
+    const std::unordered_map<uint32_t, std::string> hcclLinkTypeMap {
         {0,          "ON_CHIP"},
         {1,          "HCCS"},
         {2,          "PCIE"},
         {3,          "ROCE"},
         {4294967295, "INVALID_TYPE"}
     };
-    std::unordered_map<uint32_t, std::string> hcclTransportTypeMap = {
+    const std::unordered_map<uint32_t, std::string> hcclTransportTypeMap {
         {0,          "SDMA"},
         {1,          "RDMA"},
         {2,          "LOCAL"},
         {4294967295, "INVALID_TYPE"},
     };
-    std::unordered_map<uint32_t, std::string> hcclOpTypeMap = {
+    const std::unordered_map<uint32_t, std::string> hcclOpTypeMap {
         {0,          "SUM"},
         {1,          "MUL"},
         {2,          "MAX"},
         {3,          "MIN"},
         {4294967295, "INVALID_TYPE"}
     };
-    std::unordered_map<uint32_t, std::string> levelMap = {
-        {30000, "pytouch"},
+    const std::unordered_map<uint32_t, std::string> levelMap {
+        {30000, "pytorch"},
         {25000, "pta"},
         {20000, "acl"},
         {15000, "model"},
@@ -197,9 +197,22 @@ namespace {
         {5500,  "hccl"},
         {5000,  "runtime"}
     };
-    std::vector<std::unordered_map<uint32_t, std::string>> allMaps = {geDataTypeMap, geFormatMap, geTaskTypeMap,
-                                                                      hcclDataTypeMap, hcclLinkTypeMap,
-                                                                      hcclTransportTypeMap, hcclOpTypeMap, levelMap};
+    const std::unordered_map<uint32_t, std::string> aclApiTagMap {
+        {1, "ACL_OP"},
+        {2, "ACL_MODEL"},
+        {3, "ACL_RTS"},
+        {4, "ACL_OTHERS"},
+        {5, "ACL_NN"},
+        {6, "ACL_ASCENDC"},
+        {7, "HOST_HCCL"},
+        {9, "ACL_DVPP"},
+        {10, "ACL_GRAPH"}
+
+    };
+    std::vector<std::unordered_map<uint32_t, std::string>> allMaps {geDataTypeMap, geFormatMap, geTaskTypeMap,
+                                                                    hcclDataTypeMap, hcclLinkTypeMap,
+                                                                    hcclTransportTypeMap, hcclOpTypeMap, levelMap,
+                                                                    aclApiTagMap};
 
 }
 
