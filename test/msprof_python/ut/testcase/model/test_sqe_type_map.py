@@ -8,4 +8,4 @@ NAMESPACE = 'msmodel.sqe_type_map'
 class TestSqeType(unittest.TestCase):
 
     def test_init(self):
-        SqeType(1)
+        SqeType().instance(1)

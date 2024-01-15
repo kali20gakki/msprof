@@ -59,7 +59,7 @@ class AcsqTaskModel(ParserModel):
         sql = "select 0, task_id, stream_id, start_time, task_time " \
               "from {0} " \
               "where task_type={task_type}".format(DBNameConstant.TABLE_ACSQ_TASK,
-                                                   task_type=SqeType.AI_CORE.name)
+                                                   task_type=SqeType().instance.AI_CORE.name)
         return DBManager.fetch_all_data(self.cur, sql)
 
     def get_acsq_data_within_time_range(self: any, start_time: float, end_time: float) -> list:

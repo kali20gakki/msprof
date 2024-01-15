@@ -37,7 +37,7 @@ std::vector<std::tuple<std::string, std::string, std::string>> TypeInfoDBDumper:
     for (const auto &devices: typeInfoData) {
         for (const auto &hashPair: devices.second) {
             data.emplace_back(std::to_string(hashPair.first), hashPair.second,
-                              NumberMapping::GetInstance().Get(NumberMapping::MappingType::LEVEL, devices.first));
+                              NumberMapping::Get(NumberMapping::MappingType::LEVEL, devices.first));
         }
     }
     return data;

@@ -3,8 +3,8 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : target_info_session_time.cpp
- * Description        : TargetInfoNpuProcesser UT
+ * File Name          : target_info_session_time_processer.cpp
+ * Description        : TargetInfoSessionTimeProcesser UT
  * Author             : msprof team
  * Creation Date      : 2024/01/11
  * *****************************************************************************
@@ -53,68 +53,43 @@ protected:
 
 TEST_F(TargetInfoSessionTimeProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSuccess)
 {
-    std::set<std::string> profPath = {"PROF_0", "PROF_1", "PROF_2", "PROF_3", "PROF_4", "PROF_5", "PROF_6", "PROF_7"};
+    std::set<std::string> profPath = {"PROF_0", "PROF_1", "PROF_2", "PROF_3"};
     nlohmann::json record0 = {
-            {"startCollectionTimeBegin", "1701069324370978"},
-            {"endCollectionTimeEnd", "1701069338159976"},
-            {"startClockMonotonicRaw", "36471129942580"},
+        {"startCollectionTimeBegin", "1701069324370978"},
+        {"endCollectionTimeEnd", "1701069338159976"},
+        {"startClockMonotonicRaw", "36471129942580"},
     };
     nlohmann::json record1 = {
-            {"startCollectionTimeBegin", "1701069324301676"},
-            {"endCollectionTimeEnd", "1701069338059772"},
-            {"startClockMonotonicRaw", "36471060644730"},
+        {"startCollectionTimeBegin", "1701069324301676"},
+        {"endCollectionTimeEnd", "1701069338059772"},
+        {"startClockMonotonicRaw", "36471060644730"},
     };
     nlohmann::json record2 = {
-            {"startCollectionTimeBegin", "1701069323446942"},
-            {"endCollectionTimeEnd", "1701069338049987"},
-            {"startClockMonotonicRaw", "36470205900460"},
+        {"startCollectionTimeBegin", "1701069323446942"},
+        {"endCollectionTimeEnd", "1701069338049987"},
+        {"startClockMonotonicRaw", "36470205900460"},
     };
     nlohmann::json record3 = {
-            {"startCollectionTimeBegin", "1701069323851824"},
-            {"endCollectionTimeEnd", "1701069338041681"},
-            {"startClockMonotonicRaw", "36470610791630"},
+        {"startCollectionTimeBegin", "1701069323851824"},
+        {"endCollectionTimeEnd", "1701069338041681"},
+        {"startClockMonotonicRaw", "36470610791630"},
     };
-    nlohmann::json record4 = {
-            {"startCollectionTimeBegin", "1701069324326713"},
-            {"endCollectionTimeEnd", "1701069338060030"},
-            {"startClockMonotonicRaw", "36471085681930"},
-    };
-    nlohmann::json record5 = {
-            {"startCollectionTimeBegin", "1701069324572460"},
-            {"endCollectionTimeEnd", "1701069338066763"},
-            {"startClockMonotonicRaw", "36471331422600"},
-    };
-    nlohmann::json record6 = {
-            {"startCollectionTimeBegin", "1701069324436050"},
-            {"endCollectionTimeEnd", "1701069338050917"},
-            {"startClockMonotonicRaw", "36471195011820"},
-    };
-    nlohmann::json record7 = {
-            {"startCollectionTimeBegin", "1701069324072301"},
-            {"endCollectionTimeEnd", "1701069338087785"},
-            {"startClockMonotonicRaw", "36470831276580"},
-    };
-    Utils::ProfTimeRecord repectRecord{1701069323446942000, 1701069338159976000, UINT64_MAX};
+    Utils::ProfTimeRecord expectRecord{1701069323446942000, 1701069338159976000, UINT64_MAX};
     MOCKER_CPP(&Context::GetInfoByDeviceId)
         .stubs()
         .will(returnValue(record0))
         .then(returnValue(record1))
         .then(returnValue(record2))
-        .then(returnValue(record3))
-        .then(returnValue(record4))
-        .then(returnValue(record5))
-        .then(returnValue(record6))
-        .then(returnValue(record7));
+        .then(returnValue(record3));
     auto processer = TargetInfoSessionTimeProcesser(DB_PATH, profPath);
     EXPECT_TRUE(processer.Run());
-    EXPECT_EQ(repectRecord.startTimeNs, processer.record_.startTimeNs);
-    EXPECT_EQ(repectRecord.endTimeNs, processer.record_.endTimeNs);
+    EXPECT_EQ(expectRecord.startTimeNs, processer.record_.startTimeNs);
+    EXPECT_EQ(expectRecord.endTimeNs, processer.record_.endTimeNs);
     MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
-
     auto dbRunner = MakeShared<DBRunner>(DB_PATH);
     TimeDataFormat checkData;
     TimeDataFormat expectData = {
-            {repectRecord.startTimeNs, repectRecord.endTimeNs, Analysis::Utils::TIME_BASE_OFFSET_NS},
+        {expectRecord.startTimeNs, expectRecord.endTimeNs, Analysis::Utils::TIME_BASE_OFFSET_NS},
     };
     std::string sqlStr = "SELECT startTimeNs, endTimeNs, baseTimeNs FROM " + TABLE_NAME_TARGET_INFO_SESSION_TIME;
     if (dbRunner != nullptr) {

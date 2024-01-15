@@ -18,13 +18,11 @@
 #include <string>
 #include <vector>
 
-#include "analysis/csrc/utils/singleton.h"
-
 namespace Analysis {
 namespace Viewer {
 namespace Database {
 namespace Drafts {
-class NumberMapping : public Utils::Singleton<NumberMapping>  {
+class NumberMapping {
 public:
     // 对象类型
     enum class MappingType {
@@ -35,9 +33,10 @@ public:
         HCCL_LINK_TYPE,
         HCCL_TRANSPORT_TYPE,
         HCCL_OP_TYPE,
-        LEVEL
+        LEVEL,
+        ACL_API_TAG
     };
-    std::string Get(MappingType type, uint32_t key);
+    static std::string Get(MappingType type, uint32_t key);
 };
 
 } // Drafts

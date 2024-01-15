@@ -59,7 +59,8 @@ class AcsqTaskParser(IStarsParser):
                 start_task = start_que.popleft()
                 end_task = end_que.popleft()
                 matched_result.append(
-                    [start_task.stream_id, start_task.task_id, start_task.acc_id, SqeType(start_task.task_type).name,
+                    [start_task.stream_id, start_task.task_id, start_task.acc_id, \
+                        SqeType().instance(start_task.task_type).name,
                      # start timestamp end timestamp duration
                      start_task.sys_cnt, end_task.sys_cnt, end_task.sys_cnt - start_task.sys_cnt])
             if len(start_que) > 1 or end_que:
