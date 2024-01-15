@@ -51,8 +51,8 @@ class TaskTimeViewer(BaseViewer):
         if not device_task_type.isdigit():
             return device_task_type
         elif ChipManager().chip_id != ChipModel.CHIP_V2_1_0 and \
-                int(device_task_type) in [enum.value for enum in SqeType]:
-            return SqeType(int(device_task_type)).name
+                int(device_task_type) in [enum.value for enum in SqeType().instance]:
+            return SqeType().instance(int(device_task_type)).name
         else:
             return Constant.TASK_TYPE_OTHER
 

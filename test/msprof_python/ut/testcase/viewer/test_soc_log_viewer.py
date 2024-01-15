@@ -2,6 +2,7 @@ import json
 import unittest
 from unittest import mock
 
+from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from constant.info_json_construct import DeviceInfo
@@ -139,6 +140,37 @@ class TestTaskTimeViewer(unittest.TestCase):
         result = check.get_device_task_type("0")
         self.assertEqual(result, "Other")
 
+    def test_get_device_task_type_should_return_other_when_v2_1_0_and_device_is_number(self):
+        configs, params = {}, {'data_type': 'ffts_sub_task_time'}
+        InfoConfReader()._info_json = {"pid": "0"}
+        check = TaskTimeViewer(configs, params)
+        ChipManager().chip_id = ChipModel.CHIP_V2_1_0
+        result = check.get_device_task_type("0")
+        self.assertEqual(result, "Other")
+        InfoConfReader()._info_json = {}
+
+    def test_get_device_task_type_should_return_sdma_when_v3_and_device_is_number(self):
+        configs, params = {}, {'data_type': 'ffts_sub_task_time'}
+        InfoConfReader()._info_json = {"pid": "0"}
+        check = TaskTimeViewer(configs, params)
+        ChipManager().chip_id = ChipModel.CHIP_V3_1_0
+        result = check.get_device_task_type("9")
+        self.assertEqual(result, "SDMA_SQE")
+        InfoConfReader()._info_json = {}
+
+    def test_get_device_task_type_should_return_sdma_when_stars_and_device_is_number(self):
+        configs, params = {}, {'data_type': 'ffts_sub_task_time'}
+        InfoConfReader()._info_json = {"pid": "0"}
+        check = TaskTimeViewer(configs, params)
+        ChipManager().chip_id = ChipModel.CHIP_V4_1_0
+        result = check.get_device_task_type("11")
+        self.assertEqual(result, "SDMA_SQE")
+
+        ChipManager().chip_id = ChipModel.CHIP_V1_1_1
+        result = check.get_device_task_type("11")
+        self.assertEqual(result, "SDMA_SQE")
+        InfoConfReader()._info_json = {}
+
     def test_add_node_name(self):
         configs, params = {}, {}
         node_dict = {
@@ -231,14 +263,14 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 27, 2, 4294967295, 0, 38140478706523, 1510560, "FFTS_PLUS", "AI_CPU", 0),
             ],
             "subtask_data_list": [
-                TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "20", 1),
+                TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "5", 1),
             ],
         }
         with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V1_1_0
             check.add_node_name(data)
-            self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'C_CORE_SQE')
+            self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'EVENT_WAIT_SQE')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'AI_CPU')
 
     def test_add_node_name_should_return_device_when_v2_1_0_and_host_is_unknown_and_device_is_not_number(self):
@@ -294,14 +326,14 @@ class TestTaskTimeViewer(unittest.TestCase):
                 TopDownTask(0, 1, 27, 2, 4294967295, 0, 38140478706523, 1510560, "KERNEL_AICPU", "AI_CPU", 0),
             ],
             "subtask_data_list": [
-                TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "20", 1),
+                TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "UNKNOWN", "5", 1),
             ],
         }
         with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V1_1_0
             check.add_node_name(data)
-            self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'C_CORE_SQE')
+            self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'EVENT_WAIT_SQE')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'KERNEL_AICPU')
 
     def test_add_node_name_should_return_other_when_v2_1_0_and_host_is_unknown_and_device_belongs_to_sqetype(self):
