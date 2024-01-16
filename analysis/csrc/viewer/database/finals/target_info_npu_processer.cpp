@@ -37,6 +37,7 @@ TargetInfoNpuProcesser::TargetInfoNpuProcesser(const std::string &reportDBPath,
 
 bool TargetInfoNpuProcesser::Process(const std::string &fileDir)
 {
+    INFO("TargetInfoNpuProcesser Process, dir is %", fileDir);
     auto deviceDirs = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     NpuInfoDataFormat npuInfoData;
     for (const auto& deviceDir : deviceDirs) {
@@ -48,6 +49,7 @@ bool TargetInfoNpuProcesser::Process(const std::string &fileDir)
 void TargetInfoNpuProcesser::UpdateNpuData(const std::string &fileDir, const std::string &deviceDir,
                                            NpuInfoDataFormat &npuInfoData)
 {
+    INFO("TargetInfoNpuProcesser UpdateNpuData, dir is %", fileDir);
     uint16_t deviceId = Utils::GetDeviceIdByDevicePath(deviceDir);
     uint16_t chip = Context::GetInstance().GetPlatformVersion(deviceId, fileDir);
     std::string chipName;

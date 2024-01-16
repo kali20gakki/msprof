@@ -25,17 +25,20 @@ EnumApiLevelProcesser::EnumApiLevelProcesser(const std::string &reportDBPath, co
 
 bool EnumApiLevelProcesser::Run()
 {
+    INFO("EnumApiLevelProcesser Run.");
     return Process();
 }
 
 bool EnumApiLevelProcesser::Process(const std::string &fileDir)
 {
+    INFO("EnumApiLevelProcesser Process.");
     EnumApiLevelDataFormat enumApiData = GetData();
     return SaveData(enumApiData);
 }
 
 EnumApiLevelProcesser::EnumApiLevelDataFormat EnumApiLevelProcesser::GetData()
 {
+    INFO("EnumApiLevelProcesser GetData.");
     EnumApiLevelDataFormat apiLevelData;
     if (!Utils::Reserve(apiLevelData, API_LEVEL_TABLE.size())) {
         ERROR("Reserve for api level data failed.");

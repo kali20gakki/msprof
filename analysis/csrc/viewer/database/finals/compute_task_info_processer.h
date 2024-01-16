@@ -28,7 +28,7 @@ class ComputeTaskInfoProcesser : public TableProcesser {
                                                    int32_t, uint32_t>>;
     // name, correlationId, block_dim, mixBlockDim, taskType, opType, inputFormats, inputDataTypes, inputShapes,
     // outputFormats, outputDataTypes, outputShapes
-    using ProcessedDataFormatAT = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t,
+    using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t,
                                                          uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
 public:
     ComputeTaskInfoProcesser() = default;
@@ -38,7 +38,7 @@ protected:
     bool Process(const std::string &fileDir) override;
 private:
     OriDataFormat GetData();
-    ProcessedDataFormatAT FormatData(const OriDataFormat &oriData);
+    ProcessedDataFormat FormatData(const OriDataFormat &oriData);
     DBInfo geInfoDB_;
 };
 

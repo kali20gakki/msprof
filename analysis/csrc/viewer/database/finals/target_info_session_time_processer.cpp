@@ -28,6 +28,7 @@ TargetInfoSessionTimeProcesser::TargetInfoSessionTimeProcesser(const std::string
 
 bool TargetInfoSessionTimeProcesser::Run()
 {
+    INFO("TargetInfoNpuProcesser Run.");
     for (const auto& path : profPaths_) {
         if (!Process(path)) {
             return false;
@@ -41,18 +42,15 @@ bool TargetInfoSessionTimeProcesser::Run()
 
 bool TargetInfoSessionTimeProcesser::Process(const std::string &fileDir)
 {
+    INFO("TargetInfoSessionTimeProcesser Process, dir is %", fileDir);
     std::string hostDir = Utils::File::PathJoin({fileDir, HOST});
     Utils::ProfTimeRecord tempRecord;
     if (!Context::GetInstance().GetProfTimeRecordInfo(tempRecord, fileDir)) {
         return false;
     }
     // 开始时间取最早的，结束时间取最晚的
-    if (record_.startTimeNs > tempRecord.startTimeNs) {
-        record_.startTimeNs = tempRecord.startTimeNs;
-    }
-    if (record_.endTimeNs < tempRecord.endTimeNs) {
-        record_.endTimeNs = tempRecord.endTimeNs;
-    }
+    record_.startTimeNs = std::min(record_.startTimeNs, tempRecord.startTimeNs);
+    record_.endTimeNs = std::max(record_.endTimeNs, tempRecord.endTimeNs);
     return true;
 }
 

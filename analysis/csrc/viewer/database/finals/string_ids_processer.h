@@ -28,8 +28,10 @@ public:
     explicit StringIdsProcesser(const std::string &reportDBPath);
     virtual ~StringIdsProcesser() = default;
     bool Run() override;
+protected:
+    bool Process(const std::string &fileDir = "") override;
 private:
-    ProcessedDataFormat FormatData(const OriDataFormat &oriData);
+    static ProcessedDataFormat FormatData(const OriDataFormat &oriData);
 };
 
 } // Database

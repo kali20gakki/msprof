@@ -33,7 +33,8 @@ struct TableColumn {
     std::string name;
     std::string type;
     bool isPrimary = false;
-    TableColumn(const std::string &name, const std::string &type) : name(name), type(type)
+    TableColumn(const std::string &name, const std::string &type, const bool isPrimary = false)
+        : name(name), type(type), isPrimary(isPrimary)
     {}
     std::string ToString() const
     {
