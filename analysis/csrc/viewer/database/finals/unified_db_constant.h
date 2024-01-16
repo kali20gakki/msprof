@@ -49,6 +49,7 @@ const std::unordered_map<std::string, uint16_t> API_LEVEL_TABLE = {
 const uint64_t NANO_SECOND = 1000000000;
 const uint64_t MICRO_SECOND = 1000000;
 const uint64_t MILLI_SECOND = 1000;
+constexpr const uint64_t MAX_DB_BYTES = 10ULL * 1024 * 1024 * 1024;
 
 }  // Database
 }  // Viewer
