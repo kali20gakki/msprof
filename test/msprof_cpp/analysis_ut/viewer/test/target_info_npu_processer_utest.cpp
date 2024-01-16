@@ -87,10 +87,9 @@ TEST_F(TargetInfoNpuProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSucce
         {5, "UNKNOWN"},
     };
     std::string sqlStr = "SELECT id, name FROM " + TABLE_NAME_TARGET_INFO_NPU;
-    if (dbRunner != nullptr) {
-        EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkData));
-        EXPECT_EQ(expectData, checkData);
-    }
+    ASSERT_NE(dbRunner, nullptr);
+    EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkData));
+    EXPECT_EQ(expectData, checkData);
 }
 
 TEST_F(TargetInfoNpuProcesserUTest, TestRunShouldReturnFalseWhenOneProcessFailInMultithreading)

@@ -60,12 +60,11 @@ TEST_F(EnumApiLevelProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSucces
     const uint32_t ID_INDEX = 0;
     const uint32_t NAME_INDEX = 1;
     const uint16_t expectNum = 7;
-    if (dbRunner != nullptr) {
-        EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkData));
-        EXPECT_EQ(expectNum, checkData.size());
-        for (auto record : checkData) {
-            EXPECT_EQ(std::get<ID_INDEX>(record), API_LEVEL_TABLE.find(std::get<NAME_INDEX>(record))->second);
-        }
+    ASSERT_NE(dbRunner, nullptr);
+    EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkData));
+    EXPECT_EQ(expectNum, checkData.size());
+    for (auto record : checkData) {
+        EXPECT_EQ(std::get<ID_INDEX>(record), API_LEVEL_TABLE.find(std::get<NAME_INDEX>(record))->second);
     }
 }
 
