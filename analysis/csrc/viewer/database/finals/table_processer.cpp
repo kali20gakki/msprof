@@ -29,6 +29,13 @@ TableProcesser::TableProcesser(std::string reportDBPath, const std::set<std::str
     MAKE_SHARED_NO_OPERATION(reportDB_.dbRunner, DBRunner, reportDBPath_);
 }
 
+TableProcesser::TableProcesser(std::string reportDBPath)
+    : reportDBPath_(std::move(reportDBPath))
+{
+    MAKE_SHARED0_NO_OPERATION(reportDB_.database, ReportDB);
+    MAKE_SHARED_NO_OPERATION(reportDB_.dbRunner, DBRunner, reportDBPath_);
+}
+
 bool TableProcesser::Run()
 {
     std::atomic<bool> retFlag(true);

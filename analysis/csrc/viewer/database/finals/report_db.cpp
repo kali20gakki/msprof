@@ -20,7 +20,7 @@ namespace Database {
 
 namespace {
     const TableColumns STRING_IDS = {
-        {"id", SQL_INTEGER_TYPE},
+        {"id", SQL_INTEGER_TYPE, true},
         {"value", SQL_TEXT_TYPE}
     };
 
@@ -41,12 +41,11 @@ namespace {
     };
 
     const TableColumns TASK = {
-        {"start", SQL_INTEGER_TYPE},
-        {"end", SQL_INTEGER_TYPE},
-        {"name", SQL_INTEGER_TYPE},
+        {"start", SQL_TEXT_TYPE},
+        {"end", SQL_TEXT_TYPE},
         {"deviceId", SQL_INTEGER_TYPE},
         {"connectionId", SQL_INTEGER_TYPE},
-        {"correlationId", SQL_INTEGER_TYPE},
+        {"correlationId", SQL_INTEGER_TYPE, true},
         {"globalPid", SQL_INTEGER_TYPE},
         {"taskType", SQL_INTEGER_TYPE},
         {"contextId", SQL_INTEGER_TYPE},
@@ -57,7 +56,7 @@ namespace {
 
     const TableColumns COMPUTE_TASK_INFO = {
         {"name", SQL_INTEGER_TYPE},
-        {"correlationId", SQL_INTEGER_TYPE},
+        {"correlationId", SQL_INTEGER_TYPE, true},
         {"block_dim", SQL_INTEGER_TYPE},
         {"mixBlockDim", SQL_INTEGER_TYPE},
         {"taskType", SQL_INTEGER_TYPE},
@@ -72,7 +71,7 @@ namespace {
 
     const TableColumns COMMUNICATION_TASK_INFO = {
         {"name", SQL_INTEGER_TYPE},
-        {"correlationId", SQL_INTEGER_TYPE},
+        {"correlationId", SQL_INTEGER_TYPE, true},
         {"taskType", SQL_INTEGER_TYPE},
         {"planeId", SQL_INTEGER_TYPE},
         {"groupName", SQL_INTEGER_TYPE},

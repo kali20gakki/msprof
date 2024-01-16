@@ -40,6 +40,7 @@ class TableProcesser {
 public:
     TableProcesser() = default;
     TableProcesser(std::string reportDBPath, const std::set<std::string> &profPaths);
+    TableProcesser(std::string reportDBPath);
     virtual bool Run();
     virtual ~TableProcesser() = default;
 protected:

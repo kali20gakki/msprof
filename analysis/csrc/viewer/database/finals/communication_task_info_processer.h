@@ -38,7 +38,7 @@ protected:
     bool Process(const std::string &fileDir) override;
 private:
     OriDataFormat GetData();
-    ProcessedDataFormat FormatData(const OriDataFormat &oriData);
+    static ProcessedDataFormat FormatData(const OriDataFormat &oriData);
     DBInfo hcclSingleDeviceDB_;
 };
 
