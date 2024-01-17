@@ -181,6 +181,11 @@ namespace {
         {2,          "LOCAL"},
         {4294967295, "INVALID_TYPE"},
     };
+    const std::unordered_map<uint32_t, std::string> hcclRdmaTypeMap {
+        {0,          "RDMASendNotify"},
+        {1,          "RDMASendPayload"},
+        {4294967295, "INVALID_TYPE"}
+    };
     const std::unordered_map<uint32_t, std::string> hcclOpTypeMap {
         {0,          "SUM"},
         {1,          "MUL"},
@@ -211,7 +216,8 @@ namespace {
     };
     std::vector<std::unordered_map<uint32_t, std::string>> allMaps {geDataTypeMap, geFormatMap, geTaskTypeMap,
                                                                     hcclDataTypeMap, hcclLinkTypeMap,
-                                                                    hcclTransportTypeMap, hcclOpTypeMap, levelMap,
+                                                                    hcclTransportTypeMap, hcclRdmaTypeMap,
+                                                                    hcclOpTypeMap, levelMap,
                                                                     aclApiTagMap};
 
 }

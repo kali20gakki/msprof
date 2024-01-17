@@ -34,7 +34,7 @@ using HostTasksDumpData = std::vector<std::tuple<uint32_t,
 
 using HcclTasksDumpData = std::vector<std::tuple<uint32_t, uint32_t, std::string, std::string, uint32_t, std::string,
         double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, std::string, uint32_t, uint32_t,
-        std::string, double, std::string, std::string, uint64_t>>;
+        std::string, double, std::string, std::string, uint64_t, std::string>>;
 
 const uint32_t UNDEFINED_INT_VALUE = 4294967295;
 const std::string NA = "N/A";
@@ -297,7 +297,7 @@ void CANNTraceDBDumper::DumpHcclTasks(const HostTasks &hcclTasks)
             data.emplace_back(task->modelId, task->requestId, HashData::GetInstance().Get(task->op->name),
                               NA, UNDEFINED_INT_VALUE, std::to_string(task->timeStamp), 0, task->streamId,
                               task->taskId, desc->ctxId, task->batchId, task->deviceId, 0, "struct_type",
-                              UNDEFINED_INT_VALUE, UNDEFINED_INT_VALUE, NA, 0, NA, NA, UNDEFINED_INT_VALUE);
+                              UNDEFINED_INT_VALUE, UNDEFINED_INT_VALUE, NA, 0, NA, NA, UNDEFINED_INT_VALUE, NA);
             continue;
         }
         auto hcclTrace = Utils::ReinterpretConvert<MsprofHcclInfo *>(desc->hcclInfo->data);
@@ -310,7 +310,8 @@ void CANNTraceDBDumper::DumpHcclTasks(const HostTasks &hcclTasks)
                           static_cast<double>(hcclTrace->dataSize),
                           NumberMapping::Get(NumberMapping::MappingType::HCCL_DATA_TYPE, hcclTrace->dataType),
                           NumberMapping::Get(NumberMapping::MappingType::HCCL_LINK_TYPE, hcclTrace->linkType),
-                          hcclTrace->notifyID);
+                          hcclTrace->notifyID, NumberMapping::Get(
+                              NumberMapping::MappingType::HCCL_RDMA_TYPE, hcclTrace->rdmaType));
     }
     if (!hcclTaskDBRunner.InsertData("HCCLTask", data)) {
         result_ = false;

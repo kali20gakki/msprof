@@ -109,7 +109,8 @@ namespace {
         {"size", SQL_REAL_TYPE},
         {"data_type", SQL_TEXT_TYPE},
         {"link_type", SQL_TEXT_TYPE},
-        {"notify_id", SQL_INTEGER_TYPE}
+        {"notify_id", SQL_INTEGER_TYPE},
+        {"rdma_type", SQL_TEXT_TYPE}
     };
 
     const TableColumns HCCLOP = {
@@ -177,7 +178,8 @@ namespace {
         {"bandwidth", SQL_REAL_TYPE},
         {"context_id", SQL_INTEGER_TYPE},
         {"notify_id", SQL_INTEGER_TYPE},
-        {"batch_id", SQL_INTEGER_TYPE}
+        {"batch_id", SQL_INTEGER_TYPE},
+        {"rdma_type", SQL_TEXT_TYPE}
     };
 }
 

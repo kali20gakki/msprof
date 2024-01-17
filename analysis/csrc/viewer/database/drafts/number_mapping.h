@@ -32,6 +32,7 @@ public:
         HCCL_DATA_TYPE,
         HCCL_LINK_TYPE,
         HCCL_TRANSPORT_TYPE,
+        HCCL_RDMA_TYPE,
         HCCL_OP_TYPE,
         LEVEL,
         ACL_API_TAG
