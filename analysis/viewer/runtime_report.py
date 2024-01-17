@@ -255,8 +255,8 @@ def cube_usage(config_dict: dict, value: list) -> list:
     add cube usage column
     Numeric unit: aic_frequency: MHz, task_duration: ns
     """
-    ratio_index = config_dict.get('mac_ratio_index')
-    if value[ratio_index] == Constant.NA:
+    ratio_index = config_dict.get('mac_ratio_index', None)
+    if not ratio_index or value[ratio_index] == Constant.NA:
         value.append(Constant.NA)
     elif not NumberConstant.is_zero(min(value[ratio_index], value[config_dict.get('total_cycles_index')],
                                         value[config_dict.get('task_duration_index')])):
