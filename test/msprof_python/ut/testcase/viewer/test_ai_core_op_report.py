@@ -196,6 +196,22 @@ class TestAiCoreOpReport(unittest.TestCase):
         DataManager.add_cube_usage(headers, data)
         self.assertEqual(data, [[1, 0.668, 401282788, 11437780, 97.455], [2, 0.624, 341282228, 10237240, 92.604]])
 
+    def test_add_cube_usage_failed_when_info_json_data_invaild(self):
+        InfoConfReader()._info_json = {'DeviceInfo': [{'ai_core_num': 0, 'aic_frequency': 18}]}
+        headers = ["id", "mac_ratio", "total_cycles", "Task Duration(us)"]
+        data = [[1, 0.668, 401282788, 11437780], [2, 0.624, 341282228, 10237240]]
+        DataManager.add_cube_usage(headers, data)
+        self.assertEqual(data, [[1, 0.668, 401282788, 11437780], [2, 0.624, 341282228, 10237240]])
+        InfoConfReader()._info_json = {'DeviceInfo': [{'ai_core_num': 2, 'aic_frequency': ""}]}
+        DataManager.add_cube_usage(headers, data)
+        self.assertEqual(data, [[1, 0.668, 401282788, 11437780], [2, 0.624, 341282228, 10237240]])
+        InfoConfReader()._info_json = {'DeviceInfo': [{'ai_core_num': 2, 'aic_frequency': "abc"}]}
+        DataManager.add_cube_usage(headers, data)
+        self.assertEqual(data, [[1, 0.668, 401282788, 11437780], [2, 0.624, 341282228, 10237240]])
+        InfoConfReader()._info_json = {'DeviceInfo': [{'ai_core_num': 2, 'aic_frequency': "0.00000"}]}
+        DataManager.add_cube_usage(headers, data)
+        self.assertEqual(data, [[1, 0.668, 401282788, 11437780], [2, 0.624, 341282228, 10237240]])
+
     def test_add_memory_bound(self):
         headers = ["mac_ratio", "vec_ratio", "mte2_ratio"]
         data = [[1, 2, 3], [5, 6, 2]]

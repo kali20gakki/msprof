@@ -1,11 +1,13 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
-
+import logging
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from msmodel.interface.view_model import ViewModel
 from viewer.runtime_report import add_mem_bound, cube_usage
+from common_func.msvp_common import is_number
+from common_func.ms_constant.number_constant import NumberConstant
 
 
 class DataManager:
@@ -41,21 +43,32 @@ class DataManager:
         add cube usage data
         """
         config_dict = dict()
-        config_dict['ai_core_num'] = InfoConfReader().get_data_under_device('ai_core_num')
-        config_dict['aic_frequency'] = float(InfoConfReader().get_data_under_device('aic_frequency'))
-
-        config_dict.setdefault('mac_ratio_index', None)
-        if "mac_ratio" in headers or "aic_mac_ratio" in headers:
-            config_dict['mac_ratio_index'] = \
-                headers.index("mac_ratio") if "mac_ratio" in headers else headers.index("aic_mac_ratio")
-        config_dict.setdefault('total_cycles_index', None)
-        if "total_cycles" in headers or "aic_total_cycles" in headers:
-            config_dict['total_cycles_index'] = \
-                headers.index("total_cycles") if "total_cycles" in headers else headers.index("aic_total_cycles")
-        config_dict['task_duration_index'] = \
+        total_cycles = 'total_cycles'
+        total_cycles_index = 'total_cycles_index'
+        mac_ratio = 'mac_ratio'
+        ai_core_num = 'ai_core_num'
+        aic_frequency = 'aic_frequency'
+        mac_ratio_index = 'mac_ratio_index'
+        task_duration_index = 'task_duration_index'
+        config_dict[ai_core_num] = InfoConfReader().get_data_under_device(ai_core_num)
+        config_dict[aic_frequency] = InfoConfReader().get_data_under_device(aic_frequency)
+        if not is_number(config_dict[aic_frequency]):
+            logging.error("aic_frequency is not number.")
+            return
+        config_dict[aic_frequency] = float(config_dict[aic_frequency])
+        if NumberConstant.is_zero(config_dict[ai_core_num]) or NumberConstant.is_zero(config_dict[aic_frequency]):
+            logging.error("ai_core_num or aic_frequency is zero, calculate cube usage failed.")
+            return
+        if mac_ratio in headers or "aic_mac_ratio" in headers:
+            config_dict[mac_ratio_index] = \
+                headers.index(mac_ratio) if mac_ratio in headers else headers.index("aic_mac_ratio")
+        if total_cycles in headers or "aic_total_cycles" in headers:
+            config_dict[total_cycles_index] = \
+                headers.index(total_cycles) if total_cycles in headers else headers.index("aic_total_cycles")
+        config_dict[task_duration_index] = \
             headers.index("Task Duration(us)") if "Task Duration(us)" in headers else None
-        if config_dict.get('task_duration_index') and config_dict.get('total_cycles_index') and \
-                config_dict.get("mac_ratio_index"):
+        if config_dict.get(task_duration_index, None) and config_dict.get(total_cycles_index, None) and \
+                config_dict.get(mac_ratio_index, None):
             headers.append("cube_utilization(%)")
             for index, row in enumerate(data):
                 data[index] = cube_usage(config_dict, list(row))
