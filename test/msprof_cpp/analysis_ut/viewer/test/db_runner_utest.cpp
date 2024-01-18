@@ -23,8 +23,8 @@ class DBRunnerUtest : public testing::Test {
 protected:
     static void TearDownTestCase()
     {
-        if (File::Exist("/tmp/a.db")) {
-            File::DeleteFile("/tmp/a.db");
+        if (File::Exist("./a.db")) {
+            File::DeleteFile("./a.db");
         }
     }
 };
@@ -40,14 +40,14 @@ std::vector<TableColumn> cols = {
 
 TEST_F(DBRunnerUtest, DBRunner)
 {
-    std::string path = "/tmp/a.db";
+    std::string path = "./a.db";
     auto dbRunner = std::make_shared<DBRunner>(path);
     EXPECT_EQ(path, dbRunner->path_);
 }
 
 TEST_F(DBRunnerUtest, CreateTable)
 {
-    std::string path = "/tmp/a.db";
+    std::string path = "./a.db";
     auto dbRunner = std::make_shared<DBRunner>(path);
     std::vector<TableColumn> cols = {
         TableColumn("id", "INT"),
@@ -60,7 +60,7 @@ TEST_F(DBRunnerUtest, CreateTable)
 
 TEST_F(DBRunnerUtest, DropTable)
 {
-    std::string path = "/tmp/a.db";
+    std::string path = "./a.db";
     auto dbRunner = std::make_shared<DBRunner>(path);
     auto rc = dbRunner->DropTable("tb3");
     EXPECT_EQ(rc, true);
@@ -68,7 +68,7 @@ TEST_F(DBRunnerUtest, DropTable)
 
 TEST_F(DBRunnerUtest, InsertData)
 {
-    std::string path = "/tmp/a.db";
+    std::string path = "./a.db";
     auto dbRunner = std::make_shared<DBRunner>(path);
     dbRunner->CreateTable("tb4", cols);
     DATA_FORMAT data = {
@@ -81,7 +81,7 @@ TEST_F(DBRunnerUtest, InsertData)
 
 TEST_F(DBRunnerUtest, DeleteData)
 {
-    std::string path = "/tmp/a.db";
+    std::string path = "./a.db";
     auto dbRunner = std::make_shared<DBRunner>(path);
     std::vector<TableColumn> cols = {
         TableColumn("id", "INT"),
@@ -100,7 +100,7 @@ TEST_F(DBRunnerUtest, DeleteData)
 
 TEST_F(DBRunnerUtest, QueryData)
 {
-    std::string path = "/tmp/a.db";
+    std::string path = "./a.db";
     auto dbRunner = std::make_shared<DBRunner>(path);
     dbRunner->CreateTable("tb4", cols);
     dbRunner->DeleteData("DELETE FROM tb4;");
@@ -129,7 +129,7 @@ TEST_F(DBRunnerUtest, QueryData)
 
 TEST_F(DBRunnerUtest, UpdateData)
 {
-    std::string path = "/tmp/a.db";
+    std::string path = "./a.db";
     auto dbRunner = std::make_shared<DBRunner>(path);
     std::vector<TableColumn> cols = {
         TableColumn("id", "INT"),
@@ -148,7 +148,7 @@ TEST_F(DBRunnerUtest, UpdateData)
 
 TEST_F(DBRunnerUtest, MultithreadingInsertQuery)
 {
-    std::string path = "/tmp/a.db";
+    std::string path = "./a.db";
     auto dbRunner = std::make_shared<DBRunner>(path);
     dbRunner->DropTable("tb4");
     dbRunner->CreateTable("tb4", cols);

@@ -35,6 +35,10 @@ static std::string GetColumnsString(const std::vector <TableColumn> &cols)
 
 bool DBRunner::CreateTable(const std::string &tableName, const std::vector <TableColumn> &cols) const
 {
+    if (tableName.empty()) {
+        ERROR("The tableName is empty string");
+        return false;
+    }
     INFO("Start create %", tableName);
     std::string valuesStr = GetColumnsString(cols);
     std::string sql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" + valuesStr + ");";
@@ -53,6 +57,10 @@ bool DBRunner::CreateTable(const std::string &tableName, const std::vector <Tabl
 
 bool DBRunner::DropTable(const std::string &tableName) const
 {
+    if (tableName.empty()) {
+        ERROR("The tableName is empty string");
+        return false;
+    }
     INFO("Start drop %", tableName);
     std::string sql = "DROP TABLE " + tableName + ";";
     auto conn = std::make_shared<Connection>(path_);
