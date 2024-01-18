@@ -31,12 +31,12 @@ namespace {
     };
 
     const TableColumns TARGET_INFO_NPU = {
-        {"id", SQL_INTEGER_TYPE},
+        {"id", SQL_INTEGER_TYPE, true},
         {"name", SQL_TEXT_TYPE}
     };
 
     const TableColumns ENUM_API_LEVEL = {
-        {"id", SQL_INTEGER_TYPE},
+        {"id", SQL_INTEGER_TYPE, true},
         {"name", SQL_TEXT_TYPE}
     };
 
@@ -90,7 +90,7 @@ namespace {
         {"end", SQL_NUMERIC_TYPE},
         {"level", SQL_INTEGER_TYPE},
         {"globalTid", SQL_INTEGER_TYPE},
-        {"connectionId", SQL_INTEGER_TYPE},
+        {"connectionId", SQL_INTEGER_TYPE, true},
         {"name", SQL_INTEGER_TYPE}
     };
 }
