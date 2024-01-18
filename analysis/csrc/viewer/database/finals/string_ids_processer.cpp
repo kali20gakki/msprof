@@ -45,7 +45,7 @@ StringIdsProcesser::ProcessedDataFormat StringIdsProcesser::FormatData(const Ori
 
 bool StringIdsProcesser::Process(const std::string &fileDir)
 {
-    OriDataFormat oriData = IdPool::GetInstance().GetAllStringIds();
+    OriDataFormat oriData = IdPool::GetInstance().GetAllUint64Ids();
     auto processedData = FormatData(oriData);
     if (!SaveData(processedData)) {
         ERROR("Failed to generate the STRING_IDS table.");

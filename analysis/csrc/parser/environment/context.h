@@ -26,6 +26,18 @@ namespace Analysis {
 namespace Parser {
 namespace Environment {
 const uint16_t HOST_ID = 64;
+enum class Chip : uint16_t {
+    CHIP_V1_1_0 = 0,
+    CHIP_V2_1_0 = 1,
+    CHIP_V3_1_0 = 2,
+    CHIP_V3_2_0 = 3,
+    CHIP_V3_3_0 = 4,
+    CHIP_V4_1_0 = 5,
+    CHIP_V1_1_1 = 7,
+    CHIP_V1_1_2 = 8,
+    CHIP_V5_1_0 = 9,
+    CHIP_V1_1_3 = 11,
+};
 // 该类是Context信息单例类，读取device(host)路径下json/log文件及环境信息
 // 通过 std::unordered_map<std::string, std::unordered_map<uint16_t, nlohmann::json>> 结构的成员变量context_
 // 以prof, deviceId两层进行数据路径分割，将该device目录下的对应json和log进行key值合并，统一整合为一份json对象
@@ -34,8 +46,8 @@ class Context : public Utils::Singleton<Context> {
 public:
     bool Load(const std::set<std::string> &profPaths);
     bool IsAllExport();
-    // 获取对应device的芯片型号
-    uint16_t GetPlatformVersion(uint16_t deviceId, const std::string &profPath = "");
+    void Clear();
+public:
     // 获取start_info end_info中的时间
     bool GetProfTimeRecordInfo(Utils::ProfTimeRecord &record, const std::string &profPath = "");
     // 返回info.json 中的pid
@@ -43,21 +55,13 @@ public:
     // 获取start_log中的相关时间
     bool GetSyscntConversionParams(Utils::SyscntConversionParams &params, uint16_t deviceId,
                                    const std::string &profPath = "");
-    void Clear();
-
-private:
-    enum class Chip : uint16_t {
-        CHIP_V1_1_0 = 0,
-        CHIP_V2_1_0 = 1,
-        CHIP_V3_1_0 = 2,
-        CHIP_V3_2_0 = 3,
-        CHIP_V3_3_0 = 4,
-        CHIP_V4_1_0 = 5,
-        CHIP_V1_1_1 = 7,
-        CHIP_V1_1_2 = 8,
-        CHIP_V5_1_0 = 9,
-        CHIP_V1_1_3 = 11,
-    };
+public:
+    // 获取对应device的芯片型号
+    uint16_t GetPlatformVersion(uint16_t deviceId, const std::string &profPath = "");
+    // 判断芯片类型
+    static bool IsStarsChip(uint16_t platformVersion);
+    static bool IsChipVersionOneToOne(uint16_t platformVersion);
+    static bool IsChipV4(uint16_t platformVersion);
 
 private:
     nlohmann::json GetInfoByDeviceId(uint16_t deviceId, const std::string &profPath = "");

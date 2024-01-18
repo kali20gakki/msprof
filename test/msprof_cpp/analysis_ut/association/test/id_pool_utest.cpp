@@ -23,29 +23,46 @@ class IdPoolUTest : public testing::Test {
 protected:
     virtual void SetUp()
     {
+        IdPool::GetInstance().Clear();
     }
     virtual void TearDown()
     {
+        IdPool::GetInstance().Clear();
     }
 };
 
-TEST_F(IdPoolUTest, GetIdShouldReturnNewIndexWhenInputIsStrAndKeyNotExist)
+TEST_F(IdPoolUTest, GetUint64IdShouldReturnNewIndexWhenInputIsStrAndKeyNotExist)
 {
     uint64_t expect = 0;
     std::string opName = "conv2d";
-    auto res = IdPool::GetInstance().GetId(opName);
+    auto res = IdPool::GetInstance().GetUint64Id(opName);
     EXPECT_EQ(expect, res);
-    IdPool::GetInstance().Clear();
 }
 
-TEST_F(IdPoolUTest, GetIdShouldReturnOriIndexWhenInputIsStrAndKeyExist)
+TEST_F(IdPoolUTest, GetUint64IdShouldReturnOriIndexWhenInputIsStrAndKeyExist)
 {
     uint64_t expect = 0;
     std::string opName = "pool";
-    IdPool::GetInstance().GetId(opName);
-    auto res = IdPool::GetInstance().GetId(opName);
+    IdPool::GetInstance().GetUint64Id(opName);
+    auto res = IdPool::GetInstance().GetUint64Id(opName);
     EXPECT_EQ(expect, res);
-    IdPool::GetInstance().Clear();
+}
+
+TEST_F(IdPoolUTest, GetUint32IdShouldReturnNewIndexWhenInputIsStrAndKeyNotExist)
+{
+    uint64_t expect = 0;
+    std::string str = "/home/test/PROF_000001_20231010105807679_GRRHDCGNICIIQCPA";
+    auto res = IdPool::GetInstance().GetUint32Id(str);
+    EXPECT_EQ(expect, res);
+}
+
+TEST_F(IdPoolUTest, GetUint32IdShouldReturnOriIndexWhenInputIsStrAndKeyExist)
+{
+    uint64_t expect = 0;
+    std::string str = "/home/test/PROF_000001_20231010105807679_GRRHDCGNICIIQCPA";
+    IdPool::GetInstance().GetUint64Id(str);
+    auto res = IdPool::GetInstance().GetUint32Id(str);
+    EXPECT_EQ(expect, res);
 }
 
 TEST_F(IdPoolUTest, GetIdShouldReturnNewIndexWhenInputIsTupleAndKeyNotExist)
@@ -79,7 +96,7 @@ TEST_F(IdPoolUTest, GetIdShouldReturnNewIndexWhenInputIsTupleAndKeyExist)
     IdPool::GetInstance().Clear();
 }
 
-TEST_F(IdPoolUTest, GetAllStringIdsShouldReturnStringIds)
+TEST_F(IdPoolUTest, GetAllUint64IdsShouldReturnMaps)
 {
     std::unordered_map<std::string, uint64_t> expect;
     uint64_t denseId = 2;
@@ -89,17 +106,17 @@ TEST_F(IdPoolUTest, GetAllStringIdsShouldReturnStringIds)
     expect["pool"] = poolId;
     expect["conv2d"] = conv2dId;
     std::string opName = "conv2d";
-    IdPool::GetInstance().GetId(opName);
+    IdPool::GetInstance().GetUint64Id(opName);
     opName = "pool";
-    IdPool::GetInstance().GetId(opName);
+    IdPool::GetInstance().GetUint64Id(opName);
     opName = "dense";
-    IdPool::GetInstance().GetId(opName);
-    auto res = IdPool::GetInstance().GetAllStringIds();
+    IdPool::GetInstance().GetUint64Id(opName);
+    auto res = IdPool::GetInstance().GetAllUint64Ids();
     EXPECT_EQ(expect, res);
     IdPool::GetInstance().Clear();
 }
 
-TEST_F(IdPoolUTest, IdsShouldBeUniqueWhenInputIsStrInTheMultiThreadScenario)
+TEST_F(IdPoolUTest, Uint64IdShouldBeUniqueWhenInputIsStrInTheMultiThreadScenario)
 {
     const int threadsNum = 200;
     const int tasksNum = 100;
@@ -108,18 +125,17 @@ TEST_F(IdPoolUTest, IdsShouldBeUniqueWhenInputIsStrInTheMultiThreadScenario)
     ThreadPool pool(threadsNum);
     std::mutex taskMutex;
     std::mutex taskRepeatedMutex;
-
     auto err = pool.Start();
     EXPECT_TRUE(err);
 
     for (uint64_t i = 0; i < tasksNum; i++) {
         auto taskGet = [i, &taskResult, &taskMutex]() {
-            auto res = IdPool::GetInstance().GetId(std::to_string(i));
+            auto res = IdPool::GetInstance().GetUint64Id(std::to_string(i));
             std::lock_guard<std::mutex> lock(taskMutex);
             taskResult.emplace_back(res);
         };
         auto taskRepeatedGet = [i, &taskRepeatedResult, &taskRepeatedMutex]() {
-            auto res = IdPool::GetInstance().GetId(std::to_string(i));
+            auto res = IdPool::GetInstance().GetUint64Id(std::to_string(i));
             std::lock_guard<std::mutex> lock(taskRepeatedMutex);
             taskRepeatedResult.emplace_back(res);
         };
@@ -136,6 +152,44 @@ TEST_F(IdPoolUTest, IdsShouldBeUniqueWhenInputIsStrInTheMultiThreadScenario)
         EXPECT_EQ(i, taskRepeatedResult[i]);
     }
     IdPool::GetInstance().Clear();
+}
+
+TEST_F(IdPoolUTest, Uint32IdShouldBeUniqueWhenInputIsStrInTheMultiThreadScenario)
+{
+    const int threadsNum = 200;
+    const int tasksNum = 100;
+    std::vector<uint64_t> taskResult;
+    std::vector<uint64_t> taskRepeatedResult;
+    ThreadPool pool(threadsNum);
+    std::mutex taskMutex;
+    std::mutex taskRepeatedMutex;
+    auto err = pool.Start();
+    EXPECT_TRUE(err);
+
+    for (uint64_t i = 0; i < tasksNum; i++) {
+    auto taskGet = [i, &taskResult, &taskMutex]() {
+        auto res = IdPool::GetInstance().GetUint32Id(std::to_string(i));
+        std::lock_guard<std::mutex> lock(taskMutex);
+        taskResult.emplace_back(res);
+    };
+    auto taskRepeatedGet = [i, &taskRepeatedResult, &taskRepeatedMutex]() {
+        auto res = IdPool::GetInstance().GetUint32Id(std::to_string(i));
+        std::lock_guard<std::mutex> lock(taskRepeatedMutex);
+        taskRepeatedResult.emplace_back(res);
+    };
+    pool.AddTask(taskGet);
+    pool.AddTask(taskRepeatedGet);
+    }
+
+    pool.WaitAllTasks();
+    pool.Stop();
+    std::sort(taskResult.begin(), taskResult.end());
+    std::sort(taskRepeatedResult.begin(), taskRepeatedResult.end());
+    for (uint64_t i = 0; i < tasksNum; ++i) {
+    EXPECT_EQ(i, taskResult[i]);
+    EXPECT_EQ(i, taskRepeatedResult[i]);
+}
+IdPool::GetInstance().Clear();
 }
 
 TEST_F(IdPoolUTest, IdsShouldBeUniqueWhenInputIsTupleInTheMultiThreadScenario)

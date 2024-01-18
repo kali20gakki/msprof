@@ -22,7 +22,7 @@ using namespace Analysis::Viewer::Database;
 using namespace Analysis::Association::Credential;
 using namespace Analysis::Utils;
 namespace {
-const int DEPTH = 5;
+const int DEPTH = 0;
 const std::string STRING_IDS_PATH = "./string_ids_path";
 const std::string DB_PATH = File::PathJoin({STRING_IDS_PATH, "report.db"});
 const uint16_t STRING_NUM = 2;
@@ -34,14 +34,18 @@ class StringIdsProcesserUTest : public testing::Test {
 protected:
     virtual void SetUp()
     {
-        File::CreateDir(STRING_IDS_PATH);
-        IdPool::GetInstance().GetId("Conv2d");
-        IdPool::GetInstance().GetId("pool");
+        IdPool::GetInstance().Clear();
+        if (File::Check(STRING_IDS_PATH)) {
+            File::RemoveDir(STRING_IDS_PATH, DEPTH);
+        }
+        EXPECT_TRUE(File::CreateDir(STRING_IDS_PATH));
+        IdPool::GetInstance().GetUint64Id("Conv2d");
+        IdPool::GetInstance().GetUint64Id("pool");
     }
     virtual void TearDown()
     {
         IdPool::GetInstance().Clear();
-        File::RemoveDir(STRING_IDS_PATH, DEPTH);
+        EXPECT_TRUE(File::RemoveDir(STRING_IDS_PATH, DEPTH));
     }
 };
 
@@ -64,7 +68,7 @@ TEST_F(StringIdsProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSuccess)
     PROCESSED_DATA_FORMAT result;
     MAKE_SHARED0_NO_OPERATION(ReportDBRunner, DBRunner, DB_PATH);
     auto processer = StringIdsProcesser(DB_PATH);
-    IdPool::GetInstance().GetId("pool");
+    IdPool::GetInstance().GetUint64Id("pool");
     EXPECT_TRUE(processer.Run());
     std::string sql{"SELECT * FROM " + TARGET_TABLE_NAME};
     ReportDBRunner->QueryData(sql, result);

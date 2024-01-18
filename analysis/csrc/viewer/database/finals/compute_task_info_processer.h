@@ -23,13 +23,13 @@ class ComputeTaskInfoProcesser : public TableProcesser {
     // timestamp, batch_id, input_formats, input_data_types, input_shapes, output_formats,
     // output_data_types, output_shapes, device_id, context_id
     using OriDataFormat = std::vector<std::tuple<uint32_t, std::string, int32_t, int32_t, uint32_t, uint32_t,
-                                                   std::string, std::string, double, uint32_t, std::string,
-                                                   std::string, std::string, std::string, std::string, std::string,
-                                                   int32_t, uint32_t>>;
+                                                 std::string, std::string, double, uint32_t, std::string,
+                                                 std::string, std::string, std::string, std::string, std::string,
+                                                 int32_t, uint32_t>>;
     // name, correlationId, block_dim, mixBlockDim, taskType, opType, inputFormats, inputDataTypes, inputShapes,
     // outputFormats, outputDataTypes, outputShapes
     using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t,
-                                                         uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+                                                       uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
 public:
     ComputeTaskInfoProcesser() = default;
     ComputeTaskInfoProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths);
@@ -37,9 +37,8 @@ public:
 protected:
     bool Process(const std::string &fileDir) override;
 private:
-    OriDataFormat GetData();
+    static OriDataFormat GetData(const DBInfo &geInfo);
     ProcessedDataFormat FormatData(const OriDataFormat &oriData);
-    DBInfo geInfoDB_;
 };
 
 } // Database

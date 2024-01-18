@@ -10,6 +10,7 @@
  * *****************************************************************************
  */
 
+#include <unordered_set>
 #include "analysis/csrc/parser/environment/context.h"
 
 #include "analysis/csrc/dfx/error_code.h"
@@ -302,6 +303,26 @@ void Context::Clear()
 {
     context_.clear();
 }
+
+bool Context::IsStarsChip(uint16_t platformVersion)
+{
+    return IsChipVersionOneToOne(platformVersion) || IsChipV4(platformVersion);
+}
+
+bool Context::IsChipVersionOneToOne(uint16_t platformVersion)
+{
+    auto chipV1_1_1 = static_cast<int>(Chip::CHIP_V1_1_0);
+    auto chipV1_1_2 = static_cast<int>(Chip::CHIP_V1_1_2);
+    auto chipV1_1_3 = static_cast<int>(Chip::CHIP_V1_1_3);
+    std::unordered_set<int> checkList{chipV1_1_1, chipV1_1_2, chipV1_1_3};
+    return static_cast<bool>(checkList.count(platformVersion));
+}
+
+bool Context::IsChipV4(uint16_t platformVersion)
+{
+    return platformVersion == static_cast<int>(Chip::CHIP_V4_1_0);
+}
+
 }  // namespace Environment
 }  // namespace Parser
 }  // namespace Analysis

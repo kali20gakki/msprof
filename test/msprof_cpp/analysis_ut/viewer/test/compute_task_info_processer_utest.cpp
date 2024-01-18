@@ -65,20 +65,24 @@ class ComputeTaskInfoProcesserUTest : public testing::Test {
 protected:
     virtual void SetUp()
     {
-        File::CreateDir(COMPUTE_TASK_PATH);
-        File::CreateDir(PROF_PATH_A);
-        File::CreateDir(PROF_PATH_B);
-        File::CreateDir(File::PathJoin({PROF_PATH_A, HOST_SUFFIX}));
-        File::CreateDir(File::PathJoin({PROF_PATH_B, HOST_SUFFIX}));
-        File::CreateDir(File::PathJoin({PROF_PATH_A, HOST_SUFFIX, SQLITE_SUFFIX}));
-        File::CreateDir(File::PathJoin({PROF_PATH_B, HOST_SUFFIX, SQLITE_SUFFIX}));
+        IdPool::GetInstance().Clear();
+        if (File::Check(COMPUTE_TASK_PATH)) {
+            File::RemoveDir(COMPUTE_TASK_PATH, DEPTH);
+        }
+        EXPECT_TRUE(File::CreateDir(COMPUTE_TASK_PATH));
+        EXPECT_TRUE(File::CreateDir(PROF_PATH_A));
+        EXPECT_TRUE(File::CreateDir(PROF_PATH_B));
+        EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_A, HOST_SUFFIX})));
+        EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_B, HOST_SUFFIX})));
+        EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_A, HOST_SUFFIX, SQLITE_SUFFIX})));
+        EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_B, HOST_SUFFIX, SQLITE_SUFFIX})));
         CreateTaskInfo(File::PathJoin({PROF_PATH_A, HOST_SUFFIX, SQLITE_SUFFIX, DB_SUFFIX}), DATA_A);
         CreateTaskInfo(File::PathJoin({PROF_PATH_B, HOST_SUFFIX, SQLITE_SUFFIX, DB_SUFFIX}), DATA_B);
     }
     virtual void TearDown()
     {
         IdPool::GetInstance().Clear();
-        File::RemoveDir(COMPUTE_TASK_PATH, DEPTH);
+        EXPECT_TRUE(File::RemoveDir(COMPUTE_TASK_PATH, DEPTH));
     }
     static void CreateTaskInfo(const std::string& dbPath, GeInfoFormat data)
     {

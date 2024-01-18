@@ -214,7 +214,7 @@ TEST_F(ApiProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSuccess)
     EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkData));
     EXPECT_EQ(expectNum, checkData.size());
     const uint16_t expectStringIdNum = 11;
-    EXPECT_EQ(IdPool::GetInstance().GetAllStringIds().size(), expectStringIdNum);
+    EXPECT_EQ(IdPool::GetInstance().GetAllUint64Ids().size(), expectStringIdNum);
     CheckApiDataValid(checkData, pids);
 }
 

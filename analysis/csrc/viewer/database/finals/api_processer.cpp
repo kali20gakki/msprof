@@ -114,11 +114,11 @@ bool ApiProcesser::FormatData(const std::string &fileDir, const ApiDataFormat &a
         double start = Utils::GetLocalTime(Utils::GetTimeFromSyscnt(tempData.start, params), record);
         double end = Utils::GetLocalTime(Utils::GetTimeFromSyscnt(tempData.end, params), record);
         uint64_t connectionId = (pid << MoveCount) + tempData.connectionId;
-        uint64_t name = IdPool::GetInstance().GetId(tempData.structType);
+        uint64_t name = IdPool::GetInstance().GetUint64Id(tempData.structType);
         if (level == MSPROF_REPORT_ACL_LEVEL) {
-            name = IdPool::GetInstance().GetId(tempData.id);
+            name = IdPool::GetInstance().GetUint64Id(tempData.id);
         } else if (level == MSPROF_REPORT_HCCL_NODE_LEVEL) {
-            name = IdPool::GetInstance().GetId(tempData.itemId);
+            name = IdPool::GetInstance().GetUint64Id(tempData.itemId);
         }
         processedData.emplace_back(start, end, level, globalTid, connectionId, name);
     }
