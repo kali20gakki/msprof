@@ -35,7 +35,7 @@ public:
 protected:
     bool Process(const std::string &fileDir) override;
 private:
-    static OriDataFormat GetData(DBInfo &raceVariable);
+    static OriDataFormat GetData(DBInfo &ascendTaskDB);
     ProcessedDataFormat FormatData(const OriDataFormat &oriData, uint16_t deviceId, uint64_t globalPid,
                                    uint16_t platformVersion, Utils::ProfTimeRecord &timeRecord);
     static uint64_t GetTaskType(const std::string &hostType, const std::string &deviceType, uint16_t platformVersion);
