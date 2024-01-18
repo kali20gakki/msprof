@@ -45,7 +45,7 @@ public:
     using Event = Analysis::Entities::Event;
     using EventType = Analysis::Entities::EventType;
 
-    TreeAnalyzer(std::shared_ptr<TreeNode> &node, uint32_t threadId)
+    TreeAnalyzer(const std::shared_ptr<TreeNode> &node, uint32_t threadId)
         : root_(node), threadId_(threadId)
     {}
     // 入口函数

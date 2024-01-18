@@ -108,7 +108,7 @@ void KernelParserWorker::DumpTypeInfoData()
 
 void KernelParserWorker::LaunchTraceParser()
 {
-    HostTraceWorker hostTraceWorker;
+    HostTraceWorker hostTraceWorker{hostFilePath_};
     if (!hostTraceWorker.Run()) {
         ERROR("Host trace parse failed");
         result_ = false;
