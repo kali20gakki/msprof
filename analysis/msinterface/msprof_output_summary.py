@@ -25,7 +25,6 @@ and dump to a file named slice_*.json.
 Enable multiple processes based on the number of slice.
 """
 
-import csv
 import logging
 import multiprocessing
 import os
@@ -130,6 +129,14 @@ class MsprofOutputSummary:
                 if not value or value < time:
                     file_dict.update({key: time})
         return [k + str(v) + data_type for k, v in file_dict.items()]
+
+    @classmethod
+    def read_file(cls, reader):
+        while True:
+            line = reader.readline()
+            if not line:
+                break
+            yield line
 
     def export(self: any, command_type: str) -> None:
         """
@@ -286,18 +293,19 @@ class MsprofOutputSummary:
     def _insert_summary_data(self, file_name_path: str, device_id: str,
                              helper: FileSliceHelper):
         with FileOpen(file_name_path, mode='r', max_size=self.FILE_MAX_SIZE) as _csv_file:
-            reader = csv.DictReader(_csv_file.file_reader)
-            if reader.fieldnames and helper.check_header_is_empty():
-                csv_header = [self.DEVICE_ID, *reader.fieldnames]
+            header = _csv_file.file_reader.readline()
+            line_num = -1
+            if header and helper.check_header_is_empty():
+                csv_header = [self.DEVICE_ID, *list(header.split(','))]
                 helper.set_header(csv_header)
-            all_data = [[]] * FileSliceHelper.CSV_LIMIT
-            for i, row in enumerate(reader):
-                remainder = i % FileSliceHelper.CSV_LIMIT
-                if i and not remainder:
+            all_data = [''] * FileSliceHelper.CSV_LIMIT
+            for row in self.read_file(_csv_file.file_reader):
+                line_num += 1
+                remainder = line_num % FileSliceHelper.CSV_LIMIT
+                if line_num and not remainder:
                     helper.insert_data(all_data)
-                row[self.DEVICE_ID] = device_id
-                all_data[remainder] = row
-            helper.insert_data(all_data[:(reader.line_num - 1) % FileSliceHelper.CSV_LIMIT])
+                all_data[remainder] = f'{device_id},{row}'
+            helper.insert_data(all_data[:(line_num + 1) % FileSliceHelper.CSV_LIMIT])
 
     def _export_msprof_timeline(self: any) -> None:
         self._export_all_timeline_data()
