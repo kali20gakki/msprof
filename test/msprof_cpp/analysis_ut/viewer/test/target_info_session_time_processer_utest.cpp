@@ -93,10 +93,9 @@ TEST_F(TargetInfoSessionTimeProcesserUTest, TestRunShouldReturnTrueWhenProcesser
         {expectRecord.startTimeNs, expectRecord.endTimeNs, Analysis::Utils::TIME_BASE_OFFSET_NS},
     };
     std::string sqlStr = "SELECT startTimeNs, endTimeNs, baseTimeNs FROM " + TABLE_NAME_TARGET_INFO_SESSION_TIME;
-    if (dbRunner != nullptr) {
+    ASSERT_NE(dbRunner, nullptr);
     EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkData));
     EXPECT_EQ(expectData, checkData);
-    }
 }
 
 TEST_F(TargetInfoSessionTimeProcesserUTest, TestRunShouldReturnFalseWhenGetTimeRecordFail)

@@ -32,12 +32,10 @@ public:
 protected:
     bool Process(const std::string &fileDir) override;
 private:
-    ApiDataFormat GetData(const std::string &dbPath);
-    bool FormatData(const uint64_t &pid, const ApiDataFormat &oriData, ProcessedDataFormat &processedData);
+    ApiDataFormat GetData(const std::string &fileDir);
+    bool FormatData(const std::string &fileDir, const ApiDataFormat &oriData,
+                    ProcessedDataFormat &processedData) const;
     static uint16_t GetLevelValue(const std::string &key);
-    DBInfo apieventDB_;
-    Utils::SyscntConversionParams params_;
-    Utils::ProfTimeRecord record_;
 };
 
 

@@ -22,15 +22,15 @@ namespace Database {
 
 const uint32_t POOLNUM = 2;
 
-TableProcesser::TableProcesser(std::string reportDBPath, const std::set<std::string> &profPaths)
-    : reportDBPath_(std::move(reportDBPath)), profPaths_(profPaths)
+TableProcesser::TableProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths)
+    : reportDBPath_(reportDBPath), profPaths_(profPaths)
 {
     MAKE_SHARED0_NO_OPERATION(reportDB_.database, ReportDB);
     MAKE_SHARED_NO_OPERATION(reportDB_.dbRunner, DBRunner, reportDBPath_);
 }
 
-TableProcesser::TableProcesser(std::string reportDBPath)
-    : reportDBPath_(std::move(reportDBPath))
+TableProcesser::TableProcesser(const std::string &reportDBPath)
+    : reportDBPath_(reportDBPath)
 {
     MAKE_SHARED0_NO_OPERATION(reportDB_.database, ReportDB);
     MAKE_SHARED_NO_OPERATION(reportDB_.dbRunner, DBRunner, reportDBPath_);

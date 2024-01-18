@@ -34,13 +34,16 @@ struct DBInfo {
 };
 
 // 该类用于定义处理父类
-// 主要包括以下特性：
-// 1. 设计各db处理流程
+// 主要包括以下特性：用于规范各db处理流程
+// 1、Run拉起processer整体流程
+// 2、以PROF文件为粒度，分别拉起Process
+// (不强制要求 Run, Process完成上述工作,具体根据子类的实际情况进行实现,比如不感知PROF文件的情况)
+// 3、子类内部自行调用Save进行数据dump
 class TableProcesser {
 public:
     TableProcesser() = default;
-    TableProcesser(std::string reportDBPath, const std::set<std::string> &profPaths);
-    TableProcesser(std::string reportDBPath);
+    TableProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    TableProcesser(const std::string &reportDBPath);
     virtual bool Run();
     virtual ~TableProcesser() = default;
 protected:
@@ -55,6 +58,7 @@ protected:
 template<typename... Args>
 bool TableProcesser::SaveData(const std::vector<std::tuple<Args...>> &data) const
 {
+    INFO("Processer Save % Data.", reportDB_.tableName);
     if (data.empty()) {
         ERROR("% is empty.", reportDB_.tableName);
         return false;
