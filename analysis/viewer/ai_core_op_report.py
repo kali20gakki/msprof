@@ -68,24 +68,31 @@ class AiCoreOpReport:
     def _union_task_ge_ai_core_data(data: list, ai_core_group_dict: dict) -> list:
         union_data = []
         if not ai_core_group_dict or not data:
-            return data
+            # 没有pmu数据, 去除HCCL小算子
+            return AiCoreOpReport._filter_hccl_op(data)
         ai_core_data_len = len(ai_core_group_dict.get(next(iter(ai_core_group_dict)))[0])
         # 全导情况下，task type的索引是5，非全导情况下，task type的索引是6
         task_type_idx = 5 if ProfilingScene().is_all_export() else 6
         for datum in data:
+            if datum[task_type_idx] == Constant.TASK_TYPE_HCCL_AI_CPU:
+                # 针对helper场景, 去除运行在AI_CPU的HCCL小算子,
+                logging.info("Found ai cpu hccl small op of stream %d, task %d", datum[2], datum[1])
+                continue
             # 2 stream id; 1 task id of datum
-
             ai_core_queue = ai_core_group_dict.get(datum[1:3] + (datum[-1],), deque([]))
             if not ai_core_queue:
+                # 没有匹配的pmu数据, 包括AI_CPU, DSA, DVPP算子
                 logging.debug("No ai core data of stream %d, task %d", datum[2], datum[1])
                 union_data.append(datum + (Constant.NA,) * ai_core_data_len)
                 continue
             if datum[task_type_idx] in AiCoreOpReport().HARDWARE_OP_LIST:
-                logging.debug("Found %s op of stream %d, task %d", datum[5], datum[2], datum[1])
+                # 处理task_id翻转情况下的AI_CPU, DSA, DVPP算子
+                logging.debug("Found %s op of stream %d, task %d", datum[task_type_idx], datum[2], datum[1])
                 union_data.append(datum + (Constant.NA,) * ai_core_data_len)
                 continue
             ai_core_datum = ai_core_queue.popleft()
             if datum[task_type_idx] == Constant.TASK_TYPE_HCCL:
+                # 去除运行在AI_CORE的HCCL小算子
                 logging.info("Found ai core hccl small op of stream %d, task %d", datum[2], datum[1])
                 continue
             union_data.append(datum + ai_core_datum)
@@ -95,6 +102,18 @@ class AiCoreOpReport:
                 logging.debug("Losing ge or task time data of stream %d, task %d", stream_task[0], stream_task[1])
 
         return union_data
+
+    @staticmethod
+    def _filter_hccl_op(data: list) -> list:
+        filter_data = []
+        # 全导情况下，task type的索引是5，非全导情况下，task type的索引是6
+        task_type_idx = 5 if ProfilingScene().is_all_export() else 6
+        for datum in data:
+            if datum[task_type_idx] in (Constant.TASK_TYPE_HCCL_AI_CPU, Constant.TASK_TYPE_HCCL):
+                logging.info("Found hccl small op of stream %d, task %d", datum[2], datum[1])
+                continue
+            filter_data.append(datum)
+        return filter_data
 
     @staticmethod
     def _count_num(table: str, curs: any) -> int:

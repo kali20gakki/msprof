@@ -507,9 +507,9 @@ class TaskGear(CANNGear):
         if self.is_hccl_task(hccl_event, add_dto):
             op_name = hccl_dto.item_id
             task_type = Constant.TASK_TYPE_HCCL
-        if add_dto.task_type == self.KERNEL_AICPU:
-            # helper场景: HCCL算子运行在AI_CPU上, 但api没有HCCL层数据
-            task_type = Constant.TASK_TYPE_AI_CPU
+            if add_dto.task_type == self.KERNEL_AICPU:
+                # helper场景: HCCL算子运行在AI_CPU上
+                task_type = Constant.TASK_TYPE_HCCL_AI_CPU
         for cxt_id in cxt_ids:
             self.task_info.append([model_id, op_name, add_dto.stream_id, add_dto.task_id, 0, 0,
                                    'N/A', task_type, 'N/A', request_id, add_dto.thread_id, add_dto.timestamp,
@@ -533,8 +533,8 @@ class TaskGear(CANNGear):
             # notice: reduce TBE op
             op_name = hccl_dto.item_id
         if add_dto.task_type == self.KERNEL_AICPU and task_type == Constant.TASK_TYPE_HCCL:
-            # helper场景: HCCL算子运行在AI_CPU上, 但api没有HCCL层数据
-            task_type = Constant.TASK_TYPE_AI_CPU
+            # helper场景: HCCL算子运行在AI_CPU上
+            task_type = Constant.TASK_TYPE_HCCL_AI_CPU
         for cxt_id in cxt_ids:
             self.task_info.append([model_id, op_name, add_dto.stream_id, add_dto.task_id,
                                    node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,

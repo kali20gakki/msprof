@@ -162,12 +162,31 @@ class TestAiCoreOpReport(unittest.TestCase):
             (1, 2, 3, 11, 16, "AI_CPU", 'N/A'), (4, 5, 6, 11, 16, "AI_CPU", 'N/A'), (7, 8, 9, 11, 16, 10, 'N/A')
         ]
         data = [
-            (1, 2, 3, 11, 16, "AI_CPU"), (4, 5, 6, 11, 16, "AI_CPU"), (7, 8, 9, 11, 16, 10), (1, 2, 3, 11, 16, "HCCL")
+            (1, 2, 3, 11, 16, "AI_CPU"),
+            (4, 5, 6, 11, 16, "AI_CPU"),
+            (7, 8, 9, 11, 16, 10),
+            (1, 2, 3, 11, 16, "HCCL"),
+            (1, 3, 3, 11, 16, "HCCL_AI_CPU")
         ]
         ai_core_group_dict = {
             (2, 3, "AI_CPU"): deque([(10,)]), (5, 6, "AI_CPU"): deque([(40,)]),
             (10, 11, 12): deque([(20,)]), (2, 3, "HCCL"): deque([(50,)])
         }
+        res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
+        self.assertEqual(res, expect_res)
+
+    def test_union_task_ge_ai_core_data_should_return_3_data_when_have_no_pmu_data(self):
+        expect_res = [
+            (1, 2, 3, 11, 16, "AI_CPU"), (4, 5, 6, 11, 16, "AI_CPU"), (7, 8, 9, 11, 16, 10)
+        ]
+        data = [
+            (1, 2, 3, 11, 16, "AI_CPU"),
+            (4, 5, 6, 11, 16, "AI_CPU"),
+            (7, 8, 9, 11, 16, 10),
+            (1, 2, 3, 11, 16, "HCCL"),
+            (1, 3, 3, 11, 16, "HCCL_AI_CPU")
+        ]
+        ai_core_group_dict = {}
         res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
         self.assertEqual(res, expect_res)
 
