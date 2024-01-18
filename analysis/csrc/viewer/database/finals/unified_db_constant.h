@@ -45,6 +45,46 @@ const std::unordered_map<std::string, uint16_t> API_LEVEL_TABLE = {
     {"runtime",  MSPROF_REPORT_RUNTIME_LEVEL}
 };
 
+// TS为stars时芯片的sqetype
+const std::map<std::string, std::string> STARS_SQE_TYPE_TABLE{
+    {"0", "AI_CORE"},
+    {"1", "AI_CPU"},
+    {"2", "AIV_SQE"},
+    {"3", "PLACE_HOLDER_SQE"},
+    {"4", "EVENT_RECORD_SQE"},
+    {"5", "EVENT_WAIT_SQE"},
+    {"6", "NOTIFY_RECORD_SQE"},
+    {"7", "NOTIFY_WAIT_SQE"},
+    {"8", "WRITE_VALUE_SQE"},
+    {"9", "VQ6_SQE"},
+    {"10", "TOF_SQE"},
+    {"11", "SDMA_SQE"},
+    {"12", "VPC_SQE"},
+    {"13", "JPEGE_SQE"},
+    {"14", "JPEGD_SQE"},
+    {"15", "DSA_SQE"},
+    {"16", "ROCCE_SQE"},
+    {"17", "PCIE_DMA_SQE"},
+    {"18", "HOST_CPU_SQE"},
+    {"19", "CDQM_SQE"},
+    {"20", "C_CORE_SQE"}
+};
+
+// TS为hwts时芯片的sqetype
+const std::map<std::string, std::string> HW_SQE_TYPE_TABLE{
+    {"0", "AI_CORE"},
+    {"1", "AI_CPU"},
+    {"2", "AIV_SQE"},
+    {"3", "PLACE_HOLDER_SQE"},
+    {"4", "EVENT_RECORD_SQE"},
+    {"5", "EVENT_WAIT_SQE"},
+    {"6", "NOTIFY_RECORD_SQE"},
+    {"7", "NOTIFY_WAIT_SQE"},
+    {"8", "WRITE_VALUE_SQE"},
+    {"9", "SDMA_SQE"},
+    {"10", "MAX_SQE"}
+};
+
 // 单位换算常量
 const uint64_t NANO_SECOND = 1000000000;
 const uint64_t MICRO_SECOND = 1000000;

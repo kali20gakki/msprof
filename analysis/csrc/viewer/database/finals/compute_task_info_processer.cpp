@@ -49,21 +49,18 @@ ComputeTaskInfoProcesser::ComputeTaskInfoProcesser(const std::string &reportDBPa
                                                    const std::set<std::string> &profPaths)
     : TableProcesser(reportDBPath, profPaths)
 {
-    geInfoDB_.dbName = "ge_info.db";
-    geInfoDB_.tableName = "TaskInfo";
-    MAKE_SHARED0_NO_OPERATION(geInfoDB_.database, GEInfoDB);
     reportDB_.tableName = TABLE_NAME_COMPUTE_TASK_INFO;
 }
 
-ComputeTaskInfoProcesser::OriDataFormat ComputeTaskInfoProcesser::GetData()
+ComputeTaskInfoProcesser::OriDataFormat ComputeTaskInfoProcesser::GetData(const DBInfo &geInfoDB)
 {
     OriDataFormat oriData;
     std::string sql{"SELECT model_id, op_name, stream_id, task_id, block_dim, mix_block_dim, task_type, op_type, "
                     "timestamp, batch_id, IFNULL(input_formats, 'NULL'), IFNULL(input_data_types, 'NULL'), "
                     "IFNULL(input_shapes, 'NULL'), IFNULL(output_formats, 'NULL'), IFNULL(output_data_types, 'NULL'), "
-                    "IFNULL(output_shapes, 'NULL'), device_id, context_id FROM " + geInfoDB_.tableName};
-    if (!geInfoDB_.dbRunner->QueryData(sql, oriData)) {
-        ERROR("Failed to obtain data from the % table.", geInfoDB_.tableName);
+                    "IFNULL(output_shapes, 'NULL'), device_id, context_id FROM " + geInfoDB.tableName};
+    if (!geInfoDB.dbRunner->QueryData(sql, oriData)) {
+        ERROR("Failed to obtain data from the % table.", geInfoDB.tableName);
     }
     return oriData;
 }
@@ -90,18 +87,18 @@ ComputeTaskInfoProcesser::ProcessedDataFormat ComputeTaskInfoProcesser::FormatDa
                  data.maxBlockDim, oriTaskType, oriOpType, std::ignore, data.batchId, oriInputFormats,
                  oriInputDataTypes, oriInputShapes, oriOutputFormats, oriOutputDataTypes,
                  oriOutputShapes, data.deviceId, data.contextId) = row;
-        data.opName = IdPool::GetInstance().GetId(oriOpName);
-        data.taskType = IdPool::GetInstance().GetId(oriTaskType);
-        data.opType = IdPool::GetInstance().GetId(oriOpType);
+        data.opName = IdPool::GetInstance().GetUint64Id(oriOpName);
+        data.taskType = IdPool::GetInstance().GetUint64Id(oriTaskType);
+        data.opType = IdPool::GetInstance().GetUint64Id(oriOpType);
         data.correlationId = IdPool::GetInstance().GetId(
             std::make_tuple(
                 data.deviceId, data.modelId, data.streamId, data.taskId, data.contextId, data.batchId));
-        data.inputFormats = IdPool::GetInstance().GetId(oriInputFormats);
-        data.inputDataTypes = IdPool::GetInstance().GetId(oriInputDataTypes);
-        data.inputShapes = IdPool::GetInstance().GetId(oriInputShapes);
-        data.outputFormats = IdPool::GetInstance().GetId(oriOutputFormats);
-        data.outputDataTypes = IdPool::GetInstance().GetId(oriOutputDataTypes);
-        data.outputShapes = IdPool::GetInstance().GetId(oriOutputShapes);
+        data.inputFormats = IdPool::GetInstance().GetUint64Id(oriInputFormats);
+        data.inputDataTypes = IdPool::GetInstance().GetUint64Id(oriInputDataTypes);
+        data.inputShapes = IdPool::GetInstance().GetUint64Id(oriInputShapes);
+        data.outputFormats = IdPool::GetInstance().GetUint64Id(oriOutputFormats);
+        data.outputDataTypes = IdPool::GetInstance().GetUint64Id(oriOutputDataTypes);
+        data.outputShapes = IdPool::GetInstance().GetUint64Id(oriOutputShapes);
         processedData.emplace_back(data.opName, data.correlationId, data.blockDim, data.maxBlockDim, data.taskType,
                                    data.opType, data.inputFormats, data.inputDataTypes, data.inputShapes,
                                    data.outputFormats, data.outputDataTypes, data.outputShapes);
@@ -111,15 +108,19 @@ ComputeTaskInfoProcesser::ProcessedDataFormat ComputeTaskInfoProcesser::FormatDa
 
 bool ComputeTaskInfoProcesser::Process(const std::string &fileDir)
 {
-    std::string dbPath = Utils::File::PathJoin({fileDir, HOST, SQLITE, geInfoDB_.dbName});
+    DBInfo geInfoDB;
+    geInfoDB.tableName = "TaskInfo";
+    geInfoDB.dbName = "ge_info.db";
+    MAKE_SHARED0_NO_OPERATION(geInfoDB.database, GEInfoDB);
+    std::string dbPath = Utils::File::PathJoin({fileDir, HOST, SQLITE, geInfoDB.dbName});
     if (!Utils::FileReader::Check(dbPath, MAX_DB_BYTES)) {
         ERROR("DbPath does not exists: %.", dbPath);
         return false;
     }
-    MAKE_SHARED_RETURN_VALUE(geInfoDB_.dbRunner, DBRunner, false, dbPath);
-    auto oriData = GetData();
+    MAKE_SHARED_RETURN_VALUE(geInfoDB.dbRunner, DBRunner, false, dbPath);
+    auto oriData = GetData(geInfoDB);
     if (oriData.empty()) {
-        ERROR("Get % data failed in %.", geInfoDB_.tableName, dbPath);
+        ERROR("Get % data failed in %.", geInfoDB.tableName, dbPath);
         return false;
     }
     auto processedData = FormatData(oriData);

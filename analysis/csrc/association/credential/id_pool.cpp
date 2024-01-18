@@ -30,21 +30,34 @@ const uint32_t BATCH_ID = 5;
 // 清除map数据
 void IdPool::Clear()
 {
-    stringIds_.clear();
+    uint64Ids_.clear();
     correlationIds_.clear();
-    stringIndex_ = 0;
+    uint32Ids_.clear();
+    uint64Index_ = 0;
     correlationIndex_ = 0;
+    uint32Index_ = 0;
 }
 
-// 获取string格式map的key对应value，如果不存在则添加(key, value)并返回value
-uint64_t IdPool::GetId(const std::string& key)
+// 获取string格式map的key对应value(64位)，如果不存在则添加(key, value)并返回value
+uint64_t IdPool::GetUint64Id(const std::string& key)
 {
-    std::lock_guard<std::mutex> lock(stringMutex_);
-    if (stringIds_.find(key) == stringIds_.end()) {
-        stringIds_.insert({key, stringIndex_});
-        stringIndex_++;
+    std::lock_guard<std::mutex> lock(uint64Mutex_);
+    if (uint64Ids_.find(key) == uint64Ids_.end()) {
+        uint64Ids_.insert({key, uint64Index_});
+        uint64Index_++;
     }
-    return stringIds_[key];
+    return uint64Ids_[key];
+}
+
+// 获取string格式map的key对应value(32位)，如果不存在则添加(key, value)并返回value
+uint64_t IdPool::GetUint32Id(const std::string& key)
+{
+    std::lock_guard<std::mutex> lock(uint32Mutex_);
+    if (uint32Ids_.find(key) == uint32Ids_.end()) {
+        uint32Ids_.insert({key, uint32Index_});
+        uint32Index_++;
+    }
+    return uint32Ids_[key];
 }
 
 // 获取CorrelationTuple格式map的key对应value，如果不存在则添加(key, value)并返回value
@@ -62,10 +75,10 @@ uint64_t IdPool::GetId(const CorrelationTuple& key)
 }
 
 // 输出stringIds_ map全部数据
-std::unordered_map<std::string, uint64_t>& IdPool::GetAllStringIds()
+std::unordered_map<std::string, uint64_t>& IdPool::GetAllUint64Ids()
 {
-    std::lock_guard<std::mutex> lock(stringMutex_);
-    return stringIds_;
+    std::lock_guard<std::mutex> lock(uint64Mutex_);
+    return uint64Ids_;
 }
 
 }

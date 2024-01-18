@@ -21,6 +21,7 @@ namespace Viewer {
 namespace Database {
 
 const uint32_t POOLNUM = 2;
+const uint16_t CONNECTION_ID_BITS = 42;
 
 TableProcesser::TableProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths)
     : reportDBPath_(reportDBPath), profPaths_(profPaths)
@@ -50,7 +51,6 @@ bool TableProcesser::Run()
     pool.Stop();
     return retFlag;
 }
-
 
 } // Database
 } // Viewer

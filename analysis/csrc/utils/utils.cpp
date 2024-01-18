@@ -10,6 +10,7 @@
  * *****************************************************************************
  */
 
+#include <unordered_set>
 #include "analysis/csrc/utils/utils.h"
 
 #include "analysis/csrc/dfx/error_code.h"
@@ -17,6 +18,7 @@
 
 namespace Analysis {
 namespace Utils {
+using namespace Analysis::Parser::Environment;
 std::string Join(const std::vector<std::string> &str, const std::string &delimiter)
 {
     std::stringstream ss;
@@ -125,6 +127,18 @@ uint16_t GetDeviceIdByDevicePath(const std::string &filePath)
     return deviceId;
 }
 
+bool IsNumber(const std::string& s)
+{
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) ++it;
+    return !s.empty() && it == s.end();
+}
+
+uint64_t Splicing(uint32_t high, uint32_t low)
+{
+    const uint8_t shift = 32;
+    return (static_cast<uint64_t>(high) << shift) | low;
+}
 
 }  // namespace Utils
 }  // namespace Analysis

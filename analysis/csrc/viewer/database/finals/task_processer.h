@@ -12,6 +12,7 @@
 #ifndef ANALYSIS_VIEWER_DATABASE_TASK_PROCESSER_H
 #define ANALYSIS_VIEWER_DATABASE_TASK_PROCESSER_H
 
+#include "analysis/csrc/utils/time_utils.h"
 #include "analysis/csrc/viewer/database/finals/table_processer.h"
 
 namespace Analysis {
@@ -22,10 +23,10 @@ class TaskProcesser : public TableProcesser {
     // model_id, index_id, stream_id, task_id, context_id, batch_id, start_time, duration, host_task_type,
     // device_task_type, connection_id
     using OriDataFormat = std::vector<std::tuple<uint32_t, int32_t, int32_t, uint32_t, uint32_t, uint32_t, double,
-                                                   double, std::string, std::string, int64_t>>;
+                                                   double, std::string, std::string, uint32_t>>;
     // start, end, deviceId, connectionId, correlationId, globalPid, taskType, contextId, streamId, taskId,
     // modelId
-    using ProcessedDataFormat = std::vector<std::tuple<double, double, uint32_t, int64_t, uint64_t,
+    using ProcessedDataFormat = std::vector<std::tuple<std::string, std::string, uint32_t, int64_t, uint64_t,
                                                          uint64_t, uint32_t, uint32_t, int32_t, uint32_t, uint32_t>>;
 public:
     TaskProcesser() = default;
@@ -34,11 +35,10 @@ public:
 protected:
     bool Process(const std::string &fileDir) override;
 private:
-    OriDataFormat GetData();
-    ProcessedDataFormat FormatData(const OriDataFormat &oriData);
-    uint64_t GetTaskType(const std::string &hostType, const std::string &deviceType);
-    uint64_t GetConnectionId(uint64_t high, uint64_t low);
-    DBInfo ascendTaskDB_;
+    static OriDataFormat GetData(DBInfo &raceVariable);
+    ProcessedDataFormat FormatData(const OriDataFormat &oriData, uint16_t deviceId, uint64_t globalPid,
+                                   uint16_t platformVersion, Utils::ProfTimeRecord &timeRecord);
+    static uint64_t GetTaskType(const std::string &hostType, const std::string &deviceType, uint16_t platformVersion);
 };
 
 } // Database
