@@ -22,22 +22,22 @@ class ConnectionUtest : public testing::Test {
 protected:
     static void TearDownTestCase()
     {
-        if (File::Exist("/tmp/a.db")) {
-            File::DeleteFile("/tmp/a.db");
+        if (File::Exist("./a.db")) {
+            File::DeleteFile("./a.db");
         }
     }
 };
 
 TEST_F(ConnectionUtest, Connection)
 {
-    std::string path = "/tmp/a.db";
+    std::string path = "./a.db";
     auto dbConn = std::make_shared<Connection>(path);
     EXPECT_NE(nullptr, dbConn->db_);
 }
 
 TEST_F(ConnectionUtest, ExecuteCreateTable)
 {
-    std::string path = "/tmp/a.db";
+    std::string path = "./a.db";
     auto dbConn = std::make_shared<Connection>(path);
     std::string sql = "CREATE TABLE IF NOT EXISTS tb1 (id INT PRIMARY KEY,name VARCHAR(255),age INT);";
     auto rc = dbConn->ExecuteCreateTable(sql);
@@ -46,7 +46,7 @@ TEST_F(ConnectionUtest, ExecuteCreateTable)
 
 TEST_F(ConnectionUtest, ExecuteDropTable)
 {
-    std::string path = "/tmp/a.db";
+    std::string path = "./a.db";
     auto dbConn = std::make_shared<Connection>(path);
     std::string sql = "DROP TABLE tb1;";
     auto rc = dbConn->ExecuteDropTable(sql);
@@ -55,7 +55,7 @@ TEST_F(ConnectionUtest, ExecuteDropTable)
 
 TEST_F(ConnectionUtest, ExecuteInsert)
 {
-    std::string path = "/tmp/a.db";
+    std::string path = "./a.db";
     auto dbConn = std::make_shared<Connection>(path);
     dbConn->ExecuteDropTable("DROP TABLE tb2;");
     std::string sql = "CREATE TABLE IF NOT EXISTS tb2 (c1 INTEGER PRIMARY KEY,c2 INTEGER, c3 INTEGER,"
@@ -71,7 +71,7 @@ TEST_F(ConnectionUtest, ExecuteInsert)
 
 TEST_F(ConnectionUtest, ExecuteDelete)
 {
-    std::string path = "/tmp/a.db";
+    std::string path = "./a.db";
     auto dbConn = std::make_shared<Connection>(path);
     std::string sql = "CREATE TABLE IF NOT EXISTS tb1 (id INT PRIMARY KEY,name VARCHAR(255),age INT);";
     dbConn->ExecuteCreateTable(sql);
@@ -86,7 +86,7 @@ TEST_F(ConnectionUtest, ExecuteDelete)
 
 TEST_F(ConnectionUtest, ExecuteUpdate)
 {
-    std::string path = "/tmp/a.db";
+    std::string path = "./a.db";
     auto dbConn = std::make_shared<Connection>(path);
     std::string sql = "CREATE TABLE IF NOT EXISTS tb1 (id INT PRIMARY KEY,name VARCHAR(255),age INT);";
     dbConn->ExecuteCreateTable(sql);
@@ -101,7 +101,7 @@ TEST_F(ConnectionUtest, ExecuteUpdate)
 
 TEST_F(ConnectionUtest, ExecuteQuery)
 {
-    std::string path = "/tmp/a.db";
+    std::string path = "./a.db";
     auto dbConn = std::make_shared<Connection>(path);
     dbConn->ExecuteDropTable("DROP TABLE tb2;");
     std::string sql = "CREATE TABLE IF NOT EXISTS tb2 (c1 INTEGER PRIMARY KEY,c2 INTEGER, c3 INTEGER,"
@@ -135,7 +135,7 @@ TEST_F(ConnectionUtest, ExecuteQuery)
 
 TEST_F(ConnectionUtest, InsertCmd)
 {
-    std::string path = "/tmp/a.db";
+    std::string path = "./a.db";
     auto dbConn = std::make_shared<Connection>(path);
     auto rc = dbConn->InsertCmd("tb1", 3);
     EXPECT_EQ(rc, true);
@@ -144,7 +144,7 @@ TEST_F(ConnectionUtest, InsertCmd)
 
 TEST_F(ConnectionUtest, QueryCmd)
 {
-    std::string path = "/tmp/a.db";
+    std::string path = "./a.db";
     auto dbConn = std::make_shared<Connection>(path);
     auto rc = dbConn->QueryCmd("SELECT * FROM tb1;");
     EXPECT_EQ(rc, true);
