@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 import unittest
+from io import StringIO
 from unittest import mock
 from unittest.mock import MagicMock
 
@@ -167,17 +168,16 @@ class TestMsprofOutputSummary(unittest.TestCase):
     def test_insert_summary_data_when_more_than_1000000_then_insert_data(self):
         helper = FileSliceHelper("test", "op_summary", "summary")
         mock_iterator = MagicMock()
-        mock_iterator.__iter__.return_value = iter([{11: 1, 12: 2, 13: 3}, ] * 1000001)
-        mock_iterator.fieldnames = [11, 12, 13]
+        mock_iterator.__iter__.return_value = iter(['1,2,3'] * 1000001)
         with mock.patch(NAMESPACE + '.FileOpen'), \
                 mock.patch('common_func.file_manager.check_path_valid'), \
-                mock.patch('csv.DictReader', return_value=mock_iterator), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary.read_file', return_value=mock_iterator), \
                 mock.patch('common_func.file_slice_helper.FileSliceHelper.check_header_is_empty',
                            return_value=True), \
-                mock.patch('common_func.file_slice_helper.FileSliceHelper.dump_csv_data'):
+                mock.patch('common_func.msvp_common.create_normal_writer'):
             check = MsprofOutputSummary('test')
             check._insert_summary_data("op_summary", "test", helper)
-            self.assertEqual(len(helper.data_list), 1000001)
+            self.assertEqual(len(helper.data_list), 1)
 
     def test_get_newest_file_list_when_csv_normal_filename_then_pass(self):
         _file_list = [
@@ -208,6 +208,14 @@ class TestMsprofOutputSummary(unittest.TestCase):
         data_type = StrConstant.FILE_SUFFIX_JSON
         check = MsprofOutputSummary('test')
         self.assertEqual(check.get_newest_file_list(_file_list, data_type), [])
+
+    def test_read_file_when_normal_then_pass(self):
+        input_str = "data1"
+        output_list = ["data1"]
+        reader = StringIO(input_str)
+        check = MsprofOutputSummary('test')
+        res = list(check.read_file(reader))
+        self.assertEqual(res, output_list)
 
     def test_get_file_name_when_normal_name_then_pass(self):
         check = MsprofOutputSummary('test')

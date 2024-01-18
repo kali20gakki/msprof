@@ -189,7 +189,7 @@ def create_csv(csv_file: str, headers: list, data: list, save_old_file: bool = T
         return json.dumps({'status': NumberConstant.ERROR, 'info': str('bak or mkdir json dir failed'), 'data': ''})
     try:
         if use_dict:
-            create_csv_dict_writer(csv_file, headers, data)
+            create_normal_writer(csv_file, headers, data)
         else:
             create_csv_writer(csv_file, headers, data)
         return json.dumps({'status': NumberConstant.SUCCESS, 'info': '', 'data': csv_file})
@@ -209,17 +209,16 @@ def create_csv_writer(csv_file: str, headers: list, data: list):
         writer.writerows(data[slice_count * NumberConstant.DATA_NUM:])
 
 
-def create_csv_dict_writer(csv_file: str, headers: list, data: list):
-    with FdOpen(csv_file, newline='') as _csv_file:
+def create_normal_writer(csv_file: str, headers: list, data: list):
+    with FdOpen(csv_file) as _csv_file:
         if not headers:
             return
-        writer = csv.DictWriter(_csv_file, fieldnames=headers)
-        writer.writeheader()
+        _csv_file.write(','.join(headers))
         slice_count = len(data) // NumberConstant.DATA_NUM
         for index in range(slice_count):
-            writer.writerows(data[index * NumberConstant.DATA_NUM:
-                                  (index + 1) * NumberConstant.DATA_NUM])
-        writer.writerows(data[slice_count * NumberConstant.DATA_NUM:])
+            _csv_file.writelines(data[index * NumberConstant.DATA_NUM:
+                                      (index + 1) * NumberConstant.DATA_NUM])
+        _csv_file.writelines(data[slice_count * NumberConstant.DATA_NUM:])
 
 
 def create_json(json_file: str, headers: list, data: list, save_old_file: bool = True) -> str:
@@ -433,4 +432,3 @@ def clear_project_dirs(project_dir: str) -> None:
 
 def format_high_precision_for_csv(data: str) -> str:
     return data + '\t'
-
