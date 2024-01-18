@@ -37,8 +37,8 @@ KernelParserWorker::KernelParserWorker(std::string hostFilePath) : hostFilePath_
 int KernelParserWorker::Run()
 {
     Log::GetInstance().Init(Utils::File::PathJoin({hostFilePath_, "..", "mindstudio_profiler_log"}));
-    std::set<std::string> profPath {Utils::File::PathJoin({hostFilePath_, "..", ".."})};
-    Context::GetInstance().Load(profPath);
+    std::set<std::string> profPaths {Utils::File::PathJoin({hostFilePath_, ".."})};
+    Context::GetInstance().Load(profPaths);
     INFO("Start run KernelParserWorker");
     // 先创建目录
     std::string sqlBaseDir = Utils::File::PathJoin({hostFilePath_, "sqlite"});

@@ -17,7 +17,7 @@ namespace PyInterface {
 using KernelParserWorker = Analysis::Worker::KernelParserWorker;
 PyMethodDef g_methodTestSchedule[] = {
     {"dump_cann_trace", WrapDumpCANNTrace, METH_VARARGS, ""},
-    {nullptr, nullptr}
+    {NULL, NULL}
 };
 
 PyMethodDef *GetParserMethods()
@@ -27,10 +27,10 @@ PyMethodDef *GetParserMethods()
 
 PyObject *WrapDumpCANNTrace(PyObject *self, PyObject *args)
 {
-    std::string parseFilePath = nullptr;
+    const char *parseFilePath = NULL;
     if (!PyArg_ParseTuple(args, "s", &parseFilePath)) {
         PyErr_SetString(PyExc_TypeError, "parser.dump_cann_trace args parse failed!");
-        return nullptr;
+        return NULL;
     }
     KernelParserWorker parserWorker(parseFilePath);
     auto res = parserWorker.Run();

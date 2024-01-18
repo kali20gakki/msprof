@@ -16,7 +16,8 @@ include_directories(${COLLECTOR}/inc/toolchain)
 include_directories(${OPENSOURCE}/json/include)
 
 include_directories(/usr/local/include/)
-include_directories(/opt/buildtools/python-3.9.11/include/python3.9)
+find_package(Python REQUIRED COMPONENTS Development)
+include_directories(${Python_INCLUDE_DIRS})
 
 # 严格控制so中源文件范围，所有源文件精细到最末端文件夹
 aux_source_directory(${CSRC}/association SOURCES)

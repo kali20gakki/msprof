@@ -23,36 +23,36 @@
 
 namespace Analysis {
 namespace PyInterface {
-    static PyMethodDef g_moduleMethods[] = {
-        {nullptr, nullptr}
-    };
+static PyMethodDef g_moduleMethods[] = {
+    {NULL, NULL}
+};
 
-    static PyModuleDef g_mylibMethods = {
-        PyModuleDef_HEAD_INIT, "msprof_analysis", // name of module
-        "", // module documentation, may be nullptr
-        -1, // size of per-interpreter state of the module, or -1 if the module keeps state in global variables.
-        g_moduleMethods
-    };
+static PyModuleDef g_mylibMethods = {
+    PyModuleDef_HEAD_INIT, "msprof_analysis", // name of module
+    "", // module documentation, may be NULL
+    -1, // size of per-interpreter state of the module, or -1 if the module keeps state in global variables.
+    g_moduleMethods
+};
 
-    static void AddSubModule(PyObject *root, const char *name, PyMethodDef *methods)
-    {
-        PyObject *d = PyModule_GetDict(root);
-        std::string subModuleName = name;
-        std::string moduleName = "msprof_analysis." + subModuleName;
-        PyObject *subModule = PyDict_GetItemString(d, name);
-        if (subModule == nullptr) {
-            subModule = PyImport_AddModule(moduleName.c_str());
-            PyDict_SetItemString(d, name, subModule);
-            Py_XDECREF(subModule);
-        }
-        // populate module's dict
-        d = PyModule_GetDict(subModule);
-        for (PyMethodDef *m = methods; m->ml_name != nullptr; ++m) {
-            PyObject *methodObj = PyCFunction_NewEx(m, nullptr, nullptr);
-            PyDict_SetItemString(d, m->ml_name, methodObj);
-            Py_XDECREF(methodObj);
-        }
+static void AddSubModule(PyObject *root, const char *name, PyMethodDef *methods)
+{
+    PyObject *d = PyModule_GetDict(root);
+    std::string subModuleName = name;
+    std::string moduleName = "msprof_analysis." + subModuleName;
+    PyObject *subModule = PyDict_GetItemString(d, name);
+    if (subModule == NULL) {
+        subModule = PyImport_AddModule(moduleName.c_str());
+        PyDict_SetItemString(d, name, subModule);
+        Py_XDECREF(subModule);
     }
+    // populate module's dict
+    d = PyModule_GetDict(subModule);
+    for (PyMethodDef *m = methods; m->ml_name != NULL; ++m) {
+        PyObject *methodObj = PyCFunction_NewEx(m, NULL, NULL);
+        PyDict_SetItemString(d, m->ml_name, methodObj);
+        Py_XDECREF(methodObj);
+    }
+}
 
 #ifdef __cplusplus
 extern "C" {
