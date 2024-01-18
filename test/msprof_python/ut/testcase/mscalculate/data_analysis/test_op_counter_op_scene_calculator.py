@@ -73,8 +73,9 @@ class TestOpCounterOpSceneCalculator(unittest.TestCase):
         InfoConfReader()._info_json = {'devices': '0'}
         check = OpCounterOpSceneCalculator(file_list, CONFIG)
         result = getattr(check, "_get_ge_sql")()
-        sql = "select model_id, op_name, op_type, task_type, task_id, stream_id,"\
-              " batch_id,context_id from TaskInfo where device_id=0 and task_type != 'HCCL'"
+        sql = "select model_id, op_name, op_type, task_type, task_id, stream_id, "\
+              "batch_id,context_id from TaskInfo where device_id=0 " \
+              "and task_type != 'HCCL' and task_type != 'HCCL_AI_CPU'"
         self.assertEqual(sql, result)
 
     def test_create_ge_merge(self):
