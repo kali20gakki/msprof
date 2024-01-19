@@ -208,7 +208,7 @@ class AiCoreOpReport:
                            [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE]) as hccl_model:
             if not hccl_model.check_table():
                 return []
-            hccl_comunication_data = hccl_model.get_hccl_op_data()
+            hccl_comunication_data = hccl_model.get_hccl_op_data_by_group()
         if not hccl_comunication_data:
             return []
 

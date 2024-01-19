@@ -200,11 +200,6 @@ class TestHCCLModel(TestDirCRBaseModel):
 
         model.finalize()
 
-    def test_get_hccl_op_data_sql(self):
-        with mock.patch(NAMESPACE + '.DBManager.fetch_all_data'):
-            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
-            check.get_hccl_op_data()
-
     def test_get_task_time_sql(self):
         with mock.patch(NAMESPACE + '.DBManager.fetch_all_data'):
             check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
