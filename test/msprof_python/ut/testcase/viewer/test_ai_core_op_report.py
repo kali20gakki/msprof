@@ -24,7 +24,10 @@ config = {'handler': '_get_op_summary_data',
 
 class TestAiCoreOpReport(unittest.TestCase):
     def test_get_op_summary_data1(self):
-        with mock.patch(NAMESPACE + '.AiCoreOpReport.get_ai_core_op_summary_data', return_value=[]):
+        with mock.patch(NAMESPACE + '.AiCoreOpReport.get_ai_core_op_summary_data', return_value=[]), \
+                mock.patch("os.path.exists", return_value=True), \
+                mock.patch(NAMESPACE + '.HcclViewModel.check_table', return_value=True), \
+                mock.patch(NAMESPACE + '.HcclViewModel.get_hccl_op_data_by_group', return_value=[]):
             check = AiCoreOpReport()
             res = check.get_op_summary_data("0", "", config)
         expect_res = [

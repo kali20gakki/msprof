@@ -60,16 +60,6 @@ class HcclViewModel(ViewModel):
     def rebuild_hccl_op_report_table(self):
         self.create_table_by_name(DBNameConstant.TABLE_HCCL_OP_REPORT)
 
-    def get_hccl_op_data(self):
-        """
-        get the real execution of the communication op
-        """
-        sql = f"select model_id, index_id, op_name, min(timestamp) as timestamp, " \
-              f"max(timestamp + duration) - min(timestamp) as duration, task_type, op_type, connection_id " \
-              f"from {DBNameConstant.TABLE_HCCL_SINGLE_DEVICE} " \
-              f"group by op_name, first_timestamp"
-        return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclTask)
-
     def get_hccl_task_data(self):
         if not self.attach_to_db(DBNameConstant.DB_ASCEND_TASK):
             logging.error("Attach to db %s failed, task data not found.", DBNameConstant.DB_ASCEND_TASK)
@@ -131,7 +121,7 @@ class HcclViewModel(ViewModel):
               f"max(timestamp + duration) - min(timestamp) as duration, task_type, op_type, connection_id " \
               f"from {DBNameConstant.TABLE_HCCL_SINGLE_DEVICE} " \
               f"WHERE is_master = 1 " \
-              f"group by op_name, first_timestamp, group_name"
+              f"group by op_name, first_timestamp"
         return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclTask)
 
     def get_hccl_op_time_section(self):

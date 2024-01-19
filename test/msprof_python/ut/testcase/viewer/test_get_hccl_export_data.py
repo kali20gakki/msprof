@@ -35,8 +35,7 @@ class TestHCCLExport(unittest.TestCase):
         data = ((1, 1, 1),)
         insert_sql = "insert into {0} values ({1})".format(table_name, "?," * (len(data[0]) - 1) + "?")
         conn, curs = db_manager.create_table('hccl.db', create_sql, insert_sql, data)
-        with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_data', return_value=[]):
-            res = HCCLExport(PARAMS).get_hccl_timeline_data()
+        res = HCCLExport(PARAMS).get_hccl_timeline_data()
         self.assertEqual(res, [])
         with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_all_data', return_value=[]), \
                 mock.patch('msmodel.interface.view_model.DBManager.create_connect_db', return_value=(conn, curs)), \
