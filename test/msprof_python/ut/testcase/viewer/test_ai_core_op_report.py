@@ -246,7 +246,8 @@ class TestAiCoreOpReport(unittest.TestCase):
         InfoConfReader()._local_time_offset = 10.0
         res_data = (
             "select -1,  task_id, stream_id,  'N/A', 'N/A', task_type, start_time, duration_time, "
-            "wait_time ,'N/A' from task_time where task_type!=? and task_type!=? order by start_time",
+            "wait_time, (case when task_time.subtask_id=4294967295 then 'N/A' else task_time.subtask_id end) "
+            "from task_time where task_type!=? and task_type!=? order by start_time",
             ['Op Name', 'stream_id']
         )
         ProfilingScene().init('')

@@ -456,15 +456,16 @@ class AiCoreOpReport:
     def _get_table_sql_and_headers_without_ge(cls: any, headers: list) -> tuple:
         cls.clear_no_ge_data_headers(headers)
         model_id = "{0}, ".format(NumberConstant.DEFAULT_MODEL_ID) if ProfilingScene().is_all_export() else 'model_id, '
-        subtask_id = ",subtask_id " if ChipManager().is_chip_v4() else ",'N/A'"
         sql = "select {model_id} task_id, stream_id, {index_info} 'N/A', 'N/A', task_type, " \
-              "start_time, duration_time, wait_time {subtask_id} from {0} where task_type!=? " \
+              "start_time, duration_time, wait_time, " \
+              "(case when {0}.subtask_id={context_id} then 'N/A' else {0}.subtask_id end) " \
+              "from {0} where task_type!=? " \
               "and task_type!=? order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                     NS_TO_US=NumberConstant.NS_TO_US,
                     index_info=cls._get_index_id_sql_condition(),
                     local_time_offset=InfoConfReader().get_local_time_offset(),
-                    subtask_id=subtask_id,
+                    context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
                     model_id=model_id)
         return sql, headers
 
