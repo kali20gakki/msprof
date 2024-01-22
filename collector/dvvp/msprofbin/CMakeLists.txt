@@ -9,6 +9,7 @@ set(msprofBinHeader
     include
     ../
     ../app
+    ${TOP_DIR}/
     ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/collector/dvvp/depend/inc/slog
     ${TOP_DIR}/opensource/json/include
@@ -52,7 +53,21 @@ set(hdcCpp
     ../adx/wrapper/memory_utils.cpp
 )
 
+aux_source_directory(${TOP_DIR}/analysis/csrc/viewer/database/finals ANALYSIS_SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/viewer/database/ ANALYSIS_SOURCES)
+set(ANALYSIS_SOURCES
+    ${ANALYSIS_SOURCES}
+    ${TOP_DIR}/analysis/csrc/dfx/log.cpp
+    ${TOP_DIR}/analysis/csrc/utils/thread_pool.cpp
+    ${TOP_DIR}/analysis/csrc/utils/file.cpp
+    ${TOP_DIR}/analysis/csrc/utils/time_utils.cpp
+    ${TOP_DIR}/analysis/csrc/utils/utils.cpp
+    ${TOP_DIR}/analysis/csrc/parser/environment/context.cpp
+    ${TOP_DIR}/analysis/csrc/association/credential/id_pool.cpp
+)
+
 add_executable(msprofbin
+    ${ANALYSIS_SOURCES}
     ${TOP_DIR}/collector/dvvp/common/platform/platform_adapter.cpp
     ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter.cpp
     ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter_msprof.cpp
@@ -168,6 +183,7 @@ target_link_libraries(msprofbin PRIVATE
     c_sec
     ascend_protobuf_static
     -lpthread
+    -lsqlite3
     dl
 )
 
