@@ -3,17 +3,16 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : api_processer_utest.cpp
- * Description        : ApiProcesser UT
+ * File Name          : api_processor_utest.cpp
+ * Description        : ApiProcessor UT
  * Author             : msprof team
  * Creation Date      : 2024/01/09
  * *****************************************************************************
  */
 
 #include "gtest/gtest.h"
-#include "analysis/csrc/viewer/database/finals/api_processer.h"
+#include "analysis/csrc/viewer/database/finals/api_processor.h"
 #include "mockcpp/mockcpp.hpp"
-
 #include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/parser/environment/context.h"
@@ -69,7 +68,7 @@ const uint16_t LEVEL_INDEX = 2;
 const uint16_t TID_INDEX = 3;
 const uint16_t CONNECTION_ID_INDEX = 7;
 
-class ApiProcesserUTest : public testing::Test {
+class ApiProcessorUTest : public testing::Test {
 protected:
     static void SetUpTestCase()
     {
@@ -191,7 +190,7 @@ void CheckApiDataValid(const QueryDataFormat &checkData)
         EXPECT_EQ(Utils::StrToDouble(tempEnd, end), ANALYSIS_OK);
         EXPECT_LE(tempStart, tempEnd);
         // 比对前后的level是否一致
-        EXPECT_EQ(level, ApiProcesser().GetLevelValue(std::get<LEVEL_INDEX>(API_DATA[index])));
+        EXPECT_EQ(level, ApiProcessor().GetLevelValue(std::get<LEVEL_INDEX>(API_DATA[index])));
         uint32_t oriTid = std::get<TID_INDEX>(API_DATA[index]);
         uint32_t oriConId = std::get<CONNECTION_ID_INDEX>(API_DATA[index]);
         // globalTid和connectionId 都是高位为同一个uint32，低位为对应id。因此两者的高32位应一致
@@ -202,10 +201,10 @@ void CheckApiDataValid(const QueryDataFormat &checkData)
     }
 }
 
-TEST_F(ApiProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSuccess)
+TEST_F(ApiProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
-    auto processer = ApiProcesser(DB_PATH, {PROF_PATHS});
-    EXPECT_TRUE(processer.Run());
+    auto processor = ApiProcessor(DB_PATH, {PROF_PATHS});
+    EXPECT_TRUE(processor.Run());
     std::shared_ptr<DBRunner> dbRunner;
     MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
     QueryDataFormat checkData;
@@ -220,13 +219,13 @@ TEST_F(ApiProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSuccess)
     CheckApiDataValid(checkData);
 }
 
-TEST_F(ApiProcesserUTest, TestRunShouldReturnFalseWhenProcesserFail)
+TEST_F(ApiProcessorUTest, TestRunShouldReturnFalseWhenProcessorFail)
 {
-    auto processer = ApiProcesser(DB_PATH, {PROF0});
+    auto processor = ApiProcessor(DB_PATH, {PROF0});
     MOCKER_CPP(&Context::GetSyscntConversionParams)
     .stubs()
     .will(returnValue(false));
-    EXPECT_FALSE(processer.Run());
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&Context::GetSyscntConversionParams).reset();
 
     MOCKER_CPP(&Context::GetSyscntConversionParams)
@@ -235,29 +234,29 @@ TEST_F(ApiProcesserUTest, TestRunShouldReturnFalseWhenProcesserFail)
     MOCKER_CPP(&Context::GetProfTimeRecordInfo)
     .stubs()
     .will(returnValue(false));
-    EXPECT_FALSE(processer.Run());
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&Context::GetSyscntConversionParams).reset();
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).reset();
 }
 
-TEST_F(ApiProcesserUTest, TestRunShouldReturnFalseWhenFormatDataFail)
+TEST_F(ApiProcessorUTest, TestRunShouldReturnFalseWhenFormatDataFail)
 {
-    auto processer = ApiProcesser(DB_PATH, {PROF0});
+    auto processor = ApiProcessor(DB_PATH, {PROF0});
     MOCKER_CPP(&FileReader::Check)
     .stubs()
     .will(returnValue(false));
-    EXPECT_FALSE(processer.Run());
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&FileReader::Check).reset();
 
     MOCKER_CPP(&ProcessedDataFormat::reserve)
     .stubs()
     .will(throws(std::bad_alloc()));
-    EXPECT_FALSE(processer.Run());
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&ProcessedDataFormat::reserve).reset();
 
     MOCKER_CPP(&ProcessedDataFormat::empty)
     .stubs()
     .will(returnValue(true));
-    EXPECT_FALSE(processer.Run());
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&ProcessedDataFormat::empty).reset();
 }

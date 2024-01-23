@@ -3,8 +3,8 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : task_processer_utest.cpp
- * Description        : task_processer UT
+ * File Name          : task_processor_utest.cpp
+ * Description        : task_processor UT
  * Author             : msprof team
  * Creation Date      : 2024/1/1
  * *****************************************************************************
@@ -14,10 +14,9 @@
 #include <set>
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "analysis/csrc/viewer/database/finals/task_processer.h"
+#include "analysis/csrc/viewer/database/finals/task_processor.h"
 #include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/utils/thread_pool.h"
-#include "analysis/csrc/utils/file.h"
 #include "analysis/csrc/parser/environment/context.h"
 
 using namespace Analysis::Viewer::Database;
@@ -73,7 +72,7 @@ AscendTaskFormat DATA_B{{4294967295, -1, 37, 6, 3, 0, 8719911184665.1, 680.01367
                            "MEMCPY_ASYNC", "PCIE_DMA_SQE", 14991}};
 }
 
-class TaskProcesserUTest : public testing::Test {
+class TaskProcessorUTest : public testing::Test {
 protected:
     virtual void SetUp()
     {
@@ -139,7 +138,7 @@ void CheckStringId(ProcessedDataFormat data)
     }
 }
 
-TEST_F(TaskProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSuccess)
+TEST_F(TaskProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
     ProcessedDataFormat result;
     MAKE_SHARED0_NO_OPERATION(ReportDBRunner, DBRunner, DB_PATH);
@@ -153,8 +152,8 @@ TEST_F(TaskProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSuccess)
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
     .stubs()
     .will(returnValue(true));
-    auto processer = TaskProcesser(DB_PATH, PROF_PATHS);
-    EXPECT_TRUE(processer.Run());
+    auto processor = TaskProcessor(DB_PATH, PROF_PATHS);
+    EXPECT_TRUE(processor.Run());
     ReportDBRunner->QueryData(sql, result);
     CheckCorrelationId(result);
     CheckStringId(result);
@@ -163,7 +162,7 @@ TEST_F(TaskProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSuccess)
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
 }
 
-TEST_F(TaskProcesserUTest, TestRunShouldReturnFalseWhenSourceTableNotExist)
+TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenSourceTableNotExist)
 {
     auto dbPath = File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE_SUFFIX, DB_SUFFIX});
     std::shared_ptr<DBRunner> dbRunner;
@@ -172,11 +171,11 @@ TEST_F(TaskProcesserUTest, TestRunShouldReturnFalseWhenSourceTableNotExist)
     dbPath = File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE_SUFFIX, DB_SUFFIX});
     MAKE_SHARED0_NO_OPERATION(dbRunner, DBRunner, dbPath);
     dbRunner->DropTable(TABLE_NAME);
-    auto processer = TaskProcesser(DB_PATH, PROF_PATHS);
-    EXPECT_FALSE(processer.Run());
+    auto processor = TaskProcessor(DB_PATH, PROF_PATHS);
+    EXPECT_FALSE(processor.Run());
 }
 
-TEST_F(TaskProcesserUTest, TestRunShouldReturnFalseWhenCreateTableFailed)
+TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenCreateTableFailed)
 {
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPlatformVersion)
     .stubs()
@@ -187,18 +186,18 @@ TEST_F(TaskProcesserUTest, TestRunShouldReturnFalseWhenCreateTableFailed)
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
     .stubs()
     .will(returnValue(true));
-    auto processer = TaskProcesser(DB_PATH, PROF_PATHS);
+    auto processor = TaskProcessor(DB_PATH, PROF_PATHS);
     MOCKER_CPP(&Analysis::Viewer::Database::DBRunner::CreateTable)
     .stubs()
     .will(returnValue(false));
-    EXPECT_FALSE(processer.Run());
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&Analysis::Viewer::Database::DBRunner::CreateTable).reset();
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPlatformVersion).reset();
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPidFromInfoJson).reset();
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
 }
 
-TEST_F(TaskProcesserUTest, TestRunShouldReturnFalseWhenCheckPathFailed)
+TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenCheckPathFailed)
 {
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPlatformVersion)
     .stubs()
@@ -209,18 +208,18 @@ TEST_F(TaskProcesserUTest, TestRunShouldReturnFalseWhenCheckPathFailed)
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
     .stubs()
     .will(returnValue(true));
-    auto processer = TaskProcesser(DB_PATH, PROF_PATHS);
+    auto processor = TaskProcessor(DB_PATH, PROF_PATHS);
     MOCKER_CPP(&Analysis::Utils::File::Check)
     .stubs()
     .will(returnValue(false));
-    EXPECT_FALSE(processer.Run());
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&Analysis::Utils::File::Check).reset();
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPlatformVersion).reset();
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPidFromInfoJson).reset();
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
 }
 
-TEST_F(TaskProcesserUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
+TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
 {
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPlatformVersion)
     .stubs()
@@ -234,30 +233,30 @@ TEST_F(TaskProcesserUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
     auto id{TableColumn("Id", "INTEGER")};
     auto name{TableColumn("Name", "INTEGER")};
     std::vector<TableColumn> cols{id, name};
-    auto processer = TaskProcesser(DB_PATH, PROF_PATHS);
+    auto processor = TaskProcessor(DB_PATH, PROF_PATHS);
     MOCKER_CPP(&Analysis::Viewer::Database::Database::GetTableCols)
     .stubs()
     .will(returnValue(cols));
-    EXPECT_FALSE(processer.Run());
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&Analysis::Viewer::Database::Database::GetTableCols).reset();
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPlatformVersion).reset();
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPidFromInfoJson).reset();
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
 }
 
-TEST_F(TaskProcesserUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
+TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
 {
     using TempT = std::tuple<std::string, std::string, uint32_t, int64_t, uint64_t,
                              uint64_t, uint32_t, uint32_t, int32_t, uint32_t, uint32_t>;
     MOCKER_CPP(&std::vector<TempT>::reserve)
     .stubs()
     .will(throws(std::bad_alloc()));
-    auto processer = TaskProcesser(DB_PATH, PROF_PATHS);
-    EXPECT_FALSE(processer.Run());
+    auto processor = TaskProcessor(DB_PATH, PROF_PATHS);
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&std::vector<TempT>::reserve).reset();
 }
 
-TEST_F(TaskProcesserUTest, TestRunShouldReturnTrueWhenNoDb)
+TEST_F(TaskProcessorUTest, TestRunShouldReturnTrueWhenNoDb)
 {
     std::vector<std::string> deviceList = {File::PathJoin({TASK_PATH, "test", "device_1"})};
     MOCKER_CPP(&Utils::File::GetFilesWithPrefix)
@@ -266,7 +265,7 @@ TEST_F(TaskProcesserUTest, TestRunShouldReturnTrueWhenNoDb)
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
     .stubs()
     .will(returnValue(true));
-    auto processor = TaskProcesser(DB_PATH, {File::PathJoin({TASK_PATH, "test"})});
+    auto processor = TaskProcessor(DB_PATH, {File::PathJoin({TASK_PATH, "test"})});
     EXPECT_TRUE(processor.Run());
     MOCKER_CPP(&Utils::File::GetFilesWithPrefix).reset();
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();

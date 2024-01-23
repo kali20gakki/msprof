@@ -3,30 +3,30 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : string_ids_processer.h
- * Description        : stringids_processer，处理StringIds数据
+ * File Name          : string_ids_processor.h
+ * Description        : stringids_processor，处理StringIds数据
  * Author             : msprof team
  * Creation Date      : 2023/12/16
  * *****************************************************************************
  */
 
-#ifndef ANALYSIS_VIEWER_DATABASE_FINALS_STRINGIDS_PROCESSER_H
-#define ANALYSIS_VIEWER_DATABASE_FINALS_STRINGIDS_PROCESSER_H
+#ifndef ANALYSIS_VIEWER_DATABASE_FINALS_STRINGIDS_PROCESSOR_H
+#define ANALYSIS_VIEWER_DATABASE_FINALS_STRINGIDS_PROCESSOR_H
 
-#include "analysis/csrc/viewer/database/finals/table_processer.h"
+#include "analysis/csrc/viewer/database/finals/table_processor.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
 
 // 该类用于生成StringIds表
-class StringIdsProcesser : public TableProcesser {
+class StringIdsProcessor : public TableProcessor {
     using OriDataFormat = std::unordered_map<std::string, uint64_t>;
     using ProcessedDataFormat = std::vector<std::tuple<uint64_t, std::string>>;
 public:
-    StringIdsProcesser() = default;
-    explicit StringIdsProcesser(const std::string &reportDBPath);
-    virtual ~StringIdsProcesser() = default;
+    StringIdsProcessor() = default;
+    explicit StringIdsProcessor(const std::string &reportDBPath);
+    virtual ~StringIdsProcessor() = default;
     bool Run() override;
 protected:
     bool Process(const std::string &fileDir = "") override;
@@ -38,4 +38,4 @@ private:
 } // Viewer
 } // Analysis
 
-#endif // ANALYSIS_VIEWER_DATABASE_FINALS_STRINGIDS_PROCESSER_H
+#endif // ANALYSIS_VIEWER_DATABASE_FINALS_STRINGIDS_PROCESSOR_H

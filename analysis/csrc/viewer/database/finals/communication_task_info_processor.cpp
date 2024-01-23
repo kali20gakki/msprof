@@ -3,13 +3,13 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : communication_task_info_processer.cpp
- * Description        : communication_task_info_processer，处理表相关数据
+ * File Name          : communication_task_info_processor.cpp
+ * Description        : communication_task_info_processor，处理表相关数据
  * Author             : msprof team
  * Creation Date      : 2023/12/16
  * *****************************************************************************
  */
-#include "analysis/csrc/viewer/database/finals/communication_task_info_processer.h"
+#include "analysis/csrc/viewer/database/finals/communication_task_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/association/credential/id_pool.h"
 
@@ -40,19 +40,19 @@ struct CommunicationTaskData {
 };
 }
 
-CommunicationTaskInfoProcesser::CommunicationTaskInfoProcesser(const std::string &reportDBPath,
+CommunicationTaskInfoProcessor::CommunicationTaskInfoProcessor(const std::string &reportDBPath,
                                                                const std::set<std::string> &profPaths)
-    : TableProcesser(reportDBPath, profPaths) {}
+    : TableProcessor(reportDBPath, profPaths) {}
 
-bool CommunicationTaskInfoProcesser::Run()
+bool CommunicationTaskInfoProcessor::Run()
 {
     INFO("EnumApiLevelProcessor Run.");
-    bool flag = TableProcesser::Run();
+    bool flag = TableProcessor::Run();
     PrintProcessorResult(flag, TABLE_NAME_COMMUNICATION_TASK_INFO);
     return flag;
 }
 
-CommunicationTaskInfoProcesser::OriDataFormat CommunicationTaskInfoProcesser::GetData(DBInfo &hcclSingleDeviceDB)
+CommunicationTaskInfoProcessor::OriDataFormat CommunicationTaskInfoProcessor::GetData(DBInfo &hcclSingleDeviceDB)
 {
     OriDataFormat oriData;
     std::string sql{"SELECT model_id, op_name, hccl_name, group_name, plane_id, stream_id, task_id, local_rank, "
@@ -64,7 +64,7 @@ CommunicationTaskInfoProcesser::OriDataFormat CommunicationTaskInfoProcesser::Ge
     return oriData;
 }
 
-CommunicationTaskInfoProcesser::ProcessedDataFormat CommunicationTaskInfoProcesser::FormatData(
+CommunicationTaskInfoProcessor::ProcessedDataFormat CommunicationTaskInfoProcessor::FormatData(
     const OriDataFormat &oriData, uint16_t deviceId)
 {
     ProcessedDataFormat processedData;
@@ -100,7 +100,7 @@ CommunicationTaskInfoProcesser::ProcessedDataFormat CommunicationTaskInfoProcess
     return processedData;
 }
 
-bool CommunicationTaskInfoProcesser::Process(const std::string &fileDir)
+bool CommunicationTaskInfoProcessor::Process(const std::string &fileDir)
 {
     bool flag = true;
     DBInfo hcclSingleDeviceDB("hccl_single_device.db", "HCCLSingleDevice");
