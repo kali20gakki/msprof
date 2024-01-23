@@ -42,9 +42,14 @@ struct CommunicationTaskData {
 
 CommunicationTaskInfoProcesser::CommunicationTaskInfoProcesser(const std::string &reportDBPath,
                                                                const std::set<std::string> &profPaths)
-    : TableProcesser(reportDBPath, profPaths)
+    : TableProcesser(reportDBPath, profPaths) {}
+
+bool CommunicationTaskInfoProcesser::Run()
 {
-    reportDB_.tableName = TABLE_NAME_COMMUNICATION_TASK_INFO;
+    INFO("EnumApiLevelProcessor Run.");
+    bool flag = TableProcesser::Run();
+    PrintProcessorResult(flag, TABLE_NAME_COMMUNICATION_TASK_INFO);
+    return flag;
 }
 
 CommunicationTaskInfoProcesser::OriDataFormat CommunicationTaskInfoProcesser::GetData(DBInfo &hcclSingleDeviceDB)
@@ -98,17 +103,20 @@ CommunicationTaskInfoProcesser::ProcessedDataFormat CommunicationTaskInfoProcess
 bool CommunicationTaskInfoProcesser::Process(const std::string &fileDir)
 {
     bool flag = true;
-    DBInfo hcclSingleDeviceDB;
-    hcclSingleDeviceDB.dbName = "hccl_single_device.db";
-    hcclSingleDeviceDB.tableName = "HCCLSingleDevice";
+    DBInfo hcclSingleDeviceDB("hccl_single_device.db", "HCCLSingleDevice");
     MAKE_SHARED0_RETURN_VALUE(hcclSingleDeviceDB.database, HCCLSingleDeviceDB, false);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
         uint16_t deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
         std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, hcclSingleDeviceDB.dbName});
+        // 并不是所有场景都有hccl数据
+        if (!Utils::File::Exist(dbPath)) {
+            WARN("Can't find the db, the path is %.", dbPath);
+            continue;
+        }
         if (!Utils::FileReader::Check(dbPath, MAX_DB_BYTES)) {
             flag = false;
-            ERROR("DbPath does not exists: %.", dbPath);
+            ERROR("Check % failed.", dbPath);
             continue;
         }
         MAKE_SHARED_RETURN_VALUE(hcclSingleDeviceDB.dbRunner, DBRunner, false, dbPath);
@@ -119,7 +127,7 @@ bool CommunicationTaskInfoProcesser::Process(const std::string &fileDir)
             continue;
         }
         auto processedData = FormatData(oriData, deviceId);
-        if (!SaveData(processedData)) {
+        if (!SaveData(processedData, TABLE_NAME_COMMUNICATION_TASK_INFO)) {
             flag = false;
             ERROR("Save data failed, %.", dbPath);
             continue;

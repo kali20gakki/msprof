@@ -30,26 +30,31 @@ namespace {
 
 TargetInfoNpuProcesser::TargetInfoNpuProcesser(const std::string &reportDBPath,
                                                const std::set<std::string> &profPaths)
-    : TableProcesser(reportDBPath, profPaths)
+    : TableProcesser(reportDBPath, profPaths) {}
+
+bool TargetInfoNpuProcesser::Run()
 {
-    reportDB_.tableName = TABLE_NAME_TARGET_INFO_NPU;
-};
+    INFO("TargetInfoNpuProcessor Run.");
+    bool flag = TableProcesser::Run();
+    PrintProcessorResult(flag, TABLE_NAME_TARGET_INFO_NPU);
+    return flag;
+}
 
 bool TargetInfoNpuProcesser::Process(const std::string &fileDir)
 {
-    INFO("TargetInfoNpuProcesser Process, dir is %", fileDir);
+    INFO("TargetInfoNpuProcessor Process, dir is %", fileDir);
     auto deviceDirs = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     NpuInfoDataFormat npuInfoData;
     for (const auto& deviceDir : deviceDirs) {
         UpdateNpuData(fileDir, deviceDir, npuInfoData);
     }
-    return SaveData(npuInfoData);
+    return SaveData(npuInfoData, TABLE_NAME_TARGET_INFO_NPU);
 }
 
 void TargetInfoNpuProcesser::UpdateNpuData(const std::string &fileDir, const std::string &deviceDir,
                                            NpuInfoDataFormat &npuInfoData)
 {
-    INFO("TargetInfoNpuProcesser UpdateNpuData, dir is %", fileDir);
+    INFO("TargetInfoNpuProcessor UpdateNpuData, dir is %", fileDir);
     uint16_t deviceId = Utils::GetDeviceIdByDevicePath(deviceDir);
     uint16_t chip = Context::GetInstance().GetPlatformVersion(deviceId, fileDir);
     std::string chipName;

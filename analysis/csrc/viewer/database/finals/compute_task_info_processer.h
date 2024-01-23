@@ -34,11 +34,12 @@ public:
     ComputeTaskInfoProcesser() = default;
     ComputeTaskInfoProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths);
     virtual ~ComputeTaskInfoProcesser() = default;
+    bool Run() override;
 protected:
     bool Process(const std::string &fileDir) override;
 private:
     static OriDataFormat GetData(const DBInfo &geInfo);
-    ProcessedDataFormat FormatData(const OriDataFormat &oriData);
+    static ProcessedDataFormat FormatData(const OriDataFormat &oriData);
 };
 
 } // Database

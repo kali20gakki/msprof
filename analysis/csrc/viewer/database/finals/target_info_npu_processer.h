@@ -25,6 +25,7 @@ using NpuInfoDataFormat = std::vector<std::tuple<uint16_t, std::string>>;
 public:
     TargetInfoNpuProcesser() = default;
     TargetInfoNpuProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    bool Run() override;
 protected:
     bool Process(const std::string &fileDir) override;
 private:

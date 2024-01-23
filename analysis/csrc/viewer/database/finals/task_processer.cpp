@@ -24,7 +24,7 @@ struct TaskData {
     double start;
     double duration;
     double end;
-    uint32_t connectionId;
+    uint64_t connectionId;
     uint64_t correlationId;
     uint64_t taskType;
     uint32_t contextId;
@@ -40,9 +40,14 @@ struct TaskData {
 }
 
 TaskProcesser::TaskProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : TableProcesser(reportDBPath, profPaths)
+    : TableProcesser(reportDBPath, profPaths) {}
+
+bool TaskProcesser::Run()
 {
-    reportDB_.tableName = TABLE_NAME_TASK;
+    INFO("TaskProcessor Run.");
+    bool flag = TableProcesser::Run();
+    PrintProcessorResult(flag, TABLE_NAME_TASK);
+    return flag;
 }
 
 uint64_t TaskProcesser::GetTaskType(const std::string& hostType, const std::string& deviceType,
@@ -85,7 +90,7 @@ TaskProcesser::OriDataFormat TaskProcesser::GetData(DBInfo &ascendTaskDB)
 }
 
 TaskProcesser::ProcessedDataFormat TaskProcesser::FormatData(const OriDataFormat &oriData, uint16_t deviceId,
-                                                             uint64_t globalPid, uint16_t platformVersion,
+                                                             uint32_t globalPid, uint16_t platformVersion,
                                                              Utils::ProfTimeRecord &timeRecord)
 {
     ProcessedDataFormat processedData;
@@ -101,7 +106,7 @@ TaskProcesser::ProcessedDataFormat TaskProcesser::FormatData(const OriDataFormat
         std::tie(data.modelId, std::ignore, data.streamId, data.taskId, data.contextId, data.batchId,
                  data.start, data.duration, oriHostTaskType, oriDeviceTaskType, oriConnectionId) = row;
         data.end = data.start + std::max(data.duration, 0.0);
-        data.connectionId = Utils::Splicing(globalPid, oriConnectionId);
+        data.connectionId = Utils::Contact(globalPid, oriConnectionId);
         data.correlationId = IdPool::GetInstance().GetId(
             std::make_tuple(deviceId, data.modelId, data.streamId, data.taskId, data.contextId,
                             data.batchId));
@@ -119,20 +124,15 @@ TaskProcesser::ProcessedDataFormat TaskProcesser::FormatData(const OriDataFormat
 bool TaskProcesser::Process(const std::string &fileDir)
 {
     INFO("Start to process %.", fileDir);
-    uint16_t deviceId;
-    uint16_t platformVersion;
-    uint32_t globalPid;
     Utils::ProfTimeRecord timeRecord;
-    DBInfo ascendTaskDB;
+    DBInfo ascendTaskDB("ascend_task.db", "AscendTask");
     bool flag = true;
-    ascendTaskDB.dbName = "ascend_task.db";
-    ascendTaskDB.tableName = "AscendTask";
     MAKE_SHARED0_NO_OPERATION(ascendTaskDB.database, AscendTaskDB);
-    globalPid = IdPool::GetInstance().GetUint32Id(fileDir);
+    uint32_t globalPid = IdPool::GetInstance().GetUint32Id(fileDir);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
-        deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
-        platformVersion = Context::GetInstance().GetPlatformVersion(deviceId, fileDir);
+        uint16_t deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
+        uint16_t platformVersion = Context::GetInstance().GetPlatformVersion(deviceId, fileDir);
         if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir)) {
             ERROR("Failed to obtain the time in start_info and end_info.");
             flag = false;
@@ -140,8 +140,13 @@ bool TaskProcesser::Process(const std::string &fileDir)
         }
         std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, ascendTaskDB.dbName});
         INFO("Start to process %, pid:%, deviceId:%.", dbPath, globalPid, deviceId);
+        // 并不是所有场景都有ascend task数据
+        if (!Utils::File::Exist(dbPath)) {
+            WARN("Can't find the db, the path is %.", dbPath);
+            continue;
+        }
         if (!Utils::FileReader::Check(dbPath, MAX_DB_BYTES)) {
-            ERROR("DbPath does not exists: %.", dbPath);
+            ERROR("Check % failed.", dbPath);
             flag = false;
             continue;
         }
@@ -152,9 +157,8 @@ bool TaskProcesser::Process(const std::string &fileDir)
             ERROR("Get % data failed in %.", ascendTaskDB.tableName, dbPath);
             continue;
         }
-        auto processedData = FormatData(oriData, deviceId, globalPid,
-                                        platformVersion, timeRecord);
-        if (!SaveData(processedData)) {
+        auto processedData = FormatData(oriData, deviceId, globalPid, platformVersion, timeRecord);
+        if (!SaveData(processedData, TABLE_NAME_TASK)) {
             flag = false;
             ERROR("Save data failed, %.", dbPath);
             continue;

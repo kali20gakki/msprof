@@ -24,50 +24,51 @@ using Context = Parser::Environment::Context;
 
 namespace {
 struct ApiData {
-    std::string structType = "";
-    std::string id = "";
-    std::string level = "";
-    std::string itemId = "";
+    std::string structType;
+    std::string id;
+    std::string level;
+    std::string itemId;
     uint64_t start = UINT64_MAX;
     uint64_t end = UINT64_MAX;
     uint32_t threadId = UINT32_MAX;
     uint32_t connectionId = UINT32_MAX;
 };
-// 供左移右移使用
-const uint16_t MoveCount = 32;
 }
 
 ApiProcesser::ApiProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : TableProcesser(reportDBPath, profPaths)
+    : TableProcesser(reportDBPath, profPaths) {}
+
+bool ApiProcesser::Run()
 {
-    reportDB_.tableName = TABLE_NAME_API;
-};
+    INFO("ApiProcessor Run.");
+    bool flag = TableProcesser::Run();
+    PrintProcessorResult(flag, TABLE_NAME_API);
+    return flag;
+}
 
 bool ApiProcesser::Process(const std::string &fileDir)
 {
-    INFO("ApiProcesser Process, dir is %", fileDir);
-    ApiDataFormat apiData = GetData(fileDir);
+    INFO("ApiProcessor Process, dir is %", fileDir);
+    DBInfo apieventDB("api_event.db", "ApiData");
+    std::string dbPath = Utils::File::PathJoin({fileDir, HOST, SQLITE, apieventDB.dbName});
+    // db check 设置为10G
+    if (!Utils::FileReader::Check(dbPath, MAX_DB_BYTES)) {
+        ERROR("Check % failed.", dbPath);
+        return false;
+    }
+    ApiDataFormat apiData = GetData(dbPath, apieventDB);
     ProcessedDataFormat processedData;
     if (!FormatData(fileDir, apiData, processedData)) {
         ERROR("FormatData failed, fileDir is %.", fileDir);
         return false;
     }
-    return SaveData(processedData);
+    return SaveData(processedData, TABLE_NAME_API);
 }
 
-ApiProcesser::ApiDataFormat ApiProcesser::GetData(const std::string &fileDir)
+ApiProcesser::ApiDataFormat ApiProcesser::GetData(const std::string &dbPath, DBInfo &apieventDB)
 {
-    INFO("ApiProcesser GetData, dir is %", fileDir);
-    DBInfo apieventDB;
-    apieventDB.dbName = "api_event.db";
-    apieventDB.tableName = "ApiData";
-    std::string dbPath = Utils::File::PathJoin({fileDir, HOST, SQLITE, apieventDB.dbName});
+    INFO("ApiProcessor GetData, dir is %", dbPath);
     ApiDataFormat apiData;
-    // db check 设置为10G
-    if (!Utils::FileReader::Check(dbPath, MAX_DB_BYTES)) {
-        ERROR("Check % failed.", dbPath);
-        return apiData;
-    }
     MAKE_SHARED_RETURN_VALUE(apieventDB.dbRunner, DBRunner, apiData, dbPath);
     if (apieventDB.dbRunner == nullptr) {
         ERROR("Create % connection failed.", dbPath);
@@ -83,10 +84,10 @@ ApiProcesser::ApiDataFormat ApiProcesser::GetData(const std::string &fileDir)
 }
 
 bool ApiProcesser::FormatData(const std::string &fileDir, const ApiDataFormat &apiData,
-                              ProcessedDataFormat &processedData) const
+                              ProcessedDataFormat &processedData)
 {
-    INFO("ApiProcesser FormatData, dir is %", fileDir);
-    uint64_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, fileDir);
+    INFO("ApiProcessor FormatData, dir is %", fileDir);
+    uint32_t pid = IdPool::GetInstance().GetUint32Id(fileDir);
     Utils::SyscntConversionParams params;
     Utils::ProfTimeRecord record;
     if (!Context::GetInstance().GetSyscntConversionParams(params, Parser::Environment::HOST_ID, fileDir)) {
@@ -102,18 +103,23 @@ bool ApiProcesser::FormatData(const std::string &fileDir, const ApiDataFormat &a
         return false;
     }
     if (!Utils::Reserve(processedData, apiData.size())) {
-        ERROR("Reserve for % data failed.", reportDB_.tableName);
+        ERROR("Reserve for % data failed.", TABLE_NAME_API);
         return false;
     }
     ApiData tempData;
     for (const auto& data : apiData) {
         std::tie(tempData.structType, tempData.id, tempData.level, tempData.threadId, tempData.itemId,
                  tempData.start, tempData.end, tempData.connectionId) = data;
+        if (tempData.start == 0 || tempData.end == 0) {
+            continue;
+        }
         uint16_t level = GetLevelValue(tempData.level);
-        uint64_t globalTid = (pid << MoveCount) + tempData.threadId;
-        double start = Utils::GetLocalTime(Utils::GetTimeFromSyscnt(tempData.start, params), record);
-        double end = Utils::GetLocalTime(Utils::GetTimeFromSyscnt(tempData.end, params), record);
-        uint64_t connectionId = (pid << MoveCount) + tempData.connectionId;
+        uint64_t globalTid = Utils::Contact(pid, tempData.threadId);
+        std::string start = std::to_string(
+            Utils::GetLocalTime(Utils::GetTimeFromSyscnt(tempData.start, params), record));
+        std::string end = std::to_string(
+            Utils::GetLocalTime(Utils::GetTimeFromSyscnt(tempData.end, params), record));
+        uint64_t connectionId = Utils::Contact(pid, tempData.connectionId);
         uint64_t name = IdPool::GetInstance().GetUint64Id(tempData.structType);
         if (level == MSPROF_REPORT_ACL_LEVEL) {
             name = IdPool::GetInstance().GetUint64Id(tempData.id);

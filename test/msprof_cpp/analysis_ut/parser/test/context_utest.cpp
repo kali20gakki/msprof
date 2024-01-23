@@ -406,12 +406,37 @@ TEST_F(ContextUTest, TestGetSyscntConversionParamsShouldReturnFreq1000WhenFreqIs
     SyscntConversionParams res;
     EXPECT_TRUE(Context::GetInstance().GetSyscntConversionParams(
         res, HOST_ID, {File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
-    double expectFreq = 1000.0;
+    uint64_t expectSysCnt = 3666503140109;
+    uint64_t expectHostMonotonic = 36471130547330;
+    EXPECT_EQ(res.freq, DEFAULT_FREQ);
+    EXPECT_EQ(res.sysCnt, expectSysCnt);
+    EXPECT_EQ(res.hostMonotonic, expectHostMonotonic);
+}
+
+TEST_F(ContextUTest, TestGetSyscntConversionParamsShouldReturnFreq1000WhenFreqIs0)
+{
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON})));
+    // info.json
+    nlohmann::json info = {
+        {"drvVersion", 467732},
+        {"platform_version", "7"},
+        {"pid", "2376271"},
+        {"CPU", {{{"Frequency", "0"}}}},
+        {"DeviceInfo", {{{"hwts_frequency", "50.0"}}}},
+    };
+    FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON}));
+    infoWriter.WriteText(info.dump());
+
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    SyscntConversionParams res;
+    EXPECT_FALSE(Context::GetInstance().GetSyscntConversionParams(
+        res, HOST_ID, {File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    double expectFreq = 0.0;
     uint64_t expectSysCnt = 3666503140109;
     uint64_t expectHostMonotonic = 36471130547330;
     EXPECT_EQ(res.freq, expectFreq);
     EXPECT_EQ(res.sysCnt, expectSysCnt);
-    EXPECT_EQ(res.hostMonotonic, expectHostMonotonic);
+    EXPECT_EQ(res.hostMonotonic, UINT64_MAX);
 }
 
 TEST_F(ContextUTest, TestGetSyscntConversionParamsShouldReturnDefaultValueWhenHostStrToU16Failed)
@@ -439,8 +464,7 @@ TEST_F(ContextUTest, TestGetSyscntConversionParamsShouldReturnDefaultValueWhenHo
     SyscntConversionParams res;
     EXPECT_FALSE(Context::GetInstance().GetSyscntConversionParams(
         res, HOST_ID, {File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
-    double expectFreq = 1000;
-    EXPECT_EQ(res.freq, expectFreq);
+    EXPECT_EQ(res.freq, DEFAULT_FREQ);
     EXPECT_EQ(res.sysCnt, UINT64_MAX);
     EXPECT_EQ(res.hostMonotonic, UINT64_MAX);
 }
@@ -476,8 +500,7 @@ TEST_F(ContextUTest, TestGetSyscntConversionParamsShouldReturnDefaultValueWhenDe
     SyscntConversionParams res;
     EXPECT_FALSE(Context::GetInstance().GetSyscntConversionParams(
         res, 0, {File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
-    double expectFreq = 1000;
-    EXPECT_EQ(res.freq, expectFreq);
+    EXPECT_EQ(res.freq, DEFAULT_FREQ);
     EXPECT_EQ(res.sysCnt, UINT64_MAX);
     EXPECT_EQ(res.hostMonotonic, UINT64_MAX);
 }
