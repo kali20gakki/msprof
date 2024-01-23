@@ -3,14 +3,14 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : target_info_session_time_processer.cpp
- * Description        : TargetInfoSessionTimeProcesser UT
+ * File Name          : target_info_session_time_processor.cpp
+ * Description        : TargetInfoSessionTimeProcessor UT
  * Author             : msprof team
  * Creation Date      : 2024/01/11
  * *****************************************************************************
  */
 
-#include "analysis/csrc/viewer/database/finals/target_info_session_time_processer.h"
+#include "analysis/csrc/viewer/database/finals/target_info_session_time_processor.h"
 
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
@@ -27,7 +27,7 @@ const std::string TARGET_INFO_SESSION_TIME_DIR = "./target_info_session_time";
 const std::string REPORT = "report.db";
 const std::string DB_PATH = File::PathJoin({TARGET_INFO_SESSION_TIME_DIR, REPORT});
 
-class TargetInfoSessionTimeProcesserUTest : public testing::Test {
+class TargetInfoSessionTimeProcessorUTest : public testing::Test {
 protected:
     static void SetUpTestCase()
     {
@@ -51,7 +51,7 @@ protected:
     }
 };
 
-TEST_F(TargetInfoSessionTimeProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSuccess)
+TEST_F(TargetInfoSessionTimeProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
     std::set<std::string> profPath = {"PROF_0", "PROF_1", "PROF_2", "PROF_3"};
     nlohmann::json record0 = {
@@ -81,10 +81,10 @@ TEST_F(TargetInfoSessionTimeProcesserUTest, TestRunShouldReturnTrueWhenProcesser
         .then(returnValue(record1))
         .then(returnValue(record2))
         .then(returnValue(record3));
-    auto processer = TargetInfoSessionTimeProcesser(DB_PATH, profPath);
-    EXPECT_TRUE(processer.Run());
-    EXPECT_EQ(expectRecord.startTimeNs, processer.record_.startTimeNs);
-    EXPECT_EQ(expectRecord.endTimeNs, processer.record_.endTimeNs);
+    auto processor = TargetInfoSessionTimeProcessor(DB_PATH, profPath);
+    EXPECT_TRUE(processor.Run());
+    EXPECT_EQ(expectRecord.startTimeNs, processor.record_.startTimeNs);
+    EXPECT_EQ(expectRecord.endTimeNs, processor.record_.endTimeNs);
     MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
     std::shared_ptr<DBRunner> dbRunner;
     MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
@@ -98,14 +98,14 @@ TEST_F(TargetInfoSessionTimeProcesserUTest, TestRunShouldReturnTrueWhenProcesser
     EXPECT_EQ(expectData, checkData);
 }
 
-TEST_F(TargetInfoSessionTimeProcesserUTest, TestRunShouldReturnFalseWhenGetTimeRecordFail)
+TEST_F(TargetInfoSessionTimeProcessorUTest, TestRunShouldReturnFalseWhenGetTimeRecordFail)
 {
     std::set<std::string> profPath = {"PROF_0", "PROF_1", "PROF_2", "PROF_3", "PROF_4", "PROF_5", "PROF_6", "PROF_7"};
     MOCKER_CPP(&Context::GetProfTimeRecordInfo)
     .stubs()
     .will(returnValue(false));
-    auto processer = TargetInfoSessionTimeProcesser(DB_PATH, profPath);
-    EXPECT_FALSE(processer.Run());
+    auto processor = TargetInfoSessionTimeProcessor(DB_PATH, profPath);
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).reset();
 }
 

@@ -3,13 +3,13 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : task_proceser.h
- * Description        : task_processer，处理AscendTask表相关数据
+ * File Name          : task_processor.h
+ * Description        : task_processor，处理AscendTask表相关数据
  * Author             : msprof team
  * Creation Date      : 2023/12/16
  * *****************************************************************************
  */
-#include "analysis/csrc/viewer/database/finals/task_processer.h"
+#include "analysis/csrc/viewer/database/finals/task_processor.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/parser/environment/context.h"
@@ -39,18 +39,18 @@ struct TaskData {
 };
 }
 
-TaskProcesser::TaskProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : TableProcesser(reportDBPath, profPaths) {}
+TaskProcessor::TaskProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
+    : TableProcessor(reportDBPath, profPaths) {}
 
-bool TaskProcesser::Run()
+bool TaskProcessor::Run()
 {
     INFO("TaskProcessor Run.");
-    bool flag = TableProcesser::Run();
+    bool flag = TableProcessor::Run();
     PrintProcessorResult(flag, TABLE_NAME_TASK);
     return flag;
 }
 
-uint64_t TaskProcesser::GetTaskType(const std::string& hostType, const std::string& deviceType,
+uint64_t TaskProcessor::GetTaskType(const std::string& hostType, const std::string& deviceType,
                                     uint16_t platformVersion)
 {
     std::string taskType;
@@ -77,7 +77,7 @@ uint64_t TaskProcesser::GetTaskType(const std::string& hostType, const std::stri
     return IdPool::GetInstance().GetUint64Id(taskType);
 }
 
-TaskProcesser::OriDataFormat TaskProcesser::GetData(DBInfo &ascendTaskDB)
+TaskProcessor::OriDataFormat TaskProcessor::GetData(DBInfo &ascendTaskDB)
 {
     OriDataFormat oriData;
     std::string sql{"SELECT model_id, index_id, stream_id, task_id, context_id, batch_id, start_time, duration, "
@@ -89,7 +89,7 @@ TaskProcesser::OriDataFormat TaskProcesser::GetData(DBInfo &ascendTaskDB)
     return oriData;
 }
 
-TaskProcesser::ProcessedDataFormat TaskProcesser::FormatData(const OriDataFormat &oriData, uint16_t deviceId,
+TaskProcessor::ProcessedDataFormat TaskProcessor::FormatData(const OriDataFormat &oriData, uint16_t deviceId,
                                                              uint32_t globalPid, uint16_t platformVersion,
                                                              Utils::ProfTimeRecord &timeRecord)
 {
@@ -121,7 +121,7 @@ TaskProcesser::ProcessedDataFormat TaskProcesser::FormatData(const OriDataFormat
     return processedData;
 }
 
-bool TaskProcesser::Process(const std::string &fileDir)
+bool TaskProcessor::Process(const std::string &fileDir)
 {
     INFO("Start to process %.", fileDir);
     Utils::ProfTimeRecord timeRecord;

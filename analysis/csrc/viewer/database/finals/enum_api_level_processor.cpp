@@ -3,13 +3,13 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : enum_api_level_processer.cpp
+ * File Name          : enum_api_level_processor.cpp
  * Description        : 处理api相关数据
  * Author             : msprof team
  * Creation Date      : 2023/12/18
  * *****************************************************************************
  */
-#include "enum_api_level_processer.h"
+#include "enum_api_level_processor.h"
 
 #include "unified_db_constant.h"
 
@@ -17,10 +17,10 @@ namespace Analysis {
 namespace Viewer {
 namespace Database {
 
-EnumApiLevelProcesser::EnumApiLevelProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : TableProcesser(reportDBPath, profPaths) {}
+EnumApiLevelProcessor::EnumApiLevelProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
+    : TableProcessor(reportDBPath, profPaths) {}
 
-bool EnumApiLevelProcesser::Run()
+bool EnumApiLevelProcessor::Run()
 {
     INFO("EnumApiLevelProcessor Run.");
     bool flag = Process();
@@ -28,14 +28,14 @@ bool EnumApiLevelProcesser::Run()
     return flag;
 }
 
-bool EnumApiLevelProcesser::Process(const std::string &fileDir)
+bool EnumApiLevelProcessor::Process(const std::string &fileDir)
 {
     INFO("EnumApiLevelProcessor Process.");
     EnumApiLevelDataFormat enumApiData = GetData();
     return SaveData(enumApiData, TABLE_NAME_ENUM_API_LEVEL);
 }
 
-EnumApiLevelProcesser::EnumApiLevelDataFormat EnumApiLevelProcesser::GetData()
+EnumApiLevelProcessor::EnumApiLevelDataFormat EnumApiLevelProcessor::GetData()
 {
     INFO("EnumApiLevelProcessor GetData.");
     EnumApiLevelDataFormat apiLevelData;

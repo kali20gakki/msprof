@@ -3,17 +3,17 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : table_process_factory.cpp
- * Description        : processer的父类实现类，规定统一流程
+ * File Name          : table_processor_factory.cpp
+ * Description        : processor的父类实现类，规定统一流程
  * Author             : msprof team
  * Creation Date      : 2023/12/14
  * *****************************************************************************
  */
 
-#include "analysis/csrc/viewer/database/finals/table_processer_factory.h"
+#include "analysis/csrc/viewer/database/finals/table_processor_factory.h"
 
 #include "analysis/csrc/utils/thread_pool.h"
-#include "analysis/csrc/viewer/database/finals/api_processer.h"
+#include "analysis/csrc/viewer/database/finals/api_processor.h"
 
 namespace Analysis {
 namespace Viewer {
@@ -21,16 +21,16 @@ namespace Database {
 
 const uint32_t POOLNUM = 2;
 
-std::shared_ptr<TableProcesser> TableProcesserFactory::CreateTableProcessor(
+std::shared_ptr<TableProcessor> TableProcessorFactory::CreateTableProcessor(
     const std::string &tableName,
     const std::string &reportDBPath,
     const std::set<std::string> &profPaths)
 {
-    std::shared_ptr<TableProcesser> processer = nullptr;
-    if (tableName == "api_processer") {
-        // 工厂类生成ApiProcesser
+    std::shared_ptr<TableProcessor> processor = nullptr;
+    if (tableName == "api_processor") {
+        // 工厂类生成ApiProcessor
     }
-    return processer;
+    return processor;
 }
 
 

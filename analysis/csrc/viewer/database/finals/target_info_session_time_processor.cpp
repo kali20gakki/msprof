@@ -3,13 +3,13 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : target_info_session_time_processer.cpp
+ * File Name          : target_info_session_time_processor.cpp
  * Description        : 落盘采集时间（开始、结束）数据
  * Author             : msprof team
  * Creation Date      : 2023/12/19
  * *****************************************************************************
  */
-#include "target_info_session_time_processer.h"
+#include "target_info_session_time_processor.h"
 
 #include "analysis/csrc/parser/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
@@ -19,11 +19,11 @@ namespace Viewer {
 namespace Database {
 using Context = Parser::Environment::Context;
 
-TargetInfoSessionTimeProcesser::TargetInfoSessionTimeProcesser(const std::string &reportDBPath,
+TargetInfoSessionTimeProcessor::TargetInfoSessionTimeProcessor(const std::string &reportDBPath,
                                                                const std::set<std::string> &profPaths)
-    : TableProcesser(reportDBPath, profPaths) {}
+    : TableProcessor(reportDBPath, profPaths) {}
 
-bool TargetInfoSessionTimeProcesser::Run()
+bool TargetInfoSessionTimeProcessor::Run()
 {
     INFO("TargetInfoSessionTimeProcessor Run.");
     bool flag = true;
@@ -45,7 +45,7 @@ bool TargetInfoSessionTimeProcesser::Run()
     return flag;
 }
 
-bool TargetInfoSessionTimeProcesser::Process(const std::string &fileDir)
+bool TargetInfoSessionTimeProcessor::Process(const std::string &fileDir)
 {
     INFO("TargetInfoSessionTimeProcessor Process, dir is %", fileDir);
     std::string hostDir = Utils::File::PathJoin({fileDir, HOST});

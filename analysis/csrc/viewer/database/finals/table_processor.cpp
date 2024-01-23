@@ -3,8 +3,8 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : table_processer.cpp
- * Description        : processer的父类实现类，规定统一流程
+ * File Name          : table_processor.cpp
+ * Description        : processor的父类实现类，规定统一流程
  * Author             : msprof team
  * Creation Date      : 2023/12/14
  * *****************************************************************************
@@ -12,7 +12,7 @@
 #include <utility>
 #include <atomic>
 
-#include "analysis/csrc/viewer/database/finals/table_processer.h"
+#include "analysis/csrc/viewer/database/finals/table_processor.h"
 
 #include "analysis/csrc/utils/thread_pool.h"
 
@@ -22,21 +22,21 @@ namespace Database {
 
 const uint32_t POOLNUM = 2;
 
-TableProcesser::TableProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths)
+TableProcessor::TableProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
     : reportDBPath_(reportDBPath), profPaths_(profPaths)
 {
     MAKE_SHARED0_NO_OPERATION(reportDB_.database, ReportDB);
     MAKE_SHARED_NO_OPERATION(reportDB_.dbRunner, DBRunner, reportDBPath_);
 }
 
-TableProcesser::TableProcesser(const std::string &reportDBPath)
+TableProcessor::TableProcessor(const std::string &reportDBPath)
     : reportDBPath_(reportDBPath)
 {
     MAKE_SHARED0_NO_OPERATION(reportDB_.database, ReportDB);
     MAKE_SHARED_NO_OPERATION(reportDB_.dbRunner, DBRunner, reportDBPath_);
 }
 
-bool TableProcesser::Run()
+bool TableProcessor::Run()
 {
     std::atomic<bool> retFlag(true);
     Analysis::Utils::ThreadPool pool(POOLNUM);
@@ -51,7 +51,7 @@ bool TableProcesser::Run()
     return retFlag;
 }
 
-void TableProcesser::PrintProcessorResult(bool result, const std::string &processorName)
+void TableProcessor::PrintProcessorResult(bool result, const std::string &processorName)
 {
     if (result) {
         PRINT_INFO("% run success!", processorName);

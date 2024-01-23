@@ -3,13 +3,13 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : target_info_npu_processer.cpp
+ * File Name          : target_info_npu_processor.cpp
  * Description        : 落盘不同device对应芯片型号数据
  * Author             : msprof team
  * Creation Date      : 2023/12/18
  * *****************************************************************************
  */
-#include "analysis/csrc/viewer/database/finals/target_info_npu_processer.h"
+#include "analysis/csrc/viewer/database/finals/target_info_npu_processor.h"
 
 #include "analysis/csrc/parser/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
@@ -28,19 +28,19 @@ namespace {
     };
 }
 
-TargetInfoNpuProcesser::TargetInfoNpuProcesser(const std::string &reportDBPath,
+TargetInfoNpuProcessor::TargetInfoNpuProcessor(const std::string &reportDBPath,
                                                const std::set<std::string> &profPaths)
-    : TableProcesser(reportDBPath, profPaths) {}
+    : TableProcessor(reportDBPath, profPaths) {}
 
-bool TargetInfoNpuProcesser::Run()
+bool TargetInfoNpuProcessor::Run()
 {
     INFO("TargetInfoNpuProcessor Run.");
-    bool flag = TableProcesser::Run();
+    bool flag = TableProcessor::Run();
     PrintProcessorResult(flag, TABLE_NAME_TARGET_INFO_NPU);
     return flag;
 }
 
-bool TargetInfoNpuProcesser::Process(const std::string &fileDir)
+bool TargetInfoNpuProcessor::Process(const std::string &fileDir)
 {
     INFO("TargetInfoNpuProcessor Process, dir is %", fileDir);
     auto deviceDirs = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
@@ -51,7 +51,7 @@ bool TargetInfoNpuProcesser::Process(const std::string &fileDir)
     return SaveData(npuInfoData, TABLE_NAME_TARGET_INFO_NPU);
 }
 
-void TargetInfoNpuProcesser::UpdateNpuData(const std::string &fileDir, const std::string &deviceDir,
+void TargetInfoNpuProcessor::UpdateNpuData(const std::string &fileDir, const std::string &deviceDir,
                                            NpuInfoDataFormat &npuInfoData)
 {
     INFO("TargetInfoNpuProcessor UpdateNpuData, dir is %", fileDir);
