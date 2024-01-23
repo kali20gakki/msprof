@@ -215,3 +215,14 @@ TEST_F(CommunicationTaskInfoProcesserUTest, TestRunShouldReturnFalseWhenReserveF
     EXPECT_FALSE(processer.Run());
     MOCKER_CPP(&std::vector<TempT>::reserve).reset();
 }
+
+TEST_F(CommunicationTaskInfoProcesserUTest, TestRunShouldReturnTrueWhenNoDb)
+{
+    std::vector<std::string> deviceList = {File::PathJoin({COMMUNICATION_TASK_PATH, "test", "device_1"})};
+    MOCKER_CPP(&Utils::File::GetFilesWithPrefix)
+    .stubs()
+    .will(returnValue(deviceList));
+    auto processor = CommunicationTaskInfoProcesser(DB_PATH, {File::PathJoin({COMMUNICATION_TASK_PATH, "test"})});
+    EXPECT_TRUE(processor.Run());
+    MOCKER_CPP(&Utils::File::GetFilesWithPrefix).reset();
+}

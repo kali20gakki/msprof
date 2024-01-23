@@ -34,12 +34,20 @@ protected:
     }
 };
 
+TEST_F(TimeUtilsUTest, TestGetTimeFromSyscntShouldReturnOriSysCntWhenFreqIsDefault)
+{
+    SyscntConversionParams params{DEFAULT_FREQ, 3666503140109, 36471130547330};
+    uint64_t taskSysCnt = 3666510676667;
+    double expectRes = 3666510676667.000;
+    EXPECT_DOUBLE_EQ(GetTimeFromSyscnt(taskSysCnt, params), expectRes);
+}
+
 TEST_F(TimeUtilsUTest, TestGetTimeFromSyscntShouldReturnTimestamp)
 {
     SyscntConversionParams params{100.0, 3666503140109, 36471130547330};
     uint64_t taskSysCnt = 3666510676667;
     double expectRes = 36471205912910.000;
-    EXPECT_EQ(GetTimeFromSyscnt(taskSysCnt, params), expectRes);
+    EXPECT_DOUBLE_EQ(GetTimeFromSyscnt(taskSysCnt, params), expectRes);
 }
 
 TEST_F(TimeUtilsUTest, TestGetLocalTimeShouldReturnLocalTimestamp)
@@ -48,5 +56,5 @@ TEST_F(TimeUtilsUTest, TestGetLocalTimeShouldReturnLocalTimestamp)
     ProfTimeRecord record{1701069324370978000, 1701069338159976000, 36471129942580};
     uint64_t taskSysCnt = 3666510676667;
     double expectRes = 123261324446948336.000;
-    EXPECT_EQ(GetLocalTime(GetTimeFromSyscnt(taskSysCnt, params), record), expectRes);
+    EXPECT_DOUBLE_EQ(GetLocalTime(GetTimeFromSyscnt(taskSysCnt, params), record), expectRes);
 }

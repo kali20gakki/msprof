@@ -21,7 +21,6 @@ namespace Viewer {
 namespace Database {
 
 const uint32_t POOLNUM = 2;
-const uint16_t CONNECTION_ID_BITS = 42;
 
 TableProcesser::TableProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths)
     : reportDBPath_(reportDBPath), profPaths_(profPaths)
@@ -44,12 +43,21 @@ bool TableProcesser::Run()
     pool.Start();
     for (const auto& fileDir : profPaths_) {
         pool.AddTask([this, fileDir, &retFlag]() {
-            retFlag = retFlag && Process(fileDir);
+            retFlag = Process(fileDir) & retFlag;
         });
     }
     pool.WaitAllTasks();
     pool.Stop();
     return retFlag;
+}
+
+void TableProcesser::PrintProcessorResult(bool result, const std::string &processorName)
+{
+    if (result) {
+        PRINT_INFO("% run success!", processorName);
+    } else {
+        PRINT_ERROR("% run failed!", processorName);
+    }
 }
 
 } // Database

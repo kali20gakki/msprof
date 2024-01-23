@@ -20,6 +20,7 @@ namespace Utils {
 
 // 2020年1月1日0时0分0秒 作为基准时间 ns
 const uint64_t TIME_BASE_OFFSET_NS = 1577808000000000000;
+const double DEFAULT_FREQ = 1000.0;
 
 // SyscntConversionParams 用于记录 syscnt 转为 timestamp 所需要的三个数据
 // 分为host侧和device的syscnt两种情况，不同情况下，所需要的数据来源不同
@@ -27,7 +28,7 @@ const uint64_t TIME_BASE_OFFSET_NS = 1577808000000000000;
 // sysCnt: 基于开机时间的syscnt, host使用 host_start_log; device 使用 dev_start_log 中的cntvct
 // hostMonotonic: 基于开机时间的monotonic, 不论host还是device，固定使用host侧下的host_start_log 中的 clock_monotonic_raw
 struct SyscntConversionParams {
-    double freq = 1000.0;
+    double freq = DEFAULT_FREQ;
     uint64_t sysCnt = UINT64_MAX;
     uint64_t hostMonotonic = UINT64_MAX;
     SyscntConversionParams() = default;

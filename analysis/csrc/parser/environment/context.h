@@ -60,7 +60,8 @@ public:
     uint16_t GetPlatformVersion(uint16_t deviceId, const std::string &profPath = "");
     // 判断芯片类型
     static bool IsStarsChip(uint16_t platformVersion);
-    static bool IsChipVersionOneToOne(uint16_t platformVersion);
+    // 校验是否为CHIP_V1_1_x系列(不包含CHIP_V1_1_0)
+    static bool IsChipV1(uint16_t platformVersion);
     static bool IsChipV4(uint16_t platformVersion);
 
 private:

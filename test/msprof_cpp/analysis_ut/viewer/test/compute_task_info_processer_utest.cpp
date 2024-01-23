@@ -209,3 +209,9 @@ TEST_F(ComputeTaskInfoProcesserUTest, TestRunShouldReturnFalseWhenReserveFailedT
     EXPECT_FALSE(processer.Run());
     MOCKER_CPP(&std::vector<TempT>::reserve).reset();
 }
+
+TEST_F(ComputeTaskInfoProcesserUTest, TestRunShouldReturnTrueWhenNoDb)
+{
+    auto processor = ComputeTaskInfoProcesser(DB_PATH, {File::PathJoin({COMPUTE_TASK_PATH, "test"})});
+    EXPECT_TRUE(processor.Run());
+}

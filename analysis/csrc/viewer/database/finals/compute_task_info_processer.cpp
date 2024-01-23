@@ -47,9 +47,14 @@ struct ComputeTaskInfoData {
 
 ComputeTaskInfoProcesser::ComputeTaskInfoProcesser(const std::string &reportDBPath,
                                                    const std::set<std::string> &profPaths)
-    : TableProcesser(reportDBPath, profPaths)
+    : TableProcesser(reportDBPath, profPaths) {}
+
+bool ComputeTaskInfoProcesser::Run()
 {
-    reportDB_.tableName = TABLE_NAME_COMPUTE_TASK_INFO;
+    INFO("EnumApiLevelProcessor Run.");
+    bool flag = TableProcesser::Run();
+    PrintProcessorResult(flag, TABLE_NAME_COMPUTE_TASK_INFO);
+    return flag;
 }
 
 ComputeTaskInfoProcesser::OriDataFormat ComputeTaskInfoProcesser::GetData(const DBInfo &geInfoDB)
@@ -108,13 +113,16 @@ ComputeTaskInfoProcesser::ProcessedDataFormat ComputeTaskInfoProcesser::FormatDa
 
 bool ComputeTaskInfoProcesser::Process(const std::string &fileDir)
 {
-    DBInfo geInfoDB;
-    geInfoDB.tableName = "TaskInfo";
-    geInfoDB.dbName = "ge_info.db";
+    DBInfo geInfoDB("ge_info.db", "TaskInfo");
     MAKE_SHARED0_NO_OPERATION(geInfoDB.database, GEInfoDB);
     std::string dbPath = Utils::File::PathJoin({fileDir, HOST, SQLITE, geInfoDB.dbName});
+    // 并不是所有场景都有ge info数据
+    if (!Utils::File::Exist(dbPath)) {
+        WARN("Can't find the db, the path is %.", dbPath);
+        return true;
+    }
     if (!Utils::FileReader::Check(dbPath, MAX_DB_BYTES)) {
-        ERROR("DbPath does not exists: %.", dbPath);
+        ERROR("Check % failed.", dbPath);
         return false;
     }
     MAKE_SHARED_RETURN_VALUE(geInfoDB.dbRunner, DBRunner, false, dbPath);
@@ -124,7 +132,7 @@ bool ComputeTaskInfoProcesser::Process(const std::string &fileDir)
         return false;
     }
     auto processedData = FormatData(oriData);
-    if (!SaveData(processedData)) {
+    if (!SaveData(processedData, TABLE_NAME_COMPUTE_TASK_INFO)) {
         ERROR("Save data failed.");
         return false;
     }

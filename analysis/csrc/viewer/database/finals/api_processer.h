@@ -24,17 +24,18 @@ class ApiProcesser : public TableProcesser {
 using ApiDataFormat = std::vector<std::tuple<std::string, std::string, std::string, uint32_t,
         std::string, uint64_t, uint64_t, uint64_t>>;
 // start, end, level, globalTid, connectionId, name
-using ProcessedDataFormat = std::vector<std::tuple<double, double, uint16_t,
+using ProcessedDataFormat = std::vector<std::tuple<std::string, std::string, uint16_t,
         uint64_t, uint64_t, uint64_t>>;
 public:
     ApiProcesser() = default;
     ApiProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    bool Run() override;
 protected:
     bool Process(const std::string &fileDir) override;
 private:
-    ApiDataFormat GetData(const std::string &fileDir);
-    bool FormatData(const std::string &fileDir, const ApiDataFormat &oriData,
-                    ProcessedDataFormat &processedData) const;
+    static ApiDataFormat GetData(const std::string &dbPath, DBInfo &apieventDB);
+    static bool FormatData(const std::string &fileDir, const ApiDataFormat &oriData,
+                    ProcessedDataFormat &processedData) ;
     static uint16_t GetLevelValue(const std::string &key);
 };
 
