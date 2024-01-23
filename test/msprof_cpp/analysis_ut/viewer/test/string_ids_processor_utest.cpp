@@ -3,20 +3,19 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : string_ids_processer_utest.cpp
- * Description        : string_ids_processer UT
+ * File Name          : string_ids_processor_utest.cpp
+ * Description        : string_ids_processor UT
  * Author             : msprof team
  * Creation Date      : 2023/12/11
  * *****************************************************************************
  */
 #include <algorithm>
 #include <vector>
-#include <set>
+
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "analysis/csrc/viewer/database/finals/string_ids_processer.h"
+#include "analysis/csrc/viewer/database/finals/string_ids_processor.h"
 #include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/utils/file.h"
 
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Association::Credential;
@@ -30,7 +29,7 @@ const std::string TARGET_TABLE_NAME = "STRING_IDS";
 using PROCESSED_DATA_FORMAT = std::vector<std::tuple<uint64_t, std::string>>;
 }
 
-class StringIdsProcesserUTest : public testing::Test {
+class StringIdsProcessorUTest : public testing::Test {
 protected:
     virtual void SetUp()
     {
@@ -62,48 +61,48 @@ void CheckStringId(PROCESSED_DATA_FORMAT data)
     }
 }
 
-TEST_F(StringIdsProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSuccess)
+TEST_F(StringIdsProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
     std::shared_ptr<DBRunner> ReportDBRunner;
     PROCESSED_DATA_FORMAT result;
     MAKE_SHARED0_NO_OPERATION(ReportDBRunner, DBRunner, DB_PATH);
-    auto processer = StringIdsProcesser(DB_PATH);
+    auto processor = StringIdsProcessor(DB_PATH);
     IdPool::GetInstance().GetUint64Id("pool");
-    EXPECT_TRUE(processer.Run());
+    EXPECT_TRUE(processor.Run());
     std::string sql{"SELECT * FROM " + TARGET_TABLE_NAME};
     ReportDBRunner->QueryData(sql, result);
     CheckStringId(result);
 }
 
-TEST_F(StringIdsProcesserUTest, TestRunShouldReturnFalseWhenCreateTableFailed)
+TEST_F(StringIdsProcessorUTest, TestRunShouldReturnFalseWhenCreateTableFailed)
 {
-    auto processer = StringIdsProcesser(DB_PATH);
+    auto processor = StringIdsProcessor(DB_PATH);
     MOCKER_CPP(&Analysis::Viewer::Database::DBRunner::CreateTable)
     .stubs()
     .will(returnValue(false));
-    EXPECT_FALSE(processer.Run());
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&Analysis::Viewer::Database::DBRunner::CreateTable).reset();
 }
 
-TEST_F(StringIdsProcesserUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
+TEST_F(StringIdsProcessorUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
 {
     auto id{TableColumn("Id", "INTEGER")};
     std::vector<TableColumn> cols{id};
-    auto processer = StringIdsProcesser(DB_PATH);
+    auto processor = StringIdsProcessor(DB_PATH);
     MOCKER_CPP(&Analysis::Viewer::Database::Database::GetTableCols)
     .stubs()
     .will(returnValue(cols));
-    EXPECT_FALSE(processer.Run());
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&Analysis::Viewer::Database::Database::GetTableCols).reset();
 }
 
-TEST_F(StringIdsProcesserUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
+TEST_F(StringIdsProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
 {
     using TempT = std::tuple<uint64_t, std::string>;
     MOCKER_CPP(&std::vector<TempT>::reserve)
     .stubs()
     .will(throws(std::bad_alloc()));
-    auto processer = StringIdsProcesser(DB_PATH);
-    EXPECT_FALSE(processer.Run());
+    auto processor = StringIdsProcessor(DB_PATH);
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&std::vector<TempT>::reserve).reset();
 }

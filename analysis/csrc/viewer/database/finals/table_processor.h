@@ -3,7 +3,7 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : table_processer.h
+ * File Name          : table_processor.h
  * Description        : db工厂类
  * Author             : msprof team
  * Creation Date      : 2023/12/07
@@ -41,13 +41,13 @@ struct DBInfo {
 // 2、以PROF文件为粒度，分别拉起Process
 // (不强制要求 Run, Process完成上述工作,具体根据子类的实际情况进行实现,比如不感知PROF文件的情况)
 // 3、子类内部自行调用Save进行数据dump
-class TableProcesser {
+class TableProcessor {
 public:
-    TableProcesser() = default;
-    TableProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths);
-    TableProcesser(const std::string &reportDBPath);
+    TableProcessor() = default;
+    TableProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    TableProcessor(const std::string &reportDBPath);
     virtual bool Run();
-    virtual ~TableProcesser() = default;
+    virtual ~TableProcessor() = default;
 protected:
     virtual bool Process(const std::string &fileDir) = 0;
     template<typename... Args>
@@ -59,7 +59,7 @@ protected:
 }; // class TableProcessor
 
 template<typename... Args>
-bool TableProcesser::SaveData(const std::vector<std::tuple<Args...>> &data, const std::string &tableName) const
+bool TableProcessor::SaveData(const std::vector<std::tuple<Args...>> &data, const std::string &tableName) const
 {
     INFO("Processor Save % Data.", tableName);
     if (data.empty()) {

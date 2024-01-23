@@ -3,14 +3,14 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : target_info_npu_processer.cpp
- * Description        : TargetInfoNpuProcesser UT
+ * File Name          : target_info_npu_processor.cpp
+ * Description        : TargetInfoNpuProcessor UT
  * Author             : msprof team
  * Creation Date      : 2024/01/11
  * *****************************************************************************
  */
 
-#include "analysis/csrc/viewer/database/finals/target_info_npu_processer.h"
+#include "analysis/csrc/viewer/database/finals/target_info_npu_processor.h"
 
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
@@ -27,7 +27,7 @@ const std::string TARGET_INFO_NPU_DIR = "./target_info_npu";
 const std::string REPORT = "report.db";
 const std::string DB_PATH = File::PathJoin({TARGET_INFO_NPU_DIR, REPORT});
 
-class TargetInfoNpuProcesserUTest : public testing::Test {
+class TargetInfoNpuProcessorUTest : public testing::Test {
 protected:
     static void SetUpTestCase()
     {
@@ -51,7 +51,7 @@ protected:
     }
 };
 
-TEST_F(TargetInfoNpuProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSuccess)
+TEST_F(TargetInfoNpuProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
     std::vector<std::string> deviceDirs = {"device_0", "device_1", "device_2", "device_3", "device_4", "device_5"};
     uint16_t chip0 = 0;
@@ -71,8 +71,8 @@ TEST_F(TargetInfoNpuProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSucce
         .then(returnValue(chip5))
         .then(returnValue(chip7))
         .then(returnValue(chipX));
-    auto processer = TargetInfoNpuProcesser(DB_PATH, {""});
-    EXPECT_TRUE(processer.Run());
+    auto processor = TargetInfoNpuProcessor(DB_PATH, {""});
+    EXPECT_TRUE(processor.Run());
     MOCKER_CPP(&File::GetFilesWithPrefix).reset();
     MOCKER_CPP(&Context::GetPlatformVersion).reset();
     std::shared_ptr<DBRunner> dbRunner;
@@ -92,7 +92,7 @@ TEST_F(TargetInfoNpuProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSucce
     EXPECT_EQ(expectData, checkData);
 }
 
-TEST_F(TargetInfoNpuProcesserUTest, TestRunShouldReturnFalseWhenOneProcessFailInMultithreading)
+TEST_F(TargetInfoNpuProcessorUTest, TestRunShouldReturnFalseWhenOneProcessFailInMultithreading)
 {
     std::set<std::string> profPath = {"PROF_0", "PROF_1", "PROF_2", "PROF_3", "PROF_4", "PROF_5", "PROF_6", "PROF_7"};
     NpuInfoDataFormat checkData;
@@ -101,8 +101,8 @@ TEST_F(TargetInfoNpuProcesserUTest, TestRunShouldReturnFalseWhenOneProcessFailIn
     .will(returnValue(true))
     .then(returnValue(false))
     .then(returnValue(true));
-    auto processer = TargetInfoNpuProcesser(DB_PATH, profPath);
-    EXPECT_FALSE(processer.Run());
+    auto processor = TargetInfoNpuProcessor(DB_PATH, profPath);
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&NpuInfoDataFormat::empty).reset();
 }
 

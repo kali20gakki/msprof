@@ -3,13 +3,13 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : api_processer.cpp
+ * File Name          : api_processor.cpp
  * Description        : 处理api相关数据
  * Author             : msprof team
  * Creation Date      : 2023/12/13
  * *****************************************************************************
  */
-#include "analysis/csrc/viewer/database/finals/api_processer.h"
+#include "analysis/csrc/viewer/database/finals/api_processor.h"
 
 #include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/dfx/error_code.h"
@@ -35,18 +35,18 @@ struct ApiData {
 };
 }
 
-ApiProcesser::ApiProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : TableProcesser(reportDBPath, profPaths) {}
+ApiProcessor::ApiProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
+    : TableProcessor(reportDBPath, profPaths) {}
 
-bool ApiProcesser::Run()
+bool ApiProcessor::Run()
 {
     INFO("ApiProcessor Run.");
-    bool flag = TableProcesser::Run();
+    bool flag = TableProcessor::Run();
     PrintProcessorResult(flag, TABLE_NAME_API);
     return flag;
 }
 
-bool ApiProcesser::Process(const std::string &fileDir)
+bool ApiProcessor::Process(const std::string &fileDir)
 {
     INFO("ApiProcessor Process, dir is %", fileDir);
     DBInfo apieventDB("api_event.db", "ApiData");
@@ -65,7 +65,7 @@ bool ApiProcesser::Process(const std::string &fileDir)
     return SaveData(processedData, TABLE_NAME_API);
 }
 
-ApiProcesser::ApiDataFormat ApiProcesser::GetData(const std::string &dbPath, DBInfo &apieventDB)
+ApiProcessor::ApiDataFormat ApiProcessor::GetData(const std::string &dbPath, DBInfo &apieventDB)
 {
     INFO("ApiProcessor GetData, dir is %", dbPath);
     ApiDataFormat apiData;
@@ -83,7 +83,7 @@ ApiProcesser::ApiDataFormat ApiProcesser::GetData(const std::string &dbPath, DBI
     return apiData;
 }
 
-bool ApiProcesser::FormatData(const std::string &fileDir, const ApiDataFormat &apiData,
+bool ApiProcessor::FormatData(const std::string &fileDir, const ApiDataFormat &apiData,
                               ProcessedDataFormat &processedData)
 {
     INFO("ApiProcessor FormatData, dir is %", fileDir);
@@ -135,7 +135,7 @@ bool ApiProcesser::FormatData(const std::string &fileDir, const ApiDataFormat &a
     return true;
 }
 
-uint16_t ApiProcesser::GetLevelValue(const std::string &key)
+uint16_t ApiProcessor::GetLevelValue(const std::string &key)
 {
     auto it = API_LEVEL_TABLE.find(key);
     if (it == API_LEVEL_TABLE.end()) {

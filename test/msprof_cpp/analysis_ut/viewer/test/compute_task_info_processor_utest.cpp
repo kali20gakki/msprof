@@ -3,8 +3,8 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : compute_task_info_processer_utest.cpp
- * Description        : compute_task_info_processer UT
+ * File Name          : compute_task_info_processor_utest.cpp
+ * Description        : compute_task_info_processor UT
  * Author             : msprof team
  * Creation Date      : 2024/1/4
  * *****************************************************************************
@@ -14,7 +14,7 @@
 #include <set>
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "analysis/csrc/viewer/database/finals/compute_task_info_processer.h"
+#include "analysis/csrc/viewer/database/finals/compute_task_info_processor.h"
 #include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/utils/thread_pool.h"
 
@@ -61,7 +61,7 @@ GeInfoFormat DATA_B{{4294967295, "Add", 2, 3, 20, 40, "1", "MIX_AIC", "MatMulV2"
                        "\"3072,768\"", "FRACTAL_NZ", "FLOAT", "\"48,192,16,16\"", 0, 4294967295, "NO"}};
 }
 
-class ComputeTaskInfoProcesserUTest : public testing::Test {
+class ComputeTaskInfoProcessorUTest : public testing::Test {
 protected:
     virtual void SetUp()
     {
@@ -140,19 +140,19 @@ void CheckStringId(PROCESSED_DATA_FORMAT data)
     }
 }
 
-TEST_F(ComputeTaskInfoProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSuccess)
+TEST_F(ComputeTaskInfoProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
     PROCESSED_DATA_FORMAT result;
     MAKE_SHARED0_NO_OPERATION(ReportDBRunner, DBRunner, DB_PATH);
     std::string sql{"SELECT * FROM " + TARGET_TABLE_NAME};
-    auto processer = ComputeTaskInfoProcesser(DB_PATH, PROF_PATHS);
-    EXPECT_TRUE(processer.Run());
+    auto processor = ComputeTaskInfoProcessor(DB_PATH, PROF_PATHS);
+    EXPECT_TRUE(processor.Run());
     ReportDBRunner->QueryData(sql, result);
     CheckCorrelationId(result);
     CheckStringId(result);
 }
 
-TEST_F(ComputeTaskInfoProcesserUTest, TestRunShouldReturnFalseWhenSourceTableNotExist)
+TEST_F(ComputeTaskInfoProcessorUTest, TestRunShouldReturnFalseWhenSourceTableNotExist)
 {
     auto dbPath = File::PathJoin({PROF_PATH_A, HOST_SUFFIX, SQLITE_SUFFIX, DB_SUFFIX});
     std::shared_ptr<DBRunner> dbRunner;
@@ -161,57 +161,57 @@ TEST_F(ComputeTaskInfoProcesserUTest, TestRunShouldReturnFalseWhenSourceTableNot
     dbPath = File::PathJoin({PROF_PATH_B, HOST_SUFFIX, SQLITE_SUFFIX, DB_SUFFIX});
     MAKE_SHARED0_NO_OPERATION(dbRunner, DBRunner, dbPath);
     dbRunner->DropTable(TABLE_NAME);
-    auto processer = ComputeTaskInfoProcesser(DB_PATH, PROF_PATHS);
-    EXPECT_FALSE(processer.Run());
+    auto processor = ComputeTaskInfoProcessor(DB_PATH, PROF_PATHS);
+    EXPECT_FALSE(processor.Run());
 }
 
-TEST_F(ComputeTaskInfoProcesserUTest, TestRunShouldReturnFalseWhenCreateTableFailed)
+TEST_F(ComputeTaskInfoProcessorUTest, TestRunShouldReturnFalseWhenCreateTableFailed)
 {
-    auto processer = ComputeTaskInfoProcesser(DB_PATH, PROF_PATHS);
+    auto processor = ComputeTaskInfoProcessor(DB_PATH, PROF_PATHS);
     MOCKER_CPP(&Analysis::Viewer::Database::DBRunner::CreateTable)
     .stubs()
     .will(returnValue(false));
-    EXPECT_FALSE(processer.Run());
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&Analysis::Viewer::Database::DBRunner::CreateTable).reset();
 }
 
-TEST_F(ComputeTaskInfoProcesserUTest, TestRunShouldReturnFalseWhenCheckPathFailed)
+TEST_F(ComputeTaskInfoProcessorUTest, TestRunShouldReturnFalseWhenCheckPathFailed)
 {
-    auto processer = ComputeTaskInfoProcesser(DB_PATH, PROF_PATHS);
+    auto processor = ComputeTaskInfoProcessor(DB_PATH, PROF_PATHS);
     MOCKER_CPP(&Analysis::Utils::File::Check)
     .stubs()
     .will(returnValue(false));
-    EXPECT_FALSE(processer.Run());
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&Analysis::Utils::File::Check).reset();
 }
 
-TEST_F(ComputeTaskInfoProcesserUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
+TEST_F(ComputeTaskInfoProcessorUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
 {
     auto id{TableColumn("Id", "INTEGER")};
     auto name{TableColumn("Name", "INTEGER")};
     std::vector<TableColumn> cols{id, name};
-    auto processer = ComputeTaskInfoProcesser(DB_PATH, PROF_PATHS);
+    auto processor = ComputeTaskInfoProcessor(DB_PATH, PROF_PATHS);
     MOCKER_CPP(&Analysis::Viewer::Database::Database::GetTableCols)
     .stubs()
     .will(returnValue(cols));
-    EXPECT_FALSE(processer.Run());
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&Analysis::Viewer::Database::Database::GetTableCols).reset();
 }
 
-TEST_F(ComputeTaskInfoProcesserUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
+TEST_F(ComputeTaskInfoProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
 {
     using TempT = std::tuple<uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t,
                              uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>;
     MOCKER_CPP(&std::vector<TempT>::reserve)
     .stubs()
     .will(throws(std::bad_alloc()));
-    auto processer = ComputeTaskInfoProcesser(DB_PATH, PROF_PATHS);
-    EXPECT_FALSE(processer.Run());
+    auto processor = ComputeTaskInfoProcessor(DB_PATH, PROF_PATHS);
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&std::vector<TempT>::reserve).reset();
 }
 
-TEST_F(ComputeTaskInfoProcesserUTest, TestRunShouldReturnTrueWhenNoDb)
+TEST_F(ComputeTaskInfoProcessorUTest, TestRunShouldReturnTrueWhenNoDb)
 {
-    auto processor = ComputeTaskInfoProcesser(DB_PATH, {File::PathJoin({COMPUTE_TASK_PATH, "test"})});
+    auto processor = ComputeTaskInfoProcessor(DB_PATH, {File::PathJoin({COMPUTE_TASK_PATH, "test"})});
     EXPECT_TRUE(processor.Run());
 }

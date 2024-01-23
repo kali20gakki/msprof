@@ -3,13 +3,13 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : compute_task_info_processer.h
- * Description        : compute_task_info_processer，处理TaskInfo表相关数据
+ * File Name          : compute_task_info_processor.h
+ * Description        : compute_task_info_processor，处理TaskInfo表相关数据
  * Author             : msprof team
  * Creation Date      : 2023/12/16
  * *****************************************************************************
  */
-#include "analysis/csrc/viewer/database/finals/compute_task_info_processer.h"
+#include "analysis/csrc/viewer/database/finals/compute_task_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/association/credential/id_pool.h"
 
@@ -45,19 +45,19 @@ struct ComputeTaskInfoData {
     {}
 };
 
-ComputeTaskInfoProcesser::ComputeTaskInfoProcesser(const std::string &reportDBPath,
+ComputeTaskInfoProcessor::ComputeTaskInfoProcessor(const std::string &reportDBPath,
                                                    const std::set<std::string> &profPaths)
-    : TableProcesser(reportDBPath, profPaths) {}
+    : TableProcessor(reportDBPath, profPaths) {}
 
-bool ComputeTaskInfoProcesser::Run()
+bool ComputeTaskInfoProcessor::Run()
 {
     INFO("EnumApiLevelProcessor Run.");
-    bool flag = TableProcesser::Run();
+    bool flag = TableProcessor::Run();
     PrintProcessorResult(flag, TABLE_NAME_COMPUTE_TASK_INFO);
     return flag;
 }
 
-ComputeTaskInfoProcesser::OriDataFormat ComputeTaskInfoProcesser::GetData(const DBInfo &geInfoDB)
+ComputeTaskInfoProcessor::OriDataFormat ComputeTaskInfoProcessor::GetData(const DBInfo &geInfoDB)
 {
     OriDataFormat oriData;
     std::string sql{"SELECT model_id, op_name, stream_id, task_id, block_dim, mix_block_dim, task_type, op_type, "
@@ -70,7 +70,7 @@ ComputeTaskInfoProcesser::OriDataFormat ComputeTaskInfoProcesser::GetData(const 
     return oriData;
 }
 
-ComputeTaskInfoProcesser::ProcessedDataFormat ComputeTaskInfoProcesser::FormatData(const OriDataFormat &oriData)
+ComputeTaskInfoProcessor::ProcessedDataFormat ComputeTaskInfoProcessor::FormatData(const OriDataFormat &oriData)
 {
     ProcessedDataFormat processedData;
     ComputeTaskInfoData data;
@@ -111,7 +111,7 @@ ComputeTaskInfoProcesser::ProcessedDataFormat ComputeTaskInfoProcesser::FormatDa
     return processedData;
 }
 
-bool ComputeTaskInfoProcesser::Process(const std::string &fileDir)
+bool ComputeTaskInfoProcessor::Process(const std::string &fileDir)
 {
     DBInfo geInfoDB("ge_info.db", "TaskInfo");
     MAKE_SHARED0_NO_OPERATION(geInfoDB.database, GEInfoDB);

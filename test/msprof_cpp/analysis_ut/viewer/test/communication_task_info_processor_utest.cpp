@@ -3,8 +3,8 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : communication_task_info_processer_utest.cpp
- * Description        : communication_task_info_processer UT
+ * File Name          : communication_task_info_processor_utest.cpp
+ * Description        : communication_task_info_processor UT
  * Author             : msprof team
  * Creation Date      : 2024/1/4
  * *****************************************************************************
@@ -14,7 +14,7 @@
 #include <set>
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "analysis/csrc/viewer/database/finals/communication_task_info_processer.h"
+#include "analysis/csrc/viewer/database/finals/communication_task_info_processor.h"
 #include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
@@ -66,7 +66,7 @@ const HcclSingleDeviceFormat DATA_B{{4294967295, -1, "hcom_allReduce__360_0_2", 
                                        "HCCS", 87.530865228098, 4294967295, 8, 2, "INVALID_TYPE"}};
 }
 
-class CommunicationTaskInfoProcesserUTest : public testing::Test {
+class CommunicationTaskInfoProcessorUTest : public testing::Test {
 protected:
     virtual void SetUp()
     {
@@ -145,20 +145,20 @@ void CheckStringId(ProcessedDataFormat data)
     }
 }
 
-TEST_F(CommunicationTaskInfoProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSuccess)
+TEST_F(CommunicationTaskInfoProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
     std::shared_ptr<DBRunner> reportDBRunner;
     ProcessedDataFormat result;
     std::string sql{"SELECT * FROM " + TABLE_NAME_COMMUNICATION_TASK_INFO};
     MAKE_SHARED0_NO_OPERATION(reportDBRunner, DBRunner, DB_PATH);
-    auto processer = CommunicationTaskInfoProcesser(DB_PATH, PROF_PATHS);
-    EXPECT_TRUE(processer.Run());
+    auto processor = CommunicationTaskInfoProcessor(DB_PATH, PROF_PATHS);
+    EXPECT_TRUE(processor.Run());
     reportDBRunner->QueryData(sql, result);
     CheckCorrelationId(result);
     CheckStringId(result);
 }
 
-TEST_F(CommunicationTaskInfoProcesserUTest, TestRunShouldReturnFalseWhenSourceTableNotExist)
+TEST_F(CommunicationTaskInfoProcessorUTest, TestRunShouldReturnFalseWhenSourceTableNotExist)
 {
     auto dbPath = File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX});
     std::shared_ptr<DBRunner> dbRunner;
@@ -167,62 +167,62 @@ TEST_F(CommunicationTaskInfoProcesserUTest, TestRunShouldReturnFalseWhenSourceTa
     dbPath = File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE, DB_SUFFIX});
     MAKE_SHARED0_NO_OPERATION(dbRunner, DBRunner, dbPath);
     dbRunner->DropTable(TABLE_NAME);
-    auto processer = CommunicationTaskInfoProcesser(DB_PATH, PROF_PATHS);
-    EXPECT_FALSE(processer.Run());
+    auto processor = CommunicationTaskInfoProcessor(DB_PATH, PROF_PATHS);
+    EXPECT_FALSE(processor.Run());
 }
 
-TEST_F(CommunicationTaskInfoProcesserUTest, TestRunShouldReturnFalseWhenCreateTableFailed)
+TEST_F(CommunicationTaskInfoProcessorUTest, TestRunShouldReturnFalseWhenCreateTableFailed)
 {
-    auto processer = CommunicationTaskInfoProcesser(DB_PATH, PROF_PATHS);
+    auto processor = CommunicationTaskInfoProcessor(DB_PATH, PROF_PATHS);
     MOCKER_CPP(&Analysis::Viewer::Database::DBRunner::CreateTable)
     .stubs()
     .will(returnValue(false));
-    EXPECT_FALSE(processer.Run());
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&Analysis::Viewer::Database::DBRunner::CreateTable).reset();
 }
 
-TEST_F(CommunicationTaskInfoProcesserUTest, TestRunShouldReturnFalseWhenCheckPathFailed)
+TEST_F(CommunicationTaskInfoProcessorUTest, TestRunShouldReturnFalseWhenCheckPathFailed)
 {
-    auto processer = CommunicationTaskInfoProcesser(DB_PATH, PROF_PATHS);
+    auto processor = CommunicationTaskInfoProcessor(DB_PATH, PROF_PATHS);
     MOCKER_CPP(&Analysis::Utils::File::Check)
     .stubs()
     .will(returnValue(false));
-    EXPECT_FALSE(processer.Run());
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&Analysis::Utils::File::Check).reset();
 }
 
-TEST_F(CommunicationTaskInfoProcesserUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
+TEST_F(CommunicationTaskInfoProcessorUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
 {
     auto id{TableColumn("Id", "INTEGER")};
     auto name{TableColumn("Name", "INTEGER")};
     std::vector<TableColumn> cols{id, name};
-    auto processer = CommunicationTaskInfoProcesser(DB_PATH, PROF_PATHS);
+    auto processor = CommunicationTaskInfoProcessor(DB_PATH, PROF_PATHS);
     MOCKER_CPP(&Analysis::Viewer::Database::Database::GetTableCols)
     .stubs()
     .will(returnValue(cols));
-    EXPECT_FALSE(processer.Run());
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&Analysis::Viewer::Database::Database::GetTableCols).reset();
 }
 
-TEST_F(CommunicationTaskInfoProcesserUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
+TEST_F(CommunicationTaskInfoProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
 {
     using TempT = std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t, uint64_t,
                              uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t>;
     MOCKER_CPP(&std::vector<TempT>::reserve)
     .stubs()
     .will(throws(std::bad_alloc()));
-    auto processer = CommunicationTaskInfoProcesser(DB_PATH, PROF_PATHS);
-    EXPECT_FALSE(processer.Run());
+    auto processor = CommunicationTaskInfoProcessor(DB_PATH, PROF_PATHS);
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&std::vector<TempT>::reserve).reset();
 }
 
-TEST_F(CommunicationTaskInfoProcesserUTest, TestRunShouldReturnTrueWhenNoDb)
+TEST_F(CommunicationTaskInfoProcessorUTest, TestRunShouldReturnTrueWhenNoDb)
 {
     std::vector<std::string> deviceList = {File::PathJoin({COMMUNICATION_TASK_PATH, "test", "device_1"})};
     MOCKER_CPP(&Utils::File::GetFilesWithPrefix)
     .stubs()
     .will(returnValue(deviceList));
-    auto processor = CommunicationTaskInfoProcesser(DB_PATH, {File::PathJoin({COMMUNICATION_TASK_PATH, "test"})});
+    auto processor = CommunicationTaskInfoProcessor(DB_PATH, {File::PathJoin({COMMUNICATION_TASK_PATH, "test"})});
     EXPECT_TRUE(processor.Run());
     MOCKER_CPP(&Utils::File::GetFilesWithPrefix).reset();
 }
