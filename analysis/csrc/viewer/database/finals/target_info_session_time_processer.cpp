@@ -21,31 +21,37 @@ using Context = Parser::Environment::Context;
 
 TargetInfoSessionTimeProcesser::TargetInfoSessionTimeProcesser(const std::string &reportDBPath,
                                                                const std::set<std::string> &profPaths)
-    : TableProcesser(reportDBPath, profPaths)
-{
-    reportDB_.tableName = TABLE_NAME_TARGET_INFO_SESSION_TIME;
-};
+    : TableProcesser(reportDBPath, profPaths) {}
 
 bool TargetInfoSessionTimeProcesser::Run()
 {
-    INFO("TargetInfoNpuProcesser Run.");
+    INFO("TargetInfoSessionTimeProcessor Run.");
+    bool flag = true;
     for (const auto& path : profPaths_) {
         if (!Process(path)) {
-            return false;
+            flag = false;
         }
+    }
+    // 若Process中数据获取失败,理应不落盘数据
+    if (!flag) {
+        ERROR("Get session time failed.");
+        return flag;
     }
     TimeDataFormat timeInfoData = {
         std::make_tuple(record_.startTimeNs, record_.endTimeNs, Analysis::Utils::TIME_BASE_OFFSET_NS)
     };
-    return SaveData(timeInfoData);
+    flag = SaveData(timeInfoData, TABLE_NAME_TARGET_INFO_SESSION_TIME);
+    PrintProcessorResult(flag, TABLE_NAME_ENUM_API_LEVEL);
+    return flag;
 }
 
 bool TargetInfoSessionTimeProcesser::Process(const std::string &fileDir)
 {
-    INFO("TargetInfoSessionTimeProcesser Process, dir is %", fileDir);
+    INFO("TargetInfoSessionTimeProcessor Process, dir is %", fileDir);
     std::string hostDir = Utils::File::PathJoin({fileDir, HOST});
     Utils::ProfTimeRecord tempRecord;
     if (!Context::GetInstance().GetProfTimeRecordInfo(tempRecord, fileDir)) {
+        ERROR("GetProfTimeRecordInfo failed, profPath is %.", fileDir);
         return false;
     }
     // 开始时间取最早的，结束时间取最晚的

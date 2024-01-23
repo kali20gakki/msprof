@@ -32,11 +32,12 @@ public:
     TaskProcesser() = default;
     TaskProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths);
     virtual ~TaskProcesser() = default;
+    bool Run() override;
 protected:
     bool Process(const std::string &fileDir) override;
 private:
     static OriDataFormat GetData(DBInfo &ascendTaskDB);
-    ProcessedDataFormat FormatData(const OriDataFormat &oriData, uint16_t deviceId, uint64_t globalPid,
+    static ProcessedDataFormat FormatData(const OriDataFormat &oriData, uint16_t deviceId, uint32_t globalPid,
                                    uint16_t platformVersion, Utils::ProfTimeRecord &timeRecord);
     static uint64_t GetTaskType(const std::string &hostType, const std::string &deviceType, uint16_t platformVersion);
 };

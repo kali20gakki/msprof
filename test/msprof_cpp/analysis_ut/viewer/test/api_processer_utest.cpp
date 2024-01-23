@@ -15,6 +15,7 @@
 #include "mockcpp/mockcpp.hpp"
 
 #include "analysis/csrc/association/credential/id_pool.h"
+#include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/parser/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
@@ -27,11 +28,11 @@ using namespace Analysis::Association::Credential;
 using ApiDataFormat = std::vector<std::tuple<std::string, std::string, std::string, uint32_t,
         std::string, uint64_t, uint64_t, uint64_t>>;
 // start, end, level, globalTid, connectionId, name
-using ProcessedDataFormat = std::vector<std::tuple<double, double, uint16_t,
+using ProcessedDataFormat = std::vector<std::tuple<std::string, std::string, uint16_t,
         uint64_t, uint64_t, uint64_t>>;
 
 // start, end, level, globalTid, connectionId, name
-using QueryDataFormat = std::vector<std::tuple<double, double, uint32_t,
+using QueryDataFormat = std::vector<std::tuple<std::string, std::string, uint32_t,
         uint64_t, uint64_t, uint64_t>>;
 
 const std::string API_DIR = "./api";
@@ -50,7 +51,7 @@ const std::string END_INFO = "end_info";
 const std::string HOST_START_LOG = "host_start.log";
 
 const ApiDataFormat API_DATA = {
-    {"StreamSyncTaskFinish", "0", "runtime", 116, "0", 65177262396323, 65177262396323, 0},
+    {"StreamSyncTaskFinish", "0", "runtime", 116, "0", 65177262396323, 65177262396323, 1},
     {"ACL_RTS", "aclrtSynchronizeStreamWithTimeout", "acl", 116, "0", 65177262395395, 65177262397115, 2},
     {"ACL_RTS", "aclrtMemcpy", "test", 116, "0", 65177262397274, 65177262404692, 4},
     {"launch", "0", "node", 116, "Index4", 65177262436161, 65177262437816, 24},
@@ -59,6 +60,10 @@ const ApiDataFormat API_DATA = {
     {"HOST_HCCL", "hcom_allReduce_", "acl", 6635, "hcom_allReduce_", 65177264940493, 65177264975485, 245},
     {"master", "0", "hccl", 6635, "hcom_allReduce_", 65177264940493, 65177264975485, 247},
     {"ACL_OTHERS", "262144", "acl", 116, "GraphOperation::Setup", 65177265026179, 65177265048078, 299},
+};
+// 构造一个开始时间为0的数据,该数据会被过滤,故单独插入
+const ApiDataFormat INVALID_DATA = {
+    {"ACL_RTS", "aclrtSetDevice", "acl", 116, "0", 0, 65177262396300, 0},
 };
 const uint16_t LEVEL_INDEX = 2;
 const uint16_t TID_INDEX = 3;
@@ -71,20 +76,21 @@ protected:
         EXPECT_TRUE(File::CreateDir(API_DIR));
         EXPECT_TRUE(File::CreateDir(PROF0));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF0, HOST})));
+        EXPECT_TRUE(CreateAPIDB(File::PathJoin({PROF0, HOST, SQLITE}), INVALID_DATA));
         EXPECT_TRUE(CreateAPIDB(File::PathJoin({PROF0, HOST, SQLITE}), API_DATA));
-        CreateJsonAndLog(File::PathJoin({PROF0, HOST}), "10");
+        CreateJsonAndLog(File::PathJoin({PROF0, HOST}));
         EXPECT_TRUE(File::CreateDir(PROF1));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF1, HOST})));
         EXPECT_TRUE(CreateAPIDB(File::PathJoin({PROF1, HOST, SQLITE}), API_DATA));
-        CreateJsonAndLog(File::PathJoin({PROF1, HOST}), "20");
+        CreateJsonAndLog(File::PathJoin({PROF1, HOST}));
         EXPECT_TRUE(File::CreateDir(PROF2));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF2, HOST})));
         EXPECT_TRUE(CreateAPIDB(File::PathJoin({PROF2, HOST, SQLITE}), API_DATA));
-        CreateJsonAndLog(File::PathJoin({PROF2, HOST}), "30");
+        CreateJsonAndLog(File::PathJoin({PROF2, HOST}));
         EXPECT_TRUE(File::CreateDir(PROF3));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF3, HOST})));
         EXPECT_TRUE(CreateAPIDB(File::PathJoin({PROF3, HOST, SQLITE}), API_DATA));
-        CreateJsonAndLog(File::PathJoin({PROF3, HOST}), "40");
+        CreateJsonAndLog(File::PathJoin({PROF3, HOST}));
         EXPECT_TRUE(Context::GetInstance().Load(PROF_PATHS));
     }
 
@@ -118,13 +124,13 @@ protected:
         IdPool::GetInstance().Clear();
     }
 
-    static void CreateJsonAndLog(const std::string &filePath, const std::string &pid)
+    static void CreateJsonAndLog(const std::string &filePath)
     {
         // info.json
         nlohmann::json info = {
             {"drvVersion", 467732},
             {"platform_version", "7"},
-            {"pid", pid},
+            {"pid", "10"},
             {"CPU", {{{"Frequency", "100.000000"}}}},
             {"DeviceInfo", {{{"hwts_frequency", "49.000000"}}}},
         };
@@ -165,11 +171,11 @@ protected:
     }
 };
 
-void CheckApiDataValid(const QueryDataFormat &checkData, const std::vector<uint64_t> &pids)
+void CheckApiDataValid(const QueryDataFormat &checkData)
 {
     // 业务角度，用于校验获取到的API表的数据
-    double start;
-    double end;
+    std::string start;
+    std::string end;
     uint16_t level;
     uint64_t tid;
     uint64_t connectionId;
@@ -177,17 +183,18 @@ void CheckApiDataValid(const QueryDataFormat &checkData, const std::vector<uint6
     const uint16_t moveCount = 32;
     for (uint16_t i = 0; i < checkData.size(); ++i) {
         auto index = i % API_DATA.size();
-        auto pIndex = i / API_DATA.size();
         std::tie(start, end, level, tid, connectionId, name) = checkData[i];
         // 开始小于结束时间
-        EXPECT_LE(start, end);
+        double tempStart;
+        double tempEnd;
+        EXPECT_EQ(Utils::StrToDouble(tempStart, start), ANALYSIS_OK);
+        EXPECT_EQ(Utils::StrToDouble(tempEnd, end), ANALYSIS_OK);
+        EXPECT_LE(tempStart, tempEnd);
         // 比对前后的level是否一致
         EXPECT_EQ(level, ApiProcesser().GetLevelValue(std::get<LEVEL_INDEX>(API_DATA[index])));
         uint32_t oriTid = std::get<TID_INDEX>(API_DATA[index]);
         uint32_t oriConId = std::get<CONNECTION_ID_INDEX>(API_DATA[index]);
-        // 对pid获取的函数进行了打桩，模拟了不同的PROF文件的pid不同，此处挨个校验pid
-        EXPECT_EQ((tid >> moveCount), pids[pIndex]);
-        // globalTid和connectionId 都是高位为pid，低位为对应id。因此两者的高32位应一致
+        // globalTid和connectionId 都是高位为同一个uint32，低位为对应id。因此两者的高32位应一致
         EXPECT_EQ((tid >> moveCount), (connectionId >> moveCount));
         // 分别校验获取到的tid和connectionId的低32位是否与原先保持一致。
         EXPECT_EQ((tid & 0xffffffff), oriTid);
@@ -198,11 +205,6 @@ void CheckApiDataValid(const QueryDataFormat &checkData, const std::vector<uint6
 TEST_F(ApiProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSuccess)
 {
     auto processer = ApiProcesser(DB_PATH, {PROF_PATHS});
-    uint64_t pid0 = 10;
-    uint64_t pid1 = 20;
-    uint64_t pid2 = 30;
-    uint64_t pid3 = 40;
-    std::vector<uint64_t> pids = {pid0, pid1, pid2, pid3};
     EXPECT_TRUE(processer.Run());
     std::shared_ptr<DBRunner> dbRunner;
     MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
@@ -215,7 +217,7 @@ TEST_F(ApiProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSuccess)
     EXPECT_EQ(expectNum, checkData.size());
     const uint16_t expectStringIdNum = 11;
     EXPECT_EQ(IdPool::GetInstance().GetAllUint64Ids().size(), expectStringIdNum);
-    CheckApiDataValid(checkData, pids);
+    CheckApiDataValid(checkData);
 }
 
 TEST_F(ApiProcesserUTest, TestRunShouldReturnFalseWhenProcesserFail)

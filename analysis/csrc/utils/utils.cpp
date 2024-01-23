@@ -134,10 +134,16 @@ bool IsNumber(const std::string& s)
     return !s.empty() && it == s.end();
 }
 
-uint64_t Splicing(uint32_t high, uint32_t low)
+uint64_t Contact(uint32_t high, uint32_t low)
 {
     const uint8_t shift = 32;
     return (static_cast<uint64_t>(high) << shift) | low;
+}
+
+bool IsDoubleEqual(double checkDouble, double standard)
+{
+    const double eps = 1e-9;
+    return (std::abs(checkDouble - standard) < eps);
 }
 
 }  // namespace Utils

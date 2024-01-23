@@ -34,6 +34,7 @@ public:
     CommunicationTaskInfoProcesser() = default;
     CommunicationTaskInfoProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths);
     virtual ~CommunicationTaskInfoProcesser() = default;
+    bool Run() override;
 protected:
     bool Process(const std::string &fileDir) override;
 private:

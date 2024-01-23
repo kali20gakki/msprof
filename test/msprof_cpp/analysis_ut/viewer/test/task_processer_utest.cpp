@@ -256,3 +256,18 @@ TEST_F(TaskProcesserUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEm
     EXPECT_FALSE(processer.Run());
     MOCKER_CPP(&std::vector<TempT>::reserve).reset();
 }
+
+TEST_F(TaskProcesserUTest, TestRunShouldReturnTrueWhenNoDb)
+{
+    std::vector<std::string> deviceList = {File::PathJoin({TASK_PATH, "test", "device_1"})};
+    MOCKER_CPP(&Utils::File::GetFilesWithPrefix)
+    .stubs()
+    .will(returnValue(deviceList));
+    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
+    .stubs()
+    .will(returnValue(true));
+    auto processor = TaskProcesser(DB_PATH, {File::PathJoin({TASK_PATH, "test"})});
+    EXPECT_TRUE(processor.Run());
+    MOCKER_CPP(&Utils::File::GetFilesWithPrefix).reset();
+    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
+}
