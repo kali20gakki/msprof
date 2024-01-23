@@ -18,27 +18,26 @@ namespace Viewer {
 namespace Database {
 
 EnumApiLevelProcesser::EnumApiLevelProcesser(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : TableProcesser(reportDBPath, profPaths)
-{
-    reportDB_.tableName = TABLE_NAME_ENUM_API_LEVEL;
-};
+    : TableProcesser(reportDBPath, profPaths) {}
 
 bool EnumApiLevelProcesser::Run()
 {
-    INFO("EnumApiLevelProcesser Run.");
-    return Process();
+    INFO("EnumApiLevelProcessor Run.");
+    bool flag = Process();
+    PrintProcessorResult(flag, TABLE_NAME_ENUM_API_LEVEL);
+    return flag;
 }
 
 bool EnumApiLevelProcesser::Process(const std::string &fileDir)
 {
-    INFO("EnumApiLevelProcesser Process.");
+    INFO("EnumApiLevelProcessor Process.");
     EnumApiLevelDataFormat enumApiData = GetData();
-    return SaveData(enumApiData);
+    return SaveData(enumApiData, TABLE_NAME_ENUM_API_LEVEL);
 }
 
 EnumApiLevelProcesser::EnumApiLevelDataFormat EnumApiLevelProcesser::GetData()
 {
-    INFO("EnumApiLevelProcesser GetData.");
+    INFO("EnumApiLevelProcessor GetData.");
     EnumApiLevelDataFormat apiLevelData;
     if (!Utils::Reserve(apiLevelData, API_LEVEL_TABLE.size())) {
         ERROR("Reserve for api level data failed.");

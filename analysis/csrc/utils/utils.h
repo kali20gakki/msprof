@@ -31,7 +31,9 @@ int StrToDouble(double &dest, const std::string &numStr);
 // 对于传入的 {local_path}/PROF_xxx/host, 也返回host对应的id（64）
 uint16_t GetDeviceIdByDevicePath(const std::string &filePath);
 bool IsNumber(const std::string& s);
-uint64_t Splicing(uint32_t high, uint32_t low);
+// 将两个uint32_t 拼成uint64_t
+uint64_t Contact(uint32_t high, uint32_t low);
+bool IsDoubleEqual(double checkDouble, double standard);
 
 // make_shared参数个数为0，异常操作为return void
 #define MAKE_SHARED0_RETURN_VOID(instance, type) \

@@ -86,8 +86,8 @@ namespace {
     };
 
     const TableColumns API = {
-        {"start", SQL_NUMERIC_TYPE},
-        {"end", SQL_NUMERIC_TYPE},
+        {"start", SQL_TEXT_TYPE},
+        {"end", SQL_TEXT_TYPE},
         {"level", SQL_INTEGER_TYPE},
         {"globalTid", SQL_INTEGER_TYPE},
         {"connectionId", SQL_INTEGER_TYPE, true},

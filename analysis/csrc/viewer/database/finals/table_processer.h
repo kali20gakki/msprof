@@ -31,11 +31,13 @@ struct DBInfo {
     std::string tableName;
     std::shared_ptr<Database> database;
     std::shared_ptr<DBRunner> dbRunner;
+    DBInfo() = default;
+    DBInfo(std::string dbName, std::string tableName) : dbName(dbName), tableName(tableName) {};
 };
 
 // 该类用于定义处理父类
 // 主要包括以下特性：用于规范各db处理流程
-// 1、Run拉起processer整体流程
+// 1、Run拉起processor整体流程
 // 2、以PROF文件为粒度，分别拉起Process
 // (不强制要求 Run, Process完成上述工作,具体根据子类的实际情况进行实现,比如不感知PROF文件的情况)
 // 3、子类内部自行调用Save进行数据dump
@@ -49,18 +51,19 @@ public:
 protected:
     virtual bool Process(const std::string &fileDir) = 0;
     template<typename... Args>
-    bool SaveData(const std::vector<std::tuple<Args...>> &data) const;
+    bool SaveData(const std::vector<std::tuple<Args...>> &data, const std::string &tableName) const;
+    static void PrintProcessorResult(bool result, const std::string &processorName);
     std::string reportDBPath_;
     std::set<std::string> profPaths_;
     DBInfo reportDB_;
-}; // class TableProcesser
+}; // class TableProcessor
 
 template<typename... Args>
-bool TableProcesser::SaveData(const std::vector<std::tuple<Args...>> &data) const
+bool TableProcesser::SaveData(const std::vector<std::tuple<Args...>> &data, const std::string &tableName) const
 {
-    INFO("Processer Save % Data.", reportDB_.tableName);
+    INFO("Processor Save % Data.", tableName);
     if (data.empty()) {
-        ERROR("% is empty.", reportDB_.tableName);
+        ERROR("% is empty.", tableName);
         return false;
     }
     if (reportDB_.database == nullptr) {
@@ -71,11 +74,11 @@ bool TableProcesser::SaveData(const std::vector<std::tuple<Args...>> &data) cons
         ERROR("Report db runner is nullptr.");
         return false;
     }
-    if (!reportDB_.dbRunner->CreateTable(reportDB_.tableName, reportDB_.database->GetTableCols(reportDB_.tableName))) {
-        ERROR("Create table: % failed", reportDB_.tableName);
+    if (!reportDB_.dbRunner->CreateTable(tableName, reportDB_.database->GetTableCols(tableName))) {
+        ERROR("Create table: % failed", tableName);
         return false;
     }
-    if (!reportDB_.dbRunner->InsertData(reportDB_.tableName, data)) {
+    if (!reportDB_.dbRunner->InsertData(tableName, data)) {
         ERROR("Insert data into % failed", reportDBPath_);
         return false;
     }

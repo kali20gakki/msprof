@@ -12,7 +12,7 @@
 
 #include "analysis/csrc/viewer/database/finals/string_ids_processer.h"
 #include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 namespace Analysis {
 namespace Viewer {
@@ -20,14 +20,14 @@ namespace Database {
 using namespace Association::Credential;
 
 StringIdsProcesser::StringIdsProcesser(const std::string &reportDBPath)
-    : TableProcesser(reportDBPath)
-{
-    reportDB_.tableName = "STRING_IDS";
-}
+    : TableProcesser(reportDBPath) {}
 
 bool StringIdsProcesser::Run()
 {
-    return Process();
+    INFO("StringIdsProcessor Run.");
+    bool flag = Process();
+    PrintProcessorResult(flag, TABLE_NAME_STRING_IDS);
+    return flag;
 }
 
 StringIdsProcesser::ProcessedDataFormat StringIdsProcesser::FormatData(const OriDataFormat &oriData)
@@ -47,7 +47,7 @@ bool StringIdsProcesser::Process(const std::string &fileDir)
 {
     OriDataFormat oriData = IdPool::GetInstance().GetAllUint64Ids();
     auto processedData = FormatData(oriData);
-    if (!SaveData(processedData)) {
+    if (!SaveData(processedData, TABLE_NAME_STRING_IDS)) {
         ERROR("Failed to generate the STRING_IDS table.");
         return false;
     }
