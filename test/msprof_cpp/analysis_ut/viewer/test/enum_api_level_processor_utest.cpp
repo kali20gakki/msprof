@@ -3,14 +3,14 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : enum_api_level_processer.cpp
- * Description        : EnumApiLevelProcesser UT
+ * File Name          : enum_api_level_processor.cpp
+ * Description        : EnumApiLevelProcessor UT
  * Author             : msprof team
  * Creation Date      : 2024/01/10
  * *****************************************************************************
  */
 
-#include "analysis/csrc/viewer/database/finals/enum_api_level_processer.h"
+#include "analysis/csrc/viewer/database/finals/enum_api_level_processor.h"
 
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
@@ -24,7 +24,7 @@ const std::string ENUM_API_LEVEL_DIR = "./enum_api_level";
 const std::string REPORT = "report.db";
 const std::string DB_PATH = File::PathJoin({ENUM_API_LEVEL_DIR, REPORT});
 
-class EnumApiLevelProcesserUTest : public testing::Test {
+class EnumApiLevelProcessorUTest : public testing::Test {
 protected:
     static void SetUpTestCase()
     {
@@ -48,10 +48,10 @@ protected:
     }
 };
 
-TEST_F(EnumApiLevelProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSuccess)
+TEST_F(EnumApiLevelProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
-    auto processer = EnumApiLevelProcesser(DB_PATH, {""});
-    EXPECT_TRUE(processer.Run());
+    auto processor = EnumApiLevelProcessor(DB_PATH, {""});
+    EXPECT_TRUE(processor.Run());
 
     std::shared_ptr<DBRunner> dbRunner;
     MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
@@ -68,27 +68,27 @@ TEST_F(EnumApiLevelProcesserUTest, TestRunShouldReturnTrueWhenProcesserRunSucces
     }
 }
 
-TEST_F(EnumApiLevelProcesserUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
+TEST_F(EnumApiLevelProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
 {
     using TempT = std::tuple<uint16_t, std::string>;
     MOCKER_CPP(&std::vector<TempT>::reserve).stubs().will(throws(std::bad_alloc()));
-    auto processer = EnumApiLevelProcesser(DB_PATH, {""});
-    EXPECT_FALSE(processer.Run());
+    auto processor = EnumApiLevelProcessor(DB_PATH, {""});
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&std::vector<TempT>::reserve).reset();
 }
 
-TEST_F(EnumApiLevelProcesserUTest, TestRunShouldReturnFalseWhenMakeSharedFailedThenPtrIsNullptr)
+TEST_F(EnumApiLevelProcessorUTest, TestRunShouldReturnFalseWhenMakeSharedFailedThenPtrIsNullptr)
 {
     MOCKER_CPP(&std::make_shared<ReportDB>).stubs().will(throws(std::bad_alloc()));
-    auto processer = EnumApiLevelProcesser(DB_PATH, {""});
-    EXPECT_FALSE(processer.Run());
+    auto processor = EnumApiLevelProcessor(DB_PATH, {""});
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&std::make_shared<ReportDB>).reset();
 }
 
-TEST_F(EnumApiLevelProcesserUTest, TestRunShouldReturnFalseWhenCreateTableFailed)
+TEST_F(EnumApiLevelProcessorUTest, TestRunShouldReturnFalseWhenCreateTableFailed)
 {
     MOCKER_CPP(&DBRunner::CreateTable).stubs().will(returnValue(false));
-    auto processer = EnumApiLevelProcesser(DB_PATH, {""});
-    EXPECT_FALSE(processer.Run());
+    auto processor = EnumApiLevelProcessor(DB_PATH, {""});
+    EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&DBRunner::CreateTable).reset();
 }

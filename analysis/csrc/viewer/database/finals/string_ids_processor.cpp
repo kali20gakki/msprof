@@ -3,14 +3,14 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : stringids_processer.cpp
- * Description        : stringids_processer，处理StringIds数据
+ * File Name          : stringids_processor.cpp
+ * Description        : stringids_processor，处理StringIds数据
  * Author             : msprof team
  * Creation Date      : 2023/12/16
  * *****************************************************************************
  */
 
-#include "analysis/csrc/viewer/database/finals/string_ids_processer.h"
+#include "analysis/csrc/viewer/database/finals/string_ids_processor.h"
 #include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
@@ -19,10 +19,10 @@ namespace Viewer {
 namespace Database {
 using namespace Association::Credential;
 
-StringIdsProcesser::StringIdsProcesser(const std::string &reportDBPath)
-    : TableProcesser(reportDBPath) {}
+StringIdsProcessor::StringIdsProcessor(const std::string &reportDBPath)
+    : TableProcessor(reportDBPath) {}
 
-bool StringIdsProcesser::Run()
+bool StringIdsProcessor::Run()
 {
     INFO("StringIdsProcessor Run.");
     bool flag = Process();
@@ -30,7 +30,7 @@ bool StringIdsProcesser::Run()
     return flag;
 }
 
-StringIdsProcesser::ProcessedDataFormat StringIdsProcesser::FormatData(const OriDataFormat &oriData)
+StringIdsProcessor::ProcessedDataFormat StringIdsProcessor::FormatData(const OriDataFormat &oriData)
 {
     ProcessedDataFormat processedData;
     if (!Utils::Reserve(processedData, oriData.size())) {
@@ -43,7 +43,7 @@ StringIdsProcesser::ProcessedDataFormat StringIdsProcesser::FormatData(const Ori
     return processedData;
 }
 
-bool StringIdsProcesser::Process(const std::string &fileDir)
+bool StringIdsProcessor::Process(const std::string &fileDir)
 {
     OriDataFormat oriData = IdPool::GetInstance().GetAllUint64Ids();
     auto processedData = FormatData(oriData);

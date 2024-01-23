@@ -16,14 +16,14 @@
 #include "analysis/csrc/dfx/log.h"
 #include "analysis/csrc/utils/time_utils.h"
 #include "analysis/csrc/utils/thread_pool.h"
-#include "analysis/csrc/viewer/database/finals/table_processer_factory.h"
+#include "analysis/csrc/viewer/database/finals/table_processor_factory.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
 
 std::vector<std::string> dbName = {
-    "api_processer"
+    "api_processor"
 };
 
 void UnifiedDBManager::Init()
@@ -44,13 +44,13 @@ bool UnifiedDBManager::Run()
     pool.Start();
     for (auto name : dbName) {
         pool.AddTask([this, &name]() {
-            std::shared_ptr<TableProcesser> processer =
-                TableProcesserFactory::CreateTableProcessor(name, reportDBPath_, profPaths_);
-            if (processer == nullptr) {
+            std::shared_ptr<TableProcessor> processor =
+                TableProcessorFactory::CreateTableProcessor(name, reportDBPath_, profPaths_);
+            if (processor == nullptr) {
                 ERROR("% is not defined", name);
                 return false;
             }
-            processer->Run();
+            processor->Run();
         });
     }
 
