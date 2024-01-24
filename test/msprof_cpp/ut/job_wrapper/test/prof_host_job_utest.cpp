@@ -8,6 +8,7 @@
 #include "uploader_mgr.h"
 #include "utils/utils.h"
 #include "thread/thread.h"
+
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
 using namespace Analysis::Dvvp::JobWrapper;

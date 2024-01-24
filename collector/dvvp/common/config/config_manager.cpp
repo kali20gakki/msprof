@@ -84,6 +84,7 @@ void ConfigManager::Uninit()
 int ConfigManager::GetAicoreEvents(const std::string &aicoreMetricsType, std::string &aicoreEvents) const
 {
     if (aicoreMetricsType.empty()) {
+        MSPROF_LOGE("Argument aic_metrics is empty.");
         return PROFILING_FAILED;
     }
     auto iter = AICORE_METRICS_LIST.find(aicoreMetricsType);
@@ -125,12 +126,12 @@ int ConfigManager::GetL2cacheEvents(std::string &l2CacheEvents) const
 void ConfigManager::MsprofL2CacheAdapter(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
 {
     if (params->l2CacheTaskProfiling != MSVP_PROF_ON) {
-        params->l2CacheTaskProfiling = "off";
+        params->l2CacheTaskProfiling = MSVP_PROF_OFF;
         return;
     }
     int ret = ConfigManager::instance()->GetL2cacheEvents(params->l2CacheTaskProfilingEvents);
     if (ret != PROFILING_SUCCESS) {
-        params->l2CacheTaskProfiling = "off";
+        params->l2CacheTaskProfiling = MSVP_PROF_OFF;
         MSPROF_LOGW("The platform is invalid for l2 cache, l2 cache data will not be collected");
     } else {
         params->l2CacheTaskProfiling = MSVP_PROF_ON;

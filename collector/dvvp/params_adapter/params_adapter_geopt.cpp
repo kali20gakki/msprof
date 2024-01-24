@@ -144,34 +144,34 @@ int ParamsAdapterGeOpt::ParamsCheckGeOpt() const
 
 void ParamsAdapterGeOpt::GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg)
 {
-    paramContainer_[INPUT_CFG_COM_OUTPUT] = geCfg->output();
-    paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = geCfg->storage_limit();
-    paramContainer_[INPUT_CFG_COM_MSPROFTX] = geCfg->msproftx();
-    paramContainer_[INPUT_CFG_COM_TASK_TIME] = geCfg->task_time();
-    paramContainer_[INPUT_CFG_COM_TRAINING_TRACE] = geCfg->training_trace();
-    paramContainer_[INPUT_CFG_COM_TASK_TRACE] = geCfg->task_trace();
-    paramContainer_[INPUT_CFG_COM_AICPU] = geCfg->aicpu();
-    paramContainer_[INPUT_CFG_COM_L2] = geCfg->l2();
-    paramContainer_[INPUT_CFG_COM_HCCL] = geCfg->hccl();
+    paramContainer_[INPUT_CFG_COM_OUTPUT] = geCfg->output;
+    paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = geCfg->storageLimit;
+    paramContainer_[INPUT_CFG_COM_MSPROFTX] = geCfg->msproftx;
+    paramContainer_[INPUT_CFG_COM_TASK_TIME] = geCfg->taskTime;
+    paramContainer_[INPUT_CFG_COM_TRAINING_TRACE] = geCfg->trainingTrace;
+    paramContainer_[INPUT_CFG_COM_TASK_TRACE] = geCfg->taskTrace;
+    paramContainer_[INPUT_CFG_COM_AICPU] = geCfg->aicpu;
+    paramContainer_[INPUT_CFG_COM_L2] = geCfg->l2;
+    paramContainer_[INPUT_CFG_COM_HCCL] = geCfg->hccl;
     paramContainer_[INPUT_CFG_COM_ASCENDCL] = "off";
-    paramContainer_[INPUT_CFG_COM_RUNTIME_API] = geCfg->runtime_api();
-    paramContainer_[INPUT_CFG_COM_AIC_METRICS] = geCfg->aic_metrics();
-    paramContainer_[INPUT_CFG_COM_AIV_METRICS] = geCfg->aiv_metrics();
-    paramContainer_[INPUT_CFG_COM_POWER] = geCfg->power();
-    paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = (geCfg->sys_hardware_mem_freq() <= 0) ? "" :
-        std::to_string(geCfg->sys_hardware_mem_freq());
-    paramContainer_[INPUT_CFG_COM_LLC_MODE] = geCfg->llc_profiling();
-    paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = (geCfg->sys_io_sampling_freq() <= 0) ? "" :
-        std::to_string(geCfg->sys_io_sampling_freq());
-    paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = (geCfg->sys_interconnection_freq() <= 0) ? "" :
-        std::to_string(geCfg->sys_interconnection_freq());
-    paramContainer_[INPUT_CFG_COM_DVPP_FREQ] = (geCfg->dvpp_freq() <= 0) ? "" :
-        std::to_string(geCfg->dvpp_freq());
-    paramContainer_[INPUT_CFG_HOST_SYS] = geCfg->host_sys();
-    paramContainer_[INPUT_CFG_HOST_SYS_USAGE] = geCfg->host_sys_usage();
-    paramContainer_[INPUT_CFG_HOST_SYS_USAGE_FREQ] = (geCfg->host_sys_usage_freq() <= 0) ? "" :
-        std::to_string(geCfg->host_sys_usage_freq());
-    std::string instrFreqParam = std::to_string(geCfg->instr_profiling_freq());
+    paramContainer_[INPUT_CFG_COM_RUNTIME_API] = geCfg->runtimeApi;
+    paramContainer_[INPUT_CFG_COM_AIC_METRICS] = geCfg->aicMetrics;
+    paramContainer_[INPUT_CFG_COM_AIV_METRICS] = geCfg->aivMetrics;
+    paramContainer_[INPUT_CFG_COM_POWER] = geCfg->power;
+    paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = (geCfg->sysHardwareMemFreq <= 0) ? "" :
+        std::to_string(geCfg->sysHardwareMemFreq);
+    paramContainer_[INPUT_CFG_COM_LLC_MODE] = geCfg->llcProfiling;
+    paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = (geCfg->sysIoSamplingFreq <= 0) ? "" :
+        std::to_string(geCfg->sysIoSamplingFreq);
+    paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = (geCfg->sysInterconnectionFreq <= 0) ? "" :
+        std::to_string(geCfg->sysInterconnectionFreq);
+    paramContainer_[INPUT_CFG_COM_DVPP_FREQ] = (geCfg->dvppFreq <= 0) ? "" :
+        std::to_string(geCfg->dvppFreq);
+    paramContainer_[INPUT_CFG_HOST_SYS] = geCfg->hostSys;
+    paramContainer_[INPUT_CFG_HOST_SYS_USAGE] = geCfg->hostSysUsage;
+    paramContainer_[INPUT_CFG_HOST_SYS_USAGE_FREQ] = (geCfg->hostSysUsageFreq <= 0) ? "" :
+        std::to_string(geCfg->hostSysUsageFreq);
+    std::string instrFreqParam = std::to_string(geCfg->instrProfilingFreq);
     if (instrFreqParam.compare("0") != 0) {
         paramContainer_[INPUT_CFG_COM_INSTR_PROFILING_FREQ] = instrFreqParam;
     }
@@ -247,20 +247,19 @@ int ParamsAdapterGeOpt::SetOutputDir(std::string &outputDir) const
 
 bool ParamsAdapterGeOpt::CheckInstrAndTaskParamBothSet(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg)
 {
-    std::string instrFreqParam = std::to_string(geCfg->instr_profiling_freq());
-    if (instrFreqParam.compare("0") == 0) {
+    if (geCfg->instrProfilingFreq == 0) {
         return false;
     }
     const std::vector<std::pair<bool, std::string>> ARG_VEC {
-        {geCfg->task_time() == "on" || geCfg->task_time() == "l0" || geCfg->task_time() == "l1", " task_time "},
-        {geCfg->task_trace() == "on", " task_trace "},
-        {geCfg->training_trace() == "on", " training_trace "},
-        {geCfg->aicpu() == "on", " aicpu "},
-        {geCfg->l2() == "on", " l2 "},
-        {geCfg->hccl() == "on", " hccl "},
-        {geCfg->runtime_api() == "on", " runtime_api "},
-        {!geCfg->aic_metrics().empty(), " aic_metrics "},
-        {!geCfg->aiv_metrics().empty(), " aiv_metrics "}
+        {geCfg->taskTime == "on" || geCfg->taskTime == "l0" || geCfg->taskTime == "l1", " task_time "},
+        {geCfg->taskTrace == "on", " task_trace "},
+        {geCfg->trainingTrace == "on", " training_trace "},
+        {geCfg->aicpu == "on", " aicpu "},
+        {geCfg->l2 == "on", " l2 "},
+        {geCfg->hccl == "on", " hccl "},
+        {geCfg->runtimeApi == "on", " runtime_api "},
+        {!geCfg->aicMetrics.empty(), " aic_metrics "},
+        {!geCfg->aivMetrics.empty(), " aiv_metrics "}
     };
     bool anyComflict = std::any_of(ARG_VEC.begin(), ARG_VEC.end(), [](std::pair<bool, std::string> arg) {
         return arg.first;
@@ -272,8 +271,8 @@ bool ParamsAdapterGeOpt::CheckInstrAndTaskParamBothSet(SHARED_PTR_ALIA<ProfGeOpt
                 comflictStr.append(arg.second);
             }
         }
-        MSPROF_LOGE("[Ge opt] Profiling fails to start because instr_profiling_freq is set,"
-            " Params %s not allowed to set in single operator model if instr_profiling_freq is set.",
+        MSPROF_LOGE("[Ge opt] Profiling fails to start because instrProfilingFreq is set,"
+            " Params %s not allowed to set in single operator model if instrProfilingFreq is set.",
             comflictStr.c_str());
         return true;
     }

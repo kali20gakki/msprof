@@ -4,7 +4,6 @@
 #include "errno/error_code.h"
 #include "collection_register.h"
 
-
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
 

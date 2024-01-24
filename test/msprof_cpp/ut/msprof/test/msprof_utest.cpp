@@ -15,7 +15,6 @@
 #include "prof_reporter.h"
 #include "config/config_manager.h"
 #include "proto/msprofiler.pb.h"
-#include "proto/msprofiler_ext.pb.h"
 #include "uploader_mgr.h"
 #include "msprof_stamp_pool.h"
 #define private public

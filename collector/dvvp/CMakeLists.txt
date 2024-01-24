@@ -4,7 +4,6 @@ protobuf_generate(profiler_proto
     CppPath
     HeaderPath
     ${CMAKE_CURRENT_SOURCE_DIR}/proto/msprofiler.proto
-    ${CMAKE_CURRENT_SOURCE_DIR}/proto/msprofiler_ext.proto
     TARGET
 )
 
@@ -131,6 +130,7 @@ set(msprofilerCpp
     job_wrapper/src/prof_timer.cpp
     job_wrapper/src/prof_host_job.cpp
     message/codec.cpp
+    message/prof_json_config.cpp
     msprof/common/src/receive_data.cpp
     msprof/common/src/msprof_callback_handler.cpp
     msprof/common/src/msprof_reporter_mgr.cpp

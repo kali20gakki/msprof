@@ -2,7 +2,6 @@ protobuf_generate(profiler
 	CppPath
 	HeaderPath
 	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler.proto
-	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler_ext.proto
 )
 
 set(profilerSrcFiles
@@ -52,6 +51,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_timer.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_host_job.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/message/codec.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/message/prof_json_config.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/common/src/msprof_callback_handler.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/common/src/msprof_reporter_mgr.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/common/src/receive_data.cpp

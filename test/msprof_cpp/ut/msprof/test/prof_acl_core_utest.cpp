@@ -13,7 +13,6 @@
 #include "prof_api_common.h"
 #include "prof_acl_mgr.h"
 #include "profiling/ge_profiling.h"
-#include "proto/msprofiler_ext.pb.h"
 #include "proto/msprofiler.pb.h"
 #include "uploader_dumper.h"
 #include "uploader_mgr.h"

@@ -16,13 +16,13 @@
 #include "errno/error_code.h"
 #include "msprof_dlog.h"
 #include "message/prof_params.h"
+#include "message/prof_json_config.h"
 #include "msprof_callback_handler.h"
 #include "op_desc_parser.h"
 #include "platform/platform.h"
 #include "platform/platform_adapter.h"
 #include "prof_manager.h"
 #include "prof_params_adapter.h"
-#include "proto/msprofiler_ext.pb.h"
 #include "transport/parser_transport.h"
 #include "transport/transport.h"
 #include "transport/file_transport.h"
@@ -1198,15 +1198,19 @@ int32_t ProfAclMgr::MsprofInitAclJson(VOID_PTR data, uint32_t len)
         return MSPROF_ERROR_NONE;
     }
     std::string aclCfg(reinterpret_cast<CHAR_PTR>(data), len);
+    if (aclCfg.empty()) {
+        MSPROF_LOGE("Empty config of acljson.");
+        return MSPROF_ERROR_CONFIG_INVALID;
+    }
     MSPROF_LOGI("Input aclJsonConfig: %s", aclCfg.c_str());
-    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfAclConfig> inputCfgPb = nullptr;
-    MSVP_MAKE_SHARED0_RET(inputCfgPb, analysis::dvvp::proto::ProfAclConfig, MSPROF_ERROR_MEM_NOT_ENOUGH);
-    if (!google::protobuf::util::JsonStringToMessage(aclCfg, inputCfgPb.get()).ok()) {
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfAclConfig> inputCfgPb = nullptr;
+    MSVP_MAKE_SHARED0_RET(inputCfgPb, analysis::dvvp::message::ProfAclConfig, MSPROF_ERROR_MEM_NOT_ENOUGH);
+    if (JsonStringToAclCfg(aclCfg, inputCfgPb) != PROFILING_SUCCESS) {
         MSPROF_LOGE("The format of input aclJsonConfig is invalid");
         MSPROF_INNER_ERROR("EK9999", "The format of input aclJsonConfig is invalid");
         return MSPROF_ERROR_CONFIG_INVALID;
     }
-    if (inputCfgPb->switch_() != MSVP_PROF_ON) {
+    if (inputCfgPb->profSwitch != MSVP_PROF_ON) {
         MSPROF_LOGW("Profiling switch is off");
         return MSPROF_ERROR_ACL_JSON_OFF;
     }
@@ -1273,16 +1277,20 @@ int32_t ProfAclMgr::MsprofInitGeOptions(VOID_PTR data, uint32_t len)
     MsprofGeOptions *optionCfg = (struct MsprofGeOptions *)data;
     std::string jobInfo = MsprofCheckAndGetChar(optionCfg->jobId, MSPROF_OPTIONS_DEF_LEN_MAX);
     std::string options = MsprofCheckAndGetChar(optionCfg->options, MSPROF_OPTIONS_DEF_LEN_MAX);
+    if (options.empty()) {
+        MSPROF_LOGE("Empty config of geoption.");
+        return MSPROF_ERROR_CONFIG_INVALID;
+    }
     MSPROF_LOGI("MsprofInitGeOptions, jobInfo:%s, options:%s", jobInfo.c_str(), options.c_str());
-    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> inputCfgPb = nullptr;
-    MSVP_MAKE_SHARED0_RET(inputCfgPb, analysis::dvvp::proto::ProfGeOptionsConfig, MSPROF_ERROR_MEM_NOT_ENOUGH);
-    if (!google::protobuf::util::JsonStringToMessage(options, inputCfgPb.get()).ok()) {
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfGeOptionsConfig> inputCfgPb = nullptr;
+    MSVP_MAKE_SHARED0_RET(inputCfgPb, analysis::dvvp::message::ProfGeOptionsConfig, MSPROF_ERROR_MEM_NOT_ENOUGH);
+    if (JsonStringToGeCfg(options, inputCfgPb) != PROFILING_SUCCESS) {
         MSPROF_LOGE("The format of input ge options is invalid");
         MSPROF_INNER_ERROR("EK9999", "The format of input ge options is invalid");
         return MSPROF_ERROR_CONFIG_INVALID;
     }
     if (params_ != nullptr) {
-        MSPROF_LOGW("MsprofInitAclJson params exist");
+        MSPROF_LOGW("MsprofInitGeOptions params exist");
     } else {
         MSVP_MAKE_SHARED0_RET(params_, analysis::dvvp::message::ProfileParams, MSPROF_ERROR_MEM_NOT_ENOUGH);
     }
@@ -1325,8 +1333,8 @@ int32_t ProfAclMgr::MsprofInitAclEnv(const std::string &envValue)
     baseDir_ = Utils::CreateTaskId(0);
     storageLimit_ = params_->storageLimit;
     if (!ParamValidation::instance()->CheckStorageLimit(storageLimit_)) {
-        MSPROF_LOGE("storage_limit para is invalid");
-        MSPROF_INNER_ERROR("EK9999", "storage_limit para is invalid");
+        MSPROF_LOGE("storageLimit para is invalid");
+        MSPROF_INNER_ERROR("EK9999", "storageLimit para is invalid");
         return MSPROF_ERROR_CONFIG_INVALID;
     }
     dataTypeConfig_ = params_->dataTypeConfig;
@@ -1350,8 +1358,8 @@ int32_t ProfAclMgr::MsprofHelperParamConstruct(const std::string &msprofPath, co
     resultPath_ = params_->result_dir;
     baseDir_ = Utils::CreateTaskId(0);
     if (!ParamValidation::instance()->CheckStorageLimit(params_->storageLimit)) {
-        MSPROF_LOGE("storage_limit para is invalid");
-        MSPROF_INNER_ERROR("EK9999", "storage_limit para is invalid");
+        MSPROF_LOGE("storageLimit para is invalid");
+        MSPROF_INNER_ERROR("EK9999", "storageLimit para is invalid");
         return MSPROF_ERROR_CONFIG_INVALID;
     }
     storageLimit_ = params_->storageLimit;

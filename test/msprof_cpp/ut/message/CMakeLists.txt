@@ -2,11 +2,11 @@ protobuf_generate(profiler
 	CppPath
 	HeaderPath
 	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler.proto
-	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler_ext.proto
 )
 set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}//dvvp/message/codec.cpp 
-    ${MSPROF_SOURCE_DIR}//dvvp/message/dispatcher.cpp 
+    ${MSPROF_SOURCE_DIR}//dvvp/message/dispatcher.cpp
+    ${MSPROF_SOURCE_DIR}//dvvp/message/prof_json_config.cpp
     ${MSPROF_SOURCE_DIR}//dvvp/common/utils/utils.cpp
     ${MSPROF_SOURCE_DIR}//dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
@@ -23,6 +23,7 @@ set(localSrcFiles
     test/codec_test.cpp 
     test/dispatcher_test.cpp 
     test/message_test.cpp 
+    test/prof_json_config_test.cpp
     ../stub/hdc-log-stub.cpp 
 )
 

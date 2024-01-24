@@ -13,12 +13,14 @@
 
 #include "params_adapter_acljson.h"
 #include "errno/error_code.h"
+#include "message/prof_json_config.h"
 #include "param_validation.h"
 #include "utils.h"
 
 using namespace Collector::Dvvp::ParamsAdapter;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
+using namespace analysis::dvvp::message;
 
 class ParamsAdapterAcljsonUtest : public testing::Test {
 protected:
@@ -40,9 +42,9 @@ TEST_F(ParamsAdapterAcljsonUtest, AclJsonParamAdapterModule)
     int ret = AclJsonParamAdapterMgr->Init();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 
-    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfAclConfig> aclCfg;
-    MSVP_MAKE_SHARED0_VOID(aclCfg, analysis::dvvp::proto::ProfAclConfig);
-    aclCfg->set_storage_limit("200MB");
+    SHARED_PTR_ALIA<ProfAclConfig> aclCfg;
+    MSVP_MAKE_SHARED0_VOID(aclCfg, ProfAclConfig);
+    aclCfg->storageLimit = "200MB";
     AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
 }
 TEST_F(ParamsAdapterAcljsonUtest, GenAclJsonContainer)
@@ -50,10 +52,10 @@ TEST_F(ParamsAdapterAcljsonUtest, GenAclJsonContainer)
     GlobalMockObject::verify();
     std::shared_ptr<ParamsAdapterAclJson> AclJsonParamAdapterMgr;
     MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, ParamsAdapterAclJson);
-    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfAclConfig> aclCfg;
-    MSVP_MAKE_SHARED0_VOID(aclCfg, analysis::dvvp::proto::ProfAclConfig);
-    aclCfg->set_storage_limit("200MB");
-    aclCfg->set_l2("on");
+    SHARED_PTR_ALIA<ProfAclConfig> aclCfg;
+    MSVP_MAKE_SHARED0_VOID(aclCfg, ProfAclConfig);
+    aclCfg->storageLimit = "200MB";
+    aclCfg->l2 = "on";
     AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
 }
 
@@ -138,8 +140,8 @@ TEST_F(ParamsAdapterAcljsonUtest, GetParamFromInputCfg)
     GlobalMockObject::verify();
     std::shared_ptr<ParamsAdapterAclJson> AclJsonParamAdapterMgr;
     MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, ParamsAdapterAclJson);
-    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfAclConfig> inputCfgPb;
-    MSVP_MAKE_SHARED0_VOID(inputCfgPb, analysis::dvvp::proto::ProfAclConfig);
+    SHARED_PTR_ALIA<ProfAclConfig> inputCfgPb;
+    MSVP_MAKE_SHARED0_VOID(inputCfgPb, ProfAclConfig);
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
     MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
     EXPECT_EQ(PROFILING_FAILED, AclJsonParamAdapterMgr->GetParamFromInputCfg(nullptr, params));
