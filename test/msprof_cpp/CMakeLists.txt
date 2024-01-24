@@ -21,7 +21,6 @@ protobuf_generate(profiler
     CppPath
     HeaderPath
     ${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler.proto
-    ${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler_ext.proto
 )
 set(CMAKE_CXX_FLAGS " -Wno-unused")
 

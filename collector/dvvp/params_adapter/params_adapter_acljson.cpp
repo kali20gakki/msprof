@@ -134,7 +134,7 @@ int ParamsAdapterAclJson::ParamsCheckAclJson() const
 
 void ParamsAdapterAclJson::GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> aclCfg)
 {
-    paramContainer_[INPUT_CFG_COM_OUTPUT] = aclCfg->output();
+    paramContainer_[INPUT_CFG_COM_OUTPUT] = aclCfg->output;
     if (paramContainer_[INPUT_CFG_COM_OUTPUT].empty()) {
         std::string envWorkPath = Utils::GetEnvString(ASCEND_WORK_PATH_ENV);
         if (!envWorkPath.empty()) {
@@ -142,30 +142,30 @@ void ParamsAdapterAclJson::GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> ac
             paramContainer_[INPUT_CFG_COM_OUTPUT] = ascendWorkPathDir;
         }
     }
-    paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = aclCfg->storage_limit();
-    paramContainer_[INPUT_CFG_COM_MSPROFTX] = aclCfg->msproftx();
-    paramContainer_[INPUT_CFG_COM_TASK_TIME] = aclCfg->task_time();
-    paramContainer_[INPUT_CFG_COM_AICPU] = aclCfg->aicpu();
-    paramContainer_[INPUT_CFG_COM_L2] = aclCfg->l2();
-    paramContainer_[INPUT_CFG_COM_HCCL] = aclCfg->hccl();
-    paramContainer_[INPUT_CFG_COM_ASCENDCL] = aclCfg->ascendcl();
-    paramContainer_[INPUT_CFG_COM_RUNTIME_API] = aclCfg->runtime_api();
-    paramContainer_[INPUT_CFG_COM_AIC_METRICS] = aclCfg->aic_metrics();
-    paramContainer_[INPUT_CFG_COM_AIV_METRICS] = aclCfg->aiv_metrics();
-    paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = (aclCfg->sys_hardware_mem_freq() <= 0) ? "" :
-        std::to_string(aclCfg->sys_hardware_mem_freq());
-    paramContainer_[INPUT_CFG_COM_LLC_MODE] = aclCfg->llc_profiling();
-    paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = (aclCfg->sys_io_sampling_freq() <= 0) ? "" :
-        std::to_string(aclCfg->sys_io_sampling_freq());
-    paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = (aclCfg->sys_interconnection_freq() <= 0) ? "" :
-        std::to_string(aclCfg->sys_interconnection_freq());
-    paramContainer_[INPUT_CFG_COM_DVPP_FREQ] = (aclCfg->dvpp_freq() <= 0) ? "" :
-        std::to_string(aclCfg->dvpp_freq());
-    paramContainer_[INPUT_CFG_HOST_SYS] = aclCfg->host_sys();
-    paramContainer_[INPUT_CFG_HOST_SYS_USAGE] = aclCfg->host_sys_usage();
-    paramContainer_[INPUT_CFG_HOST_SYS_USAGE_FREQ] = (aclCfg->host_sys_usage_freq() <= 0) ? "" :
-        std::to_string(aclCfg->host_sys_usage_freq());
-    std::string instrFreqParam = std::to_string(aclCfg->instr_profiling_freq());
+    paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = aclCfg->storageLimit;
+    paramContainer_[INPUT_CFG_COM_MSPROFTX] = aclCfg->msproftx;
+    paramContainer_[INPUT_CFG_COM_TASK_TIME] = aclCfg->taskTime;
+    paramContainer_[INPUT_CFG_COM_AICPU] = aclCfg->aicpu;
+    paramContainer_[INPUT_CFG_COM_L2] = aclCfg->l2;
+    paramContainer_[INPUT_CFG_COM_HCCL] = aclCfg->hccl;
+    paramContainer_[INPUT_CFG_COM_ASCENDCL] = aclCfg->ascendcl;
+    paramContainer_[INPUT_CFG_COM_RUNTIME_API] = aclCfg->runtimeApi;
+    paramContainer_[INPUT_CFG_COM_AIC_METRICS] = aclCfg->aicMetrics;
+    paramContainer_[INPUT_CFG_COM_AIV_METRICS] = aclCfg->aivMetrics;
+    paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = (aclCfg->sysHardwareMemFreq <= 0) ? "" :
+        std::to_string(aclCfg->sysHardwareMemFreq);
+    paramContainer_[INPUT_CFG_COM_LLC_MODE] = aclCfg->llcProfiling;
+    paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = (aclCfg->sysIoSamplingFreq <= 0) ? "" :
+        std::to_string(aclCfg->sysIoSamplingFreq);
+    paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = (aclCfg->sysInterconnectionFreq <= 0) ? "" :
+        std::to_string(aclCfg->sysInterconnectionFreq);
+    paramContainer_[INPUT_CFG_COM_DVPP_FREQ] = (aclCfg->dvppFreq <= 0) ? "" :
+        std::to_string(aclCfg->dvppFreq);
+    paramContainer_[INPUT_CFG_HOST_SYS] = aclCfg->hostSys;
+    paramContainer_[INPUT_CFG_HOST_SYS_USAGE] = aclCfg->hostSysUsage;
+    paramContainer_[INPUT_CFG_HOST_SYS_USAGE_FREQ] = (aclCfg->hostSysUsageFreq <= 0) ? "" :
+        std::to_string(aclCfg->hostSysUsageFreq);
+    std::string instrFreqParam = std::to_string(aclCfg->instrProfilingFreq);
     if (instrFreqParam.compare("0") != 0) {
         paramContainer_[INPUT_CFG_COM_INSTR_PROFILING_FREQ] = instrFreqParam;
     }
@@ -249,19 +249,19 @@ std::string ParamsAdapterAclJson::SetOutputDir(const std::string &outputDir) con
 
 bool ParamsAdapterAclJson::CheckInstrAndTaskParamBothSet(SHARED_PTR_ALIA<ProfAclConfig> aclCfg)
 {
-    std::string instrFreqParam = std::to_string(aclCfg->instr_profiling_freq());
-    if (instrFreqParam.compare("0") == 0) {
+    if (aclCfg->instrProfilingFreq == 0) {
+        MSPROF_LOGI("[Acl json] instrProfilingFreq is 0.");
         return false;
     }
     const std::vector<std::pair<bool, std::string>> ARG_VEC {
-        {aclCfg->task_time() == "on" || aclCfg->task_time() == "l0" || aclCfg->task_time() == "l1", " task_time "},
-        {aclCfg->aicpu() == "on", " aicpu "},
-        {aclCfg->l2() == "on", " l2 "},
-        {aclCfg->hccl() == "on", " hccl "},
-        {aclCfg->ascendcl() == "on", " acsendcl "},
-        {aclCfg->runtime_api() == "on", " runtime_api "},
-        {!aclCfg->aic_metrics().empty(), " aic_metrics "},
-        {!aclCfg->aiv_metrics().empty(), " aiv_metrics "}
+        {aclCfg->taskTime == "on" || aclCfg->taskTime == "l0" || aclCfg->taskTime == "l1", " task_time "},
+        {aclCfg->aicpu == "on", " aicpu "},
+        {aclCfg->l2 == "on", " l2 "},
+        {aclCfg->hccl == "on", " hccl "},
+        {aclCfg->ascendcl == "on", " acsendcl "},
+        {aclCfg->runtimeApi == "on", " runtime_api "},
+        {!aclCfg->aicMetrics.empty(), " aic_metrics "},
+        {!aclCfg->aivMetrics.empty(), " aiv_metrics "}
     };
     bool anyComflict = std::any_of(ARG_VEC.begin(), ARG_VEC.end(), [](std::pair<bool, std::string> arg) {
         return arg.first;
@@ -273,8 +273,8 @@ bool ParamsAdapterAclJson::CheckInstrAndTaskParamBothSet(SHARED_PTR_ALIA<ProfAcl
                 comflictStr.append(arg.second);
             }
         }
-        MSPROF_LOGE("[Acl json] Profiling fails to start because instr_profiling_freq is set,"
-            " Params %s not allowed to set in single operator model if instr_profiling_freq is set.",
+        MSPROF_LOGE("[Acl json] Profiling fails to start because instrProfilingFreq is set,"
+            " Params %s not allowed to set in single operator model if instrProfilingFreq is set.",
             comflictStr.c_str());
         return true;
     }

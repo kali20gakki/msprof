@@ -8,13 +8,12 @@
 #define COLLECTOR_DVVP_PARAMS_ADAPTER_GEOPT_H
 
 #include "params_adapter.h"
-#include "proto/msprofiler_ext.pb.h"
+#include "message/prof_json_config.h"
 
 namespace Collector {
 namespace Dvvp {
 namespace ParamsAdapter {
-using analysis::dvvp::proto::ProfGeOptionsConfig;
-
+using namespace analysis::dvvp::message;
 class ParamsAdapterGeOpt : public ParamsAdapter {
 public:
     ParamsAdapterGeOpt() : params_(nullptr) {};

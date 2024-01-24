@@ -12,7 +12,6 @@
 #include "transport/hdc/hdc_transport.h"
 #include "config/config.h"
 #include "proto/msprofiler.pb.h"
-#include "proto/msprofiler_ext.pb.h"
 #include "transport/transport.h"
 #include "msprof_callback_handler.h"
 #include "param_validation.h"

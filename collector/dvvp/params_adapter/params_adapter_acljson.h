@@ -7,12 +7,12 @@
 #ifndef COLLECTOR_DVVP_PARAMS_ADAPTER_ACLJSON_H
 #define COLLECTOR_DVVP_PARAMS_ADAPTER_ACLJSON_H
 #include "params_adapter.h"
-#include "proto/msprofiler_ext.pb.h"
+#include "message/prof_json_config.h"
+
 namespace Collector {
 namespace Dvvp {
 namespace ParamsAdapter {
-using analysis::dvvp::proto::ProfAclConfig;
-
+using namespace analysis::dvvp::message;
 class ParamsAdapterAclJson : public ParamsAdapter {
 public:
     ParamsAdapterAclJson() : params_(nullptr) {};

@@ -2,7 +2,6 @@ protobuf_generate(profiler
 	CppPath
 	HeaderPath
 	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler.proto
-	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler_ext.proto
 )
 set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp

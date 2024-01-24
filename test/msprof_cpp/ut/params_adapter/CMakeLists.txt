@@ -2,7 +2,6 @@ protobuf_generate(profiler
 	CppPath
 	HeaderPath
 	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler.proto
-	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler_ext.proto
 )
 
 set(common_src_file
@@ -14,6 +13,7 @@ set(common_src_file
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/input_parser.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/message/prof_json_config.cpp
     ${TOP_DIR}/test/msprof_cpp/stub/driver_plugin_stub.cpp
 )
 

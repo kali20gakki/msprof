@@ -13,11 +13,14 @@
 
 #include "params_adapter_geopt.h"
 #include "errno/error_code.h"
+#include "message/prof_json_config.h"
 #include "param_validation.h"
 #include "platform/platform.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Collector::Dvvp::ParamsAdapter;
+using namespace analysis::dvvp::common::utils;
+using namespace analysis::dvvp::message;
 
 class ParamsAdapterGeoptUtest : public testing::Test {
 protected:
@@ -50,10 +53,10 @@ TEST_F(ParamsAdapterGeoptUtest, GeOptParamAdapterModule)
     int ret = GeOptParamAdapterMgr->Init();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 
-    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> geCfg;
-    MSVP_MAKE_SHARED0_VOID(geCfg, analysis::dvvp::proto::ProfGeOptionsConfig);
-    geCfg->set_storage_limit("200MB");
-    geCfg->set_instr_profiling_freq(1);
+    SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg;
+    MSVP_MAKE_SHARED0_VOID(geCfg, ProfGeOptionsConfig);
+    geCfg->storageLimit = "200MB";
+    geCfg->instrProfilingFreq = 1;
     GeOptParamAdapterMgr->GenGeOptionsContainer(geCfg);
 }
 
@@ -120,12 +123,12 @@ TEST_F(ParamsAdapterGeoptUtest, CheckInstrAndTaskParamBothSet)
     GlobalMockObject::verify();
     std::shared_ptr<ParamsAdapterGeOpt> GeOptParamAdapterMgr;
     MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, ParamsAdapterGeOpt);
-    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> geCfg = nullptr;
-    MSVP_MAKE_SHARED0_VOID(geCfg, analysis::dvvp::proto::ProfGeOptionsConfig);
-    geCfg->set_instr_profiling_freq(1);
-    geCfg->set_task_time("on");
+    SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg = nullptr;
+    MSVP_MAKE_SHARED0_VOID(geCfg, ProfGeOptionsConfig);
+    geCfg->instrProfilingFreq = 1;
+    geCfg->taskTime = "on";
     EXPECT_EQ(true, GeOptParamAdapterMgr->CheckInstrAndTaskParamBothSet(geCfg));
-    geCfg->set_task_time("off");
+    geCfg->taskTime = "off";
     EXPECT_EQ(false, GeOptParamAdapterMgr->CheckInstrAndTaskParamBothSet(geCfg));
 }
 
@@ -134,14 +137,14 @@ TEST_F(ParamsAdapterGeoptUtest, GeGetParamFromInputCfg)
     GlobalMockObject::verify();
     std::shared_ptr<ParamsAdapterGeOpt> GeOptParamAdapterMgr;
     MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, ParamsAdapterGeOpt);
-    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> geCfg = nullptr;
+    SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg = nullptr;
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params = nullptr;
     int ret = GeOptParamAdapterMgr->GetParamFromInputCfg(geCfg, params);
     EXPECT_EQ(PROFILING_FAILED, ret);
     MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
     ret = GeOptParamAdapterMgr->GetParamFromInputCfg(geCfg, params);
     EXPECT_EQ(PROFILING_FAILED, ret);
-    MSVP_MAKE_SHARED0_VOID(geCfg, analysis::dvvp::proto::ProfGeOptionsConfig);
+    MSVP_MAKE_SHARED0_VOID(geCfg, ProfGeOptionsConfig);
 
     MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::Init)
         .stubs()

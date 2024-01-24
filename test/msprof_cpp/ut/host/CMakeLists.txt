@@ -2,7 +2,6 @@ protobuf_generate(profiler
 	CppPath
 	HeaderPath
 	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler.proto
-	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler_ext.proto
 )
 set(commonSrcFiles
     ${MSPROF_SOURCE_DIR}//dvvp/adx/wrapper/adx_prof_api.cpp    
