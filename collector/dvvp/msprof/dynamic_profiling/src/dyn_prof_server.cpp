@@ -123,7 +123,7 @@ int DynProfServer::DynProfServerCreateSock()
     MSPROF_LOGI("Dynamic profiling server socket domain: %s.", sockPath_.c_str());
     sockaddr_un sockAddr;
     sockAddr.sun_family = AF_UNIX;
-    errno_t err = strncpy_s(sockAddr.sun_path, sizeof(sockAddr.sun_path) - 1, sockPath_.c_str(), sockPath_.size());
+    errno_t err = strncpy_s(sockAddr.sun_path, sizeof(sockAddr.sun_path), sockPath_.c_str(), sockPath_.size());
     if (err != EOK) {
         MSPROF_LOGE("Dynamic profiling server sockPath copy failed, err: %d, sockPath: %s", err, sockPath_.c_str());
         return PROFILING_FAILED;
@@ -312,7 +312,7 @@ int DynProfServer::DynProfServerRsqMsg(DynProfMsgType msgType, DynProfMsgProcRes
     rsqMsg.msgType = msgType;
     rsqMsg.statusCode = rsqCode;
     rsqMsg.msgDataLen = msgData.size();
-    errno_t err = memcpy_s(rsqMsg.msgData, sizeof(rsqMsg.msgData) - 1, msgData.c_str(), msgData.size());
+    errno_t err = memcpy_s(rsqMsg.msgData, sizeof(rsqMsg.msgData), msgData.c_str(), msgData.size());
     if (err != EOK) {
         MSPROF_LOGE("Dynamic profiling server copy rsqMsg failed, err: %d, rsqMsg: %s", err, msgData.c_str());
         return PROFILING_FAILED;

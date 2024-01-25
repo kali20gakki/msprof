@@ -956,8 +956,11 @@ static void LocalGetArmManufacturer(char *cpuImplememter, MmCpuDesc *cpuInfo)
     for (int32_t i = limit - 1; i >= 0; --i) {
         ret = strcasecmp(cpuImplememter, gManufacturerTable[i].key);
         if (ret == 0) {
-            (void)memcpy_s(cpuInfo->manufacturer, sizeof(cpuInfo->manufacturer),
-                gManufacturerTable[i].value, (strlen(gManufacturerTable[i].value) + 1U));
+            ret = memcpy_s(cpuInfo->manufacturer, sizeof(cpuInfo->manufacturer),
+                gManufacturerTable[i].value, (strlen(gManufacturerTable[i].value)));
+            if (ret != PROFILING_SUCCESS) {
+                MSPROF_LOGE("memcpy failed, error code is %d.", ret);
+            }
             return;
         }
     }
@@ -995,7 +998,10 @@ static void LocalGetCpuProcV1(FILE *fp, MmCpuDesc *cpuInfo)
     }
     const char* tmp = LocalGetArmVersion(cpuImplememter, strlen(cpuImplememter), cpuPart, strlen(cpuPart));
     if (tmp != nullptr) {
-        (void)memcpy_s(cpuInfo->version, sizeof(cpuInfo->version), tmp, strlen(tmp) + 1U);
+        int32_t ret = memcpy_s(cpuInfo->version, sizeof(cpuInfo->version), tmp, strlen(tmp));
+        if (ret != PROFILING_SUCCESS) {
+            MSPROF_LOGE("memcpy failed, error code is %d.", ret);
+        }
     }
     LocalGetArmManufacturer(cpuImplememter, cpuInfo);
     return;
