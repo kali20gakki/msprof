@@ -33,7 +33,7 @@ int32_t SetCommandHandleProf(ProfCommand &command)
         return ACL_ERROR_PROFILING_FAILURE;
     }
     command.params.profDataLen = msprofParams.size();
-    errno_t err = strncpy_s(command.params.profData, PARAM_LEN_MAX, msprofParams.c_str(), msprofParams.size() + 1);
+    errno_t err = strncpy_s(command.params.profData, PARAM_LEN_MAX, msprofParams.c_str(), msprofParams.size());
     if (err != EOK) {
         MSPROF_LOGE("string copy failed, err: %d", err);
         return ACL_ERROR_PROFILING_FAILURE;
