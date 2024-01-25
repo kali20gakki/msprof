@@ -32,6 +32,7 @@ const std::string TABLE_NAME_ENUM_API_LEVEL = "ENUM_API_LEVEL";
 const std::string TABLE_NAME_TASK = "TASK";
 const std::string TABLE_NAME_COMPUTE_TASK_INFO = "COMPUTE_TASK_INFO";
 const std::string TABLE_NAME_COMMUNICATION_TASK_INFO = "COMMUNICATION_TASK_INFO";
+const std::string TABLE_NAME_COMMUNICATION_OP = "COMMUNICATION_OP";
 const std::string TABLE_NAME_API = "API";
 
 // api level

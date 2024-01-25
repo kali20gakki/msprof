@@ -82,7 +82,17 @@ namespace {
         {"transportType", SQL_INTEGER_TYPE},
         {"size", SQL_INTEGER_TYPE},
         {"dataType", SQL_INTEGER_TYPE},
-        {"linkType", SQL_INTEGER_TYPE}
+        {"linkType", SQL_INTEGER_TYPE},
+        {"opId", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns COMMUNICATION_OP = {
+        {"opName", SQL_INTEGER_TYPE},
+        {"start", SQL_TEXT_TYPE},
+        {"end", SQL_TEXT_TYPE},
+        {"connectionId", SQL_INTEGER_TYPE},
+        {"groupName", SQL_INTEGER_TYPE},
+        {"opId", SQL_INTEGER_TYPE, true}
     };
 
     const TableColumns API = {
@@ -106,6 +116,7 @@ ReportDB::ReportDB()
         {TABLE_NAME_TASK, TASK},
         {TABLE_NAME_COMPUTE_TASK_INFO, COMPUTE_TASK_INFO},
         {TABLE_NAME_COMMUNICATION_TASK_INFO, COMMUNICATION_TASK_INFO},
+        {TABLE_NAME_COMMUNICATION_OP, COMMUNICATION_OP},
         {TABLE_NAME_API, API},
     };
 }
