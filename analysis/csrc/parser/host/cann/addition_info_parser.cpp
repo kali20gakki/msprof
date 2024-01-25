@@ -120,13 +120,12 @@ int TensorInfoParser::ProduceData()
             continue;
         }
         // tensor info拼接
-        if (concatTensor->tensorNum + currTensor->tensorNum > TENSOR_DATA_MAX_NUM) {
-            ERROR("Concat tensor info length > %", TENSOR_DATA_MAX_NUM);
-            delete currTensorInfo;
-            continue;
-        }
         for (uint32_t i = 0; i < currTensor->tensorNum; ++i) {
-            concatTensor->tensorData[concatTensor->tensorNum] = currTensor->tensorData[i];
+            if (concatTensor->tensorNum >= MSPROF_GE_TENSOR_DATA_NUM) {
+                concatTensor->tensorData.emplace_back(currTensor->tensorData[i]);
+            } else {
+                concatTensor->tensorData[concatTensor->tensorNum] = currTensor->tensorData[i];
+            }
             concatTensor->tensorNum += 1;
         }
         delete currTensorInfo;

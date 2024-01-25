@@ -8,6 +8,7 @@
 #define MSPROFILER_PROF_COMMON_H_
 
 #include <stdint.h>
+#include <vector>
 
 #ifdef __cplusplus
 extern "C" {
@@ -299,7 +300,6 @@ struct MsprofAdditionalInfo {  // for MsprofReportAdditionalInfo buffer data
     uint8_t  data[MSPROF_ADDTIONAL_INFO_DATA_LENGTH];
 };
 
-const uint16_t TENSOR_DATA_MAX_NUM = 20;
 struct ConcatTensorInfo {
     uint16_t magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
     uint16_t level = 0;
@@ -309,7 +309,7 @@ struct ConcatTensorInfo {
     uint64_t timeStamp = 0;
     uint64_t opName = 0;
     uint32_t tensorNum = 0;
-    MsrofTensorData tensorData[TENSOR_DATA_MAX_NUM] {};
+    std::vector<MsrofTensorData> tensorData{MSPROF_GE_TENSOR_DATA_NUM};
 };
 #ifdef __cplusplus
 }

@@ -97,9 +97,10 @@ protected:
      1. unaging和aging文件中，tensor_info数据的读取
      2. 设置invalidDataNum，验证无效数据的处理
      3. 多条tensor数据合成一个ConcatTensorInfo数据，tensorNum相加
-     4. 多条tensor数据合并后，tensorNum>=20的情况
+     4. 多条tensor数据合并，单个tensor_info中tensor数量小于5，汇总后tensorNum>=20的情况也可以正常合并，不丢弃剩余tensor信息
      5. 文件切片，其中需要合并的tensor数据会分布在两个文件中(slice_0的尾部和slice_1的头部) */
-    static void GenTensorData(uint16_t level, uint32_t concatTensorNum, uint16_t invalidDataNum = 0)
+    static void GenTensorData(uint16_t level, uint32_t concatTensorNum, uint16_t invalidDataNum = 0,
+                              uint32_t tensorNum = MSPROF_GE_TENSOR_DATA_NUM)
     {
         const uint32_t dataLen = 8;
         std::vector<MsprofAdditionalInfo> agingTraces;
@@ -116,7 +117,7 @@ protected:
             }
             auto tensorInfo = ReinterpretConvert<MsprofTensorInfo*>(info.data);
             tensorInfo->opName = i / concatTensorNum + 1;
-            tensorInfo->tensorNum = MSPROF_GE_TENSOR_DATA_NUM;
+            tensorInfo->tensorNum = tensorNum;
             if (i * 2 < TENSOR_DATA_NUM) {  // agingTraces和unAgingTraces各生成TENSOR_DATA_NUM / 2个数据
                 unAgingTraces.emplace_back(info);
             } else {
@@ -271,13 +272,13 @@ TEST_F(AdditionInfoParserUTest, TestTensorInfoParserProduceDataShouldReturn6000D
 
 TEST_F(AdditionInfoParserUTest, TestTensorInfoParserProduceDataShouldReturn3600DataWhenAllConcatTensorNumExceed20)
 {
-    uint32_t concatTensorNum = 5;
-    GenTensorData(MSPROF_REPORT_NODE_LEVEL, concatTensorNum);
+    uint32_t concatTensorNum = 8;
+    uint32_t geTensorNum = 3;
+    GenTensorData(MSPROF_REPORT_NODE_LEVEL, concatTensorNum, 0, geTensorNum);
     auto parser = std::make_shared<TensorInfoParser>(File::PathJoin({DATA_DIR, "host", "data"}));
     auto data = parser->ParseData<ConcatTensorInfo>();
     const uint32_t dataLen = 8;
     const uint16_t dataNum = TENSOR_DATA_NUM / concatTensorNum;
-    const uint32_t maxTensorNum = 20;
     ASSERT_EQ(dataNum, data.size());
     for (size_t i = 0; i < dataNum; ++i) {
         EXPECT_EQ(MSPROF_DATA_HEAD_MAGIC_NUM, data[i]->magicNumber);
@@ -287,6 +288,6 @@ TEST_F(AdditionInfoParserUTest, TestTensorInfoParserProduceDataShouldReturn3600D
         EXPECT_EQ(dataLen, data[i]->dataLen);
         EXPECT_EQ(TENSOR_DATA_NUM + i, data[i]->timeStamp);
         EXPECT_EQ(i + 1, data[i]->opName);
-        EXPECT_EQ(maxTensorNum, data[i]->tensorNum);
+        EXPECT_EQ(geTensorNum * concatTensorNum, data[i]->tensorNum);
     }
 }
