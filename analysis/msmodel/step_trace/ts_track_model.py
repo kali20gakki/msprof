@@ -117,6 +117,19 @@ class TsTrackModel(BaseModel, ABC):
         return DBManager.fetchone(self.cur, sql, (iteration.model_id, *iteration_range),
                                   dto_class=StepTraceDto)
 
+    def get_step_syscnt_range(self, iteration: IterationRange):
+        """
+        get step start sys_cnt and end sys_cnt
+        """
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA) or \
+           not DBManager.judge_row_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA):
+            return EmptyClass()
+        iteration_range = iteration.get_iteration_range()
+        sql = f"select min(step_start) as step_start, max(step_end) as step_end " \
+              f"from {DBNameConstant.TABLE_STEP_TRACE_DATA} where model_id = ? and index_id >= ? and index_id <= ?"
+        return DBManager.fetchone(self.cur, sql, (iteration.model_id, *iteration_range),
+                                  dto_class=StepTraceDto)
+
     def get_step_end_list_with_iter_range(self, iteration: IterationRange):
         """
         get step trace within the range of iteration.

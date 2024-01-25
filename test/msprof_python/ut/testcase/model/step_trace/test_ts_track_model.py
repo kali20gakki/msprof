@@ -70,3 +70,20 @@ class TestTsTrackModel(TestDirCRBaseModel):
                 result = model.get_step_syscnt_range_by_iter_range(iteration_2)
                 self.assertEqual(result.step_start, 8046487344086)
                 self.assertEqual(result.step_end, 8046487472738)
+
+    def test_get_step_syscnt_range_should_return_min_start_and_max_end_syscnt_when_iter_1_and_2(self):
+        data = [
+            [1, 1, 8046427017271, 8046427146986, 1],
+            [2, 1, 8046487344086, 8046487472738, 2]
+        ]
+        with mock.patch(NAMESPACE + '.DBManager.sql_create_general_table',
+                        return_value="CREATE TABLE IF NOT EXISTS step_trace_data(index_id INTEGER, "
+                                     "model_id INTEGER, step_start INTEGER, step_end INTEGER, iter_id INTEGER)"):
+            with TsTrackModel(self.PROF_DEVICE_DIR,
+                              DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_STEP_TRACE_DATA]) as model:
+                model.create_table(DBNameConstant.TABLE_STEP_TRACE_DATA)
+                model.flush(DBNameConstant.TABLE_STEP_TRACE_DATA, data)
+                iteration_1 = IterationRange(model_id=1, iteration_id=1, iteration_count=2)
+                result = model.get_step_syscnt_range(iteration_1)
+                self.assertEqual(8046427017271, result.step_start)
+                self.assertEqual(8046487472738, result.step_end)
