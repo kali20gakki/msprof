@@ -19,9 +19,14 @@ class ProfilingScene:
         self.project_path = None
         self._scene = None
         self._all_export = True
+        self._step_export = False
 
     def set_all_export(self: any, value: bool) -> None:
         self._all_export = value
+
+    def set_value(self: any, **kwargs) -> None:
+        self._all_export = kwargs.get("all_export", self._all_export)
+        self._step_export = kwargs.get("step_export", self._step_export)
 
     def init(self: any, project_path: str) -> None:
         """
@@ -48,6 +53,14 @@ class ProfilingScene:
         :return: True or False
         """
         return self._all_export
+
+    def is_step_export(self: any) -> bool:
+        """
+        check whether step export
+        :return: True or False
+        """
+        # 按step导数据必须要支持全导
+        return self._all_export and self._step_export
 
     def is_operator(self: any) -> bool:
         """

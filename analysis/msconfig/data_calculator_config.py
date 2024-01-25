@@ -145,4 +145,10 @@ class DataCalculatorConfig(MetaConfig):
             ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('position', 'H')
         ],
+        'StarsIterRecCalculator': [
+            ('path', 'mscalculate.stars.stars_iter_rec_calculator'),
+            ('chip_model', '5,7,8,11'),
+            ('level', '1'),
+            ('position', 'D')
+        ],
     }

@@ -540,8 +540,7 @@ class TablesConfig(MetaConfig):
             ('task_count', 'INTEGER,null'),
             ('task_offset', 'INTEGER,null'),
             ('ai_core_num', 'INTEGER,null'),
-            ('ai_core_offset', 'INTEGER,null'),
-            ('sys_cnt', 'INTEGER,null')
+            ('ai_core_offset', 'INTEGER,null')
         ],
         'HwtsBatchMap': [
             ('stream_id', 'INTEGER,null'),

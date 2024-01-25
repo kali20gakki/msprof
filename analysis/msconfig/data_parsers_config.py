@@ -235,12 +235,6 @@ class DataParsersConfig(MetaConfig):
             ('level', '4'),
             ('position', 'D')
         ],
-        'StarsIterRecParser': [
-            ('path', 'msparser.iter_rec.stars_iter_rec_parser'),
-            ('chip_model', '5,7,8,11'),
-            ('level', '4'),
-            ('position', 'D')
-        ],
         'NanoStarsParser': [
             ('path', 'msparser.nano.nano_stars_parser'),
             ('chip_model', '9'),
