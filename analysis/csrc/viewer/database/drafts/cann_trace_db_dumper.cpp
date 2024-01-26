@@ -83,12 +83,11 @@ void CANNTraceDBDumper::DumpHcclOps(const HCCLBigOpDescs &hcclOps)
         return;
     }
     for (const auto &op: hcclOps) {
-        auto deviceId = op->hcclBigOpDesc->deviceId;
-
         if (op == nullptr || op->hcclBigOpDesc == nullptr) {
             ERROR("DumpHcclOps: Empty op or desc");
             continue;
         }
+        auto deviceId = op->hcclBigOpDesc->deviceId;
         auto desc = op->hcclBigOpDesc;
         // several attributes can not get currently, use default value
         uint32_t modelId = UNDEFINED_INT_VALUE;
