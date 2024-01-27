@@ -1609,6 +1609,7 @@ int ParamValidation::CheckHostSysCmdOutIsExist(const std::string tmpDir,
     std::string tmpStr = tmp.str();
     MmUnlink(tmpDir);
     int ret = CheckHostOutString(tmpStr, toolName);
+    in.close();
     if (ret != PROFILING_SUCCESS) {
         ret = UninitCheckHostSysCmd(tmpProcess); // stop check process.
         if (ret != PROFILING_SUCCESS) {
