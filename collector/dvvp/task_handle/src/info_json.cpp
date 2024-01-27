@@ -503,7 +503,6 @@ void InfoJson::SetPidInfo(SHARED_PTR_ALIA<InfoMain> infoMain, int pid)
         } else {
             MSPROF_LOGE("Set pid_name failed(failed to open the file for pid_name info), pid=%d", pid);
         }
-        processInfo.close();
         // The length of searching tag "Name:\t" is 6. This constant is used to locate the position of pid_name.
         constexpr size_t searchTagLength = 6;
         size_t pidNamePos = pidName.find("Name:\t") + searchTagLength;
