@@ -310,21 +310,6 @@ def add_aicore_units(header: list):
         header[index] = item
 
 
-def check_file_writable(path: str) -> None:
-    """
-    check path is file and writable
-    :param path: file path
-    :return: None
-    """
-    if path and os.path.exists(path):
-        check_path_valid(path, True)
-        if not os.access(path, os.W_OK):
-            ReturnCodeCheck.print_and_return_status(json.dumps(
-                {'status': NumberConstant.ERROR,
-                 'info': "The path '%s' does not have permission to write. "
-                         'Please check that the path is writeable.' % path}))
-
-
 def check_dir_writable(path: str, create_dir: bool = False) -> None:
     """
     check path is dir and writable

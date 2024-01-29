@@ -7,6 +7,7 @@ import logging
 import math
 import os
 
+from common_func.common import call_sys_exit
 from common_func.common import error
 from common_func.common import print_msg
 from common_func.constant import Constant
@@ -112,7 +113,12 @@ class ClusterDataPreparationParser:
         calculate data
         :return: None
         """
-        check_path_valid(self._collection_path, False)
+        try:
+            check_path_valid(self._collection_path, False)
+        except ProfException as err:
+            if err.message:
+                error(self.FILE_NAME, err)
+            call_sys_exit(err.code)
         if not self._check_device_path_valid():
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR,
                                 "Parameter settings are incorrect, please check input: --id.")

@@ -12,7 +12,7 @@ from common_func.file_manager import FileOpen
 from common_func.file_name_manager import FileNameManagerConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.os_manager import check_file_readable
+from common_func.file_manager import check_file_readable
 from common_func.path_manager import PathManager
 from msmodel.ai_cpu.data_preparation_model import DataPreparationModel
 from msparser.interface.data_parser import DataParser

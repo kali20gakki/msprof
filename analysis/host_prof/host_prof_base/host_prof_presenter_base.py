@@ -9,7 +9,7 @@ from common_func.common import call_sys_exit
 from common_func.constant import Constant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
-from common_func.os_manager import check_file_readable
+from common_func.file_manager import check_file_readable
 from common_func.path_manager import PathManager
 
 

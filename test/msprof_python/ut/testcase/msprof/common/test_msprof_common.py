@@ -130,6 +130,18 @@ def test_get_valid_sub_path_should_return_real_path_when_collect_path_and_sub_di
                                         os.path.realpath(expected_path))
 
 
+def test_get_valid_sub_path_should_return_equal_real_path_when_collect_path_and_sub_dir_exist():
+    collect_path = '/host/collect_path'
+    sub_dir = '/collect_path_folder'
+    joined_path = os.path.join(collect_path, sub_dir)
+    is_file = False
+    with mock.patch('os.access', return_value=True), \
+            mock.patch('os.path.exists', return_value=True), \
+            mock.patch('os.path.isdir', return_value=True):
+        unittest.TestCase().assertEqual(get_valid_sub_path(collect_path, sub_dir, is_file),
+                                        os.path.realpath(joined_path))
+
+
 def test_check_collection_dir():
     collect_path = './'
     InfoJsonReaderManager(InfoJson(version='1.0')).process()

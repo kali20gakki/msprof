@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2024. All rights reserved.
 
 import argparse
 import os
@@ -73,7 +73,12 @@ class MsprofEntrance:
         parser, export_parser, import_parser, monitor_parser, query_parser, analyze_parser = self.construct_arg_parser()
 
         args = parser.parse_args(sys.argv[1:])
-        check_path_valid(args.collection_path, False)
+        try:
+            check_path_valid(args.collection_path, False)
+        except ProfException as err:
+            if err.message:
+                error(self.FILE_NAME, err)
+            call_sys_exit(err.code)
         if len(sys.argv) < 2:
             parser.print_help()
             call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)

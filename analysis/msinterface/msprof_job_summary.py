@@ -8,7 +8,6 @@ import os
 from common_func.common import print_info
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
-from common_func.file_manager import check_path_valid
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.file_name_manager import get_msprof_json_compiles
 from common_func.ms_constant.str_constant import StrConstant
