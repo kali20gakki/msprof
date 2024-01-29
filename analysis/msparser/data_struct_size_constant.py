@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2021-2023. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2024. All rights reserved.
 
 import struct
 
@@ -58,7 +58,7 @@ class StructFmt:
     ACC_PMU_FMT = "HHLQHH3L4Q"
     SOC_FMT = "HHLQ4LHH7L"
     FFTS_PMU_FMT = "4HQ4HQ12Q"
-    FFTS_BLOCK_PMU_FMT = "4HQ4HLHH12Q"
+    FFTS_BLOCK_PMU_FMT = "4HQ2HBBHLHH12Q"
     FFTS_LOG_FMT = "HHHHQHHBBH10L"
     FFTS_PLUS_LOG_FMT = "4HQ4H10L"
     LPS_FMT = "HHLQ12LHHLQ12LHHLQ12L"
