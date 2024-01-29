@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2024. All rights reserved.
 
 from common_func.utils import Utils
 from profiling_bean.struct_info.struct_decoder import StructDecoder
@@ -16,12 +16,16 @@ class FftsBlockPmuBean(StructDecoder):
         self.func_type = Utils.get_func_type(filed[0])
         self._stream_id = Utils.get_stream_id(filed[2])
         self._task_id = filed[3]
-        self._subtask_id = filed[6]
-        self._ffts_type = filed[7] >> 13
         self._subtask_type = filed[5] & int(b'11111111')
-        self._total_cycle = filed[12]
-        self._pmu_list = filed[14:22]
-        self._time_list = filed[22:]
+        self._subtask_id = filed[6]
+        self._core_type = filed[7] & 1
+        self._core_id = filed[7] >> 1
+        self._ffts_type = filed[8] >> 5
+        self._sub_block_id = filed[11]
+        self._block_id = filed[12]
+        self._total_cycle = filed[13]
+        self._pmu_list = filed[15:23]
+        self._time_list = filed[23:]
 
     @property
     def stream_id(self: any) -> int:
@@ -62,6 +66,38 @@ class FftsBlockPmuBean(StructDecoder):
         :return: task_type
         """
         return self._subtask_type
+
+    @property
+    def core_type(self: any) -> int:
+        """
+        get core_type
+        :return: core_type
+        """
+        return self._core_type
+
+    @property
+    def core_id(self: any) -> int:
+        """
+        get core_id
+        :return: core_id
+        """
+        return self._core_id
+
+    @property
+    def sub_block_id(self: any) -> int:
+        """
+        get sub_block_id
+        :return: sub_block_id
+        """
+        return self._sub_block_id
+
+    @property
+    def block_id(self: any) -> int:
+        """
+        get block_id
+        :return: block_id
+        """
+        return self._block_id
 
     @property
     def total_cycle(self: any) -> int:

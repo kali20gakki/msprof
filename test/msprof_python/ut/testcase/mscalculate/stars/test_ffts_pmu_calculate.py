@@ -2,7 +2,7 @@
 # coding=utf-8
 """
 function:
-Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
+Copyright Huawei Technologies Co., Ltd. 2022-2024. All rights reserved.
 """
 from unittest import TestCase
 from unittest import mock
@@ -14,6 +14,7 @@ from constant.constant import CONFIG
 from mscalculate.stars.ffts_pmu_calculator import FftsPmuCalculator
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.stars.ffts_pmu import FftsPmuBean
+from profiling_bean.stars.ffts_block_pmu import FftsBlockPmuBean
 
 NAMESPACE = 'mscalculate.stars.ffts_pmu_calculator'
 
@@ -35,6 +36,7 @@ class TestFftsPmuCalculator(TestCase):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config",
                         return_value={"ai_core_profiling_mode": "task-based", "aiv_profiling_mode": "task-based"}), \
                 mock.patch(NAMESPACE + '.FftsPmuCalculator.calculate'), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator.parse'), \
                 mock.patch(NAMESPACE + '.FftsPmuCalculator.init_params'), \
                 mock.patch(NAMESPACE + '.FftsPmuCalculator.save'):
             check = FftsPmuCalculator(self.file_list, CONFIG)
@@ -152,14 +154,20 @@ class TestFftsPmuCalculator(TestCase):
 
     def test_save_no_data(self):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
-                mock.patch(NAMESPACE + '.logging.warning'):
+                mock.patch(NAMESPACE + '.logging.error'):
             check = FftsPmuCalculator(self.file_list, CONFIG)
             check.save()
 
     def test_calculate_block_pmu_list(self):
-        data_1 = [1, 2, 3, 4, 5, 6, 7, 89, 9, 1, 4, 5, 6, 789, 9, 5, 5, 5, 6, 7, 9, 54, 1, 55, 5]
-        data_2 = [1, 2, 3, 4, 5, 6, 7, 32768, 9, 1, 4, 5, 6, 789, 9, 5, 5, 5, 6, 7, 9, 9, 8, 7]
-        pmu_data_list = [FftsPmuBean(data_1), FftsPmuBean(data_2)]
+        data_1 = [
+            617, 27603, 3, 2, 0, 6, 0, 55, 128, 0, 0, 1, 1, 642379,
+            0, 28, 0, 28384, 0, 920, 209, 2584, 121, 2201803260082, 2201803277549
+        ]
+        data_2 = [
+            617, 27603, 3, 2, 0, 6, 0, 55, 128, 0, 0, 1, 1, 642379,
+            0, 28, 0, 28384, 0, 920, 209, 2584, 121, 2201803260082, 2201803277549
+        ]
+        pmu_data_list = [FftsBlockPmuBean(data_1), FftsBlockPmuBean(data_2)]
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'), \
                 mock.patch(NAMESPACE + '.AicPmuUtils.get_pmu_events',
@@ -171,21 +179,135 @@ class TestFftsPmuCalculator(TestCase):
             check.calculate_block_pmu_list(pmu_data_list[1])
             check.calculate_block_pmu_list(pmu_data_list[0])
 
+    def test_is_block_should_return_true_when_taskBlock_in_sample_json_is_on(self):
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            check._sample_json = {'taskBlock': 'on'}
+            self.assertTrue(check.is_block())
+
+    def test_is_block_should_return_false_when_taskBlock_in_sample_json_is_empty(self):
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            check._sample_json = {'taskBlock': ''}
+            self.assertFalse(check.is_block())
+
+    def test_is_block_should_return_false_when_taskBlock_is_not_in_sample_json(self):
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            check._sample_json = {}
+            self.assertFalse(check.is_block())
+
+    def test_get_group_number_when_is_block(self):
+        key = '3-0-0'
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator.is_block', return_value=True):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            check._block_dims = {
+                'block_dim': {key: [20]},
+                'mix_block_dim': {key: [40]}
+            }
+            self.assertEqual(check.get_group_number(key, 120), 2)
+
+    def test_get_group_number_when_is_not_block(self):
+        key = '3-0-0'
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator.is_block', return_value=False):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            check._block_dims = {
+                'block_dim': {key: [20]},
+                'mix_block_dim': {key: [40]}
+            }
+            self.assertEqual(check.get_group_number(key, 120), 3)
+
     def test_add_block_pmu_list(self):
-        block_dict = {43 - 13 - 0: [['MIX_AIC', (349456, (1161, 0, 1088, 0, 7809, 7380, 391, 13))],
-                                    ['MIX_AIC', (349425, (1161, 0, 1121, 0, 7915, 7409, 407, 13))]],
-                      43 - 14 - 0: [['MIX_AIV', (349456, (1161, 0, 1088, 0, 7809, 7380, 391, 13))]],
-                      43 - 14 - 0: [['MIX_OTHER', (349456, (1161, 0, 1088, 0, 7809, 7380, 391, 13))]]}
+        block_dict = {43 - 13 - 0: [['MIX_AIC', (349456, (1161, 0, 1088, 0, 7809, 7380, 391, 13)), 1, 21, 7, 0],
+                                    ['MIX_AIC', (349425, (1161, 0, 1121, 0, 7915, 7409, 407, 13)), 1, 22, 7, 0]],
+                      43 - 14 - 0: [['MIX_AIV', (349456, (1161, 0, 1088, 0, 7809, 7380, 391, 13)), 1, 23, 7, 0]],
+                      43 - 14 - 0: [['MIX_OTHER', (349456, (1161, 0, 1088, 0, 7809, 7380, 391, 13)), 0, 24, 7, 0]]}
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'), \
                 mock.patch(NAMESPACE + '.AicPmuUtils.get_pmu_events',
                            return_value=['vec_ratio', 'mac_ratio', 'scalar_ratio',
                                          'mte1_ratio', 'mte2_ratio', 'mte3_ratio',
                                          'icache_req_ratio', 'icache_miss_rate']), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator.get_group_number', return_value=20), \
                 mock.patch(NAMESPACE + '.FftsPmuCalculator._get_pmu_value'):
             check = FftsPmuCalculator(self.file_list, CONFIG)
             check.block_dict = block_dict
             check.add_block_pmu_list()
+
+    def test_group_block_with_iter_when_is_not_block(self):
+        key = '12-133-0'
+        mix_type = 'MIX_AIC'
+        value = [
+            (mix_type, (3054, (59, 0, 749, 0, 2, 1667, 100, 48)), 1),
+            (mix_type, (3472, (59, 0, 773, 0, 2, 1863, 93, 47)), 1),
+            (mix_type, (3708, (59, 0, 464, 0, 2, 1862, 97, 51)), 1),
+            (mix_type, (3798, (59, 0, 867, 0, 2, 1731, 99, 50)), 1),
+            (mix_type, (4305, (59, 0, 1014, 0, 2, 1387, 96, 50)), 1),
+            (mix_type, (4673, (59, 0, 585, 0, 2, 997, 96, 46)), 1),
+            (mix_type, (4884, (59, 0, 2740, 0, 2, 1745, 110, 50)), 1),
+            (mix_type, (5488, (59, 0, 2242, 0, 2, 1059, 94, 47)), 1)
+        ]
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator.is_block', return_value=False):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            check._block_dims = {
+                'block_dim': {key: [2]},
+                'mix_block_dim': {key: [4]}
+            }
+            result_value = {
+                0: (
+                    (mix_type, 3054, (59, 0, 749, 0, 2, 1667, 100, 48), 1),
+                    (mix_type, 3472, (59, 0, 773, 0, 2, 1863, 93, 47), 1),
+                    (mix_type, 3708, (59, 0, 464, 0, 2, 1862, 97, 51), 1),
+                    (mix_type, 3798, (59, 0, 867, 0, 2, 1731, 99, 50), 1)
+                ),
+                1: (
+                    (mix_type, 4305, (59, 0, 1014, 0, 2, 1387, 96, 50), 1),
+                    (mix_type, 4673, (59, 0, 585, 0, 2, 997, 96, 46), 1),
+                    (mix_type, 4884, (59, 0, 2740, 0, 2, 1745, 110, 50), 1),
+                    (mix_type, 5488, (59, 0, 2242, 0, 2, 1059, 94, 47), 1)
+                )
+            }
+            self.assertEqual(check.group_block_with_iter(key, value), result_value)
+
+    def test_group_block_with_iter_when_is_block(self):
+        key = '3-0-0'
+        mix_type = 'MIX_AIC'
+        value = [
+            (mix_type, (324486, (28, 0, 21339, 0, 817, 129, 2684, 118)), 0),
+            (mix_type, (324504, (28, 0, 21265, 0, 741, 126, 2679, 124)), 0),
+            (mix_type, (324872, (28, 0, 22183, 0, 866, 139, 2672, 117)), 1),
+            (mix_type, (324850, (28, 0, 21295, 0, 968, 150, 2668, 117)), 1),
+            (mix_type, (325659, (28, 0, 22337, 0, 1004, 134, 2782, 161)), 1),
+            (mix_type, (325898, (28, 0, 23192, 0, 824, 138, 2740, 119)), 1)
+        ]
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator.is_block', return_value=True):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            check._block_dims = {
+                'block_dim': {key: [2]},
+                'mix_block_dim': {key: [4]}
+            }
+            result_value = {
+                0: (
+                    (mix_type, 324486, (28, 0, 21339, 0, 817, 129, 2684, 118), 0),
+                    (mix_type, 324504, (28, 0, 21265, 0, 741, 126, 2679, 124), 0),
+                    (mix_type, 324872, (28, 0, 22183, 0, 866, 139, 2672, 117), 1),
+                    (mix_type, 324850, (28, 0, 21295, 0, 968, 150, 2668, 117), 1),
+                    (mix_type, 325659, (28, 0, 22337, 0, 1004, 134, 2782, 161), 1),
+                    (mix_type, 325898, (28, 0, 23192, 0, 824, 138, 2740, 119), 1)
+                )
+            }
+            self.assertEqual(check.group_block_with_iter(key, value), result_value)
 
     def test_get_current_freq(self):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}):
@@ -261,3 +383,100 @@ class TestFftsPmuCalculator(TestCase):
             check._set_ffts_table_name_list()
             self.assertEqual(check.aic_table_name_list, table_name_list[2:])
             self.assertEqual(check.aiv_table_name_list, [])
+
+    def test_calculate_total_cycle_and_cycle_list_when_not_is_block(self):
+        mix_type = 'MIX_AIC'
+        value_new_dict = (
+            (mix_type, 330021, (28, 0, 20301, 0, 1190, 113, 2546, 149), 1),
+            (mix_type, 330228, (28, 0, 21270, 0, 1310, 132, 2497, 104), 1),
+            (mix_type, 329840, (28, 0, 23177, 0, 1237, 150, 2618, 105), 1),
+            (mix_type, 330393, (28, 0, 20396, 0, 1322, 136, 2546, 153), 1),
+            (mix_type, 330656, (28, 0, 22451, 0, 1353, 119, 2497, 104), 1),
+            (mix_type, 330646, (28, 0, 22104, 0, 1146, 136, 2510, 105), 1),
+            (mix_type, 331017, (28, 0, 21286, 0, 1456, 124, 2495, 105), 1),
+            (mix_type, 331151, (28, 0, 20880, 0, 956, 137, 2496, 103), 1),
+            (mix_type, 331200, (28, 0, 22202, 0, 1128, 134, 2504, 105), 1),
+            (mix_type, 331234, (28, 0, 22545, 0, 1322, 127, 2508, 103), 1)
+        )
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator.is_block', return_value=False):
+            mix_type_value = mix_type
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            total_cycle, cycle_list = check._calculate_total_cycle_and_cycle_list(mix_type_value, value_new_dict)
+            self.assertEqual(3306386, total_cycle)
+            self.assertEqual([280, 0, 216612, 0, 12420, 1308, 25217, 1136], cycle_list)
+
+    def test_calculate_total_cycle_and_cycle_list_when_is_block_and_mix_type_is_aic(self):
+        mix_type = 'MIX_AIC'
+        value_new_dict = (
+            (mix_type, 333500, (28, 0, 21310, 0, 1279, 118, 2505, 105), 0),
+            (mix_type, 334082, (607, 0, 42125, 0, 1245, 4445, 4635, 172), 0),
+            (mix_type, 333836, (615, 0, 42215, 0, 1536, 4129, 4645, 174), 0),
+            (mix_type, 334162, (28, 0, 22234, 0, 894, 133, 2438, 106), 0),
+            (mix_type, 334771, (607, 0, 37655, 0, 1192, 4208, 4710, 183), 0),
+            (mix_type, 334472, (607, 0, 41371, 0, 1768, 4158, 4653, 175), 0),
+            (mix_type, 334531, (28, 0, 23870, 0, 916, 110, 2436, 104), 0),
+            (mix_type, 334822, (607, 0, 42507, 0, 1356, 4381, 4649, 179), 0),
+            (mix_type, 334674, (28, 0, 23805, 0, 1250, 2043, 2507, 106), 1),
+            (mix_type, 334884, (607, 0, 38959, 0, 1671, 4679, 4645, 178), 1),
+            (mix_type, 335333, (607, 0, 38650, 0, 1407, 4035, 4665, 196), 1),
+            (mix_type, 335092, (607, 0, 41318, 0, 1773, 4261, 4641, 171), 1),
+            (mix_type, 335197, (607, 0, 41360, 0, 1292, 4321, 4646, 175), 1),
+            (mix_type, 335418, (607, 0, 38754, 0, 1624, 4379, 4651, 179), 1),
+            (mix_type, 335319, (28, 0, 23401, 0, 985, 130, 2439, 106), 1),
+            (mix_type, 335632, (28, 0, 22379, 0, 1128, 142, 2510, 105), 1),
+            (mix_type, 335985, (607, 0, 39348, 0, 1987, 4441, 4640, 173), 1),
+            (mix_type, 335659, (28, 0, 22348, 0, 1066, 148, 2443, 105), 1),
+            (mix_type, 335843, (607, 0, 43672, 0, 1742, 6423, 4646, 176), 1),
+            (mix_type, 335768, (28, 0, 22357, 0, 1146, 146, 2439, 106), 1),
+            (mix_type, 336066, (607, 0, 40218, 0, 1811, 7432, 4645, 177), 1),
+            (mix_type, 335818, (28, 0, 23172, 0, 875, 112, 2507, 102), 1),
+            (mix_type, 336239, (607, 0, 44852, 0, 1277, 4187, 4640, 177), 1),
+            (mix_type, 336609, (607, 0, 46346, 0, 1506, 6712, 4644, 176), 1)
+        )
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator.is_block', return_value=True):
+            mix_type_value = mix_type
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            total_cycle, cycle_list = check._calculate_total_cycle_and_cycle_list(mix_type_value, value_new_dict)
+            self.assertEqual(5369536, total_cycle)
+            self.assertEqual([6238, 0, 550939, 0, 22540, 53591, 61308, 2408], cycle_list)
+
+    def test_get_total_cycle_and_cycle_list_when_is_block_and_mix_type_is_aiv(self):
+        mix_type = 'MIX_AIV'
+        value_new_dict = (
+            (mix_type, 335985, (607, 0, 39348, 0, 1987, 4441, 4640, 173), 1),
+            (mix_type, 335659, (28, 0, 22348, 0, 1066, 148, 2443, 105), 1),
+            (mix_type, 335843, (607, 0, 43672, 0, 1742, 6423, 4646, 176), 1),
+            (mix_type, 335768, (28, 0, 22357, 0, 1146, 146, 2439, 106), 1),
+            (mix_type, 336066, (607, 0, 40218, 0, 1811, 7432, 4645, 177), 1),
+            (mix_type, 335818, (28, 0, 23172, 0, 875, 112, 2507, 102), 1),
+            (mix_type, 336239, (607, 0, 44852, 0, 1277, 4187, 4640, 177), 1),
+            (mix_type, 336609, (607, 0, 46346, 0, 1506, 6712, 4644, 176), 1),
+            (mix_type, 333500, (28, 0, 21310, 0, 1279, 118, 2505, 105), 0),
+            (mix_type, 334082, (607, 0, 42125, 0, 1245, 4445, 4635, 172), 0),
+            (mix_type, 333836, (615, 0, 42215, 0, 1536, 4129, 4645, 174), 0),
+            (mix_type, 334162, (28, 0, 22234, 0, 894, 133, 2438, 106), 0),
+            (mix_type, 334771, (607, 0, 37655, 0, 1192, 4208, 4710, 183), 0),
+            (mix_type, 334472, (607, 0, 41371, 0, 1768, 4158, 4653, 175), 0),
+            (mix_type, 334531, (28, 0, 23870, 0, 916, 110, 2436, 104), 0),
+            (mix_type, 334822, (607, 0, 42507, 0, 1356, 4381, 4649, 179), 0),
+            (mix_type, 334674, (28, 0, 23805, 0, 1250, 2043, 2507, 106), 0),
+            (mix_type, 334884, (607, 0, 38959, 0, 1671, 4679, 4645, 178), 0),
+            (mix_type, 335333, (607, 0, 38650, 0, 1407, 4035, 4665, 196), 0),
+            (mix_type, 335092, (607, 0, 41318, 0, 1773, 4261, 4641, 171), 0),
+            (mix_type, 335197, (607, 0, 41360, 0, 1292, 4321, 4646, 175), 0),
+            (mix_type, 335418, (607, 0, 38754, 0, 1624, 4379, 4651, 179), 0),
+            (mix_type, 335319, (28, 0, 23401, 0, 985, 130, 2439, 106), 0),
+            (mix_type, 335632, (28, 0, 22379, 0, 1128, 142, 2510, 105), 0)
+        )
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator.is_block', return_value=True):
+            mix_type_value = mix_type
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            total_cycle, cycle_list = check._calculate_total_cycle_and_cycle_list(mix_type_value, value_new_dict)
+            self.assertEqual(5355725, total_cycle)
+            self.assertEqual([6246, 0, 541913, 0, 21316, 45672, 61375, 2414], cycle_list)
