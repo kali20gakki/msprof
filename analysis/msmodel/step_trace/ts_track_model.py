@@ -16,6 +16,7 @@ from msmodel.interface.base_model import BaseModel
 from msmodel.interface.view_model import ViewModel
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
+from profiling_bean.db_dto.step_trace_dto import StepTraceOriginDto
 from profiling_bean.db_dto.step_trace_ge_dto import StepTraceGeDto
 from profiling_bean.db_dto.time_section_dto import TimeSectionDto
 from msparser.step_trace.ts_binary_data_reader.task_flip_bean import TaskFlip
@@ -147,6 +148,25 @@ class TsTrackModel(BaseModel, ABC):
             return []
         sql = "select stream_id, timestamp, task_id, flip_num from {0}".format(DBNameConstant.TABLE_DEVICE_TASK_FLIP)
         return DBManager.fetch_all_data(self.cur, sql, dto_class=TaskFlip)
+
+    def get_step_trace_with_tag(self: any, tags: list) -> list:
+        if not tags or not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE) or \
+                not DBManager.judge_row_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE):
+            return []
+        tags_condition = ",".join([str(tag) for tag in tags])
+        select_sql = f"select DISTINCT index_id, model_id, timestamp, tag_id, stream_id " \
+                     f"from {DBNameConstant.TABLE_STEP_TRACE} " \
+                     f"where tag_id in ({tags_condition}) order by timestamp"
+        return DBManager.fetch_all_data(self.cur, select_sql, dto_class=StepTraceOriginDto)
+
+    def get_step_time(self: any) -> list:
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_STEP_TIME) or \
+                not DBManager.judge_row_exist(self.cur, DBNameConstant.TABLE_STEP_TIME):
+            return []
+
+        select_sql = f"select index_id, model_id, step_start, step_end, iter_id " \
+                     f"from {DBNameConstant.TABLE_STEP_TIME}"
+        return DBManager.fetch_all_data(self.cur, select_sql, dto_class=StepTraceDto)
 
 
 class TsTrackViewModel(ViewModel):
