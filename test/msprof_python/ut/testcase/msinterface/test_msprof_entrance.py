@@ -4,12 +4,12 @@
 function:
 Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
+import unittest
 from argparse import Namespace
 from unittest import mock
-import unittest
 
-from msinterface.msprof_entrance import MsprofEntrance
 from common_func.profiling_scene import ProfilingScene
+from msinterface.msprof_entrance import MsprofEntrance
 
 NAMESPACE = 'msinterface.msprof_entrance'
 

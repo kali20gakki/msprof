@@ -13,7 +13,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
-from common_func.os_manager import check_file_readable
+from common_func.file_manager import check_file_readable
 from framework.offset_calculator import OffsetCalculator
 from msmodel.hardware.ddr_model import DdrModel
 from msparser.data_struct_size_constant import StructFmt

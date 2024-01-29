@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2024. All rights reserved.
 
 import json
 import os
@@ -12,7 +12,7 @@ from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
 from common_func.file_name_manager import FileNameManagerConstant
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.os_manager import check_dir_writable
+from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from common_func.return_code_checker import ReturnCodeCheck
 
@@ -182,46 +182,31 @@ def check_path_valid(path: str, is_file: bool, max_size: int = Constant.MAX_READ
     :return: None
     """
     if path == "":
-        ReturnCodeCheck.print_and_return_status(
-            json.dumps({'status': NumberConstant.ERROR, 'info': 'The path is empty. '
-                                                                'Please enter a valid path.'}))
+        raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, "The path is empty. Please enter a valid path.")
     if not os.path.exists(path):
-        ReturnCodeCheck.print_and_return_status(
-            json.dumps({'status': NumberConstant.ERROR,
-                        'info': "The path '%s' does not exist. Please check "
-                                'that the path exists.' % path}))
+        raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
+                            f"The path \"{path}\" does not exist. Please check that the path exists.")
     if is_file:
         if not os.path.isfile(path):
-            ReturnCodeCheck.print_and_return_status(json.dumps(
-                {'status': NumberConstant.ERROR,
-                 'info': "The path '%s' is not a file. Please check the "
-                         'path.' % path}))
+            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
+                                f"The path \"{path}\" is not a file. Please check the path.")
         if os.path.islink(path):
-            ReturnCodeCheck.print_and_return_status(json.dumps(
-            {'status': NumberConstant.ERROR,
-            'info': "The file '%s' is link. Please check the "
-                    'path.' % path}))
+            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
+                                f"The path \"{path}\" is link. Please check the path.")
         if os.path.getsize(path) > max_size:
-            ReturnCodeCheck.print_and_return_status(json.dumps(
-            {'status': NumberConstant.ERROR,
-            'info': "The file '%s' is too large to read. Please check the "
-                    'path.' % path}))
+            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
+                                f"The path \"{path}\" is too large to read. Please check the path.")
     else:
         if not os.path.isdir(path):
-            ReturnCodeCheck.print_and_return_status(json.dumps(
-                {'status': NumberConstant.ERROR,
-                 'info': "The path '%s' is not a directory. Please check the "
-                         'path.' % path}))
+            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
+                                f"The path \"{path}\" is not a directory. Please check the path.")
         if os.path.islink(path):
-            ReturnCodeCheck.print_and_return_status(json.dumps(
-            {'status': NumberConstant.ERROR,
-            'info': "The path '%s' is link. Please check the "
-                    'path.' % path}))
+            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
+                                f"The path \"{path}\" is link. Please check the path.")
     if not os.access(path, os.R_OK):
-        ReturnCodeCheck.print_and_return_status(json.dumps(
-            {'status': NumberConstant.ERROR,
-             'info': "The path '%s' does not have permission to read. Please "
-                     'check that the path is readable.' % path}))
+        raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
+                            f"The path \"{path}\" does not have permission to read. "
+                            f"Please check that the path is readable.")
 
 
 def check_db_path_valid(path: str, is_create: bool = False, max_size: int = Constant.MAX_READ_DB_FILE_BYTES) -> None:
@@ -236,3 +221,43 @@ def check_db_path_valid(path: str, is_create: bool = False, max_size: int = Cons
             {'status': NumberConstant.ERROR,
              'info': "The db file '%s' is too large to read. Please check the "
                      'path.' % path}))
+
+
+def check_file_readable(path: str) -> None:
+    """
+    check path is file and readable
+    """
+    check_path_valid(path, True)
+    if os.path.getsize(path) > Constant.MAX_READ_FILE_BYTES:
+        raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
+                            f"The \"{path}\" is too large. Please check the path.")
+
+
+def check_file_writable(path: str) -> None:
+    """
+    check path is file and writable
+    """
+    if path and os.path.exists(path):
+        check_path_valid(path, True)
+        if not os.access(path, os.W_OK):
+            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
+                                f"The path \"{path}\" does not have permission to write. "
+                                f"Please check that the path is writeable.")
+
+
+def check_dir_readable(path: str) -> None:
+    """
+    check path is dir and readable
+    """
+    check_path_valid(path, False)
+
+
+def check_dir_writable(path: str) -> None:
+    """
+    check path is dir and writable
+    """
+    check_path_valid(path, False)
+    if not os.access(path, os.W_OK):
+        raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
+                            f"The path \"{path}\" does not have permission to write. "
+                            f"Please check that the path is writeable.")

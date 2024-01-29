@@ -8,13 +8,12 @@ from collections import OrderedDict
 from common_func.common import check_number_valid
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
+from common_func.file_manager import FileOpen
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
-from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
-from common_func.file_manager import FileOpen
 from common_func.utils import Utils
 from msmodel.hardware.mini_llc_model import MiniLlcModel
 from profiling_bean.prof_enum.data_tag import DataTag

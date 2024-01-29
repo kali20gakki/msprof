@@ -19,8 +19,8 @@ from common_func.msprof_common import MsProfCommonConstant
 from common_func.msvp_common import create_csv
 from common_func.msvp_common import create_json
 from common_func.msvp_constant import MsvpConstant
-from common_func.os_manager import check_file_readable
-from common_func.os_manager import check_file_writable
+from common_func.file_manager import check_file_readable
+from common_func.file_manager import check_file_writable
 from common_func.path_manager import PathManager
 from common_func.profiling_scene import ProfilingScene
 from profiling_bean.prof_enum.timeline_slice_strategy import LoadingTimeLevel

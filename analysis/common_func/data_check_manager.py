@@ -6,7 +6,7 @@ import os
 
 from common_func import file_name_manager
 from common_func.constant import Constant
-from common_func.os_manager import check_dir_readable
+from common_func.file_manager import check_dir_readable
 from common_func.path_manager import PathManager
 from common_func.config_mgr import ConfigMgr
 from common_func.msprof_common import get_path_dir

@@ -86,12 +86,12 @@ class TestMsprofJobSummary(unittest.TestCase):
                 mock.patch('os.path.realpath', return_value='test'):
             with mock.patch('os.path.exists', return_value=True), \
                     mock.patch('os.path.isfile', return_value=False), \
-                    mock.patch(NAMESPACE + '.check_path_valid', return_value=True):
+                    mock.patch(NAMESPACE + '.get_valid_sub_path', return_value=True):
                 result = MsprofJobSummary('test').get_msprof_json_file('test')
                 self.assertEqual(result, [])
             with mock.patch('os.path.exists', return_value=True), \
                     mock.patch('os.path.isfile', return_value=True), \
-                    mock.patch(NAMESPACE + '.check_path_valid', return_value=True), \
+                    mock.patch(NAMESPACE + '.get_valid_sub_path', return_value=True), \
                     mock.patch('builtins.open', mock.mock_open(read_data='[]')), \
                     mock.patch('logging.error'):
                 result = MsprofJobSummary('test').get_msprof_json_file('test')
