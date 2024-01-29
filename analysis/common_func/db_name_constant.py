@@ -138,6 +138,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_MODEL_WITH_Q = "ModelWithQ"
     TABLE_TASK_TYPE = "TaskType"
     TABLE_STEP_TRACE_DATA = "step_trace_data"
+    TABLE_STEP_TIME = "StepTime"
     # cpu usage
     TABLE_HOST_CPU_INFO = "CpuInfo"
     TABLE_HOST_CPU_USAGE = "CpuUsage"

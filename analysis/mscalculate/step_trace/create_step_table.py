@@ -15,6 +15,7 @@ from common_func.path_manager import PathManager
 from common_func.step_trace_constant import StepTraceConstant
 from mscalculate.step_trace.tag_handler.tag_dispatch_handler import DispatchModelHandler
 from profiling_bean.db_dto.step_trace_dto import StepTraceOriginDto
+from msmodel.step_trace.ts_track_model import TsTrackModel
 
 
 class CreateSubTable:
@@ -73,6 +74,7 @@ class CreateSubTable:
 class CreateStepTraceData(CreateSubTable):
     """
     create step trace table
+    step_trace_data存储每个子图迭代的开始结束时间
     """
 
     data = []
@@ -108,6 +110,48 @@ class CreateStepTraceData(CreateSubTable):
 
         insert_sql = 'insert into {0} values ({1})'.format(
             DBNameConstant.TABLE_STEP_TRACE_DATA, ",".join("?" * len(cls.data[0])))
+        DBManager.executemany_sql(conn, insert_sql, cls.data)
+
+
+class CreateStepTime(CreateSubTable):
+    """
+    create StepTime table
+    StepTime存储每个Step的开始结束时间
+    """
+    data = []
+    sample_config = {}
+    db_name = DBNameConstant.DB_STEP_TRACE
+    table_name = DBNameConstant.TABLE_STEP_TIME
+
+    @classmethod
+    def extract_data(cls: any, collect_data: any = None) -> None:
+        with TsTrackModel(cls.sample_config.get("result_dir"), DBNameConstant.DB_STEP_TRACE,
+                          [DBNameConstant.TABLE_STEP_TRACE]) as ts:
+            step_data = ts.get_step_trace_with_tag([StepTraceConstant.STEP_START_TAG, StepTraceConstant.STEP_END_TAG])
+        step_time = {}
+        for data in step_data:
+            step_time.setdefault(data.index_id, []).append(data)
+        for index_id, data in step_time.items():
+            if len(data) != 2:  # 有2个数据：step开始和step结束的打点
+                logging.error("The step trace data is missing.")
+                continue
+            cls.data.append(
+                [index_id, data[0].model_id, data[0].timestamp, data[1].timestamp, index_id]
+            )
+
+    @classmethod
+    def create_table(cls: any, conn: any) -> None:
+        # sorted by step end syscnt. Index 3 is step end syscnt
+        if not cls.data:
+            return
+
+        cls.data = sorted(cls.data, key=lambda x: x[3])
+        create_sql = "create table if not exists {0} (index_id int, model_id int, " \
+                     "step_start int, step_end int, iter_id int)".format(cls.table_name)
+        DBManager.execute_sql(conn, create_sql)
+
+        insert_sql = 'insert into {0} values ({1})'.format(
+            cls.table_name, ",".join("?" * len(cls.data[0])))
         DBManager.executemany_sql(conn, insert_sql, cls.data)
 
 
@@ -185,6 +229,8 @@ class CreateTrainingTrace(CreateSubTable):
 
     @classmethod
     def create_table(cls: any, conn: any) -> None:
+        cls.update_step_time()
+
         create_sql = "create table if not exists {0} " \
                      "(device_id int, model_id int, iteration_id int, " \
                      "FP_start int, " \
@@ -231,6 +277,15 @@ class CreateTrainingTrace(CreateSubTable):
         cls.data.append([cls.sample_config.get("devices"), model_id, index_id, forward_pro,
                          back_pro, step_end, iteration_time, fp_bp_time,
                          grad_refresh_bound, NumberConstant.NULL_NUMBER])
+
+    @classmethod
+    def update_step_time(cls: any):
+        with TsTrackModel(cls.sample_config.get("result_dir"), DBNameConstant.DB_STEP_TRACE,
+                          [DBNameConstant.TABLE_STEP_TIME]) as ts:
+            step_data = ts.get_step_time()
+        for data in step_data:
+            cls.data.append([cls.sample_config.get("devices"), data.model_id, data.index_id, 0, 0,
+                             data.step_end, data.step_end - data.step_start, 0, 0, NumberConstant.NULL_NUMBER])
 
     @classmethod
     def update_data_aug(cls: any) -> None:
@@ -346,7 +401,7 @@ class StepTableBuilder:
     """
     TIMESTAMP_INDEX = 2
     model_handler = DispatchModelHandler()
-    table_list = [CreateStepTraceData, CreateAllReduce, CreateTrainingTrace, GetNextCreator]
+    table_list = [CreateStepTraceData, CreateStepTime, CreateAllReduce, CreateTrainingTrace, GetNextCreator]
     step_conn = None
     step_curs = None
 

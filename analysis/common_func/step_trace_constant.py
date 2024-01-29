@@ -18,6 +18,8 @@ class StepTraceConstant:
     ITER_END_TAG = 4
     ALL_REDUCE_START = 10000
     GET_NEXT_START_TAG = 20000
+    STEP_START_TAG = 60000
+    STEP_END_TAG = 60001
 
     STEP_START = "step_start"
     STEP_END = "step_end"
