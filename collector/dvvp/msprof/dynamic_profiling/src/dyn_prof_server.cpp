@@ -312,7 +312,7 @@ int DynProfServer::DynProfServerRsqMsg(DynProfMsgType msgType, DynProfMsgProcRes
     rsqMsg.msgType = msgType;
     rsqMsg.statusCode = rsqCode;
     rsqMsg.msgDataLen = msgData.size();
-    errno_t err = memcpy_s(rsqMsg.msgData, sizeof(rsqMsg.msgData), msgData.c_str(), msgData.size());
+    errno_t err = memcpy_s(rsqMsg.msgData, sizeof(rsqMsg.msgData), msgData.c_str(), msgData.size() + 1);
     if (err != EOK) {
         MSPROF_LOGE("Dynamic profiling server copy rsqMsg failed, err: %d, rsqMsg: %s", err, msgData.c_str());
         return PROFILING_FAILED;
