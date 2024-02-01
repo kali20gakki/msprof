@@ -78,6 +78,7 @@ from viewer.task_time_viewer import TaskTimeViewer
 from viewer.training.step_trace_viewer import StepTraceViewer
 from viewer.training.task_op_viewer import TaskOpViewer
 from viewer.ts_cpu_report import TsCpuReport
+from viewer.ai_core_freq_viewer import AiCoreFreqViewer
 
 
 class MsProfExportDataUtils:
@@ -496,8 +497,12 @@ class MsProfExportDataUtils:
             logging.warning("Please check params, currently bulk data export params should be timeline.")
             return []
         row_timeline = PipelineOverlapViewer(configs, params).get_timeline_data()
-
         MsprofTimeline().add_export_data(row_timeline, params.get(StrConstant.PARAM_DATA_TYPE))
+        
+        # only chip v4 support aicore freqs_list
+        freqs_list = AiCoreFreqViewer(params).get_all_data()
+        if len(freqs_list) > 0:
+            MsprofTimeline().add_export_data(freqs_list, params.get(StrConstant.PARAM_DATA_TYPE))
         return MsprofTimeline().export_all_data()
 
 

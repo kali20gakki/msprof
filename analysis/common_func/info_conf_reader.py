@@ -211,7 +211,7 @@ class InfoConfReader:
         except (ValueError, TypeError) as err:
             logging.error(err)
             raise ProfException(ProfException.PROF_SYSTEM_EXIT) from err
-        return float(freq) * 1000000.0
+        return float(freq) * NumberConstant.FREQ_TO_MHz
 
     def get_collect_time(self: any) -> tuple:
         """
@@ -380,7 +380,7 @@ class InfoConfReader:
         if host_cpu_info:
             freq = host_cpu_info[0].get('Frequency')
             if is_number(freq) and float(freq) > 0.0:
-                self._host_freq = float(freq) * 1000000.0
+                self._host_freq = float(freq) * NumberConstant.FREQ_TO_MHz
             else:
                 logging.info("No host frequency, or the frequency is invalid.")
                 self._host_freq = self.HOST_DEFAULT_FREQ
