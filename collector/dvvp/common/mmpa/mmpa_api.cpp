@@ -1007,6 +1007,19 @@ static void LocalGetCpuProcV1(FILE *fp, MmCpuDesc *cpuInfo)
     return;
 }
 
+static void LocalGetDeduplicateCnt(int32_t *physicalIds, int32_t id, int32_t *physicalIdCnt)
+{
+    for (int32_t i = 0; i < *physicalIdCnt; ++i) {
+        if (physicalIds[i] == id) {
+            return;
+        }
+    }
+    if (*physicalIdCnt < MMPA_MAX_PHYSICALCPU_COUNT) {
+        physicalIds[*physicalIdCnt] = id;
+        ++(*physicalIdCnt);
+    }
+}
+
 static void LocalGetCpuProcV2(FILE *fp, MmCpuDesc *cpuInfo, int32_t *physicalCount)
 {
     char buf[MMPA_CPUPROC_BUF_SIZE]                 = {0};
@@ -1019,6 +1032,9 @@ static void LocalGetCpuProcV2(FILE *fp, MmCpuDesc *cpuInfo, int32_t *physicalCou
     constexpr int base = 10;
     char *end = nullptr;
     uint32_t length = 0U;
+    int32_t physicalIdCnt = 0;
+    int32_t physicalIds[MMPA_MAX_PHYSICALCPU_COUNT] = {0};
+    int32_t intPhysicalID = 0;
     while (fgets(buf, static_cast<int>(sizeof(buf)), fp) != nullptr) {
         length = static_cast<uint32_t>(strlen(buf));
         if (LocalLookup(buf, length, "cpu MHz", cpuMhz, sizeof(cpuMhz)) == PROFILING_SUCCESS) {
@@ -1031,6 +1047,8 @@ static void LocalGetCpuProcV2(FILE *fp, MmCpuDesc *cpuInfo, int32_t *physicalCou
             continue; // processor index + 1
         }
         if (LocalLookup(buf, length, "physical id", physicalID, sizeof(physicalID)) == PROFILING_SUCCESS) {
+            intPhysicalID = std::strtol(physicalID, &end, base);
+            LocalGetDeduplicateCnt(physicalIds, intPhysicalID, &physicalIdCnt);
             continue;
         }
         if (LocalLookup(buf, length, "Thread Count", cpuThreads, sizeof(cpuThreads)) == PROFILING_SUCCESS) {
@@ -1043,7 +1061,9 @@ static void LocalGetCpuProcV2(FILE *fp, MmCpuDesc *cpuInfo, int32_t *physicalCou
     cpuInfo->frequency = std::strtol(cpuMhz, &end, base);
     cpuInfo->ncores = std::strtol(cpuCores, &end, base);
     cpuInfo->ncounts = std::strtol(cpuCnt, &end, base) + 1;
-    *physicalCount += std::strtol(physicalID, &end, base);
+    if (physicalIdCnt != 0) {
+        *physicalCount = physicalIdCnt; // only update physicalCount when cpuinfo has physical id
+    }
     cpuInfo->nthreads = std::strtol(cpuThreads, &end, base);
     cpuInfo->maxFrequency = std::strtol(maxSpeed, &end, base);
     return;
