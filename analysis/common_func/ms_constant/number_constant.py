@@ -60,6 +60,7 @@ class NumberConstant:
     MS_TO_US = 1000.0
     US_TO_MS = 1000.0
     MS_TO_NS = 1000000.0
+    FREQ_TO_MHz = 1000000.0
     LLC_BYTE = 64.0
     FLT_EPSILON = 1.0e-9
     USTONS = 1000
