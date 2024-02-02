@@ -356,6 +356,9 @@ void ArgsManager::AddAnalysisArgs()
             "\t\t\t\t\t\t   the default value is 1", "1"},
         {"model-id", "The export model id, only uesd when argument export is on, msprof will\n"
             "\t\t\t\t\t\t   export minium accessible model by default.(full-platform)", "-1"},
+        {"type", "The export type, only used when the parameters `application` or `export` \n"
+            "\t\t\t\t\t\t   are set to on or when it is a system-collected value.\n"
+            "\t\t\t\t\t\t   include db, text, the default value is text.(full-platform)", "text"},
         {"summary-format", "The export summary file format, only uesd when argument export is on,\n"
             "\t\t\t\t\t\t   include csv, json, the default value is csv.(full-platform)", "csv"}
     };

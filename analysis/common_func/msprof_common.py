@@ -33,6 +33,7 @@ class MsProfCommonConstant:
     msprof common constant
     """
     DEFAULT_IP = '127.0.0.1'
+    DB = "db"
     SUMMARY = "summary"
     TIMELINE = "timeline"
     COMMON_FILE_NAME = os.path.basename(__file__)

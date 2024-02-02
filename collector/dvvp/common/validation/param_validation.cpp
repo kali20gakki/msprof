@@ -50,6 +50,29 @@ const int MAX_EVENT_SIZE = 8;  // every batch event size
 const int MAX_CORE_ID_SIZE = 50;  // ai core or aiv core id size
 const int BASE_HEX = 16;  // hex to int
 
+namespace {
+    bool CheckDirValid(const std::string &path, std::string &errReason)
+    {
+        if (path.size() > MAX_PATH_LENGTH) {
+            errReason = "Argument --output is invalid because of exceeds the maximum length of " +
+                         std::to_string(MAX_PATH_LENGTH) + ".";
+            return false;
+        }
+        if (!Utils::IsDir(path)) {
+            errReason = "Argument --output=" + path + " is not a dir.";
+            return false;
+        }
+        if (MmAccess2(path, M_W_OK) != PROFILING_SUCCESS) {
+            errReason = "Argument --output=" + path + " permission denied.";
+            return false;
+        }
+        if (Utils::CanonicalizePath(path).empty()) {
+            errReason = "Argument --output is invalid because of get the canonicalized absolute pathname failed";
+            return false;
+        }
+        return true;
+    }
+}
 
 ParamValidation::ParamValidation()
 {
@@ -69,55 +92,72 @@ int ParamValidation::Uninit() const
     return PROFILING_SUCCESS;
 }
 
-bool ParamValidation::CheckOutputIsValid(const std::string &outputPath) const
+bool ParamValidation::CheckCollectOutputIsValid(const std::string &outputPath) const
 {
     if (outputPath.empty()) {
         MSPROF_LOGI("output is empty");
         return true;
     }
-    std::string errReason = "output should be a valid dir and path lenth shoule be shorter than " +
-        std::to_string(MAX_PATH_LENGTH) + ".";
-    std::string path = Utils::RelativePathToAbsolutePath(outputPath);
-    if (!path.empty()) {
-        if (path.size() > MAX_PATH_LENGTH) {
-            MSPROF_LOGE("Invalid value for Argument 'output'. The maximum length is %d.", MAX_PATH_LENGTH);
-            CMD_LOGE("Argument --output is invalid because of exceeds the maximum length of %d.", MAX_PATH_LENGTH);
+
+    std::string errReason;
+    if (Utils::IsFileExist(outputPath)) {
+        // 校验路径有效性
+        if (!CheckDirValid(outputPath, errReason)) {
+            MSPROF_LOGE("profiling error %s", errReason.c_str());
+            CMD_LOGE("profiling error %s", errReason.c_str());
             MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-                std::vector<std::string>({"output", outputPath, errReason}));
-            return false;
-        }
-        if (Utils::CreateDir(path) != PROFILING_SUCCESS) {
-            char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
-            MSPROF_LOGE("Create output dir failed.ErrorCode: %d, ErrorInfo: %s.", MmGetErrorCode(),
-                MmGetErrorFormatMessage(MmGetErrorCode(), errBuf, MAX_ERR_STRING_LEN));
-            CMD_LOGE("output dir: %s create failed.", path.c_str());
-            MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-                std::vector<std::string>({"output", outputPath, errReason}));
-            return false;
-        }
-        if (!Utils::IsDir(path)) {
-            MSPROF_LOGE("Argument 'output' %s is not a dir.", path.c_str());
-            CMD_LOGE("Argument --output=%s is not a dir.", path.c_str());
-            MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-                std::vector<std::string>({"output", outputPath, errReason}));
-            return false;
-        }
-        if (MmAccess2(path, M_W_OK) != PROFILING_SUCCESS) {
-            MSPROF_LOGE("Argument 'output' %s permission denied.", path.c_str());
-            CMD_LOGE("Argument --output=%s permission denied.", path.c_str());
-            MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-                std::vector<std::string>({"output", outputPath, errReason}));
-            return false;
-        }
-        if (Utils::CanonicalizePath(path).empty()) {
-            MSPROF_LOGE("output is invalid because of get the canonicalized absolute pathname failed.");
-            CMD_LOGE("Argument --output is invalid because of get the canonicalized absolute pathname failed");
+                               std::vector<std::string>({"output", outputPath, errReason}));
             return false;
         }
     } else {
-        MSPROF_LOGE("Argument 'output' is invalid. Failed to get the canonicalized absolute pathname.");
+        // 路径可以不存在，使用RelativePathToAbsolutePath拼接绝对路径用于创建dir
+        std::string path = Utils::RelativePathToAbsolutePath(outputPath);
+        if (path.size() > MAX_PATH_LENGTH) {
+            MSPROF_LOGE("Invalid value for Argument 'output'. The maximum length is %d.", MAX_PATH_LENGTH);
+            CMD_LOGE("Argument --output is invalid because of exceeds the maximum length of %d.", MAX_PATH_LENGTH);
+            errReason = "Argument --output is invalid because of exceeds the maximum length of " +
+                                     std::to_string(MAX_PATH_LENGTH) + ".";
+            MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+                               std::vector<std::string>({"output", outputPath, errReason}));
+            return false;
+        }
+
+        if (Utils::CreateDir(path) != PROFILING_SUCCESS) {
+            char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
+            MSPROF_LOGE("Create output dir failed.ErrorCode: %d, ErrorInfo: %s.", MmGetErrorCode(),
+                        MmGetErrorFormatMessage(MmGetErrorCode(), errBuf, MAX_ERR_STRING_LEN));
+            CMD_LOGE("output dir: %s create failed.", path.c_str());
+            errReason = "output dir: " + path + " create failed.";
+            MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+                               std::vector<std::string>({"output", outputPath, errReason}));
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool ParamValidation::CheckAnalysisOutputIsPathValid(const std::string &outputPath) const
+{
+    std::string errReason;
+
+    if (!Utils::IsFileExist(outputPath)) {
+        MSPROF_LOGE("Argument --output is invalid because of %s does not exist.", outputPath.c_str());
+        CMD_LOGE("Argument --output is invalid because of %s does not exist.", outputPath.c_str());
+        errReason = "Argument --output is invalid because of " + outputPath + " does not exist.";
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+                           std::vector<std::string>({"output", outputPath, errReason}));
         return false;
     }
+
+    if (!CheckDirValid(outputPath, errReason)) {
+        MSPROF_LOGE("profiling error %s", errReason.c_str());
+        CMD_LOGE("profiling error %s", errReason.c_str());
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+                           std::vector<std::string>({"output", outputPath, errReason}));
+        return false;
+    }
+
     return true;
 }
 
@@ -484,6 +524,27 @@ bool ParamValidation::CheckExportSummaryFormatIsValid(const std::string &summary
             "Please input 'json' or 'csv'.", summaryFormat.c_str());
         MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
             std::vector<std::string>({"summary-format", summaryFormat, errReason}));
+        return false;
+    }
+    return true;
+}
+
+bool ParamValidation::CheckExportTypeIsValid(const std::string &exportType) const
+{
+    std::string errReason = "type should be in range of 'db | text'.";
+    if (exportType.empty()) {
+        MSPROF_LOGE("Argument --type expected one argument");
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"type", exportType, errReason}));
+        return false;
+    }
+    if (exportType != "db" && exportType != "text") {
+        MSPROF_LOGE("Argument --type=%s is invalid. "
+            "Please input 'db' or 'text'.", exportType.c_str());
+        CMD_LOGE("Argument --type=%s is invalid. "
+            "Please input 'db' or 'text'.", exportType.c_str());
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"type", exportType, errReason}));
         return false;
     }
     return true;

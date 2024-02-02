@@ -581,17 +581,17 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, ProfStarsAcsqParamIsValid) {
     EXPECT_EQ(1, entry->ProfStarsAcsqParamIsValid("dsa,vdec"));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckOutputIsValid)
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckAnalysisOutputIsPathValid)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     std::string output;
-    EXPECT_EQ(true, entry->CheckOutputIsValid(output));
+    EXPECT_EQ(false, entry->CheckAnalysisOutputIsPathValid(output));
     output = std::string(1025, 'x'); // 1025 = MAX_PATH_LENGTH + 1;
-    EXPECT_EQ(false, entry->CheckOutputIsValid(output));
+    EXPECT_EQ(false, entry->CheckAnalysisOutputIsPathValid(output));
     output.clear();
     output = "./";
-    EXPECT_EQ(true, entry->CheckOutputIsValid(output));
+    EXPECT_EQ(true, entry->CheckAnalysisOutputIsPathValid(output));
 }
 
 TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckLlcModeIsValid1)

@@ -15,11 +15,13 @@
 #include "param_validation.h"
 #include "errno/error_code.h"
 #include "input_parser.h"
+#include "utils/utils.h"
 
 
 using namespace Collector::Dvvp::ParamsAdapter;
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Msprof;
+using namespace analysis::dvvp::common::utils;
 
 class ParamsAdapterMsprofUtest : public testing::Test {
 protected:
@@ -196,8 +198,10 @@ TEST_F(ParamsAdapterMsprofUtest, AnalysisParamsAdapt)
         {ARGS_EXPORT_ITERATION_ID, std::make_pair(cmdInfo, "--iteration-id=1")},
         {ARGS_SUMMARY_FORMAT, std::make_pair(cmdInfo, "--summary-format=csv")}
     };
+    Utils::CreateDir("./result");
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
     MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
     MsprofParamAdapterMgr->params_ = params;
     EXPECT_EQ(PROFILING_SUCCESS, MsprofParamAdapterMgr->AnalysisParamsAdapt(argsMap));
+    Utils::RemoveDir("./result");
 }

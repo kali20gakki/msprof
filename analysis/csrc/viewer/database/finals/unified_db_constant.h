@@ -24,6 +24,9 @@ const std::string HOST = "host";
 const std::string DEVICE_PREFIX = "device_";
 const std::string SQLITE = "sqlite";
 
+// db name
+const std::string DB_NAME_REPORT_DB = "report";
+
 // table name
 const std::string TABLE_NAME_STRING_IDS = "STRING_IDS";
 const std::string TABLE_NAME_TARGET_INFO_SESSION_TIME = "TARGET_INFO_SESSION_TIME";

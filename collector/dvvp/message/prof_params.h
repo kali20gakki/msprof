@@ -157,6 +157,7 @@ struct ProfileParams : BaseInfo {
     std::string querySwitch;
     std::string exportSwitch;
     std::string clearSwitch;
+    std::string exportType;
     std::string exportSummaryFormat;
     std::string exportIterationId;
     std::string exportModelId;
@@ -202,6 +203,7 @@ struct ProfileParams : BaseInfo {
           host_cpu_profiling_sampling_interval(DEFAULT_PROFILING_INTERVAL_20MS),
           host_mem_profiling_sampling_interval(DEFAULT_PROFILING_INTERVAL_20MS),
           pythonPath(""), parseSwitch("off"), querySwitch("off"), exportSwitch("off"), clearSwitch("off"),
+          exportType(DEFAULT_PROFILING_EXPORT_TYPE),
           exportSummaryFormat(PROFILING_SUMMARY_FORMAT), exportIterationId(DEFAULT_INTERATION_ID),
           exportModelId(DEFAULT_MODEL_ID), usedParams(), dataTypeConfig(0), npuAppMemProfiling("on"),
           npuModuleMemProfiling("on"), analyzeSwitch("off"), delayTime(""), durationTime(""),

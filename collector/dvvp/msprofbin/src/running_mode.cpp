@@ -21,6 +21,9 @@
 #include "platform/platform.h"
 #include "env_manager.h"
 #include "mmpa_api.h"
+#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/viewer/database/finals/unified_db_manager.h"
+
 
 namespace Collector {
 namespace Dvvp {
@@ -445,6 +448,45 @@ int RunningMode::StartQueryTask()
     return PROFILING_SUCCESS;
 }
 
+int RunningMode::UnifiedDBExport()
+{
+    auto unifiedDbManager =
+        Analysis::Viewer::Database::UnifiedDBManager(params_->result_dir, jobResultDirList_);
+    if (unifiedDbManager.Init() != PROFILING_SUCCESS) {
+        CmdLog::instance()->CmdInfoLog("UnifiedDB init failed.");
+        return PROFILING_FAILED;
+    }
+    if (unifiedDbManager.Run() == PROFILING_FAILED) {
+        MSPROF_LOGE("AppMode export unified db failed in %s.", Utils::BaseName(params_->result_dir).c_str());
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
+}
+
+int RunningMode::RunExportDBTask(const ExecCmdParams &execCmdParams,
+    std::vector<std::string> &envsV, int &exitCode)
+{
+    std::vector<std::string> argsSqlitV = {
+        analysisPath_,
+        "export", "db",
+        "-dir=" + jobResultDir_
+    };
+ 
+    int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsSqlitV, envsV, exitCode, taskPid_);
+    if (ret == PROFILING_FAILED) {
+        MSPROF_LOGE("Failed to launch export db task, data path: %s", Utils::BaseName(jobResultDir_).c_str());
+        return PROFILING_FAILED;
+    }
+    ret = WaitRunningProcess(taskName_ + " db");
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to wait export db process %d to exit, ret=%d", reinterpret_cast<int>(taskPid_), ret);
+        return PROFILING_FAILED;
+    }
+    taskPid_ = MSVP_MMPROCESS;
+    exitCode = INVALID_EXIT_CODE;
+    return PROFILING_SUCCESS;
+}
+
 int RunningMode::RunExportSummaryTask(const ExecCmdParams &execCmdParams,
     std::vector<std::string> &envsV, int &exitCode)
 {
@@ -529,14 +571,23 @@ int RunningMode::StartExportTask()
     std::vector<std::string> envsV;
     int exitCode = INVALID_EXIT_CODE;
     SetEnvList(envsV);
-    if (RunExportTimelineTask(execCmdParams, envsV, exitCode) != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Export timeline failed in %s.", Utils::BaseName(jobResultDir_).c_str());
-        return PROFILING_FAILED;
+
+    if (params_->exportType == "db") {
+        if (RunExportDBTask(execCmdParams, envsV, exitCode) != PROFILING_SUCCESS) {
+            MSPROF_LOGE("Export db failed in %s.", Utils::BaseName(jobResultDir_).c_str());
+            return PROFILING_FAILED;
+        }
+    } else {
+        if (RunExportTimelineTask(execCmdParams, envsV, exitCode) != PROFILING_SUCCESS) {
+            MSPROF_LOGE("Export timeline failed in %s.", Utils::BaseName(jobResultDir_).c_str());
+            return PROFILING_FAILED;
+        }
+        if (RunExportSummaryTask(execCmdParams, envsV, exitCode) != PROFILING_SUCCESS) {
+            MSPROF_LOGE("Export summary failed in %s.", Utils::BaseName(jobResultDir_).c_str());
+            return PROFILING_FAILED;
+        }
     }
-    if (RunExportSummaryTask(execCmdParams, envsV, exitCode) != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Export summary failed in %s.", Utils::BaseName(jobResultDir_).c_str());
-        return PROFILING_FAILED;
-    }
+
     CmdLog::instance()->CmdInfoLog("Export all data in %s done.", Utils::BaseName(jobResultDir_).c_str());
     return PROFILING_SUCCESS;
 }
@@ -622,7 +673,7 @@ AppMode::AppMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams> para
     whiteSet_ = {
         ARGS_OUTPUT, ARGS_STORAGE_LIMIT, ARGS_APPLICATION, ARGS_ENVIRONMENT, ARGS_AIC_MODE,
         ARGS_AIC_METRICE, ARGS_AIV_MODE, ARGS_AIV_METRICS, ARGS_LLC_PROFILING, ARGS_DYNAMIC_PROF, ARGS_DYNAMIC_PROF_PID,
-        ARGS_ASCENDCL, ARGS_AI_CORE, ARGS_AIV, ARGS_MODEL_EXECUTION,
+        ARGS_ASCENDCL, ARGS_AI_CORE, ARGS_AIV, ARGS_MODEL_EXECUTION, ARGS_EXPORT_TYPE,
         ARGS_RUNTIME_API, ARGS_TASK_TIME, ARGS_AICPU, ARGS_CPU_PROFILING, ARGS_SYS_PROFILING,
         ARGS_PID_PROFILING, ARGS_HARDWARE_MEM, ARGS_IO_PROFILING, ARGS_INTERCONNECTION_PROFILING,
         ARGS_DVPP_PROFILING, ARGS_L2_PROFILING, ARGS_AIC_FREQ, ARGS_AIV_FREQ, ARGS_INSTR_PROFILING_FREQ,
@@ -689,6 +740,9 @@ int AppMode::RunModeTasks()
             MSPROF_LOGW("[App Mode] Run query task failed.");
             return PROFILING_SUCCESS;
         }
+    }
+    if (params_->exportType == "db") {
+        UnifiedDBExport();
     }
     return PROFILING_SUCCESS;
 }
@@ -760,7 +814,7 @@ SystemMode::SystemMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams
     whiteSet_ = {
         ARGS_OUTPUT, ARGS_STORAGE_LIMIT, ARGS_AIC_MODE, ARGS_SYS_DEVICES,
         ARGS_AIC_METRICE, ARGS_AIV_MODE, ARGS_AIV_METRICS, ARGS_LLC_PROFILING,
-        ARGS_AI_CORE, ARGS_AIV, ARGS_CPU_PROFILING, ARGS_SYS_PROFILING,
+        ARGS_AI_CORE, ARGS_AIV, ARGS_CPU_PROFILING, ARGS_SYS_PROFILING, ARGS_EXPORT_TYPE,
         ARGS_PID_PROFILING, ARGS_HARDWARE_MEM, ARGS_IO_PROFILING, ARGS_INTERCONNECTION_PROFILING,
         ARGS_DVPP_PROFILING, ARGS_L2_PROFILING, ARGS_AIC_FREQ, ARGS_AIV_FREQ, ARGS_INSTR_PROFILING_FREQ,
         ARGS_INSTR_PROFILING, ARGS_SYS_SAMPLING_FREQ, ARGS_PID_SAMPLING_FREQ, ARGS_HARDWARE_MEM_SAMPLING_FREQ,
@@ -913,6 +967,9 @@ int SystemMode::RunModeTasks()
             MSPROF_LOGW("[System Mode] Run query task failed.");
             return PROFILING_SUCCESS;
         }
+    }
+    if (params_->exportType == "db") {
+        UnifiedDBExport();
     }
     return PROFILING_SUCCESS;
 }
@@ -1456,7 +1513,7 @@ ExportMode::ExportMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams
     : RunningMode(preCheckParams, "export", params)
 {
     whiteSet_ = {
-        ARGS_OUTPUT, ARGS_EXPORT, ARGS_EXPORT_ITERATION_ID,
+        ARGS_OUTPUT, ARGS_EXPORT, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_TYPE,
         ARGS_EXPORT_MODEL_ID, ARGS_SUMMARY_FORMAT, ARGS_PYTHON_PATH, ARGS_CLEAR
     };
     neccessarySet_ = {ARGS_OUTPUT, ARGS_EXPORT};
@@ -1503,8 +1560,51 @@ int ExportMode::RunModeTasks()
         MSPROF_LOGE("[Export Mode] Run export task failed.");
         return PROFILING_FAILED;
     }
+    if (params_->exportType == "db") {
+        if (UnifiedDBExport() != PROFILING_SUCCESS) {
+            MSPROF_LOGE("[Export Mode] Run UnifiedDBExport task failed.");
+            return PROFILING_FAILED;
+        }
+    }
     return PROFILING_SUCCESS;
 }
+
+int ExportMode::UnifiedDBExport()
+{
+    std::string unifiedDBOutPutPath = Utils::RealPath(params_->result_dir);
+    if (unifiedDBOutPutPath.empty()) {
+        CmdLog::instance()->CmdErrorLog("[UnifiedDBExport] Invalid outPutPath, please check your params!");
+        return PROFILING_FAILED;
+    }
+    // 获取out_put下的所有文件夹并检查时否是同一次采集
+    std::vector<std::string> profDirs;
+    if (unifiedDBOutPutPath.find("PROF") == std::string::npos) {
+        profDirs = Analysis::Utils::File::GetOriginData(unifiedDBOutPutPath, {"PROF"}, {""});
+    } else {
+        profDirs.push_back(unifiedDBOutPutPath);
+    }
+    std::string errInfo;
+    std::set<std::string> profFolderPaths(profDirs.begin(), profDirs.end());
+    if (!Analysis::Viewer::Database::UnifiedDBManager::CheckProfDirsValid(profFolderPaths, errInfo)) {
+        CmdLog::instance()->CmdInfoLog("[UnifiedDBExport] Invalid params! %s", errInfo.c_str());
+        MSPROF_LOGE("[UnifiedDBExport] Invalid params! %s", errInfo.c_str());
+        return PROFILING_FAILED;
+    }
+
+    auto unifiedDbManager =
+        Analysis::Viewer::Database::UnifiedDBManager(unifiedDBOutPutPath, profFolderPaths);
+    if (unifiedDbManager.Init() != PROFILING_SUCCESS) {
+        CmdLog::instance()->CmdInfoLog("UnifiedDB init failed.");
+        return PROFILING_FAILED;
+    }
+
+    if (unifiedDbManager.Run() == PROFILING_FAILED) {
+        MSPROF_LOGE("AppMode export unified db failed in %s.", Utils::BaseName(unifiedDBOutPutPath).c_str());
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
+}
+
 }
 }
 }

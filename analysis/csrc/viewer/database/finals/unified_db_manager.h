@@ -23,13 +23,14 @@ namespace Database {
 class UnifiedDBManager {
 public:
     UnifiedDBManager(const std::string &output, const std::set<std::string> &profPaths)
-        : output_(output), profPaths_(profPaths) {};
-    bool Run();
+        : outputPath_(output), ProfFolderPaths_(profPaths) {};
+    int Run();
+    int Init();
+    static bool CheckProfDirsValid(const std::set<std::string> &profFolderPaths, std::string &errInfo);
 private:
-    void Init();
     std::string reportDBPath_;
-    std::string output_;
-    std::set<std::string> profPaths_;
+    std::string outputPath_;
+    std::set<std::string> ProfFolderPaths_;
 };
 
 }  // Database
@@ -37,4 +38,3 @@ private:
 }  // Analysis
 
 #endif // #define ANALYSIS_VIEWER_DATABASE_UNIFIED_DB_MANAGER_H
-
