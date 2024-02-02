@@ -17,6 +17,7 @@
 #include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/utils/file.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "collector/dvvp/common/config/config.h"
 
 using namespace Analysis::Utils;
 using namespace Analysis::Parser::Environment;
@@ -31,6 +32,7 @@ const std::string START_INFO = "start_info";
 const std::string END_INFO = "end_info";
 const std::string HOST_START_LOG = "host_start.log";
 const std::string DEVICE_START_LOG = "dev_start.log";
+const int MSVP_MMPROCESS = -1;
 
 class ContextUTest : public testing::Test {
 protected:
@@ -551,4 +553,28 @@ TEST_F(ContextUTest, TestInfoValueShouldReturnRightDataWhenReadMultiProfPath)
     EXPECT_EQ(testParams.freq, expectParams.freq);
     EXPECT_EQ(testParams.sysCnt, expectParams.sysCnt);
     EXPECT_EQ(testParams.hostMonotonic, expectParams.hostMonotonic);
+}
+
+TEST_F(ContextUTest, TestGetMsprofBinPidFromInfoJsonShouldReturnMSVP_MMPROCESSWhenMsprofBinIsEmpty)
+{
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, SAMPLE_JSON})));
+    nlohmann::json sampleJson;
+    sampleJson["msprofBinPid"] = nullptr;
+    FileWriter sampleWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, SAMPLE_JSON}));
+    sampleWriter.WriteText(sampleJson.dump());
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    EXPECT_EQ(Context::GetInstance().GetMsBinPid(HOST_ID, File::PathJoin({CONTEXT_DIR, TEST_DIR})),
+              analysis::dvvp::common::config::MSVP_MMPROCESS);
+}
+
+TEST_F(ContextUTest, TestGetMsprofBinPidFromInfoJsonShouldReturnSucessWhenMsprofBinIsEmpty)
+{
+    int msprofBinPid = 123456; // 123456 表示一个pid的值
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, SAMPLE_JSON})));
+    nlohmann::json sampleJson;
+    sampleJson["msprofBinPid"] = msprofBinPid;
+    FileWriter sampleWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, SAMPLE_JSON}));
+    sampleWriter.WriteText(sampleJson.dump());
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    EXPECT_EQ(Context::GetInstance().GetMsBinPid(HOST_ID, File::PathJoin({CONTEXT_DIR, TEST_DIR})), msprofBinPid);
 }

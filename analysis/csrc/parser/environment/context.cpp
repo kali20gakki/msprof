@@ -10,13 +10,15 @@
  * *****************************************************************************
  */
 
-#include <unordered_set>
 #include "analysis/csrc/parser/environment/context.h"
+
+#include <unordered_set>
 
 #include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/dfx/log.h"
 #include "analysis/csrc/utils/utils.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "collector/dvvp/common/config/config.h"
 
 namespace Analysis {
 namespace Parser {
@@ -188,7 +190,7 @@ nlohmann::json Context::GetInfoByDeviceId(uint16_t deviceId, const std::string &
     nlohmann::json emptyJson;
     auto profInfo = profPath.empty() ? context_.begin() : context_.find(profPath);
     if (profInfo == context_.end()) {
-        ERROR("Can't find PROF file.");
+        ERROR("Can't find PROF file. Please check your input path %.", profPath);
         return emptyJson;
     }
     auto deviceInfo = profInfo->second;
@@ -256,6 +258,17 @@ uint64_t Context::GetPidFromInfoJson(uint16_t deviceId, const std::string &profP
         ERROR("Pid to uint64_t failed.");
     }
     return pid;
+}
+
+int64_t Context::GetMsBinPid(uint16_t deviceId, const std::string &profPath)
+{
+    const auto &info = GetInfoByDeviceId(deviceId, profPath);
+    if (info.empty()) {
+        ERROR("Samplejson is empty, please cheak your path %.", profPath);
+        return analysis::dvvp::common::config::MSVP_MMPROCESS;
+    }
+ 
+    return info.value("msprofBinPid", analysis::dvvp::common::config::MSVP_MMPROCESS);
 }
 
 bool Context::GetSyscntConversionParams(Utils::SyscntConversionParams &params,

@@ -38,6 +38,7 @@ public:
 private:
     int Init();
     void CreateCfgMap();
+    int CheckAnalysisParams();
     int ParamsCheckMsprof();
     bool ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfgValue) const;
     int ParamsCheckDynProf() const;
@@ -48,7 +49,8 @@ private:
     void SetDefaultParamsQuery() const;
     void SetDefaultParamsExport() const;
     int CheckMsprofMode(const std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap);
-    void SetParamsSelf();
+    void SetCollectParams();
+    void SetAnalysisParams();
     void SpliteAppPath(const std::string &appParams);
     int SetModeDefaultParams(MsprofMode modeType);
     int SystemToolsIsExist() const;
@@ -62,6 +64,7 @@ private:
     std::string appDir_;
     std::string app_;
     SHARED_PTR_ALIA<ProfileParams> params_;
+    // 存储params的中间容器，用来校验之后赋值给params_
     std::array<std::string, INPUT_CFG_MAX> paramContainer_;
     std::unordered_map<MsprofArgsType, InputCfg> cfgMap_;
     std::vector<InputCfg> msprofConfig_;

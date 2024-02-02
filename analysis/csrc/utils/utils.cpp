@@ -19,6 +19,7 @@
 namespace Analysis {
 namespace Utils {
 using namespace Analysis::Parser::Environment;
+
 std::string Join(const std::vector<std::string> &str, const std::string &delimiter)
 {
     std::stringstream ss;

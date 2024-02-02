@@ -243,6 +243,7 @@ const char * const STORAGE_LIMIT_UNIT = "MB";
 const char * const DEFAULT_INTERATION_ID    = "-1";
 const char * const DEFAULT_MODEL_ID         = "-1";
 const char * const PROFILING_SUMMARY_FORMAT = "csv";
+const char * const DEFAULT_PROFILING_EXPORT_TYPE = "text";
 
 // used for init param
 constexpr int DEFAULT_PROFILING_INTERVAL_5MS   = 5;

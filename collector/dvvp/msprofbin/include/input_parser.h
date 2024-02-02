@@ -45,6 +45,7 @@ enum MsprofArgsType {
     ARGS_SYS_DEVICES,
     ARGS_LLC_PROFILING,
     ARGS_PYTHON_PATH,
+    ARGS_EXPORT_TYPE,
     ARGS_SUMMARY_FORMAT,
     // switch
     ARGS_ASCENDCL,
@@ -118,6 +119,7 @@ const MmStructOption longOptions[] = {
     {"sys-devices", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_SYS_DEVICES},
     {"llc-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_LLC_PROFILING},
     {"python-path", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_PYTHON_PATH},
+    {"type", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_EXPORT_TYPE},
     {"summary-format", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_SUMMARY_FORMAT},
     // switch
     {"ascendcl", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_ASCENDCL},             // the default value is on

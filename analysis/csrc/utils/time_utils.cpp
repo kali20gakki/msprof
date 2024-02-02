@@ -13,6 +13,7 @@
 #include "analysis/csrc/utils/time_utils.h"
 
 #include <ctime>
+#include <iomanip>
 
 #include "analysis/csrc/dfx/log.h"
 #include "analysis/csrc/utils/utils.h"
@@ -22,6 +23,8 @@ namespace Analysis {
 namespace Utils {
 
 using namespace Analysis::Viewer::Database;
+const int YEAR_DISPLAY_WIDTH = 4; // 年的固定宽度是4
+const int TIME_DISPLAY_WIDTH = 2; // 日期的固定宽度是2，不足的前面补零
     
 std::string GetFormatLocalTime()
 {
@@ -30,10 +33,15 @@ std::string GetFormatLocalTime()
     struct tm *tm = localtime_r(&t, &localTm);
 
     std::stringstream sstr;
+
     // 将秒数转换为本地时间,年从1900算起,需要+1900,月为0-11,所以要+1
-    sstr << (tm->tm_year + 1900) << (tm->tm_mon + 1) << tm->tm_mday <<
-            tm->tm_hour << tm->tm_min << tm->tm_sec;
-    
+    sstr << std::setw(YEAR_DISPLAY_WIDTH) << std::setfill('0') << (tm->tm_year + 1900)
+         << std::setw(TIME_DISPLAY_WIDTH) << std::setfill('0') << (tm->tm_mon + 1)
+         << std::setw(TIME_DISPLAY_WIDTH) << std::setfill('0') << tm->tm_mday
+         << std::setw(TIME_DISPLAY_WIDTH) << std::setfill('0') << tm->tm_hour
+         << std::setw(TIME_DISPLAY_WIDTH) << std::setfill('0') << tm->tm_min
+         << std::setw(TIME_DISPLAY_WIDTH) << std::setfill('0') << tm->tm_sec;
+
     // 格式：20231129134509  年月日时分秒的拼接字符串
     return sstr.str();
 }

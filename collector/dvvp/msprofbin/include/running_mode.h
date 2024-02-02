@@ -31,6 +31,7 @@ public:
     virtual int ModeParamsCheck() = 0;
     virtual int RunModeTasks() = 0;
     virtual void UpdateOutputDirInfo();
+    virtual int UnifiedDBExport();
     void StopRunningTasks() const;
     void RemoveRecordFile(const std::string &fileName) const;
     SHARED_PTR_ALIA<Analysis::Dvvp::Msprof::ProfTask> GetRunningTask(const std::string &jobId);
@@ -53,6 +54,8 @@ protected:
     int RunExportSummaryTask(const analysis::dvvp::common::utils::ExecCmdParams &execCmdParams,
         std::vector<std::string> &envsV, int &exitCode);
     int RunExportTimelineTask(const analysis::dvvp::common::utils::ExecCmdParams &execCmdParams,
+        std::vector<std::string> &envsV, int &exitCode);
+    int RunExportDBTask(const analysis::dvvp::common::utils::ExecCmdParams &execCmdParams,
         std::vector<std::string> &envsV, int &exitCode);
     int CheckAnalysisEnv();
     int WaitRunningProcess(std::string processUsage) const;
@@ -162,6 +165,7 @@ public:
     ~ExportMode() override;
     int ModeParamsCheck() override;
     int RunModeTasks() override;
+    int UnifiedDBExport() override;
     void UpdateOutputDirInfo() override;
 };
 }

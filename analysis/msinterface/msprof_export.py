@@ -505,6 +505,9 @@ class ExportCommand:
         file_dispatch = FileDispatch(sample_json)
         file_dispatch.dispatch_calculator()
 
+        if self.command_type == MsProfCommonConstant.DB:
+            return
+
         self._add_export_type(result_dir)
         if not self._has_data_to_export():
             print_info(self.FILE_NAME, 'There is no %s data to export for "%s"' % (self.command_type, result_dir))

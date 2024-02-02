@@ -27,6 +27,22 @@ using namespace Analysis::Dvvp::Common::Platform;
 using namespace Analysis::Dvvp::Msprof;
 using namespace analysis::dvvp::message;
 using namespace Collector::Dvvp::DynProf;
+
+namespace {
+    std::set<MsprofArgsType> ALALYSIS_ARGS = {
+        ARGS_OUTPUT, ARGS_PYTHON_PATH, ARGS_EXPORT_TYPE, ARGS_SUMMARY_FORMAT, ARGS_PARSE,
+        ARGS_QUERY, ARGS_EXPORT, ARGS_CLEAR,
+        ARGS_ANALYZE, ARGS_RULE, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID};
+    std::unordered_map<int, InputCfg> ARGS_TRANS_MAP = {
+        {ARGS_OUTPUT, INPUT_CFG_COM_OUTPUT}, {ARGS_PYTHON_PATH, INPUT_CFG_PYTHON_PATH},
+        {ARGS_EXPORT_TYPE, INPUT_CFG_EXPORT_TYPE},
+        {ARGS_SUMMARY_FORMAT, INPUT_CFG_SUMMARY_FORMAT}, {ARGS_PARSE, INPUT_CFG_PARSE},
+        {ARGS_QUERY, INPUT_CFG_QUERY}, {ARGS_EXPORT, INPUT_CFG_EXPORT}, {ARGS_CLEAR, INPUT_CFG_CLEAR},
+        {ARGS_EXPORT_ITERATION_ID, INPUT_CFG_ITERATION_ID}, {ARGS_EXPORT_MODEL_ID, INPUT_CFG_MODEL_ID},
+        {ARGS_ANALYZE, INPUT_CFG_ANALYZE}, {ARGS_RULE, INPUT_CFG_RULE}
+    };
+}
+
 int ParamsAdapterMsprof::Init()
 {
     paramContainer_.fill("");
@@ -295,7 +311,7 @@ void ParamsAdapterMsprof::SpliteAppPath(const std::string &appParams)
     Utils::SplitPath(cmdPath_, appDir_, app_);
 }
 
-void ParamsAdapterMsprof::SetParamsSelf()
+void ParamsAdapterMsprof::SetCollectParams()
 {
     params_->app = app_;
     params_->cmdPath = cmdPath_;
@@ -303,6 +319,19 @@ void ParamsAdapterMsprof::SetParamsSelf()
     params_->app_dir = appDir_;
     params_->app_env = paramContainer_[INPUT_CFG_MSPROF_ENVIRONMENT].empty() ?
         params_->app_env : paramContainer_[INPUT_CFG_MSPROF_ENVIRONMENT];
+    params_->pythonPath = paramContainer_[INPUT_CFG_PYTHON_PATH].empty() ?
+        params_->pythonPath : paramContainer_[INPUT_CFG_PYTHON_PATH];
+    params_->exportType = paramContainer_[INPUT_CFG_EXPORT_TYPE].empty() ?
+        params_->exportType : paramContainer_[INPUT_CFG_EXPORT_TYPE];
+    params_->msprofBinPid = Utils::GetPid();
+    params_->npuAppMemProfiling = (msprofMode_ == MsprofMode::MSPROF_MODE_SYSTEM) ? "off" : "on";
+    params_->npuModuleMemProfiling = (msprofMode_ == MsprofMode::MSPROF_MODE_SYSTEM) ? "off" : "on";
+}
+
+void ParamsAdapterMsprof::SetAnalysisParams()
+{
+    params_->result_dir = paramContainer_[INPUT_CFG_COM_OUTPUT].empty() ?
+        params_->result_dir : paramContainer_[INPUT_CFG_COM_OUTPUT];
     params_->pythonPath = paramContainer_[INPUT_CFG_PYTHON_PATH].empty() ?
         params_->pythonPath : paramContainer_[INPUT_CFG_PYTHON_PATH];
     params_->parseSwitch = paramContainer_[INPUT_CFG_PARSE].empty() ?
@@ -315,6 +344,8 @@ void ParamsAdapterMsprof::SetParamsSelf()
         params_->querySwitch : paramContainer_[INPUT_CFG_QUERY];
     params_->exportSwitch = paramContainer_[INPUT_CFG_EXPORT].empty() ?
         params_->exportSwitch : paramContainer_[INPUT_CFG_EXPORT];
+    params_->exportType = paramContainer_[INPUT_CFG_EXPORT_TYPE].empty() ?
+        params_->exportType : paramContainer_[INPUT_CFG_EXPORT_TYPE];
     params_->exportSummaryFormat = paramContainer_[INPUT_CFG_SUMMARY_FORMAT].empty() ?
         params_->exportSummaryFormat : paramContainer_[INPUT_CFG_SUMMARY_FORMAT];
     params_->clearSwitch = paramContainer_[INPUT_CFG_CLEAR].empty() ?
@@ -323,9 +354,6 @@ void ParamsAdapterMsprof::SetParamsSelf()
         params_->exportIterationId : paramContainer_[INPUT_CFG_ITERATION_ID];
     params_->exportModelId = paramContainer_[INPUT_CFG_MODEL_ID].empty() ?
         params_->exportModelId : paramContainer_[INPUT_CFG_MODEL_ID];
-    params_->msprofBinPid = Utils::GetPid();
-    params_->npuAppMemProfiling = (msprofMode_ == MsprofMode::MSPROF_MODE_SYSTEM) ? "off" : "on";
-    params_->npuModuleMemProfiling = (msprofMode_ == MsprofMode::MSPROF_MODE_SYSTEM) ? "off" : "on";
 }
 
 int ParamsAdapterMsprof::SystemToolsIsExist() const
@@ -374,17 +402,7 @@ int ParamsAdapterMsprof::AnalysisParamsAdapt(
 {
     paramContainer_.fill("");
     bool ret = false;
-    std::set<MsprofArgsType> analysisArgs = {
-        ARGS_OUTPUT, ARGS_PYTHON_PATH, ARGS_SUMMARY_FORMAT, ARGS_PARSE, ARGS_QUERY, ARGS_EXPORT, ARGS_CLEAR,
-        ARGS_ANALYZE, ARGS_RULE, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID};
-    std::unordered_map<int, InputCfg> argsTransMap = {
-        {ARGS_OUTPUT, INPUT_CFG_COM_OUTPUT}, {ARGS_PYTHON_PATH, INPUT_CFG_PYTHON_PATH},
-        {ARGS_SUMMARY_FORMAT, INPUT_CFG_SUMMARY_FORMAT}, {ARGS_PARSE, INPUT_CFG_PARSE},
-        {ARGS_QUERY, INPUT_CFG_QUERY}, {ARGS_EXPORT, INPUT_CFG_EXPORT}, {ARGS_CLEAR, INPUT_CFG_CLEAR},
-        {ARGS_EXPORT_ITERATION_ID, INPUT_CFG_ITERATION_ID}, {ARGS_EXPORT_MODEL_ID, INPUT_CFG_MODEL_ID},
-        {ARGS_ANALYZE, INPUT_CFG_ANALYZE}, {ARGS_RULE, INPUT_CFG_RULE}
-    };
-    for (auto arg : analysisArgs) {
+    for (auto arg : ALALYSIS_ARGS) {
         if (argvMap.find(arg) == argvMap.end()) {
             continue;
         }
@@ -396,11 +414,23 @@ int ParamsAdapterMsprof::AnalysisParamsAdapt(
         if (!CheckAnalysisConfig(arg, argsValue)) {
             return PROFILING_FAILED;
         }
-        paramContainer_[argsTransMap[arg]] = argsValue;
+        paramContainer_[ARGS_TRANS_MAP[arg]] = argsValue;
     }
-    params_->result_dir = paramContainer_[INPUT_CFG_COM_OUTPUT].empty() ? params_->result_dir :
-        paramContainer_[INPUT_CFG_COM_OUTPUT];
-    SetParamsSelf();
+    SetAnalysisParams();
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapterMsprof::CheckAnalysisParams()
+{
+    for (auto arg : ALALYSIS_ARGS) {
+        std::string inputCfg = paramContainer_[ARGS_TRANS_MAP[arg]];
+        if (inputCfg == "") {
+            continue;
+        }
+        if (!CheckAnalysisConfig(arg, inputCfg)) {
+            return PROFILING_FAILED;
+        }
+    }
     return PROFILING_SUCCESS;
 }
 
@@ -409,10 +439,13 @@ bool ParamsAdapterMsprof::CheckAnalysisConfig(MsprofArgsType arg, const std::str
     bool ret = false;
     switch (arg) {
         case ARGS_OUTPUT:
-            ret = ParamValidation::instance()->CheckOutputIsValid(argsValue);
+            ret = ParamValidation::instance()->CheckAnalysisOutputIsPathValid(argsValue);
             break;
         case ARGS_PYTHON_PATH:
             ret = ParamValidation::instance()->CheckPythonPathIsValid(argsValue);
+            break;
+        case ARGS_EXPORT_TYPE:
+            ret = ParamValidation::instance()->CheckExportTypeIsValid(argsValue);
             break;
         case ARGS_SUMMARY_FORMAT:
             ret = ParamValidation::instance()->CheckExportSummaryFormatIsValid(argsValue);
@@ -495,7 +528,7 @@ int ParamsAdapterMsprof::GetParamFromInputCfg(
         MSPROF_LOGE("msprof trans to params fail.");
         return PROFILING_FAILED;
     }
-    SetParamsSelf();
+    SetCollectParams();
     return PROFILING_SUCCESS;
 }
 
@@ -517,6 +550,11 @@ int ParamsAdapterMsprof::ParamsCheck()
         return PROFILING_FAILED;
     }
 
+    ret = CheckAnalysisParams();
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("analysis profiling param check fail.");
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 
@@ -556,7 +594,8 @@ void ParamsAdapterMsprof::CreateCfgMap()
         {ARGS_AIC_MODE, INPUT_CFG_COM_AIC_MODE}, {ARGS_AIC_METRICE, INPUT_CFG_COM_AIC_METRICS},
         {ARGS_AIV_MODE, INPUT_CFG_COM_AIV_MODE}, {ARGS_AIV_METRICS, INPUT_CFG_COM_AIV_METRICS},
         {ARGS_SYS_DEVICES, INPUT_CFG_COM_SYS_DEVICES}, {ARGS_LLC_PROFILING, INPUT_CFG_COM_LLC_MODE},
-        {ARGS_PYTHON_PATH, INPUT_CFG_PYTHON_PATH}, {ARGS_SUMMARY_FORMAT, INPUT_CFG_SUMMARY_FORMAT},
+        {ARGS_PYTHON_PATH, INPUT_CFG_PYTHON_PATH},
+        {ARGS_EXPORT_TYPE, INPUT_CFG_EXPORT_TYPE}, {ARGS_SUMMARY_FORMAT, INPUT_CFG_SUMMARY_FORMAT},
         {ARGS_ASCENDCL, INPUT_CFG_COM_ASCENDCL}, {ARGS_AI_CORE, INPUT_CFG_COM_AI_CORE},
         {ARGS_AIV, INPUT_CFG_COM_AI_VECTOR}, {ARGS_MODEL_EXECUTION, INPUT_CFG_COM_MODEL_EXECUTION},
         {ARGS_RUNTIME_API, INPUT_CFG_COM_RUNTIME_API}, {ARGS_TASK_TIME, INPUT_CFG_COM_TASK_TIME},
