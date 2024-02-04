@@ -1,6 +1,6 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
-            Copyright, 2023, Huawei Tech. Co., Ltd.
+            版权所有 (c) 华为技术有限公司 2024-2024
+            Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
  * File Name          : hp_float.h
@@ -18,13 +18,15 @@
 namespace Analysis {
 namespace Utils {
 /*
-HPFloat:高精度浮点类型
+==============HPFloat:高精度浮点类型===================
+1.类设计
 基于数量级（多项式）运算
 支持运算:+,-,<<（乘以10的倍数）>>（乘以10的倍数）,+=,-=,-(负号),=
 构造函数支持:string,HPFloat,整型与浮点型
-除HPFloat构造时与参数精度相同，其他类型参数构造均为30位精度，EditLen方法可修改精度
-使用方法：
-定义&构造：
+除HPFloat构造时与参数精度相同，其他类型参数构造均为30位精度，SetPrecision方法可修改精度
+====================================================
+2.使用方法：
+2.1定义&构造：
 HPFloat a;
 std::string str = "2.33";
 double num = 2.33;
@@ -33,24 +35,50 @@ HPFloat b(a);
 HPFloat c(str);
 HPFloat d(num);
 HPFloat e(num2);
-运算：
+2.2 运算：
+支持运算:+,-,<<（乘以10的倍数）>>（乘以10的倍数）,+=,-=,-(负号),=
+使用方法和c++基本类一致
 a += b;
 auto m = c - d;
+===================================================
+3.特殊情况
+3.1特殊构造&赋值：
+char a = 123;
+unsigned char b = 123;
+std::string c = "123";
+HPFloat m(a);
+HPFloat n(b);
+HPFloat o(c);
+m,n和o存储的实际数值都是123，实际上char(unsigned char)可以视为一个数值而不是字符，例如INT8就是signed char的别名
+3.2 精度继承：
+初HPFloat操作赋值，其他赋值操作不改变类原有精度，赋值过大数会发生精度溢出
+HPFloat赋值操作由于等价于复制构造，因此继承右侧精
+HPFloat a;
+a.SetPrecision(5);
+a = 123.233  这里实际存储数值123.23(四舍五入舍去，小数点末尾0不存储）
+a = 123.235  这里实际存储数值123.24(四舍五入舍去，小数点末尾0不存储）
+a = 123233   这里实际存储数值123230(与c++ double类型丢失非小数行为一致，四舍五入精度前一位，之后数字归零
+a = 123235   这里实际存储数值123240(与c++ double类型丢失非小数行为一致，四舍五入精度前一位，之后数字归零
 */
 class HPFloat {
 public:
     HPFloat();
-    template <typename T>
+    template<typename T>
     HPFloat(T value);
     HPFloat(const HPFloat &value);
-    HPFloat &operator=(const HPFloat num);
-    HPFloat &operator=(const long long num);
-    HPFloat &operator=(const std::string num);
-    HPFloat &operator=(const double num);
-    HPFloat &operator=(const int num);
-    template <typename T>
-    HPFloat &operator=(const T num);
+    HPFloat &operator=(const HPFloat &num);
+    HPFloat &operator=(long long num);
+    HPFloat &operator=(unsigned long long num);
+    HPFloat &operator=(long num);
+    HPFloat &operator=(unsigned long num);
+    HPFloat &operator=(int num);
+    HPFloat &operator=(unsigned int num);
+    HPFloat &operator=(const std::string &num);
+    HPFloat &operator=(const char *num);
+    template<typename T>
+    HPFloat &operator=(const T &op);
     // 由于重载运算符方法内部需要访问参数的私有变量，例如num_，所以需要使用友元函数
+    // 绝对值运算使用小写字母是因为要重载abs函数
     friend HPFloat abs(const HPFloat &op1);
     friend HPFloat operator+(const HPFloat &op1, const HPFloat &op2);
     friend HPFloat operator-(const HPFloat &op1, const HPFloat &op2);
@@ -58,22 +86,36 @@ public:
     friend HPFloat operator<<(const HPFloat &op, const int n);
     // 临时方案，十进制右移位，相当于除以10的n次幂
     friend HPFloat operator>>(const HPFloat &op, const int n);
+    // 负号
     friend HPFloat operator-(const HPFloat &op);
     friend HPFloat operator+=(HPFloat &op1, const HPFloat &op2);
     friend HPFloat operator-=(HPFloat &op1, const HPFloat &op2);
-    // 定义精度
+    friend bool operator==(const HPFloat &op1, const HPFloat &op2);
+    friend bool operator!=(const HPFloat &op1, const HPFloat &op2);
+    friend bool operator>(const HPFloat &op1, const HPFloat &op2);
+    friend bool operator>=(const HPFloat &op1, const HPFloat &op2);
+    friend bool operator<(const HPFloat &op1, const HPFloat &op2);
+    friend bool operator<=(const HPFloat &op1, const HPFloat &op2);
+    // 定义精度, 只接受正整数参数
+    void SetPrecision(unsigned long length);
     void SetPrecision(long long length);
-    // 数据位数(整数位+小数位，不包含小数点）
+    void SetPrecision(double length) = delete;
+    void SetPrecision(float length) = delete;
+    template<typename T>
+    void SetPrecision(T length);
+    // 数据位数(有效位数+未占用位，不包含小数点）
     size_t Len() const;
     // 输出字符串格式
     std::string Str();
-    // 输出double格式
+    // 输出double格式，不建议使用
     double Double();
+    // 量化，指定保留n位小数，不足n位不处理
+    void Quantize(unsigned long n);
 private:
     // 清空数据，保留精度
     void Clear();
-    // 输出有效长度，即num_中实际使用位数
-    long long EffectiveLen() const;
+    // 设置动态长度变量，即num_中实际使用位数
+    void SetDynamicLen();
     void Simple();
     // 整体退位,用于将最小数量级位数按照四舍五入舍弃，处理精度溢出使用
     void BackSpace();
@@ -81,17 +123,58 @@ private:
     void MoveForward(long long step);
     void MoveBackward(long long step);
     // 返回最小数量级
-    long long Mindig() const;
+    long long MinDig() const;
+    // 返回理论最小数量级
+    long long TheoreticalMinDig() const;
+    // 坐标加法,基于num_坐标进行运算
+    void CoorAdd(signed char op, unsigned long psi);
+    // 数量级加法,基于多项式数量级进行运算
+    void DigAdd(signed char op, long long n);
+    // 坐标减法核心
+    void CoreCoorSub(signed char op, long long psi);
+    // 坐标减法
+    void CoorSub(signed char op, long long psi);
+    // 数量级减法,基于多项式数量级进行运算
+    void DigSub(signed char op, long long d);
+    bool SimplifyStr(std::string &str);
 private:
     // 默认精度
-    uint16_t defaultPrecision_{30};
+    unsigned long defaultPrecision_{30};
+    // 允许最小精度
+    unsigned int minPrecision_{3};
     // 最大数量级,传入数据按数量级（多项式）表示，例如a1*10^2+a2*10^1+a3*10^0+a4*10^-1，本例中digit_=2
     long long digit_{0};
     // 数位,用于倒序存储数据
     std::vector<signed char> num_;
-    // 符号
-    bool symbol_{true};
+    // 符号, 正数为false，负数为true
+    bool symbol_{false};
+    // 动态长度，表示num_有效位数长度（计算过程中不恒等于占用位数）
+    unsigned long dynamicLen_{0};
 };
+
+template<typename T>
+HPFloat::HPFloat(T value)
+{
+    for (unsigned long i = 0; i < defaultPrecision_; i++) {
+        num_.emplace_back(0);
+    }
+    *this = value;
+}
+
+template<typename T>
+HPFloat &HPFloat::operator=(const T &op)
+{
+    *this = std::to_string(op);
+    return *this;
+}
+
+template<typename T>
+void Utils::HPFloat::SetPrecision(T length)
+{
+    SetPrecision(static_cast<long long>(length));
+}
+
+const HPFloat ZERO(0);
 
 }
 }

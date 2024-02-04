@@ -6,12 +6,14 @@ add_executable(
         test/file_utest.cpp
         test/utils_utest.cpp
         test/time_utils_utest.cpp
+        test/hp_float_utest.cpp
         ${TOP_DIR}/analysis/csrc/entities/event.cpp
         ${TOP_DIR}/analysis/csrc/utils/safe_unordered_map.h
         ${TOP_DIR}/analysis/csrc/utils/thread_pool.cpp
         ${TOP_DIR}/analysis/csrc/utils/file.cpp
         ${TOP_DIR}/analysis/csrc/utils/utils.cpp
         ${TOP_DIR}/analysis/csrc/utils/time_utils.cpp
+        ${TOP_DIR}/analysis/csrc/utils/hp_float.cpp
         ${TOP_DIR}/analysis/csrc/dfx/log.cpp
 )
 
