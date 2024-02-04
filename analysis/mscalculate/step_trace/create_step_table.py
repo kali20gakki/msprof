@@ -339,49 +339,57 @@ class GetNextCreator(CreateSubTable):
     sample_config = {}
     db_name = DBNameConstant.DB_TRACE
     table_name = DBNameConstant.TABLE_GET_NEXT
+    getnext_start = dict()
+    getnext_end = dict()
+    TIMESTAMP = "timestamp"
 
     @classmethod
     def extract_data(cls: typing.Any, collect_data: typing.Any) -> None:
-        for model_id, model_data in collect_data.items():
+        for model_data in collect_data.values():
+            for index_data in model_data.values():
+                cls.update_data(index_data)
+        for model_id, model_data in cls.getnext_start.items():
             for index_id, index_data in model_data.items():
-                cls.update_data(model_id, index_id, index_data)
+                for key, start_deque in index_data.items():
+                    end_deque = cls.getnext_end.get(model_id, {}).get(index_id, {}).get(key, deque())
+                    cls.match_getnext(start_deque, end_deque, model_id, index_id)
 
     @classmethod
-    def extract_getnext_time(cls: typing.Any, records: typing.Dict) -> list:
-        getnext_time = []
-        for record in records:
-            if record[StepTraceConstant.TAG_ID] % 2 == 0:  # contineous 2 tags represent getnext start and end
-                # getnext start
-                getnext_time.append([record.get(StepTraceConstant.TIME_STAMP, 0), 0])
-                continue
-            # getnext end
-            if not getnext_time:
-                continue
-            # index -1 represent latest data and index 1 represent end time in latest data
-            if getnext_time[-1][1] == 0:
-                getnext_time[-1][1] = record.get(StepTraceConstant.TIME_STAMP, 0)
-            else:
-                # when end time has been assigned non-zero value, the start time is missing,
-                # so append new data in getnext_time
-                getnext_time.append([0, record.get(StepTraceConstant.TIME_STAMP, 0)])
-        return getnext_time
+    def match_getnext(cls: any, start_deque: deque, end_deque: deque, model_id: int, index_id: int) -> None:
+        mismatch_count = 0
+        while start_deque and end_deque:
+            start_record = start_deque.popleft()
+            end_record = end_deque.popleft()
+            while end_record.get(cls.TIMESTAMP, 0) < start_record.get(cls.TIMESTAMP, 0):
+                mismatch_count += 1
+                end_record = end_deque.popleft()
+            cls.data.append(
+                [
+                    model_id,
+                    index_id,
+                    start_record.get(cls.TIMESTAMP, 0),
+                    end_record.get(cls.TIMESTAMP, 0)
+                ]
+            )
+        if start_deque or end_deque:
+            logging.error("The getnext mismatch happen with model_id: %d, index_id: %d, start len: %d, end len: %d.",
+                          model_id, index_id, len(start_deque), len(end_deque))
+        if mismatch_count > 0:
+            logging.error("There are %d getnext mismatching.", mismatch_count)
 
     @classmethod
-    def update_data(cls: typing.Any, model_id: int, index_id: int, index_data: typing.Dict) -> None:
-        for records in index_data.get(StepTraceConstant.GET_NEXT, {}).values():
-            getnext_time = cls.extract_getnext_time(records)
-            for start_time, end_time in getnext_time:
-                if start_time == 0 or end_time == 0:
-                    logging.error("The get_next step trace data is missing")
-                    continue
-                cls.data.append(
-                    [
-                        model_id,
-                        index_id,
-                        start_time,
-                        end_time,
-                    ]
-                )
+    def update_data(cls: typing.Any, index_data: typing.Dict) -> None:
+        for key, records in index_data.get(StepTraceConstant.GET_NEXT, {}).items():
+            # 一次迭代中可能会多次调用getnext来读取数据, 通过key来区分
+            for record in records:
+                model_id = record.get("model_id", 0)
+                index_id = record.get("index_id", 1)
+                if record[StepTraceConstant.TAG_ID] % 2 == 0:
+                    cls.getnext_start.setdefault(model_id, {})\
+                        .setdefault(index_id, {}).setdefault(key, deque()).append(record)
+                else:
+                    cls.getnext_end.setdefault(model_id, {})\
+                        .setdefault(index_id, {}).setdefault(key, deque()).append(record)
 
     @classmethod
     def create_table(cls: typing.Any, conn: typing.Any) -> None:
@@ -516,6 +524,9 @@ class StepTracePreProcess:
                 self.current_step_trace_queue.append({"tag": [record], "all_record": [record]})
             elif record.tag_id == self.MODEL_END_TAG:
                 self.deal_model_end_tag(record)
+            elif StepTraceConstant.GET_NEXT_START_TAG <= record.tag_id < StepTraceConstant.STEP_START_TAG:
+                if self.current_step_trace_queue:
+                    self.current_step_trace_queue[-1]["all_record"].append(record)
             elif record.tag_id >= self.HCCL_START_TAG:
                 self.deal_hccl_tag(record)
             else:
