@@ -1595,7 +1595,8 @@ int ExportMode::UnifiedDBExport()
     }
     std::string errInfo;
     std::set<std::string> profFolderPaths(profDirs.begin(), profDirs.end());
-    if (!Analysis::Viewer::Database::UnifiedDBManager::CheckProfDirsValid(profFolderPaths, errInfo)) {
+    if (!Analysis::Viewer::Database::UnifiedDBManager::
+        CheckProfDirsValid(unifiedDBOutPutPath, profFolderPaths, errInfo)) {
         CmdLog::instance()->CmdInfoLog("[Export Mode] Invalid params! %s", errInfo.c_str());
         MSPROF_LOGE("[Export Mode] Invalid params! %s", errInfo.c_str());
         return PROFILING_FAILED;
