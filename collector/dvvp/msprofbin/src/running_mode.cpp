@@ -1573,7 +1573,7 @@ int ExportMode::UnifiedDBExport()
 {
     std::string unifiedDBOutPutPath = Utils::RealPath(params_->result_dir);
     if (unifiedDBOutPutPath.empty()) {
-        CmdLog::instance()->CmdErrorLog("[UnifiedDBExport] Invalid outPutPath, please check your params!");
+        CmdLog::instance()->CmdErrorLog("[Export Mode] Invalid outPutPath, please check your params!");
         return PROFILING_FAILED;
     }
     // 获取out_put下的所有文件夹并检查时否是同一次采集
@@ -1586,20 +1586,20 @@ int ExportMode::UnifiedDBExport()
     std::string errInfo;
     std::set<std::string> profFolderPaths(profDirs.begin(), profDirs.end());
     if (!Analysis::Viewer::Database::UnifiedDBManager::CheckProfDirsValid(profFolderPaths, errInfo)) {
-        CmdLog::instance()->CmdInfoLog("[UnifiedDBExport] Invalid params! %s", errInfo.c_str());
-        MSPROF_LOGE("[UnifiedDBExport] Invalid params! %s", errInfo.c_str());
+        CmdLog::instance()->CmdInfoLog("[Export Mode] Invalid params! %s", errInfo.c_str());
+        MSPROF_LOGE("[Export Mode] Invalid params! %s", errInfo.c_str());
         return PROFILING_FAILED;
     }
 
     auto unifiedDbManager =
         Analysis::Viewer::Database::UnifiedDBManager(unifiedDBOutPutPath, profFolderPaths);
     if (unifiedDbManager.Init() != PROFILING_SUCCESS) {
-        CmdLog::instance()->CmdInfoLog("UnifiedDB init failed.");
+        CmdLog::instance()->CmdInfoLog("[Export Mode] UnifiedDB init failed.");
         return PROFILING_FAILED;
     }
 
     if (unifiedDbManager.Run() == PROFILING_FAILED) {
-        MSPROF_LOGE("AppMode export unified db failed in %s.", Utils::BaseName(unifiedDBOutPutPath).c_str());
+        MSPROF_LOGE("[Export Mode] export unified db failed in %s.", Utils::BaseName(unifiedDBOutPutPath).c_str());
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
