@@ -63,7 +63,7 @@ int StrToU16(uint16_t &dest, const std::string &numStr)
         return ANALYSIS_ERROR;
     }
     if (pos != numStr.size()) {
-        ERROR("StrToU16 failed, the input string is '%s'.", numStr.c_str());
+        ERROR("StrToU16 failed, the input string is '%'.", numStr.c_str());
         return ANALYSIS_ERROR;
     }
     return ANALYSIS_OK;
@@ -83,7 +83,7 @@ int StrToU64(uint64_t &dest, const std::string &numStr)
         return ANALYSIS_ERROR;
     }
     if (pos != numStr.size()) {
-        ERROR("StrToU64 failed, the input string is '%s'.", numStr.c_str());
+        ERROR("StrToU64 failed, the input string is '%'.", numStr.c_str());
         return ANALYSIS_ERROR;
     }
     return ANALYSIS_OK;
@@ -103,7 +103,7 @@ int StrToDouble(double &dest, const std::string &numStr)
         return ANALYSIS_ERROR;
     }
     if (pos != numStr.size()) {
-        ERROR("StrToDouble failed, the input string is '%s'.", numStr.c_str());
+        ERROR("StrToDouble failed, the input string is '%'.", numStr.c_str());
         return ANALYSIS_ERROR;
     }
     return ANALYSIS_OK;

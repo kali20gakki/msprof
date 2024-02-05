@@ -24,7 +24,7 @@
 namespace Analysis {
 namespace PyInterface {
 static PyMethodDef g_moduleMethods[] = {
-    {NULL, NULL}
+    {nullptr, nullptr}
 };
 
 static PyModuleDef g_mylibMethods = {
@@ -40,15 +40,15 @@ static void AddSubModule(PyObject *root, const char *name, PyMethodDef *methods)
     std::string subModuleName = name;
     std::string moduleName = "msprof_analysis." + subModuleName;
     PyObject *subModule = PyDict_GetItemString(d, name);
-    if (subModule == NULL) {
+    if (subModule == nullptr) {
         subModule = PyImport_AddModule(moduleName.c_str());
         PyDict_SetItemString(d, name, subModule);
         Py_XDECREF(subModule);
     }
     // populate module's dict
     d = PyModule_GetDict(subModule);
-    for (PyMethodDef *m = methods; m->ml_name != NULL; ++m) {
-        PyObject *methodObj = PyCFunction_NewEx(m, NULL, NULL);
+    for (PyMethodDef *m = methods; m->ml_name != nullptr; ++m) {
+        PyObject *methodObj = PyCFunction_NewEx(m, nullptr, nullptr);
         PyDict_SetItemString(d, m->ml_name, methodObj);
         Py_XDECREF(methodObj);
     }
