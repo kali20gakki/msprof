@@ -360,9 +360,14 @@ class GetNextCreator(CreateSubTable):
         while start_deque and end_deque:
             start_record = start_deque.popleft()
             end_record = end_deque.popleft()
-            while end_record.get(cls.TIMESTAMP, 0) < start_record.get(cls.TIMESTAMP, 0):
+            while end_deque and end_record.get(cls.TIMESTAMP, 0) < start_record.get(cls.TIMESTAMP, 0):
+                # 保证 start time <= end time
                 mismatch_count += 1
                 end_record = end_deque.popleft()
+            while start_deque and start_deque[0].get(cls.TIMESTAMP, 0) <= end_record.get(cls.TIMESTAMP, 0):
+                # 保证 start time <= end time, 且start time最接近end time
+                mismatch_count += 1
+                start_record = start_deque.popleft()  # 下一个start record
             cls.data.append(
                 [
                     model_id,
@@ -384,12 +389,13 @@ class GetNextCreator(CreateSubTable):
             for record in records:
                 model_id = record.get("model_id", 0)
                 index_id = record.get("index_id", 1)
+                stream_key = str(record.get("stream_id", 0)) + "_" + str(key)
                 if record[StepTraceConstant.TAG_ID] % 2 == 0:
                     cls.getnext_start.setdefault(model_id, {})\
-                        .setdefault(index_id, {}).setdefault(key, deque()).append(record)
+                        .setdefault(index_id, {}).setdefault(stream_key, deque()).append(record)
                 else:
                     cls.getnext_end.setdefault(model_id, {})\
-                        .setdefault(index_id, {}).setdefault(key, deque()).append(record)
+                        .setdefault(index_id, {}).setdefault(stream_key, deque()).append(record)
 
     @classmethod
     def create_table(cls: typing.Any, conn: typing.Any) -> None:

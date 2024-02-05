@@ -15,7 +15,7 @@ NAMESPACE = 'mscalculate.step_trace.create_step_table'
 def get_data():
     timestamp = 189746300646091
     model_ids = [1, 1, 1, 1, 1, 2, 2, 2, 2, 2]
-    tag_ids = [0, 20000, 20001, 20001, 1, 0, 20000, 20001, 20000, 1]
+    tag_ids = [0, 20001, 20000, 20001, 1, 0, 20000, 20000, 20001, 1]
     data = [StepTraceOriginDto() for _ in range(len(model_ids))]
     for step_trace, model_id, tag_id in zip(data, model_ids, tag_ids):
         step_trace.index_id = 1
@@ -40,8 +40,8 @@ class TestCreateGetNext(unittest.TestCase):
                 mock.patch(NAMESPACE + '.DBManager.execute_sql'), \
                 mock.patch(NAMESPACE + '.DBManager.executemany_sql'):
             StepTableBuilder.run(sample_config)
-            self.assertEqual(GetNextCreator.data, [[1, 1, 189746300646101, 189746300646111],
-                                                   [2, 1, 189746300646151, 189746300646161],
+            self.assertEqual(GetNextCreator.data, [[1, 1, 189746300646111, 189746300646121],
+                                                   [2, 1, 189746300646161, 189746300646171],
                                                    ])
 
 
