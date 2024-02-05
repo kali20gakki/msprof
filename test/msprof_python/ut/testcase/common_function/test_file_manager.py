@@ -31,6 +31,8 @@ class TestFileManager(unittest.TestCase):
         with os.fdopen(os.open(os.path.join("test_file_manager/data", FileNameManagerConstant.ALL_FILE_TAG),
                                Constant.WRITE_FLAGS, Constant.WRITE_MODES), "w"):
             pass
+        self.assertEqual(False, FileManager.is_analyzed_data("test_file_manager"))
+        os.mkdir(os.path.join("test_file_manager", "sqlite"), 0o777)
         self.assertEqual(True, FileManager.is_analyzed_data("test_file_manager"))
         shutil.rmtree("test_file_manager")
 
