@@ -57,6 +57,8 @@ public:
     // 获取start_log中的相关时间
     bool GetSyscntConversionParams(Utils::SyscntConversionParams &params, uint16_t deviceId,
                                    const std::string &profPath = "");
+    // 获取PROF文件下的device 以及host编号
+    std::vector<uint16_t> GetDeviceId(const std::string &profPath);
 public:
     // 获取对应device的芯片型号
     uint16_t GetPlatformVersion(uint16_t deviceId, const std::string &profPath = "");

@@ -45,14 +45,15 @@ namespace {
     };
 }
 
-bool UnifiedDBManager::CheckProfDirsValid(const std::set<std::string> &profFolderPaths, std::string &errInfo)
+bool UnifiedDBManager::CheckProfDirsValid(const std::string outputDir,
+                                          const std::set<std::string> &profFolderPaths, std::string &errInfo)
 {
     if (profFolderPaths.empty()) {
         errInfo = "The prof files in the current directory are empty. Please check your file path.";
         return false;
     }
 
-    if (Analysis::Parser::Environment::Context::GetInstance().Load(profFolderPaths) == false) {
+    if (Context::GetInstance().Load(profFolderPaths) == false) {
         errInfo = "JSON parameter loading failed. Please check if the JSON data is complete.";
         return false;
     }
@@ -60,20 +61,29 @@ bool UnifiedDBManager::CheckProfDirsValid(const std::set<std::string> &profFolde
     // 获取第一个元素
     auto it = profFolderPaths.begin();
 
+    // 或者 PROF路径下的samplejson数据，因为不知道有哪些device,所以取读到的数据里第一个
+    std::vector<uint16_t> deviceIds = Context::GetInstance().GetDeviceId(*it);
+    if (deviceIds.empty()) {
+        errInfo = "The data does not contain information about devices or hosts. Please check the data " \
+                  "collected from your path " + outputDir;
+        return false;
+    }
+    uint16_t deviceId = deviceIds.front();
+
     int64_t msprofBinPid =
-        Context::GetInstance().GetMsBinPid(Analysis::Parser::Environment::HOST_ID, *it);
+        Context::GetInstance().GetMsBinPid(deviceId, *it);
     if (msprofBinPid == analysis::dvvp::common::config::MSVP_MMPROCESS) {
-        errInfo = "Cannot determine if it is the same collection. Please check the value \
-                   of msprofbinpid in the sample.json under the path " + *it;
+        errInfo = "Cannot determine if it is the same collection. Please check the value" \
+                   "of msprofbinpid in the sample.json under the path " + outputDir;
         return false;
     }
 
     // 从第二个元素开始遍历
     ++it;
     for (; it != profFolderPaths.end(); ++it) {
-        if (Context::GetInstance().GetMsBinPid(Analysis::Parser::Environment::HOST_ID, *it) != msprofBinPid) {
-            errInfo = "The profiling results under the " + *it + " path are not from \
-                       the same data collection session. Please verify and rerun.";
+        if (Context::GetInstance().GetMsBinPid(deviceId, *it) != msprofBinPid) {
+            errInfo = "The profiling results under the " + outputDir + " path are not from "\
+                       "the same data collection session. Please verify and rerun.";
             return false;
         }
     }

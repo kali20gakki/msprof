@@ -190,7 +190,7 @@ nlohmann::json Context::GetInfoByDeviceId(uint16_t deviceId, const std::string &
     nlohmann::json emptyJson;
     auto profInfo = profPath.empty() ? context_.begin() : context_.find(profPath);
     if (profInfo == context_.end()) {
-        ERROR("Can't find PROF file. Please check your input path %.", profPath);
+        ERROR("Can't find PROF file. input path %.", profPath);
         return emptyJson;
     }
     auto deviceInfo = profInfo->second;
@@ -264,11 +264,26 @@ int64_t Context::GetMsBinPid(uint16_t deviceId, const std::string &profPath)
 {
     const auto &info = GetInfoByDeviceId(deviceId, profPath);
     if (info.empty()) {
-        ERROR("Samplejson is empty, please cheak your path %.", profPath);
+        ERROR("Samplejson is empty, path %.", profPath);
         return analysis::dvvp::common::config::MSVP_MMPROCESS;
     }
  
     return info.value("msprofBinPid", analysis::dvvp::common::config::MSVP_MMPROCESS);
+}
+
+std::vector<uint16_t> Context::GetDeviceId(const std::string &profPath)
+{
+    std::vector<uint16_t> deviceIds;
+    auto profInfo = profPath.empty() ? context_.begin() : context_.find(profPath);
+    if (profInfo == context_.end()) {
+        ERROR("Can't find PROF file. path %.", profPath);
+        return deviceIds;
+    }
+    auto deviceInfo = profInfo->second;
+    for (auto it = deviceInfo.begin(); it != deviceInfo.end(); ++it) {
+        deviceIds.push_back(it->first);
+    }
+    return deviceIds;
 }
 
 bool Context::GetSyscntConversionParams(Utils::SyscntConversionParams &params,
