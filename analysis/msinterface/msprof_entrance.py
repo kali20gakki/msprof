@@ -199,7 +199,7 @@ class MsprofEntrance:
             type=str, help='<Optional> the format for export, supports csv and json.')
         self._add_export_argument(timeline_parser)
         db_parser = subparsers.add_parser('db', help='Get db data.')
-        self._add_export_argument(db_parser)
+        self._add_collect_path_argument(db_parser)
 
     def _import_parser(self: any, import_parser: any) -> None:
         self._add_collect_path_argument(import_parser)
