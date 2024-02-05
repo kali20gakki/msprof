@@ -1528,6 +1528,16 @@ int ExportMode::ModeParamsCheck()
         MSPROF_LOGE("[Export Mode] Invalid params!");
         return PROFILING_FAILED;
     }
+    if (params_->exportType == "db") {
+        preCheckParams_ = "export and --type";
+        whiteSet_ = {
+            ARGS_OUTPUT, ARGS_EXPORT, ARGS_EXPORT_TYPE, ARGS_PYTHON_PATH
+        };
+        neccessarySet_ = {ARGS_OUTPUT, ARGS_EXPORT, ARGS_EXPORT_TYPE};
+        blackSet_ = {ARGS_QUERY, ARGS_PARSE, ARGS_ANALYZE, ARGS_RULE,
+                     ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID,
+                     ARGS_SUMMARY_FORMAT, ARGS_CLEAR};
+    }
     if (CheckForbiddenParams() != PROFILING_SUCCESS ||
         CheckNeccessaryParams() != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
