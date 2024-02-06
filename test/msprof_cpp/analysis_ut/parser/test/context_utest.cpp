@@ -563,7 +563,7 @@ TEST_F(ContextUTest, TestGetMsprofBinPidFromInfoJsonShouldReturnMSVP_MMPROCESSWh
     FileWriter sampleWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, SAMPLE_JSON}));
     sampleWriter.WriteText(sampleJson.dump());
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
-    EXPECT_EQ(Context::GetInstance().GetMsBinPid(HOST_ID, File::PathJoin({CONTEXT_DIR, TEST_DIR})),
+    EXPECT_EQ(Context::GetInstance().GetMsBinPid(File::PathJoin({CONTEXT_DIR, TEST_DIR})),
               analysis::dvvp::common::config::MSVP_MMPROCESS);
 }
 
@@ -571,10 +571,14 @@ TEST_F(ContextUTest, TestGetMsprofBinPidFromInfoJsonShouldReturnSucessWhenMsprof
 {
     int msprofBinPid = 123456; // 123456 表示一个pid的值
     EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, SAMPLE_JSON})));
+    std::vector<uint16_t> deviceIds = {HOST_ID};
+    MOCKER_CPP(&Context::GetDeviceId)
+        .stubs()
+        .will(returnValue(deviceIds));
     nlohmann::json sampleJson;
     sampleJson["msprofBinPid"] = msprofBinPid;
     FileWriter sampleWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, SAMPLE_JSON}));
     sampleWriter.WriteText(sampleJson.dump());
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
-    EXPECT_EQ(Context::GetInstance().GetMsBinPid(HOST_ID, File::PathJoin({CONTEXT_DIR, TEST_DIR})), msprofBinPid);
+    EXPECT_EQ(Context::GetInstance().GetMsBinPid(File::PathJoin({CONTEXT_DIR, TEST_DIR})), msprofBinPid);
 }

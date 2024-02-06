@@ -260,11 +260,20 @@ uint64_t Context::GetPidFromInfoJson(uint16_t deviceId, const std::string &profP
     return pid;
 }
 
-int64_t Context::GetMsBinPid(uint16_t deviceId, const std::string &profPath)
+int64_t Context::GetMsBinPid(const std::string &profPath)
 {
+    // PROF路径下的samplejson数据，因为不知道有哪些device,所以取读到的数据里第一个
+    std::vector<uint16_t> deviceIds = GetDeviceId(profPath);
+    if (deviceIds.empty()) {
+        PRINT_ERROR("The data does not contain information about devices or hosts. the data " \
+                    "collected from your path %", profPath);
+        return analysis::dvvp::common::config::MSVP_MMPROCESS;
+    }
+    uint16_t deviceId = deviceIds.front();
+
     const auto &info = GetInfoByDeviceId(deviceId, profPath);
     if (info.empty()) {
-        ERROR("Samplejson is empty, path %.", profPath);
+        PRINT_ERROR("Samplejson is empty, path %.", profPath);
         return analysis::dvvp::common::config::MSVP_MMPROCESS;
     }
  

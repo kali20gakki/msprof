@@ -53,7 +53,7 @@ public:
     // 返回info.json 中的pid
     uint64_t GetPidFromInfoJson(uint16_t deviceId, const std::string &profPath = "");
     // 返回samplejson.json 中的msprofBinPid
-    int64_t GetMsBinPid(uint16_t deviceId, const std::string &profPath);
+    int64_t GetMsBinPid(const std::string &profPath);
     // 获取start_log中的相关时间
     bool GetSyscntConversionParams(Utils::SyscntConversionParams &params, uint16_t deviceId,
                                    const std::string &profPath = "");

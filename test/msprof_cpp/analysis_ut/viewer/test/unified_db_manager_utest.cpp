@@ -125,7 +125,7 @@ protected:
 
     virtual void SetUp() {}
 
-    virtual void TearDown() {}
+    virtual void TearDown() { GlobalMockObject::verify(); }
 };
 
 TEST_F(UnifiedDBManagerUTest, TestCheckProfDirsValidReturnFalseWhenprofFolderPathsIsEmpty)
