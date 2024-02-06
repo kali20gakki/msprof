@@ -60,28 +60,17 @@ bool UnifiedDBManager::CheckProfDirsValid(const std::string outputDir,
 
     // 获取第一个元素
     auto it = profFolderPaths.begin();
-
-    // 或者 PROF路径下的samplejson数据，因为不知道有哪些device,所以取读到的数据里第一个
-    std::vector<uint16_t> deviceIds = Context::GetInstance().GetDeviceId(*it);
-    if (deviceIds.empty()) {
-        errInfo = "The data does not contain information about devices or hosts. Please check the data " \
-                  "collected from your path " + outputDir;
-        return false;
-    }
-    uint16_t deviceId = deviceIds.front();
-
-    int64_t msprofBinPid =
-        Context::GetInstance().GetMsBinPid(deviceId, *it);
+    int64_t msprofBinPid = Context::GetInstance().GetMsBinPid(*it);
     if (msprofBinPid == analysis::dvvp::common::config::MSVP_MMPROCESS) {
-        errInfo = "Cannot determine if it is the same collection. Please check the value" \
-                   "of msprofbinpid in the sample.json under the path " + outputDir;
+        errInfo = "The current msprofBinPid is an invalid value:" + std::to_string(msprofBinPid) +
+                  ". Please check the value of your path:" + *it + ".";
         return false;
     }
 
     // 从第二个元素开始遍历
     ++it;
     for (; it != profFolderPaths.end(); ++it) {
-        if (Context::GetInstance().GetMsBinPid(deviceId, *it) != msprofBinPid) {
+        if (Context::GetInstance().GetMsBinPid(*it) != msprofBinPid) {
             errInfo = "The profiling results under the " + outputDir + " path are not from "\
                        "the same data collection session. Please verify and rerun.";
             return false;

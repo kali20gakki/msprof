@@ -226,8 +226,8 @@ class ExportCommand:
         self.list_map = {
             'export_type_list': [],
             'devices_list': '',
-            'model_id': getattr(args, self.MODEL_ID),
-            'input_model_id': getattr(args, self.MODEL_ID) is not None
+            'model_id': getattr(args, self.MODEL_ID, None),
+            'input_model_id': getattr(args, self.MODEL_ID, None) is not None
         }
         self.iteration_range = None
         self._cluster_params = {'is_cluster_scene': False, 'cluster_path': []}
