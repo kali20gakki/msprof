@@ -33,6 +33,8 @@ class TestFileManager(unittest.TestCase):
             pass
         self.assertEqual(False, FileManager.is_analyzed_data("test_file_manager"))
         os.mkdir(os.path.join("test_file_manager", "sqlite"), 0o777)
+        self.assertEqual(False, FileManager.is_analyzed_data("test_file_manager"))
+        os.mkdir(os.path.join("test_file_manager", "sqlite", "op_summary.db"), 0o777)
         self.assertEqual(True, FileManager.is_analyzed_data("test_file_manager"))
         shutil.rmtree("test_file_manager")
 

@@ -76,7 +76,8 @@ class FileManager:
         data_dir = PathManager.get_data_dir(project_path)
         sqlite_dir = PathManager.get_sql_dir(project_path)
         is_analyse = False
-        if os.path.exists(data_dir) and os.path.exists(sqlite_dir):
+        sqlite_list = os.listdir(sqlite_dir) if os.path.exists(sqlite_dir) else []
+        if os.path.exists(data_dir) and sqlite_list:
             all_file_name = os.path.join(data_dir, FileNameManagerConstant.ALL_FILE_TAG)
             if os.path.exists(all_file_name):
                 is_analyse = True
