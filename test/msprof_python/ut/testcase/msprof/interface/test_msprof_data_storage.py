@@ -9,6 +9,7 @@ from unittest import mock
 
 from common_func.constant import Constant
 from common_func.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ExportMode
 from msinterface.msprof_data_storage import MsprofDataStorage
 
 NAMESPACE = 'msinterface.msprof_data_storage'
@@ -187,9 +188,11 @@ class TestMsprofDataStorage(unittest.TestCase):
         params = {"data_type": "abc", "device_id": "0", "model_id": "1", "iter_id": "1"}
         ProfilingScene().init(" ")
         ProfilingScene()._scene = Constant.STEP_INFO
+        ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
         with mock.patch(NAMESPACE + '.MsprofDataStorage.get_current_time_str', return_value="20230905200300"):
             self.assertEqual(MsprofDataStorage.get_export_prefix_file_name(params, 0, True),
                              "abc_0_1_1_slice_0_20230905200300")
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
     def test_make_export_file_name_should_return_json_name_when_give_timeline_json(self):
         params = {

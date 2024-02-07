@@ -8,6 +8,7 @@ from common_func.info_conf_reader import InfoConfReader
 from constant.constant import ITER_RANGE
 from msinterface.msprof_timeline import MsprofTimeline
 from common_func.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ExportMode
 
 NAMESPACE = 'msinterface.msprof_timeline'
 
@@ -37,7 +38,7 @@ class TestMsprofTimeline(unittest.TestCase):
                 key = MsprofTimeline()
                 key.add_export_data(data2, 'acl')
 
-                ProfilingScene().set_all_export(False)
+                ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
                 data = [
                     {
                         'name': 'process_name', 'pid': 1, 'tid': 1,
@@ -49,6 +50,7 @@ class TestMsprofTimeline(unittest.TestCase):
                     }
                 ]
                 key.add_export_data(data, 'acl')
+                ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
 
     def test_export_all_data(self):

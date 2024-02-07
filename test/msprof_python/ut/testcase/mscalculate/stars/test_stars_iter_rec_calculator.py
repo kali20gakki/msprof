@@ -11,6 +11,7 @@ from common_func.file_manager import FdOpen
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ExportMode
 from mscalculate.stars.stars_iter_rec_calculator import StarsIterRecCalculator
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
@@ -47,16 +48,14 @@ class TestStarsIterRecCalculator(unittest.TestCase):
         os.makedirs(cls.DATA_PATH)
         path_sqlite = os.path.join(cls.PROF_DEVICE_DIR, 'sqlite')
         os.makedirs(path_sqlite)
-        ProfilingScene().set_value(all_export=True)
-        ProfilingScene().set_value(step_export=True)
+        ProfilingScene().set_mode(ExportMode.STEP_EXPORT)
         cls.create_pmu_data()
         cls.create_task_data()
 
     @classmethod
     def tearDownClass(cls) -> None:
         clear_dt_project(cls.DIR_PATH)
-        ProfilingScene().set_value(all_export=True)
-        ProfilingScene().set_value(step_export=False)
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
     @classmethod
     def create_pmu_data(cls):

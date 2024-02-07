@@ -575,17 +575,16 @@ class StepTraceViewer:
         """
 
         sql = "select iteration_id, " \
-              "(case when FP_start={2} then 'N/A' else FP_start end), " \
-              "(case when BP_end={2} then 'N/A' else BP_end end), " \
+              "(case when FP_start={1} then 'N/A' else FP_start end), " \
+              "(case when BP_end={1} then 'N/A' else BP_end end), " \
               "iteration_end, " \
-              "(case when iteration_time={2} then 'N/A' else iteration_time*{0} end), " \
-              "(case when fp_bp_time={2} then 'N/A' else fp_bp_time*{0} end), " \
-              "(case when grad_refresh_bound={2} then 'N/A' else grad_refresh_bound*{0} end), " \
-              "(case when data_aug_bound={2} then 'N/A' else data_aug_bound*{0} end), " \
-              "(case when model_id={3} then 'N/A' else model_id end) " \
-              "from {1} " \
-              "where model_id=? and iteration_id>=? and iteration_id<=?".format(StepTraceConstant.syscnt_to_micro(),
-                                                                                DBNameConstant.TABLE_TRAINING_TRACE,
+              "(case when iteration_time={1} then 'N/A' else iteration_time end), " \
+              "(case when fp_bp_time={1} then 'N/A' else fp_bp_time end), " \
+              "(case when grad_refresh_bound={1} then 'N/A' else grad_refresh_bound end), " \
+              "(case when data_aug_bound={1} then 'N/A' else data_aug_bound end), " \
+              "(case when model_id={2} then 'N/A' else model_id end) " \
+              "from {0} " \
+              "where model_id=? and iteration_id>=? and iteration_id<=?".format(DBNameConstant.TABLE_TRAINING_TRACE,
                                                                                 NumberConstant.NULL_NUMBER,
                                                                                 NumberConstant.DEFAULT_MODEL_ID)
         return DBManager.fetch_all_data(curs, sql, (iter_range.model_id, *iter_range.get_iteration_range()))

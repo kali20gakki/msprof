@@ -78,7 +78,7 @@ class OpCounterOpSceneCalculator(MsMultiProcess):
         process
         :return: None
         """
-        if ProfilingScene().is_all_export():
+        if ProfilingScene().is_all_export() or ProfilingScene().is_step_export():
             self.process()
 
     def process(self: any) -> None:

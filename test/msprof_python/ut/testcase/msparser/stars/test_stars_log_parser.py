@@ -4,6 +4,7 @@ from unittest import mock
 
 from common_func.file_manager import FileOpen
 from common_func.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ExportMode
 from msparser.stars.parser_dispatcher import ParserDispatcher
 from msparser.stars.stars_log_parser import StarsLogCalCulator
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -21,7 +22,7 @@ class TestStarsLogCalCulator(unittest.TestCase):
             check.init_dispatcher()
 
     def test_calculate_when_db_exist_then_do_not_execute(self):
-        ProfilingScene().set_all_export(False)
+        ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
         with mock.patch(NAMESPACE + '.StarsLogCalCulator.init_dispatcher'), \
                 mock.patch(NAMESPACE + '.PathManager.get_data_file_path', return_value='123'), \
                 mock.patch('common_func.utils.Utils.get_scene', return_value='step_info'), \
@@ -32,7 +33,7 @@ class TestStarsLogCalCulator(unittest.TestCase):
             key.calculate()
             key._parse_by_iter.assert_not_called()
         ProfilingScene().init(sample_config.get('result_dir'))
-        ProfilingScene().set_all_export(True)
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
         with mock.patch(NAMESPACE + '.StarsLogCalCulator.init_dispatcher'), \
                 mock.patch(NAMESPACE + '.PathManager.get_data_file_path', return_value='123'), \
                 mock.patch('common_func.utils.Utils.get_scene', return_value='single_op'), \
@@ -56,7 +57,6 @@ class TestStarsLogCalCulator(unittest.TestCase):
             key.ms_run()
 
     def test_parse_all_file(self):
-        ProfilingScene().set_all_export(True)
         data = struct.pack('=4HQ4HQ12Q', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         with mock.patch(NAMESPACE + '.PathManager.get_data_file_path'), \
                 mock.patch('os.path.exists', return_value=False), \
@@ -74,7 +74,7 @@ class TestStarsLogCalCulator(unittest.TestCase):
 
     def test_parse_by_iter(self):
         ProfilingScene().init("")
-        ProfilingScene().set_all_export(False)
+        ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
         with mock.patch('common_func.utils.Utils.get_scene', return_value='step_info'), \
                 mock.patch('msparser.stars.parser_dispatcher.ParserDispatcher.init'), \
                 mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.init'), \
@@ -93,6 +93,7 @@ class TestStarsLogCalCulator(unittest.TestCase):
             key = StarsLogCalCulator(file_list={DataTag.STARS_LOG: ['a_2', 'b_1']},
                                      sample_config={'1': 'ada', 'result_dir': '11'})
             key.calculate()
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
 
 if __name__ == '__main__':

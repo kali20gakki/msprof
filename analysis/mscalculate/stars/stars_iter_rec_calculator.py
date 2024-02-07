@@ -57,7 +57,7 @@ class StarsIterRecCalculator(IParser, MsMultiProcess):
         multiprocess to parse stars task and pmu data
         :return: None
         """
-        if self._file_list and (not ProfilingScene().is_all_export() or ProfilingScene().is_step_export()):
+        if self._file_list and not ProfilingScene().is_all_export():
             self.parse()
             self.save()
 
@@ -67,7 +67,7 @@ class StarsIterRecCalculator(IParser, MsMultiProcess):
         :return:
         """
         with TsTrackModel(self._project_path, DBNameConstant.DB_STEP_TRACE,
-                          [DBNameConstant.TABLE_STEP_TRACE_DATA]) as trace:
+                          [ProfilingScene().get_step_table_name()]) as trace:
             step_time = trace.get_step_syscnt_range(self._iter_range)
         pmu_files = self._file_list.get(DataTag.FFTS_PMU, [])
         if Utils.get_aicore_type(self.sample_config) != StrConstant.AIC_SAMPLE_BASED_MODE and pmu_files:
