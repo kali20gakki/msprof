@@ -39,7 +39,7 @@ TEST_F(TimeUtilsUTest, TestGetTimeFromSyscntShouldReturnOriSysCntWhenFreqIsDefau
     SyscntConversionParams params{DEFAULT_FREQ, 3666503140109, 36471130547330};
     uint64_t taskSysCnt = 3666510676667;
     double expectRes = 3666510676667.000;
-    EXPECT_DOUBLE_EQ(GetTimeFromSyscnt(taskSysCnt, params), expectRes);
+    EXPECT_DOUBLE_EQ(GetTimeFromSyscnt(taskSysCnt, params).Double(), expectRes);
 }
 
 TEST_F(TimeUtilsUTest, TestGetTimeFromSyscntShouldReturnTimestamp)
@@ -47,7 +47,7 @@ TEST_F(TimeUtilsUTest, TestGetTimeFromSyscntShouldReturnTimestamp)
     SyscntConversionParams params{100.0, 3666503140109, 36471130547330};
     uint64_t taskSysCnt = 3666510676667;
     double expectRes = 36471205912910.000;
-    EXPECT_DOUBLE_EQ(GetTimeFromSyscnt(taskSysCnt, params), expectRes);
+    EXPECT_DOUBLE_EQ(GetTimeFromSyscnt(taskSysCnt, params).Double(), expectRes);
 }
 
 TEST_F(TimeUtilsUTest, TestGetLocalTimeShouldReturnLocalTimestamp)
@@ -55,6 +55,7 @@ TEST_F(TimeUtilsUTest, TestGetLocalTimeShouldReturnLocalTimestamp)
     SyscntConversionParams params{100.0, 3666503140109, 36471130547330};
     ProfTimeRecord record{1701069324370978000, 1701069338159976000, 36471129942580};
     uint64_t taskSysCnt = 3666510676667;
-    double expectRes = 123261324446948336.000;
-    EXPECT_DOUBLE_EQ(GetLocalTime(GetTimeFromSyscnt(taskSysCnt, params), record), expectRes);
+    std::string expectRes = "1701069324446948.33";
+    auto timestamp = GetTimeFromSyscnt(taskSysCnt, params);
+    EXPECT_EQ(GetLocalTime(timestamp, record).Str(), expectRes);
 }

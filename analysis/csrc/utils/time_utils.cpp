@@ -25,6 +25,7 @@ namespace Utils {
 using namespace Analysis::Viewer::Database;
 const int YEAR_DISPLAY_WIDTH = 4; // 年的固定宽度是4
 const int TIME_DISPLAY_WIDTH = 2; // 日期的固定宽度是2，不足的前面补零
+const int NS_US = 3; // NS到US的时间转换的数量级，3表示10^3的指数
     
 std::string GetFormatLocalTime()
 {
@@ -46,22 +47,29 @@ std::string GetFormatLocalTime()
     return sstr.str();
 }
 
-double GetTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params)
+HPFloat GetTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params)
 {
     if (IsDoubleEqual(params.freq, DEFAULT_FREQ)) {
         // 当freq为默认值时,默认数据为 monotonic,直接返回即可
-        return static_cast<double>(syscnt);
+        return {syscnt};
     }
     if (syscnt < params.sysCnt) {
         ERROR("The base syscnt's value % greater than the task syscnt's value % .", params.sysCnt, syscnt);
-        return static_cast<double>(syscnt);
+        return {syscnt};
     }
-    return static_cast<double>((syscnt - params.sysCnt) / params.freq * MILLI_SECOND + params.hostMonotonic);
+    HPFloat res = (syscnt - params.sysCnt) / params.freq;
+    res = res << NS_US;
+    res += HPFloat(params.hostMonotonic);
+    return res;
 }
 
-double GetLocalTime(double timestamp, const ProfTimeRecord &record)
+HPFloat GetLocalTime(HPFloat &timestamp, const ProfTimeRecord &record)
 {
-    return static_cast<double>(timestamp + (record.startTimeNs - record.baseTimeNs - TIME_BASE_OFFSET_NS));
+    HPFloat baseTime = record.startTimeNs - record.baseTimeNs;
+    HPFloat res = timestamp + baseTime;
+    res = res >> NS_US;
+    res.Quantize();
+    return res;
 }
 
 }  // namespace Utils
