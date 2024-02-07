@@ -163,7 +163,7 @@ bool Context::CheckInfoValueIsValid(const std::string &profPath, uint16_t device
 
 bool Context::IsAllExport()
 {
-    const auto &info = GetInfoByDeviceId(HOST_ID);
+    const auto &info = GetInfoByDeviceId();
     if (info.empty()) {
         return false;
     }
@@ -194,6 +194,13 @@ nlohmann::json Context::GetInfoByDeviceId(uint16_t deviceId, const std::string &
         return emptyJson;
     }
     auto deviceInfo = profInfo->second;
+    if (deviceId == UINT16_MAX) {
+        if (deviceInfo.begin() == deviceInfo.end()) {
+            ERROR("Can't find host or device file. input path %.", profPath);
+            return emptyJson;
+        }
+        return deviceInfo.begin()->second;
+    }
     if (deviceInfo.find(deviceId) == deviceInfo.end()) {
         ERROR("Can't find any info data in %, which device id is %.", profPath, deviceId);
         return emptyJson;
@@ -263,7 +270,7 @@ uint64_t Context::GetPidFromInfoJson(uint16_t deviceId, const std::string &profP
 int64_t Context::GetMsBinPid(const std::string &profPath)
 {
     // PROF路径下的samplejson数据，因为不知道有哪些device,所以取读到的数据里第一个
-    std::vector<uint16_t> deviceIds = GetDeviceId(profPath);
+    std::vector<uint16_t> deviceIds = GetDeviceIds(profPath);
     if (deviceIds.empty()) {
         PRINT_ERROR("The data does not contain information about devices or hosts. the data " \
                     "collected from your path %", profPath);
@@ -280,7 +287,7 @@ int64_t Context::GetMsBinPid(const std::string &profPath)
     return info.value("msprofBinPid", analysis::dvvp::common::config::MSVP_MMPROCESS);
 }
 
-std::vector<uint16_t> Context::GetDeviceId(const std::string &profPath)
+std::vector<uint16_t> Context::GetDeviceIds(const std::string &profPath)
 {
     std::vector<uint16_t> deviceIds;
     auto profInfo = profPath.empty() ? context_.begin() : context_.find(profPath);
@@ -289,8 +296,8 @@ std::vector<uint16_t> Context::GetDeviceId(const std::string &profPath)
         return deviceIds;
     }
     auto deviceInfo = profInfo->second;
-    for (auto it = deviceInfo.begin(); it != deviceInfo.end(); ++it) {
-        deviceIds.push_back(it->first);
+    for (const auto& it : deviceInfo) {
+        deviceIds.emplace_back(static_cast<uint16_t>(it.first));
     }
     return deviceIds;
 }

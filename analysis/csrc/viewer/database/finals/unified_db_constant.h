@@ -29,14 +29,19 @@ const std::string DB_NAME_REPORT_DB = "report";
 
 // table name
 const std::string TABLE_NAME_STRING_IDS = "STRING_IDS";
-const std::string TABLE_NAME_TARGET_INFO_SESSION_TIME = "TARGET_INFO_SESSION_TIME";
-const std::string TABLE_NAME_TARGET_INFO_NPU = "TARGET_INFO_NPU";
-const std::string TABLE_NAME_ENUM_API_LEVEL = "ENUM_API_LEVEL";
+const std::string TABLE_NAME_SESSION_TIME_INFO = "SESSION_TIME_INFO";
+const std::string TABLE_NAME_NPU_INFO = "NPU_INFO";
 const std::string TABLE_NAME_TASK = "TASK";
 const std::string TABLE_NAME_COMPUTE_TASK_INFO = "COMPUTE_TASK_INFO";
 const std::string TABLE_NAME_COMMUNICATION_TASK_INFO = "COMMUNICATION_TASK_INFO";
 const std::string TABLE_NAME_COMMUNICATION_OP = "COMMUNICATION_OP";
 const std::string TABLE_NAME_API = "API";
+
+// enum table name
+const std::string TABLE_NAME_ENUM = "ENUM";
+const std::string TABLE_NAME_ENUM_API_LEVEL = "ENUM_API_LEVEL";
+const std::string TABLE_NAME_ENUM_IO_TYPE = "ENUM_IO_TYPE";
+const std::string TABLE_NAME_ENUM_NPU_MODULE = "ENUM_NPU_MODULE";
 
 // api level
 const std::unordered_map<std::string, uint16_t> API_LEVEL_TABLE = {
@@ -47,6 +52,92 @@ const std::unordered_map<std::string, uint16_t> API_LEVEL_TABLE = {
     {"node", MSPROF_REPORT_NODE_LEVEL},
     {"hccl",  MSPROF_REPORT_HCCL_NODE_LEVEL},
     {"runtime",  MSPROF_REPORT_RUNTIME_LEVEL}
+};
+
+// IO type
+const std::unordered_map<std::string, uint16_t> IO_TYPE_TABLE = {
+    {"app", 0},
+    {"device", 1},
+    {"read", 3},
+    {"write", 4}
+};
+
+// npu module name
+const std::unordered_map<std::string, uint16_t> NPU_MODULE_NAME_TABLE = {
+    {"SLOG", 0},
+    {"IDEDD", 1},
+    {"IDEDH", 2},
+    {"HCCL", 3},
+    {"FMK", 4},
+    {"HIAIENGINE",  5},
+    {"DVPP",  6},
+    {"RUNTIME", 7},
+    {"CCE", 8},
+    {"HDC", 9},
+    {"DRV", 10},
+    {"MDCFUSION", 11},
+    {"MDCLOCATION",  12},
+    {"MDCPERCEPTION",  13},
+    {"MDCFSM", 14},
+    {"MDCCOMMON", 15},
+    {"MDCMONITOR", 16},
+    {"MDCBSWP", 17},
+    {"MDCDEFAULT", 18},
+    {"MDCSC",  19},
+    {"MDCPNC",  20},
+    {"MLL", 21},
+    {"DEVMM", 22},
+    {"KERNEL", 23},
+    {"LIBMEDIA", 24},
+    {"CCECPU", 25},
+    {"ASCENDDK",  26},
+    {"ROS",  27},
+    {"HCCP", 28},
+    {"ROCE", 29},
+    {"TEFUSION", 30},
+    {"PROFILING", 31},
+    {"DP", 32},
+    {"APP",  33},
+    {"TS",  34},
+    {"TSDUMP", 35},
+    {"AICPU", 36},
+    {"LP", 37},
+    {"TDT", 38},
+    {"FE", 39},
+    {"MD",  40},
+    {"MB",  41},
+    {"ME", 42},
+    {"IMU", 43},
+    {"IMP", 44},
+    {"GE", 45},
+    {"MDCFUSA", 46},
+    {"CAMERA",  47},
+    {"ASCENDCL",  48},
+    {"TEEOS", 49},
+    {"ISP", 50},
+    {"SIS", 51},
+    {"HSM", 52},
+    {"DSS", 53},
+    {"PROCMGR",  54},
+    {"BBOX",  55},
+    {"AIVECTOR", 56},
+    {"TBE", 57},
+    {"FV", 58},
+    {"MDCMAP", 59},
+    {"TUNE", 60},
+    {"HSS",  61},
+    {"FFTS",  62},
+    {"OP",  63},
+    {"UDF",  64},
+    {"HICAID", 65},
+    {"TSYNC", 66},
+    {"AUDIO", 67},
+    {"TPRT", 68},
+    {"ASCENDCKERNEL", 69},
+    {"ASYS",  70},
+    {"ATRACE",  71},
+    {"MBUFF", 72},
+    {"CUSTOM", 73}
 };
 
 // TS为stars时芯片的sqetype

@@ -3,34 +3,35 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : enum_api_processor.h
- * Description        : 落盘api level层级数据
+ * File Name          : session_time_info_processor.h
+ * Description        : 落盘采集时间（开始、结束）数据
  * Author             : msprof team
  * Creation Date      : 2023/12/18
  * *****************************************************************************
  */
 
-#ifndef MSPROF_ANALYSIS_ENUM_API_LEVEL_PROCESSOR_H
-#define MSPROF_ANALYSIS_ENUM_API_LEVEL_PROCESSOR_H
+#ifndef ANALYSIS_VIEWER_DATABASE_SESSION_TIME_INFO_PROCESSOR_H
+#define ANALYSIS_VIEWER_DATABASE_SESSION_TIME_INFO_PROCESSOR_H
 
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
+#include "analysis/csrc/utils/time_utils.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-// 该类用于落盘api level相关数据
-// api level 不同的PROF文件中通用，因此只需调用一回
-class EnumApiLevelProcessor : public TableProcessor {
-// level_id, level_name
-using EnumApiLevelDataFormat = std::vector<std::tuple<uint16_t, std::string>>;
+
+// 该类用于落盘采集任务的开始结束时间
+class SessionTimeInfoProcessor : public TableProcessor {
+// startTime, endTime, baseTime
+using TimeDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t>>;
 public:
-    EnumApiLevelProcessor() = default;
-    EnumApiLevelProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    SessionTimeInfoProcessor() = default;
+    SessionTimeInfoProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
     bool Run() override;
 protected:
     bool Process(const std::string &fileDir = "") override;
 private:
-    static EnumApiLevelDataFormat GetData();
+    Utils::ProfTimeRecord record_;
 };
 
 
@@ -38,4 +39,4 @@ private:
 } // Viewer
 } // Analysis
 
-#endif // MSPROF_ANALYSIS_ENUM_API_LEVEL_PROCESSOR_H
+#endif // ANALYSIS_VIEWER_DATABASE_SESSION_TIME_INFO_PROCESSOR_H

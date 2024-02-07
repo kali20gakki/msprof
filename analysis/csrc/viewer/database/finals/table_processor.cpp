@@ -53,9 +53,7 @@ bool TableProcessor::Run()
 
 void TableProcessor::PrintProcessorResult(bool result, const std::string &processorName)
 {
-    if (result) {
-        PRINT_INFO("% run success!", processorName);
-    } else {
+    if (!result) {
         PRINT_ERROR("% run failed!", processorName);
     }
 }

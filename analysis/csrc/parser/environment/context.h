@@ -51,17 +51,17 @@ public:
     // 获取start_info end_info中的时间
     bool GetProfTimeRecordInfo(Utils::ProfTimeRecord &record, const std::string &profPath = "");
     // 返回info.json 中的pid
-    uint64_t GetPidFromInfoJson(uint16_t deviceId, const std::string &profPath = "");
+    uint64_t GetPidFromInfoJson(uint16_t deviceId = UINT16_MAX, const std::string &profPath = "");
     // 返回samplejson.json 中的msprofBinPid
     int64_t GetMsBinPid(const std::string &profPath);
     // 获取start_log中的相关时间
-    bool GetSyscntConversionParams(Utils::SyscntConversionParams &params, uint16_t deviceId,
+    bool GetSyscntConversionParams(Utils::SyscntConversionParams &params, uint16_t deviceId = UINT16_MAX,
                                    const std::string &profPath = "");
     // 获取PROF文件下的device 以及host编号
-    std::vector<uint16_t> GetDeviceId(const std::string &profPath);
+    std::vector<uint16_t> GetDeviceIds(const std::string &profPath);
 public:
     // 获取对应device的芯片型号
-    uint16_t GetPlatformVersion(uint16_t deviceId, const std::string &profPath = "");
+    uint16_t GetPlatformVersion(uint16_t deviceId = UINT16_MAX, const std::string &profPath = "");
     // 判断芯片类型
     static bool IsStarsChip(uint16_t platformVersion);
     // 校验是否为CHIP_V1_1_x系列(不包含CHIP_V1_1_0)
@@ -69,7 +69,7 @@ public:
     static bool IsChipV4(uint16_t platformVersion);
 
 private:
-    nlohmann::json GetInfoByDeviceId(uint16_t deviceId, const std::string &profPath = "");
+    nlohmann::json GetInfoByDeviceId(uint16_t deviceId = UINT16_MAX, const std::string &profPath = "");
     bool LoadJsonData(const std::string &profPath, const std::string &deviceDir, uint16_t deviceId);
     bool LoadLogData(const std::string &profPath, const std::string &deviceDir, uint16_t deviceId);
     bool CheckInfoValueIsValid(const std::string &profPath, uint16_t deviceId);
