@@ -14,13 +14,10 @@
 
 #include <atomic>
 #include <vector>
-#include <iostream>
 
 #include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/dfx/log.h"
 #include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/utils/file.h"
-#include "analysis/csrc/utils/time_utils.h"
 #include "analysis/csrc/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/table_processor_factory.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
@@ -35,17 +32,18 @@ using namespace analysis::dvvp::common::error;
 
 namespace {
     const std::vector<std::string> DB_NAME = {
-        TABLE_NAME_TARGET_INFO_SESSION_TIME,
-        TABLE_NAME_TARGET_INFO_NPU,
-        TABLE_NAME_ENUM_API_LEVEL,
+        TABLE_NAME_ENUM,
+        TABLE_NAME_SESSION_TIME_INFO,
+        TABLE_NAME_NPU_INFO,
         TABLE_NAME_TASK,
         TABLE_NAME_COMPUTE_TASK_INFO,
         TABLE_NAME_COMMUNICATION_TASK_INFO,
+        TABLE_NAME_COMMUNICATION_OP,
         TABLE_NAME_API
     };
 }
 
-bool UnifiedDBManager::CheckProfDirsValid(const std::string outputDir,
+bool UnifiedDBManager::CheckProfDirsValid(const std::string& outputDir,
                                           const std::set<std::string> &profFolderPaths, std::string &errInfo)
 {
     if (profFolderPaths.empty()) {
@@ -53,7 +51,7 @@ bool UnifiedDBManager::CheckProfDirsValid(const std::string outputDir,
         return false;
     }
 
-    if (Context::GetInstance().Load(profFolderPaths) == false) {
+    if (!Context::GetInstance().Load(profFolderPaths)) {
         errInfo = "JSON parameter loading failed. Please check if the JSON data is complete.";
         return false;
     }
@@ -85,7 +83,7 @@ int UnifiedDBManager::Init()
 
     Analysis::Association::Credential::IdPool::GetInstance();
 
-    if (Analysis::Parser::Environment::Context::GetInstance().Load(ProfFolderPaths_) == false) {
+    if (!Analysis::Parser::Environment::Context::GetInstance().Load(ProfFolderPaths_)) {
         ERROR("JSON parameter loading failed. Please check if the JSON data is complete.");
         return PROFILING_FAILED;
     }
@@ -104,7 +102,7 @@ int UnifiedDBManager::Run()
     Analysis::Utils::ThreadPool pool(tableProcessors);
     pool.Start();
     std::atomic<bool> retFlag(true);
-    for (auto name : DB_NAME) {
+    for (const auto& name : DB_NAME) {
         pool.AddTask([this, name, &retFlag]() {
             std::shared_ptr<TableProcessor> processor =
                 TableProcessorFactory::CreateTableProcessor(name, reportDBPath_, ProfFolderPaths_);
@@ -113,15 +111,15 @@ int UnifiedDBManager::Run()
                 retFlag = false;
                 return;
             }
-            retFlag = processor->Run() && retFlag;
+            retFlag = processor->Run() & retFlag;
         });
     }
 
     pool.WaitAllTasks();
     pool.Stop();
 
-    if (retFlag == false) {
-        ERROR("“The unified db process failed to be executed");
+    if (!retFlag) {
+        ERROR("The unified db process failed to be executed");
     }
 
     // string_id table 要在其他所有table 全部生成之后再去生成
