@@ -14,6 +14,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from common_func.step_trace_constant import StepTraceConstant
+from common_func.profiling_scene import ProfilingScene
 from msmodel.step_trace.cluster_step_trace_model import ClusterStepTraceModel
 from msparser.interface.iparser import IParser
 from profiling_bean.db_dto.step_trace_dto import TrainingTraceDto
@@ -55,6 +56,9 @@ class ClusterStepTraceParser(IParser):
 
     @staticmethod
     def _sql_for_step_trace() -> str:
+        model_id_condition = "model_id != {}".format(NumberConstant.INVALID_MODEL_ID)
+        if ProfilingScene().is_step_export():
+            model_id_condition = "model_id = {}".format(NumberConstant.INVALID_MODEL_ID)
         sql = "select device_id, " \
               "model_id, " \
               "iteration_id, " \
@@ -65,11 +69,11 @@ class ClusterStepTraceParser(IParser):
               "(case when fp_bp_time={1} then {1} else fp_bp_time*{2} end) as fp_bp_time, " \
               "(case when grad_refresh_bound={1} then {1} else grad_refresh_bound*{2} end) as grad_refresh_bound, " \
               "(case when data_aug_bound={1} then {1} else data_aug_bound*{2} end) as data_aug_bound " \
-              "from {3}".format(
-            NumberConstant.DEFAULT_MODEL_ID,
-            NumberConstant.NULL_NUMBER,
-            StepTraceConstant.syscnt_to_micro(),
-            DBNameConstant.TABLE_TRAINING_TRACE)
+              "from {3} where {4}".format(NumberConstant.DEFAULT_MODEL_ID,
+                                          NumberConstant.NULL_NUMBER,
+                                          StepTraceConstant.syscnt_to_micro(),
+                                          DBNameConstant.TABLE_TRAINING_TRACE,
+                                          model_id_condition)
         return sql
 
     @staticmethod
