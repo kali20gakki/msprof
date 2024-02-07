@@ -15,6 +15,7 @@ add_executable(
         ${TOP_DIR}/analysis/csrc/dfx/log.cpp
         ${TOP_DIR}/analysis/csrc/utils/file.cpp
         ${TOP_DIR}/analysis/csrc/utils/utils.cpp
+        ${TOP_DIR}/analysis/csrc/utils/hp_float.cpp
         ${TOP_DIR}/analysis/csrc/parser/environment/context.cpp
 )
 

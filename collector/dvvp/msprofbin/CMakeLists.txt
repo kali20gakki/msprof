@@ -61,6 +61,7 @@ set(ANALYSIS_SOURCES
     ${TOP_DIR}/analysis/csrc/utils/file.cpp
     ${TOP_DIR}/analysis/csrc/utils/time_utils.cpp
     ${TOP_DIR}/analysis/csrc/utils/utils.cpp
+    ${TOP_DIR}/analysis/csrc/utils/hp_float.cpp
     ${TOP_DIR}/analysis/csrc/parser/environment/context.cpp
     ${TOP_DIR}/analysis/csrc/association/credential/id_pool.cpp
 )

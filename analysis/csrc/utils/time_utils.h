@@ -14,10 +14,10 @@
 #define ANALYSIS_UTILS_TIME_UTILS_H
 
 #include <string>
+#include "analysis/csrc/utils/hp_float.h"
 
 namespace Analysis {
 namespace Utils {
-
 // 2020年1月1日0时0分0秒 作为基准时间 ns
 const uint64_t TIME_BASE_OFFSET_NS = 1577808000000000000;
 const double DEFAULT_FREQ = 1000.0;
@@ -47,10 +47,9 @@ struct ProfTimeRecord {
 
 std::string GetFormatLocalTime();
 // 将syscnt转为timestamp 返回结果为ns级
-double GetTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params);
-// 计算加上本地的偏移时间（再减去基准时间）, ns级
-double GetLocalTime(double timestamp, const ProfTimeRecord &record);
-
+HPFloat GetTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params);
+// 计算加上本地的偏移时间（再减去基准时间）, us级
+HPFloat GetLocalTime(HPFloat &timestamp, const ProfTimeRecord &record);
 
 }  // namespace Utils
 }  // namespace Analysis
