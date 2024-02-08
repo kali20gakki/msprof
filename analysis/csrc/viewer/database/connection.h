@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <type_traits>
 #include <initializer_list>
+#include <unordered_map>
 
 #include "analysis/csrc/dfx/log.h"
 
@@ -71,6 +72,7 @@ public:
     template<typename... Args>
     bool ExecuteQuery(const std::string &sql, std::vector<std::tuple<Args...>> &result);
     bool ExecuteUpdate(const std::string &sql);
+    std::vector<TableColumn> ExecuteGetTableColumns(const std::string &tableName);
 
 private:
     bool InsertCmd(const std::string &tableName, const int &colNum);
