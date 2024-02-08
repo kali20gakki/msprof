@@ -35,13 +35,14 @@ bool TargetInfoSessionTimeProcessor::Run()
     // 若Process中数据获取失败,理应不落盘数据
     if (!flag) {
         ERROR("Get session time failed.");
+        PrintProcessorResult(flag, TABLE_NAME_TARGET_INFO_SESSION_TIME);
         return flag;
     }
     TimeDataFormat timeInfoData = {
         std::make_tuple(record_.startTimeNs, record_.endTimeNs, Analysis::Utils::TIME_BASE_OFFSET_NS)
     };
     flag = SaveData(timeInfoData, TABLE_NAME_TARGET_INFO_SESSION_TIME);
-    PrintProcessorResult(flag, TABLE_NAME_ENUM_API_LEVEL);
+    PrintProcessorResult(flag, TABLE_NAME_TARGET_INFO_SESSION_TIME);
     return flag;
 }
 

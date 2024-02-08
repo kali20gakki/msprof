@@ -48,6 +48,10 @@ bool TargetInfoNpuProcessor::Process(const std::string &fileDir)
     for (const auto& deviceDir : deviceDirs) {
         UpdateNpuData(fileDir, deviceDir, npuInfoData);
     }
+    if (npuInfoData.empty()) {
+        WARN("No device info in %.", fileDir);
+        return true;
+    }
     return SaveData(npuInfoData, TABLE_NAME_TARGET_INFO_NPU);
 }
 
