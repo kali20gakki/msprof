@@ -31,7 +31,7 @@ using Context = Parser::Environment::Context;
 using namespace analysis::dvvp::common::error;
 
 namespace {
-    const std::vector<std::string> TABLE_NAME = {
+    const std::vector<std::string> DB_NAME = {
         TABLE_NAME_TARGET_INFO_SESSION_TIME,
         TABLE_NAME_TARGET_INFO_NPU,
         TABLE_NAME_ENUM_API_LEVEL,
@@ -63,7 +63,7 @@ bool UnifiedDBManager::CheckProfDirsValid(const std::string& outputDir,
                       ". Please check the value of your path:" + path + ".";
             return false;
         }
-        if (preMsprofBinPid != msprofBinPid && preMsprofBinPid != analysis::dvvp::common::config::MSVP_MMPROCESS) {
+        if (preMsprofBinPid != analysis::dvvp::common::config::MSVP_MMPROCESS && preMsprofBinPid != msprofBinPid) {
             errInfo = "The profiling results under the " + outputDir + " path are not from "\
                        "the same data collection session. Please verify and rerun.";
             return false;
@@ -99,7 +99,7 @@ int UnifiedDBManager::Run()
     Analysis::Utils::ThreadPool pool(tableProcessors);
     pool.Start();
     std::atomic<bool> retFlag(true);
-    for (const auto& name : TABLE_NAME) {
+    for (const auto& name : DB_NAME) {
         pool.AddTask([this, name, &retFlag]() {
             std::shared_ptr<TableProcessor> processor =
                 TableProcessorFactory::CreateTableProcessor(name, reportDBPath_, ProfFolderPaths_);

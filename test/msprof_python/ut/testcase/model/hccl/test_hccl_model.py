@@ -9,6 +9,7 @@ from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ExportMode
 from model.test_dir_cr_base_model import TestDirCRBaseModel
 from msmodel.hccl.hccl_model import HCCLModel
 from msmodel.hccl.hccl_model import HcclViewModel
@@ -183,7 +184,7 @@ class TestHCCLModel(TestDirCRBaseModel):
         with mock.patch(NAMESPACE + '.HcclViewModel.attach_to_db', return_value=True):
             scene = ProfilingScene()
             scene._scene = Constant.STEP_INFO
-            ProfilingScene().set_all_export(False)
+            ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
 
             # test on device_0 matched case
             InfoConfReader()._info_json = {"devices": "0"}

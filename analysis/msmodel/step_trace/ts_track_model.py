@@ -79,42 +79,43 @@ class TsTrackModel(BaseModel, ABC):
 
         return ai_cpu_with_state
 
-    def get_step_trace_data(self: any) -> list:
+    def get_step_trace_data(self: any, table_name: str) -> list:
         """
         get step trace data
         """
-        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA) or \
-           not DBManager.judge_row_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA):
+        if not DBManager.judge_table_exist(self.cur, table_name) or \
+                not DBManager.judge_row_exist(self.cur, table_name):
             return []
-        sql = "select model_id, index_id, iter_id, step_start, step_end from {0}".format(
-            DBNameConstant.TABLE_STEP_TRACE_DATA)
+        sql = "select model_id, index_id, iter_id, step_start, step_end from {0}".format(table_name)
         step_trace_data = DBManager.fetch_all_data(self.cur, sql, dto_class=StepTraceDto)
         return step_trace_data
 
-    def get_max_index_id_with_model(self, model_id):
+    def get_index_range_with_model(self, model_id):
         """
         get the max iteration id of the model id.
         """
-        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA) or \
-           not DBManager.judge_row_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA):
+        table_name = ProfilingScene().get_step_table_name()
+        if not DBManager.judge_table_exist(self.cur, table_name) or \
+                not DBManager.judge_row_exist(self.cur, table_name):
             return EmptyClass()
-        sql = f'select max(index_id) as index_id from {DBNameConstant.TABLE_STEP_TRACE_DATA} where model_id=?'
-        return DBManager.fetchone(self.cur, sql, (model_id,), dto_class=StepTraceDto)
+        sql = f'select min(index_id), max(index_id) from {table_name} where model_id=?'
+        return DBManager.fetchone(self.cur, sql, (model_id,))
 
     def get_step_syscnt_range_by_iter_range(self, iteration: IterationRange):
         """
         get step time range by the iteration range.
         """
-        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA) or \
-           not DBManager.judge_row_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA):
+        table_name = ProfilingScene().get_step_table_name()
+        if not DBManager.judge_table_exist(self.cur, table_name) or \
+                not DBManager.judge_row_exist(self.cur, table_name):
             return EmptyClass()
         iteration_range = iteration.get_iteration_range()
         if iteration_range[0] == 1:
             sql = f"select 0 as step_start, max(step_end) as step_end " \
-                  f"from {DBNameConstant.TABLE_STEP_TRACE_DATA} where model_id=? and index_id>=? and index_id<=?"
+                  f"from {table_name} where model_id=? and index_id>=? and index_id<=?"
         else:
             sql = f"select min(step_start) as step_start, max(step_end) as step_end " \
-                  f"from {DBNameConstant.TABLE_STEP_TRACE_DATA} where model_id=? and index_id>=? and index_id<=?"
+                  f"from {table_name} where model_id=? and index_id>=? and index_id<=?"
         return DBManager.fetchone(self.cur, sql, (iteration.model_id, *iteration_range),
                                   dto_class=StepTraceDto)
 
@@ -122,12 +123,13 @@ class TsTrackModel(BaseModel, ABC):
         """
         get step start sys_cnt and end sys_cnt
         """
-        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA) or \
-           not DBManager.judge_row_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA):
+        table_name = ProfilingScene().get_step_table_name()
+        if not DBManager.judge_table_exist(self.cur, table_name) or \
+                not DBManager.judge_row_exist(self.cur, table_name):
             return EmptyClass()
         iteration_range = iteration.get_iteration_range()
         sql = f"select min(step_start) as step_start, max(step_end) as step_end " \
-              f"from {DBNameConstant.TABLE_STEP_TRACE_DATA} where model_id = ? and index_id >= ? and index_id <= ?"
+              f"from {table_name} where model_id = ? and index_id >= ? and index_id <= ?"
         return DBManager.fetchone(self.cur, sql, (iteration.model_id, *iteration_range),
                                   dto_class=StepTraceDto)
 
@@ -135,10 +137,11 @@ class TsTrackModel(BaseModel, ABC):
         """
         get step trace within the range of iteration.
         """
-        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA) or \
-           not DBManager.judge_row_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA):
+        table_name = ProfilingScene().get_step_table_name()
+        if not DBManager.judge_table_exist(self.cur, table_name) or \
+                not DBManager.judge_row_exist(self.cur, table_name):
             return []
-        sql = f"select index_id, step_end from {DBNameConstant.TABLE_STEP_TRACE_DATA} " \
+        sql = f"select index_id, step_end from {table_name} " \
               f"where model_id=? and index_id>=? and index_id<=? order by step_end"
         return DBManager.fetch_all_data(self.cur, sql, (iteration.model_id, *iteration.get_iteration_range()),
                                         dto_class=StepTraceDto)

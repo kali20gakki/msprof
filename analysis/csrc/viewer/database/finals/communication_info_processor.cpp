@@ -18,6 +18,7 @@ namespace Viewer {
 namespace Database {
 using namespace Association::Credential;
 using namespace Parser::Environment;
+using namespace Analysis::Utils;
 namespace {
 struct CommunicationOpData {
     uint64_t opName = UINT64_MAX;
@@ -26,8 +27,11 @@ struct CommunicationOpData {
     uint32_t opId = UINT32_MAX;
     std::string start;
     std::string end;
-    double oriStart;
-    double oriEnd;
+};
+struct CommunicationOpEndpointsTime {
+    double firstTaskStartTime;
+    double lastTaskStartTime;
+    double lastTaskDuration;
 };
 }
 
@@ -62,6 +66,7 @@ bool CommunicationInfoProcessor::FormatData(const OriDataFormat &oriData,
     CommunicationTaskData taskData;
     HcclSingleDeviceData hcclData;
     std::unordered_map<uint32_t, CommunicationOpData> opData;
+    std::unordered_map<uint32_t, CommunicationOpEndpointsTime> endpoints;
     if (!Utils::Reserve(processedTaskData, oriData.size())) {
         ERROR("Reserve for communication task data failed.");
         return false;
@@ -75,23 +80,28 @@ bool CommunicationInfoProcessor::FormatData(const OriDataFormat &oriData,
         if (opData.find(taskData.opId) == opData.end()) {
             opData[taskData.opId].opId = taskData.opId;
             opData[taskData.opId].opName = taskData.opName;
-            opData[taskData.opId].oriStart = Utils::GetLocalTime(hcclData.timestamp, threadData.timeRecord);
-            opData[taskData.opId].oriEnd = opData[taskData.opId].oriStart + hcclData.duration;
+            endpoints[taskData.opId].firstTaskStartTime = hcclData.timestamp;
+            endpoints[taskData.opId].lastTaskStartTime = hcclData.timestamp;
+            endpoints[taskData.opId].lastTaskDuration = hcclData.duration;
             opData[taskData.opId].connectionId = Utils::Contact(threadData.globalPid, hcclData.connectionId);
             opData[taskData.opId].groupName = taskData.groupName;
         } else {
-            opData[taskData.opId].oriStart = std::min(opData[taskData.opId].oriStart,
-                                                      Utils::GetLocalTime(hcclData.timestamp,
-                                                                          threadData.timeRecord));
-            opData[taskData.opId].oriEnd =std::max(opData[taskData.opId].oriEnd,
-                                                   Utils::GetLocalTime(hcclData.timestamp, threadData.timeRecord)
-                                                       + hcclData.duration);
+            endpoints[taskData.opId].firstTaskStartTime = std::min(endpoints[taskData.opId].firstTaskStartTime,
+                                                                   hcclData.timestamp);
+            if (hcclData.timestamp + hcclData.duration > endpoints[taskData.opId].lastTaskStartTime +
+                endpoints[taskData.opId].lastTaskDuration) {
+                endpoints[taskData.opId].lastTaskStartTime = hcclData.timestamp;
+                endpoints[taskData.opId].lastTaskDuration = hcclData.duration;
+            }
         }
     }
     for (auto item = opData.begin(); item != opData.end(); ++item) {
+        auto key = item->first;
         auto data = item->second;
-        data.start = std::to_string(data.oriStart);
-        data.end = std::to_string(data.oriEnd);
+        HPFloat start{endpoints[key].firstTaskStartTime};
+        HPFloat end = HPFloat(endpoints[key].lastTaskStartTime) + HPFloat(endpoints[key].lastTaskDuration);
+        data.start = Utils::GetLocalTime(start, threadData.timeRecord).Str();
+        data.end = Utils::GetLocalTime(end, threadData.timeRecord).Str();
         processedOpData.emplace_back(data.opName, data.start, data.end, data.connectionId, data.groupName, data.opId);
     }
     return true;

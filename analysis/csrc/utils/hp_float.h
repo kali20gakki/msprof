@@ -109,8 +109,8 @@ public:
     std::string Str();
     // 输出double格式，不建议使用
     double Double();
-    // 量化，指定保留n位小数，不足n位不处理
-    void Quantize(unsigned long n);
+    // 量化，指定保留n位小数，不足n位不处理, 默认保留3位小数
+    void Quantize(unsigned long n = 3);
 private:
     // 清空数据，保留精度
     void Clear();
@@ -136,6 +136,7 @@ private:
     void CoorSub(signed char op, long long psi);
     // 数量级减法,基于多项式数量级进行运算
     void DigSub(signed char op, long long d);
+    // 化简字符串用于构造函数
     bool SimplifyStr(std::string &str);
 private:
     // 默认精度

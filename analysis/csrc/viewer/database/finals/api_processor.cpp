@@ -119,10 +119,10 @@ bool ApiProcessor::FormatData(const std::string &fileDir, const ApiDataFormat &a
         }
         uint16_t level = GetLevelValue(tempData.level);
         uint64_t globalTid = Utils::Contact(pid, tempData.threadId);
-        std::string start = std::to_string(
-            Utils::GetLocalTime(Utils::GetTimeFromSyscnt(tempData.start, params), record));
-        std::string end = std::to_string(
-            Utils::GetLocalTime(Utils::GetTimeFromSyscnt(tempData.end, params), record));
+        Utils::HPFloat startTimestamp = Utils::GetTimeFromSyscnt(tempData.start, params);
+        Utils::HPFloat endTimestamp = Utils::GetTimeFromSyscnt(tempData.end, params);
+        std::string start = Utils::GetLocalTime(startTimestamp, record).Str();
+        std::string end = Utils::GetLocalTime(endTimestamp, record).Str();
         uint64_t connectionId = Utils::Contact(pid, tempData.connectionId);
         uint64_t name = IdPool::GetInstance().GetUint64Id(tempData.structType);
         if (level == MSPROF_REPORT_ACL_LEVEL) {

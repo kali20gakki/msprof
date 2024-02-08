@@ -9,12 +9,12 @@
  * Creation Date      : 2023/11/3
  * *****************************************************************************
  */
- 
+
 #include "analysis/csrc/viewer/database/connection.h"
 
 #include <sqlite3.h>
 #include <iostream>
-
+#include <stdexcept>
 #include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
@@ -29,6 +29,7 @@ Connection::Connection(const std::string &path)
     if (rc != SQLITE_OK) {
         std::string errorMsg = "Failed to open database: " + std::string(sqlite3_errmsg(db_));
         ERROR("sqlite3_exec return %, %", rc, errorMsg);
+        throw std::runtime_error("Connection failed, sqlite3 cannot create directory");
     }
     sqlite3_exec(db_, "PRAGMA synchronous = OFF;", nullptr, nullptr, nullptr);
 }
@@ -97,6 +98,28 @@ bool Connection::ExecuteUpdate(const std::string &sql)
         return false;
     }
     return true;
+}
+
+std::vector<TableColumn> Connection::ExecuteGetTableColumns(const std::string &tableName)
+{
+    std::vector <TableColumn> cols;
+    std::string sql = "PRAGMA table_info(" + tableName + ");";
+    sqlite3_busy_timeout(db_, TIMEOUT);
+    bool rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt_, nullptr);
+    if (rc != SQLITE_OK) {
+        std::string errorMsg = std::string(sqlite3_errmsg(db_));
+        ERROR("% failed", sql);
+        return cols;
+    }
+    while (sqlite3_step(stmt_) == SQLITE_ROW) {
+        std::string name;
+        std::string type;
+        GetColumn(name);
+        GetColumn(type);
+        index_ = 0;
+        cols.emplace_back(TableColumn(name, type));
+    }
+    return cols;
 }
 
 bool Connection::InsertCmd(const std::string &tableName, const int &colNum)

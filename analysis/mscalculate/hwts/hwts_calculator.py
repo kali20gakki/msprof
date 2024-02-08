@@ -148,7 +148,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                 self._parse(_offset_calculator.pre_process(_hwts_log_reader.file_reader, os.path.getsize(_file)))
 
     def _reform_data(self: any, prep_data_res: list) -> list:
-        if self.is_need_parse_all_file():
+        if self.is_need_parse_all_file() or ProfilingScene().is_step_export():
             for index, datum in enumerate(prep_data_res):
                 # index 0 stream id, index 1 task id
                 prep_data_res[index] = list(datum[:2]) + [

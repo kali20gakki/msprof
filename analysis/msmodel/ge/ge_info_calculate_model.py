@@ -12,6 +12,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
+from common_func.profiling_scene import ProfilingScene
 from msmodel.interface.base_model import BaseModel
 from msmodel.step_trace.ts_track_model import TsTrackModel
 
@@ -116,7 +117,7 @@ class GeInfoModel(BaseModel):
             return []
 
         with ts_model:
-            step_trace_data = ts_model.get_step_trace_data()
+            step_trace_data = ts_model.get_step_trace_data(DBNameConstant.TABLE_STEP_TRACE_DATA)
         return step_trace_data
 
     def get_ge_task_data(self: any, is_static_shape: str) -> dict:
@@ -132,6 +133,22 @@ class GeInfoModel(BaseModel):
                   "where index_id<>0 and (task_type = '{1}' or task_type = '{2}') " \
                   "group by model_id||'-'||index_id".format(DBNameConstant.TABLE_GE_TASK,
                                                             Constant.TASK_TYPE_AI_CORE, Constant.TASK_TYPE_HCCL)
+        if ProfilingScene().is_step_export():
+            if is_static_shape == Constant.GE_STATIC_SHAPE:
+                sql = "select {model_id}, GROUP_CONCAT(stream_id||'-'||task_id||'-'||batch_id) from {0} " \
+                      "where index_id=0 and (task_type = '{1}' or task_type = '{2}') " \
+                      "group by {model_id}".format(DBNameConstant.TABLE_GE_TASK,
+                                                   Constant.TASK_TYPE_AI_CORE,
+                                                   Constant.TASK_TYPE_HCCL,
+                                                   model_id=NumberConstant.INVALID_MODEL_ID)
+            else:
+                sql = "select {model_id}||'-'||index_id, " \
+                      "GROUP_CONCAT(stream_id||'-'||task_id||'-'||batch_id) from {0} " \
+                      "where index_id<>0 and (task_type = '{1}' or task_type = '{2}') " \
+                      "group by {model_id}||'-'||index_id".format(DBNameConstant.TABLE_GE_TASK,
+                                                                  Constant.TASK_TYPE_AI_CORE,
+                                                                  Constant.TASK_TYPE_HCCL,
+                                                                  model_id=NumberConstant.INVALID_MODEL_ID)
         task_data = DBManager.fetch_all_data(self.cur, sql)
         task_data_dict = {}
         if task_data:

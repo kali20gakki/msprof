@@ -8,6 +8,7 @@ from unittest import mock
 from common_func.constant import Constant
 from common_func.msprof_object import CustomizedNamedtupleFactory
 from common_func.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ExportMode
 from constant.constant import CONFIG
 from constant.constant import clear_dt_project
 from mscalculate.hccl.hccl_calculator import HcclCalculator
@@ -152,6 +153,22 @@ class TestHcclCalculator(unittest.TestCase):
         communication_data = check._merge_hccl_ops_and_tasks(hccl_ops, hccl_tasks)
         self.assertEqual(communication_data, [])
 
+    def test_merge_hccl_ops_and_tasks_should_return_2_data_when_step_export_and_ops_queue_not_empty(self):
+        hccl_ops = [HcclOps(model_id=4294967295), HcclOps(model_id=4294967296)]
+        hccl_tasks = [HcclTask(model_id=4294967295), HcclTask(model_id=4294967296)]
+        ProfilingScene().set_mode(ExportMode.STEP_EXPORT)
+        check = HcclCalculator([], CONFIG)
+        communication_data = check._merge_hccl_ops_and_tasks(hccl_ops, hccl_tasks)
+        self.assertEqual(2, len(communication_data))
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
+
+    def test_merge_hccl_ops_and_tasks_should_return_2_data_when_all_export_and_ops_queue_not_empty(self):
+        hccl_ops = [HcclOps(model_id=4294967295), HcclOps(model_id=4294967296)]
+        hccl_tasks = [HcclTask(model_id=4294967295), HcclTask(model_id=4294967296)]
+        check = HcclCalculator([], CONFIG)
+        communication_data = check._merge_hccl_ops_and_tasks(hccl_ops, hccl_tasks)
+        self.assertEqual(2, len(communication_data))
+
     def test_get_hccl_op_report_data_should_return_empty_data_when_input_empty(self):
         hccl_data = []
         check = HcclCalculator([], CONFIG)
@@ -169,7 +186,6 @@ class TestHcclCalculator(unittest.TestCase):
         scene = ProfilingScene()
         scene._scene = Constant.SINGLE_OP
         check = HcclCalculator([], CONFIG)
-        ProfilingScene().set_all_export(True)
         self.assertTrue(check._judge_calculate_again())
         scene._scene = None
 
@@ -177,7 +193,6 @@ class TestHcclCalculator(unittest.TestCase):
         scene = ProfilingScene()
         scene._scene = Constant.SINGLE_OP
         check = HcclCalculator([], CONFIG)
-        ProfilingScene().set_all_export(True)
         with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True):
             self.assertFalse(check._judge_calculate_again())
         scene._scene = None
@@ -186,11 +201,11 @@ class TestHcclCalculator(unittest.TestCase):
         scene = ProfilingScene()
         scene._scene = Constant.STEP_INFO
         check = HcclCalculator([], CONFIG)
-        ProfilingScene().set_all_export(False)
+        ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
         with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=False):
             self.assertTrue(check._judge_calculate_again())
         scene._scene = None
-        ProfilingScene().set_all_export(True)
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
     def test_ms_run(self):
         with mock.patch("os.path.exists", return_value=True), \

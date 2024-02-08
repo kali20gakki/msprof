@@ -35,6 +35,7 @@ from common_func.msvp_common import check_dir_writable
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ExportMode
 from common_func.system_data_check_manager import SystemDataCheckManager
 from common_func.utils import Utils
 from framework.file_dispatch import FileDispatch
@@ -287,10 +288,10 @@ class ExportCommand:
                 logging.warning("The flip is not consistent between host and device")
 
     @staticmethod
-    def _process_init(result_dir, is_all_export):
+    def _process_init(result_dir, export_mode):
         init_log(result_dir)
         LoadInfoManager.load_info(result_dir)
-        ProfilingScene().set_all_export(is_all_export)
+        ProfilingScene().set_mode(export_mode)
 
     def process(self: any) -> None:
         """
@@ -306,17 +307,29 @@ class ExportCommand:
         """
         check all report
         """
-        if not ProfilingScene().is_all_export():
+        if ProfilingScene().is_graph_export():
             if ProfilingScene().is_operator():
+                # 单算子不能按子图导
                 error(self.FILE_NAME,
                       "Please do not set 'model-id' and 'iteration-id' in single op mode.")
                 call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
             return
         if not (ChipManager().is_chip_all_data_export() and InfoConfReader().is_all_export_version()):
-            ProfilingScene().set_all_export(ProfilingScene().is_operator())
-            self.sample_config[StrConstant.ALL_EXPORT] = ProfilingScene().is_all_export()
+            # 不支持唯一ID, 不支持基于唯一ID的全导和按step导出
+            if ProfilingScene().is_step_export():
+                # 按step导出必须支持唯一ID
+                error(self.FILE_NAME, "Do not support iteration export. Please upgrade package and driver.")
+                call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
+            # 图模式按子图导, 单算子全导
+            export_mode = ExportMode.ALL_EXPORT if ProfilingScene().is_operator() else ExportMode.GRAPH_EXPORT
+            ProfilingScene().set_mode(export_mode)
+            self.sample_config[StrConstant.EXPORT_MODE] = export_mode
             return
-        print_info(self.FILE_NAME, "All collect data will be exported.")
+        # 支持唯一ID, 对flip进行校验
+        if ProfilingScene().is_step_export():
+            print_info(self.FILE_NAME, "Step data will be exported.")
+        else:
+            print_info(self.FILE_NAME, "All collected data will be exported.")
         host_flip_da_path = PathManager.get_db_path(result_dir, DBNameConstant.DB_RTS_TRACK)
         device_flip_da_path = PathManager.get_db_path(result_dir, DBNameConstant.DB_STEP_TRACE)
         if not os.path.exists(host_flip_da_path) or not os.path.exists(device_flip_da_path):
@@ -359,7 +372,14 @@ class ExportCommand:
 
     def _is_iteration_range_valid(self, project_path):
         with TsTrackModel(project_path, DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_STEP_TRACE_DATA]) as _trace:
-            step_trace = _trace.get_max_index_id_with_model(self.list_map.get(self.MODEL_ID))
+            min_iter, max_iter = _trace.get_index_range_with_model(self.list_map.get(self.MODEL_ID))
+
+        if self.iteration_id < min_iter or self.iteration_id + self.iteration_count - 1 > max_iter:
+            error(self.FILE_NAME,
+                  f'The exported iteration {self.iteration_id}-{self.iteration_id + self.iteration_count - 1} '
+                  f'is invalid for model id {self.list_map.get(self.MODEL_ID)}. '
+                  f'Please enter a valid iteration within {min_iter}-{max_iter}.')
+            return False
 
         if self.iteration_count < NumberConstant.DEFAULT_ITER_ID \
                 or self.iteration_count > IterationRange.MAX_ITERATION_COUNT:
@@ -367,15 +387,6 @@ class ExportCommand:
                                   f'for model id {self.list_map.get(self.MODEL_ID)}. '
                                   f'Must be greater than 0 and less than or equal to '
                                   f'{IterationRange.MAX_ITERATION_COUNT}. Please enter a valid iteration count.')
-            return False
-
-        if step_trace and self.iteration_id + self.iteration_count - 1 > step_trace.index_id:
-            error(self.FILE_NAME,
-                  f'The current iteration id is {self.iteration_id}, '
-                  f'and you want to export {self.iteration_count} rounds of iterations, '
-                  f'but the current maximum iteration is {step_trace.index_id} for model id '
-                  f'{self.list_map.get(self.MODEL_ID)}. '
-                  f'Please enter a valid iteration id and iteration count.')
             return False
         return True
 
@@ -386,24 +397,19 @@ class ExportCommand:
         :return: void
         """
         ProfilingScene().init(project_path)
-        if ProfilingScene().is_all_export() and self.iteration_count > NumberConstant.DEFAULT_ITER_COUNT:
-            warn(self.FILE_NAME, f'Param of "iteration-count" is {self.iteration_count}, '
-                                 f'but it is unnecessary in all export mode.')
-            self.iteration_count = NumberConstant.DEFAULT_ITER_COUNT
+        if ProfilingScene().is_all_export():
+            if self.iteration_count > NumberConstant.DEFAULT_ITER_COUNT:
+                warn(self.FILE_NAME, f'Param of "iteration-count" is {self.iteration_count}, '
+                                     f'but it is unnecessary in all export mode.')
+                self.iteration_count = NumberConstant.DEFAULT_ITER_COUNT
             return
-
-        if self.iteration_id < NumberConstant.DEFAULT_ITER_ID:
-            error(self.FILE_NAME,
-                  f'The iteration id {self.iteration_id} is invalid for model id '
-                  f'{self.list_map.get(self.MODEL_ID)}. Must be greater than 0. Please enter a valid iteration id.')
-            raise ProfException(ProfException.PROF_INVALID_STEP_TRACE_ERROR)
 
         if not self._is_iteration_range_valid(project_path):
             raise ProfException(ProfException.PROF_INVALID_STEP_TRACE_ERROR)
 
     def _analyse_sample_config(self: any, result_dir: str) -> None:
         self.sample_config = ConfigMgr.read_sample_config(result_dir)
-        self.sample_config[StrConstant.ALL_EXPORT] = ProfilingScene().is_all_export()
+        self.sample_config[StrConstant.EXPORT_MODE] = ProfilingScene().get_mode()
 
     def _analyse_data(self: any, result_dir: str) -> None:
         is_data_analyzed = FileManager.is_analyzed_data(result_dir)
@@ -454,7 +460,7 @@ class ExportCommand:
                 self.list_map[self.MODEL_ID] = Constant.GE_OP_MODEL_ID
             return
 
-        if self.list_map.get(self.MODEL_ID) not in model_match_set:
+        if profiling_scene.is_graph_export() and self.list_map.get(self.MODEL_ID) not in model_match_set:
             message = f"The model id {self.list_map.get(self.MODEL_ID)} is invalid. " \
                       f"Must select from {model_match_set}. Please enter a valid model id."
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
@@ -482,7 +488,7 @@ class ExportCommand:
             sample_json = {
                 StrConstant.SAMPLE_CONFIG_PROJECT_PATH: result_dir,
             }
-        sample_json[StrConstant.ALL_EXPORT] = ProfilingScene().is_all_export()
+        sample_json[StrConstant.EXPORT_MODE] = ProfilingScene().get_mode()
         return sample_json
 
     def _has_data_to_export(self):
@@ -563,8 +569,8 @@ class ExportCommand:
             check_dir_writable(dir_name)
             shutil.rmtree(dir_name)
 
-    def _multiprocessing_handle_export_data(self: any, event, result_dir, is_all_export):
-        ExportCommand._process_init(result_dir, is_all_export)
+    def _multiprocessing_handle_export_data(self: any, event, result_dir, export_mode):
+        ExportCommand._process_init(result_dir, export_mode)
         self._handle_export_output_data(event, result_dir)
 
     def _handle_export_output_data(self: any, event, result_dir):
@@ -585,14 +591,14 @@ class ExportCommand:
                      'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
             return
         processes = []
-        is_all_export = ProfilingScene().is_all_export()
+        export_mode = ProfilingScene().get_mode()
         try:
             for event in self.list_map.get('export_type_list', []):
                 if self.command_type == MsProfCommonConstant.TIMELINE:
                     self._handle_export_output_data(event, result_dir)
                     continue
                 process = multiprocessing.Process(target=self._multiprocessing_handle_export_data,
-                                                      args=(event, result_dir, is_all_export))
+                                                  args=(event, result_dir, export_mode))
                 process.start()
                 processes.append(process)
             for process in processes:

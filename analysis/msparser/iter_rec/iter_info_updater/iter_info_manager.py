@@ -6,6 +6,7 @@ from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.path_manager import PathManager
+from common_func.profiling_scene import ProfilingScene
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from msmodel.step_trace.ts_track_model import TsTrackModel
 from msparser.iter_rec.iter_info_updater.iter_info import IterInfo
@@ -17,7 +18,7 @@ class IterInfoManager:
         self.iter_to_iter_info = {}
         self._ts_track_model = TsTrackModel(self.project_path,
                                             DBNameConstant.DB_STEP_TRACE,
-                                            [DBNameConstant.TABLE_STEP_TRACE_DATA])
+                                            [ProfilingScene().get_step_table_name()])
         self._ge_model = GeInfoModel(self.project_path)
 
     @classmethod
@@ -30,8 +31,8 @@ class IterInfoManager:
             return False
 
         with TsTrackModel(result_dir, DBNameConstant.DB_STEP_TRACE,
-                          [DBNameConstant.TABLE_STEP_TRACE_DATA]) as ts_track_model:
-            step_trace_data = ts_track_model.get_step_trace_data()
+                          [ProfilingScene().get_step_table_name()]) as ts_track_model:
+            step_trace_data = ts_track_model.get_step_trace_data(ProfilingScene().get_step_table_name())
         if not step_trace_data:
             return False
         step_trace_data = sorted(step_trace_data, key=lambda x: x.step_start)
@@ -49,7 +50,7 @@ class IterInfoManager:
         if not self._ts_track_model.check_table():
             return
         with self._ts_track_model:
-            step_trace_data = self._ts_track_model.get_step_trace_data()
+            step_trace_data = self._ts_track_model.get_step_trace_data(ProfilingScene().get_step_table_name())
         self.regist_parallel_set(step_trace_data)
 
         if not DBManager.check_tables_in_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_INFO),
