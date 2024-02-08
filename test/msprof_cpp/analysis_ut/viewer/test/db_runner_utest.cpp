@@ -146,6 +146,42 @@ TEST_F(DBRunnerUtest, UpdateData)
     EXPECT_EQ(rc, true);
 }
 
+bool isEqual(const std::vector<TableColumn>& vec1, const std::vector<TableColumn>& vec2)
+{
+    if (vec1.size() != vec2.size()) {
+        return false;
+    }
+
+    for (size_t i = 0; i < vec1.size(); i++) {
+        if (vec1[i].name != vec2[i].name || vec1[i].type != vec2[i].type) {
+            return false;
+        }
+    }
+    return true;
+}
+
+TEST_F(DBRunnerUtest, GetTableColumns)
+{
+    std::string path = "./a.db";
+    auto dbRunner = std::make_shared<DBRunner>(path);
+    dbRunner->CreateTable("tb4", cols);
+    DATA_FORMAT data = {
+        std::make_tuple(2147483647, 4294967295, 9223372036854775807, 118972596256332.95,
+                        1340.046875,  "hcom_allGather__516_2")
+    };
+    dbRunner->InsertData("tb4", data);
+    std::vector<TableColumn> expectedTableColumns{
+        {"col1", "INTEGER"},
+        {"col2", "INTEGER"},
+        {"col3", "INTEGER"},
+        {"col4", "NUMERIC"},
+        {"col5", "REAL"},
+        {"col6", "TEXT"},
+    };
+    auto tableColumns = dbRunner->GetTableColumns("tb4");
+    EXPECT_TRUE(isEqual(tableColumns, expectedTableColumns));
+}
+
 TEST_F(DBRunnerUtest, MultithreadingInsertQuery)
 {
     std::string path = "./a.db";

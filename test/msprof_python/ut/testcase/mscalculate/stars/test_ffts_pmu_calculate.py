@@ -10,6 +10,7 @@ from unittest import mock
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ExportMode
 from constant.constant import CONFIG
 from mscalculate.stars.ffts_pmu_calculator import FftsPmuCalculator
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -43,7 +44,7 @@ class TestFftsPmuCalculator(TestCase):
             check.ms_run()
 
     def test_calculate_by_iter_no_table(self):
-        ProfilingScene().set_all_export(False)
+        ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.Utils.get_scene', return_value=Constant.STEP_INFO), \
                 mock.patch("os.path.exists", return_value=True), \
@@ -55,9 +56,10 @@ class TestFftsPmuCalculator(TestCase):
                 mock.patch(NAMESPACE + '.HwtsIterModel.check_table', return_value=False):
             check = FftsPmuCalculator(self.file_list, CONFIG)
             check.calculate()
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
     def test_calculate_by_iter_table_exist_and_save(self):
-        ProfilingScene().set_all_export(False)
+        ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.Utils.get_scene', return_value=Constant.STEP_INFO), \
                 mock.patch("os.path.exists", return_value=True), \
@@ -87,6 +89,7 @@ class TestFftsPmuCalculator(TestCase):
             check._freq = 1500
             check.calculate()
             check.save()
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
     def test_save_should_be_success_when__is_mix_needed_is_true(self):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
@@ -124,7 +127,6 @@ class TestFftsPmuCalculator(TestCase):
             mixCalcute.save()
 
     def test_calculate_all_file(self):
-        ProfilingScene().set_all_export(True)
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.Utils.get_scene', return_value=Constant.SINGLE_OP), \
                 mock.patch(NAMESPACE + '.PathManager.get_data_file_path'), \
@@ -142,7 +144,6 @@ class TestFftsPmuCalculator(TestCase):
             check.calculate()
 
     def test_calculate_when_table_exist_then_do_not_execute(self):
-        ProfilingScene().set_all_export(True)
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.Utils.get_scene', return_value=Constant.SINGLE_OP), \
                 mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \

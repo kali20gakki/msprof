@@ -3,8 +3,8 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : enum_api_level_processor.cpp
- * Description        : 处理api相关数据
+ * File Name          : enum_processor.cpp
+ * Description        : 落盘枚举表数据
  * Author             : msprof team
  * Creation Date      : 2023/12/18
  * *****************************************************************************
@@ -16,6 +16,14 @@
 namespace Analysis {
 namespace Viewer {
 namespace Database {
+namespace {
+
+const std::unordered_map<std::string, std::unordered_map<std::string, uint16_t>> ENUM_TABLE = {
+    {TABLE_NAME_ENUM_API_LEVEL, API_LEVEL_TABLE},
+    {TABLE_NAME_ENUM_MEMORY, MEMORY_TABLE},
+    {TABLE_NAME_ENUM_NPU_MODULE, NPU_MODULE_NAME_TABLE}
+};
+}
 
 EnumProcessor::EnumProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
     : TableProcessor(reportDBPath, profPaths) {}
@@ -24,61 +32,35 @@ bool EnumProcessor::Run()
 {
     INFO("EnumProcessor Run.");
     bool flag = Process();
-    PrintProcessorResult(flag, TABLE_NAME_ENUM);
+    PrintProcessorResult(flag, PROCESSOR_NAME_ENUM);
     return flag;
 }
 
 bool EnumProcessor::Process(const std::string &fileDir)
 {
     INFO("EnumProcessor Process.");
-    bool flag = GetApiLevelData();
-    flag &= GetIOTypeData();
-    flag &= GetNpuModuleData();
+    bool flag = true;
+    for (const auto& tableName : ENUM_TABLE) {
+        flag &= SaveEnumData(tableName.first);
+    }
     return flag;
 }
 
-bool EnumProcessor::GetApiLevelData()
+bool EnumProcessor::SaveEnumData(const std::string &tableName)
 {
-    INFO("EnumProcessor GetApiLevelData.");
-    EnumFormat apiLevelData;
-    if (!Utils::Reserve(apiLevelData, API_LEVEL_TABLE.size())) {
-        ERROR("Reserve for api level data failed.");
+    INFO("EnumProcessor: %.", tableName);
+    auto table = ENUM_TABLE.find(tableName);
+    // Process内保证不出现表外的表名,省去end判定
+    EnumDataFormat enumData;
+    if (!Utils::Reserve(enumData, table->second.size())) {
+        ERROR("Reserve for % data failed.", tableName);
         return false;
     }
-    for (const auto& record : API_LEVEL_TABLE) {
-        apiLevelData.emplace_back(record.second, record.first);
+    for (const auto& record : table->second) {
+        enumData.emplace_back(record.second, record.first);
     }
-    return SaveData(apiLevelData, TABLE_NAME_ENUM_API_LEVEL);
+    return SaveData(enumData, tableName);
 }
-
-bool EnumProcessor::GetIOTypeData()
-{
-    INFO("EnumProcessor GetIOTypeData.");
-    EnumFormat ioTypeData;
-    if (!Utils::Reserve(ioTypeData, IO_TYPE_TABLE.size())) {
-        ERROR("Reserve for IO type data failed.");
-        return false;
-    }
-    for (const auto& record : IO_TYPE_TABLE) {
-        ioTypeData.emplace_back(record.second, record.first);
-    }
-    return SaveData(ioTypeData, TABLE_NAME_ENUM_IO_TYPE);
-}
-
-bool EnumProcessor::GetNpuModuleData()
-{
-    INFO("EnumProcessor GetNpuModuleData.");
-    EnumFormat npuModuleData;
-    if (!Utils::Reserve(npuModuleData, NPU_MODULE_NAME_TABLE.size())) {
-        ERROR("Reserve for NPU module data failed.");
-        return false;
-    }
-    for (const auto& record : NPU_MODULE_NAME_TABLE) {
-        npuModuleData.emplace_back(record.second, record.first);
-    }
-    return SaveData(npuModuleData, TABLE_NAME_ENUM_NPU_MODULE);
-}
-
 
 } // Database
 } // Viewer

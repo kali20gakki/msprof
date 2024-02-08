@@ -266,7 +266,10 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                 idx += 1
 
         if ops_queue:
-            logging.error('ops_queue is not empty (len=%d)', len(ops_queue))
+            if ProfilingScene().is_step_export():
+                logging.warning('ops_queue is not empty (len=%d)', len(ops_queue))
+            else:
+                logging.error('ops_queue is not empty (len=%d)', len(ops_queue))
         if task_queue:
             logging.error('task_queue is not empty (len=%d)', len(task_queue))
 

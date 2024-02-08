@@ -39,7 +39,7 @@ class CommunicationInfoProcessor : public TableProcessor {
     // 不同线程需要实例化的数据集合，由于函数行数限制定义为结构体
     struct ThreadData {
         uint16_t deviceId = UINT16_MAX;
-        uint32_t globalPid = UINT32_MAX;
+        uint32_t profId = UINT32_MAX;
         Utils::ProfTimeRecord timeRecord;
         DBInfo hcclSingleDeviceDB{"hccl_single_device.db", "HCCLSingleDevice"};
     };

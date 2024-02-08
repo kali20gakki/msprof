@@ -104,7 +104,7 @@ namespace {
         {"name", SQL_TEXT_TYPE}
     };
 
-    const TableColumns ENUM_IO_TYPE = {
+    const TableColumns ENUM_MEMORY = {
         {"id", SQL_INTEGER_TYPE, true},
         {"name", SQL_TEXT_TYPE}
     };
@@ -129,7 +129,7 @@ ReportDB::ReportDB()
         {TABLE_NAME_API, API},
         // ENUM
         {TABLE_NAME_ENUM_API_LEVEL, ENUM_API_LEVEL},
-        {TABLE_NAME_ENUM_IO_TYPE, ENUM_IO_TYPE},
+        {TABLE_NAME_ENUM_MEMORY, ENUM_MEMORY},
         {TABLE_NAME_ENUM_NPU_MODULE, ENUM_NPU_MODULE},
     };
 }

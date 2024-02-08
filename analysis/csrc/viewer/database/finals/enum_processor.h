@@ -4,7 +4,7 @@
 ****************************************************************************** */
 /* ******************************************************************************
  * File Name          : enum_processor.h
- * Description        : 落盘api level层级数据
+ * Description        : 落盘枚举表数据
  * Author             : msprof team
  * Creation Date      : 2023/12/18
  * *****************************************************************************
@@ -19,10 +19,9 @@ namespace Analysis {
 namespace Viewer {
 namespace Database {
 // 该类用于落盘枚举相关数据
-// api level 不同的PROF文件中通用，因此只需调用一回
 class EnumProcessor : public TableProcessor {
-// level_id, level_name
-using EnumFormat = std::vector<std::tuple<uint16_t, std::string>>;
+// 枚举值, 枚举名
+using EnumDataFormat = std::vector<std::tuple<uint16_t, std::string>>;
 public:
     EnumProcessor() = default;
     EnumProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
@@ -30,9 +29,7 @@ public:
 protected:
     bool Process(const std::string &fileDir = "") override;
 private:
-    bool GetApiLevelData();
-    bool GetIOTypeData();
-    bool GetNpuModuleData();
+    bool SaveEnumData(const std::string &tableName);
 };
 
 

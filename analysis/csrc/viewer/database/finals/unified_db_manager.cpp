@@ -31,15 +31,14 @@ using Context = Parser::Environment::Context;
 using namespace analysis::dvvp::common::error;
 
 namespace {
-    const std::vector<std::string> DB_NAME = {
-        TABLE_NAME_ENUM,
-        TABLE_NAME_SESSION_TIME_INFO,
-        TABLE_NAME_NPU_INFO,
-        TABLE_NAME_TASK,
-        TABLE_NAME_COMPUTE_TASK_INFO,
-        TABLE_NAME_COMMUNICATION_TASK_INFO,
-        TABLE_NAME_COMMUNICATION_OP,
-        TABLE_NAME_API
+    const std::vector<std::string> PROCESSOR_NAME = {
+        PROCESSOR_NAME_SESSION_TIME_INFO,
+        PROCESSOR_NAME_NPU_INFO,
+        PROCESSOR_NAME_TASK,
+        PROCESSOR_NAME_COMPUTE_TASK_INFO,
+        PROCESSOR_NAME_COMMUNICATION,
+        PROCESSOR_NAME_API,
+        PROCESSOR_NAME_ENUM
     };
 }
 
@@ -56,24 +55,22 @@ bool UnifiedDBManager::CheckProfDirsValid(const std::string& outputDir,
         return false;
     }
 
-    // 获取第一个元素
-    auto it = profFolderPaths.begin();
-    int64_t msprofBinPid = Context::GetInstance().GetMsBinPid(*it);
-    if (msprofBinPid == analysis::dvvp::common::config::MSVP_MMPROCESS) {
-        errInfo = "The current msprofBinPid is an invalid value:" + std::to_string(msprofBinPid) +
-                  ". Please check the value of your path:" + *it + ".";
-        return false;
-    }
-
-    // 从第二个元素开始遍历
-    ++it;
-    for (; it != profFolderPaths.end(); ++it) {
-        if (Context::GetInstance().GetMsBinPid(*it) != msprofBinPid) {
+    int64_t preMsprofBinPid = analysis::dvvp::common::config::MSVP_MMPROCESS;
+    for (const auto& path : profFolderPaths) {
+        int64_t msprofBinPid = Context::GetInstance().GetMsBinPid(path);
+        if (msprofBinPid == analysis::dvvp::common::config::MSVP_MMPROCESS) {
+            errInfo = "The current msprofBinPid is an invalid value:" + std::to_string(msprofBinPid) +
+                      ". Please check the value of your path:" + path + ".";
+            return false;
+        }
+        if (preMsprofBinPid != analysis::dvvp::common::config::MSVP_MMPROCESS && preMsprofBinPid != msprofBinPid) {
             errInfo = "The profiling results under the " + outputDir + " path are not from "\
                        "the same data collection session. Please verify and rerun.";
             return false;
         }
+        preMsprofBinPid = msprofBinPid;
     }
+
     return true;
 }
 
@@ -102,7 +99,7 @@ int UnifiedDBManager::Run()
     Analysis::Utils::ThreadPool pool(tableProcessors);
     pool.Start();
     std::atomic<bool> retFlag(true);
-    for (const auto& name : DB_NAME) {
+    for (const auto& name : PROCESSOR_NAME) {
         pool.AddTask([this, name, &retFlag]() {
             std::shared_ptr<TableProcessor> processor =
                 TableProcessorFactory::CreateTableProcessor(name, reportDBPath_, ProfFolderPaths_);
@@ -119,14 +116,14 @@ int UnifiedDBManager::Run()
     pool.Stop();
 
     if (!retFlag) {
-        ERROR("The unified db process failed to be executed");
+        ERROR("“The unified db process failed to be executed");
     }
 
     // string_id table 要在其他所有table 全部生成之后再去生成
     std::shared_ptr<TableProcessor> processor =
-        TableProcessorFactory::CreateTableProcessor(TABLE_NAME_STRING_IDS, reportDBPath_, ProfFolderPaths_);
+        TableProcessorFactory::CreateTableProcessor(PROCESSOR_NAME_STRING_IDS, reportDBPath_, ProfFolderPaths_);
     if (processor == nullptr) {
-        ERROR("% is not defined", TABLE_NAME_STRING_IDS);
+        ERROR("% is not defined", PROCESSOR_NAME_STRING_IDS);
         return PROFILING_FAILED;
     } else {
         if (!processor->Run()) {
@@ -135,7 +132,7 @@ int UnifiedDBManager::Run()
         }
     }
 
-    // TABLE_NAME_STRING_IDS
+    // PROCESSOR_NAME_STRING_IDS
     return PROFILING_SUCCESS;
 }
 

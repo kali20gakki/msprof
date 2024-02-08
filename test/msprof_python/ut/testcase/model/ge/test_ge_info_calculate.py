@@ -3,6 +3,8 @@ import unittest
 from unittest import mock
 
 from common_func.constant import Constant
+from common_func.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ExportMode
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from sqlite.db_manager import DBManager
@@ -150,3 +152,22 @@ class TestGeInfoModel(unittest.TestCase):
             check = GeInfoModel("")
             res = check.get_ge_data(Constant.GE_DYNAMIC_SHAPE)
         self.assertEqual({1: {'7', '8'}}, res)
+
+    def test_get_ge_data_should_return_none_when_static_shape_and_step_export(self):
+        ProfilingScene().set_mode(ExportMode.STEP_EXPORT)
+        with mock.patch(NAMESPACE + ".Utils.is_step_scene", return_value=True), \
+                mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value={}):
+            check = GeInfoModel("")
+            res = check.get_ge_task_data(Constant.GE_STATIC_SHAPE)
+        self.assertEqual({}, res)
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
+
+    def test_get_ge_data_should_return_none_when_dynamic_shape_and_step_export(self):
+        ProfilingScene().set_mode(ExportMode.STEP_EXPORT)
+        with mock.patch(NAMESPACE + ".Utils.is_step_scene", return_value=True), \
+                mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value={}):
+            check = GeInfoModel("")
+            res = check.get_ge_task_data(Constant.GE_DYNAMIC_SHAPE)
+        self.assertEqual({}, res)
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
+
