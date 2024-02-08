@@ -37,7 +37,7 @@ CommunicationInfoProcessor::CommunicationInfoProcessor(const std::string &report
 
 bool CommunicationInfoProcessor::Run()
 {
-    INFO("EnumApiLevelProcessor Run.");
+    INFO("CommunicationInfoProcessor Run.");
     bool flag = TableProcessor::Run();
     PrintProcessorResult(flag, TABLE_NAME_COMMUNICATION_TASK_INFO);
     return flag;
@@ -125,15 +125,7 @@ bool CommunicationInfoProcessor::Process(const std::string &fileDir)
     threadData.globalPid = IdPool::GetInstance().GetUint32Id(fileDir);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
-        CommunicationTaskDataFormat taskData;
-        CommunicationOpDataFormat opData;
-        threadData.deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
         std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, threadData.hcclSingleDeviceDB.dbName});
-        if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir)) {
-            ERROR("Failed to obtain the time in start_info and end_info.");
-            flag = false;
-            continue;
-        }
         // 并不是所有场景都有hccl数据
         if (!Utils::File::Exist(dbPath)) {
             WARN("Can't find the db, the path is %.", dbPath);
@@ -142,6 +134,14 @@ bool CommunicationInfoProcessor::Process(const std::string &fileDir)
         if (!Utils::FileReader::Check(dbPath, MAX_DB_BYTES)) {
             flag = false;
             ERROR("Check % failed.", dbPath);
+            continue;
+        }
+        CommunicationTaskDataFormat taskData;
+        CommunicationOpDataFormat opData;
+        threadData.deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
+        if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir)) {
+            ERROR("Failed to obtain the time in start_info and end_info.");
+            flag = false;
             continue;
         }
         MAKE_SHARED_RETURN_VALUE(threadData.hcclSingleDeviceDB.dbRunner, DBRunner, false, dbPath);

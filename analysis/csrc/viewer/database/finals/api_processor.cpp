@@ -51,7 +51,11 @@ bool ApiProcessor::Process(const std::string &fileDir)
     INFO("ApiProcessor Process, dir is %", fileDir);
     DBInfo apieventDB("api_event.db", "ApiData");
     std::string dbPath = Utils::File::PathJoin({fileDir, HOST, SQLITE, apieventDB.dbName});
-    // db check 设置为10G
+    // 并不是所有场景都有api数据
+    if (!Utils::File::Exist(dbPath)) {
+        WARN("Can't find the db, the path is %.", dbPath);
+        return true;
+    }
     if (!Utils::FileReader::Check(dbPath, MAX_DB_BYTES)) {
         ERROR("Check % failed.", dbPath);
         return false;

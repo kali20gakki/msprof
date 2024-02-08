@@ -14,13 +14,10 @@
 
 #include <atomic>
 #include <vector>
-#include <iostream>
 
 #include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/dfx/log.h"
 #include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/utils/file.h"
-#include "analysis/csrc/utils/time_utils.h"
 #include "analysis/csrc/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/table_processor_factory.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
@@ -34,7 +31,7 @@ using Context = Parser::Environment::Context;
 using namespace analysis::dvvp::common::error;
 
 namespace {
-    const std::vector<std::string> DB_NAME = {
+    const std::vector<std::string> TABLE_NAME = {
         TABLE_NAME_TARGET_INFO_SESSION_TIME,
         TABLE_NAME_TARGET_INFO_NPU,
         TABLE_NAME_ENUM_API_LEVEL,
@@ -45,7 +42,7 @@ namespace {
     };
 }
 
-bool UnifiedDBManager::CheckProfDirsValid(const std::string outputDir,
+bool UnifiedDBManager::CheckProfDirsValid(const std::string& outputDir,
                                           const std::set<std::string> &profFolderPaths, std::string &errInfo)
 {
     if (profFolderPaths.empty()) {
@@ -53,29 +50,27 @@ bool UnifiedDBManager::CheckProfDirsValid(const std::string outputDir,
         return false;
     }
 
-    if (Context::GetInstance().Load(profFolderPaths) == false) {
+    if (!Context::GetInstance().Load(profFolderPaths)) {
         errInfo = "JSON parameter loading failed. Please check if the JSON data is complete.";
         return false;
     }
 
-    // 获取第一个元素
-    auto it = profFolderPaths.begin();
-    int64_t msprofBinPid = Context::GetInstance().GetMsBinPid(*it);
-    if (msprofBinPid == analysis::dvvp::common::config::MSVP_MMPROCESS) {
-        errInfo = "The current msprofBinPid is an invalid value:" + std::to_string(msprofBinPid) +
-                  ". Please check the value of your path:" + *it + ".";
-        return false;
-    }
-
-    // 从第二个元素开始遍历
-    ++it;
-    for (; it != profFolderPaths.end(); ++it) {
-        if (Context::GetInstance().GetMsBinPid(*it) != msprofBinPid) {
+    int64_t preMsprofBinPid = analysis::dvvp::common::config::MSVP_MMPROCESS;
+    for (const auto& path : profFolderPaths) {
+        int64_t msprofBinPid = Context::GetInstance().GetMsBinPid(path);
+        if (msprofBinPid == analysis::dvvp::common::config::MSVP_MMPROCESS) {
+            errInfo = "The current msprofBinPid is an invalid value:" + std::to_string(msprofBinPid) +
+                      ". Please check the value of your path:" + path + ".";
+            return false;
+        }
+        if (preMsprofBinPid != msprofBinPid && preMsprofBinPid != analysis::dvvp::common::config::MSVP_MMPROCESS) {
             errInfo = "The profiling results under the " + outputDir + " path are not from "\
                        "the same data collection session. Please verify and rerun.";
             return false;
         }
+        preMsprofBinPid = msprofBinPid;
     }
+
     return true;
 }
 
@@ -85,7 +80,7 @@ int UnifiedDBManager::Init()
 
     Analysis::Association::Credential::IdPool::GetInstance();
 
-    if (Analysis::Parser::Environment::Context::GetInstance().Load(ProfFolderPaths_) == false) {
+    if (!Analysis::Parser::Environment::Context::GetInstance().Load(ProfFolderPaths_)) {
         ERROR("JSON parameter loading failed. Please check if the JSON data is complete.");
         return PROFILING_FAILED;
     }
@@ -104,7 +99,7 @@ int UnifiedDBManager::Run()
     Analysis::Utils::ThreadPool pool(tableProcessors);
     pool.Start();
     std::atomic<bool> retFlag(true);
-    for (auto name : DB_NAME) {
+    for (const auto& name : TABLE_NAME) {
         pool.AddTask([this, name, &retFlag]() {
             std::shared_ptr<TableProcessor> processor =
                 TableProcessorFactory::CreateTableProcessor(name, reportDBPath_, ProfFolderPaths_);
@@ -113,14 +108,14 @@ int UnifiedDBManager::Run()
                 retFlag = false;
                 return;
             }
-            retFlag = processor->Run() && retFlag;
+            retFlag = processor->Run() & retFlag;
         });
     }
 
     pool.WaitAllTasks();
     pool.Stop();
 
-    if (retFlag == false) {
+    if (!retFlag) {
         ERROR("“The unified db process failed to be executed");
     }
 

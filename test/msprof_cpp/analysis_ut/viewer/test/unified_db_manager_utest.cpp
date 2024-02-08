@@ -188,17 +188,14 @@ TEST_F(UnifiedDBManagerUTest, TestCheckProfDirsValidReturnFalseWhenMsprofBinPidE
 TEST_F(UnifiedDBManagerUTest, TestCheckProfDirsValidReturnTrueWhenMsprofBinPidExistAndEqual)
 {
     std::string errInfo;
-    std::vector<uint16_t> deviceIds ={64};
+    int64_t msprofBinPid = 34567;
     const std::set<std::string> profFolderPaths = {"./test11", "./test222"};
     MOCKER_CPP(&Context::Load)
         .stubs()
         .will(returnValue(true));
-    MOCKER_CPP(&Context::GetDeviceId)
-        .stubs()
-        .will(returnValue(deviceIds));
     MOCKER_CPP(&Context::GetMsBinPid)
         .stubs()
-        .will(returnValue(34567)).then(returnValue(34567)); // 34567 表示一个msprofBinPid的示例
+        .will(returnValue(msprofBinPid)); // 34567 表示一个msprofBinPid的示例
     EXPECT_TRUE(UnifiedDBManager::CheckProfDirsValid("./test", profFolderPaths, errInfo));
     GlobalMockObject::verify();
 }
