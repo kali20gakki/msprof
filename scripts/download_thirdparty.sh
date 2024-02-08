@@ -27,7 +27,7 @@ fi
 mkdir -p ${OPENSOURCE_DIR} && cd ${OPENSOURCE_DIR}
 git clone ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/protobuf.git protobuf -b v3.13.0
 git clone ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/nlohmann/json.git json -b v3.7.3
-git clone  --branch 2.4.5-h0.computing.cann.r3 ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/makeself.git
+git clone  --branch 2.5.0-h0.computing.cann.r2 ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/makeself.git
 
 mkdir -p ${LLT_DIR} && cd ${LLT_DIR}
 git clone ssh://git@szv-open.codehub.huawei.com:2222/OpenSourceCenter/google/googletest.git -b release-1.12.1

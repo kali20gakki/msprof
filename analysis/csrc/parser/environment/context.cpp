@@ -133,29 +133,29 @@ bool Context::CheckInfoValueIsValid(const std::string &profPath, uint16_t device
                   "the ProfPath is %, DeviceId is %.", valueName, profPath, deviceId);
             return false;
         }
-        if (deviceId == HOST_ID) {
-            if (!info.at("CPU").is_array() || (info.at("CPU").size() != 1)) {
-                ERROR("CPU's value is invalid, "
-                      "the ProfPath is %, DeviceId is %.", profPath, deviceId);
-                return false;
-            }
-            if (!info.at("CPU").back().contains("Frequency")) {
-                ERROR("There are no Frequency in context info, "
-                      "the ProfPath is %, DeviceId is %.", valueName, profPath, deviceId);
-                return false;
-            }
-        } else {
-            if (!info.at("DeviceInfo").is_array() || (info.at("DeviceInfo").size() != 1)) {
-                ERROR("DeviceInfo's value is invalid, "
-                      "the ProfPath is %, DeviceId is %.", profPath, deviceId);
-                return false;
-            }
-            auto freqArr = info.at("DeviceInfo").back();
-            if (!freqArr.contains("hwts_frequency") || freqArr.at("hwts_frequency").empty()) {
-                ERROR("There are no hwts_frequency in context info, "
-                      "the ProfPath is %, DeviceId is %.", valueName, profPath, deviceId);
-                return false;
-            }
+    }
+    if (deviceId == HOST_ID) {
+        if (!info.at("CPU").is_array() || (info.at("CPU").size() != 1)) {
+            ERROR("CPU's value is invalid, "
+                  "the ProfPath is %, DeviceId is %.", profPath, deviceId);
+            return false;
+        }
+        if (!info.at("CPU").back().contains("Frequency")) {
+            ERROR("There are no Frequency in context info, "
+                  "the ProfPath is %, DeviceId is %.", profPath, deviceId);
+            return false;
+        }
+    } else {
+        if (!info.at("DeviceInfo").is_array() || (info.at("DeviceInfo").size() != 1)) {
+            ERROR("DeviceInfo's value is invalid, "
+                  "the ProfPath is %, DeviceId is %.", profPath, deviceId);
+            return false;
+        }
+        auto freqArr = info.at("DeviceInfo").back();
+        if (!freqArr.contains("hwts_frequency") || freqArr.at("hwts_frequency").empty()) {
+            ERROR("There are no hwts_frequency in context info, "
+                  "the ProfPath is %, DeviceId is %.", profPath, deviceId);
+            return false;
         }
     }
     return true;
@@ -226,7 +226,7 @@ bool Context::GetProfTimeRecordInfo(Utils::ProfTimeRecord &record, const std::st
 {
     auto info = GetInfoByDeviceId(HOST_ID, profPath);
     if (info.empty()) {
-        WARN("There is no host time log in %, it will use device time log!");
+        WARN("There is no host time log in %, it will use device time log!", profPath);
         info = GetInfoByDeviceId(DEFAULT_DEVICE_ID, profPath);
         if (info.empty()) {
             return false;
@@ -311,11 +311,12 @@ bool Context::GetSyscntConversionParams(Utils::SyscntConversionParams &params,
             ERROR("DeviceFreq to double failed.");
             return false;
         }
-        // 固定取host的clock_monotonic_raw
-        info = GetInfoByDeviceId(HOST_ID, profPath);
-        if (info.empty()) {
-            ERROR("No host info.");
-            return false;
+        // 固定取host的clock_monotonic_raw. 若无host,则继续使用device info.
+        const auto hostInfo = GetInfoByDeviceId(HOST_ID, profPath);
+        if (hostInfo.empty()) {
+            WARN("No host info, it will use device clock_monotonic_raw.");
+        } else {
+            info = hostInfo;
         }
     }
     if (IsDoubleEqual(params.freq, 0)) {

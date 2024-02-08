@@ -3,10 +3,21 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2023. All rights reserved.
 
 import logging
+from enum import Enum
 
 from common_func.constant import Constant
 from common_func.singleton import singleton
 from common_func.utils import Utils
+from common_func.db_name_constant import DBNameConstant
+
+
+class ExportMode(Enum):
+    """
+    数据导出模式
+    """
+    ALL_EXPORT = 0
+    STEP_EXPORT = 1
+    GRAPH_EXPORT = 2
 
 
 @singleton
@@ -18,15 +29,13 @@ class ProfilingScene:
     def __init__(self: any) -> None:
         self.project_path = None
         self._scene = None
-        self._all_export = True
-        self._step_export = False
+        self._mode = ExportMode.ALL_EXPORT
 
-    def set_all_export(self: any, value: bool) -> None:
-        self._all_export = value
+    def set_mode(self: any, mode: ExportMode) -> None:
+        self._mode = mode
 
-    def set_value(self: any, **kwargs) -> None:
-        self._all_export = kwargs.get("all_export", self._all_export)
-        self._step_export = kwargs.get("step_export", self._step_export)
+    def get_mode(self: any) -> ExportMode:
+        return self._mode
 
     def init(self: any, project_path: str) -> None:
         """
@@ -50,21 +59,41 @@ class ProfilingScene:
     def is_all_export(self: any) -> bool:
         """
         check whether all export
+        通过用户输入确定模式
         :return: True or False
         """
-        return self._all_export
+        return self._mode == ExportMode.ALL_EXPORT
 
     def is_step_export(self: any) -> bool:
         """
         check whether step export
+        通过用户输入确定模式
         :return: True or False
         """
         # 按step导数据必须要支持全导
-        return self._all_export and self._step_export
+        return self._mode == ExportMode.STEP_EXPORT
+
+    def is_graph_export(self: any) -> bool:
+        """
+        check whether graph export
+        通过用户输入确定模式
+        :return: True or False
+        """
+        return self._mode == ExportMode.GRAPH_EXPORT
+
+    def get_step_table_name(self: any) -> str:
+        """
+        根据不同场景, 返回step_trace_data或者StepTime表名
+        """
+        if self.is_step_export():
+            return DBNameConstant.TABLE_STEP_TIME
+        else:
+            return DBNameConstant.TABLE_STEP_TRACE_DATA
 
     def is_operator(self: any) -> bool:
         """
         check whether operator
+        通过step trace数据确定是否单算子
         :return: True or False
         """
         return self.get_scene() == Constant.SINGLE_OP
@@ -72,6 +101,7 @@ class ProfilingScene:
     def is_mix_operator_and_graph(self: any) -> bool:
         """
         check whether operator
+        通过step trace数据确定是否图和单算子混合
         :return: True or False
         """
         return self.get_scene() == Constant.MIX_OP_AND_GRAPH

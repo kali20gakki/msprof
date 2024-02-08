@@ -35,6 +35,7 @@ protected:
     virtual void SetUp()
     {
         File::CreateDir(TEST_DB_FILE_PATH);
+        File::CreateDir(TEST_DB_FILE_PATH + "/sqlite");
     }
 
     virtual void TearDown()

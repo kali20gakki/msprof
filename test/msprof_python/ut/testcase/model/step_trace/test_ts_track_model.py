@@ -6,6 +6,7 @@ from unittest import mock
 from msmodel.step_trace.ts_track_model import TsTrackModel
 from model.test_dir_cr_base_model import TestDirCRBaseModel
 from common_func.db_name_constant import DBNameConstant
+from common_func.profiling_scene import ProfilingScene
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 
 NAMESPACE = 'msmodel.step_trace.ts_track_model'
@@ -87,3 +88,21 @@ class TestTsTrackModel(TestDirCRBaseModel):
                 result = model.get_step_syscnt_range(iteration_1)
                 self.assertEqual(8046427017271, result.step_start)
                 self.assertEqual(8046487472738, result.step_end)
+
+    def test_get_step_data(self):
+        data = [
+            [1, 4294967295, 8046427017271, 8046427146986, 1],
+            [2, 4294967295, 8046487344086, 8046487472738, 2]
+        ]
+        table_name = ProfilingScene().get_step_table_name()
+        with mock.patch(NAMESPACE + '.DBManager.sql_create_general_table',
+                        return_value="CREATE TABLE IF NOT EXISTS step_trace_data(index_id INTEGER, "
+                                     "model_id INTEGER, step_start INTEGER, step_end INTEGER, iter_id INTEGER)"):
+            with TsTrackModel(self.PROF_DEVICE_DIR,
+                              DBNameConstant.DB_STEP_TRACE, [table_name]) as model:
+                model.create_table(table_name)
+                model.flush(table_name, data)
+                result = model.get_step_trace_data(ProfilingScene().get_step_table_name())
+                self.assertEqual(2, len(result))
+                self.assertEqual(8046427017271, result[0].step_start)
+                self.assertEqual(8046487344086, result[1].step_start)

@@ -11,6 +11,7 @@ from unittest import mock
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ExportMode
 from constant.constant import CONFIG
 from constant.constant import ITER_RANGE
 from mscalculate.aic.aic_calculator import AicCalculator
@@ -66,7 +67,7 @@ class TestAicCalculator(unittest.TestCase):
             check.calculate()
 
     def test_calculate_when_table_exist_then_do_not_execute(self):
-        ProfilingScene().set_all_export(True)
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=True), \
                 mock.patch('logging.info'):
@@ -76,13 +77,13 @@ class TestAicCalculator(unittest.TestCase):
             check._parse_all_file.assert_not_called()
 
     def test_calculate_when_not_all_export_then_parse_by_iter(self):
-        ProfilingScene().set_all_export(False)
+        ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}):
             check = AicCalculator(self.file_list, CONFIG)
             check._parse_by_iter = mock.Mock(return_value=None)
             check.calculate()
             check._parse_by_iter.assert_called_once()
-        ProfilingScene().set_all_export(True)
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
     def test_parse(self):
         aic_reader = struct.pack("=BBHHHII10Q8I", 1, 2, 3, 4, 5, 6, 78, 9, 1, 0, 1, 2, 3, 4, 6, 5, 2, 4, 5, 6, 7, 89, 9,

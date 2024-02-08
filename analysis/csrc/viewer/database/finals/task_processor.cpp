@@ -19,6 +19,7 @@ namespace Viewer {
 namespace Database {
 using namespace Association::Credential;
 using namespace Analysis::Parser::Environment;
+using namespace Analysis::Utils;
 namespace {
 struct TaskData {
     double start;
@@ -105,7 +106,8 @@ TaskProcessor::ProcessedDataFormat TaskProcessor::FormatData(const OriDataFormat
     for (auto &row: oriData) {
         std::tie(data.modelId, std::ignore, data.streamId, data.taskId, data.contextId, data.batchId,
                  data.start, data.duration, oriHostTaskType, oriDeviceTaskType, oriConnectionId) = row;
-        data.end = data.start + std::max(data.duration, 0.0);
+        HPFloat start{data.start};
+        HPFloat end = start + HPFloat(data.duration);
         data.connectionId = Utils::Contact(globalPid, oriConnectionId);
         data.correlationId = IdPool::GetInstance().GetId(
             std::make_tuple(deviceId, data.modelId, data.streamId, data.taskId, data.contextId,
@@ -113,8 +115,8 @@ TaskProcessor::ProcessedDataFormat TaskProcessor::FormatData(const OriDataFormat
         data.taskType = GetTaskType(oriHostTaskType, oriDeviceTaskType,
                                     platformVersion);
         processedData.emplace_back(
-            std::to_string(Utils::GetLocalTime(data.start, timeRecord)),
-            std::to_string(Utils::GetLocalTime(data.end, timeRecord)),
+            Utils::GetLocalTime(start, timeRecord).Str(),
+            Utils::GetLocalTime(end, timeRecord).Str(),
             deviceId, data.connectionId, data.correlationId, globalPid, data.taskType,
             data.contextId, data.streamId, data.taskId, data.modelId);
     }

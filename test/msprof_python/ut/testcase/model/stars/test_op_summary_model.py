@@ -3,6 +3,7 @@ from unittest import mock
 
 from common_func.db_name_constant import DBNameConstant
 from common_func.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ExportMode
 from model.test_dir_cr_base_model import TestDirCRBaseModel
 from msmodel.stars.op_summary_model import OpSummaryModel
 from sqlite.db_manager import DBOpen
@@ -181,7 +182,7 @@ class TestOpSummaryModel(TestDirCRBaseModel):
             db_open.create_table(create_task_time_sql)
             db_open.insert_data(DBNameConstant.TABLE_SUMMARY_GE, ge_summary_data)
             db_open.insert_data(DBNameConstant.TABLE_SUMMARY_TASK_TIME, task_time_data)
-            ProfilingScene().set_all_export(True)
+            ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
             check = OpSummaryModel(SAMPLE_CONFIG)
             check.cur = db_open.db_curs
             check.conn = db_open.db_conn
@@ -217,7 +218,7 @@ class TestOpSummaryModel(TestDirCRBaseModel):
             db_open.create_table(create_task_time_sql)
             db_open.insert_data(DBNameConstant.TABLE_SUMMARY_GE, ge_summary_data)
             db_open.insert_data(DBNameConstant.TABLE_SUMMARY_TASK_TIME, task_time_data)
-            ProfilingScene().set_all_export(False)
+            ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
             check = OpSummaryModel(SAMPLE_CONFIG)
             check.cur = db_open.db_curs
             check.conn = db_open.db_conn

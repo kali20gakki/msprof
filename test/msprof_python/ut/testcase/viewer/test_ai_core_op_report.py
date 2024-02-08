@@ -8,6 +8,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msvp_constant import MsvpConstant
 from common_func.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ExportMode
 from constant.ut_db_name_constant import DB_AICORE_OP_SUMMARY
 from constant.ut_db_name_constant import DB_OP_COUNTER
 from constant.ut_db_name_constant import TABLE_OP_COUNTER_OP_REPORT
@@ -67,8 +68,10 @@ class TestAiCoreOpReport(unittest.TestCase):
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             ProfilingScene().init('')
             ProfilingScene()._scene = Constant.STEP_INFO
+            ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
             res = AiCoreOpReport.get_ai_core_op_summary_data('', '', {})
         self.assertEqual(res, [])
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
     def test_update_model_name_and_infer_id(self):
         data = [[1, 2, 9, 'global_step/Assign', 'Assign', 'AI_CORE',
@@ -252,7 +255,7 @@ class TestAiCoreOpReport(unittest.TestCase):
         )
         ProfilingScene().init('')
         ProfilingScene()._scene = Constant.SINGLE_OP
-        ProfilingScene().set_all_export(True)
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
         res = AiCoreOpReport._get_table_sql_and_headers_without_ge(["Op Name", "stream_id", "Block Dim"])
         self.assertEqual(res, res_data)
 

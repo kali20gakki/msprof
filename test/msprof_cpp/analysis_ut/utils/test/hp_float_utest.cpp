@@ -151,6 +151,12 @@ TEST_F(HPFloatUTest, TestConstructorFailedWhenInputIsInvalidStr)
     } catch (const std::invalid_argument &err) {
         EXPECT_STREQ(err.what(), "Invalid character encountered");
     }
+    input = "10.0.0.1";
+    try {
+        HPFloat num{input};
+    } catch (const std::invalid_argument &err) {
+        EXPECT_STREQ(err.what(), "Invalid character encountered");
+    }
 }
 
 // 测试比较运算符
@@ -331,4 +337,174 @@ TEST_F(HPFloatUTest, TestDouble)
     double input = -987654.321;
     HPFloat num{input};
     EXPECT_EQ(num.Double(), input);
+}
+
+TEST_F(HPFloatUTest, TestQuantize)
+{
+    double input = -987654.321876;
+    HPFloat num{input};
+    num.Quantize();
+    // 已有小数位数大于3，四舍五入取3位
+    EXPECT_EQ(num.Str(), "-987654.322");
+    // 已有小数位数小于3，不处理
+    num = "12344.2";
+    EXPECT_EQ(num.Str(), "12344.2");
+    num = "12344";
+    EXPECT_EQ(num.Str(), "12344");
+}
+
+TEST_F(HPFloatUTest, TestPlusEqualsWhenSymbolIsNotTheSame)
+{
+    HPFloat num1{"-76345932003423.00076"};
+    HPFloat num2{"12345723421234.2"};
+    num1 += num2;
+    EXPECT_EQ(num1.Str(), "-64000208582188.80076");
+    num1 = "12345723421234.2";
+    num2 = "-76345932003423.00076";
+    num1 += num2;
+    EXPECT_EQ(num1.Str(), "-64000208582188.80076");
+}
+
+TEST_F(HPFloatUTest, TestPlusEqualsWhenOneOperatorIsZero)
+{
+    HPFloat num1{"-76345932003423.00076"};
+    HPFloat num2{0};
+    num1 += num2;
+    EXPECT_EQ(num1.Str(), "-76345932003423.00076");
+    num1 = "0";
+    num2 = "12345723421234.2";
+    num1 += num2;
+    EXPECT_EQ(num1.Str(), "12345723421234.2");
+}
+
+TEST_F(HPFloatUTest, TestPlusEqualsWhenPrecisionIsDifferent)
+{
+    HPFloat num1;
+    HPFloat num2;
+    int precision5 = 5;
+    num1.SetPrecision(precision5);
+    num1 = "233.23";
+    num2 = "12345723421234.987654321";
+    num1 += num2; // a += b;精度取两者最大
+    EXPECT_EQ(num1.Str(), "12345723421468.217654321");
+}
+
+TEST_F(HPFloatUTest, TestPlusEqualsInMultipleScenarios)
+{
+    HPFloat num1;
+    HPFloat num2;
+    int precision8 = 8;
+    // 测试无溢出正常调用情况
+    num1 = "233.23";
+    num2 = "12345723421234.987654321";
+    num1 += num2;
+    EXPECT_EQ(num1.Str(), "12345723421468.217654321");
+    // 测试加数的数量级小于被加数理论最小数量级2位情况，直接舍去
+    num1 = "233.23";
+    num1.SetPrecision(precision8); // 内部存储32332000，理论最小数量级-5
+    num2.SetPrecision(precision8); // 防止精度提升，两者精度设置相同
+    num2 = 0.1111111; // 0.1111111 最小数量级-7，超出加数最小数量级1位以上
+    num1 += num2;
+    EXPECT_EQ(num1.Str(), "233.34111");
+    // 测试加数的数量级小于被加数理论最小数量级1位情况,末位数据四舍五入
+    num1 = "233.23";
+    num2 = "23.000008";
+    num1 += num2;
+    EXPECT_EQ(num1.Str(), "256.23001");
+    // 加数数量级超过被加数理论最大数量级情况，被加数右移空出数量级
+    num1 = "233.13145"; // 被加数数量级=2
+    num2 = 30000; // 30000,加数数量级=4
+    num1 += num2;
+    EXPECT_EQ(num1.Str(), "30233.131"); // 45因为右移舍去，不进位（4<5)
+    num1 = "233.13145";
+    num2 = 3000; // 30000,加数数量级=4
+    num1 += num2;
+    EXPECT_EQ(num1.Str(), "3233.1315"); // 5因为右移舍去，进位
+}
+
+TEST_F(HPFloatUTest, TestPlus)
+{
+    // +完全由+=实现，仅测试覆盖率
+    HPFloat num1{"233.23"};
+    HPFloat num2{"12345723421234.987654321"};
+    HPFloat num3 = num1 + num2;
+    EXPECT_EQ(num3.Str(), "12345723421468.217654321");
+}
+
+TEST_F(HPFloatUTest, TestMinusWhenSymbolIsNotTheSame)
+{
+    // 被减数为-，减数为+
+    HPFloat num1{"-76345932003423.00076"};
+    HPFloat num2{"12345723421234.2"};
+    HPFloat num3 = num1 - num2;
+    EXPECT_EQ(num3.Str(), "-88691655424657.20076");
+    // 被减数为+，减数为-
+    num1 = "12345723421234.2";
+    num2 = "-76345932003423.00076";
+    num3 = num1 - num2;
+    EXPECT_EQ(num3.Str(), "88691655424657.20076");
+}
+
+TEST_F(HPFloatUTest, TestMinusWhenOneOperatorIsZero)
+{
+    HPFloat num1{"-76345932003423.00076"};
+    HPFloat num2{0};
+    num1 += num2;
+    EXPECT_EQ(num1.Str(), "-76345932003423.00076");
+    num1 = "0";
+    num2 = "12345723421234.2";
+    num1 += num2;
+    EXPECT_EQ(num1.Str(), "12345723421234.2");
+}
+
+TEST_F(HPFloatUTest, TestMinusInMultipleScenarios)
+{
+    HPFloat num1;
+    HPFloat num2;
+    long precision8 = 8;
+    // 测试无溢出正常调用情况
+    // 小减大情况
+    num1 = "233.23";
+    num2 = "12345723421234.987654321";
+    HPFloat num3 = num1 - num2;
+    EXPECT_EQ(num3.Str(), "-12345723421001.757654321");
+    // 大减小情况
+    num1 = "12345723421234.987654321";
+    num2 = "233.23";
+    num3 = num1 - num2;
+    EXPECT_EQ(num3.Str(), "12345723421001.757654321");
+    // 测试减数的数量级小于被加数理论最小数量级2位情况
+    // 由于是减法，这个用例会同时覆盖减数的数量级小于被加数理论最小数量级1位情况
+    num1 = "233.23";
+    num1.SetPrecision(precision8); // 内部存储32332000，理论最小数量级-5
+    num2.SetPrecision(precision8); // 防止精度提升，两者精度设置相同
+    num2 = 0.1111111; // 0.1111111, 最小数量级-7，超出加数最小数量级1位以上， 1<5，不进位
+    num3 = num1 - num2;
+    EXPECT_EQ(num3.Str(), "233.11889");
+    num2 = 0.1111183; // 0.1111183, 8>5,进位,相当于0.11112
+    num3 = num1 - num2;
+    EXPECT_EQ(num3.Str(), "233.11888");
+}
+
+TEST_F(HPFloatUTest, TestMinusEquals)
+{
+    // -=完全由-实现，仅测试覆盖率
+    HPFloat num1{"233.23"};
+    HPFloat num2{"12345723421234.987654321"};
+    HPFloat num3 = num1 - num2;
+    EXPECT_EQ(num3.Str(), "-12345723421001.757654321");
+}
+
+TEST_F(HPFloatUTest, TestLeftShift)
+{
+    HPFloat num1{"233.23"};
+    HPFloat num3 = num1 << 3; // 3，十进制左移3位，相当于乘以10^3
+    EXPECT_EQ(num3.Str(), "233230");
+}
+
+TEST_F(HPFloatUTest, TestRightShift)
+{
+    HPFloat num1{"233.23"};
+    HPFloat num3 = num1 >> 3; // 3，十进制右移3位，相当于除以10^3
+    EXPECT_EQ(num3.Str(), "0.23323");
 }

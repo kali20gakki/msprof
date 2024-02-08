@@ -12,6 +12,7 @@ from common_func.msprof_common import check_path_valid
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
 from common_func.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ExportMode
 from msinterface.msprof_analyze import AnalyzeCommand
 from msinterface.msprof_export import ExportCommand
 from msinterface.msprof_import import ImportCommand
@@ -93,7 +94,12 @@ class MsprofEntrance:
         # when setting 'iteration-id' and 'model-id' args, export one iteration in one model
         if sys.argv[1] == 'export' and hasattr(args, "model_id") and hasattr(args, "iteration_id"):
             if args.model_id is not None and args.iteration_id is not None:
-                ProfilingScene().set_all_export(False)
+                if args.model_id == NumberConstant.INVALID_MODEL_ID:
+                    # model_id==4294967295是按step导出
+                    ProfilingScene().set_mode(ExportMode.STEP_EXPORT)
+                else:
+                    # 按子图导出
+                    ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
             # 'iteration-id' and 'model-id' must be set simultaneously
             if (args.model_id is None) ^ (args.iteration_id is None):
                 error(self.FILE_NAME,

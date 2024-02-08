@@ -143,7 +143,6 @@ TEST_F(UnifiedDBManagerUTest, TestCheckProfDirsValidReturnFalseWhenContextLoadEr
         .stubs()
         .will(returnValue(false));
     EXPECT_FALSE(UnifiedDBManager::CheckProfDirsValid("./test", profFolderPaths, errInfo));
-    GlobalMockObject::verify();
 }
 
 TEST_F(UnifiedDBManagerUTest, TestCheckProfDirsValidReturnFalseWhenPathIsExceedingFixedLength)
@@ -154,11 +153,12 @@ TEST_F(UnifiedDBManagerUTest, TestCheckProfDirsValidReturnFalseWhenPathIsExceedi
         .stubs()
         .will(returnValue(false));
     EXPECT_FALSE(UnifiedDBManager::CheckProfDirsValid("./test", profFolderPaths, errInfo));
-    GlobalMockObject::verify();
 }
 
 TEST_F(UnifiedDBManagerUTest, TestCheckProfDirsValidReturnFalseWhenMsprofBinPidExistButIsDifferent)
 {
+    int64_t msprofBinPid1 = 123456; // 123456 表示一个随机的msprofBinPid的值
+    int64_t msprofBinPid2 = 34567;  // 34567 表示一个随机的msprofBinPid的值
     std::string errInfo;
     const std::set<std::string> profFolderPaths = {"./test11", "./test222"};
     MOCKER_CPP(&Context::Load)
@@ -166,13 +166,14 @@ TEST_F(UnifiedDBManagerUTest, TestCheckProfDirsValidReturnFalseWhenMsprofBinPidE
         .will(returnValue(true));
     MOCKER_CPP(&Context::GetMsBinPid)
         .stubs()
-        .will(returnValue(123456)).then(returnValue(34567)); // 123456 和 34567表示两个msprofbinpid的值
+        .will(returnValue(msprofBinPid1)).then(returnValue(msprofBinPid2));
     EXPECT_FALSE(UnifiedDBManager::CheckProfDirsValid("./test", profFolderPaths, errInfo));
-    GlobalMockObject::verify();
 }
 
 TEST_F(UnifiedDBManagerUTest, TestCheckProfDirsValidReturnFalseWhenMsprofBinPidExistAndEqualToMSVP_MMPROCESS)
 {
+    int64_t msprofBinPid1 = -1;  // -1 表示一个随机的msprofBinPid的值
+    int64_t msprofBinPid2 = 25;  // 25 表示一个随机的msprofBinPid的值
     std::string errInfo;
     const std::set<std::string> profFolderPaths = {"./test11", "./test222"};
     MOCKER_CPP(&Context::Load)
@@ -180,9 +181,8 @@ TEST_F(UnifiedDBManagerUTest, TestCheckProfDirsValidReturnFalseWhenMsprofBinPidE
         .will(returnValue(true));
     MOCKER_CPP(&Context::GetMsBinPid)
         .stubs()
-        .will(returnValue(MSVP_MMPROCESS)).then(returnValue(34567)); // 34567 表示一个msprofBinpid的有效值
+        .will(returnValue(msprofBinPid1)).then(returnValue(msprofBinPid2)); // 34567 表示一个msprofBinpid的有效值
     EXPECT_FALSE(UnifiedDBManager::CheckProfDirsValid("./test", profFolderPaths, errInfo));
-    GlobalMockObject::verify();
 }
 
 TEST_F(UnifiedDBManagerUTest, TestCheckProfDirsValidReturnTrueWhenMsprofBinPidExistAndEqual)
@@ -197,7 +197,6 @@ TEST_F(UnifiedDBManagerUTest, TestCheckProfDirsValidReturnTrueWhenMsprofBinPidEx
         .stubs()
         .will(returnValue(msprofBinPid)); // 34567 表示一个msprofBinPid的示例
     EXPECT_TRUE(UnifiedDBManager::CheckProfDirsValid("./test", profFolderPaths, errInfo));
-    GlobalMockObject::verify();
 }
 
 TEST_F(UnifiedDBManagerUTest, TestUnifiedDBManagerInitReturnFailedWhenSampleJsonIsExist)
@@ -212,7 +211,6 @@ TEST_F(UnifiedDBManagerUTest, TestUnifiedDBManagerInitReturnFailedWhenSampleJson
     FileWriter sampleWriter(File::PathJoin({"./unifiedDBManagerUTest/PROF1", HOST, SAMPLE_JSON}));
     sampleWriter.WriteText(sampleJson.dump());
     EXPECT_EQ(unifiedDbManager.Init(), PROFILING_SUCCESS);
-    GlobalMockObject::verify();
     EXPECT_TRUE(File::RemoveDir(UNIFIED_DB_DIR, 0));
 }
 
@@ -228,6 +226,5 @@ TEST_F(UnifiedDBManagerUTest, TestUnifiedDBManagerInitReturnFailedWhenSampleJson
     FileWriter sampleWriter(File::PathJoin({"./unifiedDBManagerUTest/PROF1", HOST, SAMPLE_JSON}));
     sampleWriter.WriteText(sampleJson.dump());
     EXPECT_EQ(unifiedDbManager.Init(), PROFILING_FAILED);
-    GlobalMockObject::verify();
     EXPECT_TRUE(File::RemoveDir(UNIFIED_DB_DIR, 0));
 }

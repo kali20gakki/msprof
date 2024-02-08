@@ -133,7 +133,7 @@ class CreateStepTime(CreateSubTable):
             step_time.setdefault(data.index_id, []).append(data)
         for index_id, data in step_time.items():
             if len(data) != 2:  # 有2个数据：step开始和step结束的打点
-                logging.error("The step trace data is missing.")
+                logging.error("The step trace data is missing in step %d.", index_id)
                 continue
             cls.data.append(
                 [index_id, data[0].model_id, data[0].timestamp, data[1].timestamp, index_id]
