@@ -131,15 +131,7 @@ bool TaskProcessor::Process(const std::string &fileDir)
     uint32_t globalPid = IdPool::GetInstance().GetUint32Id(fileDir);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
-        uint16_t deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
-        uint16_t platformVersion = Context::GetInstance().GetPlatformVersion(deviceId, fileDir);
-        if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir)) {
-            ERROR("Failed to obtain the time in start_info and end_info.");
-            flag = false;
-            continue;
-        }
         std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, ascendTaskDB.dbName});
-        INFO("Start to process %, pid:%, deviceId:%.", dbPath, globalPid, deviceId);
         // 并不是所有场景都有ascend task数据
         if (!Utils::File::Exist(dbPath)) {
             WARN("Can't find the db, the path is %.", dbPath);
@@ -150,6 +142,14 @@ bool TaskProcessor::Process(const std::string &fileDir)
             flag = false;
             continue;
         }
+        uint16_t deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
+        uint16_t platformVersion = Context::GetInstance().GetPlatformVersion(deviceId, fileDir);
+        if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir)) {
+            ERROR("Failed to obtain the time in start_info and end_info.");
+            flag = false;
+            continue;
+        }
+        INFO("Start to process %, pid:%, deviceId:%.", dbPath, globalPid, deviceId);
         MAKE_SHARED_RETURN_VALUE(ascendTaskDB.dbRunner, DBRunner, false, dbPath);
         auto oriData = GetData(ascendTaskDB);
         if (oriData.empty()) {

@@ -210,6 +210,18 @@ TEST_F(ContextUTest, TestLoadShouldReturnFalseWhenReadLogException)
     MOCKER_CPP(&FileReader::ReadText).reset();
 }
 
+TEST_F(ContextUTest, TestLoadShouldReturnTrueWhenOnlyDevice)
+{
+    EXPECT_TRUE(File::RemoveDir(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST}), 0));
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+}
+
+TEST_F(ContextUTest, TestLoadShouldReturnTrueWhenOnlyHost)
+{
+    EXPECT_TRUE(File::RemoveDir(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0"}), 0));
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+}
+
 TEST_F(ContextUTest, TestIsAllExportShouldReturnFalseWhenContextEmpty)
 {
     EXPECT_FALSE(Context::GetInstance().IsAllExport());
@@ -224,6 +236,7 @@ TEST_F(ContextUTest, TestIsAllExportShouldReturnTrueWhenAllExportConditionIsMatc
 TEST_F(ContextUTest, TestIsAllExportShouldReturnFalseWhenDrvVersionLessThanAllExportVersion)
 {
     EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON})));
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", INFO_JSON})));
     nlohmann::json info = {
         {"drvVersion", 1},
         {"platform_version", "7"},
@@ -233,6 +246,8 @@ TEST_F(ContextUTest, TestIsAllExportShouldReturnFalseWhenDrvVersionLessThanAllEx
     };
     FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON}));
     infoWriter.WriteText(info.dump());
+    FileWriter deviceInfoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", INFO_JSON}));
+    deviceInfoWriter.WriteText(info.dump());
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
     EXPECT_FALSE(Context::GetInstance().IsAllExport());
 }
@@ -240,6 +255,7 @@ TEST_F(ContextUTest, TestIsAllExportShouldReturnFalseWhenDrvVersionLessThanAllEx
 TEST_F(ContextUTest, TestIsAllExportShouldReturnFalseWhenStrToU16Failed)
 {
     EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON})));
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", INFO_JSON})));
     nlohmann::json info = {
         {"drvVersion", 467732},
         {"platform_version", "2dd"},
@@ -249,6 +265,8 @@ TEST_F(ContextUTest, TestIsAllExportShouldReturnFalseWhenStrToU16Failed)
     };
     FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON}));
     infoWriter.WriteText(info.dump());
+    FileWriter deviceInfoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", INFO_JSON}));
+    deviceInfoWriter.WriteText(info.dump());
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
     EXPECT_FALSE(Context::GetInstance().IsAllExport());
 }
@@ -256,6 +274,7 @@ TEST_F(ContextUTest, TestIsAllExportShouldReturnFalseWhenStrToU16Failed)
 TEST_F(ContextUTest, TestIsAllExportShouldReturnFalseWhenChipV310)
 {
     EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON})));
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", INFO_JSON})));
     nlohmann::json info = {
         {"drvVersion", 467732},
         {"platform_version", "2"},
@@ -265,6 +284,8 @@ TEST_F(ContextUTest, TestIsAllExportShouldReturnFalseWhenChipV310)
     };
     FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON}));
     infoWriter.WriteText(info.dump());
+    FileWriter deviceInfoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", INFO_JSON}));
+    deviceInfoWriter.WriteText(info.dump());
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
     EXPECT_FALSE(Context::GetInstance().IsAllExport());
 }
@@ -375,6 +396,15 @@ TEST_F(ContextUTest, TestGetProfTimeRecordInfoShouldReturnDefaultValueWhenTimeIn
     EXPECT_EQ(res.baseTimeNs, UINT64_MAX - TIME_BASE_OFFSET_NS);
     EXPECT_EQ(res.startTimeNs, UINT64_MAX);
     EXPECT_EQ(res.endTimeNs, 0);
+}
+
+TEST_F(ContextUTest, TestGetProfTimeRecordInfoShouldReturnFalseWhenNoHostAndDevice)
+{
+    EXPECT_TRUE(File::RemoveDir(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST}), 0));
+    EXPECT_TRUE(File::RemoveDir(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0"}), 0));
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    ProfTimeRecord res;
+    EXPECT_FALSE(Context::GetInstance().GetProfTimeRecordInfo(res, {File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
 }
 
 TEST_F(ContextUTest, TestGetProfTimeRecordInfoShouldReturnRightValueWhenSuccess)
@@ -567,18 +597,20 @@ TEST_F(ContextUTest, TestGetMsprofBinPidFromInfoJsonShouldReturnMSVP_MMPROCESSWh
               analysis::dvvp::common::config::MSVP_MMPROCESS);
 }
 
-TEST_F(ContextUTest, TestGetMsprofBinPidFromInfoJsonShouldReturnSucessWhenMsprofBinIsEmpty)
+TEST_F(ContextUTest, TestGetMsprofBinPidFromInfoJsonShouldReturnSucessWhenGetSameId)
 {
     int msprofBinPid = 123456; // 123456 表示一个pid的值
     EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, SAMPLE_JSON})));
-    std::vector<uint16_t> deviceIds = {HOST_ID};
-    MOCKER_CPP(&Context::GetDeviceId)
-        .stubs()
-        .will(returnValue(deviceIds));
-    nlohmann::json sampleJson;
-    sampleJson["msprofBinPid"] = msprofBinPid;
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", SAMPLE_JSON})));
+    // sample.json
+    nlohmann::json sample = {
+        {"msprofBinPid", msprofBinPid},
+    };
     FileWriter sampleWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, SAMPLE_JSON}));
-    sampleWriter.WriteText(sampleJson.dump());
+    sampleWriter.WriteText(sample.dump());
+    FileWriter deviceSampleWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", SAMPLE_JSON}));
+    deviceSampleWriter.WriteText(sample.dump());
+
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
     EXPECT_EQ(Context::GetInstance().GetMsBinPid(File::PathJoin({CONTEXT_DIR, TEST_DIR})), msprofBinPid);
 }
