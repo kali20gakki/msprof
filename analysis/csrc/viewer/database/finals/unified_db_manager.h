@@ -26,7 +26,7 @@ public:
         : outputPath_(output), ProfFolderPaths_(profPaths) {};
     int Run();
     int Init();
-    static bool CheckProfDirsValid(const std::string outputDir,
+    static bool CheckProfDirsValid(const std::string& outputDir,
                                    const std::set<std::string> &profFolderPaths, std::string &errInfo);
 private:
     std::string reportDBPath_;

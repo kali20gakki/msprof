@@ -106,3 +106,10 @@ TEST_F(StringIdsProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDat
     EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&std::vector<TempT>::reserve).reset();
 }
+
+TEST_F(StringIdsProcessorUTest, TestRunShouldReturnTrueWhenDataIsEmpty)
+{
+    IdPool::GetInstance().Clear();
+    auto processor = StringIdsProcessor(DB_PATH);
+    EXPECT_TRUE(processor.Run());
+}

@@ -92,17 +92,33 @@ TEST_F(TargetInfoNpuProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSucce
     EXPECT_EQ(expectData, checkData);
 }
 
+TEST_F(TargetInfoNpuProcessorUTest, TestRunShouldReturnTrueWhenNoDevice)
+{
+    auto processor = TargetInfoNpuProcessor(DB_PATH, {""});
+    EXPECT_TRUE(processor.Run());
+}
+
 TEST_F(TargetInfoNpuProcessorUTest, TestRunShouldReturnFalseWhenOneProcessFailInMultithreading)
 {
-    std::set<std::string> profPath = {"PROF_0", "PROF_1", "PROF_2", "PROF_3", "PROF_4", "PROF_5", "PROF_6", "PROF_7"};
-    NpuInfoDataFormat checkData;
-    MOCKER_CPP(&NpuInfoDataFormat::empty)
+    using format = std::vector<std::tuple<uint16_t, std::string>>;
+    std::set<std::string> profPath = {"PROF_0", "PROF_1", "PROF_2", "PROF_3"};
+    std::vector<std::string> deviceDirs0 = {"device_0"};
+    std::vector<std::string> deviceDirs1 = {"device_1"};
+    std::vector<std::string> deviceDirs2 = {"device_2"};
+    uint16_t chip0 = 0;
+    MOCKER_CPP(&File::GetFilesWithPrefix)
     .stubs()
-    .will(returnValue(true))
-    .then(returnValue(false))
-    .then(returnValue(true));
+    .will(returnValue(deviceDirs0))
+    .then(returnValue(deviceDirs1))
+    .then(returnValue(deviceDirs1))
+    .then(returnValue(deviceDirs2));
+    MOCKER_CPP(&Context::GetPlatformVersion)
+    .stubs()
+    .will(returnValue(chip0));
+    format checkData;
     auto processor = TargetInfoNpuProcessor(DB_PATH, profPath);
     EXPECT_FALSE(processor.Run());
-    MOCKER_CPP(&NpuInfoDataFormat::empty).reset();
+    MOCKER_CPP(&File::GetFilesWithPrefix).reset();
+    MOCKER_CPP(&Context::GetPlatformVersion).reset();
 }
 
