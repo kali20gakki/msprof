@@ -51,9 +51,9 @@ ComputeTaskInfoProcessor::ComputeTaskInfoProcessor(const std::string &reportDBPa
 
 bool ComputeTaskInfoProcessor::Run()
 {
-    INFO("EnumApiLevelProcessor Run.");
+    INFO("ComputeTaskInfoProcessor Run.");
     bool flag = TableProcessor::Run();
-    PrintProcessorResult(flag, TABLE_NAME_COMPUTE_TASK_INFO);
+    PrintProcessorResult(flag, PROCESSOR_NAME_COMPUTE_TASK_INFO);
     return flag;
 }
 

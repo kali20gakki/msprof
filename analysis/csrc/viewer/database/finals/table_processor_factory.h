@@ -27,7 +27,7 @@ namespace Database {
 
 class TableProcessorFactory {
 public:
-    static std::shared_ptr<TableProcessor> CreateTableProcessor(const std::string &tableName,
+    static std::shared_ptr<TableProcessor> CreateTableProcessor(const std::string &processorName,
                                                                 const std::string &reportDBPath,
                                                                 const std::set<std::string> &profPaths);
     ~TableProcessorFactory() = default;

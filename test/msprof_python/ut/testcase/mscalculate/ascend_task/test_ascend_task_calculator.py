@@ -10,6 +10,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ExportMode
 from mscalculate.ascend_task.ascend_task import TopDownTask
 from mscalculate.ascend_task.ascend_task_calculator import AscendTaskCalculator
 from profiling_bean.db_dto.step_trace_dto import IterationRange
@@ -45,15 +46,15 @@ class TestAscendTaskCalculator(unittest.TestCase):
     def test__judge_calculate_again_should_return_true_when_in_graph_scene(self):
         scene = ProfilingScene()
         scene._scene = Constant.STEP_INFO
-        ProfilingScene().set_all_export(False)
+        ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
         self.assertTrue(self.calculator._judge_calculate_again())
         scene._scene = None
-        ProfilingScene().set_all_export(True)
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
     def test__judge_calculate_again_should_return_true_when_no_ascend_task_db_in_op_scene(self):
         scene = ProfilingScene()
         scene._scene = Constant.SINGLE_OP
-        ProfilingScene().set_all_export(True)
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
         with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=False):
             self.assertTrue(self.calculator._judge_calculate_again())
         scene._scene = None
@@ -61,7 +62,7 @@ class TestAscendTaskCalculator(unittest.TestCase):
     def test__judge_calculate_again_should_return_false_when_exist_ascend_task_db_in_op_scene(self):
         scene = ProfilingScene()
         scene._scene = Constant.SINGLE_OP
-        ProfilingScene().set_all_export(True)
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
         with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True):
             self.assertFalse(self.calculator._judge_calculate_again())
         scene._scene = None

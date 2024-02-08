@@ -132,7 +132,7 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
         if "model_id" in ge_summary_headers and "model_id" in task_time_headers:
             inner_join_condition += " and a.model_id=b.model_id"
         if "index_id" in ge_summary_headers and "index_id" in task_time_headers:
-            if not ProfilingScene().is_all_export():
+            if ProfilingScene().is_graph_export():
                 inner_join_condition += " and (a.index_id=b.index_id or b.index_id=0)"
             else:
                 inner_join_condition += " "

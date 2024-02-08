@@ -144,7 +144,7 @@ class StrConstant:
 
     TASK_START_TIME = 'Task Start Time(us)'
 
-    ALL_EXPORT = "all_export"
+    EXPORT_MODE = "export_mode"
 
     #prefix for api and event
     LEVEL_MAP = {

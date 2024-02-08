@@ -42,7 +42,7 @@ bool ApiProcessor::Run()
 {
     INFO("ApiProcessor Run.");
     bool flag = TableProcessor::Run();
-    PrintProcessorResult(flag, TABLE_NAME_API);
+    PrintProcessorResult(flag, PROCESSOR_NAME_API);
     return flag;
 }
 
@@ -51,7 +51,11 @@ bool ApiProcessor::Process(const std::string &fileDir)
     INFO("ApiProcessor Process, dir is %", fileDir);
     DBInfo apieventDB("api_event.db", "ApiData");
     std::string dbPath = Utils::File::PathJoin({fileDir, HOST, SQLITE, apieventDB.dbName});
-    // db check 设置为10G
+    // 并不是所有场景都有api数据
+    if (!Utils::File::Exist(dbPath)) {
+        WARN("Can't find the db, the path is %.", dbPath);
+        return true;
+    }
     if (!Utils::FileReader::Check(dbPath, MAX_DB_BYTES)) {
         ERROR("Check % failed.", dbPath);
         return false;
@@ -87,7 +91,8 @@ bool ApiProcessor::FormatData(const std::string &fileDir, const ApiDataFormat &a
                               ProcessedDataFormat &processedData)
 {
     INFO("ApiProcessor FormatData, dir is %", fileDir);
-    uint32_t pid = IdPool::GetInstance().GetUint32Id(fileDir);
+    uint32_t profId = IdPool::GetInstance().GetUint32Id(fileDir);
+    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, fileDir);
     Utils::SyscntConversionParams params;
     Utils::ProfTimeRecord record;
     if (!Context::GetInstance().GetSyscntConversionParams(params, Parser::Environment::HOST_ID, fileDir)) {
@@ -115,11 +120,11 @@ bool ApiProcessor::FormatData(const std::string &fileDir, const ApiDataFormat &a
         }
         uint16_t level = GetLevelValue(tempData.level);
         uint64_t globalTid = Utils::Contact(pid, tempData.threadId);
-        std::string start = std::to_string(
-            Utils::GetLocalTime(Utils::GetTimeFromSyscnt(tempData.start, params), record));
-        std::string end = std::to_string(
-            Utils::GetLocalTime(Utils::GetTimeFromSyscnt(tempData.end, params), record));
-        uint64_t connectionId = Utils::Contact(pid, tempData.connectionId);
+        Utils::HPFloat startTimestamp = Utils::GetTimeFromSyscnt(tempData.start, params);
+        Utils::HPFloat endTimestamp = Utils::GetTimeFromSyscnt(tempData.end, params);
+        std::string start = Utils::GetLocalTime(startTimestamp, record).Str();
+        std::string end = Utils::GetLocalTime(endTimestamp, record).Str();
+        uint64_t connectionId = Utils::Contact(profId, tempData.connectionId);
         uint64_t name = IdPool::GetInstance().GetUint64Id(tempData.structType);
         if (level == MSPROF_REPORT_ACL_LEVEL) {
             name = IdPool::GetInstance().GetUint64Id(tempData.id);

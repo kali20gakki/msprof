@@ -26,7 +26,7 @@ bool StringIdsProcessor::Run()
 {
     INFO("StringIdsProcessor Run.");
     bool flag = Process();
-    PrintProcessorResult(flag, TABLE_NAME_STRING_IDS);
+    PrintProcessorResult(flag, PROCESSOR_NAME_STRING_IDS);
     return flag;
 }
 
@@ -46,6 +46,10 @@ StringIdsProcessor::ProcessedDataFormat StringIdsProcessor::FormatData(const Ori
 bool StringIdsProcessor::Process(const std::string &fileDir)
 {
     OriDataFormat oriData = IdPool::GetInstance().GetAllUint64Ids();
+    if (oriData.empty()) {
+        WARN("No StringIds data.");
+        return true;
+    }
     auto processedData = FormatData(oriData);
     if (!SaveData(processedData, TABLE_NAME_STRING_IDS)) {
         ERROR("Failed to generate the STRING_IDS table.");

@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "analysis/csrc/viewer/database/connection.h"
+#include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
 namespace Viewer {
@@ -39,6 +40,7 @@ public:
     template<typename... Args>
     bool QueryData(const std::string &sql, std::vector<std::tuple<Args...>> &result) const;
     bool UpdateData(const std::string &sql) const;
+    std::vector<TableColumn> GetTableColumns(const std::string &tableName);
 private:
     std::string path_;
 };
@@ -51,11 +53,8 @@ bool DBRunner::InsertData(const std::string &tableName, const std::vector<std::t
         return false;
     }
     INFO("Start insert data to %", tableName);
-    auto conn = std::make_shared<Connection>(path_);
-    if (!conn) {
-        ERROR("Connection init failed");
-        return false;
-    }
+    std::shared_ptr<Connection> conn;
+    MAKE_SHARED_RETURN_VALUE(conn, Connection, false, path_);
     if (!conn->ExecuteInsert(tableName, data)) {
         ERROR("Insert data to % failed", tableName);
         return false;
@@ -68,11 +67,8 @@ template<typename... Args>
 bool DBRunner::QueryData(const std::string &sql, std::vector<std::tuple<Args...>> &result) const
 {
     INFO("Start query data");
-    auto conn = std::make_shared<Connection>(path_);
-    if (!conn) {
-        ERROR("Connection init failed");
-        return false;
-    }
+    std::shared_ptr<Connection> conn;
+    MAKE_SHARED_RETURN_VALUE(conn, Connection, false, path_);
     if (!conn->ExecuteQuery(sql, result)) {
         ERROR("Query data failed: %", sql);
         return false;

@@ -19,6 +19,7 @@ namespace Viewer {
 namespace Database {
 using namespace Association::Credential;
 using namespace Analysis::Parser::Environment;
+using namespace Analysis::Utils;
 namespace {
 struct TaskData {
     double start;
@@ -46,7 +47,7 @@ bool TaskProcessor::Run()
 {
     INFO("TaskProcessor Run.");
     bool flag = TableProcessor::Run();
-    PrintProcessorResult(flag, TABLE_NAME_TASK);
+    PrintProcessorResult(flag, PROCESSOR_NAME_TASK);
     return flag;
 }
 
@@ -89,9 +90,7 @@ TaskProcessor::OriDataFormat TaskProcessor::GetData(DBInfo &ascendTaskDB)
     return oriData;
 }
 
-TaskProcessor::ProcessedDataFormat TaskProcessor::FormatData(const OriDataFormat &oriData, uint16_t deviceId,
-                                                             uint32_t globalPid, uint16_t platformVersion,
-                                                             Utils::ProfTimeRecord &timeRecord)
+TaskProcessor::ProcessedDataFormat TaskProcessor::FormatData(const OriDataFormat &oriData, const ThreadData &threadData)
 {
     ProcessedDataFormat processedData;
     TaskData data;
@@ -105,17 +104,18 @@ TaskProcessor::ProcessedDataFormat TaskProcessor::FormatData(const OriDataFormat
     for (auto &row: oriData) {
         std::tie(data.modelId, std::ignore, data.streamId, data.taskId, data.contextId, data.batchId,
                  data.start, data.duration, oriHostTaskType, oriDeviceTaskType, oriConnectionId) = row;
-        data.end = data.start + std::max(data.duration, 0.0);
-        data.connectionId = Utils::Contact(globalPid, oriConnectionId);
+        HPFloat start{data.start};
+        HPFloat end = start + HPFloat(data.duration);
+        data.connectionId = Utils::Contact(threadData.profId, oriConnectionId);
         data.correlationId = IdPool::GetInstance().GetId(
-            std::make_tuple(deviceId, data.modelId, data.streamId, data.taskId, data.contextId,
+            std::make_tuple(threadData.deviceId, data.modelId, data.streamId, data.taskId, data.contextId,
                             data.batchId));
         data.taskType = GetTaskType(oriHostTaskType, oriDeviceTaskType,
-                                    platformVersion);
+                                    threadData.platformVersion);
         processedData.emplace_back(
-            std::to_string(Utils::GetLocalTime(data.start, timeRecord)),
-            std::to_string(Utils::GetLocalTime(data.end, timeRecord)),
-            deviceId, data.connectionId, data.correlationId, globalPid, data.taskType,
+            Utils::GetLocalTime(start, threadData.timeRecord).Str(),
+            Utils::GetLocalTime(end, threadData.timeRecord).Str(),
+            threadData.deviceId, data.connectionId, data.correlationId, threadData.pid, data.taskType,
             data.contextId, data.streamId, data.taskId, data.modelId);
     }
     return processedData;
@@ -124,22 +124,14 @@ TaskProcessor::ProcessedDataFormat TaskProcessor::FormatData(const OriDataFormat
 bool TaskProcessor::Process(const std::string &fileDir)
 {
     INFO("Start to process %.", fileDir);
-    Utils::ProfTimeRecord timeRecord;
-    DBInfo ascendTaskDB("ascend_task.db", "AscendTask");
+    ThreadData threadData;
     bool flag = true;
-    MAKE_SHARED0_NO_OPERATION(ascendTaskDB.database, AscendTaskDB);
-    uint32_t globalPid = IdPool::GetInstance().GetUint32Id(fileDir);
+    MAKE_SHARED0_NO_OPERATION(threadData.ascendTaskDB.database, AscendTaskDB);
+    threadData.profId = IdPool::GetInstance().GetUint32Id(fileDir);
+    threadData.pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, fileDir);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
-        uint16_t deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
-        uint16_t platformVersion = Context::GetInstance().GetPlatformVersion(deviceId, fileDir);
-        if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir)) {
-            ERROR("Failed to obtain the time in start_info and end_info.");
-            flag = false;
-            continue;
-        }
-        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, ascendTaskDB.dbName});
-        INFO("Start to process %, pid:%, deviceId:%.", dbPath, globalPid, deviceId);
+        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, threadData.ascendTaskDB.dbName});
         // 并不是所有场景都有ascend task数据
         if (!Utils::File::Exist(dbPath)) {
             WARN("Can't find the db, the path is %.", dbPath);
@@ -150,20 +142,28 @@ bool TaskProcessor::Process(const std::string &fileDir)
             flag = false;
             continue;
         }
-        MAKE_SHARED_RETURN_VALUE(ascendTaskDB.dbRunner, DBRunner, false, dbPath);
-        auto oriData = GetData(ascendTaskDB);
-        if (oriData.empty()) {
+        threadData.deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
+        threadData.platformVersion = Context::GetInstance().GetPlatformVersion(threadData.deviceId, fileDir);
+        if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir)) {
+            ERROR("Failed to obtain the time in start_info and end_info.");
             flag = false;
-            ERROR("Get % data failed in %.", ascendTaskDB.tableName, dbPath);
             continue;
         }
-        auto processedData = FormatData(oriData, deviceId, globalPid, platformVersion, timeRecord);
+        INFO("Start to process %, pid:%, deviceId:%.", dbPath, threadData.pid, threadData.deviceId);
+        MAKE_SHARED_RETURN_VALUE(threadData.ascendTaskDB.dbRunner, DBRunner, false, dbPath);
+        auto oriData = GetData(threadData.ascendTaskDB);
+        if (oriData.empty()) {
+            flag = false;
+            ERROR("Get % data failed in %.", threadData.ascendTaskDB.tableName, dbPath);
+            continue;
+        }
+        auto processedData = FormatData(oriData, threadData);
         if (!SaveData(processedData, TABLE_NAME_TASK)) {
             flag = false;
             ERROR("Save data failed, %.", dbPath);
             continue;
         }
-        INFO("process %, pid:%, deviceId:% ends.", dbPath, globalPid, deviceId);
+        INFO("process %, pid:%, deviceId:% ends.", dbPath, threadData.pid, threadData.deviceId);
     }
     INFO("process % ends.", fileDir);
     return flag;

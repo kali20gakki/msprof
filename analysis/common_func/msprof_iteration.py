@@ -117,8 +117,9 @@ class MsprofIteration:
         get step iteration time
         """
         trace_conn, trace_curs = DBManager.check_connect_db(self._result_dir, DBNameConstant.DB_STEP_TRACE)
+        table_name = ProfilingScene().get_step_table_name()
         if not trace_conn or not trace_curs \
-                or not DBManager.judge_table_exist(trace_curs, DBNameConstant.TABLE_STEP_TRACE_DATA):
+                or not DBManager.judge_table_exist(trace_curs, table_name):
             return []
         try:
             trace_data = self._get_iteration_time(trace_curs, iter_range)
@@ -137,12 +138,13 @@ class MsprofIteration:
         :return: [iter_id - 1, iter_id] or [min_iter_id - 1, max_iter_id] in pytorch graph
         """
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
+        table_name = ProfilingScene().get_step_table_name()
 
         parallel_iter_range = []
         for _iter in iter_range.get_iteration_range():
             trace_conn, trace_curs = DBManager.check_connect_db_path(db_path)
             if not trace_conn or not trace_curs \
-                    or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
+                    or not DBManager.check_tables_in_db(db_path, table_name):
                 return []
             current_iter = self.get_iteration_info_by_index_id(_iter, iter_range.model_id)
             if not current_iter:
@@ -150,7 +152,7 @@ class MsprofIteration:
 
             # find first parallel iter
             sql = "select model_id, index_id, iter_id, step_start, step_end from {0} " \
-                  "where step_end>? and step_end<=? order by step_end".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+                  "where step_end>? and step_end<=? order by step_end".format(table_name)
             first_parallel_iter = DBManager.fetchone(
                 trace_curs, sql, (current_iter.step_start, current_iter.step_end,), dto_class=StepTraceDto)
             DBManager.destroy_db_connect(trace_conn, trace_curs)
@@ -171,14 +173,15 @@ class MsprofIteration:
 
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         trace_conn, trace_curs = DBManager.check_connect_db_path(db_path)
+        table_name = ProfilingScene().get_step_table_name()
         if not trace_conn or not trace_curs \
-                or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
+                or not DBManager.check_tables_in_db(db_path, table_name):
             return set()
         iter_id_range = self.get_parallel_iter_range(iter_range)
         if not iter_id_range:
             return iter_set
         sql = "select model_id, index_id, iter_id, step_start, step_end from {0} " \
-              "where iter_id>=? and iter_id<=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+              "where iter_id>=? and iter_id<=?".format(table_name)
         parallel_iter_info_list = DBManager.fetch_all_data(
             trace_curs, sql, iter_id_range, dto_class=StepTraceDto)
 
@@ -199,13 +202,14 @@ class MsprofIteration:
         """
         get iteration info by index_id
         """
+        table_name = ProfilingScene().get_step_table_name()
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         trace_conn, trace_curs = DBManager.check_connect_db(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         if not trace_conn or not trace_curs \
-                or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
+                or not DBManager.check_tables_in_db(db_path, table_name):
             return EmptyClass()
         sql = "select model_id, index_id, iter_id, step_start, step_end from {0} " \
-              "where model_id={1} and index_id={2}".format(DBNameConstant.TABLE_STEP_TRACE_DATA, model_id, index_id)
+              "where model_id={1} and index_id={2}".format(table_name, model_id, index_id)
         iter_info = DBManager.fetchone(trace_curs, sql, dto_class=StepTraceDto)
         DBManager.destroy_db_connect(trace_conn, trace_curs)
         return iter_info
@@ -248,7 +252,7 @@ class MsprofIteration:
 
             # find last and not parallel iter
             sql = "select step_end from {0} " \
-                  "where step_end<? order by step_end desc ".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+                  "where step_end<? order by step_end desc ".format(ProfilingScene().get_step_table_name())
             last_not_parallel_iter = DBManager.fetchone(
                 trace_curs, sql, (current_iter.step_start,), dto_class=StepTraceDto)
             if not last_not_parallel_iter:

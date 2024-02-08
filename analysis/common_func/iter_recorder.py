@@ -7,6 +7,7 @@ import logging
 from common_func.db_name_constant import DBNameConstant
 from common_func.msprof_exception import ProfException
 from common_func.utils import Utils
+from common_func.profiling_scene import ProfilingScene
 from msmodel.step_trace.ts_track_model import TsTrackModel
 
 
@@ -51,8 +52,8 @@ class IterRecorder:
         if not Utils.is_step_scene(self._project_path):
             return
         with TsTrackModel(self._project_path, DBNameConstant.DB_STEP_TRACE,
-                          [DBNameConstant.TABLE_STEP_TRACE_DATA]) as ts_track_model:
-            step_trace_data = ts_track_model.get_step_trace_data()
+                          [ProfilingScene().get_step_table_name()]) as ts_track_model:
+            step_trace_data = ts_track_model.get_step_trace_data(ProfilingScene().get_step_table_name())
             for step_trace in step_trace_data:
                 self._iter_end_dict[step_trace.iter_id] = step_trace.step_end
                 self._iter_time.append([step_trace.step_start, step_trace.step_end])

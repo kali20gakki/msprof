@@ -6,6 +6,7 @@ from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ExportMode
 from constant.constant import clear_dt_project
 from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
@@ -74,7 +75,7 @@ class TestMemcpyModel(unittest.TestCase):
         expect_res = [(1, 2, 2.5, 2.6, 2.7, 0.10000000000000009, 'MemcopyAsync', 'other')]
         memcpy_calculator = MemcpyCalculator({}, {"result_dir": self.DIR_PATH, "iter_id": IterationRange(2, 1, 1),
                                                   "model_id": 2})
-        ProfilingScene().set_all_export(False)
+        ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
 
         with mock.patch('common_func.utils.Utils.get_scene', return_value=Constant.STEP_INFO):
             ProfilingScene().init("")
@@ -89,7 +90,7 @@ class TestMemcpyModel(unittest.TestCase):
                       (1, 2, 2.5, 2.6, 2.7, 0.10000000000000009, 'MemcopyAsync', 'other')]
         memcpy_calculator = MemcpyCalculator({}, {"result_dir": self.DIR_PATH, "iter_id": IterationRange(2, 1, 1),
                                                   "model_id": 2})
-        ProfilingScene().set_all_export(True)
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
         with mock.patch('common_func.utils.Utils.get_scene', return_value=Constant.SINGLE_OP):
             ProfilingScene().init("")

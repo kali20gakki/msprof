@@ -25,6 +25,7 @@ using CHAR_PTR = char *;
 std::string Join(const std::vector<std::string> &str, const std::string &delimiter);
 std::vector<std::string> Split(const std::string &str, const std::string &delimiter);
 int StrToU16(uint16_t &dest, const std::string &numStr);
+int StrToU32(uint32_t &dest, const std::string &numStr);
 int StrToU64(uint64_t &dest, const std::string &numStr);
 int StrToDouble(double &dest, const std::string &numStr);
 // 根据所给的device路径获取对应的deviceId {local_path}/PROF_xxx/device_{id} 返回id对应的数值

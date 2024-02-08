@@ -3,7 +3,7 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : target_info_npu_processor.cpp
+ * File Name          : npu_info_processor.cpp
  * Description        : 落盘不同device对应芯片型号数据
  * Author             : msprof team
  * Creation Date      : 2023/12/18
@@ -28,15 +28,14 @@ namespace {
     };
 }
 
-NpuInfoProcessor::NpuInfoProcessor(const std::string &reportDBPath,
-                                               const std::set<std::string> &profPaths)
+NpuInfoProcessor::NpuInfoProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
     : TableProcessor(reportDBPath, profPaths) {}
 
 bool NpuInfoProcessor::Run()
 {
     INFO("NpuInfoProcessor Run.");
     bool flag = TableProcessor::Run();
-    PrintProcessorResult(flag, TABLE_NAME_NPU_INFO);
+    PrintProcessorResult(flag, PROCESSOR_NAME_NPU_INFO);
     return flag;
 }
 
@@ -48,11 +47,15 @@ bool NpuInfoProcessor::Process(const std::string &fileDir)
     for (const auto& deviceDir : deviceDirs) {
         UpdateNpuData(fileDir, deviceDir, npuInfoData);
     }
+    if (npuInfoData.empty()) {
+        WARN("No device info in %.", fileDir);
+        return true;
+    }
     return SaveData(npuInfoData, TABLE_NAME_NPU_INFO);
 }
 
 void NpuInfoProcessor::UpdateNpuData(const std::string &fileDir, const std::string &deviceDir,
-                                           NpuInfoDataFormat &npuInfoData)
+                                     NpuInfoDataFormat &npuInfoData)
 {
     INFO("NpuInfoProcessor UpdateNpuData, dir is %", fileDir);
     uint16_t deviceId = Utils::GetDeviceIdByDevicePath(deviceDir);

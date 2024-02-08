@@ -27,20 +27,32 @@ const std::string SQLITE = "sqlite";
 // db name
 const std::string DB_NAME_REPORT_DB = "report";
 
-// table name
+// processor name & table name
+const std::string PROCESSOR_NAME_STRING_IDS = "STRING_IDS";
 const std::string TABLE_NAME_STRING_IDS = "STRING_IDS";
+
+const std::string PROCESSOR_NAME_SESSION_TIME_INFO = "SESSION_TIME_INFO";
 const std::string TABLE_NAME_SESSION_TIME_INFO = "SESSION_TIME_INFO";
+
+const std::string PROCESSOR_NAME_NPU_INFO = "NPU_INFO";
 const std::string TABLE_NAME_NPU_INFO = "NPU_INFO";
+
+const std::string PROCESSOR_NAME_TASK = "TASK";
 const std::string TABLE_NAME_TASK = "TASK";
+
+const std::string PROCESSOR_NAME_COMPUTE_TASK_INFO = "COMPUTE_TASK_INFO";
 const std::string TABLE_NAME_COMPUTE_TASK_INFO = "COMPUTE_TASK_INFO";
+
+const std::string PROCESSOR_NAME_COMMUNICATION = "COMMUNICATION";
 const std::string TABLE_NAME_COMMUNICATION_TASK_INFO = "COMMUNICATION_TASK_INFO";
 const std::string TABLE_NAME_COMMUNICATION_OP = "COMMUNICATION_OP";
+
+const std::string PROCESSOR_NAME_API = "API";
 const std::string TABLE_NAME_API = "API";
 
-// enum table name
-const std::string TABLE_NAME_ENUM = "ENUM";
+const std::string PROCESSOR_NAME_ENUM = "ENUM";
 const std::string TABLE_NAME_ENUM_API_LEVEL = "ENUM_API_LEVEL";
-const std::string TABLE_NAME_ENUM_IO_TYPE = "ENUM_IO_TYPE";
+const std::string TABLE_NAME_ENUM_MEMORY = "ENUM_MEMORY";
 const std::string TABLE_NAME_ENUM_NPU_MODULE = "ENUM_NPU_MODULE";
 
 // api level
@@ -54,12 +66,14 @@ const std::unordered_map<std::string, uint16_t> API_LEVEL_TABLE = {
     {"runtime",  MSPROF_REPORT_RUNTIME_LEVEL}
 };
 
-// IO type
-const std::unordered_map<std::string, uint16_t> IO_TYPE_TABLE = {
+// paired type 成对数据枚举表
+const std::unordered_map<std::string, uint16_t> MEMORY_TABLE = {
     {"app", 0},
     {"device", 1},
     {"read", 3},
-    {"write", 4}
+    {"write", 4},
+    {"allocate", 5},
+    {"release", 6}
 };
 
 // npu module name

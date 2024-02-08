@@ -9,7 +9,6 @@
  * Creation Date      : 2023/12/14
  * *****************************************************************************
  */
-#include <utility>
 #include <atomic>
 
 #include "analysis/csrc/viewer/database/finals/table_processor.h"

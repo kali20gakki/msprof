@@ -224,18 +224,19 @@ void HPFloat::CoorAdd(signed char op, unsigned long psi)
         digit_ += static_cast<long long>(psi - dynamicLen_);
         num_[psi] = op;
         dynamicLen_ = psi;
-        Simple();
         return;
     }
     num_[psi] += op;
     // 是否进位
     if (num_[psi] >= CARRY_THRESHOLD) {
+        unsigned char temp = 0;
         // 如果精度已满
         if (psi == num_.size() - 1) {
             // 退格让出一位精度
             BackSpace();
             // 这里不会出现psi-1小于0的情况
             num_[psi - 1] -= CARRY_THRESHOLD;
+            temp = num_[psi - 1];
             digit_++;
             num_[psi] = 1;
             // 还原因BackSpace造成的dynamicLen_变化
@@ -243,16 +244,95 @@ void HPFloat::CoorAdd(signed char op, unsigned long psi)
         } else {
             CoorAdd(1, psi + 1);
             num_[psi] -= CARRY_THRESHOLD;
+            temp = num_[psi];
+        }
+        if (!temp) {
+            Simple();
         }
     }
+}
+
+void HPFloat::DigAdd(signed char op, long long n)
+{
+    Simple();
+    // 给定数量级不超过数据最大数量级情况
+    if (digit_ >= n) {
+        // 如果超出理论最小精度范围1位以上，直接返回
+        if (TheoreticalMinDig() - 1 > n) {
+            return;
+        }
+        // 如果超出理论最小精度范围1位，四舍五入处理末位数据
+        if (TheoreticalMinDig() - 1 == n) {
+            if (op >= ROUNDING_THRESHOLD) {
+                MoveForward(static_cast<long long>(Len() - dynamicLen_ - 1));
+                CoorAdd(1, 0);
+                return;
+            } else {
+                return;
+            }
+        }
+        // 判断是否需要平移来对齐
+        if (MinDig() <= n) {
+            CoorAdd(op, n - digit_ + dynamicLen_);
+        } else { // 给定数量级小于原数据最小数量级，原数据MoveForward提供存放空间
+            MoveForward(MinDig() - n);
+            num_[0] = op;
+        }
+    } else { // 给定数量级未超过数据理论最大数量级情况
+        if (MinDig() + Len() - 1 >= n) {
+            dynamicLen_ += n - digit_;
+            num_[dynamicLen_] = op; // 精度足够，直接填充
+        } else {
+            MoveBackward(static_cast<long long>(n - (MinDig() + Len() - 1))); // 精度不足，舍去末位数据
+            num_[num_.size() - 1] = op;
+            dynamicLen_ = num_.size() - 1;
+        }
+        digit_ = n;
+    }
+}
+
+void HPFloat::CoreCoorSub(signed char op, long long psi)
+{
+    num_[psi] -= op;
+    if (num_[psi] < 0) {
+        num_[psi] += CARRY_THRESHOLD;
+        CoreCoorSub(1, psi + 1); // 递归借位
+    }
+}
+
+void HPFloat::CoorSub(signed char op, long long psi)
+{
+    unsigned long prevLen = dynamicLen_;
+    CoreCoorSub(op, psi);
+    SetDynamicLen();
+    digit_ -= static_cast<long long>(prevLen - dynamicLen_);
     Simple();
 }
 
-HPFloat operator-(const HPFloat &op)
+// 不支持小减大，通过对外接口-,-=限制
+void HPFloat::DigSub(signed char op, long long n)
 {
-    HPFloat ans(op);
-    ans.symbol_ = !op.symbol_;
-    return ans;
+    // 如果超出理论最小精度范围1位以上，直接返回
+    if (TheoreticalMinDig() - 1 > n) {
+        return;
+    }
+    // 如果超出理论最小精度范围1位，四舍五入处理末位数据
+    if (TheoreticalMinDig() - 1 == n) {
+        if (op >= ROUNDING_THRESHOLD) {
+            MoveForward(static_cast<long long>(Len() - dynamicLen_ - 1));
+            CoorSub(1, 0);
+            return;
+        } else {
+            return;
+        }
+    }
+    // 是否需要平移来对齐
+    if (MinDig() <= n) {
+        CoorSub(op, static_cast<long long>(n - digit_ + dynamicLen_));
+    } else { // 给定数量级小于原数据最小数量级，原数据MoveForward提供存放空间
+        MoveForward(MinDig() - n);
+        CoorSub(op, 0);
+    }
 }
 
 std::string HPFloat::Str()
@@ -297,6 +377,15 @@ double HPFloat::Double()
         ans *= -1;
     }
     return ans;
+}
+
+void HPFloat::Quantize(unsigned long n)
+{
+    long long offset = -MinDig() - n;
+    if (offset <= 0) {
+        return;
+    }
+    MoveBackward(offset);
 }
 
 HPFloat &HPFloat::operator=(const HPFloat &op)
@@ -499,6 +588,110 @@ bool operator<(const HPFloat &op1, const HPFloat &op2)
 bool operator<=(const HPFloat &op1, const HPFloat &op2)
 {
     return !(op1 > op2);
+}
+
+HPFloat operator-(const HPFloat &op)
+{
+    HPFloat ans(op);
+    ans.symbol_ = !op.symbol_;
+    return ans;
+}
+
+HPFloat operator+(const HPFloat &op1, const HPFloat &op2)
+{
+    HPFloat ans(op1);
+    ans += op2;
+    return ans;
+}
+
+HPFloat operator+=(HPFloat &op1, const HPFloat &op2)
+{
+    // 按照加数和被加数最大精度设置结果最大精度
+    op1.SetPrecision(std::max(op1.Len(), op2.Len()));
+    // 如果符号不同，传递给减法
+    if (op1.symbol_ != op2.symbol_) {
+        HPFloat op3(op2);
+        if (op1.symbol_) {
+            op1.symbol_ = false;
+            op3 -= op1;
+            op1 = op3;
+            return op1;
+        } else {
+            op3.symbol_ = false;
+            op1 -= op3;
+            return op1;
+        }
+    }
+    // 如果被加数为零，直接返回
+    if (op1 == ZERO) {
+        op1 = op2;
+        return op1;
+    } else if (op2 == ZERO) {
+        return op1;
+    }
+    long long minDig = op2.MinDig();
+    // 一个个传入到DigAdd
+    for (unsigned long i = 0; i <= op2.dynamicLen_; i++) {
+        op1.DigAdd(op2.num_[i], minDig + i);
+    }
+    return op1;
+}
+
+HPFloat operator-(const HPFloat &op1, const HPFloat &op2)
+{
+    // 符号不同就传递给加法
+    if (op1.symbol_ != op2.symbol_) {
+        if (op1.symbol_) {
+            HPFloat ans(op1);
+            ans.symbol_ = false;
+            ans += op2;
+            ans.symbol_ = true;
+            return ans;
+        } else {
+            HPFloat ans(op2);
+            ans.symbol_ = false;
+            ans += op1;
+            return ans;
+        }
+    }
+    // 减法不判断op是否为0，因为会确保是大减小，存在0计算量很小
+    bool bg = (op1 >= op2); // 确保传递时不发生小减大
+    HPFloat ans(bg ? op1 : op2);
+    HPFloat op((!bg) ? op1 : op2);
+    ans.symbol_ = !bg;
+    long long minDig = op.MinDig();
+    for (unsigned long i = 0; i <= op.dynamicLen_; i++) { // 循环传递参数
+        ans.DigSub(op.num_[i], minDig + i);
+    }
+    return ans;
+}
+
+HPFloat operator-=(HPFloat &op1, const HPFloat &op2)
+{
+    HPFloat ans(op1);
+    ans = op1 - op2;
+    op1 = ans;
+    return ans;
+}
+
+HPFloat operator<<(const HPFloat &op, const int n)
+{
+    if (n < 0) {
+        return op >> -n;
+    }
+    HPFloat ans{op};
+    ans.digit_ += n;
+    return ans;
+}
+
+HPFloat operator>>(const HPFloat &op, const int n)
+{
+    if (n < 0) {
+        return op << -n;
+    }
+    HPFloat ans{op};
+    ans.digit_ -= n;
+    return ans;
 }
 
 }

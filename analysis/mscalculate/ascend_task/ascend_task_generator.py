@@ -14,6 +14,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.platform.chip_manager import ChipManager
 from common_func.msprof_object import CustomizedNamedtupleFactory
+from common_func.profiling_scene import ProfilingScene
 from mscalculate.ascend_task.ascend_task import DeviceTask
 from mscalculate.ascend_task.ascend_task import HostTask
 from mscalculate.ascend_task.device_task_collector import DeviceTaskCollector
@@ -55,8 +56,10 @@ class AscendTaskGenerator:
         """
         ascend_tasks = []
         if model_id == NumberConstant.INVALID_MODEL_ID:
+            # 全导和按step导出
             ascend_tasks = self._get_all_ascend_tasks()
         else:
+            # 按子图导出
             for iter_ in range(iter_start, iter_end + 1):
                 self.iter_id = iter_
                 ascend_tasks_in_iter = self._get_ascend_tasks_within_iter(model_id, iter_)
@@ -125,9 +128,14 @@ class AscendTaskGenerator:
 
         if host_queue:
             if failed_match:
-                logging.error("device tasks less than host tasks for stream_id: %d, task_id: %d, ctx_id: %d."
-                              " Tasks that use these IDs may have mismatches.",
-                              host_queue[0].stream_id, host_queue[0].task_id, host_queue[0].context_id)
+                if ProfilingScene().is_step_export():
+                    logging.error("device tasks less than host tasks for stream_id: %d, task_id: %d, ctx_id: %d."
+                                  " Tasks that use these IDs may have mismatches.",
+                                  host_queue[0].stream_id, host_queue[0].task_id, host_queue[0].context_id)
+                else:
+                    logging.warning("device tasks less than host tasks for stream_id: %d, task_id: %d, ctx_id: %d."
+                                    " Tasks that use these IDs may have mismatches.",
+                                    host_queue[0].stream_id, host_queue[0].task_id, host_queue[0].context_id)
             else:
                 logging.debug("no device tasks found for stream_id: %d, task_id: %d, ctx_id: %d.",
                               host_queue[0].stream_id, host_queue[0].task_id, host_queue[0].context_id)

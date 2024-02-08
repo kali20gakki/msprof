@@ -133,29 +133,29 @@ bool Context::CheckInfoValueIsValid(const std::string &profPath, uint16_t device
                   "the ProfPath is %, DeviceId is %.", valueName, profPath, deviceId);
             return false;
         }
-        if (deviceId == HOST_ID) {
-            if (!info.at("CPU").is_array() || (info.at("CPU").size() != 1)) {
-                ERROR("CPU's value is invalid, "
-                      "the ProfPath is %, DeviceId is %.", profPath, deviceId);
-                return false;
-            }
-            if (!info.at("CPU").back().contains("Frequency")) {
-                ERROR("There are no Frequency in context info, "
-                      "the ProfPath is %, DeviceId is %.", valueName, profPath, deviceId);
-                return false;
-            }
-        } else {
-            if (!info.at("DeviceInfo").is_array() || (info.at("DeviceInfo").size() != 1)) {
-                ERROR("DeviceInfo's value is invalid, "
-                      "the ProfPath is %, DeviceId is %.", profPath, deviceId);
-                return false;
-            }
-            auto freqArr = info.at("DeviceInfo").back();
-            if (!freqArr.contains("hwts_frequency") || freqArr.at("hwts_frequency").empty()) {
-                ERROR("There are no hwts_frequency in context info, "
-                      "the ProfPath is %, DeviceId is %.", valueName, profPath, deviceId);
-                return false;
-            }
+    }
+    if (deviceId == HOST_ID) {
+        if (!info.at("CPU").is_array() || (info.at("CPU").size() != 1)) {
+            ERROR("CPU's value is invalid, "
+                  "the ProfPath is %, DeviceId is %.", profPath, deviceId);
+            return false;
+        }
+        if (!info.at("CPU").back().contains("Frequency")) {
+            ERROR("There are no Frequency in context info, "
+                  "the ProfPath is %, DeviceId is %.", profPath, deviceId);
+            return false;
+        }
+    } else {
+        if (!info.at("DeviceInfo").is_array() || (info.at("DeviceInfo").size() != 1)) {
+            ERROR("DeviceInfo's value is invalid, "
+                  "the ProfPath is %, DeviceId is %.", profPath, deviceId);
+            return false;
+        }
+        auto freqArr = info.at("DeviceInfo").back();
+        if (!freqArr.contains("hwts_frequency") || freqArr.at("hwts_frequency").empty()) {
+            ERROR("There are no hwts_frequency in context info, "
+                  "the ProfPath is %, DeviceId is %.", profPath, deviceId);
+            return false;
         }
     }
     return true;
@@ -194,11 +194,12 @@ nlohmann::json Context::GetInfoByDeviceId(uint16_t deviceId, const std::string &
         return emptyJson;
     }
     auto deviceInfo = profInfo->second;
-    if (deviceId == UINT16_MAX) {
-        if (deviceInfo.begin() == deviceInfo.end()) {
-            ERROR("Can't find host or device file. input path %.", profPath);
-            return emptyJson;
-        }
+    if (deviceInfo.begin() == deviceInfo.end()) {
+        ERROR("Can't find host or device file. input path %.", profPath);
+        return emptyJson;
+    }
+    // 若不设置deviceId(使用默认id),则直接返回第一条info
+    if (deviceId == DEFAULT_DEVICE_ID) {
         return deviceInfo.begin()->second;
     }
     if (deviceInfo.find(deviceId) == deviceInfo.end()) {
@@ -223,9 +224,13 @@ uint16_t Context::GetPlatformVersion(uint16_t deviceId, const std::string &profP
 
 bool Context::GetProfTimeRecordInfo(Utils::ProfTimeRecord &record, const std::string &profPath)
 {
-    const auto &info = GetInfoByDeviceId(HOST_ID, profPath);
+    auto info = GetInfoByDeviceId(HOST_ID, profPath);
     if (info.empty()) {
-        return false;
+        WARN("There is no host time log in %, it will use device time log!", profPath);
+        info = GetInfoByDeviceId(DEFAULT_DEVICE_ID, profPath);
+        if (info.empty()) {
+            return false;
+        }
     }
     uint64_t startTimeUs = UINT64_MAX;
     if (StrToU64(startTimeUs, info.at("startCollectionTimeBegin")) != ANALYSIS_OK) {
@@ -254,52 +259,28 @@ bool Context::GetProfTimeRecordInfo(Utils::ProfTimeRecord &record, const std::st
     return true;
 }
 
-uint64_t Context::GetPidFromInfoJson(uint16_t deviceId, const std::string &profPath)
+uint32_t Context::GetPidFromInfoJson(uint16_t deviceId, const std::string &profPath)
 {
     const auto &info = GetInfoByDeviceId(deviceId, profPath);
-    uint64_t pid = 0;
+    uint32_t pid = 0;
     if (info.empty()) {
         return pid;
     }
-    if (StrToU64(pid, info.at("pid")) != ANALYSIS_OK) {
-        ERROR("Pid to uint64_t failed.");
+    if (StrToU32(pid, info.at("pid")) != ANALYSIS_OK) {
+        ERROR("Pid to uint32_t failed.");
     }
     return pid;
 }
 
 int64_t Context::GetMsBinPid(const std::string &profPath)
 {
-    // PROF路径下的samplejson数据，因为不知道有哪些device,所以取读到的数据里第一个
-    std::vector<uint16_t> deviceIds = GetDeviceIds(profPath);
-    if (deviceIds.empty()) {
-        PRINT_ERROR("The data does not contain information about devices or hosts. the data " \
-                    "collected from your path %", profPath);
-        return analysis::dvvp::common::config::MSVP_MMPROCESS;
-    }
-    uint16_t deviceId = deviceIds.front();
-
-    const auto &info = GetInfoByDeviceId(deviceId, profPath);
+    const auto &info = GetInfoByDeviceId(DEFAULT_DEVICE_ID, profPath);
     if (info.empty()) {
         PRINT_ERROR("Samplejson is empty, path %.", profPath);
         return analysis::dvvp::common::config::MSVP_MMPROCESS;
     }
  
     return info.value("msprofBinPid", analysis::dvvp::common::config::MSVP_MMPROCESS);
-}
-
-std::vector<uint16_t> Context::GetDeviceIds(const std::string &profPath)
-{
-    std::vector<uint16_t> deviceIds;
-    auto profInfo = profPath.empty() ? context_.begin() : context_.find(profPath);
-    if (profInfo == context_.end()) {
-        ERROR("Can't find PROF file. path %.", profPath);
-        return deviceIds;
-    }
-    auto deviceInfo = profInfo->second;
-    for (const auto& it : deviceInfo) {
-        deviceIds.emplace_back(static_cast<uint16_t>(it.first));
-    }
-    return deviceIds;
 }
 
 bool Context::GetSyscntConversionParams(Utils::SyscntConversionParams &params,
@@ -330,11 +311,12 @@ bool Context::GetSyscntConversionParams(Utils::SyscntConversionParams &params,
             ERROR("DeviceFreq to double failed.");
             return false;
         }
-        // 固定取host的clock_monotonic_raw
-        info = GetInfoByDeviceId(HOST_ID, profPath);
-        if (info.empty()) {
-            ERROR("No host info.");
-            return false;
+        // 固定取host的clock_monotonic_raw. 若无host,则继续使用device info.
+        const auto hostInfo = GetInfoByDeviceId(HOST_ID, profPath);
+        if (hostInfo.empty()) {
+            WARN("No host info, it will use device clock_monotonic_raw.");
+        } else {
+            info = hostInfo;
         }
     }
     if (IsDoubleEqual(params.freq, 0)) {

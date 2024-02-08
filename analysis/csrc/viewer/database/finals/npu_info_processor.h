@@ -3,7 +3,7 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : target_info_npu_processor.h
+ * File Name          : npu_info_processor.h
  * Description        : 落盘不同device对应芯片型号数据
  * Author             : msprof team
  * Creation Date      : 2023/12/18
