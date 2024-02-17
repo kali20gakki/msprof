@@ -57,6 +57,24 @@ class TestMsprofQueryData(unittest.TestCase):
                         result = key.get_job_iteration_info()
                     self.assertEqual(result, [])
 
+    def test_get_step_iteration_info_should_return_1_info_and_step_order_by_duration_when_query_step_export(self):
+        create_sql = "create table IF NOT EXISTS StepTime (index_id INT,model_id INT,step_start," \
+                     "step_end,iter_id INT default 1)"
+        data = (
+            (1, 4294967295, 10000, 10010, 1),
+            (2, 4294967295, 20000, 20200, 2),
+            (3, 4294967295, 30000, 31000, 3),
+            (4, 4294967295, 40000, 40100, 4),
+        )
+        insert_sql = "insert into {0} values ({value})".format("StepTime",
+                                                               value="?," * (len(data[0]) - 1) + "?")
+        db_manager = DBManager()
+        conn, curs = db_manager.create_table("step_trace.db", create_sql, insert_sql, data)
+        key = MsprofQueryData(db_manager.db_path + "/../")
+        result = key.get_step_iteration_info()
+        self.assertEqual([[4294967295, 4, '3,2,4,1']], result)
+        db_manager.destroy([conn, curs])
+
     def test_update_top_iteration_info(self):
         msprof_query_data = MsprofQueryData('123')
         _db_manager = DBManager()

@@ -11,7 +11,9 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
+from common_func.ms_constant.number_constant import NumberConstant
 from msmodel.step_trace.cluster_step_trace_model import ClusterStepTraceModel
+from msmodel.step_trace.ts_track_model import TsTrackModel
 from profiling_bean.basic_info.query_data_bean import QueryDataBean
 from profiling_bean.db_dto.hwts_rec_dto import HwtsRecDto
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
@@ -69,9 +71,8 @@ class MsprofQueryData:
         return InfoConfReader().get_job_basic_info()
 
     @classmethod
-    def _get_iteration_infos(cls: any, curs: any) -> list:
-        sql = "select model_id, max(index_id) from {} group by model_id".format(
-            DBNameConstant.TABLE_STEP_TRACE_DATA)
+    def _get_iteration_infos(cls: any, curs: any, table_name: str = DBNameConstant.TABLE_STEP_TRACE_DATA) -> list:
+        sql = "select model_id, max(index_id) from {} group by model_id".format(table_name)
         iteration_infos = DBManager.fetch_all_data(curs, sql)
         if not iteration_infos or not iteration_infos[0]:
             return []
@@ -85,7 +86,8 @@ class MsprofQueryData:
         return model_ids_set
 
     @classmethod
-    def _update_top_iteration_info(cls: any, iteration_infos: list, model_ids_set: set, curs: any) -> list:
+    def _update_top_iteration_info(cls: any, iteration_infos: list, model_ids_set: set,
+                                   curs: any, table_name: str = DBNameConstant.TABLE_STEP_TRACE_DATA) -> list:
         if not iteration_infos or not model_ids_set:
             return []
 
@@ -96,7 +98,7 @@ class MsprofQueryData:
             "(select count(*) + 1 from {0} as t2 where t2.model_id = t1.model_id and " \
             "(t2.step_end - t2.step_start) > (t1.step_end - t1.step_start)) as top " \
             "from {0} as t1) as t where top <= {1} order by model_id, top" \
-                .format(DBNameConstant.TABLE_STEP_TRACE_DATA, cls.QUERY_TOP_ITERATION_NUM)
+                .format(table_name, cls.QUERY_TOP_ITERATION_NUM)
         top_index_ids = DBManager.fetch_all_data(curs, top_sql)
         if not top_index_ids or not top_index_ids[0]:
             return []
@@ -156,6 +158,20 @@ class MsprofQueryData:
 
         return iteration_infos_result
 
+    def get_step_iteration_info(self: any) -> list:
+        db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_STEP_TRACE)
+        conn, curs = DBManager.check_connect_db_path(db_path)
+        if not conn or not curs or not DBManager.judge_table_exist(
+                curs, DBNameConstant.TABLE_STEP_TIME):
+            DBManager.destroy_db_connect(conn, curs)
+            return []
+        iteration_infos = self._get_iteration_infos(curs, DBNameConstant.TABLE_STEP_TIME)
+        model_ids_set = {NumberConstant.INVALID_MODEL_ID}
+        iteration_infos_result = self._update_top_iteration_info(iteration_infos, model_ids_set,
+                                                                 curs, DBNameConstant.TABLE_STEP_TIME)
+        DBManager.destroy_db_connect(conn, curs)
+        return iteration_infos_result
+
     def assembly_job_info(self: any, basic_data: list, iteration_data: list) -> list:
         """
         Splicing data into query data object classes.
@@ -188,7 +204,7 @@ class MsprofQueryData:
         if not basic_data:
             return []
 
-        iteration_data = self.get_job_iteration_info()
+        iteration_data = self.get_job_iteration_info() + self.get_step_iteration_info()
         return self.assembly_job_info(basic_data, iteration_data)
 
     def _get_model_id_set_without_ge(self: any, trace_curs: any) -> set:

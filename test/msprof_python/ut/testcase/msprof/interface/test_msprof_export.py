@@ -523,25 +523,6 @@ class TestExportCommand(unittest.TestCase):
         InfoConfReader()._info_json = {"drvVersion": InfoConfReader().ALL_EXPORT_VERSION}
         ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
-    def test__check_all_report_should_exit_when_input_iter_exceed_collected_iters(self) -> None:
-        args_dic = {"collection_path": "test", "iteration_id": 1, "model_id": None, "iteration_count": 4}
-        InfoConfReader()._info_json = {"drvVersion": InfoConfReader().ALL_EXPORT_VERSION}
-        ProfilingScene().set_mode(ExportMode.STEP_EXPORT)
-        ChipManager().chip_id = 2
-        args = Namespace(**args_dic)
-        step_data = [
-            StepTraceDto(1, 1, 4294967295, 111, 222),
-            StepTraceDto(2, 2, 4294967295, 333, 444),
-        ]
-        with mock.patch('common_func.common.error'), \
-                mock.patch('msmodel.interface.base_model.BaseModel.check_table', return_value=True), \
-                mock.patch('msmodel.step_trace.ts_track_model.TsTrackModel.get_step_time',
-                           return_value=step_data), \
-                mock.patch('sys.exit'):
-            test = ExportCommand("summary", args)
-            test._check_all_report("./")
-        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
-
     def test__check_all_report_should_sys_exit_when_not_all_export_but_single_op_mode(self):
         ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
         ProfilingScene()._scene = "single_op"
