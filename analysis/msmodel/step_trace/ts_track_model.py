@@ -162,15 +162,6 @@ class TsTrackModel(BaseModel, ABC):
                      f"where tag_id in ({tags_condition}) order by timestamp"
         return DBManager.fetch_all_data(self.cur, select_sql, dto_class=StepTraceOriginDto)
 
-    def get_step_time(self: any) -> list:
-        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_STEP_TIME) or \
-                not DBManager.judge_row_exist(self.cur, DBNameConstant.TABLE_STEP_TIME):
-            return []
-
-        select_sql = f"select index_id, model_id, step_start, step_end, iter_id " \
-                     f"from {DBNameConstant.TABLE_STEP_TIME}"
-        return DBManager.fetch_all_data(self.cur, select_sql, dto_class=StepTraceDto)
-
 
 class TsTrackViewModel(ViewModel):
     def __init__(self: any, path: str) -> None:
