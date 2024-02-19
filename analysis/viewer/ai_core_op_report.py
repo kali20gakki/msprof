@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2020-2023. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2024. All rights reserved.
 
 import logging
 import os
 from collections import deque
 
-from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.data_manager import DataManager
 from common_func.db_manager import DBManager
@@ -15,8 +14,8 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_common import add_aicore_units
-from common_func.msvp_common import read_cpu_cfg
 from common_func.msvp_common import format_high_precision_for_csv
+from common_func.msvp_common import read_cpu_cfg
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
@@ -224,7 +223,7 @@ class AiCoreOpReport:
                 index_id = [_hccl_op.index_id]
             hccl_data[index] = model_name + [_hccl_op.model_id, Constant.NA, Constant.NA] + index_id + \
                                [
-                                   _hccl_op.op_name, _hccl_op.op_type, _hccl_op.task_type,
+                                   _hccl_op.op_name, _hccl_op.op_type, 'N/A', _hccl_op.task_type,
                                    int(_hccl_op.timestamp), int(_hccl_op.duration),
                                    Constant.DEFAULT_VALUE, Constant.DEFAULT_VALUE
                                ]
@@ -419,7 +418,11 @@ class AiCoreOpReport:
     def _get_tensor_table_sql_and_headers(cls: any, headers: list) -> tuple:
         # ge or subtask need modify the context_id or subtask_id so that it should be same.
         sql = "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info}" \
-              "{1}.op_name, {1}.op_type, {1}.task_type," \
+              "{1}.op_name, {1}.op_type, " \
+              "(case when {1}.op_state is 'N/A' then 'N/A' " \
+              "when {1}.op_state is '1' then 'dynamic'" \
+              "when {1}.op_state is '0' then 'static' end), " \
+              "{1}.task_type," \
               "{0}.start_time, {0}.duration_time," \
               "{0}.wait_time, {1}.block_dim, {1}.mix_block_dim, {1}.op_flag," \
               "(case when {1}.input_shapes is NULL then 'N/A' else {1}.input_shapes end), " \
