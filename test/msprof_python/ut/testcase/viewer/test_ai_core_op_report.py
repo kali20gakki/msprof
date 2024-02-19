@@ -145,10 +145,12 @@ class TestAiCoreOpReport(unittest.TestCase):
 
     def test_union_task_ge_ai_core_data(self):
         expect_res = [(1, 2, 3, 11, 16, 4, 10), (4, 5, 6, 11, 16, 7, 40), (7, 8, 9, 11, 16, 10, 'N/A')]
-        data = [(1, 2, 3, 11, 16, 4), (4, 5, 6, 11, 16, 7), (7, 8, 9, 11, 16, 10)]
+        data = [(1, 2, 3, 11, 16, 4, -1), (4, 5, 6, 11, 16, 7, -1), (7, 8, 9, 11, 16, 10, -1)]
         ai_core_group_dict = {(2, 3, 4): deque([(10,)]), (5, 6, 7): deque([(40,)]), (10, 11, 12): deque([(20,)])}
+        AiCoreOpReport.IS_PMU_UNIQUE_ID = False
         res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
         self.assertEqual(res, expect_res)
+        AiCoreOpReport.IS_PMU_UNIQUE_ID = True
 
     def test_format_summary_data(self):
         headers = ['Task Start Time(us)', 'Task Duration(us)', 'Task Wait Time(us)']
@@ -169,15 +171,15 @@ class TestAiCoreOpReport(unittest.TestCase):
             (1, 2, 3, 11, 16, "AI_CPU", 'N/A'), (4, 5, 6, 11, 16, "AI_CPU", 'N/A'), (7, 8, 9, 11, 16, 10, 'N/A')
         ]
         data = [
-            (1, 2, 3, 11, 16, "AI_CPU"),
-            (4, 5, 6, 11, 16, "AI_CPU"),
-            (7, 8, 9, 11, 16, 10),
-            (1, 2, 3, 11, 16, "HCCL"),
-            (1, 3, 3, 11, 16, "HCCL_AI_CPU")
+            (1, 2, 3, 11, 16, "AI_CPU", 0),
+            (4, 5, 6, 11, 16, "AI_CPU", 0),
+            (7, 8, 9, 11, 16, 10, 0),
+            (1, 2, 3, 11, 16, "HCCL", 0),
+            (1, 3, 3, 11, 16, "HCCL_AI_CPU", 0)
         ]
         ai_core_group_dict = {
-            (2, 3, "AI_CPU"): deque([(10,)]), (5, 6, "AI_CPU"): deque([(40,)]),
-            (10, 11, 12): deque([(20,)]), (2, 3, "HCCL"): deque([(50,)])
+            (0, 2, 3, "AI_CPU"): deque([(10,)]), (0, 5, 6, "AI_CPU"): deque([(40,)]),
+            (0, 10, 11, 12): deque([(20,)]), (0, 2, 3, "HCCL"): deque([(50,)])
         }
         res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
         self.assertEqual(res, expect_res)
@@ -187,11 +189,11 @@ class TestAiCoreOpReport(unittest.TestCase):
             (1, 2, 3, 11, 16, "AI_CPU"), (4, 5, 6, 11, 16, "AI_CPU"), (7, 8, 9, 11, 16, 10)
         ]
         data = [
-            (1, 2, 3, 11, 16, "AI_CPU"),
-            (4, 5, 6, 11, 16, "AI_CPU"),
-            (7, 8, 9, 11, 16, 10),
-            (1, 2, 3, 11, 16, "HCCL"),
-            (1, 3, 3, 11, 16, "HCCL_AI_CPU")
+            (1, 2, 3, 11, 16, "AI_CPU", 0),
+            (4, 5, 6, 11, 16, "AI_CPU", 0),
+            (7, 8, 9, 11, 16, 10, 0),
+            (1, 2, 3, 11, 16, "HCCL", 0),
+            (1, 3, 3, 11, 16, "HCCL_AI_CPU", 0)
         ]
         ai_core_group_dict = {}
         res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
@@ -250,7 +252,8 @@ class TestAiCoreOpReport(unittest.TestCase):
         InfoConfReader()._local_time_offset = 10.0
         res_data = (
             "select -1,  task_id, stream_id,  'N/A', 'N/A', task_type, start_time, duration_time, "
-            "wait_time, (case when task_time.subtask_id=4294967295 then 'N/A' else task_time.subtask_id end) "
+            "wait_time, (case when task_time.subtask_id=4294967295 then 'N/A' else task_time.subtask_id end), "
+            "batch_id "
             "from task_time where task_type!=? and task_type!=? order by start_time",
             ['Op Name', 'stream_id']
         )

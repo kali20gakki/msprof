@@ -67,7 +67,8 @@ class FftsPmuModel(ParserModel):
                                                                   'start_time INT,'
                                                                   'end_time INT, '
                                                                   'ffts_type INT,'
-                                                                  'core_type INT', name=table_name)
+                                                                  'core_type INT,'
+                                                                  'batch_id INT', name=table_name)
         try:
             DBManager.execute_sql(self.conn, sql)
         except sqlite3.Error as err:
