@@ -388,7 +388,8 @@ def create_metric_table(conn: any, metrics: list, table_name: str) -> bool:
     sql = 'CREATE TABLE IF NOT EXISTS {name}({column})'.format(
         column=','.join(metric.replace('(ms)', '').replace('(GB/s)', '')
                         + ' numeric' for metric in metrics) + ', task_id INT, '
-                                                              'stream_id INT, core_type INT ', name=table_name)
+                                                              'stream_id INT, core_type INT, batch_id INT',
+        name=table_name)
     return DBManager.execute_sql(conn, sql)
 
 
