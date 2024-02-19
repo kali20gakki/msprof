@@ -854,6 +854,7 @@ class TablesConfig(MetaConfig):
             ('stream_id', 'INTEGER,null'),
             ('op_name', 'TEXT,null'),
             ('op_type', 'TEXT,null'),
+            ('op_state', 'TEXT,null'),
             ('block_dim', 'INTEGER,null'),
             ('mix_block_dim', 'INTEGER,null'),
             ('task_type', 'TEXT,null'),

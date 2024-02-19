@@ -18,7 +18,7 @@ from viewer.ai_core_op_report import ReportOPCounter
 
 NAMESPACE = 'viewer.ai_core_op_report'
 config = {'handler': '_get_op_summary_data',
-          'headers': ['Model Name', 'Model ID', 'Task ID', 'Stream ID', 'Infer ID', 'Op Name', 'OP Type',
+          'headers': ['Model Name', 'Model ID', 'Task ID', 'Stream ID', 'Infer ID', 'Op Name', 'OP Type', 'OP State',
                       'Task Type', 'Task Start Time(us)', 'Task Duration(us)', 'Task Wait Time(us)', 'Block Dim'],
           'db': 'ai_core_op_summary.db', 'unused_cols': []}
 
@@ -32,7 +32,7 @@ class TestAiCoreOpReport(unittest.TestCase):
             check = AiCoreOpReport()
             res = check.get_op_summary_data("0", "", config)
         expect_res = [
-            'Model Name', 'Model ID', 'Task ID', 'Stream ID', 'Infer ID', 'Op Name', 'OP Type',
+            'Model Name', 'Model ID', 'Task ID', 'Stream ID', 'Infer ID', 'Op Name', 'OP Type', 'OP State',
             'Task Type', 'Task Start Time(us)', 'Task Duration(us)', 'Task Wait Time(us)', 'Block Dim'
         ]
         self.assertEqual(res[0], expect_res)
@@ -120,12 +120,13 @@ class TestAiCoreOpReport(unittest.TestCase):
 
     def test_get_op_summary_data(self):
         create_ge_sql = "CREATE TABLE IF NOT EXISTS ge_summary(model_name text,model_id INTEGER,task_id INTEGER," \
-                        "stream_id INTEGER, op_name text,op_type text,block_dim INTEGER,input_shapes text," \
+                        "stream_id INTEGER, op_name text,op_type text,op_state text," \
+                        "block_dim INTEGER,input_shapes text," \
                         "input_data_types text,input_formats text,output_shapes text,output_data_types text," \
                         "output_formats text,device_id INTEGER,task_type text,index_id INTEGER)"
         union_sql = "select * from ge_summary where ge_summary.index_id=? and ge_summary.task_type!=?"
-        ge_data = ((0, 4294967295, 3, 6, "TransData", "TransData", 32, "1,512,1,1", "DT_FLOAT", "NCHW", "1,32,1,1,16",
-                    "DT_FLOAT", "NC1HWC0", 0, "AI_CORE", 1),)
+        ge_data = ((0, 4294967295, 3, 6, "TransData", "TransData", 'static',
+                    32, "1,512,1,1", "DT_FLOAT", "NCHW", "1,32,1,1,16", "DT_FLOAT", "NC1HWC0", 0, "AI_CORE", 1),)
         with DBOpen(DB_AICORE_OP_SUMMARY) as db_open:
             db_open.create_table(create_ge_sql)
             db_open.insert_data(DBNameConstant.TABLE_SUMMARY_GE, ge_data)
