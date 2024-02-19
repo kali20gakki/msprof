@@ -42,7 +42,7 @@ bool ApiProcessor::Run()
 {
     INFO("ApiProcessor Run.");
     bool flag = TableProcessor::Run();
-    PrintProcessorResult(flag, TABLE_NAME_API);
+    PrintProcessorResult(flag, PROCESSOR_NAME_API);
     return flag;
 }
 
@@ -91,7 +91,8 @@ bool ApiProcessor::FormatData(const std::string &fileDir, const ApiDataFormat &a
                               ProcessedDataFormat &processedData)
 {
     INFO("ApiProcessor FormatData, dir is %", fileDir);
-    uint32_t pid = IdPool::GetInstance().GetUint32Id(fileDir);
+    uint32_t profId = IdPool::GetInstance().GetUint32Id(fileDir);
+    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, fileDir);
     Utils::SyscntConversionParams params;
     Utils::ProfTimeRecord record;
     if (!Context::GetInstance().GetSyscntConversionParams(params, Parser::Environment::HOST_ID, fileDir)) {
@@ -123,7 +124,7 @@ bool ApiProcessor::FormatData(const std::string &fileDir, const ApiDataFormat &a
         Utils::HPFloat endTimestamp = Utils::GetTimeFromSyscnt(tempData.end, params);
         std::string start = Utils::GetLocalTime(startTimestamp, record).Str();
         std::string end = Utils::GetLocalTime(endTimestamp, record).Str();
-        uint64_t connectionId = Utils::Contact(pid, tempData.connectionId);
+        uint64_t connectionId = Utils::Contact(profId, tempData.connectionId);
         uint64_t name = IdPool::GetInstance().GetUint64Id(tempData.structType);
         if (level == MSPROF_REPORT_ACL_LEVEL) {
             name = IdPool::GetInstance().GetUint64Id(tempData.id);

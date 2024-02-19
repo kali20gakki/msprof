@@ -13,12 +13,11 @@
 #include "analysis/csrc/viewer/database/finals/table_processor_factory.h"
 
 #include "analysis/csrc/utils/thread_pool.h"
-#include "analysis/csrc/utils/utils.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/viewer/database/finals/string_ids_processor.h"
-#include "analysis/csrc/viewer/database/finals/target_info_npu_processor.h"
-#include "analysis/csrc/viewer/database/finals/target_info_session_time_processor.h"
-#include "analysis/csrc/viewer/database/finals/enum_api_level_processor.h"
+#include "analysis/csrc/viewer/database/finals/npu_info_processor.h"
+#include "analysis/csrc/viewer/database/finals/session_time_info_processor.h"
+#include "analysis/csrc/viewer/database/finals/enum_processor.h"
 #include "analysis/csrc/viewer/database/finals/task_processor.h"
 #include "analysis/csrc/viewer/database/finals/compute_task_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/communication_info_processor.h"
@@ -29,33 +28,33 @@ namespace Viewer {
 namespace Database {
 
 std::shared_ptr<TableProcessor> TableProcessorFactory::CreateTableProcessor(
-    const std::string &tableName,
+    const std::string &processorName,
     const std::string &reportDBPath,
     const std::set<std::string> &profPaths)
 {
     std::shared_ptr<TableProcessor> processor = nullptr;
-    if (tableName == TABLE_NAME_STRING_IDS) {
+    if (processorName == PROCESSOR_NAME_STRING_IDS) {
         MAKE_SHARED_RETURN_VALUE(processor, StringIdsProcessor, nullptr, reportDBPath);
     }
-    if (tableName == TABLE_NAME_TARGET_INFO_SESSION_TIME) {
-        MAKE_SHARED_RETURN_VALUE(processor, TargetInfoNpuProcessor, nullptr, reportDBPath, profPaths);
+    if (processorName == PROCESSOR_NAME_SESSION_TIME_INFO) {
+        MAKE_SHARED_RETURN_VALUE(processor, NpuInfoProcessor, nullptr, reportDBPath, profPaths);
     }
-    if (tableName == TABLE_NAME_TARGET_INFO_NPU) {
-        MAKE_SHARED_RETURN_VALUE(processor, TargetInfoSessionTimeProcessor, nullptr, reportDBPath, profPaths);
+    if (processorName == PROCESSOR_NAME_NPU_INFO) {
+        MAKE_SHARED_RETURN_VALUE(processor, SessionTimeInfoProcessor, nullptr, reportDBPath, profPaths);
     }
-    if (tableName == TABLE_NAME_ENUM_API_LEVEL) {
-        MAKE_SHARED_RETURN_VALUE(processor, EnumApiLevelProcessor, nullptr, reportDBPath, profPaths);
+    if (processorName == PROCESSOR_NAME_ENUM) {
+        MAKE_SHARED_RETURN_VALUE(processor, EnumProcessor, nullptr, reportDBPath, profPaths);
     }
-    if (tableName == TABLE_NAME_TASK) {
+    if (processorName == PROCESSOR_NAME_TASK) {
         MAKE_SHARED_RETURN_VALUE(processor, TaskProcessor, nullptr, reportDBPath, profPaths);
     }
-    if (tableName == TABLE_NAME_COMPUTE_TASK_INFO) {
+    if (processorName == PROCESSOR_NAME_COMPUTE_TASK_INFO) {
         MAKE_SHARED_RETURN_VALUE(processor, ComputeTaskInfoProcessor, nullptr, reportDBPath, profPaths);
     }
-    if (tableName == TABLE_NAME_COMMUNICATION_TASK_INFO) {
+    if (processorName == PROCESSOR_NAME_COMMUNICATION) {
         MAKE_SHARED_RETURN_VALUE(processor, CommunicationInfoProcessor, nullptr, reportDBPath, profPaths);
     }
-    if (tableName == TABLE_NAME_API) {
+    if (processorName == PROCESSOR_NAME_API) {
         MAKE_SHARED_RETURN_VALUE(processor, ApiProcessor, nullptr, reportDBPath, profPaths);
     }
     return processor;

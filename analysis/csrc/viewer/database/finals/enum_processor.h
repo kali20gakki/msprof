@@ -3,35 +3,33 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : target_info_session_time_processor.h
- * Description        : 落盘采集时间（开始、结束）数据
+ * File Name          : enum_processor.h
+ * Description        : 落盘枚举表数据
  * Author             : msprof team
  * Creation Date      : 2023/12/18
  * *****************************************************************************
  */
 
-#ifndef ANALYSIS_VIEWER_DATABASE_TARGET_INFO_TIME_PROCESSOR_H
-#define ANALYSIS_VIEWER_DATABASE_TARGET_INFO_TIME_PROCESSOR_H
+#ifndef MSPROF_ANALYSIS_ENUM_PROCESSOR_H
+#define MSPROF_ANALYSIS_ENUM_PROCESSOR_H
 
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
-#include "analysis/csrc/utils/time_utils.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-
-// 该类用于落盘采集任务的开始结束时间
-class TargetInfoSessionTimeProcessor : public TableProcessor {
-// startTime, endTime, baseTime
-using TimeDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t>>;
+// 该类用于落盘枚举相关数据
+class EnumProcessor : public TableProcessor {
+// 枚举值, 枚举名
+using EnumDataFormat = std::vector<std::tuple<uint16_t, std::string>>;
 public:
-    TargetInfoSessionTimeProcessor() = default;
-    TargetInfoSessionTimeProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    EnumProcessor() = default;
+    EnumProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
     bool Run() override;
 protected:
     bool Process(const std::string &fileDir = "") override;
 private:
-    Utils::ProfTimeRecord record_;
+    bool SaveEnumData(const std::string &tableName);
 };
 
 
@@ -39,4 +37,4 @@ private:
 } // Viewer
 } // Analysis
 
-#endif // ANALYSIS_VIEWER_DATABASE_TARGET_INFO_TIME_PROCESSOR_H
+#endif // MSPROF_ANALYSIS_ENUM_PROCESSOR_H

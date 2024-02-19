@@ -259,15 +259,15 @@ bool Context::GetProfTimeRecordInfo(Utils::ProfTimeRecord &record, const std::st
     return true;
 }
 
-uint64_t Context::GetPidFromInfoJson(uint16_t deviceId, const std::string &profPath)
+uint32_t Context::GetPidFromInfoJson(uint16_t deviceId, const std::string &profPath)
 {
     const auto &info = GetInfoByDeviceId(deviceId, profPath);
-    uint64_t pid = 0;
+    uint32_t pid = 0;
     if (info.empty()) {
         return pid;
     }
-    if (StrToU64(pid, info.at("pid")) != ANALYSIS_OK) {
-        ERROR("Pid to uint64_t failed.");
+    if (StrToU32(pid, info.at("pid")) != ANALYSIS_OK) {
+        ERROR("Pid to uint32_t failed.");
     }
     return pid;
 }

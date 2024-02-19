@@ -24,18 +24,13 @@ namespace {
         {"value", SQL_TEXT_TYPE}
     };
 
-    const TableColumns TARGET_INFO_SESSION_TIME = {
+    const TableColumns SESSION_TIME_INFO = {
         {"startTimeNs", SQL_INTEGER_TYPE},
         {"endTimeNs", SQL_INTEGER_TYPE},
         {"baseTimeNs", SQL_INTEGER_TYPE},
     };
 
-    const TableColumns TARGET_INFO_NPU = {
-        {"id", SQL_INTEGER_TYPE, true},
-        {"name", SQL_TEXT_TYPE}
-    };
-
-    const TableColumns ENUM_API_LEVEL = {
+    const TableColumns NPU_INFO = {
         {"id", SQL_INTEGER_TYPE, true},
         {"name", SQL_TEXT_TYPE}
     };
@@ -103,6 +98,21 @@ namespace {
         {"connectionId", SQL_INTEGER_TYPE, true},
         {"name", SQL_INTEGER_TYPE}
     };
+
+    const TableColumns ENUM_API_LEVEL = {
+        {"id", SQL_INTEGER_TYPE, true},
+        {"name", SQL_TEXT_TYPE}
+    };
+
+    const TableColumns ENUM_MEMORY = {
+        {"id", SQL_INTEGER_TYPE, true},
+        {"name", SQL_TEXT_TYPE}
+    };
+
+    const TableColumns ENUM_NPU_MODULE = {
+        {"id", SQL_INTEGER_TYPE, true},
+        {"name", SQL_TEXT_TYPE}
+    };
 }
 
 ReportDB::ReportDB()
@@ -110,14 +120,17 @@ ReportDB::ReportDB()
     dbName_ = "report.db";
     tableColNames_ = {
         {TABLE_NAME_STRING_IDS, STRING_IDS},
-        {TABLE_NAME_TARGET_INFO_SESSION_TIME, TARGET_INFO_SESSION_TIME},
-        {TABLE_NAME_TARGET_INFO_NPU, TARGET_INFO_NPU},
-        {TABLE_NAME_ENUM_API_LEVEL, ENUM_API_LEVEL},
+        {TABLE_NAME_SESSION_TIME_INFO, SESSION_TIME_INFO},
+        {TABLE_NAME_NPU_INFO, NPU_INFO},
         {TABLE_NAME_TASK, TASK},
         {TABLE_NAME_COMPUTE_TASK_INFO, COMPUTE_TASK_INFO},
         {TABLE_NAME_COMMUNICATION_TASK_INFO, COMMUNICATION_TASK_INFO},
         {TABLE_NAME_COMMUNICATION_OP, COMMUNICATION_OP},
         {TABLE_NAME_API, API},
+        // ENUM
+        {TABLE_NAME_ENUM_API_LEVEL, ENUM_API_LEVEL},
+        {TABLE_NAME_ENUM_MEMORY, ENUM_MEMORY},
+        {TABLE_NAME_ENUM_NPU_MODULE, ENUM_NPU_MODULE},
     };
 }
 

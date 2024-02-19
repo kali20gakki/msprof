@@ -52,7 +52,7 @@ public:
     // 获取start_info end_info中的时间
     bool GetProfTimeRecordInfo(Utils::ProfTimeRecord &record, const std::string &profPath = "");
     // 返回info.json 中的pid
-    uint64_t GetPidFromInfoJson(uint16_t deviceId = DEFAULT_DEVICE_ID, const std::string &profPath = "");
+    uint32_t GetPidFromInfoJson(uint16_t deviceId = DEFAULT_DEVICE_ID, const std::string &profPath = "");
     // 返回samplejson.json 中的msprofBinPid
     int64_t GetMsBinPid(const std::string &profPath);
     // 获取start_log中的相关时间

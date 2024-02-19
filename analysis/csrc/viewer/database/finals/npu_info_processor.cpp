@@ -3,13 +3,13 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : target_info_npu_processor.cpp
+ * File Name          : npu_info_processor.cpp
  * Description        : 落盘不同device对应芯片型号数据
  * Author             : msprof team
  * Creation Date      : 2023/12/18
  * *****************************************************************************
  */
-#include "analysis/csrc/viewer/database/finals/target_info_npu_processor.h"
+#include "analysis/csrc/viewer/database/finals/npu_info_processor.h"
 
 #include "analysis/csrc/parser/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
@@ -28,21 +28,20 @@ namespace {
     };
 }
 
-TargetInfoNpuProcessor::TargetInfoNpuProcessor(const std::string &reportDBPath,
-                                               const std::set<std::string> &profPaths)
+NpuInfoProcessor::NpuInfoProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
     : TableProcessor(reportDBPath, profPaths) {}
 
-bool TargetInfoNpuProcessor::Run()
+bool NpuInfoProcessor::Run()
 {
-    INFO("TargetInfoNpuProcessor Run.");
+    INFO("NpuInfoProcessor Run.");
     bool flag = TableProcessor::Run();
-    PrintProcessorResult(flag, TABLE_NAME_TARGET_INFO_NPU);
+    PrintProcessorResult(flag, PROCESSOR_NAME_NPU_INFO);
     return flag;
 }
 
-bool TargetInfoNpuProcessor::Process(const std::string &fileDir)
+bool NpuInfoProcessor::Process(const std::string &fileDir)
 {
-    INFO("TargetInfoNpuProcessor Process, dir is %", fileDir);
+    INFO("NpuInfoProcessor Process, dir is %", fileDir);
     auto deviceDirs = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     NpuInfoDataFormat npuInfoData;
     for (const auto& deviceDir : deviceDirs) {
@@ -52,13 +51,13 @@ bool TargetInfoNpuProcessor::Process(const std::string &fileDir)
         WARN("No device info in %.", fileDir);
         return true;
     }
-    return SaveData(npuInfoData, TABLE_NAME_TARGET_INFO_NPU);
+    return SaveData(npuInfoData, TABLE_NAME_NPU_INFO);
 }
 
-void TargetInfoNpuProcessor::UpdateNpuData(const std::string &fileDir, const std::string &deviceDir,
-                                           NpuInfoDataFormat &npuInfoData)
+void NpuInfoProcessor::UpdateNpuData(const std::string &fileDir, const std::string &deviceDir,
+                                     NpuInfoDataFormat &npuInfoData)
 {
-    INFO("TargetInfoNpuProcessor UpdateNpuData, dir is %", fileDir);
+    INFO("NpuInfoProcessor UpdateNpuData, dir is %", fileDir);
     uint16_t deviceId = Utils::GetDeviceIdByDevicePath(deviceDir);
     uint16_t chip = Context::GetInstance().GetPlatformVersion(deviceId, fileDir);
     std::string chipName;
