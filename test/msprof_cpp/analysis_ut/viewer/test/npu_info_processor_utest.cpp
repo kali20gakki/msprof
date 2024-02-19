@@ -10,7 +10,7 @@
  * *****************************************************************************
  */
 
-#include "analysis/csrc/viewer/database/finals/target_info_npu_processor.h"
+#include "analysis/csrc/viewer/database/finals/npu_info_processor.h"
 
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
@@ -23,20 +23,20 @@ using namespace Parser::Environment;
 using namespace Analysis::Utils;
 using NpuInfoDataFormat = std::vector<std::tuple<uint32_t, std::string>>;
 
-const std::string TARGET_INFO_NPU_DIR = "./target_info_npu";
+const std::string NPU_INFO_DIR = "./target_info_npu";
 const std::string REPORT = "report.db";
-const std::string DB_PATH = File::PathJoin({TARGET_INFO_NPU_DIR, REPORT});
+const std::string DB_PATH = File::PathJoin({NPU_INFO_DIR, REPORT});
 
-class TargetInfoNpuProcessorUTest : public testing::Test {
+class NpuInfoProcessorUTest : public testing::Test {
 protected:
     static void SetUpTestCase()
     {
-        EXPECT_TRUE(File::CreateDir(TARGET_INFO_NPU_DIR));
+        EXPECT_TRUE(File::CreateDir(NPU_INFO_DIR));
     }
 
     static void TearDownTestCase()
     {
-        EXPECT_TRUE(File::RemoveDir(TARGET_INFO_NPU_DIR, 0));
+        EXPECT_TRUE(File::RemoveDir(NPU_INFO_DIR, 0));
     }
 
     virtual void SetUp()
@@ -51,7 +51,7 @@ protected:
     }
 };
 
-TEST_F(TargetInfoNpuProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
+TEST_F(NpuInfoProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
     std::vector<std::string> deviceDirs = {"device_0", "device_1", "device_2", "device_3", "device_4", "device_5"};
     uint16_t chip0 = 0;
@@ -71,7 +71,7 @@ TEST_F(TargetInfoNpuProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSucce
         .then(returnValue(chip5))
         .then(returnValue(chip7))
         .then(returnValue(chipX));
-    auto processor = TargetInfoNpuProcessor(DB_PATH, {""});
+    auto processor = NpuInfoProcessor(DB_PATH, {""});
     EXPECT_TRUE(processor.Run());
     MOCKER_CPP(&File::GetFilesWithPrefix).reset();
     MOCKER_CPP(&Context::GetPlatformVersion).reset();
@@ -86,19 +86,19 @@ TEST_F(TargetInfoNpuProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSucce
         {4, "Ascend310B"},
         {5, "UNKNOWN"},
     };
-    std::string sqlStr = "SELECT id, name FROM " + TABLE_NAME_TARGET_INFO_NPU;
+    std::string sqlStr = "SELECT id, name FROM " + TABLE_NAME_NPU_INFO;
     ASSERT_NE(dbRunner, nullptr);
     EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkData));
     EXPECT_EQ(expectData, checkData);
 }
 
-TEST_F(TargetInfoNpuProcessorUTest, TestRunShouldReturnTrueWhenNoDevice)
+TEST_F(NpuInfoProcessorUTest, TestRunShouldReturnTrueWhenNoDevice)
 {
-    auto processor = TargetInfoNpuProcessor(DB_PATH, {""});
+    auto processor = NpuInfoProcessor(DB_PATH, {""});
     EXPECT_TRUE(processor.Run());
 }
 
-TEST_F(TargetInfoNpuProcessorUTest, TestRunShouldReturnFalseWhenOneProcessFailInMultithreading)
+TEST_F(NpuInfoProcessorUTest, TestRunShouldReturnFalseWhenOneProcessFailInMultithreading)
 {
     using format = std::vector<std::tuple<uint16_t, std::string>>;
     std::set<std::string> profPath = {"PROF_0", "PROF_1", "PROF_2", "PROF_3"};
@@ -116,7 +116,7 @@ TEST_F(TargetInfoNpuProcessorUTest, TestRunShouldReturnFalseWhenOneProcessFailIn
     .stubs()
     .will(returnValue(chip0));
     format checkData;
-    auto processor = TargetInfoNpuProcessor(DB_PATH, profPath);
+    auto processor = NpuInfoProcessor(DB_PATH, profPath);
     EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&File::GetFilesWithPrefix).reset();
     MOCKER_CPP(&Context::GetPlatformVersion).reset();

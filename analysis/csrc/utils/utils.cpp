@@ -69,6 +69,26 @@ int StrToU16(uint16_t &dest, const std::string &numStr)
     return ANALYSIS_OK;
 }
 
+int StrToU32(uint32_t &dest, const std::string &numStr)
+{
+    if (numStr.empty()) {
+        ERROR("StrToU32 failed, the input string is empty.");
+        return ANALYSIS_ERROR;
+    }
+    size_t pos = 0;
+    try {
+        dest = std::stoul(numStr, &pos);
+    } catch (...) {
+        ERROR("StrToU32 failed, the input string is '%'.", numStr.c_str());
+        return ANALYSIS_ERROR;
+    }
+    if (pos != numStr.size()) {
+        ERROR("StrToU32 failed, the input string is '%'.", numStr.c_str());
+        return ANALYSIS_ERROR;
+    }
+    return ANALYSIS_OK;
+}
+
 int StrToU64(uint64_t &dest, const std::string &numStr)
 {
     if (numStr.empty()) {

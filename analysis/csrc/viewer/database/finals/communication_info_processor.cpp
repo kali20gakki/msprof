@@ -43,7 +43,7 @@ bool CommunicationInfoProcessor::Run()
 {
     INFO("CommunicationInfoProcessor Run.");
     bool flag = TableProcessor::Run();
-    PrintProcessorResult(flag, TABLE_NAME_COMMUNICATION_TASK_INFO);
+    PrintProcessorResult(flag, PROCESSOR_NAME_COMMUNICATION);
     return flag;
 }
 
@@ -83,7 +83,7 @@ bool CommunicationInfoProcessor::FormatData(const OriDataFormat &oriData,
             endpoints[taskData.opId].firstTaskStartTime = hcclData.timestamp;
             endpoints[taskData.opId].lastTaskStartTime = hcclData.timestamp;
             endpoints[taskData.opId].lastTaskDuration = hcclData.duration;
-            opData[taskData.opId].connectionId = Utils::Contact(threadData.globalPid, hcclData.connectionId);
+            opData[taskData.opId].connectionId = Utils::Contact(threadData.profId, hcclData.connectionId);
             opData[taskData.opId].groupName = taskData.groupName;
         } else {
             endpoints[taskData.opId].firstTaskStartTime = std::min(endpoints[taskData.opId].firstTaskStartTime,
@@ -132,7 +132,7 @@ bool CommunicationInfoProcessor::Process(const std::string &fileDir)
 {
     bool flag = true;
     ThreadData threadData;
-    threadData.globalPid = IdPool::GetInstance().GetUint32Id(fileDir);
+    threadData.profId = IdPool::GetInstance().GetUint32Id(fileDir);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
         std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, threadData.hcclSingleDeviceDB.dbName});

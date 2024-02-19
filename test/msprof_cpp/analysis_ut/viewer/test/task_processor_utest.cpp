@@ -27,7 +27,7 @@ namespace {
 Utils::ProfTimeRecord Tbo;
 std::shared_ptr<DBRunner> ReportDBRunner;
 const int DEPTH = 0;
-const uint16_t PLATFORM_VERSION = 5;
+const uint16_t PLATFORM_VERSION = static_cast<uint16_t>(Environment::Chip::CHIP_V4_1_0);
 const uint64_t PID = 233;
 const uint64_t START_TIME_NS = 1700902984041176000;
 const uint64_t END_TIME_NS = 1700902986330096000;
@@ -117,8 +117,9 @@ void CheckCorrelationId(ProcessedDataFormat data)
     for (auto item : data) {
         correlationId.emplace_back(std::get<correlationIdIndex>(item));
     }
+    EXPECT_EQ(correlationId.size(), OP_NUM);
     std::sort(correlationId.begin(), correlationId.end());
-    for (int i = 0; i < OP_NUM; ++i) {
+    for (size_t i = 0; i < correlationId.size(); ++i) {
         EXPECT_EQ(correlationId[i], i);
     }
 }
@@ -132,8 +133,9 @@ void CheckStringId(ProcessedDataFormat data)
         stringIdsSet.insert(std::get<stringIdIndex>(item));
     }
     stringIds.assign(stringIdsSet.begin(), stringIdsSet.end());
+    EXPECT_EQ(stringIds.size(), STRING_NUM);
     std::sort(stringIds.begin(), stringIds.end());
-    for (int i = 0; i < STRING_NUM; ++i) {
+    for (size_t i = 0; i < stringIds.size(); ++i) {
         EXPECT_EQ(stringIds[i], i);
     }
 }

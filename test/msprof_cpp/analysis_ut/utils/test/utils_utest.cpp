@@ -76,6 +76,27 @@ TEST_F(UtilsUTest, TestStrToU16ShouldReturnERRORWhenStrIsBeyondThreshold)
     EXPECT_EQ(StrToU16(dest, "999999999999999999"), ANALYSIS_ERROR);
 }
 
+TEST_F(UtilsUTest, TestStrToU32ShouldReturnOKWhenStrIsNumber)
+{
+    uint32_t dest;
+    uint32_t expectRes = 11;
+    EXPECT_EQ(StrToU32(dest, "11"), ANALYSIS_OK);
+    ASSERT_EQ(dest, expectRes);
+}
+
+TEST_F(UtilsUTest, TestStrToU32ShouldReturnERRORWhenStrIsNotNumber)
+{
+    uint32_t dest;
+    EXPECT_EQ(StrToU32(dest, "11tt"), ANALYSIS_ERROR);
+}
+
+TEST_F(UtilsUTest, TestStrToU32ShouldReturnERRORWhenStrIsBeyondThreshold)
+{
+    uint32_t dest;
+    std::string errorStr = "999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999";
+    EXPECT_EQ(StrToU32(dest, errorStr), ANALYSIS_ERROR);
+}
+
 TEST_F(UtilsUTest, TestStrToU64ShouldReturnOKWhenStrIsNumber)
 {
     uint64_t dest;

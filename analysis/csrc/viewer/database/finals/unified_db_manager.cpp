@@ -31,14 +31,14 @@ using Context = Parser::Environment::Context;
 using namespace analysis::dvvp::common::error;
 
 namespace {
-    const std::vector<std::string> DB_NAME = {
-        TABLE_NAME_TARGET_INFO_SESSION_TIME,
-        TABLE_NAME_TARGET_INFO_NPU,
-        TABLE_NAME_ENUM_API_LEVEL,
-        TABLE_NAME_TASK,
-        TABLE_NAME_COMPUTE_TASK_INFO,
-        TABLE_NAME_COMMUNICATION_TASK_INFO,
-        TABLE_NAME_API
+    const std::vector<std::string> PROCESSOR_NAME = {
+        PROCESSOR_NAME_SESSION_TIME_INFO,
+        PROCESSOR_NAME_NPU_INFO,
+        PROCESSOR_NAME_TASK,
+        PROCESSOR_NAME_COMPUTE_TASK_INFO,
+        PROCESSOR_NAME_COMMUNICATION,
+        PROCESSOR_NAME_API,
+        PROCESSOR_NAME_ENUM
     };
 }
 
@@ -99,7 +99,7 @@ int UnifiedDBManager::Run()
     Analysis::Utils::ThreadPool pool(tableProcessors);
     pool.Start();
     std::atomic<bool> retFlag(true);
-    for (const auto& name : DB_NAME) {
+    for (const auto& name : PROCESSOR_NAME) {
         pool.AddTask([this, name, &retFlag]() {
             std::shared_ptr<TableProcessor> processor =
                 TableProcessorFactory::CreateTableProcessor(name, reportDBPath_, ProfFolderPaths_);
@@ -121,9 +121,9 @@ int UnifiedDBManager::Run()
 
     // string_id table 要在其他所有table 全部生成之后再去生成
     std::shared_ptr<TableProcessor> processor =
-        TableProcessorFactory::CreateTableProcessor(TABLE_NAME_STRING_IDS, reportDBPath_, ProfFolderPaths_);
+        TableProcessorFactory::CreateTableProcessor(PROCESSOR_NAME_STRING_IDS, reportDBPath_, ProfFolderPaths_);
     if (processor == nullptr) {
-        ERROR("% is not defined", TABLE_NAME_STRING_IDS);
+        ERROR("% is not defined", PROCESSOR_NAME_STRING_IDS);
         return PROFILING_FAILED;
     } else {
         if (!processor->Run()) {
@@ -132,7 +132,7 @@ int UnifiedDBManager::Run()
         }
     }
 
-    // TABLE_NAME_STRING_IDS
+    // PROCESSOR_NAME_STRING_IDS
     return PROFILING_SUCCESS;
 }
 

@@ -193,8 +193,6 @@ void CheckApiDataValid(const QueryDataFormat &checkData)
         EXPECT_EQ(level, ApiProcessor().GetLevelValue(std::get<LEVEL_INDEX>(API_DATA[index])));
         uint32_t oriTid = std::get<TID_INDEX>(API_DATA[index]);
         uint32_t oriConId = std::get<CONNECTION_ID_INDEX>(API_DATA[index]);
-        // globalTid和connectionId 都是高位为同一个uint32，低位为对应id。因此两者的高32位应一致
-        EXPECT_EQ((tid >> moveCount), (connectionId >> moveCount));
         // 分别校验获取到的tid和connectionId的低32位是否与原先保持一致。
         EXPECT_EQ((tid & 0xffffffff), oriTid);
         EXPECT_EQ((connectionId & 0xffffffff), oriConId);

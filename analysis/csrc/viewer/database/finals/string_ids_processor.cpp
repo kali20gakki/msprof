@@ -26,7 +26,7 @@ bool StringIdsProcessor::Run()
 {
     INFO("StringIdsProcessor Run.");
     bool flag = Process();
-    PrintProcessorResult(flag, TABLE_NAME_STRING_IDS);
+    PrintProcessorResult(flag, PROCESSOR_NAME_STRING_IDS);
     return flag;
 }
 
