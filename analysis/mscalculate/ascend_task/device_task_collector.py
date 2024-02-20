@@ -62,7 +62,7 @@ class DeviceTaskCollector:
             return []
         device_tasks = self.collectors.get(self.chip)(float('-inf'), float('inf'))
         if ChipManager().is_chip_all_data_export() and InfoConfReader().is_all_export_version():
-            device_tasks = self.set_batch_id_by_flip(device_tasks)
+            device_tasks = FlipCalculator.set_device_batch_id(device_tasks, self.result_dir)
         return device_tasks
 
     def get_device_tasks_by_model_and_iter(self, model_id, iter_id) -> List[DeviceTask]:
@@ -78,14 +78,7 @@ class DeviceTaskCollector:
         device_tasks = \
             self.collectors.get(chip)(iter_start * NumberConstant.NS_TO_US, iter_end * NumberConstant.NS_TO_US)
         if ChipManager().is_chip_all_data_export() and InfoConfReader().is_all_export_version():
-            device_tasks = self.set_batch_id_by_flip(device_tasks)
-        return device_tasks
-
-    def set_batch_id_by_flip(self: any, device_tasks: list) -> List:
-        with TsTrackModel(self.result_dir,
-                          DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_DEVICE_TASK_FLIP]) as model:
-            task_flip = model.get_task_flip_data()
-        device_tasks = FlipCalculator.compute_batch_id(device_tasks, task_flip)
+            device_tasks = FlipCalculator.set_device_batch_id(device_tasks, self.result_dir)
         return device_tasks
 
     def get_sub_tasks_by_time_range(self: any, start_time: float, end_time: float) -> List[DeviceTask]:

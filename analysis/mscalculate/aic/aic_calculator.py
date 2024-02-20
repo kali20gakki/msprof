@@ -89,7 +89,7 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
         AicPmuUtils.remove_redundant(pmu_list)
         data_list.append([
             total_time, data.total_cycle, *list(itertools.chain.from_iterable(pmu_list.values())), data.task_id,
-            data.stream_id, self.core_type
+            data.stream_id, self.core_type, -1  # -1 是batch_id
         ])
 
     def calculate_total_time(self: any, data: AicPmuBean, data_type: str = 'aic'):

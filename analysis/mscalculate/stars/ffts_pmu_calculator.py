@@ -7,6 +7,7 @@ import logging
 import os
 import sqlite3
 import struct
+from collections import namedtuple
 
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
@@ -24,11 +25,13 @@ from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
 from common_func.utils import Utils
+from common_func.msprof_object import CustomizedNamedtupleFactory
 from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import OffsetCalculator
 from mscalculate.aic.aic_utils import AicPmuUtils
 from mscalculate.aic.pmu_calculator import PmuCalculator
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
+from mscalculate.flip.flip_calculator import FlipCalculator
 from msmodel.aic.aic_pmu_model import AicPmuModel
 from msmodel.freq.freq_parser_model import FreqParserModel
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
@@ -100,6 +103,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         self.aic_calculator = CalculateAiCoreData(self._result_dir)
         self.aic_table_name_list = []
         self.aiv_table_name_list = []
+        self.data_name = []
 
     @staticmethod
     def _get_total_cycle_and_pmu_data(data: any, is_true: bool) -> tuple:
@@ -170,8 +174,10 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
             self.calculate_mix_pmu_list(self.pmu_data)
         else:
             self.calculate_pmu_list(self.pmu_data)
-        # 对self.pmu_data列表进行排序，排序的依据是每个元素的倒数第三个子元素，即end_time
-        self.pmu_data.sort(key=lambda x: x[-3])
+        self.pmu_data = FlipCalculator.set_device_batch_id(self.pmu_data, self._result_dir)
+        if not self._is_mix_needed:
+            # 去除timestamp字段
+            self.pmu_data = [pmu_data[:-1] for pmu_data in self.pmu_data]
 
     def save(self: any) -> None:
         """
@@ -191,6 +197,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         :return:
         """
         enumerate_data_list = self._data_list.get(StrConstant.CONTEXT_PMU_TYPE, [])
+        pmu_data_type = None
         for index, data in enumerate(enumerate_data_list):
             task_type = 0 if data.is_aic_data() else 1
             aic_pmu_value, aiv_pmu_value, aic_total_cycle, aiv_total_cycle = \
@@ -213,12 +220,24 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
                 itertools.chain.from_iterable(PmuMetrics(aic_pmu_value).get_pmu_by_event_name(aic_pmu_value)))
             aiv_pmu_value_list = list(
                 itertools.chain.from_iterable(PmuMetrics(aiv_pmu_value).get_pmu_by_event_name(aiv_pmu_value)))
-            pmu_data = (
+            if not pmu_data_type:
+                aic_pmu_name = ["aic_" + str(i) for i in range(len(aic_pmu_value_list))]
+                aiv_pmu_name = ["aiv_" + str(i) for i in range(len(aiv_pmu_value_list))]
+                self.data_name = [
+                    "aic_total_time", "aic_total_cycle", *aic_pmu_name,
+                    "aiv_total_time", "aiv_total_cycle", *aiv_pmu_name,
+                    "task_id", "stream_id", "subtask_id", "subtask_type",
+                    "start_time", "timestamp", "ffts_type", "task_type", "batch_id"
+                ]
+                pmu_data_type = CustomizedNamedtupleFactory.enhance_namedtuple(
+                    namedtuple("PmuData", self.data_name), {})
+            pmu_data = pmu_data_type(
                 aic_total_time, aic_total_cycle, *aic_pmu_value_list,
                 aiv_total_time, aiv_total_cycle, *aiv_pmu_value_list,
                 data.task_id, data.stream_id, data.subtask_id, data.subtask_type,
                 InfoConfReader().time_from_syscnt(data.time_list[0]),
-                InfoConfReader().time_from_syscnt(data.time_list[1]), data.ffts_type, task_type
+                InfoConfReader().time_from_syscnt(data.time_list[1]), data.ffts_type, task_type,
+                -1,  # default batch_id
             )
             pmu_data_list[index] = pmu_data
 
@@ -231,6 +250,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         """
         self.__update_model_instance()
         enumerate_data_list = self._data_list.get(StrConstant.CONTEXT_PMU_TYPE, [])
+        pmu_data_type = None
         for index, data in enumerate(enumerate_data_list):
             task_type = 0 if data.is_aic_data() else 1
             pmu_list = {}
@@ -248,9 +268,19 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
                                                          self._sample_json.get('ai_core_metrics'))
             pmu_list = {k: pmu_list[k] for k in self.aic_table_name_list if k in pmu_list}
             AicPmuUtils.remove_redundant(pmu_list)
-            pmu_data = (
+            if not pmu_data_type:
+                pmu_name = ["pmu_" + str(i) for i in range(len(pmu_list))]
+                self.data_name = [
+                    "total_time", "total_cycle", *pmu_name,
+                    "task_id", "stream_id", "task_type", "batch_id", "timestamp"
+                ]
+                pmu_data_type = CustomizedNamedtupleFactory.enhance_namedtuple(
+                    namedtuple("PmuData", self.data_name), {})
+            pmu_data = pmu_data_type(
                 total_time, data.total_cycle, *list(itertools.chain.from_iterable(pmu_list.values())), data.task_id,
-                data.stream_id, task_type
+                data.stream_id, task_type,
+                -1,  # default batch_id
+                InfoConfReader().time_from_syscnt(data.time_list[1]),  # end time
             )
             pmu_data_list[index] = pmu_data
 

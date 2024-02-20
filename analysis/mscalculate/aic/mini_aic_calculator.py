@@ -146,10 +146,10 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
             algos.append(algo)
         algo_lst = Utils.generator_to_list("cast(" + algo + " as decimal(8,2)) " for algo in algos)
         sql = "SELECT " + ",".join(algo_lst) \
-              + ", task_id, stream_id, '0' FROM EventCount where device_id=?"
+              + ", task_id, stream_id, '0', -1 as batch_id FROM EventCount where device_id=?"
         if have_step_info:
             sql = "SELECT " + ",".join(algo_lst) \
-                  + ", task_id, stream_id, '0' " \
+                  + ", task_id, stream_id, '0', -1 as batch_id " \
                     "FROM EventCount where device_id=? limit ? offset ?"
         return sql
 

@@ -481,3 +481,74 @@ class TestFftsPmuCalculator(TestCase):
             total_cycle, cycle_list = check._calculate_total_cycle_and_cycle_list(mix_type_value, value_new_dict)
             self.assertEqual(5355725, total_cycle)
             self.assertEqual([6246, 0, 541913, 0, 21316, 45672, 61375, 2414], cycle_list)
+
+    def test_calculate_mix_pmu_list_should_return_3_data_when_3_data_parsed(self):
+        context_task = [
+            FftsPmuBean([0, 0, 1, 1, 0, 0, 4294967295, 8192, 0, 0, 1111, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 10000, 10100]),
+            FftsPmuBean([0, 0, 1, 2, 0, 0, 4294967295, 8192, 0, 0, 1112, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 10200, 10300]),
+            FftsPmuBean([0, 0, 1, 3, 0, 0, 4294967295, 8192, 0, 0, 1113, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 10400, 10500]),
+        ]
+        pmu_value = {
+            "l0a_read_bw(GB/s)": [0],
+            "l0a_write_bw(GB/s)": [0],
+            "l0b_read_bw(GB/s)": [0],
+            "l0b_write_bw(GB/s)": [0],
+            "l0c_read_bw(GB/s)": [0],
+            "l0c_read_bw_cube(GB/s)": [0],
+            "l0c_write_bw(GB/s)": [0],
+            "l0c_write_bw_cube(GB/s)": [0],
+        }
+        pmu_data_list = [None] * len(context_task)
+        InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 1000}]}
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator._get_current_block', return_value=10), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator._get_pmu_value', return_value=pmu_value):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            check._data_list['context_task'] = context_task
+            check._freq = 1000
+            check._core_num_dict = {
+                "aic": 1,
+                "aiv": 1,
+            }
+            check.aic_table_name_list = list(pmu_value.keys())
+            check.aiv_table_name_list = list(pmu_value.keys())
+            check.calculate_mix_pmu_list(pmu_data_list)
+            self.assertEqual(3, len(pmu_data_list))
+
+    def test_calculate_pmu_list_should_return_3_data_when_3_data_parsed(self):
+        context_task = [
+            FftsPmuBean([0, 0, 1, 1, 0, 0, 4294967295, 8192, 0, 0, 1111, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 10000, 10100]),
+            FftsPmuBean([0, 0, 1, 2, 0, 0, 4294967295, 8192, 0, 0, 1112, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 10200, 10300]),
+            FftsPmuBean([0, 0, 1, 3, 0, 0, 4294967295, 8192, 0, 0, 1113, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 10400, 10500]),
+        ]
+        pmu_value = {
+            "l0a_read_bw(GB/s)": [0],
+            "l0a_write_bw(GB/s)": [0],
+            "l0b_read_bw(GB/s)": [0],
+            "l0b_write_bw(GB/s)": [0],
+            "l0c_read_bw(GB/s)": [0],
+            "l0c_read_bw_cube(GB/s)": [0],
+            "l0c_write_bw(GB/s)": [0],
+            "l0c_write_bw_cube(GB/s)": [0],
+        }
+        pmu_data_list = [None] * len(context_task)
+        InfoConfReader()._info_json = {"DeviceInfo": [{'aic_frequency': 1500, 'hwts_frequency': 1000}]}
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator._get_current_block', return_value=10), \
+                mock.patch(NAMESPACE + '.CalculateAiCoreData.compute_ai_core_data', return_value=[0, pmu_value]):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            check._data_list['context_task'] = context_task
+            check._freq = 1000
+            check._core_num_dict = {
+                "aic": 1,
+                "aiv": 1,
+            }
+            check.aic_table_name_list = list(pmu_value.keys())
+            check.calculate_pmu_list(pmu_data_list)
+            self.assertEqual(3, len(pmu_data_list))

@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2020-2023. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2024. All rights reserved.
 
 import logging
 import os
 from collections import deque
 
-from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.data_manager import DataManager
 from common_func.db_manager import DBManager
@@ -15,8 +14,8 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_common import add_aicore_units
-from common_func.msvp_common import read_cpu_cfg
 from common_func.msvp_common import format_high_precision_for_csv
+from common_func.msvp_common import read_cpu_cfg
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
@@ -63,6 +62,7 @@ class AiCoreOpReport:
     MODEL_NAME_INDEX = 0
     INFER_ID_INDEX = 4
     AI_CPU_TABLE = "ai_cpu_datas"
+    IS_PMU_UNIQUE_ID = True
 
     @staticmethod
     def _union_task_ge_ai_core_data(data: list, ai_core_group_dict: dict) -> list:
@@ -78,8 +78,13 @@ class AiCoreOpReport:
                 # 针对helper场景, 去除运行在AI_CPU的HCCL小算子,
                 logging.info("Found ai cpu hccl small op of stream %d, task %d", datum[2], datum[1])
                 continue
-            # 2 stream id; 1 task id of datum
-            ai_core_queue = ai_core_group_dict.get(datum[1:3] + (datum[-1],), deque([]))
+            #  1-task_id, 2-stream_id, -2-context_id, -1-batch_id, (batch_id, task_id, stream_id, context_id)作为key
+            key = (datum[-1],) + datum[1:3] + (datum[-2],)
+            if not AiCoreOpReport.IS_PMU_UNIQUE_ID:
+                # 不支持唯一id, (task_id, stream_id, context_id)作为key
+                key = key[1:]
+            datum = datum[:-1]  # 去除batch_id, 不在交付件中展现
+            ai_core_queue = ai_core_group_dict.get(key, deque([]))
             if not ai_core_queue:
                 # 没有匹配的pmu数据, 包括AI_CPU, DSA, DVPP算子
                 logging.debug("No ai core data of stream %d, task %d", datum[2], datum[1])
@@ -112,6 +117,7 @@ class AiCoreOpReport:
             if datum[task_type_idx] in (Constant.TASK_TYPE_HCCL_AI_CPU, Constant.TASK_TYPE_HCCL):
                 logging.info("Found hccl small op of stream %d, task %d", datum[2], datum[1])
                 continue
+            datum = datum[:-1]  # 去除batch_id, 不在交付件中展现
             filter_data.append(datum)
         return filter_data
 
@@ -148,9 +154,10 @@ class AiCoreOpReport:
             format(NumberConstant.DEFAULT_GE_CONTEXT_ID)
         if not ChipManager().is_chip_v4():
             subtask_id = ",'N/A'"
-        return "select {1}, task_id, stream_id {subtask_id} from {0}".format(DBNameConstant.TABLE_SUMMARY_METRICS,
-                                                                             used_headers,
-                                                                             subtask_id=subtask_id)
+        return "select {1}, batch_id, task_id, stream_id {subtask_id} from {0}".format(
+            DBNameConstant.TABLE_SUMMARY_METRICS,
+            used_headers,
+            subtask_id=subtask_id)
 
     @staticmethod
     def _get_ai_core_float_cols(columns: list) -> list:
@@ -224,7 +231,7 @@ class AiCoreOpReport:
                 index_id = [_hccl_op.index_id]
             hccl_data[index] = model_name + [_hccl_op.model_id, Constant.NA, Constant.NA] + index_id + \
                                [
-                                   _hccl_op.op_name, _hccl_op.op_type, _hccl_op.task_type,
+                                   _hccl_op.op_name, _hccl_op.op_type, 'N/A', _hccl_op.task_type,
                                    int(_hccl_op.timestamp), int(_hccl_op.duration),
                                    Constant.DEFAULT_VALUE, Constant.DEFAULT_VALUE
                                ]
@@ -394,11 +401,18 @@ class AiCoreOpReport:
 
     @classmethod
     def _group_by_stream_task(cls: any, ai_core_data: list) -> dict:
+        if not ai_core_data:
+            return {}
+        idx = -4  # 唯一id的起始下标, 将最后4个元素（batch_id, task_id, stream_id, subtask_id）作为唯一id
+        # 下标-4是batch_id, 当batch_id==-1时, 不支持batch_id匹配pmu数据
+        if ai_core_data[0][-4] == -1:
+            cls.IS_PMU_UNIQUE_ID = False
+            idx = -3  # 不支持唯一id, 将最后3个元素（task_id, stream_id, subtask_id）作为pmu匹配的依据
         ai_core_group_dict = {}
         for ai_core_datum in ai_core_data:
-            # the last three element is task id, stream id, subtask_id
-            ai_core_group_value = ai_core_group_dict.setdefault(ai_core_datum[-3:], deque([]))
-            ai_core_group_value.append(ai_core_datum[:-3])
+            # the last 4 element is batch_id, task id, stream id, subtask_id
+            ai_core_group_value = ai_core_group_dict.setdefault(ai_core_datum[idx:], deque([]))
+            ai_core_group_value.append(ai_core_datum[:-4])
         return ai_core_group_dict
 
     @classmethod
@@ -419,7 +433,11 @@ class AiCoreOpReport:
     def _get_tensor_table_sql_and_headers(cls: any, headers: list) -> tuple:
         # ge or subtask need modify the context_id or subtask_id so that it should be same.
         sql = "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info}" \
-              "{1}.op_name, {1}.op_type, {1}.task_type," \
+              "{1}.op_name, {1}.op_type, " \
+              "(case when {1}.op_state is 'N/A' then 'N/A' " \
+              "when {1}.op_state is '1' then 'dynamic'" \
+              "when {1}.op_state is '0' then 'static' end), " \
+              "{1}.task_type," \
               "{0}.start_time, {0}.duration_time," \
               "{0}.wait_time, {1}.block_dim, {1}.mix_block_dim, {1}.op_flag," \
               "(case when {1}.input_shapes is NULL then 'N/A' else {1}.input_shapes end), " \
@@ -428,7 +446,8 @@ class AiCoreOpReport:
               "(case when {1}.output_shapes is NULL then 'N/A' else {1}.output_shapes end), " \
               "(case when {1}.output_data_types is NULL then 'N/A' else {1}.output_data_types end), " \
               "(case when {1}.output_formats is NULL then 'N/A' else {1}.output_formats end), " \
-              "(case when {1}.context_id={context_id} then 'N/A' else {1}.context_id end) " \
+              "(case when {1}.context_id={context_id} then 'N/A' else {1}.context_id end), " \
+              "{0}.batch_id " \
               "from {0} inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id={1}.stream_id " \
               "and {1}.task_type != ? and {1}.task_type != ? " \
               "and {0}.batch_id={1}.batch_id " \
@@ -459,7 +478,8 @@ class AiCoreOpReport:
             if not ProfilingScene().is_graph_export() else 'model_id, '
         sql = "select {model_id} task_id, stream_id, {index_info} 'N/A', 'N/A', task_type, " \
               "start_time, duration_time, wait_time, " \
-              "(case when {0}.subtask_id={context_id} then 'N/A' else {0}.subtask_id end) " \
+              "(case when {0}.subtask_id={context_id} then 'N/A' else {0}.subtask_id end), " \
+              "batch_id " \
               "from {0} where task_type!=? " \
               "and task_type!=? order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,

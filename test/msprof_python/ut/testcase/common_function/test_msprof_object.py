@@ -27,7 +27,7 @@ class TestCustomizedNamedtupleFactory(unittest.TestCase):
 
     def test__enhance_namedtuple_func(self):
         origin_tuple = namedtuple("test_name_tuple", ["a", "b", "c"])
-        enhanced_tuple = CustomizedNamedtupleFactory._enhance_namedtuple(origin_tuple, {"kk": 100})
+        enhanced_tuple = CustomizedNamedtupleFactory.enhance_namedtuple(origin_tuple, {"kk": 100})
         self.assertTrue(hasattr(enhanced_tuple, "kk"))
         self.assertTrue(hasattr(enhanced_tuple, "replace"))
         obj = enhanced_tuple(1, 2, 3)

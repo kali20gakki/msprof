@@ -7,6 +7,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_iteration import MsprofIteration
 from msmodel.interface.view_model import ViewModel
+from profiling_bean.db_dto.api_data_dto import ApiDataDto
 
 
 class ApiDataViewModel(ViewModel):
@@ -50,7 +51,13 @@ class ApiDataViewModel(ViewModel):
                                                             where_condition=self._get_where_condition())
         return DBManager.fetch_all_data(self.cur, search_data_sql)
 
+    def get_earliests_api(self):
+        search_data_sql = "select * from {} ORDER BY " \
+            "start LIMIT 1".format(DBNameConstant.TABLE_API_DATA)
+        return DBManager.fetch_all_data(self.cur, search_data_sql, dto_class=ApiDataDto)
+
     def _get_where_condition(self):
         return MsprofIteration(self._result_dir).get_condition_within_iteration(self._iter_range,
                                                                                 time_start_key='start',
                                                                                 time_end_key='end')
+    
