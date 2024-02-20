@@ -99,6 +99,34 @@ namespace {
         {"name", SQL_INTEGER_TYPE}
     };
 
+    const TableColumns NPU_MEM = {
+        {"type", SQL_INTEGER_TYPE},
+        {"ddrUsage", SQL_NUMERIC_TYPE},
+        {"hbmUsage", SQL_NUMERIC_TYPE},
+        {"timestamp", SQL_TEXT_TYPE},
+        {"deviceId", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns NPU_MODULE_MEM = {
+        {"moduleId", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_TEXT_TYPE},
+        {"totalReserved", SQL_NUMERIC_TYPE},
+        {"deviceId", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns NPU_OP_MEM = {
+        {"operatorName", SQL_INTEGER_TYPE},
+        {"addr", SQL_INTEGER_TYPE},
+        {"type", SQL_INTEGER_TYPE},
+        {"size", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_TEXT_TYPE},
+        {"globalTid", SQL_INTEGER_TYPE},
+        {"totalAllocate", SQL_NUMERIC_TYPE},
+        {"totalReserve", SQL_NUMERIC_TYPE},
+        {"component", SQL_INTEGER_TYPE},
+        {"deviceId", SQL_INTEGER_TYPE}
+    };
+
     const TableColumns ENUM_API_LEVEL = {
         {"id", SQL_INTEGER_TYPE, true},
         {"name", SQL_TEXT_TYPE}
@@ -127,6 +155,9 @@ ReportDB::ReportDB()
         {TABLE_NAME_COMMUNICATION_TASK_INFO, COMMUNICATION_TASK_INFO},
         {TABLE_NAME_COMMUNICATION_OP, COMMUNICATION_OP},
         {TABLE_NAME_API, API},
+        {TABLE_NAME_NPU_MEM, NPU_MEM},
+        {TABLE_NAME_NPU_MODULE_MEM, NPU_MODULE_MEM},
+        {TABLE_NAME_NPU_OP_MEM, NPU_OP_MEM},
         // ENUM
         {TABLE_NAME_ENUM_API_LEVEL, ENUM_API_LEVEL},
         {TABLE_NAME_ENUM_MEMORY, ENUM_MEMORY},

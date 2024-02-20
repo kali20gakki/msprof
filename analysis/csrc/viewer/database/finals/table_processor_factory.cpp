@@ -22,6 +22,8 @@
 #include "analysis/csrc/viewer/database/finals/compute_task_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/communication_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/api_processor.h"
+#include "analysis/csrc/viewer/database/finals/npu_mem_processor.h"
+#include "analysis/csrc/viewer/database/finals/npu_module_mem_processor.h"
 
 namespace Analysis {
 namespace Viewer {
@@ -56,6 +58,12 @@ std::shared_ptr<TableProcessor> TableProcessorFactory::CreateTableProcessor(
     }
     if (processorName == PROCESSOR_NAME_API) {
         MAKE_SHARED_RETURN_VALUE(processor, ApiProcessor, nullptr, reportDBPath, profPaths);
+    }
+    if (processorName == PROCESSOR_NAME_NPU_MEM) {
+        MAKE_SHARED_RETURN_VALUE(processor, NpuMemProcessor, nullptr, reportDBPath, profPaths);
+    }
+    if (processorName == PROCESSOR_NAME_NPU_MODULE_MEM) {
+        MAKE_SHARED_RETURN_VALUE(processor, NpuModuleMemProcessor, nullptr, reportDBPath, profPaths);
     }
     return processor;
 }
