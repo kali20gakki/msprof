@@ -18,7 +18,6 @@
 #include "analysis/csrc/dfx/log.h"
 #include "analysis/csrc/utils/utils.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-
 namespace Analysis {
 namespace Utils {
 
@@ -26,7 +25,6 @@ using namespace Analysis::Viewer::Database;
 const int YEAR_DISPLAY_WIDTH = 4; // 年的固定宽度是4
 const int TIME_DISPLAY_WIDTH = 2; // 日期的固定宽度是2，不足的前面补零
 const int NS_US = 3; // NS到US的时间转换的数量级，3表示10^3的指数
-    
 std::string GetFormatLocalTime()
 {
     time_t t = time(nullptr);  // 获取1970年1月1日0点0分0秒到现在经过的秒数
@@ -61,6 +59,11 @@ HPFloat GetTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params)
     res = res << NS_US;
     res += HPFloat(params.hostMonotonic);
     return res;
+}
+
+HPFloat GetTimeBySamplingTimestamp(double timestamp, const SyscntConversionParams &params)
+{
+    return HPFloat(timestamp * MILLI_SECOND) + HPFloat(params.hostMonotonic);
 }
 
 HPFloat GetLocalTime(HPFloat &timestamp, const ProfTimeRecord &record)
