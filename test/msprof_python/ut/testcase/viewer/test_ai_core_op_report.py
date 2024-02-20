@@ -18,7 +18,7 @@ from viewer.ai_core_op_report import ReportOPCounter
 
 NAMESPACE = 'viewer.ai_core_op_report'
 config = {'handler': '_get_op_summary_data',
-          'headers': ['Model Name', 'Model ID', 'Task ID', 'Stream ID', 'Infer ID', 'Op Name', 'OP Type',
+          'headers': ['Model Name', 'Model ID', 'Task ID', 'Stream ID', 'Infer ID', 'Op Name', 'OP Type', 'OP State',
                       'Task Type', 'Task Start Time(us)', 'Task Duration(us)', 'Task Wait Time(us)', 'Block Dim'],
           'db': 'ai_core_op_summary.db', 'unused_cols': []}
 
@@ -32,7 +32,7 @@ class TestAiCoreOpReport(unittest.TestCase):
             check = AiCoreOpReport()
             res = check.get_op_summary_data("0", "", config)
         expect_res = [
-            'Model Name', 'Model ID', 'Task ID', 'Stream ID', 'Infer ID', 'Op Name', 'OP Type',
+            'Model Name', 'Model ID', 'Task ID', 'Stream ID', 'Infer ID', 'Op Name', 'OP Type', 'OP State',
             'Task Type', 'Task Start Time(us)', 'Task Duration(us)', 'Task Wait Time(us)', 'Block Dim'
         ]
         self.assertEqual(res[0], expect_res)
@@ -120,12 +120,13 @@ class TestAiCoreOpReport(unittest.TestCase):
 
     def test_get_op_summary_data(self):
         create_ge_sql = "CREATE TABLE IF NOT EXISTS ge_summary(model_name text,model_id INTEGER,task_id INTEGER," \
-                        "stream_id INTEGER, op_name text,op_type text,block_dim INTEGER,input_shapes text," \
+                        "stream_id INTEGER, op_name text,op_type text,op_state text," \
+                        "block_dim INTEGER,input_shapes text," \
                         "input_data_types text,input_formats text,output_shapes text,output_data_types text," \
                         "output_formats text,device_id INTEGER,task_type text,index_id INTEGER)"
         union_sql = "select * from ge_summary where ge_summary.index_id=? and ge_summary.task_type!=?"
-        ge_data = ((0, 4294967295, 3, 6, "TransData", "TransData", 32, "1,512,1,1", "DT_FLOAT", "NCHW", "1,32,1,1,16",
-                    "DT_FLOAT", "NC1HWC0", 0, "AI_CORE", 1),)
+        ge_data = ((0, 4294967295, 3, 6, "TransData", "TransData", 'static',
+                    32, "1,512,1,1", "DT_FLOAT", "NCHW", "1,32,1,1,16", "DT_FLOAT", "NC1HWC0", 0, "AI_CORE", 1),)
         with DBOpen(DB_AICORE_OP_SUMMARY) as db_open:
             db_open.create_table(create_ge_sql)
             db_open.insert_data(DBNameConstant.TABLE_SUMMARY_GE, ge_data)
@@ -144,10 +145,12 @@ class TestAiCoreOpReport(unittest.TestCase):
 
     def test_union_task_ge_ai_core_data(self):
         expect_res = [(1, 2, 3, 11, 16, 4, 10), (4, 5, 6, 11, 16, 7, 40), (7, 8, 9, 11, 16, 10, 'N/A')]
-        data = [(1, 2, 3, 11, 16, 4), (4, 5, 6, 11, 16, 7), (7, 8, 9, 11, 16, 10)]
+        data = [(1, 2, 3, 11, 16, 4, -1), (4, 5, 6, 11, 16, 7, -1), (7, 8, 9, 11, 16, 10, -1)]
         ai_core_group_dict = {(2, 3, 4): deque([(10,)]), (5, 6, 7): deque([(40,)]), (10, 11, 12): deque([(20,)])}
+        AiCoreOpReport.IS_PMU_UNIQUE_ID = False
         res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
         self.assertEqual(res, expect_res)
+        AiCoreOpReport.IS_PMU_UNIQUE_ID = True
 
     def test_format_summary_data(self):
         headers = ['Task Start Time(us)', 'Task Duration(us)', 'Task Wait Time(us)']
@@ -168,15 +171,15 @@ class TestAiCoreOpReport(unittest.TestCase):
             (1, 2, 3, 11, 16, "AI_CPU", 'N/A'), (4, 5, 6, 11, 16, "AI_CPU", 'N/A'), (7, 8, 9, 11, 16, 10, 'N/A')
         ]
         data = [
-            (1, 2, 3, 11, 16, "AI_CPU"),
-            (4, 5, 6, 11, 16, "AI_CPU"),
-            (7, 8, 9, 11, 16, 10),
-            (1, 2, 3, 11, 16, "HCCL"),
-            (1, 3, 3, 11, 16, "HCCL_AI_CPU")
+            (1, 2, 3, 11, 16, "AI_CPU", 0),
+            (4, 5, 6, 11, 16, "AI_CPU", 0),
+            (7, 8, 9, 11, 16, 10, 0),
+            (1, 2, 3, 11, 16, "HCCL", 0),
+            (1, 3, 3, 11, 16, "HCCL_AI_CPU", 0)
         ]
         ai_core_group_dict = {
-            (2, 3, "AI_CPU"): deque([(10,)]), (5, 6, "AI_CPU"): deque([(40,)]),
-            (10, 11, 12): deque([(20,)]), (2, 3, "HCCL"): deque([(50,)])
+            (0, 2, 3, "AI_CPU"): deque([(10,)]), (0, 5, 6, "AI_CPU"): deque([(40,)]),
+            (0, 10, 11, 12): deque([(20,)]), (0, 2, 3, "HCCL"): deque([(50,)])
         }
         res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
         self.assertEqual(res, expect_res)
@@ -186,11 +189,11 @@ class TestAiCoreOpReport(unittest.TestCase):
             (1, 2, 3, 11, 16, "AI_CPU"), (4, 5, 6, 11, 16, "AI_CPU"), (7, 8, 9, 11, 16, 10)
         ]
         data = [
-            (1, 2, 3, 11, 16, "AI_CPU"),
-            (4, 5, 6, 11, 16, "AI_CPU"),
-            (7, 8, 9, 11, 16, 10),
-            (1, 2, 3, 11, 16, "HCCL"),
-            (1, 3, 3, 11, 16, "HCCL_AI_CPU")
+            (1, 2, 3, 11, 16, "AI_CPU", 0),
+            (4, 5, 6, 11, 16, "AI_CPU", 0),
+            (7, 8, 9, 11, 16, 10, 0),
+            (1, 2, 3, 11, 16, "HCCL", 0),
+            (1, 3, 3, 11, 16, "HCCL_AI_CPU", 0)
         ]
         ai_core_group_dict = {}
         res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
@@ -249,7 +252,8 @@ class TestAiCoreOpReport(unittest.TestCase):
         InfoConfReader()._local_time_offset = 10.0
         res_data = (
             "select -1,  task_id, stream_id,  'N/A', 'N/A', task_type, start_time, duration_time, "
-            "wait_time, (case when task_time.subtask_id=4294967295 then 'N/A' else task_time.subtask_id end) "
+            "wait_time, (case when task_time.subtask_id=4294967295 then 'N/A' else task_time.subtask_id end), "
+            "batch_id "
             "from task_time where task_type!=? and task_type!=? order by start_time",
             ['Op Name', 'stream_id']
         )

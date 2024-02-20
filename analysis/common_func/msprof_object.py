@@ -61,10 +61,10 @@ class CustomizedNamedtupleFactory:
         for name in dir(dto_class):
             if isinstance(getattr(dto_class, name), property):
                 extra_properties[name] = getattr(dto_class, name)
-        return CustomizedNamedtupleFactory._enhance_namedtuple(base_tuple, extra_properties)
+        return CustomizedNamedtupleFactory.enhance_namedtuple(base_tuple, extra_properties)
 
     @staticmethod
-    def _enhance_namedtuple(tuple_type: type, function_dict: dict):
+    def enhance_namedtuple(tuple_type: type, function_dict: dict):
         """
         Enhance namedtuple, add function or attribute for it.
         tuple_type: base type

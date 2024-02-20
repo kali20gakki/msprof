@@ -89,6 +89,7 @@ class TablesOperatorConfig(MetaConfig):
             ('stream_id', 'INTEGER,null'),
             ('op_name', 'text,null'),
             ('op_type', 'text,null'),
+            ('op_state', 'text,null'),
             ('block_dim', 'INTEGER,null'),
             ('mix_block_dim', 'INTEGER,null'),
             ('task_type', 'text,null'),

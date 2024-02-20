@@ -282,7 +282,7 @@ class CreateTrainingTrace(CreateSubTable):
     def update_step_time(cls: any):
         with TsTrackModel(cls.sample_config.get("result_dir"), DBNameConstant.DB_STEP_TRACE,
                           [DBNameConstant.TABLE_STEP_TIME]) as ts:
-            step_data = ts.get_step_time()
+            step_data = ts.get_step_trace_data(DBNameConstant.TABLE_STEP_TIME)
         for data in step_data:
             cls.data.append([cls.sample_config.get("devices"), data.model_id, data.index_id, 0, 0,
                              data.step_end, data.step_end - data.step_start, 0, 0, NumberConstant.NULL_NUMBER])

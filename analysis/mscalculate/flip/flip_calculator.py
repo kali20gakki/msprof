@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from msparser.compact_info.task_track_bean import TaskTrackBean
 from mscalculate.ascend_task.ascend_task import DeviceTask
 from msparser.step_trace.ts_binary_data_reader.task_flip_bean import TaskFlip
+from common_func.db_name_constant import DBNameConstant
+from msmodel.step_trace.ts_track_model import TsTrackModel
 
 
 @dataclass
@@ -79,3 +81,11 @@ class FlipCalculator:
             key = "{}-{}".format(getattr(data, "device_id", 0), data.stream_id)
             sep_data.setdefault(key, []).append(data)
         return sep_data
+
+    @staticmethod
+    def set_device_batch_id(data: list, result_dir: str) -> List:
+        with TsTrackModel(result_dir,
+                          DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_DEVICE_TASK_FLIP]) as model:
+            task_flip = model.get_task_flip_data()
+        device_tasks = FlipCalculator.compute_batch_id(data, task_flip)
+        return device_tasks
