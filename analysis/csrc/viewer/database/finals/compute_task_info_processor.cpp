@@ -117,13 +117,12 @@ bool ComputeTaskInfoProcessor::Process(const std::string &fileDir)
     MAKE_SHARED0_NO_OPERATION(geInfoDB.database, GEInfoDB);
     std::string dbPath = Utils::File::PathJoin({fileDir, HOST, SQLITE, geInfoDB.dbName});
     // 并不是所有场景都有ge info数据
-    if (!Utils::File::Exist(dbPath)) {
-        WARN("Can't find the db, the path is %.", dbPath);
+    auto status = CheckPath(dbPath);
+    if (status != CHECK_SUCCESS) {
+        if (status == CHECK_FAILED) {
+            return false;
+        }
         return true;
-    }
-    if (!Utils::FileReader::Check(dbPath, MAX_DB_BYTES)) {
-        ERROR("Check % failed.", dbPath);
-        return false;
     }
     MAKE_SHARED_RETURN_VALUE(geInfoDB.dbRunner, DBRunner, false, dbPath);
     auto oriData = GetData(geInfoDB);
