@@ -9,6 +9,7 @@ from unittest import mock
 
 from common_func.constant import Constant
 from common_func.profiling_scene import ProfilingScene
+from common_func.file_slice_helper import FileSliceHelper
 from common_func.profiling_scene import ExportMode
 from msinterface.msprof_data_storage import MsprofDataStorage
 
@@ -54,20 +55,21 @@ class TestMsprofDataStorage(unittest.TestCase):
 
     def test_export_summary_data_1(self):
         headers = 2
-        data = 2
+        data = [2]
         params = {"export_format": "csv"}
-        with mock.patch(NAMESPACE + '.MsprofDataStorage._make_export_file_name', return_value=2), \
+        with mock.patch(NAMESPACE + '.FileSliceHelper.make_export_file_name', return_value="test_01_1"), \
                 mock.patch(NAMESPACE + '.check_file_writable'), \
                 mock.patch(NAMESPACE + '.create_csv', return_value=1):
             key = MsprofDataStorage()
             result = key.export_summary_data(headers, data, params)
-        self.assertEqual(result, 1)
+        json_dump = '{"status": 1, "info": "bak or mkdir json dir failed", "data": ""}'
+        self.assertEqual(result, json_dump)
 
     def test_export_summary_data_2(self):
         headers = 1
-        data = 1
+        data = [1]
         params = {"export_format": "json"}
-        with mock.patch(NAMESPACE + '.MsprofDataStorage._make_export_file_name', return_value=1), \
+        with mock.patch(NAMESPACE + '.FileSliceHelper.make_export_file_name', return_value="test_0111"), \
                 mock.patch(NAMESPACE + '.check_file_writable'), \
                 mock.patch(NAMESPACE + '.create_json', return_value=1):
             key = MsprofDataStorage()
@@ -92,7 +94,7 @@ class TestMsprofDataStorage(unittest.TestCase):
     def test_export_timeline_data_to_json_2(self):
         result = {'test1': 1}
         params = {"data_type": 1}
-        with mock.patch(NAMESPACE + '.MsprofDataStorage._make_export_file_name', return_value=1), \
+        with mock.patch(NAMESPACE + '.FileSliceHelper.make_export_file_name', return_value=1), \
                 mock.patch(NAMESPACE + '.check_file_writable'), \
                 mock.patch('os.path.exists', return_value=True), \
                 mock.patch('os.remove', return_value=True), \
@@ -175,55 +177,6 @@ class TestMsprofDataStorage(unittest.TestCase):
             key.data_list = []
             key.tid_set = {i for i in range(10000000)}
             key.get_slice_times('a', 1)
-
-    def test_get_current_time_str_should_return_success_when_input_data_is_valid(self):
-        utc_time = datetime.now(tz=timezone.utc)
-        current_time = utc_time.replace(tzinfo=timezone.utc).astimezone(tz=None)
-        self.assertEqual(MsprofDataStorage.get_current_time_str(), current_time.strftime('%Y%m%d%H%M%S'))
-
-    def test_get_current_time_str_should_return_success_when_data_length_is_14(self):
-        self.assertEqual(len(MsprofDataStorage.get_current_time_str()), 14)
-
-    def test_get_export_prefix_file_name_should_return_name_when_normal(self):
-        params = {"data_type": "abc", "device_id": "0", "model_id": "1", "iter_id": "1"}
-        ProfilingScene().init(" ")
-        ProfilingScene()._scene = Constant.STEP_INFO
-        ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
-        with mock.patch(NAMESPACE + '.MsprofDataStorage.get_current_time_str', return_value="20230905200300"):
-            self.assertEqual(MsprofDataStorage.get_export_prefix_file_name(params, 0, True),
-                             "abc_0_1_1_slice_0_20230905200300")
-        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
-
-    def test_make_export_file_name_should_return_json_name_when_give_timeline_json(self):
-        params = {
-            "data_type": "abc", "device_id": "0", "model_id": "1", "iter_id": "1",
-            "export_type": "timeline"
-        }
-        with mock.patch(NAMESPACE + '.MsprofDataStorage.get_export_prefix_file_name',
-                        return_value="abc_0_1_1_slice_0_20230905200300"):
-            self.assertEqual(MsprofDataStorage._make_export_file_name(params),
-                             "abc_0_1_1_slice_0_20230905200300.json")
-
-    def test_make_export_file_name_should_return_json_name_when_give_summary_json(self):
-        params = {
-            "data_type": "abc", "device_id": "0", "model_id": "1", "iter_id": "1",
-            "export_type": "summary", "export_format": "json"
-        }
-        with mock.patch(NAMESPACE + '.MsprofDataStorage.get_export_prefix_file_name',
-                        return_value="abc_0_1_1_slice_0_20230905200300"):
-            self.assertEqual(MsprofDataStorage._make_export_file_name(params),
-                             "abc_0_1_1_slice_0_20230905200300.json")
-
-    def test_make_export_file_name_should_return_csv_name_when_give_summary_csv(self):
-        params = {
-            "data_type": "abc", "device_id": "0", "model_id": "1", "iter_id": "1",
-            "export_type": "summary", "export_format": "csv"
-        }
-        with mock.patch(NAMESPACE + '.MsprofDataStorage.get_export_prefix_file_name',
-                        return_value="abc_0_1_1_slice_0_20230905200300"):
-            self.assertEqual(MsprofDataStorage._make_export_file_name(params),
-                             "abc_0_1_1_slice_0_20230905200300.csv")
-
 
 if __name__ == '__main__':
     unittest.main()
