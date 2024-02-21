@@ -69,12 +69,12 @@ class TestExportCommand(unittest.TestCase):
         with mock.patch(NAMESPACE + ".DataCheckManager.check_data_exist", return_value=True), \
                 mock.patch(NAMESPACE + ".ConfigMgr.read_sample_config", return_value=sample_config):
             test = ExportCommand("timeline", args)
-            test.sample_config = {'devices': '0'}
+            InfoConfReader()._sample_json = {"devices": '0'}
             test._add_export_type("")
         with mock.patch(NAMESPACE + ".DataCheckManager.check_data_exist", return_value=True), \
                 mock.patch(NAMESPACE + ".ConfigMgr.read_sample_config", return_value=sample_config):
             test = ExportCommand("summary", args)
-            test.sample_config = {'devices': '0'}
+            InfoConfReader()._sample_json = {"devices": '0'}
             test._add_export_type("")
 
     def test_add_export_type_should_return_timeline_list_map_when_current_dir_is_host_and_device_exists(self):
@@ -89,6 +89,7 @@ class TestExportCommand(unittest.TestCase):
              mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
             test = ExportCommand('timeline', args)
             test.sample_config = {'devices': '64'}
+            InfoConfReader()._sample_json = {"devices": '64'}
             test._add_export_type(result_dir + "host")
             self.assertGreater(len(test.list_map['export_type_list']), 0)
 
@@ -96,6 +97,7 @@ class TestExportCommand(unittest.TestCase):
         result_dir = "./msprof/test/"
         args_dic = {'collection_path': 'test', 'iteration_id': 1, 'model_id': None}
         args = Namespace(**args_dic)
+        InfoConfReader()._sample_json = {"devices": '64'}
         sample_config = {'helper_profiling': ''}
         with mock.patch(NAMESPACE + '.DataCheckManager.check_data_exist', return_value=True), \
              mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=sample_config), \
@@ -118,6 +120,7 @@ class TestExportCommand(unittest.TestCase):
              mock.patch(NAMESPACE + '.AiStackDataCheckManager._is_device_exist', return_value=True), \
              mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
             test = ExportCommand('timeline', args)
+            InfoConfReader()._sample_json = {"devices": '0'}
             test.sample_config = {'devices': '0'}
             test._add_export_type(result_dir + "device_0")
             self.assertGreater(len(test.list_map['export_type_list']), 0)
@@ -134,6 +137,7 @@ class TestExportCommand(unittest.TestCase):
              mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
             test = ExportCommand('timeline', args)
             test.sample_config = {'devices': '64'}
+            InfoConfReader()._sample_json = {"devices": '0'}
             test._add_export_type(result_dir + "host")
             self.assertGreater(len(test.list_map['export_type_list']), 0)
 
@@ -149,6 +153,7 @@ class TestExportCommand(unittest.TestCase):
              mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
             test = ExportCommand('summary', args)
             test.sample_config = {'devices': '64'}
+            InfoConfReader()._sample_json = {"devices": '64'}
             test._add_export_type(result_dir + "host")
             self.assertGreater(len(test.list_map['export_type_list']), 0)
 
@@ -451,6 +456,24 @@ class TestExportCommand(unittest.TestCase):
                 test.list_map["devices_list"] = ["1"]
                 test.process()
             with mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', retrun_value=False):
+                test = ExportCommand("summary", args)
+                test.list_map["devices_list"] = ["1"]
+                test.process()
+
+    def test_test_process_test_when_command_type_is_summary(self):
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
+        args = Namespace(**args_dic)
+        with mock.patch('os.path.join', return_value='JOB/device_0'), \
+                mock.patch('os.path.realpath', return_value='JOB/device_0'), \
+                mock.patch('os.listdir', return_value=[]), \
+                mock.patch(NAMESPACE + '.check_path_valid'), \
+                mock.patch(NAMESPACE + '.ExportCommand._handle_export'), \
+                mock.patch(NAMESPACE + '.ExportCommand._show_tuning_result'), \
+                mock.patch(NAMESPACE + '.MsprofJobSummary._export_msprof_timeline'), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._is_in_prof_file', return_value=False), \
+                mock.patch(NAMESPACE + '.get_path_dir', return_value=[]), \
+                mock.patch(NAMESPACE + '.get_valid_sub_path'):
+            with mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', retrun_value=True):
                 test = ExportCommand("summary", args)
                 test.list_map["devices_list"] = ["1"]
                 test.process()

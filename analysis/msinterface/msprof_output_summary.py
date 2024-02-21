@@ -321,7 +321,7 @@ class MsprofOutputSummary:
             all_data = [''] * FileSliceHelper.CSV_LIMIT
             for index, row in enumerate(self.read_file(_csv_file.file_reader)):
                 line_num = index + 1
-                if line_num == FileSliceHelper.CSV_LIMIT:
+                if line_num > FileSliceHelper.CSV_LIMIT:
                     logging.error("The CSV file size limit is %d rows, and the size of the %s file "
                                   "has exceeded the limit. ", FileSliceHelper.CSV_LIMIT, file_name_path)
                     return
