@@ -684,8 +684,9 @@ class ExportCommand:
                 else:
                     self._process_sub_dirs(sub_dir, is_cluster=True)
                 self.list_map['devices_list'] = ''
-        job_summary = MsprofJobSummary(collect_path)
-        job_summary.export(self.command_type)
+        if self.command_type != MsProfCommonConstant.DB:
+            job_summary = MsprofJobSummary(collect_path)
+            job_summary.export(self.command_type)
 
-        profier = MsprofOutputSummary(collect_path, self.export_format)
-        profier.export(self.command_type)
+            profier = MsprofOutputSummary(collect_path, self.export_format)
+            profier.export(self.command_type)
