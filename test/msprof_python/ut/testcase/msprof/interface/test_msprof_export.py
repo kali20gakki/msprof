@@ -286,6 +286,18 @@ class TestExportCommand(unittest.TestCase):
             self.assertEqual(ProfException.PROF_INVALID_STEP_TRACE_ERROR, err.value.code)
         ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
+    def test_check_index_id_should_throw_exception_when_not_report_step_trace_in_step_export_mode(self):
+        args_dic = {"collection_path": "test", "iteration_id": -1, "model_id": None, "iteration_count": 1}
+        args = Namespace(**args_dic)
+        ProfilingScene().set_mode(ExportMode.STEP_EXPORT)
+        with mock.patch(NAMESPACE + ".TsTrackModel.get_index_range_with_model", return_value=[]):
+            with pytest.raises(ProfException) as err:
+                ProfilingScene()._scene = Constant.SINGLE_OP
+                test = ExportCommand("timeline", args)
+                test._check_index_id("")
+            self.assertEqual(ProfException.PROF_INVALID_STEP_TRACE_ERROR, err.value.code)
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
+
     def test_prepare_for_export(self):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 3, "iteration_count": 1}
         args = Namespace(**args_dic)
