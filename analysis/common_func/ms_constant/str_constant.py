@@ -41,6 +41,7 @@ class StrConstant:
     PARAM_ITER_ID = "iter_id"
     PARAM_EXPORT_TYPE = "export_type"
     PARAM_EXPORT_FORMAT = "export_format"
+    PARAM_EXPORT_DUMP_FOLDER = "export_dump_folder"
 
     # constant within sample config
     SAMPLE_CONFIG_PROJECT_PATH = "result_dir"

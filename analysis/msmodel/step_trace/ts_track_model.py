@@ -97,7 +97,7 @@ class TsTrackModel(BaseModel, ABC):
         table_name = ProfilingScene().get_step_table_name()
         if not DBManager.judge_table_exist(self.cur, table_name) or \
                 not DBManager.judge_row_exist(self.cur, table_name):
-            return EmptyClass()
+            return []
         sql = f'select min(index_id), max(index_id) from {table_name} where model_id=?'
         return DBManager.fetchone(self.cur, sql, (model_id,))
 

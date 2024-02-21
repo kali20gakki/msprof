@@ -372,8 +372,12 @@ class ExportCommand:
 
     def _is_iteration_range_valid(self, project_path):
         with TsTrackModel(project_path, DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_STEP_TRACE_DATA]) as _trace:
-            min_iter, max_iter = _trace.get_index_range_with_model(self.list_map.get(self.MODEL_ID))
-
+            iter_range = _trace.get_index_range_with_model(self.list_map.get(self.MODEL_ID))
+        if not iter_range:
+            error(self.FILE_NAME, "The step export is not supported.")
+            return False
+        min_iter = iter_range[0]
+        max_iter = iter_range[1]
         if self.iteration_id < min_iter or self.iteration_id + self.iteration_count - 1 > max_iter:
             error(self.FILE_NAME,
                   f'The exported iteration {self.iteration_id}-{self.iteration_id + self.iteration_count - 1} '
@@ -626,7 +630,8 @@ class ExportCommand:
             StrConstant.PARAM_EXPORT_TYPE: self.command_type,
             StrConstant.PARAM_ITER_ID: self.iteration_range,
             StrConstant.PARAM_EXPORT_FORMAT: self.export_format,
-            StrConstant.PARAM_MODEL_ID: self.list_map.get("model_id")
+            StrConstant.PARAM_MODEL_ID: self.list_map.get("model_id"),
+            StrConstant.PARAM_EXPORT_DUMP_FOLDER: self.command_type
         }
 
         self._handle_export_data(params)
@@ -682,5 +687,5 @@ class ExportCommand:
         job_summary = MsprofJobSummary(collect_path)
         job_summary.export(self.command_type)
 
-        profier = MsprofOutputSummary(collect_path)
+        profier = MsprofOutputSummary(collect_path, self.export_format)
         profier.export(self.command_type)

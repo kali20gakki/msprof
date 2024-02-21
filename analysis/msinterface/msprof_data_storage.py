@@ -21,6 +21,7 @@ from common_func.msvp_common import create_json
 from common_func.msvp_constant import MsvpConstant
 from common_func.file_manager import check_file_readable
 from common_func.file_manager import check_file_writable
+from common_func.file_slice_helper import FileSliceHelper
 from common_func.path_manager import PathManager
 from common_func.profiling_scene import ProfilingScene
 from profiling_bean.prof_enum.timeline_slice_strategy import LoadingTimeLevel
@@ -80,7 +81,7 @@ class MsprofDataStorage:
         MsprofDataStorage.clear_timeline_dir(params)
         data_path = []
         for slice_time in range(len(json_data[1])):
-            timeline_file_path = MsprofDataStorage._make_export_file_name(params, slice_time, json_data[0])
+            timeline_file_path = FileSliceHelper.make_export_file_name(params, slice_time, json_data[0])
             if os.path.exists(timeline_file_path):
                 os.remove(timeline_file_path)
             try:
@@ -103,10 +104,11 @@ class MsprofDataStorage:
         :return:
         """
         if headers and data:
-            summary_file_path = MsprofDataStorage._make_export_file_name(params)
+            summary_file_path = FileSliceHelper.make_export_file_name(params)
             check_file_writable(summary_file_path)
+            helper = FileSliceHelper(params, headers, data)
             if params.get(StrConstant.PARAM_EXPORT_FORMAT) == StrConstant.EXPORT_CSV:
-                return create_csv(summary_file_path, headers, data, save_old_file=False)
+                return helper.slice_and_dump_summary_data_as_csv()
             if params.get(StrConstant.PARAM_EXPORT_FORMAT) == StrConstant.EXPORT_JSON:
                 return create_json(summary_file_path, headers, data, save_old_file=False)
         if data:
@@ -133,28 +135,6 @@ class MsprofDataStorage:
                 os.remove(os.path.join(timeline_dir, file))
 
     @staticmethod
-    def get_current_time_str() -> str:
-        utc_time = datetime.now(tz=timezone.utc)
-        current_time = utc_time.replace(tzinfo=timezone.utc).astimezone(tz=None)
-        return current_time.strftime('%Y%m%d%H%M%S')
-
-    @staticmethod
-    def get_export_prefix_file_name(params: dict, slice_times: int = 0, slice_switch=False) -> str:
-        file_name = params.get(StrConstant.PARAM_DATA_TYPE)
-        if params.get(StrConstant.PARAM_DEVICE_ID) is not None and \
-                params.get(StrConstant.PARAM_DEVICE_ID) != NumberConstant.HOST_ID:
-            file_name += "_" + str(params.get(StrConstant.PARAM_DEVICE_ID))
-            if ProfilingScene().is_graph_export():
-                file_name += "_" + str(params.get(StrConstant.PARAM_MODEL_ID))
-            if params.get(StrConstant.PARAM_ITER_ID) is not None:
-                file_name += "_" + str(params.get(StrConstant.PARAM_ITER_ID))
-        if slice_switch:
-            file_name += "_slice_{}".format(str(slice_times))
-        date_str = MsprofDataStorage.get_current_time_str()
-        file_name += "_" + date_str
-        return file_name
-
-    @staticmethod
     def _calculate_loading_time(row_line_level: int, count_line_level: int) -> float:
         """
         Calculate the approximate time
@@ -165,20 +145,6 @@ class MsprofDataStorage:
         And the start value is proportional to the total number of records.
         """
         return (7 * count_line_level / 36000000 + 5.1) * row_line_level / 1000 + 9 * count_line_level / 2000000
-
-    @staticmethod
-    def _make_export_file_name(params: dict, slice_times: int = 0, slice_switch=False) -> str:
-        file_name = MsprofDataStorage.get_export_prefix_file_name(params, slice_times, slice_switch)
-        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.SUMMARY:
-            file_suffix = StrConstant.FILE_SUFFIX_CSV
-            if params.get(StrConstant.PARAM_EXPORT_FORMAT) == StrConstant.EXPORT_JSON:
-                file_suffix = StrConstant.FILE_SUFFIX_JSON
-            return os.path.join(
-                PathManager.get_summary_dir(params.get(StrConstant.PARAM_RESULT_DIR)),
-                file_name + file_suffix)
-        return os.path.join(
-            PathManager.get_timeline_dir(params.get(StrConstant.PARAM_RESULT_DIR)),
-            file_name + StrConstant.FILE_SUFFIX_JSON)
 
     @staticmethod
     def _get_time_level(line_level: float) -> int:

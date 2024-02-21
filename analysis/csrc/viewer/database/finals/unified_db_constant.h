@@ -14,7 +14,8 @@
 #define ANALYSIS_VIEWER_DATABASE_UNIFIED_DB_CONSTANT_H
 
 #include <string>
-
+#include <unordered_map>
+#include <map>
 #include "collector/inc/toolchain/prof_common.h"
 
 namespace Analysis {
@@ -49,6 +50,15 @@ const std::string TABLE_NAME_COMMUNICATION_OP = "COMMUNICATION_OP";
 
 const std::string PROCESSOR_NAME_API = "API";
 const std::string TABLE_NAME_API = "API";
+
+const std::string PROCESSOR_NAME_NPU_MEM = "NPU_MEM";
+const std::string TABLE_NAME_NPU_MEM = "NPU_MEM";
+
+const std::string PROCESSOR_NAME_NPU_MODULE_MEM = "NPU_MODULE_MEM";
+const std::string TABLE_NAME_NPU_MODULE_MEM = "NPU_MODULE_MEM";
+
+const std::string PROCESSOR_NAME_NPU_OP_MEM = "NPU_OP_MEM";
+const std::string TABLE_NAME_NPU_OP_MEM = "NPU_OP_MEM";
 
 const std::string PROCESSOR_NAME_ENUM = "ENUM";
 const std::string TABLE_NAME_ENUM_API_LEVEL = "ENUM_API_LEVEL";
@@ -199,6 +209,7 @@ const uint64_t NANO_SECOND = 1000000000;
 const uint64_t MICRO_SECOND = 1000000;
 const uint64_t MILLI_SECOND = 1000;
 constexpr const uint64_t MAX_DB_BYTES = 10ULL * 1024 * 1024 * 1024;
+const uint16_t BYTE_SIZE = 1024;
 
 }  // Database
 }  // Viewer

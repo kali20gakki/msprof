@@ -84,6 +84,21 @@ public:
     HCCLSingleDeviceDB();
 };
 
+class NpuMemDB : public Database {
+public:
+    NpuMemDB();
+};
+
+class NpuModuleMemDB : public Database {
+public:
+    NpuModuleMemDB();
+};
+
+class TaskMemoryDB : public Database {
+public:
+    TaskMemoryDB();
+};
+
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis

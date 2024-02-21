@@ -30,7 +30,13 @@ class MsprofJobSummary:
     def __init__(self: any, output: str) -> None:
         self._output = output
         self._host_data = []
-        self.param = {'project': self._output, 'data_type': 'msprof'}
+        self.param = {
+            StrConstant.PARAM_RESULT_DIR: self._output,
+            StrConstant.PARAM_DATA_TYPE: 'msprof',
+            StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.TIMELINE,
+            StrConstant.PARAM_EXPORT_FORMAT: None,
+            StrConstant.PARAM_EXPORT_DUMP_FOLDER: MsProfCommonConstant.TIMELINE
+        }
 
     def export(self: any, command_type: str) -> None:
         """

@@ -39,7 +39,6 @@ from common_func.file_manager import FdOpen
 from common_func.file_manager import FileOpen
 from common_func.file_manager import check_path_valid
 from common_func.file_slice_helper import FileSliceHelper
-from common_func.file_slice_helper import make_export_file_name
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_common import get_path_dir
@@ -58,7 +57,7 @@ class MsprofOutputSummary:
     """
     DEVICE_PREFIX = "device_"
     INVALID_SUFFIX = "invalid"
-    MSPROF_HOST_DIR = "host"
+    MSPROF_HOST = "host"
     DEVICE_ID = "Device_id"
     DEVICE_ID_PREFIX_LEN = 7
     SLICE_LEN = 7
@@ -68,8 +67,9 @@ class MsprofOutputSummary:
         "msprof", "step_trace", "msprof_tx"
     ]
 
-    def __init__(self: any, output: str) -> None:
+    def __init__(self: any, output: str, export_format: str) -> None:
         self._output = output
+        self._export_format = export_format
         self._output_dir = ""
         self._log_dir = ""
 
@@ -163,7 +163,7 @@ class MsprofOutputSummary:
         """
         file_list = os.listdir(self._output)
         for file_name in file_list:
-            if file_name == self.MSPROF_HOST_DIR or \
+            if file_name == self.MSPROF_HOST or \
                     file_name.startswith(self.DEVICE_PREFIX):
                 return True
         return False
@@ -172,13 +172,15 @@ class MsprofOutputSummary:
         """
         get summary or timeline's suffix, ".csv" or ".json"
         """
-        if command_type == MsProfCommonConstant.SUMMARY:
-            return StrConstant.FILE_SUFFIX_CSV
-        elif command_type == MsProfCommonConstant.TIMELINE:
+        if command_type == MsProfCommonConstant.SUMMARY and self._export_format == StrConstant.EXPORT_JSON:
             return StrConstant.FILE_SUFFIX_JSON
-        else:
-            logging.error("%s is invalid, can't export this type file.", command_type)
-            return self.INVALID_SUFFIX
+        if command_type == MsProfCommonConstant.SUMMARY and self._export_format == StrConstant.EXPORT_CSV:
+            return StrConstant.FILE_SUFFIX_CSV
+        if command_type == MsProfCommonConstant.TIMELINE:
+            return StrConstant.FILE_SUFFIX_JSON
+
+        logging.error("%s is invalid, can't export this type file.", command_type)
+        return self.INVALID_SUFFIX
 
     def _clear_output_folder(self, suffix: str) -> bool:
         if suffix == self.INVALID_SUFFIX:
@@ -203,27 +205,37 @@ class MsprofOutputSummary:
             return False
 
     def _export_msprof_summary(self):
-        self._copy_host_summary()
-        self._merge_device_summary()
+        # host 侧数据 以及summary 是 json格式的时候，按文件拷贝
+        if self._export_format == StrConstant.EXPORT_JSON:
+            sub_dirs = get_path_dir(self._output)
+            for sub_dir in sub_dirs:
+                self._copy_summary_data(sub_dir, StrConstant.FILE_SUFFIX_JSON)
+            return
+        else:
+            self._copy_summary_data(self.MSPROF_HOST, StrConstant.FILE_SUFFIX_CSV)
+            self._merge_device_summary()
 
-    def _copy_host_summary(self):
+    def _copy_summary_data(self, folder_name: str, file_suffix: str):
         """
-        all csv file in host/summary will be moved
+        拷贝summary文件夹下所有数据到output目录下，host可以看作一种特殊的device
         """
-        host_dir = os.path.join(self._output, self.MSPROF_HOST_DIR)
+        if not (folder_name == self.MSPROF_HOST or folder_name.startswith(self.DEVICE_PREFIX)):
+            return
         summary_path = os.path.realpath(
-            os.path.join(self._output, host_dir, MsProfCommonConstant.SUMMARY))
+            os.path.join(self._output, folder_name, MsProfCommonConstant.SUMMARY))
         if not os.path.exists(summary_path):
             return
-        file_list = self.get_newest_file_list(os.listdir(summary_path), StrConstant.FILE_SUFFIX_CSV)
+        file_list = self.get_newest_file_list(os.listdir(summary_path), file_suffix)
         for file_name in file_list:
             params = {
-                StrConstant.PARAM_RESULT_DIR: self._output_dir,
+                StrConstant.PARAM_RESULT_DIR: self._output,
                 StrConstant.PARAM_DATA_TYPE: self._get_file_name(file_name),
-                StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.SUMMARY
+                StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.SUMMARY,
+                StrConstant.PARAM_EXPORT_FORMAT: self._export_format,
+                StrConstant.PARAM_EXPORT_DUMP_FOLDER: PathManager.MINDSTUDIO_PROFILER_OUTPUT
             }
             shutil.copy(os.path.join(summary_path, file_name),
-                        make_export_file_name(params))
+                        FileSliceHelper.make_export_file_name(params))
 
     def _merge_device_summary(self):
         """
@@ -233,7 +245,7 @@ class MsprofOutputSummary:
         sub_dirs = get_path_dir(self._output)
         summary_file_set = set()
         for sub_dir in sub_dirs:
-            if sub_dir == self.MSPROF_HOST_DIR:
+            if sub_dir == self.MSPROF_HOST:
                 continue
             sub_path = get_valid_sub_path(self._output, sub_dir, False)
             if not DataCheckManager.contain_info_json_data(sub_path):
@@ -270,9 +282,16 @@ class MsprofOutputSummary:
         """
         get summary_data then create or open csv file in target dir
         """
-        helper = FileSliceHelper(self._output_dir, targe_name, MsProfCommonConstant.SUMMARY)
+        params = {
+            StrConstant.PARAM_DATA_TYPE: targe_name,
+            StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.SUMMARY,
+            StrConstant.PARAM_EXPORT_FORMAT: self._export_format,
+            StrConstant.PARAM_RESULT_DIR: self._output,
+            StrConstant.PARAM_EXPORT_DUMP_FOLDER: PathManager.MINDSTUDIO_PROFILER_OUTPUT
+        }
+        helper = FileSliceHelper(params, [], [])
         for sub_dir in sub_dirs:
-            if sub_dir == self.MSPROF_HOST_DIR:
+            if sub_dir == self.MSPROF_HOST:
                 continue
             sub_path = get_valid_sub_path(self._output, sub_dir, False)
             if not DataCheckManager.contain_info_json_data(sub_path):
@@ -294,18 +313,20 @@ class MsprofOutputSummary:
                              helper: FileSliceHelper):
         with FileOpen(file_name_path, mode='r', max_size=self.FILE_MAX_SIZE) as _csv_file:
             header = _csv_file.file_reader.readline()
-            line_num = -1
             if header and helper.check_header_is_empty():
                 csv_header = [self.DEVICE_ID, *list(header.split(','))]
                 helper.set_header(csv_header)
+
+            line_num = 0
             all_data = [''] * FileSliceHelper.CSV_LIMIT
-            for row in self.read_file(_csv_file.file_reader):
-                line_num += 1
-                remainder = line_num % FileSliceHelper.CSV_LIMIT
-                if line_num and not remainder:
-                    helper.insert_data(all_data)
-                all_data[remainder] = f'{device_id},{row}'
-            helper.insert_data(all_data[:(line_num + 1) % FileSliceHelper.CSV_LIMIT])
+            for index, row in enumerate(self.read_file(_csv_file.file_reader)):
+                line_num = index + 1
+                if line_num == FileSliceHelper.CSV_LIMIT:
+                    logging.error("The CSV file size limit is %d rows, and the size of the %s file "
+                                  "has exceeded the limit. ", FileSliceHelper.CSV_LIMIT, file_name_path)
+                    return
+                all_data[index] = f'{device_id},{row}'
+            helper.insert_data(all_data[:line_num])
 
     def _export_msprof_timeline(self: any) -> None:
         self._export_all_timeline_data()
@@ -343,7 +364,14 @@ class MsprofOutputSummary:
         pool = multiprocessing.Pool(processes=4)
         is_need_slice = True if slice_max_count else False
         for index in range(slice_max_count + 1):
-            helper = FileSliceHelper(self._output_dir, targe_name, MsProfCommonConstant.TIMELINE)
+            params = {
+                StrConstant.PARAM_DATA_TYPE: targe_name,
+                StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.TIMELINE,
+                StrConstant.PARAM_EXPORT_FORMAT: self._export_format,
+                StrConstant.PARAM_RESULT_DIR: self._output,
+                StrConstant.PARAM_EXPORT_DUMP_FOLDER: PathManager.MINDSTUDIO_PROFILER_OUTPUT
+            }
+            helper = FileSliceHelper(params, [], [])
             try:
                 pool.apply_async(func=self._insert_json_data,
                                  args=(timeline_file_dict.get(index, []), helper,
@@ -363,11 +391,14 @@ class MsprofOutputSummary:
         """
         if len(file_list) == 1:
             params = {
-                StrConstant.PARAM_RESULT_DIR: self._output_dir,
+                StrConstant.PARAM_RESULT_DIR: self._output,
                 StrConstant.PARAM_DATA_TYPE: self._get_file_name(os.path.basename(file_list[0])),
-                StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.TIMELINE
+                StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.TIMELINE,
+                StrConstant.PARAM_EXPORT_FORMAT: self._export_format,
+                StrConstant.PARAM_EXPORT_DUMP_FOLDER: PathManager.MINDSTUDIO_PROFILER_OUTPUT
             }
-            shutil.copy(file_list[0], make_export_file_name(params, slice_index, slice_switch=is_need_slice))
+            shutil.copy(file_list[0],
+                        FileSliceHelper.make_export_file_name(params, slice_index, slice_switch=is_need_slice))
             return
         for _file_name in file_list:
             helper.insert_data(Utils.get_json_data(_file_name))

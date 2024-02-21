@@ -181,6 +181,34 @@ namespace {
         {"batch_id", SQL_INTEGER_TYPE},
         {"rdma_type", SQL_TEXT_TYPE}
     };
+
+    const TableColumns NpuMem = {
+        {"event", SQL_TEXT_TYPE},
+        {"ddr", SQL_INTEGER_TYPE},
+        {"hbm", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"memory", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns NpuModuleMem = {
+        {"module_id", SQL_INTEGER_TYPE},
+        {"syscnt", SQL_NUMERIC_TYPE},
+        {"total_size", SQL_INTEGER_TYPE},
+        {"device_type", SQL_TEXT_TYPE}
+    };
+
+    const TableColumns NpuOpMemRaw = {
+        {"operator", SQL_TEXT_TYPE},
+        {"addr", SQL_TEXT_TYPE},
+        {"size", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"thread_id", SQL_INTEGER_TYPE},
+        {"total_allocate_memory", SQL_INTEGER_TYPE},
+        {"total_reserve_memory", SQL_INTEGER_TYPE},
+        {"level", SQL_INTEGER_TYPE},
+        {"type", SQL_INTEGER_TYPE},
+        {"device_type", SQL_TEXT_TYPE}
+    };
 }
 
 std::string Database::GetDBName() const
@@ -248,6 +276,25 @@ HCCLSingleDeviceDB::HCCLSingleDeviceDB()
     dbName_ = "hccl_single_device.db";
     tableColNames_["HCCLSingleDevice"] = HCCLSingleDevice;
 }
+
+NpuMemDB::NpuMemDB()
+{
+    dbName_ = "npu_mem.db";
+    tableColNames_["NpuMem"] = NpuMem;
+}
+
+NpuModuleMemDB::NpuModuleMemDB()
+{
+    dbName_ = "npu_module_mem.db";
+    tableColNames_["NpuModuleMem"] = NpuModuleMem;
+}
+
+TaskMemoryDB::TaskMemoryDB()
+{
+    dbName_ = "task_memory.db";
+    tableColNames_["NpuOpMemRaw"] = NpuOpMemRaw;
+}
+
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis
