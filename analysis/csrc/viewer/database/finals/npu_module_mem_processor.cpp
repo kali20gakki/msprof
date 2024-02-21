@@ -82,18 +82,16 @@ bool NpuModuleMemProcessor::Process(const std::string &fileDir)
     for (const auto &devicePath: deviceList) {
         std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, npuModuleMemDB.dbName});
         // 并不是所有场景都有NpuModuleMem数据
-        if (!Utils::File::Exist(dbPath)) {
-            WARN("Can't find the db, the path is %.", dbPath);
+        auto status = CheckPath(dbPath);
+        if (status != CHECK_SUCCESS) {
+            if (status == CHECK_FAILED) {
+                flag = false;
+            }
             continue;
         }
         if (!timeFlag) {
             ERROR("GetSyscntConversionParams failed, profPath is %.", fileDir);
             return false;
-        }
-        if (!Utils::FileReader::Check(dbPath, MAX_DB_BYTES)) {
-            ERROR("Check % failed.", dbPath);
-            flag = false;
-            continue;
         }
         uint16_t deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
         INFO("Start to process %, deviceId:%.", dbPath, deviceId);

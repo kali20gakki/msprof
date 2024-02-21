@@ -137,13 +137,11 @@ bool CommunicationInfoProcessor::Process(const std::string &fileDir)
     for (const auto& devicePath: deviceList) {
         std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, threadData.hcclSingleDeviceDB.dbName});
         // 并不是所有场景都有hccl数据
-        if (!Utils::File::Exist(dbPath)) {
-            WARN("Can't find the db, the path is %.", dbPath);
-            continue;
-        }
-        if (!Utils::FileReader::Check(dbPath, MAX_DB_BYTES)) {
-            flag = false;
-            ERROR("Check % failed.", dbPath);
+        auto status = CheckPath(dbPath);
+        if (status != CHECK_SUCCESS) {
+            if (status == CHECK_FAILED) {
+                flag = false;
+            }
             continue;
         }
         CommunicationTaskDataFormat taskData;
