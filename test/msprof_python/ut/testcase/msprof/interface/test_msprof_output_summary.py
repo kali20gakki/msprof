@@ -19,7 +19,7 @@ class TestMsprofOutputSummary(unittest.TestCase):
     def test_export_when_not_in_prof_file_then_pass(self):
         with mock.patch('common_func.common.print_info'), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._is_in_prof_file', return_value=False):
-            MsprofOutputSummary('test').export(MsProfCommonConstant.SUMMARY)
+            MsprofOutputSummary('test', "csv").export(MsProfCommonConstant.SUMMARY)
 
     def test_export_when_in_prof_file_but_can_not_clear_file_then_return(self):
         with mock.patch('common_func.common.print_info'), \
@@ -27,14 +27,14 @@ class TestMsprofOutputSummary(unittest.TestCase):
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._get_file_suffix'), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._clear_output_folder', return_value=False), \
                 mock.patch('logging.error'):
-            MsprofOutputSummary('test').export(MsProfCommonConstant.SUMMARY)
+            MsprofOutputSummary('test', "csv").export(MsProfCommonConstant.SUMMARY)
 
     def test_export_when_in_prof_file_and_export_summary_then_pass(self):
         with mock.patch('common_func.common.print_info'), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._is_in_prof_file', return_value=True), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._get_file_suffix'), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._clear_output_folder', return_value=True):
-            check = MsprofOutputSummary('test')
+            check = MsprofOutputSummary('test', "csv")
             check._export_msprof_summary = mock.Mock()
             check._export_readme_file = mock.Mock()
             check.export(MsProfCommonConstant.SUMMARY)
@@ -46,7 +46,7 @@ class TestMsprofOutputSummary(unittest.TestCase):
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._is_in_prof_file', return_value=True), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._get_file_suffix'), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._clear_output_folder', return_value=True):
-            check = MsprofOutputSummary('test')
+            check = MsprofOutputSummary('test', "csv")
             check._export_msprof_timeline = mock.Mock()
             check._export_readme_file = mock.Mock()
             check.export(MsProfCommonConstant.TIMELINE)
@@ -54,28 +54,28 @@ class TestMsprofOutputSummary(unittest.TestCase):
             check._export_readme_file.assert_called_once()
 
     def test_get_file_suffix_when_summary_then_return_csv_suffix(self):
-        check = MsprofOutputSummary('test')
+        check = MsprofOutputSummary('test', "csv")
         self.assertEqual(check._get_file_suffix(MsProfCommonConstant.SUMMARY), StrConstant.FILE_SUFFIX_CSV)
 
     def test_get_file_suffix_when_timeline_then_return_json_suffix(self):
-        check = MsprofOutputSummary('test')
+        check = MsprofOutputSummary('test', "csv")
         self.assertEqual(check._get_file_suffix(MsProfCommonConstant.TIMELINE), StrConstant.FILE_SUFFIX_JSON)
 
     def test_get_file_suffix_when_invalid_then_return_csv_suffix(self):
         with mock.patch('logging.error'), \
                 mock.patch('sys.exit'):
-            check = MsprofOutputSummary('test')
+            check = MsprofOutputSummary('test', "csv")
             self.assertEqual(check._get_file_suffix("abc"), check.INVALID_SUFFIX)
 
     def test_clear_output_folder_when_suffix_invalid_then_return_False(self):
-        check = MsprofOutputSummary('test')
+        check = MsprofOutputSummary('test', "csv")
         self.assertFalse(check._clear_output_folder(check.INVALID_SUFFIX))
 
     def test_clear_output_folder_when_path_not_exist_then_mkdir_return_True(self):
         with mock.patch('os.path.join', return_value="test"), \
                 mock.patch('os.path.exists', return_value=False), \
                 mock.patch('os.makedirs'):
-            check = MsprofOutputSummary('test')
+            check = MsprofOutputSummary('test', "csv")
             self.assertTrue(check._clear_output_folder(StrConstant.FILE_SUFFIX_CSV))
 
     def test_clear_output_folder_when_path_exist_then_move_file_succes_return_True(self):
@@ -88,32 +88,32 @@ class TestMsprofOutputSummary(unittest.TestCase):
                 mock.patch('os.path.getsize', return_value=1000), \
                 mock.patch('os.access', return_value=True), \
                 mock.patch('os.remove'):
-            check = MsprofOutputSummary('test')
+            check = MsprofOutputSummary('test', "csv")
             self.assertTrue(check._clear_output_folder(StrConstant.FILE_SUFFIX_CSV))
 
     def test_is_in_prof_file_when_in_prof_file_then_return_True(self):
         with mock.patch('os.listdir', return_value=["host", "123"]):
-            check = MsprofOutputSummary('test')
+            check = MsprofOutputSummary('test', "csv")
             self.assertTrue(check._is_in_prof_file())
 
         with mock.patch('os.listdir', return_value=["device_1", "123"]):
-            check = MsprofOutputSummary('test')
+            check = MsprofOutputSummary('test', "csv")
             self.assertTrue(check._is_in_prof_file())
 
     def test_is_in_prof_file_when_not_in_prof_file_then_return_False(self):
         with mock.patch('os.listdir', return_value=["123"]):
-            check = MsprofOutputSummary('test')
+            check = MsprofOutputSummary('test', "csv")
             self.assertFalse(check._is_in_prof_file())
 
     def test_export_msprof_summary_when_normal_then_pass(self):
-        check = MsprofOutputSummary('test')
-        check._copy_host_summary = mock.Mock()
+        check = MsprofOutputSummary('test', "csv")
+        check._copy_summary_data = mock.Mock()
         check._merge_device_summary = mock.Mock()
         check._export_msprof_summary()
-        check._copy_host_summary.assert_called_once()
+        check._copy_summary_data.assert_called_once()
         check._merge_device_summary.assert_called_once()
 
-    def test_copy_host_summary_when_normal_then_pass(self):
+    def test_copy_summary_data_when_normal_then_pass(self):
         with mock.patch('os.path.join', return_value="test"), \
                 mock.patch('os.path.realpath', return_value="test"), \
                 mock.patch('os.path.exists', return_value=True), \
@@ -121,10 +121,10 @@ class TestMsprofOutputSummary(unittest.TestCase):
                 mock.patch(NAMESPACE + '.MsprofOutputSummary.get_newest_file_list',
                            return_value=["op_summary_0_1_1_20230905213000.csv"]), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._get_file_name', return_value="op_summary"), \
-                mock.patch(NAMESPACE + '.make_export_file_name',
+                mock.patch(NAMESPACE + '.FileSliceHelper.make_export_file_name',
                            return_value=["op_summary_0_1_1_20230905213000.csv"]), \
                 mock.patch('shutil.copy'):
-            MsprofOutputSummary('test')._copy_host_summary()
+            MsprofOutputSummary('test', "csv")._copy_summary_data("test", ".csv")
 
     def test_merge_device_summary_when_normal_then_pass(self):
         with mock.patch(NAMESPACE + '.get_path_dir', return_value=['host', 'device_0', 'device_1']), \
@@ -138,7 +138,7 @@ class TestMsprofOutputSummary(unittest.TestCase):
                 mock.patch('multiprocessing.pool.Pool.apply_async'), \
                 mock.patch('multiprocessing.pool.Pool.close'), \
                 mock.patch('multiprocessing.pool.Pool.join'):
-            MsprofOutputSummary('test')._merge_device_summary()
+            MsprofOutputSummary('test', "csv")._merge_device_summary()
 
     def test_get_summary_file_name_when_normal_then_pass(self):
         with mock.patch('os.path.join', return_value="test"), \
@@ -148,7 +148,7 @@ class TestMsprofOutputSummary(unittest.TestCase):
                 mock.patch(NAMESPACE + '.MsprofOutputSummary.get_newest_file_list',
                            return_value=["op_summary_0_1_1_20230905213000.csv"]), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._get_file_name', return_value="op_summary"):
-            file_set = MsprofOutputSummary('test')._get_summary_file_name("test")
+            file_set = MsprofOutputSummary('test', "csv")._get_summary_file_name("test")
             self.assertEqual(len(file_set), 1)
 
     def test_save_summary_data_when_normal_then_pass(self):
@@ -163,10 +163,17 @@ class TestMsprofOutputSummary(unittest.TestCase):
                            return_value=["op_summary_0_1_1_20230905213000.csv"]), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._insert_summary_data'), \
                 mock.patch('common_func.file_slice_helper.FileSliceHelper.dump_csv_data'):
-            MsprofOutputSummary('test')._save_summary_data("op_summary", ['host', 'device_0', 'device_1'])
+            MsprofOutputSummary('test', "csv")._save_summary_data("op_summary", ['host', 'device_0', 'device_1'])
 
     def test_insert_summary_data_when_more_than_1000000_then_insert_data(self):
-        helper = FileSliceHelper("test", "op_summary", "summary")
+        params = {
+            StrConstant.PARAM_DATA_TYPE: "op_summary",
+            StrConstant.PARAM_EXPORT_TYPE: "summary",
+            StrConstant.PARAM_EXPORT_FORMAT: "csv",
+            StrConstant.PARAM_RESULT_DIR: "test",
+            StrConstant.PARAM_EXPORT_DUMP_FOLDER: "summary"
+        }
+        helper = FileSliceHelper(params, [], [])
         mock_iterator = MagicMock()
         mock_iterator.__iter__.return_value = iter(['1,2,3'] * 1000001)
         with mock.patch(NAMESPACE + '.FileOpen'), \
@@ -175,9 +182,9 @@ class TestMsprofOutputSummary(unittest.TestCase):
                 mock.patch('common_func.file_slice_helper.FileSliceHelper.check_header_is_empty',
                            return_value=True), \
                 mock.patch('common_func.msvp_common.create_normal_writer'):
-            check = MsprofOutputSummary('test')
+            check = MsprofOutputSummary('test', "csv")
             check._insert_summary_data("op_summary", "test", helper)
-            self.assertEqual(len(helper.data_list), 1)
+            self.assertEqual(len(helper.data_list), 0)
 
     def test_get_newest_file_list_when_csv_normal_filename_then_pass(self):
         _file_list = [
@@ -187,7 +194,7 @@ class TestMsprofOutputSummary(unittest.TestCase):
             "step_trace_20230905191336.json", "step_trace_20230805191336.json"
         ]
         data_type = StrConstant.FILE_SUFFIX_CSV
-        check = MsprofOutputSummary('test')
+        check = MsprofOutputSummary('test', "csv")
         self.assertEqual(check.get_newest_file_list(_file_list, data_type),
                          ["op_summary_20230905191336.csv", "step_trace_20230905191336.csv"])
 
@@ -199,44 +206,44 @@ class TestMsprofOutputSummary(unittest.TestCase):
             "step_trace_20230905191336.json", "step_trace_20230805191336.json"
         ]
         data_type = StrConstant.FILE_SUFFIX_JSON
-        check = MsprofOutputSummary('test')
+        check = MsprofOutputSummary('test', "csv")
         self.assertEqual(check.get_newest_file_list(_file_list, data_type),
                          ["msprof_20230905191336.json", "step_trace_20230905191336.json"])
 
     def test_get_newest_file_list_when_invalid_filename_then_return_empty(self):
         _file_list = ["op_summary_20230905191336", "op.csv", "step_trace_qwer.csv"]
         data_type = StrConstant.FILE_SUFFIX_JSON
-        check = MsprofOutputSummary('test')
+        check = MsprofOutputSummary('test', "csv")
         self.assertEqual(check.get_newest_file_list(_file_list, data_type), [])
 
     def test_read_file_when_normal_then_pass(self):
         input_str = "data1"
         output_list = ["data1"]
         reader = StringIO(input_str)
-        check = MsprofOutputSummary('test')
+        check = MsprofOutputSummary('test', "csv")
         res = list(check.read_file(reader))
         self.assertEqual(res, output_list)
 
     def test_get_file_name_when_normal_name_then_pass(self):
-        check = MsprofOutputSummary('test')
+        check = MsprofOutputSummary('test', "csv")
         self.assertEqual(check._get_file_name("msprof_20230905191336.json"), "msprof")
 
     def test_get_file_name_when_invalid_name_then_pass(self):
-        check = MsprofOutputSummary('test')
+        check = MsprofOutputSummary('test', "csv")
         self.assertEqual(check._get_file_name("msprof.json"), "invalid")
 
         self.assertEqual(check._get_file_name("2msprof.json"), "invalid")
 
     def test_export_msprof_timeline_when_normal_then_pass(self):
         with mock.patch(NAMESPACE + '.MsprofOutputSummary._export_all_timeline_data'):
-            MsprofOutputSummary('test')._export_msprof_timeline()
+            MsprofOutputSummary('test', "csv")._export_msprof_timeline()
 
     def test_export_all_timeline_data_when_normal_then_pass(self):
         with mock.patch(NAMESPACE + '.get_path_dir', return_value=['device']), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._save_timeline_data'), \
                 mock.patch('multiprocessing.Process.start'), \
                 mock.patch('multiprocessing.Process.join'):
-            MsprofOutputSummary('test')._export_all_timeline_data()
+            MsprofOutputSummary('test', "csv")._export_all_timeline_data()
 
     def test_save_timeline_data_when_normal_then_pass(self):
         with mock.patch('os.path.realpath', return_value='test'), \
@@ -253,12 +260,19 @@ class TestMsprofOutputSummary(unittest.TestCase):
                 mock.patch('multiprocessing.pool.Pool.apply_async'), \
                 mock.patch('multiprocessing.pool.Pool.close'), \
                 mock.patch('multiprocessing.pool.Pool.join'):
-            MsprofOutputSummary('test')._save_timeline_data("msprof", ["test"])
+            MsprofOutputSummary('test', "csv")._save_timeline_data("msprof", ["test"])
 
     def test_insert_json_data_when_device_is_1_then_copy(self):
+        params = {
+            StrConstant.PARAM_DATA_TYPE: "msprof",
+            StrConstant.PARAM_EXPORT_TYPE: "timeline",
+            StrConstant.PARAM_EXPORT_FORMAT: "csv",
+            StrConstant.PARAM_RESULT_DIR: "test",
+            StrConstant.PARAM_EXPORT_DUMP_FOLDER: "timeline"
+        }
         with mock.patch('shutil.copy'):
-            helper = FileSliceHelper("test", "msprof", "timeline")
-            check = MsprofOutputSummary('test')
+            helper = FileSliceHelper(params, [], [])
+            check = MsprofOutputSummary('test', "csv")
             helper.insert_data = mock.Mock()
             helper.dump_json_data = mock.Mock()
             check._insert_json_data(["msprof_slice_0_20231216.json"], helper, True, 1)
@@ -266,8 +280,15 @@ class TestMsprofOutputSummary(unittest.TestCase):
             helper.dump_json_data.assert_not_called()
 
     def test_insert_json_data_when_device_more_than_1_then_merge_json(self):
-        helper = FileSliceHelper("test", "msprof", "timeline")
-        check = MsprofOutputSummary('test')
+        params = {
+            StrConstant.PARAM_DATA_TYPE: "msprof",
+            StrConstant.PARAM_EXPORT_TYPE: "timeline",
+            StrConstant.PARAM_EXPORT_FORMAT: "csv",
+            StrConstant.PARAM_RESULT_DIR: "test",
+            StrConstant.PARAM_EXPORT_DUMP_FOLDER: "timeline"
+        }
+        helper = FileSliceHelper(params, [], [])
+        check = MsprofOutputSummary('test', "csv")
         helper.insert_data = mock.Mock()
         helper.dump_json_data = mock.Mock()
         check._insert_json_data(["msprof_slice_0_20231216.json", "msprof_slice_0_20231216.json"], helper, True, 1)
@@ -278,7 +299,7 @@ class TestMsprofOutputSummary(unittest.TestCase):
         with mock.patch('os.path.realpath', return_value='test'), \
                 mock.patch('os.path.join', return_value='test'), \
                 mock.patch('os.path.exists', return_value=False):
-            check = MsprofOutputSummary('test')
+            check = MsprofOutputSummary('test', "csv")
             self.assertEqual(check._get_timeline_file_with_slice("qwer", "test_path", {}),
                              ({}, 0))
 
@@ -290,7 +311,7 @@ class TestMsprofOutputSummary(unittest.TestCase):
                 mock.patch(NAMESPACE + '.MsprofOutputSummary.get_newest_file_list',
                            return_value=["msprof_slice_1_20230923193400.json",
                                          "step_trace_slice_1_20230923193400.json"]):
-            check = MsprofOutputSummary('test')
+            check = MsprofOutputSummary('test', "csv")
             self.assertEqual(check._get_timeline_file_with_slice("msprof", "test_path", {}),
                              ({1: ['test']}, 1))
 
@@ -305,11 +326,11 @@ class TestMsprofOutputSummary(unittest.TestCase):
                 mock.patch(NAMESPACE + '.FdOpen.__enter__', mock.mock_open(read_data='123')), \
                 mock.patch(NAMESPACE + '.FdOpen.__exit__'), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._get_readme_info'):
-            MsprofOutputSummary('test')._export_readme_file()
+            MsprofOutputSummary('test', "csv")._export_readme_file()
 
     def test_get_readme_info_when_normal_then_get_desc(self):
         file_dict = {"begin": "hello", "step_trace": "qwer", "123": "zxc"}
         file_set = set()
         file_set.add("step_trace")
-        self.assertEqual(MsprofOutputSummary('test')._get_readme_info(file_set, file_dict, ".json"),
+        self.assertEqual(MsprofOutputSummary('test', "csv")._get_readme_info(file_set, file_dict, ".json"),
                          "hello1.step_trace.json:qwer\n")

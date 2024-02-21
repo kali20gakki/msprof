@@ -626,7 +626,8 @@ class ExportCommand:
             StrConstant.PARAM_EXPORT_TYPE: self.command_type,
             StrConstant.PARAM_ITER_ID: self.iteration_range,
             StrConstant.PARAM_EXPORT_FORMAT: self.export_format,
-            StrConstant.PARAM_MODEL_ID: self.list_map.get("model_id")
+            StrConstant.PARAM_MODEL_ID: self.list_map.get("model_id"),
+            StrConstant.PARAM_EXPORT_DUMP_FOLDER: self.command_type
         }
 
         self._handle_export_data(params)
@@ -682,5 +683,5 @@ class ExportCommand:
         job_summary = MsprofJobSummary(collect_path)
         job_summary.export(self.command_type)
 
-        profier = MsprofOutputSummary(collect_path)
+        profier = MsprofOutputSummary(collect_path, self.export_format)
         profier.export(self.command_type)
