@@ -124,3 +124,17 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
             self.assertEqual(freqs_list[1]['tid'], 0)
             self.assertEqual(freqs_list[1]['args']['MHz'], 1850)
             self.assertEqual(freqs_list[1]['ph'], "C")
+
+
+    def test_aicore_freq_viewer_no_lpm_data_return_ok(self):
+        """
+        目的：覆盖ai_core_freq_viewer。py 文件get_all_data
+        UT设计意图：获取api_event.db 中的ApiData表格中最好的事件开始时间，作为aicore频率起始时间戳。m
+        具体操作：插入几条数据，获取其中的最早的开始时间
+        """
+        ChipManager().chip_id = ChipModel.CHIP_V4_1_0
+
+        with FreqDataViewModel(self.params) as freq_model:
+            # apidata数据
+            query_freqs = freq_model.get_data()
+            self.assertEqual(len(query_freqs), 0)
