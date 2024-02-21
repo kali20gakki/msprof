@@ -12,6 +12,7 @@
 #include "analysis/csrc/viewer/database/finals/npu_mem_processor.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/dfx/error_code.h"
 
 namespace Analysis {
 namespace Viewer {
@@ -63,7 +64,9 @@ NpuMemProcessor::ProcessedDataFormat NpuMemProcessor::FormatData(const OriDataFo
         std::tie(data.event, data.ddr, data.hbm, data.timestamp, data.memory) = row;
         HPFloat timestamp{GetTimeBySamplingTimestamp(data.timestamp, params)};
         uint16_t type = UINT16_MAX;
-        Utils::StrToU16(type, data.event);
+        if (Utils::StrToU16(type, data.event) == ANALYSIS_OK) {
+            WARN("Converting string(event) to integer failed.");
+        }
         processedData.emplace_back(
             type, data.ddr / BYTE_SIZE, data.hbm / BYTE_SIZE, GetLocalTime(timestamp, timeRecord).Str(), deviceId);
     }
@@ -83,18 +86,16 @@ bool NpuMemProcessor::Process(const std::string &fileDir)
     for (const auto& devicePath: deviceList) {
         std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, npuMemDB.dbName});
         // 并不是所有场景都有NpuMem数据
-        if (!Utils::File::Exist(dbPath)) {
-            WARN("Can't find the db, the path is %.", dbPath);
+        auto status = CheckPath(dbPath);
+        if (status != CHECK_SUCCESS) {
+            if (status == CHECK_FAILED) {
+                flag = false;
+            }
             continue;
         }
         if (!timeFlag) {
             ERROR("GetSyscntConversionParams failed, profPath is %.", fileDir);
             return false;
-        }
-        if (!Utils::FileReader::Check(dbPath, MAX_DB_BYTES)) {
-            ERROR("Check % failed.", dbPath);
-            flag = false;
-            continue;
         }
         uint16_t deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
         INFO("Start to process %, deviceId:%.", dbPath, deviceId);

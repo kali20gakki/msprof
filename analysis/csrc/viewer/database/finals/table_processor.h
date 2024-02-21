@@ -34,7 +34,11 @@ struct DBInfo {
     DBInfo() = default;
     DBInfo(std::string dbName, std::string tableName) : dbName(dbName), tableName(tableName) {};
 };
-
+// GeHash表映射map结构
+using GeHashMap = std::unordered_map<std::string, std::string>;
+const uint8_t CHECK_SUCCESS = 0;
+const uint8_t NOT_EXIST = 1;
+const uint8_t CHECK_FAILED = 2;
 // 该类用于定义处理父类
 // 主要包括以下特性：用于规范各db处理流程
 // 1、Run拉起processor整体流程
@@ -53,6 +57,8 @@ protected:
     template<typename... Args>
     bool SaveData(const std::vector<std::tuple<Args...>> &data, const std::string &tableName) const;
     static void PrintProcessorResult(bool result, const std::string &processorName);
+    static bool GetGeHashMap(GeHashMap &hashMap, const std::string &fileDir);
+    static uint8_t CheckPath(const std::string& path);
     std::string reportDBPath_;
     std::set<std::string> profPaths_;
     DBInfo reportDB_;
