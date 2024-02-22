@@ -24,6 +24,7 @@ from common_func.path_manager import PathManager
 from framework.load_info_manager import LoadInfoManager
 from msmodel.cluster_info.communication_model import CommunicationModel
 from msparser.cluster.communication_matrix_parser import CommunicationMatrixParser
+from msmodel.cluster_info.communication_analyzer_model import CommunicationAnalyzerModel
 
 
 class CommunicationMatrixAnalyzer:
@@ -39,10 +40,10 @@ class CommunicationMatrixAnalyzer:
         3: 'LOCAL'
     }
 
-    def __init__(self: any, collection_path: any) -> None:
+    def __init__(self: any, collection_path: any, export_type: any) -> None:
         self.collection_path = collection_path
         self.hccl_op_data = defaultdict(list)
-
+        self.export_type = export_type
 
     def process(self):
         """Analyzing Communication Data"""
@@ -90,9 +91,6 @@ class CommunicationMatrixAnalyzer:
                 self.hccl_op_data[op_name].append(event)
 
     def _generate_output(self, rank_path: str) -> None:
-        """
-        Generate output json file
-        """
         self._get_hccl_data_from_db(rank_path)
         if not self.hccl_op_data:
             message = f"fail to get hccl data"
@@ -101,10 +99,20 @@ class CommunicationMatrixAnalyzer:
 
         communication_matrix_parser = CommunicationMatrixParser(self.hccl_op_data)
         op_info = communication_matrix_parser.run()
-        output_result = self._process_output(op_info)
+
+        if self.export_type == 'text':
+            self._dump_dict_to_json(self._process_output(op_info))
+        elif self.export_type == 'db':
+            self._dump_dict_to_db(self._process_output(op_info))
+
+    def _dump_dict_to_db(self, output_result: dict) -> object:
+        output_file_path = PathManager.get_analyze_dir(self.collection_path)
+        with CommunicationAnalyzerModel(output_file_path, [DBNameConstant.TABLE_COMM_ANALYZER_MATRIX]) as _model:
+            _model.flush_communication_data_to_db(output_result)
+
+    def _dump_dict_to_json(self, output_result: dict):
         output_file_name = "communication_matrix.json"
-        save_dir = os.path.dirname(os.path.realpath(rank_path))
-        output_file_path = PathManager.get_analyze_result_path(save_dir, output_file_name)
+        output_file_path = PathManager.get_analyze_result_path(self.collection_path, output_file_name)
         result = create_json_for_dict(output_file_path, output_result)
         result_json = json.loads(result)
         if result_json["status"] == NumberConstant.SUCCESS:
