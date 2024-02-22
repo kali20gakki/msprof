@@ -24,6 +24,7 @@ from common_func.msvp_common import create_json_for_dict
 from common_func.path_manager import PathManager
 from framework.load_info_manager import LoadInfoManager
 from msmodel.cluster_info.communication_model import CommunicationModel
+from msmodel.cluster_info.communication_analyzer_model import CommunicationAnalyzerModel
 from msparser.cluster.communication_parser import CommunicationParser
 
 
@@ -34,9 +35,10 @@ class CommunicationAnalyzer:
     FILE_NAME = os.path.basename(__file__)
     HOST_PATH = 'host'
 
-    def __init__(self: any, collection_path: any) -> None:
+    def __init__(self: any, collection_path: any, export_type: any) -> None:
         self.collection_path = collection_path
         self.rank_hccl_data_dict = {}
+        self.export_type = export_type
 
 
     @staticmethod
@@ -104,12 +106,21 @@ class CommunicationAnalyzer:
         communication_parser = self._generate_parser(rank_path)
         op_info = communication_parser.run()
 
-        self._dump_dict_to_json(rank_path, self._process_dict(op_info))
+        if self.export_type == 'text':
+            self._dump_dict_to_json(self._process_dict(op_info))
+        elif self.export_type == 'db':
+            self._dump_dict_to_db(self._process_dict(op_info))
 
-    def _dump_dict_to_json(self: any, rank_path: str, output_result: dict):
+    def _dump_dict_to_db(self, output_result: dict):
+        output_file_path = PathManager.get_analyze_dir(self.collection_path)
+        with CommunicationAnalyzerModel(output_file_path,
+                                        [DBNameConstant.TABLE_COMM_ANALYZER_TIME,
+                                         DBNameConstant.TABLE_COMM_ANALYZER_BAND]) as _model:
+            _model.flush_communication_data_to_db(output_result)
+
+    def _dump_dict_to_json(self, output_result: dict):
         output_file_name = "communication.json"
-        save_dir = os.path.dirname(os.path.realpath(rank_path))
-        output_file_path = PathManager.get_analyze_result_path(save_dir, output_file_name)
+        output_file_path = PathManager.get_analyze_result_path(self.collection_path, output_file_name)
         result = create_json_for_dict(output_file_path, output_result)
         result_json = json.loads(result)
         if result_json["status"] == NumberConstant.SUCCESS:

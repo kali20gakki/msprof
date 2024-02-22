@@ -43,6 +43,18 @@ class TestAnalyzeCommand(unittest.TestCase):
                 mock.patch('os.path.exists', side_effect=(False, True)):
             AnalyzeCommand(args).process()
 
+    def test_process_should_do_nothing_when_type_db(self):
+        args_dic = {"collection_path": "test", "rule": "communication", "type": "db"}
+        args = Namespace(**args_dic)
+        sample_config = {
+            "profLevel": "l1",
+        }
+        with mock.patch('common_func.data_check_manager.get_path_dir', return_value=['device_0', 'host']), \
+                mock.patch(NAMESPACE + '.warn'), \
+                mock.patch('common_func.config_mgr.ConfigMgr.read_sample_config', return_value=sample_config), \
+                mock.patch('os.path.exists', side_effect=(False, True)), \
+                mock.patch('analyzer.communication_analyzer.CommunicationAnalyzer.process'):
+            AnalyzeCommand(args).process()
 
 if __name__ == '__main__':
     unittest.main()

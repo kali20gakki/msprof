@@ -5,6 +5,7 @@ from unittest import mock
 import pytest
 
 from analyzer.communication_matrix_analyzer import CommunicationMatrixAnalyzer
+from msparser.cluster.communication_matrix_parser import CommunicationMatrixParser
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_exception import ProfException
 
@@ -28,6 +29,81 @@ class HcclEvent:
 
 class TestCommunicationMatrixAnalyzer(unittest.TestCase):
     collection_path = 'test'
+    analyzed_data = [
+        {
+            'op_name': 'hcom_allReduce__1@group_name',
+            'link_info': [
+                {
+                    'Src Rank': 0,
+                    'Dst Rank': 1,
+                    'Transport Type': 0,
+                    'Transit Size(MB)': 1,
+                    'Transit Time(ms)': 1,
+                    'Bandwidth(GB/s)': 1
+                },
+                {
+                    'Src Rank': 0,
+                    'Dst Rank': 0,
+                    'Transport Type': 3,
+                    'Transit Size(MB)': 1,
+                    'Transit Time(ms)': 1,
+                    'Bandwidth(GB/s)': 1
+                }
+            ]
+        },
+        {
+            'op_name': 'hcom_allReduce__2@group_name',
+            'link_info': [
+                {
+                    'Src Rank': 1,
+                    'Dst Rank': 9,
+                    'Transport Type': 2,
+                    'Transit Size(MB)': 1,
+                    'Transit Time(ms)': 1,
+                    'Bandwidth(GB/s)': 1
+                },
+                {
+                    'Src Rank': 1,
+                    'Dst Rank': 1,
+                    'Transport Type': 3,
+                    'Transit Size(MB)': 1,
+                    'Transit Time(ms)': 1,
+                    'Bandwidth(GB/s)': 1
+                }
+            ]
+        }
+    ]
+
+    expected_data = {
+        'hcom_allReduce__1@group_name': {
+            '0-1': {
+                'Transport Type': 'HCCS',
+                'Transit Size(MB)': 1,
+                'Transit Time(ms)': 1,
+                'Bandwidth(GB/s)': 1
+            },
+            '0-0': {
+                'Transport Type': 'LOCAL',
+                'Transit Size(MB)': 1,
+                'Transit Time(ms)': 1,
+                'Bandwidth(GB/s)': 1
+            }
+        },
+        'hcom_allReduce__2@group_name': {
+            '1-9': {
+                'Transport Type': 'RDMA',
+                'Transit Size(MB)': 1,
+                'Transit Time(ms)': 1,
+                'Bandwidth(GB/s)': 1
+            },
+            '1-1': {
+                'Transport Type': 'LOCAL',
+                'Transit Size(MB)': 1,
+                'Transit Time(ms)': 1,
+                'Bandwidth(GB/s)': 1
+            }
+        },
+    }
 
     def test_get_hccl_data_from_db_should_return_hccl_data_when_get_hccl_data_correct(self):
         events = [
@@ -42,95 +118,20 @@ class TestCommunicationMatrixAnalyzer(unittest.TestCase):
         }
         with mock.patch(NAMESPACE + ".CommunicationModel.check_table", return_value=True), \
                 mock.patch(NAMESPACE + ".CommunicationModel.get_all_events_from_db", return_value=events):
-            analyzer = CommunicationMatrixAnalyzer(self.collection_path)
+            analyzer = CommunicationMatrixAnalyzer(self.collection_path, 'text')
             analyzer._get_hccl_data_from_db(os.path.join(self.collection_path, "device_1"))
 
             self.assertEqual(analyzer.hccl_op_data, expected_result)
 
     def test_process_dict_should_return_correct_dict_when_process_analyzed_data(self):
-        analyzed_data = [
-            {
-                'op_name': 'hcom_allReduce__1@group_name',
-                'link_info': [
-                    {
-                        'Src Rank': 0,
-                        'Dst Rank': 1,
-                        'Transport Type': 0,
-                        'Transit Size(MB)': 1,
-                        'Transit Time(ms)': 1,
-                        'Bandwidth(GB/s)': 1
-                    },
-                    {
-                        'Src Rank': 0,
-                        'Dst Rank': 0,
-                        'Transport Type': 3,
-                        'Transit Size(MB)': 1,
-                        'Transit Time(ms)': 1,
-                        'Bandwidth(GB/s)': 1
-                    }
-                ]
-            },
-            {
-                'op_name': 'hcom_allReduce__2@group_name',
-                'link_info': [
-                    {
-                        'Src Rank': 1,
-                        'Dst Rank': 9,
-                        'Transport Type': 2,
-                        'Transit Size(MB)': 1,
-                        'Transit Time(ms)': 1,
-                        'Bandwidth(GB/s)': 1
-                    },
-                    {
-                        'Src Rank': 1,
-                        'Dst Rank': 1,
-                        'Transport Type': 3,
-                        'Transit Size(MB)': 1,
-                        'Transit Time(ms)': 1,
-                        'Bandwidth(GB/s)': 1
-                    }
-                ]
-            }
-        ]
-
-        expected_data = {
-            'hcom_allReduce__1@group_name': {
-                '0-1': {
-                    'Transport Type': 'HCCS',
-                    'Transit Size(MB)': 1,
-                    'Transit Time(ms)': 1,
-                    'Bandwidth(GB/s)': 1
-                },
-                '0-0': {
-                    'Transport Type': 'LOCAL',
-                    'Transit Size(MB)': 1,
-                    'Transit Time(ms)': 1,
-                    'Bandwidth(GB/s)': 1
-                }
-            },
-            'hcom_allReduce__2@group_name': {
-                '1-9': {
-                    'Transport Type': 'RDMA',
-                    'Transit Size(MB)': 1,
-                    'Transit Time(ms)': 1,
-                    'Bandwidth(GB/s)': 1
-                },
-                '1-1': {
-                    'Transport Type': 'LOCAL',
-                    'Transit Size(MB)': 1,
-                    'Transit Time(ms)': 1,
-                    'Bandwidth(GB/s)': 1
-                }
-            },
-        }
-        analyzer = CommunicationMatrixAnalyzer(self.collection_path)
-        processed_data = analyzer._process_output(analyzed_data)
-        self.assertEqual(processed_data, expected_data)
+        analyzer = CommunicationMatrixAnalyzer(self.collection_path, 'text')
+        processed_data = analyzer._process_output(self.analyzed_data)
+        self.assertEqual(processed_data, self.expected_data)
 
     def test_generate_output_should_raise_exception_when_no_rank_hccl_data_dict(self):
         with mock.patch(NAMESPACE + ".CommunicationMatrixAnalyzer._get_hccl_data_from_db"),  \
                 pytest.raises(ProfException) as err:
-            analyzer = CommunicationMatrixAnalyzer(self.collection_path)
+            analyzer = CommunicationMatrixAnalyzer(self.collection_path, 'text')
             analyzer._generate_output(os.path.join(self.collection_path, "device_1"))
             self.assertEqual(ProfException.PROF_INVALID_DATA_ERROR, err.value.code)
 
@@ -138,13 +139,35 @@ class TestCommunicationMatrixAnalyzer(unittest.TestCase):
         with mock.patch(NAMESPACE + ".CommunicationModel.check_db", return_value=True), \
                 mock.patch(NAMESPACE + ".CommunicationModel.get_all_events_from_db", return_value=[]), \
                 pytest.raises(ProfException) as err:
-            analyzer = CommunicationMatrixAnalyzer(self.collection_path)
+            analyzer = CommunicationMatrixAnalyzer(self.collection_path, 'text')
             analyzer._get_hccl_data_from_db(os.path.join(self.collection_path, "device_1"))
             self.assertEqual(ProfException.PROF_INVALID_DATA_ERROR, err.value.code)
 
     def test_get_hccl_data_from_db_should_raise_exception_when_no_hccl_allReduce_table(self):
         with mock.patch(NAMESPACE + ".CommunicationModel.check_table", return_value=False), \
                 pytest.raises(ProfException) as err:
-            analyzer = CommunicationMatrixAnalyzer(self.collection_path)
+            analyzer = CommunicationMatrixAnalyzer(self.collection_path, 'text')
             analyzer._get_hccl_data_from_db(os.path.join(self.collection_path, "device_1"))
             self.assertEqual(ProfException.PROF_INVALID_CONNECT_ERROR, err.value.code)
+
+    def test_dump_dict_to_db_should_flush_correct_data_to_db(self):
+        with mock.patch("msmodel.cluster_info.communication_analyzer_model.CommunicationAnalyzerModel."
+                        "flush_communication_data_to_db"):
+            analyzer = CommunicationMatrixAnalyzer(self.collection_path, 'db')
+            analyzer._dump_dict_to_db(self.expected_data)
+
+    def test_generate_output_should_dump_dict_to_db_when_export_type_is_db(self):
+        with mock.patch("msparser.cluster.communication_matrix_parser.CommunicationMatrixParser.run"), \
+                mock.patch(NAMESPACE + ".CommunicationMatrixAnalyzer._dump_dict_to_db"), \
+                mock.patch(NAMESPACE + ".CommunicationMatrixAnalyzer._get_hccl_data_from_db"):
+            analyzer = CommunicationMatrixAnalyzer(self.collection_path, 'db')
+            analyzer.hccl_op_data = self.expected_data
+            analyzer._generate_output(os.path.join(self.collection_path, "device_1"))
+
+    def test_generate_output_should_dump_dict_to_db_when_export_type_is_text(self):
+        with mock.patch("msparser.cluster.communication_matrix_parser.CommunicationMatrixParser.run"), \
+                mock.patch(NAMESPACE + ".CommunicationMatrixAnalyzer._dump_dict_to_json"), \
+                mock.patch(NAMESPACE + ".CommunicationMatrixAnalyzer._get_hccl_data_from_db"):
+            analyzer = CommunicationMatrixAnalyzer(self.collection_path, 'text')
+            analyzer.hccl_op_data = self.expected_data
+            analyzer._generate_output(os.path.join(self.collection_path, "device_1"))
