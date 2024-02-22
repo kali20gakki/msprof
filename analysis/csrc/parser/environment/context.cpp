@@ -229,6 +229,7 @@ bool Context::GetProfTimeRecordInfo(Utils::ProfTimeRecord &record, const std::st
         WARN("There is no host time log in %, it will use device time log!", profPath);
         info = GetInfoByDeviceId(DEFAULT_DEVICE_ID, profPath);
         if (info.empty()) {
+            ERROR("No device time log in %.", profPath);
             return false;
         }
     }

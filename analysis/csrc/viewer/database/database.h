@@ -99,6 +99,16 @@ public:
     TaskMemoryDB();
 };
 
+class NicDB : public Database {
+public:
+    NicDB();
+};
+
+class RoceDB : public Database {
+public:
+    RoceDB();
+};
+
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis
