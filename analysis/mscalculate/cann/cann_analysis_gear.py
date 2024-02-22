@@ -373,14 +373,14 @@ class TaskGear(CANNGear):
         model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
         # 根据task type是否在白名单内对context_ids和connection_id进行处理，以应对Node@Launch下有多个Task的问题
-        # 对于在白名单内的task正常生成context_ids和connection_id，反之使用对应的默认值
+        # 对于在白名单内的task正常生成context_ids，反之使用对应的默认值
         if task_track_dto.task_type in self.CONTEXT_ID_WHITE_LIST:
             context_ids = self.get_context_ids(call_stack)
-            connection_id = node_dto.connection_id if node_dto.connection_id is not None else \
-                Constant.DEFAULT_INVALID_VALUE
         else:
             context_ids = str(NumberConstant.DEFAULT_GE_CONTEXT_ID)
-            connection_id = Constant.DEFAULT_INVALID_VALUE
+
+        connection_id = node_dto.connection_id if node_dto.connection_id is not None else \
+            Constant.DEFAULT_INVALID_VALUE
 
         self.host_tasks.append(
             [model_id, request_id, task_track_dto.stream_id, task_track_dto.task_id,
