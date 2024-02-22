@@ -127,6 +127,44 @@ namespace {
         {"deviceId", SQL_INTEGER_TYPE}
     };
 
+    const TableColumns NIC = {
+        {"deviceId", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_TEXT_TYPE},
+        {"bandwidth", SQL_INTEGER_TYPE},
+        {"rxPacketRate", SQL_NUMERIC_TYPE},
+        {"rxByteRate", SQL_NUMERIC_TYPE},
+        {"rxPackets", SQL_INTEGER_TYPE},
+        {"rxBytes", SQL_INTEGER_TYPE},
+        {"rxErrors", SQL_INTEGER_TYPE},
+        {"rxDropped", SQL_INTEGER_TYPE},
+        {"txPacketRate", SQL_NUMERIC_TYPE},
+        {"txByteRate", SQL_NUMERIC_TYPE},
+        {"txPackets", SQL_INTEGER_TYPE},
+        {"txBytes", SQL_INTEGER_TYPE},
+        {"txErrors", SQL_INTEGER_TYPE},
+        {"txDropped", SQL_INTEGER_TYPE},
+        {"funcId", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns RoCE = {
+        {"deviceId", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_TEXT_TYPE},
+        {"bandwidth", SQL_INTEGER_TYPE},
+        {"rxPacketRate", SQL_NUMERIC_TYPE},
+        {"rxByteRate", SQL_NUMERIC_TYPE},
+        {"rxPackets", SQL_INTEGER_TYPE},
+        {"rxBytes", SQL_INTEGER_TYPE},
+        {"rxErrors", SQL_INTEGER_TYPE},
+        {"rxDropped", SQL_INTEGER_TYPE},
+        {"txPacketRate", SQL_NUMERIC_TYPE},
+        {"txByteRate", SQL_NUMERIC_TYPE},
+        {"txPackets", SQL_INTEGER_TYPE},
+        {"txBytes", SQL_INTEGER_TYPE},
+        {"txErrors", SQL_INTEGER_TYPE},
+        {"txDropped", SQL_INTEGER_TYPE},
+        {"funcId", SQL_INTEGER_TYPE}
+    };
+
     const TableColumns ENUM_API_LEVEL = {
         {"id", SQL_INTEGER_TYPE, true},
         {"name", SQL_TEXT_TYPE}
@@ -158,6 +196,8 @@ ReportDB::ReportDB()
         {TABLE_NAME_NPU_MEM, NPU_MEM},
         {TABLE_NAME_NPU_MODULE_MEM, NPU_MODULE_MEM},
         {TABLE_NAME_NPU_OP_MEM, NPU_OP_MEM},
+        {TABLE_NAME_NIC, NIC},
+        {TABLE_NAME_ROCE, RoCE},
         // ENUM
         {TABLE_NAME_ENUM_API_LEVEL, ENUM_API_LEVEL},
         {TABLE_NAME_ENUM_MEMORY, ENUM_MEMORY},

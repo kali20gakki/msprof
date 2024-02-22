@@ -209,6 +209,46 @@ namespace {
         {"type", SQL_INTEGER_TYPE},
         {"device_type", SQL_TEXT_TYPE}
     };
+
+    const TableColumns NicOriginalData = {
+        {"device_id", SQL_INTEGER_TYPE},
+        {"replayid", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"bandwidth", SQL_INTEGER_TYPE},
+        {"rxpacket", SQL_REAL_TYPE},
+        {"rxbyte", SQL_REAL_TYPE},
+        {"rxpackets", SQL_REAL_TYPE},
+        {"rxbytes", SQL_REAL_TYPE},
+        {"rxerrors", SQL_REAL_TYPE},
+        {"rxdropped", SQL_REAL_TYPE},
+        {"txpacket", SQL_REAL_TYPE},
+        {"txbyte", SQL_REAL_TYPE},
+        {"txpackets", SQL_REAL_TYPE},
+        {"txbytes", SQL_REAL_TYPE},
+        {"txerrors", SQL_REAL_TYPE},
+        {"txdropped", SQL_REAL_TYPE},
+        {"funcid", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns RoceOriginalData = {
+        {"device_id", SQL_INTEGER_TYPE},
+        {"replayid", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_REAL_TYPE},
+        {"bandwidth", SQL_INTEGER_TYPE},
+        {"rxpacket", SQL_REAL_TYPE},
+        {"rxbyte", SQL_REAL_TYPE},
+        {"rxpackets", SQL_REAL_TYPE},
+        {"rxbytes", SQL_REAL_TYPE},
+        {"rxerrors", SQL_REAL_TYPE},
+        {"rxdropped", SQL_REAL_TYPE},
+        {"txpacket", SQL_REAL_TYPE},
+        {"txbyte", SQL_REAL_TYPE},
+        {"txpackets", SQL_REAL_TYPE},
+        {"txbytes", SQL_REAL_TYPE},
+        {"txerrors", SQL_REAL_TYPE},
+        {"txdropped", SQL_REAL_TYPE},
+        {"funcid", SQL_INTEGER_TYPE}
+    };
 }
 
 std::string Database::GetDBName() const
@@ -293,6 +333,18 @@ TaskMemoryDB::TaskMemoryDB()
 {
     dbName_ = "task_memory.db";
     tableColNames_["NpuOpMemRaw"] = NpuOpMemRaw;
+}
+
+NicDB::NicDB()
+{
+    dbName_ = "nic.db";
+    tableColNames_["NicOriginalData"] = NicOriginalData;
+}
+
+RoceDB::RoceDB()
+{
+    dbName_ = "roce.db";
+    tableColNames_["RoceOriginalData"] = RoceOriginalData;
 }
 
 } // namespace Database
