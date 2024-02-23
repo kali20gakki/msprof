@@ -64,7 +64,7 @@ NpuMemProcessor::ProcessedDataFormat NpuMemProcessor::FormatData(const OriDataFo
         std::tie(data.event, data.ddr, data.hbm, data.timestamp, data.memory) = row;
         HPFloat timestamp{GetTimeBySamplingTimestamp(data.timestamp, params)};
         uint16_t type = UINT16_MAX;
-        if (Utils::StrToU16(type, data.event) == ANALYSIS_OK) {
+        if (Utils::StrToU16(type, data.event) == ANALYSIS_ERROR) {
             WARN("Converting string(event) to integer failed.");
         }
         processedData.emplace_back(

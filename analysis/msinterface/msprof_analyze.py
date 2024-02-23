@@ -22,6 +22,7 @@ class AnalyzeCommand:
     def __init__(self: any, args: any) -> None:
         self.collection_path = os.path.realpath(args.collection_path)
         self.rule = args.rule
+        self.export_type = getattr(args, "export_type", 'text')
         self.clear_mode = getattr(args, "clear_mode", False)
 
     def process(self: any) -> None:
@@ -35,7 +36,7 @@ class AnalyzeCommand:
         }
         rules = set(self.rule.split(','))
         for rule in rules:
-            analyze_command = analyze_handler.get(rule)(self.collection_path)
+            analyze_command = analyze_handler.get(rule)(self.collection_path, self.export_type)
             analyze_command.process()
         self._clear_dir(self.collection_path)
 

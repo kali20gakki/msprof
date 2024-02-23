@@ -111,6 +111,9 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_AIV_METRIC_SUMMARY = "AivMetricSummary"
 
     DB_HCCL_SINGLE_DEVICE = "hccl_single_device.db"
+
+    DB_COMMUNICATION_ANALYZER = "communication_analyzer.db"
+
     TABLE_HCCL_SINGLE_DEVICE = "HCCLSingleDevice"
     TABLE_HCCL_OP_REPORT = "HcclOpReport"
 
@@ -293,6 +296,11 @@ class DBNameConstant(metaclass=ABCMeta):
     # flip
     TABLE_HOST_TASK_FLIP = "HostTaskFlip"
     TABLE_DEVICE_TASK_FLIP = "DeviceTaskFlip"
+
+    # communication analyzer time, bandwidth, matrix
+    TABLE_COMM_ANALYZER_TIME = "CommAnalyzerTime"
+    TABLE_COMM_ANALYZER_BAND = "CommAnalyzerBandwidth"
+    TABLE_COMM_ANALYZER_MATRIX = "CommAnalyzerMatrix"
 
     @abstractmethod
     def get_db_name(self: any) -> str:

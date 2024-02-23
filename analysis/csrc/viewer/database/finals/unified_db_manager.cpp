@@ -21,8 +21,8 @@
 #include "analysis/csrc/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/table_processor_factory.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "collector/dvvp/common/errno/error_code.h"
 #include "collector/dvvp/common/config/config.h"
+#include "collector/dvvp/common/errno/error_code.h"
 
 namespace Analysis {
 namespace Viewer {
@@ -60,21 +60,21 @@ bool UnifiedDBManager::CheckProfDirsValid(const std::string& outputDir,
         return false;
     }
 
-    int64_t preMsprofBinPid = analysis::dvvp::common::config::MSVP_MMPROCESS;
-    for (const auto& path : profFolderPaths) {
-        int64_t msprofBinPid = Context::GetInstance().GetMsBinPid(path);
-        if (msprofBinPid == analysis::dvvp::common::config::MSVP_MMPROCESS) {
-            errInfo = "The current msprofBinPid is an invalid value:" + std::to_string(msprofBinPid) +
-                      ". Please check the value of your path:" + path + ".";
-            return false;
-        }
-        if (preMsprofBinPid != analysis::dvvp::common::config::MSVP_MMPROCESS && preMsprofBinPid != msprofBinPid) {
-            errInfo = "The profiling results under the " + outputDir + " path are not from "\
-                       "the same data collection session. Please verify and rerun.";
-            return false;
-        }
-        preMsprofBinPid = msprofBinPid;
-    }
+//    int64_t preMsprofBinPid = analysis::dvvp::common::config::MSVP_MMPROCESS;
+//    for (const auto& path : profFolderPaths) {
+//        int64_t msprofBinPid = Context::GetInstance().GetMsBinPid(path);
+//        if (msprofBinPid == analysis::dvvp::common::config::MSVP_MMPROCESS) {
+//            errInfo = "The current msprofBinPid is an invalid value:" + std::to_string(msprofBinPid) +
+//                      ". Please check the value of your path:" + path + ".";
+//            return false;
+//        }
+//        if (preMsprofBinPid != analysis::dvvp::common::config::MSVP_MMPROCESS && preMsprofBinPid != msprofBinPid) {
+//            errInfo = "The profiling results under the " + outputDir + " path are not from "\
+//                       "the same data collection session. Please verify and rerun.";
+//            return false;
+//        }
+//        preMsprofBinPid = msprofBinPid;
+//    }
 
     return true;
 }
