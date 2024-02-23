@@ -40,7 +40,7 @@ namespace {
         {"end", SQL_TEXT_TYPE},
         {"deviceId", SQL_INTEGER_TYPE},
         {"connectionId", SQL_INTEGER_TYPE},
-        {"correlationId", SQL_INTEGER_TYPE, true},
+        {"correlationId", SQL_INTEGER_TYPE},
         {"globalPid", SQL_INTEGER_TYPE},
         {"taskType", SQL_INTEGER_TYPE},
         {"contextId", SQL_INTEGER_TYPE},

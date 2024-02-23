@@ -225,3 +225,6 @@ class MsprofEntrance:
         analyze_parser.add_argument(
             '--clear', dest='clear_mode', action='store_true',
             default=False, help='<Optional> the clear mode flag')
+        analyze_parser.add_argument(
+            '--type', dest='export_type',
+            type=str, help='Specify the output file type, db or text', required=False, default="text")

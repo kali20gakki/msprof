@@ -13,19 +13,18 @@
 #include "analysis/csrc/viewer/database/finals/table_processor_factory.h"
 
 #include "analysis/csrc/utils/thread_pool.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/viewer/database/finals/string_ids_processor.h"
-#include "analysis/csrc/viewer/database/finals/npu_info_processor.h"
-#include "analysis/csrc/viewer/database/finals/session_time_info_processor.h"
-#include "analysis/csrc/viewer/database/finals/enum_processor.h"
-#include "analysis/csrc/viewer/database/finals/task_processor.h"
-#include "analysis/csrc/viewer/database/finals/compute_task_info_processor.h"
-#include "analysis/csrc/viewer/database/finals/communication_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/api_processor.h"
+#include "analysis/csrc/viewer/database/finals/communication_info_processor.h"
+#include "analysis/csrc/viewer/database/finals/compute_task_info_processor.h"
+#include "analysis/csrc/viewer/database/finals/enum_processor.h"
+#include "analysis/csrc/viewer/database/finals/npu_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_mem_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_module_mem_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_op_mem_processor.h"
+#include "analysis/csrc/viewer/database/finals/session_time_info_processor.h"
+#include "analysis/csrc/viewer/database/finals/string_ids_processor.h"
 #include "analysis/csrc/viewer/database/finals/sys_io_processor.h"
+#include "analysis/csrc/viewer/database/finals/task_processor.h"
 
 namespace Analysis {
 namespace Viewer {
