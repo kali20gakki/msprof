@@ -337,6 +337,9 @@ int RunningMode::StartAnalyzeTask()
     if (params_->clearSwitch == "on") {
         argsV.push_back("--clear");
     }
+    if (params_->exportType == "db") {
+        argsV.push_back("--type=db");
+    }
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsV, envsV, exitCode, taskPid_);
     if (ret == PROFILING_FAILED) {
         MSPROF_LOGE("Failed to launch analyze task, data path: %s", Utils::BaseName(jobResultDir_).c_str());
@@ -471,7 +474,7 @@ int RunningMode::RunExportDBTask(const ExecCmdParams &execCmdParams,
         "export", "db",
         "-dir=" + jobResultDir_
     };
- 
+
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsSqlitV, envsV, exitCode, taskPid_);
     if (ret == PROFILING_FAILED) {
         MSPROF_LOGE("Failed to launch export db task, data path: %s", Utils::BaseName(jobResultDir_).c_str());
@@ -1405,7 +1408,7 @@ int ParseMode::RunModeTasks()
 AnalyzeMode::AnalyzeMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams> params)
     : RunningMode(preCheckParams, "analyze", params)
 {
-    whiteSet_ = {ARGS_OUTPUT, ARGS_ANALYZE, ARGS_PYTHON_PATH, ARGS_RULE, ARGS_CLEAR};
+    whiteSet_ = {ARGS_OUTPUT, ARGS_ANALYZE, ARGS_PYTHON_PATH, ARGS_RULE, ARGS_CLEAR, ARGS_EXPORT_TYPE};
     neccessarySet_ = {ARGS_OUTPUT, ARGS_ANALYZE};
     blackSet_ = {ARGS_QUERY, ARGS_EXPORT, ARGS_PARSE};
 }
@@ -1454,7 +1457,6 @@ int AnalyzeMode::RunModeTasks()
         MSPROF_LOGE("[Analyze Mode] Run analyze task failed.");
         return PROFILING_FAILED;
     }
-    
     return PROFILING_SUCCESS;
 }
 

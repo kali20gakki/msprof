@@ -81,7 +81,7 @@ NpuOpMemProcessor::ProcessedDataFormat NpuOpMemProcessor::FormatData(const OriDa
             data.type = MEMORY_TABLE.at("allocate");
         }
         uint64_t addr = UINT64_MAX;
-        if (Utils::StrToU64(addr, data.addr) == ANALYSIS_OK) { // 转uint64失败默认值为UINT64_MAX
+        if (Utils::StrToU64(addr, data.addr) == ANALYSIS_ERROR) { // 转uint64失败默认值为UINT64_MAX
             WARN("Converting string(addr) to integer failed.");
         }
         processedData.emplace_back(

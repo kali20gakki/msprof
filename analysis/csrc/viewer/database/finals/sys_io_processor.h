@@ -1,6 +1,6 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
-            Copyright, 2023, Huawei Tech. Co., Ltd.
+            版权所有 (c) 华为技术有限公司 2024-2024
+            Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
  * File Name          : sys_io_processor.h
@@ -19,26 +19,26 @@ namespace Analysis {
 namespace Viewer {
 namespace Database {
 // 该类用于定义处理SYS IO的相关数据：当前仅包括 NIC和RoCE
-class SysIoProcessor : public TableProcessor {
+class SysIOProcessor : public TableProcessor {
 // device_id, timestamp, bandwidth, rxpacket, rxbyte, rxpackets, rxbytes, rxerrors, rxdropped,
 // txpacket, txbyte, txpackets, txbytes, txerrors, txdropped, funcid
-using SysIoDataFormat = std::vector<std::tuple<uint32_t, double, uint32_t, double, double, uint32_t,
+using SysIODataFormat = std::vector<std::tuple<uint32_t, double, uint32_t, double, double, uint32_t,
         uint32_t, uint32_t, uint32_t, double, double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t>>;
 // deviceId, timestamp, bandwidth, rxPacketRate, rxByteRate, rxPackets, rxBytes, rxErrors, rxDropped
 // txPacketRate, txByteRate, txPackets, txBytes, txErrors, txDropped, funcId
 using ProcessedDataFormat = std::vector<std::tuple<uint16_t, std::string, uint32_t, double, double, uint32_t,
         uint32_t, uint32_t, uint32_t, double, double, uint32_t, uint32_t, uint32_t, uint32_t, uint16_t>>;
 public:
-    SysIoProcessor() = default;
-    SysIoProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths,
+    SysIOProcessor() = default;
+    SysIOProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths,
                    const std::string &processorName);
     bool Run() override;
 protected:
     bool Process(const std::string &fileDir) override;
 private:
-    SysIoDataFormat GetData(const std::string &dbPath, DBInfo &sysIoDB) const;
+    SysIODataFormat GetData(const std::string &dbPath, DBInfo &sysIODB) const;
     bool FormatData(const std::string &fileDir, const Utils::ProfTimeRecord timeRecord,
-                    const SysIoDataFormat &sysIoData, ProcessedDataFormat &processedData);
+                    const SysIODataFormat &sysIOData, ProcessedDataFormat &processedData);
     std::string processorName_;
 };
 
@@ -46,14 +46,14 @@ private:
 // 后续若有差异，则分别在各自processor中做子类自己的处理
 
 // 处理NIC数据
-class NicProcessor : public SysIoProcessor {
+class NicProcessor : public SysIOProcessor {
 public:
     NicProcessor() = default;
     NicProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
 };
 
 // 处理RoCE数据
-class RoCEProcessor : public SysIoProcessor {
+class RoCEProcessor : public SysIOProcessor {
 public:
     RoCEProcessor() = default;
     RoCEProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);

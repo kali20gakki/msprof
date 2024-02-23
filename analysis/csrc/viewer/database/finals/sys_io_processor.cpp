@@ -1,6 +1,6 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
-            Copyright, 2023, Huawei Tech. Co., Ltd.
+            版权所有 (c) 华为技术有限公司 2024-2024
+            Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
  * File Name          : sys_io_processor.cpp
@@ -21,7 +21,7 @@ namespace Database {
 using Context = Parser::Environment::Context;
 
 namespace {
-struct SysIoData {
+struct SysIOData {
     uint16_t device_id = UINT16_MAX;
     uint16_t funcid = UINT16_MAX;
     double timestamp = 0.0;
@@ -46,11 +46,11 @@ const std::unordered_map<std::string, std::tuple<std::string, std::string, std::
 };
 }
 
-SysIoProcessor::SysIoProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths,
+SysIOProcessor::SysIOProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths,
                                const std::string &processorName)
     : TableProcessor(reportDBPath, profPaths), processorName_(processorName) {}
 
-bool SysIoProcessor::Run()
+bool SysIOProcessor::Run()
 {
     INFO("% Run.", processorName_);
     bool flag = TableProcessor::Run();
@@ -58,7 +58,7 @@ bool SysIoProcessor::Run()
     return flag;
 }
 
-bool SysIoProcessor::Process(const std::string &fileDir)
+bool SysIOProcessor::Process(const std::string &fileDir)
 {
     INFO("% Process, dir is %", processorName_, fileDir);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
@@ -66,12 +66,12 @@ bool SysIoProcessor::Process(const std::string &fileDir)
     std::string oriTableName;
     std::string targetTableName;
     std::tie(oriDbName, oriTableName, targetTableName) = ORI_DB_INFO_TABLE.find(processorName_)->second;
-    DBInfo sysIoDB(oriDbName, oriTableName);
+    DBInfo sysIODB(oriDbName, oriTableName);
     bool flag = true;
     Utils::ProfTimeRecord timeRecord;
     bool timeFlag = Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir);
     for (const auto& devicePath: deviceList) {
-        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, sysIoDB.dbName});
+        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, sysIODB.dbName});
         // 并不是所有场景都有sys io数据
         auto status = CheckPath(dbPath);
         if (status != CHECK_SUCCESS) {
@@ -84,9 +84,9 @@ bool SysIoProcessor::Process(const std::string &fileDir)
             ERROR("Failed to GetProfTimeRecordInfo, fileDir is %.", fileDir);
             return false;
         }
-        SysIoDataFormat sysIoData = GetData(dbPath, sysIoDB);
+        SysIODataFormat sysIOData = GetData(dbPath, sysIODB);
         ProcessedDataFormat processedData;
-        if (!FormatData(fileDir, timeRecord, sysIoData, processedData)) {
+        if (!FormatData(fileDir, timeRecord, sysIOData, processedData)) {
             ERROR("FormatData failed, fileDir is %.", fileDir);
             flag = false;
             continue;
@@ -100,41 +100,41 @@ bool SysIoProcessor::Process(const std::string &fileDir)
     return flag;
 }
 
-SysIoProcessor::SysIoDataFormat SysIoProcessor::GetData(const std::string &dbPath, DBInfo &sysIoDB) const
+SysIOProcessor::SysIODataFormat SysIOProcessor::GetData(const std::string &dbPath, DBInfo &sysIODB) const
 {
     INFO("% GetData, dir is %", processorName_, dbPath);
-    SysIoDataFormat sysIoData;
-    MAKE_SHARED_RETURN_VALUE(sysIoDB.dbRunner, DBRunner, sysIoData, dbPath);
-    if (sysIoDB.dbRunner == nullptr) {
+    SysIODataFormat sysIOData;
+    MAKE_SHARED_RETURN_VALUE(sysIODB.dbRunner, DBRunner, sysIOData, dbPath);
+    if (sysIODB.dbRunner == nullptr) {
         ERROR("Create % connection failed.", dbPath);
-        return sysIoData;
+        return sysIOData;
     }
     std::string sql = "SELECT device_id, timestamp, bandwidth, rxpacket, rxpackets, rxbytes, rxerrors, rxdropped "
                       "txpacket, txbyte, txpackets, txbytes, txerrors, txdropped, funcid "
-                      "FROM " + sysIoDB.tableName;
-    if (!sysIoDB.dbRunner->QueryData(sql, sysIoData)) {
+                      "FROM " + sysIODB.tableName;
+    if (!sysIODB.dbRunner->QueryData(sql, sysIOData)) {
         ERROR("Query api data failed, db path is %.", dbPath);
-        return sysIoData;
+        return sysIOData;
     }
-    return sysIoData;
+    return sysIOData;
 }
 
-bool SysIoProcessor::FormatData(const std::string &fileDir, const Utils::ProfTimeRecord timeRecord,
-                                const SysIoDataFormat &sysIoData, ProcessedDataFormat &processedData)
+bool SysIOProcessor::FormatData(const std::string &fileDir, const Utils::ProfTimeRecord timeRecord,
+                                const SysIODataFormat &sysIOData, ProcessedDataFormat &processedData)
 {
     INFO("% FormatData, dir is %", processorName_, fileDir);
     Utils::SyscntConversionParams params;
     Utils::ProfTimeRecord record;
-    if (sysIoData.empty()) {
-        ERROR("Sys io original data is empty, processor name is %.", processorName_);
+    if (sysIOData.empty()) {
+        ERROR("Sys IO original data is empty, processor name is %.", processorName_);
         return false;
     }
-    if (!Utils::Reserve(processedData, sysIoData.size())) {
+    if (!Utils::Reserve(processedData, sysIOData.size())) {
         ERROR("Reserve for % data failed.", processorName_);
         return false;
     }
-    SysIoData tempData;
-    for (const auto& data : sysIoData) {
+    SysIOData tempData;
+    for (const auto& data : sysIOData) {
         std::tie(tempData.device_id, tempData.timestamp, tempData.bandwidth, tempData.rxpacket, tempData.rxbyte,
                  tempData.rxpackets, tempData.rxbytes, tempData.rxerrors, tempData.rxdropped,
                  tempData.txpacket, tempData.txbyte, tempData.txpackets, tempData.txbytes,
@@ -154,10 +154,10 @@ bool SysIoProcessor::FormatData(const std::string &fileDir, const Utils::ProfTim
 }
 
 NicProcessor::NicProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : SysIoProcessor(reportDBPath, profPaths, PROCESSOR_NAME_NIC) {}
+    : SysIOProcessor(reportDBPath, profPaths, PROCESSOR_NAME_NIC) {}
 
 RoCEProcessor::RoCEProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : SysIoProcessor(reportDBPath, profPaths, PROCESSOR_NAME_ROCE) {}
+    : SysIOProcessor(reportDBPath, profPaths, PROCESSOR_NAME_ROCE) {}
 
 
 } // Database
