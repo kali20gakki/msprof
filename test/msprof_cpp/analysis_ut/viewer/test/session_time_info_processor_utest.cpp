@@ -3,8 +3,8 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : target_info_session_time_processor.cpp
- * Description        : TargetInfoSessionTimeProcessor UT
+ * File Name          : session_time_info_processor.cpp
+ * Description        : SessionTimeInfoProcessor UT
  * Author             : msprof team
  * Creation Date      : 2024/01/11
  * *****************************************************************************

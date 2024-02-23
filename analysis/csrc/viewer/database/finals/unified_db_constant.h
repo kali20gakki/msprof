@@ -65,6 +65,13 @@ const std::string TABLE_NAME_ENUM_API_LEVEL = "ENUM_API_LEVEL";
 const std::string TABLE_NAME_ENUM_MEMORY = "ENUM_MEMORY";
 const std::string TABLE_NAME_ENUM_NPU_MODULE = "ENUM_NPU_MODULE";
 
+const std::string PROCESSOR_NAME_NIC = "NIC";
+const std::string TABLE_NAME_NIC = "NIC";
+
+const std::string PROCESSOR_NAME_ROCE = "ROCE";
+const std::string TABLE_NAME_ROCE = "ROCE";
+
+
 // api level
 const std::unordered_map<std::string, uint16_t> API_LEVEL_TABLE = {
     {"pytorch", MSPROF_REPORT_PYTORCH_LEVEL},
@@ -76,7 +83,7 @@ const std::unordered_map<std::string, uint16_t> API_LEVEL_TABLE = {
     {"runtime",  MSPROF_REPORT_RUNTIME_LEVEL}
 };
 
-// paired type 成对数据枚举表
+// 内存相关枚举表
 const std::unordered_map<std::string, uint16_t> MEMORY_TABLE = {
     {"app", 0},
     {"device", 1},
