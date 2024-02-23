@@ -501,8 +501,7 @@ class MsProfExportDataUtils:
         
         # only chip v4 support aicore freqs_list
         freqs_list = AiCoreFreqViewer(params).get_all_data()
-        if len(freqs_list) > 0:
-            MsprofTimeline().add_export_data(freqs_list, params.get(StrConstant.PARAM_DATA_TYPE))
+        MsprofTimeline().add_export_data(freqs_list, params.get(StrConstant.PARAM_DATA_TYPE))
         return MsprofTimeline().export_all_data()
 
 
