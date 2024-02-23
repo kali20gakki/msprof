@@ -21,8 +21,8 @@
 #include "analysis/csrc/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/table_processor_factory.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "collector/dvvp/common/errno/error_code.h"
 #include "collector/dvvp/common/config/config.h"
+#include "collector/dvvp/common/errno/error_code.h"
 
 namespace Analysis {
 namespace Viewer {
@@ -41,7 +41,9 @@ namespace {
         PROCESSOR_NAME_ENUM,
         PROCESSOR_NAME_NPU_MEM,
         PROCESSOR_NAME_NPU_MODULE_MEM,
-        PROCESSOR_NAME_NPU_OP_MEM
+        PROCESSOR_NAME_NPU_OP_MEM,
+        PROCESSOR_NAME_NIC,
+        PROCESSOR_NAME_ROCE,
     };
 }
 
@@ -119,7 +121,7 @@ int UnifiedDBManager::Run()
     pool.Stop();
 
     if (!retFlag) {
-        ERROR("“The unified db process failed to be executed");
+        ERROR("The unified db process failed to be executed");
     }
 
     // string_id table 要在其他所有table 全部生成之后再去生成

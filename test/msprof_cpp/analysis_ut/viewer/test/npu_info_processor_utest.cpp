@@ -3,8 +3,8 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : target_info_npu_processor.cpp
- * Description        : TargetInfoNpuProcessor UT
+ * File Name          : npu_info_processor.cpp
+ * Description        : NpuInfoProcessor UT
  * Author             : msprof team
  * Creation Date      : 2024/01/11
  * *****************************************************************************
@@ -23,7 +23,7 @@ using namespace Parser::Environment;
 using namespace Analysis::Utils;
 using NpuInfoDataFormat = std::vector<std::tuple<uint32_t, std::string>>;
 
-const std::string NPU_INFO_DIR = "./target_info_npu";
+const std::string NPU_INFO_DIR = "./npu_info";
 const std::string REPORT = "report.db";
 const std::string DB_PATH = File::PathJoin({NPU_INFO_DIR, REPORT});
 

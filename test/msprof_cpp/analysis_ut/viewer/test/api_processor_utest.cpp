@@ -102,6 +102,7 @@ protected:
         MAKE_SHARED_RETURN_VALUE(dbRunner, DBRunner, false, File::PathJoin({sqlitePath, database->GetDBName()}));
         EXPECT_TRUE(dbRunner->CreateTable(TABLE_NAME, database->GetTableCols("ApiEventData")));
         EXPECT_TRUE(dbRunner->InsertData(TABLE_NAME, data));
+        return true;
     }
 
     static void TearDownTestCase()

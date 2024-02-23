@@ -72,7 +72,7 @@ private:
     bool LoadJsonData(const std::string &profPath, const std::string &deviceDir, uint16_t deviceId);
     bool LoadLogData(const std::string &profPath, const std::string &deviceDir, uint16_t deviceId);
     bool CheckInfoValueIsValid(const std::string &profPath, uint16_t deviceId);
-    std::unordered_map<std::string, std::unordered_map<uint16_t, nlohmann::json>> context_;
+    std::unordered_map<std::string, std::map<uint16_t, nlohmann::json>> context_;
 };  // class Context
 }  // namespace Environment
 }  // namespace Parser
