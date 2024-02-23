@@ -1,12 +1,12 @@
 /* ******************************************************************************
             版权所有 (c) 华为技术有限公司 2024-2024
-            Copyright, 2023, Huawei Tech. Co., Ltd.
+            Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
  * File Name          : sys_io_processor_utest.cpp
- * Description        : SysIoProcessor UT
+ * Description        : SysIOProcessor UT
  * Author             : msprof team
- * Creation Date      : 2024/01/11
+ * Creation Date      : 2024/02/21
  * *****************************************************************************
  */
 
@@ -23,7 +23,7 @@ using namespace Parser::Environment;
 using namespace Analysis::Utils;
 // device_id, replayid, timestamp, bandwidth, rxpacket, rxbyte, rxpackets, rxbytes, rxerrors, rxdropped,
 // txpacket, txbyte, txpackets, txbytes, txerrors, txdropped, funcid
-using SysIoDataFormat = std::vector<std::tuple<uint16_t, uint16_t, double, uint32_t, double, double, uint32_t,
+using SysIODataFormat = std::vector<std::tuple<uint16_t, uint16_t, double, uint32_t, double, double, uint32_t,
     uint32_t, uint32_t, uint32_t, double, double, uint32_t, uint32_t, uint32_t, uint32_t, uint16_t>>;
 // deviceId, timestamp, bandwidth, rxPacketRate, rxByteRate, rxPackets, rxBytes, rxErrors, rxDropped
 // txPacketRate, txByteRate, txPackets, txBytes, txErrors, txDropped, funcId
@@ -39,7 +39,7 @@ const std::string REPORT = "report.db";
 const std::string DB_PATH = File::PathJoin({SYS_IO_DIR, REPORT});
 const std::string PROF = File::PathJoin({SYS_IO_DIR, "PROF"});
 
-const SysIoDataFormat NIC_DATA = {
+const SysIODataFormat NIC_DATA = {
     {0, 0, 236328380142660, 200000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 236328388200700, 200000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 236328400152980, 200000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -47,7 +47,7 @@ const SysIoDataFormat NIC_DATA = {
     {0, 0, 236328420031060, 200000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
 
-const SysIoDataFormat RoCE_DATA = {
+const SysIODataFormat RoCE_DATA = {
     {0, 0, 236328388350260, 200000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 236328396248260, 200000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 236328408033420, 200000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -55,17 +55,17 @@ const SysIoDataFormat RoCE_DATA = {
     {0, 0, 236328428032780, 200000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
 
-class SysIoProcessorUTest : public testing::Test {
+class SysIOProcessorUTest : public testing::Test {
 protected:
     static void SetUpTestCase()
     {
         EXPECT_TRUE(File::CreateDir(SYS_IO_DIR));
         EXPECT_TRUE(File::CreateDir(PROF));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF, DEVICE_PREFIX + "0"})));
-        EXPECT_TRUE(CreateSysIoDB(File::PathJoin({PROF, DEVICE_PREFIX + "0", SQLITE})));
+        EXPECT_TRUE(CreateSysIODB(File::PathJoin({PROF, DEVICE_PREFIX + "0", SQLITE})));
     }
 
-    static bool CreateSysIoDB(const std::string& sqlitePath)
+    static bool CreateSysIODB(const std::string& sqlitePath)
     {
         EXPECT_TRUE(File::CreateDir(sqlitePath));
         std::shared_ptr<NicDB> nicDb;
@@ -102,7 +102,7 @@ protected:
     }
 };
 
-TEST_F(SysIoProcessorUTest, TestNicRunShouldReturnTrueWhenProcessorRunSuccess)
+TEST_F(SysIOProcessorUTest, TestNicRunShouldReturnTrueWhenProcessorRunSuccess)
 {
     nlohmann::json record = {
         {"startCollectionTimeBegin", "1701069323851824"},
@@ -125,7 +125,7 @@ TEST_F(SysIoProcessorUTest, TestNicRunShouldReturnTrueWhenProcessorRunSuccess)
     EXPECT_EQ(expectNum, checkData.size());
 }
 
-TEST_F(SysIoProcessorUTest, TestRoCERunShouldReturnTrueWhenProcessorRunSuccess)
+TEST_F(SysIOProcessorUTest, TestRoCERunShouldReturnTrueWhenProcessorRunSuccess)
 {
     nlohmann::json record = {
         {"startCollectionTimeBegin", "1701069323851824"},
@@ -148,7 +148,7 @@ TEST_F(SysIoProcessorUTest, TestRoCERunShouldReturnTrueWhenProcessorRunSuccess)
     EXPECT_EQ(expectNum, checkData.size());
 }
 
-TEST_F(SysIoProcessorUTest, TestNicRunShouldReturnFalseWhenProcessorRunFailed)
+TEST_F(SysIOProcessorUTest, TestNicRunShouldReturnFalseWhenProcessorRunFailed)
 {
     nlohmann::json record = {
         {"startCollectionTimeBegin", "1701069323851824"},
@@ -176,7 +176,7 @@ TEST_F(SysIoProcessorUTest, TestNicRunShouldReturnFalseWhenProcessorRunFailed)
     MOCKER_CPP(&DBRunner::CreateTable).reset();
 }
 
-TEST_F(SysIoProcessorUTest, TestNicRunShouldReturnFalseWhenFormatDataFailed)
+TEST_F(SysIOProcessorUTest, TestNicRunShouldReturnFalseWhenFormatDataFailed)
 {
     nlohmann::json record = {
         {"startCollectionTimeBegin", "1701069323851824"},
@@ -185,25 +185,25 @@ TEST_F(SysIoProcessorUTest, TestNicRunShouldReturnFalseWhenFormatDataFailed)
     };
 
     MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
-    // sysIoData empty
+    // sysIOData empty
     MOCKER_CPP(&QueryataFormat::empty).stubs().will(returnValue(true));
     auto processor1 = NicProcessor(DB_PATH, {PROF});
     EXPECT_FALSE(processor1.Run());
     MOCKER_CPP(&QueryataFormat::empty).reset();
 
     // Reserve failed
-    using SysIoFormat = std::vector<std::tuple<uint16_t, std::string, uint32_t, double, double, uint32_t,
+    using SysIOFormat = std::vector<std::tuple<uint16_t, std::string, uint32_t, double, double, uint32_t,
         uint32_t, uint32_t, uint32_t, double, double, uint32_t, uint32_t, uint32_t, uint32_t, uint16_t>>;
-    MOCKER_CPP(&SysIoFormat::reserve).stubs().will(throws(std::bad_alloc()));
+    MOCKER_CPP(&SysIOFormat::reserve).stubs().will(throws(std::bad_alloc()));
     auto processor2 = NicProcessor(DB_PATH, {PROF});
     EXPECT_FALSE(processor2.Run());
-    MOCKER_CPP(&SysIoFormat::reserve).reset();
+    MOCKER_CPP(&SysIOFormat::reserve).reset();
 
     // ProcessedDataFormat empty
-    MOCKER_CPP(&SysIoFormat::empty).stubs().will(returnValue(true));
+    MOCKER_CPP(&SysIOFormat::empty).stubs().will(returnValue(true));
     auto processor3 = NicProcessor(DB_PATH, {PROF});
     EXPECT_FALSE(processor3.Run());
-    MOCKER_CPP(&SysIoFormat::empty).reset();
+    MOCKER_CPP(&SysIOFormat::empty).reset();
 
     MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
 }
