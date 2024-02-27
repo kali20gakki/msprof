@@ -40,7 +40,8 @@ const std::string DEVICE_START_LOG = "dev_start.log";
 // 已经校验过的字段,可直接使用.at();未被校验过的字段则使用.value(),来设置默认值。确保读取正常
 const std::set<std::string> CHECK_VALUES = {
     "platform_version", "startCollectionTimeBegin", "endCollectionTimeEnd",
-    "startClockMonotonicRaw", "pid", "cntvct", "CPU", "DeviceInfo", "clock_monotonic_raw"
+    "startClockMonotonicRaw", "pid", "cntvct", "CPU", "DeviceInfo", "clock_monotonic_raw",
+    "llc_profiling"
 };
 }
 
@@ -284,6 +285,16 @@ int64_t Context::GetMsBinPid(const std::string &profPath)
     return info.value("msprofBinPid", analysis::dvvp::common::config::MSVP_MMPROCESS);
 }
 
+std::string Context::GetLLCProfiling(uint16_t deviceId, const std::string &profPath)
+{
+    const auto &info = GetInfoByDeviceId(deviceId, profPath);
+    if (info.empty()) {
+        ERROR("Samplejson is empty, path %.", profPath);
+        return "";
+    }
+    return info.value("llc_profiling", "");
+}
+
 bool Context::GetSyscntConversionParams(Utils::SyscntConversionParams &params,
                                         uint16_t deviceId, const std::string &profPath)
 {
@@ -344,7 +355,7 @@ bool Context::IsStarsChip(uint16_t platformVersion)
 
 bool Context::IsChipV1(uint16_t platformVersion)
 {
-    auto chipV1_1_1 = static_cast<int>(Chip::CHIP_V1_1_0);
+    auto chipV1_1_1 = static_cast<int>(Chip::CHIP_V1_1_1);
     auto chipV1_1_2 = static_cast<int>(Chip::CHIP_V1_1_2);
     auto chipV1_1_3 = static_cast<int>(Chip::CHIP_V1_1_3);
     std::unordered_set<int> checkList{chipV1_1_1, chipV1_1_2, chipV1_1_3};
@@ -354,6 +365,11 @@ bool Context::IsChipV1(uint16_t platformVersion)
 bool Context::IsChipV4(uint16_t platformVersion)
 {
     return platformVersion == static_cast<int>(Chip::CHIP_V4_1_0);
+}
+
+bool Context::IsFirstChipV1(uint16_t platformVersion)
+{
+    return platformVersion == static_cast<int>(Chip::CHIP_V1_1_0);
 }
 
 }  // namespace Environment

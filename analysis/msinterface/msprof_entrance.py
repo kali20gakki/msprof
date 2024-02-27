@@ -66,6 +66,16 @@ class MsprofEntrance:
         analyze_command = AnalyzeCommand(args)
         analyze_command.process()
 
+    @staticmethod
+    def _set_export_mode(args: any) -> None:
+        if args.model_id is not None and args.iteration_id is not None:
+            if args.model_id == NumberConstant.INVALID_MODEL_ID:
+                # model_id==4294967295是按step导出
+                ProfilingScene().set_mode(ExportMode.STEP_EXPORT)
+            else:
+                # 按子图导出
+                ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
+
     def main(self: any) -> None:
         """
         parse argument and run command
@@ -93,13 +103,7 @@ class MsprofEntrance:
                 call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
         # when setting 'iteration-id' and 'model-id' args, export one iteration in one model
         if sys.argv[1] == 'export' and hasattr(args, "model_id") and hasattr(args, "iteration_id"):
-            if args.model_id is not None and args.iteration_id is not None:
-                if args.model_id == NumberConstant.INVALID_MODEL_ID:
-                    # model_id==4294967295是按step导出
-                    ProfilingScene().set_mode(ExportMode.STEP_EXPORT)
-                else:
-                    # 按子图导出
-                    ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
+            self._set_export_mode(args)
             # 'iteration-id' and 'model-id' must be set simultaneously
             if (args.model_id is None) ^ (args.iteration_id is None):
                 error(self.FILE_NAME,

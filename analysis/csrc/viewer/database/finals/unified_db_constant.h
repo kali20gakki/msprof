@@ -71,6 +71,8 @@ const std::string TABLE_NAME_NIC = "NIC";
 const std::string PROCESSOR_NAME_ROCE = "ROCE";
 const std::string TABLE_NAME_ROCE = "ROCE";
 
+const std::string PROCESSOR_NAME_LLC = "LLC";
+const std::string TABLE_NAME_LLC = "LLC";
 
 // api level
 const std::unordered_map<std::string, uint16_t> API_LEVEL_TABLE = {

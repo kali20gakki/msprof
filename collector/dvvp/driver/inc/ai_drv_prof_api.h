@@ -344,6 +344,8 @@ int DoProfTsCpuStart(const DrvPeripheralProfileCfg &peripheralCfg,
                      TEMPLATE_T_PTR<T> configP,
                      uint32_t configSize);
 
+bool CheckProfilingEventsSize(const std::vector<std::string> &profEvents);
+
 int DrvTscpuStart(const DrvPeripheralProfileCfg &peripheralCfg,
                   const std::vector<std::string> &profEvents);
 

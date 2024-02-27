@@ -140,6 +140,7 @@ protected:
         // sample.json
         nlohmann::json sample = {
             {"storageLimit", ""},
+            {"llc_profiling", "read"},
         };
         FileWriter sampleWriter(File::PathJoin({filePath, SAMPLE_JSON}));
         sampleWriter.WriteText(sample.dump());
