@@ -208,8 +208,11 @@ TEST_F(UnifiedDBManagerUTest, TestUnifiedDBManagerInitReturnFailedWhenSampleJson
         Analysis::Viewer::Database::UnifiedDBManager("./unifiedDBManagerUTest", profFolderPaths);
     nlohmann::json sampleJson;
     sampleJson["msprofBinPid"] = nullptr;
+    sampleJson["llc_profiling"] = "read";
     FileWriter sampleWriter(File::PathJoin({"./unifiedDBManagerUTest/PROF1", HOST, SAMPLE_JSON}));
     sampleWriter.WriteText(sampleJson.dump());
+    FileWriter sampleWriterDevice(File::PathJoin({"./unifiedDBManagerUTest/PROF1", DEVICE_PREFIX + "0", SAMPLE_JSON}));
+    sampleWriterDevice.WriteText(sampleJson.dump());
     EXPECT_EQ(unifiedDbManager.Init(), PROFILING_SUCCESS);
     EXPECT_TRUE(File::RemoveDir(UNIFIED_DB_DIR, 0));
 }
@@ -223,6 +226,7 @@ TEST_F(UnifiedDBManagerUTest, TestUnifiedDBManagerInitReturnFailedWhenSampleJson
         Analysis::Viewer::Database::UnifiedDBManager("./unifiedDBManagerUTest", profFolderPaths);
     nlohmann::json sampleJson;
     sampleJson["msprofBinPid"] = nullptr;
+    sampleJson["llc_profiling"] = "read";
     FileWriter sampleWriter(File::PathJoin({"./unifiedDBManagerUTest/PROF1", HOST, SAMPLE_JSON}));
     sampleWriter.WriteText(sampleJson.dump());
     EXPECT_EQ(unifiedDbManager.Init(), PROFILING_FAILED);

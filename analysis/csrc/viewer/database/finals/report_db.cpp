@@ -165,6 +165,15 @@ namespace {
         {"funcId", SQL_INTEGER_TYPE}
     };
 
+    const TableColumns LLC = {
+        {"deviceId", SQL_INTEGER_TYPE},
+        {"llcId", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_TEXT_TYPE},
+        {"hitRate", SQL_REAL_TYPE},
+        {"throughput", SQL_REAL_TYPE},
+        {"mode", SQL_INTEGER_TYPE},
+    };
+
     const TableColumns ENUM_API_LEVEL = {
         {"id", SQL_INTEGER_TYPE, true},
         {"name", SQL_TEXT_TYPE}
@@ -198,6 +207,7 @@ ReportDB::ReportDB()
         {TABLE_NAME_NPU_OP_MEM, NPU_OP_MEM},
         {TABLE_NAME_NIC, NIC},
         {TABLE_NAME_ROCE, RoCE},
+        {TABLE_NAME_LLC, LLC},
         // ENUM
         {TABLE_NAME_ENUM_API_LEVEL, ENUM_API_LEVEL},
         {TABLE_NAME_ENUM_MEMORY, ENUM_MEMORY},

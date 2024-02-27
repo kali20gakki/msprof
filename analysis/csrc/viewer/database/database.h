@@ -109,6 +109,11 @@ public:
     RoceDB();
 };
 
+class LLCDB : public Database {
+public:
+    LLCDB();
+};
+
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis

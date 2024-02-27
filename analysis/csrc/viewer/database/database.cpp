@@ -249,6 +249,14 @@ namespace {
         {"txdropped", SQL_REAL_TYPE},
         {"funcid", SQL_INTEGER_TYPE}
     };
+
+    const TableColumns LLCOriginData = {
+        {"device_id", SQL_INTEGER_TYPE},
+        {"l3tid", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_REAL_TYPE},
+        {"hitrate", SQL_REAL_TYPE},
+        {"throughput", SQL_REAL_TYPE},
+    };
 }
 
 std::string Database::GetDBName() const
@@ -345,6 +353,12 @@ RoceDB::RoceDB()
 {
     dbName_ = "roce.db";
     tableColNames_["RoceOriginalData"] = RoceOriginalData;
+}
+
+LLCDB::LLCDB()
+{
+    dbName_ = "llc.db";
+    tableColNames_["LLCMetrics"] = LLCOriginData;
 }
 
 } // namespace Database
