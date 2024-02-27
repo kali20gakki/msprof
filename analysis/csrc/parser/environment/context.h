@@ -55,6 +55,7 @@ public:
     uint32_t GetPidFromInfoJson(uint16_t deviceId = DEFAULT_DEVICE_ID, const std::string &profPath = "");
     // 返回samplejson.json 中的msprofBinPid
     int64_t GetMsBinPid(const std::string &profPath);
+    std::string GetLLCProfiling(uint16_t deviceId, const std::string &profPath);
     // 获取start_log中的相关时间
     bool GetSyscntConversionParams(Utils::SyscntConversionParams &params, uint16_t deviceId = DEFAULT_DEVICE_ID,
                                    const std::string &profPath = "");
@@ -66,6 +67,8 @@ public:
     // 校验是否为CHIP_V1_1_x系列(不包含CHIP_V1_1_0)
     static bool IsChipV1(uint16_t platformVersion);
     static bool IsChipV4(uint16_t platformVersion);
+    // 校验是否为CHIP_V1_1_0
+    static bool IsFirstChipV1(uint16_t platformVersion);
 
 private:
     nlohmann::json GetInfoByDeviceId(uint16_t deviceId = DEFAULT_DEVICE_ID, const std::string &profPath = "");

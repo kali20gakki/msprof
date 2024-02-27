@@ -68,6 +68,7 @@ protected:
         // sample.json
         nlohmann::json sample = {
             {"storageLimit", ""},
+            {"llc_profiling", "read"},
         };
         FileWriter sampleWriter(File::PathJoin({filePath, SAMPLE_JSON}));
         sampleWriter.WriteText(sample.dump());
@@ -590,6 +591,7 @@ TEST_F(ContextUTest, TestGetMsprofBinPidFromInfoJsonShouldReturnMSVP_MMPROCESSWh
     EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, SAMPLE_JSON})));
     nlohmann::json sampleJson;
     sampleJson["msprofBinPid"] = nullptr;
+    sampleJson["llc_profiling"] = "read";
     FileWriter sampleWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, SAMPLE_JSON}));
     sampleWriter.WriteText(sampleJson.dump());
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
@@ -605,6 +607,7 @@ TEST_F(ContextUTest, TestGetMsprofBinPidFromInfoJsonShouldReturnSucessWhenGetSam
     // sample.json
     nlohmann::json sample = {
         {"msprofBinPid", msprofBinPid},
+        {"llc_profiling", "read"},
     };
     FileWriter sampleWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, SAMPLE_JSON}));
     sampleWriter.WriteText(sample.dump());
