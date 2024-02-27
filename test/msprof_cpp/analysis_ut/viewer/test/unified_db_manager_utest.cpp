@@ -135,20 +135,17 @@ TEST_F(UnifiedDBManagerUTest, TestCheckProfDirsValidReturnFalseWhenprofFolderPat
     EXPECT_FALSE(UnifiedDBManager::CheckProfDirsValid("./test", profFolderPaths, errInfo));
 }
 
+TEST_F(UnifiedDBManagerUTest, TestCheckProfDirsValidReturnTrueWhenOnlyOnePath)
+{
+    std::string errInfo;
+    const std::set<std::string> profFolderPaths = {"./test11"};
+    EXPECT_TRUE(UnifiedDBManager::CheckProfDirsValid("./test", profFolderPaths, errInfo));
+}
+
 TEST_F(UnifiedDBManagerUTest, TestCheckProfDirsValidReturnFalseWhenContextLoadError)
 {
     std::string errInfo;
-    const std::set<std::string> profFolderPaths = {"./test11"};
-    MOCKER_CPP(&Context::Load)
-        .stubs()
-        .will(returnValue(false));
-    EXPECT_FALSE(UnifiedDBManager::CheckProfDirsValid("./test", profFolderPaths, errInfo));
-}
-
-TEST_F(UnifiedDBManagerUTest, TestCheckProfDirsValidReturnFalseWhenPathIsExceedingFixedLength)
-{
-    std::string errInfo;
-    const std::set<std::string> profFolderPaths = {"./test11"};
+    const std::set<std::string> profFolderPaths = {"./test11", "./test222"};
     MOCKER_CPP(&Context::Load)
         .stubs()
         .will(returnValue(false));
