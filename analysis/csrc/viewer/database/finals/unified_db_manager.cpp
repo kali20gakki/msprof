@@ -121,7 +121,7 @@ int UnifiedDBManager::Run()
     pool.Stop();
 
     if (!retFlag) {
-        ERROR("“The unified db process failed to be executed");
+        ERROR("The unified db process failed to be executed");
     }
 
     // string_id table 要在其他所有table 全部生成之后再去生成

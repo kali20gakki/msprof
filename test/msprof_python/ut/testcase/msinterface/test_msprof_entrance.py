@@ -8,6 +8,8 @@ import unittest
 from argparse import Namespace
 from unittest import mock
 
+from common_func.info_conf_reader import InfoConfReader
+from common_func.profiling_scene import ExportMode
 from common_func.profiling_scene import ProfilingScene
 from msinterface.msprof_entrance import MsprofEntrance
 
@@ -44,3 +46,11 @@ class TestMsprofEntrance(unittest.TestCase):
                 mock.patch(NAMESPACE + '.ExportCommand.process'), \
                 mock.patch('sys.exit'):
             MsprofEntrance().main()
+
+    def test_set_export_mode(self):
+        args_dic = {"collection_path": "test", "iteration_id": 1, "model_id": 4294967295, "iteration_count": None}
+        InfoConfReader()._info_json = {"drvVersion": 0}
+        ProfilingScene().set_mode(ExportMode.STEP_EXPORT)
+        args = Namespace(**args_dic)
+        with mock.patch('sys.argv', args):
+            MsprofEntrance()._set_export_mode(args)

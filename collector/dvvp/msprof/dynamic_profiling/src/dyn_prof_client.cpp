@@ -140,7 +140,7 @@ bool DyncProfMsgProcCli::IsServerDisconnect(std::string &echoTips)
         return false;
     }
     echoTips = "Server disconnected, " + std::string(rspMsg.msgData, rspMsg.msgDataLen);
-    MSPROF_LOGI("Dynamic profiling client receive disconnet from server.");
+    MSPROF_LOGI("Dynamic profiling client receive disconnect from server.");
     return true;
 }
 
@@ -262,7 +262,7 @@ int DyncProfMsgProcCli::CreateDynProfClientSock()
         return PROFILING_FAILED;
     }
     // client socket create success
-    MSPROF_LOGI("Dynamic profiling client connet server success.");
+    MSPROF_LOGI("Dynamic profiling client connect server success.");
     cliSockFd_ = sockFd;
     return PROFILING_SUCCESS;
 }
@@ -275,7 +275,6 @@ int DyncProfMsgProcCli::SendMsgToServer(DynProfMsgType reqMsgtype, DynProfMsgTyp
     // send message
     DynProfReqMsg reqMsg;
     reqMsg.msgType = reqMsgtype;
-    reqMsg.msgDataLen = reqMsgParams.size();
     errno_t err = memset_s(reqMsg.msgData, sizeof(reqMsg.msgData), 0, sizeof(reqMsg.msgData));
     if (err != EOK) {
         MSPROF_LOGE("Dynamic profiling client clear reqMsg failed, err: %d", err);
