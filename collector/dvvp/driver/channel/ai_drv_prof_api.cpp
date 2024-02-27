@@ -214,11 +214,19 @@ int DrvTscpuStart(const DrvPeripheralProfileCfg &peripheralCfg,
     return PROFILING_SUCCESS;
 }
 
-int DrvAicoreStart(const DrvPeripheralProfileCfg &peripheralCfg, const std::vector<int> &profCores,
-                   const std::vector<std::string> &profEvents)
+bool CheckProfilingEventsSize(const std::vector<std::string> &profEvents)
 {
     if (profEvents.size() > PMU_EVENT_MAX_NUM) {
         MSPROF_LOGE("profiling events size over %d, event_num=%d", PMU_EVENT_MAX_NUM, profEvents.size());
+        return false;
+    }
+    return true;
+}
+
+int DrvAicoreStart(const DrvPeripheralProfileCfg &peripheralCfg, const std::vector<int> &profCores,
+                   const std::vector<std::string> &profEvents)
+{
+    if (!CheckProfilingEventsSize(profEvents)) {
         return PROFILING_FAILED;
     }
     uint32_t profDeviceId = (uint32_t)peripheralCfg.profDeviceId;
@@ -272,8 +280,7 @@ int DrvAicoreStart(const DrvPeripheralProfileCfg &peripheralCfg, const std::vect
 
 int DrvAicoreTaskBasedStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const std::vector<std::string> &profEvents)
 {
-    if (profEvents.size() > PMU_EVENT_MAX_NUM) {
-        MSPROF_LOGE("profiling events size over %d, event_num=%d", PMU_EVENT_MAX_NUM, profEvents.size());
+    if (!CheckProfilingEventsSize(profEvents)) {
         return PROFILING_FAILED;
     }
     uint32_t configSize = sizeof(TsAiCoreProfileConfigT);
