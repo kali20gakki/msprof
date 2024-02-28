@@ -9,6 +9,8 @@ import json
 from common_func.info_conf_reader import InfoConfReader
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ExportMode
 from common_func.platform.chip_manager import ChipManager
 from profiling_bean.prof_enum.chip_model import ChipModel
 from msmodel.freq.freq_data_viewer_model import FreqDataViewModel
@@ -125,6 +127,47 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
             self.assertEqual(freqs_list[1]['args']['MHz'], 1850)
             self.assertEqual(freqs_list[1]['ph'], "C")
 
+    def test_aicore_freq_viewer_not_all_export_get_all_data_return_ok(self):
+        """
+        目的: 测试非全导场景下AiCoreFreqViewer.get_all_data函数
+        UT设计意图：获取api_event.db 中的ApiData表格中最好的事件开始时间，作为aicore频率起始时间戳。m
+        具体操作：插入几条数据，获取其中的最早的开始时间
+        """
+        ChipManager().chip_id = ChipModel.CHIP_V4_1_0
+        freqs_data = [
+            # freqency INTEGER, syscnt INTEGER
+            [2, 1850]
+        ]
+
+        with FreqDataViewModel(self.params) as freq_model, ApiDataViewModel(self.params) as api_model:
+            origin_mode = ProfilingScene()._mode
+            ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
+            # mock freq.db 和 apidata数据
+            freq_model.create_table()
+            freq_model.insert_data_to_db(DBNameConstant.TABLE_FREQ_PARSE, freqs_data)
+            api_model.create_table()
+            api_model.insert_data_to_db(DBNameConstant.TABLE_API_DATA, self.apis_data)
+            query_freqs = freq_model.get_data()
+            query_api_start_time = api_model.get_earliests_api()
+            self.assertEqual(len(query_freqs), 1)
+            self.assertEqual(query_api_start_time[0].start, 4)
+            freqs_list = AiCoreFreqViewer(self.params).get_all_data()
+            self.assertEqual(len(freqs_list), 3)
+            self.assertEqual(json.dumps(freqs_list[0]),
+                '{"name": "process_name", "pid": 1, "tid": 0, "args": {"name": "AI Core Freq"}, "ph": "M"}')
+            self.assertEqual(freqs_list[1]['name'], "AI Core Freq")
+            self.assertEqual(freqs_list[1]['pid'], 1)
+            self.assertEqual(freqs_list[1]['tid'], 0)
+            self.assertEqual(freqs_list[1]['args']['MHz'], 1850.0)
+            self.assertEqual(freqs_list[1]['ph'], "C")
+            self.assertTrue(isinstance(freqs_list[1]['ts'], str))
+            self.assertEqual(freqs_list[2]['name'], "AI Core Freq")
+            self.assertEqual(freqs_list[2]['pid'], 1)
+            self.assertEqual(freqs_list[2]['tid'], 0)
+            self.assertEqual(freqs_list[2]['args']['MHz'], 1850)
+            self.assertEqual(freqs_list[2]['ph'], "C")
+            self.assertTrue(isinstance(freqs_list[2]['ts'], str))
+            ProfilingScene().set_mode(origin_mode)
 
     def test_aicore_freq_viewer_no_lpm_data_return_ok(self):
         """

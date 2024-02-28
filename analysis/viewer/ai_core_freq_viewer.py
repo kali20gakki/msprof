@@ -27,10 +27,10 @@ class AiCoreFreqViewer:
         self.freq_model = FreqDataViewModel(params)
         self.apidata_model = ApiDataViewModel(params)
 
-    def get_start_time(self):
+    def get_start_time(self) -> str:
         if not ProfilingScene().is_all_export():
             start_time, _ = MsprofTimeline().get_start_end_time()
-            return start_time
+            return str(start_time)
         with self.apidata_model as _model:
             apidata = _model.get_earliests_api()
             if not apidata:
