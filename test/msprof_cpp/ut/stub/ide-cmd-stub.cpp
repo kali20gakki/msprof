@@ -1,5 +1,7 @@
 #include <memory>
 
+#include "mmpa/mmpa_api.h"
+
 namespace Analysis {
 namespace Dvvp {
 namespace Adx {
@@ -26,8 +28,7 @@ void* IdeXmalloc(size_t size)
 void IdeXfree(void* ptr)
 {
     if (ptr != nullptr) {
-        free(ptr);
-        ptr = nullptr;
+        FREE_BUF(ptr);
     }
 }
 } // namespace Adx

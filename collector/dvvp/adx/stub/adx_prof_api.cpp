@@ -5,6 +5,7 @@
  * Create: 2020-08-05
  */
 #include "adx_prof_api.h"
+#include "mmpa/mmpa_api.h"
 #include "msprof_dlog.h"
 #include "memory_utils.h"
 #include "errno/error_code.h"
@@ -62,8 +63,7 @@ int AdxIdeCreatePacket(CONST_VOID_PTR buffer, int length, IdeBuffT &outPut, int 
 void AdxIdeFreePacket(IdeBuffT &out)
 {
     if (out != nullptr) {
-        free(out);
-        out = nullptr;
+        FREE_BUF(out);
     }
 }
 

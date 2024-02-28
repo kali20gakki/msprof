@@ -275,6 +275,7 @@ int DyncProfMsgProcCli::SendMsgToServer(DynProfMsgType reqMsgtype, DynProfMsgTyp
     // send message
     DynProfReqMsg reqMsg;
     reqMsg.msgType = reqMsgtype;
+    reqMsg.msgDataLen = reqMsgParams.size();
     errno_t err = memset_s(reqMsg.msgData, sizeof(reqMsg.msgData), 0, sizeof(reqMsg.msgData));
     if (err != EOK) {
         MSPROF_LOGE("Dynamic profiling client clear reqMsg failed, err: %d", err);
@@ -315,13 +316,10 @@ int DyncProfMsgProcCli::SendMsgToServer(DynProfMsgType reqMsgtype, DynProfMsgTyp
     }
     // encapsulate tips.
     std::string detail = (rspMsg.msgDataLen == 0) ? (".") : (", " + std::string(rspMsg.msgData, rspMsg.msgDataLen));
-    if (rspMsg.statusCode != DynProfMsgProcRes::EXE_SUCC) {
-        echoTips = "Execution fail" + detail;
-        return PROFILING_FAILED;
-    } else {
-        echoTips = "Execution success" + detail;
-        return PROFILING_SUCCESS;
-    }
+    echoTips = (rspMsg.statusCode != DynProfMsgProcRes::EXE_SUCC)
+      ? "Execution fail" + detail
+      : "Execution success" + detail;
+    return (rspMsg.statusCode != DynProfMsgProcRes::EXE_SUCC) ? PROFILING_FAILED : PROFILING_SUCCESS;
 }
 
 DynProfMngCli::DynProfMngCli() : enabled_(false), appPid_(0)

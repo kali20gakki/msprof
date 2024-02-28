@@ -9,6 +9,7 @@
  */
 #include "memory_utils.h"
 #include <cerrno>
+#include "mmpa/mmpa_api.h"
 #include "securec.h"
 #include "msprof_dlog.h"
 
@@ -32,8 +33,7 @@ IdeMemHandle IdeXmalloc(size_t size)
     err = memset_s(val, size, 0, size);
     if (err != EOK) {
         MSPROF_LOGE("[IdeXmalloc]memory clear failed, err: %d", err);
-        free(val);
-        val = nullptr;
+        FREE_BUF(val);
         return nullptr;
     }
     return val;
@@ -63,8 +63,7 @@ IdeMemHandle IdeXrmalloc(const IdeMemHandle ptr, size_t ptrsize, size_t size)
 void IdeXfree(IdeMemHandle ptr)
 {
     if (ptr != nullptr) {
-        free(ptr);
-        ptr = nullptr;
+        FREE_BUF(ptr);
     }
 }
 }   // namespace Adx
