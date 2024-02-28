@@ -10,6 +10,7 @@
 #include "ai_drv_dev_api.h"
 #include "driver_plugin.h"
 #include "errno/error_code.h"
+#include "mmpa/mmpa_api.h"
 #include "msprof_error_manager.h"
 #include "securec.h"
 namespace analysis {
@@ -205,8 +206,7 @@ int DrvTscpuStart(const DrvPeripheralProfileCfg &peripheralCfg,
         return PROFILING_FAILED;
     }
     int ret = DoProfTsCpuStart(peripheralCfg, profEvents, configP, configSize);
-    free(configP);
-    configP = nullptr;
+    FREE_BUF(configP);
     if (ret != PROF_OK) {
         return PROFILING_FAILED;
     }
@@ -238,8 +238,7 @@ int DrvAicoreStart(const DrvPeripheralProfileCfg &peripheralCfg, const std::vect
     FUNRET_CHECK_EQUAL_RET_VALUE(configP == nullptr, true, PROFILING_FAILED);
     if (memset_s(configP, configSize, 0, configSize) != EOK) {
         MSPROF_LOGE("DrvAicoreStart, memset failed");
-        free(configP);
-        configP = nullptr;
+        FREE_BUF(configP);
         return PROFILING_FAILED;
     }
     configP->tag = (Utils::IsDynProfMode()) ? (1) : (0);
@@ -266,8 +265,7 @@ int DrvAicoreStart(const DrvPeripheralProfileCfg &peripheralCfg, const std::vect
     profStartPara.user_data = configP;
     profStartPara.user_data_size = configSize;
     int ret = DriverPlugin::instance()->MsprofDrvStart(profDeviceId, profChannel, &profStartPara);
-    free(configP);
-    configP = nullptr;
+    FREE_BUF(configP);
     if (ret != PROF_OK) {
         MSPROF_LOGE("Failed to start profiling DrvAicoreStart, profDeviceId=%d, profChannel=%d,"
             " profSamplePeriod=%d, ret=%d", profDeviceId, static_cast<int>(profChannel), profSamplePeriod, ret);
@@ -292,8 +290,7 @@ int DrvAicoreTaskBasedStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const 
 
     if (memset_s(configP, configSize, 0, configSize) != EOK) {
         MSPROF_LOGE("DrvAicoreTaskBasedStart, memset failed");
-        free(configP);
-        configP = nullptr;
+        FREE_BUF(configP);
         return PROFILING_FAILED;
     }
     configP->tag = (Utils::IsDynProfMode()) ? (1) : (0);
@@ -315,8 +312,7 @@ int DrvAicoreTaskBasedStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const 
     profStartPara.user_data_size = configSize;
     int ret = DriverPlugin::instance()->MsprofDrvStart((uint32_t)profDeviceId, profChannel, &profStartPara);
 
-    free(configP);
-    configP = nullptr;
+    FREE_BUF(configP);
 
     if (ret != PROF_OK) {
         MSPROF_LOGE("Failed to start profiling DrvAicoreTaskBasedStart, profDeviceId=%d,"
@@ -361,8 +357,7 @@ int DrvL2CacheTaskStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const std:
 
     if (memset_s(configP, configSize, 0, configSize) != EOK) {
         MSPROF_LOGE("DrvL2CacheTaskStart, memset failed");
-        free(configP);
-        configP = nullptr;
+        FREE_BUF(configP);
         return PROFILING_FAILED;
     }
     configP->eventNum = (uint32_t)profEvents.size();
@@ -382,8 +377,7 @@ int DrvL2CacheTaskStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const std:
     profStartPara.user_data_size = configSize;
     profStartPara.channel_type = PROF_TS_TYPE;
     int ret = DriverPlugin::instance()->MsprofDrvStart((uint32_t)profDeviceId, profChannel, &profStartPara);
-    free(configP);
-    configP = nullptr;
+    FREE_BUF(configP);
     if (ret != PROF_OK) {
         MSPROF_LOGE("Failed to start profiling DrvL2CacheTaskStart, profDeviceId=%d,"
             " profChannel=%d, ret=%d",
@@ -534,8 +528,7 @@ int DrvFftsProfileStart(const DrvPeripheralProfileCfg &peripheralCfg, const std:
     }
     if (memset_s(configP, configSize, 0, configSize) != EOK) {
         MSPROF_LOGE("memset failed");
-        free(configP);
-        configP = nullptr;
+        FREE_BUF(configP);
         return PROFILING_FAILED;
     }
     configP->cfgMode = peripheralCfg.cfgMode; // 0-none,1-aic,2-aiv,3-aic&aiv
@@ -551,8 +544,7 @@ int DrvFftsProfileStart(const DrvPeripheralProfileCfg &peripheralCfg, const std:
     profStartPara.user_data = configP;
     profStartPara.user_data_size = configSize;
     int ret = DriverPlugin::instance()->MsprofDrvStart(profDeviceId, profChannel, &profStartPara);
-    free(configP);
-    configP = nullptr;
+    FREE_BUF(configP);
     if (ret != PROF_OK) {
         MSPROF_LOGE("Failed to start profiling DrvFftsProfileStart, profDeviceId=%d, profChannel=%d, ret=%d",
             profDeviceId, static_cast<int>(profChannel), ret);

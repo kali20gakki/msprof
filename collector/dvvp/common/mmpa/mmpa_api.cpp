@@ -311,8 +311,7 @@ void MmScandirFree(MmDirent **entryList, int32_t count)
     }
     for (int32_t j = 0; j < count; j++) {
         if (entryList[j] != nullptr) {
-            free(entryList[j]);
-            entryList[j] = nullptr;
+            FREE_BUF(entryList[j]);
         }
     }
     free(entryList);

@@ -20,6 +20,7 @@
 #include "config/config_manager.h"
 #include "platform/platform.h"
 #include "errno/error_code.h"
+#include "mmpa/mmpa_api.h"
 #include "msprof_dlog.h"
 #include "securec.h"
 
@@ -300,8 +301,7 @@ std::string Utils::DirName(const std::string &path)
         if (dirc != nullptr) {
             result = dirc;
         }
-        free(pathc);
-        pathc = nullptr;
+        FREE_BUF(pathc);
     }
     return result;
 }
@@ -328,8 +328,7 @@ std::string Utils::BaseName(const std::string &path)
         if (basec != nullptr) {
             result = basec;
         }
-        free(pathc);
-        pathc = nullptr;
+        FREE_BUF(pathc);
     }
     return result;
 }
@@ -372,13 +371,11 @@ int Utils::SplitPath(const std::string &path, std::string &dir, std::string &bas
     }
 
     if (dirc != nullptr) {
-        free(dirc);
-        dirc = nullptr;
+        FREE_BUF(dirc);
     }
 
     if (basec != nullptr) {
-        free(basec);
-        basec = nullptr;
+        FREE_BUF(basec);
     }
 
     return ret;
@@ -625,8 +622,7 @@ int Utils::ChangeWorkDir(const std::string &fileName)
         MSPROF_LOGW("chdir(%s) failed.", dirc);
     }
     if (dirc != nullptr) {
-        free(dirc);
-        dirc = nullptr;
+        FREE_BUF(dirc);
     }
     return PROFILING_SUCCESS;
 }
@@ -1255,8 +1251,7 @@ void* Utils::ProfMalloc(size_t size)
     err = memset_s(val, size, 0, size);
     if (err != EOK) {
         MSPROF_LOGE("memset failed");
-        free(val);
-        val = nullptr;
+        FREE_BUF(val);
         return nullptr;
     }
 
@@ -1271,8 +1266,7 @@ void* Utils::ProfMalloc(size_t size)
 void Utils::ProfFree(VOID_PTR &ptr)
 {
     if (ptr != nullptr) {
-        free(ptr);
-        ptr = nullptr;
+        FREE_BUF(ptr);
     }
 }
 
