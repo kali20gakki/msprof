@@ -68,7 +68,7 @@ NpuMemProcessor::ProcessedDataFormat NpuMemProcessor::FormatData(const OriDataFo
             WARN("Converting string(event) to integer failed.");
         }
         processedData.emplace_back(
-            type, data.ddr / BYTE_SIZE, data.hbm / BYTE_SIZE, GetLocalTime(timestamp, timeRecord).Str(), deviceId);
+            type, data.ddr / BYTE_SIZE, data.hbm / BYTE_SIZE, GetLocalTime(timestamp, timeRecord).Uint64(), deviceId);
     }
     return processedData;
 }

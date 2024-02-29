@@ -37,7 +37,7 @@ const std::string TABLE_NAME = "NpuMem";
 
 using OriDataFormat = std::vector<std::tuple<std::string, uint64_t, uint64_t, double, uint64_t>>;
 
-using ProcessedDataFormat = std::vector<std::tuple<uint8_t, double, double, std::string, uint16_t>>;
+using ProcessedDataFormat = std::vector<std::tuple<uint8_t, double, double, uint64_t, uint16_t>>;
 
 const OriDataFormat DATA_A{{"0", 0, 47243669504, 4, 47243669504},
                            {"1", 0, 47414005760, 212, 47414005760}};
@@ -137,7 +137,7 @@ TEST_F(NpuMemProcessorUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
 
 TEST_F(NpuMemProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
 {
-    using TempT = std::tuple<uint8_t, double, double, std::string, uint16_t>;
+    using TempT = std::tuple<uint8_t, double, double, uint64_t, uint16_t>;
     MOCKER_CPP(&std::vector<TempT>::reserve)
     .stubs()
     .will(throws(std::bad_alloc()));

@@ -65,7 +65,7 @@ LLCProcessor::ProcessedDataFormat LLCProcessor::FormatData(const OriDataFormat &
         std::tie(llcData.deviceId, llcData.llcID, llcData.timestamp, llcData.hitRate, llcData.throughput) = row;
         HPFloat timestamp = GetTimeBySamplingTimestamp(llcData.timestamp, params);
         processedData.emplace_back(
-            llcData.deviceId, llcData.llcID, GetLocalTime(timestamp, timeRecord).Str(),
+            llcData.deviceId, llcData.llcID, GetLocalTime(timestamp, timeRecord).Uint64(),
             llcData.hitRate, llcData.throughput, mode);
     }
     return processedData;

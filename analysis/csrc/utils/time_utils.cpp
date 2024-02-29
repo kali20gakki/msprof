@@ -70,8 +70,6 @@ HPFloat GetLocalTime(HPFloat &timestamp, const ProfTimeRecord &record)
 {
     HPFloat baseTime = record.startTimeNs - record.baseTimeNs;
     HPFloat res = timestamp + baseTime;
-    res = res >> NS_US;
-    res.Quantize();
     return res;
 }
 

@@ -34,7 +34,7 @@ class CommunicationInfoProcessor : public TableProcessor {
                                                                uint64_t, uint64_t, uint32_t, uint32_t, uint64_t,
                                                                uint64_t, uint64_t, uint64_t, uint32_t>>;
     // opName, start, end, connectionId, group_name, opId
-    using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, std::string, std::string, uint64_t, uint64_t,
+    using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                                                              uint64_t>>;
     // 不同线程需要实例化的数据集合，由于函数行数限制定义为结构体
     struct ThreadData {

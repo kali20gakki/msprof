@@ -109,6 +109,8 @@ public:
     std::string Str();
     // 输出double格式，不建议使用
     double Double();
+    // 输出uint64格式
+    uint64_t Uint64();
     // 量化，指定保留n位小数，不足n位不处理, 默认保留3位小数
     void Quantize(unsigned long n = 3);
 private:

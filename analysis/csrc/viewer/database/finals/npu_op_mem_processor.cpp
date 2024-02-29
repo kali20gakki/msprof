@@ -86,7 +86,7 @@ NpuOpMemProcessor::ProcessedDataFormat NpuOpMemProcessor::FormatData(const OriDa
         }
         processedData.emplace_back(
             IdPool::GetInstance().GetUint64Id(hashMap[data.operatorName]), addr, data.type, data.size,
-            GetLocalTime(timestamp, timeRecord).Str(), Utils::Contact(profId, data.threadId),
+            GetLocalTime(timestamp, timeRecord).Uint64(), Utils::Contact(profId, data.threadId),
             data.totalAllocateMemory / BYTE_SIZE, data.totalReserveMemory / BYTE_SIZE,
             IdPool::GetInstance().GetUint64Id(COMPONENT), GetDeviceId(data.device_type));
     }

@@ -113,8 +113,8 @@ TaskProcessor::ProcessedDataFormat TaskProcessor::FormatData(const OriDataFormat
         data.taskType = GetTaskType(oriHostTaskType, oriDeviceTaskType,
                                     threadData.platformVersion);
         processedData.emplace_back(
-            Utils::GetLocalTime(start, threadData.timeRecord).Str(),
-            Utils::GetLocalTime(end, threadData.timeRecord).Str(),
+            Utils::GetLocalTime(start, threadData.timeRecord).Uint64(),
+            Utils::GetLocalTime(end, threadData.timeRecord).Uint64(),
             threadData.deviceId, data.connectionId, data.correlationId, threadData.pid, data.taskType,
             data.contextId, data.streamId, data.taskId, data.modelId);
     }

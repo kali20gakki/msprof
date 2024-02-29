@@ -388,6 +388,21 @@ void HPFloat::Quantize(unsigned long n)
     MoveBackward(offset);
 }
 
+uint64_t HPFloat::Uint64()
+{
+    if (digit_ < 0) {
+        return 0;
+    } else if (symbol_) {
+        return UINT64_MAX;
+    }
+    uint64_t res = 0;
+    long long start = dynamicLen_ - digit_; // 需要显示的转为long long类型
+    for (long long i = dynamicLen_; i >= start; i--) {
+        res = res * POWER_10 + num_[i];
+    }
+    return res;
+}
+
 HPFloat &HPFloat::operator=(const HPFloat &op)
 {
     if (this == &op) {
