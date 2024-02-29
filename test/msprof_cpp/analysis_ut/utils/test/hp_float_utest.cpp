@@ -339,6 +339,23 @@ TEST_F(HPFloatUTest, TestDouble)
     EXPECT_EQ(num.Double(), input);
 }
 
+TEST_F(HPFloatUTest, TestUint64)
+{
+    // 测试浮点数
+    std::string input = "123456789123456789.654321";
+    HPFloat num{input};
+    EXPECT_EQ(num.Uint64(), 123456789123456789); // 123456789123456789，取整
+    // 测试整数
+    num = "987654321";
+    EXPECT_EQ(num.Uint64(), 987654321); // 987654321，测试整数情况
+    // 测试最高数量级小于0
+    num = "0.654321";
+    EXPECT_EQ(num.Uint64(), 0);
+    // 测试负数，返回UINT64_MAX
+    num = "-12345233456.321";
+    EXPECT_EQ(num.Uint64(), UINT64_MAX);
+}
+
 TEST_F(HPFloatUTest, TestQuantize)
 {
     double input = -987654.321876;

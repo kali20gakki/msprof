@@ -25,7 +25,7 @@ public:
     // device_id, l3tid, timestamp, hitrate, throughput
     using OriDataFormat = std::vector<std::tuple<uint32_t, uint32_t, double, double, double>>;
     // deviceId, llcID, timestamp, hitRate, throughput, mode
-    using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint32_t, std::string, double, double, uint16_t>>;
+    using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint32_t, uint64_t, double, double, uint16_t>>;
 
     LLCProcessor() = default;
     LLCProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);

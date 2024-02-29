@@ -64,7 +64,7 @@ NpuModuleMemProcessor::ProcessedDataFormat NpuModuleMemProcessor::FormatData(con
         std::tie(data.moduleId, data.syscnt, data.totalSize, data.deviceType) = row;
         HPFloat timestamp{GetTimeBySamplingTimestamp(data.syscnt, params)};
         processedData.emplace_back(
-            data.moduleId, GetLocalTime(timestamp, timeRecord).Str(), data.totalSize / BYTE_SIZE, deviceId);
+            data.moduleId, GetLocalTime(timestamp, timeRecord).Uint64(), data.totalSize / BYTE_SIZE, deviceId);
     }
     return processedData;
 }

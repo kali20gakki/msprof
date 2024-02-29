@@ -23,7 +23,7 @@ class NpuModuleMemProcessor : public TableProcessor {
     // module_id, syscnt, total_size, device_type
     using OriDataFormat = std::vector<std::tuple<uint32_t, double, uint64_t, std::string>>;
     // module_id, timestamp, totalReserved, deviceId
-    using ProcessedDataFormat = std::vector<std::tuple<uint32_t, std::string, double, uint16_t>>;
+    using ProcessedDataFormat = std::vector<std::tuple<uint32_t, uint64_t, double, uint16_t>>;
 public:
     NpuModuleMemProcessor() = default;
     NpuModuleMemProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);

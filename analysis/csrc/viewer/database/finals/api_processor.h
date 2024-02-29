@@ -24,7 +24,7 @@ class ApiProcessor : public TableProcessor {
 using ApiDataFormat = std::vector<std::tuple<std::string, std::string, std::string, uint32_t,
         std::string, uint64_t, uint64_t, uint64_t>>;
 // start, end, level, globalTid, connectionId, name
-using ProcessedDataFormat = std::vector<std::tuple<std::string, std::string, uint16_t,
+using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint16_t,
         uint64_t, uint64_t, uint64_t>>;
 public:
     ApiProcessor() = default;

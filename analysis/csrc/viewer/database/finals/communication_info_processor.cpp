@@ -21,12 +21,12 @@ using namespace Parser::Environment;
 using namespace Analysis::Utils;
 namespace {
 struct CommunicationOpData {
+    uint32_t opId = UINT32_MAX;
     uint64_t opName = UINT64_MAX;
     uint64_t groupName = UINT64_MAX;
     uint64_t connectionId = UINT64_MAX;
-    uint32_t opId = UINT32_MAX;
-    std::string start;
-    std::string end;
+    uint64_t start = UINT64_MAX;
+    uint64_t end = UINT64_MAX;
 };
 struct CommunicationOpEndpointsTime {
     double firstTaskStartTime;
@@ -100,8 +100,8 @@ bool CommunicationInfoProcessor::FormatData(const OriDataFormat &oriData,
         auto data = item->second;
         HPFloat start{endpoints[key].firstTaskStartTime};
         HPFloat end = HPFloat(endpoints[key].lastTaskStartTime) + HPFloat(endpoints[key].lastTaskDuration);
-        data.start = Utils::GetLocalTime(start, threadData.timeRecord).Str();
-        data.end = Utils::GetLocalTime(end, threadData.timeRecord).Str();
+        data.start = Utils::GetLocalTime(start, threadData.timeRecord).Uint64();
+        data.end = Utils::GetLocalTime(end, threadData.timeRecord).Uint64();
         processedOpData.emplace_back(data.opName, data.start, data.end, data.connectionId, data.groupName, data.opId);
     }
     return true;

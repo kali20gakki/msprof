@@ -47,8 +47,8 @@ const std::string TARGET_TABLE_NAME = "TASK";
 
 using AscendTaskFormat = std::vector<std::tuple<uint32_t, int32_t, int32_t, uint32_t, uint32_t, uint32_t, double,
                                                   double, std::string, std::string, int64_t>>;
-using ProcessedDataFormat = std::vector<std::tuple<std::string, std::string, uint32_t, int64_t, uint64_t,
-                                                     uint64_t, uint32_t, uint32_t, int32_t, uint32_t, uint32_t>>;
+using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, int64_t, uint64_t,
+                                                   uint64_t, uint32_t, uint32_t, int32_t, uint32_t, uint32_t>>;
 
 AscendTaskFormat DATA_A{{4294967295, -1, 37, 1, 3, 0, 8719911184665.1, 680.013671875,
                            "UNKNOWN", "MIX_AIC", 14991},
@@ -248,7 +248,7 @@ TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
 
 TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
 {
-    using TempT = std::tuple<std::string, std::string, uint32_t, int64_t, uint64_t,
+    using TempT = std::tuple<uint64_t, uint64_t, uint32_t, int64_t, uint64_t,
                              uint64_t, uint32_t, uint32_t, int32_t, uint32_t, uint32_t>;
     MOCKER_CPP(&std::vector<TempT>::reserve)
     .stubs()

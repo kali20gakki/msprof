@@ -140,7 +140,7 @@ bool SysIOProcessor::FormatData(const std::string &fileDir, const Utils::ProfTim
                  tempData.txpacket, tempData.txbyte, tempData.txpackets, tempData.txbytes,
                  tempData.txerrors, tempData.txdropped, tempData.funcid) = data;
         Utils::HPFloat timestamp{tempData.timestamp};
-        processedData.emplace_back(tempData.device_id, Utils::GetLocalTime(timestamp, timeRecord).Str(),
+        processedData.emplace_back(tempData.device_id, Utils::GetLocalTime(timestamp, timeRecord).Uint64(),
                                    tempData.bandwidth, tempData.rxpacket, tempData.rxbyte, tempData.rxpackets,
                                    tempData.rxbytes, tempData.rxerrors, tempData.rxdropped,
                                    tempData.txpacket, tempData.txbyte, tempData.txpackets, tempData.txbytes,

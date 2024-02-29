@@ -27,7 +27,7 @@ using SysIODataFormat = std::vector<std::tuple<uint16_t, uint16_t, double, uint3
     uint32_t, uint32_t, uint32_t, double, double, uint32_t, uint32_t, uint32_t, uint32_t, uint16_t>>;
 // deviceId, timestamp, bandwidth, rxPacketRate, rxByteRate, rxPackets, rxBytes, rxErrors, rxDropped
 // txPacketRate, txByteRate, txPackets, txBytes, txErrors, txDropped, funcId
-using ProcessedDataFormat = std::vector<std::tuple<uint16_t, std::string, uint32_t, double, double, uint32_t,
+using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint32_t, double, double, uint32_t,
     uint32_t, uint32_t, uint32_t, double, double, uint32_t, uint32_t, uint32_t, uint32_t, uint16_t>>;
 // device_id, timestamp, bandwidth, rxpacket, rxbyte, rxpackets, rxbytes, rxerrors, rxdropped,
 // txpacket, txbyte, txpackets, txbytes, txerrors, txdropped, funcid
@@ -192,7 +192,7 @@ TEST_F(SysIOProcessorUTest, TestNicRunShouldReturnFalseWhenFormatDataFailed)
     MOCKER_CPP(&QueryataFormat::empty).reset();
 
     // Reserve failed
-    using SysIOFormat = std::vector<std::tuple<uint16_t, std::string, uint32_t, double, double, uint32_t,
+    using SysIOFormat = std::vector<std::tuple<uint16_t, uint64_t, uint32_t, double, double, uint32_t,
         uint32_t, uint32_t, uint32_t, double, double, uint32_t, uint32_t, uint32_t, uint32_t, uint16_t>>;
     MOCKER_CPP(&SysIOFormat::reserve).stubs().will(throws(std::bad_alloc()));
     auto processor2 = NicProcessor(DB_PATH, {PROF});

@@ -53,7 +53,7 @@ using CommunicationTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, u
                                                            uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t,
                                                            uint64_t, uint32_t>>;
 
-using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, std::string, std::string, uint64_t, uint64_t,
+using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                                                          uint64_t>>;
 
 const HcclSingleDeviceFormat DATA_A{{4294967295, -1, "hcom_allReduce__360_0_1", 0, "Memcpy", "10652853832407468360",

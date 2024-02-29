@@ -36,8 +36,8 @@ namespace {
     };
 
     const TableColumns TASK = {
-        {"start", SQL_TEXT_TYPE},
-        {"end", SQL_TEXT_TYPE},
+        {"start", SQL_INTEGER_TYPE},
+        {"end", SQL_INTEGER_TYPE},
         {"deviceId", SQL_INTEGER_TYPE},
         {"connectionId", SQL_INTEGER_TYPE},
         {"correlationId", SQL_INTEGER_TYPE, true},
@@ -83,16 +83,16 @@ namespace {
 
     const TableColumns COMMUNICATION_OP = {
         {"opName", SQL_INTEGER_TYPE},
-        {"start", SQL_TEXT_TYPE},
-        {"end", SQL_TEXT_TYPE},
+        {"start", SQL_INTEGER_TYPE},
+        {"end", SQL_INTEGER_TYPE},
         {"connectionId", SQL_INTEGER_TYPE},
         {"groupName", SQL_INTEGER_TYPE},
         {"opId", SQL_INTEGER_TYPE, true}
     };
 
     const TableColumns API = {
-        {"start", SQL_TEXT_TYPE},
-        {"end", SQL_TEXT_TYPE},
+        {"start", SQL_INTEGER_TYPE},
+        {"end", SQL_INTEGER_TYPE},
         {"level", SQL_INTEGER_TYPE},
         {"globalTid", SQL_INTEGER_TYPE},
         {"connectionId", SQL_INTEGER_TYPE, true},
@@ -103,13 +103,13 @@ namespace {
         {"type", SQL_INTEGER_TYPE},
         {"ddrUsage", SQL_NUMERIC_TYPE},
         {"hbmUsage", SQL_NUMERIC_TYPE},
-        {"timestamp", SQL_TEXT_TYPE},
+        {"timestamp", SQL_INTEGER_TYPE},
         {"deviceId", SQL_INTEGER_TYPE}
     };
 
     const TableColumns NPU_MODULE_MEM = {
         {"moduleId", SQL_INTEGER_TYPE},
-        {"timestamp", SQL_TEXT_TYPE},
+        {"timestamp", SQL_INTEGER_TYPE},
         {"totalReserved", SQL_NUMERIC_TYPE},
         {"deviceId", SQL_INTEGER_TYPE}
     };
@@ -119,7 +119,7 @@ namespace {
         {"addr", SQL_INTEGER_TYPE},
         {"type", SQL_INTEGER_TYPE},
         {"size", SQL_INTEGER_TYPE},
-        {"timestamp", SQL_TEXT_TYPE},
+        {"timestamp", SQL_INTEGER_TYPE},
         {"globalTid", SQL_INTEGER_TYPE},
         {"totalAllocate", SQL_NUMERIC_TYPE},
         {"totalReserve", SQL_NUMERIC_TYPE},
@@ -129,7 +129,7 @@ namespace {
 
     const TableColumns NIC = {
         {"deviceId", SQL_INTEGER_TYPE},
-        {"timestamp", SQL_TEXT_TYPE},
+        {"timestamp", SQL_INTEGER_TYPE},
         {"bandwidth", SQL_INTEGER_TYPE},
         {"rxPacketRate", SQL_NUMERIC_TYPE},
         {"rxByteRate", SQL_NUMERIC_TYPE},
@@ -148,7 +148,7 @@ namespace {
 
     const TableColumns RoCE = {
         {"deviceId", SQL_INTEGER_TYPE},
-        {"timestamp", SQL_TEXT_TYPE},
+        {"timestamp", SQL_INTEGER_TYPE},
         {"bandwidth", SQL_INTEGER_TYPE},
         {"rxPacketRate", SQL_NUMERIC_TYPE},
         {"rxByteRate", SQL_NUMERIC_TYPE},
@@ -168,7 +168,7 @@ namespace {
     const TableColumns LLC = {
         {"deviceId", SQL_INTEGER_TYPE},
         {"llcId", SQL_INTEGER_TYPE},
-        {"timestamp", SQL_TEXT_TYPE},
+        {"timestamp", SQL_INTEGER_TYPE},
         {"hitRate", SQL_REAL_TYPE},
         {"throughput", SQL_REAL_TYPE},
         {"mode", SQL_INTEGER_TYPE},

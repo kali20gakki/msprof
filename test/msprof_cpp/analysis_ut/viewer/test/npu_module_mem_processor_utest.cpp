@@ -137,7 +137,7 @@ TEST_F(NpuModuleMemProcessorUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
 
 TEST_F(NpuModuleMemProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
 {
-    using TempT = std::tuple<uint32_t, std::string, double, uint16_t>;
+    using TempT = std::tuple<uint32_t, uint64_t, double, uint16_t>;
     MOCKER_CPP(&std::vector<TempT>::reserve)
     .stubs()
     .will(throws(std::bad_alloc()));

@@ -26,8 +26,8 @@ class TaskProcessor : public TableProcessor {
                                                    double, std::string, std::string, uint32_t>>;
     // start, end, deviceId, connectionId, correlationId, globalPid, taskType, contextId, streamId, taskId,
     // modelId
-    using ProcessedDataFormat = std::vector<std::tuple<std::string, std::string, uint32_t, int64_t, uint64_t,
-                                                         uint64_t, uint32_t, uint32_t, int32_t, uint32_t, uint32_t>>;
+    using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, int64_t, uint64_t,
+                                                       uint64_t, uint32_t, uint32_t, int32_t, uint32_t, uint32_t>>;
     struct ThreadData {
         uint16_t deviceId = UINT16_MAX;
         uint16_t platformVersion = UINT16_MAX;
