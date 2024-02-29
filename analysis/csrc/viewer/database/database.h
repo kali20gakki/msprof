@@ -109,6 +109,16 @@ public:
     RoceDB();
 };
 
+class HBMDB : public Database {
+public:
+    HBMDB();
+};
+
+class DDRDB : public Database {
+public:
+    DDRDB();
+};
+
 class LLCDB : public Database {
 public:
     LLCDB();

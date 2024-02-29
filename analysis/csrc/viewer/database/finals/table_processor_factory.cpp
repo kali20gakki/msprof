@@ -16,7 +16,9 @@
 #include "analysis/csrc/viewer/database/finals/api_processor.h"
 #include "analysis/csrc/viewer/database/finals/communication_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/compute_task_info_processor.h"
+#include "analysis/csrc/viewer/database/finals/ddr_processor.h"
 #include "analysis/csrc/viewer/database/finals/enum_processor.h"
+#include "analysis/csrc/viewer/database/finals/hbm_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_mem_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_module_mem_processor.h"
@@ -74,6 +76,12 @@ std::shared_ptr<TableProcessor> TableProcessorFactory::CreateTableProcessor(
     }
     if (processorName == PROCESSOR_NAME_ROCE) {
         MAKE_SHARED_RETURN_VALUE(processor, RoCEProcessor, nullptr, reportDBPath, profPaths);
+    }
+    if (processorName == PROCESSOR_NAME_HBM) {
+        MAKE_SHARED_RETURN_VALUE(processor, HBMProcessor, nullptr, reportDBPath, profPaths);
+    }
+    if (processorName == PROCESSOR_NAME_DDR) {
+        MAKE_SHARED_RETURN_VALUE(processor, DDRProcessor, nullptr, reportDBPath, profPaths);
     }
     return processor;
 }
