@@ -165,6 +165,21 @@ namespace {
         {"funcId", SQL_INTEGER_TYPE}
     };
 
+    const TableColumns HBM = {
+        {"deviceId", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_INTEGER_TYPE},
+        {"bandwidth", SQL_NUMERIC_TYPE},
+        {"hbmId", SQL_INTEGER_TYPE},
+        {"type", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns DDR = {
+        {"deviceId", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_INTEGER_TYPE},
+        {"read", SQL_NUMERIC_TYPE},
+        {"write", SQL_NUMERIC_TYPE}
+    };
+
     const TableColumns LLC = {
         {"deviceId", SQL_INTEGER_TYPE},
         {"llcId", SQL_INTEGER_TYPE},
@@ -207,6 +222,8 @@ ReportDB::ReportDB()
         {TABLE_NAME_NPU_OP_MEM, NPU_OP_MEM},
         {TABLE_NAME_NIC, NIC},
         {TABLE_NAME_ROCE, RoCE},
+        {TABLE_NAME_HBM, HBM},
+        {TABLE_NAME_DDR, DDR},
         {TABLE_NAME_LLC, LLC},
         // ENUM
         {TABLE_NAME_ENUM_API_LEVEL, ENUM_API_LEVEL},

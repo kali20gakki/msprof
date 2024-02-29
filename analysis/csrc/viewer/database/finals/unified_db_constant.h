@@ -71,6 +71,12 @@ const std::string TABLE_NAME_NIC = "NIC";
 const std::string PROCESSOR_NAME_ROCE = "ROCE";
 const std::string TABLE_NAME_ROCE = "ROCE";
 
+const std::string PROCESSOR_NAME_HBM = "HBM";
+const std::string TABLE_NAME_HBM = "HBM";
+
+const std::string PROCESSOR_NAME_DDR = "DDR";
+const std::string TABLE_NAME_DDR = "DDR";
+
 const std::string PROCESSOR_NAME_LLC = "LLC";
 const std::string TABLE_NAME_LLC = "LLC";
 

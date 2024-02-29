@@ -44,6 +44,8 @@ namespace {
         PROCESSOR_NAME_NPU_OP_MEM,
         PROCESSOR_NAME_NIC,
         PROCESSOR_NAME_ROCE,
+        PROCESSOR_NAME_HBM,
+        PROCESSOR_NAME_DDR,
     };
 }
 

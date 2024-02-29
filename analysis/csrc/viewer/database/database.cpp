@@ -250,6 +250,24 @@ namespace {
         {"funcid", SQL_INTEGER_TYPE}
     };
 
+    const TableColumns HBMbwData = {
+        {"device_id", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_REAL_TYPE},
+        {"bandwidth", SQL_REAL_TYPE},
+        {"hbmid", SQL_INTEGER_TYPE},
+        {"event_type", SQL_TEXT_TYPE}
+    };
+
+    const TableColumns DDRMetricData = {
+        {"device_id", SQL_INTEGER_TYPE},
+        {"replayid", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_REAL_TYPE},
+        {"flux_read", SQL_REAL_TYPE},
+        {"flux_write", SQL_REAL_TYPE},
+        {"fluxid_read", SQL_REAL_TYPE},
+        {"fluxid_write", SQL_REAL_TYPE}
+    };
+
     const TableColumns LLCOriginData = {
         {"device_id", SQL_INTEGER_TYPE},
         {"l3tid", SQL_INTEGER_TYPE},
@@ -353,6 +371,18 @@ RoceDB::RoceDB()
 {
     dbName_ = "roce.db";
     tableColNames_["RoceOriginalData"] = RoceOriginalData;
+}
+
+HBMDB::HBMDB()
+{
+    dbName_ = "hbm.db";
+    tableColNames_["HBMbwData"] = HBMbwData;
+}
+
+DDRDB::DDRDB()
+{
+    dbName_ = "ddr.db";
+    tableColNames_["DDRMetricData"] = DDRMetricData;
 }
 
 LLCDB::LLCDB()
