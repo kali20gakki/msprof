@@ -55,6 +55,11 @@ bool UnifiedDBManager::CheckProfDirsValid(const std::string& outputDir,
         return false;
     }
 
+    // 对于单PROF情况,不校验MsprofBinPid
+    if (profFolderPaths.size() == 1) {
+        return true;
+    }
+
     if (!Context::GetInstance().Load(profFolderPaths)) {
         errInfo = "JSON parameter loading failed. Please check if the JSON data is complete.";
         return false;
@@ -75,7 +80,6 @@ bool UnifiedDBManager::CheckProfDirsValid(const std::string& outputDir,
         }
         preMsprofBinPid = msprofBinPid;
     }
-
     return true;
 }
 
