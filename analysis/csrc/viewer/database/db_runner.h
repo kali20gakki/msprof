@@ -39,6 +39,8 @@ public:
     bool DeleteData(const std::string &sql) const;
     template<typename... Args>
     bool QueryData(const std::string &sql, std::vector<std::tuple<Args...>> &result) const;
+    template<typename... Args>
+    std::vector<std::tuple<Args...>> QueryData(const std::string &sql) const;
     bool UpdateData(const std::string &sql) const;
     std::vector<TableColumn> GetTableColumns(const std::string &tableName);
 private:
@@ -75,6 +77,18 @@ bool DBRunner::QueryData(const std::string &sql, std::vector<std::tuple<Args...>
     }
     INFO("Query data success: %", sql);
     return true;
+}
+
+template<typename... Args>
+std::vector<std::tuple<Args...>> DBRunner::QueryData(const std::string &sql) const
+{
+    INFO("Start query data");
+    std::vector<std::tuple<Args...>> result;
+    std::shared_ptr<Connection> conn;
+    MAKE_SHARED_RETURN_VALUE(conn, Connection, result, path_);
+    result = conn->ExecuteQuery(sql);
+    INFO("Query data end: %", sql);
+    return result;
 }
 } // Database
 } // Viewer

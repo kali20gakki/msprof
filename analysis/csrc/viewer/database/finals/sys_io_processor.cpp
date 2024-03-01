@@ -22,7 +22,7 @@ using Context = Parser::Environment::Context;
 
 namespace {
 struct SysIOData {
-    uint16_t device_id = UINT16_MAX;
+    uint16_t deviceId = UINT16_MAX;
     uint16_t funcid = UINT16_MAX;
     double timestamp = 0.0;
     double rxpacket = 0.0;
@@ -86,7 +86,7 @@ bool SysIOProcessor::Process(const std::string &fileDir)
         }
         SysIODataFormat sysIOData = GetData(dbPath, sysIODB);
         ProcessedDataFormat processedData;
-        if (!FormatData(fileDir, timeRecord, sysIOData, processedData)) {
+        if (!FormatData(timeRecord, sysIOData, processedData)) {
             ERROR("FormatData failed, fileDir is %.", fileDir);
             flag = false;
             continue;
@@ -102,7 +102,7 @@ bool SysIOProcessor::Process(const std::string &fileDir)
 
 SysIOProcessor::SysIODataFormat SysIOProcessor::GetData(const std::string &dbPath, DBInfo &sysIODB) const
 {
-    INFO("% GetData, dir is %", processorName_, dbPath);
+    INFO("% GetData, dir is %.", processorName_, dbPath);
     SysIODataFormat sysIOData;
     MAKE_SHARED_RETURN_VALUE(sysIODB.dbRunner, DBRunner, sysIOData, dbPath);
     if (sysIODB.dbRunner == nullptr) {
@@ -113,18 +113,16 @@ SysIOProcessor::SysIODataFormat SysIOProcessor::GetData(const std::string &dbPat
                       "txpacket, txbyte, txpackets, txbytes, txerrors, txdropped, funcid "
                       "FROM " + sysIODB.tableName;
     if (!sysIODB.dbRunner->QueryData(sql, sysIOData)) {
-        ERROR("Query api data failed, db path is %.", dbPath);
+        ERROR("Query sys IO data failed, db path is %.", dbPath);
         return sysIOData;
     }
     return sysIOData;
 }
 
-bool SysIOProcessor::FormatData(const std::string &fileDir, const Utils::ProfTimeRecord timeRecord,
+bool SysIOProcessor::FormatData(const Utils::ProfTimeRecord timeRecord,
                                 const SysIODataFormat &sysIOData, ProcessedDataFormat &processedData)
 {
-    INFO("% FormatData, dir is %", processorName_, fileDir);
-    Utils::SyscntConversionParams params;
-    Utils::ProfTimeRecord record;
+    INFO("% FormatData.", processorName_);
     if (sysIOData.empty()) {
         ERROR("Sys IO original data is empty, processor name is %.", processorName_);
         return false;
@@ -135,12 +133,12 @@ bool SysIOProcessor::FormatData(const std::string &fileDir, const Utils::ProfTim
     }
     SysIOData tempData;
     for (const auto& data : sysIOData) {
-        std::tie(tempData.device_id, tempData.timestamp, tempData.bandwidth, tempData.rxpacket, tempData.rxbyte,
+        std::tie(tempData.deviceId, tempData.timestamp, tempData.bandwidth, tempData.rxpacket, tempData.rxbyte,
                  tempData.rxpackets, tempData.rxbytes, tempData.rxerrors, tempData.rxdropped,
                  tempData.txpacket, tempData.txbyte, tempData.txpackets, tempData.txbytes,
                  tempData.txerrors, tempData.txdropped, tempData.funcid) = data;
         Utils::HPFloat timestamp{tempData.timestamp};
-        processedData.emplace_back(tempData.device_id, Utils::GetLocalTime(timestamp, timeRecord).Uint64(),
+        processedData.emplace_back(tempData.deviceId, Utils::GetLocalTime(timestamp, timeRecord).Uint64(),
                                    tempData.bandwidth, tempData.rxpacket, tempData.rxbyte, tempData.rxpackets,
                                    tempData.rxbytes, tempData.rxerrors, tempData.rxdropped,
                                    tempData.txpacket, tempData.txbyte, tempData.txpackets, tempData.txbytes,

@@ -59,6 +59,11 @@ public:
     // 获取start_log中的相关时间
     bool GetSyscntConversionParams(Utils::SyscntConversionParams &params, uint16_t deviceId = DEFAULT_DEVICE_ID,
                                    const std::string &profPath = "");
+    // aic和aiv的freq的值在采集时使用同一个值,即两者频率始终保持一致,这里只取aic_frequency
+    // 该频率只在device侧能取到
+    bool GetPmuFreq(double &freq, uint16_t deviceId = DEFAULT_DEVICE_ID, const std::string &profPath = "");
+    // 采集开关中不支持单独设置aiv-mode,因此ai_core_profiling_mode和aiv_profiling_mode应保持一致,这里使用ai_core_profiling_mode
+    bool GetMetricMode(std::string &metricMode, const std::string &profPath = "");
 public:
     // 获取对应device的芯片型号
     uint16_t GetPlatformVersion(uint16_t deviceId = DEFAULT_DEVICE_ID, const std::string &profPath = "");
