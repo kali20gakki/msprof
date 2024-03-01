@@ -43,6 +43,10 @@ struct TableColumn {
         auto str = isPrimary ? base + " PRIMARY KEY" : base;
         return str;
     }
+
+    bool operator==(const TableColumn& other) const {
+        return (name == other.name) && (type == other.type);
+    }
 };
 
 template<size_t... S>
@@ -71,6 +75,8 @@ public:
     bool ExecuteDelete(const std::string &sql);
     template<typename... Args>
     bool ExecuteQuery(const std::string &sql, std::vector<std::tuple<Args...>> &result);
+    template<typename... Args>
+    std::vector<std::tuple<Args...>> ExecuteQuery(const std::string &sql);
     bool ExecuteUpdate(const std::string &sql);
     std::vector<TableColumn> ExecuteGetTableColumns(const std::string &tableName);
 
@@ -201,6 +207,32 @@ bool Connection::ExecuteQuery(const std::string &sql, std::vector<std::tuple<Arg
         result.emplace_back(row);
     }
     return true;
+}
+
+template<typename... Args>
+std::vector<std::tuple<Args...>> Connection::ExecuteQuery(const std::string &sql)
+{
+    std::vector<std::tuple<Args...>> result;
+    if (!QueryCmd(sql)) {
+        return result;
+    }
+    while (true) {
+        auto rc = sqlite3_step(stmt_);
+        if (rc != SQLITE_ROW) {
+            if (rc != SQLITE_DONE) {
+                std::string errorMsg = "Failed to query data: " + std::string(sqlite3_errmsg(db_));
+                ERROR("sqlite3_step return %, %", rc, errorMsg);
+                result.clear();
+                return result;
+            }
+            break;
+        }
+        std::tuple<Args...> row;
+        index_ = -1;
+        GetRow(row);
+        result.emplace_back(row);
+    }
+    return result;
 }
 } // Database
 } // Viewer

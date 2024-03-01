@@ -114,6 +114,16 @@ public:
     LLCDB();
 };
 
+class AicoreDB : public Database {
+public:
+    AicoreDB();
+};
+
+class AiVectorCoreDB : public Database {
+public:
+    AiVectorCoreDB();
+};
+
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis

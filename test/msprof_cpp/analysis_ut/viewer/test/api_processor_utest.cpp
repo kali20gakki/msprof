@@ -132,14 +132,14 @@ protected:
             {"platform_version", "7"},
             {"pid", "10"},
             {"CPU", {{{"Frequency", "100.000000"}}}},
-            {"DeviceInfo", {{{"hwts_frequency", "49.000000"}}}},
+            {"DeviceInfo", {{{"hwts_frequency", "49.000000"}, {"aic_frequency", "1850"}}}},
         };
         FileWriter infoWriter(File::PathJoin({filePath, INFO_JSON}));
         infoWriter.WriteText(info.dump());
 
         // sample.json
         nlohmann::json sample = {
-            {"storageLimit", ""},
+            {"ai_core_profiling_mode", "task-based"},
             {"llc_profiling", "read"},
         };
         FileWriter sampleWriter(File::PathJoin({filePath, SAMPLE_JSON}));

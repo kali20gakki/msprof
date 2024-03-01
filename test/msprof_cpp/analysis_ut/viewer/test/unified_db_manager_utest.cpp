@@ -60,7 +60,7 @@ namespace {
             {"platform_version", "7"},
             {"pid", "2376271"},
             {"CPU", {{{"Frequency", "100.000000"}}}},
-            {"DeviceInfo", {{{"hwts_frequency", "49.000000"}}}},
+            {"DeviceInfo", {{{"hwts_frequency", "49.000000"}, {"aic_frequency", "1850"}}}},
         };
         FileWriter infoWriter(File::PathJoin({filePath, INFO_JSON}));
         infoWriter.WriteText(info.dump());
@@ -206,6 +206,7 @@ TEST_F(UnifiedDBManagerUTest, TestUnifiedDBManagerInitReturnFailedWhenSampleJson
     nlohmann::json sampleJson;
     sampleJson["msprofBinPid"] = nullptr;
     sampleJson["llc_profiling"] = "read";
+    sampleJson["ai_core_profiling_mode"] = "task-based";
     FileWriter sampleWriter(File::PathJoin({"./unifiedDBManagerUTest/PROF1", HOST, SAMPLE_JSON}));
     sampleWriter.WriteText(sampleJson.dump());
     FileWriter sampleWriterDevice(File::PathJoin({"./unifiedDBManagerUTest/PROF1", DEVICE_PREFIX + "0", SAMPLE_JSON}));
