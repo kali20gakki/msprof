@@ -37,7 +37,7 @@ protected:
     bool Process(const std::string &fileDir) override;
 private:
     SysIODataFormat GetData(const std::string &dbPath, DBInfo &sysIODB) const;
-    bool FormatData(const std::string &fileDir, const Utils::ProfTimeRecord timeRecord,
+    bool FormatData(const Utils::ProfTimeRecord timeRecord,
                     const SysIODataFormat &sysIOData, ProcessedDataFormat &processedData);
     std::string processorName_;
 };
