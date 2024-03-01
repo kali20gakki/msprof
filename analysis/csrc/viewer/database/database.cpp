@@ -276,7 +276,7 @@ namespace {
         {"throughput", SQL_REAL_TYPE},
     };
 
-    const TableColumns AICoreOriginalData = {
+    const TableColumns SampleAICoreOriginalData = {
         {"mode", SQL_INTEGER_TYPE},
         {"replayid", SQL_INTEGER_TYPE},
         {"timestamp", SQL_NUMERIC_TYPE},
@@ -416,14 +416,14 @@ LLCDB::LLCDB()
 AicoreDB::AicoreDB()
 {
     dbName_ = "aicore.db";
-    tableColNames_["AICoreOriginalData"] = AICoreOriginalData;
+    tableColNames_["AICoreOriginalData"] = SampleAICoreOriginalData;
     tableColNames_["MetricSummary"] = SampleMetricSummary;
 }
 
 AiVectorCoreDB::AiVectorCoreDB()
 {
     dbName_ = "ai_vector_core.db";
-    tableColNames_["AICoreOriginalData"] = AICoreOriginalData;
+    tableColNames_["AICoreOriginalData"] = SampleAICoreOriginalData;
     tableColNames_["MetricSummary"] = SampleMetricSummary;
 }
 

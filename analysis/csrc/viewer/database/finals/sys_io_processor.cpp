@@ -22,13 +22,13 @@ using Context = Parser::Environment::Context;
 
 namespace {
 struct SysIOData {
-    uint16_t deviceId = UINT16_MAX;
-    uint16_t funcid = UINT16_MAX;
     double timestamp = 0.0;
     double rxpacket = 0.0;
     double rxbyte = 0.0;
     double txpacket = 0.0;
     double txbyte = 0.0;
+    uint32_t deviceId = UINT32_MAX;
+    uint32_t funcid = UINT32_MAX;
     uint32_t bandwidth = UINT32_MAX;
     uint32_t rxpackets = UINT32_MAX;
     uint32_t rxbytes = UINT32_MAX;
@@ -109,8 +109,8 @@ SysIOProcessor::SysIODataFormat SysIOProcessor::GetData(const std::string &dbPat
         ERROR("Create % connection failed.", dbPath);
         return sysIOData;
     }
-    std::string sql = "SELECT device_id, timestamp, bandwidth, rxpacket, rxpackets, rxbytes, rxerrors, rxdropped "
-                      "txpacket, txbyte, txpackets, txbytes, txerrors, txdropped, funcid "
+    std::string sql = "SELECT device_id, timestamp, bandwidth, rxpacket, txbyte, rxpackets, rxbytes, rxerrors, "
+                      "rxdropped, txpacket, txbyte, txpackets, txbytes, txerrors, txdropped, funcid "
                       "FROM " + sysIODB.tableName;
     if (!sysIODB.dbRunner->QueryData(sql, sysIOData)) {
         ERROR("Query sys IO data failed, db path is %.", dbPath);
@@ -138,11 +138,12 @@ bool SysIOProcessor::FormatData(const Utils::ProfTimeRecord timeRecord,
                  tempData.txpacket, tempData.txbyte, tempData.txpackets, tempData.txbytes,
                  tempData.txerrors, tempData.txdropped, tempData.funcid) = data;
         Utils::HPFloat timestamp{tempData.timestamp};
-        processedData.emplace_back(tempData.deviceId, Utils::GetLocalTime(timestamp, timeRecord).Uint64(),
+        processedData.emplace_back(static_cast<uint16_t>(tempData.deviceId),
+                                   Utils::GetLocalTime(timestamp, timeRecord).Uint64(),
                                    tempData.bandwidth, tempData.rxpacket, tempData.rxbyte, tempData.rxpackets,
                                    tempData.rxbytes, tempData.rxerrors, tempData.rxdropped,
                                    tempData.txpacket, tempData.txbyte, tempData.txpackets, tempData.txbytes,
-                                   tempData.txerrors, tempData.txdropped, tempData.funcid);
+                                   tempData.txerrors, tempData.txdropped, static_cast<uint16_t>(tempData.funcid));
     }
     if (processedData.empty()) {
         ERROR("% data processing error.", processorName_);

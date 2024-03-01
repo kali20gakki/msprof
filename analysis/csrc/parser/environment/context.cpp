@@ -142,7 +142,7 @@ bool Context::CheckInfoValueIsValid(const std::string &profPath, uint16_t device
             return false;
         }
         if (!info.at("CPU").back().contains("Frequency")) {
-            ERROR("There are no Frequency in context info, "
+            ERROR("There is no Frequency in context info, "
                   "the ProfPath is %, DeviceId is %.", profPath, deviceId);
             return false;
         }
@@ -154,12 +154,12 @@ bool Context::CheckInfoValueIsValid(const std::string &profPath, uint16_t device
         }
         auto freqArr = info.at("DeviceInfo").back();
         if (!freqArr.contains("hwts_frequency") || freqArr.at("hwts_frequency").empty()) {
-            ERROR("There are no hwts_frequency in context info, "
+            ERROR("There is no hwts_frequency in context info, "
                   "the ProfPath is %, DeviceId is %.", profPath, deviceId);
             return false;
         }
         if (!freqArr.contains("aic_frequency") || freqArr.at("aic_frequency").empty()) {
-            ERROR("There are no aic_frequency in context info, "
+            ERROR("There is no aic_frequency in context info, "
                   "the ProfPath is %, DeviceId is %.", profPath, deviceId);
             return false;
         }

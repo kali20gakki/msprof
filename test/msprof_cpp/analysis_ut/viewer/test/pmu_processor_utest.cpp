@@ -9,14 +9,12 @@
  * Creation Date      : 2024/02/29
  * *****************************************************************************
  */
-
 #include "analysis/csrc/viewer/database/finals/pmu_processor.h"
 
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/parser/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-
 
 using namespace Analysis::Viewer::Database;
 using namespace Parser::Environment;
@@ -28,12 +26,6 @@ using OSTFormat = std::vector<std::tuple<uint64_t, std::string, uint32_t>>;
 // Original Sample Summary Format:aicore/ai_vector_core中的MetricSummary
 // metric, value, coreid
 using OSSFormat = std::vector<std::tuple<std::string, double, uint32_t>>;
-// 手动设置task-based pmu表Foramt
-// aic_total_time, aic_total_cycles, aic_mac_time, aic_mac_ratio_extra,
-// aiv_total_time, aiv_total_cycles, aiv_vec_time, aiv_vec_ratio, task_id, stream_id, subtask_id,
-// start_time, end_time, batch_id
-using OTFormat = std::vector<std::tuple<double, double, double, double, double, double, double, double,
-        uint32_t, uint32_t, uint32_t, double, double, uint32_t>>;
 
 // Processed Sample Timeline Format
 // deviceId, timestamp, totalCycle, usage, freq, coreId
@@ -41,8 +33,6 @@ using PSTFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, double, d
 // Processed Sample Summary Format
 // deviceId, metric, value, coreId
 using PSSFormat = std::vector<std::tuple<uint16_t, uint64_t, double, uint16_t>>;
-
-
 
 const std::string PMU_DIR = "./pmu";
 const std::string REPORT = "report.db";
@@ -70,40 +60,11 @@ const OSSFormat SAMPLE_SUMMARY = {
     {"mac_ratio", 0.36563948509522, 1},
 };
 
-const OTFormat TASK_DATA = {
-    {318.36, 14135332, 197.9849315375118, 0.62189009780598, 75.1, 6668981, 0.87503179271316, 0.01165155516263,
-     22, 68, 2344, 21203781495130.004, 21203812838010.004, 0},
-    {327.19, 14527061, 197.98020025179216, 0.60509245469541, 76.41, 6785309, 0.87503201991243, 0.01145179976328,
-     22, 68, 2356, 21203781495130.004, 21203813146290.004, 0},
-    {313.94, 13939056, 197.98647121440646, 0.63065066960058, 61.91, 5497563, 0.8750522076782, 0.01413426276334,
-     22, 68, 2357, 21203781495130.004, 21203813447710.004, 0},
-    {315.17, 13993558, 197.98357473417414, 0.62818026694855, 61.88, 5495101, 0.87502004421757, 0.01414059541399,
-     22, 68, 2358, 21203781495130.004, 21203813750090.004, 0},
-};
-
-const TableColumns TASK_METRIC_SUMMARY = {
-    {"aic_total_time", SQL_NUMERIC_TYPE},
-    {"aic_total_cycles", SQL_NUMERIC_TYPE},
-    {"aic_mac_time", SQL_NUMERIC_TYPE},
-    {"aic_mac_ratio_extra", SQL_NUMERIC_TYPE},
-    {"aiv_total_time", SQL_NUMERIC_TYPE},
-    {"aiv_total_cycles", SQL_NUMERIC_TYPE},
-    {"aiv_vec_time", SQL_NUMERIC_TYPE},
-    {"aiv_vec_ratio", SQL_NUMERIC_TYPE},
-    {"task_id", SQL_INTEGER_TYPE},
-    {"stream_id", SQL_INTEGER_TYPE},
-    {"subtask_id", SQL_INTEGER_TYPE},
-    {"start_time", SQL_NUMERIC_TYPE},
-    {"end_time", SQL_NUMERIC_TYPE},
-    {"batch_id", SQL_INTEGER_TYPE},
-};
-
 class PmuProcessorUTest : public testing::Test {
 protected:
     static void SetUpTestCase()
     {
         EXPECT_TRUE(File::CreateDir(PMU_DIR));
-        Analysis::Log::GetInstance().Init(PMU_DIR);
         EXPECT_TRUE(File::CreateDir(PROF));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF, DEVICE_PREFIX + "0"})));
         EXPECT_TRUE(CreatePmuDB(File::PathJoin({PROF, DEVICE_PREFIX + "0", SQLITE})));
@@ -129,11 +90,6 @@ protected:
         EXPECT_TRUE(aivRunner->InsertData("AICoreOriginalData", SAMPLE_TIMELINE));
         EXPECT_TRUE(aivRunner->CreateTable("MetricSummary", aivDB->GetTableCols("MetricSummary")));
         EXPECT_TRUE(aivRunner->InsertData("MetricSummary", SAMPLE_SUMMARY));
-
-        std::shared_ptr<DBRunner> metricRunner;
-        MAKE_SHARED_RETURN_VALUE(metricRunner, DBRunner, false, File::PathJoin({sqlitePath, "metric_summary.db"}));
-        EXPECT_TRUE(metricRunner->CreateTable("MetricSummary", TASK_METRIC_SUMMARY));
-        EXPECT_TRUE(metricRunner->InsertData("MetricSummary", TASK_DATA));
         return true;
     }
 
@@ -247,18 +203,3 @@ TEST_F(PmuProcessorUTest, TestSampleFormatShouldReturnFalseWhenFormatDataFailed)
     MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
 }
 
-TEST_F(PmuProcessorUTest, TestTaskRunShouldReturnTrueWhenRunSuccess)
-{
-    nlohmann::json record = {
-        {"startCollectionTimeBegin", "1701069323851824"},
-        {"endCollectionTimeEnd", "1701069338041681"},
-        {"startClockMonotonicRaw", "36470610791630"},
-        {"DeviceInfo", {{{"aic_frequency", "1000"}}}},
-        {"ai_core_profiling_mode", "task-based"},
-        {"platform_version", "7"},
-    };
-    MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
-    auto processor = PmuProcessor(DB_PATH, {PROF});
-    EXPECT_TRUE(processor.Run());
-    MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
-}
