@@ -12,17 +12,8 @@
 #ifndef ANALYSIS_VIEWER_DATABASE_PMU_PROCESSOR_H
 #define ANALYSIS_VIEWER_DATABASE_PMU_PROCESSOR_H
 
-#include <iostream>
-#include <sqlite3.h>
-#include <vector>
-#include <string>
-#include <memory>
-#include <stdexcept>
-#include <type_traits>
-
 #include "analysis/csrc/utils/time_utils.h"
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 namespace Analysis {
 namespace Viewer {
@@ -57,13 +48,6 @@ public:
 protected:
     bool Process(const std::string &fileDir) override;
 private:
-    template<typename... Args>
-    bool TaskBasedProcess(const std::string &fileDir);
-    TableColumns GetAndCheckTableColumns(std::unordered_map<std::string, uint16_t> dbPathTable);
-    template<typename... Args>
-    std::vector<std::tuple<Args...>> GetTaskBasedData(const std::string &dbPath);
-    bool CreateMetricSummaryTable(const TableColumns &tableColumns);
-
     bool SampleBasedProcess(const std::string &fileDir);
     bool SampleBasedTimelineProcess(const std::unordered_map<std::string, uint16_t> &dbPathTable,
                                     const std::string &fileDir);
@@ -75,22 +59,6 @@ private:
     OSSFormat GetSampleBasedSummaryData(const std::string &dbPath);
     bool FormatSampleBasedSummaryData(const OSSFormat &oriData, PSSFormat &processedData, const uint16_t deviceId);
 };
-
-template<typename... Args>
-std::vector<std::tuple<Args...>> PmuProcessor::GetTaskBasedData(const std::string &dbPath)
-{
-    INFO("Start GetTaskBasedData.");
-    std::vector<std::tuple<Args...>> result;
-    std::shared_ptr<DBRunner> dbRunner;
-    MAKE_SHARED_RETURN_VALUE(dbRunner, DBRunner, result, dbPath);
-    if (dbRunner == nullptr) {
-        ERROR("Create % connection failed.", dbPath);
-        return result;
-    }
-    std::string sql = "SELECT * FROM MetricSummary;";
-    result = dbRunner->QueryData(sql);
-    return result;
-}
 
 
 } // Database

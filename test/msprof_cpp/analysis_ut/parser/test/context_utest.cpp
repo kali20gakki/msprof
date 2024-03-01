@@ -663,11 +663,11 @@ TEST_F(ContextUTest, TestGetPmuFreqShouldReturnFalseWhenFreqToDoubleFailed)
     EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", INFO_JSON})));
     // info.json
     nlohmann::json info = {
-            {"drvVersion", 467732},
-            {"platform_version", "7"},
-            {"pid", "2376271"},
-            {"CPU", {{{"Frequency", "abc"}}}},
-            {"DeviceInfo", {{{"hwts_frequency", "abc"}, {"aic_frequency", "abc"}}}},
+        {"drvVersion", 467732},
+        {"platform_version", "7"},
+        {"pid", "2376271"},
+        {"CPU", {{{"Frequency", "abc"}}}},
+        {"DeviceInfo", {{{"hwts_frequency", "abc"}, {"aic_frequency", "abc"}}}},
     };
     FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", INFO_JSON}));
     infoWriter.WriteText(info.dump());

@@ -9,9 +9,6 @@
  * Creation Date      : 2024/2/26
  * *****************************************************************************
  */
-#include <tuple>
-#include <utility>
-#include <array>
 #include "analysis/csrc/viewer/database/finals/pmu_processor.h"
 
 #include "analysis/csrc/dfx/error_code.h"
@@ -29,6 +26,7 @@ using namespace Analysis::Utils;
 namespace {
 const std::set<std::string> SampleBasedDBNames = {"ai_vector_core_", "aicore_"};
 const std::string TaskBased = "task-based";
+const double INVALID_FREQ = 0.0;
 
 struct SampleTimelineData {
     double timestamp = 0.0;
@@ -68,85 +66,9 @@ bool PmuProcessor::Process(const std::string &fileDir)
             WARN("This platformVersion does not support the processing of pmu data.");
             return true;
         }
-        return TaskBasedProcess(fileDir);
+        return true;
     }
     return SampleBasedProcess(fileDir);
-}
-
-//bool PmuProcessor::TaskBasedProcess(const std::string &fileDir)
-//{
-//    INFO("TaskBasedProcess, dir is %", fileDir);
-//    auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
-//    std::unordered_map<std::string, uint16_t> dbPathTable;
-//    for (const auto& devicePath : deviceList) {
-//        auto deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
-//        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, "metric_summary.db"});
-//        auto status = CheckPath(dbPath);
-//        if (status == CHECK_SUCCESS) {
-//            dbPathTable.insert({dbPath, deviceId});
-//        } else if (status == CHECK_FAILED) {
-//            return false;
-//        }
-//    }
-//    auto tableColumns = GetAndCheckTableColumns(dbPathTable);
-//    if (tableColumns.empty()) {
-//        ERROR("GetAndCheckTableColumns failed, please check tableColums are consistent.");
-//        return false;
-//    }
-//    if (!CreateMetricSummaryTable(tableColumns)) {
-//        ERROR("TaskBased create info table failed.");
-//        return false;
-//    }
-//    bool flag = true;
-//    for (const auto& pair : dbPathTable) {
-//        auto processedData = GetTaskBasedData(pair.first);
-//        std::cout << "vector的大小为：" << processedData.size() << std::endl;
-//        for (int i = 0; i < processedData.size(); ++i) {
-//            constexpr std::size_t tupleSize = std::tuple_size<decltype(processedData[i])>::value;
-//            std::cout << "元组的大小为：" << tupleSize << std::endl;
-//        }
-//
-//        if (!SaveData(processedData, TABLE_NAME_TASK_PMU_INFO)) {
-//            ERROR("TaskBased: saveData failed, dbPath is %.", pair.first);
-//            flag = false;
-//        }
-//    }
-//    return flag;
-//}
-
-TableColumns PmuProcessor::GetAndCheckTableColumns(std::unordered_map<std::string, uint16_t> dbPathTable)
-{
-    INFO("GetAndCheckTableColumns.");
-    TableColumns tableColumns;
-    for (const auto& pair : dbPathTable) {
-        std::shared_ptr<DBRunner> dbRunner;
-        MAKE_SHARED_RETURN_VALUE(dbRunner, DBRunner, tableColumns, pair.first);
-        if (dbRunner == nullptr) {
-            ERROR("Create % connection failed.", pair.first);
-        }
-        if (tableColumns.empty()) {
-            tableColumns = dbRunner->GetTableColumns("MetricSummary");
-        } else if (tableColumns != dbRunner->GetTableColumns("MetricSummary")) {
-            ERROR("%'s tableColumns are different from others.", pair.first);
-            // 若发现表字段各db中不同,则返回空表头
-            tableColumns.clear();
-            return tableColumns;
-        }
-    }
-    return tableColumns;
-}
-
-bool PmuProcessor::CreateMetricSummaryTable(const TableColumns &tableColumns)
-{
-    if (reportDB_.dbRunner == nullptr) {
-        ERROR("Report db runner is nullptr.");
-        return false;
-    }
-    if (!reportDB_.dbRunner->CreateTable(TABLE_NAME_TASK_PMU_INFO, tableColumns)) {
-        ERROR("Create table: % failed", "MetricSummary");
-        return false;
-    }
-    return true;
 }
 
 bool PmuProcessor::SampleBasedProcess(const std::string &fileDir)
@@ -190,8 +112,9 @@ bool PmuProcessor::SampleBasedTimelineProcess(const std::unordered_map<std::stri
     }
     for (const auto& pair : dbPathTable) {
         threadData.deviceId = pair.second;
-        if (!Context::GetInstance().GetPmuFreq(threadData.freq, threadData.deviceId, fileDir)) {
-            ERROR("GetPmuFreq failed, profPath is %.", fileDir);
+        if (!Context::GetInstance().GetPmuFreq(threadData.freq, threadData.deviceId, fileDir) ||
+                IsDoubleEqual(threadData.freq, INVALID_FREQ)) {
+            ERROR("GetPmuFreq failed or aic freq is invalid, profPath is %.", fileDir);
             return false;
         }
         auto oriData = GetSampleBasedTimelineData(pair.first);
@@ -251,6 +174,11 @@ bool PmuProcessor::FormatSampleBasedTimelineData(const OSTFormat &oriData, PSTFo
         auto corePreRecord = coreIdTimeMap.find(tempData.coreid);
         double interval = (corePreRecord == coreIdTimeMap.end()) ? 1.0 : (tempData.timestamp - corePreRecord->second);
         coreIdTimeMap[tempData.coreid] = tempData.timestamp;
+        if (IsDoubleEqual(threadData.freq, INVALID_FREQ)) {
+            WARN("The interval is invalid, the record timestamp is %, "
+                 "core id is %.", tempData.timestamp, tempData.coreid);
+            continue;
+        }
         // task_cyc 单位为 次; freq单位为 MHz,即次/秒; interval单位为 ns
         // 由公式 (task_cyc / (freq * 10^6) / (interval / 10^9)) * 100% 化简而来
         double usage = (cycle * MILLI_SECOND) / (threadData.freq * interval) * PERCENTAGE;
@@ -328,7 +256,6 @@ bool PmuProcessor::FormatSampleBasedSummaryData(const OSSFormat &oriData, PSSFor
     }
     return true;
 }
-
 
 } // Database
 } // Viewer

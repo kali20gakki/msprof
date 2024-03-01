@@ -205,11 +205,6 @@ namespace {
         {"coreId", SQL_TEXT_TYPE}
     };
 
-    const TableColumns TASK_METRIC_SUMMARY = {
-        {"taskId", SQL_INTEGER_TYPE},
-        {"streamId", SQL_INTEGER_TYPE},
-    };
-
     const TableColumns ENUM_API_LEVEL = {
         {"id", SQL_INTEGER_TYPE, true},
         {"name", SQL_TEXT_TYPE}
@@ -246,7 +241,6 @@ ReportDB::ReportDB()
         {TABLE_NAME_HBM, HBM},
         {TABLE_NAME_DDR, DDR},
         {TABLE_NAME_LLC, LLC},
-        {TABLE_NAME_TASK_PMU_INFO, TASK_METRIC_SUMMARY},
         {TABLE_NAME_SAMPLE_PMU_TIMELINE, SAMPLE_PMU_TIMELINE},
         {TABLE_NAME_SAMPLE_PMU_SUMMARY, SAMPLE_PMU_SUMMARY},
         // ENUM
