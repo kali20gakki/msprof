@@ -189,6 +189,22 @@ namespace {
         {"mode", SQL_INTEGER_TYPE},
     };
 
+    const TableColumns SAMPLE_PMU_TIMELINE = {
+        {"deviceId", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_INTEGER_TYPE},
+        {"totalCycle", SQL_INTEGER_TYPE},
+        {"usage", SQL_NUMERIC_TYPE},
+        {"freq", SQL_NUMERIC_TYPE},
+        {"coreId", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns SAMPLE_PMU_SUMMARY = {
+        {"deviceId", SQL_INTEGER_TYPE},
+        {"metric", SQL_INTEGER_TYPE},
+        {"value", SQL_TEXT_TYPE},
+        {"coreId", SQL_TEXT_TYPE}
+    };
+
     const TableColumns ENUM_API_LEVEL = {
         {"id", SQL_INTEGER_TYPE, true},
         {"name", SQL_TEXT_TYPE}
@@ -225,6 +241,8 @@ ReportDB::ReportDB()
         {TABLE_NAME_HBM, HBM},
         {TABLE_NAME_DDR, DDR},
         {TABLE_NAME_LLC, LLC},
+        {TABLE_NAME_SAMPLE_PMU_TIMELINE, SAMPLE_PMU_TIMELINE},
+        {TABLE_NAME_SAMPLE_PMU_SUMMARY, SAMPLE_PMU_SUMMARY},
         // ENUM
         {TABLE_NAME_ENUM_API_LEVEL, ENUM_API_LEVEL},
         {TABLE_NAME_ENUM_MEMORY, ENUM_MEMORY},

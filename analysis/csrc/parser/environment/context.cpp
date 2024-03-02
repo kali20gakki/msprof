@@ -41,7 +41,7 @@ const std::string DEVICE_START_LOG = "dev_start.log";
 const std::set<std::string> CHECK_VALUES = {
     "platform_version", "startCollectionTimeBegin", "endCollectionTimeEnd",
     "startClockMonotonicRaw", "pid", "cntvct", "CPU", "DeviceInfo", "clock_monotonic_raw",
-    "llc_profiling"
+    "llc_profiling", "ai_core_profiling_mode"
 };
 }
 
@@ -142,7 +142,7 @@ bool Context::CheckInfoValueIsValid(const std::string &profPath, uint16_t device
             return false;
         }
         if (!info.at("CPU").back().contains("Frequency")) {
-            ERROR("There are no Frequency in context info, "
+            ERROR("There is no Frequency in context info, "
                   "the ProfPath is %, DeviceId is %.", profPath, deviceId);
             return false;
         }
@@ -154,7 +154,12 @@ bool Context::CheckInfoValueIsValid(const std::string &profPath, uint16_t device
         }
         auto freqArr = info.at("DeviceInfo").back();
         if (!freqArr.contains("hwts_frequency") || freqArr.at("hwts_frequency").empty()) {
-            ERROR("There are no hwts_frequency in context info, "
+            ERROR("There is no hwts_frequency in context info, "
+                  "the ProfPath is %, DeviceId is %.", profPath, deviceId);
+            return false;
+        }
+        if (!freqArr.contains("aic_frequency") || freqArr.at("aic_frequency").empty()) {
+            ERROR("There is no aic_frequency in context info, "
                   "the ProfPath is %, DeviceId is %.", profPath, deviceId);
             return false;
         }
@@ -340,6 +345,36 @@ bool Context::GetSyscntConversionParams(Utils::SyscntConversionParams &params,
         ERROR("HostMonotonic to uint64_t failed.");
         return false;
     }
+    return true;
+}
+
+bool Context::GetPmuFreq(double &freq, uint16_t deviceId, const std::string &profPath)
+{
+    if (deviceId == HOST_ID) {
+        ERROR("Host do not have aic or aiv frequency!");
+        return false;
+    }
+    auto info = GetInfoByDeviceId(deviceId, profPath);
+    // 根据deviceId取对应的文件中的数据
+    if (info.empty()) {
+        return false;
+    }
+    // freq 来自info.json
+    if (StrToDouble(freq, info.at("DeviceInfo").back().at("aic_frequency")) != ANALYSIS_OK) {
+        ERROR("DeviceFreq to double failed.");
+        return false;
+    }
+    return true;
+}
+
+bool Context::GetMetricMode(std::string &metricMode, const std::string &profPath)
+{
+    auto info = GetInfoByDeviceId(DEFAULT_DEVICE_ID, profPath);
+    // 根据deviceId取对应的文件中的数据
+    if (info.empty()) {
+        return false;
+    }
+    metricMode = info.at("ai_core_profiling_mode");
     return true;
 }
 

@@ -275,6 +275,28 @@ namespace {
         {"hitrate", SQL_REAL_TYPE},
         {"throughput", SQL_REAL_TYPE},
     };
+
+    const TableColumns SampleAICoreOriginalData = {
+        {"mode", SQL_INTEGER_TYPE},
+        {"replayid", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"coreid", SQL_INTEGER_TYPE},
+        {"task_cyc", SQL_TEXT_TYPE},
+        {"event1", SQL_TEXT_TYPE},
+        {"event2", SQL_TEXT_TYPE},
+        {"event3", SQL_TEXT_TYPE},
+        {"event4", SQL_TEXT_TYPE},
+        {"event5", SQL_TEXT_TYPE},
+        {"event6", SQL_TEXT_TYPE},
+        {"event7", SQL_TEXT_TYPE},
+        {"event8", SQL_TEXT_TYPE},
+    };
+
+    const TableColumns SampleMetricSummary = {
+        {"metric", SQL_TEXT_TYPE},
+        {"value", SQL_NUMERIC_TYPE},
+        {"coreid", SQL_INTEGER_TYPE},
+    };
 }
 
 std::string Database::GetDBName() const
@@ -389,6 +411,20 @@ LLCDB::LLCDB()
 {
     dbName_ = "llc.db";
     tableColNames_["LLCMetrics"] = LLCOriginData;
+}
+
+AicoreDB::AicoreDB()
+{
+    dbName_ = "aicore.db";
+    tableColNames_["AICoreOriginalData"] = SampleAICoreOriginalData;
+    tableColNames_["MetricSummary"] = SampleMetricSummary;
+}
+
+AiVectorCoreDB::AiVectorCoreDB()
+{
+    dbName_ = "ai_vector_core.db";
+    tableColNames_["AICoreOriginalData"] = SampleAICoreOriginalData;
+    tableColNames_["MetricSummary"] = SampleMetricSummary;
 }
 
 } // namespace Database
