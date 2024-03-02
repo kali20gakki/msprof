@@ -134,6 +134,16 @@ public:
     AiVectorCoreDB();
 };
 
+class PCIeDB : public Database {
+public:
+    PCIeDB();
+};
+
+class HCCSDB : public Database {
+public:
+    HCCSDB();
+};
+
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis
