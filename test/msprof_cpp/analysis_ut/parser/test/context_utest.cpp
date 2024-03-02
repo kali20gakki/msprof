@@ -60,14 +60,14 @@ protected:
             {"platform_version", "7"},
             {"pid", "2376271"},
             {"CPU", {{{"Frequency", "100.000000"}}}},
-            {"DeviceInfo", {{{"hwts_frequency", "49.000000"}}}},
+            {"DeviceInfo", {{{"hwts_frequency", "49.000000"}, {"aic_frequency", "1850"}}}},
         };
         FileWriter infoWriter(File::PathJoin({filePath, INFO_JSON}));
         infoWriter.WriteText(info.dump());
 
         // sample.json
         nlohmann::json sample = {
-            {"storageLimit", ""},
+            {"ai_core_profiling_mode", "task-based"},
             {"llc_profiling", "read"},
         };
         FileWriter sampleWriter(File::PathJoin({filePath, SAMPLE_JSON}));
@@ -137,12 +137,12 @@ TEST_F(ContextUTest, TestLoadShouldReturnTrueWhenReadJsonSuccess)
 
 TEST_F(ContextUTest, TestLoadShouldFalseWhenNoValue)
 {
-EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON})));
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON})));
     nlohmann::json info = {
         {"drvVersion", 467732},
         {"pid", "2376271"},
         {"CPU", {{{"Frequency", "100.000000"}}}},
-        {"DeviceInfo", {{{"hwts_frequency", "49.000000"}}}},
+        {"DeviceInfo", {{{"hwts_frequency", "49.000000"}, {"aic_frequency", "1850"}}}},
     };
     FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON}));
     infoWriter.WriteText(info.dump());
@@ -157,7 +157,7 @@ TEST_F(ContextUTest, TestLoadShouldFalseWhenNoCPUFrequency)
         {"platform_version", "7"},
         {"pid", "2376271"},
         {"CPU", {{{"abc", "100.000000"}}}},
-        {"DeviceInfo", {{{"hwts_frequency", "49.000000"}}}},
+        {"DeviceInfo", {{{"hwts_frequency", "49.000000"}, {"aic_frequency", "1850"}}}},
     };
     FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON}));
     infoWriter.WriteText(info.dump());
@@ -173,6 +173,21 @@ TEST_F(ContextUTest, TestLoadShouldFalseWhenNoDeviceHWTSFrequency)
         {"pid", "2376271"},
         {"CPU", {{{"Frequency", "100.000000"}}}},
         {"DeviceInfo", {{{"abc", "49.000000"}}}},
+    };
+    FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", INFO_JSON}));
+    infoWriter.WriteText(info.dump());
+    EXPECT_FALSE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+}
+
+TEST_F(ContextUTest, TestLoadShouldFalseWhenNoDeviceAicFrequency)
+{
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", INFO_JSON})));
+    nlohmann::json info = {
+        {"drvVersion", 467732},
+        {"platform_version", "7"},
+        {"pid", "2376271"},
+        {"CPU", {{{"Frequency", "100.000000"}}}},
+        {"DeviceInfo", {{{"hwts_frequency", "49.000000"}}}},
     };
     FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", INFO_JSON}));
     infoWriter.WriteText(info.dump());
@@ -243,7 +258,7 @@ TEST_F(ContextUTest, TestIsAllExportShouldReturnFalseWhenDrvVersionLessThanAllEx
         {"platform_version", "7"},
         {"pid", "2376271"},
         {"CPU", {{{"Frequency", "100.000000"}}}},
-        {"DeviceInfo", {{{"hwts_frequency", "49.000000"}}}},
+        {"DeviceInfo", {{{"hwts_frequency", "49.000000"}, {"aic_frequency", "1850"}}}},
     };
     FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON}));
     infoWriter.WriteText(info.dump());
@@ -262,7 +277,7 @@ TEST_F(ContextUTest, TestIsAllExportShouldReturnFalseWhenStrToU16Failed)
         {"platform_version", "2dd"},
         {"pid", "2376271"},
         {"CPU", {{{"Frequency", "100.000000"}}}},
-        {"DeviceInfo", {{{"hwts_frequency", "49.000000"}}}},
+        {"DeviceInfo", {{{"hwts_frequency", "49.000000"}, {"aic_frequency", "1850"}}}},
     };
     FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON}));
     infoWriter.WriteText(info.dump());
@@ -281,7 +296,7 @@ TEST_F(ContextUTest, TestIsAllExportShouldReturnFalseWhenChipV310)
         {"platform_version", "2"},
         {"pid", "2376271"},
         {"CPU", {{{"Frequency", "100.000000"}}}},
-        {"DeviceInfo", {{{"hwts_frequency", "49.000000"}}}},
+        {"DeviceInfo", {{{"hwts_frequency", "49.000000"}, {"aic_frequency", "1850"}}}},
     };
     FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON}));
     infoWriter.WriteText(info.dump());
@@ -305,7 +320,7 @@ TEST_F(ContextUTest, TestGetPlatformVersionShouldReturnUINT16MAXWhenPlatformVers
         {"platform_version", "abc"},
         {"pid", "2376271"},
         {"CPU", {{{"Frequency", "100.000000"}}}},
-        {"DeviceInfo", {{{"hwts_frequency", "49.000000"}}}},
+        {"DeviceInfo", {{{"hwts_frequency", "49.000000"}, {"aic_frequency", "1850"}}}},
     };
     FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON}));
     infoWriter.WriteText(info.dump());
@@ -329,7 +344,7 @@ TEST_F(ContextUTest, TestGetPidFromInfoJsonShouldReturn0WhenPidStrToU16Failed)
         {"platform_version", "7"},
         {"pid", "abc"},
         {"CPU", {{{"Frequency", "100.000000"}}}},
-        {"DeviceInfo", {{{"hwts_frequency", "49.000000"}}}},
+        {"DeviceInfo", {{{"hwts_frequency", "49.000000"}, {"aic_frequency", "1850"}}}},
     };
     FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON}));
     infoWriter.WriteText(info.dump());
@@ -430,7 +445,7 @@ TEST_F(ContextUTest, TestGetSyscntConversionParamsShouldReturnFreq1000WhenFreqIs
         {"platform_version", "7"},
         {"pid", "2376271"},
         {"CPU", {{{"Frequency", ""}}}},
-        {"DeviceInfo", {{{"hwts_frequency", "50.0"}}}},
+        {"DeviceInfo", {{{"hwts_frequency", "50.0"}, {"aic_frequency", "1850"}}}},
     };
     FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON}));
     infoWriter.WriteText(info.dump());
@@ -455,7 +470,7 @@ TEST_F(ContextUTest, TestGetSyscntConversionParamsShouldReturnFreq1000WhenFreqIs
         {"platform_version", "7"},
         {"pid", "2376271"},
         {"CPU", {{{"Frequency", "0"}}}},
-        {"DeviceInfo", {{{"hwts_frequency", "50.0"}}}},
+        {"DeviceInfo", {{{"hwts_frequency", "50.0"}, {"aic_frequency", "1850"}}}},
     };
     FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON}));
     infoWriter.WriteText(info.dump());
@@ -482,7 +497,7 @@ TEST_F(ContextUTest, TestGetSyscntConversionParamsShouldReturnDefaultValueWhenHo
         {"platform_version", "7"},
         {"pid", "2376271"},
         {"CPU", {{{"Frequency", "abc"}}}},
-        {"DeviceInfo", {{{"hwts_frequency", "abc"}}}},
+        {"DeviceInfo", {{{"hwts_frequency", "abc"}, {"aic_frequency", "1850"}}}},
     };
     FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON}));
     infoWriter.WriteText(info.dump());
@@ -513,7 +528,7 @@ TEST_F(ContextUTest, TestGetSyscntConversionParamsShouldReturnDefaultValueWhenDe
         {"platform_version", "7"},
         {"pid", "2376271"},
         {"CPU", {{{"Frequency", "abc"}}}},
-        {"DeviceInfo", {{{"hwts_frequency", "abc"}}}},
+        {"DeviceInfo", {{{"hwts_frequency", "abc"}, {"aic_frequency", "1850"}}}},
     };
     FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", INFO_JSON}));
     infoWriter.WriteText(info.dump());
@@ -592,6 +607,7 @@ TEST_F(ContextUTest, TestGetMsprofBinPidFromInfoJsonShouldReturnMSVP_MMPROCESSWh
     nlohmann::json sampleJson;
     sampleJson["msprofBinPid"] = nullptr;
     sampleJson["llc_profiling"] = "read";
+    sampleJson["ai_core_profiling_mode"] = "task-based";
     FileWriter sampleWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, SAMPLE_JSON}));
     sampleWriter.WriteText(sampleJson.dump());
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
@@ -608,6 +624,7 @@ TEST_F(ContextUTest, TestGetMsprofBinPidFromInfoJsonShouldReturnSucessWhenGetSam
     nlohmann::json sample = {
         {"msprofBinPid", msprofBinPid},
         {"llc_profiling", "read"},
+        {"ai_core_profiling_mode", "task-based"},
     };
     FileWriter sampleWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, SAMPLE_JSON}));
     sampleWriter.WriteText(sample.dump());
@@ -616,4 +633,61 @@ TEST_F(ContextUTest, TestGetMsprofBinPidFromInfoJsonShouldReturnSucessWhenGetSam
 
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
     EXPECT_EQ(Context::GetInstance().GetMsBinPid(File::PathJoin({CONTEXT_DIR, TEST_DIR})), msprofBinPid);
+}
+
+TEST_F(ContextUTest, TestGetPmuFreqShouldReturnFalseWhenGetHostAicFreq)
+{
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
+    double freq = 0.0;
+    EXPECT_FALSE(Context::GetInstance().GetPmuFreq(freq, HOST_ID, File::PathJoin({CONTEXT_DIR, LOCAL_DIR})));
+}
+
+TEST_F(ContextUTest, TestGetPmuFreqShouldReturnFalseWhenInfoIsEmpty)
+{
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
+    double freq = 0.0;
+    EXPECT_FALSE(Context::GetInstance().GetPmuFreq(freq, 0, File::PathJoin({CONTEXT_DIR, "test"})));
+}
+
+TEST_F(ContextUTest, TestGetPmuFreqShouldReturnTrueWhenGetFreqSuccess)
+{
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
+    double freq = 0.0;
+    double expectFreq = 1850.0;
+    EXPECT_TRUE(Context::GetInstance().GetPmuFreq(freq, 0, File::PathJoin({CONTEXT_DIR, LOCAL_DIR})));
+    EXPECT_DOUBLE_EQ(freq, expectFreq);
+}
+
+TEST_F(ContextUTest, TestGetPmuFreqShouldReturnFalseWhenFreqToDoubleFailed)
+{
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", INFO_JSON})));
+    // info.json
+    nlohmann::json info = {
+        {"drvVersion", 467732},
+        {"platform_version", "7"},
+        {"pid", "2376271"},
+        {"CPU", {{{"Frequency", "abc"}}}},
+        {"DeviceInfo", {{{"hwts_frequency", "abc"}, {"aic_frequency", "abc"}}}},
+    };
+    FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", INFO_JSON}));
+    infoWriter.WriteText(info.dump());
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    double freq = 0.0;
+    EXPECT_FALSE(Context::GetInstance().GetPmuFreq(freq, 0, File::PathJoin({CONTEXT_DIR, TEST_DIR})));
+}
+
+TEST_F(ContextUTest, TestGetMetricModeShouldReturnFalseWhenInfoIsEmpty)
+{
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
+    std::string mode;
+    EXPECT_FALSE(Context::GetInstance().GetMetricMode(mode, File::PathJoin({CONTEXT_DIR, "test"})));
+}
+
+TEST_F(ContextUTest, TestGetMetricModeShouldReturnTrueWhenGetSuccess)
+{
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
+    std::string mode;
+    std::string expectMode = "task-based";
+    EXPECT_TRUE(Context::GetInstance().GetMetricMode(mode, File::PathJoin({CONTEXT_DIR, LOCAL_DIR})));
+    EXPECT_EQ(mode, expectMode);
 }

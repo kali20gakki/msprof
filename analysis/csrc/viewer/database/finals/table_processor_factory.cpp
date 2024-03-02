@@ -19,10 +19,12 @@
 #include "analysis/csrc/viewer/database/finals/ddr_processor.h"
 #include "analysis/csrc/viewer/database/finals/enum_processor.h"
 #include "analysis/csrc/viewer/database/finals/hbm_processor.h"
+#include "analysis/csrc/viewer/database/finals/llc_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_mem_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_module_mem_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_op_mem_processor.h"
+#include "analysis/csrc/viewer/database/finals/pmu_processor.h"
 #include "analysis/csrc/viewer/database/finals/session_time_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/string_ids_processor.h"
 #include "analysis/csrc/viewer/database/finals/sys_io_processor.h"
@@ -40,48 +42,38 @@ std::shared_ptr<TableProcessor> TableProcessorFactory::CreateTableProcessor(
     std::shared_ptr<TableProcessor> processor = nullptr;
     if (processorName == PROCESSOR_NAME_STRING_IDS) {
         MAKE_SHARED_RETURN_VALUE(processor, StringIdsProcessor, nullptr, reportDBPath);
-    }
-    if (processorName == PROCESSOR_NAME_SESSION_TIME_INFO) {
+    } else if (processorName == PROCESSOR_NAME_SESSION_TIME_INFO) {
         MAKE_SHARED_RETURN_VALUE(processor, NpuInfoProcessor, nullptr, reportDBPath, profPaths);
-    }
-    if (processorName == PROCESSOR_NAME_NPU_INFO) {
+    } else if (processorName == PROCESSOR_NAME_NPU_INFO) {
         MAKE_SHARED_RETURN_VALUE(processor, SessionTimeInfoProcessor, nullptr, reportDBPath, profPaths);
-    }
-    if (processorName == PROCESSOR_NAME_ENUM) {
+    } else if (processorName == PROCESSOR_NAME_ENUM) {
         MAKE_SHARED_RETURN_VALUE(processor, EnumProcessor, nullptr, reportDBPath, profPaths);
-    }
-    if (processorName == PROCESSOR_NAME_TASK) {
+    } else if (processorName == PROCESSOR_NAME_TASK) {
         MAKE_SHARED_RETURN_VALUE(processor, TaskProcessor, nullptr, reportDBPath, profPaths);
-    }
-    if (processorName == PROCESSOR_NAME_COMPUTE_TASK_INFO) {
+    } else if (processorName == PROCESSOR_NAME_COMPUTE_TASK_INFO) {
         MAKE_SHARED_RETURN_VALUE(processor, ComputeTaskInfoProcessor, nullptr, reportDBPath, profPaths);
-    }
-    if (processorName == PROCESSOR_NAME_COMMUNICATION) {
+    } else if (processorName == PROCESSOR_NAME_COMMUNICATION) {
         MAKE_SHARED_RETURN_VALUE(processor, CommunicationInfoProcessor, nullptr, reportDBPath, profPaths);
-    }
-    if (processorName == PROCESSOR_NAME_API) {
+    } else if (processorName == PROCESSOR_NAME_API) {
         MAKE_SHARED_RETURN_VALUE(processor, ApiProcessor, nullptr, reportDBPath, profPaths);
-    }
-    if (processorName == PROCESSOR_NAME_NPU_MEM) {
+    } else if (processorName == PROCESSOR_NAME_NPU_MEM) {
         MAKE_SHARED_RETURN_VALUE(processor, NpuMemProcessor, nullptr, reportDBPath, profPaths);
-    }
-    if (processorName == PROCESSOR_NAME_NPU_MODULE_MEM) {
+    } else if (processorName == PROCESSOR_NAME_NPU_MODULE_MEM) {
         MAKE_SHARED_RETURN_VALUE(processor, NpuModuleMemProcessor, nullptr, reportDBPath, profPaths);
-    }
-    if (processorName == PROCESSOR_NAME_NPU_OP_MEM) {
+    } else if (processorName == PROCESSOR_NAME_NPU_OP_MEM) {
         MAKE_SHARED_RETURN_VALUE(processor, NpuOpMemProcessor, nullptr, reportDBPath, profPaths);
-    }
-    if (processorName == PROCESSOR_NAME_NIC) {
+    } else if (processorName == PROCESSOR_NAME_NIC) {
         MAKE_SHARED_RETURN_VALUE(processor, NicProcessor, nullptr, reportDBPath, profPaths);
-    }
-    if (processorName == PROCESSOR_NAME_ROCE) {
+    } else if (processorName == PROCESSOR_NAME_ROCE) {
         MAKE_SHARED_RETURN_VALUE(processor, RoCEProcessor, nullptr, reportDBPath, profPaths);
-    }
-    if (processorName == PROCESSOR_NAME_HBM) {
+    } else if (processorName == PROCESSOR_NAME_HBM) {
         MAKE_SHARED_RETURN_VALUE(processor, HBMProcessor, nullptr, reportDBPath, profPaths);
-    }
-    if (processorName == PROCESSOR_NAME_DDR) {
+    } else if (processorName == PROCESSOR_NAME_DDR) {
         MAKE_SHARED_RETURN_VALUE(processor, DDRProcessor, nullptr, reportDBPath, profPaths);
+    } else if (processorName == PROCESSOR_NAME_PMU) {
+        MAKE_SHARED_RETURN_VALUE(processor, PmuProcessor, nullptr, reportDBPath, profPaths);
+    } else if (processorName == PROCESSOR_NAME_LLC) {
+        MAKE_SHARED_RETURN_VALUE(processor, LLCProcessor, nullptr, reportDBPath, profPaths);
     }
     return processor;
 }

@@ -46,6 +46,8 @@ namespace {
         PROCESSOR_NAME_ROCE,
         PROCESSOR_NAME_HBM,
         PROCESSOR_NAME_DDR,
+        PROCESSOR_NAME_PMU,
+        PROCESSOR_NAME_LLC,
     };
 }
 

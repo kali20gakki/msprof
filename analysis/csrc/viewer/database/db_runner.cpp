@@ -102,6 +102,7 @@ std::vector<TableColumn> DBRunner::GetTableColumns(const std::string &tableName)
     auto cols = conn->ExecuteGetTableColumns(tableName);
     if (cols.empty()) {
         ERROR("Get % columns failed", tableName);
+        return cols;
     }
     INFO("Get % columns success", tableName);
     return cols;

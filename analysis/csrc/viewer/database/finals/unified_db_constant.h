@@ -80,6 +80,11 @@ const std::string TABLE_NAME_DDR = "DDR";
 const std::string PROCESSOR_NAME_LLC = "LLC";
 const std::string TABLE_NAME_LLC = "LLC";
 
+const std::string PROCESSOR_NAME_PMU = "PMU";
+const std::string TABLE_NAME_TASK_PMU_INFO = "TASK_PMU_INFO";
+const std::string TABLE_NAME_SAMPLE_PMU_TIMELINE = "SAMPLE_PMU_TIMELINE";
+const std::string TABLE_NAME_SAMPLE_PMU_SUMMARY = "SAMPLE_PMU_SUMMARY";
+
 // api level
 const std::unordered_map<std::string, uint16_t> API_LEVEL_TABLE = {
     {"pytorch", MSPROF_REPORT_PYTORCH_LEVEL},
@@ -225,6 +230,7 @@ const uint64_t MICRO_SECOND = 1000000;
 const uint64_t MILLI_SECOND = 1000;
 constexpr const uint64_t MAX_DB_BYTES = 10ULL * 1024 * 1024 * 1024;
 const uint16_t BYTE_SIZE = 1024;
+const uint16_t PERCENTAGE = 100;
 
 }  // Database
 }  // Viewer
