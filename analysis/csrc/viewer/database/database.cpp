@@ -297,6 +297,39 @@ namespace {
         {"value", SQL_NUMERIC_TYPE},
         {"coreid", SQL_INTEGER_TYPE},
     };
+
+    const TableColumns PCIE = {
+        {"timestamp", SQL_INTEGER_TYPE},
+        {"device_id", SQL_INTEGER_TYPE},
+        {"tx_p_bandwidth_min", SQL_REAL_TYPE},
+        {"tx_p_bandwidth_max", SQL_REAL_TYPE},
+        {"tx_p_bandwidth_avg", SQL_REAL_TYPE},
+        {"tx_np_bandwidth_min", SQL_REAL_TYPE},
+        {"tx_np_bandwidth_max", SQL_REAL_TYPE},
+        {"tx_np_bandwidth_avg", SQL_REAL_TYPE},
+        {"tx_cpl_bandwidth_min", SQL_REAL_TYPE},
+        {"tx_cpl_bandwidth_max", SQL_REAL_TYPE},
+        {"tx_cpl_bandwidth_avg", SQL_REAL_TYPE},
+        {"tx_np_lantency_min", SQL_REAL_TYPE},
+        {"tx_np_lantency_max", SQL_REAL_TYPE},
+        {"tx_np_lantency_avg", SQL_REAL_TYPE},
+        {"rx_p_bandwidth_min", SQL_REAL_TYPE},
+        {"rx_p_bandwidth_max", SQL_REAL_TYPE},
+        {"rx_p_bandwidth_avg", SQL_REAL_TYPE},
+        {"rx_np_bandwidth_min", SQL_REAL_TYPE},
+        {"rx_np_bandwidth_max", SQL_REAL_TYPE},
+        {"rx_np_bandwidth_avg", SQL_REAL_TYPE},
+        {"rx_cpl_bandwidth_min", SQL_REAL_TYPE},
+        {"rx_cpl_bandwidth_max", SQL_REAL_TYPE},
+        {"rx_cpl_bandwidth_avg", SQL_REAL_TYPE}
+    };
+
+    const TableColumns HCCS = {
+        {"device_id", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_REAL_TYPE},
+        {"txthroughput", SQL_INTEGER_TYPE},
+        {"rxthroughput", SQL_INTEGER_TYPE},
+    };
 }
 
 std::string Database::GetDBName() const
@@ -425,6 +458,18 @@ AiVectorCoreDB::AiVectorCoreDB()
     dbName_ = "ai_vector_core.db";
     tableColNames_["AICoreOriginalData"] = SampleAICoreOriginalData;
     tableColNames_["MetricSummary"] = SampleMetricSummary;
+}
+
+PCIeDB::PCIeDB()
+{
+    dbName_ = "pcie.db";
+    tableColNames_["PcieOriginalData"] = PCIE;
+}
+
+HCCSDB::HCCSDB()
+{
+    dbName_ = "hccs.db";
+    tableColNames_["HCCSEventsData"] = HCCS;
 }
 
 } // namespace Database

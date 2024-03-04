@@ -95,7 +95,7 @@ namespace {
         {"end", SQL_INTEGER_TYPE},
         {"level", SQL_INTEGER_TYPE},
         {"globalTid", SQL_INTEGER_TYPE},
-        {"connectionId", SQL_INTEGER_TYPE, true},
+        {"connectionId", SQL_INTEGER_TYPE},
         {"name", SQL_INTEGER_TYPE}
     };
 
@@ -205,6 +205,39 @@ namespace {
         {"coreId", SQL_TEXT_TYPE}
     };
 
+    const TableColumns PCIE = {
+        {"deviceId", SQL_INTEGER_TYPE},
+        {"timestampNs", SQL_INTEGER_TYPE},
+        {"txPostMin", SQL_REAL_TYPE},
+        {"txPostMax", SQL_REAL_TYPE},
+        {"txPostAvg", SQL_REAL_TYPE},
+        {"txNonpostMin", SQL_REAL_TYPE},
+        {"txNonpostMax", SQL_REAL_TYPE},
+        {"txNonpostAvg", SQL_REAL_TYPE},
+        {"txCplMin", SQL_REAL_TYPE},
+        {"txCplMax", SQL_REAL_TYPE},
+        {"txCplAvg", SQL_REAL_TYPE},
+        {"txNonpostLatencyMin", SQL_REAL_TYPE},
+        {"txNonpostLatencyMax", SQL_REAL_TYPE},
+        {"txNonpostLatencyAvg", SQL_REAL_TYPE},
+        {"rxPostMin", SQL_REAL_TYPE},
+        {"rxPostMax", SQL_REAL_TYPE},
+        {"rxPostAvg", SQL_REAL_TYPE},
+        {"rxNonpostMin", SQL_REAL_TYPE},
+        {"rxNonpostMax", SQL_REAL_TYPE},
+        {"rxNonpostAvg", SQL_REAL_TYPE},
+        {"rxCplMin", SQL_REAL_TYPE},
+        {"rxCplMax", SQL_REAL_TYPE},
+        {"rxCplAvg", SQL_REAL_TYPE}
+    };
+
+    const TableColumns HCCS = {
+        {"deviceId", SQL_INTEGER_TYPE},
+        {"timestampNs", SQL_INTEGER_TYPE},
+        {"txThroughput", SQL_NUMERIC_TYPE},
+        {"rxThroughput", SQL_NUMERIC_TYPE}
+    };
+
     const TableColumns ENUM_API_LEVEL = {
         {"id", SQL_INTEGER_TYPE, true},
         {"name", SQL_TEXT_TYPE}
@@ -243,6 +276,8 @@ ReportDB::ReportDB()
         {TABLE_NAME_LLC, LLC},
         {TABLE_NAME_SAMPLE_PMU_TIMELINE, SAMPLE_PMU_TIMELINE},
         {TABLE_NAME_SAMPLE_PMU_SUMMARY, SAMPLE_PMU_SUMMARY},
+        {TABLE_NAME_PCIE, PCIE},
+        {TABLE_NAME_HCCS, HCCS},
         // ENUM
         {TABLE_NAME_ENUM_API_LEVEL, ENUM_API_LEVEL},
         {TABLE_NAME_ENUM_MEMORY, ENUM_MEMORY},

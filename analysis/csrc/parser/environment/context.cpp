@@ -136,7 +136,7 @@ bool Context::CheckInfoValueIsValid(const std::string &profPath, uint16_t device
         }
     }
     if (deviceId == HOST_ID) {
-        if (!info.at("CPU").is_array() || (info.at("CPU").size() != 1)) {
+        if (!info.at("CPU").is_array()) {
             ERROR("CPU's value is invalid, "
                   "the ProfPath is %, DeviceId is %.", profPath, deviceId);
             return false;

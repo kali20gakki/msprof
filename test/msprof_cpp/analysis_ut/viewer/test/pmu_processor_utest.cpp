@@ -1,6 +1,6 @@
 /* ******************************************************************************
             版权所有 (c) 华为技术有限公司 2024-2024
-            Copyright, 2023, Huawei Tech. Co., Ltd.
+            Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
  * File Name          : pmu_processor_utest.cpp
@@ -123,6 +123,24 @@ TEST_F(PmuProcessorUTest, TestSampleRunShouldReturnTrueWhenRunSuccess)
     auto processor = PmuProcessor(DB_PATH, {PROF});
     EXPECT_TRUE(processor.Run());
     MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
+
+    std::shared_ptr<DBRunner> dbRunner;
+    MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
+    uint16_t expectDBNum = 2; // 数据来源于两个db: aicore.db和ai_vector_core.db
+    using QueryTimeline = std::vector<std::tuple<uint32_t, uint64_t, uint64_t, double, double, uint32_t>>;
+    QueryTimeline timelineData;
+    uint16_t expectNum = SAMPLE_TIMELINE.size() * expectDBNum;
+    std::string sqlStr = "SELECT * FROM " + TABLE_NAME_SAMPLE_PMU_TIMELINE;
+    ASSERT_NE(dbRunner, nullptr);
+    EXPECT_TRUE(dbRunner->QueryData(sqlStr, timelineData));
+    EXPECT_EQ(expectNum, timelineData.size());
+
+    using QuerySummary = std::vector<std::tuple<uint32_t, uint64_t, double, uint32_t>>;
+    QuerySummary summaryData;
+    expectNum = SAMPLE_SUMMARY.size() * expectDBNum;
+    sqlStr = "SELECT * FROM " + TABLE_NAME_SAMPLE_PMU_SUMMARY;
+    EXPECT_TRUE(dbRunner->QueryData(sqlStr, summaryData));
+    EXPECT_EQ(expectNum, summaryData.size());
 }
 
 TEST_F(PmuProcessorUTest, TestSampleBasedProcessShouldReturnFalseWhenTimelineOrSummaryFailed)
@@ -140,26 +158,26 @@ TEST_F(PmuProcessorUTest, TestSampleBasedProcessShouldReturnFalseWhenTimelineOrS
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(false));
     MOCKER_CPP(&PmuProcessor::FormatSampleBasedSummaryData).stubs().will(returnValue(false));
     auto processor1 = PmuProcessor(DB_PATH, {PROF});
-    EXPECT_FALSE(processor1.SampleBasedProcess(PROF));
+    EXPECT_FALSE(processor1.Run());
     MOCKER_CPP(&PmuProcessor::FormatSampleBasedSummaryData).reset();
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).reset();
 
     // timeline GetPmuFreq false
     MOCKER_CPP(&Context::GetPmuFreq).stubs().will(returnValue(false));
     auto processor2 = PmuProcessor(DB_PATH, {PROF});
-    EXPECT_FALSE(processor2.SampleBasedProcess(PROF));
+    EXPECT_FALSE(processor2.Run());
     MOCKER_CPP(&Context::GetPmuFreq).reset();
 
     // timeline FormatSampleBasedTimelineData false
     MOCKER_CPP(&PmuProcessor::FormatSampleBasedTimelineData).stubs().will(returnValue(false));
     auto processor3 = PmuProcessor(DB_PATH, {PROF});
-    EXPECT_FALSE(processor3.SampleBasedProcess(PROF));
+    EXPECT_FALSE(processor3.Run());
     MOCKER_CPP(&PmuProcessor::FormatSampleBasedTimelineData).reset();
 
     // SaveData false
     MOCKER_CPP(&DBRunner::CreateTable).stubs().will(returnValue(false));
     auto processor4 = PmuProcessor(DB_PATH, {PROF});
-    EXPECT_FALSE(processor4.SampleBasedProcess(PROF));
+    EXPECT_FALSE(processor4.Run());
     MOCKER_CPP(&DBRunner::CreateTable).reset();
 
     MOCKER_CPP(&Context::GetInfoByDeviceId).reset();

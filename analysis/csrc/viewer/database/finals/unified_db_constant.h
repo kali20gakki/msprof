@@ -85,6 +85,12 @@ const std::string TABLE_NAME_TASK_PMU_INFO = "TASK_PMU_INFO";
 const std::string TABLE_NAME_SAMPLE_PMU_TIMELINE = "SAMPLE_PMU_TIMELINE";
 const std::string TABLE_NAME_SAMPLE_PMU_SUMMARY = "SAMPLE_PMU_SUMMARY";
 
+const std::string PROCESSOR_NAME_PCIE = "PCIE";
+const std::string TABLE_NAME_PCIE = "PCIE";
+
+const std::string PROCESSOR_NAME_HCCS = "HCCS";
+const std::string TABLE_NAME_HCCS = "HCCS";
+
 // api level
 const std::unordered_map<std::string, uint16_t> API_LEVEL_TABLE = {
     {"pytorch", MSPROF_REPORT_PYTORCH_LEVEL},

@@ -19,11 +19,13 @@
 #include "analysis/csrc/viewer/database/finals/ddr_processor.h"
 #include "analysis/csrc/viewer/database/finals/enum_processor.h"
 #include "analysis/csrc/viewer/database/finals/hbm_processor.h"
+#include "analysis/csrc/viewer/database/finals/hccs_processor.h"
 #include "analysis/csrc/viewer/database/finals/llc_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_mem_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_module_mem_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_op_mem_processor.h"
+#include "analysis/csrc/viewer/database/finals/pcie_processor.h"
 #include "analysis/csrc/viewer/database/finals/pmu_processor.h"
 #include "analysis/csrc/viewer/database/finals/session_time_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/string_ids_processor.h"
@@ -74,6 +76,10 @@ std::shared_ptr<TableProcessor> TableProcessorFactory::CreateTableProcessor(
         MAKE_SHARED_RETURN_VALUE(processor, PmuProcessor, nullptr, reportDBPath, profPaths);
     } else if (processorName == PROCESSOR_NAME_LLC) {
         MAKE_SHARED_RETURN_VALUE(processor, LLCProcessor, nullptr, reportDBPath, profPaths);
+    } else if (processorName == PROCESSOR_NAME_PCIE) {
+        MAKE_SHARED_RETURN_VALUE(processor, PCIeProcessor, nullptr, reportDBPath, profPaths);
+    } else if (processorName == PROCESSOR_NAME_HCCS) {
+        MAKE_SHARED_RETURN_VALUE(processor, HCCSProcessor, nullptr, reportDBPath, profPaths);
     }
     return processor;
 }

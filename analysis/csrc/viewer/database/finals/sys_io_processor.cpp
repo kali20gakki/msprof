@@ -109,7 +109,7 @@ SysIOProcessor::SysIODataFormat SysIOProcessor::GetData(const std::string &dbPat
         ERROR("Create % connection failed.", dbPath);
         return sysIOData;
     }
-    std::string sql = "SELECT device_id, timestamp, bandwidth, rxpacket, txbyte, rxpackets, rxbytes, rxerrors, "
+    std::string sql = "SELECT device_id, timestamp, bandwidth, rxpacket, rxbyte, rxpackets, rxbytes, rxerrors, "
                       "rxdropped, txpacket, txbyte, txpackets, txbytes, txerrors, txdropped, funcid "
                       "FROM " + sysIODB.tableName;
     if (!sysIODB.dbRunner->QueryData(sql, sysIOData)) {
