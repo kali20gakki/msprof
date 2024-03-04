@@ -12,6 +12,7 @@
 
 #include <string>
 #include <memory>
+#include <set>
 #include "analysis/csrc/association/cann/tree_analyzer.h"
 
 namespace Analysis {
@@ -28,10 +29,14 @@ const uint16_t TWO_BYTES = 16;
 const uint16_t AICORE_TASK_TYPE = 0;
 const uint64_t INVALID_MODEL_ID = 4294967295;
 const std::string KERNEL_TASK_PREFIX = "KERNEL";
-const std::string HCCL_TASK_TYPE = "HCCL";
-const std::string FFTS_PLUS_TASK_TYPE = "FFTS_PLUS";
+const uint32_t FFTS_PLUS_TASK_TYPE = 6;
+const uint32_t HCCL_TASK_TYPE = 9;
+const uint32_t HCCL_AI_CPU_TASK_TYPE = 11;
 const std::string KERNEL_FFTS_PLUS_TASK_TYPE = "FFTS_PLUS";
 const std::string KERNEL_STARS_COMMON_TASK_TYPE = "STARS_COMMON";
+const std::string KERNEL_AI_CORE_TASK_TYPE = "KERNEL_AICORE";
+const std::string KERNEL_AI_CPU_TASK_TYPE = "KERNEL_AICPU";
+const std::set<std::string> CONTEXT_ID_WHITE_LIST = {"KERNEL_AICORE", "KERNEL_AIVEC", "FFTS_PLUS"};
 }
 
 void TreeAnalyzer::Analyze()
@@ -94,7 +99,13 @@ void TreeAnalyzer::AnalyzeRuntimeNode(const std::shared_ptr<TreeNode> &node)
     if (isHccl) {
         auto hcclTasks = GetHcclTaskDescs(node);
         hcclTasks_.insert(hcclTasks_.end(), hcclTasks.begin(), hcclTasks.end());
-        tasks_.insert(tasks_.end(), hcclTasks.begin(), hcclTasks.end());
+        for (auto &task : hcclTasks) {
+            if (isCompute) {
+                // task已插入，无需再次插入
+                continue;
+            }
+            tasks_.emplace_back(task);
+        }
         UpdateHcclBigOpDescs(node);
     }
 
@@ -192,11 +203,13 @@ std::vector<std::shared_ptr<Event>> TreeAnalyzer::GetNodeRecordsByType(const std
 std::shared_ptr<HostTask> TreeAnalyzer::GenHostTask(const std::shared_ptr<MsprofCompactInfo> &track,
                                                     const std::shared_ptr<MsprofApi> &modelApi,
                                                     const std::shared_ptr<Operator> &opPtr,
-                                                    uint32_t ctxId, uint16_t taskType)
+                                                    uint32_t ctxId, uint16_t taskType,
+                                                    int64_t connectionId)
 {
     std::shared_ptr<HostTask> task;
     MAKE_SHARED0_RETURN_VALUE(task, HostTask, nullptr);
 
+    task->connection_id = connectionId;
     task->streamId = track->data.runtimeTrack.streamId;
     task->taskId = track->data.runtimeTrack.taskId;
     task->contextId = ctxId;
@@ -210,14 +223,15 @@ std::shared_ptr<HostTask> TreeAnalyzer::GenHostTask(const std::shared_ptr<Msprof
     return task;
 }
 
-HostTasks TreeAnalyzer::GenHostTasks(ComputeOpDescs &ops,
-                                     const std::shared_ptr<MsprofCompactInfo> &track,
-                                     const std::shared_ptr<MsprofApi> &modelApi)
+HostTasks TreeAnalyzer::GenComputeHostTasks(ComputeOpDescs &ops,
+                                            const std::shared_ptr<MsprofCompactInfo> &track,
+                                            const std::shared_ptr<MsprofApi> &modelApi,
+                                            int64_t connection_id)
 {
     // L0场景没有上报Node层信息
     if (ops.empty()) {
         auto task = GenHostTask(track, modelApi, nullptr,
-                                DEFAULT_CONTEXT_ID, track->data.runtimeTrack.taskType);
+                                DEFAULT_CONTEXT_ID, track->data.runtimeTrack.taskType, connection_id);
         return {task};
     }
 
@@ -227,7 +241,8 @@ HostTasks TreeAnalyzer::GenHostTasks(ComputeOpDescs &ops,
         std::vector<uint32_t> ctxIds;
         // 只有FFTS+类型应该保留CtxId, 过滤Memcpy存在CtxId
         if (desc->ctxId) {
-            ctxIds.assign(desc->ctxId->data, desc->ctxId->data + desc->ctxId->dataLen);
+            auto ctxIdInfo = ReinterpretConvert<MsprofContextIdInfo *>(desc->ctxId->data);
+            ctxIds.assign(ctxIdInfo->ctxIds, ctxIdInfo->ctxIds + ctxIdInfo->ctxIdNum);
         } else {
             ctxIds = {DEFAULT_CONTEXT_ID};
         }
@@ -236,29 +251,79 @@ HostTasks TreeAnalyzer::GenHostTasks(ComputeOpDescs &ops,
         if (desc->nodeDesc == nullptr) {
             for (const auto &ctxId: ctxIds) {
                 auto task = GenHostTask(track, modelApi, nullptr, ctxId,
-                                        track->data.runtimeTrack.taskType);
+                                        track->data.runtimeTrack.taskType, connection_id);
                 results.emplace_back(task);
             }
             continue;
         }
 
-        auto taskType = track->data.nodeBasicInfo.taskType;
-        auto nodeBasicTaskType = TypeData::GetInstance().Get(track->level,
-                                                             track->data.nodeBasicInfo.taskType);
-        if (nodeBasicTaskType == FFTS_PLUS_TASK_TYPE) {
-            // FFTS+存在整图下发的场景，需要将整图上报的信息排除
-            continue;
-        } else if (nodeBasicTaskType == HCCL_TASK_TYPE) {
-            // reduce TBE op需要将类型改为AI_CORE
-            taskType = AICORE_TASK_TYPE;
-        }
-
         for (const auto &ctxId: ctxIds) {
-            auto task = GenHostTask(track, modelApi, pair.second, ctxId, taskType);
+            auto task = GenHostTask(track, modelApi, pair.second, ctxId,
+                                    track->data.runtimeTrack.taskType, connection_id);
             results.emplace_back(task);
         }
     }
     return results;
+}
+
+void TreeAnalyzer::UpdateComputeDescForFftsSituation(ComputeOpDescs &descs,
+                                                     const std::shared_ptr<Event> &track)
+{
+    std::string specialKey;
+    // notice： 特殊场景，刷新op描述
+    for (auto &pair : descs) {
+        if (!pair.second->opDesc) {
+            ERROR("Illegal compute op, no op desc found, threadId = %", threadId_);
+            continue;
+        }
+        if (!pair.second->opDesc->nodeDesc) {
+            continue;
+        }
+        // 特殊场景1： ffts+模式会上报一条多余的nodebasic用于标记ffts图，删除
+        if (pair.second->opDesc->nodeDesc->data.nodeBasicInfo.taskType == FFTS_PLUS_TASK_TYPE) {
+            specialKey = pair.first;
+            // 该数据在一个task中只有1条
+            break;
+        }
+    }
+    if (!specialKey.empty()) {
+        descs.erase(specialKey);
+    }
+}
+
+void TreeAnalyzer::UpdateComputeDescForHcclSituation(ComputeOpDescs &descs,
+                                                     const std::shared_ptr<Event> &track,
+                                                     uint32_t item_id)
+{
+    if (descs.empty()) {
+        // 补充一个临时的算子描述，只发生在L0场景
+        std::shared_ptr<OpDesc> desc;
+        std::shared_ptr<Operator> op;
+        MAKE_SHARED0_NO_OPERATION(desc, OpDesc);
+        MAKE_SHARED0_NO_OPERATION(op, Operator, desc, UINT64_MAX, OpType::OPTYPE_INVALID);
+        descs[std::to_string(UINT64_MAX) + "_" + std::to_string(UINT64_MAX)] = op;
+    }
+    for (auto &pair : descs) {
+        if (!pair.second->opDesc) {
+            ERROR("Illegal compute op, no op desc found, threadId = %", threadId_);
+            continue;
+        }
+        if (!pair.second->opDesc->nodeDesc) {
+            // 避免内存泄露
+            MAKE_SHARED0_NO_OPERATION(pair.second->opDesc->nodeDesc, MsprofCompactInfo);
+        }
+        // 特殊场景2：hccl类任务将opName刷成item id
+        pair.second->opDesc->nodeDesc->data.nodeBasicInfo.opName = item_id;
+        auto taskType = track->compactPtr->data.runtimeTrack.taskType;
+        auto taskTypeStr = TypeData::GetInstance().Get(MSPROF_REPORT_RUNTIME_LEVEL, taskType);
+        if (taskTypeStr == KERNEL_AI_CPU_TASK_TYPE) {
+            // 特殊场景3：HCCL AICPU任务，该任务需要将任务类型刷为HCCL_AICPU
+            pair.second->opDesc->nodeDesc->data.nodeBasicInfo.taskType = HCCL_AI_CPU_TASK_TYPE;
+        } else if (taskTypeStr == KERNEL_AI_CORE_TASK_TYPE) {
+            // 特殊场景4：HCCL AICORE(Reduce TBE)任务，该任务需要将任务类型刷为AI_CORE
+            pair.second->opDesc->nodeDesc->data.nodeBasicInfo.taskType = HCCL_TASK_TYPE;
+        }
+    }
 }
 
 HostTasks TreeAnalyzer::GetComputeTaskDescs(const std::shared_ptr<TreeNode> &node)
@@ -268,17 +333,29 @@ HostTasks TreeAnalyzer::GetComputeTaskDescs(const std::shared_ptr<TreeNode> &nod
     auto modelNode = path_.find(MSPROF_REPORT_MODEL_LEVEL) != path_.end() ?
                      path_[MSPROF_REPORT_MODEL_LEVEL] : nullptr;
 
-    ComputeOpDescs ops = GetComputeOpDescs(nodeNode);
     auto tracks = GetNodeRecordsByType(node, EventType::EVENT_TYPE_TASK_TRACK);
     if (tracks.empty()) {
         ERROR("TreeNode task track records is empty, threadId = %", threadId_);
         return {};
     }
+
+    std::string type = TypeData::GetInstance().Get(MSPROF_REPORT_RUNTIME_LEVEL,
+                                                   tracks.back()->compactPtr->data.runtimeTrack.taskType);
+    bool useCtxId = CONTEXT_ID_WHITE_LIST.find(type) != CONTEXT_ID_WHITE_LIST.end();
+    ComputeOpDescs ops = GetComputeOpDescs(nodeNode, useCtxId);
+    // 特殊场景，刷新算子描述
+    UpdateComputeDescForFftsSituation(ops, tracks.back());
+    if (IsHcclTask()) {
+        auto hcclNode = path_.find(MSPROF_REPORT_HCCL_NODE_LEVEL) != path_.end() ?
+                        path_[MSPROF_REPORT_HCCL_NODE_LEVEL] : nullptr;
+        auto item_id = hcclNode == nullptr ? 0 : hcclNode->event->apiPtr->itemId;
+        UpdateComputeDescForHcclSituation(ops, tracks.back(), item_id);
+    }
     auto track = tracks.back()->compactPtr;
     auto modelApi = modelNode != nullptr ?
                     modelNode->event->apiPtr : nullptr;
 
-    auto results = GenHostTasks(ops, track, modelApi);
+    auto results = GenComputeHostTasks(ops, track, modelApi, nodeNode->event->id);
     return results;
 }
 
@@ -313,7 +390,7 @@ HostTasks TreeAnalyzer::GetHcclTaskDescs(const std::shared_ptr<TreeNode> &node)
     for (const auto &pair: hcclOpDescs) {
         auto desc = pair.second->hcclSmallOpDesc;
         auto task = GenHostTask(track, modelApi, pair.second, desc->ctxId,
-                                track->data.runtimeTrack.taskType);
+                                track->data.runtimeTrack.taskType, nodeNode->event->id);
         results.emplace_back(task);
     }
     return results;
@@ -335,11 +412,11 @@ std::shared_ptr<HostTask> TreeAnalyzer::GetOtherTaskDesc(const std::shared_ptr<T
     auto track = tracks.back()->compactPtr;
 
     auto task = GenHostTask(track, modelApi, nullptr, DEFAULT_CONTEXT_ID,
-                            track->data.runtimeTrack.taskType);
+                            track->data.runtimeTrack.taskType, INVALID_VALUE);
     return task;
 }
 
-ComputeOpDescs TreeAnalyzer::GetComputeOpDescs(const std::shared_ptr<TreeNode> &nodeNode)
+ComputeOpDescs TreeAnalyzer::GetComputeOpDescs(const std::shared_ptr<TreeNode> &nodeNode, bool useCtxId)
 {
     ComputeOpDescs opDescs;
     if (!nodeNode) {
@@ -356,6 +433,9 @@ ComputeOpDescs TreeAnalyzer::GetComputeOpDescs(const std::shared_ptr<TreeNode> &
             UpdateComputeOpDescs<ConcatTensorInfo, &OpDesc::tensorDesc>(opDescs, trace,
                                                                         trace->opName);
         } else if (record->info.type == EventType::EVENT_TYPE_CONTEXT_ID) {
+            if (!useCtxId) {
+                continue;
+            }
             auto trace = record->additionPtr;
             auto ctxIdNode = ReinterpretConvert<MsprofContextIdInfo *>(trace->data);
             UpdateComputeOpDescs<MsprofAdditionalInfo, &OpDesc::ctxId>(opDescs, trace,
@@ -378,13 +458,13 @@ HCCLSmallOpDescs TreeAnalyzer::GetHcclSmallOpDescs(const std::shared_ptr<TreeNod
         // ctxId 存在，先根据其生成descs, 再补充hccl info
         auto ret = UpdateHcclSmallOpDescs(opDescs, ctxIdRecords, hcclInfoRecords);
         if (!ret) {
-            ERROR("Update hccl small op descs failed by ctxId and hcclInfo");
+            ERROR("Update hccl small op descs failed by ctxId and hcclInfo, threadId = %", threadId_);
         }
     } else if (!hcclInfoRecords.empty()) {
         // 根据hccl info 生成
         auto ret = UpdateHcclSmallOpDescs(opDescs, hcclInfoRecords);
         if (!ret) {
-            ERROR("Update hccl small op descs failed by hcclInfo");
+            ERROR("Update hccl small op descs failed by hcclInfo, threadId = %", threadId_);
         }
     } else {
         std::shared_ptr<HcclSmallOpDesc> desc;

@@ -81,7 +81,7 @@ struct Event {
         std::shared_ptr<ConcatTensorInfo> tensorPtr;
     };
     EventInfo info;
-    uint32_t id = 0;    // 全局唯一ID
+    int64_t id = 0;    // 全局唯一ID
 
     ~Event()
     {

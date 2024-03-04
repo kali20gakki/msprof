@@ -228,6 +228,7 @@ class TaskGear(CANNGear):
     KERNEL_FFTS_PLUS_TASK_TYPE = "FFTS_PLUS"
     KERNEL_STARS_COMMON_TASK_TYPE = "STARS_COMMON"
     KERNEL_AICPU = "KERNEL_AICPU"
+    KERNEL_AICORE = "KERNEL_AICORE"
     CONTEXT_ID_WHITE_LIST = ["KERNEL_AICORE", "KERNEL_AIVEC", "FFTS_PLUS"]
 
     class RuntimeApi:
@@ -465,6 +466,16 @@ class TaskGear(CANNGear):
             return is_not_hccl_task
         return False
 
+    def get_truth_task_type_for_kernel_hccl_task(self, add_dto):
+        task_type = Constant.TASK_TYPE_HCCL
+        if add_dto.task_type == self.KERNEL_AICPU:
+            # helper场景: HCCL算子运行在AI_CPU上
+            task_type = Constant.TASK_TYPE_HCCL_AI_CPU
+        if add_dto.task_type == self.KERNEL_AICORE:
+            # Reduce tbe
+            task_type = Constant.TASK_TYPE_HCCL
+        return task_type
+
     def add_kernel_task(self, call_stack: dict, add_dto: TaskTrackDto):
         node_event: Event = call_stack.get(Constant.NODE_LEVEL)
         node_dto: ApiDataDto = self.db.get_api(node_event)
@@ -514,10 +525,7 @@ class TaskGear(CANNGear):
         task_type = 'N/A'
         if self.is_hccl_task(hccl_event, add_dto):
             op_name = hccl_dto.item_id
-            task_type = Constant.TASK_TYPE_HCCL
-            if add_dto.task_type == self.KERNEL_AICPU:
-                # helper场景: HCCL算子运行在AI_CPU上
-                task_type = Constant.TASK_TYPE_HCCL_AI_CPU
+            task_type = self.get_truth_task_type_for_kernel_hccl_task(add_dto)
         for cxt_id in cxt_ids:
             self.task_info.append([model_id, op_name, add_dto.stream_id, add_dto.task_id, 0, 0,
                                    'N/A', task_type, 'N/A', request_id, add_dto.thread_id, add_dto.timestamp,
@@ -540,9 +548,7 @@ class TaskGear(CANNGear):
         if self.is_hccl_task(hccl_event, add_dto):
             # notice: reduce TBE op
             op_name = hccl_dto.item_id
-        if add_dto.task_type == self.KERNEL_AICPU and task_type == Constant.TASK_TYPE_HCCL:
-            # helper场景: HCCL算子运行在AI_CPU上
-            task_type = Constant.TASK_TYPE_HCCL_AI_CPU
+            task_type = self.get_truth_task_type_for_kernel_hccl_task(add_dto)
         for cxt_id in cxt_ids:
             self.task_info.append([model_id, op_name, add_dto.stream_id, add_dto.task_id,
                                    node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,

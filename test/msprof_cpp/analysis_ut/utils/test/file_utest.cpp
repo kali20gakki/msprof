@@ -342,3 +342,35 @@ TEST_F(FileUTest, TestGetOriginDataShouldReturn2ValidFileWhen2ValidAnd2Invalid)
     File::DeleteFile("/tmp/prefix_test_slice_0.done");
     File::DeleteFile("/tmp/prefix_test_slice_0.complete");
 }
+
+TEST_F(FileUTest, TestSortFilesByAgingANdSliceNumShouldReturnSortedFilesWhenInputIsOutOfOrder)
+{
+    std::vector<std::string> files = {"PROF/aging.file.slice_1", "PROF/unaging.file.slice_1",
+                                      "PROF/aging.file.slice_12", "PROF/unaging.file.slice_12",
+                                      "PROF/aging.file.slice_6", "PROF/unaging.file.slice_6"};
+    std::vector<std::string> expectFiles = {"PROF/unaging.file.slice_1", "PROF/unaging.file.slice_6",
+                                            "PROF/unaging.file.slice_12", "PROF/aging.file.slice_1",
+                                            "PROF/aging.file.slice_6", "PROF/aging.file.slice_12"};
+    auto newFiles = File::SortFilesByAgingAndSliceNum(files);
+    EXPECT_EQ(newFiles.size(), files.size());
+    for (uint32_t i = 0; i < expectFiles.size(); i++) {
+        EXPECT_EQ(newFiles[i], expectFiles[i]);
+    }
+}
+
+TEST_F(FileUTest, TestSortFilesByAgingANdSliceNumShouldReturnSortedFilesWhenInputIsOutOfOrder2)
+{
+    std::vector<std::string> files = {"./PROF/host/data/unaging.additional.tensor_info.slice_0",
+                                      "./PROF/host/data/aging.additional.tensor_info.slice_0",
+                                      "./PROF/host/data/unaging.additional.tensor_info.slice_1",
+                                      "./PROF/host/data/aging.additional.tensor_info.slice_1"};
+    std::vector<std::string> expectFiles = {"./PROF/host/data/unaging.additional.tensor_info.slice_0",
+                                            "./PROF/host/data/unaging.additional.tensor_info.slice_1",
+                                            "./PROF/host/data/aging.additional.tensor_info.slice_0",
+                                            "./PROF/host/data/aging.additional.tensor_info.slice_1"};
+    auto newFiles = File::SortFilesByAgingAndSliceNum(files);
+    EXPECT_EQ(newFiles.size(), files.size());
+    for (uint32_t i = 0; i < expectFiles.size(); i++) {
+        EXPECT_EQ(newFiles[i], expectFiles[i]);
+    }
+}

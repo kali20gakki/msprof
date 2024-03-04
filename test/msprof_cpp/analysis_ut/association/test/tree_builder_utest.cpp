@@ -87,13 +87,13 @@ std::shared_ptr<EventQueue> GenCtxIdEvents()
 
     int nodeCnt = 0;
     for (auto dot: nodelLevelEvents["Node"]) {
-        FakeEventGenerator::AddCtxIdEvent(contextIdEvents, dot, MSPROF_REPORT_NODE_LEVEL);
+        FakeEventGenerator::AddNodeCtxIdEvent(contextIdEvents, dot, {dot, dot});
         nodeCnt++;
     }
 
     int hcclCnt = 0;
     for (auto dot: hcclLevelEvents["Hccl"]) {
-        FakeEventGenerator::AddCtxIdEvent(contextIdEvents, dot, MSPROF_REPORT_HCCL_NODE_LEVEL);
+        FakeEventGenerator::AddHcclCtxIdEvent(contextIdEvents, dot, dot, dot);
         hcclCnt++;
     }
     contextIdEvents->Sort();
@@ -144,7 +144,7 @@ std::shared_ptr<EventQueue> GenHcclInfoEvents()
     };
     int cnt = 0;
     for (auto dot: Events["Hccl"]) {
-        FakeEventGenerator::AddHcclInfoEvent(hcclInfoEvents, dot);
+        FakeEventGenerator::AddHcclInfoEvent(hcclInfoEvents, dot, cnt);
         cnt++;
     }
     hcclInfoEvents->Sort();
@@ -208,17 +208,20 @@ TEST_F(TreeBuilderUTest, TestAddLevelEventsShouldReturnFalseWhenInputNullptrOrEm
     /* 测试events为nullptr，levelNodes不为空的情况 */
     std::vector<std::shared_ptr<TreeNode>> oneNodes{std::shared_ptr<TreeNode>{}};
     auto nullEventQueuePtr = std::shared_ptr<EventQueue>{};
-    auto checkNullPtr = treeBuilder->AddLevelEvents(nullEventQueuePtr, oneNodes);
+    auto checkNullPtr = treeBuilder->AddLevelEvents(nullEventQueuePtr, oneNodes,
+                                                    EventType::EVENT_TYPE_NODE_BASIC_INFO);
     EXPECT_EQ(false, checkNullPtr);
 
     /* 测试events不为nullptr，levelNodes为空的情况 */
     auto eventQueuePtr = std::make_shared<EventQueue>(1, 5);
     std::vector<std::shared_ptr<TreeNode>> emptyNodes{};
-    auto checkEmptyNodes = treeBuilder->AddLevelEvents(eventQueuePtr, emptyNodes);
+    auto checkEmptyNodes = treeBuilder->AddLevelEvents(eventQueuePtr, emptyNodes,
+                                                       EventType::EVENT_TYPE_NODE_BASIC_INFO);
     EXPECT_EQ(false, checkEmptyNodes);
 
     /* 测试events为nullptr，levelNodes为空的情况 */
-    auto checkAllEmpty = treeBuilder->AddLevelEvents(nullEventQueuePtr, emptyNodes);
+    auto checkAllEmpty = treeBuilder->AddLevelEvents(nullEventQueuePtr, emptyNodes,
+                                                     EventType::EVENT_TYPE_NODE_BASIC_INFO);
     EXPECT_EQ(false, checkEmptyNodes);
 }
 
@@ -248,7 +251,7 @@ TEST_F(TreeBuilderUTest, TestAddLevelEventsShouldMatchCorrectNodeWhenInputNotEmp
         eventQueue->Push(eventPtr);
     }
 
-    auto checkFalse = treeBuilder->AddLevelEvents(eventQueue, levelNodes);
+    auto checkFalse = treeBuilder->AddLevelEvents(eventQueue, levelNodes, EventType::EVENT_TYPE_NODE_BASIC_INFO);
     /* 因为存在没有匹配上的元素，范围值应为false */
     EXPECT_EQ(false, checkFalse);
 

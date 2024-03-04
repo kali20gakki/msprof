@@ -91,7 +91,7 @@ struct Operator {
 // 用于存储分析树结果，DBDumper将此信息落盘
 struct HostTask {
     uint64_t modelId = 0;
-    uint64_t nodeTraceId = 0;
+    int64_t connection_id = 0; // -1 表示该任务无node直连
     uint64_t taskType = 0;
     uint64_t timeStamp = 0;
     uint32_t streamId = 0;

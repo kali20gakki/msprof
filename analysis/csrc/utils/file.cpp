@@ -14,9 +14,11 @@
 
 #include <dirent.h>
 #include <sys/stat.h>
+#include <set>
 
 #include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
 namespace Utils {
@@ -102,7 +104,7 @@ uint64_t File::Size(const std::string &filePath)
     return fileStat.st_size;
 }
 
-bool File::CreateDir(const std::string& path, const mode_t &mode)
+bool File::CreateDir(const std::string &path, const mode_t &mode)
 {
     if (path.empty()) {
         ERROR("Create directory path is empty.");
@@ -174,7 +176,7 @@ bool File::RemoveDir(const std::string &path, int depth)
     return true;
 }
 
-std::string File::PathJoin(const std::vector<std::string>& paths)
+std::string File::PathJoin(const std::vector<std::string> &paths)
 {
     if (paths.empty()) {
         ERROR("The file stat failed.");
@@ -385,7 +387,7 @@ void FileWriter::Open(const std::string &path, const std::ios_base::openmode &mo
     path_ = path;
 }
 
-void FileWriter::WriteText(const std::string& content)
+void FileWriter::WriteText(const std::string &content)
 {
     if (IsOpen()) {
         outStream_ << content;
@@ -416,7 +418,6 @@ std::vector<std::string> File::GetOriginData(const std::string &path,
             matchedFiles = File::FilterFileWithSuffix(matchedFiles, filter);
         }
 
-        std::sort(matchedFiles.begin(), matchedFiles.end());
         std::move(
             matchedFiles.begin(),
             matchedFiles.end(),
@@ -424,6 +425,46 @@ std::vector<std::string> File::GetOriginData(const std::string &path,
         );
     }
     return files;
+}
+std::vector<std::string> File::SortFilesByAgingAndSliceNum(std::vector<std::string> &files)
+{
+    static std::set<std::string> usefulPre = {"aging", "unaging"};
+    auto func = [](std::string &f1, std::string &f2) {
+        auto base1 = BaseName(f1);
+        auto base2 = BaseName(f2);
+        if (base1.empty() or base2.empty()) {
+            ERROR("Illegal file name % or %", base1, base2);
+            return base1 > base2;
+        }
+        uint32_t sliceNum1;
+        uint32_t sliceNum2;
+        auto patternAging1 = Split(base1, ".");
+        auto patternAging2 = Split(base2, ".");
+        auto patternSlice1 = Split(base1, "_");
+        auto patternSlice2 = Split(base2, "_");
+        if (usefulPre.find(patternAging1[0]) == usefulPre.end() or
+            usefulPre.find(patternAging2[0]) == usefulPre.end()) {
+            ERROR("Illegal file name % or %, aging|unaging prefix is needed", base1, base2);
+            return base1 > base2;
+        }
+        if (!IsNumber(patternSlice1.back()) or !IsNumber(patternSlice2.back())) {
+            ERROR("Illegal file name % or %, no slice num found", base1, base2);
+            return base1 > base2;
+        }
+        StrToU32(sliceNum1, patternSlice1.back());
+        StrToU32(sliceNum2, patternSlice2.back());
+        // 为了配合compact解析 优先级unaging>aging
+        return patternAging1[0] > patternAging2[0] or (patternAging1[0] == patternAging2[0] and sliceNum1 < sliceNum2);
+    };
+    std::sort(files.begin(), files.end(), func);
+    return files;
+}
+std::string File::BaseName(const std::string &path)
+{
+    if (path.empty()) {
+        return path;
+    }
+    return Split(path, "/").back();
 }
 
 }  // namespace Utils

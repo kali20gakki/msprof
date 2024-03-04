@@ -75,7 +75,8 @@ public:
         eventQueue->Push(eventPtr);
     }
 
-    static void AddNodeBasicEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot)
+    static void AddNodeBasicEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot,
+                                  uint64_t opType = 1, uint32_t task_type = 0)
     {
         EventInfo testInfo{EventType::EVENT_TYPE_NODE_BASIC_INFO, MSPROF_REPORT_NODE_LEVEL, dot, dot};
         auto nodeBasic = std::make_shared<MsprofCompactInfo>();
@@ -84,6 +85,8 @@ public:
 
         MsprofNodeBasicInfo node;
         node.opName = dot;
+        node.opType = opType;
+        node.taskType = task_type;
         nodeBasic->data.nodeBasicInfo = node;
         auto eventPtr = std::make_shared<Event>(nodeBasic, testInfo);
         eventQueue->Push(eventPtr);
@@ -92,24 +95,60 @@ public:
     static void AddTensorInfoEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot)
     {
         EventInfo testInfo{EventType::EVENT_TYPE_TENSOR_INFO, MSPROF_REPORT_NODE_LEVEL, dot, dot};
-        auto eventPtr = std::make_shared<Event>(std::shared_ptr<ConcatTensorInfo>{},
-                                                testInfo);
+        auto tensor = std::make_shared<ConcatTensorInfo>();
+        tensor->level = MSPROF_REPORT_NODE_LEVEL;
+        tensor->timeStamp = dot;
+        tensor->opName = dot;
+
+        auto eventPtr = std::make_shared<Event>(tensor, testInfo);
         eventQueue->Push(eventPtr);
     }
 
-    static void AddCtxIdEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot, uint16_t level)
+    // 增加一个node ctx id的Event
+    static void AddNodeCtxIdEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot,
+                                  std::pair<uint32_t, uint32_t> ctxRange)
     {
-        EventInfo testInfo{EventType::EVENT_TYPE_CONTEXT_ID, level, dot, dot};
+        EventInfo testInfo{EventType::EVENT_TYPE_CONTEXT_ID, MSPROF_REPORT_NODE_LEVEL, dot, dot};
         auto addtionInfo = std::make_shared<MsprofAdditionalInfo>();
-        uint32_t num = 2;
+        uint32_t num = ctxRange.second - ctxRange.first + 1;
+        if (num > MSPROF_CTX_ID_MAX_NUM) {
+            throw std::runtime_error("ctx id num is illegal");
+        }
         addtionInfo->timeStamp = dot;
         addtionInfo->dataLen = num;
 
         MsprofContextIdInfo ctxId;
         ctxId.opName = dot;
         ctxId.ctxIdNum = num;
-        uint32_t ids[2] = {0, 1};
-        std::memcpy(ctxId.ctxIds, &ids, sizeof(ids));
+        uint32_t ids[MSPROF_CTX_ID_MAX_NUM];
+        for (uint32_t i = 0; i < ctxRange.second - ctxRange.first + 1; i++) {
+            ids[i] = ctxRange.first + i;
+        }
+        std::memcpy(ctxId.ctxIds, &ids, sizeof(uint32_t) * num);
+        std::memcpy(addtionInfo->data, &ctxId, sizeof(ctxId));
+
+        auto eventPtr = std::make_shared<Event>(addtionInfo, testInfo);
+        eventQueue->Push(eventPtr);
+    }
+
+    // 增加一个hccl ctx id的Event
+    static void AddHcclCtxIdEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot,
+                                  uint32_t endCtx, uint32_t startCtx = 0)
+    {
+        EventInfo testInfo{EventType::EVENT_TYPE_CONTEXT_ID, MSPROF_REPORT_HCCL_NODE_LEVEL, dot, dot};
+        auto addtionInfo = std::make_shared<MsprofAdditionalInfo>();
+        uint32_t num = 2;
+
+        addtionInfo->timeStamp = dot;
+        addtionInfo->dataLen = num;
+
+        MsprofContextIdInfo ctxId;
+        ctxId.opName = dot;
+        ctxId.ctxIdNum = num;
+        uint32_t ids[2];
+        ids[0] = startCtx;
+        ids[1] = endCtx;
+        std::memcpy(ctxId.ctxIds, &ids, sizeof(uint32_t) * num);
         std::memcpy(addtionInfo->data, &ctxId, sizeof(ctxId));
 
         auto eventPtr = std::make_shared<Event>(addtionInfo, testInfo);
@@ -132,9 +171,8 @@ public:
         eventQueue->Push(eventPtr);
     }
 
-    static void AddHcclInfoEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot)
+    static void AddHcclInfoEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot, uint32_t ctxId)
     {
-        static uint32_t cnt_ = 0;
         EventInfo testInfo{EventType::EVENT_TYPE_HCCL_INFO, MSPROF_REPORT_HCCL_NODE_LEVEL, dot, dot};
         auto hcclInfo = std::make_shared<MsprofAdditionalInfo>();
         hcclInfo->magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
@@ -142,12 +180,11 @@ public:
         hcclInfo->type = static_cast<uint32_t>(EventType::EVENT_TYPE_HCCL_INFO);
         hcclInfo->timeStamp = static_cast<uint64_t>(dot);
         auto hcclTrace = MsprofHcclInfo{};
-        hcclTrace.ctxID = cnt_;
+        hcclTrace.ctxID = ctxId;
         hcclTrace.itemId = dot;
         std::memcpy(hcclInfo->data, &hcclTrace, sizeof(hcclTrace));
         auto eventPtr = std::make_shared<Event>(hcclInfo, testInfo);
         eventQueue->Push(eventPtr);
-        cnt_++;
     }
 };
 

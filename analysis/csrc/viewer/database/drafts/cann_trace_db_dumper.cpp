@@ -30,7 +30,7 @@ using HCCLOpsDumpData = std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uin
         std::string, uint64_t, uint64_t, uint32_t, uint32_t>>;
 
 using HostTasksDumpData = std::vector<std::tuple<uint32_t,
-        uint32_t, uint32_t, uint32_t, std::string, uint32_t, std::string, uint32_t, std::string, std::string>>;
+        uint32_t, uint32_t, uint32_t, std::string, uint32_t, std::string, uint32_t, std::string, int64_t>>;
 
 using HcclTasksDumpData = std::vector<std::tuple<uint32_t, uint32_t, std::string, std::string, uint32_t, std::string,
         double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, std::string, uint32_t, uint32_t,
@@ -138,7 +138,7 @@ void CANNTraceDBDumper::DumpHostTasks(const HostTasks &hostTasks)
                           std::to_string(task->contextId),
                           task->batchId, taskType, task->deviceId,
                           std::to_string(task->timeStamp),
-                          "connection_id");
+                          task->connection_id);
     }
     if (!hostTaskDBRunner.InsertData("HostTask", data)) {
         result_ = false;

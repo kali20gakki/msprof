@@ -37,9 +37,14 @@ public:
     static bool RemoveDir(const std::string &path, int depth);
     static bool Chmod(const std::string &path, const mode_t &mode);
     static std::string PathJoin(const std::vector<std::string> &paths);
+    static std::string BaseName(const std::string &path);
     static std::vector<std::string> GetFilesWithPrefix(const std::string &path, const std::string &prefix);
     static std::vector<std::string> FilterFileWithSuffix(const std::vector<std::string> &files,
                                                          const std::string &suffix);
+    /*!
+     * 将文件排序，排序依据为: 第一优先级：unaging>aging, 第二优先级：slice num递增
+     */
+    static std::vector<std::string> SortFilesByAgingAndSliceNum(std::vector<std::string> &files);
     /*!
      * 从data目录下筛选文件
      * @param path data目录

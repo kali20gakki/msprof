@@ -33,32 +33,32 @@ ApiEventDBDumper::ApiEventDBDumper(const std::string &hostFilePath) : BaseDumper
     MAKE_SHARED0_NO_OPERATION(database_, ApiEventDB);
 }
 
-EventData ApiEventDBDumper::GenerateData(const ApiData &apiEvent)
+EventData ApiEventDBDumper::GenerateData(const ApiData &apiTraces)
 {
     EventData data;
-    if (!Utils::Reserve(data, apiEvent.size())) {
+    if (!Utils::Reserve(data, apiTraces.size())) {
         return data;
     }
-    for (const auto &event: apiEvent) {
-        auto connectionId = UNDEFINED_INT_VALUE;
+    for (auto &traceEvent : apiTraces) {
         std::string structType;
         std::string id;
+        auto trace = traceEvent->apiPtr;
         // 除了acl层数据，其他数据的id设置为"0"
         // 对于acl层数据，type这个字段，高16位表示类型，低16位表示API的hash，所以这里右移
-        if (event->level == MSPROF_REPORT_ACL_LEVEL) {
+        if (trace->level == MSPROF_REPORT_ACL_LEVEL) {
             structType = NumberMapping::Get(NumberMapping::MappingType::ACL_API_TAG,
-                                            event->type >> TWO_BYTES);
-            id = TypeData::GetInstance().Get(event->level, event->type);
+                                            trace->type >> TWO_BYTES);
+            id = TypeData::GetInstance().Get(trace->level, trace->type);
         } else {
-            structType = TypeData::GetInstance().Get(event->level, event->type);
+            structType = TypeData::GetInstance().Get(trace->level, trace->type);
             id = "0";
         }
+        std::string itemId = trace->itemId == 0 ? "0": HashData::GetInstance().Get(trace->itemId);
         data.emplace_back(structType, id,
-                          NumberMapping::Get(NumberMapping::MappingType::LEVEL, event->level),
-                          event->threadId,
-                          event->itemId == 0 ? "0" : HashData::GetInstance().Get(event->itemId),
-                          event->beginTime, event->endTime,
-                          connectionId);
+                          NumberMapping::Get(NumberMapping::MappingType::LEVEL, trace->level),
+                          trace->threadId,
+                          itemId, trace->beginTime, trace->endTime,
+                          traceEvent->id);
     }
     return data;
 }

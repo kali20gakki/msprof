@@ -13,6 +13,7 @@
 #include <algorithm>
 
 #include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/utils/time_logger.h"
 #include "analysis/csrc/entities/event_queue.h"
 
 namespace Analysis {
@@ -25,6 +26,9 @@ EventQueue::EventQueue(uint32_t threadId, uint64_t initSize) : threadId_(threadI
 
 void EventQueue::Sort()
 {
+    std::string loggerName = "Sort event num " + std::to_string(tail_) +
+        " in thread " + std::to_string(threadId_);
+    Utils::TimeLogger logger(loggerName);
     auto comp = [](const std::shared_ptr<Event> &event1,
                    const std::shared_ptr<Event> &event2) {
         return event1->info.start < event2->info.start ||
@@ -63,7 +67,7 @@ std::shared_ptr<Event> EventQueue::Pop()
 std::shared_ptr<Event> EventQueue::Top()
 {
     if (Empty()) {
-        ERROR("Can not get top event when EventQueue is empty");
+        INFO("EventQueue for thread % is empty", threadId_);
         return nullptr;
     }
     return data_[head_];
