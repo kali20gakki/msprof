@@ -35,6 +35,7 @@ bool IsNumber(const std::string& s);
 // 将两个uint32_t 拼成uint64_t
 uint64_t Contact(uint32_t high, uint32_t low);
 bool IsDoubleEqual(double checkDouble, double standard);
+std::string AddQuotation(std::string str);
 
 // make_shared参数个数为0，异常操作为return void
 #define MAKE_SHARED0_RETURN_VOID(instance, type) \

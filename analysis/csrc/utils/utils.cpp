@@ -167,5 +167,9 @@ bool IsDoubleEqual(double checkDouble, double standard)
     return (std::abs(checkDouble - standard) < eps);
 }
 
+std::string AddQuotation(std::string str)
+{
+    return Join({"\"", str, "\""}, "");
+}
 }  // namespace Utils
 }  // namespace Analysis
