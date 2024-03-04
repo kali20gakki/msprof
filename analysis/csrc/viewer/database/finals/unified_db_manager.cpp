@@ -50,6 +50,8 @@ namespace {
         PROCESSOR_NAME_LLC,
         PROCESSOR_NAME_PCIE,
         PROCESSOR_NAME_HCCS,
+        PROCESSOR_NAME_ACC_PMU,
+        PROCESSOR_NAME_SOC,
     };
 }
 

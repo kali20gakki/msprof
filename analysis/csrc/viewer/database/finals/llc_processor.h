@@ -38,7 +38,8 @@ protected:
 private:
     static OriDataFormat GetData(DBInfo &dbInfo);
     static ProcessedDataFormat FormatData(const OriDataFormat &oriData, uint16_t mode,
-                                          Utils::ProfTimeRecord &timeRecord, Utils::SyscntConversionParams &params);
+                                          const Utils::ProfTimeRecord &timeRecord,
+                                          Utils::SyscntConversionParams &params);
     bool ProcessData(const std::string &fileDir);
 };
 } // Database

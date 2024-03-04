@@ -34,7 +34,8 @@ protected:
 private:
     static OriDataFormat GetData(DBInfo &npuMemDB);
     static ProcessedDataFormat FormatData(const OriDataFormat &oriData, uint16_t deviceId,
-                                          Utils::ProfTimeRecord &timeRecord, Utils::SyscntConversionParams &params);
+                                          const Utils::ProfTimeRecord &timeRecord,
+                                          Utils::SyscntConversionParams &params);
 };
 
 } // Database

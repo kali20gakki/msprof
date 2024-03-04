@@ -91,6 +91,13 @@ const std::string TABLE_NAME_PCIE = "PCIE";
 const std::string PROCESSOR_NAME_HCCS = "HCCS";
 const std::string TABLE_NAME_HCCS = "HCCS";
 
+const std::string PROCESSOR_NAME_ACC_PMU = "ACC_PMU";
+const std::string TABLE_NAME_ACC_PMU = "ACC_PMU";
+
+const std::string PROCESSOR_NAME_SOC = "SOC";
+const std::string TABLE_NAME_SOC = "SOC_BANDWIDTH_LEVEL";
+
+
 // api level
 const std::unordered_map<std::string, uint16_t> API_LEVEL_TABLE = {
     {"pytorch", MSPROF_REPORT_PYTORCH_LEVEL},

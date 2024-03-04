@@ -252,6 +252,23 @@ namespace {
         {"id", SQL_INTEGER_TYPE, true},
         {"name", SQL_TEXT_TYPE}
     };
+
+    const TableColumns ACC_PMU = {
+        {"accId", SQL_INTEGER_TYPE},
+        {"readBandwidth", SQL_INTEGER_TYPE},
+        {"writeBbandwidth", SQL_INTEGER_TYPE},
+        {"readOst", SQL_INTEGER_TYPE},
+        {"writeOst", SQL_INTEGER_TYPE},
+        {"timestampNs", SQL_NUMERIC_TYPE},
+        {"deviceId", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns SOC_BANDWIDTH_LEVEL = {
+        {"l2BufferBwLevel", SQL_INTEGER_TYPE},
+        {"mataBwLevel", SQL_INTEGER_TYPE},
+        {"timestampNs", SQL_NUMERIC_TYPE},
+        {"deviceId", SQL_INTEGER_TYPE}
+    };
 }
 
 ReportDB::ReportDB()
@@ -278,6 +295,8 @@ ReportDB::ReportDB()
         {TABLE_NAME_SAMPLE_PMU_SUMMARY, SAMPLE_PMU_SUMMARY},
         {TABLE_NAME_PCIE, PCIE},
         {TABLE_NAME_HCCS, HCCS},
+        {TABLE_NAME_ACC_PMU, ACC_PMU},
+        {TABLE_NAME_SOC, SOC_BANDWIDTH_LEVEL},
         // ENUM
         {TABLE_NAME_ENUM_API_LEVEL, ENUM_API_LEVEL},
         {TABLE_NAME_ENUM_MEMORY, ENUM_MEMORY},
