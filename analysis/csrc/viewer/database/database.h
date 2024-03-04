@@ -134,6 +134,16 @@ public:
     AiVectorCoreDB();
 };
 
+class AccPmuDB : public Database {
+public:
+    AccPmuDB();
+};
+
+class SocProfilerDB : public Database {
+public:
+    SocProfilerDB();
+};
+
 class PCIeDB : public Database {
 public:
     PCIeDB();

@@ -60,7 +60,7 @@ NpuOpMemProcessor::OriDataFormat NpuOpMemProcessor::GetData(DBInfo &npuOpMemDB)
 }
 
 NpuOpMemProcessor::ProcessedDataFormat NpuOpMemProcessor::FormatData(const OriDataFormat &oriData,
-                                                                     Utils::ProfTimeRecord &timeRecord,
+                                                                     const Utils::ProfTimeRecord &timeRecord,
                                                                      Utils::SyscntConversionParams &params,
                                                                      GeHashMap &hashMap, uint32_t profId)
 {

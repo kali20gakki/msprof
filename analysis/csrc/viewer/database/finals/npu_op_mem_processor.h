@@ -35,7 +35,7 @@ protected:
     bool Process(const std::string &fileDir) override;
 private:
     static OriDataFormat GetData(DBInfo &npuOpMemDB);
-    static ProcessedDataFormat FormatData(const OriDataFormat &oriData, Utils::ProfTimeRecord &timeRecord,
+    static ProcessedDataFormat FormatData(const OriDataFormat &oriData, const Utils::ProfTimeRecord &timeRecord,
                                           Utils::SyscntConversionParams &params, GeHashMap &hashMap, uint32_t profId);
     static uint16_t GetDeviceId(const std::string& deviceType);
 };

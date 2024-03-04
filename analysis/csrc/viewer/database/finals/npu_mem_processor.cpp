@@ -51,7 +51,7 @@ NpuMemProcessor::OriDataFormat NpuMemProcessor::GetData(DBInfo &npuMemDB)
 }
 
 NpuMemProcessor::ProcessedDataFormat NpuMemProcessor::FormatData(const OriDataFormat &oriData, uint16_t deviceId,
-                                                                 Utils::ProfTimeRecord &timeRecord,
+                                                                 const Utils::ProfTimeRecord &timeRecord,
                                                                  Utils::SyscntConversionParams &params)
 {
     ProcessedDataFormat processedData;

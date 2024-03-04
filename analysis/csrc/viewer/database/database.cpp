@@ -330,6 +330,21 @@ namespace {
         {"txthroughput", SQL_INTEGER_TYPE},
         {"rxthroughput", SQL_INTEGER_TYPE},
     };
+
+    const TableColumns AccPmu = {
+        {"acc_id", SQL_INTEGER_TYPE},
+        {"read_bandwidth", SQL_INTEGER_TYPE},
+        {"write_bandwidth", SQL_INTEGER_TYPE},
+        {"read_ost", SQL_INTEGER_TYPE},
+        {"write_ost", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE}
+    };
+
+    const TableColumns InterSoc = {
+        {"l2_buffer_bw_level", SQL_INTEGER_TYPE},
+        {"mata_bw_level", SQL_INTEGER_TYPE},
+        {"sys_time", SQL_REAL_TYPE}
+    };
 }
 
 std::string Database::GetDBName() const
@@ -445,6 +460,17 @@ LLCDB::LLCDB()
     dbName_ = "llc.db";
     tableColNames_["LLCMetrics"] = LLCOriginData;
 }
+AccPmuDB::AccPmuDB()
+{
+    dbName_ = "acc_pmu.db";
+    tableColNames_["AccPmu"] = AccPmu;
+}
+
+SocProfilerDB::SocProfilerDB()
+{
+    dbName_ = "soc_profiler.db";
+    tableColNames_["InterSoc"] = InterSoc;
+};
 
 AicoreDB::AicoreDB()
 {

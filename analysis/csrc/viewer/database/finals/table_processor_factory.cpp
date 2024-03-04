@@ -13,6 +13,7 @@
 #include "analysis/csrc/viewer/database/finals/table_processor_factory.h"
 
 #include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/viewer/database/finals/acc_pmu_processor.h"
 #include "analysis/csrc/viewer/database/finals/api_processor.h"
 #include "analysis/csrc/viewer/database/finals/communication_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/compute_task_info_processor.h"
@@ -28,6 +29,7 @@
 #include "analysis/csrc/viewer/database/finals/pcie_processor.h"
 #include "analysis/csrc/viewer/database/finals/pmu_processor.h"
 #include "analysis/csrc/viewer/database/finals/session_time_info_processor.h"
+#include "analysis/csrc/viewer/database/finals/soc_processor.h"
 #include "analysis/csrc/viewer/database/finals/string_ids_processor.h"
 #include "analysis/csrc/viewer/database/finals/sys_io_processor.h"
 #include "analysis/csrc/viewer/database/finals/task_processor.h"
@@ -80,6 +82,10 @@ std::shared_ptr<TableProcessor> TableProcessorFactory::CreateTableProcessor(
         MAKE_SHARED_RETURN_VALUE(processor, PCIeProcessor, nullptr, reportDBPath, profPaths);
     } else if (processorName == PROCESSOR_NAME_HCCS) {
         MAKE_SHARED_RETURN_VALUE(processor, HCCSProcessor, nullptr, reportDBPath, profPaths);
+    } else if (processorName == PROCESSOR_NAME_ACC_PMU) {
+        MAKE_SHARED_RETURN_VALUE(processor, AccPmuProcessor, nullptr, reportDBPath, profPaths);
+    } else if (processorName == PROCESSOR_NAME_SOC) {
+        MAKE_SHARED_RETURN_VALUE(processor, SocProcessor, nullptr, reportDBPath, profPaths);
     }
     return processor;
 }

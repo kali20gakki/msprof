@@ -53,7 +53,8 @@ LLCProcessor::OriDataFormat LLCProcessor::GetData(DBInfo &dbInfo)
 }
 
 LLCProcessor::ProcessedDataFormat LLCProcessor::FormatData(const OriDataFormat &oriData, uint16_t mode,
-                                                           ProfTimeRecord &timeRecord, SyscntConversionParams &params)
+                                                           const Utils::ProfTimeRecord &timeRecord,
+                                                           SyscntConversionParams &params)
 {
     ProcessedDataFormat processedData;
     if (!Utils::Reserve(processedData, oriData.size())) {
