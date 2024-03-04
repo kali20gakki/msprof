@@ -56,7 +56,8 @@ EventData ApiEventDBDumper::GenerateData(const ApiData &apiEvent)
         data.emplace_back(structType, id,
                           NumberMapping::Get(NumberMapping::MappingType::LEVEL, event->level),
                           event->threadId,
-                          HashData::GetInstance().Get(event->itemId), event->beginTime, event->endTime,
+                          event->itemId == 0 ? "0" : HashData::GetInstance().Get(event->itemId),
+                          event->beginTime, event->endTime,
                           connectionId);
     }
     return data;
