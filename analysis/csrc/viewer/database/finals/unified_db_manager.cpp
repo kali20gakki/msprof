@@ -48,6 +48,8 @@ namespace {
         PROCESSOR_NAME_DDR,
         PROCESSOR_NAME_PMU,
         PROCESSOR_NAME_LLC,
+        PROCESSOR_NAME_PCIE,
+        PROCESSOR_NAME_HCCS,
     };
 }
 
