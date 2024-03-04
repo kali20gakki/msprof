@@ -1,27 +1,17 @@
+include_directories(${GTEST_INCLUDE_DIR})
+include_directories(${MOCKCPP_INCLUDE_DIR})
+include_directories(${TOP_DIR}/)
+include_directories(${TOP_DIR}/opensource/json/include)
+
+aux_source_directory(${TOP_DIR}/analysis/csrc/utils/ SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/entities/ SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/dfx/ SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/utils SOURCES)
+aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/utils/test SOURCES)
+
 add_executable(
         utils_utest
-        test/main.cpp
-        test/safe_unordered_map_utest.cpp
-        test/thread_pool_utest.cpp
-        test/file_utest.cpp
-        test/utils_utest.cpp
-        test/time_utils_utest.cpp
-        test/hp_float_utest.cpp
-        ${TOP_DIR}/analysis/csrc/entities/event.cpp
-        ${TOP_DIR}/analysis/csrc/utils/safe_unordered_map.h
-        ${TOP_DIR}/analysis/csrc/utils/thread_pool.cpp
-        ${TOP_DIR}/analysis/csrc/utils/file.cpp
-        ${TOP_DIR}/analysis/csrc/utils/utils.cpp
-        ${TOP_DIR}/analysis/csrc/utils/time_utils.cpp
-        ${TOP_DIR}/analysis/csrc/utils/hp_float.cpp
-        ${TOP_DIR}/analysis/csrc/dfx/log.cpp
-)
-
-target_include_directories(utils_utest PRIVATE
-        ${GTEST_INCLUDE_DIR}
-        ${MOCKCPP_INCLUDE_DIR}
-        ${TOP_DIR}/
-        ${TOP_DIR}/opensource/json/include
+        ${SOURCES}
 )
 
 run_test(utils_utest)

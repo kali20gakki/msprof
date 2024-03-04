@@ -55,18 +55,36 @@ bool HostTraceWorker::Run()
 
     // 2. 建树
     // 建树前需要先对KernelEvents排序
-    SortKernelEvents();
+    SortEvents();
     MultiThreadBuildTree();
     // 3. 分析树 & DB Dump
     MultiThreadAnalyzeTreeDumpData();
     return true;
 }
 
-void HostTraceWorker::SortKernelEvents()
+void HostTraceWorker::SortEvents()
 {
     for (auto tid: threadIds_) {
         if (cannWarehouses_[tid].kernelEvents != nullptr) {
             cannWarehouses_[tid].kernelEvents->Sort();
+        }
+        if (cannWarehouses_[tid].fusionOpInfoEvents != nullptr) {
+            cannWarehouses_[tid].fusionOpInfoEvents->Sort();
+        }
+        if (cannWarehouses_[tid].nodeBasicInfoEvents != nullptr) {
+            cannWarehouses_[tid].nodeBasicInfoEvents->Sort();
+        }
+        if (cannWarehouses_[tid].tensorInfoEvents != nullptr) {
+            cannWarehouses_[tid].tensorInfoEvents->Sort();
+        }
+        if (cannWarehouses_[tid].contextIdEvents != nullptr) {
+            cannWarehouses_[tid].contextIdEvents->Sort();
+        }
+        if (cannWarehouses_[tid].hcclInfoEvents != nullptr) {
+            cannWarehouses_[tid].hcclInfoEvents->Sort();
+        }
+        if (cannWarehouses_[tid].hcclInfoEvents != nullptr) {
+            cannWarehouses_[tid].hcclInfoEvents->Sort();
         }
     }
 }
@@ -78,17 +96,18 @@ void HostTraceWorker::MultiThreadBuildTree()
     pool.Start();
     for (auto tid: threadIds_) {
         pool.AddTask([this, tid]() {
-            PRINT_INFO("Start multi thread build tree, threadId = %", tid);
+            INFO("Start multi thread build tree, threadId = %", tid);
             std::shared_ptr<CANNWarehouse> cannWareHouse;
             MAKE_SHARED_RETURN_VOID(cannWareHouse, CANNWarehouse, cannWarehouses_[tid]);
             std::shared_ptr<TreeBuilder> treeBuilder;
             MAKE_SHARED_RETURN_VOID(treeBuilder, TreeBuilder, cannWareHouse, tid);
             auto treeNode = treeBuilder->Build();
-
-            // 保存建树完成的根节点
-            std::lock_guard<std::mutex> lock(mutex_);
-            treeNodes_.emplace_back(tid, treeNode);
-            PRINT_INFO("Multi thread build tree done, threadId = %", tid);
+            if (treeNode) {
+                // 保存建树完成的根节点
+                std::lock_guard<std::mutex> lock(mutex_);
+                treeNodes_.emplace_back(tid, treeNode);
+                INFO("Multi thread build tree done, threadId = %", tid);
+            }
         });
     }
 

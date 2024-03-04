@@ -57,7 +57,7 @@ public:
     // 获取所有ThreadID的集合
     std::set<uint32_t> &GetThreadIdSet();
     // 获取原始全量Api类型的数据
-    std::vector<std::shared_ptr<MsprofApi>> &GetApiTraces();
+    std::vector<std::shared_ptr<Event>> &GetApiTraces();
     // 获取FlipTask数据
     std::vector<std::shared_ptr<Adapter::FlipTask>> &GetFlipTasks();
 private:
@@ -101,7 +101,7 @@ private:
 
 private:
     std::mutex tidLock_;
-    std::vector<std::shared_ptr<MsprofApi>> apiTraces_;
+    std::vector<std::shared_ptr<Event>> apiTraces_;
     std::vector<std::shared_ptr<Adapter::FlipTask>> flipTasks_;
     std::set<uint32_t> threadIds_;
     std::string hostPath_;

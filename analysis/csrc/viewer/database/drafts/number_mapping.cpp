@@ -157,6 +157,7 @@ namespace {
         {8,  "DVPP"},
         {9,  "HCCL"},
         {10, "INVALID"},
+        {11, "HCCL_AI_CPU"}
     };
     const std::unordered_map<uint32_t, std::string> hcclDataTypeMap {
         {0,          "INT8"},

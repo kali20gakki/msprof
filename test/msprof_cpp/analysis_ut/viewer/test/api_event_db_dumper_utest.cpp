@@ -11,12 +11,14 @@
  */
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
+#include "analysis/csrc/entities/event.h"
 #include "analysis/csrc/viewer/database/drafts/api_event_db_dumper.h"
 
 using namespace Analysis::Utils;
 using namespace Analysis::Viewer::Database::Drafts;
 using namespace Analysis::Viewer::Database;
-using ApiData = std::vector<std::shared_ptr<MsprofApi>>;
+using namespace Analysis::Entities;
+using ApiData = std::vector<std::shared_ptr<Event>>;
 const std::string TEST_DB_FILE_PATH = "./sqlite";
 const uint32_t ACL_LEVEL_NUMBER = 20000;
 const uint32_t PYTORCH_LEVEL_NUMBER = 30000;
@@ -35,7 +37,7 @@ protected:
     }
 };
 
-TEST_F(ApiEventDBDumperUtest, TestApiEventDBDumperWithCompletedApiEventShouldInsertDataCorrectly)
+TEST_F(ApiEventDBDumperUtest, TestApiEventDBDumperShouldInsertDataCorrectly)
 {
     ApiEventDBDumper apiEventDbDumper(".");
     auto apiPtr1 = std::make_shared<MsprofApi>();
@@ -47,16 +49,11 @@ TEST_F(ApiEventDBDumperUtest, TestApiEventDBDumperWithCompletedApiEventShouldIns
     apiPtr1->endTime = endTime1;
     apiPtr1->itemId = 0;
 
-    auto apiPtr2 = std::make_shared<MsprofApi>();
-    uint64_t endTime2 = 5;
-    uint32_t threadId2 = 2;
-    apiPtr2->type = 1;
-    apiPtr2->level = PYTORCH_LEVEL_NUMBER;
-    apiPtr2->threadId = threadId2;
-    apiPtr2->beginTime = 1;
-    apiPtr2->endTime = endTime2;
-    apiPtr2->itemId = 1;
-    ApiData apiData {apiPtr1, apiPtr2};
+    EventInfo info1(EventType::EVENT_TYPE_API, MSPROF_REPORT_ACL_LEVEL, 1, endTime1);
+    auto even1 = std::make_shared<Event>(apiPtr1, info1);
+
+    ApiData apiData = {even1};
+
     auto res = apiEventDbDumper.DumpData(apiData);
     EXPECT_TRUE(res);
 
@@ -78,13 +75,6 @@ TEST_F(ApiEventDBDumperUtest, TestApiEventDBDumperWithCompletedApiEventShouldIns
     EXPECT_EQ(std::get<col4>(data[0]), "0");
     EXPECT_EQ(std::get<col5>(data[0]), 1);
     EXPECT_EQ(std::get<col6>(data[0]), endTime1);
-    EXPECT_EQ(std::get<0>(data[1]), "1");
-    EXPECT_EQ(std::get<1>(data[1]), "0");
-    EXPECT_EQ(std::get<col2>(data[1]), "pytorch");
-    EXPECT_EQ(std::get<col3>(data[1]), threadId2);
-    EXPECT_EQ(std::get<col4>(data[1]), "1");
-    EXPECT_EQ(std::get<col5>(data[1]), 1);
-    EXPECT_EQ(std::get<col6>(data[1]), endTime2);
 }
 
 TEST_F(ApiEventDBDumperUtest, TestApiEventDBDumperShouldReturnFalseWhenDBNotCreated)
@@ -94,12 +84,10 @@ TEST_F(ApiEventDBDumperUtest, TestApiEventDBDumperShouldReturnFalseWhenDBNotCrea
     auto apiPtr1 = std::make_shared<MsprofApi>();
     apiPtr1->type = 1 << TWO_BYTES;
     apiPtr1->level = ACL_LEVEL_NUMBER;
+    EventInfo info1(EventType::EVENT_TYPE_API, MSPROF_REPORT_ACL_LEVEL, 1, 1);
+    auto even1 = std::make_shared<Event>(apiPtr1, info1);
 
-    auto apiPtr2 = std::make_shared<MsprofApi>();
-    apiPtr2->type = 1 << TWO_BYTES;
-    apiPtr2->level = PYTORCH_LEVEL_NUMBER;
-
-    ApiData apiData {apiPtr1, apiPtr2};
+    ApiData apiData{even1};
     auto res = apiEventDbDumper.DumpData(apiData);
     ASSERT_FALSE(res);
 }
@@ -112,11 +100,10 @@ TEST_F(ApiEventDBDumperUtest, TestApiEventDBDumperShouldReturnFalseWhenCannotIns
     apiPtr1->type = 1 << TWO_BYTES;
     apiPtr1->level = ACL_LEVEL_NUMBER;
 
-    auto apiPtr2 = std::make_shared<MsprofApi>();
-    apiPtr2->type = 1 << TWO_BYTES;
-    apiPtr2->level = PYTORCH_LEVEL_NUMBER;
+    EventInfo info1(EventType::EVENT_TYPE_API, MSPROF_REPORT_ACL_LEVEL, 1, 1);
+    auto even1 = std::make_shared<Event>(apiPtr1, info1);
 
-    ApiData apiData {apiPtr1, apiPtr2};
+    ApiData apiData{even1};
     auto res = apiEventDbDumper.DumpData(apiData);
     ASSERT_FALSE(res);
 }

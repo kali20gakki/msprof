@@ -49,7 +49,8 @@ public:
 
     // 向核心树的Model, Node, Hccl 层节点添加附加Event
     bool AddLevelEvents(std::shared_ptr<EventQueue> &events,
-                        std::vector<std::shared_ptr<TreeNode>> &levelNodes) const;
+                        std::vector<std::shared_ptr<TreeNode>> &levelNodes,
+                        EventType eventType) const;
     // 向叶子节点添加Runtime层的event
     bool AddTaskTrackEvents(std::shared_ptr<TreeNode> &rootNode,
                             std::shared_ptr<EventQueue> &events,

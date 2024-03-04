@@ -99,7 +99,7 @@ private:
     // 获取其他节点的信息
     std::shared_ptr<HostTask> GetOtherTaskDesc(const std::shared_ptr<TreeNode> &node);
     // 获取算子信息，key为OpName + timeStamp
-    ComputeOpDescs GetComputeOpDescs(const std::shared_ptr<TreeNode> &nodeNode);
+    ComputeOpDescs GetComputeOpDescs(const std::shared_ptr<TreeNode> &nodeNode, bool useCtxId);
     // 获取TreeNode中指定EventType的Records
     std::vector<std::shared_ptr<Event>> GetNodeRecordsByType(const std::shared_ptr<TreeNode> &node,
                                                              const EventType &type);
@@ -119,10 +119,15 @@ private:
     std::shared_ptr<HostTask> GenHostTask(const std::shared_ptr<MsprofCompactInfo> &track,
                                           const std::shared_ptr<MsprofApi> &modelApi,
                                           const std::shared_ptr<Operator> &opPtr,
-                                          uint32_t ctxId, uint16_t taskType);
-    // 根据输入参数生成HostTask数组，该函数包含了业务场景判断逻辑
-    HostTasks GenHostTasks(ComputeOpDescs &ops, const std::shared_ptr<MsprofCompactInfo> &track,
-                           const std::shared_ptr<MsprofApi> &modelApi);
+                                          uint32_t ctxId, uint16_t taskType,
+                                          int64_t connectionId);
+    // 根据输入参数生成HostTask数组
+    HostTasks GenComputeHostTasks(ComputeOpDescs &ops, const std::shared_ptr<MsprofCompactInfo> &track,
+                                  const std::shared_ptr<MsprofApi> &modelApi, int64_t connection_id);
+
+    void UpdateComputeDescForFftsSituation(ComputeOpDescs &descs, const std::shared_ptr<Event> &track);
+    void UpdateComputeDescForHcclSituation(ComputeOpDescs &descs, const std::shared_ptr<Event> &track,
+                                           uint32_t item_id);
 
 private:
     // 树的root节点

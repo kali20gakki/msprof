@@ -77,21 +77,21 @@ std::shared_ptr<TreeNode> TreeBuilder::Build()
 
     // Model Level
     pool.AddTask([this, &graphIdMapEvents, &fusionOpInfoEvents]() {
-        AddLevelEvents(graphIdMapEvents, modelLevelNodes_);
-        AddLevelEvents(fusionOpInfoEvents, modelLevelNodes_);
+        AddLevelEvents(graphIdMapEvents, modelLevelNodes_, EventType::EVENT_TYPE_GRAPH_ID_MAP);
+        AddLevelEvents(fusionOpInfoEvents, modelLevelNodes_, EventType::EVENT_TYPE_FUSION_OP_INFO);
     });
 
     // Node Level
     pool.AddTask([this, &nodeCtxIdEvents, &tensorInfoEvents, &nodeBasicInfoEvents]() {
-        AddLevelEvents(nodeBasicInfoEvents, nodeLevelNodes_);
-        AddLevelEvents(tensorInfoEvents, nodeLevelNodes_);
-        AddLevelEvents(nodeCtxIdEvents, nodeLevelNodes_);
+        AddLevelEvents(nodeBasicInfoEvents, nodeLevelNodes_, EventType::EVENT_TYPE_NODE_BASIC_INFO);
+        AddLevelEvents(tensorInfoEvents, nodeLevelNodes_, EventType::EVENT_TYPE_TENSOR_INFO);
+        AddLevelEvents(nodeCtxIdEvents, nodeLevelNodes_, EventType::EVENT_TYPE_CONTEXT_ID);
     });
 
     // Hccl level
     pool.AddTask([this, &hcclCtxIdEvents, &hcclInfoEvents]() {
-        AddLevelEvents(hcclCtxIdEvents, hcclLevelNodes_);
-        AddLevelEvents(hcclInfoEvents, hcclLevelNodes_);
+        AddLevelEvents(hcclCtxIdEvents, hcclLevelNodes_, EventType::EVENT_TYPE_CONTEXT_ID);
+        AddLevelEvents(hcclInfoEvents, hcclLevelNodes_, EventType::EVENT_TYPE_HCCL_INFO);
     });
 
     pool.WaitAllTasks();
@@ -128,11 +128,12 @@ EventQueuePair TreeBuilder::GroupCtxIdEvents(std::shared_ptr<EventQueue> &ctxIdE
 
 // 双指针遍历向Model Node HCCL Level的TreeNode中添加events
 bool TreeBuilder::AddLevelEvents(std::shared_ptr<EventQueue> &events,
-                                 std::vector<std::shared_ptr<TreeNode>> &levelNodes) const
+                                 std::vector<std::shared_ptr<TreeNode>> &levelNodes,
+                                 EventType eventType) const
 {
     // 检查输入各Type的Events指针
     if (!events) {
-        ERROR("Events pointer is nullptr, threadId = %", threadId_);
+        WARN("Events pointer is nullptr, threadId = %, event type: %", threadId_, static_cast<int>(eventType));
         return false;
     }
     // 保证非空
@@ -155,20 +156,22 @@ bool TreeBuilder::AddLevelEvents(std::shared_ptr<EventQueue> &events,
             if (std::next(it) != levelNodes.end() && event->info.start < (*std::next(it))->event->info.start) {
                 events->Pop(); // 丢掉此event
                 mismatchCnt++;
-                ERROR("Drop event threadId = %, start = %, its start time between "
-                      "last TreeNode end and next TreeNode start", threadId_, event->info.start);
+                ERROR("Drop event threadId = %, start = %, event type: %, its start time between "
+                      "last TreeNode end and next TreeNode start", threadId_, event->info.start,
+                      static_cast<int>(eventType));
             }
             it++;
         } else {
             // event小于TreeNode的开始时间，此event对应的TreeNode丢失
             events->Pop(); // 丢掉此event
             mismatchCnt++;
-            ERROR("Drop event threadId = %, start = %, its start time less than TreeNode start time",
-                  threadId_, event->info.start);
+            ERROR("Drop event threadId = %, event type: %, event time range: [%, %], node time range: [%, %]",
+                  threadId_, static_cast<int>(eventType), event->info.start, event->info.end,
+                  (*it)->event->info.start, (*it)->event->info.end);
         }
     }
-    INFO("Add LevelEvents done, threadId = %, matchCnt = %, mismatchCnt = % ",
-         threadId_, matchCnt, mismatchCnt);
+    INFO("Add LevelEvents done, threadId = %, event type: %, matchCnt = %, mismatchCnt = % ",
+         threadId_, static_cast<int>(eventType), matchCnt, mismatchCnt);
     // events没有匹配完
     if (!events->Empty()) {
         ERROR("After matching events is not empty, size = %, threadId = %", events->GetSize(), threadId_);

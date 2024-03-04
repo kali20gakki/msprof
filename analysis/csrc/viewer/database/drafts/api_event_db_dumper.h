@@ -16,10 +16,10 @@
 
 #include <thread>
 #include <unordered_map>
-#include "collector/inc/toolchain/prof_common.h"
 #include "analysis/csrc/viewer/database/db_runner.h"
 #include "analysis/csrc/viewer/database/database.h"
 #include "analysis/csrc/viewer/database/drafts/base_dumper.h"
+#include "analysis/csrc/entities/event.h"
 
 namespace Analysis {
 namespace Viewer {
@@ -29,10 +29,10 @@ using EventData = std::vector<std::tuple<std::string, std::string, std::string, 
         uint64_t, uint64_t, uint32_t>>;
 
 class ApiEventDBDumper final : public BaseDumper<ApiEventDBDumper> {
-    using ApiData = std::vector<std::shared_ptr<MsprofApi>>;
+    using ApiData = std::vector<std::shared_ptr<Entities::Event>>;
 public:
     explicit ApiEventDBDumper(const std::string &hostFilePath);
-    EventData GenerateData(const ApiData &apiEvent);
+    EventData GenerateData(const ApiData &apiTraces);
 };
 } // Database
 } // Viewer

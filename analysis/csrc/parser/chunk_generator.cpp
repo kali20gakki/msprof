@@ -10,11 +10,10 @@
  * *****************************************************************************
  */
 
-#include "analysis/csrc/parser/chunk_generator.h"
-
 #include "analysis/csrc/dfx/log.h"
 #include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/parser/chunk_generator.h"
 
 namespace Analysis {
 namespace Parser {
@@ -24,6 +23,7 @@ ChunkGenerator::ChunkGenerator(uint32_t chunkSize, const std::string &path, cons
     : chunkSize_(chunkSize)
 {
     auto files = File::GetOriginData(path, filePrefix, {"done", "complete"});
+    files = File::SortFilesByAgingAndSliceNum(files);
     std::move(
         files.begin(),
         files.end(),
@@ -69,7 +69,7 @@ CHAR_PTR ChunkGenerator::Pop()
         WARN("Nothing remain to Pop.");
         return nullptr;
     }
-    auto chunk = new (std::nothrow) char[chunkSize_];
+    auto chunk = new(std::nothrow) char[chunkSize_];
     if (!chunk) {
         ERROR("New chunk failed.");
         return nullptr;

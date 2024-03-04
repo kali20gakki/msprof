@@ -1,16 +1,15 @@
-add_executable(
-    dfx_utest
-    test/main.cpp
-    test/log_utest.cpp
-    ${TOP_DIR}/analysis/csrc/dfx/log.cpp
-    ${TOP_DIR}/analysis/csrc/utils/file.cpp
-)
+include_directories(${GTEST_INCLUDE_DIR})
+include_directories(${MOCKCPP_INCLUDE_DIR})
+include_directories(${TOP_DIR}/)
+include_directories(${TOP_DIR}/opensource/json/include)
 
-target_include_directories(dfx_utest PRIVATE
-    ${TOP_DIR}/
-    ${GTEST_INCLUDE_DIR}
-    ${MOCKCPP_INCLUDE_DIR}
-    ${TOP_DIR}/opensource/json/include
+aux_source_directory(${TOP_DIR}/analysis/csrc/utils/ SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/dfx/ SOURCES)
+aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/dfx/test SOURCES)
+
+add_executable(
+        dfx_utest
+        ${SOURCES}
 )
 
 run_test(dfx_utest)

@@ -37,7 +37,7 @@ public:
     // 启动整个流程
     bool Run();
 private:
-    void SortKernelEvents();
+    void SortEvents();
     void MultiThreadBuildTree();
     void MultiThreadAnalyzeTreeDumpData();
 private:

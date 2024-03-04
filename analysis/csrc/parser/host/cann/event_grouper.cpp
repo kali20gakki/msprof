@@ -30,7 +30,7 @@ std::set<uint32_t> &EventGrouper::GetThreadIdSet()
     return threadIds_;
 }
 
-std::vector<std::shared_ptr<MsprofApi>> &EventGrouper::GetApiTraces()
+std::vector<std::shared_ptr<Event>> &EventGrouper::GetApiTraces()
 {
     return apiTraces_;
 }
@@ -114,7 +114,6 @@ void EventGrouper::GroupEvents<ApiEventParser, MsprofApi, &CANNWarehouse::kernel
     MAKE_SHARED_RETURN_VOID(parser, ApiEventParser, hostPath_);
 
     auto traces = parser->ParseData<MsprofApi>();
-    apiTraces_ = traces; // 保存一份全量api
 
     // 统计各个threadId元素个数，用于EventQueue分配精确的内存大小，避免大量内存浪费
     std::unordered_map<uint32_t, uint64_t> threadIdNum;
@@ -130,14 +129,17 @@ void EventGrouper::GroupEvents<ApiEventParser, MsprofApi, &CANNWarehouse::kernel
     CANNWarehouses kernelWarehouses;
     // 2. 转换生成Event，并将其添加到 CANNWarehouses
     for (const auto &trace: traces) {
-        // 只处理符合条件的trace，提升性能
-        if (!isKernelApiEvent(trace)) {
-            continue;
-        }
         EventInfo info{eventType, trace->level,
                        trace->beginTime, trace->endTime};
         std::shared_ptr<Event> event;
         MAKE_SHARED_BREAK(event, Event, trace, info);
+        apiTraces_.emplace_back(event); // 保存一份全量api
+
+        // 只处理符合条件的trace，提升性能
+        if (!isKernelApiEvent(trace)) {
+            continue;
+        }
+
         // 新建
         if (!kernelWarehouses.FindAndInsertIfNotExist(trace->threadId)) {
             std::shared_ptr<EventQueue> que;
