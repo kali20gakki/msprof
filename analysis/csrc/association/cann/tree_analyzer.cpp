@@ -242,9 +242,9 @@ HostTasks TreeAnalyzer::GenHostTasks(ComputeOpDescs &ops,
             continue;
         }
 
-        auto taskType = desc->nodeDesc->level;
-        auto nodeBasicTaskType = TypeData::GetInstance().Get(desc->nodeDesc->level,
-                                                             track->data.runtimeTrack.taskType);
+        auto taskType = track->data.nodeBasicInfo.taskType;
+        auto nodeBasicTaskType = TypeData::GetInstance().Get(track->level,
+                                                             track->data.nodeBasicInfo.taskType);
         if (nodeBasicTaskType == FFTS_PLUS_TASK_TYPE) {
             // FFTS+存在整图下发的场景，需要将整图上报的信息排除
             continue;

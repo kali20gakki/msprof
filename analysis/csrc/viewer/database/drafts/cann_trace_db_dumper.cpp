@@ -100,7 +100,7 @@ void CANNTraceDBDumper::DumpHcclOps(const HCCLBigOpDescs &hcclOps)
                           HashData::GetInstance().Get(op->name),
                           msprofCompactInfo == nullptr ? "HCCL" : std::to_string(
                               msprofCompactInfo->data.nodeBasicInfo.taskType),
-                          msprofCompactInfo == nullptr ? NA : std::to_string(
+                          msprofCompactInfo == nullptr ? NA : HashData::GetInstance().Get(
                               msprofCompactInfo->data.nodeBasicInfo.opType),
                           desc->beginTime, desc->endTime, isDynamic,
                           connection_id);
@@ -300,8 +300,8 @@ void CANNTraceDBDumper::DumpHcclTasks(const HostTasks &hcclTasks)
             continue;
         }
         auto hcclTrace = Utils::ReinterpretConvert<MsprofHcclInfo *>(desc->hcclInfo->data);
-        data.emplace_back(task->modelId, task->requestId, HashData::GetInstance().Get(task->op->name),
-                          HashData::GetInstance().Get(hcclTrace->groupName), hcclTrace->planeID,
+        data.emplace_back(task->modelId, task->requestId, HashData::GetInstance().Get(hcclTrace->itemId),
+                          std::to_string(hcclTrace->groupName), hcclTrace->planeID,
                           std::to_string(task->timeStamp), hcclTrace->durationEstimated, task->streamId, task->taskId,
                           desc->ctxId, task->batchId, task->deviceId, 0, "struct_type", hcclTrace->localRank,
                           hcclTrace->remoteRank, NumberMapping::Get(
