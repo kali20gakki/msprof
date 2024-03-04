@@ -210,22 +210,21 @@ void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInf
             outputShape.emplace_back(Utils::Join(shapes, ","));
         }
     }
-    auto desc = task->op->opDesc;
-    auto ctxId = desc->ctxId;
-    auto threadId = ctxId == nullptr ? 0 : ctxId->threadId;
+    auto threadId = tensorDesc->threadId;
     uint32_t blockDim = nodeBasicInfo.blockDim & 0xffff;
     auto mixBlockDim = blockDim * (nodeBasicInfo.blockDim >> 16);
     auto opFlag = nodeBasicInfo.opFlag ? "YES" : "NO";
+    auto opState = std::to_string(nodeBasicInfo.opState);
     data.emplace_back(task->modelId, HashData::GetInstance().Get(nodeBasicInfo.opName), task->streamId,
                       task->taskId,
-                      blockDim, mixBlockDim, NA,
+                      blockDim, mixBlockDim, opState,
                       NumberMapping::Get(
                           NumberMapping::MappingType::GE_TASK_TYPE, nodeBasicInfo.taskType),
                       HashData::GetInstance().Get(nodeBasicInfo.opType), task->requestId, threadId,
                       static_cast<double>(task->timeStamp), task->batchId, tensorNum, Utils::Join(inputFormat, ";"),
-                      Utils::Join(inputDataType, ";"), Utils::Join(inputShape, ";"),
+                      Utils::Join(inputDataType, ";"), Utils::AddQuotation(Utils::Join(inputShape, ";")),
                       Utils::Join(outputFormat, ";"), Utils::Join(outputDataType, ";"),
-                      Utils::Join(outputShape, ";"), task->deviceId, task->contextId, opFlag);
+                      Utils::AddQuotation(Utils::Join(outputShape, ";")), task->deviceId, task->contextId, opFlag);
 }
 
 void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskInfoData &data)
@@ -246,18 +245,19 @@ void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskI
                           task->deviceId, UNDEFINED_INT_VALUE, "NO");
         return;
     }
-    auto ctxId = desc->ctxId;
-    auto threadId = ctxId == nullptr ? 0 : ctxId->threadId;
+    auto node = desc->nodeDesc;
     auto nodeBasicInfo = nodeBasic->data.nodeBasicInfo;
     auto blockDim = nodeBasicInfo.blockDim & 0xffff;
     auto mixBlockDim = blockDim * (nodeBasicInfo.blockDim >> 16);
     auto tensorDesc = desc->tensorDesc;
+    auto threadId = tensorDesc == nullptr ? 0 : tensorDesc->threadId;
     auto opFlag = nodeBasicInfo.opFlag ? "YES" : "NO";
+    auto opState = std::to_string(nodeBasicInfo.opState);
     if (!tensorDesc) {
         data.emplace_back(task->modelId, HashData::GetInstance().Get(nodeBasicInfo.opName), task->streamId,
                           task->taskId, blockDim,
-                          mixBlockDim, NA, NumberMapping::Get(NumberMapping::MappingType::GE_TASK_TYPE,
-                                                              nodeBasicInfo.taskType),
+                          mixBlockDim, opState, NumberMapping::Get(NumberMapping::MappingType::GE_TASK_TYPE,
+                                                                   nodeBasicInfo.taskType),
                           HashData::GetInstance().Get(nodeBasicInfo.opType),
                           task->requestId, threadId, static_cast<double>(task->timeStamp), task->batchId,
                           0, NA, NA, NA, NA, NA, NA, task->deviceId, task->contextId, opFlag);

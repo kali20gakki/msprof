@@ -36,7 +36,7 @@ using HostTask = Analysis::Entities::HostTask;
 using OpDesc = Analysis::Entities::OpDesc;
 using HostTasks = std::vector<std::shared_ptr<HostTask>>;
 using TaskInfoData = std::vector<std::tuple<uint32_t, std::string, uint32_t, uint32_t, uint32_t, uint32_t, std::string,
-        std::string, std::string, uint32_t, uint32_t, double, uint32_t, uint32_t, std::string, std::string, std::string,
+        std::string, std::string, int32_t, uint32_t, double, uint32_t, uint32_t, std::string, std::string, std::string,
         std::string, std::string, std::string, uint32_t, uint32_t, std::string>>;
 using HCCLBigOpDescs = Analysis::Association::Cann::HCCLBigOpDescs;
 public:
