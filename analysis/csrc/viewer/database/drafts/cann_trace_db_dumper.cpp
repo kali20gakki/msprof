@@ -17,6 +17,7 @@
 #include "analysis/csrc/utils/thread_pool.h"
 #include "analysis/csrc/utils/time_logger.h"
 #include "analysis/csrc/viewer/database/drafts/number_mapping.h"
+#include "collector/inc/toolchain/prof_common.h"
 
 namespace Analysis {
 namespace Viewer {
@@ -26,15 +27,15 @@ using ThreadPool = Analysis::Utils::ThreadPool;
 using HashData = Analysis::Parser::Host::Cann::HashData;
 using TypeData = Analysis::Parser::Host::Cann::TypeData;
 
-using HCCLOpsDumpData = std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, std::string, std::string,
-        std::string, uint64_t, uint64_t, uint32_t, uint32_t>>;
+using HCCLOpsDumpData = std::vector<std::tuple<uint32_t, uint64_t, int32_t, uint32_t, std::string, std::string,
+        std::string, uint64_t, uint64_t, std::string, int64_t>>;
 
 using HostTasksDumpData = std::vector<std::tuple<uint32_t,
         uint32_t, uint32_t, uint32_t, std::string, uint32_t, std::string, uint32_t, std::string, int64_t>>;
 
-using HcclTasksDumpData = std::vector<std::tuple<uint32_t, uint32_t, std::string, std::string, uint32_t, std::string,
-        double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, std::string, uint32_t, uint32_t,
-        std::string, double, std::string, std::string, uint64_t, std::string>>;
+using HcclTasksDumpData = std::vector<std::tuple<uint32_t, int32_t, std::string, std::string, uint32_t, std::string,
+        double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
+        std::string, double, std::string, std::string, std::string, std::string>>;
 
 const uint32_t UNDEFINED_INT_VALUE = 4294967295;
 const std::string NA = "N/A";
@@ -89,20 +90,22 @@ void CANNTraceDBDumper::DumpHcclOps(const HCCLBigOpDescs &hcclOps)
         }
         auto deviceId = op->hcclBigOpDesc->deviceId;
         auto desc = op->hcclBigOpDesc;
-        // several attributes can not get currently, use default value
-        uint32_t modelId = UNDEFINED_INT_VALUE;
-        uint32_t indexId = UNDEFINED_INT_VALUE;
-        uint32_t isDynamic = UNDEFINED_INT_VALUE;
-        uint32_t connection_id = -1;
+        uint64_t modelId = desc->modelId;
+        int32_t indexId = desc->indexId;
+        std::string isDynamic = NA;
+        int64_t connection_id = desc->connectionId;
         auto msprofCompactInfo = desc->nodeDesc;
         data.emplace_back(deviceId, modelId, indexId,
                           msprofCompactInfo == nullptr ? -1 : msprofCompactInfo->threadId,
                           HashData::GetInstance().Get(op->name),
-                          msprofCompactInfo == nullptr ? "HCCL" : std::to_string(
+                          msprofCompactInfo == nullptr ? "HCCL" : NumberMapping::Get(
+                              NumberMapping::MappingType::GE_TASK_TYPE,
                               msprofCompactInfo->data.nodeBasicInfo.taskType),
                           msprofCompactInfo == nullptr ? NA : HashData::GetInstance().Get(
                               msprofCompactInfo->data.nodeBasicInfo.opType),
-                          desc->beginTime, desc->endTime, isDynamic,
+                          desc->beginTime, desc->endTime,
+                          msprofCompactInfo == nullptr ? isDynamic :
+                              std::to_string(msprofCompactInfo->data.nodeBasicInfo.opState),
                           connection_id);
     }
     if (!hcclOpDBRunner.InsertData("HCCLOP", data)) {
@@ -272,7 +275,6 @@ void CANNTraceDBDumper::DumpHcclTasks(const HostTasks &hcclTasks)
         INFO("Empty hccl tasks");
         return;
     }
-    Utils::TimeLogger t{"Dump hccl tasks"};
     HCCLDB hcclDB;
     std::string hcclTaskDBPath = Utils::File::PathJoin({hostFilePath_, "sqlite", hcclDB.GetDBName()});
     DBRunner hcclTaskDBRunner(hcclTaskDBPath);
@@ -292,24 +294,24 @@ void CANNTraceDBDumper::DumpHcclTasks(const HostTasks &hcclTasks)
             continue;
         }
         auto desc = task->op->hcclSmallOpDesc;
+        auto isMaster = desc->isMaster;
         if (!desc->hcclInfo || !desc->hcclInfo->data) {
-            data.emplace_back(task->modelId, task->requestId, HashData::GetInstance().Get(task->op->name),
-                              NA, UNDEFINED_INT_VALUE, std::to_string(task->timeStamp), 0, task->streamId,
-                              task->taskId, desc->ctxId, task->batchId, task->deviceId, 0, "struct_type",
-                              UNDEFINED_INT_VALUE, UNDEFINED_INT_VALUE, NA, 0, NA, NA, UNDEFINED_INT_VALUE, NA);
+            data.emplace_back(task->modelId, task->requestId, NA, NA, UNDEFINED_INT_VALUE,
+                              std::to_string(task->timeStamp), 0, task->streamId, task->taskId, desc->ctxId,
+                              task->batchId, task->deviceId, isMaster, UNDEFINED_INT_VALUE,
+                              UNDEFINED_INT_VALUE, NA, 0, NA, NA, NA, NA);
             continue;
         }
         auto hcclTrace = Utils::ReinterpretConvert<MsprofHcclInfo *>(desc->hcclInfo->data);
         data.emplace_back(task->modelId, task->requestId, HashData::GetInstance().Get(hcclTrace->itemId),
-                          std::to_string(hcclTrace->groupName), hcclTrace->planeID,
-                          std::to_string(task->timeStamp), hcclTrace->durationEstimated, task->streamId, task->taskId,
-                          desc->ctxId, task->batchId, task->deviceId, 0, "struct_type", hcclTrace->localRank,
-                          hcclTrace->remoteRank, NumberMapping::Get(
-                              NumberMapping::MappingType::HCCL_TRANSPORT_TYPE, hcclTrace->transportType),
+                          std::to_string(hcclTrace->groupName), hcclTrace->planeID, std::to_string(task->timeStamp),
+                          hcclTrace->durationEstimated, task->streamId, task->taskId, desc->ctxId, task->batchId,
+                          task->deviceId, isMaster, hcclTrace->localRank, hcclTrace->remoteRank,
+                          NumberMapping::Get(NumberMapping::MappingType::HCCL_TRANSPORT_TYPE, hcclTrace->transportType),
                           static_cast<double>(hcclTrace->dataSize),
                           NumberMapping::Get(NumberMapping::MappingType::HCCL_DATA_TYPE, hcclTrace->dataType),
                           NumberMapping::Get(NumberMapping::MappingType::HCCL_LINK_TYPE, hcclTrace->linkType),
-                          hcclTrace->notifyID, NumberMapping::Get(
+                          std::to_string(hcclTrace->notifyID), NumberMapping::Get(
                               NumberMapping::MappingType::HCCL_RDMA_TYPE, hcclTrace->rdmaType));
     }
     if (!hcclTaskDBRunner.InsertData("HCCLTask", data)) {

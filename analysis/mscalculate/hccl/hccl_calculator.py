@@ -182,7 +182,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                                     data.hccl_name, data.group_name, data.first_timestamp, data.plane_id,
                                     data.timestamp, data.duration, data.is_dynamic,
                                     data.task_type, data.op_type, data.connection_id,
-                                    data.is_master, data.stream_id, data.task_id, data.struct_type,
+                                    data.is_master, data.stream_id, data.task_id,
                                     data.duration_estimated, data.local_rank, data.remote_rank, data.transport_type,
                                     data.size, data.data_type, data.link_type, data.bandwidth, data.context_id,
                                     data.notify_id, data.batch_id, data.rdma_type])

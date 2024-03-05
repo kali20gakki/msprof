@@ -77,7 +77,6 @@ class HcclViewModel(ViewModel):
         sql = "SELECT a.model_id as model_id, a.index_id as index_id, a.name as hccl_name, a.plane_id as plane_id, " \
               "a.timestamp as host_timestamp,a.group_name as group_name, b.start_time as timestamp, " \
               "a.is_master as is_master, a.stream_id as stream_id, a.task_id as task_id, " \
-              "a.struct_type as struct_type," \
               "a.duration as duration_estimated, a.local_rank as local_rank, a.remote_rank as remote_rank," \
               "a.transport_type as transport_type, a.size as size, a.data_type as data_type," \
               " a.link_type as link_type," \

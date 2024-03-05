@@ -48,8 +48,6 @@ class HcclTask:
     op_type: str = Constant.NA
     task_type: str = Constant.NA
     connection_id: int = Constant.DEFAULT_INVALID_VALUE
-    is_master: int = Constant.DEFAULT_INVALID_VALUE
-    struct_type: int = Constant.DEFAULT_INVALID_VALUE
     duration_estimated: int = Constant.DEFAULT_INVALID_VALUE
     local_rank: int = Constant.DEFAULT_INVALID_VALUE
     remote_rank: int = Constant.DEFAULT_INVALID_VALUE

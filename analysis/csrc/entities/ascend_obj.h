@@ -37,8 +37,13 @@ struct OpDesc {
 
 // 通信小算子描述信息
 struct HcclSmallOpDesc {
-    std::shared_ptr<MsprofAdditionalInfo> hcclInfo = nullptr;
     uint32_t ctxId = DEFAULT_CONTEXT_ID;
+    uint8_t isMaster = 0;  // 1代表master
+    std::shared_ptr<MsprofAdditionalInfo> hcclInfo = nullptr;
+
+    HcclSmallOpDesc(uint32_t ctxId, uint32_t isMaster, const std::shared_ptr<MsprofAdditionalInfo> &hcclInfo)
+        : ctxId(ctxId), isMaster(isMaster), hcclInfo(hcclInfo)
+    {}
 };
 
 // 通信大算子描述信息
@@ -46,10 +51,15 @@ struct HcclBigOpDesc {
     uint64_t beginTime = 0;
     uint64_t endTime = 0;
     uint16_t deviceId = 0;
+    uint64_t modelId = 0;
+    int32_t indexId = 0;
+    int64_t connectionId = 0;
     std::shared_ptr<MsprofCompactInfo> nodeDesc = nullptr;
 
-    HcclBigOpDesc(uint64_t begin, uint64_t end, uint16_t deviceId, const std::shared_ptr<MsprofCompactInfo> &node)
-        : beginTime(begin), endTime(end), deviceId(deviceId), nodeDesc(node)
+    HcclBigOpDesc(uint64_t begin, uint64_t end, uint16_t deviceId, uint64_t model_id, int32_t index_id,
+                  int64_t connectionId, const std::shared_ptr<MsprofCompactInfo> &node)
+        : beginTime(begin), endTime(end), deviceId(deviceId), modelId(model_id), indexId(index_id),
+        connectionId(connectionId), nodeDesc(node)
     {}
 };
 

@@ -76,13 +76,13 @@ class TestHCCLModel(TestDirCRBaseModel):
         # model_id, index_id, name, group_name, plane_id, timestamp, duration,
         # stream_id, task_id, context_id, batch_id, device_id, args
         hccl_task_data = [
-            (1, -1, "Memcpy", "1", 1, 1, 1, 100, 200, 300, 0, 0, 0, "1", 1, 1, "1", 20, "a", "b", "2", "RDMA_SEND"),
-            (1, -1, "Notify_Wait", "1", 1, 1, 1, 102, 202, 302, 0, 0, 0, "1", 1, 1, "1", 20, "a", "b", "2", "INVALID"),
-            (1, -1, "Notify_Record", "1", 1, 1, 1, 103, 203, 303, 0, 0, 0, "1", 1, 1, "1", 20, "a", "b", "2",
+            (1, -1, "Memcpy", "1", 1, 1, 1, 100, 200, 300, 0, 0, 0, 1, 1, "1", 20, "a", "b", "2", "RDMA_SEND"),
+            (1, -1, "Notify_Wait", "1", 1, 1, 1, 102, 202, 302, 0, 0, 0, 1, 1, "1", 20, "a", "b", "2", "INVALID"),
+            (1, -1, "Notify_Record", "1", 1, 1, 1, 103, 203, 303, 0, 0, 0, 1, 1, "1", 20, "a", "b", "2",
              "INVALID"),
-            (1, -1, "Memcpy", "1", 1, 1, 1, 999, 204, 304, 0, 0, 0, "1", 1, 1, "1", 20, "a", "b", "2", "INVALID"),
-            (1, -1, "Memcpy", "1", 1, 1, 1, 105, 205, 305, 0, 1, 0, "1", 1, 1, "1", 20, "a", "b", "2", "INVALID"),
-            (1, -1, "Memcpy", "1", 1, 1, 1, 999, 206, 306, 0, 2, 0, "1", 1, 1, "1", 20, "a", "b", "2", "INVALID"),
+            (1, -1, "Memcpy", "1", 1, 1, 1, 999, 204, 304, 0, 0, 0, 1, 1, "1", 20, "a", "b", "2", "INVALID"),
+            (1, -1, "Memcpy", "1", 1, 1, 1, 105, 205, 305, 0, 1, 0, 1, 1, "1", 20, "a", "b", "2", "INVALID"),
+            (1, -1, "Memcpy", "1", 1, 1, 1, 999, 206, 306, 0, 2, 0, 1, 1, "1", 20, "a", "b", "2", "INVALID"),
         ]
 
         # model_id, index_id, stream_id, task_id, context_id, batch_id, start_time,

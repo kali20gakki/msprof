@@ -110,10 +110,12 @@ private:
     // 根据ctxId和hcclinfo更新hccl小算子描述信息
     bool UpdateHcclSmallOpDescs(HCCLSmallOpDescs &descs,
                                 const std::vector<std::shared_ptr<Event>> &ctxIDRecords,
-                                const std::vector<std::shared_ptr<Event>> &hcclInfoRecords);
+                                const std::vector<std::shared_ptr<Event>> &hcclInfoRecords,
+                                uint8_t isMaster);
     // 根据hcclinfo更新hccl小算子描述信息
     bool UpdateHcclSmallOpDescs(HCCLSmallOpDescs &descs,
-                                const std::vector<std::shared_ptr<Event>> &hcclInfoRecords);
+                                const std::vector<std::shared_ptr<Event>> &hcclInfoRecords,
+                                uint8_t isMaster);
 
     // 根据输入参数生成HostTask，该函数纯粹负责HostTask生成
     std::shared_ptr<HostTask> GenHostTask(const std::shared_ptr<MsprofCompactInfo> &track,
