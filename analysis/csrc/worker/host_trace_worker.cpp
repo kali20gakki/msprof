@@ -43,23 +43,31 @@ bool HostTraceWorker::Run()
         return false;
     }
     threadIds_ = grouper->GetThreadIdSet();
-    // api event 数据落盘
-    auto apiTraces = grouper->GetApiTraces();
-    std::shared_ptr<ApiEventDBDumper> apiDumper;
-    MAKE_SHARED_RETURN_VALUE(apiDumper, ApiEventDBDumper, false, hostPath_);
-    auto ret = apiDumper->DumpData(apiTraces);
-    if (!ret) {
-        ERROR("Dump api traces data failed");
-        return false;
-    }
-
-    // 2. 建树
-    // 建树前需要先对KernelEvents排序
-    SortEvents();
-    MultiThreadBuildTree();
-    // 3. 分析树 & DB Dump
-    MultiThreadAnalyzeTreeDumpData();
-    return true;
+    bool ret = true;
+    ThreadPool pool(poolSize_);
+    pool.Start();
+    pool.AddTask([this, &grouper, &ret]() {
+        TimeLogger t{"Dump api data start"};
+        // api event 数据落盘
+        auto apiTraces = grouper->GetApiTraces();
+        std::shared_ptr<ApiEventDBDumper> apiDumper;
+        MAKE_SHARED_RETURN_VALUE(apiDumper, ApiEventDBDumper, false, hostPath_);
+        ret = apiDumper->DumpData(apiTraces);
+        if (!ret) {
+            ERROR("Dump api traces data failed");
+        }
+    });
+    pool.AddTask([this]() {
+        // 建树
+        // 建树前需要先对KernelEvents排序
+        SortEvents();
+        MultiThreadBuildTree();
+        // 分析树 & DB Dump
+        MultiThreadAnalyzeTreeDumpData();
+    });
+    pool.WaitAllTasks();
+    pool.Stop();
+    return ret;
 }
 
 void HostTraceWorker::SortEvents()

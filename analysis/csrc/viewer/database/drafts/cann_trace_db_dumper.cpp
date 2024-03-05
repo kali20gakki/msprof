@@ -48,14 +48,24 @@ CANNTraceDBDumper::CANNTraceDBDumper(std::string hostFilePath) : hostFilePath_(s
 bool CANNTraceDBDumper::DumpData(TreeAnalyzer analyzer)
 {
     Utils::TimeLogger t{"Dump CANN data"};
-    HCCLBigOpDescs hcclBigOps = analyzer.GetHcclBigOps();
-    HostTasks hostTasks = analyzer.GetTasks();
-    HostTasks computeTasks = analyzer.GetComputeTasks();
-    HostTasks hcclTasks = analyzer.GetHCCLTasks();
-    DumpHcclOps(hcclBigOps);
-    DumpHostTasks(hostTasks);
-    DumpOpDesc(computeTasks);
-    DumpHcclTasks(hcclTasks);
+    ThreadPool pool(poolSize_);
+    pool.Start();
+    pool.AddTask([this, &analyzer]() {
+        HCCLBigOpDescs hcclBigOps = analyzer.GetHcclBigOps();
+        HostTasks hcclTasks = analyzer.GetHCCLTasks();
+        DumpHcclOps(hcclBigOps);
+        DumpHcclTasks(hcclTasks);
+    });
+    pool.AddTask([this, &analyzer]() {
+        HostTasks hostTasks = analyzer.GetTasks();
+        DumpHostTasks(hostTasks);
+    });
+    pool.AddTask([this, &analyzer]() {
+        HostTasks computeTasks = analyzer.GetComputeTasks();
+        DumpOpDesc(computeTasks);
+    });
+    pool.WaitAllTasks();
+    pool.Stop();
     if (!result_) {
         ERROR("Dump CANN data failed!");
         return false;
@@ -275,6 +285,7 @@ void CANNTraceDBDumper::DumpHcclTasks(const HostTasks &hcclTasks)
         INFO("Empty hccl tasks");
         return;
     }
+    Utils::TimeLogger t{"DumpHcclTasks start"};
     HCCLDB hcclDB;
     std::string hcclTaskDBPath = Utils::File::PathJoin({hostFilePath_, "sqlite", hcclDB.GetDBName()});
     DBRunner hcclTaskDBRunner(hcclTaskDBPath);
