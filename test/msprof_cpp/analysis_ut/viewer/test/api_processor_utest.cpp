@@ -26,13 +26,13 @@ using namespace Analysis::Association::Credential;
 // struct_type, id, level, thread_id, item_id, start, end, connection_id
 using ApiDataFormat = std::vector<std::tuple<std::string, std::string, std::string, uint32_t,
         std::string, uint64_t, uint64_t, uint64_t>>;
-// start, end, level, globalTid, connectionId, name
+// start, end, type, globalTid, connectionId, name, apiId
 using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint16_t,
-        uint64_t, uint64_t, uint64_t>>;
+        uint64_t, uint64_t, uint64_t, uint64_t>>;
 
-// start, end, level, globalTid, connectionId, name
-using QueryDataFormat = std::vector<std::tuple<std::string, std::string, uint32_t,
-        uint64_t, uint64_t, uint64_t>>;
+// start, end, type, globalTid, connectionId, name, apiId
+using QueryDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t,
+        uint64_t, uint64_t, uint64_t, uint64_t>>;
 
 const std::string API_DIR = "./api";
 const std::string REPORT = "report.db";
@@ -43,11 +43,6 @@ const std::string PROF2 = File::PathJoin({API_DIR, "PROF_2"});
 const std::string PROF3 = File::PathJoin({API_DIR, "PROF_3"});
 const std::string TABLE_NAME = "ApiData";
 const std::set<std::string> PROF_PATHS = {PROF0, PROF1, PROF2, PROF3};
-const std::string INFO_JSON = "info.json";
-const std::string SAMPLE_JSON = "sample.json";
-const std::string START_INFO = "start_info";
-const std::string END_INFO = "end_info";
-const std::string HOST_START_LOG = "host_start.log";
 
 const ApiDataFormat API_DATA = {
     {"StreamSyncTaskFinish", "0", "runtime", 116, "0", 65177262396323, 65177262396323, 1},
@@ -77,20 +72,15 @@ protected:
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF0, HOST})));
         EXPECT_TRUE(CreateAPIDB(File::PathJoin({PROF0, HOST, SQLITE}), INVALID_DATA));
         EXPECT_TRUE(CreateAPIDB(File::PathJoin({PROF0, HOST, SQLITE}), API_DATA));
-        CreateJsonAndLog(File::PathJoin({PROF0, HOST}));
         EXPECT_TRUE(File::CreateDir(PROF1));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF1, HOST})));
         EXPECT_TRUE(CreateAPIDB(File::PathJoin({PROF1, HOST, SQLITE}), API_DATA));
-        CreateJsonAndLog(File::PathJoin({PROF1, HOST}));
         EXPECT_TRUE(File::CreateDir(PROF2));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF2, HOST})));
         EXPECT_TRUE(CreateAPIDB(File::PathJoin({PROF2, HOST, SQLITE}), API_DATA));
-        CreateJsonAndLog(File::PathJoin({PROF2, HOST}));
         EXPECT_TRUE(File::CreateDir(PROF3));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF3, HOST})));
         EXPECT_TRUE(CreateAPIDB(File::PathJoin({PROF3, HOST, SQLITE}), API_DATA));
-        CreateJsonAndLog(File::PathJoin({PROF3, HOST}));
-        EXPECT_TRUE(Context::GetInstance().Load(PROF_PATHS));
     }
 
     static bool CreateAPIDB(const std::string& sqlitePath, ApiDataFormat data)
@@ -100,7 +90,7 @@ protected:
         MAKE_SHARED0_RETURN_VALUE(database, ApiEventDB, false);
         std::shared_ptr<DBRunner> dbRunner;
         MAKE_SHARED_RETURN_VALUE(dbRunner, DBRunner, false, File::PathJoin({sqlitePath, database->GetDBName()}));
-        EXPECT_TRUE(dbRunner->CreateTable(TABLE_NAME, database->GetTableCols("ApiData")));
+        EXPECT_TRUE(dbRunner->CreateTable(TABLE_NAME, database->GetTableCols(TABLE_NAME)));
         EXPECT_TRUE(dbRunner->InsertData(TABLE_NAME, data));
         return true;
     }
@@ -114,6 +104,16 @@ protected:
     virtual void SetUp()
     {
         IdPool::GetInstance().Clear();
+        nlohmann::json record = {
+            {"startCollectionTimeBegin", "1701069324370978"},
+            {"endCollectionTimeEnd", "1701069338159976"},
+            {"startClockMonotonicRaw", "36471129942580"},
+            {"pid", "10"},
+            {"cntvct", "65177261204177"},
+            {"CPU", {{{"Frequency", "100.000000"}}}},
+            {"clock_monotonic_raw", "651599377155020"},
+        };
+        MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
     }
 
     virtual void TearDown()
@@ -122,77 +122,28 @@ protected:
             EXPECT_TRUE(File::DeleteFile(DB_PATH));
         }
         IdPool::GetInstance().Clear();
-    }
-
-    static void CreateJsonAndLog(const std::string &filePath)
-    {
-        // info.json
-        nlohmann::json info = {
-            {"drvVersion", 467732},
-            {"platform_version", "7"},
-            {"pid", "10"},
-            {"CPU", {{{"Frequency", "100.000000"}}}},
-            {"DeviceInfo", {{{"hwts_frequency", "49.000000"}, {"aic_frequency", "1850"}}}},
-        };
-        FileWriter infoWriter(File::PathJoin({filePath, INFO_JSON}));
-        infoWriter.WriteText(info.dump());
-
-        // sample.json
-        nlohmann::json sample = {
-            {"ai_core_profiling_mode", "task-based"},
-            {"llc_profiling", "read"},
-        };
-        FileWriter sampleWriter(File::PathJoin({filePath, SAMPLE_JSON}));
-        sampleWriter.WriteText(sample.dump());
-
-        // start.info
-        nlohmann::json startInfo = {
-            {"collectionTimeEnd", ""},
-            {"clockMonotonicRaw", "36471129942580"},
-            {"collectionTimeBegin", "1701069324370978"},
-        };
-        FileWriter startInfoWriter(File::PathJoin({filePath, START_INFO}));
-        startInfoWriter.WriteText(startInfo.dump());
-
-        // end.info
-        nlohmann::json endInfo = {
-            {"collectionTimeEnd", "1701069338159976"},
-            {"clockMonotonicRaw", "8721930460279"},
-            {"collectionTimeBegin", ""},
-        };
-        FileWriter endInfoWriter(File::PathJoin({filePath, END_INFO}));
-        endInfoWriter.WriteText(endInfo.dump());
-
-        // host_start.log
-        FileWriter hostStartLogWriter(File::PathJoin({filePath, HOST_START_LOG}));
-        hostStartLogWriter.WriteText("[Host]\n");
-        hostStartLogWriter.WriteText("clock_monotonic_raw: 651599377155020\n");
-        hostStartLogWriter.WriteText("cntvct: 65177261204177\n");
-        hostStartLogWriter.WriteText("cntvct_diff: 0\n");
+        MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
     }
 };
 
 void CheckApiDataValid(const QueryDataFormat &checkData)
 {
     // 业务角度，用于校验获取到的API表的数据
-    std::string start;
-    std::string end;
-    uint16_t level;
+    uint64_t start;
+    uint64_t end;
+    uint16_t type;
     uint64_t tid;
     uint64_t connectionId;
     uint64_t name;
+    uint32_t apiId;
     const uint16_t moveCount = 32;
     for (uint16_t i = 0; i < checkData.size(); ++i) {
         auto index = i % API_DATA.size();
-        std::tie(start, end, level, tid, connectionId, name) = checkData[i];
+        std::tie(start, end, type, tid, connectionId, name, apiId) = checkData[i];
         // 开始小于结束时间
-        double tempStart;
-        double tempEnd;
-        EXPECT_EQ(Utils::StrToDouble(tempStart, start), ANALYSIS_OK);
-        EXPECT_EQ(Utils::StrToDouble(tempEnd, end), ANALYSIS_OK);
-        EXPECT_LE(tempStart, tempEnd);
+        EXPECT_LE(start, end);
         // 比对前后的level是否一致
-        EXPECT_EQ(level, ApiProcessor().GetLevelValue(std::get<LEVEL_INDEX>(API_DATA[index])));
+        EXPECT_EQ(type, ApiProcessor().GetLevelValue(std::get<LEVEL_INDEX>(API_DATA[index])));
         uint32_t oriTid = std::get<TID_INDEX>(API_DATA[index]);
         uint32_t oriConId = std::get<CONNECTION_ID_INDEX>(API_DATA[index]);
         // 分别校验获取到的tid和connectionId的低32位是否与原先保持一致。
@@ -209,7 +160,7 @@ TEST_F(ApiProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
     MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
     QueryDataFormat checkData;
     uint16_t expectNum = API_DATA.size() * PROF_PATHS.size();
-    std::string sqlStr = "SELECT start, end, level, globalTid, connectionId, name FROM "
+    std::string sqlStr = "SELECT startNs, endNs, type, globalTid, connectionId, name, apiId FROM "
         + TABLE_NAME_API;
     ASSERT_NE(dbRunner, nullptr);
     EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkData));

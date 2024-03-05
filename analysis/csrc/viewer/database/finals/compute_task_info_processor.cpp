@@ -27,7 +27,7 @@ struct ComputeTaskInfoData {
     uint32_t batchId;
     uint32_t blockDim;
     uint32_t maxBlockDim;
-    uint64_t correlationId;
+    uint64_t globalTaskId;
     uint64_t opName;
     uint64_t taskType;
     uint64_t opType;
@@ -39,7 +39,7 @@ struct ComputeTaskInfoData {
     uint64_t outputShapes;
     ComputeTaskInfoData() : deviceId(INT32_MAX), modelId(UINT32_MAX), streamId(UINT32_MAX), taskId(UINT32_MAX),
         contextId(UINT32_MAX), batchId(UINT32_MAX), blockDim(UINT32_MAX), maxBlockDim(UINT32_MAX),
-        correlationId(UINT64_MAX), opName(UINT64_MAX), taskType(UINT64_MAX), opType(UINT64_MAX),
+        globalTaskId(UINT64_MAX), opName(UINT64_MAX), taskType(UINT64_MAX), opType(UINT64_MAX),
         inputFormats(UINT64_MAX), inputDataTypes(UINT64_MAX), inputShapes(UINT64_MAX), outputFormats(UINT64_MAX),
         outputDataTypes(UINT64_MAX), outputShapes(UINT64_MAX)
     {}
@@ -95,16 +95,15 @@ ComputeTaskInfoProcessor::ProcessedDataFormat ComputeTaskInfoProcessor::FormatDa
         data.opName = IdPool::GetInstance().GetUint64Id(oriOpName);
         data.taskType = IdPool::GetInstance().GetUint64Id(oriTaskType);
         data.opType = IdPool::GetInstance().GetUint64Id(oriOpType);
-        data.correlationId = IdPool::GetInstance().GetId(
-            std::make_tuple(
-                data.deviceId, data.modelId, data.streamId, data.taskId, data.contextId, data.batchId));
+        data.globalTaskId = IdPool::GetInstance().GetId(
+            std::make_tuple(data.deviceId, data.streamId, data.taskId, data.contextId, data.batchId));
         data.inputFormats = IdPool::GetInstance().GetUint64Id(oriInputFormats);
         data.inputDataTypes = IdPool::GetInstance().GetUint64Id(oriInputDataTypes);
         data.inputShapes = IdPool::GetInstance().GetUint64Id(oriInputShapes);
         data.outputFormats = IdPool::GetInstance().GetUint64Id(oriOutputFormats);
         data.outputDataTypes = IdPool::GetInstance().GetUint64Id(oriOutputDataTypes);
         data.outputShapes = IdPool::GetInstance().GetUint64Id(oriOutputShapes);
-        processedData.emplace_back(data.opName, data.correlationId, data.blockDim, data.maxBlockDim, data.taskType,
+        processedData.emplace_back(data.opName, data.globalTaskId, data.blockDim, data.maxBlockDim, data.taskType,
                                    data.opType, data.inputFormats, data.inputDataTypes, data.inputShapes,
                                    data.outputFormats, data.outputDataTypes, data.outputShapes);
     }

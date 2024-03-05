@@ -73,7 +73,7 @@ bool CommunicationInfoProcessor::FormatData(const OriDataFormat &oriData,
     }
     for (auto &row: oriData) {
         Update(row, hcclData, taskData, threadData.deviceId);
-        processedTaskData.emplace_back(taskData.opName, taskData.correlationId, taskData.taskType, taskData.planeId,
+        processedTaskData.emplace_back(taskData.opName, taskData.globalTaskId, taskData.taskType, taskData.planeId,
                                        taskData.groupName, taskData.notifyId, taskData.rdmaType, taskData.srcRank,
                                        taskData.dstRank, taskData.transportType, taskData.size, taskData.dataType,
                                        taskData.linkType, taskData.opId);
@@ -116,9 +116,8 @@ void CommunicationInfoProcessor::Update(const HcclFormat &oriData, HcclSingleDev
              taskData.contextId, taskData.notifyId, taskData.batchId, hcclData.rdmaType,
              hcclData.timestamp, hcclData.duration, hcclData.connectionId) = oriData;
     taskData.opName = IdPool::GetInstance().GetUint64Id(hcclData.opName);
-    taskData.correlationId = IdPool::GetInstance().GetId(
-        std::make_tuple(deviceId, taskData.modelId, taskData.streamId, taskData.taskId, taskData.contextId,
-                        taskData.batchId));
+    taskData.globalTaskId = IdPool::GetInstance().GetId(
+        std::make_tuple(deviceId, taskData.streamId, taskData.taskId, taskData.contextId, taskData.batchId));
     taskData.taskType = IdPool::GetInstance().GetUint64Id(hcclData.HCCLName);
     taskData.groupName = IdPool::GetInstance().GetUint64Id(hcclData.groupName);
     taskData.rdmaType = IdPool::GetInstance().GetUint64Id(hcclData.rdmaType);

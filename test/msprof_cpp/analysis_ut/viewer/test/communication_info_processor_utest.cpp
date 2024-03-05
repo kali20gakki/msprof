@@ -113,16 +113,16 @@ protected:
     }
 };
 
-void CheckCorrelationId(CommunicationTaskDataFormat data)
+void CheckGlobalTaskId(CommunicationTaskDataFormat data)
 {
-    const uint16_t correlationIdIndex = 1;
-    std::vector<uint64_t> correlationIds;
+    const uint16_t globalTaskIdIndex = 1;
+    std::vector<uint64_t> globalTaskIds;
     for (auto item : data) {
-        correlationIds.emplace_back(std::get<correlationIdIndex>(item));
+        globalTaskIds.emplace_back(std::get<globalTaskIdIndex>(item));
     }
-    std::sort(correlationIds.begin(), correlationIds.end());
+    std::sort(globalTaskIds.begin(), globalTaskIds.end());
     for (int i = 0; i < OP_NUM; ++i) {
-        EXPECT_EQ(correlationIds[i], i);
+        EXPECT_EQ(globalTaskIds[i], i);
     }
 }
 
@@ -185,7 +185,7 @@ TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunS
     auto processor = CommunicationInfoProcessor(DB_PATH, PROF_PATHS);
     EXPECT_TRUE(processor.Run());
     reportDBRunner->QueryData(sql, taskResult);
-    CheckCorrelationId(taskResult);
+    CheckGlobalTaskId(taskResult);
     CheckStringId(taskResult);
     sql = "SELECT * FROM " + TABLE_NAME_COMMUNICATION_OP;
     reportDBRunner->QueryData(sql, opResult);

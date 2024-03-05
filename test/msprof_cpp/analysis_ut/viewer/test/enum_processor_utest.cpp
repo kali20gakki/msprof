@@ -3,7 +3,7 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : enum_api_level_processor.cpp
+ * File Name          : enum_processor.cpp
  * Description        : EnumApiLevelProcessor UT
  * Author             : msprof team
  * Creation Date      : 2024/01/10
@@ -51,7 +51,7 @@ protected:
 void CheckEnumApiLevel(const std::shared_ptr<DBRunner> &dbRunner)
 {
     EnumDataFormat checkData;
-    std::string sqlStr = "SELECT id, name FROM " + TABLE_NAME_ENUM_API_LEVEL;
+    std::string sqlStr = "SELECT id, name FROM " + TABLE_NAME_ENUM_API_TYPE;
     const uint32_t ID_INDEX = 0;
     const uint32_t NAME_INDEX = 1;
     const uint16_t expectNum = API_LEVEL_TABLE.size();

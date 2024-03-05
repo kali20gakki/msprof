@@ -61,7 +61,7 @@ const std::string PROCESSOR_NAME_NPU_OP_MEM = "NPU_OP_MEM";
 const std::string TABLE_NAME_NPU_OP_MEM = "NPU_OP_MEM";
 
 const std::string PROCESSOR_NAME_ENUM = "ENUM";
-const std::string TABLE_NAME_ENUM_API_LEVEL = "ENUM_API_LEVEL";
+const std::string TABLE_NAME_ENUM_API_TYPE = "ENUM_API_TYPE";
 const std::string TABLE_NAME_ENUM_MEMORY = "ENUM_MEMORY";
 const std::string TABLE_NAME_ENUM_NPU_MODULE = "ENUM_NPU_MODULE";
 
@@ -100,8 +100,6 @@ const std::string TABLE_NAME_SOC = "SOC_BANDWIDTH_LEVEL";
 
 // api level
 const std::unordered_map<std::string, uint16_t> API_LEVEL_TABLE = {
-    {"pytorch", MSPROF_REPORT_PYTORCH_LEVEL},
-    {"pta", MSPROF_REPORT_PTA_LEVEL},
     {"acl", MSPROF_REPORT_ACL_LEVEL},
     {"model", MSPROF_REPORT_MODEL_LEVEL},
     {"node", MSPROF_REPORT_NODE_LEVEL},

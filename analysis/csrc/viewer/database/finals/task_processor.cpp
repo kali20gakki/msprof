@@ -26,14 +26,14 @@ struct TaskData {
     double duration;
     double end;
     uint64_t connectionId;
-    uint64_t correlationId;
+    uint64_t globalTaskId;
     uint64_t taskType;
     uint32_t contextId;
     uint32_t streamId;
     uint32_t taskId;
     uint32_t modelId;
     uint32_t batchId;
-    TaskData() : start(0.0), duration(0.0), end(0.0), connectionId(UINT32_MAX), correlationId(UINT64_MAX),
+    TaskData() : start(0.0), duration(0.0), end(0.0), connectionId(UINT32_MAX), globalTaskId(UINT64_MAX),
         taskType(UINT64_MAX), contextId(UINT32_MAX), streamId(UINT32_MAX), taskId(UINT32_MAX), modelId(UINT32_MAX),
         batchId(UINT32_MAX)
     {}
@@ -107,15 +107,14 @@ TaskProcessor::ProcessedDataFormat TaskProcessor::FormatData(const OriDataFormat
         HPFloat start{data.start};
         HPFloat end = start + HPFloat(data.duration);
         data.connectionId = Utils::Contact(threadData.profId, oriConnectionId);
-        data.correlationId = IdPool::GetInstance().GetId(
-            std::make_tuple(threadData.deviceId, data.modelId, data.streamId, data.taskId, data.contextId,
-                            data.batchId));
+        data.globalTaskId = IdPool::GetInstance().GetId(
+            std::make_tuple(threadData.deviceId, data.streamId, data.taskId, data.contextId, data.batchId));
         data.taskType = GetTaskType(oriHostTaskType, oriDeviceTaskType,
                                     threadData.platformVersion);
         processedData.emplace_back(
             Utils::GetLocalTime(start, threadData.timeRecord).Uint64(),
             Utils::GetLocalTime(end, threadData.timeRecord).Uint64(),
-            threadData.deviceId, data.connectionId, data.correlationId, threadData.pid, data.taskType,
+            threadData.deviceId, data.connectionId, data.globalTaskId, threadData.pid, data.taskType,
             data.contextId, data.streamId, data.taskId, data.modelId);
     }
     return processedData;
