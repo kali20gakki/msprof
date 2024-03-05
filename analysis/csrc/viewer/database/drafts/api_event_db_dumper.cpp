@@ -28,7 +28,7 @@ using HashData = Analysis::Parser::Host::Cann::HashData;
 using TypeData = Analysis::Parser::Host::Cann::TypeData;
 
 ApiEventDBDumper::ApiEventDBDumper(const std::string &hostFilePath) : BaseDumper<ApiEventDBDumper>(
-        hostFilePath, "ApiEventData")
+        hostFilePath, "ApiData")
 {
     MAKE_SHARED0_NO_OPERATION(database_, ApiEventDB);
 }

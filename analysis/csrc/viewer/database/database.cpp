@@ -365,7 +365,7 @@ TableColumns Database::GetTableCols(const std::string &tableName)
 ApiEventDB::ApiEventDB()
 {
     dbName_ = "api_event.db";
-    tableColNames_["ApiEventData"] = ApiEventData;
+    tableColNames_["ApiData"] = ApiEventData;
 }
 
 RuntimeDB::RuntimeDB()
