@@ -24,7 +24,7 @@ class TaskProcessor : public TableProcessor {
     // device_task_type, connection_id
     using OriDataFormat = std::vector<std::tuple<uint32_t, int32_t, int32_t, uint32_t, uint32_t, uint32_t, double,
                                                    double, std::string, std::string, uint32_t>>;
-    // start, end, deviceId, connectionId, correlationId, globalPid, taskType, contextId, streamId, taskId,
+    // start, end, deviceId, connectionId, globalTaskId, globalPid, taskType, contextId, streamId, taskId,
     // modelId
     using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, int64_t, uint64_t,
                                                        uint64_t, uint32_t, uint32_t, int32_t, uint32_t, uint32_t>>;

@@ -19,7 +19,7 @@ namespace Database {
 namespace {
 
 const std::unordered_map<std::string, std::unordered_map<std::string, uint16_t>> ENUM_TABLE = {
-    {TABLE_NAME_ENUM_API_LEVEL, API_LEVEL_TABLE},
+    {TABLE_NAME_ENUM_API_TYPE, API_LEVEL_TABLE},
     {TABLE_NAME_ENUM_MEMORY, MEMORY_TABLE},
     {TABLE_NAME_ENUM_NPU_MODULE, NPU_MODULE_NAME_TABLE}
 };

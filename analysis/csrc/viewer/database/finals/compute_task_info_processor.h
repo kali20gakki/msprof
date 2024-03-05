@@ -26,7 +26,7 @@ class ComputeTaskInfoProcessor : public TableProcessor {
                                                  std::string, std::string, double, uint32_t, std::string,
                                                  std::string, std::string, std::string, std::string, std::string,
                                                  int32_t, uint32_t>>;
-    // name, correlationId, block_dim, mixBlockDim, taskType, opType, inputFormats, inputDataTypes, inputShapes,
+    // name, globalTaskId, block_dim, mixBlockDim, taskType, opType, inputFormats, inputDataTypes, inputShapes,
     // outputFormats, outputDataTypes, outputShapes
     using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t,
                                                        uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;

@@ -27,7 +27,6 @@ namespace {
     const TableColumns SESSION_TIME_INFO = {
         {"startTimeNs", SQL_INTEGER_TYPE},
         {"endTimeNs", SQL_INTEGER_TYPE},
-        {"baseTimeNs", SQL_INTEGER_TYPE},
     };
 
     const TableColumns NPU_INFO = {
@@ -36,11 +35,11 @@ namespace {
     };
 
     const TableColumns TASK = {
-        {"start", SQL_INTEGER_TYPE},
-        {"end", SQL_INTEGER_TYPE},
+        {"startNs", SQL_INTEGER_TYPE},
+        {"endNs", SQL_INTEGER_TYPE},
         {"deviceId", SQL_INTEGER_TYPE},
         {"connectionId", SQL_INTEGER_TYPE},
-        {"correlationId", SQL_INTEGER_TYPE, true},
+        {"globalTaskId", SQL_INTEGER_TYPE, true},
         {"globalPid", SQL_INTEGER_TYPE},
         {"taskType", SQL_INTEGER_TYPE},
         {"contextId", SQL_INTEGER_TYPE},
@@ -51,7 +50,7 @@ namespace {
 
     const TableColumns COMPUTE_TASK_INFO = {
         {"name", SQL_INTEGER_TYPE},
-        {"correlationId", SQL_INTEGER_TYPE, true},
+        {"globalTaskId", SQL_INTEGER_TYPE, true},
         {"block_dim", SQL_INTEGER_TYPE},
         {"mixBlockDim", SQL_INTEGER_TYPE},
         {"taskType", SQL_INTEGER_TYPE},
@@ -66,7 +65,7 @@ namespace {
 
     const TableColumns COMMUNICATION_TASK_INFO = {
         {"name", SQL_INTEGER_TYPE},
-        {"correlationId", SQL_INTEGER_TYPE, true},
+        {"globalTaskId", SQL_INTEGER_TYPE, true},
         {"taskType", SQL_INTEGER_TYPE},
         {"planeId", SQL_INTEGER_TYPE},
         {"groupName", SQL_INTEGER_TYPE},
@@ -83,33 +82,34 @@ namespace {
 
     const TableColumns COMMUNICATION_OP = {
         {"opName", SQL_INTEGER_TYPE},
-        {"start", SQL_INTEGER_TYPE},
-        {"end", SQL_INTEGER_TYPE},
+        {"startNs", SQL_INTEGER_TYPE},
+        {"endNs", SQL_INTEGER_TYPE},
         {"connectionId", SQL_INTEGER_TYPE},
         {"groupName", SQL_INTEGER_TYPE},
         {"opId", SQL_INTEGER_TYPE, true}
     };
 
     const TableColumns API = {
-        {"start", SQL_INTEGER_TYPE},
-        {"end", SQL_INTEGER_TYPE},
-        {"level", SQL_INTEGER_TYPE},
+        {"startNs", SQL_INTEGER_TYPE},
+        {"endNs", SQL_INTEGER_TYPE},
+        {"type", SQL_INTEGER_TYPE},
         {"globalTid", SQL_INTEGER_TYPE},
         {"connectionId", SQL_INTEGER_TYPE},
-        {"name", SQL_INTEGER_TYPE}
+        {"name", SQL_INTEGER_TYPE},
+        {"apiId", SQL_INTEGER_TYPE}
     };
 
     const TableColumns NPU_MEM = {
         {"type", SQL_INTEGER_TYPE},
         {"ddrUsage", SQL_NUMERIC_TYPE},
         {"hbmUsage", SQL_NUMERIC_TYPE},
-        {"timestamp", SQL_INTEGER_TYPE},
+        {"timestampNs", SQL_INTEGER_TYPE},
         {"deviceId", SQL_INTEGER_TYPE}
     };
 
     const TableColumns NPU_MODULE_MEM = {
         {"moduleId", SQL_INTEGER_TYPE},
-        {"timestamp", SQL_INTEGER_TYPE},
+        {"timestampNs", SQL_INTEGER_TYPE},
         {"totalReserved", SQL_NUMERIC_TYPE},
         {"deviceId", SQL_INTEGER_TYPE}
     };
@@ -119,7 +119,7 @@ namespace {
         {"addr", SQL_INTEGER_TYPE},
         {"type", SQL_INTEGER_TYPE},
         {"size", SQL_INTEGER_TYPE},
-        {"timestamp", SQL_INTEGER_TYPE},
+        {"timestampNs", SQL_INTEGER_TYPE},
         {"globalTid", SQL_INTEGER_TYPE},
         {"totalAllocate", SQL_NUMERIC_TYPE},
         {"totalReserve", SQL_NUMERIC_TYPE},
@@ -129,7 +129,7 @@ namespace {
 
     const TableColumns NIC = {
         {"deviceId", SQL_INTEGER_TYPE},
-        {"timestamp", SQL_INTEGER_TYPE},
+        {"timestampNs", SQL_INTEGER_TYPE},
         {"bandwidth", SQL_INTEGER_TYPE},
         {"rxPacketRate", SQL_NUMERIC_TYPE},
         {"rxByteRate", SQL_NUMERIC_TYPE},
@@ -148,7 +148,7 @@ namespace {
 
     const TableColumns RoCE = {
         {"deviceId", SQL_INTEGER_TYPE},
-        {"timestamp", SQL_INTEGER_TYPE},
+        {"timestampNs", SQL_INTEGER_TYPE},
         {"bandwidth", SQL_INTEGER_TYPE},
         {"rxPacketRate", SQL_NUMERIC_TYPE},
         {"rxByteRate", SQL_NUMERIC_TYPE},
@@ -167,7 +167,7 @@ namespace {
 
     const TableColumns HBM = {
         {"deviceId", SQL_INTEGER_TYPE},
-        {"timestamp", SQL_INTEGER_TYPE},
+        {"timestampNs", SQL_INTEGER_TYPE},
         {"bandwidth", SQL_NUMERIC_TYPE},
         {"hbmId", SQL_INTEGER_TYPE},
         {"type", SQL_INTEGER_TYPE}
@@ -175,7 +175,7 @@ namespace {
 
     const TableColumns DDR = {
         {"deviceId", SQL_INTEGER_TYPE},
-        {"timestamp", SQL_INTEGER_TYPE},
+        {"timestampNs", SQL_INTEGER_TYPE},
         {"read", SQL_NUMERIC_TYPE},
         {"write", SQL_NUMERIC_TYPE}
     };
@@ -183,15 +183,21 @@ namespace {
     const TableColumns LLC = {
         {"deviceId", SQL_INTEGER_TYPE},
         {"llcId", SQL_INTEGER_TYPE},
-        {"timestamp", SQL_INTEGER_TYPE},
+        {"timestampNs", SQL_INTEGER_TYPE},
         {"hitRate", SQL_REAL_TYPE},
         {"throughput", SQL_REAL_TYPE},
         {"mode", SQL_INTEGER_TYPE},
     };
 
+    const TableColumns TASK_PMU_INFO = {
+        {"globalTaskId", SQL_INTEGER_TYPE},
+        {"name", SQL_INTEGER_TYPE},
+        {"value", SQL_NUMERIC_TYPE}
+    };
+
     const TableColumns SAMPLE_PMU_TIMELINE = {
         {"deviceId", SQL_INTEGER_TYPE},
-        {"timestamp", SQL_INTEGER_TYPE},
+        {"timestampNs", SQL_INTEGER_TYPE},
         {"totalCycle", SQL_INTEGER_TYPE},
         {"usage", SQL_NUMERIC_TYPE},
         {"freq", SQL_NUMERIC_TYPE},
@@ -238,7 +244,7 @@ namespace {
         {"rxThroughput", SQL_NUMERIC_TYPE}
     };
 
-    const TableColumns ENUM_API_LEVEL = {
+    const TableColumns ENUM_API_TYPE = {
         {"id", SQL_INTEGER_TYPE, true},
         {"name", SQL_TEXT_TYPE}
     };
@@ -291,6 +297,7 @@ ReportDB::ReportDB()
         {TABLE_NAME_HBM, HBM},
         {TABLE_NAME_DDR, DDR},
         {TABLE_NAME_LLC, LLC},
+        {TABLE_NAME_TASK_PMU_INFO, TASK_PMU_INFO},
         {TABLE_NAME_SAMPLE_PMU_TIMELINE, SAMPLE_PMU_TIMELINE},
         {TABLE_NAME_SAMPLE_PMU_SUMMARY, SAMPLE_PMU_SUMMARY},
         {TABLE_NAME_PCIE, PCIE},
@@ -298,7 +305,7 @@ ReportDB::ReportDB()
         {TABLE_NAME_ACC_PMU, ACC_PMU},
         {TABLE_NAME_SOC, SOC_BANDWIDTH_LEVEL},
         // ENUM
-        {TABLE_NAME_ENUM_API_LEVEL, ENUM_API_LEVEL},
+        {TABLE_NAME_ENUM_API_TYPE, ENUM_API_TYPE},
         {TABLE_NAME_ENUM_MEMORY, ENUM_MEMORY},
         {TABLE_NAME_ENUM_NPU_MODULE, ENUM_NPU_MODULE},
     };
