@@ -61,7 +61,7 @@ TEST_F(ApiEventDBDumperUtest, TestApiEventDBDumperShouldInsertDataCorrectly)
     std::string runtimeDBPath = Utils::File::PathJoin({TEST_DB_FILE_PATH, apiEventDB.GetDBName()});
     DBRunner runtimeDBRunner(runtimeDBPath);
     std::vector<std::tuple<std::string, std::string, std::string, uint32_t, std::string, uint64_t, uint64_t>> data;
-    runtimeDBRunner.QueryData("select * from ApiEventData", data);
+    runtimeDBRunner.QueryData("select * from ApiData", data);
     // 如果level不是acl，则会直接把id置为0
     const int col2 = 2;
     const int col3 = 3;
