@@ -45,9 +45,8 @@ const std::string TABLE_NAME = "HCCLSingleDevice";
 using HcclSingleDeviceFormat = std::vector<std::tuple<uint32_t, int32_t, std::string, uint32_t, std::string,
                                                       std::string, double, int32_t, double, double, double,
                                                       std::string, std::string, uint64_t, int32_t, uint64_t, uint32_t,
-                                                      std::string, double, uint32_t, uint32_t, std::string, uint64_t,
-                                                      std::string, std::string, double, uint32_t, uint64_t, uint32_t,
-                                                      std::string>>;
+                                                      double, uint32_t, uint32_t, std::string, uint64_t, std::string,
+                                                      std::string, double, uint32_t, uint64_t, uint32_t, std::string>>;
 
 using CommunicationTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t, uint64_t,
                                                            uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t,
@@ -58,19 +57,19 @@ using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uin
 
 const HcclSingleDeviceFormat DATA_A{{4294967295, -1, "hcom_allReduce__360_0_1", 0, "Memcpy", "10652853832407468360",
                                      78180470736653, 0, 781687236999155, 2994.875, 1, "HCCL", "hcom_allReduce_", 125,
-                                     1, 11, 1, "master", 14.1825906735751, 0, 0, "SDMA", 262144, "INVALID_TYPE",
+                                     1, 11, 1, 14.1825906735751, 0, 0, "SDMA", 262144, "INVALID_TYPE",
                                      "ON_CHIP", 87.530865228098, 4294967295, 4294967296, 1, "INVALID_TYPE"},
                                     {4294967295, -1, "hcom_allReduce__360_0_1", 0, "Memcpy", "10652853832407468360",
                                      78180470736653, 0, 781687236999155, 2994.875, 1, "HCCL", "hcom_allReduce_", 126,
-                                     1, 11, 2, "master", 14.1825906735751, 0, 0, "SDMA", 262144, "FP16",
+                                     1, 11, 2, 14.1825906735751, 0, 0, "SDMA", 262144, "FP16",
                                      "HCCS", 87.530865228098, 4294967295, 8, 1, "INVALID_TYPE"}};
 const HcclSingleDeviceFormat DATA_B{{4294967295, -1, "hcom_allReduce__360_0_2", 0, "Memcpy23", "10652853832407468233",
                                      78180470736653, 0, 781687236999155, 2994.875, 3, "HCCL", "hcom_allReduce_", 125,
-                                     1, 11, 3, "master", 14.1825906735751, 1, 4, "SDMA", 262144, "INVALID_TYPE",
+                                     1, 11, 3, 14.1825906735751, 1, 4, "SDMA", 262144, "INVALID_TYPE",
                                      "ON_CHIP", 87.530865228098, 4294967295, 4294967296, 1, "INVALID_TYPE"},
                                     {4294967295, -1, "hcom_allReduce__360_0_1", 0, "Memcpy", "10652853832407468832",
                                      78180470736653, 0, 781687236999155, 2994.875, 1, "HCCL", "hcom_allReduce_", 126,
-                                     1, 21, 4, "master", 14.1825906735751, 4, 2, "SDMA", 262144, "FP32",
+                                     1, 21, 4, 14.1825906735751, 4, 2, "SDMA", 262144, "FP32",
                                      "HCCS", 87.530865228098, 4294967295, 8, 2, "INVALID_TYPE"}};
 }
 

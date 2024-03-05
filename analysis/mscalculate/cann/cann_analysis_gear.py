@@ -408,14 +408,14 @@ class TaskGear(CANNGear):
             hccl_info_dto = hccl_desc.hccl_info
             context_id = int(hccl_desc.ctx_info.ctx_id)
             is_master = 1 if hccl_event.struct_type == 'master' else 0
+            notify_id = hccl_info_dto.notify_id if int(hccl_info_dto.notify_id) != -1 else "N/A"
             hccl_tasks[i] = [
                 model_id, request_id, hccl_info_dto.op_name, hccl_info_dto.group_name,
                 hccl_info_dto.plane_id, task_track_dto.timestamp, hccl_info_dto.duration_estimated,
                 task_track_dto.stream_id, task_track_dto.task_id, context_id,
                 task_track_dto.batch_id, task_track_dto.device_id, is_master,
-                hccl_event.struct_type,
                 hccl_info_dto.local_rank, hccl_info_dto.remote_rank, hccl_info_dto.transport_type, hccl_info_dto.size,
-                hccl_info_dto.data_type, hccl_info_dto.link_type, hccl_info_dto.notify_id, hccl_info_dto.rdma_type
+                hccl_info_dto.data_type, hccl_info_dto.link_type, notify_id, hccl_info_dto.rdma_type
             ]
         self.hccl_task_info.extend(hccl_tasks)
 

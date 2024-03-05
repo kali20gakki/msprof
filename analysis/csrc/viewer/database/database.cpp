@@ -102,14 +102,13 @@ namespace {
         {"batch_id", SQL_INTEGER_TYPE},
         {"device_id", SQL_INTEGER_TYPE},
         {"is_master", SQL_INTEGER_TYPE},
-        {"struct_type", SQL_TEXT_TYPE},
         {"local_rank", SQL_INTEGER_TYPE},
         {"remote_rank", SQL_INTEGER_TYPE},
         {"transport_type", SQL_TEXT_TYPE},
         {"size", SQL_REAL_TYPE},
         {"data_type", SQL_TEXT_TYPE},
         {"link_type", SQL_TEXT_TYPE},
-        {"notify_id", SQL_INTEGER_TYPE},
+        {"notify_id", SQL_TEXT_TYPE},
         {"rdma_type", SQL_TEXT_TYPE}
     };
 
@@ -123,7 +122,7 @@ namespace {
         {"op_type", SQL_TEXT_TYPE},
         {"begin", SQL_TEXT_TYPE},
         {"end", SQL_REAL_TYPE},
-        {"is_dynamic", SQL_INTEGER_TYPE},
+        {"is_dynamic", SQL_TEXT_TYPE},
         {"connection_id", SQL_INTEGER_TYPE}
     };
 
@@ -167,7 +166,6 @@ namespace {
         {"is_master", SQL_INTEGER_TYPE},
         {"stream_id", SQL_INTEGER_TYPE},
         {"task_id", SQL_INTEGER_TYPE},
-        {"struct_type", SQL_TEXT_TYPE},
         {"duration_estimated", SQL_INTEGER_TYPE},
         {"local_rank", SQL_INTEGER_TYPE},
         {"remote_rank", SQL_INTEGER_TYPE},
@@ -177,7 +175,7 @@ namespace {
         {"link_type", SQL_TEXT_TYPE},
         {"bandwidth", SQL_REAL_TYPE},
         {"context_id", SQL_INTEGER_TYPE},
-        {"notify_id", SQL_INTEGER_TYPE},
+        {"notify_id", SQL_TEXT_TYPE},
         {"batch_id", SQL_INTEGER_TYPE},
         {"rdma_type", SQL_TEXT_TYPE}
     };

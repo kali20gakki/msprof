@@ -164,12 +164,18 @@ void TreeAnalyzer::UpdateHcclBigOpDescs(const std::shared_ptr<TreeNode> &node)
         return;
     }
 
+    auto modelTrace = path_.find(MSPROF_REPORT_MODEL_LEVEL) != path_.end() ?
+                      path_[MSPROF_REPORT_MODEL_LEVEL] : nullptr;
+    auto modelApi = modelTrace != nullptr ? modelTrace->event->apiPtr : nullptr;
+    auto index_id = modelApi != nullptr ? modelApi->reserve : -1;
+    auto model_id = modelApi != nullptr ? modelApi->itemId : INVALID_MODEL_ID;
+    auto connectionId = nodeNode->event->id;
     auto nodeRecords = GetNodeRecordsByType(nodeNode, EventType::EVENT_TYPE_NODE_BASIC_INFO);
     if (nodeRecords.empty()) {
         auto nodeApi = nodeNode->event->apiPtr;
         std::shared_ptr<HcclBigOpDesc> desc;
         MAKE_SHARED_RETURN_VOID(desc, HcclBigOpDesc, nodeApi->beginTime,
-                                nodeApi->endTime, deviceId, nullptr);
+                                nodeApi->endTime, deviceId, model_id, index_id, connectionId, nullptr);
         std::shared_ptr<Operator> op;
         MAKE_SHARED_RETURN_VOID(op, Operator, desc, nodeApi->itemId, OpType::OPTYPE_HCCL_BIG);
         hcclBigOpDescs_.emplace_back(op);
@@ -181,7 +187,7 @@ void TreeAnalyzer::UpdateHcclBigOpDescs(const std::shared_ptr<TreeNode> &node)
         auto nodeDesc = (nodeRecord == nullptr) ? nullptr : nodeRecord->compactPtr;
         std::shared_ptr<HcclBigOpDesc> desc;
         MAKE_SHARED_RETURN_VOID(desc, HcclBigOpDesc, nodeApi->beginTime,
-                                nodeApi->endTime, deviceId, nodeDesc);
+                                nodeApi->endTime, deviceId, model_id, index_id, connectionId, nodeDesc);
         std::shared_ptr<Operator> op;
         MAKE_SHARED_RETURN_VOID(op, Operator, desc, nodeApi->itemId, OpType::OPTYPE_HCCL_BIG);
         hcclBigOpDescs_.emplace_back(op);
@@ -453,22 +459,24 @@ HCCLSmallOpDescs TreeAnalyzer::GetHcclSmallOpDescs(const std::shared_ptr<TreeNod
     HCCLSmallOpDescs opDescs;
     auto ctxIdRecords = GetNodeRecordsByType(hcclNode, EventType::EVENT_TYPE_CONTEXT_ID);
     auto hcclInfoRecords = GetNodeRecordsByType(hcclNode, EventType::EVENT_TYPE_HCCL_INFO);
+    auto hcclApi = hcclNode->event->apiPtr;
+    auto isMaster = TypeData::GetInstance().Get(hcclApi->level, hcclApi->type) == "master" ? 1: 0;
 
     if (!ctxIdRecords.empty()) {
         // ctxId 存在，先根据其生成descs, 再补充hccl info
-        auto ret = UpdateHcclSmallOpDescs(opDescs, ctxIdRecords, hcclInfoRecords);
+        auto ret = UpdateHcclSmallOpDescs(opDescs, ctxIdRecords, hcclInfoRecords, isMaster);
         if (!ret) {
             ERROR("Update hccl small op descs failed by ctxId and hcclInfo, threadId = %", threadId_);
         }
     } else if (!hcclInfoRecords.empty()) {
         // 根据hccl info 生成
-        auto ret = UpdateHcclSmallOpDescs(opDescs, hcclInfoRecords);
+        auto ret = UpdateHcclSmallOpDescs(opDescs, hcclInfoRecords, isMaster);
         if (!ret) {
             ERROR("Update hccl small op descs failed by hcclInfo, threadId = %", threadId_);
         }
     } else {
         std::shared_ptr<HcclSmallOpDesc> desc;
-        MAKE_SHARED0_RETURN_VALUE(desc, HcclSmallOpDesc, opDescs);
+        MAKE_SHARED_RETURN_VALUE(desc, HcclSmallOpDesc, opDescs, DEFAULT_CONTEXT_ID, isMaster, nullptr);
         std::shared_ptr<Operator> op;
         MAKE_SHARED_RETURN_VALUE(op, Operator, opDescs, desc, 0, OpType::OPTYPE_HCCL_SMALL);
         opDescs.insert({DEFAULT_CONTEXT_ID, op});
@@ -479,7 +487,8 @@ HCCLSmallOpDescs TreeAnalyzer::GetHcclSmallOpDescs(const std::shared_ptr<TreeNod
 
 bool TreeAnalyzer::UpdateHcclSmallOpDescs(HCCLSmallOpDescs &descs,
                                           const std::vector<std::shared_ptr<Event>> &ctxIdRecords,
-                                          const std::vector<std::shared_ptr<Event>> &hcclInfoRecords)
+                                          const std::vector<std::shared_ptr<Event>> &hcclInfoRecords,
+                                          uint8_t isMaster)
 {
     // 根据ctxId生成descs
     for (const auto &record: ctxIdRecords) {
@@ -491,7 +500,7 @@ bool TreeAnalyzer::UpdateHcclSmallOpDescs(HCCLSmallOpDescs &descs,
         }
         for (uint32_t id = ctxIdTrace->ctxIds[0]; id <= ctxIdTrace->ctxIds[1]; ++id) {
             std::shared_ptr<HcclSmallOpDesc> desc;
-            MAKE_SHARED0_RETURN_VALUE(desc, HcclSmallOpDesc, false);
+            MAKE_SHARED_RETURN_VALUE(desc, HcclSmallOpDesc, false, DEFAULT_CONTEXT_ID, isMaster, nullptr);
             desc->ctxId = id;
             std::shared_ptr<Operator> op;
             MAKE_SHARED_RETURN_VALUE(op, Operator, false, desc, ctxIdTrace->opName, OpType::OPTYPE_HCCL_SMALL);
@@ -515,7 +524,8 @@ bool TreeAnalyzer::UpdateHcclSmallOpDescs(HCCLSmallOpDescs &descs,
 }
 
 bool TreeAnalyzer::UpdateHcclSmallOpDescs(HCCLSmallOpDescs &descs,
-                                          const std::vector<std::shared_ptr<Event>> &hcclInfoRecords)
+                                          const std::vector<std::shared_ptr<Event>> &hcclInfoRecords,
+                                          uint8_t isMaster)
 {
     for (const auto &record: hcclInfoRecords) {
         auto trace = record->additionPtr;
@@ -523,7 +533,7 @@ bool TreeAnalyzer::UpdateHcclSmallOpDescs(HCCLSmallOpDescs &descs,
         auto key = hcclTrace->ctxID;
 
         std::shared_ptr<HcclSmallOpDesc> desc;
-        MAKE_SHARED0_RETURN_VALUE(desc, HcclSmallOpDesc, false);
+        MAKE_SHARED_RETURN_VALUE(desc, HcclSmallOpDesc, false, DEFAULT_CONTEXT_ID, isMaster, nullptr);
         desc->hcclInfo = trace;
         std::shared_ptr<Operator> op;
         MAKE_SHARED_RETURN_VALUE(op, Operator, false, desc, hcclTrace->itemId, OpType::OPTYPE_HCCL_SMALL);

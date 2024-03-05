@@ -237,7 +237,7 @@ TEST_F(TreeAnalyzerUTest, TestUpdateHcclSmallOpDescsShouldReturn2DescsWhenInputC
     auto treeNode = std::make_shared<TreeNode>(nullptr);
     auto ana = std::make_shared<TreeAnalyzer>(treeNode, 1);
 
-    auto ret = ana->UpdateHcclSmallOpDescs(descs, ctxIdRecords, hcclInfoRecords);
+    auto ret = ana->UpdateHcclSmallOpDescs(descs, ctxIdRecords, hcclInfoRecords, 0);
 
     std::vector<uint32_t> expectCtxIds{0, 1};
     EXPECT_EQ(ret, true);

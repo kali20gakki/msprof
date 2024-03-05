@@ -47,7 +47,7 @@ protected:
     static void MockGetHCCLTasks()
     {
         HostTask hcclHostTask;
-        auto pMiniOpDesc = std::make_shared<Analysis::Entities::HcclSmallOpDesc>();
+        auto pMiniOpDesc = std::make_shared<Analysis::Entities::HcclSmallOpDesc>(0, 0, nullptr);
         pMiniOpDesc->ctxId = 0;
         auto hcclTrace = MsprofHcclInfo{};
         hcclTrace.opType = 1;
@@ -85,7 +85,7 @@ protected:
 
     static void MockGetTasks()
     {
-        auto pMiniOpDesc = std::make_shared<Entities::HcclSmallOpDesc>();
+        auto pMiniOpDesc = std::make_shared<Entities::HcclSmallOpDesc>(0, 0, nullptr);
         std::shared_ptr<Operator> pointer = std::make_shared<Operator>(pMiniOpDesc, 0,
                                                                        Entities::OpType::OPTYPE_HCCL_SMALL);
         HostTask task;
@@ -104,7 +104,7 @@ protected:
         trace->data.nodeBasicInfo = *nodeBasicInfo;
         trace->data.runtimeTrack = *runtime;
 
-        auto desc = std::make_shared<HcclBigOpDesc>(1, 1, 1, std::shared_ptr<MsprofCompactInfo>(trace));
+        auto desc = std::make_shared<HcclBigOpDesc>(1, 1, 1, 1, 1, 1, std::shared_ptr<MsprofCompactInfo>(trace));
         auto op = std::make_shared<Operator>(desc, 0, Entities::OpType::OPTYPE_HCCL_BIG);
         auto hcclBigOps = std::make_shared<HCCLBigOpDescs>();
         hcclBigOps->emplace_back(op);
@@ -154,7 +154,7 @@ TEST_F(CannDBDumperUtest,
     EXPECT_EQ(std::get<INPUT_DATA_TYPE_POSITION>(TaskInfoData[0]), "");
 
     std::vector<std::tuple<uint32_t, uint32_t, std::string, std::string, uint32_t, std::string,
-            double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, std::string, uint32_t, uint32_t,
+            double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
             std::string, double, std::string, std::string, uint64_t, std::string>> HCCLTaskData;
     hcclOpDBRunner.QueryData("select * from HCCLTask", HCCLTaskData);
     EXPECT_EQ(HCCLTaskData.size(), 1);
@@ -209,7 +209,7 @@ TEST_F(CannDBDumperUtest,
     EXPECT_EQ(std::get<INPUT_DATA_TYPE_POSITION>(TaskInfoData[0]), "N/A");
 
     std::vector<std::tuple<uint32_t, uint32_t, std::string, std::string, uint32_t, std::string,
-            double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, std::string, uint32_t, uint32_t,
+            double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
             std::string, double, std::string, std::string, uint64_t, std::string>> HCCLTaskData;
     hcclOpDBRunner.QueryData("select * from HCCLTask", HCCLTaskData);
     EXPECT_EQ(HCCLTaskData.size(), 1);
