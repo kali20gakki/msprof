@@ -62,7 +62,7 @@ NpuOpMemProcessor::OriDataFormat NpuOpMemProcessor::GetData(DBInfo &npuOpMemDB)
 NpuOpMemProcessor::ProcessedDataFormat NpuOpMemProcessor::FormatData(const OriDataFormat &oriData,
                                                                      const Utils::ProfTimeRecord &timeRecord,
                                                                      Utils::SyscntConversionParams &params,
-                                                                     GeHashMap &hashMap, uint32_t profId)
+                                                                     GeHashMap &hashMap, uint32_t pid)
 {
     ProcessedDataFormat processedData;
     NpuOpMemData data;
@@ -86,7 +86,7 @@ NpuOpMemProcessor::ProcessedDataFormat NpuOpMemProcessor::FormatData(const OriDa
         }
         processedData.emplace_back(
             IdPool::GetInstance().GetUint64Id(hashMap[data.operatorName]), addr, data.type, data.size,
-            GetLocalTime(timestamp, timeRecord).Uint64(), Utils::Contact(profId, data.threadId),
+            GetLocalTime(timestamp, timeRecord).Uint64(), Utils::Contact(pid, data.threadId),
             data.totalAllocateMemory / BYTE_SIZE, data.totalReserveMemory / BYTE_SIZE,
             IdPool::GetInstance().GetUint64Id(COMPONENT), GetDeviceId(data.device_type));
     }
@@ -96,6 +96,7 @@ NpuOpMemProcessor::ProcessedDataFormat NpuOpMemProcessor::FormatData(const OriDa
 bool NpuOpMemProcessor::Process(const std::string &fileDir)
 {
     INFO("Start to process %.", fileDir);
+    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, fileDir);
     Utils::ProfTimeRecord timeRecord;
     Utils::SyscntConversionParams params;
     DBInfo npuOpMemDB("task_memory.db", "NpuOpMemRaw");
@@ -123,12 +124,11 @@ bool NpuOpMemProcessor::Process(const std::string &fileDir)
         ERROR("Get % data failed in %.", npuOpMemDB.tableName, dbPath);
         return false;
     }
-    auto profId = IdPool::GetInstance().GetUint32Id(fileDir);
     GeHashMap hashMap;
     if (!GetGeHashMap(hashMap, fileDir)) {
         return false; // GetGeHashMap方法内有日志输出，这里直接返回
     }
-    auto processedData = FormatData(oriData, timeRecord, params, hashMap, profId);
+    auto processedData = FormatData(oriData, timeRecord, params, hashMap, pid);
     if (!SaveData(processedData, TABLE_NAME_NPU_OP_MEM)) {
         ERROR("Save data failed, %.", dbPath);
         return false;

@@ -36,7 +36,7 @@ protected:
 private:
     static OriDataFormat GetData(DBInfo &npuOpMemDB);
     static ProcessedDataFormat FormatData(const OriDataFormat &oriData, const Utils::ProfTimeRecord &timeRecord,
-                                          Utils::SyscntConversionParams &params, GeHashMap &hashMap, uint32_t profId);
+                                          Utils::SyscntConversionParams &params, GeHashMap &hashMap, uint32_t pid);
     static uint16_t GetDeviceId(const std::string& deviceType);
 };
 

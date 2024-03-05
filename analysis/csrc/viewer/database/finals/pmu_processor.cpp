@@ -24,9 +24,19 @@ using namespace Association::Credential;
 using namespace Analysis::Utils;
 
 namespace {
-const std::set<std::string> SampleBasedDBNames = {"ai_vector_core_", "aicore_"};
-const std::string TaskBased = "task-based";
+const std::set<std::string> SAMPLE_BASED_DB_NAMES = {"ai_vector_core_", "aicore_"};
+const std::set<std::string> INVALID_COLUMN_NAMES = {"task_id", "stream_id", "subtask_id", "batch_id", "task_type",
+                                                    "start_time", "end_time", "ffts_type", "core_type"};
+const std::string TASK_BASED = "task-based";
 const double INVALID_FREQ = 0.0;
+
+struct TaskPmuData {
+    uint32_t streamId = UINT32_MAX;
+    uint32_t taskId = UINT32_MAX;
+    uint32_t subtaskId = UINT32_MAX;
+    uint32_t batchId = UINT32_MAX;
+    double value = 0.0;
+};
 
 struct SampleTimelineData {
     double timestamp = 0.0;
@@ -59,16 +69,141 @@ bool PmuProcessor::Process(const std::string &fileDir)
         ERROR("GetMetricMode failed.");
         return false;
     }
-    if (metricMode == TaskBased) {
-        // 对于task-based pmu数据,目前只支持stars芯片(仅stars支持获取correlationId)
+    if (metricMode == TASK_BASED) {
+        // 对于task-based pmu数据,目前只支持stars芯片(仅stars支持获取globalTaskId)
         auto version = Context::GetInstance().GetPlatformVersion(Parser::Environment::DEFAULT_DEVICE_ID, fileDir);
         if (!Context::GetInstance().IsStarsChip(version)) {
             WARN("This platformVersion does not support the processing of pmu data.");
             return true;
         }
-        return true;
+        return TaskBasedProcess(fileDir);
     }
     return SampleBasedProcess(fileDir);
+}
+
+bool PmuProcessor::TaskBasedProcess(const std::string &fileDir)
+{
+    INFO("TaskBasedProcess, dir is %", fileDir);
+    auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
+    std::unordered_map<std::string, uint16_t> dbPathTable;
+    for (const auto& devicePath : deviceList) {
+        auto deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
+        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, "metric_summary.db"});
+        auto status = CheckPath(dbPath);
+        if (status == CHECK_SUCCESS) {
+            dbPathTable.insert({dbPath, deviceId});
+        } else if (status == CHECK_FAILED) {
+            return false;
+        }
+    }
+    DBInfo metricDB("metric_summary.db", "MetricSummary");
+    auto tableColumns = GetAndCheckTableColumns(dbPathTable, metricDB);
+    if (tableColumns.empty()) {
+        ERROR("GetAndCheckTableColumns failed, please check tableColums are consistent.");
+        return false;
+    }
+    bool flag = true;
+    for (const auto& pair : dbPathTable) {
+        for (const auto& tableColumn : tableColumns) {
+            if (!TaskBasedProcessByColumnName(pair, tableColumn.name, metricDB)) {
+                ERROR("TaskBasedProcess: process % data failed, dbPath is %.", tableColumn.name, pair.first);
+                flag = false;
+            }
+        }
+    }
+    return flag;
+}
+
+TableColumns PmuProcessor::GetAndCheckTableColumns(std::unordered_map<std::string, uint16_t> dbPathTable,
+                                                   DBInfo &metricDB)
+{
+    INFO("GetAndCheckTableColumns.");
+    TableColumns tableColumns;
+    for (const auto& pair : dbPathTable) {
+        MAKE_SHARED_RETURN_VALUE(metricDB.dbRunner, DBRunner, tableColumns, pair.first);
+        if (metricDB.dbRunner == nullptr) {
+            ERROR("Create % connection failed.", pair.first);
+        }
+        if (tableColumns.empty()) {
+            tableColumns = metricDB.dbRunner->GetTableColumns(metricDB.tableName);
+        } else if (tableColumns != metricDB.dbRunner->GetTableColumns(metricDB.tableName)) {
+            ERROR("%'s tableColumns are different from others.", pair.first);
+            // 若发现在各db中表字段不同,则返回空表头
+            tableColumns.clear();
+            return tableColumns;
+        }
+    }
+    return tableColumns;
+}
+
+bool PmuProcessor::TaskBasedProcessByColumnName(const std::pair<const std::string, uint16_t> dbRecord,
+                                                const std::string &columnName, DBInfo &metricDB)
+{
+    if (INVALID_COLUMN_NAMES.find(columnName) != INVALID_COLUMN_NAMES.end()) {
+        INFO("This column[%] does not need to be processed.", columnName);
+        return true;
+    }
+    OTFormat pmuData = GetTaskBasedData(dbRecord.first, columnName, metricDB);
+    PTFormat processedData;
+    if (!FormatTaskBasedData(pmuData, processedData, columnName, dbRecord.second)) {
+        ERROR("FormatData failed, dbPath is %.", dbRecord.first);
+        return false;
+    }
+    if (!SaveData(processedData, TABLE_NAME_TASK_PMU_INFO)) {
+        ERROR("Save data failed, %.", dbRecord.first);
+        return false;
+    }
+    return true;
+}
+
+PmuProcessor::OTFormat PmuProcessor::GetTaskBasedData(const std::string &dbPath, const std::string &columnName,
+                                                      DBInfo &metricDB)
+{
+    INFO("GetTaskBasedData, dbPath is %, column name is %.", dbPath, columnName);
+    OTFormat oriData;
+    MAKE_SHARED_RETURN_VALUE(metricDB.dbRunner, DBRunner, oriData, dbPath);
+    if (metricDB.dbRunner == nullptr) {
+        ERROR("Create % connection failed.", dbPath);
+        return oriData;
+    }
+    std::string sql = "SELECT stream_id, task_id, subtask_id, batch_id, " + columnName + " "
+                      "FROM " + metricDB.tableName;
+    if (!metricDB.dbRunner->QueryData(sql, oriData)) {
+        ERROR("Query task-based % data failed, db path is %.", columnName, dbPath);
+        return oriData;
+    }
+    return oriData;
+}
+
+bool PmuProcessor::FormatTaskBasedData(const OTFormat &oriData, PTFormat &processedData,
+                                       const std::string &columnName, const uint16_t &deviceId)
+{
+    INFO("FormatTaskBasedData.");
+    if (oriData.empty()) {
+        ERROR("Task-based original data is empty, columnName is %.", columnName);
+        return false;
+    }
+    if (!Utils::Reserve(processedData, oriData.size())) {
+        ERROR("Reserve for % task-based data failed, columnName is %.", columnName);
+        return false;
+    }
+    // 当前task-based pmu存在两个问题:
+    // 1、没有考虑memory_bound或是cube utilization的计算
+    // 2、对于类似ratio_extra命名的字段没有做名称的刷新(去掉extra等动作)
+    // 当前pmu time的单位为us
+    TaskPmuData tempData;
+    for (const auto &row: oriData) {
+        std::tie(tempData.streamId, tempData.taskId, tempData.subtaskId, tempData.batchId, tempData.value) = row;
+        uint64_t globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(static_cast<uint16_t>(deviceId),
+                                                                            tempData.streamId, tempData.taskId,
+                                                                            tempData.subtaskId, tempData.batchId));
+        processedData.emplace_back(globalTaskId, IdPool::GetInstance().GetUint64Id(columnName), tempData.value);
+    }
+    if (processedData.empty()) {
+        ERROR("FormatTaskBasedData data processing error.");
+        return false;
+    }
+    return true;
 }
 
 bool PmuProcessor::SampleBasedProcess(const std::string &fileDir)
@@ -76,7 +211,7 @@ bool PmuProcessor::SampleBasedProcess(const std::string &fileDir)
     INFO("SampleBasedProcess, dir is %", fileDir);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     std::unordered_map<std::string, uint16_t> dbPathTable;
-    for (const auto& name : SampleBasedDBNames) {
+    for (const auto& name : SAMPLE_BASED_DB_NAMES) {
         for (const auto& devicePath : deviceList) {
             auto deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
             std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, name + std::to_string(deviceId) + ".db"});

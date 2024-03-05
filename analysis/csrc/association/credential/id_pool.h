@@ -21,7 +21,7 @@
 namespace Analysis {
 namespace Association {
 namespace Credential {
-using CorrelationTuple = std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t>;
+using CorrelationTuple = std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, uint32_t>;
 class IdPool : public Utils::Singleton<IdPool> {
 public:
     void Clear();

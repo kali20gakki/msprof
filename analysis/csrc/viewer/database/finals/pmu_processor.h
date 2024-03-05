@@ -27,6 +27,9 @@ using OSTFormat = std::vector<std::tuple<uint64_t, std::string, uint32_t>>;
 // Original Sample Summary Format:aicore/ai_vector_core中的MetricSummary
 // metric, value, coreid
 using OSSFormat = std::vector<std::tuple<std::string, double, uint32_t>>;
+// Original Task Format: 只取id + 对应字段的value
+// stream_id, task_id, subtask_id, batch_id, value
+using OTFormat = std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, double>>;
 
 // Processed Sample Timeline Format
 // deviceId, timestamp, totalCycle, usage, freq, coreId
@@ -34,6 +37,9 @@ using PSTFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, double, d
 // Processed Sample Summary Format
 // deviceId, metric, value, coreId
 using PSSFormat = std::vector<std::tuple<uint16_t, uint64_t, double, uint16_t>>;
+// Processed Task Format
+// globalTaskId, name, value
+using PTFormat = std::vector<std::tuple<uint64_t, uint64_t, double>>;
 
 struct ThreadData {
     uint16_t deviceId = UINT16_MAX;
@@ -48,6 +54,14 @@ public:
 protected:
     bool Process(const std::string &fileDir) override;
 private:
+    bool TaskBasedProcess(const std::string &fileDir);
+    TableColumns GetAndCheckTableColumns(std::unordered_map<std::string, uint16_t> dbPathTable, DBInfo &metricDB);
+    bool TaskBasedProcessByColumnName(const std::pair<const std::string, uint16_t> dbRecord,
+                                      const std::string &columnName, DBInfo &metricDB);
+    OTFormat GetTaskBasedData(const std::string &dbPath, const std::string &columnName, DBInfo &metricDB);
+    bool FormatTaskBasedData(const OTFormat &oriData, PTFormat &processedData, const std::string &columnName,
+                             const uint16_t &deviceId);
+
     bool SampleBasedProcess(const std::string &fileDir);
     bool SampleBasedTimelineProcess(const std::unordered_map<std::string, uint16_t> &dbPathTable,
                                     const std::string &fileDir);

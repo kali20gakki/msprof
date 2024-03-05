@@ -96,16 +96,16 @@ protected:
     }
 };
 
-void CheckCorrelationId(PROCESSED_DATA_FORMAT data)
+void CheckGlobalTaskId(PROCESSED_DATA_FORMAT data)
 {
-    const uint16_t correlationIdIndex = 1;
-    std::vector<uint64_t> correlationId;
+    const uint16_t globalTaskIdIndex = 1;
+    std::vector<uint64_t> globalTaskIds;
     for (auto item : data) {
-        correlationId.emplace_back(std::get<correlationIdIndex>(item));
+        globalTaskIds.emplace_back(std::get<globalTaskIdIndex>(item));
     }
-    std::sort(correlationId.begin(), correlationId.end());
+    std::sort(globalTaskIds.begin(), globalTaskIds.end());
     for (int i = 0; i < OP_NUM; ++i) {
-        EXPECT_EQ(correlationId[i], i);
+        EXPECT_EQ(globalTaskIds[i], i);
     }
 }
 
@@ -148,7 +148,7 @@ TEST_F(ComputeTaskInfoProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuc
     auto processor = ComputeTaskInfoProcessor(DB_PATH, PROF_PATHS);
     EXPECT_TRUE(processor.Run());
     ReportDBRunner->QueryData(sql, result);
-    CheckCorrelationId(result);
+    CheckGlobalTaskId(result);
     CheckStringId(result);
 }
 

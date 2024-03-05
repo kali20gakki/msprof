@@ -28,7 +28,7 @@ class CommunicationInfoProcessor : public TableProcessor {
                                   uint32_t, uint32_t, std::string, uint64_t, std::string, std::string, uint32_t,
                                   uint64_t, uint32_t, std::string, double, double, uint32_t>;
     using OriDataFormat = std::vector<HcclFormat>;
-    // name, correlationId, taskType, planeId, groupName, notifyId, rdmaType, srcRank, dstRank, transportType,
+    // name, globalTaskId, taskType, planeId, groupName, notifyId, rdmaType, srcRank, dstRank, transportType,
     // size, dataType, linkType, opId
     using CommunicationTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t,
                                                                uint64_t, uint64_t, uint32_t, uint32_t, uint64_t,
@@ -53,7 +53,7 @@ class CommunicationInfoProcessor : public TableProcessor {
         uint32_t srcRank = UINT32_MAX;
         uint32_t dstRank = UINT32_MAX;
         uint32_t opId = UINT32_MAX;
-        uint64_t correlationId = UINT64_MAX;
+        uint64_t globalTaskId = UINT64_MAX;
         uint64_t opName = UINT64_MAX;
         uint64_t taskType = UINT64_MAX;
         uint64_t groupName = UINT64_MAX;

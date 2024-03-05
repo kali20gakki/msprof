@@ -110,17 +110,17 @@ protected:
     }
 };
 
-void CheckCorrelationId(ProcessedDataFormat data)
+void CheckGlobalTaskId(ProcessedDataFormat data)
 {
-    const uint16_t correlationIdIndex = 4;
-    std::vector<uint64_t> correlationId;
+    const uint16_t globalTaskIdIndex = 4;
+    std::vector<uint64_t> globalTaskIds;
     for (auto item : data) {
-        correlationId.emplace_back(std::get<correlationIdIndex>(item));
+        globalTaskIds.emplace_back(std::get<globalTaskIdIndex>(item));
     }
-    EXPECT_EQ(correlationId.size(), OP_NUM);
-    std::sort(correlationId.begin(), correlationId.end());
-    for (size_t i = 0; i < correlationId.size(); ++i) {
-        EXPECT_EQ(correlationId[i], i);
+    EXPECT_EQ(globalTaskIds.size(), OP_NUM);
+    std::sort(globalTaskIds.begin(), globalTaskIds.end());
+    for (size_t i = 0; i < globalTaskIds.size(); ++i) {
+        EXPECT_EQ(globalTaskIds[i], i);
     }
 }
 
@@ -157,7 +157,7 @@ TEST_F(TaskProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
     auto processor = TaskProcessor(DB_PATH, PROF_PATHS);
     EXPECT_TRUE(processor.Run());
     ReportDBRunner->QueryData(sql, result);
-    CheckCorrelationId(result);
+    CheckGlobalTaskId(result);
     CheckStringId(result);
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPlatformVersion).reset();
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPidFromInfoJson).reset();

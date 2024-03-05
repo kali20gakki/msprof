@@ -255,7 +255,7 @@ bool Context::GetProfTimeRecordInfo(Utils::ProfTimeRecord &record, const std::st
         return false;
     }
     // 先判断时间之间的大小关系，确保后续计算时整数不回绕
-    if ((startTimeUs * MILLI_SECOND < baseTimeNs) || (startTimeUs * MILLI_SECOND - baseTimeNs < TIME_BASE_OFFSET_NS)) {
+    if ((startTimeUs * MILLI_SECOND < baseTimeNs)) {
         ERROR("The value of startTimeUs and baseTimeNs is invalid.");
         return false;
     }

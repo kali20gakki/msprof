@@ -122,8 +122,6 @@ bool ApiProcessor::FormatData(const std::string &fileDir, const ApiDataFormat &a
         uint64_t globalTid = Utils::Contact(pid, tempData.threadId);
         Utils::HPFloat startTimestamp = Utils::GetTimeFromSyscnt(tempData.start, params);
         Utils::HPFloat endTimestamp = Utils::GetTimeFromSyscnt(tempData.end, params);
-        uint64_t start = Utils::GetLocalTime(startTimestamp, record).Uint64();
-        uint64_t end = Utils::GetLocalTime(endTimestamp, record).Uint64();
         uint64_t connectionId = Utils::Contact(profId, tempData.connectionId);
         uint64_t name = IdPool::GetInstance().GetUint64Id(tempData.structType);
         if (level == MSPROF_REPORT_ACL_LEVEL) {
@@ -131,7 +129,10 @@ bool ApiProcessor::FormatData(const std::string &fileDir, const ApiDataFormat &a
         } else if (level == MSPROF_REPORT_HCCL_NODE_LEVEL) {
             name = IdPool::GetInstance().GetUint64Id(tempData.itemId);
         }
-        processedData.emplace_back(start, end, level, globalTid, connectionId, name);
+        // apiId 仅在框架侧有意义,当前直接使用connectionId作为替代
+        processedData.emplace_back(Utils::GetLocalTime(startTimestamp, record).Uint64(),
+                                   Utils::GetLocalTime(endTimestamp, record).Uint64(),
+                                   level, globalTid, connectionId, name, connectionId);
     }
     if (processedData.empty()) {
         ERROR("Api data processing error.");

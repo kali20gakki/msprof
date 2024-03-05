@@ -43,6 +43,11 @@ struct TableColumn {
         auto str = isPrimary ? base + " PRIMARY KEY" : base;
         return str;
     }
+
+    bool operator==(const TableColumn& other) const
+    {
+        return (name == other.name) && (type == other.type);
+    }
 };
 
 template<size_t... S>

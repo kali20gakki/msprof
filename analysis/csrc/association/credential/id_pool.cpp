@@ -20,11 +20,10 @@ namespace Credential {
 
 namespace {
 const uint32_t DEVICE_ID = 0;
-const uint32_t MODEL_ID = 1;
-const uint32_t STREAM_ID = 2;
-const uint32_t TASK_ID = 3;
-const uint32_t CONTEXT_ID = 4;
-const uint32_t BATCH_ID = 5;
+const uint32_t STREAM_ID = 1;
+const uint32_t TASK_ID = 2;
+const uint32_t CONTEXT_ID = 3;
+const uint32_t BATCH_ID = 4;
 }
 
 // 清除map数据
@@ -65,7 +64,7 @@ uint64_t IdPool::GetId(const CorrelationTuple& key)
 {
     std::lock_guard<std::mutex> lock(correlationMutex_);
     std::string stringKey = Utils::Join("_", Utils::Join("_",
-        std::get<DEVICE_ID>(key), std::get<MODEL_ID>(key), std::get<STREAM_ID>(key)),
+        std::get<DEVICE_ID>(key), std::get<STREAM_ID>(key)),
         std::get<TASK_ID>(key), std::get<CONTEXT_ID>(key), std::get<BATCH_ID>(key));
     if (correlationIds_.find(stringKey) == correlationIds_.end()) {
         correlationIds_.insert({stringKey, correlationIndex_});
