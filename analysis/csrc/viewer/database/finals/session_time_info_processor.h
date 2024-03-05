@@ -22,8 +22,8 @@ namespace Database {
 
 // 该类用于落盘采集任务的开始结束时间
 class SessionTimeInfoProcessor : public TableProcessor {
-// startTime, endTime, baseTime
-using TimeDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t>>;
+// startTime, endTime
+using TimeDataFormat = std::vector<std::tuple<uint64_t, uint64_t>>;
 public:
     SessionTimeInfoProcessor() = default;
     SessionTimeInfoProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);

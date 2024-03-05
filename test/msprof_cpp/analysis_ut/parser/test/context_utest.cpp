@@ -387,7 +387,7 @@ TEST_F(ContextUTest, TestGetProfTimeRecordInfoShouldReturnDefaultValueWhenStrToU
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
     ProfTimeRecord res;
     EXPECT_FALSE(Context::GetInstance().GetProfTimeRecordInfo(res, {File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
-    EXPECT_EQ(res.baseTimeNs, UINT64_MAX - TIME_BASE_OFFSET_NS);
+    EXPECT_EQ(res.baseTimeNs, UINT64_MAX);
     EXPECT_EQ(res.startTimeNs, UINT64_MAX);
     EXPECT_EQ(res.endTimeNs, 0);
 }
@@ -409,7 +409,7 @@ TEST_F(ContextUTest, TestGetProfTimeRecordInfoShouldReturnDefaultValueWhenTimeIn
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
     ProfTimeRecord res;
     EXPECT_FALSE(Context::GetInstance().GetProfTimeRecordInfo(res, {File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
-    EXPECT_EQ(res.baseTimeNs, UINT64_MAX - TIME_BASE_OFFSET_NS);
+    EXPECT_EQ(res.baseTimeNs, UINT64_MAX);
     EXPECT_EQ(res.startTimeNs, UINT64_MAX);
     EXPECT_EQ(res.endTimeNs, 0);
 }

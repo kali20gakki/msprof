@@ -38,9 +38,7 @@ bool SessionTimeInfoProcessor::Run()
         PrintProcessorResult(flag, PROCESSOR_NAME_SESSION_TIME_INFO);
         return flag;
     }
-    TimeDataFormat timeInfoData = {
-        std::make_tuple(record_.startTimeNs, record_.endTimeNs, Analysis::Utils::TIME_BASE_OFFSET_NS)
-    };
+    TimeDataFormat timeInfoData = {std::make_tuple(record_.startTimeNs, record_.endTimeNs)};
     flag = SaveData(timeInfoData, TABLE_NAME_SESSION_TIME_INFO);
     PrintProcessorResult(flag, PROCESSOR_NAME_SESSION_TIME_INFO);
     return flag;
@@ -49,7 +47,6 @@ bool SessionTimeInfoProcessor::Run()
 bool SessionTimeInfoProcessor::Process(const std::string &fileDir)
 {
     INFO("SessionTimeInfoProcessor Process, dir is %", fileDir);
-    std::string hostDir = Utils::File::PathJoin({fileDir, HOST});
     Utils::ProfTimeRecord tempRecord;
     if (!Context::GetInstance().GetProfTimeRecordInfo(tempRecord, fileDir)) {
         ERROR("GetProfTimeRecordInfo failed, profPath is %.", fileDir);

@@ -69,12 +69,11 @@ TEST_F(IdPoolUTest, GetIdShouldReturnNewIndexWhenInputIsTupleAndKeyNotExist)
 {
     uint64_t expect = 0;
     uint32_t deviceId = 1;
-    uint32_t modelId = 2;
     uint32_t streamId = 3;
     uint32_t taskId = 4;
     uint32_t contextId = 5;
     uint32_t batchId = 6;
-    CorrelationTuple key = std::make_tuple(deviceId, modelId, streamId, taskId, contextId, batchId);
+    CorrelationTuple key = std::make_tuple(deviceId, streamId, taskId, contextId, batchId);
     auto res = IdPool::GetInstance().GetId(key);
     EXPECT_EQ(expect, res);
     IdPool::GetInstance().Clear();
@@ -84,12 +83,11 @@ TEST_F(IdPoolUTest, GetIdShouldReturnNewIndexWhenInputIsTupleAndKeyExist)
 {
     uint64_t expect = 0;
     uint32_t deviceId = 2;
-    uint32_t modelId = 3;
     uint32_t streamId = 4;
     uint32_t taskId = 4;
     uint32_t contextId = 5;
     uint32_t batchId = 6;
-    CorrelationTuple key = std::make_tuple(deviceId, modelId, streamId, taskId, contextId, batchId);
+    CorrelationTuple key = std::make_tuple(deviceId, streamId, taskId, contextId, batchId);
     IdPool::GetInstance().GetId(key);
     auto res = IdPool::GetInstance().GetId(key);
     EXPECT_EQ(expect, res);
@@ -207,12 +205,12 @@ TEST_F(IdPoolUTest, IdsShouldBeUniqueWhenInputIsTupleInTheMultiThreadScenario)
 
     for (uint64_t i = 0; i < tasksNum; i++) {
         auto taskGet = [i, &taskResult, &taskMutex]() {
-            auto res = IdPool::GetInstance().GetId(std::make_tuple(i, i, i, i, i, i));
+            auto res = IdPool::GetInstance().GetId(std::make_tuple(i, i, i, i, i));
             std::lock_guard<std::mutex> lock(taskMutex);
             taskResult.emplace_back(res);
         };
         auto taskRepeatedGet = [i, &taskRepeatedResult, &taskRepeatedMutex]() {
-            auto res = IdPool::GetInstance().GetId(std::make_tuple(i, i, i, i, i, i));
+            auto res = IdPool::GetInstance().GetId(std::make_tuple(i, i, i, i, i));
             std::lock_guard<std::mutex> lock(taskRepeatedMutex);
             taskRepeatedResult.emplace_back(res);
         };

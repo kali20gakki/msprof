@@ -21,7 +21,7 @@ using namespace Analysis::Viewer::Database;
 using namespace Parser::Environment;
 using namespace Analysis::Utils;
 
-using TimeDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t>>;
+using TimeDataFormat = std::vector<std::tuple<uint64_t, uint64_t>>;
 
 const std::string SESSION_TIME_INFO_DIR = "./session_time_info";
 const std::string REPORT = "report.db";
@@ -89,10 +89,8 @@ TEST_F(SessionTimeInfoProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuc
     std::shared_ptr<DBRunner> dbRunner;
     MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
     TimeDataFormat checkData;
-    TimeDataFormat expectData = {
-        {expectRecord.startTimeNs, expectRecord.endTimeNs, Analysis::Utils::TIME_BASE_OFFSET_NS},
-    };
-    std::string sqlStr = "SELECT startTimeNs, endTimeNs, baseTimeNs FROM " + TABLE_NAME_SESSION_TIME_INFO;
+    TimeDataFormat expectData = {{expectRecord.startTimeNs, expectRecord.endTimeNs}};
+    std::string sqlStr = "SELECT startTimeNs, endTimeNs FROM " + TABLE_NAME_SESSION_TIME_INFO;
     ASSERT_NE(dbRunner, nullptr);
     EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkData));
     EXPECT_EQ(expectData, checkData);

@@ -18,8 +18,6 @@
 
 namespace Analysis {
 namespace Utils {
-// 2020年1月1日0时0分0秒 作为基准时间 ns
-const uint64_t TIME_BASE_OFFSET_NS = 1577808000000000000;
 const double DEFAULT_FREQ = 1000.0;
 
 // SyscntConversionParams 用于记录 syscnt 转为 timestamp 所需要的三个数据
@@ -39,7 +37,7 @@ struct SyscntConversionParams {
 struct ProfTimeRecord {
     uint64_t startTimeNs = UINT64_MAX;                                  // host start info 基于世界时间的任务开始时间
     uint64_t endTimeNs = 0;                                             // host end info 基于世界时间的任务结束时间
-    uint64_t baseTimeNs = startTimeNs - TIME_BASE_OFFSET_NS;            // host start info 基于开机时间的任务开始时间
+    uint64_t baseTimeNs = UINT64_MAX;                                   // host start info 基于开机时间的任务开始时间
     ProfTimeRecord() = default;
     ProfTimeRecord(uint64_t startTimeNs, uint64_t endTimeNs, uint64_t baseTimeNs)
         : startTimeNs(startTimeNs), endTimeNs(endTimeNs), baseTimeNs(baseTimeNs){};
