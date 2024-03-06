@@ -24,7 +24,6 @@ using namespace Analysis::Association::Credential;
 namespace {
 struct NpuOpMemData {
     uint32_t threadId = 0;
-    uint32_t level = 0;
     uint32_t type = 0;
     uint64_t totalAllocateMemory = 0;
     uint64_t totalReserveMemory = 0;
@@ -43,6 +42,7 @@ NpuOpMemProcessor::NpuOpMemProcessor(const std::string &reportDBPath, const std:
 bool NpuOpMemProcessor::Run()
 {
     INFO("NpuOpMemProcessor Run.");
+    stringGeId_ = IdPool::GetInstance().GetUint64Id(COMPONENT);
     bool flag = TableProcessor::Run();
     PrintProcessorResult(flag, PROCESSOR_NAME_NPU_OP_MEM);
     return flag;
@@ -52,7 +52,7 @@ NpuOpMemProcessor::OriDataFormat NpuOpMemProcessor::GetData(DBInfo &npuOpMemDB)
 {
     OriDataFormat oriData;
     std::string sql{"SELECT operator, addr, size, timestamp, thread_id, total_allocate_memory, total_reserve_memory, "
-                    "level, type, device_type FROM " + npuOpMemDB.tableName};
+                    "device_type FROM " + npuOpMemDB.tableName};
     if (!npuOpMemDB.dbRunner->QueryData(sql, oriData)) {
         ERROR("Failed to obtain data from the % table.", npuOpMemDB.tableName);
     }
@@ -62,7 +62,7 @@ NpuOpMemProcessor::OriDataFormat NpuOpMemProcessor::GetData(DBInfo &npuOpMemDB)
 NpuOpMemProcessor::ProcessedDataFormat NpuOpMemProcessor::FormatData(const OriDataFormat &oriData,
                                                                      const Utils::ProfTimeRecord &timeRecord,
                                                                      Utils::SyscntConversionParams &params,
-                                                                     GeHashMap &hashMap, uint32_t pid)
+                                                                     GeHashMap &hashMap, uint32_t pid) const
 {
     ProcessedDataFormat processedData;
     NpuOpMemData data;
@@ -72,7 +72,7 @@ NpuOpMemProcessor::ProcessedDataFormat NpuOpMemProcessor::FormatData(const OriDa
     }
     for (auto &row: oriData) {
         std::tie(data.operatorName, data.addr, data.size, data.timestamp, data.threadId, data.totalAllocateMemory,
-                 data.totalReserveMemory, data.level, std::ignore, data.device_type) = row;
+                 data.totalReserveMemory, data.device_type) = row;
         HPFloat timestamp{GetTimeFromSyscnt(data.timestamp, params)};
         if (data.size < 0) {
             data.size = std::abs(data.size);
@@ -87,8 +87,7 @@ NpuOpMemProcessor::ProcessedDataFormat NpuOpMemProcessor::FormatData(const OriDa
         processedData.emplace_back(
             IdPool::GetInstance().GetUint64Id(hashMap[data.operatorName]), addr, data.type, data.size,
             GetLocalTime(timestamp, timeRecord).Uint64(), Utils::Contact(pid, data.threadId),
-            data.totalAllocateMemory / BYTE_SIZE, data.totalReserveMemory / BYTE_SIZE,
-            IdPool::GetInstance().GetUint64Id(COMPONENT), GetDeviceId(data.device_type));
+            data.totalAllocateMemory, data.totalReserveMemory, stringGeId_, GetDeviceId(data.device_type));
     }
     return processedData;
 }

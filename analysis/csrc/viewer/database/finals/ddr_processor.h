@@ -23,7 +23,7 @@ class DDRProcessor : public TableProcessor {
 // device_id, timestamp, flux_read, flux_write
     using OriDataFormat = std::vector<std::tuple<uint32_t, double, double, double>>;
 // deviceId, timestamp, read, write
-    using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, double, double>>;
+    using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, uint64_t>>;
 public:
     DDRProcessor() = default;
     DDRProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);

@@ -20,12 +20,12 @@ namespace Viewer {
 namespace Database {
 // 该类用于生成NPU_OP_MEM表
 class NpuOpMemProcessor : public TableProcessor {
-    // operator, addr, size, timestamp, thread_id, total_allocate_memory, total_reserve_memory, level, type, device_type
+    // operator, addr, size, timestamp, thread_id, total_allocate_memory, total_reserve_memory, device_type
     using OriDataFormat = std::vector<std::tuple<std::string, std::string, int64_t, double, uint32_t, uint64_t,
-                                                 uint64_t, uint32_t, uint32_t, std::string>>;
+                                                 uint64_t, std::string>>;
     // operatorName, addr, type, size, timestamp, globalTid, totalAllocate, totalReserve,  component, deviceId
     using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint64_t, uint64_t, uint64_t,
-                                                       double, double, uint64_t, uint16_t>>;
+                                                       uint64_t, uint64_t, uint64_t, uint16_t>>;
 public:
     NpuOpMemProcessor() = default;
     NpuOpMemProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
@@ -35,9 +35,10 @@ protected:
     bool Process(const std::string &fileDir) override;
 private:
     static OriDataFormat GetData(DBInfo &npuOpMemDB);
-    static ProcessedDataFormat FormatData(const OriDataFormat &oriData, const Utils::ProfTimeRecord &timeRecord,
-                                          Utils::SyscntConversionParams &params, GeHashMap &hashMap, uint32_t pid);
+    ProcessedDataFormat FormatData(const OriDataFormat &oriData, const Utils::ProfTimeRecord &timeRecord,
+                                   Utils::SyscntConversionParams &params, GeHashMap &hashMap, uint32_t pid) const;
     static uint16_t GetDeviceId(const std::string& deviceType);
+    uint64_t stringGeId_;
 };
 
 } // Database

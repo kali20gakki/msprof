@@ -23,7 +23,7 @@ class HCCSProcessor : public TableProcessor {
 // device_id, timestamp, txthroughput, rxthroughput
 using HccsDataFormat = std::vector<std::tuple<uint32_t, double, double, double>>;
 // deviceId, timestampNs, txThroughput, rxThroughput
-using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, double, double>>;
+using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, uint64_t>>;
 
 public:
     HCCSProcessor() = default;
