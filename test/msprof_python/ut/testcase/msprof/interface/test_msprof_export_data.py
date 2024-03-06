@@ -288,10 +288,10 @@ class TestMsProfExportDataUtils(unittest.TestCase):
     def test_get_roce_data_1(self):
         configs = {"db": 'hwts', "table": '789'}
         params = {"export_type": "timeline", "project": '987', "device_id": "654", "data_type": "ddcp"}
-        with mock.patch(NAMESPACE + '.get_network_timeline', return_value=321):
+        with mock.patch(NAMESPACE + '.get_network_timeline', return_value=[{"args": {"name": "ROH"}}]):
             key = MsProfExportDataUtils()
             result = key._get_roce_data(configs, params)
-        self.assertEqual(result, 321)
+        self.assertEqual(result, [{"args": {"name": "ROH"}}])
 
     def test_get_roce_data_2(self):
         configs = {"db": 'hwts', "table": '987'}
