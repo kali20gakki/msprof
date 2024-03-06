@@ -528,4 +528,3 @@ class RoceModel(BaseModel, ABC):
             tx_dropped_rate = self._get_tx_dropped_rate(tx_packet_dic, device_id, func_id)
         rate_info = (rx_error_rate, rx_dropped_rate, tx_error_rate, tx_dropped_rate)
         return rate_info
-

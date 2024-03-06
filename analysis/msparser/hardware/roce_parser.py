@@ -24,7 +24,7 @@ class ParsingRoceData(MsMultiProcess):
     parsing peripheral data class
     """
 
-    DEFAULT_NIC_FUNC_ID = 0
+    DEFAULT_ROCE_FUNC_ID = 0
     SCRIPT_PATH = os.path.realpath(os.path.dirname(__file__))
     NETWORK_HEADER_TAG = 'rxPacket/s'
 
@@ -50,7 +50,7 @@ class ParsingRoceData(MsMultiProcess):
                     continue
                 self.read_binary_data(file_name)
                 FileManager.add_complete_file(self.project_path, file_name)
-                logging.info("Create NIC DB finished!")
+                logging.info("Parse roce data finished!")
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
             logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
 
@@ -106,12 +106,17 @@ class ParsingRoceData(MsMultiProcess):
 
     def _generate_roce_data(self: any, network_data: list) -> None:
         tables_path = ConfigManager.TABLES_TRAINING
-        nic_header_num = DBManager.get_table_field_num(DBNameConstant.TABLE_ROCE_ORIGIN + "Map", tables_path)
+        roce_header_num = DBManager.get_table_field_num(DBNameConstant.TABLE_ROCE_ORIGIN + "Map", tables_path)
         self.roce_data = []
         # chip 0 nic diff, exclude device_id and replay_id
+        has_type_id = True
+        if len(network_data) > 0:
+            # 新上报一个typeid字段用以标识(ROCE:0, ROH:1)
+            if roce_header_num > len(network_data[0]) + 2:
+                has_type_id = False
         for nd in network_data:
             item = [self._device_id, 0, float(nd[0].replace(":", ''))]
             item.extend(nd[1:])
-            if nic_header_num != len(network_data[0]) + 2:
-                item.extend([self.DEFAULT_NIC_FUNC_ID])
+            if not has_type_id:
+                item.append(0)
             self.roce_data.append(tuple(item))
