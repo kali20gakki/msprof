@@ -65,6 +65,7 @@ private:
     void RecordTreeNode(const std::shared_ptr<TreeNode> &treeNode, const uint16_t &eventLevel);
     // 处理剩余的TaskTrackEvents，将其挂到rootNode上
     void AddRemainTaskTrackEvents(std::shared_ptr<TreeNode> &rootNode, std::shared_ptr<EventQueue> &events) const;
+    std::shared_ptr<TreeNode> GenerateRoot();
 private:
     // 建树时记录叶子节点，用于在其上添加TaskTrack
     std::vector<std::shared_ptr<TreeNode>> leafNodes_;

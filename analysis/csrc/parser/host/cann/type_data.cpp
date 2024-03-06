@@ -87,6 +87,11 @@ bool TypeData::ReadFiles(const std::vector<std::string> &files)
                 ERROR("Convert str % to uint64 error", typeTokens[1]);
                 continue;
             }
+            if (typeData_.find(level) != typeData_.end() and
+                typeData_[level].find(type) != typeData_[level].end()) {
+                // 采集侧修复后该行变为ERROR
+                WARN("Duplicate type found level: %, type: %", level, type);
+            }
             typeData_[level][type] = tokens[1];
         }
     }

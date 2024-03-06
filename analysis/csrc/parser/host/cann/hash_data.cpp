@@ -72,6 +72,10 @@ bool HashData::ReadFiles(const std::vector<std::string> &files)
                 ERROR("Convert str % to uint64 error", tokens[0]);
                 continue;
             }
+            if (hashData_.find(key) != hashData_.end()) {
+                // 采集侧修复后该行变为ERROR
+                WARN("Duplicate hash found key: %", key);
+            }
             hashData_[key] = tokens[1];
         }
     }
