@@ -15,9 +15,9 @@ class GeLogicStreamInfoBean(StructDecoder):
         self._logic_stream_id = data[6]
         physic_stream_num = data[7]
         start_index = 8   # physic_stream_id 从第八个开始存储
-        self._physic_stream_id = []
+        self._physic_logic_stream_id = []
         for index in range(start_index, start_index + physic_stream_num):
-            self._physic_stream_id.append(str(data[index]))
+            self._physic_logic_stream_id.append([data[index], self._logic_stream_id])
  
     @property
     def logic_stream_id(self: any) -> int:
@@ -27,9 +27,9 @@ class GeLogicStreamInfoBean(StructDecoder):
         return self._logic_stream_id
  
     @property
-    def physic_stream_id(self: any) -> str:
+    def physic_logic_stream_id(self: any) -> list:
         """
         for physic stream id
         """
-        return ",".join(self._physic_stream_id)
+        return self._physic_logic_stream_id
 

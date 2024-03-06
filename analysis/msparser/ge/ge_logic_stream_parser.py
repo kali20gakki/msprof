@@ -32,7 +32,7 @@ class GeLogicStreamParser(DataParser, MsMultiProcess):
     def _get_ge_logic_stream_data(bean_data: any) -> list:
         if not bean_data:
             return []
-        return [bean_data.logic_stream_id, bean_data.physic_stream_id]
+        return bean_data.physic_logic_stream_id
  
     def parse(self: any) -> None:
         """
@@ -51,10 +51,17 @@ class GeLogicStreamParser(DataParser, MsMultiProcess):
         """
         if not self._ge_logic_stream_data:
             return
+        format_data = self.format_stream_data()
         model = GeLogicStreamInfoModel(self._project_path)
         with model as _model:
-            _model.flush(self._ge_logic_stream_data)
+            _model.flush(format_data)
  
+    def format_stream_data(self) -> list:
+        format_data = []
+        for stream_list in self._ge_logic_stream_data:
+            format_data.extend(stream_list)
+        return format_data
+
     def ms_run(self: any) -> None:
         """
         parse and save ge hash data

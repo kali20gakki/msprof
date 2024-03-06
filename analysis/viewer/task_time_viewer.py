@@ -12,6 +12,7 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ge_logic_stream_singleton import GeLogicStreamSingleton
 from common_func.ms_constant.stars_constant import StarsConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.platform.chip_manager import ChipManager
@@ -195,13 +196,13 @@ class TaskTimeViewer(BaseViewer):
                     [
                         data.op_name,
                         self.trace_pid_map.get("Task Scheduler", 0),
-                        data.stream_id,
+                        GeLogicStreamSingleton().get_logic_stream_id(data.stream_id),
                         InfoConfReader().trans_into_local_time(data.start_time),
                         data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
                         {
                             "Model Id": data.model_id,
                             "Task Type": TaskTimeViewer.get_device_task_type(data.device_task_type),
-                            "Stream Id": data.stream_id,
+                            "Physic Stream Id": data.stream_id,
                             "Task Id": data.task_id,
                             'Batch Id': data.batch_id,
                             "Subtask Id": data.context_id,

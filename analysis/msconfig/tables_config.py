@@ -68,8 +68,8 @@ class TablesConfig(MetaConfig):
             ('op_name', 'TEXT,null')
         ],
         'GeLogicStreamInfoMap': [
-            ('logic_stream', 'TEXT,null'),
-            ('physic_stream', 'TEXT,null')
+            ('physic_stream', 'INTEGER,null'),
+            ('logic_stream', 'INTEGER,null')
         ],
         'OriginalDataMap': [
             ('common', 'TEXT,null'),
