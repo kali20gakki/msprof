@@ -111,10 +111,10 @@ bool HCCSProcessor::FormatData(const Utils::ProfTimeRecord timeRecord,
     for (auto &row: hccsData) {
         std::tie(tempData.deviceId, tempData.timestamp, tempData.txThroughput, tempData.rxThroughput) = row;
         HPFloat timestamp{tempData.timestamp};
-        // 暂时不做数据格式转换,目前是MB/s
         processedData.emplace_back(static_cast<uint16_t>(tempData.deviceId),
                                    GetLocalTime(timestamp, timeRecord).Uint64(),
-                                   tempData.txThroughput, tempData.rxThroughput);
+                                   static_cast<uint64_t>(tempData.txThroughput * BYTE_SIZE * BYTE_SIZE), // MB/s -> B/s
+                                   static_cast<uint64_t>(tempData.txThroughput * BYTE_SIZE * BYTE_SIZE));
     }
     if (processedData.empty()) {
         ERROR("Hccs data processing error.");

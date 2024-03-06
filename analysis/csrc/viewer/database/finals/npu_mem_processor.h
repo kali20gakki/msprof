@@ -20,10 +20,10 @@ namespace Viewer {
 namespace Database {
 // 该类用于生成NPU_MEM表
 class NpuMemProcessor : public TableProcessor {
-    // event, ddr, hbm, timestamp, memory
-    using OriDataFormat = std::vector<std::tuple<std::string, uint64_t, uint64_t, double, uint64_t>>;
+    // event, ddr, hbm, timestamp
+    using OriDataFormat = std::vector<std::tuple<std::string, uint64_t, uint64_t, double>>;
     // type, ddrUsage, hbmUsage, timestamp, deviceId
-    using ProcessedDataFormat = std::vector<std::tuple<uint8_t, double, double, uint64_t, uint16_t>>;
+    using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, uint64_t, uint16_t>>;
 public:
     NpuMemProcessor() = default;
     NpuMemProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);

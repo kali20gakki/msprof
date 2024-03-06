@@ -120,7 +120,7 @@ TEST_F(HBMProcessorUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
 
 TEST_F(HBMProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
 {
-    using TempT = std::tuple<uint16_t, uint64_t, double, uint8_t, uint16_t>;
+    using TempT = std::tuple<uint16_t, uint64_t, uint64_t, uint8_t, uint16_t>;
     MOCKER_CPP(&std::vector<TempT>::reserve).stubs().will(throws(std::bad_alloc()));
     auto processor = HBMProcessor(DB_PATH, PROF_PATHS);
     EXPECT_FALSE(processor.Run());

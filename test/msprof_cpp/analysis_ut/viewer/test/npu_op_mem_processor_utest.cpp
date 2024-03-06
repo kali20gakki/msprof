@@ -43,8 +43,8 @@ const std::string HASH_TABLE_NAME = "GeHashInfo";
 using OriDataFormat = std::vector<std::tuple<std::string, std::string, int64_t, double, uint32_t, uint64_t,
                                              uint64_t, uint32_t, uint32_t, std::string>>;
 
-using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint64_t, std::string, uint64_t,
-                                                   double, double, uint64_t, uint32_t>>;
+using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint64_t, uint64_t, uint64_t,
+                                                   uint64_t, uint64_t, uint64_t, uint32_t>>;
 
 using HashDataFormat = std::vector<std::tuple<std::string, std::string>>;
 
@@ -188,7 +188,7 @@ TEST_F(NpuOpMemProcessorUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
 TEST_F(NpuOpMemProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
 {
     using TempT = std::tuple<uint64_t, uint64_t, uint32_t, uint64_t, uint64_t, uint64_t,
-                             double, double, uint64_t, uint16_t>;
+                             uint64_t, uint64_t, uint64_t, uint16_t>;
     MOCKER_CPP(&std::vector<TempT>::reserve)
     .stubs()
     .will(throws(std::bad_alloc()));
