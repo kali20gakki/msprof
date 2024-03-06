@@ -17,6 +17,11 @@ class StarsConfig(MetaConfig):
             ('db', 'soc_log.db'),
             ('table', 'FftsLog')
         ],
+        'SioParser': [
+            ('fmt', '011001'),
+            ('db', 'sio.db'),
+            ('table', 'Sio')
+        ],
         'AccPmuParser': [
             ('fmt', '011010'),
             ('db', 'acc_pmu.db'),

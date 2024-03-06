@@ -1160,6 +1160,8 @@ int ProfStarsSocProfileJob::SetPeripheralConfig()
         period = collectionJobCfg_->comParams->params->interconnection_sampling_interval;
         configP->inter_chip.innerSwitch = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
         configP->inter_chip.period = static_cast<uint32_t>(period > 0 ? period : DEFAULT_PROFILING_INTERVAL_20MS);
+        configP->inter_die.innerSwitch = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
+        configP->inter_die.period = static_cast<uint32_t>(period > 0 ? period : DEFAULT_PROFILING_INTERVAL_20MS);
     }
 
     if (collectionJobCfg_->comParams->params->hardware_mem == analysis::dvvp::common::config::MSVP_PROF_ON) {

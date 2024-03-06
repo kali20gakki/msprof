@@ -68,6 +68,13 @@ class TestCommunicationAnalyzer(unittest.TestCase):
                         "Bandwidth(GB/s)": 0,
                         "Bandwidth(Utilization)": 0,
                         "Size Distribution": {}
+                    },
+                    "SIO": {
+                        "Transit Size(MB)": 0,
+                        "Transit Time(ms)": 0,
+                        "Bandwidth(GB/s)": 0,
+                        "Bandwidth(Utilization)": 0,
+                        "Size Distribution": {}
                     }
                 }
             }
@@ -103,6 +110,12 @@ class TestCommunicationAnalyzer(unittest.TestCase):
                     "Size Distribution": {}
                 },
                 "PCIE": {
+                    "Transit Size(MB)": 0,
+                    "Transit Time(ms)": 0,
+                    "Bandwidth(GB/s)": 0,
+                    "Size Distribution": {}
+                },
+                "SIO": {
                     "Transit Size(MB)": 0,
                     "Transit Time(ms)": 0,
                     "Bandwidth(GB/s)": 0,

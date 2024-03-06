@@ -54,6 +54,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_SOC_LOG = "soc_log.db"
     DB_ACC_PMU = "acc_pmu.db"
     DB_STARS_SOC = "soc_profiler.db"
+    DB_SIO = "sio.db"
     DB_STARS_CHIP_TRANS = "chip_trans.db"
     DB_LOW_POWER = "lowpower.db"
     DB_BIU_PERF = "biu_perf.db"
@@ -224,6 +225,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_STARS_PA_LINK = "PaLinkInfo"
     TABLE_STARS_PCIE = "PcieInfo"
     TABLE_LOWPOWER = "LowPower"
+    TABLE_SIO = "Sio"
 
     # ge
     TABLE_GE_TASK = "TaskInfo"

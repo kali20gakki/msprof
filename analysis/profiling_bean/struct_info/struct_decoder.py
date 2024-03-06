@@ -21,6 +21,7 @@ class StructDecoder:
         "AcsqTask": StructFmt.ACSQ_TASK_FMT,
         "AccPmuDecoder": StructFmt.ACC_PMU_FMT,
         "InterSoc": StructFmt.SOC_FMT,
+        "SioDecoder": StructFmt.SIO_FMT,
         "StarsDecoder": StructFmt.STARS_FMT,
         "LpeDecoder": StructFmt.LPE_FMT,
         "LpsDecoder": StructFmt.LPS_FMT,

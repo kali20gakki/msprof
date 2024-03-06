@@ -174,6 +174,7 @@ namespace {
         {1,          "HCCS"},
         {2,          "PCIE"},
         {3,          "ROCE"},
+        {4,          "SIO"},
         {4294967295, "INVALID_TYPE"}
     };
     const std::unordered_map<uint32_t, std::string> hcclTransportTypeMap {

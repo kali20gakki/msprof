@@ -68,4 +68,5 @@ class ExportDataType(Enum):
     HCCL_STATISTIC = 61
     API_STATISTIC = 62
     NPU_MODULE_MEM = 63
+    SIO = 64
     MSPROF = 100
