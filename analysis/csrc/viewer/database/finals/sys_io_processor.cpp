@@ -21,23 +21,22 @@ namespace Database {
 using Context = Parser::Environment::Context;
 
 namespace {
+struct BandwidthData {
+    double packet = 0.0;
+    double byte = 0.0;
+    uint32_t packets = UINT32_MAX;
+    uint32_t bytes = UINT32_MAX;
+    uint32_t errors = UINT32_MAX;
+    uint32_t dropped = UINT32_MAX;
+};
+
 struct SysIOData {
     double timestamp = 0.0;
-    double rxpacket = 0.0;
-    double rxbyte = 0.0;
-    double txpacket = 0.0;
-    double txbyte = 0.0;
-    uint32_t deviceId = UINT32_MAX;
     uint32_t funcid = UINT32_MAX;
-    uint32_t bandwidth = UINT32_MAX;
-    uint32_t rxpackets = UINT32_MAX;
-    uint32_t rxbytes = UINT32_MAX;
-    uint32_t rxerrors = UINT32_MAX;
-    uint32_t rxdropped = UINT32_MAX;
-    uint32_t txpackets = UINT32_MAX;
-    uint32_t txbytes = UINT32_MAX;
-    uint32_t txerrors = UINT32_MAX;
-    uint32_t txdropped = UINT32_MAX;
+    uint32_t deviceId = UINT32_MAX;
+    uint64_t bandwidth = UINT64_MAX;
+    BandwidthData rx;
+    BandwidthData tx;
 };
 
 const std::unordered_map<std::string, std::tuple<std::string, std::string, std::string>> ORI_DB_INFO_TABLE = {
@@ -133,17 +132,18 @@ bool SysIOProcessor::FormatData(const Utils::ProfTimeRecord timeRecord,
     }
     SysIOData tempData;
     for (const auto& data : sysIOData) {
-        std::tie(tempData.deviceId, tempData.timestamp, tempData.bandwidth, tempData.rxpacket, tempData.rxbyte,
-                 tempData.rxpackets, tempData.rxbytes, tempData.rxerrors, tempData.rxdropped,
-                 tempData.txpacket, tempData.txbyte, tempData.txpackets, tempData.txbytes,
-                 tempData.txerrors, tempData.txdropped, tempData.funcid) = data;
+        std::tie(tempData.deviceId, tempData.timestamp, tempData.bandwidth, tempData.rx.packet, tempData.rx.byte,
+                 tempData.rx.packets, tempData.rx.bytes, tempData.rx.errors, tempData.rx.dropped,
+                 tempData.tx.packet, tempData.tx.byte, tempData.tx.packets, tempData.tx.bytes,
+                 tempData.tx.errors, tempData.tx.dropped, tempData.funcid) = data;
         Utils::HPFloat timestamp{tempData.timestamp};
         processedData.emplace_back(static_cast<uint16_t>(tempData.deviceId),
                                    Utils::GetLocalTime(timestamp, timeRecord).Uint64(),
-                                   tempData.bandwidth, tempData.rxpacket, tempData.rxbyte, tempData.rxpackets,
-                                   tempData.rxbytes, tempData.rxerrors, tempData.rxdropped,
-                                   tempData.txpacket, tempData.txbyte, tempData.txpackets, tempData.txbytes,
-                                   tempData.txerrors, tempData.txdropped, static_cast<uint16_t>(tempData.funcid));
+                                   tempData.bandwidth * BYTE_SIZE * BYTE_SIZE, // MB/s -> B/s
+                                   tempData.rx.packet, tempData.rx.byte, tempData.rx.packets,
+                                   tempData.rx.bytes, tempData.rx.errors, tempData.rx.dropped,
+                                   tempData.tx.packet, tempData.tx.byte, tempData.tx.packets, tempData.tx.bytes,
+                                   tempData.tx.errors, tempData.tx.dropped, static_cast<uint16_t>(tempData.funcid));
     }
     if (processedData.empty()) {
         ERROR("% data processing error.", processorName_);

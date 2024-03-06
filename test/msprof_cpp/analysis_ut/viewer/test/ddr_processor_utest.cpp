@@ -120,7 +120,7 @@ TEST_F(DDRProcessorUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
 
 TEST_F(DDRProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
 {
-    using TempT = std::tuple<uint16_t, uint64_t, double, double>;
+    using TempT = std::tuple<uint16_t, uint64_t, uint64_t, uint64_t>;
     MOCKER_CPP(&std::vector<TempT>::reserve).stubs().will(throws(std::bad_alloc()));
     auto processor = DDRProcessor(DB_PATH, PROF_PATHS);
     EXPECT_FALSE(processor.Run());
