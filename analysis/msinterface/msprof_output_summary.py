@@ -59,6 +59,7 @@ class MsprofOutputSummary:
     INVALID_SUFFIX = "invalid"
     MSPROF_HOST = "host"
     DEVICE_ID = "Device_id"
+    PROF_RULE = r"^prof_rule_\d+\.json"
     DEVICE_ID_PREFIX_LEN = 7
     SLICE_LEN = 7
     README = "README.txt"
@@ -146,7 +147,7 @@ class MsprofOutputSummary:
         print_info(MsProfCommonConstant.COMMON_FILE_NAME, f"Start exporting {command_type} output_file.")
         if not self._is_in_prof_file():
             return
-        if not self._clear_output_folder(self._get_file_suffix(command_type)):
+        if not self._make_output_folder(self._get_file_suffix(command_type)):
             logging.error("Clear file in mindstudio_profiler_output.")
             return
         if command_type == MsProfCommonConstant.SUMMARY:
@@ -182,40 +183,25 @@ class MsprofOutputSummary:
         logging.error("%s is invalid, can't export this type file.", command_type)
         return self.INVALID_SUFFIX
 
-    def _clear_output_folder(self, suffix: str) -> bool:
+    def _make_output_folder(self, suffix: str) -> bool:
         if suffix == self.INVALID_SUFFIX:
             return False
         self._output_dir = os.path.join(self._output, PathManager.MINDSTUDIO_PROFILER_OUTPUT)
         if not os.path.exists(self._output_dir):
             os.makedirs(self._output_dir, Constant.FOLDER_MASK)
-            return True
-        file_list = os.listdir(self._output_dir)
-        check_dir_writable(self._output_dir)
-        try:
-            for output_file in file_list:
-                dir_name = os.path.join(self._output_dir, output_file)
-                if not output_file.endswith(suffix) and output_file != self.README:
-                    continue
-                check_path_valid(dir_name, is_file=True, max_size=self.FILE_MAX_SIZE)
-                os.remove(dir_name)
-            return True
-        except PermissionError as err:
-            logging.warning("PermissionError: Can not delete file in mindstudio_profiler_output!")
-            warn(MsProfCommonConstant.COMMON_FILE_NAME, err)
-            return False
+        return True
 
     def _export_msprof_summary(self):
-        # host 侧数据 以及summary 是 json格式的时候，按文件拷贝
+        # summary 是 json格式的时候，按文件拷贝
         if self._export_format == StrConstant.EXPORT_JSON:
             sub_dirs = get_path_dir(self._output)
             for sub_dir in sub_dirs:
                 self._copy_summary_data(sub_dir, StrConstant.FILE_SUFFIX_JSON)
             return
         else:
-            self._copy_summary_data(self.MSPROF_HOST, StrConstant.FILE_SUFFIX_CSV)
-            self._merge_device_summary()
+            self._merge_summary()
 
-    def _copy_summary_data(self, folder_name: str, file_suffix: str):
+    def _copy_summary_data(self, folder_name: str, file_suffix: str, is_merge_summary=False):
         """
         拷贝summary文件夹下所有数据到output目录下，host可以看作一种特殊的device
         """
@@ -227,17 +213,25 @@ class MsprofOutputSummary:
             return
         file_list = self.get_newest_file_list(os.listdir(summary_path), file_suffix)
         for file_name in file_list:
-            params = {
-                StrConstant.PARAM_RESULT_DIR: self._output,
-                StrConstant.PARAM_DATA_TYPE: self._get_file_name(file_name),
-                StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.SUMMARY,
-                StrConstant.PARAM_EXPORT_FORMAT: self._export_format,
-                StrConstant.PARAM_EXPORT_DUMP_FOLDER: PathManager.MINDSTUDIO_PROFILER_OUTPUT
-            }
-            shutil.copy(os.path.join(summary_path, file_name),
-                        FileSliceHelper.make_export_file_name(params))
+            if re.match(self.PROF_RULE, file_name):
+                prof_rule_name = file_name.split(".")[0] + "_" + FileSliceHelper.get_current_time_str()
+                prof_rule_path = os.path.join(self._output, PathManager.MINDSTUDIO_PROFILER_OUTPUT,
+                                                prof_rule_name + file_suffix)
+                shutil.copy(os.path.join(summary_path, file_name), prof_rule_path)
+                continue
+            # host 和device 的 csv合并, 只拷贝prof_rule_*.json
+            if is_merge_summary is False:
+                params = {
+                    StrConstant.PARAM_RESULT_DIR: self._output,
+                    StrConstant.PARAM_DATA_TYPE: self._get_file_name(file_name),
+                    StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.SUMMARY,
+                    StrConstant.PARAM_EXPORT_FORMAT: StrConstant.EXPORT_JSON,
+                    StrConstant.PARAM_EXPORT_DUMP_FOLDER: PathManager.MINDSTUDIO_PROFILER_OUTPUT
+                }
+                shutil.copy(os.path.join(summary_path, file_name),
+                            FileSliceHelper.make_export_file_name(params))
 
-    def _merge_device_summary(self):
+    def _merge_summary(self):
         """
         merge csv file if they have the same name
         op_summary_0_0_1 and op_summary_0_0_2 both op_summary
@@ -245,12 +239,11 @@ class MsprofOutputSummary:
         sub_dirs = get_path_dir(self._output)
         summary_file_set = set()
         for sub_dir in sub_dirs:
-            if sub_dir == self.MSPROF_HOST:
-                continue
             sub_path = get_valid_sub_path(self._output, sub_dir, False)
             if not DataCheckManager.contain_info_json_data(sub_path):
                 continue
             summary_file_set.update(self._get_summary_file_name(sub_path))
+            self._copy_summary_data(sub_dir, StrConstant.FILE_SUFFIX_JSON, True)
 
         pool = multiprocessing.Pool(processes=4)
         for summary_file in summary_file_set:
@@ -291,17 +284,18 @@ class MsprofOutputSummary:
         }
         helper = FileSliceHelper(params, [], [])
         for sub_dir in sub_dirs:
-            if sub_dir == self.MSPROF_HOST:
-                continue
             sub_path = get_valid_sub_path(self._output, sub_dir, False)
             if not DataCheckManager.contain_info_json_data(sub_path):
                 continue
             summary_path = os.path.realpath(
                 os.path.join(sub_path, MsProfCommonConstant.SUMMARY))
             if not os.path.exists(summary_path):
-                return
+                continue
             file_list = os.listdir(summary_path)
-            device_id = os.path.basename(sub_path)[self.DEVICE_ID_PREFIX_LEN:]
+            if sub_dir == self.MSPROF_HOST:
+                device_id = "host"
+            else:
+                device_id = os.path.basename(sub_path)[self.DEVICE_ID_PREFIX_LEN:]
             for file_name in self.get_newest_file_list(file_list, StrConstant.FILE_SUFFIX_CSV):
                 if not file_name.startswith(targe_name):
                     continue
