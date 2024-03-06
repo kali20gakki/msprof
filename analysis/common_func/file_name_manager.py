@@ -89,8 +89,6 @@ class FileNameManagerConstant:
     GE_FUSION_OP_PATTERN = r"^Framework\.fusion_op_info_(\d+)\.(\d+)\.slice_\d+"
     GE_HOST_SCH_FILE_PATTERN = r"^Framework\.dynamic_op_execute\.(\d+)\.slice_\d+"
 
-    GE_LOGIC_STREAM_INFO_PATTERN = r"^ge_logic_stream_info\.(\d+)\.slice_\d+"
-
     HBM_FILE_PATTERN = r"^hbm\.data\.(\d+)\.slice_\d+"
     HBM_TRAINING_FILE_PATTERN = r"hbm\.data\.\d+\.dev\.profiler_default_tag\.(\d+)\.slice_\d+"
 
@@ -227,6 +225,7 @@ class FileNameManagerConstant:
     FUSION_ADD_INFO_PATTERN = r"^(unaging|aging)\.additional\.fusion_op_info\.slice_\d+"
     MEMORY_APPLICATION_FILE_PATTERN = r"^(unaging|aging)\.additional\.memory_application\.slice_\d+"
     CTX_ID_FILE_PATTERN = r"^(unaging|aging)\.additional\.context_id_info\.slice_\d+"
+    GE_LOGIC_STREAM_INFO_PATTERN = r"^(unaging|aging)\.additional\.logic_stream_info\.slice_\d+"
     AICPU_FILE_PATTERN = r"^aging\.additional\.data_preprocess\.slice_\d+"
 
     # nano

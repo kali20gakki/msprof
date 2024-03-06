@@ -11,6 +11,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
+from common_func.ge_logic_stream_singleton import GeLogicStreamSingleton
 from common_func.msvp_common import format_high_precision_for_csv
 from msmodel.memory_copy.memcpy_model import MemcpyModel
 
@@ -131,8 +132,9 @@ class MemoryCopyViewer:
                                     ("Start Time", start_time),
                                     ("End Time", end_time)])
 
+                logic_stream_id = GeLogicStreamSingleton().get_logic_stream_id(datum[6])
                 timeline_datum = [
-                    datum[0], NumberConstant.TASK_TIME_PID, datum[6],
+                    datum[0], NumberConstant.TASK_TIME_PID, logic_stream_id,
                     start_time, datum[5], args
                 ]
                 timeline_data.append(timeline_datum)

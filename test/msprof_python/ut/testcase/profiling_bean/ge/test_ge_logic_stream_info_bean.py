@@ -7,10 +7,10 @@ NAMESPACE = 'msmodel.ge.ge_logic_stream_model'
 
 class TestGeLogicStreamInfoBean(unittest.TestCase):
     def test_construct_shoule_return_success_when_db_check_ok(self):
-        args = [23130, 0, 0, 0, 0, 0, 1, 2, *(120,) * 48]
+        args = [23130, 0, 0, 0, 0, 0, 1, 2, *(120,) * 52]
         bean = GeLogicStreamInfoBean(args)
         self.assertEqual(bean.logic_stream_id, 1)
-        self.assertEqual(bean.physic_stream_id, '120,120')
+        self.assertEqual(bean._physic_logic_stream_id, [[120, 1], [120, 1]])
 
 
 if __name__ == '__main__':

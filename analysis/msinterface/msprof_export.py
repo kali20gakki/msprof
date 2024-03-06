@@ -23,6 +23,7 @@ from common_func.file_manager import FileManager
 from common_func.host_data_check_manager import HostDataCheckManager
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ge_logic_stream_singleton import GeLogicStreamSingleton
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_common import analyze_collect_data
@@ -676,6 +677,7 @@ class ExportCommand:
                 if DataCheckManager.contain_info_json_data(sub_path):
                     self._update_cluster_params(sub_path, is_cluster)
                     InfoConfReader().load_info(sub_path)
+                    GeLogicStreamSingleton().load_info(sub_path)
                     self._handle_export(sub_path)
                     self._show_tuning_result(sub_path)
                 elif sub_path and is_cluster:
