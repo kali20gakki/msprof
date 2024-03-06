@@ -41,8 +41,8 @@ using namespace Analysis::Utils;
 */
 std::shared_ptr<TreeNode> TreeBuilder::Build()
 {
-    if (!cannWarehouse_->kernelEvents) {
-        WARN("CANNWarehouse kernelEvents pointer is nullptr, threadId = %", threadId_);
+    if (!cannWarehouse_->kernelEvents && !cannWarehouse_->taskTrackEvents) {
+        WARN("No key profiling info to build tree, threadId = %", threadId_);
         return nullptr;
     }
     kernelEvents_ = cannWarehouse_->kernelEvents;
@@ -54,17 +54,16 @@ std::shared_ptr<TreeNode> TreeBuilder::Build()
     auto hcclInfoEvents = cannWarehouse_->hcclInfoEvents;
     auto taskTrackEvents = cannWarehouse_->taskTrackEvents;
 
-    // rootNode的时间片应该覆盖整个EventQueue
-    EventInfo rootInfo{EventType::EVENT_TYPE_API, 0, 0, kernelEvents_->GetBound() + 1};
-    std::shared_ptr<MsprofApi> api;
-    MAKE_SHARED0_RETURN_VALUE(api, MsprofApi, nullptr);
-    std::shared_ptr<Event> rootEvent;
-    MAKE_SHARED_RETURN_VALUE(rootEvent, Event, nullptr, api, rootInfo);
-    std::shared_ptr<TreeNode> rootNode;
-    MAKE_SHARED_RETURN_VALUE(rootNode, TreeNode, nullptr, rootEvent);
-    // 1. 用Api和TaskTrack Event建立核心树
-    auto tree = BuildTree(rootNode, 0);
-
+    auto rootNode = GenerateRoot();
+    std::shared_ptr<TreeNode> tree;
+    if (kernelEvents_ and !kernelEvents_->Empty()) {
+        // 1. 用Api和TaskTrack Event建立核心树
+        tree = BuildTree(rootNode, 0);
+    } else {
+        // 1. root节点就是整颗核心树
+        tree = rootNode;
+        leafNodes_.emplace_back(rootNode);
+    }
     auto ctxIdPair = GroupCtxIdEvents(contextIdEvents);
     auto nodeCtxIdEvents = ctxIdPair.first;
     auto hcclCtxIdEvents = ctxIdPair.second;
@@ -100,6 +99,25 @@ std::shared_ptr<TreeNode> TreeBuilder::Build()
     AddTaskTrackEvents(rootNode, taskTrackEvents, leafNodes_);
     INFO("Build Tree End, ThreadId = %", threadId_);
     return tree;
+}
+
+std::shared_ptr<TreeNode> TreeBuilder::GenerateRoot()
+{
+    uint64_t bound;
+    // rootNode的时间片应该覆盖整个EventQueue
+    if (!kernelEvents_ or kernelEvents_->Empty()) {
+        bound = cannWarehouse_->taskTrackEvents->GetBound();
+    } else {
+        bound = kernelEvents_->GetBound();
+    }
+    EventInfo rootInfo{EventType::EVENT_TYPE_API, 0, 0, bound + 1};
+    std::shared_ptr<MsprofApi> api;
+    MAKE_SHARED0_RETURN_VALUE(api, MsprofApi, nullptr);
+    std::shared_ptr<Event> rootEvent;
+    MAKE_SHARED_RETURN_VALUE(rootEvent, Event, nullptr, api, rootInfo);
+    std::shared_ptr<TreeNode> rootNode;
+    MAKE_SHARED_RETURN_VALUE(rootNode, TreeNode, nullptr, rootEvent);
+    return rootNode;
 }
 
 // 将ctxIdEvents按Level分为Node和HCCL层
@@ -280,11 +298,11 @@ void TreeBuilder::RecordTreeNode(const std::shared_ptr<TreeNode> &treeNode,
 std::shared_ptr<TreeNode> TreeBuilder::BuildTree(std::shared_ptr<TreeNode> parent, int depth)
 {
     if (depth >= MAX_DEPTH) {
-        ERROR("The maximum recursion depth is exceeded");
+        ERROR("The maximum recursion depth is exceeded, thread id: %", threadId_);
         return nullptr;
     }
     if (!parent) {
-        ERROR("Parent pointer is nullptr");
+        ERROR("Parent pointer is nullptr, thread id: %", threadId_);
         return nullptr;
     }
 

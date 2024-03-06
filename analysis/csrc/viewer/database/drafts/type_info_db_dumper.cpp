@@ -34,10 +34,10 @@ std::vector<std::tuple<std::string, std::string, std::string>> TypeInfoDBDumper:
         ERROR("Can't reserve vector");
         return data;
     }
-    for (const auto &devices: typeInfoData) {
-        for (const auto &hashPair: devices.second) {
+    for (const auto &levelPair: typeInfoData) {
+        for (const auto &hashPair: levelPair.second) {
             data.emplace_back(std::to_string(hashPair.first), hashPair.second,
-                              NumberMapping::Get(NumberMapping::MappingType::LEVEL, devices.first));
+                              NumberMapping::Get(NumberMapping::MappingType::LEVEL, levelPair.first));
         }
     }
     return data;

@@ -73,8 +73,15 @@ bool HostTraceWorker::Run()
 void HostTraceWorker::SortEvents()
 {
     for (auto tid: threadIds_) {
+        if (!cannWarehouses_.Find(tid)) {
+            // 部分线程只有非kernel的api,不存在任何profiling可分析数据
+            continue;
+        }
         if (cannWarehouses_[tid].kernelEvents != nullptr) {
             cannWarehouses_[tid].kernelEvents->Sort();
+        }
+        if (cannWarehouses_[tid].graphIdMapEvents != nullptr) {
+            cannWarehouses_[tid].graphIdMapEvents->Sort();
         }
         if (cannWarehouses_[tid].fusionOpInfoEvents != nullptr) {
             cannWarehouses_[tid].fusionOpInfoEvents->Sort();

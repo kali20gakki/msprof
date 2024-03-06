@@ -120,7 +120,7 @@ namespace {
         {"op_name", SQL_TEXT_TYPE},
         {"task_type", SQL_TEXT_TYPE},
         {"op_type", SQL_TEXT_TYPE},
-        {"begin", SQL_TEXT_TYPE},
+        {"begin", SQL_REAL_TYPE},
         {"end", SQL_REAL_TYPE},
         {"is_dynamic", SQL_TEXT_TYPE},
         {"connection_id", SQL_INTEGER_TYPE}
