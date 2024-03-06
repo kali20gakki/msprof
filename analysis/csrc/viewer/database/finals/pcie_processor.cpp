@@ -20,9 +20,9 @@ namespace Database {
 using Context = Parser::Environment::Context;
 namespace {
 struct BandwidthData {
-    double min = 0.0;
-    double max = 0.0;
-    double avg = 0.0;
+    uint32_t min = UINT32_MAX;
+    uint32_t max = UINT32_MAX;
+    uint32_t avg = UINT32_MAX;
 };
 
 struct PCIeOriData {
@@ -134,17 +134,21 @@ bool PCIeProcessor::FormatData(const Utils::ProfTimeRecord timeRecord,
                  tempData.rxNopost.min, tempData.rxNopost.max, tempData.rxNopost.avg,
                  tempData.rxCpl.min, tempData.rxCpl.max, tempData.rxCpl.avg) = data;
         Utils::HPFloat timestamp{tempData.timestamp};
-        // 暂时不做数据格式转换,目前是B/us
+        // B/us -> B/s
         processedData.emplace_back(static_cast<uint16_t>(tempData.deviceId),
                                    Utils::GetLocalTime(timestamp, timeRecord).Uint64(),
-                                   tempData.txPost.min, tempData.txPost.max, tempData.txPost.avg,
-                                   tempData.txNopost.min, tempData.txNopost.max, tempData.txNopost.avg,
-                                   tempData.txCpl.min, tempData.txCpl.max, tempData.txCpl.avg,
-                                   tempData.txNopostLatency.min, tempData.txNopostLatency.max,
-                                   tempData.txNopostLatency.avg,
-                                   tempData.rxPost.min, tempData.rxPost.max, tempData.rxPost.avg,
-                                   tempData.rxNopost.min, tempData.rxNopost.max, tempData.rxNopost.avg,
-                                   tempData.rxCpl.min, tempData.rxCpl.max, tempData.rxCpl.avg);
+                                   tempData.txPost.min * MICRO_SECOND, tempData.txPost.max * MICRO_SECOND,
+                                   tempData.txPost.avg * MICRO_SECOND, tempData.txNopost.min * MICRO_SECOND,
+                                   tempData.txNopost.max * MICRO_SECOND, tempData.txNopost.avg * MICRO_SECOND,
+                                   tempData.txCpl.min * MICRO_SECOND, tempData.txCpl.max * MICRO_SECOND,
+                                   tempData.txCpl.avg * MICRO_SECOND, tempData.txNopostLatency.min * MICRO_SECOND,
+                                   tempData.txNopostLatency.max * MICRO_SECOND,
+                                   tempData.txNopostLatency.avg * MICRO_SECOND,
+                                   tempData.rxPost.min * MICRO_SECOND, tempData.rxPost.max * MICRO_SECOND,
+                                   tempData.rxPost.avg * MICRO_SECOND, tempData.rxNopost.min * MICRO_SECOND,
+                                   tempData.rxNopost.max * MICRO_SECOND, tempData.rxNopost.avg * MICRO_SECOND,
+                                   tempData.rxCpl.min * MICRO_SECOND, tempData.rxCpl.max * MICRO_SECOND,
+                                   tempData.rxCpl.avg * MICRO_SECOND);
     }
     if (processedData.empty()) {
         ERROR("PCIe data processing error.");

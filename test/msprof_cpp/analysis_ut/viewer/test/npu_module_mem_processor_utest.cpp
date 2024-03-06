@@ -39,7 +39,7 @@ const std::string TABLE_NAME = "NpuModuleMem";
 
 using OriDataFormat = std::vector<std::tuple<uint32_t, double, uint64_t, std::string>>;
 
-using ProcessedDataFormat = std::vector<std::tuple<uint32_t, std::string, double, uint16_t>>;
+using ProcessedDataFormat = std::vector<std::tuple<uint32_t, uint64_t, uint64_t, uint16_t>>;
 
 const OriDataFormat DATA_A{{0, 48673240, 0, "NPU:1"}, {7, 48673240, 20025344, "NPU:1"}};
 const OriDataFormat DATA_B{{30, 623107876, 0, "NPU:1"}, {33, 623107876, 58720256, "NPU:1"}};
@@ -137,13 +137,12 @@ TEST_F(NpuModuleMemProcessorUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
 
 TEST_F(NpuModuleMemProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
 {
-    using TempT = std::tuple<uint32_t, uint64_t, double, uint16_t>;
-    MOCKER_CPP(&std::vector<TempT>::reserve)
+    MOCKER_CPP(&ProcessedDataFormat::reserve)
     .stubs()
     .will(throws(std::bad_alloc()));
     auto processor = NpuModuleMemProcessor(DB_PATH, PROF_PATHS);
     EXPECT_FALSE(processor.Run());
-    MOCKER_CPP(&std::vector<TempT>::reserve).reset();
+    MOCKER_CPP(&ProcessedDataFormat::reserve).reset();
 }
 
 TEST_F(NpuModuleMemProcessorUTest, TestRunShouldReturnTrueWhenNoDb)
