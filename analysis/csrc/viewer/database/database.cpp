@@ -127,7 +127,6 @@ namespace {
     };
 
     const TableColumns HostTaskFlip = {
-        {"device_id", SQL_INTEGER_TYPE},
         {"stream_id", SQL_INTEGER_TYPE},
         {"timestamp", SQL_NUMERIC_TYPE},
         {"task_id", SQL_INTEGER_TYPE},
