@@ -19,6 +19,7 @@
 #include "analysis/csrc/association/cann/tree_analyzer.h"
 #include "analysis/csrc/viewer/database/drafts/cann_trace_db_dumper.h"
 #include "analysis/csrc/viewer/database/drafts/api_event_db_dumper.h"
+#include "analysis/csrc/viewer/database/drafts/flip_task_db_dumper.h"
 
 using namespace Analysis::Utils;
 using namespace Analysis::Parser::Host::Cann;
@@ -46,6 +47,17 @@ bool HostTraceWorker::Run()
     bool ret = true;
     ThreadPool pool(poolSize_);
     pool.Start();
+    pool.AddTask([this, &grouper, &ret]() {
+        TimeLogger t{"Dump flip tasks data start"};
+        // flip tasks 数据落盘
+        auto flipTasks = grouper->GetFlipTasks();
+        std::shared_ptr<FlipTaskDBDumper> flipDumper;
+        MAKE_SHARED_RETURN_VALUE(flipDumper, FlipTaskDBDumper, false, hostPath_);
+        ret = flipDumper->DumpData(flipTasks);
+        if (!ret) {
+            ERROR("Dump flip tasks data failed");
+        }
+    });
     pool.AddTask([this, &grouper, &ret]() {
         TimeLogger t{"Dump api data start"};
         // api event 数据落盘
