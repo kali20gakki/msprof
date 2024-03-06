@@ -88,16 +88,14 @@ bool EventGrouper::Group()
 
 bool EventGrouper::isKernelApiEvent(const std::shared_ptr<MsprofApi> &trace) const
 {
-    // 先排除异常条件下上报的非法api
-    if (trace->beginTime <= 0 || trace->beginTime == trace->endTime) {
-        ERROR("Invaild api event, threadId = %, level = %, begin = %, end = %",
-              trace->threadId, trace->level, trace->beginTime, trace->endTime);
-        return false;
-    }
-    // 再检查是否是Model Node HCCL 这三层的trace
     if (trace->level == MSPROF_REPORT_MODEL_LEVEL ||
         trace->level == MSPROF_REPORT_NODE_LEVEL ||
         trace->level == MSPROF_REPORT_HCCL_NODE_LEVEL) {
+        if (trace->beginTime <= 0 || trace->beginTime == trace->endTime) {
+            ERROR("Invaild api event, threadId = %, level = %, begin = %, end = %",
+                  trace->threadId, trace->level, trace->beginTime, trace->endTime);
+            return false;
+        }
         return true;
     }
     return false;

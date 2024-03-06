@@ -73,7 +73,12 @@ std::shared_ptr<EventQueue> GenKernelEventQueue(std::unordered_map<
     };
     for (const auto &le: levels) {
         for (auto range: apiEvents[le]) {
-            FakeEventGenerator::AddApiEvent(kernelEvents, levelNum[le], range.first, range.second);
+            if (le == "Model") {
+                FakeEventGenerator::AddApiEvent(kernelEvents, levelNum[le], range.first, range.second,
+                                                range.second, range.second);
+            } else {
+                FakeEventGenerator::AddApiEvent(kernelEvents, levelNum[le], range.first, range.second);
+            }
         }
     }
     kernelEvents->Sort();
@@ -268,6 +273,65 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerShouldReturnZeroWhenInputNullptr)
     EXPECT_EQ(tasks.size(), 0);
 }
 
+std::shared_ptr<TreeAnalyzer> GetAnalyzerForNoKernelEventsScenario()
+{
+    // 逻辑树如下
+    // Runtime:  tk(50)    tk(110)     tk(220)    tk(240)
+    std::vector<std::pair<uint64_t, uint64_t>> items{
+        {50, 2},     // Runtime OtherTask
+        {110, 52},   // Runtime FFTS_PLUS
+        {220, 1045}, // Runtime NOTIFY_RECORD
+        {240, 1045}, // Runtime NOTIFY_RECORD
+    };
+    auto taskTrackEvents = GenTaskTrackEventQueue(items);
+
+    auto cannWarehouse = std::make_shared<CANNWarehouse>();
+    cannWarehouse->taskTrackEvents = taskTrackEvents;
+
+    // 建树
+    auto treeBuilder = std::make_shared<TreeBuilder>(cannWarehouse, 1);
+    auto treeNode = treeBuilder->Build();
+
+    // 分析树
+    TypeData::GetInstance().Load("./");
+    auto ana = std::make_shared<TreeAnalyzer>(treeNode, 1);
+    return ana;
+}
+
+// 特殊测试场景1：只有tk数据
+TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerForNoKernelEventsScenario)
+{
+    auto ana = GetAnalyzerForNoKernelEventsScenario();
+    ana->Analyze();
+
+    auto computeTasks = ana->GetComputeTasks();
+    auto hcclTasks = ana->GetHCCLTasks();
+    auto bigOPs = ana->GetHcclBigOps();
+    auto tasks = ana->GetTasks();
+
+    std::vector<uint64_t> expectComputeTaskTimes;
+    std::vector<uint64_t> expectHcclTaskTimes;
+    // 110中多一条是ffts+大任务的标记
+    std::vector<uint64_t> expectTaskTimes{50, 110, 220, 240};
+    // DEFAULT_CONTEXT_ID分别代表一个tk,
+    std::vector<uint64_t> expectTaskCtxIds{DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
+                                           DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID};
+    // 先检查个数正确
+    EXPECT_EQ(computeTasks.size(), expectComputeTaskTimes.size());
+    EXPECT_EQ(hcclTasks.size(), expectHcclTaskTimes.size());
+    EXPECT_EQ(tasks.size(), expectTaskTimes.size());
+
+    // 再匹配内容正确
+    for (uint16_t i = 0; i < tasks.size(); i++) {
+        EXPECT_EQ(tasks[i]->timeStamp, expectTaskTimes[i]);
+    }
+
+    std::sort(tasks.begin(), tasks.end(), HostTaskCompCtx());
+    for (uint16_t i = 0; i < tasks.size(); i++) {
+        EXPECT_EQ(tasks[i]->contextId, expectTaskCtxIds[i]);
+    }
+}
+
 std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L0()
 {
     // 逻辑树如下，其中[n]标识每个context id event中带几个context id
@@ -276,7 +340,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L0()
     //                  c(125,126)[2]
     //                  c(127,128)[2]
     // Hccl  :                       [210, 220] [230, 250]  [252, 300] [330, 350]
-    // Runtime:  tk(50)    tk(110)     tk(220)    tk(240)     tk(260)    tk(340)
+    // Runtime:  tk(50)    tk(110)     tk(220)    tk(240)     tk(260)    tk(340)      tk(430)         tk(880)
     auto kernelEvents = GenKernelEventQueueWithTradComm();
     auto contextIdEvents = GenNodeCtxIdEventQueue();
     std::vector<std::pair<uint64_t, uint64_t>> items{
@@ -286,6 +350,8 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L0()
         {240, 1045}, // Runtime NOTIFY_RECORD
         {260, 0},    // Runtime KERNEL_AICORE
         {340, 1},    // Runtime KERNEL_AICPU
+        {430, 1},    // Runtime KERNEL_AICPU 注意： 非计算类算子
+        {880, 1},    // Runtime KERNEL_AICPU 注意： 非计算类算子
     };
     auto taskTrackEvents = GenTaskTrackEventQueue(items);
 
@@ -322,11 +388,18 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L0)
                                                   DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID};
     std::vector<uint64_t> expectHcclTaskTimes{220, 240, 260, 340};
     // 110中多一条是ffts+大任务的标记
-    std::vector<uint64_t> expectTaskTimes{50, 110, 110, 110, 110, 110, 110, 110, 110, 110, 220, 240, 260, 340};
+    std::vector<uint64_t>
+        expectTaskTimes{50, 110, 110, 110, 110, 110, 110, 110, 110, 110, 220, 240, 260, 340, 430, 880};
     // DEFAULT_CONTEXT_ID分别代表一个tk,
     std::vector<uint64_t> expectTaskCtxIds{0, 1, 2, 3, 4, 5, 6, 7, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
                                            DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
+                                           DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
                                            DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID};
+
+    std::vector<uint64_t> expectModelIds{200, 200, 200, 200, 200, 200, 200, 200, 200, 200,
+                                         400, 400, 400, 400, 800, UINT32_MAX};
+    std::vector<int64_t> expectRequestIds{200, 200, 200, 200, 200, 200, 200, 200, 200, 200,
+                                          400, 400, 400, 400, 800, -1};
     // 特殊场景校验分别代表AI_CORE和HCCL_AICPU
     std::vector<uint64_t> expectHcclComputeTaskTaskType{9, 11};
     const uint64_t expectbigOPsNum = 3;
@@ -335,6 +408,8 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L0)
     EXPECT_EQ(hcclTasks.size(), expectHcclTaskTimes.size());
     EXPECT_EQ(bigOPs.size(), expectbigOPsNum);
     EXPECT_EQ(tasks.size(), expectTaskTimes.size());
+    EXPECT_EQ(tasks.size(), expectModelIds.size());
+    EXPECT_EQ(tasks.size(), expectRequestIds.size());
 
     // 再匹配内容正确
     for (uint16_t i = 0; i < computeTasks.size(); i++) {
@@ -348,6 +423,12 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L0)
     }
     for (uint16_t i = 0; i < tasks.size(); i++) {
         EXPECT_EQ(tasks[i]->timeStamp, expectTaskTimes[i]);
+    }
+    for (uint16_t i = 0; i < tasks.size(); i++) {
+        EXPECT_EQ(tasks[i]->modelId, expectModelIds[i]);
+    }
+    for (uint16_t i = 0; i < tasks.size(); i++) {
+        EXPECT_EQ(tasks[i]->requestId, expectRequestIds[i]);
     }
 
     std::sort(tasks.begin(), tasks.end(), HostTaskCompCtx());

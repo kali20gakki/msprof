@@ -31,7 +31,7 @@ using HCCLOpsDumpData = std::vector<std::tuple<uint32_t, uint64_t, int32_t, uint
         std::string, uint64_t, uint64_t, std::string, int64_t>>;
 
 using HostTasksDumpData = std::vector<std::tuple<uint32_t,
-        uint32_t, uint32_t, uint32_t, std::string, uint32_t, std::string, uint32_t, std::string, int64_t>>;
+        int64_t, uint32_t, uint32_t, std::string, uint32_t, std::string, uint32_t, std::string, int64_t>>;
 
 using HcclTasksDumpData = std::vector<std::tuple<uint32_t, int32_t, std::string, std::string, uint32_t, std::string,
         double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,

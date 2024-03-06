@@ -141,6 +141,9 @@ bool TreeAnalyzer::IsHcclTask()
 
 bool TreeAnalyzer::IsComputeTask(const std::shared_ptr<TreeNode> &node)
 {
+    if (path_.find(MSPROF_REPORT_NODE_LEVEL) == path_.end()) {
+        return false;
+    }
     for (const auto &record: node->records) {
         if (record->info.type != EventType::EVENT_TYPE_TASK_TRACK) {
             continue;
@@ -352,6 +355,9 @@ void TreeAnalyzer::UpdateComputeDescForHcclSituation(ComputeOpDescs &descs,
 
 HostTasks TreeAnalyzer::GetComputeTaskDescs(const std::shared_ptr<TreeNode> &node)
 {
+    if (path_.find(MSPROF_REPORT_NODE_LEVEL) == path_.end()) {
+        return {};
+    }
     auto nodeNode = path_.find(MSPROF_REPORT_NODE_LEVEL) != path_.end() ?
                     path_[MSPROF_REPORT_NODE_LEVEL] : nullptr;
     auto modelNode = path_.find(MSPROF_REPORT_MODEL_LEVEL) != path_.end() ?
