@@ -74,14 +74,13 @@ class CommunicationParser(MetaParser):
                 wait_flag = False
                 op_time_dict[OpAnalysisType.TRANSIT_TIME] += \
                     HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS
-            if event.transport_type == StrConstant.RDMA and \
-                    HcclAnalysisTool.determine_rdma(master_events, idx, rdma_transit_op_num):
+            if event.rdma_type == 'RDMA_SEND_PAYLOAD':
                 wait_flag = False
                 rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(master_events, idx, rdma_transit_op_num)
                 op_time_dict[OpAnalysisType.TRANSIT_TIME] += rdma_transit_result[0]
-                idx += rdma_transit_op_num
+                idx += 1
                 continue
-            if event.hccl_name == StrConstant.NOTIFY_WAIT:
+            if event.rdma_type == 'RDMA_PAYLOAD_PREPARE':
                 wait_time = HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS
                 if wait_flag:
                     op_time_dict[OpAnalysisType.SYNCHRONIZATION_TIME] += wait_time
@@ -121,13 +120,13 @@ class CommunicationParser(MetaParser):
                     op_bandwidth_dict, transport_type,
                     HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.COMMUNICATION_B_to_MB,
                     HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS)
-            if event.transport_type == StrConstant.RDMA and \
-                    HcclAnalysisTool.determine_rdma(events, idx, rdma_transit_op_num):
-                rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(events, idx, rdma_transit_op_num)
+            if event.rdma_type == 'RDMA_SEND_PAYLOAD':
+                rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(events, idx,
+                                                                          rdma_transit_op_num)
                 HcclAnalysisTool.update_bandwidth_record(op_bandwidth_dict, event.transport_type,
                                                          rdma_transit_result[1],
                                                          rdma_transit_result[0])
-                idx += rdma_transit_op_num
+                idx += 1
                 continue
             idx += 1
         for transport_type in StrConstant.TRANSIT_TYPE:

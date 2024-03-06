@@ -41,12 +41,56 @@ class HcclCalculator(ICalculator, MsMultiProcess):
 
     @staticmethod
     def update_bandwidth(communication_data: List[HcclTask]):
+        i = 0
+        j = 0
+        volume = 0
+        index_cache = []
+        curr_payload_task_id = communication_data[i].task_id
+
         for index, data in enumerate(communication_data):
-            if data.duration == 0:
-                bandwidth = 0
-            else:
-                bandwidth = data.size / data.duration  # 10^9 / 10^9 = 1 scale(GB/s)
+            bandwidth = HcclCalculator._calculate_bandwidth_gb_s(data.duration, data.size)
             communication_data[index] = data.replace(bandwidth=bandwidth)
+
+        while i < len(communication_data):
+            while i < len(communication_data) and communication_data[i].rdma_type != StrConstant.RDMA_SEND_PAYLOAD:
+                curr_payload_task_id = communication_data[i].task_id
+                i += 1
+            if i >= len(communication_data):
+                break
+            index_cache.append(i)
+            volume += communication_data[i].size
+            j = i + 1
+            while j < len(communication_data) and communication_data[j].rdma_type != StrConstant.RDMA_PAYLOAD_ACK:
+                if communication_data[j].task_id != curr_payload_task_id:
+                    logging.error('monitor on task %d is not closed!', communication_data[j].task_id)
+                    break
+                j += 1
+                if communication_data[j].rdma_type == StrConstant.RDMA_SEND_PAYLOAD:
+                    volume += communication_data[j].size
+                    index_cache.append(j)
+            if j >= len(communication_data):
+                break
+            total_time = communication_data[j].timestamp - communication_data[i].timestamp + communication_data[
+                j].duration
+            bandwidth = (volume * NumberConstant.COMMUNICATION_B_to_GB) / (total_time * NumberConstant.NS_TO_S)
+
+            for idx in index_cache:
+                communication_data[idx] = communication_data[idx].replace(bandwidth=bandwidth)
+            index_cache.clear()
+            volume = 0
+            i = j + 1
+
+    @staticmethod
+    def record_first_rdma_payload_task_time(payload0_time, data):
+        if payload0_time == 0:
+            payload0_time = data.timestamp
+        return payload0_time
+
+    @staticmethod
+    def update_rdma_payload_bandwidth(communication_data, update_cache, index_cache, bandwidth):
+        for idx, task in enumerate(update_cache):
+            cur_task = task
+            communication_data[index_cache[idx]] = cur_task.replace(bandwidth=bandwidth)
 
     @staticmethod
     def update_op_name_by_group_name(communication_data: List[HcclTask]):
@@ -62,6 +106,14 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             index = group_dict[data.group_name]["count"]
             communication_data[num] = data.replace(
                 op_name=f"{data.op_name}_{data.group_name[-3:]}_{str(index)}_{str(data.iter_id)}")
+
+    @staticmethod
+    def _calculate_bandwidth_gb_s(duration, size):
+        if duration == 0:
+            bandwidth = 0
+        else:
+            bandwidth = (size * NumberConstant.COMMUNICATION_B_to_GB) / (duration * NumberConstant.NS_TO_S)
+        return bandwidth
 
     @staticmethod
     def _cal_total(type_time: dict) -> int:

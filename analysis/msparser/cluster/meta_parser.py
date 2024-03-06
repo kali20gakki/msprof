@@ -79,10 +79,8 @@ class HcclAnalysisTool:
     @classmethod
     def get_rdma_time_info(cls: any, events: list, idx: int, rdma_transit_op_num: int) -> list:
         transit_size = HcclAnalysisTool.get_value(events[idx].size, 'size') / NumberConstant.COMMUNICATION_B_to_MB
-        transit_time = HcclAnalysisTool.get_value(events[idx + rdma_transit_op_num - 1].duration +
-                                                  events[idx + rdma_transit_op_num - 1].timestamp -
-                                                  events[idx].timestamp,
-                                                  'duration') / NumberConstant.NS_TO_MS
+        transit_time = HcclAnalysisTool.get_value(((events[idx].size * NumberConstant.COMMUNICATION_B_to_GB) /
+                                                   events[idx].bandwidth) * NumberConstant.S_TO_MS, 'duration')
         return [transit_time, transit_size]
 
     @classmethod
