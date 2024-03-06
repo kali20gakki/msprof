@@ -43,7 +43,7 @@ class CommunicationParser(MetaParser):
     @staticmethod
     def is_transit_sdma_event(event) -> bool:
         if event.transport_type == StrConstant.SDMA and event.hccl_name in StrConstant.SDMA_TRANSIT_ITEMS and \
-                HcclAnalysisTool.get_transport_type(event.local_rank, event.remote_rank) != StrConstant.LOCAL:
+                HcclAnalysisTool.get_transport_type(event) != StrConstant.LOCAL:
             return True
         else:
             return False
@@ -111,8 +111,8 @@ class CommunicationParser(MetaParser):
             rdma_transit_op_num = NumberConstant.RDMA_WITH_BARRIER_TASK_NUM
         while idx < len(events):
             event = events[idx]
-            if event.transport_type == StrConstant.SDMA and event.hccl_name in StrConstant.SDMA_TRANSIT_ITEMS:
-                transport_type = HcclAnalysisTool.get_transport_type(event.local_rank, event.remote_rank)
+            if CommunicationParser.is_transit_sdma_event(event):
+                transport_type = HcclAnalysisTool.get_transport_type(event)
                 # do not consider local copy
                 if transport_type == StrConstant.LOCAL:
                     idx += 1

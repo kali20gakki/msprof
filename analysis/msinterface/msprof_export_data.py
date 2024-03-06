@@ -71,6 +71,7 @@ from viewer.pipeline_overlap_viewer import PipelineOverlapViewer
 from viewer.runtime_report import get_task_scheduler_data
 from viewer.stars.acc_pmu_viewer import AccPmuViewer
 from viewer.stars.low_power_viewer import LowPowerViewer
+from viewer.stars.sio_viewer import SioViewer
 from viewer.stars.stars_chip_trans_view import StarsChipTransView
 from viewer.stars.stars_soc_view import StarsSocView
 from viewer.task_queue_viewer import TaskQueueViewer
@@ -584,6 +585,10 @@ class MsProfExportDataUtils:
     def _get_api_data(configs: dict, params: dict) -> any:
         return ApiViewer(configs, params).get_timeline_data()
 
+    @staticmethod
+    def _get_sio_data(configs: dict, params: dict) -> any:
+        return SioViewer(configs, params).get_timeline_data()
+
     @classmethod
     def export_data(cls: any, params: dict) -> str:
         """
@@ -607,7 +612,7 @@ class MsProfExportDataUtils:
                 return MsprofDataStorage().export_summary_data(headers, data, params)
             timeline_data = handler(configs, params)
             cls.add_timeline_data(params, timeline_data)
-            skip_list = ["event", "api"]
+            skip_list = ["event", "api", "sio"]
             if params.get(StrConstant.PARAM_DATA_TYPE) in skip_list:
                 return json.dumps({"status": NumberConstant.SKIP})
             return MsprofDataStorage().export_timeline_data_to_json(timeline_data, params)

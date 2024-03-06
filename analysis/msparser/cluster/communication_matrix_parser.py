@@ -92,7 +92,7 @@ class CommunicationMatrixParser(MetaParser):
             if event.transport_type == StrConstant.SDMA and event.hccl_name in StrConstant.SDMA_TRANSIT_ITEMS:
                 if link_key not in link_info:
                     link_info[link_key] = [0] * len(MatrixDataType.__members__)
-                trans_type = HcclAnalysisTool.get_transport_type(event.local_rank, event.remote_rank)
+                trans_type = HcclAnalysisTool.get_transport_type(event)
                 link_info[link_key][MatrixDataType.TRANSPORT_TYPE] = HcclAnalysisTool.convert_to_enum(trans_type)
                 trans_size = HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.COMMUNICATION_B_to_MB
                 link_info[link_key][MatrixDataType.TRANS_SIZE] += trans_size

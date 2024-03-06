@@ -385,10 +385,12 @@ class StrConstant:
     ]
 
     # hccl str constant
-    TRANSIT_TYPE = ["RDMA", "HCCS", "PCIE", "SDMA"]
+    TRANSIT_TYPE = ["RDMA", "HCCS", "PCIE", "SDMA", "SIO"]
     TOTAL = "Total HCCL Operators"
+    ON_CHIP = "ON_CHIP"
     HCCS = "HCCS"
     PCIE = "PCIE"
+    SIO = "SIO"
     RDMA = "RDMA"
     SDMA = "SDMA"
     LOCAL = "LOCAL"
@@ -472,3 +474,4 @@ class TransportType(IntEnum):
     PCIE = 1
     RDMA = 2
     LOCAL = 3
+    SIO = 4

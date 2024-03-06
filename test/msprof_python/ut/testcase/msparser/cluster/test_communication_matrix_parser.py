@@ -26,6 +26,7 @@ class Event:
         self.duration = 1000000
         self.transport_type = transport_type
         self.timestamp = 0
+        self.link_type = StrConstant.HCCS
 
 
 class TestCommunicationMatrixParser(unittest.TestCase):

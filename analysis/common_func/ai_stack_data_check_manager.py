@@ -258,6 +258,17 @@ class AiStackDataCheckManager(DataCheckManager):
             and bool(path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_ACC_PMU)))
 
     @classmethod
+    def contain_sio_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+        """
+        The data path contain sio data
+        :param result_dir: data dir path
+        :param device_id: device id
+        :return: if contained sio data
+        """
+        return cls._contain_stars_profiler_data(result_dir, device_id=device_id) \
+            and path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_SIO))
+
+    @classmethod
     def contain_stars_low_power_data(cls: any, result_dir: str, device_id: int = None) -> bool:
         """
         The data path contain lowpower sample data

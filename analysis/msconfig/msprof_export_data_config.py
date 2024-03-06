@@ -224,6 +224,11 @@ class MsProfExportDataConfig(MetaConfig):
             ('table', 'MsprofTx'),
             ('headers', 'pid,tid,operator_name,call_stack')
         ],
+        'sio': [
+            ('handler', '_get_sio_data'),
+            ('db', 'sio.db'),
+            ('table', 'Sio')
+        ],
         'inter_soc_transmission': [
             ('handler', '_get_inter_soc_summary'),
             ('db', 'soc_profiler.db'),
