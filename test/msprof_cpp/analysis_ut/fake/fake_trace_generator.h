@@ -39,7 +39,8 @@ using EventQueue = Analysis::Entities::EventQueue;
 // 伪造生成EventQueue相关公用函数
 class FakeEventGenerator {
 public:
-    static void AddApiEvent(std::shared_ptr<EventQueue> &eventQueue, uint16_t level, uint64_t start, uint64_t end)
+    static void AddApiEvent(std::shared_ptr<EventQueue> &eventQueue, uint16_t level, uint64_t start,
+                            uint64_t end, uint32_t reserve = 0, uint64_t item_id = 0)
     {
         EventInfo testInfo{EventType::EVENT_TYPE_API, level, start, end};
         auto api = std::make_shared<MsprofApi>();
@@ -47,10 +48,10 @@ public:
         api->level = level;
         api->type = static_cast<uint32_t>(EventType::EVENT_TYPE_API);
         api->threadId = 0;
-        api->reserve = 0;
+        api->reserve = reserve;
         api->beginTime = static_cast<uint64_t>(start);
         api->endTime = static_cast<uint64_t>(end);
-        api->itemId = 0;
+        api->itemId = item_id;
         auto eventPtr = std::make_shared<Event>(api, testInfo);
         eventQueue->Push(eventPtr);
     }

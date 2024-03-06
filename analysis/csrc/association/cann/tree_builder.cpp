@@ -97,6 +97,7 @@ std::shared_ptr<TreeNode> TreeBuilder::Build()
     pool.Stop();
     // 向叶子节点添加TaskTrack类型的events
     AddTaskTrackEvents(rootNode, taskTrackEvents, leafNodes_);
+    AddMissedDummyEvents(rootNode, modelLevelNodes_, missDummyNodes_);
     INFO("Build Tree End, ThreadId = %", threadId_);
     return tree;
 }
@@ -150,13 +151,13 @@ bool TreeBuilder::AddLevelEvents(std::shared_ptr<EventQueue> &events,
                                  EventType eventType) const
 {
     // 检查输入各Type的Events指针
-    if (!events) {
-        WARN("Events pointer is nullptr, threadId = %, event type: %", threadId_, static_cast<int>(eventType));
+    if (!events || events->Empty()) {
+        WARN("No Events, threadId = %, event type: %", threadId_, static_cast<int>(eventType));
         return false;
     }
     // 保证非空
-    if (events->Empty() || levelNodes.empty()) {
-        ERROR("Events or LevelNodes is empty, threadId = % ", threadId_);
+    if (levelNodes.empty()) {
+        ERROR("LevelNodes is empty, threadId = % ", threadId_);
         return false;
     }
     uint64_t matchCnt = 0; // 在时间片范围内的数量
@@ -201,16 +202,16 @@ bool TreeBuilder::AddLevelEvents(std::shared_ptr<EventQueue> &events,
 // 双指针遍历向核心树叶子中添加TaskTrackEvents
 bool TreeBuilder::AddTaskTrackEvents(std::shared_ptr<TreeNode> &rootNode,
                                      std::shared_ptr<EventQueue> &events,
-                                     std::vector<std::shared_ptr<TreeNode>> &leafNodes) const
+                                     std::vector<std::shared_ptr<TreeNode>> &leafNodes)
 {
     // 检查输入Runtime Events指针
-    if (!events) {
-        ERROR("TaskTrack Events pointer is nullptr, threadId = %", threadId_);
+    if (!events || events->Empty()) {
+        ERROR("TaskTrack Events is empty, threadId = %", threadId_);
         return false;
     }
     // 保证非空
-    if (events->Empty() || leafNodes.empty()) {
-        ERROR("TaskTrack Events or LevelNodes is empty, threadId = % ", threadId_);
+    if (leafNodes.empty()) {
+        ERROR("LevelNodes is empty, threadId = % ", threadId_);
         return false;
     }
     uint64_t matchCnt = 0; // 在时间片范围内的数量
@@ -237,14 +238,14 @@ bool TreeBuilder::AddTaskTrackEvents(std::shared_ptr<TreeNode> &rootNode,
             // event超过TreeNode的结束时间，需要检查是否在下一个TreeNode的开始之前
             if (std::next(it) != leafNodes.end() && event->info.start < (*std::next(it))->event->info.start) {
                 // 挂到rootNode
-                rootNode->children.emplace_back(dummyNode);
+                missDummyNodes_.emplace_back(dummyNode);
                 events->Pop();
                 mismatchCnt++;
             }
             it++; // 可能在下一个TreeNode的时间片内，跳过当前TreeNode
         } else {
-            // event小于TreeNode的开始时间，挂到rootNode
-            rootNode->children.emplace_back(dummyNode);
+            // event小于TreeNode的开始时间，记录下来，后面再次校验确认是挂到root还是model
+            missDummyNodes_.emplace_back(dummyNode);
             events->Pop();
             mismatchCnt++;
         }
@@ -254,13 +255,58 @@ bool TreeBuilder::AddTaskTrackEvents(std::shared_ptr<TreeNode> &rootNode,
     // events没有匹配完
     if (!events->Empty()) {
         INFO("After matching TaskTrackEvents is not empty, size = %, threadId = %", events->GetSize(), threadId_);
-        AddRemainTaskTrackEvents(rootNode, events);
+        AddRemainTaskTrackEvents(events);
     }
     return true;
 }
 
-void TreeBuilder::AddRemainTaskTrackEvents(std::shared_ptr<TreeNode> &rootNode,
-                                           std::shared_ptr<EventQueue> &events) const
+bool TreeBuilder::AddMissedDummyEvents(std::shared_ptr<TreeNode> &rootNode,
+                                       std::vector<std::shared_ptr<TreeNode>> &modelNodes,
+                                       std::vector<std::shared_ptr<TreeNode>> &missDummyNodes) const
+{
+    if (modelNodes.empty() || missDummyNodes.empty()) {
+        INFO("No dummy node need to Calibrate, threadId = %", threadId_);
+        return false;
+    }
+    auto mnIt = modelNodes.begin();
+    auto mdIt = missDummyNodes.begin();
+    uint32_t matchCnt = 0;
+    uint32_t mismatchCnt = 0;
+    while (mnIt != modelNodes.end() && mdIt != missDummyNodes.end()) {
+        if ((*mdIt)->event->info.start > (*mnIt)->event->info.start &&
+            (*mdIt)->event->info.start <= (*mnIt)->event->info.end) {
+            // 挂到model
+            (*mnIt)->children.emplace_back((*mdIt));
+            mdIt++;
+            matchCnt++;
+        } else if ((*mdIt)->event->info.start > (*mnIt)->event->info.end) {
+            // event超过TreeNode的结束时间，需要检查是否在下一个TreeNode的开始之前
+            if (std::next(mnIt) != modelNodes.end() &&
+                (*mdIt)->event->info.start < (*std::next(mnIt))->event->info.start) {
+                // 挂到rootNode
+                rootNode->children.emplace_back((*mdIt));
+                mismatchCnt++;
+                mdIt++;
+            }
+            mnIt++; // 可能在下一个TreeNode的时间片内，跳过当前TreeNode
+        } else {
+            // event小于TreeNode的开始时间，挂到root
+            rootNode->children.emplace_back((*mdIt));
+            mdIt++;
+            mismatchCnt++;
+        }
+    }
+    while (mdIt != missDummyNodes.end()) {
+        rootNode->children.emplace_back((*mdIt));
+        mdIt++;
+        mismatchCnt++;
+    }
+    INFO("AddMissedDummyEvents done, threadId = %, matchCnt = %, mismatchCnt = % ",
+         threadId_, matchCnt, mismatchCnt);
+    return true;
+}
+
+void TreeBuilder::AddRemainTaskTrackEvents(std::shared_ptr<EventQueue> &events)
 {
     while (!events->Empty()) {
         auto event = events->Top();
@@ -275,8 +321,8 @@ void TreeBuilder::AddRemainTaskTrackEvents(std::shared_ptr<TreeNode> &rootNode,
         MAKE_SHARED_RETURN_VOID(dummyNode, TreeNode, dummyEvent);
         dummyNode->records.emplace_back(event);
 
-        // 直接挂到rootNode
-        rootNode->children.emplace_back(dummyNode);
+        // 存入miss
+        missDummyNodes_.emplace_back(dummyNode);
         events->Pop();
     }
 }
