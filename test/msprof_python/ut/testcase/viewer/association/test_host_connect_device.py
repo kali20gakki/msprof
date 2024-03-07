@@ -74,7 +74,7 @@ class TestHostToDevice(unittest.TestCase):
                 TraceViewHeaderConstant.TRACE_HEADER_DURATION: 0.74,
                 TraceViewHeaderConstant.TRACE_HEADER_PH: "X",
                 TraceViewHeaderConstant.TRACE_HEADER_ARGS: {
-                    "Task Type": "SDMA", "Stream Id": 11, "Task Id": 4043,
+                    "Task Type": "SDMA", "Physic Stream Id": 11, "Task Id": 4043,
                     "Batch Id": 0, "Subtask Id": 0, "connection_id": 19,
                 }
             },
@@ -86,7 +86,7 @@ class TestHostToDevice(unittest.TestCase):
                 TraceViewHeaderConstant.TRACE_HEADER_DURATION: 31.92,
                 TraceViewHeaderConstant.TRACE_HEADER_PH: "X",
                 TraceViewHeaderConstant.TRACE_HEADER_ARGS: {
-                    "Task Type": "AI_CORE", "Stream Id": 4, "Task Id": 33573,
+                    "Task Type": "AI_CORE", "Physic Stream Id": 4, "Task Id": 33573,
                     "Batch Id": 23, "Subtask Id": 4294967295, "connection_id": 14983
                 },
             },
@@ -165,7 +165,7 @@ class TestHostToDevice(unittest.TestCase):
                 TraceViewHeaderConstant.TRACE_HEADER_DURATION: 10, 
                 TraceViewHeaderConstant.TRACE_HEADER_PH: "X",
                 TraceViewHeaderConstant.TRACE_HEADER_ARGS: {
-                    "Task Type": "AI_CORE", "Stream Id": 4, "Task Id": 33573,
+                    "Task Type": "AI_CORE", "Physic Stream Id": 4, "Task Id": 33573,
                     "Batch Id": 23, "Subtask Id": 1, "connection_id": 14983
                 },
             },
@@ -177,7 +177,7 @@ class TestHostToDevice(unittest.TestCase):
                 TraceViewHeaderConstant.TRACE_HEADER_DURATION: 20,
                 TraceViewHeaderConstant.TRACE_HEADER_PH: "X",
                 TraceViewHeaderConstant.TRACE_HEADER_ARGS: {
-                    "Task Type": "AI_CORE", "Stream Id": 4, "Task Id": 33574,
+                    "Task Type": "AI_CORE", "Physic Stream Id": 4, "Task Id": 33574,
                     "Batch Id": 23, "Subtask Id": 2, "connection_id": 14983
                 },
             },
