@@ -54,12 +54,13 @@ struct HcclBigOpDesc {
     uint64_t modelId = 0;
     int32_t indexId = 0;
     int64_t connectionId = 0;
+    uint32_t thread_id = 0;
     std::shared_ptr<MsprofCompactInfo> nodeDesc = nullptr;
 
-    HcclBigOpDesc(uint64_t begin, uint64_t end, uint16_t deviceId, uint64_t model_id, int32_t index_id,
-                  int64_t connectionId, const std::shared_ptr<MsprofCompactInfo> &node)
-        : beginTime(begin), endTime(end), deviceId(deviceId), modelId(model_id), indexId(index_id),
-        connectionId(connectionId), nodeDesc(node)
+    HcclBigOpDesc(uint64_t begin, uint64_t end, uint16_t deviceId, uint64_t modelId, int32_t indexId,
+                  int64_t connectionId, uint32_t threadId, const std::shared_ptr<MsprofCompactInfo> &node)
+        : beginTime(begin), endTime(end), deviceId(deviceId), modelId(modelId), indexId(indexId),
+          connectionId(connectionId), nodeDesc(node), thread_id(threadId)
     {}
 };
 
@@ -105,11 +106,12 @@ struct HostTask {
     uint64_t taskType = 0;
     uint64_t timeStamp = 0;
     uint32_t streamId = 0;
-    uint16_t taskId = 0;       // 和采集侧的数据类型不一致，采集侧的高低16位会被分别用作batchId和TaskId
     uint32_t contextId = 0;
+    uint16_t taskId = 0;       // 和采集侧的数据类型不一致，采集侧的高低16位会被分别用作batchId和TaskId
     uint16_t batchId = 0;
     uint16_t deviceId = 0;
-    int64_t requestId = 0;
+    int32_t requestId = 0;
+    uint32_t thread_id = 0;
     std::shared_ptr<Operator> op = nullptr;
 };
 

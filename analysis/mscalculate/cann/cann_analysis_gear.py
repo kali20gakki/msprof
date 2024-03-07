@@ -437,7 +437,7 @@ class TaskGear(CANNGear):
         connection_id = node_dto.connection_id if node_dto.connection_id is not None else Constant.DEFAULT_INVALID_VALUE
         if not node_event.additional_record:
             self.hccl_op_info.append([task_track_dto.device_id, model_id, request_id,
-                                      node_dto.thread_id, node_dto.item_id,
+                                      task_track_dto.thread_id, node_dto.item_id,
                                       self.HCCL_TASK_TYPE, "N/A", node_dto.start, node_dto.end,
                                       "N/A", connection_id])
             return

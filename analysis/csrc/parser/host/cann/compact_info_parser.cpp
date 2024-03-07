@@ -44,6 +44,9 @@ std::vector<std::shared_ptr<FlipTask>> CompactInfoParser::GetData()
 
 int CompactInfoParser::ProduceData()
 {
+    if (chunkProducer_->Empty()) {
+        return ANALYSIS_OK;
+    }
     if (!Reserve(compactData_, chunkProducer_->Size())) {
         ERROR("%: Reserve data failed", parserName_);
         return ANALYSIS_ERROR;
@@ -72,6 +75,9 @@ int NodeBasicInfoParser::ProduceData()
     if (staticChunkProducer->ReadChunk() != ANALYSIS_OK) {
         ERROR("%: Read Chunk failed.", parserName_);
         return ANALYSIS_ERROR;
+    }
+    if (chunkProducer_->Empty() && staticChunkProducer->Empty()) {
+        return ANALYSIS_OK;
     }
     if (!Reserve(compactData_, chunkProducer_->Size() + staticChunkProducer->Size())) {
         ERROR("%: Reserve data failed", parserName_);
@@ -104,6 +110,9 @@ int NodeBasicInfoParser::ProduceData()
 
 int TaskTrackParser::ProduceData()
 {
+    if (chunkProducer_->Empty()) {
+        return ANALYSIS_OK;
+    }
     const uint64_t flipTaskType = 98;
     const uint64_t maintenanceTaskType = 6;
     if (!Reserve(compactData_, chunkProducer_->Size())) {

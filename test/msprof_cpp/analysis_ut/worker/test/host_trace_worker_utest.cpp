@@ -33,11 +33,11 @@ protected:
 };
 
 
-TEST_F(HostTraceWorkerUtest, TestKernalHostTraceWorkerShouldReturnFalseWhenInputDirIsEmpty)
+TEST_F(HostTraceWorkerUtest, TestKernalHostTraceWorkerShouldReturnTrueWhenInputDirIsEmpty)
 {
     HostTraceWorker hostTraceWorker{TEST_HOST_FILE_PATH};
     auto ret = hostTraceWorker.Run();
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
 }
 
 TEST_F(HostTraceWorkerUtest, TestKernalHostTraceWorkerShouldReturnTrueWhenGroupResultIsNotEmpty)

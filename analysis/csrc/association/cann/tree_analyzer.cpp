@@ -195,7 +195,7 @@ void TreeAnalyzer::UpdateHcclBigOpDescs(const std::shared_ptr<TreeNode> &node)
         auto nodeApi = nodeNode->event->apiPtr;
         std::shared_ptr<HcclBigOpDesc> desc;
         MAKE_SHARED_RETURN_VOID(desc, HcclBigOpDesc, nodeApi->beginTime,
-                                nodeApi->endTime, deviceId, model_id, index_id, connectionId, nullptr);
+                                nodeApi->endTime, deviceId, model_id, index_id, connectionId, track->threadId, nullptr);
         std::shared_ptr<Operator> op;
         MAKE_SHARED_RETURN_VOID(op, Operator, desc, nodeApi->itemId, OpType::OPTYPE_HCCL_BIG);
         hcclBigOpDescs_.emplace_back(op);
@@ -206,8 +206,8 @@ void TreeAnalyzer::UpdateHcclBigOpDescs(const std::shared_ptr<TreeNode> &node)
         auto nodeApi = nodeNode->event->apiPtr;
         auto nodeDesc = (nodeRecord == nullptr) ? nullptr : nodeRecord->compactPtr;
         std::shared_ptr<HcclBigOpDesc> desc;
-        MAKE_SHARED_RETURN_VOID(desc, HcclBigOpDesc, nodeApi->beginTime,
-                                nodeApi->endTime, deviceId, model_id, index_id, connectionId, nodeDesc);
+        MAKE_SHARED_RETURN_VOID(desc, HcclBigOpDesc, nodeApi->beginTime, nodeApi->endTime,
+                                deviceId, model_id, index_id, connectionId, track->threadId, nodeDesc);
         std::shared_ptr<Operator> op;
         MAKE_SHARED_RETURN_VOID(op, Operator, desc, nodeApi->itemId, OpType::OPTYPE_HCCL_BIG);
         hcclBigOpDescs_.emplace_back(op);
@@ -246,17 +246,26 @@ std::shared_ptr<HostTask> TreeAnalyzer::GenHostTask(const std::shared_ptr<Msprof
     task->taskType = taskType;
     task->deviceId = track->data.runtimeTrack.deviceId;
     task->timeStamp = track->timeStamp;
+    task->thread_id = track->threadId;
     return task;
 }
 
 HostTasks TreeAnalyzer::GenComputeHostTasks(ComputeOpDescs &ops,
                                             const std::shared_ptr<MsprofCompactInfo> &track,
-                                            const std::shared_ptr<MsprofApi> &modelApi,
                                             int64_t connection_id)
 {
-    // L0场景没有上报Node层信息
+    auto modelNode = path_.find(MSPROF_REPORT_MODEL_LEVEL) != path_.end() ?
+                     path_[MSPROF_REPORT_MODEL_LEVEL] : nullptr;
+    auto modelApi = modelNode == nullptr ? nullptr : modelNode->event->apiPtr;
+    // L0场景没有上报Node层补充信息且该任务非ctx类任务
     if (ops.empty()) {
-        auto task = GenHostTask(track, modelApi, nullptr,
+        // 补充一条有效的Op信息
+        auto nodeNode = path_.find(MSPROF_REPORT_NODE_LEVEL) != path_.end() ?
+                        path_[MSPROF_REPORT_NODE_LEVEL] : nullptr;
+        std::shared_ptr<Operator> op;
+        std::shared_ptr<OpDesc> desc;
+        MAKE_SHARED_RETURN_VALUE(op, Operator, {}, desc, nodeNode->event->apiPtr->itemId, OpType::OPTYPE_RESERVED);
+        auto task = GenHostTask(track, modelApi, op,
                                 DEFAULT_CONTEXT_ID, track->data.runtimeTrack.taskType, connection_id);
         return {task};
     }
@@ -264,6 +273,12 @@ HostTasks TreeAnalyzer::GenComputeHostTasks(ComputeOpDescs &ops,
     HostTasks results;
     for (const auto &pair: ops) {
         auto desc = pair.second->opDesc;
+        if (!desc) {
+            ERROR("No op % desc found for task timestamp: % when gen compute task",
+                  pair.second->name, track->timeStamp);
+            continue;
+        }
+
         std::vector<uint32_t> ctxIds;
         // 只有FFTS+类型应该保留CtxId
         if (desc->ctxId) {
@@ -271,16 +286,6 @@ HostTasks TreeAnalyzer::GenComputeHostTasks(ComputeOpDescs &ops,
             ctxIds.assign(ctxIdInfo->ctxIds, ctxIdInfo->ctxIds + ctxIdInfo->ctxIdNum);
         } else {
             ctxIds = {DEFAULT_CONTEXT_ID};
-        }
-
-        // L0 FFTS+场景没有上报NodeBasicInfo, 但是存在ctxIds
-        if (desc->nodeDesc == nullptr && pair.second->type != OpType::OPTYPE_INVALID) {
-            for (const auto &ctxId: ctxIds) {
-                auto task = GenHostTask(track, modelApi, nullptr, ctxId,
-                                        track->data.runtimeTrack.taskType, connection_id);
-                results.emplace_back(task);
-            }
-            continue;
         }
 
         for (const auto &ctxId: ctxIds) {
@@ -382,10 +387,8 @@ HostTasks TreeAnalyzer::GetComputeTaskDescs(const std::shared_ptr<TreeNode> &nod
         UpdateComputeDescForHcclSituation(ops, tracks.back(), item_id);
     }
     auto track = tracks.back()->compactPtr;
-    auto modelApi = modelNode != nullptr ?
-                    modelNode->event->apiPtr : nullptr;
 
-    auto results = GenComputeHostTasks(ops, track, modelApi, nodeNode->event->id);
+    auto results = GenComputeHostTasks(ops, track, nodeNode->event->id);
     return results;
 }
 
