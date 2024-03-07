@@ -544,7 +544,7 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L1)
         EXPECT_EQ(computeTasks[i]->op->opDesc->nodeDesc->data.nodeBasicInfo.opType,
                   expectComputeTaskOpTypes[i]);
     }
-    EXPECT_EQ(computeTasks[normalNum]->op, nullptr);
+    EXPECT_EQ(computeTasks[normalNum]->op->opDesc->nodeDesc, nullptr);
 
     for (uint16_t i = 0; i < normalNum; i++) {
         EXPECT_EQ(computeTasks[i]->op->opDesc->tensorDesc->timeStamp, expectComputeTaskTensorTimes[i]);

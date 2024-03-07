@@ -61,6 +61,9 @@ std::vector<std::shared_ptr<MsprofEvent>> ApiEventParser::GetData()
 
 int ApiEventParser::ProduceData()
 {
+    if (chunkProducer_->Empty()) {
+        return ANALYSIS_OK;
+    }
     std::map<std::tuple<uint16_t, uint32_t, uint32_t, uint32_t, uint64_t>, MsprofEvent*> startEventMap;
     if (!Reserve(apiData_, chunkProducer_->Size())) {
         ERROR("%: Reserve data failed", parserName_);

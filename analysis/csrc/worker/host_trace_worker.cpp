@@ -41,24 +41,9 @@ bool HostTraceWorker::Run()
     grouper->Group();
 
     cannWarehouses_ = grouper->GetGroupEvents();
-    if (cannWarehouses_.Empty()) {
-        WARN("Group events result is empty, stop the rest of the process");
-        return false;
-    }
     threadIds_ = grouper->GetThreadIdSet();
     ThreadPool pool(poolSize_);
     pool.Start();
-    pool.AddTask([this, &grouper]() {
-        TimeLogger t{"Dump flip tasks data start"};
-        // flip tasks 数据落盘
-        auto flipTasks = grouper->GetFlipTasks();
-        std::shared_ptr<FlipTaskDBDumper> flipDumper;
-        MAKE_SHARED_RETURN_VALUE(flipDumper, FlipTaskDBDumper, false, hostPath_);
-        auto ret = flipDumper->DumpData(flipTasks);
-        if (!ret) {
-            ERROR("Dump flip tasks data failed");
-        }
-    });
     pool.AddTask([this, &grouper]() {
         TimeLogger t{"Dump api data start"};
         // api event 数据落盘
@@ -70,42 +55,56 @@ bool HostTraceWorker::Run()
             ERROR("Dump api traces data failed");
         }
     });
-    pool.AddTask([this, &hostDataPath]() {
-        TimeLogger t{"Dump fusion op start"};
-        // fusion op 数据落盘
-        std::shared_ptr<FusionOpInfoParser> parser;
-        MAKE_SHARED_NO_OPERATION(parser, FusionOpInfoParser, hostDataPath);
-        auto fusionOps = parser->ParseData<MsprofAdditionalInfo>();
-        std::shared_ptr<FusionOpDumper> dumper;
-        MAKE_SHARED_NO_OPERATION(dumper, FusionOpDumper, hostPath_);
-        auto ret = dumper->DumpData(fusionOps);
-        if (!ret) {
-            ERROR("Dump fusion op failed");
-        }
-    });
-    pool.AddTask([this, &hostDataPath]() {
-        TimeLogger t{"Dump graph id map data start"};
-        std::shared_ptr<GraphIdParser> parser;
-        MAKE_SHARED_NO_OPERATION(parser, GraphIdParser, hostDataPath);
+    if (!cannWarehouses_.Empty()) {
+        pool.AddTask([this, &grouper]() {
+            TimeLogger t{"Dump flip tasks data start"};
+            // flip tasks 数据落盘
+            auto flipTasks = grouper->GetFlipTasks();
+            std::shared_ptr<FlipTaskDBDumper> flipDumper;
+            MAKE_SHARED_RETURN_VALUE(flipDumper, FlipTaskDBDumper, false, hostPath_);
+            auto ret = flipDumper->DumpData(flipTasks);
+            if (!ret) {
+                ERROR("Dump flip tasks data failed");
+            }
+        });
+        pool.AddTask([this, &hostDataPath]() {
+            TimeLogger t{"Dump fusion op start"};
+            // fusion op 数据落盘
+            std::shared_ptr<FusionOpInfoParser> parser;
+            MAKE_SHARED_NO_OPERATION(parser, FusionOpInfoParser, hostDataPath);
+            auto fusionOps = parser->ParseData<MsprofAdditionalInfo>();
+            std::shared_ptr<FusionOpDumper> dumper;
+            MAKE_SHARED_NO_OPERATION(dumper, FusionOpDumper, hostPath_);
+            auto ret = dumper->DumpData(fusionOps);
+            if (!ret) {
+                ERROR("Dump fusion op failed");
+            }
+        });
+        pool.AddTask([this, &hostDataPath]() {
+            TimeLogger t{"Dump graph id map data start"};
+            std::shared_ptr<GraphIdParser> parser;
+            MAKE_SHARED_NO_OPERATION(parser, GraphIdParser, hostDataPath);
 
-        auto traces = parser->ParseData<MsprofAdditionalInfo>();
-        // graphIdMap 数据落盘
-        std::shared_ptr<GraphIdMapDBDumper> graphIdMapDumper;
-        MAKE_SHARED_NO_OPERATION(graphIdMapDumper, GraphIdMapDBDumper, hostPath_);
-        auto ret = graphIdMapDumper->DumpData(traces);
-        if (!ret) {
-            ERROR("Dump graph id map data failed");
-        }
-    });
+            auto traces = parser->ParseData<MsprofAdditionalInfo>();
+            // graphIdMap 数据落盘
+            std::shared_ptr<GraphIdMapDBDumper> graphIdMapDumper;
+            MAKE_SHARED_NO_OPERATION(graphIdMapDumper, GraphIdMapDBDumper, hostPath_);
+            auto ret = graphIdMapDumper->DumpData(traces);
+            if (!ret) {
+                ERROR("Dump graph id map data failed");
+            }
+        });
 
-    pool.AddTask([this]() {
-        // 建树
-        // 建树前需要先对KernelEvents排序
-        SortEvents();
-        MultiThreadBuildTree();
-        // 分析树 & DB Dump
-        MultiThreadAnalyzeTreeDumpData();
-    });
+        pool.AddTask([this]() {
+            // 建树
+            // 建树前需要先对KernelEvents排序
+            SortEvents();
+            MultiThreadBuildTree();
+            // 分析树 & DB Dump
+            MultiThreadAnalyzeTreeDumpData();
+        });
+    }
+
     pool.WaitAllTasks();
     pool.Stop();
     return true;
