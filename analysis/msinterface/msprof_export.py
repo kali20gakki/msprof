@@ -690,3 +690,5 @@ class ExportCommand:
 
             profier = MsprofOutputSummary(collect_path, self.export_format)
             profier.export(self.command_type)
+
+            PathManager.del_summary_and_timeline_dir(collect_path, sub_dirs)
