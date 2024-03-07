@@ -107,14 +107,14 @@ class ParsingNicData(MsMultiProcess):
     def _insert_nic_data(self: any, network_data: list) -> None:
         nic_header_num = DBManager.get_table_field_num(DBNameConstant.TABLE_NIC_ORIGIN + "Map", self.TABLE_PATH)
         # chip 0 nic diff, exclude device_id and replay_id
-        type_mask = False
+        has_type_id = True
         if len(network_data) > 0:
-            if nic_header_num > len(network_data[0]) + 2:
-                type_mask = True
+            if nic_header_num == len(network_data[0]) + 2:
+                has_type_id = False
         for nd in network_data:
             item = [self.device_id, self.replay_id, float(nd[0].replace(":", ''))]
             # nic数据后面会多一个无意义字段
-            if type_mask:
+            if has_type_id:
                 item.extend(nd[1:-1])
             else:
                 item.extend(nd[1:])
