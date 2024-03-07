@@ -218,12 +218,6 @@ class MsProfExportDataConfig(MetaConfig):
              'pid, tid, category, event_type, payload_type, payload_value, Start_time(us), '
              'End_time(us), message_type, message')
         ],
-        'pytorch_operator_view': [
-            ('handler', '_get_pytorch_operator_data'),
-            ('db', 'msproftx.db'),
-            ('table', 'MsprofTx'),
-            ('headers', 'pid,tid,operator_name,call_stack')
-        ],
         'sio': [
             ('handler', '_get_sio_data'),
             ('db', 'sio.db'),
@@ -281,9 +275,6 @@ class MsProfExportDataConfig(MetaConfig):
                         'Release Total Allocated(KB),Release Total Reserved(KB),Device'),
             ('db', 'memory_application.db'),
             ('table', 'NpuOpMem')
-        ],
-        'task_queue': [
-            ('handler', '_get_task_queue_timeline')
         ],
         'event': [
             ('handler', '_get_event_data'),

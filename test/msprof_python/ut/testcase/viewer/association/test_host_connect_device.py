@@ -64,6 +64,7 @@ class TestHostToDevice(unittest.TestCase):
             self.assertEqual(api_data, expected_data)
 
     def test_add_connect_line_task_time(self):
+        InfoConfReader()._local_time_offset = 10.0
         task_time_data = [
             {
                 TraceViewHeaderConstant.TRACE_HEADER_NAME: "SDMA",
@@ -154,6 +155,7 @@ class TestHostToDevice(unittest.TestCase):
             self.assertEqual(hccl_data, expected_data)
 
     def test_add_connect_line_should_add_two_line_when_input_one_node_has_two_task(self):
+        InfoConfReader()._local_time_offset = 10.0
         task_time_data = [
             {
                 TraceViewHeaderConstant.TRACE_HEADER_NAME: "Task1",

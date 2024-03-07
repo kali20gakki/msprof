@@ -58,9 +58,7 @@ class ExportDataType(Enum):
     LOW_POWER = 51
     INSTR = 52
     ACC_PMU = 53
-    PYTORCH_OPERATOR_VIEW = 54
     NPU_MEM = 55
-    TASK_QUEUE = 56
     OPERATOR_MEMORY = 57
     MEMORY_RECORD = 58
     EVENT = 59

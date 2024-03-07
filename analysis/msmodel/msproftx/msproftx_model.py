@@ -29,7 +29,7 @@ class MsprofTxModel(ParserModel):
         get timeline data
         """
         all_data_sql = f"select category, pid, tid, start_time, (end_time-start_time) as dur_time, payload_type, " \
-                       f"payload_value, message_type, message, event_type, call_stack " \
+                       f"payload_value, message_type, message, event_type " \
                        f"from {DBNameConstant.TABLE_MSPROFTX} " \
                        f"where file_tag={DataTag.MSPROFTX_TORCH.value} or file_tag={DataTag.MSPROFTX.value}"
         return DBManager.fetch_all_data(self.cur, all_data_sql, dto_class=MsprofTxDto)
@@ -45,23 +45,9 @@ class MsprofTxModel(ParserModel):
                        f"where file_tag={DataTag.MSPROFTX_TORCH.value} or file_tag={DataTag.MSPROFTX.value}"
         return DBManager.fetch_all_data(self.cur, all_data_sql)
 
-    def get_pytorch_operator_data(self: any) -> list:
-        all_data_sql = f"select pid, tid, message, call_stack from {DBNameConstant.TABLE_MSPROFTX} where file_tag=?"
-        return DBManager.fetch_all_data(self.cur, all_data_sql, (DataTag.MSPROFTX_TORCH.value,))
-
     def get_torch_op_data(self: any) -> list:
         sql = f"select t2.tid tid, t2.pid pid, t2.start_time start_time, t2.message message from (select " \
               f"distinct message from {DBNameConstant.TABLE_MSPROFTX} where file_tag={DataTag.MSPROFTX_CANN.value})t1" \
               f" inner join (select tid, pid, start_time, message from {DBNameConstant.TABLE_MSPROFTX} " \
               f"where file_tag={DataTag.MSPROFTX_TORCH.value})t2 on t1.message=t2.message order by start_time"
-        return DBManager.fetch_all_data(self.cur, sql, dto_class=MsprofTxDto)
-
-    def get_task_queue_origin_data(self: any) -> list:
-        sql = f"select pid, tid, category, start_time, message from {DBNameConstant.TABLE_MSPROFTX} " \
-              f"where file_tag={DataTag.MSPROFTX_PIPELINE.value} order by category, start_time"
-        return DBManager.fetch_all_data(self.cur, sql, dto_class=MsprofTxDto)
-
-    def get_task_queue_tid_meta_data(self: any) -> list:
-        sql = f"select category, tid from {DBNameConstant.TABLE_MSPROFTX} where " \
-              f"file_tag={DataTag.MSPROFTX_PIPELINE.value} group by category, tid"
         return DBManager.fetch_all_data(self.cur, sql, dto_class=MsprofTxDto)
