@@ -88,6 +88,30 @@ namespace {
         {"level", SQL_TEXT_TYPE}
     };
 
+    const TableColumns FusionOPInfo = {
+        {"level", SQL_TEXT_TYPE},
+        {"struct_type", SQL_TEXT_TYPE},
+        {"thread_id", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"op_name", SQL_TEXT_TYPE},
+        {"fusion_op_num", SQL_INTEGER_TYPE},
+        {"memory_input", SQL_TEXT_TYPE},
+        {"memory_output", SQL_TEXT_TYPE},
+        {"memory_weight", SQL_TEXT_TYPE},
+        {"memory_workspace", SQL_TEXT_TYPE},
+        {"memory_total", SQL_TEXT_TYPE},
+        {"fusion_op_names", SQL_TEXT_TYPE}
+    };
+
+    const TableColumns GraphIdMap = {
+        {"level", SQL_TEXT_TYPE},
+        {"struct_type", SQL_TEXT_TYPE},
+        {"thread_id", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"model_name", SQL_TEXT_TYPE},
+        {"graph_id", SQL_INTEGER_TYPE}
+    };
+
     const TableColumns HCCLTask = {
         {"model_id", SQL_INTEGER_TYPE},
         {"index_id", SQL_INTEGER_TYPE},
@@ -383,6 +407,18 @@ HashDB::HashDB()
     dbName_ = "ge_hash.db";
     tableColNames_["GeHashInfo"] = GeHashInfo;
     tableColNames_["TypeHashInfo"] = TypeHashInfo;
+}
+
+FusionOpInfoDB::FusionOpInfoDB()
+{
+    dbName_ = "fusion_op_info.db";
+    tableColNames_["FusionOPInfo"] = FusionOPInfo;
+}
+
+GraphIdMapDB::GraphIdMapDB()
+{
+    dbName_ = "graph_id_map.db";
+    tableColNames_["GraphIdMap"] = GraphIdMap;
 }
 
 HCCLDB::HCCLDB()
