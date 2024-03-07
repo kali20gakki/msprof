@@ -4,6 +4,8 @@
 
 import logging
 import os
+import shutil
+import stat
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
@@ -184,3 +186,29 @@ class PathManager:
             if file_name.startswith("device_"):
                 device_count += 1
         return device_count
+
+    @classmethod
+    def del_summary_and_timeline_dir(cls: any, collect_path: str, sub_dirs: list):
+        for sub_dir in sub_dirs:
+            joined_path = os.path.join(collect_path, sub_dir)
+            sub_path = os.path.realpath(joined_path)
+            summary_dir = PathManager.get_summary_dir(sub_path)
+            timeline_dir = PathManager.get_timeline_dir(sub_path)
+            PathManager.del_dir(summary_dir)
+            PathManager.del_dir(timeline_dir)
+
+
+    @classmethod
+    def del_dir(cls: any, del_path):
+        """
+        先删除所有文件，再使用shutil.rmtree递归删除所有空的文件夹
+        直接使用shutil.rmtree会遇到权限问题
+        :param del_path:
+        :return:
+        """
+        for dir_path, _, file_list in os.walk(del_path):
+            for file in file_list:
+                file_path = os.path.join(dir_path, file)
+                os.chmod(file_path, stat.S_IWUSR)  # 这里解决删除不了的权限问题
+                os.remove(file_path)
+        shutil.rmtree(del_path, ignore_errors=True)
