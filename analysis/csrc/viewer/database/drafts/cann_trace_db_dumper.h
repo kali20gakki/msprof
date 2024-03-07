@@ -63,6 +63,7 @@ private:
 
     void AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInfo> &tensorDesc, MsprofNodeBasicInfo nodeBasicInfo,
                             TaskInfoData &data, const std::shared_ptr<HostTask> &task);
+    static std::string GetFormat(uint32_t oriFormat);
     const uint32_t poolSize_ = 3;
     std::string hostFilePath_;
     bool result_;

@@ -20,6 +20,8 @@
 #include "analysis/csrc/viewer/database/drafts/cann_trace_db_dumper.h"
 #include "analysis/csrc/viewer/database/drafts/api_event_db_dumper.h"
 #include "analysis/csrc/viewer/database/drafts/flip_task_db_dumper.h"
+#include "analysis/csrc/viewer/database/drafts/fusion_op_dumper.h"
+#include "analysis/csrc/viewer/database/drafts/graph_id_map_db_dumper.h"
 
 using namespace Analysis::Utils;
 using namespace Analysis::Parser::Host::Cann;
@@ -44,31 +46,58 @@ bool HostTraceWorker::Run()
         return false;
     }
     threadIds_ = grouper->GetThreadIdSet();
-    bool ret = true;
     ThreadPool pool(poolSize_);
     pool.Start();
-    pool.AddTask([this, &grouper, &ret]() {
+    pool.AddTask([this, &grouper]() {
         TimeLogger t{"Dump flip tasks data start"};
         // flip tasks 数据落盘
         auto flipTasks = grouper->GetFlipTasks();
         std::shared_ptr<FlipTaskDBDumper> flipDumper;
         MAKE_SHARED_RETURN_VALUE(flipDumper, FlipTaskDBDumper, false, hostPath_);
-        ret = flipDumper->DumpData(flipTasks);
+        auto ret = flipDumper->DumpData(flipTasks);
         if (!ret) {
             ERROR("Dump flip tasks data failed");
         }
     });
-    pool.AddTask([this, &grouper, &ret]() {
+    pool.AddTask([this, &grouper]() {
         TimeLogger t{"Dump api data start"};
         // api event 数据落盘
         auto apiTraces = grouper->GetApiTraces();
         std::shared_ptr<ApiEventDBDumper> apiDumper;
         MAKE_SHARED_RETURN_VALUE(apiDumper, ApiEventDBDumper, false, hostPath_);
-        ret = apiDumper->DumpData(apiTraces);
+        auto ret = apiDumper->DumpData(apiTraces);
         if (!ret) {
             ERROR("Dump api traces data failed");
         }
     });
+    pool.AddTask([this, &hostDataPath]() {
+        TimeLogger t{"Dump fusion op start"};
+        // fusion op 数据落盘
+        std::shared_ptr<FusionOpInfoParser> parser;
+        MAKE_SHARED_NO_OPERATION(parser, FusionOpInfoParser, hostDataPath);
+        auto fusionOps = parser->ParseData<MsprofAdditionalInfo>();
+        std::shared_ptr<FusionOpDumper> dumper;
+        MAKE_SHARED_NO_OPERATION(dumper, FusionOpDumper, hostPath_);
+        auto ret = dumper->DumpData(fusionOps);
+        if (!ret) {
+            ERROR("Dump fusion op failed");
+        }
+    });
+    pool.AddTask([this, &hostDataPath]() {
+        TimeLogger t{"Dump graph id map data start"};
+        std::shared_ptr<GraphIdParser> parser;
+        MAKE_SHARED_NO_OPERATION(parser, GraphIdParser, hostDataPath);
+
+        auto traces = parser->ParseData<MsprofAdditionalInfo>();
+        // graphIdMap 数据落盘
+        std::shared_ptr<GraphIdMapDBDumper> graphIdMapDumper;
+        MAKE_SHARED_NO_OPERATION(graphIdMapDumper, GraphIdMapDBDumper, hostPath_);
+        auto ret = graphIdMapDumper->DumpData(traces);
+        if (!ret) {
+            ERROR("Dump graph id map data failed");
+        }
+    });
+
     pool.AddTask([this]() {
         // 建树
         // 建树前需要先对KernelEvents排序
@@ -79,7 +108,7 @@ bool HostTraceWorker::Run()
     });
     pool.WaitAllTasks();
     pool.Stop();
-    return ret;
+    return true;
 }
 
 void HostTraceWorker::SortEvents()

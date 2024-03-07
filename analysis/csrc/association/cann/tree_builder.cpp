@@ -264,7 +264,7 @@ bool TreeBuilder::AddMissedDummyEvents(std::shared_ptr<TreeNode> &rootNode,
                                        std::vector<std::shared_ptr<TreeNode>> &modelNodes,
                                        std::vector<std::shared_ptr<TreeNode>> &missDummyNodes) const
 {
-    if (modelNodes.empty() || missDummyNodes.empty()) {
+    if (missDummyNodes.empty()) {
         INFO("No dummy node need to Calibrate, threadId = %", threadId_);
         return false;
     }

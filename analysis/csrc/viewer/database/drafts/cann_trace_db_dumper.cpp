@@ -27,17 +27,19 @@ using ThreadPool = Analysis::Utils::ThreadPool;
 using HashData = Analysis::Parser::Host::Cann::HashData;
 using TypeData = Analysis::Parser::Host::Cann::TypeData;
 
-using HCCLOpsDumpData = std::vector<std::tuple<uint32_t, uint64_t, int32_t, uint32_t, std::string, std::string,
+using HCCLOpsDumpData = std::vector<std::tuple<uint32_t, uint32_t, int32_t, int64_t, std::string, std::string,
         std::string, uint64_t, uint64_t, std::string, int64_t>>;
 
 using HostTasksDumpData = std::vector<std::tuple<uint32_t,
         int64_t, uint32_t, uint32_t, std::string, uint32_t, std::string, uint32_t, std::string, int64_t>>;
 
-using HcclTasksDumpData = std::vector<std::tuple<uint32_t, int32_t, std::string, std::string, uint32_t, std::string,
-        double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
+using HcclTasksDumpData = std::vector<
+        std::tuple<uint32_t, int64_t, std::string, std::string, int64_t, std::string,
+        double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, int32_t, int32_t,
         std::string, double, std::string, std::string, std::string, std::string>>;
 
 const uint32_t UNDEFINED_INT_VALUE = 4294967295;
+const int32_t INVALID_VALUE = -1;
 const std::string NA = "N/A";
 const uint32_t INPUT_FORMAT_INDEX = 0;
 const uint32_t OUTPUT_FORMAT_INDEX = 1;
@@ -105,8 +107,9 @@ void CANNTraceDBDumper::DumpHcclOps(const HCCLBigOpDescs &hcclOps)
         std::string isDynamic = NA;
         int64_t connection_id = desc->connectionId;
         auto msprofCompactInfo = desc->nodeDesc;
+        int64_t thread_id = (msprofCompactInfo == nullptr) ? -1 : static_cast<int64_t>(msprofCompactInfo->threadId);
         data.emplace_back(deviceId, modelId, indexId,
-                          msprofCompactInfo == nullptr ? -1 : msprofCompactInfo->threadId,
+                          thread_id,
                           HashData::GetInstance().Get(op->name),
                           msprofCompactInfo == nullptr ? "HCCL" : NumberMapping::Get(
                               NumberMapping::MappingType::GE_TASK_TYPE,
@@ -209,14 +212,12 @@ void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInf
             shapes.emplace_back(std::to_string(shape));
         }
         if (tenosrData.tensorType == INPUT_FORMAT_INDEX) {
-            inputFormat.emplace_back(
-                NumberMapping::Get(NumberMapping::MappingType::GE_FORMAT, tenosrData.format));
+            inputFormat.emplace_back(GetFormat(tenosrData.format));
             inputDataType.emplace_back(
                 NumberMapping::Get(NumberMapping::MappingType::GE_DATA_TYPE, tenosrData.dataType));
             inputShape.emplace_back(Utils::Join(shapes, ","));
         } else if (tenosrData.tensorType == OUTPUT_FORMAT_INDEX) {
-            outputFormat.emplace_back(
-                NumberMapping::Get(NumberMapping::MappingType::GE_FORMAT, tenosrData.format));
+            outputFormat.emplace_back(GetFormat(tenosrData.format));
             outputDataType.emplace_back(
                 NumberMapping::Get(NumberMapping::MappingType::GE_DATA_TYPE, tenosrData.dataType)
             );
@@ -238,6 +239,19 @@ void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInf
                       Utils::Join(inputDataType, ";"), Utils::AddQuotation(Utils::Join(inputShape, ";")),
                       Utils::Join(outputFormat, ";"), Utils::Join(outputDataType, ";"),
                       Utils::AddQuotation(Utils::Join(outputShape, ";")), task->deviceId, task->contextId, opFlag);
+}
+
+std::string CANNTraceDBDumper::GetFormat(uint32_t oriFormat)
+{
+    auto format = oriFormat & 0xff;
+    auto subFormat = (oriFormat & 0xffff00) >> 8;
+    std::string enumFormat = NumberMapping::Get(NumberMapping::MappingType::GE_FORMAT, format);
+    std::string enumSubFormat = std::to_string(subFormat);
+    std::vector<std::string> vec{enumFormat, enumSubFormat};
+    if (subFormat > 0) {
+        enumFormat = Utils::Join(vec, ":");
+    }
+    return enumFormat;
 }
 
 void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskInfoData &data)
@@ -307,10 +321,10 @@ void CANNTraceDBDumper::DumpHcclTasks(const HostTasks &hcclTasks)
         auto desc = task->op->hcclSmallOpDesc;
         auto isMaster = desc->isMaster;
         if (!desc->hcclInfo || !desc->hcclInfo->data) {
-            data.emplace_back(task->modelId, task->requestId, NA, NA, UNDEFINED_INT_VALUE,
-                              std::to_string(task->timeStamp), 0, task->streamId, task->taskId, desc->ctxId,
-                              task->batchId, task->deviceId, isMaster, UNDEFINED_INT_VALUE,
-                              UNDEFINED_INT_VALUE, NA, 0, NA, NA, NA, NA);
+            data.emplace_back(task->modelId, task->requestId, NA, NA, INVALID_VALUE,
+                              std::to_string(task->timeStamp), INVALID_VALUE, task->streamId, task->taskId, desc->ctxId,
+                              task->batchId, task->deviceId, isMaster, INVALID_VALUE,
+                              INVALID_VALUE, NA, INVALID_VALUE, NA, NA, NA, NA);
             continue;
         }
         auto hcclTrace = Utils::ReinterpretConvert<MsprofHcclInfo *>(desc->hcclInfo->data);
