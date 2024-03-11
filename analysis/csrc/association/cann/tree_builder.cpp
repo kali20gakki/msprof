@@ -152,12 +152,12 @@ bool TreeBuilder::AddLevelEvents(std::shared_ptr<EventQueue> &events,
 {
     // 检查输入各Type的Events指针
     if (!events || events->Empty()) {
-        WARN("No Events, threadId = %, event type: %", threadId_, static_cast<int>(eventType));
+        WARN("No Events, event type: %, threadId = %", static_cast<int>(eventType), threadId_);
         return false;
     }
     // 保证非空
     if (levelNodes.empty()) {
-        ERROR("LevelNodes is empty, threadId = % ", threadId_);
+        ERROR("LevelNodes is empty, level: %, threadId = % ", events->Top()->info.level, threadId_);
         return false;
     }
     uint64_t matchCnt = 0; // 在时间片范围内的数量
