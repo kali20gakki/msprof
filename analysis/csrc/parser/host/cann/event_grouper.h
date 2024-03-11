@@ -61,7 +61,9 @@ public:
     // 获取FlipTask数据
     std::vector<std::shared_ptr<Adapter::FlipTask>> &GetFlipTasks();
 private:
-    bool isKernelApiEvent(const std::shared_ptr<MsprofApi> &trace) const;
+    bool isKernelApiEvent(const std::shared_ptr<MsprofApi> &trace);
+    void InitLastKernelTimes(const std::set<uint32_t> &threadIds);
+    void RecordCANNWareHouses();
 
     template<typename P, typename M, std::shared_ptr<EventQueue> CANNWarehouse::*element>
     void GroupEvents(const std::string &typeName, EventType eventType)
@@ -106,6 +108,8 @@ private:
     std::set<uint32_t> threadIds_;
     std::string hostPath_;
     CANNWarehouses cannWarehouses_; // 所有threadId的数据
+    // 记录已经处理好的kernelEvents的最晚时间（threadId, level, time）
+    std::unordered_map<uint32_t, std::unordered_map<uint16_t, std::pair<uint64_t, uint64_t>>> lastKernelTimes_;
 };
 
 // 特化模板需要声明在类外

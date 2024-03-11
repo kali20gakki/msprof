@@ -83,10 +83,44 @@ bool EventGrouper::Group()
 
     pool.WaitAllTasks();
     pool.Stop();
+    RecordCANNWareHouses();
+
     return true;
 }
 
-bool EventGrouper::isKernelApiEvent(const std::shared_ptr<MsprofApi> &trace) const
+void EventGrouper::RecordCANNWareHouses()
+{
+    for (auto thread: threadIds_) {
+        if (!cannWarehouses_.Find(thread)) {
+            continue;
+        }
+        auto wareHouse = cannWarehouses_[thread];
+        INFO("After group events, Kernel: %, GraphId: %, FusionOp: %, NodeBasic: %, Tensor: %, ContextId: %,"
+             " HcclInfo: %, TaskTrack: %, thread: %",
+             wareHouse.kernelEvents ? wareHouse.kernelEvents->GetSize() : 0,
+             wareHouse.graphIdMapEvents ? wareHouse.graphIdMapEvents->GetSize() : 0,
+             wareHouse.fusionOpInfoEvents ? wareHouse.fusionOpInfoEvents->GetSize() : 0,
+             wareHouse.nodeBasicInfoEvents ? wareHouse.nodeBasicInfoEvents->GetSize() : 0,
+             wareHouse.tensorInfoEvents ? wareHouse.tensorInfoEvents->GetSize() : 0,
+             wareHouse.contextIdEvents ? wareHouse.contextIdEvents->GetSize() : 0,
+             wareHouse.hcclInfoEvents ? wareHouse.hcclInfoEvents->GetSize() : 0,
+             wareHouse.taskTrackEvents ? wareHouse.taskTrackEvents->GetSize() : 0,
+             thread);
+    }
+}
+
+void EventGrouper::InitLastKernelTimes(const std::set<uint32_t> &threadIds)
+{
+    for (auto threadId: threadIds) {
+        lastKernelTimes_[threadId] = {
+            {MSPROF_REPORT_MODEL_LEVEL, {0, 0}},
+            {MSPROF_REPORT_NODE_LEVEL, {0, 0}},
+            {MSPROF_REPORT_HCCL_NODE_LEVEL, {0, 0}}
+        };
+    }
+}
+
+bool EventGrouper::isKernelApiEvent(const std::shared_ptr<MsprofApi> &trace)
 {
     if (trace->level == MSPROF_REPORT_MODEL_LEVEL ||
         trace->level == MSPROF_REPORT_NODE_LEVEL ||
@@ -96,7 +130,17 @@ bool EventGrouper::isKernelApiEvent(const std::shared_ptr<MsprofApi> &trace) con
                   trace->threadId, trace->level, trace->beginTime, trace->endTime);
             return false;
         }
-        return true;
+        // 判断区间相交则为冗余数据
+        auto lastPair = lastKernelTimes_[trace->threadId][trace->level];
+        if (lastPair.second < trace->beginTime or trace->endTime < lastPair.first) {
+            lastKernelTimes_[trace->threadId][trace->level] = {trace->beginTime, trace->endTime};
+            return true;
+        }
+        WARN("Redundant api, level: %, time: [%, %], last valid api time: [%, %], threadId = %",
+             trace->level, trace->beginTime, trace->endTime,
+             lastKernelTimes_[trace->threadId][trace->level].first,
+             lastKernelTimes_[trace->threadId][trace->level].second, trace->threadId);
+        return false;
     }
     return false;
 }
@@ -118,11 +162,14 @@ void EventGrouper::GroupEvents<ApiEventParser, MsprofApi, &CANNWarehouse::kernel
     std::set<uint32_t> threadIds;
     for (const auto &trace: traces) {
         threadIds.insert(trace->threadId);
+    }
+    InitLastKernelTimes(threadIds);
+    for (const auto &trace: traces) {
         if (isKernelApiEvent(trace)) {
             threadIdNum[trace->threadId] += 1;
         }
     }
-
+    InitLastKernelTimes(threadIds);
     // 使用临时CANNWarehouses用于暂存kernel类型的数据，减小多线程竞争，提升性能
     CANNWarehouses kernelWarehouses;
     // 2. 转换生成Event，并将其添加到 CANNWarehouses
