@@ -25,15 +25,15 @@ using namespace Analysis::Utils;
 // tx_np_lantency_min, tx_np_lantency_max, tx_np_lantency_avg, rx_p_bandwidth_min, rx_p_bandwidth_max,
 // rx_p_bandwidth_avg, rx_np_bandwidth_min, rx_np_bandwidth_max, rx_np_bandwidth_avg, rx_cpl_bandwidth_min,
 // rx_cpl_bandwidth_max, rx_cpl_bandwidth_avg
-using PCIeDataFormat = std::vector<std::tuple<uint32_t, uint64_t, double, double, double, double, double,
-        double, double, double, double, double, double, double, double, double, double, double, double, double,
-        double, double, double>>;
+using PCIeDataFormat = std::vector<std::tuple<uint32_t, uint64_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
+        uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
+        uint32_t, uint32_t, uint32_t, uint32_t, uint32_t>>;
 // deviceId, timestampNs, txPostMin, txPostMax, txPostAvg, txNonpostMin, txNonpostMax, txNonpostAvg,
 // txCplMin, txCplMax, txCplAvg, txNonpostLatencyMin, txNonpostLatencyMax, txNonpostLatencyAvg,
 // rxPostMin, rxPostMax, rxPostAvg, rxNonpostMin, rxNonpostMax, rxNonpostAvg, rxCplMin, rxCplMax, rxCplAvg
-using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, double, double, double, double, double,
-        double, double, double, double, double, double, double, double, double, double, double, double, double,
-        double, double, double>>;
+using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
+        uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
+        uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
 
 const std::string PCIE_DIR = "./pcie";
 const std::string REPORT = "report.db";

@@ -284,15 +284,13 @@ class TaskGear(CANNGear):
     @staticmethod
     def get_task_level_additional_dto(event: Event) -> tuple:
         mem_cpy_info_dto = MemCopyInfoDto()
-        task_track_dto = TaskTrackDto()
+        task_track_dtos = []
         for record in event.additional_record:
             if isinstance(record.dto, MemCopyInfoDto):
                 mem_cpy_info_dto = record.dto
-            elif isinstance(record.dto, TaskTrackDto) and task_track_dto.struct_type is None:
-                # RUNTIME sometimes report multiple task tracks in one api call,
-                # in which case, only the first task track is valid
-                task_track_dto = record.dto
-        return mem_cpy_info_dto, task_track_dto
+            elif isinstance(record.dto, TaskTrackDto):
+                task_track_dtos.append(record.dto)
+        return mem_cpy_info_dto, task_track_dtos
 
     @classmethod
     def get_context_ids_in_node(cls: any, node_event: Event) -> list:
@@ -439,7 +437,7 @@ class TaskGear(CANNGear):
         connection_id = node_dto.connection_id if node_dto.connection_id is not None else Constant.DEFAULT_INVALID_VALUE
         if not node_event.additional_record:
             self.hccl_op_info.append([task_track_dto.device_id, model_id, request_id,
-                                      node_dto.thread_id, node_dto.item_id,
+                                      task_track_dto.thread_id, node_dto.item_id,
                                       self.HCCL_TASK_TYPE, "N/A", node_dto.start, node_dto.end,
                                       "N/A", connection_id])
             return
@@ -561,22 +559,21 @@ class TaskGear(CANNGear):
                                    "YES" if node_basic_info_dto.op_flag else "NO"])
 
     def run(self, event: Event, call_stack: dict):
-        dto: ApiDataDto = self.db.get_api(event)
-
         # pure runtime api
         if not event.is_invalid() and not event.additional_record:
             return
 
-        mem_cpy_dto, task_track_dto = self.get_task_level_additional_dto(event)
-        if task_track_dto.struct_type is not None:
-            self.add_host_task(call_stack, task_track_dto)
+        mem_cpy_dto, task_track_dtos = self.get_task_level_additional_dto(event)
+        for task_track_dto in task_track_dtos:
+            if task_track_dto.struct_type is not None:
+                self.add_host_task(call_stack, task_track_dto)
 
-        hccl_event: Event = call_stack.get(Constant.HCCL_LEVEL)
-        if self.is_hccl_task(hccl_event, task_track_dto):
-            self.add_hccl_task(call_stack.get(Constant.MODEL_LEVEL), hccl_event, task_track_dto)
-            self.add_hccl_op(call_stack, task_track_dto)
-        if self.is_kernel_task(task_track_dto, hccl_event.is_invalid()):
-            self.add_kernel_task(call_stack, task_track_dto)
+            hccl_event: Event = call_stack.get(Constant.HCCL_LEVEL)
+            if self.is_hccl_task(hccl_event, task_track_dto):
+                self.add_hccl_task(call_stack.get(Constant.MODEL_LEVEL), hccl_event, task_track_dto)
+                self.add_hccl_op(call_stack, task_track_dto)
+            if self.is_kernel_task(task_track_dto, hccl_event.is_invalid()):
+                self.add_kernel_task(call_stack, task_track_dto)
 
     def save_task_info(self):
         if not self.task_info:

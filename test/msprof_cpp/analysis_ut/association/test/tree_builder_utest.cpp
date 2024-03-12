@@ -301,31 +301,46 @@ TEST_F(TreeBuilderUTest, TestBuildTreeShouldBuildCorrectTreeWhenCANNWarehouseNot
     cannWarehouse->fusionOpInfoEvents = fusionOpInfoEvents;
     cannWarehouse->hcclInfoEvents = hcclInfoEvents;
     cannWarehouse->taskTrackEvents = taskTrackEvents;
-
     /* 期望生成的Tree每一层的字符串
      * Event格式: 类型 + start + _ + end, []标识其为additional类型Event，挂在左边最近的节点上
      * eg: Node层一个api节点(start = 1, end = 10)上挂了GraphIdMap(start = 2, end = 2)和
      * GraphIdMap(start = 5, end = 5)可表示为: Api1_10 [GraphIdMap2_2] [GraphIdMap5_5]
      * */
+    // 核心event：
+    // Model, [110, 200],
+    // Node,  [110, 130], [150, 170], [175, 180],
+    // Hccl,  [115, 125], [155, 165],
+    // 逻辑树如下，其中[n]标识每个context id event中带几个context id
+    // Model :  [110,                                                                                    200]
+    // g(105)g(110)             g(115) g(200)                                                                   g(210)
+    // f(104)f(110)             f(116) f(200)                                                                   f(220)
+    // Node  :  [110,                              130]        [150,                      170]     [175, 180]
+    // n(105) n(110)    n(115) n(115) n(130)         n(135) n(150)   n(155) n(160)      n(170)                  n(1000)
+    // t(109) t(110)        t(113) t(130)            t(134) t(150)   t(151)             t(170)t(175)
+    //                                                               t(152)
+    // c(109) c(110)             c(130)              c(134) c(150)   c(151)             c(170)c(172)
+    //
+    //
+    // Hccl  :          [115,                125]                 [155,               165]
+    // h(103) h(110) h(115) h(120)  h(125)       h(130)  h(155)       h(160) h(165)        h(170)
+    //  c(115)             c(117) c(125)         c(130)               c(160)
+    // Runtime: tk(114) tk(115) tk(120) tk(125) tk(130)       tk(155) tk(160) tk(165)tk(170)tk(175) tk(180) tk(190,210)
     std::vector<std::string> ans{
-        "Api0_201 ", // Root Level
+        "Api0_201 ", // 第一层
         "Api110_200 [GraphIdMap115_115] [GraphIdMap200_200] [FusionOpInfo116_116] "
-        "[FusionOpInfo200_200] Dummy114_114 [TaskTrack114_114] "
-        "Dummy115_115 [TaskTrack115_115] Dummy130_130 [TaskTrack130_130] "
-        "Dummy155_155 [TaskTrack155_155] Dummy170_170 [TaskTrack170_170] "
-        "Dummy175_175 [TaskTrack175_175] Dummy190_190 [TaskTrack190_190] "
-        "Dummy210_210 [TaskTrack210_210] ",  // Model Level
-        "Api110_130 [NodeBasicInfo115_115] [NodeBasicInfo115_115] "
-        "[NodeBasicInfo130_130] [TensorInfo113_113] [TensorInfo130_130] "
-        "[ContextId130_130] Api150_170 [NodeBasicInfo155_155] "
-        "[NodeBasicInfo160_160] [NodeBasicInfo170_170] [TensorInfo151_151] "
-        "[TensorInfo152_152] [TensorInfo170_170] [ContextId151_151] "
-        "[ContextId170_170] Api175_180 ", // Node Level
+        "[FusionOpInfo200_200] Dummy210_210 [TaskTrack210_210] ",  // 第二层
+        "Api110_130 [NodeBasicInfo115_115] [NodeBasicInfo115_115] [NodeBasicInfo130_130] "
+        "[TensorInfo113_113] [TensorInfo130_130] [ContextId130_130] Api150_170 [NodeBasicInfo155_155] "
+        "[NodeBasicInfo160_160] [NodeBasicInfo170_170] [TensorInfo151_151] [TensorInfo152_152] "
+        "[TensorInfo170_170] [ContextId151_151] [ContextId170_170] Api175_180 Dummy114_114 "
+        "[TaskTrack114_114] Dummy115_115 [TaskTrack115_115] Dummy130_130 [TaskTrack130_130] "
+        "Dummy155_155 [TaskTrack155_155] Dummy170_170 [TaskTrack170_170] Dummy175_175 [TaskTrack175_175] "
+        "Dummy190_190 [TaskTrack190_190] ", // 第三层
         "Api115_125 [ContextId117_117] [ContextId125_125] [HcclInfo120_120] "
         "[HcclInfo125_125] Api155_165 [ContextId160_160] [HcclInfo160_160] "
-        "[HcclInfo165_165] Dummy180_180 [TaskTrack180_180] ", // HCCL Level
+        "[HcclInfo165_165] Dummy180_180 [TaskTrack180_180] ", // 第四层
         "Dummy120_120 [TaskTrack120_120] Dummy125_125 [TaskTrack125_125] "
-        "Dummy160_160 [TaskTrack160_160] Dummy165_165 [TaskTrack165_165] " // Dummy(Runtime) Level
+        "Dummy160_160 [TaskTrack160_160] Dummy165_165 [TaskTrack165_165] " // 第五层
     };
 
     /* 建树 */

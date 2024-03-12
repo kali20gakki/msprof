@@ -37,7 +37,8 @@ class CommunicationMatrixAnalyzer:
         0: 'HCCS',
         1: 'PCIE',
         2: 'RDMA',
-        3: 'LOCAL'
+        3: 'LOCAL',
+        4: 'SIO'
     }
 
     def __init__(self: any, collection_path: any, export_type: any) -> None:

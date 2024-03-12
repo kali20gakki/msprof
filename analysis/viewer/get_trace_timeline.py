@@ -281,6 +281,18 @@ def _get_network_data(table: dict, sql_: dict, curs: any, *param: any) -> dict:
     return dump_data
 
 
+def get_network_type(result_dir):
+    db_name = DBNameConstant.DB_ROCE_ORIGIN
+    conn, curs = DBManager.check_connect_db(result_dir, db_name)
+    query_type_sql = "SELECT DISTINCT typeid FROM {}".format(DBNameConstant.TABLE_ROCE_ORIGIN)
+    typeid = DBManager.fetch_all_data(curs, query_type_sql)
+    DBManager.destroy_db_connect(conn, curs)
+    if not typeid:
+        return "RoCE"
+    else:
+        return "RoCE" if typeid[0][0] == 0 else "ROH"
+
+
 def get_network_timeline(result_dir: str, devid: str, start: int, end: int, collect_type: str) -> any:
     """
     Return trace-viewer json format RoCE/NIC timeline
@@ -289,7 +301,7 @@ def get_network_timeline(result_dir: str, devid: str, start: int, end: int, coll
     if collect_type == 'roce':
         table['_db'] = DBNameConstant.DB_ROCE_RECEIVE
         table['_table'] = DBNameConstant.TABLE_ROCE_RECEIVE
-        table['_header'] = 'RoCE'
+        table['_header'] = get_network_type(result_dir)
     elif collect_type == 'nic':
         table['_db'] = DBNameConstant.DB_NIC_RECEIVE
         table['_table'] = DBNameConstant.TABLE_NIC_RECEIVE

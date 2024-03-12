@@ -71,8 +71,8 @@ class AiCoreOpReport:
             # 没有pmu数据, 去除HCCL小算子
             return AiCoreOpReport._filter_hccl_op(data)
         ai_core_data_len = len(ai_core_group_dict.get(next(iter(ai_core_group_dict)))[0])
-        # 全导和按step导，task type的索引是5; 按子图导，task type的索引是6
-        task_type_idx = 6 if ProfilingScene().is_graph_export() else 5
+        # 全导和按step导，task type的索引是6; 按子图导，task type的索引是7
+        task_type_idx = 7 if ProfilingScene().is_graph_export() else 6
         for datum in data:
             if datum[task_type_idx] == Constant.TASK_TYPE_HCCL_AI_CPU:
                 # 针对helper场景, 去除运行在AI_CPU的HCCL小算子,
@@ -111,8 +111,8 @@ class AiCoreOpReport:
     @staticmethod
     def _filter_hccl_op(data: list) -> list:
         filter_data = []
-        # 全导和按step导，task type的索引是5; 按子图导，task type的索引是6
-        task_type_idx = 6 if ProfilingScene().is_graph_export() else 5
+        # 全导和按step导，task type的索引是6; 按子图导，task type的索引是7
+        task_type_idx = 7 if ProfilingScene().is_graph_export() else 6
         for datum in data:
             if datum[task_type_idx] in (Constant.TASK_TYPE_HCCL_AI_CPU, Constant.TASK_TYPE_HCCL):
                 logging.info("Found hccl small op of stream %d, task %d", datum[2], datum[1])
@@ -476,8 +476,8 @@ class AiCoreOpReport:
         cls.clear_no_ge_data_headers(headers)
         model_id = "{0}, ".format(NumberConstant.DEFAULT_MODEL_ID) \
             if not ProfilingScene().is_graph_export() else 'model_id, '
-        sql = "select {model_id} task_id, stream_id, {index_info} 'N/A', 'N/A', task_type, " \
-              "start_time, duration_time, wait_time, " \
+        sql = "select {model_id} task_id, stream_id, {index_info} 'N/A', 'N/A', 'N/A', " \
+              "task_type, start_time, duration_time, wait_time, " \
               "(case when {0}.subtask_id={context_id} then 'N/A' else {0}.subtask_id end), " \
               "batch_id " \
               "from {0} where task_type!=? " \

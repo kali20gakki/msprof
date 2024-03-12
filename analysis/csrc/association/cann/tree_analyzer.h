@@ -125,7 +125,7 @@ private:
                                           int64_t connectionId);
     // 根据输入参数生成HostTask数组
     HostTasks GenComputeHostTasks(ComputeOpDescs &ops, const std::shared_ptr<MsprofCompactInfo> &track,
-                                  const std::shared_ptr<MsprofApi> &modelApi, int64_t connection_id);
+                                  int64_t connection_id);
 
     void UpdateComputeDescForFftsSituation(ComputeOpDescs &descs, const std::shared_ptr<Event> &track);
     void UpdateComputeDescForHcclSituation(ComputeOpDescs &descs, const std::shared_ptr<Event> &track,

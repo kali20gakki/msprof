@@ -722,8 +722,19 @@ class TablesConfig(MetaConfig):
             ('end_time', 'INTEGER, null'),
             ('message_type', 'INTEGER, null'),
             ('message', 'TEXT, null'),
-            ('call_stack', 'TEXT, null'),
             ('file_tag', 'INTEGER, null')
+        ],
+        'SioMap': [
+            ('acc_id', 'INTEGER, null'),
+            ('req_rx', 'NUMERIC, null'),
+            ('rsp_rx', 'NUMERIC, null'),
+            ('snp_rx', 'NUMERIC, null'),
+            ('dat_rx', 'NUMERIC, null'),
+            ('req_tx', 'NUMERIC, null'),
+            ('rsp_tx', 'NUMERIC, null'),
+            ('snp_tx', 'NUMERIC, null'),
+            ('dat_tx', 'NUMERIC, null'),
+            ('timestamp', 'NUMERIC, null')
         ],
         'InterSocMap': [
             ('l2_buffer_bw_level', 'INTEGER, null'),

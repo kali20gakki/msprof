@@ -20,8 +20,6 @@ class GeLogicStreamSingleton:
         self.project_path = ""
 
     def load_info(self, project_path):
-        if "host" in project_path:
-            return
         self.project_path = project_path
         ge_db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_LOGIC_STREAM_INFO)
         if not DBManager.check_tables_in_db(ge_db_path, DBNameConstant.TABLE_GE_LOGIC_STREAM_INFO):
@@ -60,7 +58,7 @@ class GeLogicStreamSingleton:
         return [ge_stream_result, max_physic_stream]
 
     def get_logic_stream_id(self, physic_stream):
-        if self.use_flag is False:
+        if self.use_flag is False or self.max_length == 0:
             return physic_stream
         if physic_stream > self.max_length or self.stream_id_mapping[physic_stream] is None:
             return physic_stream

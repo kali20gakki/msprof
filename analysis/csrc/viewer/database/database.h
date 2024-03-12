@@ -64,6 +64,16 @@ public:
     HashDB();
 };
 
+class FusionOpInfoDB : public Database {
+public:
+    FusionOpInfoDB();
+};
+
+class GraphIdMapDB : public Database {
+public:
+    GraphIdMapDB();
+};
+
 class HCCLDB : public Database {
 public:
     HCCLDB();

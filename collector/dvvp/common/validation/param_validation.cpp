@@ -13,6 +13,7 @@
 #include <cctype>
 #include <sys/stat.h>
 #include <algorithm>
+#include <unordered_map>
 #include "config/config.h"
 #include "errno/error_code.h"
 #include "message/prof_params.h"
@@ -49,6 +50,11 @@ const int MAX_PERIOD = 30 * 24 * 3600; // 30 * 24 * 3600 = 30day's seconds
 const int MAX_EVENT_SIZE = 8;  // every batch event size
 const int MAX_CORE_ID_SIZE = 50;  // ai core or aiv core id size
 const int BASE_HEX = 16;  // hex to int
+const std::unordered_map<std::string, std::string> INVALID_CHAR = {
+    {"\n", "\\n"}, {"\f", "\\f"}, {"\r", "\\r"}, {"\b", "\\b"}, {"\t", "\\t"}, {"\v", "\\v"},
+    {"\u000D", "\\u000D"}, {"\u000A", "\\u000A"}, {"\u000C", "\\u000C"}, {"\u000B", "\\u000B"},
+    {"\u0009", "\\u0009"}, {"\u0008", "\\u0008"}, {"\u007F", "\\u007F"}
+};
 
 namespace {
     bool CheckDirValid(const std::string &path, std::string &errReason)
@@ -69,6 +75,17 @@ namespace {
         if (Utils::CanonicalizePath(path).empty()) {
             errReason = "Argument --output is invalid because of get the canonicalized absolute pathname failed";
             return false;
+        }
+        return true;
+    }
+
+    bool CheckPathCharValid(const std::string path)
+    {
+        for (auto &item: INVALID_CHAR) {
+            if (path.find(item.first) != std::string::npos) {
+                MSPROF_LOGE("The path contains invalid character: %s.", item.second);
+                return false;
+            }
         }
         return true;
     }
@@ -98,7 +115,11 @@ bool ParamValidation::CheckCollectOutputIsValid(const std::string &outputPath) c
         MSPROF_LOGI("output is empty");
         return true;
     }
-
+    if (!CheckPathCharValid(outputPath)) {
+        MSPROF_LOGE("Output path is invalid.");
+        CMD_LOGE("Output path is invalid.");
+        return false;
+    }
     std::string errReason;
     if (Utils::IsFileExist(outputPath)) {
         // 校验路径有效性
@@ -140,7 +161,11 @@ bool ParamValidation::CheckCollectOutputIsValid(const std::string &outputPath) c
 bool ParamValidation::CheckAnalysisOutputIsPathValid(const std::string &outputPath) const
 {
     std::string errReason;
-
+    if (!CheckPathCharValid(outputPath)) {
+        MSPROF_LOGE("Analysis output path is invalid.");
+        CMD_LOGE("Analysis output path is invalid.");
+        return false;
+    }
     if (!Utils::IsFileExist(outputPath)) {
         MSPROF_LOGE("Argument --output is invalid because of %s does not exist.", outputPath.c_str());
         CMD_LOGE("Argument --output is invalid because of %s does not exist.", outputPath.c_str());

@@ -288,10 +288,10 @@ class TestMsProfExportDataUtils(unittest.TestCase):
     def test_get_roce_data_1(self):
         configs = {"db": 'hwts', "table": '789'}
         params = {"export_type": "timeline", "project": '987', "device_id": "654", "data_type": "ddcp"}
-        with mock.patch(NAMESPACE + '.get_network_timeline', return_value=321):
+        with mock.patch(NAMESPACE + '.get_network_timeline', return_value=[{"args": {"name": "ROH"}}]):
             key = MsProfExportDataUtils()
             result = key._get_roce_data(configs, params)
-        self.assertEqual(result, 321)
+        self.assertEqual(result, [{"args": {"name": "ROH"}}])
 
     def test_get_roce_data_2(self):
         configs = {"db": 'hwts', "table": '987'}
@@ -663,14 +663,6 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         with mock.patch(NAMESPACE + '.StarsChipTransView.get_timeline_data', return_value={}):
             res = MsProfExportDataUtils._get_stars_chip_trans_data({}, {})
         self.assertEqual(res, {})
-
-    def test_get_pytorch_operator_data(self):
-        sample_configs = {"test": 2}
-        params = {"export_type": "summary"}
-        with mock.patch(NAMESPACE + '.MsprofTxViewer.get_pytorch_operator_data', return_value=('test', [1], 1)):
-            key = MsProfExportDataUtils()
-            result = key._get_pytorch_operator_data(sample_configs, params)
-        self.assertEqual(result, ('test', [1], 1))
 
 
 if __name__ == '__main__':

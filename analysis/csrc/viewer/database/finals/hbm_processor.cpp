@@ -63,8 +63,8 @@ HBMProcessor::ProcessedDataFormat HBMProcessor::FormatData(const OriDataFormat &
         HPFloat timestamp{data.timestamp};
         uint16_t type = MEMORY_TABLE.at(data.eventType); // 枚举表MEMORY_TABLE可以保证key存在
         processedData.emplace_back(
-            static_cast<uint16_t>(data.deviceId), GetLocalTime(timestamp, timeRecord).Uint64(), data.bandwidth,
-            data.hbmId, type);
+            static_cast<uint16_t>(data.deviceId), GetLocalTime(timestamp, timeRecord).Uint64(),
+            static_cast<uint64_t>(data.bandwidth * BYTE_SIZE * BYTE_SIZE), data.hbmId, type); // bandwidth MB/s -> B/s
     }
     return processedData;
 }

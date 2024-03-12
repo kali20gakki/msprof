@@ -36,7 +36,7 @@ std::shared_ptr<ConcatTensorInfo> CreateConcatTensorInfo(MsprofAdditionalInfo *a
     concatTensorInfo->threadId = additionalInfo->threadId;
     concatTensorInfo->dataLen = additionalInfo->dataLen;
     concatTensorInfo->timeStamp = additionalInfo->timeStamp;
-    auto tensorInfo = ReinterpretConvert<MsprofTensorInfo*>(additionalInfo->data);
+    auto tensorInfo = ReinterpretConvert<MsprofTensorInfo *>(additionalInfo->data);
     concatTensorInfo->opName = tensorInfo->opName;
     concatTensorInfo->tensorNum = tensorInfo->tensorNum;
     for (uint32_t i = 0; i < tensorInfo->tensorNum; ++i) {
@@ -65,12 +65,15 @@ std::vector<std::shared_ptr<ConcatTensorInfo>> AdditionInfoParser::GetData()
 
 int AdditionInfoParser::ProduceData()
 {
+    if (chunkProducer_->Empty()) {
+        return ANALYSIS_OK;
+    }
     if (!Reserve(additionalData_, chunkProducer_->Size())) {
         ERROR("%: Reserve data failed", parserName_);
         return ANALYSIS_ERROR;
     }
     while (!chunkProducer_->Empty()) {
-        auto additionalInfo = ReinterpretConvert<MsprofAdditionalInfo*>(chunkProducer_->Pop());
+        auto additionalInfo = ReinterpretConvert<MsprofAdditionalInfo *>(chunkProducer_->Pop());
         if (!additionalInfo) {
             ERROR("%: Pop chunk failed.", parserName_);
             return ANALYSIS_ERROR;
@@ -87,13 +90,16 @@ int AdditionInfoParser::ProduceData()
 
 int TensorInfoParser::ProduceData()
 {
+    if (chunkProducer_->Empty()) {
+        return ANALYSIS_OK;
+    }
     if (!Reserve(concatTensorData_, chunkProducer_->Size())) {
         ERROR("%: Reserve data failed", parserName_);
         return ANALYSIS_ERROR;
     }
     std::shared_ptr<ConcatTensorInfo> concatTensor = nullptr;
     while (!chunkProducer_->Empty()) {
-        auto currTensorInfo = ReinterpretConvert<MsprofAdditionalInfo*>(chunkProducer_->Pop());
+        auto currTensorInfo = ReinterpretConvert<MsprofAdditionalInfo *>(chunkProducer_->Pop());
         if (!currTensorInfo) {
             ERROR("%: Pop chunk failed.", parserName_);
             return ANALYSIS_ERROR;
@@ -103,11 +109,10 @@ int TensorInfoParser::ProduceData()
             delete currTensorInfo;
             continue;
         }
-        auto currTensor = ReinterpretConvert<MsprofTensorInfo*>(currTensorInfo->data);
+        auto currTensor = ReinterpretConvert<MsprofTensorInfo *>(currTensorInfo->data);
         if (!concatTensor ||
-                currTensor->opName != concatTensor->opName ||
-                currTensorInfo->timeStamp != concatTensor->timeStamp ||
-                currTensorInfo->threadId != concatTensor->threadId) {
+            currTensor->opName != concatTensor->opName || currTensorInfo->timeStamp != concatTensor->timeStamp ||
+            currTensorInfo->threadId != concatTensor->threadId) {
             if (concatTensor) {
                 concatTensorData_.emplace_back(concatTensor);
             }

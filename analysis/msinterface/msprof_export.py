@@ -116,12 +116,12 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_biu_perf_data},
             {'export_type': ExportDataType.ACC_PMU,
              'handler': AiStackDataCheckManager.contain_acc_pmu_data},
-            {'export_type': ExportDataType.TASK_QUEUE,
-             'handler': AiStackDataCheckManager.contain_task_queue_data},
             {'export_type': ExportDataType.EVENT,
              'handler': AiStackDataCheckManager.contain_event_data},
             {'export_type': ExportDataType.API,
              'handler': AiStackDataCheckManager.contain_api_data},
+            {'export_type': ExportDataType.SIO,
+             'handler': AiStackDataCheckManager.contain_sio_data},
             {'export_type': ExportDataType.MSPROF,
              'handler': lambda result_dir, device_id=None: True}
         ],
@@ -199,8 +199,6 @@ class ExportCommand:
              'handler': HostDataCheckManager.contain_host_network_usage_data},
             {'export_type': ExportDataType.HOST_DISK_USAGE,
              'handler': HostDataCheckManager.contain_host_disk_usage_data},
-            {'export_type': ExportDataType.PYTORCH_OPERATOR_VIEW,
-             'handler': AiStackDataCheckManager.contain_pytorch_operator_profiler_data},
             {'export_type': ExportDataType.OPERATOR_MEMORY,
              'handler': AiStackDataCheckManager.contain_op_mem_data},
             {'export_type': ExportDataType.MEMORY_RECORD,
@@ -692,3 +690,5 @@ class ExportCommand:
 
             profier = MsprofOutputSummary(collect_path, self.export_format)
             profier.export(self.command_type)
+
+            PathManager.del_summary_and_timeline_dir(collect_path, sub_dirs)

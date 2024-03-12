@@ -41,7 +41,7 @@ public:
             ERROR("%: Read Chunk failed.", parserName_);
             return {};
         }
-        if (!chunkProducer_->Empty() && ProduceData() != ANALYSIS_OK) {
+        if (ProduceData() != ANALYSIS_OK) {
             ERROR("%: Format data failed.", parserName_);
             return {};
         }

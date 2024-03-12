@@ -56,6 +56,20 @@ void GenApiEventsBin(const std::string &fakeDataDir, const int num)
 
         apiTrace.emplace_back(tmp);
     }
+    // 补充不正常的api
+    for (int i = n; i < num + n; i++) {
+        auto tmp = MsprofApi{};
+        tmp.magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
+        tmp.level = MSPROF_REPORT_MODEL_LEVEL;
+        tmp.type = static_cast<uint32_t>(EventType::EVENT_TYPE_API);
+        tmp.threadId = static_cast<uint32_t>(i);
+        tmp.reserve = static_cast<uint32_t>(i);
+        tmp.beginTime = static_cast<uint64_t>(n * i);
+        tmp.endTime = static_cast<uint64_t>(n * i + 1);
+        tmp.itemId = static_cast<uint32_t>(i);
+
+        apiTrace.emplace_back(tmp);
+    }
 
     auto fakeGen = std::make_shared<FakeTraceGenerator>(fakeDataDir);
     fakeGen->WriteBin<MsprofApi>(apiTrace, EventType::EVENT_TYPE_API, true, 0);

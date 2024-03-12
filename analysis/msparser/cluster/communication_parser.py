@@ -18,6 +18,7 @@ class CommunicationParser(MetaParser):
     """
     cluster communication data parser
     """
+
     def __init__(self: any, events_data) -> None:
         self.op_events_dict = events_data
         self.op_info = {}
@@ -43,7 +44,7 @@ class CommunicationParser(MetaParser):
     @staticmethod
     def is_transit_sdma_event(event) -> bool:
         if event.transport_type == StrConstant.SDMA and event.hccl_name in StrConstant.SDMA_TRANSIT_ITEMS and \
-                HcclAnalysisTool.get_transport_type(event.local_rank, event.remote_rank) != StrConstant.LOCAL:
+                HcclAnalysisTool.get_transport_type(event) != StrConstant.LOCAL:
             return True
         else:
             return False
@@ -75,12 +76,19 @@ class CommunicationParser(MetaParser):
                 op_time_dict[OpAnalysisType.TRANSIT_TIME] += \
                     HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS
             if event.rdma_type == 'RDMA_SEND_PAYLOAD':
+                saved_size = 0
+                first_payload_time = events[idx].timestamp
+                while events[idx + 1].rdma_type == 'RDMA_SEND_PAYLOAD':
+                    saved_size += events[idx].size
+                    idx += 1
+                time_elapsed = events[idx].timestamp - first_payload_time
                 wait_flag = False
                 rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(master_events, idx, rdma_transit_op_num)
-                op_time_dict[OpAnalysisType.TRANSIT_TIME] += rdma_transit_result[0]
-                idx += 1
+                op_time_dict[OpAnalysisType.TRANSIT_TIME] += (rdma_transit_result[0] + time_elapsed /
+                                                              NumberConstant.NS_TO_MS)
+                idx += rdma_transit_op_num
                 continue
-            if event.rdma_type == 'RDMA_PAYLOAD_PREPARE':
+            if event.hccl_name == StrConstant.NOTIFY_WAIT:
                 wait_time = HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS
                 if wait_flag:
                     op_time_dict[OpAnalysisType.SYNCHRONIZATION_TIME] += wait_time
@@ -110,8 +118,8 @@ class CommunicationParser(MetaParser):
             rdma_transit_op_num = NumberConstant.RDMA_WITH_BARRIER_TASK_NUM
         while idx < len(events):
             event = events[idx]
-            if event.transport_type == StrConstant.SDMA and event.hccl_name in StrConstant.SDMA_TRANSIT_ITEMS:
-                transport_type = HcclAnalysisTool.get_transport_type(event.local_rank, event.remote_rank)
+            if CommunicationParser.is_transit_sdma_event(event):
+                transport_type = HcclAnalysisTool.get_transport_type(event)
                 # do not consider local copy
                 if transport_type == StrConstant.LOCAL:
                     idx += 1
@@ -121,12 +129,19 @@ class CommunicationParser(MetaParser):
                     HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.COMMUNICATION_B_to_MB,
                     HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS)
             if event.rdma_type == 'RDMA_SEND_PAYLOAD':
-                rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(events, idx,
-                                                                          rdma_transit_op_num)
+                saved_size = 0
+                first_payload_time = events[idx].timestamp
+                while events[idx + 1].rdma_type == 'RDMA_SEND_PAYLOAD':
+                    saved_size += events[idx].size
+                    idx += 1
+                time_elapsed = events[idx].timestamp - first_payload_time
+                rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(events, idx, rdma_transit_op_num)
                 HcclAnalysisTool.update_bandwidth_record(op_bandwidth_dict, event.transport_type,
-                                                         rdma_transit_result[1],
-                                                         rdma_transit_result[0])
-                idx += 1
+                                                         rdma_transit_result[
+                                                             1] + saved_size / NumberConstant.COMMUNICATION_B_to_MB,
+                                                         rdma_transit_result[
+                                                             0] + time_elapsed / NumberConstant.NS_TO_MS)
+                idx += rdma_transit_op_num
                 continue
             idx += 1
         for transport_type in StrConstant.TRANSIT_TYPE:
@@ -175,7 +190,7 @@ class CommunicationParser(MetaParser):
                 self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO] = self.op_time_parser(events)
                 self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO][OpAnalysisType.START_TIME] = \
                     float(InfoConfReader().trans_into_local_time(
-                       min(events, key=lambda x: x.timestamp).timestamp))
+                        min(events, key=lambda x: x.timestamp).timestamp))
                 # choose all stream for Bandwidth analysis parser
                 self.op_info[hccl_name][rank_id][StrConstant.COMMNUNICATION_BANDWIDTH_INFO] \
                     = self.op_bandwidth_parser(events)

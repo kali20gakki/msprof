@@ -92,7 +92,7 @@ class CommunicationMatrixParser(MetaParser):
             if event.transport_type == StrConstant.SDMA and event.hccl_name in StrConstant.SDMA_TRANSIT_ITEMS:
                 if link_key not in link_info:
                     link_info[link_key] = [0] * len(MatrixDataType.__members__)
-                trans_type = HcclAnalysisTool.get_transport_type(event.local_rank, event.remote_rank)
+                trans_type = HcclAnalysisTool.get_transport_type(event)
                 link_info[link_key][MatrixDataType.TRANSPORT_TYPE] = HcclAnalysisTool.convert_to_enum(trans_type)
                 trans_size = HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.COMMUNICATION_B_to_MB
                 link_info[link_key][MatrixDataType.TRANS_SIZE] += trans_size
@@ -102,17 +102,24 @@ class CommunicationMatrixParser(MetaParser):
                 if trans_size > HcclAnalysisTool.MessageSizeThreshold.get(trans_type, 0):
                     link_info[link_key][MatrixDataType.LARGE_PACKET_NUM] += 1
             if event.rdma_type == 'RDMA_SEND_PAYLOAD':
+                saved_size, first_payload_time = 0, events[idx].timestamp
+                while events[idx + 1].rdma_type == 'RDMA_SEND_PAYLOAD':
+                    saved_size += events[idx].size
+                    idx += 1
+                time_elapsed = events[idx].timestamp - first_payload_time
                 if link_key not in link_info:
                     link_info[link_key] = [0] * len(MatrixDataType.__members__)
                 link_info[link_key][MatrixDataType.TRANSPORT_TYPE] =\
                     HcclAnalysisTool.convert_to_enum(event.transport_type)
                 rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(events, idx, rdma_transit_op_num)
-                link_info[link_key][MatrixDataType.TRANS_TIME] += rdma_transit_result[0]
-                link_info[link_key][MatrixDataType.TRANS_SIZE] += rdma_transit_result[1]
+                link_info[link_key][MatrixDataType.TRANS_TIME] += (rdma_transit_result[0] + time_elapsed /
+                                                                   NumberConstant.NS_TO_MS)
+                link_info[link_key][MatrixDataType.TRANS_SIZE] += (rdma_transit_result[1] + saved_size /
+                                                                   NumberConstant.COMMUNICATION_B_to_MB)
                 link_info[link_key][MatrixDataType.PACKET_NUM] += 1
                 if rdma_transit_result[1] > HcclAnalysisTool.MessageSizeThreshold.get(event.transport_type, 0):
                     link_info[link_key][MatrixDataType.LARGE_PACKET_NUM] += 1
-                idx += 1
+                idx += rdma_transit_op_num
                 continue
             idx += 1
         hccl_dict = {StrConstant.OP_NAME: hccl_name, StrConstant.LINK_INFO: link_info}
