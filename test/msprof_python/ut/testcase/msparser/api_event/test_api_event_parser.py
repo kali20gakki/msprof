@@ -44,16 +44,19 @@ class TestApiEventParser(unittest.TestCase):
             check.save()
 
     def test_parse(self):
-        ctx_data = (23130, 5000, 1113, 320736, 0, 4144667991734458, 4144667991734458, 0)
-        struct_data = struct.pack("HHIIIQQQ", *ctx_data)
+        struct_data = struct.pack('=HHIIIQQQHHIIIQQQ',
+                                  23130, 5000, 1113, 94827, 0, 3095879082697020, 3095879082697020, 0,
+                                  23130, 20000, 458759, 94815, 0, 0, 3095879086912038, 0)
         with mock.patch(NAMESPACE + '.is_valid_original_data', return_value=True), \
                 mock.patch(NAMESPACE + '.ApiEventParser.get_file_path_and_check', return_value=True), \
                 mock.patch('common_func.file_manager.check_path_valid', return_value=True), \
                 mock.patch(NAMESPACE + '.logging.info', return_value=True):
-            with mock.patch('os.path.getsize', return_value=40), \
+            with mock.patch('os.path.getsize', return_value=80), \
                     mock.patch('builtins.open', mock.mock_open(read_data=struct_data)):
                 check = ApiEventParser(self.file_list, CONFIG)
                 check.parse()
+                # 过滤一条开始时间为0的异常数据,数据按self.file_list中aging/unaging分别落盘两次
+                self.assertEqual(len(check._api_data), 2)
 
 
 if __name__ == '__main__':
