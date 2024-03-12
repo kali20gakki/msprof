@@ -22,13 +22,14 @@ namespace Viewer {
 namespace Database {
 namespace Drafts {
 namespace {
-    const uint32_t TWO_BYTES = 16;
+const uint32_t TWO_BYTES = 16;
 }
 using HashData = Analysis::Parser::Host::Cann::HashData;
 using TypeData = Analysis::Parser::Host::Cann::TypeData;
+const uint32_t stepInfoItem = 1;
 
 ApiEventDBDumper::ApiEventDBDumper(const std::string &hostFilePath) : BaseDumper<ApiEventDBDumper>(
-        hostFilePath, "ApiData")
+    hostFilePath, "ApiData")
 {
     MAKE_SHARED0_NO_OPERATION(database_, ApiEventDB);
 }
@@ -53,7 +54,14 @@ EventData ApiEventDBDumper::GenerateData(const ApiData &apiTraces)
             structType = TypeData::GetInstance().Get(trace->level, trace->type);
             id = "0";
         }
-        std::string itemId = trace->itemId == 0 ? "0": HashData::GetInstance().Get(trace->itemId);
+        std::string itemId;
+        if (trace->level == MSPROF_REPORT_MODEL_LEVEL ||
+            (trace->itemId == stepInfoItem && trace->level == MSPROF_REPORT_NODE_LEVEL)) {
+            // node层的step_info以及model层
+            itemId = std::to_string(trace->itemId);
+        } else {
+            itemId = (trace->itemId == 0) ? "0" : HashData::GetInstance().Get(trace->itemId);
+        }
         data.emplace_back(structType, id,
                           NumberMapping::Get(NumberMapping::MappingType::LEVEL, trace->level),
                           trace->threadId,

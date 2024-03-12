@@ -26,7 +26,7 @@ using SysIODataFormat = std::vector<std::tuple<uint32_t, double, uint32_t, doubl
         uint32_t, uint32_t, uint32_t, double, double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t>>;
 // deviceId, timestamp, bandwidth, rxPacketRate, rxByteRate, rxPackets, rxBytes, rxErrors, rxDropped
 // txPacketRate, txByteRate, txPackets, txBytes, txErrors, txDropped, funcId
-using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint32_t, double, double, uint32_t,
+using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, double, double, uint32_t,
         uint32_t, uint32_t, uint32_t, double, double, uint32_t, uint32_t, uint32_t, uint32_t, uint16_t>>;
 public:
     SysIOProcessor() = default;

@@ -46,7 +46,8 @@ class TablesTrainingConfig(MetaConfig):
             ('txbytes', 'REAL,null'),
             ('txerrors', 'REAL,null'),
             ('txdropped', 'REAL,null'),
-            ('funcid', 'INTEGER,null')
+            ('funcid', 'INTEGER,null'),
+            ('typeid', 'INTEGER,null')
         ],
         'RoceReportDataMap': [
             ('device_id', 'INTEGER,null'),

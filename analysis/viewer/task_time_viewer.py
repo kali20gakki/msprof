@@ -153,7 +153,7 @@ class TaskTimeViewer(BaseViewer):
                  StarsConstant().find_key_by_value(data.device_task_type),
                  InfoConfReader().trans_into_local_time(data.start_time),
                  data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
-                 {"Stream Id": data.stream_id, "Task Id": data.task_id, 'Batch Id': data.batch_id,
+                 {"Physic Stream Id": data.stream_id, "Task Id": data.task_id, 'Batch Id': data.batch_id,
                   "Subtask Id": data.context_id, "connection_id": data.connection_id, }])
         if not result_list:
             return []
@@ -174,7 +174,7 @@ class TaskTimeViewer(BaseViewer):
                  StarsConstant().find_key_by_value(data.device_task_type),
                  InfoConfReader().trans_into_local_time(data.start_time),
                  data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
-                 {"Stream Id": data.stream_id, "Task Id": data.task_id, 'Batch Id': data.batch_id,
+                 {"Physic Stream Id": data.stream_id, "Task Id": data.task_id, 'Batch Id': data.batch_id,
                   "Subtask Id": data.context_id,
                   "Subtask Type": TaskTimeViewer.get_device_task_type(data.device_task_type),
                   "connection_id": data.connection_id, }])

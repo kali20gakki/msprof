@@ -40,14 +40,14 @@ class CommunicationAnalyzer:
         self.rank_hccl_data_dict = {}
         self.export_type = export_type
 
-
     @staticmethod
     def _process_dict(dict_data: dict) -> dict:
         """Delete unnecessary fields in dict"""
         proc_dict = {}
         for op_name, op_data in dict_data.items():
             proc_dict[op_name] = op_data.get(Constant.DEFAULT_INVALID_VALUE)
-            for transport_type in [StrConstant.RDMA, StrConstant.SDMA, StrConstant.PCIE, StrConstant.HCCS]:
+            for transport_type in [StrConstant.RDMA, StrConstant.SDMA, StrConstant.PCIE, StrConstant.HCCS,
+                                   StrConstant.SIO]:
                 proc_dict[op_name].get(StrConstant.COMMNUNICATION_BANDWIDTH_INFO).get(transport_type) \
                     .pop(OpBandWidthType.BANDWIDTH_UTILIZATION)
         return proc_dict
@@ -158,4 +158,3 @@ class CommunicationAnalyzer:
         LoadInfoManager.load_info(sub_path)
         prepare_for_analyze(os.path.join(sub_path, '..'))
         self._generate_output(sub_path)
-

@@ -7,7 +7,6 @@ import os
 from collections import defaultdict
 from collections import deque
 from typing import List
-
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
@@ -22,6 +21,7 @@ from mscalculate.interface.icalculator import ICalculator
 from msconfig.config_manager import ConfigManager
 from msmodel.hccl.hccl_model import HcclViewModel
 from profiling_bean.db_dto.step_trace_dto import IterationRange
+from msparser.cluster.meta_parser import HcclAnalysisTool
 
 
 class HcclCalculator(ICalculator, MsMultiProcess):
@@ -41,44 +41,70 @@ class HcclCalculator(ICalculator, MsMultiProcess):
 
     @staticmethod
     def update_bandwidth(communication_data: List[HcclTask]):
-        i = 0
-        j = 0
-        volume = 0
-        index_cache = []
-        curr_payload_task_id = communication_data[i].task_id
+        task_dict = dict()
+        idx = 0
+        for task in communication_data:
+            op_name = task.op_name
+            if op_name not in task_dict:
+                task_dict[op_name] = {}
 
+            planeid = task.plane_id
+            if planeid not in task_dict[op_name]:
+                task_dict[op_name][planeid] = []
+            if task.op_name in task_dict:
+                task_dict[task.op_name].get(task.plane_id, []).append((task, idx))
+            idx += 1
+
+        for op_name in task_dict:
+            for planeid in task_dict[op_name]:
+                events = []
+                planeid_events = task_dict[op_name][planeid]
+                for task in planeid_events:
+                    events.append(task[0])
+                HcclCalculator.calc_bandwidth(events)
+
+                for i, _ in enumerate(planeid_events):
+                    communication_data[planeid_events[i][1]] = communication_data[planeid_events[i][1]].replace(
+                        bandwidth=events[i].bandwidth)
+
+    @staticmethod
+    def calc_bandwidth(communication_data: List[HcclTask]):
+        idx = 0
         for index, data in enumerate(communication_data):
             bandwidth = HcclCalculator._calculate_bandwidth_gb_s(data.duration, data.size)
             communication_data[index] = data.replace(bandwidth=bandwidth)
+        while idx < len(communication_data):
+            cur_task = communication_data[idx]
+            if cur_task.rdma_type == 'RDMA_SEND_PAYLOAD':
+                saved_size = 0
+                index_cache = []
+                first_payload_time = communication_data[idx].timestamp
+                while communication_data[idx + 1].rdma_type == 'RDMA_SEND_PAYLOAD':
+                    saved_size += communication_data[idx].size
+                    index_cache.append(idx)
+                    idx += 1
 
-        while i < len(communication_data):
-            while i < len(communication_data) and communication_data[i].rdma_type != StrConstant.RDMA_SEND_PAYLOAD:
-                curr_payload_task_id = communication_data[i].task_id
-                i += 1
-            if i >= len(communication_data):
-                break
-            index_cache.append(i)
-            volume += communication_data[i].size
-            j = i + 1
-            while j < len(communication_data) and communication_data[j].rdma_type != StrConstant.RDMA_PAYLOAD_ACK:
-                if communication_data[j].task_id != curr_payload_task_id:
-                    logging.error('monitor on task %d is not closed!', communication_data[j].task_id)
-                    break
-                j += 1
-                if communication_data[j].rdma_type == StrConstant.RDMA_SEND_PAYLOAD:
-                    volume += communication_data[j].size
-                    index_cache.append(j)
-            if j >= len(communication_data):
-                break
-            total_time = communication_data[j].timestamp - communication_data[i].timestamp + communication_data[
-                j].duration
-            bandwidth = (volume * NumberConstant.COMMUNICATION_B_to_GB) / (total_time * NumberConstant.NS_TO_S)
+                time_elapsed = communication_data[idx].timestamp - first_payload_time
+                if HcclAnalysisTool.is_send_or_recv_op(communication_data, idx):
+                    rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(communication_data, idx,
+                                                                              NumberConstant.RDMA_NO_BARRIER_TASK_NUM)
+                    idx_jump = NumberConstant.RDMA_NO_BARRIER_TASK_NUM
+                else:
+                    rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(communication_data, idx,
+                                                                              NumberConstant.RDMA_WITH_BARRIER_TASK_NUM)
+                    idx_jump = NumberConstant.RDMA_WITH_BARRIER_TASK_NUM
 
-            for idx in index_cache:
-                communication_data[idx] = communication_data[idx].replace(bandwidth=bandwidth)
-            index_cache.clear()
-            volume = 0
-            i = j + 1
+                payload_time = rdma_transit_result[0] + time_elapsed / NumberConstant.NS_TO_MS
+                payload_size = rdma_transit_result[1] + saved_size / NumberConstant.COMMUNICATION_B_to_MB
+                payload_bandwidth = payload_size / payload_time
+                communication_data[idx] = communication_data[idx].replace(bandwidth=payload_bandwidth)
+
+                for index in index_cache:
+                    communication_data[index] = communication_data[index].replace(bandwidth=payload_bandwidth)
+
+                idx += idx_jump
+                continue
+            idx += 1
 
     @staticmethod
     def record_first_rdma_payload_task_time(payload0_time, data):
@@ -174,8 +200,8 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                 logging.error("communication data is empty")
                 return
 
-            self.update_bandwidth(communication_data)
             self.update_op_name_by_group_name(communication_data)
+            self.update_bandwidth(communication_data)
             is_hccl_op_type_valid = self._generate_hccl_op_info(communication_data)
             if is_hccl_op_type_valid:
                 hccl_op_report_data = self._get_hccl_op_report_data(communication_data)

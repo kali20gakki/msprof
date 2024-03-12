@@ -23,7 +23,6 @@ namespace {
 struct NpuMemData {
     uint64_t ddr = 0;
     uint64_t hbm = 0;
-    uint64_t memory = 0;
     double timestamp = 0.0;
     std::string event;
 };
@@ -43,7 +42,7 @@ bool NpuMemProcessor::Run()
 NpuMemProcessor::OriDataFormat NpuMemProcessor::GetData(DBInfo &npuMemDB)
 {
     OriDataFormat oriData;
-    std::string sql{"SELECT event, ddr, hbm, timestamp, memory FROM " + npuMemDB.tableName};
+    std::string sql{"SELECT event, ddr, hbm, timestamp FROM " + npuMemDB.tableName};
     if (!npuMemDB.dbRunner->QueryData(sql, oriData)) {
         ERROR("Failed to obtain data from the % table.", npuMemDB.tableName);
     }
@@ -61,14 +60,13 @@ NpuMemProcessor::ProcessedDataFormat NpuMemProcessor::FormatData(const OriDataFo
         return processedData;
     }
     for (auto &row: oriData) {
-        std::tie(data.event, data.ddr, data.hbm, data.timestamp, data.memory) = row;
+        std::tie(data.event, data.ddr, data.hbm, data.timestamp) = row;
         HPFloat timestamp{GetTimeBySamplingTimestamp(data.timestamp, params)};
         uint16_t type = UINT16_MAX;
         if (Utils::StrToU16(type, data.event) == ANALYSIS_ERROR) {
             WARN("Converting string(event) to integer failed.");
         }
-        processedData.emplace_back(
-            type, data.ddr / BYTE_SIZE, data.hbm / BYTE_SIZE, GetLocalTime(timestamp, timeRecord).Uint64(), deviceId);
+        processedData.emplace_back(type, data.ddr, data.hbm, GetLocalTime(timestamp, timeRecord).Uint64(), deviceId);
     }
     return processedData;
 }

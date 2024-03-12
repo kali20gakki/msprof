@@ -52,6 +52,7 @@ class HcclInfoParser(DataParser, MsMultiProcess):
         HCCS = 1
         PCIE = 2
         ROCE = 3
+        SIO = 4
         INVALID_TYPE = 4294967295
 
     class TransPortType(Enum):

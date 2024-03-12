@@ -79,7 +79,7 @@ class HostToDevice:
         tmp_list = []
         for trace in traces:
             trace_args = trace.get('args', {})
-            stream_id = trace_args.get("Stream Id")
+            stream_id = trace_args.get("Physic Stream Id")
             task_id = trace_args.get("Task Id")
             batch_id = trace_args.get("Batch Id")
             context_id: int = trace_args.get("Subtask Id", Constant.DEFAULT_INVALID_VALUE)

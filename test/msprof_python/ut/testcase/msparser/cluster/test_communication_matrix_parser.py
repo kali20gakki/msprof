@@ -27,6 +27,9 @@ class Event:
         self.transport_type = transport_type
         self.timestamp = 0
         self.bandwidth = 1
+        self.rdma_type = 'INVALID_TYPE'
+        self.link_type = StrConstant.HCCS
+
 
 
 class TestCommunicationMatrixParser(unittest.TestCase):
@@ -100,6 +103,7 @@ class TestCommunicationMatrixParser(unittest.TestCase):
             events = [Event(StrConstant.RDMA, StrConstant.RDMA_SEND), Event(StrConstant.RDMA, StrConstant.RDMA_SEND),
                       Event(StrConstant.RDMA, StrConstant.NOTIFY_WAIT), Event(StrConstant.RDMA, StrConstant.RDMA_SEND),
                       Event(StrConstant.RDMA, StrConstant.NOTIFY_WAIT)]
+            events[0].rdma_type = 'RDMA_SEND_PAYLOAD'
             parser = CommunicationMatrixParser({})
             parser.parse_ops(events, 'op_name')
             self.assertEqual(parser.op_info[0][StrConstant.LINK_INFO]['0-1'][2], 1)

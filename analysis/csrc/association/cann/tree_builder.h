@@ -54,7 +54,10 @@ public:
     // 向叶子节点添加Runtime层的event
     bool AddTaskTrackEvents(std::shared_ptr<TreeNode> &rootNode,
                             std::shared_ptr<EventQueue> &events,
-                            std::vector<std::shared_ptr<TreeNode>> &leafNodes) const;
+                            std::vector<std::shared_ptr<TreeNode>> &leafNodes);
+
+    bool AddMissedDummyEvents(std::shared_ptr<TreeNode> &rootNode, std::vector<std::shared_ptr<TreeNode>> &modelNodes,
+                              std::vector<std::shared_ptr<TreeNode>> &missDummyNodes) const;
 
 private:
     // 建树核心逻辑
@@ -64,11 +67,13 @@ private:
     // 建树时记录各个Level的TreeNode
     void RecordTreeNode(const std::shared_ptr<TreeNode> &treeNode, const uint16_t &eventLevel);
     // 处理剩余的TaskTrackEvents，将其挂到rootNode上
-    void AddRemainTaskTrackEvents(std::shared_ptr<TreeNode> &rootNode, std::shared_ptr<EventQueue> &events) const;
+    void AddRemainTaskTrackEvents(std::shared_ptr<EventQueue> &events);
     std::shared_ptr<TreeNode> GenerateRoot();
 private:
     // 建树时记录叶子节点，用于在其上添加TaskTrack
     std::vector<std::shared_ptr<TreeNode>> leafNodes_;
+    // 记录没有挂上的dummy节点，做二次校验
+    std::vector<std::shared_ptr<TreeNode>> missDummyNodes_;
     // 用于建树的Model、Node、HCCL Level的Api Type Events
     std::shared_ptr<EventQueue> kernelEvents_ = nullptr;
     // 包含各个类型的events

@@ -61,28 +61,6 @@ class TestHcclAnalysisTool(unittest.TestCase):
         ret = HcclAnalysisTool.get_rdma_time_info(events, 0, 5)
         self.assertEqual(ret, [1, 1])
 
-    def test_get_transport_type_hccs(self):
-        ret = HcclAnalysisTool.get_transport_type(1, 0)
-        self.assertEqual(ret, StrConstant.HCCS)
-
-    def test_get_transport_type_pcie(self):
-        ret = HcclAnalysisTool.get_transport_type(5, 0)
-        self.assertEqual(ret, StrConstant.PCIE)
-
-    def test_get_transport_type_hccs_chip_v4(self):
-        ChipManager().chip_id = ChipModel.CHIP_V4_1_0
-        ret = HcclAnalysisTool.get_transport_type(5, 0)
-        self.assertEqual(ret, StrConstant.HCCS)
-        ChipManager().chip_id = ChipModel.CHIP_V1_1_0
-
-    def test_get_transport_type_local1(self):
-        ret = HcclAnalysisTool.get_transport_type(0, 0)
-        self.assertEqual(ret, StrConstant.LOCAL)
-
-    def test_get_transport_type_local2(self):
-        ret = HcclAnalysisTool.get_transport_type(488546486, 0)
-        self.assertEqual(ret, StrConstant.LOCAL)
-
 
 class TestCommunicationParser(unittest.TestCase):
     def test_run(self):
@@ -108,6 +86,8 @@ class TestCommunicationParser(unittest.TestCase):
 
     def test_op_time_parser(self):
         LOCAL = 'LOCAL'
+        ROCE = 'ROCE'
+        Notify_Wait = 'Notify_Wait'
         # test ProfException when master_events is empty
         err_hccl_data_ffts = [
             HcclTask(plane_id=0, hccl_name="0", duration=0, timestamp=0,
@@ -123,31 +103,33 @@ class TestCommunicationParser(unittest.TestCase):
         events = [
             HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='Memcpy', rdma_type='INVALID_TYPE',
                      timestamp=63888072593921.055, duration=319959.1875, transport_type='SDMA', task_id=1,
-                     size=209715200, bandwidth=0.65544359466158),
+                     size=209715200, bandwidth=0.65544359466158, link_type='ON_CHIP'),
             HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='RDMASend', rdma_type='RDMA_SEND_NOTIFY',
                      timestamp=63888072915640.34, duration=320.0234375, transport_type='RDMA', task_id=1, size=4,
-                     bandwidth=0.00001249908454),
-            HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='Notify_Wait', rdma_type='RDMA_PAYLOAD_PREPARE',
-                     timestamp=63888072917700.47, duration=20, transport_type=LOCAL, task_id=1, size=0, bandwidth=0),
+                     bandwidth=0.00001249908454, link_type=ROCE),
+            HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name=Notify_Wait, rdma_type='RDMA_PAYLOAD_PREPARE',
+                     timestamp=63888072917700.47, duration=20, transport_type=LOCAL, task_id=1, size=0, bandwidth=0,
+                     link_type='INVALID_TYPE'),
             HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='RDMASend', rdma_type='RDMA_SEND_PAYLOAD',
                      timestamp=63888072919960.61, duration=320.015625, transport_type='RDMA', task_id=1, size=104857600,
-                     bandwidth=24.28991694888519),
+                     bandwidth=24.28991694888519, link_type=ROCE),
             HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='RDMASend', rdma_type='RDMA_SEND_NOTIFY',
                      timestamp=63888072921720.71, duration=320.0234375, transport_type='RDMA', task_id=1, size=4,
-                     bandwidth=0.00001249908454),
-            HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='Notify_Wait', rdma_type='RDMA_PAYLOAD_CHECK',
+                     bandwidth=0.00001249908454, link_type=ROCE),
+            HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name=Notify_Wait, rdma_type='RDMA_PAYLOAD_CHECK',
                      timestamp=63888072923480.82, duration=4310758.46875, transport_type=LOCAL, task_id=1, size=0,
-                     bandwidth=0),
+                     bandwidth=0, link_type='INVALID_TYPE'),
             HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='RDMASend', rdma_type='RDMA_SEND_NOTIFY',
                      timestamp=63888077234799.32, duration=320.0234375, transport_type='RDMA', task_id=1, size=4,
-                     bandwidth=0.00001249908454),
-            HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='Notify_Wait', rdma_type='RDMA_PAYLOAD_ACK',
+                     bandwidth=0.00001249908454, link_type=ROCE),
+            HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name=Notify_Wait, rdma_type='RDMA_PAYLOAD_ACK',
                      timestamp=63888077236859.445, duration=20, transport_type=LOCAL, task_id=1, size=0,
-                     bandwidth=-1),
+                     bandwidth=-1, link_type='INVALID_TYPE'),
             HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='Memcpy', rdma_type='INVALID_TYPE',
                      timestamp=63888077238999.58, duration=160429.6171875, transport_type='SDMA', task_id=1,
-                     size=104857600, bandwidth=0.65360500036255),
+                     size=104857600, bandwidth=0.65360500036255, link_type='ON_CHIP'),
         ]
+
         op_time_dict = CommunicationParser({}).op_time_parser(events)
         self.assertAlmostEqual(op_time_dict["Transit Time(ms)"], 4.3169188359375)
         self.assertAlmostEqual(op_time_dict["Wait Time(ms)"], 0.00002)
@@ -160,10 +142,18 @@ class TestCommunicationParser(unittest.TestCase):
         RDMA = 'RDMA'
         SDMA = 'SDMA'
         LOCAL = 'LOCAL'
+        ROCE = 'ROCE'
         Notify_Wait = 'Notify_Wait'
         RDMASEND = 'RDMASend'
         OP_NAME = 'hcom_allReduce__721_0_1'
         RDMA_SEND_NOTIFY = 'RDMA_SEND_NOTIFY'
+        Bandwidth_GB_S = 'Bandwidth(GB/s)'
+        Bandwidth_Utilization = 'Bandwidth(Utilization)'
+        Large_Packet_Ratio = 'Large Packet Ratio'
+        Size_Distribution = 'Size Distribution'
+        Transit_Size_MB = 'Transit Size(MB)'
+        Transit_Time_ms = 'Transit Time(ms)'
+        INVALID_TYPE = 'INVALID_TYPE'
         standard_bandwidth = {
             StrConstant.RDMA: 12.5,
             StrConstant.HCCS: 18,
@@ -171,14 +161,30 @@ class TestCommunicationParser(unittest.TestCase):
         }
         expect_bandwidth_dict = {
             'HCCS': {
-                'Bandwidth(GB/s)': 0,
-                'Bandwidth(Utilization)': 0.0,
-                'Large Packet Ratio': 0,
-                'Size Distribution': defaultdict(lambda: [0, 0]),
-                'Transit Size(MB)': 0,
-                'Transit Time(ms)': 0
+                Bandwidth_GB_S: 0,
+                Bandwidth_Utilization: 0.0,
+                Large_Packet_Ratio: 0,
+                Size_Distribution: defaultdict(lambda: [0, 0]),
+                Transit_Size_MB: 0,
+                Transit_Time_ms: 0
             },
             'PCIE': {
+                Bandwidth_GB_S: 0,
+                Bandwidth_Utilization: 0.0,
+                Large_Packet_Ratio: 0,
+                Size_Distribution: defaultdict(lambda: [0, 0]),
+                Transit_Size_MB: 0,
+                Transit_Time_ms: 0
+            },
+            'SIO': {
+                Bandwidth_GB_S: 0,
+                Bandwidth_Utilization: 0.0,
+                Large_Packet_Ratio: 0,
+                Size_Distribution: defaultdict(lambda: [0, 0]),
+                Transit_Size_MB: 0,
+                Transit_Time_ms: 0
+            },
+            'SIO': {
                 'Bandwidth(GB/s)': 0,
                 'Bandwidth(Utilization)': 0.0,
                 'Large Packet Ratio': 0,
@@ -187,50 +193,51 @@ class TestCommunicationParser(unittest.TestCase):
                 'Transit Time(ms)': 0
             },
             'RDMA': {
-                'Bandwidth(GB/s)': 24.2899,
-                'Bandwidth(Utilization)': 1.9432,
-                'Large Packet Ratio': 1.0,
-                'Size Distribution': {104.8576: [1, 4.3169188359375]},
-                'Transit Size(MB)': 104.8576,
-                'Transit Time(ms)': 4.3169188359375
+                Bandwidth_GB_S: 24.2899,
+                Bandwidth_Utilization: 1.9432,
+                Large_Packet_Ratio: 1.0,
+                Size_Distribution: {104.8576: [1, 4.3169188359375]},
+                Transit_Size_MB: 104.8576,
+                Transit_Time_ms: 4.3169188359375
             },
             SDMA: {
-                'Bandwidth(GB/s)': 0,
-                'Bandwidth(Utilization)': 0.0,
-                'Large Packet Ratio': 0,
-                'Size Distribution': defaultdict(lambda: [0, 0]),
-                'Transit Size(MB)': 0,
-                'Transit Time(ms)': 0
+                Bandwidth_GB_S: 0,
+                Bandwidth_Utilization: 0.0,
+                Large_Packet_Ratio: 0,
+                Size_Distribution: defaultdict(lambda: [0, 0]),
+                Transit_Size_MB: 0,
+                Transit_Time_ms: 0
             },
         }
 
         events = [
-            HcclTask(op_name=OP_NAME, hccl_name='Memcpy', rdma_type='INVALID_TYPE',
-                     timestamp=63888072593921.055, duration=319959.1875, transport_type=SDMA, task_id=1,
-                     size=209715200, bandwidth=0.65544359466158),
-            HcclTask(op_name=OP_NAME, hccl_name=RDMASEND, rdma_type=RDMA_SEND_NOTIFY,
-                     timestamp=63888072915640.34, duration=320.0234375, transport_type=RDMA, task_id=1, size=4,
-                     bandwidth=0.00001249908454),
-            HcclTask(op_name=OP_NAME, hccl_name=Notify_Wait, rdma_type='RDMA_PAYLOAD_PREPARE',
-                     timestamp=63888072917700.47, duration=20, transport_type=LOCAL, task_id=1, size=0, bandwidth=0),
-            HcclTask(op_name=OP_NAME, hccl_name=RDMASEND, rdma_type='RDMA_SEND_PAYLOAD',
-                     timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1, size=104857600,
-                     bandwidth=24.28991694888519),
-            HcclTask(op_name=OP_NAME, hccl_name=RDMASEND, rdma_type=RDMA_SEND_NOTIFY,
-                     timestamp=63888072921720.71, duration=320.0234375, transport_type=RDMA, task_id=1, size=4,
-                     bandwidth=0.00001249908454),
-            HcclTask(op_name=OP_NAME, hccl_name=Notify_Wait, rdma_type='RDMA_PAYLOAD_CHECK',
+            HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='Memcpy', rdma_type=INVALID_TYPE,
+                     timestamp=63888072593921.055, duration=319959.1875, transport_type='SDMA', task_id=1,
+                     size=209715200, bandwidth=0.65544359466158, link_type='ON_CHIP'),
+            HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='RDMASend', rdma_type='RDMA_SEND_NOTIFY',
+                     timestamp=63888072915640.34, duration=320.0234375, transport_type='RDMA', task_id=1, size=4,
+                     bandwidth=0.00001249908454, link_type=ROCE),
+            HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name=Notify_Wait, rdma_type='RDMA_PAYLOAD_PREPARE',
+                     timestamp=63888072917700.47, duration=20, transport_type=LOCAL, task_id=1, size=0, bandwidth=0,
+                     link_type=INVALID_TYPE),
+            HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='RDMASend', rdma_type='RDMA_SEND_PAYLOAD',
+                     timestamp=63888072919960.61, duration=320.015625, transport_type='RDMA', task_id=1, size=104857600,
+                     bandwidth=24.28991694888519, link_type=ROCE),
+            HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='RDMASend', rdma_type='RDMA_SEND_NOTIFY',
+                     timestamp=63888072921720.71, duration=320.0234375, transport_type='RDMA', task_id=1, size=4,
+                     bandwidth=0.00001249908454, link_type=ROCE),
+            HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name=Notify_Wait, rdma_type='RDMA_PAYLOAD_CHECK',
                      timestamp=63888072923480.82, duration=4310758.46875, transport_type=LOCAL, task_id=1, size=0,
-                     bandwidth=0),
-            HcclTask(op_name=OP_NAME, hccl_name=RDMASEND, rdma_type=RDMA_SEND_NOTIFY,
-                     timestamp=63888077234799.32, duration=320.0234375, transport_type=RDMA, task_id=1, size=4,
-                     bandwidth=0.00001249908454),
-            HcclTask(op_name=OP_NAME, hccl_name=Notify_Wait, rdma_type='RDMA_PAYLOAD_ACK',
+                     bandwidth=0, link_type=INVALID_TYPE),
+            HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='RDMASend', rdma_type='RDMA_SEND_NOTIFY',
+                     timestamp=63888077234799.32, duration=320.0234375, transport_type='RDMA', task_id=1, size=4,
+                     bandwidth=0.00001249908454, link_type=ROCE),
+            HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name=Notify_Wait, rdma_type='RDMA_PAYLOAD_ACK',
                      timestamp=63888077236859.445, duration=20, transport_type=LOCAL, task_id=1, size=0,
-                     bandwidth=-1),
-            HcclTask(op_name=OP_NAME, hccl_name='Memcpy', rdma_type='INVALID_TYPE',
-                     timestamp=63888077238999.58, duration=160429.6171875, transport_type=SDMA, task_id=1,
-                     size=104857600, bandwidth=0.65360500036255),
+                     bandwidth=-1, link_type=INVALID_TYPE),
+            HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='Memcpy', rdma_type=INVALID_TYPE,
+                     timestamp=63888077238999.58, duration=160429.6171875, transport_type='SDMA', task_id=1,
+                     size=104857600, bandwidth=0.65360500036255, link_type='ON_CHIP'),
         ]
         with mock.patch("msparser.cluster.meta_parser.HcclAnalysisTool.get_standard_bandwidth",
                         return_value=standard_bandwidth):

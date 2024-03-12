@@ -53,6 +53,7 @@ from viewer.get_trace_timeline import get_aicore_utilization_timeline
 from viewer.get_trace_timeline import get_dvpp_timeline
 from viewer.get_trace_timeline import get_hccs_timeline
 from viewer.get_trace_timeline import get_network_timeline
+from viewer.get_trace_timeline import get_network_type
 from viewer.get_trace_timeline import get_pcie_timeline
 from viewer.hardware_info_report import get_ddr_data
 from viewer.hardware_info_report import get_llc_bandwidth
@@ -71,9 +72,9 @@ from viewer.pipeline_overlap_viewer import PipelineOverlapViewer
 from viewer.runtime_report import get_task_scheduler_data
 from viewer.stars.acc_pmu_viewer import AccPmuViewer
 from viewer.stars.low_power_viewer import LowPowerViewer
+from viewer.stars.sio_viewer import SioViewer
 from viewer.stars.stars_chip_trans_view import StarsChipTransView
 from viewer.stars.stars_soc_view import StarsSocView
-from viewer.task_queue_viewer import TaskQueueViewer
 from viewer.task_time_viewer import TaskTimeViewer
 from viewer.training.step_trace_viewer import StepTraceViewer
 from viewer.training.task_op_viewer import TaskOpViewer
@@ -313,9 +314,13 @@ class MsProfExportDataUtils:
                                                params.get(StrConstant.PARAM_DEVICE_ID),
                                                NumberConstant.DEFAULT_START_TIME,
                                                NumberConstant.DEFAULT_END_TIME, params.get(StrConstant.DATA_TYPE))
+            if roce_result[0].get('args', {}).get('name', "") == "ROH":
+                params[StrConstant.PARAM_DATA_TYPE] = "roh"
             return roce_result
-
         data_type = params.get(StrConstant.PARAM_DATA_TYPE)
+        network_type = get_network_type(params.get(StrConstant.PARAM_RESULT_DIR))
+        if network_type == "ROH":
+            params[StrConstant.PARAM_DATA_TYPE] = "roh"
         db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR),
                                           configs.get(StrConstant.CONFIG_DB).format(
                                               params.get(StrConstant.PARAM_DEVICE_ID)))
@@ -534,10 +539,6 @@ class MsProfExportDataUtils:
         return MsprofTxViewer(configs, params).get_timeline_data()
 
     @staticmethod
-    def _get_pytorch_operator_data(configs: dict, params: dict) -> any:
-        return MsprofTxViewer(configs, params).get_pytorch_operator_data()
-
-    @staticmethod
     def _get_stars_soc_data(configs: dict, params: dict) -> any:
         return StarsSocView(configs, params).get_timeline_data()
 
@@ -584,6 +585,10 @@ class MsProfExportDataUtils:
     def _get_api_data(configs: dict, params: dict) -> any:
         return ApiViewer(configs, params).get_timeline_data()
 
+    @staticmethod
+    def _get_sio_data(configs: dict, params: dict) -> any:
+        return SioViewer(configs, params).get_timeline_data()
+
     @classmethod
     def export_data(cls: any, params: dict) -> str:
         """
@@ -607,7 +612,7 @@ class MsProfExportDataUtils:
                 return MsprofDataStorage().export_summary_data(headers, data, params)
             timeline_data = handler(configs, params)
             cls.add_timeline_data(params, timeline_data)
-            skip_list = ["event", "api"]
+            skip_list = ["event", "api", "sio"]
             if params.get(StrConstant.PARAM_DATA_TYPE) in skip_list:
                 return json.dumps({"status": NumberConstant.SKIP})
             return MsprofDataStorage().export_timeline_data_to_json(timeline_data, params)
@@ -700,7 +705,3 @@ class MsProfExportDataUtils:
         return get_core_sample_data(params.get(StrConstant.PARAM_RESULT_DIR),
                                     configs.get(StrConstant.CONFIG_DB),
                                     params.get(StrConstant.PARAM_DEVICE_ID), params)
-
-    @classmethod
-    def _get_task_queue_timeline(cls: any, configs: dict, params: dict) -> any:
-        return TaskQueueViewer(params).get_task_queue_data()

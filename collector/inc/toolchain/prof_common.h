@@ -146,7 +146,7 @@ struct MsprofHcclInfo {
     uint64_t dataSize; // bytes
     uint32_t opType; // {0: sum, 1: mul, 2: max, 3: min}
     uint32_t dataType; // data type {0: INT8, 1: INT16, 2: INT32, 3: FP16, 4:FP32, 5:INT64, 6:UINT64}
-    uint32_t linkType; // link type {0: 'OnChip', 1: 'HCCS', 2: 'PCIe', 3: 'RoCE'}
+    uint32_t linkType; // link type {0: 'OnChip', 1: 'HCCS', 2: 'PCIe', 3: 'RoCE', 4: 'SIO'}
     uint32_t transportType; // transport type {0: SDMA, 1: RDMA, 2:LOCAL}
     uint32_t rdmaType; // RDMA type {0: RDMASendNotify, 1:RDMASendPayload}
     uint32_t reserve2;
@@ -221,8 +221,10 @@ const uint32_t MSPROF_REPORT_ACL_GRAPH_BASE_TYPE         = 0x0A0000U;
 const uint32_t MSPROF_REPORT_MODEL_GRAPH_ID_MAP_TYPE    = 0;  /* type info: graph_id_map */
 const uint32_t MSPROF_REPORT_MODEL_EXECUTE_TYPE         = 1;  /* type info: execute */
 const uint32_t MSPROF_REPORT_MODEL_LOAD_TYPE            = 2;  /* type info: load */
-const uint32_t MSPROF_REPORT_MODEL_EXEOM_TYPE           = 3;  /* type info: exeom */
+const uint32_t MSPROF_REPORT_MODEL_INPUT_COPY_TYPE      = 3;  /* type info: IntputCopy */
+const uint32_t MSPROF_REPORT_MODEL_OUTPUT_COPY_TYPE     = 4;  /* type info: OutputCopy */
 const uint32_t MSPROF_REPORT_MODEL_LOGIC_STREAM_TYPE    = 7;  /* type info: logic_stream_info */
+const uint32_t MSPROF_REPORT_MODEL_EXEOM_TYPE           = 8;  /* type info: exeom */
 const uint32_t MSPROF_REPORT_MODEL_UDF_BASE_TYPE        = 0x010000U;  /* type info: udf_info */
 const uint32_t MSPROF_REPORT_MODEL_AICPU_BASE_TYPE      = 0x020000U;  /* type info: aicpu */
 

@@ -48,7 +48,8 @@ class HcclAnalysisTool:
     MessageSizeThreshold = {
         StrConstant.RDMA: NumberConstant.RDMA_MESSAGE_SIZE_THRESHOLD,
         StrConstant.HCCS: NumberConstant.HCCS_MESSAGE_SIZE_THRESHOLD,
-        StrConstant.PCIE: NumberConstant.PCIE_MESSAGE_SIZE_THRESHOLD
+        StrConstant.PCIE: NumberConstant.PCIE_MESSAGE_SIZE_THRESHOLD,
+        StrConstant.SIO: NumberConstant.SIO_MESSAGE_SIZE_THRESHOLD,
     }
 
     @classmethod
@@ -79,8 +80,10 @@ class HcclAnalysisTool:
     @classmethod
     def get_rdma_time_info(cls: any, events: list, idx: int, rdma_transit_op_num: int) -> list:
         transit_size = HcclAnalysisTool.get_value(events[idx].size, 'size') / NumberConstant.COMMUNICATION_B_to_MB
-        transit_time = HcclAnalysisTool.get_value(((events[idx].size * NumberConstant.COMMUNICATION_B_to_GB) /
-                                                   events[idx].bandwidth) * NumberConstant.S_TO_MS, 'duration')
+        transit_time = HcclAnalysisTool.get_value(events[idx + rdma_transit_op_num - 1].duration +
+                                                  events[idx + rdma_transit_op_num - 1].timestamp -
+                                                  events[idx].timestamp,
+                                                  'duration') / NumberConstant.NS_TO_MS
         return [transit_time, transit_size]
 
     @classmethod
@@ -102,14 +105,11 @@ class HcclAnalysisTool:
         return dic
 
     @classmethod
-    def get_transport_type(cls: any, src_id: int, dst_id: int):
-        if src_id == dst_id or \
-                src_id // NumberConstant.RANK_NUM_PER_SERVER != dst_id // NumberConstant.RANK_NUM_PER_SERVER:
-            return StrConstant.LOCAL
-        if not ChipManager().is_chip_v4() and \
-                src_id // NumberConstant.RANK_NUM_PER_OS != dst_id // NumberConstant.RANK_NUM_PER_OS:
-            return StrConstant.PCIE
-        return StrConstant.HCCS
+    def get_transport_type(cls: any, event):
+        """
+        只适用于transport_type为SDMA且event.name为"Memcpy", "Reduce_Inline"
+        """
+        return StrConstant.LOCAL if event.link_type == StrConstant.ON_CHIP else event.link_type
 
     @classmethod
     def update_time_ratio(cls: any, op_time_dict: dict, op_name: str) -> None:
@@ -138,10 +138,12 @@ class HcclAnalysisTool:
     def combine_sdma_info(cls: any, bandwidth_dict: dict) -> None:
         bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_SIZE_MB] = \
             bandwidth_dict[StrConstant.HCCS][OpBandWidthType.TRANSIT_SIZE_MB] + \
-            bandwidth_dict[StrConstant.PCIE][OpBandWidthType.TRANSIT_SIZE_MB]
+            bandwidth_dict[StrConstant.PCIE][OpBandWidthType.TRANSIT_SIZE_MB] + \
+            bandwidth_dict[StrConstant.SIO][OpBandWidthType.TRANSIT_SIZE_MB]
         bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_TIME_MS] = \
             bandwidth_dict[StrConstant.HCCS][OpBandWidthType.TRANSIT_TIME_MS] + \
-            bandwidth_dict[StrConstant.PCIE][OpBandWidthType.TRANSIT_TIME_MS]
+            bandwidth_dict[StrConstant.PCIE][OpBandWidthType.TRANSIT_TIME_MS] + \
+            bandwidth_dict[StrConstant.SIO][OpBandWidthType.TRANSIT_TIME_MS]
         if bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_TIME_MS] != 0:
             bandwidth_dict[StrConstant.SDMA][OpBandWidthType.BANDWIDTH_GB_S] = round(
                 (bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_SIZE_MB] /
@@ -199,6 +201,8 @@ class HcclAnalysisTool:
             return TransportType.RDMA
         if trans_type == StrConstant.LOCAL:
             return TransportType.LOCAL
+        if trans_type == StrConstant.SIO:
+            return TransportType.SIO
         logging.warning('trans_type is not normal, which is', trans_type)
         return -1
 
@@ -212,6 +216,7 @@ class HcclAnalysisTool:
             return StrConstant.RDMA
         if trans_data_type == TransportType.LOCAL:
             return StrConstant.LOCAL
+        if trans_data_type == TransportType.SIO:
+            return StrConstant.SIO
         logging.warning('trans_data_type is not normal, which is', trans_data_type)
         return 'Unknown transport type'
-
