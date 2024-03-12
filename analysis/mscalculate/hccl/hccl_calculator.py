@@ -255,7 +255,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
 
             while task_queue and task_queue[0].host_timestamp <= (op.timestamp + op.duration):
                 task = task_queue.popleft()
-                key = f'{task.stream_id}-{task.task_id}-{task.context_id}'
+                key = f'{task.stream_id}-{task.task_id}-{task.context_id}-{task.batch_id}'
                 count = 1
                 if key in hccl_op_with_task:
                     count = hccl_op_with_task_index.get(key, 1) + 1

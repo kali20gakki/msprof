@@ -86,6 +86,17 @@ class ApiEventParser(DataParser, MsMultiProcess):
         reserve = struct.unpack("=Q", data[24:32])
         return reserve[0] == self.CHECK_RESERVE
 
+    def _decode_data(self, data: bytes):
+        if self._check_reserve_num(data):
+            self._event_data.append((self.connection_id, EventDataBean.decode(data)))
+        else:
+            api_data = ApiDataBean.decode(data)
+            if api_data.start == 0:
+                logging.info("The api data's start time is 0, it will be filtered.")
+                return
+            self._api_data.append((self.connection_id, api_data))
+        self.connection_id += 1
+
     def _read_data(self: any, file_path: str, offset: OffsetCalculator) -> None:
         file_size = os.path.getsize(file_path)
         if not file_size:
@@ -96,8 +107,4 @@ class ApiEventParser(DataParser, MsMultiProcess):
             for _index in range(file_size // struct_size):
                 data = _all_data[_index * struct_size:(_index + 1) * struct_size]
                 self.check_magic_num(data)
-                if self._check_reserve_num(data):
-                    self._event_data.append((self.connection_id, EventDataBean.decode(data)))
-                else:
-                    self._api_data.append((self.connection_id, ApiDataBean.decode(data)))
-                self.connection_id += 1
+                self._decode_data(data)
