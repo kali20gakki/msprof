@@ -956,3 +956,19 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, IsValidAnalyzeRuleSwitch)
     ret = ParamValidation::instance()->IsValidAnalyzeRuleSwitch("rule", "communication,xxxx");
     EXPECT_EQ(false, ret);
 }
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST,
+    TestCheckCollectOutputIsValidShouldReturnFalseWhenPathHasEscapeChar)
+{
+    using namespace analysis::dvvp::common::validation;
+    const std::string path = "/test/profiling\n/a";
+    EXPECT_FALSE(ParamValidation::instance()->CheckCollectOutputIsValid(path));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST,
+    TestCheckAnalysisOutputIsPathValidShouldReturnFalseWhenPathHasEscapeChar)
+{
+    using namespace analysis::dvvp::common::validation;
+    const std::string path = "/test/profiling\n/a";
+    EXPECT_FALSE(ParamValidation::instance()->CheckAnalysisOutputIsPathValid(path));
+}
