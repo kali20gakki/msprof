@@ -569,6 +569,8 @@ static void PrintOp()
 void ArgsManager::PrintHelp()
 {
     Init();
+    std::cout << std::endl << "msprof (MindStudio Profiler) is part of performance analysis tools "
+                              "powered by MindStudio" << std::endl;
     std::cout << std::endl << "Usage:" << std::endl;
     std::cout << "      ./msprof [--options]" << std::endl << std::endl;
     PrintOp();
