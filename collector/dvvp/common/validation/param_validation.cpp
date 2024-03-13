@@ -51,9 +51,8 @@ const int MAX_EVENT_SIZE = 8;  // every batch event size
 const int MAX_CORE_ID_SIZE = 50;  // ai core or aiv core id size
 const int BASE_HEX = 16;  // hex to int
 const std::unordered_map<std::string, std::string> INVALID_CHAR = {
-    {"\n", "\\n"}, {"\f", "\\f"}, {"\r", "\\r"}, {"\b", "\\b"}, {"\t", "\\t"}, {"\v", "\\v"},
-    {"\u000D", "\\u000D"}, {"\u000A", "\\u000A"}, {"\u000C", "\\u000C"}, {"\u000B", "\\u000B"},
-    {"\u0009", "\\u0009"}, {"\u0008", "\\u0008"}, {"\u007F", "\\u007F"}
+    {"\n", "\\n"}, {"\f", "\\f"}, {"\r", "\\r"}, {"\b", "\\b"},
+    {"\t", "\\t"}, {"\v", "\\v"}, {"\u007F", "\\u007F"}
 };
 
 namespace {

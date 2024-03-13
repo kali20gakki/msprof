@@ -71,6 +71,29 @@ TEST_F(FileUTest, TestSize)
     EXPECT_EQ(0, File::Size("test_file"));
 }
 
+TEST_F(FileUTest, TestCheckDir)
+{
+    // 测试空路径
+    EXPECT_FALSE(File::CheckDir(""));
+    // 测试路径过长
+    const int pathDepth = 350;
+    std::vector<std::string> paths(pathDepth, "test");
+    std::string path = File::PathJoin(paths);
+    EXPECT_FALSE(File::CheckDir(path));
+    // 测试路径包含无效字符
+    EXPECT_FALSE(File::CheckDir("/test/test\ndir/"));
+    // 测试不存在的目录
+    EXPECT_FALSE(File::CheckDir("test_dir"));
+    // 测试软链接
+    EXPECT_TRUE(File::CreateDir("test_dir"));
+    EXPECT_EQ(0, symlink("test_dir", "test_dir_soft_link"));
+    EXPECT_FALSE(File::CheckDir("test_dir_soft_link"));
+    // 测试正常情况
+    EXPECT_TRUE(File::CheckDir("test_dir"));
+    EXPECT_TRUE(File::RemoveDir("test_dir", 0));
+    EXPECT_TRUE(File::DeleteFile("test_dir_soft_link"));
+}
+
 TEST_F(FileUTest, TestCreateDir)
 {
     EXPECT_FALSE(File::CreateDir(""));

@@ -28,6 +28,10 @@ const uint16_t MAX_PATH_SIZE = 1024;
 const uint32_t MAX_SUB_FILES_SIZE = 100000;
 constexpr int DIR_CHECK_MODE = R_OK | W_OK | X_OK; // rwx
 const int MAX_DEPTH = 20;
+const std::unordered_map<std::string, std::string> INVALID_CHAR = {
+    {"\n", "\\n"}, {"\f", "\\f"}, {"\r", "\\r"}, {"\b", "\\b"},
+    {"\t", "\\t"}, {"\v", "\\v"}, {"\u007F", "\\u007F"}
+};
 }
 
 bool File::Chmod(const std::string &path, const mode_t &mode)
@@ -102,6 +106,37 @@ uint64_t File::Size(const std::string &filePath)
         return 0;
     }
     return fileStat.st_size;
+}
+
+bool File::CheckDir(const std::string &path)
+{
+    if (path.empty()) {
+        ERROR("The directory path is empty.");
+        return false;
+    }
+    if (path.size() > MAX_PATH_SIZE) {
+        ERROR("The length of path '%' > %.", path, MAX_PATH_SIZE);
+        return false;
+    }
+    for (auto &item: INVALID_CHAR) {
+        if (path.find(item.first) != std::string::npos) {
+            ERROR("The path contains invalid character: %s.", item.second);
+            return false;
+        }
+    }
+    if (!File::Exist(path)) {
+        ERROR("The directory path '%' not exists.", path);
+        return false;
+    }
+    if (IsSoftLink(path)) {
+        ERROR("The path '%' is soft link.", path);
+        return false;
+    }
+    if (!File::Access(path, DIR_CHECK_MODE)) {
+        ERROR("The path '%' have no rwx access.", path);
+        return false;
+    }
+    return true;
 }
 
 bool File::CreateDir(const std::string &path, const mode_t &mode)
