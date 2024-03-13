@@ -24,7 +24,7 @@ class TestApiDataModel(unittest.TestCase):
     def test_reformat_data(self):
         bin_data = struct.pack('=HHIIIQQQHHIIIQQQHHIIIQQQ',
                                23130, 5000, 1113, 94827, 0, 3095879082697020, 3095879082697020, 0,
-                               23130, 20000, 458759, 94815, 0, 0, 3095879086912038, 0,
+                               23130, 20000, 458759, 94815, 0, 3095879086911896, 3095879086912038, 0,
                                23130, 5000, 1002, 94815, 0, 3095879519081144, 3095879519087172, 0)
         connection_ids = [0, 1, 2]
         data_list = [
