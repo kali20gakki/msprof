@@ -10,6 +10,7 @@ from common_func.msprof_common import add_all_file_complete
 from common_func.msprof_common import analyze_collect_data
 from common_func.msprof_common import check_collection_dir
 from common_func.msprof_common import check_path_valid
+from common_func.msprof_common import check_path_char_valid
 from common_func.msprof_common import get_info_by_key
 from common_func.msprof_common import get_path_dir
 from common_func.msprof_common import get_valid_sub_path
@@ -158,6 +159,13 @@ def test_check_collection_dir():
                 mock.patch(NAMESPACE + '.error'):
             ret = check_collection_dir(collect_path)
             unittest.TestCase().assertFalse(ret)
+
+
+def test_check_path_char_valid_should_throw_exception_when_path_contains_escape_character():
+    with pytest.raises(ProfException) as err:
+        path = "/test/test_path\n11/"
+        check_path_char_valid(path)
+    unittest.TestCase().assertEqual("The path contains invalid character: '\\n'.", err.value.message)
 
 
 if __name__ == '__main__':

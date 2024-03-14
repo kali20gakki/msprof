@@ -110,6 +110,17 @@ def check_path_valid(path: str, is_output: bool) -> None:
     check_dir_writable(path)
 
 
+def check_path_char_valid(path: str) -> None:
+    invalid_char = {
+        "\n": "\\n", "\f": "\\f", "\r": "\\r", "\b": "\\b", "\t": "\\t", "\v": "\\v",
+        "\u007F": "\\u007F",
+    }
+    for key, value in invalid_char.items():
+        if key in path:
+            message = f"The path contains invalid character: '{value}'."
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
+
+
 def prepare_for_parse(output_path: str) -> None:
     """
     create data and corresponding directories

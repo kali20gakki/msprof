@@ -216,7 +216,7 @@ class MsprofOutputSummary:
             if re.match(self.PROF_RULE, file_name):
                 prof_rule_name = file_name.split(".")[0] + "_" + FileSliceHelper.get_current_time_str()
                 prof_rule_path = os.path.join(self._output, PathManager.MINDSTUDIO_PROFILER_OUTPUT,
-                                                prof_rule_name + file_suffix)
+                                              prof_rule_name + file_suffix)
                 shutil.copy(os.path.join(summary_path, file_name), prof_rule_path)
                 continue
             # host 和device 的 csv合并, 只拷贝prof_rule_*.json
@@ -245,15 +245,11 @@ class MsprofOutputSummary:
             summary_file_set.update(self._get_summary_file_name(sub_path))
             self._copy_summary_data(sub_dir, StrConstant.FILE_SUFFIX_JSON, True)
 
+        error = "Output: An exception occurs when multiple processes process the summary file. The error is %s"
         pool = multiprocessing.Pool(processes=4)
         for summary_file in summary_file_set:
-            try:
-                pool.apply_async(func=self._save_summary_data,
-                                 args=(summary_file, sub_dirs))
-            except ProfException as err:
-                logging.error("Output: An exception occurs when multiple processes process the summary file. "
-                              "The error is %s", err)
-                return
+            pool.apply_async(func=self._save_summary_data, args=(summary_file, sub_dirs),
+                             error_callback=lambda error_info: logging.error(error, error_info))
         pool.close()
         pool.join()
 
@@ -355,25 +351,22 @@ class MsprofOutputSummary:
                 self._get_timeline_file_with_slice(targe_name, sub_path, timeline_file_dict)
             slice_max_count = max(slice_count, slice_max_count)
 
+        params = {
+            StrConstant.PARAM_DATA_TYPE: targe_name,
+            StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.TIMELINE,
+            StrConstant.PARAM_EXPORT_FORMAT: self._export_format,
+            StrConstant.PARAM_RESULT_DIR: self._output,
+            StrConstant.PARAM_EXPORT_DUMP_FOLDER: PathManager.MINDSTUDIO_PROFILER_OUTPUT
+        }
+
+        error = "Output: An exception occurs when multiple processes process the timeline file. The error is %s"
         pool = multiprocessing.Pool(processes=4)
         is_need_slice = True if slice_max_count else False
         for index in range(slice_max_count + 1):
-            params = {
-                StrConstant.PARAM_DATA_TYPE: targe_name,
-                StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.TIMELINE,
-                StrConstant.PARAM_EXPORT_FORMAT: self._export_format,
-                StrConstant.PARAM_RESULT_DIR: self._output,
-                StrConstant.PARAM_EXPORT_DUMP_FOLDER: PathManager.MINDSTUDIO_PROFILER_OUTPUT
-            }
             helper = FileSliceHelper(params, [], [])
-            try:
-                pool.apply_async(func=self._insert_json_data,
-                                 args=(timeline_file_dict.get(index, []), helper,
-                                       is_need_slice, index))
-            except ProfException as err:
-                logging.error("Output: An exception occurs when multiple processes process the timeline file. "
-                              "The error is %s", err)
-                return
+            pool.apply_async(func=self._insert_json_data,
+                             args=(timeline_file_dict.get(index, []), helper, is_need_slice, index),
+                             error_callback=lambda error_info: logging.error(error, error_info))
         pool.close()
         pool.join()
 
