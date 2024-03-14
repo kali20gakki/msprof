@@ -41,18 +41,10 @@ class HcclCalculator(ICalculator, MsMultiProcess):
 
     @staticmethod
     def update_bandwidth(communication_data: List[HcclTask]):
-        task_dict = dict()
+        task_dict = defaultdict(lambda: defaultdict(list))
         idx = 0
         for task in communication_data:
-            op_name = task.op_name
-            if op_name not in task_dict:
-                task_dict[op_name] = {}
-
-            planeid = task.plane_id
-            if planeid not in task_dict[op_name]:
-                task_dict[op_name][planeid] = []
-            if task.op_name in task_dict:
-                task_dict[task.op_name].get(task.plane_id, []).append((task, idx))
+            task_dict[task.op_name][task.plane_id].append((idx, task))
             idx += 1
 
         for op_name in task_dict:
@@ -60,63 +52,41 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                 events = []
                 planeid_events = task_dict[op_name][planeid]
                 for task in planeid_events:
-                    events.append(task[0])
+                    events.append(task[1])
                 HcclCalculator.calc_bandwidth(events)
 
                 for i, _ in enumerate(planeid_events):
-                    communication_data[planeid_events[i][1]] = communication_data[planeid_events[i][1]].replace(
+                    communication_data[planeid_events[i][0]] = communication_data[planeid_events[i][0]].replace(
                         bandwidth=events[i].bandwidth)
 
     @staticmethod
     def calc_bandwidth(communication_data: List[HcclTask]):
         idx = 0
+        if HcclAnalysisTool.is_send_or_recv_op(communication_data, idx):
+            idx_jump = NumberConstant.RDMA_NO_BARRIER_TASK_NUM
+        else:
+            idx_jump = NumberConstant.RDMA_WITH_BARRIER_TASK_NUM
         for index, data in enumerate(communication_data):
+            if data.rdma_type == 'RDMA_SEND_PAYLOAD':
+                continue
             bandwidth = HcclCalculator._calculate_bandwidth_gb_s(data.duration, data.size)
             communication_data[index] = data.replace(bandwidth=bandwidth)
         while idx < len(communication_data):
             cur_task = communication_data[idx]
             if cur_task.rdma_type == 'RDMA_SEND_PAYLOAD':
-                saved_size = 0
-                index_cache = []
-                first_payload_time = communication_data[idx].timestamp
-                while communication_data[idx + 1].rdma_type == 'RDMA_SEND_PAYLOAD':
-                    saved_size += communication_data[idx].size
-                    index_cache.append(idx)
-                    idx += 1
-
-                time_elapsed = communication_data[idx].timestamp - first_payload_time
-                if HcclAnalysisTool.is_send_or_recv_op(communication_data, idx):
-                    rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(communication_data, idx,
-                                                                              NumberConstant.RDMA_NO_BARRIER_TASK_NUM)
-                    idx_jump = NumberConstant.RDMA_NO_BARRIER_TASK_NUM
-                else:
-                    rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(communication_data, idx,
-                                                                              NumberConstant.RDMA_WITH_BARRIER_TASK_NUM)
-                    idx_jump = NumberConstant.RDMA_WITH_BARRIER_TASK_NUM
-
-                payload_time = rdma_transit_result[0] + time_elapsed / NumberConstant.NS_TO_MS
-                payload_size = rdma_transit_result[1] + saved_size / NumberConstant.COMMUNICATION_B_to_MB
+                rdma_send_payload_transit_result = HcclAnalysisTool.get_rdma_send_payload_info(communication_data, idx,
+                                                                                               idx_jump)
+                payload_time = rdma_send_payload_transit_result[0]
+                payload_size = rdma_send_payload_transit_result[1]
+                payload_cnt = rdma_send_payload_transit_result[2]
                 payload_bandwidth = payload_size / payload_time
-                communication_data[idx] = communication_data[idx].replace(bandwidth=payload_bandwidth)
 
-                for index in index_cache:
+                for index in range(idx, idx + payload_cnt):
                     communication_data[index] = communication_data[index].replace(bandwidth=payload_bandwidth)
 
-                idx += idx_jump
+                idx += payload_cnt + idx_jump
                 continue
             idx += 1
-
-    @staticmethod
-    def record_first_rdma_payload_task_time(payload0_time, data):
-        if payload0_time == 0:
-            payload0_time = data.timestamp
-        return payload0_time
-
-    @staticmethod
-    def update_rdma_payload_bandwidth(communication_data, update_cache, index_cache, bandwidth):
-        for idx, task in enumerate(update_cache):
-            cur_task = task
-            communication_data[index_cache[idx]] = cur_task.replace(bandwidth=bandwidth)
 
     @staticmethod
     def update_op_name_by_group_name(communication_data: List[HcclTask]):
@@ -135,7 +105,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
 
     @staticmethod
     def _calculate_bandwidth_gb_s(duration, size):
-        if duration == 0:
+        if abs(duration) < 1e-15:
             bandwidth = 0
         else:
             bandwidth = (size * NumberConstant.COMMUNICATION_B_to_GB) / (duration * NumberConstant.NS_TO_S)

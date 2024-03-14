@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2024. All rights reserved.
 
 import unittest
 from collections import defaultdict
@@ -183,14 +183,6 @@ class TestCommunicationParser(unittest.TestCase):
                 Size_Distribution: defaultdict(lambda: [0, 0]),
                 Transit_Size_MB: 0,
                 Transit_Time_ms: 0
-            },
-            'SIO': {
-                'Bandwidth(GB/s)': 0,
-                'Bandwidth(Utilization)': 0.0,
-                'Large Packet Ratio': 0,
-                'Size Distribution': defaultdict(lambda: [0, 0]),
-                'Transit Size(MB)': 0,
-                'Transit Time(ms)': 0
             },
             'RDMA': {
                 Bandwidth_GB_S: 24.2899,

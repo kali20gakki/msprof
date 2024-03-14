@@ -87,6 +87,21 @@ class HcclAnalysisTool:
         return [transit_time, transit_size]
 
     @classmethod
+    def get_rdma_send_payload_info(cls: any, events: list, idx: int, rdma_transit_op_num: int) -> list:
+        saved_size = 0
+        payload_cnt = 0
+        first_payload_time = events[idx].timestamp
+        while events[idx].rdma_type == 'RDMA_SEND_PAYLOAD':
+            saved_size += events[idx].size
+            payload_cnt += 1
+            idx += 1
+        transit_size = saved_size / NumberConstant.COMMUNICATION_B_to_MB
+        transit_time = HcclAnalysisTool.get_value(events[idx + rdma_transit_op_num - 2].duration +
+                                                  events[idx + rdma_transit_op_num - 2].timestamp -
+                                                  first_payload_time, 'duration') / NumberConstant.NS_TO_MS
+        return [transit_time, transit_size, payload_cnt]
+
+    @classmethod
     def is_send_or_recv_op(cls, events: list, idx: int) -> bool:
         return 'send' in events[idx].op_name or 'receive' in events[idx].op_name
 
