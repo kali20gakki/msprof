@@ -109,14 +109,15 @@ class ParsingRoceData(MsMultiProcess):
         roce_header_num = DBManager.get_table_field_num(DBNameConstant.TABLE_ROCE_ORIGIN + "Map", tables_path)
         self.roce_data = []
         # chip 0 nic diff, exclude device_id and replay_id
-        has_type_id = True
+        has_type_id = False
         if len(network_data) > 0:
-            # 新上报一个typeid字段用以标识(ROCE:0, ROH:1)
-            if roce_header_num > len(network_data[0]) + 2:
-                has_type_id = False
+            # 新上报一个typeid字段用以标识是否是ROH(ROCE:0, RoCE(ROH):1)
+            if roce_header_num < len(network_data[0]) + 2:
+                has_type_id = True
         for nd in network_data:
             item = [self._device_id, 0, float(nd[0].replace(":", ''))]
-            item.extend(nd[1:])
-            if not has_type_id:
-                item.append(0)
+            if has_type_id:
+                item.extend(nd[1:-1])
+            else:
+                item.extend(nd[1:])
             self.roce_data.append(tuple(item))
