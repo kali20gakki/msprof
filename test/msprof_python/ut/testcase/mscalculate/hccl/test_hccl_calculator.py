@@ -239,69 +239,13 @@ class TestHcclCalculator(unittest.TestCase):
             check._hccl_op_report_data = [("all_reduce", 1.0, 1.0, 1.0, 1.0, 1.0, 100.0)]
             check.save()
 
-    def test_calculate_bandwidth_gb_s(self):
+    def test_calculate_bandwidth_gb_s_should_return_correct_bandwidth_in_GB_S(self):
         ret = HcclCalculator._calculate_bandwidth_gb_s(duration=319959.1875, size=209715200)
         ret_0_duration = HcclCalculator._calculate_bandwidth_gb_s(duration=0, size=666666)
         self.assertEqual(ret, 655.4435946615847)
         self.assertEqual(ret_0_duration, 0)
 
-    def test_record_first_rdma_payload_task_time(self):
-        data = HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='Memcpy', rdma_type='INVALID_TYPE',
-                        timestamp=63888072593921.055, duration=319959.1875, transport_type='SDMA', task_id=1,
-                        size=209715200, bandwidth=0.65544359466158)
-        payload0_time = 666666
-        ret = HcclCalculator.record_first_rdma_payload_task_time(0, data)
-        ret_for_recorded_payload = HcclCalculator.record_first_rdma_payload_task_time(payload0_time, data)
-        self.assertEqual(ret, data.timestamp)
-        self.assertEqual(ret_for_recorded_payload, payload0_time)
-
-    def test_update_rdma_payload_bandwidth(self):
-        OP_NAME = 'hcom_allReduce__721_0_1'
-        RDMA_SEND = 'RDMASend'
-        RDMA = 'RDMA'
-        RDMA_SEND_NOTIFY = 'RDMA_SEND_NOTIFY'
-        NOTIFY_WAIT = 'Notify_Wait'
-        LOCAL = 'LOCAL'
-        event = [
-            HcclTask(op_name=OP_NAME, hccl_name='Memcpy', rdma_type='INVALID_TYPE',
-                     timestamp=63888072593921.055, duration=319959.1875, transport_type='SDMA', task_id=1,
-                     size=209715200, bandwidth=0.65544359466158),
-            HcclTask(op_name=OP_NAME, hccl_name=RDMA_SEND, rdma_type=RDMA_SEND_NOTIFY,
-                     timestamp=63888072915640.34, duration=320.0234375, transport_type=RDMA, task_id=1, size=4,
-                     bandwidth=0.00001249908454),
-            HcclTask(op_name=OP_NAME, hccl_name=NOTIFY_WAIT, rdma_type='RDMA_PAYLOAD_PREPARE',
-                     timestamp=63888072917700.47, duration=20, transport_type=LOCAL, task_id=1, size=0, bandwidth=0),
-            HcclTask(op_name=OP_NAME, hccl_name=RDMA_SEND, rdma_type='RDMA_SEND_PAYLOAD',
-                     timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1, size=104857600,
-                     bandwidth=24.28991694888519),
-            HcclTask(op_name=OP_NAME, hccl_name=RDMA_SEND, rdma_type=RDMA_SEND_NOTIFY,
-                     timestamp=63888072921720.71, duration=320.0234375, transport_type=RDMA, task_id=1, size=4,
-                     bandwidth=0.00001249908454),
-            HcclTask(op_name=OP_NAME, hccl_name=NOTIFY_WAIT, rdma_type='RDMA_PAYLOAD_CHECK',
-                     timestamp=63888072923480.82, duration=4310758.46875, transport_type=LOCAL, task_id=1, size=0,
-                     bandwidth=0),
-            HcclTask(op_name=OP_NAME, hccl_name=RDMA_SEND, rdma_type=RDMA_SEND_NOTIFY,
-                     timestamp=63888077234799.32, duration=320.0234375, transport_type=RDMA, task_id=1, size=4,
-                     bandwidth=0.00001249908454),
-            HcclTask(op_name=OP_NAME, hccl_name=NOTIFY_WAIT, rdma_type='RDMA_PAYLOAD_ACK',
-                     timestamp=63888077236859.445, duration=20, transport_type=LOCAL, task_id=1, size=0,
-                     bandwidth=-1),
-            HcclTask(op_name=OP_NAME, hccl_name='Memcpy', rdma_type='INVALID_TYPE',
-                     timestamp=63888077238999.58, duration=160429.6171875, transport_type='SDMA', task_id=1,
-                     size=104857600, bandwidth=0.65360500036255),
-        ]
-        update_cache = [
-            HcclTask(op_name=OP_NAME, hccl_name=RDMA_SEND, rdma_type='RDMA_SEND_PAYLOAD',
-                     timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1, size=104857600,
-                     bandwidth=24.28991694888519)
-        ]
-        index_cache = [3]
-        bandwidth = 666666
-        HcclCalculator.update_rdma_payload_bandwidth(event, update_cache, index_cache, bandwidth)
-
-        self.assertEqual(event[3].bandwidth, 666666)
-
-    def test_update_bandwidth(self):
+    def test_update_bandwidth_should_update_correct_bandwidth(self):
         RDMA = 'RDMA'
         OP_NAME = 'hcom_allReduce__721_0_1'
         RDMA_SEND_NOTIFY = 'RDMA_SEND_NOTIFY'

@@ -76,17 +76,11 @@ class CommunicationParser(MetaParser):
                 op_time_dict[OpAnalysisType.TRANSIT_TIME] += \
                     HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS
             if event.rdma_type == 'RDMA_SEND_PAYLOAD':
-                saved_size = 0
-                first_payload_time = events[idx].timestamp
-                while events[idx + 1].rdma_type == 'RDMA_SEND_PAYLOAD':
-                    saved_size += events[idx].size
-                    idx += 1
-                time_elapsed = events[idx].timestamp - first_payload_time
+                rdma_transit_result = HcclAnalysisTool.get_rdma_send_payload_info(master_events, idx,
+                                                                                  rdma_transit_op_num)
+                op_time_dict[OpAnalysisType.TRANSIT_TIME] += (rdma_transit_result[0])
+                idx += rdma_transit_op_num + rdma_transit_result[2]
                 wait_flag = False
-                rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(master_events, idx, rdma_transit_op_num)
-                op_time_dict[OpAnalysisType.TRANSIT_TIME] += (rdma_transit_result[0] + time_elapsed /
-                                                              NumberConstant.NS_TO_MS)
-                idx += rdma_transit_op_num
                 continue
             if event.hccl_name == StrConstant.NOTIFY_WAIT:
                 wait_time = HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS
@@ -129,19 +123,10 @@ class CommunicationParser(MetaParser):
                     HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.COMMUNICATION_B_to_MB,
                     HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS)
             if event.rdma_type == 'RDMA_SEND_PAYLOAD':
-                saved_size = 0
-                first_payload_time = events[idx].timestamp
-                while events[idx + 1].rdma_type == 'RDMA_SEND_PAYLOAD':
-                    saved_size += events[idx].size
-                    idx += 1
-                time_elapsed = events[idx].timestamp - first_payload_time
-                rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(events, idx, rdma_transit_op_num)
+                rdma_transit_result = HcclAnalysisTool.get_rdma_send_payload_info(events, idx, rdma_transit_op_num)
                 HcclAnalysisTool.update_bandwidth_record(op_bandwidth_dict, event.transport_type,
-                                                         rdma_transit_result[
-                                                             1] + saved_size / NumberConstant.COMMUNICATION_B_to_MB,
-                                                         rdma_transit_result[
-                                                             0] + time_elapsed / NumberConstant.NS_TO_MS)
-                idx += rdma_transit_op_num
+                                                         rdma_transit_result[1], rdma_transit_result[0])
+                idx += rdma_transit_op_num + rdma_transit_result[2]
                 continue
             idx += 1
         for transport_type in StrConstant.TRANSIT_TYPE:
