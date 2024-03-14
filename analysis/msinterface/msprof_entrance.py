@@ -9,6 +9,7 @@ import sys
 from common_func.common import call_sys_exit
 from common_func.common import error
 from common_func.msprof_common import check_path_valid
+from common_func.msprof_common import check_path_char_valid
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
 from common_func.profiling_scene import ProfilingScene
@@ -85,6 +86,7 @@ class MsprofEntrance:
 
         args = parser.parse_args(sys.argv[1:])
         try:
+            check_path_char_valid(args.collection_path)
             check_path_valid(args.collection_path, False)
         except ProfException as err:
             if err.message:

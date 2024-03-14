@@ -12,9 +12,14 @@
 
 #include "analysis/csrc/py_interface/py_init_parser.h"
 #include "analysis/csrc/worker/kernel_parser_worker.h"
+#include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/dfx/error_code.h"
+
 namespace Analysis {
 namespace PyInterface {
 using KernelParserWorker = Analysis::Worker::KernelParserWorker;
+using namespace Analysis::Utils;
 PyMethodDef g_methodTestSchedule[] = {
     {"dump_cann_trace", WrapDumpCANNTrace, METH_VARARGS, ""},
     {NULL, NULL}
@@ -31,6 +36,10 @@ PyObject *WrapDumpCANNTrace(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s", &parseFilePath)) {
         PyErr_SetString(PyExc_TypeError, "parser.dump_cann_trace args parse failed!");
         return NULL;
+    }
+    if (!File::CheckDir(parseFilePath)) {
+        ERROR("Parse failed or dump failed.");
+        return Py_BuildValue("i", ANALYSIS_ERROR);
     }
     KernelParserWorker parserWorker(parseFilePath);
     auto res = parserWorker.Run();
