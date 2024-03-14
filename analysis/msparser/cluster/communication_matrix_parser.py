@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2024. All rights reserved.
 
 import logging
 from enum import IntEnum
@@ -101,19 +101,18 @@ class CommunicationMatrixParser(MetaParser):
                 link_info[link_key][MatrixDataType.PACKET_NUM] += 1
                 if trans_size > HcclAnalysisTool.MessageSizeThreshold.get(trans_type, 0):
                     link_info[link_key][MatrixDataType.LARGE_PACKET_NUM] += 1
-            if event.transport_type == StrConstant.RDMA and \
-                    HcclAnalysisTool.determine_rdma(events, idx, rdma_transit_op_num):
+            if event.rdma_type == 'RDMA_SEND_PAYLOAD':
+                rdma_transit_result = HcclAnalysisTool.get_rdma_send_payload_info(events, idx, rdma_transit_op_num)
                 if link_key not in link_info:
                     link_info[link_key] = [0] * len(MatrixDataType.__members__)
-                link_info[link_key][MatrixDataType.TRANSPORT_TYPE] =\
+                link_info[link_key][MatrixDataType.TRANSPORT_TYPE] = \
                     HcclAnalysisTool.convert_to_enum(event.transport_type)
-                rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(events, idx, rdma_transit_op_num)
                 link_info[link_key][MatrixDataType.TRANS_TIME] += rdma_transit_result[0]
                 link_info[link_key][MatrixDataType.TRANS_SIZE] += rdma_transit_result[1]
                 link_info[link_key][MatrixDataType.PACKET_NUM] += 1
                 if rdma_transit_result[1] > HcclAnalysisTool.MessageSizeThreshold.get(event.transport_type, 0):
                     link_info[link_key][MatrixDataType.LARGE_PACKET_NUM] += 1
-                idx += rdma_transit_op_num
+                idx += rdma_transit_op_num + rdma_transit_result[2]
                 continue
             idx += 1
         hccl_dict = {StrConstant.OP_NAME: hccl_name, StrConstant.LINK_INFO: link_info}

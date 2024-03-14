@@ -64,6 +64,10 @@ class HcclInfoParser(DataParser, MsMultiProcess):
     class RdmaType(Enum):
         RDMA_SEND_NOTIFY = 0
         RDMA_SEND_PAYLOAD = 1
+        RDMA_PAYLOAD_PREPARE = 2
+        RDMA_PAYLOAD_CHECK = 3
+        RDMA_PAYLOAD_ACK = 4
+        RDMA_SEND_OP = 5
         INVALID_TYPE = 4294967295
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:

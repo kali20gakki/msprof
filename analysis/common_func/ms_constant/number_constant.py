@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2024. All rights reserved.
 
 from decimal import Decimal
 
@@ -57,6 +57,10 @@ class NumberConstant:
     NS_TO_US = 1000.0
     NS_TO_MS = 1000000.0
     TEN_NS_TO_US = 100.0
+    NS_TO_S = 0.001 ** 3
+    US_TO_S = 0.001 ** 2
+    MS_TO_S = 0.001
+    S_TO_MS = 1000.0
     MS_TO_US = 1000.0
     US_TO_MS = 1000.0
     MS_TO_NS = 1000000.0
@@ -138,6 +142,7 @@ class NumberConstant:
     RANK_NUM_PER_OS = 4
     MAX_RANK_NUMS = 4096
     COMMUNICATION_B_to_MB = 1000 ** 2
+    COMMUNICATION_B_to_GB = 0.001 ** 3
     COMMUNICATION_MB_to_GB = 1000
 
     DEFAULT_LAYER_SORT_START = 10

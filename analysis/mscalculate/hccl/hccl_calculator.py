@@ -7,7 +7,6 @@ import os
 from collections import defaultdict
 from collections import deque
 from typing import List
-
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
@@ -22,6 +21,7 @@ from mscalculate.interface.icalculator import ICalculator
 from msconfig.config_manager import ConfigManager
 from msmodel.hccl.hccl_model import HcclViewModel
 from profiling_bean.db_dto.step_trace_dto import IterationRange
+from msparser.cluster.meta_parser import HcclAnalysisTool
 
 
 class HcclCalculator(ICalculator, MsMultiProcess):
@@ -41,12 +41,52 @@ class HcclCalculator(ICalculator, MsMultiProcess):
 
     @staticmethod
     def update_bandwidth(communication_data: List[HcclTask]):
+        task_dict = defaultdict(lambda: defaultdict(list))
+        idx = 0
+        for task in communication_data:
+            task_dict[task.op_name][task.plane_id].append((idx, task))
+            idx += 1
+
+        for op_name in task_dict:
+            for planeid in task_dict[op_name]:
+                events = []
+                planeid_events = task_dict[op_name][planeid]
+                for task in planeid_events:
+                    events.append(task[1])
+                HcclCalculator.calc_bandwidth(events)
+
+                for i, _ in enumerate(planeid_events):
+                    communication_data[planeid_events[i][0]] = communication_data[planeid_events[i][0]].replace(
+                        bandwidth=events[i].bandwidth)
+
+    @staticmethod
+    def calc_bandwidth(communication_data: List[HcclTask]):
+        idx = 0
+        if HcclAnalysisTool.is_send_or_recv_op(communication_data, idx):
+            idx_jump = NumberConstant.RDMA_NO_BARRIER_TASK_NUM
+        else:
+            idx_jump = NumberConstant.RDMA_WITH_BARRIER_TASK_NUM
         for index, data in enumerate(communication_data):
-            if data.duration == 0:
-                bandwidth = 0
-            else:
-                bandwidth = data.size / data.duration  # 10^9 / 10^9 = 1 scale(GB/s)
+            if data.rdma_type == 'RDMA_SEND_PAYLOAD':
+                continue
+            bandwidth = HcclCalculator._calculate_bandwidth_gb_s(data.duration, data.size)
             communication_data[index] = data.replace(bandwidth=bandwidth)
+        while idx < len(communication_data):
+            cur_task = communication_data[idx]
+            if cur_task.rdma_type == 'RDMA_SEND_PAYLOAD':
+                rdma_send_payload_transit_result = HcclAnalysisTool.get_rdma_send_payload_info(communication_data, idx,
+                                                                                               idx_jump)
+                payload_time = rdma_send_payload_transit_result[0]
+                payload_size = rdma_send_payload_transit_result[1]
+                payload_cnt = rdma_send_payload_transit_result[2]
+                payload_bandwidth = payload_size / payload_time
+
+                for index in range(idx, idx + payload_cnt):
+                    communication_data[index] = communication_data[index].replace(bandwidth=payload_bandwidth)
+
+                idx += payload_cnt + idx_jump
+                continue
+            idx += 1
 
     @staticmethod
     def update_op_name_by_group_name(communication_data: List[HcclTask]):
@@ -62,6 +102,14 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             index = group_dict[data.group_name]["count"]
             communication_data[num] = data.replace(
                 op_name=f"{data.op_name}_{data.group_name[-3:]}_{str(index)}_{str(data.iter_id)}")
+
+    @staticmethod
+    def _calculate_bandwidth_gb_s(duration, size):
+        if abs(duration) < 1e-15:
+            bandwidth = 0
+        else:
+            bandwidth = (size * NumberConstant.COMMUNICATION_B_to_GB) / (duration * NumberConstant.NS_TO_S)
+        return bandwidth
 
     @staticmethod
     def _cal_total(type_time: dict) -> int:
@@ -122,8 +170,8 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                 logging.error("communication data is empty")
                 return
 
-            self.update_bandwidth(communication_data)
             self.update_op_name_by_group_name(communication_data)
+            self.update_bandwidth(communication_data)
             is_hccl_op_type_valid = self._generate_hccl_op_info(communication_data)
             if is_hccl_op_type_valid:
                 hccl_op_report_data = self._get_hccl_op_report_data(communication_data)
