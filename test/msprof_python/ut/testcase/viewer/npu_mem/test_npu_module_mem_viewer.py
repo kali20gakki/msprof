@@ -75,7 +75,8 @@ class TestNpuModuleMemViewer(TestDirCRBaseModel):
         expected_headers = ['component', 'timestamp', 'total_reserve_memory', 'device_type']
         expected_data = [
             ['RUNTIME', '10.000\t', 4, 'NPU:0'],
-            ['HDC', '11.000\t', 2, 'NPU:0']
+            ['HDC', '11.000\t', 2, 'NPU:0'],
+            ['CCE', '11.000\t', -1, 'NPU:0']
         ]
         InfoConfReader()._info_json = {
             'CPU': [{'Frequency': "1000"}]
@@ -83,7 +84,8 @@ class TestNpuModuleMemViewer(TestDirCRBaseModel):
         InfoConfReader()._local_time_offset = 10.0
         module_mem_data = [
             [7, 0, 4096, 'NPU:0'],
-            [9, 1000, 2048, 'NPU:0']
+            [9, 1000, 2048, 'NPU:0'],
+            [8, 1000, -1, 'NPU:0']
         ]
         module_mem_dto = self.get_module_mem_dto(module_mem_data)
         with mock.patch(NAMESPACE + '.NpuAiStackMemModel.check_db', return_value=True), \

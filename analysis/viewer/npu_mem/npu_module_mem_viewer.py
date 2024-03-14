@@ -48,13 +48,17 @@ class NpuModuleMemViewer:
             except ValueError:
                 logging.warning("Invalid module id, please check!")
                 module_name = datum.module_id
+            if datum.total_size > 0:
+                total_size = round(datum.total_size / NumberConstant.KILOBYTE, NumberConstant.ROUND_THREE_DECIMAL)
+            else:
+                total_size = datum.total_size
             self._data.append([module_name,
                                format_high_precision_for_csv(
                                    InfoConfReader().trans_into_local_time(
                                        InfoConfReader().time_from_host_syscnt(int(datum.syscnt),
                                                                               NumberConstant.MICRO_SECOND),
                                        use_us=True)),
-                               round(datum.total_size / NumberConstant.KILOBYTE, NumberConstant.ROUND_THREE_DECIMAL),
+                               total_size,
                                datum.device_type
                                ])
         return self._configs.get(StrConstant.CONFIG_HEADERS), self._data, len(self._data)
