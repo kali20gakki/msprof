@@ -53,7 +53,6 @@ from viewer.get_trace_timeline import get_aicore_utilization_timeline
 from viewer.get_trace_timeline import get_dvpp_timeline
 from viewer.get_trace_timeline import get_hccs_timeline
 from viewer.get_trace_timeline import get_network_timeline
-from viewer.get_trace_timeline import get_network_type
 from viewer.get_trace_timeline import get_pcie_timeline
 from viewer.hardware_info_report import get_ddr_data
 from viewer.hardware_info_report import get_llc_bandwidth
@@ -314,13 +313,9 @@ class MsProfExportDataUtils:
                                                params.get(StrConstant.PARAM_DEVICE_ID),
                                                NumberConstant.DEFAULT_START_TIME,
                                                NumberConstant.DEFAULT_END_TIME, params.get(StrConstant.DATA_TYPE))
-            if roce_result[0].get('args', {}).get('name', "") == "ROH":
-                params[StrConstant.PARAM_DATA_TYPE] = "roh"
             return roce_result
+
         data_type = params.get(StrConstant.PARAM_DATA_TYPE)
-        network_type = get_network_type(params.get(StrConstant.PARAM_RESULT_DIR))
-        if network_type == "ROH":
-            params[StrConstant.PARAM_DATA_TYPE] = "roh"
         db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR),
                                           configs.get(StrConstant.CONFIG_DB).format(
                                               params.get(StrConstant.PARAM_DEVICE_ID)))
