@@ -395,6 +395,9 @@ class StrConstant:
     SDMA = "SDMA"
     LOCAL = "LOCAL"
     NOTIFY_WAIT = "Notify_Wait"
+    RDMA_PAYLOAD_PREPARE = "RDMA_PAYLOAD_PREPARE"
+    RDMA_SEND_PAYLOAD = "RDMA_SEND_PAYLOAD"
+    RDMA_PAYLOAD_ACK = "RDMA_PAYLOAD_ACK"
     REDUCE_TBE = "Reduce TBE"
     RDMA_SEND = "RDMASend"
     SDMA_TRANSIT_ITEMS = ["Memcpy", "Reduce_Inline"]
