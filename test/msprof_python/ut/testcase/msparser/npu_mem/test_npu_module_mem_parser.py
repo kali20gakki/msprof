@@ -63,3 +63,13 @@ class TestNpuModuleMemParser(unittest.TestCase):
             check = NpuModuleMemParser(self.file_list, CONFIG)
             check._process_npu_module_mem_data('test', 24, [])
         self.assertEqual(check._npu_module_mem_data, [[7, 1000, 4096, 'NPU:0']])
+
+    def test_process_npu_module_mem_data_should_get_warning_skip_data_when_negative_reversed(self):
+        npu_module_mem_data_new = struct.pack('=IIQQ', 1, 2, 3, 9223372036854775808)
+        with mock.patch('builtins.open', mock.mock_open(read_data=npu_module_mem_data_new)), \
+                mock.patch(NAMESPACE + '.FileOpen'), \
+                mock.patch('common_func.file_manager.check_path_valid'), \
+                mock.patch(NAMESPACE + '.OffsetCalculator.pre_process', return_value=npu_module_mem_data_new):
+            check = NpuModuleMemParser(self.file_list, CONFIG)
+            check._process_npu_module_mem_data('test', 24, [])
+        self.assertEqual(check._npu_module_mem_data, [[1, 3, -1, 'NPU:0']])

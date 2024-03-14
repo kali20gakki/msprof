@@ -88,10 +88,24 @@ class NpuModuleMemParser(DataParser, MsMultiProcess):
             for _index in range(file_size // StructFmt.NPU_MODULE_MEM_SIZE):
                 data = _all_data[_index * StructFmt.NPU_MODULE_MEM_SIZE:(_index + 1) * StructFmt.NPU_MODULE_MEM_SIZE]
                 npu_module_mem_data_bean = NpuModuleMemDataBean.decode(data)
-                if npu_module_mem_data_bean:
+                if npu_module_mem_data_bean is None:
+                    continue
+                if npu_module_mem_data_bean.total_size > NumberConstant.DEFAULT_NUMBER:
+                    # negative reversed
+                    logging.warning(
+                        "The total_size %d greater than integer maximum of sqlite,"
+                        " please confirm wheather the total_size is reversed.",
+                        npu_module_mem_data_bean.total_size)
                     self._npu_module_mem_data.append([
                         npu_module_mem_data_bean.module_id,
                         npu_module_mem_data_bean.cpu_cycle_count,
-                        npu_module_mem_data_bean.total_size,
+                        -1,
                         device_type
                     ])
+                    continue
+                self._npu_module_mem_data.append([
+                    npu_module_mem_data_bean.module_id,
+                    npu_module_mem_data_bean.cpu_cycle_count,
+                    npu_module_mem_data_bean.total_size,
+                    device_type
+                ])
