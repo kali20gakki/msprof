@@ -60,4 +60,3 @@ class ApiDataViewModel(ViewModel):
         return MsprofIteration(self._result_dir).get_condition_within_iteration(self._iter_range,
                                                                                 time_start_key='start',
                                                                                 time_end_key='end')
-    
