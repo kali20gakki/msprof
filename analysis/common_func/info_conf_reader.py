@@ -241,6 +241,12 @@ class InfoConfReader:
         """
         return self._start_info.get(StrConstant.COLLECT_DATE_BEGIN), self._end_info.get(StrConstant.COLLECT_DATE_END)
 
+    def get_dev_cnt(self: any) -> int:
+        """
+        Compatibility for getting dev_cnt (The dev_cnt is obtained from the cntvct in dev_start.log file.)
+        """
+        return int(self._dev_cnt * NumberConstant.NANO_SECOND)
+
     def time_from_syscnt(self: any, sys_cnt: int, time_fmt: int = NumberConstant.NANO_SECOND) -> float:
         """
         transfer sys cnt to time unit.

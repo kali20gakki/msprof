@@ -17,6 +17,7 @@ from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.iparser import IParser
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.freq import FreqLpmConvBean
+from common_func.info_conf_reader import InfoConfReader
 
 
 class FreqParser(IParser, MsMultiProcess):
@@ -67,11 +68,13 @@ class FreqParser(IParser, MsMultiProcess):
 
     def _read_file(self: any, _file_path: str, _file_size: int, offset_calculator: OffsetCalculator) -> None:
         freq_data_bean = FreqLpmConvBean()
+        dev_cnt = InfoConfReader().get_dev_cnt()
         with FileOpen(_file_path, 'rb') as file_reader:
             _all_freq_data = offset_calculator.pre_process(file_reader.file_reader, _file_size)
             freq_data_chunks = Utils.chunks(_all_freq_data, StructFmt.FREQ_DATA_SIZE)
             for freq_data in freq_data_chunks:
                 freq_data_bean.decode(freq_data)
-                for lpm_data in freq_data_bean.lpm_data:
-                    self._freq_data.append([lpm_data.syscnt, lpm_data.freq])
+                self._freq_data.extend([[lpm_data.syscnt, lpm_data.freq]
+                                        for lpm_data in freq_data_bean.lpm_data
+                                        if lpm_data.syscnt >= dev_cnt])
         FileManager.add_complete_file(self._project_path, _file_path)

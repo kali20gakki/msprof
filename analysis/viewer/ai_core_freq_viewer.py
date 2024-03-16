@@ -39,8 +39,7 @@ class AiCoreFreqViewer:
                 start_ts, _ = InfoConfReader().get_collect_time()
                 return start_ts
             return InfoConfReader().trans_into_local_time(
-                    InfoConfReader().time_from_host_syscnt(apidata[0].start, NumberConstant.MICRO_SECOND), use_us=True)
-
+                InfoConfReader().time_from_host_syscnt(apidata[0].start, NumberConstant.MICRO_SECOND), use_us=True)
 
     def get_all_data(self):
         '''
@@ -76,7 +75,13 @@ class AiCoreFreqViewer:
                     OrderedDict({"MHz": row[1]})
                 ]
                 freq_lists.append(data_list)
-            
+        _, end_ts = InfoConfReader().get_collect_time()
+        data_last = freq_lists[-1]
+        data_list = [
+            data_last[0], end_ts, self._pid, 0,
+            data_last[4]
+        ]
+        freq_lists.append(data_list)
         changed_frequency = TraceViewManager.column_graph_trace(
             TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, freq_lists)
         result.extend(changed_frequency)

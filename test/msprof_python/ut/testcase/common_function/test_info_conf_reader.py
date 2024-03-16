@@ -15,6 +15,7 @@ class TestInfoConfReader(unittest.TestCase):
         info_reader._host_freq = None
         info_reader._local_time_offset = 0
         info_reader._start_info = {}
+        info_reader._dev_cnt = 0.0
 
     def test_time_from_host_syscnt_should_return_original_time_when_host_freq_is_default(self):
         InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
@@ -62,7 +63,9 @@ class TestInfoConfReader(unittest.TestCase):
         InfoConfReader()._local_time_offset = 3000.0
         self.assertEqual(InfoConfReader().trans_into_local_time(3000000000.0, use_us=True), '3000003000.000')
 
-
+    def test_get_dev_cnt_should_return_nano_second(self):
+        InfoConfReader()._dev_cnt = 3000.000
+        self.assertEqual(InfoConfReader().get_dev_cnt(), 3000000000000)
 
 
 if __name__ == '__main__':
