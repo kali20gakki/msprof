@@ -44,49 +44,64 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         task_dict = defaultdict(lambda: defaultdict(list))
         idx = 0
         for task in communication_data:
-            task_dict[task.op_name][task.plane_id].append((idx, task))
+            task_dict[task.op_name][task.plane_id].append([idx, task])
             idx += 1
 
         for op_name in task_dict:
             for planeid in task_dict[op_name]:
-                events = []
-                planeid_events = task_dict[op_name][planeid]
-                for task in planeid_events:
-                    events.append(task[1])
-                HcclCalculator.calc_bandwidth(events)
-
-                for i, _ in enumerate(planeid_events):
-                    communication_data[planeid_events[i][0]] = communication_data[planeid_events[i][0]].replace(
-                        bandwidth=events[i].bandwidth)
+                planeid_tasks = task_dict[op_name][planeid]
+                HcclCalculator.calc_bandwidth(planeid_tasks)
+                for i, _ in enumerate(planeid_tasks):
+                    communication_data[planeid_tasks[i][0]] = communication_data[planeid_tasks[i][0]].replace(
+                        bandwidth=planeid_tasks[i][1].bandwidth)
 
     @staticmethod
     def calc_bandwidth(communication_data: List[HcclTask]):
         idx = 0
-        if HcclAnalysisTool.is_send_or_recv_op(communication_data, idx):
+        if 'send' in communication_data[idx][1].op_name or 'receive' in communication_data[idx][1].op_name:
             idx_jump = NumberConstant.RDMA_NO_BARRIER_TASK_NUM
         else:
             idx_jump = NumberConstant.RDMA_WITH_BARRIER_TASK_NUM
         for index, data in enumerate(communication_data):
-            if data.rdma_type == 'RDMA_SEND_PAYLOAD':
+            if data[1].rdma_type == 'RDMA_SEND_PAYLOAD':
                 continue
-            bandwidth = HcclCalculator._calculate_bandwidth_gb_s(data.duration, data.size)
-            communication_data[index] = data.replace(bandwidth=bandwidth)
+            bandwidth = HcclCalculator._calculate_bandwidth_gb_s(data[1].duration, data[1].size)
+            communication_data[index][1] = data[1].replace(bandwidth=bandwidth)
         while idx < len(communication_data):
-            cur_task = communication_data[idx]
+            cur_task = communication_data[idx][1]
             if cur_task.rdma_type == 'RDMA_SEND_PAYLOAD':
-                rdma_send_payload_transit_result = HcclAnalysisTool.get_rdma_send_payload_info(communication_data, idx,
-                                                                                               idx_jump)
+                payload_cnt = HcclCalculator.find_consecutive_payload_tasks(communication_data, idx)
+                rdma_send_payload_transit_result = HcclCalculator.calculate_consecutive_payload_tasks_info(
+                    communication_data, idx, payload_cnt, idx_jump)
                 payload_time = rdma_send_payload_transit_result[0]
                 payload_size = rdma_send_payload_transit_result[1]
-                payload_cnt = rdma_send_payload_transit_result[2]
                 payload_bandwidth = payload_size / payload_time
 
                 for index in range(idx, idx + payload_cnt):
-                    communication_data[index] = communication_data[index].replace(bandwidth=payload_bandwidth)
-
+                    communication_data[index][1] = communication_data[index][1].replace(bandwidth=payload_bandwidth)
                 idx += payload_cnt + idx_jump
                 continue
             idx += 1
+
+    @staticmethod
+    def find_consecutive_payload_tasks(events, idx):
+        count = 0
+        while events[idx][1].rdma_type == 'RDMA_SEND_PAYLOAD':
+            idx += 1
+            count += 1
+        return count
+
+    @staticmethod
+    def calculate_consecutive_payload_tasks_info(events, idx, payload_cnt, idx_jump):
+        saved_size = 0
+        first_payload_time = events[idx][1].timestamp
+        for i in range(idx, idx + payload_cnt):
+            saved_size += events[i][1].size
+        transit_size = saved_size / NumberConstant.COMMUNICATION_B_to_MB
+        transit_time = HcclAnalysisTool.get_value(events[idx + payload_cnt + idx_jump - 2][1].duration +
+                                                  events[idx + payload_cnt + idx_jump - 2][1].timestamp -
+                                                  first_payload_time, 'duration') / NumberConstant.NS_TO_MS
+        return [transit_time, transit_size]
 
     @staticmethod
     def update_op_name_by_group_name(communication_data: List[HcclTask]):
