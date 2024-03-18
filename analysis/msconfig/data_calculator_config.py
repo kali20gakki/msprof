@@ -116,18 +116,6 @@ class DataCalculatorConfig(MetaConfig):
             ('level', '14'),
             ('position', 'D')
         ],
-        'TorchAclRelationCalculator': [
-            ('path', 'mscalculate.sync_acl_npu.torch_acl_relation'),
-            ('chip_model', '0,1,2,3,4,5,7,8,11'),
-            ('level', '2'),
-            ('position', 'H')
-        ],
-        'TorchNpuRelationCalculator': [
-            ('path', 'mscalculate.sync_acl_npu.torch_npu_relation'),
-            ('chip_model', '0,1,2,3,4,5,7,8,11'),
-            ('level', '3'),
-            ('position', 'H')
-        ],
         'AscendTaskCalculator': [
             ('path', 'mscalculate.ascend_task.ascend_task_calculator'),
             ('chip_model', '0,1,2,3,4,5,7,8,9,11'),

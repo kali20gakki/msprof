@@ -469,7 +469,6 @@ class TestExportCommand(unittest.TestCase):
                 mock.patch(NAMESPACE + '.check_path_valid'), \
                 mock.patch(NAMESPACE + '.ExportCommand._handle_export'), \
                 mock.patch(NAMESPACE + '.ExportCommand._show_tuning_result'), \
-                mock.patch(NAMESPACE + '.MsprofJobSummary._export_msprof_timeline'), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._is_in_prof_file', return_value=False), \
                 mock.patch(NAMESPACE + '.get_path_dir', return_value=[]), \
                 mock.patch(NAMESPACE + '.get_valid_sub_path'):

@@ -66,6 +66,8 @@ class TestNpuModuleMemViewer(TestDirCRBaseModel):
             self.assertEqual(data, expected_data)
 
     def test_get_summary_data_should_return_module_men_data_when_get_module_mem_data(self):
+        InfoConfReader()._host_freq = 1000000000.0
+        InfoConfReader()._local_time_offset = 10.0
         config = {"headers": ["component", "timestamp", "total_reserve_memory", "device_type"]}
         params = {
             "project": "test_npu_module_mem_view",
@@ -78,10 +80,6 @@ class TestNpuModuleMemViewer(TestDirCRBaseModel):
             ['HDC', '11.000\t', 2, 'NPU:0'],
             ['CCE', '11.000\t', -1, 'NPU:0']
         ]
-        InfoConfReader()._info_json = {
-            'CPU': [{'Frequency': "1000"}]
-        }
-        InfoConfReader()._local_time_offset = 10.0
         module_mem_data = [
             [7, 0, 4096, 'NPU:0'],
             [9, 1000, 2048, 'NPU:0'],

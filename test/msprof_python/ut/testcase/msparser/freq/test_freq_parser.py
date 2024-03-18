@@ -37,7 +37,8 @@ class TestFreqParser(unittest.TestCase):
         origin_data = [2, 0, 100, 10, 0, 120, 30, 0] + [0] * (len(StructFmt.FREQ_FMT) - 8)
         data = struct.pack(StructFmt.FREQ_FMT, *origin_data)
         offset_calculator = OffsetCalculator(self.file_list.get(DataTag.FREQ), StructFmt.FREQ_DATA_SIZE, 'test')
-        with mock.patch('builtins.open', mock.mock_open(read_data=data)),\
+        with mock.patch('builtins.open', mock.mock_open(read_data=data)), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch(NAMESPACE + '.OffsetCalculator.pre_process', return_value=data),\
                 mock.patch(NAMESPACE + '.FileManager.add_complete_file'):
             check = FreqParser(self.file_list, CONFIG)

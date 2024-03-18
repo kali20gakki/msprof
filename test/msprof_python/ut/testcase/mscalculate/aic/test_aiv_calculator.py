@@ -48,10 +48,10 @@ class TestAivCalculator(unittest.TestCase):
             check._parse(aic_reader)
 
     def test_save(self):
-        with mock.patch('msmodel.aic.aic_pmu_model.AicPmuModel.init'), \
+        with mock.patch('msmodel.aic.aiv_pmu_model.AivPmuModel.init'), \
                 mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
-                mock.patch('msmodel.aic.aic_pmu_model.AicPmuModel.flush'), \
-                mock.patch('msmodel.aic.aic_pmu_model.AicPmuModel.finalize'):
+                mock.patch('msmodel.aic.aiv_pmu_model.AivPmuModel.flush'), \
+                mock.patch('msmodel.aic.aiv_pmu_model.AivPmuModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
             check = AivCalculator(self.file_list, CONFIG)
             check._aiv_data_list = [123]

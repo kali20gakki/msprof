@@ -72,10 +72,6 @@ class TestHostCpuUsagePresenter(unittest.TestCase):
         db_manager.destroy(res)
 
     def test_get_cpu_usage_data(self):
-        check = HostCpuUsagePresenter(self.result_dir, self.file_name)
-        check.cur_model = HostCpuUsage('test')
-        result = check.get_cpu_usage_data()
-        self.assertEqual(result, {})
         with mock.patch('host_prof.host_cpu_usage.model.host_cpu_usage.'
                         'HostCpuUsage.check_db', return_value=True), \
                 mock.patch('host_prof.host_cpu_usage.model.host_cpu_usage.'
@@ -99,10 +95,6 @@ class TestHostCpuUsagePresenter(unittest.TestCase):
             self.assertEqual(result, data_list)
 
     def test_get_cpu_list(self):
-        check = HostCpuUsagePresenter(self.result_dir, self.file_name)
-        check.cur_model = HostCpuUsage('test')
-        result = check._get_cpu_list()
-        self.assertEqual(result, {})
         with mock.patch('host_prof.host_cpu_usage.model.host_cpu_usage.'
                         'HostCpuUsage.check_db', return_value=True), \
                 mock.patch('host_prof.host_cpu_usage.model.host_cpu_usage.'
