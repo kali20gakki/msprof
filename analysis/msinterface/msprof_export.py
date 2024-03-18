@@ -680,7 +680,7 @@ class ExportCommand:
                     self._process_sub_dirs(sub_dir, is_cluster=True)
                 self.list_map['devices_list'] = ''
         if self.command_type != MsProfCommonConstant.DB:
-            profier = MsprofOutputSummary(collect_path, self.export_format)
-            profier.export(self.command_type)
+            profiler = MsprofOutputSummary(collect_path, self.export_format)
+            profiler.export(self.command_type)
 
             PathManager.del_summary_and_timeline_dir(collect_path, sub_dirs)

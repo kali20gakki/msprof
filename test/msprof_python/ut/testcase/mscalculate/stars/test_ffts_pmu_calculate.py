@@ -201,7 +201,7 @@ class TestFftsPmuCalculator(TestCase):
             check._sample_json = {}
             self.assertFalse(check.is_block())
 
-    def test_get_group_number_when_is_block(self):
+    def test_get_group_number_when_is_block_and_mix_block_dim_not_equals_0(self):
         key = '3-0-0'
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'), \
@@ -209,9 +209,36 @@ class TestFftsPmuCalculator(TestCase):
             check = FftsPmuCalculator(self.file_list, CONFIG)
             check._block_dims = {
                 'block_dim': {key: [20]},
-                'mix_block_dim': {key: [40]}
+                'mix_block_dim': {key: [40]},
+                'block_dim_group': {key: [[20, 40]]}
             }
-            self.assertEqual(check.get_group_number(key, 120), 2)
+            self.assertEqual(check._get_group_number(59, [60]), 0)
+
+    def test_get_group_number_when_is_not_block_and_mix_block_dim_equals_0(self):
+        key = '3-0-0'
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator.is_block', return_value=False):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            check._block_dims = {
+                'block_dim': {key: [20, 20]},
+                'mix_block_dim': {key: [40, 0]},
+                'block_dim_group': {key: [[20, 40], [20, 0]]}
+            }
+            self.assertEqual(check._get_group_number(39, [40, 0]), 0)
+
+    def test_get_group_number_when_is_block_and_mix_block_dim_equals_0(self):
+        key = '3-0-0'
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator.is_block', return_value=True):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            check._block_dims = {
+                'block_dim': {key: [20, 20]},
+                'mix_block_dim': {key: [40, 0]},
+                'block_dim_group': {key: [[20, 40], [20, 0]]}
+            }
+            self.assertEqual(check._get_group_number(79, [60, 20]), 1)
 
     def test_get_group_number_when_is_not_block(self):
         key = '3-0-0'
@@ -221,25 +248,37 @@ class TestFftsPmuCalculator(TestCase):
             check = FftsPmuCalculator(self.file_list, CONFIG)
             check._block_dims = {
                 'block_dim': {key: [20]},
-                'mix_block_dim': {key: [40]}
+                'mix_block_dim': {key: [40]},
+                'block_dim_group': {key: [[20, 40]]}
             }
-            self.assertEqual(check.get_group_number(key, 120), 3)
+            self.assertEqual(check._get_group_number(420, [40]), 10)
 
     def test_add_block_pmu_list(self):
-        block_dict = {43 - 13 - 0: [['MIX_AIC', (349456, (1161, 0, 1088, 0, 7809, 7380, 391, 13)), 1, 21, 7, 0],
-                                    ['MIX_AIC', (349425, (1161, 0, 1121, 0, 7915, 7409, 407, 13)), 1, 22, 7, 0]],
-                      43 - 14 - 0: [['MIX_AIV', (349456, (1161, 0, 1088, 0, 7809, 7380, 391, 13)), 1, 23, 7, 0]],
-                      43 - 14 - 0: [['MIX_OTHER', (349456, (1161, 0, 1088, 0, 7809, 7380, 391, 13)), 0, 24, 7, 0]]}
+        key = '12-133-0'
+        mix_type = 'MIX_AIC'
+        block_dict = {
+            key: [
+                [mix_type, (349456, (1161, 0, 1088, 0, 7809, 7380, 391, 13)), 1, 21, 7, 0],
+                [mix_type, (349425, (1161, 0, 1121, 0, 7915, 7409, 407, 13)), 1, 22, 7, 0],
+                [mix_type, (349456, (1161, 0, 1088, 0, 7809, 7380, 391, 13)), 1, 23, 7, 0],
+                [mix_type, (349456, (1161, 0, 1088, 0, 7809, 7380, 391, 13)), 0, 24, 7, 0]
+            ]
+        }
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'), \
                 mock.patch(NAMESPACE + '.AicPmuUtils.get_pmu_events',
                            return_value=['vec_ratio', 'mac_ratio', 'scalar_ratio',
                                          'mte1_ratio', 'mte2_ratio', 'mte3_ratio',
                                          'icache_req_ratio', 'icache_miss_rate']), \
-                mock.patch(NAMESPACE + '.FftsPmuCalculator.get_group_number', return_value=20), \
+                mock.patch(NAMESPACE + '.FftsPmuCalculator.group_block_with_iter'), \
                 mock.patch(NAMESPACE + '.FftsPmuCalculator._get_pmu_value'):
             check = FftsPmuCalculator(self.file_list, CONFIG)
             check.block_dict = block_dict
+            check._block_dims = {
+                'block_dim': {key: [1]},
+                'mix_block_dim': {key: [2]},
+                'block_dim_group': {key: [[1, 2]]}
+            }
             check.add_block_pmu_list()
 
     def test_group_block_with_iter_when_is_not_block(self):
@@ -261,8 +300,10 @@ class TestFftsPmuCalculator(TestCase):
             check = FftsPmuCalculator(self.file_list, CONFIG)
             check._block_dims = {
                 'block_dim': {key: [2]},
-                'mix_block_dim': {key: [4]}
+                'mix_block_dim': {key: [4]},
+                'block_dim_group': {key: [[2, 4]]}
             }
+            group_size_list = check.get_group_size_list(key)
             result_value = {
                 0: (
                     (mix_type, 3054, (59, 0, 749, 0, 2, 1667, 100, 48), 1),
@@ -277,7 +318,7 @@ class TestFftsPmuCalculator(TestCase):
                     (mix_type, 5488, (59, 0, 2242, 0, 2, 1059, 94, 47), 1)
                 )
             }
-            self.assertEqual(check.group_block_with_iter(key, value), result_value)
+            self.assertEqual(check.group_block_with_iter(value, group_size_list), result_value)
 
     def test_group_block_with_iter_when_is_block(self):
         key = '3-0-0'
@@ -296,8 +337,10 @@ class TestFftsPmuCalculator(TestCase):
             check = FftsPmuCalculator(self.file_list, CONFIG)
             check._block_dims = {
                 'block_dim': {key: [2]},
-                'mix_block_dim': {key: [4]}
+                'mix_block_dim': {key: [4]},
+                'block_dim_group': {key: [[2, 4]]}
             }
+            group_size_list = check.get_group_size_list(key)
             result_value = {
                 0: (
                     (mix_type, 324486, (28, 0, 21339, 0, 817, 129, 2684, 118), 0),
@@ -308,7 +351,7 @@ class TestFftsPmuCalculator(TestCase):
                     (mix_type, 325898, (28, 0, 23192, 0, 824, 138, 2740, 119), 1)
                 )
             }
-            self.assertEqual(check.group_block_with_iter(key, value), result_value)
+            self.assertEqual(check.group_block_with_iter(value, group_size_list), result_value)
 
     def test_get_current_freq(self):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}):

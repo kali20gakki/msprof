@@ -113,6 +113,26 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         return (data.total_cycle, data.pmu_list) if is_true else (0, [0] * FftsPmuCalculator.PMU_LENGTH)
 
     @staticmethod
+    def _get_group_number(number: int, group_size_list: list) -> int:
+        """
+        主要针对静态图场景，得到block pmu数据分组的编号
+        Input:
+        key: 用该条block pmu数据stream_id-task_id-subtask_id.
+        number: 同一个key下，该条block pmu数据为第几条被上报的数据
+        Output:
+        group_number: 该条block pmu数据应该被分到第几组
+        """
+        group_count = len(group_size_list)
+        # 主要针对动态图场景
+        if group_count == 1 and group_size_list[0] != 0:
+            return number // group_size_list[0]
+        for i in range(group_count):
+            # 通过前缀和来判断当前索引所对应的数据应该被分到第几组
+            if number < sum(group_size_list[:i + 1]):
+                return i
+        return group_count - 1
+
+    @staticmethod
     def _is_not_mix_main_core(core_data, data_type) -> bool:
         return bool((core_data.is_ffts_mix_aic_data() and data_type == 'aiv') or
                     (core_data.is_ffts_mix_aiv_data() and data_type == 'aic'))
@@ -200,12 +220,14 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         pmu_data_type = None
         for index, data in enumerate(enumerate_data_list):
             task_type = 0 if data.is_aic_data() else 1
+            block_dim = self._get_current_block('block_dim', data)
+            mix_block_dim = self._get_current_block('mix_block_dim', data)
             aic_pmu_value, aiv_pmu_value, aic_total_cycle, aiv_total_cycle = \
-                self.add_block_mix_pmu_to_context_pmu(data, task_type)
+                self.add_block_mix_pmu_to_context_pmu(data, task_type, mix_block_dim)
             block_dim_dict = {}
             # False代表主核（False），True代表从核（True）
-            block_dim_dict.setdefault(False, self._get_current_block('block_dim', data))
-            block_dim_dict.setdefault(True, self._get_current_block('mix_block_dim', data))
+            block_dim_dict.setdefault(False, block_dim)
+            block_dim_dict.setdefault(True, mix_block_dim)
             aic_total_time = self.calculate_total_time(data, aic_total_cycle, block_dim_dict)
             aiv_total_time = self.calculate_total_time(data, aiv_total_cycle, block_dim_dict, data_type='aiv')
             aic_pmu_value = self.aic_calculator.add_pipe_time(
@@ -294,7 +316,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         total_time = Utils.cal_total_time(total_cycle, int(freq), block_dim, core_num)
         return total_time
 
-    def add_block_mix_pmu_to_context_pmu(self, data: any, task_type: int) -> tuple:
+    def add_block_mix_pmu_to_context_pmu(self, data: any, task_type: int, mix_block_dim: int) -> tuple:
         """
         add block mix pmu to context pmu
         将block pmu数据添加到context pmu中
@@ -317,7 +339,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         aic_total_cycle = data.total_cycle if not task_type else 0
         aiv_total_cycle = data.total_cycle if task_type else 0
         # 从核的total_cycle和pmu数据由block pmu提供
-        if mix_pmu_info:
+        if mix_pmu_info and mix_block_dim != 0:
             pmu_info = mix_pmu_info.pop(0)
             mix_pmu_value, mix_total_cycle = pmu_info.get('pmu'), pmu_info.get('total_cycle')
             if pmu_info.get('mix_type') == Constant.TASK_TYPE_MIX_AIV:
@@ -342,29 +364,22 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         pmu_list = aic_pmu_value if mix_type == Constant.TASK_TYPE_MIX_AIC else aiv_pmu_value
         self.block_dict.setdefault(task_key, []).append((mix_type, pmu_list, data.core_type))
 
+    def get_group_size_list(self: any, key: str) -> list:
+        group_size_list = []
+        # 1.不开启block模式，每组的大小为mix_block_dim
+        # 2.开启block模式，每组的大小为（block_dim + mix_block_dim）
+        # 先判断采集到这份数据时，是否开启了block模式，然后再获取每组的group size
+        for item in self._block_dims.get('block_dim_group', {}).get(key, []):
+            if self.is_block():
+                group_size_list.append((item[0] + item[1]))
+            else:
+                group_size_list.append(item[1])
+        return group_size_list
+
     def is_block(self) -> bool:
         if 'taskBlock' in self._sample_json and self._sample_json.get('taskBlock') == 'on':
             return True
         return False
-
-    def get_group_number(self: any, key: str, number: int) -> str:
-        """
-        主要针对静态图场景，得到block pmu数据分组的编号
-        1.不开启block模式，每组的大小为mix_block_dim
-        2.开启block模式，每组的大小为（block_dim + mix_block_dim）
-        Input:
-        key: 用该条block pmu数据stream_id-task_id-subtask_id.
-        number: 同一个key下，该条block pmu数据为第几条被上报的数据
-        Output:
-        group_number: 该条block pmu数据应该被分到第几组
-        """
-        block_dim = self._block_dims['block_dim'].get(key)[0]
-        mix_block_dim = self._block_dims['mix_block_dim'].get(key)[0]
-        if self.is_block():
-            group_number = number // (block_dim + mix_block_dim)
-        else:
-            group_number = number // mix_block_dim
-        return group_number
 
     def add_block_pmu_list(self) -> None:
         """
@@ -387,7 +402,8 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         if not self.block_dict:
             return
         for key, value in self.block_dict.items():
-            grouped_block_dict = self.group_block_with_iter(key, value)
+            group_size_list = self.get_group_size_list(key)
+            grouped_block_dict = self.group_block_with_iter(value, group_size_list)
             mix_pmu_list = []
             for _, pmu_info_value in grouped_block_dict.items():
                 mix_type_set = {pmu_info[0] for pmu_info in pmu_info_value}
@@ -408,7 +424,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
                 mix_pmu_list.append({'mix_type': mix_type, 'total_cycle': total_cycle, 'pmu': pmu})
             self.mix_pmu_dict[key] = mix_pmu_list
 
-    def group_block_with_iter(self, key, value) -> dict:
+    def group_block_with_iter(self, value, group_size_list) -> dict:
         """
         将拥有相同key（stream_id-task_id-subtask_id）的原始block pmu数据进行分组，主要针对静态图模式
         假设在静态图模式下，一个MIX算子跑了N个迭代，其block_dim 为10, mix_block_dim为20
@@ -422,7 +438,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         for number, item in enumerate(value):
             # item[0], item[1][0], item[1][1], item[2]分别表示mix type、total cycle、pmu list和core type
             single_pmu_value = (item[0], item[1][0], item[1][1], item[2])
-            group_number = self.get_group_number(key, number)
+            group_number = self._get_group_number(number, group_size_list)
             if group_number in pmu_info_dict:
                 pmu_info_dict[group_number] += (single_pmu_value, )
             else:
@@ -546,6 +562,8 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
             _key = self.STREAM_TASK_CONTEXT_KEY_FMT.format(data.stream_id, data.task_id, data.context_id)
             self._block_dims['block_dim'].setdefault(_key, []).append(int(data.block_dim))
             if data.task_type in [Constant.TASK_TYPE_MIX_AIV, Constant.TASK_TYPE_MIX_AIC]:
+                self._block_dims['block_dim_group'].setdefault(_key, []).append(
+                    [int(data.block_dim), int(data.mix_block_dim)])
                 self._block_dims['mix_block_dim'].setdefault(_key, []).append(int(data.mix_block_dim))
 
     def __update_model_instance(self):
