@@ -44,10 +44,3 @@ class MsprofTxModel(ParserModel):
                        f"end_time, message_type, message from {DBNameConstant.TABLE_MSPROFTX} " \
                        f"where file_tag={DataTag.MSPROFTX_TORCH.value} or file_tag={DataTag.MSPROFTX.value}"
         return DBManager.fetch_all_data(self.cur, all_data_sql)
-
-    def get_torch_op_data(self: any) -> list:
-        sql = f"select t2.tid tid, t2.pid pid, t2.start_time start_time, t2.message message from (select " \
-              f"distinct message from {DBNameConstant.TABLE_MSPROFTX} where file_tag={DataTag.MSPROFTX_CANN.value})t1" \
-              f" inner join (select tid, pid, start_time, message from {DBNameConstant.TABLE_MSPROFTX} " \
-              f"where file_tag={DataTag.MSPROFTX_TORCH.value})t2 on t1.message=t2.message order by start_time"
-        return DBManager.fetch_all_data(self.cur, sql, dto_class=MsprofTxDto)

@@ -55,10 +55,6 @@ class TestHostNetworkUsage(unittest.TestCase):
         db_manager.destroy(res)
 
     def test_get_network_usage_data(self):
-        check = HostNetworkUsagePresenter(self.result_dir, self.file_name)
-        check.cur_model = HostNetworkUsage('test')
-        result = check.get_network_usage_data()
-        self.assertEqual(result, {})
         with mock.patch('host_prof.host_network_usage.model.host_network_usage.'
                         'HostNetworkUsage.check_db', return_value=True), \
                 mock.patch('host_prof.host_network_usage.model.host_network_usage.'

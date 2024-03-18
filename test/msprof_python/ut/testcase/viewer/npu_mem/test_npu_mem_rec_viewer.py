@@ -51,9 +51,7 @@ class TestNpuMemRecViewer(TestDirCRBaseModel):
             ['GE', '10.000\t', 0.0, 0.0, 'NPU:5'],
             ['GE', '11.000\t', 1.0, 1.0, 'NPU:5']
         ]
-        InfoConfReader()._info_json = {
-            'CPU': [{'Frequency': "1000"}]
-        }
+        InfoConfReader()._host_freq = 1000000000.0
         InfoConfReader()._local_time_offset = 10.0
         op_mem_rec_data = [
             ['GE', 0, 0, 0, 'NPU:5'],

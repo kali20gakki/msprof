@@ -78,13 +78,16 @@ def test_analyse_bin_dp():
 
 
 def test_read_bin_data():
+    InfoConfReader()._local_time_offset = 10.0
     data = struct.pack("=HHIQ16s64sQQ2Q", 23130, 100, 1, 2, b'test', b'test', 0, 0, 0, 0)
     with mock.patch('os.path.getsize', return_value=128), \
+            mock.patch("common_func.file_manager.check_path_valid"), \
             mock.patch('builtins.open', mock.mock_open(read_data=data)):
         result = ParseDpData.read_bin_data('test')
         unittest.TestCase().assertEqual(result, [(10.002, 'test', 'test', 0)])
     with mock.patch('os.path.getsize', return_value=128), \
             mock.patch('builtins.open', side_effect=OSError), \
+            mock.patch("common_func.file_manager.check_path_valid"), \
             mock.patch(NAMESPACE + '.logging.error'):
         result = ParseDpData.read_bin_data('test')
         unittest.TestCase().assertEqual(result, [])

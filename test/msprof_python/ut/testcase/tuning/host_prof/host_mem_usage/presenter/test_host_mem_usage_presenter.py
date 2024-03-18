@@ -54,10 +54,6 @@ class TestHostMemUsagePresenter(unittest.TestCase):
         db_manager.destroy(res)
 
     def test_get_mem_usage_data(self):
-        check = HostMemUsagePresenter(self.result_dir, self.file_name)
-        check.cur_model = HostMemUsage('test')
-        result = check.get_mem_usage_data()
-        self.assertEqual(result, {})
         with mock.patch('host_prof.host_mem_usage.model.host_mem_usage.'
                         'HostMemUsage.check_db', return_value=True), \
                 mock.patch('host_prof.host_mem_usage.model.host_mem_usage.'

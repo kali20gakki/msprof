@@ -182,12 +182,11 @@ class TestHcclCalculator(unittest.TestCase):
         hccl_op_report_data = check._hccl_op_report_data
         self.assertEqual(hccl_op_report_data, [])
 
-    def test_judge_calculate_again_should_return_true_in_operator_scene(self):
-        scene = ProfilingScene()
-        scene._scene = Constant.SINGLE_OP
+    def test_judge_calculate_again_should_return_true_when_not_all_export(self):
+        ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
         check = HcclCalculator([], CONFIG)
         self.assertTrue(check._judge_calculate_again())
-        scene._scene = None
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
     def test_judge_calculate_again_should_return_false_when_tables_in_db(self):
         scene = ProfilingScene()

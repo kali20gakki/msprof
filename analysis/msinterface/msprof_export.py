@@ -42,7 +42,6 @@ from common_func.utils import Utils
 from framework.file_dispatch import FileDispatch
 from framework.load_info_manager import LoadInfoManager
 from msinterface.msprof_export_data import MsProfExportDataUtils
-from msinterface.msprof_job_summary import MsprofJobSummary
 from msinterface.msprof_output_summary import MsprofOutputSummary
 from msinterface.msprof_timeline import MsprofTimeline
 from msmodel.compact_info.task_track_model import TaskTrackModel
@@ -681,9 +680,6 @@ class ExportCommand:
                     self._process_sub_dirs(sub_dir, is_cluster=True)
                 self.list_map['devices_list'] = ''
         if self.command_type != MsProfCommonConstant.DB:
-            job_summary = MsprofJobSummary(collect_path)
-            job_summary.export(self.command_type)
-
             profier = MsprofOutputSummary(collect_path, self.export_format)
             profier.export(self.command_type)
 

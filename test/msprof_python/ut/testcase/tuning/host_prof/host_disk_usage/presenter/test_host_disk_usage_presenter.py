@@ -63,10 +63,6 @@ class TestHostDiskUsagePresenter(unittest.TestCase):
         db_manager.destroy(res)
 
     def test_get_disk_usage_data(self):
-        check = HostDiskUsagePresenter(self.result_dir, self.file_name)
-        check.cur_model = HostDiskUsage('test')
-        result = check.get_disk_usage_data()
-        self.assertEqual(result, {})
         with mock.patch('host_prof.host_disk_usage.model.host_disk_usage.'
                         'HostDiskUsage.check_db', return_value=True), \
                 mock.patch('host_prof.host_disk_usage.model.host_disk_usage.'

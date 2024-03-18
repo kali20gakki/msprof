@@ -54,13 +54,17 @@ class TestAicCalculator(unittest.TestCase):
             check._parse_all_file()
 
     def test_calculate(self):
-        with mock.patch(NAMESPACE + '.AicCalculator._parse_all_file'), \
+        ProfilingScene().set_mode(ExportMode.STEP_EXPORT)
+        with mock.patch(NAMESPACE + '.AicCalculator._parse_by_iter'), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch('common_func.utils.Utils.get_scene', return_value='single_op'):
             check = AicCalculator(self.file_list, CONFIG)
             check.calculate()
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
         ProfilingScene().init('test')
         with mock.patch(NAMESPACE + '.AicCalculator._parse_all_file'), \
+                mock.patch("common_func.file_manager.check_path_valid"), \
                 mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch('common_func.utils.Utils.get_scene', return_value='train'):
             check = AicCalculator(self.file_list, CONFIG)
