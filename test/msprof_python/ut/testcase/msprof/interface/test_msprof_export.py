@@ -545,6 +545,20 @@ class TestExportCommand(unittest.TestCase):
             test = ExportCommand("summary", args)
             test._check_all_report("./")
 
+    def test__get_min_model_id_should_return_when_match_set_not_empty(self) -> None:
+        model_match_set = {1, 2}
+        args_dic = {"collection_path": "test", "iteration_id": None, "model_id": None, "iteration_count": None}
+        args = Namespace(**args_dic)
+        res = ExportCommand("summary", args)._get_min_model_id(model_match_set)
+        self.assertEqual(1, res)
+
+    def test__get_min_model_id_should_throw_exception_when_match_set_is_empty(self) -> None:
+        args_dic = {"collection_path": "test", "iteration_id": None, "model_id": None, "iteration_count": None}
+        args = Namespace(**args_dic)
+        with pytest.raises(ProfException) as err:
+            ExportCommand("summary", args)._get_min_model_id(set())
+        self.assertEqual(ProfException.PROF_INVALID_PARAM_ERROR, err.value.code)
+
     def test__check_all_report_should_exit_when_not_support_unique_id_but_step_export(self) -> None:
         args_dic = {"collection_path": "test", "iteration_id": None, "model_id": None, "iteration_count": None}
         InfoConfReader()._info_json = {"drvVersion": 0}

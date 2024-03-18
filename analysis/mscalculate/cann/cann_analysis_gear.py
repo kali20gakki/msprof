@@ -547,6 +547,9 @@ class TaskGear(CANNGear):
             # notice: reduce TBE op
             op_name = hccl_dto.item_id
             task_type = self.get_truth_task_type_for_kernel_hccl_task(add_dto)
+        elif task_type == Constant.TASK_TYPE_HCCL and add_dto.task_type == self.KERNEL_AICPU:
+            # helper场景, HCCL算子运行在AI_CPU上, 但没有HCCL层api
+            task_type = Constant.TASK_TYPE_AI_CPU
         for cxt_id in cxt_ids:
             self.task_info.append([model_id, op_name, add_dto.stream_id, add_dto.task_id,
                                    node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,

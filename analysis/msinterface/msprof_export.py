@@ -263,21 +263,6 @@ class ExportCommand:
         return result_dir.endswith("host")
 
     @staticmethod
-    def _update_model_and_index(result_dir: str, trace_data_dict: dict) -> list:
-        conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_HWTS_REC)
-        if not (conn and curs):
-            return []
-        sql = "select iter_id from {} where ai_core_num > 0".format(DBNameConstant.TABLE_HWTS_ITER_SYS)
-        iter_data = DBManager.fetch_all_data(curs, sql, dto_class=HwtsRecDto)
-        DBManager.destroy_db_connect(conn, curs)
-        result = dict()
-        for data in iter_data:
-            if data.iter_id in trace_data_dict.keys():
-                model_id_times = result.get(trace_data_dict.get(data.iter_id, 0), 0)
-                result[trace_data_dict.get(data.iter_id, 0)] = model_id_times + 1
-        return list(zip(result.keys(), result.values()))
-
-    @staticmethod
     def _check_flip_data(host_flip: list, device_flip: list) -> None:
         if len(host_flip) != len(device_flip):
             logging.warning("Different flip numbers, %d host flips and %d device flips.",
@@ -291,6 +276,14 @@ class ExportCommand:
         init_log(result_dir)
         LoadInfoManager.load_info(result_dir)
         ProfilingScene().set_mode(export_mode)
+
+    @staticmethod
+    def _get_min_model_id(model_match_set):
+        if model_match_set:
+            return min(model_match_set)
+        message = "The model_id obtained from the GE doesn't overlap that in the step_trace. The reported data " \
+                  "may be lost and the profiling will stop. Check whether the reported data is correct."
+        raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
 
     def process(self: any) -> None:
         """
@@ -343,7 +336,7 @@ class ExportCommand:
     def _set_default_model_id(self, result_dir, model_match_set, ge_data_set):
         conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_STEP_TRACE)
         if not (conn and curs):
-            return min(model_match_set)
+            return self._get_min_model_id(model_match_set)
         sql = "select model_id, max(index_id) from {} group by model_id".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
         model_and_index = list(filter(lambda x: x[0] in model_match_set, DBManager.fetch_all_data(curs, sql)))
 
@@ -351,11 +344,14 @@ class ExportCommand:
             trace_data = DBManager.fetch_all_data(
                 curs, "select model_id, iter_id from {}".format(DBNameConstant.TABLE_STEP_TRACE_DATA),
                 dto_class=StepTraceDto)
-            model_and_index = self._update_model_and_index(result_dir,
-                                                           {data.iter_id: data.model_id for data in trace_data})
+            result = dict()
+            for data in trace_data:
+                model_id_times = result.get(data.model_id, 0)
+                result[data.model_id] = model_id_times + 1
+            model_and_index = list(zip(result.keys(), result.values()))
         model_and_index.sort(key=lambda x: x[1])
         DBManager.destroy_db_connect(conn, curs)
-        return model_and_index.pop()[0] if model_and_index else min(model_match_set)
+        return model_and_index.pop()[0] if model_and_index else self._get_min_model_id(model_match_set)
 
     def _add_export_type(self: any, result_dir: str) -> None:
         self.list_map['export_type_list'] = []
@@ -675,8 +671,8 @@ class ExportCommand:
                 if DataCheckManager.contain_info_json_data(sub_path):
                     self._update_cluster_params(sub_path, is_cluster)
                     InfoConfReader().load_info(sub_path)
-                    GeLogicStreamSingleton().load_info(sub_path)
                     self._handle_export(sub_path)
+                    GeLogicStreamSingleton().load_info(sub_path)
                     self._show_tuning_result(sub_path)
                 elif sub_path and is_cluster:
                     warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
