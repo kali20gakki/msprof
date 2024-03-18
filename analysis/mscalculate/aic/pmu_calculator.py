@@ -47,7 +47,7 @@ class PmuCalculator(ICalculator):
     def init_params(self):
         self._project_path = self.sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._iter_range = self.sample_config.get(StrConstant.PARAM_ITER_ID)
-        self._block_dims = {'block_dim': {}, 'mix_block_dim': {}}
+        self._block_dims = {'block_dim': {}, 'mix_block_dim': {}, 'block_dim_group': {}}
         self._core_num_dict = {'aic': 0, 'aiv': 0}
         self._freq = 0
         self.get_block_dim_from_ge()
