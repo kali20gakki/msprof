@@ -144,20 +144,22 @@ class TestAiCoreOpReport(unittest.TestCase):
             self.assertEqual(res, [])
 
     def test_union_task_ge_ai_core_data(self):
+        headers = ['Model ID', 'Task ID', 'Stream ID', 'Op Name', 'OP Type', 'OP State', 'Task Type', 'Context ID']
         op_state = "static"
+        task_type_ai_core = "AI_CORE"
         expect_res = [
-            (1, 2, 3, 11, 16, op_state, 4, 10),
-            (4, 5, 6, 11, 16, op_state, 7, 40),
-            (7, 8, 9, 11, 16, op_state, 10, "N/A")
+            (1, 2, 3, 11, 16, op_state, task_type_ai_core, 4, 10),
+            (4, 5, 6, 11, 16, op_state, task_type_ai_core, 7, 40),
+            (7, 8, 9, 11, 16, op_state, task_type_ai_core, 10, "N/A")
         ]
         data = [
-            (1, 2, 3, 11, 16, op_state, 4, -1),
-            (4, 5, 6, 11, 16, op_state, 7, -1),
-            (7, 8, 9, 11, 16, op_state, 10, -1)
+            (1, 2, 3, 11, 16, op_state, task_type_ai_core, 4, -1),
+            (4, 5, 6, 11, 16, op_state, task_type_ai_core, 7, -1),
+            (7, 8, 9, 11, 16, op_state, task_type_ai_core, 10, -1)
         ]
         ai_core_group_dict = {(2, 3, 4): deque([(10,)]), (5, 6, 7): deque([(40,)]), (10, 11, 12): deque([(20,)])}
         AiCoreOpReport.IS_PMU_UNIQUE_ID = False
-        res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
+        res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict, headers)
         self.assertEqual(res, expect_res)
         AiCoreOpReport.IS_PMU_UNIQUE_ID = True
 
@@ -176,42 +178,44 @@ class TestAiCoreOpReport(unittest.TestCase):
         self.assertEqual(res, expect)
 
     def test_union_task_ge_ai_core_data_success_when_exist_hardware_op_list(self):
+        headers = ['Model ID', 'Task ID', 'Stream ID', 'Op Name', 'OP Type', 'OP State', 'Task Type', 'Context ID']
         op_state = "dynamic"
         expect_res = [
-            (1, 2, 3, 11, 16, op_state, "AI_CPU", "N/A"),
-            (4, 5, 6, 11, 16, op_state, "AI_CPU", "N/A"),
-            (7, 8, 9, 11, 16, op_state, 10, "N/A")
+            (1, 2, 3, 11, 16, op_state, "AI_CPU", 1, "N/A"),
+            (4, 5, 6, 11, 16, op_state, "AI_CPU", 2, "N/A"),
+            (7, 8, 9, 11, 16, op_state, "AI_CORE", 10, "N/A")
         ]
         data = [
-            (1, 2, 3, 11, 16, op_state, "AI_CPU", 0),
-            (4, 5, 6, 11, 16, op_state, "AI_CPU", 0),
-            (7, 8, 9, 11, 16, op_state, 10, 0),
-            (1, 2, 3, 11, 16, op_state, "HCCL", 0),
-            (1, 3, 3, 11, 16, op_state, "HCCL_AI_CPU", 0)
+            (1, 2, 3, 11, 16, op_state, "AI_CPU", 1, 0),
+            (4, 5, 6, 11, 16, op_state, "AI_CPU", 2, 0),
+            (7, 8, 9, 11, 16, op_state, "AI_CORE", 10, 0),
+            (1, 2, 3, 11, 16, op_state, "HCCL", 3, 0),
+            (1, 3, 3, 11, 16, op_state, "HCCL_AI_CPU", 4, 0)
         ]
         ai_core_group_dict = {
-            (0, 2, 3, "AI_CPU"): deque([(10,)]), (0, 5, 6, "AI_CPU"): deque([(40,)]),
-            (0, 10, 11, 12): deque([(20,)]), (0, 2, 3, "HCCL"): deque([(50,)])
+            (0, 2, 3, 1): deque([(10,)]), (0, 5, 6, 2): deque([(40,)]),
+            (0, 10, 11, 12): deque([(20,)]), (0, 2, 3, 3): deque([(50,)])
         }
-        res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
+        res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict, headers)
         self.assertEqual(res, expect_res)
 
     def test_union_task_ge_ai_core_data_should_return_3_data_when_have_no_pmu_data(self):
+        headers = ['Model ID', 'Task ID', 'Stream ID', 'Op Name', 'OP Type', 'OP State', 'Task Type', 'Context ID']
         op_state = "N/A"
         expect_res = [
-            (1, 2, 3, 11, 16, op_state, "AI_CPU"),
-            (4, 5, 6, 11, 16, op_state, "AI_CPU"),
-            (7, 8, 9, 11, 16, op_state, 10)
+            (1, 2, 3, 11, 16, op_state, "AI_CPU", 1),
+            (4, 5, 6, 11, 16, op_state, "AI_CPU", 2),
+            (7, 8, 9, 11, 16, op_state, "AI_CORE", 10)
         ]
         data = [
-            (1, 2, 3, 11, 16, op_state, "AI_CPU", 0),
-            (4, 5, 6, 11, 16, op_state, "AI_CPU", 0),
-            (7, 8, 9, 11, 16, op_state, 10, 0),
-            (1, 2, 3, 11, 16, op_state, "HCCL", 0),
-            (1, 3, 3, 11, 16, op_state, "HCCL_AI_CPU", 0)
+            (1, 2, 3, 11, 16, op_state, "AI_CPU", 1, 0),
+            (4, 5, 6, 11, 16, op_state, "AI_CPU", 2, 0),
+            (7, 8, 9, 11, 16, op_state, "AI_CORE", 10, 0),
+            (1, 2, 3, 11, 16, op_state, "HCCL", 3, 0),
+            (1, 3, 3, 11, 16, op_state, "HCCL_AI_CPU", 4, 0)
         ]
         ai_core_group_dict = {}
-        res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
+        res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict, headers)
         self.assertEqual(res, expect_res)
 
     def test_count_num(self):
