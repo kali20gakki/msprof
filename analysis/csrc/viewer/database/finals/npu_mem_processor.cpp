@@ -49,21 +49,21 @@ NpuMemProcessor::OriDataFormat NpuMemProcessor::GetData(DBInfo &npuMemDB)
     return oriData;
 }
 
-NpuMemProcessor::ProcessedDataFormat NpuMemProcessor::FormatData(const OriDataFormat &oriData, uint16_t deviceId,
-                                                                 const Utils::ProfTimeRecord &timeRecord,
-                                                                 Utils::SyscntConversionParams &params)
+NpuMemProcessor::ProcessedDataFormat NpuMemProcessor::FormatData(const OriDataFormat &oriData, const uint16_t deviceId,
+                                                                 const uint64_t hostMonotonic,
+                                                                 const ProfTimeRecord &timeRecord)
 {
     ProcessedDataFormat processedData;
     NpuMemData data;
-    if (!Utils::Reserve(processedData, oriData.size())) {
+    if (!Reserve(processedData, oriData.size())) {
         ERROR("Reserve for NpuMem data failed.");
         return processedData;
     }
     for (auto &row: oriData) {
         std::tie(data.event, data.ddr, data.hbm, data.timestamp) = row;
-        HPFloat timestamp{GetTimeBySamplingTimestamp(data.timestamp, params)};
+        HPFloat timestamp{GetTimeBySamplingTimestamp(data.timestamp, hostMonotonic)};
         uint16_t type = UINT16_MAX;
-        if (Utils::StrToU16(type, data.event) == ANALYSIS_ERROR) {
+        if (StrToU16(type, data.event) == ANALYSIS_ERROR) {
             WARN("Converting string(event) to integer failed.");
         }
         processedData.emplace_back(type, data.ddr, data.hbm, GetLocalTime(timestamp, timeRecord).Uint64(), deviceId);
@@ -74,15 +74,15 @@ NpuMemProcessor::ProcessedDataFormat NpuMemProcessor::FormatData(const OriDataFo
 bool NpuMemProcessor::Process(const std::string &fileDir)
 {
     INFO("Start to process %.", fileDir);
-    Utils::ProfTimeRecord timeRecord;
-    Utils::SyscntConversionParams params;
+    ProfTimeRecord timeRecord;
+    uint64_t hostMonotonic;
     DBInfo npuMemDB("npu_mem.db", "NpuMem");
     bool flag = true;
     MAKE_SHARED0_NO_OPERATION(npuMemDB.database, NpuMemDB);
-    auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
-    bool timeFlag = Context::GetInstance().GetSyscntConversionParams(params, HOST_ID, fileDir);
+    auto deviceList = File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
+    bool timeFlag = Context::GetInstance().GetClockMonotonicRaw(hostMonotonic, HOST_ID, fileDir);
     for (const auto& devicePath: deviceList) {
-        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, npuMemDB.dbName});
+        std::string dbPath = File::PathJoin({devicePath, SQLITE, npuMemDB.dbName});
         // 并不是所有场景都有NpuMem数据
         auto status = CheckPath(dbPath);
         if (status != CHECK_SUCCESS) {
@@ -92,10 +92,10 @@ bool NpuMemProcessor::Process(const std::string &fileDir)
             continue;
         }
         if (!timeFlag) {
-            ERROR("GetSyscntConversionParams failed, profPath is %.", fileDir);
+            ERROR("GetClockMonotonicRaw failed, profPath is %.", fileDir);
             return false;
         }
-        uint16_t deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
+        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
         INFO("Start to process %, deviceId:%.", dbPath, deviceId);
         if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir)) {
             ERROR("Failed to obtain the time in start_info and end_info.");
@@ -109,7 +109,7 @@ bool NpuMemProcessor::Process(const std::string &fileDir)
             ERROR("Get % data failed in %.", npuMemDB.tableName, dbPath);
             continue;
         }
-        auto processedData = FormatData(oriData, deviceId, timeRecord, params);
+        auto processedData = FormatData(oriData, deviceId, hostMonotonic, timeRecord);
         if (!SaveData(processedData, TABLE_NAME_NPU_MEM)) {
             flag = false;
             ERROR("Save data failed, %.", dbPath);

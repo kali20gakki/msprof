@@ -42,9 +42,10 @@ bool LLCProcessor::Run()
     return flag;
 }
 
-LLCProcessor::OriDataFormat LLCProcessor::GetData(DBInfo &dbInfo)
+LLCProcessor::OriDataFormat LLCProcessor::GetData(const std::string &dbPath, DBInfo &dbInfo)
 {
     OriDataFormat data;
+    MAKE_SHARED_RETURN_VALUE(dbInfo.dbRunner, DBRunner, data, dbPath);
     std::string sql {"SELECT device_id, l3tid, timestamp, hitrate, throughput FROM " + dbInfo.tableName};
     if (!dbInfo.dbRunner->QueryData(sql, data)) {
         ERROR("Failed to obtain data from the % table.", dbInfo.tableName);
@@ -52,22 +53,26 @@ LLCProcessor::OriDataFormat LLCProcessor::GetData(DBInfo &dbInfo)
     return data;
 }
 
-LLCProcessor::ProcessedDataFormat LLCProcessor::FormatData(const OriDataFormat &oriData, uint16_t mode,
-                                                           const Utils::ProfTimeRecord &timeRecord,
-                                                           SyscntConversionParams &params)
+LLCProcessor::ProcessedDataFormat LLCProcessor::FormatData(const OriDataFormat &oriData, const ThreadData &threadData,
+                                                           const uint16_t mode)
 {
     ProcessedDataFormat processedData;
-    if (!Utils::Reserve(processedData, oriData.size())) {
+    if (oriData.empty()) {
+        ERROR("LLC oriData is empty.");
+        return processedData;
+    }
+    if (!Reserve(processedData, oriData.size())) {
         ERROR("Reserve for LLC data failed.");
         return processedData;
     }
     LLCData llcData;
     for (auto &row: oriData) {
         std::tie(llcData.deviceId, llcData.llcID, llcData.timestamp, llcData.hitRate, llcData.throughput) = row;
-        HPFloat timestamp = GetTimeBySamplingTimestamp(llcData.timestamp, params);
+        HPFloat timestamp = GetTimeBySamplingTimestamp(llcData.timestamp,
+                                                       threadData.hostMonotonic - threadData.deviceMonotonic);
         processedData.emplace_back(
-            llcData.deviceId, llcData.llcID, GetLocalTime(timestamp, timeRecord).Uint64(),
-            llcData.hitRate, llcData.throughput, mode);
+            llcData.deviceId, llcData.llcID, GetLocalTime(timestamp, threadData.timeRecord).Uint64(),
+            llcData.hitRate * PERCENTAGE, static_cast<uint64_t>(llcData.throughput * BYTE_SIZE * BYTE_SIZE), mode);
     }
     return processedData;
 }
@@ -91,14 +96,13 @@ bool LLCProcessor::Process(const std::string &fileDir)
 bool LLCProcessor::ProcessData(const std::string &fileDir)
 {
     bool flag = true;
-    Utils::ProfTimeRecord timeRecord;
-    Utils::SyscntConversionParams params;
+    ThreadData threadData;
     DBInfo llcDB("llc.db", "LLCMetrics");
-    auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
-    bool timeFlag = Context::GetInstance().GetSyscntConversionParams(params, HOST_ID, fileDir);
-    bool timeRecordFlag = Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir);
+    auto deviceList = File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
+    bool timeFlag = Context::GetInstance().GetClockMonotonicRaw(threadData.hostMonotonic, HOST_ID, fileDir);
+    bool timeRecordFlag = Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir);
     for (const auto &devicePath: deviceList) {
-        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, llcDB.dbName});
+        std::string dbPath = File::PathJoin({devicePath, SQLITE, llcDB.dbName});
         auto status = CheckPath(dbPath);
         if (status != CHECK_SUCCESS) {
             if (status == CHECK_FAILED) {
@@ -110,32 +114,33 @@ bool LLCProcessor::ProcessData(const std::string &fileDir)
             ERROR("Get param flag: %, get time record flag: %, in path %.", timeFlag, timeRecordFlag, fileDir);
             return false;
         }
-        uint16_t deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
-        INFO("Start to process %, deviceId:%.", dbPath, deviceId);
-        auto iter = MEMORY_TABLE.find(Context::GetInstance().GetLLCProfiling(deviceId, fileDir));
+        threadData.deviceId = GetDeviceIdByDevicePath(devicePath);
+        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, threadData.deviceId, fileDir) ||
+                (threadData.hostMonotonic < threadData.deviceMonotonic)) {
+            ERROR("Device MonotonicRaw is invalid in path: %., device id is %", fileDir, threadData.deviceId);
+            flag = false;
+            continue;
+        }
+        auto iter = MEMORY_TABLE.find(Context::GetInstance().GetLLCProfiling(threadData.deviceId, fileDir));
         if (iter == MEMORY_TABLE.end()) {
-            ERROR("Failed to obtain llc profiling from sample.json in path: %.", devicePath);
+            ERROR("GetLLCProfiling failed in path: %, device id is %", fileDir, threadData.deviceId);
             flag = false;
             continue;
         }
         uint16_t mode = iter->second;
-        MAKE_SHARED_RETURN_VALUE(llcDB.dbRunner, DBRunner, false, dbPath);
-        auto oriData = GetData(llcDB);
-        if (oriData.empty()) {
-            flag = false;
-            ERROR("Get % data empty in %.", llcDB.tableName, dbPath);
-            continue;
-        }
-        auto processedData = FormatData(oriData, mode, timeRecord, params);
+        INFO("Start to process %, deviceId:%.", dbPath, threadData.deviceId);
+        auto oriData = GetData(dbPath, llcDB);
+        auto processedData = FormatData(oriData, threadData, mode);
         if (!SaveData(processedData, TABLE_NAME_LLC)) {
             flag = false;
             ERROR("Save data failed, %.", dbPath);
             continue;
         }
-        INFO("process %, deviceId:% ends.", dbPath, deviceId);
+        INFO("process %, deviceId:% ends.", dbPath, threadData.deviceId);
     }
     return flag;
 }
+
 }  // Database
 }  // Viewer
 }  // Analysis

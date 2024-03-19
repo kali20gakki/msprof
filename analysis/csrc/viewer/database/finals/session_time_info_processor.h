@@ -14,7 +14,6 @@
 #define ANALYSIS_VIEWER_DATABASE_SESSION_TIME_INFO_PROCESSOR_H
 
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
-#include "analysis/csrc/utils/time_utils.h"
 
 namespace Analysis {
 namespace Viewer {

@@ -56,19 +56,20 @@ protected:
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_B, DEVICE_DIR, SQLITE})));
         CreateLLCDB(File::PathJoin({PROF_PATH_A, DEVICE_DIR, SQLITE, DB_NAME}), DATA_A);
         CreateLLCDB(File::PathJoin({PROF_PATH_B, DEVICE_DIR, SQLITE, DB_NAME}), DATA_B);
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).stubs()
-            .will(returnValue(true));
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetSyscntConversionParams).stubs()
-            .will(returnValue(true));
-        std::string llcProfiling = "read";
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetLLCProfiling).stubs()
-            .will(returnValue(llcProfiling));
+        nlohmann::json record = {
+            {"startCollectionTimeBegin", "1701069323851824"},
+            {"endCollectionTimeEnd", "1701069338041681"},
+            {"startClockMonotonicRaw", "36470610791630"},
+            {"clock_monotonic_raw", "36471130547330"},
+            {"llc_profiling", "read"},
+            {"platform_version", "5"},
+        };
+        MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
     }
     static void TearDownTestCase()
     {
         EXPECT_TRUE(File::RemoveDir(LLC_PATH, 0));
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetSyscntConversionParams).reset();
+        GlobalMockObject::verify();
     }
 
     static void CreateLLCDB(const std::string &dbPath, LLCProcessor::OriDataFormat data)
@@ -129,8 +130,6 @@ TEST_F(LLCProcessorUTest, TestRunShouldReturnFalseWhenGetTimeRecordFailed)
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).stubs()
         .will(returnValue(false));
     EXPECT_FALSE(processor.Run());
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).stubs()
-        .will(returnValue(true));
 }
 
 TEST_F(LLCProcessorUTest, TestRunShouldReturnFalseWhenCheckPathFailed)

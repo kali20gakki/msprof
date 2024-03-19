@@ -185,7 +185,7 @@ namespace {
         {"llcId", SQL_INTEGER_TYPE},
         {"timestampNs", SQL_INTEGER_TYPE},
         {"hitRate", SQL_REAL_TYPE},
-        {"throughput", SQL_REAL_TYPE},
+        {"throughput", SQL_INTEGER_TYPE},
         {"mode", SQL_INTEGER_TYPE},
     };
 
@@ -207,8 +207,8 @@ namespace {
     const TableColumns SAMPLE_PMU_SUMMARY = {
         {"deviceId", SQL_INTEGER_TYPE},
         {"metric", SQL_INTEGER_TYPE},
-        {"value", SQL_TEXT_TYPE},
-        {"coreId", SQL_TEXT_TYPE}
+        {"value", SQL_NUMERIC_TYPE},
+        {"coreId", SQL_INTEGER_TYPE}
     };
 
     const TableColumns PCIE = {

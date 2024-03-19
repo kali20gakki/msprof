@@ -14,7 +14,6 @@
 
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/utils/time_utils.h"
 
 namespace Analysis {
 namespace Viewer {
@@ -36,13 +35,6 @@ class CommunicationInfoProcessor : public TableProcessor {
     // opName, start, end, connectionId, group_name, opId
     using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                                                              uint64_t>>;
-    // 不同线程需要实例化的数据集合，由于函数行数限制定义为结构体
-    struct ThreadData {
-        uint16_t deviceId = UINT16_MAX;
-        uint32_t profId = UINT32_MAX;
-        Utils::ProfTimeRecord timeRecord;
-        DBInfo hcclSingleDeviceDB{"hccl_single_device.db", "HCCLTaskSingleDevice"};
-    };
     struct CommunicationTaskData {
         int32_t planeId = INT32_MAX;
         uint32_t modelId = UINT32_MAX;

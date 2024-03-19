@@ -83,6 +83,13 @@ protected:
 
     virtual void SetUp()
     {
+        nlohmann::json record = {
+            {"startCollectionTimeBegin", "1701069323851824"},
+            {"endCollectionTimeEnd", "1701069338041681"},
+            {"startClockMonotonicRaw", "36470610791630"},
+            {"clock_monotonic_raw", "36471130547330"},
+        };
+        MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
     }
 
     virtual void TearDown()
@@ -90,20 +97,14 @@ protected:
         if (File::Exist(DB_PATH)) {
             EXPECT_TRUE(File::DeleteFile(DB_PATH));
         }
+        GlobalMockObject::verify();
     }
 };
 
 TEST_F(PCIeProcessorUTest, TestRunShouldReturnTrueWhenRunSuccess)
 {
-    nlohmann::json record = {
-        {"startCollectionTimeBegin", "1701069323851824"},
-        {"endCollectionTimeEnd", "1701069338041681"},
-        {"startClockMonotonicRaw", "36470610791630"},
-    };
-    MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
     auto processor = PCIeProcessor(DB_PATH, {PROF});
     EXPECT_TRUE(processor.Run());
-    MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
 
     std::shared_ptr<DBRunner> dbRunner;
     MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
@@ -130,12 +131,6 @@ TEST_F(PCIeProcessorUTest, TestProcessShouldReturnFalseWhenGetRecordOrCheckPathF
 
 TEST_F(PCIeProcessorUTest, TestFormatDataShouldReturnFalseWhenFormatDataFailed)
 {
-    nlohmann::json record = {
-        {"startCollectionTimeBegin", "1701069323851824"},
-        {"endCollectionTimeEnd", "1701069338041681"},
-        {"startClockMonotonicRaw", "36470610791630"},
-    };
-    MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
     // dataFormat empty
     MOCKER_CPP(&PCIeDataFormat::empty).stubs().will(returnValue(true));
     auto processor1 = PCIeProcessor(DB_PATH, {PROF});
@@ -153,7 +148,5 @@ TEST_F(PCIeProcessorUTest, TestFormatDataShouldReturnFalseWhenFormatDataFailed)
     auto processor3 = PCIeProcessor(DB_PATH, {PROF});
     EXPECT_FALSE(processor3.Run());
     MOCKER_CPP(&ProcessedDataFormat::empty).reset();
-
-    MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
 }
 
