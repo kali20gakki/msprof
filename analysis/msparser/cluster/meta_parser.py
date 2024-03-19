@@ -87,19 +87,24 @@ class HcclAnalysisTool:
         return [transit_time, transit_size]
 
     @classmethod
-    def get_rdma_send_payload_info(cls: any, events: list, idx: int, rdma_transit_op_num: int) -> list:
-        saved_size = 0
-        payload_cnt = 0
-        first_payload_time = events[idx].timestamp
+    def find_consecutive_payload_tasks_count(cls: any, events: list, idx: int) -> int:
+        count = 0
         while events[idx].rdma_type == 'RDMA_SEND_PAYLOAD':
-            saved_size += events[idx].size
-            payload_cnt += 1
             idx += 1
+            count += 1
+        return count
+
+    @classmethod
+    def calculate_consecutive_payload_tasks_info(cls: any, events: list, idx: int, payload_cnt: int, idx_jump: int):
+        saved_size = 0
+        first_payload_time = events[idx].timestamp
+        for i in range(idx, idx + payload_cnt):
+            saved_size += events[i].size
         transit_size = saved_size / NumberConstant.COMMUNICATION_B_to_MB
-        transit_time = HcclAnalysisTool.get_value(events[idx + rdma_transit_op_num - 2].duration +
-                                                  events[idx + rdma_transit_op_num - 2].timestamp -
+        transit_time = HcclAnalysisTool.get_value(events[idx + payload_cnt + idx_jump - 2].duration +
+                                                  events[idx + payload_cnt + idx_jump - 2].timestamp -
                                                   first_payload_time, 'duration') / NumberConstant.NS_TO_MS
-        return [transit_time, transit_size, payload_cnt]
+        return [transit_time, transit_size]
 
     @classmethod
     def is_send_or_recv_op(cls, events: list, idx: int) -> bool:
