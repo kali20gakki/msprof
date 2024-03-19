@@ -76,7 +76,6 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                 payload_time = rdma_send_payload_transit_result[0]
                 payload_size = rdma_send_payload_transit_result[1]
                 payload_bandwidth = payload_size / payload_time
-
                 for index in range(idx, idx + payload_cnt):
                     communication_data[index][1] = communication_data[index][1].replace(bandwidth=payload_bandwidth)
                 idx += payload_cnt + idx_jump
