@@ -12,7 +12,6 @@ from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_object import HighPerfDict
-from common_func.msprof_object import CustomizedNamedtupleFactory
 from mscalculate.cann.additional_record import AdditionalRecord
 from mscalculate.cann.cann_event_generator import CANNThreadDB
 from mscalculate.cann.event import Event
@@ -24,9 +23,9 @@ from msmodel.runtime.runtime_host_task_model import RuntimeHostTaskModel
 from profiling_bean.db_dto.api_data_dto import ApiDataDto
 from profiling_bean.db_dto.ctx_id_dto import CtxIdDto
 from profiling_bean.db_dto.fusion_op_info_dto import FusionOpInfoDto
-from profiling_bean.db_dto.ge_time_dto import GeTimeDto
 from profiling_bean.db_dto.graph_id_map_dto import GraphIdMapDto
 from profiling_bean.db_dto.hccl_info_dto import HCCLInfoDto
+from profiling_bean.db_dto.hccl_op_info_dto import HCCLOpInfoDto
 from profiling_bean.db_dto.mem_copy_info_dto import MemCopyInfoDto
 from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
 from profiling_bean.db_dto.task_track_dto import TaskTrackDto
@@ -340,6 +339,8 @@ class TaskGear(CANNGear):
             elif isinstance(record.dto, CtxIdDto):
                 node_desc = node_descs.set_default_call_obj_later(self.NodeDesc.get_hash(record.dto), self.NodeDesc)
                 node_desc.ctx_info = record.dto
+            elif isinstance(record.dto, HCCLOpInfoDto):
+                continue
             else:
                 logging.error("Unsupported additional type: %s in node level.", type(record.dto))
         return node_descs
@@ -435,19 +436,38 @@ class TaskGear(CANNGear):
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
         model_id = NumberConstant.INVALID_MODEL_ID if model_dto.item_id is None else model_dto.item_id
         connection_id = node_dto.connection_id if node_dto.connection_id is not None else Constant.DEFAULT_INVALID_VALUE
+
+        node_basic_info = [
+            task_track_dto.device_id, model_id, request_id, task_track_dto.thread_id, node_dto.item_id,
+            self.HCCL_TASK_TYPE, Constant.NA, node_dto.start, node_dto.end,
+            Constant.NA, connection_id
+        ]
+        hccl_op_info = [
+            Constant.DEFAULT_INVALID_VALUE, Constant.DEFAULT_INVALID_VALUE,
+            Constant.NA, Constant.NA, Constant.DEFAULT_INVALID_VALUE, Constant.NA
+        ]
+
         if not node_event.additional_record:
-            self.hccl_op_info.append([task_track_dto.device_id, model_id, request_id,
-                                      task_track_dto.thread_id, node_dto.item_id,
-                                      self.HCCL_TASK_TYPE, "N/A", node_dto.start, node_dto.end,
-                                      "N/A", connection_id])
+            self.hccl_op_info.append(node_basic_info + hccl_op_info)
             return
 
+        has_hccl_op_info = False
         for record in node_event.additional_record:
             if isinstance(record.dto, NodeBasicInfoDto):
-                self.hccl_op_info.append([task_track_dto.device_id, model_id, request_id,
-                                          node_dto.thread_id, node_dto.item_id,
-                                          record.dto.task_type, record.dto.op_type, node_dto.start, node_dto.end,
-                                          record.dto.is_dynamic, connection_id])
+                node_basic_info = [
+                    task_track_dto.device_id, model_id, request_id, node_dto.thread_id, node_dto.item_id,
+                    record.dto.task_type, record.dto.op_type, node_dto.start, node_dto.end,
+                    record.dto.is_dynamic, connection_id
+                ]
+            if isinstance(record.dto, HCCLOpInfoDto):
+                hccl_op_info = [
+                    record.dto.relay, record.dto.retry, record.dto.data_type,
+                    record.dto.alg_type, record.dto.count, record.dto.group_name
+                ]
+                has_hccl_op_info = True
+        if not has_hccl_op_info:
+            logging.error("Not report hccl op info for api: %s", node_dto.item_id)
+        self.hccl_op_info.append(node_basic_info + hccl_op_info)
 
     def is_kernel_task(self, task_track_dto: TaskTrackDto, is_not_hccl_task: bool) -> bool:
         if task_track_dto.struct_type is None:

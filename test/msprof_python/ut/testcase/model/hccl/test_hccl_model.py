@@ -47,7 +47,7 @@ class TestHCCLModel(TestDirCRBaseModel):
                      "plane_id INTEGER, " \
                      "timestamp REAL, " \
                      "duration REAL, " \
-                     "args TEXT)".format(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
+                     "args TEXT)".format(DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE)
         test = HcclTask()
         for index, i in enumerate(data):
             if hasattr(test, col[index]):
@@ -55,20 +55,20 @@ class TestHCCLModel(TestDirCRBaseModel):
         with DBOpen(DBNameConstant.DB_HCCL) as db_open:
             db_open.create_table(create_sql)
             with mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[test]):
-                check = HCCLModel("", [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
+                check = HCCLModel("", [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE])
                 check.cur = db_open.db_curs
                 check.get_hccl_data()
 
     def test_get_hccl_task_data_should_return_empty_when_attach_db_failed(self):
         with mock.patch(NAMESPACE + '.HcclViewModel.attach_to_db', return_value=False):
-            model = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
+            model = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE])
             ret = model.get_hccl_task_data()
             self.assertEqual([], ret)
 
     def test_get_hccl_task_data_should_return_empty_when_device_id_na(self):
         with mock.patch(NAMESPACE + '.HcclViewModel.attach_to_db', return_value=True):
             InfoConfReader()._info_json = {}
-            model = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
+            model = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE])
             ret = model.get_hccl_task_data()
             self.assertEqual([], ret)
 
@@ -128,18 +128,28 @@ class TestHCCLModel(TestDirCRBaseModel):
     def test_get_hccl_ops_should_return_empty_when_device_id_na(self):
         with mock.patch(NAMESPACE + '.HcclViewModel.attach_to_db', return_value=True):
             InfoConfReader()._info_json = {}
-            model = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
+            model = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE])
             ret = model.get_hccl_ops(1, 1)
             self.assertEqual([], ret)
 
     def test_get_hccl_ops_should_return_diff_result_when_query_diff_device_id_in_op_scene(self):
+        broadcast_op_name = "hcom_broadcast_"
+        task_type = "HCCL"
+        group_name = "728400854065026987"
+        alg_type = "HD-MESH"
         # device_id, model_id, index_id, thread_id, op_name, task_type, op_type, begin, end, is_dynamic, connection_id
+        # relay, retry, data_type, alg_type, count, group_name
         hccl_op_data = [
-            (0, 1, 1, 1, "hcom_broadcast_", "HCCL", "hcom_broadcast_", 1, 1, 1, 1),
-            (0, 1, 1, 1, "hcom_broadcast_", "HCCL", "hcom_broadcast_", 2, 1, 1, 1),
-            (0, 1, 1, 1, "hcom_broadcast_", "HCCL", "hcom_broadcast_", 3, 1, 1, 1),
-            (1, 1, 1, 1, "hcom_broadcast_", "HCCL", "hcom_broadcast_", 3, 1, 1, 1),
-            (2, 1, 1, 1, "hcom_broadcast_", "HCCL", "hcom_broadcast_", 4, 1, 1, 1),
+            (0, 1, 1, 1, broadcast_op_name, task_type, broadcast_op_name, 1, 1, 1, 1,
+             1, 0, "INT8", alg_type, 123, group_name),
+            (0, 1, 1, 1, broadcast_op_name, task_type, broadcast_op_name, 2, 1, 1, 1,
+             1, 0, "INT16", alg_type, 489, group_name),
+            (0, 1, 1, 1, broadcast_op_name, task_type, broadcast_op_name, 3, 1, 1, 1,
+             1, 0, "INT32", alg_type, 984, group_name),
+            (1, 1, 1, 1, broadcast_op_name, task_type, broadcast_op_name, 3, 1, 1, 1,
+             1, 0, "INT64", alg_type, 892, group_name),
+            (2, 1, 1, 1, broadcast_op_name, task_type, broadcast_op_name, 4, 1, 1, 1,
+             1, 0, "FP16", alg_type, 369, group_name),
         ]
 
         model = HcclViewModel(self.PROF_DEVICE_DIR, DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_OP])
@@ -167,13 +177,23 @@ class TestHCCLModel(TestDirCRBaseModel):
         model.finalize()
 
     def test_get_hccl_ops_should_return_diff_result_when_query_diff_device_id_in_graph_scene(self):
+        broadcast_op_name = "hcom_broadcast_"
+        task_type = "HCCL"
+        group_name = "728400854065026987"
+        alg_type = "HD-MESH"
         # device_id, model_id, index_id, thread_id, op_name, task_type, op_type, begin, end, is_dynamic, connection_id
+        # relay, retry, data_type, alg_type, count, group_name
         hccl_op_data = [
-            (0, 1, 1, 1, "hcom_broadcast_", "HCCL", "hcom_broadcast_", 1, 1, 1, 1),
-            (0, 2, 2, 1, "hcom_broadcast_", "HCCL", "hcom_broadcast_", 2, 1, 1, 1),
-            (0, 2, 2, 1, "hcom_broadcast_", "HCCL", "hcom_broadcast_", 3, 1, 1, 1),
-            (1, 1, 1, 1, "hcom_broadcast_", "HCCL", "hcom_broadcast_", 3, 1, 1, 1),
-            (2, 3, 3, 1, "hcom_broadcast_", "HCCL", "hcom_broadcast_", 4, 1, 1, 1),
+            (0, 1, 1, 1, broadcast_op_name, task_type, broadcast_op_name, 1, 1, 1, 1,
+             1, 0, "INT8", alg_type, 123, group_name),
+            (0, 2, 2, 1, broadcast_op_name, task_type, broadcast_op_name, 2, 1, 1, 1,
+             1, 0, "INT16", alg_type, 146, group_name),
+            (0, 2, 2, 1, broadcast_op_name, task_type, broadcast_op_name, 3, 1, 1, 1,
+             1, 0, "INT32", alg_type, 692, group_name),
+            (1, 1, 1, 1, broadcast_op_name, task_type, broadcast_op_name, 3, 1, 1, 1,
+             1, 0, "INT64", alg_type, 437, group_name),
+            (2, 3, 3, 1, broadcast_op_name, task_type, broadcast_op_name, 4, 1, 1, 1,
+             1, 0, "FP16", alg_type, 831, group_name),
         ]
 
         model = HcclViewModel(self.PROF_DEVICE_DIR, DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_OP])
@@ -203,12 +223,14 @@ class TestHCCLModel(TestDirCRBaseModel):
 
     def test_get_task_time_sql(self):
         with mock.patch(NAMESPACE + '.DBManager.fetch_all_data'):
-            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
+            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                                  [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE])
             check.get_task_time_sql()
 
     def test_get_hccl_op_data_by_group_sql(self):
         with mock.patch(NAMESPACE + '.DBManager.fetch_all_data'):
-            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
+            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                                  [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE])
             check.get_hccl_op_data_by_group()
 
     def test_get_hccl_op_data_by_group_sql_should_return_empty_when_no_master(self):
@@ -223,27 +245,37 @@ class TestHCCLModel(TestDirCRBaseModel):
              9402293354310575111, 642070508282, 2, 6286050773361.97, 1409648.16503906,
              1, "HCCL", "hcom_allReduce_", 733589, 0),
         ]
-        model = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
+        model = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                              [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE])
         model.init()
         model.create_table()
-        model.insert_data_to_db(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE, hccl_op_data)
+        model.insert_data_to_db(DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE, hccl_op_data)
         with mock.patch(NAMESPACE + '.HcclViewModel.attach_to_db', return_value=True):
             hccl_result = model.get_hccl_op_data_by_group()
             self.assertEqual(len(hccl_result), 0)
         model.finalize()
 
+    def test_get_hccl_op_info_from_table_sql(self):
+        with mock.patch(NAMESPACE + '.DBManager.fetch_all_data'):
+            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                                  [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE])
+            check.get_hccl_op_info_from_table()
+
     def test_get_hccl_op_time_section_sql(self):
         with mock.patch(NAMESPACE + '.DBManager.fetch_all_data'):
-            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
+            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                                  [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE])
             check.get_hccl_op_time_section()
 
     def test_create_table_by_name_should_drop_table_when_tabel_exist(self):
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
-            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
+            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                                  [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE])
             check.create_table_by_name(table_name='test_name')
 
     def test_create_table_by_name_should_not_drop_table_when_tabel_not_exist(self):
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False), \
                 mock.patch(NAMESPACE + '.DBManager.sql_create_general_table'):
-            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
+            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                                  [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE])
             check.create_table_by_name(table_name='test_name')

@@ -83,6 +83,7 @@ class DataTag(Enum):
     DBG_FILE = 70
     NPU_MODULE_MEM = 71
     AICPU_ADD_INFO = 72
+    HCCL_OP_INFO = 74
 
 
 @unique

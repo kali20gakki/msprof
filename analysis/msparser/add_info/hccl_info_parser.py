@@ -4,11 +4,11 @@
 
 import logging
 import os
-from enum import Enum
 
 from common_func.constant import Constant
 from common_func.file_manager import FileOpen
 from common_func.hash_dict_constant import HashDictData
+from common_func.hccl_info_common import trans_enum_name, RoleType, OpType, DataType, LinkType, TransPortType, RdmaType
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
@@ -25,54 +25,6 @@ class HcclInfoParser(DataParser, MsMultiProcess):
     parsing hccl information data class
     """
 
-    class RoleType(Enum):
-        DST = 0
-        SRC = 1
-        INVALID_TYPE = 4294967295
-
-    class OpType(Enum):
-        SUM = 0
-        MUL = 1
-        MAX = 2
-        MIN = 3
-        INVALID_TYPE = 4294967295
-
-    class DataType(Enum):
-        INT8 = 0
-        INT16 = 1
-        INT32 = 2
-        FP16 = 3
-        FP32 = 4
-        INT64 = 5
-        UINT64 = 6
-        INVALID_TYPE = 4294967295
-
-    class LinkType(Enum):
-        ON_CHIP = 0
-        HCCS = 1
-        PCIE = 2
-        ROCE = 3
-        SIO = 4
-        HCCS_SW = 5
-        STANDARD_ROCE = 6
-        RESERVED = 7
-        INVALID_TYPE = 4294967295
-
-    class TransPortType(Enum):
-        SDMA = 0
-        RDMA = 1
-        LOCAL = 2
-        INVALID_TYPE = 4294967295
-
-    class RdmaType(Enum):
-        RDMA_SEND_NOTIFY = 0
-        RDMA_SEND_PAYLOAD = 1
-        RDMA_PAYLOAD_PREPARE = 2
-        RDMA_PAYLOAD_CHECK = 3
-        RDMA_PAYLOAD_ACK = 4
-        RDMA_SEND_OP = 5
-        INVALID_TYPE = 4294967295
-
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
         super(DataParser, self).__init__(sample_config)
@@ -80,13 +32,6 @@ class HcclInfoParser(DataParser, MsMultiProcess):
         self._sample_config = sample_config
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._hccl_info_data = []
-
-    @staticmethod
-    def trans_enum_name(enum_class, value):
-        try:
-            return enum_class(int(value)).name
-        except ValueError:
-            return value
 
     def parse(self: any) -> None:
         """
@@ -133,12 +78,12 @@ class HcclInfoParser(DataParser, MsMultiProcess):
         hash_data = HashDictData(self._project_path).get_ge_hash_dict()
         reformat = []
         for data in self._hccl_info_data:
-            role = self.trans_enum_name(self.RoleType, data.role)
-            op_type = self.trans_enum_name(self.OpType, data.op_type)
-            data_type = self.trans_enum_name(self.DataType, data.data_type)
-            link_type = self.trans_enum_name(self.LinkType, data.link_type)
-            transport_type = self.trans_enum_name(self.TransPortType, data.transport_type)
-            rdma_type = self.trans_enum_name(self.RdmaType, data.rdma_type)
+            role = trans_enum_name(RoleType, data.role)
+            op_type = trans_enum_name(OpType, data.op_type)
+            data_type = trans_enum_name(DataType, data.data_type)
+            link_type = trans_enum_name(LinkType, data.link_type)
+            transport_type = trans_enum_name(TransPortType, data.transport_type)
+            rdma_type = trans_enum_name(RdmaType, data.rdma_type)
             reformat.append(
                 [data.level, type_info_data.get(data.struct_type, data.struct_type), data.thread_id, data.data_len,
                  data.timestamp, hash_data.get(data.item_id, data.item_id), data.ccl_tag,

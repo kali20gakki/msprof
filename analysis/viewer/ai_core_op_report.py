@@ -216,7 +216,7 @@ class AiCoreOpReport:
         if not os.path.exists(PathManager.get_db_path(project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
             return []
         with HcclViewModel(project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
-                           [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE]) as hccl_model:
+                           [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE]) as hccl_model:
             if not hccl_model.check_table():
                 return []
             hccl_comunication_data = hccl_model.get_hccl_op_data_by_group()

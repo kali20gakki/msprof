@@ -29,6 +29,7 @@ from profiling_bean.db_dto.ctx_id_dto import CtxIdDto
 from profiling_bean.db_dto.fusion_op_info_dto import FusionOpInfoDto
 from profiling_bean.db_dto.ge_time_dto import GeTimeDto
 from profiling_bean.db_dto.hccl_info_dto import HCCLInfoDto
+from profiling_bean.db_dto.hccl_op_info_dto import HCCLOpInfoDto
 from profiling_bean.db_dto.mem_copy_info_dto import MemCopyInfoDto
 from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
 from profiling_bean.db_dto.task_track_dto import TaskTrackDto
@@ -232,7 +233,11 @@ class TestCANNAnalysisGear(unittest.TestCase):
         node_basic_info_dto.task_type = 'HCCL'
         node_basic_info_dto.op_name = "1"
         node_basic_info_dto.timestamp = 400
-        event8.additional_record = [self.create_addition_record(node_basic_info_dto, 400, record_db)]
+        hccl_op_info = HCCLOpInfoDto(data_type="FP32", alg_type="RING-MESH", count=742)
+        event8.additional_record = [
+            self.create_addition_record(node_basic_info_dto, 400, record_db),
+            self.create_addition_record(hccl_op_info, 400, record_db)
+        ]
         event9 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 372, 390, "hccl tbe", 0), api_db)
         hccl_info_dto = HCCLInfoDto()
         hccl_info_dto.plane_id = 9
@@ -288,6 +293,10 @@ class TestCANNAnalysisGear(unittest.TestCase):
         self.assertTrue(
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
                                           DBNameConstant.TABLE_HCCL_TASK, 'plane_id', 8))
+    
+        self.assertTrue(
+            DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
+                                          DBNameConstant.TABLE_HCCL_OP, 'data_type', "FP32"))
 
     def test_task_gear_should_return_when_invalid_node_event(self):
         gear = TaskGear(self.PROF_HOST_DIR)

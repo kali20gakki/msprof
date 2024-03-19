@@ -208,7 +208,7 @@ class MsProfExportDataConfig(MetaConfig):
         'hccl': [
             ('handler', '_get_hccl_timeline'),
             ('db', 'hccl_single_device.db'),
-            ('table', 'HCCLSingleDevice')
+            ('table', 'HCCLTaskSingleDevice')
         ],
         'msprof_tx': [
             ('handler', '_get_msproftx_data'),

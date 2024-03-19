@@ -40,9 +40,9 @@ const std::string PROF_PATH_A = File::PathJoin({COMMUNICATION_TASK_PATH,
 const std::string PROF_PATH_B = File::PathJoin({COMMUNICATION_TASK_PATH,
                                                 "./PROF_000001_20231125090304037_012333MBJNQLKJ"});
 const std::set<std::string> PROF_PATHS = {PROF_PATH_A, PROF_PATH_B};
-const std::string TABLE_NAME = "HCCLSingleDevice";
+const std::string TABLE_NAME = "HCCLTaskSingleDevice";
 
-using HcclSingleDeviceFormat = std::vector<std::tuple<uint32_t, int32_t, std::string, uint32_t, std::string,
+using HcclTaskSingleDeviceFormat = std::vector<std::tuple<uint32_t, int32_t, std::string, uint32_t, std::string,
                                                       std::string, double, int32_t, double, double, double,
                                                       std::string, std::string, uint64_t, int32_t, uint64_t, uint32_t,
                                                       double, uint32_t, uint32_t, std::string, uint64_t, std::string,
@@ -55,15 +55,15 @@ using CommunicationTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, u
 using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                                                          uint64_t>>;
 
-const HcclSingleDeviceFormat DATA_A{{4294967295, -1, "hcom_allReduce__360_0_1", 0, "Memcpy", "10652853832407468360",
+const HcclTaskSingleDeviceFormat DATA_A{{4294967295, -1, "hcom_allReduce__360_0_1", 0, "Memcpy", "10652832407468360",
                                      78180470736653, 0, 781687236999155, 2994.875, 1, "HCCL", "hcom_allReduce_", 125,
                                      1, 11, 1, 14.1825906735751, 0, 0, "SDMA", 262144, "INVALID_TYPE",
                                      "ON_CHIP", 87.530865228098, 4294967295, 4294967296, 1, "INVALID_TYPE"},
-                                    {4294967295, -1, "hcom_allReduce__360_0_1", 0, "Memcpy", "10652853832407468360",
+                                    {4294967295, -1, "hcom_allReduce__360_0_1", 0, "Memcpy", "10652832407468360",
                                      78180470736653, 0, 781687236999155, 2994.875, 1, "HCCL", "hcom_allReduce_", 126,
                                      1, 11, 2, 14.1825906735751, 0, 0, "SDMA", 262144, "FP16",
                                      "HCCS", 87.530865228098, 4294967295, 8, 1, "INVALID_TYPE"}};
-const HcclSingleDeviceFormat DATA_B{{4294967295, -1, "hcom_allReduce__360_0_2", 0, "Memcpy23", "10652853832407468233",
+const HcclTaskSingleDeviceFormat DATA_B{{4294967295, -1, "hcom_allReduce__360_0_2", 0, "Memcpy23", "10653832407468233",
                                      78180470736653, 0, 781687236999155, 2994.875, 3, "HCCL", "hcom_allReduce_", 125,
                                      1, 11, 3, 14.1825906735751, 1, 4, "SDMA", 262144, "INVALID_TYPE",
                                      "ON_CHIP", 87.530865228098, 4294967295, 4294967296, 1, "INVALID_TYPE"},
@@ -100,7 +100,7 @@ protected:
         EXPECT_TRUE(File::RemoveDir(COMMUNICATION_TASK_PATH, DEPTH));
         MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
     }
-    static void CreateHcclSingleDevice(const std::string& dbPath, HcclSingleDeviceFormat data)
+    static void CreateHcclSingleDevice(const std::string& dbPath, HcclTaskSingleDeviceFormat data)
     {
         std::shared_ptr<HCCLSingleDeviceDB> database;
         MAKE_SHARED0_RETURN_VOID(database, HCCLSingleDeviceDB);

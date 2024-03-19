@@ -41,7 +41,7 @@ class CommunicationInfoProcessor : public TableProcessor {
         uint16_t deviceId = UINT16_MAX;
         uint32_t profId = UINT32_MAX;
         Utils::ProfTimeRecord timeRecord;
-        DBInfo hcclSingleDeviceDB{"hccl_single_device.db", "HCCLSingleDevice"};
+        DBInfo hcclSingleDeviceDB{"hccl_single_device.db", "HCCLTaskSingleDevice"};
     };
     struct CommunicationTaskData {
         int32_t planeId = INT32_MAX;
@@ -64,7 +64,7 @@ class CommunicationInfoProcessor : public TableProcessor {
         uint64_t notifyId = UINT64_MAX;
         uint64_t rdmaType = UINT64_MAX;
     };
-    struct HcclSingleDeviceData {
+    struct HcclTaskSingleDeviceData {
         uint32_t connectionId = UINT32_MAX;
         double timestamp = 0.0;
         double duration = 0.0;
@@ -87,7 +87,7 @@ private:
     static OriDataFormat GetData(const DBInfo &hcclSingleDeviceDB);
     bool FormatData(const OriDataFormat &oriData, CommunicationTaskDataFormat &taskData,
                     CommunicationOpDataFormat &opData, const ThreadData &threadData);
-    void Update(const HcclFormat &oriData, HcclSingleDeviceData &hcclData, CommunicationTaskData &taskData,
+    void Update(const HcclFormat &oriData, HcclTaskSingleDeviceData &hcclData, CommunicationTaskData &taskData,
                 uint16_t deviceId);
 };
 

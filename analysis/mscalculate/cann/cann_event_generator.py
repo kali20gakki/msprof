@@ -18,6 +18,7 @@ from msmodel.add_info.graph_add_info_model import GraphAddInfoModel
 from msmodel.add_info.hccl_info_model import HcclInfoModel
 from msmodel.add_info.tensor_add_info_model import TensorAddInfoModel
 from msmodel.api.api_data_model import ApiDataModel
+from msmodel.compact_info.hccl_op_info_model import HcclOpInfoModel
 from msmodel.compact_info.memcpy_info_model import MemcpyInfoModel
 from msmodel.compact_info.node_basic_info_model import NodeBasicInfoModel
 from msmodel.compact_info.task_track_model import TaskTrackModel
@@ -28,6 +29,7 @@ from profiling_bean.db_dto.event_data_dto import EventDataDto
 from profiling_bean.db_dto.fusion_op_info_dto import FusionOpInfoDto
 from profiling_bean.db_dto.graph_id_map_dto import GraphIdMapDto
 from profiling_bean.db_dto.hccl_info_dto import HCCLInfoDto
+from profiling_bean.db_dto.hccl_op_info_dto import HCCLOpInfoDto
 from profiling_bean.db_dto.mem_copy_info_dto import MemCopyInfoDto
 from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
 from profiling_bean.db_dto.task_track_dto import TaskTrackDto
@@ -79,6 +81,7 @@ class CANNEventGenerator:
         self.hccl_info_model = HcclInfoModel(self._project_path)
         self.graph_id_map_model = GraphAddInfoModel(self._project_path)
         self.fusion_op_info_model = FusionAddInfoModel(self._project_path)
+        self.hccl_op_info_model = HcclOpInfoModel(self._project_path)
 
     @staticmethod
     def is_kernel_api(api_data_dto: ApiDataDto) -> bool:
@@ -205,6 +208,13 @@ class CANNEventGenerator:
             fusion_op_infos = fusion_op_model.get_all_data(DBNameConstant.TABLE_FUSION_ADD_INFO, FusionOpInfoDto)
             self.record_additional_info(fusion_op_infos)
 
+    def generate_hccl_op_info_event(self):
+        if not self.hccl_op_info_model.check_db():
+            return
+        with self.hccl_op_info_model as hccl_op_info_model:
+            hccl_op_infos = hccl_op_info_model.get_all_data(DBNameConstant.TABLE_HCCL_OP_INFO, HCCLOpInfoDto)
+            self.record_additional_info(hccl_op_infos)
+
     def lock_queues(self):
         for queue in self.event_queues.values():
             queue.lock()
@@ -233,6 +243,7 @@ class CANNEventGenerator:
         self.generate_graph_id_map_event()
         self.generate_fusion_op_info_event()
         self.generate_ctx_id_event()
+        self.generate_hccl_op_info_event()
         self.generate_hccl_info_event()
 
         self.lock_queues()

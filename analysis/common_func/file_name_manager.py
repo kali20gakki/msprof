@@ -227,6 +227,7 @@ class FileNameManagerConstant:
     CTX_ID_FILE_PATTERN = r"^(unaging|aging)\.additional\.context_id_info\.slice_\d+"
     GE_LOGIC_STREAM_INFO_PATTERN = r"^(unaging|aging)\.additional\.logic_stream_info\.slice_\d+"
     AICPU_FILE_PATTERN = r"^aging\.additional\.data_preprocess\.slice_\d+"
+    HCCL_OP_INFO_FILE_PATTERN = r"^(unaging|aging)\.compact\.hccl_op_info\.slice_\d+"
 
     # nano
     NANO_MODEL_EXEOM_PATTERN = r"^unaging\.additional\.model_exeom\.slice_\d+"
@@ -1015,3 +1016,11 @@ def get_dbg_file_compiles() -> tuple:
     :return: nano host info files regex
     """
     return (re.compile(FileNameManagerConstant.DBG_PATTERN),)
+
+
+def get_hccl_op_info_compiles() -> tuple:
+    """
+    get hccl op info data files regex compiles
+    :return: hccl op info data files regex
+    """
+    return (re.compile(FileNameManagerConstant.HCCL_OP_INFO_FILE_PATTERN),)

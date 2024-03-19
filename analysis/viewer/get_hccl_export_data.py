@@ -14,6 +14,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
+from mscalculate.hccl.hccl_task import HcclOps
 from mscalculate.hccl.hccl_task import HcclTask
 from msmodel.hccl.hccl_model import HcclViewModel
 
@@ -65,13 +66,13 @@ class HCCLExport:
         get data for hccl timeline
         """
         with HcclViewModel(self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
-                           [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE]) as hccl_model:
+                           [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE]) as hccl_model:
             if not hccl_model.check_table():
                 logging.error("get hccl data failed, may be the hccl file not completed or hccl parser "
                               "failed. please check data file.")
                 return []
 
-            hccl_data = hccl_model.get_all_data(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE, dto_class=HcclTask)
+            hccl_data = hccl_model.get_all_data(DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE, dto_class=HcclTask)
             if not hccl_data:
                 logging.error("get hccl data failed, may be lack of hccl files containing iteration %s",
                               self.iter_range.iteration_id)
@@ -138,26 +139,32 @@ class HCCLExport:
             TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, _hccl_format_data + _hccl_format_op_data))
 
     def _format_hccl_op_data(self):
-        with HcclViewModel(self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
-                           DBNameConstant.TABLE_HCCL_SINGLE_DEVICE) as hccl_model:
-            hccl_op_data = hccl_model.get_hccl_op_data_by_group()
-            _hccl_format_op_data = [
-                [
+        with HcclViewModel(
+                self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE,
+                DBNameConstant.TABLE_HCCL_OP_SINGLE_DEVICE]) as hccl_model:
+            hccl_op_data_from_group = hccl_model.get_hccl_op_data_by_group()
+            hccl_op_info_from_table = hccl_model.get_hccl_op_info_from_table()
+            hccl_format_op_data = [None] * len(hccl_op_data_from_group)
+            for idx, hccl_op in enumerate(hccl_op_data_from_group):
+                hccl_op_info = hccl_op_info_from_table.get(hccl_op.connection_id, HcclOps())
+                args = {
+                    "connection_id": hccl_op.connection_id,
+                    "model id": hccl_op.model_id,
+                    "data_type": hccl_op_info.data_type,
+                    "alg_type": hccl_op_info.alg_type,
+                    "count": hccl_op_info.count
+                }
+
+                hccl_format_op_data[idx] = [
                     hccl_op.op_name, self.pid_value, self.hccl_groups.get(hccl_op.group_name).start_index,
                     InfoConfReader().trans_into_local_time(raw_timestamp=hccl_op.timestamp),
-                    hccl_op.duration / NumberConstant.NS_TO_US,
-                    {
-                        "connection_id": hccl_op.connection_id,
-                        "model id": hccl_op.model_id,
-                    },
+                    hccl_op.duration / NumberConstant.NS_TO_US, args
                 ]
-                for hccl_op in hccl_op_data
-            ]
-        return _hccl_format_op_data
+        return hccl_format_op_data
 
     def _format_hccl_communication_data(self, hccl_data: List[HcclTask]):
         # for L0 collect, plane id will be filled -1
-        if not hccl_data or hccl_data[0].group_name == self.INVALID_GROUP:
+        if not hccl_data or hccl_data[0].plane_id == self.INVALID_PLANE:
             return []
         _hccl_format_data = [0] * len(hccl_data)
         for index, _hccl_data in enumerate(hccl_data):
