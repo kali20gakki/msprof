@@ -6,6 +6,7 @@ import unittest
 from unittest import mock
 
 from common_func.constant import Constant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_object import CustomizedNamedtupleFactory
 from common_func.profiling_scene import ProfilingScene
 from common_func.profiling_scene import ExportMode
@@ -18,6 +19,7 @@ from mscalculate.hccl.hccl_task import HcclTask
 NAMESPACE = 'mscalculate.hccl.hccl_calculator'
 
 HcclTask = CustomizedNamedtupleFactory.generate_named_tuple_from_dto(HcclTask, [])
+HcclOps = CustomizedNamedtupleFactory.generate_named_tuple_from_dto(HcclOps, [])
 
 
 class TestHcclCalculator(unittest.TestCase):
@@ -47,23 +49,29 @@ class TestHcclCalculator(unittest.TestCase):
         with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True), \
                 mock.patch(NAMESPACE + '.HcclCalculator._merge_hccl_ops_and_tasks', return_value=[
                     HcclTask(op_name="hccl_op", timestamp=1, duration=1, op_type="all_reduce")]):
+            InfoConfReader()._info_json = {"devices": "0"}
             check = HcclCalculator([], CONFIG)
             check.calculate()
-            hccl_data = check._hccl_data
+            hccl_task_data = check._hccl_task_data
             hccl_op_report_data = check._hccl_op_report_data
-            self.assertEqual(29, len(hccl_data[0]))
+            hccl_op_data = check._hccl_op_data
+            self.assertEqual(29, len(hccl_task_data[0]))
             self.assertEqual([("all_reduce", 1.0, 1.0, 1.0, 1.0, 1.0, 100.0)], hccl_op_report_data)
+            self.assertEqual([], hccl_op_data)
 
     def test_calculate_should_update_both_hccl_data_and_hccl_op_report_data_when_op_type_invalid(self):
         with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True), \
                 mock.patch(NAMESPACE + '.HcclCalculator._merge_hccl_ops_and_tasks', return_value=[
                     HcclTask(op_name="hccl_op", timestamp=1, duration=1, op_type=Constant.NA)]):
+            InfoConfReader()._info_json = {"devices": "0"}
             check = HcclCalculator([], CONFIG)
             check.calculate()
-            hccl_data = check._hccl_data
+            hccl_task_data = check._hccl_task_data
             hccl_op_report_data = check._hccl_op_report_data
-            self.assertEqual(29, len(hccl_data[0]))
+            hccl_op_data = check._hccl_op_data
+            self.assertEqual(29, len(hccl_task_data[0]))
             self.assertEqual([], hccl_op_report_data)
+            self.assertEqual([], hccl_op_data)
 
     def test_generate_hccl_op_info_should_return_three_data_when_the_input_len_is_three(self):
         hccl_data = [
@@ -73,7 +81,7 @@ class TestHcclCalculator(unittest.TestCase):
         ]
         check = HcclCalculator([], CONFIG)
         check._generate_hccl_op_info(hccl_data)
-        self.assertEqual(3, len(check._hccl_data))
+        self.assertEqual(3, len(check._hccl_task_data))
 
     def test_cal_total_should_return_5_when_input_is_the_following_task_time(self):
         task_time = {
@@ -137,7 +145,7 @@ class TestHcclCalculator(unittest.TestCase):
         check = HcclCalculator([], CONFIG)
         communication_data = check._merge_hccl_ops_and_tasks(hccl_ops, hccl_tasks)
         self.assertEqual(len(communication_data), 5)
-
+        self.assertEqual(len(check._hccl_op_data), 8)
 
     def test_merge_hccl_ops_and_tasks_should_return_empty_list_when_input_hcclops_empty(self):
         hccl_ops = []
@@ -145,6 +153,7 @@ class TestHcclCalculator(unittest.TestCase):
         check = HcclCalculator([], CONFIG)
         communication_data = check._merge_hccl_ops_and_tasks(hccl_ops, hccl_tasks)
         self.assertEqual(communication_data, [])
+        self.assertEqual(check._hccl_op_data, [])
 
     def test_merge_hccl_ops_and_tasks_should_return_empty_list_when_input_hccltasks_empty(self):
         hccl_ops = [HcclOps(model_id=4294967295), HcclOps(model_id=4294967296)]
@@ -152,6 +161,7 @@ class TestHcclCalculator(unittest.TestCase):
         check = HcclCalculator([], CONFIG)
         communication_data = check._merge_hccl_ops_and_tasks(hccl_ops, hccl_tasks)
         self.assertEqual(communication_data, [])
+        self.assertEqual(check._hccl_op_data, [])
 
     def test_merge_hccl_ops_and_tasks_should_return_2_data_when_step_export_and_ops_queue_not_empty(self):
         hccl_ops = [HcclOps(model_id=4294967295), HcclOps(model_id=4294967296)]
@@ -161,6 +171,7 @@ class TestHcclCalculator(unittest.TestCase):
         communication_data = check._merge_hccl_ops_and_tasks(hccl_ops, hccl_tasks)
         self.assertEqual(2, len(communication_data))
         ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
+        self.assertEqual(len(check._hccl_op_data), 1)
 
     def test_merge_hccl_ops_and_tasks_should_return_2_data_when_all_export_and_ops_queue_not_empty(self):
         hccl_ops = [HcclOps(model_id=4294967295), HcclOps(model_id=4294967296)]
@@ -168,6 +179,7 @@ class TestHcclCalculator(unittest.TestCase):
         check = HcclCalculator([], CONFIG)
         communication_data = check._merge_hccl_ops_and_tasks(hccl_ops, hccl_tasks)
         self.assertEqual(2, len(communication_data))
+        self.assertEqual(len(check._hccl_op_data), 1)
 
     def test_get_hccl_op_report_data_should_return_empty_data_when_input_empty(self):
         hccl_data = []
@@ -217,24 +229,35 @@ class TestHcclCalculator(unittest.TestCase):
 
     def test_save_should_return_none_when_hccl_data_empty(self):
         check = HcclCalculator([], CONFIG)
-        check._hccl_data = []
+        check._hccl_task_data = []
         self.assertIsNone(check.save())
 
-    def test_save_should_return_none_when_hccl_data_not_empty_and_hccl_op_report_data_empty(self):
-        with mock.patch("msmodel.hccl.hccl_model.HcclViewModel.rebuild_hccl_table"), \
+    def test_save_should_return_none_when_hccl_data_not_empty_and_hccl_op_data_empty(self):
+        with mock.patch("msmodel.hccl.hccl_model.HcclViewModel.rebuild_hccl_task_table"), \
              mock.patch("msmodel.hccl.hccl_model.HcclViewModel.insert_data_to_db"):
             check = HcclCalculator([], CONFIG)
-            check._hccl_data = [HcclOps(model_id=4294967295)]
+            check._hccl_task_data = [HcclOps(model_id=4294967295)]
+            check._hccl_op_data = []
+            self.assertIsNone(check.save())
+
+    def test_save_should_return_none_when_hccl_data_and_hccl_op_data_not_empty_and_hccl_op_report_data_empty(self):
+        with mock.patch("msmodel.hccl.hccl_model.HcclViewModel.rebuild_hccl_task_table"), \
+             mock.patch("msmodel.hccl.hccl_model.HcclViewModel.insert_data_to_db"), \
+             mock.patch("msmodel.hccl.hccl_model.HcclViewModel.rebuild_hccl_op_table"):
+            check = HcclCalculator([], CONFIG)
+            check._hccl_task_data = [HcclOps(model_id=4294967295)]
+            check._hccl_op_data = [HcclOps(model_id=4294967295, data_type="INT32")]
             check._hccl_op_report_data = []
             self.assertIsNone(check.save())
 
-    def test_save_should_not_return_none_when_hccl_data_and_hccl_op_report_data_not_empty(self):
-        with mock.patch("msmodel.hccl.hccl_model.HcclViewModel.rebuild_hccl_table"), \
+    def test_save_should_not_return_none_when_hccl_data_and_hccl_op_data_and_hccl_op_report_data_not_empty(self):
+        with mock.patch("msmodel.hccl.hccl_model.HcclViewModel.rebuild_hccl_task_table"), \
              mock.patch("msmodel.hccl.hccl_model.HcclViewModel.insert_data_to_db"), \
-             mock.patch("msmodel.hccl.hccl_model.HcclViewModel.rebuild_hccl_op_report_table"), \
-             mock.patch("msmodel.hccl.hccl_model.HcclViewModel.insert_data_to_db"):
+             mock.patch("msmodel.hccl.hccl_model.HcclViewModel.rebuild_hccl_op_table"), \
+             mock.patch("msmodel.hccl.hccl_model.HcclViewModel.rebuild_hccl_op_report_table"):
             check = HcclCalculator([], CONFIG)
-            check._hccl_data = [HcclOps(model_id=4294967295)]
+            check._hccl_task_data = [HcclOps(model_id=4294967295)]
+            check._hccl_op_data = [HcclOps(model_id=4294967841, data_type="INT32")]
             check._hccl_op_report_data = [("all_reduce", 1.0, 1.0, 1.0, 1.0, 1.0, 100.0)]
             check.save()
 
@@ -316,7 +339,3 @@ class TestHcclCalculator(unittest.TestCase):
 
         for idx, _ in enumerate(event):
             self.assertAlmostEqual(ans[idx].bandwidth, event[idx].bandwidth)
-
-
-
-

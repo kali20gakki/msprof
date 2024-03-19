@@ -171,7 +171,7 @@ namespace {
         {"connection_id", SQL_INTEGER_TYPE}
     };
 
-    const TableColumns HCCLSingleDevice = {
+    const TableColumns HCCLTaskSingleDevice = {
         {"model_id", SQL_INTEGER_TYPE},
         {"index_id", SQL_INTEGER_TYPE},
         {"op_name", SQL_TEXT_TYPE},
@@ -443,7 +443,7 @@ AscendTaskDB::AscendTaskDB()
 HCCLSingleDeviceDB::HCCLSingleDeviceDB()
 {
     dbName_ = "hccl_single_device.db";
-    tableColNames_["HCCLSingleDevice"] = HCCLSingleDevice;
+    tableColNames_["HCCLTaskSingleDevice"] = HCCLTaskSingleDevice;
 }
 
 NpuMemDB::NpuMemDB()

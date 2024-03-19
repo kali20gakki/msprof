@@ -247,4 +247,9 @@ class DataParsersConfig(MetaConfig):
             ('level', '3'),
             ('position', 'H')
         ],
+        'HcclOpInfoParser': [
+            ('path', 'msparser.compact_info.hccl_op_info_parser'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
+            ('level', '2')
+        ],
     }

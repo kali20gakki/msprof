@@ -143,6 +143,11 @@ class StructFmt:
     NPU_MODULE_MEM_FMT = "IIQQ"
     NPU_MODULE_MEM_SIZE = struct.calcsize(NPU_MODULE_MEM_FMT)
 
+    # compact hccl op info
+    HCCL_OP_INFO_RESIDUAL_SIZE = 20
+    HCCL_OP_INFO_FMT = "HHIIIQBBHQQ" + "B" * HCCL_OP_INFO_RESIDUAL_SIZE
+    HCCL_OP_INFO_SIZE = struct.calcsize(BYTE_ORDER_CHAR + HCCL_OP_INFO_FMT)
+
     # compact runtime
     TASK_TRACK_RESIDUAL_SIZE = 24
     TASK_TRACK_FMT = "HHIIIQHHHHQ" + "B" * TASK_TRACK_RESIDUAL_SIZE

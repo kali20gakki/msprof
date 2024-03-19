@@ -115,8 +115,9 @@ class DBNameConstant(metaclass=ABCMeta):
 
     DB_COMMUNICATION_ANALYZER = "communication_analyzer.db"
 
-    TABLE_HCCL_SINGLE_DEVICE = "HCCLSingleDevice"
+    TABLE_HCCL_TASK_SINGLE_DEVICE = "HCCLTaskSingleDevice"
     TABLE_HCCL_OP_REPORT = "HcclOpReport"
+    TABLE_HCCL_OP_SINGLE_DEVICE = "HCCLOpSingleDevice"
 
     TABLE_OP_COUNTER_GE_MERGE = "ge_task_merge"
     TABLE_OP_COUNTER_OP_REPORT = "op_report"
@@ -291,6 +292,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_HOST_TASK = "HostTask"
     TABLE_ASCEND_TASK = "AscendTask"
     TABLE_HCCL_OP_REPORT = "HcclOpReport"
+    TABLE_HCCL_OP_INFO = "HcclOpInfo"
 
     # nano
     TABLE_NANO_TASK = "NanoTask"

@@ -227,8 +227,8 @@ class HostToDevice:
         if not path_check(PathManager.get_db_path(self._result_dir, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
             return set()
         with ViewModel(self._result_dir, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
-                       [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE]) as hccl_model:
-            sql = f"select distinct connection_id from {DBNameConstant.TABLE_HCCL_SINGLE_DEVICE}"
+                       [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE]) as hccl_model:
+            sql = f"select distinct connection_id from {DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE}"
             connection_ids = hccl_model.get_sql_data(sql)
 
         return set(conn_id[0] for conn_id in connection_ids)

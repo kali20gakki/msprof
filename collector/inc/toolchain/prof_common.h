@@ -236,6 +236,7 @@ const uint32_t MSPROF_REPORT_NODE_CONTEXT_ID_INFO_TYPE  = 4;  /* type info: cont
 const uint32_t MSPROF_REPORT_NODE_LAUNCH_TYPE           = 5;  /* type info: launch */
 const uint32_t MSPROF_REPORT_NODE_TASK_MEMORY_TYPE      = 6;  /* type info: task_memory_info */
 const uint32_t MSPROF_REPORT_NODE_HOST_OP_EXEC_TYPE     = 8;  /* type info: op exec */
+const uint32_t MSPROF_REPORT_NODE_HCCL_OP_INFO_TYPE     = 10;  /* type info: hccl op info */
 
 /* Msprof report type of node(10000) level(ge api), offset: 0x010000 */
 const uint32_t MSPROF_REPORT_NODE_GE_API_BASE_TYPE      = 0x010000U;
@@ -276,6 +277,29 @@ struct MsprofRuntimeTrack {  // for MsprofReportCompactInfo buffer data
     uint64_t taskType;
 };
 
+enum AlgType {
+    HCCL_ALG_NONE = 0,
+    HCCL_ALG_MESH,
+    HCCL_ALG_RING,
+    HCCL_ALG_NB,
+    HCCL_ALG_HD,
+    HCCL_ALG_NHR,
+    HCCL_ALG_PIPELINE,
+    HCCL_ALG_PAIRWISE,
+    HCCL_ALG_STAR,
+};
+
+#pragma pack(1)
+struct MsprofHcclOPInfo {  // for MsprofReportCompactInfo buffer data
+    uint8_t relay : 1;
+    uint8_t retry : 1;
+    uint8_t dataType;
+    uint16_t algType;     // 通信算子使用的算法,每4bit表示一个阶段,最多4个阶段
+    uint64_t count;
+    uint64_t groupName;
+};
+#pragma pack()
+
 const uint16_t MSPROF_COMPACT_INFO_DATA_LENGTH = 40;
 struct MsprofCompactInfo {  // for MsprofReportCompactInfo buffer data
     uint16_t magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
@@ -288,6 +312,7 @@ struct MsprofCompactInfo {  // for MsprofReportCompactInfo buffer data
         uint8_t info[MSPROF_COMPACT_INFO_DATA_LENGTH];
         MsprofRuntimeTrack runtimeTrack;
         MsprofNodeBasicInfo nodeBasicInfo;
+        MsprofHcclOPInfo hcclopInfo;
     } data;
 };
 

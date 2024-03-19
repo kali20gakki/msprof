@@ -15,6 +15,7 @@ from profiling_bean.db_dto.event_data_dto import EventDataDto
 from profiling_bean.db_dto.fusion_op_info_dto import FusionOpInfoDto
 from profiling_bean.db_dto.graph_id_map_dto import GraphIdMapDto
 from profiling_bean.db_dto.hccl_info_dto import HCCLInfoDto
+from profiling_bean.db_dto.hccl_op_info_dto import HCCLOpInfoDto
 from profiling_bean.db_dto.mem_copy_info_dto import MemCopyInfoDto
 from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
 from profiling_bean.db_dto.task_track_dto import TaskTrackDto
@@ -58,7 +59,8 @@ class TestClusterLinkCalculate(unittest.TestCase):
                 mock.patch(NAMESPACE + '.CANNEventGenerator.generate_graph_id_map_event'), \
                 mock.patch(NAMESPACE + '.CANNEventGenerator.generate_fusion_op_info_event'), \
                 mock.patch(NAMESPACE + '.CANNEventGenerator.generate_ctx_id_event'), \
-                mock.patch(NAMESPACE + '.CANNEventGenerator.generate_hccl_info_event'):
+                mock.patch(NAMESPACE + '.CANNEventGenerator.generate_hccl_info_event'), \
+                mock.patch(NAMESPACE + '.CANNEventGenerator.generate_hccl_op_info_event'):
             ret = CANNEventGenerator(["test"]).run()
             self.assertEqual(len(ret), 0)
 
@@ -332,6 +334,31 @@ class TestClusterLinkCalculate(unittest.TestCase):
                 mock.patch(NAMESPACE + '.FusionAddInfoModel.get_all_data',
                            return_value=[dto1, dto2]):
             generator.generate_fusion_op_info_event()
+            self.assertEqual(len(generator.event_queues), 2)
+            self.assertEqual(len(generator.record_databases), 2)
+            self.assertEqual(generator.event_queues.get(0).size, 1)
+            self.assertEqual(generator.event_queues.get(1).size, 1)
+
+    def test_generate_hccl_op_info_event_should_record_0_event_when_check_db_error(self):
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.HcclOpInfoModel.check_db',
+                        return_value=False):
+            generator.generate_hccl_op_info_event()
+            self.assertEqual(len(generator.event_queues), 0)
+
+    def test_generate_hccl_op_info_event_should_record_2_event_when_2_node_in_2_thread_in_db(self):
+        dto1 = HCCLOpInfoDto()
+        dto1.thread_id = 0
+        dto1.timestamp = 100
+        dto2 = HCCLOpInfoDto()
+        dto2.thread_id = 1
+        dto2.timestamp = 200
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.HcclOpInfoModel.check_db',
+                        return_value=True), \
+                mock.patch(NAMESPACE + '.HcclOpInfoModel.get_all_data',
+                           return_value=[dto1, dto2]):
+            generator.generate_hccl_op_info_event()
             self.assertEqual(len(generator.event_queues), 2)
             self.assertEqual(len(generator.record_databases), 2)
             self.assertEqual(generator.event_queues.get(0).size, 1)

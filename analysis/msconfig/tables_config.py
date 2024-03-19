@@ -644,7 +644,7 @@ class TablesConfig(MetaConfig):
             ('hit_rate', 'REAL'),
             ('victim_rate', 'REAL')
         ],
-        'HCCLSingleDeviceMap': [
+        'HCCLTaskSingleDeviceMap': [
             ('model_id', 'INTEGER, null'),
             ('index_id', 'INTEGER, null'),
             ('op_name', 'TEXT, null'),
@@ -675,6 +675,20 @@ class TablesConfig(MetaConfig):
             ('batch_id', 'INTEGER, null'),
             ('rdma_type', 'TEXT', 'null'),
         ],
+        'HCCLOpSingleDeviceMap': [
+            ('model_id', 'INTEGER, null'),
+            ('op_name', 'TEXT, null'),
+            ('task_type', 'TEXT, null'),
+            ('op_type', 'TEXT, null'),
+            ('timestamp', 'NUMERIC, null'),
+            ('relay', 'INTEGER, null'),
+            ('retry', 'INTEGER, null'),
+            ('data_type', 'TEXT, null'),
+            ('alg_type', 'TEXT, null'),
+            ('count', 'NUMERIC, null'),
+            ('group_name', 'TEXT, null'),
+            ('connection_id', 'INTEGER, null'),
+        ],
         'HCCLOPMap': [
             ('device_id', 'INTEGER, null'),
             ('model_id', 'INTEGER, null'),
@@ -687,6 +701,12 @@ class TablesConfig(MetaConfig):
             ('end', 'REAL, null'),
             ('is_dynamic', 'TEXT, null'),
             ('connection_id', 'INTEGER, null'),
+            ('relay', 'INTEGER, null'),
+            ('retry', 'INTEGER, null'),
+            ('data_type', 'TEXT, null'),
+            ('alg_type', 'TEXT, null'),
+            ('count', 'NUMERIC, null'),
+            ('group_name', 'TEXT, null'),
         ],
         'HCCLTaskMap': [
             ('model_id', 'INTEGER, null'),
@@ -1331,5 +1351,17 @@ class TablesConfig(MetaConfig):
             ('transit_size', 'NUMERIC,null'),
             ('transit_time', 'NUMERIC,null'),
             ('bandwidth', 'NUMERIC,null'),
+        ],
+        'HcclOpInfoMap': [
+            ('level', 'TEXT,null'),
+            ('struct_type', 'TEXT,null'),
+            ('thread_id', 'INTEGER,null'),
+            ('timestamp', 'NUMERIC,null'),
+            ('relay', 'INTEGER,null'),
+            ('retry', 'INTEGER,null'),
+            ('data_type', 'TEXT,null'),
+            ('alg_type', 'TEXT,null'),
+            ('count', 'NUMERIC,null'),
+            ('group_name', 'TEXT,null')
         ],
     }

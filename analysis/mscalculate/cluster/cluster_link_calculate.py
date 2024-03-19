@@ -147,7 +147,7 @@ class ClusterSingleLinkCalculator(MsMultiProcess):
         """
         if not os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
             return
-        with HCCLModel(self._project_path, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE]) as self.model:
+        with HCCLModel(self._project_path, [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE]) as self.model:
             if not self.model.check_table():
                 return
             self.hccl_data = self.model.get_hccl_data()

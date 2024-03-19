@@ -66,6 +66,7 @@ class StructDecoder:
         "NanoStarsBean": StructFmt.NANO_STARS_PROFILE_FMT,
         "TaskFlipBean": StructFmt.DEVICE_TASK_FLIP,
         "NpuModuleMemDataBean": StructFmt.NPU_MODULE_MEM_FMT,
+        "HcclOpInfoBean": StructFmt.HCCL_OP_INFO_FMT,
     }
 
     @classmethod

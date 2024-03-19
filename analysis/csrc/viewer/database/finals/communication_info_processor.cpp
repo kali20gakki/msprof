@@ -64,7 +64,7 @@ bool CommunicationInfoProcessor::FormatData(const OriDataFormat &oriData,
                                             CommunicationOpDataFormat &processedOpData, const ThreadData &threadData)
 {
     CommunicationTaskData taskData;
-    HcclSingleDeviceData hcclData;
+    HcclTaskSingleDeviceData hcclData;
     std::unordered_map<uint32_t, CommunicationOpData> opData;
     std::unordered_map<uint32_t, CommunicationOpEndpointsTime> endpoints;
     if (!Utils::Reserve(processedTaskData, oriData.size())) {
@@ -107,7 +107,7 @@ bool CommunicationInfoProcessor::FormatData(const OriDataFormat &oriData,
     return true;
 }
 
-void CommunicationInfoProcessor::Update(const HcclFormat &oriData, HcclSingleDeviceData &hcclData,
+void CommunicationInfoProcessor::Update(const HcclFormat &oriData, HcclTaskSingleDeviceData &hcclData,
                                         CommunicationTaskData &taskData, uint16_t deviceId)
 {
     std::tie(taskData.modelId, hcclData.opName, hcclData.HCCLName, hcclData.groupName, taskData.planeId,

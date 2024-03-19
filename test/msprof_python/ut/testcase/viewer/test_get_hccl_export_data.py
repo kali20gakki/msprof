@@ -7,6 +7,7 @@ from collections import namedtuple
 from unittest import mock
 
 from common_func.msprof_object import CustomizedNamedtupleFactory
+from mscalculate.hccl.hccl_task import HcclOps
 from mscalculate.hccl.hccl_task import HcclTask
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import ITER_RANGE
@@ -29,7 +30,7 @@ class TestHCCLExport(unittest.TestCase):
 
     def test_get_hccl_timeline_data(self):
         db_manager = DBManager()
-        table_name = 'HCCLSingleDevice'
+        table_name = 'HCCLTaskSingleDevice'
         create_sql = "CREATE TABLE IF NOT EXISTS {0} (model_id int, index_id int, iteration int)".format(table_name)
 
         data = ((1, 1, 1),)
@@ -63,12 +64,17 @@ class TestHCCLExport(unittest.TestCase):
                              ['op_name', 'timestamp', 'args', 'duration',
                               "group_name", "connection_id", "model_id"])
         op_data = [op_data('test_1', 0, [1, 2, 3], 0, "1", 0, 10)]
+        op_info_data = {0: HcclOps(op_name='test', data_type='INT64', connection_id=0, model_id=10, alg_type='HD-NB')}
         InfoConfReader()._info_json = {"pid": 1}
-        with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_data_by_group', return_value=op_data):
+        with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_data_by_group', return_value=op_data), \
+            mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_info_from_table', return_value=op_info_data):
             hccl = HCCLExport(PARAMS)
             hccl._format_hccl_data(hccl_data)
             # 1 + 3 * 2 + 3
             self.assertEqual(len(hccl.result), 10)
+            hccl_op_args = hccl.result[-1]['args']
+            self.assertEqual(hccl_op_args['data_type'], 'INT64')
+            self.assertEqual(hccl_op_args['alg_type'], 'HD-NB')
 
     def test__add_hccl_bar_should_return_correct_hccl_bar(self):
         hccl = HCCLExport(PARAMS)

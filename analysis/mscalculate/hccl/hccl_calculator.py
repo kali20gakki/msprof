@@ -35,8 +35,10 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         self._file_list = file_list
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._model = HcclViewModel(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
-                                    [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE, DBNameConstant.TABLE_HCCL_OP_REPORT])
-        self._hccl_data = []
+                                    [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE, DBNameConstant.TABLE_HCCL_OP_REPORT,
+                                     DBNameConstant.TABLE_HCCL_OP_SINGLE_DEVICE])
+        self._hccl_task_data = []
+        self._hccl_op_data = []
         self._hccl_op_report_data = []
 
     @staticmethod
@@ -140,13 +142,17 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         for value in grouped_data.values():
             value["duration"] = value["max_timestamp"] - value["min_timestamp"]
 
-        op_type_group = defaultdict(lambda: {"count": 0, "total_time": 0, "min": float("inf"), "max": -float("inf")})
+        min_key = "min"
+        max_key = "max"
+        op_type_group = defaultdict(
+            lambda: {"count": 0, "total_time": 0, min_key: float("inf"), max_key: -float("inf")}
+        )
         for entry in grouped_data.values():
             op_type_status = op_type_group[entry["op_type"]]
             op_type_status["count"] += 1
             op_type_status["total_time"] += entry["duration"]
-            op_type_status["min"] = min(op_type_status["min"], entry["duration"])
-            op_type_status["max"] = max(op_type_status["max"], entry["duration"])
+            op_type_status[min_key] = min(op_type_status[min_key], entry["duration"])
+            op_type_status[max_key] = max(op_type_status[max_key], entry["duration"])
         for status in op_type_group.values():
             status["avg"] = status["total_time"] / status["count"]
         return op_type_group
@@ -181,10 +187,14 @@ class HcclCalculator(ICalculator, MsMultiProcess):
 
     def save(self: any) -> None:
         with self._model as hccl_model:
-            if not self._hccl_data:
+            if not self._hccl_task_data:
                 return
-            hccl_model.rebuild_hccl_table()
-            hccl_model.insert_data_to_db(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE, self._hccl_data)
+            hccl_model.rebuild_hccl_task_table()
+            hccl_model.insert_data_to_db(DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE, self._hccl_task_data)
+            if not self._hccl_op_data:
+                return
+            hccl_model.rebuild_hccl_op_table()
+            hccl_model.insert_data_to_db(DBNameConstant.TABLE_HCCL_OP_SINGLE_DEVICE, self._hccl_op_data)
             if not self._hccl_op_report_data:
                 return
             hccl_model.rebuild_hccl_op_report_table()
@@ -205,35 +215,37 @@ class HcclCalculator(ICalculator, MsMultiProcess):
 
     def _drop_table(self):
         with self._model as hccl_model:
-            hccl_model.drop_table(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
+            hccl_model.drop_table(DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE)
             hccl_model.drop_table(DBNameConstant.TABLE_HCCL_OP_REPORT)
+            hccl_model.drop_table(DBNameConstant.TABLE_HCCL_OP_SINGLE_DEVICE)
 
     def _judge_calculate_again(self):
         if not ProfilingScene().is_all_export():
-            logging.info("In graph scene, to generate table %s and %s", DBNameConstant.TABLE_HCCL_SINGLE_DEVICE,
+            logging.info("In graph scene, to generate table %s and %s", DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE,
                          DBNameConstant.TABLE_HCCL_OP_REPORT)
             return True
         else:
             hccl_db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)
-            if DBManager.check_tables_in_db(hccl_db_path, DBNameConstant.TABLE_HCCL_SINGLE_DEVICE):
+            if DBManager.check_tables_in_db(hccl_db_path, DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE):
                 logging.info("Found table %s in operator scene, no need to generate again",
-                             DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
+                             DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE)
                 return False
-            logging.info("No table %s or %s found, to generate it", DBNameConstant.TABLE_HCCL_SINGLE_DEVICE,
+            logging.info("No table %s or %s found, to generate it", DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE,
                          DBNameConstant.TABLE_HCCL_OP_REPORT)
             return True
 
     def _generate_hccl_op_info(self, hccl_data: List[HcclTask]) -> bool:
         is_hccl_op_type_valid = False
         for data in hccl_data:
-            self._hccl_data.append([data.model_id, data.index_id, data.op_name, data.iteration,
-                                    data.hccl_name, data.group_name, data.first_timestamp, data.plane_id,
-                                    data.timestamp, data.duration, data.is_dynamic,
-                                    data.task_type, data.op_type, data.connection_id,
-                                    data.is_master, data.stream_id, data.task_id,
-                                    data.duration_estimated, data.local_rank, data.remote_rank, data.transport_type,
-                                    data.size, data.data_type, data.link_type, data.bandwidth, data.context_id,
-                                    data.notify_id, data.batch_id, data.rdma_type])
+            self._hccl_task_data.append([data.model_id, data.index_id, data.op_name, data.iteration,
+                                         data.hccl_name, data.group_name, data.first_timestamp, data.plane_id,
+                                         data.timestamp, data.duration, data.is_dynamic,
+                                         data.task_type, data.op_type, data.connection_id,
+                                         data.is_master, data.stream_id, data.task_id, 
+                                         data.duration_estimated, data.local_rank, data.remote_rank,
+                                         data.transport_type, data.size,
+                                         data.data_type, data.link_type, data.bandwidth, data.context_id,
+                                         data.notify_id, data.batch_id, data.rdma_type])
             if data.op_type != Constant.NA:
                 is_hccl_op_type_valid = True
         return is_hccl_op_type_valid
@@ -275,7 +287,9 @@ class HcclCalculator(ICalculator, MsMultiProcess):
 
     def _merge_hccl_ops_and_tasks(self, hccl_ops: List[HcclOps], hccl_tasks: List[HcclTask]) -> List[HcclTask]:
         def update_task_desc_with_hccl_op(op_desc: HcclOps, task_desc: any, times_for_hccl_op: int) -> HcclTask:
+            group_name = op_desc.group_name if task_desc.group_name == Constant.NA else task_desc.group_name
             return task_desc.replace(op_name=op_desc.op_name,
+                                     group_name=group_name,
                                      task_type=op_desc.task_type,
                                      op_type=op_desc.op_type,
                                      first_timestamp=op_desc.timestamp,
@@ -294,6 +308,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         task_queue = deque(hccl_tasks)
         hccl_op_with_task = set()
         hccl_op_with_task_index = {}
+
         while ops_queue and task_queue:
             op = ops_queue.popleft()
             # check corner case: task time between last op end time and next op start time
@@ -312,6 +327,10 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                 task = update_task_desc_with_hccl_op(op, task, count)
                 res[idx] = task
                 idx += 1
+
+            self._hccl_op_data.append([op.model_id, op.op_name, op.task_type, op.op_type, op.timestamp,
+                                       op.relay, op.retry, op.data_type, op.alg_type, op.count,
+                                       op.group_name, op.connection_id])
 
         if ops_queue:
             if ProfilingScene().is_step_export():

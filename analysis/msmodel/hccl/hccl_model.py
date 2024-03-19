@@ -31,14 +31,14 @@ class HCCLModel(ParserModel):
         :param data_list: hccl data
         :return:
         """
-        self.insert_data_to_db(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE, data_list)
+        self.insert_data_to_db(DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE, data_list)
 
     def get_hccl_data(self: any) -> list:
         """
         get hccl data
         :return:
         """
-        sql = "select * from {}".format(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
+        sql = "select * from {}".format(DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE)
         data = DBManager.fetch_all_data(self.cur, sql, dto_class=HcclTask)
         return data
 
@@ -54,8 +54,11 @@ class HcclViewModel(ViewModel):
                      "{0}.start_time + {0}.duration as complete from {0} )".format(DBNameConstant.TABLE_ASCEND_TASK)
         return select_sql
 
-    def rebuild_hccl_table(self):
-        self.create_table_by_name(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
+    def rebuild_hccl_task_table(self):
+        self.create_table_by_name(DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE)
+
+    def rebuild_hccl_op_table(self):
+        self.create_table_by_name(DBNameConstant.TABLE_HCCL_OP_SINGLE_DEVICE)
 
     def rebuild_hccl_op_report_table(self):
         self.create_table_by_name(DBNameConstant.TABLE_HCCL_OP_REPORT)
@@ -105,7 +108,8 @@ class HcclViewModel(ViewModel):
             where_condition = f'and model_id={model_id} and (index_id={index_id} or index_id=0)'
 
         sql = "SELECT model_id, index_id, op_name, task_type, op_type, connection_id, begin as timestamp, " \
-              "end - begin as duration, is_dynamic from {0} " \
+              "end - begin as duration, is_dynamic, " \
+              "relay, retry, data_type, alg_type, count, group_name from {0} " \
               "WHERE device_id = {device_id} " \
               "{where_condition} " \
               "order by timestamp" \
@@ -118,14 +122,23 @@ class HcclViewModel(ViewModel):
         """
         sql = f"select model_id, index_id, op_name, group_name, min(timestamp) as timestamp, " \
               f"max(timestamp + duration) - min(timestamp) as duration, task_type, op_type, connection_id " \
-              f"from {DBNameConstant.TABLE_HCCL_SINGLE_DEVICE} " \
+              f"from {DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE} " \
               f"WHERE is_master = 1 " \
               f"group by op_name, first_timestamp"
         return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclTask)
 
+    def get_hccl_op_info_from_table(self):
+        """
+        get hccl op info from HCCLOpSingleDevice
+        """
+        sql = f"select relay, retry, data_type, alg_type, count, group_name, connection_id " \
+              f"from {DBNameConstant.TABLE_HCCL_OP_SINGLE_DEVICE}"
+        hccl_op_data = DBManager.fetch_all_data(self.cur, sql, dto_class=HcclOps)
+        return {hccl_op.connection_id: hccl_op for hccl_op in hccl_op_data}
+
     def get_hccl_op_time_section(self):
         sql = f'select min(timestamp) as start_time, max(timestamp + duration) as end_time ' \
-              f'from {DBNameConstant.TABLE_HCCL_SINGLE_DEVICE} ' \
+              f'from {DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE} ' \
               f"WHERE is_master = 1 " \
               f'group by op_name, first_timestamp'
         return DBManager.fetch_all_data(self.cur, sql, dto_class=CommunicationTimeSection)

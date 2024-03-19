@@ -21,6 +21,12 @@ class HcclOps:
     end: int = Constant.DEFAULT_VALUE
     is_dynamic: int = Constant.DEFAULT_INVALID_VALUE
     connection_id: int = Constant.DEFAULT_INVALID_VALUE
+    relay: int = Constant.DEFAULT_INVALID_VALUE
+    retry: int = Constant.DEFAULT_INVALID_VALUE
+    data_type: str = Constant.NA
+    alg_type: str = Constant.NA
+    count: int = Constant.DEFAULT_INVALID_VALUE
+    group_name: str = Constant.NA
 
 
 @dataclass
