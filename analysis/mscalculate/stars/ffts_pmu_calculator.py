@@ -115,10 +115,11 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
     @staticmethod
     def _get_group_number(number: int, group_size_list: list) -> int:
         """
-        主要针对静态图场景，得到block pmu数据分组的编号
+        得到block pmu数据分组的编号
+        主要针对静态图场景，以及Task Type为MIX_MIV类型算子的mix_block_dim为0的情况
         Input:
-        key: 用该条block pmu数据stream_id-task_id-subtask_id.
         number: 同一个key下，该条block pmu数据为第几条被上报的数据
+        group_size_list: 包含每组数据大小的列表
         Output:
         group_number: 该条block pmu数据应该被分到第几组
         """
@@ -127,7 +128,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         if group_count == 1 and group_size_list[0] != 0:
             return number // group_size_list[0]
         for i in range(group_count):
-            # 通过前缀和来判断当前索引所对应的数据应该被分到第几组
+            # 通过前缀和来判断当前索引所对应的数据应该被分到第几组，如果group_size_list中包含0则通过前缀和跳过
             if number < sum(group_size_list[:i + 1]):
                 return i
         return group_count - 1
@@ -338,7 +339,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         mix_pmu_info = self.mix_pmu_dict.get(data_key, {})
         aic_total_cycle = data.total_cycle if not task_type else 0
         aiv_total_cycle = data.total_cycle if task_type else 0
-        # 从核的total_cycle和pmu数据由block pmu提供
+        # 从核的total_cycle和pmu数据由block pmu提供，如果某条context pmu数据的mix_block_dim为0则直接跳过
         if mix_pmu_info and mix_block_dim != 0:
             pmu_info = mix_pmu_info.pop(0)
             mix_pmu_value, mix_total_cycle = pmu_info.get('pmu'), pmu_info.get('total_cycle')
@@ -365,10 +366,13 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         self.block_dict.setdefault(task_key, []).append((mix_type, pmu_list, data.core_type))
 
     def get_group_size_list(self: any, key: str) -> list:
+        """
+        通过self._block_dims中的block_dim_group来获取一个包含每组大小的列表
+        1.不开启block模式，每组的大小为mix_block_dim
+        2.开启block模式，每组的大小为（block_dim + mix_block_dim）
+        先判断采集到这份数据时，是否开启了block模式，然后再获取每组的group size
+        """
         group_size_list = []
-        # 1.不开启block模式，每组的大小为mix_block_dim
-        # 2.开启block模式，每组的大小为（block_dim + mix_block_dim）
-        # 先判断采集到这份数据时，是否开启了block模式，然后再获取每组的group size
         for item in self._block_dims.get('block_dim_group', {}).get(key, []):
             if self.is_block():
                 group_size_list.append((item[0] + item[1]))
