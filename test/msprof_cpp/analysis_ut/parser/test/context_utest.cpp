@@ -16,6 +16,7 @@
 
 #include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/utils/utils.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "collector/dvvp/common/config/config.h"
 
@@ -690,4 +691,32 @@ TEST_F(ContextUTest, TestGetMetricModeShouldReturnTrueWhenGetSuccess)
     std::string expectMode = "task-based";
     EXPECT_TRUE(Context::GetInstance().GetMetricMode(mode, File::PathJoin({CONTEXT_DIR, LOCAL_DIR})));
     EXPECT_EQ(mode, expectMode);
+}
+
+TEST_F(ContextUTest, TestGetClockMonotonicRawShouldReturnTrueWhenGetSuccess)
+{
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
+    uint64_t monotonicRaw;
+    uint64_t expectTime = 36471130547330;
+    EXPECT_TRUE(Context::GetInstance().GetClockMonotonicRaw(monotonicRaw, HOST_ID,
+                                                            File::PathJoin({CONTEXT_DIR, LOCAL_DIR})));
+    EXPECT_EQ(monotonicRaw, expectTime);
+}
+
+TEST_F(ContextUTest, TestGetClockMonotonicRawShouldReturnFalseWhenDataError)
+{
+    nlohmann::json record = {};
+    uint64_t monotonicRaw;
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
+    // info empty
+    MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
+    EXPECT_FALSE(Context::GetInstance().GetClockMonotonicRaw(monotonicRaw, HOST_ID,
+                                                             File::PathJoin({CONTEXT_DIR, LOCAL_DIR})));
+    MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
+
+    // str to u64 failed
+    MOCKER_CPP(&Analysis::Utils::StrToU64).stubs().will(returnValue(Analysis::ANALYSIS_ERROR));
+    EXPECT_FALSE(Context::GetInstance().GetClockMonotonicRaw(monotonicRaw, HOST_ID,
+                                                             File::PathJoin({CONTEXT_DIR, LOCAL_DIR})));
+    MOCKER_CPP(&Analysis::Utils::StrToU64).reset();
 }

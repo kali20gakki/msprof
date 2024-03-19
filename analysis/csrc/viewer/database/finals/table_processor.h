@@ -18,6 +18,7 @@
 #include <set>
 
 #include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/utils/time_utils.h"
 #include "analysis/csrc/viewer/database/db_runner.h"
 #include "analysis/csrc/viewer/database/finals/report_db.h"
 
@@ -34,6 +35,16 @@ struct DBInfo {
     DBInfo() = default;
     DBInfo(std::string dbName, std::string tableName) : dbName(dbName), tableName(tableName) {};
 };
+
+// 存放各processor中的各线程数据
+struct ThreadData {
+    uint16_t deviceId = UINT16_MAX;
+    uint32_t profId = UINT32_MAX;
+    uint64_t hostMonotonic = UINT64_MAX;
+    uint64_t deviceMonotonic = UINT64_MAX;
+    Utils::ProfTimeRecord timeRecord;
+};
+
 // GeHash表映射map结构
 using GeHashMap = std::unordered_map<std::string, std::string>;
 const uint8_t CHECK_SUCCESS = 0;

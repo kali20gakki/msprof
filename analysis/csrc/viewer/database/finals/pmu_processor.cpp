@@ -28,7 +28,7 @@ const std::set<std::string> SAMPLE_BASED_DB_NAMES = {"ai_vector_core_", "aicore_
 const std::set<std::string> INVALID_COLUMN_NAMES = {"task_id", "stream_id", "subtask_id", "batch_id", "task_type",
                                                     "start_time", "end_time", "ffts_type", "core_type"};
 const std::string TASK_BASED = "task-based";
-const double INVALID_FREQ = 0.0;
+const double DOUBLE_ZERO = 0.0;
 
 struct TaskPmuData {
     uint32_t streamId = UINT32_MAX;
@@ -247,14 +247,15 @@ bool PmuProcessor::SampleBasedTimelineProcess(const std::unordered_map<std::stri
     }
     for (const auto& pair : dbPathTable) {
         threadData.deviceId = pair.second;
-        if (!Context::GetInstance().GetPmuFreq(threadData.freq, threadData.deviceId, fileDir) ||
-                IsDoubleEqual(threadData.freq, INVALID_FREQ)) {
+        double freq;
+        if (!Context::GetInstance().GetPmuFreq(freq, threadData.deviceId, fileDir) ||
+                IsDoubleEqual(freq, DOUBLE_ZERO)) {
             ERROR("GetPmuFreq failed or aic freq is invalid, profPath is %.", fileDir);
             return false;
         }
         auto oriData = GetSampleBasedTimelineData(pair.first);
         PSTFormat processedData;
-        if (!FormatSampleBasedTimelineData(oriData, processedData, threadData)) {
+        if (!FormatSampleBasedTimelineData(oriData, processedData, threadData, freq)) {
             ERROR("FormatSampleBasedTimelineData failed, dbPath is %.", pair.first);
             flag = false;
             continue;
@@ -286,7 +287,7 @@ PmuProcessor::OSTFormat PmuProcessor::GetSampleBasedTimelineData(const std::stri
 }
 
 bool PmuProcessor::FormatSampleBasedTimelineData(const OSTFormat &oriData, PSTFormat &processedData,
-                                                 const ThreadData &threadData)
+                                                 const ThreadData &threadData, const double freq)
 {
     INFO("FormatSampleBasedTimelineData.");
     if (oriData.empty()) {
@@ -309,18 +310,18 @@ bool PmuProcessor::FormatSampleBasedTimelineData(const OSTFormat &oriData, PSTFo
         auto corePreRecord = coreIdTimeMap.find(tempData.coreid);
         double interval = (corePreRecord == coreIdTimeMap.end()) ? 1.0 : (tempData.timestamp - corePreRecord->second);
         coreIdTimeMap[tempData.coreid] = tempData.timestamp;
-        if (IsDoubleEqual(threadData.freq, INVALID_FREQ)) {
+        if (IsDoubleEqual(interval, DOUBLE_ZERO)) {
             WARN("The interval is invalid, the record timestamp is %, "
                  "core id is %.", tempData.timestamp, tempData.coreid);
             continue;
         }
         // task_cyc 单位为 次; freq单位为 MHz,即次/秒; interval单位为 ns
         // 由公式 (task_cyc / (freq * 10^6) / (interval / 10^9)) * 100% 化简而来
-        double usage = (cycle * MILLI_SECOND) / (threadData.freq * interval) * PERCENTAGE;
+        double usage = (cycle * MILLI_SECOND) / (freq * interval) * PERCENTAGE;
 
         Utils::HPFloat timestamp{tempData.timestamp};
         processedData.emplace_back(threadData.deviceId, Utils::GetLocalTime(timestamp, threadData.timeRecord).Uint64(),
-                                   cycle, usage, threadData.freq, static_cast<uint16_t>(tempData.coreid));
+                                   cycle, usage, freq, static_cast<uint16_t>(tempData.coreid));
     }
     if (processedData.empty()) {
         ERROR("FormatSampleBasedSummaryData data processing error.");

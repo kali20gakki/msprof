@@ -131,10 +131,11 @@ bool CommunicationInfoProcessor::Process(const std::string &fileDir)
 {
     bool flag = true;
     ThreadData threadData;
+    DBInfo hcclSingleDeviceDB("hccl_single_device.db", "HCCLTaskSingleDevice");
     threadData.profId = IdPool::GetInstance().GetUint32Id(fileDir);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
-        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, threadData.hcclSingleDeviceDB.dbName});
+        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, hcclSingleDeviceDB.dbName});
         // 并不是所有场景都有hccl数据
         auto status = CheckPath(dbPath);
         if (status != CHECK_SUCCESS) {
@@ -151,11 +152,11 @@ bool CommunicationInfoProcessor::Process(const std::string &fileDir)
             flag = false;
             continue;
         }
-        MAKE_SHARED_RETURN_VALUE(threadData.hcclSingleDeviceDB.dbRunner, DBRunner, false, dbPath);
-        auto oriData = GetData(threadData.hcclSingleDeviceDB);
+        MAKE_SHARED_RETURN_VALUE(hcclSingleDeviceDB.dbRunner, DBRunner, false, dbPath);
+        auto oriData = GetData(hcclSingleDeviceDB);
         if (oriData.empty()) {
             flag = false;
-            ERROR("Get % data failed in %.", threadData.hcclSingleDeviceDB.tableName, dbPath);
+            ERROR("Get % data failed in %.", hcclSingleDeviceDB.tableName, dbPath);
             continue;
         }
         if (!FormatData(oriData, taskData, opData, threadData)) {

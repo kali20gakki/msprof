@@ -90,7 +90,9 @@ TaskProcessor::OriDataFormat TaskProcessor::GetData(DBInfo &ascendTaskDB)
     return oriData;
 }
 
-TaskProcessor::ProcessedDataFormat TaskProcessor::FormatData(const OriDataFormat &oriData, const ThreadData &threadData)
+TaskProcessor::ProcessedDataFormat TaskProcessor::FormatData(const OriDataFormat &oriData,
+                                                             const ThreadData &threadData,
+                                                             const uint16_t platformVersion, const uint32_t pid)
 {
     ProcessedDataFormat processedData;
     TaskData data;
@@ -110,11 +112,11 @@ TaskProcessor::ProcessedDataFormat TaskProcessor::FormatData(const OriDataFormat
         data.globalTaskId = IdPool::GetInstance().GetId(
             std::make_tuple(threadData.deviceId, data.streamId, data.taskId, data.contextId, data.batchId));
         data.taskType = GetTaskType(oriHostTaskType, oriDeviceTaskType,
-                                    threadData.platformVersion);
+                                    platformVersion);
         processedData.emplace_back(
             Utils::GetLocalTime(start, threadData.timeRecord).Uint64(),
             Utils::GetLocalTime(end, threadData.timeRecord).Uint64(),
-            threadData.deviceId, data.connectionId, data.globalTaskId, threadData.pid, data.taskType,
+            threadData.deviceId, data.connectionId, data.globalTaskId, pid, data.taskType,
             data.contextId, data.streamId, data.taskId, data.modelId);
     }
     return processedData;
@@ -124,13 +126,14 @@ bool TaskProcessor::Process(const std::string &fileDir)
 {
     INFO("Start to process %.", fileDir);
     ThreadData threadData;
+    DBInfo ascendTaskDB("ascend_task.db", "AscendTask");
     bool flag = true;
-    MAKE_SHARED0_NO_OPERATION(threadData.ascendTaskDB.database, AscendTaskDB);
+    MAKE_SHARED0_NO_OPERATION(ascendTaskDB.database, AscendTaskDB);
     threadData.profId = IdPool::GetInstance().GetUint32Id(fileDir);
-    threadData.pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, fileDir);
+    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, fileDir);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
-        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, threadData.ascendTaskDB.dbName});
+        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, ascendTaskDB.dbName});
         // 并不是所有场景都有ascend task数据
         auto status = CheckPath(dbPath);
         if (status != CHECK_SUCCESS) {
@@ -140,27 +143,27 @@ bool TaskProcessor::Process(const std::string &fileDir)
             continue;
         }
         threadData.deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
-        threadData.platformVersion = Context::GetInstance().GetPlatformVersion(threadData.deviceId, fileDir);
+        uint16_t platformVersion = Context::GetInstance().GetPlatformVersion(threadData.deviceId, fileDir);
         if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir)) {
             ERROR("Failed to obtain the time in start_info and end_info.");
             flag = false;
             continue;
         }
-        INFO("Start to process %, pid:%, deviceId:%.", dbPath, threadData.pid, threadData.deviceId);
-        MAKE_SHARED_RETURN_VALUE(threadData.ascendTaskDB.dbRunner, DBRunner, false, dbPath);
-        auto oriData = GetData(threadData.ascendTaskDB);
+        INFO("Start to process %, pid:%, deviceId:%.", dbPath, pid, threadData.deviceId);
+        MAKE_SHARED_RETURN_VALUE(ascendTaskDB.dbRunner, DBRunner, false, dbPath);
+        auto oriData = GetData(ascendTaskDB);
         if (oriData.empty()) {
             flag = false;
-            ERROR("Get % data failed in %.", threadData.ascendTaskDB.tableName, dbPath);
+            ERROR("Get % data failed in %.", ascendTaskDB.tableName, dbPath);
             continue;
         }
-        auto processedData = FormatData(oriData, threadData);
+        auto processedData = FormatData(oriData, threadData, platformVersion, pid);
         if (!SaveData(processedData, TABLE_NAME_TASK)) {
             flag = false;
             ERROR("Save data failed, %.", dbPath);
             continue;
         }
-        INFO("process %, pid:%, deviceId:% ends.", dbPath, threadData.pid, threadData.deviceId);
+        INFO("process %, pid:%, deviceId:% ends.", dbPath, pid, threadData.deviceId);
     }
     INFO("process % ends.", fileDir);
     return flag;

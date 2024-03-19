@@ -12,7 +12,6 @@
 #ifndef ANALYSIS_VIEWER_DATABASE_NPU_MEM_PROCESSOR_H
 #define ANALYSIS_VIEWER_DATABASE_NPU_MEM_PROCESSOR_H
 
-#include "analysis/csrc/utils/time_utils.h"
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
 
 namespace Analysis {
@@ -33,9 +32,9 @@ protected:
     bool Process(const std::string &fileDir) override;
 private:
     static OriDataFormat GetData(DBInfo &npuMemDB);
-    static ProcessedDataFormat FormatData(const OriDataFormat &oriData, uint16_t deviceId,
-                                          const Utils::ProfTimeRecord &timeRecord,
-                                          Utils::SyscntConversionParams &params);
+    static ProcessedDataFormat FormatData(const OriDataFormat &oriData, const uint16_t deviceId,
+                                          const uint64_t hostMonotonic,
+                                          const Utils::ProfTimeRecord &timeRecord);
 };
 
 } // Database

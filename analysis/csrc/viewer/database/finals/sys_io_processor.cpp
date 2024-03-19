@@ -18,7 +18,8 @@
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using Context = Parser::Environment::Context;
+using namespace Analysis::Parser::Environment;
+using namespace Analysis::Utils;
 
 namespace {
 struct BandwidthData {
@@ -60,17 +61,18 @@ bool SysIOProcessor::Run()
 bool SysIOProcessor::Process(const std::string &fileDir)
 {
     INFO("% Process, dir is %", processorName_, fileDir);
-    auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
+    auto deviceList = File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
+    ThreadData threadData;
     std::string oriDbName;
     std::string oriTableName;
     std::string targetTableName;
     std::tie(oriDbName, oriTableName, targetTableName) = ORI_DB_INFO_TABLE.find(processorName_)->second;
     DBInfo sysIODB(oriDbName, oriTableName);
     bool flag = true;
-    Utils::ProfTimeRecord timeRecord;
-    bool timeFlag = Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir);
+    bool timeFlag = Context::GetInstance().GetClockMonotonicRaw(threadData.hostMonotonic, HOST_ID, fileDir);
+    timeFlag = timeFlag && Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir);
     for (const auto& devicePath: deviceList) {
-        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, sysIODB.dbName});
+        std::string dbPath = File::PathJoin({devicePath, SQLITE, sysIODB.dbName});
         // 并不是所有场景都有sys io数据
         auto status = CheckPath(dbPath);
         if (status != CHECK_SUCCESS) {
@@ -83,9 +85,16 @@ bool SysIOProcessor::Process(const std::string &fileDir)
             ERROR("Failed to GetProfTimeRecordInfo, fileDir is %.", fileDir);
             return false;
         }
+        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
+        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, deviceId, fileDir) ||
+                (threadData.hostMonotonic < threadData.deviceMonotonic)) {
+            ERROR("Device MonotonicRaw is invalid in path: %., device id is %", fileDir, deviceId);
+            flag = false;
+            continue;
+        }
         SysIODataFormat sysIOData = GetData(dbPath, sysIODB);
         ProcessedDataFormat processedData;
-        if (!FormatData(timeRecord, sysIOData, processedData)) {
+        if (!FormatData(threadData, sysIOData, processedData)) {
             ERROR("FormatData failed, fileDir is %.", fileDir);
             flag = false;
             continue;
@@ -118,7 +127,7 @@ SysIOProcessor::SysIODataFormat SysIOProcessor::GetData(const std::string &dbPat
     return sysIOData;
 }
 
-bool SysIOProcessor::FormatData(const Utils::ProfTimeRecord timeRecord,
+bool SysIOProcessor::FormatData(const ThreadData &threadData,
                                 const SysIODataFormat &sysIOData, ProcessedDataFormat &processedData)
 {
     INFO("% FormatData.", processorName_);
@@ -126,7 +135,7 @@ bool SysIOProcessor::FormatData(const Utils::ProfTimeRecord timeRecord,
         ERROR("Sys IO original data is empty, processor name is %.", processorName_);
         return false;
     }
-    if (!Utils::Reserve(processedData, sysIOData.size())) {
+    if (!Reserve(processedData, sysIOData.size())) {
         ERROR("Reserve for % data failed.", processorName_);
         return false;
     }
@@ -136,9 +145,10 @@ bool SysIOProcessor::FormatData(const Utils::ProfTimeRecord timeRecord,
                  tempData.rx.packets, tempData.rx.bytes, tempData.rx.errors, tempData.rx.dropped,
                  tempData.tx.packet, tempData.tx.byte, tempData.tx.packets, tempData.tx.bytes,
                  tempData.tx.errors, tempData.tx.dropped, tempData.funcid) = data;
-        Utils::HPFloat timestamp{tempData.timestamp};
+        HPFloat timestamp = GetTimeBySamplingTimestamp(tempData.timestamp,
+                                                       threadData.hostMonotonic - threadData.deviceMonotonic);
         processedData.emplace_back(static_cast<uint16_t>(tempData.deviceId),
-                                   Utils::GetLocalTime(timestamp, timeRecord).Uint64(),
+                                   GetLocalTime(timestamp, threadData.timeRecord).Uint64(),
                                    tempData.bandwidth * BYTE_SIZE * BYTE_SIZE, // MB/s -> B/s
                                    tempData.rx.packet, tempData.rx.byte, tempData.rx.packets,
                                    tempData.rx.bytes, tempData.rx.errors, tempData.rx.dropped,

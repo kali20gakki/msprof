@@ -17,7 +17,8 @@
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using Context = Parser::Environment::Context;
+using namespace Analysis::Parser::Environment;
+using namespace Analysis::Utils;
 namespace {
 struct BandwidthData {
     uint32_t min = UINT32_MAX;
@@ -52,13 +53,14 @@ bool PCIeProcessor::Run()
 bool PCIeProcessor::Process(const std::string &fileDir)
 {
     INFO("PCIeProcessor Process, dir is %", fileDir);
-    auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
+    ThreadData threadData;
+    auto deviceList = File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     DBInfo pcieDB("pcie.db", "PcieOriginalData");
     bool flag = true;
-    Utils::ProfTimeRecord timeRecord;
-    bool timeFlag = Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir);
+    bool timeFlag = Context::GetInstance().GetClockMonotonicRaw(threadData.hostMonotonic, HOST_ID, fileDir);
+    timeFlag = timeFlag && Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir);
     for (const auto& devicePath: deviceList) {
-        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, pcieDB.dbName});
+        std::string dbPath = File::PathJoin({devicePath, SQLITE, pcieDB.dbName});
         // 并不是所有场景都有PCIe数据
         auto status = CheckPath(dbPath);
         if (status != CHECK_SUCCESS) {
@@ -71,9 +73,16 @@ bool PCIeProcessor::Process(const std::string &fileDir)
             ERROR("Failed to GetProfTimeRecordInfo, fileDir is %.", fileDir);
             return false;
         }
+        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
+        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, deviceId, fileDir) ||
+                (threadData.hostMonotonic < threadData.deviceMonotonic)) {
+            ERROR("Device MonotonicRaw is invalid in path: %., device id is %", fileDir, deviceId);
+            flag = false;
+            continue;
+        }
         PCIeDataFormat pcieData = GetData(dbPath, pcieDB);
         ProcessedDataFormat processedData;
-        if (!FormatData(timeRecord, pcieData, processedData)) {
+        if (!FormatData(threadData, pcieData, processedData)) {
             ERROR("FormatData failed, fileDir is %.", fileDir);
             flag = false;
             continue;
@@ -111,7 +120,7 @@ PCIeProcessor::PCIeDataFormat PCIeProcessor::GetData(const std::string &dbPath, 
     return pcieData;
 }
 
-bool PCIeProcessor::FormatData(const Utils::ProfTimeRecord timeRecord,
+bool PCIeProcessor::FormatData(const ThreadData &threadData,
                                const PCIeDataFormat &pcieData, ProcessedDataFormat &processedData)
 {
     INFO("PCIeProcessor FormatData.");
@@ -119,7 +128,7 @@ bool PCIeProcessor::FormatData(const Utils::ProfTimeRecord timeRecord,
         ERROR("Pcie original data is empty.");
         return false;
     }
-    if (!Utils::Reserve(processedData, pcieData.size())) {
+    if (!Reserve(processedData, pcieData.size())) {
         ERROR("Reserve for PCIe data failed.");
         return false;
     }
@@ -133,10 +142,11 @@ bool PCIeProcessor::FormatData(const Utils::ProfTimeRecord timeRecord,
                  tempData.rxPost.min, tempData.rxPost.max, tempData.rxPost.avg,
                  tempData.rxNopost.min, tempData.rxNopost.max, tempData.rxNopost.avg,
                  tempData.rxCpl.min, tempData.rxCpl.max, tempData.rxCpl.avg) = data;
-        Utils::HPFloat timestamp{tempData.timestamp};
+        HPFloat timestamp = GetTimeBySamplingTimestamp(tempData.timestamp,
+                                                       threadData.hostMonotonic - threadData.deviceMonotonic);
         // B/us -> B/s
         processedData.emplace_back(static_cast<uint16_t>(tempData.deviceId),
-                                   Utils::GetLocalTime(timestamp, timeRecord).Uint64(),
+                                   GetLocalTime(timestamp, threadData.timeRecord).Uint64(),
                                    tempData.txPost.min * MICRO_SECOND, tempData.txPost.max * MICRO_SECOND,
                                    tempData.txPost.avg * MICRO_SECOND, tempData.txNopost.min * MICRO_SECOND,
                                    tempData.txNopost.max * MICRO_SECOND, tempData.txNopost.avg * MICRO_SECOND,
