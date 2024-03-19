@@ -417,6 +417,7 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
             return ACL_ERROR_PROF_NOT_RUN;
         }
     }
+    PlatformAdapter::instance()->Uninit();
     // stop devices
     int ret = CancleHostAndDevTasks(profStopCfg->devNums, profStopCfg->devIdList);
     if (ret != ACL_SUCCESS) {
