@@ -27,6 +27,7 @@ class MemoryCopyViewer:
                                   DBNameConstant.DB_MEMORY_COPY,
                                   DBNameConstant.TABLE_TS_MEMCPY_CALCULATION
                                   )
+        self._pid = InfoConfReader().get_json_pid_data()
 
     @staticmethod
     def add_runtime_memcpy_args(sql_data: list, args: dict) -> dict:
@@ -134,7 +135,7 @@ class MemoryCopyViewer:
 
                 logic_stream_id = GeLogicStreamSingleton().get_logic_stream_id(datum[6])
                 timeline_datum = [
-                    datum[0], NumberConstant.TASK_TIME_PID, logic_stream_id,
+                    datum[0], self._pid, logic_stream_id,
                     start_time, datum[5], args
                 ]
                 timeline_data.append(timeline_datum)

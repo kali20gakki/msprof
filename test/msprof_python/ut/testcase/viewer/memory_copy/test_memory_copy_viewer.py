@@ -12,6 +12,7 @@ NAMESPACE = 'msmodel.memory_copy.memcpy_model.MemcpyModel'
 class TestMemoryCopyViewer(unittest.TestCase):
     def setUp(self) -> None:
         self.current_path = ""
+        InfoConfReader()._info_json = {"pid": 0}
         self.memcopy_viewer = MemoryCopyViewer(self.current_path)
 
     def test_get_memory_copy_chip0_summary_1(self):
