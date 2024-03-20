@@ -267,7 +267,7 @@ HostTasks TreeAnalyzer::GenComputeHostTasks(ComputeOpDescs &ops,
         MAKE_SHARED_RETURN_VALUE(op, Operator, {}, desc, nodeNode->event->apiPtr->itemId, OpType::OPTYPE_RESERVED);
         auto task = GenHostTask(track, modelApi, op,
                                 DEFAULT_CONTEXT_ID, track->data.runtimeTrack.taskType, connection_id);
-        return {task};
+        return (task != nullptr) ? HostTasks{task} : HostTasks{};
     }
 
     HostTasks results;
@@ -291,7 +291,9 @@ HostTasks TreeAnalyzer::GenComputeHostTasks(ComputeOpDescs &ops,
         for (const auto &ctxId: ctxIds) {
             auto task = GenHostTask(track, modelApi, pair.second, ctxId,
                                     track->data.runtimeTrack.taskType, connection_id);
-            results.emplace_back(task);
+            if (task) {
+                results.emplace_back(task);
+            }
         }
     }
     return results;
@@ -424,7 +426,9 @@ HostTasks TreeAnalyzer::GetHcclTaskDescs(const std::shared_ptr<TreeNode> &node)
         auto desc = pair.second->hcclSmallOpDesc;
         auto task = GenHostTask(track, modelApi, pair.second, desc->ctxId,
                                 track->data.runtimeTrack.taskType, nodeNode->event->id);
-        results.emplace_back(task);
+        if (task) {
+            results.emplace_back(task);
+        }
     }
     return results;
 }
