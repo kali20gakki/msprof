@@ -39,9 +39,7 @@ class FilenameIntroductionConfig(MetaConfig):
                            "If there is only one device, no Reduce data is output.\n"),
             ('msprof_tx', "msproftx timeline data. The collected host msproftx timeline data is combined "
                           "by thread for associated performance display.\n"
-                          "\tevent_type: Event type.\n"
-                          "\tcall_stack: call_stack data information. The data is displayed only for "
-                          "E2E Profiling in PyTorch training scenarios.\n"),
+                          "\tevent_type: Event type.\n"),
         ],
         'summary': [
             ('begin', "Summary file description:\n"),
@@ -233,8 +231,6 @@ class FilenameIntroductionConfig(MetaConfig):
             ('msprof_tx', "msproftx summary data. The collected host msproftx summary data is combined by "
                           "thread for associated performance display.\n"
                           "\tmessage: Character string description carried in the msproftx profiling process.\n"),
-            ('pytorch_operator_view', "msprof_tx summary data in PyTorch E2E Profiling scenarios.\n"
-                                      "\tcall_stack: call_stack data information.\n"),
         ]
     }
 
