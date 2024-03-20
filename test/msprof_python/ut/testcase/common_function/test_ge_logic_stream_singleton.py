@@ -59,6 +59,18 @@ class TestGeLogicStreamSingleton(unittest.TestCase):
             stream_id = GeLogicStreamSingleton().get_logic_stream_id(5)
             self.assertEqual(stream_id, 5)
 
+    def test_get_logic_stream_id_success_when_physic_stream_is_exceeds(self):
+        with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='test'), \
+                mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
+                mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"), \
+                mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[(1, 0), (2, 0), (3, 0)]), \
+                mock.patch(NAMESPACE + ".DBManager.fetchone", return_value=(65539,)), \
+                mock.patch(NAMESPACE + '.DBManager.drop_table'):
+            GeLogicStreamSingleton().load_info(PROJECT_PATH)
+            stream_id = GeLogicStreamSingleton().get_logic_stream_id(5)
+            self.assertEqual(stream_id, 5)
+
 
 if __name__ == '__main__':
     unittest.main()

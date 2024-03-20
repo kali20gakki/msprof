@@ -6,6 +6,7 @@ import logging
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from common_func.singleton import singleton
 
@@ -20,6 +21,7 @@ class GeLogicStreamSingleton:
         self.project_path = ""
 
     def load_info(self, project_path):
+        self.clear()
         self.project_path = project_path
         ge_db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_LOGIC_STREAM_INFO)
         if not DBManager.check_tables_in_db(ge_db_path, DBNameConstant.TABLE_GE_LOGIC_STREAM_INFO):
@@ -28,6 +30,10 @@ class GeLogicStreamSingleton:
         ge_stream_result = self.get_ge_logic_stream_data()
         stream_mapping_list = ge_stream_result[0]
         self.max_length = ge_stream_result[1][0]
+        if self.max_length > NumberConstant.DEFAULT_STREAM_ID:
+            self.use_flag = False
+            logging.error("The physical stream_id %d reported exceeds the maximum value.", self.max_length)
+            return
         self.stream_id_mapping = [None] * (self.max_length + 1)
         for mspping in stream_mapping_list:
             self.add_stream_id_mapping(mspping[0], mspping[1])
@@ -63,3 +69,9 @@ class GeLogicStreamSingleton:
         if physic_stream > self.max_length or self.stream_id_mapping[physic_stream] is None:
             return physic_stream
         return self.stream_id_mapping[physic_stream]
+
+    def clear(self: any) -> None:
+        self.use_flag = True
+        self.max_length = 0
+        self.stream_id_mapping = []
+        self.project_path = ""
