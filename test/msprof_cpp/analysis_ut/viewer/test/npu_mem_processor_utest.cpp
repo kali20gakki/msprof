@@ -22,6 +22,7 @@
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Utils;
 using namespace Analysis::Parser;
+using namespace Parser::Environment;
 namespace {
 const int DEPTH = 0;
 const std::string NPU_MEM_PATH = "./npu_mem_path";
@@ -49,6 +50,7 @@ class NpuMemProcessorUTest : public testing::Test {
 protected:
     virtual void SetUp()
     {
+        Analysis::Log::GetInstance().Init("./");
         EXPECT_TRUE(File::CreateDir(NPU_MEM_PATH));
         EXPECT_TRUE(File::CreateDir(PROF_PATH_A));
         EXPECT_TRUE(File::CreateDir(PROF_PATH_B));
@@ -58,18 +60,18 @@ protected:
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE})));
         CreateNpuMem(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_A);
         CreateNpuMem(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_B);
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
-            .stubs()
-            .will(returnValue(true));
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetSyscntConversionParams)
-            .stubs()
-            .will(returnValue(true));
+        nlohmann::json record = {
+            {"startCollectionTimeBegin", "1701069323851824"},
+            {"endCollectionTimeEnd", "1701069338041681"},
+            {"startClockMonotonicRaw", "36470610791630"},
+            {"clock_monotonic_raw", "36471130547330"},
+        };
+        MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
     }
     virtual void TearDown()
     {
         EXPECT_TRUE(File::RemoveDir(NPU_MEM_PATH, DEPTH));
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetSyscntConversionParams).reset();
+        GlobalMockObject::verify();
     }
     static void CreateNpuMem(const std::string &dbPath, OriDataFormat data)
     {

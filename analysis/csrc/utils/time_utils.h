@@ -47,7 +47,7 @@ std::string GetFormatLocalTime();
 // 将syscnt转为timestamp 返回结果为ns级
 HPFloat GetTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params);
 // 将采样时间戳转为host侧时间戳
-HPFloat GetTimeBySamplingTimestamp(double timestamp, const SyscntConversionParams &params);
+HPFloat GetTimeBySamplingTimestamp(double timestamp, const uint64_t monotonic);
 // 计算加上本地的偏移时间, ns级
 HPFloat GetLocalTime(HPFloat &timestamp, const ProfTimeRecord &record);
 

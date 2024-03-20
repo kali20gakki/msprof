@@ -51,18 +51,18 @@ NpuModuleMemProcessor::OriDataFormat NpuModuleMemProcessor::GetData(DBInfo &npuM
 
 NpuModuleMemProcessor::ProcessedDataFormat NpuModuleMemProcessor::FormatData(const OriDataFormat &oriData,
                                                                              uint16_t deviceId,
-                                                                             const Utils::ProfTimeRecord &timeRecord,
-                                                                             Utils::SyscntConversionParams &params)
+                                                                             const ProfTimeRecord &timeRecord,
+                                                                             SyscntConversionParams &params)
 {
     ProcessedDataFormat processedData;
     NpuModuleMemData data;
-    if (!Utils::Reserve(processedData, oriData.size())) {
+    if (!Reserve(processedData, oriData.size())) {
         ERROR("Reserve for NpuModuleMem data failed.");
         return processedData;
     }
     for (auto &row: oriData) {
         std::tie(data.moduleId, data.syscnt, data.totalSize, data.deviceType) = row;
-        HPFloat timestamp{GetTimeBySamplingTimestamp(data.syscnt, params)};
+        HPFloat timestamp{GetTimeFromSyscnt(data.syscnt, params)};
         processedData.emplace_back(
             data.moduleId, GetLocalTime(timestamp, timeRecord).Uint64(), data.totalSize, deviceId);
     }
@@ -72,15 +72,15 @@ NpuModuleMemProcessor::ProcessedDataFormat NpuModuleMemProcessor::FormatData(con
 bool NpuModuleMemProcessor::Process(const std::string &fileDir)
 {
     INFO("Start to process %.", fileDir);
-    Utils::ProfTimeRecord timeRecord;
-    Utils::SyscntConversionParams params;
+    ProfTimeRecord timeRecord;
+    SyscntConversionParams params;
     DBInfo npuModuleMemDB("npu_module_mem.db", "NpuModuleMem");
     bool flag = true;
     MAKE_SHARED0_NO_OPERATION(npuModuleMemDB.database, NpuModuleMemDB);
-    auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
+    auto deviceList = File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     bool timeFlag = Context::GetInstance().GetSyscntConversionParams(params, HOST_ID, fileDir);
     for (const auto &devicePath: deviceList) {
-        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, npuModuleMemDB.dbName});
+        std::string dbPath = File::PathJoin({devicePath, SQLITE, npuModuleMemDB.dbName});
         // 并不是所有场景都有NpuModuleMem数据
         auto status = CheckPath(dbPath);
         if (status != CHECK_SUCCESS) {
@@ -93,7 +93,7 @@ bool NpuModuleMemProcessor::Process(const std::string &fileDir)
             ERROR("GetSyscntConversionParams failed, profPath is %.", fileDir);
             return false;
         }
-        uint16_t deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
+        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
         INFO("Start to process %, deviceId:%.", dbPath, deviceId);
         if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir)) {
             ERROR("Failed to obtain the time in start_info and end_info.");

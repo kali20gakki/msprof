@@ -12,7 +12,6 @@
 #ifndef ANALYSIS_VIEWER_DATABASE_HCCS_PROCESSOR_H
 #define ANALYSIS_VIEWER_DATABASE_HCCS_PROCESSOR_H
 
-#include "analysis/csrc/utils/time_utils.h"
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
 
 namespace Analysis {
@@ -33,7 +32,7 @@ protected:
     bool Process(const std::string &fileDir) override;
 private:
     HccsDataFormat GetData(const std::string &dbPath, DBInfo &hccsDB);
-    bool FormatData(const Utils::ProfTimeRecord timeRecord,
+    bool FormatData(const ThreadData &threadData,
                     const HccsDataFormat &hccsData, ProcessedDataFormat &processedData);
 };
 

@@ -91,6 +91,13 @@ protected:
 
     virtual void SetUp()
     {
+        nlohmann::json record = {
+            {"startCollectionTimeBegin", "1701069323851824"},
+            {"endCollectionTimeEnd", "1701069338041681"},
+            {"startClockMonotonicRaw", "36470610791630"},
+            {"clock_monotonic_raw", "36471130547330"},
+        };
+        MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
     }
 
     virtual void TearDown()
@@ -104,17 +111,8 @@ protected:
 
 TEST_F(SysIOProcessorUTest, TestNicRunShouldReturnTrueWhenProcessorRunSuccess)
 {
-    nlohmann::json record = {
-        {"startCollectionTimeBegin", "1701069323851824"},
-        {"endCollectionTimeEnd", "1701069338041681"},
-        {"startClockMonotonicRaw", "36470610791630"},
-    };
-    MOCKER_CPP(&Context::GetInfoByDeviceId)
-    .stubs()
-    .will(returnValue(record));
     auto processor = NicProcessor(DB_PATH, {PROF});
     EXPECT_TRUE(processor.Run());
-    MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
     std::shared_ptr<DBRunner> dbRunner;
     MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
     QueryataFormat checkData;
@@ -127,17 +125,8 @@ TEST_F(SysIOProcessorUTest, TestNicRunShouldReturnTrueWhenProcessorRunSuccess)
 
 TEST_F(SysIOProcessorUTest, TestRoCERunShouldReturnTrueWhenProcessorRunSuccess)
 {
-    nlohmann::json record = {
-        {"startCollectionTimeBegin", "1701069323851824"},
-        {"endCollectionTimeEnd", "1701069338041681"},
-        {"startClockMonotonicRaw", "36470610791630"},
-    };
-    MOCKER_CPP(&Context::GetInfoByDeviceId)
-    .stubs()
-    .will(returnValue(record));
     auto processor = RoCEProcessor(DB_PATH, {PROF});
     EXPECT_TRUE(processor.Run());
-    MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
     std::shared_ptr<DBRunner> dbRunner;
     MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
     QueryataFormat checkData;
@@ -150,11 +139,6 @@ TEST_F(SysIOProcessorUTest, TestRoCERunShouldReturnTrueWhenProcessorRunSuccess)
 
 TEST_F(SysIOProcessorUTest, TestNicRunShouldReturnFalseWhenProcessorRunFailed)
 {
-    nlohmann::json record = {
-        {"startCollectionTimeBegin", "1701069323851824"},
-        {"endCollectionTimeEnd", "1701069338041681"},
-        {"startClockMonotonicRaw", "36470610791630"},
-    };
     // CheckPath failed
     MOCKER_CPP(&TableProcessor::CheckPath)
     .stubs()
@@ -164,27 +148,20 @@ TEST_F(SysIOProcessorUTest, TestNicRunShouldReturnFalseWhenProcessorRunFailed)
     MOCKER_CPP(&TableProcessor::CheckPath).reset();
 
     // GetProfTimeRecordInfo failed
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(false));
     auto processor2 = NicProcessor(DB_PATH, {PROF});
     EXPECT_FALSE(processor2.Run());
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).reset();
 
     // save failed
-    MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
     MOCKER_CPP(&DBRunner::CreateTable).stubs().will(returnValue(false));
     auto processor3 = NicProcessor(DB_PATH, {PROF});
     EXPECT_FALSE(processor3.Run());
-    MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
     MOCKER_CPP(&DBRunner::CreateTable).reset();
 }
 
 TEST_F(SysIOProcessorUTest, TestNicRunShouldReturnFalseWhenFormatDataFailed)
 {
-    nlohmann::json record = {
-        {"startCollectionTimeBegin", "1701069323851824"},
-        {"endCollectionTimeEnd", "1701069338041681"},
-        {"startClockMonotonicRaw", "36470610791630"},
-    };
-
-    MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
     // sysIOData empty
     MOCKER_CPP(&QueryataFormat::empty).stubs().will(returnValue(true));
     auto processor1 = NicProcessor(DB_PATH, {PROF});
@@ -204,6 +181,4 @@ TEST_F(SysIOProcessorUTest, TestNicRunShouldReturnFalseWhenFormatDataFailed)
     auto processor3 = NicProcessor(DB_PATH, {PROF});
     EXPECT_FALSE(processor3.Run());
     MOCKER_CPP(&SysIOFormat::empty).reset();
-
-    MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
 }
