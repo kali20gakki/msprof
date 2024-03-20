@@ -49,7 +49,7 @@ bool HostTraceWorker::Run()
         // api event 数据落盘
         auto apiTraces = grouper->GetApiTraces();
         std::shared_ptr<ApiEventDBDumper> apiDumper;
-        MAKE_SHARED_RETURN_VALUE(apiDumper, ApiEventDBDumper, false, hostPath_);
+        MAKE_SHARED_RETURN_VOID(apiDumper, ApiEventDBDumper, hostPath_);
         auto ret = apiDumper->DumpData(apiTraces);
         if (!ret) {
             ERROR("Dump api traces data failed");
@@ -61,7 +61,7 @@ bool HostTraceWorker::Run()
             // flip tasks 数据落盘
             auto flipTasks = grouper->GetFlipTasks();
             std::shared_ptr<FlipTaskDBDumper> flipDumper;
-            MAKE_SHARED_RETURN_VALUE(flipDumper, FlipTaskDBDumper, false, hostPath_);
+            MAKE_SHARED_RETURN_VOID(flipDumper, FlipTaskDBDumper, hostPath_);
             auto ret = flipDumper->DumpData(flipTasks);
             if (!ret) {
                 ERROR("Dump flip tasks data failed");
@@ -71,10 +71,10 @@ bool HostTraceWorker::Run()
             TimeLogger t{"Dump fusion op start"};
             // fusion op 数据落盘
             std::shared_ptr<FusionOpInfoParser> parser;
-            MAKE_SHARED_NO_OPERATION(parser, FusionOpInfoParser, hostDataPath);
+            MAKE_SHARED_RETURN_VOID(parser, FusionOpInfoParser, hostDataPath);
             auto fusionOps = parser->ParseData<MsprofAdditionalInfo>();
             std::shared_ptr<FusionOpDumper> dumper;
-            MAKE_SHARED_NO_OPERATION(dumper, FusionOpDumper, hostPath_);
+            MAKE_SHARED_RETURN_VOID(dumper, FusionOpDumper, hostPath_);
             auto ret = dumper->DumpData(fusionOps);
             if (!ret) {
                 ERROR("Dump fusion op failed");
@@ -83,12 +83,11 @@ bool HostTraceWorker::Run()
         pool.AddTask([this, &hostDataPath]() {
             TimeLogger t{"Dump graph id map data start"};
             std::shared_ptr<GraphIdParser> parser;
-            MAKE_SHARED_NO_OPERATION(parser, GraphIdParser, hostDataPath);
-
+            MAKE_SHARED_RETURN_VOID(parser, GraphIdParser, hostDataPath);
             auto traces = parser->ParseData<MsprofAdditionalInfo>();
             // graphIdMap 数据落盘
             std::shared_ptr<GraphIdMapDBDumper> graphIdMapDumper;
-            MAKE_SHARED_NO_OPERATION(graphIdMapDumper, GraphIdMapDBDumper, hostPath_);
+            MAKE_SHARED_RETURN_VOID(graphIdMapDumper, GraphIdMapDBDumper, hostPath_);
             auto ret = graphIdMapDumper->DumpData(traces);
             if (!ret) {
                 ERROR("Dump graph id map data failed");
