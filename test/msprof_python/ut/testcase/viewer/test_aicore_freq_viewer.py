@@ -2,21 +2,21 @@
 # coding=utf-8
 """
 function:
-Copyright Huawei Technologies Co., Ltd. 2023. All rights reserved.
+Copyright Huawei Technologies Co., Ltd. 2024. All rights reserved.
 """
 import json
 
-from common_func.info_conf_reader import InfoConfReader
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
-from common_func.profiling_scene import ProfilingScene
-from common_func.profiling_scene import ExportMode
 from common_func.platform.chip_manager import ChipManager
-from profiling_bean.prof_enum.chip_model import ChipModel
-from msmodel.freq.freq_data_viewer_model import FreqDataViewModel
-from viewer.ai_core_freq_viewer import AiCoreFreqViewer
-from msmodel.api.api_data_viewer_model import ApiDataViewModel
+from common_func.profiling_scene import ExportMode
+from common_func.profiling_scene import ProfilingScene
 from model.test_dir_cr_base_model import TestDirCRBaseModel
+from msmodel.api.api_data_viewer_model import ApiDataViewModel
+from msmodel.freq.freq_data_viewer_model import FreqDataViewModel
+from profiling_bean.prof_enum.chip_model import ChipModel
+from viewer.ai_core_freq_viewer import AiCoreFreqViewer
 
 NAMESPACE = 'msmodel.freq.freq_data_viewer_model'
 
