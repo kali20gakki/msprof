@@ -41,13 +41,14 @@ bool HCCSProcessor::Run()
 bool HCCSProcessor::Process(const std::string &fileDir)
 {
     INFO("Start to process %.", fileDir);
-    Utils::ProfTimeRecord timeRecord;
+    ThreadData threadData;
     DBInfo hccsDB("hccs.db", "HCCSEventsData");
     bool flag = true;
-    auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
-    bool timeFlag = Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir);
+    auto deviceList = File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
+    bool timeFlag = Context::GetInstance().GetClockMonotonicRaw(threadData.hostMonotonic, HOST_ID, fileDir);
+    timeFlag = timeFlag && Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir);
     for (const auto& devicePath: deviceList) {
-        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, hccsDB.dbName});
+        std::string dbPath = File::PathJoin({devicePath, SQLITE, hccsDB.dbName});
         // 并不是所有场景都有hccs数据
         auto status = CheckPath(dbPath);
         if (status != CHECK_SUCCESS) {
@@ -60,9 +61,16 @@ bool HCCSProcessor::Process(const std::string &fileDir)
             ERROR("Failed to obtain the time in start_info and end_info.");
             return false;
         }
+        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
+        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, deviceId, fileDir) ||
+                (threadData.hostMonotonic < threadData.deviceMonotonic)) {
+            ERROR("Device MonotonicRaw is invalid in path: %., device id is %", fileDir, deviceId);
+            flag = false;
+            continue;
+        }
         HccsDataFormat hccsData = GetData(dbPath, hccsDB);
         ProcessedDataFormat processedData;
-        if (!FormatData(timeRecord, hccsData, processedData)) {
+        if (!FormatData(threadData, hccsData, processedData)) {
             ERROR("FormatData failed, fileDir is %.", fileDir);
             flag = false;
             continue;
@@ -95,7 +103,7 @@ HCCSProcessor::HccsDataFormat HCCSProcessor::GetData(const std::string &dbPath, 
     return hccsData;
 }
 
-bool HCCSProcessor::FormatData(const Utils::ProfTimeRecord timeRecord,
+bool HCCSProcessor::FormatData(const ThreadData &threadData,
                                const HccsDataFormat &hccsData, ProcessedDataFormat &processedData)
 {
     INFO("HCCSProcessor FormatData.");
@@ -103,16 +111,17 @@ bool HCCSProcessor::FormatData(const Utils::ProfTimeRecord timeRecord,
         ERROR("Hccs original data is empty.");
         return false;
     }
-    if (!Utils::Reserve(processedData, hccsData.size())) {
+    if (!Reserve(processedData, hccsData.size())) {
         ERROR("Reserve for Hccs data failed.");
         return false;
     }
     HCCSOriData tempData;
     for (auto &row: hccsData) {
         std::tie(tempData.deviceId, tempData.timestamp, tempData.txThroughput, tempData.rxThroughput) = row;
-        HPFloat timestamp{tempData.timestamp};
+        HPFloat timestamp = GetTimeBySamplingTimestamp(tempData.timestamp,
+                                                       threadData.hostMonotonic - threadData.deviceMonotonic);
         processedData.emplace_back(static_cast<uint16_t>(tempData.deviceId),
-                                   GetLocalTime(timestamp, timeRecord).Uint64(),
+                                   GetLocalTime(timestamp, threadData.timeRecord).Uint64(),
                                    static_cast<uint64_t>(tempData.txThroughput * BYTE_SIZE * BYTE_SIZE), // MB/s -> B/s
                                    static_cast<uint64_t>(tempData.txThroughput * BYTE_SIZE * BYTE_SIZE));
     }

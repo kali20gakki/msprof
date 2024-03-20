@@ -61,9 +61,9 @@ HPFloat GetTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params)
     return res;
 }
 
-HPFloat GetTimeBySamplingTimestamp(double timestamp, const SyscntConversionParams &params)
+HPFloat GetTimeBySamplingTimestamp(double timestamp, const uint64_t monotonic)
 {
-    return HPFloat(timestamp * MILLI_SECOND) + HPFloat(params.hostMonotonic);
+    return HPFloat(timestamp) + HPFloat(monotonic);
 }
 
 HPFloat GetLocalTime(HPFloat &timestamp, const ProfTimeRecord &record)

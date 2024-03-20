@@ -12,7 +12,6 @@
 #ifndef ANALYSIS_VIEWER_DATABASE_HBM_PROCESSOR_H
 #define ANALYSIS_VIEWER_DATABASE_HBM_PROCESSOR_H
 
-#include "analysis/csrc/utils/time_utils.h"
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
 
 namespace Analysis {
@@ -32,7 +31,7 @@ protected:
     bool Process(const std::string &fileDir) override;
 private:
     static OriDataFormat GetData(const DBInfo &HBMDB);
-    static ProcessedDataFormat FormatData(const OriDataFormat &oriData, const Utils::ProfTimeRecord &timeRecord);
+    static ProcessedDataFormat FormatData(const OriDataFormat &oriData, const ThreadData &threadData);
 };
 
 } // Database

@@ -171,11 +171,14 @@ bool Context::IsAllExport()
 {
     const auto &info = GetInfoByDeviceId();
     if (info.empty()) {
+        ERROR("IsAllExport device info is empty.");
         return false;
     }
     // 低版本的驱动中不存在drvVersion字段，该字段使用时需要默认值
     auto drvVersion = info.value("drvVersion", 0u);
     if (drvVersion < ALL_EXPORT_VERSION) {
+        WARN("DrvVersion not support all export, drvVersion is %, ALL_EXPORT_VERSION is %",
+             drvVersion, ALL_EXPORT_VERSION);
         return false;
     }
     uint16_t chip;
@@ -186,6 +189,7 @@ bool Context::IsAllExport()
     if (chip == static_cast<uint16_t>(Chip::CHIP_V1_1_0) ||
             chip == static_cast<uint16_t>(Chip::CHIP_V3_1_0) ||
             chip == static_cast<uint16_t>(Chip::CHIP_V1_1_3)) {
+        WARN("Platform_version not support all export.");
         return false;
     }
     return true;
@@ -220,10 +224,11 @@ uint16_t Context::GetPlatformVersion(uint16_t deviceId, const std::string &profP
     const auto &info = GetInfoByDeviceId(deviceId, profPath);
     uint16_t platformVersion = UINT16_MAX;
     if (info.empty()) {
+        ERROR("GetPlatformVersion device info is empty.");
         return platformVersion;
     }
     if (StrToU16(platformVersion, info.at("platform_version")) != ANALYSIS_OK) {
-        ERROR("PlatformVersion to uint16_t failed.");
+        ERROR("PlatformVersion to uint16_t failed, invalid str is %.", info.at("platform_version"));
     }
     return platformVersion;
 }
@@ -241,22 +246,23 @@ bool Context::GetProfTimeRecordInfo(Utils::ProfTimeRecord &record, const std::st
     }
     uint64_t startTimeUs = UINT64_MAX;
     if (StrToU64(startTimeUs, info.at("startCollectionTimeBegin")) != ANALYSIS_OK) {
-        ERROR("StartTime to uint64_t failed.");
+        ERROR("StartTime to uint64_t failed, invalid str is %.", info.at("startCollectionTimeBegin"));
         return false;
     }
     uint64_t endTimeUs = 0;
     if (StrToU64(endTimeUs, info.at("endCollectionTimeEnd")) != ANALYSIS_OK) {
-        ERROR("EndTime to uint64_t failed.");
+        ERROR("EndTime to uint64_t failed, invalid str is %.", info.at("endCollectionTimeEnd"));
         return false;
     }
     uint64_t baseTimeNs = UINT64_MAX;
     if (StrToU64(baseTimeNs, info.at("startClockMonotonicRaw")) != ANALYSIS_OK) {
-        ERROR("BaseTime to uint64_t failed.");
+        ERROR("BaseTime to uint64_t failed, invalid str is %.", info.at("startClockMonotonicRaw"));
         return false;
     }
     // 先判断时间之间的大小关系，确保后续计算时整数不回绕
     if ((startTimeUs * MILLI_SECOND < baseTimeNs)) {
-        ERROR("The value of startTimeUs and baseTimeNs is invalid.");
+        ERROR("The value of startTimeUs and baseTimeNs is invalid, startTimeUs is %, baseTimeNs is %",
+              startTimeUs, baseTimeNs);
         return false;
     }
     // startInfo endInfo 里的 collectionTime的单位是us，需要转换成ns
@@ -271,10 +277,11 @@ uint32_t Context::GetPidFromInfoJson(uint16_t deviceId, const std::string &profP
     const auto &info = GetInfoByDeviceId(deviceId, profPath);
     uint32_t pid = 0;
     if (info.empty()) {
+        ERROR("GetPidFromInfoJson device info is empty.");
         return pid;
     }
     if (StrToU32(pid, info.at("pid")) != ANALYSIS_OK) {
-        ERROR("Pid to uint32_t failed.");
+        ERROR("Pid to uint32_t failed, invalid str is %.", info.at("pid"));
     }
     return pid;
 }
@@ -304,13 +311,13 @@ bool Context::GetSyscntConversionParams(Utils::SyscntConversionParams &params,
                                         uint16_t deviceId, const std::string &profPath)
 {
     auto info = GetInfoByDeviceId(deviceId, profPath);
-    // 根据deviceId取对应的文件中的数据
     if (info.empty()) {
+        ERROR("GetSyscntConversionParams device info is empty.");
         return false;
     }
     // cntvct 来自 start_log
     if (StrToU64(params.sysCnt, info.at("cntvct")) != ANALYSIS_OK) {
-        ERROR("SysCnt to uint64_t failed.");
+        ERROR("SysCnt to uint64_t failed, invalid str is %.", info.at("cntvct"));
         return false;
     }
     if (deviceId == HOST_ID) {
@@ -319,13 +326,13 @@ bool Context::GetSyscntConversionParams(Utils::SyscntConversionParams &params,
         if (freq.empty()) {
             INFO("HostFreq is empty, it will be set 1000.0 .");
         } else if (StrToDouble(params.freq, freq) != ANALYSIS_OK) {
-            ERROR("HostFreq to double failed.");
+            ERROR("HostFreq to double failed, invalid str is %.", freq);
             return false;
         }
     } else {
         // freq 来自info.json
         if (StrToDouble(params.freq, info.at("DeviceInfo").back().at("hwts_frequency")) != ANALYSIS_OK) {
-            ERROR("DeviceFreq to double failed.");
+            ERROR("DeviceFreq to double failed, invalid str is %.", info.at("DeviceInfo").back().at("hwts_frequency"));
             return false;
         }
         // 固定取host的clock_monotonic_raw. 若无host,则继续使用device info.
@@ -342,7 +349,7 @@ bool Context::GetSyscntConversionParams(Utils::SyscntConversionParams &params,
     }
     // clock_monotonic_raw 来自host目录下的 host_start_log
     if (StrToU64(params.hostMonotonic, info.at("clock_monotonic_raw")) != ANALYSIS_OK) {
-        ERROR("HostMonotonic to uint64_t failed.");
+        ERROR("HostMonotonic to uint64_t failed, invalid str is %.", info.at("clock_monotonic_raw"));
         return false;
     }
     return true;
@@ -355,13 +362,13 @@ bool Context::GetPmuFreq(double &freq, uint16_t deviceId, const std::string &pro
         return false;
     }
     auto info = GetInfoByDeviceId(deviceId, profPath);
-    // 根据deviceId取对应的文件中的数据
     if (info.empty()) {
+        ERROR("GetPmuFreq device info is empty.");
         return false;
     }
     // freq 来自info.json
     if (StrToDouble(freq, info.at("DeviceInfo").back().at("aic_frequency")) != ANALYSIS_OK) {
-        ERROR("DeviceFreq to double failed.");
+        ERROR("DeviceFreq to double failed, invalid str is %.", info.at("DeviceInfo").back().at("aic_frequency"));
         return false;
     }
     return true;
@@ -370,11 +377,25 @@ bool Context::GetPmuFreq(double &freq, uint16_t deviceId, const std::string &pro
 bool Context::GetMetricMode(std::string &metricMode, const std::string &profPath)
 {
     auto info = GetInfoByDeviceId(DEFAULT_DEVICE_ID, profPath);
-    // 根据deviceId取对应的文件中的数据
     if (info.empty()) {
+        ERROR("GetMetricMode device info is empty.");
         return false;
     }
     metricMode = info.at("ai_core_profiling_mode");
+    return true;
+}
+
+bool Context::GetClockMonotonicRaw(uint64_t &monotonicRaw, uint16_t deviceId, const std::string &profPath)
+{
+    auto info = GetInfoByDeviceId(deviceId, profPath);
+    if (info.empty()) {
+        ERROR("GetClockMonotonicRaw device info is empty.");
+        return false;
+    }
+    if (StrToU64(monotonicRaw, info.at("clock_monotonic_raw")) != ANALYSIS_OK) {
+        ERROR("Monotonic to uint64_t failed, invalid str is %.", info.at("clock_monotonic_raw"));
+        return false;
+    }
     return true;
 }
 

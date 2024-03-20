@@ -12,7 +12,6 @@
 #ifndef ANALYSIS_VIEWER_DATABASE_SYS_IO_PROCESSOR_H
 #define ANALYSIS_VIEWER_DATABASE_SYS_IO_PROCESSOR_H
 
-#include "analysis/csrc/utils/time_utils.h"
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
 
 namespace Analysis {
@@ -37,7 +36,7 @@ protected:
     bool Process(const std::string &fileDir) override;
 private:
     SysIODataFormat GetData(const std::string &dbPath, DBInfo &sysIODB) const;
-    bool FormatData(const Utils::ProfTimeRecord timeRecord,
+    bool FormatData(const ThreadData &threadData,
                     const SysIODataFormat &sysIOData, ProcessedDataFormat &processedData);
     std::string processorName_;
 };

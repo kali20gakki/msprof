@@ -48,22 +48,22 @@ DDRProcessor::OriDataFormat DDRProcessor::GetData(const DBInfo &DDRDB)
     return oriData;
 }
 
-DDRProcessor::ProcessedDataFormat DDRProcessor::FormatData(const OriDataFormat &oriData,
-                                                           const Utils::ProfTimeRecord &timeRecord)
+DDRProcessor::ProcessedDataFormat DDRProcessor::FormatData(const OriDataFormat &oriData, const ThreadData &threadData)
 {
     ProcessedDataFormat processedData;
     DDRData data;
-    if (!Utils::Reserve(processedData, oriData.size())) {
+    if (!Reserve(processedData, oriData.size())) {
         ERROR("Reserve for DDR data failed.");
         return processedData;
     }
     for (auto &row: oriData) {
         std::tie(data.deviceId, data.timestamp, data.fluxRead, data.fluxWrite) = row;
-        HPFloat timestamp{data.timestamp};
+        HPFloat timestamp = GetTimeBySamplingTimestamp(data.timestamp,
+                                                       threadData.hostMonotonic - threadData.deviceMonotonic);
         HPFloat readRate{data.fluxRead * BYTE_SIZE * BYTE_SIZE}; // MB/s -> B/s
         HPFloat writeRate{data.fluxWrite * BYTE_SIZE * BYTE_SIZE};
         processedData.emplace_back(
-            static_cast<uint16_t>(data.deviceId), GetLocalTime(timestamp, timeRecord).Uint64(),
+            static_cast<uint16_t>(data.deviceId), GetLocalTime(timestamp, threadData.timeRecord).Uint64(),
             static_cast<uint64_t>(data.fluxRead * BYTE_SIZE * BYTE_SIZE),
             static_cast<uint64_t>(data.fluxWrite * BYTE_SIZE * BYTE_SIZE));
     }
@@ -73,14 +73,14 @@ DDRProcessor::ProcessedDataFormat DDRProcessor::FormatData(const OriDataFormat &
 bool DDRProcessor::Process(const std::string &fileDir)
 {
     INFO("Start to process %.", fileDir);
-    Utils::ProfTimeRecord timeRecord;
+    ThreadData threadData;
     DBInfo ddrDB("ddr.db", "DDRMetricData");
     bool flag = true;
-    MAKE_SHARED0_NO_OPERATION(ddrDB.database, DDRDB);
-    auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
-    bool timeFlag = Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir);
+    auto deviceList = File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
+    bool timeFlag = Context::GetInstance().GetClockMonotonicRaw(threadData.hostMonotonic, HOST_ID, fileDir);
+    timeFlag = timeFlag && Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir);
     for (const auto& devicePath: deviceList) {
-        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, ddrDB.dbName});
+        std::string dbPath = File::PathJoin({devicePath, SQLITE, ddrDB.dbName});
         // 并不是所有场景都有ddr数据
         auto status = CheckPath(dbPath);
         if (status != CHECK_SUCCESS) {
@@ -95,6 +95,13 @@ bool DDRProcessor::Process(const std::string &fileDir)
             flag = false;
             continue;
         }
+        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
+        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, deviceId, fileDir) ||
+                (threadData.hostMonotonic < threadData.deviceMonotonic)) {
+            ERROR("Device MonotonicRaw is invalid in path: %., device id is %", fileDir, deviceId);
+            flag = false;
+            continue;
+        }
         MAKE_SHARED_RETURN_VALUE(ddrDB.dbRunner, DBRunner, false, dbPath);
         auto oriData = GetData(ddrDB);
         if (oriData.empty()) {
@@ -102,7 +109,7 @@ bool DDRProcessor::Process(const std::string &fileDir)
             ERROR("Get % data failed in %.", ddrDB.tableName, dbPath);
             continue;
         }
-        auto processedData = FormatData(oriData, timeRecord);
+        auto processedData = FormatData(oriData, threadData);
         if (!SaveData(processedData, TABLE_NAME_DDR)) {
             flag = false;
             ERROR("Save data failed, %.", dbPath);

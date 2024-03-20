@@ -50,20 +50,21 @@ HBMProcessor::OriDataFormat HBMProcessor::GetData(const DBInfo &HBMDB)
 }
 
 HBMProcessor::ProcessedDataFormat HBMProcessor::FormatData(const OriDataFormat &oriData,
-                                                           const Utils::ProfTimeRecord &timeRecord)
+                                                           const ThreadData &threadData)
 {
     ProcessedDataFormat processedData;
     HBMData data;
-    if (!Utils::Reserve(processedData, oriData.size())) {
+    if (!Reserve(processedData, oriData.size())) {
         ERROR("Reserve for HBM data failed.");
         return processedData;
     }
     for (auto &row: oriData) {
         std::tie(data.deviceId, data.timestamp, data.bandwidth, data.hbmId, data.eventType) = row;
-        HPFloat timestamp{data.timestamp};
+        HPFloat timestamp = GetTimeBySamplingTimestamp(data.timestamp,
+                                                       threadData.hostMonotonic - threadData.deviceMonotonic);
         uint16_t type = MEMORY_TABLE.at(data.eventType); // 枚举表MEMORY_TABLE可以保证key存在
         processedData.emplace_back(
-            static_cast<uint16_t>(data.deviceId), GetLocalTime(timestamp, timeRecord).Uint64(),
+            static_cast<uint16_t>(data.deviceId), GetLocalTime(timestamp, threadData.timeRecord).Uint64(),
             static_cast<uint64_t>(data.bandwidth * BYTE_SIZE * BYTE_SIZE), data.hbmId, type); // bandwidth MB/s -> B/s
     }
     return processedData;
@@ -72,14 +73,14 @@ HBMProcessor::ProcessedDataFormat HBMProcessor::FormatData(const OriDataFormat &
 bool HBMProcessor::Process(const std::string &fileDir)
 {
     INFO("Start to process %.", fileDir);
-    Utils::ProfTimeRecord timeRecord;
+    ThreadData threadData;
     DBInfo hbmDB("hbm.db", "HBMbwData");
     bool flag = true;
-    MAKE_SHARED0_NO_OPERATION(hbmDB.database, HBMDB);
-    auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
-    bool timeFlag = Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir);
+    auto deviceList = File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
+    bool timeFlag = Context::GetInstance().GetClockMonotonicRaw(threadData.hostMonotonic, HOST_ID, fileDir);
+    timeFlag = timeFlag && Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir);
     for (const auto& devicePath: deviceList) {
-        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, hbmDB.dbName});
+        std::string dbPath = File::PathJoin({devicePath, SQLITE, hbmDB.dbName});
         // 并不是所有场景都有hbm数据
         auto status = CheckPath(dbPath);
         if (status != CHECK_SUCCESS) {
@@ -94,6 +95,13 @@ bool HBMProcessor::Process(const std::string &fileDir)
             flag = false;
             continue;
         }
+        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
+        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, deviceId, fileDir) ||
+                (threadData.hostMonotonic < threadData.deviceMonotonic)) {
+            ERROR("Device MonotonicRaw is invalid in path: %., device id is %", fileDir, deviceId);
+            flag = false;
+            continue;
+        }
         MAKE_SHARED_RETURN_VALUE(hbmDB.dbRunner, DBRunner, false, dbPath);
         auto oriData = GetData(hbmDB);
         if (oriData.empty()) {
@@ -101,7 +109,7 @@ bool HBMProcessor::Process(const std::string &fileDir)
             ERROR("Get % data failed in %.", hbmDB.tableName, dbPath);
             continue;
         }
-        auto processedData = FormatData(oriData, timeRecord);
+        auto processedData = FormatData(oriData, threadData);
         if (!SaveData(processedData, TABLE_NAME_HBM)) {
             flag = false;
             ERROR("Save data failed, %.", dbPath);

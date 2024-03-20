@@ -12,7 +12,6 @@
 #ifndef ANALYSIS_VIEWER_DATABASE_PMU_PROCESSOR_H
 #define ANALYSIS_VIEWER_DATABASE_PMU_PROCESSOR_H
 
-#include "analysis/csrc/utils/time_utils.h"
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
 
 namespace Analysis {
@@ -41,12 +40,6 @@ using PSSFormat = std::vector<std::tuple<uint16_t, uint64_t, double, uint16_t>>;
 // globalTaskId, name, value
 using PTFormat = std::vector<std::tuple<uint64_t, uint64_t, double>>;
 
-struct ThreadData {
-    uint16_t deviceId = UINT16_MAX;
-    double freq = 0.0;
-    Utils::ProfTimeRecord timeRecord;
-};
-
 public:
     PmuProcessor() = default;
     PmuProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
@@ -67,7 +60,7 @@ private:
                                     const std::string &fileDir);
     OSTFormat GetSampleBasedTimelineData(const std::string &dbPath);
     bool FormatSampleBasedTimelineData(const OSTFormat &oriData, PSTFormat &processedData,
-                                       const ThreadData &threadData);
+                                       const ThreadData &threadData, const double freq);
 
     bool SampleBasedSummaryProcess(const std::unordered_map<std::string, uint16_t> &dbPathTable);
     OSSFormat GetSampleBasedSummaryData(const std::string &dbPath);

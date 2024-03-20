@@ -12,7 +12,6 @@
 #ifndef ANALYSIS_VIEWER_DATABASE_TASK_PROCESSOR_H
 #define ANALYSIS_VIEWER_DATABASE_TASK_PROCESSOR_H
 
-#include "analysis/csrc/utils/time_utils.h"
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
 
 namespace Analysis {
@@ -28,14 +27,6 @@ class TaskProcessor : public TableProcessor {
     // modelId
     using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, int64_t, uint64_t,
                                                        uint64_t, uint32_t, uint32_t, int32_t, uint32_t, uint32_t>>;
-    struct ThreadData {
-        uint16_t deviceId = UINT16_MAX;
-        uint16_t platformVersion = UINT16_MAX;
-        uint32_t profId = UINT32_MAX;
-        uint32_t pid = UINT32_MAX;
-        Utils::ProfTimeRecord timeRecord;
-        DBInfo ascendTaskDB{"ascend_task.db", "AscendTask"};
-    };
 public:
     TaskProcessor() = default;
     TaskProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
@@ -45,7 +36,8 @@ protected:
     bool Process(const std::string &fileDir) override;
 private:
     static OriDataFormat GetData(DBInfo &ascendTaskDB);
-    static ProcessedDataFormat FormatData(const OriDataFormat &oriData, const ThreadData &threadData);
+    static ProcessedDataFormat FormatData(const OriDataFormat &oriData, const ThreadData &threadData,
+                                          const uint16_t platformVersion, const uint32_t pid);
     static uint64_t GetTaskType(const std::string &hostType, const std::string &deviceType, uint16_t platformVersion);
 };
 

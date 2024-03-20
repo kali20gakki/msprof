@@ -13,7 +13,6 @@
 #ifndef ANALYSIS_VIEWER_DATABASE_PCIE_PROCESSOR_H
 #define ANALYSIS_VIEWER_DATABASE_PCIE_PROCESSOR_H
 
-#include "analysis/csrc/utils/time_utils.h"
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
 
 namespace Analysis {
@@ -35,6 +34,7 @@ using PCIeDataFormat = std::vector<std::tuple<uint32_t, uint64_t, uint32_t, uint
 using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
     uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
     uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+
 public:
     PCIeProcessor() = default;
     PCIeProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
@@ -43,7 +43,7 @@ protected:
     bool Process(const std::string &fileDir) override;
 private:
     PCIeDataFormat GetData(const std::string &dbPath, DBInfo &pcieDB);
-    bool FormatData(const Utils::ProfTimeRecord timeRecord,
+    bool FormatData(const ThreadData &threadData,
                     const PCIeDataFormat &pcieDB, ProcessedDataFormat &processedData);
 };
 
