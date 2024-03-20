@@ -2,18 +2,22 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2024. All rights reserved.
 
-from collections import OrderedDict
 import logging
-from common_func.ms_constant.number_constant import NumberConstant
+from collections import OrderedDict
+
+from common_func.db_manager import DBManager
+from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
-from common_func.trace_view_manager import TraceViewManager
-from common_func.trace_view_header_constant import TraceViewHeaderConstant
+from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
+from common_func.trace_view_header_constant import TraceViewHeaderConstant
+from common_func.trace_view_manager import TraceViewManager
 from msinterface.msprof_timeline import MsprofTimeline
-from msmodel.freq.freq_data_viewer_model import FreqDataViewModel
 from msmodel.api.api_data_viewer_model import ApiDataViewModel
+from msmodel.freq.freq_data_viewer_model import FreqDataViewModel
 
 
 class AiCoreFreqViewer:
@@ -31,11 +35,16 @@ class AiCoreFreqViewer:
         if not ProfilingScene().is_all_export():
             start_time, _ = MsprofTimeline().get_start_end_time()
             return str(start_time)
+        db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_API_EVENT)
+        conn, curs = DBManager.check_connect_db_path(db_path)
+        if not conn or not curs:
+            start_ts, _ = InfoConfReader().get_collect_time()
+            return start_ts
         with self.apidata_model as _model:
             apidata = _model.get_earliests_api()
             if not apidata:
-                logging.warning("Fetching apidata starttime result is none! \
-                    aicore freq start time will been set device start.info begin time")
+                logging.warning("Fetching api data start time result is none! "
+                                "aicore freq start time will be equal to the begin time in start.info")
                 start_ts, _ = InfoConfReader().get_collect_time()
                 return start_ts
             return InfoConfReader().trans_into_local_time(
@@ -52,11 +61,11 @@ class AiCoreFreqViewer:
             return result
 
         # add header for freq view
-        result.extend(TraceViewManager.metadata_event([["process_name", self._pid, \
-            InfoConfReader().get_json_tid_data(), \
-            TraceViewHeaderConstant.PROCESS_AI_CORE_FREQ]]))
+        result.extend(TraceViewManager.metadata_event([["process_name", self._pid,
+                                                        InfoConfReader().get_json_tid_data(),
+                                                        TraceViewHeaderConstant.PROCESS_AI_CORE_FREQ]]))
         # freq unit is MHZ, read from info.json
-        freq_lists = []       
+        freq_lists = []
         data_list = [
             TraceViewHeaderConstant.PROCESS_AI_CORE_FREQ, self.get_start_time(), self._pid, 0,
             OrderedDict({"MHz": InfoConfReader().get_freq("aic") / NumberConstant.FREQ_TO_MHz})
@@ -67,7 +76,7 @@ class AiCoreFreqViewer:
         with self.freq_model as _model:
             freq_rows = _model.get_data()
             for row in freq_rows:
-                # row index 0 is syscnt, and row index 1 is freqency
+                # row index 0 is syscnt, and row index 1 is frequency
                 to_local_ts = InfoConfReader().trans_syscnt_into_local_time(row[0])
                 data_list = [
                     TraceViewHeaderConstant.PROCESS_AI_CORE_FREQ,
