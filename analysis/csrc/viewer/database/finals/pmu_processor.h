@@ -31,11 +31,11 @@ using OSSFormat = std::vector<std::tuple<std::string, double, uint32_t>>;
 using OTFormat = std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, double>>;
 
 // Processed Sample Timeline Format
-// deviceId, timestamp, totalCycle, usage, freq, coreId
-using PSTFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, double, double, uint16_t>>;
+// deviceId, timestamp, totalCycle, usage, freq, coreId, coreType
+using PSTFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, double, double, uint16_t, uint64_t>>;
 // Processed Sample Summary Format
-// deviceId, metric, value, coreId
-using PSSFormat = std::vector<std::tuple<uint16_t, uint64_t, double, uint16_t>>;
+// deviceId, metric, value, coreId, coreType
+using PSSFormat = std::vector<std::tuple<uint16_t, uint64_t, double, uint16_t, uint64_t>>;
 // Processed Task Format
 // globalTaskId, name, value
 using PTFormat = std::vector<std::tuple<uint64_t, uint64_t, double>>;
@@ -56,15 +56,16 @@ private:
                              const uint16_t &deviceId);
 
     bool SampleBasedProcess(const std::string &fileDir);
-    bool SampleBasedTimelineProcess(const std::unordered_map<std::string, uint16_t> &dbPathTable,
+    bool SampleBasedTimelineProcess(const std::unordered_map<std::string, std::tuple<uint16_t, uint64_t>> &dbPathTable,
                                     const std::string &fileDir);
     OSTFormat GetSampleBasedTimelineData(const std::string &dbPath);
     bool FormatSampleBasedTimelineData(const OSTFormat &oriData, PSTFormat &processedData,
-                                       const ThreadData &threadData, const double freq);
+                                       const ThreadData &threadData, const double freq, const uint64_t coreType);
 
-    bool SampleBasedSummaryProcess(const std::unordered_map<std::string, uint16_t> &dbPathTable);
+    bool SampleBasedSummaryProcess(const std::unordered_map<std::string, std::tuple<uint16_t, uint64_t>> &dbPathTable);
     OSSFormat GetSampleBasedSummaryData(const std::string &dbPath);
-    bool FormatSampleBasedSummaryData(const OSSFormat &oriData, PSSFormat &processedData, const uint16_t deviceId);
+    bool FormatSampleBasedSummaryData(const OSSFormat &oriData, PSSFormat &processedData, const uint16_t deviceId,
+                                      const uint64_t coreType);
 };
 
 

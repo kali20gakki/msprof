@@ -38,10 +38,11 @@ const std::string TABLE_NAME = "NpuMem";
 
 using OriDataFormat = std::vector<std::tuple<std::string, uint64_t, uint64_t, double, uint64_t>>;
 
-using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, uint64_t, uint16_t>>;
+using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint16_t>>;
 
 const OriDataFormat DATA_A{{"0", 0, 47243669504, 4, 47243669504},
-                           {"1", 0, 47414005760, 212, 47414005760}};
+                           {"1", 0, 47414005760, 212, 47414005760},
+                           {"abc", 0, 47414005780, 300, 47414005780}};
 const OriDataFormat DATA_B{{"0", 0, 47243669504, 19986, 47243669504},
                            {"1", 0, 47415054336, 20185, 47415054336}};
 }
@@ -50,7 +51,6 @@ class NpuMemProcessorUTest : public testing::Test {
 protected:
     virtual void SetUp()
     {
-        Analysis::Log::GetInstance().Init("./");
         EXPECT_TRUE(File::CreateDir(NPU_MEM_PATH));
         EXPECT_TRUE(File::CreateDir(PROF_PATH_A));
         EXPECT_TRUE(File::CreateDir(PROF_PATH_B));

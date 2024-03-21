@@ -89,14 +89,13 @@ namespace {
         {"opId", SQL_INTEGER_TYPE, true}
     };
 
-    const TableColumns API = {
+    const TableColumns CANN_API = {
         {"startNs", SQL_INTEGER_TYPE},
         {"endNs", SQL_INTEGER_TYPE},
         {"type", SQL_INTEGER_TYPE},
         {"globalTid", SQL_INTEGER_TYPE},
-        {"connectionId", SQL_INTEGER_TYPE},
-        {"name", SQL_INTEGER_TYPE},
-        {"apiId", SQL_INTEGER_TYPE}
+        {"connectionId", SQL_INTEGER_TYPE, true},
+        {"name", SQL_INTEGER_TYPE}
     };
 
     const TableColumns NPU_MEM = {
@@ -201,14 +200,16 @@ namespace {
         {"totalCycle", SQL_INTEGER_TYPE},
         {"usage", SQL_NUMERIC_TYPE},
         {"freq", SQL_NUMERIC_TYPE},
-        {"coreId", SQL_INTEGER_TYPE}
+        {"coreId", SQL_INTEGER_TYPE},
+        {"coreType", SQL_INTEGER_TYPE},
     };
 
     const TableColumns SAMPLE_PMU_SUMMARY = {
         {"deviceId", SQL_INTEGER_TYPE},
         {"metric", SQL_INTEGER_TYPE},
         {"value", SQL_NUMERIC_TYPE},
-        {"coreId", SQL_INTEGER_TYPE}
+        {"coreId", SQL_INTEGER_TYPE},
+        {"coreType", SQL_INTEGER_TYPE},
     };
 
     const TableColumns PCIE = {
@@ -249,22 +250,17 @@ namespace {
         {"name", SQL_TEXT_TYPE}
     };
 
-    const TableColumns ENUM_MEMORY = {
-        {"id", SQL_INTEGER_TYPE, true},
-        {"name", SQL_TEXT_TYPE}
-    };
-
-    const TableColumns ENUM_NPU_MODULE = {
+    const TableColumns ENUM_MODULE = {
         {"id", SQL_INTEGER_TYPE, true},
         {"name", SQL_TEXT_TYPE}
     };
 
     const TableColumns ACC_PMU = {
         {"accId", SQL_INTEGER_TYPE},
-        {"readBandwidth", SQL_INTEGER_TYPE},
-        {"writeBandwidth", SQL_INTEGER_TYPE},
-        {"readOst", SQL_INTEGER_TYPE},
-        {"writeOst", SQL_INTEGER_TYPE},
+        {"readBwLevel", SQL_INTEGER_TYPE},
+        {"writeBwLevel", SQL_INTEGER_TYPE},
+        {"readOstLevel", SQL_INTEGER_TYPE},
+        {"writeOstLevel", SQL_INTEGER_TYPE},
         {"timestampNs", SQL_NUMERIC_TYPE},
         {"deviceId", SQL_INTEGER_TYPE}
     };
@@ -288,7 +284,7 @@ ReportDB::ReportDB()
         {TABLE_NAME_COMPUTE_TASK_INFO, COMPUTE_TASK_INFO},
         {TABLE_NAME_COMMUNICATION_TASK_INFO, COMMUNICATION_TASK_INFO},
         {TABLE_NAME_COMMUNICATION_OP, COMMUNICATION_OP},
-        {TABLE_NAME_API, API},
+        {TABLE_NAME_CANN_API, CANN_API},
         {TABLE_NAME_NPU_MEM, NPU_MEM},
         {TABLE_NAME_NPU_MODULE_MEM, NPU_MODULE_MEM},
         {TABLE_NAME_NPU_OP_MEM, NPU_OP_MEM},
@@ -306,8 +302,7 @@ ReportDB::ReportDB()
         {TABLE_NAME_SOC, SOC_BANDWIDTH_LEVEL},
         // ENUM
         {TABLE_NAME_ENUM_API_TYPE, ENUM_API_TYPE},
-        {TABLE_NAME_ENUM_MEMORY, ENUM_MEMORY},
-        {TABLE_NAME_ENUM_NPU_MODULE, ENUM_NPU_MODULE},
+        {TABLE_NAME_ENUM_MODULE, ENUM_MODULE},
     };
 }
 
