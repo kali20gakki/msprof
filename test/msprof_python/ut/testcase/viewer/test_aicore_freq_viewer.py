@@ -113,7 +113,7 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
             self.assertEqual(len(query_freqs), 1)
             self.assertEqual(query_api_start_time[0].start, 4)
             freqs_list = AiCoreFreqViewer(self.params).get_all_data()
-            self.assertEqual(len(freqs_list), 4)
+            self.assertEqual(len(freqs_list), 3)
             self.assertEqual(json.dumps(freqs_list[0]),
                 '{"name": "process_name", "pid": 1, "tid": 0, "args": {"name": "AI Core Freq"}, "ph": "M"}')
             self.assertEqual(freqs_list[1]['name'], "AI Core Freq")
@@ -152,7 +152,7 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
             self.assertEqual(len(query_freqs), 1)
             self.assertEqual(query_api_start_time[0].start, 4)
             freqs_list = AiCoreFreqViewer(self.params).get_all_data()
-            self.assertEqual(len(freqs_list), 4)
+            self.assertEqual(len(freqs_list), 3)
             self.assertEqual(json.dumps(freqs_list[0]),
                 '{"name": "process_name", "pid": 1, "tid": 0, "args": {"name": "AI Core Freq"}, "ph": "M"}')
             self.assertEqual(freqs_list[1]['name'], "AI Core Freq")
