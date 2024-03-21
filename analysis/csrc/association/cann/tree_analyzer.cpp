@@ -28,6 +28,7 @@ const int64_t INVALID_VALUE = -1;
 const uint16_t TWO_BYTES = 16;
 const uint32_t TASK_ID_BIT = 0x0000FFFF;
 const uint16_t AICORE_TASK_TYPE = 0;
+const uint16_t AICPU_TASK_TYPE = 1;
 const uint64_t INVALID_MODEL_ID = 4294967295;
 const uint64_t PLACEHOLDER_OP_NAME = UINT64_MAX;
 const std::string KERNEL_TASK_PREFIX = "KERNEL";
@@ -360,6 +361,19 @@ void TreeAnalyzer::UpdateComputeDescForHcclSituation(ComputeOpDescs &descs,
     }
 }
 
+void TreeAnalyzer::UpdateComputeDescForHelperSituation(ComputeOpDescs &descs)
+{
+    for (auto &pair : descs) {
+        if (!pair.second->opDesc || !pair.second->opDesc->nodeDesc) {
+            continue;
+        }
+        // helper场景：HCCL算子运行在AI_CPU上, 但没有HCCL层api，任务类型刷为AICPU
+        if (pair.second->opDesc->nodeDesc->data.nodeBasicInfo.taskType == HCCL_TASK_TYPE) {
+            pair.second->opDesc->nodeDesc->data.nodeBasicInfo.taskType = AICPU_TASK_TYPE;
+        }
+    }
+}
+
 HostTasks TreeAnalyzer::GetComputeTaskDescs(const std::shared_ptr<TreeNode> &node)
 {
     if (path_.find(MSPROF_REPORT_NODE_LEVEL) == path_.end()) {
@@ -387,6 +401,8 @@ HostTasks TreeAnalyzer::GetComputeTaskDescs(const std::shared_ptr<TreeNode> &nod
                         path_[MSPROF_REPORT_HCCL_NODE_LEVEL] : nullptr;
         auto item_id = hcclNode == nullptr ? 0 : hcclNode->event->apiPtr->itemId;
         UpdateComputeDescForHcclSituation(ops, tracks.back(), item_id);
+    } else if (type == KERNEL_AI_CPU_TASK_TYPE) {
+        UpdateComputeDescForHelperSituation(ops);
     }
     auto track = tracks.back()->compactPtr;
 
@@ -462,18 +478,21 @@ ComputeOpDescs TreeAnalyzer::GetComputeOpDescs(const std::shared_ptr<TreeNode> &
     }
     for (const auto &record: nodeNode->records) {
         if (record->info.type == EventType::EVENT_TYPE_NODE_BASIC_INFO) {
-            auto trace = record->compactPtr;
+            std::shared_ptr<MsprofCompactInfo> trace;
+            MAKE_SHARED_RETURN_VALUE(trace, MsprofCompactInfo, opDescs, *(record->compactPtr));
             UpdateComputeOpDescs<MsprofCompactInfo, &OpDesc::nodeDesc>(opDescs, trace,
                                                                        trace->data.nodeBasicInfo.opName);
         } else if (record->info.type == EventType::EVENT_TYPE_TENSOR_INFO) {
-            auto trace = record->tensorPtr;
+            std::shared_ptr<ConcatTensorInfo> trace;
+            MAKE_SHARED_RETURN_VALUE(trace, ConcatTensorInfo, opDescs, *(record->tensorPtr));
             UpdateComputeOpDescs<ConcatTensorInfo, &OpDesc::tensorDesc>(opDescs, trace,
                                                                         trace->opName);
         } else if (record->info.type == EventType::EVENT_TYPE_CONTEXT_ID) {
             if (!useCtxId) {
                 continue;
             }
-            auto trace = record->additionPtr;
+            std::shared_ptr<MsprofAdditionalInfo> trace;
+            MAKE_SHARED_RETURN_VALUE(trace, MsprofAdditionalInfo, opDescs, *(record->additionPtr));
             auto ctxIdNode = ReinterpretConvert<MsprofContextIdInfo *>(trace->data);
             UpdateComputeOpDescs<MsprofAdditionalInfo, &OpDesc::ctxId>(opDescs, trace,
                                                                        ctxIdNode->opName);
