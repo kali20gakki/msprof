@@ -38,6 +38,7 @@ struct CANNWarehouse {
     std::shared_ptr<EventQueue> contextIdEvents = nullptr;
     std::shared_ptr<EventQueue> hcclInfoEvents = nullptr;
     std::shared_ptr<EventQueue> taskTrackEvents = nullptr;
+    std::shared_ptr<EventQueue> hcclOpInfoEvents = nullptr;
 };
 
 } // namespace Cann

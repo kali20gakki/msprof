@@ -147,7 +147,13 @@ namespace {
         {"begin", SQL_REAL_TYPE},
         {"end", SQL_REAL_TYPE},
         {"is_dynamic", SQL_TEXT_TYPE},
-        {"connection_id", SQL_INTEGER_TYPE}
+        {"connection_id", SQL_INTEGER_TYPE},
+        {"relay", SQL_INTEGER_TYPE},
+        {"retry", SQL_INTEGER_TYPE},
+        {"data_type", SQL_TEXT_TYPE},
+        {"alg_type", SQL_TEXT_TYPE},
+        {"count", SQL_NUMERIC_TYPE},
+        {"group_name", SQL_TEXT_TYPE}
     };
 
     const TableColumns HostTaskFlip = {
@@ -201,6 +207,21 @@ namespace {
         {"notify_id", SQL_TEXT_TYPE},
         {"batch_id", SQL_INTEGER_TYPE},
         {"rdma_type", SQL_TEXT_TYPE}
+    };
+
+    const TableColumns HCCLOpSingleDevice = {
+        {"model_id", SQL_INTEGER_TYPE},
+        {"op_name", SQL_TEXT_TYPE},
+        {"task_type", SQL_TEXT_TYPE},
+        {"op_type", SQL_TEXT_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"relay", SQL_INTEGER_TYPE},
+        {"retry", SQL_INTEGER_TYPE},
+        {"data_type", SQL_TEXT_TYPE},
+        {"alg_type", SQL_TEXT_TYPE},
+        {"count", SQL_NUMERIC_TYPE},
+        {"group_name", SQL_TEXT_TYPE},
+        {"connection_id", SQL_INTEGER_TYPE}
     };
 
     const TableColumns NpuMem = {
@@ -444,6 +465,7 @@ HCCLSingleDeviceDB::HCCLSingleDeviceDB()
 {
     dbName_ = "hccl_single_device.db";
     tableColNames_["HCCLTaskSingleDevice"] = HCCLTaskSingleDevice;
+    tableColNames_["HCCLOpSingleDevice"] = HCCLOpSingleDevice;
 }
 
 NpuMemDB::NpuMemDB()

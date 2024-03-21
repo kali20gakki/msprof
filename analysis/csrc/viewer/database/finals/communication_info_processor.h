@@ -18,22 +18,28 @@
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-// 该类用于依据HCCLSingelDevice表生成COMMUNICATION_TASK_INFO(通信小算子)和COMMUNICATION_OP表(通信大算子)
+// 该类用于依据HCCLSingelDevice库生成COMMUNICATION_TASK_INFO(通信小算子)和COMMUNICATION_OP表(通信大算子)
 class CommunicationInfoProcessor : public TableProcessor {
+public:
     // model_id, op_name, hccl_name, group_name, plane_id, stream_id, task_id, local_rank, remote_rank,
     // transport_type, size, data_type, link_type, context_id, notify_id, batch_id, rdma_type, timestamp, duration,
     // connection_id
-    using HcclFormat = std::tuple<uint32_t, std::string, std::string, std::string, int32_t, uint64_t, uint32_t,
+    using HcclTaskFormat = std::tuple<uint32_t, std::string, std::string, std::string, int32_t, uint64_t, uint32_t,
                                   uint32_t, uint32_t, std::string, uint64_t, std::string, std::string, uint32_t,
                                   uint64_t, uint32_t, std::string, double, double, uint32_t>;
-    using OriDataFormat = std::vector<HcclFormat>;
+    using OriTaskDataFormat = std::vector<HcclTaskFormat>;
+    // connection_id, op_name, relay, retry, data_type, alg_type, count, group_name
+    using HcclOpFormat = std::tuple<uint32_t, std::string, int32_t, int32_t, std::string, std::string, uint64_t,
+                                    std::string>;
+    using OriOpDataFormat = std::vector<HcclOpFormat>;
     // name, globalTaskId, taskType, planeId, groupName, notifyId, rdmaType, srcRank, dstRank, transportType,
     // size, dataType, linkType, opId
     using CommunicationTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t,
                                                                uint64_t, uint64_t, uint32_t, uint32_t, uint64_t,
                                                                uint64_t, uint64_t, uint64_t, uint32_t>>;
-    // opName, start, end, connectionId, group_name, opId
+    // opName, start, end, connectionId, group_name, opId, relay, retry, data_type, alg_type, count
     using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
+                                                             uint64_t, int32_t, int32_t, uint64_t, std::string,
                                                              uint64_t>>;
     struct CommunicationTaskData {
         int32_t planeId = INT32_MAX;
@@ -56,6 +62,19 @@ class CommunicationInfoProcessor : public TableProcessor {
         uint64_t notifyId = UINT64_MAX;
         uint64_t rdmaType = UINT64_MAX;
     };
+    struct CommunicationOpData {
+        uint64_t opName = UINT64_MAX;
+        uint64_t groupName = UINT64_MAX;
+        uint64_t connectionId = UINT64_MAX;
+        uint32_t opId = UINT32_MAX;
+        uint64_t start = UINT64_MAX;
+        uint64_t end = UINT64_MAX;
+        int32_t relay = 0;
+        int32_t retry = 0;
+        uint64_t dataType = UINT64_MAX;
+        std::string algType = "N/A";
+        uint64_t count = UINT64_MAX;
+    };
     struct HcclTaskSingleDeviceData {
         uint32_t connectionId = UINT32_MAX;
         double timestamp = 0.0;
@@ -76,11 +95,20 @@ public:
 protected:
     bool Process(const std::string &fileDir) override;
 private:
-    static OriDataFormat GetData(const DBInfo &hcclSingleDeviceDB);
-    bool FormatData(const OriDataFormat &oriData, CommunicationTaskDataFormat &taskData,
-                    CommunicationOpDataFormat &opData, const ThreadData &threadData);
-    void Update(const HcclFormat &oriData, HcclTaskSingleDeviceData &hcclData, CommunicationTaskData &taskData,
-                uint16_t deviceId);
+    static OriTaskDataFormat GetTaskData(const DBInfo &hcclSingleDeviceDB);
+    static OriOpDataFormat GetOpData(const DBInfo &hcclSingleDeviceDB);
+    bool ProcessOneDevice(const std::string &devicePath, ThreadData &threadData,
+                          DBInfo &taskDBInfo, DBInfo &opDBInfo,
+                          const std::string &fileDir, GeHashMap &hashMap);
+    bool FormatData(const OriTaskDataFormat &oriTaskData, const OriOpDataFormat &oriOpData,
+                    CommunicationTaskDataFormat &taskData, CommunicationOpDataFormat &opData,
+                    const ThreadData &threadData, GeHashMap &hashMap);
+    void Update(const HcclTaskFormat &oriData, HcclTaskSingleDeviceData &hcclData, CommunicationTaskData &taskData,
+                uint16_t deviceId, GeHashMap &hashMap);
+    void UpdateOpInfo(CommunicationOpData &opData, uint32_t connectionId,
+                      const std::unordered_map<uint32_t, size_t> &opInfoIdxMap,
+                      const OriOpDataFormat &oriOpData, GeHashMap &hashMap);
+    std::unordered_map<uint32_t, size_t> GenOpInfoIdxmap(const OriOpDataFormat &oriOpData);
 };
 
 } // Database

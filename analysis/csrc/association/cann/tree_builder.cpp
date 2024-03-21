@@ -29,7 +29,7 @@ using namespace Analysis::Utils;
  EventLevel      此Level包含的EventType
 |- ACL
 |- Model    [graph_id_map, fusion_op_info]
-|- Node     [node_basic_info, tensor_info, context_id]
+|- Node     [node_basic_info, tensor_info, context_id, hccl_op_info]
 |- HCCL     [hccl_info, context_id]
 |- Runtime  [task_track, mem_cpy]
 
@@ -54,6 +54,7 @@ std::shared_ptr<TreeNode> TreeBuilder::Build()
     auto contextIdEvents = cannWarehouse_->contextIdEvents;
     auto hcclInfoEvents = cannWarehouse_->hcclInfoEvents;
     auto taskTrackEvents = cannWarehouse_->taskTrackEvents;
+    auto hcclOpInfoEvents = cannWarehouse_->hcclOpInfoEvents;
 
     auto rootNode = GenerateRoot();
     std::shared_ptr<TreeNode> tree;
@@ -81,10 +82,11 @@ std::shared_ptr<TreeNode> TreeBuilder::Build()
     });
 
     // Node Level
-    pool.AddTask([this, &nodeCtxIdEvents, &tensorInfoEvents, &nodeBasicInfoEvents]() {
+    pool.AddTask([this, &nodeCtxIdEvents, &tensorInfoEvents, &nodeBasicInfoEvents, &hcclOpInfoEvents]() {
         AddLevelEvents(nodeBasicInfoEvents, nodeLevelNodes_, EventType::EVENT_TYPE_NODE_BASIC_INFO);
         AddLevelEvents(tensorInfoEvents, nodeLevelNodes_, EventType::EVENT_TYPE_TENSOR_INFO);
         AddLevelEvents(nodeCtxIdEvents, nodeLevelNodes_, EventType::EVENT_TYPE_CONTEXT_ID);
+        AddLevelEvents(hcclOpInfoEvents, nodeLevelNodes_, EventType::EVENT_TYPE_HCCL_OP_INFO);
     });
 
     // Hccl level

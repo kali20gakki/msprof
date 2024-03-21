@@ -86,7 +86,12 @@ namespace {
         {"endNs", SQL_INTEGER_TYPE},
         {"connectionId", SQL_INTEGER_TYPE},
         {"groupName", SQL_INTEGER_TYPE},
-        {"opId", SQL_INTEGER_TYPE, true}
+        {"opId", SQL_INTEGER_TYPE, true},
+        {"relay", SQL_INTEGER_TYPE},
+        {"retry", SQL_INTEGER_TYPE},
+        {"dataType", SQL_INTEGER_TYPE},
+        {"algType", SQL_INTEGER_TYPE},
+        {"count", SQL_NUMERIC_TYPE}
     };
 
     const TableColumns API = {

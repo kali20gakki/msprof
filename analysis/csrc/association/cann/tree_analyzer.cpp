@@ -192,27 +192,26 @@ void TreeAnalyzer::UpdateHcclBigOpDescs(const std::shared_ptr<TreeNode> &node)
     auto model_id = modelApi != nullptr ? modelApi->itemId : INVALID_MODEL_ID;
     auto connectionId = nodeNode->event->id;
     auto nodeRecords = GetNodeRecordsByType(nodeNode, EventType::EVENT_TYPE_NODE_BASIC_INFO);
-    if (nodeRecords.empty()) {
-        auto nodeApi = nodeNode->event->apiPtr;
-        std::shared_ptr<HcclBigOpDesc> desc;
-        MAKE_SHARED_RETURN_VOID(desc, HcclBigOpDesc, nodeApi->beginTime,
-                                nodeApi->endTime, deviceId, model_id, index_id, connectionId, track->threadId, nullptr);
-        std::shared_ptr<Operator> op;
-        MAKE_SHARED_RETURN_VOID(op, Operator, desc, nodeApi->itemId, OpType::OPTYPE_HCCL_BIG);
-        hcclBigOpDescs_.emplace_back(op);
-        return;
+    std::shared_ptr<MsprofCompactInfo> nodeDesc = nullptr;
+    if (!nodeRecords.empty() && nodeRecords.front() != nullptr) {
+        nodeDesc = nodeRecords.front()->compactPtr;
+    }
+    auto hcclOpRecords = GetNodeRecordsByType(nodeNode, EventType::EVENT_TYPE_HCCL_OP_INFO);
+    std::shared_ptr<MsprofCompactInfo> hcclOpDesc = nullptr;
+    if (!hcclOpRecords.empty() && hcclOpRecords.front() != nullptr) {
+        hcclOpDesc = hcclOpRecords.front()->compactPtr;
+    } else {
+        ERROR("Not report hccl op info for api: %", model_id);
     }
 
-    for (const auto &nodeRecord: nodeRecords) {
-        auto nodeApi = nodeNode->event->apiPtr;
-        auto nodeDesc = (nodeRecord == nullptr) ? nullptr : nodeRecord->compactPtr;
-        std::shared_ptr<HcclBigOpDesc> desc;
-        MAKE_SHARED_RETURN_VOID(desc, HcclBigOpDesc, nodeApi->beginTime, nodeApi->endTime,
-                                deviceId, model_id, index_id, connectionId, track->threadId, nodeDesc);
-        std::shared_ptr<Operator> op;
-        MAKE_SHARED_RETURN_VOID(op, Operator, desc, nodeApi->itemId, OpType::OPTYPE_HCCL_BIG);
-        hcclBigOpDescs_.emplace_back(op);
-    }
+    auto nodeApi = nodeNode->event->apiPtr;
+    std::shared_ptr<HcclBigOpDesc> desc;
+    MAKE_SHARED_RETURN_VOID(desc, HcclBigOpDesc, nodeApi->beginTime,
+                            nodeApi->endTime, deviceId, model_id, index_id,
+                            connectionId, track->threadId, nodeDesc, hcclOpDesc);
+    std::shared_ptr<Operator> op;
+    MAKE_SHARED_RETURN_VOID(op, Operator, desc, nodeApi->itemId, OpType::OPTYPE_HCCL_BIG);
+    hcclBigOpDescs_.emplace_back(op);
 }
 
 std::vector<std::shared_ptr<Event>> TreeAnalyzer::GetNodeRecordsByType(const std::shared_ptr<TreeNode> &node,

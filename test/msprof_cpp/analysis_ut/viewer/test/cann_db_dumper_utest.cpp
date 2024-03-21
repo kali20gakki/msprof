@@ -101,10 +101,16 @@ protected:
         auto trace = new MsprofCompactInfo;
         auto nodeBasicInfo = new MsprofNodeBasicInfo;
         auto runtime = new MsprofRuntimeTrack;
+        
         trace->data.nodeBasicInfo = *nodeBasicInfo;
         trace->data.runtimeTrack = *runtime;
 
-        auto desc = std::make_shared<HcclBigOpDesc>(1, 1, 1, 1, 1, 1, 1, std::shared_ptr<MsprofCompactInfo>(trace));
+        auto hcclOp = new MsprofHcclOPInfo;
+        auto hcclOpCompactInfo = new MsprofCompactInfo;
+        hcclOpCompactInfo->data.hcclopInfo = *hcclOp;
+
+        auto desc = std::make_shared<HcclBigOpDesc>(1, 1, 1, 1, 1, 1, 1, std::shared_ptr<MsprofCompactInfo>(trace),
+                                                    std::shared_ptr<MsprofCompactInfo>(hcclOpCompactInfo));
         auto op = std::make_shared<Operator>(desc, 0, Entities::OpType::OPTYPE_HCCL_BIG);
         auto hcclBigOps = std::make_shared<HCCLBigOpDescs>();
         hcclBigOps->emplace_back(op);

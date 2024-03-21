@@ -175,6 +175,9 @@ namespace {
         {2,          "PCIE"},
         {3,          "ROCE"},
         {4,          "SIO"},
+        {5,          "HCCS_SW"},
+        {6,          "STANDARD_ROCE"},
+        {7,          "RESERVED"},
         {4294967295, "INVALID_TYPE"}
     };
     const std::unordered_map<uint32_t, std::string> hcclTransportTypeMap {
@@ -186,6 +189,10 @@ namespace {
     const std::unordered_map<uint32_t, std::string> hcclRdmaTypeMap {
         {0,          "RDMA_SEND_NOTIFY"},
         {1,          "RDMA_SEND_PAYLOAD"},
+        {2,          "RDMA_PAYLOAD_PREPARE"},
+        {3,          "RDMA_PAYLOAD_CHECK"},
+        {4,          "RDMA_PAYLOAD_ACK"},
+        {5,          "RDMA_SEND_OP"},
         {4294967295, "INVALID_TYPE"}
     };
     const std::unordered_map<uint32_t, std::string> hcclOpTypeMap {
@@ -193,6 +200,18 @@ namespace {
         {1,          "MUL"},
         {2,          "MAX"},
         {3,          "MIN"},
+        {4294967295, "INVALID_TYPE"}
+    };
+    const std::unordered_map<uint32_t, std::string> hcclAlgTypeMap {
+        {0,          "NONE"},
+        {1,          "MESH"},
+        {2,          "RING"},
+        {3,          "NB"},
+        {4,          "HD"},
+        {5,          "NHR"},
+        {6,          "PIPELINE"},
+        {7,          "PAIRWISE"},
+        {8,          "STAR"},
         {4294967295, "INVALID_TYPE"}
     };
     const std::unordered_map<uint32_t, std::string> levelMap {
@@ -220,7 +239,7 @@ namespace {
                                                                     hcclDataTypeMap, hcclLinkTypeMap,
                                                                     hcclTransportTypeMap, hcclRdmaTypeMap,
                                                                     hcclOpTypeMap, levelMap,
-                                                                    aclApiTagMap};
+                                                                    aclApiTagMap, hcclAlgTypeMap};
 
 }
 
