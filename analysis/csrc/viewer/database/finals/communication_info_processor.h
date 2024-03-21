@@ -39,8 +39,7 @@ public:
                                                                uint64_t, uint64_t, uint64_t, uint32_t>>;
     // opName, start, end, connectionId, group_name, opId, relay, retry, data_type, alg_type, count
     using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
-                                                             uint64_t, int32_t, int32_t, uint64_t, std::string,
-                                                             uint64_t>>;
+                                                             uint64_t, int32_t, int32_t, uint64_t, uint64_t, uint64_t>>;
     struct CommunicationTaskData {
         int32_t planeId = INT32_MAX;
         uint32_t modelId = UINT32_MAX;
@@ -72,7 +71,7 @@ public:
         int32_t relay = 0;
         int32_t retry = 0;
         uint64_t dataType = UINT64_MAX;
-        std::string algType = "N/A";
+        uint64_t algType = UINT64_MAX;
         uint64_t count = UINT64_MAX;
     };
     struct HcclTaskSingleDeviceData {

@@ -86,8 +86,7 @@ bool SysIOProcessor::Process(const std::string &fileDir)
             return false;
         }
         uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, deviceId, fileDir) ||
-                (threadData.hostMonotonic < threadData.deviceMonotonic)) {
+        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, deviceId, fileDir)) {
             ERROR("Device MonotonicRaw is invalid in path: %., device id is %", fileDir, deviceId);
             flag = false;
             continue;
@@ -146,7 +145,7 @@ bool SysIOProcessor::FormatData(const ThreadData &threadData,
                  tempData.tx.packet, tempData.tx.byte, tempData.tx.packets, tempData.tx.bytes,
                  tempData.tx.errors, tempData.tx.dropped, tempData.funcid) = data;
         HPFloat timestamp = GetTimeBySamplingTimestamp(tempData.timestamp,
-                                                       threadData.hostMonotonic - threadData.deviceMonotonic);
+                                                       threadData.hostMonotonic, threadData.deviceMonotonic);
         processedData.emplace_back(static_cast<uint16_t>(tempData.deviceId),
                                    GetLocalTime(timestamp, threadData.timeRecord).Uint64(),
                                    tempData.bandwidth * BYTE_SIZE * BYTE_SIZE, // MB/s -> B/s

@@ -61,9 +61,10 @@ HPFloat GetTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params)
     return res;
 }
 
-HPFloat GetTimeBySamplingTimestamp(double timestamp, const uint64_t monotonic)
+HPFloat GetTimeBySamplingTimestamp(double timestamp, const uint64_t hostMonotonic, const uint64_t deviceMonotonic)
 {
-    return HPFloat(timestamp) + HPFloat(monotonic);
+    // 时间单位均为ns
+    return HPFloat(timestamp) + HPFloat(hostMonotonic) - HPFloat(deviceMonotonic);
 }
 
 HPFloat GetLocalTime(HPFloat &timestamp, const ProfTimeRecord &record)

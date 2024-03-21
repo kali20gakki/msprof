@@ -43,7 +43,7 @@ const std::string HASH_TABLE_NAME = "GeHashInfo";
 using OriDataFormat = std::vector<std::tuple<std::string, std::string, int64_t, double, uint32_t, uint64_t,
                                              uint64_t, uint32_t, uint32_t, std::string>>;
 
-using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint64_t, uint64_t, uint64_t,
+using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                                                    uint64_t, uint64_t, uint64_t, uint32_t>>;
 
 using HashDataFormat = std::vector<std::tuple<std::string, std::string>>;
@@ -64,6 +64,7 @@ class NpuOpMemProcessorUTest : public testing::Test {
 protected:
     virtual void SetUp()
     {
+        IdPool::GetInstance().Clear();
         EXPECT_TRUE(File::CreateDir(NPU_OP_MEM_PATH));
         EXPECT_TRUE(File::CreateDir(PROF_PATH_A));
         EXPECT_TRUE(File::CreateDir(PROF_PATH_B));
@@ -85,8 +86,8 @@ protected:
     virtual void TearDown()
     {
         EXPECT_TRUE(File::RemoveDir(NPU_OP_MEM_PATH, DEPTH));
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetSyscntConversionParams).reset();
+        GlobalMockObject::verify();
+        IdPool::GetInstance().Clear();
     }
     static void CreateNpuOpMem(const std::string &dbPath, OriDataFormat data)
     {
@@ -113,11 +114,13 @@ protected:
 void CheckStringId(ProcessedDataFormat data)
 {
     const uint16_t operatorNameIndex = 0;
+    const uint16_t typeIndex = 2;
     const uint16_t componentIndex = 8;
     std::set<uint64_t> stringIdsSet;
     std::vector<uint64_t> stringIds;
     for (auto item : data) {
         stringIdsSet.insert(std::get<operatorNameIndex>(item));
+        stringIdsSet.insert(std::get<typeIndex>(item));
         stringIdsSet.insert(std::get<componentIndex>(item));
     }
     stringIds.assign(stringIdsSet.begin(), stringIdsSet.end());
@@ -187,7 +190,7 @@ TEST_F(NpuOpMemProcessorUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
 
 TEST_F(NpuOpMemProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
 {
-    using TempT = std::tuple<uint64_t, uint64_t, uint32_t, uint64_t, uint64_t, uint64_t,
+    using TempT = std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                              uint64_t, uint64_t, uint64_t, uint16_t>;
     MOCKER_CPP(&std::vector<TempT>::reserve)
     .stubs()

@@ -62,8 +62,7 @@ bool HCCSProcessor::Process(const std::string &fileDir)
             return false;
         }
         uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, deviceId, fileDir) ||
-                (threadData.hostMonotonic < threadData.deviceMonotonic)) {
+        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, deviceId, fileDir)) {
             ERROR("Device MonotonicRaw is invalid in path: %., device id is %", fileDir, deviceId);
             flag = false;
             continue;
@@ -119,7 +118,7 @@ bool HCCSProcessor::FormatData(const ThreadData &threadData,
     for (auto &row: hccsData) {
         std::tie(tempData.deviceId, tempData.timestamp, tempData.txThroughput, tempData.rxThroughput) = row;
         HPFloat timestamp = GetTimeBySamplingTimestamp(tempData.timestamp,
-                                                       threadData.hostMonotonic - threadData.deviceMonotonic);
+                                                       threadData.hostMonotonic, threadData.deviceMonotonic);
         processedData.emplace_back(static_cast<uint16_t>(tempData.deviceId),
                                    GetLocalTime(timestamp, threadData.timeRecord).Uint64(),
                                    static_cast<uint64_t>(tempData.txThroughput * BYTE_SIZE * BYTE_SIZE), // MB/s -> B/s

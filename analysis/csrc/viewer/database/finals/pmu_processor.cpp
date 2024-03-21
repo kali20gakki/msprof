@@ -24,7 +24,11 @@ using namespace Association::Credential;
 using namespace Analysis::Utils;
 
 namespace {
-const std::set<std::string> SAMPLE_BASED_DB_NAMES = {"ai_vector_core_", "aicore_"};
+const std::string AI_VECTOR_CORE_PREFIX = "ai_vector_core_";
+const std::string TYPE_AIV = "AIV";
+const std::string AI_CORE_PREFIX = "aicore_";
+const std::string TYPE_AIC = "AIC";
+const std::set<std::string> SAMPLE_BASED_DB_NAMES = {AI_VECTOR_CORE_PREFIX, AI_CORE_PREFIX};
 const std::set<std::string> INVALID_COLUMN_NAMES = {"task_id", "stream_id", "subtask_id", "batch_id", "task_type",
                                                     "start_time", "end_time", "ffts_type", "core_type"};
 const std::string TASK_BASED = "task-based";
@@ -209,21 +213,26 @@ bool PmuProcessor::FormatTaskBasedData(const OTFormat &oriData, PTFormat &proces
 bool PmuProcessor::SampleBasedProcess(const std::string &fileDir)
 {
     INFO("SampleBasedProcess, dir is %", fileDir);
+    bool flag = true;
+    uint64_t stringAiCoreId = IdPool::GetInstance().GetUint64Id(TYPE_AIC);
+    uint64_t stringAiVectorCoreId = IdPool::GetInstance().GetUint64Id(TYPE_AIV);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
-    std::unordered_map<std::string, uint16_t> dbPathTable;
+    std::unordered_map<std::string, std::tuple<uint16_t, uint64_t>> dbPathTable;
     for (const auto& name : SAMPLE_BASED_DB_NAMES) {
+        uint64_t coreType = (name == AI_CORE_PREFIX) ? stringAiCoreId : stringAiVectorCoreId;
         for (const auto& devicePath : deviceList) {
             auto deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
             std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, name + std::to_string(deviceId) + ".db"});
             auto status = CheckPath(dbPath);
             if (status == CHECK_SUCCESS) {
-                dbPathTable.insert({dbPath, deviceId});
+                dbPathTable.insert({dbPath, std::make_tuple(deviceId, coreType)});
             } else if (status == CHECK_FAILED) {
-                return false;
+                flag = false;
+                ERROR("Check % failed!", dbPath);
+                continue;
             }
         }
     }
-    bool flag = true;
     if (!SampleBasedTimelineProcess(dbPathTable, fileDir)) {
         ERROR("Failed to process sample-based timeline data, fileDir is %.", fileDir);
         flag = false;
@@ -235,8 +244,8 @@ bool PmuProcessor::SampleBasedProcess(const std::string &fileDir)
     return flag;
 }
 
-bool PmuProcessor::SampleBasedTimelineProcess(const std::unordered_map<std::string, uint16_t> &dbPathTable,
-                                              const std::string &fileDir)
+bool PmuProcessor::SampleBasedTimelineProcess(
+    const std::unordered_map<std::string, std::tuple<uint16_t, uint64_t>> &dbPathTable, const std::string &fileDir)
 {
     INFO("SampleBasedTimeline");
     bool flag = true;
@@ -246,7 +255,8 @@ bool PmuProcessor::SampleBasedTimelineProcess(const std::unordered_map<std::stri
         return false;
     }
     for (const auto& pair : dbPathTable) {
-        threadData.deviceId = pair.second;
+        // 0 deviceId, 1 coreType
+        threadData.deviceId = std::get<0>(pair.second);
         double freq;
         if (!Context::GetInstance().GetPmuFreq(freq, threadData.deviceId, fileDir) ||
                 IsDoubleEqual(freq, DOUBLE_ZERO)) {
@@ -255,7 +265,7 @@ bool PmuProcessor::SampleBasedTimelineProcess(const std::unordered_map<std::stri
         }
         auto oriData = GetSampleBasedTimelineData(pair.first);
         PSTFormat processedData;
-        if (!FormatSampleBasedTimelineData(oriData, processedData, threadData, freq)) {
+        if (!FormatSampleBasedTimelineData(oriData, processedData, threadData, freq, std::get<1>(pair.second))) {
             ERROR("FormatSampleBasedTimelineData failed, dbPath is %.", pair.first);
             flag = false;
             continue;
@@ -287,7 +297,8 @@ PmuProcessor::OSTFormat PmuProcessor::GetSampleBasedTimelineData(const std::stri
 }
 
 bool PmuProcessor::FormatSampleBasedTimelineData(const OSTFormat &oriData, PSTFormat &processedData,
-                                                 const ThreadData &threadData, const double freq)
+                                                 const ThreadData &threadData, const double freq,
+                                                 const uint64_t coreType)
 {
     INFO("FormatSampleBasedTimelineData.");
     if (oriData.empty()) {
@@ -321,7 +332,7 @@ bool PmuProcessor::FormatSampleBasedTimelineData(const OSTFormat &oriData, PSTFo
 
         Utils::HPFloat timestamp{tempData.timestamp};
         processedData.emplace_back(threadData.deviceId, Utils::GetLocalTime(timestamp, threadData.timeRecord).Uint64(),
-                                   cycle, usage, freq, static_cast<uint16_t>(tempData.coreid));
+                                   cycle, usage, freq, static_cast<uint16_t>(tempData.coreid), coreType);
     }
     if (processedData.empty()) {
         ERROR("FormatSampleBasedSummaryData data processing error.");
@@ -330,14 +341,16 @@ bool PmuProcessor::FormatSampleBasedTimelineData(const OSTFormat &oriData, PSTFo
     return true;
 }
 
-bool PmuProcessor::SampleBasedSummaryProcess(const std::unordered_map<std::string, uint16_t> &dbPathTable)
+bool PmuProcessor::SampleBasedSummaryProcess(
+    const std::unordered_map<std::string, std::tuple<uint16_t, uint64_t>> &dbPathTable)
 {
     INFO("SampleBasedSummary");
     bool flag = true;
     for (const auto& pair : dbPathTable) {
         auto oriData = GetSampleBasedSummaryData(pair.first);
         PSSFormat processedData;
-        if (!FormatSampleBasedSummaryData(oriData, processedData, pair.second)) {
+        // 0 deviceId, 1 coreType
+        if (!FormatSampleBasedSummaryData(oriData, processedData, std::get<0>(pair.second), std::get<1>(pair.second))) {
             ERROR("FormatSampleBasedSummaryData failed, dbPath is %.", pair.first);
             flag = false;
             continue;
@@ -369,7 +382,7 @@ PmuProcessor::OSSFormat PmuProcessor::GetSampleBasedSummaryData(const std::strin
 }
 
 bool PmuProcessor::FormatSampleBasedSummaryData(const OSSFormat &oriData, PSSFormat &processedData,
-                                                const uint16_t deviceId)
+                                                const uint16_t deviceId, const uint64_t coreType)
 {
     INFO("FormatSampleBasedSummaryData.");
     if (oriData.empty()) {
@@ -384,7 +397,7 @@ bool PmuProcessor::FormatSampleBasedSummaryData(const OSSFormat &oriData, PSSFor
     for (const auto& data : oriData) {
         std::tie(tempData.metric, tempData.value, tempData.coreid) = data;
         processedData.emplace_back(deviceId, IdPool::GetInstance().GetUint64Id(tempData.metric),
-                                   tempData.value, static_cast<uint16_t>(tempData.coreid));
+                                   tempData.value, static_cast<uint16_t>(tempData.coreid), coreType);
     }
     if (processedData.empty()) {
         ERROR("FormatSampleBasedSummaryData data processing error.");

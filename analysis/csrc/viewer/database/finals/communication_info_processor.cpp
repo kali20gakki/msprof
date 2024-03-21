@@ -31,7 +31,7 @@ struct CommunicationOpEndpointsTime {
 uint64_t GetGroupNameValue(const std::string &groupName, GeHashMap &hashMap)
 {
     uint64_t intGroupName = 0;
-    if (Utils::StrToU64(intGroupName, groupName) == ANALYSIS_OK) {
+    if (groupName != NA && Utils::StrToU64(intGroupName, groupName) == ANALYSIS_OK) {
         return IdPool::GetInstance().GetUint64Id(hashMap[groupName]);
     }
     return IdPool::GetInstance().GetUint64Id(groupName);
@@ -159,7 +159,7 @@ void CommunicationInfoProcessor::UpdateOpInfo(CommunicationOpData &opData, uint3
         std::tie(connectionId, opName, opData.relay, opData.retry, dataType, algType,
                  opData.count, groupName) = oriData;
         opData.dataType = IdPool::GetInstance().GetUint64Id(dataType);
-        opData.algType = algType;
+        opData.algType = IdPool::GetInstance().GetUint64Id(algType);
         opData.groupName = GetGroupNameValue(groupName, hashMap);
     }
 }
