@@ -154,7 +154,7 @@ std::shared_ptr<EventQueue> GenHcclInfoEvents()
  EventLevel      此Level包含的EventType
 |- ACL
 |- Model    [graph_id_map, fusion_op_info]
-|- Node     [node_basic_info, tensor_info, context_id]
+|- Node     [node_basic_info, tensor_info, context_id, hccl_op_info]
 |- HCCL     [hccl_info, context_id]
 |- Runtime  [task_track, mem_cpy]
 */
@@ -198,6 +198,25 @@ std::shared_ptr<EventQueue> GenTaskTrackEvents()
     }
     taskTrackEvents->Sort();
     return taskTrackEvents;
+}
+
+std::shared_ptr<EventQueue> GenHcclOpInfoEvents()
+{
+    auto hcclOpInfoEvents = std::make_shared<EventQueue>(1, 10);
+    std::unordered_map<std::string, std::vector<uint64_t>> Events{
+        // NodeLevel: {"Node", {{110, 130}, {150, 170}}},
+        //  Index      0     1    2    3    4    5   6     7    8    9    10
+        {"Node", {105, 110, 115, 115, 130, 135, 150, 155, 160, 170, 1000}}
+    };
+    int cnt = 0;
+    for (auto dot: Events["Node"]) {
+        FakeEventGenerator::AddHcclOpEvent(
+            hcclOpInfoEvents, dot,
+            {AlgType::HCCL_ALG_HD, AlgType::HCCL_ALG_NB, AlgType::HCCL_ALG_MESH, AlgType::HCCL_ALG_NHR});
+        cnt++;
+    }
+    hcclOpInfoEvents->Sort();
+    return hcclOpInfoEvents;
 }
 
 TEST_F(TreeBuilderUTest, TestAddLevelEventsShouldReturnFalseWhenInputNullptrOrEmpty)
@@ -266,7 +285,7 @@ TEST_F(TreeBuilderUTest, TestAddLevelEventsShouldMatchCorrectNodeWhenInputNotEmp
 
     /* 首先需要保证size相等，然后检查每个元素是否相等 */
     EXPECT_EQ(ans.size(), vaild.size());
-    for (int i = 0; i < vaild.size(); ++i) {
+    for (size_t i = 0; i < vaild.size(); ++i) {
         EXPECT_EQ(ans[i], vaild[i]);
     }
 }
@@ -291,6 +310,7 @@ TEST_F(TreeBuilderUTest, TestBuildTreeShouldBuildCorrectTreeWhenCANNWarehouseNot
     auto fusionOpInfoEvents = GenFusionOpInfoEvents();
     auto hcclInfoEvents = GenHcclInfoEvents();
     auto taskTrackEvents = GenTaskTrackEvents();
+    auto hcclOpInfoEvents = GenHcclOpInfoEvents();
 
     auto cannWarehouse = std::make_shared<CANNWarehouse>();
     cannWarehouse->kernelEvents = kernelEvents;
@@ -301,6 +321,8 @@ TEST_F(TreeBuilderUTest, TestBuildTreeShouldBuildCorrectTreeWhenCANNWarehouseNot
     cannWarehouse->fusionOpInfoEvents = fusionOpInfoEvents;
     cannWarehouse->hcclInfoEvents = hcclInfoEvents;
     cannWarehouse->taskTrackEvents = taskTrackEvents;
+    cannWarehouse->hcclOpInfoEvents = hcclOpInfoEvents;
+
     /* 期望生成的Tree每一层的字符串
      * Event格式: 类型 + start + _ + end, []标识其为additional类型Event，挂在左边最近的节点上
      * eg: Node层一个api节点(start = 1, end = 10)上挂了GraphIdMap(start = 2, end = 2)和
@@ -330,9 +352,11 @@ TEST_F(TreeBuilderUTest, TestBuildTreeShouldBuildCorrectTreeWhenCANNWarehouseNot
         "Api110_200 [GraphIdMap115_115] [GraphIdMap200_200] [FusionOpInfo116_116] "
         "[FusionOpInfo200_200] Dummy210_210 [TaskTrack210_210] ",  // 第二层
         "Api110_130 [NodeBasicInfo115_115] [NodeBasicInfo115_115] [NodeBasicInfo130_130] "
-        "[TensorInfo113_113] [TensorInfo130_130] [ContextId130_130] Api150_170 [NodeBasicInfo155_155] "
+        "[TensorInfo113_113] [TensorInfo130_130] [ContextId130_130] "
+        "[HcclOpInfo115_115] [HcclOpInfo115_115] [HcclOpInfo130_130] Api150_170 [NodeBasicInfo155_155] "
         "[NodeBasicInfo160_160] [NodeBasicInfo170_170] [TensorInfo151_151] [TensorInfo152_152] "
-        "[TensorInfo170_170] [ContextId151_151] [ContextId170_170] Api175_180 Dummy175_175 "
+        "[TensorInfo170_170] [ContextId151_151] [ContextId170_170] "
+        "[HcclOpInfo155_155] [HcclOpInfo160_160] [HcclOpInfo170_170] Api175_180 Dummy175_175 "
         "[TaskTrack175_175] Dummy190_190 [TaskTrack190_190] ", // 第三层
         "Api115_125 [ContextId117_117] [ContextId125_125] [HcclInfo120_120] "
         "[HcclInfo125_125] Dummy114_114 [TaskTrack114_114] Dummy115_115 [TaskTrack115_115] "
@@ -351,7 +375,7 @@ TEST_F(TreeBuilderUTest, TestBuildTreeShouldBuildCorrectTreeWhenCANNWarehouseNot
 
     /* 首先需要保证size相等，然后检查每个元素是否相等 */
     EXPECT_EQ(ans.size(), levelStr.size());
-    for (int i = 0; i < ans.size(); ++i) {
+    for (size_t i = 0; i < ans.size(); ++i) {
         EXPECT_EQ(ans[i], levelStr[i]);
     }
 }

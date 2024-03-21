@@ -79,6 +79,10 @@ bool EventGrouper::Group()
         GroupEvents<TaskTrackParser, MsprofCompactInfo,
                     &CANNWarehouse::taskTrackEvents>("TaskTrack", EventType::EVENT_TYPE_TASK_TRACK);
     });
+    pool.AddTask([this]() {
+        GroupEvents<HcclOpInfoParser, MsprofCompactInfo,
+                    &CANNWarehouse::hcclOpInfoEvents>("HcclOpInfo", EventType::EVENT_TYPE_HCCL_OP_INFO);
+    });
 
     pool.WaitAllTasks();
     pool.Stop();
@@ -95,7 +99,7 @@ void EventGrouper::RecordCANNWareHouses()
         }
         auto wareHouse = cannWarehouses_[thread];
         INFO("After group events, Kernel: %, GraphId: %, FusionOp: %, NodeBasic: %, Tensor: %, ContextId: %,"
-             " HcclInfo: %, TaskTrack: %, thread: %",
+             " HcclInfo: %, TaskTrack: %, HcclOpInfo: %, thread: %",
              wareHouse.kernelEvents ? wareHouse.kernelEvents->GetSize() : 0,
              wareHouse.graphIdMapEvents ? wareHouse.graphIdMapEvents->GetSize() : 0,
              wareHouse.fusionOpInfoEvents ? wareHouse.fusionOpInfoEvents->GetSize() : 0,
@@ -104,6 +108,7 @@ void EventGrouper::RecordCANNWareHouses()
              wareHouse.contextIdEvents ? wareHouse.contextIdEvents->GetSize() : 0,
              wareHouse.hcclInfoEvents ? wareHouse.hcclInfoEvents->GetSize() : 0,
              wareHouse.taskTrackEvents ? wareHouse.taskTrackEvents->GetSize() : 0,
+             wareHouse.hcclOpInfoEvents ? wareHouse.hcclOpInfoEvents->GetSize() : 0,
              thread);
     }
 }

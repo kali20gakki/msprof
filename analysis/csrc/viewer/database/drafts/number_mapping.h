@@ -35,7 +35,8 @@ public:
         HCCL_RDMA_TYPE,
         HCCL_OP_TYPE,
         LEVEL,
-        ACL_API_TAG
+        ACL_API_TAG,
+        HCCL_ALG_TYPE
     };
     static std::string Get(MappingType type, uint32_t key);
 };

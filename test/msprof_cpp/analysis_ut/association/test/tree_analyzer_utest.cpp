@@ -30,6 +30,38 @@ using namespace Analysis::Utils;
 
 const std::string TEST_FILE = "./aging.additional.type_info_dic.slice_0";
 
+std::string ConvertHcclOpAlgTypeToStr(uint16_t algType)
+{
+    const uint32_t algTypePhaseCnt = 4;
+    const uint32_t algTypeBitCnt = 4;
+    const uint16_t algTypeBitMask = 0b1111;
+    const uint16_t algTypeNone = static_cast<uint16_t>(AlgType::HCCL_ALG_NONE);
+    std::unordered_map<uint16_t, std::string> hcclAlgTypeMap {
+        {0,          "NONE"},
+        {1,          "MESH"},
+        {2,          "RING"},
+        {3,          "NB"},
+        {4,          "HD"},
+        {5,          "NHR"},
+        {6,          "PIPELINE"},
+        {7,          "PAIRWISE"},
+        {8,          "STAR"}
+    };
+    std::vector<std::string> algPhaseList;
+    for (uint32_t i = 0; i < algTypePhaseCnt; ++i) {
+        uint16_t algPhase = algType & algTypeBitMask;
+        if (algPhase == algTypeNone) {
+            break;
+        }
+        algPhaseList.emplace_back(hcclAlgTypeMap[algPhase]);
+        algType >>= algTypeBitCnt;
+    }
+    if (algPhaseList.empty()) {
+        return "NONE";
+    }
+    return Join(algPhaseList, "-");
+}
+
 class TreeAnalyzerUTest : public testing::Test {
 protected:
     // 所有测试用例之前执行
@@ -226,6 +258,17 @@ std::shared_ptr<Event> GenHcclInfoEvent(uint64_t dot)
     return eventPtr;
 }
 
+std::shared_ptr<EventQueue> GenHcclOpInfoEventQueue(const std::vector<uint64_t> &timeStamps,
+                                                    const std::vector<std::vector<uint16_t>> &algList)
+{
+    auto hcclOpInfoEvents = std::make_shared<EventQueue>(1, 10);
+    for (size_t i = 0; i < timeStamps.size(); ++i) {
+        FakeEventGenerator::AddHcclOpEvent(hcclOpInfoEvents, timeStamps[i], algList[i]);
+    }
+    hcclOpInfoEvents->Sort();
+    return hcclOpInfoEvents;
+}
+
 TEST_F(TreeAnalyzerUTest, TestUpdateHcclSmallOpDescsShouldReturn2DescsWhenInputCtxIdLenIs2)
 {
     uint64_t dot = 123;
@@ -339,6 +382,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L0()
     // Node  :  [2, 99]  [100, 150]  [202,                     250]  [251,  301] [329, 351]  [410, 500]
     //                  c(125,126)[2]
     //                  c(127,128)[2]
+    //                                hop(210)                         hop(253)   hop(330)
     // Hccl  :                       [210, 220] [230, 250]            [252, 300] [330, 350]
     // Runtime:  tk(50)    tk(110)     tk(220)    tk(240)   tk(225)     tk(260)    tk(340)      tk(430)  tk(880)
     auto kernelEvents = GenKernelEventQueueWithTradComm();
@@ -355,11 +399,18 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L0()
         {880, 1},    // Runtime KERNEL_AICPU 注意： 非计算类算子
     };
     auto taskTrackEvents = GenTaskTrackEventQueue(items);
+    std::vector<std::vector<uint16_t>> algList{
+        {AlgType::HCCL_ALG_HD, AlgType::HCCL_ALG_MESH, AlgType::HCCL_ALG_NB, AlgType::HCCL_ALG_RING},
+        {AlgType::HCCL_ALG_NHR, AlgType::HCCL_ALG_STAR, AlgType::HCCL_ALG_NB, AlgType::HCCL_ALG_HD},
+        {AlgType::HCCL_ALG_MESH, AlgType::HCCL_ALG_RING, AlgType::HCCL_ALG_HD, AlgType::HCCL_ALG_PIPELINE}
+    };
+    auto hcclOpInfoEvents = GenHcclOpInfoEventQueue({210, 253, 330}, algList);
 
     auto cannWarehouse = std::make_shared<CANNWarehouse>();
     cannWarehouse->kernelEvents = kernelEvents;
     cannWarehouse->taskTrackEvents = taskTrackEvents;
     cannWarehouse->contextIdEvents = contextIdEvents;
+    cannWarehouse->hcclOpInfoEvents = hcclOpInfoEvents;
 
     // 建树
     auto treeBuilder = std::make_shared<TreeBuilder>(cannWarehouse, 1);
@@ -404,6 +455,8 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L0)
     // 特殊场景校验分别代表AI_CORE和HCCL_AICPU
     std::vector<uint64_t> expectHcclComputeTaskTaskType{9, 11};
     const uint64_t expectbigOPsNum = 3;
+    std::vector<uint64_t> expectbigOPsCount{420, 506, 660};
+    std::vector<std::string> expectbigOPsAlgType{"HD-MESH-NB-RING", "NHR-STAR-NB-HD", "MESH-RING-HD-PIPELINE"};
     // 先检查个数正确
     EXPECT_EQ(computeTasks.size(), expectComputeTaskTimes.size());
     EXPECT_EQ(hcclTasks.size(), expectHcclTaskTimes.size());
@@ -443,6 +496,12 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L0)
         EXPECT_EQ(computeTasks[i + specialComputeTaskStart]->op->opDesc->nodeDesc->data.nodeBasicInfo.taskType,
                   expectHcclComputeTaskTaskType[i]);
     }
+
+    for (uint16_t i = 0; i < bigOPs.size(); i++) {
+        EXPECT_EQ(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.count, expectbigOPsCount[i]);
+        EXPECT_EQ(ConvertHcclOpAlgTypeToStr(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.algType),
+                  expectbigOPsAlgType[i]);
+    }
 }
 
 std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L1()
@@ -458,6 +517,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L1()
     //                  c-n-t(128)[2]
     //                    ng(129)
     //                   t(144【d】)
+    //                                hop(211)                    hop(252)   hop(330)
     // Hccl  :                       [210, 220] [230, 250]       [252, 300] [330, 350]
     //                                hI(211)     hI(231)          hI(253)    hI(331)
     // Runtime:  tk(50)    tk(110)     tk(220)  tk(240)   TK(225)  tk(260)    tk(340)      tk(430)
@@ -479,6 +539,12 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L1()
         {430, 1},    // Runtime KERNEL_AICPU
     };
     auto taskTrackEvents = GenTaskTrackEventQueue(items);
+    std::vector<std::vector<uint16_t>> algList{
+        {AlgType::HCCL_ALG_PAIRWISE, AlgType::HCCL_ALG_NB, AlgType::HCCL_ALG_HD, AlgType::HCCL_ALG_RING},
+        {AlgType::HCCL_ALG_STAR, AlgType::HCCL_ALG_NHR, AlgType::HCCL_ALG_PIPELINE, AlgType::HCCL_ALG_NB},
+        {AlgType::HCCL_ALG_MESH, AlgType::HCCL_ALG_NB, AlgType::HCCL_ALG_HD, AlgType::HCCL_ALG_STAR}
+    };
+    auto hcclOpInfoEvents = GenHcclOpInfoEventQueue({211, 252, 330}, algList);
 
     auto cannWarehouse = std::make_shared<CANNWarehouse>();
     cannWarehouse->kernelEvents = kernelEvents;
@@ -487,6 +553,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L1()
     cannWarehouse->contextIdEvents = contextIdEvents;
     cannWarehouse->taskTrackEvents = taskTrackEvents;
     cannWarehouse->tensorInfoEvents = tensorInfoEvents;
+    cannWarehouse->hcclOpInfoEvents = hcclOpInfoEvents;
 
     // 建树
     auto treeBuilder = std::make_shared<TreeBuilder>(cannWarehouse, 1);
@@ -529,6 +596,8 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L1)
     // 特殊场景校验分别代表AI_CORE，AI_CPU和HCCL_AICPU
     std::vector<uint64_t> expectHcclComputeTaskTaskType{1, 9, 11, 1};
     const uint64_t expectbigOPsNum = 3;
+    std::vector<uint64_t> expectbigOPsCount{422, 504, 660};
+    std::vector<std::string> expectbigOPsAlgType{"PAIRWISE-NB-HD-RING", "STAR-NHR-PIPELINE-NB", "MESH-NB-HD-STAR"};
     // 先检查个数正确
     EXPECT_EQ(computeTasks.size(), expectComputeTaskTimes.size());
     EXPECT_EQ(hcclTasks.size(), expectHcclTaskTimes.size());
@@ -568,6 +637,12 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L1)
         EXPECT_EQ(tasks[i]->contextId, expectTaskCtxIds[i]);
     }
 
+    for (uint16_t i = 0; i < bigOPs.size(); i++) {
+        EXPECT_EQ(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.count, expectbigOPsCount[i]);
+        EXPECT_EQ(ConvertHcclOpAlgTypeToStr(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.algType),
+                  expectbigOPsAlgType[i]);
+    }
+
     uint32_t specialComputeTaskStart = 9;
     for (uint32_t i = 0; i + specialComputeTaskStart < computeTasks.size(); i++) {
         EXPECT_EQ(computeTasks[i + specialComputeTaskStart]->op->opDesc->nodeDesc->data.nodeBasicInfo.taskType,
@@ -582,6 +657,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L0()
     // Model :  [1,                          200]  [201,             400]  [401, 800]
     // Node  :  [2, 99]  [100, 150]   [160, 195]   [202,  300] [302, 399]
     //                                 c(171)[1]
+    //                                               hop(205)   hop(305)
     // Hccl  :                                     [202,  300] [302, 399]
     //                                              c(230)[3]   c(310)[3]
     // Runtime:  tk(50)   tk(105)       tk(165)      tk(220)     tk(330)
@@ -603,11 +679,17 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L0()
         {330, 52}, // Runtime FFTS_PLUS
     };
     auto taskTrackEvents = GenTaskTrackEventQueue(items);
+    std::vector<std::vector<uint16_t>> algList{
+        {AlgType::HCCL_ALG_PAIRWISE, AlgType::HCCL_ALG_NB, AlgType::HCCL_ALG_HD, AlgType::HCCL_ALG_RING},
+        {AlgType::HCCL_ALG_STAR, AlgType::HCCL_ALG_NHR, AlgType::HCCL_ALG_PIPELINE, AlgType::HCCL_ALG_NB}
+    };
+    auto hcclOpInfoEvents = GenHcclOpInfoEventQueue({205, 305}, algList);
 
     auto cannWarehouse = std::make_shared<CANNWarehouse>();
     cannWarehouse->kernelEvents = kernelEvents;
     cannWarehouse->contextIdEvents = contextIdEvents;
     cannWarehouse->taskTrackEvents = taskTrackEvents;
+    cannWarehouse->hcclOpInfoEvents = hcclOpInfoEvents;
 
     // 建树
     auto treeBuilder = std::make_shared<TreeBuilder>(cannWarehouse, 1);
@@ -641,6 +723,8 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L0)
                                            DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
                                            DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID};
     const uint64_t expectbigOPsNum = 2;
+    std::vector<uint64_t> expectbigOPsCount{410, 610};
+    std::vector<std::string> expectbigOPsAlgType{"PAIRWISE-NB-HD-RING", "STAR-NHR-PIPELINE-NB"};
     // 先检查个数正确
     EXPECT_EQ(computeTasks.size(), expectComputeTaskTimes.size());
     EXPECT_EQ(hcclTasks.size(), expectHcclTaskTimes.size());
@@ -665,6 +749,12 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L0)
     for (uint16_t i = 0; i < tasks.size(); i++) {
         EXPECT_EQ(tasks[i]->contextId, expectTaskCtxIds[i]);
     }
+
+    for (uint16_t i = 0; i < bigOPs.size(); i++) {
+        EXPECT_EQ(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.count, expectbigOPsCount[i]);
+        EXPECT_EQ(ConvertHcclOpAlgTypeToStr(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.algType),
+                  expectbigOPsAlgType[i]);
+    }
 }
 
 std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L1()
@@ -674,6 +764,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L1()
     // Model :  [1,                          200]  [201,              400]  [401, 800]
     // Node  :  [2, 99]  [100, 150]   [160, 195]   [202,  300] [302,  399]
     //                    n-t(125)     c-n-t(171)    n(250)       n(310)
+    //                                               hop(205)    hop(305)
     // Hccl  :                                     [202,  300] [302,  399]
     //                                               c(230)[3]  c(310)[3]
     //                                            hInfo(230)[3] hInfo(310)[3]
@@ -699,6 +790,11 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L1()
         {330, 52}, // Runtime FFTS_PLUS
     };
     auto taskTrackEvents = GenTaskTrackEventQueue(items);
+    std::vector<std::vector<uint16_t>> algList{
+        {AlgType::HCCL_ALG_PAIRWISE, AlgType::HCCL_ALG_NB, AlgType::HCCL_ALG_HD, AlgType::HCCL_ALG_RING},
+        {AlgType::HCCL_ALG_STAR, AlgType::HCCL_ALG_NHR, AlgType::HCCL_ALG_PIPELINE, AlgType::HCCL_ALG_NB}
+    };
+    auto hcclOpInfoEvents = GenHcclOpInfoEventQueue({205, 305}, algList);
 
     auto cannWarehouse = std::make_shared<CANNWarehouse>();
     cannWarehouse->kernelEvents = kernelEvents;
@@ -707,6 +803,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L1()
     cannWarehouse->contextIdEvents = contextIdEvents;
     cannWarehouse->taskTrackEvents = taskTrackEvents;
     cannWarehouse->tensorInfoEvents = tensorInfoEvents;
+    cannWarehouse->hcclOpInfoEvents = hcclOpInfoEvents;
 
     // 建树
     auto treeBuilder = std::make_shared<TreeBuilder>(cannWarehouse, 1);
@@ -741,7 +838,8 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L1)
                                            DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
                                            DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID};
     const uint64_t expectbigOPsNum = 2;
-
+    std::vector<uint64_t> expectbigOPsCount{410, 610};
+    std::vector<std::string> expectbigOPsAlgType{"PAIRWISE-NB-HD-RING", "STAR-NHR-PIPELINE-NB"};
     std::vector<uint64_t> expectComputeTaskOpTypes{1, 1, 3};
     std::vector<uint64_t> expectComputeTaskTensorTimes{125, 125, 171};
 
@@ -788,5 +886,11 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L1)
     std::sort(hcclTasks.begin(), hcclTasks.end(), HostTaskCompCtx());
     for (uint16_t i = 0; i < hcclTasks.size(); i++) {
         EXPECT_EQ(hcclTasks[i]->contextId, expectHcclTaskCtxIds[i]);
+    }
+
+    for (uint16_t i = 0; i < bigOPs.size(); i++) {
+        EXPECT_EQ(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.count, expectbigOPsCount[i]);
+        EXPECT_EQ(ConvertHcclOpAlgTypeToStr(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.algType),
+                  expectbigOPsAlgType[i]);
     }
 }

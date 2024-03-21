@@ -148,6 +148,8 @@ uint64_t g_getCannEventsNum(std::set<uint32_t> &tids, CANNWarehouses &cwhs, cons
             cnt += cwhs[tid].hcclInfoEvents->GetSize();
         } else if (eventName == "taskTrackEvents" && cwhs[tid].taskTrackEvents != nullptr) {
             cnt += cwhs[tid].taskTrackEvents->GetSize();
+        } else if (eventName == "hcclOpInfoEvents" && cwhs[tid].hcclOpInfoEvents != nullptr) {
+            cnt += cwhs[tid].hcclOpInfoEvents->GetSize();
         }
     }
     return cnt;
@@ -193,34 +195,22 @@ TEST_F(EventGrouperUTest, TestGroupShouldGroupCorrespondingEventsWhenDataDirHasA
     const std::string hostDataDir = fakeDataDir + "/host/data";
     // 生成所有类型Fake数据
     GenApiEventsBin(fakeDataDir, MaxNum);
-    GenAdditionalInfoEventsBin(fakeDataDir,
-                               EventType::EVENT_TYPE_GRAPH_ID_MAP,
-                               MSPROF_REPORT_MODEL_LEVEL,
-                               MaxNum);
-    GenAdditionalInfoEventsBin(fakeDataDir,
-                               EventType::EVENT_TYPE_FUSION_OP_INFO,
-                               MSPROF_REPORT_MODEL_LEVEL,
-                               MaxNum);
-    GenCompactInfoEventsBin(fakeDataDir,
-                            EventType::EVENT_TYPE_NODE_BASIC_INFO,
-                            MSPROF_REPORT_NODE_LEVEL,
-                            MaxNum);
-    GenAdditionalInfoEventsBin(fakeDataDir,
-                               EventType::EVENT_TYPE_TENSOR_INFO,
-                               MSPROF_REPORT_HCCL_NODE_LEVEL,
-                               MaxNum);
-    GenAdditionalInfoEventsBin(fakeDataDir,
-                               EventType::EVENT_TYPE_CONTEXT_ID,
-                               MSPROF_REPORT_NODE_LEVEL,
-                               MaxNum);
-    GenAdditionalInfoEventsBin(fakeDataDir,
-                               EventType::EVENT_TYPE_HCCL_INFO,
-                               MSPROF_REPORT_HCCL_NODE_LEVEL,
-                               MaxNum);
-    GenCompactInfoEventsBin(fakeDataDir,
-                            EventType::EVENT_TYPE_TASK_TRACK,
-                            MSPROF_REPORT_RUNTIME_LEVEL,
-                            MaxNum);
+    GenAdditionalInfoEventsBin(fakeDataDir, EventType::EVENT_TYPE_GRAPH_ID_MAP,
+                               MSPROF_REPORT_MODEL_LEVEL, MaxNum);
+    GenAdditionalInfoEventsBin(fakeDataDir, EventType::EVENT_TYPE_FUSION_OP_INFO,
+                               MSPROF_REPORT_MODEL_LEVEL, MaxNum);
+    GenCompactInfoEventsBin(fakeDataDir, EventType::EVENT_TYPE_NODE_BASIC_INFO,
+                            MSPROF_REPORT_NODE_LEVEL, MaxNum);
+    GenAdditionalInfoEventsBin(fakeDataDir, EventType::EVENT_TYPE_TENSOR_INFO,
+                               MSPROF_REPORT_HCCL_NODE_LEVEL, MaxNum);
+    GenAdditionalInfoEventsBin(fakeDataDir, EventType::EVENT_TYPE_CONTEXT_ID,
+                               MSPROF_REPORT_NODE_LEVEL, MaxNum);
+    GenAdditionalInfoEventsBin(fakeDataDir, EventType::EVENT_TYPE_HCCL_INFO,
+                               MSPROF_REPORT_HCCL_NODE_LEVEL, MaxNum);
+    GenCompactInfoEventsBin(fakeDataDir, EventType::EVENT_TYPE_TASK_TRACK,
+                            MSPROF_REPORT_RUNTIME_LEVEL, MaxNum);
+    GenCompactInfoEventsBin(fakeDataDir, EventType::EVENT_TYPE_HCCL_OP_INFO,
+                            MSPROF_REPORT_NODE_LEVEL, MaxNum);
 
     // 多线程解析
     auto grouper = std::make_shared<EventGrouper>(hostDataDir);
@@ -238,6 +228,7 @@ TEST_F(EventGrouperUTest, TestGroupShouldGroupCorrespondingEventsWhenDataDirHasA
     EXPECT_EQ(MaxNum, g_getCannEventsNum(tids, res, "contextIdEvents"));
     EXPECT_EQ(MaxNum, g_getCannEventsNum(tids, res, "hcclInfoEvents"));
     EXPECT_EQ(MaxNum, g_getCannEventsNum(tids, res, "taskTrackEvents"));
+    EXPECT_EQ(MaxNum, g_getCannEventsNum(tids, res, "hcclOpInfoEvents"));
 
     EXPECT_EQ(true, File::RemoveDir(fakeDataDir, 0));
 }
