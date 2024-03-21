@@ -45,6 +45,7 @@ class FreqParser(IParser, MsMultiProcess):
         parse the data under the file path
         :return: NA
         """
+        self._freq_data = [[InfoConfReader().get_dev_cnt(), InfoConfReader().get_freq(StrConstant.AIC)]]
         freq_files = self._file_list.get(DataTag.FREQ)
         freq_files.sort(key=lambda x: int(x.split("_")[-1]))
         offset_calculator = OffsetCalculator(freq_files, StructFmt.FREQ_DATA_SIZE, self._project_path)
@@ -71,10 +72,12 @@ class FreqParser(IParser, MsMultiProcess):
         dev_cnt = InfoConfReader().get_dev_cnt()
         with FileOpen(_file_path, 'rb') as file_reader:
             _all_freq_data = offset_calculator.pre_process(file_reader.file_reader, _file_size)
-            freq_data_chunks = Utils.chunks(_all_freq_data, StructFmt.FREQ_DATA_SIZE)
-            for freq_data in freq_data_chunks:
-                freq_data_bean.decode(freq_data)
-                self._freq_data.extend([[lpm_data.syscnt, lpm_data.freq]
-                                        for lpm_data in freq_data_bean.lpm_data
-                                        if lpm_data.syscnt >= dev_cnt])
+        freq_data_chunks = Utils.chunks(_all_freq_data, StructFmt.FREQ_DATA_SIZE)
+        for freq_data in freq_data_chunks:
+            freq_data_bean.decode(freq_data)
+            for lpm_data in freq_data_bean.lpm_data:
+                if lpm_data.syscnt < dev_cnt:
+                    self._freq_data[0][1] = lpm_data.freq
+                    continue
+                self._freq_data.append([lpm_data.syscnt, lpm_data.freq])
         FileManager.add_complete_file(self._project_path, _file_path)

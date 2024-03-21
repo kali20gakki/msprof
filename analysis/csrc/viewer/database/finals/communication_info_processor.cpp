@@ -12,6 +12,7 @@
 #include "analysis/csrc/viewer/database/finals/communication_info_processor.h"
 #include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/dfx/error_code.h"
 
 namespace Analysis {
 namespace Viewer {
@@ -20,19 +21,21 @@ using namespace Association::Credential;
 using namespace Parser::Environment;
 using namespace Analysis::Utils;
 namespace {
-struct CommunicationOpData {
-    uint32_t opId = UINT32_MAX;
-    uint64_t opName = UINT64_MAX;
-    uint64_t groupName = UINT64_MAX;
-    uint64_t connectionId = UINT64_MAX;
-    uint64_t start = UINT64_MAX;
-    uint64_t end = UINT64_MAX;
-};
+const std::string NA = "N/A";
 struct CommunicationOpEndpointsTime {
     double firstTaskStartTime;
     double lastTaskStartTime;
     double lastTaskDuration;
 };
+
+uint64_t GetGroupNameValue(const std::string &groupName, GeHashMap &hashMap)
+{
+    uint64_t intGroupName = 0;
+    if (groupName != NA && Utils::StrToU64(intGroupName, groupName) == ANALYSIS_OK) {
+        return IdPool::GetInstance().GetUint64Id(hashMap[groupName]);
+    }
+    return IdPool::GetInstance().GetUint64Id(groupName);
+}
 }
 
 CommunicationInfoProcessor::CommunicationInfoProcessor(const std::string &reportDBPath,
@@ -47,32 +50,45 @@ bool CommunicationInfoProcessor::Run()
     return flag;
 }
 
-CommunicationInfoProcessor::OriDataFormat CommunicationInfoProcessor::GetData(const DBInfo &hcclSingleDeviceDB)
+CommunicationInfoProcessor::OriTaskDataFormat CommunicationInfoProcessor::GetTaskData(const DBInfo &taskSingleDevice)
 {
-    OriDataFormat oriData;
+    OriTaskDataFormat oriTaskData;
     std::string sql{"SELECT model_id, op_name, hccl_name, group_name, plane_id, stream_id, task_id, local_rank, "
                     "remote_rank, transport_type, size, data_type, link_type, context_id, notify_id, batch_id, "
-                    "rdma_type, timestamp, duration, connection_id FROM " + hcclSingleDeviceDB.tableName};
-    if (!hcclSingleDeviceDB.dbRunner->QueryData(sql, oriData)) {
-        ERROR("Failed to obtain data from the % table.", hcclSingleDeviceDB.tableName);
+                    "rdma_type, timestamp, duration, connection_id FROM " + taskSingleDevice.tableName};
+    if (!taskSingleDevice.dbRunner->QueryData(sql, oriTaskData)) {
+        ERROR("Failed to obtain data from the % table.", taskSingleDevice.tableName);
     }
-    return oriData;
+    return oriTaskData;
 }
 
-bool CommunicationInfoProcessor::FormatData(const OriDataFormat &oriData,
-                                            CommunicationTaskDataFormat &processedTaskData,
-                                            CommunicationOpDataFormat &processedOpData, const ThreadData &threadData)
+CommunicationInfoProcessor::OriOpDataFormat CommunicationInfoProcessor::GetOpData(const DBInfo &opSingleDevice)
 {
+    OriOpDataFormat oriOpData;
+    std::string sql{"SELECT connection_id, op_name, relay, retry, data_type, alg_type, count, group_name "
+                    "FROM " + opSingleDevice.tableName};
+    if (!opSingleDevice.dbRunner->QueryData(sql, oriOpData)) {
+        ERROR("Failed to obtain data from the % table.", opSingleDevice.tableName);
+    }
+    return oriOpData;
+}
+
+bool CommunicationInfoProcessor::FormatData(const OriTaskDataFormat &oriTaskData, const OriOpDataFormat &oriOpData,
+                                            CommunicationTaskDataFormat &processedTaskData,
+                                            CommunicationOpDataFormat &processedOpData,
+                                            const ThreadData &threadData, GeHashMap &hashMap)
+{
+    if (!Utils::Reserve(processedTaskData, oriTaskData.size())) {
+        ERROR("Reserve for communication task data failed.");
+        return false;
+    }
     CommunicationTaskData taskData;
     HcclTaskSingleDeviceData hcclData;
     std::unordered_map<uint32_t, CommunicationOpData> opData;
     std::unordered_map<uint32_t, CommunicationOpEndpointsTime> endpoints;
-    if (!Utils::Reserve(processedTaskData, oriData.size())) {
-        ERROR("Reserve for communication task data failed.");
-        return false;
-    }
-    for (auto &row: oriData) {
-        Update(row, hcclData, taskData, threadData.deviceId);
+    std::unordered_map<uint32_t, size_t> opInfoIdxMap = GenOpInfoIdxmap(oriOpData);
+    for (auto &row: oriTaskData) {
+        Update(row, hcclData, taskData, threadData.deviceId, hashMap);
         processedTaskData.emplace_back(taskData.opName, taskData.globalTaskId, taskData.taskType, taskData.planeId,
                                        taskData.groupName, taskData.notifyId, taskData.rdmaType, taskData.srcRank,
                                        taskData.dstRank, taskData.transportType, taskData.size, taskData.dataType,
@@ -85,6 +101,7 @@ bool CommunicationInfoProcessor::FormatData(const OriDataFormat &oriData,
             endpoints[taskData.opId].lastTaskDuration = hcclData.duration;
             opData[taskData.opId].connectionId = Utils::Contact(threadData.profId, hcclData.connectionId);
             opData[taskData.opId].groupName = taskData.groupName;
+            UpdateOpInfo(opData[taskData.opId], hcclData.connectionId, opInfoIdxMap, oriOpData, hashMap);
         } else {
             endpoints[taskData.opId].firstTaskStartTime = std::min(endpoints[taskData.opId].firstTaskStartTime,
                                                                    hcclData.timestamp);
@@ -102,13 +119,14 @@ bool CommunicationInfoProcessor::FormatData(const OriDataFormat &oriData,
         HPFloat end = HPFloat(endpoints[key].lastTaskStartTime) + HPFloat(endpoints[key].lastTaskDuration);
         data.start = Utils::GetLocalTime(start, threadData.timeRecord).Uint64();
         data.end = Utils::GetLocalTime(end, threadData.timeRecord).Uint64();
-        processedOpData.emplace_back(data.opName, data.start, data.end, data.connectionId, data.groupName, data.opId);
+        processedOpData.emplace_back(data.opName, data.start, data.end, data.connectionId, data.groupName, data.opId,
+                                     data.relay, data.retry, data.dataType, data.algType, data.count);
     }
     return true;
 }
 
-void CommunicationInfoProcessor::Update(const HcclFormat &oriData, HcclTaskSingleDeviceData &hcclData,
-                                        CommunicationTaskData &taskData, uint16_t deviceId)
+void CommunicationInfoProcessor::Update(const HcclTaskFormat &oriData, HcclTaskSingleDeviceData &hcclData,
+                                        CommunicationTaskData &taskData, uint16_t deviceId, GeHashMap &hashMap)
 {
     std::tie(taskData.modelId, hcclData.opName, hcclData.HCCLName, hcclData.groupName, taskData.planeId,
              taskData.streamId, taskData.taskId, taskData.srcRank, taskData.dstRank,
@@ -119,7 +137,7 @@ void CommunicationInfoProcessor::Update(const HcclFormat &oriData, HcclTaskSingl
     taskData.globalTaskId = IdPool::GetInstance().GetId(
         std::make_tuple(deviceId, taskData.streamId, taskData.taskId, taskData.contextId, taskData.batchId));
     taskData.taskType = IdPool::GetInstance().GetUint64Id(hcclData.HCCLName);
-    taskData.groupName = IdPool::GetInstance().GetUint64Id(hcclData.groupName);
+    taskData.groupName = GetGroupNameValue(hcclData.groupName, hashMap);
     taskData.rdmaType = IdPool::GetInstance().GetUint64Id(hcclData.rdmaType);
     taskData.transportType = IdPool::GetInstance().GetUint64Id(hcclData.transportType);
     taskData.dataType = IdPool::GetInstance().GetUint64Id(hcclData.dataType);
@@ -127,55 +145,95 @@ void CommunicationInfoProcessor::Update(const HcclFormat &oriData, HcclTaskSingl
     taskData.opId = IdPool::GetInstance().GetUint32Id(Utils::Join("_", hcclData.opName, hcclData.groupName, deviceId));
 }
 
+void CommunicationInfoProcessor::UpdateOpInfo(CommunicationOpData &opData, uint32_t connectionId,
+                                              const std::unordered_map<uint32_t, size_t> &opInfoIdxMap,
+                                              const OriOpDataFormat &oriOpData, GeHashMap &hashMap)
+{
+    auto indexIt = opInfoIdxMap.find(connectionId);
+    if (indexIt != opInfoIdxMap.end()) {
+        const auto &oriData = oriOpData[indexIt->second];
+        std::string opName;
+        std::string dataType;
+        std::string algType;
+        std::string groupName;
+        std::tie(connectionId, opName, opData.relay, opData.retry, dataType, algType,
+                 opData.count, groupName) = oriData;
+        opData.dataType = IdPool::GetInstance().GetUint64Id(dataType);
+        opData.algType = IdPool::GetInstance().GetUint64Id(algType);
+        opData.groupName = GetGroupNameValue(groupName, hashMap);
+    }
+}
+
+std::unordered_map<uint32_t, size_t> CommunicationInfoProcessor::GenOpInfoIdxmap(const OriOpDataFormat &oriOpData)
+{
+    std::unordered_map<uint32_t, size_t> opInfoIdxMap;
+    uint32_t connectionId = 0;
+    for (size_t i = 0; i < oriOpData.size(); ++i) {
+        connectionId = std::get<0>(oriOpData[i]);
+        opInfoIdxMap[connectionId] = i;
+    }
+    return opInfoIdxMap;
+}
+
 bool CommunicationInfoProcessor::Process(const std::string &fileDir)
 {
-    bool flag = true;
     ThreadData threadData;
-    DBInfo hcclSingleDeviceDB("hccl_single_device.db", "HCCLTaskSingleDevice");
+    DBInfo taskDBInfo("hccl_single_device.db", "HCCLTaskSingleDevice");
+    DBInfo opDBInfo("hccl_single_device.db", "HCCLOpSingleDevice");
     threadData.profId = IdPool::GetInstance().GetUint32Id(fileDir);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
+    GeHashMap hashMap;
+    if (!GetGeHashMap(hashMap, fileDir)) {
+        return false; // GetGeHashMap方法内有日志输出，这里直接返回
+    }
+    bool flag = true;
     for (const auto& devicePath: deviceList) {
-        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, hcclSingleDeviceDB.dbName});
-        // 并不是所有场景都有hccl数据
-        auto status = CheckPath(dbPath);
-        if (status != CHECK_SUCCESS) {
-            if (status == CHECK_FAILED) {
-                flag = false;
-            }
-            continue;
-        }
-        CommunicationTaskDataFormat taskData;
-        CommunicationOpDataFormat opData;
-        threadData.deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
-        if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir)) {
-            ERROR("Failed to obtain the time in start_info and end_info.");
+        if (!ProcessOneDevice(devicePath, threadData, taskDBInfo, opDBInfo, fileDir, hashMap)) {
             flag = false;
-            continue;
-        }
-        MAKE_SHARED_RETURN_VALUE(hcclSingleDeviceDB.dbRunner, DBRunner, false, dbPath);
-        auto oriData = GetData(hcclSingleDeviceDB);
-        if (oriData.empty()) {
-            flag = false;
-            ERROR("Get % data failed in %.", hcclSingleDeviceDB.tableName, dbPath);
-            continue;
-        }
-        if (!FormatData(oriData, taskData, opData, threadData)) {
-            flag = false;
-            ERROR("Save % data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO, dbPath);
-            continue;
-        }
-        if (!SaveData(taskData, TABLE_NAME_COMMUNICATION_TASK_INFO)) {
-            flag = false;
-            ERROR("Save % data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO, dbPath);
-            continue;
-        }
-        if (!SaveData(opData, TABLE_NAME_COMMUNICATION_OP)) {
-            flag = false;
-            ERROR("Save % data failed, %.", TABLE_NAME_COMMUNICATION_OP, dbPath);
-            continue;
         }
     }
     return flag;
+}
+
+bool CommunicationInfoProcessor::ProcessOneDevice(const std::string &devicePath, ThreadData &threadData,
+                                                  DBInfo &taskDBInfo, DBInfo &opDBInfo,
+                                                  const std::string &fileDir, GeHashMap &hashMap)
+{
+    std::string taskDBPath = Utils::File::PathJoin({devicePath, SQLITE, taskDBInfo.dbName});
+    // 并不是所有场景都有hccl数据
+    auto status = CheckPath(taskDBPath);
+    if (status != CHECK_SUCCESS) {
+        return status != CHECK_FAILED;
+    }
+    CommunicationTaskDataFormat taskData;
+    CommunicationOpDataFormat opData;
+    threadData.deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
+    if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir)) {
+        ERROR("Failed to obtain the time in start_info and end_info.");
+        return false;
+    }
+    MAKE_SHARED_RETURN_VALUE(taskDBInfo.dbRunner, DBRunner, false, taskDBPath);
+    auto oriTaskData = GetTaskData(taskDBInfo);
+    if (oriTaskData.empty()) {
+        ERROR("Get % data failed in %.", taskDBInfo.tableName, taskDBPath);
+        return false;
+    }
+    std::string opDBPath = Utils::File::PathJoin({devicePath, SQLITE, opDBInfo.dbName});
+    MAKE_SHARED_RETURN_VALUE(opDBInfo.dbRunner, DBRunner, false, opDBPath);
+    auto oriOpData = GetOpData(opDBInfo);
+    if (!FormatData(oriTaskData, oriOpData, taskData, opData, threadData, hashMap)) {
+        ERROR("Save % data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO, taskDBPath);
+        return false;
+    }
+    if (!SaveData(taskData, TABLE_NAME_COMMUNICATION_TASK_INFO)) {
+        ERROR("Save % data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO, taskDBPath);
+        return false;
+    }
+    if (!SaveData(opData, TABLE_NAME_COMMUNICATION_OP)) {
+        ERROR("Save % data failed, %.", TABLE_NAME_COMMUNICATION_OP, taskDBPath);
+        return false;
+    }
+    return true;
 }
 
 }

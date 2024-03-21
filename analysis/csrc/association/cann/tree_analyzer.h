@@ -129,7 +129,8 @@ private:
 
     void UpdateComputeDescForFftsSituation(ComputeOpDescs &descs, const std::shared_ptr<Event> &track);
     void UpdateComputeDescForHcclSituation(ComputeOpDescs &descs, const std::shared_ptr<Event> &track,
-                                           uint32_t item_id);
+                                           uint64_t item_id);
+    static void UpdateComputeDescForHelperSituation(ComputeOpDescs &descs);
 
 private:
     // 树的root节点

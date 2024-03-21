@@ -32,7 +32,7 @@ namespace Entities {
 ------------------------- CANN ---------------------------------
 |- ACL Level
 |- Model Level [graph_id_map, fusion_op_info]
-|- Node Level [node_basic_info, tensor_info, context_id]
+|- Node Level [node_basic_info, tensor_info, context_id, hccl_op_info]
 |- HCCL Level [hccl_info, context_id]
 |- Runtime Level [task_track, mem_cpy]
 -------------------------- NPU ---------------------------------
@@ -52,6 +52,7 @@ enum class EventType {
     EVENT_TYPE_GRAPH_ID_MAP,
     EVENT_TYPE_FUSION_OP_INFO,
     EVENT_TYPE_TASK_TRACK,
+    EVENT_TYPE_HCCL_OP_INFO,
     EVENT_TYPE_MEM_CPY,
     EVENT_TYPE_DUMMY, // 虚拟类型，用于建树时标志虚拟节点
     EVENT_TYPE_INVALID

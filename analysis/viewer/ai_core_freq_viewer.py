@@ -31,25 +31,6 @@ class AiCoreFreqViewer:
         self.freq_model = FreqDataViewModel(params)
         self.apidata_model = ApiDataViewModel(params)
 
-    def get_start_time(self) -> str:
-        if not ProfilingScene().is_all_export():
-            start_time, _ = MsprofTimeline().get_start_end_time()
-            return str(start_time)
-        db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_API_EVENT)
-        conn, curs = DBManager.check_connect_db_path(db_path)
-        if not conn or not curs:
-            start_ts, _ = InfoConfReader().get_collect_time()
-            return start_ts
-        with self.apidata_model as _model:
-            apidata = _model.get_earliests_api()
-            if not apidata:
-                logging.warning("Fetching api data start time result is none! "
-                                "aicore freq start time will be equal to the begin time in start.info")
-                start_ts, _ = InfoConfReader().get_collect_time()
-                return start_ts
-            return InfoConfReader().trans_into_local_time(
-                InfoConfReader().time_from_host_syscnt(apidata[0].start, NumberConstant.MICRO_SECOND), use_us=True)
-
     def get_all_data(self):
         '''
         1、read the fixed aicore freq from info.json
@@ -64,15 +45,8 @@ class AiCoreFreqViewer:
         result.extend(TraceViewManager.metadata_event([["process_name", self._pid,
                                                         InfoConfReader().get_json_tid_data(),
                                                         TraceViewHeaderConstant.PROCESS_AI_CORE_FREQ]]))
-        # freq unit is MHZ, read from info.json
+        # freq unit is MHZ
         freq_lists = []
-        data_list = [
-            TraceViewHeaderConstant.PROCESS_AI_CORE_FREQ, self.get_start_time(), self._pid, 0,
-            OrderedDict({"MHz": InfoConfReader().get_freq("aic") / NumberConstant.FREQ_TO_MHz})
-        ]
-        freq_lists.append(data_list)
-
-        # get freq from freq.db
         with self.freq_model as _model:
             freq_rows = _model.get_data()
             for row in freq_rows:

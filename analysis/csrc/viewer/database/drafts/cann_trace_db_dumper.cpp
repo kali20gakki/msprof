@@ -27,8 +27,9 @@ using ThreadPool = Analysis::Utils::ThreadPool;
 using HashData = Analysis::Parser::Host::Cann::HashData;
 using TypeData = Analysis::Parser::Host::Cann::TypeData;
 
-using HCCLOpsDumpData = std::vector<std::tuple<uint32_t, uint32_t, int32_t, uint32_t, std::string, std::string,
-                                               std::string, uint64_t, uint64_t, std::string, int64_t>>;
+using HCCLOpsDumpData = std::vector<std::tuple<uint32_t, uint64_t, int32_t, uint32_t, std::string, std::string,
+                                               std::string, uint64_t, uint64_t, std::string, int64_t,
+                                               int32_t, int32_t, std::string, std::string, uint64_t, std::string>>;
 
 using HostTasksDumpData =
     std::vector<std::tuple<uint32_t, int64_t, uint32_t, uint32_t, std::string,
@@ -36,14 +37,79 @@ using HostTasksDumpData =
 
 using HcclTasksDumpData = std::vector<
     std::tuple<uint32_t, int64_t, std::string, std::string, int64_t, std::string,
-               double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, int32_t, int32_t,
+               double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
                std::string, double, std::string, std::string, std::string, std::string>>;
 
+namespace {
 const uint32_t UNDEFINED_INT_VALUE = 4294967295;
 const int32_t INVALID_VALUE = -1;
 const std::string NA = "N/A";
 const uint32_t INPUT_FORMAT_INDEX = 0;
 const uint32_t OUTPUT_FORMAT_INDEX = 1;
+
+const uint32_t ALG_TYPE_PHASE_CNT = 4;
+const uint32_t ALG_TYPE_BIT_CNT = 4;
+const uint16_t ALG_TYPE_BIT_MASK = 0b1111;
+const uint16_t ALG_TYPE_NONE = static_cast<uint16_t>(AlgType::HCCL_ALG_NONE);
+
+std::string ConvertHcclOpAlgTypeToStr(uint16_t algType)
+{
+    std::vector<std::string> algPhaseList;
+    for (uint32_t i = 0; i < ALG_TYPE_PHASE_CNT; ++i) {
+        uint16_t algPhase = algType & ALG_TYPE_BIT_MASK;
+        if (algPhase == ALG_TYPE_NONE) {
+            break;
+        }
+        algPhaseList.emplace_back(
+            NumberMapping::Get(NumberMapping::MappingType::HCCL_ALG_TYPE, algPhase));
+        algType >>= ALG_TYPE_BIT_CNT;
+    }
+    if (algPhaseList.empty()) {
+        return NumberMapping::Get(NumberMapping::MappingType::HCCL_ALG_TYPE, ALG_TYPE_NONE);
+    }
+    return Utils::Join(algPhaseList, "-");
+}
+
+void AddHcclOpDumpData(HCCLOpsDumpData& data, const std::shared_ptr<Analysis::Entities::Operator> &op)
+{
+    auto bigOpDesc = op->hcclBigOpDesc;
+    // several attributes can not get currently, use default value
+    uint64_t modelId = bigOpDesc->modelId;
+    int32_t indexId = bigOpDesc->indexId;
+    std::string isDynamic = NA;
+    int64_t connectionId = bigOpDesc->connectionId;
+    uint32_t thread_id = bigOpDesc->thread_id;
+    std::string taskType = "HCCL";
+    std::string opType = NA;
+    auto nodeDesc = bigOpDesc->nodeDesc;
+    if (nodeDesc != nullptr) {
+        taskType = NumberMapping::Get(NumberMapping::MappingType::GE_TASK_TYPE,
+                                      nodeDesc->data.nodeBasicInfo.taskType),
+        opType = HashData::GetInstance().Get(nodeDesc->data.nodeBasicInfo.opType);
+        isDynamic = std::to_string(nodeDesc->data.nodeBasicInfo.opState);
+    }
+    int32_t relay = -1;
+    int32_t retry = -1;
+    std::string dataType = NA;
+    std::string algType = NA;
+    uint64_t count = -1;
+    std::string groupName = NA;
+    auto opInfoDesc = bigOpDesc->opInfoDesc;
+    if (opInfoDesc != nullptr) {
+        relay = opInfoDesc->data.hcclopInfo.relay;
+        retry = opInfoDesc->data.hcclopInfo.retry;
+        dataType = NumberMapping::Get(NumberMapping::MappingType::HCCL_DATA_TYPE,
+                                      opInfoDesc->data.hcclopInfo.dataType);
+        algType = ConvertHcclOpAlgTypeToStr(opInfoDesc->data.hcclopInfo.algType);
+        count = opInfoDesc->data.hcclopInfo.count;
+        groupName = std::to_string(opInfoDesc->data.hcclopInfo.groupName);
+    }
+    data.emplace_back(bigOpDesc->deviceId, modelId, indexId, thread_id,
+                      HashData::GetInstance().Get(op->name),
+                      taskType, opType, bigOpDesc->beginTime, bigOpDesc->endTime, isDynamic, connectionId,
+                      relay, retry, dataType, algType, count, groupName);
+}
+}
 CANNTraceDBDumper::CANNTraceDBDumper(std::string hostFilePath) : hostFilePath_(std::move(hostFilePath)),
                                                                  result_(true)
 {}
@@ -101,26 +167,7 @@ void CANNTraceDBDumper::DumpHcclOps(const HCCLBigOpDescs &hcclOps)
             ERROR("DumpHcclOps: Empty op or desc");
             continue;
         }
-        auto deviceId = op->hcclBigOpDesc->deviceId;
-        auto desc = op->hcclBigOpDesc;
-        uint64_t modelId = desc->modelId;
-        int32_t indexId = desc->indexId;
-        std::string isDynamic = NA;
-        int64_t connection_id = desc->connectionId;
-        auto msprofCompactInfo = desc->nodeDesc;
-        uint32_t thread_id = desc->thread_id;
-        data.emplace_back(deviceId, modelId, indexId,
-                          thread_id,
-                          HashData::GetInstance().Get(op->name),
-                          msprofCompactInfo == nullptr ? "HCCL" : NumberMapping::Get(
-                              NumberMapping::MappingType::GE_TASK_TYPE,
-                              msprofCompactInfo->data.nodeBasicInfo.taskType),
-                          msprofCompactInfo == nullptr ? NA : HashData::GetInstance().Get(
-                              msprofCompactInfo->data.nodeBasicInfo.opType),
-                          desc->beginTime, desc->endTime,
-                          msprofCompactInfo == nullptr ? isDynamic :
-                          std::to_string(msprofCompactInfo->data.nodeBasicInfo.opState),
-                          connection_id);
+        AddHcclOpDumpData(data, op);
     }
     if (!hcclOpDBRunner.InsertData("HCCLOP", data)) {
         ERROR("DumpHcclOps: Insert into db failed");
@@ -225,7 +272,6 @@ void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInf
             outputShape.emplace_back(Utils::Join(shapes, ","));
         }
     }
-    auto threadId = tensorDesc->threadId;
     uint32_t blockDim = nodeBasicInfo.blockDim & 0xffff;
     auto mixBlockDim = blockDim * (nodeBasicInfo.blockDim >> 16);
     auto opFlag = nodeBasicInfo.opFlag ? "YES" : "NO";
@@ -235,8 +281,8 @@ void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInf
                       blockDim, mixBlockDim, opState,
                       NumberMapping::Get(
                           NumberMapping::MappingType::GE_TASK_TYPE, nodeBasicInfo.taskType),
-                      HashData::GetInstance().Get(nodeBasicInfo.opType), task->requestId, threadId,
-                      static_cast<double>(task->timeStamp), task->batchId, tensorNum, Utils::Join(inputFormat, ";"),
+                      HashData::GetInstance().Get(nodeBasicInfo.opType), task->requestId, task->thread_id,
+                      task->timeStamp, task->batchId, tensorNum, Utils::Join(inputFormat, ";"),
                       Utils::Join(inputDataType, ";"), Utils::AddQuotation(Utils::Join(inputShape, ";")),
                       Utils::Join(outputFormat, ";"), Utils::Join(outputDataType, ";"),
                       Utils::AddQuotation(Utils::Join(outputShape, ";")), task->deviceId, task->contextId, opFlag);
@@ -266,7 +312,7 @@ void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskI
         // L0
         auto name = HashData::GetInstance().Get(task->op->name);
         data.emplace_back(task->modelId, name, task->streamId, task->taskId, 0, 0, NA, NA, NA,
-                          task->requestId, task->thread_id, double(task->timeStamp), task->batchId,
+                          task->requestId, task->thread_id, task->timeStamp, task->batchId,
                           0, "", "", "", "", "", "",
                           task->deviceId, task->contextId, NA);
         return;
@@ -276,7 +322,6 @@ void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskI
     auto blockDim = nodeBasicInfo.blockDim & 0xffff;
     auto mixBlockDim = blockDim * (nodeBasicInfo.blockDim >> 16);
     auto tensorDesc = desc->tensorDesc;
-    auto threadId = tensorDesc == nullptr ? 0 : tensorDesc->threadId;
     auto opFlag = nodeBasicInfo.opFlag ? "YES" : "NO";
     auto opState = std::to_string(nodeBasicInfo.opState);
     if (!tensorDesc) {
@@ -285,7 +330,7 @@ void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskI
                           mixBlockDim, opState, NumberMapping::Get(NumberMapping::MappingType::GE_TASK_TYPE,
                                                                    nodeBasicInfo.taskType),
                           HashData::GetInstance().Get(nodeBasicInfo.opType),
-                          task->requestId, threadId, static_cast<double>(task->timeStamp), task->batchId,
+                          task->requestId, task->thread_id, task->timeStamp, task->batchId,
                           0, NA, NA, NA, NA, NA, NA, task->deviceId, task->contextId, opFlag);
         return;
     }

@@ -10,7 +10,6 @@
  * *****************************************************************************
  */
 
-
 #include "analysis/csrc/parser/host/cann/event_grouper.h"
 
 using namespace Analysis::Utils;
@@ -80,6 +79,10 @@ bool EventGrouper::Group()
         GroupEvents<TaskTrackParser, MsprofCompactInfo,
                     &CANNWarehouse::taskTrackEvents>("TaskTrack", EventType::EVENT_TYPE_TASK_TRACK);
     });
+    pool.AddTask([this]() {
+        GroupEvents<HcclOpInfoParser, MsprofCompactInfo,
+                    &CANNWarehouse::hcclOpInfoEvents>("HcclOpInfo", EventType::EVENT_TYPE_HCCL_OP_INFO);
+    });
 
     pool.WaitAllTasks();
     pool.Stop();
@@ -96,7 +99,7 @@ void EventGrouper::RecordCANNWareHouses()
         }
         auto wareHouse = cannWarehouses_[thread];
         INFO("After group events, Kernel: %, GraphId: %, FusionOp: %, NodeBasic: %, Tensor: %, ContextId: %,"
-             " HcclInfo: %, TaskTrack: %, thread: %",
+             " HcclInfo: %, TaskTrack: %, HcclOpInfo: %, thread: %",
              wareHouse.kernelEvents ? wareHouse.kernelEvents->GetSize() : 0,
              wareHouse.graphIdMapEvents ? wareHouse.graphIdMapEvents->GetSize() : 0,
              wareHouse.fusionOpInfoEvents ? wareHouse.fusionOpInfoEvents->GetSize() : 0,
@@ -105,6 +108,7 @@ void EventGrouper::RecordCANNWareHouses()
              wareHouse.contextIdEvents ? wareHouse.contextIdEvents->GetSize() : 0,
              wareHouse.hcclInfoEvents ? wareHouse.hcclInfoEvents->GetSize() : 0,
              wareHouse.taskTrackEvents ? wareHouse.taskTrackEvents->GetSize() : 0,
+             wareHouse.hcclOpInfoEvents ? wareHouse.hcclOpInfoEvents->GetSize() : 0,
              thread);
     }
 }
@@ -156,7 +160,7 @@ void EventGrouper::GroupEvents<ApiEventParser, MsprofApi, &CANNWarehouse::kernel
     MAKE_SHARED_RETURN_VOID(parser, ApiEventParser, hostPath_);
 
     auto traces = parser->ParseData<MsprofApi>();
-
+    SortByTimeAndLevel(traces);
     // 统计各个threadId元素个数，用于EventQueue分配精确的内存大小，避免大量内存浪费
     std::unordered_map<uint32_t, uint64_t> threadIdNum;
     std::set<uint32_t> threadIds;
@@ -215,6 +219,7 @@ void EventGrouper::GroupEvents<TaskTrackParser, MsprofCompactInfo, &CANNWarehous
     MAKE_SHARED_RETURN_VOID(parser, TaskTrackParser, hostPath_);
 
     auto traces = parser->ParseData<MsprofCompactInfo>();
+    SortByTimeAndLevel(traces);
     flipTasks_ = parser->ParseData<Adapter::FlipTask>();
 
     // 统计各个threadId元素个数，用于EventQueue分配精确的内存大小，避免大量内存浪费
@@ -242,6 +247,17 @@ void EventGrouper::GroupEvents<TaskTrackParser, MsprofCompactInfo, &CANNWarehous
     }
     std::lock_guard<std::mutex> lock(tidLock_);
     threadIds_.insert(threadIds.begin(), threadIds.end());
+}
+
+template<>
+bool EventGrouper::SortByTimeAndLevel<MsprofApi>(std::vector<std::shared_ptr<MsprofApi>> &traces)
+{
+    auto comp =
+        [](std::shared_ptr<MsprofApi> &api1, std::shared_ptr<MsprofApi> &api2) {
+            return api1->beginTime < api2->beginTime ||
+                (api1->beginTime == api2->beginTime && api1->level > api2->level);
+        };
+    std::sort(traces.begin(), traces.end(), comp);
 }
 
 } // namespace Cann

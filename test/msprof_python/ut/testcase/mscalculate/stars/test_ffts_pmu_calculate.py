@@ -9,10 +9,12 @@ from unittest import mock
 
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
 from common_func.profiling_scene import ExportMode
 from constant.constant import CONFIG
 from mscalculate.stars.ffts_pmu_calculator import FftsPmuCalculator
+from profiling_bean.prof_enum.chip_model import ChipModel
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.stars.ffts_pmu import FftsPmuBean
 from profiling_bean.stars.ffts_block_pmu import FftsBlockPmuBean
@@ -87,11 +89,13 @@ class TestFftsPmuCalculator(TestCase):
             check._core_num_dict = {'aic': 30, 'aiv': 0}
             check._block_dims = {'2-2': [22, 22]}
             check._freq = 1500
+            check.parse()
             check.calculate()
             check.save()
         ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
     def test_save_should_be_success_when__is_mix_needed_is_true(self):
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.Utils.get_scene', return_value=Constant.SINGLE_OP), \
                 mock.patch("os.path.exists", return_value=True), \
@@ -117,14 +121,20 @@ class TestFftsPmuCalculator(TestCase):
                                         b'\xafH\x03\x00\x00\xe9"+\xafH\x03\x00\x00'), \
                 mock.patch(NAMESPACE + ".FftsPmuModel.create_table"), \
                 mock.patch(NAMESPACE + '.FftsPmuModel.flush'):
+            ChipManager().chip_id = ChipModel.CHIP_V4_1_0
+            InfoConfReader()._info_json = {
+                "drvVersion": InfoConfReader().ALL_EXPORT_VERSION,
+                "DeviceInfo": [{'aic_frequency': 1500, 'hwts_frequency': 1000}],
+            }
             mixCalcute = FftsPmuCalculator(self.file_list, CONFIG)
-            InfoConfReader()._info_json = {'DeviceInfo': [{'aic_frequency': 1500, 'hwts_frequency': 1000}]}
             mixCalcute._core_num_dict = {'aic': 30, 'aiv': 0}
             mixCalcute._block_dims = {'2-2': [22, 22]}
             mixCalcute._freq = 1500
+            mixCalcute.parse()
             mixCalcute.calculate()
             mixCalcute._is_mix_needed = True
             mixCalcute.save()
+            InfoConfReader()._info_json = {}
 
     def test_calculate_all_file(self):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
