@@ -195,7 +195,8 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
             self.calculate_mix_pmu_list(self.pmu_data)
         else:
             self.calculate_pmu_list(self.pmu_data)
-        self.pmu_data = FlipCalculator.set_device_batch_id(self.pmu_data, self._result_dir)
+        if ChipManager().is_chip_all_data_export() and InfoConfReader().is_all_export_version():
+            self.pmu_data = FlipCalculator.set_device_batch_id(self.pmu_data, self._result_dir)
         if not self._is_mix_needed:
             # 去除timestamp字段
             self.pmu_data = [pmu_data[:-1] for pmu_data in self.pmu_data]
