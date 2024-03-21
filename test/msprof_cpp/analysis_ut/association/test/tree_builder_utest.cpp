@@ -326,19 +326,18 @@ TEST_F(TreeBuilderUTest, TestBuildTreeShouldBuildCorrectTreeWhenCANNWarehouseNot
     //  c(115)             c(117) c(125)         c(130)               c(160)
     // Runtime: tk(114) tk(115) tk(120) tk(125) tk(130)       tk(155) tk(160) tk(165)tk(170)tk(175) tk(180) tk(190,210)
     std::vector<std::string> ans{
-        "Api0_201 ", // 第一层
+        "Api0_211 ", // 第一层
         "Api110_200 [GraphIdMap115_115] [GraphIdMap200_200] [FusionOpInfo116_116] "
         "[FusionOpInfo200_200] Dummy210_210 [TaskTrack210_210] ",  // 第二层
         "Api110_130 [NodeBasicInfo115_115] [NodeBasicInfo115_115] [NodeBasicInfo130_130] "
         "[TensorInfo113_113] [TensorInfo130_130] [ContextId130_130] Api150_170 [NodeBasicInfo155_155] "
         "[NodeBasicInfo160_160] [NodeBasicInfo170_170] [TensorInfo151_151] [TensorInfo152_152] "
-        "[TensorInfo170_170] [ContextId151_151] [ContextId170_170] Api175_180 Dummy114_114 "
-        "[TaskTrack114_114] Dummy115_115 [TaskTrack115_115] Dummy130_130 [TaskTrack130_130] "
-        "Dummy155_155 [TaskTrack155_155] Dummy170_170 [TaskTrack170_170] Dummy175_175 [TaskTrack175_175] "
-        "Dummy190_190 [TaskTrack190_190] ", // 第三层
+        "[TensorInfo170_170] [ContextId151_151] [ContextId170_170] Api175_180 Dummy175_175 "
+        "[TaskTrack175_175] Dummy190_190 [TaskTrack190_190] ", // 第三层
         "Api115_125 [ContextId117_117] [ContextId125_125] [HcclInfo120_120] "
-        "[HcclInfo125_125] Api155_165 [ContextId160_160] [HcclInfo160_160] "
-        "[HcclInfo165_165] Dummy180_180 [TaskTrack180_180] ", // 第四层
+        "[HcclInfo125_125] Dummy114_114 [TaskTrack114_114] Dummy115_115 [TaskTrack115_115] "
+        "Dummy130_130 [TaskTrack130_130] Api155_165 [ContextId160_160] [HcclInfo160_160] [HcclInfo165_165] "
+        "Dummy155_155 [TaskTrack155_155] Dummy170_170 [TaskTrack170_170] Dummy180_180 [TaskTrack180_180] ", // 第四层
         "Dummy120_120 [TaskTrack120_120] Dummy125_125 [TaskTrack125_125] "
         "Dummy160_160 [TaskTrack160_160] Dummy165_165 [TaskTrack165_165] " // 第五层
     };
