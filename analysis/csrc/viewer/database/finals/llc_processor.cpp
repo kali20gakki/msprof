@@ -9,17 +9,23 @@
  * Creation Date      : 2024/2/26
  * *****************************************************************************
  */
-
 #include "analysis/csrc/viewer/database/finals/llc_processor.h"
+
+#include <unordered_set>
+
+#include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/parser/environment/context.h"
+#include "collector/dvvp/common/config/config.h"
 
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
+using namespace Association::Credential;
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Utils;
+using namespace analysis::dvvp::common::config;
 namespace {
 struct LLCData {
     uint16_t deviceId = 0;
@@ -28,6 +34,8 @@ struct LLCData {
     double hitRate = 0.0;
     double throughput = 0.0;
 };
+
+std::unordered_set<std::string> LLC_MODES = {LLC_PROFILING_READ, LLC_PROFILING_WRITE};
 }
 
 LLCProcessor::LLCProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
@@ -54,7 +62,7 @@ LLCProcessor::OriDataFormat LLCProcessor::GetData(const std::string &dbPath, DBI
 }
 
 LLCProcessor::ProcessedDataFormat LLCProcessor::FormatData(const OriDataFormat &oriData, const ThreadData &threadData,
-                                                           const uint16_t mode)
+                                                           const uint64_t mode)
 {
     ProcessedDataFormat processedData;
     if (oriData.empty()) {
@@ -69,7 +77,7 @@ LLCProcessor::ProcessedDataFormat LLCProcessor::FormatData(const OriDataFormat &
     for (auto &row: oriData) {
         std::tie(llcData.deviceId, llcData.llcID, llcData.timestamp, llcData.hitRate, llcData.throughput) = row;
         HPFloat timestamp = GetTimeBySamplingTimestamp(llcData.timestamp,
-                                                       threadData.hostMonotonic - threadData.deviceMonotonic);
+                                                       threadData.hostMonotonic, threadData.deviceMonotonic);
         processedData.emplace_back(
             llcData.deviceId, llcData.llcID, GetLocalTime(timestamp, threadData.timeRecord).Uint64(),
             llcData.hitRate * PERCENTAGE, static_cast<uint64_t>(llcData.throughput * BYTE_SIZE * BYTE_SIZE), mode);
@@ -115,22 +123,20 @@ bool LLCProcessor::ProcessData(const std::string &fileDir)
             return false;
         }
         threadData.deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, threadData.deviceId, fileDir) ||
-                (threadData.hostMonotonic < threadData.deviceMonotonic)) {
+        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, threadData.deviceId, fileDir)) {
             ERROR("Device MonotonicRaw is invalid in path: %., device id is %", fileDir, threadData.deviceId);
             flag = false;
             continue;
         }
-        auto iter = MEMORY_TABLE.find(Context::GetInstance().GetLLCProfiling(threadData.deviceId, fileDir));
-        if (iter == MEMORY_TABLE.end()) {
+        std::string mode = Context::GetInstance().GetLLCProfiling(threadData.deviceId, fileDir);
+        if (LLC_MODES.find(mode) == LLC_MODES.end()) {
             ERROR("GetLLCProfiling failed in path: %, device id is %", fileDir, threadData.deviceId);
             flag = false;
             continue;
         }
-        uint16_t mode = iter->second;
         INFO("Start to process %, deviceId:%.", dbPath, threadData.deviceId);
         auto oriData = GetData(dbPath, llcDB);
-        auto processedData = FormatData(oriData, threadData, mode);
+        auto processedData = FormatData(oriData, threadData, IdPool::GetInstance().GetUint64Id(mode));
         if (!SaveData(processedData, TABLE_NAME_LLC)) {
             flag = false;
             ERROR("Save data failed, %.", dbPath);

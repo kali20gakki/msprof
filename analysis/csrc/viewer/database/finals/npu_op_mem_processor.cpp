@@ -24,7 +24,7 @@ using namespace Analysis::Association::Credential;
 namespace {
 struct NpuOpMemData {
     uint32_t threadId = 0;
-    uint32_t type = 0;
+    uint64_t type = 0;
     uint64_t totalAllocateMemory = 0;
     uint64_t totalReserveMemory = 0;
     int64_t size = 0;
@@ -34,6 +34,8 @@ struct NpuOpMemData {
     std::string device_type;
 };
 const std::string COMPONENT = "GE"; // 命令行侧写死GE
+const std::string RELEASE = "release";
+const std::string ALLOCATE = "allocate";
 }
 
 NpuOpMemProcessor::NpuOpMemProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
@@ -43,6 +45,8 @@ bool NpuOpMemProcessor::Run()
 {
     INFO("NpuOpMemProcessor Run.");
     stringGeId_ = IdPool::GetInstance().GetUint64Id(COMPONENT);
+    stringReleaseId_ = IdPool::GetInstance().GetUint64Id(RELEASE);
+    stringAllocateId_ = IdPool::GetInstance().GetUint64Id(ALLOCATE);
     bool flag = TableProcessor::Run();
     PrintProcessorResult(flag, PROCESSOR_NAME_NPU_OP_MEM);
     return flag;
@@ -76,9 +80,9 @@ NpuOpMemProcessor::ProcessedDataFormat NpuOpMemProcessor::FormatData(const OriDa
         HPFloat timestamp{GetTimeFromSyscnt(data.timestamp, params)};
         if (data.size < 0) {
             data.size = std::abs(data.size);
-            data.type = MEMORY_TABLE.at("release"); // key写死在MEMORY_TABLE常量map中，不涉及外部输入，不做校验
+            data.type = stringReleaseId_;
         } else {
-            data.type = MEMORY_TABLE.at("allocate");
+            data.type = stringAllocateId_;
         }
         uint64_t addr = UINT64_MAX;
         if (Utils::StrToU64(addr, data.addr) == ANALYSIS_ERROR) { // 转uint64失败默认值为UINT64_MAX

@@ -22,7 +22,7 @@ class HBMProcessor : public TableProcessor {
 // device_id, timestamp, bandwidth, hbmid, event_type
     using OriDataFormat = std::vector<std::tuple<uint32_t, double, double, uint32_t, std::string>>;
 // deviceId, timestamp, bandwidth, hbmId, type
-    using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, uint8_t, uint16_t>>;
+    using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, uint8_t, uint64_t>>;
 public:
     HBMProcessor() = default;
     HBMProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);

@@ -22,6 +22,7 @@ class AccPmuProcessor : public TableProcessor {
     // acc_id, read_bandwidth, write_bandwidth, read_ost, write_ost, timestamp
     using OriDataFormat = std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, double>>;
 
+    // accId, readBwLevel, writeBwLevel, readOstLevel, writeOstLevel, timestampNs, deviceId
     using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint32_t, uint32_t,
                                                        uint32_t, uint32_t, uint64_t, uint16_t>>;
 public:

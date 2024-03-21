@@ -66,7 +66,7 @@ bool ApiProcessor::Process(const std::string &fileDir)
         ERROR("FormatData failed, fileDir is %.", fileDir);
         return false;
     }
-    return SaveData(processedData, TABLE_NAME_API);
+    return SaveData(processedData, TABLE_NAME_CANN_API);
 }
 
 ApiProcessor::ApiDataFormat ApiProcessor::GetData(const std::string &dbPath, DBInfo &apieventDB)
@@ -108,16 +108,13 @@ bool ApiProcessor::FormatData(const std::string &fileDir, const ApiDataFormat &a
         return false;
     }
     if (!Utils::Reserve(processedData, apiData.size())) {
-        ERROR("Reserve for % data failed.", TABLE_NAME_API);
+        ERROR("Reserve for % data failed.", TABLE_NAME_CANN_API);
         return false;
     }
     ApiData tempData;
     for (const auto& data : apiData) {
         std::tie(tempData.structType, tempData.id, tempData.level, tempData.threadId, tempData.itemId,
                  tempData.start, tempData.end, tempData.connectionId) = data;
-        if (tempData.start == 0 || tempData.end == 0) {
-            continue;
-        }
         uint16_t level = GetLevelValue(tempData.level);
         uint64_t globalTid = Utils::Contact(pid, tempData.threadId);
         Utils::HPFloat startTimestamp = Utils::GetTimeFromSyscnt(tempData.start, params);
@@ -132,7 +129,7 @@ bool ApiProcessor::FormatData(const std::string &fileDir, const ApiDataFormat &a
         // apiId 仅在框架侧有意义,当前直接使用connectionId作为替代
         processedData.emplace_back(Utils::GetLocalTime(startTimestamp, record).Uint64(),
                                    Utils::GetLocalTime(endTimestamp, record).Uint64(),
-                                   level, globalTid, connectionId, name, connectionId);
+                                   level, globalTid, connectionId, name);
     }
     if (processedData.empty()) {
         ERROR("Api data processing error.");

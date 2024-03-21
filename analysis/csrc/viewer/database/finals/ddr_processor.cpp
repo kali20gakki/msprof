@@ -59,7 +59,7 @@ DDRProcessor::ProcessedDataFormat DDRProcessor::FormatData(const OriDataFormat &
     for (auto &row: oriData) {
         std::tie(data.deviceId, data.timestamp, data.fluxRead, data.fluxWrite) = row;
         HPFloat timestamp = GetTimeBySamplingTimestamp(data.timestamp,
-                                                       threadData.hostMonotonic - threadData.deviceMonotonic);
+                                                       threadData.hostMonotonic, threadData.deviceMonotonic);
         HPFloat readRate{data.fluxRead * BYTE_SIZE * BYTE_SIZE}; // MB/s -> B/s
         HPFloat writeRate{data.fluxWrite * BYTE_SIZE * BYTE_SIZE};
         processedData.emplace_back(
@@ -96,8 +96,7 @@ bool DDRProcessor::Process(const std::string &fileDir)
             continue;
         }
         uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, deviceId, fileDir) ||
-                (threadData.hostMonotonic < threadData.deviceMonotonic)) {
+        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, deviceId, fileDir)) {
             ERROR("Device MonotonicRaw is invalid in path: %., device id is %", fileDir, deviceId);
             flag = false;
             continue;

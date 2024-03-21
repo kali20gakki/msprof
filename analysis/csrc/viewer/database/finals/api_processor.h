@@ -22,9 +22,9 @@ class ApiProcessor : public TableProcessor {
 // struct_type, id, level, thread_id, item_id, start, end, connection_id
 using ApiDataFormat = std::vector<std::tuple<std::string, std::string, std::string, uint32_t,
         std::string, uint64_t, uint64_t, uint64_t>>;
-// start, end, type, globalTid, connectionId, name, apiId
+// start, end, type, globalTid, connectionId, name
 using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint16_t,
-        uint64_t, uint64_t, uint64_t, uint64_t>>;
+        uint64_t, uint64_t, uint64_t>>;
 public:
     ApiProcessor() = default;
     ApiProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);

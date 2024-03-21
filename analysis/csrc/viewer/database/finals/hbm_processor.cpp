@@ -10,6 +10,7 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/viewer/database/finals/hbm_processor.h"
+#include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/parser/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
@@ -18,6 +19,7 @@ namespace Viewer {
 namespace Database {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Utils;
+using namespace Association::Credential;
 namespace {
 struct HBMData {
     uint32_t deviceId = 0; // 这里使用uint32是因为db_runner的QueryData方法不支持存储精度低于uint32的数据
@@ -61,8 +63,8 @@ HBMProcessor::ProcessedDataFormat HBMProcessor::FormatData(const OriDataFormat &
     for (auto &row: oriData) {
         std::tie(data.deviceId, data.timestamp, data.bandwidth, data.hbmId, data.eventType) = row;
         HPFloat timestamp = GetTimeBySamplingTimestamp(data.timestamp,
-                                                       threadData.hostMonotonic - threadData.deviceMonotonic);
-        uint16_t type = MEMORY_TABLE.at(data.eventType); // 枚举表MEMORY_TABLE可以保证key存在
+                                                       threadData.hostMonotonic, threadData.deviceMonotonic);
+        uint64_t type = IdPool::GetInstance().GetUint64Id(data.eventType);
         processedData.emplace_back(
             static_cast<uint16_t>(data.deviceId), GetLocalTime(timestamp, threadData.timeRecord).Uint64(),
             static_cast<uint64_t>(data.bandwidth * BYTE_SIZE * BYTE_SIZE), data.hbmId, type); // bandwidth MB/s -> B/s
@@ -96,8 +98,7 @@ bool HBMProcessor::Process(const std::string &fileDir)
             continue;
         }
         uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, deviceId, fileDir) ||
-                (threadData.hostMonotonic < threadData.deviceMonotonic)) {
+        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, deviceId, fileDir)) {
             ERROR("Device MonotonicRaw is invalid in path: %., device id is %", fileDir, deviceId);
             flag = false;
             continue;

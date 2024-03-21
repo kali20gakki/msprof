@@ -26,13 +26,13 @@ using namespace Analysis::Association::Credential;
 // struct_type, id, level, thread_id, item_id, start, end, connection_id
 using ApiDataFormat = std::vector<std::tuple<std::string, std::string, std::string, uint32_t,
         std::string, uint64_t, uint64_t, uint64_t>>;
-// start, end, type, globalTid, connectionId, name, apiId
+// start, end, type, globalTid, connectionId, name
 using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint16_t,
-        uint64_t, uint64_t, uint64_t, uint64_t>>;
+        uint64_t, uint64_t, uint64_t>>;
 
-// start, end, type, globalTid, connectionId, name, apiId
+// start, end, type, globalTid, connectionId, name
 using QueryDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t,
-        uint64_t, uint64_t, uint64_t, uint64_t>>;
+        uint64_t, uint64_t, uint64_t>>;
 
 const std::string API_DIR = "./api";
 const std::string REPORT = "report.db";
@@ -55,10 +55,6 @@ const ApiDataFormat API_DATA = {
     {"master", "0", "hccl", 6635, "hcom_allReduce_", 65177264940493, 65177264975485, 247},
     {"ACL_OTHERS", "262144", "acl", 116, "GraphOperation::Setup", 65177265026179, 65177265048078, 299},
 };
-// 构造一个开始时间为0的数据,该数据会被过滤,故单独插入
-const ApiDataFormat INVALID_DATA = {
-    {"ACL_RTS", "aclrtSetDevice", "acl", 116, "0", 0, 65177262396300, 0},
-};
 const uint16_t LEVEL_INDEX = 2;
 const uint16_t TID_INDEX = 3;
 const uint16_t CONNECTION_ID_INDEX = 7;
@@ -70,7 +66,6 @@ protected:
         EXPECT_TRUE(File::CreateDir(API_DIR));
         EXPECT_TRUE(File::CreateDir(PROF0));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF0, HOST})));
-        EXPECT_TRUE(CreateAPIDB(File::PathJoin({PROF0, HOST, SQLITE}), INVALID_DATA));
         EXPECT_TRUE(CreateAPIDB(File::PathJoin({PROF0, HOST, SQLITE}), API_DATA));
         EXPECT_TRUE(File::CreateDir(PROF1));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF1, HOST})));
@@ -135,11 +130,10 @@ void CheckApiDataValid(const QueryDataFormat &checkData)
     uint64_t tid;
     uint64_t connectionId;
     uint64_t name;
-    uint32_t apiId;
     const uint16_t moveCount = 32;
     for (uint16_t i = 0; i < checkData.size(); ++i) {
         auto index = i % API_DATA.size();
-        std::tie(start, end, type, tid, connectionId, name, apiId) = checkData[i];
+        std::tie(start, end, type, tid, connectionId, name) = checkData[i];
         // 开始小于结束时间
         EXPECT_LE(start, end);
         // 比对前后的level是否一致
@@ -160,8 +154,7 @@ TEST_F(ApiProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
     MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
     QueryDataFormat checkData;
     uint16_t expectNum = API_DATA.size() * PROF_PATHS.size();
-    std::string sqlStr = "SELECT startNs, endNs, type, globalTid, connectionId, name, apiId FROM "
-        + TABLE_NAME_API;
+    std::string sqlStr = "SELECT startNs, endNs, type, globalTid, connectionId, name FROM " + TABLE_NAME_CANN_API;
     ASSERT_NE(dbRunner, nullptr);
     EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkData));
     EXPECT_EQ(expectNum, checkData.size());
