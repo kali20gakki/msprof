@@ -56,11 +56,13 @@ struct HcclBigOpDesc {
     int64_t connectionId = 0;
     uint32_t thread_id = 0;
     std::shared_ptr<MsprofCompactInfo> nodeDesc = nullptr;
+    std::shared_ptr<MsprofCompactInfo> opInfoDesc = nullptr;
 
     HcclBigOpDesc(uint64_t begin, uint64_t end, uint16_t deviceId, uint64_t modelId, int32_t indexId,
-                  int64_t connectionId, uint32_t threadId, const std::shared_ptr<MsprofCompactInfo> &node)
+                  int64_t connectionId, uint32_t threadId, const std::shared_ptr<MsprofCompactInfo> &node,
+                  const std::shared_ptr<MsprofCompactInfo> &hcclOpDesc)
         : beginTime(begin), endTime(end), deviceId(deviceId), modelId(modelId), indexId(indexId),
-          connectionId(connectionId), nodeDesc(node), thread_id(threadId)
+          connectionId(connectionId), thread_id(threadId), nodeDesc(node), opInfoDesc(hcclOpDesc)
     {}
 };
 

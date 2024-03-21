@@ -97,6 +97,21 @@ private:
         "aging.compact.task_track.slice",
     };
 };  // class TaskTrackParser
+
+// 该类的作用是hccl op info info数据的解析
+class HcclOpInfoParser final : public CompactInfoParser {
+public:
+    explicit HcclOpInfoParser(const std::string &path) : CompactInfoParser(path, "HcclOpInfoParser")
+    {
+        Init(filePrefix_);
+    }
+
+private:
+    std::vector<std::string> filePrefix_ = {
+        "unaging.compact.hccl_op_info.slice",
+        "aging.compact.hccl_op_info.slice",
+    };
+};  // class HcclOpInfoParser
 }  // namespace Cann
 }  // namespace Host
 }  // namespace Parser

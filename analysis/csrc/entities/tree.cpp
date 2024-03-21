@@ -33,6 +33,7 @@ std::vector<std::string> EventTypeString{
     "GraphIdMap",
     "FusionOpInfo",
     "TaskTrack",
+    "HcclOpInfo",
     "MemoryCopy",
     "Dummy",
     "Invalid"

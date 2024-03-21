@@ -27,10 +27,10 @@ using namespace Analysis::Parser;
 namespace {
 const int DEPTH = 0;
 const uint16_t OP_NUM = 4;
-const uint16_t STRING_NUM = 13;
-const uint16_t OP_NAME_NUM = 2;
+const uint16_t OP_NAME_NUM = 3;
 const uint16_t CONNECTION_ID_NUM = 3;
 const uint16_t OP_ID_NUM = 3;
+const uint16_t OP_DATATYPE_NUM = 3;
 const std::string COMMUNICATION_TASK_PATH = "./task_path";
 const std::string DB_PATH = File::PathJoin({COMMUNICATION_TASK_PATH, "report.db"});
 const std::string DEVICE_SUFFIX = "device_0";
@@ -40,7 +40,8 @@ const std::string PROF_PATH_A = File::PathJoin({COMMUNICATION_TASK_PATH,
 const std::string PROF_PATH_B = File::PathJoin({COMMUNICATION_TASK_PATH,
                                                 "./PROF_000001_20231125090304037_012333MBJNQLKJ"});
 const std::set<std::string> PROF_PATHS = {PROF_PATH_A, PROF_PATH_B};
-const std::string TABLE_NAME = "HCCLTaskSingleDevice";
+const std::string TASK_TABLE_NAME = "HCCLTaskSingleDevice";
+const std::string OP_TABLE_NAME = "HCCLOpSingleDevice";
 
 using HcclTaskSingleDeviceFormat = std::vector<std::tuple<uint32_t, int32_t, std::string, uint32_t, std::string,
                                                       std::string, double, int32_t, double, double, double,
@@ -48,29 +49,30 @@ using HcclTaskSingleDeviceFormat = std::vector<std::tuple<uint32_t, int32_t, std
                                                       double, uint32_t, uint32_t, std::string, uint64_t, std::string,
                                                       std::string, double, uint32_t, uint64_t, uint32_t, std::string>>;
 
-using CommunicationTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t, uint64_t,
-                                                           uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t,
-                                                           uint64_t, uint32_t>>;
-
-using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
-                                                         uint64_t>>;
+using HcclOpSingleDeviceFormat = std::vector<std::tuple<uint32_t, std::string, std::string, std::string,
+                                                        double, int32_t, int32_t, std::string, std::string,
+                                                        uint64_t, std::string, uint32_t>>;
 
 const HcclTaskSingleDeviceFormat DATA_A{{4294967295, -1, "hcom_allReduce__360_0_1", 0, "Memcpy", "10652832407468360",
-                                     78180470736653, 0, 781687236999155, 2994.875, 1, "HCCL", "hcom_allReduce_", 125,
+                                     78180470736653, 0, 781687236999151, 2994.875, 1, "HCCL", "hcom_allReduce_", 125,
                                      1, 11, 1, 14.1825906735751, 0, 0, "SDMA", 262144, "INVALID_TYPE",
                                      "ON_CHIP", 87.530865228098, 4294967295, 4294967296, 1, "INVALID_TYPE"},
-                                    {4294967295, -1, "hcom_allReduce__360_0_1", 0, "Memcpy", "10652832407468360",
-                                     78180470736653, 0, 781687236999155, 2994.875, 1, "HCCL", "hcom_allReduce_", 126,
+                                    {4294967295, -1, "hcom_allReduce__360_0_1", 0, "Reduce23", "10652832407468360",
+                                     78180470736653, 0, 781687236999152, 2994.875, 1, "HCCL", "hcom_allReduce_", 126,
                                      1, 11, 2, 14.1825906735751, 0, 0, "SDMA", 262144, "FP16",
                                      "HCCS", 87.530865228098, 4294967295, 8, 1, "INVALID_TYPE"}};
-const HcclTaskSingleDeviceFormat DATA_B{{4294967295, -1, "hcom_allReduce__360_0_2", 0, "Memcpy23", "10653832407468233",
-                                     78180470736653, 0, 781687236999155, 2994.875, 3, "HCCL", "hcom_allReduce_", 125,
+const HcclOpSingleDeviceFormat DATA_OP_A {{4294967295, "hcom_allReduce_", "HCCL", "hcom_allReduce_",
+                                           821026362976, 0, 1, "INT16",	"HD-NB", 3021, "10652832407468360", 125}};
+const HcclTaskSingleDeviceFormat DATA_B{{4294967295, -1, "hcom_allReduce__233_0_2", 0, "Memcpy23", "10653832407468233",
+                                     78180470736653, 0, 781687236999153, 2994.875, 3, "HCCL", "hcom_allReduce_", 125,
                                      1, 11, 3, 14.1825906735751, 1, 4, "SDMA", 262144, "INVALID_TYPE",
                                      "ON_CHIP", 87.530865228098, 4294967295, 4294967296, 1, "INVALID_TYPE"},
-                                    {4294967295, -1, "hcom_allReduce__360_0_1", 0, "Memcpy", "10652853832407468832",
-                                     78180470736653, 0, 781687236999155, 2994.875, 1, "HCCL", "hcom_allReduce_", 126,
+                                    {4294967295, -1, "hcom_allReduce__832_0_1", 0, "Memcpy", "10652853832407468832",
+                                     78180470736653, 0, 781687236999154, 2994.875, 1, "HCCL", "hcom_allReduce_", 126,
                                      1, 21, 4, 14.1825906735751, 4, 2, "SDMA", 262144, "FP32",
                                      "HCCS", 87.530865228098, 4294967295, 8, 2, "INVALID_TYPE"}};
+const HcclOpSingleDeviceFormat DATA_OP_B {{4294967295, "hcom_allReduce_", "HCCL", "hcom_allReduce_",
+                                           821026362976, 1, 1, "INT32",	"HD-NHR", 4921, "10652853832407468832", 126}};
 }
 
 class CommunicationInfoProcessorUTest : public testing::Test {
@@ -88,9 +90,14 @@ protected:
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX})));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE})));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE})));
-        CreateHcclSingleDevice(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_A);
-        CreateHcclSingleDevice(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_B);
+        CreateHcclTaskSingleDevice(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_A);
+        CreateHcclTaskSingleDevice(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_B);
+        CreateHcclOpSingleDevice(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_OP_A);
+        CreateHcclOpSingleDevice(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_OP_B);
         MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
+            .stubs()
+            .will(returnValue(true));
+        MOCKER_CPP(&Analysis::Viewer::Database::TableProcessor::GetGeHashMap)
             .stubs()
             .will(returnValue(true));
     }
@@ -100,19 +107,29 @@ protected:
         EXPECT_TRUE(File::RemoveDir(COMMUNICATION_TASK_PATH, DEPTH));
         MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
     }
-    static void CreateHcclSingleDevice(const std::string& dbPath, HcclTaskSingleDeviceFormat data)
+    static void CreateHcclTaskSingleDevice(const std::string& dbPath, HcclTaskSingleDeviceFormat data)
     {
         std::shared_ptr<HCCLSingleDeviceDB> database;
         MAKE_SHARED0_RETURN_VOID(database, HCCLSingleDeviceDB);
         std::shared_ptr<DBRunner> dbRunner;
         MAKE_SHARED_RETURN_VOID(dbRunner, DBRunner, dbPath);
-        auto cols = database->GetTableCols(TABLE_NAME);
-        dbRunner->CreateTable(TABLE_NAME, cols);
-        dbRunner->InsertData(TABLE_NAME, data);
+        auto cols = database->GetTableCols(TASK_TABLE_NAME);
+        dbRunner->CreateTable(TASK_TABLE_NAME, cols);
+        dbRunner->InsertData(TASK_TABLE_NAME, data);
+    }
+    static void CreateHcclOpSingleDevice(const std::string& dbPath, HcclOpSingleDeviceFormat data)
+    {
+        std::shared_ptr<HCCLSingleDeviceDB> database;
+        MAKE_SHARED0_RETURN_VOID(database, HCCLSingleDeviceDB);
+        std::shared_ptr<DBRunner> dbRunner;
+        MAKE_SHARED_RETURN_VOID(dbRunner, DBRunner, dbPath);
+        auto cols = database->GetTableCols(OP_TABLE_NAME);
+        dbRunner->CreateTable(OP_TABLE_NAME, cols);
+        dbRunner->InsertData(OP_TABLE_NAME, data);
     }
 };
 
-void CheckGlobalTaskId(CommunicationTaskDataFormat data)
+void CheckGlobalTaskId(CommunicationInfoProcessor::CommunicationTaskDataFormat data)
 {
     const uint16_t globalTaskIdIndex = 1;
     std::vector<uint64_t> globalTaskIds;
@@ -125,60 +142,72 @@ void CheckGlobalTaskId(CommunicationTaskDataFormat data)
     }
 }
 
-void CheckStringId(CommunicationTaskDataFormat data)
+void CheckStringId(CommunicationInfoProcessor::CommunicationTaskDataFormat data)
 {
     const uint16_t nameIndex = 0;
+    const std::set<uint64_t> nameSet = {IdPool::GetInstance().GetUint64Id("hcom_allReduce__360_0_1"),
+                                        IdPool::GetInstance().GetUint64Id("hcom_allReduce__233_0_2"),
+                                        IdPool::GetInstance().GetUint64Id("hcom_allReduce__832_0_1")};
     const uint16_t taskTypeIndex = 2;
-    const uint16_t groupNameIndex = 4;
+    const std::set<uint64_t> taskTypeSet = {IdPool::GetInstance().GetUint64Id("Memcpy"),
+                                            IdPool::GetInstance().GetUint64Id("Memcpy23"),
+                                            IdPool::GetInstance().GetUint64Id("Reduce23")};
     const uint16_t rdmaTypeIndex = 6;
+    const uint64_t rdmaTypeHashId = IdPool::GetInstance().GetUint64Id("INVALID_TYPE");
     const uint16_t srcRankIndex = 7;
+    const std::set<uint64_t> srcRankSet = {0, 1, 4};
     const uint16_t dstRankIndex = 8;
+    const std::set<uint64_t> dstRankSet = {0, 2, 4};
     const uint16_t transportTypeIndex = 9;
+    const uint64_t transportTypeHashId = IdPool::GetInstance().GetUint64Id("SDMA");
     const uint16_t dataTypeIndex = 11;
+    const std::set<uint64_t> dataTypeSet = {IdPool::GetInstance().GetUint64Id("FP16"),
+                                            IdPool::GetInstance().GetUint64Id("FP32"),
+                                            IdPool::GetInstance().GetUint64Id("INVALID_TYPE")};
     const uint16_t linkTypeIndex = 12;
+    const std::set<uint64_t> linkTypeSet = {IdPool::GetInstance().GetUint64Id("HCCS"),
+                                            IdPool::GetInstance().GetUint64Id("ON_CHIP")};
     std::set<uint64_t> stringIdsSet;
     std::vector<uint64_t> stringIds;
     for (auto item : data) {
-        stringIdsSet.insert(std::get<nameIndex>(item));
-        stringIdsSet.insert(std::get<taskTypeIndex>(item));
-        stringIdsSet.insert(std::get<groupNameIndex>(item));
-        stringIdsSet.insert(std::get<rdmaTypeIndex>(item));
-        stringIdsSet.insert(std::get<srcRankIndex>(item));
-        stringIdsSet.insert(std::get<dstRankIndex>(item));
-        stringIdsSet.insert(std::get<transportTypeIndex>(item));
-        stringIdsSet.insert(std::get<dataTypeIndex>(item));
-        stringIdsSet.insert(std::get<linkTypeIndex>(item));
-    }
-    stringIds.assign(stringIdsSet.begin(), stringIdsSet.end());
-    std::sort(stringIds.begin(), stringIds.end());
-    for (int i = 0; i < STRING_NUM; ++i) {
-        EXPECT_EQ(stringIds[i], i);
+        EXPECT_NE(nameSet.find(std::get<nameIndex>(item)), nameSet.end());
+        EXPECT_NE(taskTypeSet.find(std::get<taskTypeIndex>(item)), taskTypeSet.end());
+        EXPECT_EQ(std::get<rdmaTypeIndex>(item), rdmaTypeHashId);
+        EXPECT_NE(srcRankSet.find(std::get<srcRankIndex>(item)), srcRankSet.end());
+        EXPECT_NE(dstRankSet.find(std::get<dstRankIndex>(item)), dstRankSet.end());
+        EXPECT_EQ(std::get<transportTypeIndex>(item), transportTypeHashId);
+        EXPECT_NE(dataTypeSet.find(std::get<dataTypeIndex>(item)), dataTypeSet.end());
+        EXPECT_NE(linkTypeSet.find(std::get<linkTypeIndex>(item)), linkTypeSet.end());
     }
 }
 
-void CheckOpInfo(CommunicationOpDataFormat data)
+void CheckOpInfo(CommunicationInfoProcessor::CommunicationOpDataFormat data)
 {
     const uint16_t opNameIndex = 0;
     const uint16_t connectionIdIndex = 3;
     const uint16_t opIdIndex = 5;
+    const uint16_t opDataTypeIndex = 8;
     std::set<uint64_t> opNameSet;
     std::set<uint64_t> connectionIdSet;
     std::set<uint32_t> opIdSet;
+    std::set<uint64_t> opDataTypeSet;
     for (auto item : data) {
         opNameSet.insert(std::get<opNameIndex>(item));
         connectionIdSet.insert(std::get<connectionIdIndex>(item));
         opIdSet.insert(std::get<opIdIndex>(item));
+        opDataTypeSet.insert(std::get<opDataTypeIndex>(item));
     }
     EXPECT_EQ(opNameSet.size(), OP_NAME_NUM);
     EXPECT_EQ(connectionIdSet.size(), CONNECTION_ID_NUM);
     EXPECT_EQ(opIdSet.size(), OP_ID_NUM);
+    EXPECT_EQ(opDataTypeSet.size(), OP_DATATYPE_NUM);
 }
 
 TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
     std::shared_ptr<DBRunner> reportDBRunner;
-    CommunicationTaskDataFormat taskResult;
-    CommunicationOpDataFormat opResult;
+    CommunicationInfoProcessor::CommunicationTaskDataFormat taskResult;
+    CommunicationInfoProcessor::CommunicationOpDataFormat opResult;
     std::string sql{"SELECT * FROM " + TABLE_NAME_COMMUNICATION_TASK_INFO};
     MAKE_SHARED0_NO_OPERATION(reportDBRunner, DBRunner, DB_PATH);
     auto processor = CommunicationInfoProcessor(DB_PATH, PROF_PATHS);
@@ -196,10 +225,10 @@ TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnFalseWhenSourceTableN
     auto dbPath = File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX});
     std::shared_ptr<DBRunner> dbRunner;
     MAKE_SHARED0_NO_OPERATION(dbRunner, DBRunner, dbPath);
-    dbRunner->DropTable(TABLE_NAME);
+    dbRunner->DropTable(TASK_TABLE_NAME);
     dbPath = File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE, DB_SUFFIX});
     MAKE_SHARED0_NO_OPERATION(dbRunner, DBRunner, dbPath);
-    dbRunner->DropTable(TABLE_NAME);
+    dbRunner->DropTable(TASK_TABLE_NAME);
     auto processor = CommunicationInfoProcessor(DB_PATH, PROF_PATHS);
     EXPECT_FALSE(processor.Run());
 }

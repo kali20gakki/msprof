@@ -13,6 +13,7 @@
 #ifndef ANALYSIS_PARSER_HOST_CANN_EVENT_GROUPER_H
 #define ANALYSIS_PARSER_HOST_CANN_EVENT_GROUPER_H
 
+#include <algorithm>
 #include <cstdint>
 #include <memory>
 #include <unordered_map>
@@ -73,6 +74,7 @@ private:
         std::shared_ptr<P> parser;
         MAKE_SHARED_RETURN_VOID(parser, P, hostPath_);
         auto traces = parser->template ParseData<M>();
+        SortByTimeAndLevel(traces);
 
         // 统计各个threadId元素个数，用于EventQueue分配精确的内存大小，避免大量内存浪费
         std::unordered_map<uint32_t, uint64_t> threadIdNum;
@@ -101,6 +103,17 @@ private:
         threadIds_.insert(threadIds.begin(), threadIds.end());
     }
 
+    template<typename T>
+    bool SortByTimeAndLevel(std::vector<std::shared_ptr<T>> &traces)
+    {
+        auto comp =
+            [](std::shared_ptr<T> &api1, std::shared_ptr<T> &api2) {
+                return api1->timeStamp < api2->timeStamp ||
+                    (api1->timeStamp == api2->timeStamp && api1->level > api2->level);
+            };
+        std::sort(traces.begin(), traces.end(), comp);
+    }
+
 private:
     std::mutex tidLock_;
     std::vector<std::shared_ptr<Event>> apiTraces_;
@@ -122,6 +135,9 @@ template<>
 void EventGrouper::GroupEvents<TaskTrackParser, MsprofCompactInfo, &CANNWarehouse::taskTrackEvents>(
     const std::string &typeName,
     EventType eventType);
+
+template<>
+bool EventGrouper::SortByTimeAndLevel<MsprofApi>(std::vector<std::shared_ptr<MsprofApi>> &traces);
 
 } // namespace Cann
 } // namespace Host

@@ -71,6 +71,11 @@ class HcclOpInfoBean(CompactInfoBean):
         return str(self._group_name)
 
     def convert_alg_type(self):
+        """
+        hccl算法最多有4个阶段,每个阶段4bit,共16bit,第一阶段放在12-15位,第二阶段放在8-11位,以此类推
+        如: 0b 0001 0010 0011 0100
+        从最后4位开始解析,结果是: HD-NB-RING-MESH
+        """
         alg_phase_list = []
         alg_type = self._alg_type
         for _ in range(self.ALG_TYPE_PHASE_CNT):
@@ -82,4 +87,4 @@ class HcclOpInfoBean(CompactInfoBean):
         if not alg_phase_list:
             self._alg_type = AlgType.NONE.name
         else:
-            self._alg_type = '-'.join([trans_enum_name(AlgType, alg_phase) for alg_phase in alg_phase_list[::-1]])
+            self._alg_type = '-'.join(map(str, [trans_enum_name(AlgType, alg_phase) for alg_phase in alg_phase_list]))

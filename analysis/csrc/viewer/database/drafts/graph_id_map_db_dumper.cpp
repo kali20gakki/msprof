@@ -39,7 +39,8 @@ GraphIdMapData GraphIdMapDBDumper::GenerateData(const GraphIdMaps &graphIdMaps)
             auto structType = TypeData::GetInstance().Get(graphIdMap->level, graphIdMap->type);
             auto threadId = graphIdMap->threadId;
             auto timestamp = graphIdMap->timeStamp;
-            auto modelName = HashData::GetInstance().Get(idMapStruct->modelName);
+            auto modelName = (idMapStruct->modelName == 0) ? "0" :
+                HashData::GetInstance().Get(idMapStruct->modelName);
             auto graphId = idMapStruct->graphId;
             data.emplace_back(level, structType, threadId, timestamp, modelName, graphId);
         }

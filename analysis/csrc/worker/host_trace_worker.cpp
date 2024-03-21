@@ -96,8 +96,7 @@ bool HostTraceWorker::Run()
 
         pool.AddTask([this]() {
             // 建树
-            // 建树前需要先对KernelEvents排序
-            SortEvents();
+            // 建树前已经对KernelEvents排序
             MultiThreadBuildTree();
             // 分析树 & DB Dump
             MultiThreadAnalyzeTreeDumpData();
@@ -107,40 +106,6 @@ bool HostTraceWorker::Run()
     pool.WaitAllTasks();
     pool.Stop();
     return true;
-}
-
-void HostTraceWorker::SortEvents()
-{
-    for (auto tid: threadIds_) {
-        if (!cannWarehouses_.Find(tid)) {
-            // 部分线程只有非kernel的api,不存在任何profiling可分析数据
-            continue;
-        }
-        if (cannWarehouses_[tid].kernelEvents != nullptr) {
-            cannWarehouses_[tid].kernelEvents->Sort();
-        }
-        if (cannWarehouses_[tid].graphIdMapEvents != nullptr) {
-            cannWarehouses_[tid].graphIdMapEvents->Sort();
-        }
-        if (cannWarehouses_[tid].fusionOpInfoEvents != nullptr) {
-            cannWarehouses_[tid].fusionOpInfoEvents->Sort();
-        }
-        if (cannWarehouses_[tid].nodeBasicInfoEvents != nullptr) {
-            cannWarehouses_[tid].nodeBasicInfoEvents->Sort();
-        }
-        if (cannWarehouses_[tid].tensorInfoEvents != nullptr) {
-            cannWarehouses_[tid].tensorInfoEvents->Sort();
-        }
-        if (cannWarehouses_[tid].contextIdEvents != nullptr) {
-            cannWarehouses_[tid].contextIdEvents->Sort();
-        }
-        if (cannWarehouses_[tid].hcclInfoEvents != nullptr) {
-            cannWarehouses_[tid].hcclInfoEvents->Sort();
-        }
-        if (cannWarehouses_[tid].hcclInfoEvents != nullptr) {
-            cannWarehouses_[tid].hcclInfoEvents->Sort();
-        }
-    }
 }
 
 void HostTraceWorker::MultiThreadBuildTree()

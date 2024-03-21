@@ -187,6 +187,27 @@ public:
         auto eventPtr = std::make_shared<Event>(hcclInfo, testInfo);
         eventQueue->Push(eventPtr);
     }
+
+    static void AddHcclOpEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot,
+                               const std::vector<uint16_t> &algList)
+    {
+        EventInfo testInfo{EventType::EVENT_TYPE_HCCL_OP_INFO, MSPROF_REPORT_NODE_LEVEL, dot, dot};
+        auto hcclOp = std::make_shared<MsprofCompactInfo>();
+        hcclOp->level = MSPROF_REPORT_NODE_LEVEL;
+        hcclOp->timeStamp = dot;
+
+        MsprofHcclOPInfo node;
+        node.groupName = dot;
+        node.count = dot + dot;
+        node.algType = 0;
+        const int alg_bit_cnt = 4;
+        for (size_t i = 0; i < algList.size(); ++i) {
+            node.algType |= (algList[i] << (i * alg_bit_cnt));
+        }
+        hcclOp->data.hcclopInfo = node;
+        auto eventPtr = std::make_shared<Event>(hcclOp, testInfo);
+        eventQueue->Push(eventPtr);
+    }
 };
 
 class FakeTraceGenerator {
@@ -282,6 +303,7 @@ private:
         {EventType::EVENT_TYPE_TASK_TRACK, "compact.task_track.slice_"},
         {EventType::EVENT_TYPE_TENSOR_INFO, "additional.tensor_info.slice_"},
         {EventType::EVENT_TYPE_MEM_CPY, "compact.memcpy_info.slice_"},
+        {EventType::EVENT_TYPE_HCCL_OP_INFO, "compact.hccl_op_info.slice_"},
     };
 };
 
