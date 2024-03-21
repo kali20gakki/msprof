@@ -12,6 +12,7 @@
 
 #include "analysis/csrc/parser/host/cann/addition_info_parser.h"
 
+#include <unordered_map>
 #include "analysis/csrc/dfx/log.h"
 #include "analysis/csrc/parser/chunk_generator.h"
 #include "analysis/csrc/utils/utils.h"
@@ -97,7 +98,7 @@ int TensorInfoParser::ProduceData()
         ERROR("%: Reserve data failed", parserName_);
         return ANALYSIS_ERROR;
     }
-    std::shared_ptr<ConcatTensorInfo> concatTensor = nullptr;
+    std::unordered_map<std::string, std::shared_ptr<ConcatTensorInfo>> concatTensorMap;
     while (!chunkProducer_->Empty()) {
         auto currTensorInfo = ReinterpretConvert<MsprofAdditionalInfo *>(chunkProducer_->Pop());
         if (!currTensorInfo) {
@@ -110,20 +111,18 @@ int TensorInfoParser::ProduceData()
             continue;
         }
         auto currTensor = ReinterpretConvert<MsprofTensorInfo *>(currTensorInfo->data);
-        if (!concatTensor ||
-            currTensor->opName != concatTensor->opName || currTensorInfo->timeStamp != concatTensor->timeStamp ||
-            currTensorInfo->threadId != concatTensor->threadId) {
-            if (concatTensor) {
-                concatTensorData_.emplace_back(concatTensor);
-            }
-            concatTensor = CreateConcatTensorInfo(currTensorInfo);
-            delete currTensorInfo;
+        std::string key = Utils::Join("_", currTensor->opName, currTensorInfo->timeStamp, currTensorInfo->threadId);
+        if (concatTensorMap.find(key) == concatTensorMap.end()) {
+            auto concatTensor = CreateConcatTensorInfo(currTensorInfo);
             if (!concatTensor) {
                 ERROR("%: Create concat tensor failed.");
                 return ANALYSIS_ERROR;
             }
+            concatTensorMap.insert({key, concatTensor});
+            delete currTensorInfo;
             continue;
         }
+        auto concatTensor = concatTensorMap[key];
         // tensor info拼接
         for (uint32_t i = 0; i < currTensor->tensorNum; ++i) {
             if (concatTensor->tensorNum >= MSPROF_GE_TENSOR_DATA_NUM) {
@@ -135,8 +134,8 @@ int TensorInfoParser::ProduceData()
         }
         delete currTensorInfo;
     }
-    if (concatTensor) {
-        concatTensorData_.emplace_back(concatTensor);
+    for (const auto &kv: concatTensorMap) {
+        concatTensorData_.emplace_back(kv.second);
     }
     return ANALYSIS_OK;
 }
