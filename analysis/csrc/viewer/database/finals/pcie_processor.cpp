@@ -74,8 +74,7 @@ bool PCIeProcessor::Process(const std::string &fileDir)
             return false;
         }
         uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, deviceId, fileDir) ||
-                (threadData.hostMonotonic < threadData.deviceMonotonic)) {
+        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, deviceId, fileDir)) {
             ERROR("Device MonotonicRaw is invalid in path: %., device id is %", fileDir, deviceId);
             flag = false;
             continue;
@@ -143,7 +142,7 @@ bool PCIeProcessor::FormatData(const ThreadData &threadData,
                  tempData.rxNopost.min, tempData.rxNopost.max, tempData.rxNopost.avg,
                  tempData.rxCpl.min, tempData.rxCpl.max, tempData.rxCpl.avg) = data;
         HPFloat timestamp = GetTimeBySamplingTimestamp(tempData.timestamp,
-                                                       threadData.hostMonotonic - threadData.deviceMonotonic);
+                                                       threadData.hostMonotonic, threadData.deviceMonotonic);
         // B/us -> B/s
         processedData.emplace_back(static_cast<uint16_t>(tempData.deviceId),
                                    GetLocalTime(timestamp, threadData.timeRecord).Uint64(),

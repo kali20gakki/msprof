@@ -22,7 +22,7 @@ class NpuMemProcessor : public TableProcessor {
     // event, ddr, hbm, timestamp
     using OriDataFormat = std::vector<std::tuple<std::string, uint64_t, uint64_t, double>>;
     // type, ddrUsage, hbmUsage, timestamp, deviceId
-    using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, uint64_t, uint16_t>>;
+    using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint16_t>>;
 public:
     NpuMemProcessor() = default;
     NpuMemProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
@@ -32,9 +32,10 @@ protected:
     bool Process(const std::string &fileDir) override;
 private:
     static OriDataFormat GetData(DBInfo &npuMemDB);
-    static ProcessedDataFormat FormatData(const OriDataFormat &oriData, const uint16_t deviceId,
-                                          const uint64_t hostMonotonic,
-                                          const Utils::ProfTimeRecord &timeRecord);
+    ProcessedDataFormat FormatData(const OriDataFormat &oriData, const uint16_t deviceId,
+                                   const uint64_t hostMonotonic, const Utils::ProfTimeRecord &timeRecord) const;
+    uint64_t stringAppId_;
+    uint64_t stringDeviceId_;
 };
 
 } // Database

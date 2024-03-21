@@ -23,7 +23,7 @@ class NpuOpMemProcessor : public TableProcessor {
     using OriDataFormat = std::vector<std::tuple<std::string, std::string, int64_t, double, uint32_t, uint64_t,
                                                  uint64_t, std::string>>;
     // operatorName, addr, type, size, timestamp, globalTid, totalAllocate, totalReserve,  component, deviceId
-    using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint64_t, uint64_t, uint64_t,
+    using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                                                        uint64_t, uint64_t, uint64_t, uint16_t>>;
 public:
     NpuOpMemProcessor() = default;
@@ -38,6 +38,8 @@ private:
                                    Utils::SyscntConversionParams &params, GeHashMap &hashMap, uint32_t pid) const;
     static uint16_t GetDeviceId(const std::string& deviceType);
     uint64_t stringGeId_;
+    uint64_t stringReleaseId_;
+    uint64_t stringAllocateId_;
 };
 
 } // Database

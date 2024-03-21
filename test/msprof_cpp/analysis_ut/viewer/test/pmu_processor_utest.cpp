@@ -37,11 +37,11 @@ using TempTaskFormat = std::vector<std::tuple<double, double, double, double, do
 using OTFormat = std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, double>>;
 
 // Processed Sample Timeline Format
-// deviceId, timestamp, totalCycle, usage, freq, coreId
-using PSTFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, double, double, uint16_t>>;
+// deviceId, timestamp, totalCycle, usage, freq, coreId, coreType
+using PSTFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, double, double, uint16_t, uint64_t>>;
 // Processed Sample Summary Format
-// deviceId, metric, value, coreId
-using PSSFormat = std::vector<std::tuple<uint16_t, uint64_t, double, uint16_t>>;
+// deviceId, metric, value, coreId, coreType
+using PSSFormat = std::vector<std::tuple<uint16_t, uint64_t, double, uint16_t, uint64_t>>;
 // Processed Task Format
 // globalTaskId, name, value
 using PTFormat = std::vector<std::tuple<uint64_t, uint64_t, double>>;
@@ -254,7 +254,7 @@ TEST_F(PmuProcessorUTest, TestSampleRunShouldReturnTrueWhenRunSuccess)
     std::shared_ptr<DBRunner> dbRunner;
     MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
     uint16_t expectDBNum = 2; // 数据来源于两个db: aicore.db和ai_vector_core.db
-    using QueryTimeline = std::vector<std::tuple<uint32_t, uint64_t, uint64_t, double, double, uint32_t>>;
+    using QueryTimeline = std::vector<std::tuple<uint32_t, uint64_t, uint64_t, double, double, uint32_t, uint64_t>>;
     QueryTimeline timelineData;
     uint16_t expectNum = SAMPLE_TIMELINE.size() * expectDBNum;
     std::string sqlStr = "SELECT * FROM " + TABLE_NAME_SAMPLE_PMU_TIMELINE;
@@ -262,7 +262,7 @@ TEST_F(PmuProcessorUTest, TestSampleRunShouldReturnTrueWhenRunSuccess)
     EXPECT_TRUE(dbRunner->QueryData(sqlStr, timelineData));
     EXPECT_EQ(expectNum, timelineData.size());
 
-    using QuerySummary = std::vector<std::tuple<uint32_t, uint64_t, double, uint32_t>>;
+    using QuerySummary = std::vector<std::tuple<uint32_t, uint64_t, double, uint32_t, uint64_t>>;
     QuerySummary summaryData;
     expectNum = SAMPLE_SUMMARY.size() * expectDBNum;
     sqlStr = "SELECT * FROM " + TABLE_NAME_SAMPLE_PMU_SUMMARY;

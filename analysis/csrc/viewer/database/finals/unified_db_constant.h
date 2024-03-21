@@ -49,7 +49,7 @@ const std::string TABLE_NAME_COMMUNICATION_TASK_INFO = "COMMUNICATION_TASK_INFO"
 const std::string TABLE_NAME_COMMUNICATION_OP = "COMMUNICATION_OP";
 
 const std::string PROCESSOR_NAME_API = "API";
-const std::string TABLE_NAME_API = "API";
+const std::string TABLE_NAME_CANN_API = "CANN_API";
 
 const std::string PROCESSOR_NAME_NPU_MEM = "NPU_MEM";
 const std::string TABLE_NAME_NPU_MEM = "NPU_MEM";
@@ -62,8 +62,7 @@ const std::string TABLE_NAME_NPU_OP_MEM = "NPU_OP_MEM";
 
 const std::string PROCESSOR_NAME_ENUM = "ENUM";
 const std::string TABLE_NAME_ENUM_API_TYPE = "ENUM_API_TYPE";
-const std::string TABLE_NAME_ENUM_MEMORY = "ENUM_MEMORY";
-const std::string TABLE_NAME_ENUM_NPU_MODULE = "ENUM_NPU_MODULE";
+const std::string TABLE_NAME_ENUM_MODULE = "ENUM_MODULE";
 
 const std::string PROCESSOR_NAME_NIC = "NIC";
 const std::string TABLE_NAME_NIC = "NIC";
@@ -107,18 +106,8 @@ const std::unordered_map<std::string, uint16_t> API_LEVEL_TABLE = {
     {"runtime",  MSPROF_REPORT_RUNTIME_LEVEL}
 };
 
-// 内存相关枚举表
-const std::unordered_map<std::string, uint16_t> MEMORY_TABLE = {
-    {"app", 0},
-    {"device", 1},
-    {"read", 3},
-    {"write", 4},
-    {"allocate", 5},
-    {"release", 6}
-};
-
 // npu module name
-const std::unordered_map<std::string, uint16_t> NPU_MODULE_NAME_TABLE = {
+const std::unordered_map<std::string, uint16_t> MODULE_NAME_TABLE = {
     {"SLOG", 0},
     {"IDEDD", 1},
     {"IDEDH", 2},

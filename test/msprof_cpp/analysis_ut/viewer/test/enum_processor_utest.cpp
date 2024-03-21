@@ -62,31 +62,18 @@ void CheckEnumApiLevel(const std::shared_ptr<DBRunner> &dbRunner)
     }
 }
 
-void CheckEnumMemory(const std::shared_ptr<DBRunner> &dbRunner)
-{
-    EnumDataFormat checkData;
-    std::string sqlStr = "SELECT id, name FROM " + TABLE_NAME_ENUM_MEMORY;
-    const uint32_t ID_INDEX = 0;
-    const uint32_t NAME_INDEX = 1;
-    const uint16_t expectNum = MEMORY_TABLE.size();
-    EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkData));
-    EXPECT_EQ(expectNum, checkData.size());
-    for (auto record : checkData) {
-        EXPECT_EQ(std::get<ID_INDEX>(record), MEMORY_TABLE.find(std::get<NAME_INDEX>(record))->second);
-    }
-}
 
-void CheckEnumNpuModule(const std::shared_ptr<DBRunner> &dbRunner)
+void CheckEnumModule(const std::shared_ptr<DBRunner> &dbRunner)
 {
     EnumDataFormat checkData;
-    std::string sqlStr = "SELECT id, name FROM " + TABLE_NAME_ENUM_NPU_MODULE;
+    std::string sqlStr = "SELECT id, name FROM " + TABLE_NAME_ENUM_MODULE;
     const uint32_t ID_INDEX = 0;
     const uint32_t NAME_INDEX = 1;
-    const uint16_t expectNum = NPU_MODULE_NAME_TABLE.size();
+    const uint16_t expectNum = MODULE_NAME_TABLE.size();
     EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkData));
     EXPECT_EQ(expectNum, checkData.size());
     for (auto record : checkData) {
-        EXPECT_EQ(std::get<ID_INDEX>(record), NPU_MODULE_NAME_TABLE.find(std::get<NAME_INDEX>(record))->second);
+        EXPECT_EQ(std::get<ID_INDEX>(record), MODULE_NAME_TABLE.find(std::get<NAME_INDEX>(record))->second);
     }
 }
 
@@ -101,8 +88,7 @@ TEST_F(EnumProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
     MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
     ASSERT_NE(dbRunner, nullptr);
     CheckEnumApiLevel(dbRunner);
-    CheckEnumMemory(dbRunner);
-    CheckEnumNpuModule(dbRunner);
+    CheckEnumModule(dbRunner);
 }
 
 TEST_F(EnumProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)

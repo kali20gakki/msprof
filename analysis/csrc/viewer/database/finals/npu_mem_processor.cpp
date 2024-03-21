@@ -10,6 +10,7 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/viewer/database/finals/npu_mem_processor.h"
+#include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/parser/environment/context.h"
 #include "analysis/csrc/dfx/error_code.h"
@@ -17,6 +18,7 @@
 namespace Analysis {
 namespace Viewer {
 namespace Database {
+using namespace Analysis::Association::Credential;
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Utils;
 namespace {
@@ -26,6 +28,10 @@ struct NpuMemData {
     double timestamp = 0.0;
     std::string event;
 };
+const std::string APP = "app";
+const uint64_t APP_INDEX = 0;
+const std::string DEVICE = "device";
+const uint64_t DEVICE_INDEX = 1;
 }
 
 NpuMemProcessor::NpuMemProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
@@ -34,6 +40,8 @@ NpuMemProcessor::NpuMemProcessor(const std::string &reportDBPath, const std::set
 bool NpuMemProcessor::Run()
 {
     INFO("NpuMemProcessor Run.");
+    stringAppId_ = IdPool::GetInstance().GetUint64Id(APP);
+    stringDeviceId_ = IdPool::GetInstance().GetUint64Id(DEVICE);
     bool flag = TableProcessor::Run();
     PrintProcessorResult(flag, PROCESSOR_NAME_NPU_MEM);
     return flag;
@@ -51,7 +59,7 @@ NpuMemProcessor::OriDataFormat NpuMemProcessor::GetData(DBInfo &npuMemDB)
 
 NpuMemProcessor::ProcessedDataFormat NpuMemProcessor::FormatData(const OriDataFormat &oriData, const uint16_t deviceId,
                                                                  const uint64_t hostMonotonic,
-                                                                 const ProfTimeRecord &timeRecord)
+                                                                 const ProfTimeRecord &timeRecord) const
 {
     ProcessedDataFormat processedData;
     NpuMemData data;
@@ -61,10 +69,16 @@ NpuMemProcessor::ProcessedDataFormat NpuMemProcessor::FormatData(const OriDataFo
     }
     for (auto &row: oriData) {
         std::tie(data.event, data.ddr, data.hbm, data.timestamp) = row;
-        HPFloat timestamp{GetTimeBySamplingTimestamp(data.timestamp, hostMonotonic)};
-        uint16_t type = UINT16_MAX;
-        if (StrToU16(type, data.event) == ANALYSIS_ERROR) {
-            WARN("Converting string(event) to integer failed.");
+        // 原数据结果还未加device monotonic，无需减去
+        HPFloat timestamp{GetTimeBySamplingTimestamp(data.timestamp, hostMonotonic, 0)};
+        uint64_t type = UINT64_MAX;
+        if (StrToU64(type, data.event) == ANALYSIS_ERROR) {
+            ERROR("Converting string(event: %) to integer failed, deviceId is: %.", data.event, deviceId);
+        }
+        if (type == APP_INDEX) {
+            type = stringAppId_;
+        } else if (type == DEVICE_INDEX) {
+            type = stringDeviceId_;
         }
         processedData.emplace_back(type, data.ddr, data.hbm, GetLocalTime(timestamp, timeRecord).Uint64(), deviceId);
     }
