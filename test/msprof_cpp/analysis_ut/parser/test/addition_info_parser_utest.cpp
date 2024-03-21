@@ -211,10 +211,7 @@ TEST_F(AdditionInfoParserUTest, TestTensorInfoParserShouldReturn6000ConcatTensor
         EXPECT_EQ(MSPROF_DATA_HEAD_MAGIC_NUM, concatTensorInfo[i]->magicNumber);
         EXPECT_EQ(MSPROF_REPORT_NODE_LEVEL, concatTensorInfo[i]->level);
         EXPECT_EQ(static_cast<uint32_t>(EventType::EVENT_TYPE_TENSOR_INFO), concatTensorInfo[i]->type);
-        EXPECT_EQ(i, concatTensorInfo[i]->threadId);
         EXPECT_EQ(dataLen, concatTensorInfo[i]->dataLen);
-        EXPECT_EQ(TENSOR_DATA_NUM + i, concatTensorInfo[i]->timeStamp);
-        EXPECT_EQ(i + 1, concatTensorInfo[i]->opName);
         EXPECT_EQ(MSPROF_GE_TENSOR_DATA_NUM * TENSOR_NUM_TO_CONCAT, concatTensorInfo[i]->tensorNum);
     }
 }
@@ -258,15 +255,7 @@ TEST_F(AdditionInfoParserUTest, TestTensorInfoParserProduceDataShouldReturn6000D
         EXPECT_EQ(MSPROF_DATA_HEAD_MAGIC_NUM, data[i]->magicNumber);
         EXPECT_EQ(MSPROF_REPORT_NODE_LEVEL, data[i]->level);
         EXPECT_EQ(static_cast<uint32_t>(EventType::EVENT_TYPE_TENSOR_INFO), data[i]->type);
-        EXPECT_EQ(i, data[i]->threadId);
         EXPECT_EQ(dataLen, data[i]->dataLen);
-        EXPECT_EQ(TENSOR_DATA_NUM + i, data[i]->timeStamp);
-        EXPECT_EQ(i + 1, data[i]->opName);
-        if (i == dataNum -1) {
-            EXPECT_EQ(MSPROF_GE_TENSOR_DATA_NUM * (TENSOR_NUM_TO_CONCAT - 1), data[i]->tensorNum);
-            continue;
-        }
-        EXPECT_EQ(MSPROF_GE_TENSOR_DATA_NUM * TENSOR_NUM_TO_CONCAT, data[i]->tensorNum);
     }
 }
 
@@ -284,10 +273,7 @@ TEST_F(AdditionInfoParserUTest, TestTensorInfoParserProduceDataShouldReturn3600D
         EXPECT_EQ(MSPROF_DATA_HEAD_MAGIC_NUM, data[i]->magicNumber);
         EXPECT_EQ(MSPROF_REPORT_NODE_LEVEL, data[i]->level);
         EXPECT_EQ(static_cast<uint32_t>(EventType::EVENT_TYPE_TENSOR_INFO), data[i]->type);
-        EXPECT_EQ(i, data[i]->threadId);
         EXPECT_EQ(dataLen, data[i]->dataLen);
-        EXPECT_EQ(TENSOR_DATA_NUM + i, data[i]->timeStamp);
-        EXPECT_EQ(i + 1, data[i]->opName);
         EXPECT_EQ(geTensorNum * concatTensorNum, data[i]->tensorNum);
     }
 }

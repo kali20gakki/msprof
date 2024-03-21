@@ -184,8 +184,8 @@ namespace {
         {4294967295, "INVALID_TYPE"},
     };
     const std::unordered_map<uint32_t, std::string> hcclRdmaTypeMap {
-        {0,          "RDMASendNotify"},
-        {1,          "RDMASendPayload"},
+        {0,          "RDMA_SEND_NOTIFY"},
+        {1,          "RDMA_SEND_PAYLOAD"},
         {4294967295, "INVALID_TYPE"}
     };
     const std::unordered_map<uint32_t, std::string> hcclOpTypeMap {

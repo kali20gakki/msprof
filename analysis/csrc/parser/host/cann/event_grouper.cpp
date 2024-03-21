@@ -10,7 +10,6 @@
  * *****************************************************************************
  */
 
-
 #include "analysis/csrc/parser/host/cann/event_grouper.h"
 
 using namespace Analysis::Utils;
@@ -156,7 +155,7 @@ void EventGrouper::GroupEvents<ApiEventParser, MsprofApi, &CANNWarehouse::kernel
     MAKE_SHARED_RETURN_VOID(parser, ApiEventParser, hostPath_);
 
     auto traces = parser->ParseData<MsprofApi>();
-
+    SortByTimeAndLevel(traces);
     // 统计各个threadId元素个数，用于EventQueue分配精确的内存大小，避免大量内存浪费
     std::unordered_map<uint32_t, uint64_t> threadIdNum;
     std::set<uint32_t> threadIds;
@@ -215,6 +214,7 @@ void EventGrouper::GroupEvents<TaskTrackParser, MsprofCompactInfo, &CANNWarehous
     MAKE_SHARED_RETURN_VOID(parser, TaskTrackParser, hostPath_);
 
     auto traces = parser->ParseData<MsprofCompactInfo>();
+    SortByTimeAndLevel(traces);
     flipTasks_ = parser->ParseData<Adapter::FlipTask>();
 
     // 统计各个threadId元素个数，用于EventQueue分配精确的内存大小，避免大量内存浪费
@@ -242,6 +242,17 @@ void EventGrouper::GroupEvents<TaskTrackParser, MsprofCompactInfo, &CANNWarehous
     }
     std::lock_guard<std::mutex> lock(tidLock_);
     threadIds_.insert(threadIds.begin(), threadIds.end());
+}
+
+template<>
+bool EventGrouper::SortByTimeAndLevel<MsprofApi>(std::vector<std::shared_ptr<MsprofApi>> &traces)
+{
+    auto comp =
+        [](std::shared_ptr<MsprofApi> &api1, std::shared_ptr<MsprofApi> &api2) {
+            return api1->beginTime < api2->beginTime ||
+                (api1->beginTime == api2->beginTime && api1->level > api2->level);
+        };
+    std::sort(traces.begin(), traces.end(), comp);
 }
 
 } // namespace Cann

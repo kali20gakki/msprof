@@ -326,7 +326,7 @@ void TreeAnalyzer::UpdateComputeDescForFftsSituation(ComputeOpDescs &descs,
 
 void TreeAnalyzer::UpdateComputeDescForHcclSituation(ComputeOpDescs &descs,
                                                      const std::shared_ptr<Event> &track,
-                                                     uint32_t item_id)
+                                                     uint64_t item_id)
 {
     if (descs.empty()) {
         // 补充一个临时的算子描述，只发生在L0场景
