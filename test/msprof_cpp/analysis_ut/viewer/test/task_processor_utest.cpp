@@ -164,6 +164,26 @@ TEST_F(TaskProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
 }
 
+TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenCreateIndexFailed)
+{
+    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPlatformVersion)
+    .stubs()
+    .will(returnValue(PLATFORM_VERSION));
+    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPidFromInfoJson)
+    .stubs()
+    .will(returnValue(PID));
+    MOCKER_CPP(&DBRunner::CreateIndex).stubs().will(returnValue(false));
+    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPlatformVersion)
+    .stubs()
+    .will(returnValue(PLATFORM_VERSION));
+    auto processor = TaskProcessor(DB_PATH, PROF_PATHS);
+    EXPECT_FALSE(processor.Run());
+    MOCKER_CPP(&DBRunner::CreateIndex).reset();
+    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPlatformVersion).reset();
+    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPidFromInfoJson).reset();
+    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
+}
+
 TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenSourceTableNotExist)
 {
     auto dbPath = File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE_SUFFIX, DB_SUFFIX});

@@ -12,6 +12,7 @@
 #include <atomic>
 
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/utils/file.h"
 #include "analysis/csrc/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
 
@@ -21,6 +22,7 @@ namespace Database {
 namespace {
 using GeHashFormat = std::vector<std::tuple<std::string, std::string>>;
 const uint32_t POOLNUM = 2;
+const uint64_t INVALID_DB_SIZE = 0;
 }
 
 TableProcessor::TableProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
@@ -88,7 +90,7 @@ bool TableProcessor::GetGeHashMap(GeHashMap &hashMap, const std::string &fileDir
 
 uint8_t TableProcessor::CheckPath(const std::string& path)
 {
-    if (!Utils::File::Exist(path)) {
+    if (!Utils::File::Exist(path) || Utils::File::Size(path) == INVALID_DB_SIZE) {
         WARN("Can't find the db, the path is %.", path);
         return NOT_EXIST;
     }
@@ -97,6 +99,21 @@ uint8_t TableProcessor::CheckPath(const std::string& path)
         return CHECK_FAILED;
     }
     return CHECK_SUCCESS;
+}
+
+bool TableProcessor::CreateTableIndex(const std::string &tableName, const std::string &indexName,
+                                      const std::vector<std::string> &colNames) const
+{
+    INFO("Processor CreateTableIndex, table is % , indexName is %.", tableName, indexName);
+    if (reportDB_.dbRunner == nullptr) {
+        ERROR("Report db runner is nullptr.");
+        return false;
+    }
+    if (!reportDB_.dbRunner->CreateIndex(tableName, indexName, colNames)) {
+        ERROR("Create table index failed, table is % , indexName is %.", tableName, indexName);
+        return false;
+    }
+    return true;
 }
 
 } // Database

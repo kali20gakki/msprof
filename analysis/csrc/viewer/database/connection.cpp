@@ -23,6 +23,14 @@ namespace Database {
 using namespace Analysis::Utils;
 using namespace Analysis;
 
+namespace {
+const std::string CREATE_TABLE = "create table";
+const std::string CREATE_INDEX = "create index";
+const std::string DROP_TABLE = "drop table";
+const std::string DELETE = "delete";
+const std::string UPDATE = "update";
+}
+
 Connection::Connection(const std::string &path)
 {
     int rc = sqlite3_open(path.c_str(), &db_); // 连接数据库
@@ -44,60 +52,43 @@ Connection::~Connection()
     }
 }
 
-bool Connection::ExecuteCreateTable(const std::string &sql)
+bool Connection::ExecuteSql(const std::string &sql, const std::string &sqlType)
 {
     CHAR_PTR errMsg = nullptr;
     sqlite3_busy_timeout(db_, TIMEOUT);
     int rc = sqlite3_exec(db_, sql.c_str(), nullptr, nullptr, &errMsg);
     if (rc != SQLITE_OK) {
-        std::string errorMsg = "Failed to create table: " + std::string(errMsg);
+        std::string errorMsg = "Failed to " + sqlType +": " + std::string(errMsg);
         ERROR("sqlite3_exec return %, %", rc, errorMsg);
         sqlite3_free(errMsg);
         return false;
     }
     return true;
+}
+
+bool Connection::ExecuteCreateTable(const std::string &sql)
+{
+    return ExecuteSql(sql, CREATE_TABLE);
+}
+
+bool Connection::ExecuteCreateIndex(const std::string &sql)
+{
+    return ExecuteSql(sql, CREATE_INDEX);
 }
 
 bool Connection::ExecuteDropTable(const std::string &sql)
 {
-    CHAR_PTR errMsg = nullptr;
-    sqlite3_busy_timeout(db_, TIMEOUT);
-    int rc = sqlite3_exec(db_, sql.c_str(), nullptr, nullptr, &errMsg);
-    if (rc != SQLITE_OK) {
-        std::string errorMsg = "Failed to drop table: " + std::string(errMsg);
-        ERROR("sqlite3_exec return %, %", rc, errorMsg);
-        sqlite3_free(errMsg);
-        return false;
-    }
-    return true;
+    return ExecuteSql(sql, DROP_TABLE);
 }
 
 bool Connection::ExecuteDelete(const std::string &sql)
 {
-    CHAR_PTR errMsg = nullptr;
-    sqlite3_busy_timeout(db_, TIMEOUT);
-    int rc = sqlite3_exec(db_, sql.c_str(), nullptr, nullptr, &errMsg);
-    if (rc != SQLITE_OK) {
-        std::string errorMsg = "Failed to delete: " + std::string(errMsg);
-        ERROR("sqlite3_exec return %, %", rc, errorMsg);
-        sqlite3_free(errMsg);
-        return false;
-    }
-    return true;
+    return ExecuteSql(sql, DELETE);
 }
 
 bool Connection::ExecuteUpdate(const std::string &sql)
 {
-    CHAR_PTR errMsg = nullptr;
-    sqlite3_busy_timeout(db_, TIMEOUT);
-    int rc = sqlite3_exec(db_, sql.c_str(), nullptr, nullptr, &errMsg);
-    if (rc != SQLITE_OK) {
-        std::string errorMsg = "Failed to update table: " + std::string(errMsg);
-        ERROR("sqlite3_exec return %, %", rc, errorMsg);
-        sqlite3_free(errMsg);
-        return false;
-    }
-    return true;
+    return ExecuteSql(sql, UPDATE);
 }
 
 std::vector<TableColumn> Connection::ExecuteGetTableColumns(const std::string &tableName)

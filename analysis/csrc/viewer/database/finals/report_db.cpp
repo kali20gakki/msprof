@@ -30,7 +30,7 @@ namespace {
     };
 
     const TableColumns NPU_INFO = {
-        {"id", SQL_INTEGER_TYPE, true},
+        {"id", SQL_INTEGER_TYPE},
         {"name", SQL_TEXT_TYPE}
     };
 
@@ -39,7 +39,7 @@ namespace {
         {"endNs", SQL_INTEGER_TYPE},
         {"deviceId", SQL_INTEGER_TYPE},
         {"connectionId", SQL_INTEGER_TYPE},
-        {"globalTaskId", SQL_INTEGER_TYPE, true},
+        {"globalTaskId", SQL_INTEGER_TYPE},
         {"globalPid", SQL_INTEGER_TYPE},
         {"taskType", SQL_INTEGER_TYPE},
         {"contextId", SQL_INTEGER_TYPE},
@@ -65,7 +65,7 @@ namespace {
 
     const TableColumns COMMUNICATION_TASK_INFO = {
         {"name", SQL_INTEGER_TYPE},
-        {"globalTaskId", SQL_INTEGER_TYPE, true},
+        {"globalTaskId", SQL_INTEGER_TYPE},
         {"taskType", SQL_INTEGER_TYPE},
         {"planeId", SQL_INTEGER_TYPE},
         {"groupName", SQL_INTEGER_TYPE},

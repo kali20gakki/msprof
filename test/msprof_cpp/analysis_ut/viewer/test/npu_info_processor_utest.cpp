@@ -116,8 +116,10 @@ TEST_F(NpuInfoProcessorUTest, TestRunShouldReturnFalseWhenOneProcessFailInMultit
     .stubs()
     .will(returnValue(chip0));
     format checkData;
+    MOCKER_CPP(&DBRunner::CreateTable).stubs().will(returnValue(false));
     auto processor = NpuInfoProcessor(DB_PATH, profPath);
     EXPECT_FALSE(processor.Run());
+    MOCKER_CPP(&DBRunner::CreateTable).reset();
     MOCKER_CPP(&File::GetFilesWithPrefix).reset();
     MOCKER_CPP(&Context::GetPlatformVersion).reset();
 }
