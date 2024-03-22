@@ -100,6 +100,10 @@ bool PmuProcessor::TaskBasedProcess(const std::string &fileDir)
             return false;
         }
     }
+    if (dbPathTable.empty()) {
+        INFO("There is no db to export, prof path is %.", fileDir);
+        return true;
+    }
     DBInfo metricDB("metric_summary.db", "MetricSummary");
     auto tableColumns = GetAndCheckTableColumns(dbPathTable, metricDB);
     if (tableColumns.empty()) {
@@ -232,6 +236,10 @@ bool PmuProcessor::SampleBasedProcess(const std::string &fileDir)
                 continue;
             }
         }
+    }
+    if (dbPathTable.empty()) {
+        INFO("There is no db to export, prof path is %.", fileDir);
+        return true;
     }
     if (!SampleBasedTimelineProcess(dbPathTable, fileDir)) {
         ERROR("Failed to process sample-based timeline data, fileDir is %.", fileDir);

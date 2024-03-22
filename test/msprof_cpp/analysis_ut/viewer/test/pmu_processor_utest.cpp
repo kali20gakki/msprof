@@ -348,3 +348,31 @@ TEST_F(PmuProcessorUTest, TestSampleRunShouldReturnFalseWhenFormatDataFailed)
     MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
 }
 
+TEST_F(PmuProcessorUTest, TestWhenNoDBShouldReturnTrue)
+{
+    nlohmann::json record = {
+        {"ai_core_profiling_mode", SAMPLE_BASED},
+        {"platform_version", "5"},
+    };
+    std::string profTest = File::PathJoin({PMU_DIR, "PROF_TEST"});
+    EXPECT_TRUE(File::CreateDir(profTest));
+    EXPECT_TRUE(File::CreateDir(File::PathJoin({profTest, DEVICE_PREFIX + "0"})));
+    EXPECT_TRUE(File::CreateDir(File::PathJoin({profTest, DEVICE_PREFIX + "0", SQLITE})));
+
+    MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
+    auto processor1 = PmuProcessor(DB_PATH, {profTest});
+    EXPECT_TRUE(processor1.Run());
+    MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
+
+    record = {
+        {"ai_core_profiling_mode", TASK_BASED},
+        {"platform_version", "5"},
+    };
+    MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
+    auto processor2 = PmuProcessor(DB_PATH, {profTest});
+    EXPECT_TRUE(processor2.Run());
+    MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
+
+    EXPECT_TRUE(File::RemoveDir(profTest, 0));
+}
+

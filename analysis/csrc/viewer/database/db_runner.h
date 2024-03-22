@@ -32,6 +32,8 @@ class DBRunner {
 public:
     explicit DBRunner(const std::string &dbPath): path_(dbPath) {};
     bool CreateTable(const std::string &tableName, const std::vector<TableColumn> &cols) const;
+    bool CreateIndex(const std::string &tableName, const std::string &indexName,
+                     const std::vector<std::string> &colNames) const;
     bool DropTable(const std::string &tableName) const;
     // 数据插入接口，支持不同类型数据的插入
     template<typename... Args>
