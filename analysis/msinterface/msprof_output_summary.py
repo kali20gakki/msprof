@@ -155,7 +155,9 @@ class MsprofOutputSummary:
         elif command_type == MsProfCommonConstant.TIMELINE:
             self._export_msprof_timeline()
         self._export_readme_file()
-        print_info(MsProfCommonConstant.COMMON_FILE_NAME, f"End exporting {command_type} output_file.")
+        output_path = os.path.join(self._output, PathManager.MINDSTUDIO_PROFILER_OUTPUT)
+        print_info(MsProfCommonConstant.COMMON_FILE_NAME, f"End exporting {command_type} output_file." \
+                   f"The file is stored in the {output_path} path.")
 
     def _is_in_prof_file(self):
         """
