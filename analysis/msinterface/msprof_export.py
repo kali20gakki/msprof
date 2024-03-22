@@ -526,9 +526,7 @@ class ExportCommand:
         result = json.loads(MsProfExportDataUtils.export_data(params))
         if result.get('status', NumberConstant.EXCEPTION) == NumberConstant.SKIP:
             return
-        if result.get('status', NumberConstant.EXCEPTION) == NumberConstant.SUCCESS:
-            self._print_export_info(params, result.get('data', []))
-        else:
+        if result.get('status', NumberConstant.EXCEPTION) != NumberConstant.SUCCESS:
             if result.get('status', NumberConstant.EXCEPTION) == NumberConstant.ERROR:
                 error(self.FILE_NAME, result.get('info', ""))
             else:
@@ -615,8 +613,6 @@ class ExportCommand:
 
     def _export_data(self: any, event: dict, device_id: str, result_dir: str) -> None:
         export_data_type = event.get('export_type', ExportDataType.INVALID).name.lower()
-        print_info(self.FILE_NAME,
-                   'Start to export %s %s data ...' % (export_data_type, self.command_type))
         params = {
             StrConstant.PARAM_DATA_TYPE: export_data_type,
             StrConstant.PARAM_RESULT_DIR: result_dir,
