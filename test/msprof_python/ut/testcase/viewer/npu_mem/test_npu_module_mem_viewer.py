@@ -78,12 +78,16 @@ class TestNpuModuleMemViewer(TestDirCRBaseModel):
         expected_data = [
             ['RUNTIME', '10.000\t', 4, 'NPU:0'],
             ['HDC', '11.000\t', 2, 'NPU:0'],
-            ['CCE', '11.000\t', -1, 'NPU:0']
+            ['CCE', '11.000\t', -1, 'NPU:0'],
+            ['INVLID_MOUDLE_ID', '12.333\t', -1, 'NPU:0'],
+            [75, '12.333\t', -1, 'NPU:0']
         ]
         module_mem_data = [
             [7, 0, 4096, 'NPU:0'],
             [9, 1000, 2048, 'NPU:0'],
-            [8, 1000, -1, 'NPU:0']
+            [8, 1000, -1, 'NPU:0'],
+            [74, 2333, -1, 'NPU:0'],
+            [75, 2333, -1, 'NPU:0']
         ]
         module_mem_dto = self.get_module_mem_dto(module_mem_data)
         with mock.patch(NAMESPACE + '.NpuAiStackMemModel.check_db', return_value=True), \
