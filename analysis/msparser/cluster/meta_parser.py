@@ -89,13 +89,18 @@ class HcclAnalysisTool:
     @classmethod
     def find_consecutive_payload_tasks_count(cls: any, events: list, idx: int) -> int:
         count = 0
-        while events[idx].rdma_type == 'RDMA_SEND_PAYLOAD':
+        while idx < len(events) and events[idx].rdma_type == 'RDMA_SEND_PAYLOAD':
             idx += 1
             count += 1
         return count
 
     @classmethod
     def calculate_consecutive_payload_tasks_info(cls: any, events: list, idx: int, payload_cnt: int, idx_jump: int):
+        if (idx + payload_cnt + idx_jump - 2) >= len(events):
+            op_name = events[idx].op_name
+            logging.warning("Bandwidth calculation abnormal. Index out of range, missing closure tasks. op_name:%s",
+                            op_name)
+            return []
         saved_size = 0
         first_payload_time = events[idx].timestamp
         for i in range(idx, idx + payload_cnt):
@@ -108,7 +113,7 @@ class HcclAnalysisTool:
 
     @classmethod
     def is_send_or_recv_op(cls, events: list, idx: int) -> bool:
-        return 'send' in events[idx].op_name or 'receive' in events[idx].op_name
+        return 'send' in events[idx].op_name.lower() or 'receive' in events[idx].op_name.lower()
 
     @classmethod
     def init_dict(cls: any, keys: list) -> dict:

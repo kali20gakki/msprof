@@ -79,8 +79,11 @@ class CommunicationParser(MetaParser):
                 payload_cnt = HcclAnalysisTool.find_consecutive_payload_tasks_count(master_events, idx)
                 rdma_transit_result = (HcclAnalysisTool.calculate_consecutive_payload_tasks_info(
                                         master_events, idx, payload_cnt, rdma_transit_op_num))
+                if not rdma_transit_result:
+                    idx += payload_cnt
+                    continue
                 op_time_dict[OpAnalysisType.TRANSIT_TIME] += (rdma_transit_result[0])
-                idx += rdma_transit_op_num + payload_cnt
+                idx += rdma_transit_op_num + payload_cnt - 1
                 wait_flag = False
                 continue
             if event.hccl_name == StrConstant.NOTIFY_WAIT:
@@ -127,9 +130,12 @@ class CommunicationParser(MetaParser):
                 payload_cnt = HcclAnalysisTool.find_consecutive_payload_tasks_count(events, idx)
                 rdma_transit_result = HcclAnalysisTool.calculate_consecutive_payload_tasks_info(
                                         events, idx, payload_cnt, rdma_transit_op_num)
+                if not rdma_transit_result:
+                    idx += payload_cnt
+                    continue
                 HcclAnalysisTool.update_bandwidth_record(op_bandwidth_dict, event.transport_type,
                                                          rdma_transit_result[1], rdma_transit_result[0])
-                idx += rdma_transit_op_num + payload_cnt
+                idx += rdma_transit_op_num + payload_cnt - 1
                 continue
             idx += 1
         for transport_type in StrConstant.TRANSIT_TYPE:

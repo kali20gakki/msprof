@@ -61,6 +61,31 @@ class TestHcclAnalysisTool(unittest.TestCase):
         ret = HcclAnalysisTool.get_rdma_time_info(events, 0, 5)
         self.assertEqual(ret, [1, 1])
 
+    def test_find_consecutive_payload_tasks_count(self):
+        RDMA = 'RDMA'
+        OP_NAME = 'hcom_allReduce__721_0_1'
+        RDMASend = 'RDMASend'
+        RDMA_SEND_PAYLOAD = 'RDMA_SEND_PAYLOAD'
+
+        events = [
+            HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_PAYLOAD,
+                         timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
+                         size=104857600,
+                         bandwidth=-1),
+            HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_PAYLOAD,
+                         timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
+                         size=104857600,
+                         bandwidth=-1),
+            HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_PAYLOAD,
+                         timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
+                         size=104857600,
+                         bandwidth=-1),
+        ]
+        idx = 0
+        payload_cnt = HcclAnalysisTool.find_consecutive_payload_tasks_count(events, idx)
+        ans = 3
+        self.assertAlmostEqual(payload_cnt, ans)
+
 
 class TestCommunicationParser(unittest.TestCase):
     def test_run(self):
@@ -88,6 +113,10 @@ class TestCommunicationParser(unittest.TestCase):
         LOCAL = 'LOCAL'
         ROCE = 'ROCE'
         Notify_Wait = 'Notify_Wait'
+        RDMASEND = 'RDMASend'
+        OP_NAME = 'hcom_allReduce__721_0_1'
+        RDMA_SEND_PAYLOAD = 'RDMA_SEND_PAYLOAD'
+        RDMA = 'RDMA'
         # test ProfException when master_events is empty
         err_hccl_data_ffts = [
             HcclTask(plane_id=0, hccl_name="0", duration=0, timestamp=0,
@@ -128,6 +157,18 @@ class TestCommunicationParser(unittest.TestCase):
             HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='Memcpy', rdma_type='INVALID_TYPE',
                      timestamp=63888077238999.58, duration=160429.6171875, transport_type='SDMA', task_id=1,
                      size=104857600, bandwidth=0.65360500036255, link_type='ON_CHIP'),
+            HcclTask(op_name=OP_NAME, hccl_name=RDMASEND, rdma_type=RDMA_SEND_PAYLOAD,
+                     timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
+                     size=104857600,
+                     bandwidth=-1),
+            HcclTask(op_name=OP_NAME, hccl_name=RDMASEND, rdma_type=RDMA_SEND_PAYLOAD,
+                     timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
+                     size=104857600,
+                     bandwidth=-1),
+            HcclTask(op_name=OP_NAME, hccl_name=RDMASEND, rdma_type=RDMA_SEND_PAYLOAD,
+                     timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
+                     size=104857600,
+                     bandwidth=-1),
         ]
 
         op_time_dict = CommunicationParser({}).op_time_parser(events)
@@ -147,6 +188,7 @@ class TestCommunicationParser(unittest.TestCase):
         RDMASEND = 'RDMASend'
         OP_NAME = 'hcom_allReduce__721_0_1'
         RDMA_SEND_NOTIFY = 'RDMA_SEND_NOTIFY'
+        RDMA_SEND_PAYLOAD = 'RDMA_SEND_PAYLOAD'
         Bandwidth_GB_S = 'Bandwidth(GB/s)'
         Bandwidth_Utilization = 'Bandwidth(Utilization)'
         Large_Packet_Ratio = 'Large Packet Ratio'
@@ -230,6 +272,18 @@ class TestCommunicationParser(unittest.TestCase):
             HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='Memcpy', rdma_type=INVALID_TYPE,
                      timestamp=63888077238999.58, duration=160429.6171875, transport_type='SDMA', task_id=1,
                      size=104857600, bandwidth=0.65360500036255, link_type='ON_CHIP'),
+            HcclTask(op_name=OP_NAME, hccl_name=RDMASEND, rdma_type=RDMA_SEND_PAYLOAD,
+                     timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
+                     size=104857600,
+                     bandwidth=-1),
+            HcclTask(op_name=OP_NAME, hccl_name=RDMASEND, rdma_type=RDMA_SEND_PAYLOAD,
+                     timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
+                     size=104857600,
+                     bandwidth=-1),
+            HcclTask(op_name=OP_NAME, hccl_name=RDMASEND, rdma_type=RDMA_SEND_PAYLOAD,
+                     timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
+                     size=104857600,
+                     bandwidth=-1),
         ]
         with mock.patch("msparser.cluster.meta_parser.HcclAnalysisTool.get_standard_bandwidth",
                         return_value=standard_bandwidth):
