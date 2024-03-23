@@ -179,5 +179,6 @@ class ModuleName(Enum):
     ASCENDCKERNEL = 69
     ASYS = 70
     ATRACE = 71
-    MBUFF = 72
-    CUSTOM = 73
+    RTC = 72
+    SYSMONITOR = 73
+    INVLID_MOUDLE_ID = 74
