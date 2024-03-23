@@ -1,21 +1,15 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2024. All rights reserved.
-
-import logging
+import copy
 from collections import OrderedDict
 
-from common_func.db_manager import DBManager
-from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
-from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
-from common_func.profiling_scene import ProfilingScene
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
-from msinterface.msprof_timeline import MsprofTimeline
 from msmodel.api.api_data_viewer_model import ApiDataViewModel
 from msmodel.freq.freq_data_viewer_model import FreqDataViewModel
 
@@ -24,6 +18,7 @@ class AiCoreFreqViewer:
     '''
     Read aicore freq and generate aicore freq view
     '''
+
     def __init__(self, params: dict):
         self._params = params
         self._project_path = params.get(StrConstant.PARAM_RESULT_DIR)
@@ -49,6 +44,9 @@ class AiCoreFreqViewer:
         freq_lists = []
         with self.freq_model as _model:
             freq_rows = _model.get_data()
+            if not freq_rows:
+                freq_rows.append((InfoConfReader().get_dev_cnt(),
+                                  InfoConfReader().get_freq(StrConstant.AIC) / NumberConstant.FREQ_TO_MHz))
             for row in freq_rows:
                 # row index 0 is syscnt, and row index 1 is frequency
                 to_local_ts = InfoConfReader().trans_syscnt_into_local_time(row[0])
@@ -59,12 +57,10 @@ class AiCoreFreqViewer:
                 ]
                 freq_lists.append(data_list)
         _, end_ts = InfoConfReader().get_collect_time()
-        data_last = freq_lists[-1]
-        data_list = [
-            data_last[0], end_ts, self._pid, 0,
-            data_last[4]
-        ]
-        freq_lists.append(data_list)
+        final_data = copy.deepcopy(freq_lists[-1])
+        # 增加一条记录，时间替换为采集结束时间，截断柱状图
+        final_data[1] = end_ts
+        freq_lists.append(final_data)
         changed_frequency = TraceViewManager.column_graph_trace(
             TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, freq_lists)
         result.extend(changed_frequency)
