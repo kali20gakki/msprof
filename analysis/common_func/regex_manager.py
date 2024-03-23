@@ -10,7 +10,7 @@ class RegexManagerConstant:
     # check the expression inner bracket.
     REGEX_INNER_BRACKET = r'\([^()]+\)'
     # check the expression connected by && or ||.
-    REGEX_CONNECTED = r'\w+\.?\w+\s*[&|]{2}\s*\w+\.?\w+'
+    REGEX_CONNECTED = r'^\w{1,20}\.?\w{1,20}\s{0,20}[&|]{2}\s{0,20}\w{1,20}\.?\w{1,20}'
     # check the expression split by && or ||.
     REGEX_SPLIT_CONNECTED = r'[&|() ]'
     # check the expression and get comparator symbols.
@@ -23,17 +23,17 @@ class RegexManagerConstant:
     REGEX_LOW_OPERATOR = r'\d|\.| '
 
     # calculate multiply for match of num*num
-    REGEX_CALCULATE_MULTIPLY = r'(\d+\.?\d*\*-?\d+\.?\d*)'
+    REGEX_CALCULATE_MULTIPLY = r'(^\d{1,20}\.?\d{0,20}\*-?\d{1,20}\.?\d{0,20})'
     # calculate division for match of num/num
-    REGEX_CALCULATE_DIVISION = r'(\d+\.?\d*/-?\d+\.?\d*)'
+    REGEX_CALCULATE_DIVISION = r'(^\d{1,20}\.?\d{0,20}/-?\d{1,20}\.?\d{0,20})'
     # calculate remainder for match of num%num
-    REGEX_CALCULATE_REMAINDER = r'(\d+\.?\d*%-?\d+\.?\d*)'
+    REGEX_CALCULATE_REMAINDER = r'(^\d{1,20}\.?\d{0,20}%-?\d{1,20}\.?\d{0,20})'
     # calculate SrcAnd for match of num&num
-    REGEX_CALCULATE_SRCAND = r'(\d+\.?\d*&-?\d+\.?\d*)'
+    REGEX_CALCULATE_SRCAND = r'(^\d{1,20}\.?\d{0,20}&-?\d{1,20}\.?\d{0,20})'
     # calculate addition for match of num+num
-    REGEX_CALCULATE_ADDITION = r'(\d+\.?\d*\+-?\d+\.?\d*)'
+    REGEX_CALCULATE_ADDITION = r'(^\d{1,20}\.?\d{0,20}\+-?\d{1,20}\.?\d{0,20})'
     # calculate subtraction for match of num-num
-    REGEX_CALCULATE_SUBTRACTION = r'(\d+\.?\d*--?\d+\.?\d*)'
+    REGEX_CALCULATE_SUBTRACTION = r'(^\d{1,20}\.?\d{0,20}--?\d{1,20}\.?\d{0,20})'
 
     # slice for slice_num
     REGEX_SLICE = r'(slice_\d+)'
