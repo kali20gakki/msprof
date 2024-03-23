@@ -50,6 +50,26 @@ bool DBRunner::CreateTable(const std::string &tableName, const std::vector <Tabl
     return true;
 }
 
+bool DBRunner::CreateIndex(const std::string &tableName, const std::string &indexName,
+                           const std::vector<std::string> &colNames) const
+{
+    if (tableName.empty()) {
+        ERROR("The tableName is empty string");
+        return false;
+    }
+    INFO("Start create % index.", tableName);
+    std::string valuesStr = Join(colNames, ",");
+    std::string sql = "CREATE INDEX IF NOT EXISTS " + indexName + " ON " + tableName + " (" + valuesStr + ");";
+    std::shared_ptr<Connection> conn;
+    MAKE_SHARED_RETURN_VALUE(conn, Connection, false, path_);
+    if (!conn->ExecuteCreateIndex(sql)) {
+        ERROR("Create % index failed", tableName);
+        return false;
+    }
+    INFO("create % index success", tableName);
+    return true;
+}
+
 bool DBRunner::DropTable(const std::string &tableName) const
 {
     if (tableName.empty()) {

@@ -58,6 +58,36 @@ TEST_F(DBRunnerUtest, CreateTable)
     EXPECT_EQ(rc, true);
 }
 
+TEST_F(DBRunnerUtest, CreateIndexWhenNoThisColThenReturnFalse)
+{
+    std::string path = "./a.db";
+    auto dbRunner = std::make_shared<DBRunner>(path);
+    std::vector<TableColumn> cols = {
+        TableColumn("id", "INT"),
+        TableColumn("name", "VARCHAR(255)"),
+        TableColumn("age", "INT")
+    };
+    auto rc = dbRunner->CreateTable("tb3", cols);
+    EXPECT_EQ(rc, true);
+    rc = dbRunner->CreateIndex("tb3", "a", {"a"});
+    EXPECT_EQ(rc, false);
+}
+
+TEST_F(DBRunnerUtest, CreateIndexWhenCreateSuccessThenReturnTrue)
+{
+    std::string path = "./a.db";
+    auto dbRunner = std::make_shared<DBRunner>(path);
+    std::vector<TableColumn> cols = {
+            TableColumn("id", "INT"),
+            TableColumn("name", "VARCHAR(255)"),
+            TableColumn("age", "INT")
+    };
+    auto rc = dbRunner->CreateTable("tb3", cols);
+    EXPECT_EQ(rc, true);
+    rc = dbRunner->CreateIndex("tb3", "a", {"age"});
+    EXPECT_EQ(rc, true);
+}
+
 TEST_F(DBRunnerUtest, DropTable)
 {
     std::string path = "./a.db";

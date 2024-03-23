@@ -35,6 +35,23 @@ TEST_F(ConnectionUtest, Connection)
     EXPECT_NE(nullptr, dbConn->db_);
 }
 
+TEST_F(ConnectionUtest, ExecuteCreateIndexWhenIndexExistReturnFalse)
+{
+    std::string path = "./a.db";
+    auto dbConn = std::make_shared<Connection>(path);
+    std::string sql = "CREATE TABLE IF NOT EXISTS tb1 (id INT PRIMARY KEY,name VARCHAR(255),age INT);";
+    auto rc = dbConn->ExecuteCreateTable(sql);
+    EXPECT_EQ(rc, true);
+
+    sql = "CREATE INDEX IF NOT EXISTS a ON tb1 ( age );";
+    rc = dbConn->ExecuteCreateIndex(sql);
+    EXPECT_EQ(rc, true);
+
+    sql = "CREATE INDEX IF NOT EXISTS a ON tb2 ( age );";
+    rc = dbConn->ExecuteCreateIndex(sql);
+    EXPECT_EQ(rc, false);
+}
+
 TEST_F(ConnectionUtest, ExecuteCreateTable)
 {
     std::string path = "./a.db";

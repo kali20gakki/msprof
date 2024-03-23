@@ -67,6 +67,8 @@ protected:
     virtual bool Process(const std::string &fileDir) = 0;
     template<typename... Args>
     bool SaveData(const std::vector<std::tuple<Args...>> &data, const std::string &tableName) const;
+    bool CreateTableIndex(const std::string &tableName, const std::string &indexName,
+                          const std::vector<std::string> &colNames) const;
     static void PrintProcessorResult(bool result, const std::string &processorName);
     static bool GetGeHashMap(GeHashMap &hashMap, const std::string &fileDir);
     static uint8_t CheckPath(const std::string& path);
