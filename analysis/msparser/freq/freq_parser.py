@@ -7,6 +7,7 @@ import os
 
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager, FileOpen
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
@@ -45,7 +46,9 @@ class FreqParser(IParser, MsMultiProcess):
         parse the data under the file path
         :return: NA
         """
-        self._freq_data = [[InfoConfReader().get_dev_cnt(), InfoConfReader().get_freq(StrConstant.AIC)]]
+        self._freq_data = [
+            [InfoConfReader().get_dev_cnt(), InfoConfReader().get_freq(StrConstant.AIC) / NumberConstant.FREQ_TO_MHz]
+        ]
         freq_files = self._file_list.get(DataTag.FREQ)
         freq_files.sort(key=lambda x: int(x.split("_")[-1]))
         offset_calculator = OffsetCalculator(freq_files, StructFmt.FREQ_DATA_SIZE, self._project_path)
