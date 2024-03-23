@@ -169,6 +169,33 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
             self.assertTrue(isinstance(freqs_list[2]['ts'], str))
             ProfilingScene().set_mode(origin_mode)
 
+    def test_aicore_freq_viewer_when_no_freq_return_ok(self):
+        """
+        目的：覆盖ai_core_freq_viewer。py 文件get_all_data
+        UT设计意图：当不上报变频数据时，InfoConfReader().get_dev_cnt()作为开始时间，以默认频率作为freq。
+        """
+        ChipManager().chip_id = ChipModel.CHIP_V4_1_0
+
+        with FreqDataViewModel(self.params) as freq_model, ApiDataViewModel(self.params) as api_model:
+            # mock freq.db 和 apidata数据
+            freq_model.create_table()
+            query_freqs = freq_model.get_data()
+            self.assertEqual(len(query_freqs), 0)
+            freqs_list = AiCoreFreqViewer(self.params).get_all_data()
+            self.assertEqual(len(freqs_list), 3)
+            self.assertEqual(json.dumps(freqs_list[0]),
+                '{"name": "process_name", "pid": 1, "tid": 0, "args": {"name": "AI Core Freq"}, "ph": "M"}')
+            self.assertEqual(freqs_list[1]['name'], "AI Core Freq")
+            self.assertEqual(freqs_list[1]['pid'], 1)
+            self.assertEqual(freqs_list[1]['tid'], 0)
+            self.assertEqual(freqs_list[1]['args']['MHz'], 1850.0)
+            self.assertEqual(freqs_list[1]['ph'], "C")
+            self.assertEqual(freqs_list[1]['name'], "AI Core Freq")
+            self.assertEqual(freqs_list[1]['pid'], 1)
+            self.assertEqual(freqs_list[1]['tid'], 0)
+            self.assertEqual(freqs_list[1]['args']['MHz'], 1850)
+            self.assertEqual(freqs_list[1]['ph'], "C")
+
     def test_aicore_freq_viewer_no_lpm_data_return_ok(self):
         """
         目的：覆盖ai_core_freq_viewer。py 文件get_all_data
