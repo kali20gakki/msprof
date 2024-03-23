@@ -22,6 +22,8 @@ using namespace Parser::Environment;
 using namespace Analysis::Utils;
 namespace {
 const std::string NA = "N/A";
+const std::string INDEX_NAME = "CommunicationTaskIndex";
+const std::vector<std::string> COMMUNICATION_TASK_INDEX_COL_NAMES = {"globalTaskId"};
 struct CommunicationOpEndpointsTime {
     double firstTaskStartTime;
     double lastTaskStartTime;
@@ -227,6 +229,10 @@ bool CommunicationInfoProcessor::ProcessOneDevice(const std::string &devicePath,
     }
     if (!SaveData(taskData, TABLE_NAME_COMMUNICATION_TASK_INFO)) {
         ERROR("Save % data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO, taskDBPath);
+        return false;
+    }
+    if (!CreateTableIndex(TABLE_NAME_COMMUNICATION_TASK_INFO, INDEX_NAME, COMMUNICATION_TASK_INDEX_COL_NAMES)) {
+        ERROR("Create table index failed.");
         return false;
     }
     if (!SaveData(opData, TABLE_NAME_COMMUNICATION_OP)) {

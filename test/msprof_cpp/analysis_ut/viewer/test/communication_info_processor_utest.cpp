@@ -220,6 +220,14 @@ TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunS
     CheckOpInfo(opResult);
 }
 
+TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnFalseWhenCreateIndexFailed)
+{
+    MOCKER_CPP(&DBRunner::CreateIndex).stubs().will(returnValue(false));
+    auto processor = CommunicationInfoProcessor(DB_PATH, PROF_PATHS);
+    EXPECT_FALSE(processor.Run());
+    MOCKER_CPP(&DBRunner::CreateIndex).reset();
+}
+
 TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnFalseWhenSourceTableNotExist)
 {
     auto dbPath = File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX});

@@ -21,6 +21,8 @@ using namespace Association::Credential;
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Utils;
 namespace {
+const std::string INDEX_NAME = "TaskIndex";
+const std::vector<std::string> TASK_INDEX_COL_NAMES = {"startNs", "globalTaskId"};
 struct TaskData {
     double start;
     double duration;
@@ -162,6 +164,10 @@ bool TaskProcessor::Process(const std::string &fileDir)
             flag = false;
             ERROR("Save data failed, %.", dbPath);
             continue;
+        }
+        if (!CreateTableIndex(TABLE_NAME_TASK, INDEX_NAME, TASK_INDEX_COL_NAMES)) {
+            ERROR("Create table index failed.");
+            flag = false;
         }
         INFO("process %, pid:%, deviceId:% ends.", dbPath, pid, threadData.deviceId);
     }
