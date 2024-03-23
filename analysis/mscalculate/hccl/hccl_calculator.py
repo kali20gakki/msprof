@@ -7,6 +7,7 @@ import os
 from collections import defaultdict
 from collections import deque
 from typing import List
+from typing import Union
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
@@ -58,9 +59,10 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                         bandwidth=planeid_tasks[i][1].bandwidth)
 
     @staticmethod
-    def calc_bandwidth(communication_data: List[HcclTask]):
+    def calc_bandwidth(communication_data: List[List[Union[int, HcclTask]]]):
         idx = 0
-        if 'send' in communication_data[idx][1].op_name or 'receive' in communication_data[idx][1].op_name:
+        if ('send' in communication_data[idx][1].op_name.lower() or
+                'receive' in communication_data[idx][1].op_name.lower()):
             idx_jump = NumberConstant.RDMA_NO_BARRIER_TASK_NUM
         else:
             idx_jump = NumberConstant.RDMA_WITH_BARRIER_TASK_NUM
@@ -75,34 +77,52 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                 payload_cnt = HcclCalculator.find_consecutive_payload_tasks(communication_data, idx)
                 rdma_send_payload_transit_result = HcclCalculator.calculate_consecutive_payload_tasks_info(
                     communication_data, idx, payload_cnt, idx_jump)
-                payload_time = rdma_send_payload_transit_result[0]
-                payload_size = rdma_send_payload_transit_result[1]
-                payload_bandwidth = payload_size / payload_time
+                if not rdma_send_payload_transit_result:
+                    HcclCalculator.update_unclosed_rdma_task_bandwidth(idx, payload_cnt, communication_data)
+                    idx += payload_cnt
+                    continue
+                payload_time = rdma_send_payload_transit_result[0] / NumberConstant.NS_TO_MS
+                payload_size = rdma_send_payload_transit_result[1] / NumberConstant.COMMUNICATION_B_to_MB
+                if payload_time:
+                    payload_bandwidth = payload_size / payload_time
+                else:
+                    payload_bandwidth = 0
                 for index in range(idx, idx + payload_cnt):
                     communication_data[index][1] = communication_data[index][1].replace(bandwidth=payload_bandwidth)
-                idx += payload_cnt + idx_jump
+                idx += payload_cnt + idx_jump - 1
                 continue
             idx += 1
 
     @staticmethod
+    def update_unclosed_rdma_task_bandwidth(idx, payload_cnt, communication_data):
+        for index in range(idx, idx + payload_cnt):
+            bandwidth = HcclCalculator._calculate_bandwidth_gb_s(communication_data[index][1].duration,
+                                                                 communication_data[index][1].size)
+            communication_data[index][1] = communication_data[index][1].replace(bandwidth=bandwidth)
+
+    @staticmethod
     def find_consecutive_payload_tasks(events, idx):
         count = 0
-        while events[idx][1].rdma_type == 'RDMA_SEND_PAYLOAD':
+        while idx < len(events) and events[idx][1].rdma_type == 'RDMA_SEND_PAYLOAD':
             idx += 1
             count += 1
         return count
 
     @staticmethod
     def calculate_consecutive_payload_tasks_info(events, idx, payload_cnt, idx_jump):
+        if (idx + payload_cnt + idx_jump - 2) >= len(events):
+            op_name = events[idx][1].op_name
+            logging.warning("Bandwidth calculation abnormal. Index out of range, missing closure tasks. op_name:%s",
+                            op_name)
+            return []
         saved_size = 0
         first_payload_time = events[idx][1].timestamp
         for i in range(idx, idx + payload_cnt):
             saved_size += events[i][1].size
-        transit_size = saved_size / NumberConstant.COMMUNICATION_B_to_MB
         transit_time = HcclAnalysisTool.get_value(events[idx + payload_cnt + idx_jump - 2][1].duration +
                                                   events[idx + payload_cnt + idx_jump - 2][1].timestamp -
-                                                  first_payload_time, 'duration') / NumberConstant.NS_TO_MS
-        return [transit_time, transit_size]
+                                                  first_payload_time, 'duration')
+        return [transit_time, saved_size]
 
     @staticmethod
     def update_op_name_by_group_name(communication_data: List[HcclTask]):

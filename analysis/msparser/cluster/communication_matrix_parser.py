@@ -105,6 +105,9 @@ class CommunicationMatrixParser(MetaParser):
                 payload_cnt = HcclAnalysisTool.find_consecutive_payload_tasks_count(events, idx)
                 rdma_transit_result = HcclAnalysisTool.calculate_consecutive_payload_tasks_info(
                                                         events, idx, payload_cnt, rdma_transit_op_num)
+                if not rdma_transit_result:
+                    idx += payload_cnt
+                    continue
                 if link_key not in link_info:
                     link_info[link_key] = [0] * len(MatrixDataType.__members__)
                 link_info[link_key][MatrixDataType.TRANSPORT_TYPE] = \
@@ -114,7 +117,7 @@ class CommunicationMatrixParser(MetaParser):
                 link_info[link_key][MatrixDataType.PACKET_NUM] += 1
                 if rdma_transit_result[1] > HcclAnalysisTool.MessageSizeThreshold.get(event.transport_type, 0):
                     link_info[link_key][MatrixDataType.LARGE_PACKET_NUM] += 1
-                idx += rdma_transit_op_num + payload_cnt
+                idx += rdma_transit_op_num + payload_cnt - 1
                 continue
             idx += 1
         hccl_dict = {StrConstant.OP_NAME: hccl_name, StrConstant.LINK_INFO: link_info}

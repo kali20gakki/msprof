@@ -277,6 +277,7 @@ class TestHcclCalculator(unittest.TestCase):
         RDMASend = 'RDMASend'
         INVALID_TYPE = 'INVALID_TYPE'
         SDMA = 'SDMA'
+        RDMA_SEND_PAYLOAD = 'RDMA_SEND_PAYLOAD'
         event = [
             HcclTask(op_name=OP_NAME, hccl_name=Memcpy, rdma_type=INVALID_TYPE,
                      timestamp=63888072593921.055, duration=319959.1875, transport_type=SDMA, task_id=1,
@@ -286,7 +287,7 @@ class TestHcclCalculator(unittest.TestCase):
                      bandwidth=-1),
             HcclTask(op_name=OP_NAME, hccl_name=NOTIFY_WAIT, rdma_type='RDMA_PAYLOAD_PREPARE',
                      timestamp=63888072917700.47, duration=20, transport_type=LOCAL, task_id=1, size=0, bandwidth=-1),
-            HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type='RDMA_SEND_PAYLOAD',
+            HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_PAYLOAD,
                      timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1, size=104857600,
                      bandwidth=-1),
             HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_NOTIFY,
@@ -317,7 +318,7 @@ class TestHcclCalculator(unittest.TestCase):
                      bandwidth=0.01249908453971),
             HcclTask(op_name=OP_NAME, hccl_name=NOTIFY_WAIT, rdma_type='RDMA_PAYLOAD_PREPARE',
                      timestamp=63888072917700.47, duration=20, transport_type=LOCAL, task_id=1, size=0, bandwidth=0),
-            HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type='RDMA_SEND_PAYLOAD',
+            HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_PAYLOAD,
                      timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1, size=104857600,
                      bandwidth=24.28991694888519),
             HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_NOTIFY,
@@ -339,3 +340,77 @@ class TestHcclCalculator(unittest.TestCase):
 
         for idx, _ in enumerate(event):
             self.assertAlmostEqual(ans[idx].bandwidth, event[idx].bandwidth)
+
+        event2 = [
+            HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_PAYLOAD,
+                         timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
+                         size=104857600,
+                         bandwidth=-1),
+            HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_PAYLOAD,
+                         timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
+                         size=104857600,
+                         bandwidth=-1),
+            HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_PAYLOAD,
+                         timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
+                         size=104857600,
+                         bandwidth=-1),
+        ]
+        HcclCalculator.update_bandwidth(event2)
+        ans2 = [
+            HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_PAYLOAD,
+                         timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
+                         size=104857600,
+                         bandwidth=327664.0007812118),
+            HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_PAYLOAD,
+                         timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
+                         size=104857600,
+                         bandwidth=327664.0007812118),
+            HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_PAYLOAD,
+                         timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
+                         size=104857600,
+                         bandwidth=327664.0007812118),
+        ]
+
+        for idx, _ in enumerate(event2):
+            self.assertAlmostEqual(ans2[idx].bandwidth, event2[idx].bandwidth)
+
+
+
+
+
+    def test_update_unclosed_rdma_task_bandwidth(self):
+        RDMA = 'RDMA'
+        OP_NAME = 'hcom_allReduce__721_0_1'
+        RDMASend = 'RDMASend'
+        RDMA_SEND_PAYLOAD = 'RDMA_SEND_PAYLOAD'
+
+        events = [
+            [0, HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_PAYLOAD,
+                     timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1, size=104857600,
+                     bandwidth=-1)],
+            [1, HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_PAYLOAD,
+                     timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1, size=104857600,
+                     bandwidth=-1)],
+            [2, HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_PAYLOAD,
+                     timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1, size=104857600,
+                     bandwidth=-1)],
+        ]
+        idx = 0
+        payload_cnt = 3
+        HcclCalculator.update_unclosed_rdma_task_bandwidth(idx, payload_cnt, events)
+        ans = [
+            [0, HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_PAYLOAD,
+                     timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1, size=104857600,
+                     bandwidth=327664.0007812118)],
+            [1, HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_PAYLOAD,
+                     timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1, size=104857600,
+                     bandwidth=327664.0007812118)],
+            [2, HcclTask(op_name=OP_NAME, hccl_name=RDMASend, rdma_type=RDMA_SEND_PAYLOAD,
+                     timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1, size=104857600,
+                     bandwidth=327664.0007812118)],
+        ]
+        for idx, _ in enumerate(events):
+            self.assertAlmostEqual(ans[idx][1].bandwidth, events[idx][1].bandwidth)
+
+
+
