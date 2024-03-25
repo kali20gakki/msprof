@@ -80,6 +80,11 @@ void Flip::ComputeBatchId(std::vector<std::shared_ptr<MsprofCompactInfo>> &taskT
             flipTaskInStream = iter->second;
         }
         flipTaskInStream.emplace_back(maxFlip);
+        if (flipTaskInStream.size() > UINT16_MAX) {
+            ERROR("The size of flip task in device_id % and stream_id % is greater than %.",
+                  flipTaskInStream[0]->deviceId, flipTaskInStream[0]->streamId, UINT16_MAX);
+            continue;
+        }
         uint32_t batchId = 0;
         uint32_t taskIdx = 0;
         while (taskIdx < taskTrackInStream.size() && batchId < flipTaskInStream.size()) {
