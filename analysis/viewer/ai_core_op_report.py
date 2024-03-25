@@ -63,28 +63,23 @@ class AiCoreOpReport:
     INFER_ID_INDEX = 4
     AI_CPU_TABLE = "ai_cpu_datas"
     IS_PMU_UNIQUE_ID = True
-    TASK_TYPE = "Task Type"
-    TASK_ID = "Task ID"
-    STREAM_ID = "Stream ID"
 
     @staticmethod
-    def _union_task_ge_ai_core_data(data: list, ai_core_group_dict: dict, headers: list) -> list:
+    def _union_task_ge_ai_core_data(data: list, ai_core_group_dict: dict) -> list:
         union_data = []
         if not ai_core_group_dict or not data:
             # 没有pmu数据, 去除HCCL小算子
-            return AiCoreOpReport._filter_hccl_op(data, headers)
+            return AiCoreOpReport._filter_hccl_op(data)
         ai_core_data_len = len(ai_core_group_dict.get(next(iter(ai_core_group_dict)))[0])
-        task_type_idx = headers.index(AiCoreOpReport.TASK_TYPE)
-        task_id_idx = headers.index(AiCoreOpReport.TASK_ID)
-        stream_id_idx = headers.index(AiCoreOpReport.STREAM_ID)
-        context_id_idx = headers.index(AiCoreOpReport.ADDITION_HEADER[0])
+        # 全导和按step导，task type的索引是6; 按子图导，task type的索引是7
+        task_type_idx = 7 if ProfilingScene().is_graph_export() else 6
         for datum in data:
             if datum[task_type_idx] == Constant.TASK_TYPE_HCCL_AI_CPU:
                 # 针对helper场景, 去除运行在AI_CPU的HCCL小算子,
                 logging.info("Found ai cpu hccl small op of stream %d, task %d", datum[2], datum[1])
                 continue
-            # (batch_id, task_id, stream_id, context_id)作为key, -1是batch id的索引
-            key = (datum[-1], datum[task_id_idx], datum[stream_id_idx], datum[context_id_idx])
+            #  1-task_id, 2-stream_id, -2-context_id, -1-batch_id, (batch_id, task_id, stream_id, context_id)作为key
+            key = (datum[-1],) + datum[1:3] + (datum[-2],)
             if not AiCoreOpReport.IS_PMU_UNIQUE_ID:
                 # 不支持唯一id, (task_id, stream_id, context_id)作为key
                 key = key[1:]
@@ -114,9 +109,10 @@ class AiCoreOpReport:
         return union_data
 
     @staticmethod
-    def _filter_hccl_op(data: list, headers: list) -> list:
+    def _filter_hccl_op(data: list) -> list:
         filter_data = []
-        task_type_idx = headers.index(AiCoreOpReport.TASK_TYPE)
+        # 全导和按step导，task type的索引是6; 按子图导，task type的索引是7
+        task_type_idx = 7 if ProfilingScene().is_graph_export() else 6
         for datum in data:
             if datum[task_type_idx] in (Constant.TASK_TYPE_HCCL_AI_CPU, Constant.TASK_TYPE_HCCL):
                 logging.info("Found hccl small op of stream %d, task %d", datum[2], datum[1])
@@ -371,7 +367,7 @@ class AiCoreOpReport:
         data = DBManager.fetch_all_data(curs, union_sql, filter_params)
         if not data:
             return []
-        data = cls._union_task_ge_ai_core_data(data, ai_core_group_dict, headers)
+        data = cls._union_task_ge_ai_core_data(data, ai_core_group_dict)
         data = cls._update_op_name_from_hash(project_path, data)
         if ProfilingScene().is_graph_export():
             data = cls._update_model_name_and_infer_id(project_path, data)
