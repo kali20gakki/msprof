@@ -97,6 +97,7 @@ public:
     friend bool operator<(const HPFloat &op1, const HPFloat &op2);
     friend bool operator<=(const HPFloat &op1, const HPFloat &op2);
     // 定义精度, 只接受正整数参数
+    void SetPrecision(int32_t length);
     void SetPrecision(unsigned long length);
     void SetPrecision(long long length);
     void SetPrecision(double length) = delete;
@@ -104,7 +105,7 @@ public:
     template<typename T>
     void SetPrecision(T length);
     // 数据位数(有效位数+未占用位，不包含小数点）
-    size_t Len() const;
+    int32_t Len() const;
     // 输出字符串格式
     std::string Str();
     // 输出double格式，不建议使用
@@ -112,7 +113,7 @@ public:
     // 输出uint64格式
     uint64_t Uint64();
     // 量化，指定保留n位小数，不足n位不处理, 默认保留3位小数
-    void Quantize(unsigned long n = 3);
+    void Quantize(int32_t n = 3);
 private:
     // 清空数据，保留精度
     void Clear();
@@ -122,37 +123,39 @@ private:
     // 整体退位,用于将最小数量级位数按照四舍五入舍弃，处理精度溢出使用
     void BackSpace();
     // 移位操作，用于位数对齐
-    void MoveForward(long long step);
-    void MoveBackward(long long step);
+    void MoveForward(int32_t step);
+    void MoveBackward(int32_t step);
     // 返回最小数量级
-    long long MinDig() const;
+    int32_t MinDig() const;
     // 返回理论最小数量级
-    long long TheoreticalMinDig() const;
+    int32_t TheoreticalMinDig() const;
     // 坐标加法,基于num_坐标进行运算
-    void CoorAdd(signed char op, unsigned long psi);
+    void CoorAdd(signed char op, int32_t psi);
     // 数量级加法,基于多项式数量级进行运算
-    void DigAdd(signed char op, long long n);
+    void DigAdd(signed char op, int32_t n);
     // 坐标减法核心
-    void CoreCoorSub(signed char op, long long psi);
+    void CoreCoorSub(signed char op, int32_t psi);
     // 坐标减法
-    void CoorSub(signed char op, long long psi);
+    void CoorSub(signed char op, int32_t psi);
     // 数量级减法,基于多项式数量级进行运算
-    void DigSub(signed char op, long long d);
+    void DigSub(signed char op, int32_t d);
     // 化简字符串用于构造函数
     bool SimplifyStr(std::string &str);
 private:
     // 默认精度
-    unsigned long defaultPrecision_{30};
+    int32_t defaultPrecision_{30};
     // 允许最小精度
-    unsigned int minPrecision_{3};
+    int32_t minPrecision_{3};
+    // 允许最大精度
+    int32_t maxPrecision_{100};
     // 最大数量级,传入数据按数量级（多项式）表示，例如a1*10^2+a2*10^1+a3*10^0+a4*10^-1，本例中digit_=2
-    long long digit_{0};
+    int32_t digit_{0};
     // 数位,用于倒序存储数据
     std::vector<signed char> num_;
     // 符号, 正数为false，负数为true
     bool symbol_{false};
     // 动态长度，表示num_有效位数长度（计算过程中不恒等于占用位数）
-    unsigned long dynamicLen_{0};
+    int32_t dynamicLen_{0};
 };
 
 template<typename T>
@@ -174,7 +177,7 @@ HPFloat &HPFloat::operator=(const T &op)
 template<typename T>
 void Utils::HPFloat::SetPrecision(T length)
 {
-    SetPrecision(static_cast<long long>(length));
+    SetPrecision(static_cast<int32_t>(length));
 }
 
 const HPFloat ZERO(0);
