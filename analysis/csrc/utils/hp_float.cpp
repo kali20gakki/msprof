@@ -9,10 +9,11 @@
  * Creation Date      : 2024/1/10
  * *****************************************************************************
  */
-#include "analysis/csrc/utils/hp_float.h"
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
+#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/utils/hp_float.h"
 namespace Analysis {
 namespace Utils {
 namespace {
@@ -25,7 +26,7 @@ const int POWER_10 = 10; // 根据用途分别定义10，增加代码可读性
 // 主要用于msprof相关的大数运算
 HPFloat::HPFloat()
 {
-    for (int i = 0; i < defaultPrecision_; i++) {
+    for (int32_t i = 0; i < defaultPrecision_; i++) {
         num_.emplace_back(0);
     }
     symbol_ = false;
@@ -38,9 +39,9 @@ HPFloat::HPFloat(const HPFloat& value)
     *this = value;
 }
 
-size_t HPFloat::Len() const
+int32_t HPFloat::Len() const
 {
-    return num_.size();
+    return static_cast<int32_t>(num_.size());
 }
 
 // 清空数据，保留精度
@@ -56,7 +57,7 @@ void HPFloat::Clear()
 
 void HPFloat::Simple()
 {
-    unsigned long index = 0;
+    int32_t index = 0;
     // 计算末尾的零
     while (index < num_.size() && num_[index] == 0) {
         index++;
@@ -76,9 +77,16 @@ void HPFloat::Simple()
     }
 }
 
-void HPFloat::SetPrecision(unsigned long length)
+void HPFloat::SetPrecision(int32_t length)
 {
-    unsigned long oriLen = num_.size();
+    if (length < 0) {
+        ERROR("Invalid argument, SetPrecision function accepts only positive integer arguments");
+        return;
+    } else if (length > maxPrecision_) {
+        ERROR("Invalid argument, length exceeds maximum allowed precision");
+        return;
+    }
+    int32_t oriLen = static_cast<int32_t>(num_.size());
     if (oriLen == length) {
         return;
     }
@@ -87,23 +95,25 @@ void HPFloat::SetPrecision(unsigned long length)
     }
     // 判断需要扩容还是收缩
     if (length > oriLen) {
-        for (unsigned long i = 0; i < length - oriLen; i++) {
+        for (int32_t i = 0; i < length - oriLen; i++) {
             num_.emplace_back(0);
         }
     } else {
-        MoveForward(static_cast<long long>(oriLen - dynamicLen_ - 1));
-        MoveBackward(static_cast<long long>(oriLen - length));
+        MoveForward(oriLen - dynamicLen_ - 1);
+        MoveBackward(oriLen - length);
         num_.erase(num_.end() - oriLen + length, num_.end());
     }
     Simple();
 }
 
+void HPFloat::SetPrecision(unsigned long length)
+{
+    SetPrecision(static_cast<int32_t>(length));
+}
+
 void HPFloat::SetPrecision(long long length)
 {
-    if (length < 0) {
-        throw std::invalid_argument("Invalid argument, SetPrecision function accepts only positive integer arguments");
-    }
-    SetPrecision(static_cast<unsigned long>(length));
+    SetPrecision(static_cast<int32_t>(length));
 }
 
 void HPFloat::SetDynamicLen()
@@ -113,8 +123,8 @@ void HPFloat::SetDynamicLen()
         dynamicLen_ = num_.size() - 1;
         return;
     }
-    // 计算高位零的数量，这里i使用long long为了避免死循环
-    for (auto i = static_cast<long long>(num_.size() - 1); i >= 0; i--) {
+    // 计算高位零的数量，这里num_.size-1使用int32_t为了避免死循环
+    for (auto i = static_cast<int32_t>(num_.size() - 1); i >= 0; i--) {
         if (num_[i] == 0) {
             continue;
         } else {
@@ -124,22 +134,21 @@ void HPFloat::SetDynamicLen()
     }
 }
 
-long long HPFloat::MinDig() const
+int32_t HPFloat::MinDig() const
 {
-    return digit_ - static_cast<long long>(dynamicLen_);
+    return digit_ - dynamicLen_;
 }
 
-long long HPFloat::TheoreticalMinDig() const
+int32_t HPFloat::TheoreticalMinDig() const
 {
-    return digit_ - static_cast<long long>(num_.size()) + 1;
+    return digit_ - static_cast<int32_t>(num_.size()) + 1;
 }
 
 void HPFloat::BackSpace()
 {
     // 记录末位
     signed char tail = num_[0];
-    unsigned long len = dynamicLen_;
-    for (unsigned long i = 1; i <= len; i++) {
+    for (int32_t i = 1; i <= dynamicLen_; i++) {
         num_[i - 1] = num_[i];
         num_[i] = 0;
     }
@@ -150,7 +159,7 @@ void HPFloat::BackSpace()
     dynamicLen_ -= 1;
 }
 
-void HPFloat::MoveForward(long long step)
+void HPFloat::MoveForward(int32_t step)
 {
     if (!step) {
         return;
@@ -160,9 +169,7 @@ void HPFloat::MoveForward(long long step)
         MoveBackward(-step);
         return;
     }
-    unsigned long len = dynamicLen_;
-    // 这里i使用long long为了避免死循环
-    for (long long i = len; i >= 0; i--) {
+    for (int32_t i = dynamicLen_; i >= 0; i--) {
         // 处理超出精度范围情况
         if (step + i >= num_.size()) {
             continue;
@@ -173,7 +180,7 @@ void HPFloat::MoveForward(long long step)
     SetDynamicLen();
 }
 
-void HPFloat::MoveBackward(long long step)
+void HPFloat::MoveBackward(int32_t step)
 {
     if (!step) {
         return;
@@ -182,14 +189,13 @@ void HPFloat::MoveBackward(long long step)
         MoveForward(-step);
         return;
     }
-    unsigned long len = dynamicLen_;
     // 移动大于精度，全清，保留数量级
-    if (step > len + 1) {
+    if (step > dynamicLen_ + 1) {
         Clear();
         return;
     }
     signed char tail = num_[step -1];
-    for (unsigned long i = step; i <= len; i++) {
+    for (int32_t i = step; i <= dynamicLen_; i++) {
         num_[i - step] = num_[i];
         num_[i] = 0;
     }
@@ -206,7 +212,7 @@ bool HPFloat::SimplifyStr(std::string &str)
         symbol = true;
         str.erase(0, 1);
     }
-    long long index = 0;
+    int32_t index = 0;
     while (index < num_.size() && str[index] == '0') {
         index++;
     }
@@ -217,11 +223,11 @@ bool HPFloat::SimplifyStr(std::string &str)
     return symbol;
 }
 
-void HPFloat::CoorAdd(signed char op, unsigned long psi)
+void HPFloat::CoorAdd(signed char op, int32_t psi)
 {
     // 如果在已用精度之前，直接填充
     if (psi > dynamicLen_) {
-        digit_ += static_cast<long long>(psi - dynamicLen_);
+        digit_ += psi - dynamicLen_;
         num_[psi] = op;
         dynamicLen_ = psi;
         return;
@@ -234,7 +240,7 @@ void HPFloat::CoorAdd(signed char op, unsigned long psi)
         if (psi == num_.size() - 1) {
             // 退格让出一位精度
             BackSpace();
-            // 这里不会出现psi-1小于0的情况
+            // 这里不会出现psi-1小于0的情况,因为允许最小精度是3位
             num_[psi - 1] -= CARRY_THRESHOLD;
             temp = num_[psi - 1];
             digit_++;
@@ -252,7 +258,7 @@ void HPFloat::CoorAdd(signed char op, unsigned long psi)
     }
 }
 
-void HPFloat::DigAdd(signed char op, long long n)
+void HPFloat::DigAdd(signed char op, int32_t n)
 {
     Simple();
     // 给定数量级不超过数据最大数量级情况
@@ -264,7 +270,7 @@ void HPFloat::DigAdd(signed char op, long long n)
         // 如果超出理论最小精度范围1位，四舍五入处理末位数据
         if (TheoreticalMinDig() - 1 == n) {
             if (op >= ROUNDING_THRESHOLD) {
-                MoveForward(static_cast<long long>(Len() - dynamicLen_ - 1));
+                MoveForward(Len() - dynamicLen_ - 1);
                 CoorAdd(1, 0);
                 return;
             } else {
@@ -283,7 +289,7 @@ void HPFloat::DigAdd(signed char op, long long n)
             dynamicLen_ += n - digit_;
             num_[dynamicLen_] = op; // 精度足够，直接填充
         } else {
-            MoveBackward(static_cast<long long>(n - (MinDig() + Len() - 1))); // 精度不足，舍去末位数据
+            MoveBackward(n - (MinDig() + Len() - 1)); // 精度不足，舍去末位数据
             num_[num_.size() - 1] = op;
             dynamicLen_ = num_.size() - 1;
         }
@@ -291,7 +297,7 @@ void HPFloat::DigAdd(signed char op, long long n)
     }
 }
 
-void HPFloat::CoreCoorSub(signed char op, long long psi)
+void HPFloat::CoreCoorSub(signed char op, int32_t psi)
 {
     num_[psi] -= op;
     if (num_[psi] < 0) {
@@ -300,17 +306,17 @@ void HPFloat::CoreCoorSub(signed char op, long long psi)
     }
 }
 
-void HPFloat::CoorSub(signed char op, long long psi)
+void HPFloat::CoorSub(signed char op, int32_t psi)
 {
-    unsigned long prevLen = dynamicLen_;
+    int32_t prevLen = dynamicLen_;
     CoreCoorSub(op, psi);
     SetDynamicLen();
-    digit_ -= static_cast<long long>(prevLen - dynamicLen_);
+    digit_ -= prevLen - dynamicLen_;
     Simple();
 }
 
 // 不支持小减大，通过对外接口-,-=限制
-void HPFloat::DigSub(signed char op, long long n)
+void HPFloat::DigSub(signed char op, int32_t n)
 {
     // 如果超出理论最小精度范围1位以上，直接返回
     if (TheoreticalMinDig() - 1 > n) {
@@ -319,7 +325,7 @@ void HPFloat::DigSub(signed char op, long long n)
     // 如果超出理论最小精度范围1位，四舍五入处理末位数据
     if (TheoreticalMinDig() - 1 == n) {
         if (op >= ROUNDING_THRESHOLD) {
-            MoveForward(static_cast<long long>(Len() - dynamicLen_ - 1));
+            MoveForward(Len() - dynamicLen_ - 1);
             CoorSub(1, 0);
             return;
         } else {
@@ -328,7 +334,7 @@ void HPFloat::DigSub(signed char op, long long n)
     }
     // 是否需要平移来对齐
     if (MinDig() <= n) {
-        CoorSub(op, static_cast<long long>(n - digit_ + dynamicLen_));
+        CoorSub(op, n - digit_ + dynamicLen_);
     } else { // 给定数量级小于原数据最小数量级，原数据MoveForward提供存放空间
         MoveForward(MinDig() - n);
         CoorSub(op, 0);
@@ -348,15 +354,14 @@ std::string HPFloat::Str()
             str+= '0'; // 高位补零
         }
     }
-    // 这里i使用long long为了避免死循环
-    for (long long i = dynamicLen_; i >= 0; i--) {
+    for (int32_t i = dynamicLen_; i >= 0; i--) {
         str+= static_cast<char>(num_[i] + ASCII_0); // 循环输出
-        if (static_cast<long long>(dynamicLen_ - i) == digit_ && i != 0) {
+        if (dynamicLen_ - i == digit_ && i != 0) {
             str+= '.'; // 小数点
         }
     }
     // 低位补零
-    for (long long i = MinDig(); i > 0; i--) {
+    for (int32_t i = MinDig(); i > 0; i--) {
         str+= '0';
     }
 
@@ -367,8 +372,7 @@ double HPFloat::Double()
 {
     // 不建议输出Double格式，因为转Double过程本身会丢失精度
     double ans = 0;
-    // 这里i需要定义为long long，如果定义为unsigned long pow参数会发生“整数提升”问题指数变为unsigned long
-    for (long long i = 0; i <= dynamicLen_; i++) {
+    for (int32_t i = 0; i <= dynamicLen_; i++) {
         double temp = num_[i];
         temp *= pow(POWER_10, MinDig() + i);
         ans += temp; // 循环加法输出
@@ -379,9 +383,13 @@ double HPFloat::Double()
     return ans;
 }
 
-void HPFloat::Quantize(unsigned long n)
+void HPFloat::Quantize(int32_t n)
 {
-    long long offset = -MinDig() - n;
+    if (n < 0) {
+        ERROR("Invalid argument, Quantize function accepts only positive integer arguments");
+        return;
+    }
+    int32_t offset = -MinDig() - n;
     if (offset <= 0) {
         return;
     }
@@ -396,8 +404,8 @@ uint64_t HPFloat::Uint64()
         return UINT64_MAX;
     }
     uint64_t res = 0;
-    long long start = dynamicLen_ - digit_; // 需要显示的转为long long类型
-    for (long long i = dynamicLen_; i >= start; i--) {
+    int32_t start = dynamicLen_ - digit_; // dynamicLen_表示vector总长度，digit_表示最大位数，前者>=后者
+    for (int32_t i = dynamicLen_; i >= start; i--) {
         res = res * POWER_10 + num_[i];
     }
     return res;
@@ -410,8 +418,8 @@ HPFloat &HPFloat::operator=(const HPFloat &op)
     }
     Clear();
     SetPrecision(op.Len());
-    unsigned long len = op.dynamicLen_;
-    for (unsigned long i = 0; i <= len; ++i) {
+    int32_t len = op.dynamicLen_;
+    for (int32_t i = 0; i <= len; ++i) {
         this->num_[i] = op.num_[i];
     }
     digit_ = op.digit_;
@@ -425,23 +433,24 @@ HPFloat &HPFloat::operator=(unsigned long long op)
 {
     Clear();
     // 为了处理num数量级超过用例最大精度溢出情况，记录原始精度同时扩大当前精度
-    unsigned long oriPrecision = num_.size();
+    auto oriPrecision = static_cast<int32_t>(num_.size());
     // 取正
     unsigned long long num = op;
-    unsigned long n = 0;
+    int32_t n = 0;
     unsigned long long tmp = 1;
     while (tmp <= num) {
         // 计算数量级
         n++;
         num /= POWER_10;
     }
+    n = std::min(n, maxPrecision_); // 取最小值，防止vector溢出
     SetPrecision(std::max(oriPrecision, n));
-    for (unsigned long i = 0; i <= n; i++) {
+    for (int32_t i = 0; i <= n; i++) {
         // 逐个填入
         num_[i] = op % POWER_10;
         op = (op - op % POWER_10) / POWER_10;
     }
-    digit_ = static_cast<long long>(n - 1);
+    digit_ = n - 1;
     dynamicLen_ = n - 1;
     symbol_ = false;
     // 还原精度，正确处理精度丢失
@@ -491,31 +500,36 @@ HPFloat &HPFloat::operator=(const std::string &num)
     SetPrecision(std::max(oriPrecision, num.size()));
     std::string op = num;
     symbol_ = SimplifyStr(op);
-    bool ifDot = false;
-    unsigned long dotLoc = 0;
-    for (unsigned long i = 0; i < op.size(); i++) {
-        if (op[i] == '.') { // 记录小数点的位置
+    int8_t ifDot = 0;
+    int32_t dotLoc = 0;
+    int32_t count = 0; // 用于记录有效数字位数
+    for (int32_t i = 0; i < op.size() && count < maxPrecision_; i++) {
+        if (op[i] == '.') {
             if (ifDot) {
-                throw std::invalid_argument("Invalid character encountered");
+                ERROR("Invalid character encountered");
+                continue;
             }
-            ifDot = true;
+            ifDot = 1;
             dotLoc = i;
+            count += 1;
             continue;
         }
         if (op[i] < ASCII_0 || op[i] > ASCII_9) { // 遇到异常数据，抛出错误,行为与库函数一致,48:'0',57:'9'
-            throw std::invalid_argument("Invalid character encountered");
+            ERROR("Invalid character encountered");
+            continue;
         }
-        num_[i - ifDot] = op[i] - ASCII_0; // 录入数据
+        num_[i - ifDot] = op[i] - ASCII_0; // 录入数据， i恒定>=ifDot
+        count += 1;
     }
     if (op[op.size() - 1] == '.') { // 如果小数点在末尾
         op.erase(op.size() - 1, 1);
-        long long zeroNum = 0;
+        int32_t zeroNum = 0;
         while (zeroNum <= op.size() - 1 && op[op.size() - 1 - zeroNum] == '0') {
             zeroNum++;
         }
         digit_ += -zeroNum - 1; // 算出数量级
     } else {
-        digit_ += static_cast<long long>(op.size() - 1 - dotLoc - ifDot); // 算出数量级
+        digit_ += static_cast<int32_t>(op.size()) - 1 - dotLoc - ifDot; // 算出数量级
     }
     SetDynamicLen();
     SetPrecision(oriPrecision);
@@ -542,8 +556,8 @@ bool operator==(const HPFloat &op1, const HPFloat &op2)
     if (!(op1.digit_ == op2.digit_ && op1.dynamicLen_ == op2.dynamicLen_ && op1.symbol_ == op2.symbol_)) {
         return false;
     }
-    unsigned long length = op1.dynamicLen_;
-    for (unsigned long i = 0; i <= length; i++) {
+    int32_t length = op1.dynamicLen_;
+    for (int32_t i = 0; i <= length; i++) {
         if (op1.num_[i] != op2.num_[i]) { // 数位一一比较
             return false;
         }
@@ -574,11 +588,11 @@ bool operator>(const HPFloat &op1, const HPFloat &op2)
     if (op1.digit_ != op2.digit_) {
         return (op1.digit_ > op2.digit_) && !op1.symbol_;
     }
-    unsigned long len1 = op1.dynamicLen_;
-    unsigned long len2 = op2.dynamicLen_;
-    unsigned long minLen = std::min(len1, len2);
+    int32_t len1 = op1.dynamicLen_;
+    int32_t len2 = op2.dynamicLen_;
+    int32_t minLen = std::min(len1, len2);
     // 从最高数量级开始比较
-    for (unsigned long i = 0; i <= minLen; i++) {
+    for (int32_t i = 0; i <= minLen; i++) {
         if (op1.num_[len1- i] != op2.num_[len2 - i]) {
             return (op1.num_[len1 - i] > op2.num_[len2 - i]) && !op1.symbol_;
         }
@@ -644,9 +658,9 @@ HPFloat operator+=(HPFloat &op1, const HPFloat &op2)
     } else if (op2 == ZERO) {
         return op1;
     }
-    long long minDig = op2.MinDig();
+    int32_t minDig = op2.MinDig();
     // 一个个传入到DigAdd
-    for (unsigned long i = 0; i <= op2.dynamicLen_; i++) {
+    for (int32_t i = 0; i <= op2.dynamicLen_; i++) {
         op1.DigAdd(op2.num_[i], minDig + i);
     }
     return op1;
@@ -674,8 +688,8 @@ HPFloat operator-(const HPFloat &op1, const HPFloat &op2)
     HPFloat ans(bg ? op1 : op2);
     HPFloat op((!bg) ? op1 : op2);
     ans.symbol_ = !bg;
-    long long minDig = op.MinDig();
-    for (unsigned long i = 0; i <= op.dynamicLen_; i++) { // 循环传递参数
+    int32_t minDig = op.MinDig();
+    for (int32_t i = 0; i <= op.dynamicLen_; i++) { // 循环传递参数
         ans.DigSub(op.num_[i], minDig + i);
     }
     return ans;
