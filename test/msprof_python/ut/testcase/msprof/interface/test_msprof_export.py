@@ -16,6 +16,7 @@ from common_func.profiling_scene import ExportMode
 from msinterface.msprof_export import ExportCommand
 from msparser.step_trace.ts_binary_data_reader.task_flip_bean import TaskFlip
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
+from profiling_bean.prof_enum.export_data_type import ExportDataType
 from sqlite.db_manager import DBManager
 
 NAMESPACE = 'msinterface.msprof_export'
@@ -642,6 +643,16 @@ class TestExportCommand(unittest.TestCase):
             test = ExportCommand("summary", args)
             test._check_all_report("./")
         InfoConfReader()._info_json = {}
+
+    def test__multiprocessing_handle_export_data_raise_profexception(self) -> None:
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
+        args = Namespace(**args_dic)
+        for exception in [ProfException(13, "data exceed limit"), ProfException(2)]:
+            with mock.patch(NAMESPACE + '.ExportCommand._process_init'), \
+                    mock.patch(NAMESPACE + '.ExportCommand._handle_export_output_data', side_effect=exception):
+                test = ExportCommand("summary", args)
+                event = {'export_type': ExportDataType.TASK_TIME}
+                test._multiprocessing_handle_export_data(event, "test", "summary")
 
 
 if __name__ == '__main__':
