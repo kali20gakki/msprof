@@ -4,11 +4,13 @@
 
 import logging
 import multiprocessing
+import os
 import time
 from abc import abstractmethod
 
-from common_func.common import init_log
+from common_func.common import init_log, warn
 from common_func.constant import Constant
+from common_func.msprof_exception import ProfException
 from common_func.profiling_scene import ProfilingScene
 from common_func.profiling_scene import ExportMode
 from common_func.ms_constant.str_constant import StrConstant
@@ -19,6 +21,8 @@ class MsMultiProcess(multiprocessing.Process):
     """
     ms multi process base class
     """
+
+    FILE_NAME = os.path.basename(__file__)
 
     def __init__(self: any, sample_config: dict) -> None:
         super().__init__()
@@ -46,6 +50,12 @@ class MsMultiProcess(multiprocessing.Process):
         self.process_init()
         try:
             self.ms_run()
+        except ProfException as err:
+            if err.message:
+                err.callback(self.FILE_NAME, err.message)
+            else:
+                result_dir = self.sample_config.get("result_dir")
+                warn(self.FILE_NAME, 'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
         except Exception as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
         logging.info("%s process data finished, execute time is %.3f s",

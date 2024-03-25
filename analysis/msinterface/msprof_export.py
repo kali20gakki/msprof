@@ -567,7 +567,14 @@ class ExportCommand:
 
     def _multiprocessing_handle_export_data(self: any, event, result_dir, export_mode):
         ExportCommand._process_init(result_dir, export_mode)
-        self._handle_export_output_data(event, result_dir)
+        try:
+            self._handle_export_output_data(event, result_dir)
+        except ProfException as err:
+            if err.message:
+                err.callback(MsProfCommonConstant.COMMON_FILE_NAME, err.message)
+            else:
+                warn(MsProfCommonConstant.COMMON_FILE_NAME,
+                     'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
 
     def _handle_export_output_data(self: any, event, result_dir):
         if not self.list_map.get('devices_list', []):
