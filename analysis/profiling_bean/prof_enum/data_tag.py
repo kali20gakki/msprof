@@ -181,4 +181,5 @@ class ModuleName(Enum):
     ATRACE = 71
     RTC = 72
     SYSMONITOR = 73
-    INVLID_MOUDLE_ID = 74
+    MBUFF = 74
+    CUSTOM = 75
