@@ -102,16 +102,16 @@ int UnifiedDBManager::Init()
         return PROFILING_FAILED;
     }
 
-    // reportdb name and Path
-    reportDBPath_ = outputPath_ + "/" +
-                    DB_NAME_REPORT_DB + "_" + Analysis::Utils::GetFormatLocalTime() + ".db";
+    // msprofdb name and Path
+    msprofDBPath_ = outputPath_ + "/" +
+                    DB_NAME_MSPROF_DB + "_" + Analysis::Utils::GetFormatLocalTime() + ".db";
 
     return PROFILING_SUCCESS;
 }
 
 int UnifiedDBManager::Run()
 {
-    INFO("Start export report.db %", reportDBPath_);
+    INFO("Start export msprof.db %", msprofDBPath_);
     const uint16_t tableProcessors = 5; // 最多有五个线程
     Analysis::Utils::ThreadPool pool(tableProcessors);
     pool.Start();
@@ -119,7 +119,7 @@ int UnifiedDBManager::Run()
     for (const auto& name : PROCESSOR_NAME) {
         pool.AddTask([this, name, &retFlag]() {
             std::shared_ptr<TableProcessor> processor =
-                TableProcessorFactory::CreateTableProcessor(name, reportDBPath_, ProfFolderPaths_);
+                TableProcessorFactory::CreateTableProcessor(name, msprofDBPath_, ProfFolderPaths_);
             if (processor == nullptr) {
                 ERROR("% is not defined", name);
                 retFlag = false;
@@ -138,7 +138,7 @@ int UnifiedDBManager::Run()
 
     // string_id table 要在其他所有table 全部生成之后再去生成
     std::shared_ptr<TableProcessor> processor =
-        TableProcessorFactory::CreateTableProcessor(PROCESSOR_NAME_STRING_IDS, reportDBPath_, ProfFolderPaths_);
+        TableProcessorFactory::CreateTableProcessor(PROCESSOR_NAME_STRING_IDS, msprofDBPath_, ProfFolderPaths_);
     if (processor == nullptr) {
         ERROR("% is not defined", PROCESSOR_NAME_STRING_IDS);
         return PROFILING_FAILED;

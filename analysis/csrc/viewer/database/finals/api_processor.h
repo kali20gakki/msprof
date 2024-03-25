@@ -27,7 +27,7 @@ using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint16_t,
         uint64_t, uint64_t, uint64_t>>;
 public:
     ApiProcessor() = default;
-    ApiProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    ApiProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);
     bool Run() override;
 protected:
     bool Process(const std::string &fileDir) override;

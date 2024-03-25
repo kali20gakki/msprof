@@ -34,8 +34,8 @@ const std::string DEVICE = "device";
 const uint64_t DEVICE_INDEX = 1;
 }
 
-NpuMemProcessor::NpuMemProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : TableProcessor(reportDBPath, profPaths) {}
+NpuMemProcessor::NpuMemProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths)
+    : TableProcessor(msprofDBPath, profPaths) {}
 
 bool NpuMemProcessor::Run()
 {

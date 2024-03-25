@@ -32,7 +32,7 @@ class ComputeTaskInfoProcessor : public TableProcessor {
                                                        uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
 public:
     ComputeTaskInfoProcessor() = default;
-    ComputeTaskInfoProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    ComputeTaskInfoProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);
     virtual ~ComputeTaskInfoProcessor() = default;
     bool Run() override;
 protected:

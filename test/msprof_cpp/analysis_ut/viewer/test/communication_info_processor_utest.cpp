@@ -32,7 +32,7 @@ const uint16_t CONNECTION_ID_NUM = 3;
 const uint16_t OP_ID_NUM = 3;
 const uint16_t OP_DATATYPE_NUM = 3;
 const std::string COMMUNICATION_TASK_PATH = "./task_path";
-const std::string DB_PATH = File::PathJoin({COMMUNICATION_TASK_PATH, "report.db"});
+const std::string DB_PATH = File::PathJoin({COMMUNICATION_TASK_PATH, "msprof.db"});
 const std::string DEVICE_SUFFIX = "device_0";
 const std::string DB_SUFFIX = "hccl_single_device.db";
 const std::string PROF_PATH_A = File::PathJoin({COMMUNICATION_TASK_PATH,
@@ -205,18 +205,18 @@ void CheckOpInfo(CommunicationInfoProcessor::CommunicationOpDataFormat data)
 
 TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
-    std::shared_ptr<DBRunner> reportDBRunner;
+    std::shared_ptr<DBRunner> msprofDBRunner;
     CommunicationInfoProcessor::CommunicationTaskDataFormat taskResult;
     CommunicationInfoProcessor::CommunicationOpDataFormat opResult;
     std::string sql{"SELECT * FROM " + TABLE_NAME_COMMUNICATION_TASK_INFO};
-    MAKE_SHARED0_NO_OPERATION(reportDBRunner, DBRunner, DB_PATH);
+    MAKE_SHARED0_NO_OPERATION(msprofDBRunner, DBRunner, DB_PATH);
     auto processor = CommunicationInfoProcessor(DB_PATH, PROF_PATHS);
     EXPECT_TRUE(processor.Run());
-    reportDBRunner->QueryData(sql, taskResult);
+    msprofDBRunner->QueryData(sql, taskResult);
     CheckGlobalTaskId(taskResult);
     CheckStringId(taskResult);
     sql = "SELECT * FROM " + TABLE_NAME_COMMUNICATION_OP;
-    reportDBRunner->QueryData(sql, opResult);
+    msprofDBRunner->QueryData(sql, opResult);
     CheckOpInfo(opResult);
 }
 

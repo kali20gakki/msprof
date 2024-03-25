@@ -24,8 +24,8 @@ using namespace Analysis::Utils;
 using TimeDataFormat = std::vector<std::tuple<uint64_t, uint64_t>>;
 
 const std::string SESSION_TIME_INFO_DIR = "./session_time_info";
-const std::string REPORT = "report.db";
-const std::string DB_PATH = File::PathJoin({SESSION_TIME_INFO_DIR, REPORT});
+const std::string MSPROF = "msprof.db";
+const std::string DB_PATH = File::PathJoin({SESSION_TIME_INFO_DIR, MSPROF});
 
 class SessionTimeInfoProcessorUTest : public testing::Test {
 protected:

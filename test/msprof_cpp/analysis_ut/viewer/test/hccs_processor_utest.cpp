@@ -28,8 +28,8 @@ using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t,
 using QueryDataFormat = std::vector<std::tuple<uint32_t, uint64_t, uint64_t, uint64_t>>;
 
 const std::string HCCS_DIR = "./hccs";
-const std::string REPORT = "report.db";
-const std::string DB_PATH = File::PathJoin({HCCS_DIR, REPORT});
+const std::string MSPROF = "msprof.db";
+const std::string DB_PATH = File::PathJoin({HCCS_DIR, MSPROF});
 const std::string PROF = File::PathJoin({HCCS_DIR, "PROF"});
 
 const HccsDataFormat HCCS_DATA = {

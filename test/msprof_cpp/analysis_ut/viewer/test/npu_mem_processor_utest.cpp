@@ -26,7 +26,7 @@ using namespace Parser::Environment;
 namespace {
 const int DEPTH = 0;
 const std::string NPU_MEM_PATH = "./npu_mem_path";
-const std::string DB_PATH = File::PathJoin({NPU_MEM_PATH, "report.db"});
+const std::string DB_PATH = File::PathJoin({NPU_MEM_PATH, "msprof.db"});
 const std::string DEVICE_SUFFIX = "device_0";
 const std::string DB_SUFFIX = "npu_mem.db";
 const std::string PROF_PATH_A = File::PathJoin({NPU_MEM_PATH,

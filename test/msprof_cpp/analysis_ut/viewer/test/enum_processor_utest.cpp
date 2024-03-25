@@ -21,8 +21,8 @@ using namespace Analysis::Utils;
 using EnumDataFormat = std::vector<std::tuple<uint32_t, std::string>>;
 
 const std::string ENUM_DIR = "./enum";
-const std::string REPORT = "report.db";
-const std::string DB_PATH = File::PathJoin({ENUM_DIR, REPORT});
+const std::string MSPROF = "msprof.db";
+const std::string DB_PATH = File::PathJoin({ENUM_DIR, MSPROF});
 
 class EnumProcessorUTest : public testing::Test {
 protected:
@@ -102,10 +102,10 @@ TEST_F(EnumProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEm
 
 TEST_F(EnumProcessorUTest, TestRunShouldReturnFalseWhenMakeSharedFailedThenPtrIsNullptr)
 {
-    MOCKER_CPP(&std::make_shared<ReportDB>).stubs().will(throws(std::bad_alloc()));
+    MOCKER_CPP(&std::make_shared<MsprofDB>).stubs().will(throws(std::bad_alloc()));
     auto processor = EnumProcessor(DB_PATH, {""});
     EXPECT_FALSE(processor.Run());
-    MOCKER_CPP(&std::make_shared<ReportDB>).reset();
+    MOCKER_CPP(&std::make_shared<MsprofDB>).reset();
 }
 
 TEST_F(EnumProcessorUTest, TestRunShouldReturnFalseWhenCreateTableFailed)

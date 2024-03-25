@@ -25,7 +25,7 @@ class StringIdsProcessor : public TableProcessor {
     using ProcessedDataFormat = std::vector<std::tuple<uint64_t, std::string>>;
 public:
     StringIdsProcessor() = default;
-    explicit StringIdsProcessor(const std::string &reportDBPath);
+    explicit StringIdsProcessor(const std::string &msprofDBPath);
     virtual ~StringIdsProcessor() = default;
     bool Run() override;
 protected:

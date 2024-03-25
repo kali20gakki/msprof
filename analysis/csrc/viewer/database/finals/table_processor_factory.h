@@ -17,7 +17,7 @@
 #include <memory>
 
 #include "analysis/csrc/utils/utils.h"
-#include "analysis/csrc/viewer/database/finals/report_db.h"
+#include "analysis/csrc/viewer/database/finals/msprof_db.h"
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
 
 namespace Analysis {
@@ -28,7 +28,7 @@ namespace Database {
 class TableProcessorFactory {
 public:
     static std::shared_ptr<TableProcessor> CreateTableProcessor(const std::string &processorName,
-                                                                const std::string &reportDBPath,
+                                                                const std::string &msprofDBPath,
                                                                 const std::set<std::string> &profPaths);
     ~TableProcessorFactory() = default;
 };  // class TableProcessorFactory

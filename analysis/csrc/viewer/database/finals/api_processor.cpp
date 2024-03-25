@@ -35,8 +35,8 @@ struct ApiData {
 };
 }
 
-ApiProcessor::ApiProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : TableProcessor(reportDBPath, profPaths) {}
+ApiProcessor::ApiProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths)
+    : TableProcessor(msprofDBPath, profPaths) {}
 
 bool ApiProcessor::Run()
 {

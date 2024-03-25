@@ -3,14 +3,14 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : report_db.cpp
- * Description        : 定义reportDB中的表结构
+ * File Name          : msprof_db.cpp
+ * Description        : 定义msprofDB中的表结构
  * Author             : msprof team
  * Creation Date      : 2023/12/13
  * *****************************************************************************
  */
 
-#include "analysis/csrc/viewer/database/finals/report_db.h"
+#include "analysis/csrc/viewer/database/finals/msprof_db.h"
 
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
@@ -278,9 +278,9 @@ namespace {
     };
 }
 
-ReportDB::ReportDB()
+MsprofDB::MsprofDB()
 {
-    dbName_ = "report.db";
+    dbName_ = "msprof.db";
     tableColNames_ = {
         {TABLE_NAME_STRING_IDS, STRING_IDS},
         {TABLE_NAME_SESSION_TIME_INFO, SESSION_TIME_INFO},

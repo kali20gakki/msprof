@@ -27,8 +27,8 @@ struct HCCSOriData {
 };
 }
 
-HCCSProcessor::HCCSProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : TableProcessor(reportDBPath, profPaths) {}
+HCCSProcessor::HCCSProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths)
+    : TableProcessor(msprofDBPath, profPaths) {}
 
 bool HCCSProcessor::Run()
 {

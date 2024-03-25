@@ -29,7 +29,7 @@ public:
     static bool CheckProfDirsValid(const std::string& outputDir,
                                    const std::set<std::string> &profFolderPaths, std::string &errInfo);
 private:
-    std::string reportDBPath_;
+    std::string msprofDBPath_;
     std::string outputPath_;
     std::set<std::string> ProfFolderPaths_;
 };

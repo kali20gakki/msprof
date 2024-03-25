@@ -20,12 +20,12 @@
 #include "analysis/csrc/utils/utils.h"
 #include "analysis/csrc/utils/time_utils.h"
 #include "analysis/csrc/viewer/database/db_runner.h"
-#include "analysis/csrc/viewer/database/finals/report_db.h"
+#include "analysis/csrc/viewer/database/finals/msprof_db.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-// 该结构体用于区分原始db和report db 所需的对象和属性
+// 该结构体用于区分原始db和msprof db 所需的对象和属性
 // 规定了 db名字， table名字，和对应的database和dbRunner对象
 struct DBInfo {
     std::string dbName;
@@ -59,8 +59,8 @@ const uint8_t CHECK_FAILED = 2;
 class TableProcessor {
 public:
     TableProcessor() = default;
-    TableProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
-    TableProcessor(const std::string &reportDBPath);
+    TableProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);
+    TableProcessor(const std::string &msprofDBPath);
     virtual bool Run();
     virtual ~TableProcessor() = default;
 protected:
@@ -72,9 +72,9 @@ protected:
     static void PrintProcessorResult(bool result, const std::string &processorName);
     static bool GetGeHashMap(GeHashMap &hashMap, const std::string &fileDir);
     static uint8_t CheckPath(const std::string& path);
-    std::string reportDBPath_;
+    std::string msprofDBPath_;
     std::set<std::string> profPaths_;
-    DBInfo reportDB_;
+    DBInfo msprofDB_;
 }; // class TableProcessor
 
 template<typename... Args>
@@ -85,20 +85,20 @@ bool TableProcessor::SaveData(const std::vector<std::tuple<Args...>> &data, cons
         ERROR("% is empty.", tableName);
         return false;
     }
-    if (reportDB_.database == nullptr) {
-        ERROR("Report db database is nullptr.");
+    if (msprofDB_.database == nullptr) {
+        ERROR("Msprof db database is nullptr.");
         return false;
     }
-    if (reportDB_.dbRunner == nullptr) {
-        ERROR("Report db runner is nullptr.");
+    if (msprofDB_.dbRunner == nullptr) {
+        ERROR("Msprof db runner is nullptr.");
         return false;
     }
-    if (!reportDB_.dbRunner->CreateTable(tableName, reportDB_.database->GetTableCols(tableName))) {
+    if (!msprofDB_.dbRunner->CreateTable(tableName, msprofDB_.database->GetTableCols(tableName))) {
         ERROR("Create table: % failed", tableName);
         return false;
     }
-    if (!reportDB_.dbRunner->InsertData(tableName, data)) {
-        ERROR("Insert data into % failed", reportDBPath_);
+    if (!msprofDB_.dbRunner->InsertData(tableName, data)) {
+        ERROR("Insert data into % failed", msprofDBPath_);
         return false;
     }
     return true;

@@ -42,8 +42,8 @@ struct TaskData {
 };
 }
 
-TaskProcessor::TaskProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : TableProcessor(reportDBPath, profPaths) {}
+TaskProcessor::TaskProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths)
+    : TableProcessor(msprofDBPath, profPaths) {}
 
 bool TaskProcessor::Run()
 {

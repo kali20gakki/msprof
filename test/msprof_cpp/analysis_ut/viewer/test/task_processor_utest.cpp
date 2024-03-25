@@ -25,7 +25,7 @@ using namespace Analysis::Utils;
 using namespace Analysis::Parser;
 namespace {
 Utils::ProfTimeRecord Tbo;
-std::shared_ptr<DBRunner> ReportDBRunner;
+std::shared_ptr<DBRunner> MsprofDBRunner;
 const int DEPTH = 0;
 const uint16_t PLATFORM_VERSION = static_cast<uint16_t>(Environment::Chip::CHIP_V4_1_0);
 const uint64_t PID = 233;
@@ -35,7 +35,7 @@ const uint64_t BASE_TIME_NS = 8719641548578;
 const uint16_t OP_NUM = 10;
 const uint16_t STRING_NUM = 7;
 const std::string TASK_PATH = "./task_path";
-const std::string DB_PATH = File::PathJoin({TASK_PATH, "report.db"});
+const std::string DB_PATH = File::PathJoin({TASK_PATH, "msprof.db"});
 const std::string DEVICE_SUFFIX = "device_0";
 const std::string DB_SUFFIX = "ascend_task.db";
 const std::string SQLITE_SUFFIX = "sqlite";
@@ -143,7 +143,7 @@ void CheckStringId(ProcessedDataFormat data)
 TEST_F(TaskProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
     ProcessedDataFormat result;
-    MAKE_SHARED0_NO_OPERATION(ReportDBRunner, DBRunner, DB_PATH);
+    MAKE_SHARED0_NO_OPERATION(MsprofDBRunner, DBRunner, DB_PATH);
     std::string sql{"SELECT * FROM " + TARGET_TABLE_NAME};
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPlatformVersion)
     .stubs()
@@ -156,7 +156,7 @@ TEST_F(TaskProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
     .will(returnValue(true));
     auto processor = TaskProcessor(DB_PATH, PROF_PATHS);
     EXPECT_TRUE(processor.Run());
-    ReportDBRunner->QueryData(sql, result);
+    MsprofDBRunner->QueryData(sql, result);
     CheckGlobalTaskId(result);
     CheckStringId(result);
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetPlatformVersion).reset();

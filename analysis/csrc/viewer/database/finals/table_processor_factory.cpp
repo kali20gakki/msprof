@@ -12,6 +12,8 @@
 
 #include "analysis/csrc/viewer/database/finals/table_processor_factory.h"
 
+#include <unordered_map>
+
 #include "analysis/csrc/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/acc_pmu_processor.h"
 #include "analysis/csrc/viewer/database/finals/api_processor.h"
@@ -38,54 +40,85 @@ namespace Analysis {
 namespace Viewer {
 namespace Database {
 
+namespace {
+    using ProcessorConstructor = std::function<void(const std::string&, const std::set<std::string>&,
+                                                    std::shared_ptr<TableProcessor>&)>;
+    std::unordered_map<std::string, ProcessorConstructor> processorTable = {
+        {PROCESSOR_NAME_STRING_IDS,        [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, StringIdsProcessor, msprofDBPath);}},
+        {PROCESSOR_NAME_SESSION_TIME_INFO, [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, SessionTimeInfoProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_NPU_INFO,          [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, NpuInfoProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_ENUM,              [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, EnumProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_TASK,              [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, TaskProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_COMPUTE_TASK_INFO, [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, ComputeTaskInfoProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_COMMUNICATION,     [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, CommunicationInfoProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_API,               [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, ApiProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_NPU_MEM,           [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, NpuMemProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_NPU_MODULE_MEM,    [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, NpuModuleMemProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_NPU_OP_MEM,        [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, NpuOpMemProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_NIC,               [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, NicProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_ROCE,              [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, RoCEProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_HBM,               [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, HBMProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_DDR,               [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, DDRProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_PMU,               [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, PmuProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_LLC,               [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, LLCProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_PCIE,              [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, PCIeProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_HCCS,              [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, HCCSProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_ACC_PMU,           [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, AccPmuProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_SOC,               [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, SocProcessor, msprofDBPath, profPaths);}}
+    };
+}
+
 std::shared_ptr<TableProcessor> TableProcessorFactory::CreateTableProcessor(
     const std::string &processorName,
-    const std::string &reportDBPath,
+    const std::string &msprofDBPath,
     const std::set<std::string> &profPaths)
 {
     std::shared_ptr<TableProcessor> processor = nullptr;
-    if (processorName == PROCESSOR_NAME_STRING_IDS) {
-        MAKE_SHARED_RETURN_VALUE(processor, StringIdsProcessor, nullptr, reportDBPath);
-    } else if (processorName == PROCESSOR_NAME_SESSION_TIME_INFO) {
-        MAKE_SHARED_RETURN_VALUE(processor, NpuInfoProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_NPU_INFO) {
-        MAKE_SHARED_RETURN_VALUE(processor, SessionTimeInfoProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_ENUM) {
-        MAKE_SHARED_RETURN_VALUE(processor, EnumProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_TASK) {
-        MAKE_SHARED_RETURN_VALUE(processor, TaskProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_COMPUTE_TASK_INFO) {
-        MAKE_SHARED_RETURN_VALUE(processor, ComputeTaskInfoProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_COMMUNICATION) {
-        MAKE_SHARED_RETURN_VALUE(processor, CommunicationInfoProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_API) {
-        MAKE_SHARED_RETURN_VALUE(processor, ApiProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_NPU_MEM) {
-        MAKE_SHARED_RETURN_VALUE(processor, NpuMemProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_NPU_MODULE_MEM) {
-        MAKE_SHARED_RETURN_VALUE(processor, NpuModuleMemProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_NPU_OP_MEM) {
-        MAKE_SHARED_RETURN_VALUE(processor, NpuOpMemProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_NIC) {
-        MAKE_SHARED_RETURN_VALUE(processor, NicProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_ROCE) {
-        MAKE_SHARED_RETURN_VALUE(processor, RoCEProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_HBM) {
-        MAKE_SHARED_RETURN_VALUE(processor, HBMProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_DDR) {
-        MAKE_SHARED_RETURN_VALUE(processor, DDRProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_PMU) {
-        MAKE_SHARED_RETURN_VALUE(processor, PmuProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_LLC) {
-        MAKE_SHARED_RETURN_VALUE(processor, LLCProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_PCIE) {
-        MAKE_SHARED_RETURN_VALUE(processor, PCIeProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_HCCS) {
-        MAKE_SHARED_RETURN_VALUE(processor, HCCSProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_ACC_PMU) {
-        MAKE_SHARED_RETURN_VALUE(processor, AccPmuProcessor, nullptr, reportDBPath, profPaths);
-    } else if (processorName == PROCESSOR_NAME_SOC) {
-        MAKE_SHARED_RETURN_VALUE(processor, SocProcessor, nullptr, reportDBPath, profPaths);
+    auto item = processorTable.find(processorName);
+    if (item != processorTable.end()) {
+        item->second(msprofDBPath, profPaths, processor);
     }
     return processor;
 }

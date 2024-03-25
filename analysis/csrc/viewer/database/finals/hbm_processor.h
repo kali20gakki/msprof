@@ -25,7 +25,7 @@ class HBMProcessor : public TableProcessor {
     using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, uint8_t, uint64_t>>;
 public:
     HBMProcessor() = default;
-    HBMProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    HBMProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);
     bool Run() override;
 protected:
     bool Process(const std::string &fileDir) override;

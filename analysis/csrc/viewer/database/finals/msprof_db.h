@@ -3,15 +3,15 @@
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : report_db.h
- * Description        : 定义reportDB中的表结构
+ * File Name          : msprof_db.h
+ * Description        : 定义msprofDB中的表结构
  * Author             : msprof team
  * Creation Date      : 2023/12/13
  * *****************************************************************************
  */
 
-#ifndef ANALYSIS_VIEWER_DATABASE_REPORT_DB_H
-#define ANALYSIS_VIEWER_DATABASE_REPORT_DB_H
+#ifndef ANALYSIS_VIEWER_DATABASE_MSPROF_DB_H
+#define ANALYSIS_VIEWER_DATABASE_MSPROF_DB_H
 
 #include "analysis/csrc/viewer/database/database.h"
 
@@ -20,9 +20,9 @@ namespace Analysis {
 namespace Viewer {
 namespace Database {
 
-class ReportDB : public Database {
+class MsprofDB : public Database {
 public:
-    ReportDB();
+    MsprofDB();
 };
 
 
@@ -30,4 +30,4 @@ public:
 } // Viewer
 } // Analysis
 
-#endif // ANALYSIS_VIEWER_DATABASE_REPORT_DB_H
+#endif // ANALYSIS_VIEWER_DATABASE_MSPROF_DB_H

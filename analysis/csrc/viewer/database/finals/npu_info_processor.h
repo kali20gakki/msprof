@@ -24,7 +24,7 @@ class NpuInfoProcessor : public TableProcessor {
 using NpuInfoDataFormat = std::vector<std::tuple<uint16_t, std::string>>;
 public:
     NpuInfoProcessor() = default;
-    NpuInfoProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    NpuInfoProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);
     bool Run() override;
 protected:
     bool Process(const std::string &fileDir) override;

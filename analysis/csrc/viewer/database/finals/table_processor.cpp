@@ -25,18 +25,18 @@ const uint32_t POOLNUM = 2;
 const uint64_t INVALID_DB_SIZE = 0;
 }
 
-TableProcessor::TableProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : reportDBPath_(reportDBPath), profPaths_(profPaths)
+TableProcessor::TableProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths)
+    : msprofDBPath_(msprofDBPath), profPaths_(profPaths)
 {
-    MAKE_SHARED0_NO_OPERATION(reportDB_.database, ReportDB);
-    MAKE_SHARED_NO_OPERATION(reportDB_.dbRunner, DBRunner, reportDBPath_);
+    MAKE_SHARED0_NO_OPERATION(msprofDB_.database, MsprofDB);
+    MAKE_SHARED_NO_OPERATION(msprofDB_.dbRunner, DBRunner, msprofDBPath_);
 }
 
-TableProcessor::TableProcessor(const std::string &reportDBPath)
-    : reportDBPath_(reportDBPath)
+TableProcessor::TableProcessor(const std::string &msprofDBPath)
+    : msprofDBPath_(msprofDBPath)
 {
-    MAKE_SHARED0_NO_OPERATION(reportDB_.database, ReportDB);
-    MAKE_SHARED_NO_OPERATION(reportDB_.dbRunner, DBRunner, reportDBPath_);
+    MAKE_SHARED0_NO_OPERATION(msprofDB_.database, MsprofDB);
+    MAKE_SHARED_NO_OPERATION(msprofDB_.dbRunner, DBRunner, msprofDBPath_);
 }
 
 bool TableProcessor::Run()
@@ -105,11 +105,11 @@ bool TableProcessor::CreateTableIndex(const std::string &tableName, const std::s
                                       const std::vector<std::string> &colNames) const
 {
     INFO("Processor CreateTableIndex, table is % , indexName is %.", tableName, indexName);
-    if (reportDB_.dbRunner == nullptr) {
+    if (msprofDB_.dbRunner == nullptr) {
         ERROR("Report db runner is nullptr.");
         return false;
     }
-    if (!reportDB_.dbRunner->CreateIndex(tableName, indexName, colNames)) {
+    if (!msprofDB_.dbRunner->CreateIndex(tableName, indexName, colNames)) {
         ERROR("Create table index failed, table is % , indexName is %.", tableName, indexName);
         return false;
     }

@@ -25,7 +25,7 @@ class SocProcessor : public TableProcessor {
     using ProcessedDataFormat = std::vector<std::tuple<uint32_t, uint32_t, uint64_t, uint16_t>>;
 public:
     SocProcessor() = default;
-    SocProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    SocProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);
     virtual ~SocProcessor() = default;
     bool Run() override;
 protected:

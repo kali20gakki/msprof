@@ -25,7 +25,7 @@ class NpuMemProcessor : public TableProcessor {
     using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint16_t>>;
 public:
     NpuMemProcessor() = default;
-    NpuMemProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    NpuMemProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);
     virtual ~NpuMemProcessor() = default;
     bool Run() override;
 protected:

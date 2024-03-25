@@ -26,7 +26,7 @@ namespace {
     const std::string DEVICE_DIR = "device_0";
     const std::string DB_NAME = "llc.db";
     const std::string TABLE_NAME = "LLCMetrics";
-    const std::string DB_PATH = File::PathJoin({LLC_PATH, "report.db"});
+    const std::string DB_PATH = File::PathJoin({LLC_PATH, "msprof.db"});
     const std::string PROF_PATH_A = File::PathJoin({LLC_PATH,
                                                     "./PROF_000001_20231125090304037_02333394MBJNQLKJ"});
     const std::string PROF_PATH_B = File::PathJoin({LLC_PATH,
