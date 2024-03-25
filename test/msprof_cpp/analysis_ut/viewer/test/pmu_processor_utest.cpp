@@ -47,8 +47,8 @@ using PSSFormat = std::vector<std::tuple<uint16_t, uint64_t, double, uint16_t, u
 using PTFormat = std::vector<std::tuple<uint64_t, uint64_t, double>>;
 
 const std::string PMU_DIR = "./pmu";
-const std::string REPORT = "report.db";
-const std::string DB_PATH = File::PathJoin({PMU_DIR, REPORT});
+const std::string MSPROF = "msprof.db";
+const std::string DB_PATH = File::PathJoin({PMU_DIR, MSPROF});
 const std::string PROF = File::PathJoin({PMU_DIR, "PROF"});
 const std::string TASK_BASED = "task-based";
 const std::string SAMPLE_BASED = "sample-based";

@@ -24,8 +24,8 @@ using namespace Analysis::Utils;
 using NpuInfoDataFormat = std::vector<std::tuple<uint32_t, std::string>>;
 
 const std::string NPU_INFO_DIR = "./npu_info";
-const std::string REPORT = "report.db";
-const std::string DB_PATH = File::PathJoin({NPU_INFO_DIR, REPORT});
+const std::string MSPROF = "msprof.db";
+const std::string DB_PATH = File::PathJoin({NPU_INFO_DIR, MSPROF});
 
 class NpuInfoProcessorUTest : public testing::Test {
 protected:

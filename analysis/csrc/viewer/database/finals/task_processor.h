@@ -29,7 +29,7 @@ class TaskProcessor : public TableProcessor {
                                                        uint64_t, uint32_t, uint32_t, int32_t, uint32_t, uint32_t>>;
 public:
     TaskProcessor() = default;
-    TaskProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    TaskProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);
     virtual ~TaskProcessor() = default;
     bool Run() override;
 protected:

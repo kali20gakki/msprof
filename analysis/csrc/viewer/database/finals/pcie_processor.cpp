@@ -39,8 +39,8 @@ struct PCIeOriData {
 };
 }
 
-PCIeProcessor::PCIeProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : TableProcessor(reportDBPath, profPaths) {}
+PCIeProcessor::PCIeProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths)
+    : TableProcessor(msprofDBPath, profPaths) {}
 
 bool PCIeProcessor::Run()
 {

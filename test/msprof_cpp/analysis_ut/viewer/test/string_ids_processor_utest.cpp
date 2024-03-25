@@ -23,7 +23,7 @@ using namespace Analysis::Utils;
 namespace {
 const int DEPTH = 0;
 const std::string STRING_IDS_PATH = "./string_ids_path";
-const std::string DB_PATH = File::PathJoin({STRING_IDS_PATH, "report.db"});
+const std::string DB_PATH = File::PathJoin({STRING_IDS_PATH, "msprof.db"});
 const uint16_t STRING_NUM = 2;
 const std::string TARGET_TABLE_NAME = "STRING_IDS";
 using PROCESSED_DATA_FORMAT = std::vector<std::tuple<uint64_t, std::string>>;
@@ -63,14 +63,14 @@ void CheckStringId(PROCESSED_DATA_FORMAT data)
 
 TEST_F(StringIdsProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
-    std::shared_ptr<DBRunner> ReportDBRunner;
+    std::shared_ptr<DBRunner> MsprofDBRunner;
     PROCESSED_DATA_FORMAT result;
-    MAKE_SHARED0_NO_OPERATION(ReportDBRunner, DBRunner, DB_PATH);
+    MAKE_SHARED0_NO_OPERATION(MsprofDBRunner, DBRunner, DB_PATH);
     auto processor = StringIdsProcessor(DB_PATH);
     IdPool::GetInstance().GetUint64Id("pool");
     EXPECT_TRUE(processor.Run());
     std::string sql{"SELECT * FROM " + TARGET_TABLE_NAME};
-    ReportDBRunner->QueryData(sql, result);
+    MsprofDBRunner->QueryData(sql, result);
     CheckStringId(result);
 }
 

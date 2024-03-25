@@ -28,7 +28,7 @@ namespace {
 const int DEPTH = 0;
 const uint16_t STRING_NUM = 4;
 const std::string NPU_OP_MEM_PATH = "./npu_op_mem_path";
-const std::string DB_PATH = File::PathJoin({NPU_OP_MEM_PATH, "report.db"});
+const std::string DB_PATH = File::PathJoin({NPU_OP_MEM_PATH, "msprof.db"});
 const std::string HOST_SUFFIX = "host";
 const std::string DB_SUFFIX = "task_memory.db";
 const std::string DB_HASH_SUFFIX = "ge_hash.db";
@@ -132,13 +132,13 @@ void CheckStringId(ProcessedDataFormat data)
 
 TEST_F(NpuOpMemProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
-    std::shared_ptr<DBRunner> reportDBRunner;
+    std::shared_ptr<DBRunner> msprofDBRunner;
     ProcessedDataFormat memResult;
     std::string sql{"SELECT * FROM " + TABLE_NAME_NPU_OP_MEM};
-    MAKE_SHARED0_NO_OPERATION(reportDBRunner, DBRunner, DB_PATH);
+    MAKE_SHARED0_NO_OPERATION(msprofDBRunner, DBRunner, DB_PATH);
     auto processor = NpuOpMemProcessor(DB_PATH, PROF_PATHS);
     EXPECT_TRUE(processor.Run());
-    reportDBRunner->QueryData(sql, memResult);
+    msprofDBRunner->QueryData(sql, memResult);
     CheckStringId(memResult);
 }
 

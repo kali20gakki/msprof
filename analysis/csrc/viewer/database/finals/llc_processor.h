@@ -27,7 +27,7 @@ public:
     using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint32_t, uint64_t, double, uint64_t, uint64_t>>;
 
     LLCProcessor() = default;
-    LLCProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    LLCProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);
     virtual ~LLCProcessor() = default;
     bool Run() override;
 

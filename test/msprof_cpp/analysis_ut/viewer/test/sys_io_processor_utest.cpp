@@ -35,8 +35,8 @@ using QueryataFormat = std::vector<std::tuple<uint32_t, double, uint32_t, double
     uint32_t, uint32_t, uint32_t, double, double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t>>;
 
 const std::string SYS_IO_DIR = "./sys_io";
-const std::string REPORT = "report.db";
-const std::string DB_PATH = File::PathJoin({SYS_IO_DIR, REPORT});
+const std::string MSPROF = "msprof.db";
+const std::string DB_PATH = File::PathJoin({SYS_IO_DIR, MSPROF});
 const std::string PROF = File::PathJoin({SYS_IO_DIR, "PROF"});
 
 const SysIODataFormat NIC_DATA = {

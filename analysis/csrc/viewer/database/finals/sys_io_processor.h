@@ -29,7 +29,7 @@ using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t,
         uint32_t, uint32_t, uint32_t, double, double, uint32_t, uint32_t, uint32_t, uint32_t, uint16_t>>;
 public:
     SysIOProcessor() = default;
-    SysIOProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths,
+    SysIOProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths,
                    const std::string &processorName);
     bool Run() override;
 protected:
@@ -48,14 +48,14 @@ private:
 class NicProcessor : public SysIOProcessor {
 public:
     NicProcessor() = default;
-    NicProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    NicProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);
 };
 
 // 处理RoCE数据
 class RoCEProcessor : public SysIOProcessor {
 public:
     RoCEProcessor() = default;
-    RoCEProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    RoCEProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);
 };
 
 

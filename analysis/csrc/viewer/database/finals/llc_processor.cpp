@@ -38,8 +38,8 @@ struct LLCData {
 std::unordered_set<std::string> LLC_MODES = {LLC_PROFILING_READ, LLC_PROFILING_WRITE};
 }
 
-LLCProcessor::LLCProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : TableProcessor(reportDBPath, profPaths)
+LLCProcessor::LLCProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths)
+    : TableProcessor(msprofDBPath, profPaths)
 {}
 
 bool LLCProcessor::Run()

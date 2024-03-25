@@ -46,9 +46,9 @@ const std::unordered_map<std::string, std::tuple<std::string, std::string, std::
 };
 }
 
-SysIOProcessor::SysIOProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths,
+SysIOProcessor::SysIOProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths,
                                const std::string &processorName)
-    : TableProcessor(reportDBPath, profPaths), processorName_(processorName) {}
+    : TableProcessor(msprofDBPath, profPaths), processorName_(processorName) {}
 
 bool SysIOProcessor::Run()
 {
@@ -161,11 +161,11 @@ bool SysIOProcessor::FormatData(const ThreadData &threadData,
     return true;
 }
 
-NicProcessor::NicProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : SysIOProcessor(reportDBPath, profPaths, PROCESSOR_NAME_NIC) {}
+NicProcessor::NicProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths)
+    : SysIOProcessor(msprofDBPath, profPaths, PROCESSOR_NAME_NIC) {}
 
-RoCEProcessor::RoCEProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : SysIOProcessor(reportDBPath, profPaths, PROCESSOR_NAME_ROCE) {}
+RoCEProcessor::RoCEProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths)
+    : SysIOProcessor(msprofDBPath, profPaths, PROCESSOR_NAME_ROCE) {}
 
 
 } // Database

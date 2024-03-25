@@ -38,8 +38,8 @@ const std::string RELEASE = "release";
 const std::string ALLOCATE = "allocate";
 }
 
-NpuOpMemProcessor::NpuOpMemProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : TableProcessor(reportDBPath, profPaths) {}
+NpuOpMemProcessor::NpuOpMemProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths)
+    : TableProcessor(msprofDBPath, profPaths) {}
 
 bool NpuOpMemProcessor::Run()
 {

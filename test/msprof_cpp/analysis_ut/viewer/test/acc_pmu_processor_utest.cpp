@@ -22,7 +22,7 @@ using namespace Analysis::Parser;
 namespace {
 const int DEPTH = 0;
 const std::string BASE_PATH = "./acc_path";
-const std::string DB_PATH = File::PathJoin({BASE_PATH, "report.db"});
+const std::string DB_PATH = File::PathJoin({BASE_PATH, "msprof.db"});
 const std::string DEVICE = "device_0";
 const std::string DB_NAME = "acc_pmu.db";
 const std::string PROF_PATH_A = File::PathJoin({BASE_PATH, "./PROF_000001_20231125090304037_02333394MBJNQLKJ"});

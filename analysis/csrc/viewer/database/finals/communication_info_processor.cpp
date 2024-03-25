@@ -40,9 +40,9 @@ uint64_t GetGroupNameValue(const std::string &groupName, GeHashMap &hashMap)
 }
 }
 
-CommunicationInfoProcessor::CommunicationInfoProcessor(const std::string &reportDBPath,
+CommunicationInfoProcessor::CommunicationInfoProcessor(const std::string &msprofDBPath,
                                                        const std::set<std::string> &profPaths)
-    : TableProcessor(reportDBPath, profPaths) {}
+    : TableProcessor(msprofDBPath, profPaths) {}
 
 bool CommunicationInfoProcessor::Run()
 {

@@ -45,9 +45,9 @@ struct ComputeTaskInfoData {
     {}
 };
 
-ComputeTaskInfoProcessor::ComputeTaskInfoProcessor(const std::string &reportDBPath,
+ComputeTaskInfoProcessor::ComputeTaskInfoProcessor(const std::string &msprofDBPath,
                                                    const std::set<std::string> &profPaths)
-    : TableProcessor(reportDBPath, profPaths) {}
+    : TableProcessor(msprofDBPath, profPaths) {}
 
 bool ComputeTaskInfoProcessor::Run()
 {

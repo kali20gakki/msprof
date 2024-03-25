@@ -27,7 +27,7 @@ class AccPmuProcessor : public TableProcessor {
                                                        uint32_t, uint32_t, uint64_t, uint16_t>>;
 public:
     AccPmuProcessor() = default;
-    AccPmuProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    AccPmuProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);
     virtual ~AccPmuProcessor() = default;
     bool Run() override;
 protected:

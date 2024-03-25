@@ -37,7 +37,7 @@ using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t,
 
 public:
     PCIeProcessor() = default;
-    PCIeProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    PCIeProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);
     bool Run() override;
 protected:
     bool Process(const std::string &fileDir) override;

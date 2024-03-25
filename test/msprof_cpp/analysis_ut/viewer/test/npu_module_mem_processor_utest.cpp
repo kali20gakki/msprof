@@ -27,7 +27,7 @@ using namespace Analysis::Parser;
 namespace {
 const int DEPTH = 0;
 const std::string NPU_MODULE_MEM_PATH = "./npu_module_mem_path";
-const std::string DB_PATH = File::PathJoin({NPU_MODULE_MEM_PATH, "report.db"});
+const std::string DB_PATH = File::PathJoin({NPU_MODULE_MEM_PATH, "msprof.db"});
 const std::string DEVICE_SUFFIX = "device_0";
 const std::string DB_SUFFIX = "npu_module_mem.db";
 const std::string PROF_PATH_A = File::PathJoin({NPU_MODULE_MEM_PATH,

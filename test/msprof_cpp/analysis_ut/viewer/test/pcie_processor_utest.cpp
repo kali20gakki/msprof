@@ -36,8 +36,8 @@ using ProcessedDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t,
         uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
 
 const std::string PCIE_DIR = "./pcie";
-const std::string REPORT = "report.db";
-const std::string DB_PATH = File::PathJoin({PCIE_DIR, REPORT});
+const std::string MSPROF = "msprof.db";
+const std::string DB_PATH = File::PathJoin({PCIE_DIR, MSPROF});
 const std::string PROF = File::PathJoin({PCIE_DIR, "PROF"});
 
 // 一条异常的数据

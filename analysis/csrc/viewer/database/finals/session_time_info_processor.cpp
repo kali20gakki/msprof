@@ -19,9 +19,9 @@ namespace Viewer {
 namespace Database {
 using Context = Parser::Environment::Context;
 
-SessionTimeInfoProcessor::SessionTimeInfoProcessor(const std::string &reportDBPath,
+SessionTimeInfoProcessor::SessionTimeInfoProcessor(const std::string &msprofDBPath,
                                                    const std::set<std::string> &profPaths)
-    : TableProcessor(reportDBPath, profPaths) {}
+    : TableProcessor(msprofDBPath, profPaths) {}
 
 bool SessionTimeInfoProcessor::Run()
 {

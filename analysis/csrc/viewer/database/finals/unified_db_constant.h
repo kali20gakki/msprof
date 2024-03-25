@@ -26,7 +26,7 @@ const std::string DEVICE_PREFIX = "device_";
 const std::string SQLITE = "sqlite";
 
 // db name
-const std::string DB_NAME_REPORT_DB = "report";
+const std::string DB_NAME_MSPROF_DB = "msprof";
 
 // processor name & table name
 const std::string PROCESSOR_NAME_STRING_IDS = "STRING_IDS";

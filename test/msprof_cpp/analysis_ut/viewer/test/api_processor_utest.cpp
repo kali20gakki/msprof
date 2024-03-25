@@ -35,8 +35,8 @@ using QueryDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t,
         uint64_t, uint64_t, uint64_t>>;
 
 const std::string API_DIR = "./api";
-const std::string REPORT = "report.db";
-const std::string DB_PATH = File::PathJoin({API_DIR, REPORT});
+const std::string MSPROF = "msprof.db";
+const std::string DB_PATH = File::PathJoin({API_DIR, MSPROF});
 const std::string PROF0 = File::PathJoin({API_DIR, "PROF_0"});
 const std::string PROF1 = File::PathJoin({API_DIR, "PROF_1"});
 const std::string PROF2 = File::PathJoin({API_DIR, "PROF_2"});

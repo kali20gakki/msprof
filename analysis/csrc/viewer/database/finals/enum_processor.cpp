@@ -24,8 +24,8 @@ const std::unordered_map<std::string, std::unordered_map<std::string, uint16_t>>
 };
 }
 
-EnumProcessor::EnumProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : TableProcessor(reportDBPath, profPaths) {}
+EnumProcessor::EnumProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths)
+    : TableProcessor(msprofDBPath, profPaths) {}
 
 bool EnumProcessor::Run()
 {

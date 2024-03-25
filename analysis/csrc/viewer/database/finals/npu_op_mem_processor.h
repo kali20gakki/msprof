@@ -27,7 +27,7 @@ class NpuOpMemProcessor : public TableProcessor {
                                                        uint64_t, uint64_t, uint64_t, uint16_t>>;
 public:
     NpuOpMemProcessor() = default;
-    NpuOpMemProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths);
+    NpuOpMemProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);
     virtual ~NpuOpMemProcessor() = default;
     bool Run() override;
 protected:

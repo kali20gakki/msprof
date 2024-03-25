@@ -55,8 +55,8 @@ struct SampleSummaryData {
 };
 }
 
-PmuProcessor::PmuProcessor(const std::string &reportDBPath, const std::set<std::string> &profPaths)
-    : TableProcessor(reportDBPath, profPaths) {}
+PmuProcessor::PmuProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths)
+    : TableProcessor(msprofDBPath, profPaths) {}
 
 bool PmuProcessor::Run()
 {

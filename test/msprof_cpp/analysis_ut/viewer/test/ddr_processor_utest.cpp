@@ -23,7 +23,7 @@ using namespace Parser::Environment;
 namespace {
 const int DEPTH = 0;
 const std::string BASE_PATH = "./ddr_path";
-const std::string DB_PATH = File::PathJoin({BASE_PATH, "report.db"});
+const std::string DB_PATH = File::PathJoin({BASE_PATH, "msprof.db"});
 const std::string DEVICE_SUFFIX = "device_0";
 const std::string DB_SUFFIX = "ddr.db";
 const std::string SQLITE_SUFFIX = "sqlite";

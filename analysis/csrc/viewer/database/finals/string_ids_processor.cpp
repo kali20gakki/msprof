@@ -19,8 +19,8 @@ namespace Viewer {
 namespace Database {
 using namespace Association::Credential;
 
-StringIdsProcessor::StringIdsProcessor(const std::string &reportDBPath)
-    : TableProcessor(reportDBPath) {}
+StringIdsProcessor::StringIdsProcessor(const std::string &msprofDBPath)
+    : TableProcessor(msprofDBPath) {}
 
 bool StringIdsProcessor::Run()
 {

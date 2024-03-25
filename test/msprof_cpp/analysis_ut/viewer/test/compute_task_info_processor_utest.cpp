@@ -22,12 +22,12 @@ using namespace Analysis::Viewer::Database;
 using namespace Analysis::Association::Credential;
 using namespace Analysis::Utils;
 namespace {
-std::shared_ptr<DBRunner> ReportDBRunner;
+std::shared_ptr<DBRunner> MsprofDBRunner;
 const int DEPTH = 0;
 const uint16_t OP_NUM = 4;
 const uint16_t STRING_NUM = 18;
 const std::string COMPUTE_TASK_PATH = "./compute_task_path";
-const std::string DB_PATH = File::PathJoin({COMPUTE_TASK_PATH, "report.db"});
+const std::string DB_PATH = File::PathJoin({COMPUTE_TASK_PATH, "msprof.db"});
 const std::string HOST_SUFFIX = "host";
 const std::string DB_SUFFIX = "ge_info.db";
 const std::string SQLITE_SUFFIX = "sqlite";
@@ -143,11 +143,11 @@ void CheckStringId(PROCESSED_DATA_FORMAT data)
 TEST_F(ComputeTaskInfoProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
     PROCESSED_DATA_FORMAT result;
-    MAKE_SHARED0_NO_OPERATION(ReportDBRunner, DBRunner, DB_PATH);
+    MAKE_SHARED0_NO_OPERATION(MsprofDBRunner, DBRunner, DB_PATH);
     std::string sql{"SELECT * FROM " + TARGET_TABLE_NAME};
     auto processor = ComputeTaskInfoProcessor(DB_PATH, PROF_PATHS);
     EXPECT_TRUE(processor.Run());
-    ReportDBRunner->QueryData(sql, result);
+    MsprofDBRunner->QueryData(sql, result);
     CheckGlobalTaskId(result);
     CheckStringId(result);
 }
