@@ -179,7 +179,7 @@ class HostSyscallPresenter(HostProfPresenterBase):
         else:
             command_name = '*'
             command_tid = pid
-            api_name = command_api_list[0].split('(')[0] if len(command_api_list) == 2 else "NA"
+            api_name = command_api_list[0].split('(')[0] if len(command_api_list) != 0 else "NA"
         return command_name, command_tid, api_name
 
     @staticmethod
