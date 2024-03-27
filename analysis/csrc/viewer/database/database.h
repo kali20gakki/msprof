@@ -64,14 +64,9 @@ public:
     HashDB();
 };
 
-class FusionOpInfoDB : public Database {
+class GeModelInfoDB : public Database {
 public:
-    FusionOpInfoDB();
-};
-
-class GraphIdMapDB : public Database {
-public:
-    GraphIdMapDB();
+    GeModelInfoDB();
 };
 
 class HCCLDB : public Database {

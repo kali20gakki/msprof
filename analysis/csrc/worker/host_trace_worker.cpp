@@ -20,8 +20,7 @@
 #include "analysis/csrc/viewer/database/drafts/cann_trace_db_dumper.h"
 #include "analysis/csrc/viewer/database/drafts/api_event_db_dumper.h"
 #include "analysis/csrc/viewer/database/drafts/flip_task_db_dumper.h"
-#include "analysis/csrc/viewer/database/drafts/fusion_op_dumper.h"
-#include "analysis/csrc/viewer/database/drafts/graph_id_map_db_dumper.h"
+#include "analysis/csrc/viewer/database/drafts/model_name_db_dumper.h"
 
 using namespace Analysis::Utils;
 using namespace Analysis::Parser::Host::Cann;
@@ -68,29 +67,16 @@ bool HostTraceWorker::Run()
             }
         });
         pool.AddTask([this, &hostDataPath]() {
-            TimeLogger t{"Dump fusion op start"};
-            // fusion op 数据落盘
-            std::shared_ptr<FusionOpInfoParser> parser;
-            MAKE_SHARED_RETURN_VOID(parser, FusionOpInfoParser, hostDataPath);
-            auto fusionOps = parser->ParseData<MsprofAdditionalInfo>();
-            std::shared_ptr<FusionOpDumper> dumper;
-            MAKE_SHARED_RETURN_VOID(dumper, FusionOpDumper, hostPath_);
-            auto ret = dumper->DumpData(fusionOps);
-            if (!ret) {
-                ERROR("Dump fusion op failed");
-            }
-        });
-        pool.AddTask([this, &hostDataPath]() {
-            TimeLogger t{"Dump graph id map data start"};
+            TimeLogger t{"Dump model name data start"};
             std::shared_ptr<GraphIdParser> parser;
             MAKE_SHARED_RETURN_VOID(parser, GraphIdParser, hostDataPath);
             auto traces = parser->ParseData<MsprofAdditionalInfo>();
-            // graphIdMap 数据落盘
-            std::shared_ptr<GraphIdMapDBDumper> graphIdMapDumper;
-            MAKE_SHARED_RETURN_VOID(graphIdMapDumper, GraphIdMapDBDumper, hostPath_);
-            auto ret = graphIdMapDumper->DumpData(traces);
+            // ModelName 数据落盘
+            std::shared_ptr<ModelNameDBDumper> modelNameDumper;
+            MAKE_SHARED_RETURN_VOID(modelNameDumper, ModelNameDBDumper, hostPath_);
+            auto ret = modelNameDumper->DumpData(traces);
             if (!ret) {
-                ERROR("Dump graph id map data failed");
+                ERROR("Dump model name data failed");
             }
         });
 

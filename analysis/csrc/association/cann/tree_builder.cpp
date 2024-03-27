@@ -77,7 +77,6 @@ std::shared_ptr<TreeNode> TreeBuilder::Build()
 
     // Model Level
     pool.AddTask([this, &graphIdMapEvents, &fusionOpInfoEvents]() {
-        AddLevelEvents(graphIdMapEvents, modelLevelNodes_, EventType::EVENT_TYPE_GRAPH_ID_MAP);
         AddLevelEvents(fusionOpInfoEvents, modelLevelNodes_, EventType::EVENT_TYPE_FUSION_OP_INFO);
     });
 

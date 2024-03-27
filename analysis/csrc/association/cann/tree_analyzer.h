@@ -17,6 +17,7 @@
 #include <queue>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "analysis/csrc/entities/ascend_obj.h"
 #include "analysis/csrc/entities/event.h"
@@ -28,6 +29,8 @@ namespace Analysis {
 namespace Association {
 namespace Cann {
 
+using GeFusionOpInfo = Analysis::Entities::GeFusionOpInfo;
+using GeFusionOpInfos = std::vector<std::shared_ptr<GeFusionOpInfo>>;
 using HostTask = Analysis::Entities::HostTask;
 using HostTasks = std::vector<std::shared_ptr<HostTask>>;
 using Operator = Analysis::Entities::Operator;
@@ -58,6 +61,8 @@ public:
     HostTasks &GetTasks();
     // 获取HCCL大算子数据
     HCCLBigOpDescs &GetHcclBigOps();
+    // 获取ge_model_info的GeFusionOpInfo
+    GeFusionOpInfos &GetGeFusionOpInfos();
 
 private:
     // 更新计算类算子模板函数
@@ -86,6 +91,8 @@ private:
     void AnalyzeNode(const std::shared_ptr<TreeNode> &node);
     // 分析Runtime层的TreeNode，当DFS到Runtime层时进入此函数
     void AnalyzeRuntimeNode(const std::shared_ptr<TreeNode> &node);
+    // 分析Model层的TreeNode，当DFS到Model层时进入此函数
+    void AnalyzeModelNode(const std::shared_ptr<TreeNode> &node);
 
     // 判断当前task是否属于通讯类
     bool IsHcclTask();
@@ -147,6 +154,10 @@ private:
     HostTasks computeTasks_;
     // HCCL大算子信息
     HCCLBigOpDescs hcclBigOpDescs_;
+    // GeFusionOpInfo表
+    GeFusionOpInfos geFusionOpInfos_;
+    // model节点的map，记录该节点是否被搜索过
+    std::unordered_set<std::string> visitedModel_;
 };
 
 } // namespace Cann
