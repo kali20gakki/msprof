@@ -18,6 +18,7 @@ from profiling_bean.db_dto.hccl_info_dto import HCCLInfoDto
 from profiling_bean.db_dto.hccl_op_info_dto import HCCLOpInfoDto
 from profiling_bean.db_dto.mem_copy_info_dto import MemCopyInfoDto
 from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
+from profiling_bean.db_dto.node_attr_info_dto import NodeAttrInfoDto
 from profiling_bean.db_dto.task_track_dto import TaskTrackDto
 from profiling_bean.db_dto.tensor_info_dto import TensorInfoDto
 
@@ -53,6 +54,7 @@ class TestClusterLinkCalculate(unittest.TestCase):
     def test_run(self):
         with mock.patch(NAMESPACE + '.CANNEventGenerator.generate_api_event'), \
                 mock.patch(NAMESPACE + '.CANNEventGenerator.generate_node_basic_info_event'), \
+                mock.patch(NAMESPACE + '.CANNEventGenerator.generate_node_attr_info_event'), \
                 mock.patch(NAMESPACE + '.CANNEventGenerator.generate_tensor_info_event'), \
                 mock.patch(NAMESPACE + '.CANNEventGenerator.generate_task_track_event'), \
                 mock.patch(NAMESPACE + '.CANNEventGenerator.generate_mem_copy_info_event'), \
@@ -161,6 +163,29 @@ class TestClusterLinkCalculate(unittest.TestCase):
                 mock.patch(NAMESPACE + '.NodeBasicInfoModel.get_all_data',
                            return_value=[dto1, dto2]):
             generator.generate_node_basic_info_event()
+            self.assertEqual(len(generator.event_queues), 2)
+            self.assertEqual(len(generator.record_databases), 2)
+            self.assertEqual(generator.event_queues.get(0).size, 1)
+            self.assertEqual(generator.event_queues.get(1).size, 1)
+
+    def test_generate_node_attr_info_event_should_record_0_event_when_check_db_error(self):
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.NodeAttrInfoModel.check_db',
+                        return_value=False):
+            generator.generate_node_attr_info_event()
+            self.assertEqual(len(generator.event_queues), 0)
+
+    def test_generate_node_attr_info_event_should_record_2_event_when_2_node_in_2_thread_in_db(self):
+        dto1 = NodeAttrInfoDto()
+        dto1.thread_id = 0
+        dto1.timestamp = 100
+        dto2 = NodeAttrInfoDto()
+        dto2.thread_id = 1
+        dto2.timestamp = 200
+        generator = CANNEventGenerator("test")
+        with mock.patch(NAMESPACE + '.NodeAttrInfoModel.check_db', return_value=True), \
+                mock.patch(NAMESPACE + '.NodeAttrInfoModel.get_all_data', return_value=[dto1, dto2]):
+            generator.generate_node_attr_info_event()
             self.assertEqual(len(generator.event_queues), 2)
             self.assertEqual(len(generator.record_databases), 2)
             self.assertEqual(generator.event_queues.get(0).size, 1)

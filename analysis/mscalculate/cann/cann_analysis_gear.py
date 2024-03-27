@@ -27,6 +27,7 @@ from profiling_bean.db_dto.graph_id_map_dto import GraphIdMapDto
 from profiling_bean.db_dto.hccl_info_dto import HCCLInfoDto
 from profiling_bean.db_dto.hccl_op_info_dto import HCCLOpInfoDto
 from profiling_bean.db_dto.mem_copy_info_dto import MemCopyInfoDto
+from profiling_bean.db_dto.node_attr_info_dto import NodeAttrInfoDto
 from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
 from profiling_bean.db_dto.task_track_dto import TaskTrackDto
 from profiling_bean.db_dto.tensor_info_dto import TensorInfoDto
@@ -247,13 +248,17 @@ class TaskGear(CANNGear):
                     self.task_id, self.batch_id, self.data_size, self.memcpy_direction]
 
     class NodeDesc:
-        def __init__(self, node_basic_info=NodeBasicInfoDto(), tensor_info=TensorInfoDto(), ctx_info=CtxIdDto()):
+        def __init__(self, node_basic_info=NodeBasicInfoDto(), tensor_info=TensorInfoDto(),
+                     ctx_info=CtxIdDto(), node_attr_info=NodeAttrInfoDto()):
             self.node_basic_info = node_basic_info
             self.tensor_info = tensor_info
             self.ctx_info = ctx_info
+            self.node_attr_info = node_attr_info
 
         @staticmethod
-        def get_hash(dto: Union[NodeBasicInfoDto, TensorInfoDto, CtxIdDto]):
+        def get_hash(dto: Union[NodeBasicInfoDto, TensorInfoDto, CtxIdDto, NodeAttrInfoDto, HCCLOpInfoDto]):
+            if isinstance(dto, NodeAttrInfoDto):
+                return str(int(dto.timestamp))
             return dto.op_name + "-" + str(int(dto.timestamp))
 
         def is_invalid(self):
@@ -329,15 +334,25 @@ class TaskGear(CANNGear):
 
     def get_node_descs(self, event: Event) -> dict:
         node_descs = HighPerfDict()
+        hash_key = ''
+        for record in event.additional_record:
+            if isinstance(record.dto, HCCLOpInfoDto):
+                continue
+            hash_key = self.NodeDesc.get_hash(record.dto)
+            if isinstance(record.dto, NodeAttrInfoDto):
+                break
         for record in event.additional_record:
             if isinstance(record.dto, NodeBasicInfoDto):
-                node_desc = node_descs.set_default_call_obj_later(self.NodeDesc.get_hash(record.dto), self.NodeDesc)
+                node_desc = node_descs.set_default_call_obj_later(hash_key, self.NodeDesc)
                 node_desc.node_basic_info = record.dto
             elif isinstance(record.dto, TensorInfoDto):
-                node_desc = node_descs.set_default_call_obj_later(self.NodeDesc.get_hash(record.dto), self.NodeDesc)
+                node_desc = node_descs.set_default_call_obj_later(hash_key, self.NodeDesc)
                 node_desc.tensor_info = record.dto
+            elif isinstance(record.dto, NodeAttrInfoDto):
+                node_desc = node_descs.set_default_call_obj_later(hash_key, self.NodeDesc)
+                node_desc.node_attr_info = record.dto
             elif isinstance(record.dto, CtxIdDto):
-                node_desc = node_descs.set_default_call_obj_later(self.NodeDesc.get_hash(record.dto), self.NodeDesc)
+                node_desc = node_descs.set_default_call_obj_later(hash_key, self.NodeDesc)
                 node_desc.ctx_info = record.dto
             elif isinstance(record.dto, HCCLOpInfoDto):
                 continue
@@ -501,7 +516,7 @@ class TaskGear(CANNGear):
         hccl_dto: ApiDataDto = self.db.get_api(hccl_event)
 
         if not node_dto.item_id and not hccl_dto.item_id:
-            # this happen when runtime task is not respond to a op
+            # this happens when runtime task is not respond to a op
             logging.warning("task with timestamp %d is not respond to a op.", add_dto.timestamp)
             return
 
@@ -511,7 +526,7 @@ class TaskGear(CANNGear):
 
         node_descs = self.get_node_descs(node_event)
         if not node_descs:
-            # this happen when prof data is collected in level 0,
+            # this happens when prof data is collected in level 0,
             # or hccl (reduce TBE op) op which is not same thread with node launch.
             self.add_kernel_task_l0([node_dto, self.NodeDesc()], add_dto,
                                     [hccl_event, hccl_dto], [model_id, request_id])
@@ -521,14 +536,15 @@ class TaskGear(CANNGear):
             node_basic_info_dto: NodeBasicInfoDto = node_desc.node_basic_info
 
             if node_basic_info_dto.task_type is None:
-                # this happen when prof data is collected in level 0 with ffts plus
+                # this happens when prof data is collected in level 0 with ffts plus
                 self.add_kernel_task_l0([node_dto, node_desc], add_dto,
                                         [hccl_event, hccl_dto], [model_id, request_id])
                 continue
             if node_basic_info_dto.task_type == self.FFTS_PLUS_TASK_TYPE:
                 continue
 
-            self.add_kernel_task_l1([node_dto, node_desc], add_dto, [hccl_event, hccl_dto], [model_id, request_id])
+            self.add_kernel_task_l1_or_l2([node_dto, node_desc], add_dto,
+                                          [hccl_event, hccl_dto], [model_id, request_id])
 
     def add_kernel_task_l0(self, node_info: list, add_dto: TaskTrackDto, hccl_info: list, model_info: list):
         node_dto = node_info[0]
@@ -548,9 +564,10 @@ class TaskGear(CANNGear):
             self.task_info.append([model_id, op_name, add_dto.stream_id, add_dto.task_id, 0, 0,
                                    'N/A', task_type, 'N/A', request_id, add_dto.thread_id, add_dto.timestamp,
                                    add_dto.batch_id, None, None, None, None, None, None, None,
-                                   add_dto.device_id, int(cxt_id), "N/A"])
+                                   add_dto.device_id, int(cxt_id), "N/A", "N/A"])
 
-    def add_kernel_task_l1(self, node_info: list, add_dto: TaskTrackDto, hccl_info: list, model_info: list):
+    def add_kernel_task_l1_or_l2(self, node_info: list, add_dto: TaskTrackDto, hccl_info: list, model_info: list):
+        # 采集开启l2开关之后，需要在建树的逻辑里面添加attr的相关信息
         node_dto = node_info[0]
         node_desc = node_info[1]
         hccl_event = hccl_info[0]
@@ -560,6 +577,7 @@ class TaskGear(CANNGear):
         node_basic_info_dto: NodeBasicInfoDto = node_desc.node_basic_info
         tensor_info_dto: TensorInfoDto = node_desc.tensor_info
         ctx_id_dto: CtxIdDto = node_desc.ctx_info
+        node_attr_info: NodeAttrInfoDto = node_desc.node_attr_info
         cxt_ids = str(ctx_id_dto.ctx_id).split(',')
         op_name = ctx_id_dto.op_name if ctx_id_dto.op_name else node_dto.item_id
         task_type = node_basic_info_dto.task_type
@@ -579,7 +597,8 @@ class TaskGear(CANNGear):
                                    tensor_info_dto.input_data_types, tensor_info_dto.input_shapes,
                                    tensor_info_dto.output_formats, tensor_info_dto.output_data_types,
                                    tensor_info_dto.output_shapes, add_dto.device_id, int(cxt_id),
-                                   "YES" if node_basic_info_dto.op_flag else "NO"])
+                                   "YES" if node_basic_info_dto.op_flag else "NO",
+                                   "N/A" if not node_attr_info.hashid else node_attr_info.hashid])
 
     def run(self, event: Event, call_stack: dict):
         # pure runtime api

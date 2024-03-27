@@ -30,7 +30,8 @@ class TablesConfig(MetaConfig):
             ('output_shapes', 'TEXT,null'),
             ('device_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null'),
-            ('op_flag', 'TEXT,null')
+            ('op_flag', 'TEXT,null'),
+            ('hashid', 'TEXT,null'),
         ],
         'GeHashInfoMap': [
             ('hash_key', 'TEXT,null'),
@@ -1166,6 +1167,13 @@ class TablesConfig(MetaConfig):
             ('mix_block_dim', 'INTEGER,null'),
             ('op_flag', 'INTEGER,null'),
             ('is_dynamic', 'INTEGER,null'),
+        ],
+        'NodeAttrInfoMap': [
+            ('level', 'TEXT,null'),
+            ('struct_type', 'TEXT,null'),
+            ('thread_id', 'INTEGER,null'),
+            ('timestamp', 'NUMERIC,null'),
+            ('hashid', 'TEXT,null'),
         ],
         'GraphIdMapMap': [
             ('level', 'TEXT,null'),

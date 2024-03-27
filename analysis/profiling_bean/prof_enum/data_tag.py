@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2021-2023. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2024. All rights reserved.
 
 from enum import Enum
 from enum import unique
@@ -83,6 +83,7 @@ class DataTag(Enum):
     DBG_FILE = 70
     NPU_MODULE_MEM = 71
     AICPU_ADD_INFO = 72
+    NODE_ATTR_INFO = 73
     HCCL_OP_INFO = 74
 
 

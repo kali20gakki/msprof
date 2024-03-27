@@ -57,6 +57,7 @@ class StructDecoder:
         "MultiThreadBean": StructFmt.MULTI_THREAD_FMT,
         "GraphAddInfoBean": StructFmt.GRAPH_ADD_INFO_FMT,
         "NodeBasicInfoBean": StructFmt.NODE_BASIC_INFO_FMT,
+        "NodeAttrInfoBean": StructFmt.NODE_ATTR_INFO_FMT,
         "TensorAddInfoBean": StructFmt.TENSOR_ADD_INFO_FMT,
         "FusionAddInfoBean": StructFmt.FUSION_ADD_INFO_FMT,
         "CtxIdBean": StructFmt.CTX_ID_FMT,
