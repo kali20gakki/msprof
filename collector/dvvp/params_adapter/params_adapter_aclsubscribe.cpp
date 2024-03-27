@@ -25,10 +25,13 @@ int ParamsAdapterAclSubscribe::Init()
 void ParamsAdapterAclSubscribe::GenAclSubscribeContainer(const ProfAicoreMetrics aicMetrics,
                                                          const uint64_t dataTypeConfig)
 {
-    if (dataTypeConfig & PROF_TASK_TIME_L1_MASK) {
+    if (dataTypeConfig & PROF_TASK_TIME_L2_MASK) {
+        paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_L2;
+    } else if (dataTypeConfig & PROF_TASK_TIME_L1_MASK) {
         paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_L1;
+    } else if (dataTypeConfig & PROF_TASK_TIME_L0_MASK) {
+        paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_L0;
     }
-
     if (dataTypeConfig & PROF_KEYPOINT_TRACE_MASK) {
         paramContainer_[INPUT_CFG_COM_TRAINING_TRACE] = MSVP_PROF_ON;
     }

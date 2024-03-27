@@ -76,6 +76,15 @@ struct MsprofNodeBasicInfo {
     uint8_t opState;
 };
 
+enum AttrType {
+    OP_ATTR = 0,
+};
+
+struct MsprofAttrInfo {
+    uint32_t attrType;
+    uint64_t hashId;
+};
+
 struct MsrofTensorData {
     uint32_t tensorType;
     uint32_t format;
@@ -236,6 +245,7 @@ const uint32_t MSPROF_REPORT_NODE_CONTEXT_ID_INFO_TYPE  = 4;  /* type info: cont
 const uint32_t MSPROF_REPORT_NODE_LAUNCH_TYPE           = 5;  /* type info: launch */
 const uint32_t MSPROF_REPORT_NODE_TASK_MEMORY_TYPE      = 6;  /* type info: task_memory_info */
 const uint32_t MSPROF_REPORT_NODE_HOST_OP_EXEC_TYPE     = 8;  /* type info: op exec */
+const uint32_t MSPROF_REPORT_NODE_ATTR_INFO_TYPE        = 9;  /* type info: node_attr_info */
 const uint32_t MSPROF_REPORT_NODE_HCCL_OP_INFO_TYPE     = 10;  /* type info: hccl op info */
 
 /* Msprof report type of node(10000) level(ge api), offset: 0x010000 */
@@ -312,6 +322,7 @@ struct MsprofCompactInfo {  // for MsprofReportCompactInfo buffer data
         uint8_t info[MSPROF_COMPACT_INFO_DATA_LENGTH];
         MsprofRuntimeTrack runtimeTrack;
         MsprofNodeBasicInfo nodeBasicInfo;
+        MsprofAttrInfo nodeAttrInfo;
         MsprofHcclOPInfo hcclopInfo;
     } data;
 };

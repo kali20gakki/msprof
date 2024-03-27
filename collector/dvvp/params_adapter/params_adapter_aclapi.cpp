@@ -131,7 +131,9 @@ void ParamsAdapterAclApi::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
             setConfig_.insert(cfg.second);
         }
     }
-    if (apiCfg->dataTypeConfig & PROF_TASK_TIME_L1_MASK) {
+    if (apiCfg->dataTypeConfig & PROF_TASK_TIME_L2_MASK) {
+        paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_L2;
+    } else if (apiCfg->dataTypeConfig & PROF_TASK_TIME_L1_MASK) {
         paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_L1;
     } else if (apiCfg->dataTypeConfig & PROF_TASK_TIME_L0_MASK) {
         paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_L0;
