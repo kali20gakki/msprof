@@ -117,6 +117,15 @@ struct HostTask {
     std::shared_ptr<Operator> op = nullptr;
 };
 
+// 存储GeFusionOpInfo表
+struct GeFusionOpInfo {
+    uint64_t modelId;
+    std::shared_ptr<ProfFusionOpInfo> fusionOpInfo = nullptr;
+    GeFusionOpInfo(uint64_t modelId, const std::shared_ptr<ProfFusionOpInfo> &fusionOp)
+        : modelId(modelId), fusionOpInfo(fusionOp)
+    {}
+};
+
 } // namespace Entities
 } // namespace Analysis
 #endif // ANALYSIS_ENTITIES_ASCEND_OBJ_H

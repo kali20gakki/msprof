@@ -39,6 +39,7 @@ using TaskInfoData = std::vector<std::tuple<uint32_t, std::string, uint32_t, uin
         std::string, std::string, int32_t, uint32_t, uint64_t, uint32_t, uint32_t, std::string, std::string,
         std::string, std::string, std::string, std::string, uint32_t, uint32_t, std::string>>;
 using HCCLBigOpDescs = Analysis::Association::Cann::HCCLBigOpDescs;
+using GeFusionOpInfos = Analysis::Association::Cann::GeFusionOpInfos;
 public:
     // 创建时传入host路径
     explicit CANNTraceDBDumper(std::string hostFilePath);
@@ -59,6 +60,9 @@ private:
     // 落盘HCCLTask
     void DumpHcclTasks(const HostTasks &hcclTasks);
 
+    // 落盘GeFusionOpInfo
+    void DumpGeFusionOps(const GeFusionOpInfos &geFusionOps);
+
     void AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskInfoData &data);
 
     void AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInfo> &tensorDesc, MsprofNodeBasicInfo nodeBasicInfo,
@@ -66,7 +70,7 @@ private:
     static std::string GetFormat(uint32_t oriFormat);
     const uint32_t poolSize_ = 3;
     std::string hostFilePath_;
-    bool result_;
+    std::atomic<bool> result_;
 };
 } // Drafts
 } // Database

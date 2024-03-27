@@ -69,7 +69,7 @@ private:
     };
 };  // class FusionOpInfoParser
 
-// 该类的作用是fusion op数据的解析
+// 该类的作用是graph_id_map数据的解析
 class GraphIdParser final : public AdditionInfoParser {
 public:
     explicit GraphIdParser(const std::string &path) : AdditionInfoParser(path, "GraphIdParser")

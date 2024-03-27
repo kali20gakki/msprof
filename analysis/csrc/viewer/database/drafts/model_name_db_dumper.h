@@ -3,31 +3,32 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : graph_id_map_db_dumper.h
- * Description        : graph_id_map落盘
+ * File Name          : model_name_db_dumper.h
+ * Description        : modelname落盘
  * Author             : msprof team
  * Creation Date      : 2024/3/7
  * *****************************************************************************
  */
-#ifndef ANALYSIS_CSRC_VIEWER_DATABASE_GRAPH_ID_MAP_DB_DUMPER_H
-#define ANALYSIS_CSRC_VIEWER_DATABASE_GRAPH_ID_MAP_DB_DUMPER_H
+#ifndef ANALYSIS_CSRC_VIEWER_DATABASE_MODEL_NAME_DB_DUMPER_H
+#define ANALYSIS_CSRC_VIEWER_DATABASE_MODEL_NAME_DB_DUMPER_H
 
+#include "collector/inc/toolchain/prof_common.h"
 #include "analysis/csrc/viewer/database/drafts/base_dumper.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
 namespace Drafts {
-using GraphIdMapData = std::vector<std::tuple<std::string, std::string, uint32_t, uint64_t, std::string, uint32_t>>;
-class GraphIdMapDBDumper : public BaseDumper<GraphIdMapDBDumper> {
+using ModelNameData = std::vector<std::tuple<uint32_t, std::string>>;
+class ModelNameDBDumper : public BaseDumper<ModelNameDBDumper> {
     using GraphIdMaps = std::vector<std::shared_ptr<MsprofAdditionalInfo>>;
 public:
-    explicit GraphIdMapDBDumper(const std::string &hostFilePath);
-    GraphIdMapData GenerateData(const GraphIdMaps &graphIdMaps);
+    explicit ModelNameDBDumper(const std::string &hostFilePath);
+    ModelNameData GenerateData(const GraphIdMaps &graphIdMaps);
 };
 } // Drafts
 } // Database
 } // Viewer
 } // Analysis
 
-#endif // ANALYSIS_CSRC_VIEWER_DATABASE_GRAPH_ID_MAP_DB_DUMPER_H
+#endif // ANALYSIS_CSRC_VIEWER_DATABASE_MODEL_NAME_DB_DUMPER_H

@@ -172,6 +172,14 @@ public:
         eventQueue->Push(eventPtr);
     }
 
+    static void AddFusionOpEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot,
+                                 std::shared_ptr<MsprofAdditionalInfo> additionPtr)
+    {
+        EventInfo testInfo{EventType::EVENT_TYPE_FUSION_OP_INFO, MSPROF_REPORT_MODEL_LEVEL, dot, dot};
+        auto eventPtr = std::make_shared<Event>(additionPtr, testInfo);
+        eventQueue->Push(eventPtr);
+    }
+
     static void AddHcclInfoEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot, uint32_t ctxId)
     {
         EventInfo testInfo{EventType::EVENT_TYPE_HCCL_INFO, MSPROF_REPORT_HCCL_NODE_LEVEL, dot, dot};

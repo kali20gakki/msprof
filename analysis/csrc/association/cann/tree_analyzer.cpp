@@ -67,6 +67,11 @@ HCCLBigOpDescs &TreeAnalyzer::GetHcclBigOps()
     return hcclBigOpDescs_;
 }
 
+GeFusionOpInfos &TreeAnalyzer::GetGeFusionOpInfos()
+{
+    return geFusionOpInfos_;
+}
+
 void TreeAnalyzer::DeepFirstSearch(const std::shared_ptr<TreeNode> &node)
 {
     if (!node || !node->event) {
@@ -86,6 +91,8 @@ void TreeAnalyzer::AnalyzeNode(const std::shared_ptr<TreeNode> &node)
 {
     if (node->event->info.level == MSPROF_REPORT_RUNTIME_LEVEL) {
         AnalyzeRuntimeNode(node);
+    } else if (node->event->info.level == MSPROF_REPORT_MODEL_LEVEL) {
+        AnalyzeModelNode(node);
     }
 }
 
@@ -133,6 +140,30 @@ void TreeAnalyzer::AnalyzeRuntimeNode(const std::shared_ptr<TreeNode> &node)
             tasks_.emplace_back(otherTask);
         }
     }
+}
+
+void TreeAnalyzer::AnalyzeModelNode(const std::shared_ptr<TreeNode> &node)
+{
+    auto modelApi = (node != nullptr && node->event != nullptr) ? node->event->apiPtr : nullptr;
+    std::string key = Utils::Join("_", node->event->info.start, node->event->info.end);
+    if (visitedModel_.find(key) != visitedModel_.end()) {
+        return;
+    }
+    auto modelId = modelApi != nullptr ? modelApi->itemId : INVALID_MODEL_ID;
+    for (const auto &record: node->records) {
+        if (record->info.type == EventType::EVENT_TYPE_FUSION_OP_INFO) {
+            auto fusionOp = record->additionPtr;
+            if (fusionOp) {
+                auto fusionStruct = Utils::ReinterpretConvert<ProfFusionOpInfo *>(fusionOp->data);
+                std::shared_ptr<ProfFusionOpInfo> fusionOpInfo;
+                MAKE_SHARED_RETURN_VOID(fusionOpInfo, ProfFusionOpInfo, *fusionStruct);
+                std::shared_ptr<GeFusionOpInfo> geFusionOpInfo;
+                MAKE_SHARED_RETURN_VOID(geFusionOpInfo, GeFusionOpInfo, modelId, fusionOpInfo);
+                geFusionOpInfos_.emplace_back(geFusionOpInfo);
+            }
+        }
+    }
+    visitedModel_.insert(key);
 }
 
 bool TreeAnalyzer::IsHcclTask()

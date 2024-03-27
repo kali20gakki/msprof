@@ -269,6 +269,17 @@ std::shared_ptr<EventQueue> GenHcclOpInfoEventQueue(const std::vector<uint64_t> 
     return hcclOpInfoEvents;
 }
 
+std::shared_ptr<EventQueue> GenFusionOpEventQueue(const std::vector<uint64_t> &fusionOps)
+{
+    auto fusionOpInfoEvents = std::make_shared<EventQueue>(1, 10);
+    for (auto dot: fusionOps) {
+        auto additionPtr = std::make_shared<MsprofAdditionalInfo>();
+        FakeEventGenerator::AddFusionOpEvent(fusionOpInfoEvents, dot, additionPtr);
+    }
+    fusionOpInfoEvents->Sort();
+    return fusionOpInfoEvents;
+}
+
 TEST_F(TreeAnalyzerUTest, TestUpdateHcclSmallOpDescsShouldReturn2DescsWhenInputCtxIdLenIs2)
 {
     uint64_t dot = 123;
@@ -655,6 +666,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L0()
     // 逻辑树如下，其中[n]标识每个context id event中带几个context id
     // 其中tk(110),tk(120),tk(168)为计算任务
     // Model :  [1,                          200]  [201,             400]  [401, 800]
+    //                    f(125)                                               f(600)
     // Node  :  [2, 99]  [100, 150]   [160, 195]   [202,  300] [302, 399]
     //                                 c(171)[1]
     //                                               hop(205)   hop(305)
@@ -684,12 +696,14 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L0()
         {AlgType::HCCL_ALG_STAR, AlgType::HCCL_ALG_NHR, AlgType::HCCL_ALG_PIPELINE, AlgType::HCCL_ALG_NB}
     };
     auto hcclOpInfoEvents = GenHcclOpInfoEventQueue({205, 305}, algList);
+    auto fusionOpInfoEvents =  GenFusionOpEventQueue({125, 600});
 
     auto cannWarehouse = std::make_shared<CANNWarehouse>();
     cannWarehouse->kernelEvents = kernelEvents;
     cannWarehouse->contextIdEvents = contextIdEvents;
     cannWarehouse->taskTrackEvents = taskTrackEvents;
     cannWarehouse->hcclOpInfoEvents = hcclOpInfoEvents;
+    cannWarehouse->fusionOpInfoEvents = fusionOpInfoEvents;
 
     // 建树
     auto treeBuilder = std::make_shared<TreeBuilder>(cannWarehouse, 1);
@@ -711,6 +725,7 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L0)
     auto hcclTasks = ana->GetHCCLTasks();
     auto bigOPs = ana->GetHcclBigOps();
     auto tasks = ana->GetTasks();
+    auto geFusionOpInfos = ana->GetGeFusionOpInfos();
 
     std::vector<uint64_t> expectComputeTaskTimes{110, 120, 168};
     std::vector<uint64_t> expectComputeTaskCtxIds{DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, 0};
@@ -718,20 +733,24 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L0)
     // 多出的一个220，一个330分别标识ffts+大任务, 多出的一个168标识MIX算子
     std::vector<uint64_t> expectTaskTimes{50, 105, 110, 120, 165, 168, 168, 220, 220, 220, 220, 330, 330, 330, 330};
     // DEFAULT_CONTEXT_ID分别代表一个tk,
-    std::vector<uint64_t> expectTaskCtxIds{0, 0, 0, 1, 1, 2, 2,
+    std::vector<uint64_t> expectTaskCtxIds{0, 0, 0, 1, 1, 2, 2, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
                                            DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
-                                           DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
-                                           DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID};
+                                           DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID};
     const uint64_t expectbigOPsNum = 2;
     std::vector<uint64_t> expectbigOPsCount{410, 610};
     std::vector<std::string> expectbigOPsAlgType{"PAIRWISE-NB-HD-RING", "STAR-NHR-PIPELINE-NB"};
+    std::vector<uint64_t> expectGeFusionOpInfoTimes{125, 600};
     // 先检查个数正确
     EXPECT_EQ(computeTasks.size(), expectComputeTaskTimes.size());
     EXPECT_EQ(hcclTasks.size(), expectHcclTaskTimes.size());
     EXPECT_EQ(bigOPs.size(), expectbigOPsNum);
     EXPECT_EQ(tasks.size(), expectTaskTimes.size());
-
+    EXPECT_EQ(geFusionOpInfos.size(), expectGeFusionOpInfoTimes.size());
     // 再匹配内容正确
+    uint64_t modelId1 = 200;
+    uint64_t modelId2 = 800;
+    EXPECT_EQ(geFusionOpInfos[0]->modelId, modelId1);
+    EXPECT_EQ(geFusionOpInfos[1]->modelId, modelId2);
     for (uint16_t i = 0; i < computeTasks.size(); i++) {
         EXPECT_EQ(computeTasks[i]->timeStamp, expectComputeTaskTimes[i]);
     }
@@ -762,6 +781,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L1()
     // 逻辑树如下，其中[n]标识每个event中带几个context id
     // 其中tk(110),tk(120),tk(168)为计算任务
     // Model :  [1,                          200]  [201,              400]  [401, 800]
+    //                    f(125)                                               f(600)
     // Node  :  [2, 99]  [100, 150]   [160, 195]   [202,  300] [302,  399]
     //                    n-t(125)     c-n-t(171)    n(250)       n(310)
     //                                               hop(205)    hop(305)
@@ -776,6 +796,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L1()
     auto nodeBasicInfoEvents = GenNodeBasicInfoEventQueue({{125, 1, 1}, {171, 3, 2}, {250, 333, 9}, {310, 334, 9}});
     auto tensorInfoEvents = GenTensorInfoEventQueue({125, 171});
     auto contextIdEvents = GenHcclCtxIdEventQueue();
+    auto fusionOpInfoEvents =  GenFusionOpEventQueue({125, 600});
     uint32_t nodeCtxDot = 171;
     FakeEventGenerator::AddNodeCtxIdEvent(contextIdEvents, nodeCtxDot, {0, 0});
     contextIdEvents->Sort();
@@ -804,6 +825,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L1()
     cannWarehouse->taskTrackEvents = taskTrackEvents;
     cannWarehouse->tensorInfoEvents = tensorInfoEvents;
     cannWarehouse->hcclOpInfoEvents = hcclOpInfoEvents;
+    cannWarehouse->fusionOpInfoEvents = fusionOpInfoEvents;
 
     // 建树
     auto treeBuilder = std::make_shared<TreeBuilder>(cannWarehouse, 1);
@@ -825,6 +847,7 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L1)
     auto hcclTasks = ana->GetHCCLTasks();
     auto bigOPs = ana->GetHcclBigOps();
     auto tasks = ana->GetTasks();
+    auto geFusionOpInfos = ana->GetGeFusionOpInfos();
 
     std::vector<uint64_t> expectComputeTaskTimes{110, 120, 168};
     std::vector<uint64_t> expectComputeTaskCtxIds{0, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID};
@@ -842,14 +865,23 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L1)
     std::vector<std::string> expectbigOPsAlgType{"PAIRWISE-NB-HD-RING", "STAR-NHR-PIPELINE-NB"};
     std::vector<uint64_t> expectComputeTaskOpTypes{1, 1, 3};
     std::vector<uint64_t> expectComputeTaskTensorTimes{125, 125, 171};
+    std::vector<uint64_t> expectGeFusionOpInfoTimes{125, 600};
 
     // 先检查个数正确
     EXPECT_EQ(computeTasks.size(), expectComputeTaskTimes.size());
     EXPECT_EQ(hcclTasks.size(), expectHcclTaskTimes.size());
     EXPECT_EQ(bigOPs.size(), expectbigOPsNum);
     EXPECT_EQ(tasks.size(), expectTaskTimes.size());
+    EXPECT_EQ(geFusionOpInfos.size(), expectGeFusionOpInfoTimes.size());
 
     // 再匹配内容正确
+    uint64_t modelId1 = 200;
+    uint64_t modelId2 = 800;
+    EXPECT_EQ(geFusionOpInfos[0]->modelId, modelId1);
+    EXPECT_EQ(geFusionOpInfos[1]->modelId, modelId2);
+    EXPECT_TRUE(geFusionOpInfos[0]->fusionOpInfo != nullptr);
+    EXPECT_TRUE(geFusionOpInfos[1]->fusionOpInfo != nullptr);
+
     for (uint16_t i = 0; i < computeTasks.size(); i++) {
         EXPECT_EQ(computeTasks[i]->timeStamp, expectComputeTaskTimes[i]);
     }

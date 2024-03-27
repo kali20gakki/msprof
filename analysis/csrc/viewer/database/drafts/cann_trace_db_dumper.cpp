@@ -40,6 +40,9 @@ using HcclTasksDumpData = std::vector<
                double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
                std::string, double, std::string, std::string, std::string, std::string>>;
 
+using GeFusionOpsDumpData = std::vector<std::tuple<uint64_t, std::string, uint32_t, std::string, std::string,
+                                        std::string, std::string, std::string, std::string>>;
+
 namespace {
 const uint32_t UNDEFINED_INT_VALUE = 4294967295;
 const int32_t INVALID_VALUE = -1;
@@ -132,6 +135,10 @@ bool CANNTraceDBDumper::DumpData(TreeAnalyzer analyzer)
     pool.AddTask([this, &analyzer]() {
         HostTasks computeTasks = analyzer.GetComputeTasks();
         DumpOpDesc(computeTasks);
+    });
+    pool.AddTask([this, &analyzer]() {
+        GeFusionOpInfos geFusionOps = analyzer.GetGeFusionOpInfos();
+        DumpGeFusionOps(geFusionOps);
     });
     pool.WaitAllTasks();
     pool.Stop();
@@ -385,6 +392,54 @@ void CANNTraceDBDumper::DumpHcclTasks(const HostTasks &hcclTasks)
     if (!hcclTaskDBRunner.InsertData("HCCLTask", data)) {
         result_ = false;
         ERROR("DumpHcclTasks: Insert into db failed");
+    }
+}
+
+
+void CANNTraceDBDumper::DumpGeFusionOps(const GeFusionOpInfos &geFusionOps)
+{
+    if (geFusionOps.empty()) {
+        INFO("Empty geFusionOps");
+        return;
+    }
+    Utils::TimeLogger t{"DumpGeFusionOps start"};
+    GeModelInfoDB geModelInfoDb;
+    std::string geModelInfoDbPath = Utils::File::PathJoin({hostFilePath_, "sqlite", geModelInfoDb.GetDBName()});
+    DBRunner geFusionOpDBRunner(geModelInfoDbPath);
+    if (!geFusionOpDBRunner.CreateTable("GeFusionOpInfo", geModelInfoDb.GetTableCols("GeFusionOpInfo"))) {
+        result_ = false;
+        ERROR("DumpGeFusionOps: create table GeFusionOpInfo failed");
+        return;
+    }
+    GeFusionOpsDumpData data;
+    if (!Utils::Reserve(data, geFusionOps.size())) {
+        result_ = false;
+        return;
+    }
+    for (const auto &geFusionOp: geFusionOps) {
+        auto fusionStruct = geFusionOp->fusionOpInfo;
+        std::vector<std::string> fusionOpNames;
+        if (!Utils::Reserve(fusionOpNames, fusionStruct->fusionOpNum)) {
+            break;
+        }
+        for (uint32_t i = 0; i < fusionStruct->fusionOpNum; i++) {
+            fusionOpNames.emplace_back(HashData::GetInstance().Get(fusionStruct->fusionOpId[i]));
+        }
+        data.emplace_back(
+            geFusionOp->modelId,
+            HashData::GetInstance().Get(fusionStruct->opName),
+            fusionStruct->fusionOpNum,
+            Utils::Join(fusionOpNames, ","),
+            std::to_string(fusionStruct->inputMemsize),
+            std::to_string(fusionStruct->outputMemsize),
+            std::to_string(fusionStruct->weightMemSize),
+            std::to_string(fusionStruct->workspaceMemSize),
+            std::to_string(fusionStruct->totalMemSize)
+        );
+    }
+    if (!geFusionOpDBRunner.InsertData("GeFusionOpInfo", data)) {
+        result_ = false;
+        ERROR("DumpGeFusionOps: Insert into db failed");
     }
 }
 } // Drafts

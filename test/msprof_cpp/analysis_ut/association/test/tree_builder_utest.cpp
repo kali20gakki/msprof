@@ -100,23 +100,6 @@ std::shared_ptr<EventQueue> GenCtxIdEvents()
     return contextIdEvents;
 }
 
-std::shared_ptr<EventQueue> GenGraphIdMapEvents()
-{
-    auto graphIdMapEvents = std::make_shared<EventQueue>(1, 10);
-    std::unordered_map<std::string, std::vector<uint64_t>> Events{
-        //  Model   {"Model", {{110, 200}}},
-        //  Index      0     1    2    3    4
-        {"Model", {105, 110, 115, 200, 210}}
-    };
-    int cnt = 0;
-    for (auto dot: Events["Model"]) {
-        FakeEventGenerator::AddGraphIdMapEvent(graphIdMapEvents, dot);
-        cnt++;
-    }
-    graphIdMapEvents->Sort();
-    return graphIdMapEvents;
-}
-
 std::shared_ptr<EventQueue> GenFusionOpInfoEvents()
 {
     auto fusioOpInfoEvents = std::make_shared<EventQueue>(1, 10);
@@ -306,7 +289,6 @@ TEST_F(TreeBuilderUTest, TestBuildTreeShouldBuildCorrectTreeWhenCANNWarehouseNot
     auto nodeBasicInfoEvents = GenNodeBasicInfoEvents();
     auto tensorInfoEvents = GenTensorInfoEvents();
     auto contextIdEvents = GenCtxIdEvents();
-    auto graphIdMapEvents = GenGraphIdMapEvents();
     auto fusionOpInfoEvents = GenFusionOpInfoEvents();
     auto hcclInfoEvents = GenHcclInfoEvents();
     auto taskTrackEvents = GenTaskTrackEvents();
@@ -317,7 +299,6 @@ TEST_F(TreeBuilderUTest, TestBuildTreeShouldBuildCorrectTreeWhenCANNWarehouseNot
     cannWarehouse->nodeBasicInfoEvents = nodeBasicInfoEvents;
     cannWarehouse->tensorInfoEvents = tensorInfoEvents;
     cannWarehouse->contextIdEvents = contextIdEvents;
-    cannWarehouse->graphIdMapEvents = graphIdMapEvents;
     cannWarehouse->fusionOpInfoEvents = fusionOpInfoEvents;
     cannWarehouse->hcclInfoEvents = hcclInfoEvents;
     cannWarehouse->taskTrackEvents = taskTrackEvents;
@@ -349,7 +330,7 @@ TEST_F(TreeBuilderUTest, TestBuildTreeShouldBuildCorrectTreeWhenCANNWarehouseNot
     // Runtime: tk(114) tk(115) tk(120) tk(125) tk(130)       tk(155) tk(160) tk(165)tk(170)tk(175) tk(180) tk(190,210)
     std::vector<std::string> ans{
         "Api0_211 ", // 第一层
-        "Api110_200 [GraphIdMap115_115] [GraphIdMap200_200] [FusionOpInfo116_116] "
+        "Api110_200 [FusionOpInfo116_116] "
         "[FusionOpInfo200_200] Dummy210_210 [TaskTrack210_210] ",  // 第二层
         "Api110_130 [NodeBasicInfo115_115] [NodeBasicInfo115_115] [NodeBasicInfo130_130] "
         "[TensorInfo113_113] [TensorInfo130_130] [ContextId130_130] "
