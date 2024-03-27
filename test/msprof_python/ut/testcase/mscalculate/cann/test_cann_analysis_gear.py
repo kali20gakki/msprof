@@ -2,7 +2,7 @@
 # coding=utf-8
 """
 function:
-Copyright Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+Copyright Huawei Technologies Co., Ltd. 2023-2024. All rights reserved.
 """
 import collections
 import os
@@ -27,14 +27,14 @@ from mscalculate.cann.event import Event
 from profiling_bean.db_dto.api_data_dto import ApiDataDto
 from profiling_bean.db_dto.ctx_id_dto import CtxIdDto
 from profiling_bean.db_dto.fusion_op_info_dto import FusionOpInfoDto
-from profiling_bean.db_dto.ge_time_dto import GeTimeDto
+from profiling_bean.db_dto.graph_id_map_dto import GraphIdMapDto
 from profiling_bean.db_dto.hccl_info_dto import HCCLInfoDto
 from profiling_bean.db_dto.hccl_op_info_dto import HCCLOpInfoDto
 from profiling_bean.db_dto.mem_copy_info_dto import MemCopyInfoDto
+from profiling_bean.db_dto.node_attr_info_dto import NodeAttrInfoDto
 from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
 from profiling_bean.db_dto.task_track_dto import TaskTrackDto
 from profiling_bean.db_dto.tensor_info_dto import TensorInfoDto
-from profiling_bean.db_dto.graph_id_map_dto import GraphIdMapDto
 
 NAMESPACE = 'mscalculate.cann.cann_analysis_gear'
 
@@ -272,7 +272,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
         gear.run(event10, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event8,
                            Constant.HCCL_LEVEL: event9})
         gear.run(event13, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: Event.invalid_event(),
-                          Constant.HCCL_LEVEL: event12})
+                           Constant.HCCL_LEVEL: event12})
         gear.flush_data()
 
         self.assertEqual(
@@ -293,7 +293,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
         self.assertTrue(
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
                                           DBNameConstant.TABLE_HCCL_TASK, 'plane_id', 8))
-    
+
         self.assertTrue(
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
                                           DBNameConstant.TABLE_HCCL_OP, 'data_type', "FP32"))
@@ -355,9 +355,14 @@ class TestCANNAnalysisGear(unittest.TestCase):
         tensor_info_dto.op_name = "1"
         tensor_info_dto.timestamp = 140
         tensor_info_dto.struct_type = '1'
+        node_attr_info_dto = NodeAttrInfoDto()
+        node_attr_info_dto.op_name = "1"
+        node_attr_info_dto.timestamp = 140
+        node_attr_info_dto.struct_type = '9'
         event2.additional_record = [
             self.create_addition_record(node_basic_info_dto, 140, record_db),
-            self.create_addition_record(tensor_info_dto, 140, record_db)
+            self.create_addition_record(tensor_info_dto, 140, record_db),
+            self.create_addition_record(node_attr_info_dto, 140, record_db)
         ]
 
         gear.run(event1, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event2,

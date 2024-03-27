@@ -207,6 +207,11 @@ class DataParsersConfig(MetaConfig):
             ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('level', '2'),
         ],
+        'NodeAttrInfoParser': [
+            ('path', 'msparser.compact_info.node_attr_info_parser'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
+            ('level', '2'),
+        ],
         'MemoryApplicationParser': [
             ('path', 'msparser.add_info.memory_application_parser'),
             ('chip_model', '0,1,2,3,4,5,7,8,11'),

@@ -79,6 +79,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_MEMORY_OP = "task_memory.db"
     DB_ASCEND_TASK = "ascend_task.db"
     DB_NPU_MODULE_MEM = "npu_module_mem.db"
+    DB_NODE_ATTR_INFO = "node_attr_info.db"
 
     # DB tables
     TABLE_ACL_DATA = "AclData"
@@ -291,7 +292,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_HCCL_TASK = "HCCLTask"
     TABLE_HOST_TASK = "HostTask"
     TABLE_ASCEND_TASK = "AscendTask"
-    TABLE_HCCL_OP_REPORT = "HcclOpReport"
+    TABLE_NODE_ATTR_INFO = "NodeAttrInfo"
     TABLE_HCCL_OP_INFO = "HcclOpInfo"
 
     # nano

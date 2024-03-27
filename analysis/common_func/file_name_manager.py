@@ -221,6 +221,7 @@ class FileNameManagerConstant:
     MULTI_THREAD_FILE_PATTERN = r"^(unaging|aging)\.additional\.Multi_Thread\.slice_\d+"
     TENSOR_ADD_INFO_FILE_PATTERN = r"^(unaging|aging)\.additional\.tensor_info\.slice_\d+"
     NODE_BASIC_INFO_FILE_PATTERN = r"^(unaging|aging)\.compact\.node_basic_info\.slice_\d+"
+    NODE_ATTR_INFO_FILE_PATTERN = r"^(unaging|aging)\.compact\.node_attr_info\.slice_\d+"
     GRAPH_ADD_INFO_FILE_PATTERN = r"^(unaging|aging)\.additional\.graph_id_map\.slice_\d+"
     FUSION_ADD_INFO_PATTERN = r"^(unaging|aging)\.additional\.fusion_op_info\.slice_\d+"
     MEMORY_APPLICATION_FILE_PATTERN = r"^(unaging|aging)\.additional\.memory_application\.slice_\d+"
@@ -960,6 +961,14 @@ def get_ge_node_basic_info_compiles() -> tuple:
     :return: ge node basic info files regex
     """
     return (re.compile(FileNameManagerConstant.NODE_BASIC_INFO_FILE_PATTERN),)
+
+
+def get_node_attr_info_compiles() -> tuple:
+    """
+    get node attr info files regex compiles
+    :return: node attr info files regex
+    """
+    return (re.compile(FileNameManagerConstant.NODE_ATTR_INFO_FILE_PATTERN),)
 
 
 def get_ge_fusion_add_info_compiles() -> tuple:

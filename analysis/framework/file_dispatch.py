@@ -10,6 +10,7 @@ from common_func.file_name_manager import get_acl_compiles
 from common_func.file_name_manager import get_acl_hash_compiles
 from common_func.file_name_manager import get_ai_core_compiles
 from common_func.file_name_manager import get_ai_cpu_compiles
+from common_func.file_name_manager import get_aicpu_compiles
 from common_func.file_name_manager import get_aiv_compiles
 from common_func.file_name_manager import get_api_event_compiles
 from common_func.file_name_manager import get_biu_compiles
@@ -22,7 +23,6 @@ from common_func.file_name_manager import get_ffts_pmu_compiles
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.file_name_manager import get_freq_compiles
 from common_func.file_name_manager import get_ge_ctx_id_info_compiles
-from common_func.file_name_manager import get_aicpu_compiles
 from common_func.file_name_manager import get_ge_fusion_add_info_compiles
 from common_func.file_name_manager import get_ge_fusion_op_compiles
 from common_func.file_name_manager import get_ge_graph_add_info_compiles
@@ -61,6 +61,7 @@ from common_func.file_name_manager import get_nic_compiles
 from common_func.file_name_manager import get_npu_mem_compiles
 from common_func.file_name_manager import get_npu_module_mem_compiles
 from common_func.file_name_manager import get_npu_op_mem_compiles
+from common_func.file_name_manager import get_node_attr_info_compiles
 from common_func.file_name_manager import get_parallel_strategy_compiles
 from common_func.file_name_manager import get_pcie_compiles
 from common_func.file_name_manager import get_pid_cpu_usage_compiles
@@ -153,6 +154,7 @@ class FileDispatch:
         DataTag.GRAPH_ADD_INFO: get_ge_graph_add_info_compiles(),
         DataTag.TENSOR_ADD_INFO: get_ge_tensor_add_info_compiles(),
         DataTag.NODE_BASIC_INFO: get_ge_node_basic_info_compiles(),
+        DataTag.NODE_ATTR_INFO: get_node_attr_info_compiles(),
         DataTag.FUSION_ADD_INFO: get_ge_fusion_add_info_compiles(),
         DataTag.MEMORY_APPLICATION: get_ge_memory_application_info_compiles(),
         DataTag.CTX_ID: get_ge_ctx_id_info_compiles(),

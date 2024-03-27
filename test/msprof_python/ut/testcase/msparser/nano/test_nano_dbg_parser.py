@@ -16,7 +16,7 @@ NAMESPACE = 'msparser.nano.nano_dbg_parser'
 
 GE_TASK_INFO_DATA_LIST = [
     [2, 'trans_TransData_0', 0, 0, 1, 0, '0', 'KERNEL', 'TransData', -1, 16, -1, 0, -1,
-     'NHWC;', 'FLOAT16;', '32,1,512,36;', 'FORMAT_1;', 'FLOAT16;', '32,5,1,512,8;', 0, 4294967295, 'NO']
+     'NHWC;', 'FLOAT16;', '32,1,512,36;', 'FORMAT_1;', 'FLOAT16;', '32,5,1,512,8;', 0, 4294967295, 'NO', 'N/A']
 ]
 HOST_TASK_INFO_DATA_LIST = [[2, 0, 0, 0, '4294967295', 0, 'KERNEL', 0, -1, -1]]
 

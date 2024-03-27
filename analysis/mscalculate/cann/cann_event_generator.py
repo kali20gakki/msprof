@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2023-2024. All rights reserved.
 
 import logging
 from typing import List
@@ -21,6 +21,7 @@ from msmodel.api.api_data_model import ApiDataModel
 from msmodel.compact_info.hccl_op_info_model import HcclOpInfoModel
 from msmodel.compact_info.memcpy_info_model import MemcpyInfoModel
 from msmodel.compact_info.node_basic_info_model import NodeBasicInfoModel
+from msmodel.compact_info.node_attr_info_model import NodeAttrInfoModel
 from msmodel.compact_info.task_track_model import TaskTrackModel
 from msmodel.event.event_data_model import EventDataModel
 from profiling_bean.db_dto.api_data_dto import ApiDataDto, generate_api_data_from_event
@@ -32,6 +33,7 @@ from profiling_bean.db_dto.hccl_info_dto import HCCLInfoDto
 from profiling_bean.db_dto.hccl_op_info_dto import HCCLOpInfoDto
 from profiling_bean.db_dto.mem_copy_info_dto import MemCopyInfoDto
 from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
+from profiling_bean.db_dto.node_attr_info_dto import NodeAttrInfoDto
 from profiling_bean.db_dto.task_track_dto import TaskTrackDto
 from profiling_bean.db_dto.tensor_info_dto import TensorInfoDto
 from viewer.api_viewer import ApiViewer
@@ -74,6 +76,7 @@ class CANNEventGenerator:
         self.api_data_model = ApiDataModel(self._project_path)
         self.event_data_model = EventDataModel(self._project_path)
         self.node_basic_info_model = NodeBasicInfoModel(self._project_path)
+        self.node_attr_info_model = NodeAttrInfoModel(self._project_path)
         self.tensor_info_model = TensorAddInfoModel(self._project_path)
         self.task_track_model = TaskTrackModel(self._project_path, [DBNameConstant.TABLE_TASK_TRACK])
         self.mem_copy_model = MemcpyInfoModel(self._project_path)
@@ -159,6 +162,13 @@ class CANNEventGenerator:
             node_basic_infos = node_basic_model.get_all_data(DBNameConstant.TABLE_NODE_BASIC_INFO, NodeBasicInfoDto)
             self.record_additional_info(node_basic_infos)
 
+    def generate_node_attr_info_event(self):
+        if not self.node_attr_info_model.check_db():
+            return
+        with self.node_attr_info_model as node_attr_model:
+            node_attr_infos = node_attr_model.get_all_data(DBNameConstant.TABLE_NODE_ATTR_INFO, NodeAttrInfoDto)
+            self.record_additional_info(node_attr_infos)
+
     def generate_tensor_info_event(self):
         if not self.tensor_info_model.check_db():
             return
@@ -237,6 +247,7 @@ class CANNEventGenerator:
         self.generate_api_event()
 
         self.generate_node_basic_info_event()
+        self.generate_node_attr_info_event()
         self.generate_tensor_info_event()
         self.generate_task_track_event()
         self.generate_mem_copy_info_event()
