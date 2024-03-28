@@ -182,7 +182,8 @@ const std::unordered_map<std::string, uint16_t> MODULE_NAME_TABLE = {
     {"ATRACE",  71},
     {"RTC", 72},
     {"SYSMONITOR", 73},
-    {"INVLID_MOUDLE_ID", 74}
+    {"MBUFF", 74},
+    {"CUSTOM", 75}
 };
 
 // TS为stars时芯片的sqetype
