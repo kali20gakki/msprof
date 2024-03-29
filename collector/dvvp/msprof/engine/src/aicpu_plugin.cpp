@@ -5,6 +5,7 @@
  * Create: 2020-09-18
  */
 #include "aicpu_plugin.h"
+#include <chrono>
 #include "codec.h"
 #include "error_code.h"
 #include "msprof_dlog.h"
@@ -25,7 +26,7 @@ using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::MsprofErrMgr;
 
 AicpuPlugin::AicpuPlugin()
-    : dataInitialized_(false), logicDevId_(-1), dataTran_(nullptr), server_(nullptr)
+    : dataInitialized_(false), logicDevId_(-1), server_(nullptr)
 {}
 
 AicpuPlugin::~AicpuPlugin()
@@ -65,13 +66,25 @@ int AicpuPlugin::UnInit()
     MSPROF_LOGI("Uinit AicpuPlugin Transport Begin, logicDevId:%d", logicDevId_);
     if (dataInitialized_) {
         dataInitialized_ = false;
-        if (dataTran_ != nullptr) {
-            dataTran_.reset();
+        for (auto &tran : dataTran_) {
+            if (tran != nullptr) {
+                tran->CloseSession();
+                tran.reset();
+            }
+        }
+
+        std::chrono::seconds timeout(1);
+        for (auto &val : result_) {
+            if (val.valid() && val.wait_for(timeout) == std::future_status::ready) {
+                MSPROF_LOGI("Device(%d) ProfHdcServer wait for receiving data success", logicDevId_);
+                val.get();
+            }
         }
         if (server_ != nullptr) {
             Analysis::Dvvp::Adx::AdxHdcServerDestroy(server_);
         }
         StopNoWait();
+        dataTran_.clear();
     }
     MSPROF_LOGI("Uinit AicpuPlugin Transport End, logicDevId:%d", logicDevId_);
     return PROFILING_SUCCESS;
@@ -134,34 +147,40 @@ void AicpuPlugin::Run(const struct error_message::Context &errorContext)
     MSPROF_LOGI("Device(%d) AicpuPlugin is running", logicDevId_);
     while (!IsQuit()) {
         MSPROF_LOGI("Device(%d) AicpuPlugin CreateHdcServerTransport begin", logicDevId_);
-        dataTran_ = analysis::dvvp::transport::HDCTransportFactory().CreateHdcServerTransport(logicDevId_, server_);
-        if (dataTran_ == nullptr) {
+        auto dataTran = analysis::dvvp::transport::HDCTransportFactory().CreateHdcServerTransport(logicDevId_, server_);
+        if (dataTran == nullptr) {
             MSPROF_LOGW("Device(%d) can not CreateHdcServerTransport", logicDevId_);
             return;
         }
         MSPROF_LOGI("Device(%d) AicpuPlugin CreateHdcServerTransport success", logicDevId_);
-        TLV_REQ_PTR packet = nullptr;
-        int ret = PROFILING_SUCCESS;
-        while (!IsQuit()) {
-            packet = nullptr;
-            ret = dataTran_->RecvPacket(&packet);
-            if (ret == IDE_DAEMON_SOCK_CLOSE) {
-                MSPROF_EVENT("Device(%d) AicpuPlugin session closed, exits", logicDevId_);
-                return;
-            } else if (ret < 0 || packet == nullptr) {
-                MSPROF_EVENT("Device(%d) AicpuPlugin recv data ends, exits", logicDevId_);
-                break;
-            }
-            MSPROF_LOGD("[HdcTransport] RecvDataPacket %d bytes", packet->len);
+        dataTran_.push_back(dataTran);
+        auto retval = std::async(std::launch::async, [this, dataTran]()->int32_t {
+            TLV_REQ_PTR packet = nullptr;
+            int32_t ret = PROFILING_SUCCESS;
+            MSPROF_LOGI("Device(%d) ProfHdcServer read message begin", this->logicDevId_);
+            while (!IsQuit()) {
+                packet = nullptr;
+                ret = dataTran->RecvPacket(&packet);
+                if (ret < 0 || packet == nullptr) {
+                    MSPROF_EVENT("Device(%d) ProfHdcServer recv data ends, exits", this->logicDevId_);
+                    break;
+                }
 
-            ret = ReceiveStreamData(packet->value, packet->len);
-            if (ret != PROFILING_SUCCESS) {
-                MSPROF_LOGE("Device(%d) ReceiveStreamData failed", logicDevId_);
-                MSPROF_INNER_ERROR("EK9999", "Device(%d) ReceiveStreamData failed", logicDevId_);
+                MSPROF_LOGD("[HdcTransport] RecvDataPacket %d bytes", packet->len);
+                ret = ReceiveStreamData(packet->value, packet->len);
+                if (ret != PROFILING_SUCCESS) {
+                    MSPROF_LOGE("Device(%d) ReceiveStreamData failed", this->logicDevId_);
+                    MSPROF_INNER_ERROR("EK9999", "Device(%d) ReceiveStreamData failed", this->logicDevId_);
+                }
+                dataTran->DestroyPacket(packet);
+                packet = nullptr;
             }
-            dataTran_->DestroyPacket(packet);
-            packet = nullptr;
-        }
+            dataTran->CloseSession();
+            MSPROF_LOGI("Device(%d) ProfHdcServer read message end", logicDevId_);
+            return ret;
+        });
+        MSPROF_LOGI("Device(%d) ProfHdcServer CreateHdcServerTransport success", logicDevId_);
+        result_.emplace_back(std::move(retval));
     }
     MSPROF_LOGI("Device(%d) AicpuPlugin exit", logicDevId_);
 }
