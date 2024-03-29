@@ -12,6 +12,7 @@
 #define MSPROF_ENGINE_AICPU_PLUGIN_H
 
 #include <string>
+#include <future>
 #include "utils.h"
 #include "transport/transport.h"
 #include "thread/thread.h"
@@ -35,9 +36,10 @@ private:
 private:
     bool dataInitialized_;
     int32_t logicDevId_;
-    SHARED_PTR_ALIA<analysis::dvvp::transport::AdxTransport> dataTran_;
+    std::vector<SHARED_PTR_ALIA<analysis::dvvp::transport::AdxTransport>> dataTran_;
     HDC_SERVER server_;
     std::string logicDevIdStr_;
+    std::vector<std::future<int32_t>> result_;
 };
 }
 }
