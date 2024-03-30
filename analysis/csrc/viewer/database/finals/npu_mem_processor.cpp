@@ -69,8 +69,8 @@ NpuMemProcessor::ProcessedDataFormat NpuMemProcessor::FormatData(const OriDataFo
     }
     for (auto &row: oriData) {
         std::tie(data.event, data.ddr, data.hbm, data.timestamp) = row;
-        // 原数据结果还未加device monotonic，无需减去
-        HPFloat timestamp{GetTimeBySamplingTimestamp(data.timestamp, hostMonotonic, 0)};
+        // 原数据结果还未加device monotonic，无需减去, 且原始时间单位为us
+        HPFloat timestamp{GetTimeBySamplingTimestamp(data.timestamp * MILLI_SECOND, hostMonotonic, 0)};
         uint64_t type = UINT64_MAX;
         if (StrToU64(type, data.event) == ANALYSIS_ERROR) {
             ERROR("Converting string(event: %) to integer failed, deviceId is: %.", data.event, deviceId);
