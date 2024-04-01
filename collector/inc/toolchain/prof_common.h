@@ -81,6 +81,7 @@ enum AttrType {
 };
 
 struct MsprofAttrInfo {
+    uint64_t opName;
     uint32_t attrType;
     uint64_t hashId;
 };

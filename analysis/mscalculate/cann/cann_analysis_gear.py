@@ -257,8 +257,6 @@ class TaskGear(CANNGear):
 
         @staticmethod
         def get_hash(dto: Union[NodeBasicInfoDto, TensorInfoDto, CtxIdDto, NodeAttrInfoDto, HCCLOpInfoDto]):
-            if isinstance(dto, NodeAttrInfoDto):
-                return str(int(dto.timestamp))
             return dto.op_name + "-" + str(int(dto.timestamp))
 
         def is_invalid(self):
@@ -334,26 +332,18 @@ class TaskGear(CANNGear):
 
     def get_node_descs(self, event: Event) -> dict:
         node_descs = HighPerfDict()
-        hash_key = ''
-        for record in event.additional_record:
-            if isinstance(record.dto, HCCLOpInfoDto):
-                continue
-            hash_key = self.NodeDesc.get_hash(record.dto)
-            if isinstance(record.dto, NodeAttrInfoDto):
-                break
         for record in event.additional_record:
             if isinstance(record.dto, NodeBasicInfoDto):
-                node_desc = node_descs.set_default_call_obj_later(hash_key, self.NodeDesc)
+                node_desc = node_descs.set_default_call_obj_later(self.NodeDesc.get_hash(record.dto), self.NodeDesc)
                 node_desc.node_basic_info = record.dto
             elif isinstance(record.dto, TensorInfoDto):
-                node_desc = node_descs.set_default_call_obj_later(hash_key, self.NodeDesc)
+                node_desc = node_descs.set_default_call_obj_later(self.NodeDesc.get_hash(record.dto), self.NodeDesc)
                 node_desc.tensor_info = record.dto
-            elif isinstance(record.dto, NodeAttrInfoDto):
-                node_desc = node_descs.set_default_call_obj_later(hash_key, self.NodeDesc)
-                node_desc.node_attr_info = record.dto
             elif isinstance(record.dto, CtxIdDto):
-                node_desc = node_descs.set_default_call_obj_later(hash_key, self.NodeDesc)
+                node_desc = node_descs.set_default_call_obj_later(self.NodeDesc.get_hash(record.dto), self.NodeDesc)
                 node_desc.ctx_info = record.dto
+            elif isinstance(record.dto, NodeAttrInfoDto):
+                continue
             elif isinstance(record.dto, HCCLOpInfoDto):
                 continue
             else:
