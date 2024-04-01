@@ -5,6 +5,7 @@
 import os
 import shutil
 import unittest
+from collections import namedtuple
 from unittest import mock
 
 from common_func.constant import Constant
@@ -15,6 +16,7 @@ from common_func.file_manager import check_dir_writable
 from common_func.file_manager import check_file_readable
 from common_func.file_manager import check_file_writable
 from common_func.file_manager import check_path_valid
+from common_func.file_manager import check_so_valid
 from common_func.file_name_manager import FileNameManagerConstant
 from common_func.msprof_exception import ProfException
 
@@ -199,3 +201,38 @@ class TestFileManager(unittest.TestCase):
                          "The path \"/path/host/writable\" does not have "
                          "permission to write. Please check that the path is writeable.")
 
+    def test_check_so_valid_should_return_false_when_so_is_not_file(self):
+        path = "/path/host/msprof_analysis.so"
+        with mock.patch('os.path.isfile', return_value=False):
+            self.assertFalse(check_so_valid(path))
+
+    def test_check_so_valid_should_return_false_when_so_is_soft_link(self):
+        path = "/path/host/msprof_analysis.so"
+        with mock.patch('os.path.isfile', return_value=True), \
+             mock.patch('os.path.islink', return_value=True):
+            self.assertFalse(check_so_valid(path))
+
+    def test_check_so_valid_should_return_false_when_so_has_no_permission_to_execute(self):
+        path = "/path/host/msprof_analysis.so"
+        with mock.patch('os.path.isfile', return_value=True), \
+             mock.patch('os.path.islink', return_value=False), \
+             mock.patch('os.access', return_value=False):
+            self.assertFalse(check_so_valid(path))
+
+    def test_check_so_valid_should_return_false_when_others_has_permission_to_write(self):
+        path = "/path/host/msprof_analysis.so"
+        StatInfo = namedtuple("StatInfo", ["st_mode"])
+        with mock.patch('os.path.isfile', return_value=True), \
+             mock.patch('os.path.islink', return_value=False), \
+             mock.patch('os.access', return_value=True), \
+             mock.patch('os.stat', return_value=StatInfo(0o022)):
+            self.assertFalse(check_so_valid(path))
+
+    def test_check_so_valid_should_return_false_when_file_owner_is_not_root_or_current_user(self):
+        path = "/path/host/msprof_analysis.so"
+        StatInfo = namedtuple("StatInfo", ["st_mode", "st_uid", "st_gid"])
+        with mock.patch('os.path.isfile', return_value=True), \
+             mock.patch('os.path.islink', return_value=False), \
+             mock.patch('os.access', return_value=True), \
+             mock.patch('os.stat', return_value=StatInfo(0o001, 3, 4)):
+            self.assertFalse(check_so_valid(path))

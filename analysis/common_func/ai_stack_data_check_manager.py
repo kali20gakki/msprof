@@ -37,28 +37,11 @@ class AiStackDataCheckManager(DataCheckManager):
         return False
 
     @classmethod
-    def contain_ge_model_load_data(cls: any, result_dir: str, device_id: any = None) -> bool:
-        """
-        The data path contain Framework.model_load_info data or not
-        """
-        return AiStackDataCheckManager._check_output(result_dir, device_id) and \
-            DBManager.check_connect_db(result_dir, DBNameConstant.DB_GE_MODEL_INFO)[0]
-
-    @classmethod
-    def contain_ge_fusion_op_data(cls: any, result_dir: str, device_id: any = None) -> bool:
-        """
-        The data path contain Framework.model_load_info data or not
-        """
-        return AiStackDataCheckManager._check_output(result_dir, device_id) and \
-            DBManager.check_connect_db(result_dir, DBNameConstant.DB_FUSION_ADD_INFO)[0]
-
-    @classmethod
     def contain_fusion_op_data(cls: any, result_dir: str, device_id: any = None) -> bool:
-        """
-        The data path contain Framework.model_load_info data or not
-        """
-        return cls.contain_ge_model_load_data(result_dir, device_id=device_id) and \
-            cls.contain_ge_fusion_op_data(result_dir, device_id=device_id)
+        return AiStackDataCheckManager._check_output(result_dir, device_id) and \
+            DBManager.check_connect_db(result_dir, DBNameConstant.DB_GE_MODEL_INFO)[0] and \
+            DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_GE_MODEL_INFO),
+                                         DBNameConstant.TABLE_GE_FUSION_OP_INFO, DBNameConstant.TABLE_MODEL_NAME)
 
     @classmethod
     def contain_l2_cache_data(cls: any, result_dir: str, device_id: any = None) -> bool:

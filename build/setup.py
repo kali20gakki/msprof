@@ -22,7 +22,8 @@ setup(
     packages=find_packages(root_path),
     include_package_data=False,
     package_data={
-        "": ["*.json"]
+        "": ["*.json"],
+        "analysis": ["lib64/*"]
     },
     python_requires=">=3.7"
 )
