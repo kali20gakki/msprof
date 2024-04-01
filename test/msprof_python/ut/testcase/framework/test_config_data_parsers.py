@@ -16,3 +16,9 @@ class TestConfigDataParsers(unittest.TestCase):
     def test_get_parsers(self):
         InfoConfReader()._sample_json = {'devices': '0'}
         ConfigDataParsers.get_parsers(ConfigManager.DATA_CALCULATOR, str(ChipModel.CHIP_V3_1_0.value))
+
+    def test_load_can_cpp_parse(self):
+        ret = ConfigDataParsers._load_can_cpp_parse("NpuMemParser")
+        self.assertFalse(ret, False)
+        ret = ConfigDataParsers._load_can_cpp_parse("HashDicParser")
+        self.assertTrue(ret, True)

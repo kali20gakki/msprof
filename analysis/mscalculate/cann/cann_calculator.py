@@ -2,12 +2,16 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
+import importlib
 import logging
+import os
+import sys
 from typing import List
 
 from common_func.constant import Constant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
+from common_func.profiling_scene import ProfilingScene
 from mscalculate.cann.cann_analysis_chain import CANNAnalysisChain
 from mscalculate.cann.cann_analysis_gear import HCCLGear, ACLGear
 from mscalculate.cann.cann_analysis_gear import ModelGear
@@ -64,5 +68,13 @@ class CANNCalculator(ICalculator, MsMultiProcess):
         :return: None
         """
         logging.info("start to analysis cann software callstack")
+        if ProfilingScene().is_cpp_parse_enable():
+            sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "..", "lib64")))
+            logging.info("Data will be parsed by msprof_analysis.so!")
+            msprof_analysis_module = importlib.import_module("msprof_analysis")
+            msprof_analysis_module.parser.dump_cann_trace(self._project_path)
+            return
+        else:
+            logging.warning("Data will not be parsed by msprof_analysis.so!")
         self.calculate()
         self.save()

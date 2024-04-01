@@ -2,10 +2,13 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2023. All rights reserved.
 
+import os
 import logging
 from enum import Enum
 
 from common_func.constant import Constant
+from common_func.file_manager import check_so_valid
+from common_func.platform.chip_manager import ChipManager
 from common_func.singleton import singleton
 from common_func.utils import Utils
 from common_func.db_name_constant import DBNameConstant
@@ -30,6 +33,19 @@ class ProfilingScene:
         self.project_path = None
         self._scene = None
         self._mode = ExportMode.ALL_EXPORT
+
+    @staticmethod
+    def is_cpp_parse_enable() -> bool:
+        """
+        check whether cpp_parse
+        :return: cpp_parse
+        """
+        if ChipManager().is_chip_v5_1_0():
+            return False
+        so_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "lib64", "msprof_analysis.so")
+        if not check_so_valid(so_path):
+            return False
+        return True
 
     def set_mode(self: any, mode: ExportMode) -> None:
         self._mode = mode

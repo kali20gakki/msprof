@@ -61,6 +61,24 @@ if [ ! -z "${TOOLKIT_HITEST}" ] && [ "${TOOLKIT_HITEST}" == "on" ]; then
     HI_TEST=${TOOLKIT_HITEST}
 fi
 
-cmake ../cmake/superbuild/ -DMSPROF_BUILD_TYPE=${BUILD_TYPE} -DHITEST=${HI_TEST}
-make -j64
+function collector_compile() {
+    cd ${TOP_DIR}/build
+    cmake ../cmake/superbuild/ -DMSPROF_BUILD_TYPE=${BUILD_TYPE} -DHITEST=${HI_TEST}
+    make -j64
+}
+
+function analysis_compile() {
+    mkdir -p ${TOP_DIR}/analysis/csrc/build
+    cd ${TOP_DIR}/analysis/csrc/build
+    cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${TOP_DIR}/analysis
+    make -j64 && make clean && make install
+    if [ $? -ne 0 ]; then
+        echo "analysis_compile failed"
+        exit 1
+    fi
+    cd ${TOP_DIR}/build
+}
+
+collector_compile
+analysis_compile
 bash ${TOP_DIR}/scripts/create_run_package_pack.sh ${VERSION} ${PACKAGE_TYPE}

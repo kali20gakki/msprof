@@ -1,13 +1,15 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2024. All rights reserved.
-
+import importlib
 import json
+import logging
 import os
 import re
 
 from common_func.common import CommonConstant, print_info
 from common_func.common import error
+from common_func.common import is_linux
 from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
 from common_func.file_name_manager import FileNameManagerConstant
@@ -263,3 +265,52 @@ def check_dir_writable(path: str) -> None:
         raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
                             f"The path \"{path}\" does not have permission to write. "
                             f"Please check that the path is writeable.")
+
+
+def is_other_writable(path: str) -> bool:
+    """
+    check whether others can write
+    0o022 means 755
+    """
+    stat_info = os.stat(path)
+    return bool(stat_info.st_mode & 0o022)
+
+
+def check_file_owner(path: str) -> bool:
+    """
+    Check the file owner is the root user or the current user.
+    """
+    if not is_linux():
+        return False
+    stat_info = os.stat(path)
+    current_uid = os.geteuid()
+    pwd_module = importlib.import_module("pwd")
+    if current_uid == 0:  # root用户
+        return True
+    else:
+        current_user = pwd_module.getpwuid(current_uid)
+        return current_user.pw_uid == stat_info.st_uid and current_user.pw_gid == stat_info.st_gid
+
+
+def check_so_valid(path: str) -> bool:
+    """
+    check so file is file and executable
+    """
+    if not os.path.isfile(path):
+        logging.warning("The path %s is not a file. Please check the path.", path)
+        return False
+    elif os.path.islink(path):
+        logging.warning("The path %s is link. Please check the path.", path)
+        return False
+    elif not os.access(path, os.R_OK):
+        logging.warning("The path %s does not have permission to open. "
+                        "Please check that the path is readable.", path)
+        return False
+    elif is_other_writable(path):
+        logging.warning("The path %s is writable by others", path)
+        return False
+    elif not check_file_owner(path):
+        logging.warning("The path %s owner is not the current user.", path)
+        return False
+    else:
+        return True

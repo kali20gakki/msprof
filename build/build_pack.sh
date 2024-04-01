@@ -63,13 +63,14 @@ function analysis_compile() {
     mkdir -p ${TOP_DIR}/analysis/csrc/build
     cd ${TOP_DIR}/analysis/csrc/build
     cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${TOP_DIR}/analysis
-    make -j64 && make clean
+    make -j64 && make clean && make install
     if [ $? -ne 0 ]; then
         echo "analysis_compile failed"
         exit 1
     fi
+    cd ${TOP_DIR}/build
 }
 
 collector_compile
-bash ${TOP_DIR}/scripts/create_run_package.sh ${VERSION} ${PACKAGE_TYPE}
 analysis_compile
+bash ${TOP_DIR}/scripts/create_run_package.sh ${VERSION} ${PACKAGE_TYPE}
