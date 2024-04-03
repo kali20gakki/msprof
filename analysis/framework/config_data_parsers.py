@@ -140,7 +140,8 @@ class ConfigDataParsers:
             "GraphAddInfoParser",
             "NodeBasicInfoParser",
             "MemoryApplicationParser",
-            "CtxIdParser"
+            "CtxIdParser",
+            "HcclOpInfoParser"
         ]:
             return True
         return False
