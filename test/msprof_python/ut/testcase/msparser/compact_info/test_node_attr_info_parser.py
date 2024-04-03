@@ -37,7 +37,7 @@ class TestNodeAttrInfoParser(unittest.TestCase):
                 mock.patch(MODEL_NAMESPACE + '.NodeAttrInfoModel.finalize'):
             check = NodeAttrInfoParser(self.file_list, CONFIG)
             check._task_track_data = [
-                'node', 'node_attr_info', 3602526, 38202864071026,
+                'node', 'node_attr_info', 3602526, 'aclnnInplaceCopy_TransposeAiCore_Transpose', 38202864071026,
                 'strides: 0; pads: 0; dilations: 0; groups: 1;data_formats: 0'
             ]
             check.save()
@@ -49,12 +49,15 @@ class TestNodeAttrInfoParser(unittest.TestCase):
         NodeAttrInfoParser({DataTag.NODE_ATTR_INFO: []}, CONFIG).ms_run()
 
     def test_get_node_attr_info_data(self):
-        node_attr_info_data = (23130, 10000, 9, 3602526, 8, 38202863941896, 14943139970160221335, *(0,) * 4)
-        struct_data = struct.pack("HHIIIQQ4Q", *node_attr_info_data)
+        node_attr_info_data = (
+            23130, 10000, 9, 915562, 20, 1147447818475641, 5800791449677985058, 0, 1172856012119002644, *(0,) * 3
+        )
+        struct_data = struct.pack("HHIIIQQIQIQQ", *node_attr_info_data)
         data = NodeAttrInfoBean.decode(struct_data)
         check = NodeAttrInfoParser(self.file_list, CONFIG)
         result = check._get_node_attr_info_data(data)
-        self.assertEqual(result, ['node', '9', 3602526, 38202863941896, 14943139970160221335])
+        self.assertEqual(result, ['node', '9', 915562, 1147447818475641,
+                                  5800791449677985058, 3965646057194389504])
 
     def test_transform_node_attr_info_data(self):
         level = 'node'
@@ -64,11 +67,12 @@ class TestNodeAttrInfoParser(unittest.TestCase):
             }
         }
         ge_hash_dict = {
-            '14943139970160221335': 'strides: 0; pads: 0; dilations: 0; groups: 1;data_formats: 0',
+            '14943139970160221335': 'src_format:ND|dst_format:FRACTAL_NZ|src_subformat:0|dst_subformat:0|groups:0|',
+            '6371697640902395132': 'aclnnMm_TransData_TransData',
         }
         data_list = [
-            [level, '9', 3602526, 38202863941896, 14943139970160221335],
-            [level, '9', 3602526, 38202864071026, 14943139970160221335]
+            [level, '9', 3602526, 38202863941896, 6371697640902395132, 14943139970160221335],
+            [level, '9', 3602526, 38202864071026, 6371697640902395132, 14943139970160221335]
         ]
         with mock.patch(GE_HASH_MODEL_NAMESPACE + '.GeHashViewModel.init'), \
                 mock.patch(GE_HASH_MODEL_NAMESPACE + '.GeHashViewModel.get_type_hash_data',
@@ -79,6 +83,9 @@ class TestNodeAttrInfoParser(unittest.TestCase):
             check = NodeAttrInfoParser(self.file_list, CONFIG)
             data = check._transform_node_attr_info_data(data_list)
             self.assertEqual(len(data), 2)
-            self.assertEqual(len(data[0]), 5)
+            self.assertEqual(len(data[0]), 6)
             self.assertEqual(data[0][1], '9')
-            self.assertEqual(data[0][4], '14943139970160221335')
+            self.assertEqual(data[0][4],
+                             '6371697640902395132')
+            self.assertEqual(data[0][5],
+                             14943139970160221335)

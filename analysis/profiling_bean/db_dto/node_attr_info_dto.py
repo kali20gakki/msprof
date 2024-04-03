@@ -11,5 +11,7 @@ class NodeAttrInfoDto(metaclass=InstanceCheckMeta):
     level: str = None
     struct_type: str = None
     thread_id: int = None
-    hashid: str = None
     timestamp: float = None
+    op_name: str = None
+    hashid: str = None
+

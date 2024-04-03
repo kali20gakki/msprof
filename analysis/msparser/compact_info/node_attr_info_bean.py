@@ -13,13 +13,21 @@ class NodeAttrInfoBean(CompactInfoBean):
     def __init__(self: any, *args) -> None:
         super().__init__(*args)
         data = args[0]
-        self._hashid = data[6]
+        self._node_id = data[6]
+        self._hash_id = data[8]
 
     @property
-    def hashid(self: any) -> str:
+    def node_id(self: any) -> str:
         """
-        node attr hash id
+        for node id
         """
-        return self._hashid
+        return self._node_id
+
+    @property
+    def hash_id(self: any) -> str:
+        """
+        the hash id for attribute information of operators
+        """
+        return self._hash_id
 
 

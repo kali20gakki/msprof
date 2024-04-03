@@ -32,7 +32,8 @@ class NodeAttrInfoParser(DataParser, MsMultiProcess):
         transform bean to data
         """
         return [
-            bean_data.level, bean_data.struct_type, bean_data.thread_id, bean_data.timestamp, bean_data.hashid
+            bean_data.level, bean_data.struct_type, bean_data.thread_id,
+            bean_data.timestamp, bean_data.node_id, bean_data.hash_id
         ]
 
     def save(self: any) -> None:
@@ -76,7 +77,7 @@ class NodeAttrInfoParser(DataParser, MsMultiProcess):
         type_hash_dict = hash_dict_data.get_type_hash_dict()
         ge_hash_dict = hash_dict_data.get_ge_hash_dict()
         for data in data_list:
-            # data[1]: struct_type  data[4]: hashid
+            # data[1]: struct_type, data[4]: op_name
             data[1] = type_hash_dict.get('node', {}).get(data[1], data[1])
             data[4] = ge_hash_dict.get(str(data[4]), str(data[4]))
         return data_list

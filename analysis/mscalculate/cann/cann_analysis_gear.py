@@ -343,7 +343,8 @@ class TaskGear(CANNGear):
                 node_desc = node_descs.set_default_call_obj_later(self.NodeDesc.get_hash(record.dto), self.NodeDesc)
                 node_desc.ctx_info = record.dto
             elif isinstance(record.dto, NodeAttrInfoDto):
-                continue
+                node_desc = node_descs.set_default_call_obj_later(self.NodeDesc.get_hash(record.dto), self.NodeDesc)
+                node_desc.node_attr_info = record.dto
             elif isinstance(record.dto, HCCLOpInfoDto):
                 continue
             else:
