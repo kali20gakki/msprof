@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2024. All rights reserved.
 import copy
 from collections import OrderedDict
+from decimal import Decimal
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
@@ -57,6 +58,8 @@ class AiCoreFreqViewer:
                 ]
                 freq_lists.append(data_list)
         _, end_ts = InfoConfReader().get_collect_time()
+        if not end_ts:
+            end_ts = str(Decimal(freq_lists[-1][1]) + 1)
         final_data = copy.deepcopy(freq_lists[-1])
         # 增加一条记录，时间替换为采集结束时间，截断柱状图
         final_data[1] = end_ts

@@ -36,7 +36,7 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
             ]
         }
         InfoConfReader()._start_info = {StrConstant.COLLECT_TIME_BEGIN: "1"}
-        InfoConfReader()._end_info = {StrConstant.COLLECT_TIME_END: "2"}
+        InfoConfReader()._end_info = {}
         self.params = {
             "data_type": "msprof",
             "project": self.PROF_HOST_DIR,
