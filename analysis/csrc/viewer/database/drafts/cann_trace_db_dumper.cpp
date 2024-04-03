@@ -283,16 +283,19 @@ void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInf
     auto mixBlockDim = blockDim * (nodeBasicInfo.blockDim >> 16);
     auto opFlag = nodeBasicInfo.opFlag ? "YES" : "NO";
     auto opState = std::to_string(nodeBasicInfo.opState);
+    auto inputFormatStr = inputFormat.empty() ? NA : Utils::Join(inputFormat, ";");
+    auto inputDataTypeStr = inputDataType.empty() ? NA : Utils::Join(inputDataType, ";");
+    auto inputShapeStr = inputShape.empty() ? NA : Utils::AddQuotation(Utils::Join(inputShape, ";"));
+    auto outputFormatStr = outputFormat.empty() ? NA : Utils::Join(outputFormat, ";");
+    auto outputDataTypeStr = outputDataType.empty() ? NA : Utils::Join(outputDataType, ";");
+    auto outputShapeStr = outputShape.empty() ? NA : Utils::AddQuotation(Utils::Join(outputShape, ";"));
     data.emplace_back(task->modelId, HashData::GetInstance().Get(nodeBasicInfo.opName), task->streamId,
-                      task->taskId,
-                      blockDim, mixBlockDim, opState,
+                      task->taskId, blockDim, mixBlockDim, opState,
                       NumberMapping::Get(
                           NumberMapping::MappingType::GE_TASK_TYPE, nodeBasicInfo.taskType),
                       HashData::GetInstance().Get(nodeBasicInfo.opType), task->requestId, task->thread_id,
-                      task->timeStamp, task->batchId, tensorNum, Utils::Join(inputFormat, ";"),
-                      Utils::Join(inputDataType, ";"), Utils::AddQuotation(Utils::Join(inputShape, ";")),
-                      Utils::Join(outputFormat, ";"), Utils::Join(outputDataType, ";"),
-                      Utils::AddQuotation(Utils::Join(outputShape, ";")), task->deviceId, task->contextId, opFlag);
+                      task->timeStamp, task->batchId, tensorNum, inputFormatStr, inputDataTypeStr, inputShapeStr,
+                      outputFormatStr, outputDataTypeStr, outputShapeStr, task->deviceId, task->contextId, opFlag);
 }
 
 std::string CANNTraceDBDumper::GetFormat(uint32_t oriFormat)

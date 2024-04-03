@@ -157,7 +157,7 @@ TEST_F(CannDBDumperUtest,
             uint32_t, uint32_t>> TaskInfoData;
     opDescDBRunner.QueryData("select * from TaskInfo", TaskInfoData);
     EXPECT_EQ(TaskInfoData.size(), 1);
-    EXPECT_EQ(std::get<INPUT_DATA_TYPE_POSITION>(TaskInfoData[0]), "");
+    EXPECT_EQ(std::get<INPUT_DATA_TYPE_POSITION>(TaskInfoData[0]), "N/A");
 
     std::vector<std::tuple<uint32_t, uint32_t, std::string, std::string, uint32_t, std::string,
             double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
