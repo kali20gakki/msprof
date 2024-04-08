@@ -32,7 +32,7 @@ const std::vector<std::string> aclCfgName = {"dvpp_freq", "host_sys_usage_freq",
 
 inline bool isValueInArray(const std::vector<std::string>& arr, std::string value)
 {
-    for (int i = 0; i < arr.size(); i++) {
+    for (size_t i = 0; i < arr.size(); i++) {
         if (arr[i] == value) {
             return true;
         }
