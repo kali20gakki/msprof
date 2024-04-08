@@ -25,15 +25,7 @@ using namespace Analysis::Dvvp::App;
 using namespace analysis::dvvp::common::config;
 using namespace Collector::Dvvp::Msprofbin;
 
-void SigHandler(int sig)
-{
-    if (sig == SIGINT) {
-        pid_t pid = MsopprofManager::instance()->GetMsopprofPid();
-        if (pid > 0) {
-            kill(pid, SIGTERM);
-        }
-    }
-}
+void SigHandler(int sig) {}
 
 MsopprofManager::MsopprofManager()
 {
