@@ -54,7 +54,7 @@ class SioViewer(BaseViewer, ABC):
         for data in datas:
             acc_id = data[self.ACC_ID]
             timestamp = data[self.TIME_STAMP]
-            if acc_id in timestamp_dict:
+            if acc_id in timestamp_dict and timestamp_dict[acc_id] != timestamp:
                 data_size_list = data[self.REQ_RX: self.TIME_STAMP]
                 bandwidth_data = [data_size / (NumberConstant.BYTES_TO_KB ** 2) / ((
                                  timestamp - timestamp_dict[acc_id]) / NumberConstant.NANO_SECOND)
