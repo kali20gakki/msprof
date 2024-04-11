@@ -314,7 +314,7 @@ void MmScandirFree(MmDirent **entryList, int32_t count)
             FREE_BUF(entryList[j]);
         }
     }
-    free(entryList);
+    FREE_BUF(entryList);
 }
 
 static int32_t LocalRmDirPreCheck(const std::string &pathName)
@@ -379,7 +379,7 @@ int32_t MmRmdir(const std::string &pathName)
         } else {
             ret = unlink(buf);
             if (ret == PROFILING_SUCCESS) {
-                free(buf);
+                FREE_BUF(buf);
                 continue;
             }
         }
@@ -587,18 +587,18 @@ int32_t MmGetMac(MmMacInfo **list, int32_t *count)
     }
     if (memset_s(macInfo, needSize, 0, needSize) != EOK) {
         close(sock);
-        free(macInfo);
+        FREE_BUF(macInfo);
         return PROFILING_FAILED;
     }
     ret = LocalGetMacInfo(sock, ifc, macInfo, count);
     if (ret != PROFILING_SUCCESS) {
         close(sock);
-        free(macInfo);
+        FREE_BUF(macInfo);
         return PROFILING_FAILED;
     }
     (void)close(sock);
     if (*count <= 0) {
-        (void)free(macInfo);
+        FREE_BUF(macInfo);
         return PROFILING_FAILED;
     } else {
         *list = macInfo;
@@ -611,7 +611,7 @@ int32_t MmGetMacFree(MmMacInfo *list, int32_t count)
     if ((list == nullptr) || (count < 0)) {
         return PROFILING_INVALID_PARAM;
     }
-    (void)free(list);
+    FREE_BUF(list);
     return PROFILING_SUCCESS;
 }
 
@@ -1112,19 +1112,19 @@ int32_t MmGetCpuInfo(MmCpuDesc **cpuInfo, int32_t *count)
     }
 
     if (memset_s(pCpuDesc, needSize, 0, needSize) != EOK) {
-        free(pCpuDesc);
+        FREE_BUF(pCpuDesc);
         return PROFILING_FAILED;
     }
 
     if (uname(&sysInfo) == PROFILING_SUCCESS) {
         uint32_t sysMachineLen = strnlen(sysInfo.machine, sizeof(cpuDest.arch));
         if (sysMachineLen == sizeof(cpuDest.arch)) {
-            free(pCpuDesc);
+            FREE_BUF(pCpuDesc);
             return PROFILING_FAILED;
         }
         ret = memcpy_s(cpuDest.arch, sizeof(cpuDest.arch), sysInfo.machine, sysMachineLen + 1U);
         if (ret != PROFILING_SUCCESS) {
-            free(pCpuDesc);
+            FREE_BUF(pCpuDesc);
             return PROFILING_FAILED;
         }
     }
@@ -1145,7 +1145,7 @@ int32_t MmCpuInfoFree(MmCpuDesc *cpuInfo, int32_t count)
     if ((cpuInfo == nullptr) || (count == 0)) {
         return PROFILING_INVALID_PARAM;
     }
-    (void)free(cpuInfo);
+    FREE_BUF(cpuInfo);
     return PROFILING_SUCCESS;
 }
 
