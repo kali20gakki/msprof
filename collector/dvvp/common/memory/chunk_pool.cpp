@@ -7,6 +7,7 @@
 #include "chunk_pool.h"
 #include "securec.h"
 #include "msprof_dlog.h"
+#include "mmpa_api.h"
 
 namespace analysis {
 namespace dvvp {
@@ -42,8 +43,7 @@ bool Chunk::Init()
 void Chunk::Uninit()
 {
     if (buffer_ != nullptr) {
-        free(buffer_);
-        buffer_ = nullptr;
+        FREE_BUF(buffer_);
     }
     bufferSize_ = 0;
 }

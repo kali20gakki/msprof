@@ -31,7 +31,7 @@ MsprofStampPool::~MsprofStampPool()
 {
     if (g_stampPoolHandle != nullptr) {
         if (g_stampPoolHandle->memPool != nullptr) {
-            free(g_stampPoolHandle->memPool);
+            FREE_BUF(g_stampPoolHandle->memPool);
         }
         delete g_stampPoolHandle;
         g_stampPoolHandle = nullptr;
@@ -95,7 +95,7 @@ int MsprofStampPool::UnInit() const
         return PROFILING_FAILED;
     }
 
-    free(g_stampPoolHandle->memPool);
+    FREE_BUF(g_stampPoolHandle->memPool);
 
     delete g_stampPoolHandle;
     g_stampPoolHandle = nullptr;

@@ -96,8 +96,10 @@
 
 #define FREE_BUF(buf)                \
     do {                             \
-        free(buf);                   \
-        buf = nullptr;               \
+        if ((buf) != nullptr) {        \
+            free(buf);               \
+            buf = nullptr;           \
+        }                            \
     } while (0)
 
 namespace Collector {
