@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 
 import logging
+from collections import defaultdict
 
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import OpAnalysisType
@@ -48,102 +49,6 @@ class CommunicationParser(MetaParser):
             return True
         else:
             return False
-
-    @staticmethod
-    def op_time_parser(events: list) -> dict:
-        """
-        time info parser
-        """
-        # in case there exists keys that never use, init dict first
-        values = [value for key, value in OpAnalysisType.__dict__.items() if '__' not in key]
-        op_time_dict = HcclAnalysisTool.init_dict(values)
-        wait_flag = True
-        idx = 0
-        # only choose master stream for op time analysis parser
-        master_plane_id = CommunicationParser.get_master_plane_id(events)
-        master_events = [event for event in events if event.plane_id == master_plane_id]
-        if not master_events:
-            logging.error("Fail to get master events info, communication parser is interrupted")
-            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
-        op_name = master_events[0].op_name
-        rdma_transit_op_num = NumberConstant.RDMA_NO_BARRIER_TASK_NUM
-        if not HcclAnalysisTool.is_send_or_recv_op(master_events, idx):
-            rdma_transit_op_num = NumberConstant.RDMA_WITH_BARRIER_TASK_NUM
-        while idx < len(master_events):
-            event = master_events[idx]
-            if CommunicationParser.is_transit_sdma_event(event):
-                wait_flag = False
-                op_time_dict[OpAnalysisType.TRANSIT_TIME] += \
-                    HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS
-            if event.rdma_type == 'RDMA_SEND_PAYLOAD':
-                payload_cnt = HcclAnalysisTool.find_consecutive_payload_tasks_count(master_events, idx)
-                rdma_transit_result = (HcclAnalysisTool.calculate_consecutive_payload_tasks_info(
-                                        master_events, idx, payload_cnt, rdma_transit_op_num))
-                if not rdma_transit_result:
-                    idx += payload_cnt
-                    continue
-                op_time_dict[OpAnalysisType.TRANSIT_TIME] += (rdma_transit_result[0])
-                idx += rdma_transit_op_num + payload_cnt - 1
-                wait_flag = False
-                continue
-            if event.hccl_name == StrConstant.NOTIFY_WAIT:
-                wait_time = HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS
-                if wait_flag:
-                    op_time_dict[OpAnalysisType.SYNCHRONIZATION_TIME] += wait_time
-                op_time_dict[OpAnalysisType.WAIT_TIME] += wait_time
-            idx += 1
-        latest_event = max(events, key=lambda x: x.timestamp + x.duration)
-        earliest_event = min(events, key=lambda x: x.timestamp)
-        op_time_dict[OpAnalysisType.ELAPSE_TIME] = \
-            (latest_event.timestamp + latest_event.duration -
-             earliest_event.timestamp) / NumberConstant.NS_TO_MS
-        op_time_dict[OpAnalysisType.IDLE_TIME] = \
-            op_time_dict[OpAnalysisType.ELAPSE_TIME] - \
-            op_time_dict[OpAnalysisType.TRANSIT_TIME] - \
-            op_time_dict[OpAnalysisType.WAIT_TIME]
-        HcclAnalysisTool.update_time_ratio(op_time_dict, op_name)
-        return op_time_dict
-
-    @staticmethod
-    def op_bandwidth_parser(events: list) -> dict:
-        """
-        Bandwidth info parser
-        """
-        op_bandwidth_dict = HcclAnalysisTool.init_bandwidth_dict()
-        idx = 0
-        rdma_transit_op_num = NumberConstant.RDMA_NO_BARRIER_TASK_NUM
-        if not HcclAnalysisTool.is_send_or_recv_op(events, idx):
-            rdma_transit_op_num = NumberConstant.RDMA_WITH_BARRIER_TASK_NUM
-        while idx < len(events):
-            event = events[idx]
-            if CommunicationParser.is_transit_sdma_event(event):
-                transport_type = HcclAnalysisTool.get_transport_type(event)
-                # do not consider local copy
-                if transport_type == StrConstant.LOCAL:
-                    idx += 1
-                    continue
-                HcclAnalysisTool.update_bandwidth_record(
-                    op_bandwidth_dict, transport_type,
-                    HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.COMMUNICATION_B_to_MB,
-                    HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS)
-            if event.rdma_type == 'RDMA_SEND_PAYLOAD':
-                payload_cnt = HcclAnalysisTool.find_consecutive_payload_tasks_count(events, idx)
-                rdma_transit_result = HcclAnalysisTool.calculate_consecutive_payload_tasks_info(
-                                        events, idx, payload_cnt, rdma_transit_op_num)
-                if not rdma_transit_result:
-                    idx += payload_cnt
-                    continue
-                HcclAnalysisTool.update_bandwidth_record(op_bandwidth_dict, event.transport_type,
-                                                         rdma_transit_result[1], rdma_transit_result[0])
-                idx += rdma_transit_op_num + payload_cnt - 1
-                continue
-            idx += 1
-        for transport_type in StrConstant.TRANSIT_TYPE:
-            if transport_type == StrConstant.SDMA:
-                HcclAnalysisTool.combine_sdma_info(op_bandwidth_dict)
-            else:
-                HcclAnalysisTool.analyze_bandwidth_info(op_bandwidth_dict, transport_type)
-        return op_bandwidth_dict
 
     @staticmethod
     def get_master_plane_id(events: list) -> int:
@@ -237,3 +142,110 @@ class CommunicationParser(MetaParser):
                 HcclAnalysisTool.combine_sdma_info(total_dict)
             else:
                 HcclAnalysisTool.analyze_bandwidth_info(total_dict, transport_type)
+
+    def op_time_parser(self, events: list) -> dict:
+        """
+        time info parser
+        """
+        # in case there exists keys that never use, init dict first
+        values = [value for key, value in OpAnalysisType.__dict__.items() if '__' not in key]
+        op_time_dict = HcclAnalysisTool.init_dict(values)
+        wait_flag = True
+        idx = 0
+        # only choose master stream for op time analysis parser
+        master_plane_id = CommunicationParser.get_master_plane_id(events)
+        master_events = [event for event in events if event.plane_id == master_plane_id]
+        if not master_events:
+            logging.error("Fail to get master events info, communication parser is interrupted")
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+        op_name = master_events[0].op_name
+        rdma_transit_op_num = NumberConstant.RDMA_NO_BARRIER_TASK_NUM
+        if not HcclAnalysisTool.is_send_or_recv_op(master_events, idx):
+            rdma_transit_op_num = NumberConstant.RDMA_WITH_BARRIER_TASK_NUM
+        while idx < len(master_events):
+            event = master_events[idx]
+            if CommunicationParser.is_transit_sdma_event(event):
+                wait_flag = False
+                op_time_dict[OpAnalysisType.TRANSIT_TIME] += \
+                    HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS
+            if event.rdma_type == 'RDMA_SEND_PAYLOAD':
+                payload_cnt = HcclAnalysisTool.find_consecutive_payload_tasks_count(master_events, idx)
+                rdma_transit_result = (HcclAnalysisTool.calculate_consecutive_payload_tasks_info(
+                    master_events, idx, payload_cnt, rdma_transit_op_num))
+                if not rdma_transit_result:
+                    idx += payload_cnt
+                    continue
+                op_time_dict[OpAnalysisType.TRANSIT_TIME] += (rdma_transit_result[0])
+                idx += rdma_transit_op_num + payload_cnt - 1
+                wait_flag = False
+                continue
+            if event.hccl_name == StrConstant.NOTIFY_WAIT:
+                wait_time = HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS
+                if wait_flag:
+                    op_time_dict[OpAnalysisType.SYNCHRONIZATION_TIME] += wait_time
+                op_time_dict[OpAnalysisType.WAIT_TIME] += wait_time
+            idx += 1
+        latest_event = max(events, key=lambda x: x.timestamp + x.duration)
+        earliest_event = min(events, key=lambda x: x.timestamp)
+        op_time_dict[OpAnalysisType.ELAPSE_TIME] = \
+            (latest_event.timestamp + latest_event.duration -
+             earliest_event.timestamp) / NumberConstant.NS_TO_MS
+        op_time_dict[OpAnalysisType.IDLE_TIME] = \
+            op_time_dict[OpAnalysisType.ELAPSE_TIME] - \
+            op_time_dict[OpAnalysisType.TRANSIT_TIME] - \
+            op_time_dict[OpAnalysisType.WAIT_TIME]
+        HcclAnalysisTool.update_time_ratio(op_time_dict, op_name)
+        return op_time_dict
+
+    def op_bandwidth_parser(self, events: list) -> dict:
+        """
+        Bandwidth info parser
+        """
+        op_bandwidth_dict = HcclAnalysisTool.init_bandwidth_dict()
+        idx = 0
+        rdma_transit_op_num = NumberConstant.RDMA_NO_BARRIER_TASK_NUM
+        if not HcclAnalysisTool.is_send_or_recv_op(events, idx):
+            rdma_transit_op_num = NumberConstant.RDMA_WITH_BARRIER_TASK_NUM
+        task_dict = defaultdict(list)
+        for task in events:
+            task_dict[task.plane_id].append(task)
+        for planeid in task_dict.keys():
+            planeid_tasks = task_dict[planeid]
+            idx = 0
+            while idx < len(planeid_tasks):
+                event = planeid_tasks[idx]
+                if CommunicationParser.is_transit_sdma_event(event):
+                    self._calculate_sdma_bw(op_bandwidth_dict, event)
+                if event.rdma_type == 'RDMA_SEND_PAYLOAD':
+                    idx = self._calculate_rdma_bw(op_bandwidth_dict, planeid_tasks, idx, rdma_transit_op_num)
+                    continue
+                idx += 1
+        for transport_type in StrConstant.TRANSIT_TYPE:
+            if transport_type == StrConstant.SDMA:
+                HcclAnalysisTool.combine_sdma_info(op_bandwidth_dict)
+            else:
+                HcclAnalysisTool.analyze_bandwidth_info(op_bandwidth_dict, transport_type)
+        return op_bandwidth_dict
+
+    def _calculate_sdma_bw(self, op_bandwidth_dict, event):
+        transport_type = HcclAnalysisTool.get_transport_type(event)
+        # do not consider local copy
+        if transport_type == StrConstant.LOCAL:
+            return
+        HcclAnalysisTool.update_bandwidth_record(
+            op_bandwidth_dict, transport_type,
+            HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.COMMUNICATION_B_to_MB,
+            HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS)
+
+    def _calculate_rdma_bw(self, op_bandwidth_dict, planeid_tasks, idx, rdma_transit_op_num):
+        event = planeid_tasks[idx]
+        payload_cnt = HcclAnalysisTool.find_consecutive_payload_tasks_count(planeid_tasks, idx)
+        rdma_transit_result = HcclAnalysisTool.calculate_consecutive_payload_tasks_info(
+            planeid_tasks, idx, payload_cnt, rdma_transit_op_num)
+        if not rdma_transit_result:
+            idx += payload_cnt
+            return idx
+        HcclAnalysisTool.update_bandwidth_record(op_bandwidth_dict, event.transport_type,
+                                                 rdma_transit_result[1], rdma_transit_result[0])
+        idx += rdma_transit_op_num + payload_cnt - 1
+        return idx

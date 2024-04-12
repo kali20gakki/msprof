@@ -29,6 +29,7 @@ class Event:
         self.bandwidth = 1
         self.rdma_type = 'INVALID_TYPE'
         self.link_type = StrConstant.HCCS
+        self.plane_id = 0
 
 
 
