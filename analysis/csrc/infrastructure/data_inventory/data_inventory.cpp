@@ -15,8 +15,6 @@
 
 using namespace Analysis;
 
-namespace Analysis {
-
 namespace Infra {
 
 bool DataInventory::InputToData(std::type_index idx, BaseTypePtr ptr)
@@ -31,20 +29,17 @@ bool DataInventory::InputToData(std::type_index idx, BaseTypePtr ptr)
     return ret.second;
 }
 
-std::set<std::type_index> DataInventory::RemoveRestData(const std::set<std::type_index>& keepingDataType)
+void DataInventory::RemoveRestData(const std::set<std::type_index>& keepingDataType)
 {
-    std::set<std::type_index> removedTypes;
     std::lock_guard<std::mutex> lg(mutex_);
     for (auto it = data_.begin(); it != data_.end();) {
         if (std::find(keepingDataType.begin(), keepingDataType.end(), it->first) ==
                 std::end(keepingDataType)) {
-            removedTypes.insert(it->first);
             it = data_.erase(it);
             continue;
         }
         ++it;
     }
-    return removedTypes;
 }
 
 BaseTypePtr DataInventory::GetPtr(std::type_index idx) const
@@ -56,8 +51,6 @@ BaseTypePtr DataInventory::GetPtr(std::type_index idx) const
     }
 
     return it->second;
-}
-
 }
 
 }

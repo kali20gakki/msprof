@@ -25,7 +25,6 @@
 using Analysis::Log;
 using Analysis::Format;
 
-namespace Analysis {
 namespace Infra {
 
 struct BaseType {
@@ -79,9 +78,8 @@ public:
      * @brief 输入需要保留的数据类型，删除其它数据
      *
      * @param keepingDataType 需要保留的数据类型列表
-     * @return 释放的类型集合
      */
-    std::set<std::type_index> RemoveRestData(const std::set<std::type_index>& keepingDataType);
+    void RemoveRestData(const std::set<std::type_index>& keepingDataType);
 
     DataInventory() = default;
     ~DataInventory() = default;
@@ -116,8 +114,6 @@ private:
     std::unordered_map<std::type_index, BaseTypePtr> data_;
     mutable std::mutex mutex_;
 };
-
-}
 
 }
 
