@@ -3,8 +3,8 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : data_inventory_utest.cpp
- * Description        : DataInventory UT
+ * File Name          : tree_analyzer_utest.cpp
+ * Description        : TreeAnalyzer UT
  * Author             : msprof team
  * Creation Date      : 2024/4/9
  * *****************************************************************************
@@ -17,7 +17,6 @@
 
 using namespace std;
 using namespace testing;
-using namespace Analysis;
 using namespace Infra;
 
 class DataInventoryUTest : public Test {
