@@ -22,7 +22,7 @@ using KernelParserWorker = Analysis::Worker::KernelParserWorker;
 using namespace Analysis::Utils;
 PyMethodDef g_methodTestSchedule[] = {
     {"dump_cann_trace", WrapDumpCANNTrace, METH_VARARGS, ""},
-    {NULL, NULL}
+    {NULL, NULL, METH_VARARGS, ""}
 };
 
 PyMethodDef *GetParserMethods()
