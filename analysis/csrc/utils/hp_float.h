@@ -83,9 +83,9 @@ public:
     friend HPFloat operator+(const HPFloat &op1, const HPFloat &op2);
     friend HPFloat operator-(const HPFloat &op1, const HPFloat &op2);
     // 临时方案，十进制左移位，相当于乘以10的n次幂
-    friend HPFloat operator<<(const HPFloat &op, const int n);
+    friend HPFloat operator<<(const HPFloat &op, int n);
     // 临时方案，十进制右移位，相当于除以10的n次幂
-    friend HPFloat operator>>(const HPFloat &op, const int n);
+    friend HPFloat operator>>(const HPFloat &op, int n);
     // 负号
     friend HPFloat operator-(const HPFloat &op);
     friend HPFloat operator+=(HPFloat &op1, const HPFloat &op2);
@@ -161,7 +161,7 @@ private:
 template<typename T>
 HPFloat::HPFloat(T value)
 {
-    for (unsigned long i = 0; i < defaultPrecision_; i++) {
+    for (int32_t i = 0; i < defaultPrecision_; i++) {
         num_.emplace_back(0);
     }
     *this = value;

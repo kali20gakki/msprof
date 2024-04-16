@@ -58,15 +58,16 @@ void HPFloat::Clear()
 void HPFloat::Simple()
 {
     int32_t index = 0;
+    auto length = Len();
     // 计算末尾的零
-    while (index < num_.size() && num_[index] == 0) {
+    while (index < length && num_[index] == 0) {
         index++;
     }
     // 无需化简，返回
     if (index == 0) {
         return;
     }
-    if (index == num_.size()) {
+    if (index == length) {
         // 数量级和符号归零
         digit_ = 0;
         symbol_ = false;
@@ -86,7 +87,7 @@ void HPFloat::SetPrecision(int32_t length)
         ERROR("Invalid argument, length exceeds maximum allowed precision");
         return;
     }
-    int32_t oriLen = static_cast<int32_t>(num_.size());
+    int32_t oriLen = Len();
     if (oriLen == length) {
         return;
     }
@@ -119,12 +120,13 @@ void HPFloat::SetPrecision(long long length)
 void HPFloat::SetDynamicLen()
 {
     // 如果精度全部占满，设置全长
-    if (num_[num_.size() - 1] != 0) {
-        dynamicLen_ = num_.size() - 1;
+    if (num_[Len() - 1] != 0) {
+        dynamicLen_ = Len() - 1;
         return;
     }
+    auto length = Len();
     // 计算高位零的数量，这里num_.size-1使用int32_t为了避免死循环
-    for (auto i = static_cast<int32_t>(num_.size() - 1); i >= 0; i--) {
+    for (auto i = length - 1; i >= 0; i--) {
         if (num_[i] == 0) {
             continue;
         } else {
@@ -141,7 +143,7 @@ int32_t HPFloat::MinDig() const
 
 int32_t HPFloat::TheoreticalMinDig() const
 {
-    return digit_ - static_cast<int32_t>(num_.size()) + 1;
+    return digit_ - Len() + 1;
 }
 
 void HPFloat::BackSpace()
@@ -169,9 +171,10 @@ void HPFloat::MoveForward(int32_t step)
         MoveBackward(-step);
         return;
     }
+    auto length = Len();
     for (int32_t i = dynamicLen_; i >= 0; i--) {
         // 处理超出精度范围情况
-        if (step + i >= num_.size()) {
+        if (step + i >= length) {
             continue;
         }
         num_[step + i] = num_[i];
@@ -213,7 +216,8 @@ bool HPFloat::SimplifyStr(std::string &str)
         str.erase(0, 1);
     }
     int32_t index = 0;
-    while (index < num_.size() && str[index] == '0') {
+    auto length = Len();
+    while (index < length && str[index] == '0') {
         index++;
     }
     if (index != 0) {
@@ -237,7 +241,7 @@ void HPFloat::CoorAdd(signed char op, int32_t psi)
     if (num_[psi] >= CARRY_THRESHOLD) {
         unsigned char temp = 0;
         // 如果精度已满
-        if (psi == num_.size() - 1) {
+        if (psi == Len() - 1) {
             // 退格让出一位精度
             BackSpace();
             // 这里不会出现psi-1小于0的情况,因为允许最小精度是3位
@@ -290,8 +294,8 @@ void HPFloat::DigAdd(signed char op, int32_t n)
             num_[dynamicLen_] = op; // 精度足够，直接填充
         } else {
             MoveBackward(n - (MinDig() + Len() - 1)); // 精度不足，舍去末位数据
-            num_[num_.size() - 1] = op;
-            dynamicLen_ = num_.size() - 1;
+            num_[Len() - 1] = op;
+            dynamicLen_ = Len() - 1;
         }
         digit_ = n;
     }
@@ -433,7 +437,7 @@ HPFloat &HPFloat::operator=(unsigned long long op)
 {
     Clear();
     // 为了处理num数量级超过用例最大精度溢出情况，记录原始精度同时扩大当前精度
-    auto oriPrecision = static_cast<int32_t>(num_.size());
+    auto oriPrecision = Len();
     // 取正
     unsigned long long num = op;
     int32_t n = 0;
@@ -503,7 +507,7 @@ HPFloat &HPFloat::operator=(const std::string &num)
     int8_t ifDot = 0;
     int32_t dotLoc = 0;
     int32_t count = 0; // 用于记录有效数字位数
-    for (int32_t i = 0; i < op.size() && count < maxPrecision_; i++) {
+    for (int32_t i = 0; i < static_cast<int32_t>(op.size()) && count < maxPrecision_; i++) {
         if (op[i] == '.') {
             if (ifDot) {
                 ERROR("Invalid character encountered");
@@ -524,7 +528,7 @@ HPFloat &HPFloat::operator=(const std::string &num)
     if (op[op.size() - 1] == '.') { // 如果小数点在末尾
         op.erase(op.size() - 1, 1);
         int32_t zeroNum = 0;
-        while (zeroNum <= op.size() - 1 && op[op.size() - 1 - zeroNum] == '0') {
+        while (zeroNum <= static_cast<int32_t>(op.size()) - 1 && op[op.size() - 1 - zeroNum] == '0') {
             zeroNum++;
         }
         digit_ += -zeroNum - 1; // 算出数量级
