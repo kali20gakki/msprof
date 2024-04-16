@@ -31,7 +31,7 @@ class TablesConfig(MetaConfig):
             ('device_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null'),
             ('op_flag', 'TEXT,null'),
-            ('hashid', 'NUMERIC,null'),
+            ('hashid', 'TEXT,null'),
         ],
         'GeHashInfoMap': [
             ('hash_key', 'TEXT,null'),
@@ -1174,7 +1174,7 @@ class TablesConfig(MetaConfig):
             ('thread_id', 'INTEGER,null'),
             ('timestamp', 'NUMERIC,null'),
             ('op_name', 'TEXT,null'),
-            ('hashid', 'NUMERIC,null'),
+            ('hashid', 'TEXT,null'),
         ],
         'GraphIdMapMap': [
             ('level', 'TEXT,null'),
