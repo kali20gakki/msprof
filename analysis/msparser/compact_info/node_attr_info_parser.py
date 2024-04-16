@@ -77,7 +77,8 @@ class NodeAttrInfoParser(DataParser, MsMultiProcess):
         type_hash_dict = hash_dict_data.get_type_hash_dict()
         ge_hash_dict = hash_dict_data.get_ge_hash_dict()
         for data in data_list:
-            # data[1]: struct_type, data[4]: op_name
+            # data[1]: struct_type, data[4]: op_name, data[5]: hashid
             data[1] = type_hash_dict.get('node', {}).get(data[1], data[1])
             data[4] = ge_hash_dict.get(str(data[4]), str(data[4]))
+            data[5] = str(data[5])
         return data_list

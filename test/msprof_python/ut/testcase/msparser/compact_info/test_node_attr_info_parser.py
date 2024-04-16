@@ -70,9 +70,10 @@ class TestNodeAttrInfoParser(unittest.TestCase):
             '14943139970160221335': 'src_format:ND|dst_format:FRACTAL_NZ|src_subformat:0|dst_subformat:0|groups:0|',
             '6371697640902395132': 'aclnnMm_TransData_TransData',
         }
+        hashid = '14943139970160221335'
         data_list = [
-            [level, '9', 3602526, 38202863941896, 6371697640902395132, 14943139970160221335],
-            [level, '9', 3602526, 38202864071026, 6371697640902395132, 14943139970160221335]
+            [level, '9', 3602526, 38202863941896, 6371697640902395132, hashid],
+            [level, '9', 3602526, 38202864071026, 6371697640902395132, hashid]
         ]
         with mock.patch(GE_HASH_MODEL_NAMESPACE + '.GeHashViewModel.init'), \
                 mock.patch(GE_HASH_MODEL_NAMESPACE + '.GeHashViewModel.get_type_hash_data',
@@ -85,7 +86,5 @@ class TestNodeAttrInfoParser(unittest.TestCase):
             self.assertEqual(len(data), 2)
             self.assertEqual(len(data[0]), 6)
             self.assertEqual(data[0][1], '9')
-            self.assertEqual(data[0][4],
-                             '6371697640902395132')
-            self.assertEqual(data[0][5],
-                             14943139970160221335)
+            self.assertEqual(data[0][4], '6371697640902395132')
+            self.assertEqual(data[0][5], hashid)
