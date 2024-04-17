@@ -22,9 +22,12 @@ class ProcessSpy final {
 public:
     explicit ProcessSpy(const std::string& processName) : processName_(processName)
     {
-        std::cout << processName_ << " Enter!" << std::endl;
+        // 可以通过打印定位问题，例如：std::cout << processName_ << " Enter!" << std::endl
     }
-    ~ProcessSpy() {std::cout << processName_ << " Out!" << std::endl;}
+    ~ProcessSpy()
+    {
+        // 可以通过打印定位问题，例如：std::cout << processName_ << " Out!" << std::endl
+    }
     static uint32_t GetResult(const std::string& processName);
     static void SetResult(const std::string& processName, uint32_t result);
     static void ClearResult();

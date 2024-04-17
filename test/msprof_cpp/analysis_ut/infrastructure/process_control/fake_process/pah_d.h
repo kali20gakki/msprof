@@ -23,8 +23,8 @@ class PahD : public Infra::Process {
 };
 
 struct StructD {
-    StructD() {std::cout << "StructD Construct!" << std::endl;}
-    ~StructD() {std::cout << "StructD Destruct!" << std::endl;}
+    StructD() {}
+    ~StructD() {}
 };
 
 }

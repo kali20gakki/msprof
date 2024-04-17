@@ -25,8 +25,8 @@ class PabC : public BaseGc, public Infra::Process {
 };
 
 struct StructC {
-    StructC() {std::cout << "StructC Construct!" << std::endl;}
-    ~StructC() {std::cout << "StructC Destruct!" << std::endl;}
+    StructC() {}
+    ~StructC() {}
 };
 
 }

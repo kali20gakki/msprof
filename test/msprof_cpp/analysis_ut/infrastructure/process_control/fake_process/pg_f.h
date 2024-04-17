@@ -25,8 +25,8 @@ class PgF : public Infra::Process {
 };
 
 struct StructF {
-    StructF() {std::cout << "StructF Construct!" << std::endl;}
-    ~StructF() {std::cout << "StructF Destruct!" << std::endl;}
+    StructF() {}
+    ~StructF() {}
 };
 
 }
