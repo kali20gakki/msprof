@@ -25,8 +25,8 @@ class PstartA : public Infra::Process {
 };
 
 struct StartA {
-    StartA() {}
-    ~StartA() {}
+    StartA() {std::cout << "PstartA Construct!" << std::endl;}
+    ~StartA() {std::cout << "PstartA Destruct!" << std::endl;}
     int i;
 };
 

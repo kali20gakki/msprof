@@ -3,34 +3,27 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : pstart_h.cpp
+ * File Name          : pdf_e.h
  * Description        : fake process
  * Author             : msprof team
- * Creation Date      : 2024/4/12
+ * Creation Date      : 2024/4/9
  * *****************************************************************************
  */
-#include "pstart_h.h"
-#include "infrastructure/process/include/process_register.h"
-#include "process_spy.h"
+#ifndef ANALYSIS_UT_INFRASTRUCTURE_PROCESS_CONTROL_PDF_E_H
+#define ANALYSIS_UT_INFRASTRUCTURE_PROCESS_CONTROL_PDF_E_H
+#include <iostream>
+#include "analysis/csrc/infrastructure/process/include/process.h"
 
 namespace Analysis {
 
-using namespace Infra;
-
 namespace Ps {
 
-uint32_t PstartH::ProcessEntry(DataInventory& dataInventory, const Infra::Context&)
-{
-    PROCESS_TRACE(PstartH);
-    auto data = std::make_shared<StartH>();
-    dataInventory.Inject(data);
+class PdfE : public Infra::Process {
+    uint32_t ProcessEntry(Infra::DataInventory& dataInventory, const Infra::Context& context) override;
+};
 
-    return ProcessSpy::GetResult("PstartH");
 }
 
 }
 
-REGISTER_PROCESS_SEQUENCE(Ps::PstartH, true);
-REGISTER_PROCESS_SUPPORT_CHIP(Ps::PstartH, CHIP_V1_1_0);
-
-}
+#endif

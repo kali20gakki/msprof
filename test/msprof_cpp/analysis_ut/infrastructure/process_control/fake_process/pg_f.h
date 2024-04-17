@@ -14,6 +14,7 @@
 #include <iostream>
 #include "analysis/csrc/infrastructure/process/include/process.h"
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
+#include "analysis/csrc/infrastructure/process/include/process.h"
 
 namespace Analysis {
 
@@ -24,8 +25,8 @@ class PgF : public Infra::Process {
 };
 
 struct StructF {
-    StructF() {}
-    ~StructF() {}
+    StructF() {std::cout << "StructF Construct!" << std::endl;}
+    ~StructF() {std::cout << "StructF Destruct!" << std::endl;}
 };
 
 }

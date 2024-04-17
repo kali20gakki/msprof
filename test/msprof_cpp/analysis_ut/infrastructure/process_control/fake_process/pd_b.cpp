@@ -13,6 +13,7 @@
 #include "infrastructure/process/include/process_register.h"
 #include "pah_d.h"
 #include "pstart_a.h"  // 包含这个头文件是为了测试，实际写代码的时候，请不要包含自己不需要的头文件
+#include "process_spy.h"
 
 namespace Analysis {
 
@@ -21,6 +22,7 @@ namespace Ps {
 
 uint32_t PdB::ProcessEntry(DataInventory& dataInventory, const Infra::Context&)
 {
+    PROCESS_TRACE(PdB);
     auto a = dataInventory.GetPtr<Ps::StartA>();
     if (!a) { // 这里是测试，框架应该在进入本流程时，不应该释放这个内存
         return 1;
@@ -32,7 +34,7 @@ uint32_t PdB::ProcessEntry(DataInventory& dataInventory, const Infra::Context&)
     d4g->testStr = "testStr";
     dataInventory.Inject(d4g);
 
-    return 0;
+    return ProcessSpy::GetResult("PdB");
 }
 
 }

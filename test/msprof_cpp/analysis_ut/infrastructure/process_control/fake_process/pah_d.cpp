@@ -13,6 +13,7 @@
 #include "infrastructure/process/include/process_register.h"
 #include "pstart_a.h"
 #include "pstart_h.h"
+#include "process_spy.h"
 
 namespace Analysis {
 
@@ -21,6 +22,7 @@ namespace Ps {
 
 uint32_t PahD::ProcessEntry(DataInventory& dataInventory, const Infra::Context&)
 {
+    PROCESS_TRACE(PahD);
     auto a = dataInventory.GetPtr<Ps::StartA>();
     auto h = dataInventory.GetPtr<Ps::StartH>();  // H流程在chipv2时不生成，因此下面不判断h
     if (!a) {
@@ -32,7 +34,7 @@ uint32_t PahD::ProcessEntry(DataInventory& dataInventory, const Infra::Context&)
     auto d = std::make_shared<StructD>();
     dataInventory.Inject(d);
 
-    return 0;
+    return ProcessSpy::GetResult("PahD");
 }
 
 }

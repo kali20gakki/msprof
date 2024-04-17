@@ -3,34 +3,32 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : pstart_h.cpp
+ * File Name          : base_gc.h
  * Description        : fake process
  * Author             : msprof team
- * Creation Date      : 2024/4/12
+ * Creation Date      : 2024/4/9
  * *****************************************************************************
  */
-#include "pstart_h.h"
-#include "infrastructure/process/include/process_register.h"
-#include "process_spy.h"
+#ifndef ANALYSIS_UT_INFRASTRUCTURE_PROCESS_CONTROL_BASE_GC_H
+#define ANALYSIS_UT_INFRASTRUCTURE_PROCESS_CONTROL_BASE_GC_H
+#include <cstdint>
 
 namespace Analysis {
 
-using namespace Infra;
-
 namespace Ps {
 
-uint32_t PstartH::ProcessEntry(DataInventory& dataInventory, const Infra::Context&)
-{
-    PROCESS_TRACE(PstartH);
-    auto data = std::make_shared<StartH>();
-    dataInventory.Inject(data);
+class BaseGc {
+public:
+    BaseGc() = default;
+    virtual ~BaseGc() = default;
+protected:
+    void CommonFun();
+};
 
-    return ProcessSpy::GetResult("PstartH");
+uint32_t GetBaseGcCount();
+void ResetBaseGcCount();
 }
 
 }
 
-REGISTER_PROCESS_SEQUENCE(Ps::PstartH, true);
-REGISTER_PROCESS_SUPPORT_CHIP(Ps::PstartH, CHIP_V1_1_0);
-
-}
+#endif

@@ -16,6 +16,7 @@
 #include <string>
 #include "analysis/csrc/infrastructure/process/include/process.h"
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
+#include "analysis/csrc/infrastructure/process/include/process.h"
 
 namespace Analysis {
 
@@ -26,14 +27,14 @@ class PdB : public Infra::Process {
 };
 
 struct StructB4c {
-    StructB4c() {}
-    ~StructB4c() {}
+    StructB4c() {std::cout << "StructB4c Construct!" << std::endl;}
+    ~StructB4c() {std::cout << "StructB4c Destruct!" << std::endl;}
     const char* testCh;
 };
 
 struct StructB4g {
-    StructB4g() {}
-    ~StructB4g() {}
+    StructB4g() {std::cout << "StructB4g Construct!" << std::endl;}
+    ~StructB4g() {std::cout << "StructB4g Destruct!" << std::endl;}
     std::string testStr;
 };
 

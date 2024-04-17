@@ -11,6 +11,7 @@
  */
 #include "pstart_a.h"
 #include "infrastructure/process/include/process_register.h"
+#include "process_spy.h"
 
 namespace Analysis {
 
@@ -19,11 +20,12 @@ namespace Ps {
 
 uint32_t PstartA::ProcessEntry(DataInventory& dataInventory, const Infra::Context&)
 {
+    PROCESS_TRACE(PstartA);
     auto data = std::make_shared<Ps::StartA>();
     data->i = TEST_MAGIC_NUMBER;
     dataInventory.Inject(data);
 
-    return 0;
+    return ProcessSpy::GetResult("PstartA");
 }
 
 }
