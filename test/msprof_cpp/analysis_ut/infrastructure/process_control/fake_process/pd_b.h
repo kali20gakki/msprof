@@ -27,14 +27,14 @@ class PdB : public Infra::Process {
 };
 
 struct StructB4c {
-    StructB4c() {std::cout << "StructB4c Construct!" << std::endl;}
-    ~StructB4c() {std::cout << "StructB4c Destruct!" << std::endl;}
+    StructB4c() {}
+    ~StructB4c() {}
     const char* testCh;
 };
 
 struct StructB4g {
-    StructB4g() {std::cout << "StructB4g Construct!" << std::endl;}
-    ~StructB4g() {std::cout << "StructB4g Destruct!" << std::endl;}
+    StructB4g() {}
+    ~StructB4g() {}
     std::string testStr;
 };
 

@@ -27,8 +27,8 @@ class PabG : public BaseGc, public Infra::Process {
 };
 
 struct StructG {
-    StructG() {std::cout << "StructG Construct!" << std::endl;}
-    ~StructG() {std::cout << "StructG Destruct!" << std::endl;}
+    StructG() {}
+    ~StructG() {}
 };
 
 }

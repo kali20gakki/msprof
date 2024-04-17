@@ -24,8 +24,8 @@ class PstartH : public Infra::Process {
 };
 
 struct StartH {
-    StartH() {std::cout << "StartH Construct!" << std::endl;}
-    ~StartH() {std::cout << "StartH Destruct!" << std::endl;}
+    StartH() {}
+    ~StartH() {}
     const char* member;
 };
 
