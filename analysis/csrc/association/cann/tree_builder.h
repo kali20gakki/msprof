@@ -46,7 +46,8 @@ public:
     {}
     // 用api和task_track建核心树
     std::shared_ptr<TreeNode> Build();
-
+    // 多线程添加附加Event
+    void MultiThreadAddLevelEvents();
     // 向核心树的Model, Node, Hccl 层节点添加附加Event
     bool AddLevelEvents(std::shared_ptr<EventQueue> &events,
                         std::vector<std::shared_ptr<TreeNode>> &levelNodes,

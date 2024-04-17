@@ -47,14 +47,7 @@ std::shared_ptr<TreeNode> TreeBuilder::Build()
         return nullptr;
     }
     kernelEvents_ = cannWarehouse_->kernelEvents;
-    auto graphIdMapEvents = cannWarehouse_->graphIdMapEvents;
-    auto fusionOpInfoEvents = cannWarehouse_->fusionOpInfoEvents;
-    auto nodeBasicInfoEvents = cannWarehouse_->nodeBasicInfoEvents;
-    auto tensorInfoEvents = cannWarehouse_->tensorInfoEvents;
-    auto contextIdEvents = cannWarehouse_->contextIdEvents;
-    auto hcclInfoEvents = cannWarehouse_->hcclInfoEvents;
     auto taskTrackEvents = cannWarehouse_->taskTrackEvents;
-    auto hcclOpInfoEvents = cannWarehouse_->hcclOpInfoEvents;
 
     auto rootNode = GenerateRoot();
     std::shared_ptr<TreeNode> tree;
@@ -65,6 +58,28 @@ std::shared_ptr<TreeNode> TreeBuilder::Build()
         // 1. root节点就是整颗核心树
         tree = rootNode;
     }
+    if (!tree) {
+        ERROR("Build Tree Failed, ThreadId = %", threadId_);
+        return nullptr;
+    }
+    MultiThreadAddLevelEvents();
+    // 向核心树添加TaskTrack类型的events
+    AddTaskTrackEvents(rootNode, taskTrackEvents);
+    if (taskTrackEvents && !taskTrackEvents->Empty()) {
+        ERROR("taskTrackEvents matching is not complete, threadId: %", threadId_);
+    }
+    INFO("Build Tree End, ThreadId = %", threadId_);
+    return tree;
+}
+
+void TreeBuilder::MultiThreadAddLevelEvents()
+{
+    auto fusionOpInfoEvents = cannWarehouse_->fusionOpInfoEvents;
+    auto nodeBasicInfoEvents = cannWarehouse_->nodeBasicInfoEvents;
+    auto tensorInfoEvents = cannWarehouse_->tensorInfoEvents;
+    auto contextIdEvents = cannWarehouse_->contextIdEvents;
+    auto hcclInfoEvents = cannWarehouse_->hcclInfoEvents;
+    auto hcclOpInfoEvents = cannWarehouse_->hcclOpInfoEvents;
     auto ctxIdPair = GroupCtxIdEvents(contextIdEvents);
     auto nodeCtxIdEvents = ctxIdPair.first;
     auto hcclCtxIdEvents = ctxIdPair.second;
@@ -76,7 +91,7 @@ std::shared_ptr<TreeNode> TreeBuilder::Build()
     pool.Start();
 
     // Model Level
-    pool.AddTask([this, &graphIdMapEvents, &fusionOpInfoEvents]() {
+    pool.AddTask([this, &fusionOpInfoEvents]() {
         AddLevelEvents(fusionOpInfoEvents, modelLevelNodes_, EventType::EVENT_TYPE_FUSION_OP_INFO);
     });
 
@@ -96,13 +111,6 @@ std::shared_ptr<TreeNode> TreeBuilder::Build()
 
     pool.WaitAllTasks();
     pool.Stop();
-    // 向核心树添加TaskTrack类型的events
-    AddTaskTrackEvents(rootNode, taskTrackEvents);
-    if (taskTrackEvents && !taskTrackEvents->Empty()) {
-        ERROR("taskTrackEvents matching is not complete, threadId: %", threadId_);
-    }
-    INFO("Build Tree End, ThreadId = %", threadId_);
-    return tree;
 }
 
 std::shared_ptr<TreeNode> TreeBuilder::GenerateRoot()
