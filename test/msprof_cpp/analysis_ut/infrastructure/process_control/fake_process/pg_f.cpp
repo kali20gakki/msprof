@@ -13,6 +13,7 @@
 #include "infrastructure/process/include/process_register.h"
 #include "pab_g.h"
 #include "pab_c.h"
+#include "process_spy.h"
 
 namespace Analysis {
 
@@ -21,6 +22,7 @@ namespace Ps {
 
 uint32_t PgF::ProcessEntry(DataInventory& dataInventory, const Infra::Context&)
 {
+    PROCESS_TRACE(PgF);
     auto a = dataInventory.GetPtr<Ps::StructG>();
     auto c = dataInventory.GetPtr<Ps::StructC>();
     if (!a) { // 这里不能强判断c，c是可选流程，在chipv2场景不运行
@@ -29,7 +31,7 @@ uint32_t PgF::ProcessEntry(DataInventory& dataInventory, const Infra::Context&)
     auto f = std::make_shared<StructF>();
     dataInventory.Inject(f);
 
-    return 0;
+    return ProcessSpy::GetResult("PgF");
 }
 
 }

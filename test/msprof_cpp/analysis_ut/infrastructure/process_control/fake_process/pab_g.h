@@ -13,20 +13,22 @@
 #define ANALYSIS_UT_INFRASTRUCTURE_PROCESS_CONTROL_PAB_G_H
 
 #include <iostream>
+#include "base_gc.h"
 #include "analysis/csrc/infrastructure/process/include/process.h"
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
+#include "analysis/csrc/infrastructure/process/include/process.h"
 
 namespace Analysis {
 
 namespace Ps {
 
-class PabG : public Infra::Process {
+class PabG : public BaseGc, public Infra::Process {
     uint32_t ProcessEntry(Infra::DataInventory& dataInventory, const Infra::Context& context) override;
 };
 
 struct StructG {
-    StructG() {}
-    ~StructG() {}
+    StructG() {std::cout << "StructG Construct!" << std::endl;}
+    ~StructG() {std::cout << "StructG Destruct!" << std::endl;}
 };
 
 }

@@ -13,6 +13,7 @@
 #include "infrastructure/process/include/process_register.h"
 #include "pstart_a.h"
 #include "pd_b.h"
+#include "process_spy.h"
 
 namespace Analysis {
 
@@ -21,6 +22,8 @@ namespace Ps {
 
 uint32_t PabG::ProcessEntry(DataInventory& dataInventory, const Infra::Context&)
 {
+    PROCESS_TRACE(PabG);
+    CommonFun();
     auto a = dataInventory.GetPtr<Ps::StartA>();
     if (!a || a->i != TEST_MAGIC_NUMBER) {
         return 1;
@@ -33,7 +36,7 @@ uint32_t PabG::ProcessEntry(DataInventory& dataInventory, const Infra::Context&)
     auto g = std::make_shared<StructG>();
     dataInventory.Inject(g);
 
-    return 0;
+    return ProcessSpy::GetResult("PabG");
 }
 
 }

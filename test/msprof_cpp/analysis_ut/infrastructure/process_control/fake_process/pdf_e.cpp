@@ -3,34 +3,39 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : pstart_h.cpp
+ * File Name          : pdf_e.cpp
  * Description        : fake process
  * Author             : msprof team
  * Creation Date      : 2024/4/12
  * *****************************************************************************
  */
-#include "pstart_h.h"
+#include "pdf_e.h"
 #include "infrastructure/process/include/process_register.h"
+#include "pah_d.h"
+#include "pg_f.h"
 #include "process_spy.h"
 
 namespace Analysis {
 
 using namespace Infra;
-
 namespace Ps {
 
-uint32_t PstartH::ProcessEntry(DataInventory& dataInventory, const Infra::Context&)
+uint32_t PdfE::ProcessEntry(DataInventory& dataInventory, const Infra::Context&)
 {
-    PROCESS_TRACE(PstartH);
-    auto data = std::make_shared<StartH>();
-    dataInventory.Inject(data);
+    PROCESS_TRACE(PdfE);
+    auto d = dataInventory.GetPtr<Ps::StructD>();
+    auto f = dataInventory.GetPtr<Ps::StructF>();
+    if (!d || !f) { // 这里是测试，框架应该在进入本流程时，不应该释放这个内存
+        return 1;
+    }
 
-    return ProcessSpy::GetResult("PstartH");
+    return ProcessSpy::GetResult("PdfE");
 }
 
 }
 
-REGISTER_PROCESS_SEQUENCE(Ps::PstartH, true);
-REGISTER_PROCESS_SUPPORT_CHIP(Ps::PstartH, CHIP_V1_1_0);
+REGISTER_PROCESS_SEQUENCE(Ps::PdfE, true, Ps::PahD, Ps::PgF);
+REGISTER_PROCESS_DEPENDENT_DATA(Ps::PdfE, Ps::StructD, Ps::StructF);
+REGISTER_PROCESS_SUPPORT_CHIP(Ps::PdfE, CHIP_ID_ALL);
 
 }
