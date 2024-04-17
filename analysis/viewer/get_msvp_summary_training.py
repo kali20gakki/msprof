@@ -115,8 +115,8 @@ def _format_hbm_data(data: list) -> list:
     for index, item in enumerate(data):
         if not index:
             hbm_data[index] = list(item)
-            hbm_data[index][1] = format_high_precision_for_csv(item[1]) if item[1] else item[1]
-            hbm_data[index][2] = format_high_precision_for_csv(item[2]) if item[2] else item[2]
+            hbm_data[index][1] = item[1]
+            hbm_data[index][2] = item[2]
         else:
             hbm_data[index] = list(item)
             hbm_data[index][1] = round(item[1], NumberConstant.ROUND_THREE_DECIMAL) if item[1] else item[2]
