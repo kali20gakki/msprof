@@ -3,14 +3,12 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : tree_analyzer_utest.cpp
- * Description        : TreeAnalyzer UT
+ * File Name          : log_stubs.cpp
+ * Description        : dfx common UT stubs
  * Author             : msprof team
- * Creation Date      : 2024/4/9
+ * Creation Date      : 2024/4/12
  * *****************************************************************************
  */
-#include <thread>
-#include <string>
 #include "analysis/csrc/dfx/log.h"
 
 namespace Analysis {
@@ -22,11 +20,4 @@ void Log::LogMsg(const std::string& message, const std::string &level,
 {
 }
 
-namespace Utils {
-
-void Analysis::Utils::FileWriter::Close() {}
-
-
-} // namespace Utils
 } // namespace Analysis
-
