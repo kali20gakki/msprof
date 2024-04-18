@@ -24,7 +24,7 @@
 namespace Analysis {
 namespace PyInterface {
 static PyMethodDef g_moduleMethods[] = {
-    {NULL, NULL, METH_VARARGS, ""}
+    {nullptr, nullptr, METH_VARARGS, ""}
 };
 
 static PyModuleDef g_mylibMethods = {
@@ -32,10 +32,10 @@ static PyModuleDef g_mylibMethods = {
     "", // module documentation, may be NULL
     -1, // size of per-interpreter state of the module, or -1 if the module keeps state in global variables.
     g_moduleMethods,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr
 };
 
 static void AddSubModule(PyObject *root, const char *name, PyMethodDef *methods)
