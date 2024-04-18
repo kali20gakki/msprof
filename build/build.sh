@@ -72,7 +72,7 @@ function analysis_compile() {
     mkdir -p ${TOP_DIR}/build/analysis
     cd ${TOP_DIR}/build/analysis
     cmake ../../analysis/csrc -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${TOP_DIR}/analysis
-    make -j64 && make clean && make install
+    make -j64 && make install
     if [ $? -ne 0 ]; then
         echo "analysis_compile failed"
         exit 1
