@@ -254,8 +254,6 @@ target_compile_options(msprofiler_share PRIVATE
     -D_GLIBCXX_USE_CXX11_ABI=0
     -D_FORTIFY_SOURCE=2
     $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-O2>
-    -fstack-check
-    -ftrapv
 )
 
 target_link_options(msprofiler_share PRIVATE
