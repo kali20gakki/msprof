@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
+            版权所有 (c) 华为技术有限公司 2023-2024
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -37,7 +37,7 @@ using OpDesc = Analysis::Entities::OpDesc;
 using HostTasks = std::vector<std::shared_ptr<HostTask>>;
 using TaskInfoData = std::vector<std::tuple<uint32_t, std::string, uint32_t, uint32_t, uint32_t, uint32_t, std::string,
         std::string, std::string, int32_t, uint32_t, uint64_t, uint32_t, uint32_t, std::string, std::string,
-        std::string, std::string, std::string, std::string, uint32_t, uint32_t, std::string>>;
+        std::string, std::string, std::string, std::string, uint32_t, uint32_t, std::string, std::string>>;
 using HCCLBigOpDescs = Analysis::Association::Cann::HCCLBigOpDescs;
 using GeFusionOpInfos = Analysis::Association::Cann::GeFusionOpInfos;
 public:

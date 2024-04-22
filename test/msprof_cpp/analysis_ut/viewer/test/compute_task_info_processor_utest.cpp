@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
+            版权所有 (c) 华为技术有限公司 2023-2024
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -42,23 +42,24 @@ const std::string TARGET_TABLE_NAME = "COMPUTE_TASK_INFO";
 using GeInfoFormat = std::vector<std::tuple<uint32_t, std::string, int32_t, int32_t, uint32_t, uint32_t, std::string,
                                               std::string, std::string, int32_t, uint32_t, double, uint32_t, uint32_t,
                                               std::string, std::string, std::string, std::string, std::string,
-                                              std::string, int32_t, uint32_t, std::string>>;
+                                              std::string, int32_t, uint32_t, std::string, std::string>>;
 
-using PROCESSED_DATA_FORMAT = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t,
-                                                     uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+using PROCESSED_DATA_FORMAT = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t,
+                                                     uint64_t, uint64_t, uint64_t, uint64_t,
+                                                     uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
 
 GeInfoFormat DATA_A{{4294967295, "aclnnMm_MatMulCommon_MatMulV2", 2, 1, 20, 40, "1", "MIX_AIC", "MatMulV2", -1,
                        3391981, 453148218443103, 0, 3, "FORMAT_ND;FORMAT_ND", "FLOAT16;FLOAT16",
-                       "\"10000,10000;10000,10000\"", "FORMAT_ND", "FLOAT16", "\"10000,10000\"", 0, 0, "NO"},
+                       "\"10000,10000;10000,10000\"", "FORMAT_ND", "FLOAT16", "\"10000,10000\"", 0, 0, "NO", "N/A"},
                       {4294967295, "trans_TransData_0", 2, 2, 35, 0, "1", "AI_CORE", "TransData", -1,
                        250512, 569402956566, 0, 2, "FORMAT_ND", "FLOAT",
-                       "\"3072,768\"", "FRACTAL_NZ", "FLOAT", "\"48,192,16,16\"", 0, 4294967295, "NO"}};
+                       "\"3072,768\"", "FRACTAL_NZ", "FLOAT", "\"48,192,16,16\"", 0, 4294967295, "NO", "N/A"}};
 GeInfoFormat DATA_B{{4294967295, "Add", 2, 3, 20, 40, "1", "MIX_AIC", "MatMulV2", -1,
                        3391981, 453148218443103, 0, 3, "FORMAT_ND;FORMAT_ND", "FLOAT16;FLOAT16",
-                       "\"10000,10000;10000,10000\"", "FORMAT_ND", "FLOAT16", "\"10000,10000\"", 0, 0, "NO"},
+                       "\"10000,10000;10000,10000\"", "FORMAT_ND", "FLOAT16", "\"10000,10000\"", 0, 0, "NO", "N/A"},
                       {4294967295, "trans_TransData_14", 2, 4, 35, 0, "1", "AI_CORE", "TransData", -1,
                        250512, 569402956566, 0, 2, "FORMAT_ND", "FLOAT",
-                       "\"3072,768\"", "FRACTAL_NZ", "FLOAT", "\"48,192,16,16\"", 0, 4294967295, "NO"}};
+                       "\"3072,768\"", "FRACTAL_NZ", "FLOAT", "\"48,192,16,16\"", 0, 4294967295, "NO", "N/A"}};
 }
 
 class ComputeTaskInfoProcessorUTest : public testing::Test {
@@ -120,6 +121,7 @@ void CheckStringId(PROCESSED_DATA_FORMAT data)
     const uint16_t outputFormatsIndex = 9;
     const uint16_t outputDataTypesIndex = 10;
     const uint16_t outputShapesIndex = 11;
+    const uint16_t hashidIndex = 12;
     std::set<uint64_t> stringIdsSet;
     std::vector<uint64_t> stringIds;
     for (auto item : data) {
@@ -132,6 +134,7 @@ void CheckStringId(PROCESSED_DATA_FORMAT data)
         stringIdsSet.insert(std::get<outputFormatsIndex>(item));
         stringIdsSet.insert(std::get<outputDataTypesIndex>(item));
         stringIdsSet.insert(std::get<outputShapesIndex>(item));
+        stringIdsSet.insert(std::get<hashidIndex>(item));
     }
     stringIds.assign(stringIdsSet.begin(), stringIdsSet.end());
     std::sort(stringIds.begin(), stringIds.end());
@@ -200,8 +203,9 @@ TEST_F(ComputeTaskInfoProcessorUTest, TestRunShouldReturnFalseWhenInsertDataFail
 
 TEST_F(ComputeTaskInfoProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
 {
-    using TempT = std::tuple<uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t,
-                             uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>;
+    using TempT = std::tuple<uint64_t, uint64_t, uint32_t, uint32_t,
+                             uint64_t, uint64_t, uint64_t, uint64_t,
+                             uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>;
     MOCKER_CPP(&std::vector<TempT>::reserve)
     .stubs()
     .will(throws(std::bad_alloc()));

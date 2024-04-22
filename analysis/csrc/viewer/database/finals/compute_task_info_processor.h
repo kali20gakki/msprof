@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
+            版权所有 (c) 华为技术有限公司 2023-2024
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -21,15 +21,16 @@ namespace Database {
 class ComputeTaskInfoProcessor : public TableProcessor {
     // model_id, op_name, stream_id, task_id, block_dim, mix_block_dim, task_type, op_type,
     // timestamp, batch_id, input_formats, input_data_types, input_shapes, output_formats,
-    // output_data_types, output_shapes, device_id, context_id
+    // output_data_types, output_shapes, device_id, context_id, hashid
     using OriDataFormat = std::vector<std::tuple<uint32_t, std::string, int32_t, int32_t, uint32_t, uint32_t,
                                                  std::string, std::string, double, uint32_t, std::string,
                                                  std::string, std::string, std::string, std::string, std::string,
-                                                 int32_t, uint32_t>>;
+                                                 int32_t, uint32_t, std::string>>;
     // name, globalTaskId, block_dim, mixBlockDim, taskType, opType, inputFormats, inputDataTypes, inputShapes,
-    // outputFormats, outputDataTypes, outputShapes
-    using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t,
-                                                       uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+    // outputFormats, outputDataTypes, outputShapes, hashid
+    using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t,
+                                                       uint64_t, uint64_t, uint64_t, uint64_t,
+                                                       uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
 public:
     ComputeTaskInfoProcessor() = default;
     ComputeTaskInfoProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);
@@ -39,7 +40,7 @@ protected:
     bool Process(const std::string &fileDir) override;
 private:
     static OriDataFormat GetData(const DBInfo &geInfo);
-    static ProcessedDataFormat FormatData(const OriDataFormat &oriData);
+    static ProcessedDataFormat FormatData(const OriDataFormat &oriData, GeHashMap &hashMap);
 };
 
 } // Database

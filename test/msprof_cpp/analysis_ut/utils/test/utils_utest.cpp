@@ -43,7 +43,8 @@ TEST_F(UtilsUTest, TestJoinShouldReturn)
 TEST_F(UtilsUTest, TestSplitShouldNotSplitWhenDelimiterIsEmpty)
 {
     auto splitStr = Split("test.split", "");
-    ASSERT_EQ(1, splitStr.size());
+    uint16_t expectRes = 1;
+    ASSERT_EQ(expectRes, splitStr.size());
     EXPECT_EQ("test.split", splitStr[0]);
 }
 
@@ -62,6 +63,56 @@ TEST_F(UtilsUTest, TestStrToU16ShouldReturnOKWhenStrIsNumber)
     uint16_t expectRes = 11;
     EXPECT_EQ(StrToU16(dest, "11"), ANALYSIS_OK);
     ASSERT_EQ(dest, expectRes);
+}
+
+TEST_F(UtilsUTest, TestSplitShouldReturnVectorWithTwoElements)
+{
+    const int splitPosition = 1;
+    auto res = Split("key1:value1:key2:value2", ":", splitPosition);
+    uint16_t expectRes = 2;
+    ASSERT_EQ(expectRes, res.size());
+    EXPECT_EQ("key1", res[0]);
+    EXPECT_EQ("value1:key2:value2", res[1]);
+}
+
+TEST_F(UtilsUTest, TestSplitShouldReturnVectorWithTwoElementsAndSplitPositionEquals2)
+{
+    const int splitPosition = 2;
+    auto res = Split("key1:value1:key2:value2", ":", splitPosition);
+    uint16_t expectRes = 2;
+    ASSERT_EQ(expectRes, res.size());
+    EXPECT_EQ("key1:value1", res[0]);
+    EXPECT_EQ("key2:value2", res[1]);
+}
+
+TEST_F(UtilsUTest, TestSplitShouldReturnVectorWithTwoElementsAndSplitPositionEquals3)
+{
+    const int splitPosition = 3;
+    auto res = Split("key1:value1:key2:value2", ":", splitPosition);
+    uint16_t expectRes = 2;
+    ASSERT_EQ(expectRes, res.size());
+    EXPECT_EQ("key1:value1:key2", res[0]);
+    EXPECT_EQ("value2", res[1]);
+}
+
+TEST_F(UtilsUTest, TestSplitShouldReturnVectorWithEmptyValueWhenDelimiterAtEndOfString)
+{
+    const int splitPosition = 1;
+    auto res = Split("key1::", ":", splitPosition);
+    uint16_t expectRes = 2;
+    ASSERT_EQ(expectRes, res.size());
+    EXPECT_EQ("key1", res[0]);
+    EXPECT_EQ(":", res[1]);
+}
+
+TEST_F(UtilsUTest, TestSplitShouldReturnVectorWithEmptyKeyWhenDelimiterAtBeginningOfString)
+{
+    const int splitPosition = 1;
+    auto res = Split("::value", ":", splitPosition);
+    uint16_t expectRes = 2;
+    ASSERT_EQ(expectRes, res.size());
+    EXPECT_EQ("", res[0]);
+    EXPECT_EQ(":value", res[1]);
 }
 
 TEST_F(UtilsUTest, TestStrToU16ShouldReturnERRORWhenStrIsNotNumber)

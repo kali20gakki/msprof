@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
+            版权所有 (c) 华为技术有限公司 2023-2024
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -32,12 +32,12 @@ namespace Entities {
 ------------------------- CANN ---------------------------------
 |- ACL Level
 |- Model Level [graph_id_map, fusion_op_info]
-|- Node Level [node_basic_info, tensor_info, context_id, hccl_op_info]
+|- Node Level [node_basic_info, node_attr_info, node_tensor_info, context_id, hccl_op_info]
 |- HCCL Level [hccl_info, context_id]
 |- Runtime Level [task_track, mem_cpy]
 -------------------------- NPU ---------------------------------
 
- Event类型：api, event, node_basic_info, tensor_info, hccl_info,
+ Event类型：api, event, node_basic_info, node_attr_info, tensor_info, hccl_info,
 context_id, graph_id_map, fusion_op_info, task_track, mem_cpy
 
  */
@@ -46,6 +46,7 @@ enum class EventType {
     EVENT_TYPE_API = 0,
     EVENT_TYPE_EVENT,  // 两个EVENT_TYPE_EVENT可以拼出一个EVENT_TYPE_API
     EVENT_TYPE_NODE_BASIC_INFO,
+    EVENT_TYPE_NODE_ATTR_INFO,
     EVENT_TYPE_TENSOR_INFO,
     EVENT_TYPE_HCCL_INFO,
     EVENT_TYPE_CONTEXT_ID,
@@ -66,7 +67,7 @@ struct EventInfo {
     EventType type = EventType::EVENT_TYPE_INVALID; // 类型
     uint16_t level = 0;                             // 层级
     uint64_t start = 0;                             // 开始时间
-    uint64_t end = 0;                               // 结束时间 对于addtional Event start == end
+    uint64_t end = 0;                               // 结束时间 对于additional Event start == end
 };
 
 // Event为本工程对软硬件上报的各类信息(Trace)的抽象, 表示一个时间点或时间片发生的事件

@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
+            版权所有 (c) 华为技术有限公司 2023-2024
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -51,6 +51,23 @@ std::shared_ptr<EventQueue> GenNodeBasicInfoEvents()
     }
     nodeBasicInfoEvents->Sort();
     return nodeBasicInfoEvents;
+}
+
+std::shared_ptr<EventQueue> GenNodeAttrInfoEvents()
+{
+    auto nodeAttrInfoEvents = std::make_shared<EventQueue>(1, 10);
+    std::unordered_map<std::string, std::vector<uint64_t>> Events{
+        // NodeLevel: {"Node", {{110, 130}, {150, 170}}},
+        //  Index      0     1    2    3    4    5   6     7    8    9    10
+        {"Node", {105, 110, 115, 115, 130, 135, 150, 155, 160, 170, 1000}}
+    };
+    int cnt = 0;
+    for (auto dot: Events["Node"]) {
+        FakeEventGenerator::AddNodeAttrEvent(nodeAttrInfoEvents, dot);
+        cnt++;
+    }
+    nodeAttrInfoEvents->Sort();
+    return nodeAttrInfoEvents;
 }
 
 std::shared_ptr<EventQueue> GenTensorInfoEvents()
@@ -137,7 +154,7 @@ std::shared_ptr<EventQueue> GenHcclInfoEvents()
  EventLevel      此Level包含的EventType
 |- ACL
 |- Model    [graph_id_map, fusion_op_info]
-|- Node     [node_basic_info, tensor_info, context_id, hccl_op_info]
+|- Node     [node_basic_info, node_attr_info, tensor_info, context_id, hccl_op_info]
 |- HCCL     [hccl_info, context_id]
 |- Runtime  [task_track, mem_cpy]
 */
@@ -287,6 +304,7 @@ TEST_F(TreeBuilderUTest, TestBuildTreeShouldBuildCorrectTreeWhenCANNWarehouseNot
     /* 生成cannWarehouse各个type的数据 */
     auto kernelEvents = GenKernelEvents();
     auto nodeBasicInfoEvents = GenNodeBasicInfoEvents();
+    auto nodeAttrInfoEvents = GenNodeAttrInfoEvents();
     auto tensorInfoEvents = GenTensorInfoEvents();
     auto contextIdEvents = GenCtxIdEvents();
     auto fusionOpInfoEvents = GenFusionOpInfoEvents();
@@ -297,6 +315,7 @@ TEST_F(TreeBuilderUTest, TestBuildTreeShouldBuildCorrectTreeWhenCANNWarehouseNot
     auto cannWarehouse = std::make_shared<CANNWarehouse>();
     cannWarehouse->kernelEvents = kernelEvents;
     cannWarehouse->nodeBasicInfoEvents = nodeBasicInfoEvents;
+    cannWarehouse->nodeAttrInfoEvents = nodeAttrInfoEvents;
     cannWarehouse->tensorInfoEvents = tensorInfoEvents;
     cannWarehouse->contextIdEvents = contextIdEvents;
     cannWarehouse->fusionOpInfoEvents = fusionOpInfoEvents;
@@ -317,8 +336,10 @@ TEST_F(TreeBuilderUTest, TestBuildTreeShouldBuildCorrectTreeWhenCANNWarehouseNot
     // Model :  [110,                                                                                    200]
     // g(105)g(110)             g(115) g(200)                                                                   g(210)
     // f(104)f(110)             f(116) f(200)                                                                   f(220)
+    // 其中n-a-t-c表示nodeBasicInfo, nodeAttrInfo, tensorInfo, ctxId
     // Node  :  [110,                              130]        [150,                      170]     [175, 180]
     // n(105) n(110)    n(115) n(115) n(130)         n(135) n(150)   n(155) n(160)      n(170)                  n(1000)
+    // a(105) a(110)    a(115) a(115) a(130)         a(135) a(150)   a(155) a(160)      a(170)                  a(1000)
     // t(109) t(110)        t(113) t(130)            t(134) t(150)   t(151)             t(170)t(175)
     //                                                               t(152)
     // c(109) c(110)             c(130)              c(134) c(150)   c(151)             c(170)c(172)
@@ -333,9 +354,12 @@ TEST_F(TreeBuilderUTest, TestBuildTreeShouldBuildCorrectTreeWhenCANNWarehouseNot
         "Api110_200 [FusionOpInfo116_116] "
         "[FusionOpInfo200_200] Dummy210_210 [TaskTrack210_210] ",  // 第二层
         "Api110_130 [NodeBasicInfo115_115] [NodeBasicInfo115_115] [NodeBasicInfo130_130] "
+        "[NodeAttrInfo115_115] [NodeAttrInfo115_115] [NodeAttrInfo130_130] "
         "[TensorInfo113_113] [TensorInfo130_130] [ContextId130_130] "
         "[HcclOpInfo115_115] [HcclOpInfo115_115] [HcclOpInfo130_130] Api150_170 [NodeBasicInfo155_155] "
-        "[NodeBasicInfo160_160] [NodeBasicInfo170_170] [TensorInfo151_151] [TensorInfo152_152] "
+        "[NodeBasicInfo160_160] [NodeBasicInfo170_170] "
+        "[NodeAttrInfo155_155] [NodeAttrInfo160_160] [NodeAttrInfo170_170] "
+        "[TensorInfo151_151] [TensorInfo152_152] "
         "[TensorInfo170_170] [ContextId151_151] [ContextId170_170] "
         "[HcclOpInfo155_155] [HcclOpInfo160_160] [HcclOpInfo170_170] Api175_180 Dummy175_175 "
         "[TaskTrack175_175] Dummy190_190 [TaskTrack190_190] ", // 第三层

@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
+            版权所有 (c) 华为技术有限公司 2023-2024
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -32,7 +32,7 @@ std::string Join(const std::vector<std::string> &str, const std::string &delimit
     return ss.str();
 }
 
-std::vector<std::string> Split(const std::string &str, const std::string &delimiter)
+std::vector<std::string> Split(const std::string &str, const std::string &delimiter, const int &splitPosition)
 {
     std::vector<std::string> res;
     if (delimiter.empty()) {
@@ -41,11 +41,24 @@ std::vector<std::string> Split(const std::string &str, const std::string &delimi
     }
     size_t start = 0;
     size_t end;
-    while ((end = str.find(delimiter, start)) != std::string::npos) {
-        res.emplace_back(str.substr(start, end - start));
-        start = end + delimiter.length();
+    if (splitPosition < 0) {
+        while ((end = str.find(delimiter, start)) != std::string::npos) {
+            res.emplace_back(str.substr(start, end - start));
+            start = end + delimiter.length();
+        }
+        res.emplace_back(str.substr(start));
+    } else {
+        int count = 0;
+        while (count < splitPosition && (end = str.find(delimiter, start)) != std::string::npos) {
+            start = end + delimiter.length();
+            count++;
+        }
+        if (count < splitPosition) {
+            return res;
+        }
+        res.emplace_back(str.substr(0, start - 1));
+        res.emplace_back(str.substr(start));
     }
-    res.emplace_back(str.substr(start));
     return res;
 }
 

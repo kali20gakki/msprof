@@ -44,6 +44,7 @@ protected:
         GenCompactInfoData(EventType::EVENT_TYPE_MEM_CPY, MSPROF_REPORT_NODE_LEVEL);
         GenCompactInfoData(EventType::EVENT_TYPE_TASK_TRACK, MSPROF_REPORT_NODE_LEVEL, 0, true);
         GenCompactInfoData(EventType::EVENT_TYPE_HCCL_OP_INFO, MSPROF_REPORT_NODE_LEVEL);
+        GenCompactInfoData(EventType::EVENT_TYPE_NODE_ATTR_INFO, MSPROF_REPORT_NODE_LEVEL);
     }
 
     static void TearDownTestCase()
@@ -52,13 +53,13 @@ protected:
     }
 
     /* GenCompactInfoData数据构造：
-     1. 生成(aging/unaging)的compact二进制数据文件，包括node_basic_info，task_track，memcpy_info，hccl_op_info
+     1. 生成(aging/unaging)的compact二进制数据文件，包括node_basic_info，node_attr_info，task_track，memcpy_info，hccl_op_info
      2. 前一半数据数据写入unaging文件，后一半数据写入aging文件
      3. 通过设置invalidDataNum，把最后invalidDataNum个数据改成无效数据，magicNumber设置成MSPROF_DATA_HEAD_MAGIC_NUM + 1
      4. 当生成task track数据时，倒数第2个数据的taskType设置成flipTaskType (task id翻转)，
         最后1个数据的taskType设置成maintenanceTaskType (流销毁task)
      可以看护的场景：
-     1. unaging和aging文件中，node_basic_info，task_track和memcpy_info数据的读取
+     1. unaging和aging文件中，node_basic_info，node_attr_info，task_track和memcpy_info数据的读取
      2. 设置invalidDataNum，验证无效数据的处理
      3. 对于task track数据，验证flipTask数据的读取和解析，以及maintenanceTask的过滤 */
     static void GenCompactInfoData(EventType type, uint16_t level,
@@ -263,6 +264,40 @@ TEST_F(CompactInfoParserUTest, TestTaskTrackParserProduceDataShouldReturn7DataWh
     auto data = parser->ParseData<MsprofCompactInfo>();
     Check(data, EventType::EVENT_TYPE_TASK_TRACK, MSPROF_REPORT_NODE_LEVEL,
           DATA_NUM - invalidDataNum);
+}
+
+TEST_F(CompactInfoParserUTest, TestNodeAttrInfoParserShouldReturn10DataWhenParseSuccess)
+{
+    auto parser = std::make_shared<NodeAttrInfoParser>(File::PathJoin({DATA_DIR, "host", "data"}));
+    auto data = parser->ParseData<MsprofCompactInfo>();
+    Check(data, EventType::EVENT_TYPE_NODE_ATTR_INFO, MSPROF_REPORT_NODE_LEVEL, DATA_NUM);
+}
+
+TEST_F(CompactInfoParserUTest, TestNodeAttrInfoParserProduceDataShouldReturnEmptyWhenReserveFailed)
+{
+    MOCKER_CPP(&std::vector<std::shared_ptr<MsprofCompactInfo>>::reserve).stubs()
+        .will(throws(std::bad_alloc()));
+    auto parser = std::make_shared<NodeAttrInfoParser>(File::PathJoin({DATA_DIR, "host", "data"}));
+    auto data = parser->ParseData<MsprofCompactInfo>();
+    EXPECT_EQ(0, data.size());
+}
+
+TEST_F(CompactInfoParserUTest, TestNodeAttrInfoParserProduceDataShouldReturnEmptyWhenPopNullptr)
+{
+    MOCKER_CPP(&ChunkGenerator::Pop).stubs()
+        .will(returnValue(static_cast<CHAR_PTR>(nullptr)));
+    auto parser = std::make_shared<NodeAttrInfoParser>(File::PathJoin({DATA_DIR, "host", "data"}));
+    auto data = parser->ParseData<MsprofCompactInfo>();
+    EXPECT_EQ(0, data.size());
+}
+
+TEST_F(CompactInfoParserUTest, TestNodeAttrInfoParserProduceDataShouldReturn9DataWhen1DataIsInvalid)
+{
+    const uint16_t invalidDataNum = 1;
+    GenCompactInfoData(EventType::EVENT_TYPE_NODE_ATTR_INFO, MSPROF_REPORT_NODE_LEVEL, invalidDataNum);
+    auto parser = std::make_shared<NodeAttrInfoParser>(File::PathJoin({DATA_DIR, "host", "data"}));
+    auto data = parser->ParseData<MsprofCompactInfo>();
+    Check(data, EventType::EVENT_TYPE_NODE_ATTR_INFO, MSPROF_REPORT_NODE_LEVEL, DATA_NUM - invalidDataNum);
 }
 
 TEST_F(CompactInfoParserUTest, TestHcclOpInfoParserShouldReturn10DataWhenParseSuccess)

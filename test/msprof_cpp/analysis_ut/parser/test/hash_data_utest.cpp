@@ -27,11 +27,13 @@ protected:
     {
         // 创建test_file文件
         FileWriter fw(TEST_FILE);
-        // 合法数据
+        // AssignAdd和AssignAdd:t1均为合法数据
         fw.WriteText("836640106292564866:AssignAdd\n");
         fw.WriteText("7419384796023234053:npu_runconfig/iterations_per_loop/Assign\n");
+        fw.WriteText("836640106292564867:AssignAdd:t1\n");
         // 异常数据
-        fw.WriteText("836640106292564866:AssignAdd:t1\n");
+        fw.WriteText("7419384796023234053t2:npu_runconfig/iterations_per_loop/Assign\n");
+        fw.WriteText("836640106292564868:AssignAdd::t1\n");
         fw.WriteText("7419384796023234053t2:npu_runconfig/iterations_per_loop/Assign\n");
         fw.Close();
     }
@@ -63,7 +65,7 @@ TEST_F(HashDataUTest, GetShouldReturnNumWhenNoHashInDict)
     EXPECT_STREQ(str.c_str(), expectRes.c_str());
 }
 
-TEST_F(HashDataUTest, GetShouldReturnStrWhenHashInDict)
+TEST_F(HashDataUTest, GetShouldReturnStrWhenHashInDictWithoutDelimiter)
 {
     HashData::GetInstance().Load("./");
     std::string expectRes = "AssignAdd";
@@ -72,10 +74,19 @@ TEST_F(HashDataUTest, GetShouldReturnStrWhenHashInDict)
     HashData::GetInstance().Clear();
 }
 
+TEST_F(HashDataUTest, GetShouldReturnStrWhenHashInDict)
+{
+    HashData::GetInstance().Load("./");
+    std::string expectRes = "AssignAdd:t1";
+    auto str = HashData::GetInstance().Get(836640106292564867);
+    EXPECT_STREQ(str.c_str(), expectRes.c_str());
+    HashData::GetInstance().Clear();
+}
+
 TEST_F(HashDataUTest, GetAllShouldReturn2ValidResInFile)
 {
     HashData::GetInstance().Load("./");
-    int expectResSize = 2;
+    int expectResSize = 4;
     EXPECT_EQ(expectResSize, HashData::GetInstance().GetAll().size());
     HashData::GetInstance().Clear();
 }

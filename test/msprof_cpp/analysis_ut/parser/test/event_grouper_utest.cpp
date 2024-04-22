@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
+            版权所有 (c) 华为技术有限公司 2023-2024
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -140,6 +140,8 @@ uint64_t g_getCannEventsNum(std::set<uint32_t> &tids, CANNWarehouses &cwhs, cons
             cnt += cwhs[tid].fusionOpInfoEvents->GetSize();
         } else if (eventName == "nodeBasicInfoEvents" && cwhs[tid].nodeBasicInfoEvents != nullptr) {
             cnt += cwhs[tid].nodeBasicInfoEvents->GetSize();
+        } else if (eventName == "nodeAttrInfoEvents" && cwhs[tid].nodeAttrInfoEvents != nullptr) {
+            cnt += cwhs[tid].nodeAttrInfoEvents->GetSize();
         } else if (eventName == "tensorInfoEvents" && cwhs[tid].tensorInfoEvents != nullptr) {
             cnt += cwhs[tid].tensorInfoEvents->GetSize();
         } else if (eventName == "contextIdEvents" && cwhs[tid].contextIdEvents != nullptr) {
@@ -201,6 +203,8 @@ TEST_F(EventGrouperUTest, TestGroupShouldGroupCorrespondingEventsWhenDataDirHasA
                                MSPROF_REPORT_MODEL_LEVEL, MaxNum);
     GenCompactInfoEventsBin(fakeDataDir, EventType::EVENT_TYPE_NODE_BASIC_INFO,
                             MSPROF_REPORT_NODE_LEVEL, MaxNum);
+    GenCompactInfoEventsBin(fakeDataDir, EventType::EVENT_TYPE_NODE_ATTR_INFO,
+                            MSPROF_REPORT_NODE_LEVEL, MaxNum);
     GenAdditionalInfoEventsBin(fakeDataDir, EventType::EVENT_TYPE_TENSOR_INFO,
                                MSPROF_REPORT_HCCL_NODE_LEVEL, MaxNum);
     GenAdditionalInfoEventsBin(fakeDataDir, EventType::EVENT_TYPE_CONTEXT_ID,
@@ -224,6 +228,7 @@ TEST_F(EventGrouperUTest, TestGroupShouldGroupCorrespondingEventsWhenDataDirHasA
     EXPECT_EQ(MaxNum, g_getCannEventsNum(tids, res, "graphIdMapEvents"));
     EXPECT_EQ(MaxNum, g_getCannEventsNum(tids, res, "fusionOpInfoEvents"));
     EXPECT_EQ(MaxNum, g_getCannEventsNum(tids, res, "nodeBasicInfoEvents"));
+    EXPECT_EQ(MaxNum, g_getCannEventsNum(tids, res, "nodeAttrInfoEvents"));
     EXPECT_EQ(MaxNum, g_getCannEventsNum(tids, res, "tensorInfoEvents"));
     EXPECT_EQ(MaxNum, g_getCannEventsNum(tids, res, "contextIdEvents"));
     EXPECT_EQ(MaxNum, g_getCannEventsNum(tids, res, "hcclInfoEvents"));

@@ -139,6 +139,7 @@ class ConfigDataParsers:
             "FusionAddInfoParser",
             "GraphAddInfoParser",
             "NodeBasicInfoParser",
+            "NodeAttrInfoParser",
             "MemoryApplicationParser",
             "CtxIdParser",
             "HcclOpInfoParser"

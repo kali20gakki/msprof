@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
+            版权所有 (c) 华为技术有限公司 2023-2024
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -60,7 +60,8 @@ bool HashData::ReadFiles(const std::vector<std::string> &files)
             return false;
         }
         for (const auto &line : text) {
-            auto tokens = Utils::Split(line, ":");
+            const int splitPosition = 1;
+            auto tokens = Utils::Split(line, ":", splitPosition);
             if (tokens.size() != expectTokenSize) {
                 ERROR("Found illegal hash line: %", line);
                 continue;

@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
+            版权所有 (c) 华为技术有限公司 2023-2024
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -29,7 +29,7 @@ using namespace Analysis::Utils;
  EventLevel      此Level包含的EventType
 |- ACL
 |- Model    [graph_id_map, fusion_op_info]
-|- Node     [node_basic_info, tensor_info, context_id, hccl_op_info]
+|- Node     [node_basic_info, node_attr_info, tensor_info, context_id, hccl_op_info]
 |- HCCL     [hccl_info, context_id]
 |- Runtime  [task_track, mem_cpy]
 
@@ -76,6 +76,7 @@ void TreeBuilder::MultiThreadAddLevelEvents()
 {
     auto fusionOpInfoEvents = cannWarehouse_->fusionOpInfoEvents;
     auto nodeBasicInfoEvents = cannWarehouse_->nodeBasicInfoEvents;
+    auto nodeAttrInfoEvents = cannWarehouse_->nodeAttrInfoEvents;
     auto tensorInfoEvents = cannWarehouse_->tensorInfoEvents;
     auto contextIdEvents = cannWarehouse_->contextIdEvents;
     auto hcclInfoEvents = cannWarehouse_->hcclInfoEvents;
@@ -96,8 +97,10 @@ void TreeBuilder::MultiThreadAddLevelEvents()
     });
 
     // Node Level
-    pool.AddTask([this, &nodeCtxIdEvents, &tensorInfoEvents, &nodeBasicInfoEvents, &hcclOpInfoEvents]() {
+    pool.AddTask([this, &nodeCtxIdEvents, &tensorInfoEvents, &nodeBasicInfoEvents,
+                             &nodeAttrInfoEvents, &hcclOpInfoEvents]() {
         AddLevelEvents(nodeBasicInfoEvents, nodeLevelNodes_, EventType::EVENT_TYPE_NODE_BASIC_INFO);
+        AddLevelEvents(nodeAttrInfoEvents, nodeLevelNodes_, EventType::EVENT_TYPE_NODE_ATTR_INFO);
         AddLevelEvents(tensorInfoEvents, nodeLevelNodes_, EventType::EVENT_TYPE_TENSOR_INFO);
         AddLevelEvents(nodeCtxIdEvents, nodeLevelNodes_, EventType::EVENT_TYPE_CONTEXT_ID);
         AddLevelEvents(hcclOpInfoEvents, nodeLevelNodes_, EventType::EVENT_TYPE_HCCL_OP_INFO);

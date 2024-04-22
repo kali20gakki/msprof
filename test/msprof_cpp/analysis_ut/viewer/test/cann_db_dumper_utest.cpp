@@ -66,6 +66,7 @@ protected:
     {
         auto kernelTask = std::make_shared<HostTask>();
         MsprofNodeBasicInfo msprofNodeBasicInfo{};
+        MsprofAttrInfo msprofNodeAttrInfo{};
         auto ctx = std::make_shared<MsprofAdditionalInfo>();
         ctx->threadId = 0;
         auto tensorDesc = std::make_shared<ConcatTensorInfo>();
@@ -74,6 +75,7 @@ protected:
         kernelDesc->tensorDesc = std::make_shared<ConcatTensorInfo>();
         kernelDesc->nodeDesc = std::make_shared<MsprofCompactInfo>();
         kernelDesc->nodeDesc->data.nodeBasicInfo = msprofNodeBasicInfo;
+        kernelDesc->nodeDesc->data.nodeAttrInfo = msprofNodeAttrInfo;
         kernelDesc->ctxId = std::make_shared<MsprofAdditionalInfo>();
         auto kernelOp = std::make_shared<Operator>(kernelDesc, 0, Analysis::Entities::OpType::OPTYPE_COMPUTE);
         kernelTask->op = kernelOp;
@@ -100,9 +102,11 @@ protected:
     {
         auto trace = new MsprofCompactInfo;
         auto nodeBasicInfo = new MsprofNodeBasicInfo;
+        auto nodeAttrInfo = new MsprofAttrInfo;
         auto runtime = new MsprofRuntimeTrack;
         
         trace->data.nodeBasicInfo = *nodeBasicInfo;
+        trace->data.nodeAttrInfo = *nodeAttrInfo;
         trace->data.runtimeTrack = *runtime;
 
         auto hcclOp = new MsprofHcclOPInfo;
