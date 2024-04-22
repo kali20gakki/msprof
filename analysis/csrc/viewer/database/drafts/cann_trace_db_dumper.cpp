@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
+            版权所有 (c) 华为技术有限公司 2023-2024
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -274,11 +274,13 @@ void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInf
         } else if (tenosrData.tensorType == OUTPUT_FORMAT_INDEX) {
             outputFormat.emplace_back(GetFormat(tenosrData.format));
             outputDataType.emplace_back(
-                NumberMapping::Get(NumberMapping::MappingType::GE_DATA_TYPE, tenosrData.dataType)
-            );
+                NumberMapping::Get(NumberMapping::MappingType::GE_DATA_TYPE, tenosrData.dataType));
             outputShape.emplace_back(Utils::Join(shapes, ","));
         }
     }
+    auto desc = task->op->opDesc;
+    auto attr = desc->nodeAttr;
+    auto hashId = attr ? std::to_string(attr->data.nodeAttrInfo.hashId) : NA;
     uint32_t blockDim = nodeBasicInfo.blockDim & 0xffff;
     auto mixBlockDim = blockDim * (nodeBasicInfo.blockDim >> 16);
     auto opFlag = nodeBasicInfo.opFlag ? "YES" : "NO";
@@ -291,11 +293,11 @@ void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInf
     auto outputShapeStr = outputShape.empty() ? NA : Utils::AddQuotation(Utils::Join(outputShape, ";"));
     data.emplace_back(task->modelId, HashData::GetInstance().Get(nodeBasicInfo.opName), task->streamId,
                       task->taskId, blockDim, mixBlockDim, opState,
-                      NumberMapping::Get(
-                          NumberMapping::MappingType::GE_TASK_TYPE, nodeBasicInfo.taskType),
+                      NumberMapping::Get(NumberMapping::MappingType::GE_TASK_TYPE, nodeBasicInfo.taskType),
                       HashData::GetInstance().Get(nodeBasicInfo.opType), task->requestId, task->thread_id,
                       task->timeStamp, task->batchId, tensorNum, inputFormatStr, inputDataTypeStr, inputShapeStr,
-                      outputFormatStr, outputDataTypeStr, outputShapeStr, task->deviceId, task->contextId, opFlag);
+                      outputFormatStr, outputDataTypeStr, outputShapeStr,
+                      task->deviceId, task->contextId, opFlag, hashId);
 }
 
 std::string CANNTraceDBDumper::GetFormat(uint32_t oriFormat)
@@ -324,11 +326,13 @@ void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskI
         data.emplace_back(task->modelId, name, task->streamId, task->taskId, 0, 0, NA, NA, NA,
                           task->requestId, task->thread_id, task->timeStamp, task->batchId,
                           0, "", "", "", "", "", "",
-                          task->deviceId, task->contextId, NA);
+                          task->deviceId, task->contextId, NA, NA);
         return;
     }
     auto node = desc->nodeDesc;
+    auto attr = desc->nodeAttr;
     auto nodeBasicInfo = node->data.nodeBasicInfo;
+    auto hashId = attr ? std::to_string(attr->data.nodeAttrInfo.hashId) : NA;
     auto blockDim = nodeBasicInfo.blockDim & 0xffff;
     auto mixBlockDim = blockDim * (nodeBasicInfo.blockDim >> 16);
     auto tensorDesc = desc->tensorDesc;
@@ -341,7 +345,7 @@ void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskI
                                                                    nodeBasicInfo.taskType),
                           HashData::GetInstance().Get(nodeBasicInfo.opType),
                           task->requestId, task->thread_id, task->timeStamp, task->batchId,
-                          0, NA, NA, NA, NA, NA, NA, task->deviceId, task->contextId, opFlag);
+                          0, NA, NA, NA, NA, NA, NA, task->deviceId, task->contextId, opFlag, hashId);
         return;
     }
     AddTensorShapeInfo(tensorDesc, nodeBasicInfo, data, task);

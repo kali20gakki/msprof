@@ -60,7 +60,8 @@ namespace {
         {"inputShapes", SQL_INTEGER_TYPE},
         {"outputFormats", SQL_INTEGER_TYPE},
         {"outputDataTypes", SQL_INTEGER_TYPE},
-        {"outputShapes", SQL_INTEGER_TYPE}
+        {"outputShapes", SQL_INTEGER_TYPE},
+        {"attrInfo", SQL_INTEGER_TYPE}
     };
 
     const TableColumns COMMUNICATION_TASK_INFO = {

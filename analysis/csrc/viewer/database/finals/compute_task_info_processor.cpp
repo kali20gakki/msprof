@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
+            版权所有 (c) 华为技术有限公司 2023-2024
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -37,11 +37,12 @@ struct ComputeTaskInfoData {
     uint64_t outputFormats;
     uint64_t outputDataTypes;
     uint64_t outputShapes;
+    uint64_t hashid;
     ComputeTaskInfoData() : deviceId(INT32_MAX), modelId(UINT32_MAX), streamId(UINT32_MAX), taskId(UINT32_MAX),
         contextId(UINT32_MAX), batchId(UINT32_MAX), blockDim(UINT32_MAX), maxBlockDim(UINT32_MAX),
         globalTaskId(UINT64_MAX), opName(UINT64_MAX), taskType(UINT64_MAX), opType(UINT64_MAX),
         inputFormats(UINT64_MAX), inputDataTypes(UINT64_MAX), inputShapes(UINT64_MAX), outputFormats(UINT64_MAX),
-        outputDataTypes(UINT64_MAX), outputShapes(UINT64_MAX)
+        outputDataTypes(UINT64_MAX), outputShapes(UINT64_MAX), hashid(UINT64_MAX)
     {}
 };
 
@@ -63,14 +64,15 @@ ComputeTaskInfoProcessor::OriDataFormat ComputeTaskInfoProcessor::GetData(const 
     std::string sql{"SELECT model_id, op_name, stream_id, task_id, block_dim, mix_block_dim, task_type, op_type, "
                     "timestamp, batch_id, IFNULL(input_formats, 'NULL'), IFNULL(input_data_types, 'NULL'), "
                     "IFNULL(input_shapes, 'NULL'), IFNULL(output_formats, 'NULL'), IFNULL(output_data_types, 'NULL'), "
-                    "IFNULL(output_shapes, 'NULL'), device_id, context_id FROM " + geInfoDB.tableName};
+                    "IFNULL(output_shapes, 'NULL'), device_id, context_id, hashid FROM " + geInfoDB.tableName};
     if (!geInfoDB.dbRunner->QueryData(sql, oriData)) {
         ERROR("Failed to obtain data from the % table.", geInfoDB.tableName);
     }
     return oriData;
 }
 
-ComputeTaskInfoProcessor::ProcessedDataFormat ComputeTaskInfoProcessor::FormatData(const OriDataFormat &oriData)
+ComputeTaskInfoProcessor::ProcessedDataFormat ComputeTaskInfoProcessor::FormatData(const OriDataFormat &oriData,
+                                                                                   GeHashMap &hashMap)
 {
     ProcessedDataFormat processedData;
     ComputeTaskInfoData data;
@@ -83,6 +85,7 @@ ComputeTaskInfoProcessor::ProcessedDataFormat ComputeTaskInfoProcessor::FormatDa
     std::string oriOutputFormats;
     std::string oriOutputDataTypes;
     std::string oriOutputShapes;
+    std::string orihashId;
     if (!Utils::Reserve(processedData, oriData.size())) {
         ERROR("Reserve for compute task data failed.");
         return processedData;
@@ -91,10 +94,15 @@ ComputeTaskInfoProcessor::ProcessedDataFormat ComputeTaskInfoProcessor::FormatDa
         std::tie(data.modelId, oriOpName, data.streamId, data.taskId, data.blockDim,
                  data.maxBlockDim, oriTaskType, oriOpType, std::ignore, data.batchId, oriInputFormats,
                  oriInputDataTypes, oriInputShapes, oriOutputFormats, oriOutputDataTypes,
-                 oriOutputShapes, data.deviceId, data.contextId) = row;
+                 oriOutputShapes, data.deviceId, data.contextId, orihashId) = row;
         data.opName = IdPool::GetInstance().GetUint64Id(oriOpName);
         data.taskType = IdPool::GetInstance().GetUint64Id(oriTaskType);
         data.opType = IdPool::GetInstance().GetUint64Id(oriOpType);
+        if (orihashId != "N/A") {
+            data.hashid = IdPool::GetInstance().GetUint64Id(hashMap[orihashId]);
+        } else {
+            data.hashid = IdPool::GetInstance().GetUint64Id(orihashId);
+        }
         data.globalTaskId = IdPool::GetInstance().GetId(
             std::make_tuple(data.deviceId, data.streamId, data.taskId, data.contextId, data.batchId));
         data.inputFormats = IdPool::GetInstance().GetUint64Id(oriInputFormats);
@@ -105,7 +113,7 @@ ComputeTaskInfoProcessor::ProcessedDataFormat ComputeTaskInfoProcessor::FormatDa
         data.outputShapes = IdPool::GetInstance().GetUint64Id(oriOutputShapes);
         processedData.emplace_back(data.opName, data.globalTaskId, data.blockDim, data.maxBlockDim, data.taskType,
                                    data.opType, data.inputFormats, data.inputDataTypes, data.inputShapes,
-                                   data.outputFormats, data.outputDataTypes, data.outputShapes);
+                                   data.outputFormats, data.outputDataTypes, data.outputShapes, data.hashid);
     }
     return processedData;
 }
@@ -129,7 +137,11 @@ bool ComputeTaskInfoProcessor::Process(const std::string &fileDir)
         ERROR("Get % data failed in %.", geInfoDB.tableName, dbPath);
         return false;
     }
-    auto processedData = FormatData(oriData);
+    GeHashMap hashMap;
+    if (!GetGeHashMap(hashMap, fileDir)) {
+        return false; // GetGeHashMap方法内有日志输出，这里直接返回
+    }
+    auto processedData = FormatData(oriData, hashMap);
     if (!SaveData(processedData, TABLE_NAME_COMPUTE_TASK_INFO)) {
         ERROR("Save data failed.");
         return false;

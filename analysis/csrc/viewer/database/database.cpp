@@ -66,7 +66,8 @@ namespace {
         {"output_shapes", SQL_TEXT_TYPE},
         {"device_id", SQL_INTEGER_TYPE},
         {"context_id", SQL_INTEGER_TYPE},
-        {"op_flag", SQL_TEXT_TYPE}
+        {"op_flag", SQL_TEXT_TYPE},
+        {"hashid", SQL_TEXT_TYPE}
     };
 
     const TableColumns StepInfo = {

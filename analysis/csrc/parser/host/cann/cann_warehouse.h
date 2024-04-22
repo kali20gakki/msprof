@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
+            版权所有 (c) 华为技术有限公司 2023-2024
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -34,6 +34,7 @@ struct CANNWarehouse {
     std::shared_ptr<EventQueue> graphIdMapEvents = nullptr;
     std::shared_ptr<EventQueue> fusionOpInfoEvents = nullptr;
     std::shared_ptr<EventQueue> nodeBasicInfoEvents = nullptr;
+    std::shared_ptr<EventQueue> nodeAttrInfoEvents = nullptr;
     std::shared_ptr<EventQueue> tensorInfoEvents = nullptr;
     std::shared_ptr<EventQueue> contextIdEvents = nullptr;
     std::shared_ptr<EventQueue> hcclInfoEvents = nullptr;

@@ -65,6 +65,21 @@ private:
     };
 };  // class NodeBasicInfoParser
 
+// 该类的作用是node attr info数据的解析
+class NodeAttrInfoParser final : public CompactInfoParser {
+public:
+    explicit NodeAttrInfoParser(const std::string &path) : CompactInfoParser(path, "NodeAttrInfoParser")
+    {
+        Init(filePrefix_);
+    }
+
+private:
+    std::vector<std::string> filePrefix_ = {
+        "unaging.compact.node_attr_info.slice",
+        "aging.compact.node_attr_info.slice",
+    };
+};  // class NodeAttrInfoParser
+
 // 该类的作用是memcpy info数据的解析
 class MemcpyInfoParser final : public CompactInfoParser {
 public:

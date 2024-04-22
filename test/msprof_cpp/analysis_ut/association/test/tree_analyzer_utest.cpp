@@ -175,6 +175,19 @@ std::shared_ptr<EventQueue> GenNodeBasicInfoEventQueue(const std::vector<std::tu
     return nodeBasicInfoEvents;
 }
 
+// OpDesc represents <dot, hashId>
+std::shared_ptr<EventQueue> GenNodeAttrInfoEventQueue(const std::vector<std::tuple<uint64_t, uint64_t>> OpDescs)
+{
+    auto nodeAttrInfoEvents = std::make_shared<EventQueue>(1, 10);
+    const uint16_t dotIndex = 0;
+    const uint16_t hashIdIndex = 1;
+    for (auto &t: OpDescs) {
+        FakeEventGenerator::AddNodeAttrEvent(nodeAttrInfoEvents, std::get<dotIndex>(t), std::get<hashIdIndex>(t));
+    }
+    nodeAttrInfoEvents->Sort();
+    return nodeAttrInfoEvents;
+}
+
 // tensorDesc represents dot
 std::shared_ptr<EventQueue> GenTensorInfoEventQueue(const std::vector<uint64_t> &tensorDescs)
 {
@@ -515,17 +528,18 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L0)
     }
 }
 
-std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L1()
+std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L2()
 {
-    // 逻辑树如下，其中c-n-t表示ctxId,nodeBasicInfo,tensorInfo，【d】表示异常情况，[n]标识每个context id event中带几个context id
+    // 逻辑树如下，其中c-n-a-t表示ctxId, nodeBasicInfo, nodeAttrInfo, tensorInfo,
+    // 【d】表示异常情况，[n]标识每个context id event中带几个context id
     // ng表示图的nodeBasic数据
     // tk(260)    tk(340)为aicpu的hccl和aicore的hccl（reduce tbe）任务
     // Model :  [1,            200]  [201,                                    400]      [401,     800]
     // Node  :  [2, 99]  [100, 150]  [202,                250] [251,  301] [329, 351]    [410, 500],
-    //                  c-n-t(125)[2]        n(222)                n(255)     n(340)        n(430)
-    //                  c-n-t(126)[2]
-    //                  c-n-t(127)[2]
-    //                  c-n-t(128)[2]
+    //                 c-n-a-t(125)[2]        n(222)                n(255)     n(340)        n(430)
+    //                 c-n-a-t(126)[2]
+    //                 c-n-a-t(127)[2]
+    //                 c-n-a-t(128)[2]
     //                    ng(129)
     //                   t(144【d】)
     //                                hop(211)                    hop(252)   hop(330)
@@ -537,6 +551,8 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L1()
     auto nodeBasicInfoEvents = GenNodeBasicInfoEventQueue({{125, 1, 0}, {126, 2, 0}, {127, 1, 1},
                                                            {128, 0, 1}, {129, 100, 6}, {222, 6, 9},
                                                            {255, 7, 9}, {340, 8, 9}, {430, 8, 9}});
+    auto nodeAttrInfoEvents = GenNodeAttrInfoEventQueue({{125, 1}, {126, 2}, {127, 1}, {128, 0}, {129, 100},
+                                                         {222, 6}, {255, 7}, {340, 8}, {430, 8}});
     auto tensorInfoEvents = GenTensorInfoEventQueue({125, 126, 127, 128, 144});
     auto contextIdEvents = GenNodeCtxIdEventQueue();
     std::vector<std::pair<uint64_t, uint64_t>> items{
@@ -561,6 +577,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L1()
     cannWarehouse->kernelEvents = kernelEvents;
     cannWarehouse->hcclInfoEvents = hcclInfoEvents;
     cannWarehouse->nodeBasicInfoEvents = nodeBasicInfoEvents;
+    cannWarehouse->nodeAttrInfoEvents = nodeAttrInfoEvents;
     cannWarehouse->contextIdEvents = contextIdEvents;
     cannWarehouse->taskTrackEvents = taskTrackEvents;
     cannWarehouse->tensorInfoEvents = tensorInfoEvents;
@@ -576,10 +593,11 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L1()
     return ana;
 }
 
-// 测试场景1 L1 : 静态图+计算类算子ffts+模式+hccl算子传统模式（MindSpore、Tensorflow、ACL推理）
-TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L1)
+// 测试场景1 L2 : 静态图+计算类算子ffts+模式+hccl算子传统模式（MindSpore、Tensorflow、ACL推理）
+// 相比L1只增加了nodeAttrInfo，其余信息不变，所以L2场景的用例可以覆盖L1
+TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L2)
 {
-    auto ana = GetAnalyzerForScenario1L1();
+    auto ana = GetAnalyzerForScenario1L2();
     ana->Analyze();
 
     auto computeTasks = ana->GetComputeTasks();
@@ -603,6 +621,7 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L1)
                                            DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
                                            DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID};
     std::vector<uint64_t> expectComputeTaskOpTypes{1, 1, 2, 2, 1, 1, 0, 0, 0, 0};
+    std::vector<uint64_t> expectComputeTaskHashIds{1, 1, 2, 2, 1, 1, 0, 0, 0, 0};
     std::vector<uint64_t> expectComputeTaskTensorTimes{125, 125, 126, 126, 127, 127, 128, 128, 144};
     // 特殊场景校验分别代表AI_CORE，AI_CPU和HCCL_AICPU
     std::vector<uint64_t> expectHcclComputeTaskTaskType{1, 9, 11, 1};
@@ -629,7 +648,12 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L1)
         EXPECT_EQ(computeTasks[i]->op->opDesc->nodeDesc->data.nodeBasicInfo.opType,
                   expectComputeTaskOpTypes[i]);
     }
+    for (uint16_t i = 0; i < normalNum; i++) {
+        EXPECT_EQ(computeTasks[i]->op->opDesc->nodeAttr->data.nodeAttrInfo.hashId,
+                  expectComputeTaskHashIds[i]);
+    }
     EXPECT_EQ(computeTasks[normalNum]->op->opDesc->nodeDesc, nullptr);
+    EXPECT_EQ(computeTasks[normalNum]->op->opDesc->nodeAttr, nullptr);
 
     for (uint16_t i = 0; i < normalNum; i++) {
         EXPECT_EQ(computeTasks[i]->op->opDesc->tensorDesc->timeStamp, expectComputeTaskTensorTimes[i]);
@@ -776,14 +800,14 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L0)
     }
 }
 
-std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L1()
+std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L2()
 {
     // 逻辑树如下，其中[n]标识每个event中带几个context id
     // 其中tk(110),tk(120),tk(168)为计算任务
     // Model :  [1,                          200]  [201,              400]  [401, 800]
     //                    f(125)                                               f(600)
     // Node  :  [2, 99]  [100, 150]   [160, 195]   [202,  300] [302,  399]
-    //                    n-t(125)     c-n-t(171)    n(250)       n(310)
+    //                   n-a-t(125)   c-n-a-t(171)   n-a(250)    n-a(310)
     //                                               hop(205)    hop(305)
     // Hccl  :                                     [202,  300] [302,  399]
     //                                               c(230)[3]  c(310)[3]
@@ -794,6 +818,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L1()
     auto kernelEvents = GenKernelEventQueueWithFFtsComm();
     auto hcclInfoEvents = GenHcclInfoEventQueue({230, 230, 230, 310, 310, 310}, {0, 1, 2, 0, 1, 2});
     auto nodeBasicInfoEvents = GenNodeBasicInfoEventQueue({{125, 1, 1}, {171, 3, 2}, {250, 333, 9}, {310, 334, 9}});
+    auto nodeAttrInfoEvents = GenNodeAttrInfoEventQueue({{125, 1}, {171, 3}, {250, 333}, {310, 334}});
     auto tensorInfoEvents = GenTensorInfoEventQueue({125, 171});
     auto contextIdEvents = GenHcclCtxIdEventQueue();
     auto fusionOpInfoEvents =  GenFusionOpEventQueue({125, 600});
@@ -821,6 +846,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L1()
     cannWarehouse->kernelEvents = kernelEvents;
     cannWarehouse->hcclInfoEvents = hcclInfoEvents;
     cannWarehouse->nodeBasicInfoEvents = nodeBasicInfoEvents;
+    cannWarehouse->nodeAttrInfoEvents = nodeAttrInfoEvents;
     cannWarehouse->contextIdEvents = contextIdEvents;
     cannWarehouse->taskTrackEvents = taskTrackEvents;
     cannWarehouse->tensorInfoEvents = tensorInfoEvents;
@@ -837,10 +863,11 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L1()
     return ana;
 }
 
-// 测试场景2 L1 : 计算类算子传统模式+hccl算子ffts+模式（Pytorch训练）
-TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L1)
+// 测试场景2 L2 : 计算类算子传统模式+hccl算子ffts+模式（Pytorch训练）
+// 相比L1只增加了nodeAttrInfo，其余信息不变，所以L2场景的用例可以覆盖L1
+TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L2)
 {
-    auto ana = GetAnalyzerForScenario2L1();
+    auto ana = GetAnalyzerForScenario2L2();
     ana->Analyze();
 
     auto computeTasks = ana->GetComputeTasks();
@@ -864,6 +891,7 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L1)
     std::vector<uint64_t> expectbigOPsCount{410, 610};
     std::vector<std::string> expectbigOPsAlgType{"PAIRWISE-NB-HD-RING", "STAR-NHR-PIPELINE-NB"};
     std::vector<uint64_t> expectComputeTaskOpTypes{1, 1, 3};
+    std::vector<uint64_t> expectComputeTaskHashIds{1, 1, 3};
     std::vector<uint64_t> expectComputeTaskTensorTimes{125, 125, 171};
     std::vector<uint64_t> expectGeFusionOpInfoTimes{125, 600};
 
@@ -889,6 +917,11 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L1)
     for (uint16_t i = 0; i < computeTasks.size(); i++) {
         EXPECT_EQ(computeTasks[i]->op->opDesc->nodeDesc->data.nodeBasicInfo.opType,
                   expectComputeTaskOpTypes[i]);
+    }
+
+    for (uint16_t i = 0; i < computeTasks.size(); i++) {
+        EXPECT_EQ(computeTasks[i]->op->opDesc->nodeAttr->data.nodeAttrInfo.hashId,
+                  expectComputeTaskHashIds[i]);
     }
 
     for (uint16_t i = 0; i < computeTasks.size(); i++) {
@@ -926,3 +959,4 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L1)
                   expectbigOPsAlgType[i]);
     }
 }
+

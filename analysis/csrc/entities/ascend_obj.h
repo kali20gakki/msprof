@@ -31,6 +31,7 @@ enum class OpType {
 // 计算算子描述信息
 struct OpDesc {
     std::shared_ptr<MsprofCompactInfo> nodeDesc = nullptr;
+    std::shared_ptr<MsprofCompactInfo> nodeAttr = nullptr;
     std::shared_ptr<ConcatTensorInfo> tensorDesc = nullptr;
     std::shared_ptr<MsprofAdditionalInfo> ctxId = nullptr;
 };

@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
+            版权所有 (c) 华为技术有限公司 2023-2024
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -90,6 +90,21 @@ public:
         node.taskType = task_type;
         nodeBasic->data.nodeBasicInfo = node;
         auto eventPtr = std::make_shared<Event>(nodeBasic, testInfo);
+        eventQueue->Push(eventPtr);
+    }
+
+    static void AddNodeAttrEvent(std::shared_ptr<EventQueue> &eventQueue, uint64_t dot, uint64_t hashId = 1)
+    {
+        EventInfo testInfo{EventType::EVENT_TYPE_NODE_ATTR_INFO, MSPROF_REPORT_NODE_LEVEL, dot, dot};
+        auto nodeAttr = std::make_shared<MsprofCompactInfo>();
+        nodeAttr->level = MSPROF_REPORT_NODE_LEVEL;
+        nodeAttr->timeStamp = dot;
+
+        MsprofAttrInfo attr;
+        attr.opName = dot;
+        attr.hashId = hashId;
+        nodeAttr->data.nodeAttrInfo = attr;
+        auto eventPtr = std::make_shared<Event>(nodeAttr, testInfo);
         eventQueue->Push(eventPtr);
     }
 
@@ -306,6 +321,7 @@ private:
         {EventType::EVENT_TYPE_FUSION_OP_INFO, "additional.fusion_op_info.slice_"},
         {EventType::EVENT_TYPE_GRAPH_ID_MAP, "additional.graph_id_map.slice_"},
         {EventType::EVENT_TYPE_NODE_BASIC_INFO, "compact.node_basic_info.slice_"},
+        {EventType::EVENT_TYPE_NODE_ATTR_INFO, "compact.node_attr_info.slice_"},
         {EventType::EVENT_TYPE_CONTEXT_ID, "additional.context_id_info.slice_"},
         {EventType::EVENT_TYPE_HCCL_INFO, "additional.hccl_info.slice_"},
         {EventType::EVENT_TYPE_TASK_TRACK, "compact.task_track.slice_"},

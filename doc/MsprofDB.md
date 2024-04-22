@@ -334,20 +334,21 @@ db命名：msprof_{时间戳}.db
 
 格式：
 
-| 字段名             | 类型      | 索引  | 含义                                   |
-|-----------------|---------|-----|--------------------------------------|
-| name            | INTEGER |     | 算子名，STRING_IDS(name)                 |
-| globalTaskId    | INTEGER | 主键  | 全局算子任务id，用于关联TASK表                   |
-| block_dim       | INTEGER |     | 算子运行切分数量，对应算子运行时核数                   |
-| mixBlockDim     | INTEGER |     | mix算子从加速器的block_dim值                 |
-| taskType        | INTEGER |     | host执行该算子的加速器类型，STRING_IDS(taskType) |
-| opType          | INTEGER |     | 算子类型，STRING_IDS(opType)              |
-| inputFormats    | INTEGER |     | 算子输入数据格式，STRING_IDS(inputFormats)    |
-| inputDataTypes  | INTEGER |     | 算子输入数据类型，STRING_IDS(inputDataTypes)  |
-| inputShapes     | INTEGER |     | 算子的输入维度，STRING_IDS(inputShapes)      |
-| outputFormats   | INTEGER |     | 算子输出数据格式，STRING_IDS(outputFormats)   |
-| outputDataTypes | INTEGER |     | 算子输出数据类型，STRING_IDS(outputDataTypes) |
-| outputShapes    | INTEGER |     | 算子输出维度，STRING_IDS(outputShapes)      |
+| 字段名             | 类型      | 索引  | 含义                                                           |
+|-----------------|---------|-----|--------------------------------------------------------------|
+| name            | INTEGER |     | 算子名，STRING_IDS(name)                                         |
+| globalTaskId    | INTEGER | 主键  | 全局算子任务id，用于关联TASK表                                           |
+| block_dim       | INTEGER |     | 算子运行切分数量，对应算子运行时核数                                           |
+| mixBlockDim     | INTEGER |     | mix算子从加速器的block_dim值                                         |
+| taskType        | INTEGER |     | host执行该算子的加速器类型，STRING_IDS(taskType)                         |
+| opType          | INTEGER |     | 算子类型，STRING_IDS(opType)                                      |
+| inputFormats    | INTEGER |     | 算子输入数据格式，STRING_IDS(inputFormats)                            |
+| inputDataTypes  | INTEGER |     | 算子输入数据类型，STRING_IDS(inputDataTypes)                          |
+| inputShapes     | INTEGER |     | 算子的输入维度，STRING_IDS(inputShapes)                              |
+| outputFormats   | INTEGER |     | 算子输出数据格式，STRING_IDS(outputFormats)                           |
+| outputDataTypes | INTEGER |     | 算子输出数据类型，STRING_IDS(outputDataTypes)                         |
+| outputShapes    | INTEGER |     | 算子输出维度，STRING_IDS(outputShapes)                              |
+| attrInfo        | INTEGER |     | 算子的attr信息，用来映射算子shape，算子自定义的参数等，STRING_IDS(attrInfo) |
 
 
 变更记录：

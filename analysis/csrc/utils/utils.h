@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2023-2023
+            版权所有 (c) 华为技术有限公司 2023-2024
             Copyright, 2023, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -23,7 +23,7 @@ namespace Analysis {
 namespace Utils {
 using CHAR_PTR = char *;
 std::string Join(const std::vector<std::string> &str, const std::string &delimiter);
-std::vector<std::string> Split(const std::string &str, const std::string &delimiter);
+std::vector<std::string> Split(const std::string &str, const std::string &delimiter, const int &splitPosition = -1);
 int StrToU16(uint16_t &dest, const std::string &numStr);
 int StrToU32(uint32_t &dest, const std::string &numStr);
 int StrToU64(uint64_t &dest, const std::string &numStr);
