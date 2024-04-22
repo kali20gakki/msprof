@@ -854,7 +854,7 @@ timeline计算公式：
 db命名：ascend_pytorch_profiler_{rankId}.db
 （无rankId时：ascend_pytorch_profiler.db）
 
-### STRIGN_IDS
+### STRING_IDS
 
 格式:
 
@@ -875,17 +875,17 @@ db命名：ascend_pytorch_profiler_{rankId}.db
 格式:
 
 | 字段名          | 类型      | 索引  | 含义       |
-|--------------|---------|-----|---------------------------------------------|
-| StartNs      | INTEGER |     | op api开始时间                                  |
-| endNs        | INTEGER |     | op api结束时间                                  |
-| globalTid    | INTEGER |     | 该api所属的全局tid。高32位：pid，低32位：tid     |
-| connectionId | INTEGER |     | 索引，用于在CONNECTION_IDS表查询对应的connection_id;如果无connection_id，此处为空    |
-| name         | INTEGER |     | 该op api名在STRING_IDS表中对应的id    |
-| sequenceNum  | INTEGER |     | op序号    |
-| fwdThreadId  | INTEGER |     | op前向线程id|
-| inputDtypes  | INTEGER |     | 输入数据类型在STRING_IDS表中对应的id |
-| inputShapes  | INTEGER |     | 输入shape在STRING_IDS表中对应的id |
-| callchainId  | INTEGER |     | 索引，用于在PYTORCH_CALLCHAINS表查询对应的call stack信息;如果无stack信息，此处为空 |
+|--------------  |---------|-----|---------------------------------------------|
+| startNs        | INTEGER |     | op api开始时间                                  |
+| endNs          | INTEGER |     | op api结束时间                                  |
+| globalTid      | INTEGER |     | 该api所属的全局tid。高32位：pid，低32位：tid     |
+| connectionId   | INTEGER |     | 索引，用于在CONNECTION_IDS表查询对应的connection_id;如果无connection_id，此处为空    |
+| name           | INTEGER |     | 该op api名在STRING_IDS表中对应的id    |
+| sequenceNumber | INTEGER |     | op序号    |
+| fwdThreadId    | INTEGER |     | op前向线程id|
+| inputDtypes    | INTEGER |     | 输入数据类型在STRING_IDS表中对应的id |
+| inputShapes    | INTEGER |     | 输入shape在STRING_IDS表中对应的id |
+| callchainId    | INTEGER |     | 索引，用于在PYTORCH_CALLCHAINS表查询对应的call stack信息;如果无stack信息，此处为空 |
 
 变更记录:
 
@@ -915,8 +915,8 @@ db命名：ascend_pytorch_profiler_{rankId}.db
 | 字段名          | 类型      | 索引  | 含义              |
 |--------------|---------|-----|---------------------------------------------|
 | id           | INTEGER |     | 索引，对应PYTORCH_API表的callchainId  |
-| stack        | INTEGER |     | 当前栈的字符串内容   |
-|stackDepth    | INTEGER |     | 当前栈所在深度|
+| stack        | INTEGER |     | 当前栈的字符串内容在STRING_IDS表中对应的id   |
+| stackDepth   | INTEGER |     | 当前栈所在深度|
 
 变更记录:
 
@@ -956,8 +956,8 @@ db命名：ascend_pytorch_profiler_{rankId}.db
 | acllocation_time           | INTEGER |     | 算子内存申请时间                   |
 | release_time               | INTEGER |     | 算子内存释放时间                   |
 | active_release_time        | INTEGER |     | 内存实际归还内存池时间                |
-| active_duration            | INTEGER |     | 内存实际占用时间                   |
 | duration                   | INTEGER |     | 内存占用时间                     |
+| active_duration            | INTEGER |     | 内存实际占用时间                   |
 | allocation_total_allocated | INTEGER |     | 算子内存分配时PTA和GE内存分配总额        |
 | allocation_total_reserved  | INTEGER |     | 算子内存分配时PTA和GE内存占用总额        |
 | allocation_total_active    | INTEGER |     | 算子内存分配时当前流申请的内存总额          |
