@@ -154,6 +154,13 @@ class HcclAnalysisTool:
 
     @classmethod
     def update_bandwidth_record(cls: any, bandwidth_dict: dict, trans_type: str, size: float, dur: float) -> None:
+        if trans_type == StrConstant.HCCS_SW:
+            trans_type = StrConstant.HCCS
+        elif trans_type == StrConstant.STANDARD_ROCE:
+            return
+        elif trans_type not in StrConstant.TRANSIT_TYPE:
+            logging.error("Unknown transport_type: %s", trans_type)
+            return
         bandwidth_dict[trans_type][OpBandWidthType.TRANSIT_SIZE_MB] += size
         bandwidth_dict[trans_type][OpBandWidthType.TRANSIT_TIME_MS] += dur
         bandwidth_dict[trans_type][OpBandWidthType.SIZE_DISTRIBUTION][size][0] += 1
@@ -218,7 +225,7 @@ class HcclAnalysisTool:
 
     @classmethod
     def convert_to_enum(cls: any, trans_type: str) -> int:
-        if trans_type == StrConstant.HCCS:
+        if trans_type == StrConstant.HCCS or trans_type == StrConstant.HCCS_SW:
             return TransportType.HCCS
         if trans_type == StrConstant.PCIE:
             return TransportType.PCIE
@@ -228,7 +235,7 @@ class HcclAnalysisTool:
             return TransportType.LOCAL
         if trans_type == StrConstant.SIO:
             return TransportType.SIO
-        logging.warning('trans_type is not normal, which is', trans_type)
+        logging.warning("trans_type is not normal, which is %s", trans_type)
         return -1
 
     @classmethod
@@ -243,5 +250,5 @@ class HcclAnalysisTool:
             return StrConstant.LOCAL
         if trans_data_type == TransportType.SIO:
             return StrConstant.SIO
-        logging.warning('trans_data_type is not normal, which is', trans_data_type)
+        logging.warning("trans_data_type is not normal, which is %d", trans_data_type)
         return 'Unknown transport type'

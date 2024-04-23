@@ -391,6 +391,8 @@ class StrConstant:
     HCCS = "HCCS"
     PCIE = "PCIE"
     SIO = "SIO"
+    HCCS_SW = "HCCS_SW"
+    STANDARD_ROCE = "STANDARD_ROCE"
     RDMA = "RDMA"
     SDMA = "SDMA"
     LOCAL = "LOCAL"

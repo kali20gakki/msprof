@@ -86,6 +86,17 @@ class TestHcclAnalysisTool(unittest.TestCase):
         ans = 3
         self.assertAlmostEqual(payload_cnt, ans)
 
+    def test_update_bandwidth_record_should_be_calculated_as_hccs_when_trans_type_is_hccs_sw(self):
+        op_bandwidth_dict = HcclAnalysisTool.init_bandwidth_dict()
+        HcclAnalysisTool.update_bandwidth_record(op_bandwidth_dict, StrConstant.HCCS_SW, 1, 2)
+        self.assertEqual(op_bandwidth_dict["HCCS"]["Transit Size(MB)"], 1)
+        self.assertEqual(op_bandwidth_dict["HCCS"]["Transit Time(ms)"], 2)
+
+    def test_update_bandwidth_record_should_normal_run_when_trans_type_is_unknown(self):
+        op_bandwidth_dict = HcclAnalysisTool.init_bandwidth_dict()
+        HcclAnalysisTool.update_bandwidth_record(op_bandwidth_dict, StrConstant.STANDARD_ROCE, 1, 2)
+        HcclAnalysisTool.update_bandwidth_record(op_bandwidth_dict, "STANDARD_HCCS", 1, 2)
+
 
 class TestCommunicationParser(unittest.TestCase):
     def test_run(self):
