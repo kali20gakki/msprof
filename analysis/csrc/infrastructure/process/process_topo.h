@@ -13,6 +13,7 @@
 #define ANALYSIS_INFRASTRUCTURE_PROCESS_PROCESS_TOPO_H
 
 #include <vector>
+#include <memory>
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
 
 namespace Analysis {
@@ -21,18 +22,14 @@ namespace Infra {
 
 class ProcessTopo final {
 public:
-    explicit ProcessTopo(const ProcessCollection& processCollection)
-        : allProcess_(processCollection) {}
-    ~ProcessTopo() = default;
+    explicit ProcessTopo(const ProcessCollection& processCollection);
+    ~ProcessTopo();
 
     ProcessCollection BuildProcessControlTopoByChip(uint32_t chipId) const;
 
 private:
-    ProcessCollection BuildRegChipTopo(uint32_t chipId) const;
-    void Prune(ProcessCollection& chipTopo) const;  // 剪枝
-
-private:
-    const ProcessCollection& allProcess_;
+    class Impl;
+    std::unique_ptr<Impl> impl_;
 };
 
 }
