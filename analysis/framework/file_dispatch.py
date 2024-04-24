@@ -50,10 +50,7 @@ from common_func.file_name_manager import get_hwts_vector_compiles
 from common_func.file_name_manager import get_l2_cache_compiles
 from common_func.file_name_manager import get_llc_compiles
 from common_func.file_name_manager import get_memcpy_info_compact_compiles
-from common_func.file_name_manager import get_msproftx_cann_compiles
 from common_func.file_name_manager import get_msproftx_compiles
-from common_func.file_name_manager import get_msproftx_pipeline_compiles
-from common_func.file_name_manager import get_msproftx_torch_compiles
 from common_func.file_name_manager import get_multi_thread_compiles
 from common_func.file_name_manager import get_nano_model_exeom_compiles
 from common_func.file_name_manager import get_nano_stars_profile_compiles
@@ -138,12 +135,9 @@ class FileDispatch:
         DataTag.DATA_QUEUE: get_data_preprocess_compiles(Constant.DATA_QUEUE),
         DataTag.HOST_QUEUE: get_host_queue_compiles(),
         DataTag.PARALLEL_STRATEGY: get_parallel_strategy_compiles(),
-        DataTag.MSPROFTX_TORCH: get_msproftx_torch_compiles(),
-        DataTag.MSPROFTX_CANN: get_msproftx_cann_compiles(),
         DataTag.NPU_MEM: get_npu_mem_compiles(),
         DataTag.NPU_MODULE_MEM: get_npu_module_mem_compiles(),
         DataTag.MEMORY_OP: get_npu_op_mem_compiles(),
-        DataTag.MSPROFTX_PIPELINE: get_msproftx_pipeline_compiles(),
         DataTag.FREQ: get_freq_compiles(),
         DataTag.API_EVENT: get_api_event_compiles(),
         DataTag.HASH_DICT: get_hash_data_compiles(),

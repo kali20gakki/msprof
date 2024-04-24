@@ -519,12 +519,10 @@ TEST_F(MSPROF_ACL_CORE_UTEST, prof_acl_api_helper) {
     aclprofDestroyStepInfo(nullptr);
     EXPECT_EQ(nullptr, aclprofCreateStamp());
     aclprofDestroyStamp(nullptr);
-    EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofSetStampTagName(nullptr, nullptr, 0));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofSetCategoryName(0, nullptr));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofSetStampCategory(nullptr, 0));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofSetStampPayload(nullptr, 0, nullptr));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofSetStampTraceMessage(nullptr, nullptr, 0));
-    EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofSetStampCallStack(nullptr, nullptr, 0));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofMark(nullptr));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofPush(nullptr));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofPop());
@@ -1840,16 +1838,6 @@ TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofCreateStamp)
     aclprofCreateStamp();
 }
 
-TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofSetStampTagName)
-{
-    GlobalMockObject::verify();
-    MOCKER_CPP(&Msprof::MsprofTx::MsprofTxManager::SetStampTagName)
-        .stubs()
-        .will(returnValue(ACL_SUCCESS));
-    aclError ret = aclprofSetStampTagName(nullptr, nullptr, 0);
-    EXPECT_EQ(ACL_SUCCESS, ret);
-}
-
 TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofDestroyStamp) {
     GlobalMockObject::verify();
     MOCKER_CPP(&Msprof::MsprofTx::MsprofTxManager::DestroyStamp)
@@ -1899,16 +1887,6 @@ TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofSetStampTraceMessage) {
         .will(returnValue(ACL_SUCCESS));
 
     aclError ret = aclprofSetStampTraceMessage(nullptr, "nullptr", 0);
-    EXPECT_EQ(ACL_SUCCESS, ret);
-}
-
-TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofSetStampCallStack) {
-    GlobalMockObject::verify();
-    MOCKER_CPP(&Msprof::MsprofTx::MsprofTxManager::SetStampCallStack)
-        .stubs()
-        .will(returnValue(ACL_SUCCESS));
-
-    aclError ret = aclprofSetStampCallStack(nullptr, "nullptr", 0);
     EXPECT_EQ(ACL_SUCCESS, ret);
 }
 

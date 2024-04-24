@@ -50,13 +50,6 @@ class TestMsprofTxParser(unittest.TestCase):
             check = MsprofTxParser(self.file_list, CONFIG)
             result = check.read_binary_data('msprotx.data.5.slice_0')
         self.assertEqual(result, 0)
-
-    def test_reshape_data(self):
-        msproftx_parser = mock.Mock()
-        end_time = 1
-        data_object = MsprofTxDecoder.decode(b'\x00' * StructFmt.MSPROFTX_FMT_SIZE)
-        setattr(msproftx_parser, "_msproftx_data_group_by_endtime", {end_time: data_object})
-        MsprofTxParser.reshape_data(msproftx_parser)
         
     def test_original_data_handler(self):
         with mock.patch(NAMESPACE + '.logging.info'), \

@@ -113,32 +113,8 @@ void MsprofTxManager::DestroyStamp(ACL_PROF_STAMP_PTR stamp) const
         MSPROF_LOGE("[DestroyStamp]MsprofTxManager is not inited yet");
         return;
     }
-    stamp->stampTagName[0] = '\0';
-    stamp->stampInfo.callStack[0] = '\0';
-    stamp->callStackLength = 0;
 
     stampPool_->DestroyStamp(stamp);
-}
-
-int MsprofTxManager::SetStampTagName(ACL_PROF_STAMP_PTR stamp, const char *tagName, uint16_t len) const
-{
-    if (!isInit_) {
-        MSPROF_LOGE("[SetStampName]MsprofTxManager is not inited yet");
-        return PROFILING_FAILED;
-    }
-    if (stamp == nullptr || tagName == nullptr) {
-        MSPROF_LOGE("aclprofStamp or name is nullptr");
-        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
-            std::vector<std::string>({"nullptr", "stamp", "stamp and tagName can not be nullptr when set TagName"}));
-        return PROFILING_FAILED;
-    }
-    auto ret = memcpy_s(stamp->report.tag, MSPROF_ENGINE_MAX_TAG_LEN - 1, tagName, len);
-    if (ret != EOK) {
-        MSPROF_LOGE("[SetStampName]strcpy_s message failed, ret=%u len=%u tagName=%s", ret, len, tagName);
-        return PROFILING_FAILED;
-    }
-    stamp->report.tag[len] = '\0';
-    return PROFILING_SUCCESS;
 }
 
 // save category and name relation
@@ -231,29 +207,6 @@ int MsprofTxManager::SetStampTraceMessage(ACL_PROF_STAMP_PTR stamp, CONST_CHAR_P
         return PROFILING_FAILED;
     }
     stamp->stampInfo.message[msgLen] = 0;
-    return PROFILING_SUCCESS;
-}
-
-int MsprofTxManager::SetStampCallStack(ACL_PROF_STAMP_PTR stamp, const char *callStack, uint32_t len) const
-{
-    if (!isInit_) {
-        MSPROF_LOGE("[SetStampCallStack]MsprofTxManager is not inited yet");
-        return PROFILING_FAILED;
-    }
-    if (stamp == nullptr || callStack == nullptr) {
-        MSPROF_LOGE("aclprofStamp or callStack is nullptr");
-        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
-            std::vector<std::string>({"nullptr", "stamp", "stamp and callStack can not be nullptr."}));
-        return PROFILING_FAILED;
-    }
- 
-    auto ret = memcpy_s(stamp->callStack, MAX_CALL_STACK_LENGTH - 1, callStack, len);
-    if (ret != EOK) {
-        MSPROF_LOGE("[SetStampCallStack]strcpy_s callStack failed, ret is %u", ret);
-        return PROFILING_FAILED;
-    }
-    stamp->callStack[len] = '\0';
-    stamp->callStackLength = len;
     return PROFILING_SUCCESS;
 }
 
@@ -360,66 +313,12 @@ int MsprofTxManager::ReportStampData(MsprofStampInstance *stamp) const
 {
     static thread_local uint32_t tid = static_cast<uint32_t>(MmGetTid());
     stamp->stampInfo.threadId = tid;
-    if (stamp->stampTagName[0] == '\0' && stamp->callStackLength == 0) {
-        auto ret = reporter_->Report(stamp->report);
-        if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("[ReportStampData] report profiling data failed.");
-            return PROFILING_FAILED;
-        }
-        return PROFILING_SUCCESS;
-    }
-    uint32_t tagNameLen = strnlen(stamp->stampTagName, MSPROF_ENGINE_MAX_TAG_LEN);
-    if (tagNameLen > 0) {
-        auto ret = strncpy_s(stamp->report.tag, MSPROF_ENGINE_MAX_TAG_LEN, stamp->stampTagName, tagNameLen);
-        if (ret != EOK) {
-            MSPROF_LOGE("[ReportStampData]strncpy_s tag name failed, ret is %u", ret);
-            return PROFILING_FAILED;
-        }
-        stamp->report.tag[tagNameLen] = '\0';
-    }
-    uint32_t callStackLength = stamp->callStackLength;
-    uint32_t pos = 0;
-    do {
-        uint32_t copyLen = (CALLSTACK_MAX_LENGTH < callStackLength) ? CALLSTACK_MAX_LENGTH : callStackLength;
-        if (copyLen > 0) {
-            auto err = strncpy_s(stamp->stampInfo.callStack, CALLSTACK_MAX_LENGTH + 1, stamp->callStack + pos, copyLen);
-            if (err != EOK) {
-                MSPROF_LOGE("[ReportStampData]strncpy_sp callStack failed");
-                return PROFILING_FAILED;
-            }
-            stamp->stampInfo.callStack[copyLen] = '\0';
-        }
-        pos += copyLen;
-        callStackLength = (callStackLength - copyLen > 0) ? (callStackLength - copyLen) : 0;
-        auto ret = reporter_->Report(stamp->report);
-        if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("[ReportStampData] report profiling data failed.");
-            return PROFILING_FAILED;
-        }
-    } while (callStackLength > 0);
-    return PROFILING_SUCCESS;
-}
-
-int MsprofTxManager::ReportStampDataV2(CONST_CHAR_PTR tag, uint32_t tagLen,
-    UNSIGNED_CHAR_PTR data, uint32_t dataLen) const
-{
-    struct ReporterData rptData;
-
-    rptData.deviceId = DEFAULT_HOST_ID;
-    rptData.data = data;
-    rptData.dataLen = dataLen;
-    int ret = memcpy_s(rptData.tag, MSPROF_ENGINE_MAX_TAG_LEN - 1, tag, tagLen);
-    if (ret != EOK) {
-        MSPROF_LOGE("[ReportStampDataV2] memcpy_s failed, ret=%d tagLen=%u.", ret, tagLen);
-        return PROFILING_FAILED;
-    }
-    rptData.tag[tagLen] = '\0';
-    ret = reporter_->Report(rptData);
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("[ReportStampDataV2] report data failed, ret=%d.", ret);
+    if (reporter_->Report(stamp->report) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[ReportStampData] report profiling data failed.");
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
 }
+
 }
 }

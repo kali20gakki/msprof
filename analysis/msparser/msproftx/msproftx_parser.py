@@ -36,15 +36,11 @@ class MsprofTxParser(IParser, MsMultiProcess):
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
         self._file_list = {
-            DataTag.MSPROFTX: file_list.get(DataTag.MSPROFTX, []),
-            DataTag.MSPROFTX_TORCH: file_list.get(DataTag.MSPROFTX_TORCH, []),
-            DataTag.MSPROFTX_CANN: file_list.get(DataTag.MSPROFTX_CANN, []),
-            DataTag.MSPROFTX_PIPELINE: file_list.get(DataTag.MSPROFTX_PIPELINE, [])
+            DataTag.MSPROFTX: file_list.get(DataTag.MSPROFTX, [])
         }
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH, '')
         self._model = MsprofTxModel(self._project_path, DBNameConstant.DB_MSPROFTX,
                                     [DBNameConstant.TABLE_MSPROFTX])
-        self._msproftx_data_group_by_endtime = {}
         self._file_tag = DataTag.MSPROFTX
         self._cur_file_list = []
         self._msproftx_data = []
@@ -61,41 +57,22 @@ class MsprofTxParser(IParser, MsMultiProcess):
                 msproftx_data = calculate.pre_process(msproftx_f.file_reader, os.path.getsize(msproftx_file))
                 for chunk in Utils.chunks(msproftx_data, StructFmt.MSPROFTX_FMT_SIZE):
                     data_object = MsprofTxDecoder.decode(chunk)
-                    self.dispatch_msproftx_data(data_object)
+                    self._msproftx_data.append((data_object.process_id, data_object.thread_id,
+                                                data_object.category, self.EVENT_DICT.get(data_object.event_type, ''),
+                                                data_object.payload_type, data_object.payload_value,
+                                                data_object.start_time, data_object.end_time,
+                                                data_object.message_type,
+                                                data_object.message,
+                                                self._file_tag))
                 return NumberConstant.SUCCESS
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error("%s: %s", file_name, err, exc_info=Constant.TRACE_BACK_SWITCH)
             return NumberConstant.ERROR
 
-    def dispatch_msproftx_data(self: any, data_object) -> None:
-        """
-        dispatch msproftx data
-        """
-        if data_object.end_time not in self._msproftx_data_group_by_endtime:
-            self._msproftx_data_group_by_endtime.setdefault(data_object.end_time, data_object)
-        else:
-            data_object_group_by_endtime = self._msproftx_data_group_by_endtime.get(data_object.end_time)
-            data_object_group_by_endtime.call_stack += data_object.call_stack
-
-    def reshape_data(self: any) -> None:
-        """
-        reshape data
-        """
-        # Semicolon splits different function stack. Semicolon should be replaced by line break for better presentation.
-        for data_object in self._msproftx_data_group_by_endtime.values():
-            self._msproftx_data.append((data_object.process_id, data_object.thread_id,
-                                        data_object.category, self.EVENT_DICT.get(data_object.event_type, ''),
-                                        data_object.payload_type, data_object.payload_value,
-                                        data_object.start_time, data_object.end_time,
-                                        data_object.message_type,
-                                        data_object.message,
-                                        self._file_tag))
-
     def parse(self: any) -> None:
         """
         parsing data file
         """
-        self._msproftx_data_group_by_endtime = {}
         try:
             for file_name in self._cur_file_list:
                 if is_valid_original_data(file_name, self._project_path):
@@ -103,7 +80,6 @@ class MsprofTxParser(IParser, MsMultiProcess):
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
 
-        self.reshape_data()
 
     def save(self: any) -> None:
         """
@@ -120,7 +96,6 @@ class MsprofTxParser(IParser, MsMultiProcess):
         main
         :return: None
         """
-
         for file_tag, file_list in self._file_list.items():
             if file_list:
                 self._file_tag = file_tag.value

@@ -82,7 +82,7 @@ class StructFmt:
     NEW_AI_CPU_FMT_SIZE = 256
     TASK_NUM_OFFSET = struct.calcsize(BYTE_ORDER_CHAR + API_CALL_FMT[:-1])
 
-    MSPROFTX_FMT = 'HHLLLLLQQQL128s76s'
+    MSPROFTX_FMT = 'HHLLLLLQQQL128s'
     MSPROFTX_FMT_SIZE = struct.calcsize(BYTE_ORDER_CHAR + MSPROFTX_FMT)
 
     # ge
