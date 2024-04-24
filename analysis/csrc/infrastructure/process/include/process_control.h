@@ -54,9 +54,8 @@ void RecordProcessStat(const ExecuteProcessStat& stat, const std::string& subDir
  */
 class ProcessControl final {
 public:
-    explicit ProcessControl(ProcessCollection& processes)
-        : allProcess_(std::move(processes)) {}
-    ~ProcessControl() = default;
+    explicit ProcessControl(ProcessCollection& processes);
+    ~ProcessControl();
 
     bool ExecuteProcess(DataInventory& dataInventory, const Context& context);
 
@@ -66,18 +65,8 @@ public:
     bool VerifyProcess(const ProcessCollection& chipRelatedProcess) const;
 
 private:
-    bool RunProcesses(ProcessCollection& chipRelatedProcess, DataInventory& dataInventory, const Context& context);
-    bool GetStatistician(std::vector<ProcessStatistcs>&& statistics, bool& dfxStop);
-    ProcessCollection TakeAwayPreparedProcess(ProcessCollection& chipRelatedProcess) const;
-    void ReleaseNoLongerUsedData(const ProcessCollection& chipRelatedProcess, DataInventory& dataInventory,
-                                 size_t levelIndex);
-    void RunPreparedProcess(ProcessCollection &preparedProcess, std::vector<ProcessStatistcs> &stat,
-                            Analysis::Utils::ThreadPool &pool, DataInventory& dataInventory,
-                            const Context& context) const;
-private:
-    ProcessCollection allProcess_;
-    ExecuteProcessStat stat_;  // dfx: 统计运行结果
-    uint32_t chipId_{};  // dfx: 记录运行什么芯片ID
+    class Impl;
+    std::unique_ptr<Impl> impl_;
 };
 
 }
