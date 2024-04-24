@@ -30,17 +30,11 @@ class MsprofTxModel(ParserModel):
         """
         all_data_sql = f"select category, pid, tid, start_time, (end_time-start_time) as dur_time, payload_type, " \
                        f"payload_value, message_type, message, event_type " \
-                       f"from {DBNameConstant.TABLE_MSPROFTX} " \
-                       f"where file_tag={DataTag.MSPROFTX_TORCH.value} or file_tag={DataTag.MSPROFTX.value}"
+                       f"from {DBNameConstant.TABLE_MSPROFTX} where file_tag={DataTag.MSPROFTX.value}"
         return DBManager.fetch_all_data(self.cur, all_data_sql, dto_class=MsprofTxDto)
-
-    def get_mark_data(self: any):
-        sql = f"select pid, tid, start_time, message from {DBNameConstant.TABLE_MSPROFTX} " \
-              f"where file_tag={DataTag.MSPROFTX_CANN.value} order by start_time desc"
-        return DBManager.fetch_all_data(self.cur, sql, dto_class=MsprofTxDto)
 
     def get_summary_data(self: any) -> list:
         all_data_sql = f"select pid, tid, category, event_type, payload_type, payload_value, start_time, " \
                        f"end_time, message_type, message from {DBNameConstant.TABLE_MSPROFTX} " \
-                       f"where file_tag={DataTag.MSPROFTX_TORCH.value} or file_tag={DataTag.MSPROFTX.value}"
+                       f"where file_tag={DataTag.MSPROFTX.value}"
         return DBManager.fetch_all_data(self.cur, all_data_sql)

@@ -131,6 +131,33 @@ struct MsprofMemoryInfo {
     uint32_t deviceId;
     uint32_t deviceType;
 };
+
+
+/**
+ * @name  MsprofStampInfo
+ * @brief struct of data reported by msproftx
+ */
+struct MsprofStampInfo {
+    uint16_t magicNumber;
+    uint16_t dataTag;
+    uint32_t processId;
+    uint32_t threadId;
+    uint32_t category;      // marker category
+    uint32_t eventType;
+    int32_t payloadType;
+    union PayloadValue {    // payload info for marker
+        uint64_t ullValue;
+        int64_t llValue;
+        double dValue;
+        uint32_t uiValue[2];
+        int32_t iValue[2];
+        float fValue[2];
+    } payload;
+    uint64_t startTime;
+    uint64_t endTime;
+    int32_t messageType;
+    char message[128];
+};
 #pragma pack()
 
 /**
@@ -168,34 +195,6 @@ struct MsprofMultiThread {
     uint32_t threadId[MSPROF_MULTI_THREAD_MAX_NUM];
 };
 #pragma pack()
-
-/**
- * @name  MsprofStampInfo
- * @brief struct of data reported by msproftx
- */
-#define CALLSTACK_MAX_LENGTH 75
-struct MsprofStampInfo {
-    uint16_t magicNumber;
-    uint16_t dataTag;
-    uint32_t processId;
-    uint32_t threadId;
-    uint32_t category;      // marker category
-    uint32_t eventType;
-    int32_t payloadType;
-    union PayloadValue {    // payload info for marker
-        uint64_t ullValue;
-        int64_t llValue;
-        double dValue;
-        uint32_t uiValue[2];
-        int32_t iValue[2];
-        float fValue[2];
-    } payload;
-    uint64_t startTime;
-    uint64_t endTime;
-    int32_t messageType;
-    char message[128];
-    char callStack[CALLSTACK_MAX_LENGTH + 1];
-};
 
 /* Msprof report level */
 const uint16_t MSPROF_REPORT_PYTORCH_LEVEL = 30000;
