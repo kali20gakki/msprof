@@ -34,7 +34,8 @@ class AiCoreFreqViewer:
         3、concat 1/2 freq
         '''
         result = []
-        if not ChipManager().is_chip_v4() or InfoConfReader().is_host_profiling():
+        if not ChipManager().is_chip_v4() and not ChipManager().is_chip_v1_1_1()\
+                or InfoConfReader().is_host_profiling():
             return result
 
         # add header for freq view
