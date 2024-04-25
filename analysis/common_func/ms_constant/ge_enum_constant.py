@@ -43,7 +43,8 @@ class GeDataType(Enum):
     DT_UINT1 = 30
     DT_INT2 = 31
     DT_UINT2 = 32
-    DT_MAX = 33
+    DT_COMPLEX32 = 33
+    DT_MAX = 34
     NUMBER_TYPE_BEGIN_ = 229
     BOOL_ = 230
     INT_ = 231
@@ -79,7 +80,7 @@ class GeDataFormat(Enum):
     """
     NCHW = 0
     NHWC = 1
-    FORMAT_ND = 2
+    ND = 2
     NC1HWC0 = 3
     FRACTAL_Z = 4
     NC1C0HWPAD = 5
@@ -103,7 +104,7 @@ class GeDataFormat(Enum):
     HASHTABLE_LOOKUP_OUTPUT = 23
     HASHTABLE_LOOKUP_HITS = 24
     C1HWNCoC0 = 25
-    FORMAT_MD = 26
+    MD = 26
     NDHWC = 27
     FRACTAL_ZZ = 28
     FRACTAL_NZ = 29
@@ -111,8 +112,8 @@ class GeDataFormat(Enum):
     DHWCN = 31
     NDC1HWC0 = 32
     FRACTAL_Z_3D = 33
-    FORMAT_CN = 34
-    FORMAT_NC = 35
+    CN = 34
+    NC = 35
     DHWNC = 36
     FRACTAL_Z_3D_TRANSPOSE = 37
     FRACTAL_ZN_LSTM = 38
@@ -122,8 +123,11 @@ class GeDataFormat(Enum):
     NULL = 42
     ND_RNN_BIAS = 43
     FRACTAL_ZN_RNN = 44
-    END = 45
-    FORMAT_NCL = 47
+    NYUV = 45
+    NYUV_A = 46
+    NCL = 47
+    FRACTAL_Z_WINO = 48
+    END = 49
     MAX = 0xff
     UNKNOWN_ = 200
     DEFAULT_ = 201
