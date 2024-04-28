@@ -20,12 +20,12 @@ from common_func.ms_constant.stars_constant import StarsConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
+from common_func.msprof_object import CustomizedNamedtupleFactory
 from common_func.msvp_common import MsvpCommonConst
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
 from common_func.utils import Utils
-from common_func.msprof_object import CustomizedNamedtupleFactory
 from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import OffsetCalculator
 from mscalculate.aic.aic_utils import AicPmuUtils
@@ -51,11 +51,11 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
     1.开启block模式
     主核会上报context pmu数据和block pmu数据，从核只会上报block pmu数据；
     主核上报的context pmu数量为1，上报的block pmu数量等于block_dim；从核上报的block pmu数据数量等于mix_block_dim
+    计算从核的pmu数据时，需要过滤block pmu数据中由主核上报的block pmu数据，防止重复计算
     2.不开启block模式
     主核只会上报context pmu数据，从核只会上报block pmu数据；
     主核上报的context pmu数量为1；从核上报的block pmu数据数量等于mix_block_dim
     假设主核是AIC，那么aic的一系列pmu数据由context pmu计算得到，aiv的一系列pmu数据由从核上报的block pmu计算得到；
-    计算从核的pmu数据时，需要过滤block pmu数据中由主核上报的block pmu数据，防止重复计算
     二、
     原有代码存在的问题：
     1.将所有key（stream_id-task_id-subtask-id）相同的block pmu数据放在一起计算。没有考虑在静态图模式下，每个算子跑N轮的情况
@@ -116,7 +116,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
     def _get_group_number(number: int, group_size_list: list) -> int:
         """
         得到block pmu数据分组的编号
-        主要针对静态图场景，以及Task Type为MIX_MIV类型算子的mix_block_dim为0的情况
+        主要针对静态图场景，以及走路径五（aclnn）场景下，Task Type为MIX_AIV类型算子的mix_block_dim为0的情况
         Input:
         number: 同一个key下，该条block pmu数据为第几条被上报的数据
         group_size_list: 包含每组数据大小的列表
@@ -124,7 +124,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         group_number: 该条block pmu数据应该被分到第几组
         """
         group_count = len(group_size_list)
-        # 主要针对动态图场景
+        # 主要针对静态图场景
         if group_count == 1 and group_size_list[0] != 0:
             return number // group_size_list[0]
         for i in range(group_count):
@@ -382,6 +382,9 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         return group_size_list
 
     def is_block(self) -> bool:
+        # 开启block模式的判断方法：
+        # 1.sample.json文件中存在'taskBlock'字段
+        # 2.'taskBlock'字段的value值为'on'
         if 'taskBlock' in self._sample_json and self._sample_json.get('taskBlock') == 'on':
             return True
         return False
@@ -437,7 +440,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         2.开启block模式，则该算子总共上报（10+20）*N条block pmu数据，每（10+20）条block pmu数据为1组
         demo single_value:
         ('MIX_AIC', (3054, (59, 0, 749, 0, 2, 1667, 100, 48)), 1)
-        1 表明core type为AIV
+        1 表示core type为AIV，0 表示core type为AIC
         """
         pmu_info_dict = {}
         for number, item in enumerate(value):
@@ -457,7 +460,7 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
         如果开启block模式，那么需要过滤掉主核上报的block pmu数据
         demo pmu_info_value:
         ('MIX_AIC', 330021, (28, 0, 20301, 0, 1190, 113, 2546, 149), 1)
-        1 表明core type为AIV
+        1 表示core type为AIV，0 表示core type为AIC
         """
         total_cycle = sum(cycle[1] for cycle in pmu_info_value)
         cycle_list = [sum(cycle[2][index] for cycle in pmu_info_value) for index in range(self.PMU_LENGTH)]
