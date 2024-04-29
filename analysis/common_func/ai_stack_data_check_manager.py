@@ -80,19 +80,23 @@ class AiStackDataCheckManager(DataCheckManager):
     def contain_dp_aicpu_data(cls: any, result_dir: str, device_id: any = None) -> bool:
         """
         The data path contain aicpu data or not
+        aicpu data by hdc and all aicpu data by driver
         """
         return cls.check_data_exist(result_dir,
                                     file_name_manager.get_data_preprocess_compiles('AICPU'),
-                                    device_id=device_id)
+                                    device_id=device_id) \
+            or cls.check_data_exist(result_dir, file_name_manager.get_aicpu_compiles(), device_id=device_id)
 
     @classmethod
     def contain_data_preprocess_dp_data(cls: any, result_dir: str, device_id: any = None) -> bool:
         """
         The data path contain dp data or not
+        dp data by hdc and all aicpu data by driver
         """
         return cls.check_data_exist(result_dir,
                                     file_name_manager.get_data_preprocess_compiles('DP'),
-                                    device_id=device_id)
+                                    device_id=device_id) \
+            or cls.check_data_exist(result_dir, file_name_manager.get_aicpu_compiles(), device_id=device_id)
 
     @classmethod
     def contain_task_time_data(cls: any, result_dir: str, device_id: any = None) -> bool:

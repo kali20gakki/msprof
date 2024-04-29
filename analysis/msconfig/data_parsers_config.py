@@ -185,7 +185,7 @@ class DataParsersConfig(MetaConfig):
         'AicpuAddInfoParser': [
             ('path', 'msparser.add_info.aicpu_add_info_parser'),
             ('chip_model', '0,1,2,3,4,5,7,8,11'),
-            ('level', '3')
+            ('position', 'D'),
         ],
         'TensorAddInfoParser': [
             ('path', 'msparser.add_info.tensor_add_info_parser'),

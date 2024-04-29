@@ -8,6 +8,7 @@ import struct
 
 from common_func.common import warn
 from common_func.constant import Constant
+from common_func.db_name_constant import DBNameConstant
 from common_func.empty_class import EmptyClass
 from common_func.file_manager import FileOpen
 from common_func.file_name_manager import get_data_preprocess_compiles
@@ -15,6 +16,9 @@ from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_valid_original_data
+from common_func.db_manager import DBManager
+from common_func.path_manager import PathManager
+from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 
 
 class ParseDpData:
@@ -96,6 +100,11 @@ class ParseDpData:
         analysis dp data
         """
         files = cls.get_files(dp_path, cls.TAG_DP, device_id)
+        db_path = PathManager.get_db_path(os.path.dirname(dp_path), DBNameConstant.DB_AI_CPU)
+        if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_AI_CPU_DP):
+            with AiCpuModel(os.path.dirname(dp_path)) as model:
+                data = model.get_all_data(DBNameConstant.TABLE_AI_CPU_DP)
+            return data
         if ParseDpData.dp_data_dispatch(files) == cls.DP_FILE_BIN_TYPE:
             return ParseDpData.analyse_bin_dp(files)
         lines = []

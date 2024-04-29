@@ -224,7 +224,7 @@ class FileNameManagerConstant:
     MEMORY_APPLICATION_FILE_PATTERN = r"^(unaging|aging)\.additional\.memory_application\.slice_\d+"
     CTX_ID_FILE_PATTERN = r"^(unaging|aging)\.additional\.context_id_info\.slice_\d+"
     GE_LOGIC_STREAM_INFO_PATTERN = r"^(unaging|aging)\.additional\.logic_stream_info\.slice_\d+"
-    AICPU_FILE_PATTERN = r"^aging\.additional\.data_preprocess\.slice_\d+"
+    AICPU_FILE_PATTERN = r"^aicpu\.data\.(\d+)\.slice_\d+"
     HCCL_OP_INFO_FILE_PATTERN = r"^(unaging|aging)\.compact\.hccl_op_info\.slice_\d+"
 
     # nano
