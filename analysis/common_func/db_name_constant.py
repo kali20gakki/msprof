@@ -87,6 +87,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_AI_CORE_REC = "AiCoreRec"
     TABLE_AI_CPU = "AiCpuData"
     TABLE_AI_CPU_FROM_TS = "AiCpuFromTs"
+    TABLE_AI_CPU_DP = "AiCpuDP"
     TABLE_ALL_REDUCE = "all_reduce"
     TABLE_CLUSTER_STEP_TRACE = "ClusterStepTrace_{}"
     TABLE_CLUSTER_ALL_REDUCE = "AllReduce_{}"

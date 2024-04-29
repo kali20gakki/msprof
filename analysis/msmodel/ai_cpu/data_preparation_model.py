@@ -14,7 +14,6 @@ class DataPreparationModel(ParserModel):
 
     def __init__(self: any, result_dir: str, table_list: list) -> None:
         super().__init__(result_dir, DBNameConstant.DB_CLUSTER_DATA_PREPROCESS, table_list)
-        self._current_table_name = None
 
     def create_table(self: any) -> None:
         """
@@ -33,14 +32,13 @@ class DataPreparationModel(ParserModel):
         :return:
         """
         for table_name in data_dict.keys():
-            self._current_table_name = table_name
-            self.flush(data_dict.get(table_name, []))
+            self.flush(data_dict.get(table_name, []), table_name)
 
-    def flush(self: any, data_list: list) -> None:
+    def flush(self: any, data_list: list, table_name: str = DBNameConstant.TABLE_DATA_QUEUE) -> None:
         """
         insert data to table
         :param data_list: collected data preparation data
+        :param table_name: table name
         :return:
         """
-        if self._current_table_name:
-            self.insert_data_to_db(self._current_table_name, data_list)
+        self.insert_data_to_db(table_name, data_list)

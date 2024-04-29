@@ -17,6 +17,7 @@ class LevelDataType(Enum):
     ACL = 20000
     MODEL = 15000
     NODE = 10000
+    AICPU = 6000
     HCCL = 5500
     RUNTIME = 5000
 

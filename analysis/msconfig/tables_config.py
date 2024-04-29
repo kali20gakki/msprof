@@ -469,6 +469,12 @@ class TablesConfig(MetaConfig):
             ('sys_start', 'INTEGER, null'),
             ('sys_end', 'INTEGER, null')
         ],
+        'AiCpuDPMap': [
+            ('timestamp', 'TEXT,null'),
+            ('action', 'TEXT,null'),
+            ('source', 'TEXT, null'),
+            ('buffer_size', 'INTEGER, null')
+        ],
         'CpuInfoMap': [
             ('cpu_num', 'INTEGER, null'),
             ('clk_jiffies', 'INTEGER, null')

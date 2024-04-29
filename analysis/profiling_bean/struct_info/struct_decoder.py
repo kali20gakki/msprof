@@ -49,7 +49,6 @@ class StructDecoder:
         "CyclesBean": StructFmt.CYCLES_FMT,
         "TaskTypeBean": StructFmt.TS_TASK_TYPE_FMT,
         "ApiDataBean": StructFmt.API_FMT,
-        "AicpuAddInfoBean": StructFmt.NEW_AI_CPU_FMT,
         "EventDataBean": StructFmt.EVENT_FMT,
         "TaskTrackBean": StructFmt.TASK_TRACK_FMT,
         "MemcpyInfoBean": StructFmt.MEMCPY_INFO_FMT,
