@@ -16,7 +16,8 @@
 #include <cstdint>
 #include <tuple>
 
-#define INVALID_CONTEXT_ID  UINT32_MAX
+constexpr uint32_t INVALID_BATCH_ID = 0;
+constexpr uint32_t INVALID_CONTEXT_ID = UINT32_MAX;
 
 namespace Analysis {
 namespace Domain {
