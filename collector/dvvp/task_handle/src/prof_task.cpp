@@ -6,6 +6,7 @@
  */
 #include "prof_task.h"
 #include <algorithm>
+#include "common/config/feature_manager.h"
 #include "config/config.h"
 #include "errno/error_code.h"
 #include "msprof_dlog.h"
@@ -146,6 +147,16 @@ int ProfTask::CreateCollectionTimeInfo(std::string collectionTime, bool isStartT
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
+}
+
+int ProfTask::CreateIncompatibleFeatureJsonFile()
+{
+    MSPROF_LOGI("TaskHandle CreateIncompatibleFeatureJsonFile.");
+    if (Analysis::Dvvp::Common::Config::FeatureManager::instance()->Init() != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to init features list.");
+        return PROFILING_FAILED;
+    }
+    return Analysis::Dvvp::Common::Config::FeatureManager::instance()->CreateIncompatibleFeatureJsonFile(params_);
 }
 
 int ProfTask::GetHostAndDeviceInfo()
@@ -308,6 +319,11 @@ void ProfTask::Run(const struct error_message::Context &errorContext)
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("ProcessDefMode CreateCollectionTimeInfo failed");
         MSPROF_INNER_ERROR("EK9999", "ProcessDefMode CreateCollectionTimeInfo failed");
+    }
+
+    ret = CreateIncompatibleFeatureJsonFile();
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("ProcessDefMode CreateIncompatibleFeatureJsonFile failed");
     }
     ProcessDefMode();
 

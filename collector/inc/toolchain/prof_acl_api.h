@@ -174,6 +174,15 @@ MSVP_PROF_API int aclprofSetCategoryName(uint32_t category, const char *category
 */
 MSVP_PROF_API int aclprofSetStampCategory(void *stamp, uint32_t category);
 
+/**
+* @ingroup AscendCL
+* @brief get prof supported features
+* @param featuresSize, pointer to feature's size
+* @param featuresData, featuresData should be nullptr
+* @retval int, status
+*/
+MSVP_PROF_API int aclprofGetSupportedFeatures(size_t* featuresSize, void** featuresData);
+
 typedef enum {
     ACL_SUBSCRIBE_OP = 0,
     ACL_SUBSCRIBE_SUBGRAPH = 1,

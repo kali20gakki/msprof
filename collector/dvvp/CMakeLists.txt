@@ -95,6 +95,7 @@ set(msprofilerCpp
     analyze/src/analyzer_rt.cpp
     analyze/src/op_desc_parser.cpp
     common/config/config_manager.cpp
+    common/config/feature_manager.cpp
     common/memory/chunk_pool.cpp
     common/mmpa/mmpa_api.cpp
     common/platform/platform.cpp

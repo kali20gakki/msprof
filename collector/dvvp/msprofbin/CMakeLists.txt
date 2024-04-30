@@ -84,6 +84,7 @@ add_executable(msprofbin
     ../app/env_manager.cpp
     ../common/utils/utils.cpp
     ../common/config/config_manager.cpp
+    ../common/config/feature_manager.cpp
     ../common/logger/cmd_log.cpp
     ../depend/src/slog_plugin.cpp
     ../depend/src/driver_plugin.cpp

@@ -6,6 +6,7 @@
  */
 
 #include "prof_task.h"
+#include "common/config/feature_manager.h"
 #include "errno/error_code.h"
 #include "config/config.h"
 #include "job_factory.h"
@@ -70,6 +71,10 @@ void ProfTask::Run(const struct error_message::Context &errorContext)
         int ret = CreateCollectionTimeInfo(GetHostTime(), true);
         if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("ProcessDefMode CreateCollectionTimeInfo failed");
+        }
+        ret = CreateIncompatibleFeatureJsonFile();
+        if (ret != PROFILING_SUCCESS) {
+            MSPROF_LOGE("ProcessDefMode CreateIncompatibleFeatureJsonFile failed");
         }
         ret = jobAdapter_->StartProf(params_);
         if (ret != PROFILING_SUCCESS) {
@@ -164,6 +169,16 @@ int ProfTask::CreateCollectionTimeInfo(std::string collectionTime, bool isStartT
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
+}
+
+int ProfTask::CreateIncompatibleFeatureJsonFile()
+{
+    MSPROF_LOGI("MsprofBin CreateIncompatibleFeatureJsonFile.");
+    if (Common::Config::FeatureManager::instance()->Init() != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to init features list.");
+        return PROFILING_FAILED;
+    }
+    return Common::Config::FeatureManager::instance()->CreateIncompatibleFeatureJsonFile(params_);
 }
 
 int ProfTask::GetHostAndDeviceInfo()

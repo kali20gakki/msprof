@@ -34,15 +34,15 @@ namespace message {
         (root)[MSG_STR(vector)] = array_obj;        \
     } while (0)
 
-#define SET_ARRAY_OBJECT_VALUE(root, vector)         \
-    do {                                             \
-        nlohmann::json array_obj;                    \
-        for (size_t i = 0; i < (vector).size(); ++i) { \
-            nlohmann::json obj;                      \
-            (vector)[i].ToObject(obj);                \
-            array_obj.push_back(obj);                \
-        }                                            \
-        (root)[MSG_STR(vector)] = array_obj;           \
+#define SET_ARRAY_OBJECT_VALUE(root, vector, name)          \
+    do {                                                    \
+        nlohmann::json array_obj;                           \
+        for (size_t i = 0; i < (vector).size(); ++i) {      \
+            nlohmann::json obj;                             \
+            (vector)[i].ToObject(obj);                      \
+            array_obj.push_back(obj);                       \
+        }                                                   \
+        (root)[name] = array_obj;                           \
     } while (0)
 
 #define FROM_ARRAY_OBJECT_VALUE(root, field, Type) do {                  \
@@ -187,7 +187,7 @@ struct Status : BaseInfo {
     void ToObject(nlohmann::json &object) override
     {
         SET_VALUE(object, status);
-        SET_ARRAY_OBJECT_VALUE(object, info);
+        SET_ARRAY_OBJECT_VALUE(object, info, MSG_STR(info));
     }
 
     void FromObject(const nlohmann::json &object) override

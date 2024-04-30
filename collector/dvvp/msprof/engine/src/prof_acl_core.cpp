@@ -12,6 +12,7 @@
 
 #include "ai_drv_dev_api.h"
 #include "command_handle.h"
+#include "common/config/feature_manager.h"
 #include "errno/error_code.h"
 #include "msprof_dlog.h"
 #include "msprof_callback_handler.h"
@@ -34,6 +35,7 @@ using namespace Msprof::MsprofTx;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Plugin;
+using namespace Analysis::Dvvp::Common::Config;
 
 static std::mutex g_aclprofMutex;
 static uint64_t g_indexId = 1;
@@ -819,5 +821,19 @@ aclError aclprofSetConfig(aclprofConfigType configType, const char *config, size
         MSPROF_LOGE("[aclprofSetConfig]Fail to set profiling config.");
         return ACL_ERROR_INVALID_PARAM;
     }
+    return ACL_SUCCESS;
+}
+
+int aclprofGetSupportedFeatures(size_t* featuresSize, void** featuresData)
+{
+    if (featuresData == nullptr || *featuresData != nullptr || featuresSize == nullptr) {
+        MSPROF_LOGE("featuresData is invalid.");
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    if (FeatureManager::instance()->Init() != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to init features list.");
+        return ACL_ERROR_UNINITIALIZE;
+    }
+    *featuresData = static_cast<void*>(FeatureManager::instance()->GetIncompatibleFeatures(featuresSize));
     return ACL_SUCCESS;
 }
