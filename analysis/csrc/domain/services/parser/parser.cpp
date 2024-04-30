@@ -13,7 +13,7 @@
 #include "parser.h"
 #include <iostream>
 #include <algorithm>
-#include "analysis/csrc/domain/services/parser/include/parser_error_code.h"
+#include "analysis/csrc/domain/services/parser/parser_error_code.h"
 
 namespace Analysis {
 namespace Domain {
