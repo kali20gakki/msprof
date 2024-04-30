@@ -16,6 +16,7 @@ coverage run --branch --source="${src_code}" -m pytest -s "${test_code}" --junit
 coverage xml -o coverage.xml
 coverage report > python_coverage_report.log
 if [[ -n "$1" && "$1" == "diff" ]];then
+  targetBranch=${targetBranch:-master}
   diff-cover coverage.xml --compare-branch="origin/${targetBranch}"  --html-report inc_coverage_result.html --fail-under=80
 fi
 echo "report: ${output_dir}"
