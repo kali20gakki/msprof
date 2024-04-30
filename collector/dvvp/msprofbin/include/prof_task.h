@@ -55,6 +55,7 @@ private:
     std::string GetHostTime();
     void GenerateFileName(bool isStartTime, std::string &filename);
     int CreateCollectionTimeInfo(std::string collectionTime, bool isStartTime);
+    int CreateIncompatibleFeatureJsonFile();
 };
 
 class ProfSocTask : public ProfTask {

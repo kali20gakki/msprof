@@ -70,6 +70,7 @@ private:
     std::string GetHostTime();
     void GenerateFileName(bool isStartTime, std::string &filename);
     int CreateCollectionTimeInfo(std::string collectionTime, bool isStartTime);
+    int CreateIncompatibleFeatureJsonFile();
     void StartDevices(const std::vector<std::string> &devicesVec);
     void ProcessDefMode();
     std::string GetDevicesStr(const std::vector<std::string> &events);

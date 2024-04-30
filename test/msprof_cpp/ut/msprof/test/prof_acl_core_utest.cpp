@@ -3,6 +3,7 @@
 #include <string.h>
 #include <google/protobuf/util/json_util.h>
 #include "config/config_manager.h"
+#include "config/feature_manager.h"
 #include "data_struct.h"
 #include "errno/error_code.h"
 #include "ge/ge_prof.h"
@@ -1693,6 +1694,46 @@ TEST_F(MSPROF_ACL_CORE_UTEST, LaunchHostAndDevTasks)
     uint32_t num = 2;
     uint32_t dev[2] = {0, DEFAULT_HOST_ID};
     Msprofiler::Api::ProfAclMgr::instance()->LaunchHostAndDevTasks(num, &dev[0]);
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, TestaclprofGetSupportedFeaturesWhenGetFeaturesReturnFeatureSize)
+{
+    // 先初始化，确认成功后再取数据
+    ASSERT_EQ(FeatureManager::instance()->Init(), PROFILING_SUCCESS);
+    size_t expectDataSize = 0;
+    auto expectDatas = FeatureManager::instance()->GetIncompatibleFeatures(&expectDataSize);
+    size_t size = 0;
+    void* featureData = nullptr;
+    EXPECT_EQ(aclprofGetSupportedFeatures(&size, &featureData), ACL_SUCCESS);
+    EXPECT_EQ(expectDataSize, size);
+    FeatureRecord* featuresPtr = static_cast<FeatureRecord*>(featureData);
+    for (size_t i = 0; i < expectDataSize; ++i) {
+        // 如果两个指针有一个是nullptr 应该被打断
+        ASSERT_FALSE((featuresPtr == nullptr or expectDatas == nullptr));
+        EXPECT_EQ(featuresPtr->featureName, expectDatas->featureName);
+        EXPECT_EQ(featuresPtr->info.affectedComponent, expectDatas->info.affectedComponent);
+        EXPECT_EQ(featuresPtr->info.affectedComponentVersion, expectDatas->info.affectedComponentVersion);
+        EXPECT_EQ(featuresPtr->info.compatibility, expectDatas->info.compatibility);
+        EXPECT_EQ(featuresPtr->info.featureVersion, expectDatas->info.featureVersion);
+        EXPECT_EQ(featuresPtr->info.infoLog, expectDatas->info.infoLog);
+        ++expectDatas;
+        ++featuresPtr;
+    }
+    FeatureManager::instance()->Uninit();
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, TestaclprofGetSupportedFeaturesWhenGetFeaturesFailedReturnErrorCode)
+{
+    // 入参异常
+    size_t size = 0;
+    void** data1 = nullptr;
+    void* data2 = nullptr;
+    EXPECT_EQ(aclprofGetSupportedFeatures(&size, data1), ACL_ERROR_INVALID_PARAM);
+
+    // featureManager init 失败
+    MOCKER_CPP(&FeatureManager::Init).stubs().will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(aclprofGetSupportedFeatures(&size, &data2), ACL_ERROR_UNINITIALIZE);
+    MOCKER_CPP(&FeatureManager::Init).reset();
 }
 
 class MSPROF_CALL_BACK_IMPL_UTEST: public testing::Test {

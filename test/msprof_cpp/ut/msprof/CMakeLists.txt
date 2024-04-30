@@ -17,6 +17,7 @@ set(profilerSrcList
     ${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_rt.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/op_desc_parser.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/config/feature_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp	

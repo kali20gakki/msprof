@@ -7,6 +7,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/memory/chunk_pool.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/config/feature_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
@@ -31,6 +32,8 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/message/codec.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/transport/uploader.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/transport/uploader_mgr.cpp
     ${CppPath}
 )
 
@@ -41,6 +44,7 @@ set(localSrcFiles
     ../../stub/driver_plugin_stub.cpp
     test/main.cpp
     test/config_manager_utest.cpp
+    test/feature_manager_utest.cpp
     test/chunk_pool_test.cpp
     test/thread_test.cpp
     test/thread_pool_utest.cpp
@@ -78,6 +82,7 @@ target_include_directories(common_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
     ${MSPROF_SOURCE_DIR}/../inc
     ${MSPROF_SOURCE_DIR}/dvvp
+    ${MSPROF_SOURCE_DIR}/dvvp/adx/inc 
     ${MSPROF_SOURCE_DIR}/dvvp/common
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics
     ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
@@ -91,6 +96,7 @@ target_include_directories(common_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/
     ${MSPROF_SOURCE_DIR}/dvvp/params_adapter
+    ${MSPROF_SOURCE_DIR}/dvvp/transport
     ${CMAKE_BINARY_DIR}/proto/profiler/
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
 )
