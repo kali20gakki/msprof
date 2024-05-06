@@ -67,4 +67,5 @@ class ExportDataType(Enum):
     API_STATISTIC = 62
     NPU_MODULE_MEM = 63
     SIO = 64
+    AICPU_MI = 65
     MSPROF = 100

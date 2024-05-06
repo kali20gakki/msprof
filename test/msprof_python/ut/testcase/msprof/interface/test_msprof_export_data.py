@@ -664,6 +664,11 @@ class TestMsProfExportDataUtils(unittest.TestCase):
             res = MsProfExportDataUtils._get_stars_chip_trans_data({}, {})
         self.assertEqual(res, {})
 
+    def test_get_aicpu_mi_data_should_return_empty_when_no_data(self):
+        res = MsProfExportDataUtils._get_aicpu_mi_data({}, {})
+        self.assertEqual(3, len(res))
+        self.assertEqual([], res[1])
+
 
 if __name__ == '__main__':
     unittest.main()
