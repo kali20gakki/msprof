@@ -296,4 +296,7 @@ class MsProfExportDataConfig(MetaConfig):
             ('handler', '_get_api_statistic_data'),
             ('headers', 'Level,API Name,Time(us),Count,Avg(us),Min(us),Max(us),Variance'),
         ],
+        'aicpu_mi': [
+            ('handler', '_get_aicpu_mi_data')
+        ],
     }

@@ -63,6 +63,18 @@ class ParseAiCpuData:
         return headers, res
 
     @staticmethod
+    def analysis_aicpu_mi(project_path: str) -> tuple:
+        """
+        parse AI_CPU MI data
+        :return: ai cpu mi  data , headers
+        """
+        headers = [
+            "Node_name", "Start_time(us)", "Start_time(us)", "Queue_size"
+        ]
+        aicpu_mi_data = ParseAiCpuData.get_ai_cpu_mi_data(project_path)
+        return headers, aicpu_mi_data
+
+    @staticmethod
     def get_aicpu_batch_id(ai_cpu_data: List[AiCpuData], ascend_task_data: List[GeTaskDto]) -> List[AiCpuData]:
         """
         get ai cpu batch_id from ascend_task data
@@ -159,6 +171,21 @@ class ParseAiCpuData:
         ai_cpu_results = ParseAiCpuData._get_aicpu_data(ai_cpu_conn, iter_range, project_path)
         DBManager.destroy_db_connect(ai_cpu_conn, ai_cpu_curs)
         return ai_cpu_results
+
+    @staticmethod
+    def get_ai_cpu_mi_data(project_path: str) -> list:
+        """
+        get ai cpu mi data
+        """
+        db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_CLUSTER_DATA_PREPROCESS)
+        conn, curs = DBManager.check_connect_db_path(db_path)
+        if not conn or not curs:
+            logging.warning("Can't connect %s", DBNameConstant.DB_CLUSTER_DATA_PREPROCESS)
+            return []
+        sql = "select node_name, start_time, end_time, queue_size from {0}".format(DBNameConstant.TABLE_DATA_QUEUE)
+        aicpu_mi_data = DBManager.fetch_all_data(conn.cursor(), sql)
+        DBManager.destroy_db_connect(conn, curs)
+        return aicpu_mi_data
 
     @staticmethod
     def get_ai_cpu_from_ts(project_path: str) -> list:

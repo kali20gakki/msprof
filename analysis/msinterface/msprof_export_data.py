@@ -584,6 +584,12 @@ class MsProfExportDataUtils:
     def _get_sio_data(configs: dict, params: dict) -> any:
         return SioViewer(configs, params).get_timeline_data()
 
+    @staticmethod
+    def _get_aicpu_mi_data(configs: dict, params: dict) -> any:
+        _ = configs
+        headers, data = ParseAiCpuData.analysis_aicpu_mi(params.get(StrConstant.PARAM_RESULT_DIR))
+        return headers, data, len(data)
+
     @classmethod
     def export_data(cls: any, params: dict) -> str:
         """
