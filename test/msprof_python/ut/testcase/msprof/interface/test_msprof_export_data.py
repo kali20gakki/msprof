@@ -471,10 +471,10 @@ class TestMsProfExportDataUtils(unittest.TestCase):
     def test_get_aicpu_data(self):
         configs = {'headers': '212'}
         params = {"iter_id": "summary", "project": "456", "device_id": '123'}
-        with mock.patch(NAMESPACE + '.ParseAiCpuData.analysis_aicpu', return_value=(1, [1, 2])):
+        with mock.patch(NAMESPACE + '.ParseAiCpuData.analysis_aicpu', return_value=[1, 2]):
             key = MsProfExportDataUtils()
             result = key._get_aicpu_data(configs, params)
-        self.assertEqual(result, (1, [1, 2], 2))
+        self.assertEqual(('212', [1, 2], 2), result)
 
     def test_get_dp_data_1(self):
         configs = {'headers': '10'}
