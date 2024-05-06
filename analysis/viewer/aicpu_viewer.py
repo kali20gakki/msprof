@@ -44,15 +44,11 @@ class ParseAiCpuData:
     """
 
     @staticmethod
-    def analysis_aicpu(project_path: str, iter_range: IterationRange) -> tuple:
+    def analysis_aicpu(project_path: str, iter_range: IterationRange) -> list:
         """
         parse and analysis AI CPU related dp data
         :return: ai cpu data , headers
         """
-        headers = [
-            "Timestamp(us)", "Node", "Compute_time(us)", "Memcpy_time(us)", "Task_time(us)",
-            "Dispatch_time(us)", "Total_time(us)", "Stream ID", "Task ID"
-        ]
         ai_cpu_results = ParseAiCpuData.get_ai_cpu_data(project_path, iter_range)
         ascend_task_results = ParseAiCpuData.get_ascend_task_ai_cpu_data(project_path)
         ge_results = ParseAiCpuData.get_ge_summary_aicpu_data(project_path)
@@ -60,19 +56,7 @@ class ParseAiCpuData:
         res = ParseAiCpuData.get_aicpu_batch_id(ai_cpu_results, ascend_task_results)
         res = ParseAiCpuData.match_aicpu_with_ge_summary(res, ge_results)
         res.sort(key=lambda x: x[0])
-        return headers, res
-
-    @staticmethod
-    def analysis_aicpu_mi(project_path: str) -> tuple:
-        """
-        parse AI_CPU MI data
-        :return: ai cpu mi  data , headers
-        """
-        headers = [
-            "Node_name", "Start_time(us)", "Start_time(us)", "Queue_size"
-        ]
-        aicpu_mi_data = ParseAiCpuData.get_ai_cpu_mi_data(project_path)
-        return headers, aicpu_mi_data
+        return res
 
     @staticmethod
     def get_aicpu_batch_id(ai_cpu_data: List[AiCpuData], ascend_task_data: List[GeTaskDto]) -> List[AiCpuData]:
@@ -173,7 +157,7 @@ class ParseAiCpuData:
         return ai_cpu_results
 
     @staticmethod
-    def get_ai_cpu_mi_data(project_path: str) -> list:
+    def get_aicpu_mi_data(project_path: str) -> list:
         """
         get ai cpu mi data
         """

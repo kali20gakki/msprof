@@ -42,10 +42,6 @@ class TestAicpuViewer(unittest.TestCase):
 
     def test_analysis_aicpu_when_noraml_then_pass(self):
         project_path = 'home\\project'
-        headers = [
-            "Timestamp(us)", "Node", "Compute_time(us)", "Memcpy_time(us)", "Task_time(us)",
-            "Dispatch_time(us)", "Total_time(us)", "Stream ID", "Task ID"
-        ]
         with mock.patch(NAMESPACE + '.ParseAiCpuData.get_ai_cpu_data'), \
                 mock.patch(NAMESPACE + '.ParseAiCpuData.get_ascend_task_ai_cpu_data'), \
                 mock.patch(NAMESPACE + '.ParseAiCpuData.get_ge_summary_aicpu_data'), \
@@ -53,7 +49,7 @@ class TestAicpuViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + '.ParseAiCpuData.match_aicpu_with_ge_summary', return_value=[]):
             check = ParseAiCpuData()
             result = check.analysis_aicpu(project_path, ITER_RANGE)
-            unittest.TestCase().assertEqual(result, (headers, []))
+            unittest.TestCase().assertEqual(result, [])
 
     def test_get_ai_cpu_data_when_connect_failed_then_return_empty(self):
         with mock.patch(NAMESPACE + '.PathManager.get_db_path'), \

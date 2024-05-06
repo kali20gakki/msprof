@@ -66,7 +66,10 @@ class MsProfExportDataConfig(MetaConfig):
              'Iteration Refresh(us),Data Aug Bound(us)')
         ],
         'aicpu': [
-            ('handler', '_get_aicpu_data')
+            ('handler', '_get_aicpu_data'),
+            ('headers',
+             'Timestamp(us),Node,Compute_time(us),Memcpy_time(us),Task_time(us),'
+             'Dispatch_time(us),Total_time(us),Stream ID,Task ID'),
         ],
         'dp': [
             ('handler', '_get_dp_data'),
@@ -297,6 +300,7 @@ class MsProfExportDataConfig(MetaConfig):
             ('headers', 'Level,API Name,Time(us),Count,Avg(us),Min(us),Max(us),Variance'),
         ],
         'aicpu_mi': [
-            ('handler', '_get_aicpu_mi_data')
+            ('handler', '_get_aicpu_mi_data'),
+            ('headers', 'Node Name,Start Time(us),End Time(us),Queue Size'),
         ],
     }

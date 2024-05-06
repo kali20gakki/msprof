@@ -427,10 +427,9 @@ class MsProfExportDataUtils:
 
     @staticmethod
     def _get_aicpu_data(configs: dict, params: dict) -> any:
-        _ = configs
-        aicpu_headers, aicpu_data = ParseAiCpuData.analysis_aicpu(params.get(StrConstant.PARAM_RESULT_DIR),
-                                                                  params.get(StrConstant.PARAM_ITER_ID))
-        return aicpu_headers, aicpu_data, len(aicpu_data)
+        aicpu_data = ParseAiCpuData.analysis_aicpu(params.get(StrConstant.PARAM_RESULT_DIR),
+                                                   params.get(StrConstant.PARAM_ITER_ID))
+        return configs.get(StrConstant.CONFIG_HEADERS), aicpu_data, len(aicpu_data)
 
     @staticmethod
     def _get_dp_data(configs: dict, params: dict) -> any:
@@ -586,9 +585,8 @@ class MsProfExportDataUtils:
 
     @staticmethod
     def _get_aicpu_mi_data(configs: dict, params: dict) -> any:
-        _ = configs
-        headers, data = ParseAiCpuData.analysis_aicpu_mi(params.get(StrConstant.PARAM_RESULT_DIR))
-        return headers, data, len(data)
+        data = ParseAiCpuData.get_aicpu_mi_data(params.get(StrConstant.PARAM_RESULT_DIR))
+        return configs.get(StrConstant.CONFIG_HEADERS), data, len(data)
 
     @classmethod
     def export_data(cls: any, params: dict) -> str:
