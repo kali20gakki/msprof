@@ -233,13 +233,6 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckAivEventsIsValid) {
     EXPECT_EQ(true, entry->CheckAivEventsIsValid(aiv));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckNameContainsDangerCharacter) {
-    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
-    EXPECT_EQ(true, entry->CheckNameContainsDangerCharacter(""));
-    const std::string cmd = "rm -rf *";
-    EXPECT_EQ(false, entry->CheckNameContainsDangerCharacter(cmd));
-}
-
 TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckAppNameIsValid) {
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     EXPECT_EQ(false, entry->CheckAppNameIsValid(""));

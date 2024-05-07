@@ -38,10 +38,6 @@ int Application::PrepareLaunchAppCmd(std::stringstream &ssCmdApp,
         MSPROF_LOGE("app name(%s) is not valid.", params->app.c_str());
         return PROFILING_FAILED;
     }
-    if (!ParamValidation::instance()->CheckNameContainsDangerCharacter(params->app_parameters)) {
-        MSPROF_LOGE("app_parameters(%s) contains not allowed character.", params->app_parameters.c_str());
-        return PROFILING_FAILED;
-    }
     ssCmdApp << params->cmdPath;
 
     if (!params->app_parameters.empty()) {
