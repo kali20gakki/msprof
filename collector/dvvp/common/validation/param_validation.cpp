@@ -951,17 +951,6 @@ bool ParamValidation::CheckAivEventsIsValid(const std::vector<std::string> &even
     return CheckAiCoreEventsIsValid(events);  // same with ai core events
 }
 
-bool ParamValidation::CheckNameContainsDangerCharacter(const std::string &cmd) const
-{
-    const std::string dangerList[] = {"rm ", "mv ", "reboot", "shutdown", "halt", "> ", "wget ", "poweroff"};
-    for (std::string str: dangerList) {
-        if (cmd.find(str) != std::string::npos) {
-            return false;
-        }
-    }
-    return true;
-}
-
 bool ParamValidation::CheckAppNameIsValid(const std::string &appName) const
 {
     if (appName.empty()) {

@@ -65,7 +65,6 @@ public:
     bool CheckCtrlCpuEventIsValid(const std::vector<std::string> &events);
     bool CheckPmuEventSizeIsValid(const int eventSize) const;
     bool CheckCoreIdSizeIsValid(const int eventSize) const;
-    bool CheckNameContainsDangerCharacter(const std::string &cmd) const;
     bool CheckDeviceIdIsValid(const std::string &devId) const;
     bool CheckProfilingMetricsLength(const std::string &metricsVal);
     bool CheckProfilingMetricsIsValid(const std::string &metricsName, const std::string &metricsVal);
