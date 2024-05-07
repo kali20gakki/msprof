@@ -211,6 +211,10 @@ class FileNameManagerConstant:
     # freq
     FREQ_FILE_PATTERN = r"lpmFreqConv\.data\.(\d+)\.slice_\d+"
 
+    # qos
+    QOS_DATA_PATTERN = r"^qos\.data\.(\d+)\.slice_\d+"
+    QOS_INFO_PATTERN = r"^qos\.info\.(\d+)\.slice_\d+"
+
     # new data struct
     API_EVENT_FILE_PATTERN = r"^(aging|unaging)\.api_event\.data\.slice_\d+"
     HASH_DATA_FILE_PATTERN = r"^(aging|unaging)\.additional\.(hash_dic|type_info_dic)\.slice_\d+"
@@ -1003,3 +1007,11 @@ def get_hccl_op_info_compiles() -> tuple:
     :return: hccl op info data files regex
     """
     return (re.compile(FileNameManagerConstant.HCCL_OP_INFO_FILE_PATTERN),)
+
+
+def get_qos_compiles() -> tuple:
+    """
+    get qos regex compiles
+    :return: qos data and qos info files regex
+    """
+    return re.compile(FileNameManagerConstant.QOS_DATA_PATTERN), re.compile(FileNameManagerConstant.QOS_INFO_PATTERN)

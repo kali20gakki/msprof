@@ -82,6 +82,7 @@ class DataTag(Enum):
     AICPU_ADD_INFO = 72
     NODE_ATTR_INFO = 73
     HCCL_OP_INFO = 74
+    QOS = 75
 
 
 @unique

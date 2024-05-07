@@ -1379,4 +1379,16 @@ class TablesConfig(MetaConfig):
             ('count', 'NUMERIC,null'),
             ('group_name', 'TEXT,null')
         ],
+        'QosOriginalDataMap': [
+            ('device_id', 'INT,null'),
+            ('replayid', 'INT,null'),
+            ('timestamp', 'REAL,null'),
+            ('bandwidth', 'INT,null'),
+            ('event_type', 'TEXT,null'),
+            ('mpamid', 'INT,null')
+        ],
+        'QosInfoMap': [
+            ('mpamid', 'INT,null'),
+            ('description', 'TEXT,null')
+        ],
     }

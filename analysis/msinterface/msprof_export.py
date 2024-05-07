@@ -121,6 +121,8 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_api_data},
             {'export_type': ExportDataType.SIO,
              'handler': AiStackDataCheckManager.contain_sio_data},
+            {'export_type': ExportDataType.QOS,
+             'handler': SystemDataCheckManager.contain_qos_data},
             {'export_type': ExportDataType.MSPROF,
              'handler': lambda result_dir, device_id=None: True}
         ],

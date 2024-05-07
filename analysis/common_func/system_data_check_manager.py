@@ -158,3 +158,11 @@ class SystemDataCheckManager(DataCheckManager):
         """
         return cls.check_data_exist(result_dir, file_name_manager.get_pid_mem_compiles(),
                                     device_id=device_id)
+
+    @classmethod
+    def contain_qos_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        """
+        The data path contain qos data or not
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_qos_compiles(),
+                                    device_id=device_id)

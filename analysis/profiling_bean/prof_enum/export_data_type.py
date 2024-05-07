@@ -68,4 +68,5 @@ class ExportDataType(Enum):
     NPU_MODULE_MEM = 63
     SIO = 64
     AICPU_MI = 65
+    QOS = 66
     MSPROF = 100

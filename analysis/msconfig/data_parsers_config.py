@@ -81,6 +81,11 @@ class DataParsersConfig(MetaConfig):
             ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('position', 'D')
         ],
+        'ParsingQosData': [
+            ('path', 'msparser.hardware.qos_parser'),
+            ('chip_model', '5'),
+            ('position', 'D')
+        ],
         'NonMiniLLCParser': [
             ('path', 'msparser.hardware.llc_parser'),
             ('chip_model', '1,2,3,4,5,7,8,11'),

@@ -48,6 +48,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_DDR = "ddr.db"
     DB_PCIE = "pcie.db"
     DB_HBM = "hbm.db"
+    DB_QOS = "qos.db"
     DB_HCCL = "hccl.db"
     DB_MSPROFTX = 'msproftx.db'
     DB_GE_HASH = "ge_hash.db"
@@ -195,6 +196,9 @@ class DBNameConstant(metaclass=ABCMeta):
     # hbm
     TABLE_HBM_ORIGIN = "HBMOriginalData"
     TABLE_HBM_BW = "HBMbwData"
+    # qos
+    TABLE_QOS_ORIGIN = "QosOriginalData"
+    TABLE_QOS_INFO = "QosInfo"
     # hccs
     TABLE_HCCS_ORIGIN = 'HCCSOriginalData'
     TABLE_HCCS_EVENTS = 'HCCSEventsData'
