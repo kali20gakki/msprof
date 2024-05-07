@@ -32,6 +32,7 @@ using namespace Collector::Dvvp::Plugin;
 using namespace Analysis::Dvvp::ProfilerCommon;
 static std::mutex g_aclgraphProfMutex;
 
+namespace {
 struct SafeUnorderedSet {
     std::unordered_set<uint32_t> record;
     std::mutex setMutex;
@@ -56,6 +57,7 @@ struct SafeUnorderedSet {
         record.insert(item);
     }
 };
+}
 
 static SafeUnorderedSet g_devRecord;
 
