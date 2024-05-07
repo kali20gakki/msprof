@@ -14,17 +14,18 @@
 #define ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_ACSQ_LOG_PARSER_ITEM_H
 
 #include <cstdint>
+#include "analysis/csrc/domain/entities/hal/include/hal_log.h"
 
 namespace Analysis {
 namespace Domain {
 
-#define PARSER_ITEM_ACSQ_LOG_START 0b000000
-#define PARSER_ITEM_ACSQ_LOG_END   0b000001
+const int PARSER_ITEM_ACSQ_LOG_START = 0b000000;
+const int PARSER_ITEM_ACSQ_LOG_END = 0b000001;
 
 #pragma pack(1)
 struct AcsqLog {
     uint16_t funcType : 6;
-    uint16_t resv1 : 4;
+    uint16_t cnt : 4;
     uint16_t taskType : 6;
     uint16_t resv2;
     uint16_t streamId : 11;
@@ -37,7 +38,7 @@ struct AcsqLog {
 };
 #pragma pack()
 
-void AcsqLogParseItem(void *binaryData, uint32_t binaryDataSize, void *halUniData, uint32_t halUniDataSize);
+int AcsqLogParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData);
 
 }
 }
