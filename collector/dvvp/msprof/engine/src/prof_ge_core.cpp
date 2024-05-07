@@ -32,6 +32,33 @@ using namespace Collector::Dvvp::Plugin;
 using namespace Analysis::Dvvp::ProfilerCommon;
 static std::mutex g_aclgraphProfMutex;
 
+struct SafeUnorderedSet {
+    std::unordered_set<uint32_t> record;
+    std::mutex setMutex;
+
+    void FindAndErase(const uint32_t item)
+    {
+        std::lock_guard<std::mutex> lock(setMutex);
+        if (record.find(item) != record.end()) {
+            record.erase(item);
+        }
+    }
+
+    size_t Count(uint32_t item)
+    {
+        std::lock_guard<std::mutex> lock(setMutex);
+        return record.count(item);
+    }
+
+    void Insert(uint32_t item)
+    {
+        std::lock_guard<std::mutex> lock(setMutex);
+        record.insert(item);
+    }
+};
+
+static SafeUnorderedSet g_devRecord;
+
 int aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeConfig *profSubscribeConfig)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
@@ -487,8 +514,7 @@ Status aclgrphProfStop(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
 
 int32_t GeOpenDeviceHandle(const uint32_t devId)
 {
-    static std::unordered_set<uint32_t> devRecord;
-    if (devRecord.count(devId) > 0) {
+    if (g_devRecord.Count(devId) > 0) {
         MSPROF_LOGI("MsprofSetDeviceImpl devId %u is running", devId);
         return PROFILING_SUCCESS;
     }
@@ -515,7 +541,7 @@ int32_t GeOpenDeviceHandle(const uint32_t devId)
             dataTypeConfig);
         return PROFILING_FAILED;
     }
-    devRecord.insert(devId);
+    g_devRecord.Insert(devId);
     return PROFILING_SUCCESS;
 }
 
@@ -524,6 +550,7 @@ void GeFinalizeHandle()
     std::vector<uint32_t> devIds;
     Msprofiler::Api::ProfAclMgr::instance()->GetRunningDevices(devIds);
     for (uint32_t devId : devIds) {
+        g_devRecord.FindAndErase(devId);
         uint64_t dataTypeConfig = 0;
         if (Msprofiler::Api::ProfAclMgr::instance()->ProfAclGetDataTypeConfig(devId, dataTypeConfig) != ACL_SUCCESS) {
             continue;
