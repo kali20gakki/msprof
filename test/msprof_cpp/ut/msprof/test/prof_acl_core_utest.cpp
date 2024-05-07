@@ -525,6 +525,8 @@ TEST_F(MSPROF_ACL_CORE_UTEST, prof_acl_api_helper) {
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofSetStampPayload(nullptr, 0, nullptr));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofSetStampTraceMessage(nullptr, nullptr, 0));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofMark(nullptr));
+    std::string msg = "test";
+    EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofMarkEx(msg.c_str(), msg.size(), stream));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofPush(nullptr));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofPop());
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofRangeStart(nullptr, nullptr));
@@ -1938,6 +1940,18 @@ TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofMark) {
         .will(returnValue(ACL_SUCCESS));
 
     aclError ret = aclprofMark(nullptr);
+    EXPECT_EQ(ACL_SUCCESS, ret);
+}
+
+TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofMarkEx)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Msprof::MsprofTx::MsprofTxManager::MarkEx)
+        .stubs()
+        .will(returnValue(ACL_SUCCESS));
+    std::string msg = "test";
+    aclrtStream streamId;
+    aclError ret = aclprofMarkEx(msg.c_str(), msg.size(), streamId);
     EXPECT_EQ(ACL_SUCCESS, ret);
 }
 

@@ -751,6 +751,13 @@ class TablesConfig(MetaConfig):
             ('message', 'TEXT, null'),
             ('file_tag', 'INTEGER, null')
         ],
+        'MsprofTxMarkExMap': [
+            ('pid', 'INTEGER, null'),
+            ('tid', 'INTEGER, null'),
+            ('timestamp', 'INTEGER, null'),
+            ('mark_id', 'INTEGER, null'),
+            ('message', 'TEXT, null')
+        ],
         'SioMap': [
             ('acc_id', 'INTEGER, null'),
             ('req_rx', 'NUMERIC, null'),

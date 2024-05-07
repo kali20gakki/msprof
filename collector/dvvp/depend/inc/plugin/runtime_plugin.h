@@ -13,18 +13,22 @@
 namespace Collector {
 namespace Dvvp {
 namespace Plugin {
+using aclrtStream = void *;
 using RtGetVisibleDeviceIdByLogicDeviceIdFunc = std::function<int32_t(int32_t, int32_t*)>;
+using RtProfilerTraceExFunc = std::function<int32_t(uint64_t, uint64_t, uint16_t, aclrtStream)>;
 class RuntimePlugin : public analysis::dvvp::common::singleton::Singleton<RuntimePlugin> {
 public:
     RuntimePlugin() : soName_("libruntime.so"), loadFlag_(0) {}
     bool IsFuncExist(const std::string &funcName) const;
     void GetAllFunction();
     int32_t MsprofRtGetVisibleDeviceIdByLogicDeviceId(int32_t logicDeviceId, int32_t* visibleDeviceId);
+    int32_t MsprofRtProfilerTraceEx(uint64_t indexId, uint64_t modelId, uint16_t tagId, aclrtStream stream);
 private:
     std::string soName_;
     static SHARED_PTR_ALIA<PluginHandle> pluginHandle_;
     PTHREAD_ONCE_T loadFlag_;
     RtGetVisibleDeviceIdByLogicDeviceIdFunc rtGetVisibleDeviceIdByLogicDeviceIdFunc_ = nullptr;
+    RtProfilerTraceExFunc rtProfilerTraceExFunc_ = nullptr;
 private:
     void LoadRuntimeSo();
 };

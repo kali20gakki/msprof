@@ -16,9 +16,14 @@ using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Mmpa;
 using namespace analysis::dvvp::common::error;
 
-int RtGetVisibleDeviceIdByLogicDeviceId(int32_t logicDeviceId, int32_t* visibleDeviceId)
+int32_t RtGetVisibleDeviceIdByLogicDeviceId(int32_t logicDeviceId, int32_t* visibleDeviceId)
 {
     *visibleDeviceId = 1;
+    return PROFILING_SUCCESS;
+}
+
+int32_t RtProfilerTraceEx(uint64_t deviceId, uint64_t modelId, uint16_t tagId, aclrtStream streamId)
+{
     return PROFILING_SUCCESS;
 }
 
@@ -73,4 +78,18 @@ TEST_F(RuntimePluginUtest, MsprofRtGetVisibleDeviceIdByLogicDeviceId)
     EXPECT_EQ(PROFILING_SUCCESS, runtimePlugin->MsprofRtGetVisibleDeviceIdByLogicDeviceId(logicDeviceId,
         &visibleDeviceId));
     EXPECT_EQ(1, visibleDeviceId);
+}
+
+TEST_F(RuntimePluginUtest, MsprofRtProfilerTraceEx)
+{
+    GlobalMockObject::verify();
+    uint64_t deviceId = 0;
+    uint64_t modelId = 0;
+    uint16_t tagId = 0;
+    aclrtStream stmId = nullptr;
+    auto runtimePlugin = RuntimePlugin::instance();
+    runtimePlugin->rtProfilerTraceExFunc_ = nullptr;
+    EXPECT_EQ(PROFILING_NOTSUPPORT, runtimePlugin->MsprofRtProfilerTraceEx(deviceId, modelId, tagId, stmId));
+    runtimePlugin->rtProfilerTraceExFunc_ = RtProfilerTraceEx;
+    EXPECT_EQ(PROFILING_SUCCESS, runtimePlugin->MsprofRtProfilerTraceEx(deviceId, modelId, tagId, stmId));
 }

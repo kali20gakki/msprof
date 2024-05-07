@@ -190,6 +190,7 @@ class FileNameManagerConstant:
     ALL_FILE_TAG = "all_file.complete"
 
     MSPROFTX_FILE_PATTERN = r"^Msprof\.msproftx\.slice_\d+"
+    MSPROFTX_MARKEX_FILE_PATTERN = r"^Msprof\.mark_ex\.slice_\d+"
     MSPROF_JSON_FILE_PATTERN = r"^msprof(_\d+)?(_\d+)?(_\d+)?(_\d+)?(_slice_\d+)?.json"
     MSPROFTX_JSON_FILE_PATTERN = r"^msprof_tx_?\d?_?\d?.json"
 
@@ -805,6 +806,14 @@ def get_parallel_strategy_compiles() -> tuple:
     :return: parallel strategy files regex
     """
     return (re.compile(FileNameManagerConstant.PARALLEL_STRATEGY_FILE_PATTERN),)
+
+
+def get_msproftx_markex_compiles() -> tuple:
+    """
+    get msproftx markex files regex compiles
+    :return: parallel msproftx markex files regex
+    """
+    return (re.compile(FileNameManagerConstant.MSPROFTX_MARKEX_FILE_PATTERN),)
 
 
 def get_msproftx_all_compiles() -> tuple:

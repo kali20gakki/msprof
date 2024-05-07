@@ -37,6 +37,7 @@ class TestL2Cache(unittest.TestCase):
                 mock.patch(NAMESPACE + '.modify_l2_cache_headers'):
             res = get_l2_cache_data('', "L2CacheSummary", columns)
         self.assertEqual(res[2], 0)
+        db_manager.destroy(test_sql)
 
     def test_modify_l2_cache_headers(self):
         headers = ["r08", "r0_a", "r09", "0xb", "0xc", "0xd", "0x54", "0x55"]

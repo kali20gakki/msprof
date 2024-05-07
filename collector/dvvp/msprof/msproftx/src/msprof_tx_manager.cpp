@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2024. All rights reserved.
  * Description: creat tx manager
  * Author:
  * Create: 2021-11-22
@@ -230,6 +230,59 @@ int MsprofTxManager::Mark(ACL_PROF_STAMP_PTR stamp) const
     return ReportStampData(stamp);
 }
 
+int MsprofTxManager::MarkEx(CONST_CHAR_PTR msg, size_t msgLen, aclrtStream stream)
+{
+    static uint64_t markIdx = 0;
+    static uint32_t pid = static_cast<uint32_t>(MmGetPid());
+    static thread_local uint32_t tid = static_cast<uint32_t>(MmGetTid());
+    if (!isInit_) {
+        MSPROF_LOGE("[MarkEx]MsprofTxManager is not inited yet");
+        return PROFILING_FAILED;
+    }
+    if (msg == nullptr || stream == nullptr) {
+        MSPROF_LOGE("[MarkEx]message or stream is nullptr");
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "message", "message and stream can not be nullptr when markEx"}));
+        return PROFILING_FAILED;
+    }
+    if (strnlen(msg, msgLen) != msgLen) {
+        MSPROF_LOGE("[MarkEx]Length of input mesage does not equal to given length.");
+        return PROFILING_FAILED;
+    }
+    MsprofTxMarkExInfo info;
+    info.processId = pid;
+    info.threadId = tid;
+    info.timestamp = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
+    {
+        std::lock_guard<std::mutex> lk(markerMtx_);
+        if (RuntimePlugin::instance()->MsprofRtProfilerTraceEx(markIdx, MARKEX_MODEL_ID, MARKEX_TAG_ID, stream) !=
+            PROFILING_SUCCESS) {
+            MSPROF_LOGE("[MarkEx]Failed to call rtProfilerTraceEx, mark idx=%u", markIdx);
+            return PROFILING_FAILED;
+        }
+        info.markId = markIdx++;
+    }
+    if (memcpy_s(info.message, MAX_MESSAGE_LEN - 1, msg, msgLen) != EOK) {
+        MSPROF_LOGE("[MarkEx]memcpy_s message failed, msgLen %zu", msgLen);
+        return PROFILING_FAILED;
+    }
+    info.message[msgLen] = '\0';
+    ReporterData data;
+    data.deviceId = DEFAULT_HOST_ID;
+    data.dataLen = sizeof(MsprofTxMarkExInfo);
+    data.data = reinterpret_cast<UNSIGNED_CHAR_PTR>(&info);
+    if (memcpy_s(data.tag, MSPROF_ENGINE_MAX_TAG_LEN, MARKEX_DATA_TAG.c_str(), MARKEX_DATA_TAG.size()) != EOK) {
+        MSPROF_LOGE("[MarkEx]memcpy_s mark_ex tag failed");
+        return PROFILING_FAILED;
+    }
+    data.tag[MARKEX_DATA_TAG.size()] = '\0';
+    if (reporter_->Report(data) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[ReportStampData] report profiling data failed.");
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
+}
+
 // stamp stack manage
 int MsprofTxManager::Push(ACL_PROF_STAMP_PTR stamp) const
 {
@@ -319,6 +372,5 @@ int MsprofTxManager::ReportStampData(MsprofStampInstance *stamp) const
     }
     return PROFILING_SUCCESS;
 }
-
 }
 }

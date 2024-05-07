@@ -122,6 +122,11 @@ class DataParsersConfig(MetaConfig):
             ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('position', 'H')
         ],
+        'MsprofTxMarkExParser': [
+            ('path', 'msparser.msproftx.msproftx_markex_parser'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
+            ('position', 'H')
+        ],
         'AicpuBinDataParser': [
             ('path', 'msparser.aicpu.aicpu_bin_data_parser'),
             ('chip_model', '0,1,2,3,4,5,7,8,11'),

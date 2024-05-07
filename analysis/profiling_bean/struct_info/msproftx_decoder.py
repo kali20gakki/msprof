@@ -79,3 +79,43 @@ class MsprofTxDecoder(StructDecoder):
         zero_ind = value.find(b'\x00')
         str_value = bytes.decode(value[0:zero_ind])
         return str_value
+
+
+class MsprofTxMarkExDecoder(StructDecoder):
+    """
+    class used to decode binary data
+    """
+    def __init__(self: any, *args: list) -> None:
+        filed = args[0]
+        self._magic = filed[0]
+        self._res1 = filed[1]
+        self._res2 = filed[2]
+        self._pid = filed[3]
+        self._tid = filed[4]
+        self._timestamp = filed[5]
+        self._mark_id = filed[6]
+        self._message = self.decode_byte(filed[7])
+
+    @property
+    def pid(self) -> int:
+        return self._pid
+
+    @property
+    def tid(self) -> int:
+        return self._tid
+
+    @property
+    def timestamp(self) -> int:
+        return self._timestamp
+
+    @property
+    def mark_id(self) -> int:
+        return self._mark_id
+
+    @property
+    def message(self: any) -> str:
+        return self._message
+
+    def decode_byte(self: any, value: str) -> str:
+        zero_ind = value.find(b'\x00')
+        return bytes.decode(value[:zero_ind])

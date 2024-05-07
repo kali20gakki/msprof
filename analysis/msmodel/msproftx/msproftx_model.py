@@ -38,3 +38,19 @@ class MsprofTxModel(ParserModel):
                        f"end_time, message_type, message from {DBNameConstant.TABLE_MSPROFTX} " \
                        f"where file_tag={DataTag.MSPROFTX.value}"
         return DBManager.fetch_all_data(self.cur, all_data_sql)
+
+
+class MsprofTxMarkExModel(ParserModel):
+    """
+    db operator for msproftx markex parser
+    """
+    def __init__(self: any, result_dir: str):
+        super().__init__(result_dir, DBNameConstant.DB_MSPROFTX, [DBNameConstant.TABLE_MSPROFTX_MARKEX])
+
+    def flush(self: any, data_list: list) -> None:
+        """
+        flush msproftx markex data to db
+        :param data_list: msproftx markex data list
+        :return: None
+        """
+        self.insert_data_to_db(DBNameConstant.TABLE_MSPROFTX_MARKEX, data_list)
