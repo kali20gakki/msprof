@@ -15,6 +15,7 @@
 
 #include <cstdint>
 #include <functional>
+#include "analysis/csrc/domain/entities/hal/include/hal_log.h"
 
 namespace Analysis {
 namespace Domain {
@@ -23,8 +24,11 @@ enum ParserType {
     PMU_PARSER,
     TRACK_PARSER,
 };
+const int MIN_COUNT = 2;
+const int VALID_CNT = 15;
+const int DEFAULT_CNT = -1;
 
-std::function<void(void *, uint32_t, void *, uint32_t)> GetParseItem(ParserType parserType, uint32_t itemType);
+std::function<int(uint8_t *, uint32_t, uint8_t *)> GetParseItem(ParserType parserType, uint32_t itemType);
 }
 }
 #endif // MSPROF_ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_FACTORY_H

@@ -21,13 +21,14 @@ namespace Analysis {
 namespace Domain {
 class StarsSocParser : public Parser {
 private:
-    uint32_t ParseDataItem(void *binaryData, uint32_t binaryDataSize, HalLogData &data);
+    uint32_t ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data);
     std::vector<std::string> GetFilePattern() override;
     uint32_t GetTrunkSize() override;
     uint32_t ParseData(Infra::DataInventory &dataInventory) override;
 private:
     std::vector<HalLogData> halUniData_;
     std::vector<std::string> filePrefix_{"stars_soc."};
+    int cnt_{-1};
 };
 }
 }

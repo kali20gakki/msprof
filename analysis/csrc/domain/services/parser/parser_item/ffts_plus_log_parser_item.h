@@ -14,16 +14,17 @@
 #define ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_FFTS_PLUS_LOG_PARSER_ITEM_H
 
 #include <cstdint>
+#include "analysis/csrc/domain/entities/hal/include/hal_log.h"
 
 namespace Analysis {
 namespace Domain {
-#define PARSER_ITEM_FFTS_PLUS_LOG_START  0b100010
-#define PARSER_ITEM_FFTS_PLUS_LOG_END    0b100011
+const int PARSER_ITEM_FFTS_PLUS_LOG_START = 0b100010;
+const int PARSER_ITEM_FFTS_PLUS_LOG_END = 0b100011;
 
 #pragma pack(1)
 struct FftsPlusLog {
     uint16_t funcType : 6;
-    uint16_t resv1 : 4;
+    uint16_t cnt : 4;
     uint16_t taskType : 6;
     uint16_t resv2;
     uint16_t taskId;
@@ -39,8 +40,8 @@ struct FftsPlusLog {
 };
 #pragma pack()
 
-void FftsPlusLogParseItem(void *binaryData, uint32_t binaryDataSize,
-                          void *halUniData, uint32_t halUniDataSize);
+int FftsPlusLogParseItem(uint8_t *binaryData, uint32_t binaryDataSize,
+                         uint8_t *halUniData);
 
 }
 }

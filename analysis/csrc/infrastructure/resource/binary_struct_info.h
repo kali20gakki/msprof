@@ -14,7 +14,7 @@
 #define ANALYSIS_INFRA_RESOURCE_BINARY_STRUCT_INFO_H
 
 namespace Analysis {
-const int STAR_SOC_STRUCT_SIZE = 64;
+const int STARS_SOC_STRUCT_SIZE = 64;
 const int FFTS_PROFILE_STRUCT_SIZE = 128;
 const int TS_TRACK_STRUCT_SIZE = 40;
 }

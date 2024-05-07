@@ -47,6 +47,7 @@ struct HalLogData {
         HalAcsqLog acsq;
         HalFftsPlusLog ffts;
     };
+    HalLogData() {}
 };
 }
 }
