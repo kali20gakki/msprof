@@ -157,6 +157,8 @@ extern "C" {
 #define CHANNEL_DVPP_PNG (140)   /* add for ascend610 */
 #define CHANNEL_DVPP_SCD (141)   /* add for ascend610 */
 #define CHANNEL_NPU_MODULE_MEM (142)
+#define CHANNEL_AICPU (143)
+#define CHANNEL_CUS_AICPU (144)
 #define CHANNEL_IDS_MAX CHANNEL_NUM
 
 #define PROF_NON_REAL 0
@@ -437,6 +439,50 @@ typedef enum {
     DRVDEV_CALL_BACK_SUCCESS = 0,
     DRVDEV_CALL_BACK_FAILED,
 } devdrv_callback_state_t;
+
+typedef enum {
+    GRP_TYPE_UNINIT = 0,
+    GRP_TYPE_BIND_DP_CPU,
+    GRP_TYPE_BIND_CP_CPU,
+    GRP_TYPE_BIND_DP_CPU_EXCLUSIVE
+} GROUP_TYPE;
+
+const uint16_t EVENT_MAX_GRP_NAME_LEN = 16;
+const uint16_t ESCHED_GRP_PARA_RSV = 3;
+typedef struct esched_grp_para {
+    GROUP_TYPE type;
+    uint32_t threadNum;  /* threadNum range: [1, 1024] */
+    char grp_name[EVENT_MAX_GRP_NAME_LEN];
+    int rsv[ESCHED_GRP_PARA_RSV];
+} EschedGrpPara;
+
+typedef enum {
+    EVENT_RANDOM_KERNEL,
+    EVENT_USR_START = 48,
+    EVENT_USR_END = 63,
+    EVENT_MAX_NUM
+} EVENT_ID;
+
+typedef struct event_info_common {
+    EVENT_ID event_id;
+    unsigned int subevent_id;
+    int pid;
+    int host_pid;
+    unsigned int grp_id;
+    unsigned long long submit_timestamp; /* The timestamp when the Event is submitted */
+    unsigned long long sched_timestamp; /* The timestamp when the event is scheduled */
+} EventInfoCommon;
+
+const uint16_t EVENT_MAX_MSG_LEN = 128;
+typedef struct event_info_priv {
+    unsigned int msg_len;
+    char msg[EVENT_MAX_MSG_LEN];
+} EventInfoPriv;
+
+typedef struct event_info {
+    struct event_info_common comm;
+    struct event_info_priv priv;
+} EventInfo;
 
 #ifdef __cplusplus
 }

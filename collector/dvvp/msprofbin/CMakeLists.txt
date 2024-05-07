@@ -120,6 +120,7 @@ add_executable(msprofbin
     ../job_wrapper/src/prof_host_job.cpp
     ../job_wrapper/src/prof_channel_manager.cpp
     ../job_wrapper/src/job_device_soc.cpp
+    ../job_wrapper/src/prof_drv_event.cpp
     ../message/codec.cpp
     ../transport/transport.cpp
     ../transport/file_transport.cpp

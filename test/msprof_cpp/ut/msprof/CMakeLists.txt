@@ -45,6 +45,7 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_peripheral_job.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_timer.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_host_job.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_drv_event.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/message/codec.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/message/prof_json_config.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/common/src/msprof_callback_handler.cpp

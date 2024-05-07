@@ -14,21 +14,7 @@ SHARED_PTR_ALIA<PluginHandle> DriverPlugin::pluginHandle_ = nullptr;
 
 void DriverPlugin::GetAllFunction()
 {
-    pluginHandle_->GetFunction<hdcError_t, HDC_SESSION, struct drvHdcMsg *, int, uint64_t, int *, uint32_t>(
-        "halHdcRecv", halHdcRecv_);
-    pluginHandle_->GetFunction<hdcError_t, HDC_SESSION, struct drvHdcMsg *, uint64_t, uint32_t>(
-        "halHdcSend", halHdcSend_);
-    pluginHandle_->GetFunction<hdcError_t, int, int, int, HDC_CLIENT, HDC_SESSION *>(
-        "halHdcSessionConnectEx", halHdcSessionConnectEx_);
     pluginHandle_->GetFunction<drvError_t, HDC_SESSION>("drvHdcSetSessionReference", drvHdcSetSessionReference_);
-    pluginHandle_->GetFunction<drvError_t, HDC_SESSION, int, int *>(
-        "halHdcGetSessionAttr", halHdcGetSessionAttr_);
-    pluginHandle_->GetFunction<drvError_t, unsigned int, halChipInfo *>("halGetChipInfo", halGetChipInfo_);
-    pluginHandle_->GetFunction<drvError_t, uint32_t, int32_t, int32_t, int64_t *>(
-        "halGetDeviceInfo", halGetDeviceInfo_);
-    pluginHandle_->GetFunction<drvError_t, int32_t *>(
-        "halGetAPIVersion", halGetApiVersion_);
-    pluginHandle_->GetFunction<int, unsigned int, unsigned int, unsigned int *>("halProfDataFlush", halProfDataFlush_);
     pluginHandle_->GetFunction<int, unsigned int, channel_list_t *>("prof_drv_get_channels", profDrvGetChannels_);
     pluginHandle_->GetFunction<int, unsigned int, unsigned int, struct prof_start_para *>(
         "prof_drv_start", profDrvStart_);
@@ -55,6 +41,34 @@ void DriverPlugin::GetAllFunction()
         "drvHdcSessionConnect", drvHdcSessionConnect_);
     pluginHandle_->GetFunction<drvError_t, HDC_SESSION>("drvHdcSessionClose", drvHdcSessionClose_);
     pluginHandle_->GetFunction<drvError_t, struct drvHdcCapacity *>("drvHdcGetCapacity", drvHdcGetCapacity_);
+    pluginHandle_->GetFunction<drvError_t, unsigned int, unsigned int *>(
+        "drvGetDeviceSplitMode", drvGetDeviceSplitMode_);
+    GetHalFunction();
+}
+
+void DriverPlugin::GetHalFunction()
+{
+    pluginHandle_->GetFunction<hdcError_t, HDC_SESSION, struct drvHdcMsg *, int, uint64_t, int *, uint32_t>(
+        "halHdcRecv", halHdcRecv_);
+    pluginHandle_->GetFunction<hdcError_t, HDC_SESSION, struct drvHdcMsg *, uint64_t, uint32_t>(
+        "halHdcSend", halHdcSend_);
+    pluginHandle_->GetFunction<hdcError_t, int, int, int, HDC_CLIENT, HDC_SESSION *>(
+        "halHdcSessionConnectEx", halHdcSessionConnectEx_);
+    pluginHandle_->GetFunction<drvError_t, HDC_SESSION, int, int *>(
+        "halHdcGetSessionAttr", halHdcGetSessionAttr_);
+    pluginHandle_->GetFunction<drvError_t, unsigned int, halChipInfo *>("halGetChipInfo", halGetChipInfo_);
+    pluginHandle_->GetFunction<drvError_t, uint32_t, int32_t, int32_t, int64_t *>(
+        "halGetDeviceInfo", halGetDeviceInfo_);
+    pluginHandle_->GetFunction<drvError_t, int32_t *>("halGetAPIVersion", halGetApiVersion_);
+    pluginHandle_->GetFunction<int, unsigned int, unsigned int, unsigned int *>("halProfDataFlush", halProfDataFlush_);
+    pluginHandle_->GetFunction<drvError_t, uint32_t, struct esched_grp_para *, unsigned int *>(
+        "halEschedCreateGrpEx", halEschedCreateGrpEx_);
+    pluginHandle_->GetFunction<drvError_t, unsigned int>("halEschedAttachDevice", halEschedAttachDevice_);
+    pluginHandle_->GetFunction<drvError_t, unsigned int>("halEschedDettachDevice", halEschedDettachDevice_);
+    pluginHandle_->GetFunction<drvError_t, unsigned int, unsigned int, unsigned int, unsigned long long>(
+        "halEschedSubscribeEvent", halEschedSubscribeEvent_);
+    pluginHandle_->GetFunction<drvError_t, unsigned int, unsigned int, unsigned int, int, struct event_info *>(
+        "halEschedWaitEvent", halEschedWaitEvent_);
 }
 
 void DriverPlugin::LoadDriverSo()
@@ -419,6 +433,75 @@ drvError_t DriverPlugin::MsprofDrvHdcGetCapacity(struct drvHdcCapacity *capacity
         return DRV_ERROR_INVALID_HANDLE;
     }
     return drvHdcGetCapacity_(capacity);
+}
+
+// halEschedCreateGrpEx
+drvError_t DriverPlugin::MsprofHalEschedCreateGrpEx(uint32_t devId,
+                                                    struct esched_grp_para *grpPara, unsigned int *grpId)
+{
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (halEschedCreateGrpEx_ == nullptr) {
+        MSPROF_LOGE("DriverPlugin halEschedCreateGrpEx function is null.");
+        return DRV_ERROR_INVALID_HANDLE;
+    }
+    return halEschedCreateGrpEx_(devId, grpPara, grpId);
+}
+
+// halEschedAttachDevice
+drvError_t DriverPlugin::MsprofHalEschedAttachDevice(unsigned int devId)
+{
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (halEschedAttachDevice_ == nullptr) {
+        MSPROF_LOGE("DriverPlugin halEschedAttachDevice function is null.");
+        return DRV_ERROR_INVALID_HANDLE;
+    }
+    return halEschedAttachDevice_(devId);
+}
+
+// halEschedDettachDevice
+drvError_t DriverPlugin::MsprofHalEschedDettachDevice(unsigned int devId)
+{
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (halEschedDettachDevice_ == nullptr) {
+        MSPROF_LOGE("DriverPlugin halEschedDettachDevice function is null.");
+        return DRV_ERROR_INVALID_HANDLE;
+    }
+    return halEschedDettachDevice_(devId);
+}
+
+// halEschedSubscribeEvent
+drvError_t DriverPlugin::MsprofHalEschedSubscribeEvent(unsigned int devId, unsigned int grpId,
+                                                       unsigned int threadId, unsigned long long eventBitmap)
+{
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (halEschedSubscribeEvent_ == nullptr) {
+        MSPROF_LOGE("DriverPlugin halEschedSubscribeEvent function is null.");
+        return DRV_ERROR_INVALID_HANDLE;
+    }
+    return halEschedSubscribeEvent_(devId, grpId, threadId, eventBitmap);
+}
+
+// halEschedWaitEvent
+drvError_t DriverPlugin::MsprofHalEschedWaitEvent(unsigned int devId, unsigned int grpId,
+                                                  unsigned int threadId, int timeout, struct event_info *event)
+{
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (halEschedWaitEvent_ == nullptr) {
+        MSPROF_LOGE("DriverPlugin halEschedWaitEvent function is null.");
+        return DRV_ERROR_INVALID_HANDLE;
+    }
+    return halEschedWaitEvent_(devId, grpId, threadId, timeout, event);
+}
+
+// drvGetDeviceSplitMode
+drvError_t DriverPlugin::MsprofDrvGetDeviceSplitMode(unsigned int devId, unsigned int* mode)
+{
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvGetDeviceSplitMode_ == nullptr) {
+        MSPROF_LOGE("DriverPlugin drvGetDeviceSplitMode function is null.");
+        return DRV_ERROR_INVALID_HANDLE;
+    }
+    return drvGetDeviceSplitMode_(devId, mode);
 }
 } // Plugin
 } // Dvvp

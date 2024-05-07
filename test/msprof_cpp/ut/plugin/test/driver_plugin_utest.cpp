@@ -104,6 +104,39 @@ drvError_t DrvGetDevIDs(uint32_t *devices, uint32_t len)
     return DRV_ERROR_NONE;
 }
 
+drvError_t HalEschedCreateGrpEx(uint32_t devId,
+                                struct esched_grp_para *grpPara, unsigned int *grpId)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t HalEschedAttachDevice(unsigned int devId)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t HalEschedDettachDevice(unsigned int devId)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t HalEschedSubscribeEvent(unsigned int devId, unsigned int grpId,
+                                   unsigned int threadId, unsigned long long eventBitmap)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t HalEschedWaitEvent(unsigned int devId, unsigned int grpId,
+                              unsigned int threadId, int timeout, struct event_info *event)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DrvGetDeviceSplitMode(unsigned int devId, unsigned int* mode)
+{
+    return DRV_ERROR_NONE;
+}
+
 class DriverPluginUtest : public testing::Test {
 protected:
     virtual void SetUp() {
@@ -335,4 +368,84 @@ TEST_F(DriverPluginUtest, MsprofDrvGetDevIDs)
     driverPlugin->drvGetDevIDs_ = DrvGetDevIDs;
     EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofDrvGetDevIDs(devices, len));
     EXPECT_EQ(1, devices[0]);
+}
+
+TEST_F(DriverPluginUtest, MsprofHalEschedCreateGrpEx)
+{
+    GlobalMockObject::verify();
+    uint32_t deviceId = 0;
+    struct esched_grp_para grpPara = {GRP_TYPE_BIND_CP_CPU, 1, {0}, {0}};
+    uint32_t grpId = 0;
+    auto driverPlugin = DriverPlugin::instance();
+    driverPlugin->halEschedCreateGrpEx_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofHalEschedCreateGrpEx(deviceId, &grpPara, &grpId));
+    driverPlugin->halEschedCreateGrpEx_ = HalEschedCreateGrpEx;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofHalEschedCreateGrpEx(deviceId, &grpPara, &grpId));
+}
+
+TEST_F(DriverPluginUtest, MsprofHalEschedAttachDevice)
+{
+    GlobalMockObject::verify();
+    uint32_t deviceId = 0;
+    auto driverPlugin = DriverPlugin::instance();
+    driverPlugin->halEschedAttachDevice_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofHalEschedAttachDevice(deviceId));
+    driverPlugin->halEschedAttachDevice_ = HalEschedAttachDevice;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofHalEschedAttachDevice(deviceId));
+}
+
+TEST_F(DriverPluginUtest, MsprofHalEschedDettachDevice)
+{
+    GlobalMockObject::verify();
+    uint32_t deviceId = 0;
+    auto driverPlugin = DriverPlugin::instance();
+    driverPlugin->halEschedDettachDevice_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofHalEschedDettachDevice(deviceId));
+    driverPlugin->halEschedDettachDevice_ = HalEschedDettachDevice;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofHalEschedDettachDevice(deviceId));
+}
+
+TEST_F(DriverPluginUtest, MsprofHalEschedSubscribeEvent)
+{
+    GlobalMockObject::verify();
+    uint32_t deviceId = 0;
+    unsigned int grpId = 0;
+    unsigned int threadId = 0;
+    unsigned long long eventBitmap = 0;
+    auto driverPlugin = DriverPlugin::instance();
+    driverPlugin->halEschedSubscribeEvent_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofHalEschedSubscribeEvent(deviceId, grpId,
+                                                                                    threadId, eventBitmap));
+    driverPlugin->halEschedSubscribeEvent_ = HalEschedSubscribeEvent;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofHalEschedSubscribeEvent(deviceId, grpId,
+                                                                          threadId, eventBitmap));
+}
+
+TEST_F(DriverPluginUtest, MsprofHalEschedWaitEvent)
+{
+    GlobalMockObject::verify();
+    uint32_t deviceId = 0;
+    unsigned int grpId = 0;
+    unsigned int threadId = 0;
+    int timeout = 10;
+    struct event_info event;
+    auto driverPlugin = DriverPlugin::instance();
+    driverPlugin->halEschedWaitEvent_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofHalEschedWaitEvent(deviceId, grpId, threadId,
+                                                                               timeout, &event));
+    driverPlugin->halEschedWaitEvent_ = HalEschedWaitEvent;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofHalEschedWaitEvent(deviceId, grpId, threadId,
+                                                                     timeout, &event));
+}
+
+TEST_F(DriverPluginUtest, MsprofDrvGetDeviceSplitMode)
+{
+    GlobalMockObject::verify();
+    uint32_t deviceId = 0;
+    unsigned int mode = 0;
+    auto driverPlugin = DriverPlugin::instance();
+    driverPlugin->drvGetDeviceSplitMode_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofDrvGetDeviceSplitMode(deviceId, &mode));
+    driverPlugin->drvGetDeviceSplitMode_ = DrvGetDeviceSplitMode;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofDrvGetDeviceSplitMode(deviceId, &mode));
 }

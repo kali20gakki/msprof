@@ -130,6 +130,7 @@ set(msprofilerCpp
     job_wrapper/src/prof_peripheral_job.cpp
     job_wrapper/src/prof_timer.cpp
     job_wrapper/src/prof_host_job.cpp
+    job_wrapper/src/prof_drv_event.cpp
     message/codec.cpp
     message/prof_json_config.cpp
     msprof/common/src/receive_data.cpp

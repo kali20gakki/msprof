@@ -26,6 +26,7 @@
 #include "prof_task.h"
 #include "mmpa_api.h"
 #include "config_manager.h"
+#include "prof_drv_event.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
@@ -1217,6 +1218,7 @@ TEST_F(JOB_WRAPPER_PROF_AICPU_JOB_TEST, Init)
     auto profAicpuJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfAicpuJob>();
     EXPECT_EQ(PROFILING_FAILED, profAicpuJob->Init(nullptr));
     collectionJobCfg_->comParams->params->dataTypeConfig |= 0x00000000ULL;
+    collectionJobCfg_->comParams->devId = 0;
     EXPECT_EQ(PROFILING_FAILED, profAicpuJob->Init(collectionJobCfg_));
     collectionJobCfg_->comParams->params->dataTypeConfig |= 0x00000008ULL;
     MOCKER(analysis::dvvp::driver::DrvGetApiVersion)
@@ -1229,6 +1231,12 @@ TEST_F(JOB_WRAPPER_PROF_AICPU_JOB_TEST, Init)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
+    MOCKER(&ProfDrvEvent::SubscribeEventThreadInit)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    MOCKER(&analysis::dvvp::driver::DrvIsSupportAdprof)
+        .stubs()
+        .will(returnValue(true));
     EXPECT_EQ(PROFILING_FAILED, profAicpuJob->Init(collectionJobCfg_));
     EXPECT_EQ(PROFILING_SUCCESS, profAicpuJob->Init(collectionJobCfg_));
     collectionJobCfg_->comParams->params->host_profiling = true;
@@ -1249,6 +1257,9 @@ TEST_F(JOB_WRAPPER_PROF_AICPU_JOB_TEST, Init_dataTypeConfig_check)
         .will(returnValue(true));
     EXPECT_EQ(PROFILING_FAILED, profAicpuJob->Init(collectionJobCfg_));
     collectionJobCfg_->comParams->params->dataTypeConfig |= PROF_AICPU_TRACE;
+    MOCKER(&analysis::dvvp::driver::DrvIsSupportAdprof)
+        .stubs()
+        .will(returnValue(true));
     EXPECT_EQ(PROFILING_SUCCESS, profAicpuJob->Init(collectionJobCfg_));
 }
 
@@ -1256,7 +1267,20 @@ TEST_F(JOB_WRAPPER_PROF_AICPU_JOB_TEST, Process)
 {
     GlobalMockObject::verify();
     auto profAicpuJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfAicpuJob>();
-    profAicpuJob->Init(collectionJobCfg_);
+    collectionJobCfg_->comParams->params->dataTypeConfig |= PROF_AICPU_TRACE;
+    MOCKER(analysis::dvvp::driver::DrvGetApiVersion)
+        .stubs()
+        .will(returnValue(SUPPORT_ADPROF_VERSION));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER(&analysis::dvvp::driver::DrvIsSupportAdprof)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(PROFILING_SUCCESS, profAicpuJob->Init(collectionJobCfg_));
+    EXPECT_EQ(PROFILING_SUCCESS, profAicpuJob->Process());
+    profAicpuJob->eventAttr_.isChannelValid = true;
+    EXPECT_EQ(PROFILING_SUCCESS, profAicpuJob->Process());
     EXPECT_EQ(PROFILING_SUCCESS, profAicpuJob->Process());
 }
 
@@ -1264,12 +1288,13 @@ TEST_F(JOB_WRAPPER_PROF_AICPU_JOB_TEST, Uninit)
 {
     GlobalMockObject::verify();
     auto profAicpuJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfAicpuJob>();
-    profAicpuJob->Init(collectionJobCfg_);
     EXPECT_EQ(PROFILING_SUCCESS, profAicpuJob->Uninit());
+    profAicpuJob->Init(collectionJobCfg_);
     MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
+    MOCKER(&ProfDrvEvent::SubscribeEventThreadUninit).stubs();
     EXPECT_EQ(PROFILING_SUCCESS, profAicpuJob->Uninit());
     EXPECT_EQ(PROFILING_SUCCESS, profAicpuJob->Uninit());
 }
