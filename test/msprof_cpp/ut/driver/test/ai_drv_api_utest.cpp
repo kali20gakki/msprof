@@ -663,3 +663,26 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetAivNum)
     EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvGetAivNum(deviceId, aivNum));
     EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::driver::DrvGetAivNum(deviceId, aivNum));
 }
+
+TEST_F(DRIVER_AI_DRV_API_TEST, TestDrvIsSupportAdprofShouldReturnFalseWhenMINITYPE)
+{
+    GlobalMockObject::verify();
+    uint32_t deviceId = 0;
+    MOCKER_CPP(&ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(0));
+    EXPECT_FALSE(analysis::dvvp::driver::DrvIsSupportAdprof(deviceId));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, TestDrvIsSupportAdprofShouldReturnTrueWhenNotSplitMode)
+{
+    GlobalMockObject::verify();
+    uint32_t deviceId = 0;
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetApiVersion)
+        .stubs()
+        .will(returnValue(analysis::dvvp::driver::SUPPORT_ADPROF_VERSION));
+    MOCKER_CPP(&ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(5));  // chip 5
+    EXPECT_TRUE(analysis::dvvp::driver::DrvIsSupportAdprof(deviceId));
+}

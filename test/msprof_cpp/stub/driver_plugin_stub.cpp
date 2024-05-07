@@ -192,6 +192,39 @@ drvError_t DriverPlugin::MsprofDrvHdcGetCapacity(struct drvHdcCapacity *capacity
     capacity->maxSegment = 32;
     return DRV_ERROR_NONE;
 }
+
+drvError_t DriverPlugin::MsprofHalEschedCreateGrpEx(uint32_t devId,
+                                                    struct esched_grp_para *grpPara, unsigned int *grpId)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DriverPlugin::MsprofHalEschedAttachDevice(unsigned int devId)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DriverPlugin::MsprofHalEschedDettachDevice(unsigned int devId)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DriverPlugin::MsprofHalEschedSubscribeEvent(unsigned int devId, unsigned int grpId,
+                                                       unsigned int threadId, unsigned long long eventBitmap)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DriverPlugin::MsprofHalEschedWaitEvent(unsigned int devId, unsigned int grpId,
+                                                  unsigned int threadId, int timeout, struct event_info *event)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DriverPlugin::MsprofDrvGetDeviceSplitMode(unsigned int devId, unsigned int* mode)
+{
+    return DRV_ERROR_NONE;
+}
 } // Plugin
 } // Dvvp
 } // Analysis

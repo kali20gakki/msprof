@@ -956,8 +956,16 @@ int ProfAclMgr::ProfStartAiCpuTrace(const uint64_t dataTypeConfig, const uint32_
     if (!(dataTypeConfig & PROF_AICPU_TRACE_MASK)) {
         return PROFILING_SUCCESS;
     }
-    if (analysis::dvvp::driver::DrvGetApiVersion() == analysis::dvvp::driver::SUPPORT_ADPROF_VERSION) {
-        return PROFILING_SUCCESS;
+    for (uint32_t i = 0; i < devNums; i++) {
+        uint32_t devId = devIdList[i];
+        if (devId == DEFAULT_HOST_ID) {
+            continue;
+        }
+        if (analysis::dvvp::driver::DrvIsSupportAdprof(devId)) {
+            MSPROF_LOGI("Collect Aicpu data by driver channel");
+            return PROFILING_SUCCESS;
+        }
+        break;
     }
     for (uint32_t i = 0; i < devNums; i++) {
         uint32_t devId = devIdList[i];

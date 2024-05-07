@@ -20,9 +20,9 @@
 #include <vector>
 #include "ai_drv_dev_api.h"
 #include "ai_drv_prof_api.h"
+#include "prof_drv_event.h"
 #include "app/application.h"
 #include "config/config.h"
-#include "collection_register.h"
 #include "collection_register.h"
 #include "prof_timer.h"
 #include "transport/prof_channel.h"
@@ -337,12 +337,22 @@ class ProfAicpuJob : public ProfDrvJob {
 public:
     ProfAicpuJob();
     ~ProfAicpuJob() override;
-    int  Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
-    int  Process() override;
-    int  Uninit() override;
+    int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
+    int Process() override;
+    int Uninit() override;
 
 protected:
     analysis::dvvp::driver::AI_DRV_CHANNEL channelId_;
+    std::string eventGrpName_;
+    TaskEventAttr eventAttr_;
+    std::atomic<uint8_t> processCount_;
+    ProfDrvEvent profDrvEvent_;
+};
+
+class ProfAiCustomCpuJob : public ProfAicpuJob {
+public:
+    ProfAiCustomCpuJob();
+    ~ProfAiCustomCpuJob() override;
 };
 
 constexpr int INSTR_GROUP_MAX_NUM = 25;       // instr profiling group id 0 ~ 24

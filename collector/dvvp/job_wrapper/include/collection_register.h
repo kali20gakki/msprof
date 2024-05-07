@@ -34,6 +34,7 @@ enum ProfCollectionJobE {
     NPU_MODULE_MEM_COLLECTION_JOB,
     LPM_FREQ_COLLECTION_JOB,
     AICPU_COLLECTION_JOB,
+    AICPU_CM_COLLECTION_JOB,
     // ts
     TS_CPU_DRV_COLLECTION_JOB,
     TS_TRACK_DRV_COLLECTION_JOB,
@@ -84,7 +85,8 @@ static const std::string COLLECTION_JOB_FILENAME[NR_MAX_COLLECTION_JOB] = {
     "data/npu_mem.data",
     "data/npu_module_mem.data",
     "data/lpmFreqConv.data",
-    "data/aging.additional.data_preprocess",
+    "data/aicpu.data",
+    "data/aicpu.data",
     "data/tscpu.data",
     "data/ts_track.data",
     "data/ts_track.aiv_data",
@@ -170,6 +172,7 @@ public:
     int CollectionJobRegisterAndRun(int devId,
                                     const ProfCollectionJobE jobTag,
                                     const SHARED_PTR_ALIA<ICollectionJob> job);
+    int CollectionJobRun(int32_t devId, const ProfCollectionJobE jobTag);
     int CollectionJobUnregisterAndStop(int devId, const ProfCollectionJobE jobTag);
 
 private:

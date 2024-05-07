@@ -406,6 +406,7 @@ int JobDeviceSoc::CreateDeviceCollectionJobArray()
                           PROFILING_FAILED);
     MSVP_MAKE_SHARED0_RET(CollectionJobV_[LPM_FREQ_COLLECTION_JOB].collectionJob, ProfLpmFreqConvJob, PROFILING_FAILED);
     MSVP_MAKE_SHARED0_RET(CollectionJobV_[AICPU_COLLECTION_JOB].collectionJob, ProfAicpuJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[AICPU_CM_COLLECTION_JOB].collectionJob, ProfAiCustomCpuJob, PROFILING_FAILED);
     // for ts
     MSVP_MAKE_SHARED0_RET(CollectionJobV_[TS_CPU_DRV_COLLECTION_JOB].collectionJob, ProfTscpuJob, PROFILING_FAILED);
     MSVP_MAKE_SHARED0_RET(CollectionJobV_[AIV_TS_TRACK_DRV_COLLECTION_JOB].collectionJob, ProfAivTsTrackJob,

@@ -336,6 +336,27 @@ uint32_t DrvGetApiVersion()
     return 0;
 }
 
+bool DrvIsSupportAdprof(uint32_t devId)
+{
+    PlatformType platform = ConfigManager::instance()->GetPlatformType();
+    if (DrvGetApiVersion() < SUPPORT_ADPROF_VERSION || platform == PlatformType::MINI_TYPE) {
+        MSPROF_LOGI("Do not support aicpu driver channel.");
+        return false;
+    }
+    uint32_t mode = 0;
+    drvError_t ret = DriverPlugin::instance()->MsprofDrvGetDeviceSplitMode(devId, &mode);
+    if (ret != DRV_ERROR_NONE) {
+        MSPROF_LOGE("Call MsprofDrvGetDeviceSplitMode failed, devId=%u, mode=%u, ret=%d", devId, mode, ret);
+        return false;
+    }
+    constexpr uint32_t VMNG_NORMAL_NONE_SPLIT_MODE = 0;
+    if ((platform == PlatformType::DC_TYPE || platform == PlatformType::CLOUD_TYPE)
+            && mode != VMNG_NORMAL_NONE_SPLIT_MODE) {
+        MSPROF_LOGI("Split mode %u not support aicpu driver channel.", mode);
+        return false;  // split mode not support dump aicpu data by driver channel
+    }
+    return true;
+}
 }  // namespace driver
 }  // namespace dvvp
 }  // namespace analysis

@@ -12,6 +12,7 @@
 #include "uploader_mgr.h"
 #include "utils/utils.h"
 #include "platform/platform.h"
+#include "mmpa_api.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -25,6 +26,7 @@ using namespace analysis::dvvp::common::utils;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Analysis::Dvvp::Common::Config;
 using namespace Analysis::Dvvp::MsprofErrMgr;
+using namespace Collector::Dvvp::Mmpa;
 
 ProfDrvJob::ProfDrvJob()
 {
@@ -1556,7 +1558,8 @@ int ProfL2CacheTaskJob::Uninit()
     return PROFILING_SUCCESS;
 }
 
-ProfAicpuJob::ProfAicpuJob() : channelId_(PROF_CHANNEL_AICPU)
+ProfAicpuJob::ProfAicpuJob() : channelId_(PROF_CHANNEL_AICPU), eventGrpName_("prof_aicpu_grp"),
+    eventAttr_{0, 0, channelId_, AICPU_COLLECTION_JOB, false, false, false, false, 0}, processCount_(0)
 {
 }
  
@@ -1572,21 +1575,23 @@ int ProfAicpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
- 
     collectionJobCfg_ = cfg;
     if (!(collectionJobCfg_->comParams->params->dataTypeConfig & PROF_AICPU_TRACE)) {
         MSPROF_LOGI("AICPU not enable, devId:%d", collectionJobCfg_->comParams->devId);
         return PROFILING_FAILED;
     }
- 
-    if (analysis::dvvp::driver::DrvGetApiVersion() < analysis::dvvp::driver::SUPPORT_ADPROF_VERSION) {
+    if (!analysis::dvvp::driver::DrvIsSupportAdprof(collectionJobCfg_->comParams->devId)) {
         MSPROF_LOGI("Collect Aicpu data by HDC");
         return PROFILING_FAILED;
     }
- 
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
-        MSPROF_LOGW("Channel is invalid, devId:%d, channelId_:%d", collectionJobCfg_->comParams->devId, channelId_);
-        return PROFILING_FAILED;
+        MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
+            static_cast<int>(channelId_));
+        eventAttr_.deviceId = collectionJobCfg_->comParams->devId;
+        // 调用驱动接口，起监控线程，等待驱动返回通道支持采集aicpu数据的信号，并启动采集任务Process
+        int32_t ret = profDrvEvent_.SubscribeEventThreadInit(collectionJobCfg_->comParams->devId,
+                                                             &eventAttr_, eventGrpName_);
+        return ret;
     }
     return PROFILING_SUCCESS;
 }
@@ -1597,13 +1602,23 @@ int ProfAicpuJob::Process()
         return PROFILING_FAILED;
     }
     MSPROF_LOGI("Begin to start profiling aicpu");
- 
+    if (!eventAttr_.isChannelValid) {
+        MSPROF_LOGI("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId, channelId_);
+        return PROFILING_SUCCESS;
+    }
+    // ensure only done once
+    uint8_t expected = 0;
+    if (!processCount_.compare_exchange_strong(expected, 1)) {
+        MSPROF_LOGI("Only process once");
+        return PROFILING_SUCCESS;
+    }
     std::string filePath = BindFileWithChannel(collectionJobCfg_->jobParams.dataPath);
     AddReader(collectionJobCfg_->comParams->params->job_id, collectionJobCfg_->comParams->devId, channelId_, filePath);
  
     int ret = DrvAicpuStart(collectionJobCfg_->comParams->devId, channelId_);
-    MSPROF_LOGI("start profiling aicpu, ret=%d", ret);
-    
+    eventAttr_.isProcessRun = true;
+    MSPROF_LOGI("Start profiling aicpu, ret=%d", ret);
+
     FUNRET_CHECK_RET_VALUE(ret, PROFILING_SUCCESS, PROFILING_SUCCESS, ret);
 }
  
@@ -1612,15 +1627,35 @@ int ProfAicpuJob::Uninit()
     if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
         return PROFILING_SUCCESS;
     }
-    if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
-        MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
-            channelId_);
+    eventAttr_.isExit = true;
+    if (eventAttr_.handle > 0) {
+        if (MmJoinTask(&eventAttr_.handle) != PROFILING_SUCCESS) {
+            MSPROF_LOGW("thread not exist tid:%d", eventAttr_.handle);
+        } else {
+            MSPROF_LOGI("aicpu event thread exit, tid:%d", eventAttr_.handle);
+        }
+    }
+    profDrvEvent_.SubscribeEventThreadUninit(static_cast<uint32_t>(collectionJobCfg_->comParams->devId));
+    if (!eventAttr_.isProcessRun) {
+        MSPROF_LOGI("ProfAicpuJob Process does not run.");
         return PROFILING_SUCCESS;
     }
     int ret = DrvStop(collectionJobCfg_->comParams->devId, channelId_);
     MSPROF_LOGI("stop profiling Channel %d data, ret=%d", static_cast<int>(channelId_), ret);
     RemoveReader(collectionJobCfg_->comParams->params->job_id, collectionJobCfg_->comParams->devId, channelId_);
     return ret;
+}
+
+ProfAiCustomCpuJob::ProfAiCustomCpuJob()
+{
+    channelId_ = PROF_CHANNEL_CUS_AICPU;
+    eventGrpName_ = "prof_cus_grp";
+    eventAttr_.channelId = channelId_;
+    eventAttr_.jobTag = AICPU_CM_COLLECTION_JOB;
+}
+
+ProfAiCustomCpuJob::~ProfAiCustomCpuJob()
+{
 }
 
 PerfExtraTask::PerfExtraTask(unsigned int bufSize, const std::string& retDir,

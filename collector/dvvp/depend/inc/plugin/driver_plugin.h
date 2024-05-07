@@ -46,6 +46,14 @@ using DrvHdcAddMsgBufferFunc = std::function<drvError_t(struct drvHdcMsg *, char
 using DrvHdcSessionConnectFunc = std::function<drvError_t(int, int, HDC_CLIENT, HDC_SESSION *)>;
 using DrvHdcSessionCloseFunc = std::function<drvError_t(HDC_SESSION)>;
 using DrvHdcGetCapacityFunc = std::function<drvError_t(struct drvHdcCapacity *)>;
+using HalEschedCreateGrpExFunc = std::function<drvError_t(uint32_t, struct esched_grp_para *, unsigned int *)>;
+using HalEschedAttachDeviceFunc = std::function<drvError_t(unsigned int)>;
+using HalEschedDettachDeviceFunc = std::function<drvError_t(unsigned int)>;
+using HalEschedSubscribeEventFunc =
+    std::function<drvError_t(unsigned int, unsigned int, unsigned int, unsigned long long)>;
+using HalEschedWaitEventFunc =
+    std::function<drvError_t(unsigned int, unsigned int, unsigned int, int, struct event_info *)>;
+using DrvGetDeviceSplitModeFunc = std::function<drvError_t(unsigned int, unsigned int*)>;
 class DriverPlugin : public analysis::dvvp::common::singleton::Singleton<DriverPlugin> {
 public:
     DriverPlugin() : soName_("libascend_hal.so"), loadFlag_(0) {}
@@ -146,6 +154,26 @@ public:
     // drvHdcGetCapacity
     drvError_t MsprofDrvHdcGetCapacity(struct drvHdcCapacity *capacity);
 
+    // halEschedCreateGrpEx
+    drvError_t MsprofHalEschedCreateGrpEx(uint32_t devId, struct esched_grp_para *grpPara, unsigned int *grpId);
+
+    // halEschedAttachDevice
+    drvError_t MsprofHalEschedAttachDevice(unsigned int devId);
+
+    // halEschedDettachDevice
+    drvError_t MsprofHalEschedDettachDevice(unsigned int devId);
+
+    // halEschedSubscribeEvent
+    drvError_t MsprofHalEschedSubscribeEvent(unsigned int devId, unsigned int grpId,
+                                             unsigned int threadId, unsigned long long eventBitmap);
+
+    // halEschedWaitEvent
+    drvError_t MsprofHalEschedWaitEvent(unsigned int devId, unsigned int grpId,
+                                        unsigned int threadId, int timeout, struct event_info *event);
+
+    // drvGetDeviceSplitMode
+    drvError_t MsprofDrvGetDeviceSplitMode(unsigned int devId, unsigned int* mode);
+
     // get all function addresses at a time
     void GetAllFunction();
 
@@ -184,9 +212,16 @@ private:
     DrvHdcSessionConnectFunc drvHdcSessionConnect_ = nullptr;
     DrvHdcSessionCloseFunc drvHdcSessionClose_ = nullptr;
     DrvHdcGetCapacityFunc drvHdcGetCapacity_ = nullptr;
+    HalEschedCreateGrpExFunc halEschedCreateGrpEx_ = nullptr;
+    HalEschedAttachDeviceFunc halEschedAttachDevice_ = nullptr;
+    HalEschedDettachDeviceFunc halEschedDettachDevice_ = nullptr;
+    HalEschedSubscribeEventFunc halEschedSubscribeEvent_ = nullptr;
+    HalEschedWaitEventFunc halEschedWaitEvent_ = nullptr;
+    DrvGetDeviceSplitModeFunc drvGetDeviceSplitMode_ = nullptr;
  
 private:
     void LoadDriverSo();
+    void GetHalFunction();
 };
 
 } // Plugin

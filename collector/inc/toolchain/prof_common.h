@@ -310,6 +310,65 @@ struct MsprofHcclOPInfo {  // for MsprofReportCompactInfo buffer data
 };
 #pragma pack()
 
+const uint16_t MSPROF_AICPU_DATA_RESERVE_BYTES = 9;
+struct MsprofAicpuNodeAdditionalData {
+    uint16_t streamId;
+    uint16_t taskId;
+    uint32_t rev;
+    uint64_t runStartTime;
+    uint64_t runStartTick;
+    uint64_t computeStartTime;
+    uint64_t memcpyStartTime;
+    uint64_t memcpyEndTime;
+    uint64_t runEndTime;
+    uint64_t runEndTick;
+    uint32_t threadId;
+    uint32_t deviceId;
+    uint64_t submitTick;
+    uint64_t scheduleTick;
+    uint64_t tickBeforeRun;
+    uint64_t tickAfterRun;
+    uint32_t kernelType;
+    uint32_t dispatchTime;
+    uint32_t totalTime;
+    uint16_t fftsThreadId;
+    uint8_t version;
+    uint8_t reserve[MSPROF_AICPU_DATA_RESERVE_BYTES];
+};
+
+const uint16_t MSPROF_AICPU_MODEL_RESERVE_BYTES = 24;
+struct MsprofAicpuModelAdditionalData {
+    uint64_t indexId;
+    uint32_t modelId;
+    uint16_t tagId;
+    uint16_t rsv1;
+    uint64_t eventId;
+    uint8_t reserve[MSPROF_AICPU_MODEL_RESERVE_BYTES];
+};
+
+const uint16_t MSPROF_DP_DATA_RESERVE_BYTES = 16;
+const uint16_t MSPROF_DP_DATA_ACTION_LEN = 16;
+const uint16_t MSPROF_DP_DATA_SOURCE_LEN = 64;
+struct MsprofAicpuDpAdditionalData {
+    char action[MSPROF_DP_DATA_ACTION_LEN];
+    char source[MSPROF_DP_DATA_SOURCE_LEN];
+    uint64_t index;
+    uint64_t size;
+    uint8_t reserve[MSPROF_DP_DATA_RESERVE_BYTES];
+};
+
+enum MsprofMindsporeNodeTag {
+    GET_NEXT_DEQUEUE_WAIT = 1,
+};
+
+struct MsprofAicpuMiAdditionalData {
+    uint32_t nodeTag;  // MsprofMindsporeNodeTag:1
+    uint32_t reserve;
+    uint64_t queueSize;
+    uint64_t runStartTime;
+    uint64_t runEndTime;
+};
+
 const uint16_t MSPROF_COMPACT_INFO_DATA_LENGTH = 40;
 struct MsprofCompactInfo {  // for MsprofReportCompactInfo buffer data
     uint16_t magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
@@ -335,7 +394,13 @@ struct MsprofAdditionalInfo {  // for MsprofReportAdditionalInfo buffer data
     uint32_t threadId;
     uint32_t dataLen;
     uint64_t timeStamp;
-    uint8_t  data[MSPROF_ADDTIONAL_INFO_DATA_LENGTH];
+    union {
+        uint8_t data[MSPROF_ADDTIONAL_INFO_DATA_LENGTH];
+        MsprofAicpuNodeAdditionalData aicpuNode;
+        MsprofAicpuModelAdditionalData aicpuModel;
+        MsprofAicpuDpAdditionalData aicpuDp;
+        MsprofAicpuMiAdditionalData aicpuMi;
+    };
 };
 
 struct ConcatTensorInfo {

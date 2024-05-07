@@ -83,6 +83,21 @@ int CollectionRegisterMgr::CollectionJobRegisterAndRun(int devId,
     return PROFILING_FAILED;
 }
 
+int CollectionRegisterMgr::CollectionJobRun(int32_t devId, const ProfCollectionJobE jobTag)
+{
+    if (devId < 0 || jobTag >= NR_MAX_COLLECTION_JOB) {
+        return PROFILING_FAILED;
+    }
+
+    std::lock_guard<std::mutex> lk(collectionJobsMutex_);
+    if (collectionJobs_.find(devId) == collectionJobs_.end() ||
+        collectionJobs_[devId].find(jobTag) == collectionJobs_[devId].end()) {
+        MSPROF_LOGI("Collection job not registeter, devId:%d jobTag:%d", devId, jobTag);
+        return PROFILING_FAILED;
+    }
+    return collectionJobs_[devId][jobTag]->Process();
+}
+
 /**
  * @berif  : unregister the job and uninit the job
  * @param  : [in] devId   : device id

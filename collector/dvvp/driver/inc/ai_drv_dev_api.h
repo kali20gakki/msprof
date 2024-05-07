@@ -21,7 +21,7 @@ constexpr char NOT_SUPPORT_FREQUENCY[] = "";
 constexpr uint32_t HOST_ID = 64; // host id
 constexpr uint32_t FREQUENCY_KHZ_TO_MHZ = 1000; // KHz to MHz
 constexpr uint32_t SUPPORT_OSC_FREQ_API_VERSION = 0x071905; // 支持获取host freq的驱动版本号
-constexpr uint32_t SUPPORT_ADPROF_VERSION = 0xFFFFFF; // 支持AICPU驱动通道的驱动版本号，目前暂未确定
+constexpr uint32_t SUPPORT_ADPROF_VERSION = 0x072316; // 支持AICPU驱动通道的驱动版本号
 int DrvGetDevNum();
 int DrvGetHostPhyIdByDeviceIndex(int index);
 int DrvGetDevIds(int numDevices, std::vector<int> &devIds);
@@ -42,6 +42,7 @@ std::string DrvGetDevIdsStr();
 bool DrvCheckIfHelperHost();
 bool DrvGetDeviceFreq(uint32_t deviceId, std::string &freq);
 uint32_t DrvGetApiVersion();
+bool DrvIsSupportAdprof(uint32_t devId);
 }  // namespace driver
 }  // namespace dvvp
 }  // namespace analysis
