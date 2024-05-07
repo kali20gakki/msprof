@@ -74,7 +74,7 @@ int ModelingCalibrateBatchId(HalUniData **task, uint32_t taskNum, int cursor, ui
     return cursor;
 }
 
-void ModelingComputeBatchIdBinary(HalUniData **task, uint32_t taskNum, HalUniData **flip, uint32_t flipNum)
+void ModelingComputeBatchIdBinary(HalUniData **task, uint32_t taskNum, HalUniData **flip, uint16_t flipNum)
 {
     if (task == nullptr || taskNum == 0 || flip == nullptr || flipNum == 0) {
         ERROR("input error!");

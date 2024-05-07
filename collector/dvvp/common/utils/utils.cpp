@@ -1455,7 +1455,7 @@ uint32_t Utils::GenerateSignature(CONST_UINT8_PTR data, uint64_t len)
     };
 
     static const int OFFSET = 8;
-    for (uint32_t i = 0; i < len; ++i) {
+    for (uint64_t i = 0; i < len; ++i) {
         signature = SIGNATURE_TABLE[(signature ^ *data++) & 0xff] ^ (signature >> OFFSET);
     }
     return signature;

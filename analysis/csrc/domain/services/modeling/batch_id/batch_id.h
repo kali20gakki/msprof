@@ -25,7 +25,7 @@ namespace Domain {
  * @param flip : 翻转数组，存放翻转指针
  * @param taskNum : 翻转数组个数
  **/
-void ModelingComputeBatchIdBinary(HalUniData **task, uint32_t taskNum, HalUniData **flip, uint32_t flipNum);
+void ModelingComputeBatchIdBinary(HalUniData **task, uint32_t taskNum, HalUniData **flip, uint16_t flipNum);
 
 }
 
