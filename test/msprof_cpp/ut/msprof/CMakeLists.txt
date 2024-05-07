@@ -34,6 +34,7 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/depend/src/runtime_plugin.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/driver/channel/ai_drv_prof_api.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/mini/ai_drv_dsmi_api.cpp
@@ -115,14 +116,13 @@ set(profilerSrcFile
     test/prof_acl_core_utest.cpp
     test/aicpu_plugin_utest.cpp
     test/analyzer_utest.cpp
-    test/msprof_utest.cpp
+    test/msproftx_utest.cpp
     ../stub/ge_stub.cpp
     ../stub/hdc-log-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
     ../stub/profile_drv_user_stub.cpp
     ../stub/hdc-api-stub.cpp
     ../../stub/driver_plugin_stub.cpp
-	../../stub/runtime_plugin_stub.cpp
     ${profilerSrcList}
 )
 

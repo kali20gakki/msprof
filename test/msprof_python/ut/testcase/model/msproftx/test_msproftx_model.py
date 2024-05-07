@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 
-from msmodel.msproftx.msproftx_model import MsprofTxModel
+from msmodel.msproftx.msproftx_model import MsprofTxModel, MsprofTxMarkExModel
 
 NAMESPACE = 'msmodel.msproftx.msproftx_model'
 
@@ -17,3 +17,11 @@ class TestMsprofTxModel(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DBManager.fetch_all_data'):
             check = MsprofTxModel('test', 'msproftx.db', ['MsprofTx'])
             check.get_timeline_data()
+
+
+class TestMsprofTxMarkExModel(unittest.TestCase):
+
+    def test_flush(self):
+        with mock.patch(NAMESPACE + '.DBManager.fetch_all_data'):
+            check = MsprofTxMarkExModel('test')
+            check.flush([])

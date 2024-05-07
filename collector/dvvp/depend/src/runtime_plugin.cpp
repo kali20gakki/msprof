@@ -12,12 +12,15 @@ using namespace analysis::dvvp::common::error;
 namespace Collector {
 namespace Dvvp {
 namespace Plugin {
+static const int32_t RT_ERROR_NONE = 0;
 SHARED_PTR_ALIA<PluginHandle> RuntimePlugin::pluginHandle_ = nullptr;
 
 void RuntimePlugin::GetAllFunction()
 {
     pluginHandle_->GetFunction<int32_t, int32_t, int32_t*>("rtGetVisibleDeviceIdByLogicDeviceId",
         rtGetVisibleDeviceIdByLogicDeviceIdFunc_);
+    pluginHandle_->GetFunction<int32_t, uint64_t, uint64_t, uint16_t, aclrtStream>("rtProfilerTraceEx",
+        rtProfilerTraceExFunc_);
 }
 
 void RuntimePlugin::LoadRuntimeSo()
@@ -49,7 +52,19 @@ int32_t RuntimePlugin::MsprofRtGetVisibleDeviceIdByLogicDeviceId(int32_t logicDe
         MSPROF_LOGW("RuntimePlugin rtGetVisibleDeviceIdByLogicDeviceId function is null.");
         return PROFILING_NOTSUPPORT;
     }
-    return rtGetVisibleDeviceIdByLogicDeviceIdFunc_(logicDeviceId, visibleDeviceId);
+    return rtGetVisibleDeviceIdByLogicDeviceIdFunc_(logicDeviceId, visibleDeviceId) == RT_ERROR_NONE ?
+        PROFILING_SUCCESS : PROFILING_FAILED;
+}
+
+int32_t RuntimePlugin::MsprofRtProfilerTraceEx(uint64_t indexId, uint64_t modelId, uint16_t tagId, aclrtStream stream)
+{
+    PthreadOnce(&loadFlag_, []()->void {RuntimePlugin::instance()->LoadRuntimeSo();});
+    if (rtProfilerTraceExFunc_ == nullptr) {
+        MSPROF_LOGW("RuntimePlugin rtProfilerTraceEx function is null.");
+        return PROFILING_NOTSUPPORT;
+    }
+    return rtProfilerTraceExFunc_(indexId, modelId, tagId, stream) == RT_ERROR_NONE ?
+        PROFILING_SUCCESS : PROFILING_FAILED;
 }
 }
 }

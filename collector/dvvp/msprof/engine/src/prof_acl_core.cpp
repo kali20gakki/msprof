@@ -747,6 +747,17 @@ aclError aclprofMark(VOID_PTR stamp)
     return MsprofTxManager::instance()->Mark(stampInstancePtr);
 }
 
+aclError aclprofMarkEx(CONST_CHAR_PTR msg, size_t msgLen, aclrtStream stream)
+{
+    if (Platform::instance()->PlatformIsHelperHostSide()) {
+        MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofMarkEx", "SocCloud"}));
+        return ACL_ERROR_FEATURE_UNSUPPORTED;
+    }
+    return MsprofTxManager::instance()->MarkEx(msg, msgLen, stream);
+}
+
 aclError aclprofPush(VOID_PTR stamp)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {

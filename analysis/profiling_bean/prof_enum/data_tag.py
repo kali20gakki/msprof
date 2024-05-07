@@ -59,6 +59,7 @@ class DataTag(Enum):
     DATA_QUEUE = 45
     HOST_QUEUE = 46
     PARALLEL_STRATEGY = 47
+    MSPROFTX_MARKEX = 48
     NPU_MEM = 50
     FREQ = 52
     HASH_DICT = 53

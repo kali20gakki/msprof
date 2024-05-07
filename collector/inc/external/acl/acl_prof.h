@@ -472,6 +472,15 @@ MSVP_PROF_API aclError aclprofSetStampTraceMessage(void *stamp, const char *msg,
 */
 MSVP_PROF_API aclError aclprofMark(void *stamp);
 
+/**
+* @ingroup AscendCL
+* @brief Record markEx timestamp
+*
+* @retval ACL_SUCCESS The function is successfully executed.
+* @retval OtherValues Failure
+*/
+MSVP_PROF_API aclError aclprofMarkEx(const char *msg, size_t msgLen, aclrtStream stream);
+
 #ifdef __cplusplus
 }
 #endif

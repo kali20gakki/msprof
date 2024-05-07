@@ -12,7 +12,6 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
-from common_func.file_manager import check_file_readable
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from framework.offset_calculator import OffsetCalculator
@@ -112,5 +111,5 @@ class MsprofTxParser(IParser, MsMultiProcess):
         status_ = self.read_binary_data(file_name)
         FileManager.add_complete_file(self._project_path, file_name)
         if status_:
-            logging.error('Insert MsprofTx data error.')
-        logging.info("Create MSPROFTX DB finished!")
+            logging.error('Parsing msproftx data file error.')
+        logging.info("Parsing msproftx data file finished!")
