@@ -134,10 +134,13 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
         self.parse()
         self.save()
 
-    def set_aicpu_data(self: any, aicpu_info: list) -> None:
-        for aicpu_info in aicpu_info:
-            get_data_func = self._get_data_func.get(int(aicpu_info.struct_type), None)
+    def set_aicpu_data(self: any, aicpu_data: list) -> None:
+        for aicpu_info in aicpu_data:
+            get_data_func = self._get_data_func.get(int(aicpu_info.struct_type))
             if not get_data_func:
                 logging.error("The aicpu type %d is invalid.", aicpu_info.struct_type)
+                continue
+            if int(aicpu_info.struct_type) == AicpuAddInfoBean.AICPU_NODE and \
+                    (aicpu_info.data.ai_cpu_task_start_time == 0 or aicpu_info.data.ai_cpu_task_end_time == 0):
                 continue
             self._aicpu_data.get(int(aicpu_info.struct_type)).append(get_data_func(aicpu_info))
