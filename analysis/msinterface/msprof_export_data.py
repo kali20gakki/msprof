@@ -79,6 +79,7 @@ from viewer.training.step_trace_viewer import StepTraceViewer
 from viewer.training.task_op_viewer import TaskOpViewer
 from viewer.ts_cpu_report import TsCpuReport
 from viewer.ai_core_freq_viewer import AiCoreFreqViewer
+from viewer.qos_viewer import QosViewer
 
 
 class MsProfExportDataUtils:
@@ -497,12 +498,11 @@ class MsProfExportDataUtils:
             return []
         row_timeline = PipelineOverlapViewer(configs, params).get_timeline_data()
         MsprofTimeline().add_export_data(row_timeline, params.get(StrConstant.PARAM_DATA_TYPE))
-        
+
         # only chip v4 support aicore freqs_list
         freqs_list = AiCoreFreqViewer(params).get_all_data()
         MsprofTimeline().add_export_data(freqs_list, params.get(StrConstant.PARAM_DATA_TYPE))
         return MsprofTimeline().export_all_data()
-
 
     @staticmethod
     def _get_task_timeline(configs: dict, params: dict) -> str:
@@ -587,6 +587,10 @@ class MsProfExportDataUtils:
     def _get_aicpu_mi_data(configs: dict, params: dict) -> any:
         data = ParseAiCpuData.get_aicpu_mi_data(params.get(StrConstant.PARAM_RESULT_DIR))
         return configs.get(StrConstant.CONFIG_HEADERS), data, len(data)
+
+    @staticmethod
+    def _get_qos_data(configs: dict, params: dict) -> any:
+        return QosViewer(configs, params).get_timeline_data()
 
     @classmethod
     def export_data(cls: any, params: dict) -> str:

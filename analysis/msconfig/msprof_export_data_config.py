@@ -303,4 +303,9 @@ class MsProfExportDataConfig(MetaConfig):
             ('handler', '_get_aicpu_mi_data'),
             ('headers', 'Node Name,Start Time(us),End Time(us),Queue Size'),
         ],
+        'qos': [
+            ('handler', '_get_qos_data'),
+            ('db', 'qos.db'),
+            ('table', 'QosInfo,QosOriginalData')
+        ],
     }

@@ -29,6 +29,8 @@ class StructFmt:
     PCIE_FMT_SIZE = 96
     HBM_FMT = "QQII"
     HBM_FMT_SIZE = 24
+    QOS_FMT = "QQII"
+    QOS_FMT_SIZE = 24
     LLC_FMT = 'QQII'
     LLC_FMT_SIZE = 24
     STEP_TRACE_FMT = "BBHLQQQHHHH"
