@@ -21,52 +21,9 @@
 #include <unordered_map>
 #include <typeindex>
 #include <string>
-#include "analysis/csrc/infrastructure/process/include/process.h"
-#include "analysis/csrc/infrastructure/resource/chip_id.h"
+#include "analysis/csrc/infrastructure/process/include/process_struct.h"
 
 namespace Analysis {
-
-namespace Infra {
-
-using ProcessCreator = std::function<std::unique_ptr<Process>()>;
-
-struct RegProcessInfo {
-    ProcessCreator creator;  // 本Process的创建函数
-    std::vector<std::type_index> paramTypes;  // 本Process需要的数据类型
-    std::vector<std::type_index> processDependence;  // 本Process依赖的前向Process
-    std::vector<uint32_t> chipIds;  // 本Process支持的ChipId
-    std::string processName;  // 本Process的类名for Dfx
-    bool mandatory;  // 是否为关键流程，关键流程失败后，会停止后续流程导致整体失败 true表示关键流程
-};
-
-using ProcessCollection = std::unordered_map<std::type_index, RegProcessInfo>;
-
-class ProcessRegister {
-public:
-    ProcessRegister(std::type_index selfType, ProcessCreator creator, bool mandatory,
-                    const char* processName,
-                    std::vector<std::type_index>&& preProcessType);
-    ProcessRegister(std::type_index selfType, std::vector<std::type_index>&& paramTypes);
-    ProcessRegister(std::type_index selfType, std::initializer_list<uint32_t> chipIds);
-
-    static ProcessCollection CopyProcessInfo();
-
-private:
-    static ProcessCollection& GetContainer();
-};
-
-template<uint32_t ...Ids>
-struct ChipIdCountChecker {
-    constexpr static size_t count_ = sizeof...(Ids);
-};
-
-template <typename... T>
-struct ClassToTypeIndexHelper {
-    ClassToTypeIndexHelper() : typeIndex{typeid(T) ...} {}
-    std::vector<std::type_index> typeIndex;
-};
-
-}
 
 template <typename P>
 std::unique_ptr<Infra::Process> TCreator()

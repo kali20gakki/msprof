@@ -14,6 +14,7 @@
 #include "pah_d.h"
 #include "pg_f.h"
 #include "process_spy.h"
+#include "analysis/csrc/infrastructure/resource/chip_id.h"
 
 namespace Analysis {
 

@@ -16,7 +16,6 @@
 #include <string>
 #include "analysis/csrc/infrastructure/process/include/process.h"
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
-#include "analysis/csrc/infrastructure/process/include/process.h"
 
 namespace Analysis {
 

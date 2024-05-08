@@ -11,6 +11,7 @@
  */
 #include "analysis/csrc/infrastructure/process/process_topo.h"
 #include <algorithm>
+#include "analysis/csrc/infrastructure/resource/chip_id.h"
 
 namespace Analysis {
 
