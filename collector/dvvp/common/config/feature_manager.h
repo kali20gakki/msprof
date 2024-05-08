@@ -41,8 +41,9 @@ struct FeatureRecord {
     char featureName[64] = "\0";
     FeatureInfo info;
     FeatureRecord() = default;
-    FeatureRecord(char* tempFeatureName, char* tempCompatibility, char* tempFeatureVersion,
-                  char* tempAffectedComponent, char* tempAffectedComponentVersion, char* tempInfoLog) noexcept
+    FeatureRecord(const char* tempFeatureName, const char* tempCompatibility, const char* tempFeatureVersion,
+                  const char* tempAffectedComponent, const char* tempAffectedComponentVersion, const char* tempInfoLog)
+                  noexcept
     {
         // 0 tempData, 1 structData, 2 structDataSize
         std::vector<std::tuple<const char*, char*, size_t>> copyList = {
