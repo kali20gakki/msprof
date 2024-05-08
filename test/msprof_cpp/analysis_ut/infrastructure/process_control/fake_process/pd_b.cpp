@@ -14,6 +14,7 @@
 #include "pah_d.h"
 #include "pstart_a.h"  // 包含这个头文件是为了测试，实际写代码的时候，请不要包含自己不需要的头文件
 #include "process_spy.h"
+#include "analysis/csrc/infrastructure/resource/chip_id.h"
 
 namespace Analysis {
 

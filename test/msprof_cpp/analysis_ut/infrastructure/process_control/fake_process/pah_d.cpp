@@ -14,6 +14,7 @@
 #include "pstart_a.h"
 #include "pstart_h.h"
 #include "process_spy.h"
+#include "analysis/csrc/infrastructure/resource/chip_id.h"
 
 namespace Analysis {
 
