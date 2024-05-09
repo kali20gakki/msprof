@@ -295,7 +295,7 @@ class MsprofOutputSummary:
             else:
                 device_id = os.path.basename(sub_path)[self.DEVICE_ID_PREFIX_LEN:]
             for file_name in self.get_newest_file_list(file_list, StrConstant.FILE_SUFFIX_CSV):
-                if not file_name.startswith(targe_name):
+                if not file_name.startswith(targe_name) or (targe_name == "aicpu" and file_name.startswith("aicpu_mi")):
                     continue
                 file_name_path = os.path.join(summary_path, file_name)
                 self._insert_summary_data(file_name_path, device_id, helper)
