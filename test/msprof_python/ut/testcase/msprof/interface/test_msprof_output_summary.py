@@ -204,13 +204,13 @@ class TestMsprofOutputSummary(unittest.TestCase):
                 mock.patch(NAMESPACE + '.get_valid_sub_path'), \
                 mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True), \
                 mock.patch('os.path.exists', return_value=True), \
-                mock.patch('os.listdir', return_value=["op_summary.csv", "npu_mem.csv"]), \
+                mock.patch('os.listdir', return_value=["op_summary.csv", "npu_mem.csv", "aicpu.csv"]), \
                 mock.patch('os.path.basename', return_value="0"), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary.get_newest_file_list',
-                           return_value=["op_summary_0_1_1_20230905213000.csv"]), \
+                           return_value=["aicpu_0_1_1_20230905213000.csv", "aicpu_mi_0_1_1_20230905213000.csv"]), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._insert_summary_data'), \
                 mock.patch('common_func.file_slice_helper.FileSliceHelper.dump_csv_data'):
-            MsprofOutputSummary(PROF_DIR, CSV_FORMAT)._save_summary_data("op_summary",
+            MsprofOutputSummary(PROF_DIR, CSV_FORMAT)._save_summary_data("aicpu",
                                                                          [HOST_DIR, DEVICE_DIR_1, 'device_1'])
 
     def test_insert_summary_data_when_more_than_1000000_then_insert_data(self):
