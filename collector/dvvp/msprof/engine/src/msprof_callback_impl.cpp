@@ -153,19 +153,19 @@ int32_t MsprofSetDeviceCallbackImpl(VOID_PTR data, uint32_t len)
     }
     ProfSetDevPara *setCfg = (struct ProfSetDevPara *)data;
     MSPROF_EVENT("MsprofSetDeviceCallback called, is open: %d", setCfg->isOpen);
+    if (!Msprofiler::Api::ProfAclMgr::instance()->IsCmdMode()) {
+        MSPROF_LOGI("MsprofSetDeviceCallbackImpl, not on cmd mode");
+        return MSPROF_ERROR;
+    }
+    std::string info;
+    if (!(ProfManager::instance()->CheckIfDevicesOnline(std::to_string(setCfg->deviceId), info))) {
+        MSPROF_LOGE("MsprofSetDeviceCallbackImpl, devId:%u is invalid, error info:%s",
+                    setCfg->deviceId, info.c_str());
+        MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceCallbackImpl, devId:%u is invalid, error info:%s",
+                           setCfg->deviceId, info.c_str());
+        return MSPROF_ERROR;
+    }
     if (setCfg->isOpen) {
-        if (!Msprofiler::Api::ProfAclMgr::instance()->IsCmdMode()) {
-            MSPROF_LOGI("MsprofSetDeviceCallbackImpl, not on cmd mode");
-            return MSPROF_ERROR;
-        }
-        std::string info;
-        if (!(ProfManager::instance()->CheckIfDevicesOnline(std::to_string(setCfg->deviceId), info))) {
-            MSPROF_LOGE("MsprofSetDeviceCallbackImpl, devId:%u is invalid, error info:%s",
-                setCfg->deviceId, info.c_str());
-            MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceCallbackImpl, devId:%u is invalid, error info:%s",
-                setCfg->deviceId, info.c_str());
-            return MSPROF_ERROR;
-        }
         int ret = RegisterReporterCallback();
         if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("MsprofSetDeviceCallbackImpl, RegisterReporterCallback failed");
@@ -179,6 +179,8 @@ int32_t MsprofSetDeviceCallbackImpl(VOID_PTR data, uint32_t len)
             MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceCallbackImpl, GeOpenDeviceHandle failed");
             return MSPROF_ERROR;
         }
+    } else {
+        return Msprofiler::Api::ProfAclMgr::instance()->MsprofResetDeviceHandle(setCfg->deviceId);
     }
     return MSPROF_ERROR_NONE;
 }

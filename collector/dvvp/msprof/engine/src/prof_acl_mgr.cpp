@@ -1450,6 +1450,23 @@ void ProfAclMgr::MsprofHostHandle(void)
     }
 }
 
+int32_t ProfAclMgr::MsprofResetDeviceHandle(uint32_t devId)
+{
+    auto devTask = devTasks_.find(devId);
+    if (devTask == devTasks_.end()) {
+        MSPROF_LOGI("Device %u task not find", devId);
+        return MSPROF_ERROR_NONE;
+    }
+
+    devTask->second.params->is_cancel = true;
+    if (ProfManager::instance()->IdeCloudProfileProcess(devTask->second.params) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to stop profiling on device %u", devId);
+        MSPROF_INNER_ERROR("EK9999", "Failed to stop profiling on device %u", devId);
+        return MSPROF_ERROR;
+    }
+    return MSPROF_ERROR_NONE;
+}
+
 int32_t ProfAclMgr::MsprofFinalizeHandle(void)
 {
     if (!Msprofiler::Api::ProfAclMgr::instance()->IsCmdMode()) {
@@ -1467,6 +1484,9 @@ int32_t ProfAclMgr::MsprofFinalizeHandle(void)
     }
     HashData::instance()->SaveHashData();
     for (auto iter = devTasks_.begin(); iter != devTasks_.end(); iter++) {
+        if (iter->second.params->is_cancel) {
+            continue;
+        }
         iter->second.params->is_cancel = true;
         if (ProfManager::instance()->IdeCloudProfileProcess(iter->second.params) != PROFILING_SUCCESS) {
             MSPROF_LOGE("Failed to finalize profiling on device %u", iter->first);
