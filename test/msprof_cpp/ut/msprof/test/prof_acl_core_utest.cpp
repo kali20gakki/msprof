@@ -793,7 +793,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofSetDeviceCallbackImpl)
         sizeof(ProfSetDevPara) - 1));
     EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl(nullptr,
         sizeof(ProfSetDevPara)));
-    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
         sizeof(ProfSetDevPara)));
 
     data.isOpen = true;
@@ -904,6 +904,52 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofTxHandle) {
 
     ret = ProfAclMgr::instance()->MsprofTxHandle();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, TestMsprofResetDeviceHandleShouldReturnErrorNoneWhenNoDevTask)
+{
+    GlobalMockObject::verify();
+    using namespace Msprofiler::Api;
+    ProfAclMgr::instance()->devTasks_.clear();
+    uint32_t devId = 0;
+    int32_t ret = ProfAclMgr::instance()->MsprofResetDeviceHandle(devId);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST,
+    TestMsprofResetDeviceHandleShouldReturnErrorWhenIdeCloudProfileProcessFailed)
+{
+    GlobalMockObject::verify();
+    using namespace Msprofiler::Api;
+    using namespace analysis::dvvp::message;
+    MOCKER_CPP(&analysis::dvvp::host::ProfManager::IdeCloudProfileProcess)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    std::shared_ptr<ProfileParams> params = std::make_shared<ProfileParams>();
+    ProfAclMgr::ProfAclTaskInfo taskInfo = {1, 0, params};
+    ProfAclMgr::instance()->devTasks_[0] = taskInfo;
+    uint32_t devId = 0;
+    int32_t ret = Msprofiler::Api::ProfAclMgr::instance()->MsprofResetDeviceHandle(devId);
+    EXPECT_EQ(MSPROF_ERROR, ret);
+    ProfAclMgr::instance()->devTasks_.clear();
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST,
+    TestMsprofResetDeviceHandleShouldReturnErrorNoneWhenIdeCloudProfileProcessSuccess)
+{
+    GlobalMockObject::verify();
+    using namespace Msprofiler::Api;
+    using namespace analysis::dvvp::message;
+    MOCKER_CPP(&analysis::dvvp::host::ProfManager::IdeCloudProfileProcess)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    std::shared_ptr<ProfileParams> params = std::make_shared<ProfileParams>();
+    ProfAclMgr::ProfAclTaskInfo taskInfo = {1, 0, params};
+    ProfAclMgr::instance()->devTasks_[0] = taskInfo;
+    uint32_t devId = 0;
+    int32_t ret = Msprofiler::Api::ProfAclMgr::instance()->MsprofResetDeviceHandle(devId);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+    ProfAclMgr::instance()->devTasks_.clear();
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, DoHostHandle) {
