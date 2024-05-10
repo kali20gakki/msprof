@@ -792,9 +792,9 @@ class TablesConfig(MetaConfig):
         ],
         'PaLinkInfoMap': [
             ('pa_link_id', 'INTEGER, null'),
-            ('pa_link_traffic_monit_rx', 'INTEGER, null'),
-            ('pa_link_traffic_monit_tx', 'INTEGER,null'),
-            ('sys_time', 'INTEGER,null')
+            ('pa_link_traffic_monit_rx', 'TEXT, null'),
+            ('pa_link_traffic_monit_tx', 'TEXT,null'),
+            ('sys_time', 'TEXT,null')
         ],
         'PcieInfoMap': [
             ('pcie_id', 'INTEGER, null'),

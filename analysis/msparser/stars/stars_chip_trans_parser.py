@@ -34,8 +34,8 @@ class StarsChipTransParser(IStarsParser):
         """
         for bean_data in self._data_list:
             self._data_dict.setdefault(bean_data.acc_type, []) \
-                .append([bean_data.event_id, bean_data.pa_rx_or_pcie_write_bw,
-                         bean_data.pa_tx_or_pcie_read_bw, bean_data.sys_time])
+                .append([bean_data.event_id, str(bean_data.pa_rx_or_pcie_write_bw),
+                         str(bean_data.pa_tx_or_pcie_read_bw), str(bean_data.sys_time)])
 
     def flush(self: any) -> None:
         """
