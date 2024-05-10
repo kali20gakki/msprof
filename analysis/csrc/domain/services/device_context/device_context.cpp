@@ -25,9 +25,32 @@
 
 using namespace Analysis;
 using namespace Analysis::Utils;
+using namespace Analysis::Domain;
 using namespace Infra;
 
+namespace Analysis {
+
+namespace Domain {
+DeviceContext& DeviceContext::Instance()
+{
+    thread_local DeviceContext ins;
+
+    // 第一次调用时进行初始化
+    if (!ins.isInitialized_) {
+    ins.deviceContextInfo.deviceFilePath = g_deviceFilePath;
+    ins.GetInfoJson();
+    ins.GetSampleJson();
+    ins.isInitialized_ = true; // 标记已初始化
+}
+
+    return ins;
+}
 thread_local std::string g_deviceFilePath;
+void ContextSaveDevicePath(std::string deviceFilePath)
+{
+    g_deviceFilePath = deviceFilePath;
+}
+
 std::vector<std::string> GetDeviceDirectories(const std::string &path)
 {
     std::vector<std::string> subdirs;
@@ -52,6 +75,10 @@ std::vector<std::string> GetDeviceDirectories(const std::string &path)
 
     closedir(dir);
     return subdirs;
+}
+
+}
+
 }
 
 std::vector<DataInventory> DeviceContextEntry(const char *targetDir, const char *stopAt)
@@ -96,7 +123,3 @@ std::vector<DataInventory> DeviceContextEntry(const char *targetDir, const char 
     return processDataVec;
 }
 
-void ContextSaveDevicePath(std::string deviceFilePath)
-{
-    g_deviceFilePath = deviceFilePath;
-}
