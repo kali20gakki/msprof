@@ -404,6 +404,7 @@ db命名：msprof_{时间戳}.db
 | dataType     | INTEGER |     | 大算子传输的数据类型，如（INT8，FP32），ENUM_HCCL_DATA_TYPE(dataType)                       |
 | algType      | INTEGER |     | 通信算子使用的算法，可分为多个阶段，如（HD-MESH）                                                |
 | count        | NUMERIC |     | 算子传输的dataType类型的数据量                                                         |
+| opType       | INTEGER |     | 算子类型，STRING_IDS(opType), 例：hcom_broadcast_                                     |
 
 
 变更记录：
@@ -411,6 +412,7 @@ db命名：msprof_{时间戳}.db
 | 日期       | 内容      |
 |----------|---------|
 | 2024/3/7 | 330首次上线 |
+| 2024/5/10 | 添加opType字段 |
 
 ### CANN_API
 

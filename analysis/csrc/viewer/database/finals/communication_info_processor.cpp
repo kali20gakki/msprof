@@ -67,7 +67,7 @@ CommunicationInfoProcessor::OriTaskDataFormat CommunicationInfoProcessor::GetTas
 CommunicationInfoProcessor::OriOpDataFormat CommunicationInfoProcessor::GetOpData(const DBInfo &opSingleDevice)
 {
     OriOpDataFormat oriOpData;
-    std::string sql{"SELECT connection_id, op_name, relay, retry, data_type, alg_type, count, group_name "
+    std::string sql{"SELECT connection_id, op_name, relay, retry, data_type, alg_type, count, group_name, op_type "
                     "FROM " + opSingleDevice.tableName};
     if (!opSingleDevice.dbRunner->QueryData(sql, oriOpData)) {
         ERROR("Failed to obtain data from the % table.", opSingleDevice.tableName);
@@ -122,7 +122,7 @@ bool CommunicationInfoProcessor::FormatData(const OriTaskDataFormat &oriTaskData
         data.start = Utils::GetLocalTime(start, threadData.timeRecord).Uint64();
         data.end = Utils::GetLocalTime(end, threadData.timeRecord).Uint64();
         processedOpData.emplace_back(data.opName, data.start, data.end, data.connectionId, data.groupName, data.opId,
-                                     data.relay, data.retry, data.dataType, data.algType, data.count);
+                                     data.relay, data.retry, data.dataType, data.algType, data.count, data.opType);
     }
     return true;
 }
@@ -158,11 +158,13 @@ void CommunicationInfoProcessor::UpdateOpInfo(CommunicationOpData &opData, uint3
         std::string dataType;
         std::string algType;
         std::string groupName;
+        std::string opType;
         std::tie(connectionId, opName, opData.relay, opData.retry, dataType, algType,
-                 opData.count, groupName) = oriData;
+                 opData.count, groupName, opType) = oriData;
         opData.dataType = IdPool::GetInstance().GetUint64Id(dataType);
         opData.algType = IdPool::GetInstance().GetUint64Id(algType);
         opData.groupName = GetGroupNameValue(groupName, hashMap);
+        opData.opType = IdPool::GetInstance().GetUint64Id(opType);
     }
 }
 

@@ -31,6 +31,7 @@ const uint16_t OP_NAME_NUM = 3;
 const uint16_t CONNECTION_ID_NUM = 3;
 const uint16_t OP_ID_NUM = 3;
 const uint16_t OP_DATATYPE_NUM = 3;
+const uint16_t OP_TYPE_NUM = 2;
 const std::string COMMUNICATION_TASK_PATH = "./task_path";
 const std::string DB_PATH = File::PathJoin({COMMUNICATION_TASK_PATH, "msprof.db"});
 const std::string DEVICE_SUFFIX = "device_0";
@@ -187,20 +188,24 @@ void CheckOpInfo(CommunicationInfoProcessor::CommunicationOpDataFormat data)
     const uint16_t connectionIdIndex = 3;
     const uint16_t opIdIndex = 5;
     const uint16_t opDataTypeIndex = 8;
+    const uint16_t opTypeIndex = 11;
     std::set<uint64_t> opNameSet;
     std::set<uint64_t> connectionIdSet;
     std::set<uint32_t> opIdSet;
     std::set<uint64_t> opDataTypeSet;
+    std::set<uint64_t> opTypeSet;
     for (auto item : data) {
         opNameSet.insert(std::get<opNameIndex>(item));
         connectionIdSet.insert(std::get<connectionIdIndex>(item));
         opIdSet.insert(std::get<opIdIndex>(item));
         opDataTypeSet.insert(std::get<opDataTypeIndex>(item));
+        opTypeSet.insert(std::get<opTypeIndex>(item));
     }
     EXPECT_EQ(opNameSet.size(), OP_NAME_NUM);
     EXPECT_EQ(connectionIdSet.size(), CONNECTION_ID_NUM);
     EXPECT_EQ(opIdSet.size(), OP_ID_NUM);
     EXPECT_EQ(opDataTypeSet.size(), OP_DATATYPE_NUM);
+    EXPECT_EQ(opTypeSet.size(), OP_TYPE_NUM);
 }
 
 TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
