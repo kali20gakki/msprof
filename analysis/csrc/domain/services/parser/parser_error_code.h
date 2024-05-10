@@ -28,6 +28,7 @@ enum {
     PARSER_FREAD_ERROR                                  = ERROR_NO(SERVICE_ID_PARSER, 0, 0x6),
 
     PARSER_TS_TRACK_NO_NEED_ITEM                        = ERROR_NO(SERVICE_ID_PARSER, 0, 0x7),
+    ERROR_SIZE_MISMATCH                                 = ERROR_NO(SERVICE_ID_PARSER, 0, 0x8)
 };
 }
 #endif // ANALYSIS_DOMAIN_SERVICE_PARSER_PARSER_ERROR_CODE_H

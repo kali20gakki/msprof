@@ -16,6 +16,7 @@
 #include "analysis/csrc/infrastructure/resource/binary_struct_info.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
+#include "analysis/csrc/domain/services/parser/parser_error_code.h"
 
 namespace Analysis {
 namespace Domain {
@@ -38,6 +39,11 @@ std::vector<std::string> StarsSocParser::GetFilePattern()
 uint32_t StarsSocParser::GetTrunkSize()
 {
     return STARS_SOC_STRUCT_SIZE;
+}
+
+uint32_t StarsSocParser::GetNoFileCode()
+{
+    return PARSER_GET_STARS_SOC_FILE_ERROR;
 }
 
 uint32_t StarsSocParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data)

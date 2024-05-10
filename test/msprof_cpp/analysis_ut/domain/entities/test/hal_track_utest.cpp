@@ -48,14 +48,14 @@ TEST_F(HalTrackUTest, ShouldSplitHalTrackDataByTrackType)
     auto data = dataInventory_.GetPtr<std::vector<HalTrackData>>();
     auto result = ClassifyTrackData(*data);
     ASSERT_EQ(result.size(), 2ul);
-    ASSERT_EQ(result[HalTrackType::TASK_FLIP_BEAN].size(), 3ul);
-    ASSERT_EQ(result[HalTrackType::INVALID_BEAN].size(), 1ul);
+    ASSERT_EQ(3ul, result[HalTrackType::TASK_FLIP_BEAN].size());
+    ASSERT_EQ(1ul, result[HalTrackType::INVALID_BEAN].size());
 }
 
 TEST_F(HalTrackUTest, ShouldReturnFlipBeanWhenInputTaskFlipBean)
 {
     auto data = dataInventory_.GetPtr<std::vector<HalTrackData>>();
     auto result = GetTrackDataByType(*data, HalTrackType::TASK_FLIP_BEAN);
-    ASSERT_EQ(result.size(), 3ul);
-    ASSERT_EQ(result[0]->type, HalTrackType::TASK_FLIP_BEAN);
+    ASSERT_EQ(3ul, result.size());
+    ASSERT_EQ(HalTrackType::TASK_FLIP_BEAN, result[0]->type);
 }

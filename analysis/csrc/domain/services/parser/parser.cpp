@@ -78,14 +78,14 @@ uint32_t Parser::ReadData(const std::vector<std::string> &files, size_t firstFil
 
         binaryDataOffset += fileSize;
     }
-
+    INFO("Data has been read to the memory successfully!");
     return Analysis::ANALYSIS_OK;
 }
 
 std::string Parser::GetFilePath(const DeviceContext &deviceContext)
 {
     std::string deviceFilePath = deviceContext.GetDeviceFilePath();
-    return deviceFilePath + "/data";
+    return Analysis::Utils::File::PathJoin({deviceFilePath, "data"});
 }
 
 uint32_t Parser::GetNoFileCode()
@@ -110,11 +110,12 @@ int ExtractNumber(const std::string &str)
 
 uint32_t Parser::ReadDataEntry(const DeviceContext &deviceContext)
 {
+    auto filePrefix = this->GetFilePattern();
     // 读取解析文件
     auto files = Analysis::Utils::File::GetOriginData(this->GetFilePath(deviceContext),
-                                                      {this->GetFilePattern()},
+                                                      filePrefix,
                                                       {"done", "complete"});
-    if (files.size() == 0) {
+    if (files.empty()) {
         ERROR("notify: no files pattern");
         this->binaryData = nullptr;
         this->binaryDataSize = 0;
@@ -149,7 +150,8 @@ uint32_t Parser::ReadDataEntry(const DeviceContext &deviceContext)
         return Analysis::PARSER_NEW_BINARY_DATA_ERROR;
     }
     this->binaryDataSize = structCount * trunkSize;
-    INFO("files total size: %", structCount * trunkSize);
+    INFO("Parse filePrefix is: %, the number of files is: %, and the total size of all files is: %",
+         Analysis::Utils::Join(filePrefix, ","), files.size(), structCount * trunkSize);
     return this->ReadData(files, firstFileOffset);
 }
 
@@ -167,7 +169,7 @@ uint32_t Parser::ProcessEntry(DataInventory &dataInventory, const Infra::Context
         ERROR("ParseData error: %", code);
         return Analysis::PARSER_PARSE_DATA_ERROR;
     }
-
+    INFO("Parser is completed!");
     return Analysis::ANALYSIS_OK;
 }
 

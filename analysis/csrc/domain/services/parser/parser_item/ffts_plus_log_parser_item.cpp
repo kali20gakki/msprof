@@ -10,14 +10,14 @@
  * *****************************************************************************
  */
 
-#include "ffts_plus_log_parser_item.h"
+#include "analysis/csrc/domain/services/parser/parser_item/ffts_plus_log_parser_item.h"
 #include "analysis/csrc/dfx/log.h"
 #include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/domain/services/parser/parser_error_code.h"
 
 namespace Analysis {
 namespace Domain {
 using namespace Analysis::Utils;
-const int ERROR_SIZE_MISMATCH = -2;
 
 int FftsPlusLogParseItem(uint8_t *binaryData, uint32_t binaryDataSize,
                          uint8_t *halUniData)
