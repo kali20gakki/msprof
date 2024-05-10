@@ -23,7 +23,8 @@ namespace Domain {
 #pragma pack(1)
 struct BlockPmu {
     uint16_t funcType : 6;     // 第1个，16位数据的低6位
-    uint16_t resv1 : 10;       // resv字段为解析完整大小结构占位需要，实际未使用
+    uint16_t cnt : 4;
+    uint16_t resv1 : 6;       // resv字段为解析完整大小结构占位需要，实际未使用
     uint16_t resv2;
     uint16_t streamId : 11;    // 第3个，16位数据低11位
     uint16_t resv3 : 5;
@@ -47,7 +48,7 @@ struct BlockPmu {
 };
 #pragma pack()
 
-void BlockPmuParseItem(void *binaryData, uint32_t binaryDataSize, void *halUniData, uint32_t halUniDataSize);
+int BlockPmuParseItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* halUniData);
 
 }
 }

@@ -39,5 +39,5 @@ TEST_F(DeviceTaskProcessUTest, ShouldInitDeviceTaskSuccess)
 {
     DeviceTaskProcess deviceTaskProcess;
     DeviceContext deviceContext;
-    ASSERT_EQ(deviceTaskProcess.Run(dataInventory_, deviceContext), Analysis::ANALYSIS_OK);
+    ASSERT_EQ(Analysis::ANALYSIS_OK, deviceTaskProcess.Run(dataInventory_, deviceContext));
 }

@@ -25,7 +25,7 @@ enum HalPmuType {
 };
 
 struct HalPmu {         // 主核context, 从核block
-    AcceleratorType acceleratorType;  // 加速器类型，即AIC、AIV、MIX_AIC、MIX_AIV
+    AcceleratorType acceleratorType{INVALID};  // 加速器类型，即AIC、AIV、MIX_AIC、MIX_AIV
     uint64_t totalCycle = 0;
     uint64_t pmuList[8] = {0};
     uint64_t timeList[2] = {0};   // startTimestamp 和 endTimestamp
@@ -39,7 +39,7 @@ struct HalPmu {         // 主核context, 从核block
 
 struct HalPmuData {
     HalUniData hd;
-    HalPmuType type;
+    HalPmuType type{INVALID_PMU};
     HalPmu pmu;
 };
 }

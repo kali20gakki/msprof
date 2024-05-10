@@ -23,7 +23,7 @@ namespace Domain {
 
 class FftsProfileParser : public Parser {
 private:
-    uint32_t ParseDataItem(void *binaryData, uint32_t binaryDataSize, HalPmuData &data);
+    uint32_t ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data);
 
     std::vector<std::string> GetFilePattern() override;
 
@@ -36,6 +36,7 @@ private:
 private:
     std::vector<HalPmuData> halUniData_;
     std::vector<std::string> filePrefix_{"ffts_profile"};
+    int cnt_{-1};
 };
 
 }
