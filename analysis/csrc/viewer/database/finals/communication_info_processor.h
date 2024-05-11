@@ -28,18 +28,19 @@ public:
                                   uint32_t, uint32_t, std::string, uint64_t, std::string, std::string, uint32_t,
                                   uint64_t, uint32_t, std::string, double, double, uint32_t>;
     using OriTaskDataFormat = std::vector<HcclTaskFormat>;
-    // connection_id, op_name, relay, retry, data_type, alg_type, count, group_name
+    // connection_id, op_name, relay, retry, data_type, alg_type, count, group_name, op_type
     using HcclOpFormat = std::tuple<uint32_t, std::string, int32_t, int32_t, std::string, std::string, uint64_t,
-                                    std::string>;
+                                    std::string, std::string>;
     using OriOpDataFormat = std::vector<HcclOpFormat>;
     // name, globalTaskId, taskType, planeId, groupName, notifyId, rdmaType, srcRank, dstRank, transportType,
     // size, dataType, linkType, opId
     using CommunicationTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t,
                                                                uint64_t, uint64_t, uint32_t, uint32_t, uint64_t,
                                                                uint64_t, uint64_t, uint64_t, uint32_t>>;
-    // opName, start, end, connectionId, group_name, opId, relay, retry, data_type, alg_type, count
+    // opName, start, end, connectionId, group_name, opId, relay, retry, data_type, alg_type, count, op_type
     using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
-                                                             uint64_t, int32_t, int32_t, uint64_t, uint64_t, uint64_t>>;
+                                                             uint64_t, int32_t, int32_t, uint64_t, uint64_t,
+                                                             uint64_t, uint64_t>>;
     struct CommunicationTaskData {
         int32_t planeId = INT32_MAX;
         uint32_t modelId = UINT32_MAX;
@@ -73,6 +74,7 @@ public:
         uint64_t dataType = UINT64_MAX;
         uint64_t algType = UINT64_MAX;
         uint64_t count = UINT64_MAX;
+        uint64_t opType = UINT64_MAX;
     };
     struct HcclTaskSingleDeviceData {
         uint32_t connectionId = UINT32_MAX;
