@@ -92,7 +92,8 @@ namespace {
         {"retry", SQL_INTEGER_TYPE},
         {"dataType", SQL_INTEGER_TYPE},
         {"algType", SQL_INTEGER_TYPE},
-        {"count", SQL_NUMERIC_TYPE}
+        {"count", SQL_NUMERIC_TYPE},
+        {"opType", SQL_INTEGER_TYPE}
     };
 
     const TableColumns CANN_API = {

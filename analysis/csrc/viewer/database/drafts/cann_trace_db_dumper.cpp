@@ -95,7 +95,7 @@ void AddHcclOpDumpData(HCCLOpsDumpData& data, const std::shared_ptr<Analysis::En
     int32_t retry = -1;
     std::string dataType = NA;
     std::string algType = NA;
-    uint64_t count = -1;
+    uint64_t count = UINT64_MAX;
     std::string groupName = NA;
     auto opInfoDesc = bigOpDesc->opInfoDesc;
     if (opInfoDesc != nullptr) {
