@@ -137,7 +137,7 @@ TEST_F(LogModelingUTest, ShouldGetRepeatedDeviceTaskData)
     oneTrackData.hd.taskId.streamId = 1;
     oneTrackData.hd.taskId.contextId = 0;
     oneTrackData.hd.timestamp = 390; // 测试时间戳为390
-    oneTrackData.type = TASK_FLIP_BEAN;
+    oneTrackData.type = TS_TASK_FLIP;
     oneTrackData.flip.flipNum = 1;
     oneTrackData.flip.timestamp = 390; // 测试时间戳为390
     flipS->push_back(oneTrackData);
@@ -316,7 +316,7 @@ TEST_F(LogModelingUTest, ShouldGetRightDeviceTaskDataWhenInputFlippedTasks)
     oneTrackData.hd.taskId.streamId = 1;
     oneTrackData.hd.taskId.contextId = 0;
     oneTrackData.hd.timestamp = 390; // 测试时间戳为390
-    oneTrackData.type = TASK_FLIP_BEAN;
+    oneTrackData.type = TS_TASK_FLIP;
     oneTrackData.flip.flipNum = 1;
     oneTrackData.flip.timestamp = 390; // 测试时间戳为390
     flipS->push_back(oneTrackData);

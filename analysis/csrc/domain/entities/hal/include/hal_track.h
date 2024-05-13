@@ -22,8 +22,8 @@ namespace Analysis {
 namespace Domain {
 
 enum HalTrackType {
-    TASK_FLIP_BEAN = 0,
-    INVALID_BEAN = 1
+    TS_TASK_FLIP = 0,
+    INVALID_TYPE = 1
 };
 
 struct HalTaskFlip {
@@ -33,10 +33,11 @@ struct HalTaskFlip {
 
 struct HalTrackData {
     HalUniData hd;
-    HalTrackType type;
+    HalTrackType type{INVALID_TYPE};
     union {
         HalTaskFlip flip;
     };
+    HalTrackData() {};
 };
 
 std::map<HalTrackType, std::vector<HalTrackData*>> ClassifyTrackData(std::vector<HalTrackData>& trackData);

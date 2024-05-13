@@ -21,12 +21,10 @@ namespace Analysis {
 namespace Domain {
 class TsTrackParser : public Parser {
 private:
-    uint32_t ParseDataItem(void *binaryData, uint32_t binaryDataSize, Domain::HalTrackData &data);
+    uint32_t ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data);
     std::vector<std::string> GetFilePattern() override;
     uint32_t GetTrunkSize() override;
     uint32_t ParseData(Infra::DataInventory& dataInventory) override;
-    uint32_t GetNoFileCode() override;
-
 private:
     std::vector<HalTrackData> halUniData_;
     std::vector<std::string> filePrefix_{"ts_track."};
