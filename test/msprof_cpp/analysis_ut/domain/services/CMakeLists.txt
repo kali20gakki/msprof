@@ -13,6 +13,7 @@ aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/process DEVICE_PARS
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/parser DEVICE_PARSER_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/parser/log DEVICE_PARSER_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/parser/pmu DEVICE_PARSER_SOURCE)
+aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/parser/track DEVICE_PARSER_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/parser/parser_item DEVICE_PARSER_SOURCE)
 
 aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/stubs/dfx DEVICE_PARSER_SOURCE)

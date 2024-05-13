@@ -27,10 +27,10 @@ protected:
     void SetUp() override
     {
         std::vector<HalTrackData> vec{
-            {{}, HalTrackType::TASK_FLIP_BEAN, {}},
-            {{}, HalTrackType::TASK_FLIP_BEAN, {}},
-            {{}, HalTrackType::TASK_FLIP_BEAN, {}},
-            {{}, HalTrackType::INVALID_BEAN, {}},
+            createHalTrackData({}, HalTrackType::TS_TASK_FLIP, {}),
+            createHalTrackData({}, HalTrackType::TS_TASK_FLIP, {}),
+            createHalTrackData({}, HalTrackType::TS_TASK_FLIP, {}),
+            createHalTrackData({}, HalTrackType::INVALID_TYPE, {}),
         };
         std::shared_ptr<std::vector<HalTrackData>> data;
         MAKE_SHARED0_NO_OPERATION(data, std::vector<HalTrackData>, std::move(vec));
@@ -41,6 +41,15 @@ protected:
     {
         dataInventory_.RemoveRestData({});
     }
+
+    HalTrackData createHalTrackData(HalUniData hd, HalTrackType type, HalTaskFlip flip)
+    {
+        HalTrackData ans = {};
+        ans.hd = hd;
+        ans.type = type;
+        ans.flip = flip;
+        return ans;
+    }
 };
 
 TEST_F(HalTrackUTest, ShouldSplitHalTrackDataByTrackType)
@@ -48,14 +57,14 @@ TEST_F(HalTrackUTest, ShouldSplitHalTrackDataByTrackType)
     auto data = dataInventory_.GetPtr<std::vector<HalTrackData>>();
     auto result = ClassifyTrackData(*data);
     ASSERT_EQ(result.size(), 2ul);
-    ASSERT_EQ(3ul, result[HalTrackType::TASK_FLIP_BEAN].size());
-    ASSERT_EQ(1ul, result[HalTrackType::INVALID_BEAN].size());
+    ASSERT_EQ(3ul, result[HalTrackType::TS_TASK_FLIP].size());
+    ASSERT_EQ(1ul, result[HalTrackType::INVALID_TYPE].size());
 }
 
 TEST_F(HalTrackUTest, ShouldReturnFlipBeanWhenInputTaskFlipBean)
 {
     auto data = dataInventory_.GetPtr<std::vector<HalTrackData>>();
-    auto result = GetTrackDataByType(*data, HalTrackType::TASK_FLIP_BEAN);
+    auto result = GetTrackDataByType(*data, HalTrackType::TS_TASK_FLIP);
     ASSERT_EQ(3ul, result.size());
-    ASSERT_EQ(HalTrackType::TASK_FLIP_BEAN, result[0]->type);
+    ASSERT_EQ(HalTrackType::TS_TASK_FLIP, result[0]->type);
 }

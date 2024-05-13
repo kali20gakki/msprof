@@ -16,6 +16,7 @@
 #include "analysis/csrc/domain/services/parser/parser_item/ffts_plus_log_parser_item.h"
 #include "analysis/csrc/domain/services/parser/parser_item/block_pmu_parser_item.h"
 #include "analysis/csrc/domain/services/parser/parser_item/chip4_pmu_parser_item.h"
+#include "analysis/csrc/domain/services/parser/parser_item/task_flip_parser_item.h"
 
 namespace Analysis {
 namespace Domain {
@@ -27,6 +28,15 @@ std::function<int(uint8_t *, uint32_t, uint8_t *)> GetLogParseItem(uint32_t item
         return FftsPlusLogParseItem;
     }
     ERROR("GetLogParseItem return nullptr, itemType: %", itemType);
+    return nullptr;
+}
+
+std::function<int(uint8_t *, uint32_t, uint8_t *)> GetTrackParseItem(uint32_t itemType)
+{
+    if (itemType == PARSER_ITEM_TASK_FLIP) {
+        return TaskFlipParseItem;
+    }
+    ERROR("GetTrackParseItem return nullptr, itemType: %", itemType);
     return nullptr;
 }
 
@@ -46,6 +56,8 @@ std::function<int(uint8_t *, uint32_t, uint8_t *)> GetParseItem(ParserType parse
     switch (parserType) {
         case LOG_PARSER:
             return GetLogParseItem(itemType);
+        case TRACK_PARSER:
+            return GetTrackParseItem(itemType);
         case PMU_PARSER:
             return GetPmuParseItem(itemType);
         default:
