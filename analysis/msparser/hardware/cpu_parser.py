@@ -165,15 +165,15 @@ class ParsingCPUData(MsMultiProcess):
         self.curs = None
         self.conn = None
         self.type = 'cpu'
+        self.dbname = "cpu.db"
         self.patterns = get_ctrl_cpu_compiles()
         self._file_list = []
 
     @classmethod
-    def get_cpu_id(cls: any, sample_config: dict, device_id: str, cpu_type: str) -> str:
+    def get_cpu_id(cls: any, sample_config: dict, cpu_type: str) -> str:
         """
         get cpu id from info.json
         :param sample_config: sample config
-        :param device_id: device id
         :param cpu_type: cpu type
         :return: cpu id
         """
@@ -181,9 +181,6 @@ class ParsingCPUData(MsMultiProcess):
         if not os.path.exists(project_path):
             logging.info("No project path found in %s", CommonConstant.SAMPLE_JSON)
             error(cls.FILE_NAME, "No project path found in {}".format(CommonConstant.SAMPLE_JSON))
-            return ''
-        info_path = os.path.realpath(os.path.join(project_path, StrConstant.INFO_JSON + '.' + device_id))
-        if not info_path:
             return ''
         cpu_id = InfoConfReader().get_data_under_device("{}_cpu".format(cpu_type))
         if not cpu_id:
@@ -196,7 +193,7 @@ class ParsingCPUData(MsMultiProcess):
         finally:
             pass
 
-    def init_cpu_db(self: any, device_id: str) -> None:
+    def init_cpu_db(self: any) -> None:
         """
         inti cpu db file
         """
@@ -205,10 +202,7 @@ class ParsingCPUData(MsMultiProcess):
             logging.info("No project path found in %s", CommonConstant.SAMPLE_JSON)
             error(self.FILE_NAME, "No project path found in {}".format(CommonConstant.SAMPLE_JSON))
             call_sys_exit(NumberConstant.ERROR)
-        self.conn = sqlite3.connect(
-            os.path.join(
-                project_path,
-                "sqlite", self.type + "cpu_" + device_id + ".db"))
+        self.conn = sqlite3.connect(os.path.join(project_path, "sqlite", self.dbname))
         self.curs = self.conn.cursor()
         try:
             self.curs.execute("PRAGMA page_size=8192")
@@ -226,7 +220,7 @@ class ParsingCPUData(MsMultiProcess):
             else:
                 self.conn.commit()
 
-    def parsing_data_file(self: any, device_id: str, cpuid: str, data_path: str) -> int:
+    def parsing_data_file(self: any, cpuid: str, data_path: str) -> int:
         """
         parsing cpu data file
         """
@@ -239,7 +233,7 @@ class ParsingCPUData(MsMultiProcess):
         if ret:
             return ret
         try:
-            self._multiprocess(data_path, project_path, cpuid, device_id)
+            self._multiprocess(data_path, project_path, cpuid)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError):
             logging.error(traceback.format_exc())
             return NumberConstant.ERROR
@@ -303,18 +297,8 @@ class ParsingCPUData(MsMultiProcess):
             logging.info("No project path found in %s", CommonConstant.SAMPLE_JSON)
             error(self.FILE_NAME, "No project path found in {}".format(CommonConstant.SAMPLE_JSON))
             return
-        devices = InfoConfReader().get_device_list()
-        if not devices:
-            logging.error("No device list found in info.json")
-            return
-        for device in devices:
-            if not str(device).isdigit():
-                logging.error("device list is not digit")
-                return
-        for device_id in devices:
-            ret = self._do_parse(device_id, project_path)
-            if not ret:
-                return
+        if not self._do_parse(project_path):
+            logging.error(self.FILE_NAME, "cpu parse error, path is {}".format(project_path))
 
     def ms_run(self: any) -> None:
         """
@@ -329,7 +313,7 @@ class ParsingCPUData(MsMultiProcess):
             if isinstance(self.conn, sqlite3.Connection):
                 self.conn.close()
 
-    def _multiprocess(self: any, data_path: str, project_path: str, cpuid: str, device_id: str) -> None:
+    def _multiprocess(self: any, data_path: str, project_path: str, cpuid: str) -> None:
         processes = []
         lock = multiprocessing.Lock()
         for i in range(self.FILE_SIZE):
@@ -339,8 +323,7 @@ class ParsingCPUData(MsMultiProcess):
                 "id": cpuid,
                 "start_pos": i * os.path.getsize(data_path) / self.FILE_SIZE,
                 "end_pos": (i + 1) * os.path.getsize(data_path) / self.FILE_SIZE,
-                "dbname": os.path.join(project_path,
-                                       "sqlite", self.type + "cpu_" + device_id),
+                "dbname": os.path.join(project_path, "sqlite", self.dbname),
                 "pro_no": i,
                 "lock": lock
             }
@@ -352,20 +335,20 @@ class ParsingCPUData(MsMultiProcess):
         for pro_ in processes:
             pro_.join()
 
-    def _do_parse(self: any, device_id: str, project_path: str) -> bool:
+    def _do_parse(self: any, project_path: str) -> bool:
         for file in os.listdir(os.path.join(project_path, "data")):
             if not (get_file_name_pattern_match(file, *self.patterns) and is_valid_original_data(file, project_path)):
                 continue
-            cpu_id = self.get_cpu_id(self.sample_config, device_id, self.type)
+            cpu_id = self.get_cpu_id(self.sample_config, self.type)
             if cpu_id == '':
                 logging.error('failed to get %s cpu id', self.type)
                 return False
             # create database
-            self.init_cpu_db(device_id)
+            self.init_cpu_db()
             data_path = os.path.join(project_path, "data", file)
             if os.path.getsize(data_path) != 0:
                 # replay id is 0
-                status = self.parsing_data_file(device_id, cpu_id, data_path)
+                status = self.parsing_data_file(cpu_id, data_path)
                 if status == NumberConstant.ERROR:
                     return False
             # create EventCount table and insert data

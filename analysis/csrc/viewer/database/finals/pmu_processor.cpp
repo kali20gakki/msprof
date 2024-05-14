@@ -24,11 +24,11 @@ using namespace Association::Credential;
 using namespace Analysis::Utils;
 
 namespace {
-const std::string AI_VECTOR_CORE_PREFIX = "ai_vector_core_";
+const std::string AI_VECTOR_CORE_DB = "ai_vector_core.db";
 const std::string TYPE_AIV = "AIV";
-const std::string AI_CORE_PREFIX = "aicore_";
+const std::string AI_CORE_DB = "aicore.db";
 const std::string TYPE_AIC = "AIC";
-const std::set<std::string> SAMPLE_BASED_DB_NAMES = {AI_VECTOR_CORE_PREFIX, AI_CORE_PREFIX};
+const std::set<std::string> SAMPLE_BASED_DB_NAMES = {AI_VECTOR_CORE_DB, AI_CORE_DB};
 const std::set<std::string> INVALID_COLUMN_NAMES = {"task_id", "stream_id", "subtask_id", "batch_id", "task_type",
                                                     "start_time", "end_time", "ffts_type", "core_type"};
 const std::string TASK_BASED = "task-based";
@@ -223,10 +223,10 @@ bool PmuProcessor::SampleBasedProcess(const std::string &fileDir)
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     std::unordered_map<std::string, std::tuple<uint16_t, uint64_t>> dbPathTable;
     for (const auto& name : SAMPLE_BASED_DB_NAMES) {
-        uint64_t coreType = (name == AI_CORE_PREFIX) ? stringAiCoreId : stringAiVectorCoreId;
+        uint64_t coreType = (name == AI_CORE_DB) ? stringAiCoreId : stringAiVectorCoreId;
         for (const auto& devicePath : deviceList) {
             auto deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
-            std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, name + std::to_string(deviceId) + ".db"});
+            std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, name});
             auto status = CheckPath(dbPath);
             if (status == CHECK_SUCCESS) {
                 dbPathTable.insert({dbPath, std::make_tuple(deviceId, coreType)});

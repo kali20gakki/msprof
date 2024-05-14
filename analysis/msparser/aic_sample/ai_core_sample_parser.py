@@ -38,7 +38,7 @@ class ParsingCoreSampleData(MsMultiProcess):
         self.ai_core_data = []
         self.device_id = self.sample_config.get("device_id", "0")
         self.model = None
-        self._db_name = 'aicore_{}.db'.format(self.device_id)
+        self._db_name = DBNameConstant.DB_NAME_AICORE
         self._replayid = 0
         self._core_type = 'aic'
         self._metrics_type = StrConstant.AI_CORE_PROFILING_METRICS
@@ -158,7 +158,7 @@ class ParsingAIVectorCoreSampleData(ParsingCoreSampleData):
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
         self.file_list = sorted(file_list.get(DataTag.AIV, []), key=lambda x: int(x.split("_")[-1]))
-        self._db_name = 'ai_vector_core_{}.db'.format(self.device_id)
+        self._db_name = DBNameConstant.DB_NAME_AI_VECTOR_CORE
         self._event = self.sample_config.get("aiv_profiling_events", "").split(",")
         self._sample_metrics_key = self.sample_config.get(StrConstant.AIV_PROFILING_METRICS)
         self._core_type = 'aiv'
@@ -184,13 +184,13 @@ class ParsingFftsAICoreSampleData(ParsingCoreSampleData):
         self.calculate = OffsetCalculator(self.file_list, StructFmt.AICORE_SAMPLE_FMT_SIZE, self.result_dir)
         self.data_dict = {
             'aic': {
-                'data_list': [], 'db_name': 'aicore_{}.db'.format(self.device_id),
+                'data_list': [], 'db_name': DBNameConstant.DB_NAME_AICORE,
                 'event': self.sample_config.get("ai_core_profiling_events", "").split(","),
                 'metrics_key': self.sample_config.get(StrConstant.AI_CORE_PROFILING_METRICS),
                 'metric_type': StrConstant.AI_CORE_PROFILING_METRICS
             },
             'aiv': {
-                'data_list': [], 'db_name': 'ai_vector_core_{}.db'.format(self.device_id),
+                'data_list': [], 'db_name': DBNameConstant.DB_NAME_AI_VECTOR_CORE,
                 'event': self.sample_config.get("aiv_profiling_events", "").split(","),
                 'metrics_key': self.sample_config.get(StrConstant.AIV_PROFILING_METRICS),
                 'metric_type': StrConstant.AIV_PROFILING_METRICS

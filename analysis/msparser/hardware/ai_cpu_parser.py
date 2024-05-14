@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-
+from common_func.db_name_constant import DBNameConstant
 from common_func.file_name_manager import get_ai_cpu_compiles
 
 from msparser.hardware.cpu_parser import ParsingCPUData
@@ -19,6 +19,7 @@ class ParsingAICPUData(ParsingCPUData):
         self.curs = None
         self.conn = None
         self.type = 'ai'
+        self.dbname = DBNameConstant.DB_NAME_AICPU
         self.patterns = get_ai_cpu_compiles()
         self._file_list = file_list.get(DataTag.AICPU, [])
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))

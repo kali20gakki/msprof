@@ -81,6 +81,11 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_ASCEND_TASK = "ascend_task.db"
     DB_NPU_MODULE_MEM = "npu_module_mem.db"
     DB_NODE_ATTR_INFO = "node_attr_info.db"
+    DB_NAME_AICORE = "aicore.db"
+    DB_NAME_AI_VECTOR_CORE = "ai_vector_core.db"
+    DB_NAME_AICPU = "aicpu.db"
+    DB_NAME_CTRLCPU = "ctrlcpu.db"
+    DB_NAME_TSCPU = "tscpu.db"
 
     # DB tables
     TABLE_ACL_DATA = "AclData"

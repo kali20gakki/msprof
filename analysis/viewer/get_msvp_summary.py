@@ -9,28 +9,11 @@ import sqlite3
 from common_func.common import CommonConstant
 from common_func.config_mgr import ConfigMgr
 from common_func.db_manager import DBManager
+from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_common import path_check
-
-
-def get_type_db_correspondences(device_id: str, type_: str, sample_config: dict) -> dict:
-    """
-    relate the device id and wished profiling type to the databaseration info
-    """
-    try:
-        if type_ == 'ai_core_profiling':
-            if sample_config.get("ai_core_profiling_mode") == StrConstant.AIC_TASK_BASED_MODE:
-                return {"ai_core_profiling": "runtime_{}.db".format(device_id)}
-            return {"ai_core_profiling": "aicore_%s" % device_id + ".db"}
-        return {"ctrl_cpu_profiling": "ctrlcpu_%s" % device_id + ".db",
-                "ts_cpu_profiling": "tscpu_%s" % device_id + ".db",
-                "ai_cpu_profiling": "aicpu_%s" % device_id + ".db"}
-    except (OSError, SystemError, ValueError, TypeError, RuntimeError):
-        return {}
-    finally:
-        pass
 
 
 def _pre_check_pmu_events(project_path: str) -> tuple:
@@ -47,21 +30,18 @@ def _pre_check_pmu_events(project_path: str) -> tuple:
     return NumberConstant.SUCCESS, 'success', sample_config
 
 
-def pre_check_pmu_events_interface(project_path: str, device_id: str, type_: str) -> tuple:
+def pre_check_pmu_events_interface(project_path: str) -> tuple:
     """
     pre check pmu events interface
     """
     try:
-        ret_code, ret_msg, ret_res = _pre_check_pmu_events(project_path)
+        ret_code, ret_msg, sample_config = _pre_check_pmu_events(project_path)
     except (OSError, SystemError, ValueError, TypeError, RuntimeError):
         return NumberConstant.ERROR, 'Failed to check pmu events.', {}
     if ret_code == NumberConstant.ERROR:
-        return ret_code, ret_msg, ret_res
-    sample_config = ret_res
-    type_db_match = get_type_db_correspondences(device_id, type_, sample_config)
-    if not type_db_match:
-        return NumberConstant.ERROR, "Failed to get db file information.", {}
-    return NumberConstant.SUCCESS, '', {'sample_config': sample_config, 'type_db_match': type_db_match}
+        return ret_code, ret_msg, sample_config
+    return NumberConstant.SUCCESS, '', {'sample_config': sample_config,
+                                        'type_db_match': {"ai_core_profiling": DBNameConstant.DB_NAME_AICORE}}
 
 
 def calculate_utilization(tmp_data: list, result_data: dict) -> None:
@@ -161,14 +141,12 @@ def _get_aicore_util(curs: any, number: float, start: float, end: float) -> str:
     return json.dumps({'status': NumberConstant.SUCCESS, 'data': result_data})
 
 
-def get_aicore_utilization(project_path: str, device_id: str, number: float, start: float, end: float) -> str:
+def get_aicore_utilization(project_path: str, number: float, start: float, end: float) -> str:
     """
     get ai core utilization data
     """
     result = {'status': 0, 'msg': ''}
-    result['status'], result['msg'], func_map = pre_check_pmu_events_interface(project_path,
-                                                                               device_id,
-                                                                               'ai_core_profiling')
+    result['status'], result['msg'], func_map = pre_check_pmu_events_interface(project_path)
     if result.get('status') == NumberConstant.ERROR:
         return json.dumps({"status": NumberConstant.ERROR, "info": result.get('msg')})
     conn, curs = DBManager.check_connect_db(project_path,

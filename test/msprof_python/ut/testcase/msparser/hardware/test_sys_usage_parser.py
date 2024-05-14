@@ -99,7 +99,6 @@ class TestParsingCpuUsageData(unittest.TestCase):
             InfoConfReader()._info_json = {'devices': '0'}
             check = ParsingCpuUsageData(self.file_list, CONFIG)
             check.main()
-        self.assertEqual(check.device_id, '0')
 
     def test_save(self):
         with mock.patch('msmodel.hardware.sys_usage_model.SysUsageModel.init'), \

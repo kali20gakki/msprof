@@ -145,7 +145,7 @@ def multiprocess_callback(args: any) -> None:
         "sample_count": MultiProcessCbConstant.SAMPLE_COUNT, 'cpu_id': args['id']
     }
     lock = args['lock']
-    conn, curs = DBManager.create_connect_db(args["dbname"] + '.db')
+    conn, curs = DBManager.create_connect_db(args["dbname"])
     try:
         with FileOpen(args["filename"], 'r') as file_obj:
             _multiprocess_callback_helper(args, file_obj.file_reader, info, conn, curs, lock)

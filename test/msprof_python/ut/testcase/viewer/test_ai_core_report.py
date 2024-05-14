@@ -15,27 +15,27 @@ params = {'core_data_type': 'ai_core_pmu_events',
 class TestAclReport(unittest.TestCase):
     def test_get_core_sample_data_1(self):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(None, None)):
-            res = get_core_sample_data('', '', 0, params)
+            res = get_core_sample_data('', '', params)
         self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
 
     def test_get_core_sample_data_2(self):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
                 mock.patch(NAMESPACE + '.get_output_event_counter', return_value=([], [])):
-            res = get_core_sample_data('', '', 0, params)
+            res = get_core_sample_data('', '', params)
         self.assertEqual(res[1], [])
 
     def test_get_core_sample_data_3(self):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
                 mock.patch(NAMESPACE + '.get_output_event_counter', return_value=([], [])):
             params["data_type"] = "ai_vector_core_pmu_events"
-            res = get_core_sample_data('', '', 0, params)
+            res = get_core_sample_data('', '', params)
         self.assertEqual(res[1], [])
 
     def test_get_core_sample_data_4(self):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
                 mock.patch(NAMESPACE + '.get_output_event_counter', return_value=([], [])):
             params["data_type"] = ""
-            res = get_core_sample_data('', '', 0, params)
+            res = get_core_sample_data('', '', params)
         self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
 
     def test_get_output_event_counter_1(self):

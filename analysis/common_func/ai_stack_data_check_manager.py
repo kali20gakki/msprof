@@ -56,7 +56,7 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain ai core data or not
         """
-        return bool(path_check(PathManager.get_db_path(result_dir, 'aicore_{}.db'.format(str(device_id))))) or \
+        return bool(path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_NAME_AICORE))) or \
             (cls.check_data_exist(result_dir, file_name_manager.get_ai_core_compiles(),
                                   device_id=device_id) and ConfigMgr.is_ai_core_sample_based(result_dir))
 
@@ -65,7 +65,7 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain ai core data or not
         """
-        return bool(path_check(PathManager.get_db_path(result_dir, 'ai_vector_core_{}.db'.format(str(device_id))))) or \
+        return bool(path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_NAME_AI_VECTOR_CORE))) or \
             cls.check_data_exist(result_dir, file_name_manager.get_aiv_compiles(),
                                  device_id=device_id) and ConfigMgr.is_aiv_sample_based(result_dir)
 

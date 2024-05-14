@@ -116,7 +116,7 @@ protected:
         std::shared_ptr<AicoreDB> aicDB;
         MAKE_SHARED0_RETURN_VALUE(aicDB, AicoreDB, false);
         std::shared_ptr<DBRunner> aicRunner;
-        MAKE_SHARED_RETURN_VALUE(aicRunner, DBRunner, false, File::PathJoin({sqlitePath, "aicore_0.db"}));
+        MAKE_SHARED_RETURN_VALUE(aicRunner, DBRunner, false, File::PathJoin({sqlitePath, "aicore.db"}));
         EXPECT_TRUE(aicRunner->CreateTable("AICoreOriginalData", aicDB->GetTableCols("AICoreOriginalData")));
         EXPECT_TRUE(aicRunner->InsertData("AICoreOriginalData", SAMPLE_TIMELINE));
         EXPECT_TRUE(aicRunner->CreateTable("MetricSummary", aicDB->GetTableCols("MetricSummary")));
@@ -125,7 +125,7 @@ protected:
         std::shared_ptr<AiVectorCoreDB> aivDB;
         MAKE_SHARED0_RETURN_VALUE(aivDB, AiVectorCoreDB, false);
         std::shared_ptr<DBRunner> aivRunner;
-        MAKE_SHARED_RETURN_VALUE(aivRunner, DBRunner, false, File::PathJoin({sqlitePath, "ai_vector_core_0.db"}));
+        MAKE_SHARED_RETURN_VALUE(aivRunner, DBRunner, false, File::PathJoin({sqlitePath, "ai_vector_core.db"}));
         EXPECT_TRUE(aivRunner->CreateTable("AICoreOriginalData", aivDB->GetTableCols("AICoreOriginalData")));
         EXPECT_TRUE(aivRunner->InsertData("AICoreOriginalData", SAMPLE_TIMELINE));
         EXPECT_TRUE(aivRunner->CreateTable("MetricSummary", aivDB->GetTableCols("MetricSummary")));

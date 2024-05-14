@@ -154,12 +154,12 @@ class TestTraceViewer(unittest.TestCase):
     def test_get_aicore_utilization_timeline_1(self):
         with mock.patch(NAMESPACE + '.get_aicore_utilization', side_effect=sqlite3.Error):
             InfoConfReader()._info_json = {"pid": 0}
-            res = get_aicore_utilization_timeline(param)
+            res = get_aicore_utilization_timeline("")
         self.assertEqual(len(res), 0)
 
         with mock.patch(NAMESPACE + '.JsonManager.loads', return_value=None):
             InfoConfReader()._info_json = {"pid": 0}
-            res = get_aicore_utilization_timeline(param)
+            res = get_aicore_utilization_timeline("")
         self.assertEqual(len(res), 0)
 
         aicore_data = {"status": 0,
@@ -168,7 +168,7 @@ class TestTraceViewer(unittest.TestCase):
                                           "average": [["176256.335450", "0.000000"]]}}}
         with mock.patch(NAMESPACE + '.get_aicore_utilization', return_value=json.dumps(aicore_data)):
             InfoConfReader()._info_json = {"pid": 0}
-            res = get_aicore_utilization_timeline(param)
+            res = get_aicore_utilization_timeline("")
         self.assertEqual(len(res), 3)
 
 

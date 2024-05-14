@@ -124,9 +124,7 @@ class MsProfExportDataUtils:
             result = get_ddr_timeline(ddr_param)
             return result
 
-        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR),
-                                          configs.get(StrConstant.CONFIG_DB).format(
-                                              params.get(StrConstant.PARAM_DEVICE_ID)))
+        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), configs.get(StrConstant.CONFIG_DB))
         return get_ddr_data(db_path, params.get(StrConstant.PARAM_DEVICE_ID), configs)
 
     @staticmethod
@@ -134,10 +132,8 @@ class MsProfExportDataUtils:
         """
         get system cpu usage data
         """
-        db_name = configs.get(StrConstant.CONFIG_DB).format(params.get(StrConstant.PARAM_DEVICE_ID))
-        if InfoConfReader().is_host_profiling():
-            db_name = DBNameConstant.DB_HOST_SYS_USAGE_CPU
-        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), db_name)
+        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR),
+                                          DBNameConstant.DB_HOST_SYS_USAGE_CPU)
         if params.get(StrConstant.DATA_TYPE) == "cpu_usage":
             return get_sys_cpu_usage_data(db_path, configs.get(StrConstant.CONFIG_TABLE), configs)
         if params.get(StrConstant.DATA_TYPE) == "process_cpu_usage":
@@ -149,8 +145,7 @@ class MsProfExportDataUtils:
         """
         get cpu pmu events
         """
-        return get_cpu_hot_function(params.get(StrConstant.PARAM_RESULT_DIR),
-                                    configs.get(StrConstant.CONFIG_DB).format(params.get(StrConstant.PARAM_DEVICE_ID)),
+        return get_cpu_hot_function(params.get(StrConstant.PARAM_RESULT_DIR), configs.get(StrConstant.CONFIG_DB),
                                     configs.get(StrConstant.CONFIG_TABLE), configs.get(StrConstant.CONFIG_HEADERS))
 
     @staticmethod
@@ -158,9 +153,8 @@ class MsProfExportDataUtils:
         """
         get ts cpu top function
         """
-        return TsCpuReport().get_output_top_function(
-            configs.get(StrConstant.CONFIG_DB).format(params.get(StrConstant.PARAM_DEVICE_ID)),
-            params.get(StrConstant.PARAM_RESULT_DIR))
+        return TsCpuReport().get_output_top_function(configs.get(StrConstant.CONFIG_DB),
+                                                     params.get(StrConstant.PARAM_RESULT_DIR))
 
     @staticmethod
     def _get_cpu_pmu_events(configs: dict, params: dict) -> any:
@@ -169,13 +163,10 @@ class MsProfExportDataUtils:
         """
         if params.get(StrConstant.PARAM_DATA_TYPE) == StrConstant.CTL_CPU_PMU or params.get(
                 StrConstant.PARAM_DATA_TYPE) == StrConstant.AI_CPU_PMU:
-            return get_aictrl_pmu_events(params.get(StrConstant.PARAM_RESULT_DIR),
-                                         configs.get(StrConstant.CONFIG_DB).format(
-                                             params.get(StrConstant.PARAM_DEVICE_ID)),
+            return get_aictrl_pmu_events(params.get(StrConstant.PARAM_RESULT_DIR), configs.get(StrConstant.CONFIG_DB),
                                          configs.get(StrConstant.CONFIG_TABLE), configs.get(StrConstant.CONFIG_HEADERS))
         if params.get(StrConstant.PARAM_DATA_TYPE) == StrConstant.TS_CPU_PMU:
-            return get_ts_pmu_events(params.get(StrConstant.PARAM_RESULT_DIR),
-                                     configs.get(StrConstant.CONFIG_DB).format(params.get(StrConstant.PARAM_DEVICE_ID)),
+            return get_ts_pmu_events(params.get(StrConstant.PARAM_RESULT_DIR), configs.get(StrConstant.CONFIG_DB),
                                      configs.get(StrConstant.CONFIG_TABLE), configs.get(StrConstant.CONFIG_HEADERS))
         return MsvpConstant.MSVP_EMPTY_DATA
 
@@ -184,10 +175,8 @@ class MsProfExportDataUtils:
         """
         get memory data
         """
-        db_name = configs.get(StrConstant.CONFIG_DB).format(params.get(StrConstant.PARAM_DEVICE_ID))
-        if InfoConfReader().is_host_profiling():
-            db_name = DBNameConstant.DB_HOST_SYS_USAGE_MEM
-        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), db_name)
+        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR),
+                                          DBNameConstant.DB_HOST_SYS_USAGE_MEM)
         if params.get(StrConstant.PARAM_DATA_TYPE) == "sys_mem":
             return get_sys_mem_data(db_path, configs.get(StrConstant.CONFIG_TABLE), configs)
         if params.get(StrConstant.PARAM_DATA_TYPE) == "process_mem":
@@ -252,8 +241,7 @@ class MsProfExportDataUtils:
         get op statistic data
         """
         db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), configs.get(StrConstant.CONFIG_DB))
-        return ReportOPCounter.report_op(db_path,
-                                         configs.get(StrConstant.CONFIG_HEADERS))
+        return ReportOPCounter.report_op(db_path, configs.get(StrConstant.CONFIG_HEADERS))
 
     @staticmethod
     def _get_hccl_statistic_data(configs: dict, params: dict) -> any:
@@ -261,8 +249,7 @@ class MsProfExportDataUtils:
         get hccl statistic data
         """
         db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), configs.get(StrConstant.CONFIG_DB))
-        return ReportHcclStatisticData.report_hccl_op(db_path,
-                                                      configs.get(StrConstant.CONFIG_HEADERS))
+        return ReportHcclStatisticData.report_hccl_op(db_path, configs.get(StrConstant.CONFIG_HEADERS))
 
     @staticmethod
     def _get_dvpp_data(configs: dict, params: dict) -> any:
@@ -281,9 +268,7 @@ class MsProfExportDataUtils:
             return result
 
         data_type = params.get(StrConstant.PARAM_DATA_TYPE)
-        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR),
-                                          configs.get(StrConstant.CONFIG_DB).format(
-                                              params.get(StrConstant.PARAM_DEVICE_ID)))
+        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), configs.get(StrConstant.CONFIG_DB))
         if data_type == StrConstant.DVPP_DATA:
             return get_peripheral_dvpp_data(db_path, configs.get(StrConstant.CONFIG_TABLE),
                                             params.get(StrConstant.PARAM_DEVICE_ID), configs)
@@ -299,9 +284,7 @@ class MsProfExportDataUtils:
             return nic_result
 
         data_type = params.get(StrConstant.PARAM_DATA_TYPE)
-        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR),
-                                          configs.get(StrConstant.CONFIG_DB).format(
-                                              params.get(StrConstant.PARAM_DEVICE_ID)))
+        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), configs.get(StrConstant.CONFIG_DB))
         if data_type == StrConstant.NIC_DATA:
             return get_peripheral_nic_data(db_path, configs.get(StrConstant.CONFIG_TABLE),
                                            params.get(StrConstant.PARAM_DEVICE_ID), configs)
@@ -317,9 +300,7 @@ class MsProfExportDataUtils:
             return roce_result
 
         data_type = params.get(StrConstant.PARAM_DATA_TYPE)
-        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR),
-                                          configs.get(StrConstant.CONFIG_DB).format(
-                                              params.get(StrConstant.PARAM_DEVICE_ID)))
+        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), configs.get(StrConstant.CONFIG_DB))
         if data_type == StrConstant.ROCE_DATA:
             return get_peripheral_nic_data(db_path, configs.get(StrConstant.CONFIG_TABLE),
                                            params.get(StrConstant.PARAM_DEVICE_ID), configs)
@@ -488,8 +469,7 @@ class MsProfExportDataUtils:
             if data:
                 return configs.get(StrConstant.CONFIG_HEADERS), data, len(data)
             return MsvpConstant.MSVP_EMPTY_DATA
-        return get_host_prof_timeline(params.get(StrConstant.PARAM_RESULT_DIR),
-                                      HostExportType.HOST_RUNTIME_API)
+        return get_host_prof_timeline(params.get(StrConstant.PARAM_RESULT_DIR), HostExportType.HOST_RUNTIME_API)
 
     @staticmethod
     def _get_bulk_data(configs: dict, params: dict) -> any:
@@ -505,7 +485,7 @@ class MsProfExportDataUtils:
         return MsprofTimeline().export_all_data()
 
     @staticmethod
-    def _get_task_timeline(configs: dict, params: dict) -> str:
+    def _get_task_timeline(configs: dict, params: dict) -> list:
         """
         get ffts task time data
         """
@@ -689,22 +669,13 @@ class MsProfExportDataUtils:
     @classmethod
     def _get_ai_core_sample_based_data(cls: any, configs: dict, params: dict) -> any:
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
-            aicore_utilization_param = {
-                'project_path': params.get(StrConstant.PARAM_RESULT_DIR),
-                'device_id': params.get(StrConstant.PARAM_DEVICE_ID),
-                'start_time': NumberConstant.DEFAULT_START_TIME,
-                'end_time': NumberConstant.DEFAULT_END_TIME
-            }
-            result = get_aicore_utilization_timeline(aicore_utilization_param)
-            return result
+            return get_aicore_utilization_timeline(params.get(StrConstant.PARAM_RESULT_DIR, ""))
         params[StrConstant.CORE_DATA_TYPE] = StrConstant.AI_CORE_PMU_EVENTS
         return get_core_sample_data(params.get(StrConstant.PARAM_RESULT_DIR),
-                                    configs.get(StrConstant.CONFIG_DB),
-                                    params.get(StrConstant.PARAM_DEVICE_ID), params)
+                                    configs.get(StrConstant.CONFIG_DB), params)
 
     @classmethod
     def _get_aiv_sample_based_data(cls: any, configs: dict, params: dict) -> any:
         params[StrConstant.CORE_DATA_TYPE] = StrConstant.AI_VECTOR_CORE_PMU_EVENTS
         return get_core_sample_data(params.get(StrConstant.PARAM_RESULT_DIR),
-                                    configs.get(StrConstant.CONFIG_DB),
-                                    params.get(StrConstant.PARAM_DEVICE_ID), params)
+                                    configs.get(StrConstant.CONFIG_DB), params)

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #  Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
-
+from common_func.db_name_constant import DBNameConstant
 from msconfig.meta_config import MetaConfig
 
 
@@ -12,51 +12,46 @@ class MsProfExportDataConfig(MetaConfig):
             ('headers',
              'Time(%),Time(us),Count,Avg(us),Min(us),Max(us),Waiting(us),Running(us),'
              'Pending(us),Type,API,Task ID,Op Name,Stream ID'),
-            ('table', 'ReportTask'),
-            ('db', 'runtime.db')
+            ('table', DBNameConstant.TABLE_RUNTIME_REPORT_TASK),
+            ('db', DBNameConstant.DB_RUNTIME)
         ],
         'ddr': [
             ('handler', '_get_ddr_data'),
             ('headers', 'Metric,Read(MB/s),Write(MB/s)'),
-            ('db', 'ddr.db')
+            ('db', DBNameConstant.DB_DDR)
         ],
         'cpu_usage': [
             ('handler', '_get_cpu_usage_data'),
             ('headers', 'Cpu Type,User(%),Sys(%),IoWait(%),Irq(%),Soft(%),Idle(%)'),
-            ('db', 'cpu_usage_{}.db'),
-            ('table', 'SysCpuUsage')
+            ('table', DBNameConstant.TABLE_SYS_USAGE)
         ],
         'process_cpu_usage': [
             ('handler', '_get_cpu_usage_data'),
             ('headers', 'PID,Name,CPU(%)'),
-            ('db', 'cpu_usage_{}.db'),
-            ('table', 'ProCpuUsage')
+            ('table', DBNameConstant.TABLE_PID_USAGE)
         ],
         'sys_mem': [
             ('handler', '_get_memory_data'),
             ('headers',
              'Memory Total,Memory Free,Buffers,Cached,Share Memory,Commit Limit,'
              'Committed AS,Huge Pages Total(pages),Huge Pages Free(pages)'),
-            ('db', 'memory_{}.db'),
-            ('table', 'sysmem')
+            ('table', DBNameConstant.TABLE_SYS_MEM)
         ],
         'process_mem': [
             ('handler', '_get_memory_data'),
             ('headers', 'PID,Name,Size(pages),Resident(pages),Shared(pages)'),
-            ('db', 'memory_{}.db'),
-            ('table', 'pidmem')
+            ('table', DBNameConstant.TABLE_PID_MEM)
         ],
         'op_summary': [
             ('handler', '_get_op_summary_data'),
             ('headers',
              'Model Name,Model ID,Task ID,Stream ID,Infer ID,Op Name,OP Type,OP State,Task Type,'
              'Task Start Time(us),Task Duration(us),Task Wait Time(us),Block Dim,Mix Block Dim,HF32 Eligible'),
-            ('db', 'ai_core_op_summary.db')
         ],
         'l2_cache': [
             ('handler', '_get_l2_cache_data'),
-            ('db', 'l2cache.db'),
-            ('table', 'L2CacheSummary'),
+            ('db', DBNameConstant.DB_L2CACHE),
+            ('table', DBNameConstant.TABLE_L2CACHE_SUMMARY),
             ('unused_cols', 'device_id,task_type'),
         ],
         'step_trace': [
@@ -79,7 +74,7 @@ class MsProfExportDataConfig(MetaConfig):
             ('handler', '_get_op_statistic_data'),
             ('headers',
              'Model Name,OP Type,Core Type,Count,Total Time(us),Min Time(us),Avg Time(us),Max Time(us),Ratio(%)'),
-            ('db', 'op_counter.db')
+            ('db', DBNameConstant.DB_OP_COUNTER)
         ],
         'hbm': [
             ('handler', '_get_hbm_data'),
@@ -93,16 +88,16 @@ class MsProfExportDataConfig(MetaConfig):
             ('headers',
              'Model Name,Model ID,Fusion Op,Original Ops,Memory Input(KB),Memory Output(KB),'
              'Memory Weight(KB),Memory Workspace(KB),Memory Total(KB)'),
-            ('db', 'ge_model_info.db'),
-            ('table', 'ModelName')
+            ('db', DBNameConstant.DB_GE_MODEL_INFO),
+            ('table', DBNameConstant.TABLE_MODEL_NAME)
         ],
         'ai_core_utilization': [
             ('handler', '_get_ai_core_sample_based_data'),
-            ('db', 'aicore_{}.db')
+            ('db', DBNameConstant.DB_NAME_AICORE)
         ],
         'ai_vector_core_utilization': [
             ('handler', '_get_aiv_sample_based_data'),
-            ('db', 'ai_vector_core_{}.db')
+            ('db', DBNameConstant.DB_NAME_AI_VECTOR_CORE)
         ],
         'hccs': [
             ('handler', '_get_hccs_data')
@@ -121,63 +116,62 @@ class MsProfExportDataConfig(MetaConfig):
         ],
         'dvpp': [
             ('handler', '_get_dvpp_data'),
-            ('db', 'peripheral.db'),
-            ('table', 'DvppReportData'),
+            ('db', DBNameConstant.DB_PERIPHERAL),
+            ('table', DBNameConstant.TABLE_DVPP_REPORT),
             ('headers', 'Dvpp Id,Engine Type,Engine ID,All Time(us),All Frame,All Utilization(%)')
         ],
         'nic': [
             ('handler', '_get_nic_data'),
-            ('db', 'nic.db'),
-            ('table', 'NicReportData'),
+            ('db', DBNameConstant.DB_NIC_ORIGIN),
+            ('table', DBNameConstant.TABLE_NIC_REPORT),
             ('headers',
              'Timestamp(us),Bandwidth(MB/s),Rx Bandwidth efficiency(%),rxPacket/s,rxError rate(%),'
              'rxDropped rate(%),Tx Bandwidth efficiency(%),txPacket/s,txError rate(%),txDropped rate(%),funcId')
         ],
         'roce': [
             ('handler', '_get_roce_data'),
-            ('db', 'roce.db'),
-            ('table', 'RoceReportData'),
+            ('db', DBNameConstant.DB_ROCE_ORIGIN),
+            ('table', DBNameConstant.TABLE_ROCE_REPORT),
             ('headers',
              'Timestamp(us),Bandwidth(MB/s),Rx Bandwidth efficiency(%),rxPacket/s,rxError rate(%),'
              'rxDropped rate(%),Tx Bandwidth efficiency(%),txPacket/s,txError rate(%),txDropped rate(%),funcId')
         ],
         'ctrl_cpu_pmu_events': [
             ('handler', '_get_cpu_pmu_events'),
-            ('table', 'OriginalData'),
+            ('table', DBNameConstant.TABLE_CPU_ORIGIN),
             ('headers', 'Event,Name,Count'),
-            ('db', 'ctrlcpu_{}.db')
+            ('db', DBNameConstant.DB_NAME_CTRLCPU)
         ],
         'ctrl_cpu_top_function': [
             ('handler', '_get_cpu_top_funcs'),
-            ('table', 'EventCount'),
+            ('table', DBNameConstant.TABLE_TS_CPU_EVENT),
             ('headers', 'Function,Module,Cycles,Cycles(%)'),
-            ('db', 'ctrlcpu_{}.db')
+            ('db', DBNameConstant.DB_NAME_CTRLCPU)
         ],
         'ai_cpu_pmu_events': [
             ('handler', '_get_cpu_pmu_events'),
-            ('table', 'OriginalData'),
+            ('table', DBNameConstant.TABLE_CPU_ORIGIN),
             ('headers', 'Event,Name,Count'),
-            ('db', 'aicpu_{}.db')
+            ('db', DBNameConstant.DB_NAME_AICPU)
         ],
         'ai_cpu_top_function': [
             ('handler', '_get_cpu_top_funcs'),
-            ('table', 'EventCount'),
+            ('table', DBNameConstant.TABLE_TS_CPU_EVENT),
             ('headers', 'Function,Module,Cycles,Cycles(%)'),
-            ('db', 'aicpu_{}.db')
+            ('db', DBNameConstant.DB_NAME_AICPU)
         ],
         'ts_cpu_pmu_events': [
             ('handler', '_get_cpu_pmu_events'),
-            ('table', 'TsOriginalData'),
+            ('table', DBNameConstant.TABLE_TSCPU_ORIGIN),
             ('headers', 'Event,Name,Count'),
-            ('db', 'tscpu_{}.db')
+            ('db', DBNameConstant.DB_NAME_TSCPU)
         ],
         'ts_cpu_top_function': [
             ('handler', '_get_ts_cpu_top_funcs'),
-            ('db', 'tscpu_{}.db')
+            ('db', DBNameConstant.DB_NAME_TSCPU)
         ],
         'os_runtime_api': [
             ('handler', '_get_host_runtime_api'),
-            ('db', 'runtime_api_analysis{}.db')
         ],
         'os_runtime_statistic': [
             ('handler', '_get_host_runtime_api'),
@@ -205,54 +199,52 @@ class MsProfExportDataConfig(MetaConfig):
         ],
         'ffts_sub_task_time': [
             ('handler', '_get_task_timeline'),
-            ('db', 'soc_log.db'),
-            ('table', 'FftsLog')
+            ('db', DBNameConstant.DB_SOC_LOG),
+            ('table', DBNameConstant.TABLE_FFTS_LOG)
         ],
         'hccl': [
             ('handler', '_get_hccl_timeline'),
-            ('db', 'hccl_single_device.db'),
-            ('table', 'HCCLTaskSingleDevice')
         ],
         'msprof_tx': [
             ('handler', '_get_msproftx_data'),
-            ('db', 'msproftx.db'),
-            ('table', 'MsprofTx'),
+            ('db', DBNameConstant.DB_MSPROFTX),
+            ('table', DBNameConstant.TABLE_MSPROFTX),
             ('headers',
              'pid, tid, category, event_type, payload_type, payload_value, Start_time(us), '
              'End_time(us), message_type, message')
         ],
         'sio': [
             ('handler', '_get_sio_data'),
-            ('db', 'sio.db'),
-            ('table', 'Sio')
+            ('db', DBNameConstant.DB_SIO),
+            ('table', DBNameConstant.TABLE_SIO)
         ],
         'inter_soc_transmission': [
             ('handler', '_get_inter_soc_summary'),
-            ('db', 'soc_profiler.db'),
-            ('table', 'InterSoc'),
+            ('db', DBNameConstant.DB_STARS_SOC),
+            ('table', DBNameConstant.TABLE_SOC_DATA),
             ('headers', 'Metric,L2Buffer_bandwidth_level,MATA_bandwidth_level')
         ],
         'acc_pmu': [
             ('handler', '_get_acc_pmu'),
-            ('db', 'acc_pmu.db'),
-            ('table', 'AccPmu'),
+            ('db', DBNameConstant.DB_ACC_PMU),
+            ('table', DBNameConstant.TABLE_ACC_PMU_DATA),
             ('headers',
              'task_id,stream_id,acc_id,block_id,read_bandwidth,write_'
              'bandwidth,read_ost,write_ost,time_stamp(us),start_time,dur_time')
         ],
         'stars_soc': [
             ('handler', '_get_stars_soc_data'),
-            ('db', 'soc_profiler.db'),
-            ('table', 'InterSoc')
+            ('db', DBNameConstant.DB_STARS_SOC),
+            ('table', DBNameConstant.TABLE_SOC_DATA)
         ],
         'stars_chip_trans': [
             ('handler', '_get_stars_chip_trans_data'),
-            ('db', 'chip_trans.db')
+            ('db', DBNameConstant.DB_STARS_CHIP_TRANS)
         ],
         'low_power': [
             ('handler', '_get_low_power_data'),
-            ('db', 'lowpower.db'),
-            ('table', 'LowPower')
+            ('db', DBNameConstant.DB_LOW_POWER),
+            ('table', DBNameConstant.TABLE_LOWPOWER)
         ],
         'instr': [
             ('handler', '_get_biu_perf_timeline')
@@ -260,8 +252,6 @@ class MsProfExportDataConfig(MetaConfig):
         'npu_mem': [
             ('handler', '_get_npu_mem_data'),
             ('headers', 'event,ddr(KB),hbm(KB),memory(KB),timestamp(us)'),
-            ('db', 'npu_mem.db'),
-            ('table', 'NpuMem')
         ],
         'memory_record': [
             ('handler', '_get_mem_record_data'),
@@ -276,24 +266,18 @@ class MsProfExportDataConfig(MetaConfig):
             ('headers', 'Name,Size(KB),Allocation Time(us),Duration(us),'
                         'Allocation Total Allocated(KB),Allocation Total Reserved(KB),'
                         'Release Total Allocated(KB),Release Total Reserved(KB),Device'),
-            ('db', 'memory_application.db'),
-            ('table', 'NpuOpMem')
         ],
         'event': [
             ('handler', '_get_event_data'),
-            ('db', 'api_event.db'),
-            ('table', 'EventData')
         ],
         'api': [
             ('handler', '_get_api_data'),
-            ('db', 'api_event.db'),
-            ('table', 'ApiData')
         ],
         'hccl_statistic': [
             ('handler', '_get_hccl_statistic_data'),
             ('headers',
              'OP Type,Count,Total Time(us),Min Time(us),Avg Time(us),Max Time(us),Ratio(%)'),
-            ('db', 'hccl_single_device.db')
+            ('db', DBNameConstant.DB_HCCL_SINGLE_DEVICE)
         ],
         'api_statistic': [
             ('handler', '_get_api_statistic_data'),
@@ -305,7 +289,6 @@ class MsProfExportDataConfig(MetaConfig):
         ],
         'qos': [
             ('handler', '_get_qos_data'),
-            ('db', 'qos.db'),
-            ('table', 'QosInfo,QosOriginalData')
+            ('db', DBNameConstant.DB_QOS)
         ],
     }

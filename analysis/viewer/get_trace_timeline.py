@@ -321,7 +321,7 @@ def get_network_timeline(result_dir: str, devid: str, start: int, end: int, coll
     return _result
 
 
-def _get_aicore_utilization_data(aicore_result: dict, pid: str, tid: str) -> list:
+def _get_aicore_utilization_data(aicore_result: dict, pid: int, tid: int) -> list:
     trace_data = []
     for aicore_name in aicore_result.get('data', {}).get('usage', {}):
         for result_value in aicore_result.get('data', {}).get('usage', {}).get(aicore_name, ''):
@@ -338,14 +338,13 @@ def _get_aicore_utilization_data(aicore_result: dict, pid: str, tid: str) -> lis
     return trace_data
 
 
-def get_aicore_utilization_timeline(param: dict) -> any:
+def get_aicore_utilization_timeline(project_path: str) -> any:
     """
     get ai core utilization trace view data
     """
     try:
-        aicore_result = get_aicore_utilization(param.get('project_path', ''), param.get('device_id', 0),
-                                               NumberConstant.DEFAULT_NUMBER, NumberConstant.DEFAULT_START_TIME,
-                                               NumberConstant.DEFAULT_END_TIME)
+        aicore_result = get_aicore_utilization(project_path, NumberConstant.DEFAULT_NUMBER,
+                                               NumberConstant.DEFAULT_START_TIME, NumberConstant.DEFAULT_END_TIME)
     except sqlite3.Error as error:
         logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
         return []
