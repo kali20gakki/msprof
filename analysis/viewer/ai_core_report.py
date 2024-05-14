@@ -15,11 +15,11 @@ from common_func.utils import Utils
 from viewer.ai_core_op_report import AiCoreOpReport
 
 
-def get_core_sample_data(result_dir: str, db_name: str, device_id: str, params: dict) -> tuple:
+def get_core_sample_data(result_dir: str, db_name: str, params: dict) -> tuple:
     """
     get AIC/AIV sample-based data
     """
-    conn, curs = DBManager.check_connect_db(result_dir, db_name.format(device_id))
+    conn, curs = DBManager.check_connect_db(result_dir, db_name)
     if not (conn and curs):
         return MsvpConstant.MSVP_EMPTY_DATA
     if params.get(StrConstant.CORE_DATA_TYPE) == StrConstant.AI_CORE_PMU_EVENTS or \

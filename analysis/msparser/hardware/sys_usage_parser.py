@@ -28,12 +28,7 @@ class ParsingCpuUsageData(MsMultiProcess):
         super().__init__(sample_config)
         self.project_path = sample_config.get("result_dir", "")
         self._file_list = file_list
-        self.device_id = self.sample_config.get("device_id", "0")
-        if InfoConfReader().is_host_profiling():
-            db_file = DBNameConstant.DB_HOST_SYS_USAGE_CPU
-        else:
-            db_file = "cpu_usage_{}.db".format(str(self.device_id))
-        self._model = SysUsageModel(self.project_path, db_file,
+        self._model = SysUsageModel(self.project_path, DBNameConstant.DB_HOST_SYS_USAGE_CPU,
                                     [DBNameConstant.TABLE_SYS_USAGE, DBNameConstant.TABLE_PID_USAGE])
         self.data_dict = {"sys_data_list": [], "pid_data_list": []}
         self.file_all = None

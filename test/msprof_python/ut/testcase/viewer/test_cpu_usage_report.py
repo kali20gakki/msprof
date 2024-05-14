@@ -9,7 +9,7 @@ from viewer.cpu_usage_report import get_sys_cpu_usage_data, get_process_cpu_usag
 NAMESPACE = 'viewer.cpu_usage_report'
 configs = {'handler': '_get_cpu_usage_data',
            'headers': ['Cpu Type', 'User(%)', 'Sys(%)', 'IoWait(%)', 'Irq(%)', 'Soft(%)', 'Idle(%)'],
-           'db': 'cpu_usage_{}.db', 'table': 'SysCpuUsage', 'unused_cols': []}
+           'table': 'SysCpuUsage', 'unused_cols': []}
 
 
 class TestCPUUsage(unittest.TestCase):
@@ -36,13 +36,13 @@ class TestCPUUsage(unittest.TestCase):
         insert_sql = "insert into {0} values ({value})".format(
             "SysCpuUsage", value="?," * (len(data[0]) - 1) + "?")
         db_manager = DBManager()
-        test_sql = db_manager.create_table("cpu_usage_0.db", create_sql, insert_sql, data)
+        test_sql = db_manager.create_table("cpu_usage.db", create_sql, insert_sql, data)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=test_sql), \
              mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             res = get_sys_cpu_usage_data('', 'SysCpuUsage', configs)
         self.assertEqual(res[2], 1)
-        test_sql = db_manager.connect_db('cpu_usage_0.db')
+        test_sql = db_manager.connect_db('cpu_usage.db')
         (test_sql[1]).execute("drop Table SysCpuUsage")
         db_manager.destroy(test_sql)
 
@@ -68,13 +68,13 @@ class TestCPUUsage(unittest.TestCase):
         insert_sql = "insert into {0} values ({value})".format(
             "ProCpuUsage", value="?," * (len(data[0]) - 1) + "?")
         db_manager = DBManager()
-        test_sql = db_manager.create_table("cpu_usage_0.db", create_sql, insert_sql, data)
+        test_sql = db_manager.create_table("cpu_usage.db", create_sql, insert_sql, data)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=test_sql), \
              mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             res = get_process_cpu_usage('', 'ProCpuUsage', configs)
         self.assertEqual(res[2], 1)
-        test_sql = db_manager.connect_db('cpu_usage_0.db')
+        test_sql = db_manager.connect_db('cpu_usage.db')
         (test_sql[1]).execute("drop Table ProCpuUsage")
         db_manager.destroy(test_sql)
 

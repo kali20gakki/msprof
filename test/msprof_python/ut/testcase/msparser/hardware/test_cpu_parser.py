@@ -134,7 +134,6 @@ def test_get_cpu_pmu_events():
 
 
 class TestParsingCPUData(unittest.TestCase):
-    device_id = '0'
 
     def test_init_cpu_db(self):
         with DBOpen('test.db') as db_open:
@@ -147,7 +146,7 @@ class TestParsingCPUData(unittest.TestCase):
                     mock.patch('os.path.join', return_value='test\\test'):
                 with mock.patch('sqlite3.connect', return_value=db_open.db_conn):
                     check = ParsingCPUData(CONFIG)
-                    check.init_cpu_db(self.device_id)
+                    check.init_cpu_db()
 
     def test_parsing_data_file(self):
         with DBOpen('test.db') as db_open:
@@ -165,12 +164,12 @@ class TestParsingCPUData(unittest.TestCase):
                         mock.patch(NAMESPACE + '.ParsingCPUData._multiprocess', side_effect=OSError):
                     check = ParsingCPUData(CONFIG)
                     check.conn, check.curs = db_open.db_conn, db_open.db_curs
-                    result = check.parsing_data_file(self.device_id, 1, 'test')
+                    result = check.parsing_data_file(1, 'test')
                 self.assertEqual(result, 1)
                 with mock.patch(NAMESPACE + '.create_originaldatatable', return_value=1):
                     check = ParsingCPUData(CONFIG)
                     check.conn, check.curs = db_open.db_conn, db_open.db_curs
-                    result = check.parsing_data_file(self.device_id, 1, 'test')
+                    result = check.parsing_data_file(1, 'test')
                 self.assertEqual(result, 1)
             with mock.patch(NAMESPACE + ".logging.error"), \
                     mock.patch('os.path.exists', return_value=True), \
@@ -182,11 +181,11 @@ class TestParsingCPUData(unittest.TestCase):
                     mock.patch(NAMESPACE + '.ParsingCPUData._multiprocess'):
                 check = ParsingCPUData(CONFIG)
                 check.conn, check.curs = db_open.db_conn, db_open.db_curs
-                result = check.parsing_data_file(self.device_id, 1, 'test')
+                result = check.parsing_data_file(1, 'test')
                 self.assertEqual(result, 0)
                 check = ParsingCPUData(CONFIG)
                 check.conn, check.curs = db_open.db_conn, db_open.db_curs
-                result = check.parsing_data_file(self.device_id, 1, 'test')
+                result = check.parsing_data_file(1, 'test')
                 self.assertEqual(result, 0)
 
     def test_create_other_table(self):
@@ -229,7 +228,6 @@ class TestParsingCPUData(unittest.TestCase):
                 mock.patch(NAMESPACE + '.error'):
             with mock.patch('os.path.exists', return_value=False):
                 check = ParsingCPUData(CONFIG)
-                InfoConfReader()._info_json = {"devices": 'a'}
                 result = check.init_and_parsing()
             self.assertEqual(result, None)
             with mock.patch('os.path.exists', return_value=True), \
@@ -242,7 +240,6 @@ class TestParsingCPUData(unittest.TestCase):
                 with mock.patch(NAMESPACE + '.ParsingCPUData.get_cpu_id',
                                 return_value=''):
                     check = ParsingCPUData(CONFIG)
-                    InfoConfReader()._info_json = {"devices": 1}
                     result = check.init_and_parsing()
                 self.assertEqual(result, None)
                 with mock.patch(NAMESPACE + '.ParsingCPUData.get_cpu_id',
@@ -252,14 +249,12 @@ class TestParsingCPUData(unittest.TestCase):
                     with mock.patch(NAMESPACE + '.ParsingCPUData.parsing_data_file',
                                     return_value=1):
                         check = ParsingCPUData(CONFIG)
-                        InfoConfReader()._info_json = {"devices": 1}
                         result = check.init_and_parsing()
                     self.assertEqual(result, None)
                     with mock.patch(NAMESPACE + '.ParsingCPUData.parsing_data_file',
                                     return_value=0), \
                             mock.patch(NAMESPACE + '.ParsingCPUData.create_other_table'):
                         check = ParsingCPUData(CONFIG)
-                        InfoConfReader()._info_json = {"devices": 1}
                         result = check.init_and_parsing()
                     self.assertEqual(result, None)
 
@@ -278,25 +273,24 @@ class TestParsingCPUData(unittest.TestCase):
 
     def test_get_cpu_id(self):
         sample_config = CONFIG
-        device_id = '0'
         cpu_type = 'ai'
         with mock.patch(NAMESPACE + '.logging.error'), \
                 mock.patch(NAMESPACE + '.logging.info'), \
                 mock.patch(NAMESPACE + '.error'):
             with mock.patch('os.path.exists', return_value=False):
-                result = ParsingCPUData.get_cpu_id(sample_config, device_id, cpu_type)
+                result = ParsingCPUData.get_cpu_id(sample_config, cpu_type)
             self.assertEqual(result, '')
             with mock.patch('os.path.exists', return_value=True), \
                     mock.patch('os.path.join', return_value='test\\test'), \
                     mock.patch('os.path.realpath', return_value='test\\test'):
                 InfoConfReader()._info_json = {'DeviceInfo': None}
-                result = ParsingCPUData.get_cpu_id(sample_config, device_id, cpu_type)
+                result = ParsingCPUData.get_cpu_id(sample_config, cpu_type)
                 self.assertEqual(result, '')
                 InfoConfReader()._info_json = {'DeviceInfo': [{'ai_cpu': 'a, 2, 3, 4, 5, 6, 7'}]}
-                result = ParsingCPUData.get_cpu_id(sample_config, device_id, cpu_type)
+                result = ParsingCPUData.get_cpu_id(sample_config, cpu_type)
                 self.assertEqual(result, '')
                 InfoConfReader()._info_json = {'DeviceInfo': [{'ai_cpu': '1,2,3,4,5,6,7'}]}
-                result = ParsingCPUData.get_cpu_id(sample_config, device_id, cpu_type)
+                result = ParsingCPUData.get_cpu_id(sample_config, cpu_type)
                 self.assertEqual(result, '1,2,3,4,5,6,7')
 
 

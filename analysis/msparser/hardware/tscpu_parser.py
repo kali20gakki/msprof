@@ -41,13 +41,10 @@ class ParsingTSData(MsMultiProcess):
         super().__init__(sample_config)
         self.project_path = sample_config.get("result_dir")
         self._file_list = file_list.get(DataTag.TSCPU, [])
-        self.device_id = self.sample_config.get("device_id", "0")
-        self._model = \
-            TscpuModel(self.project_path, 'tscpu_{}.db'.format(self.device_id), [DBNameConstant.TABLE_TSCPU_ORIGIN])
+        self._model = TscpuModel(self.project_path, DBNameConstant.DB_NAME_TSCPU, [DBNameConstant.TABLE_TSCPU_ORIGIN])
         self.calculate = OffsetCalculator(self._file_list, StructFmt.TSCPU_FMT_SIZE, self.project_path)
         self.ts_data = []
         self.replayid = '0'
-        self.tools = {'devices': []}
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
 
     @staticmethod
@@ -194,7 +191,6 @@ class ParsingTSData(MsMultiProcess):
         if is_valid_original_data(file_name, self.project_path):
             logging.info(
                 "start parsing tscpu data file: %s", file_name)
-            self.tools.setdefault('devices', []).append(self.device_id)
             if self._open_mdc_binary_data(file_name):
                 self.calculate = OffsetCalculator(self._file_list, StructFmt.MDC_TSCPU_FMT_SIZE,
                                                   self.project_path)

@@ -11,10 +11,10 @@ import unittest
 from unittest import mock
  
 from common_func.info_conf_reader import InfoConfReader
-from constant.constant import CONFIG
 from msparser.add_info.aicpu_add_info_bean import AicpuAddInfoBean
 from msparser.add_info.aicpu_add_info_parser import AicpuAddInfoParser
 from msparser.data_struct_size_constant import StructFmt
+from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = 'msparser.add_info.aicpu_add_info_parser'
@@ -26,29 +26,33 @@ class TestAicpuAddInfoParser(unittest.TestCase):
             'aicpu.data.0.slice_0'
         ]
     }
-    current_path = CONFIG.get('result_dir')
-    file_folder = os.path.join(current_path + "/sqlite")
+    DIR_PATH = os.path.join(os.path.dirname(__file__), "aicpu_add_info")
+    SQLITE_PATH = os.path.join(DIR_PATH, "sqlite")
+    CONFIG = {
+        'result_dir': DIR_PATH, 'device_id': '0', 'iter_id': IterationRange(0, 1, 1),
+        'job_id': 'job_default', 'model_id': -1
+    }
 
     def setup_class(self):
-        if not os.path.exists(self.current_path):
-            os.mkdir(self.current_path)
-        if not os.path.exists(self.file_folder):
-            os.mkdir(self.file_folder)
+        if not os.path.exists(self.DIR_PATH):
+            os.mkdir(self.DIR_PATH)
+        if not os.path.exists(self.SQLITE_PATH):
+            os.mkdir(self.SQLITE_PATH)
 
     def teardown_class(self):
-        if os.path.exists(self.current_path):
-            shutil.rmtree(self.current_path)
+        if os.path.exists(self.DIR_PATH):
+            shutil.rmtree(self.DIR_PATH)
 
     def test_ms_run(self):
         with mock.patch(NAMESPACE + '.AicpuAddInfoParser.parse'), \
                 mock.patch(NAMESPACE + '.AicpuAddInfoParser.save'):
-            check = AicpuAddInfoParser(self.file_list, CONFIG)
+            check = AicpuAddInfoParser(self.file_list, self.CONFIG)
             check.ms_run()
 
     def test_save(self):
-        check = AicpuAddInfoParser(self.file_list, CONFIG)
+        check = AicpuAddInfoParser(self.file_list, self.CONFIG)
         check.save()
-        check = AicpuAddInfoParser(self.file_list, CONFIG)
+        check = AicpuAddInfoParser(self.file_list, self.CONFIG)
         check._ai_cpu_datas = [
             [0, '0', 1e-05, 2e-05, '', 0.0, 0.0, 1e-05, 0.0, 0.0]
         ]
@@ -65,7 +69,7 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         struct_data = struct.pack(StructFmt.AI_CPU_NODE_ADD_FMT, *aicpu_data)
         data = AicpuAddInfoBean.decode(struct_data)
         with mock.patch(NAMESPACE + '.AicpuAddInfoParser.parse_bean_data', return_value=[data]):
-            check = AicpuAddInfoParser(self.file_list, CONFIG)
+            check = AicpuAddInfoParser(self.file_list, self.CONFIG)
             check.parse()
             check.save()
         data = check._aicpu_data.get(AicpuAddInfoBean.AICPU_NODE, [])
@@ -84,7 +88,7 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         struct_data = struct.pack(StructFmt.AI_CPU_NODE_ADD_FMT, *aicpu_data)
         data = AicpuAddInfoBean.decode(struct_data)
         with mock.patch(NAMESPACE + '.AicpuAddInfoParser.parse_bean_data', return_value=[data]):
-            check = AicpuAddInfoParser(self.file_list, CONFIG)
+            check = AicpuAddInfoParser(self.file_list, self.CONFIG)
             check.parse()
             check.save()
         data = check._aicpu_data.get(AicpuAddInfoBean.AICPU_NODE, [])
@@ -97,7 +101,7 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         struct_data = struct.pack(StructFmt.AI_CPU_DP_ADD_FMT, *aicpu_data)
         data = AicpuAddInfoBean.decode(struct_data)
         with mock.patch(NAMESPACE + '.AicpuAddInfoParser.parse_bean_data', return_value=[data]):
-            check = AicpuAddInfoParser(self.file_list, CONFIG)
+            check = AicpuAddInfoParser(self.file_list, self.CONFIG)
             check.parse()
         data = check._aicpu_data.get(AicpuAddInfoBean.AICPU_DP, [])
         self.assertEqual(1, len(data))
@@ -109,7 +113,7 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         struct_data = struct.pack(StructFmt.AI_CPU_MODEL_ADD_FMT, *aicpu_data)
         data = AicpuAddInfoBean.decode(struct_data)
         with mock.patch(NAMESPACE + '.AicpuAddInfoParser.parse_bean_data', return_value=[data]):
-            check = AicpuAddInfoParser(self.file_list, CONFIG)
+            check = AicpuAddInfoParser(self.file_list, self.CONFIG)
             check.parse()
         data = check._aicpu_data.get(AicpuAddInfoBean.AICPU_MODEL, [])
         self.assertEqual(1, len(data))
@@ -121,7 +125,7 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         struct_data = struct.pack(StructFmt.AI_CPU_MI_ADD_FMT, *aicpu_data)
         data = AicpuAddInfoBean.decode(struct_data)
         with mock.patch(NAMESPACE + '.AicpuAddInfoParser.parse_bean_data', return_value=[data]):
-            check = AicpuAddInfoParser(self.file_list, CONFIG)
+            check = AicpuAddInfoParser(self.file_list, self.CONFIG)
             check.parse()
         data = check._aicpu_data.get(AicpuAddInfoBean.AICPU_MI, [])
         self.assertEqual(1, len(data))

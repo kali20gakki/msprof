@@ -72,7 +72,7 @@ class HostSysUsageParser:
         self.cpu_usage_model = SysUsageModel(host_path, DBNameConstant.DB_HOST_SYS_USAGE_CPU,
                                              [DBNameConstant.TABLE_SYS_USAGE, DBNameConstant.TABLE_PID_USAGE])
         self.mem_usage_model = SysMemModel(host_path, DBNameConstant.DB_HOST_SYS_USAGE_MEM,
-                                           [DBNameConstant.DB_HOST_SYS_USAGE_MEM, DBNameConstant.DB_HOST_SYS_USAGE_MEM])
+                                           [DBNameConstant.TABLE_SYS_MEM, DBNameConstant.TABLE_PID_MEM])
         if not (self.cpu_usage_model.init() and self.mem_usage_model.init()):
             logging.error("SysUsageModel or SysMemModel init() failed.")
             return

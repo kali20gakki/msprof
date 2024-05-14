@@ -6,6 +6,7 @@ import itertools
 from abc import ABC
 from collections import defaultdict
 
+from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.trace_view_manager import TraceViewManager
@@ -77,8 +78,7 @@ class QosViewer(BaseViewer, ABC):
 
     def _get_qos_description(self):
         model = self.get_model_instance()
-        # table_list是逗号分隔的字符串
-        model.table_list = model.table_list.split(",")
+        model.table_list = [DBNameConstant.TABLE_QOS_INFO, DBNameConstant.TABLE_QOS_ORIGIN]
         if not model or not model.check_table():
             return {}
         qos_info = model.get_qos_info()

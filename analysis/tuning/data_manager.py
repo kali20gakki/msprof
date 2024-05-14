@@ -235,7 +235,7 @@ class OpSummaryTuningDataHandle(BaseTuningDataHandle):
                                                             param)
             elif sample_config.get(StrConstant.AICORE_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE:
                 param[StrConstant.CORE_DATA_TYPE] = StrConstant.AI_CORE_PMU_EVENTS
-                headers, data, _ = get_core_sample_data(project_path, "aicore_{}.db", device_id, param)
+                headers, data, _ = get_core_sample_data(project_path, DBNameConstant.DB_NAME_AICORE, param)
 
             if not headers or not data:
                 param[StrConstant.DATA_TYPE] = StrConstant.AI_VECTOR_CORE_PMU_EVENTS
@@ -243,8 +243,7 @@ class OpSummaryTuningDataHandle(BaseTuningDataHandle):
                     headers, data, _ = get_task_based_core_data(project_path, DBNameConstant.DB_RUNTIME,
                                                                 param)
                 elif sample_config.get(StrConstant.AIV_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE:
-                    headers, data, _ = get_core_sample_data(project_path, "ai_vector_core_{}.db",
-                                                            device_id, param)
+                    headers, data, _ = get_core_sample_data(project_path, DBNameConstant.DB_NAME_AI_VECTOR_CORE, param)
         return headers, data
 
     @classmethod
