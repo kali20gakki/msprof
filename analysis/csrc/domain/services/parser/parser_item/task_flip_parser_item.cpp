@@ -10,7 +10,7 @@
  * *****************************************************************************
  */
 
-#include "task_flip_parser_item.h"
+#include "analysis/csrc/domain/services/parser/parser_item/task_flip_parser_item.h"
 #include "analysis/csrc/dfx/log.h"
 #include "analysis/csrc/domain/entities/hal/include/hal_track.h"
 #include "analysis/csrc/utils/utils.h"
@@ -26,7 +26,7 @@ int TaskFlipParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *hal
 {
     if (binaryDataSize != sizeof(TaskFlip)) {
         ERROR("TaskFlipParseItem failure, struct is TaskFlip");
-        return ERROR_SIZE_MISMATCH;
+        return PARSER_ERROR_SIZE_MISMATCH;
     }
 
     auto *bin = ReinterpretConvert<TaskFlip *>(binaryData);

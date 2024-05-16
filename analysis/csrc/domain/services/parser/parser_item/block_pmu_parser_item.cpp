@@ -27,7 +27,7 @@ int BlockPmuParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *hal
 {
     if (binaryDataSize != sizeof(BlockPmu)) {
         ERROR("The TrunkSize of PMU is not equal with the ContextPmu struct");
-        return ERROR_SIZE_MISMATCH;
+        return PARSER_ERROR_SIZE_MISMATCH;
     }
 
     auto *blockPmu = ReinterpretConvert<BlockPmu *>(binaryData);
