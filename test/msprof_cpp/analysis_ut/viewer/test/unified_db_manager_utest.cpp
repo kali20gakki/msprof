@@ -61,6 +61,7 @@ namespace {
             {"pid", "2376271"},
             {"CPU", {{{"Frequency", "100.000000"}}}},
             {"DeviceInfo", {{{"hwts_frequency", "49.000000"}, {"aic_frequency", "1850"}}}},
+            {"hostname", "localhost"}
         };
         FileWriter infoWriter(File::PathJoin({filePath, INFO_JSON}));
         infoWriter.WriteText(info.dump());

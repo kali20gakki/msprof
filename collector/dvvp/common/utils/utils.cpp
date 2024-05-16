@@ -5,6 +5,8 @@
  * Create: 2018-06-13
  */
 #include "utils.h"
+#include <ifaddrs.h>
+#include <netpacket/packet.h>
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>
@@ -16,6 +18,7 @@
 #include <string>
 #include <ctime>
 #include <set>
+#include <vector>
 #include "config/config.h"
 #include "config/config_manager.h"
 #include "platform/platform.h"
@@ -43,6 +46,19 @@ std::mutex g_envMtx;
 const unsigned long long CHANGE_FROM_S_TO_NS = 1000000000;
 const unsigned int MAX_FUNC_DEPTH = 20;
 const unsigned int MAX_FILES_NUM = 100000;
+
+// For MAC (a.k.a. IEEE 802, or EUI-48) addresses, the second least significant
+// bit of the first octet signifies whether the MAC address is universally (0)
+// or locally (1) administered.  Network cards from hardware manufacturers will
+// always be universally administered to guarantee global uniqueness of the MAC
+// address, but any particular machine may have other interfaces which are
+// locally administered.
+// See https://en.wikipedia.org/wiki/MAC_address#Universal_vs._local
+static bool IsUniversalMacAddr(uint8_t firstByte)
+{
+    static const uint8_t SECOND_LEAST_BIT = 1 << 1;
+    return (firstByte & SECOND_LEAST_BIT) == 0;
+}
 
 unsigned long long Utils::GetClockRealtime()
 {
@@ -1795,6 +1811,53 @@ std::string Utils::GetInfoPrefix(const std::string &fileName)
 std::string Utils::PackDotInfo(const std::string &leftPattern, const std::string &rightPattern)
 {
     return leftPattern + "." + rightPattern;
+}
+
+std::string Utils::GetHostMacStr()
+{
+    struct ifaddrs *ifaddr = nullptr;
+    if (getifaddrs(&ifaddr) != 0) {
+        if (ifaddr != nullptr) {
+            freeifaddrs(ifaddr);
+        }
+        MSPROF_LOGE("Failed to get host mac addr");
+        return "";
+    }
+    std::vector<std::string> universalMacAddrs;
+    std::vector<std::string> localMacAddrs;
+    for (struct ifaddrs *ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == nullptr || ifa->ifa_addr->sa_family != AF_PACKET) {
+            continue;
+        }
+        if ((ifa->ifa_flags & IFF_LOOPBACK) != 0) {
+            continue;
+        }
+        struct sockaddr_ll *lladdr = reinterpret_cast<struct sockaddr_ll*>(ifa->ifa_addr);
+        uint32_t len = static_cast<uint32_t>(lladdr->sll_halen);
+        if (len > 0) {
+            std::string addr;
+            for (uint32_t i = 0; i < len; ++i) {
+                std::string hexAddr = Int2HexStr(static_cast<uint16_t>(lladdr->sll_addr[i]));
+                addr += (hexAddr.length() > 1) ? hexAddr : ("0" + hexAddr);
+            }
+            if (IsUniversalMacAddr(lladdr->sll_addr[0])) {
+                universalMacAddrs.emplace_back(addr);
+            } else {
+                localMacAddrs.emplace_back(addr);
+            }
+        }
+    }
+    if (ifaddr != nullptr) {
+        freeifaddrs(ifaddr);
+    }
+    if (universalMacAddrs.empty() && localMacAddrs.empty()) {
+        MSPROF_LOGE("Failed to get host mac addr");
+        return "";
+    }
+    std::vector<std::string>& macAddrs = universalMacAddrs.empty() ? localMacAddrs : universalMacAddrs;
+    std::sort(macAddrs.begin(), macAddrs.end());
+    UtilsStringBuilder<std::string> builder;
+    return builder.Join(macAddrs, "-");
 }
 
 }  // namespace utils

@@ -1417,3 +1417,9 @@ TEST_F(COMMON_UTILS_UTILS_TEST, StrToLongLong)
     EXPECT_EQ(PROFILING_FAILED,
               analysis::dvvp::common::utils::Utils::StrToLongLong(retValue, "9999999999999999999999999999999"));
 }
+
+TEST_F(COMMON_UTILS_UTILS_TEST, GetHostMacStr)
+{
+    std::string macStr = analysis::dvvp::common::utils::Utils::GetHostMacStr();
+    EXPECT_TRUE(macStr.length() > 0);
+}

@@ -41,7 +41,7 @@ const std::string DEVICE_START_LOG = "dev_start.log";
 const std::set<std::string> CHECK_VALUES = {
     "platform_version", "startCollectionTimeBegin", "endCollectionTimeEnd",
     "startClockMonotonicRaw", "pid", "cntvct", "CPU", "DeviceInfo", "clock_monotonic_raw",
-    "llc_profiling", "ai_core_profiling_mode"
+    "llc_profiling", "ai_core_profiling_mode", "hostname"
 };
 }
 
@@ -397,6 +397,31 @@ bool Context::GetClockMonotonicRaw(uint64_t &monotonicRaw, uint16_t deviceId, co
         return false;
     }
     return true;
+}
+
+uint64_t Context::GetHostUid(uint16_t deviceId, const std::string &profPath)
+{
+    const auto &info = GetInfoByDeviceId(deviceId, profPath);
+    if (info.empty()) {
+        ERROR("GetHostUid InfoJson info is empty.");
+        return 0;
+    }
+    uint64_t hostUid = 0;
+    if (StrToU64(hostUid, info.value("hostUid", "0")) != ANALYSIS_OK) {
+        ERROR("HostUid to uint64_t failed, invalid str is %.", info.value("hostUid", "0"));
+        return 0;
+    }
+    return hostUid;
+}
+
+std::string Context::GetHostName(uint16_t deviceId, const std::string &profPath)
+{
+    const auto &info = GetInfoByDeviceId(deviceId, profPath);
+    if (info.empty()) {
+        ERROR("GetHostName InfoJson info is empty.");
+        return "";
+    }
+    return info.at("hostname");
 }
 
 void Context::Clear()

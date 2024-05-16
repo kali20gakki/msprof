@@ -23,6 +23,7 @@
 #include "analysis/csrc/viewer/database/finals/enum_processor.h"
 #include "analysis/csrc/viewer/database/finals/hbm_processor.h"
 #include "analysis/csrc/viewer/database/finals/hccs_processor.h"
+#include "analysis/csrc/viewer/database/finals/host_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/llc_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_mem_processor.h"
@@ -53,6 +54,9 @@ namespace {
         {PROCESSOR_NAME_NPU_INFO,          [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
                                               std::shared_ptr<TableProcessor>& processor) {
             MAKE_SHARED_RETURN_VOID(processor, NpuInfoProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_HOST_INFO,          [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, HostInfoProcessor, msprofDBPath, profPaths);}},
         {PROCESSOR_NAME_ENUM,              [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
                                               std::shared_ptr<TableProcessor>& processor) {
             MAKE_SHARED_RETURN_VOID(processor, EnumProcessor, msprofDBPath, profPaths);}},

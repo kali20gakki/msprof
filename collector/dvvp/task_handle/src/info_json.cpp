@@ -23,6 +23,7 @@
 #include "platform/platform.h"
 #include "task_relationship_mgr.h"
 #include "mmpa_api.h"
+#include "transport/hash_data.h"
 
 namespace analysis {
 namespace dvvp {
@@ -272,7 +273,7 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
     std::string os(str);
     infoMain->set_os(os);
 
-    // fetch and set hostname
+    // fetch and set hostname and hostuid
     if (memset_s(str, MMPA_MAX_PATH, 0, MMPA_MAX_PATH) != EOK) {
         MSPROF_LOGE("memset failed");
         return PROFILING_FAILED;
@@ -283,6 +284,9 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
     }
     std::string hostName(str);
     infoMain->set_hostname(hostName);
+    std::string macStr = analysis::dvvp::common::utils::Utils::GetHostMacStr();
+    uint64_t macStrHashId = analysis::dvvp::transport::HashData::instance()->GenHashId(macStr);
+    infoMain->set_hostuid(macStrHashId);
 
     // fetch and set memory, clock freq, uptime, netcard info, logical cpu nums
     AddMemTotal(infoMain);
