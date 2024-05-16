@@ -92,7 +92,7 @@ class HcclViewModel(ViewModel):
               "and a.context_id = b.context_id " \
               "and a.device_id = {device_id} " \
               "and b.start_time != {invalid_start} " \
-              "order by host_timestamp" \
+              "order by host_timestamp, timestamp" \
             .format(DBNameConstant.TABLE_HCCL_TASK, DBNameConstant.TABLE_ASCEND_TASK, device_id=device_id,
                     invalid_start=NumberConstant.INVALID_TASK_TIME)
         return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclTask)
