@@ -1,7 +1,7 @@
 /* ******************************************************************************
             版权所有 (c) 华为技术有限公司 2024-2024
             Copyright, 2024, Huawei Tech. Co., Ltd.
-****************************************************************************** *
+********************************************************************************/
 /* ******************************************************************************
  * File Name          : ts_track_parser.h
  * Description        : ts_trace_data二进制文件解析
@@ -25,6 +25,7 @@ private:
     std::vector<std::string> GetFilePattern() override;
     uint32_t GetTrunkSize() override;
     uint32_t ParseData(Infra::DataInventory& dataInventory) override;
+    uint32_t GetNoFileCode() override;
 private:
     std::vector<HalTrackData> halUniData_;
     std::vector<std::string> filePrefix_{"ts_track."};

@@ -40,6 +40,11 @@ uint32_t TsTrackParser::GetTrunkSize()
     return TS_TRACK_STRUCT_SIZE;
 }
 
+uint32_t TsTrackParser::GetNoFileCode()
+{
+    return PARSER_GET_TS_TRACK_FILE_ERROR;
+}
+
 uint32_t TsTrackParser::ParseDataItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *data)
 {
     if (binaryDataSize < sizeof(TsTrackHeader)) {

@@ -15,7 +15,6 @@
 
 #include <cstdint>
 #include <functional>
-#include "analysis/csrc/domain/entities/hal/include/hal_log.h"
 
 namespace Analysis {
 namespace Domain {

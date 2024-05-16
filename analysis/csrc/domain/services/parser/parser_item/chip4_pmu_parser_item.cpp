@@ -26,7 +26,7 @@ int Chip4PmuParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *hal
 {
     if (binaryDataSize != sizeof(ContextPmu)) {
         ERROR("The TrunkSize of PMU is not equal with the ContextPmu struct");
-        return ERROR_SIZE_MISMATCH;
+        return PARSER_ERROR_SIZE_MISMATCH;
     }
     auto *contextPmu = ReinterpretConvert<ContextPmu *>(binaryData);
     auto *pmuData = ReinterpretConvert<HalPmuData *>(halUniData);
@@ -35,7 +35,7 @@ int Chip4PmuParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *hal
     pmuData->hd.taskId.batchId = INVALID_BATCH_ID;
     pmuData->hd.taskId.taskId = contextPmu->taskId;
     pmuData->hd.taskId.contextId = contextPmu->subTaskId;
-    pmuData->hd.timestamp = contextPmu->timeList[1];
+    pmuData->hd.timestamp = contextPmu->timeList[1];   // 此处使用的是context级别PMU数据的结束时间
     pmuData->type = PMU;
     pmuData->pmu.acceleratorType = GetAcceleratorTypeByType(contextPmu->subTaskType, contextPmu->fftsType);
     pmuData->pmu.ovFlag = contextPmu->ovFlag;

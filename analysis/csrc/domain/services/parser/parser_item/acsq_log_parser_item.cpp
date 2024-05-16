@@ -24,7 +24,7 @@ int AcsqLogParseItem(uint8_t *binaryData, uint32_t binaryDataSize,
 {
     if (binaryDataSize != sizeof(AcsqLog)) {
         ERROR("binaryDataSize is not equal to the size of binaryData");
-        return ERROR_SIZE_MISMATCH;
+        return PARSER_ERROR_SIZE_MISMATCH;
     }
     auto *log = ReinterpretConvert<AcsqLog *>(binaryData);
 

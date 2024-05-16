@@ -24,7 +24,7 @@ int FftsPlusLogParseItem(uint8_t *binaryData, uint32_t binaryDataSize,
 {
     if (binaryDataSize != sizeof(FftsPlusLog)) {
         ERROR("binaryDataSize is not equal to the size of binaryData");
-        return ERROR_SIZE_MISMATCH;
+        return PARSER_ERROR_SIZE_MISMATCH;
     }
 
     auto *log = ReinterpretConvert<FftsPlusLog *>(binaryData);
