@@ -34,6 +34,11 @@ namespace {
         {"name", SQL_TEXT_TYPE}
     };
 
+    const TableColumns HOST_INFO = {
+        {"hostUid", SQL_INTEGER_TYPE},
+        {"hostName", SQL_TEXT_TYPE}
+    };
+
     const TableColumns TASK = {
         {"startNs", SQL_INTEGER_TYPE},
         {"endNs", SQL_INTEGER_TYPE},
@@ -287,6 +292,7 @@ MsprofDB::MsprofDB()
         {TABLE_NAME_STRING_IDS, STRING_IDS},
         {TABLE_NAME_SESSION_TIME_INFO, SESSION_TIME_INFO},
         {TABLE_NAME_NPU_INFO, NPU_INFO},
+        {TABLE_NAME_HOST_INFO, HOST_INFO},
         {TABLE_NAME_TASK, TASK},
         {TABLE_NAME_COMPUTE_TASK_INFO, COMPUTE_TASK_INFO},
         {TABLE_NAME_COMMUNICATION_TASK_INFO, COMMUNICATION_TASK_INFO},

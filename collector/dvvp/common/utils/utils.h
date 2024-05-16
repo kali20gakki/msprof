@@ -517,6 +517,7 @@ public:
     static std::string GetInfoPrefix(const std::string &fileName);
     static std::string GetInfoSuffix(const std::string &fileName);
     static std::string PackDotInfo(const std::string &leftPattern, const std::string &rightPattern);
+    static std::string GetHostMacStr();
 };
 
 template<class T> class UtilsStringBuilder {

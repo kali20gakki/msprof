@@ -265,6 +265,7 @@ message InfoMain {
     repeated CycleToTimeInfo cycleToTime = 21;
     string pid_name = 22;
     uint32 drvVersion = 23;
+    uint64 hostUid = 24;
 }
 // for generating info.json _________END
 
