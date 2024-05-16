@@ -283,6 +283,11 @@ namespace {
         {"timestampNs", SQL_NUMERIC_TYPE},
         {"deviceId", SQL_INTEGER_TYPE}
     };
+
+    const TableColumns META_DATA = {
+        {"name", SQL_TEXT_TYPE},
+        {"value", SQL_TEXT_TYPE}
+    };
 }
 
 MsprofDB::MsprofDB()
@@ -313,6 +318,7 @@ MsprofDB::MsprofDB()
         {TABLE_NAME_HCCS, HCCS},
         {TABLE_NAME_ACC_PMU, ACC_PMU},
         {TABLE_NAME_SOC, SOC_BANDWIDTH_LEVEL},
+        {TABLE_NAME_META_DATA, META_DATA},
         // ENUM
         {TABLE_NAME_ENUM_API_TYPE, ENUM_API_TYPE},
         {TABLE_NAME_ENUM_MODULE, ENUM_MODULE},

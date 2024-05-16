@@ -351,20 +351,20 @@ db命名：msprof_{时间戳}.db
 
 格式：
 
-| 字段名             | 类型      | 索引  | 含义                                                           |
-|-----------------|---------|-----|--------------------------------------------------------------|
-| name            | INTEGER |     | 算子名，STRING_IDS(name)                                         |
-| globalTaskId    | INTEGER | 主键  | 全局算子任务id，用于关联TASK表                                           |
-| block_dim       | INTEGER |     | 算子运行切分数量，对应算子运行时核数                                           |
-| mixBlockDim     | INTEGER |     | mix算子从加速器的block_dim值                                         |
-| taskType        | INTEGER |     | host执行该算子的加速器类型，STRING_IDS(taskType)                         |
-| opType          | INTEGER |     | 算子类型，STRING_IDS(opType)                                      |
-| inputFormats    | INTEGER |     | 算子输入数据格式，STRING_IDS(inputFormats)                            |
-| inputDataTypes  | INTEGER |     | 算子输入数据类型，STRING_IDS(inputDataTypes)                          |
-| inputShapes     | INTEGER |     | 算子的输入维度，STRING_IDS(inputShapes)                              |
-| outputFormats   | INTEGER |     | 算子输出数据格式，STRING_IDS(outputFormats)                           |
-| outputDataTypes | INTEGER |     | 算子输出数据类型，STRING_IDS(outputDataTypes)                         |
-| outputShapes    | INTEGER |     | 算子输出维度，STRING_IDS(outputShapes)                              |
+| 字段名             | 类型      | 索引  | 含义                                                   |
+|-----------------|---------|-----|------------------------------------------------------|
+| name            | INTEGER |     | 算子名，STRING_IDS(name)                                 |
+| globalTaskId    | INTEGER | 主键  | 全局算子任务id，用于关联TASK表                                   |
+| block_dim       | INTEGER |     | 算子运行切分数量，对应算子运行时核数                                   |
+| mixBlockDim     | INTEGER |     | mix算子从加速器的block_dim值                                 |
+| taskType        | INTEGER |     | host执行该算子的加速器类型，STRING_IDS(taskType)                 |
+| opType          | INTEGER |     | 算子类型，STRING_IDS(opType)                              |
+| inputFormats    | INTEGER |     | 算子输入数据格式，STRING_IDS(inputFormats)                    |
+| inputDataTypes  | INTEGER |     | 算子输入数据类型，STRING_IDS(inputDataTypes)                  |
+| inputShapes     | INTEGER |     | 算子的输入维度，STRING_IDS(inputShapes)                      |
+| outputFormats   | INTEGER |     | 算子输出数据格式，STRING_IDS(outputFormats)                   |
+| outputDataTypes | INTEGER |     | 算子输出数据类型，STRING_IDS(outputDataTypes)                 |
+| outputShapes    | INTEGER |     | 算子输出维度，STRING_IDS(outputShapes)                      |
 | attrInfo        | INTEGER |     | 算子的attr信息，用来映射算子shape，算子自定义的参数等，STRING_IDS(attrInfo) |
 
 
@@ -421,14 +421,14 @@ db命名：msprof_{时间戳}.db
 | dataType     | INTEGER |     | 大算子传输的数据类型，如（INT8，FP32），ENUM_HCCL_DATA_TYPE(dataType)                       |
 | algType      | INTEGER |     | 通信算子使用的算法，可分为多个阶段，如（HD-MESH）                                                |
 | count        | NUMERIC |     | 算子传输的dataType类型的数据量                                                         |
-| opType       | INTEGER |     | 算子类型，STRING_IDS(opType), 例：hcom_broadcast_                                     |
+| opType       | INTEGER |     | 算子类型，STRING_IDS(opType), 例：hcom_broadcast_                                  |
 
 
 变更记录：
 
-| 日期       | 内容      |
-|----------|---------|
-| 2024/3/7 | 330首次上线 |
+| 日期        | 内容         |
+|-----------|------------|
+| 2024/3/7  | 330首次上线    |
 | 2024/5/10 | 添加opType字段 |
 
 ### CANN_API
@@ -868,6 +868,31 @@ timeline计算公式：
 |----------|---------|
 | 2024/3/7 | 330首次上线 |
 
+
+### META
+
+格式：
+
+| 字段名          | 类型      | 索引  | 含义  |
+|--------------|---------|-----|-----|
+| name         | TEXT    |     | 字段名 |
+| value        | TEXT    |     | 数值  |
+
+内容：
+
+| name                 | 含义                           |
+|----------------------|------------------------------|
+| SCHEMA_VERSION       | 总版本号，如 1.0.2，整体变更参照竞品        |
+| SCHEMA_VERSION_MAJOR | 大版本号，如 1， 仅当数据库格式存在重写或重构时更改  |
+| SCHEMA_VERSION_MINOR | 中版本号，如 0， 当更改列或类型时更改，存在兼容性问题 |
+| SCHEMA_VERSION_MICRO | 小版本号，如 2， 当更新表时都会更改，不具有兼容性问题 |
+
+
+变更记录：
+
+| 日期        | 内容                      |
+|-----------|-------------------------|
+| 2024/5/15 | 新增表，用于存放msprof导出的相关配置信息 |
 
 
 ## 2. pytorch框架数据db格式表结构

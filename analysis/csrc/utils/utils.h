@@ -112,6 +112,9 @@ std::string AddQuotation(std::string str);
         }                                                   \
     } while (0)
 
+// 把变量名转为字符串
+#define MSG_STR(name) (#name)
+
 template<class T>
 bool Reserve(std::vector<T> &vec, size_t s)
 {

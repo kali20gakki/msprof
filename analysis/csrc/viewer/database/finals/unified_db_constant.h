@@ -99,6 +99,9 @@ const std::string TABLE_NAME_ACC_PMU = "ACC_PMU";
 const std::string PROCESSOR_NAME_SOC = "SOC";
 const std::string TABLE_NAME_SOC = "SOC_BANDWIDTH_LEVEL";
 
+const std::string PROCESSOR_NAME_META_DATA = "META_DATA";
+const std::string TABLE_NAME_META_DATA = "META_DATA";
+
 
 // api level
 const std::unordered_map<std::string, uint16_t> API_LEVEL_TABLE = {
