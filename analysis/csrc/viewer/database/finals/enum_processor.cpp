@@ -9,9 +9,9 @@
  * Creation Date      : 2023/12/18
  * *****************************************************************************
  */
-#include "enum_processor.h"
+#include "analysis/csrc/viewer/database/finals/enum_processor.h"
 
-#include "unified_db_constant.h"
+#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 namespace Analysis {
 namespace Viewer {

@@ -53,6 +53,7 @@ namespace {
         PROCESSOR_NAME_HCCS,
         PROCESSOR_NAME_ACC_PMU,
         PROCESSOR_NAME_SOC,
+        PROCESSOR_NAME_META_DATA,
     };
 }
 

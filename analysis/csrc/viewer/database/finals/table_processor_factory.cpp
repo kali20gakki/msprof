@@ -25,6 +25,7 @@
 #include "analysis/csrc/viewer/database/finals/hccs_processor.h"
 #include "analysis/csrc/viewer/database/finals/host_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/llc_processor.h"
+#include "analysis/csrc/viewer/database/finals/meta_data_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_mem_processor.h"
 #include "analysis/csrc/viewer/database/finals/npu_module_mem_processor.h"
@@ -110,7 +111,10 @@ namespace {
             MAKE_SHARED_RETURN_VOID(processor, AccPmuProcessor, msprofDBPath, profPaths);}},
         {PROCESSOR_NAME_SOC,               [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
                                               std::shared_ptr<TableProcessor>& processor) {
-            MAKE_SHARED_RETURN_VOID(processor, SocProcessor, msprofDBPath, profPaths);}}
+            MAKE_SHARED_RETURN_VOID(processor, SocProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_META_DATA,         [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, MetaDataProcessor, msprofDBPath);}}
     };
 }
 
