@@ -16,6 +16,7 @@
 
 #include "analysis/csrc/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/acc_pmu_processor.h"
+#include "analysis/csrc/viewer/database/finals/aicore_freq_processor.h"
 #include "analysis/csrc/viewer/database/finals/api_processor.h"
 #include "analysis/csrc/viewer/database/finals/communication_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/compute_task_info_processor.h"
@@ -114,7 +115,10 @@ namespace {
             MAKE_SHARED_RETURN_VOID(processor, SocProcessor, msprofDBPath, profPaths);}},
         {PROCESSOR_NAME_META_DATA,         [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
                                               std::shared_ptr<TableProcessor>& processor) {
-            MAKE_SHARED_RETURN_VOID(processor, MetaDataProcessor, msprofDBPath);}}
+            MAKE_SHARED_RETURN_VOID(processor, MetaDataProcessor, msprofDBPath);}},
+        {PROCESSOR_NAME_AICORE_FREQ,       [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, AicoreFreqProcessor, msprofDBPath, profPaths);}},
     };
 }
 

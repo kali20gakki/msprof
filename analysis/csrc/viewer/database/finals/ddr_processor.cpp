@@ -60,11 +60,9 @@ DDRProcessor::ProcessedDataFormat DDRProcessor::FormatData(const OriDataFormat &
         std::tie(data.deviceId, data.timestamp, data.fluxRead, data.fluxWrite) = row;
         HPFloat timestamp = GetTimeBySamplingTimestamp(data.timestamp,
                                                        threadData.hostMonotonic, threadData.deviceMonotonic);
-        HPFloat readRate{data.fluxRead * BYTE_SIZE * BYTE_SIZE}; // MB/s -> B/s
-        HPFloat writeRate{data.fluxWrite * BYTE_SIZE * BYTE_SIZE};
         processedData.emplace_back(
             static_cast<uint16_t>(data.deviceId), GetLocalTime(timestamp, threadData.timeRecord).Uint64(),
-            static_cast<uint64_t>(data.fluxRead * BYTE_SIZE * BYTE_SIZE),
+            static_cast<uint64_t>(data.fluxRead * BYTE_SIZE * BYTE_SIZE), // MB/s -> B/s
             static_cast<uint64_t>(data.fluxWrite * BYTE_SIZE * BYTE_SIZE));
     }
     return processedData;

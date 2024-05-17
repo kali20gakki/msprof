@@ -381,6 +381,11 @@ namespace {
         {"mata_bw_level", SQL_INTEGER_TYPE},
         {"sys_time", SQL_REAL_TYPE}
     };
+
+    const TableColumns FreqParse = {
+        {"syscnt", SQL_INTEGER_TYPE},
+        {"freq", SQL_INTEGER_TYPE}
+    };
 }
 
 std::string Database::GetDBName() const
@@ -540,6 +545,12 @@ HCCSDB::HCCSDB()
 {
     dbName_ = "hccs.db";
     tableColNames_["HCCSEventsData"] = HCCS;
+}
+
+FreqDB::FreqDB()
+{
+    dbName_ = "freq.db";
+    tableColNames_["FreqParse"] = FreqParse;
 }
 
 } // namespace Database
