@@ -159,6 +159,11 @@ public:
     HCCSDB();
 };
 
+class FreqDB : public Database {
+public:
+    FreqDB();
+};
+
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis

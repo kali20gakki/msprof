@@ -102,6 +102,9 @@ const std::string TABLE_NAME_SOC = "SOC_BANDWIDTH_LEVEL";
 const std::string PROCESSOR_NAME_META_DATA = "META_DATA";
 const std::string TABLE_NAME_META_DATA = "META_DATA";
 
+const std::string PROCESSOR_NAME_AICORE_FREQ = "AICORE_FREQ";
+const std::string TABLE_NAME_AICORE_FREQ = "AICORE_FREQ";
+
 
 // api level
 const std::unordered_map<std::string, uint16_t> API_LEVEL_TABLE = {

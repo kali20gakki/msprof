@@ -288,6 +288,12 @@ namespace {
         {"name", SQL_TEXT_TYPE},
         {"value", SQL_TEXT_TYPE}
     };
+
+    const TableColumns AICORE_FREQ = {
+        {"deviceId", SQL_INTEGER_TYPE},
+        {"timestampNs", SQL_NUMERIC_TYPE},
+        {"freq", SQL_INTEGER_TYPE}
+    };
 }
 
 MsprofDB::MsprofDB()
@@ -319,6 +325,7 @@ MsprofDB::MsprofDB()
         {TABLE_NAME_ACC_PMU, ACC_PMU},
         {TABLE_NAME_SOC, SOC_BANDWIDTH_LEVEL},
         {TABLE_NAME_META_DATA, META_DATA},
+        {TABLE_NAME_AICORE_FREQ, AICORE_FREQ},
         // ENUM
         {TABLE_NAME_ENUM_API_TYPE, ENUM_API_TYPE},
         {TABLE_NAME_ENUM_MODULE, ENUM_MODULE},

@@ -54,6 +54,7 @@ namespace {
         PROCESSOR_NAME_ACC_PMU,
         PROCESSOR_NAME_SOC,
         PROCESSOR_NAME_META_DATA,
+        PROCESSOR_NAME_AICORE_FREQ,
     };
 }
 
