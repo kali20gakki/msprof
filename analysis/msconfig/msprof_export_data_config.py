@@ -179,20 +179,20 @@ class MsProfExportDataConfig(MetaConfig):
         ],
         'host_cpu_usage': [
             ('handler', '_get_host_cpu_usage_data'),
-            ('headers', 'Total Cpu Numbers, Occupied Cpu Numbers, Recommend Cpu Numbers')
+            ('headers', 'Total Cpu Numbers,Occupied Cpu Numbers,Recommend Cpu Numbers')
         ],
         'host_mem_usage': [
             ('handler', '_get_host_mem_usage_data'),
-            ('headers', 'Total Memory(KB), Peak Used Memory(KB), Recommend Memory(KB)')
+            ('headers', 'Total Memory(KB),Peak Used Memory(KB),Recommend Memory(KB)')
         ],
         'host_network_usage': [
             ('handler', '_get_host_network_usage_data'),
-            ('headers', 'Netcard Speed(KB/s), Peak Used Speed(KB/s), Recommend Speed(KB/s)')
+            ('headers', 'Netcard Speed(KB/s),Peak Used Speed(KB/s),Recommend Speed(KB/s)')
         ],
         'host_disk_usage': [
             ('handler', '_get_host_disk_usage_data'),
-            ('headers', 'Peak Disk Read(KB/s), Recommend Disk Read(KB/s), '
-                        'Peak Disk Write(KB/s), Recommend Disk Write(KB/s)')
+            ('headers', 'Peak Disk Read(KB/s),Recommend Disk Read(KB/s),'
+                        'Peak Disk Write(KB/s),Recommend Disk Write(KB/s)')
         ],
         'msprof': [
             ('handler', '_get_bulk_data')
