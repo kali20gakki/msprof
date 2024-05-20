@@ -12,6 +12,7 @@
 #include <atomic>
 
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/utils/file.h"
 #include "analysis/csrc/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
@@ -114,6 +115,22 @@ bool TableProcessor::CreateTableIndex(const std::string &tableName, const std::s
         return false;
     }
     return true;
+}
+
+uint16_t TableProcessor::GetEnumTypeValue(const std::string &key, const std::string &tableName,
+                                          const std::unordered_map<std::string, uint16_t> &enumTable)
+{
+    auto it = enumTable.find(key);
+    if (it == enumTable.end()) {
+        ERROR("Unknown enum key: %, table is: %.", key, tableName);
+        uint16_t res;
+        if (Utils::StrToU16(res, key) != ANALYSIS_OK) {
+            ERROR("Unknown enum key: %, it will be set %.", key, UINT16_MAX);
+            return UINT16_MAX;
+        }
+        return res;
+    }
+    return it->second;
 }
 
 } // Database

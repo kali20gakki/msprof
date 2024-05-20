@@ -71,6 +71,8 @@ protected:
                           const std::vector<std::string> &colNames) const;
     static void PrintProcessorResult(bool result, const std::string &processorName);
     static bool GetGeHashMap(GeHashMap &hashMap, const std::string &fileDir);
+    static uint16_t GetEnumTypeValue(const std::string &key, const std::string &tableName,
+                                     const std::unordered_map<std::string, uint16_t> &enumTable);
     static uint8_t CheckPath(const std::string& path);
     std::string msprofDBPath_;
     std::set<std::string> profPaths_;

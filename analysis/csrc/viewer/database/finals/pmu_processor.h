@@ -52,8 +52,9 @@ private:
     bool TaskBasedProcessByColumnName(const std::pair<const std::string, uint16_t> dbRecord,
                                       const std::string &columnName, DBInfo &metricDB);
     OTFormat GetTaskBasedData(const std::string &dbPath, const std::string &columnName, DBInfo &metricDB);
-    bool FormatTaskBasedData(const OTFormat &oriData, PTFormat &processedData, const std::string &columnName,
+    bool FormatTaskBasedData(const OTFormat &oriData, PTFormat &processedData, std::string columnName,
                              const uint16_t &deviceId);
+    uint64_t UpdateColumnName(std::string &columnName);
 
     bool SampleBasedProcess(const std::string &fileDir);
     bool SampleBasedTimelineProcess(const std::unordered_map<std::string, std::tuple<uint16_t, uint64_t>> &dbPathTable,

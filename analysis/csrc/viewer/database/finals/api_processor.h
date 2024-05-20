@@ -35,7 +35,6 @@ private:
     static ApiDataFormat GetData(const std::string &dbPath, DBInfo &apieventDB);
     static bool FormatData(const std::string &fileDir, const ApiDataFormat &oriData,
                     ProcessedDataFormat &processedData) ;
-    static uint16_t GetLevelValue(const std::string &key);
 };
 
 
