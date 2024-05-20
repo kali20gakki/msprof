@@ -169,6 +169,10 @@ TEST_F(PROF_APPLICATION_TEST, LaunchApp) {
 		.stubs()
 		.will(returnValue(paramsCmd));
 	EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::app::Application::LaunchApp(params, app_process));
+
+    params->application = "bash test.sh";
+    params->is_shell = true;
+    EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::app::Application::LaunchApp(params, app_process));
 }
 
 

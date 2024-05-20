@@ -6,6 +6,7 @@
  */
 #include "application.h"
 #include <fstream>
+#include <sstream>
 #include "config/config.h"
 #include "dyn_prof_client.h"
 #include "errno/error_code.h"
@@ -39,12 +40,12 @@ int Application::PrepareLaunchAppCmd(std::stringstream &ssCmdApp,
         return PROFILING_FAILED;
     }
     ssCmdApp << params->cmdPath;
-
+ 
     if (!params->app_parameters.empty()) {
         ssCmdApp << " ";
         ssCmdApp << params->app_parameters;
     }
-
+ 
     return PROFILING_SUCCESS;
 }
 
@@ -106,6 +107,9 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
         MSPROF_LOGE("[LaunchApp]params is empty.");
         return PROFILING_FAILED;
     }
+    if (params->is_shell) {
+        return LaunchShellApp(params, appProcess);
+    }
     std::stringstream ssCmdApp;  // cmd
     if (PROFILING_SUCCESS != PrepareLaunchAppCmd(ssCmdApp, params)) {
         return PROFILING_FAILED;
@@ -133,12 +137,43 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
         MSPROF_LOGE("Failed to PrepareAppEnvs, cmd:%s", cmd.c_str());
         return PROFILING_FAILED;
     }
+ 
     appProcess = MSVP_MMPROCESS;  // run
     if (!analysis::dvvp::common::utils::Utils::IsPythonOrBash(params->cmdPath)) {
         if (analysis::dvvp::common::utils::Utils::ChangeWorkDir(params->cmdPath) == PROFILING_FAILED) {
             return PROFILING_FAILED;
         }
     }
+    int exitCode = analysis::dvvp::common::utils::INVALID_EXIT_CODE;
+    ExecCmdParams execCmdParams(cmd, true, "");
+    ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsVec, envsVec, exitCode, appProcess);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to launch app: %s", cmd.c_str());
+        return PROFILING_FAILED;
+    }
+    return ret;
+}
+
+int Application::LaunchShellApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params, MmProcess &appProcess)
+{
+    std::vector<std::string> paramsCmd;
+ 
+    std::istringstream iss(params->application);
+    std::string args;
+    while (iss >> args) {
+        paramsCmd.push_back(args);
+    }
+ 
+    std::string cmd = paramsCmd[0];
+    std::vector<std::string> argsVec;
+    std::vector<std::string> envsVec;
+    PrepareAppArgs(paramsCmd, argsVec);  // args
+    int ret = PrepareAppEnvs(params, envsVec);  // envs
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to PrepareAppEnvs, cmd:%s", cmd.c_str());
+        return PROFILING_FAILED;
+    }
+    appProcess = MSVP_MMPROCESS;  // run
     int exitCode = analysis::dvvp::common::utils::INVALID_EXIT_CODE;
     ExecCmdParams execCmdParams(cmd, true, "");
     ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsVec, envsVec, exitCode, appProcess);

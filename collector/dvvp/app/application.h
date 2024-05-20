@@ -24,6 +24,8 @@ public:
                          MmProcess &appProcess);
 
 private:
+    static int LaunchShellApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
+                              MmProcess &appProcess);
     static int PrepareAppEnvs(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
         std::vector<std::string> &envsV);
     static int PrepareLaunchAppCmd(std::stringstream &ssPerfCmdApp,

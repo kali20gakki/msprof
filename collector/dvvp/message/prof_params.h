@@ -8,6 +8,7 @@
 #define ANALYSIS_DVVP_MESSAGE_PROFILE_PARAMS_H
 #include <set>
 #include <sstream>
+#include <vector>
 #include "msprof_dlog.h"
 #include "config/config.h"
 #include "nlohmann/json.hpp"
@@ -48,6 +49,9 @@ struct ProfileParams : BaseInfo {
     std::string app_dir;
     std::string app_parameters;
     std::string app_env;
+    // 最后输入application的时候存储在application里面
+    std::string application;
+    bool is_shell;
     // ai core
     std::string ai_core_profiling;
     int aicore_sampling_interval;
@@ -207,7 +211,7 @@ struct ProfileParams : BaseInfo {
           exportSummaryFormat(PROFILING_SUMMARY_FORMAT), exportIterationId(DEFAULT_INTERATION_ID),
           exportModelId(DEFAULT_MODEL_ID), usedParams(), dataTypeConfig(0), npuAppMemProfiling("on"),
           npuModuleMemProfiling("on"), analyzeSwitch("off"), delayTime(""), durationTime(""),
-          analyzeRuleSwitch("communication,communication_matrix")
+          analyzeRuleSwitch("communication,communication_matrix"), is_shell(FALSE)
     {
     }
 
