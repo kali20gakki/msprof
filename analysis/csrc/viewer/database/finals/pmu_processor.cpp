@@ -183,8 +183,31 @@ PmuProcessor::OTFormat PmuProcessor::GetTaskBasedData(const std::string &dbPath,
     return oriData;
 }
 
+uint64_t PmuProcessor::UpdateColumnName(std::string &columnName)
+{
+    std::string suffix = "_time";
+    if (columnName.size() >= suffix.size() && columnName.substr(columnName.size() - suffix.size()) == suffix) {
+        return MILLI_SECOND; // us -> ns
+    }
+    suffix = "_extra";
+    if (columnName.size() >= suffix.size() && columnName.substr(columnName.size() - suffix.size()) == suffix) {
+        columnName = columnName.substr(0, columnName.size() - suffix.size()); // 只改名，删去 _extra
+    }
+    suffix = "(ms)";
+    if (columnName.size() >= suffix.size() && columnName.substr(columnName.size() - suffix.size()) == suffix) {
+        columnName = columnName.substr(0, columnName.size() - suffix.size()); // 删去 (ms)
+        return MICRO_SECOND; // ms -> ns
+    }
+    suffix = "(GB/s)";
+    if (columnName.size() >= suffix.size() && columnName.substr(columnName.size() - suffix.size()) == suffix) {
+        columnName = columnName.substr(0, columnName.size() - suffix.size()); // 删去 (GB/s)
+        return BYTE_SIZE * BYTE_SIZE * BYTE_SIZE; // GB/s -> Byte/s
+    }
+    return 1;
+}
+
 bool PmuProcessor::FormatTaskBasedData(const OTFormat &oriData, PTFormat &processedData,
-                                       const std::string &columnName, const uint16_t &deviceId)
+                                       std::string columnName, const uint16_t &deviceId)
 {
     INFO("FormatTaskBasedData.");
     if (oriData.empty()) {
@@ -195,17 +218,17 @@ bool PmuProcessor::FormatTaskBasedData(const OTFormat &oriData, PTFormat &proces
         ERROR("Reserve for % task-based data failed, columnName is %.", columnName);
         return false;
     }
-    // 当前task-based pmu存在两个问题:
+    // 当前task-based pmu存在一个问题:
     // 1、没有考虑memory_bound或是cube utilization的计算
-    // 2、对于类似ratio_extra命名的字段没有做名称的刷新(去掉extra等动作)
-    // 当前pmu time的单位为us
+    auto valueScale = UpdateColumnName(columnName);
     TaskPmuData tempData;
     for (const auto &row: oriData) {
         std::tie(tempData.streamId, tempData.taskId, tempData.subtaskId, tempData.batchId, tempData.value) = row;
         uint64_t globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(static_cast<uint16_t>(deviceId),
                                                                             tempData.streamId, tempData.taskId,
                                                                             tempData.subtaskId, tempData.batchId));
-        processedData.emplace_back(globalTaskId, IdPool::GetInstance().GetUint64Id(columnName), tempData.value);
+        processedData.emplace_back(globalTaskId, IdPool::GetInstance().GetUint64Id(columnName),
+                                   tempData.value * valueScale);
     }
     if (processedData.empty()) {
         ERROR("FormatTaskBasedData data processing error.");
@@ -319,8 +342,8 @@ bool PmuProcessor::FormatSampleBasedTimelineData(const OSTFormat &oriData, PSTFo
     }
     std::unordered_map<uint32_t, double> coreIdTimeMap;
     SampleTimelineData tempData;
-    for (uint64_t i = 0; i < oriData.size(); ++i) {
-        std::tie(tempData.timestamp, tempData.task_cyc, tempData.coreid) = oriData[i];
+    for (const auto &row : oriData) {
+        std::tie(tempData.timestamp, tempData.task_cyc, tempData.coreid) = row;
         uint64_t cycle;
         if (StrToU64(cycle, tempData.task_cyc) != ANALYSIS_OK) {
             ERROR("task_cyc to uint64_t failed.");
@@ -404,8 +427,9 @@ bool PmuProcessor::FormatSampleBasedSummaryData(const OSSFormat &oriData, PSSFor
     SampleSummaryData tempData;
     for (const auto& data : oriData) {
         std::tie(tempData.metric, tempData.value, tempData.coreid) = data;
+        auto valueScale = UpdateColumnName(tempData.metric);
         processedData.emplace_back(deviceId, IdPool::GetInstance().GetUint64Id(tempData.metric),
-                                   tempData.value, static_cast<uint16_t>(tempData.coreid), coreType);
+                                   tempData.value * valueScale, static_cast<uint16_t>(tempData.coreid), coreType);
     }
     if (processedData.empty()) {
         ERROR("FormatSampleBasedSummaryData data processing error.");

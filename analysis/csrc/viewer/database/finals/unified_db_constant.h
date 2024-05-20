@@ -66,6 +66,10 @@ const std::string TABLE_NAME_NPU_OP_MEM = "NPU_OP_MEM";
 const std::string PROCESSOR_NAME_ENUM = "ENUM";
 const std::string TABLE_NAME_ENUM_API_TYPE = "ENUM_API_TYPE";
 const std::string TABLE_NAME_ENUM_MODULE = "ENUM_MODULE";
+const std::string TABLE_NAME_ENUM_HCCL_DATA_TYPE = "ENUM_HCCL_DATA_TYPE";
+const std::string TABLE_NAME_ENUM_HCCL_LINK_TYPE = "ENUM_HCCL_LINK_TYPE";
+const std::string TABLE_NAME_ENUM_HCCL_TRANSPORT_TYPE = "ENUM_HCCL_TRANSPORT_TYPE";
+const std::string TABLE_NAME_ENUM_HCCL_RDMA_TYPE = "ENUM_HCCL_RDMA_TYPE";
 
 const std::string PROCESSOR_NAME_NIC = "NIC";
 const std::string TABLE_NAME_NIC = "NIC";
@@ -193,6 +197,50 @@ const std::unordered_map<std::string, uint16_t> MODULE_NAME_TABLE = {
     {"SYSMONITOR", 73},
     {"MBUFF", 74},
     {"CUSTOM", 75}
+};
+
+// hccl info DataType
+const std::unordered_map<std::string, uint16_t> HCCL_DATA_TYPE_TABLE = {
+    {"INT8", 0},
+    {"INT16", 1},
+    {"INT32", 2},
+    {"FP16", 3},
+    {"FP32", 4},
+    {"INT64",  5},
+    {"UINT64",  6},
+    {"INVALID_TYPE", UINT16_MAX},
+};
+
+// hccl info LinkType
+const std::unordered_map<std::string, uint16_t> HCCL_LINK_TYPE_TABLE = {
+    {"ON_CHIP", 0},
+    {"HCCS", 1},
+    {"PCIE", 2},
+    {"ROCE", 3},
+    {"SIO", 4},
+    {"HCCS_SW",  5},
+    {"STANDARD_ROCE",  6},
+    {"RESERVED", 7},
+    {"INVALID_TYPE", UINT16_MAX},
+};
+
+// hccl info TransPortType
+const std::unordered_map<std::string, uint16_t> HCCL_TRANSPORT_TYPE_TABLE = {
+    {"SDMA", 0},
+    {"RDMA", 1},
+    {"LOCAL", 2},
+    {"INVALID_TYPE", UINT16_MAX},
+};
+
+// hccl info RdmaType
+const std::unordered_map<std::string, uint16_t> HCCL_RDMA_TYPE_TABLE = {
+    {"RDMA_SEND_NOTIFY", 0},
+    {"RDMA_SEND_PAYLOAD", 1},
+    {"RDMA_PAYLOAD_PREPARE", 2},
+    {"RDMA_PAYLOAD_CHECK", 3},
+    {"RDMA_PAYLOAD_ACK", 4},
+    {"RDMA_SEND_OP", 5},
+    {"INVALID_TYPE", UINT16_MAX},
 };
 
 // TS为stars时芯片的sqetype

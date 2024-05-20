@@ -12,7 +12,6 @@
 #include "analysis/csrc/viewer/database/finals/api_processor.h"
 
 #include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/parser/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
@@ -115,7 +114,7 @@ bool ApiProcessor::FormatData(const std::string &fileDir, const ApiDataFormat &a
     for (const auto& data : apiData) {
         std::tie(tempData.structType, tempData.id, tempData.level, tempData.threadId, tempData.itemId,
                  tempData.start, tempData.end, tempData.connectionId) = data;
-        uint16_t level = GetLevelValue(tempData.level);
+        uint16_t level = GetEnumTypeValue(tempData.level, MSG_STR(API_LEVEL_TABLE), API_LEVEL_TABLE);
         uint64_t globalTid = Utils::Contact(pid, tempData.threadId);
         Utils::HPFloat startTimestamp = Utils::GetTimeFromSyscnt(tempData.start, params);
         Utils::HPFloat endTimestamp = Utils::GetTimeFromSyscnt(tempData.end, params);
@@ -136,21 +135,6 @@ bool ApiProcessor::FormatData(const std::string &fileDir, const ApiDataFormat &a
         return false;
     }
     return true;
-}
-
-uint16_t ApiProcessor::GetLevelValue(const std::string &key)
-{
-    auto it = API_LEVEL_TABLE.find(key);
-    if (it == API_LEVEL_TABLE.end()) {
-        ERROR("Unknown op type key: %", key);
-        uint16_t res;
-        if (Utils::StrToU16(res, key) != ANALYSIS_OK) {
-            ERROR("Unknown op type key: %, it will be set %.", key, UINT16_MAX);
-            return UINT16_MAX;
-        }
-        return res;
-    }
-    return it->second;
 }
 
 } // Database

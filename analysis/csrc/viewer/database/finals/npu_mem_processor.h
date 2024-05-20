@@ -21,7 +21,7 @@ namespace Database {
 class NpuMemProcessor : public TableProcessor {
     // event, ddr, hbm, timestamp
     using OriDataFormat = std::vector<std::tuple<std::string, uint64_t, uint64_t, double>>;
-    // type, ddrUsage, hbmUsage, timestamp, deviceId
+    // type, ddr, hbm, timestamp, deviceId
     using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint16_t>>;
 public:
     NpuMemProcessor() = default;

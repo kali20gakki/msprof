@@ -177,9 +177,10 @@ db命名：msprof_{时间戳}.db
 
 变更记录：
 
-| 日期          | 内容   |
-|-------------|------|
-| 2024/3/13   | 计划新增 |
+| 日期        | 内容    |
+|-----------|-------|
+| 2024/3/13 | 计划新增  |
+| 2024/5/19 | 630新增 |
 
 ### ENUM_HCCL_LINK_TYPE
 
@@ -192,19 +193,24 @@ db命名：msprof_{时间戳}.db
 
 内容：
 
-| id    | name         |
-|-------|--------------|
-| 0     | ON_CHIP      |
-| 1     | HCCS         |
-| 2     | PCIE         |
-| 3     | ROCE         |
-| 65535 | INVALID_TYPE |
+| id    | name          |
+|-------|---------------|
+| 0     | ON_CHIP       |
+| 1     | HCCS          |
+| 2     | PCIE          |
+| 3     | ROCE          |
+| 4     | SIO           |
+| 5     | HCCS_SW       |
+| 6     | STANDARD_ROCE |
+| 7     | RESERVED      |
+| 65535 | INVALID_TYPE  |
 
 变更记录：
 
-| 日期        | 内容   |
-|-----------|------|
-| 2024/3/13 | 计划新增 |
+| 日期        | 内容                      |
+|-----------|-------------------------|
+| 2024/3/13 | 计划新增                    |
+| 2024/5/19 | 630新增,同时增加新的type字段（4-7） |
 
 ### ENUM_HCCL_TRANSPORT_TYPE
 
@@ -226,9 +232,10 @@ db命名：msprof_{时间戳}.db
 
 变更记录：
 
-| 日期        | 内容   |
-|-----------|------|
-| 2024/3/13 | 计划新增 |
+| 日期        | 内容    |
+|-----------|-------|
+| 2024/3/13 | 计划新增  |
+| 2024/5/19 | 630新增 |
 
 
 ### ENUM_HCCL_RDMA_TYPE
@@ -242,17 +249,22 @@ db命名：msprof_{时间戳}.db
 
 内容：
 
-| id    | name              |
-|-------|-------------------|
-| 0     | RDMA_SEND_NOTIFY  |
-| 1     | RDMA_SEND_PAYLOAD |
-| 65535 | INVALID_TYPE      |
+| id    | name                 |
+|-------|----------------------|
+| 0     | RDMA_SEND_NOTIFY     |
+| 1     | RDMA_SEND_PAYLOAD    |
+| 2     | RDMA_PAYLOAD_PREPARE |
+| 3     | RDMA_PAYLOAD_CHECK   |
+| 4     | RDMA_PAYLOAD_ACK     |
+| 5     | RDMA_SEND_OP         |
+| 65535 | INVALID_TYPE         |
 
 变更记录：
 
-| 日期        | 内容   |
-|-----------|------|
-| 2024/3/13 | 计划新增 |
+| 日期        | 内容                      |
+|-----------|-------------------------|
+| 2024/3/13 | 计划新增                    |
+| 2024/5/19 | 630新增,同时增加新的type字段（2-5） |
 
 ### STRING_IDS
 
@@ -307,17 +319,17 @@ db命名：msprof_{时间戳}.db
 
 格式：
 
-| 字段名  | 类型      | 索引  | 含义            |
-|--------|-----------|------|-----------------|
-| hostUid   | INTEGER |     |   标识host的唯一id  |
-| hostName  | TEXT    |     | host主机名称，如localhost |
+| 字段名      | 类型      | 索引  | 含义                  |
+|----------|---------|-----|---------------------|
+| hostUid  | INTEGER |     | 标识host的唯一id         |
+| hostName | TEXT    |     | host主机名称，如localhost |
 
 
 变更记录：
 
-| 日期        | 内容                |
-|------------|-------------------|
-| 2024/5/10  | 630首次上线           |
+| 日期        | 内容      |
+|-----------|---------|
+| 2024/5/10 | 630首次上线 |
 
 
 ### TASK
@@ -355,7 +367,7 @@ db命名：msprof_{时间戳}.db
 |-----------------|---------|-----|------------------------------------------------------|
 | name            | INTEGER |     | 算子名，STRING_IDS(name)                                 |
 | globalTaskId    | INTEGER | 主键  | 全局算子任务id，用于关联TASK表                                   |
-| block_dim       | INTEGER |     | 算子运行切分数量，对应算子运行时核数                                   |
+| blockDim        | INTEGER |     | 算子运行切分数量，对应算子运行时核数                                   |
 | mixBlockDim     | INTEGER |     | mix算子从加速器的block_dim值                                 |
 | taskType        | INTEGER |     | host执行该算子的加速器类型，STRING_IDS(taskType)                 |
 | opType          | INTEGER |     | 算子类型，STRING_IDS(opType)                              |
@@ -370,9 +382,10 @@ db命名：msprof_{时间戳}.db
 
 变更记录：
 
-| 日期       | 内容      |
-|----------|---------|
-| 2024/3/7 | 330首次上线 |
+| 日期        | 内容                                |
+|-----------|-----------------------------------|
+| 2024/3/7  | 330首次上线                           |
+| 2024/5/19 | 修改原有block_dim为blockDim，统一命名风格为小驼峰 |
 
 
 ### COMMUNICATION_TASK_INFO
@@ -399,10 +412,11 @@ db命名：msprof_{时间戳}.db
 
 变更记录：
 
-| 日期        | 内容                                          |
-|-----------|---------------------------------------------|
-| 2024/3/7  | 330首次上线                                     |
-| 2024/3/26 | globalTaskId修改为索引，命名为CommunicationTaskIndex |
+| 日期        | 内容                                                                     |
+|-----------|------------------------------------------------------------------------|
+| 2024/3/7  | 330首次上线                                                                |
+| 2024/3/26 | globalTaskId修改为索引，命名为CommunicationTaskIndex                            |
+| 2024/5/19 | dataType，linkType，transportType，rdmaType字段不再从StringIds里取，而从对应的enum表中获取 |
 
 ### COMMUNICATION_OP
 
@@ -426,10 +440,11 @@ db命名：msprof_{时间戳}.db
 
 变更记录：
 
-| 日期        | 内容         |
-|-----------|------------|
-| 2024/3/7  | 330首次上线    |
-| 2024/5/10 | 添加opType字段 |
+| 日期        | 内容                                     |
+|-----------|----------------------------------------|
+| 2024/3/7  | 330首次上线                                |
+| 2024/5/10 | 添加opType字段                             |
+| 2024/5/19 | dataType字段不再从StringIds里取，而从对应的enum表中获取 |
 
 ### CANN_API
 
@@ -590,35 +605,12 @@ timeline计算公式：
 | 2024/3/7 | 330首次上线 |
 
 ### RoH
-
-格式：
-
-| 字段名          | 类型      | 索引  | 含义                  |
-|--------------|---------|-----|---------------------|
-| deviceId     | INTEGER |     | deviceId            |
-| timestampNs  | INTEGER |     | 本地时间，单位 ns          |
-| bandwidth    | INTEGER |     | 带宽，单位 B/s           |
-| rxPacketRate | NUMERIC |     | 收包速率，单位 packet/s    |
-| rxByteRate   | NUMERIC |     | 接收字节速率，单位 B/s       |
-| rxPackets    | INTEGER |     | 累计收包数量，单位 packet    |
-| rxBytes      | INTEGER |     | 累计接收字节数量，单位 Byte    |
-| rxErrors     | INTEGER |     | 累计接收错误包数量，单位 packet |
-| rxDropped    | INTEGER |     | 累计接收丢包数量，单位 packet  |
-| txPacketRate | NUMERIC |     | 发包速率，单位 packet/s    |
-| txByteRate   | NUMERIC |     | 发送字节速率，单位 B/s       |
-| txPackets    | INTEGER |     | 累计发包数量，单位 packet    |
-| txBytes      | INTEGER |     | 累计发送字节数量，单位 Byte    |
-| txErrors     | INTEGER |     | 累计发送错误包数量，单位 packet |
-| txDropped    | INTEGER |     | 累计发送丢包数量，单位 packet  |
-| funcId       | INTEGER |     | 端口号                 |
-
-公式参考NIC
-
 变更记录：
 
-| 日期        | 内容   |
-|-----------|------|
-| 2024/3/13 | 计划新增 |
+| 日期        | 内容                          |
+|-----------|-----------------------------|
+| 2024/3/13 | 计划新增                        |
+| 2024/5/19 | RoH交付件和原有RoCE交付件命名一致不再新增，删去 |
 
 
 ### LLC
@@ -721,6 +713,7 @@ timeline计算公式：
 |-----------|----------------------------------|
 | 2024/3/7  | 330首次上线                          |
 | 2024/3/13 | ddrUsage和hbmUsage更名为ddr和hbm，计划变更 |
+| 2024/5/19 | ddrUsage和hbmUsage更名为ddr和hbm      |
 
 
 ### NPU_MODULE_MEM
@@ -869,7 +862,7 @@ timeline计算公式：
 | 2024/3/7 | 330首次上线 |
 
 
-### META
+### META_DATA
 
 格式：
 
@@ -973,51 +966,53 @@ db命名：ascend_pytorch_profiler_{rankId}.db
 
 格式:
 
-| 字段名             | 类型      | 索引  | 含义                                   |
-|-----------------|---------|-----|--------------------------------------|
-| component       | INTEGER |     | 组件名(GE、PTA、PTA+GE)在STRING_IDS表中对应的id |
-| time_stamp      | INTEGER |     | 时间戳                                  |
-| total_allocated | INTEGER |     | 内存分配总额                               |
-| total_reserved  | INTEGER |     | 内存预留总额                               |
-| total_active    | INTEGER |     | PTA流申请的总内存                           |
-| stream_ptr      | INTEGER |     | ascendcl流地址                          |
-| device_id       | INTEGER |     | device id                            |
+| 字段名            | 类型      | 索引  | 含义                                   |
+|----------------|---------|-----|--------------------------------------|
+| component      | INTEGER |     | 组件名(GE、PTA、PTA+GE)在STRING_IDS表中对应的id |
+| time_stamp     | INTEGER |     | 时间戳                                  |
+| totalAllocated | INTEGER |     | 内存分配总额                               |
+| totalReserved  | INTEGER |     | 内存预留总额                               |
+| totalActive    | INTEGER |     | PTA流申请的总内存                           |
+| streamPtr      | INTEGER |     | ascendcl流地址                          |
+| deviceId       | INTEGER |     | device id                            |
 
 
 变更记录:
 
-| 日期       | 内容      |
-|----------|---------|
-| 2024/3/7 | 330首次上线 |
+| 日期        | 内容 |
+|-----------|--|
+| 2024/3/7  | 330首次上线 |
+| 2024/5/19 | 修改total_allocated，total_reserved，total_active，stream_ptr， device_id等字段为小驼峰，统一命名规则|
 
 ### OP_MEMORY
 
 格式:
 
-| 字段名                        | 类型      | 索引  | 含义                         |
-|----------------------------|---------|-----|----------------------------|
-| name                       | INTEGER |     | torch op/ge op名在STRING_IDS中对应的id |
-| size                       | INTEGER |     | 算子占用内存大小                   |
-| acllocation_time           | INTEGER |     | 算子内存申请时间                   |
-| release_time               | INTEGER |     | 算子内存释放时间                   |
-| active_release_time        | INTEGER |     | 内存实际归还内存池时间                |
-| duration                   | INTEGER |     | 内存占用时间                     |
-| active_duration            | INTEGER |     | 内存实际占用时间                   |
-| allocation_total_allocated | INTEGER |     | 算子内存分配时PTA和GE内存分配总额        |
-| allocation_total_reserved  | INTEGER |     | 算子内存分配时PTA和GE内存占用总额        |
-| allocation_total_active    | INTEGER |     | 算子内存分配时当前流申请的内存总额          |
-| release_total_allocated    | INTEGER |     | 算子内存释放时PTA和GE内存分配总额        |
-| release_total_reserved     | INTEGER |     | 算子内存释放时PTA和GE内存占用总额        |
-| release_total_active       | INTEGER |     | 算子内存释放时当前流申请的内存总额          |
-| stream_ptr                 | INTEGER |     | ascendcl流地址                |
-| device_id                  | INTEGER |     | device id                  |
+| 字段名                      | 类型      | 索引  | 含义                               |
+|--------------------------|---------|-----|----------------------------------|
+| name                     | INTEGER |     | torch op/ge op名在STRING_IDS中对应的id |
+| size                     | INTEGER |     | 算子占用内存大小                         |
+| acllocationTime          | INTEGER |     | 算子内存申请时间                         |
+| releaseTime              | INTEGER |     | 算子内存释放时间                         |
+| activeReleaseTime        | INTEGER |     | 内存实际归还内存池时间                      |
+| duration                 | INTEGER |     | 内存占用时间                           |
+| activeDuration           | INTEGER |     | 内存实际占用时间                         |
+| allocationTotalAllocated | INTEGER |     | 算子内存分配时PTA和GE内存分配总额              |
+| allocationTotalReserved  | INTEGER |     | 算子内存分配时PTA和GE内存占用总额              |
+| allocationTotalActive    | INTEGER |     | 算子内存分配时当前流申请的内存总额                |
+| releaseTotalAllocated    | INTEGER |     | 算子内存释放时PTA和GE内存分配总额              |
+| releaseTotalReserved     | INTEGER |     | 算子内存释放时PTA和GE内存占用总额              |
+| releaseTotalActive       | INTEGER |     | 算子内存释放时当前流申请的内存总额                |
+| streamPtr                | INTEGER |     | ascendcl流地址                      |
+| deviceId                 | INTEGER |     | device id                        |
 
 
 变更记录:
 
-| 日期       | 内容      |
-|----------|---------|
-| 2024/3/7 | 330首次上线 |
+| 日期        | 内容              |
+|-----------|-----------------|
+| 2024/3/7  | 330首次上线         |
+| 2024/5/19 | 表中各字段统一修改为小驼峰命名 |
 
 
 ### RANK_DEVICE_MAP
@@ -1025,13 +1020,14 @@ db命名：ascend_pytorch_profiler_{rankId}.db
 
 格式:
 
-| 字段名          | 类型      | 索引  | 含义              |
-|--------------|---------|-----|---------------------------------------------|
-| rank_id      | INTEGER |     | rank id值  |
-| device_id    | INTEGER |     | 当前device id值|
+| 字段名      | 类型      | 索引  | 含义           |
+|----------|---------|-----|--------------|
+| rankId   | INTEGER |     | rank id值     |
+| deviceId | INTEGER |     | 当前device id值 |
 
 变更记录:
 
-| 日期       | 内容      |
-|----------|---------|
-| 2024/3/7 | 330首次上线 |
+| 日期        | 内容              |
+|-----------|-----------------|
+| 2024/3/7  | 330首次上线         |
+| 2024/5/19 | 表中各字段统一修改为小驼峰命名 |

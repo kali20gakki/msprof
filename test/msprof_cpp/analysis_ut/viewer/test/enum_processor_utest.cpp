@@ -48,32 +48,18 @@ protected:
     }
 };
 
-void CheckEnumApiLevel(const std::shared_ptr<DBRunner> &dbRunner)
+void CheckEnumValueByTableName(const std::shared_ptr<DBRunner> &dbRunner, const std::string &tableName,
+                               const std::unordered_map<std::string, uint16_t> &enumTable)
 {
     EnumDataFormat checkData;
-    std::string sqlStr = "SELECT id, name FROM " + TABLE_NAME_ENUM_API_TYPE;
+    std::string sqlStr = "SELECT id, name FROM " + tableName;
     const uint32_t ID_INDEX = 0;
     const uint32_t NAME_INDEX = 1;
-    const uint16_t expectNum = API_LEVEL_TABLE.size();
+    const uint16_t expectNum = enumTable.size();
     EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkData));
     EXPECT_EQ(expectNum, checkData.size());
     for (auto record : checkData) {
-        EXPECT_EQ(std::get<ID_INDEX>(record), API_LEVEL_TABLE.find(std::get<NAME_INDEX>(record))->second);
-    }
-}
-
-
-void CheckEnumModule(const std::shared_ptr<DBRunner> &dbRunner)
-{
-    EnumDataFormat checkData;
-    std::string sqlStr = "SELECT id, name FROM " + TABLE_NAME_ENUM_MODULE;
-    const uint32_t ID_INDEX = 0;
-    const uint32_t NAME_INDEX = 1;
-    const uint16_t expectNum = MODULE_NAME_TABLE.size();
-    EXPECT_TRUE(dbRunner->QueryData(sqlStr, checkData));
-    EXPECT_EQ(expectNum, checkData.size());
-    for (auto record : checkData) {
-        EXPECT_EQ(std::get<ID_INDEX>(record), MODULE_NAME_TABLE.find(std::get<NAME_INDEX>(record))->second);
+        EXPECT_EQ(std::get<ID_INDEX>(record), enumTable.find(std::get<NAME_INDEX>(record))->second);
     }
 }
 
@@ -87,8 +73,12 @@ TEST_F(EnumProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
     std::shared_ptr<DBRunner> dbRunner;
     MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
     ASSERT_NE(dbRunner, nullptr);
-    CheckEnumApiLevel(dbRunner);
-    CheckEnumModule(dbRunner);
+    CheckEnumValueByTableName(dbRunner, TABLE_NAME_ENUM_API_TYPE, API_LEVEL_TABLE);
+    CheckEnumValueByTableName(dbRunner, TABLE_NAME_ENUM_MODULE, MODULE_NAME_TABLE);
+    CheckEnumValueByTableName(dbRunner, TABLE_NAME_ENUM_HCCL_DATA_TYPE, HCCL_DATA_TYPE_TABLE);
+    CheckEnumValueByTableName(dbRunner, TABLE_NAME_ENUM_HCCL_LINK_TYPE, HCCL_LINK_TYPE_TABLE);
+    CheckEnumValueByTableName(dbRunner, TABLE_NAME_ENUM_HCCL_TRANSPORT_TYPE, HCCL_TRANSPORT_TYPE_TABLE);
+    CheckEnumValueByTableName(dbRunner, TABLE_NAME_ENUM_HCCL_RDMA_TYPE, HCCL_RDMA_TYPE_TABLE);
 }
 
 TEST_F(EnumProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)

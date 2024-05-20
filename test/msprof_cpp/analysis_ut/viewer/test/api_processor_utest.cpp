@@ -137,7 +137,8 @@ void CheckApiDataValid(const QueryDataFormat &checkData)
         // 开始小于结束时间
         EXPECT_LE(start, end);
         // 比对前后的level是否一致
-        EXPECT_EQ(type, ApiProcessor().GetLevelValue(std::get<LEVEL_INDEX>(API_DATA[index])));
+        auto tempTypeIt = API_LEVEL_TABLE.find(std::get<LEVEL_INDEX>(API_DATA[index]));
+        EXPECT_EQ(type, (tempTypeIt == API_LEVEL_TABLE.end()) ? UINT16_MAX : tempTypeIt->second);
         uint32_t oriTid = std::get<TID_INDEX>(API_DATA[index]);
         uint32_t oriConId = std::get<CONNECTION_ID_INDEX>(API_DATA[index]);
         // 分别校验获取到的tid和connectionId的低32位是否与原先保持一致。

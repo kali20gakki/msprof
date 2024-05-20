@@ -56,7 +56,7 @@ namespace {
     const TableColumns COMPUTE_TASK_INFO = {
         {"name", SQL_INTEGER_TYPE},
         {"globalTaskId", SQL_INTEGER_TYPE, true},
-        {"block_dim", SQL_INTEGER_TYPE},
+        {"blockDim", SQL_INTEGER_TYPE},
         {"mixBlockDim", SQL_INTEGER_TYPE},
         {"taskType", SQL_INTEGER_TYPE},
         {"opType", SQL_INTEGER_TYPE},
@@ -112,8 +112,8 @@ namespace {
 
     const TableColumns NPU_MEM = {
         {"type", SQL_INTEGER_TYPE},
-        {"ddrUsage", SQL_NUMERIC_TYPE},
-        {"hbmUsage", SQL_NUMERIC_TYPE},
+        {"ddr", SQL_NUMERIC_TYPE},
+        {"hbm", SQL_NUMERIC_TYPE},
         {"timestampNs", SQL_INTEGER_TYPE},
         {"deviceId", SQL_INTEGER_TYPE}
     };
@@ -138,26 +138,7 @@ namespace {
         {"deviceId", SQL_INTEGER_TYPE}
     };
 
-    const TableColumns NIC = {
-        {"deviceId", SQL_INTEGER_TYPE},
-        {"timestampNs", SQL_INTEGER_TYPE},
-        {"bandwidth", SQL_INTEGER_TYPE},
-        {"rxPacketRate", SQL_NUMERIC_TYPE},
-        {"rxByteRate", SQL_NUMERIC_TYPE},
-        {"rxPackets", SQL_INTEGER_TYPE},
-        {"rxBytes", SQL_INTEGER_TYPE},
-        {"rxErrors", SQL_INTEGER_TYPE},
-        {"rxDropped", SQL_INTEGER_TYPE},
-        {"txPacketRate", SQL_NUMERIC_TYPE},
-        {"txByteRate", SQL_NUMERIC_TYPE},
-        {"txPackets", SQL_INTEGER_TYPE},
-        {"txBytes", SQL_INTEGER_TYPE},
-        {"txErrors", SQL_INTEGER_TYPE},
-        {"txDropped", SQL_INTEGER_TYPE},
-        {"funcId", SQL_INTEGER_TYPE}
-    };
-
-    const TableColumns RoCE = {
+    const TableColumns SYS_IO = {
         {"deviceId", SQL_INTEGER_TYPE},
         {"timestampNs", SQL_INTEGER_TYPE},
         {"bandwidth", SQL_INTEGER_TYPE},
@@ -257,12 +238,7 @@ namespace {
         {"rxThroughput", SQL_NUMERIC_TYPE}
     };
 
-    const TableColumns ENUM_API_TYPE = {
-        {"id", SQL_INTEGER_TYPE, true},
-        {"name", SQL_TEXT_TYPE}
-    };
-
-    const TableColumns ENUM_MODULE = {
+    const TableColumns ENUM_TABLE = {
         {"id", SQL_INTEGER_TYPE, true},
         {"name", SQL_TEXT_TYPE}
     };
@@ -312,8 +288,8 @@ MsprofDB::MsprofDB()
         {TABLE_NAME_NPU_MEM, NPU_MEM},
         {TABLE_NAME_NPU_MODULE_MEM, NPU_MODULE_MEM},
         {TABLE_NAME_NPU_OP_MEM, NPU_OP_MEM},
-        {TABLE_NAME_NIC, NIC},
-        {TABLE_NAME_ROCE, RoCE},
+        {TABLE_NAME_NIC, SYS_IO},
+        {TABLE_NAME_ROCE, SYS_IO},
         {TABLE_NAME_HBM, HBM},
         {TABLE_NAME_DDR, DDR},
         {TABLE_NAME_LLC, LLC},
@@ -327,8 +303,12 @@ MsprofDB::MsprofDB()
         {TABLE_NAME_META_DATA, META_DATA},
         {TABLE_NAME_AICORE_FREQ, AICORE_FREQ},
         // ENUM
-        {TABLE_NAME_ENUM_API_TYPE, ENUM_API_TYPE},
-        {TABLE_NAME_ENUM_MODULE, ENUM_MODULE},
+        {TABLE_NAME_ENUM_API_TYPE, ENUM_TABLE},
+        {TABLE_NAME_ENUM_MODULE, ENUM_TABLE},
+        {TABLE_NAME_ENUM_HCCL_DATA_TYPE, ENUM_TABLE},
+        {TABLE_NAME_ENUM_HCCL_LINK_TYPE, ENUM_TABLE},
+        {TABLE_NAME_ENUM_HCCL_TRANSPORT_TYPE, ENUM_TABLE},
+        {TABLE_NAME_ENUM_HCCL_RDMA_TYPE, ENUM_TABLE},
     };
 }
 

@@ -28,7 +28,7 @@ using namespace Analysis::Utils;
 using namespace Viewer::Database;
 
 namespace {
-const uint32_t ALL_EXPORT_VERSION = 0x072211;  // 2023年10月30号之后支持全导的驱动版本号
+const uint32_t ALL_EXPORT_VERSION = 0x072211;  // 2023年10月30号之后支持全导的驱动版本号 0x072211 = 467473
 // 需要用到的json 和 log的文件名（前缀）
 const std::string INFO_JSON = "info.json";
 const std::string SAMPLE_JSON = "sample.json";

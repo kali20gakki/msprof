@@ -70,6 +70,9 @@ const OSSFormat SAMPLE_SUMMARY = {
     {"total_time(ms)", 735.67, 1},
     {"vec_ratio", 0.12561746435222, 1},
     {"mac_ratio", 0.36563948509522, 1},
+    {"ub_read_bw(GB/s)", 0.123, 1},
+    {"ub_write_bw(GB/s)", 0.12561746435222, 1},
+    {"l1_read_bw(GB/s)", 0.36563948509522, 1},
 };
 
 const TempTaskFormat TASK_DATA = {
@@ -375,4 +378,3 @@ TEST_F(PmuProcessorUTest, TestWhenNoDBShouldReturnTrue)
 
     EXPECT_TRUE(File::RemoveDir(profTest, 0));
 }
-

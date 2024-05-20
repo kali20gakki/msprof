@@ -154,20 +154,20 @@ void CheckStringId(CommunicationInfoProcessor::CommunicationTaskDataFormat data)
                                             IdPool::GetInstance().GetUint64Id("Memcpy23"),
                                             IdPool::GetInstance().GetUint64Id("Reduce23")};
     const uint16_t rdmaTypeIndex = 6;
-    const uint64_t rdmaTypeHashId = IdPool::GetInstance().GetUint64Id("INVALID_TYPE");
+    const uint64_t rdmaTypeHashId = HCCL_RDMA_TYPE_TABLE.find("INVALID_TYPE")->second;
     const uint16_t srcRankIndex = 7;
     const std::set<uint64_t> srcRankSet = {0, 1, 4};
     const uint16_t dstRankIndex = 8;
     const std::set<uint64_t> dstRankSet = {0, 2, 4};
     const uint16_t transportTypeIndex = 9;
-    const uint64_t transportTypeHashId = IdPool::GetInstance().GetUint64Id("SDMA");
+    const uint64_t transportTypeHashId = HCCL_TRANSPORT_TYPE_TABLE.find("SDMA")->second;
     const uint16_t dataTypeIndex = 11;
-    const std::set<uint64_t> dataTypeSet = {IdPool::GetInstance().GetUint64Id("FP16"),
-                                            IdPool::GetInstance().GetUint64Id("FP32"),
-                                            IdPool::GetInstance().GetUint64Id("INVALID_TYPE")};
+    const std::set<uint64_t> dataTypeSet = {HCCL_DATA_TYPE_TABLE.find("FP16")->second,
+                                            HCCL_DATA_TYPE_TABLE.find("FP32")->second,
+                                            HCCL_DATA_TYPE_TABLE.find("INVALID_TYPE")->second};
     const uint16_t linkTypeIndex = 12;
-    const std::set<uint64_t> linkTypeSet = {IdPool::GetInstance().GetUint64Id("HCCS"),
-                                            IdPool::GetInstance().GetUint64Id("ON_CHIP")};
+    const std::set<uint64_t> linkTypeSet = {HCCL_LINK_TYPE_TABLE.find("HCCS")->second,
+                                            HCCL_LINK_TYPE_TABLE.find("ON_CHIP")->second};
     std::set<uint64_t> stringIdsSet;
     std::vector<uint64_t> stringIds;
     for (auto item : data) {
