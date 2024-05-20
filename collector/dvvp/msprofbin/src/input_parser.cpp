@@ -11,6 +11,7 @@
 #include <memory>
 #include <cstring>
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 #include <sys/stat.h>
 #include "cmd_log.h"
@@ -57,7 +58,7 @@ const std::string TOOL_NAME_IOTOP   = "iotop";
 const std::string CSV_FORMAT        = "csv";
 const std::string JSON_FORMAT       = "json";
 
-
+std::string g_appStr;
 InputParser::InputParser()
 {
     MSVP_MAKE_SHARED0_VOID(params_, analysis::dvvp::message::ProfileParams);
@@ -119,6 +120,11 @@ bool InputParser::CheckInstrAndTaskParamBothSet(std::unordered_map<int, std::pai
 
 bool InputParser::CheckInputDataValidity(int argc, CONST_CHAR_PTR argv[])
 {
+    if (params_ == nullptr) {
+        MSPROF_LOGE("params_ is null in InputParser.");
+        return false;
+    }
+
     if (argc > INPUT_MAX_LENTH || argv == nullptr) {
         CmdLog::instance()->CmdErrorLog("input data is invalid,"
             "please input argc less than %d and argv is not null", INPUT_MAX_LENTH);
@@ -136,20 +142,20 @@ bool InputParser::CheckInputDataValidity(int argc, CONST_CHAR_PTR argv[])
 
 SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOpts(int argc, CONST_CHAR_PTR argv[])
 {
-    if (params_ == nullptr) {
-        MSPROF_LOGE("params_ is null in InputParser.");
-        return nullptr;
-    }
     if (!CheckInputDataValidity(argc, argv)) {
         return nullptr;
     }
+
+    int32_t argCount = 1;       // argv[0] is msprof
+    std::string appStr = GetApplicationArgv(argc, argv, argCount);
+
     int opt = 0;
     int optionIndex = 0;
     MsprofString optString  = "";
     struct MsprofCmdInfo cmdInfo = { {nullptr} };
     std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap;
     std::string argvStr = "";
-    while ((opt = MmGetOptLong(argc, const_cast<MsprofStrBufAddrT>(argv),
+    while ((opt = MmGetOptLong(argCount, const_cast<MsprofStrBufAddrT>(argv),
         optString, longOptions, &optionIndex)) != MSPROF_DAEMON_ERROR) {
         if (opt < ARGS_HELP || opt >= NR_ARGS) {
             MsprofCmdUsage("");
@@ -175,15 +181,70 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
             argvMap[opt] = std::pair<MsprofCmdInfo, std::string>(cmdInfo, argvStr);
         }
     }
+
+    SetApplicationArgv(appStr, cmdInfo, argvMap);
     if (CheckInstrAndTaskParamBothSet(argvMap)) {
         return nullptr;
     }
-    auto paramAdapter = ParamsAdapterMsprof();
-    if (paramAdapter.GetParamFromInputCfg(argvMap, params_) != PROFILING_SUCCESS) {
+
+    if (ParamsAdapterMsprof().GetParamFromInputCfg(argvMap, params_) != PROFILING_SUCCESS) {
         MSPROF_LOGE("[MsprofGetOpts]get param from InputCfg failed.");
         return nullptr;
     }
     return params_;
+}
+
+void InputParser::SetApplicationArgv(const std::string &appStr, struct MsprofCmdInfo &cmdInfo,
+                                     std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap)
+{
+    if (appStr.empty()) {
+        params_->is_shell = false;
+        return;
+    }
+    if (argvMap.find(ARGS_APPLICATION) != argvMap.end()) {
+        params_->is_shell = false;
+        CmdLog::instance()->CmdWarningLog("The executable file '%s' is useless when --application is not empty",
+                                          appStr.c_str());
+        return;
+    }
+    params_->is_shell = true;
+    g_appStr = appStr;
+    cmdInfo.args[ARGS_APPLICATION] = const_cast<CHAR_PTR>(g_appStr.c_str());
+    std::string appArg = "--application=";
+    argvMap[ARGS_APPLICATION] = std::pair<MsprofCmdInfo, std::string>(cmdInfo, appArg + appStr);
+
+    if (argvMap.find(ARGS_OUTPUT) == argvMap.end()) {
+        cmdInfo.args[ARGS_OUTPUT] = "./";
+        std::string outputStr = "--output=./";
+        argvMap[ARGS_OUTPUT] = std::pair<MsprofCmdInfo, std::string>(cmdInfo, outputStr);
+    }
+}
+
+/**
+ * @brief find msprof command parameter and user parameter splits
+ * @param [in] argc: argc
+ * @param [in] argv: argv
+ * @param [out] argCount: msprof parameter count
+ */
+std::string InputParser::GetApplicationArgv(int32_t argc, CONST_CHAR_PTR argv[], int32_t &argCount)
+{
+    std::stringstream sstr;
+    const int32_t argWithSpaceNum = 2;
+    for (int32_t i = 1; i < argc; i++) {
+        if (argv[i][0] == '-' && argv[i][1] == '-') {
+            if (std::strchr(argv[i], '=') != nullptr) {
+                argCount++;
+            } else {
+                argCount += argWithSpaceNum;
+                i++;
+            }
+        } else {
+            for (;i < argc; i++) {
+                sstr << argv[i] << " ";
+            }
+        }
+    }
+    return sstr.str();
 }
 
 bool InputParser::HasHelpParamOnly()

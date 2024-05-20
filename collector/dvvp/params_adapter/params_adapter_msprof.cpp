@@ -91,8 +91,6 @@ int ParamsAdapterMsprof::ParamsCheckMsprof()
         std::string cfgValue = paramContainer_[inputCfg];
         switch (inputCfg) {
             case INPUT_CFG_MSPROF_APPLICATION:
-                ret = ParamValidation::instance()->MsprofCheckAppValid(paramContainer_[inputCfg]);
-                break;
             case INPUT_CFG_MSPROF_ENVIRONMENT:
                 ret = ParamValidation::instance()->MsprofCheckEnvValid(cfgValue);
                 break;
@@ -317,6 +315,8 @@ void ParamsAdapterMsprof::SetCollectParams()
     params_->cmdPath = cmdPath_;
     params_->app_parameters = appParameters_;
     params_->app_dir = appDir_;
+    params_->application = paramContainer_[INPUT_CFG_MSPROF_APPLICATION].empty() ?
+        params_->application : paramContainer_[INPUT_CFG_MSPROF_APPLICATION];
     params_->app_env = paramContainer_[INPUT_CFG_MSPROF_ENVIRONMENT].empty() ?
         params_->app_env : paramContainer_[INPUT_CFG_MSPROF_ENVIRONMENT];
     params_->pythonPath = paramContainer_[INPUT_CFG_PYTHON_PATH].empty() ?

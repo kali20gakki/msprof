@@ -185,7 +185,10 @@ public:
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> MsprofGetOpts(int argc, MsprofString argv[]);
     bool HasHelpParamOnly();
 private:
+    std::string GetApplicationArgv(int32_t argc, CONST_CHAR_PTR argv[], int32_t &argCount);
     bool CheckInstrAndTaskParamBothSet(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap);
+    void SetApplicationArgv(const std::string &appStr, struct MsprofCmdInfo &cmdInfo,
+                            std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap);
 
 private:
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params_;
