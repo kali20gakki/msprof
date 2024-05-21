@@ -38,7 +38,7 @@ int PlatformAdapterMini::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfilePa
         PLATFORM_SYS_DEVICE_DDR, PLATFORM_SYS_DEVICE_NIC, PLATFORM_SYS_DEVICE_DVPP, PLATFORM_SYS_HOST_ONE_PID_CPU,
         PLATFORM_SYS_HOST_ONE_PID_MEM, PLATFORM_SYS_HOST_ONE_PID_DISK, PLATFORM_SYS_HOST_ONE_PID_OSRT,
         PLATFORM_SYS_HOST_NETWORK, PLATFORM_SYS_HOST_ALL_PID_CPU, PLATFORM_SYS_HOST_ALL_PID_MEM,
-        PLATFORM_SYS_HOST_SYS_CPU, PLATFORM_SYS_HOST_SYS_MEM};
+        PLATFORM_SYS_HOST_SYS_CPU, PLATFORM_SYS_HOST_SYS_MEM, PLATFORM_TASK_OP_ATTR};
     std::string capacityEvents = GenerateCapacityEvents();
     std::string bandwidthEvents = GenerateBandwidthEvents();
     getLlcEvents_ = {{"capacity", capacityEvents},

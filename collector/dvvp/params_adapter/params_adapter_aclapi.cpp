@@ -123,7 +123,8 @@ void ParamsAdapterAclApi::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
         {PROF_RUNTIME_API_MASK, INPUT_CFG_COM_RUNTIME_API},
         {PROF_HCCL_TRACE_MASK, INPUT_CFG_COM_HCCL},
         {PROF_MSPROFTX_MASK, INPUT_CFG_COM_MSPROFTX},
-        {PROF_TASK_MEMORY_MASK, INPUT_CFG_COM_TASK_MEMORY}
+        {PROF_TASK_MEMORY_MASK, INPUT_CFG_COM_TASK_MEMORY},
+        {PROF_OP_ATTR_MASK, INPUT_CFG_COM_OP_ATTR}
     };
     for (auto cfg : profCfgList) {
         if (apiCfg->dataTypeConfig & cfg.first) {

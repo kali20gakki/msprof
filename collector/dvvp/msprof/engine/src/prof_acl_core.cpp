@@ -272,6 +272,7 @@ ACL_PROF_CONFIG_PTR aclprofCreateConfig(UINT32_T_PTR deviceIdList, uint32_t devi
             std::vector<std::string>({"aclprofCreateConfig", "SocCloud"}));
         return nullptr;
     }
+
     if (!IsValidProfConfig(deviceIdList, deviceNums, aicoreEvents)) {
         return nullptr;
     }
