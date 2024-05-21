@@ -79,6 +79,7 @@ TEST_F(EnumProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
     CheckEnumValueByTableName(dbRunner, TABLE_NAME_ENUM_HCCL_LINK_TYPE, HCCL_LINK_TYPE_TABLE);
     CheckEnumValueByTableName(dbRunner, TABLE_NAME_ENUM_HCCL_TRANSPORT_TYPE, HCCL_TRANSPORT_TYPE_TABLE);
     CheckEnumValueByTableName(dbRunner, TABLE_NAME_ENUM_HCCL_RDMA_TYPE, HCCL_RDMA_TYPE_TABLE);
+    CheckEnumValueByTableName(dbRunner, TABLE_NAME_MSTX_EVENT_TYPE, MSTX_EVENT_TYPE_TABLE);
 }
 
 TEST_F(EnumProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)

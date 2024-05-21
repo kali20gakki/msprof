@@ -38,6 +38,7 @@
 #include "analysis/csrc/viewer/database/finals/string_ids_processor.h"
 #include "analysis/csrc/viewer/database/finals/sys_io_processor.h"
 #include "analysis/csrc/viewer/database/finals/task_processor.h"
+#include "analysis/csrc/viewer/database/finals/msproftx_processor.h"
 
 namespace Analysis {
 namespace Viewer {
@@ -119,6 +120,9 @@ namespace {
         {PROCESSOR_NAME_AICORE_FREQ,       [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
                                               std::shared_ptr<TableProcessor>& processor) {
             MAKE_SHARED_RETURN_VOID(processor, AicoreFreqProcessor, msprofDBPath, profPaths);}},
+        {PROCESSOR_NAME_MSTX,          [](const std::string& msprofDBPath, const std::set<std::string>& profPaths,
+                                              std::shared_ptr<TableProcessor>& processor) {
+            MAKE_SHARED_RETURN_VOID(processor, MsprofTxProcessor, msprofDBPath, profPaths);}},
     };
 }
 
