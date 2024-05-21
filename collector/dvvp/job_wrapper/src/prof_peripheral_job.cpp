@@ -8,6 +8,7 @@
 #include "prof_peripheral_job.h"
 #include "config/config.h"
 #include "config/config_manager.h"
+#include "driver_plugin.h"
 #include "param_validation.h"
 #include "securec.h"
 #include "utils/utils.h"
@@ -133,6 +134,10 @@ int ProfPeripheralJob::Uninit()
     }
 
     MSPROF_LOGI("begin to stop profiling Channel %d data", static_cast<int>(channelId_));
+    if (!peripheralCfg_.startSuccess) {
+        MSPROF_LOGI("stop profiling Channel %d data which isn't starting.", static_cast<int>(channelId_));
+        return PROFILING_SUCCESS;
+    }
 
     int ret = DrvStop(collectionJobCfg_->comParams->devId, channelId_);
     MSPROF_LOGI("stop profiling Channel %d data, ret=%d", static_cast<int>(channelId_), ret);
@@ -1182,6 +1187,74 @@ int ProfStarsSocProfileJob::SetPeripheralConfig()
         configP->on_chip.innerSwitch, configP->on_chip.period,
         configP->inter_chip.innerSwitch, configP->inter_chip.period,
         configP->low_power.innerSwitch, configP->low_power.period);
+    peripheralCfg_.configP = configP;
+    peripheralCfg_.configSize = configSize;
+    return PROFILING_SUCCESS;
+}
+
+struct QosProfileConfig {
+    uint32_t period;
+    uint16_t streamNum;
+    uint16_t res;
+    uint8_t mpamId[QOS_STREAM_MAX_NUM];
+};
+/*
+ * @berif  : Collect qos data
+ */
+ProfQosJob::ProfQosJob()
+{
+    channelId_ = PROF_CHANNEL_QOS;
+}
+
+ProfQosJob::~ProfQosJob() {}
+
+/*
+ * @berif  : Qos profiling init
+ * @param  : cfg : Collect data config information
+ * @return : PROFILING_FAILED(-1) : failed
+ *         : PROFILING_SUCCESS(0) : success
+ */
+int32_t ProfQosJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        MSPROF_LOGI("cfg is nullptr.");
+        return PROFILING_FAILED;
+    }
+    if (cfg->comParams->params->host_profiling) {
+        return PROFILING_FAILED;
+    }
+
+    collectionJobCfg_ = cfg;
+    if (collectionJobCfg_->comParams->params->qosProfiling.compare(MSVP_PROF_ON) != 0 ||
+        collectionJobCfg_->comParams->params->qosEventId.size() == 0) {
+        MSPROF_LOGI("Qos profiling is not enabled.");
+        return PROFILING_FAILED;
+    }
+
+    MSPROF_EVENT("Qos profiling is enabled.");
+    return PROFILING_SUCCESS;
+}
+
+/*
+ * @berif  : Qos set config
+ * @param  : None
+ * @return : PROFILING_FAILED(-1) : failed
+ *         : PROFILING_SUCCESS(0) : success
+ */
+int32_t ProfQosJob::SetPeripheralConfig()
+{
+    uint32_t configSize = sizeof(QosProfileConfig);
+    QosProfileConfig *configP = reinterpret_cast<QosProfileConfig *>(Utils::ProfMalloc(configSize));
+    if (configP == nullptr) {
+        MSPROF_LOGE("ProfQosJob ProfMalloc QosProfileConfig failed");
+        return PROFILING_FAILED;
+    }
+
+    configP->period = collectionJobCfg_->comParams->params->hardware_mem_sampling_interval;
+    configP->streamNum = static_cast<uint16_t>(collectionJobCfg_->comParams->params->qosEventId.size());
+    for (size_t i = 0; i < collectionJobCfg_->comParams->params->qosEventId.size(); i++) {
+        configP->mpamId[i] = collectionJobCfg_->comParams->params->qosEventId[i];
+    }
     peripheralCfg_.configP = configP;
     peripheralCfg_.configSize = configSize;
     return PROFILING_SUCCESS;

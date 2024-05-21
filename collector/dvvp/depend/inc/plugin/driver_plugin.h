@@ -54,6 +54,7 @@ using HalEschedSubscribeEventFunc =
 using HalEschedWaitEventFunc =
     std::function<drvError_t(unsigned int, unsigned int, unsigned int, int, struct event_info *)>;
 using DrvGetDeviceSplitModeFunc = std::function<drvError_t(unsigned int, unsigned int*)>;
+using HalGetDeviceInfoByBuffFunc = std::function<drvError_t(uint32_t, int32_t, int32_t, void*, int32_t*)>;
 class DriverPlugin : public analysis::dvvp::common::singleton::Singleton<DriverPlugin> {
 public:
     DriverPlugin() : soName_("libascend_hal.so"), loadFlag_(0) {}
@@ -174,6 +175,10 @@ public:
     // drvGetDeviceSplitMode
     drvError_t MsprofDrvGetDeviceSplitMode(unsigned int devId, unsigned int* mode);
 
+    // halGetDeviceInfoByBuff
+    drvError_t MsprofHalGetDeviceInfoByBuff(uint32_t devId, int32_t moduleType,
+                                            int32_t infoType, void *buf, int32_t *size);
+
     // get all function addresses at a time
     void GetAllFunction();
 
@@ -218,7 +223,8 @@ private:
     HalEschedSubscribeEventFunc halEschedSubscribeEvent_ = nullptr;
     HalEschedWaitEventFunc halEschedWaitEvent_ = nullptr;
     DrvGetDeviceSplitModeFunc drvGetDeviceSplitMode_ = nullptr;
- 
+    HalGetDeviceInfoByBuffFunc halGetDeviceInfoByBuff_ = nullptr;
+
 private:
     void LoadDriverSo();
     void GetHalFunction();

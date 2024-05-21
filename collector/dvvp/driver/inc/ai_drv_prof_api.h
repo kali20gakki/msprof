@@ -128,6 +128,7 @@ enum AI_DRV_CHANNEL {
     PROF_CHANNEL_NPU_APP_MEM = CHANNEL_NPU_APP_MEM, // 130
     PROF_CHANNEL_NPU_MEM = CHANNEL_NPU_MEM, // 131
     PROF_CHANNEL_LP = CHANNEL_LP, // 132
+    PROF_CHANNEL_QOS = CHANNEL_QOS, // 133
     PROF_CHANNEL_DVPP_VENC = CHANNEL_DVPP_VENC, // 135
     PROF_CHANNEL_DVPP_JPEGE = CHANNEL_DVPP_JPEGE, // 136
     PROF_CHANNEL_DVPP_VDEC = CHANNEL_DVPP_VDEC, // 137
@@ -314,7 +315,8 @@ struct TagTsL2CacheProfileConfig {
 
 struct DrvPeripheralProfileCfg {
     DrvPeripheralProfileCfg()
-        : profDeviceId(-1),
+        : startSuccess(false),
+          profDeviceId(-1),
           profSamplePeriod(0),
           profSamplePeriodHi(0),
           profChannel(PROF_CHANNEL_UNKNOWN),
@@ -324,6 +326,7 @@ struct DrvPeripheralProfileCfg {
           aicMode(0),
           aivMode(0) {}
     virtual ~DrvPeripheralProfileCfg() {}
+    bool startSuccess;
     int profDeviceId;
     int profSamplePeriod;
     int profSamplePeriodHi;
@@ -337,7 +340,7 @@ struct DrvPeripheralProfileCfg {
     std::string profDataFile;
 };
 
-int DrvPeripheralStart(const DrvPeripheralProfileCfg &peripheralCfg);
+int DrvPeripheralStart(DrvPeripheralProfileCfg &peripheralCfg);
 
 template<typename T>
 int DoProfTsCpuStart(const DrvPeripheralProfileCfg &peripheralCfg,
@@ -414,6 +417,20 @@ struct DrvProfChannelsInfo {
     unsigned int chipType;
     std::vector<struct DrvProfChannelInfo> channels;
 };
+
+constexpr uint16_t MAX_QOS_STREAM_COLLECT = 8;
+constexpr uint16_t QOS_STREAM_MAX_NUM = 20;
+constexpr uint16_t QOS_STREAM_NAME_MAX_LENGTH = 256;
+struct QosProfileInfo {
+    QosProfileInfo() : devId(0), streamNum(0), mode(0) {}
+    uint32_t devId;     // hal接口需要的字段
+    uint16_t streamNum; // mode: 0时, mpamId列表个数，mode: 1时为mpamIdIdx, 默认0
+    uint16_t mode;      // 0: 表示查询mpamId列表，1：通过mpamId查询streamName，2：通过streamName查mpamId
+    uint8_t mpamId[QOS_STREAM_MAX_NUM]; // mode: 0/2 为出参， mode: 1 为入参
+    char streamName[QOS_STREAM_NAME_MAX_LENGTH]; // mode: 0无效，mode: 1 出参, mode: 2为入参
+};
+
+void GetQosProfileInfo(uint32_t deviceId, std::string &qosEventInfo, std::vector<uint8_t> &qosEventId);
 
 class AiDrvProfApi {
 public:

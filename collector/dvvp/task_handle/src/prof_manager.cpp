@@ -381,7 +381,14 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> ProfManager::HandleProfi
         return nullptr;
     }
     Analysis::Dvvp::Host::Adapter::ProfParamsAdapter::instance()->GenerateLlcEvents(params);
-
+    uint32_t deviceId;
+    if (Utils::StrToUint32(deviceId, params->job_id) == PROFILING_FAILED) {
+        return nullptr;
+    }
+    if (params->hardware_mem.compare(MSVP_PROF_ON) == 0 && deviceId != static_cast<uint32_t>(DEFAULT_HOST_ID)) {
+        params->qosProfiling = MSVP_PROF_ON;
+        GetQosProfileInfo(deviceId, params->qosEvents, params->qosEventId);
+    }
     analysis::dvvp::common::utils::Utils::EnsureEndsInSlash(params->result_dir);
     MSPROF_LOGI("job_id:%s, result_dir:%s", params->job_id.c_str(), Utils::BaseName(params->result_dir).c_str());
     if (!CreateSampleJsonFile(params, params->result_dir)) {

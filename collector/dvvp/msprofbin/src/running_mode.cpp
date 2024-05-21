@@ -13,6 +13,7 @@
 #include "cmd_log.h"
 #include "msprof_dlog.h"
 #include "ai_drv_dev_api.h"
+#include "ai_drv_prof_api.h"
 #include "config/config_manager.h"
 #include "application.h"
 #include "transport/file_transport.h"
@@ -1024,12 +1025,15 @@ int SystemMode::StartHostTask(const std::string resultDir, const std::string dev
         return PROFILING_FAILED;
     }
     params->devices = device;
-    int devId;
-    if (Utils::StrToInt(devId, device) == PROFILING_FAILED) {
+    uint32_t devId;
+    if (Utils::StrToUint32(devId, device) == PROFILING_FAILED) {
         return PROFILING_FAILED;
     }
     if (devId == DEFAULT_HOST_ID) {
         params->host_profiling = TRUE;
+    } else if (params->hardware_mem.compare(MSVP_PROF_ON) == 0) {
+        params->qosProfiling = MSVP_PROF_ON;
+        GetQosProfileInfo(devId, params->qosEvents, params->qosEventId);
     }
     bool retu = CreateSampleJsonFile(params, resultDir);
     if (!retu) {

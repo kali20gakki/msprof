@@ -144,6 +144,14 @@ public:
     int SetPeripheralConfig() override;
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
 };
+
+class ProfQosJob : public ProfPeripheralJob {
+public:
+    ProfQosJob();
+    ~ProfQosJob() override;
+    int32_t Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
+    int32_t SetPeripheralConfig() override;
+};
 }
 }
 }
