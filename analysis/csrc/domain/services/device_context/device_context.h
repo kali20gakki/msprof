@@ -122,13 +122,13 @@ public:
     static DeviceContext& Instance();
 
     // getters
-    void Getter(std::string &deviceFilePath) const;
+    void Getter(std::string &deviceFilePath) const { deviceFilePath = this->deviceContextInfo.deviceFilePath; };
 
-    void Getter(DeviceInfo &deviceInfo) const;
+    void Getter(DeviceInfo &deviceInfo) const { deviceInfo = this->deviceContextInfo.deviceInfo; };
 
-    void Getter(SampleInfo &sampleInfo) const;
+    void Getter(SampleInfo &sampleInfo) const { sampleInfo = this->deviceContextInfo.sampleInfo; };
 
-    void Getter(DfxInfo &dfxInfo) const;
+    void Getter(DfxInfo &dfxInfo) const { dfxInfo = this->deviceContextInfo.dfxInfo; };
 
     uint32_t GetChipID() const override { return deviceContextInfo.deviceInfo.chipID; }
 
