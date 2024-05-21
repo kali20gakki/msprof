@@ -108,6 +108,8 @@ class StrConstant:
 
     HOST_TO_DEVICE = "HostToDevice"
 
+    MSTX = "MsTx"
+
     # pmu task type
     CONTEXT_PMU_TYPE = 'context_task'
     BLOCK_PMU_TYPE = 'block_task'

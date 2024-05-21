@@ -1,6 +1,6 @@
 import unittest
 
-from profiling_bean.db_dto.msproftx_dto import MsprofTxDto
+from profiling_bean.db_dto.msproftx_dto import MsprofTxDto, MsprofTxExDto
 
 
 class TestMsprofTxDto(unittest.TestCase):
@@ -29,3 +29,25 @@ class TestMsprofTxDto(unittest.TestCase):
               msproftx_dto.message,
               msproftx_dto.dur_time),
                          (0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
+
+
+class TestMsprofTxExDto(unittest.TestCase):
+    def test_init(self: any) -> None:
+        msproftx_ex_dto = MsprofTxExDto()
+        msproftx_ex_dto.pid = 0
+        msproftx_ex_dto.tid = 0
+        msproftx_ex_dto.event_type = 'marker_ex'
+        msproftx_ex_dto.start_time = 0
+        msproftx_ex_dto.dur_time = 0
+        msproftx_ex_dto.mark_id = 0
+        msproftx_ex_dto.message = 'test'
+
+        self.assertEqual((msproftx_ex_dto.pid,
+                          msproftx_ex_dto.tid,
+                          msproftx_ex_dto.event_type,
+                          msproftx_ex_dto.start_time,
+                          msproftx_ex_dto.message,
+                          msproftx_ex_dto.mark_id,
+                          msproftx_ex_dto.dur_time),
+                         (0, 0, 'marker_ex', 0, 'test', 0, 0))
+

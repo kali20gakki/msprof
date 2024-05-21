@@ -16,21 +16,25 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from msparser.interface.iparser import IParser
 from msparser.data_struct_size_constant import StructFmt
-from msmodel.msproftx.msproftx_model import MsprofTxMarkExModel
+from msmodel.msproftx.msproftx_model import MsprofTxExModel
 from framework.offset_calculator import OffsetCalculator
-from profiling_bean.struct_info.msproftx_decoder import MsprofTxMarkExDecoder
+from profiling_bean.struct_info.msproftx_decoder import MsprofTxExDecoder
 from profiling_bean.prof_enum.data_tag import DataTag
 
 
-class MsprofTxMarkExParser(IParser, MsMultiProcess):
+class MsprofTxExParser(IParser, MsMultiProcess):
     """
-    parsing MsprofTx Markex data class
+    parsing MsprofTx ex data class
     """
+    EVENT_DICT = {
+        NumberConstant.MARKER_EX: 'marker_ex'
+    }
+
     def __init__(self: any, file_dict: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
-        self._file_list = file_dict.get(DataTag.MSPROFTX_MARKEX, [])
+        self._file_list = file_dict.get(DataTag.MSPROFTX_EX, [])
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH, '')
-        self._msproftx_markex_data = []
+        self._msproftx_ex_data = []
 
     def ms_run(self: any) -> None:
         """
@@ -58,38 +62,40 @@ class MsprofTxMarkExParser(IParser, MsMultiProcess):
         save data to db
         :return: None
         """
-        if not self._msproftx_markex_data:
+        if not self._msproftx_ex_data:
             return
-        with MsprofTxMarkExModel(self._project_path) as model:
-            model.flush(self._msproftx_markex_data)
+        with MsprofTxExModel(self._project_path) as model:
+            model.flush(self._msproftx_ex_data)
 
     def _original_data_handler(self: any, file_name: str) -> None:
         """
-        handler for msproftx markex original data
+        handler for msproftx ex original data
         :param file_name: data file
         :return: None
         """
-        logging.info("start parsing msproftx markex data file: %s", file_name)
+        logging.info("start parsing msproftx ex data file: %s", file_name)
         status = self._read_binary_data(file_name)
         FileManager.add_complete_file(self._project_path, file_name)
         if status:
-            logging.error('Parsing msproftx markex data file error.')
-        logging.info("Parsing msproftx markex data file finished!")
+            logging.error('Parsing msproftx ex data file error.')
+        logging.info("Parsing msproftx ex data file finished!")
 
     def _read_binary_data(self: any, file_name: str) -> None:
         """
-        parsing msproftx markex data
+        parsing msproftx ex data
         :param file_name: data file
         :return: None
         """
-        calculate = OffsetCalculator(self._file_list, StructFmt.MSPROFTX_MARKEX_FMT_SIZE, self._project_path)
-        markex_file = PathManager.get_data_file_path(self._project_path, file_name)
+        calculate = OffsetCalculator(self._file_list, StructFmt.MSPROFTX_EX_FMT_SIZE, self._project_path)
+        msproftx_ex_file = PathManager.get_data_file_path(self._project_path, file_name)
         try:
-            with FileOpen(markex_file, 'rb') as markex_f:
-                markex_data = calculate.pre_process(markex_f.file_reader, os.path.getsize(markex_file))
-                for chunk in Utils.chunks(markex_data, StructFmt.MSPROFTX_MARKEX_FMT_SIZE):
-                    data_object = MsprofTxMarkExDecoder.decode(chunk)
-                    self._msproftx_markex_data.append((data_object.pid, data_object.tid, data_object.timestamp,
+            with FileOpen(msproftx_ex_file, 'rb') as msproftx_ex_f:
+                msproftx_ex_data = calculate.pre_process(msproftx_ex_f.file_reader, os.path.getsize(msproftx_ex_file))
+                for chunk in Utils.chunks(msproftx_ex_data, StructFmt.MSPROFTX_EX_FMT_SIZE):
+                    data_object = MsprofTxExDecoder.decode(chunk)
+                    self._msproftx_ex_data.append((data_object.pid, data_object.tid,
+                                                       self.EVENT_DICT.get(data_object.event_type, ''),
+                                                       data_object.start_time, data_object.end_time,
                                                        data_object.mark_id, data_object.message))
 
             return NumberConstant.SUCCESS

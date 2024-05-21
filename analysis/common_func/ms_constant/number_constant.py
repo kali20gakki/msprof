@@ -71,6 +71,7 @@ class NumberConstant:
     DEFAULT_STREAM_ID = 65535
     DEFAULT_TASK_ID = 65535
     PROF_PATH_MAX_LEN = 1024
+    UINT64_MAX = 18446744073709551615
 
     # memory units transfer
     BYTES_TO_KB = 1024.0
@@ -101,6 +102,7 @@ class NumberConstant:
     MARKER = 0
     PUSH_AND_POP = 1
     START_AND_END = 2
+    MARKER_EX = 3
 
     # task time
     TASK_TIME_PID = 0

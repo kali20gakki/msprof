@@ -51,6 +51,17 @@ class TrainingTraceDto(metaclass=InstanceCheckMeta):
     model_id: int = None
 
 
+@dataclass
+class MsproftxMarkDto(metaclass=InstanceCheckMeta):
+    """
+    msprofts ex mark dto
+    """
+    index_id: int = 0
+    timestamp: int = 0
+    stream_id: int = 0
+    task_id: int = 0
+
+
 Iteration = namedtuple("Iteration", ["model_id", "iteration_id", "iteration_count"])
 
 

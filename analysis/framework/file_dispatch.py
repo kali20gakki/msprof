@@ -51,7 +51,7 @@ from common_func.file_name_manager import get_l2_cache_compiles
 from common_func.file_name_manager import get_llc_compiles
 from common_func.file_name_manager import get_memcpy_info_compact_compiles
 from common_func.file_name_manager import get_msproftx_compiles
-from common_func.file_name_manager import get_msproftx_markex_compiles
+from common_func.file_name_manager import get_msproftx_ex_compiles
 from common_func.file_name_manager import get_multi_thread_compiles
 from common_func.file_name_manager import get_nano_model_exeom_compiles
 from common_func.file_name_manager import get_nano_stars_profile_compiles
@@ -132,7 +132,7 @@ class FileDispatch:
         DataTag.HCCL: get_hccl_hcom_compiles(),
         DataTag.BIU_PERF: get_biu_compiles(),
         DataTag.MSPROFTX: get_msproftx_compiles(),
-        DataTag.MSPROFTX_MARKEX: get_msproftx_markex_compiles(),
+        DataTag.MSPROFTX_EX: get_msproftx_ex_compiles(),
         DataTag.HELPER_MODEL_WITH_Q: get_helper_model_with_q_compiles(),
         DataTag.SOC_PROFILER: get_soc_profiler_compiles(),
         DataTag.DATA_QUEUE: get_data_preprocess_compiles(Constant.DATA_QUEUE),

@@ -751,10 +751,12 @@ class TablesConfig(MetaConfig):
             ('message', 'TEXT, null'),
             ('file_tag', 'INTEGER, null')
         ],
-        'MsprofTxMarkExMap': [
+        'MsprofTxExMap': [
             ('pid', 'INTEGER, null'),
             ('tid', 'INTEGER, null'),
-            ('timestamp', 'INTEGER, null'),
+            ('event_type', 'TEXT, null'),
+            ('start_time', 'INTEGER, null'),
+            ('end_time', 'INTEGER, null'),
             ('mark_id', 'INTEGER, null'),
             ('message', 'TEXT, null')
         ],

@@ -224,7 +224,7 @@ class DBNameConstant(metaclass=ABCMeta):
 
     # msproftx
     TABLE_MSPROFTX = "MsprofTx"
-    TABLE_MSPROFTX_MARKEX = "MsprofTxMarkEx"
+    TABLE_MSPROFTX_EX = "MsprofTxEx"
 
     # stars
     TABLE_PCIE_DATA = "PcieData"

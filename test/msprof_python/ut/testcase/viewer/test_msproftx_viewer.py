@@ -2,61 +2,115 @@ import unittest
 from collections import OrderedDict
 from unittest import mock
 
+from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.msvp_constant import MsvpConstant
 from viewer.msproftx_viewer import MsprofTxViewer
+from profiling_bean.db_dto.msproftx_dto import MsprofTxDto, MsprofTxExDto
 
 NAMESPACE = 'viewer.peripheral_report'
 
 
 class TestMsprofTxViewer(unittest.TestCase):
+    TRACE_HEADER_ARGS = 'args'
+    TRACE_HEADER_PID = 'pid'
+    TRACE_HEADER_TID = 'tid'
+    TRACE_HEADER_PH = 'ph'
+    TRACE_HEADER_NAME = 'name'
+    TEST_MSPROF_TX_MSG = 'test'
     configs = {'handler': '_get_msproftx_data',
                'headers': ['pid', ' tid', ' category', ' event_type', ' payload_type', ' payload_value', ' Start_time',
-                           ' End_time', ' message_type', ' message'], 'db': 'msproftx.db', 'table': 'MsprofTx',
+                           ' End_time', ' message_type', ' message'], 'db': 'msproftx.db',
                'unused_cols': []}
     params = {'data_type': 'msprof_tx', 'project': 'D:\\Job\\analyzer_testcase\\origin_data\\1910_mini_no_ai_core',
               'device_id': '0', 'job_id': 'job_default', 'export_type': 'summary', 'iter_id': 1, 'export_format': 'csv',
               'model_id': 1}
 
-    def test_get_summary_data(self):
+    def test_get_summary_data_return_vaild_data_with_get_summary_from_model(self):
+        valid_start_time = '10.001'
         InfoConfReader()._host_freq = None
         InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         InfoConfReader()._local_time_offset = 10.0
         with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxModel.get_summary_data',
-                        return_value=((0, 0, 0, 0, 0, 0, 0, 5, 0, 'test'), (0, 1, 0, 0, 1, 0, 1, 7, 0, 'test'))):
+                        return_value=((0, 0, 0, 0, 0, 0, 0, 5, 0, 'test'), (0, 1, 0, 0, 1, 0, 1, 7, 0, 'test'))), \
+                mock.patch('msmodel.msproftx.msproftx_model.MsprofTxExModel.get_summary_data',
+                           return_value=((0, 0, 3, 1, 1, 'test'), (0, 1, 3, 2, 11, 'test'))):
             result = MsprofTxViewer(self.configs, self.params).get_summary_data()
             self.assertEqual(result, (['pid', ' tid', ' category', ' event_type', ' payload_type',
                                        ' payload_value', ' Start_time', ' End_time', ' message_type', ' message'],
                                       [(0, 0, 0, 0, 0, 0, '10.000', '10.005', 0, 'test'),
-                                       (0, 1, 0, 0, 1, 0, '10.001', '10.007', 0, 'test')],
-                                      2))
+                                       (0, 1, 0, 0, 1, 0, valid_start_time, '10.007', 0, 'test'),
+                                       (0, 0, Constant.NA, 3, Constant.NA, Constant.NA,
+                                        valid_start_time, valid_start_time, Constant.NA, 'test'),
+                                       (0, 1, Constant.NA, 3, Constant.NA, Constant.NA,
+                                        '10.002', '10.011', Constant.NA, 'test')],
+                                      4))
 
-    def test_get_timeline_data(self):
-        top_down_data = mock.Mock()
-        top_down_data.category = 1
-        top_down_data.payload_type = 2
-        top_down_data.payload_value = 3
-        top_down_data.message_type = 4
-        top_down_data.event_type = 5
-        top_down_data.message = 7
-        top_down_data.pid = 8
-        top_down_data.tid = 9
-        top_down_data.start_time = 0
-        top_down_data.dur_time = 0
-
-        msproftx_data = (top_down_data,)
+    def test_get_summary_data_return_empty_data_with_get_none_summary_from_model(self):
+        InfoConfReader()._host_freq = None
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         InfoConfReader()._local_time_offset = 10.0
-        expect_res_dict = OrderedDict([
-            ("Category", str(1)),
-            ("Payload_type", 2),
-            ("Payload_value", 3),
-            ("Message_type", 4),
-            ("event_type", 5),
-        ])
+        with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxModel.get_summary_data',
+                        return_value=()), \
+                mock.patch('msmodel.msproftx.msproftx_model.MsprofTxExModel.get_summary_data',
+                           return_value=()):
+            result = MsprofTxViewer(self.configs, self.params).get_summary_data()
+            self.assertEqual(result, MsvpConstant.MSVP_EMPTY_DATA)
 
-        trace_data_msproftx = [[7, 8, 9, '10.000', 0.0, expect_res_dict]]
+    def test_get_timeline_data_return_empty_data_with_get_none_data_from_model(self):
+        with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxModel.get_timeline_data',
+                       return_value=[]), \
+                mock.patch('msmodel.msproftx.msproftx_model.MsprofTxExModel.get_timeline_data',
+                           return_value=[]):
+            result = MsprofTxViewer(self.configs, self.params).get_timeline_data()
+            self.assertEqual(result, '[]')
 
-        result = MsprofTxViewer.format_data(msproftx_data)
-        self.assertEqual(result, trace_data_msproftx)
+    def test_get_timeline_data_return_valid_data_with_get_data_from_model(self):
+        expect_timeline_data = [
+            OrderedDict([(self.TRACE_HEADER_NAME, 'process_name'), (self.TRACE_HEADER_PID, 0),
+                         (self.TRACE_HEADER_TID, 0),
+                         (self.TRACE_HEADER_ARGS, OrderedDict([('name', 'MsprofTx')])), (self.TRACE_HEADER_PH, 'M')]),
+            OrderedDict([(self.TRACE_HEADER_NAME, 'thread_name'), (self.TRACE_HEADER_PID, 0),
+                         (self.TRACE_HEADER_TID, 0),
+                         (self.TRACE_HEADER_ARGS, OrderedDict([('name', 'Thread 0')])), (self.TRACE_HEADER_PH, 'M')]),
+            OrderedDict([(self.TRACE_HEADER_NAME, 'thread_sort_index'), (self.TRACE_HEADER_PID, 0),
+                         (self.TRACE_HEADER_TID, 0),
+                         (self.TRACE_HEADER_ARGS, OrderedDict([('sort_index', 0)])), (self.TRACE_HEADER_PH, 'M')]),
+            OrderedDict([(self.TRACE_HEADER_NAME, self.TEST_MSPROF_TX_MSG), (self.TRACE_HEADER_PID, 0),
+                         (self.TRACE_HEADER_TID, 0), ('ts', '10.010'), ('dur', 0.01),
+                         (self.TRACE_HEADER_ARGS,
+                          OrderedDict([('Category', '1'), ('Payload_type', 0), ('Payload_value', 0),
+                                       ('Message_type', 0), ('event_type', 'marker')])), (self.TRACE_HEADER_PH, 'X')]),
+            OrderedDict([(self.TRACE_HEADER_NAME, self.TEST_MSPROF_TX_MSG), (self.TRACE_HEADER_PID, 0),
+                         (self.TRACE_HEADER_TID, 0), ('ts', '10.020'), ('dur', 0.0),
+                         (self.TRACE_HEADER_ARGS,
+                          OrderedDict([('mark_id', 0), ('event_type', 'marker_ex')])), (self.TRACE_HEADER_PH, 'X')])
+        ]
+        msproftx_dto = MsprofTxDto()
+        msproftx_dto.pid = 0
+        msproftx_dto.tid = 0
+        msproftx_dto.category = 1
+        msproftx_dto.event_type = 'marker'
+        msproftx_dto.payload_type = 0
+        msproftx_dto.start_time = 10
+        msproftx_dto.end_time = 20
+        msproftx_dto.message_type = 0
+        msproftx_dto.message = self.TEST_MSPROF_TX_MSG
+        msproftx_dto.dur_time = 10
+        msproftx_ex_dto = MsprofTxExDto()
+        msproftx_ex_dto.pid = 0
+        msproftx_ex_dto.tid = 0
+        msproftx_ex_dto.event_type = 'marker_ex'
+        msproftx_ex_dto.start_time = 20
+        msproftx_ex_dto.dur_time = 0
+        msproftx_ex_dto.mark_id = 0
+        msproftx_ex_dto.message = self.TEST_MSPROF_TX_MSG
+        with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxModel.get_timeline_data',
+                        return_value=[msproftx_dto]), \
+            mock.patch('msmodel.msproftx.msproftx_model.MsprofTxExModel.get_timeline_data',
+                       return_value=[msproftx_ex_dto]):
+            result = MsprofTxViewer(self.configs, self.params).get_timeline_data()
+            self.assertEqual(result, expect_timeline_data)
 
 if __name__ == '__main__':
     unittest.main()

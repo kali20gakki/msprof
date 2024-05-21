@@ -6,7 +6,7 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from msconfig.config_manager import ConfigManager
 from msmodel.interface.parser_model import ParserModel
-from profiling_bean.db_dto.msproftx_dto import MsprofTxDto
+from profiling_bean.db_dto.msproftx_dto import MsprofTxDto, MsprofTxExDto
 from profiling_bean.prof_enum.data_tag import DataTag
 
 
@@ -15,6 +15,9 @@ class MsprofTxModel(ParserModel):
     db operator for msproftx parser
     """
     TABLES_PATH = ConfigManager.TABLES
+
+    def __init__(self: any, result_dir: str, db_name: str, table_list: list) -> None:
+        super().__init__(result_dir, db_name, table_list)
 
     def flush(self: any, data_list: list) -> None:
         """
@@ -40,17 +43,33 @@ class MsprofTxModel(ParserModel):
         return DBManager.fetch_all_data(self.cur, all_data_sql)
 
 
-class MsprofTxMarkExModel(ParserModel):
+class MsprofTxExModel(ParserModel):
     """
-    db operator for msproftx markex parser
+    db operator for msproftx ex parser
     """
     def __init__(self: any, result_dir: str):
-        super().__init__(result_dir, DBNameConstant.DB_MSPROFTX, [DBNameConstant.TABLE_MSPROFTX_MARKEX])
+        super().__init__(result_dir, DBNameConstant.DB_MSPROFTX, [DBNameConstant.TABLE_MSPROFTX_EX])
 
     def flush(self: any, data_list: list) -> None:
         """
-        flush msproftx markex data to db
-        :param data_list: msproftx markex data list
+        flush msproftx ex data to db
+        :param data_list: msproftx ex data list
         :return: None
         """
-        self.insert_data_to_db(DBNameConstant.TABLE_MSPROFTX_MARKEX, data_list)
+        self.insert_data_to_db(DBNameConstant.TABLE_MSPROFTX_EX, data_list)
+
+    def get_timeline_data(self) -> list:
+        """
+        get timeline data
+        """
+        all_data_sql = f"select pid, tid, event_type, start_time, (end_time-start_time) as dur_time, " \
+                       f"mark_id, message from {DBNameConstant.TABLE_MSPROFTX_EX}"
+        return DBManager.fetch_all_data(self.cur, all_data_sql, dto_class=MsprofTxExDto)
+
+    def get_summary_data(self) -> list:
+        """
+        get timeline data
+        """
+        all_data_sql = f"select pid, tid, event_type, start_time, end_time, " \
+                       f"message from {DBNameConstant.TABLE_MSPROFTX_EX}"
+        return DBManager.fetch_all_data(self.cur, all_data_sql)

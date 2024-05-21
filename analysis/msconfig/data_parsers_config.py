@@ -120,10 +120,11 @@ class DataParsersConfig(MetaConfig):
         'MsprofTxParser': [
             ('path', 'msparser.msproftx.msproftx_parser'),
             ('chip_model', '0,1,2,3,4,5,7,8,11'),
-            ('position', 'H')
+            ('position', 'H'),
+            ('level', '2')
         ],
-        'MsprofTxMarkExParser': [
-            ('path', 'msparser.msproftx.msproftx_markex_parser'),
+        'MsprofTxExParser': [
+            ('path', 'msparser.msproftx.msproftx_ex_parser'),
             ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('position', 'H')
         ],

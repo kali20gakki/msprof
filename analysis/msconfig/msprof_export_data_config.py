@@ -207,8 +207,6 @@ class MsProfExportDataConfig(MetaConfig):
         ],
         'msprof_tx': [
             ('handler', '_get_msproftx_data'),
-            ('db', DBNameConstant.DB_MSPROFTX),
-            ('table', DBNameConstant.TABLE_MSPROFTX),
             ('headers',
              'pid, tid, category, event_type, payload_type, payload_value, Start_time(us), '
              'End_time(us), message_type, message')
