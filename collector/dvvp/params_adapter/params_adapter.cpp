@@ -308,6 +308,9 @@ void ParamsAdapter::SetTaskParams(std::array<std::string, INPUT_CFG_MAX> paramCo
     if (paramContainer[INPUT_CFG_COM_TASK_MEMORY].compare(MSVP_PROF_ON) == 0) {
         platformAdapter_->SetParamsForTaskMemory();
     }
+    if (paramContainer[INPUT_CFG_COM_OP_ATTR].compare(MSVP_PROF_ON) == 0) {
+        platformAdapter_->SetParamsForOpAttr();
+    }
     return;
 }
 

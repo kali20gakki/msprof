@@ -61,51 +61,49 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterModule)
 TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule1)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<PlatformAdapterInterface> PlatformAdapterInterfaceMgr;
-    MSVP_MAKE_SHARED0_BREAK(PlatformAdapterInterfaceMgr, PlatformAdapterInterface);
+    std::shared_ptr<PlatformAdapterInterface> mgr;
+    MSVP_MAKE_SHARED0_BREAK(mgr, PlatformAdapterInterface);
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
     MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
-    int ret = PlatformAdapterInterfaceMgr->Init(params, PlatformType::MINI_TYPE);
+    int ret = mgr->Init(params, PlatformType::MINI_TYPE);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
-    PlatformAdapterInterfaceMgr->supportSwitch_ = {
+    mgr->supportSwitch_ = {
         PLATFORM_TASK_ASCENDCL, PLATFORM_TASK_GRAPH_ENGINE, PLATFORM_TASK_RUNTIME, PLATFORM_TASK_AICPU,
         PLATFORM_TASK_HCCL, PLATFORM_TASK_TS_KEYPOINT, PLATFORM_TASK_TS_KEYPOINT_TRAINING, PLATFORM_TASK_TS_MEMCPY,
         PLATFORM_TASK_AIC_METRICS, PLATFORM_TASK_AIV_METRICS, PLATFORM_TASK_STARS_ACSQ, PLATFORM_SYS_HOST_SYS_CPU,
         PLATFORM_SYS_DEVICE_SYS_CPU_MEM_USAGE, PLATFORM_SYS_DEVICE_ALL_PID_CPU_MEM_USAGE,
         PLATFORM_SYS_DEVICE_TS_CPU_HOT_FUNC_PMU, PLATFORM_SYS_DEVICE_AI_CTRL_CPU_HOT_FUNC_PMU, PLATFORM_SYS_DEVICE_LLC,
         PLATFORM_SYS_DEVICE_DDR, PLATFORM_SYS_DEVICE_HBM, PLATFORM_SYS_DEVICE_NIC, PLATFORM_SYS_DEVICE_ROCE,
-        PLATFORM_SYS_DEVICE_HCCS, PLATFORM_SYS_DEVICE_PCIE, PLATFORM_SYS_DEVICE_DVPP,
+        PLATFORM_SYS_DEVICE_HCCS, PLATFORM_SYS_DEVICE_PCIE, PLATFORM_SYS_DEVICE_DVPP, PLATFORM_TASK_OP_ATTR,
         PLATFORM_SYS_DEVICE_INSTR_PROFILING, PLATFORM_SYS_DEVICE_POWER, PLATFORM_SYS_HOST_ONE_PID_CPU,
         PLATFORM_SYS_HOST_ONE_PID_MEM, PLATFORM_SYS_HOST_ONE_PID_DISK, PLATFORM_SYS_HOST_ONE_PID_OSRT,
         PLATFORM_SYS_HOST_NETWORK, PLATFORM_TASK_TS_TIMELINE, PLATFORM_SYS_HOST_ALL_PID_CPU,
         PLATFORM_SYS_HOST_ALL_PID_MEM, PLATFORM_TASK_AIC_HWTS, PLATFORM_TASK_AIV_HWTS, PLATFORM_TASK_L2_CACHE
     };
     struct CommonParams comParams;
-    PlatformAdapterInterfaceMgr->SetParamsForGlobal(comParams);
-    PlatformAdapterInterfaceMgr->SetParamsForStorageLimit(comParams);
-    PlatformAdapterInterfaceMgr->SetParamsForTaskTimeL1();
-    PlatformAdapterInterfaceMgr->SetParamsForTaskTimeL2();
-    PlatformAdapterInterfaceMgr->SetParamsForTaskTrace();
-    PlatformAdapterInterfaceMgr->SetParamsForTrainingTrace();
-    PlatformAdapterInterfaceMgr->SetParamsForAscendCL();
-    PlatformAdapterInterfaceMgr->SetParamsForGEL0();
-    PlatformAdapterInterfaceMgr->SetParamsForGEL1();
-    PlatformAdapterInterfaceMgr->SetParamsForRuntime();
-    PlatformAdapterInterfaceMgr->SetParamsForAICPU();
-    PlatformAdapterInterfaceMgr->SetParamsForHCCL();
-    PlatformAdapterInterfaceMgr->SetParamsForL2Cache();
+    mgr->SetParamsForGlobal(comParams);
+    mgr->SetParamsForStorageLimit(comParams);
+    mgr->SetParamsForTaskTimeL1();
+    mgr->SetParamsForTaskTimeL2();
+    mgr->SetParamsForTaskTrace();
+    mgr->SetParamsForTrainingTrace();
+    mgr->SetParamsForAscendCL();
+    mgr->SetParamsForGEL0();
+    mgr->SetParamsForGEL1();
+    mgr->SetParamsForRuntime();
+    mgr->SetParamsForAICPU();
+    mgr->SetParamsForHCCL();
+    mgr->SetParamsForL2Cache();
+    mgr->SetParamsForOpAttr();
     std::string events;
-    EXPECT_EQ(PROFILING_FAILED, PlatformAdapterInterfaceMgr->GetMetricsEvents("", events, CoreType::AI_CORE));
-    EXPECT_EQ(PROFILING_FAILED, PlatformAdapterInterfaceMgr->GetMetricsEvents("xxx", events, CoreType::AI_CORE));
-    EXPECT_EQ(PROFILING_FAILED, PlatformAdapterInterfaceMgr->GetMetricsEvents("Custom:0x1,0x2,0x3,0x4,0x5,0xFF",
-        events, CoreType::AI_CORE));
-    EXPECT_EQ(PROFILING_SUCCESS, PlatformAdapterInterfaceMgr->GetMetricsEvents("Custom:0x1,0x2,0x3,0x4,0x5,0x6",
-        events, CoreType::AI_CORE));
-    EXPECT_EQ(PROFILING_SUCCESS, PlatformAdapterInterfaceMgr->GetMetricsEvents("Memory", events, CoreType::AI_CORE));
-    EXPECT_EQ(PROFILING_SUCCESS, PlatformAdapterInterfaceMgr->GetMetricsEvents("Memory",
-        events, CoreType::AI_VECTOR_CORE));
-    EXPECT_EQ(PROFILING_FAILED, PlatformAdapterInterfaceMgr->GetMetricsEvents("xxx", events, CoreType::AI_VECTOR_CORE));
-    ret = PlatformAdapterInterfaceMgr->Uninit();
+    EXPECT_EQ(PROFILING_FAILED, mgr->GetMetricsEvents("", events, CoreType::AI_CORE));
+    EXPECT_EQ(PROFILING_FAILED, mgr->GetMetricsEvents("xxx", events, CoreType::AI_CORE));
+    EXPECT_EQ(PROFILING_FAILED, mgr->GetMetricsEvents("Custom:0x1,0x2,0x3,0x4,0x5,0xFF", events, CoreType::AI_CORE));
+    EXPECT_EQ(PROFILING_SUCCESS, mgr->GetMetricsEvents("Custom:0x1,0x2,0x3,0x4,0x5,0x6", events, CoreType::AI_CORE));
+    EXPECT_EQ(PROFILING_SUCCESS, mgr->GetMetricsEvents("Memory", events, CoreType::AI_CORE));
+    EXPECT_EQ(PROFILING_SUCCESS, mgr->GetMetricsEvents("Memory", events, CoreType::AI_VECTOR_CORE));
+    EXPECT_EQ(PROFILING_FAILED, mgr->GetMetricsEvents("xxx", events, CoreType::AI_VECTOR_CORE));
+    ret = mgr->Uninit();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     params = nullptr;
 }
@@ -131,7 +129,7 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule2)
         PLATFORM_SYS_DEVICE_POWER, PLATFORM_SYS_HOST_ONE_PID_CPU, PLATFORM_SYS_HOST_ONE_PID_MEM,
         PLATFORM_SYS_HOST_ONE_PID_DISK, PLATFORM_SYS_HOST_ONE_PID_OSRT, PLATFORM_SYS_HOST_NETWORK,
         PLATFORM_TASK_TS_TIMELINE,
-        PLATFORM_TASK_AIC_HWTS, PLATFORM_TASK_AIV_HWTS, PLATFORM_TASK_L2_CACHE
+        PLATFORM_TASK_AIC_HWTS, PLATFORM_TASK_AIV_HWTS, PLATFORM_TASK_L2_CACHE, PLATFORM_TASK_OP_ATTR
     };
     std::string metricsType = "ArithmeticUtilization";
     std::string aiMode = "task-based";
@@ -169,7 +167,7 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule3)
         PLATFORM_SYS_DEVICE_POWER, PLATFORM_SYS_HOST_ONE_PID_CPU, PLATFORM_SYS_HOST_ONE_PID_MEM,
         PLATFORM_SYS_HOST_ONE_PID_DISK, PLATFORM_SYS_HOST_ONE_PID_OSRT, PLATFORM_SYS_HOST_NETWORK,
         PLATFORM_TASK_TS_TIMELINE,
-        PLATFORM_TASK_AIC_HWTS, PLATFORM_TASK_AIV_HWTS, PLATFORM_TASK_L2_CACHE
+        PLATFORM_TASK_AIC_HWTS, PLATFORM_TASK_AIV_HWTS, PLATFORM_TASK_L2_CACHE, PLATFORM_TASK_OP_ATTR
     };
     int samplingInterval = 500;
     PlatformAdapterInterfaceMgr->SetParamsForDeviceSysCpuMemUsage(samplingInterval);

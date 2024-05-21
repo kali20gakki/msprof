@@ -209,6 +209,19 @@ void PlatformAdapterInterface::SetParamsForTaskMemory()
         MSPROF_LOGW("Unrecognized option:task_memory for PlatformType:%d", static_cast<uint8_t>(platformType_));
     }
 }
+
+void PlatformAdapterInterface::SetParamsForOpAttr()
+{
+    bool ret = false;
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_OP_ATTR) != supportSwitch_.end()) {
+        params_->dataTypeConfig |= PROF_OP_ATTR;
+        ret = true;
+    }
+    if (!ret) {
+        MSPROF_LOGW("Unrecognized option:op_attr for PlatformType:%d", static_cast<uint8_t>(platformType_));
+    }
+}
+
 void PlatformAdapterInterface::SetParamsForGEL0()
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_GRAPH_ENGINE) != supportSwitch_.end()) {
