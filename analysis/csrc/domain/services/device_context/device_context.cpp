@@ -34,21 +34,13 @@ namespace Domain {
 DeviceContext& DeviceContext::Instance()
 {
     thread_local DeviceContext ins;
-
     // 第一次调用时进行初始化
     if (!ins.isInitialized_) {
-    ins.deviceContextInfo.deviceFilePath = g_deviceFilePath;
     ins.GetInfoJson();
     ins.GetSampleJson();
     ins.isInitialized_ = true; // 标记已初始化
 }
-
     return ins;
-}
-thread_local std::string g_deviceFilePath;
-void ContextSaveDevicePath(std::string deviceFilePath)
-{
-    g_deviceFilePath = deviceFilePath;
 }
 
 std::vector<std::string> GetDeviceDirectories(const std::string &path)
@@ -97,8 +89,8 @@ static std::vector<DataInventory> DeviceContextEntry(const char *targetDir, cons
         auto &prcessData = processDataVec[i];
         ++i;
         func = [subdir, &processStat, &prcessData, stopAt] {
-            ContextSaveDevicePath(subdir);
             DeviceContext &context = DeviceContext::Instance();
+            context.SetDevicePath(subdir);
             if (stopAt != nullptr) {
                 context.deviceContextInfo.dfxInfo.stopAt = stopAt;
             }

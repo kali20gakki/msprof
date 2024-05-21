@@ -18,8 +18,6 @@
 
 namespace Analysis {
 namespace Domain {
-extern thread_local std::string g_deviceFilePath;
-
 constexpr uint32_t MIN_SUB_DIR_NBAME_LEN = 6;
 enum class AicMetricsEventsType {
     AIC_ARITHMETIC_UTILIZATION = 0,
@@ -135,6 +133,8 @@ public:
     std::string GetDeviceFilePath() const { return this->deviceContextInfo.deviceFilePath; }
 
     const std::string &GetDfxStopAtName() const override { return deviceContextInfo.dfxInfo.stopAt; }
+
+    void SetDevicePath(const std::string &devicePath) { deviceContextInfo.deviceFilePath = devicePath; }
 private:
     DeviceContextInfo deviceContextInfo;
     bool isInitialized_; // 标记是否已初始化

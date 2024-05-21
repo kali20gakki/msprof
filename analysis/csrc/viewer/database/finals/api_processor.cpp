@@ -114,7 +114,7 @@ bool ApiProcessor::FormatData(const std::string &fileDir, const ApiDataFormat &a
     for (const auto& data : apiData) {
         std::tie(tempData.structType, tempData.id, tempData.level, tempData.threadId, tempData.itemId,
                  tempData.start, tempData.end, tempData.connectionId) = data;
-        uint16_t level = GetEnumTypeValue(tempData.level, MSG_STR(API_LEVEL_TABLE), API_LEVEL_TABLE);
+        uint16_t level = GetEnumTypeValue(tempData.level, NAME_STR(API_LEVEL_TABLE), API_LEVEL_TABLE);
         uint64_t globalTid = Utils::Contact(pid, tempData.threadId);
         Utils::HPFloat startTimestamp = Utils::GetTimeFromSyscnt(tempData.start, params);
         Utils::HPFloat endTimestamp = Utils::GetTimeFromSyscnt(tempData.end, params);
