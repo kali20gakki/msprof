@@ -17,6 +17,9 @@
 #include "analysis/csrc/domain/services/parser/parser_item/block_pmu_parser_item.h"
 #include "analysis/csrc/domain/services/parser/parser_item/chip4_pmu_parser_item.h"
 #include "analysis/csrc/domain/services/parser/parser_item/task_flip_parser_item.h"
+#include "analysis/csrc/domain/services/parser/parser_item/step_trace_parser_item.h"
+#include "analysis/csrc/domain/services/parser/parser_item/task_type_parser_item.h"
+#include "analysis/csrc/domain/services/parser/parser_item/task_memcpy_parser_item.h"
 
 namespace Analysis {
 namespace Domain {
@@ -35,6 +38,12 @@ std::function<int(uint8_t *, uint32_t, uint8_t *)> GetTrackParseItem(uint32_t it
 {
     if (itemType == PARSER_ITEM_TASK_FLIP) {
         return TaskFlipParseItem;
+    } else if (itemType == PARSER_ITEM_STEP_TRACE) {
+        return StepTraceParseItem;
+    } else if (itemType == PARSER_ITEM_TS_TASK_TYPE) {
+        return TaskTypeParseItem;
+    } else if (itemType == PARSER_ITEM_TS_MEMCPY) {
+        return TaskMemcpyParseItem;
     }
     ERROR("GetTrackParseItem return nullptr, itemType: %", itemType);
     return nullptr;
@@ -65,6 +74,5 @@ std::function<int(uint8_t *, uint32_t, uint8_t *)> GetParseItem(ParserType parse
             return nullptr;
     }
 }
-
 }
 }

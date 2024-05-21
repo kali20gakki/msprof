@@ -23,7 +23,10 @@ namespace Domain {
 
 enum HalTrackType {
     TS_TASK_FLIP = 0,
-    INVALID_TYPE = 1
+    STEP_TRACE = 1,
+    TS_TASK_TYPE = 2,
+    TS_MEMCPY = 3,
+    INVALID_TYPE = 4
 };
 
 struct HalTaskFlip {
@@ -31,11 +34,30 @@ struct HalTaskFlip {
     uint16_t flipNum = 0;
 };
 
+struct HalStepTrace {
+    uint64_t timestamp = 0;
+    uint64_t indexId = 0;
+    uint64_t modelId = 0;
+    uint16_t tagId = 0;
+};
+
+struct HalTaskType {
+    uint64_t taskType = 0;
+    uint16_t taskStatus = 0;
+};
+
+struct HalTaskMemcpy {
+    uint64_t taskStatus = 0;
+};
+
 struct HalTrackData {
     HalUniData hd;
     HalTrackType type{INVALID_TYPE};
     union {
         HalTaskFlip flip;
+        HalStepTrace stepTrace;
+        HalTaskType taskType;
+        HalTaskMemcpy taskMemcpy;
     };
     HalTrackData() {};
 };

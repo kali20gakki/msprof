@@ -16,6 +16,9 @@
 #include "analysis/csrc/domain/services/parser/parser_error_code.h"
 #include "analysis/csrc/domain/services/parser/track/include/ts_track_parser.h"
 #include "analysis/csrc/domain/services/parser/parser_item/task_flip_parser_item.h"
+#include "analysis/csrc/domain/services/parser/parser_item/step_trace_parser_item.h"
+#include "analysis/csrc/domain/services/parser/parser_item/task_memcpy_parser_item.h"
+#include "analysis/csrc/domain/services/parser/parser_item/task_type_parser_item.h"
 #include "test/msprof_cpp/analysis_ut/domain/services/test/fake_generator.h"
 
 using namespace testing;
@@ -54,6 +57,38 @@ protected:
         return taskFlip;
     }
 
+    StepTrace CreateStepTrace(int funcType, int taskId, int streamId, int timestamp, int tagId)
+    {
+        StepTrace stepTrace{};
+        stepTrace.funcType = funcType;
+        stepTrace.taskId = taskId;
+        stepTrace.streamId = streamId;
+        stepTrace.timestamp = timestamp;
+        stepTrace.tagId = tagId;
+        return stepTrace;
+    }
+
+    TaskType CreateTsTaskType(int funcType, int taskId, int streamId, int timestamp, int taskStatus)
+    {
+        TaskType taskType{};
+        taskType.funcType = funcType;
+        taskType.taskId = taskId;
+        taskType.streamId = streamId;
+        taskType.timestamp = timestamp;
+        taskType.taskStatus = taskStatus;
+        return taskType;
+    }
+
+    TaskMemcpy CreateTsTaskMemcpy(int funcType, int taskId, int timestamp, int taskStatus)
+    {
+        TaskMemcpy taskMemcpy{};
+        taskMemcpy.funcType = funcType;
+        taskMemcpy.taskId = taskId;
+        taskMemcpy.timestamp = timestamp;
+        taskMemcpy.taskStatus = taskStatus;
+        return taskMemcpy;
+    }
+
 protected:
     Infra::DataInventory dataInventory_;
 };
@@ -68,10 +103,10 @@ TEST_F(TsTrackParserUtest, ShouldReturnTaskFlipDataWhenParserRun)
                                    CreateTaskFlip(0x0e, 1, 1, INVALID_TIMESTAMP, 5)};
     WriteBin(taskFlip, File::PathJoin({TS_TRACK_PATH, "data"}), "ts_track.data.0.slice_0");
     ASSERT_EQ(Analysis::ANALYSIS_OK, tsTrackParser.Run(dataInventory_, context));
-    auto logData = dataInventory_.GetPtr<std::vector<HalTrackData>>();
-    ASSERT_EQ(2ul, logData->size());
-    for (int i = 0; i < logData->size(); i++) {
-        ASSERT_EQ(expectTimestamp[i], logData->data()[i].hd.timestamp);
+    auto data = dataInventory_.GetPtr<std::vector<HalTrackData>>();
+    ASSERT_EQ(2ul, data->size());
+    for (int i = 0; i < data->size(); i++) {
+        ASSERT_EQ(expectTimestamp[i], data->data()[i].hd.timestamp);
     }
 }
 
@@ -87,10 +122,79 @@ TEST_F(TsTrackParserUtest, ShouldReturnTaskFlipDataWhenMultiData)
                                     CreateTaskFlip(0x0e, 1, 1, INVALID_TIMESTAMP, 5)};
     WriteBin(taskFlip2, File::PathJoin({TS_TRACK_PATH, "data"}), "ts_track.data.0.slice_1");
     ASSERT_EQ(tsTrackParser.Run(dataInventory_, context), Analysis::ANALYSIS_OK);
-    auto logData = dataInventory_.GetPtr<std::vector<HalTrackData>>();
-    ASSERT_EQ(4ul, logData->size());
-    for (int i = 0; i < logData->size(); i++) {
-        ASSERT_EQ(expectTimestamp[i], logData->data()[i].hd.timestamp);
+    auto data = dataInventory_.GetPtr<std::vector<HalTrackData>>();
+    ASSERT_EQ(4ul, data->size());
+    for (int i = 0; i < data->size(); i++) {
+        ASSERT_EQ(expectTimestamp[i], data->data()[i].hd.timestamp);
+    }
+}
+
+TEST_F(TsTrackParserUtest, ShouldReturnStepTraceDataWhenParser)
+{
+    std::vector<int> expectTimestamp{10, 20};
+    std::vector<int> expectTagId{1, 2};
+    TsTrackParser tsTrackParser;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = TS_TRACK_PATH;
+    std::vector<StepTrace> taskFlip1{CreateStepTrace(0x0A, 1, 1, 10, 1), CreateStepTrace(0x0A, 1, 1, 20, 2)};
+    WriteBin(taskFlip1, File::PathJoin({TS_TRACK_PATH, "data"}), "ts_track.data.0.slice_0");
+    ASSERT_EQ(tsTrackParser.Run(dataInventory_, context), Analysis::ANALYSIS_OK);
+    auto data = dataInventory_.GetPtr<std::vector<HalTrackData>>();
+    ASSERT_EQ(2ul, data->size());
+    for (int i = 0; i < data->size(); i++) {
+        ASSERT_EQ(expectTimestamp[i], data->data()[i].hd.timestamp);
+        ASSERT_EQ(expectTagId[i], data->data()[i].stepTrace.tagId);
+    }
+}
+
+TEST_F(TsTrackParserUtest, ShouldReturnTaskMemcpyDataWhenParser)
+{
+    std::vector<int> expectTimestamp{10, 20};
+    TsTrackParser tsTrackParser;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = TS_TRACK_PATH;
+    std::vector<TaskMemcpy> taskFlip1{CreateTsTaskMemcpy(0x0B, 1, 10, 1), CreateTsTaskMemcpy(0x0B, 1, 20, 1)};
+    WriteBin(taskFlip1, File::PathJoin({TS_TRACK_PATH, "data"}), "ts_track.data.0.slice_0");
+    ASSERT_EQ(tsTrackParser.Run(dataInventory_, context), Analysis::ANALYSIS_OK);
+    auto data = dataInventory_.GetPtr<std::vector<HalTrackData>>();
+    ASSERT_EQ(2ul, data->size());
+    for (int i = 0; i < data->size(); i++) {
+        ASSERT_EQ(expectTimestamp[i], data->data()[i].hd.timestamp);
+    }
+}
+
+TEST_F(TsTrackParserUtest, ShouldReturnTaskTypeDataWhenParser)
+{
+    std::vector<int> expectTimestamp{10, 20};
+    TsTrackParser tsTrackParser;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = TS_TRACK_PATH;
+    std::vector<TaskType> taskFlip1{CreateTsTaskType(0x0C, 1, 1, 10, 1), CreateTsTaskType(0x0C, 1, 1, 20, 2)};
+    WriteBin(taskFlip1, File::PathJoin({TS_TRACK_PATH, "data"}), "ts_track.data.0.slice_0");
+    ASSERT_EQ(tsTrackParser.Run(dataInventory_, context), Analysis::ANALYSIS_OK);
+    auto data = dataInventory_.GetPtr<std::vector<HalTrackData>>();
+    ASSERT_EQ(2ul, data->size());
+    for (int i = 0; i < data->size(); i++) {
+        ASSERT_EQ(expectTimestamp[i], data->data()[i].hd.timestamp);
+    }
+}
+
+TEST_F(TsTrackParserUtest, ShouldReturnTaskFlipAndStepTraceDataWhenParser)
+{
+    std::vector<int> expectTimestamp{10, 20, 100, INVALID_TIMESTAMP};
+    TsTrackParser tsTrackParser;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = TS_TRACK_PATH;
+    std::vector<TaskFlip> taskFlip{CreateTaskFlip(0x0e, 1, 1, 10, 5), CreateTaskFlip(0x0e, 1, 1, 20, 5)};
+    WriteBin(taskFlip, File::PathJoin({TS_TRACK_PATH, "data"}), "ts_track.data.0.slice_0");
+    std::vector<StepTrace> stepTrace{CreateStepTrace(0x0A, 1, 1, 100, 1),
+                                     CreateStepTrace(0x0A, 1, 1, INVALID_TIMESTAMP, 2)};
+    WriteBin(stepTrace, File::PathJoin({TS_TRACK_PATH, "data"}), "ts_track.data.0.slice_0");
+    ASSERT_EQ(tsTrackParser.Run(dataInventory_, context), Analysis::ANALYSIS_OK);
+    auto data = dataInventory_.GetPtr<std::vector<HalTrackData>>();
+    ASSERT_EQ(4ul, data->size());
+    for (int i = 0; i < data->size(); i++) {
+        ASSERT_EQ(expectTimestamp[i], data->data()[i].hd.timestamp);
     }
 }
 
