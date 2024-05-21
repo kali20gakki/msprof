@@ -10,8 +10,10 @@
 #include "ai_drv_dev_api.h"
 #include "ai_drv_prof_api.h"
 #include "driver_plugin.h"
+#include "utils/utils.h"
 
 using namespace analysis::dvvp::common::error;
+using namespace analysis::dvvp::driver;
 using namespace Collector::Dvvp::Plugin;
 using namespace  Analysis::Dvvp::Common::Config;
 #define CHANNEL_STR(s) #s
@@ -19,15 +21,14 @@ using namespace  Analysis::Dvvp::Common::Config;
 ///////////////////////////////////////////////////////////////////
 class DRIVER_AI_DRV_API_TEST: public testing::Test {
 protected:
-    virtual void SetUp() {
+    virtual void SetUp()
+    {
+        GlobalMockObject::verify();
     }
-    virtual void TearDown() {
-    }
+    virtual void TearDown() {}
 };
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetDevNum) {
-    GlobalMockObject::verify();
-
     uint32_t num_dev = 0;
 
     MOCKER(&DriverPlugin::MsprofDrvGetDevNum)
@@ -41,8 +42,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetDevNum) {
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetDevIds) {
-    GlobalMockObject::verify();
-
     std::vector<int> dev_ids;
 
     uint32_t num_dev = 0;
@@ -59,8 +58,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetDevIds) {
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvPeripheralStart) {
-    GlobalMockObject::verify();
-
     int prof_device_id = 0;
     analysis::dvvp::driver::AI_DRV_CHANNEL prof_channel = analysis::dvvp::driver::PROF_CHANNEL_NIC;
     int prof_sample_period = 10;
@@ -83,8 +80,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvPeripheralStart) {
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvTscpuStart) {
-    GlobalMockObject::verify();
-
     analysis::dvvp::driver::DrvPeripheralProfileCfg peripheralCfg;
     peripheralCfg.profDeviceId = 0;
     peripheralCfg.profChannel = analysis::dvvp::driver::PROF_CHANNEL_TS_CPU;
@@ -93,8 +88,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvTscpuStart) {
 
     std::vector<std::string> prof_events;
     prof_events.push_back("0x11");
-
-    GlobalMockObject::verify();
 
     MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
@@ -118,8 +111,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreStart) {
     prof_events.push_back("0x11");
     prof_cores.push_back(0);
 
-    GlobalMockObject::verify();
-
     MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
         .will(returnValue(PROF_ERROR))
@@ -130,7 +121,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreStart) {
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvInstrProfileStart)
 {
-    GlobalMockObject::verify();
     MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
         .will(returnValue(PROF_ERROR))
@@ -145,8 +135,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvInstrProfileStart)
     EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvInstrProfileStart(0, peripheralCfg.profChannel, 1));
 }
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreTaskBasedStart) {
-    GlobalMockObject::verify();
-
     int prof_device_id = 0;
     analysis::dvvp::driver::AI_DRV_CHANNEL prof_channel = analysis::dvvp::driver::PROF_CHANNEL_AI_CORE;
     std::vector<std::string> prof_events;
@@ -154,8 +142,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreTaskBasedStart) {
     std::string prof_data_file_path = "/path/to/data";
 
     prof_events.push_back("0x11");
-
-    GlobalMockObject::verify();
 
     MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
@@ -170,8 +156,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreTaskBasedStart) {
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvFftsProfileStart) {
-    GlobalMockObject::verify();
-
     analysis::dvvp::driver::AI_DRV_CHANNEL prof_channel = analysis::dvvp::driver::PROF_CHANNEL_FFTS_PROFILIE_TASK;
     std::vector<int>  prof_cores;
     std::vector<std::string> prof_events;
@@ -205,8 +189,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvFftsProfileStart) {
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvTsFwStart) {
-    GlobalMockObject::verify();
-
     analysis::dvvp::driver::DrvPeripheralProfileCfg peripheralCfg;
     peripheralCfg.profDeviceId = 0;
     peripheralCfg.profChannel = analysis::dvvp::driver::PROF_CHANNEL_TS_FW;
@@ -229,8 +211,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvTsFwStart) {
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvStarsSocLogStart) {
-    GlobalMockObject::verify();
-
     analysis::dvvp::driver::DrvPeripheralProfileCfg peripheralCfg;
     peripheralCfg.profDeviceId = 0;
     peripheralCfg.profChannel = analysis::dvvp::driver::PROF_CHANNEL_STARS_SOC_LOG;
@@ -254,8 +234,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvStarsSocLogStart) {
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvStop) {
-    GlobalMockObject::verify();
-
     int prof_device_id = 0;
     analysis::dvvp::driver::AI_DRV_CHANNEL prof_channel = analysis::dvvp::driver::PROF_CHANNEL_HBM;
 
@@ -269,8 +247,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvStop) {
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvChannelRead) {
-    GlobalMockObject::verify();
-
     int prof_device_id = 0;
     analysis::dvvp::driver::AI_DRV_CHANNEL prof_channel = analysis::dvvp::driver::PROF_CHANNEL_HBM;
     unsigned char out_buf[4096];
@@ -296,8 +272,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvChannelRead) {
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvChannelPoll) {
-    GlobalMockObject::verify();
-
     struct prof_poll_info out_buf[2];
 
     MOCKER(&DriverPlugin::MsprofChannelPoll)
@@ -321,8 +295,6 @@ int halProfDataFlush(unsigned int deviceId, unsigned int channelId, unsigned int
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvProfFlush) {
-    GlobalMockObject::verify();
-
     MOCKER(&DriverPlugin::MsprofHalProfDataFlush)
         .stubs()
         .will(returnValue(PROF_ERROR))
@@ -341,14 +313,10 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvProfFlush) {
 //////////////////////////////////////////////////////////////////////////
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvHwtsLogStart) {
-    GlobalMockObject::verify();
-
     int prof_device_id = 0;
     analysis::dvvp::driver::AI_DRV_CHANNEL prof_channel = analysis::dvvp::driver::PROF_CHANNEL_HWTS_LOG;
     int prof_sample_period = 10;
     std::string prof_data_file_path = "/path/to/data";
-
-    GlobalMockObject::verify();
 
     MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
@@ -361,8 +329,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvHwtsLogStart) {
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvFmkDataStart) {
-    GlobalMockObject::verify();
-
     int prof_device_id = 0;
     analysis::dvvp::driver::AI_DRV_CHANNEL prof_channel = analysis::dvvp::driver::PROF_CHANNEL_FMK;
     int prof_sample_period = 10;
@@ -371,8 +337,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvFmkDataStart) {
     std::vector<std::string> prof_events;
 
     prof_events.push_back("0x5b");
-
-    GlobalMockObject::verify();
 
     MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
@@ -386,8 +350,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvFmkDataStart) {
 
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvL2CacheTaskStart) {
-    GlobalMockObject::verify();
-
     int profDeviceId = 0;
     analysis::dvvp::driver::AI_DRV_CHANNEL prof_channel = analysis::dvvp::driver::PROF_CHANNEL_FMK;
     int profSamplePeriod = 10;
@@ -395,8 +357,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvL2CacheTaskStart) {
     std::vector<std::string> prof_events;
 
     prof_events.push_back("0x5b");
-    GlobalMockObject::verify();
-
     MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
         .will(returnValue(PROF_ERROR))
@@ -410,8 +370,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvL2CacheTaskStart) {
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetHostPhyIdByDeviceIndex) {
-    GlobalMockObject::verify();
-
     MOCKER(&DriverPlugin::MsprofDrvGetDevIDByLocalDevID)
         .stubs()
         .will(returnValue(DRV_ERROR_NO_DEVICE))
@@ -422,8 +380,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetHostPhyIdByDeviceIndex) {
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetDevIdsStr) {
-    GlobalMockObject::verify();
-
     uint32_t num_dev = 0;
     std::vector<int> devIds;
     devIds.push_back(1);
@@ -447,7 +403,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetDevIdsStr) {
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetPlatformInfo) {
-    GlobalMockObject::verify();
     uint32_t platformInfo = 0;
     MOCKER(&DriverPlugin::MsprofDrvGetPlatformInfo)
         .stubs()
@@ -461,7 +416,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetPlatformInfo) {
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvCheckIfHelperHost) {
-    GlobalMockObject::verify();
     MOCKER(&DriverPlugin::MsprofDrvGetDevNum)
         .stubs()
         .will(returnValue(DRV_ERROR_NONE))
@@ -473,7 +427,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvCheckIfHelperHost) {
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetDeviceFreq)
 {
-    GlobalMockObject::verify();
     uint32_t deviceId = 0;
     std::string freq;
     int64_t deviceFreq = 1000;
@@ -489,7 +442,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetDeviceFreq)
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetApiVersion)
 {
-    GlobalMockObject::verify();
     int32_t ver = 1;
     MOCKER(&DriverPlugin::MsprofHalGetApiVersion)
         .stubs()
@@ -503,7 +455,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetApiVersion)
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetEnvType)
 {
-    GlobalMockObject::verify();
     uint32_t deviceId = 0;
     int64_t envType = 0;
     MOCKER(&DriverPlugin::MsprofHalGetDeviceInfo)
@@ -517,7 +468,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetEnvType)
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetCtrlCpuId)
 {
-    GlobalMockObject::verify();
     uint32_t deviceId = 0;
     int64_t ctrlCpuId = 0;
     MOCKER(&DriverPlugin::MsprofHalGetDeviceInfo)
@@ -531,7 +481,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetCtrlCpuId)
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetCtrlCpuCoreNum)
 {
-    GlobalMockObject::verify();
     uint32_t deviceId = 0;
     int64_t ctrlNum = 0;
     MOCKER(&DriverPlugin::MsprofHalGetDeviceInfo)
@@ -545,7 +494,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetCtrlCpuCoreNum)
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetCtrlCpuEndianLittle)
 {
-    GlobalMockObject::verify();
     uint32_t deviceId = 0;
     int64_t ctrlCpuEndianLittle = 0;
     MOCKER(&DriverPlugin::MsprofHalGetDeviceInfo)
@@ -559,7 +507,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetCtrlCpuEndianLittle)
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetAiCpuCoreNum)
 {
-    GlobalMockObject::verify();
     uint32_t deviceId = 0;
     int64_t aiCpuCoreNum = 0;
     MOCKER(&DriverPlugin::MsprofHalGetDeviceInfo)
@@ -573,7 +520,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetAiCpuCoreNum)
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetAiCpuCoreId)
 {
-    GlobalMockObject::verify();
     uint32_t deviceId = 0;
     int64_t aiCpuCoreId = 0;
     MOCKER(&DriverPlugin::MsprofHalGetDeviceInfo)
@@ -587,7 +533,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetAiCpuCoreId)
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetAiCpuOccupyBitmap)
 {
-    GlobalMockObject::verify();
     uint32_t deviceId = 0;
     int64_t aiCpuOccupyBitmap = 0;
     MOCKER(&DriverPlugin::MsprofHalGetDeviceInfo)
@@ -601,7 +546,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetAiCpuOccupyBitmap)
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetTsCpuCoreNum)
 {
-    GlobalMockObject::verify();
     uint32_t deviceId = 0;
     int64_t tsCpuCoreNum = 0;
     MOCKER(&DriverPlugin::MsprofHalGetDeviceInfo)
@@ -615,7 +559,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetTsCpuCoreNum)
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetAiCoreId)
 {
-    GlobalMockObject::verify();
     uint32_t deviceId = 0;
     int64_t aiCoreId = 0;
     MOCKER(&DriverPlugin::MsprofHalGetDeviceInfo)
@@ -629,7 +572,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetAiCoreId)
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetAiCoreNum)
 {
-    GlobalMockObject::verify();
     uint32_t deviceId = 0;
     int64_t aiCoreNum = 0;
     MOCKER(&DriverPlugin::MsprofHalGetDeviceInfo)
@@ -643,7 +585,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetAiCoreNum)
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetAivNum)
 {
-    GlobalMockObject::verify();
     uint32_t deviceId = 0;
     int64_t aivNum = 0;
 
@@ -666,7 +607,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetAivNum)
 
 TEST_F(DRIVER_AI_DRV_API_TEST, TestDrvIsSupportAdprofShouldReturnFalseWhenMINITYPE)
 {
-    GlobalMockObject::verify();
     uint32_t deviceId = 0;
     MOCKER_CPP(&ConfigManager::GetPlatformType)
         .stubs()
@@ -676,7 +616,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, TestDrvIsSupportAdprofShouldReturnFalseWhenMINITY
 
 TEST_F(DRIVER_AI_DRV_API_TEST, TestDrvIsSupportAdprofShouldReturnTrueWhenNotSplitMode)
 {
-    GlobalMockObject::verify();
     uint32_t deviceId = 0;
     MOCKER_CPP(&analysis::dvvp::driver::DrvGetApiVersion)
         .stubs()
@@ -685,4 +624,41 @@ TEST_F(DRIVER_AI_DRV_API_TEST, TestDrvIsSupportAdprofShouldReturnTrueWhenNotSpli
         .stubs()
         .will(returnValue(5));  // chip 5
     EXPECT_TRUE(analysis::dvvp::driver::DrvIsSupportAdprof(deviceId));
+}
+
+drvError_t g_error = (drvError_t)0;
+extern "C" drvError_t halGetDeviceInfoByBuff(DriverPlugin *This, uint32_t devId, int32_t moduleType, int32_t infoType,
+                                             VOID_PTR value, int32_t *len)
+{
+    if (moduleType = MODULE_TYPE_QOS) {
+        QosProfileInfo *info = (QosProfileInfo*)value;
+        uint8_t mpamId = 12;
+        if (info->mode == 0) {
+            info->streamNum = 1;
+            info->mpamId[0] = mpamId;
+        } else if (info->mode == 1 && info->mpamId[0] == mpamId) {
+            strcpy_s(info->streamName, QOS_STREAM_NAME_MAX_LENGTH, "st_mpamid_12");
+        }
+    }
+    return g_error;
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, GetQosProfileInfo)
+{
+    MOCKER(&Collector::Dvvp::Plugin::DriverPlugin::MsprofHalGetDeviceInfoByBuff)
+        .stubs()
+        .will(returnValue(DRV_ERROR_NOT_SUPPORT))
+        .then(returnValue(DRV_ERROR_NO_DEVICE))
+        .then(invoke(halGetDeviceInfoByBuff));
+    MOCKER_CPP(&ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(0))
+        .then(returnValue(5)); // chip 5
+    std::string info;
+    std::vector<uint8_t> events;
+    GetQosProfileInfo(0, info, events);
+    GetQosProfileInfo(0, info, events);
+    GetQosProfileInfo(0, info, events);
+    GetQosProfileInfo(0, info, events);
+    EXPECT_EQ(1, events.size());
 }

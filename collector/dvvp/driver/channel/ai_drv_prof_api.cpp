@@ -8,6 +8,7 @@
 #include <cerrno>
 #include <map>
 #include "ai_drv_dev_api.h"
+#include "config/config_manager.h"
 #include "driver_plugin.h"
 #include "errno/error_code.h"
 #include "mmpa/mmpa_api.h"
@@ -17,6 +18,7 @@ namespace analysis {
 namespace dvvp {
 namespace driver {
 using namespace analysis::dvvp::common::error;
+using namespace Analysis::Dvvp::Common::Config;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 // 32 * 1024 * 0.8  is the full threshold  of ai_core_sample
@@ -119,7 +121,7 @@ bool DrvChannelsMgr::ChannelIsValid(int devId, AI_DRV_CHANNEL channelId)
     return false;
 }
 
-int DrvPeripheralStart(const DrvPeripheralProfileCfg &peripheralCfg)
+int DrvPeripheralStart(DrvPeripheralProfileCfg &peripheralCfg)
 {
     MSPROF_EVENT("Begin to start profiling DrvPeripheralStart, profDeviceId=%d,"
         " profChannel=%d, profSamplePeriod=%d",
@@ -139,7 +141,7 @@ int DrvPeripheralStart(const DrvPeripheralProfileCfg &peripheralCfg)
             peripheralCfg.profSamplePeriod, ret);
         return PROFILING_FAILED;
     }
-
+    peripheralCfg.startSuccess = true;
     MSPROF_EVENT("Succeeded to start profiling DrvPeripheralStart, profDeviceId=%d,"
         " profChannel=%d, profSamplePeriod=%d",
         peripheralCfg.profDeviceId, static_cast<int>(peripheralCfg.profChannel), peripheralCfg.profSamplePeriod);
@@ -728,6 +730,60 @@ int DrvProfFlush(unsigned int deviceId, unsigned int channelId, unsigned int &bu
     MSPROF_LOGW("Function halProfDataFlush not supported, deviceId=%u, channelId=%u", deviceId, channelId);
     return PROFILING_FAILED;
 #endif
+}
+
+void GetQosProfileInfo(uint32_t deviceId, std::string &qosEventInfo, std::vector<uint8_t> &qosEventId)
+{
+    PlatformType platform = ConfigManager::instance()->GetPlatformType();
+    if (platform != PlatformType::CHIP_V4_1_0) {
+        MSPROF_LOGI("Do not support qos driver channel.");
+        return;
+    }
+    qosEventId.clear();
+    QosProfileInfo info;
+    auto infoLength = static_cast<int32_t>(sizeof(QosProfileInfo));
+    auto ret = memset_s(info.streamName, QOS_STREAM_NAME_MAX_LENGTH, '0', QOS_STREAM_NAME_MAX_LENGTH);
+    if (ret != EOK) {
+        MSPROF_LOGE("memset failed ret:%d", ret);
+        return;
+    }
+    info.devId = deviceId;
+    if (qosEventInfo.empty()) {
+        info.mode = 0; // get qos stream list
+        ret = DriverPlugin::instance()->MsprofHalGetDeviceInfoByBuff(deviceId, MODULE_TYPE_QOS,
+                                                                     INFO_TYPE_CONFIG, &info, &infoLength);
+        if (ret == DRV_ERROR_NOT_SUPPORT) {
+            MSPROF_LOGI("Can't find halGetDeviceInfoByBuff from ascend_hal library.");
+            return;
+        } else if (ret != DRV_ERROR_NONE || info.streamNum == 0 || info.streamNum > QOS_STREAM_MAX_NUM) {
+            MSPROF_LOGE("Can't get qos info[%u] errno[%d].", info.streamNum, ret);
+            return;
+        }
+
+        uint16_t streamNum = std::min(MAX_QOS_STREAM_COLLECT, info.streamNum);
+        QosProfileInfo infoName;
+        infoName.devId = deviceId;
+        for (uint16_t i = 0; i < streamNum; i++) {
+            ret = memset_s(infoName.streamName, QOS_STREAM_NAME_MAX_LENGTH, '0', QOS_STREAM_NAME_MAX_LENGTH);
+            if (ret != EOK) {
+                MSPROF_LOGE("memset failed ret:%d", ret);
+                return;
+            }
+            infoName.streamNum = 0;
+            infoName.mpamId[0] = info.mpamId[i];
+            infoName.mode = 1; // get stream name by mpamId
+            auto ret = DriverPlugin::instance()->MsprofHalGetDeviceInfoByBuff(deviceId, MODULE_TYPE_QOS,
+                                                                              INFO_TYPE_CONFIG, &infoName, &infoLength);
+            if (ret != DRV_ERROR_NONE) {
+                continue;
+            }
+            qosEventInfo += std::string(infoName.streamName) + ",";
+            qosEventId.push_back(info.mpamId[i]);
+        }
+        if (!qosEventInfo.empty()) {
+            qosEventInfo = qosEventInfo.substr(0, qosEventInfo.size() - 1);
+        }
+    }
 }
 }  // namespace driver
 }  // namespace dvvp

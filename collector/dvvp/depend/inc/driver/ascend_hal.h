@@ -149,6 +149,7 @@ extern "C" {
 #define CHANNEL_NPU_APP_MEM (130) /* HBM and DDR used on app level */
 #define CHANNEL_NPU_MEM (131)     /* HBM and DDR used on device level */
 #define CHANNEL_LP (132)     /* low power */
+#define CHANNEL_QOS (133)
 #define CHANNEL_DVPP_VENC (135)  /* add for ascend610 */
 #define CHANNEL_DVPP_JPEGE (136) /* add for ascend610 */
 #define CHANNEL_DVPP_VDEC (137)  /* add for ascend610 */
@@ -279,6 +280,8 @@ typedef enum {
     MODULE_TYPE_TSCPU,       /**< tscpu info*/
     MODULE_TYPE_PCIE,        /**< PCIE info*/
     MODULE_TYPE_VECTOR_CORE, /**< VECTOR CORE info*/
+    MODULE_TYPE_HOST_AICPU,  /* Host Aicpu info */
+    MODULE_TYPE_QOS,         /**<qos info> */
     MODULE_TYPE_COMPUTING = 0x8000, /* computing power info */
 } DEV_MODULE_TYPE;
 
@@ -310,6 +313,14 @@ typedef enum {
     INFO_TYPE_UTILIZATION,
     INFO_TYPE_HOST_OSC_FREQUE,
     INFO_TYPE_DEV_OSC_FREQUE,
+    INFO_TYPE_SDID,
+    INFO_TYPE_SERVER_ID,
+    INFO_TYPE_SCALE_TYPE,
+    INFO_TYPE_SUPER_POD_ID,
+    INFO_TYPE_ADDR_MODE,
+    INFO_TYPE_RUN_MACH,
+    INFO_TYPE_CURRENT_FREQ,
+    INFO_TYPE_CONFIG,
 } DEV_INFO_TYPE;
 
 enum drvHdcServiceType {

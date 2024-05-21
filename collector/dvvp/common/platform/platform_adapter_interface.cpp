@@ -425,6 +425,10 @@ void PlatformAdapterInterface::SetParamsForDeviceHardwareMem(int samplingInterva
         params_->hbm_profiling_events = "read,write";
         setFlag = true;
     }
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_QOS) != supportSwitch_.end()) {
+        params_->qosProfiling = MSVP_PROF_ON;
+        setFlag = true;
+    }
     if (setFlag) {
         params_->hardware_mem = MSVP_PROF_ON;
         params_->hardware_mem_sampling_interval = samplingInterval;

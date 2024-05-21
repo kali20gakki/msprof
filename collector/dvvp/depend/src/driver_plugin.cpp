@@ -69,6 +69,8 @@ void DriverPlugin::GetHalFunction()
         "halEschedSubscribeEvent", halEschedSubscribeEvent_);
     pluginHandle_->GetFunction<drvError_t, unsigned int, unsigned int, unsigned int, int, struct event_info *>(
         "halEschedWaitEvent", halEschedWaitEvent_);
+    pluginHandle_->GetFunction<drvError_t, uint32_t, int32_t, int32_t, void *, int32_t *>("halGetDeviceInfoByBuff",
+        halGetDeviceInfoByBuff_);
 }
 
 void DriverPlugin::LoadDriverSo()
@@ -502,6 +504,17 @@ drvError_t DriverPlugin::MsprofDrvGetDeviceSplitMode(unsigned int devId, unsigne
         return DRV_ERROR_INVALID_HANDLE;
     }
     return drvGetDeviceSplitMode_(devId, mode);
+}
+
+// halGetDeviceInfoByBuff
+drvError_t DriverPlugin::MsprofHalGetDeviceInfoByBuff(uint32_t devId, int32_t moduleType,
+                                                      int32_t infoType, void *buf, int32_t *size)
+{
+    PthreadOnce(&loadFlag_, []() -> void { DriverPlugin::instance()->LoadDriverSo(); });
+    if (halGetDeviceInfoByBuff_ != nullptr) {
+        return halGetDeviceInfoByBuff_(devId, moduleType, infoType, buf, size);
+    }
+    return DRV_ERROR_NOT_SUPPORT;
 }
 } // Plugin
 } // Dvvp

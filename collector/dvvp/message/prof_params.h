@@ -84,7 +84,7 @@ struct ProfileParams : BaseInfo {
     std::string tsCpuProfiling;
     std::string ts_cpu_profiling_events;
 
-    // sys mem, sys cpuusage, app mem, app cpuusage
+    // sys mem, sys cpuusage, app mem, app cpuusage, qos
     std::string sys_profiling;
     int sys_sampling_interval;
     std::string pid_profiling;
@@ -103,6 +103,9 @@ struct ProfileParams : BaseInfo {
     std::string hbmProfiling;
     std::string hbm_profiling_events;
     int hbmInterval;
+    std::string qosProfiling;
+    std::string qosEvents;
+    std::vector<uint8_t> qosEventId;
     std::string l2CacheTaskProfiling;
     std::string l2CacheTaskProfilingEvents;
     std::string npuAppMemProfiling;
@@ -380,6 +383,8 @@ struct ProfileParams : BaseInfo {
         SetUint64Value(object, MSG_STR(dataTypeConfig), dataTypeConfig);
         SET_VALUE(object, delayTime);
         SET_VALUE(object, durationTime);
+        SET_VALUE(object, qosProfiling);
+        SET_VALUE(object, qosEvents);
     }
 
     void ToObject(nlohmann::json &object)
@@ -484,7 +489,10 @@ struct ProfileParams : BaseInfo {
         // hbm
         FROM_STRING_VALUE(object, hbmProfiling);
         FROM_STRING_VALUE(object, hbm_profiling_events);
-        FROM_INT_VALUE(object, hbmInterval, DEFAULT_PROFILING_INTERVAL_100MS);
+        FROM_INT_VALUE(object, hbmInterval, DEFAULT_PROFILING_INTERVAL_20MS);
+        // qos
+        FROM_STRING_VALUE(object, qosProfiling);
+        FROM_STRING_VALUE(object, qosEvents);
         // npu mem
         FROM_STRING_VALUE(object, npuAppMemProfiling);
         FROM_STRING_VALUE(object, npuModuleMemProfiling);
