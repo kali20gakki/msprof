@@ -55,6 +55,7 @@ namespace {
         PROCESSOR_NAME_SOC,
         PROCESSOR_NAME_META_DATA,
         PROCESSOR_NAME_AICORE_FREQ,
+        PROCESSOR_NAME_MSTX
     };
 }
 

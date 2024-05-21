@@ -386,6 +386,30 @@ namespace {
         {"syscnt", SQL_INTEGER_TYPE},
         {"freq", SQL_INTEGER_TYPE}
     };
+
+    const TableColumns MsprofTx = {
+        {"pid", SQL_INTEGER_TYPE},
+        {"tid", SQL_INTEGER_TYPE},
+        {"category", SQL_INTEGER_TYPE},
+        {"event_type", SQL_TEXT_TYPE},
+        {"payload_type", SQL_INTEGER_TYPE},
+        {"payload_value", SQL_INTEGER_TYPE},
+        {"start_time", SQL_INTEGER_TYPE},
+        {"end_time", SQL_INTEGER_TYPE},
+        {"message_type", SQL_INTEGER_TYPE},
+        {"message", SQL_TEXT_TYPE},
+        {"file_tag", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns MsprofTxEx = {
+        {"pid", SQL_INTEGER_TYPE},
+        {"tid", SQL_INTEGER_TYPE},
+        {"event_type", SQL_TEXT_TYPE},
+        {"start_time", SQL_INTEGER_TYPE},
+        {"end_time", SQL_INTEGER_TYPE},
+        {"mark_id", SQL_INTEGER_TYPE},
+        {"message", SQL_TEXT_TYPE},
+    };
 }
 
 std::string Database::GetDBName() const
@@ -551,6 +575,13 @@ FreqDB::FreqDB()
 {
     dbName_ = "freq.db";
     tableColNames_["FreqParse"] = FreqParse;
+}
+
+MsprofTxDB::MsprofTxDB()
+{
+    dbName_ = "msproftx.db";
+    tableColNames_["MsprofTx"] = MsprofTx;
+    tableColNames_["MsprofTxEx"] = MsprofTxEx;
 }
 
 } // namespace Database

@@ -270,6 +270,19 @@ namespace {
         {"timestampNs", SQL_NUMERIC_TYPE},
         {"freq", SQL_INTEGER_TYPE}
     };
+
+    const TableColumns MSTX = {
+        {"startNs", SQL_INTEGER_TYPE},
+        {"endNs", SQL_INTEGER_TYPE},
+        {"eventType", SQL_INTEGER_TYPE},
+        {"rangeId", SQL_INTEGER_TYPE},
+        {"category", SQL_INTEGER_TYPE},
+        {"message", SQL_INTEGER_TYPE},
+        {"globalTid", SQL_INTEGER_TYPE},
+        {"endGlobalTid", SQL_INTEGER_TYPE},
+        {"domainId", SQL_INTEGER_TYPE},
+        {"connectionId", SQL_INTEGER_TYPE}
+    };
 }
 
 MsprofDB::MsprofDB()
@@ -302,6 +315,7 @@ MsprofDB::MsprofDB()
         {TABLE_NAME_SOC, SOC_BANDWIDTH_LEVEL},
         {TABLE_NAME_META_DATA, META_DATA},
         {TABLE_NAME_AICORE_FREQ, AICORE_FREQ},
+        {TABLE_NAME_MSTX, MSTX},
         // ENUM
         {TABLE_NAME_ENUM_API_TYPE, ENUM_TABLE},
         {TABLE_NAME_ENUM_MODULE, ENUM_TABLE},
@@ -309,6 +323,7 @@ MsprofDB::MsprofDB()
         {TABLE_NAME_ENUM_HCCL_LINK_TYPE, ENUM_TABLE},
         {TABLE_NAME_ENUM_HCCL_TRANSPORT_TYPE, ENUM_TABLE},
         {TABLE_NAME_ENUM_HCCL_RDMA_TYPE, ENUM_TABLE},
+        {TABLE_NAME_MSTX_EVENT_TYPE, ENUM_TABLE},
     };
 }
 

@@ -109,6 +109,17 @@ const std::string TABLE_NAME_META_DATA = "META_DATA";
 const std::string PROCESSOR_NAME_AICORE_FREQ = "AICORE_FREQ";
 const std::string TABLE_NAME_AICORE_FREQ = "AICORE_FREQ";
 
+const std::string PROCESSOR_NAME_MSTX = "MSTX";
+const std::string TABLE_NAME_MSTX = "MSTX_EVENTS";
+const std::string TABLE_NAME_MSTX_EVENT_TYPE = "ENUM_MSTX_EVENT_TYPE";
+
+// mstx event type
+const std::unordered_map<std::string, uint16_t> MSTX_EVENT_TYPE_TABLE = {
+    {"marker", 0},
+    {"push/pop", 1},
+    {"start/end", 2},
+    {"marker_ex", 3}
+};
 
 // api level
 const std::unordered_map<std::string, uint16_t> API_LEVEL_TABLE = {

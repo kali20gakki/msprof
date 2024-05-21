@@ -164,6 +164,11 @@ public:
     FreqDB();
 };
 
+class MsprofTxDB : public Database {
+public:
+    MsprofTxDB();
+};
+
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis
