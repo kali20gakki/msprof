@@ -428,6 +428,11 @@ class StrConstant:
     # prof level
     PROF_LEVEL_0 = "l0"
 
+    STATUS = "status"
+    INFO = "info"
+    MSG = "msg"
+    DATA = "data"
+
     @property
     def accuracy(self: any) -> str:
         """

@@ -2,11 +2,12 @@ import json
 import unittest
 from unittest import mock
 
-from common_func.ms_constant.number_constant import NumberConstant
 from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
 from sqlite.db_manager import DBOpen
+
+from common_func.ms_constant.number_constant import NumberConstant
 from viewer.get_msvp_summary import get_aicore_utilization
 from viewer.get_msvp_summary import pre_check_pmu_events_interface
 
