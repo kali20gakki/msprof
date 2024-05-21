@@ -145,20 +145,22 @@ def get_aicore_utilization(project_path: str, number: float, start: float, end: 
     """
     get ai core utilization data
     """
-    result = {'status': 0, 'msg': ''}
-    result['status'], result['msg'], func_map = pre_check_pmu_events_interface(project_path)
-    if result.get('status') == NumberConstant.ERROR:
-        return json.dumps({"status": NumberConstant.ERROR, "info": result.get('msg')})
+    result = {StrConstant.STATUS: 0, StrConstant.MSG: ''}
+    result[StrConstant.STATUS], result[StrConstant.MSG], func_map = pre_check_pmu_events_interface(project_path)
+    if result.get(StrConstant.STATUS) == NumberConstant.ERROR:
+        return json.dumps({StrConstant.STATUS: NumberConstant.ERROR, StrConstant.INFO: result.get(StrConstant.MSG)})
     conn, curs = DBManager.check_connect_db(project_path,
                                             func_map.get('type_db_match', {}).get('ai_core_profiling'))
     if not (conn and curs):
-        return json.dumps({'status': NumberConstant.ERROR, "info": "The db doesn't exist."})
+        return json.dumps({StrConstant.STATUS: NumberConstant.ERROR, StrConstant.INFO: "The db doesn't exist."})
     try:
         if func_map.get('sample_config', {}).get("ai_core_profiling_mode") == StrConstant.AIC_SAMPLE_BASED_MODE:
             return _get_aicore_util(curs, number, start, end)
-        return json.dumps({'status': NumberConstant.ERROR, 'data': "Unable to get aicore utilization."})
+        return json.dumps(
+            {StrConstant.STATUS: NumberConstant.ERROR, StrConstant.DATA: "Unable to get aicore utilization."})
     except sqlite3.Error:
-        return json.dumps({'status': NumberConstant.ERROR, 'info': 'Can not get aicore utilization'})
+        return json.dumps(
+            {StrConstant.STATUS: NumberConstant.ERROR, StrConstant.INFO: 'Can not get aicore utilization'})
     finally:
         DBManager.destroy_db_connect(conn, curs)
 
