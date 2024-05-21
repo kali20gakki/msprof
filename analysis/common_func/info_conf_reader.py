@@ -424,7 +424,13 @@ class InfoConfReader:
         return: offset(us)
         """
         return self._local_time_offset
-    
+
+    def get_qos_events(self: any) -> float:
+        """
+        get qosEvents from sample.json
+        """
+        return str(self._sample_json.get("qosEvents", ""))
+
     def _load_json(self: any, result_path: str) -> None:
         """
         load info.json once

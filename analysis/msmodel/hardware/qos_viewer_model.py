@@ -19,13 +19,5 @@ class QosViewModel(ViewModel):
         get qos bandwidth data
         :return: list
         """
-        sql = "select timestamp, bandwidth, mpamid, event_type from {};".format(DBNameConstant.TABLE_QOS_ORIGIN)
-        return DBManager.fetch_all_data(self.cur, sql)
-
-    def get_qos_info(self: any) -> list:
-        """
-        get qos info
-        :return: list
-        """
-        sql = "select mpamid, description from {};".format(DBNameConstant.TABLE_QOS_INFO)
+        sql = "select * from {};".format(DBNameConstant.TABLE_QOS_BW)
         return DBManager.fetch_all_data(self.cur, sql)

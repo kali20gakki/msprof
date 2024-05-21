@@ -13,7 +13,7 @@ NAMESPACE = 'msparser.hardware.qos_parser'
 
 
 class TestParsingQosData(unittest.TestCase):
-    file_list = {DataTag.QOS: ['qos.data.0.slice_0', 'qos.info.0.slice_0']}
+    file_list = {DataTag.QOS: ['qos.data.0.slice_0']}
     DIR_PATH = os.path.join(os.path.dirname(__file__), "qos")
     DATA_PATH = os.path.join(DIR_PATH, "data")
     SQLITE_PATH = os.path.join(DIR_PATH, "sqlite")
@@ -24,7 +24,8 @@ class TestParsingQosData(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        InfoConfReader()._info_json = {"devices": '0'}
+        InfoConfReader()._info_json = {"DeviceInfo": [{"hwts_frequency": "50.000000"}]}
+        InfoConfReader()._sample_json = {"qosEvents": "SDMA_QOS,DVPP_VENC_QOS"}
         if not os.path.exists(cls.DATA_PATH):
             os.makedirs(cls.DATA_PATH)
             os.makedirs(cls.SQLITE_PATH)
@@ -36,16 +37,13 @@ class TestParsingQosData(unittest.TestCase):
 
     @classmethod
     def make_qos_data(cls):
-        data = struct.pack("=QQIIQQIIQQIIQQII", 66, 0, 0, 0, 66, 0, 0, 1, 66, 0, 0, 2, 66, 0, 0, 3)
-        info = "0=qos_stream_stub\n"
+        data = struct.pack("=2I2Q10I", 66, 0, 0, 0, 66, 0, 0, 1, 66, 0, 0, 2, 66, 0)
         with FdOpen(os.path.join(cls.DATA_PATH, "qos.data.0.slice_0"), operate="wb") as f:
             f.write(data)
-        with FdOpen(os.path.join(cls.DATA_PATH, "qos.info.0.slice_0")) as f:
-            f.write(info)
 
     def test_read_binary_data(self):
         check = ParsingQosData(self.file_list, self.CONFIG)
-        result = check.read_binary_data(os.path.join(self.DATA_PATH, "qos.data.0.slice_0"), "0", "0")
+        result = check.read_binary_data(os.path.join(self.DATA_PATH, "qos.data.0.slice_0"))
         self.assertEqual(result, 0)
 
     def test_parse(self):
@@ -55,7 +53,6 @@ class TestParsingQosData(unittest.TestCase):
     def test_save(self):
         check = ParsingQosData(self.file_list, self.CONFIG)
         check.qos_data = [[66, 0, 0, 0], [66, 0, 0, 1]]
-        check.qos_info = [[0, "qos_stream_stub"]]
         check.save()
 
     def test_ms_run(self):

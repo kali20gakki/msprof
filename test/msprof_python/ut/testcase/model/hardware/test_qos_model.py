@@ -12,8 +12,7 @@ NAMESPACE = 'msmodel.hardware.qos_model'
 
 class TestQosModel(unittest.TestCase):
     TABLE_LIST = [
-        DBNameConstant.TABLE_QOS_INFO,
-        DBNameConstant.TABLE_QOS_ORIGIN
+        DBNameConstant.TABLE_QOS_BW
     ]
     TEMP_DIR = 'test'
 
@@ -29,4 +28,4 @@ class TestQosModel(unittest.TestCase):
         with mock.patch(NAMESPACE + '.QosModel.insert_data_to_db'):
             InfoConfReader()._info_json = {'devices': '0'}
             check = QosModel(TestQosModel.TEMP_DIR, DBNameConstant.DB_QOS, TestQosModel.TABLE_LIST)
-            check.flush(DBNameConstant.TABLE_QOS_ORIGIN, [])
+            check.flush(DBNameConstant.TABLE_QOS_BW, [])
