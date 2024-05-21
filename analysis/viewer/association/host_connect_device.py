@@ -20,6 +20,7 @@ from common_func.trace_view_header_constant import TraceViewHeaderConstant
 class HostToDevice:
     """Connect CANN Node@launch api to corresponding device tasks/HCCL OP."""
     API_TYPE = 'api'
+    MODULE_MSPROFTX = 'msprof_tx'
     MODULE_TASK_TIME = 'task_time'
     MODULE_HCCL = 'hccl'
     NODE_LAUNCH = "Node@launch"
@@ -172,6 +173,33 @@ class HostToDevice:
                 tmp_list.extend(start_point)
         api_traces.extend(tmp_list)
 
+    def add_msproftx_ex_start_points(self: any, traces: List[Dict[str, Any]]) -> None:
+        if self._result_dir and not self._result_dir.endswith('host'):
+            return
+        if not isinstance(traces, list):
+            return
+        tmp_list = []
+        for trace in traces:
+            trace_args = trace.get('args', {})
+            mark_id = trace_args.get('mark_id', NumberConstant.UINT64_MAX)
+            if mark_id == NumberConstant.UINT64_MAX:
+                continue
+            del trace_args['mark_id']
+            pid = trace.get(TraceViewHeaderConstant.TRACE_HEADER_PID)
+            tid = trace.get(TraceViewHeaderConstant.TRACE_HEADER_TID)
+            connect_dict = {
+                TraceViewHeaderConstant.TRACE_HEADER_NAME: f'MsTx_{mark_id}',
+                TraceViewHeaderConstant.TRACE_HEADER_PH: 's',
+                TraceViewHeaderConstant.TRACE_HEADER_ID: str(mark_id),
+                TraceViewHeaderConstant.TRACE_HEADER_TS: trace.get(TraceViewHeaderConstant.TRACE_HEADER_TS),
+                TraceViewHeaderConstant.TRACE_HEADER_CAT: StrConstant.MSTX,
+                TraceViewHeaderConstant.TRACE_HEADER_PID: pid,
+                TraceViewHeaderConstant.TRACE_HEADER_TID: tid,
+                TraceViewHeaderConstant.TRACE_HEADER_BP: 'e',
+            }
+            tmp_list.append(connect_dict)
+        traces.extend(tmp_list)
+
     def add_connect_line(self, traces: List[Dict[str, Any]], data_type: str) -> None:
         """
         为Host task和HCCL OP添加连线：
@@ -180,6 +208,9 @@ class HostToDevice:
         :param traces: json traces
         :param data_type: export type
         """
+        if data_type == self.MODULE_MSPROFTX:
+            self.add_msproftx_ex_start_points(traces)
+            return
         node_tasks = self.get_node_tasks()
         if data_type == self.MODULE_TASK_TIME:
             cann_pid = self.get_cann_pid()

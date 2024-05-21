@@ -190,7 +190,7 @@ class FileNameManagerConstant:
     ALL_FILE_TAG = "all_file.complete"
 
     MSPROFTX_FILE_PATTERN = r"^Msprof\.msproftx\.slice_\d+"
-    MSPROFTX_MARKEX_FILE_PATTERN = r"^Msprof\.mark_ex\.slice_\d+"
+    MSPROFTX_EX_FILE_PATTERN = r"^Msprof\.msproftx_ex\.slice_\d+"
     MSPROF_JSON_FILE_PATTERN = r"^msprof(_\d+)?(_\d+)?(_\d+)?(_\d+)?(_slice_\d+)?.json"
     MSPROFTX_JSON_FILE_PATTERN = r"^msprof_tx_?\d?_?\d?.json"
 
@@ -808,12 +808,12 @@ def get_parallel_strategy_compiles() -> tuple:
     return (re.compile(FileNameManagerConstant.PARALLEL_STRATEGY_FILE_PATTERN),)
 
 
-def get_msproftx_markex_compiles() -> tuple:
+def get_msproftx_ex_compiles() -> tuple:
     """
-    get msproftx markex files regex compiles
-    :return: parallel msproftx markex files regex
+    get msproftx ex files regex compiles
+    :return: parallel msproftx ex files regex
     """
-    return (re.compile(FileNameManagerConstant.MSPROFTX_MARKEX_FILE_PATTERN),)
+    return (re.compile(FileNameManagerConstant.MSPROFTX_EX_FILE_PATTERN),)
 
 
 def get_msproftx_all_compiles() -> tuple:
@@ -833,7 +833,7 @@ def get_msproftx_summary_timeline_compiles() -> tuple:
         :return: msproftx files regex
     """
     return (re.compile(FileNameManagerConstant.MSPROFTX_FILE_PATTERN),
-            )
+            re.compile(FileNameManagerConstant.MSPROFTX_EX_FILE_PATTERN))
 
 
 def get_npu_mem_compiles() -> tuple:

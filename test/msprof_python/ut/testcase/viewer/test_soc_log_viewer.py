@@ -1,6 +1,7 @@
 import json
 import unittest
 from unittest import mock
+from collections import OrderedDict
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
@@ -10,6 +11,7 @@ from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
 from mscalculate.ascend_task.ascend_task import TopDownTask
 from profiling_bean.db_dto.task_time_dto import TaskTimeDto
+from profiling_bean.db_dto.step_trace_dto import MsproftxMarkDto
 from profiling_bean.prof_enum.chip_model import ChipModel
 from viewer.task_time_viewer import TaskTimeViewer
 
@@ -425,6 +427,44 @@ class TestTaskTimeViewer(unittest.TestCase):
                                ['thread_name', 2, 1, 'Thread 0(AIV)'],
                                ['thread_sort_index', 2, 1, 1]])
 
+    def test_get_timeline_data_with_empty_msproftx_data_with_no_device_msproftx_data(self):
+        configs, params = {}, {"project": ""}
+        with mock.patch('viewer.memory_copy.memory_copy_viewer.MemoryCopyViewer.get_memory_copy_timeline',
+                        return_value=[]), \
+                mock.patch("common_func.msvp_common.path_check", return_value=False), \
+                mock.patch(NAMESPACE + '.TaskTimeViewer.get_ascend_task_data', return_value={}), \
+                mock.patch(NAMESPACE + '.TaskTimeViewer.get_trace_timeline', return_value=[]):
+            check = TaskTimeViewer(configs, params)
+            ret = check.get_timeline_data()
+            self.assertEqual(ret, [])
+
+    def test_get_timeline_data_with_valid_msproftx_data_with_device_msproftx_data(self):
+        InfoConfReader()._dev_cnt = 0.0
+        InfoConfReader()._host_mon = 0.0
+        InfoConfReader()._local_time_offset = 10.0
+        device_msproftx_data_dto = MsproftxMarkDto(0, 43114577937563, 0, 0)
+        expected_trace_data = [
+            OrderedDict([
+                ('name', 'MsTx_0'), (TraceViewHeaderConstant.TRACE_HEADER_PID, 1000), ('tid', 0),
+                ('ts', '1658653708018104.830'), ('dur', 0),
+                ('args', {'Physic Stream Id': 0, 'Task Id': 0}), ('ph', 'X')]),
+            {
+                'bp': 'e', 'cat': 'MsTx', 'id': '0', 'name': 'MsTx_0', 'ph': 'f',
+                TraceViewHeaderConstant.TRACE_HEADER_PID: 1000, 'tid': 0, 'ts': '1658653708018104.830'
+            }
+        ]
+        configs, params = {}, {"project": ""}
+        with mock.patch('viewer.memory_copy.memory_copy_viewer.MemoryCopyViewer.get_memory_copy_timeline',
+                        return_value=[]), \
+                mock.patch(NAMESPACE + '.TaskTimeViewer.get_msproftx_ex_task_data',
+                           return_value=[device_msproftx_data_dto]), \
+                mock.patch(NAMESPACE + '.TaskTimeViewer.get_ascend_task_data', return_value={}), \
+                mock.patch(NAMESPACE + '.TaskTimeViewer.get_trace_timeline', return_value=[]):
+            check = TaskTimeViewer(configs, params)
+            InfoJsonReaderManager(info_json=InfoJson(devices='0',
+                                                     DeviceInfo=[{"hwts_frequency": "100"}], pid='0')).process()
+            ret = check.get_timeline_data()
+            self.assertEqual(ret, expected_trace_data)
 
 if __name__ == '__main__':
     unittest.main()

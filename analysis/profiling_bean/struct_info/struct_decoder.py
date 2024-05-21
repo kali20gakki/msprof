@@ -36,7 +36,7 @@ class StructDecoder:
         "HwtsLogBean": StructFmt.HWTS_LOG_FMT,
         "AicPmuBean": StructFmt.AIC_PMU_FMT,
         "MsprofTxDecoder": StructFmt.MSPROFTX_FMT,
-        "MsprofTxMarkExDecoder": StructFmt.MSPROFTX_MARKEX_FMT,
+        "MsprofTxExDecoder": StructFmt.MSPROFTX_EX_FMT,
         "GeStepBean": StructFmt.GE_STEP_FMT,
         "GeSessionInfoBean": StructFmt.GE_SESSION_FMT,
         "GeTensorBean": StructFmt.GE_TENSOR_FMT,

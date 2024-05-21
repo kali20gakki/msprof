@@ -26,21 +26,24 @@ using CONST_CHAR_PTR = const char *;
 constexpr uint32_t MAX_MESSAGE_LEN = 128;
 constexpr uint64_t MARKEX_MODEL_ID = 0xFFFFFFFFU;
 constexpr uint16_t MARKEX_TAG_ID = 11;
-const std::string MARKEX_DATA_TAG = "mark_ex";
+const std::string MSPROFTX_EX_TAG = "msproftx_ex";
 
 enum class EventType {
     MARK = 0,
     PUSH_OR_POP,
     START_OR_STOP,
+    MARK_EX
 };
 
-struct MsprofTxMarkExInfo {
+struct MsprofTxExInfo {
     uint16_t magicNumber = 0x5A5A;
-    uint16_t res1;
-    uint32_t res2;
+    uint16_t eventType; // type from class EventType
+    uint32_t res1;
     uint32_t processId;
     uint32_t threadId;
-    uint64_t timestamp;
+    uint64_t res2;
+    uint64_t startTime;
+    uint64_t endTime;
     uint64_t markId;
     char message[MAX_MESSAGE_LEN];
 };

@@ -239,20 +239,18 @@ int MsprofTxManager::MarkEx(CONST_CHAR_PTR msg, size_t msgLen, aclrtStream strea
         MSPROF_LOGE("[MarkEx]MsprofTxManager is not inited yet");
         return PROFILING_FAILED;
     }
-    if (msg == nullptr || stream == nullptr) {
-        MSPROF_LOGE("[MarkEx]message or stream is nullptr");
+    if (msg == nullptr || stream == nullptr || strnlen(msg, msgLen) != msgLen) {
+        MSPROF_LOGE("[MarkEx]Invalid input param for markEx");
         MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
-            std::vector<std::string>({"nullptr", "message", "message and stream can not be nullptr when markEx"}));
+            std::vector<std::string>({"nullptr", "message", "Invalid input param for markEx"}));
         return PROFILING_FAILED;
     }
-    if (strnlen(msg, msgLen) != msgLen) {
-        MSPROF_LOGE("[MarkEx]Length of input mesage does not equal to given length.");
-        return PROFILING_FAILED;
-    }
-    MsprofTxMarkExInfo info;
+    MsprofTxExInfo info;
     info.processId = pid;
     info.threadId = tid;
-    info.timestamp = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
+    info.eventType = static_cast<uint16_t>(EventType::MARK_EX);
+    info.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
+    info.endTime = info.startTime;
     {
         std::lock_guard<std::mutex> lk(markerMtx_);
         if (RuntimePlugin::instance()->MsprofRtProfilerTraceEx(markIdx, MARKEX_MODEL_ID, MARKEX_TAG_ID, stream) !=
@@ -269,13 +267,13 @@ int MsprofTxManager::MarkEx(CONST_CHAR_PTR msg, size_t msgLen, aclrtStream strea
     info.message[msgLen] = '\0';
     ReporterData data;
     data.deviceId = DEFAULT_HOST_ID;
-    data.dataLen = sizeof(MsprofTxMarkExInfo);
+    data.dataLen = sizeof(MsprofTxExInfo);
     data.data = reinterpret_cast<UNSIGNED_CHAR_PTR>(&info);
-    if (memcpy_s(data.tag, MSPROF_ENGINE_MAX_TAG_LEN, MARKEX_DATA_TAG.c_str(), MARKEX_DATA_TAG.size()) != EOK) {
+    if (memcpy_s(data.tag, MSPROF_ENGINE_MAX_TAG_LEN, MSPROFTX_EX_TAG.c_str(), MSPROFTX_EX_TAG.size()) != EOK) {
         MSPROF_LOGE("[MarkEx]memcpy_s mark_ex tag failed");
         return PROFILING_FAILED;
     }
-    data.tag[MARKEX_DATA_TAG.size()] = '\0';
+    data.tag[MSPROFTX_EX_TAG.size()] = '\0';
     if (reporter_->Report(data) != PROFILING_SUCCESS) {
         MSPROF_LOGE("[ReportStampData] report profiling data failed.");
         return PROFILING_FAILED;

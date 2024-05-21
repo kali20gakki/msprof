@@ -81,20 +81,24 @@ class MsprofTxDecoder(StructDecoder):
         return str_value
 
 
-class MsprofTxMarkExDecoder(StructDecoder):
+class MsprofTxExDecoder(StructDecoder):
     """
     class used to decode binary data
     """
     def __init__(self: any, *args: list) -> None:
         filed = args[0]
         self._magic = filed[0]
-        self._res1 = filed[1]
-        self._res2 = filed[2]
+        self._event_type = filed[1]
         self._pid = filed[3]
         self._tid = filed[4]
-        self._timestamp = filed[5]
-        self._mark_id = filed[6]
-        self._message = self.decode_byte(filed[7])
+        self._start_time = filed[6]
+        self._end_time = filed[7]
+        self._mark_id = filed[8]
+        self._message = self.decode_byte(filed[9])
+
+    @property
+    def event_type(self) -> int:
+        return self._event_type
 
     @property
     def pid(self) -> int:
@@ -105,8 +109,12 @@ class MsprofTxMarkExDecoder(StructDecoder):
         return self._tid
 
     @property
-    def timestamp(self) -> int:
-        return self._timestamp
+    def start_time(self) -> int:
+        return self._start_time
+
+    @property
+    def end_time(self) -> int:
+        return self._end_time
 
     @property
     def mark_id(self) -> int:

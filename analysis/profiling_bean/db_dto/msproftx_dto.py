@@ -20,3 +20,14 @@ class MsprofTxDto(metaclass=InstanceCheckMeta):
     pid: int = 0
     start_time: int = 0
     tid: int = 0
+
+
+@dataclass
+class MsprofTxExDto(metaclass=InstanceCheckMeta):
+    pid: int = 0
+    tid: int = 0
+    event_type: str = Constant.NA
+    start_time: int = 0
+    dur_time: int = 0
+    mark_id: int = 0
+    message: str = Constant.NA

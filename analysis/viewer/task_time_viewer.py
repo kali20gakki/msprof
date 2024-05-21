@@ -15,6 +15,8 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ge_logic_stream_singleton import GeLogicStreamSingleton
 from common_func.ms_constant.stars_constant import StarsConstant
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.msvp_common import path_check
+from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
@@ -26,6 +28,7 @@ from msmodel.stars.sub_task_model import SubTaskTimeModel
 from msmodel.task_time.ascend_task_model import AscendTaskModel
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from profiling_bean.db_dto.task_time_dto import TaskTimeDto
+from profiling_bean.db_dto.step_trace_dto import MsproftxMarkDto
 from profiling_bean.prof_enum.chip_model import ChipModel
 from profiling_bean.prof_enum.export_data_type import ExportDataType
 from viewer.get_trace_timeline import TraceViewer
@@ -122,6 +125,13 @@ class TaskTimeViewer(BaseViewer):
         trace_data_memcpy = memory_copy_viewer.get_memory_copy_timeline()
         result.extend(trace_data_memcpy)
 
+        # add msproftx ex task data
+        msproftx_ex_task_data = self.get_msproftx_ex_task_data(result_dir)
+        msproftx_ex_trace = self.get_msproftx_ex_task_trace(msproftx_ex_task_data)
+        msproftx_ex_flow_end_points = self.get_msproftx_ex_flow_end_points(msproftx_ex_task_data)
+        result.extend(msproftx_ex_trace)
+        result.extend(msproftx_ex_flow_end_points)
+
         timeline_data = self.get_ascend_task_data()
         trace_tasks = self.get_trace_timeline(timeline_data)
         result.extend(trace_tasks)
@@ -130,6 +140,53 @@ class TaskTimeViewer(BaseViewer):
                             "exporting this data or the data may be not collected.")
             return []
         return result
+
+    def get_msproftx_ex_flow_end_points(self: any, task_data: list) -> list:
+        if not task_data:
+            return []
+        end_points = []
+        for task in task_data:
+            mark_id = task.index_id
+            end_point = {
+                TraceViewHeaderConstant.TRACE_HEADER_NAME: f'MsTx_{mark_id}',
+                TraceViewHeaderConstant.TRACE_HEADER_PH: 'f',
+                TraceViewHeaderConstant.TRACE_HEADER_ID: str(mark_id),
+                TraceViewHeaderConstant.TRACE_HEADER_TS: InfoConfReader().trans_syscnt_into_local_time(task.timestamp),
+                TraceViewHeaderConstant.TRACE_HEADER_CAT: StrConstant.MSTX,
+                TraceViewHeaderConstant.TRACE_HEADER_PID: self.trace_pid_map.get("Task Scheduler", 0),
+                TraceViewHeaderConstant.TRACE_HEADER_TID: task.stream_id,
+                TraceViewHeaderConstant.TRACE_HEADER_BP: 'e',
+            }
+            end_points.append(end_point)
+        return end_points
+
+    def get_msproftx_ex_task_trace(self: any, task_data: list) -> list:
+        if not task_data:
+            return []
+        task_trace = []
+        for task in task_data:
+            task_trace.append([
+                f'MsTx_{task.index_id}', self.trace_pid_map.get('Task Scheduler', 0), task.stream_id,
+                InfoConfReader().trans_syscnt_into_local_time(task.timestamp), 0,
+                {
+                    "Physic Stream Id": task.stream_id,
+                    "Task Id": task.task_id
+                }
+            ])
+        return TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
+                                                 task_trace)
+
+    def get_msproftx_ex_task_data(self: any, result_dir: str) -> list:
+        if not path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_STEP_TRACE)):
+            return []
+        with ViewModel(result_dir, DBNameConstant.DB_STEP_TRACE,
+                       [DBNameConstant.TABLE_STEP_TRACE]) as view_model:
+            if not view_model.check_table():
+                return []
+            sql = 'select index_id, timestamp, stream_id, task_id from {} ' \
+                  'where tag_id = 11'.format(DBNameConstant.TABLE_STEP_TRACE)
+            return view_model.get_sql_data(sql, dto_class=MsproftxMarkDto)
+
 
     def get_trace_timeline(self: any, data_list: dict) -> list:
         """
