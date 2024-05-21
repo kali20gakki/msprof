@@ -1388,16 +1388,17 @@ class TablesConfig(MetaConfig):
             ('count', 'NUMERIC,null'),
             ('group_name', 'TEXT,null')
         ],
-        'QosOriginalDataMap': [
-            ('device_id', 'INT,null'),
-            ('replayid', 'INT,null'),
-            ('timestamp', 'REAL,null'),
-            ('bandwidth', 'INT,null'),
-            ('event_type', 'TEXT,null'),
-            ('mpamid', 'INT,null')
-        ],
-        'QosInfoMap': [
-            ('mpamid', 'INT,null'),
-            ('description', 'TEXT,null')
-        ],
+        'QosBwDataMap': [
+            ('timestamp', 'NUMERIC,null'),
+            ('bw1', 'NUMERIC,null'),
+            ('bw2', 'NUMERIC,null'),
+            ('bw3', 'NUMERIC,null'),
+            ('bw4', 'NUMERIC,null'),
+            ('bw5', 'NUMERIC,null'),
+            ('bw6', 'NUMERIC,null'),
+            ('bw7', 'NUMERIC,null'),
+            ('bw8', 'NUMERIC,null'),
+            ('bw9', 'NUMERIC,null'),
+            ('bw10', 'NUMERIC,null')
+        ]
     }

@@ -202,8 +202,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_HBM_ORIGIN = "HBMOriginalData"
     TABLE_HBM_BW = "HBMbwData"
     # qos
-    TABLE_QOS_ORIGIN = "QosOriginalData"
-    TABLE_QOS_INFO = "QosInfo"
+    TABLE_QOS_BW = "QosBwData"
     # hccs
     TABLE_HCCS_ORIGIN = 'HCCSOriginalData'
     TABLE_HCCS_EVENTS = 'HCCSEventsData'

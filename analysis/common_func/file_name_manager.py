@@ -214,7 +214,6 @@ class FileNameManagerConstant:
 
     # qos
     QOS_DATA_PATTERN = r"^qos\.data\.(\d+)\.slice_\d+"
-    QOS_INFO_PATTERN = r"^qos\.info\.(\d+)\.slice_\d+"
 
     # new data struct
     API_EVENT_FILE_PATTERN = r"^(aging|unaging)\.api_event\.data\.slice_\d+"
@@ -1021,6 +1020,6 @@ def get_hccl_op_info_compiles() -> tuple:
 def get_qos_compiles() -> tuple:
     """
     get qos regex compiles
-    :return: qos data and qos info files regex
+    :return: qos data files regex
     """
-    return re.compile(FileNameManagerConstant.QOS_DATA_PATTERN), re.compile(FileNameManagerConstant.QOS_INFO_PATTERN)
+    return (re.compile(FileNameManagerConstant.QOS_DATA_PATTERN),)
