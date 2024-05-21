@@ -214,7 +214,7 @@ void InputParser::SetApplicationArgv(const std::string &appStr, struct MsprofCmd
     argvMap[ARGS_APPLICATION] = std::pair<MsprofCmdInfo, std::string>(cmdInfo, appArg + appStr);
 
     if (argvMap.find(ARGS_OUTPUT) == argvMap.end()) {
-        cmdInfo.args[ARGS_OUTPUT] = "./";
+        cmdInfo.args[ARGS_OUTPUT] = const_cast<CHAR_PTR>(std::string("./").c_str());
         std::string outputStr = "--output=./";
         argvMap[ARGS_OUTPUT] = std::pair<MsprofCmdInfo, std::string>(cmdInfo, outputStr);
     }

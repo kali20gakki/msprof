@@ -140,11 +140,11 @@ void CommunicationInfoProcessor::Update(const HcclTaskFormat &oriData, HcclTaskS
         std::make_tuple(deviceId, taskData.streamId, taskData.taskId, taskData.contextId, taskData.batchId));
     taskData.taskType = IdPool::GetInstance().GetUint64Id(hcclData.HCCLName);
     taskData.groupName = GetGroupNameValue(hcclData.groupName, hashMap);
-    taskData.rdmaType = GetEnumTypeValue(hcclData.rdmaType, MSG_STR(HCCL_RDMA_TYPE_TABLE), HCCL_RDMA_TYPE_TABLE);
+    taskData.rdmaType = GetEnumTypeValue(hcclData.rdmaType, NAME_STR(HCCL_RDMA_TYPE_TABLE), HCCL_RDMA_TYPE_TABLE);
     taskData.transportType = GetEnumTypeValue(hcclData.transportType,
-                                              MSG_STR(HCCL_TRANSPORT_TYPE_TABLE), HCCL_TRANSPORT_TYPE_TABLE);
-    taskData.dataType = GetEnumTypeValue(hcclData.dataType, MSG_STR(HCCL_DATA_TYPE_TABLE), HCCL_DATA_TYPE_TABLE);
-    taskData.linkType = GetEnumTypeValue(hcclData.linkType, MSG_STR(HCCL_LINK_TYPE_TABLE), HCCL_LINK_TYPE_TABLE);
+                                              NAME_STR(HCCL_TRANSPORT_TYPE_TABLE), HCCL_TRANSPORT_TYPE_TABLE);
+    taskData.dataType = GetEnumTypeValue(hcclData.dataType, NAME_STR(HCCL_DATA_TYPE_TABLE), HCCL_DATA_TYPE_TABLE);
+    taskData.linkType = GetEnumTypeValue(hcclData.linkType, NAME_STR(HCCL_LINK_TYPE_TABLE), HCCL_LINK_TYPE_TABLE);
     taskData.opId = IdPool::GetInstance().GetUint32Id(Utils::Join("_", hcclData.opName, hcclData.groupName, deviceId));
 }
 
@@ -162,7 +162,7 @@ void CommunicationInfoProcessor::UpdateOpInfo(CommunicationOpData &opData, uint3
         std::string opType;
         std::tie(connectionId, opName, opData.relay, opData.retry, dataType, algType,
                  opData.count, groupName, opType) = oriData;
-        opData.dataType = GetEnumTypeValue(dataType, MSG_STR(HCCL_DATA_TYPE_TABLE), HCCL_DATA_TYPE_TABLE);
+        opData.dataType = GetEnumTypeValue(dataType, NAME_STR(HCCL_DATA_TYPE_TABLE), HCCL_DATA_TYPE_TABLE);
         opData.algType = IdPool::GetInstance().GetUint64Id(algType);
         opData.groupName = GetGroupNameValue(groupName, hashMap);
         opData.opType = IdPool::GetInstance().GetUint64Id(opType);
