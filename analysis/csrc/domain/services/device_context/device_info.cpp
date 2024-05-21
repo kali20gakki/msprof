@@ -19,7 +19,6 @@ using namespace Analysis;
 using namespace Analysis::Utils;
 using namespace Analysis::Domain;
 
-const std::string INFO_JSON = "info.json";
 
 namespace nlohmann {
 
@@ -54,6 +53,8 @@ struct adl_serializer<DeviceInfo> {
 namespace Analysis {
 
 namespace Domain {
+
+const std::string INFO_JSON = "info.json";
 
 bool DeviceContext::GetInfoJson()
 {

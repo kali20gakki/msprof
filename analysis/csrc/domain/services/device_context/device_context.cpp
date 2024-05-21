@@ -81,7 +81,7 @@ std::vector<std::string> GetDeviceDirectories(const std::string &path)
 
 }
 
-std::vector<DataInventory> DeviceContextEntry(const char *targetDir, const char *stopAt)
+static std::vector<DataInventory> DeviceContextEntry(const char *targetDir, const char *stopAt)
 {
     Utils::TimeLogger t{"DeviceContextEntry "};
     std::vector<std::string> subdirs = GetDeviceDirectories(targetDir);
