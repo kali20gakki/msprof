@@ -491,6 +491,95 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_api) {
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
 }
 
+TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_api_datatype_config_is_zero)
+{
+    GlobalMockObject::verify();
+
+    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::Init)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+
+    std::string result = "./acl_prof_api_stest_new";
+    analysis::dvvp::common::utils::Utils::RemoveDir(result);
+    analysis::dvvp::common::utils::Utils::CreateDir(result);
+
+    ProfConfig config;
+    config.devNums = 1;
+    config.devIdList[0] = 0;
+    config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
+    config.dataTypeConfig = ACL_PROF_ACL_API|ACL_PROF_AICORE_METRICS|ACL_PROF_AICPU;
+
+    aclprofConfig *aclConfig = aclprofCreateConfig(
+        config.devIdList, config.devNums, (aclprofAicoreMetrics)config.aicoreMetrics, nullptr, config.dataTypeConfig);
+
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterAclApi::GetParamFromInputCfg)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+
+    uint64_t dataTypeConfig = 4;
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetDataTypeConfigFromParams)
+        .stubs()
+        .with(outBound((uint64_t)dataTypeConfig))
+        .will(returnValue(PROFILING_SUCCESS));
+
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::ProfStartPrecheck)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::ProfAclStart)
+        .stubs()
+        .will(returnValue(ACL_SUCCESS));
+    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(0, aclprofStart(aclConfig));
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_api_stop_when_datatype_config_is_not_zero)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
+        .stubs()
+        .will(returnValue(false));
+
+    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::Init)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+
+    std::string result = "./acl_prof_api_stest_new";
+    analysis::dvvp::common::utils::Utils::RemoveDir(result);
+    analysis::dvvp::common::utils::Utils::CreateDir(result);
+
+    ProfConfig config;
+    config.devNums = 1;
+    config.devIdList[0] = 0;
+    config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
+    config.dataTypeConfig = ACL_PROF_ACL_API|ACL_PROF_AICORE_METRICS|ACL_PROF_AICPU;
+
+    aclprofConfig *aclConfig = aclprofCreateConfig(
+        config.devIdList, config.devNums, (aclprofAicoreMetrics)config.aicoreMetrics, nullptr, config.dataTypeConfig);
+
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterAclApi::GetParamFromInputCfg)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+
+    uint64_t dataTypeConfig = 4;
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetDataTypeConfigFromParams)
+        .stubs()
+        .with(outBound((uint64_t)dataTypeConfig))
+        .will(returnValue(PROFILING_SUCCESS));
+
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::ProfStopPrecheck)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::ProfAclStop)
+        .stubs()
+        .will(returnValue(ACL_SUCCESS));
+    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(0, aclprofStop(aclConfig));
+}
+
 TEST_F(MSPROF_ACL_CORE_UTEST, prof_acl_api_helper) {
     GlobalMockObject::verify();
 
