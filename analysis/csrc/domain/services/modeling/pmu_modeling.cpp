@@ -17,10 +17,12 @@
 #include "analysis/csrc/domain/services/parser/pmu/include/ffts_profile_parser.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
+#include "analysis/csrc/domain/services/parser/track/include/ts_track_parser.h"
 
 namespace Analysis {
 namespace Domain {
 using namespace Analysis::Utils;
+using namespace Analysis::Infra;
 void PmuModeling::SplitDataByType(std::vector<HalPmuData>& originPmuData, std::vector<HalTrackData>& flipTrack)
 {
     auto pmuData = GroupByStream<HalPmuData, HalPmuType>(originPmuData);
@@ -64,7 +66,7 @@ uint32_t PmuModeling::ProcessEntry(Infra::DataInventory& dataInventory, const In
     return Analysis::ANALYSIS_OK;
 }
 
-REGISTER_PROCESS_SEQUENCE(PmuModeling, true, FftsProfileParser);
+REGISTER_PROCESS_SEQUENCE(PmuModeling, true, FftsProfileParser, TsTrackParser);
 REGISTER_PROCESS_DEPENDENT_DATA(PmuModeling, std::vector<HalPmuData>, std::vector<HalTrackData>);
 REGISTER_PROCESS_SUPPORT_CHIP(PmuModeling, CHIP_V4_1_0);
 }
