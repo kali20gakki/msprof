@@ -24,14 +24,37 @@
 #include "analysis/csrc/infrastructure/process/include/process_struct.h"
 
 namespace Analysis {
-
+namespace Infra {
 template <typename P>
 std::unique_ptr<Infra::Process> TCreator()
 {
     std::unique_ptr<Infra::Process> ptr{new P};
     return ptr;
 }
+class ProcessRegister {
+public:
+    ProcessRegister(std::type_index selfType, ProcessCreator creator, bool mandatory, const char* processName,
+                    std::vector<std::type_index>&& preProcessType);
+    ProcessRegister(std::type_index selfType, std::vector<std::type_index>&& paramTypes);
+    ProcessRegister(std::type_index selfType, std::initializer_list<uint32_t> chipIds);
 
+    static ProcessCollection CopyProcessInfo();
+
+private:
+    static ProcessCollection& GetContainer();
+};
+
+template<uint32_t ...Ids>
+struct ChipIdCountChecker {
+    constexpr static size_t count_ = sizeof...(Ids);
+};
+
+template <typename... T>
+struct ClassToTypeIndexHelper {
+    ClassToTypeIndexHelper() : typeIndex{typeid(T) ...} {}
+    std::vector<std::type_index> typeIndex;
+};
+}
 }
 
 /**

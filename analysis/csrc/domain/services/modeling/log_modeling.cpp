@@ -11,19 +11,18 @@
  */
 #include "analysis/csrc/domain/services/modeling/include/log_modeling.h"
 #include <algorithm>
-#include <iostream>
 #include "analysis/csrc/domain/services/parser/log/include/stars_soc_parser.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 #include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/domain/services/modeling/batch_id/batch_id.h"
 #include "analysis/csrc/utils/time_logger.h"
-#include "analysis/csrc/utils/utils.h"
-#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/domain/services/parser/track/include/ts_track_parser.h"
 
 namespace Analysis {
 
 namespace Domain {
+using namespace Infra;
 namespace {
 
 constexpr uint32_t LOW_16BIT_MASK = 0xffff;
@@ -183,12 +182,9 @@ uint32_t LogModeling::ProcessEntry(Infra::DataInventory& dataInventory, const In
     return Analysis::ANALYSIS_OK;
 }
 
-}
-
-
-REGISTER_PROCESS_SEQUENCE(Domain::LogModeling, true, Domain::StarsSocParser);
+REGISTER_PROCESS_SEQUENCE(Domain::LogModeling, true, Domain::StarsSocParser, Domain::TsTrackParser);
 REGISTER_PROCESS_DEPENDENT_DATA(Domain::LogModeling, std::vector<Domain::HalLogData>,
     std::vector<Domain::HalTrackData>, std::map<Domain::TaskId, std::vector<Domain::DeviceTask>>);
 REGISTER_PROCESS_SUPPORT_CHIP(Domain::LogModeling, CHIP_V4_1_0);
-
+}
 }

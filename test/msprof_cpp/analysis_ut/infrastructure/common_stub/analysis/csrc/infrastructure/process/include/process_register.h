@@ -23,6 +23,23 @@
 #include <string>
 #include "analysis/csrc/infrastructure/process/include/process_struct.h"
 
+namespace Analysis {
+namespace Infra {
+class ProcessRegister {
+public:
+    ProcessRegister(std::type_index selfType, ProcessCreator creator, bool mandatory, const char* processName,
+                    std::vector<std::type_index>&& preProcessType);
+    ProcessRegister(std::type_index selfType, std::vector<std::type_index>&& paramTypes);
+    ProcessRegister(std::type_index selfType, std::initializer_list<uint32_t> chipIds);
+
+    static ProcessCollection CopyProcessInfo();
+
+private:
+    static ProcessCollection& GetContainer();
+};
+}
+}
+
 /**
  * @brief 注册处理流程的桩
  */
