@@ -445,11 +445,33 @@ class TestTaskTimeViewer(unittest.TestCase):
         device_msproftx_data_dto = MsproftxMarkDto(0, 43114577937563, 0, 0)
         expected_trace_data = [
             OrderedDict([
-                ('name', 'MsTx_0'), (TraceViewHeaderConstant.TRACE_HEADER_PID, 1000), ('tid', 0),
-                ('ts', '1658653708018104.830'), ('dur', 0),
-                ('args', {'Physic Stream Id': 0, 'Task Id': 0}), ('ph', 'X')]),
+                (TraceViewHeaderConstant.TRACE_HEADER_NAME, 'process_name'),
+                (TraceViewHeaderConstant.TRACE_HEADER_PID, 1000), (TraceViewHeaderConstant.TRACE_HEADER_TID, 0),
+                (TraceViewHeaderConstant.TRACE_HEADER_ARGS, OrderedDict([
+                    (TraceViewHeaderConstant.TRACE_HEADER_NAME, 'Task Scheduler')])),
+                (TraceViewHeaderConstant.TRACE_HEADER_PH, 'M')
+            ]),
+            OrderedDict([
+                (TraceViewHeaderConstant.TRACE_HEADER_NAME, 'thread_name'),
+                (TraceViewHeaderConstant.TRACE_HEADER_PID, 1000), (TraceViewHeaderConstant.TRACE_HEADER_TID, 0),
+                (TraceViewHeaderConstant.TRACE_HEADER_ARGS, OrderedDict([
+                    (TraceViewHeaderConstant.TRACE_HEADER_NAME, 'Stream 0')])),
+                (TraceViewHeaderConstant.TRACE_HEADER_PH, 'M')
+            ]),
+            OrderedDict([
+                (TraceViewHeaderConstant.TRACE_HEADER_NAME, 'thread_sort_index'),
+                (TraceViewHeaderConstant.TRACE_HEADER_PID, 1000), (TraceViewHeaderConstant.TRACE_HEADER_TID, 0),
+                (TraceViewHeaderConstant.TRACE_HEADER_ARGS, OrderedDict([('sort_index', 0)])),
+                (TraceViewHeaderConstant.TRACE_HEADER_PH, 'M')
+            ]),
+            OrderedDict([
+                (TraceViewHeaderConstant.TRACE_HEADER_NAME, 'MsTx_0'), (TraceViewHeaderConstant.TRACE_HEADER_PID, 1000),
+                (TraceViewHeaderConstant.TRACE_HEADER_TID, 0), ('ts', '1658653708018104.830'), ('dur', 0),
+                (TraceViewHeaderConstant.TRACE_HEADER_ARGS, {'Physic Stream Id': 0, 'Task Id': 0}),
+                (TraceViewHeaderConstant.TRACE_HEADER_PH, 'X')]),
             {
-                'bp': 'e', 'cat': 'MsTx', 'id': '0', 'name': 'MsTx_0', 'ph': 'f',
+                'bp': 'e', 'cat': 'MsTx', 'id': '0', TraceViewHeaderConstant.TRACE_HEADER_NAME: 'MsTx_0',
+                TraceViewHeaderConstant.TRACE_HEADER_PH: 'f',
                 TraceViewHeaderConstant.TRACE_HEADER_PID: 1000, 'tid': 0, 'ts': '1658653708018104.830'
             }
         ]

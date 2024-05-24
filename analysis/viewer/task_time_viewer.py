@@ -173,8 +173,11 @@ class TaskTimeViewer(BaseViewer):
                     "Task Id": task.task_id
                 }
             ])
-        return TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
-                                                 task_trace)
+        _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
+                                                   task_trace)
+        result = TraceViewManager.metadata_event(self.get_time_timeline_header(task_trace))
+        result.extend(_trace)
+        return result
 
     def get_msproftx_ex_task_data(self: any, result_dir: str) -> list:
         if not path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_STEP_TRACE)):
