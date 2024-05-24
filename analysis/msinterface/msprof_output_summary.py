@@ -407,7 +407,8 @@ class MsprofOutputSummary:
             return timeline_file_dict, slice_max_count
         file_list = os.listdir(timeline_path)
         for _file_name in self.get_newest_file_list(file_list, StrConstant.FILE_SUFFIX_JSON):
-            if not _file_name.startswith(target_name):
+            if (not _file_name.startswith(target_name) or
+                    (target_name == "msprof" and _file_name.startswith("msprof_tx"))):
                 continue
             match = re.search(r'_slice_\d+', _file_name)
             file_name = os.path.join(timeline_path, _file_name)
