@@ -15,7 +15,7 @@
 
 
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include "analysis/csrc/domain/entities/hal/include/hal.h"
 
 namespace Analysis {
@@ -62,7 +62,7 @@ struct HalTrackData {
     HalTrackData() {};
 };
 
-std::map<HalTrackType, std::vector<HalTrackData*>> ClassifyTrackData(std::vector<HalTrackData>& trackData);
+std::unordered_map<uint16_t, std::vector<HalTrackData*>> GetFlipData(std::vector<HalTrackData>& trackData);
 
 /**
  * 引用类型跟踪数据，获取指针存于数组中

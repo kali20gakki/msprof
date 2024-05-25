@@ -19,6 +19,7 @@ using namespace testing;
 using namespace Analysis;
 using namespace Analysis::Infra;
 using namespace Analysis::Domain;
+const uint16_t DEFAULT_STREAM_ID = 1;
 
 class HalTrackUTest : public testing::Test {
 protected:
@@ -27,10 +28,10 @@ protected:
     void SetUp() override
     {
         std::vector<HalTrackData> vec{
-            createHalTrackData({}, HalTrackType::TS_TASK_FLIP, {}),
-            createHalTrackData({}, HalTrackType::TS_TASK_FLIP, {}),
-            createHalTrackData({}, HalTrackType::TS_TASK_FLIP, {}),
-            createHalTrackData({}, HalTrackType::INVALID_TYPE, {}),
+            createHalTrackData(HalTrackType::TS_TASK_FLIP),
+            createHalTrackData(HalTrackType::TS_TASK_FLIP),
+            createHalTrackData(HalTrackType::TS_TASK_FLIP),
+            createHalTrackData(HalTrackType::INVALID_TYPE),
         };
         std::shared_ptr<std::vector<HalTrackData>> data;
         MAKE_SHARED0_NO_OPERATION(data, std::vector<HalTrackData>, std::move(vec));
@@ -42,23 +43,22 @@ protected:
         dataInventory_.RemoveRestData({});
     }
 
-    HalTrackData createHalTrackData(HalUniData hd, HalTrackType type, HalTaskFlip flip)
+    HalTrackData createHalTrackData(HalTrackType type)
     {
         HalTrackData ans = {};
-        ans.hd = hd;
+        ans.hd.taskId.streamId = DEFAULT_STREAM_ID;
         ans.type = type;
-        ans.flip = flip;
+        ans.flip = {};
         return ans;
     }
 };
 
-TEST_F(HalTrackUTest, ShouldSplitHalTrackDataByTrackType)
+TEST_F(HalTrackUTest, ShouldReturnFlipData)
 {
     auto data = dataInventory_.GetPtr<std::vector<HalTrackData>>();
-    auto result = ClassifyTrackData(*data);
-    ASSERT_EQ(result.size(), 2ul);
-    ASSERT_EQ(3ul, result[HalTrackType::TS_TASK_FLIP].size());
-    ASSERT_EQ(1ul, result[HalTrackType::INVALID_TYPE].size());
+    auto result = GetFlipData(*data);
+    ASSERT_EQ(1ul, result.size());
+    ASSERT_EQ(HalTrackType::TS_TASK_FLIP, result[DEFAULT_STREAM_ID][0]->type);
 }
 
 TEST_F(HalTrackUTest, ShouldReturnFlipBeanWhenInputTaskFlipBean)

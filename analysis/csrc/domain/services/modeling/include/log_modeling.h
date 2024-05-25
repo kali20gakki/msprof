@@ -27,17 +27,17 @@ class LogModeling final : public Infra::Process {
 private:
     uint32_t ProcessEntry(Infra::DataInventory& dataInventory, const Infra::Context& context) override;
 
-    std::map<uint16_t, std::vector<HalTrackData*>> SplitLogGroups(std::vector<HalLogData>& logData,
-        std::shared_ptr<std::vector<HalTrackData>>& flipTrack);
+    void SplitLogGroups(std::vector<HalLogData>& logData, std::shared_ptr<std::vector<HalTrackData>>& flipTrack);
     void OutputLogCounts(const std::vector<HalLogData>& logData) const;
-    void AddToDeviceTask(std::map<uint16_t, std::vector<HalLogData*>>& startTask,
-                         std::map<uint16_t, std::vector<HalLogData*>>& endTask,
-                         std::map<uint16_t, std::vector<HalTrackData*>>& flipGroups,
+    void AddToDeviceTask(std::unordered_map<uint16_t, std::vector<HalLogData*>>& startTask,
+                         std::unordered_map<uint16_t, std::vector<HalLogData*>>& endTask,
+                         std::unordered_map<uint16_t, std::vector<HalTrackData*>>& flipGroups,
                          std::map<TaskId, std::vector<DeviceTask>>& deviceTaskMap,
                          std::function<void(Domain::DeviceTask&, const HalLogData&, const HalLogData&)> mergeFunc);
 
 private:
-    std::map<uint16_t, std::vector<HalLogData*>> acsqStart_, acsqEnd_, fftsStart_, fftsEnd_;
+    std::unordered_map<uint16_t, std::vector<HalLogData*>> acsqStart_, acsqEnd_, fftsStart_, fftsEnd_;
+    std::unordered_map<uint16_t, std::vector<HalTrackData*>> flipData_;
 };
 
 }

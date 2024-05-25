@@ -59,11 +59,10 @@ void MergeStartAndEnd(const std::map<uint64_t, std::vector<HalLogData*>>& logSta
 
 }
 
-std::map<uint16_t, std::vector<HalTrackData*>> LogModeling::SplitLogGroups(std::vector<HalLogData>& logData,
-    std::shared_ptr<std::vector<HalTrackData>>& flipTrack)
+void LogModeling::SplitLogGroups(std::vector<HalLogData>& logData,
+                                 std::shared_ptr<std::vector<HalTrackData>>& flipTrack)
 {
     Utils::TimeLogger t{"LogModeling::SplitLogGroups "};
-    std::map<uint16_t, std::vector<HalTrackData*>> flipGroups;
     for (auto& halLog : logData) {
         if (halLog.type == ACSQ_LOG) {
             if (halLog.acsq.isEndTimestamp) {
@@ -80,15 +79,21 @@ std::map<uint16_t, std::vector<HalTrackData*>> LogModeling::SplitLogGroups(std::
         }
     }
     if (flipTrack) {
-        for (auto &node: *flipTrack) {
-            flipGroups[node.hd.taskId.streamId].push_back(&node);
-        }
+        auto flipGroup = GetFlipData(*flipTrack);
+        flipData_.swap(flipGroup);
     }
-    return flipGroups;
 }
 
-template<typename T, typename U>
-size_t GetAllNodeSize(const std::map<T, std::vector<U>>& tasks)
+size_t GetDeviceTaskNodeSize(const std::map<TaskId, std::vector<DeviceTask>>& tasks)
+{
+    size_t total{};
+    for (const auto& node : tasks) {
+        total += node.second.size();
+    }
+    return total;
+}
+
+size_t GetTaskNodeSize(const std::unordered_map<uint16_t, std::vector<HalLogData*>>& tasks)
 {
     size_t total{};
     for (const auto& node : tasks) {
@@ -100,15 +105,15 @@ size_t GetAllNodeSize(const std::map<T, std::vector<U>>& tasks)
 void LogModeling::OutputLogCounts(const std::vector<HalLogData>& logData) const
 {
     INFO("HalLogData size:%", logData.size());
-    INFO("acsqS stream:%, total:%", acsqStart_.size(), GetAllNodeSize(acsqStart_));
-    INFO("acsqE stream:%, total:%", acsqEnd_.size(), GetAllNodeSize(acsqEnd_));
-    INFO("fftsS stream:%, total:%", fftsStart_.size(), GetAllNodeSize(fftsStart_));
-    INFO("fftsE stream:%, total:%", fftsEnd_.size(), GetAllNodeSize(fftsEnd_));
+    INFO("acsqS stream:%, total:%", acsqStart_.size(), GetTaskNodeSize(acsqStart_));
+    INFO("acsqE stream:%, total:%", acsqEnd_.size(), GetTaskNodeSize(acsqEnd_));
+    INFO("fftsS stream:%, total:%", fftsStart_.size(), GetTaskNodeSize(fftsStart_));
+    INFO("fftsE stream:%, total:%", fftsEnd_.size(), GetTaskNodeSize(fftsEnd_));
 }
 
-void LogModeling::AddToDeviceTask(std::map<uint16_t, std::vector<HalLogData*>>& startTask,
-    std::map<uint16_t, std::vector<HalLogData*>>& endTask,
-    std::map<uint16_t, std::vector<HalTrackData*>>& flipGroups,
+void LogModeling::AddToDeviceTask(std::unordered_map<uint16_t, std::vector<HalLogData*>>& startTask,
+    std::unordered_map<uint16_t, std::vector<HalLogData*>>& endTask,
+    std::unordered_map<uint16_t, std::vector<HalTrackData*>>& flipGroups,
     std::map<TaskId, std::vector<DeviceTask>>& deviceTaskMap,
     std::function<void(Domain::DeviceTask&, const HalLogData&, const HalLogData&)> mergeFunc)
 {
@@ -156,27 +161,27 @@ uint32_t LogModeling::ProcessEntry(Infra::DataInventory& dataInventory, const In
     }
 
     // 为了后面补BatchId，按stream和开始结束的维度给log分组
-    auto flipGroups = SplitLogGroups(*logData, flipTrack);
+    SplitLogGroups(*logData, flipTrack);
     OutputLogCounts(*logData);
 
-    size_t deviceTaskNum = GetAllNodeSize(*deviceTaskMap);
+    size_t deviceTaskNum = GetDeviceTaskNodeSize(*deviceTaskMap);
     Utils::TimeLogger t{"LogModeling::AddToDeviceTask "};
-    AddToDeviceTask(acsqStart_, acsqEnd_, flipGroups, *deviceTaskMap,
+    AddToDeviceTask(acsqStart_, acsqEnd_, flipData_, *deviceTaskMap,
         [](Domain::DeviceTask& oneTask, const HalLogData& startLog, const HalLogData& endLog) {
             oneTask.taskType = startLog.acsq.taskType;
             oneTask.taskStart = startLog.acsq.timestamp;
             oneTask.taskDuration = endLog.acsq.timestamp - oneTask.taskStart;
     });
-    size_t acsqMatchedCount = GetAllNodeSize(*deviceTaskMap) - deviceTaskNum;
+    size_t acsqMatchedCount = GetDeviceTaskNodeSize(*deviceTaskMap) - deviceTaskNum;
     INFO("ACSQ matched count:%", acsqMatchedCount);
 
-    AddToDeviceTask(fftsStart_, fftsEnd_, flipGroups, *deviceTaskMap,
+    AddToDeviceTask(fftsStart_, fftsEnd_, flipData_, *deviceTaskMap,
         [](Domain::DeviceTask& oneTask, const HalLogData& startLog, const HalLogData& endLog) {
                 oneTask.taskType = startLog.ffts.subTaskType;
                 oneTask.taskStart = startLog.ffts.timestamp;
                 oneTask.taskDuration = endLog.ffts.timestamp - oneTask.taskStart;
     });
-    size_t fftsMatchedCount = GetAllNodeSize(*deviceTaskMap) - acsqMatchedCount - deviceTaskNum;
+    size_t fftsMatchedCount = GetDeviceTaskNodeSize(*deviceTaskMap) - acsqMatchedCount - deviceTaskNum;
     INFO("FFTS matched count:%", fftsMatchedCount);
 
     return Analysis::ANALYSIS_OK;

@@ -15,11 +15,13 @@
 namespace Analysis {
 namespace Domain {
 
-std::map<HalTrackType, std::vector<HalTrackData*>> ClassifyTrackData(std::vector<HalTrackData>& trackData)
+std::unordered_map<uint16_t, std::vector<HalTrackData*>> GetFlipData(std::vector<HalTrackData>& trackData)
 {
-    std::map<HalTrackType, std::vector<HalTrackData*>> trackDataMap;
+    std::unordered_map<uint16_t, std::vector<HalTrackData*>> trackDataMap;
     for (auto& data : trackData) {
-        trackDataMap[data.type].push_back(&data);
+        if (data.type == TS_TASK_FLIP) {
+            trackDataMap[data.hd.taskId.streamId].push_back(&data);
+        }
     }
     return trackDataMap;
 }

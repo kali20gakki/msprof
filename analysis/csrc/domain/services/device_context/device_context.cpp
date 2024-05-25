@@ -18,9 +18,9 @@
 #include "analysis/csrc/utils/file.h"
 #include "analysis/csrc/utils/time_logger.h"
 #include "analysis/csrc/utils/thread_pool.h"
-#include "infrastructure/process/include/process_register.h"
-#include "infrastructure/process/include/process_control.h"
-#include "infrastructure/data_inventory/include/data_inventory.h"
+#include "analysis/csrc/infrastructure/process/include/process_register.h"
+#include "analysis/csrc/infrastructure/process/include/process_control.h"
+#include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
 #include "device_context_error_code.h"
 
 using namespace Analysis;
@@ -92,7 +92,7 @@ static std::vector<DataInventory> DeviceContextEntry(const char *targetDir, cons
             DeviceContext &context = DeviceContext::Instance();
             context.SetDevicePath(subdir);
             if (stopAt != nullptr) {
-                context.deviceContextInfo.dfxInfo.stopAt = stopAt;
+                context.SetStopAt(stopAt);
             }
 
             auto regInfo = ProcessRegister::CopyProcessInfo();
