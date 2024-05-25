@@ -23,19 +23,14 @@ namespace Analysis {
 namespace Domain {
 using namespace Analysis::Utils;
 using namespace Analysis::Infra;
-void PmuModeling::SplitDataByType(std::vector<HalPmuData>& originPmuData, std::vector<HalTrackData>& flipTrack)
+void PmuModeling::GroupDataByStream(std::vector<HalPmuData>& originPmuData, std::vector<HalTrackData>& flipTrack)
 {
-    auto pmuData = GroupByStream<HalPmuData, HalPmuType>(originPmuData);
-    auto flipData = GroupByStream<HalTrackData, HalTrackType>(flipTrack);
-
-    auto fftsIt = pmuData.find(HalPmuType::PMU);
-    if (fftsIt != pmuData.end()) {
-        pmu_.swap(fftsIt->second);
+    for (auto& pmuData : originPmuData) {
+        pmu_[pmuData.hd.taskId.streamId].push_back(&pmuData);
     }
-
-    auto flipIt = flipData.find(HalTrackType::TS_TASK_FLIP);
-    if (flipIt != flipData.end()) {
-        flipGroup_.swap(flipIt->second);
+    if (!flipTrack.empty()) {
+        auto flipIt = GetFlipData(flipTrack);
+        flipGroup_.swap(flipIt);
     }
 }
 
@@ -61,7 +56,7 @@ uint32_t PmuModeling::ProcessEntry(Infra::DataInventory& dataInventory, const In
         INFO("There is no PMU data, can't supplement batchId");
         return Analysis::ANALYSIS_OK;
     }
-    SplitDataByType(*originPmuData, *flipTrack);
+    GroupDataByStream(*originPmuData, *flipTrack);
     GenerateBatchId();
     return Analysis::ANALYSIS_OK;
 }

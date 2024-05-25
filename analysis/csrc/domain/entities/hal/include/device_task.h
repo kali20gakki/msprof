@@ -26,7 +26,7 @@ struct DeviceTask {
     uint64_t taskDuration = 0;
     uint32_t blockDim = 0;
     uint32_t mixBlockDim = 0;
-    AcceleratorType acceleratorType;
+    AcceleratorType acceleratorType = INVALID;
     std::unique_ptr<PmuBaseInfo> pmuInfo = nullptr;
 };
 }

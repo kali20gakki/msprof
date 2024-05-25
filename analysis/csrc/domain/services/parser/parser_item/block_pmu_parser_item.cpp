@@ -37,7 +37,7 @@ int BlockPmuParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *hal
     pmuData->hd.taskId.batchId = INVALID_BATCH_ID;
     pmuData->hd.taskId.taskId = blockPmu->taskId;
     pmuData->hd.taskId.contextId = blockPmu->subTaskId;
-    pmuData->hd.timestamp = blockPmu->timeList[0];
+    pmuData->hd.timestamp = blockPmu->timeList[1]; // 使用结束时间进行batchId的匹配
 
     pmuData->type = BLOCK_PMU;
     pmuData->pmu.acceleratorType = GetAcceleratorTypeByType(blockPmu->subTaskType, blockPmu->fftsType);

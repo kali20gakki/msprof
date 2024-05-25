@@ -22,6 +22,7 @@ constexpr uint32_t MIN_SUB_DIR_NBAME_LEN = 6;
 enum class AicMetricsEventsType {
     AIC_ARITHMETIC_UTILIZATION = 0,
     AIC_PIPE_UTILIZATION,
+    AIC_PIPE_UTILIZATION_EXCT,
     AIC_MEMORY,
     AIC_MEMORY_L0,
     AIC_RESOURCE_CONFLICT_RATIO,
@@ -33,6 +34,7 @@ enum class AicMetricsEventsType {
 const std::unordered_map<std::string, AicMetricsEventsType> aicMetricsMap = {
     {"ArithmeticUtilization", AicMetricsEventsType::AIC_ARITHMETIC_UTILIZATION},
     {"PipeUtilization", AicMetricsEventsType::AIC_PIPE_UTILIZATION},
+    {"PipeUtilizationExct", AicMetricsEventsType::AIC_PIPE_UTILIZATION_EXCT},
     {"Memory", AicMetricsEventsType::AIC_MEMORY},
     {"MemoryL0", AicMetricsEventsType::AIC_MEMORY_L0},
     {"ResourceConflictRatio", AicMetricsEventsType::AIC_RESOURCE_CONFLICT_RATIO},
@@ -99,9 +101,6 @@ struct SampleInfo {
     uint32_t aivProfilingEvents[8];
     ProfilingMode aivProfilingMode;
     uint32_t aivSamplingInterval;
-
-    // 910B芯片MIX算子是否开启block模式
-    bool taskBlock;
 };
 
 struct DfxInfo {
@@ -135,6 +134,8 @@ public:
     const std::string &GetDfxStopAtName() const override { return deviceContextInfo.dfxInfo.stopAt; }
 
     void SetDevicePath(const std::string &devicePath) { deviceContextInfo.deviceFilePath = devicePath; }
+
+    void SetStopAt(const std::string & stopAt) { deviceContextInfo.dfxInfo.stopAt = stopAt; }
 private:
     DeviceContextInfo deviceContextInfo;
     bool isInitialized_; // 标记是否已初始化

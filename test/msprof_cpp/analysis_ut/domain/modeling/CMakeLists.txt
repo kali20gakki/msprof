@@ -6,7 +6,7 @@ include_directories(${GTEST_INCLUDE_DIR})
 
 aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/data_inventory DEVICE_MODELING_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/process DEVICE_MODELING_SOURCE)
-aux_source_directory(${TOP_DIR}/analysis/csrc/domain/entities/hal DEVICE_PARSER_SOURCE)
+aux_source_directory(${TOP_DIR}/analysis/csrc/domain/entities/hal DEVICE_MODELING_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/modeling DEVICE_MODELING_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/modeling/batch_id DEVICE_MODELING_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/utils DEVICE_MODELING_SOURCE)

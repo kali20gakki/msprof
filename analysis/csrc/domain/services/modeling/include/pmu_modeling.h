@@ -29,18 +29,8 @@ private:
     {
         return lData->hd.timestamp < rData->hd.timestamp;
     }
-
-    template<typename T, typename K>
-    std::unordered_map<K, std::unordered_map<uint16_t, std::vector<T*>>> GroupByStream(std::vector<T>& data)
-    {
-        std::unordered_map<K, std::unordered_map<uint16_t, std::vector<T*>>> streamMap;
-        for (auto& bean : data) {
-            streamMap[bean.type][bean.hd.taskId.streamId].push_back(&bean);
-        }
-        return streamMap;
-    }
     void GenerateBatchId();
-    void SplitDataByType(std::vector<HalPmuData>& pmuData, std::vector<HalTrackData>& flipTrack);
+    void GroupDataByStream(std::vector<HalPmuData>& pmuData, std::vector<HalTrackData>& flipTrack);
 private:
     std::unordered_map<uint16_t, std::vector<HalPmuData*>> pmu_;
     std::unordered_map<uint16_t, std::vector<HalTrackData*>> flipGroup_;

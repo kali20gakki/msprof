@@ -16,40 +16,30 @@
 #include <cstdint>
 #include <vector>
 #include "analysis/csrc/domain/entities/hal/include/hal.h"
+#include "analysis/csrc/domain/entities/metric/include/metric.h"
 
 namespace Analysis {
 namespace Domain {
 
 struct PmuBaseInfo {
     AcceleratorType type;
-
     virtual ~PmuBaseInfo() = default;
 };
 
-struct PmuInfoNone : public PmuBaseInfo {
-    AcceleratorType type;
+struct PmuInfoSingleAccelerator : public PmuBaseInfo {
+    double totalTime = 0;
+    uint64_t totalCycles = 0;
+    std::vector<double> pmuResult;
 };
 
-struct PmuInfoAic : public PmuBaseInfo {
-    uint64_t aicore_time = 0;
-    uint64_t aic_total_cycles = 0;
-    uint64_t pmu_list[8] = {0};
-};
-
-struct PmuInfoAiV : public PmuBaseInfo {
-    uint64_t aiv_time = 0;
-    uint64_t aiv_total_cycles = 0;
-    uint64_t pmu_list[8] = {0};
-};
-
-struct PmuInfoMix : public PmuBaseInfo {
-    uint32_t total_block_count = 0;
-    uint64_t aicore_time = 0;
-    uint64_t aic_total_cycles = 0;
-    uint64_t aiv_time = 0;
-    uint64_t aiv_total_cycles = 0;
-    uint64_t aic_pmu_list[8] = {0};
-    uint64_t aiv_pmu_list[8] = {0};
+struct PmuInfoMixAccelerator : public PmuBaseInfo {
+    uint32_t totalBlockCount = 0;
+    double aiCoreTime = 0;
+    uint64_t aicTotalCycles = 0;
+    double aivTime = 0;
+    uint64_t aivTotalCycles = 0;
+    std::vector<double> aicPmuResult;
+    std::vector<double> aivPmuResult;
 };
 }
 }
