@@ -52,6 +52,7 @@ void PlatformAdapterInterface::SetParamsForGlobal(struct CommonParams &comParams
     params_->profiling_mode = analysis::dvvp::message::PROFILING_MODE_DEF;
     params_->result_dir = comParams.output.empty() ? params_->result_dir : comParams.output;
     params_->msproftx = comParams.msproftx.empty() ? params_->msproftx : comParams.msproftx;
+    params_->ts_keypoint = params_->msproftx;
     params_->host_sys_pid = comParams.hostSysPid;
     params_->devices = comParams.device;
     params_->profiling_period = comParams.profilingPeriod;
