@@ -4,6 +4,7 @@
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.utils import Utils
+from profiling_bean.stars.stars_common import StarsCommon
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 
@@ -19,7 +20,7 @@ class AcsqTask(StructDecoder):
         # total 16 bit, get high 6 bit
         self._task_type = args[0] >> 10
         self._stream_id = Utils.get_stream_id(args[2])
-        self._task_id = args[3]
+        self._task_id = StarsCommon.set_task_id(args[2], args[3])
         self._sys_cnt = args[4]
         # [acsq_id, acc_id] is total 16 bit, acc_id is the lower 6 bit
         self._acc_id = args[6] & 63

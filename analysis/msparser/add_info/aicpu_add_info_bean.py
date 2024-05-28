@@ -8,6 +8,7 @@ from msparser.data_struct_size_constant import StructFmt
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.utils import Utils
+from profiling_bean.stars.stars_common import StarsCommon
 
 
 class AicpuNodeBean:
@@ -18,7 +19,7 @@ class AicpuNodeBean:
     def __init__(self: any, *args) -> None:
         data = args[0]
         self._stream_id = Utils.get_stream_id(data[6])
-        self._task_id = str(data[7])
+        self._task_id = StarsCommon.set_task_id(data[6], data[7])
         self._ai_cpu_task_start = data[10]
         self._compute_time = (data[12] - data[11]) / NumberConstant.MILLI_SECOND  # ms
         self._mem_copy_time = (data[13] - data[12]) / NumberConstant.MILLI_SECOND

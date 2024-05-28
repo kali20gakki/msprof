@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2024. All rights reserved.
 
 from common_func.utils import Utils
+from profiling_bean.stars.stars_common import StarsCommon
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 
@@ -15,7 +16,7 @@ class FftsBlockPmuBean(StructDecoder):
         filed = args[0]
         self.func_type = Utils.get_func_type(filed[0])
         self._stream_id = Utils.get_stream_id(filed[2])
-        self._task_id = filed[3]
+        self._task_id = StarsCommon.set_task_id(filed[2], filed[3])
         self._subtask_type = filed[5] & int(b'11111111')
         self._subtask_id = filed[6]
         self._core_type = filed[7] & 1
