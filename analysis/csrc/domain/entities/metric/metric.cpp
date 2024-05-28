@@ -11,14 +11,10 @@
  */
 
 #include "analysis/csrc/domain/entities/metric/include/metric.h"
-#include <unordered_map>
-#include <vector>
-#include "analysis/csrc/dfx/log.h"
 
 namespace Analysis {
 namespace Domain {
 namespace {
-const std::string INVALID_HEADER = "INVALID";
 std::vector<std::string> PipeUtExHeaderString{
     "mac_ratio_extra", "scalar_ratio", "mte1_ratio_extra", "mte2_ratio", "fixpipe_ratio", "icache_miss_rate",
     "mac_time", "scalar_time", "mte1_time", "mte2_time", "fixpipe_time"
@@ -56,8 +52,8 @@ std::vector<std::string> L2CacheHeaderString{
     "write_cache_hit", "write_cache_miss_allocate", "r0_read_cache_hit", "r0_read_cache_miss_allocate",
     "r1_read_cache_hit", "r1_read_cache_miss_allocate"
 };
-
-std::unordered_map<std::type_index, std::vector<std::string>> metricMappingStringTable{
+}
+std::unordered_map<std::type_index, std::vector<std::string>> Metric::metricMappingStringTable{
     {typeid(PipeUtilizationExctIndex), PipeUtExHeaderString},
     {typeid(ArithMetricIndex), ArithMetricHeaderString},
     {typeid(PipeLineUtIndex), PipeUtHeaderString},
@@ -67,18 +63,5 @@ std::unordered_map<std::type_index, std::vector<std::string>> metricMappingStrin
     {typeid(MemoryUBIndex), MemoryUBHeaderString},
     {typeid(L2CacheIndex), L2CacheHeaderString},
 };
-}
-
-template<typename T>
-const std::string& GetMetricHeaderString(T enumType)
-{
-    auto it = metricMappingStringTable.find(typeid(enumType));
-    if (it == metricMappingStringTable.end()) {
-        ERROR("Invalid enumType");
-        return INVALID_HEADER;
-    }
-    return it->second[static_cast<int>(enumType)];
-}
-
 }
 }
