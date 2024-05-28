@@ -71,4 +71,4 @@ class TestNpuOpMemParser(unittest.TestCase):
                 mock.patch(NAMESPACE + '.OffsetCalculator.pre_process', return_value=npu_op_mem_data_new):
             check = NpuOpMemParser(self.file_list, CONFIG)
             check._process_npu_op_mem_data('test', 256, [])
-        self.assertEqual(check._npu_op_mem_data, [['123', '1', 1, '123', 1, 1000, 1000, 1, 0, 'NPU:0']])
+        self.assertEqual(check._npu_op_mem_data, [['123', '1', 1, 123, 1, 1000, 1000, 1, 0, 'NPU:0']])

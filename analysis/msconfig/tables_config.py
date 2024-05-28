@@ -1275,9 +1275,9 @@ class TablesConfig(MetaConfig):
         'NpuOpMemMap': [
             ('operator', 'TEXT,null'),
             ('size', 'INTEGER,null'),
-            ('allocation_time', 'TEXT,null'),
-            ('release_time', 'TEXT,null'),
-            ('duration', 'TEXT,null'),
+            ('allocation_time', 'NUMERIC,null'),
+            ('release_time', 'NUMERIC,null'),
+            ('duration', 'NUMERIC,null'),
             ('allocation_total_allocated', 'INTEGER,null'),
             ('allocation_total_reserved', 'INTEGER,null'),
             ('release_total_allocated', 'INTEGER,null'),
