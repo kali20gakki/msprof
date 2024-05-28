@@ -88,7 +88,7 @@ class NpuOpMemParser(DataParser, MsMultiProcess):
                         str(npu_op_mem_data_bean.node_id),
                         str(npu_op_mem_data_bean.addr),
                         npu_op_mem_data_bean.size,
-                        str(npu_op_mem_data_bean.timestamp),
+                        npu_op_mem_data_bean.timestamp,
                         npu_op_mem_data_bean.thread_id,
                         npu_op_mem_data_bean.total_allocate_memory,
                         npu_op_mem_data_bean.total_reserve_memory,

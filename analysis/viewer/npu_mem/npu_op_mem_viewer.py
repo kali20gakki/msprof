@@ -38,8 +38,8 @@ class NpuOpMemViewer:
             self._data = [[datum.name, round(datum.size / NumberConstant.KILOBYTE, NumberConstant.ROUND_THREE_DECIMAL),
                            format_high_precision_for_csv(
                                InfoConfReader().trans_into_local_time(InfoConfReader().time_from_host_syscnt(
-                                   int(datum.allocation_time), NumberConstant.MICRO_SECOND), use_us=True)),
-                           round(InfoConfReader().get_host_duration(int(datum.duration), NumberConstant.MICRO_SECOND),
+                                   datum.allocation_time, NumberConstant.MICRO_SECOND), use_us=True)),
+                           round(InfoConfReader().get_host_duration(datum.duration, NumberConstant.MICRO_SECOND),
                                  NumberConstant.ROUND_THREE_DECIMAL),
                            round(datum.allocation_total_allocated / NumberConstant.KILOBYTE,
                                  NumberConstant.ROUND_THREE_DECIMAL),

@@ -100,7 +100,7 @@ class NpuOpMemCalculator(ICalculator, MsMultiProcess):
                     allocated_value = allocated_data[item_key]
                     op_mem = [
                         item.operator, allocated_value.size, allocated_value.timestamp,
-                        item_value.timestamp, int(item_value.timestamp) - int(allocated_value.timestamp),
+                        item_value.timestamp, item_value.timestamp - allocated_value.timestamp,
                         allocated_value.total_allocate_memory, allocated_value.total_reserve_memory,
                         item_value.total_allocate_memory, item_value.total_reserve_memory,
                         item_key.device_type
