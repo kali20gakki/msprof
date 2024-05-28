@@ -15,9 +15,13 @@
 
 #include <string>
 #include <typeindex>
+#include <unordered_map>
+#include <vector>
+#include "analysis/csrc/dfx/log.h"
 
 namespace Analysis {
 namespace Domain {
+const std::string INVALID_HEADER = "INVALID";
 // PipeUtilizationExct对应910B芯片的AIV的PipeUtilization,两者属于等价分组
 enum class PipeUtilizationExctIndex {
     MacRatioExtra = 0,
@@ -104,9 +108,21 @@ enum class L2CacheIndex {
     R1ReadCacheMissAllocate,
 };
 
-template<typename T>
-const std::string& GetMetricHeaderString(T enumType);
+class Metric {
+public:
+    template<typename T>
+    static const std::string &GetMetricHeaderString(T enumType)
+    {
+        auto it = metricMappingStringTable.find(typeid(enumType));
+        if (it == metricMappingStringTable.end()) {
+            ERROR("Invalid enumType");
+            return INVALID_HEADER;
+        }
+        return it->second[static_cast<int>(enumType)];
+    }
+private:
+    static std::unordered_map<std::type_index, std::vector<std::string>> metricMappingStringTable;
+};
 }
 }
-
 #endif // ANALYSIS_DOMAIN_ENTITIES_METRIC_METRIC_H

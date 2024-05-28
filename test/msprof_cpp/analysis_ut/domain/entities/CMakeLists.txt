@@ -6,6 +6,7 @@ include_directories(${GTEST_INCLUDE_DIR})
 
 aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/data_inventory DEVICE_TASK_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/entities/hal DEVICE_TASK_SOURCE)
+aux_source_directory(${TOP_DIR}/analysis/csrc/domain/entities/metric DEVICE_TASK_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/utils DEVICE_TASK_SOURCE)
 
 aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/domain/entities/test DEVICE_TASK_SOURCE)

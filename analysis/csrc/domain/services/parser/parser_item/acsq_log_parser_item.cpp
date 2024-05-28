@@ -14,6 +14,7 @@
 #include "analysis/csrc/dfx/log.h"
 #include "analysis/csrc/utils/utils.h"
 #include "analysis/csrc/domain/services/parser/parser_error_code.h"
+#include "analysis/csrc/domain/services/parser/parser_item/stars_common.h"
 
 namespace Analysis {
 namespace Domain {
@@ -30,9 +31,9 @@ int AcsqLogParseItem(uint8_t *binaryData, uint32_t binaryDataSize,
 
     auto *unionData = ReinterpretConvert<HalLogData *>(halUniData);
 
-    unionData->hd.taskId.streamId = log->streamId;
+    unionData->hd.taskId.streamId = StarsCommon::GetStreamId(log->streamId);
     unionData->hd.taskId.batchId = 0;
-    unionData->hd.taskId.taskId = log->taskId;
+    unionData->hd.taskId.taskId = StarsCommon::GetTaskId(log->streamId, log->taskId);
     unionData->hd.taskId.contextId = INVALID_CONTEXT_ID;
 
     unionData->type = ACSQ_LOG;

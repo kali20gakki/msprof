@@ -26,8 +26,7 @@ struct ContextPmu {
     uint16_t cnt : 4;
     uint16_t resv1 : 6;       // resv字段为解析完整大小结构占位需要，实际未使用
     uint16_t resv2;
-    uint16_t streamId : 11;    // 第3个，16位数据低11位
-    uint16_t resv3 : 5;
+    uint16_t streamId;    // 第3个
     uint16_t taskId;           // 第4个，16位数据
     uint64_t resv4;
     uint16_t subTaskType : 8;  // 第6个，16位数据低8位
