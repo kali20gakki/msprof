@@ -79,7 +79,16 @@ function analysis_compile() {
     fi
 }
 
+function mspti_compile() {
+    mkdir -p ${TOP_DIR}/build/mspti
+    cd ${TOP_DIR}/build/mspti
+    cmake ${TOP_DIR}/mspti -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${TOP_DIR}/build/mspti
+    make -j$(nproc)
+}
+
 collector_compile
 analysis_compile
+mspti_compile
+
 cd ${TOP_DIR}/build
 bash ${TOP_DIR}/scripts/create_run_package_pack.sh ${VERSION} ${PACKAGE_TYPE}
