@@ -59,6 +59,7 @@ const std::string CSV_FORMAT        = "csv";
 const std::string JSON_FORMAT       = "json";
 
 std::string g_appStr;
+std::string g_appPath;
 InputParser::InputParser()
 {
     MSVP_MAKE_SHARED0_VOID(params_, analysis::dvvp::message::ProfileParams);
@@ -214,7 +215,8 @@ void InputParser::SetApplicationArgv(const std::string &appStr, struct MsprofCmd
     argvMap[ARGS_APPLICATION] = std::pair<MsprofCmdInfo, std::string>(cmdInfo, appArg + appStr);
 
     if (argvMap.find(ARGS_OUTPUT) == argvMap.end()) {
-        cmdInfo.args[ARGS_OUTPUT] = const_cast<CHAR_PTR>(std::string("./").c_str());
+        g_appPath = "./";
+        cmdInfo.args[ARGS_OUTPUT] = const_cast<CHAR_PTR>(g_appPath.c_str());
         std::string outputStr = "--output=./";
         argvMap[ARGS_OUTPUT] = std::pair<MsprofCmdInfo, std::string>(cmdInfo, outputStr);
     }
