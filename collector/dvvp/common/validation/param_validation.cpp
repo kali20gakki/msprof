@@ -768,11 +768,11 @@ bool ParamValidation::IsValidSwitch(const std::string &switchStr) const
 bool ParamValidation::IsValidTaskTimeSwitch(const std::string &switchVal) const
 {
     if (switchVal.compare(MSVP_PROF_L0) == 0 || switchVal.compare(MSVP_PROF_L1) == 0 ||
-        switchVal.compare(MSVP_PROF_L2) == 0 || IsValidSwitch(switchVal)) {
+        IsValidSwitch(switchVal)) {
         return true;
     }
-    MSPROF_LOGE("The switch task_time should be set in range [l0, l1, l2, on, off].");
-    CMD_LOGE("Argument --task-time should be set in range [l0, l1, l2, on, off].");
+    MSPROF_LOGE("The switch task_time should be set in range [l0, l1, on, off].");
+    CMD_LOGE("Argument --task-time should be set in range [l0, l1, on, off].");
     return false;
 }
 

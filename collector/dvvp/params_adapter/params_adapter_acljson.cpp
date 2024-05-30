@@ -255,7 +255,7 @@ bool ParamsAdapterAclJson::CheckInstrAndTaskParamBothSet(SHARED_PTR_ALIA<ProfAcl
     }
     const std::vector<std::pair<bool, std::string>> ARG_VEC {
         {aclCfg->taskTime == "on" || aclCfg->taskTime == "l0" ||
-         aclCfg->taskTime == "l1" || aclCfg->taskTime == "l2", " task_time "},
+         aclCfg->taskTime == "l1", " task_time "},
         {aclCfg->aicpu == "on", " aicpu "},
         {aclCfg->l2 == "on", " l2 "},
         {aclCfg->hccl == "on", " hccl "},
