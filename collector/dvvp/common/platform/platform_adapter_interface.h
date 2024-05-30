@@ -154,7 +154,6 @@ private:
     int GetMetricsEvents(const std::string &metricsType, std::string &events, const CoreType type) const;
     void SetParamsForTaskTimeL0();
     void SetParamsForTaskTimeL1();
-    void SetParamsForTaskTimeL2();
 };
 }
 }

@@ -189,7 +189,6 @@ const std::string MSVP_PROF_ON = "on";
 const std::string MSVP_PROF_OFF = "off";
 const std::string MSVP_PROF_L0 = "l0";
 const std::string MSVP_PROF_L1 = "l1";
-const std::string MSVP_PROF_L2 = "l2";
 const char * const MSVP_PROF_EMPTY_STRING = "";
 
 // ai core metrics type

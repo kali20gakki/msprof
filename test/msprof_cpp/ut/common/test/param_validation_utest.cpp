@@ -919,9 +919,6 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, IsValidTaskTimeSwitch)
     ret = ParamValidation::instance()->IsValidTaskTimeSwitch("l1");
     EXPECT_EQ(true, ret);
 
-    ret = ParamValidation::instance()->IsValidTaskTimeSwitch("l2");
-    EXPECT_EQ(true, ret);
-
     ret = ParamValidation::instance()->IsValidTaskTimeSwitch("on");
     EXPECT_EQ(true, ret);
 

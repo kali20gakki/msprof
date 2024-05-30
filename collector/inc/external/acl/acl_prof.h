@@ -34,7 +34,6 @@ extern "C" {
 #define ACL_PROF_RUNTIME_API            0x00000100ULL
 #define ACL_PROF_TASK_TIME_L0           0x00000800ULL
 #define ACL_PROF_TASK_MEMORY            0x00001000ULL
-#define ACL_PROF_TASK_TIME_L2           0x00002000ULL
 #define ACL_PROF_OP_ATTR                0x00004000ULL
 
 /**

@@ -252,7 +252,7 @@ bool ParamsAdapterGeOpt::CheckInstrAndTaskParamBothSet(SHARED_PTR_ALIA<ProfGeOpt
     }
     const std::vector<std::pair<bool, std::string>> ARG_VEC {
         {geCfg->taskTime == "on" || geCfg->taskTime == "l0" ||
-         geCfg->taskTime == "l1" || geCfg->taskTime == "l2", " task_time "},
+         geCfg->taskTime == "l1", " task_time "},
         {geCfg->taskTrace == "on", " task_trace "},
         {geCfg->trainingTrace == "on", " training_trace "},
         {geCfg->aicpu == "on", " aicpu "},

@@ -139,23 +139,9 @@ void PlatformAdapterInterface::SetParamsForTaskTimeL1()
     SetParamsForGEL0();
 }
 
-void PlatformAdapterInterface::SetParamsForTaskTimeL2()
-{
-    SetParamsForTaskTimeL1();
-    params_->dataTypeConfig |= PROF_TASK_TIME_L2;
-    params_->profLevel = MSVP_PROF_L2;
-    SetParamsForGEL0();
-}
-
 void PlatformAdapterInterface::SetParamsForTaskTime(const std::string taskTimeLevel)
 {
-    if (taskTimeLevel == MSVP_PROF_L2) {
-        SetParamsForTaskTimeL2();
-    } else if (taskTimeLevel == MSVP_PROF_L1 || taskTimeLevel == MSVP_PROF_ON) {
-        SetParamsForTaskTimeL1();
-    } else if (taskTimeLevel == MSVP_PROF_L0) {
-        SetParamsForTaskTimeL0();
-    }
+    taskTimeLevel == MSVP_PROF_L0 ? SetParamsForTaskTimeL0() : SetParamsForTaskTimeL1();
 }
 
 void PlatformAdapterInterface::SetParamsForTaskTrace()

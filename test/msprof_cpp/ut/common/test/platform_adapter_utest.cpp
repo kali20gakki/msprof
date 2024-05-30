@@ -84,7 +84,6 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule1)
     mgr->SetParamsForGlobal(comParams);
     mgr->SetParamsForStorageLimit(comParams);
     mgr->SetParamsForTaskTimeL1();
-    mgr->SetParamsForTaskTimeL2();
     mgr->SetParamsForTaskTrace();
     mgr->SetParamsForTrainingTrace();
     mgr->SetParamsForAscendCL();

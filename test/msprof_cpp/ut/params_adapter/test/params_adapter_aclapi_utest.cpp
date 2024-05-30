@@ -102,7 +102,7 @@ TEST_F(ParamsAdapterAclapiUtest, ProfTaskCfgToContainer)
     struct ProfConfig apiCfg;
     apiCfg.devNums = 1;
     apiCfg.devIdList[0] = {1};
-    apiCfg.dataTypeConfig = PROF_TASK_TIME_L1 | PROF_KEYPOINT_TRACE | PROF_TASK_TIME_L2 |
+    apiCfg.dataTypeConfig = PROF_TASK_TIME_L1 | PROF_KEYPOINT_TRACE |
                             PROF_L2CACHE | PROF_ACL_API | PROF_OP_ATTR |
                             PROF_AICPU_TRACE | PROF_RUNTIME_API |
                             PROF_HCCL_TRACE | PROF_AICORE_METRICS | PROF_OP_ATTR;
@@ -120,7 +120,7 @@ TEST_F(ParamsAdapterAclapiUtest, ProfSystemCfgToContainer)
     struct ProfConfig apiCfg;
     apiCfg.devNums = 1;
     apiCfg.devIdList[0] = {1};
-    apiCfg.dataTypeConfig = PROF_TASK_TIME_L1 | PROF_KEYPOINT_TRACE | PROF_TASK_TIME_L2 |
+    apiCfg.dataTypeConfig = PROF_TASK_TIME_L1 | PROF_KEYPOINT_TRACE |
                             PROF_L2CACHE | PROF_ACL_API | PROF_OP_ATTR |
                             PROF_AICPU_TRACE | PROF_RUNTIME_API |
                             PROF_HCCL_TRACE | PROF_AICORE_METRICS;
