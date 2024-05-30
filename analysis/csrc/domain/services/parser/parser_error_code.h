@@ -21,6 +21,7 @@ enum {
     PARSER_GET_FFTS_PROFILE_FILE_ERROR                  = ERROR_NO(SERVICE_ID_PARSER, 1, 0x1),
     PARSER_GET_STARS_SOC_FILE_ERROR                     = ERROR_NO(SERVICE_ID_PARSER, 2, 0x1),
     PARSER_GET_TS_TRACK_FILE_ERROR                      = ERROR_NO(SERVICE_ID_PARSER, 3, 0x1),
+    PARSER_GET_FREQ_FILE_ERROR                          = ERROR_NO(SERVICE_ID_PARSER, 4, 0x1),
     PARSER_NEW_BINARY_DATA_ERROR                        = ERROR_NO(SERVICE_ID_PARSER, 0, 0x2),
     PARSER_READ_DATA_ERROR                              = ERROR_NO(SERVICE_ID_PARSER, 0, 0x3),
     PARSER_PARSE_DATA_ERROR                             = ERROR_NO(SERVICE_ID_PARSER, 0, 0x4),

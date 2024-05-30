@@ -16,6 +16,7 @@
 #include "analysis/csrc/domain/services/parser/parser_item_factory.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
+#include "analysis/csrc/infrastructure/process/include/process_register.h"
 #include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
@@ -53,7 +54,8 @@ uint32_t TsTrackParser::ParseDataItem(uint8_t *binaryData, uint32_t binaryDataSi
     }
     auto *header = ReinterpretConvert<TsTrackHeader *>(binaryData);
 
-    std::function<int(uint8_t *, uint32_t, uint8_t *)> parser = GetParseItem(TRACK_PARSER, header->funcType);
+    std::function<int(uint8_t *, uint32_t, uint8_t *)> parser =
+            ParserItemFactory::GetParseItem(TRACK_PARSER, header->funcType);
     if (parser != nullptr) {
         parser(binaryData, binaryDataSize, data);
         return ANALYSIS_OK;
@@ -62,7 +64,7 @@ uint32_t TsTrackParser::ParseDataItem(uint8_t *binaryData, uint32_t binaryDataSi
     return ANALYSIS_ERROR;
 }
 
-uint32_t TsTrackParser::ParseData(DataInventory& dataInventory)
+uint32_t TsTrackParser::ParseData(DataInventory& dataInventory, const Infra::Context &context)
 {
     auto trunkSize = this->GetTrunkSize();
     auto structCount = this->binaryDataSize / trunkSize;

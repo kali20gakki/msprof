@@ -36,10 +36,11 @@ DeviceContext& DeviceContext::Instance()
     thread_local DeviceContext ins;
     // 第一次调用时进行初始化
     if (!ins.isInitialized_) {
-    ins.GetInfoJson();
-    ins.GetSampleJson();
-    ins.isInitialized_ = true; // 标记已初始化
-}
+        ins.GetInfoJson();
+        ins.GetSampleJson();
+        ins.GetDeviceStart();
+        ins.isInitialized_ = true; // 标记已初始化
+    }
     return ins;
 }
 

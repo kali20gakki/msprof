@@ -19,9 +19,9 @@
 #include "analysis/csrc/domain/services/modeling/include/log_modeling.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
-#include "infrastructure/data_inventory/include/data_inventory.h"
-#include "device_context.h"
-#include "device_context_error_code.h"
+#include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
+#include "analysis/csrc/domain/services/device_context/device_context.h"
+#include "analysis/csrc/domain/services/device_context/device_context_error_code.h"
 
 using namespace Analysis;
 using namespace Analysis::Viewer::Database;

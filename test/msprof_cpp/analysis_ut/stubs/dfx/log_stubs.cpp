@@ -19,5 +19,8 @@ void Log::LogMsg(const std::string& message, const std::string &level,
                  const std::string &fileName, const uint32_t &line)
 {
 }
-
+int Log::Init(const std::string &logDir)
+{
+    return 0;
+}
 } // namespace Analysis

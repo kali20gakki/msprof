@@ -164,7 +164,7 @@ uint32_t Parser::ProcessEntry(DataInventory &dataInventory, const Infra::Context
         return Analysis::PARSER_READ_DATA_ERROR;
     }
 
-    code = this->ParseData(dataInventory);
+    code = this->ParseData(dataInventory, context);
     if (code != Analysis::ANALYSIS_OK) {
         ERROR("ParseData error: %", code);
         return Analysis::PARSER_PARSE_DATA_ERROR;
