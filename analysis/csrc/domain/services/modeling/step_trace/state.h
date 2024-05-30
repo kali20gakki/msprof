@@ -15,6 +15,7 @@
 
 #include "analysis/csrc/domain/entities/hal/include/hal_track.h"
 #include "analysis/csrc/domain/entities/step_trace/include/step_trace_tasks.h"
+#include "analysis/csrc/utils/singleton.h"
 
 namespace Analysis {
 namespace Domain {
@@ -25,6 +26,22 @@ public:
     State& InnerProcessEvent(uint32_t& indexId, const HalTrackData& step, std::vector<StepTraceTasks>& baseSteps);
     virtual State& StepEndEvent(uint32_t& indexId, const HalTrackData& step, std::vector<StepTraceTasks>& baseSteps);
     virtual State& ModeLEndEvent(uint32_t& indexId, const HalTrackData& step, std::vector<StepTraceTasks>& baseSteps);
+};
+
+class StartState : public State, public Utils::Singleton<StartState> {
+    State& ModelStartEvent(uint32_t& indexId, const HalTrackData& step,
+                           std::vector<StepTraceTasks>& baseSteps) override;
+};
+
+class PreEndState : public State, public Utils::Singleton<PreEndState> {
+    State& ModelStartEvent(uint32_t& indexId, const HalTrackData& step,
+                           std::vector<StepTraceTasks>& baseSteps) override;
+    State& StepEndEvent(uint32_t& indexId, const HalTrackData& step, std::vector<StepTraceTasks>& baseSteps) override;
+};
+
+class EndState : public State, public Utils::Singleton<EndState> {
+    State& StepEndEvent(uint32_t& indexId, const HalTrackData& step, std::vector<StepTraceTasks>& baseSteps) override;
+    State& ModeLEndEvent(uint32_t& indexId, const HalTrackData& step, std::vector<StepTraceTasks>& baseSteps) override;
 };
 
 }

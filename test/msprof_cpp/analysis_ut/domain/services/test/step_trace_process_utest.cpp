@@ -1,0 +1,198 @@
+/* ******************************************************************************
+            版权所有 (c) 华为技术有限公司 2024-2024
+            Copyright, 2024, Huawei Tech. Co., Ltd.
+****************************************************************************** */
+/* ******************************************************************************
+ * File Name          : stars_soc_parser_utest.cpp
+ * Description        : stars_soc_parser ut用例
+ * Author             : msprof team
+ * Creation Date      : 2024/5/6
+ * *****************************************************************************
+ */
+
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+#include "analysis/csrc/domain/services/device_context/device_context.h"
+#include "analysis/csrc/domain/services/modeling/step_trace/include/step_trace_process.h"
+#include "test/msprof_cpp/analysis_ut/domain/services/test/fake_generator.h"
+
+
+namespace Analysis {
+using namespace Analysis;
+using namespace Analysis::Infra;
+using namespace Analysis::Domain;
+using namespace Analysis::Utils;
+namespace {
+const int MODEL1 = 1;
+const int MODEL2 = 2;
+const int INDEX0 = 0;
+const int INDEX1 = 1;
+}
+class StepTraceProcessUtest : public testing::Test {
+protected:
+    void SetUp() override {}
+    void TearDown() override
+    {
+        dataInventory_.RemoveRestData({});
+    }
+    HalTrackData CreateHalTrackData(uint16_t moduleId, uint16_t tagId, uint64_t timestamp, uint16_t streamId = 2)
+    {
+        HalTrackData log;
+        log.stepTrace.modelId = moduleId;
+        log.stepTrace.tagId = tagId;
+        log.stepTrace.timestamp = timestamp;
+        log.hd.taskId.streamId = streamId;
+        return log;
+    }
+
+protected:
+    DataInventory dataInventory_;
+};
+
+//  modelId     tagId   timestamp   streamId
+//  1           0       10          2
+//  1           2       18          2
+//  1           3       19          2
+//  1           4       21          2
+//  1           1       25          2
+//  2           0       30          2
+//  2           20000   33          2
+//  2           20001   36          2
+//  2           2       40          2
+//  2           20002   42          2
+//  2           20003   44          2
+//  2           10000   46          6
+//  2           10001   48          6
+//  2           3       55          2
+//  2           10002   56          8
+//  2           10003   58          8
+//  2           4       60          2
+//  2           1       65          2
+TEST_F(StepTraceProcessUtest, ShouldRunSuccessWhenInputDataIsValid)
+{
+    int expectModelNum = 2;
+    int expectTrainingTraceNum1 = 1;
+    int expectAllReduceNum1 = 0;
+    int expectGetNextNum1 = 0;
+    int expectTrainingTraceNum2 = 1;
+    int expectAllReduceNum2 = 2;
+    int expectGetNextNum2 = 1;
+    DataInventory dataInventory_;
+    auto data = std::make_shared<std::vector<HalTrackData>>();
+    data->emplace_back(CreateHalTrackData(2, 20000, 33)); // 2, 20000, 33
+    data->emplace_back(CreateHalTrackData(2, 20001, 36)); // 2, 20001, 36
+    data->emplace_back(CreateHalTrackData(1, 0, 10)); // 1, 0, 10
+    data->emplace_back(CreateHalTrackData(1, 2, 18)); // 1, 2, 18
+    data->emplace_back(CreateHalTrackData(2, 20003, 44)); // 2, 20003, 44
+    data->emplace_back(CreateHalTrackData(2, 10000, 46, 6)); // 2, 10000, 46, 6
+    data->emplace_back(CreateHalTrackData(2, 10001, 48, 6)); // 2, 10001, 48, 6
+    data->emplace_back(CreateHalTrackData(1, 3, 19)); // 1, 3, 19
+    data->emplace_back(CreateHalTrackData(1, 4, 21)); // 1, 4, 21
+    data->emplace_back(CreateHalTrackData(1, 1, 25)); // 1, 1, 25
+    data->emplace_back(CreateHalTrackData(2, 1, 65)); // 2, 1, 65
+    data->emplace_back(CreateHalTrackData(2, 0, 30)); // 2, 0, 30
+    data->emplace_back(CreateHalTrackData(2, 2, 40)); // 2, 2, 40
+    data->emplace_back(CreateHalTrackData(2, 20002, 42)); // 2, 20002, 42
+    data->emplace_back(CreateHalTrackData(2, 3, 55)); // 2, 3, 55
+    data->emplace_back(CreateHalTrackData(2, 10002, 56, 8)); // 2, 10002, 56, 8
+    data->emplace_back(CreateHalTrackData(2, 10003, 58, 8)); // 2, 10003, 58, 8
+    data->emplace_back(CreateHalTrackData(2, 4, 60)); // 2, 4, 60
+    dataInventory_.Inject(data);
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = "";
+
+    auto process = StepTraceProcess();
+    process.Run(dataInventory_, context);
+
+    auto stepData = dataInventory_.GetPtr<std::map<uint32_t, std::vector<StepTraceTasks>>>();
+    auto stepDataRef = *stepData;
+    ASSERT_EQ(stepDataRef.size(), expectModelNum);
+    ASSERT_EQ(stepDataRef[MODEL1][INDEX0].trainingTrace.size(), expectTrainingTraceNum1);
+    ASSERT_EQ(stepDataRef[MODEL1][INDEX0].allReduceTable.size(), expectAllReduceNum1);
+    ASSERT_EQ(stepDataRef[MODEL1][INDEX0].getNextTable.size(), expectGetNextNum1);
+
+    ASSERT_EQ(stepDataRef[MODEL2][INDEX0].trainingTrace.size(), expectTrainingTraceNum2);
+    ASSERT_EQ(stepDataRef[MODEL2][INDEX0].allReduceTable.size(), expectAllReduceNum2);
+    ASSERT_EQ(stepDataRef[MODEL2][INDEX0].getNextTable.size(), expectGetNextNum2);
+}
+
+//  modelId     tagId   timestamp   streamId
+//  1           0       10          2
+//  1           2       18          2
+//  1           3       19          2
+//  1           4       21          2
+//  1           1       25          2
+//  2           0       30          2
+//  2           20000   33          2
+//  2           20001   36          2
+//  2           2       40          2
+//  2           20002   42          2
+//  2           20003   44          2
+//  2           10000   46          6
+//  2           20005   47          2
+//  2           10001   48          6
+//  2           3       55          2
+//  2           10002   56          8
+//  2           10003   58          8
+//  2           10004   59          6   异常数据，无结束时间
+//  2           4       60          2
+//  2           0       66          2
+//  2           4       67          2
+//  2           0       68          2
+//  2           0       68          2   异常数据，重复的model start
+//  2           1       65          2
+TEST_F(StepTraceProcessUtest, ShouldRunSuccessWhenInputContainsExceptionalData)
+{
+    int expectModelNum = 2;
+    int expectTrainingTraceNum1 = 1;
+    int expectIndexNum1 = 1;
+    int expectTrainingTraceNum2 = 1;
+    int expectAllReduceNum2 = 2;
+    int expectGetNextNum2 = 1;
+    int expectIndexNum2 = 2;
+    DataInventory dataInventory_;
+    auto data = std::make_shared<std::vector<HalTrackData>>();
+    data->emplace_back(CreateHalTrackData(2, 20000, 33)); // 2, 20000, 33
+    data->emplace_back(CreateHalTrackData(2, 20001, 36)); // 2, 20001, 36
+    data->emplace_back(CreateHalTrackData(1, 0, 10)); // 1, 0, 10
+    data->emplace_back(CreateHalTrackData(1, 2, 18)); // 1, 2, 18
+    data->emplace_back(CreateHalTrackData(2, 20003, 44)); // 2, 20003, 44
+    data->emplace_back(CreateHalTrackData(2, 10000, 46, 6)); // 2, 10000, 46, 6
+    data->emplace_back(CreateHalTrackData(2, 10001, 48, 6)); // 2, 10001, 48, 6
+    data->emplace_back(CreateHalTrackData(2, 10004, 59, 6)); // 2, 10004, 59, 6
+    data->emplace_back(CreateHalTrackData(1, 3, 19)); // 1, 3, 19
+    data->emplace_back(CreateHalTrackData(1, 4, 21)); // 1, 4, 21
+    data->emplace_back(CreateHalTrackData(1, 1, 25)); // 1, 1, 25
+    data->emplace_back(CreateHalTrackData(2, 1, 70)); // 2, 1, 70
+    data->emplace_back(CreateHalTrackData(2, 0, 30)); // 2, 0, 30
+    data->emplace_back(CreateHalTrackData(2, 2, 40)); // 2, 2, 40
+    data->emplace_back(CreateHalTrackData(2, 20002, 42)); // 2, 20002, 42
+    data->emplace_back(CreateHalTrackData(2, 20005, 47)); // 2, 20005, 47
+    data->emplace_back(CreateHalTrackData(2, 3, 55)); // 2, 3, 55
+    data->emplace_back(CreateHalTrackData(2, 10002, 56, 8)); // 2, 10002, 56, 8
+    data->emplace_back(CreateHalTrackData(2, 10003, 58, 8)); // 2, 10003, 58, 8
+    data->emplace_back(CreateHalTrackData(2, 4, 60)); // 2, 4, 60
+    data->emplace_back(CreateHalTrackData(2, 0, 66)); // 2, 0, 66
+    data->emplace_back(CreateHalTrackData(2, 4, 67)); // 2, 4, 67
+    data->emplace_back(CreateHalTrackData(2, 0, 68)); // 2, 0, 68
+    data->emplace_back(CreateHalTrackData(2, 0, 69)); // 2, 0, 69
+    dataInventory_.Inject(data);
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = "";
+
+    auto process = StepTraceProcess();
+    process.Run(dataInventory_, context);
+
+    auto stepData = dataInventory_.GetPtr<std::map<uint32_t, std::vector<StepTraceTasks>>>();
+    auto stepDataRef = *stepData;
+    ASSERT_EQ(stepDataRef.size(), expectModelNum);
+    ASSERT_EQ(stepDataRef[MODEL1][INDEX0].trainingTrace.size(), expectTrainingTraceNum1);
+    ASSERT_EQ(stepDataRef[MODEL1].size(), expectIndexNum1);
+
+    ASSERT_EQ(stepDataRef[MODEL2][INDEX0].trainingTrace.size(), expectTrainingTraceNum2);
+    ASSERT_EQ(stepDataRef[MODEL2][INDEX0].allReduceTable.size(), expectAllReduceNum2);
+    ASSERT_EQ(stepDataRef[MODEL2][INDEX0].getNextTable.size(), expectGetNextNum2);
+    ASSERT_EQ(stepDataRef[MODEL2].size(), expectIndexNum2);
+}
+
+}
