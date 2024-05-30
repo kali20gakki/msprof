@@ -24,7 +24,7 @@ private:
     uint32_t ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data);
     std::vector<std::string> GetFilePattern() override;
     uint32_t GetTrunkSize() override;
-    uint32_t ParseData(Infra::DataInventory& dataInventory) override;
+    uint32_t ParseData(Infra::DataInventory& dataInventory, const Infra::Context &context) override;
     uint32_t GetNoFileCode() override;
 private:
     std::vector<HalTrackData> halUniData_;

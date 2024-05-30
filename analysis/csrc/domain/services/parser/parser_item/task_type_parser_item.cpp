@@ -14,12 +14,11 @@
 #include "analysis/csrc/utils/utils.h"
 #include "analysis/csrc/domain/entities/hal/include/hal_track.h"
 #include "analysis/csrc/domain/services/parser/parser_error_code.h"
+#include "analysis/csrc/domain/services/parser/parser_item_factory.h"
 
 namespace Analysis {
 namespace Domain {
 using namespace Utils;
-
-const int DEFAULT_CNT = -1;
 
 int TaskTypeParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halUniData)
 {
@@ -43,5 +42,7 @@ int TaskTypeParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *hal
     uni->taskType.taskStatus = bin->taskStatus;
     return DEFAULT_CNT;
 }
+
+REGISTER_PARSER_ITEM(TRACK_PARSER, PARSER_ITEM_TS_TASK_TYPE, TaskTypeParseItem);
 }
 }

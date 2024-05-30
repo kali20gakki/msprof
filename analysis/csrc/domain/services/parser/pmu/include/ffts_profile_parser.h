@@ -29,7 +29,7 @@ private:
 
     uint32_t GetTrunkSize() override;
 
-    uint32_t ParseData(Infra::DataInventory &dataInventory) override;
+    uint32_t ParseData(Infra::DataInventory &dataInventory, const Infra::Context &context) override;
 
     uint32_t GetNoFileCode() override;
 

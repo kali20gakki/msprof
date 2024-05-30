@@ -17,6 +17,7 @@
 #include "analysis/csrc/domain/services/parser/pmu/pmu_accelerator_utils.h"
 #include "analysis/csrc/utils/utils.h"
 #include "analysis/csrc/domain/services/parser/parser_error_code.h"
+#include "analysis/csrc/domain/services/parser/parser_item_factory.h"
 #include "analysis/csrc/domain/services/parser/parser_item/stars_common.h"
 
 namespace Analysis {
@@ -51,5 +52,7 @@ int Chip4PmuParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *hal
     }
     return contextPmu->cnt;
 }
+
+REGISTER_PARSER_ITEM(PMU_PARSER, PARSER_ITEM_CONTEXT_PMU, Chip4PmuParseItem);
 }
 }

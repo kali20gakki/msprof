@@ -14,6 +14,7 @@
 #include "analysis/csrc/dfx/log.h"
 #include "analysis/csrc/utils/utils.h"
 #include "analysis/csrc/domain/services/parser/parser_error_code.h"
+#include "analysis/csrc/domain/services/parser/parser_item_factory.h"
 #include "analysis/csrc/domain/services/parser/parser_item/stars_common.h"
 
 namespace Analysis {
@@ -54,5 +55,7 @@ int FftsPlusLogParseItem(uint8_t *binaryData, uint32_t binaryDataSize,
     return log->cnt;
 }
 
+REGISTER_PARSER_ITEM(LOG_PARSER, PARSER_ITEM_FFTS_PLUS_LOG_START, FftsPlusLogParseItem);
+REGISTER_PARSER_ITEM(LOG_PARSER, PARSER_ITEM_FFTS_PLUS_LOG_END, FftsPlusLogParseItem);
 }
 }

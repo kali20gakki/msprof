@@ -47,7 +47,7 @@ private:
 
     virtual uint32_t GetTrunkSize() = 0;
 
-    virtual uint32_t ParseData(Infra::DataInventory &dataInventory) = 0;
+    virtual uint32_t ParseData(Infra::DataInventory &dataInventory, const Infra::Context &context) = 0;
 
     // 获取没有文件返回码
     virtual uint32_t GetNoFileCode();

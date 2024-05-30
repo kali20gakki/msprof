@@ -11,68 +11,40 @@
  */
 
 #include "analysis/csrc/domain/services/parser/parser_item_factory.h"
+#include <unordered_map>
 #include "analysis/csrc/dfx/log.h"
-#include "analysis/csrc/domain/services/parser/parser_item/acsq_log_parser_item.h"
-#include "analysis/csrc/domain/services/parser/parser_item/ffts_plus_log_parser_item.h"
-#include "analysis/csrc/domain/services/parser/parser_item/block_pmu_parser_item.h"
-#include "analysis/csrc/domain/services/parser/parser_item/chip4_pmu_parser_item.h"
-#include "analysis/csrc/domain/services/parser/parser_item/task_flip_parser_item.h"
-#include "analysis/csrc/domain/services/parser/parser_item/step_trace_parser_item.h"
-#include "analysis/csrc/domain/services/parser/parser_item/task_type_parser_item.h"
-#include "analysis/csrc/domain/services/parser/parser_item/task_memcpy_parser_item.h"
 
 namespace Analysis {
 namespace Domain {
-std::function<int(uint8_t *, uint32_t, uint8_t *)> GetLogParseItem(uint32_t itemType)
+using ItemFunc = std::function<int(uint8_t *, uint32_t, uint8_t *)>;
+using ItemFuncMap = std::unordered_map<uint32_t, ItemFunc>;
+ItemFunc ParserItemFactory::GetParseItem(ParserType parserType, uint32_t itemType)
 {
-    if (itemType == PARSER_ITEM_ACSQ_LOG_START || itemType == PARSER_ITEM_ACSQ_LOG_END) {
-        return AcsqLogParseItem;
-    } else if (itemType == PARSER_ITEM_FFTS_PLUS_LOG_START || itemType == PARSER_ITEM_FFTS_PLUS_LOG_END) {
-        return FftsPlusLogParseItem;
+    std::unordered_map<ParserType, ItemFuncMap> parserItemFuncs = GetContainer();
+    auto it = parserItemFuncs.find(parserType);
+    if (it == parserItemFuncs.end()) {
+        ERROR("GetParseItem return nullptr, parserType: %", parserType);
+        return nullptr;
     }
-    ERROR("GetLogParseItem return nullptr, itemType: %", itemType);
-    return nullptr;
+
+    auto parserFunc = it->second;
+    auto ans = parserFunc.find(itemType);
+    if (ans == parserFunc.end()) {
+        ERROR("GetParseItemFunc return nullptr, parserType: %, itemType: %", parserType, itemType);
+        return nullptr;
+    }
+    return ans->second;
 }
 
-std::function<int(uint8_t *, uint32_t, uint8_t *)> GetTrackParseItem(uint32_t itemType)
+ParserItemFactory::ParserItemFactory(ParserType parserType, uint32_t itemType, ItemFunc parserItemFunc)
 {
-    if (itemType == PARSER_ITEM_TASK_FLIP) {
-        return TaskFlipParseItem;
-    } else if (itemType == PARSER_ITEM_STEP_TRACE) {
-        return StepTraceParseItem;
-    } else if (itemType == PARSER_ITEM_TS_TASK_TYPE) {
-        return TaskTypeParseItem;
-    } else if (itemType == PARSER_ITEM_TS_MEMCPY) {
-        return TaskMemcpyParseItem;
-    }
-    ERROR("GetTrackParseItem return nullptr, itemType: %", itemType);
-    return nullptr;
+    GetContainer()[parserType].emplace(itemType, parserItemFunc);
 }
 
-std::function<int(uint8_t *, uint32_t, uint8_t *)> GetPmuParseItem(uint32_t itemType)
+std::unordered_map<ParserType, ItemFuncMap>& ParserItemFactory::GetContainer()
 {
-    if (itemType == PARSER_ITEM_CONTEXT_PMU) {
-        return Chip4PmuParseItem;
-    } else if (itemType == PARSER_ITEM_BLOCK_PMU) {
-        return BlockPmuParseItem;
-    }
-    ERROR("GetPmuParseItem return nullptr, itemType: %", itemType);
-    return nullptr;
-}
-
-std::function<int(uint8_t *, uint32_t, uint8_t *)> GetParseItem(ParserType parserType, uint32_t itemType)
-{
-    switch (parserType) {
-        case LOG_PARSER:
-            return GetLogParseItem(itemType);
-        case TRACK_PARSER:
-            return GetTrackParseItem(itemType);
-        case PMU_PARSER:
-            return GetPmuParseItem(itemType);
-        default:
-            ERROR("GetParseItem return nullptr, parserType: %", parserType);
-            return nullptr;
-    }
+    static std::unordered_map<ParserType, ItemFuncMap> parserItemFuncs;
+    return parserItemFuncs;
 }
 }
 }

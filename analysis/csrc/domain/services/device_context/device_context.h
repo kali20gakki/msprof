@@ -103,6 +103,11 @@ struct SampleInfo {
     uint32_t aivSamplingInterval;
 };
 
+struct DeviceStart {
+    uint64_t clockMonotonicRaw;
+    uint64_t sysCnt;
+};
+
 struct DfxInfo {
     std::string stopAt;
 };
@@ -111,6 +116,7 @@ struct DeviceContextInfo {
     std::string deviceFilePath;
     DeviceInfo deviceInfo;
     SampleInfo sampleInfo;
+    DeviceStart deviceStart;
     DfxInfo dfxInfo;
 };
 
@@ -127,6 +133,8 @@ public:
 
     void Getter(DfxInfo &dfxInfo) const { dfxInfo = this->deviceContextInfo.dfxInfo; };
 
+    void Getter(DeviceStart &deviceStart) const { deviceStart = this->deviceContextInfo.deviceStart; }
+    
     uint32_t GetChipID() const override { return deviceContextInfo.deviceInfo.chipID; }
 
     std::string GetDeviceFilePath() const { return this->deviceContextInfo.deviceFilePath; }
@@ -143,6 +151,7 @@ private:
     ~DeviceContext() = default;
     bool GetInfoJson();
     bool GetSampleJson();
+    bool GetDeviceStart();
 };
 
 }

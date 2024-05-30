@@ -15,6 +15,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <unordered_map>
 
 namespace Analysis {
 namespace Domain {
@@ -22,12 +23,35 @@ enum ParserType {
     LOG_PARSER,
     PMU_PARSER,
     TRACK_PARSER,
+    FREQ_PARSER
 };
 const int MIN_COUNT = 2;
 const int VALID_CNT = 15;
 const int DEFAULT_CNT = -1;
 
-std::function<int(uint8_t *, uint32_t, uint8_t *)> GetParseItem(ParserType parserType, uint32_t itemType);
+class ParserItemFactory {
+    using ItemFunc = std::function<int(uint8_t *, uint32_t, uint8_t *)>;
+    using ItemFuncMap = std::unordered_map<uint32_t, ItemFunc>;
+public:
+    ParserItemFactory(ParserType parserType, uint32_t itemType,
+                      std::function<int(uint8_t *, uint32_t, uint8_t *)> parserItemFunc);
+    static std::function<int(uint8_t *, uint32_t, uint8_t *)> GetParseItem(ParserType parserType, uint32_t itemType);
+private:
+    static std::unordered_map<ParserType, ItemFuncMap>& GetContainer();
+};
+
+#define PARSER_FACTORY_LINENAME(name, line) name##line
+#define PARSER_FACTORY_LINENAME_HELPER(name, line) PARSER_FACTORY_LINENAME(name, line)
+/**
+ * @brief 注册Parser可以解析的数据类型
+ *
+ * @param parserType: Parser的类型(枚举类), 参考Domain::ParserType
+ * @param itemType：可解析数据的类型(通常为FuncType)
+ * @param Func: 实际解析数据函数
+ */
+#define REGISTER_PARSER_ITEM(parserType, itemType, Func) \
+static Analysis::Domain::ParserItemFactory               \
+    PARSER_FACTORY_LINENAME_HELPER(parserType, __LINE__)(parserType, itemType, Func)
 }
 }
 #endif // MSPROF_ANALYSIS_DOMAIN_SERVICES_PARSER_PARSER_ITEM_FACTORY_H

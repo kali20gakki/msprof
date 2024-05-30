@@ -55,7 +55,8 @@ uint32_t FftsProfileParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDa
     }
     FftsProfileHeader *header = ReinterpretConvert<FftsProfileHeader *>(binaryData);
 
-    std::function<int(uint8_t *, uint32_t, uint8_t *)> parser = GetParseItem(PMU_PARSER, header->funcType);
+    std::function<int(uint8_t *, uint32_t, uint8_t *)> parser =
+            ParserItemFactory::GetParseItem(PMU_PARSER, header->funcType);
     if (parser == nullptr) {
         ERROR("There is no Parser function to handle data! funcType is %", header->funcType);
         return ANALYSIS_ERROR;
@@ -72,7 +73,7 @@ uint32_t FftsProfileParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDa
     return ANALYSIS_OK;
 }
 
-uint32_t FftsProfileParser::ParseData(DataInventory &dataInventory)
+uint32_t FftsProfileParser::ParseData(DataInventory &dataInventory, const Infra::Context &context)
 {
     auto trunkSize = this->GetTrunkSize();
     auto structCount = this->binaryDataSize / trunkSize;

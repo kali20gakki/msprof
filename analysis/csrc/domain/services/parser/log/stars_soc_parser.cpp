@@ -54,7 +54,8 @@ uint32_t StarsSocParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDataS
     }
     auto *header = ReinterpretConvert<StarsSocHeader *>(binaryData);
 
-    std::function<int(uint8_t *, uint32_t, uint8_t *)> parser = GetParseItem(LOG_PARSER, header->funcType);
+    std::function<int(uint8_t *, uint32_t, uint8_t *)> parser =
+            ParserItemFactory::GetParseItem(LOG_PARSER, header->funcType);
     if (parser == nullptr) {
         ERROR("There is no Parser function to handle data! functype is %", header->funcType);
         return ANALYSIS_ERROR;
@@ -71,7 +72,7 @@ uint32_t StarsSocParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDataS
     return ANALYSIS_OK;
 }
 
-uint32_t StarsSocParser::ParseData(DataInventory &dataInventory)
+uint32_t StarsSocParser::ParseData(DataInventory &dataInventory, const Infra::Context &context)
 {
     auto trunkSize = this->GetTrunkSize();
     auto structCount = this->binaryDataSize / trunkSize;
