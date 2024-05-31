@@ -40,6 +40,14 @@ struct TaskData {
         batchId(UINT32_MAX)
     {}
 };
+
+struct MsprofTxTaskData {
+    uint32_t modelId = UINT32_MAX;
+    uint32_t indexId = UINT32_MAX;
+    uint32_t streamId = UINT32_MAX;
+    uint32_t taskId = UINT32_MAX;
+    double timestamp = 0.0;
+};
 }
 
 TaskProcessor::TaskProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths)
@@ -171,8 +179,102 @@ bool TaskProcessor::Process(const std::string &fileDir)
         }
         INFO("process %, pid:%, deviceId:% ends.", dbPath, pid, threadData.deviceId);
     }
+    flag |= ProcessWithMsprofTxTaskData(fileDir, pid, deviceList, threadData);
     INFO("process % ends.", fileDir);
     return flag;
+}
+
+bool TaskProcessor::ProcessWithMsprofTxTaskData(const std::string &fileDir, uint32_t pid,
+                                                std::vector<std::string> &deviceList, ThreadData &threadData)
+{
+    DBInfo stepTraceDB("step_trace.db", "StepTrace");
+    MAKE_SHARED0_NO_OPERATION(stepTraceDB.database, StepTraceDB);
+    bool flag = true;
+    std::vector<std::string> validDevList;
+    for (auto& devicePath: deviceList) {
+        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, stepTraceDB.dbName});
+        // 并不是所有场景都有msproftx 打点 task数据
+        auto status = CheckPath(dbPath);
+        if (status != CHECK_SUCCESS) {
+            if (status == CHECK_FAILED) {
+                flag = false;
+            }
+            continue;
+        }
+        validDevList.emplace_back(devicePath);
+    }
+    if (validDevList.empty()) {
+        INFO("There is no step_trace.db in this data");
+        return flag;
+    }
+    Utils::SyscntConversionParams params;
+    if (!Context::GetInstance().GetSyscntConversionParams(params, threadData.deviceId, fileDir)) {
+        ERROR("GetSyscntConversionParams failed, profPath is %.", fileDir);
+        return false;
+    }
+    for (const auto& devicePath: validDevList) {
+        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, stepTraceDB.dbName});
+        threadData.deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
+        INFO("Start to process %, pid:%, deviceId:%.", dbPath, pid, threadData.deviceId);
+        MAKE_SHARED_RETURN_VALUE(stepTraceDB.dbRunner, DBRunner, false, dbPath);
+        auto oriData = GetMsprofTxTaskData(stepTraceDB);
+        if (oriData.empty()) {
+            flag = false;
+            ERROR("Get % data failed in %.", stepTraceDB.tableName, dbPath);
+            continue;
+        }
+        auto processedData = FormatMsprofTxTaskData(oriData, threadData, params, pid);
+        if (!SaveData(processedData, TABLE_NAME_TASK)) {
+            flag = false;
+            ERROR("Save data failed, %.", dbPath);
+            continue;
+        }
+        INFO("process %, pid:%, deviceId:% ends.", dbPath, pid, threadData.deviceId);
+    }
+    return flag;
+}
+
+TaskProcessor::OriMsprofTxDataFormat TaskProcessor::GetMsprofTxTaskData(DBInfo &stepTraceDB)
+{
+    OriMsprofTxDataFormat oriData;
+    std::string sql{"SELECT model_id, index_id, stream_id, task_id, timestamp FROM " + stepTraceDB.tableName +
+                    " WHERE tag_id = 11"};
+    if (!stepTraceDB.dbRunner->QueryData(sql, oriData)) {
+        ERROR("Failed to obtain data from the % table.", stepTraceDB.tableName);
+    }
+    return oriData;
+}
+
+TaskProcessor::ProcessedDataFormat TaskProcessor::FormatMsprofTxTaskData(const OriMsprofTxDataFormat &oriData,
+                                                                         const ThreadData &threadData,
+                                                                         Utils::SyscntConversionParams &params,
+                                                                         const uint32_t pid)
+{
+    // 使用connection_id里的40亿作为tx数据的connection_id起点
+    static constexpr uint32_t START_CONNECTION_ID_MSTX = 4000000000;
+    uint64_t taskType = IdPool::GetInstance().GetUint64Id("MsTx");
+    ProcessedDataFormat processedData;
+    if (!Utils::Reserve(processedData, oriData.size())) {
+        ERROR("Reserve for ascend task data failed.");
+        return processedData;
+    }
+    MsprofTxTaskData data;
+    for (auto &row: oriData) {
+        std::tie(data.modelId, data.indexId, data.streamId, data.taskId, data.timestamp) = row;
+        HPFloat start{data.timestamp};
+        HPFloat end = start;
+        uint64_t connectionId = Utils::Contact(threadData.profId, data.indexId + START_CONNECTION_ID_MSTX);
+        uint64_t globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(threadData.deviceId, data.streamId,
+                                                                            data.taskId, UINT32_MAX,
+                                                                            data.indexId + START_CONNECTION_ID_MSTX));
+        HPFloat startTimestamp = Utils::GetTimeFromSyscnt(data.timestamp, params);
+        processedData.emplace_back(
+            Utils::GetLocalTime(startTimestamp, threadData.timeRecord).Uint64(),
+            Utils::GetLocalTime(startTimestamp, threadData.timeRecord).Uint64(),
+            threadData.deviceId, connectionId, globalTaskId, pid, taskType,
+            UINT32_MAX, data.streamId, data.taskId, data.modelId);
+    }
+    return processedData;
 }
 
 }

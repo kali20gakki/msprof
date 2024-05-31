@@ -45,8 +45,9 @@ private:
     MsprofTxExDataFormat GetTxExData(const std::string &fileDir);
     bool FormatTxData(const MsprofTxDataFormat &msprofTxData, ProcessedDataFormat &processedData,
                       uint32_t pid, Utils::SyscntConversionParams &params, Utils::ProfTimeRecord &record);
-    bool FormatTxExData(const MsprofTxExDataFormat &msprofTxExData, ProcessedDataFormat &processedData,
-                        uint32_t pid, Utils::SyscntConversionParams &params, Utils::ProfTimeRecord &record);
+    bool FormatTxExData(const MsprofTxExDataFormat &txExData, ProcessedDataFormat &processedData,
+                        const std::string &fileDir, Utils::SyscntConversionParams &params,
+                        Utils::ProfTimeRecord &record);
 };
  
 } // Database

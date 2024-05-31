@@ -27,6 +27,8 @@ class TaskProcessor : public TableProcessor {
     // modelId
     using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, int64_t, uint64_t,
                                                        uint64_t, uint32_t, uint32_t, int32_t, uint32_t, uint32_t>>;
+    // model_id, index_id, stream_id, task_id, timestamp
+    using OriMsprofTxDataFormat = std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, double>>;
 public:
     TaskProcessor() = default;
     TaskProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);
@@ -34,11 +36,18 @@ public:
     bool Run() override;
 protected:
     bool Process(const std::string &fileDir) override;
+    bool ProcessWithMsprofTxTaskData(const std::string &fileDir, uint32_t pid,
+                                     std::vector<std::string> &deviceList, ThreadData &threadData);
 private:
     static OriDataFormat GetData(DBInfo &ascendTaskDB);
     static ProcessedDataFormat FormatData(const OriDataFormat &oriData, const ThreadData &threadData,
                                           const uint16_t platformVersion, const uint32_t pid);
     static uint64_t GetTaskType(const std::string &hostType, const std::string &deviceType, uint16_t platformVersion);
+    static OriMsprofTxDataFormat GetMsprofTxTaskData(DBInfo &stepTraceDB);
+    static ProcessedDataFormat FormatMsprofTxTaskData(const OriMsprofTxDataFormat &oriData,
+                                                      const ThreadData &threadData,
+                                                      Utils::SyscntConversionParams &params,
+                                                      const uint32_t pid);
 };
 
 } // Database

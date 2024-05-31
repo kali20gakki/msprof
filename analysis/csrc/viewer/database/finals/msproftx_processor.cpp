@@ -84,7 +84,7 @@ bool MsprofTxProcessor::Process(const std::string &fileDir)
         return false;
     }
     if (!FormatTxData(msprofTxData, processedData, pid, params, record) ||
-        !FormatTxExData(msprofTxExData, processedData, pid, params, record)) {
+        !FormatTxExData(msprofTxExData, processedData, fileDir, params, record)) {
         ERROR("FormatData failed, fileDir is %.", fileDir);
         return false;
     }
@@ -159,17 +159,21 @@ bool MsprofTxProcessor::FormatTxData(const MsprofTxDataFormat &msprofTxData, Pro
     return true;
 }
 
-bool MsprofTxProcessor::FormatTxExData(const MsprofTxExDataFormat &msprofTxExData, ProcessedDataFormat &processedData,
-                                       uint32_t pid, Utils::SyscntConversionParams &params,
+bool MsprofTxProcessor::FormatTxExData(const MsprofTxExDataFormat &txExData, ProcessedDataFormat &processedData,
+                                       const std::string &fileDir, Utils::SyscntConversionParams &params,
                                        Utils::ProfTimeRecord &record)
 {
+    // 使用connection_id里的40亿作为tx数据的connection_id起点
+    static constexpr uint32_t START_CONNECTION_ID_MSTX = 4000000000;
     INFO("MsprofTxExProcessor FormatTxData");
-    if (msprofTxExData.empty()) {
+    if (txExData.empty()) {
         WARN("MsprofTxEx original data is empty");
         return true;
     }
+    uint32_t profId = IdPool::GetInstance().GetUint32Id(fileDir);
+    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, fileDir);
     MsprofTxExData tmpData;
-    for (const auto &data : msprofTxExData) {
+    for (const auto &data : txExData) {
         std::tie(tmpData.tid, tmpData.eventType, tmpData.startTime, tmpData.endTime,
                  tmpData.message, tmpData.markId) = data;
         uint64_t globalTid = Utils::Contact(pid, tmpData.tid);
@@ -178,10 +182,11 @@ bool MsprofTxProcessor::FormatTxExData(const MsprofTxExDataFormat &msprofTxExDat
         Utils::HPFloat endTimestamp = Utils::GetTimeFromSyscnt(tmpData.endTime, params);
         uint16_t eventType = GetEnumTypeValue(tmpData.eventType,
                                               NAME_STR(MSTX_EVENT_TYPE_TABLE), MSTX_EVENT_TYPE_TABLE);
+        uint64_t connectionId = Utils::Contact(profId, tmpData.markId + START_CONNECTION_ID_MSTX);
         processedData.emplace_back(Utils::GetLocalTime(startTimestamp, record).Uint64(),
                                    Utils::GetLocalTime(endTimestamp, record).Uint64(),
                                    eventType, UINT32_MAX, UINT32_MAX, message, globalTid,
-                                   globalTid, UINT16_MAX, tmpData.markId);
+                                   globalTid, UINT16_MAX, connectionId);
     }
     if (processedData.empty()) {
         ERROR("MsprofTxEx data processing error.");

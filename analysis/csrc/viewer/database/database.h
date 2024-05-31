@@ -169,6 +169,11 @@ public:
     MsprofTxDB();
 };
 
+class StepTraceDB : public Database {
+public:
+    StepTraceDB();
+};
+
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis
