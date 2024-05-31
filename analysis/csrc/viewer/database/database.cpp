@@ -410,6 +410,15 @@ namespace {
         {"mark_id", SQL_INTEGER_TYPE},
         {"message", SQL_TEXT_TYPE},
     };
+
+    const TableColumns StepTrace = {
+        {"index_id", SQL_INTEGER_TYPE},
+        {"model_id", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"stream_id", SQL_INTEGER_TYPE},
+        {"task_id", SQL_INTEGER_TYPE},
+        {"tag_id", SQL_INTEGER_TYPE}
+    };
 }
 
 std::string Database::GetDBName() const
@@ -582,6 +591,12 @@ MsprofTxDB::MsprofTxDB()
     dbName_ = "msproftx.db";
     tableColNames_["MsprofTx"] = MsprofTx;
     tableColNames_["MsprofTxEx"] = MsprofTxEx;
+}
+
+StepTraceDB::StepTraceDB()
+{
+    dbName_ = "step_trace.db";
+    tableColNames_["StepTrace"] = StepTrace;
 }
 
 } // namespace Database
