@@ -31,7 +31,7 @@ using namespace Analysis::Infra;
 namespace {
 const size_t PMU_LENGTH = 8;
 const uint64_t PMU_BW_OFFSET = 1LL << 33;  // 2^33,pmu计算规则里带有BW的计算需要除以2^33
-const uint64_t FREQ_TO_MHz = 1000000;
+const uint64_t FREQ_TO_Hz = 1000000;
 const uint8_t AIV_CORE_TYPE = 1;
 const uint8_t AIC_CORE_TYPE = 0;
 }
@@ -40,7 +40,8 @@ struct CalculationElements {
     uint32_t blockDim{0};
     uint32_t coreNum{0};
     uint64_t taskCyc{0};
-    uint64_t freq{0};
+    uint64_t bwFreq{0};  // 这个频率为从info.json中读出来的aic_frequency
+    uint64_t timeFreq{0};  // 这个频率需要考虑变频，如果有变频数据，则使用变频数据的频率，没有就是有aic_frequency
     double totalTime{0.0};
     std::vector<uint64_t> pmuList;
     std::shared_ptr<std::vector<double>> floatBit;
@@ -77,7 +78,7 @@ public:
     {
         auto pmuTable = GetValueMappingOffset(params.events, pmuData.pmu.pmuList);
         params.totalTime = Calculator::CalculatorTotalTime(pmuData.pmu.totalCycle, params.blockDim, params.coreNum,
-                                                           params.freq);
+                                                           params.timeFreq);
         std::vector<double> res;
         if (calTable.size() != params.floatBit->size()) {
             ERROR("pmu calculator params init error please check!");
@@ -94,9 +95,20 @@ public:
         return res;
     }
 
+    template<typename K, typename V>
+    std::vector<std::string> GetPmuHeaderBySubType(const std::map<K, V>& mapTable)
+    {
+        std::vector<std::string> res;
+        for (auto& it : mapTable) {
+            res.emplace_back(Metric::GetMetricHeaderString(it.first));
+        }
+        return res;
+    }
+
     std::vector<double> CalculatePmuMetric(DataInventory& dataInventory, const DeviceContext& context,
                                            CalculationElements& allParams, HalPmuData& pmuData, DeviceTask& task);
     virtual ~MetricCalculator() = default;
+    virtual std::vector<std::string> GetPmuHeader() = 0;
 private:
     virtual std::vector<double> SetAllParamsAndCalculator(CalculationElements& allParams, const DeviceContext& context,
                                                           HalPmuData& pmuData) = 0;

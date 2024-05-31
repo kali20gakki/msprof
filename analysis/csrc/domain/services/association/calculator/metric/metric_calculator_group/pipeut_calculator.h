@@ -19,6 +19,12 @@ namespace Analysis {
 namespace Domain {
 using namespace Analysis::Infra;
 class PipeUtCalculator : public MetricCalculator {
+public:
+    std::vector<std::string> GetPmuHeader() override
+    {
+        auto res = GetPmuHeaderBySubType(pipeLineUtTable);
+        return res;
+    }
 private:
     std::vector<double> SetAllParamsAndCalculator(CalculationElements& allParams, const DeviceContext& context,
                                                   HalPmuData& pmuData) override

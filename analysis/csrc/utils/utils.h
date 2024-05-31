@@ -142,6 +142,13 @@ T ReinterpretConvert(V ptr)
     return reinterpret_cast<T>(ptr);
 }
 
+template<typename K, typename... Args>
+std::unique_ptr<K> MAKE_UNIQUE_PTR(Args &&... args)
+{
+    std::unique_ptr<K> ptr{new K(std::forward<Args>(args)...)};
+    return ptr;
+}
+
 template<typename T, typename U>
 inline std::shared_ptr<T> ReinterpretPointerCast(const std::shared_ptr<U> &r) noexcept
 {
