@@ -31,13 +31,12 @@ std::vector<std::string> PipeUtHeaderString{
 };
 
 std::vector<std::string> MemoryHeaderString{
-    "ub_read_bw(GB/s)", "ub_write_bw(GB/s)", "l1_read_bw(GB/s)", "l1_write_bw(GB/s)",
-    "main_mem_read_bw(GB/s)", "main_mem_write_bw(GB/s)"
+    "ub_read_bw", "ub_write_bw", "l1_read_bw", "l1_write_bw", "main_mem_read_bw", "main_mem_write_bw"
 };
 
 std::vector<std::string> MemoryL0HeaderString{
-    "l0a_read_bw(GB/s)", "l0a_write_bw(GB/s)", "l0b_read_bw(GB/s)", "l0b_write_bw(GB/s)",
-    "l0c_read_bw(GB/s)", "l0c_write_bw(GB/s)", "l0c_read_bw_cube(GB/s)", "l0c_write_bw_cube(GB/s)"
+    "l0a_read_bw", "l0a_write_bw", "l0b_read_bw", "l0b_write_bw",
+    "l0c_read_bw", "l0c_write_bw", "l0c_read_bw_cube", "l0c_write_bw_cube"
 };
 
 std::vector<std::string> ResourceHeaderString{
@@ -45,7 +44,7 @@ std::vector<std::string> ResourceHeaderString{
 };
 
 std::vector<std::string> MemoryUBHeaderString{
-    "ub_read_bw_vector(GB/s)", "ub_write_bw_vector(GB/s)", "ub_read_bw_scalar(GB/s)", "ub_write_bw_scalar(GB/s)"
+    "ub_read_bw_vector", "ub_write_bw_vector", "ub_read_bw_scalar", "ub_write_bw_scalar"
 };
 
 std::vector<std::string> L2CacheHeaderString{

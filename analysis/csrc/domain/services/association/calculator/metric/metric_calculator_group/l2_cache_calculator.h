@@ -19,6 +19,12 @@ namespace Analysis {
 namespace Domain {
 using namespace Analysis::Infra;
 class L2CacheCalculator : public MetricCalculator {
+public:
+    std::vector<std::string> GetPmuHeader() override
+    {
+        auto res = GetPmuHeaderBySubType(l2CacheTable);
+        return res;
+    }
 private:
     std::vector<double> SetAllParamsAndCalculator(CalculationElements& allParams, const DeviceContext& context,
                                                   HalPmuData& pmuData) override

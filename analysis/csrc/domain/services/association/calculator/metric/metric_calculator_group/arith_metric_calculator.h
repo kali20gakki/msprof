@@ -21,6 +21,12 @@ namespace Analysis {
 namespace Domain {
 using namespace Analysis::Infra;
 class ArithMetricCalculator : public MetricCalculator {
+public:
+    std::vector<std::string> GetPmuHeader() override
+    {
+        auto res = GetPmuHeaderBySubType(arithMetricUtTable);
+        return res;
+    }
 private:
     std::vector<double> SetAllParamsAndCalculator(CalculationElements& allParams, const DeviceContext& context,
                                                   HalPmuData& pmuData) override
