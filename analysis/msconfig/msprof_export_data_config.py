@@ -289,4 +289,8 @@ class MsProfExportDataConfig(MetaConfig):
             ('handler', '_get_qos_data'),
             ('db', DBNameConstant.DB_QOS)
         ],
+        'static_op_mem': [
+            ('handler', '_get_static_op_mem_data'),
+            ('headers', 'Op Name,Model Name,Graph ID,Node Index Start,Node Index End,Size(KB)')
+        ]
     }

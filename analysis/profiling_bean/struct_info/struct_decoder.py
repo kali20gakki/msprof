@@ -68,6 +68,7 @@ class StructDecoder:
         "TaskFlipBean": StructFmt.DEVICE_TASK_FLIP,
         "NpuModuleMemDataBean": StructFmt.NPU_MODULE_MEM_FMT,
         "HcclOpInfoBean": StructFmt.HCCL_OP_INFO_FMT,
+        "StaticOpMemBean": StructFmt.STATIC_OP_MEM_FMT,
     }
 
     @classmethod

@@ -1235,6 +1235,14 @@ class TablesConfig(MetaConfig):
             ('ctx_id_num', 'INTEGER,null'),
             ('ctx_id', 'TEXT,null'),
         ],
+        'StaticOpMemMap': [
+            ('op_name', 'TEXT,null'),
+            ('model_name', 'TEXT,null'),
+            ('graph_id', 'NUMERIC,null'),
+            ('node_index_start', 'NUMERIC,null'),
+            ('node_index_end', 'NUMERIC,null'),
+            ('op_mem_size', 'NUMERIC,null'),
+        ],
         'HostTaskMap': [
             ('model_id', 'INTEGER,null'),
             ('request_id', 'INTEGER,null'),

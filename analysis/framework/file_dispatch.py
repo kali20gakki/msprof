@@ -30,6 +30,7 @@ from common_func.file_name_manager import get_ge_hash_compiles
 from common_func.file_name_manager import get_ge_host_compiles
 from common_func.file_name_manager import get_ge_logic_stream_info_compiles
 from common_func.file_name_manager import get_ge_memory_application_info_compiles
+from common_func.file_name_manager import get_ge_static_op_mem_compiles
 from common_func.file_name_manager import get_ge_model_load_compiles
 from common_func.file_name_manager import get_ge_model_time_compiles
 from common_func.file_name_manager import get_ge_node_basic_info_compiles
@@ -154,6 +155,7 @@ class FileDispatch:
         DataTag.NODE_ATTR_INFO: get_node_attr_info_compiles(),
         DataTag.FUSION_ADD_INFO: get_ge_fusion_add_info_compiles(),
         DataTag.MEMORY_APPLICATION: get_ge_memory_application_info_compiles(),
+        DataTag.STATIC_OP_MEM: get_ge_static_op_mem_compiles(),
         DataTag.CTX_ID: get_ge_ctx_id_info_compiles(),
         DataTag.AICPU_ADD_INFO: get_aicpu_compiles(),
         DataTag.NANO_MODEL_EXEOM: get_nano_model_exeom_compiles(),

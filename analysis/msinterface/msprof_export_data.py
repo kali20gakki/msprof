@@ -74,6 +74,7 @@ from viewer.stars.low_power_viewer import LowPowerViewer
 from viewer.stars.sio_viewer import SioViewer
 from viewer.stars.stars_chip_trans_view import StarsChipTransView
 from viewer.stars.stars_soc_view import StarsSocView
+from viewer.static_op_mem_viewer import StaticOpMemViewer
 from viewer.task_time_viewer import TaskTimeViewer
 from viewer.training.step_trace_viewer import StepTraceViewer
 from viewer.training.task_op_viewer import TaskOpViewer
@@ -571,6 +572,10 @@ class MsProfExportDataUtils:
     @staticmethod
     def _get_qos_data(configs: dict, params: dict) -> any:
         return QosViewer(configs, params).get_timeline_data()
+
+    @staticmethod
+    def _get_static_op_mem_data(configs: dict, params: dict) -> any:
+        return StaticOpMemViewer(configs, params).get_summary_data()
 
     @classmethod
     def export_data(cls: any, params: dict) -> str:

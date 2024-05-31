@@ -69,4 +69,5 @@ class ExportDataType(Enum):
     SIO = 64
     AICPU_MI = 65
     QOS = 66
+    STATIC_OP_MEM = 67
     MSPROF = 100
