@@ -44,6 +44,8 @@ MSPROF_RUN_NAME="mindstudio-msprof"
 version="unknwon"
 package_type="unknwon"
 
+PKG_LIMIT_SIZE=524288000 # 500M
+
 function parse_script_args() {
     while true; do
 		if [ "$1" = "" ]; then
@@ -173,8 +175,41 @@ function sed_main_param() {
 	sed_param ${main_script}
 	build_python_whl
 	create_temp_dir ${MSPROF_TEMP_DIR}
+  check_file_exist ${MSPROF_TEMP_DIR}
 	#create_run_package ${MSPROF_RUN_NAME} ${MSPROF_TEMP_DIR} ${main_script} ${filer}
 	delete_sed_param ${main_script}
+}
+
+check_file_exist() {
+  local temp_dir=${1}
+  check_package ${temp_dir}/acl_prof.h ${PKG_LIMIT_SIZE}
+  check_package ${temp_dir}/msprof-0.0.1-py3-none-any.whl ${PKG_LIMIT_SIZE}
+  check_package ${temp_dir}/msprof ${PKG_LIMIT_SIZE}
+  check_package ${temp_dir}/libmsprofiler.so ${PKG_LIMIT_SIZE}
+  check_package ${temp_dir}/stub ${PKG_LIMIT_SIZE}
+  check_package ${temp_dir}/${INSTALL_SCRIPT} ${PKG_LIMIT_SIZE}
+  check_package ${temp_dir}/${UTILS_SCRIPT} ${PKG_LIMIT_SIZE}
+}
+
+function check_package() {
+    local _path="$1"
+    local _limit_size=$2
+    echo "check ${_path} exists"
+    # 检查路径是否存在
+    if [ ! -e "${_path}" ]; then
+        echo "${_path} does not exist."
+        exit 1
+    fi
+
+    # 检查路径是否为文件
+    if [ -f "${_path}" ]; then
+        local _file_size=$(stat -c%s "${_path}")
+        # 检查文件大小是否超过限制
+        if [ "${_file_size}" -gt "${_limit_size}" ] || [ "${_file_size}" -eq 0 ]; then
+            echo "package size exceeds limit:${_limit_size}"
+            exit 1
+        fi
+    fi
 }
 
 parse_script_args $*
