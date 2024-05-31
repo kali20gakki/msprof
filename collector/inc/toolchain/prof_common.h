@@ -132,6 +132,15 @@ struct MsprofMemoryInfo {
     uint32_t deviceType;
 };
 
+struct MsprofStaticOpMem {
+    int64_t size;        // op memory size
+    uint64_t opName;     // op name hash id
+    uint64_t lifeStart;  // serial number of op memory used
+    uint64_t lifeEnd;    // serial number of op memory used
+    uint64_t totalAllocateMemory; // static graph total allocate memory
+    uint64_t dynOpName;  // 0: invalid， other： dynamic op name of root
+    uint32_t graphId;    // multipe model
+};
 
 /**
  * @name  MsprofStampInfo
@@ -247,7 +256,7 @@ const uint32_t MSPROF_REPORT_NODE_TASK_MEMORY_TYPE      = 6;  /* type info: task
 const uint32_t MSPROF_REPORT_NODE_HOST_OP_EXEC_TYPE     = 8;  /* type info: op exec */
 const uint32_t MSPROF_REPORT_NODE_ATTR_INFO_TYPE        = 9;  /* type info: node_attr_info */
 const uint32_t MSPROF_REPORT_NODE_HCCL_OP_INFO_TYPE     = 10;  /* type info: hccl op info */
-
+const uint32_t MSPROF_REPORT_NODE_STATIC_OP_MEM_TYPE    = 11;  /* type info: static_op_mem */
 /* Msprof report type of node(10000) level(ge api), offset: 0x010000 */
 const uint32_t MSPROF_REPORT_NODE_GE_API_BASE_TYPE      = 0x010000U;
 const uint32_t MSPROF_REPORT_NODE_HCCL_BASE_TYPE        = 0x020000U; /* type info: hccl api */
