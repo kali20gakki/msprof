@@ -6,7 +6,6 @@ from abc import ABC
 import logging
 
 from common_func.info_conf_reader import InfoConfReader
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.trace_view_manager import TraceViewManager
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from msmodel.hardware.qos_viewer_model import QosViewModel

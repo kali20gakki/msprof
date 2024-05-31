@@ -226,6 +226,7 @@ class FileNameManagerConstant:
     GRAPH_ADD_INFO_FILE_PATTERN = r"^(unaging|aging)\.additional\.graph_id_map\.slice_\d+"
     FUSION_ADD_INFO_PATTERN = r"^(unaging|aging)\.additional\.fusion_op_info\.slice_\d+"
     MEMORY_APPLICATION_FILE_PATTERN = r"^(unaging|aging)\.additional\.memory_application\.slice_\d+"
+    STATIC_OP_MEM_FILE_PATTERN = r"^(unaging|aging)\.additional\.static_op_mem\.slice_\d+"
     CTX_ID_FILE_PATTERN = r"^(unaging|aging)\.additional\.context_id_info\.slice_\d+"
     GE_LOGIC_STREAM_INFO_PATTERN = r"^(unaging|aging)\.additional\.logic_stream_info\.slice_\d+"
     AICPU_FILE_PATTERN = r"^aicpu\.data\.(\d+)\.slice_\d+"
@@ -967,6 +968,14 @@ def get_ge_memory_application_info_compiles() -> tuple:
     :return: ge memory application info files regex
     """
     return (re.compile(FileNameManagerConstant.MEMORY_APPLICATION_FILE_PATTERN),)
+
+
+def get_ge_static_op_mem_compiles() -> tuple:
+    """
+    get ge static op memory files regex compiles
+    :return: ge static op memory files regex
+    """
+    return (re.compile(FileNameManagerConstant.STATIC_OP_MEM_FILE_PATTERN),)
 
 
 def get_ge_ctx_id_info_compiles() -> tuple:

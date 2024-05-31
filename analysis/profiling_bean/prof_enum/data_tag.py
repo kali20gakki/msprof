@@ -84,6 +84,7 @@ class DataTag(Enum):
     NODE_ATTR_INFO = 73
     HCCL_OP_INFO = 74
     QOS = 75
+    STATIC_OP_MEM = 76
 
 
 @unique

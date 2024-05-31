@@ -263,6 +263,12 @@ class DataParsersConfig(MetaConfig):
             ('level', '2'),
             ('position', 'H')
         ],
+        'StaticOpMemParser': [
+            ('path', 'msparser.add_info.static_op_mem_parser'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
+            ('level', '2'),
+            ('position', 'H')
+        ],
         'CtxIdParser': [
             ('path', 'msparser.add_info.ctx_id_parser'),
             ('chip_model', '5,7,8,11'),
