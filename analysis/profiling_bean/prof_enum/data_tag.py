@@ -85,6 +85,7 @@ class DataTag(Enum):
     HCCL_OP_INFO = 74
     QOS = 75
     STATIC_OP_MEM = 76
+    MC2_COMM_INFO = 77
 
 
 @unique

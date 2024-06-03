@@ -102,7 +102,8 @@ class PathManager:
             DBNameConstant.DB_FUSION_ADD_INFO, DBNameConstant.DB_GRAPH_ADD_INFO, DBNameConstant.DB_CTX_ID,
             DBNameConstant.DB_SYNC_ACL_NPU,
             DBNameConstant.DB_MEMORY_OP,
-            DBNameConstant.DB_GE_LOGIC_STREAM_INFO
+            DBNameConstant.DB_GE_LOGIC_STREAM_INFO,
+            DBNameConstant.DB_MC2_COMM_INFO,
         }
         base_result_dir = result_dir
         if db_name in db_filter:

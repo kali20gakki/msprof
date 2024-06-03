@@ -236,6 +236,9 @@ class FileNameManagerConstant:
     NANO_MODEL_EXEOM_PATTERN = r"^unaging\.additional\.model_exeom\.slice_\d+"
     NANO_STARS_PROFILE_PATTERN = r"^nano_stars_profile\.data.\d+\.slice_\d+"
 
+    # mc2
+    MC2_COMM_INFO_PATTERN = r"^(unaging|aging)\.additional\.mc2_comm_info\.slice_\d+"
+
     # dbg
     DBG_PATTERN = r".+\.dbg$"
 
@@ -1032,3 +1035,11 @@ def get_qos_compiles() -> tuple:
     :return: qos data files regex
     """
     return (re.compile(FileNameManagerConstant.QOS_DATA_PATTERN),)
+
+
+def get_mc2_comm_info_compiles() -> tuple:
+    """
+    get mc2 comm info regex compiles
+    :return: mc2 comm info data regex
+    """
+    return (re.compile(FileNameManagerConstant.MC2_COMM_INFO_PATTERN),)

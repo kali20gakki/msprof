@@ -69,6 +69,7 @@ class StructDecoder:
         "NpuModuleMemDataBean": StructFmt.NPU_MODULE_MEM_FMT,
         "HcclOpInfoBean": StructFmt.HCCL_OP_INFO_FMT,
         "StaticOpMemBean": StructFmt.STATIC_OP_MEM_FMT,
+        "Mc2CommInfoBean": StructFmt.MC2_COMM_INFO_FMT,
     }
 
     @classmethod
