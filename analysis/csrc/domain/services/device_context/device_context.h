@@ -15,10 +15,13 @@
 #include <cstdint>
 #include <unordered_map>
 #include "analysis/csrc/infrastructure/context/include/context.h"
+#include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
 
 namespace Analysis {
 namespace Domain {
+using namespace Analysis::Infra;
 constexpr uint32_t MIN_SUB_DIR_NBAME_LEN = 6;
+
 enum class AicMetricsEventsType {
     AIC_ARITHMETIC_UTILIZATION = 0,
     AIC_PIPE_UTILIZATION,
@@ -82,6 +85,11 @@ struct DeviceInfo {
     uint32_t aiCoreNum;
     uint32_t aivFrequency;
     uint32_t aivNum;
+    double hwtsFrequency;
+};
+
+struct CpuInfo {
+    double frequency{1000};
 };
 
 struct SampleInfo {
@@ -103,21 +111,30 @@ struct SampleInfo {
     uint32_t aivSamplingInterval;
 };
 
-struct DeviceStart {
-    uint64_t clockMonotonicRaw;
-    uint64_t sysCnt;
-};
-
 struct DfxInfo {
     std::string stopAt;
+};
+
+struct HostStartLog {
+    uint64_t clockMonotonicRaw{0};
+    uint64_t cntVct{0};
+    uint64_t cntVctDiff{0};
+};
+
+struct DeviceStartLog {
+    uint64_t clockMonotonicRaw{0};
+    uint64_t cntVct{0};
+    uint64_t cntVctDiff{0};  // device.start.log没有该字段，填充值
 };
 
 struct DeviceContextInfo {
     std::string deviceFilePath;
     DeviceInfo deviceInfo;
     SampleInfo sampleInfo;
-    DeviceStart deviceStart;
     DfxInfo dfxInfo;
+    HostStartLog hostStartLog;
+    DeviceStartLog deviceStart;
+    CpuInfo cpuInfo;
 };
 
 class DeviceContext : public Infra::Context {
@@ -133,15 +150,18 @@ public:
 
     void Getter(DfxInfo &dfxInfo) const { dfxInfo = this->deviceContextInfo.dfxInfo; };
 
-    void Getter(DeviceStart &deviceStart) const { deviceStart = this->deviceContextInfo.deviceStart; }
-    
+    void Getter(HostStartLog &hostStartLog) const { hostStartLog = this->deviceContextInfo.hostStartLog; };
+
+    void Getter(DeviceStartLog &deviceStart) const { deviceStart = this->deviceContextInfo.deviceStart; };
+    void Getter(CpuInfo &cpuInfo) const { cpuInfo = this->deviceContextInfo.cpuInfo; };
+
     uint32_t GetChipID() const override { return deviceContextInfo.deviceInfo.chipID; }
 
     std::string GetDeviceFilePath() const { return this->deviceContextInfo.deviceFilePath; }
 
     const std::string &GetDfxStopAtName() const override { return deviceContextInfo.dfxInfo.stopAt; }
 
-    void SetDevicePath(const std::string &devicePath) { deviceContextInfo.deviceFilePath = devicePath; }
+    void Init(const std::string &devicePath);
 
     void SetStopAt(const std::string & stopAt) { deviceContextInfo.dfxInfo.stopAt = stopAt; }
 private:
@@ -152,8 +172,10 @@ private:
     bool GetInfoJson();
     bool GetSampleJson();
     bool GetDeviceStart();
+    bool GetHostStart();
+    bool GetCpuInfo();
 };
-
+std::vector<DataInventory> DeviceContextEntry(const char *targetDir, const char *stopAt);
 }
 }
 

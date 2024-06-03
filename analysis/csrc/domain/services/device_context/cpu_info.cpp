@@ -3,10 +3,10 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : device_context.cpp
+ * File Name          : cpu_info.cpp
  * Description        : 结构化context模块
  * Author             : msprof team
- * Creation Date      : 2024/4/29
+ * Creation Date      : 2024/5/28
  * *****************************************************************************
  */
 #include "nlohmann/json.hpp"
@@ -19,47 +19,28 @@ using namespace Analysis;
 using namespace Analysis::Utils;
 using namespace Analysis::Domain;
 
-
 namespace nlohmann {
 
 template <>
-struct adl_serializer<DeviceInfo> {
-    static void to_json(json& jsonData, const DeviceInfo& infoData)
+struct adl_serializer<CpuInfo> {
+    static void to_json(json& jsonData, const CpuInfo& infoData)
     {
-        jsonData = json{{"platform_version", infoData.chipID}, {"devices", infoData.deviceId}};
+        jsonData = json{{"Frequency", infoData.frequency}};
     }
-    static void from_json(const json& jsonData, DeviceInfo& infoData)
+    static void from_json(const json& jsonData, CpuInfo& infoData)
     {
-        std::string platformVersionStr = jsonData.at("platform_version").get<std::string>();
-        infoData.chipID = std::stoi(platformVersionStr);
-
-        std::string deviceStr = jsonData.at("devices").get<std::string>();
-        infoData.deviceId = std::stoi(deviceStr);
-
-        jsonData.at("DeviceInfo").at(0).at("ai_core_num").get_to(infoData.aiCoreNum);
-
-        std::string aicFrequencyStr = jsonData.at("DeviceInfo").at(0).at("aic_frequency").get<std::string>();
-        infoData.aicFrequency = std::stoi(aicFrequencyStr);
-
-        jsonData.at("DeviceInfo").at(0).at("aiv_num").get_to(infoData.aivNum);
-
-        std::string aivFrequencyStr = jsonData.at("DeviceInfo").at(0).at("aiv_frequency").get<std::string>();
-        infoData.aivFrequency = std::stoi(aivFrequencyStr);
-
-        std::string hwtsFrequencyStr = jsonData.at("DeviceInfo").at(0).at("hwts_frequency").get<std::string>();
-        infoData.hwtsFrequency = std::stod(hwtsFrequencyStr);
+        std::string frequencyStr = jsonData.at("CPU").at(0).at("Frequency").get<std::string>();
+        infoData.frequency = std::stod(frequencyStr);
     }
 };
-
 }
 
 namespace Analysis {
-
 namespace Domain {
 
 const std::string INFO_JSON = "info.json";
 
-bool DeviceContext::GetInfoJson()
+bool DeviceContext::GetCpuInfo()
 {
     std::vector <std::string> files = Analysis::Utils::File::GetOriginData(deviceContextInfo.deviceFilePath,
                                                                            {INFO_JSON}, {"done"});
@@ -76,7 +57,7 @@ bool DeviceContext::GetInfoJson()
     }
 
     try {
-        deviceContextInfo.deviceInfo = info;
+        deviceContextInfo.cpuInfo = info;
     } catch (const std::exception& e) {
         ERROR("Error parsing JSON: '%'.", e.what());
         return false;

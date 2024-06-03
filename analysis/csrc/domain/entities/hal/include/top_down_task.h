@@ -21,19 +21,19 @@ struct TopDownTask {
     uint32_t streamId = 0;
     uint32_t contextId = 0;
     int32_t indexId = 0;
-    uint32_t deviceTaskType = 0;
-    uint64_t hostTaskType = 0;
+    std::string deviceTaskType = "";
+    std::string hostTaskType = "";
     uint64_t modelId = 0;
     int64_t connectionId = 0;
     uint64_t startTime = 0;
-    uint64_t duration = 0;
+    uint64_t endTime = 0;
 
     TopDownTask() = default;
     TopDownTask(uint16_t taskId, uint16_t batchId, uint32_t streamId, uint32_t contextId, int32_t indexId,
-                uint32_t deviceType, uint64_t hostType, uint64_t modelId, int64_t connectionId, uint64_t startTime,
-                uint64_t duration)
+                std::string deviceType, std::string hostType, uint64_t modelId, int64_t connectionId,
+                uint64_t startTime, uint64_t endTime)
         : taskId(taskId), batchId(batchId), streamId(streamId), contextId(contextId), indexId(indexId),
           deviceTaskType(deviceType), hostTaskType(hostType), modelId(modelId), connectionId(connectionId),
-          startTime(startTime), duration(duration) {}
+          startTime(startTime), endTime(endTime) {}
 };
 #endif // ANALYSIS_DOMAIN_ENTITIES_HAL_TOP_DOWN_TASK_H

@@ -31,7 +31,7 @@ class StarsCommon {
 public:
 static uint16_t GetStreamId(uint16_t originId)
 {
-    auto res = originId & STREAM_LOW_OPERATOR;
+    auto res = originId % STREAM_LOW_OPERATOR;
     return res;
 }
 

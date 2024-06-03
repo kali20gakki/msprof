@@ -25,7 +25,7 @@ namespace Domain {
 using namespace Analysis::Infra;
 class PmuAssociation : public Process {
 private:
-    void SplitPmuAndJudgeMix(std::vector<HalPmuData>& pmuData);
+    void SplitPmu(std::vector<HalPmuData>& pmuData);
     void MergeContextPmuToDeviceTask(std::vector<HalPmuData*>& pmuVec, std::vector<DeviceTask>& deviceVec,
                                      DataInventory& dataInventory, const DeviceContext& context);
     size_t MergeBlockPmuToDeviceTask(std::vector<HalPmuData*>& pmuData, DeviceTask& deviceTask,

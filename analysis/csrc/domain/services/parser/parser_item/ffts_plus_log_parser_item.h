@@ -30,7 +30,8 @@ struct FftsPlusLog {
     uint16_t streamId;
     uint16_t taskId;
     uint64_t timestamp;
-    uint16_t subTaskType;
+    uint16_t subTaskType : 8;
+    uint16_t resv3 : 8;
     uint16_t subTaskId;
     uint16_t resv4 : 13;
     uint16_t fftsType : 3;

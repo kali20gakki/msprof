@@ -56,13 +56,13 @@ uint32_t FreqParser::ParseData(DataInventory &dataInventory, const Infra::Contex
 {
     HalFreqLpmData initData;
     DeviceInfo deviceInfo;
-    DeviceStart deviceStart;
+    DeviceStartLog deviceStart;
     std::vector<HalFreqLpmData> lpmDataS;
     try {
         const DeviceContext &deviceContext = dynamic_cast<const DeviceContext&>(context);
         deviceContext.Getter(deviceStart);
         deviceContext.Getter(deviceInfo);
-        initData.sysCnt = deviceStart.sysCnt;
+        initData.sysCnt = deviceStart.cntVct;
         initData.freq = deviceInfo.aicFrequency / FREQ_TO_MHz;
     } catch (const std::bad_cast& ex) {
         ERROR("cast context to deviceContext fail in %, .what(): %", std::string(__FUNCTION__), std::string(ex.what()));
@@ -85,7 +85,7 @@ uint32_t FreqParser::ParseData(DataInventory &dataInventory, const Infra::Contex
     // 根据device启动时间过滤有效频率数据
     for (const auto& freqData : halUniData_) {
         for (const auto& freqLpmData : freqData.freqLpmDataS) {
-            if (freqLpmData.sysCnt < deviceStart.sysCnt) {
+            if (freqLpmData.sysCnt < deviceStart.cntVct) {
                 lpmDataS[0].freq = freqLpmData.freq;
             } else {
                 lpmDataS.emplace_back(std::move(freqLpmData));

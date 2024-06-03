@@ -20,7 +20,6 @@
 #include "analysis/csrc/utils/thread_pool.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
 #include "analysis/csrc/infrastructure/process/include/process_control.h"
-#include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
 #include "device_context_error_code.h"
 
 using namespace Analysis;
@@ -34,14 +33,20 @@ namespace Domain {
 DeviceContext& DeviceContext::Instance()
 {
     thread_local DeviceContext ins;
-    // 第一次调用时进行初始化
-    if (!ins.isInitialized_) {
-        ins.GetInfoJson();
-        ins.GetSampleJson();
-        ins.GetDeviceStart();
-        ins.isInitialized_ = true; // 标记已初始化
-    }
     return ins;
+}
+
+void DeviceContext::Init(const std::string &devicePath)
+{
+    if (!this->isInitialized_) {
+        this->deviceContextInfo.deviceFilePath = devicePath;
+        this->GetInfoJson();
+        this->GetSampleJson();
+        this->GetHostStart();
+        this->GetDeviceStart();
+        this->GetCpuInfo();
+        this->isInitialized_ = true; // 标记已初始化
+    }
 }
 
 std::vector<std::string> GetDeviceDirectories(const std::string &path)
@@ -52,7 +57,6 @@ std::vector<std::string> GetDeviceDirectories(const std::string &path)
         ERROR("Error opening directory: %, error: %", path, DEVICE_CONTEXT_OPEN_DIR_ERROR);
         return subdirs;
     }
-
     struct dirent *entry;
     while ((entry = readdir(dir)) != nullptr) {
         if (entry->d_type == DT_DIR) { // Check if it's a directory
@@ -65,16 +69,11 @@ std::vector<std::string> GetDeviceDirectories(const std::string &path)
             }
         }
     }
-
     closedir(dir);
     return subdirs;
 }
 
-}
-
-}
-
-static std::vector<DataInventory> DeviceContextEntry(const char *targetDir, const char *stopAt)
+std::vector<DataInventory> DeviceContextEntry(const char *targetDir, const char *stopAt)
 {
     Utils::TimeLogger t{"DeviceContextEntry "};
     std::vector<std::string> subdirs = GetDeviceDirectories(targetDir);
@@ -91,7 +90,7 @@ static std::vector<DataInventory> DeviceContextEntry(const char *targetDir, cons
         ++i;
         func = [subdir, &processStat, &prcessData, stopAt] {
             DeviceContext &context = DeviceContext::Instance();
-            context.SetDevicePath(subdir);
+            context.Init(subdir);
             if (stopAt != nullptr) {
                 context.SetStopAt(stopAt);
             }
@@ -115,4 +114,5 @@ static std::vector<DataInventory> DeviceContextEntry(const char *targetDir, cons
     }
     return processDataVec;
 }
-
+}
+}
