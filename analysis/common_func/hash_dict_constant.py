@@ -1,8 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+import os
 
 from common_func.singleton import singleton
+from common_func.path_manager import PathManager
+from common_func.db_name_constant import DBNameConstant
 from msmodel.ge.ge_hash_model import GeHashViewModel
 
 
@@ -15,7 +18,8 @@ class HashDictData:
     def __init__(self: any, project_path: str) -> None:
         self._type_hash_dict = {}
         self._ge_hash_dict = {}
-        self.load_hash_data(project_path)
+        if os.path.exists(PathManager.get_db_path(project_path, DBNameConstant.DB_GE_HASH)):
+            self.load_hash_data(project_path)
 
     def load_hash_data(self: any, project_path: str) -> None:
         """

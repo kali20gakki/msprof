@@ -103,6 +103,7 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         with mock.patch(NAMESPACE + '.AicpuAddInfoParser.parse_bean_data', return_value=[data]):
             check = AicpuAddInfoParser(self.file_list, self.CONFIG)
             check.parse()
+            check.save()
         data = check._aicpu_data.get(AicpuAddInfoBean.AICPU_DP, [])
         self.assertEqual(1, len(data))
         self.assertEqual("Last dequeue", data[0][1])
@@ -115,6 +116,7 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         with mock.patch(NAMESPACE + '.AicpuAddInfoParser.parse_bean_data', return_value=[data]):
             check = AicpuAddInfoParser(self.file_list, self.CONFIG)
             check.parse()
+            check.save()
         data = check._aicpu_data.get(AicpuAddInfoBean.AICPU_MODEL, [])
         self.assertEqual(1, len(data))
         self.assertEqual(2, data[0][3])
@@ -127,9 +129,50 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         with mock.patch(NAMESPACE + '.AicpuAddInfoParser.parse_bean_data', return_value=[data]):
             check = AicpuAddInfoParser(self.file_list, self.CONFIG)
             check.parse()
+            check.save()
         data = check._aicpu_data.get(AicpuAddInfoBean.AICPU_MI, [])
         self.assertEqual(1, len(data))
         self.assertEqual(2000, data[0][3])
+
+    def test_parse_should_return_comm_turn_data_when_type_4(self):
+        aicpu_data = [23130, 6000, 4, 1, 128, 20000,
+                      1000, 2000, 3000, 4000, 5000, 6000, 7000, 128, 0, 1, 2, 0, 2, 0] + [0] * 43
+        struct_data = struct.pack(StructFmt.KFC_COMM_TURN_FMT, *aicpu_data)
+        data = AicpuAddInfoBean.decode(struct_data)
+        with mock.patch(NAMESPACE + '.AicpuAddInfoParser.parse_bean_data', return_value=[data]):
+            check = AicpuAddInfoParser(self.file_list, self.CONFIG)
+            check.parse()
+            check.save()
+        data = check._aicpu_data.get(AicpuAddInfoBean.KFC_COMM_TURN, [])
+        self.assertEqual(1, len(data))
+        self.assertEqual(1000, data[0][5])
+
+    def test_parse_should_return_compute_turn_data_when_type_5(self):
+        aicpu_data = [23130, 6000, 5, 1, 128, 20000,
+                      1000, 2000, 3000, 128, 0, 1, 2, 0, 2, 0] + [0] * 51
+        struct_data = struct.pack(StructFmt.KFC_COMPUTE_TURN_FMT, *aicpu_data)
+        data = AicpuAddInfoBean.decode(struct_data)
+        with mock.patch(NAMESPACE + '.AicpuAddInfoParser.parse_bean_data', return_value=[data]):
+            check = AicpuAddInfoParser(self.file_list, self.CONFIG)
+            check.parse()
+            check.save()
+        data = check._aicpu_data.get(AicpuAddInfoBean.KFC_COMPUTE_TURN, [])
+        self.assertEqual(1, len(data))
+        self.assertEqual(1000, data[0][5])
+
+    def test_parse_should_return_kfc_hccl_info_data_when_type_6(self):
+        aicpu_data = [23130, 6000, 6, 1, 128, 20000,
+                      12345, 0, 111111, 0, 0, 8, 0, 0, 4294967295, 0, 2, 0, 0.1, 22390660833240, 22390660824120,
+                      0, 0, 0, 0, 0, 10, 20] + [0] * 30
+        struct_data = struct.pack(StructFmt.KFC_HCCL_INFO_FMT, *aicpu_data)
+        data = AicpuAddInfoBean.decode(struct_data)
+        with mock.patch(NAMESPACE + '.AicpuAddInfoParser.parse_bean_data', return_value=[data]):
+            check = AicpuAddInfoParser(self.file_list, self.CONFIG)
+            check.parse()
+            check.save()
+        data = check._aicpu_data.get(AicpuAddInfoBean.KFC_HCCL_INFO, [])
+        self.assertEqual(1, len(data))
+        self.assertEqual(4294967295, data[0][9])
 
 
 if __name__ == '__main__':

@@ -10,6 +10,8 @@ class TestFileManager(unittest.TestCase):
 
     def test_load_hash_data(self):
         with mock.patch('common_func.singleton.singleton'), \
+                mock.patch('os.path.exists',
+                           return_value=True), \
                 mock.patch('msmodel.ge.ge_hash_model.GeHashViewModel.get_type_hash_data',
                            return_value={'acl': {'1': 'test'}}), \
                 mock.patch('msmodel.ge.ge_hash_model.GeHashViewModel.get_ge_hash_data',

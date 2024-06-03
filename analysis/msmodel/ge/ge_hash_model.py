@@ -38,10 +38,14 @@ class GeHashViewModel(ViewModel):
         super().__init__(path, DBNameConstant.DB_GE_HASH, [])
 
     def get_ge_hash_data(self) -> dict:
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_GE_HASH):
+            return {}
         sql = "SELECT hash_key, hash_value FROM {}".format(DBNameConstant.TABLE_GE_HASH)
         return dict(DBManager.fetch_all_data(self.cur, sql))
 
     def get_type_hash_data(self) -> dict:
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_TYPE_HASH):
+            return {}
         sql = "SELECT hash_key, hash_value, level FROM {}".format(DBNameConstant.TABLE_TYPE_HASH)
         hash_data = DBManager.fetch_all_data(self.cur, sql, dto_class=GeHashDto)
         res_data = {}
