@@ -101,6 +101,7 @@ private:
     void GetColumn(uint64_t &value);
     void GetColumn(int32_t &value);
     void GetColumn(uint32_t &value);
+    void GetColumn(uint16_t &value);
     void GetColumn(double &value);
     void GetColumn(std::string &value);
     template<typename T, size_t... S>

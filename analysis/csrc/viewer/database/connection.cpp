@@ -202,6 +202,11 @@ void Connection::GetColumn(std::string &value)
     auto valueStr = const_cast<unsigned char*>(sqlite3_column_text(stmt_, ++index_));
     value = std::string(ReinterpretConvert<CHAR_PTR>(valueStr));
 }
+
+void Connection::GetColumn(uint16_t &value)
+{
+    value = sqlite3_column_int(stmt_, ++index_);
+}
 } // Database
 } // Viewer
 } // Analysis

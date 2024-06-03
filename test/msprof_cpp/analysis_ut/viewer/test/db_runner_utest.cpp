@@ -15,7 +15,7 @@
 #include "analysis/csrc/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/db_runner.h"
 
-using DATA_FORMAT = std::vector<std::tuple<int32_t, uint32_t, int64_t, double, double, std::string>>;
+using DATA_FORMAT = std::vector<std::tuple<int32_t, uint32_t, int64_t, uint16_t, double, double, std::string>>;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Utils;
 
@@ -33,9 +33,10 @@ std::vector<TableColumn> cols = {
     TableColumn("col1", "INTEGER"),
     TableColumn("col2", "INTEGER"),
     TableColumn("col3", "INTEGER"),
-    TableColumn("col4", "NUMERIC"),
-    TableColumn("col5", "REAL"),
-    TableColumn("col6", "TEXT")
+    TableColumn("col4", "INTEGER"),
+    TableColumn("col5", "NUMERIC"),
+    TableColumn("col6", "REAL"),
+    TableColumn("col7", "TEXT")
 };
 
 TEST_F(DBRunnerUtest, DBRunner)
@@ -102,7 +103,7 @@ TEST_F(DBRunnerUtest, InsertData)
     auto dbRunner = std::make_shared<DBRunner>(path);
     dbRunner->CreateTable("tb4", cols);
     DATA_FORMAT data = {
-        std::make_tuple(2147483647, 4294967295, 9223372036854775807, 118972596256332.95,
+        std::make_tuple(2147483647, 4294967295, 9223372036854775807, 100, 118972596256332.95,
                         1340.046875,  "hcom_allGather__516_2")
     };
     auto rc = dbRunner->InsertData("tb4", data);
@@ -135,7 +136,7 @@ TEST_F(DBRunnerUtest, QueryData)
     dbRunner->CreateTable("tb4", cols);
     dbRunner->DeleteData("DELETE FROM tb4;");
     DATA_FORMAT data = {
-        std::make_tuple(7, 8, 9, 1320.4, 56.5, "hcom_allGather__516_1")
+        std::make_tuple(7, 8, 9, 10, 1320.4, 56.5, "hcom_allGather__516_1")
     };
     dbRunner->InsertData("tb4", data);
     std::string sql = "SELECT * FROM tb4;";
@@ -145,14 +146,17 @@ TEST_F(DBRunnerUtest, QueryData)
     int32_t num1 = 7;
     uint32_t num2 = 8;
     int64_t num3 = 9;
+    uint16_t num4 = 10;
     for (const auto& row : result) {
         int32_t c1 = std::get<0>(row);
         uint32_t c2 = std::get<1>(row);
         int64_t c3 = std::get<2>(row);
-        std::string c6 = std::get<5>(row);
+        uint16_t c4 = std::get<3>(row);
+        std::string c6 = std::get<6>(row);
         EXPECT_EQ(num1, c1);
         EXPECT_EQ(num2, c2);
         EXPECT_EQ(num3, c3);
+        EXPECT_EQ(num4, c4);
         EXPECT_EQ("hcom_allGather__516_1", c6);
     }
 }
@@ -196,7 +200,7 @@ TEST_F(DBRunnerUtest, GetTableColumns)
     auto dbRunner = std::make_shared<DBRunner>(path);
     dbRunner->CreateTable("tb4", cols);
     DATA_FORMAT data = {
-        std::make_tuple(2147483647, 4294967295, 9223372036854775807, 118972596256332.95,
+        std::make_tuple(2147483647, 4294967295, 9223372036854775807, 100, 118972596256332.95,
                         1340.046875,  "hcom_allGather__516_2")
     };
     dbRunner->InsertData("tb4", data);
@@ -204,9 +208,10 @@ TEST_F(DBRunnerUtest, GetTableColumns)
         {"col1", "INTEGER"},
         {"col2", "INTEGER"},
         {"col3", "INTEGER"},
-        {"col4", "NUMERIC"},
-        {"col5", "REAL"},
-        {"col6", "TEXT"},
+        {"col4", "INTEGER"},
+        {"col5", "NUMERIC"},
+        {"col6", "REAL"},
+        {"col7", "TEXT"},
     };
     auto tableColumns = dbRunner->GetTableColumns("tb4");
     EXPECT_TRUE(isEqual(tableColumns, expectedTableColumns));
@@ -222,7 +227,7 @@ TEST_F(DBRunnerUtest, MultithreadingInsertQuery)
     const int threadsNum = 5;
     const int rowNum = 1000;
     DATA_FORMAT data;
-    auto row = std::make_tuple(2147483647, 4294967295, 9223372036854775807, 118972596256332.95,
+    auto row = std::make_tuple(2147483647, 4294967295, 9223372036854775807, 100, 118972596256332.95,
                                1340.046875, "hcom_allGather__516_2");
     for (int i = 0; i < rowNum; i++) {
         data.emplace_back(row);
