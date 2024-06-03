@@ -87,6 +87,8 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_NAME_AICPU = "aicpu.db"
     DB_NAME_CTRLCPU = "ctrlcpu.db"
     DB_NAME_TSCPU = "tscpu.db"
+    DB_MC2_COMM_INFO = "mc2_comm_info.db"
+    DB_KFC_INFO = "kfc_info.db"
 
     # DB tables
     TABLE_ACL_DATA = "AclData"
@@ -318,6 +320,14 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_COMM_ANALYZER_TIME = "CommAnalyzerTime"
     TABLE_COMM_ANALYZER_BAND = "CommAnalyzerBandwidth"
     TABLE_COMM_ANALYZER_MATRIX = "CommAnalyzerMatrix"
+
+    # mc2
+    TABLE_MC2_COMM_INFO = "Mc2CommInfo"
+    TABLE_KFC_INFO = "KfcInfo"
+    TABLE_KFC_COMM_TURN = "KfcCommTurn"
+    TABLE_KFC_COMPUTE_TURN = "KfcComputeTurn"
+    TABLE_KFC_OP = "KfcOP"
+    TABLE_KFC_TASK = "KfcTask"
 
     @abstractmethod
     def get_db_name(self: any) -> str:

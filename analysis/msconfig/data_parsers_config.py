@@ -311,4 +311,9 @@ class DataParsersConfig(MetaConfig):
             ('level', '2'),
             ('position', 'H')
         ],
+        'Mc2CommInfoParser': [
+            ('path', 'msparser.add_info.mc2_comm_info_parser'),
+            ('chip_model', '4,5'),
+            ('position', 'H')
+        ],
     }
