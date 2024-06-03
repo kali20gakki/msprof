@@ -36,7 +36,11 @@ int Chip4PmuParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *hal
     pmuData->hd.taskId.streamId = StarsCommon::GetStreamId(contextPmu->streamId);
     pmuData->hd.taskId.batchId = INVALID_BATCH_ID;
     pmuData->hd.taskId.taskId = StarsCommon::GetTaskId(contextPmu->streamId, contextPmu->taskId);
-    pmuData->hd.taskId.contextId = contextPmu->subTaskId;
+    if (contextPmu->fftsType == FFTS_PLUS) {
+        pmuData->hd.taskId.contextId = contextPmu->subTaskId;
+    } else {
+        pmuData->hd.taskId.contextId = INVALID_CONTEXT_ID;
+    }
     pmuData->hd.timestamp = contextPmu->timeList[1];   // 此处使用的是context级别PMU数据的结束时间
     pmuData->type = PMU;
     pmuData->pmu.acceleratorType = GetAcceleratorTypeByType(contextPmu->subTaskType, contextPmu->fftsType);

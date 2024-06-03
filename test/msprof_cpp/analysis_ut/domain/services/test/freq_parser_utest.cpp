@@ -70,7 +70,7 @@ TEST_F(FreqParserUtest, ShouldReturnFreqLpmDataWhenParserRun)
     context.isInitialized_ = true;
     context.deviceContextInfo.deviceFilePath = FREQ_LPM_PATH;
     context.deviceContextInfo.deviceInfo.aicFrequency = AIC_FREQ;
-    context.deviceContextInfo.deviceStart.sysCnt = 0;
+    context.deviceContextInfo.deviceStart.cntVct = 0;
     context.deviceContextInfo.deviceFilePath = FREQ_LPM_PATH;
     std::vector<FreqData> freqLpm{CreateFreqData(), CreateFreqData()};
     WriteBin(freqLpm, File::PathJoin({FREQ_LPM_PATH, "data"}), "lpmFreqConv.data.0.slice_0");
@@ -89,7 +89,7 @@ TEST_F(FreqParserUtest, ShouldReturnFreqLpmDataWhenMultiFile)
     context.isInitialized_ = true;
     context.deviceContextInfo.deviceFilePath = FREQ_LPM_PATH;
     context.deviceContextInfo.deviceInfo.aicFrequency = AIC_FREQ;
-    context.deviceContextInfo.deviceStart.sysCnt = 0;
+    context.deviceContextInfo.deviceStart.cntVct = 0;
     std::vector<FreqData> freqLpm{CreateFreqData(), CreateFreqData()};
     WriteBin(freqLpm, File::PathJoin({FREQ_LPM_PATH, "data"}), "lpmFreqConv.data.0.slice_0");
     WriteBin(freqLpm, File::PathJoin({FREQ_LPM_PATH, "data"}), "lpmFreqConv.data.0.slice_1");

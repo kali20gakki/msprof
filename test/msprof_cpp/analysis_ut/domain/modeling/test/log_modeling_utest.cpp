@@ -87,43 +87,43 @@ static void CheckRepeatedDeviceTaskData(Infra::DataInventory& dataInventory)
     ASSERT_EQ(device1011.size(), 1ul);
     EXPECT_EQ(device1011[0].taskType, 3); // 任务测试类型为3
     EXPECT_EQ(device1011[0].taskStart, 100);  // 任务开始测试时间100
-    EXPECT_EQ(device1011[0].taskDuration, 100); // 任务持续测试时间100
+    EXPECT_EQ(device1011[0].taskEnd, 200); // 任务结束测试时间200
     const auto& device1021 = (*deviceData)[{1, 0, 2, 1}];
     ASSERT_EQ(device1021.size(), 1ul);
     EXPECT_EQ(device1021[0].taskType, 3); // 任务测试类型为3
     EXPECT_EQ(device1021[0].taskStart, 200); // 任务开始测试时间200
-    EXPECT_EQ(device1021[0].taskDuration, 100); // 任务持续测试时间100
+    EXPECT_EQ(device1021[0].taskEnd, 300); // 任务结束测试时间300
     const auto& device10655341 = (*deviceData)[{1, 0, 65534, 1}];
     ASSERT_EQ(device10655341.size(), 1ul);
     EXPECT_EQ(device10655341[0].taskType, 3); // 任务测试类型为3
     EXPECT_EQ(device10655341[0].taskStart, 300); // 任务开始测试时间300
-    EXPECT_EQ(device10655341[0].taskDuration, 80); // 任务持续测试时间80
+    EXPECT_EQ(device10655341[0].taskEnd, 380); // 任务结束测试时间380
 
     const auto& device1111 = (*deviceData)[{1, 1, 1, 1}];
     ASSERT_EQ(device1111.size(), 2ul);
     EXPECT_EQ(device1111[0].taskType, 3); // 任务测试类型为3
     EXPECT_EQ(device1111[0].taskStart, 400); // 任务开始测试时间400
-    EXPECT_EQ(device1111[0].taskDuration, 100); // 任务持续测试时间100
+    EXPECT_EQ(device1111[0].taskEnd, 500); // 任务结束测试时间500
     EXPECT_EQ(device1111[1].taskType, 3); // 任务测试类型为3
     EXPECT_EQ(device1111[1].taskStart, 1100); // 任务开始测试时间1100
-    EXPECT_EQ(device1111[1].taskDuration, 100); // 任务持续测试时间100
+    EXPECT_EQ(device1111[1].taskEnd, 1200); // 任务结束测试时间1200
 
     const auto& device1121 = (*deviceData)[{1, 1, 2, 1}];
     ASSERT_EQ(device1121.size(), 1ul);
     EXPECT_EQ(device1121[0].taskType, 3); // 任务测试类型为3
     EXPECT_EQ(device1121[0].taskStart, 1200); // 任务开始测试时间1200
-    EXPECT_EQ(device1121[0].taskDuration, 100); // 任务持续测试时间100
+    EXPECT_EQ(device1121[0].taskEnd, 1300); // 任务结束测试时间1300
     const auto& device11655341 = (*deviceData)[{1, 1, 65534, 1}];
     ASSERT_EQ(device11655341.size(), 1ul);
     EXPECT_EQ(device11655341[0].taskType, 3); // 任务测试类型为3
     EXPECT_EQ(device11655341[0].taskStart, 1300); // 任务开始测试时间1300
-    EXPECT_EQ(device11655341[0].taskDuration, 80); // 任务持续测试时间80
+    EXPECT_EQ(device11655341[0].taskEnd, 1380); // 任务结束测试时间1380
 
     const auto& device1211 = (*deviceData)[{1, 2, 1, 1}];
     ASSERT_EQ(device1211.size(), 1ul);
     EXPECT_EQ(device1211[0].taskType, 3); // 任务测试类型为3
     EXPECT_EQ(device1211[0].taskStart, 1400); // 任务开始测试时间1400
-    EXPECT_EQ(device1211[0].taskDuration, 100); // 任务持续测试时间100
+    EXPECT_EQ(device1211[0].taskEnd, 1500); // 任务结束测试时间1500
 }
 
 TEST_F(LogModelingUTest, ShouldGetRepeatedDeviceTaskData)
@@ -201,22 +201,22 @@ TEST_F(LogModelingUTest, ShouldGetRightDeviceTaskData)
     const auto& task1011 = (*deviceData)[{1, 1, 0, 1}][0];
     EXPECT_EQ(task1011.taskType, 10); // 任务测试类型为10
     EXPECT_EQ(task1011.taskStart, 100); // 任务开始测试时间100
-    EXPECT_EQ(task1011.taskDuration, 200); // 任务持续测试时间200
+    EXPECT_EQ(task1011.taskEnd, 300); // 任务结束测试时间300
 
     const auto& task1012 = (*deviceData)[{1, 1, 0, 2}][0];
     EXPECT_EQ(task1012.taskType, 3); // 任务测试类型为3
     EXPECT_EQ(task1012.taskStart, 100); // 任务开始测试时间100
-    EXPECT_EQ(task1012.taskDuration, 100); // 任务持续测试时间100
+    EXPECT_EQ(task1012.taskEnd, 200); // 任务结束测试时间200
 
     const auto& task2011 = (*deviceData)[{2, 1, 0, 1}][0];
     EXPECT_EQ(task2011.taskType, 3); // 任务测试类型为3
     EXPECT_EQ(task2011.taskStart, 100); // 任务开始测试时间100
-    EXPECT_EQ(task2011.taskDuration, 50); // 任务持续测试时间50
+    EXPECT_EQ(task2011.taskEnd, 150); // 任务结束测试时间150
 
     const auto& task1021 = (*deviceData)[{1, 2, 0, 1}][0];
     EXPECT_EQ(task1021.taskType, 3); // 任务测试类型为3
     EXPECT_EQ(task1021.taskStart, 300); // 任务开始测试时间300
-    EXPECT_EQ(task1021.taskDuration, 200); // 任务持续测试时间200
+    EXPECT_EQ(task1021.taskEnd, 500); // 任务结束测试时间500
 
     EXPECT_EQ(deviceData->size(), 4ul); // 保证使用map[]方法时，没有新增ID，保持为4
 }
@@ -273,35 +273,35 @@ static void CheckFilppedTasks(Infra::DataInventory& dataInventory)
     const auto& beforeFlipStream_1 = (*deviceData)[{1, 0, 65534, 1}][0];
     EXPECT_EQ(beforeFlipStream_1.taskType, 3); // 任务测试类型为3
     EXPECT_EQ(beforeFlipStream_1.taskStart, 300); // 任务开始测试时间300
-    EXPECT_EQ(beforeFlipStream_1.taskDuration, 80); // 任务持续测试时间80
+    EXPECT_EQ(beforeFlipStream_1.taskEnd, 380); // 任务结束测试时间380
     const auto& afterFlipStream_1 = (*deviceData)[{1, 1, 1, 1}][0];
     EXPECT_EQ(afterFlipStream_1.taskType, 3); // 任务测试类型为3
     EXPECT_EQ(afterFlipStream_1.taskStart, 400); // 任务开始测试时间400
-    EXPECT_EQ(afterFlipStream_1.taskDuration, 100); // 任务持续测试时间100
+    EXPECT_EQ(afterFlipStream_1.taskEnd, 500); // 任务结束测试时间500
     const auto& task2011 = (*deviceData)[{2, 0, 1, 1}][0];
     EXPECT_EQ(task2011.taskType, 3); // 任务测试类型为3
     EXPECT_EQ(task2011.taskStart, 100); // 任务开始测试时间100
-    EXPECT_EQ(task2011.taskDuration, 100); // 任务持续测试时间100
+    EXPECT_EQ(task2011.taskEnd, 200); // 任务结束测试时间200
     const auto& task2012 = (*deviceData)[{2, 0, 1, 2}][0];
     EXPECT_EQ(task2012.taskType, 10); // 任务测试类型为10
     EXPECT_EQ(task2012.taskStart, 100); // 任务开始测试时间100
-    EXPECT_EQ(task2012.taskDuration, 50); // 任务持续测试时间50
+    EXPECT_EQ(task2012.taskEnd, 150); // 任务结束测试时间150
     const auto& beforeFlipStream_2 = (*deviceData)[{2, 0, 65534, 1}][0];
     EXPECT_EQ(beforeFlipStream_2.taskType, 3); // 任务测试类型为3
     EXPECT_EQ(beforeFlipStream_2.taskStart, 200); // 任务开始测试时间200
-    EXPECT_EQ(beforeFlipStream_2.taskDuration, 80); // 任务持续测试时间80
+    EXPECT_EQ(beforeFlipStream_2.taskEnd, 280); // 任务结束测试时间280
     const auto& afterFlipStream_2 = (*deviceData)[{2, 1, 1, 1}][0];
     EXPECT_EQ(afterFlipStream_2.taskType, 3); // 任务测试类型为3
     EXPECT_EQ(afterFlipStream_2.taskStart, 300); // 任务开始测试时间300
-    EXPECT_EQ(afterFlipStream_2.taskDuration, 100); // 任务持续测试时间100
+    EXPECT_EQ(afterFlipStream_2.taskEnd, 400); // 任务结束测试时间400
     const auto& task3031 = (*deviceData)[{3, 0, 3, 1}][0];
     EXPECT_EQ(task3031.taskType, 3); // 任务测试类型为3
     EXPECT_EQ(task3031.taskStart, 300); // 任务开始测试时间300
-    EXPECT_EQ(task3031.taskDuration, 100); // 任务持续测试时间100
+    EXPECT_EQ(task3031.taskEnd, 400); // 任务结束测试时间400
     const auto& task3021 = (*deviceData)[{3, 0, 2, 1}][0];
     EXPECT_EQ(task3021.taskType, 10); // 任务测试类型为10
     EXPECT_EQ(task3021.taskStart, 200); // 任务开始测试时间200
-    EXPECT_EQ(task3021.taskDuration, 100); // 任务持续测试时间100
+    EXPECT_EQ(task3021.taskEnd, 300); // 任务结束测试时间300
     EXPECT_EQ(deviceData->size(), 13ul); // 保证使用map[]方法时，没有新增ID，保持为13
 }
 

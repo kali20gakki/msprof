@@ -170,7 +170,8 @@ uint32_t LogModeling::ProcessEntry(Infra::DataInventory& dataInventory, const In
         [](Domain::DeviceTask& oneTask, const HalLogData& startLog, const HalLogData& endLog) {
             oneTask.taskType = startLog.acsq.taskType;
             oneTask.taskStart = startLog.acsq.timestamp;
-            oneTask.taskDuration = endLog.acsq.timestamp - oneTask.taskStart;
+            oneTask.taskEnd = endLog.acsq.timestamp;
+            oneTask.logType = HalLogType::ACSQ_LOG;
     });
     size_t acsqMatchedCount = GetDeviceTaskNodeSize(*deviceTaskMap) - deviceTaskNum;
     INFO("ACSQ matched count:%", acsqMatchedCount);
@@ -179,11 +180,11 @@ uint32_t LogModeling::ProcessEntry(Infra::DataInventory& dataInventory, const In
         [](Domain::DeviceTask& oneTask, const HalLogData& startLog, const HalLogData& endLog) {
                 oneTask.taskType = startLog.ffts.subTaskType;
                 oneTask.taskStart = startLog.ffts.timestamp;
-                oneTask.taskDuration = endLog.ffts.timestamp - oneTask.taskStart;
+                oneTask.taskEnd = endLog.ffts.timestamp;
+                oneTask.logType = HalLogType::FFTS_LOG;
     });
     size_t fftsMatchedCount = GetDeviceTaskNodeSize(*deviceTaskMap) - acsqMatchedCount - deviceTaskNum;
     INFO("FFTS matched count:%", fftsMatchedCount);
-
     return Analysis::ANALYSIS_OK;
 }
 
