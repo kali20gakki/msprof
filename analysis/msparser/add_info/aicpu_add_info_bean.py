@@ -199,6 +199,248 @@ class AicpuMiBean:
         return self._end_time - self._start_time
 
 
+class KfcHcclInfoBean:
+    def __init__(self: any, *args) -> None:
+        data = args[0]
+        self._item_id = data[6]
+        self._ccl_tag = data[7]
+        self._group_name = data[8]
+        self._local_rank = data[9]
+        self._remote_rank = data[10]
+        self._rank_size = data[11]
+        self._work_flow_mode = data[12]
+        self._plane_id = data[13]
+        self._context_id = data[14]
+        self._notify_id = data[15]
+        self._stage = data[16]
+        self._role = data[17]
+        self._duration_estimated = data[18]
+        self._src_addr = data[19]
+        self._dst_addr = data[20]
+        self._data_size = data[21]
+        self._op_type = data[22]
+        self._data_type = data[23]
+        self._link_type = data[24]
+        self._transport_type = data[25]
+        self._rdma_type = data[26]
+        self._task_id = StarsCommon.set_task_id(data[28], data[27])
+        self._stream_id = Utils.get_stream_id(data[28])
+
+    @property
+    def item_id(self: any) -> str:
+        return str(self._item_id)
+
+    @property
+    def ccl_tag(self: any) -> str:
+        return str(self._ccl_tag)
+
+    @property
+    def group_name(self: any) -> str:
+        return str(self._group_name)
+
+    @property
+    def local_rank(self: any) -> int:
+        return self._local_rank
+
+    @property
+    def remote_rank(self: any) -> int:
+        return self._remote_rank
+
+    @property
+    def rank_size(self: any) -> int:
+        return self._rank_size
+
+    @property
+    def work_flow_mode(self: any) -> str:
+        return str(self._work_flow_mode)
+
+    @property
+    def plane_id(self: any) -> int:
+        return self._plane_id
+
+    @property
+    def context_id(self: any) -> int:
+        return self._context_id
+
+    @property
+    def notify_id(self: any) -> str:
+        return str(self._notify_id)
+
+    @property
+    def stage(self: any) -> str:
+        return str(self._stage)
+
+    @property
+    def role(self: any) -> str:
+        return str(self._role)
+
+    @property
+    def duration_estimated(self: any) -> int:
+        return self._duration_estimated
+
+    @property
+    def src_addr(self: any) -> str:
+        return str(self._src_addr)
+
+    @property
+    def dst_addr(self: any) -> str:
+        return str(self._dst_addr)
+
+    @property
+    def data_size(self: any) -> int:
+        return self._data_size
+
+    @property
+    def op_type(self: any) -> str:
+        return str(self._op_type)
+
+    @property
+    def data_type(self: any) -> str:
+        return str(self._data_type)
+
+    @property
+    def link_type(self: any) -> str:
+        return str(self._link_type)
+
+    @property
+    def transport_type(self: any) -> str:
+        return str(self._transport_type)
+
+    @property
+    def rdma_type(self: any) -> str:
+        return str(self._rdma_type)
+
+    @property
+    def task_id(self: any) -> int:
+        return self._task_id
+
+    @property
+    def stream_id(self: any) -> int:
+        return self._stream_id
+
+
+class KfcCommTurnBean:
+    def __init__(self: any, *args) -> None:
+        data = args[0]
+        self._wait_notify_start_time = data[6]
+        self._kfc_alg_exe_start_time = data[7]
+        self._send_task_start_time = data[8]
+        self._wait_active_start_time = data[9]
+        self._active_start_time = data[10]
+        self._wait_exe_end_start_time = data[11]
+        self._rtsq_exe_end_time = data[12]
+        self._data_len = data[13]
+        self._device_id = data[14]
+        self._stream_id = Utils.get_stream_id(data[15])
+        self._task_id = StarsCommon.set_task_id(data[15], data[16])
+        self._version = data[17]
+        self._comm_turn = data[18]
+        self._current_turn = data[19]
+
+    @property
+    def device_id(self: any) -> int:
+        return self._device_id
+
+    @property
+    def stream_id(self: any) -> int:
+        return self._stream_id
+
+    @property
+    def task_id(self: any) -> int:
+        return self._task_id
+
+    @property
+    def version(self: any) -> int:
+        return self._version
+
+    @property
+    def current_turn(self: any) -> int:
+        return self._current_turn
+
+    @property
+    def comm_turn(self: any) -> int:
+        return self._comm_turn
+
+    @property
+    def wait_notify_start_time(self: any) -> int:
+        return self._wait_notify_start_time
+
+    @property
+    def kfc_alg_exe_start_time(self: any) -> int:
+        return self._kfc_alg_exe_start_time
+
+    @property
+    def send_task_start_time(self: any) -> int:
+        return self._send_task_start_time
+
+    @property
+    def wait_active_start_time(self: any) -> int:
+        return self._wait_active_start_time
+
+    @property
+    def active_start_time(self: any) -> int:
+        return self._active_start_time
+
+    @property
+    def wait_exe_end_start_time(self: any) -> int:
+        return self._wait_exe_end_start_time
+
+    @property
+    def rtsq_exe_end_time(self: any) -> int:
+        return self._rtsq_exe_end_time
+
+
+class KfcComputeTurnBean:
+    def __init__(self: any, *args) -> None:
+        data = args[0]
+        self._wait_compute_start_time = data[6]
+        self._compute_start_time = data[7]
+        self._compute_exe_end_time = data[8]
+        self._data_len = data[9]
+        self._device_id = data[10]
+        self._stream_id = Utils.get_stream_id(data[11])
+        self._task_id = StarsCommon.set_task_id(data[11], data[12])
+        self._version = data[13]
+        self._compute_turn = data[14]
+        self._current_turn = data[15]
+
+    @property
+    def device_id(self: any) -> int:
+        return self._device_id
+
+    @property
+    def stream_id(self: any) -> int:
+        return self._stream_id
+
+    @property
+    def task_id(self: any) -> int:
+        return self._task_id
+
+    @property
+    def version(self: any) -> int:
+        return self._version
+
+    @property
+    def current_turn(self: any) -> int:
+        return self._current_turn
+
+    @property
+    def compute_turn(self: any) -> int:
+        return self._compute_turn
+
+    @property
+    def wait_compute_start_time(self: any) -> int:
+        return self._wait_compute_start_time
+
+    @property
+    def compute_start_time(self: any) -> int:
+        return self._compute_start_time
+
+    @property
+    def compute_exe_end_time(self: any) -> int:
+        return self._compute_exe_end_time
+
+
 class AicpuAddInfoBean(AddInfoBean):
     """
     aicpu data info bean
@@ -207,12 +449,18 @@ class AicpuAddInfoBean(AddInfoBean):
     AICPU_DP = 1
     AICPU_MODEL = 2  # helper: MODEL_WITH_Q
     AICPU_MI = 3  # MindSpore
+    KFC_COMM_TURN = 4
+    KFC_COMPUTE_TURN = 5
+    KFC_HCCL_INFO = 6
 
     STRUCT_FMT = {
         AICPU_NODE: StructFmt.AI_CPU_NODE_ADD_FMT,
         AICPU_DP: StructFmt.AI_CPU_DP_ADD_FMT,
         AICPU_MODEL: StructFmt.AI_CPU_MODEL_ADD_FMT,
         AICPU_MI: StructFmt.AI_CPU_MI_ADD_FMT,
+        KFC_COMM_TURN: StructFmt.KFC_COMM_TURN_FMT,
+        KFC_COMPUTE_TURN: StructFmt.KFC_COMPUTE_TURN_FMT,
+        KFC_HCCL_INFO: StructFmt.KFC_HCCL_INFO_FMT,
     }
 
     AICPU_BEAN = {
@@ -220,6 +468,9 @@ class AicpuAddInfoBean(AddInfoBean):
         AICPU_DP: AicpuDPBean,
         AICPU_MODEL: AicpuModelBean,
         AICPU_MI: AicpuMiBean,
+        KFC_COMM_TURN: KfcCommTurnBean,
+        KFC_COMPUTE_TURN: KfcComputeTurnBean,
+        KFC_HCCL_INFO: KfcHcclInfoBean,
     }
 
     def __init__(self: any, *args) -> None:
