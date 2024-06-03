@@ -501,12 +501,6 @@ aclError aclprofModelSubscribe(const uint32_t modelId, const aclprofSubscribeCon
         return ret;
     }
 
-    uint64_t dataTypeConfig = ProfAclMgr::instance()->ProfAclGetDataTypeConfig(&profSubscribeConfig->config);
-    ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
-    MSPROF_LOGI("Allocate subscription config to Acl, dataTypeConfig:0x%lx, modelId:%ul", dataTypeConfig, modelId);
-    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfSubscribe(modelId, dataTypeConfig);
-    RETURN_IF_NOT_SUCCESS(ret);
-
     if (HashData::instance()->Init() == PROFILING_FAILED) {
         MSPROF_LOGE("HashData init failed in aclprofModelSubscribe");
         MSPROF_INNER_ERROR("EK9999", "HashData init failed in aclprofModelSubscribe");
