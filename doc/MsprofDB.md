@@ -888,6 +888,45 @@ timeline计算公式：
 | 2024/5/15 | 新增表，用于存放msprof导出的相关配置信息 |
 
 
+### MSTX_EVENTS
+
+格式
+
+| 字段名          | 类型      | 索引  | 含义  |
+|--------------|---------|-----|------------------------|
+| startNs      | INTEGER |     | host侧tx打点数据开始时间  |
+| endNs        | INTEGER |     | host侧tx打点数据结束时间  |
+| eventType    | INTEGER |     | host侧tx打点数据类型在ENUM_MSTX_EVENT_TYPE表里对应的id|
+| rangeId      | INTEGER |     | host侧range类型tx数据对应的range id(预留)|
+| category     | INTEGER |     | host侧tx数据所属的分类id(预留)|
+| message      | INTEGER |     | host侧tx打点数据携带信息在STRING_IDS表里对应的id|
+| globalTid    | INTEGER |     | host侧tx打点数据开始线程的全局tid|
+| endGlobalTid | INTEGER |     | host侧tx打点数据结束线程的全局tid|
+| domainId     | INTEGER |     | host侧tx打点数据所属域的域id(预留)|
+| connectionId | INTEGER |     | host侧tx打点数据与TASK表里npu打点task的关联id |
+
+变更记录：
+
+| 日期       | 内容      |
+|----------|---------|
+| 2024/5/31 | 630首次上线，用于保存host侧tx打点数据 |
+
+### ENUM_MSTX_EVENT_TYPE
+
+格式
+
+| 字段名          | 类型      | 索引  | 含义  |
+|--------------|---------|-----|------------------------|
+| id           | INTEGER | 主键 | host侧tx打点数据event类型对应的id  |
+| name         | INTEGER |     | host侧tx打点数据event类型  |
+
+变更记录：
+
+| 日期       | 内容      |
+|----------|---------|
+| 2024/5/31 | 630首次上线，用于保存host侧tx打点数据event 类型 |
+
+
 ## 2. pytorch框架数据db格式表结构
 db命名：ascend_pytorch_profiler_{rankId}.db
 （无rankId时：ascend_pytorch_profiler.db）
@@ -1031,3 +1070,20 @@ db命名：ascend_pytorch_profiler_{rankId}.db
 |-----------|-----------------|
 | 2024/3/7  | 330首次上线         |
 | 2024/5/19 | 表中各字段统一修改为小驼峰命名 |
+
+### STEP_TIME
+保存profiler采集step起始时间
+
+格式:
+
+| 字段名      | 类型      | 索引  | 含义           |
+|----------|---------|-----|--------------|
+| id       | INTEGER |     | step id值    |
+| startNs  | INTEGER |     | step开始时间  |
+| endNs    | INTEGER |     | step结束时间  |
+
+变更记录:
+
+| 日期        | 内容              |
+|-----------|-----------------|
+| 2024/5/31  | 630首次上线 |
