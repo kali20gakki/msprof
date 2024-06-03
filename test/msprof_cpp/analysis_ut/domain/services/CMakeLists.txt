@@ -27,6 +27,8 @@ aux_source_directory(${TOP_DIR}/analysis/csrc/entities DEVICE_PARSER_SOURCE)
 aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/stubs/dfx DEVICE_PARSER_SOURCE)
 aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/domain/services/test DEVICE_PARSER_SOURCE)
 
+list(APPEND DEVICE_PARSER_SOURCE ${TOP_DIR}/analysis/csrc/viewer/database/drafts/number_mapping.cpp)
+
 add_executable(
         device_parser_utest
         ${DEVICE_PARSER_SOURCE}

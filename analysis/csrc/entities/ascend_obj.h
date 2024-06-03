@@ -107,6 +107,7 @@ struct HostTask {
     uint64_t modelId = 0;
     int64_t connection_id = 0; // -1 表示该任务无node直连
     uint64_t taskType = 0;
+    std::string taskTypeStr;
     uint64_t timeStamp = 0;
     uint32_t streamId = 0;
     uint32_t contextId = 0;
