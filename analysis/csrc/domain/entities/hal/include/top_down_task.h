@@ -26,8 +26,8 @@ struct TopDownTask {
     std::string hostTaskType = "";
     uint64_t modelId = 0;
     int64_t connectionId = 0;
-    uint64_t startTime = 0;
-    uint64_t endTime = 0;
+    double startTime = 0;
+    double endTime = 0;
 
     TopDownTask() = default;
     TopDownTask(uint16_t taskId, uint16_t batchId, uint32_t streamId, uint32_t contextId, int32_t indexId,

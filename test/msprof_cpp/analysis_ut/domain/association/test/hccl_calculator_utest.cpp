@@ -84,7 +84,7 @@ const HcclTaskDataFormat HCCL_TASK_DATA = {
 // modelId, indexId, streamId, taskId, contextId, batchId, startTime, duration,
 // hostTaskType, deviceTaskType, connectionId
 using AscendTaskDataFormat = std::vector<std::tuple<uint32_t, uint32_t, uint16_t, uint16_t, uint32_t, uint16_t,
-        uint64_t, uint64_t, uint16_t, uint16_t, uint32_t>>;
+        double, double, uint16_t, uint16_t, uint32_t>>;
 const AscendTaskDataFormat ASCEND_TASK_DATA = {
     {4294967295, -1, 5, 5450, 0, 0, 88511176361580, 88511176362300, 0, 0, 17},
     {4294967295, -1, 5, 5450, 1, 0, 88511176364200, 88511176366660, 0, 0, 17},

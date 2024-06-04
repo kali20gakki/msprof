@@ -32,9 +32,9 @@ struct GroupData {
 
 struct OpTypeInfo {
     OpTypeInfo() = default;
-    OpTypeInfo(uint64_t max, uint64_t min, std::string opType) : max(max), min(min), opType(std::move(opType)) {}
-    uint64_t max = 0;
-    uint64_t min = UINT64_MAX;
+    OpTypeInfo(double max, double min, std::string opType) : max(max), min(min), opType(std::move(opType)) {}
+    double max = 0;
+    double min = std::numeric_limits<double>::infinity();
     std::string opType;
 };
 
@@ -70,6 +70,10 @@ bool HcclCalculator::GetHcclData(DataInventory& dataInventory)
     INFO("Start Hccl calculator GetHcclData.");
     auto ascendTasks = dataInventory.GetPtr<std::vector<TopDownTask>>();
     auto hcclTasks = dataInventory.GetPtr<std::vector<HcclTask>>();
+    if (ascendTasks == nullptr || hcclTasks == nullptr) {
+        ERROR("Ori ascend task data pointer or ori hccl task data pointer is nullptr.");
+        return false;
+    }
     std::vector<DeviceHcclTask> deviceHcclTasks;
     if (!MergeHcclTaskData(ascendTasks, hcclTasks, deviceHcclTasks)) {
         ERROR("Merge hccl task and ascend task failed.");
@@ -77,10 +81,15 @@ bool HcclCalculator::GetHcclData(DataInventory& dataInventory)
     }
 
     auto hcclOps = dataInventory.GetPtr<std::vector<HcclOp>>();
+    if (hcclOps == nullptr) {
+        ERROR("Ori hccl op data pointer is nullptr.");
+        return false;
+    }
     if (!MergeHcclOpData(hcclOps, deviceHcclTasks)) {
         ERROR("Merge hccl op failed.");
         return false;
     }
+    return true;
 }
 
 bool HcclCalculator::MergeHcclTaskData(const std::shared_ptr<std::vector<TopDownTask>>& ascendTasks,
@@ -99,7 +108,6 @@ bool HcclCalculator::MergeHcclTaskData(const std::shared_ptr<std::vector<TopDown
         TaskId tempId(task.streamId, task.batchId, task.taskId, task.contextId);
         taskTable[tempId] = task;
     }
-
     if (!Utils::Reserve(deviceHcclTasks, hcclTasks->size())) {
         ERROR("Reserve for hccl task failed.");
         return false;
@@ -111,10 +119,11 @@ bool HcclCalculator::MergeHcclTaskData(const std::shared_ptr<std::vector<TopDown
                   task.streamId, task.taskId, task.contextId, task.batchId);
             continue;
         }
-        if (taskTable[tempId].startTime != UINT64_MAX) {
+        if (!Utils::IsDoubleEqual(taskTable[tempId].startTime, -1)) {
             deviceHcclTasks.emplace_back(InitHcclTaskData(taskTable[tempId], task));
         }
     }
+    return true;
 }
 
 DeviceHcclTask HcclCalculator::InitHcclTaskData(const TopDownTask &topDownTask, const HcclTask &hcclTask)
@@ -291,7 +300,7 @@ void HcclCalculator::CalculateTaskBandwidth(std::vector<DeviceHcclTask*> hcclTas
             payLoadAllSize += hcclTasks[sizeI]->size;
         }
         auto transitTime = hcclTasks[closeIdx]->timestamp + hcclTasks[closeIdx]->duration - hcclTasks[idx]->timestamp;
-        double payloadBandwidth = (transitTime != 0) ? (payLoadAllSize / transitTime) : 0;
+        double payloadBandwidth = Utils::IsDoubleEqual(transitTime, 0.0) ? 0 : (payLoadAllSize / transitTime);
         for (size_t sizeI = idx; sizeI < idx + payloadCnt; ++sizeI) {
             hcclTasks[sizeI]->bandwidth = payloadBandwidth;
         }
@@ -310,7 +319,7 @@ uint16_t HcclCalculator::GetJumpNum(const DeviceHcclTask &task)
     return RDMA_WITH_BARRIER_TASK_NUM;
 }
 
-double HcclCalculator::CalculateBandwidth(double size, uint64_t duration)
+double HcclCalculator::CalculateBandwidth(double size, double duration)
 {
     // B -> GB: 以 1 / 10^9替代； ns -> s: 以 1 / 10^9替代。两者约分，带宽单位为 GB/s
     return (duration <= 0) ? 0 : static_cast<double>(size) / duration;
@@ -346,15 +355,16 @@ bool HcclCalculator::GetHcclStaticsData()
         }
     }
     std::unordered_map<std::string, HcclStastics> stasticsTable;
-    uint64_t allTaskTime = 0;
+    double allTaskTime = 0;
     for (const auto& data : groupedData) {
         auto& record =  stasticsTable[data.second.opType];
+        double duration = data.second.max - data.second.min;
         record.opType = data.second.opType;
         record.count++;
-        record.totalTime += data.second.max - data.second.min;
-        record.max = std::max(data.second.max, record.max);
-        record.min = std::min(data.second.min, record.min);
-        allTaskTime += data.second.max - data.second.min;
+        record.totalTime += duration;
+        record.max = std::max(duration, record.max);
+        record.min = std::min(duration, record.min);
+        allTaskTime += duration;
     }
     if (!Utils::Reserve(stasticsData_, stasticsTable.size())) {
         ERROR("Reserve for hccl stastics data failed.");
