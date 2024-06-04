@@ -13,6 +13,7 @@
 #ifndef ANALYSIS_DOMAIN_SERVICES_ASSOCIATION_CALCULATOR_HCCL_CALCULATOR_H
 #define ANALYSIS_DOMAIN_SERVICES_ASSOCIATION_CALCULATOR_HCCL_CALCULATOR_H
 
+#include <limits>
 #include <vector>
 
 #include "analysis/csrc/domain/entities/hal/include/top_down_task.h"
@@ -38,8 +39,8 @@ struct DeviceHcclTask {
     uint32_t remoteRank = 0;
     uint32_t contextId = 0;
     int64_t connectionId = 0;
-    uint64_t timestamp = 0;
-    uint64_t duration = 0;
+    double timestamp = 0;
+    double duration = 0;
     uint64_t hostTimestamp = 0;
     uint64_t firstTimestamp = 0;
     uint64_t modelId = 0;
@@ -60,9 +61,9 @@ struct DeviceHcclTask {
 struct HcclStastics {
     std::string opType;
     uint32_t count = 0;
-    uint64_t totalTime = 0;
-    uint64_t min = UINT64_MAX;
-    uint64_t max = 0;
+    double totalTime = 0;
+    double min = std::numeric_limits<double>::infinity();
+    double max = 0;
     double avg = 0.0;
     double ratio = 0.0;
 };
@@ -83,7 +84,7 @@ private:
     void UpdateHcclBandwidth();
     static void CalculateTaskBandwidth(std::vector<DeviceHcclTask*> hcclTasks);
     static uint16_t GetJumpNum(const DeviceHcclTask &task);
-    static double CalculateBandwidth(double size, uint64_t duration);
+    static double CalculateBandwidth(double size, double duration);
     static uint16_t FindConsecutivePayloadTask(std::vector<DeviceHcclTask*> tasks, size_t idx);
     bool GetHcclStaticsData();
     bool InjectData(DataInventory &inventory);

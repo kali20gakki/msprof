@@ -41,7 +41,7 @@ const HcclOpDataFormat HCCL_OP_DATA = {
 // taskType, opType, connectionId, isMaster, streamId, taskId, durationEstimated, localRank, remoteRank, transportType,
 // size, dataType, linkType, bandwidth, contextId, notifyId, batchId, rdmaType
 using HcclTaskDataFormat = std::vector<std::tuple<uint64_t, int32_t, std::string, uint32_t, std::string, std::string,
-        uint64_t, int32_t, uint64_t, uint64_t, std::string, std::string, std::string, int64_t, uint32_t, uint32_t,
+        uint64_t, int32_t, double, double, std::string, std::string, std::string, int64_t, uint32_t, uint32_t,
         uint32_t, double, uint32_t, uint32_t, std::string, double, std::string, std::string, double, uint32_t,
         std::string, uint32_t, std::string>>;
 const HcclTaskDataFormat HCCL_TASK_DATA = {
@@ -64,7 +64,7 @@ const HcclTaskDataFormat HCCL_TASK_DATA = {
 
 
 // opType, count, totalTime, min, avg, max, ratio
-using HcclStasticsFormat = std::vector<std::tuple<std::string, uint32_t, uint64_t, uint64_t, double, uint64_t, double>>;
+using HcclStasticsFormat = std::vector<std::tuple<std::string, uint32_t, double, double, double, double, double>>;
 const HcclStasticsFormat HCCL_STASTICS_DATA = {
     {"hcom_allReduce_", 1352, 5852671300, 211920, 4328898.890533, 133867780, 94.10197},
     {"hcom_batchSendRecv_", 96, 243562100, 542100, 2537105.208333, 105191720, 3.916105},
