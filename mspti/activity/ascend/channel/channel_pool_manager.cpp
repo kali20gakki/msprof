@@ -12,6 +12,8 @@
 
 #include "activity/ascend/channel/channel_pool_manager.h"
 #include "common/inject/driver_inject.h"
+#include "common/plog_manager.h"
+#include "common/utils.h"
 
 namespace Mspti {
 namespace Ascend {
@@ -42,9 +44,10 @@ msptiResult ChannelPoolManager::Init()
     if (ret != DRV_ERROR_NONE) {
         return MSPTI_ERROR_DEVICE_OFFLINE;
     }
-    drvChannelPoll_ = std::make_unique<ChannelPool>(dev_num);
-    if (drvChannelPoll_ == nullptr) {
-        return MSPTI_ERROR_MEMORY_MALLOC;
+    Mspti::Common::MsptiMakeUniquePtr(drvChannelPoll_, dev_num);
+    if (!drvChannelPoll_) {
+        MSPTI_LOGE("Failed to init ChannelPool.");
+        return MSPTI_ERROR_INNER;
     }
     return drvChannelPoll_->Start();
 }

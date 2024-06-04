@@ -16,6 +16,7 @@
 #include <unistd.h>
 
 #include "common/config.h"
+#include "common/plog_manager.h"
 #include "common/utils.h"
 #include "common/inject/driver_inject.h"
 #include "securec.h"
@@ -34,9 +35,11 @@ msptiResult ChannelPool::AddReader(uint32_t devId, AI_DRV_CHANNEL channelId)
     size_t channel_index = GetChannelIndex(devId, channelId);
     std::lock_guard<std::mutex> lk(mtx_);
     if (readers_map_.find(channel_index) == readers_map_.end()) {
-        auto reader = std::make_shared<ChannelReader>(devId, channelId);
+        std::shared_ptr<ChannelReader> reader = nullptr;
+        Mspti::Common::MsptiMakeSharedPtr(reader, devId, channelId);
         if (!reader) {
-            return MSPTI_ERROR_MEMORY_MALLOC;
+            MSPTI_LOGE("Create channel reader failed.");
+            return MSPTI_ERROR_INNER;
         }
         reader->Init();
         readers_map_[channel_index] = reader;
@@ -59,7 +62,11 @@ msptiResult ChannelPool::RemoveReader(uint32_t devId, AI_DRV_CHANNEL channelId)
 
 msptiResult ChannelPool::Start()
 {
-    threadPool_ = std::make_unique<Mspti::Common::ThreadPool>(Mspti::Common::LOAD_BALANCE_METHOD::ID_MOD, pool_size_);
+    Mspti::Common::MsptiMakeUniquePtr(threadPool_, Mspti::Common::LOAD_BALANCE_METHOD::ID_MOD, pool_size_);
+    if (!threadPool_) {
+        MSPTI_LOGE("Failed to init ThreadPool.");
+        return MSPTI_ERROR_INNER;
+    }
     threadPool_->SetThreadPoolQueueSize(CHANNELPOLL_THREAD_QUEUE_SIZE);
     threadPool_->Start();
     if (!thread_.joinable()) {

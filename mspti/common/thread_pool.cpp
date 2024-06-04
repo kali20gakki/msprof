@@ -11,6 +11,7 @@
 */
 
 #include "common/thread_pool.h"
+#include "common/utils.h"
 
 namespace Mspti {
 namespace Common {
@@ -42,7 +43,11 @@ int ThreadPool::Start()
     }
 
     for (unsigned int ii = 0; ii < threadNum_; ++ii) {
-        auto thread = std::make_shared<Thread>(threadPoolQueueSize_);
+        std::shared_ptr<Thread> thread = nullptr;
+        Mspti::Common::MsptiMakeSharedPtr(thread, threadPoolQueueSize_);
+        if (!thread) {
+            return -1;
+        }
         thread->Start();
         threads_.push_back(thread);
     }

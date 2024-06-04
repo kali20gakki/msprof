@@ -46,7 +46,11 @@ void ContextManager::InitDevTimeInfo(uint32_t deviceId)
     std::lock_guard<std::mutex> lk(dev_time_mtx_);
     auto iter = dev_time_info_.find(deviceId);
     if (iter == dev_time_info_.end()) {
-        auto dev_ptr = std::make_unique<DevTimeInfo>();
+        std::unique_ptr<DevTimeInfo> dev_ptr = nullptr;
+        Mspti::Common::MsptiMakeUniquePtr(dev_ptr);
+        if (!dev_ptr) {
+            return;
+        }
         dev_ptr->freq = GetDevFreq(deviceId);
         dev_ptr->hostStartMonoRawTime = Mspti::Common::Utils::GetClockMonotonicRawNs();
         dev_ptr->devStartSysCnt = GetDevStartSysCnt(deviceId);
@@ -57,7 +61,6 @@ void ContextManager::InitDevTimeInfo(uint32_t deviceId)
 
 uint64_t ContextManager::GetMonotomicFromSysCnt(uint32_t deviceId, uint64_t sysCnt)
 {
-    // 性能优化，避免频繁加减锁
     std::lock_guard<std::mutex> lk(dev_time_mtx_);
     auto iter = dev_time_info_.find(deviceId);
     if (iter == dev_time_info_.end() || iter->second->freq == 0) {

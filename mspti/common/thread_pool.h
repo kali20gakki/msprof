@@ -21,6 +21,7 @@
 
 #include "common/bound_queue.h"
 #include "common/task.h"
+#include "common/utils.h"
 #include "external/mspti_base.h"
 
 namespace Mspti {
@@ -44,7 +45,10 @@ public:
 
     void Start()
     {
-        queue_ = std::make_shared<TaskQueue>(queueSize_);
+        Mspti::Common::MsptiMakeSharedPtr(queue_, queueSize_);
+        if (!queue_) {
+            return;
+        }
         if (!thread_.joinable()) {
             thread_ = std::thread(std::bind(&Thread::Run, this));
         }

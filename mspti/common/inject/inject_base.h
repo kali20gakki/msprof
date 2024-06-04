@@ -13,7 +13,9 @@
 #ifndef MSPTI_COMMON_INJECT_INJECT_BASE_H
 #define MSPTI_COMMON_INJECT_INJECT_BASE_H
 
-#include <stdint.h>
+#include <cstdint>
+#include <stdexcept>
+#include <string>
 
 using rtError_t = uint32_t;
 using rtStream_t = void *;
@@ -28,6 +30,13 @@ enum DrvError {
 
 #define PROF_CHANNEL_NAME_LEN 32
 #define PROF_CHANNEL_NUM_MAX 160
+template<typename Type>
+inline void THROW_FUNC_NOTFOUND(Type ptr, const std::string &funName, const std::string &soName)
+{
+    if (ptr == nullptr) {
+        throw std::runtime_error("Failed to get function: \""+ funName + "\" from \"" + soName + "\"");
+    }
+}
 
 struct ChannelInfo {
     char channelName[PROF_CHANNEL_NAME_LEN];

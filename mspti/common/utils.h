@@ -13,16 +13,46 @@
 #ifndef MSPTI_COMMON_UTILS_H
 #define MSPTI_COMMON_UTILS_H
 
-#include <stdint.h>
+#include <cstdint>
+#include <exception>
+#include <memory>
+#include <string>
 
 constexpr uint32_t SECTONSEC = 1000000000UL;
 
 namespace Mspti {
 namespace Common {
 
+template<typename Types, typename... Args>
+inline void MsptiMakeSharedPtr(std::shared_ptr<Types> &ptr, Args&&... args)
+{
+    try {
+        ptr = std::make_shared<Types>(std::forward<Args>(args)...);
+    } catch (std::bad_alloc &e) {
+        throw;
+    } catch (...) {
+        ptr = nullptr;
+        return;
+    }
+}
+
+template<typename Types, typename... Args>
+inline void MsptiMakeUniquePtr(std::unique_ptr<Types> &ptr, Args&&... args)
+{
+    try {
+        ptr = std::make_unique<Types>(std::forward<Args>(args)...);
+    } catch (std::bad_alloc &e) {
+        throw;
+    } catch (...) {
+        ptr = nullptr;
+        return;
+    }
+}
+
 class Utils {
 public:
     static uint64_t GetClockMonotonicRawNs();
+    static std::string GetProcName();
 };
 
 }  // Common

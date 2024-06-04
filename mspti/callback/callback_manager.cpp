@@ -14,6 +14,7 @@
 #include <memory>
 
 #include "activity/ascend/ascend_manager.h"
+#include "common/plog_manager.h"
 
 namespace Mspti {
 namespace Callback {
@@ -37,23 +38,24 @@ CallbackManager *CallbackManager::GetInstance()
 msptiResult CallbackManager::Init(msptiSubscriberHandle *subscriber, msptiCallbackFunc callback, void* userdata)
 {
     if (subscriber == nullptr) {
-        printf("[ERROR] subscriber cannot be nullptr.\n");
+        MSPTI_LOGE("subscriber cannot be nullptr.");
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
     if (init_.load() || *subscriber == subscriber_ptr_.get()) {
-        printf("[ERROR] subscriber cannot be register repeat.\n");
+        MSPTI_LOGE("subscriber cannot be register repeat.");
         init_.store(false);
         return MSPTI_ERROR_MULTIPLE_SUBSCRIBERS_NOT_SUPPORTED;
     }
-    subscriber_ptr_ = std::make_unique<msptiSubscriber_st>();
+    Mspti::Common::MsptiMakeUniquePtr(subscriber_ptr_);
     if (!subscriber_ptr_) {
-        printf("[ERROR]Create unique_ptr failed.\n");
-        return MSPTI_ERROR_MEMORY_MALLOC;
+        MSPTI_LOGE("Failed to init subscriber.");
+        return MSPTI_ERROR_INNER;
     }
     subscriber_ptr_->handle = callback;
     subscriber_ptr_->userdata = userdata;
     *subscriber = subscriber_ptr_.get();
     init_.store(true);
+    MSPTI_LOGI("CallbackManager Init success.");
     return MSPTI_SUCCESS;
 }
 
@@ -63,11 +65,12 @@ msptiResult CallbackManager::UnInit(msptiSubscriberHandle subscriber)
         return MSPTI_SUCCESS;
     }
     if (subscriber_ptr_.get() != subscriber) {
-        printf("[ERROR] subscriber was not subscribe.\n");
+        MSPTI_LOGE("[ERROR] subscriber was not subscribe.");
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
     subscriber_ptr_.reset(nullptr);
     cbid_map_.clear();
+    MSPTI_LOGI("CallbackManager UnInit success.");
     return MSPTI_SUCCESS;
 }
 
@@ -80,6 +83,7 @@ msptiResult CallbackManager::Register(msptiCallbackDomain domain, msptiCallbackI
     } else {
         domain_entry->second.insert(cbid);
     }
+    MSPTI_LOGI("CallbackManager Register domain: %d, cbid: %d.", domain, cbid);
     return MSPTI_SUCCESS;
 }
 
@@ -88,11 +92,11 @@ msptiResult CallbackManager::UnRegister(msptiCallbackDomain domain, msptiCallbac
     std::lock_guard<std::mutex> lk(cbid_mtx_);
     auto domain_entry = cbid_map_.find(domain);
     if (domain_entry == cbid_map_.end()) {
-        printf("[WARN] callback was not enable.\n");
         return MSPTI_SUCCESS;
     } else {
         domain_entry->second.erase(cbid);
     }
+    MSPTI_LOGI("CallbackManager UnRegister domain: %d, cbid: %d.", domain, cbid);
     return MSPTI_SUCCESS;
 }
 
@@ -100,15 +104,15 @@ msptiResult CallbackManager::EnableCallback(uint32_t enable,
     msptiSubscriberHandle subscriber, msptiCallbackDomain domain, msptiCallbackId cbid)
 {
     if (!init_.load()) {
-        printf("[WARN] callback was not init.\n");
+        MSPTI_LOGW("CallbackManager was not init.");
         return MSPTI_SUCCESS;
     }
     if (subscriber != subscriber_ptr_.get()) {
-        printf("[ERROR] EnableCallback: subscriber was not subscribe.\n");
+        MSPTI_LOGE("subscriber was not subscribe.");
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
     if (domain <= MSPTI_CB_DOMAIN_INVALID || domain >= MSPTI_CB_DOMAIN_SIZE) {
-        printf("[ERROR] domain was invalid.\n");
+        MSPTI_LOGE("domain: %d was invalid.", domain);
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
     return (enable != 0) ? Register(domain, cbid) : UnRegister(domain, cbid);
@@ -118,33 +122,35 @@ msptiResult CallbackManager::EnableDomain(uint32_t enable,
     msptiSubscriberHandle subscriber, msptiCallbackDomain domain)
 {
     if (!init_.load()) {
-        printf("[WARN] callback was not init.\n");
+        MSPTI_LOGW("CallbackManager was not init.");
         return MSPTI_SUCCESS;
     }
     if (subscriber != subscriber_ptr_.get()) {
-        printf("[ERROR] EnableDomain: subscriber was not subscribe.\n");
+        MSPTI_LOGE("subscriber was not subscribe.");
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
     if (domain <= MSPTI_CB_DOMAIN_INVALID || domain >= MSPTI_CB_DOMAIN_SIZE) {
-        printf("[ERROR] domain was invalid.\n");
+        MSPTI_LOGE("domain: %d was invalid.", domain);
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
     std::lock_guard<std::mutex> lk(cbid_mtx_);
     auto cbid_set = domain_cbid_map_.find(domain);
     if (cbid_set == domain_cbid_map_.end()) {
-        printf("[INFO] domain was invalid.\n");
         return MSPTI_SUCCESS;
     }
+    msptiResult ret = MSPTI_SUCCESS;
     for (const auto& cbid : cbid_set->second) {
-        (enable != 0) ? Register(domain, cbid) : UnRegister(domain, cbid);
+        auto reg_ret = (enable != 0) ? Register(domain, cbid) : UnRegister(domain, cbid);
+        ret = (reg_ret != MSPTI_SUCCESS) ? reg_ret : ret;
     }
-    return MSPTI_SUCCESS;
+    return ret;
 }
 
 void CallbackManager::ExecuteCallback(msptiCallbackDomain domain,
     msptiCallbackId cbid, msptiApiCallbackSite site, const char* funcName)
 {
     if (!init_.load()) {
+        MSPTI_LOGW("CallbackManager was not init.");
         return;
     }
     auto iter = cbid_map_.end();

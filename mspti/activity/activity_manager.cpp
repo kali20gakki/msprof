@@ -10,36 +10,36 @@
  * *****************************************************************************
 */
 
-#include <cstring>
-#include <functional>
-
 #include "activity/activity_manager.h"
 
+#include <cstring>
+#include <functional>
 #include "securec.h"
+
+#include "common/plog_manager.h"
+#include "common/utils.h"
 
 namespace Mspti {
 namespace Activity {
 
-msptiResult ActivityBuffer::Init(msptiBuffersCallbackRequestFunc func)
+void ActivityBuffer::Init(msptiBuffersCallbackRequestFunc func)
 {
     if (func == nullptr) {
-        return MSPTI_ERROR_INNER;
+        return;
     }
     func(&buf_, &buf_size_, &records_num_);
     const static uint64_t MIN_ACTIVITY_BUFFER_SIZE = 2 * 1024 * 1024;
     if (buf_size_ < MIN_ACTIVITY_BUFFER_SIZE) {
-        printf("Please malloc buf larger than 2MB\n");
+        PRINT_LOGW("Please malloc the Activity Buffer more than 2MB. Current is %lu Bytes.", buf_size_);
     }
-    return MSPTI_SUCCESS;
 }
 
-msptiResult ActivityBuffer::UnInit(msptiBuffersCallbackCompleteFunc func)
+void ActivityBuffer::UnInit(msptiBuffersCallbackCompleteFunc func)
 {
     if (func == nullptr) {
-        return MSPTI_ERROR_INNER;
+        return;
     }
     func(buf_, buf_size_, valid_size_);
-    return MSPTI_SUCCESS;
 }
 
 msptiResult ActivityBuffer::Record(msptiActivity *activity, size_t size)
@@ -48,7 +48,7 @@ msptiResult ActivityBuffer::Record(msptiActivity *activity, size_t size)
         return MSPTI_ERROR_INNER;
     }
     if (size > buf_size_ - valid_size_) {
-        printf("There's not enough space.");
+        PRINT_LOGW("Record is dropped due to insufficient space of Activity Buffer.");
         return MSPTI_ERROR_INNER;
     }
     if (memcpy_s(buf_ + valid_size_, buf_size_ - valid_size_, activity, size) != EOK) {
@@ -56,6 +56,7 @@ msptiResult ActivityBuffer::Record(msptiActivity *activity, size_t size)
     }
     valid_size_ += size;
     records_num_++;
+    return MSPTI_SUCCESS;
 }
 
 size_t ActivityBuffer::BufSize()
@@ -86,9 +87,8 @@ ActivityManager::~ActivityManager()
     }
     JoinWorkThreads();
     FlushActivityBuffer();
-    if (total_drop_num_.load() > 0) {
-        printf("Activity Record report: %lu failed.\n", total_drop_num_.load());
-    }
+    MSPTI_LOGI("Total activity record: %lu. Total activity drop: %lu",
+        total_record_num_.load(), total_drop_num_.load());
 }
 
 void ActivityManager::JoinWorkThreads()
@@ -118,7 +118,7 @@ msptiResult ActivityManager::RegisterCallbacks(
 msptiResult ActivityManager::Register(bool enable, msptiActivityKind kind)
 {
     if (!init_.load()) {
-        printf("[WARN] ActivityManager was not init.\n");
+        PRINT_LOGW("Please register your Activity callback functions first.");
         return MSPTI_SUCCESS;
     }
     std::lock_guard<std::mutex> lk(activity_mtx_);
@@ -135,7 +135,7 @@ std::unordered_set<msptiActivityKind>& ActivityManager::GetActivities()
 msptiResult ActivityManager::GetNextRecord(uint8_t *buffer, size_t validBufferSizeBytes, msptiActivity **record)
 {
     if (buffer == nullptr) {
-        return MSPTI_ERROR_INNER;
+        return MSPTI_ERROR_INVALID_PARAMETER;
     }
     static thread_local size_t pos = 0;
     if (pos >= validBufferSizeBytes) {
@@ -169,7 +169,11 @@ msptiResult ActivityManager::Record(msptiActivity *activity, size_t size)
     static const float ACTIVITY_BUFFER_THRESHOLD = 0.8;
     std::lock_guard<std::mutex> lk(buf_mtx_);
     if (!cur_buf_) {
-        cur_buf_ = std::make_unique<ActivityBuffer>();
+        Mspti::Common::MsptiMakeUniquePtr(cur_buf_);
+        if (!cur_buf_) {
+            MSPTI_LOGE("Failed to init Activity Buffer.");
+            return MSPTI_ERROR_INNER;
+        }
         cur_buf_->Init(bufferRequested_handle_);
     } else if (cur_buf_->ValidSize() > ACTIVITY_BUFFER_THRESHOLD * cur_buf_->BufSize()) {
         {
@@ -178,10 +182,19 @@ msptiResult ActivityManager::Record(msptiActivity *activity, size_t size)
             co_activity_buffers_.emplace_back(std::move(cur_buf_));
             cv_.notify_one();
         }
-        cur_buf_ = std::make_unique<ActivityBuffer>();
+        Mspti::Common::MsptiMakeUniquePtr(cur_buf_);
+        if (!cur_buf_) {
+            MSPTI_LOGE("Failed to init Activity Buffer.");
+            return MSPTI_ERROR_INNER;
+        }
         cur_buf_->Init(bufferRequested_handle_);
     }
-    cur_buf_->Record(activity, size);
+    if (cur_buf_->Record(activity, size) != MSPTI_SUCCESS) {
+        MSPTI_LOGE("Failed to record activity.");
+        total_drop_num_++;
+        return MSPTI_ERROR_INNER;
+    }
+    total_record_num_++;
     return MSPTI_SUCCESS;
 }
 
@@ -189,7 +202,6 @@ void ActivityManager::Run()
 {
     while (true) {
         {
-            // 阻塞直到buff full或者线程退出，
             std::unique_lock<std::mutex> lk(cv_mtx_);
             cv_.wait(lk, [&] () {return buf_full_ || !thread_run_.load();});
             if (!thread_run_.load()) {

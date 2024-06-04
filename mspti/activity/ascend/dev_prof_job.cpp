@@ -16,6 +16,8 @@
 
 #include "activity/ascend/channel/channel_pool_manager.h"
 #include "common/inject/driver_inject.h"
+#include "common/plog_manager.h"
+#include "common/utils.h"
 #include "securec.h"
 
 namespace Mspti {
@@ -24,7 +26,9 @@ namespace Ascend {
 std::shared_ptr<DevProfJob> CollectionJobFactory::CreateJob(uint32_t deviceId, msptiActivityKind kind)
 {
     if (kind == MSPTI_ACTIVITY_KIND_MARK) {
-        return std::make_shared<ProfTsTrackJob>(deviceId);
+        std::shared_ptr<ProfTsTrackJob> ret = nullptr;
+        Mspti::Common::MsptiMakeSharedPtr(ret, deviceId);
+        return ret;
     }
     return nullptr;
 }
@@ -58,8 +62,8 @@ msptiResult ProfTsTrackJob::Start()
     profStartPara.userDataSize = sizeof(TsTsFwProfileConfigT);
     int ret = ProfDrvStart(deviceId_, channelId_, &profStartPara);
     if (ret != 0) {
-        printf("[ERROR]Failed to start profiling for device id: %lu, channel id: %lu\n", deviceId_, channelId_);
-        return MSPTI_ERROR_DEVICE_PROF_TASK;
+        MSPTI_LOGE("Failed to start TsTrackJob for device: %u, channel id: %u", deviceId_, channelId_);
+        return MSPTI_ERROR_INNER;
     }
     return MSPTI_SUCCESS;
 }
@@ -68,8 +72,8 @@ msptiResult ProfTsTrackJob::Stop()
 {
     int ret = ProfStop(deviceId_, channelId_);
     if (ret != 0) {
-        printf("[ERROR]Failed to stop profiling for device id: %lu, channel id: %lu\n", deviceId_, channelId_);
-        return MSPTI_ERROR_DEVICE_PROF_TASK;
+        MSPTI_LOGE("Failed to stop TsTrackJob for device: %u, channel id: %u", deviceId_, channelId_);
+        return MSPTI_ERROR_INNER;
     }
     DevProfJob::RemoveReader(deviceId_, channelId_);
     return MSPTI_SUCCESS;

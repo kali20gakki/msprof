@@ -9,9 +9,11 @@
  * Creation Date      : 2024/05/07
  * *****************************************************************************
 */
+#include "activity/ascend/ascend_manager.h"
 
 #include "activity/activity_manager.h"
-#include "activity/ascend/ascend_manager.h"
+#include "common/plog_manager.h"
+#include "common/utils.h"
 
 namespace Mspti {
 namespace Ascend {
@@ -32,28 +34,31 @@ AscendManager::~AscendManager()
 
 msptiResult AscendManager::StartDevProfTask(uint32_t deviceId)
 {
+    MSPTI_LOGI("Start device: %u task.", deviceId);
     std::lock_guard<std::mutex> lk(dev_map_mtx_);
     auto iter = dev_map_.find(deviceId);
     if (iter == dev_map_.end()) {
-        auto device = std::make_unique<Device>(deviceId);
+        std::unique_ptr<Device> device = nullptr;
+        Mspti::Common::MsptiMakeUniquePtr(device, deviceId);
         if (!device) {
-            printf("Malloc Failed\n");
-            return MSPTI_ERROR_MEMORY_MALLOC;
+            MSPTI_LOGE("Failed to init Device for device: %u.", deviceId);
+            return MSPTI_ERROR_INNER;
         }
         auto ret = device->Start(Mspti::Activity::ActivityManager::GetInstance()->GetActivities());
         if (ret != MSPTI_SUCCESS) {
-            printf("[ERROR] Device %u start failed.\n", deviceId);
+            MSPTI_LOGE("The device %u start failed.", deviceId);
             return ret;
         }
         dev_map_.insert({deviceId, std::move(device)});
     } else {
-        printf("[WARN] Device %u is running.\n", deviceId);
+        MSPTI_LOGW("The device %u is already running.", deviceId);
     }
     return MSPTI_SUCCESS;
 }
 
 msptiResult AscendManager::StopDevProfTask(uint32_t deviceId)
 {
+    MSPTI_LOGI("Stop device: %u task.", deviceId);
     std::lock_guard<std::mutex> lk(dev_map_mtx_);
     auto iter = dev_map_.find(deviceId);
     if (iter != dev_map_.end()) {

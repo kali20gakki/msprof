@@ -9,14 +9,15 @@
  * Creation Date      : 2024/05/07
  * *****************************************************************************
 */
+#include "common/function_loader.h"
 
 #include <dlfcn.h>
 
-#include "common/function_loader.h"
+#include "common/utils.h"
 
 namespace Mspti {
 namespace Common {
-
+// 该模块请使用库函数，不能使用MSPTI_LOGX
 FunctionLoader::FunctionLoader(const std::string& soName)
 {
     soName_ = soName + ".so";
@@ -74,7 +75,13 @@ void FunctionRegister::RegisteFunction(const std::string& soName, const std::str
     std::lock_guard<std::mutex> lock(mu_);
     auto itr = registry_.find(soName);
     if (itr == registry_.end()) {
-        auto func_loader = std::make_unique<FunctionLoader>(soName);
+        std::unique_ptr<FunctionLoader> func_loader = nullptr;
+        Mspti::Common::MsptiMakeUniquePtr(func_loader, soName);
+        if (!func_loader) {
+            printf("Failed to init FunctionLoader.\n");
+            return;
+        }
+
         func_loader->Set(funcName);
         registry_.emplace(soName, std::move(func_loader));
         return;
