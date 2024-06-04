@@ -10,6 +10,8 @@ class StaticOpMemBean(StructDecoder):
     """
     Operator memory bean under static graph scenarios
     """
+    NODE_INDEX_END_MAX = 4294967294
+    CORRECT_NODE_INDEX_END_MAX = 4294967295
 
     def __init__(self: any, *args) -> None:
         filed = args[0]
@@ -47,6 +49,8 @@ class StaticOpMemBean(StructDecoder):
         """
         Serial number of operator memory used
         """
+        if self._life_end == self.NODE_INDEX_END_MAX:
+            return self.CORRECT_NODE_INDEX_END_MAX
         return self._life_end
 
     @property
