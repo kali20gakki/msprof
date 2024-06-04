@@ -171,6 +171,16 @@ namespace {
         {"connection_id", SQL_INTEGER_TYPE}
     };
 
+    const TableColumns HcclOpReport = {
+        {"op_type", SQL_TEXT_TYPE},
+        {"occurrences", SQL_TEXT_TYPE},
+        {"total_time", SQL_NUMERIC_TYPE},
+        {"min", SQL_NUMERIC_TYPE},
+        {"avg", SQL_NUMERIC_TYPE},
+        {"max", SQL_NUMERIC_TYPE},
+        {"ratio", SQL_TEXT_TYPE},
+    };
+
     const TableColumns HCCLTaskSingleDevice = {
         {"model_id", SQL_INTEGER_TYPE},
         {"index_id", SQL_INTEGER_TYPE},
@@ -182,7 +192,7 @@ namespace {
         {"plane_id", SQL_INTEGER_TYPE},
         {"timestamp", SQL_NUMERIC_TYPE},
         {"duration", SQL_REAL_TYPE},
-        {"is_dynamic", SQL_REAL_TYPE},
+        {"is_dynamic", SQL_NUMERIC_TYPE},
         {"task_type", SQL_TEXT_TYPE},
         {"op_type", SQL_TEXT_TYPE},
         {"connection_id", SQL_INTEGER_TYPE},
@@ -491,8 +501,9 @@ AscendTaskDB::AscendTaskDB()
 HCCLSingleDeviceDB::HCCLSingleDeviceDB()
 {
     dbName_ = "hccl_single_device.db";
-    tableColNames_["HCCLTaskSingleDevice"] = HCCLTaskSingleDevice;
+    tableColNames_["HcclOpReport"] = HcclOpReport;
     tableColNames_["HCCLOpSingleDevice"] = HCCLOpSingleDevice;
+    tableColNames_["HCCLTaskSingleDevice"] = HCCLTaskSingleDevice;
 }
 
 NpuMemDB::NpuMemDB()

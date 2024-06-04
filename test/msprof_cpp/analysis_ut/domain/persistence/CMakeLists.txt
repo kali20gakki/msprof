@@ -1,5 +1,6 @@
 include_directories(${TOP_DIR}/test/msprof_cpp/analysis_ut/infrastructure/common_stub/)
 include_directories(${GTEST_INCLUDE_DIR})
+include_directories(${MOCKCPP_INCLUDE_DIR})
 include_directories(${TOP_DIR}/opensource/json/include)
 include_directories(${TOP_DIR}/platform/securec/include)
 include_directories(${TOP_DIR}/analysis/csrc)

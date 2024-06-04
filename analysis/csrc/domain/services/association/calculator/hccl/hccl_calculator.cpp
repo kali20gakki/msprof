@@ -344,7 +344,7 @@ bool HcclCalculator::GetHcclStaticsData()
         }
     }
     std::unordered_map<std::string, HcclStastics> stasticsTable;
-    uint64_t totalTotalTime = 0;
+    uint64_t allTaskTime = 0;
     for (const auto& data : groupedData) {
         auto& record =  stasticsTable[data.second.opType];
         record.opType = data.second.opType;
@@ -352,7 +352,7 @@ bool HcclCalculator::GetHcclStaticsData()
         record.totalTime += data.second.max - data.second.min;
         record.max = std::max(data.second.max, record.max);
         record.min = std::min(data.second.min, record.min);
-        totalTotalTime += data.second.max - data.second.min;
+        allTaskTime += data.second.max - data.second.min;
     }
     if (!Utils::Reserve(stasticsData_, stasticsTable.size())) {
         ERROR("Reserve for hccl stastics data failed.");
@@ -360,7 +360,7 @@ bool HcclCalculator::GetHcclStaticsData()
     }
     for (auto& data : stasticsTable) {
         data.second.avg = static_cast<double>(data.second.totalTime) / data.second.count;
-        data.second.ratio = static_cast<double>(data.second.totalTime) / totalTotalTime * PERCENTAGE;
+        data.second.ratio = static_cast<double>(data.second.totalTime) / allTaskTime * PERCENTAGE;
         stasticsData_.emplace_back(data.second);
     }
     std::sort(stasticsData_.begin(), stasticsData_.end(), [](const HcclStastics& task1, const HcclStastics& task2) {
