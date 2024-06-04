@@ -48,7 +48,7 @@ private:
         {PipeLineUtIndex::Mte2Time, {{0xc}, Calculator::CalculatorTimeByMultiplication}},
         {PipeLineUtIndex::Mte3Ratio, {{0xd}, Calculator::CalculatorMetricByAdditions}},
         {PipeLineUtIndex::Mte3Time, {{0xd}, Calculator::CalculatorTimeByMultiplication}},
-        {PipeLineUtIndex::ICacheMissRate, {{0x54, 0x55}, Calculator::CalculatorMetricByAdditions}}
+        {PipeLineUtIndex::ICacheMissRate, {{0x55, 0x54}, Calculator::CalculatorMetricByDivision}}
     };
 
     const std::vector<double> floatBitVec{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};

@@ -4,7 +4,7 @@
 ****************************************************************************** */
 /* ******************************************************************************
  * File Name          : device_task_process.h
- * Description        : 初始化deviceTask到dataInventory中
+ * Description        : 初始化deviceTask到dataInventory中,同时创建sqlite目录
  * Author             : msprof team
  * Creation Date      : 2024/4/22
  * *****************************************************************************

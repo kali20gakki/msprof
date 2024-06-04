@@ -17,6 +17,7 @@
 #include "analysis/csrc/domain/services/parser/log/include/stars_soc_parser.h"
 #include "analysis/csrc/domain/services/parser/parser_item/acsq_log_parser_item.h"
 #include "analysis/csrc/domain/services/parser/parser_item/ffts_plus_log_parser_item.h"
+#include "analysis/csrc/domain/services/parser/parser_item/acc_pmu_parser_item.h"
 #include "test/msprof_cpp/analysis_ut/domain/services/test/fake_generator.h"
 
 
@@ -28,6 +29,7 @@ using namespace Analysis::Utils;
 
 namespace {
 const std::string SOC_LOG_PATH = "./soc_log";
+const int ACC_PMU_SIZE = 2;
 }
 
 class StarsSocParserUtest : public testing::Test {
@@ -64,21 +66,38 @@ protected:
         return log;
     }
 
+    AccPmu CreateAccPmu(int funcType, int cnt, int accId, int timestamp, int ost)
+    {
+        AccPmu accPmu{};
+        accPmu.cnt = cnt;
+        accPmu.accId = accId;
+        accPmu.funcType = funcType;
+        accPmu.timestamp = timestamp;
+        for (int i = 0; i < ACC_PMU_SIZE; ++i) {
+            accPmu.bandwidth[i] = i * ost;
+            accPmu.ost[i] = i * ost;
+        }
+        return accPmu;
+    }
+
 protected:
     DataInventory dataInventory_;
 };
 
+
 TEST_F(StarsSocParserUtest, ShouldReturnAcsqLogDataWhenParserRun)
 {
-    std::vector<int> expectTimestamp{100, INVALID_TIMESTAMP};
+    std::vector<int> expectTimestamp{100, INVALID_TIMESTAMP, 100};
     StarsSocParser starsSocParser;
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = SOC_LOG_PATH;
     std::vector<AcsqLog> log{CreadtAcsqLog(0b000000, 1, 1, 1, 100), CreadtAcsqLog(0b000001, 2, 1, 1, 120)};
     EXPECT_TRUE(WriteBin(log, File::PathJoin({SOC_LOG_PATH, "data"}), "stars_soc.data.0.slice_0"));
+    std::vector<AccPmu> accPmu{CreateAccPmu(0b011010, 3, 10, 100, 200)};
+    EXPECT_TRUE(WriteBin(accPmu, File::PathJoin({SOC_LOG_PATH, "data"}), "stars_soc.data.0.slice_0"));
     ASSERT_EQ(starsSocParser.Run(dataInventory_, context), Analysis::ANALYSIS_OK);
     auto logData = dataInventory_.GetPtr<std::vector<HalLogData>>();
-    ASSERT_EQ(logData->size(), 2ul);
+    ASSERT_EQ(logData->size(), 3ul);
     for (int i = 0; i < logData->size(); i++) {
         ASSERT_EQ(expectTimestamp[i], logData->data()[i].hd.timestamp);
     }

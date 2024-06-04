@@ -21,7 +21,8 @@ namespace Domain {
 enum HalLogType {
     ACSQ_LOG = 0,
     FFTS_LOG,
-    INVALID_LOG = 2
+    ACC_PMU,
+    INVALID_LOG = 3
 };
 
 struct HalAcsqLog {
@@ -38,6 +39,13 @@ struct HalFftsPlusLog {
     uint16_t threadId = 0;
 };
 
+struct HalAccPmu {
+    uint64_t timestamp = 0;
+    uint16_t accId = 0;
+    uint64_t bandwidth[2] = {0};
+    uint64_t ost[2] = {0};
+};
+
 struct HalLogData {
     HalUniData hd;
 
@@ -46,6 +54,7 @@ struct HalLogData {
     union {
         HalAcsqLog acsq;
         HalFftsPlusLog ffts;
+        HalAccPmu accPmu;
     };
     HalLogData() {}
 };
