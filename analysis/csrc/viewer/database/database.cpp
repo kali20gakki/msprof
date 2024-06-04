@@ -429,6 +429,21 @@ namespace {
         {"task_id", SQL_INTEGER_TYPE},
         {"tag_id", SQL_INTEGER_TYPE}
     };
+
+    const TableColumns TaskType = {
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"stream_id", SQL_INTEGER_TYPE},
+        {"task_id", SQL_INTEGER_TYPE},
+        {"task_type", SQL_TEXT_TYPE},
+        {"task_state", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns TsMemcpy = {
+        {"timestamp", SQL_REAL_TYPE},
+        {"stream_id", SQL_INTEGER_TYPE},
+        {"task_id", SQL_INTEGER_TYPE},
+        {"task_state", SQL_INTEGER_TYPE}
+    };
 }
 
 std::string Database::GetDBName() const
@@ -608,6 +623,8 @@ StepTraceDB::StepTraceDB()
 {
     dbName_ = "step_trace.db";
     tableColNames_["StepTrace"] = StepTrace;
+    tableColNames_["TaskType"] = TaskType;
+    tableColNames_["TsMemcpy"] = TsMemcpy;
 }
 
 } // namespace Database
