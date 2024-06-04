@@ -18,6 +18,7 @@
 #include "common/context_manager.h"
 #include "common/inject/driver_inject.h"
 #include "common/inject/inject_base.h"
+#include "common/plog_manager.h"
 #include "common/utils.h"
 #include "external/mspti_activity.h"
 #include "securec.h"
@@ -75,7 +76,7 @@ msptiResult ChannelReader::Execute()
         currLen = ProfChannelRead(deviceId_, channelId_, buf + cur_pos, MAX_BUFFER_SIZE - cur_pos);
         if (currLen <= 0) {
             if (currLen < 0) {
-                printf("[ERROR]Get Data from Driver failed.\n");
+                MSPTI_LOGE("Read data from driver failed.");
             }
             break;
         }

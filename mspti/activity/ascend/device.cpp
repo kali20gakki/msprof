@@ -14,6 +14,7 @@
 #include "activity/ascend/channel/channel_pool_manager.h"
 #include "common/context_manager.h"
 #include "common/inject/driver_inject.h"
+#include "common/plog_manager.h"
 #include "external/mspti_activity.h"
 #include "external/mspti_base.h"
 
@@ -28,7 +29,7 @@ msptiResult Device::Start(const std::unordered_set<msptiActivityKind>& kinds)
 {
     kinds_ = kinds;
     if (!OnLine()) {
-        printf("[ERROR] Device %d offline.\n", deviceId_);
+        MSPTI_LOGE("The device: %u is offline.", deviceId_);
         return MSPTI_ERROR_DEVICE_OFFLINE;
     }
 
@@ -58,11 +59,12 @@ void Device::Run()
     // Create ProfJob And Start
     for (auto iter = kinds_.begin(); iter != kinds_.end(); iter++) {
         if (job_map_.find(*iter) != job_map_.end()) {
-            printf("Job has been launched.\n");
+            MSPTI_LOGW("The prof task of kind: %d is already running.", *iter);
             continue;
         }
         auto job_ptr = CollectionJobFactory::CreateJob(deviceId_, *iter);
         if (!job_ptr) {
+            MSPTI_LOGE("Create prof job failed.");
             return;
         }
         job_ptr->Start();
@@ -87,12 +89,12 @@ void Device::GetDeviceList(uint32_t* deviceNum, uint32_t *deviceIdList)
 {
     auto ret = DrvGetDevNum(deviceNum);
     if (ret != DRV_ERROR_NONE) {
-        printf("[ERROR] Get Device Num failed.\n");
+        MSPTI_LOGE("Get device num failed.");
         return;
     }
     ret = DrvGetDevIDs(deviceIdList, *deviceNum);
     if (ret != DRV_ERROR_NONE) {
-        printf("[ERROR] Get Device IDS failed. %d\n", ret);
+        MSPTI_LOGE("Get device id list failed.");
         return;
     }
 }

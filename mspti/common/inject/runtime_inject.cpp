@@ -49,6 +49,7 @@ rtError_t rtSetDevice(int32_t device)
     if (func == nullptr) {
         Mspti::Common::GetFunction<rtError_t, int32_t>("libruntime", "rtSetDevice", func);
     }
+    THROW_FUNC_NOTFOUND(func, "rtSetDevice", "libruntime.so");
     Mspti::Ascend::AscendProfEnable(true, device);
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_DEVICE_SET, __FUNCTION__);
     return func(device);
@@ -61,6 +62,7 @@ rtError_t rtDeviceReset(int32_t device)
     if (func == nullptr) {
         Mspti::Common::GetFunction<rtError_t, int32_t>("libruntime", "rtDeviceReset", func);
     }
+    THROW_FUNC_NOTFOUND(func, "rtDeviceReset", "libruntime.so");
     Mspti::Ascend::AscendProfEnable(false, device);
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_DEVICE_RESET, __FUNCTION__);
     return func(device);
@@ -73,6 +75,7 @@ rtError_t rtSetDeviceEx(int32_t device)
     if (func == nullptr) {
         Mspti::Common::GetFunction<rtError_t, int32_t>("libruntime", "rtSetDeviceEx", func);
     }
+    THROW_FUNC_NOTFOUND(func, "rtSetDeviceEx", "libruntime.so");
     Mspti::Ascend::AscendProfEnable(true, device);
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_DEVICE_SET_EX, __FUNCTION__);
     return func(device);
@@ -85,6 +88,7 @@ rtError_t RtGetDevice(int32_t* devId)
     if (func == nullptr) {
         Mspti::Common::GetFunction<rtError_t, int32_t*>("libruntime", "rtGetDevice", func);
     }
+    THROW_FUNC_NOTFOUND(func, "rtGetDevice", "libruntime.so");
     return func(devId);
 }
 
@@ -95,6 +99,7 @@ rtError_t rtCtxCreateEx(void **ctx, uint32_t flags, int32_t device)
     if (func == nullptr) {
         Mspti::Common::GetFunction<rtError_t, void **, uint32_t, int32_t>("libruntime", "rtCtxCreateEx", func);
     }
+    THROW_FUNC_NOTFOUND(func, "rtCtxCreateEx", "libruntime.so");
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_CONTEXT_CREATED_EX, __FUNCTION__);
     return func(ctx, flags, device);
 }
@@ -106,6 +111,7 @@ rtError_t rtCtxCreate(void **ctx, int32_t device)
     if (func == nullptr) {
         Mspti::Common::GetFunction<rtError_t, void **, int32_t>("libruntime", "rtCtxCreate", func);
     }
+    THROW_FUNC_NOTFOUND(func, "rtCtxCreate", "libruntime.so");
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_CONTEXT_CREATED, __FUNCTION__);
     return func(ctx, device);
 }
@@ -117,6 +123,7 @@ rtError_t rtCtxDestroy(void **ctx)
     if (func == nullptr) {
         Mspti::Common::GetFunction<rtError_t, void **>("libruntime", "rtCtxDestroy", func);
     }
+    THROW_FUNC_NOTFOUND(func, "rtCtxDestroy", "libruntime.so");
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_CONTEXT_DESTROY, __FUNCTION__);
     return func(ctx);
 }
@@ -128,6 +135,7 @@ rtError_t rtStreamCreate(rtStream_t* stream, int32_t priority)
     if (func == nullptr) {
         Mspti::Common::GetFunction<rtError_t, rtStream_t*, int32_t>("libruntime", "rtStreamCreate", func);
     }
+    THROW_FUNC_NOTFOUND(func, "rtStreamCreate", "libruntime.so");
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_STREAM_CREATED, __FUNCTION__);
     return func(stream, priority);
 }
@@ -139,6 +147,7 @@ rtError_t rtStreamDestroy(rtStream_t stream)
     if (func == nullptr) {
         Mspti::Common::GetFunction<rtError_t, rtStream_t>("libruntime", "rtStreamDestroy", func);
     }
+    THROW_FUNC_NOTFOUND(func, "rtStreamDestroy", "libruntime.so");
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_STREAM_DESTROY, __FUNCTION__);
     return func(stream);
 }
@@ -150,6 +159,7 @@ rtError_t rtStreamSynchronize(rtStream_t stream)
     if (func == nullptr) {
         Mspti::Common::GetFunction<rtError_t, rtStream_t>("libruntime", "rtStreamSynchronize", func);
     }
+    THROW_FUNC_NOTFOUND(func, "rtStreamSynchronize", "libruntime.so");
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_STREAM_SYNCHRONIZED,
         __FUNCTION__);
     return func(stream);
@@ -162,6 +172,7 @@ rtError_t RtGetStreamId(rtStream_t stm, int32_t *streamId)
     if (func == nullptr) {
         Mspti::Common::GetFunction<rtError_t, rtStream_t, int32_t*>("libruntime", "rtGetStreamId", func);
     }
+    THROW_FUNC_NOTFOUND(func, "rtGetStreamId", "libruntime.so");
     return func(stm, streamId);
 }
 
@@ -174,6 +185,7 @@ rtError_t RtProfilerTraceEx(uint64_t id, uint64_t modelId, uint16_t tagId, rtStr
         Mspti::Common::GetFunction<rtError_t, uint64_t, uint64_t, uint16_t, rtStream_t>("libruntime",
             "rtProfilerTraceEx", func);
     }
+    THROW_FUNC_NOTFOUND(func, "rtProfilerTraceEx", "libruntime.so");
     return func(id, modelId, tagId, stm);
 }
 
@@ -187,6 +199,7 @@ rtError_t rtKernelLaunch(const void* stubFunc, uint32_t blockDim, void* args,
         Mspti::Common::GetFunction<rtError_t, const void*, uint32_t, void*, uint32_t,
             rtSmDesc_t*, rtStream_t>("libruntime", "rtKernelLaunch", func);
     }
+    THROW_FUNC_NOTFOUND(func, "rtKernelLaunch", "libruntime.so");
     return func(stubFunc, blockDim, args, argsSize, smDesc, stream);
 }
 
@@ -200,6 +213,7 @@ rtError_t rtKernelLaunchWithFlagV2(const void* stubFunc, uint32_t blockDim,
         Mspti::Common::GetFunction<rtError_t, const void*, uint32_t, rtArgsEx_t*, rtSmDesc_t*, rtStream_t,
             uint32_t, const RtTaskCfgInfoT*>("libruntime", "rtKernelLaunchWithFlagV2", func);
     }
+    THROW_FUNC_NOTFOUND(func, "rtKernelLaunchWithFlagV2", "libruntime.so");
     return func(stubFunc, blockDim, argsInfo, smDesc, stream, flags, cfgInfo);
 }
 
@@ -214,5 +228,6 @@ rtError_t rtKernelLaunchWithHandleV2(
         Mspti::Common::GetFunction<rtError_t, void*, uint64_t, uint32_t, rtArgsEx_t*, rtSmDesc_t*,
             rtStream_t, const RtTaskCfgInfoT*>("libruntime", "rtKernelLaunchWithHandleV2", func);
     }
+    THROW_FUNC_NOTFOUND(func, "rtKernelLaunchWithHandleV2", "libruntime.so");
     return func(handle, tilingkey, blockDim, argsInfo, smDesc, stream, cfgInfo);
 }

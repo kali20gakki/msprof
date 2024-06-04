@@ -13,6 +13,8 @@
 #include "common/utils.h"
 
 #include <ctime>
+#include <sys/prctl.h>
+
 #include "securec.h"
 
 namespace Mspti {
@@ -28,5 +30,11 @@ uint64_t Utils::GetClockMonotonicRawNs()
     return static_cast<uint64_t>(ts.tv_sec) * SECTONSEC + static_cast<uint64_t>(ts.tv_nsec);
 }
 
+std::string Utils::GetProcName()
+{
+    static char buf[16] = {'\0'};
+    prctl(PR_GET_NAME, (unsigned long)buf);
+    return std::string(buf);
+}
 }  // Common
 }  // Mspti

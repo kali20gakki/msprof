@@ -29,8 +29,8 @@ namespace Activity {
 class ActivityBuffer {
 public:
     ActivityBuffer() = default;
-    msptiResult Init(msptiBuffersCallbackRequestFunc func);
-    msptiResult UnInit(msptiBuffersCallbackCompleteFunc func);
+    void Init(msptiBuffersCallbackRequestFunc func);
+    void UnInit(msptiBuffersCallbackCompleteFunc func);
     msptiResult Record(msptiActivity *activity, size_t size);
     size_t BufSize();
     size_t ValidSize();
@@ -83,6 +83,7 @@ private:
     std::mutex buf_mtx_;
 
     std::atomic<size_t> total_drop_num_{0};
+    std::atomic<size_t> total_record_num_{0};
     
     msptiBuffersCallbackRequestFunc bufferRequested_handle_ = nullptr;
     msptiBuffersCallbackCompleteFunc bufferCompleted_handle_ = nullptr;
