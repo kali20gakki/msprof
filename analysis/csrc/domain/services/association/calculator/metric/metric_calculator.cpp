@@ -114,8 +114,11 @@ double Calculator::CalculatorVectorFops(CalculationElements& allParams, size_t i
     return res;
 }
 
-std::unordered_map<uint32_t, uint64_t> MetricCalculator::GetValueMappingOffset(uint32_t events[8], uint64_t pmuList[8])
+std::unordered_map<uint32_t, uint64_t> MetricCalculator::GetValueMappingOffset(CalculationElements& params,
+                                                                               HalPmuData& pmuData)
 {
+    auto events = params.events;
+    auto pmuList = pmuData.pmu.pmuList;
     std::unordered_map<uint32_t, uint64_t> res;
     for (size_t i = 0; i < PMU_LENGTH; ++i) {
         res.insert({events[i], pmuList[i]});

@@ -192,7 +192,7 @@ bool TaskProcessor::ProcessWithMsprofTxTaskData(const std::string &fileDir, uint
     bool flag = true;
     std::vector<std::string> validDevList;
     for (auto& devicePath: deviceList) {
-        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, stepTraceDB.dbName});
+        std::string dbPath = Utils::GetDBPath({devicePath, SQLITE, stepTraceDB.dbName});
         // 并不是所有场景都有msproftx 打点 task数据
         auto status = CheckPath(dbPath);
         if (status != CHECK_SUCCESS) {
@@ -213,7 +213,7 @@ bool TaskProcessor::ProcessWithMsprofTxTaskData(const std::string &fileDir, uint
         return false;
     }
     for (const auto& devicePath: validDevList) {
-        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, stepTraceDB.dbName});
+        std::string dbPath = Utils::GetDBPath({devicePath, SQLITE, stepTraceDB.dbName});
         threadData.deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
         INFO("Start to process %, pid:%, deviceId:%.", dbPath, pid, threadData.deviceId);
         MAKE_SHARED_RETURN_VALUE(stepTraceDB.dbRunner, DBRunner, false, dbPath);

@@ -49,7 +49,7 @@ uint32_t AccPmuPersistence::ProcessEntry(DataInventory& dataInventory, const Con
     auto accPmu = dataInventory.GetPtr<std::vector<HalLogData>>();
     DBInfo accPmuDB("acc_pmu.db", "AccPmu");
     MAKE_SHARED0_RETURN_VALUE(accPmuDB.database, AccPmuDB, ANALYSIS_ERROR);
-    std::string dbPath = File::PathJoin({deviceContext.GetDeviceFilePath(), SQLITE, accPmuDB.dbName});
+    std::string dbPath = Utils::GetDBPath({deviceContext.GetDeviceFilePath(), SQLITE, accPmuDB.dbName});
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(accPmuDB.dbRunner, DBRunner, ANALYSIS_ERROR, dbPath);
     auto data = GenerateAccPmuData(*accPmu, deviceContext);
