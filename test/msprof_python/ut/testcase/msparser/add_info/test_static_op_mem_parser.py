@@ -47,7 +47,7 @@ class TestStaticOpMemParser(unittest.TestCase):
     def make_static_op_mem_data(cls):
         static_op_mem_data = [
             [47900023386, 223338552992, 5972190379961, 1280032, 7104496996232435956, 1, 6, 0, 0, 0] + [0] * 180,
-            [47900023386, 223338552992, 5972190427855, 800032, 2493395835644572533, 8, 26, 0, 0, 0] + [0] * 180
+            [47900023386, 223338552992, 5972190427855, 800032, 2493395835644572533, 8, 4294967294, 0, 0, 0] + [0] * 180
         ]
         with FdOpen(os.path.join(cls.DATA_PATH, "unaging.additional.static_op_mem.slice_0"), operate="wb") as f:
             for data in static_op_mem_data:
