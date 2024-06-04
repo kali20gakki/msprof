@@ -12,8 +12,6 @@
 
 #include "analysis/csrc/domain/services/device_context/load_host_data.h"
 #include <string>
-#include <iostream>
-#include <analysis/csrc/domain/valueobject/include/task_id.h>
 #include "analysis/csrc/viewer/database/database.h"
 #include "analysis/csrc/viewer/database/db_runner.h"
 #include "analysis/csrc/viewer/database/drafts/number_mapping.h"
@@ -139,7 +137,6 @@ uint32_t ReadHostGeinfo(DataInventory& dataInventory, const DeviceContext& devic
 
 uint32_t ReadHostRuntime(DataInventory& dataInventory, const DeviceContext& deviceContext)
 {
-    std::cout<<"load hostTask begin"<<std::endl;
     RuntimeDB runtimeDb;
     DeviceInfo deviceInfo{};
     deviceContext.Getter(deviceInfo);
@@ -157,9 +154,6 @@ uint32_t ReadHostRuntime(DataInventory& dataInventory, const DeviceContext& devi
         ERROR("Failed to obtain data from the % table.", runtimeDb.GetDBName());
         return ANALYSIS_ERROR;
     }
-
-    int noExistCNt = 0;
-    std::cout<<"host task size is :" <<result.size()<<std::endl;
     for (const auto& row : result) {
         int32_t request_id;
         uint32_t stream_id, task_id, context_id_u32;
@@ -185,7 +179,6 @@ uint32_t ReadHostRuntime(DataInventory& dataInventory, const DeviceContext& devi
     std::shared_ptr<DeviceId2HostRunTime> data;
     MAKE_SHARED_RETURN_VALUE(data, DeviceId2HostRunTime, ANALYSIS_ERROR, std::move(hostRuntime));
     dataInventory.Inject(data);
-    std::cout<<"load hostTask done!"<<std::endl;
     return ANALYSIS_OK;
 }
 

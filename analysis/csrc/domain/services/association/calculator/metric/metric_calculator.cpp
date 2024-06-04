@@ -46,6 +46,9 @@ double Calculator::CalculatorMetricByDivision(CalculationElements &allParams, si
         return res;
     }
     for (size_t i = 0; i < allParams.pmuList.size(); ++i) {
+        if (allParams.pmuList[i] == 0) {
+            return 0.0;
+        }
         if (i == 0) {
             res += ((*allParams.floatBit)[index] * allParams.pmuList[i] / allParams.taskCyc);
         } else {
