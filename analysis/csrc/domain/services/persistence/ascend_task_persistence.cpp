@@ -57,7 +57,7 @@ uint32_t AscendTaskPersistence::ProcessEntry(DataInventory& dataInventory, const
     auto ascendTask = dataInventory.GetPtr<std::vector<TopDownTask>>();
     DBInfo ascendTaskDB("ascend_task.db", "AscendTask");
     MAKE_SHARED0_RETURN_VALUE(ascendTaskDB.database, AscendTaskDB, ANALYSIS_ERROR);
-    std::string dbPath = Utils::File::PathJoin({deviceContext.GetDeviceFilePath(), SQLITE, ascendTaskDB.dbName});
+    std::string dbPath = Utils::GetDBPath({deviceContext.GetDeviceFilePath(), SQLITE, ascendTaskDB.dbName});
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(ascendTaskDB.dbRunner, DBRunner, ANALYSIS_ERROR, dbPath);
     auto data = GenerateAscendTaskData(*ascendTask, deviceContext);

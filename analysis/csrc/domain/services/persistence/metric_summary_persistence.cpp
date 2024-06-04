@@ -196,7 +196,7 @@ uint32_t MetricSummaryPersistence::ProcessEntry(DataInventory& dataInventory, co
     DBInfo metricSummary("metric_summary.db", "MetricSummary");
     auto columns = GetTableColumn(deviceContext);
     MAKE_SHARED_NO_OPERATION(metricSummary.database, MetricSummaryDB, columns);
-    std::string dbPath = Utils::File::PathJoin({deviceContext.GetDeviceFilePath(), SQLITE, metricSummary.dbName});
+    std::string dbPath = Utils::GetDBPath({deviceContext.GetDeviceFilePath(), SQLITE, metricSummary.dbName});
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(metricSummary.dbRunner, DBRunner, ANALYSIS_ERROR, dbPath);
     if (!metricSummary.dbRunner->CreateTable(metricSummary.tableName,

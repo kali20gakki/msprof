@@ -30,7 +30,7 @@ DeviceTaskSummary deviceTaskSummary;
 uint32_t DeviceTaskProcess::ProcessEntry(DataInventory& dataInventory, const Infra::Context& context)
 {
     const auto& deviceContext = dynamic_cast<const DeviceContext&>(context);
-    std::string sqlitePath = File::PathJoin({deviceContext.GetDeviceFilePath(), SQLITE});
+    std::string sqlitePath = Utils::GetDBPath({deviceContext.GetDeviceFilePath(), SQLITE});
     if (!File::CreateDir(sqlitePath)) {
         ERROR("Failed to create %. Please check that the path is accessible or the disk space is enough", sqlitePath);
         return ANALYSIS_ERROR;

@@ -77,7 +77,7 @@ public:
     template<typename T>
     std::vector<double> CalculatePmu(HalPmuData pmuData, std::map<T, Calculator> calTable, CalculationElements& params)
     {
-        auto pmuTable = GetValueMappingOffset(params.events, pmuData.pmu.pmuList);
+        auto pmuTable = GetValueMappingOffset(params, pmuData);
         params.totalTime = Calculator::CalculatorTotalTime(pmuData.pmu.totalCycle, params.blockDim, params.coreNum,
                                                            params.timeFreq);
         std::vector<double> res;
@@ -114,7 +114,8 @@ public:
 private:
     virtual std::vector<double> SetAllParamsAndCalculator(CalculationElements& allParams, const DeviceContext& context,
                                                           HalPmuData& pmuData) = 0;
-    static std::unordered_map<uint32_t, uint64_t> GetValueMappingOffset(uint32_t events[8], uint64_t pmuList[8]);
+    static std::unordered_map<uint32_t, uint64_t> GetValueMappingOffset(CalculationElements& params,
+                                                                        HalPmuData& pmuData);
 };
 }
 }

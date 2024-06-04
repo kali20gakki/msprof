@@ -31,7 +31,7 @@ bool SaveTaskTypeData(const std::vector<HalTrackData>& dataS, const DeviceContex
 {
     DBInfo tsTrackDB("step_trace.db", "TaskType");
     MAKE_SHARED0_RETURN_VALUE(tsTrackDB.database, StepTraceDB, ANALYSIS_ERROR);
-    std::string dbPath = Utils::File::PathJoin({deviceContext.GetDeviceFilePath(), SQLITE, tsTrackDB.dbName});
+    std::string dbPath = Utils::GetDBPath({deviceContext.GetDeviceFilePath(), SQLITE, tsTrackDB.dbName});
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(tsTrackDB.dbRunner, DBRunner, ANALYSIS_ERROR, dbPath);
     std::vector<TaskTypeDataFormat> taskTypeS;
@@ -48,7 +48,7 @@ bool SaveStepTraceData(const std::vector<HalTrackData>& dataS, const DeviceConte
 {
     DBInfo tsTrackDB("step_trace.db", "StepTrace");
     MAKE_SHARED0_RETURN_VALUE(tsTrackDB.database, StepTraceDB, ANALYSIS_ERROR);
-    std::string dbPath = Utils::File::PathJoin({deviceContext.GetDeviceFilePath(), SQLITE, tsTrackDB.dbName});
+    std::string dbPath = Utils::GetDBPath({deviceContext.GetDeviceFilePath(), SQLITE, tsTrackDB.dbName});
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(tsTrackDB.dbRunner, DBRunner, ANALYSIS_ERROR, dbPath);
     std::vector<StepTraceDataFormat> stepTraceTasks;
@@ -65,7 +65,7 @@ bool SaveTsMemcpyData(const std::vector<HalTrackData>& dataS, const DeviceContex
 {
     DBInfo tsTrackDB("step_trace.db", "TsMemcpy");
     MAKE_SHARED0_RETURN_VALUE(tsTrackDB.database, StepTraceDB, ANALYSIS_ERROR);
-    std::string dbPath = Utils::File::PathJoin({deviceContext.GetDeviceFilePath(), SQLITE, tsTrackDB.dbName});
+    std::string dbPath = Utils::GetDBPath({deviceContext.GetDeviceFilePath(), SQLITE, tsTrackDB.dbName});
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(tsTrackDB.dbRunner, DBRunner, ANALYSIS_ERROR, dbPath);
     std::vector<TaskMemcpyDataFormat> tsMemecpyTasks;
