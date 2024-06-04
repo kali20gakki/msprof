@@ -211,9 +211,14 @@ void ParamsAdapterMsprof::SetDefaultParamsApp()
     if (paramContainer_[INPUT_CFG_COM_TASK_TIME].empty()) {
         paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
     }
+
     if (paramContainer_[INPUT_CFG_COM_AI_CORE].empty()) {
-        paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
+        if (paramContainer_[INPUT_CFG_COM_TASK_TIME].compare(MSVP_PROF_L0) != 0 &&
+            paramContainer_[INPUT_CFG_COM_TASK_TIME].compare(MSVP_PROF_OFF) != 0) {
+                paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
+        }
     }
+
     paramContainer_[INPUT_CFG_COM_AIC_MODE] = (paramContainer_[INPUT_CFG_COM_AIC_MODE].empty()) ?
         PROFILING_MODE_TASK_BASED : paramContainer_[INPUT_CFG_COM_AIC_MODE];
     paramContainer_[INPUT_CFG_COM_AIC_METRICS] = (paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty()) ?
