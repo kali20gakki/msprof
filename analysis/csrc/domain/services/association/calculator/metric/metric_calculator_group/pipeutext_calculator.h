@@ -41,7 +41,7 @@ private:
         {PipeUtilizationExctIndex::Mte1RatioExtra, {{0x302}, Calculator::CalculatorMetricByAdditions}},
         {PipeUtilizationExctIndex::Mte2Ratio, {{0xc}, Calculator::CalculatorMetricByAdditions}},
         {PipeUtilizationExctIndex::FixPipeRatio, {{0x303}, Calculator::CalculatorMetricByAdditions}},
-        {PipeUtilizationExctIndex::ICacheMissRate, {{0x54, 0x55}, Calculator::CalculatorMetricByAdditions}},
+        {PipeUtilizationExctIndex::ICacheMissRate, {{0x55, 0x54}, Calculator::CalculatorMetricByDivision}},
         {PipeUtilizationExctIndex::MacTime, {{0x416, 0x417}, Calculator::CalculatorTimeByMultiplication}},
         {PipeUtilizationExctIndex::ScalarTime, {{0x9}, Calculator::CalculatorTimeByMultiplication}},
         {PipeUtilizationExctIndex::Mte1Time, {{0x302}, Calculator::CalculatorTimeByMultiplication}},

@@ -24,7 +24,7 @@ double Calculator::CalculatorTotalTime(uint64_t totalCycle, uint64_t blockDim, u
     if (!blockDim || !coreNum || !freq) {
         return 0.0;
     }
-    auto res = totalCycle * FREQ_TO_Hz / freq / blockDim * ((blockDim + coreNum - 1) / coreNum);
+    auto res = static_cast<double>(totalCycle) * FREQ_TO_Hz / freq / blockDim * ((blockDim + coreNum - 1) / coreNum);
     return res;
 }
 
@@ -34,6 +34,22 @@ double Calculator::CalculatorMetricByAdditions(CalculationElements& allParams, s
     if (allParams.taskCyc != 0) {
         for (size_t i = 0; i < allParams.pmuList.size(); ++i) {
             res += ((*allParams.floatBit)[index] * allParams.pmuList[i] / allParams.taskCyc);
+        }
+    }
+    return res;
+}
+
+double Calculator::CalculatorMetricByDivision(CalculationElements &allParams, size_t index)
+{
+    double res = 0.0;
+    if (allParams.taskCyc == 0) {
+        return res;
+    }
+    for (size_t i = 0; i < allParams.pmuList.size(); ++i) {
+        if (i == 0) {
+            res += ((*allParams.floatBit)[index] * allParams.pmuList[i] / allParams.taskCyc);
+        } else {
+            res /= ((*allParams.floatBit)[index] * allParams.pmuList[i] / allParams.taskCyc);
         }
     }
     return res;

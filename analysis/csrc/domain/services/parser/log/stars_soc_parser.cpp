@@ -57,8 +57,8 @@ uint32_t StarsSocParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDataS
     std::function<int(uint8_t *, uint32_t, uint8_t *)> parser =
             ParserItemFactory::GetParseItem(LOG_PARSER, header->funcType);
     if (parser == nullptr) {
-        ERROR("There is no Parser function to handle data! functype is %", header->funcType);
-        return ANALYSIS_ERROR;
+        WARN("There is no Parser function to handle data! functype is %", header->funcType);
+        return ANALYSIS_OK;
     }
     int currentCnt = parser(binaryData, binaryDataSize, data);
     if (cnt_ == DEFAULT_CNT) {
@@ -93,7 +93,6 @@ uint32_t StarsSocParser::ParseData(DataInventory &dataInventory, const Infra::Co
     std::shared_ptr<std::vector<HalLogData>> data;
     MAKE_SHARED_RETURN_VALUE(data, std::vector<HalLogData>, ANALYSIS_ERROR, std::move(halUniData_));
     dataInventory.Inject(data);
-
     return stat;
 }
 

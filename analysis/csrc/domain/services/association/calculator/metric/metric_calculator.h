@@ -56,17 +56,18 @@ using IntPtrType = std::vector<uint64_t>;
 
 class Calculator {
 public:
-    Calculator(std::set<int> registers, std::function<double(CalculationElements &params, size_t index)> func)
+    Calculator(std::vector<int> registers, std::function<double(CalculationElements &params, size_t index)> func)
     : registers(std::move(registers)), calculatorFunc(std::move(func)) {}
     static double CalculatorMetricByNothing(CalculationElements &allParams, size_t index);
     static double CalculatorMetricByAdditions(CalculationElements &allParams, size_t index);
+    static double CalculatorMetricByDivision(CalculationElements &allParams, size_t index);
     static double CalculatorMetricByAdditionsWithFreq(CalculationElements &allParams, size_t index);
     static double CalculatorTimeByMultiplication(CalculationElements &allParams, size_t index);
     static double CalculatorCubeFops(CalculationElements &allParams, size_t index);
     static double CalculatorVectorFops(CalculationElements &allParams, size_t index);
     static double CalculatorTotalTime(uint64_t totalCycle, uint64_t blockDim, uint64_t coreNum, uint64_t freq);
 public:
-    std::set<int> registers;
+    std::vector<int> registers;
     std::function<double(CalculationElements &params, size_t index)> calculatorFunc;
 };
 
@@ -86,6 +87,7 @@ public:
         }
         size_t index = 0;
         for (auto& cal : calTable) {
+            params.pmuList.clear();
             for (auto reg : cal.second.registers) {
                 params.pmuList.push_back(pmuTable[reg]);
             }

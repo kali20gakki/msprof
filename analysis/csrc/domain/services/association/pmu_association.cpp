@@ -16,7 +16,7 @@
 #include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
-#include "analysis/csrc/domain/services/modeling/include/log_modeling.h"
+#include "analysis/csrc/domain/services/device_context/load_host_data.h"
 #include "analysis/csrc/domain/services/modeling/include/pmu_modeling.h"
 
 namespace Analysis {
@@ -24,13 +24,19 @@ namespace Domain {
 using namespace Analysis::Utils;
 void PmuAssociation::SplitPmu(std::vector<HalPmuData> &pmuData)
 {
+    int context_size = 0;
+    int block_size = 0;
     for (auto& pmu : pmuData) {
         if (pmu.type == PMU) {
             contextPmuTask_[pmu.hd.taskId].push_back(&pmu);
+            ++context_size;
         } else {
             blockPmuTask_[pmu.hd.taskId].push_back(&pmu);
+            ++block_size;
         }
     }
+    INFO("context pmu count is : %", context_size);
+    INFO("block pmu count is : %", block_size);
 }
 
 void BlockPmuResultAccumulate(std::vector<double>& res, std::vector<double>& factor)
@@ -192,7 +198,7 @@ uint32_t PmuAssociation::ProcessEntry(Infra::DataInventory& dataInventory, const
     return ANALYSIS_OK;
 }
 
-REGISTER_PROCESS_SEQUENCE(PmuAssociation, true, LogModeling, PmuModeling);
+REGISTER_PROCESS_SEQUENCE(PmuAssociation, true, LoadHostData, PmuModeling);
 REGISTER_PROCESS_DEPENDENT_DATA(PmuAssociation, std::vector<HalPmuData>, std::map<TaskId, std::vector<DeviceTask>>);
 REGISTER_PROCESS_SUPPORT_CHIP(PmuAssociation, CHIP_ID_ALL);
 }

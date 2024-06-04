@@ -16,8 +16,6 @@
 #include "analysis/csrc/domain/services/parser/parser_item_factory.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
-#include "analysis/csrc/infrastructure/process/include/process_register.h"
-#include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
 namespace Domain {
@@ -83,7 +81,6 @@ uint32_t TsTrackParser::ParseData(DataInventory& dataInventory, const Infra::Con
     std::shared_ptr<std::vector<HalTrackData>> data;
     MAKE_SHARED_RETURN_VALUE(data, std::vector<HalTrackData>, ANALYSIS_ERROR, std::move(halUniData_));
     dataInventory.Inject(data);
-
     return stat;
 }
 
