@@ -1,5 +1,6 @@
 include_directories(${TOP_DIR}/test/msprof_cpp/analysis_ut/infrastructure/common_stub/)
 include_directories(${GTEST_INCLUDE_DIR})
+include_directories(${MOCKCPP_INCLUDE_DIR})
 include_directories(${TOP_DIR}/opensource/json/include)
 include_directories(${TOP_DIR}/platform/securec/include)
 include_directories(${TOP_DIR}/analysis/csrc)
@@ -14,6 +15,9 @@ aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/association DEVICE
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/constant DEVICE_ASSOCIATION_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/association/calculator/metric DEVICE_ASSOCIATION_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/association/calculator/ DEVICE_ASSOCIATION_SOURCE)
+aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/association/calculator/hccl DEVICE_ASSOCIATION_SOURCE)
+aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/association/calculator/hccl/include
+        DEVICE_ASSOCIATION_SOURCE)
 
 aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/stubs/dfx DEVICE_ASSOCIATION_SOURCE)
 aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/domain/association/test DEVICE_ASSOCIATION_SOURCE)
