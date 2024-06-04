@@ -14,11 +14,13 @@
 #include <algorithm>
 #include <cctype>
 #include <utility>
+#include "analysis/csrc/domain/services/association/include/ascend_task_association.h"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
+#include "analysis/csrc/domain/services/device_context/load_host_data.h"
 #include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/domain/entities/hal/include/hal.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
-#include "analysis/csrc/infrastructure/process/include/process_register.h"
+
 
 namespace Analysis {
 namespace Domain {
@@ -394,7 +396,7 @@ bool HcclCalculator::InjectData(DataInventory &inventory)
 }
 
 
-REGISTER_PROCESS_SEQUENCE(HcclCalculator, true);
+REGISTER_PROCESS_SEQUENCE(HcclCalculator, true, AscendTaskAssociation, LoadHostData);
 REGISTER_PROCESS_DEPENDENT_DATA(HcclCalculator, std::vector<TopDownTask>, std::vector<HcclTask>,
                                 std::vector<HcclOp>);
 REGISTER_PROCESS_SUPPORT_CHIP(HcclCalculator, CHIP_ID_ALL);
