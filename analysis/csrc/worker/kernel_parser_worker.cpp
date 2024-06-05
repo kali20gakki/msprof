@@ -36,7 +36,6 @@ KernelParserWorker::KernelParserWorker(std::string hostFilePath) : hostFilePath_
 
 int KernelParserWorker::Run()
 {
-    Log::GetInstance().Init(Utils::File::PathJoin({hostFilePath_, "..", "mindstudio_profiler_log"}));
     std::set<std::string> profPaths {Utils::File::PathJoin({hostFilePath_, ".."})};
     Context::GetInstance().Load(profPaths);
     INFO("Start run KernelParserWorker");
