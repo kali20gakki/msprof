@@ -84,6 +84,12 @@ public:
     AscendTaskDB();
 };
 
+
+class TraceDB : public Database {
+public:
+    TraceDB();
+};
+
 class HCCLSingleDeviceDB : public Database {
 public:
     HCCLSingleDeviceDB();

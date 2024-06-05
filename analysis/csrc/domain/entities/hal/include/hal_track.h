@@ -20,6 +20,8 @@
 
 namespace Analysis {
 namespace Domain {
+// index_id, model_id, step_start, step_end, iter_id
+using StepTraceDataVectorFormat = std::vector<std::tuple<uint32_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
 
 enum HalTrackType {
     TS_TASK_FLIP = 0,
@@ -71,6 +73,7 @@ std::unordered_map<uint16_t, std::vector<HalTrackData*>> GetFlipData(std::vector
  * @return 返回指定类型的数据的指针数组
  */
 std::vector<HalTrackData*> GetTrackDataByType(std::vector<HalTrackData>& trackData, HalTrackType type);
+StepTraceDataVectorFormat GenerateStepTime(std::vector<HalTrackData>& trackDatas);
 
 }
 }

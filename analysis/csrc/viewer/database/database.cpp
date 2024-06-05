@@ -12,7 +12,6 @@
 
 #include "analysis/csrc/viewer/database/database.h"
 
-#include "analysis/csrc/dfx/log.h"
 
 namespace Analysis {
 namespace Viewer {
@@ -179,6 +178,51 @@ namespace {
         {"avg", SQL_NUMERIC_TYPE},
         {"max", SQL_NUMERIC_TYPE},
         {"ratio", SQL_TEXT_TYPE},
+    };
+
+    const TableColumns StepTraceData = {
+        {"index_id", SQL_INTEGER_TYPE},
+        {"model_id", SQL_INTEGER_TYPE},
+        {"step_start", SQL_INTEGER_TYPE},
+        {"step_end", SQL_INTEGER_TYPE},
+        {"iter_id", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns StepTime = {
+        {"index_id", SQL_INTEGER_TYPE},
+        {"model_id", SQL_INTEGER_TYPE},
+        {"step_start", SQL_INTEGER_TYPE},
+        {"step_end", SQL_INTEGER_TYPE},
+        {"iter_id", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns AllReduce = {
+        {"device_id", SQL_INTEGER_TYPE},
+        {"model_id", SQL_INTEGER_TYPE},
+        {"index_id", SQL_INTEGER_TYPE},
+        {"iteration_end", SQL_INTEGER_TYPE},
+        {"start", SQL_INTEGER_TYPE},
+        {"end", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns GetNext = {
+        {"model_id", SQL_INTEGER_TYPE},
+        {"index_id", SQL_INTEGER_TYPE},
+        {"start_time", SQL_INTEGER_TYPE},
+        {"end_time", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns TrainingTrace = {
+        {"device_id", SQL_INTEGER_TYPE},
+        {"model_id", SQL_INTEGER_TYPE},
+        {"iteration_id", SQL_INTEGER_TYPE},
+        {"FP_start", SQL_INTEGER_TYPE},
+        {"BP_end", SQL_INTEGER_TYPE},
+        {"iteration_end", SQL_INTEGER_TYPE},
+        {"iteration_time", SQL_INTEGER_TYPE},
+        {"fp_bp_time", SQL_INTEGER_TYPE},
+        {"grad_refresh_bound", SQL_INTEGER_TYPE},
+        {"data_aug_bound", SQL_INTEGER_TYPE},
     };
 
     const TableColumns HCCLTaskSingleDevice = {
@@ -513,6 +557,14 @@ AscendTaskDB::AscendTaskDB()
     tableColNames_["AscendTask"] = AscendTask;
 }
 
+TraceDB::TraceDB()
+{
+    dbName_ = "trace.db";
+    tableColNames_["all_reduce"] = AllReduce;
+    tableColNames_["get_next"] = GetNext;
+    tableColNames_["training_trace"] = TrainingTrace;
+}
+
 HCCLSingleDeviceDB::HCCLSingleDeviceDB()
 {
     dbName_ = "hccl_single_device.db";
@@ -623,6 +675,8 @@ StepTraceDB::StepTraceDB()
 {
     dbName_ = "step_trace.db";
     tableColNames_["StepTrace"] = StepTrace;
+    tableColNames_["step_trace_data"] = StepTraceData;
+    tableColNames_["StepTime"] = StepTime;
     tableColNames_["TaskType"] = TaskType;
     tableColNames_["TsMemcpy"] = TsMemcpy;
 }

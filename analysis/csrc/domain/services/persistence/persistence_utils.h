@@ -29,7 +29,7 @@ struct DBInfo {
     std::shared_ptr<Database> database;
     std::shared_ptr<DBRunner> dbRunner;
     DBInfo() = default;
-    DBInfo(std::string dbName, std::string tableName) : dbName(dbName), tableName(tableName) {};
+    DBInfo(std::string dbName, std::string tableName) : dbName(std::move(dbName)), tableName(std::move(tableName)) {};
     virtual ~DBInfo() = default;
 };
 
