@@ -15,6 +15,7 @@
 
 #include "activity/ascend/ascend_manager.h"
 #include "common/plog_manager.h"
+#include "common/utils.h"
 
 namespace Mspti {
 namespace Callback {
@@ -43,7 +44,6 @@ msptiResult CallbackManager::Init(msptiSubscriberHandle *subscriber, msptiCallba
     }
     if (init_.load() || *subscriber == subscriber_ptr_.get()) {
         MSPTI_LOGE("subscriber cannot be register repeat.");
-        init_.store(false);
         return MSPTI_ERROR_MULTIPLE_SUBSCRIBERS_NOT_SUPPORTED;
     }
     Mspti::Common::MsptiMakeUniquePtr(subscriber_ptr_);
@@ -79,7 +79,7 @@ msptiResult CallbackManager::Register(msptiCallbackDomain domain, msptiCallbackI
     std::lock_guard<std::mutex> lk(cbid_mtx_);
     auto domain_entry = cbid_map_.find(domain);
     if (domain_entry == cbid_map_.end()) {
-        cbid_map_.emplace(domain, std::unordered_set<msptiCallbackId>(cbid));
+        cbid_map_.emplace(domain, std::unordered_set<msptiCallbackId>({cbid}));
     } else {
         domain_entry->second.insert(cbid);
     }
@@ -133,7 +133,6 @@ msptiResult CallbackManager::EnableDomain(uint32_t enable,
         MSPTI_LOGE("domain: %d was invalid.", domain);
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
-    std::lock_guard<std::mutex> lk(cbid_mtx_);
     auto cbid_set = domain_cbid_map_.find(domain);
     if (cbid_set == domain_cbid_map_.end()) {
         return MSPTI_SUCCESS;

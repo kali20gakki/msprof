@@ -4,7 +4,7 @@ CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
 
 # store product
-TEMP_OUTPUT=${TOP_DIR}/build/output
+PREFIX_DIR=${TOP_DIR}/build/prefix
 MSPROF_TEMP_DIR=${TOP_DIR}/build/msprof_tmp
 COMMON_DIR="common_script"
 mkdir -p "${MSPROF_TEMP_DIR}/${COMMON_DIR}"
@@ -48,23 +48,23 @@ PKG_LIMIT_SIZE=524288000 # 500M
 
 function parse_script_args() {
     while true; do
-		if [ "$1" = "" ]; then
-			break
-		fi
+        if [ "$1" = "" ]; then
+            break
+        fi
         case "$1" in
         version_dir=*)
-			version=${1#version_dir=}
-			shift
-			continue
+            version=${1#version_dir=}
+            shift
+            continue
             ;;
         Patch)
-			package_type="Patch"
-			shift
-			continue
+            package_type="Patch"
+            shift
+            continue
             ;;
         *)
-			echo "[ERROR]" "Input option is invalid"
-			exit 1
+            echo "[ERROR]" "Input option is invalid"
+            exit 1
             ;;
         esac
     done
@@ -72,50 +72,44 @@ function parse_script_args() {
 
 # create temp dir for product
 function create_temp_dir() {
-	local temp_dir=${1}
-	
-	if [ "${package_type}" = "Patch" ];
-		then
-			# if we want to change product, we also need to change rollback_precheck
-			cp ${TEMP_OUTPUT}/lib/libmsprofiler.so ${temp_dir}
-			cp -r ${TEMP_OUTPUT}/stub ${temp_dir}
-			cp ${TEMP_OUTPUT}/bin/msprof ${temp_dir}
-			cp -r ${TOP_DIR}/analysis ${temp_dir}
-			rm -rf ${temp_dir}/analysis/csrc
+    local temp_dir=${1}
+    local collector_dir=${PREFIX_DIR}/collector
 
-			copy_script ${MAIN_SPC} ${temp_dir}
-			copy_script ${BACKUP} ${temp_dir}
-			copy_script ${ROLLBACK_PRECHECK} ${temp_dir}
-			copy_script ${ROLLBACK_SPC} ${temp_dir}
-			copy_script ${UNINSTALL_SPC} ${temp_dir}
-			copy_script ${COMMON_DIR}/${COMMON_ROLLBACK} ${temp_dir}
-			copy_script ${COMMON_DIR}/${COMMON_UNINSTALL} ${temp_dir}
-
-		else
-			copy_script ${MAIN_SCRIPT} ${temp_dir}
-			copy_script ${COMMON_DIR}/${COMMON_UNINSTALL} ${temp_dir}
-			copy_script ${UNINSTALL} ${temp_dir}
-			cp ${TEMP_OUTPUT}/lib/libmsprofiler.so ${temp_dir}
-			cp -r ${TEMP_OUTPUT}/stub ${temp_dir}
-			cp ${TEMP_OUTPUT}/bin/msprof ${temp_dir}
-			cp -r ${TOP_DIR}/analysis ${temp_dir}
-			rm -rf ${temp_dir}/analysis/csrc
-	fi
-	copy_script ${INSTALL_SCRIPT} ${temp_dir}
-	copy_script ${UTILS_SCRIPT} ${temp_dir}
+    cp ${collector_dir}/lib/libmsprofiler.so ${temp_dir}
+    cp -r ${collector_dir}/stub ${temp_dir}
+    cp ${collector_dir}/bin/msprof ${temp_dir}
+    cp ${TOP_DIR}/collector/inc/external/acl/acl_prof.h ${temp_dir}
+    cp -r ${TOP_DIR}/analysis ${temp_dir}
+    rm -rf ${temp_dir}/analysis/csrc
+    if [ "${package_type}" = "Patch" ]; then
+        # if we want to change product, we also need to change rollback_precheck
+        copy_script ${MAIN_SPC} ${temp_dir}
+        copy_script ${BACKUP} ${temp_dir}
+        copy_script ${ROLLBACK_PRECHECK} ${temp_dir}
+        copy_script ${ROLLBACK_SPC} ${temp_dir}
+        copy_script ${UNINSTALL_SPC} ${temp_dir}
+        copy_script ${COMMON_DIR}/${COMMON_ROLLBACK} ${temp_dir}
+        copy_script ${COMMON_DIR}/${COMMON_UNINSTALL} ${temp_dir}
+    else
+        copy_script ${MAIN_SCRIPT} ${temp_dir}
+        copy_script ${COMMON_DIR}/${COMMON_UNINSTALL} ${temp_dir}
+        copy_script ${UNINSTALL} ${temp_dir}
+    fi
+    copy_script ${INSTALL_SCRIPT} ${temp_dir}
+    copy_script ${UTILS_SCRIPT} ${temp_dir}
 }
 
 # copy script
 function copy_script() {
-	local script_name=${1}
-	local temp_dir=${2}
+    local script_name=${1}
+    local temp_dir=${2}
 
     if [ -f "${temp_dir}/${script_name}" ]; then
-		rm -f "${temp_dir}/${script_name}"
-	fi
+        rm -f "${temp_dir}/${script_name}"
+    fi
 
-	cp ${RUN_SCRIPT_DIR}/${script_name} ${temp_dir}/${script_name}
-	chmod 500 "${temp_dir}/${script_name}"
+    cp ${RUN_SCRIPT_DIR}/${script_name} ${temp_dir}/${script_name}
+    chmod 500 "${temp_dir}/${script_name}"
 }
 
 function version() {
@@ -134,43 +128,43 @@ function get_package_name() {
 }
 
 function create_run_package() {
-	local run_name=${1}
-	local temp_dir=${2}
-	local main_script=${3}
-	local filer_param=${4}
-	local package_name=$(get_package_name)
-	
-	${CREATE_RUN_SCRIPT} \
-	--header ${CONTROL_PARAM_SCRIPT} \
-	--help-header ${filer_param} --pigz \
-	--complevel 4 \
-	--nomd5 \
-	--sha256 \
-	--chown \
-	${temp_dir} \
-	${OUTPUT_DIR}/${package_name} \
-	${run_name} \
-	./${main_script}
+    local run_name=${1}
+    local temp_dir=${2}
+    local main_script=${3}
+    local filer_param=${4}
+    local package_name=$(get_package_name)
+
+    ${CREATE_RUN_SCRIPT} \
+    --header ${CONTROL_PARAM_SCRIPT} \
+    --help-header ${filer_param} --pigz \
+    --complevel 4 \
+    --nomd5 \
+    --sha256 \
+    --chown \
+    ${temp_dir} \
+    ${OUTPUT_DIR}/${package_name} \
+    ${run_name} \
+    ./${main_script}
 }
 
 function sed_param() {
-	local main_script=${1}
-	sed -i "2i VERSION=$version" "${RUN_SCRIPT_DIR}/${main_script}"
-	sed -i "2i package_arch=$(arch)" "${RUN_SCRIPT_DIR}/${main_script}"
+    local main_script=${1}
+    sed -i "2i VERSION=$version" "${RUN_SCRIPT_DIR}/${main_script}"
+    sed -i "2i package_arch=$(arch)" "${RUN_SCRIPT_DIR}/${main_script}"
 
-	if [ "${main_script}" = "${MAIN_SCRIPT}" ]; then
-		sed -i "2i package_arch=$(arch)" "${RUN_SCRIPT_DIR}/${UNINSTALL}"
-	fi
+    if [ "${main_script}" = "${MAIN_SCRIPT}" ]; then
+        sed -i "2i package_arch=$(arch)" "${RUN_SCRIPT_DIR}/${UNINSTALL}"
+    fi
 }
 
 function delete_sed_param() {
-	local main_script=${1}
-	sed -i "2d" "${RUN_SCRIPT_DIR}/${main_script}"
-	sed -i "2d" "${RUN_SCRIPT_DIR}/${main_script}"
+    local main_script=${1}
+    sed -i "2d" "${RUN_SCRIPT_DIR}/${main_script}"
+    sed -i "2d" "${RUN_SCRIPT_DIR}/${main_script}"
 
-	if [ "${main_script}" = "${MAIN_SCRIPT}" ]; then
-		sed -i "2d" "${RUN_SCRIPT_DIR}/${UNINSTALL}"
-	fi
+    if [ "${main_script}" = "${MAIN_SCRIPT}" ]; then
+        sed -i "2d" "${RUN_SCRIPT_DIR}/${UNINSTALL}"
+    fi
 }
 
 function sed_main_param() {
@@ -186,6 +180,7 @@ function sed_main_param() {
 
 check_file_exist() {
   local temp_dir=${1}
+  check_package ${temp_dir}/acl_prof.h ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/msprof ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/libmsprofiler.so ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/libmsprofiler.so ${PKG_LIMIT_SIZE}
@@ -221,8 +216,8 @@ function check_package() {
 parse_script_args $*
 
 if [ "${package_type}" = "Patch" ];
-	then
-		sed_main_param ${MAIN_SPC} ${FILTER_PARAM_SCRIPT_SPC}
-	else
-		sed_main_param ${MAIN_SCRIPT} ${FILTER_PARAM_SCRIPT}
+    then
+        sed_main_param ${MAIN_SPC} ${FILTER_PARAM_SCRIPT_SPC}
+    else
+        sed_main_param ${MAIN_SCRIPT} ${FILTER_PARAM_SCRIPT}
 fi

@@ -75,7 +75,7 @@ target_link_options(stub_msprofiler PRIVATE
 )
 
 install(TARGETS stub_msprofiler OPTIONAL
-    LIBRARY DESTINATION stub
+    LIBRARY DESTINATION collector/stub
 )
 ###################### stub/libmsprofiler.so #######################
 
@@ -267,6 +267,7 @@ target_link_options(msprofiler_share PRIVATE
 
 target_link_directories(msprofiler_share PRIVATE
     ${SECUREC_LIB_DIR}
+    ${ERROR_MANAGER_LIB_DIR}
 )
 
 target_link_libraries(msprofiler_share PRIVATE
@@ -279,7 +280,7 @@ target_link_libraries(msprofiler_share PRIVATE
 )
 
 install(TARGETS msprofiler_share OPTIONAL
-    LIBRARY DESTINATION lib
+    LIBRARY DESTINATION collector/lib
 )
 
 ####################### libmsprofiler.so ###########################

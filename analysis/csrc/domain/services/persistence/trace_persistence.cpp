@@ -166,7 +166,9 @@ uint32_t ProcessAllReduceEntry(DataInventory &dataInventory, const DeviceContext
 {
     auto stepTraceTask = dataInventory.GetPtr<std::map<uint32_t, std::vector<StepTraceTasks>>>();
     std::string dbPath = Utils::File::PathJoin({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
-    auto data = GenerateAllReduce(*stepTraceTask, context.deviceContextInfo.deviceInfo.deviceId);
+    DeviceInfo deviceInfo{};
+    context.Getter(deviceInfo);
+    auto data = GenerateAllReduce(*stepTraceTask, deviceInfo.deviceId);
     auto res = SaveData(data, stepTraceDB, dbPath);
     if (!res) {
         ERROR("Process % failed!", stepTraceDB.tableName);
@@ -195,8 +197,9 @@ uint32_t ProcessTrainingTraceEntry(DataInventory &dataInventory, const DeviceCon
     auto stepTraceTask = dataInventory.GetPtr<std::map<uint32_t, std::vector<StepTraceTasks>>>();
     auto halTrackDatas = dataInventory.GetPtr<std::vector<HalTrackData>>();
     std::string dbPath = Utils::File::PathJoin({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
-    auto data = GenerateTrainingTrace(*stepTraceTask, *halTrackDatas,
-                                      context.deviceContextInfo.deviceInfo.deviceId);
+    DeviceInfo deviceInfo{};
+    context.Getter(deviceInfo);
+    auto data = GenerateTrainingTrace(*stepTraceTask, *halTrackDatas, deviceInfo.deviceId);
     auto res = SaveData(data, stepTraceDB, dbPath);
     if (!res) {
         ERROR("Process % failed!", stepTraceDB.tableName);

@@ -1,10 +1,3 @@
-include_directories(${GTEST_INCLUDE_DIR})
-include_directories(${TOP_DIR}/opensource/json/include)
-include_directories(${TOP_DIR}/platform/securec/include)
-include_directories(${TOP_DIR}/analysis/csrc)
-include_directories(${TOP_DIR}/test/msprof_cpp/analysis_ut/domain/services/)
-include_directories(${TOP_DIR}/)
-
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/modeling/batch_id DEVICE_PARSER_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/utils DEVICE_PARSER_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/data_inventory DEVICE_PARSER_SOURCE)
@@ -27,13 +20,15 @@ aux_source_directory(${TOP_DIR}/analysis/csrc/entities DEVICE_PARSER_SOURCE)
 aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/stubs/dfx DEVICE_PARSER_SOURCE)
 aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/domain/services/test DEVICE_PARSER_SOURCE)
 
-list(APPEND DEVICE_PARSER_SOURCE ${TOP_DIR}/analysis/csrc/viewer/database/drafts/number_mapping.cpp)
-
-add_executable(
-        device_parser_utest
-        ${DEVICE_PARSER_SOURCE}
+add_executable(device_parser_utest
+    ${DEVICE_PARSER_SOURCE}
+    ${TOP_DIR}/analysis/csrc/viewer/database/drafts/number_mapping.cpp
 )
 
+target_include_directories(device_parser_utest PRIVATE
+    ${TOP_DIR}/platform/securec/include
+    ${TOP_DIR}/test/msprof_cpp/analysis_ut/domain/services/
+)
 target_link_libraries(device_parser_utest PRIVATE
         c_sec_static
         -lsqlite3
