@@ -24,18 +24,18 @@ namespace Domain {
 const std::string INVALID_HEADER = "INVALID";
 // PipeUtilizationExct对应910B芯片的AIV的PipeUtilization,两者属于等价分组
 enum class PipeUtilizationExctIndex {
-    MacRatioExtra = 0,
+    // 计算该分组的PMU时，以ratio/ratio_extra结尾的metric需要计算时间
+    MacTime = 0,
+    MacRatioExtra,
+    ScalarTime,
     ScalarRatio,
+    Mte1Time,
     Mte1RatioExtra,
+    Mte2Time,
     Mte2Ratio,
+    FixPipeTime,
     FixPipeRatio,
     ICacheMissRate,
-    // 计算该分组的PMU时，以ratio/ratio_extra结尾的metric需要计算时间
-    MacTime,
-    ScalarTime,
-    Mte1Time,
-    Mte2Time,
-    FixPipeTime,
 };
 
 enum class ArithMetricIndex {
@@ -50,20 +50,20 @@ enum class ArithMetricIndex {
 };
 
 enum class PipeLineUtIndex {
-    VecRatio = 0,
+    // 计算该分组的PMU时，以ratio/ratio_extra结尾的metric需要计算时间
+    VecTime = 0,
+    VecRatio,
+    MacTime,
     MacRatio,
+    ScalarTime,
     ScalarRatio,
+    Mte1Time,
     Mte1Ratio,
+    Mte2Time,
     Mte2Ratio,
+    Mte3Time,
     Mte3Ratio,
     ICacheMissRate,
-    // 计算该分组的PMU时，以ratio/ratio_extra结尾的metric需要计算时间
-    VecTime,
-    MacTime,
-    ScalarTime,
-    Mte1Time,
-    Mte2Time,
-    Mte3Time,
 };
 
 enum class MemoryIndex {

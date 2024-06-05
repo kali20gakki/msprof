@@ -20,6 +20,15 @@
 
 namespace Analysis {
 namespace Domain {
+enum PmuHeaderType {
+    TASK_ID = 0,
+    AIC_TOTAL_CYCLE,
+    AIC_TOTAL_TIME,
+    AIC_PMU_RESULT,
+    AIV_TOTAL_CYCLE,
+    AIV_TOTAL_TIME,
+    AIV_PMU_RESULT
+};
 using namespace Infra;
 using namespace Viewer::Database;
 class MetricSummaryPersistence : public Process {
@@ -29,9 +38,11 @@ private:
     uint32_t GenerateAndSavePmuData(std::map<TaskId, std::vector<DeviceTask>>& deviceTask, sqlite3_stmt *stmt,
                                     sqlite3* db);
     uint32_t SaveDataToDb(std::map<TaskId, std::vector<DeviceTask>>& deviceTask, std::string& dbPath, DBInfo& dbInfo);
-    bool BindParametersAndExecuteInsert(std::vector<uint64_t>& ids, std::vector<double>& pmu,
+    bool BindAndExecuteInsert(std::unordered_map<PmuHeaderType, std::vector<uint64_t>>& ids,
+                                        std::unordered_map<PmuHeaderType, std::vector<double>>& pmu,
                                         sqlite3_stmt *stmt, sqlite3* db);
-    bool ConstructData(std::vector<uint64_t>& ids, std::vector<double>& result, DeviceTask& task, int aicLength,
+    bool ConstructData(std::unordered_map<PmuHeaderType, std::vector<uint64_t>>& ids,
+                       std::unordered_map<PmuHeaderType, std::vector<double>>& result, DeviceTask& task, int aicLength,
                        int aivLength);
 private:
     std::unique_ptr<MetricCalculator> aicCalculator_;

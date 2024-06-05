@@ -16,8 +16,8 @@ namespace Analysis {
 namespace Domain {
 namespace {
 std::vector<std::string> PipeUtExHeaderString{
-    "mac_ratio_extra", "scalar_ratio", "mte1_ratio_extra", "mte2_ratio", "fixpipe_ratio", "icache_miss_rate",
-    "mac_time", "scalar_time", "mte1_time", "mte2_time", "fixpipe_time"
+    "mac_time", "mac_ratio_extra", "scalar_time", "scalar_ratio", "mte1_time", "mte1_ratio_extra", "mte2_time",
+    "mte2_ratio", "fixpipe_time", "fixpipe_ratio", "icache_miss_rate"
 };
 
 std::vector<std::string> ArithMetricHeaderString{
@@ -26,8 +26,8 @@ std::vector<std::string> ArithMetricHeaderString{
 };
 
 std::vector<std::string> PipeUtHeaderString{
-    "vec_ratio", "mac_ratio", "scalar_ratio", "mte1_ratio", "mte2_ratio", "mte3_ratio", "icache_miss_rate",
-    "vec_time", "mac_time", "scalar_time", "mte1_time", "mte2_time", "mte3_time"
+    "vec_time", "vec_ratio", "mac_time", "mac_ratio", "scalar_time", "scalar_ratio", "mte1_time", "mte1_ratio",
+    "mte2_time", "mte2_ratio", "mte3_time", "mte3_ratio", "icache_miss_rate"
 };
 
 std::vector<std::string> MemoryHeaderString{
