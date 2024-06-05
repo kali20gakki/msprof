@@ -67,6 +67,10 @@ class TestInfoConfReader(unittest.TestCase):
         InfoConfReader()._dev_cnt = 3000.000
         self.assertEqual(InfoConfReader().get_dev_cnt(), 3000000000000)
 
+    def test_duration_from_syscnt_should_return_duration_time_when_hwts_frequency_is_1000(self):
+        InfoConfReader()._info_json = {'DeviceInfo': [{'hwts_frequency': "1000"}]}
+        self.assertEqual(15000000.0, InfoConfReader().duration_from_syscnt(15000000000))
+
 
 if __name__ == '__main__':
     unittest.main()

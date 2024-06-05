@@ -258,6 +258,10 @@ class InfoConfReader:
         return float(
             sys_cnt - self._dev_cnt * NumberConstant.NANO_SECOND) / hwts_freq * time_fmt + self._host_mon * time_fmt
 
+    def duration_from_syscnt(self: any, delta_syscnt: int, time_fmt: int = NumberConstant.MICRO_SECOND) -> float:
+        hwts_freq = self.get_freq(StrConstant.HWTS)
+        return float(delta_syscnt) / hwts_freq * time_fmt
+
     def time_from_host_syscnt(self: any, sys_cnt: int, time_fmt: int = NumberConstant.NANO_SECOND) -> float:
         """
         transfer sys cnt to host_time unit.

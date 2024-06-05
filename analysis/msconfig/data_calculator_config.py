@@ -139,4 +139,10 @@ class DataCalculatorConfig(MetaConfig):
             ('level', '1'),
             ('position', 'D')
         ],
+        'KfcCalculator': [
+            ('path', 'mscalculate.hccl.kfc_calculator'),
+            ('chip_model', '4,5'),
+            ('level', '7'),
+            ('position', 'D')
+        ],
     }

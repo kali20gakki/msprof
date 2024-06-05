@@ -185,10 +185,13 @@ class AiStackDataCheckManager(DataCheckManager):
         :param device_id: device id
         :return: if contained hccl hcom data, true or false
         """
-        return AiStackDataCheckManager._check_output(result_dir, device_id)\
-            and DBManager.check_tables_in_db(
-                   PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL_SINGLE_DEVICE),
-                   DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE)
+        return AiStackDataCheckManager._check_output(result_dir, device_id) \
+            and (DBManager.check_tables_in_db(
+                PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL_SINGLE_DEVICE),
+                DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE)
+                 or DBManager.check_tables_in_db(
+                        PathManager.get_db_path(result_dir, DBNameConstant.DB_KFC_INFO),
+                        DBNameConstant.TABLE_KFC_OP))
 
     @classmethod
     def contain_training_trace_data_or_step(cls: any, result_dir: str, device_id: int = None) -> bool:

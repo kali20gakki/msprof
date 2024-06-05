@@ -1,10 +1,12 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
+from collections import namedtuple
 
 from common_func.db_name_constant import DBNameConstant
 from common_func.db_manager import DBManager
 from common_func.info_conf_reader import InfoConfReader
+from common_func.msprof_object import CustomizedNamedtupleFactory
 from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.view_model import ViewModel
 
@@ -28,6 +30,11 @@ class Mc2CommInfoModel(ParserModel):
 
 
 class Mc2CommInfoViewModel(ViewModel):
+    MC2_COMM_INFO_TYPE = CustomizedNamedtupleFactory.enhance_namedtuple(
+        namedtuple("Mc2CommInfo",
+                   ["aicpu_kfc_stream_id", "comm_stream_ids", "group_name"]),
+        {})
+
     def __init__(self, result_dir: str, table_list: list):
         super().__init__(result_dir, DBNameConstant.DB_MC2_COMM_INFO, table_list)
 
@@ -37,4 +44,5 @@ class Mc2CommInfoViewModel(ViewModel):
         device_id = InfoConfReader().get_device_id()
         sql = "select aicpu_kfc_stream_id, comm_stream_ids, group_name from {0} " \
               "where rank_id={1}".format(table_name, device_id)
-        return DBManager.fetch_all_data(self.cur, sql)
+        mc2_comm_info_data = DBManager.fetch_all_data(self.cur, sql)
+        return [self.MC2_COMM_INFO_TYPE(*data) for data in mc2_comm_info_data]

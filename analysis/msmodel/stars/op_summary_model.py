@@ -1,15 +1,19 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2023. All rights reserved.
+import os
 
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.path_manager import PathManager
 from common_func.profiling_scene import ProfilingScene
+from common_func.msprof_object import CustomizedNamedtupleFactory
 from msmodel.interface.ianalysis_model import IAnalysisModel
 from msmodel.interface.view_model import ViewModel
+from msmodel.add_info.mc2_comm_info_model import Mc2CommInfoViewModel
 from profiling_bean.db_dto.time_section_dto import TimeSectionDto
+from profiling_bean.db_dto.time_section_dto import CommunicationTimeSection
 
 
 class OpSummaryModel(ViewModel, IAnalysisModel):
@@ -22,6 +26,9 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
         Constant.TASK_TYPE_AIV, Constant.TASK_TYPE_MIX_AIV,
         Constant.TASK_TYPE_MIX_AIC
     )
+
+    COMMUNICATION_TIME_SECTION_TYPE = CustomizedNamedtupleFactory.generate_named_tuple_from_dto(
+        CommunicationTimeSection, [])
 
     def __init__(self: any, sample_config: dict) -> None:
         super().__init__(sample_config.get("result_dir"), DBNameConstant.DB_AICORE_OP_SUMMARY, [])
@@ -36,6 +43,27 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
 
     def get_timeline_data(self: any) -> str:
         return self.__module__
+
+    def separate_kfc_stream(self: any, data_list: list) -> tuple:
+        if not os.path.exists(PathManager.get_db_path(self.result_dir, DBNameConstant.DB_MC2_COMM_INFO)):
+            return data_list, []
+        with Mc2CommInfoViewModel(self.result_dir, [DBNameConstant.TABLE_MC2_COMM_INFO]) as model:
+            comm_info = model.get_kfc_stream(DBNameConstant.TABLE_MC2_COMM_INFO)
+        if not comm_info:
+            return data_list, []
+        kfc_stream_id = []
+        for info in comm_info:
+            kfc_stream_id.append(info[0])  # 0-aicpu_kfc_stream_id
+        compute_data = []
+        kfc_data = []
+        for data in data_list:
+            if data.stream_id in kfc_stream_id:
+                communication_data = self.COMMUNICATION_TIME_SECTION_TYPE()
+                communication_data = communication_data.replace(start_time=data.start_time, end_time=data.end_time)
+                kfc_data.append(communication_data)
+            else:
+                compute_data.append(data)
+        return compute_data, kfc_data
 
     def get_operator_data_by_task_type(self: any, task_type: tuple = COMPUTED_TASK_TYPE) -> list:
         db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_AICORE_OP_SUMMARY)
@@ -63,3 +91,6 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
                 unknown=Constant.TASK_TYPE_UNKNOWN)
         return DBManager.fetch_all_data(self.cur, sql, dto_class=TimeSectionDto)
 
+    def get_operator_data_separated_by_kfc_stream(self: any) -> tuple:
+        operator_data = self.get_operator_data_by_task_type()
+        return self.separate_kfc_stream(operator_data)
