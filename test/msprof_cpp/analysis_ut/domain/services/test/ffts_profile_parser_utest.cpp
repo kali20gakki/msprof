@@ -167,12 +167,14 @@ TEST_F(FftsProfileParserUTest, ShouldReturnContextPmuAndBlockPmuWhenParserMultiF
     }
 }
 
-TEST_F(FftsProfileParserUTest, ShouldReturnParserReadDataErrorWhenPathNull)
+TEST_F(FftsProfileParserUTest, ShouldReturnNoDataWhenPathNull)
 {
     FftsProfileParser parser;
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = "";
-    ASSERT_EQ(Analysis::PARSER_READ_DATA_ERROR, parser.Run(dataInventory_, context));
+    ASSERT_EQ(Analysis::ANALYSIS_OK, parser.Run(dataInventory_, context));
+    auto pmuData = dataInventory_.GetPtr<std::vector<HalPmuData>>();
+    ASSERT_EQ(0ul, pmuData->size());
 }
 }
 }

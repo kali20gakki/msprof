@@ -64,7 +64,7 @@ std::vector<std::string> GetDeviceDirectories(const std::string &path)
             if (subdirName.size() > MIN_SUB_DIR_NBAME_LEN &&
                 subdirName.substr(0, MIN_SUB_DIR_NBAME_LEN) == "device" &&
                 subdirName.back() >= '0' && subdirName.back() <= '9') {
-                std::string subdirPath = Join(path, "/", subdirName);
+                std::string subdirPath = File::PathJoin({path, subdirName});
                 subdirs.push_back(subdirPath);
             }
         }

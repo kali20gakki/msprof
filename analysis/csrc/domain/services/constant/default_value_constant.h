@@ -20,7 +20,6 @@
 namespace Analysis {
 namespace Domain {
 const double INVALID_TIME = -1;
-const uint64_t DEFAULT_TIMESTAMP = UINT64_MAX;
 const std::string SQLITE = "sqlite";
 const std::string UNKNOWN_STRING = "UNKNOWN";
 }

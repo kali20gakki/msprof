@@ -75,7 +75,7 @@ void KernelParserWorker::DumpHashData()
     auto hashDataContent = HashData::GetInstance().GetAll();
     INFO("success get hash data");
     if (hashDataContent.empty()) {
-        ERROR("Empty hash data");
+        WARN("Empty hash data");
         return;
     }
     std::shared_ptr<HashDBDumper> hashDbDumper;
@@ -95,7 +95,7 @@ void KernelParserWorker::DumpTypeInfoData()
     TypeData::GetInstance().Load(dataPath);
     auto typeInfoContent = TypeData::GetInstance().GetAll();
     if (typeInfoContent.empty()) {
-        ERROR("Empty type info data");
+        WARN("Empty type info data");
         return;
     }
     TypeInfoDBDumper typeDbDumper(hostFilePath_);

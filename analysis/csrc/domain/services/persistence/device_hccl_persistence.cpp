@@ -29,12 +29,12 @@ using HcclOpDataFormat = std::vector<std::tuple<uint64_t, std::string, std::stri
 // taskType, opType, connectionId, isMaster, streamId, taskId, durationEstimated, localRank, remoteRank, transportType,
 // size, dataType, linkType, bandwidth, contextId, notifyId, batchId, rdmaType
 using HcclTaskDataFormat = std::vector<std::tuple<uint64_t, int32_t, std::string, uint16_t, std::string, std::string,
-        uint64_t, int32_t, uint64_t, uint64_t, std::string, std::string, std::string, int64_t, uint16_t, uint32_t,
+        uint64_t, int32_t, double, double, std::string, std::string, std::string, int64_t, uint16_t, uint32_t,
         uint16_t, double, uint32_t, uint32_t, std::string, double, std::string, std::string, double, uint32_t,
         std::string, uint16_t, std::string>>;
 
 // opType, count, totalTime, min, avg, max, ratio
-using HcclStasticsFormat = std::vector<std::tuple<std::string, uint32_t, uint64_t, uint64_t, double, uint64_t, double>>;
+using HcclStasticsFormat = std::vector<std::tuple<std::string, uint32_t, double, double, double, double, double>>;
 }
 
 bool SaveHcclOpData(DataInventory& dataInventory, const std::string devicePath)

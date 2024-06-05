@@ -45,8 +45,8 @@ void MergeStartAndEnd(const std::map<uint64_t, std::vector<HalLogData*>>& logSta
             uint32_t contextId = key >> 32;
             uint16_t taskId = (key >> 16) & LOW_16BIT_MASK;
             uint16_t streamId = key & LOW_16BIT_MASK;
-            ERROR("Start log size(%) not same as End log size(%); context:%, task:%, stream:%",
-                  startPair.second.size(), it->second.size(), contextId, taskId, streamId);
+            WARN("Start log size(%) not same as End log size(%); context:%, task:%, stream:%",
+                 startPair.second.size(), it != logEnd.end() ? it->second.size() : 0, contextId, taskId, streamId);
             continue;
         }
         for (size_t i = 0; i < startPair.second.size(); ++i) {
@@ -70,7 +70,7 @@ void LogModeling::SplitLogGroups(std::vector<HalLogData>& logData,
             } else {
                 acsqStart_[halLog.hd.taskId.streamId].push_back(&halLog);
             }
-        } else {
+        } else if (halLog.type == FFTS_LOG) {
             if (halLog.ffts.isEndTimestamp) {
                 fftsEnd_[halLog.hd.taskId.streamId].push_back(&halLog);
             } else {

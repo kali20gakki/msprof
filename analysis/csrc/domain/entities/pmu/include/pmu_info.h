@@ -34,6 +34,7 @@ struct PmuInfoSingleAccelerator : public PmuBaseInfo {
 
 struct PmuInfoMixAccelerator : public PmuBaseInfo {
     uint32_t totalBlockCount = 0;
+    uint64_t mainTimestamp = 0;
     double aiCoreTime = 0;
     uint64_t aicTotalCycles = 0;
     double aivTime = 0;

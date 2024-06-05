@@ -22,10 +22,13 @@
 #include "analysis/csrc/domain/services/constant/default_value_constant.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
 #include "analysis/csrc/domain/services/device_context/load_host_data.h"
+#include "analysis/csrc/domain/services/device_context/device_context.h"
+#include "analysis/csrc/utils/time_utils.h"
 
 namespace Analysis {
 namespace Domain {
 using namespace Analysis::Entities;
+using namespace Utils;
 namespace {
 const uint64_t DEFAULT_MODEL_ID = UINT64_MAX;
 const int32_t DEFAULT_INDEX_ID = -1;
@@ -70,6 +73,24 @@ const std::unordered_map<uint32_t, std::string> deviceTaskFftsPlusTypeMap {
         {13, "Load Context"},
         {15, "DSA"}
 };
+
+SyscntConversionParams GetSyscntConversionParams(const DeviceContext& context)
+{
+    CpuInfo cpuInfo;
+    context.Getter(cpuInfo);
+    HostStartLog hostStartLog;
+    context.Getter(hostStartLog);
+    uint64_t hostMonotonic = hostStartLog.clockMonotonicRaw;
+    DeviceInfo deviceInfo;
+    context.Getter(deviceInfo);
+    DeviceStartLog deviceStartLog;
+    context.Getter(deviceStartLog);
+    if (cpuInfo.frequency && hostStartLog.cntVctDiff) {
+        hostMonotonic = hostStartLog.clockMonotonicRaw + hostStartLog.cntVctDiff / cpuInfo.frequency;
+    }
+    SyscntConversionParams params{deviceInfo.hwtsFrequency, deviceStartLog.cntVct, hostMonotonic};
+    return params;
+}
 }
 
 std::string GetDeviceTaskTypeStr(const DeviceTask& task)
@@ -89,12 +110,15 @@ std::string GetDeviceTaskTypeStr(const DeviceTask& task)
     return res;
 }
 
-void MergeByHostAndDeviceTask(std::vector<TopDownTask>& res, HostTask& hostTask, std::vector<DeviceTask>& deviceTask)
+void MergeByHostAndDeviceTask(std::vector<TopDownTask>& res, HostTask& hostTask, std::vector<DeviceTask>& deviceTask,
+                              SyscntConversionParams& params)
 {
     for (auto& task : deviceTask) {
+        auto start = GetTimeFromSyscnt(task.taskStart, params);
+        auto end = GetTimeFromSyscnt(task.taskEnd, params);
         res.emplace_back(hostTask.taskId, hostTask.batchId, hostTask.streamId, hostTask.contextId, hostTask.requestId,
                          GetDeviceTaskTypeStr(task), hostTask.taskTypeStr, hostTask.modelId, hostTask.connection_id,
-                         task.taskStart, task.taskEnd);
+                         start.Double(), end.Double());
     }
 }
 
@@ -102,22 +126,26 @@ void MergeByOnlyHostTask(std::vector<TopDownTask>& res, std::vector<HostTask>& h
 {
     for (auto& task : hostTask) {
         res.emplace_back(task.taskId, task.batchId, task.streamId, task.contextId, task.requestId,
-                         UNKNOWN_STRING, task.taskTypeStr, task.modelId, task.connection_id, DEFAULT_TIMESTAMP,
-                         DEFAULT_TIMESTAMP);
+                         UNKNOWN_STRING, task.taskTypeStr, task.modelId, task.connection_id, INVALID_TIME,
+                         INVALID_TIME);
     }
 }
 
-void MergeByOnlyDeviceTask(std::vector<TopDownTask>& res, std::vector<DeviceTask>& deviceTask, const TaskId& key)
+void MergeByOnlyDeviceTask(std::vector<TopDownTask>& res, std::vector<DeviceTask>& deviceTask, const TaskId& key,
+                           SyscntConversionParams& params)
 {
     for (auto& task : deviceTask) {
+        auto start = GetTimeFromSyscnt(task.taskStart, params);
+        auto end = GetTimeFromSyscnt(task.taskEnd, params);
         res.emplace_back(key.taskId, key.batchId, key.streamId, key.contextId, DEFAULT_INDEX_ID,
                          GetDeviceTaskTypeStr(task), UNKNOWN_STRING, DEFAULT_MODEL_ID,
-                         DEFAULT_CONNECTION_ID, task.taskStart, task.taskEnd);
+                         DEFAULT_CONNECTION_ID, start.Double(), end.Double());
     }
 }
 
 std::vector<TopDownTask> GenerateTopDownTask(std::map<TaskId, std::vector<HostTask>>& hostTasks,
-                                             std::map<TaskId, std::vector<DeviceTask>>& deviceTasks)
+                                             std::map<TaskId, std::vector<DeviceTask>>& deviceTasks,
+                                             SyscntConversionParams& params)
 {
     std::set<TaskId> totalTaskId;
     std::transform(hostTasks.begin(), hostTasks.end(), std::inserter(totalTaskId, totalTaskId.begin()),
@@ -138,11 +166,11 @@ std::vector<TopDownTask> GenerateTopDownTask(std::map<TaskId, std::vector<HostTa
                 continue;
             }
             if (hostIt->second.size() == 1) {
-                MergeByHostAndDeviceTask(res, hostIt->second[0], deviceIt->second);
+                MergeByHostAndDeviceTask(res, hostIt->second[0], deviceIt->second, params);
                 matchSize += deviceIt->second.size();
             }
         } else if (hostIt == hostTasks.end()) {
-            MergeByOnlyDeviceTask(res, deviceIt->second, key);
+            MergeByOnlyDeviceTask(res, deviceIt->second, key, params);
         } else { // 因为所有的key都是从hostTasks与deviceTasks中取的，所以一定不会有两者都找不到key的情况，该分支为device为空
             MergeByOnlyHostTask(res, hostIt->second);
         }
@@ -153,13 +181,15 @@ std::vector<TopDownTask> GenerateTopDownTask(std::map<TaskId, std::vector<HostTa
 
 uint32_t AscendTaskAssociation::ProcessEntry(DataInventory &dataInventory, const Context &context)
 {
+    const DeviceContext& deviceContext = static_cast<const DeviceContext&>(context);
+    auto params = GetSyscntConversionParams(deviceContext);
     auto hostTasks = dataInventory.GetPtr<std::map<TaskId, std::vector<HostTask>>>();
     auto deviceTasks = dataInventory.GetPtr<std::map<TaskId, std::vector<DeviceTask>>>();
     if (hostTasks->empty() && deviceTasks->empty()) {
         ERROR("There is no HostTask and DeviceTask, can't generate AscendTask!");
         return ANALYSIS_ERROR;
     }
-    auto topDownTask = GenerateTopDownTask(*hostTasks, *deviceTasks);
+    auto topDownTask = GenerateTopDownTask(*hostTasks, *deviceTasks, params);
     std::shared_ptr<std::vector<TopDownTask>> data;
     MAKE_SHARED_RETURN_VALUE(data, std::vector<TopDownTask>, ANALYSIS_ERROR, std::move(topDownTask));
     dataInventory.Inject(data);
