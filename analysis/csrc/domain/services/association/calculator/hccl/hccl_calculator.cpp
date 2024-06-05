@@ -43,6 +43,7 @@ const uint16_t RDMA_WITH_BARRIER_TASK_NUM = 5;
 const uint16_t PERCENTAGE = 100;
 const std::string RDMA_SEND_PAYLOAD = "RDMA_SEND_PAYLOAD";
 const std::string NA = "N/A";
+const int POS_COMPARE_BASE = 3;
 }
 
 uint32_t HcclCalculator::ProcessEntry(DataInventory& dataInventory, const Context& context)
@@ -253,7 +254,11 @@ void HcclCalculator::UpdateHcclOpNameByGroupName()
             groupData.firstTimestamp = data.firstTimestamp;
             hcclGroup[data.groupName] = groupData;
         }
-        auto subGroupName = data.groupName.substr((data.groupName.size() - 3 < 0) ? 0 : data.groupName.size() - 3);
+        int subPoint = 0;
+        if (static_cast<int>(data.groupName.size()) > POS_COMPARE_BASE) {
+            subPoint = static_cast<int>(data.groupName.size()) - POS_COMPARE_BASE;
+        }
+        auto subGroupName = data.groupName.substr(subPoint);
         data.opName = Utils::Join("_", data.opName, subGroupName,
                                   std::to_string(hcclGroup[data.groupName].count), std::to_string(data.iterationId));
     }

@@ -22,7 +22,7 @@ namespace Analysis {
 namespace Domain {
 
 struct PmuBaseInfo {
-    AcceleratorType type;
+    AcceleratorType type = INVALID;
     virtual ~PmuBaseInfo() = default;
 };
 
