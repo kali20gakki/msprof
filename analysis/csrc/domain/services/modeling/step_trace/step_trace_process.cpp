@@ -170,7 +170,8 @@ std::vector<HalTrackData> StepTraceProcess::PreprocessData(const std::shared_ptr
 void StepTraceProcess::SaveStepTraceTask()
 {
     if (!currentStepTraceTask_.empty()) {
-        if (currentStepTraceTask_.back().stepTrace.start > currentStepTraceTask_.back().stepTrace.end) {
+        if (currentStepTraceTask_.back().stepTrace.start >= currentStepTraceTask_.back().stepTrace.end ||
+            !currentStepTraceTask_.back().stepTrace.start) {
             currentStepTraceTask_.pop_back();
         }
         if (!currentStepTraceTask_.empty()) {

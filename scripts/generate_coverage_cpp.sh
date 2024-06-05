@@ -43,6 +43,11 @@ test_obj=(
     association_utest
     viewer_utest
     parser_utest
+    device_association_utest
+    device_entities_utest
+    device_modeling_utest
+    device_parser_utest
+    device_persistence_utest
 )
 
 str_test=""
