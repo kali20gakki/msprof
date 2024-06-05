@@ -123,8 +123,5 @@ uint32_t TsTrackPersistence::ProcessEntry(DataInventory& dataInventory, const Co
     ERROR("Save tsTrack data failed");
     return ANALYSIS_ERROR;
 }
-REGISTER_PROCESS_SEQUENCE(TsTrackPersistence, true, TsTrackParser);
-REGISTER_PROCESS_DEPENDENT_DATA(TsTrackPersistence, std::vector<HalTrackData>);
-REGISTER_PROCESS_SUPPORT_CHIP(TsTrackPersistence, CHIP_ID_ALL);
 }
 }
