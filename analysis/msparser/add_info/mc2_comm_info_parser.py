@@ -35,7 +35,7 @@ class Mc2CommInfoParser(DataParser, MsMultiProcess):
         """
         if not self._file_list.get(DataTag.MC2_COMM_INFO, []):
             return
-        logging.info("start parsing mc2 comm info, files: %s", str(self._file_list.get(DataTag.AICPU_ADD_INFO)))
+        logging.info("start parsing mc2 comm info, files: %s", str(self._file_list.get(DataTag.MC2_COMM_INFO)))
         self.parse()
         self.save()
 

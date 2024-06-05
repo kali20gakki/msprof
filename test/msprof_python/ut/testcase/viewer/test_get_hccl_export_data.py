@@ -40,15 +40,17 @@ class TestHCCLExport(unittest.TestCase):
         self.assertEqual(res, [])
         with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_all_data', return_value=[]), \
                 mock.patch('msmodel.interface.view_model.DBManager.create_connect_db', return_value=(conn, curs)), \
-                mock.patch('msmodel.hccl.hccl_model.HcclViewModel.check_table', return_value=True):
+                mock.patch('msmodel.hccl.hccl_model.HcclViewModel.check_table', return_value=True), \
+                mock.patch('os.path.exists', return_value=True):
             res = HCCLExport(PARAMS).get_hccl_timeline_data()
         self.assertEqual(res, [])
         conn, curs = db_manager.create_table('hccl.db')
         with mock.patch(NAMESPACE + '.HCCLExport._format_hccl_data'), \
                 mock.patch('msmodel.interface.view_model.DBManager.create_connect_db', return_value=(conn, curs)), \
-                mock.patch('msmodel.hccl.hccl_model.HcclViewModel.check_table', return_value=True):
+                mock.patch('msmodel.hccl.hccl_model.HcclViewModel.check_table', return_value=True), \
+                mock.patch('os.path.exists', return_value=True):
             res = HCCLExport(PARAMS).get_hccl_timeline_data()
-        self.assertEqual(res, [])
+        self.assertEqual(len(res), 5)
         conn, curs = db_manager.create_table('hccl.db')
         db_manager.destroy((conn, curs))
 
@@ -69,6 +71,7 @@ class TestHCCLExport(unittest.TestCase):
         with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_data_by_group', return_value=op_data), \
             mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_info_from_table', return_value=op_info_data):
             hccl = HCCLExport(PARAMS)
+            hccl._get_meta_data(hccl_data)
             hccl._format_hccl_data(hccl_data)
             # 1 + 3 * 2 + 3
             self.assertEqual(len(hccl.result), 10)

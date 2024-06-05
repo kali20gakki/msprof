@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
-
+import os
 import logging
 from collections import OrderedDict
 from dataclasses import dataclass
@@ -14,9 +14,11 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
+from common_func.path_manager import PathManager
 from mscalculate.hccl.hccl_task import HcclOps
 from mscalculate.hccl.hccl_task import HcclTask
 from msmodel.hccl.hccl_model import HcclViewModel
+from msmodel.add_info.kfc_info_model import KfcInfoViewModel
 
 
 class HCCLExport:
@@ -65,19 +67,25 @@ class HCCLExport:
         """
         get data for hccl timeline
         """
-        with HcclViewModel(self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
-                           [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE]) as hccl_model:
-            if not hccl_model.check_table():
-                logging.error("get hccl data failed, may be the hccl file not completed or hccl parser "
-                              "failed. please check data file.")
-                return []
-
-            hccl_data = hccl_model.get_all_data(DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE, dto_class=HcclTask)
-            if not hccl_data:
-                logging.error("get hccl data failed, may be lack of hccl files containing iteration %s",
-                              self.iter_range.iteration_id)
-                return []
+        hccl_data = []
+        kfc_task = []
+        kfc_op = []
+        if os.path.exists(PathManager.get_db_path(self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
+            with HcclViewModel(self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                               [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE]) as hccl_model:
+                hccl_data = hccl_model.get_all_data(DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE, dto_class=HcclTask)
+        if os.path.exists(PathManager.get_db_path(self.project_path, DBNameConstant.DB_KFC_INFO)):
+            with KfcInfoViewModel(self.project_path,
+                                  [DBNameConstant.TABLE_KFC_TASK, DBNameConstant.TABLE_KFC_OP]) as model:
+                kfc_task = model.get_all_data(DBNameConstant.TABLE_KFC_TASK, dto_class=HcclTask)
+                kfc_op = model.get_all_data(DBNameConstant.TABLE_KFC_OP, dto_class=HcclOps)
+        if not hccl_data and (not kfc_op and not kfc_task):
+            logging.error("get hccl data failed, may be the hccl file not completed or hccl parser "
+                          "failed. please check data file.")
+            return []
+        self._get_meta_data(hccl_data + kfc_task)
         self._format_hccl_data(hccl_data)
+        self._format_kfc_data(kfc_op, kfc_task)
         return self.result
 
     def _add_hccl_bar(self):
@@ -132,11 +140,16 @@ class HCCLExport:
             index_now = self._add_group_threads(group, index_now, group.group_name != self.INVALID_GROUP)
 
     def _format_hccl_data(self: any, hccl_data: list) -> None:
-        self._get_meta_data(hccl_data)
         _hccl_format_data = self._format_hccl_communication_data(hccl_data)
         _hccl_format_op_data = self._format_hccl_op_data()
         self.result.extend(TraceViewManager.time_graph_trace(
             TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, _hccl_format_data + _hccl_format_op_data))
+
+    def _format_kfc_data(self: any, kfc_op: list, kfc_task: list) -> None:
+        _kfc_format_data = self._format_hccl_communication_data(kfc_task)
+        _kfc_format_op_data = self._format_kfc_op_data(kfc_op)
+        self.result.extend(TraceViewManager.time_graph_trace(
+            TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, _kfc_format_data + _kfc_format_op_data))
 
     def _format_hccl_op_data(self):
         with HcclViewModel(
@@ -162,6 +175,16 @@ class HCCLExport:
                 ]
         return hccl_format_op_data
 
+    def _format_kfc_op_data(self: any, kfc_op: list) -> list:
+        kfc_format_op_data = [None] * len(kfc_op)
+        for idx, hccl_op in enumerate(kfc_op):
+            kfc_format_op_data[idx] = [
+                hccl_op.op_name, self.pid_value, self.hccl_groups.get(hccl_op.group_name).start_index,
+                InfoConfReader().trans_into_local_time(raw_timestamp=hccl_op.timestamp),
+                hccl_op.duration / NumberConstant.NS_TO_US
+            ]
+        return kfc_format_op_data
+
     def _format_hccl_communication_data(self, hccl_data: List[HcclTask]):
         # for L0 collect, plane id will be filled -1
         if not hccl_data or hccl_data[0].plane_id == self.INVALID_PLANE:
@@ -169,7 +192,6 @@ class HCCLExport:
         _hccl_format_data = [0] * len(hccl_data)
         for index, _hccl_data in enumerate(hccl_data):
             hccl_args = HCCLExport.get_hccl_arg(_hccl_data)
-            hccl_args["model id"] = _hccl_data.model_id
             thread_id = self.hccl_groups.get(_hccl_data.group_name).start_index + _hccl_data.plane_id + 1
             _hccl_data_pice = [
                 _hccl_data.hccl_name, self.pid_value, thread_id,

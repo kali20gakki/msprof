@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
-
+import os
 import json
 import logging
 from typing import Dict
@@ -26,6 +26,8 @@ from msmodel.sqe_type_map import SqeType
 from msmodel.stars.ffts_log_model import FftsLogModel
 from msmodel.stars.sub_task_model import SubTaskTimeModel
 from msmodel.task_time.ascend_task_model import AscendTaskModel
+from msmodel.add_info.kfc_info_model import KfcInfoViewModel
+from msmodel.add_info.kfc_info_model import KfcTurnData
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from profiling_bean.db_dto.task_time_dto import TaskTimeDto
 from profiling_bean.db_dto.step_trace_dto import MsproftxMarkDto
@@ -113,6 +115,58 @@ class TaskTimeViewer(BaseViewer):
                 task_data['subtask_data_list'].append(data)
         return task_data
 
+    def get_kfc_turn_data(self: any) -> dict:
+        if not os.path.exists(PathManager.get_db_path(self.project_dir, DBNameConstant.DB_KFC_INFO)):
+            return {}
+        kfc_turn_data = {}
+        with KfcInfoViewModel(self.project_dir,
+                              [DBNameConstant.TABLE_KFC_COMM_TURN, DBNameConstant.TABLE_KFC_COMPUTE_TURN]) as model:
+            kfc_comm_turn_time = model.get_kfc_comm_turn_data()
+            kfc_compute_turn_time = model.get_kfc_compute_turn_data()
+        kfc_comm_turn_data = []
+        kfc_compute_turn_data = []
+        for data in kfc_comm_turn_time:
+            kfc_comm_turn_data += [
+                KfcTurnData(
+                    "WaitNotify {}".format(data.current_turn), data.stream_id, data.task_id,
+                    InfoConfReader().trans_syscnt_into_local_time(data.wait_notify_start_time),
+                    (data.kfc_alg_exe_start_time - data.wait_notify_start_time) / NumberConstant.USTONS),
+                KfcTurnData(
+                    "KfcAlgExe {}".format(data.current_turn), data.stream_id, data.task_id,
+                    InfoConfReader().trans_syscnt_into_local_time(data.kfc_alg_exe_start_time),
+                    InfoConfReader().duration_from_syscnt(data.send_task_start_time - data.kfc_alg_exe_start_time)),
+                KfcTurnData(
+                    "SendTask {}".format(data.current_turn), data.stream_id, data.task_id,
+                    InfoConfReader().trans_syscnt_into_local_time(data.send_task_start_time),
+                    InfoConfReader().duration_from_syscnt(data.wait_active_start_time - data.send_task_start_time)),
+                KfcTurnData(
+                    "WaitActive {}".format(data.current_turn), data.stream_id, data.task_id,
+                    InfoConfReader().trans_syscnt_into_local_time(data.wait_active_start_time),
+                    InfoConfReader().duration_from_syscnt(data.active_start_time - data.wait_active_start_time)),
+                KfcTurnData(
+                    "Active {}".format(data.current_turn), data.stream_id, data.task_id,
+                    InfoConfReader().trans_syscnt_into_local_time(data.active_start_time),
+                    InfoConfReader().duration_from_syscnt(data.wait_exe_end_start_time - data.active_start_time)),
+                KfcTurnData(
+                    "WaitExeEnd {}".format(data.current_turn), data.stream_id, data.task_id,
+                    InfoConfReader().trans_syscnt_into_local_time(data.wait_exe_end_start_time),
+                    InfoConfReader().duration_from_syscnt(data.rtsq_exe_end_time - data.wait_exe_end_start_time)),
+            ]
+        for data in kfc_compute_turn_time:
+            kfc_compute_turn_data += [
+                KfcTurnData(
+                    "WaitCompute {}".format(data.current_turn), data.stream_id, data.task_id,
+                    InfoConfReader().trans_syscnt_into_local_time(data.wait_compute_start_time),
+                    InfoConfReader().duration_from_syscnt(data.compute_start_time - data.wait_compute_start_time)),
+                KfcTurnData(
+                    "Compute {}".format(data.current_turn), data.stream_id, data.task_id,
+                    InfoConfReader().trans_syscnt_into_local_time(data.compute_start_time),
+                    InfoConfReader().duration_from_syscnt(data.compute_exe_end_time - data.compute_start_time)),
+            ]
+        kfc_turn_data["comm"] = kfc_comm_turn_data
+        kfc_turn_data["compute"] = kfc_compute_turn_data
+        return kfc_turn_data
+
     def get_timeline_data(self: any) -> list:
         """
         get model list timeline data
@@ -135,6 +189,9 @@ class TaskTimeViewer(BaseViewer):
         timeline_data = self.get_ascend_task_data()
         trace_tasks = self.get_trace_timeline(timeline_data)
         result.extend(trace_tasks)
+        kfc_turn_data = self.get_kfc_turn_data()
+        kfc_trace_tasks = self.format_kfc_turn(kfc_turn_data)
+        result.extend(kfc_trace_tasks)
         if not result:
             logging.warning("Can not export task time data, the current chip does not support "
                             "exporting this data or the data may be not collected.")
@@ -189,7 +246,6 @@ class TaskTimeViewer(BaseViewer):
             sql = 'select index_id, timestamp, stream_id, task_id from {} ' \
                   'where tag_id = 11'.format(DBNameConstant.TABLE_STEP_TRACE)
             return view_model.get_sql_data(sql, dto_class=MsproftxMarkDto)
-
 
     def get_trace_timeline(self: any, data_list: dict) -> list:
         """
@@ -267,6 +323,31 @@ class TaskTimeViewer(BaseViewer):
                             'Batch Id': data.batch_id,
                             "Subtask Id": data.context_id,
                             "connection_id": data.connection_id,
+                        }
+                    ]
+                )
+        if not result_list:
+            return []
+        _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
+                                                   result_list)
+        result = TraceViewManager.metadata_event(self.get_time_timeline_header(result_list))
+        result.extend(_trace)
+        return result
+
+    def format_kfc_turn(self, kfc_turn_data: dict) -> list:
+        result_list = []
+        for kfc_turn_value in kfc_turn_data.values():
+            for data in kfc_turn_value:
+                result_list.append(
+                    [
+                        data.op_name,
+                        self.trace_pid_map.get(TraceViewHeaderConstant.PROCESS_TASK, 0),
+                        GeLogicStreamSingleton().get_logic_stream_id(data.stream_id),
+                        data.start_time,
+                        data.duration if data.duration > 0 else 0,
+                        {
+                            "Physic Stream Id": data.stream_id,
+                            "Task Id": data.task_id,
                         }
                     ]
                 )

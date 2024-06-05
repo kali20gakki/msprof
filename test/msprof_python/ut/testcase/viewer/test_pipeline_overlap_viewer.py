@@ -45,7 +45,8 @@ class TestPipelineOverlapViewer(unittest.TestCase):
     def test_get_timeline_data_should_return_only_task_data_when_hccl_db_not_exist(self):
         InfoJsonReaderManager(info_json=InfoJson(pid=1000)).process()
         InfoConfReader()._local_time_offset = 10.0
-        with mock.patch('os.path.exists', side_effect=[True, False]), \
+        with mock.patch('os.path.exists', return_value=True), \
+                mock.patch(NAMESPACE + '.HcclViewModel.check_table', return_value=False), \
                 mock.patch(NAMESPACE + '.OpSummaryModel.get_operator_data_by_task_type',
                            return_value=[self.construct_time_section(1000, 1100),
                                          self.construct_time_section(1080, 1200),

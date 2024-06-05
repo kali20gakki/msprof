@@ -129,3 +129,9 @@ class TestOpSummaryModel(TestDirCRBaseModel):
             check.conn = db_open.db_conn
             res = check.get_operator_data_by_task_type()
             self.assertEqual(len(res), 0)
+
+    def test_separate_kfc_stream_should_return_empty_when_db_not_exist(self):
+        data = []
+        check = OpSummaryModel(SAMPLE_CONFIG)
+        data, _ = check.separate_kfc_stream(data)
+        self.assertEqual([], data)

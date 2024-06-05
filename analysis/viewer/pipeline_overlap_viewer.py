@@ -44,6 +44,7 @@ class PipelineOverlapViewer:
     def get_timeline_data(self):
         result = []
         compute_data = []
+        kfc_data = []
         if os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)):
             sample_config = {
                 'result_dir': self._project_path,
@@ -51,7 +52,7 @@ class PipelineOverlapViewer:
                 'model_id': Constant.DEFAULT_INVALID_VALUE
             }
             with OpSummaryModel(sample_config) as _model:
-                compute_data = _model.get_operator_data_by_task_type()
+                compute_data, kfc_data = _model.get_operator_data_separated_by_kfc_stream()
         compute_data = SectionCalculator.merge_continuous_intervals(compute_data)
         result.extend(self._format_timeline_data(OverlapType.COMPUTE_TIME, data) for data in compute_data)
 
@@ -61,6 +62,7 @@ class PipelineOverlapViewer:
                                [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE]) as _model:
                 if _model.check_table():
                     communication_data = _model.get_hccl_op_time_section()
+        communication_data += kfc_data
         communication_data = SectionCalculator.merge_continuous_intervals(communication_data)
         result.extend(
             self._format_timeline_data(OverlapType.COMMUNICATION_TIME, data)
