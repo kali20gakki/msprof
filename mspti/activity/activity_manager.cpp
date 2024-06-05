@@ -159,6 +159,7 @@ msptiResult ActivityManager::FlushActivityBuffer()
         activity_buffer->UnInit(bufferCompleted_handle_);
     }
     co_activity_buffers_.clear();
+    return MSPTI_SUCCESS;
 }
 
 msptiResult ActivityManager::Record(msptiActivity *activity, size_t size)

@@ -193,5 +193,5 @@ set_target_properties(msprofbin
 )
 
 install(TARGETS msprofbin OPTIONAL
-    RUNTIME DESTINATION bin
+    RUNTIME DESTINATION collector/bin
 )

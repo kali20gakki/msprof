@@ -12,7 +12,8 @@ LLT_DIR=${TOP_DIR}/test/opensource
 
 THIRDPARTY_LIST="${OPENSOURCE_DIR}/protobuf    \\
                  ${OPENSOURCE_DIR}/json        \\
-                 ${PLATFORM_DIR}/securec     \\
+                 ${OPENSOURCE_DIR}/makeself    \\
+                 ${PLATFORM_DIR}/securec       \\
                  ${LLT_DIR}/googletest         \\
                  ${LLT_DIR}/mockcpp"
 

@@ -11,7 +11,9 @@ if [[ -n "$1" && "$1" == "analysis" ]]; then
     cmake ../ -DPACKAGE=ut -DMODE=analysis
 elif [[ -n "$1" && "$1" == "collector" ]]; then
     cmake ../ -DPACKAGE=ut -DMODE=collector
+elif [[ -n "$1" && "$1" == "mspti" ]]; then
+    cmake ../ -DPACKAGE=ut -DMODE=mspti
 else
     cmake ../ -DPACKAGE=ut -DMODE=all
 fi
-make -j64
+make -j$(nproc)

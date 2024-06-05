@@ -59,25 +59,4 @@ function(protobuf_generate comp c_var h_var)
 
 endfunction()
 
-##################################### depend #########################################
-# error_manager
-add_library(error_manager SHARED
-    ${TOP_DIR}/collector/dvvp/depend/stub/error_manager/error_manager_stub.cpp
-)
-
-target_include_directories(error_manager PRIVATE
-    ${TOP_DIR}/collector/dvvp/depend/inc/metadef
-)
-
-target_compile_options(error_manager PRIVATE
-    -std=c++11
-    -Werror
-    -fno-common
-    -Wextra
-    -Wfloat-equal
-    -D_GLIBCXX_USE_CXX11_ABI=0
-)
-
-######################################################################################
-
 add_subdirectory(dvvp)

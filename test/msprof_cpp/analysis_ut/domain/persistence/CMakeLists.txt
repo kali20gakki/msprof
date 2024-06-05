@@ -1,11 +1,3 @@
-include_directories(${TOP_DIR}/test/msprof_cpp/analysis_ut/infrastructure/common_stub/)
-include_directories(${GTEST_INCLUDE_DIR})
-include_directories(${MOCKCPP_INCLUDE_DIR})
-include_directories(${TOP_DIR}/opensource/json/include)
-include_directories(${TOP_DIR}/platform/securec/include)
-include_directories(${TOP_DIR}/analysis/csrc)
-include_directories(${TOP_DIR}/)
-
 aux_source_directory(${TOP_DIR}/analysis/csrc/utils DEVICE_PERSISTENCE_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/data_inventory DEVICE_PERSISTENCE_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/entities/hal DEVICE_PERSISTENCE_SOURCE)
@@ -26,13 +18,12 @@ aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/parser DEVICE_PERS
 aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/stubs/dfx DEVICE_PERSISTENCE_SOURCE)
 aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/domain/persistence/test DEVICE_PERSISTENCE_SOURCE)
 
-add_executable(
-        device_persistence_utest
-        ${DEVICE_PERSISTENCE_SOURCE}
+add_executable(device_persistence_utest
+    ${DEVICE_PERSISTENCE_SOURCE}
 )
 target_link_libraries(device_persistence_utest PRIVATE
-        c_sec_static
-        -lsqlite3
+    c_sec_static
+    -lsqlite3
 )
 
 run_test(device_persistence_utest)
