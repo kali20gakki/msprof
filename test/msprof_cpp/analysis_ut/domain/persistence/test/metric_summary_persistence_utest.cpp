@@ -91,5 +91,17 @@ TEST_F(MetricSummaryPersistenceUTest, ShouldSavePmuDataSuccess)
     deviceTaskS->swap(deviceTask);
     ASSERT_EQ(ANALYSIS_OK, persistence.Run(dataInventory_, context));
 }
+
+TEST_F(MetricSummaryPersistenceUTest, ShouldReturnNoPMUWhenNoMetric)
+{
+    MetricSummaryPersistence persistence;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = DEVICE_PATH;
+    context.deviceContextInfo.deviceInfo.chipID = CHIP_V4_1_0;
+    auto deviceTaskS = dataInventory_.GetPtr<std::map<TaskId, std::vector<DeviceTask>>>();
+    auto deviceTask = GenerateDeviceTask();
+    deviceTaskS->swap(deviceTask);
+    ASSERT_EQ(ANALYSIS_OK, persistence.Run(dataInventory_, context));
+}
 }
 }

@@ -19,6 +19,7 @@
 #include "analysis/csrc/domain/services/association/include/pmu_association.h"
 #include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
+#include "analysis/csrc/domain/services/association/calculator/metric/metric_calculator_group/l2_cache_calculator.h"
 
 using namespace testing;
 using namespace Analysis::Utils;
@@ -235,6 +236,22 @@ TEST_F(PmuAssociationUTest, ShouldReturnErrorWhenDeviceTaskIsNull)
     PmuAssociation pmuAssociation;
     DeviceContext context;
     ASSERT_EQ(ANALYSIS_ERROR, pmuAssociation.Run(dataInventory_, context));
+}
+
+TEST_F(PmuAssociationUTest, ShouldReturnOKWhenAssociation)
+{
+    PmuAssociation pmuAssociation;
+    DeviceContext context;
+    context.deviceContextInfo.sampleInfo.aiCoreMetrics = AicMetricsEventsType::AIC_L2_CACHE;
+    context.deviceContextInfo.sampleInfo.aivMetrics = AivMetricsEventsType::AIV_L2_CACHE;
+    context.deviceContextInfo.deviceInfo.chipID = CHIP_V4_1_0;
+    auto pmuData = GenerateHalPmuData();
+    auto pmuDataS = dataInventory_.GetPtr<std::vector<HalPmuData>>();
+    pmuDataS->swap(pmuData);
+    auto deviceTask = GenerateDeviceTask();
+    auto deviceTaskS = dataInventory_.GetPtr<std::map<TaskId, std::vector<Domain::DeviceTask>>>();
+    deviceTaskS->swap(deviceTask);
+    ASSERT_EQ(ANALYSIS_OK, pmuAssociation.Run(dataInventory_, context));
 }
 }
 }

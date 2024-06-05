@@ -55,7 +55,6 @@ AivMetricsEventsType GetAivMetricsEventsTypeFromStr(const std::string &aivMetric
         return it->second;
     } else {
         // 如果找不到对应的枚举值，返回AicMetricsUnkown
-        ERROR("The AivMetricsEventsType % is unknown.", aivMetrics);
         return AivMetricsEventsType::AIV_METRICS_UNKNOWN;
     }
 }
@@ -67,7 +66,6 @@ AicMetricsEventsType GetAicMetricsEventsTypeFromStr(const std::string &aicMetric
         return it->second;
     } else {
         // 如果找不到对应的枚举值，返回AicMetricsUnkown
-        ERROR("The AicMetricsEventsType % is unknown.", aicMetrics);
         return AicMetricsEventsType::AIC_METRICS_UNKNOWN;
     }
 }
@@ -79,7 +77,6 @@ ProfilingMode GetProfilingModeFromStr(const std::string &profilingStr)
         return it->second;
     } else {
         // 如果找不到对应的枚举值，PROFILING_UNKOWN
-        ERROR("The ProfilingMode % is unknown.", profilingStr);
         return ProfilingMode::PROFILING_UNKOWN;
     }
 }

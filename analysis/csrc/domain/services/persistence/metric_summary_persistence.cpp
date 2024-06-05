@@ -219,6 +219,10 @@ uint32_t MetricSummaryPersistence::ProcessEntry(DataInventory& dataInventory, co
     deviceContext.Getter(sampleInfo);
     aicCalculator_ = MetricCalculatorFactory::GetAicCalculator(sampleInfo.aiCoreMetrics);
     aivCalculator_ = MetricCalculatorFactory::GetAivCalculator(sampleInfo.aivMetrics);
+    if (aicCalculator_ == nullptr || aivCalculator_ == nullptr) {
+        WARN("There is no PMU metric config don't need to persistence");
+        return ANALYSIS_OK;
+    }
     DBInfo metricSummary("metric_summary.db", "MetricSummary");
     auto columns = GetTableColumn(deviceContext);
     MAKE_SHARED_NO_OPERATION(metricSummary.database, MetricSummaryDB, columns);
