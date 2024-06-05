@@ -197,8 +197,8 @@ class HostCpuUsagePresenter(HostProfPresenterBase):
                 last_jiffies = curr_jiffies
                 last_timestamp = curr_timestamp
                 curr_data.clear()
-
-                curr_timestamp = line.split()[1]  # /proc/uptime
+                # /proc/uptime
+                curr_timestamp = line.split()[1]
                 uptime_valid = True
             elif uptime_valid:  # uptime
                 curr_jiffies = Decimal(line.split()[0]) * cpu_clk
