@@ -39,12 +39,10 @@ void PmuAssociation::SplitPmu(std::vector<HalPmuData> &pmuData)
     INFO("block pmu count is : %", block_size);
 }
 
-void BlockPmuResultAccumulate(std::vector<double>& res, std::vector<double>& factor)
+void BlockPmuResultAccumulate(uint64_t* arr1, uint64_t* arr2, int size)
 {
-    if (res.empty()) {
-        res.swap(factor);
-    } else {
-        std::transform(res.begin(), res.end(), factor.begin(), res.begin(), std::plus<double>());
+    for (int i = 0; i < size; ++i) {
+        arr1[i] += arr2[i];
     }
 }
 
@@ -71,6 +69,7 @@ void PmuAssociation::MergeContextPmuToDeviceTask(std::vector<HalPmuData*>& pmuVe
                 pmuInfoMix.aivPmuResult.swap(res);
                 pmuInfoMix.aivTime = params.totalTime;
             }
+            pmuInfoMix.mainTimestamp = pmuVec[index]->pmu.timeList[1];
             deviceVec[index].pmuInfo = MAKE_UNIQUE_PTR<PmuInfoMixAccelerator>(pmuInfoMix);
         } else {
             PmuInfoSingleAccelerator pmuInfoNormal;
@@ -108,29 +107,38 @@ size_t PmuAssociation::MergeBlockPmuToDeviceTask(std::vector<HalPmuData*>& pmuDa
     if (deviceTask.acceleratorType == MIX_AIC) {
         core_type = AIV_CORE_TYPE;
     }
+    CalculationElements params;
+    HalPmuData tempPmuData;
+    tempPmuData.type = BLOCK_PMU;
+    auto res = dynamic_cast<PmuInfoMixAccelerator *>(deviceTask.pmuInfo.get());
     for (auto it = pmuData.begin(); it != pmuData.end();) {
         if ((*it)->pmu.acceleratorType == deviceTask.acceleratorType && (*it)->pmu.coreType == core_type) {
-            auto res = dynamic_cast<PmuInfoMixAccelerator *>(deviceTask.pmuInfo.get());
             if (res->totalBlockCount >= mixCount) {
                 break;
             }
+            tempPmuData.hd.taskId = {(*it)->hd.taskId.streamId, (*it)->hd.taskId.batchId, (*it)->hd.taskId.taskId,
+                                     (*it)->hd.taskId.contextId};
             res->totalBlockCount += 1;
-            CalculationElements params;
-            if (core_type) {
-                res->aivTotalCycles += (*it)->pmu.totalCycle;
-                auto resPmu = aivCalculator_->CalculatePmuMetric(dataInventory, context, params, *(*it), deviceTask);
-                res->aivTime += params.totalTime;
-                BlockPmuResultAccumulate(res->aivPmuResult, resPmu);
-            } else {
-                res->aicTotalCycles += (*it)->pmu.totalCycle;
-                auto resPmu = aicCalculator_->CalculatePmuMetric(dataInventory, context, params, *(*it), deviceTask);
-                res->aiCoreTime += params.totalTime;
-                BlockPmuResultAccumulate(res->aicPmuResult, resPmu);
-            }
+            tempPmuData.pmu.timeList[1] = res->mainTimestamp;
+            tempPmuData.pmu.totalCycle += (*it)->pmu.totalCycle;
+            tempPmuData.pmu.acceleratorType = (*it)->pmu.acceleratorType;
+            tempPmuData.pmu.coreType = (*it)->pmu.coreType;
+            BlockPmuResultAccumulate(tempPmuData.pmu.pmuList, ((*it)->pmu.pmuList), PMU_LENGTH);
             it = pmuData.erase(it);
         } else {
             ++it;
         }
+    }
+    if (core_type) {
+        auto pmuRes = aivCalculator_->CalculatePmuMetric(dataInventory, context, params, tempPmuData, deviceTask);
+        res->aivTime = params.totalTime;
+        res->aivPmuResult.swap(pmuRes);
+        res->aivTotalCycles = tempPmuData.pmu.totalCycle;
+    } else {
+        auto pmuRes = aicCalculator_->CalculatePmuMetric(dataInventory, context, params, tempPmuData, deviceTask);
+        res->aiCoreTime = params.totalTime;
+        res->aicPmuResult.swap(pmuRes);
+        res->aicTotalCycles = tempPmuData.pmu.totalCycle;
     }
     return pmuData.size();
 }

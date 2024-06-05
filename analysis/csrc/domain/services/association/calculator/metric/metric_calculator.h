@@ -29,7 +29,7 @@ namespace Analysis {
 namespace Domain {
 using namespace Analysis::Infra;
 namespace {
-const size_t PMU_LENGTH = 8;
+const int PMU_LENGTH = 8;
 const uint64_t PMU_BW_OFFSET = 1LL << 33;  // 2^33,pmu计算规则里带有BW的计算需要除以2^33
 const uint64_t FREQ_TO_Hz = 1000000;
 const uint8_t AIV_CORE_TYPE = 1;

@@ -42,11 +42,6 @@ uint32_t FftsProfileParser::GetTrunkSize()
     return Analysis::FFTS_PROFILE_STRUCT_SIZE;
 }
 
-uint32_t FftsProfileParser::GetNoFileCode()
-{
-    return PARSER_GET_FFTS_PROFILE_FILE_ERROR;
-}
-
 uint32_t FftsProfileParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data)
 {
     if (binaryDataSize < sizeof(FftsProfileHeader)) {

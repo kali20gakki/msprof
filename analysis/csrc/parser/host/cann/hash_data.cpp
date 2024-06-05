@@ -28,7 +28,7 @@ bool Cann::HashData::Load(const std::string &path)
 {
     auto files = File::GetOriginData(path, filePrefix_, fileFilter_);
     if (files.empty()) {
-        ERROR("No hash data found.");
+        WARN("No hash data found.");
         return false;
     }
     return ReadFiles(files);

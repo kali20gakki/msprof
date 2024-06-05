@@ -163,12 +163,14 @@ TEST_F(StarsSocParserUtest, ShouldReturnAcsqLogDataAndFftsPlusLogDataWhenMultiDa
     }
 }
 
-TEST_F(StarsSocParserUtest, ShouldReturnParserReadDataErrorWhenPathError)
+TEST_F(StarsSocParserUtest, ShouldReturnNoDataWhenPathError)
 {
     StarsSocParser starsSocParser;
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = "";
-    ASSERT_EQ(Analysis::PARSER_READ_DATA_ERROR, starsSocParser.Run(dataInventory_, context));
+    ASSERT_EQ(Analysis::PARSER_PARSE_DATA_ERROR, starsSocParser.Run(dataInventory_, context));
+    auto logData = dataInventory_.GetPtr<std::vector<HalLogData>>();
+    ASSERT_EQ(0ul, logData->size());
 }
 
 }

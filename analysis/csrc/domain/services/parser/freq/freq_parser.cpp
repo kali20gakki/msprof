@@ -35,11 +35,6 @@ uint32_t FreqParser::GetTrunkSize()
     return Analysis::FREQ_STRUCT_SIZE;
 }
 
-uint32_t FreqParser::GetNoFileCode()
-{
-    return PARSER_GET_FREQ_FILE_ERROR;
-}
-
 uint32_t FreqParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data)
 {
     std::function<int(uint8_t *, uint32_t, uint8_t *)> parser =

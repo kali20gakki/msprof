@@ -88,11 +88,6 @@ std::string Parser::GetFilePath(const DeviceContext &deviceContext)
     return Analysis::Utils::File::PathJoin({deviceFilePath, "data"});
 }
 
-uint32_t Parser::GetNoFileCode()
-{
-    return Analysis::PARSER_GET_FILE_ERROR;
-}
-
 // 提取字符串尾部的数字部分
 int ExtractNumber(const std::string &str)
 {
@@ -116,10 +111,10 @@ uint32_t Parser::ReadDataEntry(const DeviceContext &deviceContext)
                                                       filePrefix,
                                                       {"done", "complete"});
     if (files.empty()) {
-        ERROR("notify: no files pattern");
+        INFO("notify: no files pattern, don't need to parse");
         this->binaryData = nullptr;
         this->binaryDataSize = 0;
-        return this->GetNoFileCode();
+        return ANALYSIS_OK;
     }
 
     // 自然排序文件名称

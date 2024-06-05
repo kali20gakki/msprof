@@ -61,8 +61,16 @@ bool MetricSummaryPersistence::ConstructData(std::vector<uint64_t>& ids, std::ve
         ids.push_back(pmu->aivTotalCycles);
         result.push_back(pmu->aiCoreTime);
         result.push_back(pmu->aivTime);
-        result.insert(result.end(), pmu->aicPmuResult.begin(), pmu->aicPmuResult.end());
-        result.insert(result.end(), pmu->aivPmuResult.begin(), pmu->aivPmuResult.end());
+        if (pmu->aicPmuResult.empty()) {
+            result.insert(result.end(), aicPmuResult.begin(), aicPmuResult.end());
+        } else {
+            result.insert(result.end(), pmu->aicPmuResult.begin(), pmu->aicPmuResult.end());
+        }
+        if (pmu->aivPmuResult.empty()) {
+            result.insert(result.end(), aivPmuResult.begin(), aivPmuResult.end());
+        } else {
+            result.insert(result.end(), pmu->aivPmuResult.begin(), pmu->aivPmuResult.end());
+        }
     } else if (task.acceleratorType == AIV) {
         auto pmu = dynamic_cast<PmuInfoSingleAccelerator*>(task.pmuInfo.get());
         ids.push_back(0);  // AIC置0
@@ -105,8 +113,8 @@ TableColumns MetricSummaryPersistence::GetTableColumn(const DeviceContext& conte
         res.emplace_back("batch_id", SQL_INTEGER_TYPE);
         res.emplace_back("aic_total_cycles", SQL_NUMERIC_TYPE);
         res.emplace_back("aiv_total_cycles", SQL_NUMERIC_TYPE);
-        res.emplace_back("aic_total_times", SQL_NUMERIC_TYPE);
-        res.emplace_back("aiv_total_times", SQL_NUMERIC_TYPE);
+        res.emplace_back("aic_total_time", SQL_NUMERIC_TYPE);
+        res.emplace_back("aiv_total_time", SQL_NUMERIC_TYPE);
         for (auto& str : aicHeader) {
             res.emplace_back((AIC_PREFIX + str), SQL_NUMERIC_TYPE);
         }

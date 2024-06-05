@@ -65,6 +65,7 @@ static std::vector<HalLogData> GetRepeatedDeviceTaskData()
     logIns.hd.taskId.streamId = 1;
     logIns.hd.taskId.batchId = 0;
     logIns.hd.taskId.contextId = 1;
+    logIns.type = ACSQ_LOG;
     logIns.acsq.taskType = 3; // 任务测试类型为3
     for (size_t i = 0; i < SEQ_NUM; ++i) {
         logIns.hd.taskId.taskId = TASK_ID_SEQ[i];

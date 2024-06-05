@@ -25,7 +25,6 @@ private:
     std::vector<std::string> GetFilePattern() override;
     uint32_t GetTrunkSize() override;
     uint32_t ParseData(Infra::DataInventory& dataInventory, const Infra::Context &context) override;
-    uint32_t GetNoFileCode() override;
 private:
     std::vector<HalTrackData> halUniData_;
     std::vector<std::string> filePrefix_{"ts_track."};

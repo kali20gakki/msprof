@@ -162,12 +162,12 @@ uint32_t ReadHostRuntime(DataInventory& dataInventory, const DeviceContext& devi
         std::string task_type, context_id;
         int64_t connection_id;
         std::tie(stream_id, request_id, batch_id, task_id, context_id, model_id, task_type, connection_id) = row;
-        TaskId id = {(uint16_t)stream_id, (uint16_t)batch_id, (uint16_t)task_id, context_id_u32};
         HostTask hostTask;
         hostTask.modelId = model_id;
         hostTask.taskTypeStr = task_type;
         hostTask.streamId = stream_id;
         StrToU32(context_id_u32, context_id);
+        TaskId id = {(uint16_t)stream_id, (uint16_t)batch_id, (uint16_t)task_id, context_id_u32};
         hostTask.contextId = context_id_u32;
         hostTask.taskId = task_id;
         hostTask.batchId = batch_id;

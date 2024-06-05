@@ -32,7 +32,7 @@ struct TopDownTask {
     TopDownTask() = default;
     TopDownTask(uint16_t taskId, uint16_t batchId, uint32_t streamId, uint32_t contextId, int32_t indexId,
                 std::string deviceType, std::string hostType, uint64_t modelId, int64_t connectionId,
-                uint64_t startTime, uint64_t endTime)
+                double startTime, double endTime)
         : taskId(taskId), batchId(batchId), streamId(streamId), contextId(contextId), indexId(indexId),
           deviceTaskType(deviceType), hostTaskType(hostType), modelId(modelId), connectionId(connectionId),
           startTime(startTime), endTime(endTime) {}

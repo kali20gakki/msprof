@@ -31,8 +31,6 @@ private:
 
     uint32_t ParseData(Infra::DataInventory &dataInventory, const Infra::Context &context) override;
 
-    uint32_t GetNoFileCode() override;
-
 private:
     std::vector<HalPmuData> halUniData_;
     std::vector<std::string> filePrefix_{"ffts_profile"};

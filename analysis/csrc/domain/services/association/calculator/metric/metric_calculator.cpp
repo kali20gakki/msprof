@@ -128,11 +128,10 @@ std::unordered_map<uint32_t, uint64_t> MetricCalculator::GetValueMappingOffset(C
 
 void SetBlockDim(DeviceTask& task, CalculationElements& allParams, HalPmuData& pmu)
 {
-    if ((pmu.pmu.acceleratorType == MIX_AIV && pmu.pmu.coreType == AIC_CORE_TYPE) ||
-        (pmu.pmu.acceleratorType == MIX_AIC && pmu.pmu.coreType == AIV_CORE_TYPE)) {
-        allParams.blockDim = task.mixBlockDim;
-    } else {
+    if (pmu.type == PMU) {
         allParams.blockDim = task.blockDim;
+    } else {
+        allParams.blockDim = task.mixBlockDim;
     }
 }
 
@@ -177,13 +176,23 @@ std::vector<double> MetricCalculator::CalculatePmuMetric(DataInventory& dataInve
     params.taskCyc = pmu.pmu.totalCycle;
     errno_t res;
     if (pmu.pmu.acceleratorType == MIX_AIC || pmu.pmu.acceleratorType == AIC) {
-        res = memcpy_s(params.events, sizeof(params.events), sampleInfo.aiCoreProfilingEvents,
-                       sizeof(sampleInfo.aiCoreProfilingEvents));
-        params.coreNum = deviceInfo.aiCoreNum;
+        if (pmu.type == PMU) {
+            res = memcpy_s(params.events, sizeof(params.events), sampleInfo.aiCoreProfilingEvents,
+                           sizeof(sampleInfo.aiCoreProfilingEvents));
+        } else {
+            res = memcpy_s(params.events, sizeof(params.events), sampleInfo.aivProfilingEvents,
+                           sizeof(sampleInfo.aivProfilingEvents));
+        }
+        params.coreNum = pmu.type == PMU ? deviceInfo.aiCoreNum : deviceInfo.aivNum;
     } else {
-        res = memcpy_s(params.events, sizeof(params.events), sampleInfo.aivProfilingEvents,
-                       sizeof(sampleInfo.aivProfilingEvents));
-        params.coreNum = deviceInfo.aivNum;
+        if (pmu.type == PMU) {
+            res = memcpy_s(params.events, sizeof(params.events), sampleInfo.aivProfilingEvents,
+                           sizeof(sampleInfo.aivProfilingEvents));
+        } else {
+            res = memcpy_s(params.events, sizeof(params.events), sampleInfo.aiCoreProfilingEvents,
+                           sizeof(sampleInfo.aiCoreProfilingEvents));
+        }
+        params.coreNum = pmu.type == PMU ? deviceInfo.aivNum : deviceInfo.aiCoreNum;
     }
     if (res != EOK) {
         ERROR("memcpy pmuEvents error taskId is %, streamId is %, contextId is %, batchId is %", pmu.hd.taskId.taskId,

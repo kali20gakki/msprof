@@ -15,7 +15,7 @@
 #include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/domain/services/constant/default_value_constant.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
-#include "analysis/csrc/domain/services/association/include/ascend_task_association.h"
+#include "analysis/csrc/domain/services/association/calculator/hccl/include/hccl_calculator.h"
 #include "analysis/csrc/domain/services/persistence/persistence_utils.h"
 
 namespace Analysis {
@@ -26,23 +26,21 @@ using namespace Viewer::Database;
 using ProcessedDataFormat = std::vector<std::tuple<uint64_t, int32_t, uint32_t, uint16_t, uint32_t, uint32_t, double,
         double, std::string, std::string, int64_t>>;
 
-ProcessedDataFormat GenerateAscendTaskData(std::vector<TopDownTask>& ascendTask, const DeviceContext& context)
+ProcessedDataFormat GenerateAscendTaskData(std::vector<TopDownTask>& ascendTask)
 {
-    auto params = GenerateSyscntConversionParams(context);
     ProcessedDataFormat processedData;
     for (auto& task : ascendTask) {
-        double start_time, duration;
-        if (task.startTime == DEFAULT_TIMESTAMP) {
+        double start_time = 0.0;
+        double duration = 0.0;
+        if (task.startTime == INVALID_TIME) {
             start_time = INVALID_TIME;
         } else {
-            auto hpFloatTime = GetTimeFromSyscnt(task.startTime, params);
-            start_time = hpFloatTime.Double();
+            start_time = task.startTime;
         }
-        if (task.endTime == DEFAULT_TIMESTAMP) {
+        if (task.endTime == INVALID_TIME) {
             duration = INVALID_TIME;
         } else {
-            auto hpFloatDuration = GetTimeFromSyscnt(task.endTime, params);
-            duration = hpFloatDuration.Double() - start_time;
+            duration = task.endTime - start_time;
         }
         processedData.emplace_back(task.modelId, task.indexId, task.streamId, task.taskId, task.contextId, task.batchId,
                                    start_time, duration, task.hostTaskType, task.deviceTaskType,
@@ -60,7 +58,7 @@ uint32_t AscendTaskPersistence::ProcessEntry(DataInventory& dataInventory, const
     std::string dbPath = Utils::GetDBPath({deviceContext.GetDeviceFilePath(), SQLITE, ascendTaskDB.dbName});
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(ascendTaskDB.dbRunner, DBRunner, ANALYSIS_ERROR, dbPath);
-    auto data = GenerateAscendTaskData(*ascendTask, deviceContext);
+    auto data = GenerateAscendTaskData(*ascendTask);
     auto res = SaveData(data, ascendTaskDB, dbPath);
     if (res) {
         INFO("Process % done!", ascendTaskDB.tableName);
@@ -69,7 +67,7 @@ uint32_t AscendTaskPersistence::ProcessEntry(DataInventory& dataInventory, const
     ERROR("Save % data failed: %", dbPath);
     return ANALYSIS_ERROR;
 }
-REGISTER_PROCESS_SEQUENCE(AscendTaskPersistence, true, AscendTaskAssociation);
+REGISTER_PROCESS_SEQUENCE(AscendTaskPersistence, true, HcclCalculator);
 REGISTER_PROCESS_DEPENDENT_DATA(AscendTaskPersistence, std::vector<TopDownTask>);
 REGISTER_PROCESS_SUPPORT_CHIP(AscendTaskPersistence, CHIP_ID_ALL);
 }

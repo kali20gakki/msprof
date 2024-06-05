@@ -22,10 +22,7 @@
 #include "analysis/csrc/utils/singleton.h"
 
 namespace Analysis {
-#define DEBUG(format, ...)                                                                                          \
-    do {                                                                                                            \
-        Log::GetInstance().LogMsg(Format(format, ##__VA_ARGS__), "[DEBUG]", Log::GetFileName(__FILE__), __LINE__);  \
-    } while (0)
+#define DEBUG(format, ...)
 
 #define INFO(format, ...)                                                                                           \
     do {                                                                                                            \

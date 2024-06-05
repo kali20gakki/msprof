@@ -41,11 +41,6 @@ uint32_t StarsSocParser::GetTrunkSize()
     return STARS_SOC_STRUCT_SIZE;
 }
 
-uint32_t StarsSocParser::GetNoFileCode()
-{
-    return PARSER_GET_STARS_SOC_FILE_ERROR;
-}
-
 uint32_t StarsSocParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDataSize, uint8_t* data)
 {
     if (binaryDataSize < sizeof(StarsSocHeader)) {

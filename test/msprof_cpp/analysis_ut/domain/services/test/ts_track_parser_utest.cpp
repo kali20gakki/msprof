@@ -198,11 +198,13 @@ TEST_F(TsTrackParserUtest, ShouldReturnTaskFlipAndStepTraceDataWhenParser)
     }
 }
 
-TEST_F(TsTrackParserUtest, ShouldReturnParserReadDataErrorWhenPathError)
+TEST_F(TsTrackParserUtest, ShouldReturnNoDataWhenPathError)
 {
     TsTrackParser tsTrackParser;
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = "";
-    ASSERT_EQ(Analysis::PARSER_READ_DATA_ERROR, tsTrackParser.Run(dataInventory_, context));
+    ASSERT_EQ(Analysis::ANALYSIS_OK, tsTrackParser.Run(dataInventory_, context));
+    auto data = dataInventory_.GetPtr<std::vector<HalTrackData>>();
+    ASSERT_EQ(0ul, data->size());
 }
 }
