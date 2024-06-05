@@ -316,4 +316,10 @@ class DataParsersConfig(MetaConfig):
             ('chip_model', '4,5'),
             ('position', 'H')
         ],
+        'DeviceDataParser': [
+            ('path', 'msparser.device_data_parser'),
+            ('chip_model', '5'),
+            ('level', '1'),
+            ('position', 'D')
+        ]
     }

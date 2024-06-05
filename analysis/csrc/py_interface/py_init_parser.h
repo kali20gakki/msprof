@@ -22,6 +22,8 @@ PyMethodDef *GetParserMethods();
 
 // 解析落盘CANN数据功能的外层包装，解析python侧传入的路径后调用KernalParserWorker启动解析流程，获取返回状态码后返回python侧
 PyObject *WrapDumpCANNTrace(PyObject *self, PyObject *args);
+// 解析Device侧数据功能的外层包装，解析python侧传入的路径后调用DeviceContextEntry启动解析流程，获取返回状态码后返回python侧
+PyObject *WrapDumpDeviceData(PyObject *self, PyObject *args);
 } // PyInterface
 } // Analyzer
 

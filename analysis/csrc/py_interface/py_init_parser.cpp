@@ -11,6 +11,7 @@
  */
 
 #include "analysis/csrc/py_interface/py_init_parser.h"
+#include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/worker/kernel_parser_worker.h"
 #include "analysis/csrc/utils/file.h"
 #include "analysis/csrc/dfx/log.h"
@@ -20,8 +21,10 @@ namespace Analysis {
 namespace PyInterface {
 using KernelParserWorker = Analysis::Worker::KernelParserWorker;
 using namespace Analysis::Utils;
+using namespace Analysis::Domain;
 PyMethodDef g_methodTestSchedule[] = {
     {"dump_cann_trace", WrapDumpCANNTrace, METH_VARARGS, ""},
+    {"dump_device_data", WrapDumpDeviceData, METH_VARARGS, ""},
     {NULL, NULL, METH_VARARGS, ""}
 };
 
@@ -32,11 +35,13 @@ PyMethodDef *GetParserMethods()
 
 PyObject *WrapDumpCANNTrace(PyObject *self, PyObject *args)
 {
+    // parseFilePath为PROF*目录下面的host目录
     const char *parseFilePath = NULL;
     if (!PyArg_ParseTuple(args, "s", &parseFilePath)) {
         PyErr_SetString(PyExc_TypeError, "parser.dump_cann_trace args parse failed!");
         return NULL;
     }
+    Log::GetInstance().Init(Utils::File::PathJoin({parseFilePath, "..", "mindstudio_profiler_log"}));
     if (!File::CheckDir(parseFilePath)) {
         ERROR("Parse failed or dump failed.");
         return Py_BuildValue("i", ANALYSIS_ERROR);
@@ -44,6 +49,24 @@ PyObject *WrapDumpCANNTrace(PyObject *self, PyObject *args)
     KernelParserWorker parserWorker(parseFilePath);
     auto res = parserWorker.Run();
     return Py_BuildValue("i", res);
+}
+
+PyObject *WrapDumpDeviceData(PyObject *self, PyObject *args)
+{
+    // parseFilePath为PROF*目录
+    const char *parseFilePath = NULL;
+    if (!PyArg_ParseTuple(args, "s", &parseFilePath)) {
+        PyErr_SetString(PyExc_TypeError, "parser.dump_device_data args parse failed!");
+        return NULL;
+    }
+    Log::GetInstance().Init(Utils::File::PathJoin({parseFilePath, "mindstudio_profiler_log"}));
+    if (!File::CheckDir(parseFilePath)) {
+        ERROR("Parse failed or dump failed.");
+        return Py_BuildValue("i", ANALYSIS_ERROR);
+    }
+    const char *stopAt = "";
+    DeviceContextEntry(parseFilePath, stopAt);
+    return Py_BuildValue("i", ANALYSIS_OK);
 }
 }
 }

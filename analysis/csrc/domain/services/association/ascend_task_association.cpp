@@ -30,7 +30,7 @@ namespace Domain {
 using namespace Analysis::Entities;
 using namespace Utils;
 namespace {
-const uint64_t DEFAULT_MODEL_ID = UINT64_MAX;
+const uint64_t DEFAULT_MODEL_ID = UINT32_MAX;
 const int32_t DEFAULT_INDEX_ID = -1;
 const int64_t DEFAULT_CONNECTION_ID = -1;
 const std::unordered_map<uint32_t, std::string> deviceTaskAcsqTypeMap {

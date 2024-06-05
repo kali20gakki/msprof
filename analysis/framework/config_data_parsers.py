@@ -8,6 +8,7 @@ import importlib
 from common_func.file_manager import check_file_readable
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
 from common_func.utils import Utils
 from msconfig.config_manager import ConfigManager
@@ -41,6 +42,7 @@ class ConfigDataParsers:
         conf_parser_read = ConfigManager.get(config_name)
         parser_section = conf_parser_read.sections()
         cpp_parse_flag = ProfilingScene().is_cpp_parse_enable()
+        all_export_flag = ProfilingScene().is_all_export()
         for _section in parser_section:
             chip_model_list = cls._load_parser_chip_model(conf_parser_read, _section)
             if chip_model not in chip_model_list:
@@ -48,6 +50,8 @@ class ConfigDataParsers:
             if position not in cls._load_parser_position(conf_parser_read, _section):
                 continue
             if cpp_parse_flag and cls._load_can_cpp_parse(_section):
+                continue
+            if cpp_parse_flag and all_export_flag and cls._load_can_cpp_parse_or_calculate_device_data(_section):
                 continue
             parser_level = cls._load_parser_level(conf_parser_read, _section)
             parsers_dict.setdefault(parser_level, []).append(cls._load_parser_module(conf_parser_read, _section))
@@ -128,7 +132,7 @@ class ConfigDataParsers:
         load can cpp parse
         :param section: parser name config in the config file
         """
-        if section in [
+        if not ChipManager().is_chip_v5_1_0() and section in [
             "ApiEventParser",
             "HashDicParser",
             "TaskTrackParser",
@@ -143,6 +147,23 @@ class ConfigDataParsers:
             "MemoryApplicationParser",
             "CtxIdParser",
             "HcclOpInfoParser"
+        ]:
+            return True
+        return False
+
+    @classmethod
+    def _load_can_cpp_parse_or_calculate_device_data(cls, section) -> bool:
+        """
+        load can cpp parse
+        :param section: parser name config in the config file
+        """
+        if ChipManager().is_chip_v4() and section in [
+            "AscendTaskCalculator",
+            "StarsLogCalCulator",
+            "FftsPmuCalculator",
+            "HcclCalculator",
+            "SubTaskCalculator",
+            "FreqParser",
         ]:
             return True
         return False
