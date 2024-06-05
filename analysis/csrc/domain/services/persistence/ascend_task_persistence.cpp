@@ -32,12 +32,12 @@ ProcessedDataFormat GenerateAscendTaskData(std::vector<TopDownTask>& ascendTask)
     for (auto& task : ascendTask) {
         double start_time = 0.0;
         double duration = 0.0;
-        if (task.startTime == INVALID_TIME) {
+        if (IsDoubleEqual(task.startTime, INVALID_TIME)) {
             start_time = INVALID_TIME;
         } else {
             start_time = task.startTime;
         }
-        if (task.endTime == INVALID_TIME) {
+        if (IsDoubleEqual(task.endTime, INVALID_TIME)) {
             duration = INVALID_TIME;
         } else {
             duration = task.endTime - start_time;

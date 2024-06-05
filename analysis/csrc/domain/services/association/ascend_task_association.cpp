@@ -85,7 +85,7 @@ SyscntConversionParams GetSyscntConversionParams(const DeviceContext& context)
     context.Getter(deviceInfo);
     DeviceStartLog deviceStartLog;
     context.Getter(deviceStartLog);
-    if (cpuInfo.frequency && hostStartLog.cntVctDiff) {
+    if (!IsDoubleEqual(cpuInfo.frequency, 0.0) && hostStartLog.cntVctDiff) {
         hostMonotonic = hostStartLog.clockMonotonicRaw + hostStartLog.cntVctDiff / cpuInfo.frequency;
     }
     SyscntConversionParams params{deviceInfo.hwtsFrequency, deviceStartLog.cntVct, hostMonotonic};
