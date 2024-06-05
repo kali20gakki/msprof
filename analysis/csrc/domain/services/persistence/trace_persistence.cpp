@@ -225,10 +225,5 @@ uint32_t TracePersistence::ProcessEntry(DataInventory &dataInventory, const Cont
     res |= ProcessTrainingTraceEntry(dataInventory, deviceContext, stepTraceInfo);
     return res;
 }
-
-REGISTER_PROCESS_SEQUENCE(TracePersistence, true, StepTraceProcess, StepTracePersistence);
-REGISTER_PROCESS_DEPENDENT_DATA(TracePersistence, std::map<uint32_t, std::vector<StepTraceTasks>>,
-                                std::vector<HalTrackData>);
-REGISTER_PROCESS_SUPPORT_CHIP(TracePersistence, CHIP_ID_ALL);
 }
 }
