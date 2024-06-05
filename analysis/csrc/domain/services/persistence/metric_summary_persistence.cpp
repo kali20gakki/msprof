@@ -19,7 +19,7 @@
 namespace Analysis {
 namespace Domain {
 namespace {
-const int CHIP4_DEFAULT_COLUMN_NUM = 6;
+const int CHIP4_DEFAULT_COLUMN_NUM = 4;
 const int OTHER_CHIP_DEFAULT_COLUMN_NUM = 5;
 const int CHIP4_PMU_TIME_NUM = 2;
 const int OTHER_CHIP_PMU_TIME_NUM = 1;
@@ -27,14 +27,31 @@ const std::string AIC_PREFIX = "aic_";
 const std::string AIV_PREFIX = "aiv_";
 }
 
-bool MetricSummaryPersistence::BindParametersAndExecuteInsert(std::vector<uint64_t>& ids, std::vector<double>& pmu,
-                                                              sqlite3_stmt *stmt, sqlite3* db)
+bool MetricSummaryPersistence::BindAndExecuteInsert(std::unordered_map<PmuHeaderType, std::vector<uint64_t>>& ids,
+                                                    std::unordered_map<PmuHeaderType, std::vector<double>>& pmu,
+                                                    sqlite3_stmt *stmt, sqlite3* db)
 {
+    // 此处和Python表头保持强规定顺序，按照id(后续不展示，可以不用关注顺序)，AIC:time cyc, pmu, AIV:time cyc pmu的顺序绑定值
     int index = 0;
-    for (auto& value : ids) {
+    for (auto& value : ids[TASK_ID]) {
         sqlite3_bind_int64(stmt, ++index, value);
     }
-    for (auto& value : pmu) {
+    for (auto& value : pmu[AIC_TOTAL_TIME]) {
+        sqlite3_bind_double(stmt, ++index, value);
+    }
+    for (auto& value : ids[AIC_TOTAL_CYCLE]) {
+        sqlite3_bind_int64(stmt, ++index, value);
+    }
+    for (auto& value : pmu[AIC_PMU_RESULT]) {
+        sqlite3_bind_double(stmt, ++index, value);
+    }
+    for (auto& value : pmu[AIV_TOTAL_TIME]) {
+        sqlite3_bind_double(stmt, ++index, value);
+    }
+    for (auto& value : ids[AIV_TOTAL_CYCLE]) {
+        sqlite3_bind_int64(stmt, ++index, value);
+    }
+    for (auto& value : pmu[AIV_PMU_RESULT]) {
         sqlite3_bind_double(stmt, ++index, value);
     }
     auto rc = sqlite3_step(stmt);
@@ -50,43 +67,44 @@ bool MetricSummaryPersistence::BindParametersAndExecuteInsert(std::vector<uint64
     return true;
 }
 
-bool MetricSummaryPersistence::ConstructData(std::vector<uint64_t>& ids, std::vector<double>& result, DeviceTask& task,
-                                             int aicLength, int aivLength)
+bool MetricSummaryPersistence::ConstructData(std::unordered_map<PmuHeaderType, std::vector<uint64_t>>& ids,
+                                             std::unordered_map<PmuHeaderType, std::vector<double>>& result,
+                                             DeviceTask& task, int aicLength, int aivLength)
 {
     std::vector<double> aicPmuResult(aicLength, 0.0);
     std::vector<double> aivPmuResult(aivLength, 0.0);
     if (task.acceleratorType == MIX_AIV || task.acceleratorType == MIX_AIC) {
         auto pmu = dynamic_cast<PmuInfoMixAccelerator*>(task.pmuInfo.get());
-        ids.push_back(pmu->aicTotalCycles);
-        ids.push_back(pmu->aivTotalCycles);
-        result.push_back(pmu->aiCoreTime);
-        result.push_back(pmu->aivTime);
+        ids[AIC_TOTAL_CYCLE].push_back(pmu->aicTotalCycles);
+        ids[AIV_TOTAL_CYCLE].push_back(pmu->aivTotalCycles);
+        result[AIC_TOTAL_TIME].push_back(pmu->aiCoreTime);
+        result[AIV_TOTAL_TIME].push_back(pmu->aivTime);
         if (pmu->aicPmuResult.empty()) {
-            result.insert(result.end(), aicPmuResult.begin(), aicPmuResult.end());
+            result[AIC_PMU_RESULT] = aicPmuResult;
         } else {
-            result.insert(result.end(), pmu->aicPmuResult.begin(), pmu->aicPmuResult.end());
+            result[AIC_PMU_RESULT] = pmu->aicPmuResult;
         }
         if (pmu->aivPmuResult.empty()) {
-            result.insert(result.end(), aivPmuResult.begin(), aivPmuResult.end());
+            result[AIV_PMU_RESULT] = aivPmuResult;
         } else {
-            result.insert(result.end(), pmu->aivPmuResult.begin(), pmu->aivPmuResult.end());
+            result[AIV_PMU_RESULT] = pmu->aivPmuResult;
         }
     } else if (task.acceleratorType == AIV) {
         auto pmu = dynamic_cast<PmuInfoSingleAccelerator*>(task.pmuInfo.get());
-        ids.push_back(0);  // AIC置0
-        ids.push_back(pmu->totalCycles);
-        result.push_back(0.0);
-        result.push_back(pmu->totalTime);
-        result.insert(result.end(), aicPmuResult.begin(), aicPmuResult.end());
-        result.insert(result.end(), pmu->pmuResult.begin(), pmu->pmuResult.end());
+        ids[AIC_TOTAL_CYCLE].push_back(0);  // AIC置0
+        ids[AIV_TOTAL_CYCLE].push_back(pmu->totalCycles);
+        result[AIC_TOTAL_TIME].push_back(0.0);
+        result[AIV_TOTAL_TIME].push_back(pmu->totalTime);
+        result[AIC_PMU_RESULT] = aicPmuResult;
+        result[AIV_PMU_RESULT] = pmu->pmuResult;
     } else if (task.acceleratorType == AIC) {
         auto pmu = dynamic_cast<PmuInfoSingleAccelerator*>(task.pmuInfo.get());
-        ids.push_back(pmu->totalCycles);
-        ids.push_back(0);  // AIV置0
-        result.push_back(pmu->totalTime);
-        result.push_back(0.0);
-        result.insert(result.end(), pmu->pmuResult.begin(), pmu->pmuResult.end());
-        result.insert(result.end(), aivPmuResult.begin(), aivPmuResult.end());
+        ids[AIC_TOTAL_CYCLE].push_back(pmu->totalCycles);
+        ids[AIV_TOTAL_CYCLE].push_back(0);  // AIV置0
+        result[AIC_TOTAL_TIME].push_back(pmu->totalTime);
+        result[AIV_TOTAL_TIME].push_back(0.0);
+        result[AIC_PMU_RESULT] = pmu->pmuResult;
+        result[AIV_PMU_RESULT] = aivPmuResult;
     } else {
         return false;
     }
@@ -111,13 +129,13 @@ TableColumns MetricSummaryPersistence::GetTableColumn(const DeviceContext& conte
         res.emplace_back("stream_id", SQL_INTEGER_TYPE);
         res.emplace_back("subtask_id", SQL_INTEGER_TYPE);
         res.emplace_back("batch_id", SQL_INTEGER_TYPE);
-        res.emplace_back("aic_total_cycles", SQL_NUMERIC_TYPE);
-        res.emplace_back("aiv_total_cycles", SQL_NUMERIC_TYPE);
         res.emplace_back("aic_total_time", SQL_NUMERIC_TYPE);
-        res.emplace_back("aiv_total_time", SQL_NUMERIC_TYPE);
+        res.emplace_back("aic_total_cycles", SQL_NUMERIC_TYPE);
         for (auto& str : aicHeader) {
             res.emplace_back((AIC_PREFIX + str), SQL_NUMERIC_TYPE);
         }
+        res.emplace_back("aiv_total_time", SQL_NUMERIC_TYPE);
+        res.emplace_back("aiv_total_cycles", SQL_NUMERIC_TYPE);
         for (auto& str : aivHeader) {
             res.emplace_back((AIV_PREFIX + str), SQL_NUMERIC_TYPE);
         }
@@ -130,8 +148,8 @@ uint32_t MetricSummaryPersistence::GenerateAndSavePmuData(std::map<TaskId, std::
 {
     std::vector<uint64_t> ids;
     ids.reserve(CHIP4_DEFAULT_COLUMN_NUM);
-    std::vector<double> result;
-    result.reserve(CHIP4_PMU_TIME_NUM + aicLength_ + aivLength_);
+    std::unordered_map<PmuHeaderType, std::vector<uint64_t>> idMap;
+    std::unordered_map<PmuHeaderType, std::vector<double>> resultMap;
     for (auto& it : deviceTask) {
         ids.clear();
         ids.push_back(it.first.taskId);
@@ -139,14 +157,14 @@ uint32_t MetricSummaryPersistence::GenerateAndSavePmuData(std::map<TaskId, std::
         ids.push_back(it.first.contextId);
         ids.push_back(it.first.batchId);
         for (auto& task : it.second) {
+            idMap[TASK_ID] = ids;
             sqlite3_reset(stmt);
-            if (!ConstructData(ids, result, task, aicLength_, aivLength_)) {
+            if (!ConstructData(idMap, resultMap, task, aicLength_, aivLength_)) {
                 continue;
             }
-            if (BindParametersAndExecuteInsert(ids, result, stmt, db)) {
-                // 保留4个id:task-stream-context-batch id
-                ids.erase(std::next(ids.begin(), 4), std::next(ids.begin(), CHIP4_DEFAULT_COLUMN_NUM));
-                result.clear();
+            if (BindAndExecuteInsert(idMap, resultMap, stmt, db)) {
+                idMap.clear();
+                resultMap.clear();
             } else {
                 ERROR("Transaction is error, rollback");
                 return ANALYSIS_ERROR;

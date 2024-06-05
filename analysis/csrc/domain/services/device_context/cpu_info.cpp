@@ -30,7 +30,9 @@ struct adl_serializer<CpuInfo> {
     static void from_json(const json& jsonData, CpuInfo& infoData)
     {
         std::string frequencyStr = jsonData.at("CPU").at(0).at("Frequency").get<std::string>();
-        infoData.frequency = std::stod(frequencyStr);
+        if (!frequencyStr.empty()) {
+            infoData.frequency = std::stod(frequencyStr);
+        }
     }
 };
 }
