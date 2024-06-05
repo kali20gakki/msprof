@@ -29,7 +29,9 @@ private:
     std::vector<double> SetAllParamsAndCalculator(CalculationElements& allParams, const DeviceContext& context,
                                                   HalPmuData& pmuData) override
     {
-        auto res = CalculatePmu(pmuData, l2CacheTable, allParams);
+        std::vector<double> res;
+        MAKE_SHARED0_RETURN_VALUE(allParams.floatBit, DoublePtrType, res);
+        res = CalculatePmu(pmuData, l2CacheTable, allParams);
         return res;
     }
 private:
