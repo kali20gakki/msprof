@@ -238,13 +238,36 @@ TEST_F(PmuAssociationUTest, ShouldReturnErrorWhenDeviceTaskIsNull)
     ASSERT_EQ(ANALYSIS_ERROR, pmuAssociation.Run(dataInventory_, context));
 }
 
-TEST_F(PmuAssociationUTest, ShouldReturnOKWhenAssociation)
+TEST_F(PmuAssociationUTest, ShouldReturnOKWhenPMUISL2Cache)
 {
     PmuAssociation pmuAssociation;
     DeviceContext context;
     context.deviceContextInfo.sampleInfo.aiCoreMetrics = AicMetricsEventsType::AIC_L2_CACHE;
     context.deviceContextInfo.sampleInfo.aivMetrics = AivMetricsEventsType::AIV_L2_CACHE;
     context.deviceContextInfo.deviceInfo.chipID = CHIP_V4_1_0;
+    auto pmuData = GenerateHalPmuData();
+    auto pmuDataS = dataInventory_.GetPtr<std::vector<HalPmuData>>();
+    pmuDataS->swap(pmuData);
+    auto deviceTask = GenerateDeviceTask();
+    auto deviceTaskS = dataInventory_.GetPtr<std::map<TaskId, std::vector<Domain::DeviceTask>>>();
+    deviceTaskS->swap(deviceTask);
+    ASSERT_EQ(ANALYSIS_OK, pmuAssociation.Run(dataInventory_, context));
+}
+
+TEST_F(PmuAssociationUTest, ShouldReturnOKWhenPMUISMemory)
+{
+    PmuAssociation pmuAssociation;
+    DeviceContext context;
+    context.deviceContextInfo.sampleInfo.aiCoreMetrics = AicMetricsEventsType::AIC_MEMORY_L0;
+    context.deviceContextInfo.sampleInfo.aivMetrics = AivMetricsEventsType::AIV_MEMORY_L0;
+    context.deviceContextInfo.deviceInfo.chipID = CHIP_V4_1_0;
+    uint32_t arr1[8]{0x1b, 0x1c, 0x21, 0x22, 0x27, 0x28, 0x29, 0x2a};
+    uint32_t arr2[8]{0x1b, 0x1c, 0x21, 0x22, 0x27, 0x28, 0x29, 0x2a};
+    context.deviceContextInfo.deviceInfo.aicFrequency = 100;  // 100为aic频率，单位：MHZ
+    for (size_t i = 0; i < PMU_LENGTH; i++) {
+        context.deviceContextInfo.sampleInfo.aivProfilingEvents[i] = arr2[i];
+        context.deviceContextInfo.sampleInfo.aiCoreProfilingEvents[i] = arr1[i];
+    }
     auto pmuData = GenerateHalPmuData();
     auto pmuDataS = dataInventory_.GetPtr<std::vector<HalPmuData>>();
     pmuDataS->swap(pmuData);

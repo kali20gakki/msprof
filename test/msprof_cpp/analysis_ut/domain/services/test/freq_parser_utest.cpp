@@ -63,7 +63,7 @@ protected:
 
 TEST_F(FreqParserUtest, ShouldReturnFreqLpmDataWhenParserRun)
 {
-    int expectSize = 2 * 55 + 1;
+    int expectSize = 2 * FREQ_COUNT + 1;
     std::vector<int> expectCount{FREQ_COUNT};
     FreqParser freqParser;
     DeviceContext context;
@@ -83,7 +83,7 @@ TEST_F(FreqParserUtest, ShouldReturnFreqLpmDataWhenParserRun)
 
 TEST_F(FreqParserUtest, ShouldReturnFreqLpmDataWhenMultiFile)
 {
-    int expectSize = 4 * 55 + 1;
+    int expectSize = 4 * FREQ_COUNT + 1;
     FreqParser freqParser;
     DeviceContext context;
     context.isInitialized_ = true;

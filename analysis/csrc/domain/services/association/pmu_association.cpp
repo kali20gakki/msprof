@@ -18,6 +18,7 @@
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
 #include "analysis/csrc/domain/services/device_context/load_host_data.h"
 #include "analysis/csrc/domain/services/modeling/include/pmu_modeling.h"
+#include "analysis/csrc/domain/entities/hal/include/hal_freq.h"
 
 namespace Analysis {
 namespace Domain {
@@ -207,7 +208,8 @@ uint32_t PmuAssociation::ProcessEntry(Infra::DataInventory& dataInventory, const
 }
 
 REGISTER_PROCESS_SEQUENCE(PmuAssociation, true, LoadHostData, PmuModeling);
-REGISTER_PROCESS_DEPENDENT_DATA(PmuAssociation, std::vector<HalPmuData>, std::map<TaskId, std::vector<DeviceTask>>);
+REGISTER_PROCESS_DEPENDENT_DATA(PmuAssociation, std::vector<HalPmuData>, std::map<TaskId, std::vector<DeviceTask>>,
+                                std::vector<HalFreqLpmData>);
 REGISTER_PROCESS_SUPPORT_CHIP(PmuAssociation, CHIP_ID_ALL);
 }
 }
