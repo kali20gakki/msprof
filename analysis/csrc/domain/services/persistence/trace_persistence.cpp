@@ -165,7 +165,7 @@ TrainingTraceFormat GenerateTrainingTrace(std::map<uint32_t, std::vector<StepTra
 uint32_t ProcessAllReduceEntry(DataInventory &dataInventory, const DeviceContext &context, DBInfo &stepTraceDB)
 {
     auto stepTraceTask = dataInventory.GetPtr<std::map<uint32_t, std::vector<StepTraceTasks>>>();
-    std::string dbPath = Utils::File::PathJoin({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
+    std::string dbPath = Utils::GetDBPath({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
     DeviceInfo deviceInfo{};
     context.Getter(deviceInfo);
     auto data = GenerateAllReduce(*stepTraceTask, deviceInfo.deviceId);
@@ -181,7 +181,7 @@ uint32_t ProcessAllReduceEntry(DataInventory &dataInventory, const DeviceContext
 uint32_t ProcessGetNextEntry(DataInventory &dataInventory, const DeviceContext &context, DBInfo &stepTraceDB)
 {
     auto stepTraceTask = dataInventory.GetPtr<std::map<uint32_t, std::vector<StepTraceTasks>>>();
-    std::string dbPath = Utils::File::PathJoin({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
+    std::string dbPath = Utils::GetDBPath({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
     auto data = GenerateGetNext(*stepTraceTask);
     auto res = SaveData(data, stepTraceDB, dbPath);
     if (!res) {
@@ -196,7 +196,7 @@ uint32_t ProcessTrainingTraceEntry(DataInventory &dataInventory, const DeviceCon
 {
     auto stepTraceTask = dataInventory.GetPtr<std::map<uint32_t, std::vector<StepTraceTasks>>>();
     auto halTrackDatas = dataInventory.GetPtr<std::vector<HalTrackData>>();
-    std::string dbPath = Utils::File::PathJoin({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
+    std::string dbPath = Utils::GetDBPath({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
     DeviceInfo deviceInfo{};
     context.Getter(deviceInfo);
     auto data = GenerateTrainingTrace(*stepTraceTask, *halTrackDatas, deviceInfo.deviceId);
@@ -214,7 +214,7 @@ uint32_t TracePersistence::ProcessEntry(DataInventory &dataInventory, const Cont
     const auto &deviceContext = dynamic_cast<const DeviceContext &>(context);
     DBInfo stepTraceInfo("trace.db", "all_reduce");
     MAKE_SHARED0_NO_OPERATION(stepTraceInfo.database, TraceDB);
-    std::string dbPath = Utils::File::PathJoin({deviceContext.GetDeviceFilePath(), SQLITE, stepTraceInfo.dbName});
+    std::string dbPath = Utils::GetDBPath({deviceContext.GetDeviceFilePath(), SQLITE, stepTraceInfo.dbName});
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(stepTraceInfo.dbRunner, DBRunner, ANALYSIS_ERROR, dbPath);
     bool res = ANALYSIS_OK;
