@@ -183,6 +183,13 @@ protected:
         EXPECT_TRUE(dbRunner->InsertData(tableName, data));
     }
 
+    void DropTable(const std::string& dpPath, const std::string &tableName)
+    {
+        std::shared_ptr<DBRunner> dbRunner;
+        MAKE_SHARED_RETURN_VOID(dbRunner, DBRunner, dpPath);
+        EXPECT_TRUE(dbRunner->DropTable(tableName));
+    }
+
     static std::map<TaskId, std::vector<DeviceTask>> GenerateDeviceTask()
     {
         std::map<TaskId, std::vector<DeviceTask>> deviceTask;
@@ -225,7 +232,7 @@ TEST_F(LoadHostDataUtest, ReturnOKWhenWithOutDeviceTask)
     ASSERT_EQ(ANALYSIS_OK, loadHostData.Run(dataInventory_, deviceContext));
 }
 
-TEST_F(LoadHostDataUtest, ReturnErrorWhenTaskInfo)
+TEST_F(LoadHostDataUtest, ReturnOKWhenTaskInfo)
 {
     GEInfoDB geInfoDb;
     std::string geInfoDbName = "TaskInfo";
@@ -238,10 +245,10 @@ TEST_F(LoadHostDataUtest, ReturnErrorWhenTaskInfo)
     deviceContext.deviceContextInfo.deviceFilePath = HOST_PATH;
     LoadHostData loadHostData;
 
-    ASSERT_EQ(ANALYSIS_ERROR, loadHostData.Run(dataInventory_, deviceContext));
+    ASSERT_EQ(ANALYSIS_OK, loadHostData.Run(dataInventory_, deviceContext));
 }
 
-TEST_F(LoadHostDataUtest, ReturnErrorWhenHcclOpAndHcclTask)
+TEST_F(LoadHostDataUtest, ReturnOKWhenHcclOpAndHcclTask)
 {
     HCCLDB hcclDb;
     std::string hcclOpDbName = "HCCLOP";
@@ -252,10 +259,10 @@ TEST_F(LoadHostDataUtest, ReturnErrorWhenHcclOpAndHcclTask)
     deviceContext.deviceContextInfo.deviceFilePath = HOST_PATH;
     LoadHostData loadHostData;
 
-    ASSERT_EQ(ANALYSIS_ERROR, loadHostData.Run(dataInventory_, deviceContext));
+    ASSERT_EQ(ANALYSIS_OK, loadHostData.Run(dataInventory_, deviceContext));
 }
 
-TEST_F(LoadHostDataUtest, ReturnErrorWhenWithoutHostTask)
+TEST_F(LoadHostDataUtest, ReturnOKWhenWithoutHostTask)
 {
     RuntimeDB runtimeDb;
     std::string runtimeDbName = "HostTask";
@@ -268,6 +275,19 @@ TEST_F(LoadHostDataUtest, ReturnErrorWhenWithoutHostTask)
     deviceContext.deviceContextInfo.deviceFilePath = HOST_PATH;
     LoadHostData loadHostData;
 
-    ASSERT_EQ(ANALYSIS_ERROR, loadHostData.Run(dataInventory_, deviceContext));
+    ASSERT_EQ(ANALYSIS_OK, loadHostData.Run(dataInventory_, deviceContext));
+}
+
+TEST_F(LoadHostDataUtest, ReturnOKWhenNoTable)
+{
+    RuntimeDB runtimeDb;
+    std::string runtimeDbName = "HostTask";
+    CreateDB(runtimeDb, runtimeDbName, RUNDB_PATH, DATA_B);
+    DropTable(RUNDB_PATH, runtimeDbName);
+    DeviceContext deviceContext;
+    deviceContext.deviceContextInfo.deviceFilePath = HOST_PATH;
+    LoadHostData loadHostData;
+
+    ASSERT_EQ(ANALYSIS_OK, loadHostData.Run(dataInventory_, deviceContext));
 }
 }

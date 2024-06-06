@@ -69,6 +69,7 @@ class Connection {
 public:
     explicit Connection(const std::string &path);
     ~Connection();
+    bool CheckTableExists(const std::string &tableName);
     bool ExecuteSql(const std::string &sql, const std::string &sqlType);
     bool ExecuteCreateTable(const std::string &sql);
     bool ExecuteCreateIndex(const std::string &sql);

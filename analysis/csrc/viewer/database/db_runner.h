@@ -31,6 +31,7 @@ using namespace Analysis;
 class DBRunner {
 public:
     explicit DBRunner(const std::string &dbPath): path_(dbPath) {};
+    bool CheckTableExists(const std::string &tableName);
     bool CreateTable(const std::string &tableName, const std::vector<TableColumn> &cols) const;
     bool CreateIndex(const std::string &tableName, const std::string &indexName,
                      const std::vector<std::string> &colNames) const;
