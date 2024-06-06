@@ -58,7 +58,7 @@ struct DeviceHcclTask {
     std::string opName;
 };
 
-struct HcclStastics {
+struct HcclStatistics {
     std::string opType;
     uint32_t count = 0;
     double totalTime = 0;
@@ -72,13 +72,13 @@ class HcclCalculator : public Process {
 private:
     uint32_t ProcessEntry(DataInventory& dataInventory, const Context& context) override;
     bool GetHcclData(DataInventory& dataInventory);
-    bool MergeHcclTaskData(const std::shared_ptr<std::vector<TopDownTask>>& ascendTasks,
+    static bool MergeHcclTaskData(const std::shared_ptr<std::vector<TopDownTask>>& ascendTasks,
                            const std::shared_ptr<std::vector<HcclTask>>& hcclTasks,
                            std::vector<DeviceHcclTask>& deviceHcclTasks);
-    DeviceHcclTask InitHcclTaskData(const TopDownTask& topDownTask, const HcclTask& hcclTask);
+    static DeviceHcclTask InitHcclTaskData(const TopDownTask& topDownTask, const HcclTask& hcclTask);
     bool MergeHcclOpData(const std::shared_ptr<std::vector<HcclOp>>& hcclOps,
                          const std::vector<DeviceHcclTask>& deviceHcclTasks);
-    static DeviceHcclTask GetCompleteHcclTaskData(const HcclOp &op, const DeviceHcclTask &hcclTask, uint16_t count);
+    DeviceHcclTask GetCompleteHcclTaskData(const HcclOp &op, const DeviceHcclTask &hcclTask, uint16_t count);
     static HcclOp GetCompleteHcclOpData(const HcclOp &op);
     void UpdateHcclOpNameByGroupName();
     void UpdateHcclBandwidth();
@@ -86,13 +86,13 @@ private:
     static uint16_t GetJumpNum(const DeviceHcclTask &task);
     static double CalculateBandwidth(double size, double duration);
     static uint16_t FindConsecutivePayloadTask(std::vector<DeviceHcclTask*> tasks, size_t idx);
-    bool GetHcclStaticsData();
+    bool GetHcclStatisticsData();
     bool InjectData(DataInventory &inventory);
 
 private:
     std::vector<HcclOp> opData_;
     std::vector<DeviceHcclTask> taskData_;
-    std::vector<HcclStastics> stasticsData_;
+    std::vector<HcclStatistics> statisticsData_;
     bool isValidData_ = false;
 };
 }

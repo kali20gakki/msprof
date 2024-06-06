@@ -202,7 +202,7 @@ TEST_F(HcclCalculatorUTest, TestProcessEntryWhenProcessSuccessThenReturnOK)
         i++;
     }
 
-    auto hcclStasticsData = dataInventory_.GetPtr<std::vector<HcclStastics>>();
-    size_t expectStasticsDataNum = 2;
-    EXPECT_EQ(expectStasticsDataNum, hcclStasticsData->size());
+    auto hcclStatisticsData = dataInventory_.GetPtr<std::vector<HcclStatistics>>();
+    size_t expectStatisticsDataNum = 2;
+    EXPECT_EQ(expectStatisticsDataNum, hcclStatisticsData->size());
 }
