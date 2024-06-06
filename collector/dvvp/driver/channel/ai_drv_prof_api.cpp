@@ -736,7 +736,6 @@ void GetQosProfileInfo(uint32_t deviceId, std::string &qosEventInfo, std::vector
 {
     PlatformType platform = ConfigManager::instance()->GetPlatformType();
     if (platform != PlatformType::CHIP_V4_1_0) {
-        MSPROF_LOGI("Do not support qos driver channel.");
         return;
     }
     qosEventId.clear();
