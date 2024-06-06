@@ -34,12 +34,20 @@ using HcclTaskDataFormat = std::vector<std::tuple<uint64_t, int32_t, std::string
         std::string, uint16_t, std::string>>;
 
 // opType, count, totalTime, min, avg, max, ratio
-using HcclStasticsFormat = std::vector<std::tuple<std::string, uint32_t, double, double, double, double, double>>;
+using HcclStatisticsFormat = std::vector<std::tuple<std::string, uint32_t, double, double, double, double, double>>;
 }
 
-bool SaveHcclOpData(DataInventory& dataInventory, const std::string devicePath)
+bool SaveHcclOpData(DataInventory& dataInventory, const std::string& devicePath)
 {
     auto opData = dataInventory.GetPtr<std::vector<HcclOp>>();
+    if (opData == nullptr) {
+        ERROR("hccl op data pointer is nullptr.");
+        return false;
+    }
+    if (opData->empty()) {
+        WARN("Hccl op data is empty.");
+        return true;
+    }
     DBInfo hcclDB("hccl_single_device.db", "HCCLOpSingleDevice");
     MAKE_SHARED0_RETURN_VALUE(hcclDB.database, HCCLSingleDeviceDB, false);
     std::string dbPath = Utils::GetDBPath({devicePath, SQLITE, hcclDB.dbName});
@@ -57,9 +65,17 @@ bool SaveHcclOpData(DataInventory& dataInventory, const std::string devicePath)
     return SaveData(saveData, hcclDB, dbPath);
 }
 
-bool SaveHcclTaskData(DataInventory& dataInventory, const std::string devicePath)
+bool SaveHcclTaskData(DataInventory& dataInventory, const std::string& devicePath)
 {
     auto taskData = dataInventory.GetPtr<std::vector<DeviceHcclTask>>();
+    if (taskData == nullptr) {
+        ERROR("hccl task data pointer is nullptr.");
+        return false;
+    }
+    if (taskData->empty()) {
+        WARN("Hccl task data is empty.");
+        return true;
+    }
     DBInfo hcclDB("hccl_single_device.db", "HCCLTaskSingleDevice");
     MAKE_SHARED0_RETURN_VALUE(hcclDB.database, HCCLSingleDeviceDB, false);
     std::string dbPath = Utils::GetDBPath({devicePath, SQLITE, hcclDB.dbName});
@@ -81,20 +97,28 @@ bool SaveHcclTaskData(DataInventory& dataInventory, const std::string devicePath
     return SaveData(saveData, hcclDB, dbPath);
 }
 
-bool SaveHcclStasticsData(DataInventory& dataInventory, const std::string devicePath)
+bool SaveHcclStatisticsData(DataInventory& dataInventory, const std::string& devicePath)
 {
-    auto stasticsData = dataInventory.GetPtr<std::vector<HcclStastics>>();
+    auto statisticsData = dataInventory.GetPtr<std::vector<HcclStatistics>>();
+    if (statisticsData == nullptr) {
+        ERROR("hccl statistics data pointer is nullptr.");
+        return false;
+    }
+    if (statisticsData->empty()) {
+        WARN("Hccl statistics data is empty.");
+        return true;
+    }
     DBInfo hcclDB("hccl_single_device.db", "HcclOpReport");
     MAKE_SHARED0_RETURN_VALUE(hcclDB.database, HCCLSingleDeviceDB, false);
     std::string dbPath = Utils::GetDBPath({devicePath, SQLITE, hcclDB.dbName});
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(hcclDB.dbRunner, DBRunner, false, dbPath);
-    HcclStasticsFormat saveData;
-    if (!Utils::Reserve(saveData, stasticsData->size())) {
+    HcclStatisticsFormat saveData;
+    if (!Utils::Reserve(saveData, statisticsData->size())) {
         ERROR("Reserve for % data failed.", hcclDB.tableName);
         return false;
     }
-    for (const auto& data : *stasticsData) {
+    for (auto& data : *statisticsData) {
         saveData.emplace_back(data.opType, data.count, data.totalTime, data.min, data.avg, data.max, data.ratio);
     }
     return SaveData(saveData, hcclDB, dbPath);
@@ -103,7 +127,7 @@ bool SaveHcclStasticsData(DataInventory& dataInventory, const std::string device
 uint32_t DeviceHcclPersistence::ProcessEntry(DataInventory& dataInventory, const Context& context)
 {
     INFO("Start to dump device hccl data.");
-    const std::string devicePath = static_cast<const DeviceContext&>(context).GetDeviceFilePath();
+    const std::string devicePath = dynamic_cast<const DeviceContext&>(context).GetDeviceFilePath();
     bool flag = true;
     if (!SaveHcclOpData(dataInventory, devicePath)) {
         flag = false;
@@ -113,15 +137,15 @@ uint32_t DeviceHcclPersistence::ProcessEntry(DataInventory& dataInventory, const
         flag = false;
         ERROR("Save hccl task single device data failed.");
     }
-    if (!SaveHcclStasticsData(dataInventory, devicePath)) {
+    if (!SaveHcclStatisticsData(dataInventory, devicePath)) {
         flag = false;
-        ERROR("Save hccl stastics single device data failed.");
+        ERROR("Save hccl statistics single device data failed.");
     }
     return (flag) ? ANALYSIS_OK : ANALYSIS_ERROR;
 }
 REGISTER_PROCESS_SEQUENCE(DeviceHcclPersistence, true, HcclCalculator);
 REGISTER_PROCESS_DEPENDENT_DATA(DeviceHcclPersistence, std::vector<HcclOp>, std::vector<DeviceHcclTask>,
-                                std::vector<HcclStastics>);
+                                std::vector<HcclStatistics>);
 REGISTER_PROCESS_SUPPORT_CHIP(DeviceHcclPersistence, CHIP_ID_ALL);
 }
 }

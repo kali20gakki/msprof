@@ -55,8 +55,8 @@ uint32_t HcclCalculator::ProcessEntry(DataInventory& dataInventory, const Contex
     }
     UpdateHcclOpNameByGroupName();
     UpdateHcclBandwidth();
-    if (!GetHcclStaticsData()) {
-        ERROR("Failed to Get hccl stastics data.");
+    if (!GetHcclStatisticsData()) {
+        ERROR("Failed to Get hccl statistics data.");
         return ANALYSIS_ERROR;
     }
     if (!InjectData(dataInventory)) {
@@ -153,9 +153,6 @@ DeviceHcclTask HcclCalculator::InitHcclTaskData(const TopDownTask &topDownTask, 
     task.timestamp = topDownTask.startTime;
     task.connectionId = topDownTask.connectionId;
     task.duration = topDownTask.endTime - topDownTask.startTime;
-    if (!isValidData_ && task.opType != NA) {
-        isValidData_ = true;
-    }
     return task;
 }
 
@@ -217,6 +214,9 @@ DeviceHcclTask HcclCalculator::GetCompleteHcclTaskData(const HcclOp &op, const D
     task.isDynamic = op.isDynamic;
     task.modelId = op.modelId;
     task.connectionId = op.connectionId;
+    if (!isValidData_ && task.opType != NA) {
+        isValidData_ = true;
+    }
     return task;
 }
 
@@ -340,9 +340,9 @@ uint16_t HcclCalculator::FindConsecutivePayloadTask(std::vector<DeviceHcclTask*>
     return count;
 }
 
-bool HcclCalculator::GetHcclStaticsData()
+bool HcclCalculator::GetHcclStatisticsData()
 {
-    INFO("Start GetHcclStaticsData.");
+    INFO("Start GetHcclStatisticsData.");
     if (!isValidData_) {
         WARN("No op type in hccl data.");
         return true;
@@ -355,14 +355,14 @@ bool HcclCalculator::GetHcclStaticsData()
             groupedData[key] = info;
         } else {
             auto& temp = groupedData[key];
-            temp.max = std::max(task.timestamp, temp.max);
+            temp.max = std::max(task.timestamp + task.duration, temp.max);
             temp.min = std::min(task.timestamp, temp.min);
         }
     }
-    std::unordered_map<std::string, HcclStastics> stasticsTable;
+    std::unordered_map<std::string, HcclStatistics> statisticsTable;
     double allTaskTime = 0;
     for (const auto& data : groupedData) {
-        auto& record =  stasticsTable[data.second.opType];
+        auto& record =  statisticsTable[data.second.opType];
         double duration = data.second.max - data.second.min;
         record.opType = data.second.opType;
         record.count++;
@@ -371,16 +371,17 @@ bool HcclCalculator::GetHcclStaticsData()
         record.min = std::min(duration, record.min);
         allTaskTime += duration;
     }
-    if (!Utils::Reserve(stasticsData_, stasticsTable.size())) {
-        ERROR("Reserve for hccl stastics data failed.");
+    if (!Utils::Reserve(statisticsData_, statisticsTable.size())) {
+        ERROR("Reserve for hccl statistics data failed.");
         return false;
     }
-    for (auto& data : stasticsTable) {
+    for (auto& data : statisticsTable) {
         data.second.avg = static_cast<double>(data.second.totalTime) / data.second.count;
         data.second.ratio = static_cast<double>(data.second.totalTime) / allTaskTime * PERCENTAGE;
-        stasticsData_.emplace_back(data.second);
+        statisticsData_.emplace_back(data.second);
     }
-    std::sort(stasticsData_.begin(), stasticsData_.end(), [](const HcclStastics& task1, const HcclStastics& task2) {
+    std::sort(statisticsData_.begin(), statisticsData_.end(),
+              [](const HcclStatistics& task1, const HcclStatistics& task2) {
         return task1.ratio > task2.ratio;
     });
     return true;
@@ -401,10 +402,10 @@ bool HcclCalculator::InjectData(DataInventory &inventory)
         flag = false;
     }
 
-    std::shared_ptr<std::vector<HcclStastics>> hcclStasticsData;
-    MAKE_SHARED0_NO_OPERATION(hcclStasticsData, std::vector<HcclStastics>, std::move(stasticsData_));
-    if (!inventory.Inject(hcclStasticsData)) {
-        ERROR("Inject hccl stastics data failed.");
+    std::shared_ptr<std::vector<HcclStatistics>> hcclStatisticsData;
+    MAKE_SHARED0_NO_OPERATION(hcclStatisticsData, std::vector<HcclStatistics>, std::move(statisticsData_));
+    if (!inventory.Inject(hcclStatisticsData)) {
+        ERROR("Inject hccl statistics data failed.");
         flag = false;
     }
     return flag;

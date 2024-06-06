@@ -64,8 +64,8 @@ const HcclTaskDataFormat HCCL_TASK_DATA = {
 
 
 // opType, count, totalTime, min, avg, max, ratio
-using HcclStasticsFormat = std::vector<std::tuple<std::string, uint32_t, double, double, double, double, double>>;
-const HcclStasticsFormat HCCL_STASTICS_DATA = {
+using HcclStatisticsFormat = std::vector<std::tuple<std::string, uint32_t, double, double, double, double, double>>;
+const HcclStatisticsFormat HCCL_STATISTICS_DATA = {
     {"hcom_allReduce_", 1352, 5852671300, 211920, 4328898.890533, 133867780, 94.10197},
     {"hcom_batchSendRecv_", 96, 243562100, 542100, 2537105.208333, 105191720, 3.916105},
     {"hcom_broadcast_", 96, 70865740, 236820, 738184.791667, 3929660, 1.139412},
@@ -100,10 +100,11 @@ protected:
         MAKE_SHARED0_NO_OPERATION(hcclTaskData, std::vector<Analysis::Domain::DeviceHcclTask>, std::move(hcclTask));
         dataInventory_.Inject(hcclTaskData);
 
-        auto hcclStastics = GenerateHcclStasticsData();
-        std::shared_ptr<std::vector<Analysis::Domain::HcclStastics>> ascendTaskData;
-        MAKE_SHARED0_NO_OPERATION(ascendTaskData, std::vector<Analysis::Domain::HcclStastics>, std::move(hcclStastics));
-        dataInventory_.Inject(ascendTaskData);
+        auto hcclStatistics = GenerateHcclStatisticsData();
+        std::shared_ptr<std::vector<Analysis::Domain::HcclStatistics>> hcclStatisticsData;
+        MAKE_SHARED0_NO_OPERATION(hcclStatisticsData, std::vector<Analysis::Domain::HcclStatistics>,
+                                  std::move(hcclStatistics));
+        dataInventory_.Inject(hcclStatisticsData);
     }
 
     void TearDown() override
@@ -140,12 +141,12 @@ protected:
         return taskData;
     }
 
-    static std::vector<Analysis::Domain::HcclStastics> GenerateHcclStasticsData()
+    static std::vector<Analysis::Domain::HcclStatistics> GenerateHcclStatisticsData()
     {
-        std::vector<Analysis::Domain::HcclStastics> taskData;
-        EXPECT_TRUE(Reserve(taskData, HCCL_STASTICS_DATA.size()));
-        for (const auto& data : HCCL_STASTICS_DATA) {
-            Analysis::Domain::HcclStastics task;
+        std::vector<Analysis::Domain::HcclStatistics> taskData;
+        EXPECT_TRUE(Reserve(taskData, HCCL_STATISTICS_DATA.size()));
+        for (const auto& data : HCCL_STATISTICS_DATA) {
+            Analysis::Domain::HcclStatistics task;
             std::tie(task.opType, task.count, task.totalTime, task.min, task.avg, task.max, task.ratio) = data;
             taskData.emplace_back(task);
         }
@@ -173,9 +174,9 @@ TEST_F(DeviceHcclPersistenceUTest, TestProcessEntryWhenProcessSuccessThenReturnO
     EXPECT_TRUE(dbRunner->QueryData("SELECT * from HCCLTaskSingleDevice", taskData));
     EXPECT_EQ(HCCL_TASK_DATA, taskData);
 
-    HcclStasticsFormat stasticsData;
-    EXPECT_TRUE(dbRunner->QueryData("SELECT * from HcclOpReport", stasticsData));
-    EXPECT_EQ(HCCL_STASTICS_DATA, stasticsData);
+    HcclStatisticsFormat statisticsData;
+    EXPECT_TRUE(dbRunner->QueryData("SELECT * from HcclOpReport", statisticsData));
+    EXPECT_EQ(HCCL_STATISTICS_DATA, statisticsData);
 }
 
 TEST_F(DeviceHcclPersistenceUTest, TestProcessEntryWhenReserveFailedThenReturnError)
@@ -184,9 +185,42 @@ TEST_F(DeviceHcclPersistenceUTest, TestProcessEntryWhenReserveFailedThenReturnEr
     Analysis::Domain::DeviceContext context;
     MOCKER_CPP(&HcclOpDataFormat::reserve).stubs().will(throws(std::bad_alloc()));
     MOCKER_CPP(&HcclTaskDataFormat::reserve).stubs().will(throws(std::bad_alloc()));
-    MOCKER_CPP(&HcclStasticsFormat::reserve).stubs().will(throws(std::bad_alloc()));
+    MOCKER_CPP(&HcclStatisticsFormat::reserve).stubs().will(throws(std::bad_alloc()));
     ASSERT_EQ(Analysis::ANALYSIS_ERROR, per.Run(dataInventory_, context));
-    MOCKER_CPP(&HcclStasticsFormat::reserve).stubs().will(throws(std::bad_alloc()));
+    MOCKER_CPP(&HcclStatisticsFormat::reserve).stubs().will(throws(std::bad_alloc()));
     MOCKER_CPP(&HcclTaskDataFormat::reserve).stubs().will(throws(std::bad_alloc()));
     MOCKER_CPP(&HcclOpDataFormat::reserve).stubs().will(throws(std::bad_alloc()));
+}
+
+TEST_F(DeviceHcclPersistenceUTest, TestProcessEntryWhenDataPointerIsNullThenReturnError)
+{
+    Analysis::Domain::DeviceHcclPersistence per;
+    Analysis::Domain::DeviceContext context;
+    Analysis::Infra::DataInventory tempDataInventory;
+    ASSERT_EQ(Analysis::ANALYSIS_ERROR, per.Run(tempDataInventory, context));
+}
+
+TEST_F(DeviceHcclPersistenceUTest, TestProcessEntryWhenDataEmptyThenReturnOK)
+{
+    Analysis::Domain::DeviceHcclPersistence per;
+    Analysis::Domain::DeviceContext context;
+    Analysis::Infra::DataInventory tempDataInventory;
+
+    std::vector<Analysis::Domain::HcclOp> hcclOp;
+    std::shared_ptr<std::vector<Analysis::Domain::HcclOp>> opData;
+    MAKE_SHARED0_NO_OPERATION(opData, std::vector<Analysis::Domain::HcclOp>, std::move(hcclOp));
+    tempDataInventory.Inject(opData);
+
+    std::vector<Analysis::Domain::DeviceHcclTask> hcclTask;
+    std::shared_ptr<std::vector<Analysis::Domain::DeviceHcclTask>> hcclTaskData;
+    MAKE_SHARED0_NO_OPERATION(hcclTaskData, std::vector<Analysis::Domain::DeviceHcclTask>, std::move(hcclTask));
+    tempDataInventory.Inject(hcclTaskData);
+
+    std::vector<Analysis::Domain::HcclStatistics> hcclStatistics;
+    std::shared_ptr<std::vector<Analysis::Domain::HcclStatistics>> hcclStatisticsData;
+    MAKE_SHARED0_NO_OPERATION(hcclStatisticsData, std::vector<Analysis::Domain::HcclStatistics>,
+                              std::move(hcclStatistics));
+    tempDataInventory.Inject(hcclStatisticsData);
+
+    ASSERT_EQ(Analysis::ANALYSIS_OK, per.Run(tempDataInventory, context));
 }
