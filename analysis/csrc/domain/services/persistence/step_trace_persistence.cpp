@@ -44,7 +44,7 @@ StepTraceDataVectorFormat GenerateStepTraceData(std::map<uint32_t, std::vector<S
 uint32_t ProcessStepTraceDataEntry(DataInventory& dataInventory, const DeviceContext& context, DBInfo& stepTraceDB)
 {
     auto stepTraceTask = dataInventory.GetPtr<std::map<uint32_t, std::vector<StepTraceTasks>>>();
-    std::string dbPath = Utils::File::PathJoin({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
+    std::string dbPath = Utils::GetDBPath({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
     auto data = GenerateStepTraceData(*stepTraceTask);
     auto res = SaveData(data, stepTraceDB, dbPath);
     if (!res) {
@@ -58,7 +58,7 @@ uint32_t ProcessStepTraceDataEntry(DataInventory& dataInventory, const DeviceCon
 uint32_t ProcessStepTimeEntry(DataInventory& dataInventory, const DeviceContext& context, DBInfo& stepTraceDB)
 {
     auto halTrackDatas = dataInventory.GetPtr<std::vector<HalTrackData>>();
-    std::string dbPath = Utils::File::PathJoin({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
+    std::string dbPath = Utils::GetDBPath({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
     auto data = GenerateStepTime(*halTrackDatas);
     auto res = SaveData(data, stepTraceDB, dbPath);
     if (!res) {
@@ -74,7 +74,7 @@ uint32_t StepTracePersistence::ProcessEntry(DataInventory& dataInventory, const 
     const auto& deviceContext = dynamic_cast<const DeviceContext&>(context);
     DBInfo stepTraceInfo("step_trace.db", "step_trace_data");
     MAKE_SHARED0_NO_OPERATION(stepTraceInfo.database, StepTraceDB);
-    std::string dbPath = Utils::File::PathJoin({deviceContext.GetDeviceFilePath(), SQLITE, stepTraceInfo.dbName});
+    std::string dbPath = Utils::GetDBPath({deviceContext.GetDeviceFilePath(), SQLITE, stepTraceInfo.dbName});
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(stepTraceInfo.dbRunner, DBRunner, ANALYSIS_ERROR, dbPath);
     bool res = ANALYSIS_OK;
