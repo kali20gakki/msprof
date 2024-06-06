@@ -104,10 +104,10 @@ bool HcclCalculator::MergeHcclTaskData(const std::shared_ptr<std::vector<TopDown
     std::sort(hcclTasks->begin(), hcclTasks->end(), [](const HcclTask& task1, const HcclTask& task2) {
         return task1.timestamp < task2.timestamp;
     });
-    std::map<TaskId, TopDownTask> taskTable;
+    std::map<TaskId, std::vector<TopDownTask>> taskTable;
     for (const auto& task : *ascendTasks) {
         TaskId tempId(task.streamId, task.batchId, task.taskId, task.contextId);
-        taskTable[tempId] = task;
+        taskTable[tempId].emplace_back(task);
     }
     if (!Utils::Reserve(deviceHcclTasks, hcclTasks->size())) {
         ERROR("Reserve for hccl task failed.");
@@ -120,8 +120,10 @@ bool HcclCalculator::MergeHcclTaskData(const std::shared_ptr<std::vector<TopDown
                   task.streamId, task.taskId, task.contextId, task.batchId);
             continue;
         }
-        if (!Utils::IsDoubleEqual(taskTable[tempId].startTime, -1)) {
-            deviceHcclTasks.emplace_back(InitHcclTaskData(taskTable[tempId], task));
+        for (const auto& ascendTask : taskTable[tempId]) {
+            if (!Utils::IsDoubleEqual(ascendTask.startTime, -1)) {
+                deviceHcclTasks.emplace_back(InitHcclTaskData(ascendTask, task));
+            }
         }
     }
     return true;

@@ -72,23 +72,22 @@ class HcclCalculator : public Process {
 private:
     uint32_t ProcessEntry(DataInventory& dataInventory, const Context& context) override;
     bool GetHcclData(DataInventory& dataInventory);
-    static bool MergeHcclTaskData(const std::shared_ptr<std::vector<TopDownTask>>& ascendTasks,
+    bool MergeHcclTaskData(const std::shared_ptr<std::vector<TopDownTask>>& ascendTasks,
                            const std::shared_ptr<std::vector<HcclTask>>& hcclTasks,
                            std::vector<DeviceHcclTask>& deviceHcclTasks);
-    static DeviceHcclTask InitHcclTaskData(const TopDownTask& topDownTask, const HcclTask& hcclTask);
+    DeviceHcclTask InitHcclTaskData(const TopDownTask& topDownTask, const HcclTask& hcclTask);
     bool MergeHcclOpData(const std::shared_ptr<std::vector<HcclOp>>& hcclOps,
                          const std::vector<DeviceHcclTask>& deviceHcclTasks);
     DeviceHcclTask GetCompleteHcclTaskData(const HcclOp &op, const DeviceHcclTask &hcclTask, uint16_t count);
-    static HcclOp GetCompleteHcclOpData(const HcclOp &op);
+    HcclOp GetCompleteHcclOpData(const HcclOp &op);
     void UpdateHcclOpNameByGroupName();
     void UpdateHcclBandwidth();
-    static void CalculateTaskBandwidth(std::vector<DeviceHcclTask*> hcclTasks);
-    static uint16_t GetJumpNum(const DeviceHcclTask &task);
-    static double CalculateBandwidth(double size, double duration);
-    static uint16_t FindConsecutivePayloadTask(std::vector<DeviceHcclTask*> tasks, size_t idx);
+    void CalculateTaskBandwidth(std::vector<DeviceHcclTask*> hcclTasks);
+    uint16_t GetJumpNum(const DeviceHcclTask &task);
+    double CalculateBandwidth(double size, double duration);
+    uint16_t FindConsecutivePayloadTask(std::vector<DeviceHcclTask*> tasks, size_t idx);
     bool GetHcclStatisticsData();
     bool InjectData(DataInventory &inventory);
-
 private:
     std::vector<HcclOp> opData_;
     std::vector<DeviceHcclTask> taskData_;
