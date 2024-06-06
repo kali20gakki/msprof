@@ -959,4 +959,21 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L2)
                   expectbigOPsAlgType[i]);
     }
 }
+std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenarioEmptyPath()
+{
+    auto treeNode = std::make_shared<TreeNode>(nullptr);
+    auto ana = std::make_shared<TreeAnalyzer>(treeNode, 1);
+    ana->path_ = std::map<uint16_t, std::shared_ptr<TreeNode>>{};
+    ana->path_[MSPROF_REPORT_NODE_LEVEL] = nullptr;
+    return ana;
+}
+
+TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerGenComputeHostTasks)
+{
+    auto ana = GetAnalyzerForScenarioEmptyPath();
+    std::unordered_map<std::string, std::shared_ptr<Operator>> ops{};
+    
+    HostTasks ht = ana -> GenComputeHostTasks(ops, nullptr, 0);
+    EXPECT_EQ(ht, HostTasks{});
+}
 

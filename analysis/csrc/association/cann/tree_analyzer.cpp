@@ -293,6 +293,9 @@ HostTasks TreeAnalyzer::GenComputeHostTasks(ComputeOpDescs &ops,
         // 补充一条有效的Op信息
         auto nodeNode = path_.find(MSPROF_REPORT_NODE_LEVEL) != path_.end() ?
                         path_[MSPROF_REPORT_NODE_LEVEL] : nullptr;
+        if (nodeNode == nullptr) {
+            return HostTasks{};
+        }
         std::shared_ptr<Operator> op;
         std::shared_ptr<OpDesc> desc;
         MAKE_SHARED_RETURN_VALUE(op, Operator, {}, desc, nodeNode->event->apiPtr->itemId, OpType::OPTYPE_RESERVED);
