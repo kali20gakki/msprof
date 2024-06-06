@@ -30,7 +30,7 @@ private:
                                                   HalPmuData& pmuData) override
     {
         std::vector<double> res;
-        MAKE_SHARED0_RETURN_VALUE(allParams.floatBit, DoublePtrType, res);
+        MAKE_SHARED_RETURN_VALUE(allParams.floatBit, DoublePtrType, res, floatBitVec);
         res = CalculatePmu(pmuData, l2CacheTable, allParams);
         return res;
     }
@@ -43,6 +43,7 @@ private:
         {L2CacheIndex::R1ReadCacheHit, {{0x508}, Calculator::CalculatorMetricByNothing}},
         {L2CacheIndex::R1ReadCacheMissAllocate, {{0x50a}, Calculator::CalculatorMetricByNothing}},
     };
+    const std::vector<double> floatBitVec{1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 };
 }
 }

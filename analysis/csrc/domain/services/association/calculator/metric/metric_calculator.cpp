@@ -71,9 +71,10 @@ double Calculator::CalculatorMetricByAdditionsWithFreq(CalculationElements& allP
 {
     double res = 0.0;
     if (allParams.taskCyc != 0 && allParams.bwFreq != 0) {
+        double freq = static_cast<double>(allParams.bwFreq);
         for (size_t i = 0; i < allParams.pmuList.size(); ++i) {
             res += ((*allParams.floatBit)[index] * allParams.pmuList[i] * (*allParams.pipSize)[index] *
-                    (*allParams.scalar)[index] / (allParams.taskCyc / allParams.bwFreq) / PMU_BW_OFFSET);
+                    (*allParams.scalar)[index] / (allParams.taskCyc / freq) / OFFSET);
         }
     }
     return res;
