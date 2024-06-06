@@ -31,6 +31,13 @@ static std::string GetColumnsString(const std::vector <TableColumn> &cols)
     return Join(result, ",");
 }
 
+bool DBRunner::CheckTableExists(const std::string &tableName)
+{
+    std::shared_ptr<Connection> conn;
+    MAKE_SHARED_RETURN_VALUE(conn, Connection, false, path_);
+    return conn->CheckTableExists(tableName);
+}
+
 bool DBRunner::CreateTable(const std::string &tableName, const std::vector <TableColumn> &cols) const
 {
     if (tableName.empty()) {

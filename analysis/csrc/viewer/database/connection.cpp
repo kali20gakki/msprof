@@ -29,6 +29,7 @@ const std::string CREATE_INDEX = "create index";
 const std::string DROP_TABLE = "drop table";
 const std::string DELETE = "delete";
 const std::string UPDATE = "update";
+const std::string CHECK = "check";
 }
 
 Connection::Connection(const std::string &path)
@@ -59,11 +60,21 @@ bool Connection::ExecuteSql(const std::string &sql, const std::string &sqlType)
     int rc = sqlite3_exec(db_, sql.c_str(), nullptr, nullptr, &errMsg);
     if (rc != SQLITE_OK) {
         std::string errorMsg = "Failed to " + sqlType +": " + std::string(errMsg);
-        ERROR("sqlite3_exec return %, %", rc, errorMsg);
+        if (sqlType == CHECK) {
+            WARN("sqlite3_exec return %, %", rc, errorMsg);
+        } else {
+            ERROR("sqlite3_exec return %, %", rc, errorMsg);
+        }
         sqlite3_free(errMsg);
         return false;
     }
     return true;
+}
+
+bool Connection::CheckTableExists(const std::string &tableName)
+{
+    std::string checkSql = "SELECT COUNT(1) FROM " + tableName + ";";
+    return ExecuteSql(checkSql, CHECK);
 }
 
 bool Connection::ExecuteCreateTable(const std::string &sql)

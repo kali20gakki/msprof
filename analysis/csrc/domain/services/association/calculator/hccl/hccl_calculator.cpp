@@ -192,12 +192,8 @@ bool HcclCalculator::MergeHcclOpData(const std::shared_ptr<std::vector<HcclOp>> 
         }
         opData_.emplace_back(GetCompleteHcclOpData(op));
     }
-    if (taskIdx < deviceHcclTasks.size() -1) {
+    if (taskIdx != 0 && taskIdx < deviceHcclTasks.size() -1) {
         ERROR("Task_queue is not empty, len is: %", deviceHcclTasks.size());
-    }
-    if (taskData_.empty()) {
-        ERROR("Communication data is empty.");
-        return false;
     }
     return true;
 }
