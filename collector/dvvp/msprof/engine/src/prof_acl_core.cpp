@@ -533,10 +533,6 @@ aclError aclprofModelUnSubscribe(const uint32_t modelId)
         return ACL_ERROR_INVALID_MODEL_ID;
     }
 
-    MSPROF_LOGI("Allocate unsubscription config to Acl, dataTypeConfig");
-    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfUnSubscribe(modelId);
-    RETURN_IF_NOT_SUCCESS(ret);
-
     uint32_t devId = 0;
     if (ProfAclMgr::instance()->GetDeviceSubscribeCount(modelId, devId) == 0) {
         Msprof::Engine::FlushAllModule(std::to_string(devId));
