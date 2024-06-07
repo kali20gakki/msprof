@@ -67,6 +67,9 @@ uint32_t FreqParser::ParseData(DataInventory &dataInventory, const Infra::Contex
     auto structCount = this->binaryDataSize / trunkSize;
     INFO("FreqProfileData structCount is : %", structCount);
     halUniData_.resize(structCount);
+    if (structCount == 0) {
+        lpmDataS.clear();  // structCount为0说明没变频数据，不需要落盘，直接使用配置文件频率即可
+    }
     int stat{ANALYSIS_OK};
     for (uint64_t i = 0; i < structCount; i++) {
         auto res = this->ParseDataItem(&this->binaryData[i * trunkSize], trunkSize,
@@ -76,7 +79,6 @@ uint32_t FreqParser::ParseData(DataInventory &dataInventory, const Infra::Contex
             ERROR("FreqProfileData parse error in %th", i);
         }
     }
-
     // 根据device启动时间过滤有效频率数据
     for (const auto& freqData : halUniData_) {
         for (int i = 0; i < freqData.count; ++i) {
@@ -88,7 +90,6 @@ uint32_t FreqParser::ParseData(DataInventory &dataInventory, const Infra::Contex
             }
         }
     }
-
     INFO("Freq.data parser is completed, begin to save data into dataInventory!");
     std::shared_ptr<std::vector<HalFreqLpmData>> data;
     MAKE_SHARED_RETURN_VALUE(data, std::vector<HalFreqLpmData>, ANALYSIS_ERROR, std::move(lpmDataS));
