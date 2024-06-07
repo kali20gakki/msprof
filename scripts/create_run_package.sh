@@ -136,7 +136,9 @@ function create_run_package() {
 
     ${CREATE_RUN_SCRIPT} \
     --header ${CONTROL_PARAM_SCRIPT} \
-    --help-header ${filer_param} --pigz \
+    --help-header ${filer_param} \
+    --pigz \
+    --tar-quietly \
     --complevel 4 \
     --nomd5 \
     --sha256 \
