@@ -100,13 +100,13 @@ TEST_F(FreqParserUtest, ShouldReturnFreqLpmDataWhenMultiFile)
     ASSERT_EQ(0, data->data()[1].sysCnt);
 }
 
-TEST_F(FreqParserUtest, ShouldReturnDefaultDataWhenPathError)
+TEST_F(FreqParserUtest, ShouldReturnNoDataWhenNoFile)
 {
     FreqParser freqParser;
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = "";
     ASSERT_EQ(Analysis::ANALYSIS_OK, freqParser.Run(dataInventory_, context));
     auto data = dataInventory_.GetPtr<std::vector<HalFreqLpmData>>();
-    ASSERT_EQ(1ul, data->size());
+    ASSERT_EQ(0ul, data->size());
 }
 }

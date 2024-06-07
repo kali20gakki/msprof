@@ -38,8 +38,8 @@ uint32_t FreqPersistence::ProcessEntry(DataInventory& dataInventory, const Conte
     const DeviceContext& deviceContext = static_cast<const DeviceContext&>(context);
     auto freqData = dataInventory.GetPtr<std::vector<HalFreqLpmData>>();
     if (freqData == nullptr) {
-        INFO("There is no freq data don't need to persistence");
-        return ANALYSIS_OK;
+        ERROR("There is no freq data, don't need to persistence");
+        return ANALYSIS_ERROR;
     }
     DBInfo freqDB("freq.db", "FreqParse");
     MAKE_SHARED0_RETURN_VALUE(freqDB.database, FreqDB, ANALYSIS_ERROR);
@@ -47,7 +47,7 @@ uint32_t FreqPersistence::ProcessEntry(DataInventory& dataInventory, const Conte
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(freqDB.dbRunner, DBRunner, ANALYSIS_ERROR, dbPath);
     auto data = GenerateFreqData(*freqData);
-    if (data.size() <= 1) {
+    if (data.empty()) {
         INFO("The freq is default data no need to persistence!");
         return ANALYSIS_OK;
     }

@@ -67,5 +67,22 @@ TEST_F(FreqPersistenceUTest, ShouldSaveFreqDataSuccess)
     freqDataS->swap(freqData);
     ASSERT_EQ(ANALYSIS_OK, persistence.Run(dataInventory_, context));
 }
+
+TEST_F(FreqPersistenceUTest, ShouldReturnErrorWhenDataIsNullPtr)
+{
+    FreqPersistence persistence;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = DEVICE_PATH;
+    dataInventory_.RemoveRestData({});
+    ASSERT_EQ(ANALYSIS_ERROR, persistence.Run(dataInventory_, context));
+}
+
+TEST_F(FreqPersistenceUTest, ShouldReturnOKWhenDataIsEmpty)
+{
+    FreqPersistence persistence;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = DEVICE_PATH;
+    ASSERT_EQ(ANALYSIS_OK, persistence.Run(dataInventory_, context));
+}
 }
 }
