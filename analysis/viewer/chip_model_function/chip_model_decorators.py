@@ -1,0 +1,49 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
+from functools import wraps
+from common_func.constant import Constant
+from profiling_bean.prof_enum.chip_model import ChipModel
+from common_func.platform.chip_manager import ChipManager
+
+NOT_SUPPORT_PMU_FOR_1911 = [
+    "vec_ratio",
+    "ub_read_bw",
+    "ub_write_bw",
+    "l2_write_bw",
+    "main_mem_write_bw",
+    "vec_fp32_ratio",
+    "vec_fp16_128lane_ratio",
+    "vec_fp16_64lane_ratio",
+    "vec_int32_ratio",
+    "vec_misc_ratio",
+    "vec_bankgroup_cflt_ratio",
+    "vec_bank_cflt_ratio",
+    "vec_resc_cflt_ratio"
+]
+
+Chip_Model_Not_Support_PMU_Dict = {
+    ChipModel.CHIP_V1_1_1: NOT_SUPPORT_PMU_FOR_1911,
+    ChipModel.CHIP_V1_1_3: NOT_SUPPORT_PMU_FOR_1911
+}
+
+
+def get_disable_support_pmu_set() -> set:
+    return set(Chip_Model_Not_Support_PMU_Dict.get(ChipManager().get_chip_id(), []))
+
+
+class ChipModeDecorators:
+    @staticmethod
+    def pmu_format_for_chip_model(func):
+        @wraps(func)
+        def wrapper(cls, headers: list, device_tasks: list) -> list:
+            disable_support_pmu_list = get_disable_support_pmu_set() & set(headers)
+            if not disable_support_pmu_list:
+                return func(cls, headers, device_tasks)
+            for name in disable_support_pmu_list:
+                idx = headers.index(name)
+                for item in device_tasks:
+                    item[idx] = Constant.NA
+            return func(cls, headers, device_tasks)
+
+        return wrapper

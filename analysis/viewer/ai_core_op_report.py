@@ -24,6 +24,7 @@ from common_func.utils import Utils
 from msmodel.hccl.hccl_model import HcclViewModel
 from viewer.ge_info_report import get_ge_hash_dict
 from viewer.ge_info_report import get_ge_model_name_dict
+from viewer.chip_model_function.chip_model_decorators import ChipModeDecorators
 
 
 class AiCoreOpReport:
@@ -308,6 +309,7 @@ class AiCoreOpReport:
         return ai_core_head_list
 
     @classmethod
+    @ChipModeDecorators.pmu_format_for_chip_model
     def _format_summary_data(cls, headers: list, device_tasks: list) -> list:
         result = filter(lambda x: x not in headers,
                         [StrConstant.TASK_START_TIME, cls.TASK_DURATION, cls.TASK_WAIT_TIME])
