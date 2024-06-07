@@ -152,6 +152,8 @@ class HCCLExport:
             TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, _kfc_format_data + _kfc_format_op_data))
 
     def _format_hccl_op_data(self):
+        if not os.path.exists(PathManager.get_db_path(self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
+            return []
         with HcclViewModel(
                 self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE,
                 DBNameConstant.TABLE_HCCL_OP_SINGLE_DEVICE]) as hccl_model:

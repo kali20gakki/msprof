@@ -1576,10 +1576,14 @@ int ProfAicpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
         return PROFILING_FAILED;
     }
     collectionJobCfg_ = cfg;
-    if (!(collectionJobCfg_->comParams->params->dataTypeConfig & PROF_AICPU_TRACE)) {
-        MSPROF_LOGI("AICPU not enable, devId:%d", collectionJobCfg_->comParams->devId);
+    const auto &profLevel = collectionJobCfg_->comParams->params->profLevel;
+    if (!(collectionJobCfg_->comParams->params->dataTypeConfig & PROF_AICPU_TRACE)
+            || profLevel.empty() || profLevel == MSVP_PROF_L0) {
+        // aicpu开关关闭，或者L0级别，不开启aicpu驱动通道
+        MSPROF_LOGI("AICPU not enable or L0, devId:%d", collectionJobCfg_->comParams->devId);
         return PROFILING_FAILED;
     }
+    // aicpu开关打开，或者L1级别，会开启aicpu驱动通道; L1级别开aicpu驱动通道是为了上报mc2算子信息
     if (!analysis::dvvp::driver::DrvIsSupportAdprof(collectionJobCfg_->comParams->devId)) {
         MSPROF_LOGI("Collect Aicpu data by HDC");
         return PROFILING_FAILED;
