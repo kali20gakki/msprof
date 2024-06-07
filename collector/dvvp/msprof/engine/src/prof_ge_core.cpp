@@ -107,12 +107,6 @@ int aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeConf
         return ret;
     }
 
-    uint64_t dataTypeConfig = ProfAclMgr::instance()->ProfAclGetDataTypeConfig(&profSubscribeConfig->config);
-    MSPROF_LOGI("Allocate subscription config to Ge, dataTypeConfig 0x%lx", dataTypeConfig);
-    ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
-    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfSubscribe(graphId, dataTypeConfig);
-    RETURN_IF_NOT_SUCCESS(ret);
-
     MSPROF_LOGI("Successfully execute aclgrphProfGraphSubscribe");
     return ACL_SUCCESS;
 }
@@ -138,10 +132,6 @@ int aclgrphProfGraphUnSubscribe(const uint32_t graphId)
             std::vector<std::string>({"aclgrphProfGraphUnSubscribe", "aclgrphProfGraphSubscribe"}));
         return ACL_ERROR_INVALID_MODEL_ID;
     }
-
-    MSPROF_LOGI("Allocate unsubscription config to Acl, dataTypeConfig");
-    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfUnSubscribe(graphId);
-    RETURN_IF_NOT_SUCCESS(ret);
 
     uint32_t devId = 0;
     if (ProfAclMgr::instance()->GetDeviceSubscribeCount(graphId, devId) == 0) {

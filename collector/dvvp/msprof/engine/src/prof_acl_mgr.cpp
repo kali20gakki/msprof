@@ -622,7 +622,8 @@ int ProfAclMgr::ProfAclModelSubscribe(const uint32_t modelId, const uint32_t dev
     uint64_t dataTypeConfig = ProfAclGetDataTypeConfig(profSubscribeConfig);
     dataTypeConfig |= PROF_RUNTIME_TRACE;
     MSPROF_LOGI("Allocate subscription config to Runtime, dataTypeConfig 0x%lx", dataTypeConfig);
-    return Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(devIdList.data(), 1, dataTypeConfig);
+    return Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(devIdList.data(), 1,
+        dataTypeConfig | PROF_OP_DETAIL | PROF_MODEL_LOAD);
 }
 
 int ProfAclMgr::CancleSubScribeDevTask(const uint32_t devId, const uint32_t modelId)
