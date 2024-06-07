@@ -69,7 +69,17 @@ class TestHCCLExport(unittest.TestCase):
         op_info_data = {0: HcclOps(op_name='test', data_type='INT64', connection_id=0, model_id=10, alg_type='HD-NB')}
         InfoConfReader()._info_json = {"pid": 1}
         with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_data_by_group', return_value=op_data), \
-            mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_info_from_table', return_value=op_info_data):
+                mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_info_from_table',
+                           return_value=op_info_data), \
+                mock.patch('os.path.exists', return_value=False):
+            hccl = HCCLExport(PARAMS)
+            hccl._get_meta_data(hccl_data)
+            hccl._format_hccl_data(hccl_data)
+            self.assertEqual(len(hccl.result), 9)
+        with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_data_by_group', return_value=op_data), \
+                mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_info_from_table',
+                           return_value=op_info_data), \
+                mock.patch('os.path.exists', return_value=True):
             hccl = HCCLExport(PARAMS)
             hccl._get_meta_data(hccl_data)
             hccl._format_hccl_data(hccl_data)

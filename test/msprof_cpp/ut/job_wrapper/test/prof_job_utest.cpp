@@ -1219,6 +1219,7 @@ TEST_F(JOB_WRAPPER_PROF_AICPU_JOB_TEST, Init)
     EXPECT_EQ(PROFILING_FAILED, profAicpuJob->Init(nullptr));
     collectionJobCfg_->comParams->params->dataTypeConfig |= 0x00000000ULL;
     collectionJobCfg_->comParams->devId = 0;
+    collectionJobCfg_->comParams->params->profLevel = MSVP_PROF_L1;
     EXPECT_EQ(PROFILING_FAILED, profAicpuJob->Init(collectionJobCfg_));
     collectionJobCfg_->comParams->params->dataTypeConfig |= 0x00000008ULL;
     MOCKER(analysis::dvvp::driver::DrvGetApiVersion)
@@ -1248,6 +1249,7 @@ TEST_F(JOB_WRAPPER_PROF_AICPU_JOB_TEST, Init_dataTypeConfig_check)
     GlobalMockObject::verify();
     auto profAicpuJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfAicpuJob>();
     collectionJobCfg_->comParams->params->host_profiling = false;
+    collectionJobCfg_->comParams->params->profLevel = MSVP_PROF_L1;
 
     MOCKER(analysis::dvvp::driver::DrvGetApiVersion)
             .stubs()
@@ -1268,6 +1270,7 @@ TEST_F(JOB_WRAPPER_PROF_AICPU_JOB_TEST, Process)
     GlobalMockObject::verify();
     auto profAicpuJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfAicpuJob>();
     collectionJobCfg_->comParams->params->dataTypeConfig |= PROF_AICPU_TRACE;
+    collectionJobCfg_->comParams->params->profLevel = MSVP_PROF_L1;
     MOCKER(analysis::dvvp::driver::DrvGetApiVersion)
         .stubs()
         .will(returnValue(SUPPORT_ADPROF_VERSION));
