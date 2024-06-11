@@ -296,7 +296,7 @@ class AiCoreSampleModel(BaseModel):
 
     def _adapt_register_change(self, sql: str) -> str:
         """
-        1911 register is changed when the pmu type is MemoryUB, 0x1a5 is one of new register.
+        chip id 7, 8, 11 register is changed when the pmu type is MemoryUB, 0x1a5 is one of new register.
         In the above scene, special adaptation is required.
         """
         if self.sample_config.get("ai_core_metrics") == "MemoryUB" and \

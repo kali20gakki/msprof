@@ -217,7 +217,7 @@ class PmuCalculateFunc:
 
     @staticmethod
     def l1_write_bw(pmu, task_cyc, freq):
-        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 128.0, 8.0, pmu, task_cyc, freq)
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq)
 
     @staticmethod
     def l2_read_bw(pmu, task_cyc, freq):
@@ -245,7 +245,7 @@ class PmuCalculateFunc:
 
     @staticmethod
     def l0b_read_bw(pmu, task_cyc, freq):
-        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 16.0, pmu, task_cyc, freq)
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq)
 
     @staticmethod
     def l0b_write_bw(pmu, task_cyc, freq):
@@ -261,11 +261,11 @@ class PmuCalculateFunc:
 
     @staticmethod
     def l0c_read_bw_cube(pmu, task_cyc, freq):
-        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 32.0, pmu, task_cyc, freq)
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq)
 
     @staticmethod
     def l0c_write_bw_cube(pmu, task_cyc, freq):
-        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 32.0, pmu, task_cyc, freq)
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq)
 
     @staticmethod
     def ub_read_bw_mte(pmu, task_cyc, freq):

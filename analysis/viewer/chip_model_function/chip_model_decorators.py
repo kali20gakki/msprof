@@ -6,7 +6,7 @@ from common_func.constant import Constant
 from profiling_bean.prof_enum.chip_model import ChipModel
 from common_func.platform.chip_manager import ChipManager
 
-NOT_SUPPORT_PMU_FOR_1911 = [
+NOT_SUPPORT_PMU_FOR_CHIP_V1_1 = [
     "vec_ratio",
     "ub_read_bw",
     "ub_write_bw",
@@ -23,8 +23,8 @@ NOT_SUPPORT_PMU_FOR_1911 = [
 ]
 
 Chip_Model_Not_Support_PMU_Dict = {
-    ChipModel.CHIP_V1_1_1: NOT_SUPPORT_PMU_FOR_1911,
-    ChipModel.CHIP_V1_1_3: NOT_SUPPORT_PMU_FOR_1911
+    ChipModel.CHIP_V1_1_1: NOT_SUPPORT_PMU_FOR_CHIP_V1_1,
+    ChipModel.CHIP_V1_1_3: NOT_SUPPORT_PMU_FOR_CHIP_V1_1
 }
 
 

@@ -385,8 +385,9 @@ class TaskGear(CANNGear):
         else:
             context_ids = str(NumberConstant.DEFAULT_GE_CONTEXT_ID)
 
-        connection_id = node_dto.connection_id if node_dto.connection_id is not None else \
-            Constant.DEFAULT_INVALID_VALUE
+        connection_id = Constant.DEFAULT_INVALID_VALUE
+        if node_dto.connection_id is not None:
+            connection_id = node_dto.connection_id
 
         self.host_tasks.append(
             [model_id, request_id, task_track_dto.stream_id, task_track_dto.task_id,
