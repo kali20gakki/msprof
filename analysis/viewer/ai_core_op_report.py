@@ -476,8 +476,9 @@ class AiCoreOpReport:
     @classmethod
     def _get_table_sql_and_headers_without_ge(cls: any, headers: list) -> tuple:
         cls.clear_no_ge_data_headers(headers)
-        model_id = "{0}, ".format(NumberConstant.DEFAULT_MODEL_ID) \
-            if not ProfilingScene().is_graph_export() else 'model_id, '
+        model_id = 'model_id, '
+        if not ProfilingScene().is_graph_export():
+            model_id = "{0}, ".format(NumberConstant.DEFAULT_MODEL_ID)
         sql = "select {model_id} task_id, stream_id, {index_info} 'N/A', 'N/A', 'N/A', " \
               "task_type, start_time, duration_time, wait_time, " \
               "(case when {0}.subtask_id={context_id} then 'N/A' else {0}.subtask_id end), " \
