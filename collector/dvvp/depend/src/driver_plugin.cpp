@@ -71,6 +71,9 @@ void DriverPlugin::GetHalFunction()
         "halEschedWaitEvent", halEschedWaitEvent_);
     pluginHandle_->GetFunction<drvError_t, uint32_t, int32_t, int32_t, void *, int32_t *>("halGetDeviceInfoByBuff",
         halGetDeviceInfoByBuff_);
+    pluginHandle_->GetFunction<drvError_t, unsigned int, ESCHED_QUERY_TYPE,
+        struct esched_input_info *, struct esched_output_info *>("halEschedQueryInfo", halEschedQueryInfo_);
+    pluginHandle_->GetFunction<drvError_t, struct halQueryDevpidInfo, pid_t *>("halQueryDevpid", halQueryDevpid_);
 }
 
 void DriverPlugin::LoadDriverSo()
@@ -515,6 +518,29 @@ drvError_t DriverPlugin::MsprofHalGetDeviceInfoByBuff(uint32_t devId, int32_t mo
         return halGetDeviceInfoByBuff_(devId, moduleType, infoType, buf, size);
     }
     return DRV_ERROR_NOT_SUPPORT;
+}
+
+// halEschedQueryInfo
+drvError_t DriverPlugin::MsprofHalEschedQueryInfo(unsigned int devId, ESCHED_QUERY_TYPE type,
+                                                  struct esched_input_info *inPut, struct esched_output_info *outPut)
+{
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (halEschedQueryInfo_ == nullptr) {
+        MSPROF_LOGE("DriverPlugin halEschedQueryInfo function is null.");
+        return DRV_ERROR_INVALID_HANDLE;
+    }
+    return halEschedQueryInfo_(devId, type, inPut, outPut);
+}
+
+// halQueryDevpid
+drvError_t DriverPlugin::MsprofHalQueryDevpid(struct halQueryDevpidInfo pidInfo, pid_t *pid)
+{
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (halQueryDevpid_ == nullptr) {
+        MSPROF_LOGE("DriverPlugin halQueryDevpid function is null.");
+        return DRV_ERROR_INVALID_HANDLE;
+    }
+    return halQueryDevpid_(pidInfo, pid);
 }
 } // Plugin
 } // Dvvp

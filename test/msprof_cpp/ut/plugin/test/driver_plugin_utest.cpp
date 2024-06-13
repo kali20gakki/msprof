@@ -137,6 +137,17 @@ drvError_t DrvGetDeviceSplitMode(unsigned int devId, unsigned int* mode)
     return DRV_ERROR_NONE;
 }
 
+drvError_t HalEschedQueryInfo(unsigned int devId, ESCHED_QUERY_TYPE type,
+                              struct esched_input_info *inPut, struct esched_output_info *outPut)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t HalQueryDevpid(struct halQueryDevpidInfo pidInfo, pid_t *pid)
+{
+    return DRV_ERROR_NONE;
+}
+
 class DriverPluginUtest : public testing::Test {
 protected:
     virtual void SetUp() {
@@ -448,4 +459,37 @@ TEST_F(DriverPluginUtest, MsprofDrvGetDeviceSplitMode)
     EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofDrvGetDeviceSplitMode(deviceId, &mode));
     driverPlugin->drvGetDeviceSplitMode_ = DrvGetDeviceSplitMode;
     EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofDrvGetDeviceSplitMode(deviceId, &mode));
+}
+
+TEST_F(DriverPluginUtest, MsprofHalEschedQueryInfo)
+{
+    GlobalMockObject::verify();
+    uint32_t devId = 0;
+    uint32_t grpId = 0;
+    struct esched_query_gid_output gidOut = {0};
+    struct esched_query_gid_input gidIn = {0, {0}};
+    struct esched_output_info outPut = {&gidOut, sizeof(struct esched_query_gid_output)};
+    struct esched_input_info inPut = {&gidIn, sizeof(struct esched_query_gid_input)};
+    auto driverPlugin = DriverPlugin::instance();
+
+    driverPlugin->halEschedQueryInfo_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofHalEschedQueryInfo(devId, QUERY_TYPE_LOCAL_GRP_ID,
+                                                                               &inPut, &outPut));
+    driverPlugin->halEschedQueryInfo_ = HalEschedQueryInfo;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofHalEschedQueryInfo(devId, QUERY_TYPE_LOCAL_GRP_ID, &inPut, &outPut));
+}
+
+TEST_F(DriverPluginUtest, MsprofHalQueryDevpid)
+{
+    GlobalMockObject::verify();
+    pid_t devPid = 0;
+    int32_t hostPid = 0;
+    uint32_t deviceId = 0;
+    struct halQueryDevpidInfo hostpidinfo = {static_cast<pid_t>(hostPid), deviceId, 0, DEVDRV_PROCESS_CPTYPE_MAX, {0}};
+    auto driverPlugin = DriverPlugin::instance();
+
+    driverPlugin->halQueryDevpid_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofHalQueryDevpid(hostpidinfo, &devPid));
+    driverPlugin->halQueryDevpid_ = HalQueryDevpid;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofHalQueryDevpid(hostpidinfo, &devPid));
 }

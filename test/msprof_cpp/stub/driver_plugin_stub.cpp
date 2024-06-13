@@ -231,6 +231,17 @@ drvError_t DriverPlugin::MsprofHalGetDeviceInfoByBuff(uint32_t devId, int32_t mo
 {
     return DRV_ERROR_NONE;
 }
+
+drvError_t DriverPlugin::MsprofHalEschedQueryInfo(unsigned int devId, ESCHED_QUERY_TYPE type,
+                                                  struct esched_input_info *inPut, struct esched_output_info *outPut)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DriverPlugin::MsprofHalQueryDevpid(struct halQueryDevpidInfo pidInfo, pid_t *pid)
+{
+    return DRV_ERROR_NONE;
+}
 } // Plugin
 } // Dvvp
 } // Analysis
