@@ -55,6 +55,10 @@ using HalEschedWaitEventFunc =
     std::function<drvError_t(unsigned int, unsigned int, unsigned int, int, struct event_info *)>;
 using DrvGetDeviceSplitModeFunc = std::function<drvError_t(unsigned int, unsigned int*)>;
 using HalGetDeviceInfoByBuffFunc = std::function<drvError_t(uint32_t, int32_t, int32_t, void*, int32_t*)>;
+using HalEschedQueryInfoFunc =
+    std::function<drvError_t(unsigned int, ESCHED_QUERY_TYPE, struct esched_input_info *, struct esched_output_info *)>;
+using HalQueryDevpidFunc = std::function<drvError_t(struct halQueryDevpidInfo, pid_t *)>;
+
 class DriverPlugin : public analysis::dvvp::common::singleton::Singleton<DriverPlugin> {
 public:
     DriverPlugin() : soName_("libascend_hal.so"), loadFlag_(0) {}
@@ -178,6 +182,13 @@ public:
     // halGetDeviceInfoByBuff
     drvError_t MsprofHalGetDeviceInfoByBuff(uint32_t devId, int32_t moduleType,
                                             int32_t infoType, void *buf, int32_t *size);
+    
+    // halEschedQueryInfo
+    drvError_t MsprofHalEschedQueryInfo(unsigned int devId, ESCHED_QUERY_TYPE type,
+                                        struct esched_input_info *inPut, struct esched_output_info *outPut);
+    
+    // halQueryDevpid
+    drvError_t MsprofHalQueryDevpid(struct halQueryDevpidInfo pidInfo, pid_t *pid);
 
     // get all function addresses at a time
     void GetAllFunction();
@@ -224,6 +235,8 @@ private:
     HalEschedWaitEventFunc halEschedWaitEvent_ = nullptr;
     DrvGetDeviceSplitModeFunc drvGetDeviceSplitMode_ = nullptr;
     HalGetDeviceInfoByBuffFunc halGetDeviceInfoByBuff_ = nullptr;
+    HalEschedQueryInfoFunc halEschedQueryInfo_ = nullptr;
+    HalQueryDevpidFunc halQueryDevpid_ = nullptr;
 
 private:
     void LoadDriverSo();

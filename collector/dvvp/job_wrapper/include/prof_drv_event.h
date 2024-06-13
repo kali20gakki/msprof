@@ -21,7 +21,6 @@ namespace Dvvp {
 namespace JobWrapper {
 struct TaskEventAttr {
     uint32_t deviceId;
-    uint32_t groupId;
     analysis::dvvp::driver::AI_DRV_CHANNEL channelId;
     enum ProfCollectionJobE jobTag;
     bool isChannelValid;
@@ -29,18 +28,21 @@ struct TaskEventAttr {
     bool isExit;
     bool isThreadStart;
     Collector::Dvvp::Mmpa::MmThread handle;
+    bool isAttachDevice;
+    std::string grpName;
 };
 
 class ProfDrvEvent {
 public:
     ProfDrvEvent();
     ~ProfDrvEvent();
-    int SubscribeEventThreadInit(uint32_t devId, TaskEventAttr *eventAttr, std::string grpName) const;
+    int SubscribeEventThreadInit(struct TaskEventAttr *eventAttr) const;
     void SubscribeEventThreadUninit(uint32_t devId) const;
 private:
-    int CreateWaitEventThread(TaskEventAttr *eventAttr) const;
-    static void *WaitEventThread(void *attr);
-    static int HandleEvent(drvError_t err, struct event_info &event, TaskEventAttr *eventAttr, bool &onceFlag);
+    static void *EventThreadHandle(void *attr);
+    static int QueryGroupId(uint32_t devId, uint32_t &grpId, std::string grpName);
+    static int QueryDevPid(struct TaskEventAttr *eventAttr);
+    static void WaitEvent(struct TaskEventAttr *eventAttr, uint32_t grpId);
 };
 
 }  // namespace JobWrapper

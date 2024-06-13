@@ -495,6 +495,54 @@ typedef struct event_info {
     struct event_info_priv priv;
 } EventInfo;
 
+typedef enum esched_query_type {
+    QUERY_TYPE_LOCAL_GRP_ID,
+    QUERY_TYPE_REMOTE_GRP_ID,
+    QUERY_TYPE_MAX
+} ESCHED_QUERY_TYPE;
+
+typedef struct esched_input_info {
+    void *inBuff;
+    unsigned int inLen;
+} EschedInputInfo;
+
+typedef struct esched_output_info {
+    void *outBuff;
+    unsigned int outLen;
+} EschedOutputInfo;
+
+typedef struct esched_query_gid_input {
+    int pid;  /* In remote query gid scenario, use drvDeviceGetBareTgid() to get remote pid */
+    char grp_name[EVENT_MAX_GRP_NAME_LEN];
+} EschedQueryGidInput;
+
+typedef struct esched_query_gid_output {
+    unsigned int grp_id;
+} EschedQueryGidOutput;
+
+#define EVENT_MAX_GRP_NAME_LEN   16
+
+enum devdrv_process_type {
+    DEVDRV_PROCESS_CP1 = 0,   /* aicpu_scheduler */
+    DEVDRV_PROCESS_CP2,       /* custom_process */
+    DEVDRV_PROCESS_DEV_ONLY,  /* TDT */
+    DEVDRV_PROCESS_QS,        /* queue_scheduler */
+    DEVDRV_PROCESS_HCCP,      /* hccp server */
+    DEVDRV_PROCESS_USER,      /* user proc, can bind many on host or device. not surport quert from host pid */
+    DEVDRV_PROCESS_CPTYPE_MAX,
+};
+
+#define HAL_QUERY_RESV_LENGTH 8
+struct halQueryDevpidInfo {
+    pid_t hostpid;
+    uint32_t devid;
+    uint32_t vfid;
+    enum devdrv_process_type proc_type;
+    char resv[HAL_QUERY_RESV_LENGTH];
+};
+
+#define DRV_ERROR_SCHED_WAIT_TIMEOUT  DRV_ERROR_WAIT_TIMEOUT
+
 #ifdef __cplusplus
 }
 #endif

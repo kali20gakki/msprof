@@ -34,66 +34,110 @@ protected:
 TEST_F(ProfDrvEventUtest, TestSubscribeEventThreadInit)
 {
     GlobalMockObject::verify();
-    TaskEventAttr eventAttr {0, 0, PROF_CHANNEL_AICPU, AICPU_COLLECTION_JOB, false, false, false, false, 0};
-    uint32_t deviceId = 0;
-    ProfDrvEvent profDrvEvent;
-    MOCKER(&ProfDrvEvent::CreateWaitEventThread)
-        .stubs()
-        .will(returnValue(PROFILING_FAILED))
-        .then(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(PROFILING_FAILED, profDrvEvent.SubscribeEventThreadInit(deviceId, &eventAttr, "aicpu"));
-    EXPECT_EQ(PROFILING_SUCCESS, profDrvEvent.SubscribeEventThreadInit(deviceId, &eventAttr, "aicpu"));
-}
-
-TEST_F(ProfDrvEventUtest, TestCreateWaitEventThread)
-{
-    GlobalMockObject::verify();
-    TaskEventAttr eventAttr {0, 0, PROF_CHANNEL_AICPU, AICPU_COLLECTION_JOB, false, false, false, false, 0};
+    TaskEventAttr eventAttr {0, PROF_CHANNEL_AICPU, AICPU_COLLECTION_JOB, false, false, false, false, 0, false, ""};
     ProfDrvEvent profDrvEvent;
     MOCKER(&MmCreateTaskWithThreadAttr)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(PROFILING_FAILED, profDrvEvent.CreateWaitEventThread(&eventAttr));
-    EXPECT_EQ(PROFILING_SUCCESS, profDrvEvent.CreateWaitEventThread(&eventAttr));
+    EXPECT_EQ(PROFILING_FAILED, profDrvEvent.SubscribeEventThreadInit(&eventAttr));
+    EXPECT_EQ(PROFILING_SUCCESS, profDrvEvent.SubscribeEventThreadInit(&eventAttr));
 }
 
-TEST_F(ProfDrvEventUtest, TestHandleEvent)
+TEST_F(ProfDrvEventUtest, TestEventThreadHandle)
 {
     GlobalMockObject::verify();
-    TaskEventAttr eventAttr {0, 0, PROF_CHANNEL_AICPU, AICPU_COLLECTION_JOB, false, false, false, false, 0};
-    drvError_t err = DRV_ERROR_NONE;
+    TaskEventAttr eventAttr {0, PROF_CHANNEL_AICPU, AICPU_COLLECTION_JOB, false, false, false, false, 0, false, ""};
     ProfDrvEvent profDrvEvent;
-    struct event_info event;
-    event.comm.event_id = EVENT_USR_START;
-    bool onceFlag = true;
-    MOCKER(&CollectionRegisterMgr::CollectionJobRun)
+
+    EXPECT_EQ(nullptr, profDrvEvent.EventThreadHandle(nullptr));
+
+    MOCKER_CPP(&ProfDrvEvent::QueryDevPid)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(PROFILING_FAILED, profDrvEvent.HandleEvent(err, event, &eventAttr, onceFlag));
-    err = DRV_ERROR_WAIT_TIMEOUT;
+    EXPECT_EQ(nullptr, profDrvEvent.EventThreadHandle((void*)&eventAttr));
+
+    MOCKER_CPP(&DriverPlugin::MsprofHalEschedAttachDevice)
+        .stubs()
+        .will(returnValue(DRV_ERROR_INVALID_HANDLE))
+        .then(returnValue(DRV_ERROR_NONE));
+    EXPECT_EQ(nullptr, profDrvEvent.EventThreadHandle((void*)&eventAttr));
+
+    MOCKER_CPP(&ProfDrvEvent::QueryGroupId)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS))
+        .then(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(nullptr, profDrvEvent.EventThreadHandle((void*)&eventAttr));
+
+    MOCKER_CPP(&DriverPlugin::MsprofHalEschedCreateGrpEx)
+        .stubs()
+        .will(returnValue(DRV_ERROR_INVALID_HANDLE))
+        .then(returnValue(DRV_ERROR_NONE));
+    EXPECT_EQ(nullptr, profDrvEvent.EventThreadHandle((void*)&eventAttr));
+
+    MOCKER_CPP(&DriverPlugin::MsprofHalEschedSubscribeEvent)
+        .stubs()
+        .will(returnValue(DRV_ERROR_INVALID_HANDLE))
+        .then(returnValue(DRV_ERROR_NONE));
+    EXPECT_EQ(nullptr, profDrvEvent.EventThreadHandle((void*)&eventAttr));
+
+    EXPECT_EQ(nullptr, profDrvEvent.EventThreadHandle((void*)&eventAttr));
+}
+
+TEST_F(ProfDrvEventUtest, TestQueryGroupId)
+{
+    GlobalMockObject::verify();
+    uint32_t devId = 0;
+    uint32_t grpId = 0;
+    ProfDrvEvent profDrvEvent;
+
+    MOCKER_CPP(&DriverPlugin::MsprofHalEschedQueryInfo)
+        .stubs()
+        .will(returnValue(DRV_ERROR_NONE))
+        .then(returnValue(DRV_ERROR_INVALID_HANDLE));
+    EXPECT_EQ(PROFILING_SUCCESS, profDrvEvent.QueryGroupId(devId, grpId, "aicpu"));
+    EXPECT_EQ(PROFILING_FAILED, profDrvEvent.QueryGroupId(devId, grpId, "aicpu"));
+}
+
+TEST_F(ProfDrvEventUtest, TestQueryDevPid)
+{
+    GlobalMockObject::verify();
+    const int32_t WAIT_COUNT = 80;
+    TaskEventAttr eventAttr {0, PROF_CHANNEL_AICPU, AICPU_COLLECTION_JOB, false, false, false, false, 0, false, ""};
+    ProfDrvEvent profDrvEvent;
+
+    MOCKER_CPP(&DriverPlugin::MsprofHalQueryDevpid)
+        .stubs()
+        .will(repeat(DRV_ERROR_INVALID_HANDLE, WAIT_COUNT))
+        .then(returnValue(DRV_ERROR_NONE));
+    EXPECT_EQ(PROFILING_FAILED, profDrvEvent.QueryDevPid(&eventAttr));
+    EXPECT_EQ(PROFILING_SUCCESS, profDrvEvent.QueryDevPid(&eventAttr));
+}
+
+TEST_F(ProfDrvEventUtest, TestWaitEvent)
+{
+    GlobalMockObject::verify();
+    TaskEventAttr eventAttr {0, PROF_CHANNEL_AICPU, AICPU_COLLECTION_JOB, false, false, false, false, 0, false, ""};
+    ProfDrvEvent profDrvEvent;
+    uint32_t grpId = 0;
+
+    MOCKER_CPP(&DriverPlugin::MsprofHalEschedWaitEvent)
+        .stubs()
+        .will(returnValue(DRV_ERROR_NONE))
+        .then(returnValue(DRV_ERROR_SCHED_WAIT_TIMEOUT))
+        .then(returnValue(DRV_ERROR_INVALID_HANDLE));
+    profDrvEvent.WaitEvent(&eventAttr, grpId);
+
     MOCKER_CPP(&DrvChannelsMgr::GetAllChannels)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     MOCKER_CPP(&DrvChannelsMgr::ChannelIsValid)
         .stubs()
         .will(returnValue(true));
-    EXPECT_EQ(PROFILING_SUCCESS, profDrvEvent.HandleEvent(err, event, &eventAttr, onceFlag));
-    err = DRV_ERROR_NO_DEVICE;
-    EXPECT_EQ(PROFILING_FAILED, profDrvEvent.HandleEvent(err, event, &eventAttr, onceFlag));
-}
+    profDrvEvent.WaitEvent(&eventAttr, grpId);
 
-TEST_F(ProfDrvEventUtest, TestWaitEventThread)
-{
-    GlobalMockObject::verify();
-    ProfDrvEvent profDrvEvent;
-    EXPECT_EQ(nullptr, profDrvEvent.WaitEventThread(nullptr));
-    TaskEventAttr eventAttr {0, 0, PROF_CHANNEL_AICPU, AICPU_COLLECTION_JOB, false, false, false, false, 0};
-    MOCKER_CPP(&ProfDrvEvent::HandleEvent)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(nullptr, profDrvEvent.WaitEventThread((void*)(&eventAttr)));
+    profDrvEvent.WaitEvent(&eventAttr, grpId);
 }
 
 TEST_F(ProfDrvEventUtest, TestSubscribeEventThreadUninit)
