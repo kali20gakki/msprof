@@ -26,7 +26,7 @@ const uint32_t TWO_BYTES = 16;
 }
 using HashData = Analysis::Parser::Host::Cann::HashData;
 using TypeData = Analysis::Parser::Host::Cann::TypeData;
-const uint32_t stepInfoItem = 1;
+const std::string GE_STEP_INFO_API_TYPE = "step_info";
 
 ApiEventDBDumper::ApiEventDBDumper(const std::string &hostFilePath) : BaseDumper<ApiEventDBDumper>(
     hostFilePath, "ApiData")
@@ -56,8 +56,8 @@ EventData ApiEventDBDumper::GenerateData(const ApiData &apiTraces)
         }
         std::string itemId;
         if (trace->level == MSPROF_REPORT_MODEL_LEVEL ||
-            (trace->itemId == stepInfoItem && trace->level == MSPROF_REPORT_NODE_LEVEL)) {
-            // node层的step_info以及model层
+            (structType == GE_STEP_INFO_API_TYPE && trace->level == MSPROF_REPORT_NODE_LEVEL)) {
+            // node层的step_info以及model层, 原来的itemId出现了60000， 60001等异常（预期为1）情况，所以使用structType作为判断依据
             itemId = std::to_string(trace->itemId);
         } else {
             itemId = (trace->itemId == 0) ? "0" : HashData::GetInstance().Get(trace->itemId);
