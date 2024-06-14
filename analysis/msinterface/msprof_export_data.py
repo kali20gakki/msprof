@@ -9,14 +9,12 @@ import threading
 from common_func.config_mgr import ConfigMgr
 from common_func.data_manager import DataManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
-from common_func.utils import Utils
 from common_func.profiling_scene import ProfilingScene
 from host_prof.host_prof_presenter_manager import HostExportType
 from host_prof.host_prof_presenter_manager import get_host_prof_summary
@@ -28,7 +26,7 @@ from msinterface.msprof_timeline import MsprofTimeline
 from msparser.aicpu.parse_dp_data import ParseDpData
 from viewer.ai_core_op_report import AiCoreOpReport
 from viewer.ai_core_op_report import ReportOPCounter
-from viewer.ai_core_report import get_core_sample_data
+from viewer.ai_core_report import AiCoreReport
 from viewer.aicpu_viewer import ParseAiCpuData
 from viewer.api_statistic_viewer import ApiStatisticViewer
 from viewer.api_viewer import ApiViewer
@@ -676,11 +674,11 @@ class MsProfExportDataUtils:
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
             return get_aicore_utilization_timeline(params.get(StrConstant.PARAM_RESULT_DIR, ""))
         params[StrConstant.CORE_DATA_TYPE] = StrConstant.AI_CORE_PMU_EVENTS
-        return get_core_sample_data(params.get(StrConstant.PARAM_RESULT_DIR),
-                                    configs.get(StrConstant.CONFIG_DB), params)
+        return AiCoreReport.get_core_sample_data(params.get(StrConstant.PARAM_RESULT_DIR),
+                                                 configs.get(StrConstant.CONFIG_DB), params)
 
     @classmethod
     def _get_aiv_sample_based_data(cls: any, configs: dict, params: dict) -> any:
         params[StrConstant.CORE_DATA_TYPE] = StrConstant.AI_VECTOR_CORE_PMU_EVENTS
-        return get_core_sample_data(params.get(StrConstant.PARAM_RESULT_DIR),
-                                    configs.get(StrConstant.CONFIG_DB), params)
+        return AiCoreReport.get_core_sample_data(params.get(StrConstant.PARAM_RESULT_DIR),
+                                                 configs.get(StrConstant.CONFIG_DB), params)

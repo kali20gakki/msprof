@@ -24,7 +24,7 @@ from common_func.section_calculator import SectionCalculator
 from msconfig.config_manager import ConfigManager
 from msmodel.stars.op_summary_model import OpSummaryModel
 from viewer.ai_core_op_report import AiCoreOpReport
-from viewer.ai_core_report import get_core_sample_data
+from viewer.ai_core_report import AiCoreReport
 from viewer.runtime_report import get_task_based_core_data
 
 
@@ -235,7 +235,7 @@ class OpSummaryTuningDataHandle(BaseTuningDataHandle):
                                                             param)
             elif sample_config.get(StrConstant.AICORE_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE:
                 param[StrConstant.CORE_DATA_TYPE] = StrConstant.AI_CORE_PMU_EVENTS
-                headers, data, _ = get_core_sample_data(project_path, DBNameConstant.DB_NAME_AICORE, param)
+                headers, data, _ = AiCoreReport.get_core_sample_data(project_path, DBNameConstant.DB_NAME_AICORE, param)
 
             if not headers or not data:
                 param[StrConstant.DATA_TYPE] = StrConstant.AI_VECTOR_CORE_PMU_EVENTS
@@ -243,7 +243,8 @@ class OpSummaryTuningDataHandle(BaseTuningDataHandle):
                     headers, data, _ = get_task_based_core_data(project_path, DBNameConstant.DB_RUNTIME,
                                                                 param)
                 elif sample_config.get(StrConstant.AIV_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE:
-                    headers, data, _ = get_core_sample_data(project_path, DBNameConstant.DB_NAME_AI_VECTOR_CORE, param)
+                    headers, data, _ = AiCoreReport.get_core_sample_data(project_path,
+                                                                         DBNameConstant.DB_NAME_AI_VECTOR_CORE, param)
         return headers, data
 
     @classmethod
