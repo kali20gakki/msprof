@@ -24,7 +24,7 @@ from common_func.utils import Utils
 from msmodel.hccl.hccl_model import HcclViewModel
 from viewer.ge_info_report import get_ge_hash_dict
 from viewer.ge_info_report import get_ge_model_name_dict
-from viewer.chip_model_function.chip_model_decorators import ChipModeDecorators
+from viewer.chip_model_function.chip_model_decorators import format_pmu_data_by_headers
 
 
 class AiCoreOpReport:
@@ -91,7 +91,7 @@ class AiCoreOpReport:
                 logging.debug("No ai core data of stream %d, task %d", datum[2], datum[1])
                 union_data.append(datum + (Constant.NA,) * ai_core_data_len)
                 continue
-            if datum[task_type_idx] in AiCoreOpReport().HARDWARE_OP_LIST:
+            if datum[task_type_idx] in AiCoreOpReport.HARDWARE_OP_LIST:
                 # 处理task_id翻转情况下的AI_CPU, DSA, DVPP算子
                 logging.debug("Found %s op of stream %d, task %d", datum[task_type_idx], datum[2], datum[1])
                 union_data.append(datum + (Constant.NA,) * ai_core_data_len)
@@ -195,7 +195,7 @@ class AiCoreOpReport:
         headers = configs.get('headers')
         cls.delete_useless_cols(headers, data)
         cls.sort_summary_data(headers, data)
-        task_data = cls._format_summary_data(headers, data)
+        task_data = cls._format_summary_data(*format_pmu_data_by_headers(headers, data))
         add_aicore_units(headers)
         return headers, task_data, len(task_data)
 
@@ -309,7 +309,6 @@ class AiCoreOpReport:
         return ai_core_head_list
 
     @classmethod
-    @ChipModeDecorators.pmu_format_for_chip_model
     def _format_summary_data(cls, headers: list, device_tasks: list) -> list:
         result = filter(lambda x: x not in headers,
                         [StrConstant.TASK_START_TIME, cls.TASK_DURATION, cls.TASK_WAIT_TIME])

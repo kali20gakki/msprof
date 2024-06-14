@@ -513,7 +513,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
     def test_get_ai_core_sample_based_data_2(self):
         configs = {"db": 321}
         params = {"export_type": "summary", "project": "456", "device_id": '123'}
-        with mock.patch(NAMESPACE + '.get_core_sample_data', return_value=123):
+        with mock.patch(NAMESPACE + '.AiCoreReport.get_core_sample_data', return_value=123):
             key = MsProfExportDataUtils()
             result = key._get_ai_core_sample_based_data(configs, params)
         self.assertEqual(result, 123)
@@ -521,7 +521,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
     def test_get_aiv_sample_based_data(self):
         configs = {"db": 456}
         params = {"project": "456", "device_id": '123'}
-        with mock.patch(NAMESPACE + '.get_core_sample_data', return_value=123):
+        with mock.patch(NAMESPACE + '.AiCoreReport.get_core_sample_data', return_value=123):
             key = MsProfExportDataUtils()
             result = key._get_aiv_sample_based_data(configs, params)
         self.assertEqual(result, 123)

@@ -3,8 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
 import unittest
 from unittest import mock
-from profiling_bean.prof_enum.chip_model import ChipModel
-from viewer.chip_model_function.chip_model_decorators import ChipModeDecorators
+from viewer.chip_model_function.chip_model_decorators import format_pmu_data_by_headers
 
 header = [
     'Model Name', 'Model ID', 'Task ID', 'Stream ID', 'Infer ID', 'Op Name', 'OP Type', 'OP State', 'Task Type',
@@ -33,16 +32,11 @@ res = [
 
 class TestChipModeDecorators(unittest.TestCase):
 
-    @classmethod
-    @ChipModeDecorators.pmu_format_for_chip_model
-    def pmu_data_report(cls, arg_header, arg_task):
-        return arg_task
-
     def test_pmu_format_for_chip_model(self):
         with mock.patch('viewer.chip_model_function.chip_model_decorators.get_disable_support_pmu_set',
                         return_value={'ub_read_bw', 'ub_write_bw', 'main_mem_write_bw'}):
-            ret = self.pmu_data_report(header, tasks)
-            self.assertEqual(res, ret)
+            _, return_tasks = format_pmu_data_by_headers(header, tasks)
+            self.assertEqual(res, return_tasks)
 
 
 if __name__ == '__main__':

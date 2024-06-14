@@ -6,20 +6,20 @@ from common_func.constant import Constant
 from profiling_bean.prof_enum.chip_model import ChipModel
 from common_func.platform.chip_manager import ChipManager
 
+# 部分表头带单位，是因为sample-based和task-based的表头不一致
 NOT_SUPPORT_PMU_FOR_CHIP_V1_1 = [
-    "vec_ratio",
-    "ub_read_bw",
-    "ub_write_bw",
-    "l2_write_bw",
-    "main_mem_write_bw",
+    "vec_ratio", "vec_time",
+    "ub_read_bw", "ub_read_bw(GB/s)",
+    "ub_write_bw", "ub_write_bw(GB/s)",
+    "l0c_write_bw", "l0c_write_bw(GB/s)",
+    "l2_write_bw", "l2_write_bw(GB/s)",
     "vec_fp32_ratio",
-    "vec_fp16_128lane_ratio",
-    "vec_fp16_64lane_ratio",
+    "vec_fp16_ratio",
     "vec_int32_ratio",
     "vec_misc_ratio",
     "vec_bankgroup_cflt_ratio",
     "vec_bank_cflt_ratio",
-    "vec_resc_cflt_ratio"
+    "vec_resc_cflt_ratio",
 ]
 
 Chip_Model_Not_Support_PMU_Dict = {
@@ -36,14 +36,19 @@ class ChipModeDecorators:
     @staticmethod
     def pmu_format_for_chip_model(func):
         @wraps(func)
-        def wrapper(cls, headers: list, device_tasks: list) -> list:
+        def wrapper(headers: list, pmu_data: list) -> list:
             disable_support_pmu_list = get_disable_support_pmu_set() & set(headers)
             if not disable_support_pmu_list:
-                return func(cls, headers, device_tasks)
+                return func(headers, pmu_data)
             for name in disable_support_pmu_list:
                 idx = headers.index(name)
-                for item in device_tasks:
+                for item in pmu_data:
                     item[idx] = Constant.NA
-            return func(cls, headers, device_tasks)
+            return func(headers, pmu_data)
 
         return wrapper
+
+
+@ChipModeDecorators.pmu_format_for_chip_model
+def format_pmu_data_by_headers(headers: list, pmu_data: list) -> tuple:
+    return headers, pmu_data
