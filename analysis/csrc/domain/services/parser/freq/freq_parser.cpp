@@ -81,7 +81,7 @@ uint32_t FreqParser::ParseData(DataInventory &dataInventory, const Infra::Contex
     }
     // 根据device启动时间过滤有效频率数据
     for (const auto& freqData : halUniData_) {
-        for (int i = 0; i < freqData.count; ++i) {
+        for (uint64_t i = 0; i < freqData.count; ++i) {
             auto freqLpmData = freqData.freqLpmDataS[i];
             if (freqLpmData.sysCnt < deviceStart.cntVct) {
                 lpmDataS[0].freq = freqLpmData.freq;
