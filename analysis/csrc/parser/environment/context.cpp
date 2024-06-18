@@ -9,7 +9,6 @@
  * Creation Date      : 2023/11/20
  * *****************************************************************************
  */
-
 #include "analysis/csrc/parser/environment/context.h"
 
 #include <unordered_set>
@@ -40,8 +39,7 @@ const std::string DEVICE_START_LOG = "dev_start.log";
 // 已经校验过的字段,可直接使用.at();未被校验过的字段则使用.value(),来设置默认值。确保读取正常
 const std::set<std::string> CHECK_VALUES = {
     "platform_version", "startCollectionTimeBegin", "endCollectionTimeEnd",
-    "startClockMonotonicRaw", "pid", "cntvct", "CPU", "DeviceInfo", "clock_monotonic_raw",
-    "llc_profiling", "ai_core_profiling_mode", "hostname"
+    "startClockMonotonicRaw", "pid", "CPU", "DeviceInfo", "llc_profiling", "ai_core_profiling_mode", "hostname"
 };
 }
 
@@ -70,7 +68,7 @@ bool Context::LoadJsonData(const std::string &profPath, const std::string &devic
     for (const auto &fileName: {INFO_JSON, SAMPLE_JSON, START_INFO, END_INFO}) {
         std::vector<std::string> files = File::GetOriginData(deviceDir, {fileName}, {"done"});
         if (files.size() != 1) {
-            ERROR("The number of % in % is invalid.", fileName, deviceDir);
+            ERROR("The number of % in % is invalid, file num is: %.", fileName, deviceDir, files.size());
             return false;
         }
         FileReader fd(files.back());
@@ -99,28 +97,42 @@ bool Context::LoadLogData(const std::string &profPath, const std::string &device
 {
     const int expectTokenSize = 2; // 2代表：前后的key和value
     // host就用host_start_log，device就用device_start_log。
-    std::string fileNamePrefix = DEVICE_START_LOG;
-    if (deviceId == HOST_ID) {
-        fileNamePrefix = HOST_START_LOG;
+    std::vector<std::string> fileNameList{HOST_START_LOG};
+    if (deviceId != HOST_ID) {
+        fileNameList.emplace_back(DEVICE_START_LOG);
     }
-    std::vector<std::string> files = File::GetOriginData(deviceDir, {fileNamePrefix}, {"done"});
-    // host、device底下只有1份log
-    if (files.size() != 1) {
-        ERROR("The number of % in % is invalid.", fileNamePrefix, deviceDir);
-        return false;
-    }
-    FileReader fd(files.back());
-    std::vector<std::string> text;
-    if (fd.ReadText(text) != ANALYSIS_OK) {
-        ERROR("Load log text failed: '%'.", files.back());
-        return false;
-    }
-    for (const auto &line : text) {
-        auto tokens = Utils::Split(line, ":");
-        if (tokens.size() != expectTokenSize) {
-            continue;
+    for (const std::string& fileName : fileNameList) {
+        std::vector<std::string> files = File::GetOriginData(deviceDir, {fileName}, {"done"});
+        // host、device底下只有1份log
+        if (files.size() != 1) {
+            ERROR("The number of % in % is invalid, file num is: %.", fileName, deviceDir, files.size());
+            return false;
         }
-        context_[profPath][deviceId][tokens[0]] = tokens[1];
+        FileReader fd(files.back());
+        std::vector<std::string> text;
+        if (fd.ReadText(text) != ANALYSIS_OK) {
+            ERROR("Load log text failed: '%'.", files.back());
+            return false;
+        }
+        for (const auto &line : text) {
+            auto tokens = Utils::Split(line, ":");
+            if (tokens.size() != expectTokenSize) {
+                continue;
+            }
+            context_[profPath][deviceId][tokens[0]] = tokens[1];
+        }
+        if (fileName == DEVICE_START_LOG) {
+            context_[profPath][deviceId]["devMonotonic"] = context_[profPath][deviceId]["clock_monotonic_raw"];
+            context_[profPath][deviceId]["devCntvct"] = context_[profPath][deviceId]["cntvct"];
+        } else if (fileName == HOST_START_LOG) {
+            context_[profPath][deviceId]["hostMonotonic"] = context_[profPath][deviceId]["clock_monotonic_raw"];
+            context_[profPath][deviceId]["hostCntvct"] = context_[profPath][deviceId]["cntvct"];
+            if (context_[profPath][deviceId].contains("cntvct_diff")) {
+                context_[profPath][deviceId]["hostCntvctDiff"] = context_[profPath][deviceId]["cntvct_diff"];
+            } else {
+                context_[profPath][deviceId]["hostCntvctDiff"] = "0";
+            }
+        }
     }
     return true;
 }
@@ -311,47 +323,51 @@ bool Context::GetSyscntConversionParams(Utils::SyscntConversionParams &params,
                                         uint16_t deviceId, const std::string &profPath)
 {
     auto info = GetInfoByDeviceId(deviceId, profPath);
+    // host freq可用作host cnt计算，也可用于host diff计算
     if (info.empty()) {
         ERROR("GetSyscntConversionParams device info is empty.");
         return false;
     }
-    // cntvct 来自 start_log
-    if (StrToU64(params.sysCnt, info.at("cntvct")) != ANALYSIS_OK) {
-        ERROR("SysCnt to uint64_t failed, invalid str is %.", info.at("cntvct"));
+    std::string hostFreqStr = info.at("CPU").back().at("Frequency");
+    double hostFreq = DEFAULT_FREQ;
+    if (hostFreqStr.empty()) {
+        INFO("HostFreq is empty, it will be set 1000.0 .");
+    } else if (StrToDouble(hostFreq, hostFreqStr) != ANALYSIS_OK) {
+        ERROR("HostFreq to double failed, invalid str is %.", hostFreqStr);
         return false;
     }
     if (deviceId == HOST_ID) {
-        // freq 来自info.json 若为空则会被设置为 默认值 1000.0
-        std::string freq = info.at("CPU").back().at("Frequency");
-        if (freq.empty()) {
-            INFO("HostFreq is empty, it will be set 1000.0 .");
-        } else if (StrToDouble(params.freq, freq) != ANALYSIS_OK) {
-            ERROR("HostFreq to double failed, invalid str is %.", freq);
-            return false;
-        }
+        params.freq = hostFreq;
     } else {
         // freq 来自info.json
         if (StrToDouble(params.freq, info.at("DeviceInfo").back().at("hwts_frequency")) != ANALYSIS_OK) {
             ERROR("DeviceFreq to double failed, invalid str is %.", info.at("DeviceInfo").back().at("hwts_frequency"));
             return false;
         }
-        // 固定取host的clock_monotonic_raw. 若无host,则继续使用device info.
-        const auto hostInfo = GetInfoByDeviceId(HOST_ID, profPath);
-        if (hostInfo.empty()) {
-            WARN("No host info, it will use device clock_monotonic_raw.");
-        } else {
-            info = hostInfo;
-        }
     }
-    if (IsDoubleEqual(params.freq, 0)) {
+    if (IsDoubleEqual(params.freq, 0) || IsDoubleEqual(hostFreq, 0)) {
         ERROR("Freq is 0, can't be used to calculate.");
         return false;
     }
-    // clock_monotonic_raw 来自host目录下的 host_start_log
-    if (StrToU64(params.hostMonotonic, info.at("clock_monotonic_raw")) != ANALYSIS_OK) {
-        ERROR("HostMonotonic to uint64_t failed, invalid str is %.", info.at("clock_monotonic_raw"));
+    // host取host的cnt， device取device的cnt
+    std::string cntName = (deviceId == HOST_ID) ? "hostCntvct" : "devCntvct";
+    if (StrToU64(params.sysCnt, info.value(cntName, "0")) != ANALYSIS_OK) {
+        ERROR("SysCnt to uint64_t failed, invalid str is %.", info.value(cntName, "0"));
         return false;
     }
+    // hostMonotonic 来自 host_start_log 的 clock_monotonic_raw
+    if (StrToU64(params.hostMonotonic, info.value("hostMonotonic", "0")) != ANALYSIS_OK) {
+        ERROR("HostMonotonic to uint64_t failed, invalid str is %.", info.value("hostMonotonic", "0"));
+        return false;
+    }
+    uint64_t diff = 0;
+    if (StrToU64(diff, info.value("hostCntvctDiff", "0")) != ANALYSIS_OK) {
+        WARN("HostCntvctDiff to uint64_t failed, invalid str is %.", info.value("hostCntvctDiff", "0"));
+        // diff 异常不影响数据解析，部分时间存在误差
+        return true;
+    }
+    // 保留整数位即可
+    params.hostMonotonic += (diff / hostFreq);
     return true;
 }
 
@@ -385,17 +401,46 @@ bool Context::GetMetricMode(std::string &metricMode, const std::string &profPath
     return true;
 }
 
-bool Context::GetClockMonotonicRaw(uint64_t &monotonicRaw, uint16_t deviceId, const std::string &profPath)
+bool Context::GetClockMonotonicRaw(uint64_t &monotonicRaw, bool isHost, uint16_t deviceId, const std::string &profPath)
 {
+    if (!isHost && (deviceId == HOST_ID)) {
+        ERROR("GetClockMonotonicRaw host do not have device monotonic!");
+        return false;
+    }
     auto info = GetInfoByDeviceId(deviceId, profPath);
     if (info.empty()) {
         ERROR("GetClockMonotonicRaw device info is empty.");
         return false;
     }
-    if (StrToU64(monotonicRaw, info.at("clock_monotonic_raw")) != ANALYSIS_OK) {
-        ERROR("Monotonic to uint64_t failed, invalid str is %.", info.at("clock_monotonic_raw"));
+    // host取host monotonic， device取device的monotonic
+    std::string monotonic = isHost ? "hostMonotonic" : "devMonotonic";
+    if (StrToU64(monotonicRaw, info.value(monotonic, "0")) != ANALYSIS_OK) {
+        ERROR("Monotonic to uint64_t failed, invalid str is %.", info.value(monotonic, "0"));
         return false;
     }
+    if (!isHost) {
+        return true;
+    }
+    std::string hostFreqStr = info.at("CPU").back().at("Frequency");
+    double hostFreq = DEFAULT_FREQ;
+    if (hostFreqStr.empty()) {
+        INFO("HostFreq is empty, it will be set 1000.0 .");
+    } else if (StrToDouble(hostFreq, hostFreqStr) != ANALYSIS_OK) {
+        ERROR("HostFreq to double failed, invalid str is %.", hostFreqStr);
+        return false;
+    }
+    if (IsDoubleEqual(hostFreq, 0)) {
+        ERROR("Freq is 0, can't be used to calculate.");
+        return false;
+    }
+    uint64_t diff = 0;
+    if (StrToU64(diff, info.value("hostCntvctDiff", "0")) != ANALYSIS_OK) {
+        WARN("HostCntvctDiff to uint64_t failed, invalid str is %.", info.value("hostCntvctDiff", "0"));
+        // diff 异常不影响数据解析，部分时间存在误差
+        return true;
+    }
+    // 保留整数位即可
+    monotonicRaw += (diff / hostFreq);
     return true;
 }
 

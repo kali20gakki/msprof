@@ -107,8 +107,7 @@ bool LLCProcessor::ProcessData(const std::string &fileDir)
     ThreadData threadData;
     DBInfo llcDB("llc.db", "LLCMetrics");
     auto deviceList = File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
-    bool timeFlag = Context::GetInstance().GetClockMonotonicRaw(threadData.hostMonotonic, HOST_ID, fileDir);
-    bool timeRecordFlag = Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir);
+    bool timeFlag = Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir);
     for (const auto &devicePath: deviceList) {
         std::string dbPath = File::PathJoin({devicePath, SQLITE, llcDB.dbName});
         auto status = CheckPath(dbPath);
@@ -118,12 +117,15 @@ bool LLCProcessor::ProcessData(const std::string &fileDir)
             }
             continue;
         }
-        if (!timeFlag || !timeRecordFlag) {
-            ERROR("Get param flag: %, get time record flag: %, in path %.", timeFlag, timeRecordFlag, fileDir);
+        if (!timeFlag) {
+            ERROR("get time record flag: %, in path %.", timeFlag, fileDir);
             return false;
         }
         threadData.deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, threadData.deviceId, fileDir)) {
+        if (!Context::GetInstance().GetClockMonotonicRaw(threadData.hostMonotonic, true,
+                                                         threadData.deviceId, fileDir) ||
+            !Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, false,
+                                                         threadData.deviceId, fileDir)) {
             ERROR("Device MonotonicRaw is invalid in path: %., device id is %", fileDir, threadData.deviceId);
             flag = false;
             continue;

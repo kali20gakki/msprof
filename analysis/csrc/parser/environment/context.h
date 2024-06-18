@@ -60,7 +60,7 @@ public:
     bool GetSyscntConversionParams(Utils::SyscntConversionParams &params, uint16_t deviceId = DEFAULT_DEVICE_ID,
                                    const std::string &profPath = "");
     // 获取start_log中的clock_monotonic_raw
-    bool GetClockMonotonicRaw(uint64_t &monotonicRaw, uint16_t deviceId = DEFAULT_DEVICE_ID,
+    bool GetClockMonotonicRaw(uint64_t &monotonicRaw, bool isHost, uint16_t deviceId = DEFAULT_DEVICE_ID,
                               const std::string &profPath = "");
     // aic和aiv的freq的值在采集时使用同一个值,即两者频率始终保持一致,这里只取aic_frequency
     // 该频率只在device侧能取到

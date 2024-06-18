@@ -98,11 +98,10 @@ ComputeTaskInfoProcessor::ProcessedDataFormat ComputeTaskInfoProcessor::FormatDa
         data.opName = IdPool::GetInstance().GetUint64Id(oriOpName);
         data.taskType = IdPool::GetInstance().GetUint64Id(oriTaskType);
         data.opType = IdPool::GetInstance().GetUint64Id(oriOpType);
-        if (orihashId != "N/A") {
-            data.hashid = IdPool::GetInstance().GetUint64Id(hashMap[orihashId]);
-        } else {
-            data.hashid = IdPool::GetInstance().GetUint64Id(orihashId);
+        if (orihashId != NA && hashMap.find(orihashId) != hashMap.end()) {
+            orihashId = hashMap[orihashId];
         }
+        data.hashid = IdPool::GetInstance().GetUint64Id(orihashId);
         data.globalTaskId = IdPool::GetInstance().GetId(
             std::make_tuple(data.deviceId, data.streamId, data.taskId, data.contextId, data.batchId));
         data.inputFormats = IdPool::GetInstance().GetUint64Id(oriInputFormats);
@@ -139,7 +138,8 @@ bool ComputeTaskInfoProcessor::Process(const std::string &fileDir)
     }
     GeHashMap hashMap;
     if (!GetGeHashMap(hashMap, fileDir)) {
-        return false; // GetGeHashMap方法内有日志输出，这里直接返回
+        ERROR("Can't get hash data.");
+        return false;
     }
     auto processedData = FormatData(oriData, hashMap);
     if (!SaveData(processedData, TABLE_NAME_COMPUTE_TASK_INFO)) {

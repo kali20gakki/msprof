@@ -21,7 +21,6 @@ using namespace Association::Credential;
 using namespace Parser::Environment;
 using namespace Analysis::Utils;
 namespace {
-const std::string NA = "N/A";
 const std::string INDEX_NAME = "CommunicationTaskIndex";
 const std::vector<std::string> COMMUNICATION_TASK_INDEX_COL_NAMES = {"globalTaskId"};
 struct CommunicationOpEndpointsTime {
@@ -30,11 +29,13 @@ struct CommunicationOpEndpointsTime {
     double lastTaskDuration;
 };
 
+// groupName 依据hash进行转换，对于无hash的数据，直接取用hash值（即groupName）进行转换
 uint64_t GetGroupNameValue(const std::string &groupName, GeHashMap &hashMap)
 {
-    uint64_t intGroupName = 0;
-    if (groupName != NA && Utils::StrToU64(intGroupName, groupName) == ANALYSIS_OK) {
-        return IdPool::GetInstance().GetUint64Id(hashMap[groupName]);
+    if (groupName != NA && Utils::IsNumber(groupName) == ANALYSIS_OK) {
+        if (hashMap.find(groupName) != hashMap.end()) {
+            return IdPool::GetInstance().GetUint64Id(hashMap[groupName]);
+        }
     }
     return IdPool::GetInstance().GetUint64Id(groupName);
 }
@@ -187,13 +188,9 @@ bool CommunicationInfoProcessor::Process(const std::string &fileDir)
     DBInfo opDBInfo("hccl_single_device.db", "HCCLOpSingleDevice");
     threadData.profId = IdPool::GetInstance().GetUint32Id(fileDir);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
-    GeHashMap hashMap;
-    if (!GetGeHashMap(hashMap, fileDir)) {
-        return false; // GetGeHashMap方法内有日志输出，这里直接返回
-    }
     bool flag = true;
     for (const auto& devicePath: deviceList) {
-        if (!ProcessOneDevice(devicePath, threadData, taskDBInfo, opDBInfo, fileDir, hashMap)) {
+        if (!ProcessOneDevice(devicePath, threadData, taskDBInfo, opDBInfo, fileDir)) {
             flag = false;
         }
     }
@@ -201,14 +198,18 @@ bool CommunicationInfoProcessor::Process(const std::string &fileDir)
 }
 
 bool CommunicationInfoProcessor::ProcessOneDevice(const std::string &devicePath, ThreadData &threadData,
-                                                  DBInfo &taskDBInfo, DBInfo &opDBInfo,
-                                                  const std::string &fileDir, GeHashMap &hashMap)
+                                                  DBInfo &taskDBInfo, DBInfo &opDBInfo, const std::string &fileDir)
 {
     std::string taskDBPath = Utils::File::PathJoin({devicePath, SQLITE, taskDBInfo.dbName});
     // 并不是所有场景都有hccl数据
     auto status = CheckPath(taskDBPath);
     if (status != CHECK_SUCCESS) {
         return status != CHECK_FAILED;
+    }
+    GeHashMap hashMap;
+    if (!GetGeHashMap(hashMap, fileDir)) {
+        ERROR("Can't get hash data.");
+        return false;
     }
     CommunicationTaskDataFormat taskData;
     CommunicationOpDataFormat opData;

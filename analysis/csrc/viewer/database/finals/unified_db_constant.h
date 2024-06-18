@@ -301,6 +301,7 @@ const uint64_t MILLI_SECOND = 1000;
 constexpr const uint64_t MAX_DB_BYTES = 10ULL * 1024 * 1024 * 1024;
 const uint16_t BYTE_SIZE = 1024;
 const uint16_t PERCENTAGE = 100;
+const std::string NA = "N/A";
 
 }  // Database
 }  // Viewer

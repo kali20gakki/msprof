@@ -99,8 +99,7 @@ private:
     static OriTaskDataFormat GetTaskData(const DBInfo &hcclSingleDeviceDB);
     static OriOpDataFormat GetOpData(const DBInfo &hcclSingleDeviceDB);
     bool ProcessOneDevice(const std::string &devicePath, ThreadData &threadData,
-                          DBInfo &taskDBInfo, DBInfo &opDBInfo,
-                          const std::string &fileDir, GeHashMap &hashMap);
+                          DBInfo &taskDBInfo, DBInfo &opDBInfo, const std::string &fileDir);
     bool FormatData(const OriTaskDataFormat &oriTaskData, const OriOpDataFormat &oriOpData,
                     CommunicationTaskDataFormat &taskData, CommunicationOpDataFormat &opData,
                     const ThreadData &threadData, GeHashMap &hashMap);

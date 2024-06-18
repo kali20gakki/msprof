@@ -493,11 +493,7 @@ TEST_F(ContextUTest, TestGetSyscntConversionParamsShouldReturnFreq1000WhenFreqIs
     EXPECT_FALSE(Context::GetInstance().GetSyscntConversionParams(
         res, HOST_ID, {File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
     double expectFreq = 0.0;
-    uint64_t expectSysCnt = 3666503140109;
-    uint64_t expectHostMonotonic = 36471130547330;
     EXPECT_EQ(res.freq, expectFreq);
-    EXPECT_EQ(res.sysCnt, expectSysCnt);
-    EXPECT_EQ(res.hostMonotonic, UINT64_MAX);
 }
 
 TEST_F(ContextUTest, TestGetSyscntConversionParamsShouldReturnDefaultValueWhenHostStrToU16Failed)
@@ -541,7 +537,7 @@ TEST_F(ContextUTest, TestGetSyscntConversionParamsShouldReturnDefaultValueWhenDe
         {"drvVersion", 467732},
         {"platform_version", "7"},
         {"pid", "2376271"},
-        {"CPU", {{{"Frequency", "abc"}}}},
+        {"CPU", {{{"Frequency", "1000"}}}},
         {"DeviceInfo", {{{"hwts_frequency", "abc"}, {"aic_frequency", "1850"}}}},
         {"hostname", "localhost"}
     };
@@ -566,6 +562,68 @@ TEST_F(ContextUTest, TestGetSyscntConversionParamsShouldReturnDefaultValueWhenDe
     EXPECT_EQ(res.freq, DEFAULT_FREQ);
     EXPECT_EQ(res.sysCnt, UINT64_MAX);
     EXPECT_EQ(res.hostMonotonic, UINT64_MAX);
+}
+
+TEST_F(ContextUTest, TestGetSyscntConversionParamsShouldReturnDefaultValueWhenCntStrToU64Failed)
+{
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", DEVICE_START_LOG})));
+
+    // device dev_start.log
+    FileWriter deviceStartLogWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", DEVICE_START_LOG}));
+    deviceStartLogWriter.WriteText("clock_monotonic_raw: abc\n");
+    deviceStartLogWriter.WriteText("cntvct: abc\n");
+
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    SyscntConversionParams res;
+    EXPECT_FALSE(Context::GetInstance().GetSyscntConversionParams(
+        res, 0, {File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    double expectDevFreq = 49.000000;
+    EXPECT_DOUBLE_EQ(res.freq, expectDevFreq);
+    EXPECT_EQ(res.sysCnt, UINT64_MAX);
+    EXPECT_EQ(res.hostMonotonic, UINT64_MAX);
+}
+
+TEST_F(ContextUTest, TestGetSyscntConversionParamsShouldReturnDefaultValueWhenMonotonicStrToU64Failed)
+{
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", HOST_START_LOG})));
+    // host host_start.log
+    FileWriter hostStartLogWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", HOST_START_LOG}));
+    hostStartLogWriter.WriteText("[Host]\n");
+    hostStartLogWriter.WriteText("clock_monotonic_raw: abc\n");
+    hostStartLogWriter.WriteText("cntvct: abc\n");
+    hostStartLogWriter.WriteText("cntvct_diff: 0\n");
+
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    SyscntConversionParams res;
+    EXPECT_FALSE(Context::GetInstance().GetSyscntConversionParams(
+        res, 0, {File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    double expectDevFreq = 49.000000;
+    EXPECT_DOUBLE_EQ(res.freq, expectDevFreq);
+    uint64_t expectCnt = 1833256145654;
+    EXPECT_EQ(res.sysCnt, expectCnt);
+    EXPECT_EQ(res.hostMonotonic, UINT64_MAX);
+}
+
+TEST_F(ContextUTest, TestGetSyscntConversionParamsShouldReturnDefaultValueWhenCntDiffStrToU64Failed)
+{
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", HOST_START_LOG})));
+    // host_start.log
+    FileWriter hostStartLogWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", HOST_START_LOG}));
+    hostStartLogWriter.WriteText("[Host]\n");
+    hostStartLogWriter.WriteText("clock_monotonic_raw: 36471130547330\n");
+    hostStartLogWriter.WriteText("cntvct: 3666503140109\n");
+    hostStartLogWriter.WriteText("cntvct_diff: abc\n");
+
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    SyscntConversionParams res;
+    EXPECT_TRUE(Context::GetInstance().GetSyscntConversionParams(
+        res, 0, {File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    double expectDevFreq = 49.000000;
+    EXPECT_DOUBLE_EQ(res.freq, expectDevFreq);
+    uint64_t expectCnt = 1833256145654;
+    EXPECT_EQ(res.sysCnt, expectCnt);
+    uint64_t expectMonotonic = 36471130547330;
+    EXPECT_EQ(res.hostMonotonic, expectMonotonic);
 }
 
 TEST_F(ContextUTest, TestInfoValueShouldReturnRightDataWhenReadMultiProfPath)
@@ -713,9 +771,17 @@ TEST_F(ContextUTest, TestGetClockMonotonicRawShouldReturnTrueWhenGetSuccess)
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
     uint64_t monotonicRaw;
     uint64_t expectTime = 36471130547330;
-    EXPECT_TRUE(Context::GetInstance().GetClockMonotonicRaw(monotonicRaw, HOST_ID,
+    EXPECT_TRUE(Context::GetInstance().GetClockMonotonicRaw(monotonicRaw, true, HOST_ID,
                                                             File::PathJoin({CONTEXT_DIR, LOCAL_DIR})));
     EXPECT_EQ(monotonicRaw, expectTime);
+}
+
+TEST_F(ContextUTest, TestGetClockMonotonicRawShouldReturnFalseWhenInHostAndGetDevice)
+{
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
+    uint64_t monotonicRaw;
+    EXPECT_FALSE(Context::GetInstance().GetClockMonotonicRaw(monotonicRaw, false, HOST_ID,
+                                                             File::PathJoin({CONTEXT_DIR, LOCAL_DIR})));
 }
 
 TEST_F(ContextUTest, TestGetClockMonotonicRawShouldReturnFalseWhenDataError)
@@ -725,13 +791,13 @@ TEST_F(ContextUTest, TestGetClockMonotonicRawShouldReturnFalseWhenDataError)
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
     // info empty
     MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
-    EXPECT_FALSE(Context::GetInstance().GetClockMonotonicRaw(monotonicRaw, HOST_ID,
+    EXPECT_FALSE(Context::GetInstance().GetClockMonotonicRaw(monotonicRaw, true, HOST_ID,
                                                              File::PathJoin({CONTEXT_DIR, LOCAL_DIR})));
     MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
 
     // str to u64 failed
     MOCKER_CPP(&Analysis::Utils::StrToU64).stubs().will(returnValue(Analysis::ANALYSIS_ERROR));
-    EXPECT_FALSE(Context::GetInstance().GetClockMonotonicRaw(monotonicRaw, HOST_ID,
+    EXPECT_FALSE(Context::GetInstance().GetClockMonotonicRaw(monotonicRaw, true, HOST_ID,
                                                              File::PathJoin({CONTEXT_DIR, LOCAL_DIR})));
     MOCKER_CPP(&Analysis::Utils::StrToU64).reset();
 }

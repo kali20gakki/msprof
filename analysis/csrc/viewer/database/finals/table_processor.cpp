@@ -71,7 +71,7 @@ bool TableProcessor::GetGeHashMap(GeHashMap &hashMap, const std::string &fileDir
     // 并不是所有场景都有ge hash数据
     auto flag = CheckPath(dbPath);
     if (flag != CHECK_SUCCESS) {
-        return false;
+        return flag != CHECK_FAILED;
     }
     MAKE_SHARED_RETURN_VALUE(hashDB.dbRunner, DBRunner, false, dbPath);
     if (hashDB.dbRunner == nullptr) {
@@ -99,6 +99,7 @@ uint8_t TableProcessor::CheckPath(const std::string& path)
         ERROR("Check % failed.", path);
         return CHECK_FAILED;
     }
+    INFO("Check % success.", path);
     return CHECK_SUCCESS;
 }
 

@@ -94,7 +94,6 @@ bool NpuMemProcessor::Process(const std::string &fileDir)
     bool flag = true;
     MAKE_SHARED0_NO_OPERATION(npuMemDB.database, NpuMemDB);
     auto deviceList = File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
-    bool timeFlag = Context::GetInstance().GetClockMonotonicRaw(hostMonotonic, HOST_ID, fileDir);
     for (const auto& devicePath: deviceList) {
         std::string dbPath = File::PathJoin({devicePath, SQLITE, npuMemDB.dbName});
         // 并不是所有场景都有NpuMem数据
@@ -105,12 +104,12 @@ bool NpuMemProcessor::Process(const std::string &fileDir)
             }
             continue;
         }
-        if (!timeFlag) {
+        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
+        INFO("Start to process %, deviceId:%.", dbPath, deviceId);
+        if (!Context::GetInstance().GetClockMonotonicRaw(hostMonotonic, true, deviceId, fileDir)) {
             ERROR("GetClockMonotonicRaw failed, profPath is %.", fileDir);
             return false;
         }
-        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-        INFO("Start to process %, deviceId:%.", dbPath, deviceId);
         if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir)) {
             ERROR("Failed to obtain the time in start_info and end_info.");
             flag = false;
