@@ -179,6 +179,7 @@ bool TaskProcessor::Process(const std::string &fileDir)
         }
         INFO("process %, pid:%, deviceId:% ends.", dbPath, pid, threadData.deviceId);
     }
+    INFO("start msprof tx process");
     flag |= ProcessWithMsprofTxTaskData(fileDir, pid, deviceList, threadData);
     INFO("process % ends.", fileDir);
     return flag;
@@ -187,6 +188,7 @@ bool TaskProcessor::Process(const std::string &fileDir)
 bool TaskProcessor::ProcessWithMsprofTxTaskData(const std::string &fileDir, uint32_t pid,
                                                 std::vector<std::string> &deviceList, ThreadData &threadData)
 {
+    INFO("in msprof tx process");
     DBInfo stepTraceDB("step_trace.db", "StepTrace");
     MAKE_SHARED0_NO_OPERATION(stepTraceDB.database, StepTraceDB);
     bool flag = true;

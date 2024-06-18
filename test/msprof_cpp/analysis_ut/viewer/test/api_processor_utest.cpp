@@ -104,9 +104,9 @@ protected:
             {"endCollectionTimeEnd", "1701069338159976"},
             {"startClockMonotonicRaw", "36471129942580"},
             {"pid", "10"},
-            {"cntvct", "65177261204177"},
+            {"hostCntvct", "65177261204177"},
             {"CPU", {{{"Frequency", "100.000000"}}}},
-            {"clock_monotonic_raw", "651599377155020"},
+            {"hostMonotonic", "651599377155020"},
         };
         MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
     }

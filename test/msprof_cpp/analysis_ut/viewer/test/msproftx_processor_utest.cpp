@@ -88,12 +88,12 @@ protected:
     virtual void SetUp()
     {
         nlohmann::json record = {
-            {"cntvct", "484576969200418"}, {"pid", "10"},
+            {"hostCntvct", "484576969200418"}, {"pid", "10"},
             {"CPU", {{{"Frequency", ""}}}},
             {"startCollectionTimeBegin", "1701069323851824"},
             {"endCollectionTimeEnd", "1701069338041681"},
             {"startClockMonotonicRaw", "36470610791630"},
-            {"clock_monotonic_raw", "36471130547330"},
+            {"hostMonotonic", "36471130547330"},
         };
         MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
     }

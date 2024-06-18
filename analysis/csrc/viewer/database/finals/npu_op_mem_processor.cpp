@@ -88,8 +88,12 @@ NpuOpMemProcessor::ProcessedDataFormat NpuOpMemProcessor::FormatData(const OriDa
         if (Utils::StrToU64(addr, data.addr) == ANALYSIS_ERROR) { // 转uint64失败默认值为UINT64_MAX
             WARN("Converting string(addr) to integer failed.");
         }
+        // hash 可能为空，不能直接使用。如果有数据才取用
+        if (hashMap.find(data.operatorName) != hashMap.end()) {
+            data.operatorName = hashMap[data.operatorName];
+        }
         processedData.emplace_back(
-            IdPool::GetInstance().GetUint64Id(hashMap[data.operatorName]), addr, data.type, data.size,
+            IdPool::GetInstance().GetUint64Id(data.operatorName), addr, data.type, data.size,
             GetLocalTime(timestamp, timeRecord).Uint64(), Utils::Contact(pid, data.threadId),
             data.totalAllocateMemory, data.totalReserveMemory, stringGeId_, GetDeviceId(data.device_type));
     }
@@ -129,7 +133,8 @@ bool NpuOpMemProcessor::Process(const std::string &fileDir)
     }
     GeHashMap hashMap;
     if (!GetGeHashMap(hashMap, fileDir)) {
-        return false; // GetGeHashMap方法内有日志输出，这里直接返回
+        ERROR("Can't get hash data.");
+        return false;
     }
     auto processedData = FormatData(oriData, timeRecord, params, hashMap, pid);
     if (!SaveData(processedData, TABLE_NAME_NPU_OP_MEM)) {

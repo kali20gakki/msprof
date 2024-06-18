@@ -33,7 +33,7 @@ const std::string DB_PATH = File::PathJoin({DATA_DIR, MSPROF});
 const std::string PROF = File::PathJoin({DATA_DIR, "PROF"});
 
 const FreqDataFormat FREQ_DATA = {
-    {484576500000000, 200},
+    {484500000000000, 200},
     {484576969200418, 1650},
     {484576973402096, 1650},
     {484576973456197, 800},
@@ -74,10 +74,12 @@ protected:
             {"startCollectionTimeBegin", "1715760307197379"},
             {"endCollectionTimeEnd", "1715760313397397"},
             {"startClockMonotonicRaw", "9691377159398230"},
-            {"clock_monotonic_raw", "9691377161797070"},
+            {"hostMonotonic", "9691377161797070"},
             {"platform_version", "5"},
+            {"CPU", {{{"Frequency", "100.000000"}}}},
             {"DeviceInfo", {{{"hwts_frequency", "50"}, {"aic_frequency", "1650"}}}},
-            {"cntvct", "484576969200418"},
+            {"devCntvct", "484576969200418"},
+            {"hostCntvctDiff", "0"},
         };
         MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
     }
