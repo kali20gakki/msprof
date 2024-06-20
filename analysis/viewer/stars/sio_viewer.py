@@ -17,7 +17,7 @@ class SioViewer(BaseViewer, ABC):
     class for get sio data
     """
 
-    DATA_TYPE = 'data_type'
+    DATA_TYPE = 'SIO'
     # 标号为在sio.db中的列索引
     ACC_ID = 0
     REQ_RX = 1
@@ -64,6 +64,6 @@ class SioViewer(BaseViewer, ABC):
                                    {value_key: bandwidth, acc_id_key: acc_id}])
             timestamp_dict[acc_id] = timestamp
         _trace = TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, result)
-        result = TraceViewManager.metadata_event([["process_name", pid, tid, self.params.get(self.DATA_TYPE)]])
+        result = TraceViewManager.metadata_event([["process_name", pid, tid, self.DATA_TYPE]])
         result.extend(_trace)
         return result

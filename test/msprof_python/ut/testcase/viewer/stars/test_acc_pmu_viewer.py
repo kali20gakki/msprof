@@ -1,5 +1,6 @@
 import unittest
 
+from common_func.info_conf_reader import InfoConfReader
 from viewer.stars.acc_pmu_viewer import AccPmuViewer
 
 
@@ -15,19 +16,22 @@ class AccPmuTestData:
 
 
 class TestAccPmuViewer(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        InfoConfReader()._info_json = {"pid": '0'}
+
     def test_get_timeline_header(self):
-        param = {"data_type": "acc_pmu"}
-        check = AccPmuViewer({}, param)
+        check = AccPmuViewer({}, {})
         ret = check.get_timeline_header()
-        self.assertEqual([["process_name", 0, 0, "acc_pmu"]], ret)
+        self.assertEqual([["process_name", 0, 0, "Acc PMU"]], ret)
 
     def test_get_trace_timeline(self):
         check = AccPmuViewer({}, {})
         ret = check.get_trace_timeline([])
         self.assertEqual([], ret)
 
-        param = {"data_type": "acc_pmu"}
         datas = [AccPmuTestData(1, 2, 3, 4, 5, 6, 7, 8, 9, 123)]
-        check = AccPmuViewer({}, param)
+        check = AccPmuViewer({}, {})
         ret = check.get_trace_timeline(datas)
         self.assertEqual(5, len(ret))

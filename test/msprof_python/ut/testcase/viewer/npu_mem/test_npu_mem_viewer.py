@@ -88,7 +88,7 @@ class TestNpuMemViewer(unittest.TestCase):
         NpuMemDtoTuple = CustomizedNamedtupleFactory.generate_named_tuple_from_dto(NpuMemDto, [])
         npu_mem_dto = NpuMemDtoTuple("0", 0, 0, 0, 6)
         expect = [
-            OrderedDict([('name', 'process_name'), ('pid', 0), ('tid', 0), ('args', OrderedDict([('name', 'NPU_MEM')])),
+            OrderedDict([('name', 'process_name'), ('pid', 0), ('tid', 0), ('args', OrderedDict([('name', 'NPU MEM')])),
                          ('ph', 'M')]),
             OrderedDict([('name', 'APP/DDR'), ('ts', '16.000'), ('pid', 0), ('tid', 0),
                          ('args', OrderedDict([('KB', 0.0)])), ('ph', 'C')]),
