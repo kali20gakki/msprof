@@ -32,7 +32,6 @@ class SioViewer(BaseViewer, ABC):
 
     def __init__(self: any, configs: dict, params: dict) -> None:
         super().__init__(configs, params)
-        self.pid = 0
         self.model_list = {
             'sio': SioModel
         }
@@ -46,7 +45,7 @@ class SioViewer(BaseViewer, ABC):
             return []
         bandwidth_name = ["req_rx", "rsp_rx", "snp_rx", "dat_rx", "req_tx", "rsp_tx", "snp_tx", "dat_tx"]
         result = []
-        pid = self.pid
+        pid = InfoConfReader().get_json_pid_data()
         tid = InfoConfReader().get_json_tid_data()
         value_key = "value"
         acc_id_key = "acc_id"
@@ -67,5 +66,4 @@ class SioViewer(BaseViewer, ABC):
         _trace = TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, result)
         result = TraceViewManager.metadata_event([["process_name", pid, tid, self.params.get(self.DATA_TYPE)]])
         result.extend(_trace)
-        self.pid += 1
         return result

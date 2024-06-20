@@ -21,7 +21,8 @@ class AccPmuViewer(BaseViewer, ABC):
 
     def __init__(self: any, configs: dict, params: dict) -> None:
         super().__init__(configs, params)
-        self.pid = 0
+        self.pid = InfoConfReader().get_json_pid_data()
+        self.tid = InfoConfReader().get_json_tid_data()
         self.model_list = {
             'acc_pmu': AccPmuModel,
         }
@@ -32,8 +33,7 @@ class AccPmuViewer(BaseViewer, ABC):
         """
         acc_header = [
             [
-                "process_name", self.pid,
-                InfoConfReader().get_json_tid_data(),
+                "process_name", self.pid, self.tid,
                 self.params.get(self.DATA_TYPE)
             ]
         ]
@@ -56,11 +56,9 @@ class AccPmuViewer(BaseViewer, ABC):
                            {'value': data.read_ost, 'acc_id': data.acc_id}])
             result.append(["write_ost", local_time,
                            {'value': data.write_ost, 'acc_id': data.acc_id}])
-        pid = self.pid
         for item in result:
-            item[2:2] = [pid, InfoConfReader().get_json_tid_data()]
+            item[2:2] = [self.pid, self.tid]
         _trace = TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, result)
         result = TraceViewManager.metadata_event(self.get_timeline_header())
         result.extend(_trace)
-        self.pid += 1
         return result
