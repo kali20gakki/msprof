@@ -16,7 +16,7 @@ class AccPmuViewer(BaseViewer, ABC):
     class for get acc_pmu data
     """
 
-    DATA_TYPE = 'data_type'
+    DATA_TYPE = 'Acc PMU'
     SAMPLE_BASED = 'sample_based'
 
     def __init__(self: any, configs: dict, params: dict) -> None:
@@ -33,8 +33,10 @@ class AccPmuViewer(BaseViewer, ABC):
         """
         acc_header = [
             [
-                "process_name", self.pid, self.tid,
-                self.params.get(self.DATA_TYPE)
+                "process_name",
+                self.pid,
+                self.tid,
+                self.DATA_TYPE
             ]
         ]
         return acc_header

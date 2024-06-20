@@ -69,7 +69,7 @@ class NpuMemViewer:
                 return []
             pid = InfoConfReader().get_json_pid_data()
             tid = InfoConfReader().get_json_tid_data()
-            trace_parser = TraceViewer("NPU_MEM")
+            trace_parser = TraceViewer("NPU MEM")
             meta_data = [["process_name", pid, tid, trace_parser.scope]]
             _result = TraceViewManager.metadata_event(meta_data)
             column_trace_data = []
