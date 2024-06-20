@@ -470,7 +470,6 @@ int DrvStarsSocLogStart(const DrvPeripheralProfileCfg &peripheralCfg,
     if (profileParams->stars_acsq_task.compare(analysis::dvvp::common::config::MSVP_PROF_ON) == 0) {
         configP.acsq_task = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
         configP.ffts_thread_task = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
-        configP.acc_pmu = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
     }
     MSPROF_LOGI("DrvStarsSocLogStart profDeviceId=%d, profChannel=%d, acsq_task=%u, acc_pmu=%u, cdqm_reg=%u,"
         "dvpp_vpc_block=%u, dvpp_jpegd_block=%u, dvpp_jpede_block=%u" "ffts_thread_task=%u, sdma_dmu=%u",
