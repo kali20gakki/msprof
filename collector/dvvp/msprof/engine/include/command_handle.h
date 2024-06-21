@@ -21,6 +21,7 @@ int32_t CommandHandleProfStop(const uint32_t devIdList[], uint32_t devNums, uint
 int32_t CommandHandleProfFinalize();
 int32_t CommandHandleProfSubscribe(uint32_t modelId, uint64_t profSwitch);
 int32_t CommandHandleProfUnSubscribe(uint32_t modelId);
+uint64_t GetProfSwitchHi(const uint64_t &dataTypeConfig);
 }  // namespace ProfilerCommon
 }  // namespace Dvvp
 }  // namespace Analysis

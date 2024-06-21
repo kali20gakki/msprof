@@ -1578,8 +1578,8 @@ int ProfAicpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     collectionJobCfg_ = cfg;
     const auto &profLevel = collectionJobCfg_->comParams->params->profLevel;
     if (!(collectionJobCfg_->comParams->params->dataTypeConfig & PROF_AICPU_TRACE)
-            || profLevel.empty() || profLevel == MSVP_PROF_L0) {
-        // aicpu开关关闭，或者L0级别，不开启aicpu驱动通道
+            || profLevel.empty() || profLevel == MSVP_PROF_L0 || collectionJobCfg_->comParams->params->isSubscribe) {
+        // aicpu开关关闭，或者L0级别，不开启aicpu驱动通道，订阅场景不开启aicpu驱动通道
         MSPROF_LOGI("AICPU not enable or L0, devId:%d", collectionJobCfg_->comParams->devId);
         return PROFILING_FAILED;
     }

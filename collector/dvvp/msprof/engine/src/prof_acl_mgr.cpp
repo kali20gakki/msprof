@@ -1121,6 +1121,7 @@ int ProfAclMgr::StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t 
     params->devices = devIdStr;
     params->profiling_mode = PROFILING_MODE_DEF;
     params->profiling_options = PROF_FEATURE_TASK;
+    params->isSubscribe = true;
     // open host_profiling
     params->host_profiling = (devId == DEFAULT_HOST_ID) ? true : false;
 
