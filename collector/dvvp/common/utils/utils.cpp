@@ -53,7 +53,6 @@ const unsigned int MAX_FILES_NUM = 100000;
 // always be universally administered to guarantee global uniqueness of the MAC
 // address, but any particular machine may have other interfaces which are
 // locally administered.
-// See https://en.wikipedia.org/wiki/MAC_address#Universal_vs._local
 static bool IsUniversalMacAddr(uint8_t firstByte)
 {
     static const uint8_t SECOND_LEAST_BIT = 1 << 1;
