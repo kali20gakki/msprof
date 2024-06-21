@@ -50,7 +50,6 @@ class TraceViewHeaderConstant:
     PROCESS_MSPROFTX = "MsprofTx"
     PROCESS_SUBTASK = 'Subtask Time'
     PROCESS_THREAD_TASK = 'Thread Task Time'
-    PROCESS_PTA = "PTA"
     PROCESS_OVERLAP_ANALYSE = "Overlap Analysis"
     PROCESS_API = "Api"
     PROCESS_EVENT = "Event"
@@ -67,7 +66,6 @@ class TraceViewHeaderConstant:
 
     # trace component layer
     COMPONENT_LAYER_FRAMEWORK = "PID Name"
-    COMPONENT_LAYER_PTA = "PTA"
     COMPONENT_LAYER_CANN = "CANN"
     COMPONENT_LAYER_ASCEND_HW = "Ascend Hardware"
     COMPONENT_LAYER_CPU_USAGE = "CPU Usage"
@@ -81,8 +79,7 @@ class TraceViewHeaderConstant:
     MSPROF_TIMELINE_FILTER_LIST = (PROCESS_ALL_REDUCE, PROCESS_AI_CPU)
 
     # component_layer_sort
-    LAYER_FRAMEWORK_SORT = 0
-    LAYER_PTA_SORT = 1
+    LAYER_FRAMEWORK_SORT = 1
     LAYER_CANN_SORT = 2
     LAYER_CPU_USAGE_SORT = 3
     LAYER_MEMORY_USAGE_SORT = 4
@@ -98,7 +95,6 @@ class TraceViewHeaderConstant:
     # 【msprof.json】 timeline layer info map
     LAYER_INFO_MAP = {
         PROCESS_MSPROFTX: LayerInfo(COMPONENT_LAYER_FRAMEWORK, GENERAL_LAYER_CPU, LAYER_FRAMEWORK_SORT),
-        PROCESS_PTA: LayerInfo(COMPONENT_LAYER_PTA, GENERAL_LAYER_CPU, LAYER_PTA_SORT),
         PROCESS_ACL: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_CPU, LAYER_CANN_SORT),
         PROCESS_GE: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_CPU, LAYER_CANN_SORT),
         PROCESS_RUNTIME: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_CPU, LAYER_CANN_SORT),
