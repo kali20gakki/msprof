@@ -66,5 +66,5 @@ TEST_F(HalTrackUTest, ShouldReturnFlipBeanWhenInputTaskFlipBean)
     auto data = dataInventory_.GetPtr<std::vector<HalTrackData>>();
     auto result = GetTrackDataByType(*data, HalTrackType::TS_TASK_FLIP);
     ASSERT_EQ(3ul, result.size());
-    ASSERT_EQ(HalTrackType::TS_TASK_FLIP, result[0]->type);
+    ASSERT_EQ(HalTrackType::TS_TASK_FLIP, result[0].type);
 }

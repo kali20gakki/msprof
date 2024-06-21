@@ -72,7 +72,7 @@ std::unordered_map<uint16_t, std::vector<HalTrackData*>> GetFlipData(std::vector
  * @param type 类型
  * @return 返回指定类型的数据的指针数组
  */
-std::vector<HalTrackData*> GetTrackDataByType(std::vector<HalTrackData>& trackData, HalTrackType type);
+std::vector<HalTrackData> GetTrackDataByType(std::vector<HalTrackData>& trackData, HalTrackType type);
 StepTraceDataVectorFormat GenerateStepTime(std::vector<HalTrackData>& trackDatas);
 
 }

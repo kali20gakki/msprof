@@ -44,6 +44,10 @@ StepTraceDataVectorFormat GenerateStepTraceData(std::map<uint32_t, std::vector<S
 uint32_t ProcessStepTraceDataEntry(DataInventory& dataInventory, const DeviceContext& context, DBInfo& stepTraceDB)
 {
     auto stepTraceTask = dataInventory.GetPtr<std::map<uint32_t, std::vector<StepTraceTasks>>>();
+    if (!stepTraceTask || stepTraceTask->empty()) {
+        WARN("StepTraceTasks is empty.");
+        return ANALYSIS_OK;
+    }
     std::string dbPath = Utils::GetDBPath({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
     auto data = GenerateStepTraceData(*stepTraceTask);
     auto res = SaveData(data, stepTraceDB, dbPath);
@@ -58,8 +62,16 @@ uint32_t ProcessStepTraceDataEntry(DataInventory& dataInventory, const DeviceCon
 uint32_t ProcessStepTimeEntry(DataInventory& dataInventory, const DeviceContext& context, DBInfo& stepTraceDB)
 {
     auto halTrackDatas = dataInventory.GetPtr<std::vector<HalTrackData>>();
+    if (!halTrackDatas || halTrackDatas->empty()) {
+        WARN("halTrackDatas is empty.");
+        return ANALYSIS_OK;
+    }
     std::string dbPath = Utils::GetDBPath({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
     auto data = GenerateStepTime(*halTrackDatas);
+    if (data.empty()) {
+        WARN("StepTime data is empty.");
+        return ANALYSIS_OK;
+    }
     auto res = SaveData(data, stepTraceDB, dbPath);
     if (!res) {
         ERROR("Process % failed!", stepTraceDB.tableName);
@@ -83,5 +95,6 @@ uint32_t StepTracePersistence::ProcessEntry(DataInventory& dataInventory, const 
     res |= ProcessStepTimeEntry(dataInventory, deviceContext, stepTraceInfo);
     return res;
 }
+
 }
 }
