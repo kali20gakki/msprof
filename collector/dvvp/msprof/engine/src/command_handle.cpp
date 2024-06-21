@@ -13,6 +13,7 @@
 #include "prof_acl_mgr.h"
 #include "platform/platform.h"
 #include "msprof_reporter_mgr.h"
+#include "config/config_manager.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -23,6 +24,7 @@ using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Plugin;
 using ProfCommand = MsprofCommandHandle;
 using namespace Msprof::Engine;
+using namespace Analysis::Dvvp::Common::Config;
 
 int32_t SetCommandHandleProf(ProfCommand &command)
 {
@@ -67,12 +69,23 @@ void ProcessDeviceList(ProfCommand &command, const uint32_t devIdList[], uint32_
     }
 }
 
+uint64_t GetProfSwitchHi(const uint64_t &dataTypeConfig)
+{
+    uint64_t profSwitchHi = 0U;
+    if (ConfigManager::instance()->GetPlatformType() == PlatformType::CHIP_V4_1_0 &&
+        (dataTypeConfig & PROF_TASK_TIME_L1_MASK) != 0) {
+        profSwitchHi |= PROF_DEV_MC2;
+    }
+    return profSwitchHi;
+}
+
 int32_t CommandHandleProfStart(const uint32_t devIdList[], uint32_t devNums, uint64_t profSwitch)
 {
     ProfCommand command;
     auto ret = memset_s(&command, sizeof(command), 0, sizeof(command));
     FUNRET_CHECK_FAIL_RET_VALUE(ret, EOK, PROFILING_FAILED);
     command.profSwitch = profSwitch;
+    command.profSwitchHi = GetProfSwitchHi(profSwitch);
     command.type = PROF_COMMANDHANDLE_TYPE_START;
     command.devNums = devNums;
     command.modelId = PROF_INVALID_MODE_ID;
@@ -103,6 +116,7 @@ int32_t CommandHandleProfStop(const uint32_t devIdList[], uint32_t devNums, uint
     auto ret = memset_s(&command, sizeof(command), 0, sizeof(command));
     FUNRET_CHECK_FAIL_RET_VALUE(ret, EOK, PROFILING_FAILED);
     command.profSwitch = profSwitch;
+    command.profSwitchHi = GetProfSwitchHi(profSwitch);
     command.type = PROF_COMMANDHANDLE_TYPE_STOP;
     command.devNums = devNums;
     command.modelId = PROF_INVALID_MODE_ID;

@@ -36,6 +36,9 @@
 #define PROF_TASK_TRACE             (PROF_MODEL_EXECUTE | PROF_RUNTIME_TRACE | PROF_KEYPOINT_TRACE | \
                                      PROF_HCCL_TRACE | PROF_TASK_TIME_L0 | PROF_TASK_TIME_L1)
 
+// profSwitchHi
+#define PROF_DEV_MC2                0x01000000000000ULL
+
 // System
 #define PROF_INSTR_PROFILING         0x000000800000ULL
 #define PROF_SYS_USAGE               0x000100000000ULL

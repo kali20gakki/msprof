@@ -178,6 +178,7 @@ struct ProfileParams : BaseInfo {
     // delay and duration time
     std::string delayTime;
     std::string durationTime;
+    bool isSubscribe;
 
     ProfileParams()
         : msprofBinPid(MSVP_MMPROCESS), is_cancel(FALSE), profiling_period(-1),
@@ -214,7 +215,7 @@ struct ProfileParams : BaseInfo {
           exportSummaryFormat(PROFILING_SUMMARY_FORMAT), exportIterationId(DEFAULT_INTERATION_ID),
           exportModelId(DEFAULT_MODEL_ID), usedParams(), dataTypeConfig(0), npuAppMemProfiling("on"),
           npuModuleMemProfiling("on"), analyzeSwitch("off"), delayTime(""), durationTime(""),
-          analyzeRuleSwitch("communication,communication_matrix"), is_shell(FALSE)
+          analyzeRuleSwitch("communication,communication_matrix"), is_shell(FALSE), isSubscribe(false)
     {
     }
 
