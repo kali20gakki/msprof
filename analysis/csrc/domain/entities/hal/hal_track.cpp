@@ -33,12 +33,12 @@ std::unordered_map<uint16_t, std::vector<HalTrackData*>> GetFlipData(std::vector
     return trackDataMap;
 }
 
-std::vector<HalTrackData*> GetTrackDataByType(std::vector<HalTrackData>& trackData, HalTrackType type)
+std::vector<HalTrackData> GetTrackDataByType(std::vector<HalTrackData>& trackData, HalTrackType type)
 {
-    std::vector<HalTrackData*> trackDataRefer;
+    std::vector<HalTrackData> trackDataRefer;
     for (auto& data : trackData) {
         if (data.type == type) {
-            trackDataRefer.push_back(&data);
+            trackDataRefer.push_back(data);
         }
     }
     return trackDataRefer;

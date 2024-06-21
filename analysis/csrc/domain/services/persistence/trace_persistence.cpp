@@ -126,25 +126,8 @@ void ProcessSingleTrainingTrace(const StepTraceTasks &stepTraceTask, TrainingTra
     }
 }
 
-TrainingTraceFormat GenerateTrainingTrace(std::map<uint32_t, std::vector<StepTraceTasks>> &stepTraceTask,
-                                          std::vector<HalTrackData>& halTraceTasks,
-                                          uint32_t deviceId)
+TrainingTraceFormat UpdateDataAugBound(TrainingTraceFormat &processedData)
 {
-    TrainingTraceFormat processedData;
-    for (auto& it : stepTraceTask) {
-        auto modelId = it.first;
-        for (const auto &element: it.second) {
-            ProcessSingleTrainingTrace(element, processedData, modelId, deviceId);
-        }
-    }
-    auto stepTimes = GenerateStepTime(halTraceTasks);
-    for (auto &stepTime : stepTimes) {
-        processedData.emplace_back(deviceId, std::get<STEP_TIME_MODEL_ID_INDEX>(stepTime),
-                                   std::get<STEP_TIME_INDEX_ID_INDEX>(stepTime), 0, 0,
-                                   std::get<STEP_TIME_STEP_END_INDEX>(stepTime),
-                                   std::get<STEP_TIME_STEP_END_INDEX>(stepTime) -
-                                   std::get<STEP_TIME_STEP_START_INDEX>(stepTime), 0, 0, 0);
-    }
     // 更新data_aug_bound
     std::sort(processedData.begin(), processedData.end(), CompareStepEnd);
     int64_t currentIterIndex = 0;
@@ -153,7 +136,7 @@ TrainingTraceFormat GenerateTrainingTrace(std::map<uint32_t, std::vector<StepTra
             auto lastIterIndex = findClosestStepEndIndex(processedData, currentIterIndex);
             if (lastIterIndex >= 0) {
                 std::get<DATA_AUG_BOUND_INDEX>(data) = std::get<FP_START_INDEX>(data) -
-                         std::get<STEP_END_INDEX>(processedData[lastIterIndex]);
+                        std::get<STEP_END_INDEX>(processedData[lastIterIndex]);
             }
         }
         currentIterIndex++;
@@ -162,13 +145,51 @@ TrainingTraceFormat GenerateTrainingTrace(std::map<uint32_t, std::vector<StepTra
     return processedData;
 }
 
+TrainingTraceFormat GenerateTrainingTraceFromHalTrace(std::vector<HalTrackData>& halTraceTasks,
+                                                      TrainingTraceFormat &processedData, uint32_t deviceId)
+{
+    auto stepTimes = GenerateStepTime(halTraceTasks);
+    if (stepTimes.empty()) {
+        WARN("StepTime data is empty.");
+        return processedData;
+    }
+    for (auto &stepTime : stepTimes) {
+        processedData.emplace_back(deviceId, std::get<STEP_TIME_MODEL_ID_INDEX>(stepTime),
+                                   std::get<STEP_TIME_INDEX_ID_INDEX>(stepTime), 0, 0,
+                                   std::get<STEP_TIME_STEP_END_INDEX>(stepTime),
+                                   std::get<STEP_TIME_STEP_END_INDEX>(stepTime) -
+                                   std::get<STEP_TIME_STEP_START_INDEX>(stepTime), 0, 0, 0);
+    }
+    return processedData;
+}
+
+TrainingTraceFormat GenerateTrainingTraceFromStepTrace(std::map<uint32_t, std::vector<StepTraceTasks>> &stepTraceTask,
+                                                       TrainingTraceFormat &processedData, uint32_t deviceId)
+{
+    for (auto& it : stepTraceTask) {
+        auto modelId = it.first;
+        for (const auto &element: it.second) {
+            ProcessSingleTrainingTrace(element, processedData, modelId, deviceId);
+        }
+    }
+    return processedData;
+}
+
 uint32_t ProcessAllReduceEntry(DataInventory &dataInventory, const DeviceContext &context, DBInfo &stepTraceDB)
 {
     auto stepTraceTask = dataInventory.GetPtr<std::map<uint32_t, std::vector<StepTraceTasks>>>();
+    if (!stepTraceTask || stepTraceTask->empty()) {
+        WARN("StepTraceTasks is empty.");
+        return ANALYSIS_OK;
+    }
     std::string dbPath = Utils::GetDBPath({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
     DeviceInfo deviceInfo{};
     context.Getter(deviceInfo);
     auto data = GenerateAllReduce(*stepTraceTask, deviceInfo.deviceId);
+    if (data.empty()) {
+        WARN("AllReduce data is empty.");
+        return ANALYSIS_OK;
+    }
     auto res = SaveData(data, stepTraceDB, dbPath);
     if (!res) {
         ERROR("Process % failed!", stepTraceDB.tableName);
@@ -181,8 +202,16 @@ uint32_t ProcessAllReduceEntry(DataInventory &dataInventory, const DeviceContext
 uint32_t ProcessGetNextEntry(DataInventory &dataInventory, const DeviceContext &context, DBInfo &stepTraceDB)
 {
     auto stepTraceTask = dataInventory.GetPtr<std::map<uint32_t, std::vector<StepTraceTasks>>>();
+    if (!stepTraceTask || stepTraceTask->empty()) {
+        WARN("StepTraceTasks is empty.");
+        return ANALYSIS_OK;
+    }
     std::string dbPath = Utils::GetDBPath({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
     auto data = GenerateGetNext(*stepTraceTask);
+    if (data.empty()) {
+        WARN("GetNext data is empty.");
+        return ANALYSIS_OK;
+    }
     auto res = SaveData(data, stepTraceDB, dbPath);
     if (!res) {
         ERROR("Process % failed!", stepTraceDB.tableName);
@@ -196,11 +225,24 @@ uint32_t ProcessTrainingTraceEntry(DataInventory &dataInventory, const DeviceCon
 {
     auto stepTraceTask = dataInventory.GetPtr<std::map<uint32_t, std::vector<StepTraceTasks>>>();
     auto halTrackDatas = dataInventory.GetPtr<std::vector<HalTrackData>>();
+    if (!halTrackDatas || halTrackDatas->empty()) {
+        WARN("HalTrackDatas is empty.");
+        return ANALYSIS_OK;
+    }
     std::string dbPath = Utils::GetDBPath({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
     DeviceInfo deviceInfo{};
     context.Getter(deviceInfo);
-    auto data = GenerateTrainingTrace(*stepTraceTask, *halTrackDatas, deviceInfo.deviceId);
-    auto res = SaveData(data, stepTraceDB, dbPath);
+    TrainingTraceFormat processedData;
+    if (stepTraceTask && !stepTraceTask->empty()) {
+        GenerateTrainingTraceFromStepTrace(*stepTraceTask, processedData, deviceInfo.deviceId);
+    }
+    GenerateTrainingTraceFromHalTrace(*halTrackDatas, processedData, deviceInfo.deviceId);
+    UpdateDataAugBound(processedData);
+    if (processedData.empty()) {
+        WARN("TrainingTrace data is empty.");
+        return ANALYSIS_OK;
+    }
+    auto res = SaveData(processedData, stepTraceDB, dbPath);
     if (!res) {
         ERROR("Process % failed!", stepTraceDB.tableName);
         return ANALYSIS_ERROR;
@@ -225,5 +267,6 @@ uint32_t TracePersistence::ProcessEntry(DataInventory &dataInventory, const Cont
     res |= ProcessTrainingTraceEntry(dataInventory, deviceContext, stepTraceInfo);
     return res;
 }
+
 }
 }

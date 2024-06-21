@@ -43,9 +43,9 @@ public:
         };
     };
 
-    std::vector<HalTrackData> Run(const std::shared_ptr<std::vector<HalTrackData>>& datas)
+    std::vector<HalTrackData> Run(const std::vector<HalTrackData>& datas)
     {
-        for (const HalTrackData& record : *datas) {
+        for (const HalTrackData& record : datas) {
             if (record.stepTrace.modelId != currentModeId_) {
                 for (auto &data : currentStepTraceQueue_) {
                     reorderedStepTrace_.insert(reorderedStepTrace_.end(), data.allRecord.begin(), data.allRecord.end());
@@ -160,9 +160,9 @@ bool Compare(const HalTrackData &a, const HalTrackData &b)
     return a.stepTrace.modelId < b.stepTrace.modelId;
 }
 
-std::vector<HalTrackData> StepTraceProcess::PreprocessData(const std::shared_ptr<std::vector<HalTrackData>>& data)
+std::vector<HalTrackData> StepTraceProcess::PreprocessData(std::vector<HalTrackData>& data)
 {
-    std::sort(data->begin(), data->end(), Compare);
+    std::sort(data.begin(), data.end(), Compare);
     auto preprocessor = StepTracePreprocess();
     return preprocessor.Run(data);
 }
@@ -183,10 +183,11 @@ void StepTraceProcess::SaveStepTraceTask()
 
 uint32_t StepTraceProcess::ProcessEntry(Infra::DataInventory& dataInventory, const Infra::Context&)
 {
-    auto oriData = dataInventory.GetPtr<std::vector<HalTrackData>>();
-    if (!oriData) {
-        ERROR("data null:stepData:%", oriData != nullptr);
-        return Analysis::ANALYSIS_ERROR;
+    INFO("Start to process step trace data");
+    auto oriData = GetTrackDataByType(*dataInventory.GetPtr<std::vector<HalTrackData>>(), STEP_TRACE);
+    if (oriData.empty()) {
+        WARN("stepData is empty");
+        return Analysis::ANALYSIS_OK;
     }
     // 预处理step trace数据
     auto stepData = PreprocessData(oriData);
@@ -207,7 +208,7 @@ uint32_t StepTraceProcess::ProcessEntry(Infra::DataInventory& dataInventory, con
     return Analysis::ANALYSIS_OK;
 }
 
-REGISTER_PROCESS_SEQUENCE(StepTraceProcess, true, TsTrackParser);
+REGISTER_PROCESS_SEQUENCE(StepTraceProcess, false, TsTrackParser);
 REGISTER_PROCESS_DEPENDENT_DATA(StepTraceProcess, std::vector<HalTrackData>);
 REGISTER_PROCESS_SUPPORT_CHIP(StepTraceProcess, CHIP_ID_ALL);
 }

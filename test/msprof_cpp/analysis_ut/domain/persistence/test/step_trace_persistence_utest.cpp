@@ -41,6 +41,7 @@ namespace Analysis {
         HalTrackData CreateHalTrackData(uint16_t moduleId, uint16_t tagId, uint64_t timestamp, uint16_t streamId = 2)
         {
             HalTrackData log;
+            log.type = STEP_TRACE;
             log.stepTrace.modelId = moduleId;
             log.stepTrace.tagId = tagId;
             log.stepTrace.timestamp = timestamp;
@@ -114,6 +115,47 @@ TEST_F(StepTracePersistenceUtest, ShouldSaveStepTraceDBSuccess)
     data->emplace_back(CreateHalTrackData(2, 20005, 47)); // 2, 20005, 47
     data->emplace_back(CreateHalTrackData(2, 60000, 67)); // 2, 60000, 67
     data->emplace_back(CreateHalTrackData(2, 60001, 68)); // 2, 60001, 68
+    dataInventory_.Inject(data);
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = DEVICE_PATH;
+
+    auto process = StepTraceProcess();
+    ASSERT_EQ(ANALYSIS_OK, process.Run(dataInventory_, context));
+
+    auto stepTraceProcess = StepTracePersistence();
+    ASSERT_EQ(ANALYSIS_OK, stepTraceProcess.Run(dataInventory_, context));
+}
+
+TEST_F(StepTracePersistenceUtest, ShouldSaveStepTraceDBSuccessWhenDataIsAged)
+{
+    DataInventory dataInventory_;
+    auto data = std::make_shared<std::vector<HalTrackData>>();
+    data->emplace_back(CreateHalTrackData(0, 3, 3)); // 0, 3, 3
+    data->emplace_back(CreateHalTrackData(1, 0, 10)); // 1, 0, 10
+    data->emplace_back(CreateHalTrackData(1, 3, 19)); // 1, 3, 19
+    data->emplace_back(CreateHalTrackData(2, 0, 30)); // 2, 0, 30
+    data->emplace_back(CreateHalTrackData(2, 20001, 36)); // 2, 20001, 36
+    data->emplace_back(CreateHalTrackData(2, 20002, 37, 12)); // 2, 20002, 37, 12
+    data->emplace_back(CreateHalTrackData(2, 20003, 44)); // 2, 20003, 44
+    data->emplace_back(CreateHalTrackData(2, 10001, 48, 6)); // 2, 10001, 48, 6
+    data->emplace_back(CreateHalTrackData(2, 10002, 49, 9)); // 2, 10002, 49, 9
+    data->emplace_back(CreateHalTrackData(2, 10003, 58, 10)); // 2, 10003, 58, 10
+    data->emplace_back(CreateHalTrackData(2, 60001, 68)); // 2, 60001, 68
+    dataInventory_.Inject(data);
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = DEVICE_PATH;
+
+    auto process = StepTraceProcess();
+    ASSERT_EQ(ANALYSIS_OK, process.Run(dataInventory_, context));
+
+    auto stepTraceProcess = StepTracePersistence();
+    ASSERT_EQ(ANALYSIS_OK, stepTraceProcess.Run(dataInventory_, context));
+}
+
+TEST_F(StepTracePersistenceUtest, ShouldRunSuccessWhenStepDataIsEmpty)
+{
+    DataInventory dataInventory_;
+    auto data = std::make_shared<std::vector<HalTrackData>>();
     dataInventory_.Inject(data);
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = DEVICE_PATH;

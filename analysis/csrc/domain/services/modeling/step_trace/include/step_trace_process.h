@@ -24,7 +24,7 @@ class StepTraceProcess : public Infra::Process {
 private:
     uint32_t ProcessEntry(Infra::DataInventory &dataInventory, const Infra::Context &context) override;
     // 预处理原始step数据
-    static std::vector<HalTrackData> PreprocessData(const std::shared_ptr<std::vector<HalTrackData>>& data);
+    static std::vector<HalTrackData> PreprocessData(std::vector<HalTrackData>& data);
     // 将当前处理完成的数据存入状态机输出数据结构中
     void SaveStepTraceTask();
 private:

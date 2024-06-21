@@ -38,6 +38,7 @@ protected:
     HalTrackData CreateHalTrackData(uint16_t moduleId, uint16_t tagId, uint64_t timestamp, uint16_t streamId = 2)
     {
         HalTrackData log;
+        log.type = STEP_TRACE;
         log.stepTrace.modelId = moduleId;
         log.stepTrace.tagId = tagId;
         log.stepTrace.timestamp = timestamp;

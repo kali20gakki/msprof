@@ -27,7 +27,7 @@ void HandleTrainingTrace(const HalTrackData& step, StepTraceTasks& baseStep)
         baseStep.trainingTrace.emplace_back(timePair);
     } else if (step.stepTrace.tagId == BP_TAG) {
         if (baseStep.trainingTrace.empty()) {
-            ERROR("TrainingTrace: There is no start tag before the end of this step.");
+            WARN("TrainingTrace: There is no start tag before the end of step: %.", step.stepTrace.indexId);
             return;
         }
         baseStep.trainingTrace.back().end = step.stepTrace.timestamp;
@@ -43,14 +43,14 @@ void HandleAllReduceTable(const HalTrackData& step, StepTraceTasks& baseStep)
         baseStep.allReduceTable[step.hd.taskId.streamId].emplace_back(timePair);
     } else {
         if (baseStep.allReduceTable.empty()) {
-            ERROR("allReduceTable is empty");
+            WARN("allReduceTable is empty");
             return;
         }
         if (baseStep.allReduceTable.find(step.hd.taskId.streamId) != baseStep.allReduceTable.end()) {
             auto& allReduce = baseStep.allReduceTable[step.hd.taskId.streamId];
             allReduce.back().end = step.stepTrace.timestamp;
         } else {
-            ERROR("StreamId % is not exist in allReduceTable", step.hd.taskId.streamId);
+            WARN("StreamId % is not exist in allReduceTable", step.hd.taskId.streamId);
             return;
         }
     }
@@ -65,14 +65,14 @@ void HandleGetNextTable(const HalTrackData& step, StepTraceTasks& baseStep)
         baseStep.getNextTable[step.hd.taskId.streamId].emplace_back(timePair);
     } else {
         if (baseStep.getNextTable.empty()) {
-            ERROR("getNextTable is empty");
+            WARN("getNextTable is empty");
             return;
         }
         if (baseStep.getNextTable.find(step.hd.taskId.streamId) != baseStep.getNextTable.end()) {
             auto& getNext = baseStep.getNextTable[step.hd.taskId.streamId];
             getNext.back().end = step.stepTrace.timestamp;
         } else {
-            ERROR("StreamId % is not exist in allReduceTable", step.hd.taskId.streamId);
+            WARN("StreamId % is not exist in getNextTable", step.hd.taskId.streamId);
             return;
         }
     }
@@ -105,7 +105,7 @@ State& State::ModelStartEvent(uint32_t& indexId, const HalTrackData& step, std::
 State& State::InnerProcessEvent(uint32_t& indexId, const HalTrackData& step, std::vector<StepTraceTasks>& baseSteps)
 {
     if (baseSteps.empty()) {
-        ERROR("State queue is empty");
+        WARN("State queue is empty");
         return *this;
     }
     auto& baseStep = baseSteps.back();
