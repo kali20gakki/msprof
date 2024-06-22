@@ -188,7 +188,9 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             op_type_status[min_key] = min(op_type_status[min_key], entry["duration"])
             op_type_status[max_key] = max(op_type_status[max_key], entry["duration"])
         for status in op_type_group.values():
-            status["avg"] = status["total_time"] / status["count"]
+            status["avg"] = 0
+            if status["count"] != 0:
+                status["avg"] = status["total_time"] / status["count"]
         return op_type_group
 
     def calculate(self: any) -> None:

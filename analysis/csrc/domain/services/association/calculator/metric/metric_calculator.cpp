@@ -52,7 +52,9 @@ double Calculator::CalculatorMetricByDivision(CalculationElements &allParams, si
         if (i == 0) {
             res += ((*allParams.floatBit)[index] * allParams.pmuList[i] / allParams.taskCyc);
         } else {
-            res /= ((*allParams.floatBit)[index] * allParams.pmuList[i] / allParams.taskCyc);
+            if ((*allParams.floatBit)[index] != 0) {
+                res /= ((*allParams.floatBit)[index] * allParams.pmuList[i] / allParams.taskCyc);
+            }
         }
     }
     return res;
