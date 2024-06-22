@@ -167,3 +167,10 @@ TEST_F(ConnectionUtest, QueryCmd)
     EXPECT_EQ(rc, true);
     EXPECT_NE(nullptr, dbConn->stmt_);
 }
+
+TEST_F(ConnectionUtest, ConnectionErrorReturn)
+{
+    // 虚假文件路径，确保构造函数失败, 进入异常分支
+    std::string path = "./fake/fake.db";
+    auto dbConn = std::make_shared<Connection>(path);
+}

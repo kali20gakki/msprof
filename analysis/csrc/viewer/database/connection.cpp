@@ -13,7 +13,6 @@
 #include "analysis/csrc/viewer/database/connection.h"
 
 #include <sqlite3.h>
-#include <iostream>
 #include <stdexcept>
 #include "analysis/csrc/utils/utils.h"
 
@@ -38,9 +37,10 @@ Connection::Connection(const std::string &path)
     if (rc != SQLITE_OK) {
         std::string errorMsg = "Failed to open database: " + std::string(sqlite3_errmsg(db_));
         ERROR("sqlite3_exec return %, %", rc, errorMsg);
-        throw std::runtime_error("Connection failed, sqlite3 cannot create directory");
+        sqlite3_close(db_);
+    } else {
+        sqlite3_exec(db_, "PRAGMA synchronous = OFF;", nullptr, nullptr, nullptr);
     }
-    sqlite3_exec(db_, "PRAGMA synchronous = OFF;", nullptr, nullptr, nullptr);
 }
 
 Connection::~Connection()

@@ -9,6 +9,7 @@
  * Creation Date      : 2024/3/1
  * *****************************************************************************
  */
+#include <iostream>
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/viewer/database/finals/acc_pmu_processor.h"
@@ -41,13 +42,17 @@ class AccPmuProcessorUTest : public testing::Test {
 protected:
     virtual void SetUp()
     {
+        Analysis::Log::GetInstance().Init("./");
         if (File::Check(BASE_PATH)) {
             File::RemoveDir(BASE_PATH, DEPTH);
         }
         EXPECT_TRUE(File::CreateDir(BASE_PATH));
         EXPECT_TRUE(File::CreateDir(PROF_PATH_A));
+        EXPECT_TRUE(File::CreateDir(PROF_PATH_B));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_A, DEVICE})));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_A, DEVICE, SQLITE})));
+        EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_B, DEVICE})));
+        EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_B, DEVICE, SQLITE})));
         CreateAccPmuMetricData(File::PathJoin({PROF_PATH_A, DEVICE, SQLITE, DB_NAME}), DATA_A);
         CreateAccPmuMetricData(File::PathJoin({PROF_PATH_B, DEVICE, SQLITE, DB_NAME}), DATA_B);
         nlohmann::json record = {
