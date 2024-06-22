@@ -20,6 +20,7 @@
 using namespace testing;
 using namespace Analysis::Infra;
 using namespace Analysis::Utils;
+using namespace Analysis::Domain;
 
 namespace Analysis {
 namespace Domain {
@@ -66,6 +67,9 @@ TEST_F(AccPmuPersistenceUTest, ShouldSaveAccPmuDataSuccess)
     AccPmuPersistence persistence;
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = DEVICE_PATH;
+    HostStartLog hostStartLog;
+    hostStartLog.cntVctDiff = 1;
+    context.deviceContextInfo.hostStartLog = hostStartLog;
     auto accPmuS = dataInventory_.GetPtr<std::vector<HalLogData>>();
     auto accPmu = CreateAccPmuData(1, 10000, 5000);
     accPmuS->swap(accPmu);
