@@ -36,7 +36,7 @@ private:
     uint32_t ProcessEntry(DataInventory& dataInventory, const Context& context) override;
     TableColumns GetTableColumn(const DeviceContext& context);
     uint32_t GenerateAndSavePmuData(std::map<TaskId, std::vector<DeviceTask>>& deviceTask, sqlite3_stmt *stmt,
-                                    sqlite3* db);
+                                    sqlite3* db, std::string& dbPath);
     uint32_t SaveDataToDb(std::map<TaskId, std::vector<DeviceTask>>& deviceTask, std::string& dbPath, DBInfo& dbInfo);
     bool BindAndExecuteInsert(std::unordered_map<PmuHeaderType, std::vector<uint64_t>>& ids,
                                         std::unordered_map<PmuHeaderType, std::vector<double>>& pmu,

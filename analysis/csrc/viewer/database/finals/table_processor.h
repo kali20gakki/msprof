@@ -74,6 +74,7 @@ protected:
     static uint16_t GetEnumTypeValue(const std::string &key, const std::string &tableName,
                                      const std::unordered_map<std::string, uint16_t> &enumTable);
     static uint8_t CheckPath(const std::string& path);
+    static uint8_t CheckPathAndTable(const std::string& path, DBInfo dbInfo);
     std::string msprofDBPath_;
     std::set<std::string> profPaths_;
     DBInfo msprofDB_;

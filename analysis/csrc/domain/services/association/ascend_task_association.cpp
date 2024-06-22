@@ -185,7 +185,7 @@ uint32_t AscendTaskAssociation::ProcessEntry(DataInventory &dataInventory, const
     auto params = GetSyscntConversionParams(deviceContext);
     auto hostTasks = dataInventory.GetPtr<std::map<TaskId, std::vector<HostTask>>>();
     auto deviceTasks = dataInventory.GetPtr<std::map<TaskId, std::vector<DeviceTask>>>();
-    if (hostTasks->empty() && deviceTasks->empty()) {
+    if (hostTasks->empty() || deviceTasks->empty()) {
         ERROR("There is no HostTask and DeviceTask, can't generate AscendTask!");
         return ANALYSIS_ERROR;
     }

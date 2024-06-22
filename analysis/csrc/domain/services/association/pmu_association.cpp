@@ -192,7 +192,7 @@ uint32_t PmuAssociation::ProcessEntry(Infra::DataInventory& dataInventory, const
     auto deviceTask = dataInventory.GetPtr<std::map<TaskId, std::vector<DeviceTask>>>();
     auto pmuData = dataInventory.GetPtr<std::vector<HalPmuData>>();
     if (deviceTask->empty()) {
-        ERROR("There is no deviceTask, can't associate!");
+        ERROR("There is no deviceTask, don't need to associate!");
         return ANALYSIS_ERROR;
     }
     SplitPmu(*pmuData);

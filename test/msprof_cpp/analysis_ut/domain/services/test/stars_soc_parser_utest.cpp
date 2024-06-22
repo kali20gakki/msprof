@@ -44,7 +44,7 @@ protected:
         dataInventory_.RemoveRestData({});
         EXPECT_TRUE(File::RemoveDir(SOC_LOG_PATH, 0));
     }
-    AcsqLog CreadtAcsqLog(int funcType, int cnt, int taskId, int streamId, int timestamp)
+    AcsqLog CreateAcsqLog(int funcType, int cnt, int taskId, int streamId, int timestamp)
     {
         AcsqLog log{};
         log.funcType = funcType;
@@ -91,7 +91,7 @@ TEST_F(StarsSocParserUtest, ShouldReturnAcsqLogDataWhenParserRun)
     StarsSocParser starsSocParser;
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = SOC_LOG_PATH;
-    std::vector<AcsqLog> log{CreadtAcsqLog(0b000000, 1, 1, 1, 100), CreadtAcsqLog(0b000001, 2, 1, 1, 120)};
+    std::vector<AcsqLog> log{CreateAcsqLog(0b000000, 1, 1, 1, 100), CreateAcsqLog(0b000001, 2, 1, 1, 120)};
     EXPECT_TRUE(WriteBin(log, File::PathJoin({SOC_LOG_PATH, "data"}), "stars_soc.data.0.slice_0"));
     std::vector<AccPmu> accPmu{CreateAccPmu(0b011010, 3, 10, 100, 200)};
     EXPECT_TRUE(WriteBin(accPmu, File::PathJoin({SOC_LOG_PATH, "data"}), "stars_soc.data.0.slice_0"));
@@ -125,7 +125,7 @@ TEST_F(StarsSocParserUtest, ShouldReturnAcsqLogDataAndFftsPlusLogDataWhenParserR
     StarsSocParser starsSocParser;
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = SOC_LOG_PATH;
-    std::vector<AcsqLog> acsqLog{CreadtAcsqLog(0b000000, 1, 1, 1, 100), CreadtAcsqLog(0b000001, 2, 1, 1, 120)};
+    std::vector<AcsqLog> acsqLog{CreateAcsqLog(0b000000, 1, 1, 1, 100), CreateAcsqLog(0b000001, 2, 1, 1, 120)};
     EXPECT_TRUE(WriteBin(acsqLog, File::PathJoin({SOC_LOG_PATH, "data"}), "stars_soc.data.0.slice_0"));
     std::vector<FftsPlusLog> fftsLog{CreateFftsPlusLog(0b100010, 3, 1, 1, 200),
                                      CreateFftsPlusLog(0b100011, 4, 1, 1, 220)};
@@ -145,8 +145,8 @@ TEST_F(StarsSocParserUtest, ShouldReturnAcsqLogDataAndFftsPlusLogDataWhenMultiDa
     StarsSocParser starsSocParser;
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = SOC_LOG_PATH;
-    std::vector<AcsqLog> acsqLog{CreadtAcsqLog(0b000000, 1, 1, 1, 100), CreadtAcsqLog(0b000001, 2, 1, 1, 120)};
-    std::vector<AcsqLog> acsqLog2{CreadtAcsqLog(0b000000, 5, 1, 1, 100), CreadtAcsqLog(0b000001, 6, 1, 1, 120)};
+    std::vector<AcsqLog> acsqLog{CreateAcsqLog(0b000000, 1, 1, 1, 100), CreateAcsqLog(0b000001, 2, 1, 1, 120)};
+    std::vector<AcsqLog> acsqLog2{CreateAcsqLog(0b000000, 5, 1, 1, 100), CreateAcsqLog(0b000001, 6, 1, 1, 120)};
     EXPECT_TRUE(WriteBin(acsqLog, File::PathJoin({SOC_LOG_PATH, "data"}), "stars_soc.data.0.slice_0"));
     EXPECT_TRUE(WriteBin(acsqLog2, File::PathJoin({SOC_LOG_PATH, "data"}), "stars_soc.data.0.slice_1"));
     std::vector<FftsPlusLog> fftsLog{CreateFftsPlusLog(0b100010, 3, 1, 1, 200),
@@ -168,9 +168,21 @@ TEST_F(StarsSocParserUtest, ShouldReturnNoDataWhenPathError)
     StarsSocParser starsSocParser;
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = "";
-    ASSERT_EQ(Analysis::PARSER_PARSE_DATA_ERROR, starsSocParser.Run(dataInventory_, context));
+    ASSERT_EQ(Analysis::ANALYSIS_OK, starsSocParser.Run(dataInventory_, context));
     auto logData = dataInventory_.GetPtr<std::vector<HalLogData>>();
     ASSERT_EQ(0ul, logData->size());
+}
+
+TEST_F(StarsSocParserUtest, ShouldParseErrorWhenNumOfLogLessThanTwo)
+{
+    StarsSocParser starsSocParser;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = SOC_LOG_PATH;
+    std::vector<AcsqLog> acsqLog{CreateAcsqLog(0b000000, 1, 1, 1, 100)};
+    EXPECT_TRUE(WriteBin(acsqLog, File::PathJoin({SOC_LOG_PATH, "data"}), "stars_soc.data.0.slice_0"));
+    ASSERT_EQ(Analysis::PARSER_PARSE_DATA_ERROR, starsSocParser.Run(dataInventory_, context));
+    auto logData = dataInventory_.GetPtr<std::vector<HalLogData>>();
+    ASSERT_EQ(1ul, logData->size());
 }
 
 }
