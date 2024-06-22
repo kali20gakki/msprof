@@ -195,8 +195,9 @@ bool TaskProcessor::ProcessWithMsprofTxTaskData(const std::string &fileDir, uint
     std::vector<std::string> validDevList;
     for (auto& devicePath: deviceList) {
         std::string dbPath = Utils::GetDBPath({devicePath, SQLITE, stepTraceDB.dbName});
+        MAKE_SHARED_RETURN_VALUE(stepTraceDB.dbRunner, DBRunner, false, dbPath);
         // 并不是所有场景都有msproftx 打点 task数据
-        auto status = CheckPath(dbPath);
+        auto status = CheckPathAndTable(dbPath, stepTraceDB);
         if (status != CHECK_SUCCESS) {
             if (status == CHECK_FAILED) {
                 flag = false;

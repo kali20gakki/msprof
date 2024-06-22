@@ -144,8 +144,9 @@ TableColumns MetricSummaryPersistence::GetTableColumn(const DeviceContext& conte
 }
 
 uint32_t MetricSummaryPersistence::GenerateAndSavePmuData(std::map<TaskId, std::vector<DeviceTask>>& deviceTask,
-                                                          sqlite3_stmt *stmt, sqlite3 *db)
+                                                          sqlite3_stmt *stmt, sqlite3 *db, std::string& dbPath)
 {
+    bool isNone = true;
     std::vector<uint64_t> ids;
     ids.reserve(CHIP4_DEFAULT_COLUMN_NUM);
     std::unordered_map<PmuHeaderType, std::vector<uint64_t>> idMap;
@@ -163,6 +164,7 @@ uint32_t MetricSummaryPersistence::GenerateAndSavePmuData(std::map<TaskId, std::
                 continue;
             }
             if (BindAndExecuteInsert(idMap, resultMap, stmt, db)) {
+                isNone = false;
                 idMap.clear();
                 resultMap.clear();
             } else {
@@ -172,6 +174,11 @@ uint32_t MetricSummaryPersistence::GenerateAndSavePmuData(std::map<TaskId, std::
         }
     }
     sqlite3_exec(db, "COMMIT", nullptr, nullptr, nullptr);
+    if (isNone && !File::DeleteFile(dbPath)) {
+        // 说明没有PMU数据，没有PMU数据就不应该生成DB，直接删除DB文件
+        ERROR("delete % failed", dbPath);
+        return ANALYSIS_ERROR;
+    }
     return ANALYSIS_OK;
 }
 
@@ -202,7 +209,7 @@ uint32_t MetricSummaryPersistence::SaveDataToDb(std::map<TaskId, std::vector<Dev
         ERROR("sqlite3_prepare_v2 run failed: %", errorMsg);
         return ANALYSIS_ERROR;
     }
-    if (GenerateAndSavePmuData(deviceTask, stmt, db) == ANALYSIS_OK) {
+    if (GenerateAndSavePmuData(deviceTask, stmt, db, dbPath) == ANALYSIS_OK) {
         return ANALYSIS_OK;
     } else {
         ERROR("Insert data to % failed", dbInfo.tableName);

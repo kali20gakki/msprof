@@ -201,8 +201,15 @@ bool CommunicationInfoProcessor::ProcessOneDevice(const std::string &devicePath,
                                                   DBInfo &taskDBInfo, DBInfo &opDBInfo, const std::string &fileDir)
 {
     std::string taskDBPath = Utils::File::PathJoin({devicePath, SQLITE, taskDBInfo.dbName});
+    std::string opDBPath = Utils::File::PathJoin({devicePath, SQLITE, opDBInfo.dbName});
+    MAKE_SHARED_RETURN_VALUE(taskDBInfo.dbRunner, DBRunner, false, taskDBPath);
+    MAKE_SHARED_RETURN_VALUE(opDBInfo.dbRunner, DBRunner, false, opDBPath);
     // 并不是所有场景都有hccl数据
-    auto status = CheckPath(taskDBPath);
+    auto status = CheckPathAndTable(taskDBPath, taskDBInfo);
+    if (status != CHECK_SUCCESS) {
+        return status != CHECK_FAILED;
+    }
+    status = CheckPathAndTable(opDBPath, opDBInfo);
     if (status != CHECK_SUCCESS) {
         return status != CHECK_FAILED;
     }
@@ -218,14 +225,11 @@ bool CommunicationInfoProcessor::ProcessOneDevice(const std::string &devicePath,
         ERROR("Failed to obtain the time in start_info and end_info.");
         return false;
     }
-    MAKE_SHARED_RETURN_VALUE(taskDBInfo.dbRunner, DBRunner, false, taskDBPath);
     auto oriTaskData = GetTaskData(taskDBInfo);
     if (oriTaskData.empty()) {
         ERROR("Get % data failed in %.", taskDBInfo.tableName, taskDBPath);
         return false;
     }
-    std::string opDBPath = Utils::File::PathJoin({devicePath, SQLITE, opDBInfo.dbName});
-    MAKE_SHARED_RETURN_VALUE(opDBInfo.dbRunner, DBRunner, false, opDBPath);
     auto oriOpData = GetOpData(opDBInfo);
     if (!FormatData(oriTaskData, oriOpData, taskData, opData, threadData, hashMap)) {
         ERROR("Save % data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO, taskDBPath);

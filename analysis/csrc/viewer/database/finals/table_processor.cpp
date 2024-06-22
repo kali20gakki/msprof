@@ -103,6 +103,19 @@ uint8_t TableProcessor::CheckPath(const std::string& path)
     return CHECK_SUCCESS;
 }
 
+uint8_t TableProcessor::CheckPathAndTable(const std::string& path, DBInfo dbInfo)
+{
+    auto res = CheckPath(path);
+    if (res != CHECK_SUCCESS) {
+        return res;
+    }
+    if (!dbInfo.dbRunner->CheckTableExists(dbInfo.tableName)) {
+        WARN("Check % not exists", dbInfo.tableName);
+        return NOT_EXIST;
+    }
+    return CHECK_SUCCESS;
+}
+
 bool TableProcessor::CreateTableIndex(const std::string &tableName, const std::string &indexName,
                                       const std::vector<std::string> &colNames) const
 {

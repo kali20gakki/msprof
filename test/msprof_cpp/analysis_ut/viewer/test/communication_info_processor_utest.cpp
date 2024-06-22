@@ -243,7 +243,7 @@ TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnFalseWhenSourceTableN
     MAKE_SHARED0_NO_OPERATION(dbRunner, DBRunner, dbPath);
     dbRunner->DropTable(TASK_TABLE_NAME);
     auto processor = CommunicationInfoProcessor(DB_PATH, PROF_PATHS);
-    EXPECT_FALSE(processor.Run());
+    EXPECT_TRUE(processor.Run());
 }
 
 TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnFalseWhenCreateTableFailed)

@@ -62,6 +62,12 @@ EventData ApiEventDBDumper::GenerateData(const ApiData &apiTraces)
         } else {
             itemId = (trace->itemId == 0) ? "0" : HashData::GetInstance().Get(trace->itemId);
         }
+        if (trace->beginTime <= 0) {
+            // 过滤开始时间小于0的数据
+            WARN("struct_type: %, item_id: %, id: % begin time is %, it will be filtered out",
+                 structType, itemId, id, trace->beginTime);
+            continue;
+        }
         data.emplace_back(structType, id,
                           NumberMapping::Get(NumberMapping::MappingType::LEVEL, trace->level),
                           trace->threadId,

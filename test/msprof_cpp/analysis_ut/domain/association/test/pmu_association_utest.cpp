@@ -231,7 +231,7 @@ TEST_F(PmuAssociationUTest, ShouldAssociateRightWhenProcessRun)
     }
 }
 
-TEST_F(PmuAssociationUTest, ShouldReturnErrorWhenDeviceTaskIsNull)
+TEST_F(PmuAssociationUTest, ShouldReturnOKWhenDeviceTaskIsNull)
 {
     PmuAssociation pmuAssociation;
     DeviceContext context;
