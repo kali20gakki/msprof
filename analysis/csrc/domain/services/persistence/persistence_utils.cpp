@@ -26,7 +26,10 @@ SyscntConversionParams GenerateSyscntConversionParams(const DeviceContext& conte
     DeviceStartLog deviceStartLog;
     context.Getter(deviceStartLog);
     if (!IsDoubleEqual(cpuInfo.frequency, 0.0) && hostStartLog.cntVctDiff) {
-        hostMonotonic = hostStartLog.clockMonotonicRaw + hostStartLog.cntVctDiff / cpuInfo.frequency;
+        uint64_t diffTime = static_cast<uint64_t>(hostStartLog.cntVctDiff / cpuInfo.frequency);
+        if (UINT64_MAX - hostStartLog.clockMonotonicRaw >= diffTime) {
+            hostMonotonic = hostStartLog.clockMonotonicRaw + diffTime;
+        }
     }
     SyscntConversionParams params{deviceInfo.hwtsFrequency, deviceStartLog.cntVct, hostMonotonic};
     return params;
