@@ -181,7 +181,7 @@ class JobMonitor:
                           job_tag)
             return
         if not FileManager.is_analyzed_data(job_path):
-            sample_config = ConfigMgr.read_sample_config(sample_file)
+            sample_config = ConfigMgr.read_sample_config(job_path)
             check_path_valid(PathManager.get_sql_dir(job_path), True)
             clear_project_dirs(job_path)
             self._launch_parsing_job_data(job_path, sample_config, job_tag)
