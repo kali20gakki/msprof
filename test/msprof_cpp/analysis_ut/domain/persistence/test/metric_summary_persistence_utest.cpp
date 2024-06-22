@@ -103,5 +103,15 @@ TEST_F(MetricSummaryPersistenceUTest, ShouldReturnNoPMUWhenNoMetric)
     deviceTaskS->swap(deviceTask);
     ASSERT_EQ(ANALYSIS_OK, persistence.Run(dataInventory_, context));
 }
+
+TEST_F(MetricSummaryPersistenceUTest, TestRunShouldReturnErrorWhenDataIsNull)
+{
+    dataInventory_.RemoveRestData({});
+    MetricSummaryPersistence persistence;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = DEVICE_PATH;
+    context.deviceContextInfo.deviceInfo.chipID = CHIP_V4_1_0;
+    ASSERT_EQ(ANALYSIS_ERROR, persistence.Run(dataInventory_, context));
+}
 }
 }

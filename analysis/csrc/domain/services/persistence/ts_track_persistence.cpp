@@ -114,6 +114,10 @@ uint32_t TsTrackPersistence::ProcessEntry(DataInventory& dataInventory, const Co
 {
     const DeviceContext& deviceContext = static_cast<const DeviceContext&>(context);
     auto halTrackTask = dataInventory.GetPtr<std::vector<HalTrackData>>();
+    if (!halTrackTask) {
+        ERROR("hal track task data is null.");
+        return ANALYSIS_ERROR;
+    }
     auto data = groupByType(*halTrackTask);
     auto res = SaveTrackData(data, deviceContext);
     if (res) {

@@ -47,6 +47,10 @@ uint32_t AccPmuPersistence::ProcessEntry(DataInventory& dataInventory, const Con
 {
     const DeviceContext& deviceContext = static_cast<const DeviceContext&>(context);
     auto accPmu = dataInventory.GetPtr<std::vector<HalLogData>>();
+    if (!accPmu) {
+        ERROR("acc pmu data is null.");
+        return ANALYSIS_ERROR;
+    }
     DBInfo accPmuDB("acc_pmu.db", "AccPmu");
     MAKE_SHARED0_RETURN_VALUE(accPmuDB.database, AccPmuDB, ANALYSIS_ERROR);
     std::string dbPath = Utils::GetDBPath({deviceContext.GetDeviceFilePath(), SQLITE, accPmuDB.dbName});

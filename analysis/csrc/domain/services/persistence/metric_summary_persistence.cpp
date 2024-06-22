@@ -215,6 +215,10 @@ uint32_t MetricSummaryPersistence::ProcessEntry(DataInventory& dataInventory, co
 {
     const DeviceContext& deviceContext = static_cast<const DeviceContext&>(context);
     auto deviceTask = dataInventory.GetPtr<std::map<TaskId, std::vector<DeviceTask>>>();
+    if (!deviceTask) {
+        ERROR("device task data is null.");
+        return ANALYSIS_ERROR;
+    }
     SampleInfo sampleInfo;
     deviceContext.Getter(sampleInfo);
     aicCalculator_ = MetricCalculatorFactory::GetAicCalculator(sampleInfo.aiCoreMetrics);

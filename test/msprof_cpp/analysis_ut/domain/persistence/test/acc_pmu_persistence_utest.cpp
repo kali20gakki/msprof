@@ -71,5 +71,14 @@ TEST_F(AccPmuPersistenceUTest, ShouldSaveAccPmuDataSuccess)
     accPmuS->swap(accPmu);
     ASSERT_EQ(ANALYSIS_OK, persistence.Run(dataInventory_, context));
 }
+
+TEST_F(AccPmuPersistenceUTest, TestRunShouldReturnErrorWhenDataIsNull)
+{
+    dataInventory_.RemoveRestData({});
+    AccPmuPersistence persistence;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = DEVICE_PATH;
+    ASSERT_EQ(ANALYSIS_ERROR, persistence.Run(dataInventory_, context));
+}
 }
 }

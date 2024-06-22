@@ -160,4 +160,13 @@ TEST_F(TsTrackPersistenceUtest, ReturnSuccessWhenMultiTypeData)
     EXPECT_TRUE(dbRunner->QueryData("SELECT * from StepTrace", stepTraceDatas));
     ASSERT_EQ(STEP_TRACE_SIZE, stepTraceDatas.size());
 }
+
+TEST_F(TsTrackPersistenceUtest, TestRunShouldReturnErrorWhenDataIsNull)
+{
+    dataInventory_.RemoveRestData({});
+    TsTrackPersistence tsTrackPersistence;
+    DeviceContext deviceContext;
+    deviceContext.deviceContextInfo.deviceFilePath = DEVICE_PATH;
+    ASSERT_EQ(ANALYSIS_ERROR, tsTrackPersistence.Run(dataInventory_, deviceContext));
+}
 }
