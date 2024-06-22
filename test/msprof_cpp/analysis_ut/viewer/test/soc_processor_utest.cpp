@@ -45,8 +45,11 @@ protected:
         }
         EXPECT_TRUE(File::CreateDir(BASE_PATH));
         EXPECT_TRUE(File::CreateDir(PROF_PATH_A));
+        EXPECT_TRUE(File::CreateDir(PROF_PATH_B));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_A, DEVICE})));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_A, DEVICE, SQLITE})));
+        EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_B, DEVICE})));
+        EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_B, DEVICE, SQLITE})));
         CreateSocMetricData(File::PathJoin({PROF_PATH_A, DEVICE, SQLITE, DB_NAME}), DATA_A);
         CreateSocMetricData(File::PathJoin({PROF_PATH_B, DEVICE, SQLITE, DB_NAME}), DATA_B);
         nlohmann::json record = {

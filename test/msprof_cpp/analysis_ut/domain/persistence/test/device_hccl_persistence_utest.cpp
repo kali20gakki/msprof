@@ -183,6 +183,7 @@ TEST_F(DeviceHcclPersistenceUTest, TestProcessEntryWhenReserveFailedThenReturnEr
 {
     Analysis::Domain::DeviceHcclPersistence per;
     Analysis::Domain::DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = DEVICE_DIR;
     MOCKER_CPP(&HcclOpDataFormat::reserve).stubs().will(throws(std::bad_alloc()));
     MOCKER_CPP(&HcclTaskDataFormat::reserve).stubs().will(throws(std::bad_alloc()));
     MOCKER_CPP(&HcclStatisticsFormat::reserve).stubs().will(throws(std::bad_alloc()));
