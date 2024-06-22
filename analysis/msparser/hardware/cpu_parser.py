@@ -16,6 +16,7 @@ from common_func.common import call_sys_exit
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.file_manager import FileManager
+from common_func.file_manager import check_path_valid
 from common_func.file_name_manager import get_ctrl_cpu_compiles
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.info_conf_reader import InfoConfReader
@@ -202,8 +203,11 @@ class ParsingCPUData(MsMultiProcess):
             logging.info("No project path found in %s", CommonConstant.SAMPLE_JSON)
             error(self.FILE_NAME, "No project path found in {}".format(CommonConstant.SAMPLE_JSON))
             call_sys_exit(NumberConstant.ERROR)
-        self.conn = sqlite3.connect(os.path.join(project_path, "sqlite", self.dbname))
-        self.curs = self.conn.cursor()
+        db_path = os.path.join(project_path, "sqlite")
+        check_path_valid(db_path, False)
+        self.conn, self.curs = DBManager.create_connect_db(os.path.join(db_path, self.dbname))
+        if not (self.conn and self.curs):
+            logging.info("Failed to connect to the database: %s", self.dbname)
         try:
             self.curs.execute("PRAGMA page_size=8192")
         except sqlite3.Error:

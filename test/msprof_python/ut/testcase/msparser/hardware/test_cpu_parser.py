@@ -2,11 +2,20 @@ import sqlite3
 import unittest
 from unittest import mock
 
+import pytest
+
+from common_func.empty_class import EmptyClass
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
-from msparser.hardware.cpu_parser import ParsingCPUData, create_originaldatatable, create_eventcounttable, \
-    sql_insert_eventcounttable, insert_eventcounttable, create_hotinstable, sql_insert_hotinstable, \
-    insert_hotinstable, get_cpu_pmu_events
+from msparser.hardware.cpu_parser import ParsingCPUData
+from msparser.hardware.cpu_parser import create_eventcounttable
+from msparser.hardware.cpu_parser import create_hotinstable
+from msparser.hardware.cpu_parser import create_originaldatatable
+from msparser.hardware.cpu_parser import get_cpu_pmu_events
+from msparser.hardware.cpu_parser import insert_eventcounttable
+from msparser.hardware.cpu_parser import insert_hotinstable
+from msparser.hardware.cpu_parser import sql_insert_eventcounttable
+from msparser.hardware.cpu_parser import sql_insert_hotinstable
 from sqlite.db_manager import DBManager
 from sqlite.db_manager import DBOpen
 
@@ -136,17 +145,12 @@ def test_get_cpu_pmu_events():
 class TestParsingCPUData(unittest.TestCase):
 
     def test_init_cpu_db(self):
-        with DBOpen('test.db') as db_open:
-            with mock.patch(NAMESPACE + ".logging.error"), \
-                    mock.patch(NAMESPACE + ".logging.info"), \
-                    mock.patch('sys.exit'), \
-                    mock.patch(NAMESPACE + '.error'), \
-                    mock.patch('traceback.format_exc', return_value='test'), \
-                    mock.patch('os.path.exists', return_value=False), \
-                    mock.patch('os.path.join', return_value='test\\test'):
-                with mock.patch('sqlite3.connect', return_value=db_open.db_conn):
-                    check = ParsingCPUData(CONFIG)
-                    check.init_cpu_db()
+        with mock.patch('os.path.exists', return_value=True), \
+                mock.patch('os.path.isdir', return_value=True), \
+                mock.patch('os.access', return_value=True):
+            with pytest.raises(AttributeError):
+                check = ParsingCPUData(CONFIG)
+                check.init_cpu_db()
 
     def test_parsing_data_file(self):
         with DBOpen('test.db') as db_open:
