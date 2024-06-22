@@ -32,7 +32,7 @@ enum class PlatformType {
     LHISI_TYPE,
     DC_TYPE,
     CHIP_V4_1_0,
-    CHIP_V4_2_0 = 7, // 1911
+    CHIP_V4_2_0 = 7,
     END_TYPE
 };
 const std::map<PlatformType, std::string> FREQUENCY_TYPE = {
