@@ -31,7 +31,9 @@ struct adl_serializer<CpuInfo> {
     {
         std::string frequencyStr = jsonData.at("CPU").at(0).at("Frequency").get<std::string>();
         if (!frequencyStr.empty()) {
-            infoData.frequency = std::stod(frequencyStr);
+            if (StrToDouble(infoData.frequency, frequencyStr) != ANALYSIS_OK) {
+                ERROR("Get frequency failed, the input string is '%'.", frequencyStr);
+            }
         }
     }
 };
