@@ -12,7 +12,6 @@
 #include "analysis/csrc/parser/environment/context.h"
 
 #include <unordered_set>
-
 #include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/dfx/log.h"
 #include "analysis/csrc/utils/utils.h"
@@ -77,18 +76,18 @@ bool Context::LoadJsonData(const std::string &profPath, const std::string &devic
             ERROR("Load json context failed: '%'.", files.back());
             return false;
         }
-        context_[profPath][deviceId].merge_patch(content);
-        if (fileName == START_INFO) {
-            context_[profPath][deviceId]["startClockMonotonicRaw"] =
-                    context_[profPath][deviceId]["clockMonotonicRaw"];
-            context_[profPath][deviceId]["startCollectionTimeBegin"] =
-                    context_[profPath][deviceId]["collectionTimeBegin"];
-        } else if (fileName == END_INFO) {
-            context_[profPath][deviceId]["endClockMonotonicRaw"] =
-                    context_[profPath][deviceId]["clockMonotonicRaw"];
-            context_[profPath][deviceId]["endCollectionTimeEnd"] =
-                    context_[profPath][deviceId]["collectionTimeEnd"];
+
+        if (fileName == START_INFO && content.contains("clockMonotonicRaw")
+            && content.contains("collectionTimeBegin")) {
+            content["startClockMonotonicRaw"] = content["clockMonotonicRaw"];
+            content["startCollectionTimeBegin"] = content["collectionTimeBegin"];
+        } else if (fileName == END_INFO && content.contains("clockMonotonicRaw")
+                   && content.contains("collectionTimeEnd")) {
+            content["endClockMonotonicRaw"] = content["clockMonotonicRaw"];
+            content["endCollectionTimeEnd"] = content["collectionTimeEnd"];
         }
+
+        context_[profPath][deviceId].merge_patch(content);
     }
     return true;
 }
@@ -121,6 +120,12 @@ bool Context::LoadLogData(const std::string &profPath, const std::string &device
             }
             context_[profPath][deviceId][tokens[0]] = tokens[1];
         }
+
+        if (!context_[profPath][deviceId].contains("clock_monotonic_raw")
+            || !context_[profPath][deviceId].contains("cntvct")) {
+            return false;
+        }
+
         if (fileName == DEVICE_START_LOG) {
             context_[profPath][deviceId]["devMonotonic"] = context_[profPath][deviceId]["clock_monotonic_raw"];
             context_[profPath][deviceId]["devCntvct"] = context_[profPath][deviceId]["cntvct"];
