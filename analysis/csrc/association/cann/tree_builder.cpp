@@ -233,8 +233,8 @@ std::shared_ptr<TreeNode> TreeBuilder::MakeDummyNode(const std::shared_ptr<Event
 bool TreeBuilder::AddTaskTrackEvents(std::shared_ptr<TreeNode> &treeNode,
                                      std::shared_ptr<EventQueue> &events, uint16_t depth)
 {
-    if (depth > MAX_BINDING_DEPTH) {
-        ERROR("The recursion exceeds the maximum depth.");
+    if (!treeNode || depth > MAX_BINDING_DEPTH) {
+        ERROR("The tree node is null or recursion depth % exceeds the maximum depth %.", depth, MAX_BINDING_DEPTH);
         return false;
     }
     // 检查输入Runtime Events指针

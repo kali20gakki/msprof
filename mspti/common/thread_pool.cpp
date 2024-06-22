@@ -12,6 +12,7 @@
 
 #include "common/thread_pool.h"
 #include "common/utils.h"
+#include "common/plog_manager.h"
 
 namespace Mspti {
 namespace Common {
@@ -85,8 +86,12 @@ int ThreadPool::Dispatch(std::shared_ptr<Task> task)
             threadIndex = currIndex_++ % threadNum_;
             break;
     }
-
-    threads_[threadIndex]->GetQueue()->Push(task);
+    auto taskQueue = threads_[threadIndex]->GetQueue();
+    if (!taskQueue) {
+        MSPTI_LOGE("The task queue is null.");
+        return -1;
+    }
+    taskQueue->Push(task);
 
     return 0;
 }

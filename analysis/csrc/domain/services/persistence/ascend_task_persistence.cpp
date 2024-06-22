@@ -53,6 +53,10 @@ uint32_t AscendTaskPersistence::ProcessEntry(DataInventory& dataInventory, const
 {
     const DeviceContext& deviceContext = static_cast<const DeviceContext&>(context);
     auto ascendTask = dataInventory.GetPtr<std::vector<TopDownTask>>();
+    if (!ascendTask) {
+        ERROR("ascend task data is null.");
+        return ANALYSIS_ERROR;
+    }
     DBInfo ascendTaskDB("ascend_task.db", "AscendTask");
     MAKE_SHARED0_RETURN_VALUE(ascendTaskDB.database, AscendTaskDB, ANALYSIS_ERROR);
     std::string dbPath = Utils::GetDBPath({deviceContext.GetDeviceFilePath(), SQLITE, ascendTaskDB.dbName});
