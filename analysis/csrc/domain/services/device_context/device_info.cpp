@@ -30,24 +30,30 @@ struct adl_serializer<DeviceInfo> {
     }
     static void from_json(const json& jsonData, DeviceInfo& infoData)
     {
+        int fromJsonResult = ANALYSIS_OK;
         std::string platformVersionStr = jsonData.at("platform_version").get<std::string>();
-        infoData.chipID = std::stoi(platformVersionStr);
+        fromJsonResult |= StrToU32(infoData.chipID, platformVersionStr);
 
         std::string deviceStr = jsonData.at("devices").get<std::string>();
-        infoData.deviceId = std::stoi(deviceStr);
+        fromJsonResult |= StrToU32(infoData.deviceId, deviceStr);
 
         jsonData.at("DeviceInfo").at(0).at("ai_core_num").get_to(infoData.aiCoreNum);
 
         std::string aicFrequencyStr = jsonData.at("DeviceInfo").at(0).at("aic_frequency").get<std::string>();
-        infoData.aicFrequency = std::stoi(aicFrequencyStr);
+        fromJsonResult |= StrToU32(infoData.aicFrequency, aicFrequencyStr);
 
         jsonData.at("DeviceInfo").at(0).at("aiv_num").get_to(infoData.aivNum);
 
         std::string aivFrequencyStr = jsonData.at("DeviceInfo").at(0).at("aiv_frequency").get<std::string>();
-        infoData.aivFrequency = std::stoi(aivFrequencyStr);
+        fromJsonResult |= StrToU32(infoData.aivFrequency, aivFrequencyStr);
 
         std::string hwtsFrequencyStr = jsonData.at("DeviceInfo").at(0).at("hwts_frequency").get<std::string>();
-        infoData.hwtsFrequency = std::stod(hwtsFrequencyStr);
+        fromJsonResult |= StrToDouble(infoData.hwtsFrequency, hwtsFrequencyStr);
+        if (fromJsonResult != ANALYSIS_OK) {
+            ERROR("Get device info from json error! The input: platform_version= %, devices= %, aic_frequency= %, "
+                  "aiv_frequency= %, hwts_frequency=%", platformVersionStr, deviceStr, aicFrequencyStr, aivFrequencyStr,
+                  hwtsFrequencyStr);
+        }
     }
 };
 

@@ -94,11 +94,11 @@ int ExtractNumber(const std::string &str)
     size_t pos = str.find_last_of('_');
     if (pos != std::string::npos) {
         std::string numStr = str.substr(pos + 1);
-        try {
-            return std::stoi(numStr);
-        } catch (const std::invalid_argument &) {
-            ERROR("Failed to parse the slice number in the binary file: %", str);
+        uint32_t extraction;
+        if (Utils::StrToU32(extraction, numStr) == ANALYSIS_OK) {
+            return extraction;
         }
+        ERROR("Failed to parse the slice number in the binary file: %", str);
     }
     return 0; // 默认返回0
 }

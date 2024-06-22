@@ -150,11 +150,11 @@ uint16_t NpuOpMemProcessor::GetDeviceId(const std::string& deviceType)
     std::size_t pos = deviceType.find(':');
     if (pos != std::string::npos) {
         std::string numStr = deviceType.substr(pos + 1);
-        try {
-            return std::stoi(numStr);
-        } catch (std::invalid_argument const &e) {
-            ERROR("Bad input: std::invalid_argument thrown");
+        uint16_t deviceId;
+        if (StrToU16(deviceId, numStr) == ANALYSIS_OK) {
+            return deviceId;
         }
+        ERROR("Bad input: std::invalid_argument thrown");
     }
     return UINT16_MAX; // 获取deviceId失败返回UINT16_MAX
 }

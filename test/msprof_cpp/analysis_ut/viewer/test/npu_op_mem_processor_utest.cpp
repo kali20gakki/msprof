@@ -210,3 +210,9 @@ TEST_F(NpuOpMemProcessorUTest, TestRunShouldReturnTrueWhenNoDb)
     EXPECT_TRUE(processor.Run());
     MOCKER_CPP(&Utils::File::GetFilesWithPrefix).reset();
 }
+
+TEST_F(NpuOpMemProcessorUTest, TestGetDeviceIdShouldReturnUINT16MAXWhenNoDeviceIdIsInvalid)
+{
+    auto processor = NpuOpMemProcessor(DB_PATH, {File::PathJoin({NPU_OP_MEM_PATH, "test"})});
+    EXPECT_EQ(UINT16_MAX, processor.GetDeviceId("device_type:aa"));
+}
