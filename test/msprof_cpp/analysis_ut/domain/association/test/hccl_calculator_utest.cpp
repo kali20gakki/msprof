@@ -15,6 +15,7 @@
 #include "analysis/csrc/domain/entities/hal/include/top_down_task.h"
 #include "analysis/csrc/infrastructure/context/include/device_context.h"
 #include "analysis/csrc/utils/utils.h"
+#include "mockcpp/mockcpp.hpp"
 
 using namespace Analysis::Domain;
 using namespace Analysis::Utils;
@@ -205,4 +206,13 @@ TEST_F(HcclCalculatorUTest, TestProcessEntryWhenProcessSuccessThenReturnOK)
     auto hcclStatisticsData = dataInventory_.GetPtr<std::vector<HcclStatistics>>();
     size_t expectStatisticsDataNum = 2;
     EXPECT_EQ(expectStatisticsDataNum, hcclStatisticsData->size());
+}
+
+TEST_F(HcclCalculatorUTest, TestAllTaskTimeIsEqualZeroThenReturnFalse)
+{
+    MOCKER(&Analysis::Utils::IsDoubleEqual).stubs().will(returnValue(false)).then(returnValue(true));
+    HcclCalculator calculator;
+    DeviceContext context;
+    ASSERT_EQ(Analysis::ANALYSIS_OK, calculator.Run(dataInventory_, context));
+    MOCKER(&Analysis::Utils::IsDoubleEqual).reset();
 }
