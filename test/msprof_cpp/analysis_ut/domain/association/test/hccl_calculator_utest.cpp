@@ -38,6 +38,8 @@ using HcclTaskDataFormat = std::vector<std::tuple<uint64_t, int32_t, std::string
         double, uint32_t, uint16_t, uint32_t, uint16_t, uint16_t, uint16_t, uint32_t, uint32_t, std::string,
         double, std::string, std::string, std::string, std::string>>;
 const HcclTaskDataFormat HCCL_TASK_DATA = {
+    {4294967295, -1, "Notify_Record", "559228325453745108", 0, 8864918631924, 1, 5, 5450, 0, 0, 1, 0, 1, 0,
+        "SDMA", 0, "INVALID_TYPE", "INVALID_TYPE", "504", "INVALID_TYPE"},
     {4294967295, -1, "Notify_Record", "559228325453745108", 0, 8864918631924, 1, 5, 5450, 0, 0, 1, 1, 1, 0,
         "SDMA", 0, "INVALID_TYPE", "INVALID_TYPE", "504", "INVALID_TYPE"},
     {4294967295, -1, "Notify_Wait", "559228325453745108", 0, 8864918631924, 0.02, 5, 5450, 1, 0, 1, 1, 1, 0,
@@ -194,7 +196,7 @@ TEST_F(HcclCalculatorUTest, TestProcessEntryWhenProcessSuccessThenReturnOK)
     // 去除4条时间为-1的非法数据
     EXPECT_EQ(HCCL_TASK_DATA.size() - 4, hcclTaskData->size());
     std::vector<double> expectBandwidth = {
-        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.004, 0.0125, 0.0, 0.00036166365280289331,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.004, 0.0125, 0.0, 0.00036166365280289331,
         0.0125, 0.0, 0.0125, 0.0, 0.15
     };
     size_t i = 0;
