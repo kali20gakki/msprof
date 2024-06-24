@@ -169,6 +169,8 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             return {}
         grouped_data = defaultdict(lambda: {"min_timestamp": float("inf"), "max_timestamp": -float("inf")})
         for data in communication_data:
+            if data.is_master == 0:
+                continue
             key = (data.op_name, data.first_timestamp, data.op_type)
             grouped_data[key]["min_timestamp"] = min(grouped_data[key]["min_timestamp"], data.timestamp)
             grouped_data[key]["max_timestamp"] = max(grouped_data[key]["max_timestamp"], data.timestamp + data.duration)

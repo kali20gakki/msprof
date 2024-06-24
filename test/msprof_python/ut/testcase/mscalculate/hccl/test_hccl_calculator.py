@@ -412,5 +412,22 @@ class TestHcclCalculator(unittest.TestCase):
         for idx, _ in enumerate(events):
             self.assertAlmostEqual(ans[idx][1].bandwidth, events[idx][1].bandwidth)
 
+    def test_get_hccl_op_report_data_should_return_filter_data_when_input_is_hccldto_list(self):
+        args = {'stream id': 2, 'task id': 0, 'context id': 4294967295, 'is_master': '1'}
+        all_gather = "all_gather"
+        all_reduce = "all_reduce"
+        hccl_data = [
+            HcclTask(op_name="hccl_op1", is_master=1, timestamp=1, duration=2, op_type=all_reduce),
+            HcclTask(op_name="hccl_op2", is_master=1, timestamp=5, duration=3, op_type=all_reduce),
+            HcclTask(op_name="hccl_op3", is_master=1, timestamp=10, duration=2, op_type=all_gather),
+            HcclTask(op_name="hccl_op4", is_master=1, timestamp=15, duration=3, op_type=all_gather),
+            HcclTask(op_name="hccl_op5", is_master=0, timestamp=15, duration=3, op_type=all_gather)
+        ]
+        check = HcclCalculator([], CONFIG)
+        hccl_op_report_data = check._get_hccl_op_report_data(hccl_data)
+        self.assertEqual(hccl_op_report_data,
+                         {all_reduce: {"count": 2, "total_time": 5, "max": 3, "min": 2, "avg": 2.5},
+                          all_gather: {"count": 2, "total_time": 5, "max": 3, "min": 2, "avg": 2.5}
+                          })
 
 

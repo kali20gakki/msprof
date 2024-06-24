@@ -347,6 +347,9 @@ bool HcclCalculator::GetHcclStatisticsData()
     }
     std::unordered_map<std::string, OpTypeInfo> groupedData;
     for (const auto& task : taskData_) {
+        if (task.isMaster == 0) {
+            continue;
+        }
         auto key = Utils::Join("-", task.opName, std::to_string(task.firstTimestamp), task.opType);
         if (groupedData.find(key) == groupedData.end()) {
             OpTypeInfo info(task.timestamp, task.timestamp, task.opType);
