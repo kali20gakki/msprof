@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2024. All rights reserved.
-import importlib
 import json
 import logging
 import os
@@ -283,13 +282,11 @@ def check_file_owner(path: str) -> bool:
     if not is_linux():
         return False
     stat_info = os.stat(path)
-    current_uid = os.geteuid()
-    pwd_module = importlib.import_module("pwd")
-    if current_uid == 0:  # root用户
+    if stat_info.st_uid == 0:  # so的所有者为root用户
         return True
     else:
-        current_user = pwd_module.getpwuid(current_uid)
-        return current_user.pw_uid == stat_info.st_uid and current_user.pw_gid == stat_info.st_gid
+        current_uid = os.geteuid()
+        return current_uid == stat_info.st_uid
 
 
 def check_so_valid(path: str) -> bool:
