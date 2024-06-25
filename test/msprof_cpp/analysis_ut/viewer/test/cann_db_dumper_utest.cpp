@@ -85,6 +85,24 @@ protected:
         MOCKER_CPP(&TreeAnalyzer::GetComputeTasks).stubs().will(returnValue(*kernelTasks));
     }
 
+    static void MockGetL0ComputeTasks()
+    {
+        auto kernelTask = std::make_shared<HostTask>();
+        MsprofNodeBasicInfo msprofNodeBasicInfo{};
+        MsprofAttrInfo msprofNodeAttrInfo{};
+        auto ctx = std::make_shared<MsprofAdditionalInfo>();
+        ctx->threadId = 0;
+        auto tensorDesc = std::make_shared<ConcatTensorInfo>();
+        tensorDesc->tensorNum = 1;
+        auto kernelDesc = std::make_shared<OpDesc>();
+        auto kernelOp = std::make_shared<Operator>(kernelDesc, 0, Analysis::Entities::OpType::OPTYPE_COMPUTE);
+        kernelTask->op = kernelOp;
+        std::shared_ptr<HostTask> computeTaskPointer = kernelTask;
+        auto kernelTasks = std::make_shared<HostTasks>();
+        kernelTasks->push_back(computeTaskPointer);
+        MOCKER_CPP(&TreeAnalyzer::GetComputeTasks).stubs().will(returnValue(*kernelTasks));
+    }
+
     static void MockGetTasks()
     {
         auto pMiniOpDesc = std::make_shared<Entities::HcclSmallOpDesc>(0, 0, nullptr);
@@ -127,6 +145,54 @@ TEST_F(CannDBDumperUtest,
 {
     MockGetHCCLTasks();
     MockGetComputeTasks();
+    MockGetTasks();
+    MockGetHcclBigOps();
+
+    CANNTraceDBDumper cannTraceDbDumper(".");
+    auto treeNode = std::make_shared<TreeNode>(nullptr);
+    TreeAnalyzer treeAnalyzer(treeNode, THREAD_ID);
+    bool ret = cannTraceDbDumper.DumpData(treeAnalyzer);
+    EXPECT_TRUE(ret);
+    HCCLDB hcclDB;
+    std::string hcclTaskDBPath = Utils::File::PathJoin({TEST_DB_FILE_PATH, hcclDB.GetDBName()});
+    DBRunner hcclOpDBRunner(hcclTaskDBPath);
+    std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, std::string, uint32_t,
+            uint32_t, std::string, std::string, uint32_t, std::string>> hcclOpData;
+    hcclOpDBRunner.QueryData("select * from HCCLOP", hcclOpData);
+    EXPECT_EQ(hcclOpData.size(), 1);
+
+    RuntimeDB runtimeDB;
+    std::string hostTaskDBPath = Utils::File::PathJoin({TEST_DB_FILE_PATH, runtimeDB.GetDBName()});
+    DBRunner hostTaskDBRunner(hostTaskDBPath);
+    std::vector<std::tuple<uint32_t,
+            uint32_t, uint32_t, uint32_t, std::string, uint32_t, std::string, uint32_t,
+            std::string, std::string>> hostTaskData;
+    hostTaskDBRunner.QueryData("select * from HostTask", hostTaskData);
+    EXPECT_EQ(hostTaskData.size(), 1);
+
+    GEInfoDB geInfoDB;
+    std::string opDescDBPath = Utils::File::PathJoin({TEST_DB_FILE_PATH, geInfoDB.GetDBName()});
+    DBRunner opDescDBRunner(opDescDBPath);
+    std::vector<std::tuple<uint32_t, std::string, uint32_t, uint32_t, uint32_t, uint32_t, std::string, uint32_t,
+            std::string, uint32_t, uint32_t, double, uint32_t, uint32_t, std::string,
+            std::string, std::string, std::string, std::string, std::string, uint32_t,
+            uint32_t, uint32_t>> TaskInfoData;
+    opDescDBRunner.QueryData("select * from TaskInfo", TaskInfoData);
+    EXPECT_EQ(TaskInfoData.size(), 1);
+    EXPECT_EQ(std::get<INPUT_DATA_TYPE_POSITION>(TaskInfoData[0]), "N/A");
+
+    std::vector<std::tuple<uint32_t, uint32_t, std::string, std::string, uint32_t, std::string,
+            double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
+            std::string, double, std::string, std::string, uint64_t, std::string>> HCCLTaskData;
+    hcclOpDBRunner.QueryData("select * from HCCLTask", HCCLTaskData);
+    EXPECT_EQ(HCCLTaskData.size(), 1);
+    EXPECT_EQ(std::get<GROUP_NAME_POSITION>(HCCLTaskData[0]), "0");
+}
+
+TEST_F(CannDBDumperUtest, TestCANNDumperShouldReturnTrueWhenComputeTaskDataIsL0ThenQueryDBShouldReturnRecords)
+{
+    MockGetHCCLTasks();
+    MockGetL0ComputeTasks();
     MockGetTasks();
     MockGetHcclBigOps();
 

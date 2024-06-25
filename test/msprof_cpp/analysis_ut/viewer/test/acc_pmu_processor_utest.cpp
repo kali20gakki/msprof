@@ -9,7 +9,6 @@
  * Creation Date      : 2024/3/1
  * *****************************************************************************
  */
-#include <iostream>
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/viewer/database/finals/acc_pmu_processor.h"
@@ -42,7 +41,6 @@ class AccPmuProcessorUTest : public testing::Test {
 protected:
     virtual void SetUp()
     {
-        Analysis::Log::GetInstance().Init("./");
         if (File::Check(BASE_PATH)) {
             File::RemoveDir(BASE_PATH, DEPTH);
         }
