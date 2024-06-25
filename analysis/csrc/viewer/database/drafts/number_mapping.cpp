@@ -167,6 +167,12 @@ namespace {
         {4,          "FP32"},
         {5,          "INT64"},
         {6,          "UINT64"},
+        {7,          "UINT8"},
+        {8,          "UINT16"},
+        {9,          "UINT32"},
+        {10,         "FP64"},
+        {11,         "BFP16"},
+        {12,         "INT128"},
         {4294967295, "INVALID_TYPE"},
     };
     const std::unordered_map<uint32_t, std::string> hcclLinkTypeMap {

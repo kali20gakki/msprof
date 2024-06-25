@@ -26,6 +26,12 @@ class DataType(Enum):
     FP32 = 4
     INT64 = 5
     UINT64 = 6
+    UINT8 = 7
+    UINT16 = 8
+    UINT32 = 9
+    FP64 = 10
+    BFP16 = 11
+    INT128 = 12
     INVALID_TYPE = 4294967295
 
 
