@@ -52,7 +52,7 @@ double Calculator::CalculatorMetricByDivision(CalculationElements &allParams, si
         if (i == 0) {
             res += ((*allParams.floatBit)[index] * allParams.pmuList[i] / allParams.taskCyc);
         } else {
-            if ((*allParams.floatBit)[index] != 0) {
+            if (!Utils::IsDoubleEqual((*allParams.floatBit)[index], 0.0)) {
                 res /= ((*allParams.floatBit)[index] * allParams.pmuList[i] / allParams.taskCyc);
             }
         }
