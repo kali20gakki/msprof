@@ -219,6 +219,12 @@ const std::unordered_map<std::string, uint16_t> HCCL_DATA_TYPE_TABLE = {
     {"FP32", 4},
     {"INT64",  5},
     {"UINT64",  6},
+    {"UINT8", 7},
+    {"UINT16", 8},
+    {"UINT32", 9},
+    {"FP64", 10},
+    {"BFP16", 11},
+    {"INT128", 12},
     {"INVALID_TYPE", UINT16_MAX},
 };
 
