@@ -325,7 +325,7 @@ void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskI
         auto name = HashData::GetInstance().Get(task->op->name);
         data.emplace_back(task->modelId, name, task->streamId, task->taskId, 0, 0, NA, NA, NA,
                           task->requestId, task->thread_id, task->timeStamp, task->batchId,
-                          0, "", "", "", "", "", "",
+                          0, NA, NA, NA, NA, NA, NA,
                           task->deviceId, task->contextId, NA, NA);
         return;
     }
