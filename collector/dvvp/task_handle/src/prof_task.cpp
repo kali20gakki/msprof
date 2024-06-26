@@ -271,8 +271,7 @@ void ProfTask::ProcessDefMode()
 {
     MSPROF_LOGI("Profiling running task");
     StartDevices(currDevicesV_);
-    int ret = GetHostAndDeviceInfo();
-    if (ret != PROFILING_SUCCESS) {
+    if (!params_->isSubscribe && GetHostAndDeviceInfo() != PROFILING_SUCCESS) {
         MSPROF_LOGE("ProcessDefMode GetHostAndDeviceInfo failed");
         MSPROF_INNER_ERROR("EK9999", "ProcessDefMode GetHostAndDeviceInfo failed");
     }
@@ -315,15 +314,14 @@ void ProfTask::Run(const struct error_message::Context &errorContext)
     // process prepare
     MSPROF_LOGI("Task %s begins to run", params_->job_id.c_str());
 
-    int ret = CreateCollectionTimeInfo(GetHostTime(), true);
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("ProcessDefMode CreateCollectionTimeInfo failed");
-        MSPROF_INNER_ERROR("EK9999", "ProcessDefMode CreateCollectionTimeInfo failed");
-    }
-
-    ret = CreateIncompatibleFeatureJsonFile();
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("ProcessDefMode CreateIncompatibleFeatureJsonFile failed");
+    if (!params_->isSubscribe) {
+        if (CreateCollectionTimeInfo(GetHostTime(), true) != PROFILING_SUCCESS) {
+            MSPROF_LOGE("ProcessDefMode CreateCollectionTimeInfo failed");
+            MSPROF_INNER_ERROR("EK9999", "ProcessDefMode CreateCollectionTimeInfo failed");
+        }
+        if (CreateIncompatibleFeatureJsonFile() != PROFILING_SUCCESS) {
+            MSPROF_LOGE("ProcessDefMode CreateIncompatibleFeatureJsonFile failed");
+        }
     }
     ProcessDefMode();
 
@@ -334,7 +332,9 @@ void ProfTask::Run(const struct error_message::Context &errorContext)
         (void)NotifyFileDoneForDevice("", iter->first);
     }
     MSPROF_LOGI("Prof task begins to finish");
-    (void)CreateCollectionTimeInfo(GetHostTime(), false);
+    if (!params_->isSubscribe) {
+        (void)CreateCollectionTimeInfo(GetHostTime(), false);
+    }
     (void)uploader_->Flush();
     uploader_ = nullptr;
 

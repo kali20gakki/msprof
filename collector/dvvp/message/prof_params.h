@@ -386,6 +386,7 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, durationTime);
         SET_VALUE(object, qosProfiling);
         SET_VALUE(object, qosEvents);
+        SET_VALUE(object, isSubscribe);
     }
 
     void ToObject(nlohmann::json &object)
@@ -519,6 +520,7 @@ struct ProfileParams : BaseInfo {
         GetUint64Value(object, MSG_STR(dataTypeConfig), dataTypeConfig, 0);
         FROM_STRING_VALUE(object, delayTime);
         FROM_STRING_VALUE(object, durationTime);
+        FROM_BOOL_VALUE(object, isSubscribe);
     }
 
     void FromObject(const nlohmann::json &object)

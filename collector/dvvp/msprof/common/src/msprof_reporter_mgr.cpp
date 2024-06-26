@@ -36,10 +36,9 @@ MsprofReporterMgr::MsprofReporterMgr() : isStarted_(false), isUploadStarted_(fal
 }
 MsprofReporterMgr::~MsprofReporterMgr()
 {
-    reportTypeInfoMap_.clear();
-    reporters_.clear();
-    reportTypeInfoMapVec_.clear();
     StopReporters();
+    reportTypeInfoMap_.clear();
+    reportTypeInfoMapVec_.clear();
 }
 
 int MsprofReporterMgr::Start()
@@ -181,26 +180,21 @@ int32_t MsprofReporterMgr::RegReportTypeInfo(uint16_t level, uint32_t typeId, co
 {
     MSPROF_LOGD("Register type info of reporter level[%u], type id %u, type name %s", level, typeId, typeName.c_str());
     std::lock_guard<std::mutex> lk(regTypeInfoMtx_);
-    if (reportTypeInfoMap_.find(level) != reportTypeInfoMap_.end() &&
-        reportTypeInfoMap_[level].find(typeId) != reportTypeInfoMap_[level].end()) {
-            MSPROF_LOGW("Type info conflict, old info:%s new info:%s",
-                        reportTypeInfoMap_[level][typeId].c_str(), typeName.c_str());
-        }
     reportTypeInfoMap_[level][typeId] = typeName;
-    reportTypeInfoMapVec_[level].emplace_back(std::pair<uint32_t, std::string>(typeId, typeName));
+    auto itr = std::find_if(reportTypeInfoMapVec_[level].begin(), reportTypeInfoMapVec_[level].end(),
+        [typeId](const std::pair<uint32_t, std::string>& pair) { return pair.first == typeId; });
+    if (itr != std::end(reportTypeInfoMapVec_[level])) {
+        itr->second = typeName;
+    } else {
+        reportTypeInfoMapVec_[level].emplace_back(std::pair<uint32_t, std::string>(typeId, typeName));
+    }
     return PROFILING_SUCCESS;
 }
 
 std::string& MsprofReporterMgr::GetRegReportTypeInfo(uint16_t level, uint32_t typeId)
 {
-    static std::string nullInfo;
     std::lock_guard<std::mutex> lk(regTypeInfoMtx_);
-    if (reportTypeInfoMap_.find(level) != reportTypeInfoMap_.end() &&
-        reportTypeInfoMap_[level].find(typeId) != reportTypeInfoMap_[level].end()) {
-        return reportTypeInfoMap_[level][typeId];
-    }
-    MSPROF_LOGW("Get type info failed, level %u, type id %u", level, typeId);
-    return nullInfo;
+    return reportTypeInfoMap_[level][typeId];
 }
 
 void MsprofReporterMgr::FillFileChunkData(const std::string &saveHashData,
