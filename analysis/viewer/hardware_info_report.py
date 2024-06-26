@@ -180,16 +180,17 @@ def llc_capacity_data(project_path: str, device_id: str, types: str) -> tuple:
     """
     get llc capacity data
     """
-    conn, curs = DBManager.check_connect_db(project_path, 'llc.db')
+    if types not in {'ctrlcpu', 'aicpu'}:
+        return MsvpConstant.MSVP_EMPTY_DATA
     sample_config = ConfigMgr.read_sample_config(project_path)
+    conn, curs = DBManager.check_connect_db(project_path, 'llc.db')
     if not (conn and curs):
         return MsvpConstant.MSVP_EMPTY_DATA
     counter_exist = DBManager.judge_table_exist(curs, "LLCOriginalData")
     if not counter_exist or sample_config.get(StrConstant.LLC_PROF, "") != StrConstant.LLC_CAPACITY_ITEM:
+        DBManager.destroy_db_connect(conn, curs)
         return MsvpConstant.MSVP_EMPTY_DATA
     try:
-        if types not in {'ctrlcpu', 'aicpu'}:
-            return MsvpConstant.MSVP_EMPTY_DATA
         return _get_llc_capacity_data(curs, project_path, device_id, types)
     except (OSError, SystemError, ValueError, TypeError, RuntimeError):
         return MsvpConstant.MSVP_EMPTY_DATA

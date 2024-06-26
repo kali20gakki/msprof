@@ -44,6 +44,30 @@ class TestHardwareInfoView(unittest.TestCase):
         db_manager.destroy(test_sql)
         self.assertEqual(len(json.loads(res)), 2)
 
+    def test_get_llc_train_summary_should_close_db_when_llc_db_is_not_existed(self):
+        error_info = "The LLC Metric Data doesn't exist."
+        db_manager = DBManager()
+        test_sql = db_manager.create_table("llc.db")
+        with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=test_sql), \
+            mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
+            res = get_llc_train_summary('', configs, 0)
+        db_manager.destroy(test_sql)
+        self.assertIn(error_info, res)
+
+    def test_get_llc_train_summary_should_close_db_when_llc_data_is_not_existed(self):
+        error_info = "The LLC Data doesn't exist."
+        db_manager = DBManager()
+        create_sql = "CREATE TABLE IF NOT EXISTS " + StrConstant.LLC_METRICS_TABLE + \
+                     " (device_id, l3tId, timestamp, hitrate, throughput)"
+        data = ((0, 0, 81951266894476, 0, 0.1),)
+        insert_sql = db_manager.insert_sql(StrConstant.LLC_METRICS_TABLE, data)
+        test_sql = db_manager.create_table("llc.db", create_sql, insert_sql, data)
+        with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=test_sql), \
+                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]):
+            res = get_llc_train_summary('', configs, 0)
+        db_manager.destroy(test_sql)
+        self.assertIn(error_info, res)
+
 
 if __name__ == '__main__':
     unittest.main()

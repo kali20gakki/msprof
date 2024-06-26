@@ -102,12 +102,16 @@ class DBManager:
         self.conn.commit()
 
     def destroy(self, res):
-        if isinstance(res[1], sqlite3.Cursor):
-            res[1].close()
-        if isinstance(res[0], sqlite3.Connection):
-            res[0].close()
-        if os.path.exists(self.db_name):
-            os.remove(self.db_name)
+        try:
+            if isinstance(res[1], sqlite3.Cursor):
+                res[1].close()
+            if isinstance(res[0], sqlite3.Connection):
+                res[0].close()
+        except sqlite3.ProgrammingError: # 重复close
+            pass
+        finally:
+            if os.path.exists(self.db_name):
+                os.remove(self.db_name)
 
     def clear_table(self, table_name):
         self.curs.execute("delete from {}".format(table_name))
