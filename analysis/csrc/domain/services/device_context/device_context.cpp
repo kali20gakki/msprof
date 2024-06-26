@@ -12,6 +12,9 @@
 #include "device_context.h"
 #include <iostream>
 #include <sstream>
+#include <functional>
+#include <vector>
+#include <algorithm>
 #include <dirent.h>
 #include "nlohmann/json.hpp"
 #include "analysis/csrc/utils/utils.h"
@@ -36,17 +39,20 @@ DeviceContext& DeviceContext::Instance()
     return ins;
 }
 
-void DeviceContext::Init(const std::string &devicePath)
+bool DeviceContext::Init(const std::string &devicePath)
 {
     if (!this->isInitialized_) {
         this->deviceContextInfo.deviceFilePath = devicePath;
-        this->GetInfoJson();
-        this->GetSampleJson();
-        this->GetHostStart();
-        this->GetDeviceStart();
-        this->GetCpuInfo();
-        this->isInitialized_ = true; // 标记已初始化
+        std::vector<std::function<bool()>> funcList = {[this]() { return this->GetInfoJson(); },
+                                                       [this]() { return this->GetCpuInfo(); },
+                                                       [this]() { return this->GetSampleJson(); },
+                                                       [this]() { return this->GetHostStart(); },
+                                                       [this]() { return this->GetDeviceStart(); }};
+        auto ret = std::all_of(funcList.begin(), funcList.end(), [](std::function<bool()> func) {return func();});
+        this->isInitialized_ = ret; // 标记已初始化
+        return ret;
     }
+    return true;
 }
 
 std::vector<std::string> GetDeviceDirectories(const std::string &path)
@@ -90,7 +96,10 @@ std::vector<DataInventory> DeviceContextEntry(const char *targetDir, const char 
         ++i;
         func = [subdir, &processStat, &prcessData, stopAt] {
             DeviceContext &context = DeviceContext::Instance();
-            context.Init(subdir);
+            if (!context.Init(subdir)) {
+                processStat = "Init failed, exit!";
+                return;
+            }
             if (stopAt != nullptr) {
                 context.SetStopAt(stopAt);
             }
