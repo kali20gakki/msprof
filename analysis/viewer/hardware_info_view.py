@@ -64,6 +64,8 @@ def get_llc_train_summary(result_dir: str, sample_config: dict, device_id: str) 
     conn, curs = DBManager.check_connect_db_path(db_path)
     res = _check_llc_db(conn, curs)
     if res:
+        if conn or curs:
+            DBManager.destroy_db_connect(conn, curs)
         return res
     try:
         l3_list = curs.execute("SELECT count(DISTINCT(l3tId)) "
@@ -74,10 +76,12 @@ def get_llc_train_summary(result_dir: str, sample_config: dict, device_id: str) 
             {"status": NumberConstant.ERROR, "info": "Failed to get data of llc bandwidth.", "data": {}})
 
     if not l3_list:
+        DBManager.destroy_db_connect(conn, curs)
         return json.dumps(
             {'status': NumberConstant.ERROR, "info": "Cannot load LLC ID from LLC Metric Data."})
     llc_data = DBManager.fetch_all_data(curs, _get_llc_sql(), (device_id,))
     if not llc_data:
+        DBManager.destroy_db_connect(conn, curs)
         return json.dumps(
             {"status": NumberConstant.ERROR, "info": "The LLC Data doesn't exist."})
 

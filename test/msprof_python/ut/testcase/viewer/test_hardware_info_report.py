@@ -118,7 +118,6 @@ class TestHardwareInfo(unittest.TestCase):
             configs[StrConstant.LLC_PROF] = StrConstant.LLC_CAPACITY_ITEM
             InfoConfReader()._info_json = {"pid": 0}
             res = llc_capacity_data('', 0, "ctrlcpu")
-        test_sql = db_manager.create_table("llc.db", create_sql, insert_sql, data)
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
                 mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=configs), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):

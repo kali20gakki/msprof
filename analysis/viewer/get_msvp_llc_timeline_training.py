@@ -291,6 +291,7 @@ def get_llc_timeline(param: dict) -> list:
 
     llc_check_result = pre_check_llc(conn, curs, sample_config, table_name)
     if llc_check_result:
+        DBManager.destroy_db_connect(curs, conn)
         return llc_check_result
 
     try:
@@ -434,6 +435,7 @@ def get_hbm_timeline(param: dict) -> list:
         logging.error("The db doesn't exist.")
         return []
     if not DBManager.judge_table_exist(curs, "HBMOriginalData"):
+        DBManager.destroy_db_connect(conn, curs)
         logging.error("The table doesn't exist.")
         return []
     trace_parser = TraceViewer("HBM")
