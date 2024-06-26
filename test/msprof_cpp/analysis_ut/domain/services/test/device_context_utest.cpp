@@ -3,10 +3,10 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : device_info_utest.cpp
- * Description        : device info json UT
+ * File Name          : device_context_utest.cpp
+ * Description        : device context UT
  * Author             : msprof team
- * Creation Date      : 2024/6/22
+ * Creation Date      : 2024/6/26
  * *****************************************************************************
  */
 #include "analysis/csrc/domain/services/device_context/device_context.h"
@@ -16,53 +16,60 @@
 #include "nlohmann/json.hpp"
 #include "analysis/csrc/utils/utils.h"
 
+
 namespace Analysis {
 namespace Domain {
 using namespace Analysis::Utils;
 
-const auto DEVICE_DIR = "./device_0";
-const std::string INFO_JSON = "info.json";
+const auto PROF_DIR = "./PROF_0";
+const auto DEVICE_DIR = "device_0";
+const auto INFO_JSON = "info.json.0";
+const auto SAMPLE_JSON = "sample.json";
 
 
-class DeviceInfoUTest : public testing::Test {
+class DeviceContextUTest : public testing::Test {
 protected:
     static void SetUpTestCase()
     {
-        EXPECT_TRUE(File::CreateDir(DEVICE_DIR));
-        CreateInfoJson(DEVICE_DIR, 0);
+        EXPECT_TRUE(File::CreateDir(PROF_DIR));
+        const auto deviceDir = File::PathJoin({PROF_DIR, DEVICE_DIR});
+        EXPECT_TRUE(File::CreateDir(deviceDir));
+        CreateJson(deviceDir);
     }
 
     static void TearDownTestCase()
     {
-        EXPECT_TRUE(File::RemoveDir(DEVICE_DIR, 0));
+        EXPECT_TRUE(File::RemoveDir(PROF_DIR, 0));
     }
 
-    static void CreateInfoJson(const std::string &filePath, uint16_t deviceId)
+    static void CreateJson(const std::string &filePath)
     {
-        // info.json
+        // info.json.0
         nlohmann::json info = {
             {"platform_version", "5"},
             {"devices", "0"},
-            {"pid", "2376271"},
             {"DeviceInfo", {{{"hwts_frequency", "49.000000"},
                              {"aic_frequency", "1850"},
-                             {"aiv_frequency", "1850aa"},
+                             {"aiv_frequency", "1850"},
                              {"ai_core_num", 25},
                              {"aiv_num", 25}}}},
-            {"hostname", "localhost"}
+            {"CPU", {{{"Frequency", "100.000000"}}}},
         };
         FileWriter infoWriter(File::PathJoin({filePath, INFO_JSON}));
         infoWriter.WriteText(info.dump());
+        // sample.json
+        nlohmann::json sample = {
+            {"ai_core_profiling", "on"},
+        };
+        FileWriter sampleWriter(File::PathJoin({filePath, SAMPLE_JSON}));
+        sampleWriter.WriteText(sample.dump());
     }
 };
 
-TEST_F(DeviceInfoUTest, TestGetInfoJsonShouldReturnFalseWhenInfoJsonInvalid)
+TEST_F(DeviceContextUTest, TestDeviceContextEntryShouldReturn1DataInventoryWhenInfoJsonInvalid)
 {
-    DeviceContext deviceContext;
-    DeviceContextInfo deviceContextInfo;
-    deviceContextInfo.deviceFilePath = DEVICE_DIR;
-    deviceContext.deviceContextInfo = deviceContextInfo;
-    EXPECT_FALSE(deviceContext.GetInfoJson());
+    EXPECT_EQ(1, DeviceContextEntry(PROF_DIR, "").size());
 }
 }  // Domain
 }  // Analysis
+

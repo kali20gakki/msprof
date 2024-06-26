@@ -161,7 +161,7 @@ public:
 
     const std::string &GetDfxStopAtName() const override { return deviceContextInfo.dfxInfo.stopAt; }
 
-    void Init(const std::string &devicePath);
+    bool Init(const std::string &devicePath);
 
     void SetStopAt(const std::string & stopAt) { deviceContextInfo.dfxInfo.stopAt = stopAt; }
 private:

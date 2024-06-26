@@ -53,6 +53,7 @@ struct adl_serializer<DeviceInfo> {
             ERROR("Get device info from json error! The input: platform_version= %, devices= %, aic_frequency= %, "
                   "aiv_frequency= %, hwts_frequency=%", platformVersionStr, deviceStr, aicFrequencyStr, aivFrequencyStr,
                   hwtsFrequencyStr);
+            throw std::runtime_error("Get info json failed");
         }
     }
 };
