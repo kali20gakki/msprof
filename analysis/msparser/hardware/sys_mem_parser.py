@@ -24,7 +24,7 @@ class ParsingMemoryData(MsMultiProcess):
     parse system and process memory data
     """
 
-    PID_DATA_PATTERN = r'(\d+) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+)'
+    PID_DATA_PATTERN = r'^(\d+) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+)'
     SYS_DATA_METRIC = (
         'MemTotal', 'MemFree', 'Buffers', 'Cached', 'Shmem', 'CommitLimit',
         'Committed_AS', 'HugePages_Total', 'HugePages_Free'
