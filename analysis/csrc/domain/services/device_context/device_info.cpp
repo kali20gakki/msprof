@@ -49,7 +49,7 @@ struct adl_serializer<DeviceInfo> {
 
         std::string hwtsFrequencyStr = jsonData.at("DeviceInfo").at(0).at("hwts_frequency").get<std::string>();
         fromJsonResult |= StrToDouble(infoData.hwtsFrequency, hwtsFrequencyStr);
-        if (fromJsonResult != ANALYSIS_OK) {
+        if (fromJsonResult != ANALYSIS_OK || IsDoubleEqual(infoData.hwtsFrequency, 0.0)) {
             ERROR("Get device info from json error! The input: platform_version= %, devices= %, aic_frequency= %, "
                   "aiv_frequency= %, hwts_frequency=%", platformVersionStr, deviceStr, aicFrequencyStr, aivFrequencyStr,
                   hwtsFrequencyStr);
