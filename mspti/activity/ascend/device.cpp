@@ -104,7 +104,7 @@ bool Device::OnLine()
     std::call_once(get_device_flag_, [this] () {
         this->GetDeviceList(&this->cur_device_num_, this->deviceIdlist_);
     });
-    if (cur_device_num_ == 0) {
+    if (cur_device_num_ == 0 || cur_device_num_ > MAX_DEVICE_NUM) {
         return false;
     }
     for (uint32_t i = 0; i < cur_device_num_; ++i) {
