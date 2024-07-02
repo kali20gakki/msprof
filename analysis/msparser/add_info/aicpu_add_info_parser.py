@@ -30,7 +30,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
         super(DataParser, self).__init__(sample_config)
         self._file_list = file_list
         self.project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
-        self.hash_data = HashDictData(self._project_path).get_ge_hash_dict()
+        self.hash_data = {}
         self._aicpu_data = {
             AicpuAddInfoBean.AICPU_NODE: [],
             AicpuAddInfoBean.AICPU_DP: [],
@@ -164,6 +164,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
             check_func=self.check_magic_num
         )
         self.set_aicpu_data(aicpu_info)
+        self.hash_data = HashDictData(self._project_path).get_ge_hash_dict()
 
     def save(self: any) -> None:
         """
