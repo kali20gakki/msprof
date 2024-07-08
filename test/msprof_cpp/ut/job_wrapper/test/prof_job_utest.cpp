@@ -1293,10 +1293,19 @@ TEST_F(JOB_WRAPPER_PROF_AICPU_JOB_TEST, Uninit)
     auto profAicpuJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfAicpuJob>();
     EXPECT_EQ(PROFILING_SUCCESS, profAicpuJob->Uninit());
     profAicpuJob->Init(collectionJobCfg_);
+    profAicpuJob->eventAttr_.isThreadStart = true;
+    MOCKER_CPP(&Collector::Dvvp::Mmpa::MmJoinTask)
+        .stubs()
+        .will(returnValue(-1))
+        .then(returnValue(0));
     MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::GetAllChannels)
+            .stubs()
+            .will(returnValue(-1))
+            .then(returnValue(0));
     MOCKER(&ProfDrvEvent::SubscribeEventThreadUninit).stubs();
     EXPECT_EQ(PROFILING_SUCCESS, profAicpuJob->Uninit());
     EXPECT_EQ(PROFILING_SUCCESS, profAicpuJob->Uninit());
