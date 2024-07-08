@@ -94,6 +94,7 @@ ExternalProject_Add(analysis
                 -DSECUREC_LIB_DIR=${CMAKE_INSTALL_PREFIX}/securec_shared
                 <SOURCE_DIR>
     BUILD_COMMAND $(MAKE)
+    DEPENDS c_sec
 )
 endif()
 
@@ -106,5 +107,6 @@ ExternalProject_Add(mspti
                 -DSECUREC_LIB_DIR=${CMAKE_INSTALL_PREFIX}/securec_shared
                 <SOURCE_DIR>
     BUILD_COMMAND $(MAKE)
+    DEPENDS c_sec
 )
 endif()
