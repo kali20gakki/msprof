@@ -12,7 +12,11 @@ class TestSioViewer(unittest.TestCase):
             (0, 1, 2, 3, 4, 5, 6, 7, 8, 216),
             (1, 1, 2, 3, 4, 5, 6, 7, 8, 216)
         ]
+        start_info = {"collectionTimeBegin": 0, "clockMonotonicRaw": 10}
+        end_info = {"collectionTimeEnd": 10}
         InfoConfReader()._info_json = {"pid": '0'}
+        InfoConfReader()._start_info = start_info
+        InfoConfReader()._end_info = end_info
         check = SioViewer({}, {})
         ret = check.get_trace_timeline(datas)
-        self.assertEqual(17, len(ret))
+        self.assertEqual(9, len(ret))
