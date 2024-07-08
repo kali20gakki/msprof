@@ -1580,12 +1580,14 @@ int ProfAicpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     if (!(collectionJobCfg_->comParams->params->dataTypeConfig & PROF_AICPU_TRACE)
             || profLevel.empty() || profLevel == MSVP_PROF_L0 || collectionJobCfg_->comParams->params->isSubscribe) {
         // aicpu开关关闭，或者L0级别，不开启aicpu驱动通道，订阅场景不开启aicpu驱动通道
-        MSPROF_LOGI("AICPU not enable or L0, devId:%d", collectionJobCfg_->comParams->devId);
+        MSPROF_LOGI("AICPU not enable or L0, devId:%d, channelId:%d",
+                    collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
         return PROFILING_FAILED;
     }
     // aicpu开关打开，或者L1级别，会开启aicpu驱动通道; L1级别开aicpu驱动通道是为了上报mc2算子信息
     if (!analysis::dvvp::driver::DrvIsSupportAdprof(collectionJobCfg_->comParams->devId)) {
-        MSPROF_LOGI("Collect Aicpu data by HDC");
+        MSPROF_LOGI("Collect Aicpu data by HDC, devId:%d, channelId:%d",
+                    collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
         return PROFILING_FAILED;
     }
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
@@ -1606,7 +1608,8 @@ int ProfAicpuJob::Process()
     if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
-    MSPROF_LOGI("Begin to start profiling aicpu");
+    MSPROF_LOGI("Begin to start profiling aicpu, devId:%d, channelId:%d",
+                collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
     if (!eventAttr_.isChannelValid) {
         MSPROF_LOGI("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId, channelId_);
         return PROFILING_SUCCESS;
@@ -1614,7 +1617,8 @@ int ProfAicpuJob::Process()
     // ensure only done once
     uint8_t expected = 0;
     if (!processCount_.compare_exchange_strong(expected, 1)) {
-        MSPROF_LOGI("Only process once");
+        MSPROF_LOGI("Only process once, devId:%d, channelId:%d",
+                    collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
         return PROFILING_SUCCESS;
     }
     std::string filePath = BindFileWithChannel(collectionJobCfg_->jobParams.dataPath);
@@ -1622,7 +1626,8 @@ int ProfAicpuJob::Process()
  
     int ret = DrvAicpuStart(collectionJobCfg_->comParams->devId, channelId_);
     eventAttr_.isProcessRun = true;
-    MSPROF_LOGI("Start profiling aicpu, ret=%d", ret);
+    MSPROF_LOGI("Start profiling aicpu, devId:%d, channelId:%d, ret=%d",
+                collectionJobCfg_->comParams->devId, static_cast<int>(channelId_), ret);
 
     FUNRET_CHECK_RET_VALUE(ret, PROFILING_SUCCESS, PROFILING_SUCCESS, ret);
 }
@@ -1635,23 +1640,27 @@ int ProfAicpuJob::Uninit()
     eventAttr_.isExit = true;
     if (eventAttr_.isThreadStart) {
         if (MmJoinTask(&eventAttr_.handle) != PROFILING_SUCCESS) {
-            MSPROF_LOGW("thread not exist tid:%d", eventAttr_.handle);
+            MSPROF_LOGW("thread not exist tid:%d, devId:%d, channelId:%d",
+                        eventAttr_.handle, collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
         } else {
-            MSPROF_LOGI("aicpu event thread exit, tid:%d", eventAttr_.handle);
+            MSPROF_LOGI("aicpu event thread exit, tid:%d, devId:%d, channelId:%d",
+                        eventAttr_.handle, collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
         }
     }
     if (eventAttr_.isAttachDevice) {
         profDrvEvent_.SubscribeEventThreadUninit(static_cast<uint32_t>(collectionJobCfg_->comParams->devId));
     }
     if (!eventAttr_.isProcessRun) {
-        MSPROF_LOGI("ProfAicpuJob Process does not run.");
+        MSPROF_LOGI("ProfAicpuJob Process does not run, devId:%d, channelId:%d.",
+                    collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
         return PROFILING_SUCCESS;
     }
     int32_t ret = 0;
     if (DrvChannelsMgr::instance()->GetAllChannels(collectionJobCfg_->comParams->devId) == PROFILING_SUCCESS &&
         DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
         ret = DrvStop(collectionJobCfg_->comParams->devId, channelId_);
-        MSPROF_LOGI("stop profiling Channel %d data, ret=%d", static_cast<int32_t>(channelId_), ret);
+        MSPROF_LOGI("stop profiling Channel %d data, devId:%d, ret=%d",
+                    static_cast<int32_t>(channelId_), collectionJobCfg_->comParams->devId, ret);
     }
     
     RemoveReader(collectionJobCfg_->comParams->params->job_id, collectionJobCfg_->comParams->devId, channelId_);
