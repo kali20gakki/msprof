@@ -80,7 +80,7 @@ TABLE_HOST_NETWORK_USAGE = "NetworkUsage"
 TABLE_HOST_PROCESS_USAGE = "ProcessUsage"
 # host syscal
 TABLE_HOST_RUNTIME_API = "Syscall"
-# 1981 ffts_log
+# ffts_log
 TABLE_FFTS_THREAD_LOG = "FftsThreadLog"
 TABLE_THREAD_TASK = "ThreadTime"
 TABLE_SUBTASK_TIME = "SubtaskTime"
