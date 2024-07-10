@@ -194,6 +194,7 @@ class HCCLExport:
         _hccl_format_data = [0] * len(hccl_data)
         for index, _hccl_data in enumerate(hccl_data):
             hccl_args = HCCLExport.get_hccl_arg(_hccl_data)
+            hccl_args["model id"] = _hccl_data.model_id
             thread_id = self.hccl_groups.get(_hccl_data.group_name).start_index + _hccl_data.plane_id + 1
             _hccl_data_pice = [
                 _hccl_data.hccl_name, self.pid_value, thread_id,
