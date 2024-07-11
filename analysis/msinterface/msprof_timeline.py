@@ -37,7 +37,7 @@ class MsprofTimeline:
         self._result_dir = None
         self._export_data_list = []
         self._iteration_time = []
-        self._default_sort_index = NumberConstant.DEFAULT_LAYER_SORT_START
+        self._default_sort_index = TraceViewHeaderConstant.DEFAULT_LAYER_SORT_START
 
     @classmethod
     def get_timeline_header(cls: any, pid: str, pid_sort_index: int) -> list:
