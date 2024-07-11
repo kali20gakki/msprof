@@ -147,7 +147,6 @@ class NumberConstant:
     COMMUNICATION_B_to_GB = 0.001 ** 3
     COMMUNICATION_MB_to_GB = 1000
 
-    DEFAULT_LAYER_SORT_START = 10
     # magic number: 5A5A
     MAGIC_NUM = 23130
 

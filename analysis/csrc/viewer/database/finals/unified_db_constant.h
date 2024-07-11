@@ -25,6 +25,15 @@ const std::string HOST = "host";
 const std::string DEVICE_PREFIX = "device_";
 const std::string SQLITE = "sqlite";
 
+// 单位换算常量
+const uint64_t NANO_SECOND = 1000000000;
+const uint64_t MICRO_SECOND = 1000000;
+const uint64_t MILLI_SECOND = 1000;
+constexpr const uint64_t MAX_DB_BYTES = 10ULL * 1024 * 1024 * 1024;
+const uint16_t BYTE_SIZE = 1024;
+const uint16_t PERCENTAGE = 100;
+const std::string NA = "N/A";
+
 // db name
 const std::string DB_NAME_MSPROF_DB = "msprof";
 
@@ -225,6 +234,7 @@ const std::unordered_map<std::string, uint16_t> HCCL_DATA_TYPE_TABLE = {
     {"FP64", 10},
     {"BFP16", 11},
     {"INT128", 12},
+    {NA, UINT16_MAX - 1},
     {"INVALID_TYPE", UINT16_MAX},
 };
 
@@ -238,6 +248,7 @@ const std::unordered_map<std::string, uint16_t> HCCL_LINK_TYPE_TABLE = {
     {"HCCS_SW",  5},
     {"STANDARD_ROCE",  6},
     {"RESERVED", 7},
+    {NA, UINT16_MAX - 1},
     {"INVALID_TYPE", UINT16_MAX},
 };
 
@@ -246,6 +257,7 @@ const std::unordered_map<std::string, uint16_t> HCCL_TRANSPORT_TYPE_TABLE = {
     {"SDMA", 0},
     {"RDMA", 1},
     {"LOCAL", 2},
+    {NA, UINT16_MAX - 1},
     {"INVALID_TYPE", UINT16_MAX},
 };
 
@@ -257,6 +269,7 @@ const std::unordered_map<std::string, uint16_t> HCCL_RDMA_TYPE_TABLE = {
     {"RDMA_PAYLOAD_CHECK", 3},
     {"RDMA_PAYLOAD_ACK", 4},
     {"RDMA_SEND_OP", 5},
+    {NA, UINT16_MAX - 1},
     {"INVALID_TYPE", UINT16_MAX},
 };
 
@@ -299,15 +312,6 @@ const std::map<std::string, std::string> HW_SQE_TYPE_TABLE{
     {"9", "SDMA_SQE"},
     {"10", "MAX_SQE"}
 };
-
-// 单位换算常量
-const uint64_t NANO_SECOND = 1000000000;
-const uint64_t MICRO_SECOND = 1000000;
-const uint64_t MILLI_SECOND = 1000;
-constexpr const uint64_t MAX_DB_BYTES = 10ULL * 1024 * 1024 * 1024;
-const uint16_t BYTE_SIZE = 1024;
-const uint16_t PERCENTAGE = 100;
-const std::string NA = "N/A";
 
 }  // Database
 }  // Viewer

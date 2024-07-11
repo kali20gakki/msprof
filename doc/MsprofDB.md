@@ -179,6 +179,7 @@ db命名：msprof_{时间戳}.db
 | 10    | FP64         |
 | 11    | BFP16        |
 | 12    | INT128       |
+| 65534 | N/A          |
 | 65535 | INVALID_TYPE |
 
 变更记录：
@@ -188,6 +189,7 @@ db命名：msprof_{时间戳}.db
 | 2024/3/13 | 计划新增  |
 | 2024/5/19 | 630新增 |
 | 2024/6/25 | 更新HcclDataType |
+| 2024/7/11 | 新增NA字段，避免L0场景下异常日志记录 |
 
 ### ENUM_HCCL_LINK_TYPE
 
@@ -210,6 +212,7 @@ db命名：msprof_{时间戳}.db
 | 5     | HCCS_SW       |
 | 6     | STANDARD_ROCE |
 | 7     | RESERVED      |
+| 65534 | N/A          |
 | 65535 | INVALID_TYPE  |
 
 变更记录：
@@ -218,6 +221,7 @@ db命名：msprof_{时间戳}.db
 |-----------|-------------------------|
 | 2024/3/13 | 计划新增                    |
 | 2024/5/19 | 630新增,同时增加新的type字段（4-7） |
+| 2024/7/11 | 新增NA字段，避免L0场景下异常日志记录 |
 
 ### ENUM_HCCL_TRANSPORT_TYPE
 
@@ -235,6 +239,7 @@ db命名：msprof_{时间戳}.db
 | 0     | SDMA         |
 | 1     | RDMA         |
 | 2     | LOCAL        |
+| 65534 | N/A          |
 | 65535 | INVALID_TYPE |
 
 变更记录：
@@ -243,6 +248,7 @@ db命名：msprof_{时间戳}.db
 |-----------|-------|
 | 2024/3/13 | 计划新增  |
 | 2024/5/19 | 630新增 |
+| 2024/7/11 | 新增NA字段，避免L0场景下异常日志记录 |
 
 
 ### ENUM_HCCL_RDMA_TYPE
@@ -264,6 +270,7 @@ db命名：msprof_{时间戳}.db
 | 3     | RDMA_PAYLOAD_CHECK   |
 | 4     | RDMA_PAYLOAD_ACK     |
 | 5     | RDMA_SEND_OP         |
+| 65534 | N/A          |
 | 65535 | INVALID_TYPE         |
 
 变更记录：
@@ -272,6 +279,7 @@ db命名：msprof_{时间戳}.db
 |-----------|-------------------------|
 | 2024/3/13 | 计划新增                    |
 | 2024/5/19 | 630新增,同时增加新的type字段（2-5） |
+| 2024/7/11 | 新增NA字段，避免L0场景下异常日志记录 |
 
 ### STRING_IDS
 
@@ -1015,7 +1023,7 @@ db命名：ascend_pytorch_profiler_{rankId}.db
 | 字段名            | 类型      | 索引  | 含义                                   |
 |----------------|---------|-----|--------------------------------------|
 | component      | INTEGER |     | 组件名(GE、PTA、PTA+GE)在STRING_IDS表中对应的id |
-| time_stamp     | INTEGER |     | 时间戳                                  |
+| timestamp      | INTEGER |     | 时间戳                                  |
 | totalAllocated | INTEGER |     | 内存分配总额                               |
 | totalReserved  | INTEGER |     | 内存预留总额                               |
 | totalActive    | INTEGER |     | PTA流申请的总内存                           |
@@ -1025,10 +1033,11 @@ db命名：ascend_pytorch_profiler_{rankId}.db
 
 变更记录:
 
-| 日期        | 内容 |
-|-----------|--|
-| 2024/3/7  | 330首次上线 |
-| 2024/5/19 | 修改total_allocated，total_reserved，total_active，stream_ptr， device_id等字段为小驼峰，统一命名规则|
+| 日期        | 内容                                                                                |
+|-----------|-----------------------------------------------------------------------------------|
+| 2024/3/7  | 330首次上线                                                                           |
+| 2024/5/19 | 修改total_allocated，total_reserved，total_active，stream_ptr， device_id等字段为小驼峰，统一命名规则 |
+| 2024/7/11 | timestamp资料中字段修改，5.19漏改                                                           |
 
 ### OP_MEMORY
 
