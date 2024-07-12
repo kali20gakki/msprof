@@ -17,7 +17,7 @@ class FftsPmuBean(StructDecoder):
 
     def __init__(self: any, *args: any) -> None:
         filed = args[0]
-        self._stream_id = Utils.get_stream_id(filed[2])
+        self._stream_id = StarsCommon.set_stream_id(filed[2], filed[3])
         self._task_id = StarsCommon.set_task_id(filed[2], filed[3])
         self._ov_flag = filed[5] & 0x400
         self._subtask_id = filed[6]

@@ -35,7 +35,7 @@ int BlockPmuParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *hal
     auto *blockPmu = ReinterpretConvert<BlockPmu *>(binaryData);
     auto *pmuData = ReinterpretConvert<HalPmuData *>(halUniData);
 
-    pmuData->hd.taskId.streamId = StarsCommon::GetStreamId(blockPmu->streamId);
+    pmuData->hd.taskId.streamId = StarsCommon::GetStreamId(blockPmu->streamId, blockPmu->taskId);
     pmuData->hd.taskId.batchId = INVALID_BATCH_ID;
     pmuData->hd.taskId.taskId = StarsCommon::GetTaskId(blockPmu->streamId, blockPmu->taskId);
     pmuData->hd.taskId.contextId = blockPmu->subTaskId;

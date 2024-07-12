@@ -19,7 +19,7 @@ class AcsqTask(StructDecoder):
         self._func_type = Utils.get_func_type(args[0])
         # total 16 bit, get high 6 bit
         self._task_type = args[0] >> 10
-        self._stream_id = Utils.get_stream_id(args[2])
+        self._stream_id = StarsCommon.set_stream_id(args[2], args[3])
         self._task_id = StarsCommon.set_task_id(args[2], args[3])
         self._sys_cnt = args[4]
         # [acsq_id, acc_id] is total 16 bit, acc_id is the lower 6 bit

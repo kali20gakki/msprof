@@ -33,7 +33,7 @@ int Chip4PmuParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *hal
     auto *contextPmu = ReinterpretConvert<ContextPmu *>(binaryData);
     auto *pmuData = ReinterpretConvert<HalPmuData *>(halUniData);
 
-    pmuData->hd.taskId.streamId = StarsCommon::GetStreamId(contextPmu->streamId);
+    pmuData->hd.taskId.streamId = StarsCommon::GetStreamId(contextPmu->streamId, contextPmu->taskId);
     pmuData->hd.taskId.batchId = INVALID_BATCH_ID;
     pmuData->hd.taskId.taskId = StarsCommon::GetTaskId(contextPmu->streamId, contextPmu->taskId);
     if (contextPmu->fftsType == FFTS_PLUS) {
