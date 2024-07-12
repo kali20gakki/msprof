@@ -7,7 +7,6 @@ from msparser.add_info.add_info_bean import AddInfoBean
 from msparser.data_struct_size_constant import StructFmt
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.utils import Utils
 from profiling_bean.stars.stars_common import StarsCommon
 
 
@@ -18,7 +17,7 @@ class AicpuNodeBean:
 
     def __init__(self: any, *args) -> None:
         data = args[0]
-        self._stream_id = Utils.get_stream_id(data[6])
+        self._stream_id = StarsCommon.set_stream_id(data[6], data[7])
         self._task_id = StarsCommon.set_task_id(data[6], data[7])
         self._ai_cpu_task_start = data[10]
         self._compute_time = (data[12] - data[11]) / NumberConstant.MILLI_SECOND  # ms
@@ -42,7 +41,7 @@ class AicpuNodeBean:
         :return: task id for ai cpu
         """
         return self._task_id
-    
+
     @property
     def compute_time(self: any) -> float:
         """
@@ -224,7 +223,7 @@ class KfcHcclInfoBean:
         self._transport_type = data[25]
         self._rdma_type = data[26]
         self._task_id = StarsCommon.set_task_id(data[28], data[27])
-        self._stream_id = Utils.get_stream_id(data[28])
+        self._stream_id = StarsCommon.set_stream_id(data[28], data[27])
 
     @property
     def item_id(self: any) -> str:
@@ -331,7 +330,7 @@ class KfcCommTurnBean:
         self._rtsq_exe_end_time = data[12]
         self._data_len = data[13]
         self._device_id = data[14]
-        self._stream_id = Utils.get_stream_id(data[15])
+        self._stream_id = StarsCommon.set_stream_id(data[15], data[16])
         self._task_id = StarsCommon.set_task_id(data[15], data[16])
         self._version = data[17]
         self._comm_turn = data[18]
@@ -398,7 +397,7 @@ class KfcComputeTurnBean:
         self._compute_exe_end_time = data[8]
         self._data_len = data[9]
         self._device_id = data[10]
-        self._stream_id = Utils.get_stream_id(data[11])
+        self._stream_id = StarsCommon.set_stream_id(data[11], data[12])
         self._task_id = StarsCommon.set_task_id(data[11], data[12])
         self._version = data[13]
         self._compute_turn = data[14]

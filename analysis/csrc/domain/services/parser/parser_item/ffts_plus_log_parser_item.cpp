@@ -33,7 +33,7 @@ int FftsPlusLogParseItem(uint8_t *binaryData, uint32_t binaryDataSize,
 
     auto *unionData = ReinterpretConvert<HalLogData *>(halUniData);
 
-    unionData->hd.taskId.streamId = StarsCommon::GetStreamId(log->streamId);
+    unionData->hd.taskId.streamId = StarsCommon::GetStreamId(log->streamId, log->taskId);
     unionData->hd.taskId.batchId = 0;
     unionData->hd.taskId.taskId = StarsCommon::GetTaskId(log->streamId, log->taskId);
     unionData->hd.taskId.contextId = log->subTaskId;
