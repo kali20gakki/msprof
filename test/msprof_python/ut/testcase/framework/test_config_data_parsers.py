@@ -16,7 +16,7 @@ from profiling_bean.prof_enum.chip_model import ChipModel
 class TestConfigDataParsers(unittest.TestCase):
     def test_get_parsers(self):
         InfoConfReader()._sample_json = {'devices': '0'}
-        ConfigDataParsers.get_parsers(ConfigManager.DATA_CALCULATOR, str(ChipModel.CHIP_V3_1_0.value))
+        ConfigDataParsers.get_parsers(ConfigManager.DATA_CALCULATOR, str(ChipModel.CHIP_V3_1_0.value), False)
 
     def test_load_can_cpp_parse(self):
         ret = ConfigDataParsers._load_can_cpp_parse("NpuMemParser")

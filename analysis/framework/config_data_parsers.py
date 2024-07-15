@@ -28,11 +28,12 @@ class ConfigDataParsers:
     DEFAULT_PARSER_LEVEL = "1"
 
     @classmethod
-    def get_parsers(cls: any, config_name: str, chip_model: str) -> dict:
+    def get_parsers(cls: any, config_name: str, chip_model: str, task_flag: bool) -> dict:
         """
         get parsers by chip model
         :param config_name: DataParsersConfig, DataCalculatorConfig
         :param chip_model: 0,1,2
+        :param task_flag: whether pmu is task-based
         :return: data parsers
         """
         parsers_dict = {}
@@ -42,7 +43,7 @@ class ConfigDataParsers:
         conf_parser_read = ConfigManager.get(config_name)
         parser_section = conf_parser_read.sections()
         cpp_parse_flag = ProfilingScene().is_cpp_parse_enable()
-        all_export_flag = ProfilingScene().is_all_export() and InfoConfReader().is_all_export_version()
+        all_export_flag = ProfilingScene().is_all_export() and InfoConfReader().is_all_export_version() and task_flag
         for _section in parser_section:
             chip_model_list = cls._load_parser_chip_model(conf_parser_read, _section)
             if chip_model not in chip_model_list:
