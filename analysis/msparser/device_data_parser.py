@@ -7,6 +7,7 @@ import logging
 import os
 import sys
 
+from common_func.config_mgr import ConfigMgr
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
@@ -25,6 +26,9 @@ class DeviceDataParser(MsMultiProcess):
         """
         调用msprof_analysis.so
         """
+        if ConfigMgr.is_ai_core_sample_based(self._project_path):
+            logging.warning("Device Data in sample-based will not be parsed by msprof_analysis.so!")
+            return
         all_export_flag = ProfilingScene().is_all_export() and InfoConfReader().is_all_export_version()
         if ProfilingScene().is_cpp_parse_enable() and all_export_flag:
             sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib64")))

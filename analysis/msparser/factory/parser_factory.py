@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
+from common_func.config_mgr import ConfigMgr
 from common_func.ms_constant.str_constant import StrConstant
 from framework.config_data_parsers import ConfigDataParsers
 from framework.iprof_factory import IProfFactory
@@ -23,7 +24,8 @@ class ParserFactory(IProfFactory):
         """
         generate parser
         """
-        return ConfigDataParsers.get_parsers(ConfigManager.DATA_PARSERS, chip_model)
+        task_flag = ConfigMgr.is_ai_core_task_based(self._project_path)
+        return ConfigDataParsers.get_parsers(ConfigManager.DATA_PARSERS, chip_model, task_flag)
 
     def run(self: any) -> None:
         """
