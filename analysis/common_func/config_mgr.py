@@ -69,7 +69,8 @@ class ConfigMgr:
         check scene of ai core task-based
         """
         sample_config = ConfigMgr.read_sample_config(result_dir)
-        return sample_config.get(StrConstant.AICORE_PROFILING_MODE) == StrConstant.AIC_TASK_BASED_MODE
+        aic_mode = sample_config.get(StrConstant.AICORE_PROFILING_MODE)
+        return aic_mode == StrConstant.AIC_TASK_BASED_MODE if aic_mode != "" else True
 
     @staticmethod
     def is_aiv_sample_based(result_dir: str) -> bool:

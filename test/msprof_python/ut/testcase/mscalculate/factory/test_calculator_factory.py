@@ -17,6 +17,7 @@ CONFIG_NAMESPACE = 'common_func.config_mgr'
 class TestCalculatorFactory(unittest.TestCase):
     def test_run(self):
         with mock.patch(NAMESPACE + '.ConfigDataParsers.get_parsers'), \
-                mock.patch(CONFIG_NAMESPACE + '.ConfigMgr.is_ai_core_task_based', return_value=True):
+                mock.patch(CONFIG_NAMESPACE + '.ConfigMgr.read_sample_config',
+                           return_value={"ai_core_profiling_mode": ""}):
             check = CalculatorFactory({}, CONFIG, '310')
             check.run()
