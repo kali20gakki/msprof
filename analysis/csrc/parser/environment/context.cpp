@@ -371,8 +371,8 @@ bool Context::GetSyscntConversionParams(Utils::SyscntConversionParams &params,
         // diff 异常不影响数据解析，部分时间存在误差
         return true;
     }
-    // 保留整数位即可
-    params.hostMonotonic += (diff / hostFreq);
+    // 保留整数位即可, monotonic(ns), diff(次), freq(MHz). 次 * 1000 / MHz = ns
+    params.hostMonotonic += (diff * MILLI_SECOND / hostFreq);
     return true;
 }
 
@@ -444,8 +444,8 @@ bool Context::GetClockMonotonicRaw(uint64_t &monotonicRaw, bool isHost, uint16_t
         // diff 异常不影响数据解析，部分时间存在误差
         return true;
     }
-    // 保留整数位即可
-    monotonicRaw += (diff / hostFreq);
+    // 保留整数位即可, monotonic(ns), diff(次), freq(MHz). 次 * 1000 / MHz = ns
+    monotonicRaw += (diff * MILLI_SECOND / hostFreq);
     return true;
 }
 

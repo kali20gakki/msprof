@@ -30,6 +30,7 @@ class TsetHostMemUsage(unittest.TestCase):
         InfoConfReader()._host_freq = None
         InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         InfoConfReader()._local_time_offset = 10.0
+        InfoConfReader()._host_local_time_offset = 10.0
         disk_info_list = ((0, 1, 2, 3, 4, 5, 6),)
         with mock.patch(NAMESPACE + '.DBManager.fetch_all_data',
                         return_value=disk_info_list):

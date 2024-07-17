@@ -41,7 +41,7 @@ class InfoConfReader:
     HOST_PROFILING_TYPE = "host_profiling"
     HOST_DEFAULT_FREQ = NumberConstant.NANO_SECOND
     ANALYSIS_VERSION = "1.0"
-    ALL_EXPORT_VERSION = 0x072211
+    ALL_EXPORT_VERSION = 0x072211  # 467473
 
     def __init__(self: any) -> None:
         self._info_json = None
@@ -49,10 +49,13 @@ class InfoConfReader:
         self._end_info = None
         self._sample_json = None
         self._start_log_time = 0
+        self._host_host_mon = 0
+        self._host_host_cnt = 0
         self._host_mon = 0
         self._host_cnt = 0
         self._host_freq = None
         self._dev_cnt = 0
+        self._host_local_time_offset = 0
         self._local_time_offset = 0
 
     @staticmethod
@@ -262,7 +265,8 @@ class InfoConfReader:
         hwts_freq = self.get_freq(StrConstant.HWTS)
         return float(delta_syscnt) / hwts_freq * time_fmt
 
-    def time_from_host_syscnt(self: any, sys_cnt: int, time_fmt: int = NumberConstant.NANO_SECOND) -> float:
+    def time_from_host_syscnt(self: any, sys_cnt: int, time_fmt: int = NumberConstant.NANO_SECOND,
+                              is_host: bool = True) -> float:
         """
         transfer sys cnt to host_time unit.
         1.task_duration_sys_count: data_sys_count - start_sys_count
@@ -270,12 +274,15 @@ class InfoConfReader:
         3.data_timestamp(host): task_duration_timestamp + start_timestamp(host)
         :param sys_cnt: host sys count
         :param time_fmt: time format
+        :param is_host: use host's host_monotonic or dev's host_monotonic
         :return: sys timestamp
         """
         host_freq = self.get_host_freq()
         if host_freq != self.HOST_DEFAULT_FREQ:
-            time = float(sys_cnt - self._host_cnt * NumberConstant.NANO_SECOND) / \
-                   host_freq * time_fmt + self._host_mon * time_fmt
+            host_mon = self._host_host_mon if is_host else self._host_mon
+            host_cnt = self._host_host_cnt if is_host else self._host_cnt
+            time = float(sys_cnt - host_cnt * NumberConstant.NANO_SECOND) / \
+                   host_freq * time_fmt + host_mon * time_fmt
             return time if time >= 0.0 else 0
         return sys_cnt * time_fmt / NumberConstant.NANO_SECOND
 
@@ -409,25 +416,26 @@ class InfoConfReader:
     def get_ai_core_profiling_mode(self):
         return self._sample_json.get("ai_core_profiling_mode")
 
-    def trans_into_local_time(self: any, raw_timestamp: float, use_us: bool = False) -> str:
+    def trans_into_local_time(self: any, raw_timestamp: float, use_us: bool = False, is_host: bool = False) -> str:
         """
         transfer raw time(ns or us) into local time
         return: local time(str)
         """
         if use_us:
-            res = Decimal(str(raw_timestamp)) + Decimal(str(self._local_time_offset))
+            res = Decimal(str(raw_timestamp)) + Decimal(str(self.get_local_time_offset(is_host)))
         else:
-            res = Decimal(str(raw_timestamp)) / Decimal(NumberConstant.USTONS) + Decimal(str(self._local_time_offset))
+            res = Decimal(str(raw_timestamp)) / Decimal(NumberConstant.USTONS) + \
+                  Decimal(str(self.get_local_time_offset(is_host)))
         res = res.quantize(decimal.Decimal('0.000'))
         return str(res)
 
-    def get_local_time_offset(self: any) -> float:
+    def get_local_time_offset(self: any, is_host: bool = False) -> float:
         """
         get the offset between local time and monotonic raw
         add the offset to monotonic raw to get the local time
         return: offset(us)
         """
-        return self._local_time_offset
+        return self._host_local_time_offset if is_host else self._local_time_offset
 
     def get_qos_events(self: any) -> float:
         """
@@ -444,19 +452,11 @@ class InfoConfReader:
         self._sample_json = self.__get_json_data(
             self.get_conf_file_path(result_path, get_sample_json_compiles()))
 
-        host_result_path = os.path.join(os.path.dirname(result_path), 'host')
-        if os.path.exists(host_result_path) and os.path.isdir(host_result_path):
-            host_result_path = os.path.realpath(host_result_path)
-            self._start_info = self.__get_json_data(
-                self.get_conf_file_path(host_result_path, get_start_info_compiles()))
-            self._end_info = self.__get_json_data(
-                self.get_conf_file_path(host_result_path, get_end_info_compiles()))
-            return
         self._start_info = self.__get_json_data(
             self.get_conf_file_path(result_path, get_start_info_compiles()))
         self._end_info = self.__get_json_data(
             self.get_conf_file_path(result_path, get_end_info_compiles()))
-        
+
     def _load_dev_start_path_line_by_line(self: any, log_file: any) -> None:
         self._dev_cnt = 0
         self._start_log_time = 0
@@ -511,6 +511,9 @@ class InfoConfReader:
                 timer = TimerBean(time, self.get_host_freq())
                 self._host_mon = float(timer.host_mon) / NumberConstant.NANO_SECOND
                 self._host_cnt = float(timer.cntvct) / NumberConstant.NANO_SECOND
+                if self.is_host_profiling():
+                    self._host_host_mon = self._host_mon
+                    self._host_host_cnt = self._host_cnt
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error('Parse time sync data error: %s', str(err), exc_info=Constant.TRACE_BACK_SWITCH)
         if self._check_monotonic_and_cnt(host_start_file):
@@ -526,6 +529,8 @@ class InfoConfReader:
         collect_raw_time, _ = self.get_collect_raw_time()
         if collect_time_begin and collect_raw_time:
             self._local_time_offset = float(collect_time_begin) - float(collect_raw_time) / NumberConstant.NS_TO_US
+            if self.is_host_profiling():
+                self._host_local_time_offset = self._local_time_offset
             return
         logging.error("No start info, or start info is invalid.")
         raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)

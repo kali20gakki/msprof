@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+from common_func.ms_constant.number_constant import NumberConstant
 
 
 class TimerBean:
@@ -18,7 +19,11 @@ class TimerBean:
 
     @property
     def host_mon(self):
+        """
+        :return: monotonic time(ns)，it will add diff when diff is valid.
+        """
         if self.cntvct_diff and self._host_freq:
-            return int(self.clock_monotonic_raw) + round(int(self.cntvct_diff) / self._host_freq)
+            return int(self.clock_monotonic_raw) + round(
+                int(self.cntvct_diff) * NumberConstant.NANO_SECOND / self._host_freq)
         else:
             return int(self.clock_monotonic_raw)

@@ -47,7 +47,8 @@ class ApiViewer:
             (
                 data[0],
                 InfoConfReader().trans_into_local_time(
-                    InfoConfReader().time_from_host_syscnt(data[1], NumberConstant.MICRO_SECOND), use_us=True),
+                    InfoConfReader().time_from_host_syscnt(data[1], NumberConstant.MICRO_SECOND),
+                    use_us=True, is_host=True),
                 InfoConfReader().get_host_duration(data[2], NumberConstant.MICRO_SECOND),
                 *data[3:],
             ) for data in timeline_data

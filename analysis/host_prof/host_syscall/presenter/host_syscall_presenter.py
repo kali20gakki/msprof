@@ -312,7 +312,7 @@ class HostSyscallPresenter(HostProfPresenterBase):
             # 'name', 'tid', 'ts', 'dur'
             temp_data = [
                 data_item[3], int(data_item[1]), int(data_item[2]),
-                InfoConfReader().trans_into_local_time(data_item[7]),
+                InfoConfReader().trans_into_local_time(data_item[7], is_host=True),
                 (float(data_item[8]) - float(data_item[7])) / NumberConstant.CONVERSION_TIME
             ]
             result.append(temp_data)

@@ -42,8 +42,9 @@ class NpuMemRecViewer:
             self._data.append([datum.component,
                                format_high_precision_for_csv(
                                    InfoConfReader().trans_into_local_time(
-                                   InfoConfReader().time_from_host_syscnt(int(datum.timestamp),
-                                                                          NumberConstant.MICRO_SECOND), use_us=True)),
+                                       InfoConfReader().time_from_host_syscnt(int(datum.timestamp),
+                                                                              NumberConstant.MICRO_SECOND),
+                                       use_us=True, is_host=True)),
                                round(datum.total_allocate_memory / NumberConstant.KILOBYTE,
                                      NumberConstant.ROUND_THREE_DECIMAL),
                                round(datum.total_reserve_memory / NumberConstant.KILOBYTE,

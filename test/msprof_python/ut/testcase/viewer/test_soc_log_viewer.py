@@ -442,6 +442,9 @@ class TestTaskTimeViewer(unittest.TestCase):
         InfoConfReader()._dev_cnt = 0.0
         InfoConfReader()._host_mon = 0.0
         InfoConfReader()._local_time_offset = 10.0
+        InfoConfReader()._info_json = {
+            'devices': '0', "pid": '1000', 'DeviceInfo': [{"hwts_frequency": "100"}], 'CPU': [{'Frequency': "100"}]
+        }
         device_msproftx_data_dto = MsproftxMarkDto(0, 43114577937563, 0, 0)
         expected_trace_data = [
             OrderedDict([
@@ -466,13 +469,13 @@ class TestTaskTimeViewer(unittest.TestCase):
             ]),
             OrderedDict([
                 (TraceViewHeaderConstant.TRACE_HEADER_NAME, 'MsTx_0'), (TraceViewHeaderConstant.TRACE_HEADER_PID, 1000),
-                (TraceViewHeaderConstant.TRACE_HEADER_TID, 0), ('ts', '1658653708018104.830'), ('dur', 0),
+                (TraceViewHeaderConstant.TRACE_HEADER_TID, 0), ('ts', '431145779385.630'), ('dur', 0),
                 (TraceViewHeaderConstant.TRACE_HEADER_ARGS, {'Physic Stream Id': 0, 'Task Id': 0}),
                 (TraceViewHeaderConstant.TRACE_HEADER_PH, 'X')]),
             {
                 'bp': 'e', 'cat': 'MsTx', 'id': '0', TraceViewHeaderConstant.TRACE_HEADER_NAME: 'MsTx_0',
                 TraceViewHeaderConstant.TRACE_HEADER_PH: 'f',
-                TraceViewHeaderConstant.TRACE_HEADER_PID: 1000, 'tid': 0, 'ts': '1658653708018104.830'
+                TraceViewHeaderConstant.TRACE_HEADER_PID: 1000, 'tid': 0, 'ts': '431145779385.630'
             }
         ]
         configs, params = {}, {"project": ""}
@@ -483,10 +486,10 @@ class TestTaskTimeViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + '.TaskTimeViewer.get_ascend_task_data', return_value={}), \
                 mock.patch(NAMESPACE + '.TaskTimeViewer.get_trace_timeline', return_value=[]):
             check = TaskTimeViewer(configs, params)
-            InfoJsonReaderManager(info_json=InfoJson(devices='0',
-                                                     DeviceInfo=[{"hwts_frequency": "100"}], pid='0')).process()
             ret = check.get_timeline_data()
             self.assertEqual(ret, expected_trace_data)
+            InfoConfReader()._info_json = {}
+
 
 if __name__ == '__main__':
     unittest.main()

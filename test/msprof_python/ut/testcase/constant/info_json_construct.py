@@ -12,15 +12,36 @@ from common_func.info_conf_reader import InfoConfReader
 from constant.constant import UT_CONFIG_FILE_PATH
 
 
+class CPUInfo:
+    DEFAULT_CPU_INFO = {
+        "Id": 0,
+        "Name": "GenuineIntel",
+        "Frequency": "100.000000",
+        "Logical_CPU_Count": 1,
+        "Type": "Intel(R) Xeon(R) Platinum 8476C"
+    }
+
+    def __init__(self, **kwargs: any):
+        for key, value in self.DEFAULT_CPU_INFO.items():
+            setattr(self, key, value)
+        self.__dict__.update(kwargs)
+
+    @property
+    def cpu_info(self):
+        return self.__dict__
+
+
 class DeviceInfo:
-    DEFAULT_DEVICE_INFO = {'id': 0, 'env_type': 3, 'ctrl_cpu_id': 'ARMv8_Cortex_A55',
-                           'ctrl_cpu_core_num': 1, 'ctrl_cpu_endian_little': 1,
-                           'ts_cpu_core_num': 1,
-                           'ai_cpu_core_num': 7, 'ai_core_num': 8, 'ai_cpu_core_id': 1,
-                           'ai_core_id': 0, 'aicpu_occupy_bitmap': 254, 'ctrl_cpu': '0',
-                           'ai_cpu': '1, 2, 3, 4, 5, 6, 7', 'aiv_num': 0,
-                           'hwts_frequency': '38.4',
-                           'aic_frequency': '1150', 'aiv_frequency': '1000'}
+    DEFAULT_DEVICE_INFO = {
+        'id': 0, 'env_type': 3, 'ctrl_cpu_id': 'ARMv8_Cortex_A55',
+        'ctrl_cpu_core_num': 1, 'ctrl_cpu_endian_little': 1,
+        'ts_cpu_core_num': 1,
+        'ai_cpu_core_num': 7, 'ai_core_num': 8, 'ai_cpu_core_id': 1,
+        'ai_core_id': 0, 'aicpu_occupy_bitmap': 254, 'ctrl_cpu': '0',
+        'ai_cpu': '1, 2, 3, 4, 5, 6, 7', 'aiv_num': 0,
+        'hwts_frequency': '38.4',
+        'aic_frequency': '1150', 'aiv_frequency': '1000'
+    }
 
     def __init__(self, **kwargs: any):
         for key, value in self.DEFAULT_DEVICE_INFO.items():
@@ -36,6 +57,7 @@ class InfoJson:
     DEFAULT_INFO_JSON = {
         "jobInfo": "NA",
         "devices": "0",
+        "CPU": [CPUInfo().cpu_info],
         "DeviceInfo": [DeviceInfo().device_info],
         "platform_version": "0",
         "pid": "1000",

@@ -95,7 +95,8 @@ class HostToDevice:
             #  stream_id    task_id     batch_id   context_id
             connection_id = (stream_id << 64) + (task_id << 48) + (batch_id << 32) + context_id
             host_task_ts = InfoConfReader().trans_into_local_time(
-                InfoConfReader().time_from_host_syscnt(host_task_ts, NumberConstant.MICRO_SECOND), use_us=True)
+                InfoConfReader().time_from_host_syscnt(host_task_ts, NumberConstant.MICRO_SECOND),
+                use_us=True, is_host=True)
 
             connect_start = {
                 TraceViewHeaderConstant.TRACE_HEADER_NAME: f'HostToDevice{connection_id}',

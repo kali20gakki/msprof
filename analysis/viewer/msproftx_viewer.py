@@ -69,7 +69,7 @@ class MsprofTxViewer:
                 top_down_data.message, top_down_data.pid, top_down_data.tid,
                 InfoConfReader().trans_into_local_time(
                     InfoConfReader().time_from_host_syscnt(top_down_data.start_time, NumberConstant.MICRO_SECOND),
-                    use_us=True),
+                    use_us=True, is_host=True),
                 InfoConfReader().get_host_duration(top_down_data.dur_time,
                                                    NumberConstant.MICRO_SECOND),
                 trace_data_args
@@ -94,7 +94,7 @@ class MsprofTxViewer:
                 data.message, data.pid, data.tid,
                 InfoConfReader().trans_into_local_time(
                     InfoConfReader().time_from_host_syscnt(data.start_time, NumberConstant.MICRO_SECOND),
-                    use_us=True),
+                    use_us=True, is_host=True),
                 InfoConfReader().get_host_duration(data.dur_time, NumberConstant.MICRO_SECOND),
                 trace_data_args
             ]
@@ -107,9 +107,11 @@ class MsprofTxViewer:
             (
                 data[0], data[1], data[2], data[3], data[4], data[5],
                 InfoConfReader().trans_into_local_time(
-                    InfoConfReader().time_from_host_syscnt(data[6], NumberConstant.MICRO_SECOND), use_us=True),
+                    InfoConfReader().time_from_host_syscnt(data[6], NumberConstant.MICRO_SECOND),
+                    use_us=True, is_host=True),
                 InfoConfReader().trans_into_local_time(
-                    InfoConfReader().time_from_host_syscnt(data[7], NumberConstant.MICRO_SECOND), use_us=True),
+                    InfoConfReader().time_from_host_syscnt(data[7], NumberConstant.MICRO_SECOND),
+                    use_us=True, is_host=True),
                 data[8], data[9]
             ) for data in summary_data
         ]
@@ -119,9 +121,11 @@ class MsprofTxViewer:
         return [
             (data[0], data[1], Constant.NA, data[2], Constant.NA, Constant.NA,
              InfoConfReader().trans_into_local_time(
-                 InfoConfReader().time_from_host_syscnt(data[3], NumberConstant.MICRO_SECOND), use_us=True),
+                 InfoConfReader().time_from_host_syscnt(data[3], NumberConstant.MICRO_SECOND),
+                 use_us=True, is_host=True),
              InfoConfReader().trans_into_local_time(
-                 InfoConfReader().time_from_host_syscnt(data[4], NumberConstant.MICRO_SECOND), use_us=True),
+                 InfoConfReader().time_from_host_syscnt(data[4], NumberConstant.MICRO_SECOND),
+                 use_us=True, is_host=True),
              Constant.NA, data[5]
              ) for data in summary_data
         ]

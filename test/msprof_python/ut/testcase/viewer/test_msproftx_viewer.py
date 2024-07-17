@@ -31,6 +31,7 @@ class TestMsprofTxViewer(unittest.TestCase):
         InfoConfReader()._host_freq = None
         InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         InfoConfReader()._local_time_offset = 10.0
+        InfoConfReader()._host_local_time_offset = 10.0
         with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxModel.get_summary_data',
                         return_value=((0, 0, 0, 0, 0, 0, 0, 5, 0, 'test'), (0, 1, 0, 0, 1, 0, 1, 7, 0, 'test'))), \
                 mock.patch('msmodel.msproftx.msproftx_model.MsprofTxExModel.get_summary_data',
