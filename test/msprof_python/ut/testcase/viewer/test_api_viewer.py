@@ -68,8 +68,12 @@ class TestApiViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + '.ApiDataViewModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + ".ApiDataViewModel.get_timeline_data",
                            return_value=[(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)]):
-            InfoJsonReaderManager(InfoJson(pid=100)).process()
+            # 清空DeviceInfo内容，info_conf_reader根据DeviceInfo判定是否为host
+            InfoJsonReaderManager(InfoJson(pid=100, DeviceInfo=[])).process()
             InfoConfReader()._local_time_offset = 10.0
+            InfoConfReader()._host_local_time_offset = 10.0
             check = ApiViewer(config, params)
             ret = check.get_timeline_data()
             self.assertEqual(expect, ret)
+            # 还原InfoJsonReaderManager数据，避免干扰其他用例
+            InfoJsonReaderManager().process()

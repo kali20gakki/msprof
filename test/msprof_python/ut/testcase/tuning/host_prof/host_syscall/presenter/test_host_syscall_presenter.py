@@ -145,6 +145,7 @@ class TestHostSyscallPresenter(unittest.TestCase):
             InfoConfReader()._host_freq = None
             InfoConfReader()._info_json = {'pid': 1, 'tid': 0, 'CPU': [{'Frequency': "1000"}]}
             InfoConfReader()._local_time_offset = 10.0
+            InfoConfReader()._host_local_time_offset = 10.0
             check = HostSyscallPresenter(self.result_dir, self.file_name)
             result = check.get_timeline_data()
         self.assertEqual(result, [])

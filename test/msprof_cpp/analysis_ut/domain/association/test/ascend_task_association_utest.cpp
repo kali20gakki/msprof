@@ -15,6 +15,7 @@
 #include <map>
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
 #include "analysis/csrc/domain/services/association/include/ascend_task_association.h"
+#include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/domain/entities/hal/include/device_task.h"
 #include "analysis/csrc/domain/entities/hal/include/top_down_task.h"
 #include "analysis/csrc/entities/ascend_obj.h"
@@ -113,7 +114,9 @@ TEST_F(AscendTaskAssociationUTest, ShouldGenerateAscendTaskWhenProcessRun)
 TEST_F(AscendTaskAssociationUTest, ShouldReturnErrorWhenTaskIsEmpty)
 {
     AscendTaskAssociation association;
-    Context context;
+    DeviceContext context;
+    uint64_t diff = 100;
+    context.deviceContextInfo.hostStartLog.cntVctDiff = diff;
     ASSERT_EQ(ANALYSIS_ERROR, association.Run(dataInventory_, context));
 }
 }

@@ -80,6 +80,7 @@ class TestEventViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + ".EventDataViewModel.get_timeline_data", return_value=[matched_event_dto]):
             InfoJsonReaderManager(InfoJson(pid=100)).process()
             InfoConfReader()._local_time_offset = 10.0
+            InfoConfReader()._host_local_time_offset = 10.0
             check = EventViewer(config, params)
             ret = check.get_timeline_data()
             self.assertEqual(expect, ret)

@@ -53,6 +53,7 @@ class TestNpuMemRecViewer(TestDirCRBaseModel):
         ]
         InfoConfReader()._host_freq = 1000000000.0
         InfoConfReader()._local_time_offset = 10.0
+        InfoConfReader()._host_local_time_offset = 10.0
         op_mem_rec_data = [
             ['GE', 0, 0, 0, 'NPU:5'],
             ['GE', 1000, 1024, 1024, 'NPU:5']

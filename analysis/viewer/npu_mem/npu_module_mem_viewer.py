@@ -56,7 +56,8 @@ class NpuModuleMemViewer:
                                format_high_precision_for_csv(
                                    InfoConfReader().trans_into_local_time(
                                        InfoConfReader().time_from_host_syscnt(int(datum.syscnt),
-                                                                              NumberConstant.MICRO_SECOND),
+                                                                              NumberConstant.MICRO_SECOND,
+                                                                              is_host=False),
                                        use_us=True)),
                                total_size,
                                datum.device_type

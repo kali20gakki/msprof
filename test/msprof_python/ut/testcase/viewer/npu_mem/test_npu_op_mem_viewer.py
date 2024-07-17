@@ -48,6 +48,7 @@ class TestNpuOpMemViewer(unittest.TestCase):
         expected_data = [['123', 0.0, '10.000\t', 0.001, 0.0, 0.0, 0.0, 0.0, 'NPU:5']]
         InfoConfReader()._host_freq = 1000000000.0
         InfoConfReader()._local_time_offset = 10.0
+        InfoConfReader()._host_local_time_offset = 10.0
         mem_dto = OpMemDto()
         mem_dto.operator = '123'
         mem_dto.size = 0

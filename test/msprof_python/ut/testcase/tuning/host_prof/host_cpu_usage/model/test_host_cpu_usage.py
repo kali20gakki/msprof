@@ -64,6 +64,7 @@ class TsetHostCpuUsage(unittest.TestCase):
         InfoConfReader()._host_freq = None
         InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         InfoConfReader()._local_time_offset = 10.0
+        InfoConfReader()._host_local_time_offset = 10.0
         create_sql = "create table if not exists CpuUsage (start_time numeric,end_time numeric,cpu_no text,usage REAL)"
         insert_sql = "insert into {} values (?,?,?,?)".format('CpuUsage')
         data = ((10000, 20000, 20, 100),)

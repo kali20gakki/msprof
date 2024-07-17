@@ -97,7 +97,7 @@ class HostCpuUsage(HostProfDataBase):
             if is_number(item[0]):
                 time_cpu = [
                     "CPU " + str(item[2]),
-                    InfoConfReader().trans_into_local_time(item[0]),
+                    InfoConfReader().trans_into_local_time(item[0], is_host=True),
                     {"Usage(%)": item[3]}
                 ]
                 result.append(time_cpu)

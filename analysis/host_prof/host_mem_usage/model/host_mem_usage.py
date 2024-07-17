@@ -51,8 +51,8 @@ class HostMemUsage(HostProfDataBase):
         result = []
         for mem_item in mem_info_list:
             time_mem = {
-                "start": InfoConfReader().trans_into_local_time(mem_item[0]),
-                "end": InfoConfReader().trans_into_local_time(mem_item[1]),
+                "start": InfoConfReader().trans_into_local_time(mem_item[0], is_host=True),
+                "end": InfoConfReader().trans_into_local_time(mem_item[1], is_host=True),
                 "usage": mem_item[2]
             }
             result.append(time_mem)

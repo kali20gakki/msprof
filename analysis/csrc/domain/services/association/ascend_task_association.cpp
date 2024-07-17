@@ -33,6 +33,7 @@ namespace {
 const uint64_t DEFAULT_MODEL_ID = UINT32_MAX;
 const int32_t DEFAULT_INDEX_ID = -1;
 const int64_t DEFAULT_CONNECTION_ID = -1;
+const uint64_t MILLI_SECOND = 1000;
 const std::unordered_map<uint32_t, std::string> deviceTaskAcsqTypeMap {
         {0, "AI_CORE"},
         {1, "AI_CPU"},
@@ -86,7 +87,10 @@ SyscntConversionParams GetSyscntConversionParams(const DeviceContext& context)
     DeviceStartLog deviceStartLog;
     context.Getter(deviceStartLog);
     if (!IsDoubleEqual(cpuInfo.frequency, 0.0) && hostStartLog.cntVctDiff) {
-        hostMonotonic = hostStartLog.clockMonotonicRaw + hostStartLog.cntVctDiff / cpuInfo.frequency;
+        uint64_t diffTime = static_cast<uint64_t>(hostStartLog.cntVctDiff * MILLI_SECOND / cpuInfo.frequency);
+        if (UINT64_MAX - hostStartLog.clockMonotonicRaw >= diffTime) {
+            hostMonotonic = hostStartLog.clockMonotonicRaw + diffTime;
+        }
     }
     SyscntConversionParams params{deviceInfo.hwtsFrequency, deviceStartLog.cntVct, hostMonotonic};
     return params;

@@ -14,6 +14,10 @@
 
 namespace Analysis {
 namespace Domain {
+namespace {
+const uint64_t MILLI_SECOND = 1000;
+}
+
 SyscntConversionParams GenerateSyscntConversionParams(const DeviceContext& context)
 {
     CpuInfo cpuInfo;
@@ -26,7 +30,7 @@ SyscntConversionParams GenerateSyscntConversionParams(const DeviceContext& conte
     DeviceStartLog deviceStartLog;
     context.Getter(deviceStartLog);
     if (!IsDoubleEqual(cpuInfo.frequency, 0.0) && hostStartLog.cntVctDiff) {
-        uint64_t diffTime = static_cast<uint64_t>(hostStartLog.cntVctDiff / cpuInfo.frequency);
+        uint64_t diffTime = static_cast<uint64_t>(hostStartLog.cntVctDiff * MILLI_SECOND / cpuInfo.frequency);
         if (UINT64_MAX - hostStartLog.clockMonotonicRaw >= diffTime) {
             hostMonotonic = hostStartLog.clockMonotonicRaw + diffTime;
         }
