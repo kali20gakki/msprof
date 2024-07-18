@@ -45,8 +45,10 @@ class StarsCommon:
         """
         In the ffts scenario, when the 14th bit of the stream id is set,
         the lower 12 bits of the stream id need to be exchanged with the task id.
-
+        when the 13th bit of the stream id is set, get the lower 12 bits of the stream id.
         """
+        if stream_id & 0x1000 != 0:
+            return Utils.get_stream_id(stream_id)
         if stream_id & 0x2000 != 0:
             stream_id = task_id & 0x0FFF
         return Utils.get_stream_id(stream_id)

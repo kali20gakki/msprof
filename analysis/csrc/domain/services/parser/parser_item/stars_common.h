@@ -39,6 +39,9 @@ class StarsCommon {
 public:
 static uint16_t GetStreamId(uint16_t streamId, uint16_t taskId)
 {
+    if ((streamId & STREAM_JUDGE_BIT12_OPERATOR) != 0) {
+        return streamId % STREAM_LOW_OPERATOR;
+    }
     if ((streamId & STREAM_JUDGE_BIT13_OPERATOR) != 0) {
         streamId = taskId & COMMON_LOW_OPERATOR;
     }
