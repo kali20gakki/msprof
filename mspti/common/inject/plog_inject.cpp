@@ -28,8 +28,8 @@ int CheckLogLevelForC(int moduleId, int level)
     using checkLogLevelForCFunc = std::function<int(int, int)>;
     static checkLogLevelForCFunc func = nullptr;
     if (func == nullptr) {
-        Mspti::Common::GetFunction<int, int, int>("libascendalog", "CheckLogLevelForC", func);
+        Mspti::Common::GetFunction<int, int, int>("libascendalog", __FUNCTION__, func);
     }
-    THROW_FUNC_NOTFOUND(func, "CheckLogLevelForC", "libascendalog.so");
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libascendalog.so");
     return func(moduleId, level);
 }

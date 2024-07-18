@@ -20,7 +20,8 @@
 using rtError_t = uint32_t;
 using rtStream_t = void *;
 using rtSmDesc_t = void;
-using rtArgsEx_t = void;
+using VOID_PTR = void*;
+using VOID_PTR_PTR = void**;
 
 enum DrvError {
     DRV_ERROR_NONE = 0,
@@ -89,5 +90,49 @@ typedef struct TagTsTsFwProfileConfig {
 enum PROFILE_MODE {
     PROFILE_REAL_TIME = 1,
 };
+
+typedef struct rtHostInputInfo {
+    uint16_t addrOffset;
+    uint16_t dataOffset;
+} RtHostInputInfoT;
+
+typedef struct tagRtArgsEx {
+    void *args;                     // args host mem addr
+    RtHostInputInfoT *hostInputInfoPtr;     // nullptr means no host mem input
+    uint32_t argsSize;              // input + output + tiling addr size + tiling data size + host mem
+    uint16_t tilingAddrOffset;      // tiling addr offset
+    uint16_t tilingDataOffset;      // tiling data offset
+    uint16_t hostInputInfoNum;      // hostInputInfo num
+    uint8_t hasTiling;              // if has tiling: 0 means no tiling
+    uint8_t isNoNeedH2DCopy;        // is no need host to device copy: 0 means need H2D copy,
+                                    // others means doesn't need H2D copy.
+    uint8_t reserved[4];
+} RtArgsExT;
+
+typedef struct tagRtAicpuArgsEx {
+    void *args; // args host mem addr
+    RtHostInputInfoT *hostInputInfoPtr; // nullptr means no host mem input
+    RtHostInputInfoT *kernelOffsetInfoPtr; // KernelOffsetInfo, it is different for CCE Kernel and fwk kernel
+    uint32_t argsSize;
+    uint16_t hostInputInfoNum; // hostInputInfo num
+    uint16_t kernelOffsetInfoNum; // KernelOffsetInfo num
+    uint16_t soNameAddrOffset; // just for CCE Kernel, default value is 0xffff for FWK kernel
+    uint16_t kernelNameAddrOffset; // just for CCE Kernel, default value is 0xffff for FWK kernel
+    bool isNoNeedH2DCopy; // is no need host to device copy: 0 means need H2D copy,
+                               // other means doesn't need H2D copy.
+    uint8_t reserved[3];
+} RtAicpuArgsExT;
+
+typedef void *rtFuncHandle;
+typedef void *rtLaunchArgsHandle;
+
+typedef struct tagRtTaskCfgInfo {
+    uint8_t qos;
+    uint8_t partId;
+    uint8_t schemMode; // rtschemModeType_t 0:normal;1:batch;2:sync
+    bool d2dCrossFlag; // d2dCrossFlag true:D2D_CROSS flase:D2D_INNER
+    uint32_t blockDimOffset;
+    uint8_t dumpflag; // dumpflag 0:fault 2:RT_KERNEL_DUMPFLAG 4:RT_FUSION_KERNEL_DUMPFLAG
+} RtTaskCfgInfoT;
 
 #endif

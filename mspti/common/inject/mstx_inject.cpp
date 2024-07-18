@@ -36,12 +36,12 @@ void aclprofMarkEx(const char* message, size_t len, RT_STREAM stream)
     activity.timestamp = Mspti::Common::Utils::GetClockMonotonicRawNs();
     activity.markId = markId;
     int32_t streamId = 0;
-    RtGetStreamId(stream, &streamId);
+    rtGetStreamId(stream, &streamId);
     activity.streamId = static_cast<uint32_t>(streamId);
     activity.deviceId = HOST_ID;
     activity.name = message;
     Mspti::Activity::ActivityManager::GetInstance()->Record(
         reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMark));
 
-    RtProfilerTraceEx(markId, 0xFFFFFFFFU, MARK_TAG_ID, stream);
+    rtProfilerTraceEx(markId, 0xFFFFFFFFU, MARK_TAG_ID, stream);
 }

@@ -88,6 +88,7 @@ msptiResult ChannelReader::Execute()
         }
         cur_pos = cur_pos + currLen - last_pos;
     }
+    return MSPTI_SUCCESS;
 }
 
 size_t ChannelReader::TransDataToActivityBuffer(char buffer[], size_t valid_size,
