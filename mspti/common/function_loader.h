@@ -62,7 +62,7 @@ static void RegisterFunction(const std::string& soName, const std::string& funcN
 }
 
 template <typename R, typename... Types>
-void GetFunction(const std::string& soName, const std::string& funcName, std::function<R(Types... args)>& func)
+void GetFunction(const std::string& soName, const std::string& funcName, std::function<R(Types...)>& func)
 {
     auto func_ptr = FunctionRegister::GetInstance()->Get(soName, funcName);
     func = (R(*)(Types...))func_ptr;

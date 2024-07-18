@@ -20,13 +20,6 @@
 extern "C" {
 #endif
 
-typedef struct TagRtTaskCfgInfo {
-    uint8_t qos;
-    uint8_t partId;
-    uint8_t schemMode;
-    uint8_t res[1];
-} RtTaskCfgInfoT;
-
 // Inject
 MSPTI_API rtError_t rtSetDevice(int32_t device);
 MSPTI_API rtError_t rtDeviceReset(int32_t device);
@@ -40,14 +33,28 @@ MSPTI_API rtError_t rtStreamSynchronize(rtStream_t stream);
 MSPTI_API rtError_t rtKernelLaunch(const void *stubFunc, uint32_t blockDim, void *args,
     uint32_t argsSize, rtSmDesc_t *smDesc, rtStream_t stream);
 MSPTI_API rtError_t rtKernelLaunchWithFlagV2(const void *stubFunc, uint32_t blockDim,
-    rtArgsEx_t *argsInfo, rtSmDesc_t *smDesc, rtStream_t stream, uint32_t flags, const RtTaskCfgInfoT *cfgInfo);
+    RtArgsExT *argsInfo, rtSmDesc_t *smDesc, rtStream_t stream, uint32_t flags, const RtTaskCfgInfoT *cfgInfo);
 MSPTI_API rtError_t rtKernelLaunchWithHandleV2(
-    void *handle, const uint64_t tilingkey, uint32_t blockDim, rtArgsEx_t *argsInfo, rtSmDesc_t *smDesc,
+    void *handle, const uint64_t tilingkey, uint32_t blockDim, RtArgsExT *argsInfo, rtSmDesc_t *smDesc,
     rtStream_t stream, const RtTaskCfgInfoT *cfgInfo);
+MSPTI_API rtError_t rtAicpuKernelLaunchExWithArgs(const uint32_t kernelType, const char* const opName,
+    const uint32_t blockDim, const RtAicpuArgsExT *argsInfo, rtSmDesc_t * const smDesc,
+    const rtStream_t stm, const uint32_t flags);
+MSPTI_API rtError_t rtLaunchKernelByFuncHandle(rtFuncHandle funcHandle, uint32_t blockDim,
+    rtLaunchArgsHandle argsHandle, rtStream_t stm);
+MSPTI_API rtError_t rtLaunchKernelByFuncHandleV2(rtFuncHandle funcHandle, uint32_t blockDim,
+    rtLaunchArgsHandle argsHandle, rtStream_t stm, const RtTaskCfgInfoT *cfgInfo);
+MSPTI_API rtError_t rtVectorCoreKernelLaunch(const VOID_PTR stubFunc, uint32_t blockDim, RtArgsExT *argsInfo,
+    rtSmDesc_t *smDesc, rtStream_t stm, uint32_t flags, const RtTaskCfgInfoT *cfgInfo);
+MSPTI_API rtError_t rtVectorCoreKernelLaunchWithHandle(VOID_PTR hdl, const uint64_t tilingKey, uint32_t blockDim,
+    RtArgsExT *argsInfo, rtSmDesc_t *smDesc, rtStream_t stm, const RtTaskCfgInfoT *cfgInfo);
+
 // Inner
-rtError_t RtGetDevice(int32_t *devId);
-rtError_t RtProfilerTraceEx(uint64_t id, uint64_t modelId, uint16_t tagId, rtStream_t stm);
-rtError_t RtGetStreamId(rtStream_t stm, int32_t *streamId);
+rtError_t rtGetDevice(int32_t *devId);
+rtError_t rtProfilerTraceEx(uint64_t id, uint64_t modelId, uint16_t tagId, rtStream_t stm);
+rtError_t rtGetStreamId(rtStream_t stm, int32_t *streamId);
+rtError_t rtBinaryGetFunction(VOID_PTR binHandle, uint64_t tilingKey, VOID_PTR_PTR funcHandle);
+rtError_t rtProfSetProSwitch(VOID_PTR data, uint32_t len);
 
 #if defined(__cplusplus)
 }
