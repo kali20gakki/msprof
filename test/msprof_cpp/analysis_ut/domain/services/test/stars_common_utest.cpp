@@ -27,6 +27,12 @@ TEST(StarCommonUTest, ShouldReturnStreamWhenStreamBit13IsNotOne)
     EXPECT_EQ(3, res);
 }
 
+TEST(StarCommonUTest, ShouldReturnStreamLow12BitsWhenStreamBit12IsOne)
+{
+    auto res = StarsCommon::GetStreamId(12291, 8);
+    EXPECT_EQ(3, res);
+}
+
 TEST(StarCommonUTest, ShouldTaskChangeLow12BitsWhenStreamBit13IsOne)
 {
     auto res = StarsCommon::GetTaskId(8195, 8);
