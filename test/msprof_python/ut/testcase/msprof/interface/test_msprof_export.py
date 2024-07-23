@@ -478,6 +478,24 @@ class TestExportCommand(unittest.TestCase):
                 test.list_map["devices_list"] = ["1"]
                 test.process()
 
+    def test_test_process_test_when_command_type_is_db(self):
+        args_dic = {"collection_path": "test"}
+        args = Namespace(**args_dic)
+        with mock.patch(NAMESPACE + '.check_path_valid'), \
+                mock.patch(NAMESPACE + '.ExportCommand._process_sub_dirs'):
+            # 不支持 so 解析
+            test = ExportCommand("db", args)
+            test.process()
+            with mock.patch('os.path.isfile', return_value=True), \
+                    mock.patch('os.path.islink', return_value=False), \
+                    mock.patch('os.access', return_value=True), \
+                    mock.patch('common_func.file_manager.is_other_writable', return_value=False), \
+                    mock.patch('common_func.file_manager.check_file_owner', return_value=True), \
+                    mock.patch('importlib.import_module'):
+                # 支持 so 解析
+                test = ExportCommand("db", args)
+                test.process()
+
     def test_handle_export_raise_profexception_0(self) -> None:
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
         args = Namespace(**args_dic)

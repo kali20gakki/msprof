@@ -31,7 +31,6 @@ public:
     virtual int ModeParamsCheck() = 0;
     virtual int RunModeTasks() = 0;
     virtual void UpdateOutputDirInfo();
-    virtual int UnifiedDBExport();
     void StopRunningTasks() const;
     void RemoveRecordFile(const std::string &fileName) const;
     SHARED_PTR_ALIA<Analysis::Dvvp::Msprof::ProfTask> GetRunningTask(const std::string &jobId);
@@ -165,7 +164,6 @@ public:
     ~ExportMode() override;
     int ModeParamsCheck() override;
     int RunModeTasks() override;
-    int UnifiedDBExport() override;
     void UpdateOutputDirInfo() override;
 };
 }

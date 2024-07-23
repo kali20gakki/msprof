@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-
+import importlib
 import json
 import logging
 import multiprocessing
 import os
 import shutil
+import sys
 
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.common import call_sys_exit
@@ -297,6 +298,9 @@ class ExportCommand:
         """
         check_path_valid(self.collection_path, False)
         self._process_sub_dirs()
+        if self.command_type == MsProfCommonConstant.DB:
+            self._run_unified_db_manager()
+            return
         if self._cluster_params.get('is_cluster_scene', False):
             self._show_cluster_tuning()
 
@@ -693,3 +697,12 @@ class ExportCommand:
             profiler.export(self.command_type)
 
             PathManager.del_summary_and_timeline_dir(collect_path, sub_dirs)
+
+    def _run_unified_db_manager(self):
+        if not ProfilingScene().is_cpp_parse_enable():
+            logging.warning("Does not support exporting the msprof.db!")
+            return
+        sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib64")))
+        logging.info("Data will be parsed by msprof_analysis.so!")
+        msprof_analysis_module = importlib.import_module("msprof_analysis")
+        msprof_analysis_module.parser.export_unified_db(self.collection_path)

@@ -315,10 +315,19 @@ TEST_F(ContextUTest, TestIsAllExportShouldReturnFalseWhenChipV310)
     EXPECT_FALSE(Context::GetInstance().IsAllExport());
 }
 
-TEST_F(ContextUTest, TestGetPlatformVersionShouldReturnUINT16MAXWhenNoDevice)
+TEST_F(ContextUTest, TestGetPlatformVersionShouldReturnOtherDeviceVersion)
 {
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
-    EXPECT_EQ(Context::GetInstance().GetPlatformVersion(1, File::PathJoin({CONTEXT_DIR, LOCAL_DIR})), UINT16_MAX);
+    uint16_t platformVersion = 7;
+    EXPECT_EQ(Context::GetInstance().GetPlatformVersion(1, File::PathJoin({CONTEXT_DIR, LOCAL_DIR})), platformVersion);
+}
+
+TEST_F(ContextUTest, TestGetPlatformVersionShouldReturnUINT16MAXWhenNoDevice)
+{
+    EXPECT_TRUE(File::RemoveDir(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST}), 0));
+    EXPECT_TRUE(File::RemoveDir(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0"}), 0));
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    EXPECT_EQ(Context::GetInstance().GetPlatformVersion(1, File::PathJoin({CONTEXT_DIR, TEST_DIR})), UINT16_MAX);
 }
 
 TEST_F(ContextUTest, TestGetPlatformVersionShouldReturnUINT16MAXWhenPlatformVersionStrToU16Failed)
@@ -353,6 +362,23 @@ TEST_F(ContextUTest, TestGetPidFromInfoJsonShouldReturn0WhenPidStrToU16Failed)
         {"drvVersion", 467732},
         {"platform_version", "7"},
         {"pid", "abc"},
+        {"CPU", {{{"Frequency", "100.000000"}}}},
+        {"DeviceInfo", {{{"hwts_frequency", "49.000000"}, {"aic_frequency", "1850"}}}},
+        {"hostname", "localhost"}
+    };
+    FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON}));
+    infoWriter.WriteText(info.dump());
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    EXPECT_EQ(Context::GetInstance().GetPidFromInfoJson(HOST_ID, File::PathJoin({CONTEXT_DIR, TEST_DIR})), 0);
+}
+
+TEST_F(ContextUTest, TestGetPidFromInfoJsonShouldReturn0WhenPidIsNA)
+{
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON})));
+    nlohmann::json info = {
+        {"drvVersion", 467732},
+        {"platform_version", "7"},
+        {"pid", "NA"},
         {"CPU", {{{"Frequency", "100.000000"}}}},
         {"DeviceInfo", {{{"hwts_frequency", "49.000000"}, {"aic_frequency", "1850"}}}},
         {"hostname", "localhost"}

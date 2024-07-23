@@ -79,7 +79,7 @@ TEST_F(HostInfoProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 TEST_F(HostInfoProcessorUTest, TestRunShouldReturnTrueWhenNoHost)
 {
     auto processor = HostInfoProcessor(DB_PATH, {""});
-    EXPECT_FALSE(processor.Run());
+    EXPECT_TRUE(processor.Run());
 }
 
 TEST_F(HostInfoProcessorUTest, TestRunShouldReturnFalseWhenOneProcessFailInMultithreading)
