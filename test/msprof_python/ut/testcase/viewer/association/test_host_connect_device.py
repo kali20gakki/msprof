@@ -293,7 +293,7 @@ class TestHostToDevice(unittest.TestCase):
     def test_get_cann_pid(self):
         InfoConfReader()._info_json = {TraceViewHeaderConstant.TRACE_HEADER_PID: 123}
         cann_pid = HostToDevice.get_cann_pid()
-        self.assertEqual(cann_pid, 126047)
+        self.assertEqual(cann_pid, 126207)
 
     def test_get_hccl_op_connection_ids(self):
         with mock.patch("common_func.msvp_common.path_check", return_value=False):
