@@ -135,4 +135,42 @@ typedef struct tagRtTaskCfgInfo {
     uint8_t dumpflag; // dumpflag 0:fault 2:RT_KERNEL_DUMPFLAG 4:RT_FUSION_KERNEL_DUMPFLAG
 } RtTaskCfgInfoT;
 
+#define MSPROF_ENGINE_MAX_TAG_LEN (63)
+
+struct ReporterData {
+    char tag[MSPROF_ENGINE_MAX_TAG_LEN + 1];  // the sub-type of the module, data with different tag will be writen
+    int deviceId;                             // the index of device
+    size_t dataLen;                           // the length of send data
+    unsigned char *data;                      // the data content
+};
+
+struct MsprofStampInfo {
+    uint16_t magicNumber;
+    uint16_t dataTag;
+    uint32_t processId;
+    uint32_t threadId;
+    uint32_t category;      // marker category
+    uint32_t eventType;
+    int32_t payloadType;
+    union PayloadValue {    // payload info for marker
+        uint64_t ullValue;
+        int64_t llValue;
+        double dValue;
+        uint32_t uiValue[2];
+        int32_t iValue[2];
+        float fValue[2];
+    } payload;
+    uint64_t startTime;
+    uint64_t endTime;
+    int32_t messageType;
+    char message[128];
+};
+
+struct MsprofStampInstance {
+    ReporterData report;
+    MsprofStampInfo stampInfo;
+    int id;
+    struct MsprofStampInstance* next;
+    struct MsprofStampInstance* prev;
+};
 #endif

@@ -14,7 +14,8 @@
 
 #include <ctime>
 #include <sys/prctl.h>
-
+#include <unistd.h>
+#include <sys/syscall.h>
 #include "securec.h"
 
 namespace Mspti {
@@ -35,6 +36,16 @@ std::string Utils::GetProcName()
     static char buf[16] = {'\0'};
     prctl(PR_GET_NAME, (unsigned long)buf);
     return std::string(buf);
+}
+
+uint32_t Utils::GetPid()
+{
+    return static_cast<uint32_t>(getpid());
+}
+
+uint32_t Utils::GetTid()
+{
+    return static_cast<uint32_t>(syscall(SYS_gettid));
 }
 }  // Common
 }  // Mspti

@@ -53,6 +53,8 @@ class Utils {
 public:
     static uint64_t GetClockMonotonicRawNs();
     static std::string GetProcName();
+    static uint32_t GetPid();
+    static uint32_t GetTid();
 };
 
 }  // Common

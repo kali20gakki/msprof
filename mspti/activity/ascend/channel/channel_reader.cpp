@@ -119,14 +119,15 @@ size_t ChannelReader::TransTsFwData(char buffer[], size_t valid_size, uint32_t d
         switch (type) {
             case RPT_TYPE_STEP_TRACE:
                 msptiActivityMark activity;
-                activity.kind = MSPTI_ACTIVITY_KIND_MARK;
-                activity.mode = 1;
+                activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
+                activity.mode = MSPTI_ACTIVITY_MARKER_MODE_DEVICE;
                 activity.timestamp = *reinterpret_cast<uint64_t*>(buffer + pos + TIMESTAMP_POS);
                 activity.timestamp = Mspti::Common::ContextManager::GetInstance()->GetMonotomicFromSysCnt(deviceId,
                     activity.timestamp);
-                activity.markId = *reinterpret_cast<uint64_t*>(buffer + pos + MARKID_POS);
-                activity.streamId = static_cast<uint32_t>(*reinterpret_cast<uint16_t*>(buffer + pos + STREAMID_POS));
-                activity.deviceId = deviceId;
+                activity.id = *reinterpret_cast<uint64_t*>(buffer + pos + MARKID_POS);
+                activity.msptiObjectId.ds.streamId =
+                        static_cast<uint32_t>(*reinterpret_cast<uint16_t*>(buffer + pos + STREAMID_POS));
+                activity.msptiObjectId.ds.deviceId = deviceId;
                 activity.name = "";
                 Mspti::Activity::ActivityManager::GetInstance()->Record(
                     reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMark));

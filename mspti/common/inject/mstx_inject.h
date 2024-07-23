@@ -23,6 +23,8 @@ extern "C" {
 
 MSPTI_API void aclprofMarkEx(const char* message, size_t len, RT_STREAM stream);
 
+MSPTI_API void aclprofMark(void *stamp);
+
 #if defined(__cplusplus)
 }
 #endif

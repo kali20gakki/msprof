@@ -25,7 +25,7 @@ namespace Ascend {
 
 std::shared_ptr<DevProfJob> CollectionJobFactory::CreateJob(uint32_t deviceId, msptiActivityKind kind)
 {
-    if (kind == MSPTI_ACTIVITY_KIND_MARK) {
+    if (kind == MSPTI_ACTIVITY_KIND_MARKER) {
         std::shared_ptr<ProfTsTrackJob> ret = nullptr;
         Mspti::Common::MsptiMakeSharedPtr(ret, deviceId);
         return ret;
