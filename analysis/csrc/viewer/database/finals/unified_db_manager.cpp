@@ -18,17 +18,14 @@
 #include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/dfx/log.h"
 #include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/table_processor_factory.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "collector/dvvp/common/config/config.h"
-#include "collector/dvvp/common/errno/error_code.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
 using Context = Parser::Environment::Context;
-using namespace analysis::dvvp::common::error;
 
 namespace {
     const std::vector<std::string> PROCESSOR_NAME = {
@@ -59,71 +56,56 @@ namespace {
     };
 }
 
-bool UnifiedDBManager::CheckProfDirsValid(const std::string& outputDir,
-                                          const std::set<std::string> &profFolderPaths, std::string &errInfo)
+bool UnifiedDBManager::CheckProfDirsValid(const std::string &output)
 {
-    if (profFolderPaths.empty()) {
-        errInfo = "The prof files in the current directory are empty. Please check your file path.";
+    if (output.empty()) {
+        ERROR("The prof files in the current directory are empty. Please check your file path.");
         return false;
     }
-
-    // 对于单PROF情况,不校验MsprofBinPid
-    if (profFolderPaths.size() == 1) {
-        return true;
+    if (output.find("PROF") == std::string::npos) {
+        auto files = Utils::File::GetOriginData(output, {"PROF"}, {""});
+        profFolderPaths_.insert(files.begin(), files.end());
+    } else {
+        profFolderPaths_.insert(output);
     }
-
-    if (!Context::GetInstance().Load(profFolderPaths)) {
-        errInfo = "JSON parameter loading failed. Please check if the JSON data is complete.";
+    if (profFolderPaths_.empty()) {
+        ERROR("Can't find any PROF file.");
         return false;
-    }
-
-    int64_t preMsprofBinPid = analysis::dvvp::common::config::MSVP_MMPROCESS;
-    for (const auto& path : profFolderPaths) {
-        int64_t msprofBinPid = Context::GetInstance().GetMsBinPid(path);
-        if (msprofBinPid == analysis::dvvp::common::config::MSVP_MMPROCESS) {
-            errInfo = "The current msprofBinPid is an invalid value:" + std::to_string(msprofBinPid) +
-                      ". Please check the value of your path:" + path + ".";
-            return false;
-        }
-        if (preMsprofBinPid != analysis::dvvp::common::config::MSVP_MMPROCESS && preMsprofBinPid != msprofBinPid) {
-            errInfo = "The profiling results under the " + outputDir + " path are not from "\
-                       "the same data collection session. Please verify and rerun.";
-            return false;
-        }
-        preMsprofBinPid = msprofBinPid;
     }
     return true;
 }
 
-int UnifiedDBManager::Init()
+std::string UnifiedDBManager::GetDBPath(const std::string& outputDir)
 {
-    Analysis::Log::GetInstance().Init(outputPath_);
-
-    Analysis::Association::Credential::IdPool::GetInstance();
-
-    if (!Analysis::Parser::Environment::Context::GetInstance().Load(ProfFolderPaths_)) {
-        ERROR("JSON parameter loading failed. Please check if the JSON data is complete.");
-        return PROFILING_FAILED;
-    }
-
-    // msprofdb name and Path
-    msprofDBPath_ = outputPath_ + "/" +
-                    DB_NAME_MSPROF_DB + "_" + Analysis::Utils::GetFormatLocalTime() + ".db";
-
-    return PROFILING_SUCCESS;
+    return outputDir + "/" + DB_NAME_MSPROF_DB + "_" + Analysis::Utils::GetFormatLocalTime() + ".db";
 }
 
-int UnifiedDBManager::Run()
+bool UnifiedDBManager::Init()
 {
-    INFO("Start export msprof.db %", msprofDBPath_);
-    const uint16_t tableProcessors = 5; // 最多有五个线程
-    Analysis::Utils::ThreadPool pool(tableProcessors);
-    pool.Start();
+    if (!CheckProfDirsValid(outputPath_)) {
+        ERROR("Check UnifiedDBManager output path failed, path is %.", outputPath_);
+        PRINT_ERROR("Check UnifiedDBManager output path failed, path is %. "
+                    "Please check msprof_analysis_log in outputPath for more info.", outputPath_);
+        return false;
+    }
+    Analysis::Association::Credential::IdPool::GetInstance();
+    if (!Analysis::Parser::Environment::Context::GetInstance().Load(profFolderPaths_)) {
+        ERROR("JSON parameter loading failed. Please check if the JSON data is complete.");
+        PRINT_ERROR("JSON parameter loading failed. Please check if the JSON data is complete. "
+                    "Please check msprof_analysis_log in outputPath for more info.");
+        return false;
+    }
+    return true;
+}
+
+bool UnifiedDBManager::RunOneProf(const std::string& profPath, Analysis::Utils::ThreadPool& pool)
+{
     std::atomic<bool> retFlag(true);
+    const auto dbPath = GetDBPath(profPath);
     for (const auto& name : PROCESSOR_NAME) {
-        pool.AddTask([this, name, &retFlag]() {
+        pool.AddTask([this, profPath, dbPath, name, &retFlag]() {
             std::shared_ptr<TableProcessor> processor =
-                TableProcessorFactory::CreateTableProcessor(name, msprofDBPath_, ProfFolderPaths_);
+                    TableProcessorFactory::CreateTableProcessor(name, dbPath, {profPath});
             if (processor == nullptr) {
                 ERROR("% is not defined", name);
                 retFlag = false;
@@ -132,29 +114,44 @@ int UnifiedDBManager::Run()
             retFlag = processor->Run() & retFlag;
         });
     }
-
+    // 等待线程池内的线程执行完毕
     pool.WaitAllTasks();
-    pool.Stop();
-
-    if (!retFlag) {
-        ERROR("The unified db process failed to be executed");
-    }
-
     // string_id table 要在其他所有table 全部生成之后再去生成
     std::shared_ptr<TableProcessor> processor =
-        TableProcessorFactory::CreateTableProcessor(PROCESSOR_NAME_STRING_IDS, msprofDBPath_, ProfFolderPaths_);
-    if (processor == nullptr) {
-        ERROR("% is not defined", PROCESSOR_NAME_STRING_IDS);
-        return PROFILING_FAILED;
-    } else {
-        if (!processor->Run()) {
-            ERROR("Dump StringId failed.");
-            return PROFILING_FAILED;
-        }
+            TableProcessorFactory::CreateTableProcessor(PROCESSOR_NAME_STRING_IDS, dbPath, {profPath});
+    if (processor == nullptr || !processor->Run()) {
+        ERROR("% error.", PROCESSOR_NAME_STRING_IDS);
+        retFlag = false;
     }
+    if (!retFlag) {
+        ERROR("The % process failed to be executed.", dbPath);
+        PRINT_ERROR("The % process failed to be executed. "
+                    "Please check msprof_analysis_log in outputPath for more info.", dbPath);
+        return false;
+    }
+    return true;
+}
 
-    // PROCESSOR_NAME_STRING_IDS
-    return PROFILING_SUCCESS;
+bool UnifiedDBManager::Run()
+{
+    INFO("Start exporting the msprof.db!");
+    const uint16_t tableProcessors = 5; // 最多有五个线程
+    Analysis::Utils::ThreadPool pool(tableProcessors);
+    pool.Start();
+    bool runFlag = true;
+    for (const auto& profPath : profFolderPaths_) {
+        runFlag = RunOneProf(profPath, pool) & runFlag;
+    }
+    pool.Stop();
+
+    if (!runFlag) {
+        ERROR("The unified db process failed to be executed.");
+        PRINT_ERROR("The unified db process failed to be executed. "
+                    "Please check msprof_analysis_log in outputPath for more info.");
+        return false;
+    }
+    PRINT_INFO("End exporting db output_file. The file is stored in the PROF file.");
+    return true;
 }
 
 }  // Database

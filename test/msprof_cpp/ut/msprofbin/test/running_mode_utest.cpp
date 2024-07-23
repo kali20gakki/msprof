@@ -1286,21 +1286,3 @@ TEST_F(RUNNING_MODE_UTEST, ExportModeRunModeTasks) {
     EXPECT_EQ(PROFILING_FAILED, rMode.RunModeTasks());
     EXPECT_EQ(PROFILING_SUCCESS, rMode.RunModeTasks());
 }
-
-TEST_F(RUNNING_MODE_UTEST, ExportModeUnifiedDBExportReturnFalseWhenResultDirIsEmpty)
-{
-    GlobalMockObject::verify();
-    std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
-        new analysis::dvvp::message::ProfileParams);
-    Collector::Dvvp::Msprofbin::ExportMode rMode("export", nullptr);
-    rMode.params_ = params;
-    params->result_dir = "./test11";
-    params->exportType = "db";
-    MOCKER_CPP(&SystemMode::CheckAnalysisEnv)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&SystemMode::StartExportTask)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(PROFILING_FAILED, rMode.RunModeTasks());
-}

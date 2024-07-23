@@ -28,6 +28,10 @@ bool HostInfoProcessor::Run()
     // profPaths_已在外部校验, 保证传到这里的值不为空
     const auto& fileDir = *(profPaths_.begin());
     bool flag = Process(fileDir);
+    // 无host目录 无数据时，避免saveData因数据为空 导致error
+    if (flag && hostInfoData_.empty()) {
+        return true;
+    }
     flag &= SaveData(hostInfoData_, TABLE_NAME_HOST_INFO);
     PrintProcessorResult(flag, PROCESSOR_NAME_HOST_INFO);
     return flag;

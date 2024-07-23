@@ -226,12 +226,8 @@ nlohmann::json Context::GetInfoByDeviceId(uint16_t deviceId, const std::string &
         return emptyJson;
     }
     // 若不设置deviceId(使用默认id),则直接返回第一条info
-    if (deviceId == DEFAULT_DEVICE_ID) {
+    if (deviceId == DEFAULT_DEVICE_ID || deviceInfo.find(deviceId) == deviceInfo.end()) {
         return deviceInfo.begin()->second;
-    }
-    if (deviceInfo.find(deviceId) == deviceInfo.end()) {
-        ERROR("Can't find any info data in %, which device id is %.", profPath, deviceId);
-        return emptyJson;
     }
     return deviceInfo[deviceId];
 }
@@ -297,7 +293,12 @@ uint32_t Context::GetPidFromInfoJson(uint16_t deviceId, const std::string &profP
         ERROR("GetPidFromInfoJson device info is empty.");
         return pid;
     }
-    if (StrToU32(pid, info.at("pid")) != ANALYSIS_OK) {
+    const std::string strPid = info.at("pid");
+    if (strPid == "NA") {
+        WARN("pid is NA and will be set 0.");
+        return pid;
+    }
+    if (StrToU32(pid, strPid) != ANALYSIS_OK) {
         ERROR("Pid to uint32_t failed, invalid str is %.", info.at("pid"));
     }
     return pid;

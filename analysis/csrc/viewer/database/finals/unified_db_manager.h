@@ -16,22 +16,25 @@
 #include <string>
 #include <set>
 
+#include "analysis/csrc/utils/thread_pool.h"
+
 namespace Analysis {
 namespace Viewer {
 namespace Database {
 
 class UnifiedDBManager {
 public:
-    UnifiedDBManager(const std::string &output, const std::set<std::string> &profPaths)
-        : outputPath_(output), ProfFolderPaths_(profPaths) {};
-    int Run();
-    int Init();
-    static bool CheckProfDirsValid(const std::string& outputDir,
-                                   const std::set<std::string> &profFolderPaths, std::string &errInfo);
+    UnifiedDBManager(const std::string &output) : outputPath_(output) {};
+    bool Run();
+    bool Init();
+private:
+    bool CheckProfDirsValid(const std::string& outputDir);
+    static std::string GetDBPath(const std::string& outputDir);
+    bool RunOneProf(const std::string& profPath, Utils::ThreadPool& pool);
 private:
     std::string msprofDBPath_;
     std::string outputPath_;
-    std::set<std::string> ProfFolderPaths_;
+    std::set<std::string> profFolderPaths_;
 };
 
 }  // Database
