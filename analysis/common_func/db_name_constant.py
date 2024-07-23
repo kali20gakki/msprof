@@ -309,9 +309,6 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_NODE_ATTR_INFO = "NodeAttrInfo"
     TABLE_HCCL_OP_INFO = "HcclOpInfo"
 
-    # nano
-    TABLE_NANO_TASK = "NanoTask"
-
     # flip
     TABLE_HOST_TASK_FLIP = "HostTaskFlip"
     TABLE_DEVICE_TASK_FLIP = "DeviceTaskFlip"

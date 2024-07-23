@@ -14,7 +14,6 @@ from msconfig.filename_introduction_config import FilenameIntroductionConfig
 from msconfig.l2_cache_config import L2CacheConfig
 from msconfig.meta_config import MetaConfig
 from msconfig.msprof_export_data_config import MsProfExportDataConfig
-from msconfig.nano_ai_core_config import NanoAICoreConfig
 from msconfig.prof_condition_config import ProfConditionConfig
 from msconfig.prof_rule_config import ProfRuleConfig
 from msconfig.stars_config import StarsConfig
@@ -42,7 +41,6 @@ class ConfigManager:
     TS_CPU = "TsCPUConfig"
     CONSTANT = "ConstantConfig"
     L2_CACHE = "L2CacheConfig"
-    NANO_AI_CORE = "NanoAICoreConfig"
     FILENAME_INTRODUCTION = "FilenameIntroductionConfig"
 
     CONFIG_MAP = {
@@ -62,7 +60,6 @@ class ConfigManager:
         TS_CPU: TsCPUConfig,
         CONSTANT: ConstantConfig,
         L2_CACHE: L2CacheConfig,
-        NANO_AI_CORE: NanoAICoreConfig,
         FILENAME_INTRODUCTION: FilenameIntroductionConfig,
     }
 

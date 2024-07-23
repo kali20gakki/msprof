@@ -57,15 +57,10 @@ class CalculateAiCoreData:
 
     @staticmethod
     def get_pmu_valid_metrics_set_by_chip() -> set:
-        if ChipManager().is_chip_v5_1_0():
-            pipe_pmu_list = Constant.NANO_AICORE_METRICS_LIST.get(Constant.PMU_PIPE).split(",")[:-1]
-            scalar_list = Constant.NANO_AICORE_METRICS_LIST.get(Constant.PMU_SCALAR_RATIO).split(",")[:-1]
-            valid_metrics_set = set(pipe_pmu_list + scalar_list)
-        else:
-            pipe_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE).split(",")[:-1]
-            pipe_execut_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE_EXECUT).split(",")
-            pipe_exct_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE_EXCT).split(",")[:-1]
-            valid_metrics_set = set(pipe_pmu_list + pipe_exct_pmu_list + pipe_execut_pmu_list)
+        pipe_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE).split(",")[:-1]
+        pipe_execut_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE_EXECUT).split(",")
+        pipe_exct_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE_EXCT).split(",")[:-1]
+        valid_metrics_set = set(pipe_pmu_list + pipe_exct_pmu_list + pipe_execut_pmu_list)
         return valid_metrics_set
 
     @staticmethod

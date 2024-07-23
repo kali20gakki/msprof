@@ -190,15 +190,6 @@ class TestCalculateRts(unittest.TestCase):
         self.assertEqual(res, [])
         sample_config["ai_core_metrics"] = "PipeUtilization"
 
-    def test_get_metrics_from_sample_config_when_cfg_name_is_nano_then_get_nano_table_name(self):
-        sample_cfg = {
-            'ai_core_profiling_events': '0x300,0x400,0x100,0x200,0x201,0x202,0x302,0x203,0x101,0x102',
-            "ai_core_metrics": "PipeUtilization"
-        }
-        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value=sample_cfg):
-            res_1 = get_metrics_from_sample_config('', cfg_name=MsvpCommonConst.NANO_AI_CORE)
-        self.assertEqual(len(res_1), 19)
-
     def test_calculate_timeline_task_time(self):
         timeline_data = [[0] * 10] * 10
         with mock.patch(NAMESPACE + ".LoadInfoManager.load_info"):

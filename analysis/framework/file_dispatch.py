@@ -16,7 +16,6 @@ from common_func.file_name_manager import get_api_event_compiles
 from common_func.file_name_manager import get_biu_compiles
 from common_func.file_name_manager import get_ctrl_cpu_compiles
 from common_func.file_name_manager import get_data_preprocess_compiles
-from common_func.file_name_manager import get_dbg_file_compiles
 from common_func.file_name_manager import get_ddr_compiles
 from common_func.file_name_manager import get_dvpp_compiles
 from common_func.file_name_manager import get_ffts_pmu_compiles
@@ -54,8 +53,6 @@ from common_func.file_name_manager import get_memcpy_info_compact_compiles
 from common_func.file_name_manager import get_msproftx_compiles
 from common_func.file_name_manager import get_msproftx_ex_compiles
 from common_func.file_name_manager import get_multi_thread_compiles
-from common_func.file_name_manager import get_nano_model_exeom_compiles
-from common_func.file_name_manager import get_nano_stars_profile_compiles
 from common_func.file_name_manager import get_nic_compiles
 from common_func.file_name_manager import get_npu_mem_compiles
 from common_func.file_name_manager import get_npu_module_mem_compiles
@@ -159,9 +156,6 @@ class FileDispatch:
         DataTag.STATIC_OP_MEM: get_ge_static_op_mem_compiles(),
         DataTag.CTX_ID: get_ge_ctx_id_info_compiles(),
         DataTag.AICPU_ADD_INFO: get_aicpu_compiles(),
-        DataTag.NANO_MODEL_EXEOM: get_nano_model_exeom_compiles(),
-        DataTag.NANO_STARS_PROFILE: get_nano_stars_profile_compiles(),
-        DataTag.DBG_FILE: get_dbg_file_compiles(),
         DataTag.HCCL_OP_INFO: get_hccl_op_info_compiles(),
         DataTag.QOS: get_qos_compiles(),
         DataTag.MC2_COMM_INFO: get_mc2_comm_info_compiles(),

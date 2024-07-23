@@ -450,8 +450,6 @@ def get_metrics_from_sample_config(project_path: str,
     metrics_list = []
     if cfg_name == MsvpCommonConst.AI_CORE:
         metrics_list = Constant.AICORE_METRICS_LIST
-    elif cfg_name == MsvpCommonConst.NANO_AI_CORE:
-        metrics_list = Constant.NANO_AICORE_METRICS_LIST
 
     if sample_config.get(metrics_type) not in metrics_list:
         return []
