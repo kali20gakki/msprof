@@ -16,7 +16,6 @@ from common_func.info_conf_reader import InfoConfReader
 from mscalculate.ascend_task.ascend_task import DeviceTask
 from mscalculate.flip.flip_calculator import FlipCalculator
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
-from msmodel.nano.nano_stars_model import NanoStarsViewModel
 from msmodel.stars.acsq_task_model import AcsqTaskModel
 from msmodel.stars.ffts_log_model import FftsLogModel
 from msmodel.task_time.hwts_aiv_model import HwtsAivModel
@@ -41,7 +40,6 @@ class DeviceTaskCollector:
             ChipModel.CHIP_V1_1_1: self._gather_chip_stars_device_tasks,
             ChipModel.CHIP_V1_1_2: self._gather_chip_stars_device_tasks,
             ChipModel.CHIP_V1_1_3: self._gather_chip_stars_device_tasks,
-            ChipModel.CHIP_V5_1_0: self._gather_chip_stars_device_tasks,
         }
 
         self.check_dbs = {
@@ -54,7 +52,6 @@ class DeviceTaskCollector:
             ChipModel.CHIP_V1_1_1: [DBNameConstant.DB_SOC_LOG],
             ChipModel.CHIP_V1_1_2: [DBNameConstant.DB_SOC_LOG],
             ChipModel.CHIP_V1_1_3: [DBNameConstant.DB_SOC_LOG],
-            ChipModel.CHIP_V5_1_0: [DBNameConstant.DB_SOC_LOG],
         }
 
     def get_all_device_tasks(self: any) -> List[DeviceTask]:
@@ -136,16 +133,6 @@ class DeviceTaskCollector:
         with FftsLogModel(self.result_dir, DBNameConstant.DB_SOC_LOG, [DBNameConstant.TABLE_SUBTASK_TIME]) as model:
             return model.get_ffts_plus_sub_task_data_within_time_range(start_time, end_time)
 
-    def _gather_device_nano_tasks_from_stars(self: any, start_time: float,
-                                             end_time: float) -> List[DeviceTask]:
-        db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_SOC_LOG)
-        if not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_NANO_TASK):
-            logging.warning("no %s.%s found", DBNameConstant.DB_SOC_LOG, DBNameConstant.TABLE_NANO_TASK)
-            return []
-
-        with NanoStarsViewModel(self.result_dir) as model:
-            return model.get_nano_data_within_time_range(start_time, end_time)
-
     def _gather_device_tasks_from_runtime(self: any, start_time: float,
                                           end_time: float) -> List[DeviceTask]:
         db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_RUNTIME)
@@ -191,11 +178,10 @@ class DeviceTaskCollector:
         # in this chip ai_core and ai_cpu data will be uploaded in soc_stars data
         device_acsq_tasks = self._gather_device_acsq_tasks_from_stars(start_time, end_time)
         device_ffts_tasks = self._gather_device_ffts_plus_sub_tasks_from_stars(start_time, end_time)
-        device_nano_tasks = self._gather_device_nano_tasks_from_stars(start_time, end_time)
-        device_tasks = [*device_acsq_tasks, *device_ffts_tasks, *device_nano_tasks]
+        device_tasks = [*device_acsq_tasks, *device_ffts_tasks]
 
         if not device_tasks:
-            logging.error("no acsq, ffts, nano device task found.")
+            logging.error("no acsq, ffts device task found.")
         return device_tasks
 
     def _check_device_data_db_exists(self: any) -> bool:

@@ -108,8 +108,7 @@ class AiStackDataCheckManager(DataCheckManager):
                 cls._contain_hwts_data(result_dir, device_id=device_id) or \
                 cls.contain_stars_soc_data(result_dir, device_id=device_id) or \
                 (cls._contain_hwts_aiv_data(result_dir, device_id=device_id) or
-                 cls._contain_ts_track_aiv_data(result_dir, device_id=device_id)) or
-                cls._contain_nano_data(result_dir, device_id=device_id))
+                 cls._contain_ts_track_aiv_data(result_dir, device_id=device_id)))
 
     @classmethod
     def contain_task_time_task(cls: any, result_dir: str, device_id: any = None) -> bool:
@@ -341,14 +340,6 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         return cls.check_data_exist(result_dir, file_name_manager.get_ge_static_op_mem_compiles(),
                                     device_id=None)
-
-    @classmethod
-    def _contain_nano_data(cls: any, result_dir: str, device_id: any = None) -> bool:
-        """
-        The data path contain nano_device data or not
-        """
-        return cls.check_data_exist(result_dir, file_name_manager.get_nano_stars_profile_compiles(),
-                                    device_id=device_id)
 
     @classmethod
     def _contain_stars_profiler_data(cls: any, result_dir: str, device_id: int = None) -> bool:

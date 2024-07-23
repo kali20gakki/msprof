@@ -37,7 +37,6 @@ class MsvpCommonConst:
     AI_CORE = "ai_core"
     CTRL_CPU = "ctrl_cpu"
     CONSTANT = "constant"
-    NANO_AI_CORE = "nano_ai_core"
 
     CONFIG_PATH = os.path.join(os.path.realpath(os.path.dirname(__file__)), "..", "msconfig")
     FILE_NAME = os.path.basename(__file__)
@@ -47,7 +46,6 @@ class MsvpCommonConst:
         AI_CORE: ConfigManager.get("AICoreConfig"),
         CTRL_CPU: ConfigManager.get("CtrlCPUConfig"),
         CONSTANT: ConfigManager.get("ConstantConfig"),
-        NANO_AI_CORE: ConfigManager.get("NanoAICoreConfig"),
     }
 
     @staticmethod

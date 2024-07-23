@@ -195,7 +195,7 @@ class DataParsersConfig(MetaConfig):
         ],
         'HashDicParser': [
             ('path', 'msparser.hash_dic.hash_dic_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,9,11'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('position', 'H')
         ],
         'TaskTrackParser': [
@@ -241,7 +241,7 @@ class DataParsersConfig(MetaConfig):
         ],
         'GraphAddInfoParser': [
             ('path', 'msparser.add_info.graph_add_info_parser'),
-            ('chip_model', '0,1,2,3,4,5,7,8,9,11'),
+            ('chip_model', '0,1,2,3,4,5,7,8,11'),
             ('level', '2'),
             ('position', 'H')
         ],
@@ -292,18 +292,6 @@ class DataParsersConfig(MetaConfig):
             ('chip_model', '1,2,3,4'),
             ('level', '4'),
             ('position', 'D')
-        ],
-        'NanoStarsParser': [
-            ('path', 'msparser.nano.nano_stars_parser'),
-            ('chip_model', '9'),
-            ('level', '2'),
-            ('position', 'D')
-        ],
-        'NanoDbgParser': [
-            ('path', 'msparser.nano.nano_dbg_parser'),
-            ('chip_model', '9'),
-            ('level', '3'),
-            ('position', 'H')
         ],
         'HcclOpInfoParser': [
             ('path', 'msparser.compact_info.hccl_op_info_parser'),

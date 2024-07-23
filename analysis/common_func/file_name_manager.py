@@ -232,15 +232,8 @@ class FileNameManagerConstant:
     AICPU_FILE_PATTERN = r"^aicpu\.data\.(\d+)\.slice_\d+"
     HCCL_OP_INFO_FILE_PATTERN = r"^(unaging|aging)\.compact\.hccl_op_info\.slice_\d+"
 
-    # nano
-    NANO_MODEL_EXEOM_PATTERN = r"^unaging\.additional\.model_exeom\.slice_\d+"
-    NANO_STARS_PROFILE_PATTERN = r"^nano_stars_profile\.data.\d+\.slice_\d+"
-
     # mc2
     MC2_COMM_INFO_PATTERN = r"^(unaging|aging)\.additional\.mc2_comm_info\.slice_\d+"
-
-    # dbg
-    DBG_PATTERN = r".+\.dbg$"
 
     def get_file_name_manager_class_name(self: any) -> any:
         """
@@ -453,7 +446,7 @@ def get_ge_tensor_info_compiles() -> tuple:
     get ge tensor info compiles
     """
     return re.compile(FileNameManagerConstant.GE_TENSOR_INFO_PATTERN), \
-           re.compile(FileNameManagerConstant.GE_TENSOR_INFO_SINGLE_PATTERN)
+        re.compile(FileNameManagerConstant.GE_TENSOR_INFO_SINGLE_PATTERN)
 
 
 def get_ge_hash_compiles() -> tuple:
@@ -995,30 +988,6 @@ def get_aicpu_compiles() -> tuple:
     :return: aicpu files regex
     """
     return (re.compile(FileNameManagerConstant.AICPU_FILE_PATTERN),)
-
-
-def get_nano_model_exeom_compiles() -> tuple:
-    """
-    get nano host info files regex compiles
-    :return: nano host info files regex
-    """
-    return (re.compile(FileNameManagerConstant.NANO_MODEL_EXEOM_PATTERN),)
-
-
-def get_nano_stars_profile_compiles() -> tuple:
-    """
-    get nano device info files regex compiles
-    :return: nano device info files regex
-    """
-    return (re.compile(FileNameManagerConstant.NANO_STARS_PROFILE_PATTERN),)
-
-
-def get_dbg_file_compiles() -> tuple:
-    """
-    get nano host info files regex compiles
-    :return: nano host info files regex
-    """
-    return (re.compile(FileNameManagerConstant.DBG_PATTERN),)
 
 
 def get_hccl_op_info_compiles() -> tuple:

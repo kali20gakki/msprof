@@ -25,7 +25,6 @@ class ChipManager:
         Constant.CHIP_V4_1_0: ChipModel.CHIP_V4_1_0,
         Constant.CHIP_V1_1_1: ChipModel.CHIP_V1_1_1,
         Constant.CHIP_V1_1_2: ChipModel.CHIP_V1_1_2,
-        Constant.CHIP_V5_1_0: ChipModel.CHIP_V5_1_0,
         Constant.CHIP_V1_1_3: ChipModel.CHIP_V1_1_3
     }
     CHIP_CORE_NUM_MAP = {
@@ -150,13 +149,6 @@ class ChipManager:
         :return: True or False
         """
         return self.is_chip_v1_1() or self.is_chip_v4()
-
-    def is_chip_v5_1_0(self: any) -> bool:
-        """
-        check the scene of chip.v5.1.0
-        :return: True or False
-        """
-        return self.chip_id == ChipModel.CHIP_V5_1_0
 
     def is_chip_all_data_export(self: any) -> bool:
         """

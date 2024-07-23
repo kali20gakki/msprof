@@ -46,23 +46,3 @@ class AicPmuModel(ParserModel):
         db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_METRICS_SUMMARY)
         if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_METRIC_SUMMARY):
             DBManager.drop_table(self.conn, DBNameConstant.TABLE_METRIC_SUMMARY)
-
-
-class NanoAicPmuModel(AicPmuModel):
-    """
-    ffts pmu model.
-    """
-
-    def __init__(self: any, result_dir: str) -> None:
-        super().__init__(result_dir)
-
-    def create_table(self: any) -> None:
-        """
-        create aic and aiv table by sample.json
-        :return:
-        """
-        self.clear()
-        aic_profiling_events = get_metrics_from_sample_config(self.result_dir,
-                                                              cfg_name=MsvpCommonConst.NANO_AI_CORE)
-        column_list = AicPmuUtils.remove_unused_column(aic_profiling_events)
-        create_metric_table(self.conn, column_list, DBNameConstant.TABLE_METRIC_SUMMARY)

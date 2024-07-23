@@ -85,18 +85,6 @@ class TestDeviceTaskCollector(unittest.TestCase):
             tasks = collector._gather_device_ffts_plus_sub_tasks_from_stars(0, 1)
             self.assertEqual(len(tasks), 1)
 
-    def testdevice_nano_tasks_from_stars_when_data_exists_then_pass(self):
-        collector = DeviceTaskCollector(self.PROF_DIR)
-        tasks = collector._gather_device_nano_tasks_from_stars(float("-inf"), float("inf"))
-        self.assertEqual(tasks, [])
-
-        with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True), \
-                mock.patch(NAMESPACE + '.NanoStarsViewModel.get_nano_data_within_time_range',
-                           return_value=[[1, 2, 4294967295, 1000, 2000, ""]]):
-            collector = DeviceTaskCollector(self.PROF_DIR)
-            tasks = collector._gather_device_nano_tasks_from_stars(0, 1)
-            self.assertEqual(len(tasks), 1)
-
     def test__gather_device_tasks_from_runtime_when_data_exists(self):
         collector = DeviceTaskCollector(self.PROF_DIR)
         tasks = collector._gather_device_tasks_from_runtime(float("-inf"), float("inf"))

@@ -133,7 +133,7 @@ class ConfigDataParsers:
         load can cpp parse
         :param section: parser name config in the config file
         """
-        if not ChipManager().is_chip_v5_1_0() and section in [
+        if section in [
             "ApiEventParser",
             "HashDicParser",
             "TaskTrackParser",
