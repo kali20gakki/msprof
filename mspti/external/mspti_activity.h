@@ -36,10 +36,22 @@ extern "C" {
 
 typedef enum {
     MSPTI_ACTIVITY_KIND_INVALID = 0,
-    MSPTI_ACTIVITY_KIND_MARK = 1,
+    MSPTI_ACTIVITY_KIND_MARKER = 1,
     MSPTI_ACTIVITY_KIND_COUNT,
     MSPTI_ACTIVITY_KIND_FORCE_INT = 0x7fffffff
 } msptiActivityKind;
+
+typedef enum {
+    MSPTI_ACTIVITY_MARKER_MODE_HOST = 0,
+    MSPTI_ACTIVITY_MARKER_MODE_DEVICE = 1
+} msptiActivityMarkerMode;
+
+typedef enum {
+    MSPTI_ACTIVITY_FLAG_NONE = 0,
+    MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS = 1 << 0, // 瞬时mark
+    MSPTI_ACTIVITY_FLAG_MARKER_START = 1 << 1, // range start
+    MSPTI_ACTIVITY_FLAG_MARKER_END = 1 << 2 // range stop
+} msptiActivityFlag;
 
 START_PACKED_ALIGNMENT
 
@@ -50,12 +62,22 @@ typedef struct PACKED_ALIGNMENT {
 
 typedef struct PACKED_ALIGNMENT {
     msptiActivityKind kind;
-    uint8_t mode;
+    msptiActivityFlag flag;
+    msptiActivityMarkerMode mode;
     uint64_t timestamp;
-    uint64_t markId;
-    uint32_t streamId;
-    uint32_t deviceId;
+    uint64_t id;
+    union {
+        struct {
+            uint32_t processId;
+            uint32_t threadId;
+        } pt;
+        struct {
+            uint32_t deviceId;
+            uint32_t streamId;
+        } ds;
+    } msptiObjectId;
     const char *name;
+    const char *domain;
 } msptiActivityMark;
 
 END_PACKED_ALIGNMENT

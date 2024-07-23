@@ -143,7 +143,7 @@ msptiResult ActivityManager::GetNextRecord(uint8_t *buffer, size_t validBufferSi
         return MSPTI_ERROR_MAX_LIMIT_REACHED;
     }
     msptiActivityKind *pKind = reinterpret_cast<msptiActivityKind*>(buffer + pos);
-    if (*pKind == MSPTI_ACTIVITY_KIND_MARK) {
+    if (*pKind == MSPTI_ACTIVITY_KIND_MARKER) {
         *record = reinterpret_cast<msptiActivity*>(buffer + pos);
         pos += sizeof(msptiActivityMark);
     }

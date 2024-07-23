@@ -32,12 +32,13 @@ void UserBufferRequest(uint8_t **buffer, size_t *size, size_t *maxNumRecords)
 static void ActivityParser(msptiActivity *pRecord)
 {
     g_records++;
-    if (pRecord->kind == MSPTI_ACTIVITY_KIND_MARK) {
+    if (pRecord->kind == MSPTI_ACTIVITY_KIND_MARKER) {
         msptiActivityMark* activity = reinterpret_cast<msptiActivityMark*>(pRecord);
-        if (activity->markId == G_MARK_MAX_NUM - 1) {
-            printf("kind: %d, mode: %d, timestamp: %lu, markId: %lu, stream: %d, deviceId: %u, name: %s\n",
-                activity->kind, activity->mode, activity->timestamp, activity->markId, activity->streamId,
-                activity->deviceId, activity->name);
+        if (activity->id == G_MARK_MAX_NUM - 1 && activity->mode == MSPTI_ACTIVITY_MARKER_MODE_HOST) {
+            printf("kind: %d, mode: %d, timestamp: %lu, markId: %lu, processId: %d, threadId: %u, name: %s\n",
+                activity->kind, activity->mode, activity->timestamp, activity->id,
+                activity->msptiObjectId.pt.processId,
+                activity->msptiObjectId.pt.threadId, activity->name);
         }
     }
 }
@@ -63,22 +64,22 @@ void UserBufferComplete(uint8_t *buffer, size_t size, size_t validSize)
 TEST_F(ActivityUtest, ActivityApiUtest)
 {
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityRegisterCallbacks(UserBufferRequest, UserBufferComplete));
-    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_MARK));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_MARKER));
     msptiActivityMark activity;
     constexpr uint32_t hostId = 64;
     constexpr uint64_t timeStamp = 1614659207688700;
     for (size_t i = 0; i < G_MARK_MAX_NUM ; ++i) {
-        activity.kind = MSPTI_ACTIVITY_KIND_MARK;
-        activity.mode = 0;
+        activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
+        activity.mode = MSPTI_ACTIVITY_MARKER_MODE_HOST;
         activity.timestamp = timeStamp;
-        activity.markId = i;
-        activity.streamId = 0;
-        activity.deviceId = hostId;
+        activity.id = i;
+        activity.msptiObjectId.pt.processId = 0;
+        activity.msptiObjectId.pt.threadId = 0;
         activity.name = "UserMark";
         Mspti::Activity::ActivityManager::GetInstance()->Record(
             reinterpret_cast<msptiActivity*>(&activity), sizeof(activity));
     }
-    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityDisable(MSPTI_ACTIVITY_KIND_MARK));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityDisable(MSPTI_ACTIVITY_KIND_MARKER));
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityFlushAll(1));
     EXPECT_EQ(G_MARK_MAX_NUM, g_records.load());
 }
