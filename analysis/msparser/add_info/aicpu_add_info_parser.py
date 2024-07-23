@@ -163,8 +163,8 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
             AicpuAddInfoBean,
             check_func=self.check_magic_num
         )
-        self.set_aicpu_data(aicpu_info)
         self.hash_data = HashDictData(self._project_path).get_ge_hash_dict()
+        self.set_aicpu_data(aicpu_info)
 
     def save(self: any) -> None:
         """
