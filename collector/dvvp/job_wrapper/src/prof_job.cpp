@@ -1576,10 +1576,16 @@ int ProfAicpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
         return PROFILING_FAILED;
     }
     collectionJobCfg_ = cfg;
+    if (collectionJobCfg_->comParams->params->isSubscribe) {
+        // 订阅场景不开启aicpu驱动通道
+        MSPROF_LOGI("Aicpu not enable in subscribe mode, devId:%d, channelId:%d",
+                    collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
+        return PROFILING_FAILED;
+    }
     const auto &profLevel = collectionJobCfg_->comParams->params->profLevel;
     if (!(collectionJobCfg_->comParams->params->dataTypeConfig & PROF_AICPU_TRACE)
-            || profLevel.empty() || profLevel == MSVP_PROF_L0 || collectionJobCfg_->comParams->params->isSubscribe) {
-        // aicpu开关关闭，或者L0级别，不开启aicpu驱动通道，订阅场景不开启aicpu驱动通道
+            && (profLevel.empty() || profLevel == MSVP_PROF_L0)) {
+        // aicpu开关关闭并且L0级别，不开启aicpu驱动通道
         MSPROF_LOGI("AICPU not enable or L0, devId:%d, channelId:%d",
                     collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
         return PROFILING_FAILED;
