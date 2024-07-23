@@ -9,6 +9,13 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.hash_dict_constant import HashDictData
+from common_func.hccl_info_common import trans_enum_name
+from common_func.hccl_info_common import RoleType
+from common_func.hccl_info_common import OpType
+from common_func.hccl_info_common import DataType
+from common_func.hccl_info_common import LinkType
+from common_func.hccl_info_common import TransPortType
+from common_func.hccl_info_common import RdmaType
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from msmodel.step_trace.ts_track_model import TsTrackModel
 from msmodel.ai_cpu.data_preparation_model import DataPreparationModel
@@ -125,6 +132,12 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
         ]
 
     def get_kfc_hccl_info_data(self: any, aicpu_info: AicpuAddInfoBean) -> list:
+        role = trans_enum_name(RoleType, aicpu_info.data.role)
+        op_type = trans_enum_name(OpType, aicpu_info.data.op_type)
+        data_type = trans_enum_name(DataType, aicpu_info.data.data_type)
+        link_type = trans_enum_name(LinkType, aicpu_info.data.link_type)
+        transport_type = trans_enum_name(TransPortType, aicpu_info.data.transport_type)
+        rdma_type = trans_enum_name(RdmaType, aicpu_info.data.rdma_type)
         return [
             aicpu_info.timestamp,
             self.hash_data.get(aicpu_info.data.item_id, aicpu_info.data.item_id),
@@ -138,16 +151,16 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
             aicpu_info.data.context_id,
             aicpu_info.data.notify_id,
             aicpu_info.data.stage,
-            aicpu_info.data.role,
+            role,
             aicpu_info.data.duration_estimated,
             aicpu_info.data.src_addr,
             aicpu_info.data.dst_addr,
             aicpu_info.data.data_size,
-            aicpu_info.data.op_type,
-            aicpu_info.data.data_type,
-            aicpu_info.data.link_type,
-            aicpu_info.data.transport_type,
-            aicpu_info.data.rdma_type,
+            op_type,
+            data_type,
+            link_type,
+            transport_type,
+            rdma_type,
             aicpu_info.data.stream_id,
             aicpu_info.data.task_id,
         ]
