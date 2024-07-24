@@ -16,8 +16,6 @@
 #include <string>
 #include <set>
 
-#include "analysis/csrc/utils/thread_pool.h"
-
 namespace Analysis {
 namespace Viewer {
 namespace Database {
@@ -30,7 +28,7 @@ public:
 private:
     bool CheckProfDirsValid(const std::string& outputDir);
     static std::string GetDBPath(const std::string& outputDir);
-    bool RunOneProf(const std::string& profPath, Utils::ThreadPool& pool);
+    bool RunOneProf(const std::string& profPath);
 private:
     std::string msprofDBPath_;
     std::string outputPath_;

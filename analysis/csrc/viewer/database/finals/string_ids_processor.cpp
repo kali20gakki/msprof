@@ -27,6 +27,8 @@ bool StringIdsProcessor::Run()
     INFO("StringIdsProcessor Run.");
     bool flag = Process();
     PrintProcessorResult(flag, PROCESSOR_NAME_STRING_IDS);
+    // 清空上一个PROF的string id信息，避免影响后面的PROF数据存入
+    IdPool::GetInstance().Clear();
     return flag;
 }
 
