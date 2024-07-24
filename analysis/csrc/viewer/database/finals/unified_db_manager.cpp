@@ -18,9 +18,9 @@
 #include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/dfx/log.h"
 #include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/table_processor_factory.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "collector/dvvp/common/config/config.h"
 
 namespace Analysis {
 namespace Viewer {
@@ -98,8 +98,11 @@ bool UnifiedDBManager::Init()
     return true;
 }
 
-bool UnifiedDBManager::RunOneProf(const std::string& profPath, Analysis::Utils::ThreadPool& pool)
+bool UnifiedDBManager::RunOneProf(const std::string& profPath)
 {
+    const uint16_t tableProcessors = 5; // 最多有五个线程
+    Analysis::Utils::ThreadPool pool(tableProcessors);
+    pool.Start();
     std::atomic<bool> retFlag(true);
     const auto dbPath = GetDBPath(profPath);
     for (const auto& name : PROCESSOR_NAME) {
@@ -116,6 +119,7 @@ bool UnifiedDBManager::RunOneProf(const std::string& profPath, Analysis::Utils::
     }
     // 等待线程池内的线程执行完毕
     pool.WaitAllTasks();
+    pool.Stop();
     // string_id table 要在其他所有table 全部生成之后再去生成
     std::shared_ptr<TableProcessor> processor =
             TableProcessorFactory::CreateTableProcessor(PROCESSOR_NAME_STRING_IDS, dbPath, {profPath});
@@ -135,15 +139,10 @@ bool UnifiedDBManager::RunOneProf(const std::string& profPath, Analysis::Utils::
 bool UnifiedDBManager::Run()
 {
     INFO("Start exporting the msprof.db!");
-    const uint16_t tableProcessors = 5; // 最多有五个线程
-    Analysis::Utils::ThreadPool pool(tableProcessors);
-    pool.Start();
     bool runFlag = true;
     for (const auto& profPath : profFolderPaths_) {
-        runFlag = RunOneProf(profPath, pool) & runFlag;
+        runFlag = RunOneProf(profPath) & runFlag;
     }
-    pool.Stop();
-
     if (!runFlag) {
         ERROR("The unified db process failed to be executed.");
         PRINT_ERROR("The unified db process failed to be executed. "
