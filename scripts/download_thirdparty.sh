@@ -33,6 +33,11 @@ git clone ssh://git@szv-open.codehub.huawei.com:2222/OpenSourceCenter/megastep/m
 mkdir -p ${LLT_DIR} && cd ${LLT_DIR}
 git clone ssh://git@szv-open.codehub.huawei.com:2222/OpenSourceCenter/google/googletest.git -b release-1.12.1
 git clone ssh://git@szv-y.codehub.huawei.com:2222/d00437232/mock_cpp.git mockcpp -b msprof
+if [ "$1" == "fuzz" ]; then
+    git clone ssh://git@lfg-y.codehub.huawei.com:2222/software-engineering-research-community/fuzz/SecTracy.git
+    git clone ssh://git@szv-open.codehub.huawei.com:2222/innersource/Fuzz/secodefuzz.git
+    cd secodefuzz && bash build.sh gcc
+fi
 
 mkdir -p ${PLATFORM_DIR} && cd ${PLATFORM_DIR}
 git clone ssh://git@codehub-dg-y.huawei.com:2222/hwsecurec_group/huawei_secure_c.git securec -b tag_Huawei_Secure_C_V100R001C01SPC012B002_00001
