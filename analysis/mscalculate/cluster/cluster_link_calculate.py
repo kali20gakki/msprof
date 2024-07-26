@@ -11,6 +11,7 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_number
 from common_func.path_manager import PathManager
 from msmodel.hccl.hccl_model import HCCLModel
+from msmodel.cluster_info.communication_model import CommunicationModel
 
 
 class ClusterLinkCalculator:
@@ -147,10 +148,8 @@ class ClusterSingleLinkCalculator(MsMultiProcess):
         """
         if not os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
             return
-        with HCCLModel(self._project_path, [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE]) as self.model:
-            if not self.model.check_table():
-                return
-            self.hccl_data = self.model.get_hccl_data()
+        with CommunicationModel(self._project_path) as self.model:
+            self.hccl_data = self.model.get_all_communication_data()
             if not self.hccl_data:
                 return
             self.get_all_link_dict()

@@ -74,16 +74,15 @@ class HCCLExport:
             with HcclViewModel(self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
                                [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE]) as hccl_model:
                 hccl_data = hccl_model.get_all_data(DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE, dto_class=HcclTask)
-        if os.path.exists(PathManager.get_db_path(self.project_path, DBNameConstant.DB_KFC_INFO)):
-            with KfcInfoViewModel(self.project_path,
+            with HcclViewModel(self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
                                   [DBNameConstant.TABLE_KFC_TASK, DBNameConstant.TABLE_KFC_OP]) as model:
                 kfc_task = model.get_all_data(DBNameConstant.TABLE_KFC_TASK, dto_class=HcclTask)
-                kfc_op = model.get_all_data(DBNameConstant.TABLE_KFC_OP, dto_class=HcclOps)
+                kfc_op = model.get_all_data(DBNameConstant.TABLE_KFC_OP, dto_class=HcclTask)
         if not hccl_data and (not kfc_op and not kfc_task):
             logging.error("get hccl data failed, may be the hccl file not completed or hccl parser "
                           "failed. please check data file.")
             return []
-        self._get_meta_data(hccl_data + kfc_task)
+        self._get_meta_data(hccl_data + kfc_task + kfc_op)
         self._format_hccl_data(hccl_data)
         self._format_kfc_data(kfc_op, kfc_task)
         return self.result
