@@ -25,13 +25,14 @@ class HCCLModel(ParserModel):
     def __init__(self: any, result_dir: str, table_list: list) -> None:
         super().__init__(result_dir, DBNameConstant.DB_HCCL_SINGLE_DEVICE, table_list)
 
-    def flush(self: any, data_list: list) -> None:
+    def flush(self: any, data_list: list, table_name: str = DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE) -> None:
         """
         insert data to table
         :param data_list: hccl data
+        :param table_name: table to insert hccl data
         :return:
         """
-        self.insert_data_to_db(DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE, data_list)
+        self.insert_data_to_db(table_name, data_list)
 
     def get_hccl_data(self: any) -> list:
         """
@@ -120,6 +121,8 @@ class HcclViewModel(ViewModel):
         """
         get the real execution of the communication op
         """
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE):
+            return []
         sql = f"select model_id, index_id, op_name, group_name, min(timestamp) as timestamp, " \
               f"max(timestamp + duration) - min(timestamp) as duration, task_type, op_type, connection_id " \
               f"from {DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE} " \
@@ -131,6 +134,8 @@ class HcclViewModel(ViewModel):
         """
         get hccl op info from HCCLOpSingleDevice
         """
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_HCCL_OP_SINGLE_DEVICE):
+            return []
         sql = f"select relay, retry, data_type, alg_type, count, group_name, connection_id " \
               f"from {DBNameConstant.TABLE_HCCL_OP_SINGLE_DEVICE}"
         hccl_op_data = DBManager.fetch_all_data(self.cur, sql, dto_class=HcclOps)

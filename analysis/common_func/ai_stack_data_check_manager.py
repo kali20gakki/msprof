@@ -189,7 +189,7 @@ class AiStackDataCheckManager(DataCheckManager):
                 PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL_SINGLE_DEVICE),
                 DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE)
                  or DBManager.check_tables_in_db(
-                        PathManager.get_db_path(result_dir, DBNameConstant.DB_KFC_INFO),
+                        PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL_SINGLE_DEVICE),
                         DBNameConstant.TABLE_KFC_OP))
 
     @classmethod

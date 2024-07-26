@@ -51,8 +51,9 @@ class TestKfcCalculator(unittest.TestCase):
         task_data = [
             TopDownTask(0, 0, 19, 0, 4294967295, 0, 38140478700000, 1500, "KERNEL_AICPU", "AI_CPU", 0),
             TopDownTask(0, 0, 19, 1, 4294967295, 0, 38140478800000, 2000, "KERNEL_AICPU", "AI_CPU", 0),
-            TopDownTask(0, 0, 52, 0, 4294967295, 0, 38140478900000, 1000, "UNKNOWN", "C_CORE_SQE", 0),
-            TopDownTask(0, 0, 54, 0, 4294967295, 0, 38140479000000, 500, "UNKNOWN", "WRITE_VALUE_SQE", 0),
+            TopDownTask(0, 0, 52, 0, 4294967295, 0, 38140478600000, 1000, "UNKNOWN", "C_CORE_SQE", 0),
+            TopDownTask(0, 0, 52, 1, 4294967295, 0, 38140478700010, 1000, "KERNEL_AICORE", "C_CORE_SQE", 0),
+            TopDownTask(0, 0, 54, 0, 4294967295, 0, 38140478800010, 500, "KERNEL_AICORE", "WRITE_VALUE_SQE", 0),
         ]
         comm_info = [
             Mc2CommInfoViewModel.MC2_COMM_INFO_TYPE(19, "52,53,54,55,56,57,58,59", group_name),
@@ -68,6 +69,8 @@ class TestKfcCalculator(unittest.TestCase):
         kfc_info_data = [
             (1, "hccl_info", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0, 266, 0, 0, 0, 52, 0,
              0, 0, 0, 0),
+            (1, "hccl_info", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0, 266, 0, 0, 0, 52, 1,
+             0, 0, 0, 0),
             (1, "Notify_Wait", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0, 266, 0, 0, 0, 54, 0,
              0, 0, 0, 0),
         ]
@@ -76,6 +79,7 @@ class TestKfcCalculator(unittest.TestCase):
                 mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=ge_data), \
                 mock.patch(NAMESPACE + ".KfcInfoViewModel.get_sql_data", return_value=kfc_info_data), \
                 mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=True), \
+                mock.patch("os.path.exists", return_value=True), \
                 mock.patch("msmodel.step_trace.ts_track_model.TsTrackModel.get_task_flip_data", return_value=[]):
             check = KfcCalculator([], CONFIG)
             check.calculate()

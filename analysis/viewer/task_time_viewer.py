@@ -110,9 +110,9 @@ class TaskTimeViewer(BaseViewer):
             task_data_list = model.get_ascend_task_data_without_unknown()
         for data in task_data_list:
             if data.context_id == NumberConstant.DEFAULT_GE_CONTEXT_ID:
-                task_data['task_data_list'].append(data)
+                task_data['task_data_list'].append(TopDownTask(*data))
             else:
-                task_data['subtask_data_list'].append(data)
+                task_data['subtask_data_list'].append(TopDownTask(*data))
         return task_data
 
     def get_kfc_turn_data(self: any) -> dict:

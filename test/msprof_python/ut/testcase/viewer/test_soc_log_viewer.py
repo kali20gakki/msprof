@@ -6,6 +6,7 @@ from collections import OrderedDict
 from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
+from common_func.msprof_object import CustomizedNamedtupleFactory
 from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
@@ -381,11 +382,13 @@ class TestTaskTimeViewer(unittest.TestCase):
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'EVENT_WAIT')
 
     def test_get_ascend_task_data_should_split_acsq_task_and_subtask_by_context_id(self):
+        InfoConfReader()._info_json = {"pid": 0}
+        top_down_task_type = CustomizedNamedtupleFactory.generate_named_tuple_from_dto(TopDownTask, [])
         configs = {}
         params = {"project": './'}
         data = [
-            TopDownTask(0, 1, 27, 2, 4294967295, 0, 38140478706523, 1510560, "KERNEL_AICPU", "AI_CPU", 0),
-            TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "FFTS_PLUS", "AIV", 1),
+            top_down_task_type(0, 1, 27, 2, 4294967295, 0, 38140478706523, 1510560, "KERNEL_AICPU", "AI_CPU", 0),
+            top_down_task_type(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "FFTS_PLUS", "AIV", 1),
         ]
         with mock.patch(NAMESPACE + '.AscendTaskModel.get_ascend_task_data_without_unknown', return_value=data):
             check = TaskTimeViewer(configs, params)
@@ -395,6 +398,7 @@ class TestTaskTimeViewer(unittest.TestCase):
             self.assertEqual(ret.get('task_data_list', [])[0].context_id, 4294967295)
             self.assertEqual(len(ret.get('subtask_data_list', [])), 1)
             self.assertEqual(ret.get('subtask_data_list', [])[0].context_id, 47)
+        InfoConfReader()._info_json = {}
 
     def test_add_thread_id_should_add_thread_id_when_matched(self):
         configs = {}

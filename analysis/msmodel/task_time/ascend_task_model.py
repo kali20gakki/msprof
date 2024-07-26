@@ -27,5 +27,4 @@ class AscendTaskModel(BaseModel):
         )
         data_sql = "select * from {} " \
                    "where device_task_type != ?".format(DBNameConstant.TABLE_ASCEND_TASK)
-        ascend_task_data = DBManager.fetch_all_data(self.cur, data_sql, param=param)
-        return [TopDownTask(*data) for data in ascend_task_data]
+        return DBManager.fetch_all_data(self.cur, data_sql, param=param, dto_class=TopDownTask)

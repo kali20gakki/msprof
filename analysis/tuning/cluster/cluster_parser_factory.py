@@ -80,9 +80,6 @@ class ClusterParserFactory:
         get op events of all rank by iteration start and end time
         """
         with CommunicationModel(rank_path) as _model:
-            if not _model.check_db():
-                logging.error("Fail to connect %s, hccl parser is interrupted", DBNameConstant.DB_HCCL_SINGLE_DEVICE)
-                raise ProfException(ProfException.PROF_INVALID_CONNECT_ERROR)
             conditions = {
                 'iter_start': iter_start_end[0][0],
                 'iter_end': iter_start_end[0][1]
