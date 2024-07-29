@@ -334,7 +334,7 @@ int DrvAicpuStart(int profDeviceId, AI_DRV_CHANNEL profChannel)
 {
     struct prof_start_para profStartPara;
     profStartPara.channel_type = PROF_PERIPHERAL_TYPE;
-    profStartPara.sample_period = 0;
+    profStartPara.sample_period = 100;  // 每100ms从驱动取数据
     profStartPara.real_time = PROFILE_REAL_TIME;
     profStartPara.user_data = nullptr;
     profStartPara.user_data_size = 0;
