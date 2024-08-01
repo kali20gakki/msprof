@@ -13,7 +13,6 @@
 
 #include <memory>
 
-#include "activity/ascend/ascend_manager.h"
 #include "common/plog_manager.h"
 #include "common/utils.h"
 

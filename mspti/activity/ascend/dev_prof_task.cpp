@@ -3,50 +3,68 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : dev_prof_job.cpp
+ * File Name          : dev_prof_task.cpp
  * Description        : Collection Job.
  * Author             : msprof team
- * Creation Date      : 2024/05/07
+ * Creation Date      : 2024/07/27
  * *****************************************************************************
 */
 
-#include "activity/ascend/dev_prof_job.h"
 
-#include <cstring>
-
+#include "activity/ascend/dev_prof_task.h"
 #include "activity/ascend/channel/channel_pool_manager.h"
 #include "common/inject/driver_inject.h"
 #include "common/plog_manager.h"
-#include "common/utils.h"
-#include "securec.h"
 
 namespace Mspti {
 namespace Ascend {
 
-std::shared_ptr<DevProfJob> CollectionJobFactory::CreateJob(uint32_t deviceId, msptiActivityKind kind)
+std::unique_ptr<DevProfTask> DevProfTaskFactory::CreateTask(uint32_t deviceId, msptiActivityKind kind)
 {
-    if (kind == MSPTI_ACTIVITY_KIND_MARKER) {
-        std::shared_ptr<ProfTsTrackJob> ret = nullptr;
-        Mspti::Common::MsptiMakeSharedPtr(ret, deviceId);
-        return ret;
+    switch (kind) {
+        case MSPTI_ACTIVITY_KIND_MARKER:
+            return std::make_unique<DevProfTaskTsFw>(deviceId);
+        default:
+            return std::make_unique<DevProfTaskDefault>(deviceId);
     }
-    return nullptr;
 }
 
-msptiResult DevProfJob::AddReader(uint32_t deviceId, AI_DRV_CHANNEL channelId)
+msptiResult DevProfTask::Start()
 {
-    return Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->AddReader(deviceId, channelId);
+    if (!t_.joinable()) {
+        t_ = std::thread(std::bind(&DevProfTask::Run, this));
+    }
+    return MSPTI_SUCCESS;
 }
 
-msptiResult DevProfJob::RemoveReader(uint32_t deviceId, AI_DRV_CHANNEL channelId)
+msptiResult DevProfTask::Stop()
 {
-    return Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->RemoveReader(deviceId, channelId);
+    {
+        std::unique_lock<std::mutex> lck(cv_mtx_);
+        task_run_ = true;
+        cv_.notify_one();
+    }
+    if (t_.joinable()) {
+        t_.join();
+    }
 }
 
-msptiResult ProfTsTrackJob::Start()
+void DevProfTask::Run()
+{
+    StartTask();
+    {
+        std::unique_lock<std::mutex> lk(cv_mtx_);
+        cv_.wait(lk, [&] () {
+            return task_run_;
+        });
+    }
+    StopTask();
+}
+
+msptiResult DevProfTaskTsFw::StartTask()
 {
     static const uint32_t SAMPLE_PERIOD = 20;
-    DevProfJob::AddReader(deviceId_, channelId_);
+    Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->AddReader(deviceId_, channelId_);
     TsTsFwProfileConfigT configP;
     if (memset_s(&configP, sizeof(configP), 0, sizeof(configP)) != EOK) {
         return MSPTI_ERROR_INNER;
@@ -68,14 +86,14 @@ msptiResult ProfTsTrackJob::Start()
     return MSPTI_SUCCESS;
 }
 
-msptiResult ProfTsTrackJob::Stop()
+msptiResult DevProfTaskTsFw::StopTask()
 {
     int ret = ProfStop(deviceId_, channelId_);
     if (ret != 0) {
         MSPTI_LOGE("Failed to stop TsTrackJob for device: %u, channel id: %u", deviceId_, channelId_);
         return MSPTI_ERROR_INNER;
     }
-    DevProfJob::RemoveReader(deviceId_, channelId_);
+    Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->RemoveReader(deviceId_, channelId_);
     return MSPTI_SUCCESS;
 }
 

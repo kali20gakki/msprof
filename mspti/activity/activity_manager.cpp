@@ -16,6 +16,7 @@
 #include <functional>
 #include "securec.h"
 
+#include "activity/ascend/dev_task_manager.h"
 #include "common/plog_manager.h"
 #include "common/utils.h"
 
@@ -86,7 +87,9 @@ ActivityManager::~ActivityManager()
         t_.join();
     }
     JoinWorkThreads();
-    FlushActivityBuffer();
+    FlushAll();
+    activity_set_.clear();
+    devices_.clear();
     MSPTI_LOGI("Total activity record: %lu. Total activity drop: %lu",
         total_record_num_.load(), total_drop_num_.load());
 }
@@ -110,26 +113,45 @@ msptiResult ActivityManager::RegisterCallbacks(
         t_ = std::thread(std::bind(&ActivityManager::Run, this));
         thread_run_.store(true);
     }
-    init_.store(true);
-    activity_set_.clear();
     return MSPTI_SUCCESS;
 }
 
-msptiResult ActivityManager::Register(bool enable, msptiActivityKind kind)
+msptiResult ActivityManager::Register(msptiActivityKind kind)
 {
-    if (!init_.load()) {
-        PRINT_LOGW("Please register your Activity callback functions first.");
-        return MSPTI_SUCCESS;
+    {
+        std::lock_guard<std::mutex> lk(activity_mtx_);
+        if (activity_set_.find(kind) != activity_set_.end()) {
+            return MSPTI_SUCCESS;
+        }
+        activity_set_.insert(kind);
     }
-    std::lock_guard<std::mutex> lk(activity_mtx_);
-    enable ? (void)activity_set_.insert(kind) : (void)activity_set_.erase(kind);
-    return MSPTI_SUCCESS;
+    std::unordered_set<uint32_t> devices;
+    {
+        std::lock_guard<std::mutex> lk(devices_mtx_);
+        devices.insert(devices_.begin(), devices_.end());
+    }
+    for (auto device : devices) {
+        Mspti::Ascend::DevTaskManager::GetInstance()->StartDevProfTask(device, kind);
+    }
 }
 
-std::unordered_set<msptiActivityKind>& ActivityManager::GetActivities()
+msptiResult ActivityManager::UnRegister(msptiActivityKind kind)
 {
-    std::lock_guard<std::mutex> lk(activity_mtx_);
-    return activity_set_;
+    {
+        std::lock_guard<std::mutex> lk(activity_mtx_);
+        if (activity_set_.find(kind) == activity_set_.end()) {
+            return MSPTI_SUCCESS;
+        }
+        activity_set_.erase(kind);
+    }
+    std::unordered_set<uint32_t> devices;
+    {
+        std::lock_guard<std::mutex> lk(devices_mtx_);
+        devices.insert(devices_.begin(), devices_.end());
+    }
+    for (auto device : devices) {
+        Mspti::Ascend::DevTaskManager::GetInstance()->StopDevProfTask(device, kind);
+    }
 }
 
 msptiResult ActivityManager::GetNextRecord(uint8_t *buffer, size_t validBufferSizeBytes, msptiActivity **record)
@@ -150,7 +172,7 @@ msptiResult ActivityManager::GetNextRecord(uint8_t *buffer, size_t validBufferSi
     return MSPTI_SUCCESS;
 }
 
-msptiResult ActivityManager::FlushActivityBuffer()
+msptiResult ActivityManager::FlushAll()
 {
     if (cur_buf_) {
         co_activity_buffers_.emplace_back(std::move(cur_buf_));
@@ -220,6 +242,44 @@ void ActivityManager::Run()
     JoinWorkThreads();
 }
 
+void ActivityManager::SetDevice(uint32_t deviceId)
+{
+    {
+        std::lock_guard<std::mutex> lk(devices_mtx_);
+        if (devices_.find(deviceId) != devices_.end()) {
+            return;
+        }
+        devices_.insert(deviceId);
+    }
+    std::unordered_set<msptiActivityKind> activity_set;
+    {
+        std::lock_guard<std::mutex> lk(activity_mtx_);
+        activity_set.insert(activity_set_.begin(), activity_set_.end());
+    }
+    for (auto activity : activity_set) {
+        Mspti::Ascend::DevTaskManager::GetInstance()->StartDevProfTask(deviceId, activity);
+    }
+}
+
+void ActivityManager::DeviceReset(uint32_t deviceId)
+{
+    {
+        std::lock_guard<std::mutex> lk(devices_mtx_);
+        if (devices_.find(deviceId) == devices_.end()) {
+            return;
+        }
+        devices_.erase(deviceId);
+    }
+    std::unordered_set<msptiActivityKind> activity_set;
+    {
+        std::lock_guard<std::mutex> lk(activity_mtx_);
+        activity_set.insert(activity_set_.begin(), activity_set_.end());
+    }
+    for (auto activity : activity_set) {
+        Mspti::Ascend::DevTaskManager::GetInstance()->StopDevProfTask(deviceId, activity);
+    }
+}
+
 }  // Activity
 }  // Mspti
 
@@ -231,12 +291,12 @@ msptiResult msptiActivityRegisterCallbacks(
 
 msptiResult msptiActivityEnable(msptiActivityKind kind)
 {
-    return Mspti::Activity::ActivityManager::GetInstance()->Register(true, kind);
+    return Mspti::Activity::ActivityManager::GetInstance()->Register(kind);
 }
 
 msptiResult msptiActivityDisable(msptiActivityKind kind)
 {
-    return Mspti::Activity::ActivityManager::GetInstance()->Register(false, kind);
+    return Mspti::Activity::ActivityManager::GetInstance()->UnRegister(kind);
 }
 
 msptiResult msptiActivityGetNextRecord(uint8_t *buffer, size_t validBufferSizeBytes, msptiActivity **record)
@@ -246,5 +306,5 @@ msptiResult msptiActivityGetNextRecord(uint8_t *buffer, size_t validBufferSizeBy
 
 msptiResult msptiActivityFlushAll(uint32_t flag)
 {
-    return Mspti::Activity::ActivityManager::GetInstance()->FlushActivityBuffer();
+    return Mspti::Activity::ActivityManager::GetInstance()->FlushAll();
 }
