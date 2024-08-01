@@ -37,7 +37,8 @@ Connection::Connection(const std::string &path)
     if (rc != SQLITE_OK) {
         std::string errorMsg = "Failed to open database: " + std::string(sqlite3_errmsg(db_));
         ERROR("sqlite3_exec return %, %", rc, errorMsg);
-        sqlite3_close(db_);
+        sqlite3_close_v2(db_);
+        db_ = nullptr;
     } else {
         sqlite3_exec(db_, "PRAGMA synchronous = OFF;", nullptr, nullptr, nullptr);
     }
@@ -45,11 +46,16 @@ Connection::Connection(const std::string &path)
 
 Connection::~Connection()
 {
-    if (db_) {
-        sqlite3_close(db_);
-    }
     if (stmt_) {
         sqlite3_finalize(stmt_);
+    }
+    if (db_) {
+        int rc = sqlite3_close(db_);
+        if (rc != SQLITE_OK) {
+            ERROR("First close failed, err: % !", sqlite3_errmsg(db_));
+            sqlite3_close_v2(db_);
+        }
+        db_ = nullptr;
     }
 }
 

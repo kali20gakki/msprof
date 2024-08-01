@@ -81,8 +81,6 @@ public:
     bool ExecuteQuery(const std::string &sql, std::vector<std::tuple<Args...>> &result);
     bool ExecuteUpdate(const std::string &sql);
     std::vector<TableColumn> ExecuteGetTableColumns(const std::string &tableName);
-    sqlite3* GetSqliteConn() { return this->db_; }
-    sqlite3_stmt* GetSqliteStmt() { return this->stmt_; }
 
 private:
     bool InsertCmd(const std::string &tableName, const int &colNum);

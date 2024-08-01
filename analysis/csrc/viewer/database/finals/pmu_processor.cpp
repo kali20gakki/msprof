@@ -107,7 +107,7 @@ bool PmuProcessor::TaskBasedProcess(const std::string &fileDir)
     DBInfo metricDB("metric_summary.db", "MetricSummary");
     auto tableColumns = GetAndCheckTableColumns(dbPathTable, metricDB);
     if (tableColumns.empty()) {
-        ERROR("GetAndCheckTableColumns failed, please check tableColums are consistent.");
+        ERROR("GetAndCheckTableColumns failed, please check tableColumns are consistent.");
         return false;
     }
     bool flag = true;
@@ -122,7 +122,7 @@ bool PmuProcessor::TaskBasedProcess(const std::string &fileDir)
     return flag;
 }
 
-TableColumns PmuProcessor::GetAndCheckTableColumns(std::unordered_map<std::string, uint16_t> dbPathTable,
+TableColumns PmuProcessor::GetAndCheckTableColumns(const std::unordered_map<std::string, uint16_t>& dbPathTable,
                                                    DBInfo &metricDB)
 {
     INFO("GetAndCheckTableColumns.");
@@ -144,7 +144,7 @@ TableColumns PmuProcessor::GetAndCheckTableColumns(std::unordered_map<std::strin
     return tableColumns;
 }
 
-bool PmuProcessor::TaskBasedProcessByColumnName(const std::pair<const std::string, uint16_t> dbRecord,
+bool PmuProcessor::TaskBasedProcessByColumnName(const std::pair<const std::string, uint16_t>& dbRecord,
                                                 const std::string &columnName, DBInfo &metricDB)
 {
     if (INVALID_COLUMN_NAMES.find(columnName) != INVALID_COLUMN_NAMES.end()) {

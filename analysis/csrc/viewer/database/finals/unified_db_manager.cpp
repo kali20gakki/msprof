@@ -139,6 +139,7 @@ bool UnifiedDBManager::RunOneProf(const std::string& profPath)
 bool UnifiedDBManager::Run()
 {
     INFO("Start exporting the msprof.db!");
+    PRINT_INFO("Start exporting the msprof.db!");
     bool runFlag = true;
     for (const auto& profPath : profFolderPaths_) {
         runFlag = RunOneProf(profPath) & runFlag;

@@ -27,40 +27,54 @@ const std::string AIC_PREFIX = "aic_";
 const std::string AIV_PREFIX = "aiv_";
 }
 
+MetricSummaryPersistence::~MetricSummaryPersistence()
+{
+    if (stmt_) {
+        sqlite3_finalize(stmt_);
+    }
+    if (db_) {
+        int rc = sqlite3_close(db_);
+        if (rc != SQLITE_OK) {
+            ERROR("First close failed, err: % !", sqlite3_errmsg(db_));
+            sqlite3_close_v2(db_);
+        }
+        db_ = nullptr;
+    }
+}
+
 bool MetricSummaryPersistence::BindAndExecuteInsert(std::unordered_map<PmuHeaderType, std::vector<uint64_t>>& ids,
-                                                    std::unordered_map<PmuHeaderType, std::vector<double>>& pmu,
-                                                    sqlite3_stmt *stmt, sqlite3* db)
+                                                    std::unordered_map<PmuHeaderType, std::vector<double>>& pmu)
 {
     // 此处和Python表头保持强规定顺序，按照id(后续不展示，可以不用关注顺序)，AIC:time cyc, pmu, AIV:time cyc pmu的顺序绑定值
     int index = 0;
     for (auto& value : ids[TASK_ID]) {
-        sqlite3_bind_int64(stmt, ++index, value);
+        sqlite3_bind_int64(stmt_, ++index, value);
     }
     for (auto& value : pmu[AIC_TOTAL_TIME]) {
-        sqlite3_bind_double(stmt, ++index, value);
+        sqlite3_bind_double(stmt_, ++index, value);
     }
     for (auto& value : ids[AIC_TOTAL_CYCLE]) {
-        sqlite3_bind_int64(stmt, ++index, value);
+        sqlite3_bind_int64(stmt_, ++index, value);
     }
     for (auto& value : pmu[AIC_PMU_RESULT]) {
-        sqlite3_bind_double(stmt, ++index, value);
+        sqlite3_bind_double(stmt_, ++index, value);
     }
     for (auto& value : pmu[AIV_TOTAL_TIME]) {
-        sqlite3_bind_double(stmt, ++index, value);
+        sqlite3_bind_double(stmt_, ++index, value);
     }
     for (auto& value : ids[AIV_TOTAL_CYCLE]) {
-        sqlite3_bind_int64(stmt, ++index, value);
+        sqlite3_bind_int64(stmt_, ++index, value);
     }
     for (auto& value : pmu[AIV_PMU_RESULT]) {
-        sqlite3_bind_double(stmt, ++index, value);
+        sqlite3_bind_double(stmt_, ++index, value);
     }
-    auto rc = sqlite3_step(stmt);
+    auto rc = sqlite3_step(stmt_);
     if (rc != SQLITE_DONE) {
         // 插入失败，回滚事务
-        if (sqlite3_exec(db, "ROLLBACK", nullptr, nullptr, nullptr)) {
+        if (sqlite3_exec(db_, "ROLLBACK", nullptr, nullptr, nullptr)) {
             ERROR("sqlite3_exec return %: rollback failed!", rc);
         }
-        std::string errorMsg = "Failed to insert data: " + std::string(sqlite3_errmsg(db));
+        std::string errorMsg = "Failed to insert data: " + std::string(sqlite3_errmsg(db_));
         ERROR("sqlite3_exec return %, %", rc, errorMsg);
         return false;
     }
@@ -144,7 +158,7 @@ TableColumns MetricSummaryPersistence::GetTableColumn(const DeviceContext& conte
 }
 
 uint32_t MetricSummaryPersistence::GenerateAndSavePmuData(std::map<TaskId, std::vector<DeviceTask>>& deviceTask,
-                                                          sqlite3_stmt *stmt, sqlite3 *db, std::string& dbPath)
+                                                          std::string& dbPath)
 {
     bool isNone = true;
     std::vector<uint64_t> ids;
@@ -159,11 +173,11 @@ uint32_t MetricSummaryPersistence::GenerateAndSavePmuData(std::map<TaskId, std::
         ids.push_back(it.first.batchId);
         for (auto& task : it.second) {
             idMap[TASK_ID] = ids;
-            sqlite3_reset(stmt);
+            sqlite3_reset(stmt_);
             if (!ConstructData(idMap, resultMap, task, aicLength_, aivLength_)) {
                 continue;
             }
-            if (BindAndExecuteInsert(idMap, resultMap, stmt, db)) {
+            if (BindAndExecuteInsert(idMap, resultMap)) {
                 isNone = false;
                 idMap.clear();
                 resultMap.clear();
@@ -173,7 +187,7 @@ uint32_t MetricSummaryPersistence::GenerateAndSavePmuData(std::map<TaskId, std::
             }
         }
     }
-    sqlite3_exec(db, "COMMIT", nullptr, nullptr, nullptr);
+    sqlite3_exec(db_, "COMMIT", nullptr, nullptr, nullptr);
     if (isNone && !File::DeleteFile(dbPath)) {
         // 说明没有PMU数据，没有PMU数据就不应该生成DB，直接删除DB文件
         ERROR("delete % failed", dbPath);
@@ -182,34 +196,44 @@ uint32_t MetricSummaryPersistence::GenerateAndSavePmuData(std::map<TaskId, std::
     return ANALYSIS_OK;
 }
 
+void MetricSummaryPersistence::CreateConnection(const std::string& dbPath)
+{
+    int rc = sqlite3_open(dbPath.c_str(), &db_); // 连接数据库
+    if (rc != SQLITE_OK) {
+        std::string errorMsg = "Failed to open database: " + std::string(sqlite3_errmsg(db_));
+        ERROR("sqlite3_exec return %, %", rc, errorMsg);
+        sqlite3_close_v2(db_);
+        db_ = nullptr;
+    } else {
+        sqlite3_exec(db_, "PRAGMA synchronous = OFF;", nullptr, nullptr, nullptr);
+    }
+}
+
 uint32_t MetricSummaryPersistence::SaveDataToDb(std::map<TaskId, std::vector<DeviceTask>>& deviceTask,
                                                 std::string& dbPath, DBInfo& dbInfo)
 {
-    std::shared_ptr<Connection> conn;
-    MAKE_SHARED_RETURN_VALUE(conn, Connection, false, dbPath);
-    auto db = conn->GetSqliteConn();
-    auto stmt = conn->GetSqliteStmt();
-    if (db == nullptr) {
+    CreateConnection(dbPath);
+    if (db_ == nullptr) {
         ERROR("Get DB fail!");
         return ANALYSIS_ERROR;
     }
     int colNum = static_cast<int>(dbInfo.database->GetTableCols(dbInfo.tableName).size());
     // 开启事务
-    sqlite3_exec(db, "BEGIN", nullptr, nullptr, nullptr);
+    sqlite3_exec(db_, "BEGIN", nullptr, nullptr, nullptr);
     std::string valueStr;
     for (int i = 0; i < colNum - 1; ++i) {
         valueStr += "?,";
     }
     valueStr = "(" + valueStr + "?)";
     std::string sql = "INSERT INTO " + dbInfo.tableName + " VALUES" + valueStr;
-    sqlite3_busy_timeout(db, TIMEOUT);
-    bool rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
+    sqlite3_busy_timeout(db_, TIMEOUT);
+    int rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt_, nullptr);
     if (rc != SQLITE_OK) {
-        std::string errorMsg = std::string(sqlite3_errmsg(db));
+        std::string errorMsg = std::string(sqlite3_errmsg(db_));
         ERROR("sqlite3_prepare_v2 run failed: %", errorMsg);
         return ANALYSIS_ERROR;
     }
-    if (GenerateAndSavePmuData(deviceTask, stmt, db, dbPath) == ANALYSIS_OK) {
+    if (GenerateAndSavePmuData(deviceTask, dbPath) == ANALYSIS_OK) {
         return ANALYSIS_OK;
     } else {
         ERROR("Insert data to % failed", dbInfo.tableName);
