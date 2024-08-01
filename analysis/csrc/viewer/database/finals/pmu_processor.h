@@ -48,8 +48,9 @@ protected:
     bool Process(const std::string &fileDir) override;
 private:
     bool TaskBasedProcess(const std::string &fileDir);
-    TableColumns GetAndCheckTableColumns(std::unordered_map<std::string, uint16_t> dbPathTable, DBInfo &metricDB);
-    bool TaskBasedProcessByColumnName(const std::pair<const std::string, uint16_t> dbRecord,
+    TableColumns GetAndCheckTableColumns(const std::unordered_map<std::string, uint16_t>& dbPathTable,
+                                         DBInfo &metricDB);
+    bool TaskBasedProcessByColumnName(const std::pair<const std::string, uint16_t>& dbRecord,
                                       const std::string &columnName, DBInfo &metricDB);
     OTFormat GetTaskBasedData(const std::string &dbPath, const std::string &columnName, DBInfo &metricDB);
     bool FormatTaskBasedData(const OTFormat &oriData, PTFormat &processedData, std::string columnName,
