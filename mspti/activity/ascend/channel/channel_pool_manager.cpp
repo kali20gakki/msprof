@@ -63,6 +63,7 @@ void ChannelPoolManager::UnInit()
 
 msptiResult ChannelPoolManager::AddReader(uint32_t devId, AI_DRV_CHANNEL channelId)
 {
+    std::lock_guard<std::mutex> lock(channelPollMutex_);
     if (drvChannelPoll_) {
         return drvChannelPoll_->AddReader(devId, channelId);
     }
@@ -71,6 +72,7 @@ msptiResult ChannelPoolManager::AddReader(uint32_t devId, AI_DRV_CHANNEL channel
 
 msptiResult ChannelPoolManager::RemoveReader(uint32_t devId, AI_DRV_CHANNEL channelId)
 {
+    std::lock_guard<std::mutex> lock(channelPollMutex_);
     if (drvChannelPoll_) {
         return drvChannelPoll_->RemoveReader(devId, channelId);
     }

@@ -13,7 +13,7 @@
 
 #include <functional>
 
-#include "activity/ascend/ascend_manager.h"
+#include "activity/activity_manager.h"
 #include "callback/callback_manager.h"
 #include "common/function_loader.h"
 
@@ -57,7 +57,7 @@ rtError_t rtSetDevice(int32_t device)
         Mspti::Common::GetFunction<rtError_t, int32_t>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
-    Mspti::Ascend::AscendProfEnable(true, device);
+    Mspti::Activity::ActivityManager::GetInstance()->SetDevice(device);
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_DEVICE_SET, __FUNCTION__);
     return func(device);
 }
@@ -70,7 +70,7 @@ rtError_t rtDeviceReset(int32_t device)
         Mspti::Common::GetFunction<rtError_t, int32_t>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
-    Mspti::Ascend::AscendProfEnable(false, device);
+    Mspti::Activity::ActivityManager::GetInstance()->DeviceReset(device);
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_DEVICE_RESET, __FUNCTION__);
     return func(device);
 }
@@ -83,7 +83,7 @@ rtError_t rtSetDeviceEx(int32_t device)
         Mspti::Common::GetFunction<rtError_t, int32_t>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
-    Mspti::Ascend::AscendProfEnable(true, device);
+    Mspti::Activity::ActivityManager::GetInstance()->SetDevice(device);
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_DEVICE_SET_EX, __FUNCTION__);
     return func(device);
 }

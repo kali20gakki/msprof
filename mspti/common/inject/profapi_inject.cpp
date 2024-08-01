@@ -14,7 +14,6 @@
 
 #include <functional>
 
-#include "activity/ascend/ascend_manager.h"
 #include "common/function_loader.h"
 #include "common/plog_manager.h"
 

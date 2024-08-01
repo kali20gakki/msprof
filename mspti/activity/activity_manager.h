@@ -50,10 +50,12 @@ public:
         msptiBuffersCallbackRequestFunc funcBufferRequested,
         msptiBuffersCallbackCompleteFunc funcBufferCompleted);
     msptiResult Record(msptiActivity *activity, size_t size);
-    msptiResult Register(bool enable, msptiActivityKind kind);
-    std::unordered_set<msptiActivityKind>& GetActivities();
     static msptiResult GetNextRecord(uint8_t *buffer, size_t validBufferSizeBytes, msptiActivity **record);
-    msptiResult FlushActivityBuffer();
+    msptiResult FlushAll();
+    void SetDevice(uint32_t deviceId);
+    void DeviceReset(uint32_t deviceId);
+    msptiResult Register(msptiActivityKind kind);
+    msptiResult UnRegister(msptiActivityKind kind);
 
 private:
     ActivityManager() = default;
@@ -66,10 +68,11 @@ private:
     void JoinWorkThreads();
 
 private:
-    std::atomic<bool> init_{false};
     // Replace map with bitest
     std::unordered_set<msptiActivityKind> activity_set_;
     std::mutex activity_mtx_;
+    std::unordered_set<uint32_t> devices_;
+    std::mutex devices_mtx_;
     
     std::thread t_;
     std::atomic<bool> thread_run_{false};
