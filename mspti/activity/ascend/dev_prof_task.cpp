@@ -16,6 +16,8 @@
 #include "common/inject/driver_inject.h"
 #include "common/plog_manager.h"
 
+#include "securec.h"
+
 namespace Mspti {
 namespace Ascend {
 
@@ -47,6 +49,7 @@ msptiResult DevProfTask::Stop()
     if (t_.joinable()) {
         t_.join();
     }
+    return MSPTI_SUCCESS;
 }
 
 void DevProfTask::Run()
