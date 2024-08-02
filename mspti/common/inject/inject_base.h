@@ -21,6 +21,7 @@ using rtError_t = uint32_t;
 using rtStream_t = void *;
 using rtSmDesc_t = void;
 using VOID_PTR = void*;
+using CONST_VOID_PTR = const void *;
 using VOID_PTR_PTR = void**;
 
 enum DrvError {

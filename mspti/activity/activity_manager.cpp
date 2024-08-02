@@ -133,6 +133,7 @@ msptiResult ActivityManager::Register(msptiActivityKind kind)
     for (auto device : devices) {
         Mspti::Ascend::DevTaskManager::GetInstance()->StartDevProfTask(device, kind);
     }
+    return MSPTI_SUCCESS;
 }
 
 msptiResult ActivityManager::UnRegister(msptiActivityKind kind)
@@ -152,6 +153,7 @@ msptiResult ActivityManager::UnRegister(msptiActivityKind kind)
     for (auto device : devices) {
         Mspti::Ascend::DevTaskManager::GetInstance()->StopDevProfTask(device, kind);
     }
+    return MSPTI_SUCCESS;
 }
 
 msptiResult ActivityManager::GetNextRecord(uint8_t *buffer, size_t validBufferSizeBytes, msptiActivity **record)

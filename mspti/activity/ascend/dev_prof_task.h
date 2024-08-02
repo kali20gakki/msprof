@@ -49,8 +49,8 @@ public:
     DevProfTaskDefault(uint32_t deviceId) : deviceId_(deviceId) {}
 
 private:
-    msptiResult StartTask() override {}
-    msptiResult StopTask() override {}
+    msptiResult StartTask() override {return MSPTI_SUCCESS;}
+    msptiResult StopTask() override {return MSPTI_SUCCESS;}
 
 private:
     uint32_t deviceId_;

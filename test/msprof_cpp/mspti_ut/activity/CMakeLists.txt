@@ -1,8 +1,11 @@
+file(GLOB_RECURSE SRC_FILE
+    ${TOP_DIR}/mspti/activity/*.cpp
+    ${TOP_DIR}/mspti/callback/*.cpp
+    ${TOP_DIR}/mspti/common/*.cpp
+)
+
 add_executable(activity_utest 
-    ${TOP_DIR}/mspti/activity/activity_manager.cpp
-    ${TOP_DIR}/mspti/common/function_loader.cpp
-    ${TOP_DIR}/mspti/common/inject/plog_inject.cpp
-    ${TOP_DIR}/mspti/common/utils.cpp
+    ${SRC_FILE}
     test/main.cpp
     test/activity_utest.cpp
 )
