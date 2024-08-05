@@ -82,10 +82,14 @@ void DriverPlugin::LoadDriverSo()
         MSVP_MAKE_SHARED1_VOID(pluginHandle_, PluginHandle, soName_);
     }
     if (!pluginHandle_->HasLoad()) {
-        if (pluginHandle_->OpenPluginFromEnv("LD_LIBRARY_PATH") != PROFILING_SUCCESS &&
-            pluginHandle_->OpenPluginFromLdcfg() != PROFILING_SUCCESS) {
+        bool isSoValid = true;
+        if (pluginHandle_->OpenPluginFromEnv("LD_LIBRARY_PATH", isSoValid) != PROFILING_SUCCESS &&
+            pluginHandle_->OpenPluginFromLdcfg(isSoValid) != PROFILING_SUCCESS) {
             MSPROF_LOGE("DriverPlugin failed to load driver so");
             return;
+        }
+        if (!isSoValid) {
+            MSPROF_LOGW("driver so it may not be secure because there are incorrect permissions");
         }
     }
     GetAllFunction();

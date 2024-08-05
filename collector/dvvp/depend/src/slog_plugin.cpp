@@ -18,8 +18,9 @@ void SlogPlugin::LoadSlogSo()
     }
     int32_t ret = PROFILING_SUCCESS;
     if (!pluginHandle_->HasLoad()) {
-        if (pluginHandle_->OpenPluginFromEnv("LD_LIBRARY_PATH") != PROFILING_SUCCESS &&
-            pluginHandle_->OpenPluginFromLdcfg() != PROFILING_SUCCESS) {
+        bool isSoValid = true;
+        if (pluginHandle_->OpenPluginFromEnv("LD_LIBRARY_PATH", isSoValid) != PROFILING_SUCCESS &&
+            pluginHandle_->OpenPluginFromLdcfg(isSoValid) != PROFILING_SUCCESS) {
             return;
         }
     }

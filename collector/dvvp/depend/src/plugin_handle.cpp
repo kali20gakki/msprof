@@ -64,7 +64,7 @@ bool PluginHandle::CheckSoValid(const std::string& soPath) const
     return false;
 }
 
-int32_t PluginHandle::OpenPluginFromEnv(const std::string envValue)
+int32_t PluginHandle::OpenPluginFromEnv(const std::string envValue, bool &isSoValid)
 {
     if (envValue.empty() || envValue.size() >= MAX_PATH_LENGTH) {
         return PROFILING_FAILED;
@@ -83,7 +83,7 @@ int32_t PluginHandle::OpenPluginFromEnv(const std::string envValue)
         return PROFILING_FAILED;
     }
     if (!CheckSoValid(realPath)) {
-        return PROFILING_FAILED;
+        isSoValid = false;
     }
     return DlopenSo(realPath);
 }
@@ -137,7 +137,7 @@ void PluginHandle::GetSoPaths(std::vector<std::string> &soPaths)
     return;
 }
 
-int32_t PluginHandle::OpenPluginFromLdcfg()
+int32_t PluginHandle::OpenPluginFromLdcfg(bool &isSoValid)
 {
     GetSoPaths(soPaths_);
     if (soPaths_.empty()) {
@@ -154,7 +154,7 @@ int32_t PluginHandle::OpenPluginFromLdcfg()
             return PROFILING_FAILED;
         }
         if (!CheckSoValid(realPath)) {
-            return PROFILING_FAILED;
+            isSoValid = false;
         }
     }
     handle_ = dlopen(soName_.c_str(), RTLD_NOW | RTLD_GLOBAL);

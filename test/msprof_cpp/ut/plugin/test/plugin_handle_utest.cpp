@@ -37,31 +37,32 @@ TEST_F(PluginHandleUtest, GetSoName)
 
 TEST_F(PluginHandleUtest, OpenPluginFromEnv)
 {
+    bool isSoValid = true;
     GlobalMockObject::verify();
     std::string soName = "libascend_hal.so";
     PluginHandle pluginHandle(soName);
     std::string envStrEmpty = "";
     std::string envStr = "LD_LIBRARY_PATH";
-    EXPECT_EQ(PROFILING_FAILED, pluginHandle.OpenPluginFromEnv(envStrEmpty));
+    EXPECT_EQ(PROFILING_FAILED, pluginHandle.OpenPluginFromEnv(envStrEmpty, isSoValid));
     std::string retStrEmpty = "";
     std::string retStr = "/usr/local/Ascend/driver/lib64/libascend_hal.so";
     MOCKER_CPP(&PluginHandle::GetSoPath)
         .stubs()
         .will(returnValue(retStrEmpty))
         .then(returnValue(retStr));
-    EXPECT_EQ(PROFILING_FAILED, pluginHandle.OpenPluginFromEnv(envStr));
+    EXPECT_EQ(PROFILING_FAILED, pluginHandle.OpenPluginFromEnv(envStr, isSoValid));
 
     MOCKER_CPP(&MmRealPath)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(PROFILING_FAILED, pluginHandle.OpenPluginFromEnv(envStr));
+    EXPECT_EQ(PROFILING_FAILED, pluginHandle.OpenPluginFromEnv(envStr, isSoValid));
 
     MOCKER_CPP(&PluginHandle::CheckSoValid)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
-    EXPECT_EQ(PROFILING_FAILED, pluginHandle.OpenPluginFromEnv(envStr));
+    EXPECT_EQ(PROFILING_FAILED, pluginHandle.OpenPluginFromEnv(envStr, isSoValid));
 
     int openfd = 0;
     MOCKER_CPP(&PluginHandle::DlopenSo)
@@ -69,8 +70,8 @@ TEST_F(PluginHandleUtest, OpenPluginFromEnv)
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    EXPECT_EQ(PROFILING_FAILED, pluginHandle.OpenPluginFromEnv(envStr));
-    EXPECT_EQ(PROFILING_SUCCESS, pluginHandle.OpenPluginFromEnv(envStr));
+    EXPECT_EQ(PROFILING_FAILED, pluginHandle.OpenPluginFromEnv(envStr, isSoValid));
+    EXPECT_EQ(PROFILING_SUCCESS, pluginHandle.OpenPluginFromEnv(envStr, isSoValid));
 }
 
 TEST_F(PluginHandleUtest, CloseHandle)
