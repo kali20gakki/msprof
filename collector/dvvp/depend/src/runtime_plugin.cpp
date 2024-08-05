@@ -30,10 +30,15 @@ void RuntimePlugin::LoadRuntimeSo()
     }
     int32_t ret = PROFILING_SUCCESS;
     if (!pluginHandle_->HasLoad()) {
-        if (pluginHandle_->OpenPluginFromEnv("LD_LIBRARY_PATH") != PROFILING_SUCCESS &&
-            pluginHandle_->OpenPluginFromLdcfg() != PROFILING_SUCCESS) {
+        bool isSoValid = true;
+        if (pluginHandle_->OpenPluginFromEnv("LD_LIBRARY_PATH", isSoValid) != PROFILING_SUCCESS &&
+            pluginHandle_->OpenPluginFromLdcfg(isSoValid) != PROFILING_SUCCESS) {
             MSPROF_LOGE("RuntimePlugin failed to load runtime so");
             return;
+        }
+
+        if (!isSoValid) {
+            MSPROF_LOGW("runtime so it may not be secure because there are incorrect permissions");
         }
     }
     GetAllFunction();

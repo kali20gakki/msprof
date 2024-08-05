@@ -31,8 +31,8 @@ public:
     explicit PluginHandle(const std::string &name) : soName_(name), handle_(nullptr), load_(false) {}
     ~PluginHandle();
     const std::string GetSoName() const;
-    int32_t OpenPluginFromEnv(const std::string envValue);
-    int32_t OpenPluginFromLdcfg();
+    int32_t OpenPluginFromEnv(const std::string envValue, bool &isSoValid);
+    int32_t OpenPluginFromLdcfg(bool &isSoValid);
     void CloseHandle();
     template <typename R, typename... Types>
     void GetFunction(const std::string& funcName, std::function<R(Types... args)>& func) const
