@@ -34,6 +34,10 @@ db命名：msprof_{时间戳}.db
 | 10000 | node    |
 | 5500  | hccl    |
 | 5000  | runtime |
+| 50001 | op |
+| 50002 | queue |
+| 50003 | trace |
+| 50004 | mstx |
 
 变更记录：
 
@@ -41,6 +45,7 @@ db命名：msprof_{时间戳}.db
 |-----------|---------|
 | 2024/3/7  | 330首次上线 |
 | 2024/3/13 | 补充表内容   |
+| 2024/8/5  | 新增PYTORCH_API表中type字段的枚举值 |
 
 
 ### ENUM_MEMORY
@@ -978,12 +983,14 @@ db命名：ascend_pytorch_profiler_{rankId}.db
 | inputDtypes    | INTEGER |     | 输入数据类型在STRING_IDS表中对应的id |
 | inputShapes    | INTEGER |     | 输入shape在STRING_IDS表中对应的id |
 | callchainId    | INTEGER |     | 索引，用于在PYTORCH_CALLCHAINS表查询对应的call stack信息;如果无stack信息，此处为空 |
+| type           | INTEGER |     | 标记数据类型，op、queue、mstx还是python_trace，数据类型存于枚举表ENUM _API_TYPE中 |
 
 变更记录:
 
 | 日期       | 内容      |
 |----------|---------|
 | 2024/3/7 | 330首次上线 |
+| 2024/8/5  | PYTORCH_API新增type字段 |
 
 ### CONNECTION_IDS
 
