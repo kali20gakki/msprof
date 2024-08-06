@@ -11,8 +11,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
-#include <iostream>
+#include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/domain/services/parser/parser_error_code.h"
 #include "analysis/csrc/domain/services/parser/freq/include/freq_parser.h"
@@ -108,5 +107,21 @@ TEST_F(FreqParserUtest, ShouldReturnNoDataWhenNoFile)
     ASSERT_EQ(Analysis::ANALYSIS_OK, freqParser.Run(dataInventory_, context));
     auto data = dataInventory_.GetPtr<std::vector<HalFreqLpmData>>();
     ASSERT_EQ(0ul, data->size());
+}
+
+TEST_F(FreqParserUtest, ShouldParseErrorWhenResizeException)
+{
+    FreqParser freqParser;
+    DeviceContext context;
+    context.isInitialized_ = true;
+    context.deviceContextInfo.deviceFilePath = FREQ_LPM_PATH;
+    context.deviceContextInfo.deviceInfo.aicFrequency = AIC_FREQ;
+    context.deviceContextInfo.deviceStart.cntVct = 0;
+    context.deviceContextInfo.deviceFilePath = FREQ_LPM_PATH;
+    std::vector<FreqData> freqLpm{CreateFreqData(), CreateFreqData()};
+    WriteBin(freqLpm, File::PathJoin({FREQ_LPM_PATH, "data"}), "lpmFreqConv.data.0.slice_0");
+    MOCKER_CPP(&std::vector<HalFreqData>::resize, void(std::vector<HalFreqData>::*)(size_t)).stubs()
+        .will(throws(std::bad_alloc()));
+    ASSERT_EQ(Analysis::PARSER_PARSE_DATA_ERROR, freqParser.Run(dataInventory_, context));
 }
 }

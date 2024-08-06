@@ -73,7 +73,10 @@ uint32_t StarsSocParser::ParseData(DataInventory &dataInventory, const Infra::Co
     auto structCount = this->binaryDataSize / trunkSize;
     INFO("StarsSoc structCount: %", structCount);
     int stat{ANALYSIS_OK};
-    halUniData_.resize(structCount);
+    if (!Utils::Resize(halUniData_, structCount)) {
+        ERROR("Resize for StarsSoc data failed!");
+        return ANALYSIS_ERROR;
+    }
     if (structCount < MIN_COUNT && structCount != 0) {
         ERROR("The stars_soc data volume is less than 2");
         stat = ANALYSIS_ERROR;

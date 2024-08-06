@@ -11,7 +11,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
+#include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/domain/services/parser/parser_error_code.h"
 #include "test/msprof_cpp/analysis_ut/domain/services/test/fake_generator.h"
@@ -175,6 +175,18 @@ TEST_F(FftsProfileParserUTest, ShouldReturnNoDataWhenPathNull)
     ASSERT_EQ(Analysis::ANALYSIS_OK, parser.Run(dataInventory_, context));
     auto pmuData = dataInventory_.GetPtr<std::vector<HalPmuData>>();
     ASSERT_EQ(0ul, pmuData->size());
+}
+
+TEST_F(FftsProfileParserUTest, ShouldParseErrorWhenResizeException)
+{
+    FftsProfileParser parser;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = FFTS_PROFILE_PATH;
+    std::vector<BlockPmu> pmu{GenerateBlockPmu()};
+    WriteBin(pmu, File::PathJoin({FFTS_PROFILE_PATH, "data"}), "ffts_profile.data.0.slice_0");
+    MOCKER_CPP(&std::vector<HalPmuData>::resize, void(std::vector<HalPmuData>::*)(size_t)).stubs()
+        .will(throws(std::bad_alloc()));
+    ASSERT_EQ(PARSER_PARSE_DATA_ERROR, parser.Run(dataInventory_, context));
 }
 }
 }
