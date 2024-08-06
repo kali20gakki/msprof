@@ -162,6 +162,8 @@ TEST_F(JOB_WRAPPER_PROF_DDR_JOB_TEST, SetPeripheralConfig) {
     collectionJobCfg_->jobParams.events->push_back("xx");
     EXPECT_EQ(PROFILING_SUCCESS, proDdrJob->SetPeripheralConfig());
     EXPECT_EQ(PROFILING_SUCCESS, proDdrJob->SetPeripheralConfig());
+    collectionJobCfg_->jobParams.events = nullptr;
+    EXPECT_EQ(PROFILING_FAILED, proDdrJob->SetPeripheralConfig());
 }
 
 
@@ -244,6 +246,8 @@ TEST_F(JOB_WRAPPER_PROF_HBM_JOB_TEST, SetPeripheralConfig)
     collectionJobCfg_->jobParams.events->push_back("read");
     collectionJobCfg_->jobParams.events->push_back("xx");
     EXPECT_EQ(PROFILING_SUCCESS, profHbmJob->SetPeripheralConfig());
+    collectionJobCfg_->jobParams.events = nullptr;
+    EXPECT_EQ(PROFILING_FAILED, profHbmJob->SetPeripheralConfig());
 }
 
 TEST_F(JOB_WRAPPER_PROF_HBM_JOB_TEST, Process) {
@@ -539,7 +543,6 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, SetPeripheralConfig) {
     MOCKER(analysis::dvvp::common::utils::Utils::ProfMalloc)
         .stubs()
         .will(returnValue((void*)tmp));
-
     collectionJobCfg_->jobParams.events = std::make_shared<std::vector<std::string> >(0);
     collectionJobCfg_->jobParams.events->push_back("read");
     collectionJobCfg_->jobParams.events->push_back("write");
@@ -550,6 +553,8 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, SetPeripheralConfig) {
     profLlcJob->peripheralCfg_ = peripheralCfg;
     profLlcJob->collectionJobCfg_ = collectionJobCfg_;
     EXPECT_EQ(PROFILING_SUCCESS, profLlcJob->SetPeripheralConfig());
+    collectionJobCfg_->jobParams.events = nullptr;
+    EXPECT_EQ(PROFILING_FAILED, profLlcJob->SetPeripheralConfig());
 }
 TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, Uninit) {
     MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
