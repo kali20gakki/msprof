@@ -14,6 +14,7 @@
 #include "common/inject/driver_inject.h"
 #include "common/plog_manager.h"
 #include "common/utils.h"
+#include "securec.h"
 
 namespace Mspti {
 namespace Ascend {
@@ -59,6 +60,35 @@ void ChannelPoolManager::UnInit()
         drvChannelPoll_->Stop();
         drvChannelPoll_.reset(nullptr);
     }
+}
+
+msptiResult ChannelPoolManager::GetAllChannels(uint32_t devId)
+{
+    std::lock_guard<std::mutex> lock(channels_mtx_);
+    ChannelListT channelList;
+    if (memset_s(&channelList, sizeof(ChannelListT), 0, sizeof(ChannelListT)) != EOK) {
+        MSPTI_LOGE("DrvGetChannels, memset failed");
+        return MSPTI_ERROR_INNER;
+    }
+    ProfDrvGetChannels(devId, &channelList);
+    if (channelList.channelNum > PROF_CHANNEL_NUM_MAX || channelList.channelNum == 0) {
+        MSPTI_LOGE("ProfDrvGetChannels failed. Channel Num: %d.", channelList.channelNum);
+        return MSPTI_ERROR_INNER;
+    }
+    for (size_t i = 0; i < channelList.channelNum; ++i) {
+        channels_[devId].insert(channelList.channel[i].channelId);
+    }
+    return MSPTI_SUCCESS;
+}
+
+bool ChannelPoolManager::CheckChannelValid(uint32_t devId, uint32_t channelId)
+{
+    std::lock_guard<std::mutex> lock(channels_mtx_);
+    auto devIter = channels_.find(devId);
+    if (devIter == channels_.end() || devIter->second.find(channelId) == devIter->second.end()) {
+        return false;
+    }
+    return true;
 }
 
 msptiResult ChannelPoolManager::AddReader(uint32_t devId, AI_DRV_CHANNEL channelId)

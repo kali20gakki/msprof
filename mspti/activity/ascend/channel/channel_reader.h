@@ -40,6 +40,7 @@ private:
     static size_t TransDataToActivityBuffer(char buffer[], size_t valid_size, uint32_t deviceId,
         AI_DRV_CHANNEL channelId);
     static size_t TransTsFwData(char buffer[], size_t valid_size, uint32_t deviceId);
+    static size_t TransStarsLog(char buffer[], size_t valid_size, uint32_t deviceId);
 
 private:
     // basic info

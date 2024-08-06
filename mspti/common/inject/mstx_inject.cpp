@@ -28,9 +28,6 @@ void aclprofMarkEx(const char* message, size_t len, RT_STREAM stream)
         MSPTI_LOGE("[Mark]Invalid input param for markEx");
         return;
     }
-    static uint32_t processId = Mspti::Common::Utils::GetPid();
-    thread_local static uint32_t threadId = Mspti::Common::Utils::GetTid();
-    static const uint32_t HOST_ID = 64;
     static const uint32_t MARK_TAG_ID = 11;
     uint64_t markId = g_markId++;
     msptiActivityMark activity;
@@ -39,8 +36,8 @@ void aclprofMarkEx(const char* message, size_t len, RT_STREAM stream)
     activity.mode = MSPTI_ACTIVITY_MARKER_MODE_HOST;
     activity.timestamp = Mspti::Common::Utils::GetClockMonotonicRawNs();
     activity.id = markId;
-    activity.msptiObjectId.pt.processId = processId;
-    activity.msptiObjectId.pt.threadId = threadId;
+    activity.msptiObjectId.pt.processId = Mspti::Common::Utils::GetPid();
+    activity.msptiObjectId.pt.threadId = Mspti::Common::Utils::GetTid();
     activity.name = message;
 
     Mspti::Activity::ActivityManager::GetInstance()->Record(
@@ -55,9 +52,6 @@ void aclprofMark(void* stamp)
         MSPTI_LOGE("[Mark]aclprofStamp is nullptr");
         return;
     }
-    static uint32_t processId = Mspti::Common::Utils::GetPid();
-    thread_local static uint32_t threadId = Mspti::Common::Utils::GetTid();
-    static const uint32_t HOST_ID = 64;
     uint64_t markId = g_markId++;
     msptiActivityMark activity;
     activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
@@ -65,8 +59,8 @@ void aclprofMark(void* stamp)
     activity.mode = MSPTI_ACTIVITY_MARKER_MODE_HOST;
     activity.timestamp = Mspti::Common::Utils::GetClockMonotonicRawNs();
     activity.id = markId;
-    activity.msptiObjectId.pt.processId = processId;
-    activity.msptiObjectId.pt.threadId = threadId;
+    activity.msptiObjectId.pt.processId = Mspti::Common::Utils::GetPid();
+    activity.msptiObjectId.pt.threadId = Mspti::Common::Utils::GetTid();
     auto stampInstancePtr = static_cast<MsprofStampInstance*>(stamp);
     activity.name = stampInstancePtr->stampInfo.message;
     Mspti::Activity::ActivityManager::GetInstance()->Record(

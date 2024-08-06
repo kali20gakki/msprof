@@ -15,6 +15,7 @@
 #include "activity/ascend/channel/channel_pool_manager.h"
 #include "common/inject/driver_inject.h"
 #include "common/plog_manager.h"
+#include "common/context_manager.h"
 
 #include "securec.h"
 
@@ -26,6 +27,20 @@ std::unique_ptr<DevProfTask> DevProfTaskFactory::CreateTask(uint32_t deviceId, m
     switch (kind) {
         case MSPTI_ACTIVITY_KIND_MARKER:
             return std::make_unique<DevProfTaskTsFw>(deviceId);
+        case MSPTI_ACTIVITY_KIND_KERNEL:
+            return CreateTaskKernel(deviceId);
+        default:
+            return std::make_unique<DevProfTaskDefault>(deviceId);
+    }
+}
+
+std::unique_ptr<DevProfTask> DevProfTaskFactory::CreateTaskKernel(uint32_t deviceId)
+{
+    auto type = Mspti::Common::ContextManager::GetInstance()->GetChipType(deviceId);
+    switch (type) {
+        case Mspti::Common::PlatformType::CHIP_910B:
+        case Mspti::Common::PlatformType::CHIP_310B:
+            return std::make_unique<DevProfTaskStars>(deviceId);
         default:
             return std::make_unique<DevProfTaskDefault>(deviceId);
     }
@@ -66,6 +81,9 @@ void DevProfTask::Run()
 
 msptiResult DevProfTaskTsFw::StartTask()
 {
+    if (!Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->CheckChannelValid(deviceId_, channelId_)) {
+        return MSPTI_SUCCESS;
+    }
     static const uint32_t SAMPLE_PERIOD = 20;
     Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->AddReader(deviceId_, channelId_);
     TsTsFwProfileConfigT configP;
@@ -90,6 +108,44 @@ msptiResult DevProfTaskTsFw::StartTask()
 }
 
 msptiResult DevProfTaskTsFw::StopTask()
+{
+    int ret = ProfStop(deviceId_, channelId_);
+    if (ret != 0) {
+        MSPTI_LOGE("Failed to stop TsTrackJob for device: %u, channel id: %u", deviceId_, channelId_);
+        return MSPTI_ERROR_INNER;
+    }
+    Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->RemoveReader(deviceId_, channelId_);
+    return MSPTI_SUCCESS;
+}
+
+msptiResult DevProfTaskStars::StartTask()
+{
+    if (!Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->CheckChannelValid(deviceId_, channelId_)) {
+        return MSPTI_SUCCESS;
+    }
+    Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->AddReader(deviceId_, channelId_);
+    StarsSocLogConfigT configP;
+    if (memset_s(&configP, sizeof(StarsSocLogConfigT), 0, sizeof(StarsSocLogConfigT)) != EOK) {
+        return MSPTI_ERROR_INNER;
+    }
+    configP.acsq_task = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
+    configP.ffts_thread_task = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
+    ProfStartParaT profStartPara;
+    profStartPara.channelType = PROF_CHANNEL_TYPE_TS;
+    static const uint32_t SAMPLE_PERIOD = 20;
+    profStartPara.samplePeriod = SAMPLE_PERIOD;
+    profStartPara.realTime = PROFILE_REAL_TIME;
+    profStartPara.userData = &configP;
+    profStartPara.userDataSize = sizeof(StarsSocLogConfigT);
+    int ret = ProfDrvStart(deviceId_, channelId_, &profStartPara);
+    if (ret != 0) {
+        MSPTI_LOGE("Failed to start ProfStarsJob for device: %u, channel id: %u", deviceId_, channelId_);
+        return MSPTI_ERROR_INNER;
+    }
+    return MSPTI_SUCCESS;
+}
+
+msptiResult DevProfTaskStars::StopTask()
 {
     int ret = ProfStop(deviceId_, channelId_);
     if (ret != 0) {
