@@ -190,6 +190,9 @@ int ProfDdrJob::SetPeripheralConfig()
 {
     samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->ddr_interval);
 
+    if (CheckJobEventParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     eventsStr_ = GetEventsStr(*(collectionJobCfg_->jobParams.events));
     uint32_t configSize = sizeof(TagDdrProfileConfig) +
                           (sizeof(uint32_t) * GetEventSize(*(collectionJobCfg_->jobParams.events)));
@@ -274,6 +277,9 @@ int ProfHbmJob::SetPeripheralConfig()
         samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->hbmInterval);
     }
 
+    if (CheckJobEventParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     eventsStr_ = GetEventsStr(*(collectionJobCfg_->jobParams.events));
     uint32_t configSize = sizeof(TagTsHbmProfileConfig) +
                           (sizeof(uint32_t) * GetEventSize(*(collectionJobCfg_->jobParams.events)));
@@ -840,6 +846,9 @@ int ProfLlcJob::SetPeripheralConfig()
 {
     samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->llc_interval);
 
+    if (CheckJobEventParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     eventsStr_ = GetEventsStr(*(collectionJobCfg_->jobParams.events));
     uint32_t configSize = sizeof(TagLlcProfileConfig);
     TagLlcProfileConfig *configP = reinterpret_cast<TagLlcProfileConfig *>(Utils::ProfMalloc(configSize));
