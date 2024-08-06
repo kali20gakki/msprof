@@ -26,11 +26,18 @@ struct DevTimeInfo {
     uint64_t devStartSysCnt;
 };
 
+enum class PlatformType {
+    CHIP_910B = 5,
+    CHIP_310B = 7,
+    END_TYPE
+};
+
 class ContextManager final {
 public:
     static ContextManager* GetInstance();
     void InitDevTimeInfo(uint32_t deviceId);
     uint64_t GetMonotomicFromSysCnt(uint32_t deviceId, uint64_t sysCnt);
+    PlatformType GetChipType(uint32_t deviceId);
 
 private:
     ContextManager() = default;

@@ -76,4 +76,19 @@ typedef enum {
     RTP_TYPE_INNER = 14,
 } TsTrackRptType;
 
+struct StarsSocLog {
+    uint32_t funcType : 6;
+    uint32_t cnt : 4;
+    uint32_t sqeType : 6;
+    uint32_t magic : 16;
+    uint32_t streamId : 16;
+    uint32_t taskId : 16;
+    uint32_t sysCntL : 32;
+    uint32_t sysCntH : 32;
+    uint32_t res0 : 16;
+    uint32_t accId : 6;
+    uint32_t acsqId : 10;
+    uint32_t res1[11];
+};
+
 #endif

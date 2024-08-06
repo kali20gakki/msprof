@@ -14,6 +14,8 @@
 
 #include <memory>
 #include <mutex>
+#include <unordered_map>
+#include <set>
 
 #include "activity/ascend/channel/channel_pool.h"
 #include "external/mspti_base.h"
@@ -27,6 +29,8 @@ public:
     static ChannelPoolManager* GetInstance();
     msptiResult Init();
     void UnInit();
+    msptiResult GetAllChannels(uint32_t devId);
+    bool CheckChannelValid(uint32_t devId, uint32_t channelId);
     msptiResult AddReader(uint32_t devId, AI_DRV_CHANNEL channelId);
     msptiResult RemoveReader(uint32_t devId, AI_DRV_CHANNEL channelId);
 
@@ -41,6 +45,8 @@ private:
 private:
     std::unique_ptr<ChannelPool> drvChannelPoll_;
     std::mutex channelPollMutex_;
+    std::unordered_map<uint32_t, std::set<uint32_t>> channels_;
+    std::mutex channels_mtx_;
 };
 }  // Channel
 }  // Ascend

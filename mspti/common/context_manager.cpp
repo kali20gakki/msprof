@@ -13,6 +13,7 @@
 #include "common/context_manager.h"
 
 #include "common/config.h"
+#include "common/plog_manager.h"
 #include "common/inject/driver_inject.h"
 #include "common/utils.h"
 
@@ -70,6 +71,22 @@ uint64_t ContextManager::GetMonotomicFromSysCnt(uint32_t deviceId, uint64_t sysC
         iter->second->hostStartMonoRawTime;
 
     return mono_time;
+}
+
+PlatformType ContextManager::GetChipType(uint32_t deviceId)
+{
+    int64_t versionInfo = 0;
+    DrvError ret = HalGetDeviceInfo(deviceId, DRV_MODULE_TYPE_SYSTEM, DRV_INFO_TYPE_VERSION, &versionInfo);
+    if (ret != DRV_ERROR_NONE) {
+        MSPTI_LOGE("Call HalGetDeviceInfo failed, deviceId: %u.", deviceId);
+        return PlatformType::END_TYPE;
+    }
+    uint32_t chipId = ((static_cast<uint64_t>(versionInfo) >> 8) & 0xff);
+    if (chipId >= static_cast<uint32_t>(PlatformType::END_TYPE)) {
+        MSPTI_LOGE("Get Chip Type failed, deviceId: %u.", deviceId);
+        return PlatformType::END_TYPE;
+    }
+    return static_cast<PlatformType>(chipId);
 }
 
 }  // Common

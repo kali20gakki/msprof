@@ -55,6 +55,7 @@ typedef struct ChannelList {
 enum AI_DRV_CHANNEL {
     PROF_CHANNEL_UNKNOWN         = 0,
     PROF_CHANNEL_TS_FW           = 44,
+    PROF_CHANNEL_STARS_SOC_LOG   = 50,
     PROF_CHANNEL_MAX             = 160,
 };
 
@@ -63,6 +64,17 @@ typedef enum ProfChannelType {
     PROF_CHANNEL_TYPE_PERIPHERAL,
     PROF_CHANNEL_TYPE_MAX,
 } PROF_CHANNEL_TYPE;
+
+typedef enum TAG_TS_PROFILE_COMMAND_TYPE {
+    TS_PROFILE_COMMAND_TYPE_ACK = 0,
+    TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE = 1,
+    TS_PROFILE_COMMAND_TYPE_PROFILING_DISABLE = 2,
+    TS_PROFILE_COMMAND_TYPE_BUFFERFULL = 3,
+    TS_PROFILE_COMMAND_TASK_BASE_ENABLE = 4,     // task base profiling enable
+    TS_PROFILE_COMMAND_TASK_BASE_DISENABLE = 5,  // task base profiling disenable
+    TS_PROFILE_COMMAND_TS_FW_ENABLE = 6,         // TS fw data enable
+    TS_PROFILE_COMMAND_TS_FW_DISENABLE = 7,      // TS fw data disenable
+} TS_PROFILE_COMMAND_TYPE_T;
 
 typedef struct ProfStartPara {
     PROF_CHANNEL_TYPE channelType;
@@ -87,6 +99,18 @@ typedef struct TagTsTsFwProfileConfig {
     uint32_t tsKeypoint;       // 1-enable,2-disable
     uint32_t tsMemcpy;         // 1-enable,2-disable
 } TsTsFwProfileConfigT;
+
+typedef struct TagStarsSocLogConfig {
+    uint32_t acsq_task;         // 1-enable,2-disable
+    uint32_t acc_pmu;           // 1-enable,2-disable
+    uint32_t cdqm_reg;          // 1-enable,2-disable
+    uint32_t dvpp_vpc_block;    // 1-enable,2-disable
+    uint32_t dvpp_jpegd_block;  // 1-enable,2-disable
+    uint32_t dvpp_jpede_block;  // 1-enable,2-disable
+    uint32_t ffts_thread_task;  // 1-enable,2-disable
+    uint32_t ffts_block;        // 1-enable,2-disable
+    uint32_t sdma_dmu;          // 1-enable,2-disable
+} StarsSocLogConfigT;
 
 enum PROFILE_MODE {
     PROFILE_REAL_TIME = 1,

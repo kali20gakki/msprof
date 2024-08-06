@@ -97,6 +97,8 @@ size_t ChannelReader::TransDataToActivityBuffer(char buffer[], size_t valid_size
     switch (channelId) {
         case PROF_CHANNEL_TS_FW:
             return TransTsFwData(buffer, valid_size, deviceId);
+        case PROF_CHANNEL_STARS_SOC_LOG:
+            return TransStarsLog(buffer, valid_size, deviceId);
         default:
             return 0;
     }
@@ -136,6 +138,16 @@ size_t ChannelReader::TransTsFwData(char buffer[], size_t valid_size, uint32_t d
                 break;
         }
         pos += *bufSize;
+    }
+    return pos;
+}
+
+size_t ChannelReader::TransStarsLog(char buffer[], size_t valid_size, uint32_t deviceId)
+{
+    size_t pos = 0;
+    while (valid_size - pos >= sizeof(StarsSocLog)) {
+        StarsSocLog* data = reinterpret_cast<StarsSocLog*>(buffer + pos);
+        pos += sizeof(StarsSocLog);
     }
     return pos;
 }

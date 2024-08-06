@@ -47,8 +47,8 @@ msptiResult DevTaskManager::StartDevProfTask(uint32_t deviceId, msptiActivityKin
         MSPTI_LOGW("Device: %u is offline.", deviceId);
         return MSPTI_SUCCESS;
     }
+    Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->GetAllChannels(deviceId);
     Mspti::Common::ContextManager::GetInstance()->InitDevTimeInfo(deviceId);
-    MSPTI_LOGE("Start device: %u task, kind: %d", deviceId, kind);
     std::lock_guard<std::mutex> lk(task_map_mtx_);
     auto iter = task_map_.find({deviceId, kind});
     if (iter == task_map_.end()) {
@@ -71,7 +71,6 @@ msptiResult DevTaskManager::StartDevProfTask(uint32_t deviceId, msptiActivityKin
 
 msptiResult DevTaskManager::StopDevProfTask(uint32_t deviceId, msptiActivityKind kind)
 {
-    MSPTI_LOGE("Stop device: %u task, kind: %d", deviceId, kind);
     std::lock_guard<std::mutex> lk(task_map_mtx_);
     auto iter = task_map_.find({deviceId, kind});
     if (iter != task_map_.end()) {

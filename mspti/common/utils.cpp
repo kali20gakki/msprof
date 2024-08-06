@@ -40,12 +40,14 @@ std::string Utils::GetProcName()
 
 uint32_t Utils::GetPid()
 {
-    return static_cast<uint32_t>(getpid());
+    static thread_local uint32_t pid = static_cast<uint32_t>(getpid());
+    return pid;
 }
 
 uint32_t Utils::GetTid()
 {
-    return static_cast<uint32_t>(syscall(SYS_gettid));
+    static thread_local uint32_t tid = static_cast<uint32_t>(syscall(SYS_gettid));
+    return tid;
 }
 }  // Common
 }  // Mspti

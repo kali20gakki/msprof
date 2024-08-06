@@ -69,10 +69,25 @@ private:
     uint32_t deviceId_;
 };
 
+class DevProfTaskStars : public DevProfTask {
+public:
+    DevProfTaskStars(uint32_t deviceId) : deviceId_(deviceId) {};
+
+private:
+    msptiResult StartTask() override;
+    msptiResult StopTask() override;
+
+private:
+    AI_DRV_CHANNEL channelId_ = PROF_CHANNEL_STARS_SOC_LOG;
+    uint32_t deviceId_;
+};
 
 class DevProfTaskFactory {
 public:
     static std::unique_ptr<DevProfTask> CreateTask(uint32_t deviceId, msptiActivityKind kind);
+
+private:
+    static std::unique_ptr<DevProfTask> CreateTaskKernel(uint32_t deviceId);
 };
 
 }  // Ascend
