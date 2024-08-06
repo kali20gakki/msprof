@@ -123,6 +123,10 @@ void ChannelPool::Run()
 
 void ChannelPool::DispatchChannel(uint32_t devId, AI_DRV_CHANNEL channelId)
 {
+    if (threadPool_ == nullptr) {
+        MSPTI_LOGE("ThreadPool is not initialized ( nullptr ).");
+        return;
+    }
     size_t channel_index = GetChannelIndex(devId, channelId);
     std::lock_guard<std::mutex> lk(mtx_);
     auto channel_iter = readers_map_.find(channel_index);
