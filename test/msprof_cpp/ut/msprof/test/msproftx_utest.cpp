@@ -18,6 +18,7 @@
 #include "message/codec.h"
 #include "utils/utils.h"
 #include "prof_reporter.h"
+#include "prof_callback.h"
 #include "config/config_manager.h"
 #include "proto/msprofiler.pb.h"
 #include "uploader_mgr.h"
@@ -102,8 +103,13 @@ int32_t MsprofReporterCallbackFail(uint32_t moduleId, uint32_t type, VOID_PTR da
     return PROFILING_FAILED;
 }
 
+std::vector<ReporterData> g_dataList_;
+
 int32_t MsprofReporterCallbackSucc(uint32_t moduleId, uint32_t type, VOID_PTR data, uint32_t len)
 {
+    if (type == MsprofReporterCallbackType::MSPROF_REPORTER_REPORT) {
+        g_dataList_.push_back(*(reinterpret_cast<ReporterData *>(data)));
+    }
     return PROFILING_SUCCESS;
 }
 
@@ -255,5 +261,32 @@ TEST_F(MsprofTxUtest, MsprofTxMarkExWillReturnSuccWithReportSucc)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(PROFILING_SUCCESS, manager->MarkEx(msg.c_str(), msg.size(), streamId));
+    manager->UnInit();
+    g_dataList_.clear();
+}
+
+TEST_F(MsprofTxUtest, ReportDataFuncWillFailWhileReportDataCallBackFail)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<MsprofTxManager> manager;
+    MSVP_MAKE_SHARED0_BREAK(manager, MsprofTxManager);
+    ReporterData data;
+    manager->SetReporterCallback(MsprofReporterCallbackFail);
+    manager->Init();
+    manager->ReportData(data);
+    EXPECT_EQ(0, g_dataList_.size());
+    manager->UnInit();
+}
+
+TEST_F(MsprofTxUtest, ReportDataFuncWillSuccWhileReportDataCallBackSucc)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<MsprofTxManager> manager;
+    MSVP_MAKE_SHARED0_BREAK(manager, MsprofTxManager);
+    ReporterData data;
+    manager->SetReporterCallback(MsprofReporterCallbackSucc);
+    manager->Init();
+    manager->ReportData(data);
+    EXPECT_EQ(1, g_dataList_.size());
     manager->UnInit();
 }

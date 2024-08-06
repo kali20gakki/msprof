@@ -23,10 +23,6 @@ static const ReporterDataChunk DEFAULT_DATA_CHUNK = {0, 0, 0, {0}, {0}};
 ReceiveData::ReceiveData()
     : started_(false),
       stopped_(false),
-      dataChunkBuf_(DEFAULT_DATA_CHUNK),
-      dataBufApi_(MsprofApi()),
-      dataBufCompactInfo_(MsprofCompactInfo()),
-      dataBufAdditionalInfo_(MsprofAdditionalInfo()),
       profileDataType_(MSPROF_DEFAULT_PROFILE_DATA_TYPE),
       totalPushCounter_(0),
       totalPushCounterSuccess_(0),

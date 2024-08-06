@@ -90,6 +90,8 @@ public:
 
     void SetReporterCallback(const MsprofReporterCallback func);
 
+    void ReportData(ReporterData &data);
+
 private:
     int ReportStampData(MsprofStampInstance *stamp) const;
 
