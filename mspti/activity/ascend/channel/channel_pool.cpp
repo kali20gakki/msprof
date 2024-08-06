@@ -114,7 +114,10 @@ void ChannelPool::Run()
                 continue;
             }
         }
-
+        if (ret < 0 || ret > CHANNEL_POOL_NUM) {
+            MSPTI_LOGE("Failed to ProfChannelPoll, CHANNEL_POOL_NUM=%d, ret=%d", CHANNEL_POOL_NUM, ret);
+            break;
+        }
         for (int ii = 0; ii < ret; ++ii) {
             DispatchChannel(channels[ii].deviceId, static_cast<AI_DRV_CHANNEL>(channels[ii].channelId));
         }
