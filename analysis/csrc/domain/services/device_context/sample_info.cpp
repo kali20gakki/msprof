@@ -26,6 +26,7 @@ namespace Analysis {
 namespace Domain {
 
 const std::string SAMPLE_JSON = "sample.json";
+const int PMU_LENGTH = 8;
 
 // 分割字符串，提取十六进制数
 void HexStrToInt(std::string &jsonStr, uint32_t intValues[8])
@@ -41,7 +42,9 @@ void HexStrToInt(std::string &jsonStr, uint32_t intValues[8])
     for (const auto &hex: hex_values) {
         uint32_t value;
         std::istringstream(hex) >> std::hex >> value;
-        intValues[index] = value;
+        if (index < PMU_LENGTH) {
+            intValues[index] = value;
+        }
         index++;
     }
 
