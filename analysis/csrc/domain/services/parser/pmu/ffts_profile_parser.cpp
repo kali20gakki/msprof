@@ -73,7 +73,10 @@ uint32_t FftsProfileParser::ParseData(DataInventory &dataInventory, const Infra:
     auto trunkSize = this->GetTrunkSize();
     auto structCount = this->binaryDataSize / trunkSize;
     INFO("FftsProfileData structCount is : %", structCount);
-    halUniData_.resize(structCount);
+    if (!Utils::Resize(halUniData_, structCount)) {
+        ERROR("Resize for FftsProfile data failed!");
+        return ANALYSIS_ERROR;
+    }
     int stat{ANALYSIS_OK};
     for (uint64_t i = 0; i < structCount; i++) {
         auto res = this->ParseDataItem(&this->binaryData[i * trunkSize], trunkSize,

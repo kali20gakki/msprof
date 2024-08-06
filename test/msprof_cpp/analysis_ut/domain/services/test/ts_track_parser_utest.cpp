@@ -11,7 +11,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
+#include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/domain/services/parser/parser_error_code.h"
 #include "analysis/csrc/domain/services/parser/track/include/ts_track_parser.h"
@@ -206,5 +206,17 @@ TEST_F(TsTrackParserUtest, ShouldReturnNoDataWhenPathError)
     ASSERT_EQ(Analysis::ANALYSIS_OK, tsTrackParser.Run(dataInventory_, context));
     auto data = dataInventory_.GetPtr<std::vector<HalTrackData>>();
     ASSERT_EQ(0ul, data->size());
+}
+
+TEST_F(TsTrackParserUtest, ShouldParseErrorWhenResizeException)
+{
+    TsTrackParser tsTrackParser;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = TS_TRACK_PATH;
+    std::vector<StepTrace> taskFlip1{CreateStepTrace(0x0A, 1, 1, 10, 1), CreateStepTrace(0x0A, 1, 1, 20, 2)};
+    WriteBin(taskFlip1, File::PathJoin({TS_TRACK_PATH, "data"}), "ts_track.data.0.slice_0");
+    MOCKER_CPP(&std::vector<HalTrackData>::resize, void(std::vector<HalTrackData>::*)(size_t)).stubs()
+        .will(throws(std::bad_alloc()));
+    ASSERT_EQ(Analysis::PARSER_PARSE_DATA_ERROR, tsTrackParser.Run(dataInventory_, context));
 }
 }

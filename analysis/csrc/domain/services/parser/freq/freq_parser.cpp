@@ -66,7 +66,10 @@ uint32_t FreqParser::ParseData(DataInventory &dataInventory, const Infra::Contex
     auto trunkSize = this->GetTrunkSize();
     auto structCount = this->binaryDataSize / trunkSize;
     INFO("FreqProfileData structCount is : %", structCount);
-    halUniData_.resize(structCount);
+    if (!Utils::Resize(halUniData_, structCount)) {
+        ERROR("Resize for FreqProfile data failed!");
+        return ANALYSIS_ERROR;
+    }
     if (structCount == 0) {
         lpmDataS.clear();  // structCount为0说明没变频数据，不需要落盘，直接使用配置文件频率即可
     }

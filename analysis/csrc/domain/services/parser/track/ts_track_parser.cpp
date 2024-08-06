@@ -64,7 +64,10 @@ uint32_t TsTrackParser::ParseData(DataInventory& dataInventory, const Infra::Con
     int stat{ANALYSIS_OK};
     INFO("TsTrack structCount: %", structCount);
 
-    halUniData_.resize(structCount);
+    if (!Utils::Resize(halUniData_, structCount)) {
+        ERROR("Resize for TsTrack data failed!");
+        return ANALYSIS_ERROR;
+    }
 
     for (uint64_t i = 0; i < structCount; i++) {
         auto *dataPoint = ReinterpretConvert<uint8_t *>(&this->halUniData_[i]);

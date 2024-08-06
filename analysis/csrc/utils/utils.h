@@ -128,6 +128,18 @@ bool Reserve(std::vector<T> &vec, size_t s)
     return true;
 }
 
+template<class T>
+bool Resize(std::vector<T> &vec, size_t s)
+{
+    try {
+        vec.resize(s);
+    } catch (...) {
+        ERROR("Resize vector failed");
+        return false;
+    }
+    return true;
+}
+
 template<typename T, typename U, U T::*element>
 void Sort(std::vector<std::shared_ptr<T>> &items)
 {
@@ -146,7 +158,7 @@ T ReinterpretConvert(V ptr)
 template<typename K, typename... Args>
 std::unique_ptr<K> MAKE_UNIQUE_PTR(Args &&... args)
 {
-    std::unique_ptr<K> ptr{new K(std::forward<Args>(args)...)};
+    std::unique_ptr<K> ptr{new(std::nothrow) K(std::forward<Args>(args)...)};
     return ptr;
 }
 

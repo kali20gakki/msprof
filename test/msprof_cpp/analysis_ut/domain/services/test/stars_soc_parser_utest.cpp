@@ -11,7 +11,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
+#include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/domain/services/parser/parser_error_code.h"
 #include "analysis/csrc/domain/services/parser/log/include/stars_soc_parser.h"
@@ -36,6 +36,7 @@ class StarsSocParserUtest : public testing::Test {
 protected:
     void SetUp() override
     {
+        GlobalMockObject::verify();
         EXPECT_TRUE(File::CreateDir(SOC_LOG_PATH));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({SOC_LOG_PATH, "data"})));
     }
@@ -183,6 +184,18 @@ TEST_F(StarsSocParserUtest, ShouldParseErrorWhenNumOfLogLessThanTwo)
     ASSERT_EQ(Analysis::PARSER_PARSE_DATA_ERROR, starsSocParser.Run(dataInventory_, context));
     auto logData = dataInventory_.GetPtr<std::vector<HalLogData>>();
     ASSERT_EQ(1ul, logData->size());
+}
+
+TEST_F(StarsSocParserUtest, ShouldParseErrorWhenResizeException)
+{
+    StarsSocParser starsSocParser;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = SOC_LOG_PATH;
+    std::vector<FftsPlusLog> log{CreateFftsPlusLog(0b100010, 1, 1, 1, 200), CreateFftsPlusLog(0b100011, 2, 1, 1, 220)};
+    EXPECT_TRUE(WriteBin(log, File::PathJoin({SOC_LOG_PATH, "data"}), "stars_soc.data.0.slice_0"));
+    MOCKER_CPP(&std::vector<HalLogData>::resize, void(std::vector<HalLogData>::*)(size_t)).stubs()
+        .will(throws(std::bad_alloc()));
+    ASSERT_EQ(Analysis::PARSER_PARSE_DATA_ERROR, starsSocParser.Run(dataInventory_, context));
 }
 
 }
