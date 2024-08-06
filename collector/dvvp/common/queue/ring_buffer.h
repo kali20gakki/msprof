@@ -45,9 +45,8 @@ using CONST_REPORT_CHUNK_TAG_PTR = const ReporterDataChunkTag *;
 template <class T>
 class RingBuffer {
 public:
-    explicit RingBuffer(const T& initialVal, size_t maxCycles = RING_BUFFER_DEFAULT_MAX_PUSH_CYCLES)
+    explicit RingBuffer(size_t maxCycles = RING_BUFFER_DEFAULT_MAX_PUSH_CYCLES)
         : capacity_(0),
-          initialVal_(initialVal),
           maxCycles_(maxCycles),
           mask_(0),
           readIndex_(0),
@@ -68,10 +67,8 @@ public:
     {
         capacity_ = capacity;
         mask_ = capacity - 1;
-        std::vector<T> data(capacity_, initialVal_);
-        dataQueue_.swap(data);
-        std::vector<uint64_t> dataAail(capacity_, static_cast<uint64_t>(DataStatus::DATA_STATUS_NOT_READY));
-        dataAvails_.swap(dataAail);
+        dataQueue_.resize(capacity);
+        dataAvails_.resize(capacity, static_cast<uint64_t>(DataStatus::DATA_STATUS_NOT_READY));
         isInited_ = true;
         std::queue<T> empty;
         std::swap(extdDataQueue_, empty);
@@ -159,7 +156,7 @@ public:
 
         size_t index = currReadCusor & mask_;
         if (dataAvails_[index]) {
-            data = dataQueue_[index];
+            data = std::move(dataQueue_[index]);
             dataAvails_[index] = static_cast<uint64_t>(DataStatus::DATA_STATUS_NOT_READY);
             readIndex_++;
             return true;
@@ -206,7 +203,6 @@ private:
 
 private:
     size_t capacity_;
-    T initialVal_;
     size_t maxCycles_;
     size_t mask_;
     std::atomic<size_t> readIndex_;

@@ -76,6 +76,7 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mini.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_miniv2.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_manager.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/mstx/src/mstx_data_handler.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_reporter.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_stamp_pool.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_client.cpp
@@ -111,12 +112,13 @@ set(profilerSrcList
 set(profilerSrcFile
     test/main.cpp
     test/dyn_prof_utest.cpp
-	test/msprof_callback_handler_utest.cpp
+    test/msprof_callback_handler_utest.cpp
     test/msprof_reporter_mgr_utest.cpp
     test/prof_acl_core_utest.cpp
     test/aicpu_plugin_utest.cpp
     test/analyzer_utest.cpp
     test/msproftx_utest.cpp
+    test/mstx_utest.cpp
     ../stub/ge_stub.cpp
     ../stub/hdc-log-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
@@ -166,6 +168,7 @@ target_include_directories(msprofiler_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/drvprof/include
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/include
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/include
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/mstx/inc
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/include
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/include
 	${MSPROF_SOURCE_DIR}/dvvp/common

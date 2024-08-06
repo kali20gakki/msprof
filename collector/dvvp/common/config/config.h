@@ -114,6 +114,7 @@ const char * const MSVP_DYN_PROF_SERVER_THREAD_NAME = "MSVP_DynProfServer";
 const char * const MSVP_DYN_PROF_CLIENT_THREAD_NAME = "MSVP_DynProfClient";
 const char * const MSVP_HASH_DATA_UPLOAD_THREAD_NAME = "MSVP_hashDataUpload";
 const char * const MSVP_TYPE_INFO_UPLOAD_THREAD_NAME = "MSVP_typeInfoUpload";
+const char * const MSVP_MSTX_DATA_HANDLE_THREAD_NAME = "MSVP_MstxDataHandle";
 
 // cloud prof config
 const std::string SAMPLE_KEY = "sample";

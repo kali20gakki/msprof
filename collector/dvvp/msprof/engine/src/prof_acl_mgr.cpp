@@ -35,6 +35,7 @@
 #include "msprof_callback_impl.h"
 #include "prof_ge_core.h"
 #include "msprof_tx_manager.h"
+#include "mstx_data_handler.h"
 #include "utils/utils.h"
 #include "mmpa_api.h"
 #include "params_adapter_aclapi.h"
@@ -56,6 +57,7 @@ using namespace Collector::Dvvp::Common::PlatformAdapter;
 using namespace Analysis::Dvvp::JobWrapper;
 using namespace Analysis::Dvvp::MsprofErrMgr;
 using namespace Msprof::MsprofTx;
+using namespace Collector::Dvvp::Mstx;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 using namespace Collector::Dvvp::ParamsAdapter;
@@ -417,6 +419,7 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
             return ACL_ERROR_PROF_NOT_RUN;
         }
     }
+    MstxDataHandler::instance()->Stop();
     PlatformAdapter::instance()->Uninit();
     // stop devices
     int ret = CancleHostAndDevTasks(profStopCfg->devNums, profStopCfg->devIdList);
@@ -1409,15 +1412,14 @@ int32_t ProfAclMgr::MsprofInitHelper(VOID_PTR data, uint32_t len)
 int ProfAclMgr::DoHostHandle()
 {
     params_->host_profiling = true;
-    int ret = PROFILING_SUCCESS;
     if (params_->IsMsprofTx()) {
         Analysis::Dvvp::ProfilerCommon::RegisterMsprofTxReporterCallback();
-        ret = MsprofTxManager::instance()->Init();
-        if (ret != PROFILING_SUCCESS) {
+        if (MsprofTxManager::instance()->Init() != PROFILING_SUCCESS ||
+            MstxDataHandler::instance()->Start() != PROFILING_SUCCESS) {
             MSPROF_LOGW("MsprofTxManager init failed");
         }
     }
-    ret = MsprofSetDeviceImpl(DEFAULT_HOST_ID);
+    int ret = MsprofSetDeviceImpl(DEFAULT_HOST_ID);
     params_->host_profiling = false;
     return ret;
 }
@@ -1459,7 +1461,6 @@ int32_t ProfAclMgr::MsprofResetDeviceHandle(uint32_t devId)
         MSPROF_LOGI("Device %u task not find", devId);
         return MSPROF_ERROR_NONE;
     }
-
     devTask->second.params->is_cancel = true;
     if (ProfManager::instance()->IdeCloudProfileProcess(devTask->second.params) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to stop profiling on device %u", devId);
@@ -1485,6 +1486,7 @@ int32_t ProfAclMgr::MsprofFinalizeHandle(void)
         return MSPROF_ERROR_NONE;
     }
     HashData::instance()->SaveHashData();
+    MstxDataHandler::instance()->Stop();
     for (auto iter = devTasks_.begin(); iter != devTasks_.end(); iter++) {
         if (iter->second.params->is_cancel) {
             continue;

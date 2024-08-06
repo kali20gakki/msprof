@@ -59,7 +59,6 @@ int MsprofTxManager::Init()
         stampPool_->UnInit();
         return PROFILING_FAILED;
     }
-
     isInit_ = true;
     return PROFILING_SUCCESS;
 }
@@ -255,7 +254,7 @@ int MsprofTxManager::MarkEx(CONST_CHAR_PTR msg, size_t msgLen, aclrtStream strea
         std::lock_guard<std::mutex> lk(markerMtx_);
         if (RuntimePlugin::instance()->MsprofRtProfilerTraceEx(markIdx, MARKEX_MODEL_ID, MARKEX_TAG_ID, stream) !=
             PROFILING_SUCCESS) {
-            MSPROF_LOGE("[MarkEx]Failed to call rtProfilerTraceEx, mark idx=%u", markIdx);
+            MSPROF_LOGE("[MarkEx]Failed to run mstx task, mark idx=%u", markIdx);
             return PROFILING_FAILED;
         }
         info.markId = markIdx++;
@@ -369,6 +368,17 @@ int MsprofTxManager::ReportStampData(MsprofStampInstance *stamp) const
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
+}
+
+void MsprofTxManager::ReportData(ReporterData &data)
+{
+    if (reporter_ == nullptr) {
+        MSPROF_LOGE("[ReportData] reporter is nullptr!");
+        return;
+    }
+    if (reporter_->Report(data) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[ReportData] Report data failed.");
+    }
 }
 }
 }
