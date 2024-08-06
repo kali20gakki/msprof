@@ -202,16 +202,16 @@ class TaskTimeViewer(BaseViewer):
         if not task_data:
             return []
         end_points = []
-        for task in task_data:
-            mark_id = task.index_id
+        for data in task_data:
+            mark_id = data[0]
             end_point = {
                 TraceViewHeaderConstant.TRACE_HEADER_NAME: f'MsTx_{mark_id}',
                 TraceViewHeaderConstant.TRACE_HEADER_PH: 'f',
                 TraceViewHeaderConstant.TRACE_HEADER_ID: str(mark_id),
-                TraceViewHeaderConstant.TRACE_HEADER_TS: InfoConfReader().trans_syscnt_into_local_time(task.timestamp),
+                TraceViewHeaderConstant.TRACE_HEADER_TS: InfoConfReader().trans_syscnt_into_local_time(data[1]),
                 TraceViewHeaderConstant.TRACE_HEADER_CAT: StrConstant.MSTX,
                 TraceViewHeaderConstant.TRACE_HEADER_PID: self.trace_pid_map.get("Task Scheduler", 0),
-                TraceViewHeaderConstant.TRACE_HEADER_TID: task.stream_id,
+                TraceViewHeaderConstant.TRACE_HEADER_TID: data[2],
                 TraceViewHeaderConstant.TRACE_HEADER_BP: 'e',
             }
             end_points.append(end_point)
@@ -221,13 +221,14 @@ class TaskTimeViewer(BaseViewer):
         if not task_data:
             return []
         task_trace = []
-        for task in task_data:
+        for data in task_data:
             task_trace.append([
-                f'MsTx_{task.index_id}', self.trace_pid_map.get('Task Scheduler', 0), task.stream_id,
-                InfoConfReader().trans_syscnt_into_local_time(task.timestamp), 0,
+                f'MsTx_{data[0]}', self.trace_pid_map.get('Task Scheduler', 0), data[2],
+                InfoConfReader().trans_syscnt_into_local_time(data[1]),
+                InfoConfReader().duration_from_syscnt(data[4]),
                 {
-                    "Physic Stream Id": task.stream_id,
-                    "Task Id": task.task_id
+                    "Physic Stream Id": data[2],
+                    "Task Id": data[3]
                 }
             ])
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
@@ -245,7 +246,23 @@ class TaskTimeViewer(BaseViewer):
                 return []
             sql = 'select index_id, timestamp, stream_id, task_id from {} ' \
                   'where tag_id = 11'.format(DBNameConstant.TABLE_STEP_TRACE)
-            return view_model.get_sql_data(sql, dto_class=MsproftxMarkDto)
+            task_list = view_model.get_sql_data(sql, dto_class=MsproftxMarkDto)
+        if not task_list:
+            return []
+        res_task_data = []
+        task_list = sorted(task_list, key=lambda x: (x.index_id, x.timestamp))
+        for i in range(len(task_list) - 1):
+            # add msproftx task dur filed
+            if task_list[i].index_id == task_list[i + 1].index_id:
+                dur = task_list[i + 1].timestamp - task_list[i].timestamp
+                res_task_data.append([task_list[i].index_id, task_list[i].timestamp,
+                                      task_list[i].stream_id, task_list[i].task_id, dur])
+                i += 1
+            else:
+                res_task_data.append([task_list[i].index_id, task_list[i].timestamp,
+                                      task_list[i].stream_id, task_list[i].task_id, 0])
+
+        return res_task_data
 
     def get_trace_timeline(self: any, data_list: dict) -> list:
         """

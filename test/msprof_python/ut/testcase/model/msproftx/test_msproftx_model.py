@@ -18,6 +18,12 @@ class TestMsprofTxModel(unittest.TestCase):
             check = MsprofTxModel('test', 'msproftx.db', ['MsprofTx'])
             check.get_timeline_data()
 
+    def test_get_summary_data_should_return_empty_list_when_no_table(self):
+        with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
+            check = MsprofTxModel('test', 'msproftx.db', ['MsprofTx'])
+            ret = check.get_summary_data()
+            self.assertEqual([], ret)
+
 
 class TestMsprofTxExModel(unittest.TestCase):
 
@@ -27,9 +33,10 @@ class TestMsprofTxExModel(unittest.TestCase):
             check.flush([])
 
     def test_get_timeline_data_should_return_true_when_get_data(self):
-        with mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[1]):
-            check = MsprofTxExModel('test1')
-            res = check.get_timeline_data()
+        with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
+            with mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[1]):
+                check = MsprofTxExModel('test1')
+                res = check.get_timeline_data()
         self.assertEqual(res, [1])
 
     def test_get_timeline_data_should_return_false_when_get_no_data(self):
@@ -39,9 +46,10 @@ class TestMsprofTxExModel(unittest.TestCase):
         self.assertEqual(res, [])
 
     def test_get_summary_data_should_return_true_when_get_data(self):
-        with mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[1]):
-            check = MsprofTxExModel('test3')
-            res = check.get_summary_data()
+        with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
+            with mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[1]):
+                check = MsprofTxExModel('test3')
+                res = check.get_summary_data()
         self.assertEqual(res, [1])
 
     def test_get_summary_data_should_return_false_when_get_no_data(self):
