@@ -88,7 +88,11 @@ ActivityManager::~ActivityManager()
                 // Exception occurred during destruction of ActivityManager
             }
         }
-        t_.join();
+        try {
+            t_.join();
+        } catch(...) {
+            // Exception occurred during destruction of ActivityManager
+        }
     }
     JoinWorkThreads();
     FlushAll();
