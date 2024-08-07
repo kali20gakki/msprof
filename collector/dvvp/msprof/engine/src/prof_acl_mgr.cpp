@@ -1276,10 +1276,10 @@ int32_t ProfAclMgr::MsprofResultPathAdapter(const std::string &dir, std::string 
 int32_t ProfAclMgr::MsprofInitGeOptions(VOID_PTR data, uint32_t len)
 {
     MSPROF_EVENT("Init profiling for GeOptions");
-    uint32_t structLen = sizeof(struct MsprofGeOptions);
+    size_t structLen = sizeof(struct MsprofGeOptions);
     if (data == nullptr || len != structLen) {
-        MSPROF_LOGE("MsprofInitGeOptions input arguments is invalid, len:%u, structLen:%u", len, structLen);
-        MSPROF_INNER_ERROR("EK9999", "MsprofInitGeOptions input arguments is invalid, len:%u, structLen:%u",
+        MSPROF_LOGE("MsprofInitGeOptions input arguments is invalid, len:%u, structLen:%zu", len, structLen);
+        MSPROF_INNER_ERROR("EK9999", "MsprofInitGeOptions input arguments is invalid, len:%u, structLen:%zu",
             len, structLen);
         return MSPROF_ERROR_CONFIG_INVALID;
     }
@@ -1383,10 +1383,10 @@ int32_t ProfAclMgr::MsprofHelperParamConstruct(const std::string &msprofPath, co
 int32_t ProfAclMgr::MsprofInitHelper(VOID_PTR data, uint32_t len)
 {
     MSPROF_EVENT("Init profiling for Helper");
-    uint32_t structLen = sizeof(struct MsprofCommandHandleParams);
+    size_t structLen = sizeof(struct MsprofCommandHandleParams);
     if (data == nullptr || len != structLen) {
-        MSPROF_LOGE("MsprofInitHelper input arguments is invalid, len:%u, structLen:%u", len, structLen);
-        MSPROF_INNER_ERROR("EK9999", "MsprofInitHelper input arguments is invalid, len:%u, structLen:%u",
+        MSPROF_LOGE("MsprofInitHelper input arguments is invalid, len:%u, structLen:%zu", len, structLen);
+        MSPROF_INNER_ERROR("EK9999", "MsprofInitHelper input arguments is invalid, len:%u, structLen:%zu",
             len, structLen);
         return MSPROF_ERROR_CONFIG_INVALID;
     }
