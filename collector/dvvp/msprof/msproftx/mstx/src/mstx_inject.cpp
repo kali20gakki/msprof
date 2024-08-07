@@ -20,12 +20,13 @@ using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mstx;
 using namespace analysis::dvvp::common::error;
 
-constexpr uint64_t MSTX_MODEL_ID = 0xFFFFFFFFU;
-constexpr uint16_t MSTX_TAG_ID = 11;
-
 static std::atomic<uint64_t> g_eventId{1};
 static std::mutex g_mutex;
 static std::unordered_map<uint64_t, aclrtStream> g_eventIdsWithStream;
+
+namespace MsprofMstxApi {
+constexpr uint64_t MSTX_MODEL_ID = 0xFFFFFFFFU;
+constexpr uint16_t MSTX_TAG_ID = 11;
 
 void MstxMarkAFunc(const char* msg, aclrtStream stream)
 {
@@ -114,8 +115,11 @@ void MstxRangeEndFunc(uint64_t id)
     }
     MSPROF_LOGI("Successfully to execute %s, range id %lu", __func__, id);
 }
+}
 
-int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
+using namespace MsprofMstxApi;
+
+extern "C" int __attribute__((visibility("default"))) InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
 {
     unsigned int outSize = 0;
     MstxFuncTable outTable;

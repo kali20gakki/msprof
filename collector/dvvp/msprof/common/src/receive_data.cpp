@@ -122,8 +122,9 @@ void ReceiveData::RunNoTagData(analysis::dvvp::common::queue::RingBuffer<T> &dat
             break;
         }
         totalCountFromRingBuff_++;
-        totalDataLengthFromRingBuff_ += sizeof(T);
-        batchSizeMax += sizeof(T);
+        uint64_t size = static_cast<uint64_t>(sizeof(T));
+        totalDataLengthFromRingBuff_ += size;
+        batchSizeMax += size;
         dataVec.push_back(data);
     }
     if (!dataVec.empty()) {
@@ -156,8 +157,9 @@ void ReceiveData::RunTagData(analysis::dvvp::common::queue::RingBuffer<T> &dataB
             break;
         }
         totalCountFromRingBuff_++;
-        totalDataLengthFromRingBuff_ += sizeof(T);
-        batchSizeMax += sizeof(T);
+        uint64_t size = static_cast<uint64_t>(sizeof(T));
+        totalDataLengthFromRingBuff_ += size;
+        batchSizeMax += size;
  
         std::string tagWizSuffix = std::to_string(data.level) + "_" + std::to_string(data.type);
         // classify data by tag.type

@@ -86,7 +86,7 @@ void DynProfServer::Run(const struct error_message::Context &errorContext)
 
     uint32_t acceptTimes = 0;
     sockaddr_un clt_addr;
-    socklen_t clt_addr_len = sizeof(clt_addr);
+    socklen_t clt_addr_len = static_cast<socklen_t>(sizeof(clt_addr));
     while (srvStarted_ && (acceptTimes < DYN_PROF_MAX_ACCEPT_TIMES)) {
         cliSockFd_ = accept(srvSockFd_, reinterpret_cast<sockaddr *>(&clt_addr), &clt_addr_len);
         if (cliSockFd_ < 0) {

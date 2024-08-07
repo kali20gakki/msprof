@@ -353,7 +353,7 @@ int ProfNpuAppMemJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 int32_t ProfNpuAppMemJob::SetPeripheralConfig()
 {
     samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->hardware_mem_sampling_interval);
-    uint32_t configSize = sizeof(TagMemProfileConfig);
+    uint32_t configSize = static_cast<uint32_t>(sizeof(TagMemProfileConfig));
     TagMemProfileConfig *configP = reinterpret_cast<TagMemProfileConfig *>(Utils::ProfMalloc(configSize));
     if (configP == nullptr) {
         MSPROF_LOGE("ProfNpuAppMemJob ProfMalloc TagMemProfileConfig failed");
@@ -414,7 +414,7 @@ int32_t ProfNpuMemJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 int32_t ProfNpuMemJob::SetPeripheralConfig()
 {
     samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->hardware_mem_sampling_interval);
-    uint32_t configSize = sizeof(TagMemProfileConfig);
+    uint32_t configSize = static_cast<uint32_t>(sizeof(TagMemProfileConfig));
     TagMemProfileConfig *configP = reinterpret_cast<TagMemProfileConfig *>(Utils::ProfMalloc(configSize));
     if (configP == nullptr) {
         MSPROF_LOGE("ProfDevMemJob ProfMalloc TagMemProfileConfig failed");
@@ -473,7 +473,7 @@ int ProfNpuModuleMemJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 int32_t ProfNpuModuleMemJob::SetPeripheralConfig()
 {
     samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->hardware_mem_sampling_interval);
-    uint32_t configSize = sizeof(TagMemProfileConfig);
+    uint32_t configSize = static_cast<uint32_t>(sizeof(TagMemProfileConfig));
     TagMemProfileConfig *configP = reinterpret_cast<TagMemProfileConfig *>(Utils::ProfMalloc(configSize));
     if (configP == nullptr) {
         MSPROF_LOGE("ProfNpuModuleMemJob ProfMalloc TagMemProfileConfig failed");
@@ -850,7 +850,7 @@ int ProfLlcJob::SetPeripheralConfig()
         return PROFILING_FAILED;
     }
     eventsStr_ = GetEventsStr(*(collectionJobCfg_->jobParams.events));
-    uint32_t configSize = sizeof(TagLlcProfileConfig);
+    uint32_t configSize = static_cast<uint32_t>(sizeof(TagLlcProfileConfig));
     TagLlcProfileConfig *configP = reinterpret_cast<TagLlcProfileConfig *>(Utils::ProfMalloc(configSize));
     if (configP == nullptr) {
         MSPROF_LOGE("ProfLlcJob ProfMalloc TagLlcProfileConfig failed");
@@ -1160,7 +1160,7 @@ int ProfStarsSocProfileJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 }
 int ProfStarsSocProfileJob::SetPeripheralConfig()
 {
-    uint32_t configSize = sizeof(StarsSocProfileConfigT);
+    uint32_t configSize = static_cast<uint32_t>(sizeof(StarsSocProfileConfigT));
     int period;
     StarsSocProfileConfigT *configP = static_cast<StarsSocProfileConfigT *>(
         Utils::ProfMalloc(static_cast<size_t>(configSize)));
@@ -1252,7 +1252,7 @@ int32_t ProfQosJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
  */
 int32_t ProfQosJob::SetPeripheralConfig()
 {
-    uint32_t configSize = sizeof(QosProfileConfig);
+    uint32_t configSize = static_cast<uint32_t>(sizeof(QosProfileConfig));
     QosProfileConfig *configP = reinterpret_cast<QosProfileConfig *>(Utils::ProfMalloc(configSize));
     if (configP == nullptr) {
         MSPROF_LOGE("ProfQosJob ProfMalloc QosProfileConfig failed");

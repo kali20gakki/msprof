@@ -80,7 +80,7 @@ std::string EncodeMessage(SHARED_PTR_ALIA<google::protobuf::Message> message)
     auto nameLen = static_cast<uint32_t>(type.size() + 1);
     uint32_t nameLenN = ::htonl(nameLen);
 
-    const uint32_t intSize = sizeof(nameLenN);
+    const uint32_t intSize = static_cast<uint32_t>(sizeof(nameLenN));
     union UnionData {
         char data[intSize];
         uint32_t nameLen;
@@ -168,7 +168,7 @@ SHARED_PTR_ALIA<google::protobuf::Message> DecodeMessage(const std::string &buf)
         MSPROF_LOGE("[DecodeMessage] buf size(%u) is too big.", nameLen);
         return nullptr;
     }
-    currLen += sizeof(uint32_t);
+    currLen += static_cast<uint32_t>(sizeof(uint32_t));
 
     // parse name
     if (bufLen < (currLen + nameLen)) {
