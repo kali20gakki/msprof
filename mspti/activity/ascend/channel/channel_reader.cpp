@@ -81,12 +81,13 @@ msptiResult ChannelReader::Execute()
             break;
         }
         size_t last_pos = TransDataToActivityBuffer(buf, cur_pos + currLen, deviceId_, channelId_);
-        if (last_pos < cur_pos + currLen) {
-            if (memcpy_s(buf, MAX_BUFFER_SIZE, buf + last_pos, cur_pos + currLen - last_pos) != EOK) {
+        size_t uint_currLen = static_cast<size_t>(currLen);
+        if (last_pos < cur_pos + uint_currLen) {
+            if (memcpy_s(buf, MAX_BUFFER_SIZE, buf + last_pos, cur_pos + uint_currLen - last_pos) != EOK) {
                 break;
             }
         }
-        cur_pos = cur_pos + currLen - last_pos;
+        cur_pos = cur_pos + uint_currLen - last_pos;
     }
     return MSPTI_SUCCESS;
 }

@@ -82,7 +82,11 @@ ActivityManager::~ActivityManager()
         thread_run_.store(false);
         {
             std::unique_lock<std::mutex> lck(cv_mtx_);
-            cv_.notify_one();
+            try {
+                cv_.notify_one();
+            } catch(...) {
+                MSPTI_LOGE("Exception occurred during destruction of ActivityManager");
+            }
         }
         t_.join();
     }

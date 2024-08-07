@@ -21,6 +21,7 @@
 
 #include "external/mspti_result.h"
 #include "external/mspti_callback.h"
+#include "common/plog_manager.h"
 
 struct msptiSubscriber_st {
     msptiCallbackFunc handle;
@@ -69,7 +70,11 @@ public:
 
     ~CallbackScope()
     {
-        CallbackManager::GetInstance()->ExecuteCallback(domain_, cbid_, MSPTI_API_EXIT, func_name_);
+        try {
+            CallbackManager::GetInstance()->ExecuteCallback(domain_, cbid_, MSPTI_API_EXIT, func_name_);
+        } catch(...) {
+            MSPTI_LOGE("Exception occurred during destruction of CallbackScope");
+        }
     }
 
 private:

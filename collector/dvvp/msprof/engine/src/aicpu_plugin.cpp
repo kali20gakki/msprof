@@ -126,10 +126,10 @@ int AicpuPlugin::ReceiveStreamData(CONST_VOID_PTR data, unsigned int dataLen)
     MSVP_MAKE_SHARED0_RET(fileChunkReq, analysis::dvvp::ProfileFileChunk, PROFILING_FAILED);
     fileChunkReq->fileName = Utils::PackDotInfo(message->filename(), jobCtx.tag);
     fileChunkReq->chunk = std::move(std::string(message->chunk().c_str(), message->chunksizeinbytes()));
-    fileChunkReq->chunkSize = message->chunksizeinbytes();
+    fileChunkReq->chunkSize = static_cast<size_t>(message->chunksizeinbytes());
     fileChunkReq->isLastChunk = message->islastchunk();
     fileChunkReq->chunkModule = message->datamodule();
-    fileChunkReq->offset = message->offset();
+    fileChunkReq->offset = static_cast<size_t>(message->offset());
     fileChunkReq->extraInfo = Utils::PackDotInfo(jobCtx.job_id, logicDevIdStr_);
     fileChunkReq->chunkStartTime = 0U;
     fileChunkReq->chunkEndTime = 0U;

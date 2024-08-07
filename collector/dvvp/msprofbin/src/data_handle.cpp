@@ -109,10 +109,10 @@ int HdcTransportDataHandle::ProcessStreamFileChunk(SHARED_PTR_ALIA<google::proto
     MSVP_MAKE_SHARED0_RET(fileChunk, analysis::dvvp::ProfileFileChunk, PROFILING_FAILED);
     fileChunk->fileName = Utils::PackDotInfo(fileChunkReq->filename(), jobCtx.tag);
     fileChunk->chunk = std::move(std::string(fileChunkReq->chunk().c_str(), fileChunkReq->chunksizeinbytes()));
-    fileChunk->chunkSize = fileChunkReq->chunksizeinbytes();
+    fileChunk->chunkSize = static_cast<size_t>(fileChunkReq->chunksizeinbytes());
     fileChunk->isLastChunk = fileChunkReq->islastchunk();
     fileChunk->chunkModule = fileChunkReq->datamodule();
-    fileChunk->offset = fileChunkReq->offset();
+    fileChunk->offset = static_cast<size_t>(fileChunkReq->offset());
     fileChunk->extraInfo = Utils::PackDotInfo(jobCtx.job_id, jobCtx.dev_id);
     fileChunk->chunkStartTime = 0U;
     fileChunk->chunkEndTime = 0U;

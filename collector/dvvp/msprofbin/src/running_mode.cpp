@@ -703,7 +703,7 @@ int AppMode::RunModeTasks()
 
     if (jobResultDirList_.empty()) {
         auto duration = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
-        if (!params_->delayTime.empty() && duration.count() <= std::stoul(params_->delayTime)) {
+        if (!params_->delayTime.empty() && static_cast<size_t>(duration.count()) <= std::stoul(params_->delayTime)) {
             MSPROF_LOGW("[App Mode] Before delay time, the app process has exited.");
             return PROFILING_SUCCESS;
         }
