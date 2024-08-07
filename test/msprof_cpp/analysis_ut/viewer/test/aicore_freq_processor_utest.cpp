@@ -101,7 +101,7 @@ TEST_F(AicoreFreqProcessorUTest, TestRunShouldReturnTrueWhenRunSuccess)
     std::shared_ptr<DBRunner> dbRunner;
     MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
     QueryDataFormat checkData;
-    // 有一条数据在采集范围外，将被过滤后，再新增两条开始结束记录
+    // 有一条数据在采集范围外，将数据过滤后，再新增两条开始和结束记录
     uint16_t expectNum = FREQ_DATA.size() - 1 + 2;
     std::string sqlStr = "SELECT deviceId, timestampNs, freq FROM " + TABLE_NAME_AICORE_FREQ;
     ASSERT_NE(dbRunner, nullptr);
