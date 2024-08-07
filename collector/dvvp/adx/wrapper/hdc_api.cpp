@@ -438,7 +438,7 @@ int32_t HdcSessionWrite(HDC_SESSION session, IdeSendBuffT buf, int32_t len, int3
     IDE_CTRL_VALUE_FAILED((hdcError == DRV_ERROR_NONE) && (pmsg != nullptr),
         return IDE_DAEMON_ERROR, "Hdc Alloc Msg, error: %d", hdcError);
 
-    uint32_t maxDatalen = capacity - sizeof(struct IdeHdcPacket);
+    uint32_t maxDatalen = capacity - static_cast<uint32_t>(sizeof(struct IdeHdcPacket));
     packet = (struct IdeHdcPacket*)IdeXmalloc(sizeof(struct IdeHdcPacket) + maxDatalen);
     if (packet == nullptr) {
         MSPROF_LOGE("[HdcSessionWrite]IdeXmalloc %lu Size failed", sizeof(struct IdeHdcPacket) + maxDatalen);

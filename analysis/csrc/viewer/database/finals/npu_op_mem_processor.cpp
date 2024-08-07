@@ -77,7 +77,7 @@ NpuOpMemProcessor::ProcessedDataFormat NpuOpMemProcessor::FormatData(const OriDa
     for (auto &row: oriData) {
         std::tie(data.operatorName, data.addr, data.size, data.timestamp, data.threadId, data.totalAllocateMemory,
                  data.totalReserveMemory, data.device_type) = row;
-        HPFloat timestamp{GetTimeFromSyscnt(data.timestamp, params)};
+        HPFloat timestamp{GetTimeFromSyscnt(static_cast<uint64_t>(data.timestamp), params)};
         if (data.size < 0) {
             data.size = std::abs(data.size);
             data.type = stringReleaseId_;
