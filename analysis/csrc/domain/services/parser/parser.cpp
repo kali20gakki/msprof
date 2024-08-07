@@ -18,6 +18,9 @@
 namespace Analysis {
 namespace Domain {
 using namespace Infra;
+namespace {
+const long INVALID_FILE_SIZE = -1;
+}
 
 uint32_t Parser::GetFileSize(const char *filePath)
 {
@@ -28,11 +31,13 @@ uint32_t Parser::GetFileSize(const char *filePath)
     }
 
     fseek(fp, 0, SEEK_END);
-    uint32_t fileSize = ftell(fp);
-
+    auto fileSize = ftell(fp);
     fclose(fp);
-
-    return fileSize;
+    if (fileSize == INVALID_FILE_SIZE) {
+        ERROR("Get File size failed! filePath is %, error: %", filePath, PARSER_FREAD_ERROR);
+        return 0;
+    }
+    return static_cast<uint32_t>(fileSize);
 }
 
 uint64_t Parser::GetFilesSize(const std::vector<std::string> &paths)
