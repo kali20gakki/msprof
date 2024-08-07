@@ -37,8 +37,9 @@ void DlogInnerForC(int moduleId, int level, const char *fmt, T... args)
     if (func == nullptr) {
         Mspti::Common::GetFunction<void, int, int, const char*, T...>("libascendalog", "DlogInnerForC", func);
     }
-    THROW_FUNC_NOTFOUND(func, "DlogInnerForC", "libascendalog.so");
-    return func(moduleId, level, fmt, args...);
+    if (func) {
+        return func(moduleId, level, fmt, args...);
+    }
 }
 
 #endif
