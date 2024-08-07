@@ -33,11 +33,11 @@ void aclprofMarkEx(const char* message, size_t len, RT_STREAM stream)
     msptiActivityMark activity;
     activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
     activity.flag = MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS;
-    activity.mode = MSPTI_ACTIVITY_MARKER_MODE_HOST;
+    activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
     activity.timestamp = Mspti::Common::Utils::GetClockMonotonicRawNs();
     activity.id = markId;
-    activity.msptiObjectId.pt.processId = Mspti::Common::Utils::GetPid();
-    activity.msptiObjectId.pt.threadId = Mspti::Common::Utils::GetTid();
+    activity.objectId.pt.processId = Mspti::Common::Utils::GetPid();
+    activity.objectId.pt.threadId = Mspti::Common::Utils::GetTid();
     activity.name = message;
 
     Mspti::Activity::ActivityManager::GetInstance()->Record(
@@ -52,15 +52,14 @@ void aclprofMark(void* stamp)
         MSPTI_LOGE("[Mark]aclprofStamp is nullptr");
         return;
     }
-    uint64_t markId = g_markId++;
     msptiActivityMark activity;
     activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
     activity.flag = MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS;
-    activity.mode = MSPTI_ACTIVITY_MARKER_MODE_HOST;
+    activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
     activity.timestamp = Mspti::Common::Utils::GetClockMonotonicRawNs();
-    activity.id = markId;
-    activity.msptiObjectId.pt.processId = Mspti::Common::Utils::GetPid();
-    activity.msptiObjectId.pt.threadId = Mspti::Common::Utils::GetTid();
+    activity.id = -1;
+    activity.objectId.pt.processId = Mspti::Common::Utils::GetPid();
+    activity.objectId.pt.threadId = Mspti::Common::Utils::GetTid();
     auto stampInstancePtr = static_cast<MsprofStampInstance*>(stamp);
     activity.name = stampInstancePtr->stampInfo.message;
     Mspti::Activity::ActivityManager::GetInstance()->Record(

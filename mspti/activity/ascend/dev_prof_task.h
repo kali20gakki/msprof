@@ -18,7 +18,7 @@
 #include <mutex>
 #include <thread>
 
-#include "external/mspti_base.h"
+#include "external/mspti_result.h"
 #include "external/mspti_activity.h"
 #include "common/inject/inject_base.h"
 

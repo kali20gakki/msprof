@@ -38,6 +38,7 @@ target_compile_options(mspti_shared PRIVATE
     -fvisibility-inlines-hidden
     -Wfloat-equal
     -Wextra
+    -DMSPTI_LIB
 )
 
 target_link_directories(mspti_shared PRIVATE

@@ -22,7 +22,7 @@
 #include "common/bound_queue.h"
 #include "common/task.h"
 #include "common/utils.h"
-#include "external/mspti_base.h"
+#include "external/mspti_result.h"
 
 namespace Mspti {
 namespace Common {

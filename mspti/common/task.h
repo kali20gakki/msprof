@@ -14,7 +14,7 @@
 #define MSPTI_COMMON_TASK_H
 
 #include "common/bound_queue.h"
-#include "external/mspti_base.h"
+#include "external/mspti_result.h"
 
 namespace Mspti {
 namespace Common {

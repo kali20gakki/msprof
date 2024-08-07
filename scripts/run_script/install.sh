@@ -39,6 +39,7 @@ function implement_install() {
 	fi
 
 	copy_file ${LIBMSPROFILER} ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}
+	copy_file ${LIBMSPTI} ${install_path}/${LIBMSPTI_PATH}/${LIBMSPTI}
 }
 
 function copy_file() {
