@@ -16,6 +16,7 @@
 #include <sys/prctl.h>
 #include <unistd.h>
 #include <sys/syscall.h>
+#include <linux/limits.h>
 #include "securec.h"
 
 namespace Mspti {
@@ -34,7 +35,7 @@ uint64_t Utils::GetClockMonotonicRawNs()
 std::string Utils::GetProcName()
 {
     static char buf[16] = {'\0'};
-    prctl(PR_GET_NAME, (unsigned long)buf);
+    prctl(PR_GET_NAME, reinterpret_cast<unsigned long>(buf));
     return std::string(buf);
 }
 
@@ -49,5 +50,41 @@ uint32_t Utils::GetTid()
     static thread_local uint32_t tid = static_cast<uint32_t>(syscall(SYS_gettid));
     return tid;
 }
+
+std::string Utils::RealPath(const std::string& path)
+{
+    if (path.empty() || path.size() > PATH_MAX) {
+        return "";
+    }
+    char realPath[PATH_MAX] = {0};
+    if (realpath(path.c_str(), realPath) == nullptr) {
+        return "";
+    }
+    return std::string(realPath);
+}
+
+std::string Utils::RelativeToAbsPath(const std::string& path)
+{
+    if (path.empty() || path.size() > PATH_MAX) {
+        return "";
+    }
+    if (path[0] != '/') {
+        char pwd_path[PATH_MAX] = {0};
+        if (getcwd(pwd_path, PATH_MAX) != nullptr) {
+            return std::string(pwd_path) + "/" + path;
+        }
+        return "";
+    }
+    return std::string(path);
+}
+
+bool Utils::FileExist(const std::string &path)
+{
+    if (path.empty() || path.size() > PATH_MAX) {
+        return false;
+    }
+    return (access(path.c_str(), F_OK) == 0) ? true : false;
+}
+
 }  // Common
 }  // Mspti

@@ -55,6 +55,9 @@ public:
     static std::string GetProcName();
     static uint32_t GetPid();
     static uint32_t GetTid();
+    static std::string RealPath(const std::string& path);
+    static std::string RelativeToAbsPath(const std::string& path);
+    static bool FileExist(const std::string &path);
 };
 
 }  // Common

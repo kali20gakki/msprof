@@ -12,6 +12,7 @@
 #include "common/function_loader.h"
 
 #include <dlfcn.h>
+#include <set>
 
 #include "common/utils.h"
 
@@ -35,10 +36,33 @@ void FunctionLoader::Set(const std::string& funcName)
     registry_[funcName] = nullptr;
 }
 
+std::string FunctionLoader::CanonicalSoPath(const std::string& soName)
+{
+    static const std::set<std::string> soNameList = {
+        "libascend_hal.so",
+        "libascendalog.so",
+        "libruntime.so"
+    };
+    if (soNameList.find(soName) == soNameList.end()) {
+        return "";
+    }
+    char *ascendHomePath = std::getenv("ASCEND_HOME_PATH");
+    if (ascendHomePath == nullptr) {
+        return soName;
+    }
+    auto soPath = std::string(ascendHomePath) + "/lib64/" + soName;
+    auto canonicalPath = Utils::RealPath(Utils::RelativeToAbsPath(soPath));
+    return Utils::FileExist(canonicalPath) ? canonicalPath : soName;
+}
+
 void *FunctionLoader::Get(const std::string& funcName)
 {
     if (!handle_) {
-        auto handle = dlopen(soName_.c_str(), RTLD_LAZY);
+        auto soPath = CanonicalSoPath(soName_);
+        if (soPath.empty()) {
+            return nullptr;
+        }
+        auto handle = dlopen(soPath.c_str(), RTLD_LAZY);
         if (handle == nullptr) {
             printf("%s\n", dlerror());
             return nullptr;

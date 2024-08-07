@@ -98,7 +98,7 @@ msptiResult DevProfTaskTsFw::StartTask()
     profStartPara.samplePeriod = SAMPLE_PERIOD;
     profStartPara.realTime = PROFILE_REAL_TIME;
     profStartPara.userData = &configP;
-    profStartPara.userDataSize = sizeof(TsTsFwProfileConfigT);
+    profStartPara.userDataSize = static_cast<unsigned int>(sizeof(TsTsFwProfileConfigT));
     int ret = ProfDrvStart(deviceId_, channelId_, &profStartPara);
     if (ret != 0) {
         MSPTI_LOGE("Failed to start TsTrackJob for device: %u, channel id: %u", deviceId_, channelId_);
@@ -136,7 +136,7 @@ msptiResult DevProfTaskStars::StartTask()
     profStartPara.samplePeriod = SAMPLE_PERIOD;
     profStartPara.realTime = PROFILE_REAL_TIME;
     profStartPara.userData = &configP;
-    profStartPara.userDataSize = sizeof(StarsSocLogConfigT);
+    profStartPara.userDataSize = static_cast<unsigned int>(sizeof(StarsSocLogConfigT));
     int ret = ProfDrvStart(deviceId_, channelId_, &profStartPara);
     if (ret != 0) {
         MSPTI_LOGE("Failed to start ProfStarsJob for device: %u, channel id: %u", deviceId_, channelId_);
