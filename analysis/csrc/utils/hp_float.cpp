@@ -467,7 +467,7 @@ HPFloat &HPFloat::operator=(long long op)
 {
     Clear();
     // 取正
-    unsigned long long num = (op > 0) ? op : -op;
+    unsigned long long num = (op > 0) ? static_cast<unsigned long long>(op) : static_cast<unsigned long long>(-op);
     *this = num;
     symbol_ = op < 0;
     Simple();
@@ -528,7 +528,8 @@ HPFloat &HPFloat::operator=(const std::string &num)
     if (op[op.size() - 1] == '.') { // 如果小数点在末尾
         op.erase(op.size() - 1, 1);
         int32_t zeroNum = 0;
-        while (zeroNum <= static_cast<int32_t>(op.size()) - 1 && op[op.size() - 1 - zeroNum] == '0') {
+        while (zeroNum <= static_cast<int32_t>(op.size()) - 1 &&
+        op[static_cast<int32_t>(op.size()) - 1 - zeroNum] == '0') {
             zeroNum++;
         }
         digit_ += -zeroNum - 1; // 算出数量级
