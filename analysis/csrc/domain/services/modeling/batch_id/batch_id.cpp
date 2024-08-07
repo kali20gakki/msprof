@@ -111,7 +111,7 @@ void ModelingComputeBatchIdBinary(HalUniData **task, uint32_t taskNum, HalUniDat
         }
 
         taskTmp = taskTmp + cursor + 1;
-        taskTmpNum = static_cast<int>(taskTmpNum) - cursor - 1;
+        taskTmpNum = static_cast<uint32_t>(static_cast<int>(taskTmpNum) - cursor - 1);
     }
 
     if (taskTmpNum > 0) {

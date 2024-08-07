@@ -32,23 +32,23 @@ struct adl_serializer<DeviceInfo> {
     {
         uint32_t fromJsonResult = 0;
         std::string platformVersionStr = jsonData.at("platform_version").get<std::string>();
-        fromJsonResult |= StrToU32(infoData.chipID, platformVersionStr);
+        fromJsonResult |= static_cast<uint32_t>(StrToU32(infoData.chipID, platformVersionStr));
 
         std::string deviceStr = jsonData.at("devices").get<std::string>();
-        fromJsonResult |= StrToU32(infoData.deviceId, deviceStr);
+        fromJsonResult |= static_cast<uint32_t>(StrToU32(infoData.deviceId, deviceStr));
 
         jsonData.at("DeviceInfo").at(0).at("ai_core_num").get_to(infoData.aiCoreNum);
 
         std::string aicFrequencyStr = jsonData.at("DeviceInfo").at(0).at("aic_frequency").get<std::string>();
-        fromJsonResult |= StrToU32(infoData.aicFrequency, aicFrequencyStr);
+        fromJsonResult |= static_cast<uint32_t>(StrToU32(infoData.aicFrequency, aicFrequencyStr));
 
         jsonData.at("DeviceInfo").at(0).at("aiv_num").get_to(infoData.aivNum);
 
         std::string aivFrequencyStr = jsonData.at("DeviceInfo").at(0).at("aiv_frequency").get<std::string>();
-        fromJsonResult |= StrToU32(infoData.aivFrequency, aivFrequencyStr);
+        fromJsonResult |= static_cast<uint32_t>(StrToU32(infoData.aivFrequency, aivFrequencyStr));
 
         std::string hwtsFrequencyStr = jsonData.at("DeviceInfo").at(0).at("hwts_frequency").get<std::string>();
-        fromJsonResult |= StrToDouble(infoData.hwtsFrequency, hwtsFrequencyStr);
+        fromJsonResult |= static_cast<uint32_t>(StrToDouble(infoData.hwtsFrequency, hwtsFrequencyStr));
         if (fromJsonResult != ANALYSIS_OK || IsDoubleEqual(infoData.hwtsFrequency, 0.0)) {
             ERROR("Get device info from json error! The input: platform_version= %, devices= %, aic_frequency= %, "
                   "aiv_frequency= %, hwts_frequency=%", platformVersionStr, deviceStr, aicFrequencyStr, aivFrequencyStr,

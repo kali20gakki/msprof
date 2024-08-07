@@ -676,7 +676,7 @@ int IdeCreatePacket(CmdClassT type, IdeString value,
         return IDE_DAEMON_ERROR;
     }
     *buf = static_cast<IdeMemHandle>(sendBuf);
-    *bufLen = static_cast<int>(sizeof(struct tlv_req)) + valueLen;
+    *bufLen = static_cast<int>(sizeof(struct tlv_req)) + static_cast<int>(valueLen);
     return IDE_DAEMON_OK;
 }
 
