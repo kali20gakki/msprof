@@ -4,6 +4,8 @@
 import unittest
 from unittest import mock
 
+import pytest
+
 from common_func.utils import Utils
 
 
@@ -27,3 +29,6 @@ class TestUtils(unittest.TestCase):
                 mock.patch('common_func.db_manager.DBManager.fetch_one_data', return_value=(1, )), \
                 mock.patch('msmodel.interface.base_model.BaseModel.finalize'):
             self.assertTrue(Utils.is_step_scene('./'))
+
+    def test_generator_to_list_should_return_empty_list_when_input_None_throws_exception(self):
+        self.assertEqual([], Utils.generator_to_list(None))
