@@ -54,7 +54,7 @@ bool AnalyzerGe::GetIsAllStaticShape() const
     return isAllStaticShape_;
 }
 
-bool AnalyzerGe::GetStreamType(const int &streamId, int &streamType)
+bool AnalyzerGe::GetStreamType(const int &streamId, uint32_t &streamType)
 {
     auto iter = steamState_.find(streamId);
     if (iter == steamState_.end()) {

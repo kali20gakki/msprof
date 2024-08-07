@@ -41,7 +41,7 @@ public:
     std::string GetOpName(const std::string &opId);
     std::string GetOpType(const std::string &opId);
     bool GetIsAllStaticShape() const;
-    bool GetStreamType(const int &streamId, int &streamType);
+    bool GetStreamType(const int &streamId, uint32_t &streamType);
 
 private:
 struct GeOpInfo {

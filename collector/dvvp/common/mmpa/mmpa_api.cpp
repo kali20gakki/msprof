@@ -480,18 +480,21 @@ int32_t MmWaitPid(MmProcess pid, int32_t *status, int32_t options)
     if ((options != 0) && (options != M_WAIT_NOHANG) && (options != M_WAIT_UNTRACED)) {
         return PROFILING_INVALID_PARAM;
     }
-
     int32_t ret = waitpid(pid, status, options);
     if (ret == PROFILING_FAILED) {
         return PROFILING_FAILED;
     }
+    if ((*status) < 0) {
+        return PROFILING_FAILED;
+    }
     if ((ret > 0) && (ret == pid)) {
         if (status != nullptr) {
-            if (WIFEXITED(*status)) {
-                *status = WEXITSTATUS(*status);
+            uint32_t st = static_cast<uint32_t>(*status);
+            if (WIFEXITED(st)) {
+                *status = WEXITSTATUS(st);
             }
-            if (WIFSIGNALED(*status)) {
-                *status = WTERMSIG(*status);
+            if (WIFSIGNALED(st)) {
+                *status = WTERMSIG(st);
             }
         }
         return PROFILING_ERROR;

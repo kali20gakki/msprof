@@ -744,7 +744,7 @@ int Utils::ExecCmdCAsync(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &ex
 int Utils::WaitProcess(MmProcess process, bool &isExited, int &exitCode, bool hang /* = true */)
 {
     isExited = false;
-    int waitStatus = 0;
+    int32_t waitStatus = 0;
     uint32_t options = 0;
     uint32_t flags1 = M_WAIT_NOHANG;
     if (!hang) {
@@ -768,7 +768,7 @@ int Utils::WaitProcess(MmProcess process, bool &isExited, int &exitCode, bool ha
 
 bool Utils::ProcessIsRuning(MmProcess process)
 {
-    int waitStatus = 0;
+    int32_t waitStatus = 0;
 
     int ret = MmWaitPid(process, &waitStatus, M_WAIT_NOHANG);
     if (ret == PROFILING_SUCCESS) {
