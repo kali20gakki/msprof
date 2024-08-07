@@ -250,14 +250,13 @@ class TaskTimeViewer(BaseViewer):
         if not task_list:
             return []
         res_task_data = []
-        task_list = sorted(task_list, key=lambda x: (x.index_id, x.timestamp))
-        for i in range(len(task_list) - 1):
-            # add msproftx task dur filed
-            if task_list[i].index_id == task_list[i + 1].index_id:
-                dur = task_list[i + 1].timestamp - task_list[i].timestamp
-                res_task_data.append([task_list[i].index_id, task_list[i].timestamp,
-                                      task_list[i].stream_id, task_list[i].task_id, dur])
-                i += 1
+        task_list.sort(key=lambda x: (x.index_id, x.timestamp))
+        res_task_data.append([task_list[0].index_id, task_list[0].timestamp,
+                              task_list[0].stream_id, task_list[0].task_id, 0])
+        for i in range(1, len(task_list)):
+            if task_list[i].index_id == task_list[i - 1].index_id:
+                # set range data duration
+                res_task_data[-1][4] = task_list[i].timestamp - res_task_data[-1][1]
             else:
                 res_task_data.append([task_list[i].index_id, task_list[i].timestamp,
                                       task_list[i].stream_id, task_list[i].task_id, 0])

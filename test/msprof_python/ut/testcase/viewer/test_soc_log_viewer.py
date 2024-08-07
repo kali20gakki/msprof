@@ -520,7 +520,7 @@ class TestTaskTimeViewer(unittest.TestCase):
             ret = check.get_msproftx_ex_task_data(result_dir)
             self.assertEqual([], ret)
 
-    def test_get_msproftx_ex_task_data_should_return_data_list_with_invalid_data_from_db(self):
+    def test_get_msproftx_ex_task_data_should_return_data_list_with_last_data_is_range(self):
         configs, params = {}, {"project": ""}
         with mock.patch(NAMESPACE + '.path_check', return_value=True), \
                 mock.patch(NAMESPACE + '.ViewModel.check_table', return_value=True), \
@@ -532,6 +532,19 @@ class TestTaskTimeViewer(unittest.TestCase):
             result_dir = ""
             ret = check.get_msproftx_ex_task_data(result_dir)
             self.assertEqual([[0, 10, 0, 0, 0], [1, 11, 0, 1, 1]], ret)
+
+    def test_get_msproftx_ex_task_data_should_return_data_list_with_last_data_is_mark(self):
+        configs, params = {}, {"project": ""}
+        with mock.patch(NAMESPACE + '.path_check', return_value=True), \
+                mock.patch(NAMESPACE + '.ViewModel.check_table', return_value=True), \
+                mock.patch(NAMESPACE + '.ViewModel.get_sql_data',
+                           return_value=[MsproftxMarkDto(0, 10, 0, 0),
+                                         MsproftxMarkDto(0, 11, 0, 1),
+                                         MsproftxMarkDto(1, 12, 0, 2)]):
+            check = TaskTimeViewer(configs, params)
+            result_dir = ""
+            ret = check.get_msproftx_ex_task_data(result_dir)
+            self.assertEqual([[0, 10, 0, 0, 1], [1, 12, 0, 2, 0]], ret)
 
 
 if __name__ == '__main__':

@@ -33,7 +33,7 @@ const uint64_t START_TIME_NS = 1700902984041176000;
 const uint64_t END_TIME_NS = 1700902986330096000;
 const uint64_t BASE_TIME_NS = 8719641548578;
 const uint16_t OP_NUM = 10;
-const uint16_t TX_OP_NUM = 2;
+const uint16_t TX_OP_NUM = 4;
 const uint16_t STRING_NUM = 7;
 const uint16_t TX_STRING_ID_NUM = 1;
 const std::string TASK_PATH = "./task_path";
@@ -65,7 +65,9 @@ AscendTaskFormat DATA_A{{4294967295, -1, 37, 1, 3, 0, 8719911184665.1, 680.01367
                            "UNKNOWN", "88", 14991},
                           {4294967295, -1, 37, 5, 7, 0, 8719911184965.11, 680.013671875,
                            "KERNEL_AICORE", "AI_CORE", 14991}};
-MsprofTxDeviceTaskFormat TX_DATA_A{{0, 4294967295, 26248923229230, 2, 10, 11}};
+MsprofTxDeviceTaskFormat TX_DATA_A{{0, 4294967295, 26248923229230, 2, 10, 11},
+                                   {1, 4294967295, 26248923229240, 2, 11, 11},
+                                   {1, 4294967295, 26248923229250, 2, 12, 11}};
 AscendTaskFormat DATA_B{{4294967295, -1, 37, 6, 3, 0, 8719911184665.1, 680.013671875,
                            "UNKNOWN", "MEMCPY_ASYNC", 14991},
                           {4294967295, -1, 37, 7, 5, 0, 8719911184665.1, 680.013671875,
@@ -76,7 +78,9 @@ AscendTaskFormat DATA_B{{4294967295, -1, 37, 6, 3, 0, 8719911184665.1, 680.01367
                            "UNKNOWN", "88", 14991},
                           {4294967295, -1, 37, 10, 7, 0, 8719911184965.11, 680.013671875,
                            "MEMCPY_ASYNC", "PCIE_DMA_SQE", 14991}};
-MsprofTxDeviceTaskFormat TX_DATA_B{{0, 4294967295, 26248923229240, 2, 11, 11}};
+MsprofTxDeviceTaskFormat TX_DATA_B{{0, 4294967295, 26248923229260, 2, 13, 11},
+                                   {1, 4294967295, 26248923229270, 2, 14, 11},
+                                   {1, 4294967295, 26248923229280, 2, 15, 11}};
 }
 
 class TaskProcessorUTest : public testing::Test {
