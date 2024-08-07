@@ -10,6 +10,7 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/viewer/database/finals/task_processor.h"
+#include <algorithm>
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/parser/environment/context.h"
@@ -47,6 +48,37 @@ struct MsprofTxTaskData {
     uint32_t streamId = UINT32_MAX;
     uint32_t taskId = UINT32_MAX;
     double timestamp = 0.0;
+
+    bool operator<(const MsprofTxTaskData& other) const
+    {
+        if (indexId < other.indexId) {
+            return true;
+        } else if (indexId == other.indexId) {
+            return timestamp < other.timestamp;
+        } else {
+            return false;
+        }
+    }
+};
+
+struct MsprofTxTableData {
+    uint32_t modelId = UINT32_MAX;
+    uint32_t indexId = UINT32_MAX;
+    uint32_t streamId = UINT32_MAX;
+    uint32_t taskId = UINT32_MAX;
+    double startTime = 0.0;
+    double endTime = 0.0;
+
+    MsprofTxTableData(uint32_t modelId, uint32_t indexId, uint32_t streamId, uint32_t taskId,
+                      double startTime, double endTime)
+    {
+        this->modelId = modelId;
+        this->indexId = indexId;
+        this->streamId = streamId;
+        this->taskId = taskId;
+        this->startTime = startTime;
+        this->endTime = endTime;
+    }
 };
 }
 
@@ -261,19 +293,36 @@ TaskProcessor::ProcessedDataFormat TaskProcessor::FormatMsprofTxTaskData(const O
         ERROR("Reserve for ascend task data failed.");
         return processedData;
     }
+    std::vector<MsprofTxTaskData> dataList;
     MsprofTxTaskData data;
     for (auto &row: oriData) {
         std::tie(data.modelId, data.indexId, data.streamId, data.taskId, data.timestamp) = row;
-        HPFloat start{data.timestamp};
-        HPFloat end = start;
+        dataList.emplace_back(data);
+    }
+    std::sort(dataList.begin(), dataList.end());
+    std::vector<MsprofTxTableData> tableDataList;
+    tableDataList.emplace_back(MsprofTxTableData(dataList[0].modelId, dataList[0].indexId,
+                                                 dataList[0].streamId, dataList[0].taskId,
+                                                 dataList[0].timestamp, dataList[0].timestamp));
+    for (size_t i = 1; i < dataList.size(); i++) {
+        if (dataList[i].indexId == dataList[i - 1].indexId) {
+            tableDataList.back().endTime = dataList[i].timestamp;
+        } else {
+            tableDataList.emplace_back(MsprofTxTableData(dataList[i].modelId, dataList[i].indexId,
+                                                         dataList[i].streamId, dataList[i].taskId,
+                                                         dataList[i].timestamp, dataList[i].timestamp));
+        }
+    }
+    for (auto &data : tableDataList) {
         uint64_t connectionId = Utils::Contact(threadData.profId, data.indexId + START_CONNECTION_ID_MSTX);
         uint64_t globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(threadData.deviceId, data.streamId,
                                                                             data.taskId, UINT32_MAX,
                                                                             data.indexId + START_CONNECTION_ID_MSTX));
-        HPFloat startTimestamp = Utils::GetTimeFromSyscnt(data.timestamp, params);
+        HPFloat startTimestamp = Utils::GetTimeFromSyscnt(data.startTime, params);
+        HPFloat endTimestamp = Utils::GetTimeFromSyscnt(data.endTime, params);
         processedData.emplace_back(
             Utils::GetLocalTime(startTimestamp, threadData.timeRecord).Uint64(),
-            Utils::GetLocalTime(startTimestamp, threadData.timeRecord).Uint64(),
+            Utils::GetLocalTime(endTimestamp, threadData.timeRecord).Uint64(),
             threadData.deviceId, connectionId, globalTaskId, pid, taskType,
             UINT32_MAX, data.streamId, data.taskId, data.modelId);
     }
