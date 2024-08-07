@@ -99,7 +99,7 @@ class Utils:
             for data in gen:
                 result.append(data)
             return result
-        except(TypeError, ) as err:
+        except (TypeError, ) as err:
             logging.error("Failed to convert generator to list. %s", err, exc_info=Constant.TRACE_BACK_SWITCH)
             return []
 
