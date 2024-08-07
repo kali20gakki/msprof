@@ -73,7 +73,7 @@ public:
         try {
             CallbackManager::GetInstance()->ExecuteCallback(domain_, cbid_, MSPTI_API_EXIT, func_name_);
         } catch(...) {
-            MSPTI_LOGE("Exception occurred during destruction of CallbackScope");
+            // Exception occurred during destruction of CallbackScope
         }
     }
 

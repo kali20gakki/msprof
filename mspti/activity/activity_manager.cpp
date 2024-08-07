@@ -85,7 +85,7 @@ ActivityManager::~ActivityManager()
             try {
                 cv_.notify_one();
             } catch(...) {
-                MSPTI_LOGE("Exception occurred during destruction of ActivityManager");
+                // Exception occurred during destruction of ActivityManager
             }
         }
         t_.join();
