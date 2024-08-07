@@ -49,8 +49,8 @@ public:
     {
         if (CheckLogLevelForC(type_, level) == 1) {
             char buf[MAX_LOG_BUF_SIZE] = {0};
-            thread_local uint64_t threadId = syscall(SYS_gettid);
-            if (sprintf_s(buf, MAX_LOG_BUF_SIZE, "[%s:%d] >>> (tid:%lu) %s\n", fileName, linNo, threadId, fmt) < 0) {
+            if (sprintf_s(buf, MAX_LOG_BUF_SIZE, "[%s:%d] >>> (tid:%u) %s\n", fileName, linNo,
+                Utils::GetTid(), fmt) < 0) {
                 return;
             }
             DlogInnerForC(type_, level, buf, args...);
@@ -61,14 +61,13 @@ public:
     void Printf(int level, const char* fileName, int linNo, const char *fmt, T... args)
     {
         char buf[MAX_LOG_BUF_SIZE] = {0};
-        thread_local uint64_t threadId = static_cast<uint64_t>(syscall(SYS_gettid));
         auto level_ptr = level_name.find(level);
         if (level_ptr == level_name.end()) {
             return;
         }
-        if (sprintf_s(buf, MAX_LOG_BUF_SIZE, "[%s] PROFILING(%ld,%s) [%s:%d] >>> (tid:%ld) %s\n",
-            level_ptr->second.c_str(), syscall(SYS_getpid), Utils::GetProcName(), fileName, linNo,
-            threadId, fmt) < 0) {
+        if (sprintf_s(buf, MAX_LOG_BUF_SIZE, "[%s] PROFILING(%u,%s) [%s:%d] >>> (tid:%u) %s\n",
+            level_ptr->second.c_str(), Utils::GetPid(), Utils::GetProcName(), fileName, linNo,
+            Utils::GetTid(), fmt) < 0) {
             return;
         }
         printf(buf, args...);

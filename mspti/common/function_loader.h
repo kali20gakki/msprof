@@ -30,6 +30,7 @@ public:
     ~FunctionLoader();
     void Set(const std::string& funcName);
     FunctionHandle Get(const std::string& funcName);
+    std::string CanonicalSoPath(const std::string& soName);
 
 private:
     std::string soName_;
