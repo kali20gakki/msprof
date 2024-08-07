@@ -32,6 +32,7 @@ using namespace Analysis::Utils;
 
 namespace {
 const std::string TS_TRACK_PATH = "./ts_track";
+const long INVALID_FILE_SIZE = -1;
 }
 
 class TsTrackParserUtest : public Test {
@@ -43,6 +44,7 @@ protected:
     }
     void TearDown() override
     {
+        GlobalMockObject::verify();
         dataInventory_.RemoveRestData({});
         EXPECT_TRUE(File::RemoveDir(TS_TRACK_PATH, 0));
     }
@@ -218,5 +220,16 @@ TEST_F(TsTrackParserUtest, ShouldParseErrorWhenResizeException)
     MOCKER_CPP(&std::vector<HalTrackData>::resize, void(std::vector<HalTrackData>::*)(size_t)).stubs()
         .will(throws(std::bad_alloc()));
     ASSERT_EQ(Analysis::PARSER_PARSE_DATA_ERROR, tsTrackParser.Run(dataInventory_, context));
+}
+
+TEST_F(TsTrackParserUtest, ShouldNormalRunWhenGetOneFileSizeFail)
+{
+    TsTrackParser tsTrackParser;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = TS_TRACK_PATH;
+    std::vector<StepTrace> taskFlip1{CreateStepTrace(0x0A, 1, 1, 10, 1), CreateStepTrace(0x0A, 1, 1, 20, 2)};
+    WriteBin(taskFlip1, File::PathJoin({TS_TRACK_PATH, "data"}), "ts_track.data.0.slice_0");
+    MOCKER_CPP(&ftell).stubs().will(returnValue(INVALID_FILE_SIZE));
+    ASSERT_EQ(Analysis::ANALYSIS_OK, tsTrackParser.Run(dataInventory_, context));
 }
 }
