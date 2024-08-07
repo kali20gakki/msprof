@@ -34,8 +34,8 @@ private:
     static OriDataFormat GetData(DBInfo &npuMemDB);
     ProcessedDataFormat FormatData(const OriDataFormat &oriData, const uint16_t deviceId,
                                    const uint64_t hostMonotonic, const Utils::ProfTimeRecord &timeRecord) const;
-    uint64_t stringAppId_;
-    uint64_t stringDeviceId_;
+    uint64_t stringAppId_ = 0;
+    uint64_t stringDeviceId_ = 0;
 };
 
 } // Database

@@ -130,7 +130,7 @@ std::vector<TableColumn> Connection::ExecuteGetTableColumns(const std::string &t
     return cols;
 }
 
-bool Connection::InsertCmd(const std::string &tableName, const int &colNum)
+bool Connection::InsertCmd(const std::string &tableName, const uint32_t &colNum)
 {
     std::string valueStr;
     for (int i = 0; i < colNum - 1; ++i) {

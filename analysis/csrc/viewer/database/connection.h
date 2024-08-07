@@ -83,7 +83,7 @@ public:
     std::vector<TableColumn> ExecuteGetTableColumns(const std::string &tableName);
 
 private:
-    bool InsertCmd(const std::string &tableName, const int &colNum);
+    bool InsertCmd(const std::string &tableName, const uint32_t &colNum);
     void BindParameters(int64_t value);
     void BindParameters(uint64_t value);
     void BindParameters(int32_t value);
@@ -161,7 +161,7 @@ void Connection::GetRow(T &row)
 template<typename... Args>
 bool Connection::ExecuteInsert(const std::string &tableName, const std::vector<std::tuple<Args...>> &data)
 {
-    int colNum = sizeof...(Args);
+    uint32_t colNum = sizeof...(Args);
     // 开启事务
     sqlite3_exec(db_, "BEGIN", nullptr, nullptr, nullptr);
     if (!InsertCmd(tableName, colNum)) {

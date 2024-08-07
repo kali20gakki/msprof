@@ -72,3 +72,30 @@ TEST_F(MmpaUtest, MmGetAndFreeMac)
     EXPECT_EQ(PROFILING_SUCCESS, MmGetMacFree(macInfo, count));
 }
 
+
+TEST_F(MmpaUtest, MmWaitPid)
+{
+    MmProcess pid1 = 2;
+    int32_t status1 = -1;
+    int32_t options = 3;
+    // option is invalid
+    EXPECT_EQ(PROFILING_INVALID_PARAM, MmWaitPid(pid1, &status1, options));
+
+    // waitpid return PROFILING_FAILED
+    int32_t ret1 = 1;
+    int32_t ret2 = 2;
+    MOCKER_CPP(&waitpid).stubs().will(returnValue(PROFILING_FAILED)).then(returnValue(ret1)).then(returnValue(ret2));
+    options = M_WAIT_NOHANG;
+    EXPECT_EQ(PROFILING_FAILED, MmWaitPid(pid1, &status1, options));
+
+    // waitpid return success, ret is 1, status1 < 0
+    EXPECT_EQ(PROFILING_FAILED, MmWaitPid(pid1, &status1, options));
+
+    // waitpid return success, ret is 2, ret == pid, status2 > 0
+    int32_t status2 = 1;
+    EXPECT_EQ(PROFILING_ERROR, MmWaitPid(pid1, &status2, options));
+
+    // waitpid return success, ret is 2, ret != pid, status2 > 0
+    MmProcess pid2 = 3;
+    EXPECT_EQ(PROFILING_SUCCESS, MmWaitPid(pid2, &status2, options));
+}

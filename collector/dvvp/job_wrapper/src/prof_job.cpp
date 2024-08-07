@@ -1599,7 +1599,7 @@ int ProfAicpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
             static_cast<int>(channelId_));
-        eventAttr_.deviceId = collectionJobCfg_->comParams->devId;
+        eventAttr_.deviceId = static_cast<uint32_t>(collectionJobCfg_->comParams->devId);
         eventAttr_.grpName = eventGrpName_;
         int32_t ret = profDrvEvent_.SubscribeEventThreadInit(&eventAttr_);
         return ret;

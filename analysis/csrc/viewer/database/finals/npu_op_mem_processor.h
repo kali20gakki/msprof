@@ -37,9 +37,9 @@ private:
     ProcessedDataFormat FormatData(const OriDataFormat &oriData, const Utils::ProfTimeRecord &timeRecord,
                                    Utils::SyscntConversionParams &params, GeHashMap &hashMap, uint32_t pid) const;
     static uint16_t GetDeviceId(const std::string& deviceType);
-    uint64_t stringGeId_;
-    uint64_t stringReleaseId_;
-    uint64_t stringAllocateId_;
+    uint64_t stringGeId_ = 0;
+    uint64_t stringReleaseId_ = 0;
+    uint64_t stringAllocateId_ = 0;
 };
 
 } // Database

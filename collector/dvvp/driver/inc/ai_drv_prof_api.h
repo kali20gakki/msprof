@@ -426,8 +426,8 @@ struct QosProfileInfo {
     uint32_t devId;     // hal接口需要的字段
     uint16_t streamNum; // mode: 0时, mpamId列表个数，mode: 1时为mpamIdIdx, 默认0
     uint16_t mode;      // 0: 表示查询mpamId列表，1：通过mpamId查询streamName，2：通过streamName查mpamId
-    uint8_t mpamId[QOS_STREAM_MAX_NUM]; // mode: 0/2 为出参， mode: 1 为入参
-    char streamName[QOS_STREAM_NAME_MAX_LENGTH]; // mode: 0无效，mode: 1 出参, mode: 2为入参
+    uint8_t mpamId[QOS_STREAM_MAX_NUM] = {0}; // mode: 0/2 为出参， mode: 1 为入参
+    char streamName[QOS_STREAM_NAME_MAX_LENGTH] = {0}; // mode: 0无效，mode: 1 出参, mode: 2为入参
 };
 
 void GetQosProfileInfo(uint32_t deviceId, std::string &qosEventInfo, std::vector<uint8_t> &qosEventId);

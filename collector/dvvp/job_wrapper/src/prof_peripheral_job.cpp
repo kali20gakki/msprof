@@ -1259,7 +1259,7 @@ int32_t ProfQosJob::SetPeripheralConfig()
         return PROFILING_FAILED;
     }
 
-    configP->period = collectionJobCfg_->comParams->params->hardware_mem_sampling_interval;
+    configP->period = static_cast<uint32_t>(collectionJobCfg_->comParams->params->hardware_mem_sampling_interval);
     configP->streamNum = static_cast<uint16_t>(collectionJobCfg_->comParams->params->qosEventId.size());
     for (size_t i = 0; i < collectionJobCfg_->comParams->params->qosEventId.size(); i++) {
         configP->mpamId[i] = collectionJobCfg_->comParams->params->qosEventId[i];
