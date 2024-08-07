@@ -62,13 +62,20 @@ function create_temp_dir() {
     fi
     mkdir -p ${temp_dir}
     local collector_dir="${PREFIX_DIR}/collector"
+    local mspti_dir="${PREFIX_DIR}/mspti"
 
     # if we want to change product, we also need to change rollback_precheck
     cp ${collector_dir}/lib/libmsprofiler.so ${temp_dir}
     cp -r ${collector_dir}/stub ${temp_dir}
     cp ${collector_dir}/bin/msprof ${temp_dir}
+    cp ${mspti_dir}/libmspti.so ${temp_dir}
     cp ${TOP_DIR}/build/build/dist/msprof-0.0.1-py3-none-any.whl ${temp_dir}
     cp ${TOP_DIR}/collector/inc/external/acl/acl_prof.h ${temp_dir}
+    cp ${TOP_DIR}/mspti/external/mspti.h ${temp_dir}
+    cp ${TOP_DIR}/mspti/external/mspti_activity.h ${temp_dir}
+    cp ${TOP_DIR}/mspti/external/mspti_callback.h ${temp_dir}
+    cp ${TOP_DIR}/mspti/external/mspti_cbid.h ${temp_dir}
+    cp ${TOP_DIR}/mspti/external/mspti_result.h ${temp_dir}
     copy_script ${INSTALL_SCRIPT} ${temp_dir}
     copy_script ${UTILS_SCRIPT} ${temp_dir}
 }
@@ -120,7 +127,7 @@ function sed_main_param() {
 	sed_param ${main_script}
 	build_python_whl
 	create_temp_dir ${MSPROF_TEMP_DIR}
-    check_file_exist ${MSPROF_TEMP_DIR}
+	check_file_exist ${MSPROF_TEMP_DIR}
 	delete_sed_param ${main_script}
 }
 
@@ -133,6 +140,12 @@ check_file_exist() {
   check_package ${temp_dir}/stub ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/${INSTALL_SCRIPT} ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/${UTILS_SCRIPT} ${PKG_LIMIT_SIZE}
+  check_package ${temp_dir}/libmspti.so ${PKG_LIMIT_SIZE}
+  check_package ${temp_dir}/mspti.h ${PKG_LIMIT_SIZE}
+  check_package ${temp_dir}/mspti_activity.h ${PKG_LIMIT_SIZE}
+  check_package ${temp_dir}/mspti_callback.h ${PKG_LIMIT_SIZE}
+  check_package ${temp_dir}/mspti_cbid.h ${PKG_LIMIT_SIZE}
+  check_package ${temp_dir}/mspti_result.h ${PKG_LIMIT_SIZE}
 }
 
 function check_package() {

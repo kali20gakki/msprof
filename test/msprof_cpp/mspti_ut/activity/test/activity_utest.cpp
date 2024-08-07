@@ -34,11 +34,11 @@ static void ActivityParser(msptiActivity *pRecord)
     g_records++;
     if (pRecord->kind == MSPTI_ACTIVITY_KIND_MARKER) {
         msptiActivityMark* activity = reinterpret_cast<msptiActivityMark*>(pRecord);
-        if (activity->id == G_MARK_MAX_NUM - 1 && activity->mode == MSPTI_ACTIVITY_MARKER_MODE_HOST) {
+        if (activity->id == G_MARK_MAX_NUM - 1 && activity->sourceKind == MSPTI_ACTIVITY_SOURCE_KIND_HOST) {
             printf("kind: %d, mode: %d, timestamp: %lu, markId: %lu, processId: %d, threadId: %u, name: %s\n",
-                activity->kind, activity->mode, activity->timestamp, activity->id,
-                activity->msptiObjectId.pt.processId,
-                activity->msptiObjectId.pt.threadId, activity->name);
+                activity->kind, activity->sourceKind, activity->timestamp, activity->id,
+                activity->objectId.pt.processId,
+                activity->objectId.pt.threadId, activity->name);
         }
     }
 }
@@ -70,11 +70,11 @@ TEST_F(ActivityUtest, ActivityApiUtest)
     constexpr uint64_t timeStamp = 1614659207688700;
     for (size_t i = 0; i < G_MARK_MAX_NUM ; ++i) {
         activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
-        activity.mode = MSPTI_ACTIVITY_MARKER_MODE_HOST;
+        activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
         activity.timestamp = timeStamp;
         activity.id = i;
-        activity.msptiObjectId.pt.processId = 0;
-        activity.msptiObjectId.pt.threadId = 0;
+        activity.objectId.pt.processId = 0;
+        activity.objectId.pt.threadId = 0;
         activity.name = "UserMark";
         Mspti::Activity::ActivityManager::GetInstance()->Record(
             reinterpret_cast<msptiActivity*>(&activity), sizeof(activity));

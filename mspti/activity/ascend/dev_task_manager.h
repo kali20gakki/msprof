@@ -20,7 +20,7 @@
 #include <set>
 
 #include "activity/ascend/dev_prof_task.h"
-#include "external/mspti_base.h"
+#include "external/mspti_result.h"
 
 namespace Mspti {
 namespace Ascend {

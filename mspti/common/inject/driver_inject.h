@@ -13,7 +13,7 @@
 #define MSPTI_COMMON_INJECT_DRIVER_INJECT_H
 
 #include "common/inject/inject_base.h"
-#include "external/mspti_base.h"
+#include "external/mspti_result.h"
 
 typedef enum {
     DRV_INFO_TYPE_ENV = 0,

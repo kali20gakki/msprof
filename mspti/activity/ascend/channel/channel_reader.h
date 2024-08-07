@@ -14,7 +14,7 @@
 #define MSPTI_ACTIVITY_ASCEND_CHANNEL_CHANNEL_READER_H
 
 #include "common/task.h"
-#include "external/mspti_base.h"
+#include "external/mspti_result.h"
 #include "common/inject/inject_base.h"
 
 namespace Mspti {

@@ -1,18 +1,19 @@
-/* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2024-2024
-            Copyright, 2024, Huawei Tech. Co., Ltd.
-****************************************************************************** */
-/* ******************************************************************************
- * File Name          : mspti_cbid.h
- * Description        : Callback ID.
- * Author             : msprof team
- * Creation Date      : 2024/05/07
- * *****************************************************************************
+/**
+* @file mspti_cbid.h
+*
+* Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
 #ifndef MSPTI_CBID_H
 #define MSPTI_CBID_H
 
+/**
+ * @brief Definitions of indices for Runtime API functions, unique across entire API
+ */
 typedef enum {
     MSPTI_CBID_RUNTIME_INVALID                              = 0,
     // Device

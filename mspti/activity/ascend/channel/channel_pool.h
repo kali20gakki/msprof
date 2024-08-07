@@ -18,7 +18,7 @@
 
 #include "activity/ascend/channel/channel_reader.h"
 #include "common/thread_pool.h"
-#include "external/mspti_base.h"
+#include "external/mspti_result.h"
 
 namespace Mspti {
 namespace Ascend {

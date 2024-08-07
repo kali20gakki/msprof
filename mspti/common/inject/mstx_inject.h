@@ -13,7 +13,7 @@
 #ifndef MSPTI_COMMON_INJECT_MSPROFTX_INJECT_H
 #define MSPTI_COMMON_INJECT_MSPROFTX_INJECT_H
 
-#include "external/mspti_base.h"
+#include "external/mspti_result.h"
 
 #define RT_STREAM void*
 

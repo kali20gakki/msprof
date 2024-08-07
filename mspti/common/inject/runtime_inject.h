@@ -14,7 +14,7 @@
 #define MSPTI_COMMON_INJECT_RUNTIME_INJECT_H
 
 #include "common/inject/inject_base.h"
-#include "external/mspti_base.h"
+#include "external/mspti_result.h"
 
 #if defined(__cplusplus)
 extern "C" {

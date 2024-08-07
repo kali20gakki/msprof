@@ -107,6 +107,9 @@ msptiResult ActivityManager::RegisterCallbacks(
     msptiBuffersCallbackRequestFunc funcBufferRequested,
     msptiBuffersCallbackCompleteFunc funcBufferCompleted)
 {
+    if (funcBufferRequested == nullptr || funcBufferCompleted == nullptr) {
+        return MSPTI_ERROR_INVALID_PARAMETER;
+    }
     bufferRequested_handle_ = funcBufferRequested;
     bufferCompleted_handle_ = funcBufferCompleted;
     if (!t_.joinable()) {

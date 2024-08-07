@@ -19,8 +19,13 @@
 #include <memory>
 #include <mutex>
 
-#include "external/mspti_base.h"
+#include "external/mspti_result.h"
 #include "external/mspti_callback.h"
+
+struct msptiSubscriber_st {
+    msptiCallbackFunc handle;
+    void* userdata;
+};
 
 namespace Mspti {
 namespace Callback {
@@ -72,7 +77,6 @@ private:
     msptiCallbackId cbid_;
     const char* func_name_;
 };
-
 }  // Callback
 }  // Mspti
 
