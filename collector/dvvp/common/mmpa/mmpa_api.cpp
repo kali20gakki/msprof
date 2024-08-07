@@ -484,7 +484,7 @@ int32_t MmWaitPid(MmProcess pid, int32_t *status, int32_t options)
     if (ret == PROFILING_FAILED) {
         return PROFILING_FAILED;
     }
-    if ((*status) < 0) {
+    if (status != nullptr && (*status) < 0) {
         return PROFILING_FAILED;
     }
     if ((ret > 0) && (ret == pid)) {
