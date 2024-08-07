@@ -32,7 +32,7 @@ using namespace analysis::dvvp::common::validation;
 * @param [in] module: the path of profiling data to be saved
 */
 UploaderDumper::UploaderDumper(const std::string& module)
-    : DataDumper(), module_(module)
+    : DataDumper(), module_(module), needCache_(false)
 {
 }
 

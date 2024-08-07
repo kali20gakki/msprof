@@ -46,6 +46,7 @@ TEST_F(MsprofReporterMgrUtest, StartReporters)
     // repeat start reporters
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StartReporters());
 }
+
  
 TEST_F(MsprofReporterMgrUtest, GenHashId)
 {
@@ -139,4 +140,19 @@ TEST_F(MsprofReporterMgrUtest, StopReporters)
     EXPECT_EQ(PROFILING_FAILED, MsprofReporterMgr::instance()->StopReporters());
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StopReporters());
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StopReporters());
+}
+
+TEST_F(MsprofReporterMgrUtest, StopReportersWillReturnFaildWhenThrowsException)
+{
+    GlobalMockObject::verify();
+    // stop after start
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsInited).stubs().will(returnValue(true));
+    EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StartReporters());
+    MsprofReporterMgr::instance()->RegReportTypeInfo(0, 0, "test");
+    MsprofReporterMgr::instance()->RegReportTypeInfo(1, 1, "test");
+    MOCKER_CPP(&UploaderMgr::UploadData, int(analysis::dvvp::transport::UploaderMgr::*)
+        (const std::string&, SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk>))
+        .stubs().will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&MsprofCallbackHandler::StopReporter).stubs().will(throws(std::bad_alloc()));
+    EXPECT_EQ(PROFILING_FAILED, MsprofReporterMgr::instance()->StopReporters());
 }

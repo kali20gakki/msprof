@@ -275,7 +275,7 @@ int FileSlice::SaveDataToLocalFiles(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileC
     if (fileChunkReq->chunkModule == FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST) {
         long long fileSize = analysis::dvvp::common::utils::Utils::GetFileSize(key);
         if (fileSize != PROFILING_FAILED) {
-            fileChunkReq->offset = fileSize;
+            fileChunkReq->offset = static_cast<size_t>(fileSize);
         }
     }
     ret = WriteToLocalFiles(key, fileChunkReq->chunk.c_str(), fileChunkReq->chunkSize,

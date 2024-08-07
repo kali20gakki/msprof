@@ -528,7 +528,7 @@ int32_t ReceiveData::DumpData(std::vector<T> &message, SHARED_PTR_ALIA<ProfileFi
     }
     bool isFirstMessage = true;
     for (size_t i = 0; i < message.size(); i++) {
-        int32_t messageLen = sizeof(T);
+        size_t messageLen = sizeof(T);
         CHAR_PTR dataPtr = reinterpret_cast<CHAR_PTR>(&message[i]);
         if (dataPtr == nullptr) {
             return PROFILING_FAILED;

@@ -270,10 +270,15 @@ int32_t MsprofReporterMgr::StopReporters()
     MSPROF_LOGI("ProfReporterMgr stop reporters");
     isStarted_ = false;
     SaveTypeInfo(true);
-    for (auto &report : reporters_) {
-        if (report.StopReporter() != PROFILING_SUCCESS) {
-            return PROFILING_FAILED;
+    try {
+        for (auto &report : reporters_) {
+            if (report.StopReporter() != PROFILING_SUCCESS) {
+                return PROFILING_FAILED;
+            }
         }
+    } catch (const std::exception& e) {
+        MSPROF_LOGE("Failed to ~StopReporters.");
+        return PROFILING_FAILED;
     }
     isSyncReporter_ = false;
     for (auto &index : indexMap_) { // 为了同一进程里多次采集，每次读地址要从0开始

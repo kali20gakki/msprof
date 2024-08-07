@@ -23,11 +23,13 @@
 #include <net/if.h>
 #include <sys/prctl.h>
 #include "file_slice.h"
+#include "config/config.h"
 #include "message/prof_params.h"
 #include "thread/thread_pool.h"
 
 using namespace analysis::dvvp::common::thread;
 using namespace analysis::dvvp::common::error;
+using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::transport;
 
 class COMMON_FILE_SLICE_TEST: public testing::Test {
@@ -153,6 +155,7 @@ TEST_F(COMMON_FILE_SLICE_TEST, SaveDataToLocalFiles) {
     message->chunk = std::string("123", 3);
     message->chunkSize = 3;
     message->isLastChunk = false;
+    message->chunkModule = FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST;
 
     std::string invalidHomeDir = "";
     std::string homeDir = "/home/test";
@@ -217,6 +220,9 @@ TEST_F(COMMON_FILE_SLICE_TEST, SaveDataToLocalFiles) {
     EXPECT_EQ(PROFILING_FAILED, ret);    
 
     //WriteToLocalFiles Failed
+    long long size = 1;
+    MOCKER_CPP(&analysis::dvvp::common::utils::Utils::GetFileSize)
+    .stubs().will(returnValue(size));
     ret = wfTransport.SaveDataToLocalFiles(message);
     EXPECT_EQ(PROFILING_FAILED, ret);
 }

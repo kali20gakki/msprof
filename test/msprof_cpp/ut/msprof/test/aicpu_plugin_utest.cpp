@@ -35,8 +35,12 @@ TEST_F(AICPU_PLUGIN_UTEST, ReceiveStreamData) {
     req->set_islastchunk(true);
     encode = analysis::dvvp::message::EncodeMessage(req);
     EXPECT_EQ(PROFILING_SUCCESS, aicpu->ReceiveStreamData(encode.c_str(), encode.size()));
-    analysis::dvvp::message::JobContext jobCtx;
+    
     req->set_islastchunk(false);
-    req->mutable_hdr()->set_job_ctx(jobCtx.ToString());
+    analysis::dvvp::message::JobContext jobCtx;
+    SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq;
     encode = analysis::dvvp::message::EncodeMessage(req);
+    MOCKER_CPP(&analysis::dvvp::message::BaseInfo::FromString).stubs().will(returnValue(true));
+    MOCKER_CPP(&Msprof::Engine::SendAiCpuData).stubs().will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_SUCCESS, aicpu->ReceiveStreamData(encode.c_str(), encode.size()));
 }
