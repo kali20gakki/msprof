@@ -86,11 +86,19 @@ for DIR in ${OUT_DIR}/platform/Tuscany/*$(lsb_release -i | awk '{print $3}' | tr
     
     cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/msprof/stub/libmsprofiler.so ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/lib64/stub/libmsprofiler.so
     cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/msprof/libmsprofiler.so ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/lib64/libmsprofiler.so
+    cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/mspti/lib64/libmspti.so ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/lib64/libmspti.so
     cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/msprof/msprof ${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT}/toolkit/tools/profiler/bin/msprof
     rm -rf ${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT}/toolkit/tools/profiler/profiler_tool/msprof-0.0.1-py3-none-any.whl
     cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/msprof/msprof-0.0.1-py3-none-any.whl \
     ${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT}/toolkit/tools/profiler/profiler_tool/msprof-0.0.1-py3-none-any.whl
     cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/msprof/acl_prof.h ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/acl/acl_prof.h
+
+    mkdir ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/mspti
+    cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/mspti/include/mspti.h ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/mspti/mspti.h
+    cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/mspti/include/mspti_activity.h ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/mspti/mspti_activity.h
+    cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/mspti/include/mspti_callback.h ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/mspti/mspti_callback.h
+    cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/mspti/include/mspti_cbid.h ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/mspti/mspti_cbid.h
+    cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/mspti/include/mspti_result.h ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/mspti/mspti_result.h
 
     create_run_package ${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT} toolkit ${package_name_toolkit_suffix}
     create_run_package ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME} runtime ${package_name_runtime_suffix}
