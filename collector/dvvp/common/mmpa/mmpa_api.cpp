@@ -851,7 +851,7 @@ static int32_t LocalLookup(char *buf, uint32_t bufLen, const char *pattern, char
     }
     const char *pValue = nullptr;
     char *pBuf = nullptr;
-    uint32_t len = strlen(pattern);
+    auto len = strlen(pattern);
 
     for (pBuf = buf; isspace(*pBuf) != 0; pBuf++) {
         if (pBuf == buf + bufLen) {

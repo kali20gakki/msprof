@@ -62,7 +62,7 @@ NpuModuleMemProcessor::ProcessedDataFormat NpuModuleMemProcessor::FormatData(con
     }
     for (auto &row: oriData) {
         std::tie(data.moduleId, data.syscnt, data.totalSize, data.deviceType) = row;
-        HPFloat timestamp{GetTimeFromSyscnt(data.syscnt, params)};
+        HPFloat timestamp{GetTimeFromSyscnt(static_cast<uint64_t>(data.syscnt), params)};
         processedData.emplace_back(
             data.moduleId, GetLocalTime(timestamp, timeRecord).Uint64(), data.totalSize, deviceId);
     }

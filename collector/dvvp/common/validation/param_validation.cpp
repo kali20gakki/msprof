@@ -1224,7 +1224,7 @@ bool ParamValidation::StorageLimitUnitValid(const std::string &storageLimit) con
 {
     std::string errReason = "storage-limit should be in range [" + std::to_string(STORAGE_LIMIT_DOWN_THD) +
         "," + std::to_string(UINT32_MAX) + "], end with MB";
-    uint32_t unitLen = strlen(STORAGE_LIMIT_UNIT);
+    auto unitLen = strlen(STORAGE_LIMIT_UNIT);
     if (storageLimit.size() <= unitLen) {
         MSPROF_LOGE("storage_limit:%s, length is less than %u", storageLimit.c_str(), unitLen + 1);
         CMD_LOGE("Argument --storage-limit=%s, length is less than %u", storageLimit.c_str(), unitLen + 1);
