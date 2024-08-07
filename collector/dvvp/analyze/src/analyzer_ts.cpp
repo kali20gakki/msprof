@@ -120,7 +120,7 @@ void AnalyzerTs::ParseTsTimelineData(CONST_CHAR_PTR data, uint32_t len)
             opTimeCount_++;
             opTimeDrafts_.erase(iter);
         }
-        analyzedBytes_ += sizeof(TsProfileTimeline);
+        analyzedBytes_ += static_cast<uint64_t>(sizeof(TsProfileTimeline));
     }
 }
 
@@ -185,7 +185,7 @@ void AnalyzerTs::ParseTsKeypointData(CONST_CHAR_PTR data, uint32_t len)
         MSPROF_LOGE("keypoint tagId error. tagId %u, keypointOp %u", tsData->tagId, keypointOpInfo_.size());
         return;
     }
-    analyzedBytes_ += sizeof(TsProfileKeypoint);
+    analyzedBytes_ += static_cast<uint64_t>(sizeof(TsProfileKeypoint));
 }
 
 void AnalyzerTs::PrintStats() const
