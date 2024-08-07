@@ -28,7 +28,7 @@ namespace Domain {
 int ModelingComputeBatchIdBinaryAlgo(HalUniData **task, uint32_t num, uint64_t flipTimestamp)
 {
     int left = 0;
-    int right = num - 1;
+    int right = static_cast<int>(num - 1);
     int mid = 0;
     while (left <= right) {
         mid = (left + right) / 2;  // 2分查找
@@ -85,7 +85,7 @@ void ModelingComputeBatchIdBinary(HalUniData **task, uint32_t taskNum, HalUniDat
     HalUniData **taskTmp = task;
     uint32_t taskTmpNum = taskNum;
     int cursor = 0;
-    int cursorArray[flipNum + 1];
+    std::vector<int> cursorArray(flipNum + 1);
     int cursorNum = 0;
 
     for (batchId = 0; batchId < flipNum; batchId++) {
@@ -111,11 +111,11 @@ void ModelingComputeBatchIdBinary(HalUniData **task, uint32_t taskNum, HalUniDat
         }
 
         taskTmp = taskTmp + cursor + 1;
-        taskTmpNum = taskTmpNum - cursor - 1;
+        taskTmpNum = static_cast<int>(taskTmpNum) - cursor - 1;
     }
 
     if (taskTmpNum > 0) {
-        cursorArray[cursorNum] = taskNum - 1;
+        cursorArray[cursorNum] = static_cast<int>(taskNum - 1);
         cursorNum++;
     }
 

@@ -167,7 +167,7 @@ public:
 private:
     DeviceContextInfo deviceContextInfo;
     bool isInitialized_; // 标记是否已初始化
-    DeviceContext() : isInitialized_(false) {};
+    DeviceContext() : isInitialized_(false) { deviceContextInfo.deviceInfo = {0, 0, 0, 0, 0, 0, 0}; };
     ~DeviceContext() = default;
     bool GetInfoJson();
     bool GetSampleJson();

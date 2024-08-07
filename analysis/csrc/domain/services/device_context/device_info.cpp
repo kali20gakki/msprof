@@ -30,7 +30,7 @@ struct adl_serializer<DeviceInfo> {
     }
     static void from_json(const json& jsonData, DeviceInfo& infoData)
     {
-        int fromJsonResult = ANALYSIS_OK;
+        uint32_t fromJsonResult = 0;
         std::string platformVersionStr = jsonData.at("platform_version").get<std::string>();
         fromJsonResult |= StrToU32(infoData.chipID, platformVersionStr);
 

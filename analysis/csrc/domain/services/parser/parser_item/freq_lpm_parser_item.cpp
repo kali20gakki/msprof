@@ -30,10 +30,10 @@ int FreqLpmParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *halU
     }
     auto *binData = ReinterpretConvert<FreqData *>(binaryData);
     auto *targetData = ReinterpretConvert<HalFreqData *>(halUniData);
-    int count = binData->count;
+    uint32_t count = binData->count;
 
     targetData->count = binData->count;
-    for (int i = 0; i < count; ++i) {
+    for (uint32_t i = 0; i < count; ++i) {
         targetData->freqLpmDataS[i].sysCnt = binData->lpmDataS[i].sysCnt;
         targetData->freqLpmDataS[i].freq = binData->lpmDataS[i].freq;
     }

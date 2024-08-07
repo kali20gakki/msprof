@@ -52,7 +52,7 @@ void FillStatisticianDependence(const ProcessCollection& regProcess, std::vector
 class ProcessControl::Impl final {
 public:
     explicit Impl(ProcessCollection& processes)
-        : allProcess_(std::move(processes)) {}
+        : allProcess_(std::move(processes)) { stat_.chipId = 0; }
     ~Impl() = default;
 
     bool VerifyProcess(const ProcessCollection& chipRelatedProcess) const
