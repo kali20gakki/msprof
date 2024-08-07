@@ -54,11 +54,11 @@ int ChunkGenerator::ReadChunk()
             return ANALYSIS_ERROR;
         }
         auto fileSize = File::Size(file);
-        if (fileSize % chunkSize_ != 0) {
+        if (fileSize % static_cast<uint64_t>(chunkSize_) != 0) {
             ERROR("The read chunk file size is invalid: %", file);
             return ANALYSIS_ERROR;
         }
-        remainSize_ += fileSize / chunkSize_;
+        remainSize_ += fileSize / static_cast<uint64_t>(chunkSize_);
     }
     return ANALYSIS_OK;
 }

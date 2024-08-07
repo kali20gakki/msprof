@@ -196,7 +196,7 @@ void Connection::GetColumn(int64_t &value)
 
 void Connection::GetColumn(uint64_t &value)
 {
-    value = sqlite3_column_int64(stmt_, ++index_);
+    value = static_cast<uint64_t>(sqlite3_column_int64(stmt_, ++index_));
 }
 
 void Connection::GetColumn(int32_t &value)
@@ -206,7 +206,7 @@ void Connection::GetColumn(int32_t &value)
 
 void Connection::GetColumn(uint32_t &value)
 {
-    value = sqlite3_column_int64(stmt_, ++index_);
+    value = static_cast<uint32_t>(sqlite3_column_int64(stmt_, ++index_));
 }
 
 void Connection::GetColumn(double &value)

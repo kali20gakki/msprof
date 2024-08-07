@@ -187,8 +187,8 @@ void Join(std::ostringstream &oss, const std::string &delimiter, T t, Args... ar
 template<typename... Args>
 std::string Join(const std::string &delimiter, Args... args)
 {
-    const int repeat = 2 * delimiter.size();
-    constexpr int count = sizeof...(args);
+    const int repeat = static_cast<int>(2 * delimiter.size());
+    constexpr int count = static_cast<int>(sizeof...(args));
     // args的长度应该至少为1
     if (!count) {
         WARN("The number of inputs to the function should be greater than 1");
