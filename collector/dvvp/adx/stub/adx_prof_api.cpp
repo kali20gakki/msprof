@@ -43,7 +43,7 @@ int DoAdxIdeCreatePacket(CmdClassT type, IdeString value, uint32_t valueLen, Ide
     }
 
     *buf = static_cast<IdeMemHandle>(sendBuf);
-    *bufLen = static_cast<int>(sizeof(struct tlv_req)) + valueLen;
+    *bufLen = static_cast<int>(sizeof(struct tlv_req)) + static_cast<int>(valueLen);
 
     return IDE_DAEMON_OK;
 }
