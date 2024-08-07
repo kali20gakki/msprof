@@ -45,6 +45,7 @@ function implement_install() {
 function copy_file() {
 	local filename=${1}
 	local target_file=$(readlink -f ${2})
+
 	if [ ! -f "$filename" ] && [ ! -d "$filename" ]; then
 		return
 	fi
