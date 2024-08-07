@@ -318,8 +318,8 @@ TaskProcessor::ProcessedDataFormat TaskProcessor::FormatMsprofTxTaskData(const O
         uint64_t globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(threadData.deviceId, data.streamId,
                                                                             data.taskId, UINT32_MAX,
                                                                             data.indexId + START_CONNECTION_ID_MSTX));
-        HPFloat startTimestamp = Utils::GetTimeFromSyscnt(data.startTime, params);
-        HPFloat endTimestamp = Utils::GetTimeFromSyscnt(data.endTime, params);
+        HPFloat startTimestamp = Utils::GetTimeFromSyscnt(static_cast<uint64_t>(data.startTime), params);
+        HPFloat endTimestamp = Utils::GetTimeFromSyscnt(static_cast<uint64_t>(data.endTime), params);
         processedData.emplace_back(
             Utils::GetLocalTime(startTimestamp, threadData.timeRecord).Uint64(),
             Utils::GetLocalTime(endTimestamp, threadData.timeRecord).Uint64(),

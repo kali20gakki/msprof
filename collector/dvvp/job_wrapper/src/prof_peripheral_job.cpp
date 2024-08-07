@@ -194,14 +194,14 @@ int ProfDdrJob::SetPeripheralConfig()
         return PROFILING_FAILED;
     }
     eventsStr_ = GetEventsStr(*(collectionJobCfg_->jobParams.events));
-    uint32_t configSize = sizeof(TagDdrProfileConfig) +
+    size_t configSize = sizeof(TagDdrProfileConfig) +
                           (sizeof(uint32_t) * GetEventSize(*(collectionJobCfg_->jobParams.events)));
     if (configSize == 0 || configSize > 0x7FFFFFFF) {
         MSPROF_LOGE("Profiling Config Size Out Range");
         return PROFILING_FAILED;
     }
 
-    TagDdrProfileConfig *configP = reinterpret_cast<TagDdrProfileConfig *>(Utils::ProfMalloc((size_t)configSize));
+    TagDdrProfileConfig *configP = reinterpret_cast<TagDdrProfileConfig *>(Utils::ProfMalloc(configSize));
     if (configP == nullptr) {
         MSPROF_LOGE("ProfDdrJob ProfMalloc TagDdrProfileConfig failed");
         return PROFILING_FAILED;
@@ -223,7 +223,7 @@ int ProfDdrJob::SetPeripheralConfig()
     }
 
     peripheralCfg_.configP = configP;
-    peripheralCfg_.configSize = configSize;
+    peripheralCfg_.configSize = static_cast<uint32_t>(configSize);
     return PROFILING_SUCCESS;
 }
 
@@ -281,7 +281,7 @@ int ProfHbmJob::SetPeripheralConfig()
         return PROFILING_FAILED;
     }
     eventsStr_ = GetEventsStr(*(collectionJobCfg_->jobParams.events));
-    uint32_t configSize = sizeof(TagTsHbmProfileConfig) +
+    size_t configSize = sizeof(TagTsHbmProfileConfig) +
                           (sizeof(uint32_t) * GetEventSize(*(collectionJobCfg_->jobParams.events)));
     if (configSize == 0 || configSize > 0x7FFFFFFF) {
         MSPROF_LOGE("Profiling Config Size Out Range");
@@ -307,7 +307,7 @@ int ProfHbmJob::SetPeripheralConfig()
     }
 
     peripheralCfg_.configP = configP;
-    peripheralCfg_.configSize = configSize;
+    peripheralCfg_.configSize = static_cast<uint32_t>(configSize);
     return PROFILING_SUCCESS;
 }
 

@@ -201,7 +201,7 @@ int DoProfTsCpuStart(const DrvPeripheralProfileCfg &peripheralCfg,
 int DrvTscpuStart(const DrvPeripheralProfileCfg &peripheralCfg,
                   const std::vector<std::string> &profEvents)
 {
-    auto configSize =
+    size_t configSize =
         sizeof(TsTsCpuProfileConfigT) + profEvents.size() * sizeof(uint32_t);
     auto configP = static_cast<TsTsCpuProfileConfigT *>(malloc(configSize));
     if (configP == nullptr) {
@@ -234,7 +234,7 @@ int DrvAicoreStart(const DrvPeripheralProfileCfg &peripheralCfg, const std::vect
     uint32_t profDeviceId = (uint32_t)peripheralCfg.profDeviceId;
     AI_DRV_CHANNEL profChannel = peripheralCfg.profChannel;
     uint32_t profSamplePeriod = (uint32_t)peripheralCfg.profSamplePeriod;
-    auto configSize = sizeof(TsAiCoreProfileConfigT);
+    size_t configSize = sizeof(TsAiCoreProfileConfigT);
 
     auto configP = static_cast<TsAiCoreProfileConfigT *>(malloc(configSize));
     FUNRET_CHECK_EQUAL_RET_VALUE(configP == nullptr, true, PROFILING_FAILED);
@@ -283,7 +283,7 @@ int DrvAicoreTaskBasedStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const 
     if (!CheckProfilingEventsSize(profEvents)) {
         return PROFILING_FAILED;
     }
-    auto configSize = sizeof(TsAiCoreProfileConfigT);
+    size_t configSize = sizeof(TsAiCoreProfileConfigT);
 
     auto configP = static_cast<TsAiCoreProfileConfigT *>(malloc(configSize));
     if (configP == nullptr) {
@@ -351,7 +351,7 @@ int DrvAicpuStart(int profDeviceId, AI_DRV_CHANNEL profChannel)
 
 int DrvL2CacheTaskStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const std::vector<std::string> &profEvents)
 {
-    auto configSize = sizeof(TagTsL2CacheProfileConfig) + profEvents.size() * sizeof(uint32_t);
+    size_t configSize = sizeof(TagTsL2CacheProfileConfig) + profEvents.size() * sizeof(uint32_t);
     auto configP = static_cast<TagTsL2CacheProfileConfig *>(malloc(configSize));
     if (configP == nullptr) {
         return PROFILING_FAILED;
@@ -521,7 +521,7 @@ int DrvFftsProfileStart(const DrvPeripheralProfileCfg &peripheralCfg, const std:
 {
     uint32_t profDeviceId = static_cast<uint32_t>(peripheralCfg.profDeviceId);
     AI_DRV_CHANNEL profChannel = peripheralCfg.profChannel;
-    auto configSize = sizeof(FftsProfileConfigT);
+    size_t configSize = sizeof(FftsProfileConfigT);
 
     auto configP = static_cast<FftsProfileConfigT *>(malloc(configSize));
     if (configP == nullptr) {
@@ -582,7 +582,7 @@ int DrvInstrProfileStart(const uint32_t devId, const AI_DRV_CHANNEL channelId, c
 
 int DrvHwtsLogStart(int profDeviceId, AI_DRV_CHANNEL profChannel)
 {
-    auto configSize = sizeof(TsHwtsProfileConfigT);
+    size_t configSize = sizeof(TsHwtsProfileConfigT);
     TsHwtsProfileConfigT configP;
     if (memset_s(&configP, configSize, 0, configSize) != EOK) {
         MSPROF_LOGE("memset failed");
@@ -612,7 +612,7 @@ int DrvHwtsLogStart(int profDeviceId, AI_DRV_CHANNEL profChannel)
 
 int DrvFmkDataStart(int devId, AI_DRV_CHANNEL profChannel)
 {
-    auto configSize = sizeof(TsHwtsProfileConfigT);
+    size_t configSize = sizeof(TsHwtsProfileConfigT);
 
     TsHwtsProfileConfigT configP;
     if (memset_s(&configP, configSize, 0, configSize) != EOK) {

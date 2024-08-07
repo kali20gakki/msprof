@@ -28,7 +28,7 @@ int DoAdxIdeCreatePacket(CmdClassT type, IdeString value, uint32_t valueLen, Ide
     }
 
     uint32_t mallocValueLen = valueLen + 1;
-    uint32_t sendLen = sizeof(struct tlv_req) + mallocValueLen;
+    uint32_t sendLen = static_cast<uint32_t>(sizeof(struct tlv_req)) + mallocValueLen;
     IdeStringBuffer sendBuf = static_cast<IdeStringBuffer>(IdeXmalloc(sendLen));
     IDE_CTRL_VALUE_FAILED(sendBuf != nullptr, return IDE_DAEMON_ERROR, "malloc memory failed");
     IdeTlvReq req = (IdeTlvReq)sendBuf;
@@ -43,7 +43,7 @@ int DoAdxIdeCreatePacket(CmdClassT type, IdeString value, uint32_t valueLen, Ide
     }
 
     *buf = static_cast<IdeMemHandle>(sendBuf);
-    *bufLen = sizeof(struct tlv_req) + valueLen;
+    *bufLen = static_cast<int>(sizeof(struct tlv_req)) + valueLen;
 
     return IDE_DAEMON_OK;
 }
