@@ -17,6 +17,12 @@
 #include <stdexcept>
 #include <string>
 
+#if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
+#define MSPTI_API __declspec(dllexport)
+#else
+#define MSPTI_API __attribute__((visibility("default")))
+#endif
+
 using rtError_t = uint32_t;
 using rtStream_t = void *;
 using rtSmDesc_t = void;
