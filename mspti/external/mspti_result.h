@@ -14,12 +14,6 @@
 #include <cstddef>
 #include <cstdint>
 
-#if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
-#define MSPTI_API
-#else
-#define MSPTI_API
-#endif
-
 /**
  * @brief MSPTI result codes.
  *

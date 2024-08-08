@@ -180,7 +180,7 @@ typedef struct msptiSubscriber_st *msptiSubscriberHandle;
  * @retval MSPTI_ERROR_MULTIPLE_SUBSCRIBERS_NOT_SUPPORTED if there is already a MSPTI subscriber
  * @retval MSPTI_ERROR_INVALID_PARAMETER if @p subscriber is NULL
  */
-MSPTI_API msptiResult msptiSubscribe(msptiSubscriberHandle *subscriber, msptiCallbackFunc callback, void* userdata);
+msptiResult msptiSubscribe(msptiSubscriberHandle *subscriber, msptiCallbackFunc callback, void* userdata);
 
 /**
  * @brief Unregister a callback subscriber.
@@ -193,7 +193,7 @@ MSPTI_API msptiResult msptiSubscribe(msptiSubscriberHandle *subscriber, msptiCal
  * @retval MSPTI_SUCCESS on success
  * @retval MSPTI_ERROR_INVALID_PARAMETER if @p subscriber is NULL or not initialized
  */
-MSPTI_API msptiResult msptiUnsubscribe(msptiSubscriberHandle subscriber);
+msptiResult msptiUnsubscribe(msptiSubscriberHandle subscriber);
 
 /**
  * @brief Enable or disabled callbacks for a specific domain and
@@ -215,7 +215,7 @@ MSPTI_API msptiResult msptiUnsubscribe(msptiSubscriberHandle subscriber);
  * @retval MSPTI_ERROR_INVALID_PARAMETER if @p subscriber, @p domain or @p
  * cbid is invalid.
  */
-MSPTI_API msptiResult msptiEnableCallback(
+msptiResult msptiEnableCallback(
     uint32_t enable, msptiSubscriberHandle subscriber, msptiCallbackDomain domain, msptiCallbackId cbid);
 
 /**
@@ -237,7 +237,7 @@ MSPTI_API msptiResult msptiEnableCallback(
  * @retval MSPTI_SUCCESS on success
  * @retval MSPTI_ERROR_INVALID_PARAMETER if @p subscriber, @p domain is invalid.
  */
-MSPTI_API msptiResult msptiEnableDomain(
+msptiResult msptiEnableDomain(
     uint32_t enable, msptiSubscriberHandle subscriber, msptiCallbackDomain domain);
 
 #if defined(__GNUC__) && defined(MSPTI_LIB)

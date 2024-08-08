@@ -240,7 +240,7 @@ typedef void(*msptiBuffersCallbackCompleteFunc)(uint8_t *buffer, size_t size, si
  * @retval MSPTI_ERROR_INVALID_PARAMETER if either
  * funcBufferRequested or funcBufferCompleted is NULL
  */
-MSPTI_API msptiResult msptiActivityRegisterCallbacks(
+msptiResult msptiActivityRegisterCallbacks(
     msptiBuffersCallbackRequestFunc funcBufferRequested, msptiBuffersCallbackCompleteFunc funcBufferCompleted);
 
 /**
@@ -254,7 +254,7 @@ MSPTI_API msptiResult msptiActivityRegisterCallbacks(
  *
  * @retval MSPTI_SUCCESS
  */
-MSPTI_API msptiResult msptiActivityEnable(msptiActivityKind kind);
+msptiResult msptiActivityEnable(msptiActivityKind kind);
 
 /**
  * @brief Disable collection of a specific kind of activity record.
@@ -267,7 +267,7 @@ MSPTI_API msptiResult msptiActivityEnable(msptiActivityKind kind);
  *
  * @retval MSPTI_SUCCESS
  */
-MSPTI_API msptiResult msptiActivityDisable(msptiActivityKind kind);
+msptiResult msptiActivityDisable(msptiActivityKind kind);
 
 /**
  * @brief Iterate over the activity records in a buffer.
@@ -285,7 +285,7 @@ MSPTI_API msptiResult msptiActivityDisable(msptiActivityKind kind);
  * @retval MSPTI_ERROR_MAX_LIMIT_REACHED if no more records in the buffer
  * @retval MSPTI_ERROR_INVALID_PARAMETER if buffer is NULL.
  */
-MSPTI_API msptiResult msptiActivityGetNextRecord(uint8_t *buffer, size_t validBufferSizeBytes, msptiActivity **record);
+msptiResult msptiActivityGetNextRecord(uint8_t *buffer, size_t validBufferSizeBytes, msptiActivity **record);
 
 /**
  * @brief Request to deliver activity records via the buffer completion callback.
@@ -303,7 +303,7 @@ MSPTI_API msptiResult msptiActivityGetNextRecord(uint8_t *buffer, size_t validBu
  *
  * @retval MSPTI_SUCCESS
  */
-MSPTI_API msptiResult msptiActivityFlushAll(uint32_t flag);
+msptiResult msptiActivityFlushAll(uint32_t flag);
 
 #if defined(__GNUC__) && defined(MSPTI_LIB)
 #pragma GCC visibility pop
