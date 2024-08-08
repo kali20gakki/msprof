@@ -66,12 +66,12 @@ COMMENTS=comments
 for DIR in ${OUT_DIR}/platform/Tuscany/*$(lsb_release -i | awk '{print $3}' | tr 'A-Z' 'a-z')*;
   do
     RM_DIR=${DIR}
-    mkdir ${CUR_DIR}/tmp
+    mkdir -p ${CUR_DIR}/tmp
 
     cp ${RM_DIR}/${MINDSTUDIO_TOOLKIT_NAME} ${CUR_DIR}/tmp
     PACKAGE_NAME_MINDSTUDIO_SUFFIX=$(ls ${CUR_DIR}/tmp)
-    mkdir ${CUR_DIR}/tmp/cann_toolkit
-    mkdir ${CUR_DIR}/tmp/cann_runtime
+    mkdir -p ${CUR_DIR}/tmp/cann_toolkit
+    mkdir -p ${CUR_DIR}/tmp/cann_runtime
     cp ${RM_DIR}/${CANN_TOOLKIT_NAME} ${CUR_DIR}/tmp/cann_toolkit
     cp ${RM_DIR}/${CANN_RUNTIME_NAME} ${CUR_DIR}/tmp/cann_runtime
     chmod -R +x ${CUR_DIR}/tmp
@@ -93,7 +93,7 @@ for DIR in ${OUT_DIR}/platform/Tuscany/*$(lsb_release -i | awk '{print $3}' | tr
     ${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT}/toolkit/tools/profiler/profiler_tool/msprof-0.0.1-py3-none-any.whl
     cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/msprof/acl_prof.h ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/acl/acl_prof.h
 
-    mkdir ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/mspti
+    mkdir -p ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/mspti
     cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/mspti/include/mspti.h ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/mspti/mspti.h
     cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/mspti/include/mspti_activity.h ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/mspti/mspti_activity.h
     cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/mspti/include/mspti_callback.h ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/mspti/mspti_callback.h
