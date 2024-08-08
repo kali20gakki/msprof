@@ -66,7 +66,7 @@ public:
             return;
         }
         if (sprintf_s(buf, MAX_LOG_BUF_SIZE, "[%s] PROFILING(%u,%s) [%s:%d] >>> (tid:%u) %s\n",
-            level_ptr->second.c_str(), Utils::GetPid(), Utils::GetProcName(), fileName, linNo,
+            level_ptr->second.c_str(), Utils::GetPid(), Utils::GetProcName().c_str(), fileName, linNo,
             Utils::GetTid(), fmt) < 0) {
             return;
         }

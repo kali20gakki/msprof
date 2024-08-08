@@ -15,7 +15,6 @@
 #include <cstdint>
 #include "mspti_result.h"
 #include "mspti_cbid.h"
-#include "common/inject/inject_base.h"
 
 #if defined(__cplusplus)
 extern "C" {
