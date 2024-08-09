@@ -392,7 +392,7 @@ class AiCoreOpReport:
         hash_dict = get_ge_hash_dict(project_path)
         result_data = []
         if not hash_dict:
-            logging.error("create op_summary data may be an error, because table GeHashInfo is not found.")
+            logging.warning("create op_summary data may be an error, because table GeHashInfo is not found.")
             return [list(_data) for _data in ai_core_data]
         for _data in ai_core_data:
             _data = list(_data)
