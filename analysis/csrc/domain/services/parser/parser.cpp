@@ -144,7 +144,7 @@ uint32_t Parser::ReadDataEntry(const DeviceContext &deviceContext)
         INFO("offset: %", firstFileOffset);
     }
 
-    this->binaryData.reset(new uint8_t[structCount * trunkSize]);
+    this->binaryData.reset(new(std::nothrow) uint8_t[structCount * trunkSize]);
     if (this->binaryData == nullptr) {
         ERROR("new binary data error!");
         return Analysis::PARSER_NEW_BINARY_DATA_ERROR;
