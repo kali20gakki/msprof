@@ -102,27 +102,19 @@ protected:
     }
 };
 
-void CheckApiDataValid(const std::vector<ApiDataFormat> &checkData)
+void CheckApiDataValid(const std::vector<ApiData> &checkData)
 {
-    // 业务角度，用于校验获取到的API表的数据
-    uint64_t start;
-    uint64_t end;
-    uint16_t level;
-    uint32_t tid;
-    uint64_t connectionId;
-    std::string name;
-    const uint16_t moveCount = 32;
-    for (uint16_t i = 0; i < checkData.size(); ++i) {
-        auto index = i % API_DATA.size();
-        std::tie(start, end, level, tid, connectionId, name) = checkData[i];
+    size_t index = 0;
+    for (const auto &data : checkData) {
         // 比对前后的level是否一致
         auto tempTypeIt = API_LEVEL_TABLE.find(std::get<LEVEL_INDEX>(API_DATA[index]));
-        EXPECT_EQ(level, (tempTypeIt == API_LEVEL_TABLE.end()) ? UINT16_MAX : tempTypeIt->second);
+        EXPECT_EQ(data.level, (tempTypeIt == API_LEVEL_TABLE.end()) ? UINT16_MAX : tempTypeIt->second);
         uint32_t oriTid = std::get<TID_INDEX>(API_DATA[index]);
         uint32_t oriConId = std::get<CONNECTION_ID_INDEX>(API_DATA[index]);
         // 分别校验获取到的tid和connectionId的低32位是否与原先保持一致。
-        EXPECT_EQ((tid & 0xffffffff), oriTid);
-        EXPECT_EQ((connectionId & 0xffffffff), oriConId);
+        EXPECT_EQ((data.threadId & 0xffffffff), oriTid);
+        EXPECT_EQ((data.connectionId & 0xffffffff), oriConId);
+        ++index;
     }
 }
 
@@ -131,17 +123,17 @@ TEST_F(ApiProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
     std::vector<DataInventory> res(PROF_PATHS.size());
     size_t i = 0;
     for (const auto& profPath : PROF_PATHS) {
-    auto processor = ApiProcessor(profPath);
-    auto &dataInventory = res[i];
-    ++i;
-    EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_API));
+        auto processor = ApiProcessor(profPath);
+        auto &dataInventory = res[i];
+        ++i;
+        EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_API));
     }
     for (auto& node : res) {
-    auto checkData = node.GetPtr<ApiViewerType>();
-    EXPECT_EQ(API_DATA.size(), checkData->data.size());
-    CheckApiDataValid(checkData->data);
-    node.RemoveRestData({});
-}
+        auto checkData = node.GetPtr<std::vector<ApiData>>();
+        EXPECT_EQ(API_DATA.size(), checkData->size());
+        CheckApiDataValid(*checkData);
+        node.RemoveRestData({});
+    }
 }
 
 TEST_F(ApiProcessorUTest, TestRunShouldReturnFalseWhenProcessorFail)
@@ -169,11 +161,11 @@ TEST_F(ApiProcessorUTest, TestRunShouldReturnFalseWhenFormatDataFail)
 {
     auto processor = ApiProcessor(PROF0);
     DataInventory dataInventory;
-    MOCKER_CPP(&std::vector<ApiDataFormat>::reserve)
+    MOCKER_CPP(&std::vector<ApiData>::reserve)
     .stubs()
     .will(throws(std::bad_alloc()));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_API));
-    MOCKER_CPP(&std::vector<ApiDataFormat>::reserve).reset();
+    MOCKER_CPP(&std::vector<ApiData>::reserve).reset();
 }
 
 TEST_F(ApiProcessorUTest, TestRunShouldReturnFalseWhenFileOverMaxSize)

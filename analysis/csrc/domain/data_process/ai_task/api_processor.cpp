@@ -10,7 +10,7 @@
  * *****************************************************************************
  */
 
-#include "api_processor.h"
+#include "analysis/csrc/domain/data_process/ai_task/api_processor.h"
 #include "analysis/csrc/parser/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
@@ -18,16 +18,6 @@ namespace Analysis {
 namespace Domain {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Utils;
-struct ApiData {
-    std::string structType;
-    std::string id;
-    std::string level;
-    std::string itemId;
-    uint64_t start = UINT64_MAX;
-    uint64_t end = UINT64_MAX;
-    uint32_t threadId = UINT32_MAX;
-    uint64_t connectionId = UINT32_MAX;
-};
 
 ApiProcessor::ApiProcessor(const std::string &profPath) : DataProcessor(profPath) {}
 
@@ -65,7 +55,7 @@ bool ApiProcessor::Process(DataInventory &dataInventory)
         ERROR("format api data error");
         return false;
     }
-    if (!SaveToDataInventory<ApiViewerType>(std::move(processedData), dataInventory,
+    if (!SaveToDataInventory<ApiData>(std::move(processedData), dataInventory,
             PROCESSOR_NAME_API)) {
         ERROR("Save data failed, %.", PROCESSOR_NAME_API);
         return false;
@@ -89,30 +79,32 @@ OriApiDataFormat ApiProcessor::LoadData(const DBInfo &apiDB, const std::string &
     return oriData;
 }
 
-std::vector<ApiDataFormat> ApiProcessor::FormatData(
+std::vector<ApiData> ApiProcessor::FormatData(
     const OriApiDataFormat &oriData, const ProfTimeRecord &record, const SyscntConversionParams &params)
 {
-    std::vector<ApiDataFormat> formatData;
+    std::vector<ApiData> formatData;
     if (!Reserve(formatData, oriData.size())) {
         ERROR("Reserved for api data failed.");
         return formatData;
     }
     ApiData data;
+    std::string id;
+    std::string itemId;
+    std::string level;
     for (const auto& row : oriData) {
-        std::tie(data.structType, data.id, data.level, data.threadId, data.itemId,
+        std::tie(data.apiName, id, level, data.threadId, itemId,
                  data.start, data.end, data.connectionId) = row;
         HPFloat startTimestamp = Utils::GetTimeFromSyscnt(data.start, params);
         HPFloat endTimestamp = Utils::GetTimeFromSyscnt(data.end, params);
-        uint16_t level = GetEnumTypeValue(data.level, NAME_STR(API_LEVEL_TABLE), API_LEVEL_TABLE);
-        std::string  name = data.structType;
-        if (level == MSPROF_REPORT_ACL_LEVEL) {
-            name = data.id;
-        } else if (level == MSPROF_REPORT_HCCL_NODE_LEVEL) {
-            name = data.itemId;
+        data.level = GetEnumTypeValue(level, NAME_STR(API_LEVEL_TABLE), API_LEVEL_TABLE);
+        if (data.level == MSPROF_REPORT_ACL_LEVEL) {
+            data.apiName = id;
+        } else if (data.level == MSPROF_REPORT_HCCL_NODE_LEVEL) {
+            data.apiName = itemId;
         }
-        formatData.emplace_back(Utils::GetLocalTime(startTimestamp, record).Uint64(),
-                                Utils::GetLocalTime(endTimestamp, record).Uint64(),
-                                level, data.threadId, data.connectionId, name);
+        data.start = GetLocalTime(startTimestamp, record).Uint64();
+        data.end = GetLocalTime(endTimestamp, record).Uint64();
+        formatData.push_back(data);
     }
     return formatData;
 }

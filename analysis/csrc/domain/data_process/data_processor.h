@@ -14,7 +14,6 @@
 #define ANALYSIS_DOMAIN_DATA_PROCESSOR_H
 
 #include <set>
-#include "analysis/csrc/domain/entities/hal/include/viewer_data.h"
 #include "analysis/csrc/infrastructure/db/include/db_info.h"
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
 
@@ -40,7 +39,7 @@ protected:
     static uint8_t CheckPathAndTable(const std::string& path, const DBInfo& dbInfo);
     static uint16_t GetEnumTypeValue(const std::string &key, const std::string &tableName,
                                      const std::unordered_map<std::string, uint16_t> &enumTable);
-    template<typename ViewerDataType, typename Tp>
+    template<typename Tp>
     bool SaveToDataInventory(std::vector<Tp>&& data, DataInventory& dataInventory, const std::string& processorName);
 
 protected:
@@ -50,7 +49,7 @@ private:
     virtual bool Process(DataInventory& dataInventory) = 0;
 };
 
-template<typename ViewerDataType, typename Tp>
+template<typename Tp>
 bool DataProcessor::SaveToDataInventory(std::vector<Tp>&& data, DataInventory& dataInventory,
                                         const std::string& processorName)
 {
@@ -59,9 +58,8 @@ bool DataProcessor::SaveToDataInventory(std::vector<Tp>&& data, DataInventory& d
         WARN("% no data to inject to dataInventory", processorName);
         return true;
     }
-    std::shared_ptr<ViewerDataType> oneSharedData;
-    MAKE_SHARED0_RETURN_VALUE(oneSharedData, ViewerDataType, false);
-    oneSharedData->data = std::move(data);
+    std::shared_ptr<std::vector<Tp>> oneSharedData;
+    MAKE_SHARED_RETURN_VALUE(oneSharedData, std::vector<Tp>, false, std::move(data));
     dataInventory.Inject(oneSharedData);
     return true;
 }
