@@ -14,16 +14,13 @@
 #define ANALYSIS_DOMAIN_API_PROCESSOR_H
 
 #include "analysis/csrc/domain/data_process/data_processor.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
 
 namespace Analysis {
 namespace Domain {
 // struct_type, id, level, thread_id, item_id, start, end, connection_id
 using OriApiDataFormat = std::vector<std::tuple<std::string, std::string, std::string, uint32_t,
         std::string, uint64_t, uint64_t, uint64_t>>;
-// start, end, level, threadId, connectionId, api_name
-using ApiDataFormat = std::tuple<uint64_t, uint64_t, uint16_t, uint32_t, uint64_t, std::string>;
-struct StructApi {};
-using ApiViewerType = ViewerData<ApiDataFormat, StructApi>;
 class ApiProcessor : public DataProcessor {
 public:
     ApiProcessor() = default;
@@ -32,7 +29,7 @@ public:
 private:
     bool Process(DataInventory& dataInventory) override;
     OriApiDataFormat LoadData(const DBInfo &apiDB, const std::string &dbPath);
-    std::vector<ApiDataFormat> FormatData(const OriApiDataFormat &oriData, const Utils::ProfTimeRecord& record,
+    std::vector<ApiData> FormatData(const OriApiDataFormat &oriData, const Utils::ProfTimeRecord &record,
                                           const Utils::SyscntConversionParams &params);
 };
 }
