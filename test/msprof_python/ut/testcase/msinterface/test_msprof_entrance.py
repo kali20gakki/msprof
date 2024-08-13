@@ -47,6 +47,36 @@ class TestMsprofEntrance(unittest.TestCase):
                 mock.patch('sys.exit'):
             MsprofEntrance().main()
 
+    def test_main_should_raise_system_exit_when_no_argument(self):
+        args = ["msprof.py"]
+        with mock.patch('sys.argv', args), \
+                mock.patch('common_func.common.error'), \
+                mock.patch(NAMESPACE + '.check_path_valid'), \
+                mock.patch(NAMESPACE + '.check_path_char_valid'), \
+                mock.patch(NAMESPACE + '.ExportCommand.process'):
+            with self.assertRaises(SystemExit):
+                MsprofEntrance().main()
+
+    def test_main_should_raise_system_exit_when_no_argument_with_export(self):
+        args = ["msprof.py", "export"]
+        with mock.patch('sys.argv', args), \
+                mock.patch('common_func.common.error'), \
+                mock.patch(NAMESPACE + '.check_path_valid'), \
+                mock.patch(NAMESPACE + '.check_path_char_valid'), \
+                mock.patch(NAMESPACE + '.ExportCommand.process'):
+            with self.assertRaises(SystemExit):
+                MsprofEntrance().main()
+
+    def test_main_should_raise_system_exit_when_dir_len_is_over_1024(self):
+        args = ["msprof.py", "export", "summary", "-dir", "t"*1025]
+        with mock.patch('sys.argv', args), \
+                mock.patch('common_func.common.error'), \
+                mock.patch(NAMESPACE + '.check_path_valid'), \
+                mock.patch(NAMESPACE + '.check_path_char_valid'), \
+                mock.patch(NAMESPACE + '.ExportCommand.process'):
+            with self.assertRaises(SystemExit):
+                MsprofEntrance().main()
+
     def test_set_export_mode(self):
         args_dic = {"collection_path": "test", "iteration_id": 1, "model_id": 4294967295, "iteration_count": None}
         InfoConfReader()._info_json = {"drvVersion": 0}

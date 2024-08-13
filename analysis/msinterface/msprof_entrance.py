@@ -85,6 +85,9 @@ class MsprofEntrance:
         parser, export_parser, import_parser, monitor_parser, query_parser, analyze_parser = self.construct_arg_parser()
 
         args = parser.parse_args(sys.argv[1:])
+        if len(sys.argv) < 2 or not hasattr(args, "collection_path"):
+            parser.print_help()
+            call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
         try:
             check_path_char_valid(args.collection_path)
             check_path_valid(args.collection_path, False)
@@ -92,17 +95,13 @@ class MsprofEntrance:
             if err.message:
                 error(self.FILE_NAME, err)
             call_sys_exit(err.code)
-        if len(sys.argv) < 2:
-            parser.print_help()
-            call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
 
-        if hasattr(args, "collection_path"):
-            path_len = len(os.path.realpath(args.collection_path))
-            if path_len > NumberConstant.PROF_PATH_MAX_LEN:
-                error(self.FILE_NAME,
-                      "Please ensure the length of input dir absolute path(%s) less than %s" %
-                      (path_len, NumberConstant.PROF_PATH_MAX_LEN))
-                call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
+        path_len = len(os.path.realpath(args.collection_path))
+        if path_len > NumberConstant.PROF_PATH_MAX_LEN:
+            error(self.FILE_NAME,
+                  "Please ensure the length of input dir absolute path(%s) less than %s" %
+                  (path_len, NumberConstant.PROF_PATH_MAX_LEN))
+            call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
         # when setting 'iteration-id' and 'model-id' args, export one iteration in one model
         if sys.argv[1] == 'export' and hasattr(args, "model_id") and hasattr(args, "iteration_id"):
             self._set_export_mode(args)
