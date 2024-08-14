@@ -34,6 +34,7 @@ private:
     void ParseOptimizeAcsqTaskData(const FftsLogHead *data, uint32_t logType);
     void ParseOptimizeSubTaskThreadData(const FftsLogHead *data, uint32_t logType);
 
+    void StarsRollBackStreamTaskId(uint16_t *streamId, uint16_t *taskId) const;
 private:
     uint64_t opTimeCount_;
     uint64_t opRepeatCount_;

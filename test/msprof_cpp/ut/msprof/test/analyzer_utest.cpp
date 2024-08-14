@@ -429,7 +429,7 @@ TEST_F(AnalyzerFftsUtest, ParseOptimizeAcsqTaskData)
     
     struct FftsAcsqLog data1;
     data1.head.logType = ACSQ_TASK_START_FUNC_TYPE;
-    data1.streamId = 0;
+    data1.streamId = 8192; // 8192 means 2^13 enable the flag for changing the low 12 bits
     data1.taskId = 0;
     analyzerFfts->ParseOptimizeAcsqTaskData(reinterpret_cast<const FftsLogHead *>(
         (reinterpret_cast<const VOID_PTR>(&data1))), data1.head.logType);
@@ -457,7 +457,7 @@ TEST_F(AnalyzerFftsUtest, ParseOptimizeSubTaskThreadData)
     
     struct FftsCxtLog data1;
     data1.head.logType = FFTS_SUBTASK_THREAD_START_FUNC_TYPE;
-    data1.streamId = 0;
+    data1.streamId = 8192; // 8192 means 2^13 enable the flag for changing the low 12 bits
     data1.taskId = 0;
     analyzerFfts->ParseOptimizeSubTaskThreadData(reinterpret_cast<const FftsLogHead *>(
         (reinterpret_cast<const VOID_PTR>(&data1))), data1.head.logType);
