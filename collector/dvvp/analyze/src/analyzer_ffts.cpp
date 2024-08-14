@@ -13,6 +13,14 @@
 namespace Analysis {
 namespace Dvvp {
 namespace Analyze {
+constexpr uint16_t TS_MASK_BIT0_BIT1   = 0x3U;    // 0b11
+constexpr uint16_t TS_MASK_BIT0_BIT11  = 0x0FFFU; // take significant bit0~11
+constexpr uint16_t TS_MASK_BIT12       = 0x1000U; // bit12 indicate whether taskId is update
+constexpr uint16_t TS_MASK_BIT13_BIT15 = 0xE000U; // take significant bit13~15
+constexpr uint16_t TS_MASK_BIT12_BIT15 = 0xF000U; // take significant bit12~15
+constexpr uint16_t TS_UPDATE_FOR_ALL   = 0b10;
+constexpr uint16_t TS_UPDATE_FLAG_BIT  = 12U;
+
 bool AnalyzerFfts::IsFftsData(const std::string &fileName) const
 {
     // "ffts.data"
@@ -79,6 +87,9 @@ void AnalyzerFfts::ParseOptimizeAcsqTaskData(const FftsLogHead *data, uint32_t l
         return;
     }
     auto acsqLog = reinterpret_cast<const FftsAcsqLog *>(data);
+    uint16_t taskId = acsqLog->taskId;
+    uint16_t streamId = acsqLog->streamId;
+    StarsRollBackStreamTaskId(&streamId, &taskId);
     std::string key = std::to_string(acsqLog->taskId) + KEY_SEPARATOR + std::to_string(acsqLog->streamId);
     auto iter = AnalyzerBase::tsOpInfo_.find(key);
     if (iter == AnalyzerBase::tsOpInfo_.end()) {
@@ -109,6 +120,9 @@ void AnalyzerFfts::ParseOptimizeSubTaskThreadData(const FftsLogHead *data, uint3
         return;
     }
     auto cxtLog = reinterpret_cast<const FftsCxtLog *>(data);
+    uint16_t taskId = cxtLog->taskId;
+    uint16_t streamId = cxtLog->streamId;
+    StarsRollBackStreamTaskId(&streamId, &taskId);
     std::string key = std::to_string(cxtLog->taskId) + KEY_SEPARATOR + std::to_string(cxtLog->streamId);
     auto iter = AnalyzerBase::tsOpInfo_.find(key);
     if (iter == AnalyzerBase::tsOpInfo_.end()) {
@@ -126,6 +140,22 @@ void AnalyzerFfts::ParseOptimizeSubTaskThreadData(const FftsLogHead *data, uint3
     analyzedBytes_ += FFTS_DATA_SIZE;
     if (iter->second.start > 0 && iter->second.end > 0) {
         HandleDeviceData(key, iter->second, totalFftsMerges_);
+    }
+}
+
+void AnalyzerFfts::StarsRollBackStreamTaskId(uint16_t *streamId, uint16_t *taskId) const
+{
+    // bit12 == 0 && bit13 == 1: streamId = (bit0~11)taskId, taskId = (bit0~11)streamId | (bit12~15)taskId
+    if ((((*streamId) >> TS_UPDATE_FLAG_BIT) & TS_MASK_BIT0_BIT1) == TS_UPDATE_FOR_ALL) {
+        uint16_t tmpTaskId = (*taskId);
+        *taskId = ((*streamId) & TS_MASK_BIT0_BIT11) | ((*taskId) & TS_MASK_BIT12_BIT15);
+        *streamId = tmpTaskId & TS_MASK_BIT0_BIT11;
+        return;
+    }
+    // bit12 == 1: streamId = (bit0~11)streamId, taskId = (bit0~11)taskId | bit12 | (bit13~15)streamId
+    if (((*streamId) & TS_MASK_BIT12) != 0U) {
+        *taskId = (((*taskId) & (TS_MASK_BIT0_BIT11 | TS_MASK_BIT12)) | ((*streamId) & TS_MASK_BIT13_BIT15));
+        *streamId &= TS_MASK_BIT0_BIT11;
     }
 }
 }  // namespace Analyze
