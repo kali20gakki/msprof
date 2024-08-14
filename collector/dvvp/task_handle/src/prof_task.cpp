@@ -79,7 +79,7 @@ int ProfTask::Uinit()
         WriteDone();
         analysis::dvvp::transport::UploaderMgr::instance()->DelUploader(params_->job_id);
         isInited_ = false;
-        MSPROF_EVENT("Uninit ProfTask succesfully");
+        MSPROF_EVENT("Uninit ProfTask successfully");
     }
 
     return PROFILING_SUCCESS;
