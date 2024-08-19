@@ -87,3 +87,20 @@ TEST_F(INPUT_PARSER_UTEST, MsprofGetOpts_6)
 		.will(returnValue(MSPROF_DAEMON_ERROR));
     EXPECT_NE(nullptr, parser.MsprofGetOpts(argc, argv));
 }
+
+TEST_F(INPUT_PARSER_UTEST, MsprofGetOpts_help)
+{
+    GlobalMockObject::verify();
+    InputParser parser = InputParser();
+    const char* myArray[] = {"msprof"};
+    const char** argv = myArray;
+    int argc = 1;
+    int opt = ARGS_HELP;
+
+    // 设置期望值和返回值
+    MOCKER(MmGetOptLong).stubs().will(returnValue(opt));
+    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::CHIP_V4_1_0));
+    EXPECT_NE(nullptr, parser.MsprofGetOpts(argc, argv));
+}
