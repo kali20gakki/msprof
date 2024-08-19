@@ -39,6 +39,7 @@ typedef enum {
    * Domain containing callback points for all runtime API functions.
    */
     MSPTI_CB_DOMAIN_RUNTIME           = 1,
+    MSPTI_CB_DOMAIN_HCCL              = 2,
     MSPTI_CB_DOMAIN_SIZE,
     MSPTI_CB_DOMAIN_FORCE_INT         = 0x7fffffff
 } msptiCallbackDomain;
@@ -101,10 +102,10 @@ typedef struct {
     * The activity record correlation ID for this callback. For a
     * driver domain callback (i.e. @p domain
     * MSPTI_CB_DOMAIN_DRIVER_API) this ID will equal the correlation ID
-    * in the CUpti_ActivityAPI record corresponding to the CANN driver
+    * in the MSPTI_ActivityAPI record corresponding to the CANN driver
     * function call. For a runtime domain callback (i.e. @p domain
     * MSPTI_CB_DOMAIN_RUNTIME_API) this ID will equal the correlation
-    * ID in the CUpti_ActivityAPI record corresponding to the CANN
+    * ID in the MSPTI_ActivityAPI record corresponding to the CANN
     * runtime function call. Within the callback, this ID can be
     * recorded to correlate user data with the activity record.
     */
@@ -219,11 +220,9 @@ msptiResult msptiEnableCallback(
     uint32_t enable, msptiSubscriberHandle subscriber, msptiCallbackDomain domain, msptiCallbackId cbid);
 
 /**
- * @brief Enable or disabled callbacks for a specific domain and
- * callback ID.
+ * @brief Enable or disabled callbacks for a specific domain
  *
  * Enable or disabled callbacks for a subscriber for a specific domain
- * and callback ID.
  *
  * @note @b Thread-safety: a subscriber must serialize access to
  * msptiEnableCallback, msptiEnableDomain.
@@ -232,7 +231,6 @@ msptiResult msptiEnableCallback(
  * callback, non-zero enables the callback.
  * @param subscriber Handle to callback subscription
  * @param domain The domain of the callback
- * @param cbid The ID of the callback
  *
  * @retval MSPTI_SUCCESS on success
  * @retval MSPTI_ERROR_INVALID_PARAMETER if @p subscriber, @p domain is invalid.
