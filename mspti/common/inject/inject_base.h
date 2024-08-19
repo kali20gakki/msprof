@@ -29,6 +29,7 @@ using rtSmDesc_t = void;
 using VOID_PTR = void*;
 using CONST_VOID_PTR = const void *;
 using VOID_PTR_PTR = void**;
+using rtMemType_t = uint32_t;
 
 enum DrvError {
     DRV_ERROR_NONE = 0,

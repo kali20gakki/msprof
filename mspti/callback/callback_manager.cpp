@@ -26,6 +26,12 @@ std::unordered_map<msptiCallbackDomain, std::unordered_set<msptiCallbackId>> Cal
         MSPTI_CBID_RUNTIME_CONTEXT_CREATED, MSPTI_CBID_RUNTIME_CONTEXT_DESTROY,
         MSPTI_CBID_RUNTIME_STREAM_CREATED, MSPTI_CBID_RUNTIME_STREAM_DESTROY,
         MSPTI_CBID_RUNTIME_STREAM_SYNCHRONIZED
+    }},
+    {MSPTI_CB_DOMAIN_HCCL, {
+        MSPTI_CBID_HCCL_ALLREDUCE, MSPTI_CBID_HCCL_BROADCAST, MSPTI_CBID_HCCL_ALLGATHER,
+        MSPTI_CBID_HCCL_REDUCE_SCATTER, MSPTI_CBID_HCCL_REDUCE, MSPTI_CBID_HCCL_ALL_TO_ALL,
+        MSPTI_CBID_HCCL_ALL_TO_ALLV, MSPTI_CBID_HCCL_BARRIER,
+        MSPTI_CBID_HCCL_SCATTER, MSPTI_CBID_HCCL_SEND, MSPTI_CBID_HCCL_RECV, MSPTI_CBID_HCCL_SENDRECV
     }}
 };
 
@@ -147,6 +153,7 @@ msptiResult CallbackManager::EnableDomain(uint32_t enable,
 void CallbackManager::ExecuteCallback(msptiCallbackDomain domain,
     msptiCallbackId cbid, msptiApiCallbackSite site, const char* funcName)
 {
+    MSPTI_LOGD("CallbackManager ExecuteCallback enter, funcName is %s", funcName);
     if (!init_.load()) {
         MSPTI_LOGW("CallbackManager was not init.");
         return;
@@ -160,6 +167,7 @@ void CallbackManager::ExecuteCallback(msptiCallbackDomain domain,
         return;
     }
     if (iter->second.find(cbid) != iter->second.end() && subscriber_ptr_->handle) {
+        MSPTI_LOGD("CallbackManager execute Callbackfunc, funcName is %s", funcName);
         msptiCallbackData callbackData;
         callbackData.callbackSite = site;
         callbackData.functionName = funcName;
