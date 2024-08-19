@@ -14,7 +14,6 @@
 #include <algorithm>
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 #include "analysis/csrc/domain/entities/hal/include/hal_freq.h"
-#include "securec.h"
 
 namespace Analysis {
 namespace Domain {
@@ -120,11 +119,13 @@ double Calculator::CalculatorVectorFops(CalculationElements& allParams, size_t i
 std::unordered_map<uint32_t, uint64_t> MetricCalculator::GetValueMappingOffset(CalculationElements& params,
                                                                                HalPmuData& pmuData)
 {
-    auto events = params.events;
-    auto pmuList = pmuData.pmu.pmuList;
     std::unordered_map<uint32_t, uint64_t> res;
-    for (size_t i = 0; i < PMU_LENGTH; ++i) {
-        res.insert({events[i], pmuList[i]});
+    if (params.events.size() != pmuData.pmu.pmuList.size()) {
+        ERROR("PMU length is not equal with pmu events, please check");
+        return res;
+    }
+    for (size_t i = 0; i < params.events.size(); ++i) {
+        res.insert({params.events[i], pmuData.pmu.pmuList[i]});
     }
     return res;
 }
@@ -164,8 +165,8 @@ std::vector<double> MetricCalculator::CalculatePmuMetric(DataInventory& dataInve
 {
     DeviceInfo deviceInfo{};
     context.Getter(deviceInfo);
-    SampleInfo sampleInfo;
-    context.Getter(sampleInfo);
+    SampleInfo info;
+    context.Getter(info);
     uint64_t freq = deviceInfo.aicFrequency * FREQ_TO_Hz;
     params.bwFreq = freq;
     // chip4的PMU计算需要判断解析的频率信息
@@ -177,29 +178,24 @@ std::vector<double> MetricCalculator::CalculatePmuMetric(DataInventory& dataInve
     }
     params.timeFreq = freq;
     params.taskCyc = pmu.pmu.totalCycle;
-    errno_t res;
+    if (!Utils::Resize(params.events, info.aiCoreProfilingEvents.size())) {
+        ERROR("pmu events resize failed!");
+        return {};
+    }
     if (pmu.pmu.acceleratorType == MIX_AIC || pmu.pmu.acceleratorType == AIC) {
         if (pmu.type == PMU) {
-            res = memcpy_s(params.events, sizeof(params.events), sampleInfo.aiCoreProfilingEvents,
-                           sizeof(sampleInfo.aiCoreProfilingEvents));
+            std::copy(info.aiCoreProfilingEvents.begin(), info.aiCoreProfilingEvents.end(), params.events.begin());
         } else {
-            res = memcpy_s(params.events, sizeof(params.events), sampleInfo.aivProfilingEvents,
-                           sizeof(sampleInfo.aivProfilingEvents));
+            std::copy(info.aivProfilingEvents.begin(), info.aivProfilingEvents.end(), params.events.begin());
         }
         params.coreNum = pmu.type == PMU ? deviceInfo.aiCoreNum : deviceInfo.aivNum;
     } else {
         if (pmu.type == PMU) {
-            res = memcpy_s(params.events, sizeof(params.events), sampleInfo.aivProfilingEvents,
-                           sizeof(sampleInfo.aivProfilingEvents));
+            std::copy(info.aivProfilingEvents.begin(), info.aivProfilingEvents.end(), params.events.begin());
         } else {
-            res = memcpy_s(params.events, sizeof(params.events), sampleInfo.aiCoreProfilingEvents,
-                           sizeof(sampleInfo.aiCoreProfilingEvents));
+            std::copy(info.aiCoreProfilingEvents.begin(), info.aiCoreProfilingEvents.end(), params.events.begin());
         }
         params.coreNum = pmu.type == PMU ? deviceInfo.aivNum : deviceInfo.aiCoreNum;
-    }
-    if (res != EOK) {
-        ERROR("memcpy pmuEvents error taskId is %, streamId is %, contextId is %, batchId is %", pmu.hd.taskId.taskId,
-              pmu.hd.taskId.streamId, pmu.hd.taskId.contextId, pmu.hd.taskId.batchId);
     }
     SetBlockDim(task, params, pmu);
     return SetAllParamsAndCalculator(params, context, pmu);

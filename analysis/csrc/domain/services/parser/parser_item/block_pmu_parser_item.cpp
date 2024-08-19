@@ -48,11 +48,10 @@ int BlockPmuParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *hal
     pmuData->pmu.totalCycle = blockPmu->totalCycle;
     pmuData->pmu.coreType = blockPmu->coreType;
     pmuData->pmu.coreId = blockPmu->coreId;
-    errno_t resPmu =  memcpy_s(pmuData->pmu.pmuList, sizeof(pmuData->pmu.pmuList),
-                               blockPmu->pmuList, sizeof(blockPmu->pmuList));
+    std::copy(blockPmu->pmuList, blockPmu->pmuList + DEFAULT_LENGTH, pmuData->pmu.pmuList.begin());
     errno_t resTime = memcpy_s(pmuData->pmu.timeList, sizeof(pmuData->pmu.timeList),
                                blockPmu->timeList, sizeof(blockPmu->timeList));
-    if (resPmu != EOK || resTime != EOK) {
+    if (resTime != EOK) {
         ERROR("memcpy blockPmu failed! taskId is %, streamId is %, contextId is", blockPmu->taskId,
               blockPmu->streamId, blockPmu->subTaskId);
     }

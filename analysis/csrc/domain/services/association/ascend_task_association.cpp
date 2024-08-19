@@ -189,13 +189,20 @@ uint32_t AscendTaskAssociation::ProcessEntry(DataInventory &dataInventory, const
     auto params = GetSyscntConversionParams(deviceContext);
     auto hostTasks = dataInventory.GetPtr<std::map<TaskId, std::vector<HostTask>>>();
     auto deviceTasks = dataInventory.GetPtr<std::map<TaskId, std::vector<DeviceTask>>>();
+    std::shared_ptr<std::vector<TopDownTask>> data;
+    std::vector<TopDownTask> res;
+    if (hostTasks->empty() && deviceTasks->empty()) {
+        WARN("No HostTasks and DeviceTasks, don't need to generate AscendTask!");
+        MAKE_SHARED_RETURN_VALUE(data, std::vector<TopDownTask>, ANALYSIS_ERROR, std::move(res));
+        dataInventory.Inject(data);
+        return ANALYSIS_OK;
+    }
     if (hostTasks->empty() || deviceTasks->empty()) {
-        ERROR("There is no HostTask and DeviceTask, can't generate AscendTask!");
+        ERROR("There is no HostTask or DeviceTask, can't generate AscendTask!");
         return ANALYSIS_ERROR;
     }
-    auto topDownTask = GenerateTopDownTask(*hostTasks, *deviceTasks, params);
-    std::shared_ptr<std::vector<TopDownTask>> data;
-    MAKE_SHARED_RETURN_VALUE(data, std::vector<TopDownTask>, ANALYSIS_ERROR, std::move(topDownTask));
+    res = GenerateTopDownTask(*hostTasks, *deviceTasks, params);
+    MAKE_SHARED_RETURN_VALUE(data, std::vector<TopDownTask>, ANALYSIS_ERROR, std::move(res));
     dataInventory.Inject(data);
     return ANALYSIS_OK;
 }

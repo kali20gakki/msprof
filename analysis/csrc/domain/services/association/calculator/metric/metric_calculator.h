@@ -28,21 +28,18 @@
 namespace Analysis {
 namespace Domain {
 using namespace Analysis::Infra;
-namespace {
-const int PMU_LENGTH = 8;
 const uint64_t OFFSET = 1LL << 33;  // 2^33,pmu计算规则里带有BW的计算需要除以2^33
 const uint64_t FREQ_TO_Hz = 1000000;
 const uint8_t AIV_CORE_TYPE = 1;
 const uint8_t AIC_CORE_TYPE = 0;
-}
 struct CalculationElements {
-    uint32_t events[8];
     uint32_t blockDim{0};
     uint32_t coreNum{0};
     uint64_t taskCyc{0};
     uint64_t bwFreq{0};  // 这个频率为从info.json中读出来的aic_frequency
     uint64_t timeFreq{0};  // 这个频率需要考虑变频，如果有变频数据，则使用变频数据的频率，没有就是有aic_frequency
     double totalTime{0.0};
+    std::vector<uint32_t> events;
     std::vector<uint64_t> pmuList;
     std::shared_ptr<std::vector<double>> floatBit;
     std::shared_ptr<std::vector<double>> pipSize;

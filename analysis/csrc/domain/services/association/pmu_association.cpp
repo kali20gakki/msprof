@@ -40,11 +40,14 @@ void PmuAssociation::SplitPmu(std::vector<HalPmuData> &pmuData)
     INFO("block pmu count is : %", block_size);
 }
 
-void BlockPmuResultAccumulate(uint64_t* arr1, uint64_t* arr2, int size)
+void BlockPmuResultAccumulate(std::vector<uint64_t> &dstVec, std::vector<uint64_t> &srcVec)
 {
-    for (int i = 0; i < size; ++i) {
-        arr1[i] += arr2[i];
+    if (dstVec.size() != srcVec.size()) {
+        if (!Resize(dstVec, srcVec.size())) {
+            ERROR("BlockPmu accumulate failed when resize occurs exception");
+        }
     }
+    std::transform(srcVec.begin(), srcVec.end(), dstVec.begin(), dstVec.begin(), std::plus<uint64_t>());
 }
 
 void PmuAssociation::MergeContextPmuToDeviceTask(std::vector<HalPmuData*>& pmuVec, std::vector<DeviceTask>& deviceVec,
@@ -124,7 +127,7 @@ size_t PmuAssociation::MergeBlockPmuToDeviceTask(std::vector<HalPmuData*>& pmuDa
             tempPmuData.pmu.totalCycle += (*it)->pmu.totalCycle;
             tempPmuData.pmu.acceleratorType = (*it)->pmu.acceleratorType;
             tempPmuData.pmu.coreType = (*it)->pmu.coreType;
-            BlockPmuResultAccumulate(tempPmuData.pmu.pmuList, ((*it)->pmu.pmuList), PMU_LENGTH);
+            BlockPmuResultAccumulate(tempPmuData.pmu.pmuList, ((*it)->pmu.pmuList));
             it = pmuData.erase(it);
         } else {
             ++it;
@@ -175,7 +178,6 @@ void PmuAssociation::AssociationByPmuType(std::map<TaskId, std::vector<DeviceTas
             }
             pmuIndex = MergeBlockPmuToDeviceTask(pmu.second, task, dataInventory, context);
             if (pmuIndex == 0) {
-                INFO("Block Pmu has been used up!");
                 break;
             }
         }
@@ -191,9 +193,9 @@ uint32_t PmuAssociation::ProcessEntry(Infra::DataInventory& dataInventory, const
     aivCalculator_ = MetricCalculatorFactory::GetAivCalculator(sampleInfo.aivMetrics);
     auto deviceTask = dataInventory.GetPtr<std::map<TaskId, std::vector<DeviceTask>>>();
     auto pmuData = dataInventory.GetPtr<std::vector<HalPmuData>>();
-    if (deviceTask->empty()) {
-        ERROR("There is no deviceTask, don't need to associate!");
-        return ANALYSIS_ERROR;
+    if (deviceTask->empty() || !pmuData || pmuData->empty()) {
+        WARN("There is no deviceTask or PMUData, don't need to associate!");
+        return ANALYSIS_OK;
     }
     SplitPmu(*pmuData);
     if (deviceContext.GetChipID() != CHIP_V4_1_0) {

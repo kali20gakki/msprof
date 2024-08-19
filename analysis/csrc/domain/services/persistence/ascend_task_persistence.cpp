@@ -57,6 +57,10 @@ uint32_t AscendTaskPersistence::ProcessEntry(DataInventory& dataInventory, const
         ERROR("ascend task data is null.");
         return ANALYSIS_ERROR;
     }
+    if (ascendTask->empty()) {
+        WARN("no ascendTask don't persistence");
+        return ANALYSIS_OK;
+    }
     DBInfo ascendTaskDB("ascend_task.db", "AscendTask");
     MAKE_SHARED0_RETURN_VALUE(ascendTaskDB.database, AscendTaskDB, ANALYSIS_ERROR);
     std::string dbPath = Utils::GetDBPath({deviceContext.GetDeviceFilePath(), SQLITE, ascendTaskDB.dbName});

@@ -111,13 +111,23 @@ TEST_F(AscendTaskAssociationUTest, ShouldGenerateAscendTaskWhenProcessRun)
     }
 }
 
-TEST_F(AscendTaskAssociationUTest, ShouldReturnErrorWhenTaskIsEmpty)
+TEST_F(AscendTaskAssociationUTest, ShouldReturnErrorWhenDeviceTaskIsEmpty)
 {
     AscendTaskAssociation association;
     DeviceContext context;
     uint64_t diff = 100;
+    auto hostDataS = dataInventory_.GetPtr<std::map<TaskId, std::vector<HostTask>>>();
+    auto hostData = GeneratorHostTask();
+    hostDataS->swap(hostData);
     context.deviceContextInfo.hostStartLog.cntVctDiff = diff;
     ASSERT_EQ(ANALYSIS_ERROR, association.Run(dataInventory_, context));
+}
+
+TEST_F(AscendTaskAssociationUTest, ShouldReturnOKWhenDeviceTaskAndHostTaskIsEmpty)
+{
+    AscendTaskAssociation association;
+    DeviceContext context;
+    ASSERT_EQ(ANALYSIS_OK, association.Run(dataInventory_, context));
 }
 }
 }

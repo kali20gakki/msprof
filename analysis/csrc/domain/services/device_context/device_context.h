@@ -21,6 +21,7 @@ namespace Analysis {
 namespace Domain {
 using namespace Analysis::Infra;
 constexpr uint32_t MIN_SUB_DIR_NBAME_LEN = 6;
+constexpr int DEFAULT_PMU_LENGTH = 8;
 
 enum class AicMetricsEventsType {
     AIC_ARITHMETIC_UTILIZATION = 0,
@@ -97,7 +98,7 @@ struct SampleInfo {
     bool aiCoreProfiling;
     AicMetricsEventsType aiCoreMetrics;
     std::string aiCoreProfilingEventsStr;
-    uint32_t aiCoreProfilingEvents[8];
+    std::vector<uint32_t> aiCoreProfilingEvents;
     uint32_t aiCoreProfilingCnt;
     ProfilingMode aiCoreProfilingMode;
     uint32_t aiCoreSamplingInterval;
@@ -106,9 +107,11 @@ struct SampleInfo {
     bool aivProfiling;
     AivMetricsEventsType aivMetrics;
     std::string aivProfilingEventsStr;
-    uint32_t aivProfilingEvents[8];
+    std::vector<uint32_t> aivProfilingEvents;
     ProfilingMode aivProfilingMode;
     uint32_t aivSamplingInterval;
+
+    SampleInfo() : aiCoreProfilingEvents(DEFAULT_PMU_LENGTH), aivProfilingEvents(DEFAULT_PMU_LENGTH) {}
 };
 
 struct DfxInfo {
