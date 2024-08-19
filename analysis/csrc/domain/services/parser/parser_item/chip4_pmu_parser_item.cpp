@@ -45,13 +45,16 @@ int Chip4PmuParseItem(uint8_t *binaryData, uint32_t binaryDataSize, uint8_t *hal
     pmuData->type = PMU;
     pmuData->pmu.acceleratorType = GetAcceleratorTypeByType(contextPmu->subTaskType, contextPmu->fftsType);
     pmuData->pmu.ovFlag = contextPmu->ovFlag;
+    if (contextPmu->ovFlag) {
+        WARN("An overflow in the operator taskId is %, streamId is %, contextId is", contextPmu->taskId,
+             contextPmu->streamId, contextPmu->subTaskId);
+    }
     pmuData->pmu.totalCycle = contextPmu->totalCycle;
-    errno_t resPmu = memcpy_s(pmuData->pmu.pmuList, sizeof(pmuData->pmu.pmuList),
-                              contextPmu->pmuList, sizeof(contextPmu->pmuList));
+    std::copy(contextPmu->pmuList, contextPmu->pmuList + DEFAULT_LENGTH, pmuData->pmu.pmuList.begin());
     errno_t resTime = memcpy_s(pmuData->pmu.timeList, sizeof(pmuData->pmu.timeList),
                                contextPmu->timeList, sizeof(contextPmu->timeList));
-    if (resPmu != EOK || resTime != EOK) {
-        ERROR("memcpy blockPmu failed! taskId is %, streamId is %, contextId is", contextPmu->taskId,
+    if (resTime != EOK) {
+        ERROR("memcpy contextPmu failed! taskId is %, streamId is %, contextId is", contextPmu->taskId,
               contextPmu->streamId, contextPmu->subTaskId);
     }
     return contextPmu->cnt;

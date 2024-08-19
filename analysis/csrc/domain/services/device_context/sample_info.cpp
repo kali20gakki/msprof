@@ -26,29 +26,23 @@ namespace Analysis {
 namespace Domain {
 
 const std::string SAMPLE_JSON = "sample.json";
-const int PMU_LENGTH = 8;
 
 // 分割字符串，提取十六进制数
-void HexStrToInt(std::string &jsonStr, uint32_t intValues[8])
+void HexStrToInt(std::string &jsonStr, std::vector<uint32_t>& intValues)
 {
-    std::vector<std::string> hex_values;
-    std::istringstream iss(jsonStr);
-    std::string token;
-    while (std::getline(iss, token, ',')) {
-        hex_values.push_back(token);
-    }
-
-    uint32_t index = 0;
-    for (const auto &hex: hex_values) {
+    std::stringstream ss(jsonStr);
+    int index = 0;
+    while (!ss.eof()) {
+        char comma;
         uint32_t value;
-        std::istringstream(hex) >> std::hex >> value;
-        if (index < PMU_LENGTH) {
+        ss >> std::hex >> value >> comma;
+        if (index < DEFAULT_PMU_LENGTH) {
             intValues[index] = value;
+        } else {
+            intValues.push_back(value);
         }
-        index++;
+        ++index;
     }
-
-    return;
 }
 
 AivMetricsEventsType GetAivMetricsEventsTypeFromStr(const std::string &aivMetrics)

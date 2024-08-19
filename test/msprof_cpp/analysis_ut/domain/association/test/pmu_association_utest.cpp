@@ -73,7 +73,7 @@ static std::vector<HalPmuData> GenerateHalPmuData()
         pmuInfo.pmu.acceleratorType = ACC_TYPE_SEQ[i];
         pmuInfo.pmu.coreType = CORE_TYPE_SEQ[i];
         pmuInfo.pmu.totalCycle = 100;  // 100为测试cycle
-        for (size_t j = 0; j < PMU_LENGTH; ++j) {
+        for (size_t j = 0; j < DEFAULT_PMU_LENGTH; ++j) {
             pmuInfo.pmu.pmuList[j] = j;
         }
         pmuData.push_back(pmuInfo);
@@ -116,7 +116,7 @@ static void SetDeviceContext(DeviceContext& context)
     context.deviceContextInfo.deviceInfo.aiCoreNum = 8;  // 8为cube核数
     context.deviceContextInfo.deviceInfo.aivNum = 8;   // 8为vector核数
     context.deviceContextInfo.deviceInfo.aicFrequency = 100;  // 100为aic频率，单位：MHZ
-    for (size_t i = 0; i < PMU_LENGTH; i++) {
+    for (size_t i = 0; i < DEFAULT_PMU_LENGTH; i++) {
         context.deviceContextInfo.sampleInfo.aivProfilingEvents[i] = arr2[i];
         context.deviceContextInfo.sampleInfo.aiCoreProfilingEvents[i] = arr1[i];
     }
@@ -235,7 +235,7 @@ TEST_F(PmuAssociationUTest, ShouldReturnOKWhenDeviceTaskIsNull)
 {
     PmuAssociation pmuAssociation;
     DeviceContext context;
-    ASSERT_EQ(ANALYSIS_ERROR, pmuAssociation.Run(dataInventory_, context));
+    ASSERT_EQ(ANALYSIS_OK, pmuAssociation.Run(dataInventory_, context));
 }
 
 TEST_F(PmuAssociationUTest, ShouldReturnOKWhenPMUISL2Cache)
@@ -264,7 +264,7 @@ TEST_F(PmuAssociationUTest, ShouldReturnOKWhenPMUISMemory)
     uint32_t arr1[8]{0x1b, 0x1c, 0x21, 0x22, 0x27, 0x28, 0x29, 0x2a};
     uint32_t arr2[8]{0x1b, 0x1c, 0x21, 0x22, 0x27, 0x28, 0x29, 0x2a};
     context.deviceContextInfo.deviceInfo.aicFrequency = 100;  // 100为aic频率，单位：MHZ
-    for (size_t i = 0; i < PMU_LENGTH; i++) {
+    for (size_t i = 0; i < DEFAULT_PMU_LENGTH; i++) {
         context.deviceContextInfo.sampleInfo.aivProfilingEvents[i] = arr2[i];
         context.deviceContextInfo.sampleInfo.aiCoreProfilingEvents[i] = arr1[i];
     }
