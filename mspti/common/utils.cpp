@@ -32,6 +32,29 @@ uint64_t Utils::GetClockMonotonicRawNs()
     return static_cast<uint64_t>(ts.tv_sec) * SECTONSEC + static_cast<uint64_t>(ts.tv_nsec);
 }
 
+uint64_t Utils::GetHostSysCnt()
+{
+    uint64_t cycles;
+#if defined(__aarch64__)
+    asm volatile("mrs %0, cntvct_el0" : "=r"(cycles));
+#elif defined(__x86_64__)
+    constexpr uint32_t uint32Bits = 32U;
+    uint32_t hi = 0;
+    uint32_t lo = 0;
+    __asm__ __volatile__("rdtsc" : "=a"(lo), "=d"(hi));
+    cycles = (static_cast<uint64_t>(lo)) | ((static_cast<uint64_t>(hi)) << uint32Bits);
+#elif defined(__arm__)
+    const uint32_t uint32Bits = 32U;
+    uint32_t hi = 0;
+    uint32_t lo = 0;
+    asm volatile("mrrc p15, 1, %0, %1, c14" : "=r"(lo), "=r"(hi));
+    cycles = (static_cast<uint64_t>(lo)) | ((static_cast<uint64_t>(hi)) << uint32Bits);
+#else
+    cycles = 0;
+#endif
+    return cycles;
+}
+
 std::string Utils::GetProcName()
 {
     static char buf[16] = {'\0'};

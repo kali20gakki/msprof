@@ -52,6 +52,7 @@ inline void MsptiMakeUniquePtr(std::unique_ptr<Types> &ptr, Args&&... args)
 class Utils {
 public:
     static uint64_t GetClockMonotonicRawNs();
+    static uint64_t GetHostSysCnt();
     static std::string GetProcName();
     static uint32_t GetPid();
     static uint32_t GetTid();

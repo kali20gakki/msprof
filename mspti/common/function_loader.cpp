@@ -41,9 +41,10 @@ std::string FunctionLoader::CanonicalSoPath(const std::string& soName)
     static const std::set<std::string> soNameList = {
         "libascend_hal.so",
         "libascendalog.so",
-        "libruntime.so"
+        "libruntime.so",
     };
     if (soNameList.find(soName) == soNameList.end()) {
+        printf("%s was invalid.\n", soName.c_str());
         return "";
     }
     char *ascendHomePath = std::getenv("ASCEND_HOME_PATH");

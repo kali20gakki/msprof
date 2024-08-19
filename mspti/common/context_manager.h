@@ -13,6 +13,7 @@
 #ifndef MSPTI_COMMON_CONTEXT_MANAGER_H
 #define MSPTI_COMMON_CONTEXT_MANAGER_H
 
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
@@ -38,6 +39,8 @@ public:
     void InitDevTimeInfo(uint32_t deviceId);
     uint64_t GetMonotomicFromSysCnt(uint32_t deviceId, uint64_t sysCnt);
     PlatformType GetChipType(uint32_t deviceId);
+    uint64_t CorrelationId();
+    void UpdateCorrelationId();
 
 private:
     ContextManager() = default;
@@ -49,6 +52,7 @@ private:
 private:
     std::unordered_map<uint32_t, std::unique_ptr<DevTimeInfo>> dev_time_info_;
     std::mutex dev_time_mtx_;
+    std::atomic<uint64_t> correlation_id_{0};
 };
 }  // Common
 }  // Mspti

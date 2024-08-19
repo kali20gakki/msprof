@@ -55,6 +55,7 @@ rtError_t rtProfilerTraceEx(uint64_t id, uint64_t modelId, uint16_t tagId, rtStr
 rtError_t rtGetStreamId(rtStream_t stm, int32_t *streamId);
 rtError_t rtBinaryGetFunction(VOID_PTR binHandle, uint64_t tilingKey, VOID_PTR_PTR funcHandle);
 rtError_t rtProfSetProSwitch(VOID_PTR data, uint32_t len);
+rtError_t rtGetVisibleDeviceIdByLogicDeviceId(const int32_t logicDeviceId, int32_t * const visibleDeviceId);
 
 #if defined(__cplusplus)
 }

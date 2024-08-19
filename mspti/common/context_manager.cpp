@@ -89,5 +89,15 @@ PlatformType ContextManager::GetChipType(uint32_t deviceId)
     return static_cast<PlatformType>(chipId);
 }
 
+uint64_t ContextManager::CorrelationId()
+{
+    return correlation_id_.load();
+}
+
+void ContextManager::UpdateCorrelationId()
+{
+    correlation_id_++;
+}
+
 }  // Common
 }  // Mspti
