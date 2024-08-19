@@ -27,6 +27,7 @@ public:
         Mspti::Common::RegisterFunction("libascend_hal", "prof_channel_read");
         Mspti::Common::RegisterFunction("libascend_hal", "prof_channel_poll");
         Mspti::Common::RegisterFunction("libascend_hal", "halGetDeviceInfo");
+        Mspti::Common::RegisterFunction("libascend_hal", "halGetAPIVersion");
     }
     ~DriverInject() = default;
 };
@@ -122,4 +123,15 @@ DrvError HalGetDeviceInfo(uint32_t deviceId, int32_t moduleType, int32_t infoTyp
     }
     THROW_FUNC_NOTFOUND(func, "halGetDeviceInfo", "libascend_hal.so");
     return func(deviceId, moduleType, infoType, value);
+}
+
+DrvError halGetAPIVersion(int32_t* apiVersion)
+{
+    using halGetAPIVersionFunc = std::function<DrvError(int32_t*)>;
+    static halGetAPIVersionFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<DrvError, int32_t*>("libascend_hal", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libascend_hal.so");
+    return func(apiVersion);
 }

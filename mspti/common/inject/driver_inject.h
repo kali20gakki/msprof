@@ -80,6 +80,7 @@ int ProfChannelRead(unsigned int deviceId, unsigned int channelId, char *outBuf,
     unsigned int bufSize);
 int ProfChannelPoll(struct ProfPollInfo* outBuf, int num, int timeout);
 DrvError HalGetDeviceInfo(uint32_t deviceId, int32_t moduleType, int32_t infoType, int64_t* value);
+DrvError halGetAPIVersion(int32_t* apiVersion);
 #if defined(__cplusplus)
 }
 #endif

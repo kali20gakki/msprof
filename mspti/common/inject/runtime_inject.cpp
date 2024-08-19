@@ -15,6 +15,7 @@
 
 #include "activity/activity_manager.h"
 #include "callback/callback_manager.h"
+#include "common/context_manager.h"
 #include "common/function_loader.h"
 
 class RuntimeInject {
@@ -43,6 +44,7 @@ public:
         Mspti::Common::RegisterFunction("libruntime", "rtVectorCoreKernelLaunchWithHandle");
         Mspti::Common::RegisterFunction("libruntime", "rtBinaryGetFunction");
         Mspti::Common::RegisterFunction("libruntime", "rtProfSetProSwitch");
+        Mspti::Common::RegisterFunction("libruntime", "rtGetVisibleDeviceIdByLogicDeviceId");
     }
     ~RuntimeInject() = default;
 };
@@ -57,9 +59,15 @@ rtError_t rtSetDevice(int32_t device)
         Mspti::Common::GetFunction<rtError_t, int32_t>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
-    Mspti::Activity::ActivityManager::GetInstance()->SetDevice(device);
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_DEVICE_SET, __FUNCTION__);
-    return func(device);
+    auto ret = func(device);
+    if (ret == MSPTI_SUCCESS) {
+        int32_t visibleDevice = 0;
+        uint32_t realDevice = rtGetVisibleDeviceIdByLogicDeviceId(device, &visibleDevice) == MSPTI_SUCCESS ?
+            static_cast<uint32_t>(visibleDevice) : static_cast<uint32_t>(device);
+        Mspti::Activity::ActivityManager::GetInstance()->SetDevice(realDevice);
+    }
+    return ret;
 }
 
 rtError_t rtDeviceReset(int32_t device)
@@ -70,7 +78,10 @@ rtError_t rtDeviceReset(int32_t device)
         Mspti::Common::GetFunction<rtError_t, int32_t>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
-    Mspti::Activity::ActivityManager::GetInstance()->DeviceReset(device);
+    int32_t visibleDevice = 0;
+    uint32_t realDevice = rtGetVisibleDeviceIdByLogicDeviceId(device, &visibleDevice) == MSPTI_SUCCESS ?
+        static_cast<uint32_t>(visibleDevice) : static_cast<uint32_t>(device);
+    Mspti::Activity::ActivityManager::GetInstance()->DeviceReset(realDevice);
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_DEVICE_RESET, __FUNCTION__);
     return func(device);
 }
@@ -83,9 +94,15 @@ rtError_t rtSetDeviceEx(int32_t device)
         Mspti::Common::GetFunction<rtError_t, int32_t>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
-    Mspti::Activity::ActivityManager::GetInstance()->SetDevice(device);
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_DEVICE_SET_EX, __FUNCTION__);
-    return func(device);
+    auto ret = func(device);
+    if (ret == MSPTI_SUCCESS) {
+        int32_t visibleDevice = 0;
+        uint32_t realDevice = rtGetVisibleDeviceIdByLogicDeviceId(device, &visibleDevice) == MSPTI_SUCCESS ?
+            static_cast<uint32_t>(visibleDevice) : static_cast<uint32_t>(device);
+        Mspti::Activity::ActivityManager::GetInstance()->SetDevice(realDevice);
+    }
+    return ret;
 }
 
 rtError_t rtGetDevice(int32_t* devId)
@@ -207,6 +224,7 @@ rtError_t rtKernelLaunch(const void* stubFunc, uint32_t blockDim, void* args,
             rtSmDesc_t*, rtStream_t>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     return func(stubFunc, blockDim, args, argsSize, smDesc, stream);
 }
 
@@ -221,6 +239,7 @@ rtError_t rtKernelLaunchWithFlagV2(const void* stubFunc, uint32_t blockDim,
             uint32_t, const RtTaskCfgInfoT*>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     return func(stubFunc, blockDim, argsInfo, smDesc, stream, flags, cfgInfo);
 }
 
@@ -236,6 +255,7 @@ rtError_t rtKernelLaunchWithHandleV2(
             rtStream_t, const RtTaskCfgInfoT*>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     return func(handle, tilingkey, blockDim, argsInfo, smDesc, stream, cfgInfo);
 }
 
@@ -251,6 +271,7 @@ rtError_t rtAicpuKernelLaunchExWithArgs(const uint32_t kernelType, const char* c
             rtSmDesc_t*, rtStream_t, uint32_t>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     return func(kernelType, opName, blockDim, argsInfo, smDesc, stm, flags);
 }
 
@@ -279,6 +300,7 @@ rtError_t rtLaunchKernelByFuncHandleV2(rtFuncHandle funcHandle, uint32_t blockDi
             const RtTaskCfgInfoT*>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     return func(funcHandle, blockDim, argsHandle, stm, cfgInfo);
 }
 
@@ -293,6 +315,7 @@ rtError_t rtVectorCoreKernelLaunch(const VOID_PTR stubFunc, uint32_t blockDim, R
             uint32_t, const RtTaskCfgInfoT*>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     return func(stubFunc, blockDim, argsInfo, smDesc, stm, flags, cfgInfo);
 }
 
@@ -307,6 +330,7 @@ rtError_t rtVectorCoreKernelLaunchWithHandle(VOID_PTR hdl, const uint64_t tiling
             rtStream_t, const RtTaskCfgInfoT*>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     return func(hdl, tilingKey, blockDim, argsInfo, smDesc, stm, cfgInfo);
 }
 
@@ -330,4 +354,15 @@ rtError_t rtProfSetProSwitch(VOID_PTR data, uint32_t len)
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
     return func(data, len);
+}
+
+rtError_t rtGetVisibleDeviceIdByLogicDeviceId(const int32_t logicDeviceId, int32_t * const visibleDeviceId)
+{
+    using rtGetVisibleDeviceIdByLogicDeviceIdFunc = std::function<rtError_t(int32_t, int32_t *)>;
+    static rtGetVisibleDeviceIdByLogicDeviceIdFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<rtError_t, int32_t, int32_t *>("libruntime", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    return func(logicDeviceId, visibleDeviceId);
 }
