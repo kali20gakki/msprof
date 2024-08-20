@@ -59,3 +59,11 @@ TEST_F(TimeUtilsUTest, TestGetLocalTimeShouldReturnLocalTimestamp)
     auto timestamp = GetTimeFromSyscnt(taskSysCnt, params);
     EXPECT_EQ(GetLocalTime(timestamp, record).Str(), expectRes);
 }
+
+TEST_F(TimeUtilsUTest, TestGetDurTimeFromSyscntShouldReturnTimestamp)
+{
+    SyscntConversionParams params{100.0, 3666503140109, 36471130547330};
+    uint64_t sysCnt = 36665;
+    uint64_t expectRes = 366650;
+    EXPECT_EQ(expectRes, GetDurTimeFromSyscnt(sysCnt, params).Uint64());
+}
