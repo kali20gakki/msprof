@@ -17,6 +17,7 @@
 #include "callback/callback_manager.h"
 #include "common/context_manager.h"
 #include "common/function_loader.h"
+#include "rt_ffts.h"
 
 class RuntimeInject {
 public:
@@ -44,6 +45,24 @@ public:
         Mspti::Common::RegisterFunction("libruntime", "rtVectorCoreKernelLaunchWithHandle");
         Mspti::Common::RegisterFunction("libruntime", "rtBinaryGetFunction");
         Mspti::Common::RegisterFunction("libruntime", "rtProfSetProSwitch");
+        Mspti::Common::RegisterFunction("libruntime", "rtLaunch");
+        Mspti::Common::RegisterFunction("libruntime", "rtKernelLaunch");
+        Mspti::Common::RegisterFunction("libruntime", "rtKernelLaunchWithHandle");
+        Mspti::Common::RegisterFunction("libruntime", "rtKernelLaunchWithHandleV2");
+        Mspti::Common::RegisterFunction("libruntime", "rtKernelLaunchWithFlag");
+        Mspti::Common::RegisterFunction("libruntime", "rtKernelLaunchWithFlagV2");
+        Mspti::Common::RegisterFunction("libruntime", "rtLaunchKernelByFuncHandleV2");
+        Mspti::Common::RegisterFunction("libruntime", "rtLaunchKernelByFuncHandleV3");
+        Mspti::Common::RegisterFunction("libruntime", "rtCpuKernelLaunch");
+        Mspti::Common::RegisterFunction("libruntime", "rtCpuKernelLaunchWithFlag");
+        Mspti::Common::RegisterFunction("libruntime", "rtAicpuKernelLaunchWithFlag");
+        Mspti::Common::RegisterFunction("libruntime", "rtAicpuKernelLaunch");
+        Mspti::Common::RegisterFunction("libruntime", "rtAicpuKernelLaunchExWithArgs");
+        Mspti::Common::RegisterFunction("libruntime", "rtVectorCoreKernelLaunch");
+        Mspti::Common::RegisterFunction("libruntime", "rtVectorCoreKernelLaunchWithHandle");
+        Mspti::Common::RegisterFunction("libruntime", "rtFftsPlusTaskLaunch");
+        Mspti::Common::RegisterFunction("libruntime", "rtFftsTaskLaunch");
+        Mspti::Common::RegisterFunction("libruntime", "rtFftsTaskLaunchWithFlag");
         Mspti::Common::RegisterFunction("libruntime", "rtGetVisibleDeviceIdByLogicDeviceId");
     }
     ~RuntimeInject() = default;
@@ -225,6 +244,7 @@ rtError_t rtKernelLaunch(const void* stubFunc, uint32_t blockDim, void* args,
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
     Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_LAUNCH, __FUNCTION__);
     return func(stubFunc, blockDim, args, argsSize, smDesc, stream);
 }
 
@@ -240,6 +260,7 @@ rtError_t rtKernelLaunchWithFlagV2(const void* stubFunc, uint32_t blockDim,
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
     Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_LAUNCH, __FUNCTION__);
     return func(stubFunc, blockDim, argsInfo, smDesc, stream, flags, cfgInfo);
 }
 
@@ -256,6 +277,7 @@ rtError_t rtKernelLaunchWithHandleV2(
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
     Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_LAUNCH, __FUNCTION__);
     return func(handle, tilingkey, blockDim, argsInfo, smDesc, stream, cfgInfo);
 }
 
@@ -271,6 +293,7 @@ rtError_t rtAicpuKernelLaunchExWithArgs(const uint32_t kernelType, const char* c
             rtSmDesc_t*, rtStream_t, uint32_t>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_AICPU_LAUNCH, __FUNCTION__);
     Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     return func(kernelType, opName, blockDim, argsInfo, smDesc, stm, flags);
 }
@@ -286,6 +309,7 @@ rtError_t rtLaunchKernelByFuncHandle(rtFuncHandle funcHandle, uint32_t blockDim,
             __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_LAUNCH, __FUNCTION__);
     return func(funcHandle, blockDim, argsHandle, stm);
 }
 
@@ -300,6 +324,7 @@ rtError_t rtLaunchKernelByFuncHandleV2(rtFuncHandle funcHandle, uint32_t blockDi
             const RtTaskCfgInfoT*>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_LAUNCH, __FUNCTION__);
     Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     return func(funcHandle, blockDim, argsHandle, stm, cfgInfo);
 }
@@ -315,6 +340,7 @@ rtError_t rtVectorCoreKernelLaunch(const VOID_PTR stubFunc, uint32_t blockDim, R
             uint32_t, const RtTaskCfgInfoT*>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_AIV_LAUNCH, __FUNCTION__);
     Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     return func(stubFunc, blockDim, argsInfo, smDesc, stm, flags, cfgInfo);
 }
@@ -330,6 +356,7 @@ rtError_t rtVectorCoreKernelLaunchWithHandle(VOID_PTR hdl, const uint64_t tiling
             rtStream_t, const RtTaskCfgInfoT*>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_AIV_LAUNCH, __FUNCTION__);
     Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     return func(hdl, tilingKey, blockDim, argsInfo, smDesc, stm, cfgInfo);
 }
@@ -365,4 +392,155 @@ rtError_t rtGetVisibleDeviceIdByLogicDeviceId(const int32_t logicDeviceId, int32
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
     return func(logicDeviceId, visibleDeviceId);
+}
+
+rtError_t rtLaunch(const void *stubFunc)
+{
+    using rtLaunchFunc = std::function<rtError_t(const void *)>;
+    static rtLaunchFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<rtError_t, const void *>("libruntime", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_LAUNCH, __FUNCTION__);
+    return func(stubFunc);
+}
+
+rtError_t rtKernelLaunchWithFlag(const void *stubFunc, uint32_t blockDim, RtArgsExT *argsInfo, rtSmDesc_t *smDesc,
+                                 rtStream_t stm, uint32_t flags)
+{
+    using rtKernelLaunchWithFlagFunc = std::function<rtError_t(const void *, uint32_t, RtArgsExT *, rtSmDesc_t *,
+                                                               rtStream_t, uint32_t)>;
+    static rtKernelLaunchWithFlagFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<rtError_t, const void *, uint32_t, RtArgsExT *, rtSmDesc_t *, rtStream_t,
+            uint32_t>("libruntime", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_LAUNCH, __FUNCTION__);
+    return func(stubFunc, blockDim, argsInfo, smDesc, stm, flags);
+}
+
+rtError_t rtLaunchKernelByFuncHandleV3(rtFuncHandle funcHandle, uint32_t blockDim, const RtArgsExT * const argsInfo,
+                                       rtStream_t stm, const RtTaskCfgInfoT * const cfgInfo)
+{
+    using rtLaunchKernelByFuncHandleV3Func = std::function<rtError_t(rtFuncHandle, uint32_t, const RtArgsExT *,
+                                                                     rtStream_t, const RtTaskCfgInfoT *)>;
+    static rtLaunchKernelByFuncHandleV3Func func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<rtError_t, rtFuncHandle, uint32_t, const RtArgsExT *, rtStream_t,
+            const RtTaskCfgInfoT *>("libruntime", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_LAUNCH, __FUNCTION__);
+    return func(funcHandle, blockDim, argsInfo, stm, cfgInfo);
+}
+
+rtError_t rtCpuKernelLaunch(const void *soName, const void *kernelName, uint32_t blockDim, const void *args,
+                            uint32_t argsSize, rtSmDesc_t *smDesc, rtStream_t stm)
+{
+    using rtCpuKernelLaunchFunc = std::function<rtError_t(const void *, const void *, uint32_t, const void *,
+                                                          uint32_t, rtSmDesc_t *, rtStream_t)>;
+    static rtCpuKernelLaunchFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<rtError_t, const void *, const void *, uint32_t, const void *, uint32_t,
+            rtSmDesc_t *, rtStream_t>("libruntime", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_CPU_LAUNCH, __FUNCTION__);
+    return func(soName, kernelName, blockDim, args, argsSize, smDesc, stm);
+}
+
+rtError_t rtCpuKernelLaunchWithFlag(const void *soName, const void *kernelName, uint32_t blockDim,
+                                    const RtArgsExT *argsInfo, rtSmDesc_t *smDesc, rtStream_t stm, uint32_t flags)
+{
+    using rtCpuKernelLaunchWithFlagFunc =
+            std::function<rtError_t(const void *, const void *, uint32_t, const RtArgsExT *, rtSmDesc_t *,
+                                    rtStream_t, uint32_t)>;
+    static rtCpuKernelLaunchWithFlagFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<rtError_t, const void *, const void *, uint32_t, const RtArgsExT *, rtSmDesc_t *,
+            rtStream_t, uint32_t>("libruntime", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_CPU_LAUNCH, __FUNCTION__);
+    return func(soName, kernelName, blockDim, argsInfo, smDesc, stm, flags);
+}
+
+rtError_t rtAicpuKernelLaunchWithFlag(const rtKernelLaunchNames_t *launchNames, uint32_t blockDim,
+                                      const RtArgsExT *argsInfo, rtSmDesc_t *smDesc, rtStream_t stm, uint32_t flags)
+{
+    using rtAicpuKernelLaunchWithFlagFunc =
+            std::function<rtError_t(const rtKernelLaunchNames_t *, uint32_t, const RtArgsExT *, rtSmDesc_t *,
+                                    rtStream_t, uint32_t)>;
+    static rtAicpuKernelLaunchWithFlagFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<rtError_t, const rtKernelLaunchNames_t *, uint32_t, const RtArgsExT *, rtSmDesc_t *,
+            rtStream_t, uint32_t>("libruntime", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_AICPU_LAUNCH, __FUNCTION__);
+    return func(launchNames, blockDim, argsInfo, smDesc, stm, flags);
+}
+
+rtError_t rtAicpuKernelLaunch(const rtKernelLaunchNames_t *launchNames, uint32_t blockDim, const void *args,
+                              uint32_t argsSize, rtSmDesc_t *smDesc, rtStream_t stm)
+{
+    using rtAicpuKernelLaunchFunc = std::function<rtError_t(const rtKernelLaunchNames_t *, uint32_t, const void *,
+                                                            uint32_t, rtSmDesc_t *, rtStream_t)>;
+    static rtAicpuKernelLaunchFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<rtError_t, const rtKernelLaunchNames_t *, uint32_t, const void *, uint32_t,
+            rtSmDesc_t *, rtStream_t>("libruntime", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_AICPU_LAUNCH, __FUNCTION__);
+    return func(launchNames, blockDim, args, argsSize, smDesc, stm);
+}
+
+rtError_t rtFftsPlusTaskLaunch(RtFftsPlusTaskInfoT *fftsPlusTaskInfo, rtStream_t stm)
+{
+    using rtFftsPlusTaskLaunchFunc = std::function<rtError_t(RtFftsPlusTaskInfoT *, rtStream_t)>;
+    static rtFftsPlusTaskLaunchFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<rtError_t, RtFftsPlusTaskInfoT *, rtStream_t>("libruntime", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_FFTS_LAUNCH, __FUNCTION__);
+    return func(fftsPlusTaskInfo, stm);
+}
+
+rtError_t rtFftsTaskLaunch(rtFftsTaskInfo_t *fftsTaskInfo, rtStream_t stm)
+{
+    using rtFftsTaskLaunchFunc = std::function<rtError_t(rtFftsTaskInfo_t *, rtStream_t)>;
+    static rtFftsTaskLaunchFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<rtError_t, rtFftsTaskInfo_t *, rtStream_t>("libruntime", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_FFTS_LAUNCH, __FUNCTION__);
+    return func(fftsTaskInfo, stm);
+}
+
+rtError_t rtFftsTaskLaunchWithFlag(rtFftsTaskInfo_t *fftsTaskInfo, rtStream_t stm, uint32_t flag)
+{
+    using rtFftsTaskLaunchWithFlagFunc = std::function<rtError_t(rtFftsTaskInfo_t *, rtStream_t, uint32_t)>;
+    static rtFftsTaskLaunchWithFlagFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<rtError_t, rtFftsTaskInfo_t *, rtStream_t,
+            uint32_t>("libruntime", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
+    Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_FFTS_LAUNCH, __FUNCTION__);
+    return func(fftsTaskInfo, stm, flag);
 }
