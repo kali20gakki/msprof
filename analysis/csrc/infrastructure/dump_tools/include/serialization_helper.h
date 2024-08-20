@@ -54,8 +54,8 @@ class SerializationHelper<0, OStream, Tuple> {
 public:
     static void DumpInJsonFormat(OStream&, const std::array<const char*,
                                  std::tuple_size<typename std::decay<Tuple>::type>{}>&,
-                                 const Tuple &tp) {}
-    static void DumpInCsvFormat(OStream &oStream, const Tuple &tp) {}
+                                 const Tuple &) {}
+    static void DumpInCsvFormat(OStream &oStream, const Tuple &) {}
 };
 
 }

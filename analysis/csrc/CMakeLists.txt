@@ -58,6 +58,7 @@ target_include_directories(msprof_analysis PRIVATE
     ${Python_INCLUDE_DIRS}
     ${TOP_DIR}
     ${TOP_DIR}/opensource/json/include
+    ${TOP_DIR}/opensource/rapidjson/include
     ${TOP_DIR}/collector/toolchain/inc
     ${TOP_DIR}/platform/securec/include
 )
