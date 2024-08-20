@@ -23,13 +23,13 @@
 #define MSPTI_API __attribute__((visibility("default")))
 #endif
 
-using rtError_t = uint32_t;
-using rtStream_t = void *;
-using rtSmDesc_t = void;
+using RtErrorT = uint32_t;
+using RtStreamT = void *;
+using RtSmDescT = void;
 using VOID_PTR = void*;
 using CONST_VOID_PTR = const void *;
 using VOID_PTR_PTR = void**;
-using rtMemType_t = uint32_t;
+using RtMemTypeT = uint32_t;
 
 enum DrvError {
     DRV_ERROR_NONE = 0,

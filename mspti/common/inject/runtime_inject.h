@@ -21,41 +21,45 @@ extern "C" {
 #endif
 
 // Inject
-MSPTI_API rtError_t rtSetDevice(int32_t device);
-MSPTI_API rtError_t rtDeviceReset(int32_t device);
-MSPTI_API rtError_t rtSetDeviceEx(int32_t device);
-MSPTI_API rtError_t rtCtxCreateEx(void **ctx, uint32_t flags, int32_t device);
-MSPTI_API rtError_t rtCtxCreate(void **ctx, int32_t device);
-MSPTI_API rtError_t rtCtxDestroy(void **ctx);
-MSPTI_API rtError_t rtStreamCreate(rtStream_t *stream, int32_t priority);
-MSPTI_API rtError_t rtStreamDestroy(rtStream_t stream);
-MSPTI_API rtError_t rtStreamSynchronize(rtStream_t stream);
-MSPTI_API rtError_t rtKernelLaunch(const void *stubFunc, uint32_t blockDim, void *args,
-    uint32_t argsSize, rtSmDesc_t *smDesc, rtStream_t stream);
-MSPTI_API rtError_t rtKernelLaunchWithFlagV2(const void *stubFunc, uint32_t blockDim,
-    RtArgsExT *argsInfo, rtSmDesc_t *smDesc, rtStream_t stream, uint32_t flags, const RtTaskCfgInfoT *cfgInfo);
-MSPTI_API rtError_t rtKernelLaunchWithHandleV2(
-    void *handle, const uint64_t tilingkey, uint32_t blockDim, RtArgsExT *argsInfo, rtSmDesc_t *smDesc,
-    rtStream_t stream, const RtTaskCfgInfoT *cfgInfo);
-MSPTI_API rtError_t rtAicpuKernelLaunchExWithArgs(const uint32_t kernelType, const char* const opName,
-    const uint32_t blockDim, const RtAicpuArgsExT *argsInfo, rtSmDesc_t * const smDesc,
-    const rtStream_t stm, const uint32_t flags);
-MSPTI_API rtError_t rtLaunchKernelByFuncHandle(rtFuncHandle funcHandle, uint32_t blockDim,
-    rtLaunchArgsHandle argsHandle, rtStream_t stm);
-MSPTI_API rtError_t rtLaunchKernelByFuncHandleV2(rtFuncHandle funcHandle, uint32_t blockDim,
-    rtLaunchArgsHandle argsHandle, rtStream_t stm, const RtTaskCfgInfoT *cfgInfo);
-MSPTI_API rtError_t rtVectorCoreKernelLaunch(const VOID_PTR stubFunc, uint32_t blockDim, RtArgsExT *argsInfo,
-    rtSmDesc_t *smDesc, rtStream_t stm, uint32_t flags, const RtTaskCfgInfoT *cfgInfo);
-MSPTI_API rtError_t rtVectorCoreKernelLaunchWithHandle(VOID_PTR hdl, const uint64_t tilingKey, uint32_t blockDim,
-    RtArgsExT *argsInfo, rtSmDesc_t *smDesc, rtStream_t stm, const RtTaskCfgInfoT *cfgInfo);
+MSPTI_API RtErrorT rtSetDevice(int32_t device);
+MSPTI_API RtErrorT rtDeviceReset(int32_t device);
+MSPTI_API RtErrorT rtSetDeviceEx(int32_t device);
+MSPTI_API RtErrorT rtCtxCreateEx(void **ctx, uint32_t flags, int32_t device);
+MSPTI_API RtErrorT rtCtxCreate(void **ctx, int32_t device);
+MSPTI_API RtErrorT rtCtxDestroy(void **ctx);
+MSPTI_API RtErrorT rtStreamCreate(RtStreamT *stream, int32_t priority);
+MSPTI_API RtErrorT rtStreamDestroy(RtStreamT stream);
+MSPTI_API RtErrorT rtStreamSynchronize(RtStreamT stream);
+MSPTI_API RtErrorT rtKernelLaunch(const void *stubFunc, uint32_t blockDim, void *args,
+                                  uint32_t argsSize, RtSmDescT *smDesc, RtStreamT stream);
+MSPTI_API RtErrorT rtKernelLaunchWithFlagV2(const void *stubFunc, uint32_t blockDim,
+                                            RtArgsExT *argsInfo, RtSmDescT *smDesc, RtStreamT stream, uint32_t flags,
+                                            const RtTaskCfgInfoT *cfgInfo);
+MSPTI_API RtErrorT rtKernelLaunchWithHandleV2(void *handle, const uint64_t tilingkey, uint32_t blockDim,
+                                              RtArgsExT *argsInfo, RtSmDescT *smDesc, RtStreamT stream,
+                                              const RtTaskCfgInfoT *cfgInfo);
+MSPTI_API RtErrorT rtAicpuKernelLaunchExWithArgs(const uint32_t kernelType, const char* const opName,
+                                                 const uint32_t blockDim, const RtAicpuArgsExT *argsInfo,
+                                                 RtSmDescT * const smDesc, const RtStreamT stm, const uint32_t flags);
+MSPTI_API RtErrorT rtLaunchKernelByFuncHandle(rtFuncHandle funcHandle, uint32_t blockDim,
+                                              rtLaunchArgsHandle argsHandle, RtStreamT stm);
+MSPTI_API RtErrorT rtLaunchKernelByFuncHandleV2(rtFuncHandle funcHandle, uint32_t blockDim,
+                                                rtLaunchArgsHandle argsHandle, RtStreamT stm,
+                                                const RtTaskCfgInfoT *cfgInfo);
+MSPTI_API RtErrorT rtVectorCoreKernelLaunch(const VOID_PTR stubFunc, uint32_t blockDim, RtArgsExT *argsInfo,
+                                            RtSmDescT *smDesc, RtStreamT stm, uint32_t flags,
+                                            const RtTaskCfgInfoT *cfgInfo);
+MSPTI_API RtErrorT rtVectorCoreKernelLaunchWithHandle(VOID_PTR hdl, const uint64_t tilingKey, uint32_t blockDim,
+                                                      RtArgsExT *argsInfo, RtSmDescT *smDesc, RtStreamT stm,
+                                                      const RtTaskCfgInfoT *cfgInfo);
 
 // Inner
-rtError_t rtGetDevice(int32_t *devId);
-rtError_t rtProfilerTraceEx(uint64_t id, uint64_t modelId, uint16_t tagId, rtStream_t stm);
-rtError_t rtGetStreamId(rtStream_t stm, int32_t *streamId);
-rtError_t rtBinaryGetFunction(VOID_PTR binHandle, uint64_t tilingKey, VOID_PTR_PTR funcHandle);
-rtError_t rtProfSetProSwitch(VOID_PTR data, uint32_t len);
-rtError_t rtGetVisibleDeviceIdByLogicDeviceId(const int32_t logicDeviceId, int32_t * const visibleDeviceId);
+RtErrorT rtGetDevice(int32_t *devId);
+RtErrorT rtProfilerTraceEx(uint64_t id, uint64_t modelId, uint16_t tagId, RtStreamT stm);
+RtErrorT rtGetStreamId(RtStreamT stm, int32_t *streamId);
+RtErrorT rtBinaryGetFunction(VOID_PTR binHandle, uint64_t tilingKey, VOID_PTR_PTR funcHandle);
+RtErrorT rtProfSetProSwitch(VOID_PTR data, uint32_t len);
+RtErrorT rtGetVisibleDeviceIdByLogicDeviceId(const int32_t logicDeviceId, int32_t * const visibleDeviceId);
 
 #if defined(__cplusplus)
 }
