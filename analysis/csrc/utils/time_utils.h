@@ -54,6 +54,8 @@ struct LocaltimeContext {
 std::string GetFormatLocalTime();
 // 将syscnt转为timestamp 返回结果为ns级
 HPFloat GetTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params);
+// 将以syscnt计算的duration转换成timestamp 返回结果为ns级
+HPFloat GetDurTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params);
 // 将采样时间戳转为host侧时间戳
 HPFloat GetTimeBySamplingTimestamp(double timestamp, const uint64_t hostMonotonic, const uint64_t deviceMonotonic);
 // 计算加上本地的偏移时间, ns级

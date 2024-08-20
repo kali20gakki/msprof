@@ -38,6 +38,7 @@ const std::string NA = "N/A";
 const std::string DB_NAME_MSPROF_DB = "msprof";
 
 // processor name & table name
+const std::string PROCESSOR_NAME_STEP_TRACE = "STEP_TRACE";
 const std::string PROCESSOR_NAME_STRING_IDS = "STRING_IDS";
 const std::string TABLE_NAME_STRING_IDS = "STRING_IDS";
 

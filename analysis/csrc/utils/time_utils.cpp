@@ -61,6 +61,13 @@ HPFloat GetTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params)
     return res;
 }
 
+HPFloat GetDurTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params)
+{
+    HPFloat res = syscnt/ params.freq;
+    res = res << NS_US;
+    return res;
+}
+
 HPFloat GetTimeBySamplingTimestamp(double timestamp, const uint64_t hostMonotonic, const uint64_t deviceMonotonic)
 {
     // 时间单位均为ns
