@@ -381,14 +381,14 @@ void ArgsManager::AddDynProfArgs()
         return;
     }
     Args dynamic = {"dynamic",
-        "Dynamic profiling switch, the default value is off.(Ascend910, Ascend910B, Ascend910 73*, Ascend310B)", OFF};
-    Args pid = {"pid", "Dynamic profiling pid of the target process.(Ascend910, Ascend910B, Ascend910 73*, Ascend310B)",
+        "Dynamic profiling switch, the default value is off.(Ascend910, Ascend910B, Ascend910_93, Ascend310B)", OFF};
+    Args pid = {"pid", "Dynamic profiling pid of the target process.(Ascend910, Ascend910B, Ascend910_93, Ascend310B)",
         "0"};
     Args delay = {"delay",
-        "Collect start delay time in seconds, range 1 ~ 4294967295s.(Ascend910, Ascend910B, Ascend910 73*, "
+        "Collect start delay time in seconds, range 1 ~ 4294967295s.(Ascend910, Ascend910B, Ascend910_93, "
         "Ascend310B)"};
     Args duration = {"duration",
-        "Collection duration in seconds, range 1 ~ 4294967295s.(Ascend910, Ascend910B, Ascend910 73*, Ascend310B)"};
+        "Collection duration in seconds, range 1 ~ 4294967295s.(Ascend910, Ascend910B, Ascend910_93, Ascend310B)"};
     argsList_.push_back(dynamic);
     argsList_.push_back(pid);
     argsList_.push_back(delay);
@@ -445,11 +445,11 @@ void ArgsManager::AddInstrArgs()
     if (driverOnline_ && platform_ != PlatformType::CHIP_V4_1_0) {
         return;
     }
-    Args instr = {"instr-profiling", "Show instr profiling data, the default value is off.(Ascend910B, Ascend910 73*)",
+    Args instr = {"instr-profiling", "Show instr profiling data, the default value is off.(Ascend910B, Ascend910_93)",
         OFF};
     Args instrFreq = {"instr-profiling-freq",
                       "The instr sampling period in clock-cycle, the default value is 1000 cycle,\n"
-                          "\t\t\t\t\t\t   the range is 300 to 30000 cycle.(Ascend910B, Ascend910 73*)",
+                          "\t\t\t\t\t\t   the range is 300 to 30000 cycle.(Ascend910B, Ascend910_93)",
                       "1000"};
     argsList_.push_back(instr);
     argsList_.push_back(instrFreq);
@@ -508,15 +508,15 @@ void ArgsManager::AddHardWareMemArgs()
                               "\t\t\t\t\t\t   LLC usage by aicpu and control cpu(Ascend310 while set llc-profiling to"
                               " capacity).\n"
                               "\t\t\t\t\t\t   LLC read/write speed(Ascend310P, Ascend910, Ascend310B, "
-                              "Ascend910B, Ascend910 73*).\n"
+                              "Ascend910B, Ascend910_93).\n"
                               "\t\t\t\t\t\t   DDR read/write speed(Ascend310, Ascend310P, Ascend910, Ascend310B).\n"
-                              "\t\t\t\t\t\t   HBM read/write speed(Ascend910, Ascend910B, Ascend910 73*).\n"
+                              "\t\t\t\t\t\t   HBM read/write speed(Ascend910, Ascend910B, Ascend910_93).\n"
                               "\t\t\t\t\t\t   Processes-level and system-level device memory usage(full-platform)");
     hardwareMemFreq.SetDetail("LLC, DDR, HBM acquisition frequency, range 1 ~ 100, the default value is 50 Hz");
     llcMode.SetDetail("The llc profiling groups.\n"
                             "\t\t\t\t\t\t   include capacity, bandwidth. the default value is capacity.(Ascend310)\n"
                             "\t\t\t\t\t\t   include read, write. the default value is read.\n"
-                            "\t\t\t\t\t\t   (Ascend310P, Ascend910, Ascend310B, Ascend910B, Ascend910 73*)");
+                            "\t\t\t\t\t\t   (Ascend310P, Ascend910, Ascend310B, Ascend910B, Ascend910_93)");
     argsList_.push_back(hardwareMem);
     argsList_.push_back(hardwareMemFreq);
     argsList_.push_back(llcMode);
@@ -570,13 +570,13 @@ void ArgsManager::AddIoArgs()
     }
     Args ioArgs = {"sys-io-profiling",
                    "NIC ROCE acquisition switch, the default value is off.\n"
-                        "\t\t\t\t\t\t   NIC(Ascend310, Ascend910, Ascend310B, Ascend910B, Ascend910 73*), "
-                        "ROCE(Ascend910, Ascend910B, Ascend910 73*)",
+                        "\t\t\t\t\t\t   NIC(Ascend310, Ascend910, Ascend310B, Ascend910B, Ascend910_93), "
+                        "ROCE(Ascend910, Ascend910B, Ascend910_93)",
                    OFF};
     Args ioFreqArgs = {"sys-io-sampling-freq",
                        "NIC ROCE acquisition frequency, range 1 ~ 100, the default value is 100 Hz.\n"
-                            "\t\t\t\t\t\t   NIC(Ascend310, Ascend910, Ascend310B, Ascend910B, Ascend910 73*), "
-                            "ROCE(Ascend910, Ascend910B, Ascend910 73*)",
+                            "\t\t\t\t\t\t   NIC(Ascend310, Ascend910, Ascend310B, Ascend910B, Ascend910_93), "
+                            "ROCE(Ascend910, Ascend910B, Ascend910_93)",
                        "100"};
     argsList_.push_back(ioArgs);
     argsList_.push_back(ioFreqArgs);
@@ -590,13 +590,13 @@ void ArgsManager::AddInterArgs()
     }
     Args interArgs = {"sys-interconnection-profiling",
                       "PCIE, HCCS acquisition switch, the default value is off.\n"
-                          "\t\t\t\t\t\t   PCIE(Ascend310P, Ascend910, Ascend910B, Ascend910 73*), "
-                          "HCCS(Ascend910, Ascend910B, Ascend910 73*)",
+                          "\t\t\t\t\t\t   PCIE(Ascend310P, Ascend910, Ascend910B, Ascend910_93), "
+                          "HCCS(Ascend910, Ascend910B, Ascend910_93)",
                       OFF};
     Args interFreq = {"sys-interconnection-freq",
                       "PCIE, HCCS acquisition frequency, range 1 ~ 50, the default value is 50 Hz.\n"
-                          "\t\t\t\t\t\t   PCIE(Ascend310P, Ascend910, Ascend910B, Ascend910 73*), "
-                          "HCCS(Ascend910, Ascend910B, Ascend910 73*)",
+                          "\t\t\t\t\t\t   PCIE(Ascend310P, Ascend910, Ascend910B, Ascend910_93), "
+                          "HCCS(Ascend910, Ascend910B, Ascend910_93)",
                       "50"};
     argsList_.push_back(interArgs);
     argsList_.push_back(interFreq);
@@ -622,7 +622,7 @@ void ArgsManager::AddL2Args()
     }
     Args l2 = {"l2",
                "L2 Cache acquisition switch. the default value is off.\n"
-                   "\t\t\t\t\t\t   (Ascend310P, Ascend910, Ascend310B, Ascend910B, Ascend910 73*)",
+                   "\t\t\t\t\t\t   (Ascend310P, Ascend910, Ascend310B, Ascend910B, Ascend910_93)",
                OFF};
     argsList_.push_back(l2);
 }
