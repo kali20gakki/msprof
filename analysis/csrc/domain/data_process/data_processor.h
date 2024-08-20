@@ -22,6 +22,7 @@ namespace Domain {
 const uint8_t CHECK_SUCCESS = 0;
 const uint8_t NOT_EXIST = 1;
 const uint8_t CHECK_FAILED = 2;
+
 using namespace Analysis::Infra;
 // 该类用于定义处理父类
 // 主要包括以下特性：用于规范各db处理流程
