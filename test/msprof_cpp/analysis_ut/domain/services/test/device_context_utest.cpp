@@ -11,6 +11,7 @@
  */
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 
+#include <dirent.h>
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "nlohmann/json.hpp"
@@ -71,6 +72,28 @@ protected:
 TEST_F(DeviceContextUTest, TestDeviceContextEntryShouldReturn1DataInventoryWhenInfoJsonInvalid)
 {
     EXPECT_EQ(1, DeviceContextEntry(PROF_DIR, "").size());
+}
+
+TEST_F(DeviceContextUTest, TestGetDeviceDirectoriesShouldPrintErrorLogWhenOpenDirectoryFailed)
+{
+    MOCKER_CPP(opendir).stubs().will(returnValue((DIR*)nullptr));
+    auto subdirs = GetDeviceDirectories(PROF_DIR);
+    EXPECT_TRUE(subdirs.empty());
+    GlobalMockObject::verify();
+}
+
+struct dirent* Mockreaddir(DIR *dir)
+{
+    errno = ENOENT; // 设置errno为ENOENT
+    return nullptr; // 返回nullptr
+}
+
+TEST_F(DeviceContextUTest, TestGetDeviceDirectoriesShouldPrintErrorLogWhenReadDirectoryFailed)
+{
+    MOCKER_CPP(readdir).stubs().will(invoke(Mockreaddir, nullptr));
+    auto subdirs = GetDeviceDirectories(PROF_DIR);
+    EXPECT_TRUE(subdirs.empty());
+    GlobalMockObject::verify();
 }
 }  // Domain
 }  // Analysis

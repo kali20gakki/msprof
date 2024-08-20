@@ -179,6 +179,7 @@ private:
     bool GetCpuInfo();
 };
 std::vector<DataInventory> DeviceContextEntry(const char *targetDir, const char *stopAt);
+std::vector<std::string> GetDeviceDirectories(const std::string &path);
 }
 }
 
