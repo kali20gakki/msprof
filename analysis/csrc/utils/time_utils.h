@@ -43,6 +43,14 @@ struct ProfTimeRecord {
         : startTimeNs(startTimeNs), endTimeNs(endTimeNs), baseTimeNs(baseTimeNs){};
 };
 
+// 转换成本地时间所需要的上下文参数
+struct LocaltimeContext {
+    uint16_t deviceId = UINT16_MAX;
+    uint64_t hostMonotonic = UINT64_MAX;
+    uint64_t deviceMonotonic = UINT64_MAX;
+    Utils::ProfTimeRecord timeRecord;
+};
+
 std::string GetFormatLocalTime();
 // 将syscnt转为timestamp 返回结果为ns级
 HPFloat GetTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params);

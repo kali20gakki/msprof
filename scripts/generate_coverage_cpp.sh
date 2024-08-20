@@ -48,6 +48,7 @@ test_obj=(
     device_modeling_utest
     device_parser_utest
     device_persistence_utest
+    data_process_utest
 )
 
 str_test=""

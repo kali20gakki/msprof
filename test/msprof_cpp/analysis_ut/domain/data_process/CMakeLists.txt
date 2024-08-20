@@ -2,6 +2,7 @@ aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/data_inventory SOUR
 aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/db SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/data_process SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/data_process/ai_task SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/domain/data_process/system SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/viewer/database SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/utils SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/dfx SOURCES)
