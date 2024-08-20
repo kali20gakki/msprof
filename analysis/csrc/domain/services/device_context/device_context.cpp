@@ -12,10 +12,12 @@
 #include "device_context.h"
 #include <iostream>
 #include <sstream>
+#include <cerrno>
 #include <functional>
 #include <vector>
 #include <algorithm>
 #include <dirent.h>
+#include <cstring>
 #include "nlohmann/json.hpp"
 #include "analysis/csrc/utils/utils.h"
 #include "analysis/csrc/utils/file.h"
@@ -60,20 +62,29 @@ std::vector<std::string> GetDeviceDirectories(const std::string &path)
     std::vector<std::string> subdirs;
     DIR *dir = opendir(path.c_str());
     if (dir == nullptr) {
-        ERROR("Error opening directory: %, error: %", path, DEVICE_CONTEXT_OPEN_DIR_ERROR);
+        ERROR("Error opening directory: %, errorCode: %, errorInfo: %", path, errno, strerror(errno));
         return subdirs;
     }
     struct dirent *entry;
+    errno = 0;
     while ((entry = readdir(dir)) != nullptr) {
+        std::string subdirName = entry->d_name;
         if (entry->d_type == DT_DIR) { // Check if it's a directory
-            std::string subdirName = entry->d_name;
+            std::string subdirPath = File::PathJoin({path, subdirName});
             if (subdirName.size() > MIN_SUB_DIR_NBAME_LEN &&
                 subdirName.substr(0, MIN_SUB_DIR_NBAME_LEN) == "device" &&
                 subdirName.back() >= '0' && subdirName.back() <= '9') {
-                std::string subdirPath = File::PathJoin({path, subdirName});
+                INFO("Directory: %", subdirPath);
                 subdirs.push_back(subdirPath);
+            } else {
+                INFO("Directory: %, is not device directory.", subdirPath);
             }
+        } else {
+            INFO("In %, % is not a directory.", path, subdirName);
         }
+    }
+    if (errno != 0) {
+        ERROR("Error reading directory: %, errorCode: %, errorInfo: %", path, errno, strerror(errno));
     }
     closedir(dir);
     return subdirs;
