@@ -30,6 +30,7 @@ aux_source_directory(${MSPROF_SOURCE_DIR}/dvvp/msprof/common/src SOURCE)
 aux_source_directory(${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src SOURCE)
 aux_source_directory(${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src SOURCE)
 aux_source_directory(${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src SOURCE)
+aux_source_directory(${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/mstx/src SOURCE)
 aux_source_directory(${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/mini SOURCE)
 aux_source_directory(${MSPROF_SOURCE_DIR}/dvvp/task_handle/src SOURCE)
 aux_source_directory(${MSPROF_SOURCE_DIR}/dvvp/transport SOURCE)
@@ -76,6 +77,7 @@ target_include_directories(collector_fuzz PRIVATE
     ${TOP_DIR}/collector/dvvp/msprof/dynamic_profiling/include
     ${TOP_DIR}/collector/dvvp/msprof/engine/include
     ${TOP_DIR}/collector/dvvp/msprof/msproftx/include
+    ${TOP_DIR}/collector/dvvp/msprof/msproftx/mstx/inc
     ${TOP_DIR}/collector/dvvp/msprof/platform/include
     ${TOP_DIR}/collector/dvvp/params_adapter
     ${TOP_DIR}/collector/dvvp/task_handle/include
