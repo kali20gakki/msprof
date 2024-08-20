@@ -115,9 +115,19 @@ public:
     NicDB();
 };
 
+class NicReceiveSendDB : public Database {
+public:
+    NicReceiveSendDB();
+};
+
 class RoceDB : public Database {
 public:
     RoceDB();
+};
+
+class RoceReceiveSendDB : public Database {
+public:
+    RoceReceiveSendDB();
 };
 
 class HBMDB : public Database {

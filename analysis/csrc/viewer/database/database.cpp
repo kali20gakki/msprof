@@ -320,6 +320,35 @@ namespace {
         {"funcid", SQL_INTEGER_TYPE}
     };
 
+    const TableColumns NicReportData = {
+        {"device_id", SQL_INTEGER_TYPE},
+        {"duration", SQL_TEXT_TYPE},
+        {"bandwidth", SQL_TEXT_TYPE},
+        {"rxbandwidth", SQL_TEXT_TYPE},
+        {"txbandwidth", SQL_TEXT_TYPE},
+        {"rxpacket", SQL_TEXT_TYPE},
+        {"rxerrorrate", SQL_TEXT_TYPE},
+        {"rxdroppedrate", SQL_TEXT_TYPE},
+        {"txpacket", SQL_TEXT_TYPE},
+        {"txerrorrate", SQL_TEXT_TYPE},
+        {"txdroppedrate", SQL_TEXT_TYPE},
+        {"funcid", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns NicReceiveSend = {
+        {"device_id", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_REAL_TYPE},
+        {"rx_bandwidth_efficiency", SQL_REAL_TYPE},
+        {"rx_packets", SQL_REAL_TYPE},
+        {"rx_error_rate", SQL_REAL_TYPE},
+        {"rx_dropped_rate", SQL_REAL_TYPE},
+        {"tx_bandwidth_efficiency", SQL_REAL_TYPE},
+        {"tx_packets", SQL_REAL_TYPE},
+        {"tx_error_rate", SQL_REAL_TYPE},
+        {"tx_dropped_rate", SQL_REAL_TYPE},
+        {"func_id", SQL_INTEGER_TYPE}
+    };
+
     const TableColumns RoceOriginalData = {
         {"device_id", SQL_INTEGER_TYPE},
         {"replayid", SQL_INTEGER_TYPE},
@@ -338,6 +367,35 @@ namespace {
         {"txerrors", SQL_REAL_TYPE},
         {"txdropped", SQL_REAL_TYPE},
         {"funcid", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns RoceReportData = {
+        {"device_id", SQL_INTEGER_TYPE},
+        {"duration", SQL_TEXT_TYPE},
+        {"bandwidth", SQL_TEXT_TYPE},
+        {"rxbandwidth", SQL_TEXT_TYPE},
+        {"txbandwidth", SQL_TEXT_TYPE},
+        {"rxpacket", SQL_TEXT_TYPE},
+        {"rxerrorrate", SQL_TEXT_TYPE},
+        {"rxdroppedrate", SQL_TEXT_TYPE},
+        {"txpacket", SQL_TEXT_TYPE},
+        {"txerrorrate", SQL_TEXT_TYPE},
+        {"txdroppedrate", SQL_TEXT_TYPE},
+        {"funcid", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns RoceReceiveSend = {
+        {"device_id", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_REAL_TYPE},
+        {"rx_bandwidth_efficiency", SQL_REAL_TYPE},
+        {"rx_packets", SQL_REAL_TYPE},
+        {"rx_error_rate", SQL_REAL_TYPE},
+        {"rx_dropped_rate", SQL_REAL_TYPE},
+        {"tx_bandwidth_efficiency", SQL_REAL_TYPE},
+        {"tx_packets", SQL_REAL_TYPE},
+        {"tx_error_rate", SQL_REAL_TYPE},
+        {"tx_dropped_rate", SQL_REAL_TYPE},
+        {"func_id", SQL_INTEGER_TYPE}
     };
 
     const TableColumns HBMbwData = {
@@ -595,12 +653,26 @@ NicDB::NicDB()
 {
     dbName_ = "nic.db";
     tableColNames_["NicOriginalData"] = NicOriginalData;
+    tableColNames_["NicReportData"] = NicReportData;
+}
+
+NicReceiveSendDB::NicReceiveSendDB()
+{
+    dbName_ = "nicreceivesend_table.db";
+    tableColNames_["NicReceiveSend"] = NicReceiveSend;
 }
 
 RoceDB::RoceDB()
 {
     dbName_ = "roce.db";
     tableColNames_["RoceOriginalData"] = RoceOriginalData;
+    tableColNames_["RoceReportData"] = RoceReportData;
+}
+
+RoceReceiveSendDB::RoceReceiveSendDB()
+{
+    dbName_ = "rocereceivesend_table.db";
+    tableColNames_["RoceReceiveSend"] = RoceReceiveSend;
 }
 
 HBMDB::HBMDB()
