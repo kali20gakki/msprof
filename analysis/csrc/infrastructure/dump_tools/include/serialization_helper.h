@@ -55,7 +55,7 @@ public:
     static void DumpInJsonFormat(OStream&, const std::array<const char*,
                                  std::tuple_size<typename std::decay<Tuple>::type>{}>&,
                                  const Tuple &) {}
-    static void DumpInCsvFormat(OStream &oStream, const Tuple &) {}
+    static void DumpInCsvFormat(OStream &, const Tuple &) {}
 };
 
 }

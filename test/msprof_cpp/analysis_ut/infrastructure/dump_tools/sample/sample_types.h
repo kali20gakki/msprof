@@ -29,4 +29,11 @@ struct DumpToolSampleStruct {
     std::vector<DumpToolSampleTp> data;
 };
 
+// 与Json不同在于，Csv不支持嵌套
+using DumpToolSampleCsvTp = std::tuple<uint64_t, int64_t, std::string, double, float, int, bool>;
+struct DumpToolSampleCsvStruct {
+    std::vector<std::string> columns;
+    std::vector<DumpToolSampleCsvTp> data;
+};
+
 #endif
