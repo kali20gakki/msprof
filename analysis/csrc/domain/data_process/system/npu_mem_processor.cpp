@@ -3,7 +3,7 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : npu_mem_processor.h
+ * File Name          : npu_mem_processor.cpp
  * Description        : npu_mem_processor，处理NpuMem表相关数据
  * Author             : msprof team
  * Creation Date      : 2024/8/8
@@ -32,7 +32,7 @@ bool NpuMemProcessor::Process(DataInventory &dataInventory)
     std::vector<NpuMemData> allProcessedData;
     for (const auto& devicePath: deviceList) {
         localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
-        flag &= ProcessSingleDevice(devicePath, localtimeContext, allProcessedData);
+        flag = ProcessSingleDevice(devicePath, localtimeContext, allProcessedData) && flag;
     }
     if (!SaveToDataInventory<NpuMemData>(std::move(allProcessedData), dataInventory, PROCESSOR_NAME_NPU_MEM)) {
             flag = false;
@@ -65,6 +65,7 @@ bool NpuMemProcessor::ProcessSingleDevice(const std::string &devicePath, Localti
         if (status == CHECK_FAILED) {
             return false;
         }
+        return true;
     }
     OriNpuMemData oriData = LoadData(npuMemDB);
     if (oriData.empty()) {

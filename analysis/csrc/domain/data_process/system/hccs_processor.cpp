@@ -3,7 +3,7 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : hccs_processor.h
+ * File Name          : hccs_processor.cpp
  * Description        : hccs_processor，处理hccs表相关数据
  * Author             : msprof team
  * Creation Date      : 2024/8/12
@@ -33,7 +33,7 @@ bool HCCSProcessor::Process(DataInventory &dataInventory)
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
         localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
-        flag &= ProcessSingleDevice(devicePath, localtimeContext, allProcessedData, allSumaryData);
+        flag = ProcessSingleDevice(devicePath, localtimeContext, allProcessedData, allSumaryData) && flag;
     }
     if (!SaveToDataInventory<HccsData>(std::move(allProcessedData), dataInventory, PROCESSOR_NAME_HCCS) ||
         !SaveToDataInventory<HccsSummaryData>(std::move(allSumaryData), dataInventory, PROCESSOR_NAME_HCCS)) {
@@ -62,6 +62,7 @@ bool HCCSProcessor::ProcessSingleDevice(const std::string &devicePath, Localtime
         if (status == CHECK_FAILED) {
             return false;
         }
+        return true;
     }
     auto processedData = ProcessData(hccsDB, localtimeContext);
     if (processedData.empty()) {

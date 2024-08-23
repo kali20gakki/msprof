@@ -36,6 +36,7 @@ class NpuMemProcessorUTest : public testing::Test {
 protected:
     static void SetUpTestCase()
     {
+        GlobalMockObject::verify();
         EXPECT_TRUE(File::CreateDir(NPU_MEM_DIR));
         EXPECT_TRUE(File::CreateDir(PROF0));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF0, DEVICE_SUFFIX})));
