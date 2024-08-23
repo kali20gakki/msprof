@@ -57,22 +57,6 @@ public:
         }
     }
 
-    template<typename... T>
-    void Printf(int level, const char* fileName, int linNo, const char *fmt, T... args)
-    {
-        char buf[MAX_LOG_BUF_SIZE] = {0};
-        auto level_ptr = level_name.find(level);
-        if (level_ptr == level_name.end()) {
-            return;
-        }
-        if (sprintf_s(buf, MAX_LOG_BUF_SIZE, "[%s] PROFILING(%u,%s) [%s:%d] >>> (tid:%u) %s\n",
-            level_ptr->second.c_str(), Utils::GetPid(), Utils::GetProcName().c_str(), fileName, linNo,
-            Utils::GetTid(), fmt) < 0) {
-            return;
-        }
-        printf(buf, args...);
-    }
-
 private:
     PlogManager() = default;
     explicit PlogManager(const PlogManager &obj) = delete;
@@ -99,15 +83,6 @@ private:
 #define MSPTI_LOGD(format, ...) do {                                                                        \
     Mspti::Common::PlogManager::GetInstance()->Log(DLOG_DEBUG, FILENAME, __LINE__, format, ##__VA_ARGS__);  \
 } while (0)
-
-#define PRINT_LOGE(format, ...) do {                                                                           \
-    Mspti::Common::PlogManager::GetInstance()->Printf(DLOG_ERROR, FILENAME, __LINE__, format, ##__VA_ARGS__);  \
-} while (0)
-
-#define PRINT_LOGW(format, ...) do {                                                                           \
-    Mspti::Common::PlogManager::GetInstance()->Printf(DLOG_WARN, FILENAME, __LINE__, format, ##__VA_ARGS__);   \
-} while (0)
-
 
 }  // Common
 }  // Mspti

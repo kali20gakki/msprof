@@ -125,7 +125,7 @@ size_t ChannelReader::TransTsFwData(char buffer[], size_t valid_size, uint32_t d
                 activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
                 activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_DEVICE;
                 activity.timestamp = *reinterpret_cast<uint64_t*>(buffer + pos + TIMESTAMP_POS);
-                activity.timestamp = Mspti::Common::ContextManager::GetInstance()->GetMonotomicFromSysCnt(deviceId,
+                activity.timestamp = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId,
                     activity.timestamp);
                 activity.id = *reinterpret_cast<uint64_t*>(buffer + pos + MARKID_POS);
                 activity.objectId.ds.streamId =

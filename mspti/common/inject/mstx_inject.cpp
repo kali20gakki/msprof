@@ -19,6 +19,7 @@
 #include "common/plog_manager.h"
 #include "common/inject/runtime_inject.h"
 #include "common/utils.h"
+#include "common/context_manager.h"
 
 std::atomic<uint64_t> g_markId{0};
 
@@ -34,7 +35,7 @@ void aclprofMarkEx(const char* message, size_t len, RT_STREAM stream)
     activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
     activity.flag = MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS;
     activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
-    activity.timestamp = Mspti::Common::Utils::GetClockMonotonicRawNs();
+    activity.timestamp = Mspti::Common::ContextManager::GetInstance()->GetHostTimeStampNs();
     activity.id = markId;
     activity.objectId.pt.processId = Mspti::Common::Utils::GetPid();
     activity.objectId.pt.threadId = Mspti::Common::Utils::GetTid();
@@ -56,7 +57,7 @@ void aclprofMark(void* stamp)
     activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
     activity.flag = MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS;
     activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
-    activity.timestamp = Mspti::Common::Utils::GetClockMonotonicRawNs();
+    activity.timestamp = Mspti::Common::ContextManager::GetInstance()->GetHostTimeStampNs();
     activity.id = -1;
     activity.objectId.pt.processId = Mspti::Common::Utils::GetPid();
     activity.objectId.pt.threadId = Mspti::Common::Utils::GetTid();
