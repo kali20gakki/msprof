@@ -8,6 +8,12 @@ add_executable(callback_utest
     test/callback_utest.cpp
 )
 
+set_target_properties(callback_utest
+    PROPERTIES
+    OUTPUT_NAME callback_utest
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
+
 run_llt_test(
     TARGET callback_utest
     TASK_NUM 1

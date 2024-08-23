@@ -22,28 +22,57 @@
 namespace Mspti {
 namespace Ascend {
 
-std::unique_ptr<DevProfTask> DevProfTaskFactory::CreateTask(uint32_t deviceId, msptiActivityKind kind)
+const std::map<Mspti::Common::PlatformType, std::map<msptiActivityKind, std::set<AI_DRV_CHANNEL>>>
+DevProfTaskFactory::kindToChannel_map_ = {
+    {
+        Mspti::Common::PlatformType::CHIP_910B, {
+            {MSPTI_ACTIVITY_KIND_MARKER, {PROF_CHANNEL_TS_FW}},
+            {MSPTI_ACTIVITY_KIND_KERNEL, {PROF_CHANNEL_TS_FW, PROF_CHANNEL_STARS_SOC_LOG}},
+        }
+    },
+    {
+        Mspti::Common::PlatformType::CHIP_310B, {
+            {MSPTI_ACTIVITY_KIND_MARKER, {PROF_CHANNEL_TS_FW}},
+            {MSPTI_ACTIVITY_KIND_KERNEL, {PROF_CHANNEL_TS_FW, PROF_CHANNEL_STARS_SOC_LOG}},
+        }
+    }
+};
+
+std::unique_ptr<DevProfTask> DevProfTaskFactory::CreateDevChannelTask(uint32_t deviceId, AI_DRV_CHANNEL channelId)
 {
-    switch (kind) {
-        case MSPTI_ACTIVITY_KIND_MARKER:
+    switch (channelId) {
+        case PROF_CHANNEL_TS_FW:
             return std::make_unique<DevProfTaskTsFw>(deviceId);
-        case MSPTI_ACTIVITY_KIND_KERNEL:
-            return CreateTaskKernel(deviceId);
+            break;
+        case PROF_CHANNEL_STARS_SOC_LOG:
+            return std::make_unique<DevProfTaskStars>(deviceId);
+            break;
         default:
             return std::make_unique<DevProfTaskDefault>(deviceId);
+            break;
     }
 }
 
-std::unique_ptr<DevProfTask> DevProfTaskFactory::CreateTaskKernel(uint32_t deviceId)
+std::vector<std::unique_ptr<DevProfTask>> DevProfTaskFactory::CreateTasks(uint32_t deviceId, msptiActivityKind kind)
 {
-    auto type = Mspti::Common::ContextManager::GetInstance()->GetChipType(deviceId);
-    switch (type) {
-        case Mspti::Common::PlatformType::CHIP_910B:
-        case Mspti::Common::PlatformType::CHIP_310B:
-            return std::make_unique<DevProfTaskStars>(deviceId);
-        default:
-            return std::make_unique<DevProfTaskDefault>(deviceId);
+    std::vector<std::unique_ptr<DevProfTask>> profTasks;
+    auto platform = Mspti::Common::ContextManager::GetInstance()->GetChipType(deviceId);
+    auto devIter = kindToChannel_map_.find(platform);
+    if (devIter == kindToChannel_map_.end()) {
+        MSPTI_LOGE("The platform: %d of device: %u is not support.", platform, deviceId);
+        return profTasks;
     }
+    auto kindIter = devIter->second.find(kind);
+    if (kindIter == devIter->second.end()) {
+        MSPTI_LOGW("The kind: %d of device: %u is not support.", kind, deviceId);
+        return profTasks;
+    }
+    const auto& channelTypes = kindIter->second;
+    for (const auto& channelType : channelTypes) {
+        auto task = CreateDevChannelTask(deviceId, channelType);
+        profTasks.emplace_back(std::move(task));
+    }
+    return profTasks;
 }
 
 msptiResult DevProfTask::Start()
@@ -79,80 +108,102 @@ void DevProfTask::Run()
     StopTask();
 }
 
+// DevProfTaskTsFw的引用计数，保证在第一次使能时，Start Device任务
+// 最后一次反使能时，Stop Device任务
+std::atomic<uint32_t> DevProfTaskTsFw::ref_cnt_{0};
 msptiResult DevProfTaskTsFw::StartTask()
 {
-    if (!Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->CheckChannelValid(deviceId_, channelId_)) {
-        return MSPTI_SUCCESS;
-    }
-    static const uint32_t SAMPLE_PERIOD = 20;
-    Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->AddReader(deviceId_, channelId_);
-    TsTsFwProfileConfigT configP;
-    if (memset_s(&configP, sizeof(configP), 0, sizeof(configP)) != EOK) {
-        return MSPTI_ERROR_INNER;
-    }
-    configP.period = SAMPLE_PERIOD;
-    configP.tsKeypoint = 1;
+    if (ref_cnt_.load() == 0) {
+        if (!Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->CheckChannelValid(deviceId_, channelId_)) {
+            return MSPTI_SUCCESS;
+        }
+        static const uint32_t SAMPLE_PERIOD = 20;
+        Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->AddReader(deviceId_, channelId_);
+        TsTsFwProfileConfigT configP;
+        if (memset_s(&configP, sizeof(configP), 0, sizeof(configP)) != EOK) {
+            return MSPTI_ERROR_INNER;
+        }
+        configP.period = SAMPLE_PERIOD;
+        configP.tsKeypoint = 1;
 
-    ProfStartParaT profStartPara;
-    profStartPara.channelType = PROF_CHANNEL_TYPE_TS;
-    profStartPara.samplePeriod = SAMPLE_PERIOD;
-    profStartPara.realTime = PROFILE_REAL_TIME;
-    profStartPara.userData = &configP;
-    profStartPara.userDataSize = static_cast<unsigned int>(sizeof(TsTsFwProfileConfigT));
-    int ret = ProfDrvStart(deviceId_, channelId_, &profStartPara);
-    if (ret != 0) {
-        MSPTI_LOGE("Failed to start TsTrackJob for device: %u, channel id: %u", deviceId_, channelId_);
-        return MSPTI_ERROR_INNER;
+        ProfStartParaT profStartPara;
+        profStartPara.channelType = PROF_CHANNEL_TYPE_TS;
+        profStartPara.samplePeriod = SAMPLE_PERIOD;
+        profStartPara.realTime = PROFILE_REAL_TIME;
+        profStartPara.userData = &configP;
+        profStartPara.userDataSize = static_cast<unsigned int>(sizeof(TsTsFwProfileConfigT));
+        int ret = ProfDrvStart(deviceId_, channelId_, &profStartPara);
+        if (ret != 0) {
+            MSPTI_LOGE("Failed to start TsTrackJob for device: %u, channel id: %u", deviceId_, channelId_);
+            return MSPTI_ERROR_INNER;
+        }
+        MSPTI_LOGI("Succeed to start TsTrackJob for device: %u, channel id: %u", deviceId_, channelId_);
     }
+    ref_cnt_++;
     return MSPTI_SUCCESS;
 }
 
 msptiResult DevProfTaskTsFw::StopTask()
 {
-    int ret = ProfStop(deviceId_, channelId_);
-    if (ret != 0) {
-        MSPTI_LOGE("Failed to stop TsTrackJob for device: %u, channel id: %u", deviceId_, channelId_);
-        return MSPTI_ERROR_INNER;
+    ref_cnt_--;
+    if (ref_cnt_.load() == 0) {
+        int ret = ProfStop(deviceId_, channelId_);
+        if (ret != 0) {
+            MSPTI_LOGE("Failed to stop TsTrackJob for device: %u, channel id: %u", deviceId_, channelId_);
+            return MSPTI_ERROR_INNER;
+        }
+        Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->RemoveReader(deviceId_, channelId_);
+        MSPTI_LOGI("Succeed to stop TsTrackJob for device: %u, channel id: %u", deviceId_, channelId_);
     }
-    Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->RemoveReader(deviceId_, channelId_);
     return MSPTI_SUCCESS;
 }
 
+// DevProfTaskStars的引用计数，保证在第一次使能时，Start Device任务
+// 最后一次反使能时，Stop Device任务
+std::atomic<uint32_t> DevProfTaskStars::ref_cnt_{0};
 msptiResult DevProfTaskStars::StartTask()
 {
-    if (!Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->CheckChannelValid(deviceId_, channelId_)) {
-        return MSPTI_SUCCESS;
+    if (ref_cnt_.load() == 0) {
+        if (!Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->CheckChannelValid(deviceId_, channelId_)) {
+            return MSPTI_SUCCESS;
+        }
+        Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->AddReader(deviceId_, channelId_);
+        StarsSocLogConfigT configP;
+        if (memset_s(&configP, sizeof(StarsSocLogConfigT), 0, sizeof(StarsSocLogConfigT)) != EOK) {
+            return MSPTI_ERROR_INNER;
+        }
+        configP.acsq_task = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
+        configP.ffts_thread_task = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
+        ProfStartParaT profStartPara;
+        profStartPara.channelType = PROF_CHANNEL_TYPE_TS;
+        static const uint32_t SAMPLE_PERIOD = 20;
+        profStartPara.samplePeriod = SAMPLE_PERIOD;
+        profStartPara.realTime = PROFILE_REAL_TIME;
+        profStartPara.userData = &configP;
+        profStartPara.userDataSize = static_cast<unsigned int>(sizeof(StarsSocLogConfigT));
+        int ret = ProfDrvStart(deviceId_, channelId_, &profStartPara);
+        if (ret != 0) {
+            MSPTI_LOGE("Failed to start ProfStarsJob for device: %u, channel id: %u", deviceId_, channelId_);
+            return MSPTI_ERROR_INNER;
+        }
+        MSPTI_LOGI("Succeed to start ProfStarsJob for device: %u, channel id: %u", deviceId_, channelId_);
     }
-    Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->AddReader(deviceId_, channelId_);
-    StarsSocLogConfigT configP;
-    if (memset_s(&configP, sizeof(StarsSocLogConfigT), 0, sizeof(StarsSocLogConfigT)) != EOK) {
-        return MSPTI_ERROR_INNER;
-    }
-    configP.acsq_task = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
-    configP.ffts_thread_task = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
-    ProfStartParaT profStartPara;
-    profStartPara.channelType = PROF_CHANNEL_TYPE_TS;
-    static const uint32_t SAMPLE_PERIOD = 20;
-    profStartPara.samplePeriod = SAMPLE_PERIOD;
-    profStartPara.realTime = PROFILE_REAL_TIME;
-    profStartPara.userData = &configP;
-    profStartPara.userDataSize = static_cast<unsigned int>(sizeof(StarsSocLogConfigT));
-    int ret = ProfDrvStart(deviceId_, channelId_, &profStartPara);
-    if (ret != 0) {
-        MSPTI_LOGE("Failed to start ProfStarsJob for device: %u, channel id: %u", deviceId_, channelId_);
-        return MSPTI_ERROR_INNER;
-    }
+    ref_cnt_++;
     return MSPTI_SUCCESS;
 }
 
 msptiResult DevProfTaskStars::StopTask()
 {
-    int ret = ProfStop(deviceId_, channelId_);
-    if (ret != 0) {
-        MSPTI_LOGE("Failed to stop TsTrackJob for device: %u, channel id: %u", deviceId_, channelId_);
-        return MSPTI_ERROR_INNER;
+    ref_cnt_--;
+    if (ref_cnt_.load() == 0) {
+        int ret = ProfStop(deviceId_, channelId_);
+        if (ret != 0) {
+            MSPTI_LOGE("Failed to stop ProfStarsJob for device: %u, channel id: %u", deviceId_, channelId_);
+            return MSPTI_ERROR_INNER;
+        }
+        Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->RemoveReader(deviceId_, channelId_);
+        MSPTI_LOGI("Succeed to stop ProfStarsJob for device: %u, channel id: %u", deviceId_, channelId_);
     }
-    Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->RemoveReader(deviceId_, channelId_);
     return MSPTI_SUCCESS;
 }
 

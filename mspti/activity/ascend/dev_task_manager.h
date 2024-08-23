@@ -18,6 +18,7 @@
 #include <mutex>
 #include <map>
 #include <set>
+#include <vector>
 
 #include "activity/ascend/dev_prof_task.h"
 #include "external/mspti_result.h"
@@ -41,12 +42,14 @@ private:
     explicit DevTaskManager(DevTaskManager &&obj) = delete;
     DevTaskManager& operator=(DevTaskManager &&obj) = delete;
     void InitDeviceList();
+    msptiResult StartAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks);
+    msptiResult StopAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks);
 
 private:
     std::set<uint32_t> device_set_;
     std::once_flag get_device_flag_;
 
-    std::map<std::pair<uint32_t, msptiActivityKind>, std::unique_ptr<DevProfTask>> task_map_;
+    std::map<std::pair<uint32_t, msptiActivityKind>, std::vector<std::unique_ptr<DevProfTask>>> task_map_;
     std::mutex task_map_mtx_;
 };
 }  // Ascend
