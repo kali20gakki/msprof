@@ -59,6 +59,6 @@ ExternalProject_Add(mspti_llt
     BUILD_COMMAND $(MAKE)
     INSTALL_COMMAND "" # llt install
     BUILD_ALWAYS TRUE
-    DEPENDS gtest_build
+    DEPENDS gtest_build mockcpp_build
 )
 endif()

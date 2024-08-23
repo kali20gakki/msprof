@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.14.1)
-project(msprof_llt)
-add_definitions(-DMSPORF_LLT)
+project(mspti_llt)
 set(CMAKE_SKIP_RPATH TRUE)
 set(TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../)
 
@@ -12,6 +11,7 @@ set(CMAKE_MODULE_PATH
 include(${TOP_DIR}/test/cmake/depend.cmake)
 
 find_package(gtest)
+find_package(mockcpp)
 
 set(CMAKE_CXX_FLAGS " -Wno-unused")
 
@@ -54,3 +54,4 @@ link_libraries(
 
 add_subdirectory(callback)
 add_subdirectory(activity)
+add_subdirectory(common)

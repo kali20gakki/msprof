@@ -61,6 +61,6 @@ fi
 
 mkdir -p ${TOP_DIR}/build/prefix
 cmake -S ${TOP_DIR}/cmake/superbuild/ -B ${TOP_DIR}/build/build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DHITEST=${HI_TEST} -DCMAKE_INSTALL_PREFIX=${TOP_DIR}/build/prefix -DOBJECT=all
-cd ${TOP_DIR}/build/build; make -j$(nproc)
+cd ${TOP_DIR}/build/build; make -j$(nproc); make clean
 
 bash ${TOP_DIR}/scripts/create_run_package_pack.sh ${VERSION} ${PACKAGE_TYPE}

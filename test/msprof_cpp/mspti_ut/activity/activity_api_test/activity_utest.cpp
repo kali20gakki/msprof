@@ -11,6 +11,7 @@
 #include "activity/activity_manager.h"
 #include "mspti.h"
 
+namespace {
 std::atomic<uint64_t> g_records{0};
 constexpr uint64_t G_MARK_MAX_NUM = 10;
 
@@ -82,4 +83,5 @@ TEST_F(ActivityUtest, ActivityApiUtest)
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityDisable(MSPTI_ACTIVITY_KIND_MARKER));
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityFlushAll(1));
     EXPECT_EQ(G_MARK_MAX_NUM, g_records.load());
+}
 }

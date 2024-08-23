@@ -39,6 +39,7 @@ enum DrvError {
 
 #define PROF_CHANNEL_NAME_LEN 32
 #define PROF_CHANNEL_NUM_MAX 160
+
 template<typename Type>
 inline void THROW_FUNC_NOTFOUND(Type ptr, const std::string &funName, const std::string &soName)
 {

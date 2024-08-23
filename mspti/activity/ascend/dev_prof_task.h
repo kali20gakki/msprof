@@ -13,14 +13,19 @@
 #ifndef MSPTI_ACTIVITY_ASCEND_DEV_PROF_TASK_H
 #define MSPTI_ACTIVITY_ASCEND_DEV_PROF_TASK_H
 
+#include <atomic>
 #include <condition_variable>
+#include <map>
 #include <memory>
 #include <mutex>
+#include <set>
 #include <thread>
+#include <vector>
 
-#include "external/mspti_result.h"
-#include "external/mspti_activity.h"
+#include "common/context_manager.h"
 #include "common/inject/inject_base.h"
+#include "external/mspti_activity.h"
+#include "external/mspti_result.h"
 
 namespace Mspti {
 namespace Ascend {
@@ -67,6 +72,7 @@ private:
 private:
     AI_DRV_CHANNEL channelId_ = PROF_CHANNEL_TS_FW;
     uint32_t deviceId_;
+    static std::atomic<uint32_t> ref_cnt_;
 };
 
 class DevProfTaskStars : public DevProfTask {
@@ -80,14 +86,20 @@ private:
 private:
     AI_DRV_CHANNEL channelId_ = PROF_CHANNEL_STARS_SOC_LOG;
     uint32_t deviceId_;
+    static std::atomic<uint32_t> ref_cnt_;
 };
 
 class DevProfTaskFactory {
 public:
-    static std::unique_ptr<DevProfTask> CreateTask(uint32_t deviceId, msptiActivityKind kind);
+    static std::vector<std::unique_ptr<DevProfTask>> CreateTasks(uint32_t deviceId, msptiActivityKind kind);
 
 private:
-    static std::unique_ptr<DevProfTask> CreateTaskKernel(uint32_t deviceId);
+    static std::unique_ptr<DevProfTask> CreateDevChannelTask(uint32_t deviceId, AI_DRV_CHANNEL channelId);
+
+private:
+    // <deviceId, ChannelID>
+    const static std::map<Mspti::Common::PlatformType,
+        std::map<msptiActivityKind, std::set<AI_DRV_CHANNEL>>> kindToChannel_map_;
 };
 
 }  // Ascend

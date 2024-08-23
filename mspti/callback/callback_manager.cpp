@@ -164,9 +164,7 @@ msptiResult CallbackManager::EnableDomain(uint32_t enable,
 void CallbackManager::ExecuteCallback(msptiCallbackDomain domain,
     msptiCallbackId cbid, msptiApiCallbackSite site, const char* funcName)
 {
-    MSPTI_LOGD("CallbackManager ExecuteCallback enter, funcName is %s", funcName);
     if (!init_.load()) {
-        MSPTI_LOGW("CallbackManager was not init.");
         return;
     }
     auto iter = cbid_map_.end();

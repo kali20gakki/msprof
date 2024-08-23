@@ -30,7 +30,7 @@ DevTaskManager *DevTaskManager::GetInstance()
 DevTaskManager::~DevTaskManager()
 {
     for (auto iter = task_map_.begin(); iter != task_map_.end(); iter++) {
-        iter->second->Stop();
+        StopAllDevKindProfTask(iter->second);
     }
     task_map_.clear();
     Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->UnInit();
@@ -41,28 +41,48 @@ DevTaskManager::DevTaskManager()
     Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->Init();
 }
 
+msptiResult DevTaskManager::StartAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks)
+{
+    msptiResult ret = MSPTI_SUCCESS;
+    for (auto& profTask : profTasks) {
+        if (profTask->Start() != MSPTI_SUCCESS) {
+            ret = MSPTI_ERROR_INNER;
+        }
+    }
+    return ret;
+}
+
+msptiResult DevTaskManager::StopAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks)
+{
+    msptiResult ret = MSPTI_SUCCESS;
+    for (auto& profTask : profTasks) {
+        if (profTask->Stop() != MSPTI_SUCCESS) {
+            ret = MSPTI_ERROR_INNER;
+        }
+        profTask.reset(nullptr);
+    }
+    return ret;
+}
+
 msptiResult DevTaskManager::StartDevProfTask(uint32_t deviceId, msptiActivityKind kind)
 {
     if (!CheckDeviceOnline(deviceId)) {
         MSPTI_LOGW("Device: %u is offline.", deviceId);
         return MSPTI_SUCCESS;
     }
+    MSPTI_LOGI("Start DevProfTask, deviceId: %u, kind: %d", deviceId, kind);
     Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->GetAllChannels(deviceId);
     Mspti::Common::ContextManager::GetInstance()->InitDevTimeInfo(deviceId);
     std::lock_guard<std::mutex> lk(task_map_mtx_);
     auto iter = task_map_.find({deviceId, kind});
     if (iter == task_map_.end()) {
-        std::unique_ptr<DevProfTask> profTask = Mspti::Ascend::DevProfTaskFactory::CreateTask(deviceId, kind);
-        if (!profTask) {
-            MSPTI_LOGE("Failed to init DevTask for device: %u.", deviceId);
-            return MSPTI_ERROR_INNER;
-        }
-        auto ret = profTask->Start();
+        auto profTasks = Mspti::Ascend::DevProfTaskFactory::CreateTasks(deviceId, kind);
+        auto ret = StartAllDevKindProfTask(profTasks);
         if (ret != MSPTI_SUCCESS) {
-            MSPTI_LOGE("The device %u start failed.", deviceId);
+            MSPTI_LOGE("The device %u start DevProfTask failed.", deviceId);
             return ret;
         }
-        task_map_.insert({{deviceId, kind}, std::move(profTask)});
+        task_map_.insert({{deviceId, kind}, std::move(profTasks)});
     } else {
         MSPTI_LOGW("The device: %u, kind: %d is already running.", deviceId, kind);
     }
@@ -71,14 +91,15 @@ msptiResult DevTaskManager::StartDevProfTask(uint32_t deviceId, msptiActivityKin
 
 msptiResult DevTaskManager::StopDevProfTask(uint32_t deviceId, msptiActivityKind kind)
 {
+    MSPTI_LOGI("Stop DevProfTask, deviceId: %u, kind: %d", deviceId, kind);
+    msptiResult ret = MSPTI_SUCCESS;
     std::lock_guard<std::mutex> lk(task_map_mtx_);
     auto iter = task_map_.find({deviceId, kind});
     if (iter != task_map_.end()) {
-        iter->second->Stop();
-        iter->second.reset(nullptr);
-        task_map_.erase({deviceId, kind});
+        ret = StopAllDevKindProfTask(iter->second);
+        task_map_.erase(iter);
     }
-    return MSPTI_SUCCESS;
+    return ret;
 }
 
 bool DevTaskManager::CheckDeviceOnline(uint32_t deviceId)
