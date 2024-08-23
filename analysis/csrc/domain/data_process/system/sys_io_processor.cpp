@@ -46,7 +46,7 @@ bool SysIOProcessor::Process(DataInventory &dataInventory)
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
         localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
-        flag &= ProcessSingleDevice(devicePath, localtimeContext, allProcessedData, allSummaryData);
+        flag = ProcessSingleDevice(devicePath, localtimeContext, allProcessedData, allSummaryData) && flag;
     }
     if (!SaveToDataInventory<SysIOOriginalData>(std::move(allProcessedData), dataInventory, processorName_) ||
         !SaveToDataInventory<SysIOReportData>(std::move(allSummaryData), dataInventory, processorName_)) {
@@ -80,6 +80,7 @@ bool SysIOProcessor::ProcessSingleDevice(const std::string &devicePath, Localtim
         if (status == CHECK_FAILED) {
             return false;
         }
+        return true;
     }
     auto processedData = ProcessData(sysIODB, localtimeContext);
     if (processedData.empty()) {
@@ -92,6 +93,7 @@ bool SysIOProcessor::ProcessSingleDevice(const std::string &devicePath, Localtim
         if (status == CHECK_FAILED) {
             return false;
         }
+        return true;
     }
     auto summaryData = ProcessSummaryData(sysIODB, localtimeContext);
     if (summaryData.empty()) {
@@ -240,6 +242,7 @@ bool SysIOTimelineProcessor::ProcessSingleDevice(const std::string &devicePath, 
         if (status == CHECK_FAILED) {
             return false;
         }
+        return true;
     }
     OriSysIOReceiveSendData oriData = LoadData(sysIOReceiveSendDB);
     if (oriData.empty()) {

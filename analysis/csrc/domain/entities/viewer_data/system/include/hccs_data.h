@@ -3,7 +3,7 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : hccs_format_data.h
+ * File Name          : hccs_data.h
  * Description        : hccs_processor处理hccs表相关数据
  * Author             : msprof team
  * Creation Date      : 2024/8/10

@@ -3,7 +3,7 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : npu_mem_format_data.h
+ * File Name          : npu_mem_data.h
  * Description        : npu_mem_processor处理NpuMem表后的格式化数据
  * Author             : msprof team
  * Creation Date      : 2024/8/10

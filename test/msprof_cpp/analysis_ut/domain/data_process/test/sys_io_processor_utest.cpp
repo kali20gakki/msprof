@@ -69,6 +69,7 @@ class SysIOProcessorUTest : public testing::Test {
 protected:
     static void SetUpTestCase()
     {
+        GlobalMockObject::verify();
         EXPECT_TRUE(File::CreateDir(SYS_IO_DIR));
         EXPECT_TRUE(File::CreateDir(PROF_DIR));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_DIR, DEVICE_PREFIX + "0"})));
@@ -129,6 +130,7 @@ protected:
     static void TearDownTestCase()
     {
         EXPECT_TRUE(File::RemoveDir(SYS_IO_DIR, 0));
+        GlobalMockObject::verify();
     }
 };
 
