@@ -31,7 +31,7 @@ void ActivityBuffer::Init(msptiBuffersCallbackRequestFunc func)
     func(&buf_, &buf_size_, &records_num_);
     const static uint64_t MIN_ACTIVITY_BUFFER_SIZE = 2 * 1024 * 1024;
     if (buf_size_ < MIN_ACTIVITY_BUFFER_SIZE) {
-        PRINT_LOGW("Please malloc the Activity Buffer more than 2MB. Current is %lu Bytes.", buf_size_);
+        MSPTI_LOGW("Please malloc the Activity Buffer more than 2MB. Current is %lu Bytes.", buf_size_);
     }
 }
 
@@ -49,7 +49,7 @@ msptiResult ActivityBuffer::Record(msptiActivity *activity, size_t size)
         return MSPTI_ERROR_INNER;
     }
     if (size > buf_size_ - valid_size_) {
-        PRINT_LOGW("Record is dropped due to insufficient space of Activity Buffer.");
+        MSPTI_LOGW("Record is dropped due to insufficient space of Activity Buffer.");
         return MSPTI_ERROR_INNER;
     }
     if (memcpy_s(buf_ + valid_size_, buf_size_ - valid_size_, activity, size) != EOK) {

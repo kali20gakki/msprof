@@ -23,8 +23,8 @@ namespace Common {
 
 struct DevTimeInfo {
     uint64_t freq;
-    uint64_t hostStartMonoRawTime;
-    uint64_t devStartSysCnt;
+    uint64_t startRealTime;
+    uint64_t startSysCnt;
 };
 
 enum class PlatformType {
@@ -37,7 +37,12 @@ class ContextManager final {
 public:
     static ContextManager* GetInstance();
     void InitDevTimeInfo(uint32_t deviceId);
-    uint64_t GetMonotomicFromSysCnt(uint32_t deviceId, uint64_t sysCnt);
+    void InitHostTimeInfo();
+    bool HostFreqIsEnable();
+    uint64_t GetRealTimeFromSysCnt(uint32_t deviceId, uint64_t sysCnt);
+    // Host
+    uint64_t GetRealTimeFromSysCnt(uint64_t sysCnt);
+    uint64_t GetHostTimeStampNs();
     PlatformType GetChipType(uint32_t deviceId);
     uint64_t CorrelationId();
     void UpdateCorrelationId();
@@ -52,6 +57,8 @@ private:
 private:
     std::unordered_map<uint32_t, std::unique_ptr<DevTimeInfo>> dev_time_info_;
     std::mutex dev_time_mtx_;
+    std::unique_ptr<DevTimeInfo> host_time_info_;
+
     std::atomic<uint64_t> correlation_id_{0};
 };
 }  // Common

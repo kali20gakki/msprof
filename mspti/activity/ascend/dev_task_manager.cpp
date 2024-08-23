@@ -39,6 +39,7 @@ DevTaskManager::~DevTaskManager()
 DevTaskManager::DevTaskManager()
 {
     Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->Init();
+    Mspti::Common::ContextManager::GetInstance()->InitHostTimeInfo();
 }
 
 msptiResult DevTaskManager::StartAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks)

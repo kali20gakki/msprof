@@ -32,6 +32,16 @@ uint64_t Utils::GetClockMonotonicRawNs()
     return static_cast<uint64_t>(ts.tv_sec) * SECTONSEC + static_cast<uint64_t>(ts.tv_nsec);
 }
 
+uint64_t Utils::GetClockRealTimeNs()
+{
+    struct timespec ts;
+    if (memset_s(&ts, sizeof(timespec), 0, sizeof(timespec)) != EOK) {
+        return 0;
+    }
+    clock_gettime(CLOCK_REALTIME, &ts);
+    return static_cast<uint64_t>(ts.tv_sec) * SECTONSEC + static_cast<uint64_t>(ts.tv_nsec);
+}
+
 uint64_t Utils::GetHostSysCnt()
 {
     uint64_t cycles;
@@ -53,13 +63,6 @@ uint64_t Utils::GetHostSysCnt()
     cycles = 0;
 #endif
     return cycles;
-}
-
-std::string Utils::GetProcName()
-{
-    static char buf[16] = {'\0'};
-    prctl(PR_GET_NAME, reinterpret_cast<unsigned long>(buf));
-    return std::string(buf);
 }
 
 uint32_t Utils::GetPid()
