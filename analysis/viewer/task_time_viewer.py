@@ -130,7 +130,7 @@ class TaskTimeViewer(BaseViewer):
                 KfcTurnData(
                     "WaitNotify {}".format(data.current_turn), data.stream_id, data.task_id,
                     InfoConfReader().trans_syscnt_into_local_time(data.wait_notify_start_time),
-                    (data.kfc_alg_exe_start_time - data.wait_notify_start_time) / NumberConstant.USTONS),
+                    InfoConfReader().duration_from_syscnt(data.kfc_alg_exe_start_time - data.wait_notify_start_time)),
                 KfcTurnData(
                     "KfcAlgExe {}".format(data.current_turn), data.stream_id, data.task_id,
                     InfoConfReader().trans_syscnt_into_local_time(data.kfc_alg_exe_start_time),
