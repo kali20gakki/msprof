@@ -139,7 +139,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
         transport_type = trans_enum_name(TransPortType, aicpu_info.data.transport_type)
         rdma_type = trans_enum_name(RdmaType, aicpu_info.data.rdma_type)
         return [
-            aicpu_info.timestamp,
+            InfoConfReader().time_from_syscnt(aicpu_info.timestamp),
             self.hash_data.get(aicpu_info.data.item_id, aicpu_info.data.item_id),
             aicpu_info.data.ccl_tag,
             aicpu_info.data.group_name,

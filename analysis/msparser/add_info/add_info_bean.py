@@ -48,7 +48,7 @@ class AddInfoBean(StructDecoder):
         return self._data_len
 
     @property
-    def timestamp(self: any) -> str:
+    def timestamp(self: any) -> int:
         """
         timestamp
         """

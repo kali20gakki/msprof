@@ -161,6 +161,7 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         self.assertEqual(1000, data[0][5])
 
     def test_parse_should_return_kfc_hccl_info_data_when_type_6(self):
+        InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}]}
         aicpu_data = [23130, 6000, 6, 1, 128, 20000,
                       12345, 0, 111111, 0, 0, 8, 0, 0, 4294967295, 0, 2, 0, 0.1, 22390660833240, 22390660824120,
                       0, 0, 0, 0, 0, 10, 20] + [0] * 30
@@ -173,6 +174,7 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         data = check._aicpu_data.get(AicpuAddInfoBean.KFC_HCCL_INFO, [])
         self.assertEqual(1, len(data))
         self.assertEqual(4294967295, data[0][9])
+        InfoConfReader()._info_json = {}
 
 
 if __name__ == '__main__':
