@@ -54,8 +54,6 @@ from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from profiling_bean.prof_enum.export_data_type import ExportDataType
 from tuning.cluster.cluster_tuning_facade import ClusterTuningFacade
 from tuning.cluster_tuning import ClusterTuning
-from tuning.profiling_tuning import ProfilingTuning
-from viewer.tuning_view import TuningView
 
 
 class ExportCommand:
@@ -643,15 +641,6 @@ class ExportCommand:
 
         self._handle_export_data(params)
 
-    def _show_tuning_result(self: any, result_dir: str) -> None:
-        if self.command_type != MsProfCommonConstant.SUMMARY or not self.list_map.get("devices_list", []) \
-                or not all(Utils.generator_to_list(device_id.isdigit()
-                                                   for device_id in self.list_map.get("devices_list", []))):
-            return
-        ProfilingTuning.run(result_dir, self.sample_config)
-        tuning_view = TuningView(result_dir, self.sample_config, self.list_map.get("devices_list")[0])
-        tuning_view.show_by_dev_id()
-
     def _show_cluster_tuning(self) -> None:
         if self.command_type != MsProfCommonConstant.SUMMARY:
             return
@@ -685,7 +674,6 @@ class ExportCommand:
                     InfoConfReader().load_info(sub_path)
                     self._handle_export(sub_path)
                     GeLogicStreamSingleton().load_info(sub_path)
-                    self._show_tuning_result(sub_path)
                 elif sub_path and is_cluster:
                     warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
                                          'such as PROF_XXX_XXX_XXX' % collect_path)
