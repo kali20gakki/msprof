@@ -11,8 +11,6 @@ class TestConfigManager(unittest.TestCase):
     def test_get(self):
         config = ConfigManager.get(ConfigManager.PROF_CONDITION)
         self.assertEqual(len(config.get_data()), 29)
-        config = ConfigManager.get(ConfigManager.PROF_RULE)
-        self.assertEqual(len(config.get_data()), 19)
         config = ConfigManager.get(ConfigManager.DATA_PARSERS)
         self.assertEqual(len(config.sections()), 57)
         config = ConfigManager.get(ConfigManager.STARS)
@@ -27,5 +25,3 @@ class TestConfigManager(unittest.TestCase):
         self.assertEqual(len(config.sections()), 59)
         config = ConfigManager.get(ConfigManager.DATA_CALCULATOR)
         self.assertEqual(len(config.sections()), 23)
-        config = ConfigManager.get(ConfigManager.TUNING_RULE)
-        self.assertEqual(len(config.get_data()), 18)

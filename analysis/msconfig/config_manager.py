@@ -15,18 +15,15 @@ from msconfig.l2_cache_config import L2CacheConfig
 from msconfig.meta_config import MetaConfig
 from msconfig.msprof_export_data_config import MsProfExportDataConfig
 from msconfig.prof_condition_config import ProfConditionConfig
-from msconfig.prof_rule_config import ProfRuleConfig
 from msconfig.stars_config import StarsConfig
 from msconfig.tables_config import TablesConfig
 from msconfig.tables_operator_config import TablesOperatorConfig
 from msconfig.tables_training_config import TablesTrainingConfig
 from msconfig.ts_cpu_config import TsCPUConfig
-from msconfig.tuning_rule_config import TuningRuleConfig
 
 
 class ConfigManager:
     PROF_CONDITION = 'ProfConditionConfig'
-    PROF_RULE = 'ProfRuleConfig'
     DATA_PARSERS = 'DataParsersConfig'
     STARS = 'StarsConfig'
     TABLES = 'TablesConfig'
@@ -34,7 +31,6 @@ class ConfigManager:
     TABLES_OPERATOR = 'TablesOperatorConfig'
     MSPROF_EXPORT_DATA = 'MsProfExportDataConfig'
     DATA_CALCULATOR = 'DataCalculatorConfig'
-    TUNING_RULE = 'TuningRuleConfig'
     AI_CORE = "AICoreConfig"
     AI_CPU = "AICPUConfig"
     CTRL_CPU = "CtrlCPUConfig"
@@ -45,7 +41,6 @@ class ConfigManager:
 
     CONFIG_MAP = {
         PROF_CONDITION: ProfConditionConfig,
-        PROF_RULE: ProfRuleConfig,
         DATA_PARSERS: DataParsersConfig,
         STARS: StarsConfig,
         TABLES: TablesConfig,
@@ -53,7 +48,6 @@ class ConfigManager:
         TABLES_OPERATOR: TablesOperatorConfig,
         MSPROF_EXPORT_DATA: MsProfExportDataConfig,
         DATA_CALCULATOR: DataCalculatorConfig,
-        TUNING_RULE: TuningRuleConfig,
         AI_CORE: AICoreConfig,
         AI_CPU: AICPUConfig,
         CTRL_CPU: CtrlCPUConfig,

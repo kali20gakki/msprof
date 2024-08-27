@@ -429,18 +429,6 @@ class TestExportCommand(unittest.TestCase):
             test.list_map = {'export_type_list': ['acl'], 'devices_list': [1]}
             test._handle_export("")
 
-    def test_show_tuning_result(self):
-        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
-        args = Namespace(**args_dic)
-        test = ExportCommand("timeline", args)
-        test._show_tuning_result('')
-
-        with mock.patch(NAMESPACE + '.ProfilingTuning.run', return_value=(True,)), \
-                mock.patch(NAMESPACE + ".TuningView.show_by_dev_id"):
-            test = ExportCommand("summary", args)
-            test.list_map["devices_list"] = ["1"]
-            test._show_tuning_result('')
-
     def test_process(self):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
         args = Namespace(**args_dic)
@@ -449,7 +437,6 @@ class TestExportCommand(unittest.TestCase):
                 mock.patch('os.listdir', return_value=[]), \
                 mock.patch(NAMESPACE + '.check_path_valid'), \
                 mock.patch(NAMESPACE + '.ExportCommand._handle_export'), \
-                mock.patch(NAMESPACE + '.ExportCommand._show_tuning_result'), \
                 mock.patch(NAMESPACE + '.get_valid_sub_path'), \
                 mock.patch(NAMESPACE + '.ExportCommand._process_sub_dirs'):
             with mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', retrun_value=True):
@@ -469,7 +456,6 @@ class TestExportCommand(unittest.TestCase):
                 mock.patch('os.listdir', return_value=[]), \
                 mock.patch(NAMESPACE + '.check_path_valid'), \
                 mock.patch(NAMESPACE + '.ExportCommand._handle_export'), \
-                mock.patch(NAMESPACE + '.ExportCommand._show_tuning_result'), \
                 mock.patch(NAMESPACE + '.MsprofOutputSummary._is_in_prof_file', return_value=False), \
                 mock.patch(NAMESPACE + '.get_path_dir', return_value=[]), \
                 mock.patch(NAMESPACE + '.get_valid_sub_path'):
