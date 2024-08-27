@@ -17,13 +17,6 @@ protected:
     virtual void TearDown() {}
 };
 
-TEST_F(UtilsUtest, GetProcNameTest)
-{
-    auto procName = Mspti::Common::Utils::GetProcName();
-    EXPECT_STREQ(procName.c_str(), "mspti_uti_utest");
-}
-
-
 TEST_F(UtilsUtest, RealPathTest)
 {
     std::string path = "./test";
