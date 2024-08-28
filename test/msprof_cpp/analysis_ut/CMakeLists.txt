@@ -18,6 +18,7 @@ include_directories(
     ${TOP_DIR}/test/msprof_cpp/analysis_ut/infrastructure/common_stub/ # 写最前面
     ${TOP_DIR}/
     ${TOP_DIR}/opensource/json/include
+    ${TOP_DIR}/opensource/rapidjson/include
     ${TOP_DIR}/platform/securec/include
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
@@ -98,3 +99,4 @@ add_subdirectory(viewer)
 add_subdirectory(worker)
 add_subdirectory(infrastructure)
 add_subdirectory(domain)
+add_subdirectory(application)

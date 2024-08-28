@@ -113,6 +113,7 @@ public:
     void Close();
     bool IsOpen() const;
     void WriteText(const std::string &content);
+    void WriteText(const char *content, std::size_t len);
     static bool Check(const std::string &path, uint64_t maxReadFileBytes = 64 * 1024 * 1024);
 
 private:

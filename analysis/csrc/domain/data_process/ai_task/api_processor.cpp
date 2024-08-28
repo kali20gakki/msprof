@@ -88,19 +88,18 @@ std::vector<ApiData> ApiProcessor::FormatData(
         return formatData;
     }
     ApiData data;
-    std::string id;
-    std::string itemId;
     std::string level;
     for (const auto& row : oriData) {
-        std::tie(data.apiName, id, level, data.threadId, itemId,
+        std::tie(data.structType, data.id, level, data.threadId, data.itemId,
                  data.start, data.end, data.connectionId) = row;
         HPFloat startTimestamp = Utils::GetTimeFromSyscnt(data.start, params);
         HPFloat endTimestamp = Utils::GetTimeFromSyscnt(data.end, params);
         data.level = GetEnumTypeValue(level, NAME_STR(API_LEVEL_TABLE), API_LEVEL_TABLE);
+        data.apiName = data.structType;
         if (data.level == MSPROF_REPORT_ACL_LEVEL) {
-            data.apiName = id;
+            data.apiName = data.id;
         } else if (data.level == MSPROF_REPORT_HCCL_NODE_LEVEL) {
-            data.apiName = itemId;
+            data.apiName = data.itemId;
         }
         data.start = GetLocalTime(startTimestamp, record).Uint64();
         data.end = GetLocalTime(endTimestamp, record).Uint64();
