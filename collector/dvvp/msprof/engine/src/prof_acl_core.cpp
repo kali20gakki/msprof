@@ -151,9 +151,8 @@ aclError aclprofFinalize()
     return ACL_SUCCESS;
 }
 
-using ACL_PROF_AICORE_EVENTS_PTR = aclprofAicoreEvents *;
 bool IsValidProfConfigPreCheck(CONST_UINT32_T_PTR deviceIdList, uint32_t deviceNums,
-    ACL_PROF_AICORE_EVENTS_PTR aicoreEvents)
+    const aclprofAicoreEvents *aicoreEvents)
 {
     if (deviceNums != 0 && deviceIdList == nullptr) {
         MSPROF_LOGE("deviceIdList is nullptr");
@@ -218,7 +217,8 @@ static bool IsValidDevId(CONST_UINT32_T_PTR deviceIdList, const uint32_t deviceN
     return true;
 }
 
-bool IsValidProfConfig(CONST_UINT32_T_PTR deviceIdList, uint32_t deviceNums, ACL_PROF_AICORE_EVENTS_PTR aicoreEvents)
+bool IsValidProfConfig(CONST_UINT32_T_PTR deviceIdList, uint32_t deviceNums,
+    const aclprofAicoreEvents *aicoreEvents)
 {
     if (!IsValidProfConfigPreCheck(deviceIdList, deviceNums, aicoreEvents)) {
         return false;
@@ -264,7 +264,7 @@ static bool GetVisibleDevIdListByLogicId(UINT32_T_PTR deviceIdList, const uint32
 }
 
 ACL_PROF_CONFIG_PTR aclprofCreateConfig(UINT32_T_PTR deviceIdList, uint32_t deviceNums,
-    aclprofAicoreMetrics aicoreMetrics, ACL_PROF_AICORE_EVENTS_PTR aicoreEvents, uint64_t dataTypeConfig)
+    aclprofAicoreMetrics aicoreMetrics, const aclprofAicoreEvents *aicoreEvents, uint64_t dataTypeConfig)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
