@@ -38,6 +38,9 @@ struct CommunicationTaskData {
     uint64_t linkType = UINT64_MAX;
     uint64_t notifyId = UINT64_MAX;
     uint64_t rdmaType = UINT64_MAX;
+    double duration = 0.0;
+    double duration_estimated = 0.0;
+    double bandwidth = 0.0;
 };
 struct CommunicationOpData {
     std::string opName;
@@ -52,6 +55,8 @@ struct CommunicationOpData {
     std::string algType;
     uint64_t count = UINT64_MAX;
     std::string opType;
+    uint32_t modelId = 0;
+    uint32_t deviceId = UINT32_MAX;
 };
 }
 }
