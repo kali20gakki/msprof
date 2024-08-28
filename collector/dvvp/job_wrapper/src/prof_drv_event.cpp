@@ -79,7 +79,7 @@ void *ProfDrvEvent::EventThreadHandle(void *attr)
             MSPROF_LOGE("Call halEschedCreateGrpEx failed. (devId=%u, ret=%d)\n", eventAttr->deviceId, ret);
             return nullptr;
         }
-        MSPROF_LOGI("create grp id:%u by name '%s'", grpId, eventAttr->grpName);
+        MSPROF_LOGI("create grp id:%u by name '%s'", grpId, eventAttr->grpName.c_str());
  
         uint64_t eventBitmap = (1ULL << static_cast<uint64_t>(EVENT_USR_START));
         ret = DriverPlugin::instance()->MsprofHalEschedSubscribeEvent(eventAttr->deviceId, grpId, 0, eventBitmap);
