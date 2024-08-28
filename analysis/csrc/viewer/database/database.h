@@ -210,6 +210,11 @@ public:
     HostNetworkUsage();
 };
 
+class ChipTransDB : public Database {
+public:
+    ChipTransDB();
+};
+
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis

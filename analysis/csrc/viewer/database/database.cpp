@@ -575,6 +575,20 @@ namespace {
         {"usage", SQL_REAL_TYPE},
         {"speed", SQL_REAL_TYPE}
     };
+
+    const TableColumns PaLinkInfo = {
+        {"pa_link_id", SQL_INTEGER_TYPE},
+        {"pa_link_traffic_monit_rx", SQL_TEXT_TYPE},
+        {"pa_link_traffic_monit_tx", SQL_TEXT_TYPE},
+        {"sys_time", SQL_INTEGER_TYPE}
+    };
+
+    const TableColumns PcieInfo = {
+        {"pcie_id", SQL_INTEGER_TYPE},
+        {"pcie_write_bandwidth", SQL_INTEGER_TYPE},
+        {"pcie_read_bandwidth", SQL_INTEGER_TYPE},
+        {"sys_time", SQL_INTEGER_TYPE}
+    };
 }
 
 std::string Database::GetDBName() const
@@ -804,6 +818,13 @@ HostNetworkUsage::HostNetworkUsage()
 {
     dbName_ = "host_network_usage.db";
     tableColNames_["NetworkUsage"] = NetworkUsage;
+}
+
+ChipTransDB::ChipTransDB()
+{
+    dbName_ = "step_trace.db";
+    tableColNames_["PaLinkInfo"] = PaLinkInfo;
+    tableColNames_["PcieInfo"] = PcieInfo;
 }
 
 } // namespace Database
