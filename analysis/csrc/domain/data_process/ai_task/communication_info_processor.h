@@ -20,14 +20,14 @@ namespace Domain {
 using GeHashMap = std::unordered_map<std::string, std::string>;
 // model_id, op_name, hccl_name, group_name, plane_id, stream_id, task_id, local_rank, remote_rank,
 // transport_type, size, data_type, link_type, context_id, notify_id, batch_id, rdma_type, timestamp, duration,
-// connection_id
+// connection_id, duration_estimated, bandwidth
 using HcclTaskFormat = std::tuple<uint32_t, std::string, std::string, std::string, int32_t, uint64_t, uint32_t,
     uint32_t, uint32_t, std::string, uint64_t, std::string, std::string, uint32_t,
-    uint64_t, uint32_t, std::string, double, double, uint32_t>;
+    uint64_t, uint32_t, std::string, double, double, uint32_t, double, double>;
 using OriTaskDataFormat = std::vector<HcclTaskFormat>;
-// connection_id, op_name, relay, retry, data_type, alg_type, count, group_name, op_type
+// connection_id, op_name, relay, retry, data_type, alg_type, count, group_name, op_type, model_id
 using HcclOpFormat = std::tuple<uint32_t, std::string, int32_t, int32_t, std::string, std::string, uint64_t,
-    std::string, std::string>;
+    std::string, std::string, uint32_t>;
 using OriOpDataFormat = std::vector<HcclOpFormat>;
 
 // 该类用于依据HCCLSingelDevice库生成COMMUNICATION_TASK_INFO(通信小算子)和COMMUNICATION_OP表(通信大算子)
@@ -40,6 +40,7 @@ public:
         OriOpDataFormat oriOpData;
         uint16_t deviceId = UINT16_MAX;
         Utils::ProfTimeRecord timeRecord;
+        GeHashMap hashMap;
     };
     struct HcclTaskSingleDeviceData {
         uint32_t connectionId = UINT32_MAX;
@@ -63,12 +64,12 @@ private:
     bool ProcessOneDevice(const std::string& devicePath, CommunicationData& communicationData,
                           DataInventory& dataInventory);
     bool FormatData(std::vector<CommunicationTaskData>& taskFormatData, std::vector<CommunicationOpData>& opFormatData,
-                    CommunicationData& communicationData, GeHashMap& hashMap);
+                    CommunicationData& communicationData);
     void Update(const HcclTaskFormat& oriData, HcclTaskSingleDeviceData& hcclData, CommunicationTaskData& taskData,
-                uint16_t deviceId, GeHashMap& hashMap);
+                CommunicationData& communicationData);
     void UpdateOpInfo(CommunicationOpData& opData, uint32_t connectionId,
-                      const std::unordered_map<uint32_t, size_t>& opInfoIdxMap,
-                      const OriOpDataFormat& oriOpData, GeHashMap& hashMap);
+                      const std::unordered_map<uint32_t, size_t>& opInfoIdxMap, const OriOpDataFormat& oriOpData,
+                      CommunicationData& communicationData);
     std::unordered_map<uint32_t, size_t> GenOpInfoIdxMap(const OriOpDataFormat& oriOpData);
 };
 } // Domain
