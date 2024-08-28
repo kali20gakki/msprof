@@ -63,6 +63,7 @@ int MstxDataHandler::Start()
         return PROFILING_SUCCESS;
     }
     Thread::SetThreadName(analysis::dvvp::common::config::MSVP_MSTX_DATA_HANDLE_THREAD_NAME);
+    analysis::dvvp::common::thread::Thread::Start();
     start_.store(true);
     return PROFILING_SUCCESS;
 }
@@ -102,31 +103,31 @@ void MstxDataHandler::ReportData()
     if (mstxDataBuf_.GetUsedSize() == 0) {
         return;
     }
-    MsprofTxExInfo info;
+    MsprofTxInfo info;
     for (;;) {
         if (!mstxDataBuf_.TryPop(info)) {
             break;
         }
-        ReporterData data = {"msproftx_ex", 64, sizeof(MsprofTxExInfo), reinterpret_cast<UNSIGNED_CHAR_PTR>(&info)};
-        MsprofTxManager::instance()->ReportData(data);
+        MsprofTxManager::instance()->ReportData(info);
     }
 }
 
 int MstxDataHandler::SaveMarkData(const char* msg, uint64_t mstxEventId)
 {
     static thread_local uint32_t tid = static_cast<uint32_t>(MmGetTid());
-    MsprofTxExInfo info;
-    info.eventType = static_cast<uint16_t>(EventType::MARK);
-    info.processId = processId_;
-    info.threadId = tid;
-    info.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
-    info.endTime = info.startTime;
-    info.markId = mstxEventId;
-    if (memcpy_s(info.message, MAX_MESSAGE_LEN - 1, msg, strlen(msg)) != EOK) {
+    MsprofTxInfo info;
+    info.infoType = 1; // 0: tx , 1: tx_ex
+    info.value.stampInfo.eventType = static_cast<uint16_t>(EventType::MARK);
+    info.value.stampInfo.processId = processId_;
+    info.value.stampInfo.threadId = tid;
+    info.value.stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
+    info.value.stampInfo.endTime = info.value.stampInfo.startTime;
+    info.value.stampInfo.markId = mstxEventId;
+    if (memcpy_s(info.value.stampInfo.message, MAX_MESSAGE_LEN - 1, msg, strlen(msg)) != EOK) {
         MSPROF_LOGE("memcpy message [%s] failed", msg);
         return PROFILING_FAILED;
     }
-    info.message[strlen(msg)] = '\0';
+    info.value.stampInfo.message[strlen(msg)] = '\0';
     if (!mstxDataBuf_.TryPush(std::move(info))) {
         MSPROF_LOGE("try push mstx data failed, event id %lu", mstxEventId);
         return PROFILING_FAILED;
@@ -138,17 +139,18 @@ int MstxDataHandler::SaveRangeDate(const char* msg, uint64_t mstxEventId, MstxDa
 {
     static thread_local uint32_t tid = static_cast<uint32_t>(MmGetTid());
     if (type == MstxDataType::DATA_RANGE_START) {
-        MsprofTxExInfo info;
-        info.eventType = static_cast<uint16_t>(EventType::START_OR_STOP);
-        info.processId = processId_;
-        info.threadId = tid;
-        info.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
-        info.markId = mstxEventId;
-        if (memcpy_s(info.message, MAX_MESSAGE_LEN - 1, msg, strlen(msg)) != EOK) {
+        MsprofTxInfo info;
+        info.infoType = 1; // 0: tx , 1: tx_ex
+        info.value.stampInfo.eventType = static_cast<uint16_t>(EventType::START_OR_STOP);
+        info.value.stampInfo.processId = processId_;
+        info.value.stampInfo.threadId = tid;
+        info.value.stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
+        info.value.stampInfo.markId = mstxEventId;
+        if (memcpy_s(info.value.stampInfo.message, MAX_MESSAGE_LEN - 1, msg, strlen(msg)) != EOK) {
             MSPROF_LOGE("memcpy message [%s] failed", msg);
             return PROFILING_FAILED;
         }
-        info.message[strlen(msg)] = '\0';
+        info.value.stampInfo.message[strlen(msg)] = '\0';
         std::lock_guard<std::mutex> lock(tmpRangeDataMutex_);
         tmpMstxRangeData_.insert({mstxEventId, std::move(info)});
         return PROFILING_SUCCESS;
@@ -159,7 +161,7 @@ int MstxDataHandler::SaveRangeDate(const char* msg, uint64_t mstxEventId, MstxDa
             MSPROF_LOGE("mstx range end event [%lu] not found", mstxEventId);
             return PROFILING_FAILED;
         }
-        iter->second.endTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
+        iter->second.value.stampInfo.endTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
         if (!mstxDataBuf_.TryPush(std::move(iter->second))) {
             MSPROF_LOGE("try push mstx data failed, event id %lu", mstxEventId);
             return PROFILING_FAILED;

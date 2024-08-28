@@ -35,15 +35,14 @@ class MsprofTxModel(ParserModel):
             return []
         all_data_sql = f"select category, pid, tid, start_time, (end_time-start_time) as dur_time, payload_type, " \
                        f"payload_value, message_type, message, event_type " \
-                       f"from {DBNameConstant.TABLE_MSPROFTX} where file_tag={DataTag.MSPROFTX.value}"
+                       f"from {DBNameConstant.TABLE_MSPROFTX}"
         return DBManager.fetch_all_data(self.cur, all_data_sql, dto_class=MsprofTxDto)
 
     def get_summary_data(self: any) -> list:
         if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_MSPROFTX):
             return []
         all_data_sql = f"select pid, tid, category, event_type, payload_type, payload_value, start_time, " \
-                       f"end_time, message_type, message from {DBNameConstant.TABLE_MSPROFTX} " \
-                       f"where file_tag={DataTag.MSPROFTX.value}"
+                       f"end_time, message_type, message from {DBNameConstant.TABLE_MSPROFTX}"
         return DBManager.fetch_all_data(self.cur, all_data_sql)
 
 

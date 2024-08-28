@@ -60,9 +60,9 @@ private:
     uint32_t processId_{0};
     std::atomic<bool> init_{false};
     std::atomic<bool> start_{false};
-    analysis::dvvp::common::queue::RingBuffer<MsprofTxExInfo> mstxDataBuf_;
+    analysis::dvvp::common::queue::RingBuffer<MsprofTxInfo> mstxDataBuf_;
     std::mutex tmpRangeDataMutex_;
-    std::unordered_map<uint64_t, MsprofTxExInfo> tmpMstxRangeData_;
+    std::unordered_map<uint64_t, MsprofTxInfo> tmpMstxRangeData_;
 };
 }
 }

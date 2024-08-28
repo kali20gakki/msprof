@@ -22,7 +22,7 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
-MsprofTxManager::MsprofTxManager() : isInit_(false), reporter_(nullptr), stampPool_(nullptr)
+MsprofTxManager::MsprofTxManager() : isInit_(false), reporter_(nullptr), stampPool_(nullptr), eventId_(1)
 {
 }
 
@@ -74,7 +74,7 @@ void MsprofTxManager::UnInit()
     }
 }
 
-void MsprofTxManager::SetReporterCallback(const MsprofReporterCallback func)
+void MsprofTxManager::SetReporterCallback(const MsprofAddiInfoReporterCallback func)
 {
     if (reporter_ == nullptr) {
         MSVP_MAKE_SHARED0_VOID(reporter_, MsprofTxReporter);
@@ -138,13 +138,6 @@ int MsprofTxManager::SetCategoryName(uint32_t category, std::string categoryName
     reporterData.tag[tagLen] = '\0';
     reporterData.dataLen = hashData.size();
     reporterData.data = (unsigned char *)hashData.c_str();
-
-    ret = reporter_->Report(reporterData);
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("[ReportStampData] report profiling data failed.");
-        return PROFILING_FAILED;
-    }
-
     return PROFILING_SUCCESS;
 }
 
@@ -161,8 +154,7 @@ int MsprofTxManager::SetStampCategory(ACL_PROF_STAMP_PTR stamp, uint32_t categor
             std::vector<std::string>({"nullptr", "stamp", "stamp can not be nullptr when set category"}));
         return PROFILING_FAILED;
     }
-
-    stamp->stampInfo.category = category;
+    stamp->txInfo.value.stampInfo.category = category;
     return PROFILING_SUCCESS;
 }
 
@@ -183,7 +175,7 @@ int MsprofTxManager::SetStampPayload(ACL_PROF_STAMP_PTR stamp, const int32_t typ
         return PROFILING_FAILED;
     }
 
-    stamp->stampInfo.payloadType = type;
+    stamp->txInfo.value.stampInfo.payloadType = type;
 
     return PROFILING_SUCCESS;
 }
@@ -200,12 +192,14 @@ int MsprofTxManager::SetStampTraceMessage(ACL_PROF_STAMP_PTR stamp, CONST_CHAR_P
             std::vector<std::string>({"nullptr", "stamp", "stamp and msg can not be nullptr when set traceMessage"}));
         return PROFILING_FAILED;
     }
-    auto ret = memcpy_s(stamp->stampInfo.message, sizeof(stamp->stampInfo.message) - 1, msg, msgLen);
+    auto ret = memcpy_s(stamp->txInfo.value.stampInfo.message, sizeof(stamp->txInfo.value.stampInfo.message) - 1,
+                        msg, msgLen);
     if (ret != EOK) {
         MSPROF_LOGE("[SetStampTraceMessage]strcpy_s message failed, ret=%u msgLen=%u", ret, msgLen);
         return PROFILING_FAILED;
     }
-    stamp->stampInfo.message[msgLen] = 0;
+    stamp->txInfo.value.stampInfo.message[msgLen] = 0;
+    MSPROF_LOGD("[SetStampTraceMessage]stamp set trace message:%s success.", stamp->txInfo.value.stampInfo.message);
     return PROFILING_SUCCESS;
 }
 
@@ -223,15 +217,15 @@ int MsprofTxManager::Mark(ACL_PROF_STAMP_PTR stamp) const
         return PROFILING_FAILED;
     }
 
-    stamp->stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
-    stamp->stampInfo.endTime = stamp->stampInfo.startTime;
-    stamp->stampInfo.eventType = static_cast<uint32_t>(EventType::MARK);
+    stamp->txInfo.value.stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
+    stamp->txInfo.value.stampInfo.endTime = stamp->txInfo.value.stampInfo.startTime;
+    stamp->txInfo.value.stampInfo.eventType = static_cast<uint32_t>(EventType::MARK);
     return ReportStampData(stamp);
 }
 
 int MsprofTxManager::MarkEx(CONST_CHAR_PTR msg, size_t msgLen, aclrtStream stream)
 {
-    static uint64_t markIdx = 0;
+    uint64_t markIdx = GetEventId();
     static uint32_t pid = static_cast<uint32_t>(MmGetPid());
     static thread_local uint32_t tid = static_cast<uint32_t>(MmGetTid());
     if (!isInit_) {
@@ -244,37 +238,34 @@ int MsprofTxManager::MarkEx(CONST_CHAR_PTR msg, size_t msgLen, aclrtStream strea
             std::vector<std::string>({"nullptr", "message", "Invalid input param for markEx"}));
         return PROFILING_FAILED;
     }
-    MsprofTxExInfo info;
-    info.processId = pid;
-    info.threadId = tid;
-    info.eventType = static_cast<uint16_t>(EventType::MARK_EX);
-    info.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
-    info.endTime = info.startTime;
-    {
-        std::lock_guard<std::mutex> lk(markerMtx_);
-        if (RuntimePlugin::instance()->MsprofRtProfilerTraceEx(markIdx, MARKEX_MODEL_ID, MARKEX_TAG_ID, stream) !=
-            PROFILING_SUCCESS) {
-            MSPROF_LOGE("[MarkEx]Failed to run mstx task, mark idx=%u", markIdx);
-            return PROFILING_FAILED;
-        }
-        info.markId = markIdx++;
+    if (msgLen > static_cast<size_t>(MAX_MESSAGE_LEN - 1) || msgLen < 1) {
+        MSPROF_LOGE("[MarkEx]The length of input message should be in range of 1~%zu",
+                    static_cast<size_t>(MAX_MESSAGE_LEN - 1));
     }
-    if (memcpy_s(info.message, MAX_MESSAGE_LEN - 1, msg, msgLen) != EOK) {
+    // create MsprofTxInfo info
+    MsprofTxInfo info;
+    info.infoType = 1;
+    info.value.stampInfo.processId = pid;
+    info.value.stampInfo.threadId = tid;
+    info.value.stampInfo.eventType = static_cast<uint16_t>(EventType::MARK_EX);
+    info.value.stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
+    info.value.stampInfo.endTime = info.value.stampInfo.startTime;
+    // rtProfilerTraceEx
+    if (RuntimePlugin::instance()->MsprofRtProfilerTraceEx(markIdx, MARKEX_MODEL_ID, MARKEX_TAG_ID, stream) !=
+        PROFILING_SUCCESS) {
+        MSPROF_LOGE("[MarkEx]Failed to run mstx task, mark idx=%u", markIdx);
+        return PROFILING_FAILED;
+    }
+    info.value.stampInfo.markId = markIdx;
+    // copy message
+    if (memcpy_s(info.value.stampInfo.message, MAX_MESSAGE_LEN - 1, msg, msgLen) != EOK) {
         MSPROF_LOGE("[MarkEx]memcpy_s message failed, msgLen %zu", msgLen);
         return PROFILING_FAILED;
     }
-    info.message[msgLen] = '\0';
-    ReporterData data;
-    data.deviceId = DEFAULT_HOST_ID;
-    data.dataLen = sizeof(MsprofTxExInfo);
-    data.data = reinterpret_cast<UNSIGNED_CHAR_PTR>(&info);
-    if (memcpy_s(data.tag, MSPROF_ENGINE_MAX_TAG_LEN, MSPROFTX_EX_TAG.c_str(), MSPROFTX_EX_TAG.size()) != EOK) {
-        MSPROF_LOGE("[MarkEx]memcpy_s mark_ex tag failed");
-        return PROFILING_FAILED;
-    }
-    data.tag[MSPROFTX_EX_TAG.size()] = '\0';
-    if (reporter_->Report(data) != PROFILING_SUCCESS) {
-        MSPROF_LOGE("[ReportStampData] report profiling data failed.");
+    info.value.stampInfo.message[msgLen] = '\0';
+    // report data
+    if (reporter_->Report(info) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[MarkEx] report profiling data failed.");
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
@@ -294,7 +285,7 @@ int MsprofTxManager::Push(ACL_PROF_STAMP_PTR stamp) const
         return PROFILING_FAILED;
     }
 
-    stamp->stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
+    stamp->txInfo.value.stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
     return stampPool_->MsprofStampPush(stamp);
 }
 
@@ -310,8 +301,8 @@ int MsprofTxManager::Pop() const
         MSPROF_LOGE("[Pop]stampPool pop failed ,stamp is null!");
         return PROFILING_FAILED;
     }
-    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
-    stamp->stampInfo.eventType = static_cast<uint32_t>(EventType::PUSH_OR_POP);
+    stamp->txInfo.value.stampInfo.endTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
+    stamp->txInfo.value.stampInfo.eventType = static_cast<uint32_t>(EventType::PUSH_OR_POP);
     return ReportStampData(stamp);
 }
 
@@ -334,7 +325,7 @@ int MsprofTxManager::RangeStart(ACL_PROF_STAMP_PTR stamp, uint32_t *rangeId) con
             std::vector<std::string>({"nullptr", "rangeId", "rangeId can not be nullptr when RangeStart"}));
         return PROFILING_FAILED;
     }
-    auto &stampInfo = stamp->stampInfo;
+    auto &stampInfo = stamp->txInfo.value.stampInfo;
     stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
     *rangeId = stampPool_->GetIdByStamp(stamp);
     return PROFILING_SUCCESS;
@@ -354,23 +345,23 @@ int MsprofTxManager::RangeStop(uint32_t rangeId) const
             std::vector<std::string>({std::to_string(rangeId), "rangeId", errorReason}));
         return PROFILING_FAILED;
     }
-    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
-    stamp->stampInfo.eventType = static_cast<uint32_t>(EventType::START_OR_STOP);
+    stamp->txInfo.value.stampInfo.endTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
+    stamp->txInfo.value.stampInfo.eventType = static_cast<uint32_t>(EventType::START_OR_STOP);
     return ReportStampData(stamp);
 }
 
 int MsprofTxManager::ReportStampData(MsprofStampInstance *stamp) const
 {
     static thread_local uint32_t tid = static_cast<uint32_t>(MmGetTid());
-    stamp->stampInfo.threadId = tid;
-    if (reporter_->Report(stamp->report) != PROFILING_SUCCESS) {
+    stamp->txInfo.value.stampInfo.threadId = tid;
+    if (reporter_->Report(stamp->txInfo) != PROFILING_SUCCESS) {
         MSPROF_LOGE("[ReportStampData] report profiling data failed.");
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
 }
 
-void MsprofTxManager::ReportData(ReporterData &data)
+void MsprofTxManager::ReportData(MsprofTxInfo &data)
 {
     if (reporter_ == nullptr) {
         MSPROF_LOGE("[ReportData] reporter is nullptr!");
@@ -379,6 +370,11 @@ void MsprofTxManager::ReportData(ReporterData &data)
     if (reporter_->Report(data) != PROFILING_SUCCESS) {
         MSPROF_LOGE("[ReportData] Report data failed.");
     }
+}
+
+uint64_t MsprofTxManager::GetEventId()
+{
+    return eventId_++;
 }
 }
 }

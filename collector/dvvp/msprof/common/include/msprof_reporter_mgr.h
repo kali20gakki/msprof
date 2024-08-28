@@ -37,6 +37,9 @@ const std::map<uint16_t, std::map<uint32_t, std::string>> DEFAULT_TYPE_INFO = {
     { MSPROF_REPORT_HCCL_NODE_LEVEL, {
         {MSPROF_REPORT_HCCL_MASTER_TYPE, "master"},
         {MSPROF_REPORT_HCCL_SLAVE_TYPE, "slave"}
+    }},
+    { MSPROF_REPORT_TX_LEVEL, {
+        {MSPROF_REPORT_TX_BASE_TYPE, "msproftx"}
     }}
 };
 

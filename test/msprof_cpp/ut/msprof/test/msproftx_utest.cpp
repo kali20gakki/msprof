@@ -33,6 +33,24 @@ using namespace Msprof::MsprofTx;
 using namespace analysis::dvvp::proto;
 using namespace Collector::Dvvp::Mmpa;
 
+int32_t MsprofAddiInfoReporterCallbackStub(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t len)
+{
+    return PROFILING_SUCCESS;
+}
+
+int32_t MsprofAddiInfoReporterCallbackFail(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t len)
+{
+    return PROFILING_FAILED;
+}
+
+std::vector<MsprofAdditionalInfo> g_dataList_;
+
+int32_t MsprofAddiInfoReporterCallbackSucc(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t len)
+{
+    g_dataList_.push_back(*(reinterpret_cast<const MsprofAdditionalInfo *>(data)));
+    return PROFILING_SUCCESS;
+}
+
 class MsprofTxUtest : public testing::Test {
 protected:
     virtual void SetUp()
@@ -93,25 +111,6 @@ TEST_F(MsprofTxUtest, MsprofTxMemPool)
     ret = stampPool->UnInit();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 }
-int32_t MsprofReporterCallbackStub(uint32_t moduleId, uint32_t type, VOID_PTR data, uint32_t len)
-{
-    return 0;
-}
-
-int32_t MsprofReporterCallbackFail(uint32_t moduleId, uint32_t type, VOID_PTR data, uint32_t len)
-{
-    return PROFILING_FAILED;
-}
-
-std::vector<ReporterData> g_dataList_;
-
-int32_t MsprofReporterCallbackSucc(uint32_t moduleId, uint32_t type, VOID_PTR data, uint32_t len)
-{
-    if (type == MsprofReporterCallbackType::MSPROF_REPORTER_REPORT) {
-        g_dataList_.push_back(*(reinterpret_cast<ReporterData *>(data)));
-    }
-    return PROFILING_SUCCESS;
-}
 
 TEST_F(MsprofTxUtest, MsprofTxManager)
 {
@@ -148,7 +147,7 @@ TEST_F(MsprofTxUtest, MsprofTxManager)
 
     manager->DestroyStamp(stamp);
 
-    manager->SetReporterCallback(MsprofReporterCallbackStub);
+    manager->SetReporterCallback(MsprofAddiInfoReporterCallbackStub);
 
     EXPECT_EQ(PROFILING_SUCCESS, manager->Init());
     
@@ -206,7 +205,7 @@ TEST_F(MsprofTxUtest, MsprofTxMarkExWillReturnFailWithInvalidInput)
     GlobalMockObject::verify();
     std::shared_ptr<MsprofTxManager> manager;
     MSVP_MAKE_SHARED0_BREAK(manager, MsprofTxManager);
-    manager->SetReporterCallback(MsprofReporterCallbackStub);
+    manager->SetReporterCallback(MsprofAddiInfoReporterCallbackStub);
     manager->Init();
     std::string msg = "test";
     EXPECT_EQ(PROFILING_FAILED, manager->MarkEx(msg.c_str(), msg.size(), nullptr));
@@ -221,7 +220,7 @@ TEST_F(MsprofTxUtest, MsprofTxMarkExWillReturnFailWithRtApiFail)
     GlobalMockObject::verify();
     std::shared_ptr<MsprofTxManager> manager;
     MSVP_MAKE_SHARED0_BREAK(manager, MsprofTxManager);
-    manager->SetReporterCallback(MsprofReporterCallbackStub);
+    manager->SetReporterCallback(MsprofAddiInfoReporterCallbackStub);
     manager->Init();
     std::string msg = "test";
     aclrtStream streamId = (void *)0x12345; // 0x12345 fake stream addr
@@ -237,7 +236,7 @@ TEST_F(MsprofTxUtest, MsprofTxMarkExWillReturnFailWithReportFail)
     GlobalMockObject::verify();
     std::shared_ptr<MsprofTxManager> manager;
     MSVP_MAKE_SHARED0_BREAK(manager, MsprofTxManager);
-    manager->SetReporterCallback(MsprofReporterCallbackFail);
+    manager->SetReporterCallback(MsprofAddiInfoReporterCallbackFail);
     manager->Init();
     std::string msg = "test";
     aclrtStream streamId = (void *)0x12345; // 0x12345 fake stream addr
@@ -253,7 +252,7 @@ TEST_F(MsprofTxUtest, MsprofTxMarkExWillReturnSuccWithReportSucc)
     GlobalMockObject::verify();
     std::shared_ptr<MsprofTxManager> manager;
     MSVP_MAKE_SHARED0_BREAK(manager, MsprofTxManager);
-    manager->SetReporterCallback(MsprofReporterCallbackSucc);
+    manager->SetReporterCallback(MsprofAddiInfoReporterCallbackSucc);
     manager->Init();
     std::string msg = "test";
     aclrtStream streamId = (void *)0x12345; // 0x12345 fake stream addr
@@ -270,8 +269,8 @@ TEST_F(MsprofTxUtest, ReportDataFuncWillFailWhileReportDataCallBackFail)
     GlobalMockObject::verify();
     std::shared_ptr<MsprofTxManager> manager;
     MSVP_MAKE_SHARED0_BREAK(manager, MsprofTxManager);
-    ReporterData data;
-    manager->SetReporterCallback(MsprofReporterCallbackFail);
+    MsprofTxInfo data;
+    manager->SetReporterCallback(MsprofAddiInfoReporterCallbackFail);
     manager->Init();
     manager->ReportData(data);
     EXPECT_EQ(0, g_dataList_.size());
@@ -283,8 +282,8 @@ TEST_F(MsprofTxUtest, ReportDataFuncWillSuccWhileReportDataCallBackSucc)
     GlobalMockObject::verify();
     std::shared_ptr<MsprofTxManager> manager;
     MSVP_MAKE_SHARED0_BREAK(manager, MsprofTxManager);
-    ReporterData data;
-    manager->SetReporterCallback(MsprofReporterCallbackSucc);
+    MsprofTxInfo data;
+    manager->SetReporterCallback(MsprofAddiInfoReporterCallbackSucc);
     manager->Init();
     manager->ReportData(data);
     EXPECT_EQ(1, g_dataList_.size());

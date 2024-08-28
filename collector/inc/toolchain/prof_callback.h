@@ -163,6 +163,17 @@ MSVP_PROF_API int32_t MsprofInit(uint32_t dataType, void *data, uint32_t dataLen
  * @return 0:SUCCESS, >0:FAILED
  */
 MSVP_PROF_API int32_t MsprofFinalize(void);
+
+/**
+ * @name  MsprofAddiInfoReporterCallback
+ * @brief callback to report msproftxInfo with the additionalInfo structure
+ * @param agingFlag      [IN] aging or unaging flag
+ * @param data      [IN] callback data
+ * @param len       [IN] callback data size
+ * @return enum MsprofErrorCode
+ */
+typedef int32_t (*MsprofAddiInfoReporterCallback)(uint32_t agingFlag, const void *data, uint32_t len);
+
 #ifdef __cplusplus
 }
 #endif

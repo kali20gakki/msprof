@@ -20,7 +20,6 @@ using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mstx;
 using namespace analysis::dvvp::common::error;
 
-static std::atomic<uint64_t> g_eventId{1};
 static std::mutex g_mutex;
 static std::unordered_map<uint64_t, aclrtStream> g_eventIdsWithStream;
 
@@ -39,7 +38,7 @@ void MstxMarkAFunc(const char* msg, aclrtStream stream)
         MSPROF_LOGE("Input msg for %s is invalid", __func__);
         return;
     }
-    uint64_t mstxEventId = g_eventId++;
+    uint64_t mstxEventId = MsprofTxManager::instance()->GetEventId();
     if (stream && RuntimePlugin::instance()->MsprofRtProfilerTraceEx(mstxEventId, MSTX_MODEL_ID,
         MSTX_TAG_ID, stream) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to run mstx task for %s", __func__);
@@ -64,7 +63,7 @@ uint64_t MstxRangeStartAFunc(const char* msg, aclrtStream stream)
         MSPROF_LOGE("input for %s is nullptr", __func__);
         return MSTX_INVALID_RANGE_ID;
     }
-    uint64_t mstxEventId = g_eventId++;
+    uint64_t mstxEventId = MsprofTxManager::instance()->GetEventId();
     if (stream && RuntimePlugin::instance()->MsprofRtProfilerTraceEx(mstxEventId, MSTX_MODEL_ID,
         MSTX_TAG_ID, stream) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to run mstx task for %s", __func__);

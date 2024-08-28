@@ -14,6 +14,7 @@ class LevelDataType(Enum):
 
     PYTORCH_TX = 30000
     PTA = 25000
+    MSPROFTX = 20500
     ACL = 20000
     MODEL = 15000
     NODE = 10000

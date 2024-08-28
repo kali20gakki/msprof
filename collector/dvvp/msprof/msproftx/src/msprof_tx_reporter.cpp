@@ -24,16 +24,6 @@ int MsprofTxReporter::Init()
         MSPROF_LOGE("[Init]ReporterCallback_ is nullptr!");
         return PROFILING_FAILED;
     }
-
-    auto ret = reporterCallback_(
-        static_cast<uint32_t>(MsprofReporterModuleId::MSPROF_MODULE_MSPROF),
-        static_cast<uint32_t>(MsprofReporterCallbackType::MSPROF_REPORTER_INIT),
-        nullptr, 0);
-    if (ret != MSPROF_ERROR_NONE) {
-        MSPROF_LOGE("[Init]Init reporterCallback failed, ret is %d", ret);
-        return PROFILING_FAILED;
-    }
-
     isInit_ = true;
     MSPROF_LOGI("[Init] MsprofTxReporter init success.");
     return PROFILING_SUCCESS;
@@ -45,25 +35,20 @@ int MsprofTxReporter::UnInit()
         MSPROF_LOGE("[UnInit]ReporterCallback_ is nullptr!");
         return PROFILING_FAILED;
     }
-
-    auto ret = reporterCallback_(
-        static_cast<uint32_t>(MsprofReporterModuleId::MSPROF_MODULE_MSPROF),
-        static_cast<uint32_t>(MsprofReporterCallbackType::MSPROF_REPORTER_UNINIT),
-        nullptr, 0);
-    if (ret != MSPROF_ERROR_NONE) {
-        MSPROF_LOGE("[UnInit]UnInit reporterCallback failed, ret is %d", ret);
-        return ret;
-    }
-
     isInit_ = false;
-    MSPROF_LOGI("[UnInit] reporetCallback UnInit success.");
-    return ret;
+    MSPROF_LOGI("[UnInit]ReporetCallback UnInit success.");
+    return PROFILING_SUCCESS;
 }
 
-int MsprofTxReporter::Report(ReporterData &data) const
+void MsprofTxReporter::SetReporterCallback(const MsprofAddiInfoReporterCallback func)
+{
+    reporterCallback_ = func;
+}
+
+int MsprofTxReporter::Report(MsprofTxInfo &data) const
 {
     if (reporterCallback_ == nullptr) {
-        MSPROF_LOGE("[Report]ReporterCallback_ is nullptr!");
+        MSPROF_LOGE("[TxReport]ReporterCallback_ is nullptr!");
         return PROFILING_FAILED;
     }
 
@@ -72,10 +57,16 @@ int MsprofTxReporter::Report(ReporterData &data) const
         return PROFILING_FAILED;
     }
 
-    return reporterCallback_(
-        static_cast<uint32_t>(MsprofReporterModuleId::MSPROF_MODULE_MSPROF),
-        static_cast<uint32_t>(MsprofReporterCallbackType::MSPROF_REPORTER_REPORT),
-        static_cast<void *>(&data), sizeof(data));
+    MsprofAdditionalInfo info;
+    info.level = MSPROF_REPORT_TX_LEVEL;
+    info.type = MSPROF_REPORT_TX_BASE_TYPE;
+    info.dataLen = sizeof(data);
+    auto ret = memcpy_s(info.data, MSPROF_ADDTIONAL_INFO_DATA_LENGTH, &data, sizeof(MsprofTxInfo));
+    if (ret != EOK) {
+        MSPROF_LOGE("[TxReport]Failed to memcpy for tx info data.");
+        return PROFILING_FAILED;
+    }
+    return reporterCallback_(1, &info, sizeof(info));
 }
 } // namespace MsprofTx
 } // namespace Msprof

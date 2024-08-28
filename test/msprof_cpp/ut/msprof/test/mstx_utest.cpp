@@ -14,12 +14,11 @@ using namespace Collector::Dvvp::Mstx;
 using namespace Msprof::MsprofTx;
 using namespace analysis::dvvp::common::utils;
 
-std::vector<ReporterData> g_txdataList_;
-int32_t MstxReporterCallbackStub(uint32_t moduleId, uint32_t type, VOID_PTR data, uint32_t len)
+std::vector<MsprofAdditionalInfo> g_txdataList_;
+
+int32_t MstxAddiInfoReporterCallbackStub(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t len)
 {
-    if (type == MsprofReporterCallbackType::MSPROF_REPORTER_REPORT) {
-        g_txdataList_.push_back(*(reinterpret_cast<ReporterData *>(data)));
-    }
+    g_txdataList_.push_back(*(reinterpret_cast<const MsprofAdditionalInfo *>(data)));
     return PROFILING_SUCCESS;
 }
 
@@ -27,7 +26,7 @@ class MstxUtest : public testing::Test {
 protected:
     virtual void SetUp()
     {
-        MsprofTxManager::instance()->SetReporterCallback(MstxReporterCallbackStub);
+        MsprofTxManager::instance()->SetReporterCallback(MstxAddiInfoReporterCallbackStub);
         MsprofTxManager::instance()->Init();
     }
     virtual void TearDown()
@@ -53,9 +52,8 @@ TEST_F(MstxUtest, MstxDataHandlerWillSaveDataWhileRunSucc)
     EXPECT_EQ(PROFILING_SUCCESS, MstxDataHandler::instance()->Stop());
     EXPECT_EQ(2, g_txdataList_.size()); // 2: mstx data size
     for (size_t i = 0; i < g_txdataList_.size(); i++) {
-        EXPECT_EQ(64, g_txdataList_[i].deviceId); // 64: host id
-        EXPECT_EQ(sizeof(MsprofTxExInfo), g_txdataList_[i].dataLen);
-        EXPECT_EQ("msproftx_ex", std::string(g_txdataList_[i].tag));
+        EXPECT_EQ(MSPROF_REPORT_TX_LEVEL, g_txdataList_[i].level);
+        EXPECT_EQ(sizeof(MsprofTxInfo), g_txdataList_[i].dataLen);
     }
 }
 

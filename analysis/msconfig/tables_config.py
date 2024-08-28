@@ -748,8 +748,7 @@ class TablesConfig(MetaConfig):
             ('start_time', 'INTEGER, null'),
             ('end_time', 'INTEGER, null'),
             ('message_type', 'INTEGER, null'),
-            ('message', 'TEXT, null'),
-            ('file_tag', 'INTEGER, null')
+            ('message', 'TEXT, null')
         ],
         'MsprofTxExMap': [
             ('pid', 'INTEGER, null'),
