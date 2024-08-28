@@ -1,3 +1,4 @@
+aux_source_directory(${TOP_DIR}/analysis/csrc/association/credential SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/data_inventory SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/db SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/data_process SOURCES)
