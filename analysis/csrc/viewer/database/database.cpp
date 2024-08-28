@@ -546,6 +546,35 @@ namespace {
         {"task_id", SQL_INTEGER_TYPE},
         {"task_state", SQL_INTEGER_TYPE}
     };
+
+    const TableColumns CpuUsage = {
+        {"start_time", SQL_NUMERIC_TYPE},
+        {"end_time", SQL_NUMERIC_TYPE},
+        {"cpu_no", SQL_TEXT_TYPE},
+        {"usage", SQL_REAL_TYPE}
+    };
+
+    const TableColumns MemUsage = {
+        {"start_time", SQL_NUMERIC_TYPE},
+        {"end_time", SQL_NUMERIC_TYPE},
+        {"usage", SQL_REAL_TYPE}
+    };
+
+    const TableColumns DiskUsage = {
+        {"start_time", SQL_NUMERIC_TYPE},
+        {"end_time", SQL_NUMERIC_TYPE},
+        {"disk_read", SQL_REAL_TYPE},
+        {"disk_write", SQL_REAL_TYPE},
+        {"swap_in", SQL_TEXT_TYPE},
+        {"usage", SQL_REAL_TYPE}
+    };
+
+    const TableColumns NetworkUsage = {
+        {"start_time", SQL_NUMERIC_TYPE},
+        {"end_time", SQL_NUMERIC_TYPE},
+        {"usage", SQL_REAL_TYPE},
+        {"speed", SQL_REAL_TYPE}
+    };
 }
 
 std::string Database::GetDBName() const
@@ -751,6 +780,30 @@ StepTraceDB::StepTraceDB()
     tableColNames_["StepTime"] = StepTime;
     tableColNames_["TaskType"] = TaskType;
     tableColNames_["TsMemcpy"] = TsMemcpy;
+}
+
+HostCpuUsage::HostCpuUsage()
+{
+    dbName_ = "host_cpu_usage.db";
+    tableColNames_["CpuUsage"] = CpuUsage;
+}
+
+HostMemUsage::HostMemUsage()
+{
+    dbName_ = "host_mem_usage.db";
+    tableColNames_["MemUsage"] = MemUsage;
+}
+
+HostDiskUsage::HostDiskUsage()
+{
+    dbName_ = "host_disk_usage.db";
+    tableColNames_["DiskUsage"] = DiskUsage;
+}
+
+HostNetworkUsage::HostNetworkUsage()
+{
+    dbName_ = "host_network_usage.db";
+    tableColNames_["NetworkUsage"] = NetworkUsage;
 }
 
 } // namespace Database

@@ -190,6 +190,26 @@ public:
     StepTraceDB();
 };
 
+class HostCpuUsage : public Database {
+public:
+    HostCpuUsage();
+};
+
+class HostMemUsage : public Database {
+public:
+    HostMemUsage();
+};
+
+class HostDiskUsage : public Database {
+public:
+    HostDiskUsage();
+};
+
+class HostNetworkUsage : public Database {
+public:
+    HostNetworkUsage();
+};
+
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis
