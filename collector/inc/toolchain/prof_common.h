@@ -146,27 +146,42 @@ struct MsprofStaticOpMem {
  * @name  MsprofStampInfo
  * @brief struct of data reported by msproftx
  */
+#define UIF_VALUE_LEN 2
+#define MAX_MESSAGE_LEN 128
 struct MsprofStampInfo {
     uint16_t magicNumber;
     uint16_t dataTag;
     uint32_t processId;
     uint32_t threadId;
-    uint32_t category;      // marker category
+    uint32_t category;    // marker category
     uint32_t eventType;
     int32_t payloadType;
-    union PayloadValue {    // payload info for marker
+    union PayloadValue {
         uint64_t ullValue;
         int64_t llValue;
         double dValue;
-        uint32_t uiValue[2];
-        int32_t iValue[2];
-        float fValue[2];
-    } payload;
+        uint32_t uiValue[UIF_VALUE_LEN];
+        int32_t iValue[UIF_VALUE_LEN];
+        float fValue[UIF_VALUE_LEN];
+    } payload;            // payload info for marker
     uint64_t startTime;
     uint64_t endTime;
+    uint64_t markId;
     int32_t messageType;
-    char message[128];
+    char message[MAX_MESSAGE_LEN];
 };
+
+#define MSPROF_TX_VALUE_MAX_LEN 224 // 224 + 8 = 232: additional data len
+struct MsprofTxInfo {
+    uint16_t infoType; // 0: Mark; 1: MarkEx
+    uint16_t res0;
+    uint32_t res1;
+    union {
+        struct MsprofStampInfo stampInfo;
+        uint8_t data[MSPROF_TX_VALUE_MAX_LEN];
+    } value;
+};
+
 #pragma pack()
 
 /**
@@ -208,6 +223,7 @@ struct MsprofMultiThread {
 /* Msprof report level */
 const uint16_t MSPROF_REPORT_PYTORCH_LEVEL = 30000;
 const uint16_t MSPROF_REPORT_PTA_LEVEL = 25000;
+const uint16_t MSPROF_REPORT_TX_LEVEL = 20500;
 const uint16_t MSPROF_REPORT_ACL_LEVEL = 20000;
 const uint16_t MSPROF_REPORT_MODEL_LEVEL = 15000;
 const uint16_t MSPROF_REPORT_NODE_LEVEL = 10000;
@@ -221,6 +237,9 @@ const uint32_t MSPROF_REPORT_PYTORCH_CALLSTACK_TYPE       = 2;
 const uint32_t MSPROF_REPORT_PYTORCH_CANN_OP_TYPE         = 3;
 const uint32_t MSPROF_REPORT_PYTORCH_TORCH_OP_TYPE        = 4;
 const uint32_t MSPROF_REPORT_PYTORCH_PIPELINE_TYPE        = 5;
+
+/* Msprof report type of tx(20500) level, offset: 0x000000 */
+const uint32_t MSPROF_REPORT_TX_BASE_TYPE                = 0x000000U;
 
 /* Msprof report type of acl(20000) level(acl), offset: 0x020000 */
 const uint32_t MSPROF_REPORT_ACL_OP_BASE_TYPE            = 0x010000U;

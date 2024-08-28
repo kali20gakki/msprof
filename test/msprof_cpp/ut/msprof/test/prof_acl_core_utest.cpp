@@ -2012,8 +2012,10 @@ TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofCreateStamp)
 {
     GlobalMockObject::verify();
     Msprof::MsprofTx::MsprofTxManager::instance()->Init();
-
-    aclprofCreateStamp();
+    auto stamp = aclprofCreateStamp();
+    EXPECT_NE(nullptr, stamp);
+    aclprofDestroyStamp(stamp);
+    Msprof::MsprofTx::MsprofTxManager::instance()->UnInit();
 }
 
 TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofDestroyStamp) {

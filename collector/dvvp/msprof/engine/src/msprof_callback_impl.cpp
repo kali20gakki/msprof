@@ -323,12 +323,8 @@ bool MsprofHostFreqIsEnableImpl()
 
 void RegisterMsprofTxReporterCallback()
 {
-    if (Msprof::Engine::MsprofCallbackHandler::reporters_.empty()) {
-        MSPROF_LOGI("MsprofCallbackHandler InitReporters");
-        Msprof::Engine::MsprofCallbackHandler::InitReporters();
-    }
     MSPROF_LOGI("Call MsprofTxManager SetReporterCallback");
-    Msprof::MsprofTx::MsprofTxManager::instance()->SetReporterCallback(MsprofReporterCallbackImpl);
+    Msprof::MsprofTx::MsprofTxManager::instance()->SetReporterCallback(MsprofAddiInfoReporterCallbackImpl);
 }
 
 int32_t MsprofilerInit()

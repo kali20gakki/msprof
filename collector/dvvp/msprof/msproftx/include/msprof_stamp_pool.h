@@ -21,8 +21,7 @@ constexpr int MAX_STAMP_SIZE = 10000;
 constexpr int CURRENT_STAMP_SIZE = 100;
 
 struct MsprofStampInstance {
-    ReporterData report;
-    MsprofStampInfo stampInfo;
+    MsprofTxInfo txInfo;
     int id;
     struct MsprofStampInstance* next;
     struct MsprofStampInstance* prev;

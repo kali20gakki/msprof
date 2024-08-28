@@ -9,29 +9,22 @@
 #define PROFILER_MSPROFTXREPORTER_H
 
 #include "prof_callback.h"
+#include "prof_common.h"
 
 namespace Msprof {
 namespace MsprofTx {
 class MsprofTxReporter {
 public:
     MsprofTxReporter();
-
     virtual ~MsprofTxReporter();
-
     int Init();
-
     int UnInit();
-
-    void SetReporterCallback(const MsprofReporterCallback func)
-    {
-        reporterCallback_ = func;
-    }
-
-    int Report(ReporterData &data) const;
+    void SetReporterCallback(MsprofAddiInfoReporterCallback func);
+    int Report(MsprofTxInfo &data) const;
 
 private:
     bool isInit_;
-    MsprofReporterCallback reporterCallback_;
+    MsprofAddiInfoReporterCallback reporterCallback_;
 };
 }
 }

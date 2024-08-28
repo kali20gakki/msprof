@@ -223,6 +223,7 @@ namespace {
     const std::unordered_map<uint32_t, std::string> levelMap {
         {30000, "pytorch"},
         {25000, "pta"},
+        {20500, "msproftx"},
         {20000, "acl"},
         {15000, "model"},
         {10000, "node"},

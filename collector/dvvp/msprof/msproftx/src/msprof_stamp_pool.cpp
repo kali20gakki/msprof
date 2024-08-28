@@ -40,6 +40,7 @@ MsprofStampPool::~MsprofStampPool()
 
 int MsprofStampPool::Init(int size)
 {
+    static auto processId = static_cast<uint32_t>(MmGetPid());
     if (size > MAX_STAMP_SIZE || size <= 0) {
         MSPROF_LOGE("Init Stamp Pool Failed, Invalid input size %d.", size);
         return PROFILING_FAILED;
@@ -73,13 +74,10 @@ int MsprofStampPool::Init(int size)
         } else {
             node->next = g_stampPoolHandle->memPool + (i + 1);
         }
-        node->stampInfo.processId = static_cast<uint32_t>(MmGetPid());
-        node->stampInfo.dataTag = MSPROF_MSPROFTX_DATA_TAG;
-        node->stampInfo.magicNumber = static_cast<uint16_t>(MSPROF_DATA_HEAD_MAGIC_NUM);
-        node->report.deviceId = DEFAULT_HOST_ID;
-        node->report.dataLen = sizeof(node->stampInfo);
-        node->report.data = reinterpret_cast<UNSIGNED_CHAR_PTR>(&node->stampInfo);
-        strncpy_s(node->report.tag, static_cast<size_t>(MSPROF_ENGINE_MAX_TAG_LEN), "msproftx", strlen("msproftx"));
+        node->txInfo.infoType = 0;
+        node->txInfo.value.stampInfo.processId = processId;
+        node->txInfo.value.stampInfo.dataTag = MSPROF_MSPROFTX_DATA_TAG;
+        node->txInfo.value.stampInfo.magicNumber = static_cast<uint16_t>(MSPROF_DATA_HEAD_MAGIC_NUM);
     }
     return PROFILING_SUCCESS;
 }
