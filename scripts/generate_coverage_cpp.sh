@@ -49,6 +49,7 @@ test_obj=(
     device_parser_utest
     device_persistence_utest
     data_process_utest
+    timeline_assemble_utest
 )
 
 str_test=""

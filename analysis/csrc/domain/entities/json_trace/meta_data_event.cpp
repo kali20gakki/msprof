@@ -14,7 +14,7 @@
 
 namespace Analysis {
 namespace Domain {
-MetaDataEvent::MetaDataEvent(int pid, int tid, std::string &name) : TraceEvent(pid, tid, name) {}
+MetaDataEvent::MetaDataEvent(int pid, int tid, const std::string &name) : TraceEvent(pid, tid, name) {}
 
 void MetaDataEvent::ToJson(JsonWriter &ostream)
 {
@@ -27,7 +27,7 @@ void MetaDataEvent::ToJson(JsonWriter &ostream)
     ostream.EndObject();
 }
 
-MetaDataNameEvent::MetaDataNameEvent(int pid, int tid, std::string &name, std::string &argName)
+MetaDataNameEvent::MetaDataNameEvent(int pid, int tid, const std::string &name, const std::string &argName)
     : MetaDataEvent(pid, tid, name), argsName_(argName) {}
 
 void MetaDataNameEvent::ProcessArgs(JsonWriter &ostream)
@@ -35,7 +35,7 @@ void MetaDataNameEvent::ProcessArgs(JsonWriter &ostream)
     ostream["name"] << argsName_;
 }
 
-MetaDataLabelEvent::MetaDataLabelEvent(int pid, int tid, std::string &name, std::string &label)
+MetaDataLabelEvent::MetaDataLabelEvent(int pid, int tid, const std::string &name, const std::string &label)
     : MetaDataEvent(pid, tid, name), argsLabel_(label) {}
 
 void MetaDataLabelEvent::ProcessArgs(JsonWriter &ostream)
@@ -43,7 +43,7 @@ void MetaDataLabelEvent::ProcessArgs(JsonWriter &ostream)
     ostream["labels"] << argsLabel_;
 }
 
-MetaDataIndexEvent::MetaDataIndexEvent(int pid, int tid, std::string &name, int index)
+MetaDataIndexEvent::MetaDataIndexEvent(int pid, int tid, const std::string &name, int index)
     : MetaDataEvent(pid, tid, name), argsSortIndex_(index) {}
 
 void MetaDataIndexEvent::ProcessArgs(JsonWriter &ostream)

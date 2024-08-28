@@ -25,6 +25,9 @@ struct ApiData {
     uint64_t end = UINT64_MAX;
     uint64_t connectionId = UINT64_MAX;
     std::string apiName;
+    std::string structType;  // api数据中的structType字段为runtime、model、node层数据的apiName
+    std::string id;  // api数据中的id字段为acl层数据的apiName
+    std::string itemId; // api数据中hccl层数据的apiName
 };
 }
 }

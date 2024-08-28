@@ -29,7 +29,7 @@ namespace Domain {
  */
 class MetaDataEvent : public TraceEvent {
 public:
-    MetaDataEvent(int pid, int tid, std::string &name);
+    MetaDataEvent(int pid, int tid, const std::string &name);
 private:
     void ToJson(JsonWriter &ostream) override;
     virtual void ProcessArgs(JsonWriter &ostream) {};
@@ -40,7 +40,7 @@ private:
 // args为name参数的MetaData
 class MetaDataNameEvent : public MetaDataEvent {
 public:
-    MetaDataNameEvent(int pid, int tid, std::string &name, std::string &argName);
+    MetaDataNameEvent(int pid, int tid, const std::string &name, const std::string &argName);
 private:
     void ProcessArgs(JsonWriter &ostream) override;
 private:
@@ -50,7 +50,7 @@ private:
 // args为labels参数的MetaData
 class MetaDataLabelEvent : public MetaDataEvent {
 public:
-    MetaDataLabelEvent(int pid, int tid, std::string &name, std::string &label);
+    MetaDataLabelEvent(int pid, int tid, const std::string &name, const std::string &label);
 private:
     void ProcessArgs(JsonWriter &ostream) override;
 private:
@@ -60,7 +60,7 @@ private:
 // args为labels参数的MetaData
 class MetaDataIndexEvent : public MetaDataEvent {
 public:
-    MetaDataIndexEvent(int pid, int tid, std::string &name, int index);
+    MetaDataIndexEvent(int pid, int tid, const std::string &name, int index);
 private:
     void ProcessArgs(JsonWriter &ostream) override;
 private:

@@ -430,6 +430,14 @@ void FileWriter::WriteText(const std::string &content)
     }
 }
 
+void FileWriter::WriteText(const char *content, std::size_t len)
+{
+    if (IsOpen()) {
+        outStream_.write(content, len);
+        outStream_.flush();
+    }
+}
+
 bool FileWriter::IsOpen() const
 {
     return outStream_.is_open();
