@@ -81,6 +81,14 @@ uint64_t GetProfSwitchHi(const uint64_t &dataTypeConfig)
 
 int32_t CommandHandleProfStart(const uint32_t devIdList[], uint32_t devNums, uint64_t profSwitch)
 {
+    if (MsprofReporterMgr::instance()->StartReporters() != PROFILING_SUCCESS) {
+        MSPROF_LOGE("CommandHandleProfStart start reporters failed");
+        return ACL_ERROR;
+    }
+    if (profSwitch == 0 && Msprofiler::Api::ProfAclMgr::instance()->IsMsprofTxSwitchOn()) {
+        MSPROF_LOGI("Profstart with only msproftx switch, need not send command to cann");
+        return ACL_SUCCESS;
+    }
     ProfCommand command;
     auto ret = memset_s(&command, sizeof(command), 0, sizeof(command));
     FUNRET_CHECK_FAIL_RET_VALUE(ret, EOK, PROFILING_FAILED);
@@ -104,38 +112,39 @@ int32_t CommandHandleProfStart(const uint32_t devIdList[], uint32_t devNums, uin
     }
     MSPROF_LOGI("CommandHandleProfStart, profSwitch:0x%lx, profSwitchHi:0x%lx, device[0]:%u, devNums:%u",
         command.profSwitch, command.profSwitchHi, command.devIdList[0], command.devNums);
-    if (MsprofReporterMgr::instance()->StartReporters() != PROFILING_SUCCESS) {
-        return ACL_ERROR;
-    }
     return ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
 }
 
 int32_t CommandHandleProfStop(const uint32_t devIdList[], uint32_t devNums, uint64_t profSwitch)
 {
-    ProfCommand command;
-    auto ret = memset_s(&command, sizeof(command), 0, sizeof(command));
-    FUNRET_CHECK_FAIL_RET_VALUE(ret, EOK, PROFILING_FAILED);
-    command.profSwitch = profSwitch;
-    command.profSwitchHi = GetProfSwitchHi(profSwitch);
-    command.type = PROF_COMMANDHANDLE_TYPE_STOP;
-    command.devNums = devNums;
-    command.modelId = PROF_INVALID_MODE_ID;
-    ProcessDeviceList(command, devIdList, devNums);
-    if (command.devNums == 0) {
-        if (!Platform::instance()->PlatformIsHelperHostSide()) {
-            return ACL_SUCCESS;
+    if (profSwitch == 0 && Msprofiler::Api::ProfAclMgr::instance()->IsMsprofTxSwitchOn()) {
+        MSPROF_LOGI("Profstop with only msproftx switch, need not send command to cann");
+    } else {
+        ProfCommand command;
+        auto ret = memset_s(&command, sizeof(command), 0, sizeof(command));
+        FUNRET_CHECK_FAIL_RET_VALUE(ret, EOK, PROFILING_FAILED);
+        command.profSwitch = profSwitch;
+        command.profSwitchHi = GetProfSwitchHi(profSwitch);
+        command.type = PROF_COMMANDHANDLE_TYPE_STOP;
+        command.devNums = devNums;
+        command.modelId = PROF_INVALID_MODE_ID;
+        ProcessDeviceList(command, devIdList, devNums);
+        if (command.devNums == 0) {
+            if (!Platform::instance()->PlatformIsHelperHostSide()) {
+                return ACL_SUCCESS;
+            }
         }
-    }
-    if (SetCommandHandleProf(command) != ACL_SUCCESS) {
-        MSPROF_LOGE("ProfStop CommandHandle set failed");
-        MSPROF_INNER_ERROR("EK9999", "ProfStop CommandHandle set failed");
-        return ACL_ERROR_PROFILING_FAILURE;
-    }
-    MSPROF_LOGI("CommandHandleProfStop, profSwitch:0x%lx, profSwitchHi:0x%lx, device[0]:%u, devNums:%u",
-        command.profSwitch, command.profSwitchHi, command.devIdList[0], command.devNums);
-    ret = ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
-    if (ret != ACL_SUCCESS) {
-        return ret;
+        if (SetCommandHandleProf(command) != ACL_SUCCESS) {
+            MSPROF_LOGE("ProfStop CommandHandle set failed");
+            MSPROF_INNER_ERROR("EK9999", "ProfStop CommandHandle set failed");
+            return ACL_ERROR_PROFILING_FAILURE;
+        }
+        MSPROF_LOGI("CommandHandleProfStop, profSwitch:0x%lx, profSwitchHi:0x%lx, device[0]:%u, devNums:%u",
+            command.profSwitch, command.profSwitchHi, command.devIdList[0], command.devNums);
+        ret = ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
+        if (ret != ACL_SUCCESS) {
+            return ret;
+        }
     }
     return (MsprofReporterMgr::instance()->StopReporters() == PROFILING_SUCCESS) ?  ACL_SUCCESS : ACL_ERROR;
 }

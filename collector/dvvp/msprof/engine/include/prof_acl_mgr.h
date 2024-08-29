@@ -104,6 +104,7 @@ public:
     uint64_t GetDeviceSubscribeCount(uint32_t modelId, uint32_t &devId);
     uint64_t GetCmdModeDataTypeConfig();
     std::string GetParamJsonStr();
+    bool IsMsprofTxSwitchOn();
     // task datatypeconfig add
 
 public:
