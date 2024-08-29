@@ -1409,6 +1409,11 @@ int32_t ProfAclMgr::MsprofInitHelper(VOID_PTR data, uint32_t len)
     return MSPROF_ERROR_NONE;
 }
 
+bool ProfAclMgr::IsMsprofTxSwitchOn()
+{
+    return params_->IsMsprofTx();
+}
+
 int ProfAclMgr::DoHostHandle()
 {
     params_->host_profiling = true;

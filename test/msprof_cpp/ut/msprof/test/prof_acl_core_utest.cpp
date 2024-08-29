@@ -491,95 +491,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_api) {
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
 }
 
-TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_api_datatype_config_is_zero)
-{
-    GlobalMockObject::verify();
-
-    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::Init)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-
-    std::string result = "./acl_prof_api_stest_new";
-    analysis::dvvp::common::utils::Utils::RemoveDir(result);
-    analysis::dvvp::common::utils::Utils::CreateDir(result);
-
-    ProfConfig config;
-    config.devNums = 1;
-    config.devIdList[0] = 0;
-    config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
-    config.dataTypeConfig = ACL_PROF_ACL_API|ACL_PROF_AICORE_METRICS|ACL_PROF_AICPU;
-
-    aclprofConfig *aclConfig = aclprofCreateConfig(
-        config.devIdList, config.devNums, (aclprofAicoreMetrics)config.aicoreMetrics, nullptr, config.dataTypeConfig);
-
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterAclApi::GetParamFromInputCfg)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-
-    uint64_t dataTypeConfig = 4;
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetDataTypeConfigFromParams)
-        .stubs()
-        .with(outBound((uint64_t)dataTypeConfig))
-        .will(returnValue(PROFILING_SUCCESS));
-
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::ProfStartPrecheck)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::ProfAclStart)
-        .stubs()
-        .will(returnValue(ACL_SUCCESS));
-    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(0, aclprofStart(aclConfig));
-}
-
-TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_api_stop_when_datatype_config_is_not_zero)
-{
-    GlobalMockObject::verify();
-    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
-        .stubs()
-        .will(returnValue(false));
-
-    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::Init)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-
-    std::string result = "./acl_prof_api_stest_new";
-    analysis::dvvp::common::utils::Utils::RemoveDir(result);
-    analysis::dvvp::common::utils::Utils::CreateDir(result);
-
-    ProfConfig config;
-    config.devNums = 1;
-    config.devIdList[0] = 0;
-    config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
-    config.dataTypeConfig = ACL_PROF_ACL_API|ACL_PROF_AICORE_METRICS|ACL_PROF_AICPU;
-
-    aclprofConfig *aclConfig = aclprofCreateConfig(
-        config.devIdList, config.devNums, (aclprofAicoreMetrics)config.aicoreMetrics, nullptr, config.dataTypeConfig);
-
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterAclApi::GetParamFromInputCfg)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-
-    uint64_t dataTypeConfig = 4;
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetDataTypeConfigFromParams)
-        .stubs()
-        .with(outBound((uint64_t)dataTypeConfig))
-        .will(returnValue(PROFILING_SUCCESS));
-
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::ProfStopPrecheck)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::ProfAclStop)
-        .stubs()
-        .will(returnValue(ACL_SUCCESS));
-    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(0, aclprofStop(aclConfig));
-}
-
 TEST_F(MSPROF_ACL_CORE_UTEST, prof_acl_api_helper) {
     GlobalMockObject::verify();
 
@@ -1062,6 +973,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, DoHostHandle) {
         new analysis::dvvp::message::ProfileParams());
     params->msproftx = "on";
     ProfAclMgr::instance()->params_ = params;
+    EXPECT_EQ(true, ProfAclMgr::instance()->IsMsprofTxSwitchOn());
 
     int ret = ProfAclMgr::instance()->DoHostHandle();
     EXPECT_EQ(PROFILING_FAILED, ret);
@@ -2169,4 +2081,66 @@ TEST_F(COMMANDHANDLE_TEST, commandHandle_api) {
     EXPECT_EQ(ACL_SUCCESS, CommandHandleProfFinalize());
     EXPECT_EQ(ACL_SUCCESS, CommandHandleProfSubscribe(0, 0));
     EXPECT_EQ(ACL_SUCCESS, CommandHandleProfUnSubscribe(0));
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStart_will_return_err_while_StartReporter_return_fail)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StartReporters)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    uint32_t devList[] = {0};
+    uint32_t devNums = 1;
+    EXPECT_EQ(ACL_ERROR, CommandHandleProfStart(devList, devNums, 0));
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStart_will_return_success_while_zero_profSwitch_and_msproftx_on)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StartReporters)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsMsprofTxSwitchOn)
+        .stubs()
+        .will(returnValue(true));
+    uint32_t devList[] = {0, 1};
+    uint32_t devNums = 2;
+    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStart(devList, devNums, 0));
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStop_will_not_send_command_while_zero_profSwitch_and_msproftx_on)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StopReporters)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsMsprofTxSwitchOn)
+        .stubs()
+        .will(returnValue(true));
+    uint32_t devList[] = {0, 1};
+    uint32_t devNums = 2;
+    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStop(devList, devNums, 0));
+}
+
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStop_will_send_command_to_cann_while_none_zero_profSwitch)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StopReporters)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsMsprofTxSwitchOn)
+        .stubs()
+        .will(returnValue(true));
+    std::string zeroStr = "{}";
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
+        .stubs()
+        .will(returnValue(zeroStr));
+    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    uint32_t devList[] = {0, 1};
+    uint32_t devNums = 2;
+    uint64_t profSwitch = 0x1;
+    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStop(devList, devNums, profSwitch));
 }
