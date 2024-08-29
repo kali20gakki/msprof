@@ -547,6 +547,32 @@ namespace {
         {"task_state", SQL_INTEGER_TYPE}
     };
 
+    const TableColumns KfcCommTurn = {
+        {"device_id", SQL_INTEGER_TYPE},
+        {"stream_id", SQL_INTEGER_TYPE},
+        {"task_id", SQL_INTEGER_TYPE},
+        {"comm_turn", SQL_INTEGER_TYPE},
+        {"current_turn", SQL_INTEGER_TYPE},
+        {"wait_notify_start_time", SQL_INTEGER_TYPE},
+        {"kfc_alg_exe_start_time", SQL_INTEGER_TYPE},
+        {"send_task_start_time", SQL_INTEGER_TYPE},
+        {"wait_active_start_time", SQL_INTEGER_TYPE},
+        {"active_start_time", SQL_INTEGER_TYPE},
+        {"wait_exe_end_start_time", SQL_INTEGER_TYPE},
+        {"rtsq_exe_end_time", SQL_INTEGER_TYPE},
+    };
+
+    const TableColumns KfcComputeTurn = {
+        {"device_id", SQL_INTEGER_TYPE},
+        {"stream_id", SQL_INTEGER_TYPE},
+        {"task_id", SQL_INTEGER_TYPE},
+        {"compute_turn", SQL_INTEGER_TYPE},
+        {"current_turn", SQL_INTEGER_TYPE},
+        {"wait_compute_start_time", SQL_INTEGER_TYPE},
+        {"compute_start_time", SQL_INTEGER_TYPE},
+        {"compute_exe_end_time", SQL_INTEGER_TYPE},
+    };
+
     const TableColumns CpuUsage = {
         {"start_time", SQL_NUMERIC_TYPE},
         {"end_time", SQL_NUMERIC_TYPE},
@@ -794,6 +820,13 @@ StepTraceDB::StepTraceDB()
     tableColNames_["StepTime"] = StepTime;
     tableColNames_["TaskType"] = TaskType;
     tableColNames_["TsMemcpy"] = TsMemcpy;
+}
+
+KfcInfo::KfcInfo()
+{
+    dbName_ = "kfc_info.db";
+    tableColNames_["KfcCommTurn"] = KfcCommTurn;
+    tableColNames_["KfcComputeTurn"] = KfcComputeTurn;
 }
 
 HostCpuUsage::HostCpuUsage()
