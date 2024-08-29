@@ -19,7 +19,8 @@
 namespace Analysis {
 namespace Domain {
 // model_id, index_id, stream_id, task_id, timestamp
-using OriMsprofTxDeviceData = std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, double>>;
+using TxDeviceData = std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, double>;
+using OriMsprofTxDeviceData = std::vector<TxDeviceData>;
 
 class MsprofTxDeviceProcessor : public DataProcessor {
 public:
@@ -30,7 +31,7 @@ private:
     OriMsprofTxDeviceData LoadData(const DBInfo &stepTraceDB, const std::string &dbPath);
     bool ProcessOneDevice(const Utils::ProfTimeRecord &record, std::vector<MsprofTxDeviceData> &res,
                           const std::string &devPath);
-    std::vector<MsprofTxDeviceData> FormatData(const OriMsprofTxDeviceData &oriData,
+    std::vector<MsprofTxDeviceData> FormatData(OriMsprofTxDeviceData &oriData,
                                                const Utils::ProfTimeRecord &record,
                                                const uint16_t deviceId,
                                                const Utils::SyscntConversionParams &params);

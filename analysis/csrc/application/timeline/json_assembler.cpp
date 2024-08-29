@@ -11,9 +11,11 @@
  */
 
 #include "analysis/csrc/application/timeline/json_assembler.h"
+#include "analysis/csrc/parser/environment/context.h"
 
 namespace Analysis {
 namespace Application {
+using namespace Analysis::Parser::Environment;
 JsonAssembler::JsonAssembler(const std::string &name, std::unordered_map<std::string, FileCategory> &&files)
     : fileMap_(files), processorName_(name) {}
 
@@ -43,6 +45,31 @@ bool JsonAssembler::Run(DataInventory& dataInventory, const std::string& profPat
 uint32_t JsonAssembler::GetFormatPid(uint32_t pid, uint32_t index, uint32_t deviceId)
 {
     return (pid << HIGH_BIT_OFFSET) | (index << MIDDLE_BIT_OFFSET) | deviceId;
+}
+
+int JsonAssembler::GetDevicePid(std::unordered_map<uint16_t, int>& pidMap, uint16_t deviceId,
+                                const std::string& profPath, uint32_t index)
+{
+    auto it = pidMap.find(deviceId);
+    if (it == pidMap.end()) {
+        auto pid = Context::GetInstance().GetPidFromInfoJson(deviceId, profPath);
+        auto formatPid = static_cast<int>(JsonAssembler::GetFormatPid(pid, index, deviceId));
+        pidMap[deviceId] = formatPid;
+        return formatPid;
+    }
+    return it->second;
+}
+
+bool JsonAssembler::FlushToFile(JsonWriter& ostream, const std::string& profPath)
+{
+    // 写msprof.json的时候是并行的，每一层JSON都有一个[],需要在写入的时候去掉
+    std::string filePath;
+    for (auto &it : fileMap_) {
+        auto fileName = it.first;
+        fileName.append("_").append(timestampStr).append(JSON_SUFFIX);
+        filePath = File::PathJoin({profPath, OUTPUT_PATH, fileName});
+        DumpTool::WriteToFile(filePath, ostream.GetString() + 1, ostream.GetSize() - FILE_CONTENT_SUFFIX, it.second);
+    }
 }
 }
 }

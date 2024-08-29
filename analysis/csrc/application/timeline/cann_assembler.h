@@ -21,7 +21,6 @@ class CannAssembler : public JsonAssembler {
 public:
     CannAssembler();
 private:
-    bool FlushToFile(JsonWriter &ostream, const std::string &profPath) override;
     uint8_t AssembleData(DataInventory& dataInventory, JsonWriter &ostream, const std::string &profPath) override;
 private:
     std::vector<std::shared_ptr<TraceEvent>> res_;

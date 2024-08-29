@@ -32,9 +32,12 @@ public:
     bool Run(DataInventory &dataInventory, const std::string &profPath);
     static uint32_t GetFormatPid(uint32_t pid, uint32_t index, uint32_t deviceId = HOST_PID);
 protected:
+    int GetDevicePid(std::unordered_map<uint16_t, int> &pidMap, uint16_t deviceId, const std::string &profPath,
+                     uint32_t index);
+protected:
     std::unordered_map<std::string, FileCategory> fileMap_;
 private:
-    virtual bool FlushToFile(JsonWriter &ostream, const std::string &profPath) = 0;
+    bool FlushToFile(JsonWriter &ostream, const std::string &profPath);
     virtual uint8_t AssembleData(DataInventory& dataInventory, JsonWriter &ostream, const std::string &profPath) = 0;
 private:
     std::string processorName_;

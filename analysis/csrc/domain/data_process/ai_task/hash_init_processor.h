@@ -20,6 +20,7 @@ namespace Analysis {
 namespace Domain {
 // GeHash表映射map结构
 using GeHashMap = std::unordered_map<std::string, std::string>;
+using StreamMap = std::unordered_map<uint32_t, uint32_t>;
 
 class HashInitProcessor : public DataProcessor {
 public:
@@ -28,6 +29,8 @@ public:
 
 private:
     bool Process(DataInventory& dataInventory) override;
+    bool ProcessLogicStream(DataInventory &dataInventory);
+    bool ProcessHashMap(DataInventory &dataInventory);
 };
 }
 }

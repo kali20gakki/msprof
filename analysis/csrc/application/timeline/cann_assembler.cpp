@@ -15,6 +15,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
 #include "analysis/csrc/parser/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/application/timeline/connection_id_pool.h"
 
 namespace Analysis {
 namespace Application {
@@ -104,7 +105,7 @@ void GenerateConnectionTrace(std::vector<ApiData> &apiData, int pid, std::vector
     std::string name;
     for (auto &data : apiData) {
         if (MSPROF_REPORT_NODE_LEVEL == data.level) {
-            connId = std::to_string(data.connectionId << CONN_OFFSET);
+            connId = ConnectionIdPool::GetConnectionId(data.connectionId, ConnectionCategory::GENERAL);
             name = HOST_TO_DEVICE + connId;
             std::shared_ptr<FlowEvent> start;
             MAKE_SHARED_RETURN_VOID(start, FlowEvent, pid, data.threadId, std::to_string(data.start / NS_TO_MS),
@@ -136,18 +137,6 @@ uint8_t CannAssembler::AssembleData(DataInventory &dataInventory, JsonWriter &os
     // 为了让下一个写入的内容形成正确的JSON格式，需要补一个","
     ostream << ",";
     return ASSEMBLE_SUCCESS;
-}
-
-bool CannAssembler::FlushToFile(JsonWriter& ostream, const std::string &profPath)
-{
-    // 写msprof.json的时候是并行的，每一层JSON都有一个[],需要在写入的时候去掉
-    std::string filePath;
-    for (auto &it : fileMap_) {
-        auto fileName = it.first;
-        fileName.append("_").append(timestampStr).append(JSON_SUFFIX);
-        filePath = File::PathJoin({profPath, OUTPUT_PATH, fileName});
-        DumpTool::WriteToFile(filePath, ostream.GetString() + 1, ostream.GetSize() - FILE_CONTENT_SUFFIX, it.second);
-    }
 }
 }
 }

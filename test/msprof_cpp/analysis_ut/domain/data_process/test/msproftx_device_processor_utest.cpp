@@ -31,7 +31,8 @@ const std::string TABLE_NAME = "StepTrace";
 using DbDataType = std::vector<std::tuple<uint32_t, uint32_t, double, uint32_t, uint32_t, uint32_t>>;
 
 DbDataType DATA_A{{0, 4294967295, 26248923229230, 2, 10, 11},
-                  {0, 4294967295, 26248923229240, 2, 11, 11}};
+                  {0, 4294967295, 26248923229240, 2, 10, 11},
+                  {1, 4294967295, 26248923229340, 2, 14, 11}};
 }
 
 class MsprofTxDeviceProcessorUTest : public testing::Test {
