@@ -21,7 +21,7 @@ namespace Domain {
 // start_time, duration, model_id, index_id, stream_id, task_id, context_id, batch_id, connection_id host_task_type,
 // device_task_type
 using OriAscendTaskData = std::vector<std::tuple<double, double, uint32_t, int32_t, uint32_t, uint32_t, uint32_t,
-                                                 uint32_t, uint32_t, std::string, std::string>>;
+                                                 uint32_t, uint64_t, std::string, std::string>>;
 class TaskProcessor : public DataProcessor {
 public:
     TaskProcessor() = default;

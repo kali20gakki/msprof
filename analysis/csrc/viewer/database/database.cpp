@@ -615,6 +615,11 @@ namespace {
         {"pcie_read_bandwidth", SQL_INTEGER_TYPE},
         {"sys_time", SQL_INTEGER_TYPE}
     };
+
+    const TableColumns GeLogicStreamInfo = {
+        {"physic_stream", SQL_INTEGER_TYPE},
+        {"logic_stream", SQL_INTEGER_TYPE},
+    };
 }
 
 std::string Database::GetDBName() const
@@ -858,6 +863,12 @@ ChipTransDB::ChipTransDB()
     dbName_ = "step_trace.db";
     tableColNames_["PaLinkInfo"] = PaLinkInfo;
     tableColNames_["PcieInfo"] = PcieInfo;
+}
+
+GeLogicStreamDB::GeLogicStreamDB()
+{
+    dbName_ = "ge_logic_stream_info.db";
+    tableColNames_["GeLogicStreamInfo"] = GeLogicStreamInfo;
 }
 
 } // namespace Database

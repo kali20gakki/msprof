@@ -11,6 +11,7 @@
  */
 
 #include "analysis/csrc/domain/data_process/ai_task/msproftx_device_processor.h"
+#include <algorithm>
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/parser/environment/context.h"
 
@@ -99,7 +100,7 @@ OriMsprofTxDeviceData MsprofTxDeviceProcessor::LoadData(const DBInfo &stepTraceD
 }
 
 std::vector<MsprofTxDeviceData> MsprofTxDeviceProcessor::FormatData(
-    const OriMsprofTxDeviceData &oriData, const ProfTimeRecord &record, const uint16_t deviceId,
+    OriMsprofTxDeviceData &oriData, const ProfTimeRecord &record, const uint16_t deviceId,
     const SyscntConversionParams &params)
 {
     std::vector<MsprofTxDeviceData> processedData;
@@ -110,12 +111,19 @@ std::vector<MsprofTxDeviceData> MsprofTxDeviceProcessor::FormatData(
     MsprofTxDeviceData data;
     double start;
     data.deviceId = deviceId;
+    std::sort(oriData.begin(), oriData.end(), [](TxDeviceData &lData, TxDeviceData rData) {
+        return std::get<4>(lData) < std::get<4>(rData); // 第4位为timestamp
+    });
     for (const auto& row : oriData) {
         std::tie(data.modelId, data.indexId, data.streamId, data.taskId, start) = row;
         data.connectionId = data.indexId + START_CONNECTION_ID_MSTX;
         HPFloat startTimestamp = Utils::GetTimeFromSyscnt(start, params);
         data.start = GetLocalTime(startTimestamp, record).Uint64();
-        processedData.push_back(data);
+        if (!processedData.empty() && data.indexId == processedData.back().indexId) {
+            processedData.back().duration = static_cast<double>(data.start - processedData.back().start);
+        } else {
+            processedData.push_back(data);
+        }
     }
     return processedData;
 }

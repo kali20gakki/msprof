@@ -221,6 +221,11 @@ public:
     ChipTransDB();
 };
 
+class GeLogicStreamDB : public Database {
+public:
+    GeLogicStreamDB();
+};
+
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis
