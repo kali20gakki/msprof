@@ -190,6 +190,12 @@ public:
     StepTraceDB();
 };
 
+
+class KfcInfo : public Database {
+public:
+    KfcInfo();
+};
+
 class HostCpuUsage : public Database {
 public:
     HostCpuUsage();
