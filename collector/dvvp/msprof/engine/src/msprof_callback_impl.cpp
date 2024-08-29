@@ -324,6 +324,7 @@ bool MsprofHostFreqIsEnableImpl()
 void RegisterMsprofTxReporterCallback()
 {
     MSPROF_LOGI("Call MsprofTxManager SetReporterCallback");
+    MsprofReporterMgr::instance()->StartReporters();
     Msprof::MsprofTx::MsprofTxManager::instance()->SetReporterCallback(MsprofAddiInfoReporterCallbackImpl);
 }
 
