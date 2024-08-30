@@ -32,12 +32,12 @@ const std::string META_DATA_THREAD_NAME = "thread_name";
 const std::string META_DATA_THREAD_INDEX = "thread_sort_index";
 const std::string HOST_TO_DEVICE = "HostToDevice";
 const std::string MS_TX = "MsTx_";
-const std::string FLOW_START = "S";
-const std::string FLOW_END = "F";
-const std::string FLOW_BP = "E";
+const std::string FLOW_START = "s";
+const std::string FLOW_END = "f";
+const std::string FLOW_BP = "e";
 const std::string OUTPUT_PATH = "mindstudio_profiler_output";
 const std::string JSON_SUFFIX = ".json";
-const double NS_TO_MS = 1000.0;
+const double NS_TO_US = 1000.0;
 const int CONN_OFFSET = 32;
 /*
  * json格式要求多个对象使用[]包装，再每一层json后添加了","分割，最终会形成[{},true]的结果，因此需要写入内容的时候过滤掉
