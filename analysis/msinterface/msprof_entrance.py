@@ -218,4 +218,5 @@ class MsprofEntrance:
             default=False, help='<Optional> the clear mode flag')
         analyze_parser.add_argument(
             '--type', dest='export_type',
-            type=str, help='Specify the output file type, db or text', required=False, default="text")
+            type=str, help='Specify the output file type, db or text', required=False,
+            default="text", choices=['db', 'text'])
