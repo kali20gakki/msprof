@@ -3,7 +3,7 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : ascend_assembler.cpp
+ * File Name          : ascend_hardware_assembler.cpp
  * Description        : 组合Ascend Hardware层数据
  * Author             : msprof team
  * Creation Date      : 2024/8/27
@@ -95,8 +95,8 @@ void AscendHardwareAssembler::GenerateTaskTrace(const std::vector<AscendTaskData
         // 存储pid，tid组合的最小集
         pidTidSet_.insert({formatPid, tid});
         std::shared_ptr<TaskTraceEvent> event;
-        MAKE_SHARED_RETURN_VOID(event, TaskTraceEvent, formatPid, tid, data.duration / NS_TO_MS,
-                                std::to_string(data.start / NS_TO_MS), traceName, data.modelId, data.streamId,
+        MAKE_SHARED_RETURN_VOID(event, TaskTraceEvent, formatPid, tid, data.duration / NS_TO_US,
+                                std::to_string(data.start / NS_TO_US), traceName, data.modelId, data.streamId,
                                 data.taskId, data.batchId, data.contextId, data.connectionId, data.deviceType);
         res_.push_back(event);
     }
@@ -114,8 +114,8 @@ void AscendHardwareAssembler::GenerateTxTrace(const std::vector<MsprofTxDeviceDa
         // 存储pid，tid组合的最小集
         pidTidSet_.insert({formatPid, tid});
         std::shared_ptr<DeviceTxTraceEvent> event;
-        MAKE_SHARED_RETURN_VOID(event, DeviceTxTraceEvent, formatPid, tid, data.duration / NS_TO_MS,
-                                std::to_string(data.start / NS_TO_MS), traceName, data.streamId, data.taskId);
+        MAKE_SHARED_RETURN_VOID(event, DeviceTxTraceEvent, formatPid, tid, data.duration / NS_TO_US,
+                                std::to_string(data.start / NS_TO_US), traceName, data.streamId, data.taskId);
         res_.push_back(event);
     }
 }
@@ -137,7 +137,7 @@ void AscendHardwareAssembler::GenerateTaskConnectionTrace(const std::vector<Asce
             formatPid = pidMap[data.deviceId];
             tid = static_cast<int>(GetPhysicStreamId(data));
             std::shared_ptr<FlowEvent> end;
-            MAKE_SHARED_RETURN_VOID(end, FlowEvent, formatPid, tid, std::to_string(data.start / NS_TO_MS),
+            MAKE_SHARED_RETURN_VOID(end, FlowEvent, formatPid, tid, std::to_string(data.start / NS_TO_US),
                                     HOST_TO_DEVICE, connId, name, FLOW_END, FLOW_BP);
             res_.push_back(end);
         }
@@ -157,7 +157,7 @@ void AscendHardwareAssembler::GenerateTxConnectionTrace(const std::vector<Msprof
         formatPid = pidMap[data.deviceId];
         tid = static_cast<int>(data.streamId);
         std::shared_ptr<FlowEvent> end;
-        MAKE_SHARED_RETURN_VOID(end, FlowEvent, formatPid, tid, std::to_string(data.start / NS_TO_MS),
+        MAKE_SHARED_RETURN_VOID(end, FlowEvent, formatPid, tid, std::to_string(data.start / NS_TO_US),
                                 MS_TX, connId, name, FLOW_END, FLOW_BP);
         res_.push_back(end);
     }

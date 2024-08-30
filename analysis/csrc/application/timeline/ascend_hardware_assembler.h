@@ -3,7 +3,7 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : ascend_assembler.h
+ * File Name          : ascend_hardware_assembler.h
  * Description        : 组合Ascend Hardware层数据
  * Author             : msprof team
  * Creation Date      : 2024/8/27

@@ -18,23 +18,21 @@
 
 namespace Analysis {
 namespace Application {
-struct HcclGroup {
-    int id;
-    int startIndex = -1;
-    std::set<int32_t> planes;
-};
-
 class HcclAssembler : public JsonAssembler {
 public:
     HcclAssembler();
 private:
     uint8_t AssembleData(DataInventory& dataInventory, JsonWriter &ostream, const std::string &profPath) override;
-    void GenerateHcclTaskTrace(std::vector<CommunicationTaskData> &task, const std::string &profPath,
+    void GenerateHcclTaskTrace(const std::vector<CommunicationTaskData> &task, const std::string &profPath,
                                std::unordered_map<uint16_t, int> &pidMap);
-    void InitHcclGroup(std::vector<CommunicationTaskData> &task);
+    void GenerateHcclOpTrace(const std::vector<CommunicationOpData> &opData, const std::string &profPath,
+                             std::unordered_map<uint16_t, int> &pidMap);
+    void GenerateConnectionTrace(const CommunicationOpData &data, int formatPid, int tid);
+    void GenerateMetaDataEvent(std::unordered_map<uint16_t, int> &pidMap);
 private:
     std::vector<std::shared_ptr<TraceEvent>> res_;
-    std::unordered_map<std::string, HcclGroup> hcclGroup_;
+    std::unordered_map<std::string, int> groupIndex_;
+    std::set<std::pair<int, int>> pidTidSet_;
 };
 
 class HcclOpTraceEvent : public DurationEvent {
@@ -57,7 +55,7 @@ class HcclTaskTraceEvent : public DurationEvent {
 public:
     HcclTaskTraceEvent(int pid, int tid, double dur, const std::string &ts, const std::string &name, uint32_t src,
                        uint32_t dst, uint32_t streamId, uint32_t taskId, uint32_t contextId, uint32_t modelId,
-                       uint64_t size, double esDur, double bw, const std::string &notifyId, const std::string &tsType,
+                       uint64_t size, double esDur, double bw, uint64_t notifyId, const std::string &tsType,
                        const std::string &taskType, const std::string &dataType, const std::string &linkType)
         : DurationEvent(pid, tid, dur, ts, name), srcRank_(src), dstRank_(dst), streamId_(streamId), taskId_(taskId),
         contextId_(contextId), modelId_(modelId), size_(size), esDur_(esDur), bandwidth_(bw), notifyId_(notifyId),
@@ -74,7 +72,7 @@ private:
     uint64_t size_;
     double esDur_;
     double bandwidth_;
-    std::string notifyId_;
+    uint64_t notifyId_;
     std::string transportType_;
     std::string taskType;
     std::string dataType_;

@@ -91,9 +91,9 @@ void GenerateApiTrace(std::vector<ApiData> &apiData, std::vector<std::shared_ptr
     for (auto &data : apiData) {
         levelStr = GetLevel(data.level);
         traceName = GetTraceName(data.level, data.apiName);
-        dur = static_cast<double>(data.end - data.start) / NS_TO_MS;
+        dur = static_cast<double>(data.end - data.start) / NS_TO_US;
         std::shared_ptr<ApiTraceEvent> event;
-        MAKE_SHARED_RETURN_VOID(event, ApiTraceEvent, pid, data.threadId, dur, std::to_string(data.start / NS_TO_MS),
+        MAKE_SHARED_RETURN_VOID(event, ApiTraceEvent, pid, data.threadId, dur, std::to_string(data.start / NS_TO_US),
                                 traceName, data.threadId, data.connectionId, data.structType, levelStr, data.id,
                                 data.itemId);
         res.push_back(event);
@@ -108,7 +108,7 @@ void GenerateConnectionTrace(std::vector<ApiData> &apiData, int pid, std::vector
             connId = ConnectionIdPool::GetConnectionId(data.connectionId, ConnectionCategory::GENERAL);
             name = HOST_TO_DEVICE + connId;
             std::shared_ptr<FlowEvent> start;
-            MAKE_SHARED_RETURN_VOID(start, FlowEvent, pid, data.threadId, std::to_string(data.start / NS_TO_MS),
+            MAKE_SHARED_RETURN_VOID(start, FlowEvent, pid, data.threadId, std::to_string(data.start / NS_TO_US),
                                     HOST_TO_DEVICE, connId, name, FLOW_START);
             res.push_back(start);
         }

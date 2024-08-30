@@ -3,8 +3,8 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : ascend_assembler_utest.cpp
- * Description        : ascend_assembler UT
+ * File Name          : ascend_hardware_assembler_utest.cpp
+ * Description        : ascend_hardware_assembler UT
  * Author             : msprof team
  * Creation Date      : 2024/8/28
  * *****************************************************************************
@@ -100,7 +100,7 @@ static std::vector<MsprofTxDeviceData> GenerateDeviceTxData()
 TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataNotExists)
 {
     AscendHardwareAssembler assembler;
-    assembler.Run(dataInventory_, PROF_PATH);
+    EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
 }
 
 TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
@@ -129,12 +129,12 @@ TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
                             "\"dur\":0.45077999999999996,\"ph\":\"X\",\"args\":{\"Model Id\":4294967295,\"Task Type\":"
                             "\"AI_CORE\",\"Physic Stream Id\":1,\"Task Id\":10,\"Batch Id\":1,\"Subtask Id\":1,"
                             "\"connection_id\":2345}},{\"name\":\"HostToDevice10071698309120\",\"pid\":10328480,"
-                            "\"tid\":1,\"ph\":\"F\",\"cat\":\"HostToDevice\",\"id\":\"10071698309120\",\"ts\":"
-                            "\"1717575960208020.750000\",\"bp\":\"E\"},{\"name\":\"MsTx_2147483647\",\"pid\":10328480,"
+                            "\"tid\":1,\"ph\":\"f\",\"cat\":\"HostToDevice\",\"id\":\"10071698309120\",\"ts\":"
+                            "\"1717575960208020.750000\",\"bp\":\"e\"},{\"name\":\"MsTx_2147483647\",\"pid\":10328480,"
                             "\"tid\":1,\"ts\":\"18446744073709552.000000\",\"dur\":0.0,\"ph\":\"X\",\"args\":"
                             "{\"Physic Stream Id\":1,\"Task Id\":13}},{\"name\":\"MsTx_7890\",\"pid\":10328480,\"tid"
-                            "\":1,\"ph\":\"F\",\"cat\":\"MsTx_\",\"id\":\"7890\",\"ts\":\"18446744073709552.000000\","
-                            "\"bp\":\"E\"},{\"name\":\"process_name\",\"pid\":10328480,\"tid\":0,\"ph\":\"M\",\"args"
+                            "\":1,\"ph\":\"f\",\"cat\":\"MsTx_\",\"id\":\"7890\",\"ts\":\"18446744073709552.000000\","
+                            "\"bp\":\"e\"},{\"name\":\"process_name\",\"pid\":10328480,\"tid\":0,\"ph\":\"M\",\"args"
                             "\":{\"name\":\"Ascend Hardware\"}},{\"name\":\"process_labels\",\"pid\":10328480,\"tid\""
                             ":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\""
                             ":10328480,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":13}},{\"name\":\"thread_name\","

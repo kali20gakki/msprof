@@ -98,7 +98,7 @@ TEST_F(CannAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
                             "\"Node@launch\",\"pid\":1024255,\"tid\":87144,\"ts\":\"1717575960208020.750000\",\"dur\":"
                             "990.0,\"ph\":\"X\",\"args\":{\"Thread Id\":87144,\"Mode\":\"launch\",\"level\":\"node\","
                             "\"id\":\"0\",\"item_id\":\"hcom_broadcast_\",\"connection_id\":2762}},{\"name\":"
-                            "\"HostToDevice11862699671552\",\"pid\":1024255,\"tid\":87144,\"ph\":\"S\",\"cat\":"
+                            "\"HostToDevice11862699671552\",\"pid\":1024255,\"tid\":87144,\"ph\":\"s\",\"cat\":"
                             "\"HostToDevice\",\"id\":\"11862699671552\",\"ts\":\"1717575960208020.750000\"},";
     EXPECT_EQ(expectStr, res.back());
 }
