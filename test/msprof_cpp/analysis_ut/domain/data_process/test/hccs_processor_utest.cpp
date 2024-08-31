@@ -120,7 +120,7 @@ TEST_F(HCCSProcessorUTest, TestFormatDataShouldReturnFalseWhenProcessDataFailed)
     MOCKER_CPP(&OriHccsData::empty).reset();
     // Reserve failed
     MOCKER_CPP(&std::vector<HccsData>::reserve).stubs().will(throws(std::bad_alloc()));
-    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MEM));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_HCCS));
     MOCKER_CPP(&std::vector<HccsData>::reserve).reset();
 }
 

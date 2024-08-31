@@ -124,7 +124,7 @@ TEST_F(HBMProcessorUTest, TestFormatDataShouldReturnFalseWhenProcessDataFailed)
     MOCKER_CPP(&OriHbmData::empty).reset();
     // Reserve failed
     MOCKER_CPP(&std::vector<HbmData>::reserve).stubs().will(throws(std::bad_alloc()));
-    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MEM));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_HBM));
     MOCKER_CPP(&std::vector<HbmData>::reserve).reset();
 }
 
