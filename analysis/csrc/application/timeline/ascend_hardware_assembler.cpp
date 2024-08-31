@@ -52,7 +52,7 @@ void AscendHardwareAssembler::InitData(DataInventory &dataInventory)
     if (taskInfo != nullptr) {
         for (const auto &node : *taskInfo) {
             opName_.emplace(TaskId{static_cast<uint16_t >(node.streamId), static_cast<uint16_t >(node.batchId),
-                static_cast<uint16_t >(node.taskId), node.contextId}, node.opName);
+                static_cast<uint16_t >(node.taskId), node.contextId, node.deviceId}, node.opName);
         }
     }
 }
@@ -60,7 +60,7 @@ void AscendHardwareAssembler::InitData(DataInventory &dataInventory)
 std::string AscendHardwareAssembler::GetOpName(const AscendTaskData& data)
 {
     TaskId id{static_cast<uint16_t>(data.streamId), static_cast<uint16_t>(data.batchId),
-        static_cast<uint16_t>(data.taskId), data.contextId};
+        static_cast<uint16_t>(data.taskId), data.contextId, data.deviceId};
     auto it = opName_.find(id);
     if (it != opName_.end()) {
         return it->second;
@@ -84,9 +84,10 @@ uint32_t AscendHardwareAssembler::GetPhysicStreamId(const AscendTaskData& data)
 }
 
 void AscendHardwareAssembler::GenerateTaskTrace(const std::vector<AscendTaskData> &taskData,
-                                                const std::string &profPath, std::unordered_map<uint16_t, int> &pidMap)
+                                                const std::string &profPath,
+                                                std::unordered_map<uint16_t, uint32_t> &pidMap)
 {
-    int formatPid;
+    uint32_t formatPid;
     std::string traceName;
     for (const auto &data : taskData) {
         traceName = GetOpName(data);
@@ -103,12 +104,14 @@ void AscendHardwareAssembler::GenerateTaskTrace(const std::vector<AscendTaskData
 }
 
 void AscendHardwareAssembler::GenerateTxTrace(const std::vector<MsprofTxDeviceData>& txData,
-                                              const std::string& profPath, std::unordered_map<uint16_t, int>& pidMap)
+                                              const std::string& profPath,
+                                              std::unordered_map<uint16_t, uint32_t>& pidMap)
 {
-    int formatPid;
+    uint32_t formatPid;
     std::string traceName;
     for (const auto &data : txData) {
-        traceName = MS_TX + std::to_string(data.indexId);
+        traceName = MS_TX;
+        traceName.append("_").append(std::to_string(data.indexId));
         formatPid = GetDevicePid(pidMap, data.deviceId, profPath, SORT_INDEX);
         int tid = static_cast<int>(data.streamId);
         // 存储pid，tid组合的最小集
@@ -121,16 +124,16 @@ void AscendHardwareAssembler::GenerateTxTrace(const std::vector<MsprofTxDeviceDa
 }
 
 void AscendHardwareAssembler::GenerateTaskConnectionTrace(const std::vector<AscendTaskData> &taskData,
-                                                          std::unordered_map<uint16_t, int> &pidMap)
+                                                          std::unordered_map<uint16_t, uint32_t> &pidMap)
 {
     std::string connId;
     std::string name;
     TaskId id;
-    int formatPid;
+    uint32_t formatPid;
     int tid;
     for (const auto &data : taskData) {
         id = {static_cast<uint16_t>(data.streamId), static_cast<uint16_t>(data.batchId),
-            static_cast<uint16_t>(data.taskId), data.contextId};
+            static_cast<uint16_t>(data.taskId), data.contextId, data.deviceId};
         if (opName_.find(id) != opName_.end()) {
             connId = ConnectionIdPool::GetConnectionId(data.connectionId, ConnectionCategory::GENERAL);
             name = HOST_TO_DEVICE + connId;
@@ -145,15 +148,15 @@ void AscendHardwareAssembler::GenerateTaskConnectionTrace(const std::vector<Asce
 }
 
 void AscendHardwareAssembler::GenerateTxConnectionTrace(const std::vector<MsprofTxDeviceData> &txData,
-                                                        std::unordered_map<uint16_t, int> &pidMap)
+                                                        std::unordered_map<uint16_t, uint32_t> &pidMap)
 {
     std::string connId;
-    std::string name;
-    int formatPid;
+    uint32_t formatPid;
     int tid;
     for (const auto &data : txData) {
         connId = ConnectionIdPool::GetConnectionId(data.connectionId, ConnectionCategory::MSPROF_TX);
-        name = MS_TX + connId;
+        auto name = MS_TX;
+        name.append("_").append(connId);
         formatPid = pidMap[data.deviceId];
         tid = static_cast<int>(data.streamId);
         std::shared_ptr<FlowEvent> end;
@@ -163,7 +166,7 @@ void AscendHardwareAssembler::GenerateTxConnectionTrace(const std::vector<Msprof
     }
 }
 
-void AscendHardwareAssembler::GenerateMetaData(std::unordered_map<uint16_t, int>& pidMap)
+void AscendHardwareAssembler::GenerateMetaData(std::unordered_map<uint16_t, uint32_t>& pidMap)
 {
     for (const auto &it : pidMap) {
         std::shared_ptr<MetaDataNameEvent> processName;
@@ -201,7 +204,7 @@ uint8_t  AscendHardwareAssembler::AssembleData(DataInventory& dataInventory, Jso
         WARN("Can't get task data from dataInventory");
         return DATA_NOT_EXIST;
     }
-    std::unordered_map<uint16_t, int> devicePid;
+    std::unordered_map<uint16_t, uint32_t> devicePid;
     if (taskData != nullptr) {
         GenerateTaskTrace(*taskData, profPath, devicePid);
         GenerateTaskConnectionTrace(*taskData, devicePid);

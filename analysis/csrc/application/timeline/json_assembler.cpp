@@ -47,13 +47,13 @@ uint32_t JsonAssembler::GetFormatPid(uint32_t pid, uint32_t index, uint32_t devi
     return (pid << HIGH_BIT_OFFSET) | (index << MIDDLE_BIT_OFFSET) | deviceId;
 }
 
-int JsonAssembler::GetDevicePid(std::unordered_map<uint16_t, int>& pidMap, uint16_t deviceId,
-                                const std::string& profPath, uint32_t index)
+uint32_t JsonAssembler::GetDevicePid(std::unordered_map<uint16_t, uint32_t >& pidMap, uint16_t deviceId,
+                                     const std::string& profPath, uint32_t index)
 {
     auto it = pidMap.find(deviceId);
     if (it == pidMap.end()) {
         auto pid = Context::GetInstance().GetPidFromInfoJson(deviceId, profPath);
-        auto formatPid = static_cast<int>(JsonAssembler::GetFormatPid(pid, index, deviceId));
+        auto formatPid = JsonAssembler::GetFormatPid(pid, index, deviceId);
         pidMap[deviceId] = formatPid;
         return formatPid;
     }
@@ -69,6 +69,26 @@ bool JsonAssembler::FlushToFile(JsonWriter& ostream, const std::string& profPath
         fileName.append("_").append(timestampStr).append(JSON_SUFFIX);
         filePath = File::PathJoin({profPath, OUTPUT_PATH, fileName});
         DumpTool::WriteToFile(filePath, ostream.GetString() + 1, ostream.GetSize() - FILE_CONTENT_SUFFIX, it.second);
+    }
+}
+
+void JsonAssembler::GenerateHWMetaData(const std::unordered_map<uint16_t, uint32_t> &pidMap,
+                                       const struct LayerInfo &layerInfo,
+                                       std::vector<std::shared_ptr<TraceEvent>> &res)
+{
+    for (const auto &kv: pidMap) {
+        std::shared_ptr<MetaDataNameEvent> processName;
+        MAKE_SHARED_RETURN_VOID(processName, MetaDataNameEvent, kv.second, DEFAULT_TID,
+                                META_DATA_PROCESS_NAME, layerInfo.component);
+        std::shared_ptr<MetaDataLabelEvent> processLabel;
+        MAKE_SHARED_RETURN_VOID(processLabel, MetaDataLabelEvent, kv.second, DEFAULT_TID,
+                                META_DATA_PROCESS_LABEL, layerInfo.label);
+        std::shared_ptr<MetaDataIndexEvent> processIndex;
+        MAKE_SHARED_RETURN_VOID(processIndex, MetaDataIndexEvent, kv.second, DEFAULT_TID,
+                                META_DATA_PROCESS_INDEX, layerInfo.sortIndex);
+        res.push_back(processName);
+        res.push_back(processLabel);
+        res.push_back(processIndex);
     }
 }
 }

@@ -75,6 +75,7 @@ static std::vector<TaskInfoData> GenerateTaskInfoData()
 {
     std::vector<TaskInfoData> res;
     TaskInfoData data;
+    data.deviceId = 0; // deviceId 0
     data.streamId = 1; // streamId 1
     data.taskId = 10; // taskId 10
     data.contextId = 1; // contextId 1
@@ -133,7 +134,7 @@ TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
                             "\"1717575960208020.750000\",\"bp\":\"e\"},{\"name\":\"MsTx_2147483647\",\"pid\":10328480,"
                             "\"tid\":1,\"ts\":\"18446744073709552.000000\",\"dur\":0.0,\"ph\":\"X\",\"args\":"
                             "{\"Physic Stream Id\":1,\"Task Id\":13}},{\"name\":\"MsTx_7890\",\"pid\":10328480,\"tid"
-                            "\":1,\"ph\":\"f\",\"cat\":\"MsTx_\",\"id\":\"7890\",\"ts\":\"18446744073709552.000000\","
+                            "\":1,\"ph\":\"f\",\"cat\":\"MsTx\",\"id\":\"7890\",\"ts\":\"18446744073709552.000000\","
                             "\"bp\":\"e\"},{\"name\":\"process_name\",\"pid\":10328480,\"tid\":0,\"ph\":\"M\",\"args"
                             "\":{\"name\":\"Ascend Hardware\"}},{\"name\":\"process_labels\",\"pid\":10328480,\"tid\""
                             ":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\""

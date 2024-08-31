@@ -12,12 +12,9 @@
 
 #include "analysis/csrc/domain/entities/json_trace/include/meta_data_event.h"
 #include <unordered_map>
-#include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
 namespace Domain {
-using namespace Analysis::Application;
-using namespace Analysis::Utils;
 
 MetaDataEvent::MetaDataEvent(uint32_t pid, int tid, const std::string &name) : TraceEvent(pid, tid, name) {}
 
@@ -59,25 +56,6 @@ void MetaDataIndexEvent::ProcessArgs(JsonWriter &ostream)
 LayerInfo GetLayerInfo(std::string processName)
 {
     return LAYER_INFO.at(processName);
-}
-
-void GenerateMetaData(const std::unordered_map<uint16_t, uint32_t> &pidMap, const struct LayerInfo &layerInfo,
-                      std::vector<std::shared_ptr<TraceEvent>> &res)
-{
-    for (const auto kv: pidMap) {
-        std::shared_ptr<MetaDataNameEvent> processName;
-        MAKE_SHARED_RETURN_VOID(processName, MetaDataNameEvent, kv.second, DEFAULT_TID,
-                                META_DATA_PROCESS_NAME, layerInfo.component);
-        std::shared_ptr<MetaDataLabelEvent> processLabel;
-        MAKE_SHARED_RETURN_VOID(processLabel, MetaDataLabelEvent, kv.second, DEFAULT_TID,
-                                META_DATA_PROCESS_LABEL, layerInfo.label);
-        std::shared_ptr<MetaDataIndexEvent> processIndex;
-        MAKE_SHARED_RETURN_VOID(processIndex, MetaDataIndexEvent, kv.second, DEFAULT_TID,
-                                META_DATA_PROCESS_INDEX, layerInfo.sortIndex);
-        res.push_back(processName);
-        res.push_back(processLabel);
-        res.push_back(processIndex);
-    }
 }
 }
 }

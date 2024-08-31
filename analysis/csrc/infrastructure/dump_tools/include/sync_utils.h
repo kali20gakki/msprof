@@ -28,7 +28,9 @@ namespace Infra {
 
 enum class FileCategory {
     MSPROF,
-    DEFAULT = 1
+    MSPROF_TX,
+    STEP,
+    DEFAULT = 3
 };
 const static std::string timestampStr = []() -> std::string {
     auto now = std::chrono::system_clock::now();

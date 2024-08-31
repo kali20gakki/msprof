@@ -27,27 +27,27 @@ public:
 private:
     uint8_t AssembleData(DataInventory& dataInventory, JsonWriter &ostream, const std::string &profPath) override;
     void GenerateTaskTrace(const std::vector<AscendTaskData> &taskData, const std::string &profPath,
-                           std::unordered_map<uint16_t, int> &pidMap);
+                           std::unordered_map<uint16_t, uint32_t> &pidMap);
     void GenerateTxTrace(const std::vector<MsprofTxDeviceData> &txData, const std::string &profPath,
-                         std::unordered_map<uint16_t, int> &pidMap);
+                         std::unordered_map<uint16_t, uint32_t> &pidMap);
     void InitData(DataInventory &dataInventory);
     std::string GetOpName(const AscendTaskData& data);
     uint32_t GetPhysicStreamId(const AscendTaskData &data);
     void GenerateTaskConnectionTrace(const std::vector<AscendTaskData> &taskData,
-                                     std::unordered_map<uint16_t, int> &pidMap);
+                                     std::unordered_map<uint16_t, uint32_t> &pidMap);
     void GenerateTxConnectionTrace(const std::vector<MsprofTxDeviceData> &txData,
-                                   std::unordered_map<uint16_t, int> &pidMap);
-    void GenerateMetaData(std::unordered_map<uint16_t, int> &pidMap);
+                                   std::unordered_map<uint16_t, uint32_t> &pidMap);
+    void GenerateMetaData(std::unordered_map<uint16_t, uint32_t> &pidMap);
 private:
     std::vector<std::shared_ptr<TraceEvent>> res_;
     std::shared_ptr<std::unordered_map<uint32_t, uint32_t>> logicStream_;
     std::map<TaskId, std::string> opName_;
-    std::set<std::pair<int, int>> pidTidSet_;
+    std::set<std::pair<uint32_t, int>> pidTidSet_;
 };
 
 class TaskTraceEvent : public DurationEvent {
 public:
-    TaskTraceEvent(int pid, int tid, double dur, const std::string &ts, const std::string &name, uint32_t modelId,
+    TaskTraceEvent(uint32_t pid, int tid, double dur, const std::string &ts, const std::string &name, uint32_t modelId,
                    uint32_t streamId, uint32_t taskId, uint32_t batchId, uint32_t contextId, uint64_t connectionId,
                    const std::string taskType)
         : DurationEvent(pid, tid, dur, ts, name), modelId_(modelId), streamId_(streamId), taskId_(taskId),
@@ -66,8 +66,8 @@ private:
 
 class DeviceTxTraceEvent : public DurationEvent {
 public:
-    DeviceTxTraceEvent(int pid, int tid, double dur, const std::string &ts, const std::string &name, uint32_t streamId,
-                       uint32_t taskId)
+    DeviceTxTraceEvent(uint32_t pid, int tid, double dur, const std::string &ts, const std::string &name,
+                       uint32_t streamId, uint32_t taskId)
         : DurationEvent(pid, tid, dur, ts, name), streamId_(streamId), taskId_(taskId) {}
 private:
     void ProcessArgs(JsonWriter &ostream) override;

@@ -38,7 +38,7 @@ const std::unordered_map<uint16_t, std::string> LEVEL_MAP{
 
 CannAssembler::CannAssembler() : JsonAssembler(CANN_ASSEMBLER, {{"msprof", FileCategory::MSPROF}}) {}
 
-void GenerateMetaData(std::vector<ApiData> &apiData, int pid, std::vector<std::shared_ptr<TraceEvent>> &res)
+void GenerateMetaData(std::vector<ApiData> &apiData, uint32_t pid, std::vector<std::shared_ptr<TraceEvent>> &res)
 {
     std::set<uint32_t> tidSet;
     std::transform(apiData.begin(), apiData.end(), std::inserter(tidSet, tidSet.end()),
@@ -83,7 +83,7 @@ std::string GetTraceName(uint16_t level, std::string &name)
     return PROCESS_API + "@" + name;
 }
 
-void GenerateApiTrace(std::vector<ApiData> &apiData, std::vector<std::shared_ptr<TraceEvent>> &res, int pid)
+void GenerateApiTrace(std::vector<ApiData> &apiData, std::vector<std::shared_ptr<TraceEvent>> &res, uint32_t pid)
 {
     std::string levelStr;
     std::string traceName;
@@ -99,7 +99,7 @@ void GenerateApiTrace(std::vector<ApiData> &apiData, std::vector<std::shared_ptr
         res.push_back(event);
     }
 }
-void GenerateConnectionTrace(std::vector<ApiData> &apiData, int pid, std::vector<std::shared_ptr<TraceEvent>> &res)
+void GenerateConnectionTrace(std::vector<ApiData> &apiData, uint32_t pid, std::vector<std::shared_ptr<TraceEvent>> &res)
 {
     std::string connId;
     std::string name;
@@ -123,7 +123,7 @@ uint8_t CannAssembler::AssembleData(DataInventory &dataInventory, JsonWriter &os
         return DATA_NOT_EXIST;
     }
     auto pid = Context::GetInstance().GetPidFromInfoJson(HOST_ID, profPath);
-    int formatPid = static_cast<int>(JsonAssembler::GetFormatPid(pid, SORT_INDEX));
+    auto formatPid = JsonAssembler::GetFormatPid(pid, SORT_INDEX);
     GenerateMetaData(*apiData, formatPid, res_);
     GenerateApiTrace(*apiData, res_, formatPid);
     GenerateConnectionTrace(*apiData, formatPid, res_);

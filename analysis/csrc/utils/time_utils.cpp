@@ -63,7 +63,7 @@ HPFloat GetTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params)
 
 HPFloat GetDurTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params)
 {
-    HPFloat res = syscnt/ params.freq;
+    HPFloat res = syscnt / params.freq;
     res = res << NS_US;
     return res;
 }

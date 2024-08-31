@@ -28,7 +28,7 @@ private:
 
 class ApiTraceEvent : public DurationEvent {
 public:
-    ApiTraceEvent(int pid, int tid, double dur, const std::string &ts, const std::string &name, uint32_t threadId,
+    ApiTraceEvent(uint32_t pid, int tid, double dur, const std::string &ts, const std::string &name, uint32_t threadId,
                   uint64_t connectionId, const std::string &mode, const std::string level, const std::string id,
                   const std::string itemId)
         : DurationEvent(pid, tid, dur, ts, name), threadId_(threadId), connectionId_(connectionId), mode_(mode),

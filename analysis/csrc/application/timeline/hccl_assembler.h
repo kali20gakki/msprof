@@ -24,21 +24,22 @@ public:
 private:
     uint8_t AssembleData(DataInventory& dataInventory, JsonWriter &ostream, const std::string &profPath) override;
     void GenerateHcclTaskTrace(const std::vector<CommunicationTaskData> &task, const std::string &profPath,
-                               std::unordered_map<uint16_t, int> &pidMap);
+                               std::unordered_map<uint16_t, uint32_t> &pidMap);
     void GenerateHcclOpTrace(const std::vector<CommunicationOpData> &opData, const std::string &profPath,
-                             std::unordered_map<uint16_t, int> &pidMap);
-    void GenerateConnectionTrace(const CommunicationOpData &data, int formatPid, int tid);
-    void GenerateMetaDataEvent(std::unordered_map<uint16_t, int> &pidMap);
+                             std::unordered_map<uint16_t, uint32_t> &pidMap);
+    void GenerateConnectionTrace(const CommunicationOpData &data, uint32_t formatPid, int tid);
+    void GenerateMetaDataEvent(std::unordered_map<uint16_t, uint32_t> &pidMap);
 private:
     std::vector<std::shared_ptr<TraceEvent>> res_;
     std::unordered_map<std::string, int> groupIndex_;
-    std::set<std::pair<int, int>> pidTidSet_;
+    std::set<std::pair<uint32_t, int>> pidTidSet_;
 };
 
 class HcclOpTraceEvent : public DurationEvent {
 public:
-    HcclOpTraceEvent(int pid, int tid, double dur, const std::string &ts, const std::string &name, uint32_t modelId,
-                     uint32_t count, uint64_t connectionId, const std::string &dataType, const std::string &algType)
+    HcclOpTraceEvent(uint32_t pid, int tid, double dur, const std::string &ts, const std::string &name,
+                     uint32_t modelId, uint32_t count, uint64_t connectionId, const std::string &dataType,
+                     const std::string &algType)
          : DurationEvent(pid, tid, dur, ts, name), modelId_(modelId), count_(count), connectionId_(connectionId),
          dataType_(dataType), algType_(algType) {}
 private:
@@ -53,7 +54,7 @@ private:
 
 class HcclTaskTraceEvent : public DurationEvent {
 public:
-    HcclTaskTraceEvent(int pid, int tid, double dur, const std::string &ts, const std::string &name, uint32_t src,
+    HcclTaskTraceEvent(uint32_t pid, int tid, double dur, const std::string &ts, const std::string &name, uint32_t src,
                        uint32_t dst, uint32_t streamId, uint32_t taskId, uint32_t contextId, uint32_t modelId,
                        uint64_t size, double esDur, double bw, uint64_t notifyId, const std::string &tsType,
                        const std::string &taskType, const std::string &dataType, const std::string &linkType)

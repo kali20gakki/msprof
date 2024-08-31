@@ -59,7 +59,7 @@ uint8_t HBMAssembler::AssembleData(DataInventory &dataInventory, JsonWriter &ost
         uint32_t formatPid = JsonAssembler::GetFormatPid(pid, layerInfo.sortIndex, deviceId);
         pidMap[deviceId] = formatPid;
     }
-    GenerateMetaData(pidMap, layerInfo, res_);
+    GenerateHWMetaData(pidMap, layerInfo, res_);
     GenerateHbmTrace(*hbmData, pidMap, res_);
     if (res_.empty()) {
         ERROR("Can't Generate any HBM process data");

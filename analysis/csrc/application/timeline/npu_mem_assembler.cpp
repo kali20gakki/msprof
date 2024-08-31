@@ -73,7 +73,7 @@ uint8_t NpuMemAssembler::AssembleData(DataInventory &dataInventory, JsonWriter &
         uint32_t formatPid = JsonAssembler::GetFormatPid(pid, layerInfo.sortIndex, deviceId);
         pidMap[deviceId] = formatPid;
     }
-    GenerateMetaData(pidMap, layerInfo, res_);
+    GenerateHWMetaData(pidMap, layerInfo, res_);
     GenerateNpuMemTrace(*npuMemData, pidMap, res_);
     if (res_.empty()) {
         ERROR("Can't Generate any NpuMem process data");

@@ -23,14 +23,18 @@ void TraceEvent::ToJson(JsonWriter &ostream)
     ostream["tid"] << tid_;
 }
 
-DurationEvent::DurationEvent(uint32_t pid, int tid, double dur, const std::string &ts, const std::string &name)
-    : TraceEvent(pid, tid, name), dur_(dur), ts_(ts) {}
+DurationEvent::DurationEvent(uint32_t pid, int tid, double dur, const std::string &ts, const std::string &name,
+                             const std::string &cat)
+    : TraceEvent(pid, tid, name), dur_(dur), ts_(ts), cat_(cat) {}
 void DurationEvent::ToJson(JsonWriter &ostream)
 {
     TraceEvent::ToJson(ostream);
     ostream["ts"] << ts_;
     ostream["dur"] << dur_;
     ostream["ph"] << ph_;
+    if (cat_ != " ") {
+        ostream["cat"] << cat_;
+    }
     ostream["args"];
     // 嵌套json，需要再包一层{}，其中ProcessArgs函数为子类实现，子类只需要关注args参数部分实现，无需感知其他参数
     ostream.StartObject();
@@ -63,9 +67,6 @@ void CounterEvent::SetSeriesValue(const std::string &key, const uint64_t &value)
     seriesValue_[key] = value;
 }
 
-FlowEvent::FlowEvent(uint32_t pid, int tid, const std::string &ts, const std::string &cat, const std::string &id,
-                     const std::string &name, const std::string &ph)
-    : TraceEvent(pid, tid, name), ts_(ts), cat_(cat), id_(id), ph_(ph), bp_(" ") {}
 FlowEvent::FlowEvent(uint32_t pid, int tid, const std::string &ts, const std::string &cat, const std::string &id,
                      const std::string &name, const std::string &ph, const std::string &bp)
     : TraceEvent(pid, tid, name), ts_(ts), cat_(cat), id_(id), ph_(ph), bp_(bp) {}

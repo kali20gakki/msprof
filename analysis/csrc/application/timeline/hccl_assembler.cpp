@@ -65,9 +65,9 @@ void HcclTaskTraceEvent::ProcessArgs(JsonWriter& ostream)
 }
 
 void HcclAssembler::GenerateHcclTaskTrace(const std::vector<CommunicationTaskData>& task, const std::string &profPath,
-                                          std::unordered_map<uint16_t, int>& pidMap)
+                                          std::unordered_map<uint16_t, uint32_t>& pidMap)
 {
-    int formatPid;
+    uint32_t formatPid;
     int tid;
     std::string transport;
     std::string dataType;
@@ -97,9 +97,9 @@ void HcclAssembler::GenerateHcclTaskTrace(const std::vector<CommunicationTaskDat
 }
 
 void HcclAssembler::GenerateHcclOpTrace(const std::vector<CommunicationOpData>& opData, const std::string& profPath,
-                                        std::unordered_map<uint16_t, int>& pidMap)
+                                        std::unordered_map<uint16_t, uint32_t>& pidMap)
 {
-    int formatPid;
+    uint32_t formatPid;
     int tid;
     std::string dataType;
     for (auto &data : opData) {
@@ -122,7 +122,7 @@ void HcclAssembler::GenerateHcclOpTrace(const std::vector<CommunicationOpData>& 
     }
 }
 
-void HcclAssembler::GenerateConnectionTrace(const CommunicationOpData& data, int formatPid, int tid)
+void HcclAssembler::GenerateConnectionTrace(const CommunicationOpData& data, uint32_t formatPid, int tid)
 {
     auto connId = ConnectionIdPool::GetConnectionId(data.connectionId, ConnectionCategory::GENERAL);
     auto traceName = HOST_TO_DEVICE + connId;
@@ -132,7 +132,7 @@ void HcclAssembler::GenerateConnectionTrace(const CommunicationOpData& data, int
     res_.push_back(flow);
 }
 
-void HcclAssembler::GenerateMetaDataEvent(std::unordered_map<uint16_t, int>& pidMap)
+void HcclAssembler::GenerateMetaDataEvent(std::unordered_map<uint16_t, uint32_t>& pidMap)
 {
     for (const auto &it : pidMap) {
         std::shared_ptr<MetaDataNameEvent> processName;
@@ -174,7 +174,7 @@ uint8_t HcclAssembler::AssembleData(DataInventory& dataInventory, JsonWriter& os
         WARN("Can't get hccl task data and hccl op data from dataInventory");
         return DATA_NOT_EXIST;
     }
-    std::unordered_map<uint16_t, int> devicePid;
+    std::unordered_map<uint16_t, uint32_t> devicePid;
     if (taskData != nullptr) {
         GenerateHcclTaskTrace(*taskData, profPath, devicePid);
     }
