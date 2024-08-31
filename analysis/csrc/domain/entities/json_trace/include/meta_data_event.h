@@ -122,8 +122,7 @@ const std::unordered_map<std::string, LayerInfo> LAYER_INFO {
 };
 
 LayerInfo GetLayerInfo(std::string processName);
-void GenerateMetaData(const std::unordered_map<uint16_t, uint32_t> &pidMap, const struct LayerInfo &layerInfo,
-                      std::vector<std::shared_ptr<TraceEvent>> &res);
+
 /**
  * MetaDataEvent对应chrome:tracing的元数据相位(MetaData Phase)，在事件跟踪中，每个事件都有一个与之相关的相位（Phase），
  * 这些相位提供了关于事件的不同方面的信息。常见的相位包括：

@@ -53,6 +53,8 @@ public:
     bool GetProfTimeRecordInfo(Utils::ProfTimeRecord &record, const std::string &profPath = "");
     // 返回info.json 中的pid
     uint32_t GetPidFromInfoJson(uint16_t deviceId = DEFAULT_DEVICE_ID, const std::string &profPath = "");
+    // 返回info.json中的pid_name
+    std::string GetPidNameFromInfoJson(uint16_t deviceId = DEFAULT_DEVICE_ID, const std::string &profPath = "");
     // 返回samplejson.json 中的msprofBinPid
     int64_t GetMsBinPid(const std::string &profPath);
     std::string GetLLCProfiling(uint16_t deviceId, const std::string &profPath);

@@ -25,9 +25,10 @@ namespace Domain {
 struct TaskId {
     TaskId() = default;
 
-    TaskId(uint16_t _streamId, uint16_t _batchId, uint16_t _taskId, uint32_t _contextId)
-        : streamId(_streamId), batchId(_batchId), taskId(_taskId), contextId(_contextId) {}
+    TaskId(uint16_t _streamId, uint16_t _batchId, uint16_t _taskId, uint32_t _contextId, uint16_t _deviceId = 0)
+        : streamId(_streamId), batchId(_batchId), taskId(_taskId), contextId(_contextId), deviceId(_deviceId) {}
 
+    uint16_t deviceId = 0;
     uint16_t streamId = 0;
     uint16_t batchId = 0;
     uint16_t taskId = 0;
@@ -36,15 +37,15 @@ struct TaskId {
     bool operator==(const TaskId &other) const
     {
         // Compare all four member variables; return true if they are equal, otherwise return false
-        return taskId == other.taskId && streamId == other.streamId && contextId == other.contextId &&
-               batchId == other.batchId;
+        return deviceId == other.deviceId && taskId == other.taskId && streamId == other.streamId &&
+            contextId == other.contextId && batchId == other.batchId;
     }
 
     bool operator<(const TaskId &other) const
     {
         // 按照taskId,streamId,contextId,batchId的顺序进行比较
-        return std::tie(taskId, streamId, contextId, batchId) <
-               std::tie(other.taskId, other.streamId, other.contextId, other.batchId);
+        return std::tie(deviceId, taskId, streamId, contextId, batchId) <
+               std::tie(other.deviceId, other.taskId, other.streamId, other.contextId, other.batchId);
     }
 };
 }

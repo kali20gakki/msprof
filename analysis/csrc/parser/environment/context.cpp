@@ -304,6 +304,16 @@ uint32_t Context::GetPidFromInfoJson(uint16_t deviceId, const std::string &profP
     return pid;
 }
 
+std::string Context::GetPidNameFromInfoJson(uint16_t deviceId, const std::string& profPath)
+{
+    const auto &info = GetInfoByDeviceId(deviceId, profPath);
+    if (info.empty()) {
+        ERROR("GetPidNameFromInfoJson device info is empty.");
+        return "";
+    }
+    return info.value("pid_name", "");
+}
+
 int64_t Context::GetMsBinPid(const std::string &profPath)
 {
     const auto &info = GetInfoByDeviceId(DEFAULT_DEVICE_ID, profPath);

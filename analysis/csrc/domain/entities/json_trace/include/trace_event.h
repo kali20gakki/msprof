@@ -48,7 +48,8 @@ private:
  */
 class DurationEvent : public TraceEvent {
 public:
-    DurationEvent(uint32_t pid, int tid, double dur, const std::string &ts, const std::string &name);
+    DurationEvent(uint32_t pid, int tid, double dur, const std::string &ts, const std::string &name,
+                  const std::string &cat = " ");
 private:
     void ToJson(JsonWriter &ostream) override;
     virtual void ProcessArgs(JsonWriter &ostream) {};
@@ -56,6 +57,7 @@ private:
     double dur_;
     std::string ts_;
     std::string ph_ = "X";
+    std::string cat_;
 };
 
 /**
@@ -83,9 +85,7 @@ private:
 class FlowEvent : public TraceEvent {
 public:
     FlowEvent(uint32_t pid, int tid, const std::string &ts, const std::string &cat, const std::string &id,
-              const std::string &name, const std::string &ph);
-    FlowEvent(uint32_t pid, int tid, const std::string &ts, const std::string &cat, const std::string &id,
-              const std::string &name, const std::string &ph, const std::string &bp);
+              const std::string &name, const std::string &ph, const std::string &bp = " ");
 private:
     void ToJson(JsonWriter &ostream) override;
 private:

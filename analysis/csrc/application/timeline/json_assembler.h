@@ -32,8 +32,10 @@ public:
     bool Run(DataInventory &dataInventory, const std::string &profPath);
     static uint32_t GetFormatPid(uint32_t pid, uint32_t index, uint32_t deviceId = HOST_PID);
 protected:
-    int GetDevicePid(std::unordered_map<uint16_t, int> &pidMap, uint16_t deviceId, const std::string &profPath,
-                     uint32_t index);
+    uint32_t GetDevicePid(std::unordered_map<uint16_t, uint32_t> &pidMap, uint16_t deviceId,
+                          const std::string &profPath, uint32_t index);
+    void GenerateHWMetaData(const std::unordered_map<uint16_t, uint32_t> &pidMap, const struct LayerInfo &layerInfo,
+                          std::vector<std::shared_ptr<TraceEvent>> &res);
 protected:
     std::unordered_map<std::string, FileCategory> fileMap_;
 private:

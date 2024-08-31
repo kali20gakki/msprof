@@ -44,8 +44,10 @@ std::vector<TrainTraceData> GenerateTraceData(const DBInfo &dbInfo, LocaltimeCon
             HPFloat fp = GetTimeFromSyscnt(tmp.fpStart, params);
             tmp.fpStart = GetLocalTime(fp, allParams.timeRecord).Uint64();
         }
-        HPFloat bp = GetTimeFromSyscnt(tmp.bpEnd, params);
-        tmp.bpEnd = GetLocalTime(bp, allParams.timeRecord).Uint64();
+        if (tmp.bpEnd != 0) {
+            HPFloat bp = GetTimeFromSyscnt(tmp.bpEnd, params);
+            tmp.bpEnd = GetLocalTime(bp, allParams.timeRecord).Uint64();
+        }
         HPFloat iterEnd = GetTimeFromSyscnt(tmp.iterEnd, params);
         tmp.iterEnd = GetLocalTime(iterEnd, allParams.timeRecord).Uint64();
         tmp.iterTime = GetDurTimeFromSyscnt(tmp.iterTime, params).Uint64();
