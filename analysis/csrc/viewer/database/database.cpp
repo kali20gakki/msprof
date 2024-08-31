@@ -620,6 +620,19 @@ namespace {
         {"physic_stream", SQL_INTEGER_TYPE},
         {"logic_stream", SQL_INTEGER_TYPE},
     };
+
+    const TableColumns Sio = {
+        {"acc_id", SQL_INTEGER_TYPE},
+        {"req_rx", SQL_NUMERIC_TYPE},
+        {"rsp_rx", SQL_NUMERIC_TYPE},
+        {"snp_rx", SQL_NUMERIC_TYPE},
+        {"dat_rx", SQL_NUMERIC_TYPE},
+        {"req_tx", SQL_NUMERIC_TYPE},
+        {"rsp_tx", SQL_NUMERIC_TYPE},
+        {"snp_tx", SQL_NUMERIC_TYPE},
+        {"dat_tx", SQL_NUMERIC_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE}
+    };
 }
 
 std::string Database::GetDBName() const
@@ -871,6 +884,11 @@ GeLogicStreamDB::GeLogicStreamDB()
     tableColNames_["GeLogicStreamInfo"] = GeLogicStreamInfo;
 }
 
+SioDB::SioDB()
+{
+    dbName_ = "sio.db";
+    tableColNames_["Sio"] = Sio;
+}
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis

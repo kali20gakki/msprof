@@ -123,7 +123,7 @@ TEST_F(LLcProcessorUTest, TestFormatDataShouldReturnFalseWhenProcessDataFailed)
     MOCKER_CPP(&OriLLcData::empty).reset();
     // Reserve failed
     MOCKER_CPP(&std::vector<LLcData>::reserve).stubs().will(throws(std::bad_alloc()));
-    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MEM));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_LLC));
     MOCKER_CPP(&std::vector<LLcData>::reserve).reset();
 }
 

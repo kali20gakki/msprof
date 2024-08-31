@@ -226,6 +226,10 @@ public:
     GeLogicStreamDB();
 };
 
+class SioDB : public Database {
+public:
+    SioDB();
+};
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis
