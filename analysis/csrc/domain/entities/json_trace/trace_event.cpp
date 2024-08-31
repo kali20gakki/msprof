@@ -14,7 +14,7 @@
 
 namespace Analysis {
 namespace Domain {
-TraceEvent::TraceEvent(int pid, int tid, const std::string &name) : pid_(pid), tid_(tid), name_(name) {}
+TraceEvent::TraceEvent(uint32_t pid, int tid, const std::string &name) : pid_(pid), tid_(tid), name_(name) {}
 
 void TraceEvent::ToJson(JsonWriter &ostream)
 {
@@ -23,7 +23,7 @@ void TraceEvent::ToJson(JsonWriter &ostream)
     ostream["tid"] << tid_;
 }
 
-DurationEvent::DurationEvent(int pid, int tid, double dur, const std::string &ts, const std::string &name)
+DurationEvent::DurationEvent(uint32_t pid, int tid, double dur, const std::string &ts, const std::string &name)
     : TraceEvent(pid, tid, name), dur_(dur), ts_(ts) {}
 void DurationEvent::ToJson(JsonWriter &ostream)
 {
@@ -38,19 +38,35 @@ void DurationEvent::ToJson(JsonWriter &ostream)
     ostream.EndObject();
 }
 
-CounterEvent::CounterEvent(int pid, int tid, std::string &ts, const std::string &name)
+CounterEvent::CounterEvent(uint32_t pid, int tid, const std::string &ts, const std::string &name)
     : TraceEvent(pid, tid, name), ts_(ts) {}
 void CounterEvent::ToJson(JsonWriter &ostream)
 {
     TraceEvent::ToJson(ostream);
     ostream["ts"] << ts_;
     ostream["ph"] << ph_;
+    ostream["args"];
+    ostream.StartObject();
+    ProcessArgs(ostream);
+    ostream.EndObject();
 }
 
-FlowEvent::FlowEvent(int pid, int tid, const std::string &ts, const std::string &cat, const std::string &id,
+void CounterEvent::ProcessArgs(JsonWriter &ostream)
+{
+    for (const auto &kv: seriesValue_) {
+        ostream[kv.first.c_str()] << kv.second;
+    }
+}
+
+void CounterEvent::SetSeriesValue(const std::string &key, const uint64_t &value)
+{
+    seriesValue_[key] = value;
+}
+
+FlowEvent::FlowEvent(uint32_t pid, int tid, const std::string &ts, const std::string &cat, const std::string &id,
                      const std::string &name, const std::string &ph)
     : TraceEvent(pid, tid, name), ts_(ts), cat_(cat), id_(id), ph_(ph), bp_(" ") {}
-FlowEvent::FlowEvent(int pid, int tid, const std::string &ts, const std::string &cat, const std::string &id,
+FlowEvent::FlowEvent(uint32_t pid, int tid, const std::string &ts, const std::string &cat, const std::string &id,
                      const std::string &name, const std::string &ph, const std::string &bp)
     : TraceEvent(pid, tid, name), ts_(ts), cat_(cat), id_(id), ph_(ph), bp_(bp) {}
 void FlowEvent::ToJson(JsonWriter &ostream)

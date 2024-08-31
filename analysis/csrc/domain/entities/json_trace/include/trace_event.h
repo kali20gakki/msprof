@@ -14,6 +14,7 @@
 #define ANALYSIS_DOMAIN_JSON_TRACE_TRACE_EVENT_H
 
 #include <string>
+#include <unordered_map>
 #include "analysis/csrc/infrastructure/dump_tools/json_tool/include/json_writer.h"
 
 namespace Analysis {
@@ -30,12 +31,12 @@ public:
         ToJson(ostream);
         ostream.EndObject();
     }
-    TraceEvent(int pid, int tid, const std::string &name);
+    TraceEvent(uint32_t pid, int tid, const std::string &name);
     virtual ~TraceEvent() = default;
 protected:
     virtual void ToJson(JsonWriter &ostream);
 private:
-    int pid_;
+    uint32_t pid_;
     int tid_;
     std::string name_;
 };
@@ -47,7 +48,7 @@ private:
  */
 class DurationEvent : public TraceEvent {
 public:
-    DurationEvent(int pid, int tid, double dur, const std::string &ts, const std::string &name);
+    DurationEvent(uint32_t pid, int tid, double dur, const std::string &ts, const std::string &name);
 private:
     void ToJson(JsonWriter &ostream) override;
     virtual void ProcessArgs(JsonWriter &ostream) {};
@@ -63,12 +64,15 @@ private:
  */
 class CounterEvent : public TraceEvent {
 public:
-    CounterEvent(int pid, int tid, std::string &ts, const std::string &name);
+    CounterEvent(uint32_t pid, int tid, const std::string &ts, const std::string &name);
+    void SetSeriesValue(const std::string &key, const uint64_t &value);
 private:
     void ToJson(JsonWriter &ostream) override;
+    void ProcessArgs(JsonWriter &ostream);
 private:
     std::string ts_;
     std::string ph_ = "C";
+    std::unordered_map<std::string, uint64_t> seriesValue_;
 };
 
 /**
@@ -78,9 +82,9 @@ private:
  */
 class FlowEvent : public TraceEvent {
 public:
-    FlowEvent(int pid, int tid, const std::string &ts, const std::string &cat, const std::string &id,
+    FlowEvent(uint32_t pid, int tid, const std::string &ts, const std::string &cat, const std::string &id,
               const std::string &name, const std::string &ph);
-    FlowEvent(int pid, int tid, const std::string &ts, const std::string &cat, const std::string &id,
+    FlowEvent(uint32_t pid, int tid, const std::string &ts, const std::string &cat, const std::string &id,
               const std::string &name, const std::string &ph, const std::string &bp);
 private:
     void ToJson(JsonWriter &ostream) override;
