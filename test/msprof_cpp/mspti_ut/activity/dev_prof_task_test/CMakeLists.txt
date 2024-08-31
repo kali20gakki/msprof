@@ -4,10 +4,18 @@ file(GLOB_RECURSE SRC_FILE
     ${TOP_DIR}/mspti/common/*.cpp
 )
 
+file(GLOB_RECURSE REMOVE_SOURCES
+    ${TOP_DIR}/mspti/common/inject/*.cpp
+)
+
+list(REMOVE_ITEM SRC_FILE ${REMOVE_SOURCES})
+
 add_executable(dev_prof_task_utest 
     ${SRC_FILE}
     main.cpp
     dev_prof_task_utest.cpp
+    ${UT_TOP_DIR}/stub/inject/profapi_inject_stub.cpp
+    ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
 )
 
 target_include_directories(dev_prof_task_utest PRIVATE

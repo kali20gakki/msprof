@@ -5,10 +5,13 @@
 *
 */
 #include "gtest/gtest.h"
+#include "mockcpp/mockcpp.hpp"
 
 #include <atomic>
 
 #include "activity/activity_manager.h"
+#include "activity/ascend/dev_task_manager.h"
+
 #include "mspti.h"
 
 namespace {
@@ -17,7 +20,10 @@ constexpr uint64_t G_MARK_MAX_NUM = 10;
 
 class ActivityUtest : public testing::Test {
 protected:
-    virtual void SetUp() {}
+    virtual void SetUp()
+    {
+        GlobalMockObject::verify();
+    }
     virtual void TearDown() {}
 };
 
@@ -64,6 +70,16 @@ void UserBufferComplete(uint8_t *buffer, size_t size, size_t validSize)
 
 TEST_F(ActivityUtest, ActivityApiUtest)
 {
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::GetInstance)
+        .stubs()
+        .will(returnValue(nullptr));
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StartDevProfTask)
+        .stubs()
+        .will(returnValue(MSPTI_SUCCESS));
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StopDevProfTask)
+        .stubs()
+        .will(returnValue(MSPTI_SUCCESS));
+
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityRegisterCallbacks(UserBufferRequest, UserBufferComplete));
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_MARKER));
     msptiActivityMark activity;
@@ -82,6 +98,24 @@ TEST_F(ActivityUtest, ActivityApiUtest)
     }
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityDisable(MSPTI_ACTIVITY_KIND_MARKER));
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityFlushAll(1));
+    EXPECT_EQ(G_MARK_MAX_NUM, g_records.load());
+}
+
+TEST_F(ActivityUtest, ActivityManagerTest)
+{
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::GetInstance)
+        .stubs()
+        .will(returnValue(nullptr));
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StartDevProfTask)
+        .stubs()
+        .will(returnValue(MSPTI_SUCCESS));
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StopDevProfTask)
+        .stubs()
+        .will(returnValue(MSPTI_SUCCESS));
+    auto instance = Mspti::Activity::ActivityManager::GetInstance();
+    instance ->SetDevice(0);
+    instance ->DeviceReset(0);
+    
     EXPECT_EQ(G_MARK_MAX_NUM, g_records.load());
 }
 }

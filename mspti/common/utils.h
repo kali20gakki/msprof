@@ -20,6 +20,12 @@
 
 constexpr uint32_t SECTONSEC = 1000000000UL;
 
+template<typename T>
+void UNUSED(T&& x)
+{
+    (void)x;
+}
+
 namespace Mspti {
 namespace Common {
 

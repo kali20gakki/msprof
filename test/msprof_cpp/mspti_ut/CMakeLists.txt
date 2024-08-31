@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.14.1)
 project(mspti_llt)
 set(CMAKE_SKIP_RPATH TRUE)
 set(TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../)
+set(UT_TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(CMAKE_MODULE_PATH
     ${TOP_DIR}/cmake/modules

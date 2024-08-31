@@ -30,12 +30,24 @@ enum ProfilerCallbackType {
     PROFILE_REPORT_EVENT_C_CALLBACK,
     PROFILE_REPORT_REG_TYPE_INFO_C_CALLBACK,
     PROFILE_REPORT_GET_HASH_ID_C_CALLBACK,
+    PROFILE_HOST_FREQ_IS_ENABLE_C_CALLBACK,
 };
 
 #define MSPROF_DATA_HEAD_MAGIC_NUM  0x5a5a
 #define MSPROF_EVENT_FLAG 0xFFFFFFFFFFFFFFFFULL
 #define PROF_INVALID_MODE_ID 0xFFFFFFFFUL
 #define MAX_DEV_NUM 64
+
+#define PROF_ACL_API              0x00000001ULL
+#define PROF_TASK_TIME            0x00000800ULL
+#define PROF_RUNTIME_TRACE        0x0000004000000ULL
+
+#define MSPTI_CONFIG_KERNEL       (PROF_TASK_TIME | PROF_RUNTIME_TRACE)
+#define MSPTI_CONFIG_API          (PROF_ACL_API | PROF_TASK_TIME)
+
+#define MSPROF_REPORT_RUNTIME_LEVEL     5000U
+#define MSPROF_REPORT_NNOPBASE_LEVEL    10000U
+#define MSPROF_REPORT_ACL_LEVEL         20000U
 
 struct MsprofApi { // for MsprofReportApi
     uint16_t magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
@@ -155,14 +167,27 @@ enum CommandHandleType {
     PROF_COMMANDHANDLE_TYPE_FINALIZE,
 };
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+namespace Mspti {
+namespace Inject {
+// 老的数据上报方式，待Lite-Profiling废弃后删除
+using ProfReportHandle = int32_t (*)(uint32_t moduleId, uint32_t type, VOID_PTR data, uint32_t len);
+int32_t profRegReporterCallback(ProfReportHandle reporter);
+int32_t MsprofReporterCallbackImpl(uint32_t moduleId, uint32_t type, VOID_PTR data, uint32_t len);
 
-MSPTI_API int32_t MsprofRegTypeInfo(uint16_t level, uint32_t typeId, const char *typeName);
-MSPTI_API int32_t MsprofReportCompactInfo(uint32_t agingFlag, const void* data, uint32_t length);
-MSPTI_API int32_t MsprofReportData(uint32_t moduleId, uint32_t type, void* data, uint32_t len);
-#if defined(__cplusplus)
+// 使能接口
+using MsprofCtrlHandle = int32_t (*)(uint32_t type, VOID_PTR data, uint32_t len);
+int32_t profRegCtrlCallback(MsprofCtrlHandle handle);
+int32_t profSetProfCommand(VOID_PTR command, uint32_t len);
+
+// 新数据结构上报方式
+int32_t MsprofRegisterProfileCallback(int32_t callbackType, VOID_PTR callback, uint32_t len);
+int8_t MsprofHostFreqIsEnableImpl();
+uint64_t MsprofGetHashIdImpl(const char* hashInfo, size_t len);
+int32_t MsptiApiReporterCallbackImpl(uint32_t agingFlag, const MsprofApi* const data);
+int32_t MsptiEventReporterCallbackImpl(uint32_t agingFlag, const MsprofEvent* const event);
+int32_t MsptiCompactInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t length);
+int32_t MsptiAddiInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t length);
+int32_t MsptiRegReportTypeInfoImpl(uint16_t level, uint32_t typeId, const char* name, size_t len);
 }
-#endif
+}
 #endif

@@ -16,10 +16,17 @@
 #include "common/context_manager.h"
 #include "common/plog_manager.h"
 #include "common/inject/driver_inject.h"
+#include "common/inject/profapi_inject.h"
 #include "common/utils.h"
+#include "securec.h"
 
 namespace Mspti {
 namespace Ascend {
+
+std::map<msptiActivityKind, uint64_t> DevTaskManager::datatype_config_map_ = {
+    {MSPTI_ACTIVITY_KIND_KERNEL, MSPTI_CONFIG_KERNEL},
+    {MSPTI_ACTIVITY_KIND_API, MSPTI_CONFIG_API},
+};
 
 DevTaskManager *DevTaskManager::GetInstance()
 {
@@ -40,6 +47,7 @@ DevTaskManager::DevTaskManager()
 {
     Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->Init();
     Mspti::Common::ContextManager::GetInstance()->InitHostTimeInfo();
+    RegisterReportCallback();
 }
 
 msptiResult DevTaskManager::StartAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks)
@@ -74,6 +82,8 @@ msptiResult DevTaskManager::StartDevProfTask(uint32_t deviceId, msptiActivityKin
     MSPTI_LOGI("Start DevProfTask, deviceId: %u, kind: %d", deviceId, kind);
     Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->GetAllChannels(deviceId);
     Mspti::Common::ContextManager::GetInstance()->InitDevTimeInfo(deviceId);
+    // 根据DeviceId配置项，开启CANN软件栈的Profiling任务
+    StartCannProfTask(deviceId, kind);
     std::lock_guard<std::mutex> lk(task_map_mtx_);
     auto iter = task_map_.find({deviceId, kind});
     if (iter == task_map_.end()) {
@@ -93,6 +103,7 @@ msptiResult DevTaskManager::StartDevProfTask(uint32_t deviceId, msptiActivityKin
 msptiResult DevTaskManager::StopDevProfTask(uint32_t deviceId, msptiActivityKind kind)
 {
     MSPTI_LOGI("Stop DevProfTask, deviceId: %u, kind: %d", deviceId, kind);
+    StopCannProfTask(deviceId, kind);
     msptiResult ret = MSPTI_SUCCESS;
     std::lock_guard<std::mutex> lk(task_map_mtx_);
     auto iter = task_map_.find({deviceId, kind});
@@ -129,5 +140,77 @@ void DevTaskManager::InitDeviceList()
     device_set_.insert(std::begin(deviceList), std::end(deviceList));
 }
 
+void DevTaskManager::RegisterReportCallback()
+{
+    if (Mspti::Inject::profRegReporterCallback(Mspti::Inject::MsprofReporterCallbackImpl) != MSPTI_SUCCESS) {
+        MSPTI_LOGE("Failed to register origin reporter callback");
+    }
+    static const std::vector<std::pair<int, VOID_PTR>> CALLBACK_FUNC_LIST = {
+        {PROFILE_REPORT_GET_HASH_ID_C_CALLBACK,
+            reinterpret_cast<VOID_PTR>(Mspti::Inject::MsprofGetHashIdImpl)},
+        {PROFILE_HOST_FREQ_IS_ENABLE_C_CALLBACK,
+            reinterpret_cast<VOID_PTR>(Mspti::Inject::MsprofHostFreqIsEnableImpl)},
+        {PROFILE_REPORT_API_C_CALLBACK,
+            reinterpret_cast<VOID_PTR>(Mspti::Inject::MsptiApiReporterCallbackImpl)},
+        {PROFILE_REPORT_EVENT_C_CALLBACK,
+            reinterpret_cast<VOID_PTR>(Mspti::Inject::MsptiEventReporterCallbackImpl)},
+        {PROFILE_REPORT_COMPACT_CALLBACK,
+            reinterpret_cast<VOID_PTR>(Mspti::Inject::MsptiCompactInfoReporterCallbackImpl)},
+        {PROFILE_REPORT_ADDITIONAL_CALLBACK,
+            reinterpret_cast<VOID_PTR>(Mspti::Inject::MsptiAddiInfoReporterCallbackImpl)},
+        {PROFILE_REPORT_REG_TYPE_INFO_C_CALLBACK,
+            reinterpret_cast<VOID_PTR>(Mspti::Inject::MsptiRegReportTypeInfoImpl)},
+    };
+    for (auto iter : CALLBACK_FUNC_LIST) {
+        auto ret = Mspti::Inject::MsprofRegisterProfileCallback(iter.first, iter.second, sizeof(VOID_PTR));
+        if (ret != MSPTI_SUCCESS) {
+            MSPTI_LOGE("Failed to register reporter callback: %d", static_cast<int32_t>(iter.first));
+        }
+    }
+}
+
+void DevTaskManager::StartCannProfTask(uint32_t deviceId, msptiActivityKind kind)
+{
+    auto cfg_iter = datatype_config_map_.find(kind);
+    if (cfg_iter == datatype_config_map_.end()) {
+        return;
+    }
+    CommandHandle command;
+    if (memset_s(&command, sizeof(command), 0, sizeof(command)) != EOK) {
+        return;
+    }
+    command.profSwitch = cfg_iter->second;
+    command.profSwitchHi = 0;
+    command.devNums = 1;
+    command.devIdList[0] = deviceId;
+    command.modelId = PROF_INVALID_MODE_ID;
+    command.type = PROF_COMMANDHANDLE_TYPE_START;
+    auto ret = Mspti::Inject::profSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(CommandHandle));
+    if (ret != MSPTI_SUCCESS) {
+        MSPTI_LOGE("Start Profiling Commond failed.");
+    }
+}
+
+void DevTaskManager::StopCannProfTask(uint32_t deviceId, msptiActivityKind kind)
+{
+    auto cfg_iter = datatype_config_map_.find(kind);
+    if (cfg_iter == datatype_config_map_.end()) {
+        return;
+    }
+    CommandHandle command;
+    if (memset_s(&command, sizeof(command), 0, sizeof(command)) != EOK) {
+        return;
+    }
+    command.profSwitch = cfg_iter->second;
+    command.profSwitchHi = 0;
+    command.devNums = 1;
+    command.devIdList[0] = deviceId;
+    command.modelId = PROF_INVALID_MODE_ID;
+    command.type = PROF_COMMANDHANDLE_TYPE_STOP;
+    auto ret = Mspti::Inject::profSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(CommandHandle));
+    if (ret != MSPTI_SUCCESS) {
+        MSPTI_LOGE("Stop Profiling Commond failed.");
+    }
+}
 }  // Ascend
 }  // Mspti

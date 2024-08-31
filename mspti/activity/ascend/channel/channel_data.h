@@ -26,9 +26,15 @@ enum StepTraceTag {
     STEP_TRACE_TAG_MARKEX = 11,
 };
 
+enum StarsFuncType {
+    STARS_FUNC_TYPE_BEGIN = 0,
+    STARS_FUNC_TYPE_END = 1,
+};
+
+#define TS_TRACK_SIZE 40
+
 #pragma pack(4)
 // 40通道
-#define TS_TRACK_SIZE 40
 struct TsTrackHead {
     uint8_t mode;
     uint8_t rptType;
@@ -72,7 +78,7 @@ struct TaskFlipInfo {
     uint8_t reserved1[4];
     uint64_t timestamp;
     uint16_t streamId;
-    uint16_t flipNum;
+    uint16_t flipId;
     uint8_t reserved2[2];
     uint16_t taskId;
     uint8_t reserved3[16];

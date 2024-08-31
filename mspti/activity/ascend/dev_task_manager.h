@@ -44,10 +44,14 @@ private:
     void InitDeviceList();
     msptiResult StartAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks);
     msptiResult StopAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks);
+    void RegisterReportCallback();
+    void StartCannProfTask(uint32_t deviceId, msptiActivityKind kind);
+    void StopCannProfTask(uint32_t deviceId, msptiActivityKind kind);
 
 private:
     std::set<uint32_t> device_set_;
     std::once_flag get_device_flag_;
+    static std::map<msptiActivityKind, uint64_t> datatype_config_map_;
 
     std::map<std::pair<uint32_t, msptiActivityKind>, std::vector<std::unique_ptr<DevProfTask>>> task_map_;
     std::mutex task_map_mtx_;

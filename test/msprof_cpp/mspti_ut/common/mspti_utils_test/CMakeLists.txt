@@ -1,13 +1,11 @@
-file(GLOB_RECURSE SRC_FILE
-    ${TOP_DIR}/mspti/activity/*.cpp
-    ${TOP_DIR}/mspti/callback/*.cpp
-    ${TOP_DIR}/mspti/common/*.cpp
-)
-
 add_executable(mspti_uti_utest 
-    ${SRC_FILE}
     main.cpp
     utils_utest.cpp
+    ${TOP_DIR}/mspti/common/utils.cpp
+)
+
+target_include_directories(mspti_uti_utest PRIVATE
+    ${UT_TOP_DIR}/ut_utils/
 )
 
 set_target_properties(mspti_uti_utest
