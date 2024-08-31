@@ -25,6 +25,7 @@ using namespace Analysis::Viewer::Database;
 struct DBInfo {
     std::string dbName;
     std::string tableName;
+    std::shared_ptr<Database> database;
     std::shared_ptr<DBRunner> dbRunner;
     DBInfo() = default;
     DBInfo(std::string dbName, std::string tableName) : dbName(dbName), tableName(tableName) {};
