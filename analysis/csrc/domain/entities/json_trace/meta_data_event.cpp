@@ -11,10 +11,15 @@
  */
 
 #include "analysis/csrc/domain/entities/json_trace/include/meta_data_event.h"
+#include <unordered_map>
+#include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
 namespace Domain {
-MetaDataEvent::MetaDataEvent(int pid, int tid, const std::string &name) : TraceEvent(pid, tid, name) {}
+using namespace Analysis::Application;
+using namespace Analysis::Utils;
+
+MetaDataEvent::MetaDataEvent(uint32_t pid, int tid, const std::string &name) : TraceEvent(pid, tid, name) {}
 
 void MetaDataEvent::ToJson(JsonWriter &ostream)
 {
@@ -27,7 +32,7 @@ void MetaDataEvent::ToJson(JsonWriter &ostream)
     ostream.EndObject();
 }
 
-MetaDataNameEvent::MetaDataNameEvent(int pid, int tid, const std::string &name, const std::string &argName)
+MetaDataNameEvent::MetaDataNameEvent(uint32_t pid, int tid, const std::string &name, const std::string &argName)
     : MetaDataEvent(pid, tid, name), argsName_(argName) {}
 
 void MetaDataNameEvent::ProcessArgs(JsonWriter &ostream)
@@ -35,7 +40,7 @@ void MetaDataNameEvent::ProcessArgs(JsonWriter &ostream)
     ostream["name"] << argsName_;
 }
 
-MetaDataLabelEvent::MetaDataLabelEvent(int pid, int tid, const std::string &name, const std::string &label)
+MetaDataLabelEvent::MetaDataLabelEvent(uint32_t pid, int tid, const std::string &name, const std::string &label)
     : MetaDataEvent(pid, tid, name), argsLabel_(label) {}
 
 void MetaDataLabelEvent::ProcessArgs(JsonWriter &ostream)
@@ -43,12 +48,36 @@ void MetaDataLabelEvent::ProcessArgs(JsonWriter &ostream)
     ostream["labels"] << argsLabel_;
 }
 
-MetaDataIndexEvent::MetaDataIndexEvent(int pid, int tid, const std::string &name, int index)
+MetaDataIndexEvent::MetaDataIndexEvent(uint32_t pid, int tid, const std::string &name, int index)
     : MetaDataEvent(pid, tid, name), argsSortIndex_(index) {}
 
 void MetaDataIndexEvent::ProcessArgs(JsonWriter &ostream)
 {
     ostream["sort_index"] << argsSortIndex_;
+}
+
+LayerInfo GetLayerInfo(std::string processName)
+{
+    return LAYER_INFO.at(processName);
+}
+
+void GenerateMetaData(const std::unordered_map<uint16_t, uint32_t> &pidMap, const struct LayerInfo &layerInfo,
+                      std::vector<std::shared_ptr<TraceEvent>> &res)
+{
+    for (const auto kv: pidMap) {
+        std::shared_ptr<MetaDataNameEvent> processName;
+        MAKE_SHARED_RETURN_VOID(processName, MetaDataNameEvent, kv.second, DEFAULT_TID,
+                                META_DATA_PROCESS_NAME, layerInfo.component);
+        std::shared_ptr<MetaDataLabelEvent> processLabel;
+        MAKE_SHARED_RETURN_VOID(processLabel, MetaDataLabelEvent, kv.second, DEFAULT_TID,
+                                META_DATA_PROCESS_LABEL, layerInfo.label);
+        std::shared_ptr<MetaDataIndexEvent> processIndex;
+        MAKE_SHARED_RETURN_VOID(processIndex, MetaDataIndexEvent, kv.second, DEFAULT_TID,
+                                META_DATA_PROCESS_INDEX, layerInfo.sortIndex);
+        res.push_back(processName);
+        res.push_back(processLabel);
+        res.push_back(processIndex);
+    }
 }
 }
 }
