@@ -43,6 +43,7 @@ std::string FunctionLoader::CanonicalSoPath(const std::string& soName)
         "libascendalog.so",
         "libruntime.so",
         "libhccl.so",
+        "libprofapi.so",
     };
     if (soNameList.find(soName) == soNameList.end()) {
         printf("%s was invalid.\n", soName.c_str());

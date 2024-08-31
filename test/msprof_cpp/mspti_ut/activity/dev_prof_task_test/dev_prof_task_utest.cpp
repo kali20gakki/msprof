@@ -35,5 +35,17 @@ TEST_F(DevProfTaskUtest, DevProfTaskFactoryTest)
     constexpr size_t KERNEL_PROF_TASK_NUM = 2;
     profTasks = Mspti::Ascend::DevProfTaskFactory::CreateTasks(deviceId, kind);
     EXPECT_EQ(KERNEL_PROF_TASK_NUM, profTasks.size());
+    msptiResult ret = MSPTI_SUCCESS;
+    for (auto& profTask : profTasks) {
+        if (profTask->Start() != MSPTI_SUCCESS) {
+            ret = MSPTI_ERROR_INNER;
+        }
+    }
+    for (auto& profTask : profTasks) {
+        if (profTask->Stop() != MSPTI_SUCCESS) {
+            ret = MSPTI_ERROR_INNER;
+        }
+    }
+    EXPECT_EQ(MSPTI_SUCCESS, ret);
 }
 }

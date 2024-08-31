@@ -16,18 +16,136 @@
 
 #include "common/function_loader.h"
 #include "common/plog_manager.h"
+#include "common/context_manager.h"
+#include "common/utils.h"
 
-int32_t MsprofRegTypeInfo(uint16_t level, uint32_t typeId, const char *typeName)
+namespace Mspti {
+namespace Inject {
+class ProfApiInject {
+public:
+    ProfApiInject() noexcept
+    {
+        Mspti::Common::RegisterFunction("libprofapi", "MsprofRegisterProfileCallback");
+        Mspti::Common::RegisterFunction("libprofapi", "profSetProfCommand");
+        Mspti::Common::RegisterFunction("libprofapi", "profRegReporterCallback");
+        Mspti::Common::RegisterFunction("libprofapi", "profRegCtrlCallback");
+        auto ctrlHandle = [](uint32_t type, VOID_PTR data, uint32_t len) -> int32_t {
+            UNUSED(type);
+            UNUSED(data);
+            UNUSED(len);
+            return MSPTI_SUCCESS;
+        };
+        Mspti::Inject::profRegCtrlCallback(ctrlHandle);
+    }
+    ~ProfApiInject() = default;
+};
+
+ProfApiInject g_profApiInject;
+
+int32_t MsprofRegisterProfileCallback(int32_t callbackType, VOID_PTR callback, uint32_t len)
 {
+    using MsprofRegisterProfileCallbackFunc = std::function<int32_t(int32_t, VOID_PTR, uint32_t)>;
+    static MsprofRegisterProfileCallbackFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<int32_t, int32_t, VOID_PTR, uint32_t>("libprofapi", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libprofapi.so");
+    return func(callbackType, callback, len);
+}
+
+int32_t profRegReporterCallback(ProfReportHandle reporter)
+{
+    using profRegReporterCallbackFunc = std::function<int32_t(ProfReportHandle)>;
+    static profRegReporterCallbackFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<int32_t, ProfReportHandle>("libprofapi", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libprofapi.so");
+    return func(reporter);
+}
+
+int32_t profRegCtrlCallback(MsprofCtrlHandle handle)
+{
+    using profRegCtrlCallbackFunc = std::function<int32_t(MsprofCtrlHandle)>;
+    static profRegCtrlCallbackFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<int32_t, MsprofCtrlHandle>("libprofapi", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libprofapi.so");
+    return func(handle);
+}
+
+int32_t profSetProfCommand(VOID_PTR command, uint32_t len)
+{
+    using profSetProfCommandFunc = std::function<int32_t(VOID_PTR, uint32_t)>;
+    static profSetProfCommandFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<int32_t, VOID_PTR, uint32_t>("libprofapi", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libprofapi.so");
+    return func(command, len);
+}
+
+int32_t MsprofReporterCallbackImpl(uint32_t moduleId, uint32_t type, VOID_PTR data, uint32_t len)
+{
+    UNUSED(moduleId);
+    UNUSED(type);
+    UNUSED(data);
+    UNUSED(len);
+    return MSPTI_SUCCESS;
+}
+
+uint64_t MsprofGetHashIdImpl(const char* hashInfo, size_t len)
+{
+    UNUSED(hashInfo);
+    UNUSED(len);
     return 0;
 }
 
-int32_t MsprofReportCompactInfo(uint32_t agingFlag, const VOID_PTR data, uint32_t length)
+int8_t MsprofHostFreqIsEnableImpl()
 {
-    return 0;
+    constexpr int8_t TRUE = 1;
+    constexpr int8_t FALSE = 0;
+    return TRUE;
 }
 
-int32_t MsprofReportData(uint32_t moduleId, uint32_t type, VOID_PTR data, uint32_t len)
+int32_t MsptiApiReporterCallbackImpl(uint32_t agingFlag, const MsprofApi* const data)
 {
+    UNUSED(agingFlag);
+    UNUSED(data);
+    return MSPTI_SUCCESS;
+}
+
+int32_t MsptiEventReporterCallbackImpl(uint32_t agingFlag, const MsprofEvent* const event)
+{
+    UNUSED(agingFlag);
+    UNUSED(event);
+    return MSPTI_SUCCESS;
+}
+
+int32_t MsptiCompactInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t length)
+{
+    UNUSED(agingFlag);
+    UNUSED(data);
+    UNUSED(length);
+    return MSPTI_SUCCESS;
+}
+
+int32_t MsptiAddiInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t length)
+{
+    UNUSED(agingFlag);
+    UNUSED(data);
+    UNUSED(length);
+    return MSPTI_SUCCESS;
+}
+
+int32_t MsptiRegReportTypeInfoImpl(uint16_t level, uint32_t typeId, const char* name, size_t len)
+{
+    UNUSED(level);
+    UNUSED(typeId);
+    UNUSED(name);
+    UNUSED(len);
     return 0;
+}
+}
 }

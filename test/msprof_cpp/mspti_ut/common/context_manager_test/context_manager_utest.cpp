@@ -19,8 +19,9 @@ protected:
 
 TEST_F(ContextManagerUtest, CorrelationIdTest)
 {
-    EXPECT_EQ(0, Mspti::Common::ContextManager::GetInstance()->CorrelationId());
+    EXPECT_EQ(0UL, Mspti::Common::ContextManager::GetInstance()->CorrelationId());
     Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
-    EXPECT_EQ(1, Mspti::Common::ContextManager::GetInstance()->CorrelationId());
+    EXPECT_EQ(1UL, Mspti::Common::ContextManager::GetInstance()->CorrelationId());
 }
+
 }

@@ -12,7 +12,7 @@
 #ifndef MSPTI_CALLBACK_H
 #define MSPTI_CALLBACK_H
 
-#include <cstdint>
+#include <stdint.h>
 #include "mspti_result.h"
 #include "mspti_cbid.h"
 
@@ -44,7 +44,7 @@ typedef enum {
     MSPTI_CB_DOMAIN_FORCE_INT         = 0x7fffffff
 } msptiCallbackDomain;
 
-using msptiCallbackId = uint32_t;
+typedef uint32_t msptiCallbackId;
 
 /**
  * @brief Specifies the point in an API call that a callback is issued.
