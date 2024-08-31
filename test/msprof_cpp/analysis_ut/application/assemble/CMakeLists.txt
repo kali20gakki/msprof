@@ -6,7 +6,10 @@ aux_source_directory(${TOP_DIR}/analysis/csrc/parser/environment SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/entities/json_trace SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/entities/viewer_data/ai_tsak SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/viewer/database SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/viewer/database/finals SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/application/timeline SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/application/database SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/association/credential SOURCES)
 aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/application/assemble/test SOURCES)
 
 add_executable(timeline_assemble_utest
