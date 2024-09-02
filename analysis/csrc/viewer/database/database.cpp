@@ -621,6 +621,44 @@ namespace {
         {"logic_stream", SQL_INTEGER_TYPE},
     };
 
+    const TableColumns KfcOP = {
+        {"model_id", SQL_INTEGER_TYPE},
+        {"index_id", SQL_INTEGER_TYPE},
+        {"op_name", SQL_TEXT_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"duration", SQL_NUMERIC_TYPE},
+        {"group_name", SQL_TEXT_TYPE},
+        {"connection_id", SQL_INTEGER_TYPE},
+    };
+
+    const TableColumns KfcTask = {
+        {"model_id", SQL_INTEGER_TYPE},
+        {"index_id", SQL_INTEGER_TYPE},
+        {"op_name", SQL_TEXT_TYPE},
+        {"op_timestamp", SQL_NUMERIC_TYPE},
+        {"op_duration", SQL_NUMERIC_TYPE},
+        {"iteration", SQL_INTEGER_TYPE},
+        {"hccl_name", SQL_TEXT_TYPE},
+        {"group_name", SQL_TEXT_TYPE},
+        {"plane_id", SQL_INTEGER_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"duration", SQL_REAL_TYPE},
+        {"stream_id", SQL_INTEGER_TYPE},
+        {"task_id", SQL_INTEGER_TYPE},
+        {"duration_estimated", SQL_INTEGER_TYPE},
+        {"local_rank", SQL_INTEGER_TYPE},
+        {"remote_rank", SQL_INTEGER_TYPE},
+        {"transport_type", SQL_TEXT_TYPE},
+        {"size", SQL_INTEGER_TYPE},
+        {"data_type", SQL_TEXT_TYPE},
+        {"link_type", SQL_TEXT_TYPE},
+        {"bandwidth", SQL_REAL_TYPE},
+        {"context_id", SQL_INTEGER_TYPE},
+        {"notify_id", SQL_TEXT_TYPE},
+        {"batch_id", SQL_INTEGER_TYPE},
+        {"rdma_type", SQL_TEXT_TYPE},
+    };
+
     const TableColumns Sio = {
         {"acc_id", SQL_INTEGER_TYPE},
         {"req_rx", SQL_NUMERIC_TYPE},
@@ -716,6 +754,8 @@ HCCLSingleDeviceDB::HCCLSingleDeviceDB()
     tableColNames_["HcclOpReport"] = HcclOpReport;
     tableColNames_["HCCLOpSingleDevice"] = HCCLOpSingleDevice;
     tableColNames_["HCCLTaskSingleDevice"] = HCCLTaskSingleDevice;
+    tableColNames_["KfcOP"] = KfcOP;
+    tableColNames_["KfcTask"] = KfcTask;
 }
 
 NpuMemDB::NpuMemDB()
