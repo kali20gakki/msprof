@@ -82,20 +82,35 @@ typedef enum {
     */
     MSPTI_ACTIVITY_FLAG_NONE = 0,
     /**
-    * Indicates the activity represents an instantaneous marker. Valid for
+    * Indicates the activity represents an pure host instantaneous marker. Valid for
     * MSPTI_ACTIVITY_KIND_MARKER.
     */
     MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS = 1 << 0,
     /**
-    * Indicates the activity represents a region start marker. Valid for
+    * Indicates the activity represents a pure host region start marker. Valid for
     * MSPTI_ACTIVITY_KIND_MARKER.
     */
     MSPTI_ACTIVITY_FLAG_MARKER_START = 1 << 1,
     /**
-    * Indicates the activity represents a region end marker. Valid for
+    * Indicates the activity represents a pure host region end marker. Valid for
     * MSPTI_ACTIVITY_KIND_MARKER.
     */
-    MSPTI_ACTIVITY_FLAG_MARKER_END = 1 << 2
+    MSPTI_ACTIVITY_FLAG_MARKER_END = 1 << 2,
+    /**
+    * Indicates the activity represents an instantaneous marker with device. Valid for
+    * MSPTI_ACTIVITY_KIND_MARKER.
+    */
+    MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS_WITH_DEVICE = 1 << 3,
+    /**
+    * Indicates the activity represents a pure start marker with device. Valid for
+    * MSPTI_ACTIVITY_KIND_MARKER.
+    */
+    MSPTI_ACTIVITY_FLAG_MARKER_START_WITH_DEVICE = 1 << 4,
+    /**
+    * Indicates the activity represents a pure end marker with device. Valid for
+    * MSPTI_ACTIVITY_KIND_MARKER.
+    */
+    MSPTI_ACTIVITY_FLAG_MARKER_END_WITH_DEVICE = 1 << 5
 } msptiActivityFlag;
 
 START_PACKED_ALIGNMENT
