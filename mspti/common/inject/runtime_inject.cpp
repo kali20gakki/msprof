@@ -212,7 +212,7 @@ RtErrorT rtGetStreamId(RtStreamT stm, int32_t *streamId)
 }
 
 
-RtErrorT rtProfilerTraceEx(uint64_t id, uint64_t modelId, uint16_t tagId, RtStreamT stm)
+RtErrorT rtProfilerTraceEx(uint64_t id, uint64_t eventType, uint16_t tagId, RtStreamT stm)
 {
     using rtProfilerTraceExFunc = std::function<RtErrorT(uint64_t, uint64_t, uint16_t, RtStreamT)>;
     static rtProfilerTraceExFunc func = nullptr;
@@ -221,7 +221,7 @@ RtErrorT rtProfilerTraceEx(uint64_t id, uint64_t modelId, uint16_t tagId, RtStre
                                                                                       __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
-    return func(id, modelId, tagId, stm);
+    return func(id, eventType, tagId, stm);
 }
 
 RtErrorT rtKernelLaunch(const void* stubFunc, uint32_t blockDim, void* args,

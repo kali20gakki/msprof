@@ -108,11 +108,13 @@ size_t ChannelReader::TransDataToActivityBuffer(char buffer[], size_t valid_size
 size_t ChannelReader::TransTsFwData(char buffer[], size_t valid_size, uint32_t deviceId)
 {
     size_t pos = 0;
+    constexpr size_t DEFAULT_DATA_SIZE = 40;
     constexpr uint32_t MIN_TSFW_SIZE = 32;
     constexpr uint32_t RPT_TYPE_POS = 1;
     constexpr uint32_t BUF_SIZE_POS = 2;
     constexpr uint32_t TIMESTAMP_POS = 8;
     constexpr uint32_t MARKID_POS = 16;
+    constexpr uint32_t FLAG_POS = 24;
     constexpr uint32_t STREAMID_POS = 32;
     while (valid_size - pos >= MIN_TSFW_SIZE) {
         uint8_t *mode = reinterpret_cast<uint8_t*>(buffer + pos);
@@ -128,17 +130,19 @@ size_t ChannelReader::TransTsFwData(char buffer[], size_t valid_size, uint32_t d
                 activity.timestamp = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId,
                     activity.timestamp);
                 activity.id = *reinterpret_cast<uint64_t*>(buffer + pos + MARKID_POS);
+                activity.flag = *reinterpret_cast<msptiActivityFlag*>(buffer + pos + FLAG_POS);
                 activity.objectId.ds.streamId =
                         static_cast<uint32_t>(*reinterpret_cast<uint16_t*>(buffer + pos + STREAMID_POS));
                 activity.objectId.ds.deviceId = deviceId;
                 activity.name = "";
                 Mspti::Activity::ActivityManager::GetInstance()->Record(
                     reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMark));
+                pos += DEFAULT_DATA_SIZE;
                 break;
             default:
+                pos += DEFAULT_DATA_SIZE;
                 break;
         }
-        pos += *bufSize;
     }
     return pos;
 }
