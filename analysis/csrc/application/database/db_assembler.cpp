@@ -19,6 +19,9 @@
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/communication_info_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system//include/acc_pmu_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system//include/aicore_freq_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system//include/ddr_data.h"
 
 
 namespace Analysis {
@@ -120,9 +123,75 @@ bool SaveCommunicationData(DataInventory& dataInventory, DBInfo& msprofDB, const
     return saveFlag;
 }
 
+bool SaveAccPmuData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    // accId, readBwLevel, writeBwLevel, readOstLevel, writeOstLevel, timestampNs, deviceId
+    using AccPmuDataFormat = std::vector<std::tuple<uint16_t, uint32_t, uint32_t,
+        uint32_t, uint32_t, uint64_t, uint16_t>>;
+    auto accPmuData = dataInventory.GetPtr<std::vector<AccPmuData>>();
+    if (accPmuData == nullptr) {
+        WARN("Acc pmu data not exist.");
+        return true;
+    }
+    AccPmuDataFormat res;
+    if (!Reserve(res, accPmuData->size())) {
+        ERROR("Reserved for acc pmu data failed.");
+        return false;
+    }
+    for (const auto& item : *accPmuData) {
+        res.emplace_back(item.accId, item.readBwLevel, item.writeBwLevel, item.readOstLevel,
+                         item.writeOstLevel, item.timestampNs, item.deviceId);
+    }
+    return SaveData(res, TABLE_NAME_ACC_PMU, msprofDB);
+}
+
+bool SaveAicoreFreqData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    // deviceId, timestampNs, freq
+    using AicoreFreqDataFormat = std::vector<std::tuple<uint16_t, uint64_t, double>>;
+    auto aicoreFreqData = dataInventory.GetPtr<std::vector<AicoreFreqData>>();
+    if (aicoreFreqData == nullptr) {
+        WARN("AIcore freq data not exist.");
+        return true;
+    }
+    AicoreFreqDataFormat res;
+    if (!Reserve(res, aicoreFreqData->size())) {
+        ERROR("Reserved for AIcore freq data failed.");
+        return false;
+    }
+    for (const auto& item : *aicoreFreqData) {
+        res.emplace_back(item.deviceId, item.timestamp, item.freq);
+    }
+    return SaveData(res, TABLE_NAME_AICORE_FREQ, msprofDB);
+}
+
+bool SaveDDRData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    // deviceId, timestamp, read, write
+    using DDRDataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, uint64_t>>;
+    auto ddrData = dataInventory.GetPtr<std::vector<DDRData>>();
+    if (ddrData == nullptr) {
+        WARN("DDR data not exist.");
+        return true;
+    }
+    DDRDataFormat res;
+    if (!Reserve(res, ddrData->size())) {
+        ERROR("Reserved for DDR data failed.");
+        return false;
+    }
+    for (const auto& item : *ddrData) {
+        res.emplace_back(item.deviceId, item.timestamp, static_cast<uint64_t>(item.fluxRead),
+                         static_cast<uint64_t>(item.fluxWrite));
+    }
+    return SaveData(res, TABLE_NAME_DDR, msprofDB);
+}
+
 std::unordered_map<std::string, SaveDataFunc> dataSaver = {
     {Viewer::Database::PROCESSOR_NAME_API,           SaveApiData},
     {Viewer::Database::PROCESSOR_NAME_COMMUNICATION, SaveCommunicationData},
+    {Viewer::Database::PROCESSOR_NAME_ACC_PMU,       SaveAccPmuData},
+    {Viewer::Database::PROCESSOR_NAME_AICORE_FREQ,   SaveAicoreFreqData},
+    {Viewer::Database::PROCESSOR_NAME_DDR,           SaveDDRData},
 };
 
 DBAssembler::DBAssembler(
