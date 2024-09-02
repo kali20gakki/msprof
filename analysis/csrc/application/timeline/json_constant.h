@@ -37,6 +37,7 @@ const std::string FLOW_END = "f";
 const std::string FLOW_BP = "e";
 const std::string OUTPUT_PATH = "mindstudio_profiler_output";
 const std::string JSON_SUFFIX = ".json";
+const std::string MSPROF_JSON_FILE = "msprof";
 const double NS_TO_US = 1000.0;
 const int CONN_OFFSET = 32;
 /*
