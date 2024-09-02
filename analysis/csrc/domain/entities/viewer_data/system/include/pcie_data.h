@@ -17,20 +17,21 @@
 namespace Analysis {
 namespace Domain {
 struct BandwidthData {
-    uint32_t min = UINT32_MAX;
-    uint32_t max = UINT32_MAX;
-    uint32_t avg = UINT32_MAX;
+    // 无数据时默认值设置为0
+    uint32_t min = 0;
+    uint32_t max = 0;
+    uint32_t avg = 0;
 };
 
 struct PCIeData {
     uint16_t deviceId = UINT16_MAX;
     uint64_t timestamp = UINT64_MAX;
     BandwidthData txPost;
-    BandwidthData txNopost;
+    BandwidthData txNonpost;
     BandwidthData txCpl;
-    BandwidthData txNopostLatency;
+    BandwidthData txNonpostLatency;
     BandwidthData rxPost;
-    BandwidthData rxNopost;
+    BandwidthData rxNonpost;
     BandwidthData rxCpl;
 };
 }

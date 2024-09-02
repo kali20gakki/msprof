@@ -8,7 +8,8 @@ import os
 import sqlite3
 from collections import OrderedDict
 
-from common_func.common import CommonConstant
+from common_func.common import byte_per_us2_mb_pers
+from common_func.common import ns2_us
 from common_func.common import warn
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -72,16 +73,16 @@ class TraceViewer:
         """
         tmp_args_data = {"Tx": 0, "Rx": 0}
         if trace_name == "PCIe_post":
-            tmp_args_data["Tx"] = data_item[4]
-            tmp_args_data["Rx"] = data_item[-7]
+            tmp_args_data["Tx"] = byte_per_us2_mb_pers(data_item[4])
+            tmp_args_data["Rx"] = byte_per_us2_mb_pers(data_item[-7])
         elif trace_name == "PCIe_nonpost":
-            tmp_args_data["Tx"] = data_item[7]
-            tmp_args_data["Rx"] = data_item[-4]
+            tmp_args_data["Tx"] = byte_per_us2_mb_pers(data_item[7])
+            tmp_args_data["Rx"] = byte_per_us2_mb_pers(data_item[-4])
         elif trace_name == "PCIe_cpl":
-            tmp_args_data["Tx"] = data_item[10]
-            tmp_args_data["Rx"] = data_item[-1]
+            tmp_args_data["Tx"] = byte_per_us2_mb_pers(data_item[10])
+            tmp_args_data["Rx"] = byte_per_us2_mb_pers(data_item[-1])
         else:
-            tmp_args_data["Tx"] = data_item[13]
+            tmp_args_data["Tx"] = ns2_us(data_item[13])
             tmp_args_data["Rx"] = 0
         tmp_trace_data = (trace_name, timestamp, pid, tid, tmp_args_data)
         return tmp_trace_data
