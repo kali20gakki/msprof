@@ -872,14 +872,15 @@ timeline计算公式：
 
 4、PCIe_cpl：接收写请求的完成数据包，单位B/s。
 
-5、PCIe_nonpost_latency：PCIe Non-Posted模式下的传输时延，单位B/s
+5、PCIe_nonpost_latency：PCIe Non-Posted模式下的传输时延，单位ns
 
 
 变更记录：
 
-| 日期       | 内容      |
-|----------|---------|
-| 2024/3/7 | 330首次上线 |
+| 日期       | 内容                           |
+|----------|------------------------------|
+| 2024/3/7 | 330首次上线                      |
+| 2024/9/2 | PCIe_nonpost_latency 单位校准为ns |
 
 
 ### META_DATA

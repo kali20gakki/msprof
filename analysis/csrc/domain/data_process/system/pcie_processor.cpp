@@ -27,15 +27,15 @@ void ConvertMicrosecToSec(BandwidthData& data)
     data.avg *= MICRO_SECOND;
 }
 
-// 处理 PCIeData 中的所有 BandwidthData 类型的成员
+// 处理 PCIeData 中的所有 BandwidthData 类型的成员, B/us -> B/s
 void ConvertBandwidthData(PCIeData& data)
 {
+    // 无txNonpostLatency
     ConvertMicrosecToSec(data.txPost);
-    ConvertMicrosecToSec(data.txNopost);
+    ConvertMicrosecToSec(data.txNonpost);
     ConvertMicrosecToSec(data.txCpl);
-    ConvertMicrosecToSec(data.txNopostLatency);
     ConvertMicrosecToSec(data.rxPost);
-    ConvertMicrosecToSec(data.rxNopost);
+    ConvertMicrosecToSec(data.rxNonpost);
     ConvertMicrosecToSec(data.rxCpl);
 }
 }
@@ -130,22 +130,21 @@ bool PCIeProcessor::FormatData(const LocaltimeContext& localtimeContext,
     }
     PCIeData tempData;
     for (const auto& data : pcieData) {
-        uint32_t deviceId;
+        uint16_t deviceId;
         uint64_t oriTimestamp;
-        std::tie(deviceId, oriTimestamp,
+        std::tie(tempData.deviceId, oriTimestamp,
                  tempData.txPost.min, tempData.txPost.max, tempData.txPost.avg,
-                 tempData.txNopost.min, tempData.txNopost.max, tempData.txNopost.avg,
+                 tempData.txNonpost.min, tempData.txNonpost.max, tempData.txNonpost.avg,
                  tempData.txCpl.min, tempData.txCpl.max, tempData.txCpl.avg,
-                 tempData.txNopostLatency.min, tempData.txNopostLatency.max, tempData.txNopostLatency.avg,
+                 tempData.txNonpostLatency.min, tempData.txNonpostLatency.max, tempData.txNonpostLatency.avg,
                  tempData.rxPost.min, tempData.rxPost.max, tempData.rxPost.avg,
-                 tempData.rxNopost.min, tempData.rxNopost.max, tempData.rxNopost.avg,
+                 tempData.rxNonpost.min, tempData.rxNonpost.max, tempData.rxNonpost.avg,
                  tempData.rxCpl.min, tempData.rxCpl.max, tempData.rxCpl.avg) = data;
         HPFloat timestamp = GetTimeBySamplingTimestamp(oriTimestamp,
                                                        localtimeContext.hostMonotonic,
                                                        localtimeContext.deviceMonotonic);
-        tempData.deviceId = static_cast<uint16_t>(deviceId);
         tempData.timestamp = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
-        // B/us -> B/s
+        // 时延单位本身即为ns, 带宽单位 B/us -> B/s
         ConvertBandwidthData(tempData);
         processedData.push_back(tempData);
     }

@@ -30,11 +30,11 @@ struct PCIeOriData {
     uint32_t deviceId = UINT32_MAX;
     uint64_t timestamp = UINT64_MAX;
     BandwidthData txPost;
-    BandwidthData txNopost;
+    BandwidthData txNonpost;
     BandwidthData txCpl;
-    BandwidthData txNopostLatency;
+    BandwidthData txNonpostLatency;
     BandwidthData rxPost;
-    BandwidthData rxNopost;
+    BandwidthData rxNonpost;
     BandwidthData rxCpl;
 };
 }
@@ -135,27 +135,26 @@ bool PCIeProcessor::FormatData(const ThreadData &threadData,
     for (const auto& data : pcieData) {
         std::tie(tempData.deviceId, tempData.timestamp,
                  tempData.txPost.min, tempData.txPost.max, tempData.txPost.avg,
-                 tempData.txNopost.min, tempData.txNopost.max, tempData.txNopost.avg,
+                 tempData.txNonpost.min, tempData.txNonpost.max, tempData.txNonpost.avg,
                  tempData.txCpl.min, tempData.txCpl.max, tempData.txCpl.avg,
-                 tempData.txNopostLatency.min, tempData.txNopostLatency.max, tempData.txNopostLatency.avg,
+                 tempData.txNonpostLatency.min, tempData.txNonpostLatency.max, tempData.txNonpostLatency.avg,
                  tempData.rxPost.min, tempData.rxPost.max, tempData.rxPost.avg,
-                 tempData.rxNopost.min, tempData.rxNopost.max, tempData.rxNopost.avg,
+                 tempData.rxNonpost.min, tempData.rxNonpost.max, tempData.rxNonpost.avg,
                  tempData.rxCpl.min, tempData.rxCpl.max, tempData.rxCpl.avg) = data;
         HPFloat timestamp = GetTimeBySamplingTimestamp(tempData.timestamp,
                                                        threadData.hostMonotonic, threadData.deviceMonotonic);
-        // B/us -> B/s
+        // B/us -> B/s, txNopostLatency 单位是ns
         processedData.emplace_back(static_cast<uint16_t>(tempData.deviceId),
                                    GetLocalTime(timestamp, threadData.timeRecord).Uint64(),
                                    tempData.txPost.min * MICRO_SECOND, tempData.txPost.max * MICRO_SECOND,
-                                   tempData.txPost.avg * MICRO_SECOND, tempData.txNopost.min * MICRO_SECOND,
-                                   tempData.txNopost.max * MICRO_SECOND, tempData.txNopost.avg * MICRO_SECOND,
+                                   tempData.txPost.avg * MICRO_SECOND, tempData.txNonpost.min * MICRO_SECOND,
+                                   tempData.txNonpost.max * MICRO_SECOND, tempData.txNonpost.avg * MICRO_SECOND,
                                    tempData.txCpl.min * MICRO_SECOND, tempData.txCpl.max * MICRO_SECOND,
-                                   tempData.txCpl.avg * MICRO_SECOND, tempData.txNopostLatency.min * MICRO_SECOND,
-                                   tempData.txNopostLatency.max * MICRO_SECOND,
-                                   tempData.txNopostLatency.avg * MICRO_SECOND,
+                                   tempData.txCpl.avg * MICRO_SECOND, tempData.txNonpostLatency.min,
+                                   tempData.txNonpostLatency.max, tempData.txNonpostLatency.avg,
                                    tempData.rxPost.min * MICRO_SECOND, tempData.rxPost.max * MICRO_SECOND,
-                                   tempData.rxPost.avg * MICRO_SECOND, tempData.rxNopost.min * MICRO_SECOND,
-                                   tempData.rxNopost.max * MICRO_SECOND, tempData.rxNopost.avg * MICRO_SECOND,
+                                   tempData.rxPost.avg * MICRO_SECOND, tempData.rxNonpost.min * MICRO_SECOND,
+                                   tempData.rxNonpost.max * MICRO_SECOND, tempData.rxNonpost.avg * MICRO_SECOND,
                                    tempData.rxCpl.min * MICRO_SECOND, tempData.rxCpl.max * MICRO_SECOND,
                                    tempData.rxCpl.avg * MICRO_SECOND);
     }
