@@ -23,14 +23,12 @@ using namespace Analysis::Utils;
 using namespace Analysis::Domain;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Parser::Environment;
-
 namespace {
 const int DEPTH = 0;
 const std::string BASE_PATH = "./ascend_test";
 const std::string PROF_PATH = File::PathJoin({BASE_PATH, "PROF_0"});
 const std::string RESULT_PATH = File::PathJoin({PROF_PATH, OUTPUT_PATH});
 }
-
 class AscendHardwareAssemblerUTest : public testing::Test {
 protected:
     virtual void TearDown()
@@ -51,7 +49,6 @@ protected:
 protected:
     DataInventory dataInventory_;
 };
-
 static std::vector<AscendTaskData> GenerateTaskData()
 {
     std::vector<AscendTaskData> res;
@@ -70,7 +67,6 @@ static std::vector<AscendTaskData> GenerateTaskData()
     res.push_back(data);
     return res;
 }
-
 static std::vector<TaskInfoData> GenerateTaskInfoData()
 {
     std::vector<TaskInfoData> res;
@@ -84,7 +80,6 @@ static std::vector<TaskInfoData> GenerateTaskInfoData()
     res.push_back(data);
     return res;
 }
-
 static std::vector<MsprofTxDeviceData> GenerateDeviceTxData()
 {
     std::vector<MsprofTxDeviceData> res;
@@ -97,13 +92,11 @@ static std::vector<MsprofTxDeviceData> GenerateDeviceTxData()
     res.push_back(data);
     return res;
 }
-
 TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataNotExists)
 {
     AscendHardwareAssembler assembler;
     EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
 }
-
 TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
 {
     AscendHardwareAssembler assembler;
@@ -144,7 +137,6 @@ TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
                             "{\"sort_index\":1}},";
     EXPECT_EQ(expectStr, res.back());
 }
-
 TEST_F(AscendHardwareAssemblerUTest, ShouldReturnFalseWhenDataAssembleFail)
 {
     AscendHardwareAssembler assembler;
