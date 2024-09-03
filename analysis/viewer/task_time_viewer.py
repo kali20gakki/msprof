@@ -106,8 +106,12 @@ class TaskTimeViewer(BaseViewer):
             'task_data_list': [],
             'subtask_data_list': [],
         }
-        with AscendTaskModel(self.project_dir, [DBNameConstant.TABLE_ASCEND_TASK]) as model:
-            task_data_list = model.get_ascend_task_data_without_unknown()
+        task_data_list = []
+        conn, curs = DBManager.check_connect_db(self.project_dir, DBNameConstant.DB_ASCEND_TASK)
+        if conn and curs:
+            DBManager.destroy_db_connect(conn, curs)
+            with AscendTaskModel(self.project_dir, [DBNameConstant.TABLE_ASCEND_TASK]) as model:
+                task_data_list = model.get_ascend_task_data_without_unknown()
         for data in task_data_list:
             if data.context_id == NumberConstant.DEFAULT_GE_CONTEXT_ID:
                 task_data['task_data_list'].append(TopDownTask(*data))
