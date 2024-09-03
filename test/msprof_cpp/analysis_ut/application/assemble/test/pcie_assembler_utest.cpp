@@ -107,23 +107,23 @@ TEST_F(PCIeAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"PCIe_cpl\",\"pid\":2383960768,\"tid\":0,\"ts\":\"1719621074669030.500000\","
-                            "\"ph\":\"C\",\"args\":{\"Ex\":0,\"Tx\":0}},{\"name\":\"PCIe_nonpost\",\"pid\":2383960768,"
-                            "\"tid\":0,\"ts\":\"1719621074669030.500000\",\"ph\":\"C\",\"args\":{\"Ex\":0,\"Tx\":0}},"
-                            "{\"name\":\"PCIe_nonpost_latency\",\"pid\":2383960768,\"tid\":0,\"ts\":"
-                            "\"1719621074669030.500000\",\"ph\":\"C\",\"args\":{\"Ex\":0,\"Tx\":0}},{\"name\":"
-                            "\"PCIe_post\",\"pid\":2383960768,\"tid\":0,\"ts\":\"1719621074669030.500000\",\"ph\":\"C"
-                            "\",\"args\":{\"Ex\":0,\"Tx\":59}},{\"name\":\"PCIe_cpl\",\"pid\":2383960768,\"tid\":0,"
-                            "\"ts\":\"1719621074688865.250000\",\"ph\":\"C\",\"args\":{\"Ex\":0,\"Tx\":0}},{\"name\":"
-                            "\"PCIe_nonpost\",\"pid\":2383960768,\"tid\":0,\"ts\":\"1719621074688865.250000\",\"ph\":"
-                            "\"C\",\"args\":{\"Ex\":0,\"Tx\":0}},{\"name\":\"PCIe_nonpost_latency\",\"pid\":2383960768,"
-                            "\"tid\":0,\"ts\":\"1719621074688865.250000\",\"ph\":\"C\",\"args\":{\"Ex\":0,\"Tx\":0}},"
-                            "{\"name\":\"PCIe_post\",\"pid\":2383960768,\"tid\":0,\"ts\":\"1719621074688865.250000\","
-                            "\"ph\":\"C\",\"args\":{\"Ex\":0,\"Tx\":73}},{\"name\":\"process_name\",\"pid\":2383960768,"
-                            "\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"PCIe\"}},{\"name\":\"process_labels\",\"pid"
-                            "\":2383960768,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},{\"name\":"
-                            "\"process_sort_index\",\"pid\":2383960768,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index"
-                            "\":22}},";
+    std::string expectStr = "{\"name\":\"PCIe_cpl\",\"pid\":2383960768,\"tid\":0,\"ts\":\"1719621074669030.500000\""
+                            ",\"ph\":\"C\",\"args\":{\"Ex\":0.0,\"Tx\":0.0}},{\"name\":\"PCIe_nonpost\",\"pid\""
+                            ":2383960768,\"tid\":0,\"ts\":\"1719621074669030.500000\",\"ph\":\"C\",\"args\":{\"Ex\":"
+                            "0.0,\"Tx\":0.0}},{\"name\":\"PCIe_nonpost_latency\",\"pid\":2383960768,\"tid\":0,\"ts\":"
+                            "\"1719621074669030.500000\",\"ph\":\"C\",\"args\":{\"Ex\":0.0,\"Tx\":0.0}},{\"name\":\""
+                            "PCIe_post\",\"pid\":2383960768,\"tid\":0,\"ts\":\"1719621074669030.500000\",\"ph\":\"C\","
+                            "\"args\":{\"Ex\":0.0,\"Tx\":59.0}},{\"name\":\"PCIe_cpl\",\"pid\":2383960768,\"tid\":0,"
+                            "\"ts\":\"1719621074688865.250000\",\"ph\":\"C\",\"args\":{\"Ex\":0.0,\"Tx\":0.0}},"
+                            "{\"name\":\"PCIe_nonpost\",\"pid\":2383960768,\"tid\":0,\"ts\":\"1719621074688865.250000"
+                            "\",\"ph\":\"C\",\"args\":{\"Ex\":0.0,\"Tx\":0.0}},{\"name\":\"PCIe_nonpost_latency\","
+                            "\"pid\":2383960768,\"tid\":0,\"ts\":\"1719621074688865.250000\",\"ph\":\"C\",\"args\":"
+                            "{\"Ex\":0.0,\"Tx\":0.0}},{\"name\":\"PCIe_post\",\"pid\":2383960768,\"tid\":0,\"ts\":"
+                            "\"1719621074688865.250000\",\"ph\":\"C\",\"args\":{\"Ex\":0.0,\"Tx\":73.0}},{\"name\":"
+                            "\"process_name\",\"pid\":2383960768,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"PCIe\"}}"
+                            ",{\"name\":\"process_labels\",\"pid\":2383960768,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels"
+                            "\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960768,\"tid\":0,\"ph\":\"M\","
+                            "\"args\":{\"sort_index\":22}},";
     EXPECT_EQ(expectStr, res.back());
 }
 

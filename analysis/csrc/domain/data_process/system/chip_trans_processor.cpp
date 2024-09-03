@@ -54,6 +54,7 @@ bool ChipTransProcessor::Process(DataInventory& dataInventory)
 
 bool ChipTransProcessor::ProcessOneDevice(const std::string& devicePath, ChipTransData& chipTransData)
 {
+    auto deviceId = GetDeviceIdByDevicePath(devicePath);
     DBInfo paLinkInfo("chip_trans.db", "PaLinkInfo");
     DBInfo pcieInfo("chip_trans.db", "PcieInfo");
     std::string paLinkDBPath = Utils::File::PathJoin({devicePath, SQLITE, paLinkInfo.dbName});
@@ -81,7 +82,7 @@ bool ChipTransProcessor::ProcessOneDevice(const std::string& devicePath, ChipTra
     }
     std::vector<PaLinkInfoData> paData;
     std::vector<PcieInfoData> pcieData;
-    if (!FormatData(paData, pcieData, chipTransData)) {
+    if (!FormatData(paData, pcieData, chipTransData, deviceId)) {
         ERROR("Format data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO);
         return false;
     }
@@ -113,11 +114,13 @@ OriPcieFormat ChipTransProcessor::LoadPcieData(const DBInfo& pcieInfo)
 }
 
 bool ChipTransProcessor::FormatData(std::vector<PaLinkInfoData>& paFormatData,
-                                    std::vector<PcieInfoData>& pcieFormatData,
-                                    ChipTransData& chipTransData)
+    std::vector<PcieInfoData>& pcieFormatData, ChipTransData& chipTransData, const uint16_t &deviceId)
 {
     PaLinkInfoData paLinkInfoData;
     PcieInfoData pcieInfoData;
+    paLinkInfoData.deviceId = deviceId;
+    paLinkInfoData.deviceId = deviceId;
+    pcieInfoData.deviceId = deviceId;
     if (!Reserve(paFormatData, chipTransData.resPaData.size()) ||
         !Reserve(pcieFormatData, chipTransData.resPcieData.size())) {
         ERROR("Reserve for Chip trains data failed.");

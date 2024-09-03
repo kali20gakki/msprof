@@ -67,14 +67,14 @@ private:
 class CounterEvent : public TraceEvent {
 public:
     CounterEvent(uint32_t pid, int tid, const std::string &ts, const std::string &name);
-    void SetSeriesValue(const std::string &key, const uint64_t &value);
+    void SetSeriesValue(const std::string &key, const double &value);
 private:
     void ToJson(JsonWriter &ostream) override;
     void ProcessArgs(JsonWriter &ostream);
 private:
     std::string ts_;
     std::string ph_ = "C";
-    std::unordered_map<std::string, uint64_t> seriesValue_;
+    std::unordered_map<std::string, double> seriesValue_;
 };
 
 /**
