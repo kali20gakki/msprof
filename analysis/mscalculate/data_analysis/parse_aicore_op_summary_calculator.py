@@ -187,6 +187,10 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
         get task time data
         :return: task data list
         """
+        conn, curs = DBManager.check_connect_db(self.project_path, DBNameConstant.DB_ASCEND_TASK)
+        if not (conn and curs):
+            DBManager.destroy_db_connect(conn, curs)
+            return []
         with AscendTaskModel(self.project_path, DBNameConstant.TABLE_ASCEND_TASK) as model:
             tasks = model.get_all_data(DBNameConstant.TABLE_ASCEND_TASK)
             if not tasks:

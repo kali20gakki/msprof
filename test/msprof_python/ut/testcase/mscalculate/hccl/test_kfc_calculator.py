@@ -80,7 +80,8 @@ class TestKfcCalculator(unittest.TestCase):
                 mock.patch(NAMESPACE + ".KfcInfoViewModel.get_sql_data", return_value=kfc_info_data), \
                 mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=True), \
                 mock.patch("os.path.exists", return_value=True), \
-                mock.patch("msmodel.step_trace.ts_track_model.TsTrackModel.get_task_flip_data", return_value=[]):
+                mock.patch("msmodel.step_trace.ts_track_model.TsTrackModel.get_task_flip_data", return_value=[]), \
+                mock.patch("common_func.db_manager.DBManager.check_connect_db", return_value=(True, True)):
             check = KfcCalculator([], CONFIG)
             check.calculate()
             check.save()

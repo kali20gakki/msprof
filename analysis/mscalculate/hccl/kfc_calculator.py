@@ -52,8 +52,12 @@ class KfcCalculator(ICalculator, MsMultiProcess):
                 model.flush(self._kfc_task_data, DBNameConstant.TABLE_KFC_TASK)
 
     def calculate_kfc_op(self: any) -> None:
-        with AscendTaskModel(self._project_path, [DBNameConstant.TABLE_ASCEND_TASK]) as model:
-            task_data = model.get_ascend_task_data_without_unknown()
+        task_data = []
+        conn, curs = DBManager.check_connect_db(self._project_path, DBNameConstant.DB_ASCEND_TASK)
+        if conn and curs:
+            DBManager.destroy_db_connect(conn, curs)
+            with AscendTaskModel(self._project_path, [DBNameConstant.TABLE_ASCEND_TASK]) as model:
+                task_data = model.get_ascend_task_data_without_unknown()
         with Mc2CommInfoViewModel(self._project_path,
                                   [DBNameConstant.TABLE_MC2_COMM_INFO]) as model:
             comm_info = model.get_kfc_stream(DBNameConstant.TABLE_MC2_COMM_INFO)

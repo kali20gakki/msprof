@@ -149,7 +149,10 @@ class TestOpSummaryOpSceneCalculator(unittest.TestCase):
     def test_get_task_time_data(self):
         check = OpSummaryOpSceneCalculator(file_list, CONFIG)
         self.assertEqual(check.get_task_time_data(), [])
-        with mock.patch(NAMESPACE + '.AscendTaskModel.get_all_data',
+        with mock.patch("common_func.db_manager.DBManager.check_connect_db", return_value=(True, True)):
+            self.assertEqual(check.get_task_time_data(), [])
+        with mock.patch("common_func.db_manager.DBManager.check_connect_db", return_value=(True, True)), \
+            mock.patch(NAMESPACE + '.AscendTaskModel.get_all_data',
                         return_value=[[1, 1, 1, 1, 1, 1, 1000, 1000, 'AI_CORE', 'AI_CORE', 0]]):
             self.assertEqual(check.get_task_time_data(), [[1, 1, 1000, 1000, 0, 'AI_CORE', 1, 1, 1, 1]])
 

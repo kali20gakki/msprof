@@ -390,7 +390,8 @@ class TestTaskTimeViewer(unittest.TestCase):
             top_down_task_type(0, 1, 27, 2, 4294967295, 0, 38140478706523, 1510560, "KERNEL_AICPU", "AI_CPU", 0),
             top_down_task_type(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "FFTS_PLUS", "AIV", 1),
         ]
-        with mock.patch(NAMESPACE + '.AscendTaskModel.get_ascend_task_data_without_unknown', return_value=data):
+        with mock.patch(NAMESPACE + '.AscendTaskModel.get_ascend_task_data_without_unknown', return_value=data), \
+                mock.patch("common_func.db_manager.DBManager.check_connect_db", return_value=(True, True)):
             check = TaskTimeViewer(configs, params)
             ret = check.get_ascend_task_data()
             self.assertEqual(len(ret), 2)
