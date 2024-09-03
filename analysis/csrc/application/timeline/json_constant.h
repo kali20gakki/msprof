@@ -40,6 +40,9 @@ const std::string JSON_SUFFIX = ".json";
 const std::string MSPROF_JSON_FILE = "msprof";
 const double NS_TO_US = 1000.0;
 const int CONN_OFFSET = 32;
+const std::string MSPROF_FILE = "msprof";
+const std::string STEP_TRACE_FILE = "step_trace";
+const std::string MSPROF_TX_FILE = "msprof_tx";
 /*
  * json格式要求多个对象使用[]包装，再每一层json后添加了","分割，最终会形成[{},true]的结果，因此需要写入内容的时候过滤掉
  * [ true],共6位长度

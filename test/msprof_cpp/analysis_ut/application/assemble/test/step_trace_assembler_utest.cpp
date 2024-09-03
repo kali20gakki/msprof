@@ -1,0 +1,194 @@
+/* ******************************************************************************
+            版权所有 (c) 华为技术有限公司 2024-2024
+            Copyright, 2024, Huawei Tech. Co., Ltd.
+****************************************************************************** */
+/* ******************************************************************************
+ * File Name          : step_trace_assembler_utest.cpp
+ * Description        : step_trace_assembler UT
+ * Author             : msprof team
+ * Creation Date      : 2024/9/2
+ * *****************************************************************************
+ */
+
+#include "gtest/gtest.h"
+#include "mockcpp/mockcpp.hpp"
+#include "analysis/csrc/application/timeline/step_trace_assembler.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/step_trace_data.h"
+#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/dfx/error_code.h"
+
+using namespace Analysis::Application;
+using namespace Analysis::Utils;
+using namespace Analysis::Domain;
+using namespace Analysis::Viewer::Database;
+using namespace Analysis::Parser::Environment;
+
+namespace {
+const int DEPTH = 0;
+const std::string BASE_PATH = "./step_test";
+const std::string PROF_PATH = File::PathJoin({BASE_PATH, "PROF_0"});
+const std::string RESULT_PATH = File::PathJoin({PROF_PATH, OUTPUT_PATH});
+std::string expectStr = "{\"name\":\"Iteration 1\",\"pid\":10248608,\"tid\":70013,\"ts\":\"830073224.426000\",\""
+                        "dur\":9598.772,\"ph\":\"X\",\"cat\":\"Iteration Time\",\"args\":{\"Iteration ID\":1,\""
+                        "FP Start\":\"830074691.065000\",\"BP End\":\"830082803.479000\",\"Iteration End\":\""
+                        "830082823.198000\",\"Iteration Time(us)\":9598.772}},{\"name\":\"FP_BP Time 1\",\"pid\":"
+                        "10248608,\"tid\":70013,\"ts\":\"830074691.065000\",\"dur\":8112.414,\"ph\":\"X\",\"cat\":"
+                        "\"FP_BP Time\",\"args\":{\"Iteration ID\":1,\"FP Start\":\"830074691.065000\",\"BP End\":"
+                        "\"830082803.479000\",\"FP_BP Time(us)\":8112.414}},{\"name\":\"Iteration Refresh 1\",\""
+                        "pid\":10248608,\"tid\":70013,\"ts\":\"830082803.479000\",\"dur\":19.719,\"ph\":\"X\",\""
+                        "cat\":\"Iteration Refresh\",\"args\":{\"Iteration ID\":1,\"BP End\":\"830082803.479000\","
+                        "\"Iteration End\":\"830082823.198000\",\"Iteration Refresh(us)\":19.719}},{\"name\":\""
+                        "Data_aug Bound 0\",\"pid\":10248608,\"tid\":70013,\"ph\":\"t\",\"cat\":\"Data_aug Bound"
+                        "\",\"id\":\"Data_aug Bound 10248608_70013\",\"ts\":\"830074691.065000\",\"args\":{\""
+                        "Iteration ID\":1}},{\"name\":\"Data_aug Bound 1\",\"pid\":10248608,\"tid\":70013,\"ph\":"
+                        "\"s\",\"cat\":\"Data_aug Bound\",\"id\":\"Data_aug Bound 10248608_70013\",\"ts\":\""
+                        "833650265121\",\"args\":{\"Data_aug Bound(us)\":7134923.284}},{\"name\":\"process_name\","
+                        "\"pid\":10248608,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Ascend Hardware\"}},{\"name"
+                        "\":\"process_labels\",\"pid\":10248608,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU"
+                        "\"}},{\"name\":\"process_sort_index\",\"pid\":10248608,\"tid\":0,\"ph\":\"M\",\"args\":"
+                        "{\"sort_index\":13}},{\"name\":\"thread_name\",\"pid\":10248608,\"tid\":70013,\"ph\":\"M"
+                        "\",\"args\":{\"name\":\"Step Trace(Model ID):13\"}},{\"name\":\"thread_sort_index\",\"pid"
+                        "\":10248608,\"tid\":70013,\"ph\":\"M\",\"args\":{\"sort_index\":70013}},{\"name\":\""
+                        "Reduce_1_0\",\"pid\":10248608,\"tid\":70013,\"ts\":\"830082637.434000\",\"dur\":30.312,"
+                        "\"ph\":\"X\",\"cat\":\"Reduce\",\"args\":{\"Iteration ID\":1,\"Reduce End 0\":\""
+                        "830082667746\",\"Reduce Start 0\":\"830082637434\"}},{\"name\":\"Reduce_1_1\",\"pid\":"
+                        "10248608,\"tid\":70013,\"ts\":\"830082804.063000\",\"dur\":6.556,\"ph\":\"X\",\"cat\":"
+                        "\"Reduce\",\"args\":{\"Iteration ID\":1,\"Reduce End 1\":\"830082810619\",\""
+                        "Reduce Start 1\":\"830082804063\"}},{\"name\":\"GetNext\",\"pid\":10248608,\"tid\":"
+                        "70013,\"ts\":\"830074693.926000\",\"dur\":31.601,\"ph\":\"X\",\"cat\":\"GetNext Time\","
+                        "\"args\":{\"GetNext Start\":\"830074693.926000\",\"GetNext End\":\"830074725.527000\",\""
+                        "GetNext Time(us)\":31.601}},{\"name\":\"GetNext\",\"pid\":10248608,\"tid\":70013,\"ts\":"
+                        "\"830074767.363000\",\"dur\":19.74,\"ph\":\"X\",\"cat\":\"GetNext Time\",\"args\":{\""
+                        "GetNext Start\":\"830074767.363000\",\"GetNext End\":\"830074787.103000\",\""
+                        "GetNext Time(us)\":19.74}},{\"name\":\"GetNext\",\"pid\":10248608,\"tid\":70013,\"ts\":"
+                        "\"830074801.783000\",\"dur\":18.966,\"ph\":\"X\",\"cat\":\"GetNext Time\",\"args\":{"
+                        "\"GetNext Start\":\"830074801.783000\",\"GetNext End\":\"830074820.749000\",\""
+                        "GetNext Time(us)\":18.966}},";
+}
+
+class StepTraceAssemblerUTest : public testing::Test {
+protected:
+    virtual void TearDown()
+    {
+        EXPECT_TRUE(File::RemoveDir(BASE_PATH, DEPTH));
+        dataInventory_.RemoveRestData({});
+        GlobalMockObject::verify();
+    }
+    virtual void SetUp()
+    {
+        if (File::Check(BASE_PATH)) {
+            File::RemoveDir(BASE_PATH, DEPTH);
+        }
+        EXPECT_TRUE(File::CreateDir(BASE_PATH));
+        EXPECT_TRUE(File::CreateDir(PROF_PATH));
+        EXPECT_TRUE(File::CreateDir(RESULT_PATH));
+    }
+protected:
+    DataInventory dataInventory_;
+};
+
+static std::vector<TrainTraceData> GenerateTrainData()
+{
+    std::vector<TrainTraceData> res;
+    TrainTraceData data;
+    data.deviceId = 0; // deviceId 0
+    data.modelId = 13; // modelId 13
+    data.indexId = 1; // indexId 1
+    data.fpStart = 830074691065; // fp 830074691065
+    data.bpEnd = 830082803479; // bp 830082803479
+    data.iterEnd = 830082823198; // iterEnd 830082823198
+    data.iterTime = 9598772; // iterTime 9598772
+    data.fpBpTime = 8112414; // fpBpTime 8112414
+    data.gradRefreshBound = 19719; // refresh 19719
+    data.dataAugBound = 7134923284; // aug 7134923284
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<GetNextData> GenerateNextData()
+{
+    std::vector<GetNextData> res;
+    GetNextData d1;
+    d1.deviceId = 0; // deviceId 0
+    d1.modelId = 13; // 13
+    d1.indexId = 1; // 1
+    d1.start = 830074693926; // start 830074693926
+    d1.end = 830074725527; // end 830074725527
+    res.push_back(d1);
+    d1.start = 830074767363; // start 830074767363
+    d1.end = 830074787103; // end 830074787103
+    res.push_back(d1);
+    d1.start = 830074801783; // start 830074801783
+    d1.end = 830074820749; // end 830074820749
+    res.push_back(d1);
+    return res;
+}
+
+static std::vector<AllReduceData> GenerateReduceData()
+{
+    std::vector<AllReduceData> res;
+    AllReduceData data;
+    data.deviceId = 0; // deviceId 0
+    data.modelId = 13; // modelId 13
+    data.indexId = 1; // indexId 1
+    data.iterEnd = 830082823198; // iterEnd 830082823198
+    data.start = 830082637434; // start 830082637434
+    data.end = 830082667746; // end 830082667746
+    res.push_back(data);
+    data.start = 830082804063; // start 830082804063
+    data.end = 830082810619; // end 830082810619
+    res.push_back(data);
+    return res;
+}
+
+TEST_F(StepTraceAssemblerUTest, ShouldReturnTrueWhenDataNotExists)
+{
+    StepTraceAssembler assembler;
+    EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
+}
+
+TEST_F(StepTraceAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
+{
+    StepTraceAssembler assembler;
+    std::shared_ptr<std::vector<TrainTraceData>> trainS;
+    std::shared_ptr<std::vector<GetNextData>> nextS;
+    std::shared_ptr<std::vector<AllReduceData>> reduceS;
+    auto train = GenerateTrainData();
+    auto next = GenerateNextData();
+    auto reduce = GenerateReduceData();
+    MAKE_SHARED_NO_OPERATION(trainS, std::vector<TrainTraceData>, train);
+    MAKE_SHARED_NO_OPERATION(nextS, std::vector<GetNextData>, next);
+    MAKE_SHARED_NO_OPERATION(reduceS, std::vector<AllReduceData>, reduce);
+    dataInventory_.Inject(trainS);
+    dataInventory_.Inject(nextS);
+    dataInventory_.Inject(reduceS);
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(10008)); // pid 10008
+    EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
+    auto files = File::GetOriginData(RESULT_PATH, {"msprof"}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    EXPECT_EQ(expectStr, res.back());
+}
+
+TEST_F(StepTraceAssemblerUTest, ShouldReturnFalseWhenDataAssembleFail)
+{
+    StepTraceAssembler assembler;
+    std::shared_ptr<std::vector<TrainTraceData>> trainS;
+    std::shared_ptr<std::vector<GetNextData>> nextS;
+    std::shared_ptr<std::vector<AllReduceData>> reduceS;
+    auto train = GenerateTrainData();
+    auto next = GenerateNextData();
+    auto reduce = GenerateReduceData();
+    MAKE_SHARED_NO_OPERATION(trainS, std::vector<TrainTraceData>, train);
+    MAKE_SHARED_NO_OPERATION(nextS, std::vector<GetNextData>, next);
+    MAKE_SHARED_NO_OPERATION(reduceS, std::vector<AllReduceData>, reduce);
+    dataInventory_.Inject(trainS);
+    dataInventory_.Inject(nextS);
+    dataInventory_.Inject(reduceS);
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(10008)); // pid 10008
+    MOCKER_CPP(&std::vector<std::shared_ptr<TraceEvent>>::empty).stubs().will(returnValue(true));
+    EXPECT_FALSE(assembler.Run(dataInventory_, PROF_PATH));
+}

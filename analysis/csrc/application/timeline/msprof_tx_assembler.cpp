@@ -51,7 +51,9 @@ void MsprofTxExTraceEvent::ProcessArgs(JsonWriter& ostream)
 }
 
 MsprofTxAssembler::MsprofTxAssembler()
-    : JsonAssembler(MSPROF_TX_ASSEMBLER, {{"msprof", FileCategory::MSPROF}, {"msprof_tx", FileCategory::MSPROF_TX}}) {}
+    : JsonAssembler(MSPROF_TX_ASSEMBLER, {{MSPROF_FILE, FileCategory::MSPROF},
+                    {MSPROF_TX_FILE, FileCategory::MSPROF_TX}})
+{}
 
 void MsprofTxAssembler::GenerateTxExConnectionTrace(const MsprofTxHostData& data, uint32_t pid)
 {
