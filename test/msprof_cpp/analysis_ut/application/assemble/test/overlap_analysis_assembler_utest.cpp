@@ -132,6 +132,127 @@ const std::string SCENARIOS1_JSON =
     "{\"name\":\"Free\",\"pid\":10329985,\"tid\":3,\"ts\":\"0.003000\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},"
     "{\"name\":\"Free\",\"pid\":10329985,\"tid\":3,\"ts\":\"0.013000\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},"
     "{\"name\":\"Free\",\"pid\":10329985,\"tid\":3,\"ts\":\"0.024000\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},";
+const std::string SCENARIOS2_JSON =
+    "{\"name\":\"process_name\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
+    "{\"name\":\"process_labels\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
+    "{\"name\":\"process_sort_index\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":28}},"
+    "{\"name\":\"thread_name\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Communication\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":0}},"
+    "{\"name\":\"thread_name\",\"pid\":10329984,\"tid\":1,\"ph\":\"M\","
+    "\"args\":{\"name\":\"Communication(Not Overlapped)\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10329984,\"tid\":1,\"ph\":\"M\",\"args\":{\"sort_index\":1}},"
+    "{\"name\":\"thread_name\",\"pid\":10329984,\"tid\":2,\"ph\":\"M\",\"args\":{\"name\":\"Computing\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10329984,\"tid\":2,\"ph\":\"M\",\"args\":{\"sort_index\":2}},"
+    "{\"name\":\"thread_name\",\"pid\":10329984,\"tid\":3,\"ph\":\"M\",\"args\":{\"name\":\"Free\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10329984,\"tid\":3,\"ph\":\"M\",\"args\":{\"sort_index\":3}},"
+    "{\"name\":\"Computing\",\"pid\":10329984,\"tid\":2,\"ts\":\"0.001000\",\"dur\":0.002,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Computing\",\"pid\":10329984,\"tid\":2,\"ts\":\"0.006000\",\"dur\":0.003,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Computing\",\"pid\":10329984,\"tid\":2,\"ts\":\"0.015000\",\"dur\":0.009,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Computing\",\"pid\":10329984,\"tid\":2,\"ts\":\"0.026000\",\"dur\":0.007,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Computing\",\"pid\":10329984,\"tid\":2,\"ts\":\"0.034000\",\"dur\":0.002,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication\",\"pid\":10329984,\"tid\":0,\"ts\":\"0.004000\","
+    "\"dur\":0.004,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication\",\"pid\":10329984,\"tid\":0,\"ts\":\"0.009000\","
+    "\"dur\":0.004,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication\",\"pid\":10329984,\"tid\":0,\"ts\":\"0.014000\","
+    "\"dur\":0.003,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication\",\"pid\":10329984,\"tid\":0,\"ts\":\"0.020000\","
+    "\"dur\":0.004,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication\",\"pid\":10329984,\"tid\":0,\"ts\":\"0.025000\","
+    "\"dur\":0.016,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication(Not Overlapped)\",\"pid\":10329984,\"tid\":1,\"ts\":\"0.004000\","
+    "\"dur\":0.002,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication(Not Overlapped)\",\"pid\":10329984,\"tid\":1,\"ts\":\"0.009000\","
+    "\"dur\":0.004,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication(Not Overlapped)\",\"pid\":10329984,\"tid\":1,\"ts\":\"0.014000\","
+    "\"dur\":0.001,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication(Not Overlapped)\",\"pid\":10329984,\"tid\":1,\"ts\":\"0.025000\","
+    "\"dur\":0.001,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication(Not Overlapped)\",\"pid\":10329984,\"tid\":1,\"ts\":\"0.033000\","
+    "\"dur\":0.001,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication(Not Overlapped)\",\"pid\":10329984,\"tid\":1,\"ts\":\"0.036000\","
+    "\"dur\":0.005,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Free\",\"pid\":10329984,\"tid\":3,\"ts\":\"0.003000\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Free\",\"pid\":10329984,\"tid\":3,\"ts\":\"0.013000\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Free\",\"pid\":10329984,\"tid\":3,\"ts\":\"0.024000\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},";
+const std::string SCENARIOS3_JSON =
+    "{\"name\":\"process_name\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
+    "{\"name\":\"process_labels\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
+    "{\"name\":\"process_sort_index\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":28}},"
+    "{\"name\":\"thread_name\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Communication\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":0}},"
+    "{\"name\":\"thread_name\",\"pid\":10329984,\"tid\":1,\"ph\":\"M\","
+    "\"args\":{\"name\":\"Communication(Not Overlapped)\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10329984,\"tid\":1,\"ph\":\"M\",\"args\":{\"sort_index\":1}},"
+    "{\"name\":\"thread_name\",\"pid\":10329984,\"tid\":2,\"ph\":\"M\",\"args\":{\"name\":\"Computing\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10329984,\"tid\":2,\"ph\":\"M\",\"args\":{\"sort_index\":2}},"
+    "{\"name\":\"thread_name\",\"pid\":10329984,\"tid\":3,\"ph\":\"M\",\"args\":{\"name\":\"Free\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10329984,\"tid\":3,\"ph\":\"M\",\"args\":{\"sort_index\":3}},"
+    "{\"name\":\"Computing\",\"pid\":10329984,\"tid\":2,\"ts\":\"0.001000\",\"dur\":0.002,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Computing\",\"pid\":10329984,\"tid\":2,\"ts\":\"0.006000\",\"dur\":0.003,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Computing\",\"pid\":10329984,\"tid\":2,\"ts\":\"0.015000\",\"dur\":0.009,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Computing\",\"pid\":10329984,\"tid\":2,\"ts\":\"0.026000\",\"dur\":0.007,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Computing\",\"pid\":10329984,\"tid\":2,\"ts\":\"0.034000\",\"dur\":0.002,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Free\",\"pid\":10329984,\"tid\":3,\"ts\":\"0.003000\",\"dur\":0.003,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Free\",\"pid\":10329984,\"tid\":3,\"ts\":\"0.009000\",\"dur\":0.006,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Free\",\"pid\":10329984,\"tid\":3,\"ts\":\"0.024000\",\"dur\":0.002,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Free\",\"pid\":10329984,\"tid\":3,\"ts\":\"0.033000\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},";
+const std::string SCENARIOS4_JSON =
+    "{\"name\":\"process_name\",\"pid\":10354687,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
+    "{\"name\":\"process_labels\",\"pid\":10354687,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
+    "{\"name\":\"process_sort_index\",\"pid\":10354687,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":28}},"
+    "{\"name\":\"process_name\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
+    "{\"name\":\"process_labels\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
+    "{\"name\":\"process_sort_index\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":28}},"
+    "{\"name\":\"thread_name\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Communication\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":0}},"
+    "{\"name\":\"thread_name\",\"pid\":10329984,\"tid\":1,\"ph\":\"M\","
+    "\"args\":{\"name\":\"Communication(Not Overlapped)\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10329984,\"tid\":1,\"ph\":\"M\",\"args\":{\"sort_index\":1}},"
+    "{\"name\":\"thread_name\",\"pid\":10329984,\"tid\":2,\"ph\":\"M\",\"args\":{\"name\":\"Computing\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10329984,\"tid\":2,\"ph\":\"M\",\"args\":{\"sort_index\":2}},"
+    "{\"name\":\"thread_name\",\"pid\":10329984,\"tid\":3,\"ph\":\"M\",\"args\":{\"name\":\"Free\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10329984,\"tid\":3,\"ph\":\"M\",\"args\":{\"sort_index\":3}},"
+    "{\"name\":\"Communication\",\"pid\":10329984,\"tid\":0,\"ts\":\"0.004000\","
+    "\"dur\":0.004,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication\",\"pid\":10329984,\"tid\":0,\"ts\":\"0.009000\","
+    "\"dur\":0.004,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication\",\"pid\":10329984,\"tid\":0,\"ts\":\"0.014000\","
+    "\"dur\":0.003,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication\",\"pid\":10329984,\"tid\":0,\"ts\":\"0.020000\","
+    "\"dur\":0.004,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication\",\"pid\":10329984,\"tid\":0,\"ts\":\"0.025000\","
+    "\"dur\":0.016,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication(Not Overlapped)\",\"pid\":10329984,\"tid\":1,\"ts\":\"0.004000\","
+    "\"dur\":0.004,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication(Not Overlapped)\",\"pid\":10329984,\"tid\":1,\"ts\":\"0.009000\","
+    "\"dur\":0.004,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication(Not Overlapped)\",\"pid\":10329984,\"tid\":1,\"ts\":\"0.014000\","
+    "\"dur\":0.003,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication(Not Overlapped)\",\"pid\":10329984,\"tid\":1,\"ts\":\"0.020000\","
+    "\"dur\":0.004,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Communication(Not Overlapped)\",\"pid\":10329984,\"tid\":1,\"ts\":\"0.025000\","
+    "\"dur\":0.016,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Free\",\"pid\":10329984,\"tid\":3,\"ts\":\"0.008000\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Free\",\"pid\":10329984,\"tid\":3,\"ts\":\"0.013000\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Free\",\"pid\":10329984,\"tid\":3,\"ts\":\"0.017000\",\"dur\":0.003,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"Free\",\"pid\":10329984,\"tid\":3,\"ts\":\"0.024000\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},"
+    "{\"name\":\"process_name\",\"pid\":10354687,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
+    "{\"name\":\"process_labels\",\"pid\":10354687,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
+    "{\"name\":\"process_sort_index\",\"pid\":10354687,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":28}},"
+    "{\"name\":\"process_name\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
+    "{\"name\":\"process_labels\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
+    "{\"name\":\"process_sort_index\",\"pid\":10329984,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":28}},"
+    "{\"name\":\"thread_name\",\"pid\":10354687,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Communication\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10354687,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":0}},"
+    "{\"name\":\"thread_name\",\"pid\":10354687,\"tid\":1,\"ph\":\"M\","
+    "\"args\":{\"name\":\"Communication(Not Overlapped)\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10354687,\"tid\":1,\"ph\":\"M\",\"args\":{\"sort_index\":1}},"
+    "{\"name\":\"thread_name\",\"pid\":10354687,\"tid\":2,\"ph\":\"M\",\"args\":{\"name\":\"Computing\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10354687,\"tid\":2,\"ph\":\"M\",\"args\":{\"sort_index\":2}},"
+    "{\"name\":\"thread_name\",\"pid\":10354687,\"tid\":3,\"ph\":\"M\",\"args\":{\"name\":\"Free\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10354687,\"tid\":3,\"ph\":\"M\",\"args\":{\"sort_index\":3}},"
+    "{\"name\":\"Free\",\"pid\":10354687,\"tid\":3,\"ts\":\"0.005000\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},";
 }
 
 class OverlapAnalysisAssemblerUTest : public testing::Test {
@@ -369,4 +490,159 @@ TEST_F(OverlapAnalysisAssemblerUTest, AssembleDataShouldContainCompleteDataInSce
     dataInventory_.Inject(commOpsPtr);
     dataInventory_.Inject(mc2CommInfoPtr);
     CheckScenarios1Data(dataInventory_);
+}
+static void CheckScenarios2Data(DataInventory &dataInventory)
+{
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(10087)); // pid 10087
+    OverlapAnalysisAssembler assembler;
+    EXPECT_TRUE(assembler.Run(dataInventory, PROF_PATH));
+    auto files = File::GetOriginData(RESULT_PATH, {"msprof"}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    EXPECT_EQ(SCENARIOS2_JSON, res.back());
+}
+
+TEST_F(OverlapAnalysisAssemblerUTest, AssembleDataShouldContainCompleteDataInScenarios2)
+{
+    // 场景2 只有通信和计算类任务
+    // 设计思路：
+    // 1. 计算、通信2类数据两两之间4种关系全覆盖
+    // 2. 计算类和通信类内部两两关系全覆盖
+    // 3. 1个device
+    // 其中 [A,B]表示三类任务中的某一类，(A,B) 表示非计算非通信的任务, {A, B}表示图模式中一个算子跑多次
+
+    // *Ascend Hardware (device 0)*
+    // S2 (Comp)           [1,3]        [6,8]      (10,12)     [16,  19]          [20,21]        [26,    33]
+    // S3 (Comp)           (1,5)         [7,9]             {15,18}              [19,   24]       {29, 32}    [34, 36]
+    // *HCCL*
+    // Group1                      [4,   8] [9,13]                                 [21,22]       [26,             39]
+    // Group2                       [5, 7]                [14,17]                 [20,  24]     [25,  27]       [38,41]
+
+    // 合并后：
+    // Communication:                      [4,8] [9,13] [14,17] [20,24] [25,41]
+    // Computing:                          [1,3] [6,9] [15,24] [26,33] [34,36]
+    // Communication(Not Overlapped):      [4,6] [9,13] [14,15] [25,26] [33,34] [36, 41]
+    // Free:                               [3,4] [13,14] [24,25]
+    std::shared_ptr<std::vector<AscendTaskData>> tasksPtr;
+    std::shared_ptr<std::vector<TaskInfoData>> compTasksPtr;
+    std::shared_ptr<std::vector<CommunicationOpData>> commOpsPtr;
+
+    std::vector<uint16_t> devices = {0};
+    std::vector<AscendTaskData> taskData;
+    std::vector<TaskInfoData> compTaskData;
+    std::vector<CommunicationOpData> commOpData;
+    for (auto &id : devices) {
+        auto ascendTasks = GenerateAscendTaskDataS2ByDevice(id);
+        taskData.insert(taskData.end(), ascendTasks.begin(), ascendTasks.end());
+        auto compTasks = GenerateCompTasksS2ByDevice(id);
+        compTaskData.insert(compTaskData.end(), compTasks.begin(), compTasks.end());
+        auto commOps = GenerateCommOpDataS1ByDevice(id);
+        commOpData.insert(commOpData.end(), commOps.begin(), commOps.end());
+    }
+    MAKE_SHARED_NO_OPERATION(tasksPtr, std::vector<AscendTaskData>, taskData);
+    MAKE_SHARED_NO_OPERATION(compTasksPtr, std::vector<TaskInfoData>, compTaskData);
+    MAKE_SHARED_NO_OPERATION(commOpsPtr, std::vector<CommunicationOpData>, commOpData);
+    dataInventory_.Inject(tasksPtr);
+    dataInventory_.Inject(compTasksPtr);
+    dataInventory_.Inject(commOpsPtr);
+    CheckScenarios2Data(dataInventory_);
+}
+
+static void CheckScenarios3Data(DataInventory &dataInventory)
+{
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(10087)); // pid 10087
+    OverlapAnalysisAssembler assembler;
+    EXPECT_TRUE(assembler.Run(dataInventory, PROF_PATH));
+    auto files = File::GetOriginData(RESULT_PATH, {"msprof"}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    EXPECT_EQ(SCENARIOS3_JSON, res.back());
+}
+
+TEST_F(OverlapAnalysisAssemblerUTest, AssembleDataShouldContainCompleteDataInScenarios3)
+{
+    // 场景3 只有计算类任务
+    // 其中 [A,B]表示三类任务中的某一类，(A,B) 表示非计算非通信的任务, {A, B}表示图模式中一个算子跑多次
+
+    // *Ascend Hardware (device 0)*
+    // S2 (Comp)           [1,3]        [6,8]      (10,12)     [16,  19]          [20,21]        [26,    33]
+    // S3 (Comp)           (1,5)         [7,9]             {15,18}              [19,   24]       {29, 32}    [34, 36]
+
+    // 合并后：
+    // Communication:
+    // Computing:                          [1,3] [6,9] [15,24] [26,33] [34,36]
+    // Communication(Not Overlapped):
+    // Free:                               [3,6] [9,15] [24,26] [33,34]
+    // 通信：
+    std::shared_ptr<std::vector<AscendTaskData>> tasksPtr;
+    std::shared_ptr<std::vector<TaskInfoData>> compTasksPtr;
+
+    std::vector<uint16_t> devices = {0};
+    std::vector<AscendTaskData> taskData;
+    std::vector<TaskInfoData> compTaskData;
+    for (auto &id : devices) {
+        auto ascendTasks = GenerateAscendTaskDataS2ByDevice(id);
+        taskData.insert(taskData.end(), ascendTasks.begin(), ascendTasks.end());
+        auto compTasks = GenerateCompTasksS2ByDevice(id);
+        compTaskData.insert(compTaskData.end(), compTasks.begin(), compTasks.end());
+    }
+    MAKE_SHARED_NO_OPERATION(tasksPtr, std::vector<AscendTaskData>, taskData);
+    MAKE_SHARED_NO_OPERATION(compTasksPtr, std::vector<TaskInfoData>, compTaskData);
+    dataInventory_.Inject(tasksPtr);
+    dataInventory_.Inject(compTasksPtr);
+    CheckScenarios3Data(dataInventory_);
+}
+
+static void CheckScenarios4Data(DataInventory &dataInventory)
+{
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(10087)); // pid 10087
+    OverlapAnalysisAssembler assembler;
+    EXPECT_TRUE(assembler.Run(dataInventory, PROF_PATH));
+    auto files = File::GetOriginData(RESULT_PATH, {"msprof"}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    EXPECT_EQ(SCENARIOS4_JSON, res.back());
+}
+
+TEST_F(OverlapAnalysisAssemblerUTest, AssembleDataShouldContainCompleteDataInScenarios4)
+{
+    // 场景4 只有通信类任务
+    // 其中 [A,B]表示三类任务中的某一类，(A,B) 表示非计算非通信的任务, {A, B}表示图模式中一个算子跑多次
+
+    // *HCCL*
+    // Group1                      [4,   8] [9,13]                                 [21,22]       [26,             39]
+    // Group2                       [5, 7]                [14,17]                 [20,  24]     [25,  27]       [38,41]
+
+    // 合并后：
+    // Communication:                      [4,8] [9,13] [14,17] [20,24] [25,41]
+    // Computing:
+    // Communication(Not Overlapped):      [4,8] [9,13] [14,17] [20,24] [25,41]
+    // Free:                               [8,9] [13,14] [17,20] [24,25]
+    std::shared_ptr<std::vector<AscendTaskData>> tasksPtr;
+    std::shared_ptr<std::vector<CommunicationOpData>> commOpsPtr;
+
+    std::vector<uint16_t> devices = {0};
+    AscendTaskData data;
+    uint64_t start = 5;
+    double dur = 1.0;
+    data.start = start;
+    data.duration = dur;
+    // 此场景理论上不可能存在一个task都没有的场景
+    std::vector<AscendTaskData> taskData = {data};
+    std::vector<CommunicationOpData> commOpData;
+    for (auto &id : devices) {
+        auto commOps = GenerateCommOpDataS1ByDevice(id);
+        commOpData.insert(commOpData.end(), commOps.begin(), commOps.end());
+    }
+    MAKE_SHARED_NO_OPERATION(tasksPtr, std::vector<AscendTaskData>, taskData);
+    MAKE_SHARED_NO_OPERATION(commOpsPtr, std::vector<CommunicationOpData>, commOpData);
+    dataInventory_.Inject(tasksPtr);
+    dataInventory_.Inject(commOpsPtr);
+    CheckScenarios4Data(dataInventory_);
 }
