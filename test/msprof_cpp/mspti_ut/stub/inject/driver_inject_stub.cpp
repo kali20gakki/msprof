@@ -1,11 +1,13 @@
 /**
-* @file callback_utest.cpp
+* @file driver_inject_stub.cpp
 *
 * Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
 *
 */
 
 #include "common/inject/driver_inject.h"
+#include "activity/ascend/channel/channel_data.h"
+#include "securec.h"
 
 DrvError HalGetDeviceInfo(uint32_t deviceId, int32_t moduleType, int32_t infoType, int64_t* value)
 {
@@ -49,10 +51,48 @@ int ProfChannelPoll(struct ProfPollInfo* outBuf, int num, int timeout)
 
 int ProfChannelRead(unsigned int deviceId, unsigned int channelId, char *outBuf, unsigned int bufSize)
 {
+    if (channelId == PROF_CHANNEL_TS_FW) {
+        static bool reportFlag = true;
+        if (reportFlag) {
+            StepTrace stepTraceData;
+            stepTraceData.tsTraceHead.rptType = RPT_TYPE_STEP_TRACE;
+            stepTraceData.tagId = STEP_TRACE_TAG_MARKEX;
+            auto ret = memcpy_s(outBuf, bufSize, (void*)&stepTraceData, sizeof(stepTraceData));
+            if (ret != EOK) {
+                return 0;
+            }
+            TaskFlipInfo taskFlipData;
+            taskFlipData.tsTraceHead.rptType = RTP_TYPE_FLIP_INFO;
+            ret = memcpy_s(outBuf + sizeof(stepTraceData), bufSize - sizeof(stepTraceData),
+                (void*)&taskFlipData, sizeof(taskFlipData));
+            if (ret != EOK) {
+                return 0;
+            }
+            reportFlag = false;
+            return sizeof(stepTraceData) + sizeof(taskFlipData);
+        }
+        return 0;
+    }
+    if (channelId == PROF_CHANNEL_STARS_SOC_LOG) {
+        static bool reportFlag = true;
+        if (reportFlag) {
+            StarsSocLog starsLogData;
+            auto ret = memcpy_s(outBuf, bufSize, (void*)&starsLogData, sizeof(starsLogData));
+            if (ret != EOK) {
+                return 0;
+            }
+            reportFlag = false;
+            return sizeof(starsLogData);
+        }
+        return 0;
+    }
     return 0;
 }
 
 DrvError DrvGetDevIDs(uint32_t* devices, uint32_t len)
 {
+    if (devices) {
+        devices[0] = 0;
+    }
     return DRV_ERROR_NONE;
 }

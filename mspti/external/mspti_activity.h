@@ -195,6 +195,82 @@ typedef struct PACKED_ALIGNMENT {
     const char *domain;
 } msptiActivityMark;
 
+typedef struct PACKED_ALIGNMENT {
+    /**
+    * The activity record kind, must be MSPTI_ACTIVITY_KIND_API.
+    */
+    msptiActivityKind kind;
+
+    /**
+    * The start timestamp for the api, in ns.
+    */
+    uint64_t start;
+
+    /**
+    * The end timestamp for the api, in ns.
+    */
+    uint64_t end;
+
+    /**
+    * A thread object requires that we identify both the process and
+    * thread ID.
+    */
+    struct {
+        uint32_t processId;
+        uint32_t threadId;
+    } pt;
+
+    /**
+    * The correlation ID of the kernel.
+    */
+    uint64_t correlationId;
+
+    /**
+    * The api name.
+    */
+    const char *name;
+} msptiActivityApi;
+
+typedef struct PACKED_ALIGNMENT {
+    /**
+    * The activity record kind, must be MSPTI_ACTIVITY_KIND_KERNEL.
+    */
+    msptiActivityKind kind;
+
+    /**
+    * The start timestamp for the kernel, in ns.
+    */
+    uint64_t start;
+
+    /**
+    * The end timestamp for the kernel, in ns.
+    */
+    uint64_t end;
+
+    /**
+    * A stream object requires that we identify device and stream ID.
+    */
+    struct {
+        uint32_t deviceId;
+        uint32_t streamId;
+    } ds;
+
+    /**
+    * The correlation ID of the kernel.
+    */
+    uint64_t correlationId;
+
+    /**
+    * The kernel type.
+    */
+    const char *type;
+
+    /**
+    * The kernel name.
+    */
+    const char *name;
+} msptiActivityKernel;
+
 END_PACKED_ALIGNMENT
 
 /**

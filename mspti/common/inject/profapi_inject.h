@@ -169,6 +169,17 @@ enum CommandHandleType {
 
 namespace Mspti {
 namespace Inject {
+
+enum ProfApiErrorCode {
+    PROFAPI_ERROR_NONE = 0,
+    PROFAPI_ERROR_MEM_NOT_ENOUGH,
+    PROFAPI_ERROR_GET_ENV,
+    PROFAPI_ERROR_CONFIG_INVALID,
+    PROFAPI_ERROR_ACL_JSON_OFF,
+    PROFAPI_ERROR,
+    PROFAPI_ERROR_UNINITIALIZE,
+};
+
 // 老的数据上报方式，待Lite-Profiling废弃后删除
 using ProfReportHandle = int32_t (*)(uint32_t moduleId, uint32_t type, VOID_PTR data, uint32_t len);
 int32_t profRegReporterCallback(ProfReportHandle reporter);
@@ -181,8 +192,8 @@ int32_t profSetProfCommand(VOID_PTR command, uint32_t len);
 
 // 新数据结构上报方式
 int32_t MsprofRegisterProfileCallback(int32_t callbackType, VOID_PTR callback, uint32_t len);
-int8_t MsprofHostFreqIsEnableImpl();
-uint64_t MsprofGetHashIdImpl(const char* hashInfo, size_t len);
+int8_t MsptiHostFreqIsEnableImpl();
+uint64_t MsptiGetHashIdImpl(const char* hashInfo, size_t len);
 int32_t MsptiApiReporterCallbackImpl(uint32_t agingFlag, const MsprofApi* const data);
 int32_t MsptiEventReporterCallbackImpl(uint32_t agingFlag, const MsprofEvent* const event);
 int32_t MsptiCompactInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t length);

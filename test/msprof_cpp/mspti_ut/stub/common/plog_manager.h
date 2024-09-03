@@ -1,5 +1,5 @@
 /**
-* @file plog_stub.cpp
+* @file plog_manager.h
 *
 * Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
 *

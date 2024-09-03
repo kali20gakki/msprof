@@ -52,8 +52,8 @@ public:
     msptiResult Record(msptiActivity *activity, size_t size);
     static msptiResult GetNextRecord(uint8_t *buffer, size_t validBufferSizeBytes, msptiActivity **record);
     msptiResult FlushAll();
-    void SetDevice(uint32_t deviceId);
-    void DeviceReset(uint32_t deviceId);
+    msptiResult SetDevice(uint32_t deviceId);
+    msptiResult DeviceReset(uint32_t deviceId);
     msptiResult Register(msptiActivityKind kind);
     msptiResult UnRegister(msptiActivityKind kind);
 

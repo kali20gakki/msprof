@@ -147,9 +147,9 @@ void DevTaskManager::RegisterReportCallback()
     }
     static const std::vector<std::pair<int, VOID_PTR>> CALLBACK_FUNC_LIST = {
         {PROFILE_REPORT_GET_HASH_ID_C_CALLBACK,
-            reinterpret_cast<VOID_PTR>(Mspti::Inject::MsprofGetHashIdImpl)},
+            reinterpret_cast<VOID_PTR>(Mspti::Inject::MsptiGetHashIdImpl)},
         {PROFILE_HOST_FREQ_IS_ENABLE_C_CALLBACK,
-            reinterpret_cast<VOID_PTR>(Mspti::Inject::MsprofHostFreqIsEnableImpl)},
+            reinterpret_cast<VOID_PTR>(Mspti::Inject::MsptiHostFreqIsEnableImpl)},
         {PROFILE_REPORT_API_C_CALLBACK,
             reinterpret_cast<VOID_PTR>(Mspti::Inject::MsptiApiReporterCallbackImpl)},
         {PROFILE_REPORT_EVENT_C_CALLBACK,

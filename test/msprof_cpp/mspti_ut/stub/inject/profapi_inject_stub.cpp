@@ -1,5 +1,5 @@
 /**
-* @file callback_utest.cpp
+* @file profapi_inject_stub.cpp
 *
 * Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
 *
@@ -46,14 +46,14 @@ int32_t MsprofReporterCallbackImpl(uint32_t moduleId, uint32_t type, VOID_PTR da
     return MSPTI_SUCCESS;
 }
 
-uint64_t MsprofGetHashIdImpl(const char* hashInfo, size_t len)
+uint64_t MsptiGetHashIdImpl(const char* hashInfo, size_t len)
 {
     UNUSED(hashInfo);
     UNUSED(len);
     return 0;
 }
 
-int8_t MsprofHostFreqIsEnableImpl()
+int8_t MsptiHostFreqIsEnableImpl()
 {
     constexpr int8_t TRUE = 1;
     constexpr int8_t FALSE = 0;

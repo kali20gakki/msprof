@@ -14,6 +14,7 @@
 
 #include <functional>
 
+#include "activity/ascend/parser/parser_manager.h"
 #include "common/function_loader.h"
 #include "common/plog_manager.h"
 #include "common/context_manager.h"
@@ -95,40 +96,61 @@ int32_t MsprofReporterCallbackImpl(uint32_t moduleId, uint32_t type, VOID_PTR da
     return MSPTI_SUCCESS;
 }
 
-uint64_t MsprofGetHashIdImpl(const char* hashInfo, size_t len)
+uint64_t MsptiGetHashIdImpl(const char* hashInfo, size_t len)
 {
-    UNUSED(hashInfo);
-    UNUSED(len);
-    return 0;
+    if (hashInfo == nullptr) {
+        MSPTI_LOGE("GenHashId failed. hashInfo is nullptr");
+        return 0;
+    }
+    return Mspti::Parser::ParserManager::GetInstance()->GenHashId(std::string(hashInfo, len));
 }
 
-int8_t MsprofHostFreqIsEnableImpl()
+int8_t MsptiHostFreqIsEnableImpl()
 {
     constexpr int8_t TRUE = 1;
     constexpr int8_t FALSE = 0;
-    return TRUE;
+    return Mspti::Common::ContextManager::GetInstance()->HostFreqIsEnable() ? TRUE : FALSE;
 }
 
 int32_t MsptiApiReporterCallbackImpl(uint32_t agingFlag, const MsprofApi* const data)
 {
     UNUSED(agingFlag);
-    UNUSED(data);
-    return MSPTI_SUCCESS;
+    if (!data) {
+        MSPTI_LOGE("Report Msprof Api data failed with nullptr.");
+        return PROFAPI_ERROR;
+    }
+    if (data->level == MSPROF_REPORT_NNOPBASE_LEVEL || data->level == MSPROF_REPORT_ACL_LEVEL) {
+        if (Mspti::Parser::ParserManager::GetInstance()->ReportApi(data) != MSPTI_SUCCESS) {
+            MSPTI_LOGE("Report Msprof Api data to ParserManager failed.");
+            return PROFAPI_ERROR;
+        }
+    }
+    return PROFAPI_ERROR_NONE;
 }
 
 int32_t MsptiEventReporterCallbackImpl(uint32_t agingFlag, const MsprofEvent* const event)
 {
     UNUSED(agingFlag);
     UNUSED(event);
-    return MSPTI_SUCCESS;
+    return PROFAPI_ERROR_NONE;
 }
 
 int32_t MsptiCompactInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t length)
 {
     UNUSED(agingFlag);
-    UNUSED(data);
-    UNUSED(length);
-    return MSPTI_SUCCESS;
+    if (data == nullptr || length != sizeof(struct MsprofCompactInfo)) {
+        MSPTI_LOGE("Report Msprof Compact failed with nullptr.");
+        return PROFAPI_ERROR;
+    }
+    const MsprofCompactInfo* compact = reinterpret_cast<const MsprofCompactInfo*>(data);
+    if (compact && compact->level == MSPROF_REPORT_RUNTIME_LEVEL && compact->type == RT_PROFILE_TYPE_TASK_TRACK) {
+        if (Mspti::Parser::ParserManager::GetInstance()->ReportRtTaskTrack(
+            compact->data.runtimeTrack)!= MSPTI_SUCCESS) {
+            MSPTI_LOGE("Report Msprof Compact data to ParserManager failed.");
+            return PROFAPI_ERROR;
+        }
+    }
+    return PROFAPI_ERROR_NONE;
 }
 
 int32_t MsptiAddiInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t length)
@@ -136,16 +158,17 @@ int32_t MsptiAddiInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR dat
     UNUSED(agingFlag);
     UNUSED(data);
     UNUSED(length);
-    return MSPTI_SUCCESS;
+    return PROFAPI_ERROR_NONE;
 }
 
 int32_t MsptiRegReportTypeInfoImpl(uint16_t level, uint32_t typeId, const char* name, size_t len)
 {
-    UNUSED(level);
-    UNUSED(typeId);
-    UNUSED(name);
-    UNUSED(len);
-    return 0;
+    if (name == nullptr) {
+        MSPTI_LOGE("RegReportTypeInfo failed with nullptr.");
+        return PROFAPI_ERROR;
+    }
+    Mspti::Parser::ParserManager::GetInstance()->RegReportTypeInfo(level, typeId, std::string(name, len));
+    return PROFAPI_ERROR_NONE;
 }
 }
 }

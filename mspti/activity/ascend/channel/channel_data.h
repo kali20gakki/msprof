@@ -31,8 +31,6 @@ enum StarsFuncType {
     STARS_FUNC_TYPE_END = 1,
 };
 
-#define TS_TRACK_SIZE 40
-
 #pragma pack(4)
 // 40通道
 struct TsTrackHead {
