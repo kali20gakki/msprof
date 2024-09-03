@@ -21,18 +21,18 @@ namespace Domain {
 struct HccsData {
     uint16_t deviceId = UINT16_MAX;
     uint64_t localTime = 0; // ns
-    uint64_t txThroughput = 0; // MB/s
-    uint64_t rxThroughput = 0; // MB/s
+    double txThroughput = 0; // MB/s
+    double rxThroughput = 0; // MB/s
 };
 
 struct HccsSummaryData {
     uint16_t deviceId = UINT16_MAX;
-    uint64_t txMaxThroughput = 0; // 最大带宽（MB/s）
-    uint64_t txMinThroughput = 0; // 最小带宽（MB/s）
-    uint64_t txAvgThroughput = 0; // 平均带宽（MB/s）
-    uint64_t rxMaxThroughput = 0;
-    uint64_t rxMinThroughput = 0;
-    uint64_t rxAvgThroughput = 0;
+    double txMaxThroughput = 0; // 最大带宽（MB/s）
+    double txMinThroughput = 0; // 最小带宽（MB/s）
+    double txAvgThroughput = 0; // 平均带宽（MB/s）
+    double rxMaxThroughput = 0;
+    double rxMinThroughput = 0;
+    double rxAvgThroughput = 0;
 };
 }
 }

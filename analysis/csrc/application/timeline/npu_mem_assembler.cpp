@@ -39,9 +39,9 @@ void GenerateNpuMemTrace(std::vector<NpuMemData> &npuMemData, const std::unorder
 {
     std::shared_ptr<CounterEvent> event;
     for (const auto &data : npuMemData) {
-        uint64_t hbmValue = data.hbm;
-        uint64_t ddrValue = data.ddr;
-        uint64_t memoryValue = data.memory;
+        double hbmValue = static_cast<double >(data.hbm);
+        double ddrValue = static_cast<double >(data.ddr);
+        double memoryValue = static_cast<double >(data.memory);
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pidMap.at(data.deviceId), DEFAULT_TID,
             std::to_string(data.localTime / NS_TO_US), CounterNameMap.at(data.event).ddr);
         event->SetSeriesValue("KB", ddrValue);

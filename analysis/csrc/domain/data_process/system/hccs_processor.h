@@ -20,7 +20,7 @@ namespace Analysis {
 namespace Domain {
 using namespace Analysis::Utils;
 // timestamp, txthroughput, rxthroughput
-using OriHccsData = std::vector<std::tuple<double, uint64_t, uint64_t>>;
+using OriHccsData = std::vector<std::tuple<double, double, double>>;
 
 // 该类用于定义处理hccs.db中HCCSEventsData表
 class HCCSProcessor : public DataProcessor {
