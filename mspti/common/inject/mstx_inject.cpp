@@ -22,7 +22,7 @@
 #include "common/context_manager.h"
 
 namespace MsptiMstxApi {
-std::atomic<uint64_t> g_markId{0};
+std::atomic<uint64_t> g_markId{1};
 constexpr uint32_t MARK_TAG_ID = 11;
 static std::mutex g_mutex;
 static std::unordered_map<uint64_t, RT_STREAM> g_rangeIds;
