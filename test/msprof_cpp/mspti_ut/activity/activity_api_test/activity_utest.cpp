@@ -1,5 +1,5 @@
 /**
-* @file callback_utest.cpp
+* @file activity_utest.cpp
 *
 * Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
 *
@@ -16,7 +16,6 @@
 
 namespace {
 std::atomic<uint64_t> g_records{0};
-constexpr uint64_t G_MARK_MAX_NUM = 10;
 
 class ActivityUtest : public testing::Test {
 protected:
@@ -41,7 +40,7 @@ static void ActivityParser(msptiActivity *pRecord)
     g_records++;
     if (pRecord->kind == MSPTI_ACTIVITY_KIND_MARKER) {
         msptiActivityMark* activity = reinterpret_cast<msptiActivityMark*>(pRecord);
-        if (activity->id == G_MARK_MAX_NUM - 1 && activity->sourceKind == MSPTI_ACTIVITY_SOURCE_KIND_HOST) {
+        if (activity->sourceKind == MSPTI_ACTIVITY_SOURCE_KIND_HOST) {
             printf("kind: %d, mode: %d, timestamp: %lu, markId: %lu, processId: %d, threadId: %u, name: %s\n",
                 activity->kind, activity->sourceKind, activity->timestamp, activity->id,
                 activity->objectId.pt.processId,
@@ -68,7 +67,43 @@ void UserBufferComplete(uint8_t *buffer, size_t size, size_t validSize)
     free(buffer);
 }
 
-TEST_F(ActivityUtest, ActivityApiUtest)
+void TestActivityApi()
+{
+    constexpr uint64_t timeStamp = 1614659207688700;
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_API));
+    msptiActivityApi api;
+    api.kind = MSPTI_ACTIVITY_KIND_API;
+    api.start = timeStamp;
+    api.end = timeStamp;
+    api.pt.processId = 0;
+    api.pt.threadId = 0;
+    api.correlationId = 1;
+    api.name = "Api";
+    Mspti::Activity::ActivityManager::GetInstance()->Record(
+        reinterpret_cast<msptiActivity*>(&api), sizeof(api));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityDisable(MSPTI_ACTIVITY_KIND_API));
+}
+
+void TestActivityKernel()
+{
+    constexpr uint64_t timeStamp = 1614659207688700;
+    constexpr uint32_t streamId = 3;
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_KERNEL));
+    msptiActivityKernel kernel;
+    kernel.kind = MSPTI_ACTIVITY_KIND_KERNEL;
+    kernel.start = timeStamp;
+    kernel.end = timeStamp;
+    kernel.ds.deviceId = 0;
+    kernel.ds.streamId = streamId;
+    kernel.correlationId = 1;
+    kernel.type = "KERNEL_AIVEC";
+    kernel.name = "Kernel";
+    Mspti::Activity::ActivityManager::GetInstance()->Record(
+        reinterpret_cast<msptiActivity*>(&kernel), sizeof(kernel));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityDisable(MSPTI_ACTIVITY_KIND_KERNEL));
+}
+
+TEST_F(ActivityUtest, ActivityExternalApiUtestWithAllKind)
 {
     MOCKER_CPP(&Mspti::Ascend::DevTaskManager::GetInstance)
         .stubs()
@@ -83,9 +118,10 @@ TEST_F(ActivityUtest, ActivityApiUtest)
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityRegisterCallbacks(UserBufferRequest, UserBufferComplete));
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_MARKER));
     msptiActivityMark activity;
-    constexpr uint32_t hostId = 64;
     constexpr uint64_t timeStamp = 1614659207688700;
-    for (size_t i = 0; i < G_MARK_MAX_NUM ; ++i) {
+    constexpr uint32_t markNum = 10;
+    uint64_t totalActivitys = 0;
+    for (size_t i = 0; i < markNum ; ++i) {
         activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
         activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
         activity.timestamp = timeStamp;
@@ -95,13 +131,18 @@ TEST_F(ActivityUtest, ActivityApiUtest)
         activity.name = "UserMark";
         Mspti::Activity::ActivityManager::GetInstance()->Record(
             reinterpret_cast<msptiActivity*>(&activity), sizeof(activity));
+        totalActivitys += 1;
     }
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityDisable(MSPTI_ACTIVITY_KIND_MARKER));
+    TestActivityApi();
+    totalActivitys += 1;
+    TestActivityKernel();
+    totalActivitys += 1;
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityFlushAll(1));
-    EXPECT_EQ(G_MARK_MAX_NUM, g_records.load());
+    EXPECT_EQ(totalActivitys, g_records.load());
 }
 
-TEST_F(ActivityUtest, ActivityManagerTest)
+TEST_F(ActivityUtest, ActivityManagerUtestWithSetAndResetDevice)
 {
     MOCKER_CPP(&Mspti::Ascend::DevTaskManager::GetInstance)
         .stubs()
@@ -113,9 +154,7 @@ TEST_F(ActivityUtest, ActivityManagerTest)
         .stubs()
         .will(returnValue(MSPTI_SUCCESS));
     auto instance = Mspti::Activity::ActivityManager::GetInstance();
-    instance ->SetDevice(0);
-    instance ->DeviceReset(0);
-    
-    EXPECT_EQ(G_MARK_MAX_NUM, g_records.load());
+    EXPECT_EQ(MSPTI_SUCCESS, instance ->SetDevice(0));
+    EXPECT_EQ(MSPTI_SUCCESS, instance ->DeviceReset(0));
 }
 }

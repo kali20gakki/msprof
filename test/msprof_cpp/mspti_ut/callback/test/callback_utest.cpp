@@ -28,7 +28,7 @@ static void UserCallback(void *pUserData, msptiCallbackDomain domain,
     }
 }
 
-TEST_F(CallbackUtest, CallbackApiTest)
+TEST_F(CallbackUtest, CallbackExternalApiTestWithRuntimeDomain)
 {
     msptiSubscriberHandle subscriber;
     EXPECT_EQ(MSPTI_SUCCESS, msptiSubscribe(&subscriber, UserCallback, nullptr));

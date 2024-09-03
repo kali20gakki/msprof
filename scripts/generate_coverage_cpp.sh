@@ -22,6 +22,7 @@ generate_coverage(){
     lcov -r ${COV_DIR}/lcov_$2.info '*ascend_protobuf*' -o ${COV_DIR}/lcov_$2.info --rc lcov_branch_coverage=1
     lcov -r ${COV_DIR}/lcov_$2.info '*gtest*' -o ${COV_DIR}/lcov_$2.info --rc lcov_branch_coverage=1
     lcov -r ${COV_DIR}/lcov_$2.info '*opensource*' -o ${COV_DIR}/lcov_$2.info --rc lcov_branch_coverage=1
+    lcov -r ${COV_DIR}/lcov_$2.info '*proto*' -o ${COV_DIR}/lcov_$2.info --rc lcov_branch_coverage=1
     echo "********************** Generate $2 Coverage Stop.*************************"
 }
 #----------------------------------------------------------
@@ -50,6 +51,13 @@ test_obj=(
     device_persistence_utest
     data_process_utest
     timeline_assemble_utest
+    activity_utest
+    dev_prof_task_utest
+    callback_utest
+    context_manager_utest
+    mspti_uti_utest
+    mspti_channel_utest
+    mspti_parser_utest
 )
 
 str_test=""
