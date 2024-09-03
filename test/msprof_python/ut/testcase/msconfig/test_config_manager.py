@@ -24,4 +24,4 @@ class TestConfigManager(unittest.TestCase):
         config = ConfigManager.get(ConfigManager.MSPROF_EXPORT_DATA)
         self.assertEqual(len(config.sections()), 59)
         config = ConfigManager.get(ConfigManager.DATA_CALCULATOR)
-        self.assertEqual(len(config.sections()), 23)
+        self.assertEqual(len(config.sections()), 24)

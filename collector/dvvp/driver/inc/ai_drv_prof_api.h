@@ -227,6 +227,7 @@ using TsTsFwProfileConfigT = struct TagTsTsFwProfileConfig {
     uint32_t ai_vector_status;  // 1-enable,2-disable
     uint32_t ts_keypoint;       // 1-enable,2-disable
     uint32_t ts_memcpy;         // 1-enable,2-disable
+    uint32_t ts_blockdim;       // 1-enable,2-disable
 };
 
 using StarsSocLogConfigT = struct TagStarsSocLogConfig {

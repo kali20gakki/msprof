@@ -5,8 +5,8 @@ import stat
 
 class DBOpen:
 
-    def __init__(self, db_name):
-        self._sqlite_path = os.path.dirname(os.path.abspath(__file__))
+    def __init__(self, db_name, sqlite_dir=None, ):
+        self._sqlite_path = os.path.dirname(os.path.abspath(__file__)) if sqlite_dir is None else sqlite_dir
         self._db_name = db_name
         self._db_path = os.path.join(self._sqlite_path, self._db_name)
         self._conn = None
@@ -107,7 +107,7 @@ class DBManager:
                 res[1].close()
             if isinstance(res[0], sqlite3.Connection):
                 res[0].close()
-        except sqlite3.ProgrammingError: # 重复close
+        except sqlite3.ProgrammingError:  # 重复close
             pass
         finally:
             if os.path.exists(self.db_name):

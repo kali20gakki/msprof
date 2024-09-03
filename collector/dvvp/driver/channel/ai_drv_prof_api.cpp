@@ -408,6 +408,7 @@ int DrvSetTsCommandType(TsTsFwProfileConfigT &configP,
     if (profileParams->ts_memcpy.compare("on") == 0) {
         configP.ts_memcpy = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
     }
+    configP.ts_blockdim = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
     return PROFILING_SUCCESS;
 }
 

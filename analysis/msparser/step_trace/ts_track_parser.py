@@ -21,6 +21,7 @@ from msmodel.step_trace.ts_track_model import TsTrackModel
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.data_parser import DataParser
 from msparser.step_trace.helper.model_with_q_parser import ModelWithQParser
+from msparser.step_trace.ts_binary_data_reader.block_dim_reader import BlockDimReader
 from msparser.step_trace.ts_binary_data_reader.step_trace_reader import StepTraceReader
 from msparser.step_trace.ts_binary_data_reader.task_type_reader import TaskTypeReader
 from msparser.step_trace.ts_binary_data_reader.ts_memcpy_reader import TsMemcpyReader
@@ -34,6 +35,7 @@ class TsTrackTag(Enum):
     TS_TASK_TYPE = 12
     TS_TASK_FLIP_OLD = 13
     TS_TASK_FLIP = 14
+    TS_BLOCK_DIM = 15
     MODEL_WITH_Q = 61
 
     @classmethod
@@ -63,6 +65,7 @@ class TstrackParser(DataParser, MsMultiProcess):
                                     DBNameConstant.TABLE_MODEL_WITH_Q,
                                     DBNameConstant.TABLE_TASK_TYPE,
                                     DBNameConstant.TABLE_DEVICE_TASK_FLIP,
+                                    DBNameConstant.TABLE_BLOCK_DIM,
                                     ])
         self.tag_reader = {
             TsTrackTag.STEP_TRACE: StepTraceReader(),
@@ -70,6 +73,7 @@ class TstrackParser(DataParser, MsMultiProcess):
             TsTrackTag.MODEL_WITH_Q: ModelWithQParser(),
             TsTrackTag.TS_TASK_TYPE: TaskTypeReader(),
             TsTrackTag.TS_TASK_FLIP: TaskFlipReader(),
+            TsTrackTag.TS_BLOCK_DIM: BlockDimReader(),
         }
 
     def parse_binary_data(self: any, file_list: list, format_size: int, tag_fmt: str) -> None:

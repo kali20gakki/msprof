@@ -7,6 +7,11 @@ from msconfig.meta_config import MetaConfig
 
 class DataCalculatorConfig(MetaConfig):
     DATA = {
+        'BlockDimCalculator': [
+            ('path', 'mscalculate.tiling_block_dim.block_dim_calculator'),
+            ('chip_model', '1,2,3,4,5,7'),
+            ('position', 'D')
+        ],
         'SubTaskCalculator': [
             ('path', 'mscalculate.stars.sub_task_calculator'),
             ('chip_model', '5'),

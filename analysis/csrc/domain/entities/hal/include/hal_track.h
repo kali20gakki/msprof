@@ -28,7 +28,8 @@ enum HalTrackType {
     STEP_TRACE = 1,
     TS_TASK_TYPE = 2,
     TS_MEMCPY = 3,
-    INVALID_TYPE = 4
+    BLOCK_DIM = 4,
+    INVALID_TYPE = 5
 };
 
 struct HalTaskFlip {
@@ -52,6 +53,11 @@ struct HalTaskMemcpy {
     uint64_t taskStatus = 0;
 };
 
+struct HalBlockDim {
+    uint64_t timestamp = 0;
+    uint32_t blockDim = 0;
+};
+
 struct HalTrackData {
     HalUniData hd;
     HalTrackType type{INVALID_TYPE};
@@ -60,6 +66,7 @@ struct HalTrackData {
         HalStepTrace stepTrace;
         HalTaskType taskType;
         HalTaskMemcpy taskMemcpy;
+        HalBlockDim blockDim;
     };
     HalTrackData() {};
 };

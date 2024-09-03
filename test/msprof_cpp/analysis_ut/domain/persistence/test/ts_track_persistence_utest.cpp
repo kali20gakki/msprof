@@ -35,11 +35,15 @@ using TaskTypeDataFormat = std::tuple<uint64_t, uint16_t, uint16_t, uint64_t, ui
 using StepTraceDataFormat = std::tuple<uint64_t, uint64_t, uint64_t, uint16_t, uint16_t, uint16_t>;
 // timestamp stream_id task_id task_state
 using TaskMemcpyDataFormat = std::tuple<uint64_t, uint16_t, uint16_t, uint64_t>;
+// timestamp stream_id task_id block_dim
+using BlockDimDataFormat = std::tuple<uint64_t, uint16_t, uint16_t, uint32_t>;
 const std::vector<TaskTypeDataFormat> TASK_TYPE_DATA{};
 const std::vector<StepTraceDataFormat> STEP_TRACE_DATA{};
 const std::vector<TaskMemcpyDataFormat> TS_MEMCPY_DATA{};
+const std::vector<BlockDimDataFormat> BLOCK_DIM_DATA{};
 const std::string DEVICE_PATH = "./device";
 const std::string STEP_TRACE_DB_PATH = File::PathJoin({DEVICE_PATH, "sqlite", "step_trace.db"});
+const int BLOCK_DIM_SIZE = 15;
 const int TASK_TYPE_SIZE = 10;
 const int TS_MEMCPY_SIZE = 9;
 const int STEP_TRACE_SIZE = 8;
@@ -107,6 +111,21 @@ protected:
         return ans;
     }
 
+    std::vector<HalTrackData> CreateHalBlockDim()
+    {
+        std::vector<HalTrackData> ans;
+        for (int i = 0; i < BLOCK_DIM_SIZE; i++) {
+            HalTrackData trackData{};
+            trackData.type = HalTrackType::BLOCK_DIM;
+            trackData.hd.taskId.taskId = i;
+            trackData.hd.taskId.streamId = i;
+            trackData.blockDim.timestamp = i;
+            trackData.blockDim.blockDim = i;
+            ans.emplace_back(std::move(trackData));
+        }
+        return ans;
+    }
+
 protected:
     DataInventory dataInventory_;
 };
@@ -130,13 +149,34 @@ TEST_F(TsTrackPersistenceUtest, ReturnSuccessWhenOnlyTaskType)
     ASSERT_EQ(TASK_TYPE_SIZE, taskTypeDatas.size());
 }
 
+TEST_F(TsTrackPersistenceUtest, ReturnSuccessWhenOnlyBlockDim)
+{
+    auto halBlockDim = CreateHalBlockDim();
+    auto halTrackData = dataInventory_.GetPtr<std::vector<HalTrackData>>();
+    halTrackData->swap(halBlockDim);
+
+    TsTrackPersistence tsTrackPersistence;
+    DeviceContext deviceContext;
+    deviceContext.deviceContextInfo.deviceFilePath = DEVICE_PATH;
+    ASSERT_EQ(ANALYSIS_OK, tsTrackPersistence.Run(dataInventory_, deviceContext));
+
+    std::shared_ptr<DBRunner> dbRunner;
+    MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, STEP_TRACE_DB_PATH);
+
+    std::vector<BlockDimDataFormat> blockDimDatas;
+    EXPECT_TRUE(dbRunner->QueryData("SELECT * from TsBlockDim", blockDimDatas));
+    ASSERT_EQ(BLOCK_DIM_SIZE, blockDimDatas.size());
+}
+
 TEST_F(TsTrackPersistenceUtest, ReturnSuccessWhenMultiTypeData)
 {
     auto halTaskType = CreateHalTaskType();
     auto halTsMemcpy = CreateHalTsMemcpy();
     auto halStepTrace = CreateHalStepTrace();
+    auto halBlockDim = CreateHalBlockDim();
     halTaskType.insert(halTaskType.begin(), halTsMemcpy.begin(), halTsMemcpy.end());
     halTaskType.insert(halTaskType.begin(), halStepTrace.begin(), halStepTrace.end());
+    halTaskType.insert(halTaskType.begin(), halBlockDim.begin(), halBlockDim.end());
     auto halTrackData = dataInventory_.GetPtr<std::vector<HalTrackData>>();
     halTrackData->swap(halTaskType);
 
@@ -159,6 +199,10 @@ TEST_F(TsTrackPersistenceUtest, ReturnSuccessWhenMultiTypeData)
     std::vector<StepTraceDataFormat> stepTraceDatas;
     EXPECT_TRUE(dbRunner->QueryData("SELECT * from StepTrace", stepTraceDatas));
     ASSERT_EQ(STEP_TRACE_SIZE, stepTraceDatas.size());
+
+    std::vector<BlockDimDataFormat> blockDimDatas;
+    EXPECT_TRUE(dbRunner->QueryData("SELECT * from TsBlockDim", blockDimDatas));
+    ASSERT_EQ(BLOCK_DIM_SIZE, blockDimDatas.size());
 }
 
 TEST_F(TsTrackPersistenceUtest, TestRunShouldReturnErrorWhenDataIsNull)

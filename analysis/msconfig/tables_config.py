@@ -1330,7 +1330,7 @@ class TablesConfig(MetaConfig):
             ('model_id', 'INTEGER,null'),
             ('model_name', 'TEXT,null'),
         ],
-        'CommAnalyzerTimeMap' : [
+        'CommAnalyzerTimeMap': [
             ('hccl_op_name', 'TEXT,null'),
             ('group_name', 'TEXT,null'),
             ('start_timestamp', 'NUMERIC,null'),
@@ -1340,7 +1340,7 @@ class TablesConfig(MetaConfig):
             ('synchronization_time', 'NUMERIC,null'),
             ('idle_time', 'NUMERIC,null'),
         ],
-        'CommAnalyzerBandwidthMap' : [
+        'CommAnalyzerBandwidthMap': [
             ('hccl_op_name', 'TEXT,null'),
             ('group_name', 'TEXT,null'),
             ('transport_type', 'TEXT,null'),
@@ -1480,5 +1480,11 @@ class TablesConfig(MetaConfig):
             ('notify_id', 'TEXT,null'),
             ('batch_id', 'INTEGER,null'),
             ('rdma_type', 'TEXT,null'),
+        ],
+        'TsBlockDimMap': [
+            ('timestamp', 'NUMERIC,null'),
+            ('stream_id', 'INTEGER,null'),
+            ('task_id', 'INTEGER,null'),
+            ('block_dim', 'INTEGER,null'),
         ],
     }

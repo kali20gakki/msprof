@@ -671,6 +671,13 @@ namespace {
         {"dat_tx", SQL_NUMERIC_TYPE},
         {"timestamp", SQL_NUMERIC_TYPE}
     };
+
+    const TableColumns TsBlockDim = {
+        {"timestamp", SQL_REAL_TYPE},
+        {"stream_id", SQL_INTEGER_TYPE},
+        {"task_id", SQL_INTEGER_TYPE},
+        {"block_dim", SQL_INTEGER_TYPE}
+    };
 }
 
 std::string Database::GetDBName() const
@@ -878,6 +885,7 @@ StepTraceDB::StepTraceDB()
     tableColNames_["StepTime"] = StepTime;
     tableColNames_["TaskType"] = TaskType;
     tableColNames_["TsMemcpy"] = TsMemcpy;
+    tableColNames_["TsBlockDim"] = TsBlockDim;
 }
 
 KfcInfo::KfcInfo()
