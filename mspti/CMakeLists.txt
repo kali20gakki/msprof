@@ -39,6 +39,8 @@ target_compile_options(mspti_shared PRIVATE
     -Wfloat-equal
     -Wextra
     -DMSPTI_LIB
+    -D_FORTIFY_SOURCE=2
+    $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-O2>
 )
 
 target_link_directories(mspti_shared PRIVATE
@@ -49,6 +51,7 @@ target_link_options(mspti_shared PRIVATE
     -Wl,-z,relro,-z,now,-z,noexecstack
     -Wl,-Bsymbolic
     -Wl,--exclude-libs=ALL
+    $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-s>
 )
 
 target_link_libraries(mspti_shared PRIVATE
