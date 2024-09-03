@@ -28,7 +28,7 @@ private:
     uint8_t AssembleData(DataInventory& dataInventory, JsonWriter &ostream, const std::string &profPath) override;
     // 仅txNopostLatency单位转为us,其余为带宽 单位转为MB/s
     std::unordered_map<uint16_t, uint32_t> GeneratePCIeTrace(std::vector<PCIeData> &pcieData,
-                                                             uint32_t layerInfo, const std::string &profPath);
+                                                             uint32_t sortIndex, const std::string &profPath);
 private:
     std::vector<std::shared_ptr<TraceEvent>> res_;
 };

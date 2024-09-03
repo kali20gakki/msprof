@@ -37,12 +37,11 @@ protected:
     void GenerateHWMetaData(const std::unordered_map<uint16_t, uint32_t> &pidMap, const struct LayerInfo &layerInfo,
                           std::vector<std::shared_ptr<TraceEvent>> &res);
 protected:
+    std::string processorName_;
     std::unordered_map<std::string, FileCategory> fileMap_;
 private:
     bool FlushToFile(JsonWriter &ostream, const std::string &profPath);
     virtual uint8_t AssembleData(DataInventory& dataInventory, JsonWriter &ostream, const std::string &profPath) = 0;
-private:
-    std::string processorName_;
 };
 }
 }

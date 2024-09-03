@@ -27,7 +27,7 @@ const std::string TX = "Tx";
 const std::string EX = "Ex";
 }
 
-PCIeAssembler::PCIeAssembler() : JsonAssembler(PROCESS_PCIE, {{"msprof", FileCategory::MSPROF}}) {}
+PCIeAssembler::PCIeAssembler() : JsonAssembler(PROCESS_PCIE, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
 
 std::unordered_map<uint16_t, uint32_t> PCIeAssembler::GeneratePCIeTrace(
     std::vector<PCIeData> &pcieData, uint32_t sortIndex, const std::string &profPath)
@@ -66,6 +66,7 @@ std::unordered_map<uint16_t, uint32_t> PCIeAssembler::GeneratePCIeTrace(
 
 uint8_t PCIeAssembler::AssembleData(DataInventory &dataInventory, JsonWriter &ostream, const std::string &profPath)
 {
+    INFO("Begin to assemble % data.", PROCESS_PCIE);
     auto pcieData = dataInventory.GetPtr<std::vector<PCIeData>>();
     if (pcieData == nullptr) {
         WARN("Can't get PCIe Data from dataInventory");
@@ -83,6 +84,7 @@ uint8_t PCIeAssembler::AssembleData(DataInventory &dataInventory, JsonWriter &os
     }
     // 为了让下一个写入的内容形成正确的JSON格式，需要补一个","
     ostream << ",";
+    INFO("Assemble % data success.", PROCESS_PCIE);
     return ASSEMBLE_SUCCESS;
 }
 }
