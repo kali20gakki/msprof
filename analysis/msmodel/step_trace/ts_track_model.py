@@ -18,6 +18,7 @@ from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from profiling_bean.db_dto.step_trace_dto import StepTraceOriginDto
 from profiling_bean.db_dto.step_trace_ge_dto import StepTraceGeDto
+from profiling_bean.db_dto.tiling_block_dim_dto import TilingBlockDimDto
 from profiling_bean.db_dto.time_section_dto import TimeSectionDto
 from msparser.step_trace.ts_binary_data_reader.task_flip_bean import TaskFlip
 
@@ -164,8 +165,8 @@ class TsTrackModel(BaseModel, ABC):
 
 
 class TsTrackViewModel(ViewModel):
-    def __init__(self: any, path: str) -> None:
-        super().__init__(path, DBNameConstant.DB_STEP_TRACE, [])
+    def __init__(self: any, path: str, table_list: list = None) -> None:
+        super().__init__(path, DBNameConstant.DB_STEP_TRACE, table_list if table_list else [])
 
     def get_hccl_operator_exe_data(self) -> list:
         if not self.attach_to_db(DBNameConstant.DB_GE_INFO):
@@ -192,3 +193,7 @@ class TsTrackViewModel(ViewModel):
         sql = "select model_id, index_id ,step_start as start_time, step_end as end_time " \
               "from {} order by end_time".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
         return DBManager.fetch_all_data(self.cur, sql, dto_class=TimeSectionDto)
+
+    def get_tiling_block_dim_data(self):
+        sql = "select stream_id, task_id, timestamp, block_dim from {}".format(DBNameConstant.TABLE_BLOCK_DIM)
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=TilingBlockDimDto)
