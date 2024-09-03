@@ -14,7 +14,7 @@
 #define ANALYSIS_DOMAIN_CHIP_TRANS_PROCESSOR_H
 
 #include "analysis/csrc/domain/data_process/data_processor.h"
-#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/chip_trans_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/chip_trans_data.h"
 
 
 namespace Analysis {
@@ -43,7 +43,7 @@ private:
     OriPcieFormat LoadPcieData(const DBInfo& pcieInfo);
     bool ProcessOneDevice(const std::string& devicePath, ChipTransData& chipTransData);
     bool FormatData(std::vector<PaLinkInfoData>& paFormatData, std::vector<PcieInfoData>& pcieFormatData,
-                    ChipTransData& chipTransData);
+                    ChipTransData& chipTransData, const uint16_t &deviceId);
 };
 }
 }

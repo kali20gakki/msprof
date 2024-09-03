@@ -18,10 +18,10 @@
 namespace Analysis {
 namespace Domain {
 struct SocBandwidthData {
-    uint32_t deviceId = UINT32_MAX;
+    uint16_t deviceId = UINT32_MAX;
     uint32_t l2_buffer_bw_level = 0;
     uint32_t mata_bw_level = 0;
-    double timestamp = 0.0;
+    uint64_t timestamp = 0;
 };
 }
 }

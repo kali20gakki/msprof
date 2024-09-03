@@ -62,7 +62,7 @@ void CounterEvent::ProcessArgs(JsonWriter &ostream)
     }
 }
 
-void CounterEvent::SetSeriesValue(const std::string &key, const uint64_t &value)
+void CounterEvent::SetSeriesValue(const std::string &key, const double &value)
 {
     seriesValue_[key] = value;
 }
