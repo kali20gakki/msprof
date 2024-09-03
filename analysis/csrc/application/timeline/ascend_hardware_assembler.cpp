@@ -21,7 +21,7 @@ namespace {
 const uint32_t SORT_INDEX = 13;
 const std::string ASCEND_ASSEMBLER = "Ascend Hardware";
 const std::string ASCEND_LABEL = "NPU";
-const std::string TASK_TYPE_FFTS_PLUS = "FFTS";
+const std::string TASK_TYPE_FFTS_PLUS = "FFTS_PLUS";
 const std::string TASK_TYPE_UNKNOWN = "UNKNOWN";
 }
 
