@@ -36,7 +36,7 @@ const std::unordered_map<uint16_t, std::string> LEVEL_MAP{
 };
 }
 
-CannAssembler::CannAssembler() : JsonAssembler(CANN_ASSEMBLER, {{"msprof", FileCategory::MSPROF}}) {}
+CannAssembler::CannAssembler() : JsonAssembler(CANN_ASSEMBLER, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
 
 void GenerateMetaData(std::vector<ApiData> &apiData, uint32_t pid, std::vector<std::shared_ptr<TraceEvent>> &res)
 {

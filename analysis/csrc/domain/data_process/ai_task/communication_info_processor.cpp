@@ -154,6 +154,8 @@ void CommunicationInfoProcessor::Update(const HcclTaskFormat& oriData, HcclTaskS
     taskData.deviceId = communicationData.deviceId;
     taskData.taskType = hcclData.HCCLName;
     taskData.duration = hcclData.duration;
+    HPFloat timestamp{hcclData.timestamp};
+    taskData.start = GetLocalTime(timestamp, communicationData.timeRecord).Uint64();
     taskData.groupName = GetGroupNameValue(hcclData.groupName, communicationData.hashMap);
     taskData.rdmaType = GetEnumTypeValue(hcclData.rdmaType, NAME_STR(HCCL_RDMA_TYPE_TABLE), HCCL_RDMA_TYPE_TABLE);
     taskData.transportType = GetEnumTypeValue(hcclData.transportType,

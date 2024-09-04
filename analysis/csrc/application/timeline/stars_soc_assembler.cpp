@@ -4,7 +4,7 @@
 ****************************************************************************** */
 /* ******************************************************************************
  * File Name          : stars_soc_assembler.cpp
- * Description        : 组合CANN层数据
+ * Description        : 组合Stars Soc层数据
  * Author             : msprof team
  * Creation Date      : 2024/8/29
  * *****************************************************************************
@@ -25,7 +25,7 @@ const std::string L2_BUFFER_BW_LEVEL = "L2 Buffer Bw Level";
 const std::string MATA_BW_LEVEL = "Mata Bw Level";
 }
 
-StarsSocAssembler::StarsSocAssembler() : JsonAssembler(PROCESS_STARS_SOC, {{"msprof", FileCategory::MSPROF}}) {}
+StarsSocAssembler::StarsSocAssembler() : JsonAssembler(PROCESS_STARS_SOC, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
 
 void GenerateStarsSocTrace(std::vector<SocBandwidthData> &socBandwidthData,
     const std::unordered_map<uint16_t, uint32_t> &pidMap, std::vector<std::shared_ptr<TraceEvent>> &res)

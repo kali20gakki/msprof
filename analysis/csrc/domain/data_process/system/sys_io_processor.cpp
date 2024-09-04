@@ -48,10 +48,34 @@ bool SysIOProcessor::Process(DataInventory &dataInventory)
         localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
         flag = ProcessSingleDevice(devicePath, localtimeContext, allProcessedData, allSummaryData) && flag;
     }
-    if (!SaveToDataInventory<SysIOOriginalData>(std::move(allProcessedData), dataInventory, processorName_) ||
-        !SaveToDataInventory<SysIOReportData>(std::move(allSummaryData), dataInventory, processorName_)) {
-            flag = false;
-            ERROR("Save % Data To DataInventory failed, profPath is %", processorName_, profPath_);
+    if (processorName_ == PROCESSOR_NAME_NIC) {
+        std::vector<NicOriginalData> allNicOriginalData;
+        NicOriginalData nicOriginalData;
+        nicOriginalData.sysIOOriginalData = std::move(allProcessedData);
+        allNicOriginalData.push_back(nicOriginalData);
+        std::vector<NicReportData> allNicReportData;
+        NicReportData nicReportData;
+        nicReportData.sysIOReportData = std::move(allSummaryData);
+        allNicReportData.push_back(nicReportData);
+        if (!SaveToDataInventory<NicOriginalData>(std::move(allNicOriginalData), dataInventory, processorName_) ||
+            !SaveToDataInventory<SysIOReportData>(std::move(allSummaryData), dataInventory, processorName_)) {
+                flag = false;
+                ERROR("Save % Data To DataInventory failed, profPath is %", processorName_, profPath_);
+        }
+    } else {
+        std::vector<RoceOriginalData> allRoceOriginalData;
+        RoceOriginalData roceOriginalData;
+        roceOriginalData.sysIOOriginalData = std::move(allProcessedData);
+        allRoceOriginalData.push_back(roceOriginalData);
+        std::vector<RoceReportData> allRoceReportData;
+        RoceReportData roceReportData;
+        roceReportData.sysIOReportData = std::move(allSummaryData);
+        allRoceReportData.push_back(roceReportData);
+        if (!SaveToDataInventory<RoceOriginalData>(std::move(allRoceOriginalData), dataInventory, processorName_) ||
+            !SaveToDataInventory<RoceReportData>(std::move(allRoceReportData), dataInventory, processorName_)) {
+                flag = false;
+                ERROR("Save % Data To DataInventory failed, profPath is %", processorName_, profPath_);
+        }
     }
     return flag;
 }
@@ -210,9 +234,25 @@ bool SysIOTimelineProcessor::Process(DataInventory &dataInventory)
         localtimeContext.deviceId= GetDeviceIdByDevicePath(devicePath);
         flag = ProcessSingleDevice(devicePath, localtimeContext, allProcessedData) && flag;
     }
-    if (!SaveToDataInventory<SysIOReceiveSendData>(std::move(allProcessedData), dataInventory, processorName_)) {
-            flag = false;
-            ERROR("Save % ReceiveSendData To DataInventory failed, profPath is %", processorName_, profPath_);
+    if (processorName_ == PROCESSOR_NAME_NIC) {
+        std::vector<NicReceiveSendData> allNicReceiveSendData;
+        NicReceiveSendData nicReceiveSendData;
+        nicReceiveSendData.sysIOReceiveSendData = std::move(allProcessedData);
+        allNicReceiveSendData.push_back(nicReceiveSendData);
+        if (!SaveToDataInventory<NicReceiveSendData>(std::move(allNicReceiveSendData), dataInventory, processorName_)) {
+                flag = false;
+                ERROR("Save % Data To DataInventory failed, profPath is %", processorName_, profPath_);
+        }
+    } else {
+        std::vector<RoceReceiveSendData> allRoceReceiveSendData;
+        RoceReceiveSendData roceReceiveSendData;
+        roceReceiveSendData.sysIOReceiveSendData = std::move(allProcessedData);
+        allRoceReceiveSendData.push_back(roceReceiveSendData);
+        if (!SaveToDataInventory<RoceReceiveSendData>(std::move(allRoceReceiveSendData),
+                                                      dataInventory, processorName_)) {
+                flag = false;
+                ERROR("Save % Data To DataInventory failed, profPath is %", processorName_, profPath_);
+        }
     }
     return flag;
 }

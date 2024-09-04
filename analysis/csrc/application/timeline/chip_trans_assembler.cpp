@@ -4,7 +4,7 @@
 ****************************************************************************** */
 /* ******************************************************************************
  * File Name          : chip_trans_assembler.cpp
- * Description        : 组合CANN层数据
+ * Description        : 组合Stars Chip Trans层数据
  * Author             : msprof team
  * Creation Date      : 2024/8/29
  * *****************************************************************************
@@ -29,7 +29,7 @@ const std::string PCIE_ID = "PCIE ID";
 }
 
 ChipTransAssembler::ChipTransAssembler() : JsonAssembler(PROCESS_STARS_CHIP_TRANS, {
-    {"msprof", FileCategory::MSPROF}}) {}
+    {MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
 
 void GeneratePaLinkInfoTrace(std::vector<PaLinkInfoData> &paLinkInfoData,
     const std::unordered_map<uint16_t, uint32_t> &pidMap, std::vector<std::shared_ptr<TraceEvent>> &res)

@@ -1,0 +1,198 @@
+/* ******************************************************************************
+            版权所有 (c) 华为技术有限公司 2024-2024
+            Copyright, 2024, Huawei Tech. Co., Ltd.
+****************************************************************************** */
+/* ******************************************************************************
+ * File Name          : sys_io_assembler_utest.cpp
+ * Description        : sys_io_assembler UT
+ * Author             : msprof team
+ * Creation Date      : 2024/8/31
+ * *****************************************************************************
+ */
+
+#include "gtest/gtest.h"
+#include "mockcpp/mockcpp.hpp"
+#include "analysis/csrc/application/timeline/sys_io_assembler.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
+#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/dfx/error_code.h"
+
+using namespace Analysis::Application;
+using namespace Analysis::Utils;
+using namespace Analysis::Domain;
+using namespace Analysis::Viewer::Database;
+using namespace Analysis::Parser::Environment;
+
+namespace {
+const int DEPTH = 0;
+const std::string BASE_PATH = "./sys_io_assembler_utest";
+const std::string PROF_PATH = File::PathJoin({BASE_PATH, "PROF_0"});
+const std::string DEVICE_PATH = File::PathJoin({PROF_PATH, "device_0"});
+const std::string RESULT_PATH = File::PathJoin({PROF_PATH, OUTPUT_PATH});
+}
+
+class SysIOAssemblerUTest : public testing::Test {
+protected:
+    virtual void SetUp()
+    {
+        if (File::Check(BASE_PATH)) {
+            File::RemoveDir(BASE_PATH, DEPTH);
+        }
+        EXPECT_TRUE(File::CreateDir(BASE_PATH));
+        EXPECT_TRUE(File::CreateDir(PROF_PATH));
+        EXPECT_TRUE(File::CreateDir(DEVICE_PATH));
+        EXPECT_TRUE(File::CreateDir(RESULT_PATH));
+    }
+    virtual void TearDown()
+    {
+        EXPECT_TRUE(File::RemoveDir(BASE_PATH, DEPTH));
+        dataInventory_.RemoveRestData({});
+        GlobalMockObject::verify();
+    }
+
+protected:
+    DataInventory dataInventory_;
+};
+
+static std::vector<NicReceiveSendData> GenerateNicReceiveSendData()
+{
+    std::vector<NicReceiveSendData> res;
+    NicReceiveSendData nicReceiveSendData;
+    SysIOReceiveSendData data;
+    data.deviceId = 0; // device 0
+    data.funcId = 0; // port 0
+    data.localTime = 1724405892226599429; // 本地时间 1724405892226599429
+    data.rxDroppedRate = 5.6; // 丢包率 5.6
+    data.rxErrorRate = 1.2; // 错误率 1.2
+    data.rxPacketRate = 60; // 收包速率 60
+    data.rxBandwidthEfficiency = 0.5; // 带宽利用率 0.5
+    data.txDroppedRate = 3.2; // 丢包率 3.2
+    data.txErrorRate = 2.2; // 错误率 2.2
+    data.txPacketRate = 50; // 发包速率 50
+    data.txBandwidthEfficiency = 0.8; // 带宽利用率 0.8
+    nicReceiveSendData.sysIOReceiveSendData.push_back({data});
+    data.localTime = 1724405892226699429; // 本地时间 1724405892226699429
+    data.rxDroppedRate = 8.6; // 丢包率 8.6
+    data.rxErrorRate = 3.2; // 错误率 3.2
+    data.rxPacketRate = 40; // 收包速率 40
+    data.rxBandwidthEfficiency = 0.9; // 带宽利用率 0.9
+    data.txDroppedRate = 3.8; // 丢包率 3.8
+    data.txErrorRate = 2.3; // 错误率 2.3
+    data.txPacketRate = 60; // 发包速率 60
+    data.txBandwidthEfficiency = 2.2; // 带宽利用率 2.2
+    nicReceiveSendData.sysIOReceiveSendData.push_back(data);
+    res.push_back(nicReceiveSendData);
+    return res;
+}
+
+static std::vector<RoceReceiveSendData> GenerateRoceReceiveSendData()
+{
+    std::vector<RoceReceiveSendData> res;
+    RoceReceiveSendData roceReceiveSendData;
+    SysIOReceiveSendData data;
+    data.deviceId = 0; // device 0
+    data.funcId = 0; // port 0
+    data.localTime = 1724405892226599429; // 本地时间 1724405892226599429
+    data.rxDroppedRate = 5.6; // 丢包率 5.6
+    data.rxErrorRate = 1.2; // 错误率 1.2
+    data.rxPacketRate = 60; // 收包速率 60
+    data.rxBandwidthEfficiency = 0.5; // 带宽利用率 0.5
+    data.txDroppedRate = 3.2; // 丢包率 3.2
+    data.txErrorRate = 2.2; // 错误率 2.2
+    data.txPacketRate = 50; // 发包速率 50
+    data.txBandwidthEfficiency = 0.8; // 带宽利用率 0.8
+    roceReceiveSendData.sysIOReceiveSendData.push_back({data});
+    data.localTime = 1724405892226699429; // 本地时间 1724405892226699429
+    data.rxDroppedRate = 8.6; // 丢包率 8.6
+    data.rxErrorRate = 3.2; // 错误率 3.2
+    data.rxPacketRate = 40; // 收包速率 40
+    data.rxBandwidthEfficiency = 0.9; // 带宽利用率 0.9
+    data.txDroppedRate = 3.8; // 丢包率 3.8
+    data.txErrorRate = 2.3; // 错误率 2.3
+    data.txPacketRate = 60; // 发包速率 60
+    data.txBandwidthEfficiency = 2.2; // 带宽利用率 2.2
+    roceReceiveSendData.sysIOReceiveSendData.push_back(data);
+    res.push_back(roceReceiveSendData);
+    return res;
+}
+
+TEST_F(SysIOAssemblerUTest, ShouldReturnTrueWhenDataNotExists)
+{
+    NicAssembler assembler;
+    EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
+}
+
+TEST_F(SysIOAssemblerUTest, NicAssemblerShouldReturnTrueWhenDataAssembleSuccess)
+{
+    NicAssembler assembler;
+    std::shared_ptr<std::vector<NicReceiveSendData>> dataS;
+    auto data = GenerateNicReceiveSendData();
+    MAKE_SHARED_NO_OPERATION(dataS, std::vector<NicReceiveSendData>, data);
+    dataInventory_.Inject(dataS);
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(2328086)); // pid 2328086
+    EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
+    auto files = File::GetOriginData(RESULT_PATH, {"msprof"}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    std::string expectStr = "{\"name\":\"process_name\",\"pid\":2383960704,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":"
+                            "\"NIC\"}},{\"name\":\"process_labels\",\"pid\":2383960704,\"tid\":0,\"ph\":\"M\",\"args"
+                            "\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960704,\"tid\":0,"
+                            "\"ph\":\"M\",\"args\":{\"sort_index\":20}},{\"name\":\"Port 0/Rx\",\"pid\":2383960704,"
+                            "\"tid\":0,\"ts\":\"1724405892226599.500000\",\"ph\":\"C\",\"args\":{\"Rx Bandwidth "
+                            "Efficiency\":0.5,\"Rx Packets\":60.0,\"Rx Error Rate\":1.2,\"Rx Dropped Rate\":5.6}},{"
+                            "\"name\":\"Port 0/Tx\",\"pid\":2383960704,\"tid\":0,\"ts\":\"1724405892226599.500000\","
+                            "\"ph\":\"C\",\"args\":{\"Tx Bandwidth Efficiency\":0.8,\"Tx Packets\":50.0,\"Tx Error "
+                            "Rate\":2.2,\"Tx Dropped Rate\":3.2}},{\"name\":\"Port 0/Rx\",\"pid\":2383960704,\"tid\":"
+                            "0,\"ts\":\"1724405892226699.500000\",\"ph\":\"C\",\"args\":{\"Rx Bandwidth Efficiency\":"
+                            "0.9,\"Rx Packets\":40.0,\"Rx Error Rate\":3.2,\"Rx Dropped Rate\":8.6}},{\"name\":\"Port "
+                            "0/Tx\",\"pid\":2383960704,\"tid\":0,\"ts\":\"1724405892226699.500000\",\"ph\":\"C\",\""
+                            "args\":{\"Tx Bandwidth Efficiency\":2.2,\"Tx Packets\":60.0,\"Tx Error Rate\":2.3,\"Tx "
+                            "Dropped Rate\":3.8}},";
+    EXPECT_EQ(expectStr, res.back());
+}
+
+TEST_F(SysIOAssemblerUTest, ShouldReturnFalseWhenDataAssembleFail)
+{
+    NicAssembler assembler;
+    std::shared_ptr<std::vector<NicReceiveSendData>> dataS;
+    auto data = GenerateNicReceiveSendData();
+    MAKE_SHARED_NO_OPERATION(dataS, std::vector<NicReceiveSendData>, data);
+    dataInventory_.Inject(dataS);
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(2328086)); // pid 2328086
+    MOCKER_CPP(&std::vector<std::shared_ptr<TraceEvent>>::empty).stubs().will(returnValue(true));
+    EXPECT_FALSE(assembler.Run(dataInventory_, PROF_PATH));
+}
+
+TEST_F(SysIOAssemblerUTest, RoCEAssemblerShouldReturnTrueWhenDataAssembleSuccess)
+{
+    RoCEAssembler assembler;
+    std::shared_ptr<std::vector<RoceReceiveSendData>> dataS;
+    auto data = GenerateRoceReceiveSendData();
+    MAKE_SHARED_NO_OPERATION(dataS, std::vector<RoceReceiveSendData>, data);
+    dataInventory_.Inject(dataS);
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(2328086)); // pid 2328086
+    EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
+    auto files = File::GetOriginData(RESULT_PATH, {MSPROF_JSON_FILE}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    std::string expectStr = "{\"name\":\"process_name\",\"pid\":2383960736,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":"
+                            "\"RoCE\"}},{\"name\":\"process_labels\",\"pid\":2383960736,\"tid\":0,\"ph\":\"M\",\"args"
+                            "\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960736,\"tid\":0,"
+                            "\"ph\":\"M\",\"args\":{\"sort_index\":21}},{\"name\":\"Port 0/Rx\",\"pid\":2383960736,"
+                            "\"tid\":0,\"ts\":\"1724405892226599.500000\",\"ph\":\"C\",\"args\":{\"Rx Bandwidth "
+                            "Efficiency\":0.5,\"Rx Packets\":60.0,\"Rx Error Rate\":1.2,\"Rx Dropped Rate\":5.6}},"
+                            "{\"name\":\"Port 0/Tx\",\"pid\":2383960736,\"tid\":0,\"ts\":\"1724405892226599.500000\""
+                            ",\"ph\":\"C\",\"args\":{\"Tx Bandwidth Efficiency\":0.8,\"Tx Packets\":50.0,\"Tx Error "
+                            "Rate\":2.2,\"Tx Dropped Rate\":3.2}},{\"name\":\"Port 0/Rx\",\"pid\":2383960736,\"tid\""
+                            ":0,\"ts\":\"1724405892226699.500000\",\"ph\":\"C\",\"args\":{\"Rx Bandwidth Efficiency\""
+                            ":0.9,\"Rx Packets\":40.0,\"Rx Error Rate\":3.2,\"Rx Dropped Rate\":8.6}},{\"name\":\"Port "
+                            "0/Tx\",\"pid\":2383960736,\"tid\":0,\"ts\":\"1724405892226699.500000\",\"ph\":\"C\",\""
+                            "args\":{\"Tx Bandwidth Efficiency\":2.2,\"Tx Packets\":60.0,\"Tx Error Rate\":2.3,\"Tx "
+                            "Dropped Rate\":3.8}},";
+    EXPECT_EQ(expectStr, res.back());
+}

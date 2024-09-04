@@ -29,7 +29,7 @@ const std::unordered_map<uint16_t, std::string> SERIES_MAP {
 };
 }
 
-SioAssembler::SioAssembler() : JsonAssembler(PROCESS_SIO, {{"msprof", FileCategory::MSPROF}}) {}
+SioAssembler::SioAssembler() : JsonAssembler(PROCESS_SIO, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
 
 void GenerateSioTrace(std::vector<SioData> &sioData, const std::unordered_map<uint16_t, uint32_t> &pidMap,
                       std::vector<std::shared_ptr<TraceEvent>> &res)

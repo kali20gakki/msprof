@@ -45,6 +45,7 @@ std::string GetDBPath(const std::vector<std::string>& paths);
             instance = std::make_shared<type>(); \
         } catch (...) {                          \
             ERROR("Make shared ptr failed");     \
+            instance = nullptr;                  \
             return;                              \
         }                                        \
     } while (0)
@@ -56,6 +57,7 @@ std::string GetDBPath(const std::vector<std::string>& paths);
             instance = std::make_shared<type>();         \
         } catch (...) {                                  \
             ERROR("Make shared ptr failed");             \
+            instance = nullptr;                          \
             return value;                                \
         }                                                \
     } while (0)
@@ -67,6 +69,7 @@ std::string GetDBPath(const std::vector<std::string>& paths);
             instance = std::make_shared<type>(__VA_ARGS__); \
         } catch (...) {                                     \
             ERROR("Make shared ptr failed");                \
+            instance = nullptr;                             \
             return;                                         \
         }                                                   \
     } while (0)
@@ -78,6 +81,7 @@ std::string GetDBPath(const std::vector<std::string>& paths);
             instance = std::make_shared<type>(__VA_ARGS__);   \
         } catch (...) {                                       \
             ERROR("Make shared ptr failed");                  \
+            instance = nullptr;                               \
             return value;                                     \
         }                                                     \
     } while (0)
@@ -89,6 +93,7 @@ std::string GetDBPath(const std::vector<std::string>& paths);
             instance = std::make_shared<type>(__VA_ARGS__); \
         } catch (...) {                                     \
             ERROR("Make shared ptr failed");                \
+            instance = nullptr;                             \
             break;                                          \
         }                                                   \
     } while (0)
@@ -100,6 +105,7 @@ std::string GetDBPath(const std::vector<std::string>& paths);
             instance = std::make_shared<type>(__VA_ARGS__); \
         } catch (...) {                                     \
             ERROR("Make shared ptr failed");                \
+            instance = nullptr;                             \
         }                                                   \
     } while (0)
 
@@ -110,6 +116,7 @@ std::string GetDBPath(const std::vector<std::string>& paths);
             instance = std::make_shared<type>(__VA_ARGS__); \
         } catch (...) {                                     \
             ERROR("Make shared ptr failed");                \
+            instance = nullptr;                             \
         }                                                   \
     } while (0)
 
