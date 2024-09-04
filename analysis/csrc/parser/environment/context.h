@@ -73,6 +73,8 @@ public:
     uint64_t GetHostUid(uint16_t deviceId = DEFAULT_DEVICE_ID, const std::string &profPath = "");
     // 获取info.json中的hostname
     std::string GetHostName(uint16_t deviceId = DEFAULT_DEVICE_ID, const std::string &profPath = "");
+    // 获取sample.json中的qosEvents
+    std::vector<std::string> GetQosEvents(uint16_t deviceId = DEFAULT_DEVICE_ID, const std::string &profPath = "");
 public:
     // 获取对应device的芯片型号
     uint16_t GetPlatformVersion(uint16_t deviceId = DEFAULT_DEVICE_ID, const std::string &profPath = "");
