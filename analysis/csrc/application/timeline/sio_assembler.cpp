@@ -81,7 +81,7 @@ uint8_t SioAssembler::AssembleData(DataInventory &dataInventory, JsonWriter &ost
     GenerateHWMetaData(pidMap, layerInfo, res_);
     GenerateSioTrace(*sioData, pidMap, res_);
     if (res_.empty()) {
-        ERROR("Can't Generate any HBM process data");
+        ERROR("Can't Generate any SIO process data");
         return ASSEMBLE_FAILED;
     }
     for (const auto &node : res_) {

@@ -678,6 +678,20 @@ namespace {
         {"task_id", SQL_INTEGER_TYPE},
         {"block_dim", SQL_INTEGER_TYPE}
     };
+
+    const TableColumns QosBwData = {
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"bw1", SQL_NUMERIC_TYPE},
+        {"bw2", SQL_NUMERIC_TYPE},
+        {"bw3", SQL_NUMERIC_TYPE},
+        {"bw4", SQL_NUMERIC_TYPE},
+        {"bw5", SQL_NUMERIC_TYPE},
+        {"bw6", SQL_NUMERIC_TYPE},
+        {"bw7", SQL_NUMERIC_TYPE},
+        {"bw8", SQL_NUMERIC_TYPE},
+        {"bw9", SQL_NUMERIC_TYPE},
+        {"bw10", SQL_NUMERIC_TYPE},
+    };
 }
 
 std::string Database::GetDBName() const
@@ -936,6 +950,12 @@ SioDB::SioDB()
 {
     dbName_ = "sio.db";
     tableColNames_["Sio"] = Sio;
+}
+
+QosDB::QosDB()
+{
+    dbName_ = "qos.db";
+    tableColNames_["QosBwData"] = QosBwData;
 }
 } // namespace Database
 } // namespace Viewer

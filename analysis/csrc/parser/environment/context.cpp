@@ -321,7 +321,7 @@ int64_t Context::GetMsBinPid(const std::string &profPath)
         PRINT_ERROR("Samplejson is empty, path %.", profPath);
         return analysis::dvvp::common::config::MSVP_MMPROCESS;
     }
- 
+
     return info.value("msprofBinPid", analysis::dvvp::common::config::MSVP_MMPROCESS);
 }
 
@@ -483,6 +483,26 @@ std::string Context::GetHostName(uint16_t deviceId, const std::string &profPath)
         return "";
     }
     return info.at("hostname");
+}
+
+std::vector<std::string> Context::GetQosEvents(uint16_t deviceId, const std::string &profPath)
+{
+    if (deviceId == HOST_ID) {
+        ERROR("Host do not have qosEvents!");
+        return {};
+    }
+    auto info = GetInfoByDeviceId(deviceId, profPath);
+    if (info.empty()) {
+        ERROR("GetQosEvents device info is empty.");
+        return {};
+    }
+    std::string qosEvents = info.at("qosEvents");
+    if (qosEvents.empty()) {
+        INFO("Check qosProfiling is on or off, if it is on, maybe some mistakes have happened");
+        return {};
+    } else {
+        return Split(qosEvents, ",");
+    }
 }
 
 void Context::Clear()

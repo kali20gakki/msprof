@@ -230,6 +230,11 @@ class SioDB : public Database {
 public:
     SioDB();
 };
+
+class QosDB : public Database {
+public:
+    QosDB();
+};
 } // namespace Database
 } // namespace Viewer
 } // namespace Analysis

@@ -64,7 +64,7 @@ uint8_t StarsSocAssembler::AssembleData(DataInventory &dataInventory, JsonWriter
     GenerateHWMetaData(pidMap, layerInfo, res_);
     GenerateStarsSocTrace(*socBandwidthData, pidMap, res_);
     if (res_.empty()) {
-        ERROR("Can't Generate any HBM process data");
+        ERROR("Can't Generate any Stars Soc process data");
         return ASSEMBLE_FAILED;
     }
     for (const auto &node : res_) {
