@@ -27,7 +27,7 @@ const std::string RX_SERIES = "Rx(MB/s)";
 const std::string TX_SERIES = "Tx(MB/s)";
 }
 
-HCCSAssembler::HCCSAssembler() : JsonAssembler(PROCESS_HCCS, {{"msprof", FileCategory::MSPROF}}) {}
+HCCSAssembler::HCCSAssembler() : JsonAssembler(PROCESS_HCCS, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
 
 void GenerateHccsTrace(std::vector<HccsData> &hccsData, const std::unordered_map<uint16_t, uint32_t> &pidMap,
                        std::vector<std::shared_ptr<TraceEvent>> &res)

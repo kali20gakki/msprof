@@ -4,7 +4,7 @@
 ****************************************************************************** */
 /* ******************************************************************************
  * File Name          : npu_mem_assembler.cpp
- * Description        : 组合CANN层数据
+ * Description        : 组合NpuMem层数据
  * Author             : msprof team
  * Creation Date      : 2024/8/29
  * *****************************************************************************
@@ -32,26 +32,27 @@ const std::unordered_map<std::string, CounterName> CounterNameMap {
 };
 }
 
-NpuMemAssembler::NpuMemAssembler() : JsonAssembler(PROCESS_NPU_MEM, {{"msprof", FileCategory::MSPROF}}) {}
+NpuMemAssembler::NpuMemAssembler() : JsonAssembler(PROCESS_NPU_MEM, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
 
 void GenerateNpuMemTrace(std::vector<NpuMemData> &npuMemData, const std::unordered_map<uint16_t, uint32_t> &pidMap,
                          std::vector<std::shared_ptr<TraceEvent>> &res)
 {
     std::shared_ptr<CounterEvent> event;
+    std::string time;
+    uint32_t pid;
     for (const auto &data : npuMemData) {
+        time = std::to_string(data.localTime / NS_TO_US);
+        pid = pidMap.at(data.deviceId);
         double hbmValue = static_cast<double >(data.hbm);
         double ddrValue = static_cast<double >(data.ddr);
         double memoryValue = static_cast<double >(data.memory);
-        MAKE_SHARED_RETURN_VOID(event, CounterEvent, pidMap.at(data.deviceId), DEFAULT_TID,
-            std::to_string(data.localTime / NS_TO_US), CounterNameMap.at(data.event).ddr);
+        MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, CounterNameMap.at(data.event).ddr);
         event->SetSeriesValue("KB", ddrValue);
         res.push_back(event);
-        MAKE_SHARED_RETURN_VOID(event, CounterEvent, pidMap.at(data.deviceId), DEFAULT_TID,
-            std::to_string(data.localTime / NS_TO_US), CounterNameMap.at(data.event).hbm);
+        MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, CounterNameMap.at(data.event).hbm);
         event->SetSeriesValue("KB", hbmValue);
         res.push_back(event);
-        MAKE_SHARED_RETURN_VOID(event, CounterEvent, pidMap.at(data.deviceId), DEFAULT_TID,
-            std::to_string(data.localTime / NS_TO_US), CounterNameMap.at(data.event).memory);
+        MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, CounterNameMap.at(data.event).memory);
         event->SetSeriesValue("KB", memoryValue);
         res.push_back(event);
     }

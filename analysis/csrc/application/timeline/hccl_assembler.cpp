@@ -35,7 +35,7 @@ std::string TransEnumToType(uint64_t key, const std::unordered_map<std::string, 
     return "";
 }
 
-HcclAssembler::HcclAssembler() : JsonAssembler(HCCL_ASSEMBLER, {{"msprof", FileCategory::MSPROF}}) {}
+HcclAssembler::HcclAssembler() : JsonAssembler(HCCL_ASSEMBLER, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
 
 void HcclOpTraceEvent::ProcessArgs(JsonWriter& ostream)
 {

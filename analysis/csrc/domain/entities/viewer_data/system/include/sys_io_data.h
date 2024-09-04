@@ -14,6 +14,8 @@
 #define ANALYSIS_DOMAIN_SYS_IO_FORMAT_PROCESSOR_H
 
 #include <cstdint>
+#include <string>
+#include <vector>
 
 namespace Analysis {
 namespace Domain {
@@ -63,6 +65,30 @@ struct SysIOReceiveSendData {
     double txErrorRate = 0.0; // 接收包错误率(%)
     double txDroppedRate = 0.0; // 接收包丢包率(%)
     uint16_t funcId = UINT16_MAX;
+};
+
+struct NicOriginalData {
+    std::vector<SysIOOriginalData> sysIOOriginalData;
+};
+
+struct NicReportData {
+    std::vector<SysIOReportData> sysIOReportData;
+};
+
+struct NicReceiveSendData {
+    std::vector<SysIOReceiveSendData> sysIOReceiveSendData;
+};
+
+struct RoceOriginalData {
+    std::vector<SysIOOriginalData> sysIOOriginalData;
+};
+
+struct RoceReportData {
+    std::vector<SysIOReportData> sysIOReportData;
+};
+
+struct RoceReceiveSendData {
+    std::vector<SysIOReceiveSendData> sysIOReceiveSendData;
 };
 }
 }

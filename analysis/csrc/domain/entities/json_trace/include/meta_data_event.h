@@ -43,6 +43,7 @@ enum ProcessSortIndex {
     LAYER_STARS_CHIP_TRANS,
     LAYER_NPU_LLC,
     LAYER_NPU_SIO,
+    LAYER_NPU_QOS,
     LAYER_OVERLAP_ANALYSIS,
     RESERVED
 };
@@ -87,6 +88,7 @@ const std::string PROCESS_STARS_SOC = "Stars Soc Info";
 const std::string PROCESS_STARS_CHIP_TRANS = "Stars Chip Trans";
 const std::string PROCESS_LLC = "LLC";
 const std::string PROCESS_SIO = "SIO";
+const std::string PROCESS_QOS = "QoS";
 
 struct LayerInfo {
     std::string component;
@@ -121,6 +123,7 @@ const std::unordered_map<std::string, LayerInfo> LAYER_INFO {
     {PROCESS_STARS_CHIP_TRANS, {PROCESS_STARS_CHIP_TRANS, LABEL_NPU, LAYER_STARS_CHIP_TRANS}},
     {PROCESS_LLC, {PROCESS_LLC, LABEL_NPU, LAYER_NPU_LLC}},
     {PROCESS_SIO, {PROCESS_SIO, LABEL_NPU, LAYER_NPU_SIO}},
+    {PROCESS_QOS, {PROCESS_QOS, LABEL_NPU, LAYER_NPU_QOS}},
     {PROCESS_OVERLAP_ANALYSE, {PROCESS_OVERLAP_ANALYSE, LABEL_NPU, LAYER_OVERLAP_ANALYSIS}},
 };
 

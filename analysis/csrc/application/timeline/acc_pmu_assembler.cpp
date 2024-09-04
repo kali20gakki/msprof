@@ -26,7 +26,7 @@ const std::string ACC_ID = "acc_id";
 const std::string VALUE = "value";
 }
 
-AccPmuAssembler::AccPmuAssembler() : JsonAssembler(PROCESS_ACC_PMU, {{"msprof", FileCategory::MSPROF}}) {}
+AccPmuAssembler::AccPmuAssembler() : JsonAssembler(PROCESS_ACC_PMU, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
 
 void GenerateAccPmuTrace(std::vector<AccPmuData> &accPmuData, const std::unordered_map<uint16_t, uint32_t> &pidMap,
                          std::vector<std::shared_ptr<TraceEvent>> &res)

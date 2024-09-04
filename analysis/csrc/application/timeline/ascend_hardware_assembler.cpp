@@ -26,7 +26,7 @@ const std::string TASK_TYPE_UNKNOWN = "UNKNOWN";
 }
 
 AscendHardwareAssembler::AscendHardwareAssembler()
-    : JsonAssembler(ASCEND_ASSEMBLER, {{"msprof", FileCategory::MSPROF}}) {}
+    : JsonAssembler(ASCEND_ASSEMBLER, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
 
 void TaskTraceEvent::ProcessArgs(JsonWriter& ostream)
 {

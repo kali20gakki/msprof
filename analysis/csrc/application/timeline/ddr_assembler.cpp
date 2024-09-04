@@ -4,7 +4,7 @@
 ****************************************************************************** */
 /* ******************************************************************************
  * File Name          : ddr_assembler.cpp
- * Description        : 组合CANN层数据
+ * Description        : 组合DDR层数据
  * Author             : msprof team
  * Creation Date      : 2024/8/29
  * *****************************************************************************
@@ -27,7 +27,7 @@ const std::string READ_SERIES = "Read(MB/s)";
 const std::string WRITE_SERIES = "Write(MB/s)";
 }
 
-DDRAssembler::DDRAssembler() : JsonAssembler(PROCESS_DDR, {{"msprof", FileCategory::MSPROF}}) {}
+DDRAssembler::DDRAssembler() : JsonAssembler(PROCESS_DDR, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
 
 void GenerateDDRTrace(std::vector<DDRData> &ddrData, const std::unordered_map<uint16_t, uint32_t> &pidMap,
                       std::vector<std::shared_ptr<TraceEvent>> &res)

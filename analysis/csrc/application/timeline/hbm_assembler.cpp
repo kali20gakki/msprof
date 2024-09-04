@@ -27,15 +27,20 @@ const std::unordered_map<std::string, std::string> CounterNameMap {
 };
 }
 
-HBMAssembler::HBMAssembler() : JsonAssembler(PROCESS_HBM, {{"msprof", FileCategory::MSPROF}}) {}
+HBMAssembler::HBMAssembler() : JsonAssembler(PROCESS_HBM, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
 
 void GenerateHbmTrace(std::vector<HbmData> &hbmData, const std::unordered_map<uint16_t, uint32_t> &pidMap,
                       std::vector<std::shared_ptr<TraceEvent>> &res)
 {
     std::shared_ptr<CounterEvent> event;
+    std::string counterName;
+    std::string series;
     for (const auto &data : hbmData) {
-        std::string counterName = "HBM " + std::to_string(data.hbmId) + "/" + CounterNameMap.at(data.eventType);
-        std::string series = CounterNameMap.at(data.eventType) + "(MB/s)";
+        counterName.clear();
+        counterName.append("HBM ").append(std::to_string(data.hbmId)).append("/").append(CounterNameMap.at(
+            data.eventType));
+        series.clear();
+        series.append(CounterNameMap.at(data.eventType)).append("(MB/s)");
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pidMap.at(data.deviceId), DEFAULT_TID,
             std::to_string(data.localTime / NS_TO_US), counterName);
         event->SetSeriesValue(series, data.bandWidth);
