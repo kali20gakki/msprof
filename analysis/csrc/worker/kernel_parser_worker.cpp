@@ -42,7 +42,8 @@ int KernelParserWorker::Run()
     // 先创建目录
     std::string sqlBaseDir = Utils::File::PathJoin({hostFilePath_, "sqlite"});
     if (!Utils::File::CreateDir(sqlBaseDir)) {
-        INFO("Create path failed");
+        ERROR("Create path failed");
+        return ANALYSIS_ERROR;
     }
     // 启动线程
     const uint16_t taskNumber = 3;

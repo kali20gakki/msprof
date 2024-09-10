@@ -93,6 +93,30 @@ class TestHostSysUsageParser(unittest.TestCase):
                 self.params["npu_id"], self.params["model_id"]))
             self.assertEqual(True, os.path.exists(pid_mem_data_file))
 
+    def test_process_should_not_generate_json_file_when_host_common_info_not_exist(self):
+        with mock.patch(NAMESPACE + '.HostSysUsageParser._get_host_dir_path', return_value=""):
+            check = HostSysUsageParser(self.params)
+            check.process()
+        with mock.patch(NAMESPACE + '.HostSysUsageParser._get_host_dir_path', return_value=self.DIR_PATH), \
+                mock.patch(NAMESPACE + '.HostSysUsageParser._get_host_common_info', return_value=None):
+            check.process()
+
+        npu_id = "npu_id"
+        model_id = "model_id"
+        query = "query"
+        sys_cpu_data_file = os.path.join(self.DIR_PATH, query, "host_sys_cpu_usage_{}_{}.json".format(
+            self.params.get(npu_id, ""), self.params.get(model_id, "")))
+        self.assertEqual(False, os.path.exists(sys_cpu_data_file))
+        pid_cpu_data_file = os.path.join(self.DIR_PATH, query, "host_pid_cpu_usage_{}_{}.json".format(
+            self.params.get(npu_id, ""), self.params.get(model_id, "")))
+        self.assertEqual(False, os.path.exists(pid_cpu_data_file))
+        sys_mem_data_file = os.path.join(self.DIR_PATH, query, "host_sys_mem_usage_{}_{}.json".format(
+            self.params.get(npu_id, ""), self.params.get(model_id, "")))
+        self.assertEqual(False, os.path.exists(sys_mem_data_file))
+        pid_mem_data_file = os.path.join(self.DIR_PATH, query, "host_pid_mem_usage_{}_{}.json".format(
+            self.params.get(npu_id, ""), self.params.get(model_id, "")))
+        self.assertEqual(False, os.path.exists(pid_mem_data_file))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -148,9 +148,8 @@ class TestParsingCPUData(unittest.TestCase):
         with mock.patch('os.path.exists', return_value=True), \
                 mock.patch('os.path.isdir', return_value=True), \
                 mock.patch('os.access', return_value=True):
-            with pytest.raises(AttributeError):
-                check = ParsingCPUData(CONFIG)
-                check.init_cpu_db()
+            check = ParsingCPUData(CONFIG)
+            check.init_cpu_db()
 
     def test_parsing_data_file(self):
         with DBOpen('test.db') as db_open:
