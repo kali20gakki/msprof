@@ -61,12 +61,12 @@ class HostSysUsageParser:
         # get host dir path from cluster_rank.db
         host_path = self._get_host_dir_path()
         if not host_path:
-            logging.info("Get prof host directory path fail.")
+            logging.warning("Get prof host directory path fail.")
             return
         # get host basic info from info.json/sample.json
         common_info = self._get_host_common_info(host_path)
         if not common_info:
-            logging.info("Get common info fail.")
+            logging.warning("The common info cannot be obtained.")
             return
 
         self.cpu_usage_model = SysUsageModel(host_path, DBNameConstant.DB_HOST_SYS_USAGE_CPU,

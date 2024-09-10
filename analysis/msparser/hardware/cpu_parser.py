@@ -207,7 +207,8 @@ class ParsingCPUData(MsMultiProcess):
         check_path_valid(db_path, False)
         self.conn, self.curs = DBManager.create_connect_db(os.path.join(db_path, self.dbname))
         if not (self.conn and self.curs):
-            logging.info("Failed to connect to the database: %s", self.dbname)
+            logging.error("Failed to connect to the database: %s", self.dbname)
+            return
         try:
             self.curs.execute("PRAGMA page_size=8192")
         except sqlite3.Error:
