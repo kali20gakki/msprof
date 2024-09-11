@@ -212,6 +212,8 @@ TEST_F(MsprofTxUtest, MsprofTxMarkExWillReturnFailWithInvalidInput)
     aclrtStream streamId = (void *)0x12345; // 0x12345 fake stream addr
     EXPECT_EQ(PROFILING_FAILED, manager->MarkEx(nullptr, msg.size(), streamId));
     EXPECT_EQ(PROFILING_FAILED, manager->MarkEx(msg.c_str(), msg.size() + 1, streamId));
+    msg = ""; // msgLen < 1
+    EXPECT_EQ(PROFILING_FAILED, manager->MarkEx(msg.c_str(), msg.size(), streamId));
     manager->UnInit();
 }
 
