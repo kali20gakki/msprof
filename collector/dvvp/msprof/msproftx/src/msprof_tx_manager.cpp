@@ -241,6 +241,7 @@ int MsprofTxManager::MarkEx(CONST_CHAR_PTR msg, size_t msgLen, aclrtStream strea
     if (msgLen > static_cast<size_t>(MAX_MESSAGE_LEN - 1) || msgLen < 1) {
         MSPROF_LOGE("[MarkEx]The length of input message should be in range of 1~%zu",
                     static_cast<size_t>(MAX_MESSAGE_LEN - 1));
+        return PROFILING_FAILED;
     }
     // create MsprofTxInfo info
     MsprofTxInfo info;
