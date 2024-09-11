@@ -47,6 +47,7 @@
 #include "uploader.h"
 #include "transport/hdc/hdc_transport.h"
 #include "msprof_reporter_mgr.h"
+#include "dyn_prof_mgr.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Analyze;
@@ -1830,6 +1831,49 @@ TEST_F(MSPROF_CALL_BACK_IMPL_UTEST, MsprofCtrlCallbackImpl)
         .then(returnValue(ACL_ERROR_PROFILING_FAILURE));
     ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
     EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, CtrlCallbackImplWillReturnErrorWhileStartDynProfFail)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&analysis::dvvp::common::utils::Utils::IsDynProfMode)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&Collector::Dvvp::DynProf::DynProfMgr::StartDynProf)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_INIT_DYNA, nullptr, 0));
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, CtrlCallbackImplWillReturnErrorWhileSetDeviceCallbackFail)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&analysis::dvvp::common::utils::Utils::IsDynProfMode)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&Collector::Dvvp::DynProf::DynProfMgr::StartDynProf)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ProfApiPlugin::MsprofProfRegDeviceStateCallback)
+        .stubs()
+        .will(returnValue(1));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_INIT_DYNA, nullptr, 0));
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, CtrlCallbackImplWillReturnSuccWhileStartDynProfSucc)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&analysis::dvvp::common::utils::Utils::IsDynProfMode)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&Collector::Dvvp::DynProf::DynProfMgr::StartDynProf)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ProfApiPlugin::MsprofProfRegDeviceStateCallback)
+        .stubs()
+        .will(returnValue(0));
+    int32_t ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_INIT_DYNA, nullptr, 0);
     EXPECT_EQ(MSPROF_ERROR_NONE, ret);
 }
  

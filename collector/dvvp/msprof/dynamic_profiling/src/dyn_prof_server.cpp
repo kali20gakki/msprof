@@ -152,7 +152,7 @@ int DynProfServer::DynProfServerCreateSock()
 
 bool DynProfServer::IdleConnectOverTime(uint32_t &recvIdleTimes) const
 {
-    if (profHasStarted_) {
+    if (profHasStarted_.load()) {
         return false;
     }
     if (++recvIdleTimes <= DYN_PROF_IDLE_LINK_HOLD_TIME) {
@@ -215,7 +215,7 @@ void DynProfServer::DynProfServerProcMsg()
 
 void DynProfServer::DynProfSrvProcStart()
 {
-    if (profHasStarted_) {
+    if (profHasStarted_.load()) {
         MSPROF_LOGW("Dynamic profiling repeat start.");
         DynProfServerRsqMsg(DynProfMsgType::START_RSP, DynProfMsgProcRes::EXE_FAIL, "Collection has been started.");
         return;
@@ -238,36 +238,39 @@ void DynProfServer::DynProfSrvProcStart()
         MSPROF_LOGE("Dynamic profiling failed to init acl manager");
         DynProfServerRsqMsg(DynProfMsgType::START_RSP, DynProfMsgProcRes::EXE_FAIL, "Internal error.");
         Msprofiler::Api::ProfAclMgr::instance()->SetModeToOff();
-        return ;
+        return;
     }
     Msprofiler::Api::ProfAclMgr::instance()->MsprofHostHandle();
     std::string startDevId;
     std::string startSuccDevId;
-    startTimes_ += 1;
-    for (auto &devInfo : devicesInfo_) {
-        startDevId = startDevId + std::to_string(devInfo.deviceId) + " ";
-        if (MsprofSetDeviceCallbackImpl(reinterpret_cast<VOID_PTR>(&devInfo), sizeof(devInfo)) != MSPROF_ERROR_NONE) {
-            continue;
+    {
+        std::lock_guard<std::mutex> lk(deviceMtx_);
+        for (auto &devInfo : deviceInfos_) {
+            startDevId = startDevId + std::to_string(devInfo.first) + " ";
+            if (MsprofSetDeviceCallbackImpl(reinterpret_cast<VOID_PTR>(&devInfo.second), sizeof(devInfo.second)) !=
+                MSPROF_ERROR_NONE) {
+                continue;
+            }
+            startSuccDevId += std::to_string(devInfo.first) + " ";
         }
-        startSuccDevId += std::to_string(devInfo.deviceId) + " ";
     }
+    
     std::string detailInfo = "Started device Id: " + startSuccDevId;
     if (startDevId != startSuccDevId || startDevId.empty()) {
         MSPROF_LOGE("Dynamic profiling start device failed, allDevId=%s, succDevId=%s.",
             startDevId.c_str(), startSuccDevId.c_str());
         DynProfServerRsqMsg(DynProfMsgType::START_RSP, DynProfMsgProcRes::EXE_FAIL, detailInfo);
-        startTimes_ -= 1;
         return;
     }
-
-    profHasStarted_ = true;
+    startTimes_ += 1;
+    profHasStarted_.store(true);
     MSPROF_LOGI("Dynamic profiling start message process success, started device id: %s.", startSuccDevId.c_str());
     DynProfServerRsqMsg(DynProfMsgType::START_RSP, DynProfMsgProcRes::EXE_SUCC, detailInfo);
 }
 
 void DynProfServer::DynProfSrvProcStop()
 {
-    if (!profHasStarted_) {
+    if (!profHasStarted_.load()) {
         MSPROF_LOGW("Dynamic profiling repeat stop.");
         DynProfServerRsqMsg(DynProfMsgType::STOP_RSP, DynProfMsgProcRes::EXE_FAIL, "Collection is not started.");
         return;
@@ -280,7 +283,7 @@ void DynProfServer::DynProfSrvProcStop()
         return;
     }
 
-    profHasStarted_ = false;
+    profHasStarted_.store(false);
     DynProfServerRsqMsg(DynProfMsgType::STOP_RSP, DynProfMsgProcRes::EXE_SUCC, "");
 }
 
@@ -289,7 +292,7 @@ void DynProfServer::DynProfSrvProcQuit()
     std::string detailInfo;
     DynProfMsgProcRes rsqCode = DynProfMsgProcRes::EXE_SUCC;
 
-    if (profHasStarted_) {
+    if (profHasStarted_.load()) {
         int ret = Msprofiler::Api::ProfAclMgr::instance()->MsprofFinalizeHandle();
         if (ret != MSPROF_ERROR_NONE) {
             MSPROF_LOGE("Dynamic profiling quit MsprofFinalizeHandle failed, ret=%d.", ret);
@@ -298,7 +301,7 @@ void DynProfServer::DynProfSrvProcQuit()
         }
     }
     DynProfServerRsqMsg(DynProfMsgType::QUIT_RSP, rsqCode, detailInfo);
-    profHasStarted_ = false;
+    profHasStarted_.store(false);
 }
 
 int DynProfServer::DynProfServerRsqMsg(DynProfMsgType msgType, DynProfMsgProcRes rsqCode,
@@ -334,7 +337,17 @@ void DynProfServer::NotifyClientDisconnet(const std::string &detailInfo)
 
 void DynProfServer::SaveDevicesInfo(ProfSetDevPara data)
 {
-    devicesInfo_.push_back(data);
+    if (profHasStarted_.load()) { // prof already start, start task for this device
+        if (MsprofSetDeviceCallbackImpl(reinterpret_cast<VOID_PTR>(&data), sizeof(data)) != MSPROF_ERROR_NONE) {
+            MSPROF_LOGE("Dynamic profiling Failed to run callback for device %u.", data.deviceId);
+        }
+    }
+    std::lock_guard<std::mutex> lk(deviceMtx_);
+    if (data.isOpen) {
+        deviceInfos_.insert({data.deviceId, data});
+    } else {
+        deviceInfos_.erase(data.deviceId);
+    }
 }
 }
 }

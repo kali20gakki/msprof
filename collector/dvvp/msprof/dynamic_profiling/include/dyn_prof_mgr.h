@@ -27,7 +27,7 @@ public:
 public:
     int StartDynProf();
     void StopDynProf();
-    void SaveDevicesInfo(ProfSetDevPara data) const;
+    void SaveDevicesInfo(ProfSetDevPara data);
     bool IsDynProfStarted();
 
 private:

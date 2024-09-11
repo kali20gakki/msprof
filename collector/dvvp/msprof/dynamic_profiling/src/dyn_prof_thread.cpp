@@ -25,7 +25,8 @@ using namespace Analysis::Dvvp::MsprofErrMgr;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::host;
 
-DynProfThread::DynProfThread() : delayTime_(0), durationTime_(0), durationSet_(false), started_(false)
+DynProfThread::DynProfThread() : delayTime_(0), durationTime_(0), durationSet_(false),
+    started_(false), profHasStarted_(false)
 {
 }
 
@@ -131,7 +132,7 @@ int DynProfThread::Stop()
 
 int DynProfThread::StartProfTask()
 {
-    if (devicesInfo_.empty()) {
+    if (deviceInfos_.empty()) {
         MSPROF_LOGW("No devices for dynamic profiling devices, maybe MsprofNotifySetdevice not called");
     }
     int ret = Msprofiler::Api::ProfAclMgr::instance()->MsprofInitAclEnv(msprofEnvCfg_);
@@ -139,27 +140,31 @@ int DynProfThread::StartProfTask()
         MSPROF_LOGE("Dynamic profiling start MsprofInitAclEnv failed, ret=%d.", ret);
         return PROFILING_FAILED;
     }
- 
+
     if (Msprofiler::Api::ProfAclMgr::instance()->Init() != PROFILING_SUCCESS) {
         MSPROF_LOGE("Dynamic profiling failed to init acl manager");
         Msprofiler::Api::ProfAclMgr::instance()->SetModeToOff();
         return PROFILING_FAILED;
     }
     Msprofiler::Api::ProfAclMgr::instance()->MsprofHostHandle();
-    
-    for (auto &devInfo : devicesInfo_) {
-        if (StartDevProfTask(devInfo) != PROFILING_SUCCESS) {
-            MSPROF_LOGE("Dynamic profiling start device: %u failed", devInfo.deviceId);
-            return PROFILING_FAILED;
+
+    {
+        std::lock_guard<std::mutex> lk(deviceMtx_);
+        for (auto &devInfo : deviceInfos_) {
+            if (HandleDevProfTask(devInfo.second) != PROFILING_SUCCESS) {
+                MSPROF_LOGE("Dynamic profiling start device: %u failed", devInfo.second);
+                return PROFILING_FAILED;
+            }
         }
     }
+    profHasStarted_.store(true);
     MSPROF_LOGI("Dynamic profiling start");
     return PROFILING_SUCCESS;
 }
  
-int DynProfThread::StartDevProfTask(const ProfSetDevPara &devInfo)
+int DynProfThread::HandleDevProfTask(const ProfSetDevPara &devInfo)
 {
-    MSPROF_EVENT("Start device %u prof task, if open: %d", devInfo.deviceId, devInfo.isOpen);
+    MSPROF_EVENT("Handle device %u prof task, if open: %d", devInfo.deviceId, devInfo.isOpen);
     if (devInfo.isOpen) {
         std::string info;
         if (!(ProfManager::instance()->CheckIfDevicesOnline(std::to_string(devInfo.deviceId), info))) {
@@ -171,8 +176,14 @@ int DynProfThread::StartDevProfTask(const ProfSetDevPara &devInfo)
             MSPROF_LOGE("GeOpenDeviceHandle failed");
             return PROFILING_FAILED;
         }
+    } else {
+        if (Msprofiler::Api::ProfAclMgr::instance()->MsprofResetDeviceHandle(devInfo.deviceId) != PROFILING_SUCCESS) {
+            MSPROF_LOGE("MsprofResetDeviceHandle failed");
+            return PROFILING_FAILED;
+        }
     }
-    MSPROF_LOGI("Succeed to start device %u prof task", devInfo.deviceId);
+    profHasStarted_.store(false);
+    MSPROF_LOGI("Succeed to Handle device %u prof task", devInfo.deviceId);
     return PROFILING_SUCCESS;
 }
  
@@ -188,11 +199,16 @@ int DynProfThread::StopProfTask()
 
 void DynProfThread::SaveDevicesInfo(ProfSetDevPara data)
 {
-    devicesInfo_.push_back(data);
-    if (Msprofiler::Api::ProfAclMgr::instance()->IsCmdMode()) { // 如果采集已开始，则开启对应device的采集任务
-        if (StartDevProfTask(data) != PROFILING_SUCCESS) {
-            MSPROF_LOGW("Failed to start device %u prof task", data.deviceId);
+    if (profHasStarted_.load()) { // prof already start, start task for this device
+        if (HandleDevProfTask(data) != PROFILING_SUCCESS) {
+            MSPROF_LOGE("Failed to start device %u prof task", data.deviceId);
         }
+    }
+    std::lock_guard<std::mutex> lk(deviceMtx_);
+    if (data.isOpen) {
+        deviceInfos_.insert({data.deviceId, data});
+    } else {
+        deviceInfos_.erase(data.deviceId);
     }
 }
 } // DynProf

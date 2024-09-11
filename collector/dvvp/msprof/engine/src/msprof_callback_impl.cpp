@@ -97,11 +97,14 @@ int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len)
         if (DynProfMgr::instance()->IsDynProfStarted()) {
             return MSPROF_ERROR_NONE;
         }
+        if (DynProfMgr::instance()->StartDynProf() != PROFILING_SUCCESS) {
+            return MSPROF_ERROR;
+        }
         if (ProfApiPlugin::instance()->MsprofProfRegDeviceStateCallback(MsprofSetDeviceCallbackForDynProfImpl) != 0) {
             MSPROF_LOGE("Dynamic profiling failed to register device state callback.");
             return MSPROF_ERROR;
         }
-        return InternalErrorCodeToExternal(DynProfMgr::instance()->StartDynProf());
+        return MSPROF_ERROR_NONE;
     }
     if ((type == MSPROF_CTRL_INIT_DYNA) &&
         (Utils::GetEnvString(PROFILER_SAMPLE_CONFIG_ENV).empty() ||

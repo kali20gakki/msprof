@@ -8,6 +8,7 @@
 #ifndef COLLECTOR_DYNAMIC_PROFILING_THREAD_H
 #define COLLECTOR_DYNAMIC_PROFILING_THREAD_H
 
+#include <atomic>
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
@@ -33,7 +34,7 @@ public:
 private:
     int GetDelayAndDurationTime();
     int StartProfTask();
-    int StartDevProfTask(const ProfSetDevPara &devInfo);
+    int HandleDevProfTask(const ProfSetDevPara &devInfo);
     int StopProfTask();
 
 private:
@@ -43,7 +44,9 @@ private:
     bool durationSet_;
     std::condition_variable cvThreadStop_;
     std::mutex threadStopMtx_;
-    std::vector<ProfSetDevPara> devicesInfo_;
+    std::atomic<bool> profHasStarted_;
+    std::mutex deviceMtx_;
+    std::map<uint32_t, ProfSetDevPara> deviceInfos_;
     std::string msprofEnvCfg_;
 };
 } // DynProf

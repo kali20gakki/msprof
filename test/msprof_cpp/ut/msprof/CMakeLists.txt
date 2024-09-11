@@ -111,7 +111,6 @@ set(profilerSrcList
 
 set(profilerSrcFile
     test/main.cpp
-    test/dyn_prof_utest.cpp
     test/msprof_callback_handler_utest.cpp
     test/msprof_reporter_mgr_utest.cpp
     test/prof_acl_core_utest.cpp
@@ -119,6 +118,7 @@ set(profilerSrcFile
     test/analyzer_utest.cpp
     test/msproftx_utest.cpp
     test/mstx_utest.cpp
+    test/dyn_prof_utest.cpp
     ../stub/ge_stub.cpp
     ../stub/hdc-log-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
