@@ -6,6 +6,9 @@
  */
 #ifndef COLLECTOR_DYNAMIC_PROFILING_SERVER_H
 #define COLLECTOR_DYNAMIC_PROFILING_SERVER_H
+
+#include <atomic>
+#include <mutex>
 #include "thread/thread.h"
 #include "dyn_prof_common.h"
 #include "prof_api.h"
@@ -36,11 +39,12 @@ private:
     int srvSockFd_;
     int cliSockFd_;
     bool srvStarted_;
-    bool profHasStarted_;
+    std::atomic<bool> profHasStarted_;
     uint32_t startTimes_;
     std::string recvParams_;
     std::string sockPath_;
-    std::vector<ProfSetDevPara> devicesInfo_;
+    std::mutex deviceMtx_;
+    std::map<uint32_t, ProfSetDevPara> deviceInfos_;
 };
 
 }

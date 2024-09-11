@@ -75,8 +75,9 @@ void DynProfMgr::StopDynProf()
     MSPROF_EVENT("Dynamic profiling task stoped");
 }
 
-void DynProfMgr::SaveDevicesInfo(ProfSetDevPara data) const
+void DynProfMgr::SaveDevicesInfo(ProfSetDevPara data)
 {
+    std::lock_guard<std::mutex> lk(startMtx_);
     if (dynProfSrv_ != nullptr) {
         dynProfSrv_->SaveDevicesInfo(data);
     } else if (dynProfThread_ != nullptr) {
