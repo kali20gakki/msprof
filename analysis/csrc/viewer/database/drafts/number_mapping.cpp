@@ -239,7 +239,8 @@ namespace {
         {6, "ACL_ASCENDC"},
         {7, "HOST_HCCL"},
         {9, "ACL_DVPP"},
-        {10, "ACL_GRAPH"}
+        {10, "ACL_GRAPH"},
+        {11, "ACL_ATB"},
 
     };
     std::vector<std::unordered_map<uint32_t, std::string>> allMaps {geDataTypeMap, geFormatMap, geTaskTypeMap,

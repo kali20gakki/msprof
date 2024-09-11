@@ -20,6 +20,8 @@ class HashDicParser(IParser, MsMultiProcess):
     """
     hash data parser
     """
+    COLON = ":"
+    UNDERLINE = "_"
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
@@ -75,7 +77,10 @@ class HashDicParser(IParser, MsMultiProcess):
         with FileOpen(file_path, "r") as _file:
             data_lines = _file.file_reader.readlines(Constant.MAX_READ_FILE_BYTES)
         for line in data_lines:
-            key, value = line.strip().split(":", 1)
+            if self.COLON not in line:
+                logging.warning("GE hash data is invalid: %s", line)
+                continue
+            key, value = line.strip().split(self.COLON, 1)
             if key.isdigit():
                 self._hash_data['ge_hash'].append([key, value])
 
@@ -83,7 +88,10 @@ class HashDicParser(IParser, MsMultiProcess):
         with FileOpen(file_path, "r") as _file:
             data_lines = _file.file_reader.readlines(Constant.MAX_READ_FILE_BYTES)
         for line in data_lines:
-            key, value = line.strip().split(":", 1)
-            level, key = key.split('_')
+            if self.COLON not in line or self.UNDERLINE not in line:
+                logging.warning("Type hash data is invalid: %s", line)
+                continue
+            key, value = line.strip().split(self.COLON, 1)
+            level, key = key.split(self.UNDERLINE)
             if key.isdigit() and level.isdigit() and int(level) in LevelDataType.member_map():
                 self._hash_data['type_hash'].append([key, value, LevelDataType(int(level)).name.lower()])

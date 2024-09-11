@@ -65,7 +65,8 @@ bool TypeData::ReadFiles(const std::vector<std::string> &files)
             continue;
         }
         for (const auto &line : text) {
-            auto tokens = Utils::Split(line, ":");
+            const int splitPosition = 1;
+            auto tokens = Utils::Split(line, ":", splitPosition);
             if (tokens.size() != expectTokenSize) {
                 ERROR("Found illegal type line: %", line);
                 continue;
