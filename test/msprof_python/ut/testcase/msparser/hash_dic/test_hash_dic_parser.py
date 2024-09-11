@@ -49,14 +49,14 @@ class TestHashDicParser(unittest.TestCase):
             check.parse()
 
     def test_read_ge_hash_data(self):
-        data = """7634890245309224580:resnet50\n10401956421971378586:ArgMaxD"""
+        data = """7634890245309224580:resnet50\n10401956421971378586:ArgMaxD\n10401956421971378587"""
         with mock.patch('common_func.file_manager.check_path_valid', return_value=True), \
                 mock.patch('builtins.open', mock.mock_open(read_data=data)):
             check = HashDicParser(self.file_list, CONFIG)
             check._read_ge_hash_data('test')
 
     def test_read_type_hash_data(self):
-        data = """20000_1:TypeOp\n20000_5:AclmdlExecute"""
+        data = """20000_1:TypeOp\n20000_5:AclmdlExecute\n20000"""
         with mock.patch('common_func.file_manager.check_path_valid', return_value=True), \
                 mock.patch('builtins.open', mock.mock_open(read_data=data)):
             check = HashDicParser(self.file_list, CONFIG)

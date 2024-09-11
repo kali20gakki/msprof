@@ -98,6 +98,7 @@ class AclApiTag(Enum):
     HOST_HCCL = 7
     ACL_DVPP = 9
     ACL_GRAPH = 10
+    ACL_ATB = 11
 
 
 @unique
