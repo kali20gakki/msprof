@@ -10,6 +10,7 @@
 #include "mockcpp/mockcpp.hpp"
 
 #include "activity/ascend/parser/parser_manager.h"
+#include "common/inject/runtime_inject.h"
 #include "common/utils.h"
 #include "securec.h"
 
@@ -23,7 +24,7 @@ protected:
     virtual void TearDown() {}
 };
 
-TEST_F(ParserUtest, ParserManagerUtestWithReportApiSuccess)
+TEST_F(ParserUtest, ShouldRetSuccessWhenReportApiSuccess)
 {
     auto instance = Mspti::Parser::ParserManager::GetInstance();
     const std::string hashInfo = "aclnnAdd_AxpyAiCore_Axpy";
@@ -45,7 +46,7 @@ TEST_F(ParserUtest, ParserManagerUtestWithReportApiSuccess)
     EXPECT_EQ(MSPTI_SUCCESS, instance->ReportApi(&data));
 }
 
-TEST_F(ParserUtest, ParserManagerUtestWithKernelSuccess)
+TEST_F(ParserUtest, ShouldRetSccessWhenReportKernelInfo)
 {
     auto instance = Mspti::Parser::ParserManager::GetInstance();
     constexpr uint16_t flipId = 0;
@@ -81,6 +82,23 @@ TEST_F(ParserUtest, ParserManagerUtestWithKernelSuccess)
     flipData.streamId = streamId;
     flipData.flipId = flipId;
     instance->ReportFlipInfo(deviceId, &flipData);
+}
+
+TEST_F(ParserUtest, ShouldRetSccessWhenReportMstxData)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(rtProfilerTraceEx)
+        .stubs()
+        .will(returnValue(static_cast<RtErrorT>(MSPTI_SUCCESS)));
+    auto instance = Mspti::Parser::ParserManager::GetInstance();
+    const char* message = "UserMark";
+    RtStreamT stream = (void*)0x1234567;
+    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportMark(message, stream));
+    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportMark(message, nullptr));
+    uint64_t markId;
+    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRangeStartA(message, stream, markId));
+    EXPECT_EQ(2UL, markId);
+    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRangeEnd(markId));
 }
 
 }

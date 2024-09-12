@@ -26,6 +26,7 @@ namespace Activity {
 void ActivityBuffer::Init(msptiBuffersCallbackRequestFunc func)
 {
     if (func == nullptr) {
+        MSPTI_LOGE("The request callback is nullptr.");
         return;
     }
     func(&buf_, &buf_size_, &records_num_);
@@ -38,6 +39,7 @@ void ActivityBuffer::Init(msptiBuffersCallbackRequestFunc func)
 void ActivityBuffer::UnInit(msptiBuffersCallbackCompleteFunc func)
 {
     if (func == nullptr) {
+        MSPTI_LOGE("The complete callback is nullptr.");
         return;
     }
     func(buf_, buf_size_, valid_size_);
@@ -46,6 +48,11 @@ void ActivityBuffer::UnInit(msptiBuffersCallbackCompleteFunc func)
 msptiResult ActivityBuffer::Record(msptiActivity *activity, size_t size)
 {
     if (activity == nullptr) {
+        MSPTI_LOGE("The activity is nullptr, failed to record.");
+        return MSPTI_ERROR_INNER;
+    }
+    if (buf_ == nullptr) {
+        MSPTI_LOGE("The ActivityBuffer is nullptr, failed to record activity.");
         return MSPTI_ERROR_INNER;
     }
     if (size > buf_size_ - valid_size_) {
@@ -69,6 +76,10 @@ size_t ActivityBuffer::ValidSize()
 {
     return valid_size_;
 }
+
+const std::set<msptiActivityKind> ActivityManager::supportActivityKinds_ = {
+    MSPTI_ACTIVITY_KIND_MARKER, MSPTI_ACTIVITY_KIND_KERNEL, MSPTI_ACTIVITY_KIND_API,
+};
 
 ActivityManager *ActivityManager::GetInstance()
 {
@@ -116,6 +127,7 @@ msptiResult ActivityManager::RegisterCallbacks(
     msptiBuffersCallbackCompleteFunc funcBufferCompleted)
 {
     if (funcBufferRequested == nullptr || funcBufferCompleted == nullptr) {
+        MSPTI_LOGE("Call msptiActivityRegisterCallbacks failed while request or complete callback is nullptr.");
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
     bufferRequested_handle_ = funcBufferRequested;
@@ -129,12 +141,17 @@ msptiResult ActivityManager::RegisterCallbacks(
 
 msptiResult ActivityManager::Register(msptiActivityKind kind)
 {
+    if (supportActivityKinds_.find(kind) == supportActivityKinds_.end()) {
+        MSPTI_LOGE("The ActivityKind: %d was not support.", static_cast<int>(kind));
+        return MSPTI_ERROR_INVALID_PARAMETER;
+    }
     {
         std::lock_guard<std::mutex> lk(activity_mtx_);
         if (activity_set_.find(kind) != activity_set_.end()) {
             return MSPTI_SUCCESS;
         }
         activity_set_.insert(kind);
+        MSPTI_LOGI("Register Activity kind: %d", static_cast<int>(kind));
     }
     std::unordered_set<uint32_t> devices;
     {
@@ -149,12 +166,17 @@ msptiResult ActivityManager::Register(msptiActivityKind kind)
 
 msptiResult ActivityManager::UnRegister(msptiActivityKind kind)
 {
+    if (supportActivityKinds_.find(kind) == supportActivityKinds_.end()) {
+        MSPTI_LOGE("The ActivityKind: %d was not support.", static_cast<int>(kind));
+        return MSPTI_ERROR_INVALID_PARAMETER;
+    }
     {
         std::lock_guard<std::mutex> lk(activity_mtx_);
         if (activity_set_.find(kind) == activity_set_.end()) {
             return MSPTI_SUCCESS;
         }
         activity_set_.erase(kind);
+        MSPTI_LOGI("UnRegister Activity kind: %d", static_cast<int>(kind));
     }
     std::unordered_set<uint32_t> devices;
     {
@@ -170,6 +192,7 @@ msptiResult ActivityManager::UnRegister(msptiActivityKind kind)
 msptiResult ActivityManager::GetNextRecord(uint8_t *buffer, size_t validBufferSizeBytes, msptiActivity **record)
 {
     if (buffer == nullptr) {
+        MSPTI_LOGE("The address of Activity Buffer is nullptr.");
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
     static thread_local size_t pos = 0;
@@ -209,6 +232,7 @@ msptiResult ActivityManager::FlushAll()
         activity_buffer->UnInit(bufferCompleted_handle_);
     }
     co_activity_buffers_.clear();
+    MSPTI_LOGI("Flush all activity buffer.");
     return MSPTI_SUCCESS;
 }
 
@@ -257,6 +281,7 @@ msptiResult ActivityManager::Record(msptiActivity *activity, size_t size)
 
 void ActivityManager::Run()
 {
+    pthread_setname_np(pthread_self(), "ActivityManager");
     while (true) {
         {
             std::unique_lock<std::mutex> lk(cv_mtx_);
@@ -278,6 +303,7 @@ void ActivityManager::Run()
 
 msptiResult ActivityManager::SetDevice(uint32_t deviceId)
 {
+    MSPTI_LOGI("Set device: %u", deviceId);
     {
         std::lock_guard<std::mutex> lk(devices_mtx_);
         if (devices_.find(deviceId) != devices_.end()) {
@@ -303,6 +329,7 @@ msptiResult ActivityManager::SetDevice(uint32_t deviceId)
 
 msptiResult ActivityManager::DeviceReset(uint32_t deviceId)
 {
+    MSPTI_LOGI("Reset device: %u", deviceId);
     {
         std::lock_guard<std::mutex> lk(devices_mtx_);
         if (devices_.find(deviceId) == devices_.end()) {

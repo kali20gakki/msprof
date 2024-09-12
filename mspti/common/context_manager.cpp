@@ -62,7 +62,7 @@ static uint64_t GetDevFreq(uint32_t device)
         auto platform = GetChipTypeImpl(device);
         auto iter = FREQ_MAP.find(platform);
         uint64_t defaultFreq = (iter == FREQ_MAP.end()) ? DEFAULT_FREQ : iter->second;
-        MSPTI_LOGW("Get Device: %u osc freq failed. use default freq: %lu", defaultFreq);
+        MSPTI_LOGW("Get Device: %u osc freq failed. use default freq: %lu", device, defaultFreq);
         return defaultFreq;
     }
     return freq;
@@ -116,7 +116,6 @@ void ContextManager::InitDevTimeInfo(uint32_t deviceId)
         dev_ptr->startRealTime = (t2 + t1) / AVE_NUM;
         dev_time_info_.insert({deviceId, std::move(dev_ptr)});
     }
-    return;
 }
 
 bool ContextManager::HostFreqIsEnable()

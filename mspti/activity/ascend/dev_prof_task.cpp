@@ -59,7 +59,7 @@ std::vector<std::unique_ptr<DevProfTask>> DevProfTaskFactory::CreateTasks(uint32
     auto platform = Mspti::Common::ContextManager::GetInstance()->GetChipType(deviceId);
     auto devIter = kindToChannel_map_.find(platform);
     if (devIter == kindToChannel_map_.end()) {
-        MSPTI_LOGE("The platform: %d of device: %u is not support.", platform, deviceId);
+        MSPTI_LOGE("The platform: %d of device: %u is not support.", static_cast<int>(platform), deviceId);
         return profTasks;
     }
     auto kindIter = devIter->second.find(kind);
@@ -98,6 +98,7 @@ msptiResult DevProfTask::Stop()
 
 void DevProfTask::Run()
 {
+    pthread_setname_np(pthread_self(), "DevProfTsak");
     StartTask();
     {
         std::unique_lock<std::mutex> lk(cv_mtx_);

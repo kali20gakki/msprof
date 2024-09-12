@@ -24,7 +24,7 @@ protected:
     virtual void TearDown() {}
 };
 
-TEST_F(ChannelUtest, ChannelReaderUtest)
+TEST_F(ChannelUtest, ShouldRetSuccessWhenExecChannelReaderCorrectly)
 {
     uint32_t deviceId = 0;
     AI_DRV_CHANNEL channelId = PROF_CHANNEL_TS_FW;

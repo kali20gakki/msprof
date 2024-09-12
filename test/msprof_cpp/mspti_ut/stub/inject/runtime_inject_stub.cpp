@@ -1,0 +1,12 @@
+/**
+* @file profapi_inject_stub.cpp
+*
+* Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
+*
+*/
+#include "common/inject/runtime_inject.h"
+
+RtErrorT rtProfilerTraceEx(uint64_t id, uint64_t modelId, uint16_t tagId, RtStreamT stm)
+{
+    return 0;
+}

@@ -92,6 +92,7 @@ void ChannelPool::Stop()
 
 void ChannelPool::Run()
 {
+    pthread_setname_np(pthread_self(), "MsptiChannelPool");
     static const int CHANNEL_POOL_NUM = 6; // at most get 6 channels to read once loop
     static const int DEFAULT_TIMEOUT_SEC = 1; // at most wait for 1 seconds
     static constexpr size_t channel_info_size = CHANNEL_POOL_NUM * sizeof(struct ProfPollInfo);

@@ -16,8 +16,6 @@
 #include "common/inject/inject_base.h"
 #include "external/mspti_result.h"
 
-#define RT_STREAM void*
-
 typedef enum {
     MSTX_FUNC_START = 0,
     MSTX_FUNC_MARKA = 1,
@@ -36,17 +34,13 @@ typedef void (*MstxFuncPointer)(void);
 typedef MstxFuncPointer** MstxFuncTable;
 typedef int (*MstxGetModuleFuncTableFunc)(MstxFuncModule module, MstxFuncTable *outTable, unsigned int *outSize);
  
-void MstxMarkAFunc(const char* msg, RT_STREAM stream);
-uint64_t MstxRangeStartAFunc(const char* msg, RT_STREAM stream);
+void MstxMarkAFunc(const char* msg, RtStreamT stream);
+uint64_t MstxRangeStartAFunc(const char* msg, RtStreamT stream);
 void MstxRangeEndFunc(uint64_t rangeId);
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
-
-MSPTI_API void aclprofMarkEx(const char* message, size_t len, RT_STREAM stream);
-
-MSPTI_API void aclprofMark(void *stamp);
 
 MSPTI_API int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable);
 
