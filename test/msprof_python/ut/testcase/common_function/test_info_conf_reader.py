@@ -12,6 +12,7 @@ class TestInfoConfReader(unittest.TestCase):
     def tearDown(self) -> None:
         info_reader = InfoConfReader()
         info_reader._info_json = {}
+        info_reader._sample_json = {}
         info_reader._host_freq = None
         info_reader._local_time_offset = 0
         info_reader._start_info = {}
@@ -70,6 +71,44 @@ class TestInfoConfReader(unittest.TestCase):
     def test_duration_from_syscnt_should_return_duration_time_when_hwts_frequency_is_1000(self):
         InfoConfReader()._info_json = {'DeviceInfo': [{'hwts_frequency': "1000"}]}
         self.assertEqual(15000000.0, InfoConfReader().duration_from_syscnt(15000000000))
+
+    def test_get_device_list_when_only_1_device_id(self):
+        InfoConfReader()._sample_json = {'devices': "5"}
+        self.assertEqual(['5'], InfoConfReader().get_device_list())
+        InfoConfReader()._sample_json = {}
+
+    def test_get_device_list_when_device_id_with_space(self):
+        InfoConfReader()._sample_json = {'devices': "5 , 7"}
+        self.assertEqual(['5 ', ' 7'], InfoConfReader().get_device_list())
+        InfoConfReader()._sample_json = {}
+
+    def test_get_device_list_when_more_than_2_device_id(self):
+        InfoConfReader()._sample_json = {'devices': "3,5,7"}
+        self.assertEqual(['3', '5', '7'], InfoConfReader().get_device_list())
+        InfoConfReader()._sample_json = {}
+
+    def test_get_device_list_when_devices_is_empty(self):
+        InfoConfReader()._sample_json = {'devices': ""}
+        with pytest.raises(ProfException) as err:
+            InfoConfReader().get_device_list()
+        InfoConfReader()._sample_json = {}
+
+    def test_get_device_list_when_no_devices(self):
+        InfoConfReader()._sample_json = {}
+        with pytest.raises(ProfException) as err:
+            InfoConfReader().get_device_list()
+        InfoConfReader()._sample_json = {}
+
+    def test_get_device_list_when_devices_is_invald(self):
+        InfoConfReader()._sample_json = {'devices': "5,abc"}
+        with pytest.raises(ProfException) as err:
+            InfoConfReader().get_device_list()
+
+        InfoConfReader()._sample_json = {'devices': "0,²"}
+        with pytest.raises(ProfException) as err:
+            InfoConfReader().get_device_list()
+
+        InfoConfReader()._sample_json = {}
 
 
 if __name__ == '__main__':
