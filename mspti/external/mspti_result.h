@@ -11,9 +11,6 @@
 #ifndef MSPTI_BASE_H
 #define MSPTI_BASE_H
 
-#include <stddef.h>
-#include <stdint.h>
-
 /**
  * @brief MSPTI result codes.
  *

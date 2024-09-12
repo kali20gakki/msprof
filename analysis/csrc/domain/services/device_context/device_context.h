@@ -95,21 +95,21 @@ struct CpuInfo {
 
 struct SampleInfo {
     // aic sample info
-    bool aiCoreProfiling;
-    AicMetricsEventsType aiCoreMetrics;
+    bool aiCoreProfiling = false;
+    AicMetricsEventsType aiCoreMetrics = AicMetricsEventsType::AIC_METRICS_UNKNOWN;
     std::string aiCoreProfilingEventsStr;
     std::vector<uint32_t> aiCoreProfilingEvents;
-    uint32_t aiCoreProfilingCnt;
-    ProfilingMode aiCoreProfilingMode;
-    uint32_t aiCoreSamplingInterval;
+    uint32_t aiCoreProfilingCnt = 0;
+    ProfilingMode aiCoreProfilingMode = ProfilingMode::PROFILING_UNKOWN;
+    uint32_t aiCoreSamplingInterval = 0;
 
     // aiv sample info
-    bool aivProfiling;
-    AivMetricsEventsType aivMetrics;
+    bool aivProfiling = false;
+    AivMetricsEventsType aivMetrics = AivMetricsEventsType::AIV_METRICS_UNKNOWN;
     std::string aivProfilingEventsStr;
     std::vector<uint32_t> aivProfilingEvents;
-    ProfilingMode aivProfilingMode;
-    uint32_t aivSamplingInterval;
+    ProfilingMode aivProfilingMode = ProfilingMode::PROFILING_UNKOWN;
+    uint32_t aivSamplingInterval = 0;
 
     SampleInfo() : aiCoreProfilingEvents(DEFAULT_PMU_LENGTH), aivProfilingEvents(DEFAULT_PMU_LENGTH) {}
 };
