@@ -45,8 +45,8 @@ private:
     msptiResult StartAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks);
     msptiResult StopAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks);
     void RegisterReportCallback();
-    void StartCannProfTask(uint32_t deviceId, msptiActivityKind kind);
-    void StopCannProfTask(uint32_t deviceId, msptiActivityKind kind);
+    msptiResult StartCannProfTask(uint32_t deviceId, msptiActivityKind kind);
+    msptiResult StopCannProfTask(uint32_t deviceId, msptiActivityKind kind);
 
 private:
     std::set<uint32_t> device_set_;

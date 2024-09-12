@@ -9,10 +9,11 @@
 
 #include "mockcpp/mockcpp.hpp"
 
-#include "mspti.h"
-#include "activity/ascend/dev_task_manager.h"
 #include "activity/ascend/channel/channel_pool_manager.h"
+#include "activity/ascend/dev_task_manager.h"
 #include "common/context_manager.h"
+#include "common/inject/profapi_inject.h"
+#include "mspti.h"
 
 namespace {
 class DevProfTaskUtest : public testing::Test {
@@ -21,7 +22,7 @@ protected:
     virtual void TearDown() {}
 };
 
-TEST_F(DevProfTaskUtest, DevProfTaskFactoryTestWithCreateTasks)
+TEST_F(DevProfTaskUtest, ShouldGetRightProfTaskNumsWhenSetDifferentKind)
 {
     GlobalMockObject::verify();
     MOCKER_CPP(&Mspti::Common::ContextManager::GetChipType)
@@ -35,10 +36,6 @@ TEST_F(DevProfTaskUtest, DevProfTaskFactoryTestWithCreateTasks)
     auto profTasks = Mspti::Ascend::DevProfTaskFactory::CreateTasks(deviceId, kind);
     constexpr size_t MARKER_PROF_TASK_NUM = 1;
     EXPECT_EQ(MARKER_PROF_TASK_NUM, profTasks.size());
-    kind = MSPTI_ACTIVITY_KIND_COUNT;
-    profTasks = Mspti::Ascend::DevProfTaskFactory::CreateTasks(deviceId, kind);
-    constexpr size_t ERROR_PROF_TASK_NUM = 0;
-    EXPECT_EQ(ERROR_PROF_TASK_NUM, profTasks.size());
     kind = MSPTI_ACTIVITY_KIND_KERNEL;
     constexpr size_t KERNEL_PROF_TASK_NUM = 2;
     profTasks = Mspti::Ascend::DevProfTaskFactory::CreateTasks(deviceId, kind);
@@ -57,12 +54,109 @@ TEST_F(DevProfTaskUtest, DevProfTaskFactoryTestWithCreateTasks)
     EXPECT_EQ(MSPTI_SUCCESS, ret);
 }
 
-TEST_F(DevProfTaskUtest, DevTaskManagerTest)
+TEST_F(DevProfTaskUtest, ShouldGetZeroProfTaskNumsWhenPlatformInvalid)
 {
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Mspti::Common::ContextManager::GetChipType)
+        .stubs()
+        .will(returnValue(Mspti::Common::PlatformType::END_TYPE));
+    constexpr uint32_t deviceId = 0;
+    msptiActivityKind kind = MSPTI_ACTIVITY_KIND_MARKER;
+    auto profTasks = Mspti::Ascend::DevProfTaskFactory::CreateTasks(deviceId, kind);
+    constexpr size_t ZERO_PROF_TASK_NUM = 0;
+    EXPECT_EQ(ZERO_PROF_TASK_NUM, profTasks.size());
+}
+
+TEST_F(DevProfTaskUtest, ShouldGetZeroProfTaskNumsWhenKindInvalid)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Mspti::Common::ContextManager::GetChipType)
+        .stubs()
+        .will(returnValue(Mspti::Common::PlatformType::CHIP_910B));
+    constexpr uint32_t deviceId = 0;
+    msptiActivityKind kind = MSPTI_ACTIVITY_KIND_COUNT;
+    auto profTasks = Mspti::Ascend::DevProfTaskFactory::CreateTasks(deviceId, kind);
+    constexpr size_t ZERO_PROF_TASK_NUM = 0;
+    EXPECT_EQ(ZERO_PROF_TASK_NUM, profTasks.size());
+}
+
+TEST_F(DevProfTaskUtest, ShouleRetSuccessWhenUseDevTaskManagerNormal)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Mspti::Ascend::Channel::ChannelPoolManager::GetAllChannels)
+        .stubs()
+        .will(returnValue(MSPTI_SUCCESS));
     auto instance = Mspti::Ascend::DevTaskManager::GetInstance();
     uint32_t deviceId = 0;
     msptiActivityKind kind = MSPTI_ACTIVITY_KIND_KERNEL;
     auto ret = instance -> StartDevProfTask(deviceId, kind);
+    EXPECT_EQ(MSPTI_SUCCESS, ret);
+
+    ret = instance -> StopDevProfTask(deviceId, kind);
+    EXPECT_EQ(MSPTI_SUCCESS, ret);
+}
+
+TEST_F(DevProfTaskUtest, ShouleRetErrorWhenDeviceOffline)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::CheckDeviceOnline)
+        .stubs()
+        .will(returnValue(false));
+    auto instance = Mspti::Ascend::DevTaskManager::GetInstance();
+    uint32_t deviceId = 0;
+    msptiActivityKind kind = MSPTI_ACTIVITY_KIND_KERNEL;
+    auto ret = instance -> StartDevProfTask(deviceId, kind);
+    EXPECT_EQ(MSPTI_ERROR_INNER, ret);
+
+    ret = instance -> StopDevProfTask(deviceId, kind);
+    EXPECT_EQ(MSPTI_ERROR_INNER, ret);
+}
+
+TEST_F(DevProfTaskUtest, ShouleRetErrorWhenGetChannelsError)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Mspti::Ascend::Channel::ChannelPoolManager::GetAllChannels)
+        .stubs()
+        .will(returnValue(MSPTI_ERROR_INNER));
+    uint32_t deviceId = 0;
+    msptiActivityKind kind = MSPTI_ACTIVITY_KIND_KERNEL;
+    auto instance = Mspti::Ascend::DevTaskManager::GetInstance();
+    auto ret = instance -> StartDevProfTask(deviceId, kind);
+    EXPECT_EQ(MSPTI_ERROR_INNER, ret);
+}
+
+TEST_F(DevProfTaskUtest, ShouleRetErrorWhenStartOrStopCannProfTaskFailed)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::CheckDeviceOnline)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&Mspti::Ascend::Channel::ChannelPoolManager::GetAllChannels)
+        .stubs()
+        .will(returnValue(MSPTI_SUCCESS));
+    MOCKER_CPP(&Mspti::Inject::profSetProfCommand)
+        .stubs()
+        .will(returnValue(static_cast<int32_t>(MSPTI_ERROR_INNER)));
+    auto instance = Mspti::Ascend::DevTaskManager::GetInstance();
+    uint32_t deviceId = 0;
+    msptiActivityKind kind = MSPTI_ACTIVITY_KIND_KERNEL;
+    auto ret = instance -> StartDevProfTask(deviceId, kind);
+    EXPECT_EQ(MSPTI_ERROR_INNER, ret);
+
+    ret = instance -> StopDevProfTask(deviceId, kind);
+    EXPECT_EQ(MSPTI_ERROR_INNER, ret);
+}
+
+TEST_F(DevProfTaskUtest, ShouleRetSuccessWhenCannProfNotSupport)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Mspti::Inject::profSetProfCommand)
+        .stubs()
+        .will(returnValue(static_cast<int32_t>(MSPTI_SUCCESS)));
+    auto instance = Mspti::Ascend::DevTaskManager::GetInstance();
+    uint32_t deviceId = 0;
+    msptiActivityKind kind = MSPTI_ACTIVITY_KIND_MARKER;
+    auto ret = instance -> StartCannProfTask(deviceId, kind);
     EXPECT_EQ(MSPTI_SUCCESS, ret);
 
     ret = instance -> StopDevProfTask(deviceId, kind);

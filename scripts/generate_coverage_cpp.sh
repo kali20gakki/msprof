@@ -53,7 +53,7 @@ test_obj=(
     dev_prof_task_utest
     callback_utest
     context_manager_utest
-    mspti_uti_utest
+    mspti_utils_utest
     mspti_channel_utest
     mspti_parser_utest
 )

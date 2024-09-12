@@ -76,14 +76,20 @@ msptiResult DevTaskManager::StopAllDevKindProfTask(std::vector<std::unique_ptr<D
 msptiResult DevTaskManager::StartDevProfTask(uint32_t deviceId, msptiActivityKind kind)
 {
     if (!CheckDeviceOnline(deviceId)) {
-        MSPTI_LOGW("Device: %u is offline.", deviceId);
-        return MSPTI_SUCCESS;
+        MSPTI_LOGE("Device: %u is offline.", deviceId);
+        return MSPTI_ERROR_INNER;
     }
     MSPTI_LOGI("Start DevProfTask, deviceId: %u, kind: %d", deviceId, kind);
-    Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->GetAllChannels(deviceId);
+    if (Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->GetAllChannels(deviceId) != MSPTI_SUCCESS) {
+        MSPTI_LOGE("Get device: %u channels failed.", deviceId);
+        return MSPTI_ERROR_INNER;
+    }
     Mspti::Common::ContextManager::GetInstance()->InitDevTimeInfo(deviceId);
     // 根据DeviceId配置项，开启CANN软件栈的Profiling任务
-    StartCannProfTask(deviceId, kind);
+    if (StartCannProfTask(deviceId, kind) != MSPTI_SUCCESS) {
+        MSPTI_LOGE("Start CannProfTask failed. deviceId: %u, kind: %d", deviceId, static_cast<int>(kind));
+        return MSPTI_ERROR_INNER;
+    }
     std::lock_guard<std::mutex> lk(task_map_mtx_);
     auto iter = task_map_.find({deviceId, kind});
     if (iter == task_map_.end()) {
@@ -102,8 +108,15 @@ msptiResult DevTaskManager::StartDevProfTask(uint32_t deviceId, msptiActivityKin
 
 msptiResult DevTaskManager::StopDevProfTask(uint32_t deviceId, msptiActivityKind kind)
 {
+    if (!CheckDeviceOnline(deviceId)) {
+        MSPTI_LOGE("Device: %u is offline.", deviceId);
+        return MSPTI_ERROR_INNER;
+    }
     MSPTI_LOGI("Stop DevProfTask, deviceId: %u, kind: %d", deviceId, kind);
-    StopCannProfTask(deviceId, kind);
+    if (StopCannProfTask(deviceId, kind) != MSPTI_SUCCESS) {
+        MSPTI_LOGE("Stop CannProfTask failed. deviceId: %u, kind: %d", deviceId, static_cast<int>(kind));
+        return MSPTI_ERROR_INNER;
+    }
     msptiResult ret = MSPTI_SUCCESS;
     std::lock_guard<std::mutex> lk(task_map_mtx_);
     auto iter = task_map_.find({deviceId, kind});
@@ -169,15 +182,17 @@ void DevTaskManager::RegisterReportCallback()
     }
 }
 
-void DevTaskManager::StartCannProfTask(uint32_t deviceId, msptiActivityKind kind)
+msptiResult DevTaskManager::StartCannProfTask(uint32_t deviceId, msptiActivityKind kind)
 {
     auto cfg_iter = datatype_config_map_.find(kind);
     if (cfg_iter == datatype_config_map_.end()) {
-        return;
+        MSPTI_LOGW("Device: %u, kind: %d don't need to start cann profiling task.", deviceId, static_cast<int>(kind));
+        return MSPTI_SUCCESS;
     }
     CommandHandle command;
     if (memset_s(&command, sizeof(command), 0, sizeof(command)) != EOK) {
-        return;
+        MSPTI_LOGE("memset CommandHandle failed.");
+        return MSPTI_ERROR_INNER;
     }
     command.profSwitch = cfg_iter->second;
     command.profSwitchHi = 0;
@@ -188,18 +203,22 @@ void DevTaskManager::StartCannProfTask(uint32_t deviceId, msptiActivityKind kind
     auto ret = Mspti::Inject::profSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(CommandHandle));
     if (ret != MSPTI_SUCCESS) {
         MSPTI_LOGE("Start Profiling Commond failed.");
+        return MSPTI_ERROR_INNER;
     }
+    return MSPTI_SUCCESS;
 }
 
-void DevTaskManager::StopCannProfTask(uint32_t deviceId, msptiActivityKind kind)
+msptiResult DevTaskManager::StopCannProfTask(uint32_t deviceId, msptiActivityKind kind)
 {
     auto cfg_iter = datatype_config_map_.find(kind);
     if (cfg_iter == datatype_config_map_.end()) {
-        return;
+        MSPTI_LOGW("Device: %u, kind: %d don't need to stop cann profiling task.", deviceId, static_cast<int>(kind));
+        return MSPTI_SUCCESS;
     }
     CommandHandle command;
     if (memset_s(&command, sizeof(command), 0, sizeof(command)) != EOK) {
-        return;
+        MSPTI_LOGE("memset CommandHandle failed.");
+        return MSPTI_ERROR_INNER;
     }
     command.profSwitch = cfg_iter->second;
     command.profSwitchHi = 0;
@@ -210,7 +229,9 @@ void DevTaskManager::StopCannProfTask(uint32_t deviceId, msptiActivityKind kind)
     auto ret = Mspti::Inject::profSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(CommandHandle));
     if (ret != MSPTI_SUCCESS) {
         MSPTI_LOGE("Stop Profiling Commond failed.");
+        return MSPTI_ERROR_INNER;
     }
+    return MSPTI_SUCCESS;
 }
 }  // Ascend
 }  // Mspti

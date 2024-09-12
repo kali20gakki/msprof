@@ -12,6 +12,7 @@
 #ifndef MSPTI_PARSER_PARSER_MANAGER_H
 #define MSPTI_PARSER_PARSER_MANAGER_H
 
+#include <atomic>
 #include <map>
 #include <tuple>
 #include <mutex>
@@ -21,6 +22,7 @@
 #include <vector>
 
 #include "common/inject/profapi_inject.h"
+#include "common/inject/runtime_inject.h"
 #include "activity/ascend/channel/channel_data.h"
 #include "external/mspti_activity.h"
 
@@ -36,15 +38,23 @@ class ParserManager final {
 public:
     static ParserManager* GetInstance();
 
-    msptiResult ReportRtTaskTrack(const MsprofRuntimeTrack& track);
+    // Device Channel
     msptiResult ReportStarsSocLog(uint32_t deviceId, const StarsSocLog* socLog);
     void ReportStepTrace(uint32_t deviceId, const StepTrace* stepTrace);
     void ReportFlipInfo(uint32_t deviceId, const TaskFlipInfo* flipInfo);
+
+    // CANN
+    msptiResult ReportRtTaskTrack(const MsprofRuntimeTrack& track);
     msptiResult ReportApi(const MsprofApi* const data);
     uint64_t GenHashId(const std::string &hashInfo);
     std::string& GetHashInfo(uint64_t hashId);
     void RegReportTypeInfo(uint16_t level, uint32_t typeId, const std::string& typeName);
     std::string& GetTypeName(uint16_t level, uint32_t typeId);
+
+    // User
+    msptiResult ReportMark(const char* msg, RtStreamT stream);
+    msptiResult ReportRangeStartA(const char* msg, RtStreamT stream, uint64_t& markId);
+    msptiResult ReportRangeEnd(uint64_t rangeId);
 
 private:
     ParserManager() = default;
@@ -55,7 +65,7 @@ private:
 
 private:
     // map<<deviceId, streamId, taskId>, msptiActivityKernel*>
-    std::map<DstType, std::unique_ptr<msptiActivityKernel>> kernel_map_;
+    std::map<DstType, std::shared_ptr<msptiActivityKernel>> kernel_map_;
     std::mutex kernel_mtx_;
     
     // map<<deviceId, streamId, flipId>, vector<dstKey>>
@@ -69,6 +79,12 @@ private:
     // <level, <typeid, typename>>
     static std::unordered_map<uint16_t, std::unordered_map<uint32_t, std::string>> typeInfo_map_;
     static std::mutex typeInfoMutex_;
+
+    // Marker
+    std::atomic<uint64_t> gMarkId_{0};
+    static constexpr uint32_t MARK_TAG_ID{11};
+    std::mutex rangeInfoMtx_;;
+    std::unordered_map<uint64_t, RtStreamT> rangeInfo_;
 };
 }  // Parser
 }  // Mspti

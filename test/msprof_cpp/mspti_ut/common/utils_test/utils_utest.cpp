@@ -18,7 +18,7 @@ protected:
     virtual void TearDown() {}
 };
 
-TEST_F(UtilsUtest, RealPathTest)
+TEST_F(UtilsUtest, ShouldGetRealPathWhenInputRelativePath)
 {
     std::string path = "./test";
     auto realPath = Mspti::Common::Utils::RealPath(path);
@@ -26,6 +26,15 @@ TEST_F(UtilsUtest, RealPathTest)
     getcwd(buf, PATH_MAX);
     std::string targetPath = std::string(buf) + "/test";
     EXPECT_STREQ(targetPath.c_str(), realPath.c_str());
+}
+
+TEST_F(UtilsUtest, ShouldGetRealPathWhenInputAbsoultePath)
+{
+    char buf[PATH_MAX];
+    getcwd(buf, PATH_MAX);
+    std::string path = std::string(buf) + "/test";
+    auto realPath = Mspti::Common::Utils::RealPath(path);
+    EXPECT_STREQ(path.c_str(), realPath.c_str());
 }
 
 TEST_F(UtilsUtest, GetClockMonotonicRawNsTest)
@@ -73,7 +82,7 @@ TEST_F(UtilsUtest, RelativeToAbsPathTest)
     }
 }
 
-TEST_F(UtilsUtest, FileExistTest)
+TEST_F(UtilsUtest, ShouldGetTrueWhenFileExist)
 {
     std::string stubPath = "test.txt";
     std::ofstream f(stubPath);
@@ -82,6 +91,12 @@ TEST_F(UtilsUtest, FileExistTest)
     }
     EXPECT_EQ(true, Mspti::Common::Utils::FileExist(stubPath));
     std::remove(stubPath.c_str());
+}
+
+TEST_F(UtilsUtest, ShouldGetFalseWhenFileNotExist)
+{
+    std::string stubPath = "test.txt";
+    EXPECT_EQ(false, Mspti::Common::Utils::FileExist(stubPath));
 }
 
 }

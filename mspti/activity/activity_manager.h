@@ -17,6 +17,7 @@
 #include <condition_variable>
 #include <deque>
 #include <mutex>
+#include <set>
 #include <thread>
 #include <vector>
 #include <unordered_set>
@@ -68,6 +69,7 @@ private:
     void JoinWorkThreads();
 
 private:
+    const static std::set<msptiActivityKind> supportActivityKinds_;
     // Replace map with bitest
     std::unordered_set<msptiActivityKind> activity_set_;
     std::mutex activity_mtx_;

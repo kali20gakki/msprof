@@ -53,6 +53,6 @@ link_libraries(
     dl
 )
 
-add_subdirectory(callback)
 add_subdirectory(activity)
+add_subdirectory(callback)
 add_subdirectory(common)

@@ -146,8 +146,8 @@ msptiResult ParserManager::ReportRtTaskTrack(const MsprofRuntimeTrack& track)
     };
     auto typeIter = KERNEL_TYPE.find(static_cast<TsTaskType>(track.taskType));
     if (typeIter != KERNEL_TYPE.end()) {
-        std::unique_ptr<msptiActivityKernel> kernel{nullptr};
-        Mspti::Common::MsptiMakeUniquePtr(kernel);
+        std::shared_ptr<msptiActivityKernel> kernel{nullptr};
+        Mspti::Common::MsptiMakeSharedPtr(kernel);
         if (!kernel) {
             MSPTI_LOGE("Mallod memory failed.");
             return MSPTI_ERROR_INNER;
@@ -167,7 +167,7 @@ msptiResult ParserManager::ReportRtTaskTrack(const MsprofRuntimeTrack& track)
             std::lock_guard<std::mutex> lk(kernel_mtx_);
             auto iter = kernel_map_.find(dstKey);
             if (iter == kernel_map_.end()) {
-                kernel_map_.insert({dstKey, std::move(kernel)});
+                kernel_map_.insert({dstKey, kernel});
             }
         }
     }
@@ -258,6 +258,93 @@ void ParserManager::ReportFlipInfo(uint32_t deviceId, const TaskFlipInfo* flipIn
         }
     }
     flip_dst_map_.erase(dsfKey);
+}
+
+msptiResult ParserManager::ReportMark(const char* msg, RtStreamT stream)
+{
+    uint64_t timestamp = Mspti::Common::ContextManager::GetInstance()->GetHostTimeStampNs();
+    uint64_t markId = gMarkId_++;
+    if (stream != nullptr && rtProfilerTraceEx(markId,
+        static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS_WITH_DEVICE), MARK_TAG_ID, stream) !=
+        MSPTI_SUCCESS) {
+        MSPTI_LOGE("Failed to run markA func.");
+        return MSPTI_ERROR_INNER;
+    }
+    msptiActivityMark activity;
+    activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
+    activity.flag = (stream != nullptr) ? MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS_WITH_DEVICE :
+        MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS;
+    activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
+    activity.id = markId;
+    activity.objectId.pt.processId = Mspti::Common::Utils::GetPid();
+    activity.objectId.pt.threadId = Mspti::Common::Utils::GetTid();
+    activity.name = msg;
+    activity.timestamp = timestamp;
+    return Mspti::Activity::ActivityManager::GetInstance()->Record(
+        reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMark));
+}
+
+msptiResult ParserManager::ReportRangeStartA(const char* msg, RtStreamT stream, uint64_t& markId)
+{
+    uint64_t timestamp = Mspti::Common::ContextManager::GetInstance()->GetHostTimeStampNs();
+    markId = gMarkId_++;
+    if (stream != nullptr && rtProfilerTraceEx(markId,
+        static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_START_WITH_DEVICE),
+        MARK_TAG_ID, stream) != MSPTI_SUCCESS) {
+        MSPTI_LOGE("Failed to run range startA func.");
+        return MSPTI_ERROR_INNER;
+    }
+    msptiActivityMark activity;
+    activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
+    activity.flag = (stream != nullptr) ? MSPTI_ACTIVITY_FLAG_MARKER_START_WITH_DEVICE :
+        MSPTI_ACTIVITY_FLAG_MARKER_START;
+    activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
+    activity.id = markId;
+    activity.objectId.pt.processId = Mspti::Common::Utils::GetPid();
+    activity.objectId.pt.threadId = Mspti::Common::Utils::GetTid();
+    activity.name = msg;
+    activity.timestamp = timestamp;
+    auto ret = Mspti::Activity::ActivityManager::GetInstance()->Record(
+        reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMark));
+    {
+        std::lock_guard<std::mutex> lock(rangeInfoMtx_);
+        rangeInfo_.insert({markId, stream});
+    }
+    return ret;
+}
+
+msptiResult ParserManager::ReportRangeEnd(uint64_t rangeId)
+{
+    uint64_t timestamp = Mspti::Common::ContextManager::GetInstance()->GetHostTimeStampNs();
+    bool withStream = false;
+    {
+        std::lock_guard<std::mutex> lock(rangeInfoMtx_);
+        auto iter = rangeInfo_.find(rangeId);
+        if (iter == rangeInfo_.end()) {
+            MSPTI_LOGW("Input rangeId[%lu] is invalid.", rangeId);
+            return MSPTI_SUCCESS;
+        }
+        if (iter->second) {
+            if (rtProfilerTraceEx(rangeId, static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_END_WITH_DEVICE),
+                MARK_TAG_ID, iter->second) != MSPTI_SUCCESS) {
+                MSPTI_LOGE("Failed to run range end func.");
+                return MSPTI_ERROR_INNER;
+            }
+            withStream = true;
+        }
+        rangeInfo_.erase(iter);
+    }
+    msptiActivityMark activity;
+    activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
+    activity.flag = withStream ? MSPTI_ACTIVITY_FLAG_MARKER_END_WITH_DEVICE : MSPTI_ACTIVITY_FLAG_MARKER_END;
+    activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
+    activity.id = rangeId;
+    activity.objectId.pt.processId = Mspti::Common::Utils::GetPid();
+    activity.objectId.pt.threadId = Mspti::Common::Utils::GetTid();
+    activity.name = "";
+    activity.timestamp = timestamp;
+    return Mspti::Activity::ActivityManager::GetInstance()->Record(
+        reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMark));
 }
 
 }  // Parser

@@ -9,11 +9,12 @@ add_executable(mspti_parser_utest
     ${TOP_DIR}/mspti/common/thread_pool.cpp
     ${TOP_DIR}/mspti/activity/ascend/dev_task_manager.cpp
     ${TOP_DIR}/mspti/activity/ascend/dev_prof_task.cpp
-    ${UT_TOP_DIR}/stub/inject/profapi_inject_stub.cpp
-    ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
     ${TOP_DIR}/mspti/activity/ascend/channel/channel_pool_manager.cpp
     ${TOP_DIR}/mspti/activity/ascend/channel/channel_pool.cpp
     ${TOP_DIR}/mspti/activity/ascend/channel/channel_reader.cpp
+    ${UT_TOP_DIR}/stub/inject/profapi_inject_stub.cpp
+    ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
+    ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
 )
 
 target_include_directories(mspti_parser_utest PRIVATE

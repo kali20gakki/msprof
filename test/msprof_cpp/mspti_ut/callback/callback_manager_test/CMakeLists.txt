@@ -1,0 +1,19 @@
+add_executable(callback_utest 
+    ${TOP_DIR}/mspti/callback/callback_manager.cpp
+    ${TOP_DIR}/mspti/common/function_loader.cpp
+    ${TOP_DIR}/mspti/common/inject/plog_inject.cpp
+    ${TOP_DIR}/mspti/common/utils.cpp
+    main.cpp
+    callback_utest.cpp
+)
+
+set_target_properties(callback_utest
+    PROPERTIES
+    OUTPUT_NAME callback_utest
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+run_llt_test(
+    TARGET callback_utest
+    TASK_NUM 1
+)

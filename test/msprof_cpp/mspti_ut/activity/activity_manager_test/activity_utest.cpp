@@ -103,11 +103,8 @@ void TestActivityKernel()
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityDisable(MSPTI_ACTIVITY_KIND_KERNEL));
 }
 
-TEST_F(ActivityUtest, ActivityExternalApiUtestWithAllKind)
+TEST_F(ActivityUtest, ShouleRetSuccessWhenSetAllKindWithCorrectApiInvocationSequence)
 {
-    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::GetInstance)
-        .stubs()
-        .will(returnValue(nullptr));
     MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StartDevProfTask)
         .stubs()
         .will(returnValue(MSPTI_SUCCESS));
@@ -117,6 +114,9 @@ TEST_F(ActivityUtest, ActivityExternalApiUtestWithAllKind)
 
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityRegisterCallbacks(UserBufferRequest, UserBufferComplete));
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_MARKER));
+    auto instance = Mspti::Activity::ActivityManager::GetInstance();
+    EXPECT_EQ(MSPTI_SUCCESS, instance ->SetDevice(0));
+    EXPECT_EQ(MSPTI_SUCCESS, instance ->DeviceReset(0));
     msptiActivityMark activity;
     constexpr uint64_t timeStamp = 1614659207688700;
     constexpr uint32_t markNum = 10;
@@ -129,8 +129,7 @@ TEST_F(ActivityUtest, ActivityExternalApiUtestWithAllKind)
         activity.objectId.pt.processId = 0;
         activity.objectId.pt.threadId = 0;
         activity.name = "UserMark";
-        Mspti::Activity::ActivityManager::GetInstance()->Record(
-            reinterpret_cast<msptiActivity*>(&activity), sizeof(activity));
+        instance->Record(reinterpret_cast<msptiActivity*>(&activity), sizeof(activity));
         totalActivitys += 1;
     }
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityDisable(MSPTI_ACTIVITY_KIND_MARKER));
@@ -142,19 +141,12 @@ TEST_F(ActivityUtest, ActivityExternalApiUtestWithAllKind)
     EXPECT_EQ(totalActivitys, g_records.load());
 }
 
-TEST_F(ActivityUtest, ActivityManagerUtestWithSetAndResetDevice)
+TEST_F(ActivityUtest, ShouldRetInvalidParameterErrorWhenSetWrongParam)
 {
-    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::GetInstance)
-        .stubs()
-        .will(returnValue(nullptr));
-    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StartDevProfTask)
-        .stubs()
-        .will(returnValue(MSPTI_SUCCESS));
-    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StopDevProfTask)
-        .stubs()
-        .will(returnValue(MSPTI_SUCCESS));
-    auto instance = Mspti::Activity::ActivityManager::GetInstance();
-    EXPECT_EQ(MSPTI_SUCCESS, instance ->SetDevice(0));
-    EXPECT_EQ(MSPTI_SUCCESS, instance ->DeviceReset(0));
+    EXPECT_EQ(MSPTI_ERROR_INVALID_PARAMETER, msptiActivityRegisterCallbacks(nullptr, nullptr));
+    EXPECT_EQ(MSPTI_ERROR_INVALID_PARAMETER, msptiActivityEnable(MSPTI_ACTIVITY_KIND_FORCE_INT));
+    EXPECT_EQ(MSPTI_ERROR_INVALID_PARAMETER, msptiActivityDisable(MSPTI_ACTIVITY_KIND_FORCE_INT));
+    msptiActivity* activity;
+    EXPECT_EQ(MSPTI_ERROR_INVALID_PARAMETER, msptiActivityGetNextRecord(nullptr, 0, &activity));
 }
 }
