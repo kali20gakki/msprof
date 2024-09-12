@@ -16,7 +16,7 @@ class TestParsingTSData(unittest.TestCase):
     def test_is_mdc_binary_data(self):
         data = struct.pack("=L", 2880154539)
         wrong_data = struct.pack("=L", 2880154538)
-        InfoConfReader()._info_json = {"devices": '0'}
+        InfoConfReader()._sample_json = {"devices": '0'}
         check = ParsingTSData(self.file_list, CONFIG)
         with mock.patch('builtins.open', mock.mock_open(read_data=wrong_data)):
             _wrong = open("test")
@@ -45,16 +45,16 @@ class TestParsingTSData(unittest.TestCase):
                 mock.patch('builtins.open', side_effect=SystemError), \
                 mock.patch('common_func.file_manager.check_path_valid'), \
                 mock.patch(NAMESPACE + '.logging.error'):
-            InfoConfReader()._info_json = {'devices': '0'}
+            InfoConfReader()._sample_json = {'devices': '0'}
             check = ParsingTSData(self.file_list, CONFIG)
-            InfoConfReader()._info_json = {'devices': '0'}
+            InfoConfReader()._sample_json = {'devices': '0'}
             check.read_binary_data('test')
         with mock.patch(NAMESPACE + '.PathManager.get_data_file_path', return_value='test'), \
                 mock.patch('os.path.getsize', return_value=struct.calcsize('=LL20QLLQQ14QLL20QLLQQ14QLL20QLLQQ14Q')), \
                 mock.patch('common_func.file_manager.check_path_valid'), \
                 mock.patch('builtins.open', mock.mock_open(read_data=data)), \
                 mock.patch(NAMESPACE + '.logging.error'):
-            InfoConfReader()._info_json = {'devices': '0'}
+            InfoConfReader()._sample_json = {'devices': '0'}
             check = ParsingTSData(self.file_list, CONFIG)
             check.read_binary_data('test')
 
@@ -73,7 +73,7 @@ class TestParsingTSData(unittest.TestCase):
                 mock.patch('framework.offset_calculator.OffsetCalculator.pre_process', return_value=data), \
                 mock.patch('builtins.open', side_effect=SystemError), \
                 mock.patch(NAMESPACE + '.logging.error'):
-            InfoConfReader()._info_json = {"devices": '0'}
+            InfoConfReader()._sample_json = {"devices": '0'}
             check = ParsingTSData(self.file_list, CONFIG)
             check.read_mdc_binary_data('test')
         with mock.patch(NAMESPACE + '.PathManager.get_data_file_path', return_value='test'), \
@@ -83,7 +83,7 @@ class TestParsingTSData(unittest.TestCase):
                 mock.patch('framework.offset_calculator.OffsetCalculator.pre_process', return_value=data), \
                 mock.patch('builtins.open', mock.mock_open(read_data=data)), \
                 mock.patch(NAMESPACE + '.logging.error'):
-            InfoConfReader()._info_json = {"devices": '0'}
+            InfoConfReader()._sample_json = {"devices": '0'}
             check = ParsingTSData(self.file_list, CONFIG)
             check.read_mdc_binary_data('test')
         self.assertEqual(len(check.ts_data), 5)
@@ -93,7 +93,7 @@ class TestParsingTSData(unittest.TestCase):
                 mock.patch(NAMESPACE + '.is_valid_original_data', side_effect=SystemError), \
                 mock.patch('common_func.file_manager.check_path_valid'), \
                 mock.patch(NAMESPACE + '.logging.error'):
-            InfoConfReader()._info_json = {"devices": '0'}
+            InfoConfReader()._sample_json = {"devices": '0'}
             check = ParsingTSData(self.file_list, CONFIG)
             result = check.start_parsing_data_file()
         self.assertEqual(result, None)
@@ -104,7 +104,7 @@ class TestParsingTSData(unittest.TestCase):
             with mock.patch(NAMESPACE + '.ParsingTSData._is_mdc_binary_data',
                             return_value=True), \
                     mock.patch(NAMESPACE + '.ParsingTSData.read_mdc_binary_data'):
-                InfoConfReader()._info_json = {"devices": '0'}
+                InfoConfReader()._sample_json = {"devices": '0'}
                 check = ParsingTSData(self.file_list, CONFIG)
                 check.start_parsing_data_file()
 
@@ -115,7 +115,7 @@ class TestParsingTSData(unittest.TestCase):
                 mock.patch(NAMESPACE + '.ParsingTSData._is_mdc_binary_data',
                            return_value=False), \
                 mock.patch(NAMESPACE + '.ParsingTSData.read_binary_data'):
-            InfoConfReader()._info_json = {"devices": '0'}
+            InfoConfReader()._sample_json = {"devices": '0'}
             check = ParsingTSData(self.file_list, CONFIG)
             check.start_parsing_data_file()
 
@@ -123,7 +123,7 @@ class TestParsingTSData(unittest.TestCase):
         with mock.patch('msmodel.hardware.tscpu_model.TscpuModel.init'), \
                 mock.patch('msmodel.hardware.tscpu_model.TscpuModel.flush'), \
                 mock.patch('msmodel.hardware.tscpu_model.TscpuModel.finalize'):
-            InfoConfReader()._info_json = {"devices": '0'}
+            InfoConfReader()._sample_json = {"devices": '0'}
             check = ParsingTSData(self.file_list, CONFIG)
             check.ts_data = [123]
             check.save()
@@ -133,5 +133,5 @@ class TestParsingTSData(unittest.TestCase):
                 mock.patch(NAMESPACE + '.ParsingTSData.start_parsing_data_file',
                            side_effect=RuntimeError), \
                 mock.patch(NAMESPACE + '.logging.error'):
-            InfoConfReader()._info_json = {"devices": '0'}
+            InfoConfReader()._sample_json = {"devices": '0'}
             ParsingTSData(self.file_list, CONFIG).ms_run()

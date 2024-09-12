@@ -317,7 +317,7 @@ class TestExportCommand(unittest.TestCase):
                 mock.patch(NAMESPACE + ".PathManager.get_summary_dir", return_value=""), \
                 mock.patch(NAMESPACE + ".check_path_valid"), \
                 mock.patch(NAMESPACE + ".print_info"):
-            InfoConfReader()._info_json = {"devices": 1}
+            InfoConfReader()._sample_json = {"devices": '1'}
             test = ExportCommand("timeline", args)
             with mock.patch(NAMESPACE + ".LoadInfoManager.load_info"), \
                     mock.patch('framework.file_dispatch.FileDispatch.dispatch_calculator'):

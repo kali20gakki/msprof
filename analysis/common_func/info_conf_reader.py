@@ -149,13 +149,20 @@ class InfoConfReader:
     def get_device_list(self: any) -> list:
         """
         get device list from project path
+        isdigit()不能确保所有的字符都能被正确识别，Unicode上标字符'²'等也能通过校验，但无法被转为int
         :return: devices list in the format: "0,1,2,3"
         """
-        device_reader = self._sample_json.get("devices")
-        devices = ""
-        if device_reader:
-            devices += str(device_reader) + ","
-        return list(filter(None, devices.split(",")))
+        devices = list(filter(None, self._sample_json.get("devices", "").strip().split(",")))
+        if not devices:
+            logging.error("Can't find correct devices in sample.json")
+            raise ProfException(ProfException.PROF_INVALID_CONFIG_ERROR)
+        for device_id in devices:
+            try:
+                int(device_id)
+            except ValueError as err:
+                logging.error("device id in sample.json is invalid, device id is: %s", device_id)
+                raise ProfException(ProfException.PROF_INVALID_DATA_ERROR) from err
+        return devices
 
     def get_rank_id(self: any) -> int:
         """

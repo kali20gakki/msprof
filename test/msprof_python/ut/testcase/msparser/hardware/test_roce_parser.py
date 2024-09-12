@@ -26,11 +26,11 @@ class TestParsingRoceData(unittest.TestCase):
                 mock.patch('common_func.file_manager.check_path_valid'), \
                 mock.patch(NAMESPACE + '.logging.error'):
             with mock.patch('builtins.open', side_effect=OSError):
-                InfoConfReader()._info_json = {"devices": '0'}
+                InfoConfReader()._sample_json = {"devices": '0'}
                 check = ParsingRoceData(self.file_list, CONFIG)
                 check.read_binary_data('test')
             with mock.patch('builtins.open', mock.mock_open(read_data="")):
-                InfoConfReader()._info_json = {"devices": '0'}
+                InfoConfReader()._sample_json = {"devices": '0'}
                 check = ParsingRoceData(self.file_list, CONFIG)
                 result = check.read_binary_data('test')
             self.assertEqual(result, None)
@@ -84,7 +84,7 @@ class TestParsingRoceData(unittest.TestCase):
                 mock.patch('msmodel.hardware.roce_model.RoceModel.create_table'), \
                 mock.patch('msmodel.hardware.roce_model.RoceModel.report_data'), \
                 mock.patch('msmodel.hardware.roce_model.RoceModel.finalize'):
-            InfoConfReader()._info_json = {"devices": '0'}
+            InfoConfReader()._sample_json = {"devices": '0'}
             check = ParsingRoceData(self.file_list, CONFIG)
             check.roce_data = [123]
             check.save()
@@ -94,5 +94,5 @@ class TestParsingRoceData(unittest.TestCase):
                 mock.patch(NAMESPACE + '.ParsingRoceData.save',
                            side_effect=RuntimeError), \
                 mock.patch(NAMESPACE + '.logging.error'):
-            InfoConfReader()._info_json = {"devices": '0'}
+            InfoConfReader()._sample_json = {"devices": '0'}
             ParsingRoceData(self.file_list, CONFIG).ms_run()

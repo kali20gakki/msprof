@@ -1,6 +1,9 @@
 import unittest
+from unittest import mock
 
 from mscalculate.step_trace.create_step_table import CreateTrainingTrace
+
+NAMESPACE = 'mscalculate.step_trace.create_step_table'
 
 
 def get_data():
@@ -58,15 +61,16 @@ class A:
 class TestCreateStepTraceData(unittest.TestCase):
 
     def test_run(self):
-        sample_config = {"result_dir": "./"}
-        CreateTrainingTrace.run(sample_config, A)
-        self.assertEqual(CreateTrainingTrace.data,
-                         [[None, 1, 1, 3, 5, 7, 5, 2, 2, 0],
-                          [None, 1, 2, 9, 11, 12, 5, 2, 1, 2],
-                          [None, 1, 3, 0, 0, 18, 2, 0, 0, 0],
-                          [None, 1, 4, 20, 0, 21, 2, 0, 0, 2],
-                          [None, 1, 5, 0, 0, 24, 2, 0, 0, 0]]
-                         )
+        sample_config = {"result_dir": "./", "devices": '0'}
+        with mock.patch(NAMESPACE + '.CreateTrainingTrace.connect_db'):
+            CreateTrainingTrace.run(sample_config, A)
+            self.assertEqual(CreateTrainingTrace.data,
+                             [['0', 1, 1, 3, 5, 7, 5, 2, 2, 0],
+                              ['0', 1, 2, 9, 11, 12, 5, 2, 1, 0],
+                              ['0', 1, 3, 0, 0, 18, 2, 0, 0, 0],
+                              ['0', 1, 4, 20, 0, 21, 2, 0, 0, 0],
+                              ['0', 1, 5, 0, 0, 24, 2, 0, 0, 0]]
+                             )
 
 
 if __name__ == '__main__':
