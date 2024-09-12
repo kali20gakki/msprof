@@ -178,7 +178,7 @@ private:
     int32_t MsprofHelperParamConstruct(const std::string &msprofPath, const std::string &paramsJson);
     void MsprofSetMemberValue();
     int LaunchHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR devIdList);
-    int CancleHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR devIdList);
+    int CancelHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR devIdList);
     int StartSubscribeDeviceTask(const uint32_t devId, const uint32_t modelId,
         PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
     int CancleSubscribeDeviceTask(const uint32_t devId, const uint32_t modelId);

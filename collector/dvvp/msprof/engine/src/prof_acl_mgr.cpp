@@ -422,7 +422,7 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
     MstxDataHandler::instance()->Stop();
     PlatformAdapter::instance()->Uninit();
     // stop devices
-    int ret = CancleHostAndDevTasks(profStopCfg->devNums, profStopCfg->devIdList);
+    int ret = CancelHostAndDevTasks(profStopCfg->devNums, profStopCfg->devIdList);
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("[ProfAclStop]Cancle host and device tasks failed.");
         return ret;
@@ -431,7 +431,7 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
     return ACL_SUCCESS;
 }
 
-int ProfAclMgr::CancleHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR devIdList)
+int ProfAclMgr::CancelHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR devIdList)
 {
     HashData::instance()->SaveHashData();
     int ret = ACL_SUCCESS;

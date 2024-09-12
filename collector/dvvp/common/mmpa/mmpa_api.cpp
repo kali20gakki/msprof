@@ -712,11 +712,10 @@ int32_t MmGetUid()
 int32_t MmGetTid()
 {
     int32_t ret = static_cast<int32_t>(syscall(SYS_gettid));
-    if (ret < 0) {
-        return PROFILING_FAILED;
+    if (ret > 0) {
+        return ret;
     }
-
-    return ret;
+    return 0;
 }
 
 int32_t MmStatGet(const std::string &path, MmStatT *buffer)
