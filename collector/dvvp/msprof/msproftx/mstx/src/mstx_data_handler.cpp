@@ -135,7 +135,7 @@ int MstxDataHandler::SaveMarkData(const char* msg, uint64_t mstxEventId)
     return PROFILING_SUCCESS;
 }
 
-int MstxDataHandler::SaveRangeDate(const char* msg, uint64_t mstxEventId, MstxDataType type)
+int MstxDataHandler::SaveRangeData(const char* msg, uint64_t mstxEventId, MstxDataType type)
 {
     static thread_local uint32_t tid = static_cast<uint32_t>(MmGetTid());
     if (type == MstxDataType::DATA_RANGE_START) {
@@ -173,7 +173,7 @@ int MstxDataHandler::SaveRangeDate(const char* msg, uint64_t mstxEventId, MstxDa
 
 int MstxDataHandler::SaveMstxData(const char* msg, uint64_t mstxEventId, MstxDataType type)
 {
-    return type == MstxDataType::DATA_MARK ? SaveMarkData(msg, mstxEventId) : SaveRangeDate(msg, mstxEventId, type);
+    return type == MstxDataType::DATA_MARK ? SaveMarkData(msg, mstxEventId) : SaveRangeData(msg, mstxEventId, type);
 }
 
 bool MstxDataHandler::IsStart()

@@ -51,7 +51,7 @@ private:
     void Init();
     void Uninit();
     int SaveMarkData(const char* msg, uint64_t mstxEventId);
-    int SaveRangeDate(const char* msg, uint64_t mstxEventId, MstxDataType type);
+    int SaveRangeData(const char* msg, uint64_t mstxEventId, MstxDataType type);
 
     void Flush();
     void ReportData();
