@@ -101,4 +101,17 @@ TEST_F(ParserUtest, ShouldRetSccessWhenReportMstxData)
     EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRangeEnd(markId));
 }
 
+TEST_F(ParserUtest, ShouldRetErrorWhenTryCacheMarkmsgFailed)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<std::string> nullPtr{nullptr};
+    MOCKER_CPP(&Mspti::Parser::ParserManager::TryCacheMarkMsg)
+        .stubs()
+        .will(returnValue(nullPtr));
+    const char* message = "UserMark";
+    auto instance = Mspti::Parser::ParserManager::GetInstance();
+    EXPECT_EQ(MSPTI_ERROR_INNER, instance->ReportMark(message, nullptr));
+    uint64_t markId;
+    EXPECT_EQ(MSPTI_ERROR_INNER, instance->ReportRangeStartA(message, nullptr, markId));
+}
 }

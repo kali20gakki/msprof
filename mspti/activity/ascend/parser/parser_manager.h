@@ -62,6 +62,7 @@ private:
     ParserManager& operator=(const ParserManager &obj) = delete;
     explicit ParserManager(ParserManager &&obj) = delete;
     ParserManager& operator=(ParserManager &&obj) = delete;
+    std::shared_ptr<std::string> TryCacheMarkMsg(const char* msg);
 
 private:
     // map<<deviceId, streamId, taskId>, msptiActivityKernel*>
@@ -85,6 +86,8 @@ private:
     static constexpr uint32_t MARK_TAG_ID{11};
     std::mutex rangeInfoMtx_;;
     std::unordered_map<uint64_t, RtStreamT> rangeInfo_;
+    static std::set<std::shared_ptr<std::string>> markMsg_;
+    static std::mutex markMsgMtx_;
 };
 }  // Parser
 }  // Mspti

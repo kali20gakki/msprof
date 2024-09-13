@@ -13,9 +13,10 @@
 #include "activity/ascend/parser/parser_manager.h"
 
 #include "activity/activity_manager.h"
-#include "common/utils.h"
+#include "common/config.h"
 #include "common/context_manager.h"
 #include "common/plog_manager.h"
+#include "common/utils.h"
 
 #include <set>
 
@@ -25,6 +26,8 @@ std::unordered_map<uint64_t, std::string> ParserManager::hashInfo_map_;
 std::mutex ParserManager::hashMutex_;
 std::unordered_map<uint16_t, std::unordered_map<uint32_t, std::string>> ParserManager::typeInfo_map_;
 std::mutex ParserManager::typeInfoMutex_;
+std::set<std::shared_ptr<std::string>> ParserManager::markMsg_;
+std::mutex ParserManager::markMsgMtx_;
 
 ParserManager *ParserManager::GetInstance()
 {
@@ -260,9 +263,32 @@ void ParserManager::ReportFlipInfo(uint32_t deviceId, const TaskFlipInfo* flipIn
     flip_dst_map_.erase(dsfKey);
 }
 
+std::shared_ptr<std::string> ParserManager::TryCacheMarkMsg(const char* msg)
+{
+    // msg字符串已在对外接口进行判空和长度判断操作
+    std::lock_guard<std::mutex> lk(markMsgMtx_);
+    if (markMsg_.size() > MARK_MAX_CACHE_NUM) {
+        MSPTI_LOGE("Cache mark msg failed, current size: %u, limit size: %u", markMsg_.size(), MARK_MAX_CACHE_NUM);
+        return nullptr;
+    }
+    std::shared_ptr<std::string> msgPtr{nullptr};
+    Mspti::Common::MsptiMakeSharedPtr(msgPtr, msg);
+    if (msgPtr == nullptr) {
+        MSPTI_LOGE("Failed to malloc memory for mark msg.");
+        return nullptr;
+    }
+    markMsg_.insert(msgPtr);
+    return msgPtr;
+}
+
 msptiResult ParserManager::ReportMark(const char* msg, RtStreamT stream)
 {
     uint64_t timestamp = Mspti::Common::ContextManager::GetInstance()->GetHostTimeStampNs();
+    auto msgPtr = TryCacheMarkMsg(msg);
+    if (msgPtr == nullptr) {
+        MSPTI_LOGE("Try Cache Mark msg failed.");
+        return MSPTI_ERROR_INNER;
+    }
     uint64_t markId = gMarkId_++;
     if (stream != nullptr && rtProfilerTraceEx(markId,
         static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS_WITH_DEVICE), MARK_TAG_ID, stream) !=
@@ -278,15 +304,20 @@ msptiResult ParserManager::ReportMark(const char* msg, RtStreamT stream)
     activity.id = markId;
     activity.objectId.pt.processId = Mspti::Common::Utils::GetPid();
     activity.objectId.pt.threadId = Mspti::Common::Utils::GetTid();
+    activity.name = msgPtr->c_str();
     activity.name = msg;
     activity.timestamp = timestamp;
     return Mspti::Activity::ActivityManager::GetInstance()->Record(
         reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMark));
 }
-
 msptiResult ParserManager::ReportRangeStartA(const char* msg, RtStreamT stream, uint64_t& markId)
 {
     uint64_t timestamp = Mspti::Common::ContextManager::GetInstance()->GetHostTimeStampNs();
+    auto msgPtr = TryCacheMarkMsg(msg);
+    if (msgPtr == nullptr) {
+        MSPTI_LOGE("Try Cache Mark msg failed.");
+        return MSPTI_ERROR_INNER;
+    }
     markId = gMarkId_++;
     if (stream != nullptr && rtProfilerTraceEx(markId,
         static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_START_WITH_DEVICE),
@@ -302,7 +333,7 @@ msptiResult ParserManager::ReportRangeStartA(const char* msg, RtStreamT stream, 
     activity.id = markId;
     activity.objectId.pt.processId = Mspti::Common::Utils::GetPid();
     activity.objectId.pt.threadId = Mspti::Common::Utils::GetTid();
-    activity.name = msg;
+    activity.name = msgPtr->c_str();
     activity.timestamp = timestamp;
     auto ret = Mspti::Activity::ActivityManager::GetInstance()->Record(
         reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMark));
