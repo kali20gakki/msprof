@@ -118,22 +118,19 @@ int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len)
     }
 
     if (Platform::instance()->PlatformIsHelperHostSide()) {
-        ret = RegisterReporterCallback();
-        if (ret != PROFILING_SUCCESS) {
+        if (RegisterReporterCallback() != PROFILING_SUCCESS) {
             MSPROF_LOGE("MsprofSetDeviceCallbackImpl, RegisterReporterCallback failed");
             MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceCallbackImpl, RegisterReporterCallback failed");
             return MSPROF_ERROR;
         }
         uint64_t profConfigType = Msprofiler::Api::ProfAclMgr::instance()->GetCmdModeDataTypeConfig();
-        ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(nullptr, 0, profConfigType);
-        if (ret == ACL_SUCCESS) {
+        if (Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(nullptr, 0, profConfigType) == ACL_SUCCESS) {
             return PROFILING_SUCCESS;
         }
         return MSPROF_ERROR;
     }
     // register device state callback
-    ret = ProfApiPlugin::instance()->MsprofProfRegDeviceStateCallback(MsprofSetDeviceCallbackImpl);
-    if (ret != 0) {
+    if (ProfApiPlugin::instance()->MsprofProfRegDeviceStateCallback(MsprofSetDeviceCallbackImpl) != 0) {
         MSPROF_LOGE("Failed to register device state callback");
         MSPROF_CALL_ERROR("EK9999", "ProfStart CommandHandle set failed");
         return MSPROF_ERROR;
