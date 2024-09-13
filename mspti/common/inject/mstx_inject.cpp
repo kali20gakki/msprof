@@ -16,13 +16,19 @@
 #include <mutex>
 
 #include "activity/ascend/parser/parser_manager.h"
+#include "common/config.h"
 #include "common/plog_manager.h"
 
 namespace MsptiMstxApi {
 void MstxMarkAFunc(const char* msg, RtStreamT stream)
 {
     if (msg == nullptr) {
-        MSPTI_LOGE("Input params is invalid.");
+        MSPTI_LOGE("Input params msg is nullptr.");
+        return;
+    }
+    // [0, 255]
+    if (strnlen(msg, MAX_MARK_MSG_LEN + 1) > MAX_MARK_MSG_LEN) {
+        MSPTI_LOGE("The len of msg is invalid.");
         return;
     }
     if (Mspti::Parser::ParserManager::GetInstance()->ReportMark(msg, stream) != MSPTI_SUCCESS) {
@@ -33,7 +39,12 @@ void MstxMarkAFunc(const char* msg, RtStreamT stream)
 uint64_t MstxRangeStartAFunc(const char* msg, RtStreamT stream)
 {
     if (msg == nullptr) {
-        MSPTI_LOGE("Input params is invalid.");
+        MSPTI_LOGE("Input params msg is nullptr.");
+        return 0;
+    }
+    // [0, 255]
+    if (strnlen(msg, MAX_MARK_MSG_LEN + 1) > MAX_MARK_MSG_LEN) {
+        MSPTI_LOGE("The len of msg is invalid.");
         return 0;
     }
     uint64_t markId = 0;
