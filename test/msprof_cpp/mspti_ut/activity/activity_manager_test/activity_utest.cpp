@@ -39,7 +39,7 @@ static void ActivityParser(msptiActivity *pRecord)
 {
     g_records++;
     if (pRecord->kind == MSPTI_ACTIVITY_KIND_MARKER) {
-        msptiActivityMark* activity = reinterpret_cast<msptiActivityMark*>(pRecord);
+        msptiActivityMarker* activity = reinterpret_cast<msptiActivityMarker*>(pRecord);
         if (activity->sourceKind == MSPTI_ACTIVITY_SOURCE_KIND_HOST) {
             printf("kind: %d, mode: %d, timestamp: %lu, markId: %lu, processId: %d, threadId: %u, name: %s\n",
                 activity->kind, activity->sourceKind, activity->timestamp, activity->id,
@@ -117,7 +117,7 @@ TEST_F(ActivityUtest, ShouleRetSuccessWhenSetAllKindWithCorrectApiInvocationSequ
     auto instance = Mspti::Activity::ActivityManager::GetInstance();
     EXPECT_EQ(MSPTI_SUCCESS, instance ->SetDevice(0));
     EXPECT_EQ(MSPTI_SUCCESS, instance ->DeviceReset(0));
-    msptiActivityMark activity;
+    msptiActivityMarker activity;
     constexpr uint64_t timeStamp = 1614659207688700;
     constexpr uint32_t markNum = 10;
     uint64_t totalActivitys = 0;

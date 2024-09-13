@@ -50,7 +50,7 @@ typedef enum {
     MSPTI_ACTIVITY_KIND_INVALID = 0,
     /**
     * Extended, optional, data about a marker. The corresponding
-    * activity record structure is msptiActivityMark
+    * activity record structure is msptiActivityMarker
     */
     MSPTI_ACTIVITY_KIND_MARKER = 1,
     MSPTI_ACTIVITY_KIND_KERNEL = 2,
@@ -193,7 +193,7 @@ typedef struct PACKED_ALIGNMENT {
     * This will be NULL for default domain.
     */
     const char *domain;
-} msptiActivityMark;
+} msptiActivityMarker;
 
 typedef struct PACKED_ALIGNMENT {
     /**

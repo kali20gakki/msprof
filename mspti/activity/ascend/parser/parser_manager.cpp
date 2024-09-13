@@ -216,7 +216,7 @@ static void ReportMarkDataToActivity(uint32_t deviceId, const StepTrace* stepTra
     if (!stepTrace) {
         return;
     }
-    msptiActivityMark mark;
+    msptiActivityMarker mark;
     mark.kind = MSPTI_ACTIVITY_KIND_MARKER;
     mark.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_DEVICE;
     mark.timestamp = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId,
@@ -228,7 +228,7 @@ static void ReportMarkDataToActivity(uint32_t deviceId, const StepTrace* stepTra
     mark.name = "";
     mark.domain = "";
     Mspti::Activity::ActivityManager::GetInstance()->Record(
-        reinterpret_cast<msptiActivity*>(&mark), sizeof(msptiActivityMark));
+        reinterpret_cast<msptiActivity*>(&mark), sizeof(msptiActivityMarker));
 }
 
 void ParserManager::ReportStepTrace(uint32_t deviceId, const StepTrace* stepTrace)
@@ -296,7 +296,7 @@ msptiResult ParserManager::ReportMark(const char* msg, RtStreamT stream)
         MSPTI_LOGE("Failed to run markA func.");
         return MSPTI_ERROR_INNER;
     }
-    msptiActivityMark activity;
+    msptiActivityMarker activity;
     activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
     activity.flag = (stream != nullptr) ? MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS_WITH_DEVICE :
         MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS;
@@ -308,7 +308,7 @@ msptiResult ParserManager::ReportMark(const char* msg, RtStreamT stream)
     activity.name = msg;
     activity.timestamp = timestamp;
     return Mspti::Activity::ActivityManager::GetInstance()->Record(
-        reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMark));
+        reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
 }
 msptiResult ParserManager::ReportRangeStartA(const char* msg, RtStreamT stream, uint64_t& markId)
 {
@@ -325,7 +325,7 @@ msptiResult ParserManager::ReportRangeStartA(const char* msg, RtStreamT stream, 
         MSPTI_LOGE("Failed to run range startA func.");
         return MSPTI_ERROR_INNER;
     }
-    msptiActivityMark activity;
+    msptiActivityMarker activity;
     activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
     activity.flag = (stream != nullptr) ? MSPTI_ACTIVITY_FLAG_MARKER_START_WITH_DEVICE :
         MSPTI_ACTIVITY_FLAG_MARKER_START;
@@ -336,7 +336,7 @@ msptiResult ParserManager::ReportRangeStartA(const char* msg, RtStreamT stream, 
     activity.name = msgPtr->c_str();
     activity.timestamp = timestamp;
     auto ret = Mspti::Activity::ActivityManager::GetInstance()->Record(
-        reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMark));
+        reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
     {
         std::lock_guard<std::mutex> lock(rangeInfoMtx_);
         rangeInfo_.insert({markId, stream});
@@ -365,7 +365,7 @@ msptiResult ParserManager::ReportRangeEnd(uint64_t rangeId)
         }
         rangeInfo_.erase(iter);
     }
-    msptiActivityMark activity;
+    msptiActivityMarker activity;
     activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
     activity.flag = withStream ? MSPTI_ACTIVITY_FLAG_MARKER_END_WITH_DEVICE : MSPTI_ACTIVITY_FLAG_MARKER_END;
     activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
@@ -375,7 +375,7 @@ msptiResult ParserManager::ReportRangeEnd(uint64_t rangeId)
     activity.name = "";
     activity.timestamp = timestamp;
     return Mspti::Activity::ActivityManager::GetInstance()->Record(
-        reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMark));
+        reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
 }
 
 }  // Parser
