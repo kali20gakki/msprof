@@ -58,8 +58,7 @@ class KfcCalculator(ICalculator, MsMultiProcess):
             DBManager.destroy_db_connect(conn, curs)
             with AscendTaskModel(self._project_path, [DBNameConstant.TABLE_ASCEND_TASK]) as model:
                 task_data = model.get_ascend_task_data_without_unknown()
-        with Mc2CommInfoViewModel(self._project_path,
-                                  [DBNameConstant.TABLE_MC2_COMM_INFO]) as model:
+        with Mc2CommInfoViewModel(self._project_path, [DBNameConstant.TABLE_MC2_COMM_INFO]) as model:
             comm_info = model.get_kfc_stream(DBNameConstant.TABLE_MC2_COMM_INFO)
         kfc_stream_id = {}
         comm_stream_ids = []
@@ -101,10 +100,9 @@ class KfcCalculator(ICalculator, MsMultiProcess):
             first_timestamp = host_timestamp.get(node_key, 0)
             kfc_op_data[i] = op_data.replace(op_name=op_name, first_timestamp=first_timestamp, iter_id=iter_id)
         HcclCalculator.update_op_name_by_group_name(kfc_op_data)
-        self._kfc_op_data = [
-            [data.ascend_data.model_id, data.ascend_data.index_id, data.op_name, data.ascend_data.start_time,
-             data.ascend_data.duration, data.group_name, data.ascend_data.connection_id] for data in kfc_op_data
-        ]
+        self._kfc_op_data = [[data.ascend_data.model_id, data.ascend_data.index_id, data.op_name,
+                              data.ascend_data.start_time, data.ascend_data.duration, data.group_name,
+                              data.ascend_data.connection_id] for data in kfc_op_data]
 
     def calculate_kfc_task(self: any) -> None:
         with KfcInfoViewModel(self._project_path,

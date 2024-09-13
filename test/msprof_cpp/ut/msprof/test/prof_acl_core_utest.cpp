@@ -1814,24 +1814,25 @@ TEST_F(MSPROF_CALL_BACK_IMPL_UTEST, MsprofCtrlCallbackImpl)
         .will(returnValue(false));
     ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
     EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+    type = MSPROF_CTRL_INIT_GE_OPTIONS;
+    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImplHandle)
+        .stubs()
+        .will(returnValue(0));
     MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
         .stubs()
         .will(returnValue(true));
     MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback)
         .stubs()
-        .will(returnValue(PROFILING_FAILED));
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
     ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
-    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
-    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(MSPROF_ERROR, ret);
     MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart)
         .stubs()
         .will(returnValue(ACL_SUCCESS))
         .then(returnValue(ACL_ERROR_PROFILING_FAILURE));
-    ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
-    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
-    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+    EXPECT_EQ(PROFILING_SUCCESS, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len));
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, CtrlCallbackImplWillReturnErrorWhileStartDynProfFail)

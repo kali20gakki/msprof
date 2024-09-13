@@ -56,6 +56,7 @@ int32_t GetRegisterResult();
 int32_t RegisterReporterCallback();
 int32_t RegisterNewReporterCallback();
 void RegisterMsprofTxReporterCallback();
+int32_t MsprofCtrlCallbackImplHandle(uint32_t type, VOID_PTR data, uint32_t len);
 }  // namespace ProfilerCommon
 }  // namespace Dvvp
 }  // namespace Analysis
