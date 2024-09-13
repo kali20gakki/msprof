@@ -205,7 +205,7 @@ msptiResult ActivityManager::GetNextRecord(uint8_t *buffer, size_t validBufferSi
     switch (*pKind) {
         case MSPTI_ACTIVITY_KIND_MARKER:
             *record = reinterpret_cast<msptiActivity*>(buffer + pos);
-            pos += sizeof(msptiActivityMark);
+            pos += sizeof(msptiActivityMarker);
             break;
         case MSPTI_ACTIVITY_KIND_KERNEL:
             *record = reinterpret_cast<msptiActivity*>(buffer + pos);
