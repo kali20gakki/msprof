@@ -100,7 +100,6 @@ void ProfAclMgr::DeviceResponseHandler::HandleResponse()
 
 void ProfAclMgr::DeviceResponseHandler::Run(const struct error_message::Context &errorContext)
 {
-    MsprofErrorManager::instance()->SetErrorContext(errorContext);
     static const int RESPONSE_TIME_S = 30; // device response timeout: 30s
     std::unique_lock<std::mutex> lk(mtx_);
     MSPROF_EVENT("Device %u started to wait for response", devId_);
