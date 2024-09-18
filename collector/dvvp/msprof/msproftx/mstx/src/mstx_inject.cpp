@@ -122,7 +122,8 @@ extern "C" int __attribute__((visibility("default"))) InitInjectionMstx(MstxGetM
 {
     unsigned int outSize = 0;
     MstxFuncTable outTable;
-    if (getFuncTable(MSTX_API_MODULE_CORE, &outTable, &outSize) != MSTX_SUCCESS || outTable == nullptr) {
+    if (getFuncTable == nullptr || getFuncTable(MSTX_API_MODULE_CORE, &outTable, &outSize) != MSTX_SUCCESS ||
+        outTable == nullptr) {
         MSPROF_LOGE("Failed to call getFuncTable");
         return MSTX_FAIL;
     }

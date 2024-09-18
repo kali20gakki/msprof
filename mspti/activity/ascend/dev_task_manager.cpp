@@ -139,11 +139,11 @@ void DevTaskManager::InitDeviceList()
 {
     uint32_t deviceNum = 0;
     auto ret = DrvGetDevNum(&deviceNum);
-    if (ret != DRV_ERROR_NONE) {
+    constexpr int32_t DEVICE_MAX_NUM = 64;
+    if (ret != DRV_ERROR_NONE || deviceNum > DEVICE_MAX_NUM) {
         MSPTI_LOGE("Get device num failed.");
         return;
     }
-    constexpr int32_t DEVICE_MAX_NUM = 64;
     uint32_t deviceList[DEVICE_MAX_NUM] = {0};
     ret = DrvGetDevIDs(deviceList, deviceNum);
     if (ret != DRV_ERROR_NONE) {
