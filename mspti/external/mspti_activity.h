@@ -48,10 +48,6 @@ typedef enum {
     * The activity record is invalid.
     */
     MSPTI_ACTIVITY_KIND_INVALID = 0,
-    /**
-    * Extended, optional, data about a marker. The corresponding
-    * activity record structure is msptiActivityMarker
-    */
     MSPTI_ACTIVITY_KIND_MARKER = 1,
     MSPTI_ACTIVITY_KIND_KERNEL = 2,
     MSPTI_ACTIVITY_KIND_API = 3,
@@ -70,44 +66,44 @@ typedef enum {
 } msptiActivitySourceKind;
 
 /**
- * @brief Flags associated with activity records.
+ * @brief Flags linked to activity records.
  *
- * Activity record flags. Flags can be combined by bitwise OR to
- * associated multiple flags with an activity record. Each flag is
- * specific to a certain activity kind, as noted below.
+ * These are the Flags that pertain to activity records.
+ * Flags can be combined by bitwise OR to
+ * associated multiple flags with an activity record.
  */
 typedef enum {
     /**
-    * Indicates the activity record has no flags.
+    * Signifies that the activity record lacks any flags.
     */
     MSPTI_ACTIVITY_FLAG_NONE = 0,
     /**
-    * Indicates the activity represents an pure host instantaneous marker. Valid for
+    * Represents the activity as a pure host instantaneous marker. Works with
     * MSPTI_ACTIVITY_KIND_MARKER.
     */
     MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS = 1 << 0,
     /**
-    * Indicates the activity represents a pure host region start marker. Valid for
+    * Represents the activity as a pure host region start marker. Works with
     * MSPTI_ACTIVITY_KIND_MARKER.
     */
     MSPTI_ACTIVITY_FLAG_MARKER_START = 1 << 1,
     /**
-    * Indicates the activity represents a pure host region end marker. Valid for
+    * Represents the activity as a pure host region end marker. Works with
     * MSPTI_ACTIVITY_KIND_MARKER.
     */
     MSPTI_ACTIVITY_FLAG_MARKER_END = 1 << 2,
     /**
-    * Indicates the activity represents an instantaneous marker with device. Valid for
+    * Represents the activity as an instantaneous marker with device. Works with
     * MSPTI_ACTIVITY_KIND_MARKER.
     */
     MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS_WITH_DEVICE = 1 << 3,
     /**
-    * Indicates the activity represents a pure start marker with device. Valid for
+    * Represents the activity as a pure start marker with device. Works with
     * MSPTI_ACTIVITY_KIND_MARKER.
     */
     MSPTI_ACTIVITY_FLAG_MARKER_START_WITH_DEVICE = 1 << 4,
     /**
-    * Indicates the activity represents a pure end marker with device. Valid for
+    * Represents the activity as a pure end marker with device. Works with
     * MSPTI_ACTIVITY_KIND_MARKER.
     */
     MSPTI_ACTIVITY_FLAG_MARKER_END_WITH_DEVICE = 1 << 5
@@ -121,8 +117,7 @@ typedef struct PACKED_ALIGNMENT {
 
 typedef union PACKED_ALIGNMENT {
     /**
-    * A process object requires that we identify the process ID. A
-    * thread object requires that we identify both the process and
+    * A thread object requires that we identify both the process and
     * thread ID.
     */
     struct {
@@ -130,8 +125,6 @@ typedef union PACKED_ALIGNMENT {
         uint32_t threadId;
     } pt;
     /**
-    * A device object requires that we identify the device ID. A
-    * context object requires that we identify both the device and
     * A stream object requires that we identify device and stream ID.
     */
     struct {
@@ -141,15 +134,13 @@ typedef union PACKED_ALIGNMENT {
 } msptiObjectId;
 
 /**
- * @brief The activity record providing a marker which is an
- * instantaneous point in time.
+ * @brief This activity record serves as a marker, representing a specific moment in time.
  *
- * The marker is specified with a descriptive name and unique id
- * (MSPTI_ACTIVITY_KIND_MARKER).
+ * The marker is characterized by a distinctive name and a unique identifier
  */
 typedef struct PACKED_ALIGNMENT {
     /**
-    * The activity record kind, must be MSPTI_ACTIVITY_KIND_MARKER.
+    * The activity record kind, always be MSPTI_ACTIVITY_KIND_MARKER.
     */
     msptiActivityKind kind;
 
@@ -298,12 +289,12 @@ typedef void(*msptiBuffersCallbackRequestFunc)(uint8_t **buffer, size_t *size, s
  * of activity records.
  *
  * This callback function returns to the MSPTI client a buffer
- * containing activity records.  The buffer contains \p validSize
+ * containing activity records.  The buffer contains @p validSize
  * bytes of activity records which should be read using
  * msptiActivityGetNextRecord. After this call MSPTI
  * relinquished ownership of the buffer and will not use it
  * anymore. The client may return the buffer to MSPTI using the
- * mspti_BuffersCallbackRequestFunc callback.
+ * msptiBuffersCallbackRequestFunc callback.
  *
  * @param buffer The activity record buffer.
  * @param size The total size of the buffer in bytes as set in
@@ -319,9 +310,6 @@ typedef void(*msptiBuffersCallbackCompleteFunc)(uint8_t *buffer, size_t size, si
  * This function registers two callback functions to be used in asynchronous
  * buffer handling. If registered, activity record buffers are handled using
  * asynchronous requested/completed callbacks from MSPTI.
- *
- * Registering these callbacks prevents the client from using MSPTI's
- * blocking enqueue/dequeue functions.
  *
  * @param funcBufferRequested callback which is invoked when an empty
  * buffer is requested by MSPTI
@@ -339,8 +327,8 @@ msptiResult msptiActivityRegisterCallbacks(
  * @brief Enable collection of a specific kind of activity record.
  *
  * Enable collection of a specific kind of activity record. Multiple
- * kinds can be enabled by calling this function multiple times. By
- * default all activity kinds are disabled for collection.
+ * kinds can be enabled by calling this function multiple times.
+ * By default, the collection of all activity types is inactive.
  *
  * @param kind The kind of activity record to collect
  *
@@ -352,8 +340,8 @@ msptiResult msptiActivityEnable(msptiActivityKind kind);
  * @brief Disable collection of a specific kind of activity record.
  *
  * Disable collection of a specific kind of activity record. Multiple
- * kinds can be disabled by calling this function multiple times. By
- * default all activity kinds are disabled for collection.
+ * kinds can be disabled by calling this function multiple times.
+ * By default, the collection of all activity types is inactive.
  *
  * @param kind The kind of activity record to stop collecting
  *
@@ -384,9 +372,8 @@ msptiResult msptiActivityGetNextRecord(uint8_t *buffer, size_t validBufferSizeBy
  *
  * This function returns the activity records associated with all contexts/streams
  * (and the global buffers not associated with any stream) to the MSPTI client
- * using the callback registered in msptiActivityRegisterCallbacks. it returns all the
- * activity buffers which have all the activity records completed, buffers need not
- * to be full though
+ * using the callback registered in msptiActivityRegisterCallbacks. It return all
+ * activity buffers that contain completed activity records, even if these buffers are not completely filled.
  *
  * Before calling this function, the buffer handling callback api must be activated
  * by calling msptiActivityRegisterCallbacks.
