@@ -111,10 +111,27 @@ void DevProfTask::Run()
 
 // DevProfTaskTsFw的引用计数，保证在第一次使能时，Start Device任务
 // 最后一次反使能时，Stop Device任务
-std::atomic<uint32_t> DevProfTaskTsFw::ref_cnt_{0};
+std::map<uint32_t, uint32_t> DevProfTaskTsFw::ref_cnts_;
+std::mutex DevProfTaskTsFw::cnt_mtx_;
 msptiResult DevProfTaskTsFw::StartTask()
 {
-    if (ref_cnt_.load() == 0) {
+    uint32_t refCnt = 0;
+    {
+        std::lock_guard<std::mutex> lk(cnt_mtx_);
+        auto iter = ref_cnts_.find(deviceId_);
+        if (iter == ref_cnts_.end()) {
+            auto ret = ref_cnts_.insert({deviceId_, refCnt});
+            if (!ret.second) {
+                MSPTI_LOGE("Insert tsfw task cnt failed.");
+                return MSPTI_ERROR_INNER;
+            }
+            iter = ret.first;
+        } else {
+            refCnt = iter->second;
+        }
+        iter->second++;
+    }
+    if (refCnt == 0) {
         if (!Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->CheckChannelValid(deviceId_, channelId_)) {
             return MSPTI_SUCCESS;
         }
@@ -140,14 +157,22 @@ msptiResult DevProfTaskTsFw::StartTask()
         }
         MSPTI_LOGI("Succeed to start TsTrackJob for device: %u, channel id: %u", deviceId_, channelId_);
     }
-    ref_cnt_++;
     return MSPTI_SUCCESS;
 }
 
 msptiResult DevProfTaskTsFw::StopTask()
 {
-    ref_cnt_--;
-    if (ref_cnt_.load() == 0) {
+    uint32_t refCnt = 0;
+    {
+        std::lock_guard<std::mutex> lk(cnt_mtx_);
+        auto iter = ref_cnts_.find(deviceId_);
+        if (iter == ref_cnts_.end()) {
+            MSPTI_LOGW("The TsFw DevProfTask was not start. DeviceId: %u", deviceId_);
+            return MSPTI_SUCCESS;
+        }
+        refCnt = --iter->second;
+    }
+    if (refCnt == 0) {
         int ret = ProfStop(deviceId_, channelId_);
         if (ret != 0) {
             MSPTI_LOGE("Failed to stop TsTrackJob for device: %u, channel id: %u", deviceId_, channelId_);
@@ -161,10 +186,27 @@ msptiResult DevProfTaskTsFw::StopTask()
 
 // DevProfTaskStars的引用计数，保证在第一次使能时，Start Device任务
 // 最后一次反使能时，Stop Device任务
-std::atomic<uint32_t> DevProfTaskStars::ref_cnt_{0};
+std::map<uint32_t, uint32_t> DevProfTaskStars::ref_cnts_;
+std::mutex DevProfTaskStars::cnt_mtx_;
 msptiResult DevProfTaskStars::StartTask()
 {
-    if (ref_cnt_.load() == 0) {
+    uint32_t refCnt = 0;
+    {
+        std::lock_guard<std::mutex> lk(cnt_mtx_);
+        auto iter = ref_cnts_.find(deviceId_);
+        if (iter == ref_cnts_.end()) {
+            auto ret = ref_cnts_.insert({deviceId_, refCnt});
+            if (!ret.second) {
+                MSPTI_LOGE("Insert stars task cnt failed.");
+                return MSPTI_ERROR_INNER;
+            }
+            iter = ret.first;
+        } else {
+            refCnt = iter->second;
+        }
+        iter->second++;
+    }
+    if (refCnt == 0) {
         if (!Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->CheckChannelValid(deviceId_, channelId_)) {
             return MSPTI_SUCCESS;
         }
@@ -189,14 +231,22 @@ msptiResult DevProfTaskStars::StartTask()
         }
         MSPTI_LOGI("Succeed to start ProfStarsJob for device: %u, channel id: %u", deviceId_, channelId_);
     }
-    ref_cnt_++;
     return MSPTI_SUCCESS;
 }
 
 msptiResult DevProfTaskStars::StopTask()
 {
-    ref_cnt_--;
-    if (ref_cnt_.load() == 0) {
+    uint32_t refCnt = 0;
+    {
+        std::lock_guard<std::mutex> lk(cnt_mtx_);
+        auto iter = ref_cnts_.find(deviceId_);
+        if (iter == ref_cnts_.end()) {
+            MSPTI_LOGW("The Stars DevProfTask was not start. DeviceId: %u", deviceId_);
+            return MSPTI_SUCCESS;
+        }
+        refCnt = --iter->second;
+    }
+    if (refCnt == 0) {
         int ret = ProfStop(deviceId_, channelId_);
         if (ret != 0) {
             MSPTI_LOGE("Failed to stop ProfStarsJob for device: %u, channel id: %u", deviceId_, channelId_);

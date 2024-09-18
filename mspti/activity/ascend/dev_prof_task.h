@@ -13,7 +13,6 @@
 #ifndef MSPTI_ACTIVITY_ASCEND_DEV_PROF_TASK_H
 #define MSPTI_ACTIVITY_ASCEND_DEV_PROF_TASK_H
 
-#include <atomic>
 #include <condition_variable>
 #include <map>
 #include <memory>
@@ -72,7 +71,8 @@ private:
 private:
     AI_DRV_CHANNEL channelId_ = PROF_CHANNEL_TS_FW;
     uint32_t deviceId_;
-    static std::atomic<uint32_t> ref_cnt_;
+    static std::map<uint32_t, uint32_t> ref_cnts_;
+    static std::mutex cnt_mtx_;
 };
 
 class DevProfTaskStars : public DevProfTask {
@@ -86,7 +86,8 @@ private:
 private:
     AI_DRV_CHANNEL channelId_ = PROF_CHANNEL_STARS_SOC_LOG;
     uint32_t deviceId_;
-    static std::atomic<uint32_t> ref_cnt_;
+    static std::map<uint32_t, uint32_t> ref_cnts_;
+    static std::mutex cnt_mtx_;
 };
 
 class DevProfTaskFactory {
