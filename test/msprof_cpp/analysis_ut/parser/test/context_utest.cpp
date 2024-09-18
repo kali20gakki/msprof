@@ -396,10 +396,9 @@ TEST_F(ContextUTest, TestGetPidFromInfoJsonShouldReturn2376271WhenSuccess)
     EXPECT_EQ(Context::GetInstance().GetPidFromInfoJson(HOST_ID, File::PathJoin({CONTEXT_DIR, LOCAL_DIR})), expectPid);
 }
 
-TEST_F(ContextUTest, TestGetProfTimeRecordInfoShouldReturnDefaultValueWhenStrToU64Failed)
+TEST_F(ContextUTest, TestGetProfTimeRecordInfoShouldReturnDefaultValueWhenstartCollectionTimeBeginStrToU64Failed)
 {
     EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, START_INFO})));
-    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, END_INFO})));
     // start.info
     nlohmann::json startInfo = {
         {"collectionTimeEnd", "abc"},
@@ -410,7 +409,17 @@ TEST_F(ContextUTest, TestGetProfTimeRecordInfoShouldReturnDefaultValueWhenStrToU
     };
     FileWriter startInfoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, START_INFO}));
     startInfoWriter.WriteText(startInfo.dump());
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    ProfTimeRecord res;
+    EXPECT_FALSE(Context::GetInstance().GetProfTimeRecordInfo(res, {File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    EXPECT_EQ(res.baseTimeNs, UINT64_MAX);
+    EXPECT_EQ(res.startTimeNs, UINT64_MAX);
+    EXPECT_EQ(res.endTimeNs, 0);
+}
 
+TEST_F(ContextUTest, TestGetProfTimeRecordInfoShouldReturnDefaultValueWhenendCollectionTimeEndStrToU64Failed)
+{
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, END_INFO})));
     // end.info
     nlohmann::json endInfo = {
         {"collectionTimeEnd", "abc"},
@@ -421,6 +430,27 @@ TEST_F(ContextUTest, TestGetProfTimeRecordInfoShouldReturnDefaultValueWhenStrToU
     };
     FileWriter endInfoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, END_INFO}));
     endInfoWriter.WriteText(endInfo.dump());
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    ProfTimeRecord res;
+    EXPECT_FALSE(Context::GetInstance().GetProfTimeRecordInfo(res, {File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    EXPECT_EQ(res.baseTimeNs, UINT64_MAX);
+    EXPECT_EQ(res.startTimeNs, UINT64_MAX);
+    EXPECT_EQ(res.endTimeNs, 0);
+}
+
+TEST_F(ContextUTest, TestGetProfTimeRecordInfoShouldReturnDefaultValueWhenstartClockMonotonicRawStrToU64Failed)
+{
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, START_INFO})));
+    // start.info
+    nlohmann::json startInfo = {
+        {"collectionTimeEnd", "abc"},
+        {"clockMonotonicRaw", "abc"},
+        {"collectionTimeBegin", "1"},
+        {"collectionDateBegin", "abc"},
+        {"collectionDateEnd", "abc"},
+    };
+    FileWriter startInfoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, START_INFO}));
+    startInfoWriter.WriteText(startInfo.dump());
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
     ProfTimeRecord res;
     EXPECT_FALSE(Context::GetInstance().GetProfTimeRecordInfo(res, {File::PathJoin({CONTEXT_DIR, TEST_DIR})}));

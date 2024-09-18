@@ -237,11 +237,11 @@ uint16_t Context::GetPlatformVersion(uint16_t deviceId, const std::string &profP
     const auto &info = GetInfoByDeviceId(deviceId, profPath);
     uint16_t platformVersion = UINT16_MAX;
     if (info.empty()) {
-        ERROR("GetPlatformVersion device info is empty.");
+        ERROR("GetPlatformVersion device info is empty, input path %, deviceId %", profPath, deviceId);
         return platformVersion;
     }
     if (StrToU16(platformVersion, info.at("platform_version")) != ANALYSIS_OK) {
-        ERROR("PlatformVersion to uint16_t failed, invalid str is %.", info.at("platform_version"));
+        ERROR("PlatformVersion to uint16_t failed, input path %, deviceId %", profPath, deviceId);
     }
     return platformVersion;
 }
@@ -259,23 +259,22 @@ bool Context::GetProfTimeRecordInfo(Utils::ProfTimeRecord &record, const std::st
     }
     uint64_t startTimeUs = UINT64_MAX;
     if (StrToU64(startTimeUs, info.at("startCollectionTimeBegin")) != ANALYSIS_OK) {
-        ERROR("StartTime to uint64_t failed, invalid str is %.", info.at("startCollectionTimeBegin"));
+        ERROR("StartTime to uint64_t failed.");
         return false;
     }
     uint64_t endTimeUs = 0;
     if (StrToU64(endTimeUs, info.at("endCollectionTimeEnd")) != ANALYSIS_OK) {
-        ERROR("EndTime to uint64_t failed, invalid str is %.", info.at("endCollectionTimeEnd"));
+        ERROR("EndTime to uint64_t failed.");
         return false;
     }
     uint64_t baseTimeNs = UINT64_MAX;
     if (StrToU64(baseTimeNs, info.at("startClockMonotonicRaw")) != ANALYSIS_OK) {
-        ERROR("BaseTime to uint64_t failed, invalid str is %.", info.at("startClockMonotonicRaw"));
+        ERROR("BaseTime to uint64_t failed.");
         return false;
     }
     // 先判断时间之间的大小关系，确保后续计算时整数不回绕
     if ((startTimeUs * MILLI_SECOND < baseTimeNs)) {
-        ERROR("The value of startTimeUs and baseTimeNs is invalid, startTimeUs is %, baseTimeNs is %",
-              startTimeUs, baseTimeNs);
+        ERROR("The value of startTimeUs and baseTimeNs is invalid.");
         return false;
     }
     // startInfo endInfo 里的 collectionTime的单位是us，需要转换成ns
@@ -290,7 +289,7 @@ uint32_t Context::GetPidFromInfoJson(uint16_t deviceId, const std::string &profP
     const auto &info = GetInfoByDeviceId(deviceId, profPath);
     uint32_t pid = 0;
     if (info.empty()) {
-        ERROR("GetPidFromInfoJson device info is empty.");
+        ERROR("GetPidFromInfoJson device info is empty, input path %, deviceId %", profPath, deviceId);
         return pid;
     }
     const std::string strPid = info.at("pid");
@@ -299,7 +298,7 @@ uint32_t Context::GetPidFromInfoJson(uint16_t deviceId, const std::string &profP
         return pid;
     }
     if (StrToU32(pid, strPid) != ANALYSIS_OK) {
-        ERROR("Pid to uint32_t failed, invalid str is %.", info.at("pid"));
+        ERROR("Pid to uint32_t failed, input path %, deviceId %", profPath, deviceId);
     }
     return pid;
 }
@@ -341,7 +340,7 @@ bool Context::GetSyscntConversionParams(Utils::SyscntConversionParams &params,
     auto info = GetInfoByDeviceId(deviceId, profPath);
     // host freq可用作host cnt计算，也可用于host diff计算
     if (info.empty()) {
-        ERROR("GetSyscntConversionParams device info is empty.");
+        ERROR("GetSyscntConversionParams device info is empty, input path %, deviceId %", profPath, deviceId);
         return false;
     }
     std::string hostFreqStr = info.at("CPU").back().at("Frequency");
@@ -349,7 +348,7 @@ bool Context::GetSyscntConversionParams(Utils::SyscntConversionParams &params,
     if (hostFreqStr.empty()) {
         INFO("HostFreq is empty, it will be set 1000.0 .");
     } else if (StrToDouble(hostFreq, hostFreqStr) != ANALYSIS_OK) {
-        ERROR("HostFreq to double failed, invalid str is %.", hostFreqStr);
+        ERROR("HostFreq to double failed, input path %, deviceId %", profPath, deviceId);
         return false;
     }
     if (deviceId == HOST_ID) {
@@ -357,23 +356,23 @@ bool Context::GetSyscntConversionParams(Utils::SyscntConversionParams &params,
     } else {
         // freq 来自info.json
         if (StrToDouble(params.freq, info.at("DeviceInfo").back().at("hwts_frequency")) != ANALYSIS_OK) {
-            ERROR("DeviceFreq to double failed, invalid str is %.", info.at("DeviceInfo").back().at("hwts_frequency"));
+            ERROR("DeviceFreq to double failed, input path %, deviceId %", profPath, deviceId);
             return false;
         }
     }
     if (IsDoubleEqual(params.freq, 0) || IsDoubleEqual(hostFreq, 0)) {
-        ERROR("Freq is 0, can't be used to calculate.");
+        ERROR("Freq is 0, can't be used to calculate, input path %, deviceId %", profPath, deviceId);
         return false;
     }
     // host取host的cnt， device取device的cnt
     std::string cntName = (deviceId == HOST_ID) ? "hostCntvct" : "devCntvct";
     if (StrToU64(params.sysCnt, info.value(cntName, "0")) != ANALYSIS_OK) {
-        ERROR("SysCnt to uint64_t failed, invalid str is %.", info.value(cntName, "0"));
+        ERROR("SysCnt to uint64_t failed, input path %, deviceId %", profPath, deviceId);
         return false;
     }
     // hostMonotonic 来自 host_start_log 的 clock_monotonic_raw
     if (StrToU64(params.hostMonotonic, info.value("hostMonotonic", "0")) != ANALYSIS_OK) {
-        ERROR("HostMonotonic to uint64_t failed, invalid str is %.", info.value("hostMonotonic", "0"));
+        ERROR("HostMonotonic to uint64_t failed, input path %, deviceId %", profPath, deviceId);
         return false;
     }
     uint64_t diff = 0;
@@ -395,12 +394,12 @@ bool Context::GetPmuFreq(double &freq, uint16_t deviceId, const std::string &pro
     }
     auto info = GetInfoByDeviceId(deviceId, profPath);
     if (info.empty()) {
-        ERROR("GetPmuFreq device info is empty.");
+        ERROR("GetPmuFreq device info is empty, input path %, deviceId %", profPath, deviceId);
         return false;
     }
     // freq 来自info.json
     if (StrToDouble(freq, info.at("DeviceInfo").back().at("aic_frequency")) != ANALYSIS_OK) {
-        ERROR("DeviceFreq to double failed, invalid str is %.", info.at("DeviceInfo").back().at("aic_frequency"));
+        ERROR("DeviceFreq to double failed, input path %, deviceId %", profPath, deviceId);
         return false;
     }
     return true;
@@ -431,7 +430,7 @@ bool Context::GetClockMonotonicRaw(uint64_t &monotonicRaw, bool isHost, uint16_t
     // host取host monotonic， device取device的monotonic
     std::string monotonic = isHost ? "hostMonotonic" : "devMonotonic";
     if (StrToU64(monotonicRaw, info.value(monotonic, "0")) != ANALYSIS_OK) {
-        ERROR("Monotonic to uint64_t failed, invalid str is %.", info.value(monotonic, "0"));
+        ERROR("Monotonic to uint64_t failed, input path %, deviceId %", profPath, deviceId);
         return false;
     }
     if (!isHost) {
@@ -442,7 +441,7 @@ bool Context::GetClockMonotonicRaw(uint64_t &monotonicRaw, bool isHost, uint16_t
     if (hostFreqStr.empty()) {
         INFO("HostFreq is empty, it will be set 1000.0 .");
     } else if (StrToDouble(hostFreq, hostFreqStr) != ANALYSIS_OK) {
-        ERROR("HostFreq to double failed, invalid str is %.", hostFreqStr);
+        ERROR("HostFreq to double failed, input path %, deviceId %", profPath, deviceId);
         return false;
     }
     if (IsDoubleEqual(hostFreq, 0)) {
@@ -464,12 +463,12 @@ uint64_t Context::GetHostUid(uint16_t deviceId, const std::string &profPath)
 {
     const auto &info = GetInfoByDeviceId(deviceId, profPath);
     if (info.empty()) {
-        ERROR("GetHostUid InfoJson info is empty.");
+        ERROR("GetHostUid InfoJson info is empty, input path %, deviceId %", profPath, deviceId);
         return 0;
     }
     uint64_t hostUid = 0;
     if (StrToU64(hostUid, info.value("hostUid", "0")) != ANALYSIS_OK) {
-        ERROR("HostUid to uint64_t failed, invalid str is %.", info.value("hostUid", "0"));
+        ERROR("HostUid to uint64_t failed, input path %, deviceId %", profPath, deviceId);
         return 0;
     }
     return hostUid;
