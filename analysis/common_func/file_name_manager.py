@@ -77,12 +77,12 @@ class FileNameManagerConstant:
 
     GE_MODEL_LOAD_FILE_PATTERN = r"^Framework\.model_load_info_(\d+)\.(\d+)\.slice_\d+"
     GE_MODEL_LOAD_INFER_FILE_PATTERN = r"^Framework\.model_load_info_(\d+).(\d+).\d+"
-    GE_MODEL_LOAD_TRAINING_FILE_PATTERN = r"^Framework\.host.model_load_info_(\d+).(\d+)\.slice_\d+"
+    GE_MODEL_LOAD_TRAINING_FILE_PATTERN = r"^Framework\.host.model_load_info_(\d+)\.(\d+)\.slice_\d+"
 
     GE_MODEL_TIME_FILE_PATTERN = r"^Framework\.model_time_info_(\d+)_(\d+)\.(\d+)\.slice_\d+"
     GE_MODEL_TIME_INFER_FILE_PATTERN = r"^Framework\.model_time_info_(\d+)_(\d+).(\d+).\d+"
     GE_MODEL_TIME_TRAINING_FILE_PATTERN = \
-        r"^Framework.host.model_time_info_(\d+)_(\d+).(\d+)\.slice_\d+"
+        r"^Framework.host.model_time_info_(\d+)_(\d+)\.(\d+)\.slice_\d+"
 
     GE_FUSION_INFO_PATTERN = r"^Framework\.model_time_info_(\d+)_(\d+)\.(\d+)\.slice_\d+"
 
