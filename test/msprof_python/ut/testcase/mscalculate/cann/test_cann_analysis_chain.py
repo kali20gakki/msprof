@@ -93,7 +93,7 @@ class TestCANNAnalysisChain(unittest.TestCase):
         root_api = invalid_dto('root', 1, 0, 300, 'root')
         root_event = chain.db.add_api(root_api)
         root_node = TreeNode(root_event)
-        tree = chain.build_tree(root_node)
+        tree = chain.build_tree(root_node, 0)
         # check level1
         self.assertEqual(len(tree.children), 2)
         self.assertEqual(tree.children[1].event.struct_type, "task4")
@@ -111,6 +111,9 @@ class TestCANNAnalysisChain(unittest.TestCase):
         self.assertEqual(tree.children[0].children[1].children[0].event.struct_type, "task2")
         self.assertEqual(len(tree.children[0].children[0].children[0].event.additional_record), 1)
         self.assertEqual(len(tree.children[0].children[1].children[0].event.additional_record), 1)
+
+        # 超出递归深度
+        tree = chain.build_tree(root_node, 25)
 
 
 if __name__ == '__main__':

@@ -5,6 +5,7 @@
 import logging
 
 from common_func.constant import Constant
+from common_func.msprof_exception import ProfException
 from mscalculate.cann.cann_event_generator import CANNThreadDB
 from mscalculate.cann.event import Event
 from mscalculate.cann.tree import TreeNode
@@ -41,7 +42,7 @@ class CANNAnalysisChain:
 
     def start(self):
         root_dto = invalid_dto(Constant.ROOT_LEVEL, self.thread_id, 0,
-                                          self.db.get_time_bound() + 1, "root")
+                               self.db.get_time_bound() + 1, "root")
         root_event = self.db.add_api(root_dto)
         # Associate the upper-level and lower-level relationships of events
         # based on timestamp points to build a callstack tree.
@@ -51,14 +52,24 @@ class CANNAnalysisChain:
         # Perform inter-layer association.
         self.run(event_tree)
 
-    def run(self, node: TreeNode):
+    def run(self, node: TreeNode, depth: int = 0):
+        depth_limit = 20  # 限制最大递归深度
+        if depth > depth_limit:
+            logging.error("Recursion depth exceeds limit!")
+            return
+        depth += 1
         self.gears.get(node.event.cann_level).run(node.event, self.now_stack)
         self.now_stack[node.event.cann_level] = node.event
         for child in node.children:
-            self.run(child)
+            self.run(child, depth)
         self.now_stack[node.event.cann_level] = Event.invalid_event()
 
-    def build_tree(self, parent: TreeNode) -> TreeNode:
+    def build_tree(self, parent: TreeNode, depth: int = 0) -> TreeNode:
+        depth_limit = 20  # 限制最大递归深度
+        if depth > depth_limit:
+            logging.error("Recursion depth exceeds limit, when build cann tree!")
+            return parent
+        depth += 1
         while True:
             # All processing is complete
             if self.event_q.empty():
@@ -94,5 +105,5 @@ class CANNAnalysisChain:
 
             self.last_event_record[event.cann_level] = event
             child_node = TreeNode(event)
-            child_tree = self.build_tree(child_node)
+            child_tree = self.build_tree(child_node, depth)
             parent.add_child(child_tree)

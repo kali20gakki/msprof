@@ -99,21 +99,6 @@ def print_msg(*args: any, **kwargs: any) -> None:
     print(*args, **kwargs)
 
 
-def check_exist_zip(file_path: str) -> bool:
-    """
-    check existence of zip file
-    """
-    for _, dirs, files in os.walk(file_path):
-        for file_ in files:
-            if file_.split(".")[-1] == "zip":
-                return True
-        for dir_ in dirs:
-            check_exist = check_exist_zip(os.path.join(file_path, dir_))
-            if check_exist:
-                return True
-    return False
-
-
 class Log:
     """
     Python logger
