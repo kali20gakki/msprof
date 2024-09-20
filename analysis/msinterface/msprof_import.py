@@ -9,6 +9,7 @@ from common_func.common import warn, print_info
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_common import analyze_collect_data, prepare_for_parse
 from common_func.msprof_common import check_path_valid
@@ -17,6 +18,7 @@ from common_func.msprof_common import get_valid_sub_path
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from framework.load_info_manager import LoadInfoManager
+from msinterface.msprof_c_interface import dump_device_data
 from msparser.cluster.cluster_info_parser import ClusterInfoParser, ClusterBasicInfo
 from msparser.cluster.cluster_step_trace_parser import ClusterStepTraceParser
 from msparser.parallel.cluster_parallel_collector import ClusterParallelCollector
@@ -82,18 +84,46 @@ class ImportCommand:
         if subdir:
             collect_path = os.path.join(self.collection_path, subdir)
         sub_dirs = sorted(get_path_dir(collect_path), reverse=True)
+        path_table = {StrConstant.HOST_PATH: "", StrConstant.DEVICE_PATH: []}
         for sub_dir in sub_dirs:  # result_dir
             sub_path = get_valid_sub_path(collect_path, sub_dir, False)
             if DataCheckManager.contain_info_json_data(sub_path):
-                LoadInfoManager.load_info(sub_path)
-                self.do_import(sub_path)
+                if sub_dir == StrConstant.HOST_PATH:
+                    path_table[StrConstant.HOST_PATH] = sub_path
+                else:
+                    path_table[StrConstant.DEVICE_PATH].append(sub_path)
             elif collect_path and is_cluster:
                 warn(self.FILE_NAME, 'Invalid parsing dir(%s), -dir must be profiling data dir, '
                                      'such as PROF_XXX_XXX_XXX' % collect_path)
             else:
                 self._process_sub_dirs(sub_dir, is_cluster=True)
+        self._process_data(path_table)
 
-    def _find_unresolved_dirs(self: any) -> list:
+    def _process_data(self, path_table: dict):
+        if not path_table.get(StrConstant.HOST_PATH) and not path_table.get(StrConstant.DEVICE_PATH):
+            warn(self.FILE_NAME, 'Invalid parsing dir("%s"), no valid dir. ' % self.collection_path)
+            return
+        # start parse
+        self._start_parse(path_table)
+
+    def _start_parse(self, path_table: dict):
+        # host
+        host_path = path_table.get(StrConstant.HOST_PATH)
+        self._parse_data(host_path)
+        # device
+        for device_path in path_table.get(StrConstant.DEVICE_PATH):
+            self._parse_data(device_path)
+        # device 执行完后执行device c化
+        dump_device_data(host_path if host_path else path_table.get(StrConstant.DEVICE_PATH)[0])
+
+    def _parse_data(self, device_path: str):
+        if not device_path:
+            return
+        prepare_for_parse(device_path)
+        LoadInfoManager.load_info(device_path)
+        self.do_import(device_path)
+
+    def _find_unresolved_dirs(self: any) -> dict:
         prof_dirs = self._get_prof_dirs()
         print_info(MsProfCommonConstant.COMMON_FILE_NAME,
                    'Start verify that all data is parsed in "%s" .' % self.collection_path)
@@ -165,17 +195,21 @@ class ImportCommand:
             return Constant.DEFAULT_TURE_VALUE
         return Constant.DEFAULT_FALSE_VALUE
 
-    def _parse_unresolved_dirs(self: any, unresolved_dirs: list) -> None:
+    def _parse_unresolved_dirs(self: any, unresolved_dirs: dict) -> None:
         print_info(MsProfCommonConstant.COMMON_FILE_NAME,
                    'Start parse unresolved dirs in "%s" ...' % self.collection_path)
+        path_table = {StrConstant.HOST_PATH: "", StrConstant.DEVICE_PATH: []}
         for pro_dir, result_dir_list in unresolved_dirs.items():
             prof_path = os.path.join(self.collection_path, pro_dir)
             for result_dir in result_dir_list:
                 result_path = get_valid_sub_path(prof_path, result_dir, False)
-                LoadInfoManager.load_info(result_path)
-                self.do_import(result_path)
-        print_info(MsProfCommonConstant.COMMON_FILE_NAME,
-                   'Unresolved dirs parse finished!')
+                # 统一收集合法路径 后续统一处理
+                if result_path.endswith(StrConstant.HOST_PATH):
+                    path_table[StrConstant.HOST_PATH] = result_path
+                else:
+                    path_table[StrConstant.DEVICE_PATH].append(result_path)
+            self._process_data(path_table)
+        print_info(MsProfCommonConstant.COMMON_FILE_NAME, 'Unresolved dirs parse finished!')
 
     def _prepare_for_cluster_parse(self: any) -> None:
         cluster_sqlite_path = PathManager.get_sql_dir(self.collection_path)

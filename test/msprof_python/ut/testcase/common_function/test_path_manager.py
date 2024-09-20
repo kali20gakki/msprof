@@ -26,6 +26,7 @@ class TestPathManager(unittest.TestCase):
         os.mkdir(os.path.join(PROF_DIR, HOST_DIR), 0o777)
         os.mkdir(os.path.join(PROF_DIR, DEVICE_DIR, "summary"), 0o777)
         os.mkdir(os.path.join(PROF_DIR, HOST_DIR, "timeline"), 0o777)
-        PathManager.del_summary_and_timeline_dir(PROF_DIR, [DEVICE_DIR, HOST_DIR])
+        os.path.join(PROF_DIR, DEVICE_DIR)
+        PathManager.del_summary_and_timeline_dir([os.path.join(PROF_DIR, DEVICE_DIR), os.path.join(PROF_DIR, HOST_DIR)])
         shutil.rmtree(PROF_DIR, ignore_errors=True)
 
