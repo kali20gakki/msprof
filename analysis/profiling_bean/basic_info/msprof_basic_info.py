@@ -5,6 +5,7 @@
 import json
 
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msprof_exception import ProfException
 from framework.load_info_manager import LoadInfoManager
 from profiling_bean.basic_info.collect_info import CollectInfo
 from profiling_bean.basic_info.device_info import DeviceInfo
@@ -107,14 +108,18 @@ class MsProfBasicInfo:
         self.__deal_with_json_keys(json_result)
         return json_result
 
-    def __deal_with_json_keys(self: any, json_data: any) -> None:
+    def __deal_with_json_keys(self: any, json_data: any, depth: int = 0) -> None:
+        depth_limit = 5  # 最大递归深度
+        if depth > depth_limit:
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+        depth += 1
         if isinstance(json_data, dict):
             for _key in list(json_data.keys()):
                 if _key in self.TRANSFORM_MAP:
                     json_data.setdefault(self.TRANSFORM_MAP.get(_key), json_data.get(_key))
                     json_data.pop(_key)
-                    self.__deal_with_json_keys(json_data.get(self.TRANSFORM_MAP.get(_key)))
-                self.__deal_with_json_keys(json_data.get(_key))
+                    self.__deal_with_json_keys(json_data.get(self.TRANSFORM_MAP.get(_key)), depth)
+                self.__deal_with_json_keys(json_data.get(_key), depth)
         elif isinstance(json_data, list):
             for per_json_data in json_data:
-                self.__deal_with_json_keys(per_json_data)
+                self.__deal_with_json_keys(per_json_data, depth)
