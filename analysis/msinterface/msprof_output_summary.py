@@ -59,7 +59,6 @@ class MsprofOutputSummary:
     INVALID_SUFFIX = "invalid"
     MSPROF_HOST = "host"
     DEVICE_ID = "Device_id"
-    PROF_RULE = r"^prof_rule_\d+\.json"
     DEVICE_ID_PREFIX_LEN = 7
     SLICE_LEN = 7
     README = "README.txt"
@@ -215,13 +214,7 @@ class MsprofOutputSummary:
             return
         file_list = self.get_newest_file_list(os.listdir(summary_path), file_suffix)
         for file_name in file_list:
-            if re.match(self.PROF_RULE, file_name):
-                prof_rule_name = file_name.split(".")[0] + "_" + FileSliceHelper.get_current_time_str()
-                prof_rule_path = os.path.join(self._output, PathManager.MINDSTUDIO_PROFILER_OUTPUT,
-                                              prof_rule_name + file_suffix)
-                shutil.copy(os.path.join(summary_path, file_name), prof_rule_path)
-                continue
-            # host 和device 的 csv合并, 只拷贝prof_rule_*.json
+            # host 和device 的 csv合并
             if is_merge_summary is False:
                 params = {
                     StrConstant.PARAM_RESULT_DIR: self._output,
@@ -230,8 +223,7 @@ class MsprofOutputSummary:
                     StrConstant.PARAM_EXPORT_FORMAT: StrConstant.EXPORT_JSON,
                     StrConstant.PARAM_EXPORT_DUMP_FOLDER: PathManager.MINDSTUDIO_PROFILER_OUTPUT
                 }
-                shutil.copy(os.path.join(summary_path, file_name),
-                            FileSliceHelper.make_export_file_name(params))
+                shutil.copy(os.path.join(summary_path, file_name), FileSliceHelper.make_export_file_name(params))
 
     def _merge_summary(self):
         """

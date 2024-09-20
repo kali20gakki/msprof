@@ -304,25 +304,6 @@ class TestExportCommand(unittest.TestCase):
             self.assertEqual(ProfException.PROF_INVALID_STEP_TRACE_ERROR, err.value.code)
         ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
-    def test_prepare_for_export(self):
-        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 3, "iteration_count": 1}
-        args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + ".ExportCommand._analyse_sample_config"), \
-                mock.patch(NAMESPACE + ".ExportCommand._analyse_data"), \
-                mock.patch(NAMESPACE + ".ExportCommand._add_export_type"), \
-                mock.patch(NAMESPACE + ".ExportCommand._check_index_id"), \
-                mock.patch(NAMESPACE + ".ExportCommand._check_model_id"), \
-                mock.patch("msinterface.msprof_timeline" + ".MsprofIteration.get_iteration_time",
-                           return_value=100), \
-                mock.patch(NAMESPACE + ".PathManager.get_summary_dir", return_value=""), \
-                mock.patch(NAMESPACE + ".check_path_valid"), \
-                mock.patch(NAMESPACE + ".print_info"):
-            InfoConfReader()._sample_json = {"devices": '1'}
-            test = ExportCommand("timeline", args)
-            with mock.patch(NAMESPACE + ".LoadInfoManager.load_info"), \
-                    mock.patch('framework.file_dispatch.FileDispatch.dispatch_calculator'):
-                test._prepare_for_export("")
-
     def test_handle_export_data(self):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 3, "iteration_count": 1}
         args = Namespace(**args_dic)
@@ -393,8 +374,7 @@ class TestExportCommand(unittest.TestCase):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + ".prepare_for_parse"), \
-                mock.patch(NAMESPACE + ".ExportCommand._export_data"), \
-                mock.patch(NAMESPACE + ".ExportCommand._prepare_for_export"):
+                mock.patch(NAMESPACE + ".ExportCommand._export_data"):
             test = ExportCommand("timeline", args)
             test.list_map = {'export_type_list': ['acl'], 'devices_list': []}
             test._handle_export("")
@@ -405,8 +385,7 @@ class TestExportCommand(unittest.TestCase):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "clear_mode": False}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + ".prepare_for_parse"), \
-                mock.patch(NAMESPACE + ".ExportCommand._export_data"), \
-                mock.patch(NAMESPACE + ".ExportCommand._prepare_for_export"):
+                mock.patch(NAMESPACE + ".ExportCommand._export_data"):
             test = ExportCommand("timeline", args)
             test.list_map = {'export_type_list': ['acl'], 'devices_list': []}
             test._handle_export("")
@@ -418,7 +397,6 @@ class TestExportCommand(unittest.TestCase):
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + ".prepare_for_parse"), \
                 mock.patch(NAMESPACE + ".ExportCommand._export_data"), \
-                mock.patch(NAMESPACE + ".ExportCommand._prepare_for_export"), \
                 mock.patch('os.path.exists', return_value=True), \
                 mock.patch('os.path.join', return_value='JOB/device_0'), \
                 mock.patch(NAMESPACE + '.check_dir_writable'), \
@@ -468,46 +446,77 @@ class TestExportCommand(unittest.TestCase):
         args_dic = {"collection_path": "test"}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + '.check_path_valid'), \
-                mock.patch(NAMESPACE + '.ExportCommand._process_sub_dirs'):
-            # 不支持 so 解析
+            mock.patch(NAMESPACE + '.get_path_dir', return_value=['host', 'device_1', 'device_2']), \
+            mock.patch(NAMESPACE + '.get_valid_sub_path', return_value='host'), \
+            mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True), \
+            mock.patch(NAMESPACE + '.ExportCommand._start_parse'), \
+            mock.patch(NAMESPACE + '.ExportCommand._start_calculate'), \
+            mock.patch(NAMESPACE + '.LoadInfoManager.load_info'):
+            # 无法调用so
             test = ExportCommand("db", args)
             test.process()
             with mock.patch('os.path.isfile', return_value=True), \
-                    mock.patch('os.path.islink', return_value=False), \
-                    mock.patch('os.access', return_value=True), \
-                    mock.patch('common_func.file_manager.is_other_writable', return_value=False), \
-                    mock.patch('common_func.file_manager.check_file_owner', return_value=True), \
-                    mock.patch('importlib.import_module'):
-                # 支持 so 解析
+                mock.patch('os.path.islink', return_value=False), \
+                mock.patch('os.access', return_value=True), \
+                mock.patch('common_func.file_manager.is_other_writable', return_value=False), \
+                mock.patch('common_func.file_manager.check_file_owner', return_value=True), \
+                mock.patch('importlib.import_module'):
+                # 调用so
                 test = ExportCommand("db", args)
                 test.process()
+
+    def test_process_when_command_type_is_timeline(self):
+        args_dic = {"collection_path": "test"}
+        args = Namespace(**args_dic)
+        with mock.patch(NAMESPACE + '.check_path_valid'), \
+            mock.patch(NAMESPACE + '.get_path_dir', return_value=['host', 'device_1', 'device_2']), \
+            mock.patch(NAMESPACE + '.get_valid_sub_path', return_value='host'):
+            # 无info_json
+            test = ExportCommand("timeline", args)
+            test.process()
+            with mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True), \
+                    mock.patch('common_func.msprof_common.prepare_log'), \
+                    mock.patch('framework.file_dispatch.FileDispatch.dispatch_calculator'), \
+                    mock.patch(NAMESPACE + '.LoadInfoManager.load_info'), \
+                    mock.patch(NAMESPACE + '.ExportCommand._analyse_sample_config'), \
+                    mock.patch(NAMESPACE + '.ExportCommand._analyse_data'), \
+                    mock.patch(NAMESPACE + '.ExportCommand._add_export_type'), \
+                    mock.patch(NAMESPACE + '.ExportCommand._handle_export'),  \
+                    mock.patch('msinterface.msprof_output_summary.MsprofOutputSummary.export'), \
+                    mock.patch('common_func.config_mgr.ConfigMgr.is_ai_core_sample_based'), \
+                    mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=False), \
+                    mock.patch('importlib.import_module'):
+                InfoConfReader()._info_json = {"drvVersion": InfoConfReader().ALL_EXPORT_VERSION}
+                InfoConfReader()._sample_json = {"devices": "5"}
+                ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
+                # 支持 so 解析
+                test = ExportCommand("timeline", args)
+                test.process()
+            InfoConfReader()._info_json = {}
+            InfoConfReader()._sample_json = {}
 
     def test_handle_export_raise_profexception_0(self) -> None:
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
         args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + '.ExportCommand._prepare_export', side_effect=ProfException(2, 'test', print_info)):
-            test = ExportCommand("summary", args)
-            test._handle_export('test')
+        test = ExportCommand("summary", args)
+        test._handle_export('test')
 
     def test_handle_export_raise_profexception_1(self) -> None:
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
         args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + '.ExportCommand._prepare_export', side_effect=ProfException(2, 'test', warn)):
-            test = ExportCommand("summary", args)
-            test._handle_export('test')
+        test = ExportCommand("summary", args)
+        test._handle_export('test')
 
     def test_handle_export_raise_profexception_2(self) -> None:
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
         args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + '.ExportCommand._prepare_export', side_effect=ProfException(2)):
-            test = ExportCommand("summary", args)
-            test._handle_export('test')
+        test = ExportCommand("summary", args)
+        test._handle_export('test')
 
     def test_handle_export_raise_profexception_3(self) -> None:
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
         args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + '.ExportCommand._prepare_export'), \
-                mock.patch(NAMESPACE + '.ExportCommand._export_data', side_effect=ProfException(2, 'test', error)):
+        with mock.patch(NAMESPACE + '.ExportCommand._export_data', side_effect=ProfException(2, 'test', error)):
             test = ExportCommand("summary", args)
             test.list_map = {'export_type_list': [1]}
             test._handle_export('test')
@@ -515,8 +524,7 @@ class TestExportCommand(unittest.TestCase):
     def test_handle_export_raise_profexception_4(self) -> None:
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
         args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + '.ExportCommand._prepare_export'), \
-                mock.patch(NAMESPACE + '.ExportCommand._export_data', side_effect=ProfException(2)):
+        with mock.patch(NAMESPACE + '.ExportCommand._export_data', side_effect=ProfException(2)):
             test = ExportCommand("summary", args)
             test.list_map = {'export_type_list': [1]}
             test._handle_export('test')
@@ -567,6 +575,20 @@ class TestExportCommand(unittest.TestCase):
         args_dic = {"collection_path": "test", "iteration_id": None, "model_id": None, "iteration_count": None}
         InfoConfReader()._info_json = {"drvVersion": 0}
         ProfilingScene().set_mode(ExportMode.STEP_EXPORT)
+        args = Namespace(**args_dic)
+        with mock.patch('common_func.common.error'), \
+                mock.patch('msmodel.interface.base_model.BaseModel.check_table', return_value=True), \
+                mock.patch('sys.exit'):
+            test = ExportCommand("summary", args)
+            test._check_all_report("./")
+        InfoConfReader()._info_json = {"drvVersion": InfoConfReader().ALL_EXPORT_VERSION}
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
+
+    def test__check_all_report_should_exit_when_support_unique_id_but_step_export(self) -> None:
+        args_dic = {"collection_path": "test", "iteration_id": None, "model_id": None, "iteration_count": None}
+        InfoConfReader()._info_json = {"drvVersion": InfoConfReader().ALL_EXPORT_VERSION}
+        ProfilingScene().set_mode(ExportMode.STEP_EXPORT)
+        ChipManager().chip_id = 5
         args = Namespace(**args_dic)
         with mock.patch('common_func.common.error'), \
                 mock.patch('msmodel.interface.base_model.BaseModel.check_table', return_value=True), \

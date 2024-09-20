@@ -7,7 +7,6 @@ import logging
 import multiprocessing
 import os
 import shutil
-import sys
 
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.common import call_sys_exit
@@ -42,13 +41,14 @@ from common_func.system_data_check_manager import SystemDataCheckManager
 from common_func.utils import Utils
 from framework.file_dispatch import FileDispatch
 from framework.load_info_manager import LoadInfoManager
+from msinterface.msprof_c_interface import export_unified_db
+from msinterface.msprof_c_interface import dump_device_data
 from msinterface.msprof_export_data import MsProfExportDataUtils
 from msinterface.msprof_output_summary import MsprofOutputSummary
 from msinterface.msprof_timeline import MsprofTimeline
 from msmodel.compact_info.task_track_model import TaskTrackModel
 from msmodel.step_trace.ts_track_model import TsTrackModel
 from msparser.step_trace.ts_binary_data_reader.task_flip_bean import TaskFlip
-from profiling_bean.db_dto.hwts_rec_dto import HwtsRecDto
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from profiling_bean.prof_enum.export_data_type import ExportDataType
@@ -296,9 +296,6 @@ class ExportCommand:
         """
         check_path_valid(self.collection_path, False)
         self._process_sub_dirs()
-        if self.command_type == MsProfCommonConstant.DB:
-            self._run_unified_db_manager()
-            return
         if self._cluster_params.get('is_cluster_scene', False):
             self._show_cluster_tuning()
 
@@ -326,9 +323,9 @@ class ExportCommand:
             return
         # 支持唯一ID, 对flip进行校验
         if ProfilingScene().is_step_export():
-            print_info(self.FILE_NAME, "Step data will be exported.")
+            print_info(self.FILE_NAME, "Step data will be exported, path is: %s." % result_dir)
         else:
-            print_info(self.FILE_NAME, "All collected data will be exported.")
+            print_info(self.FILE_NAME, "All collected data will be exported, path is: %s." % result_dir)
         host_flip_da_path = PathManager.get_db_path(result_dir, DBNameConstant.DB_RTS_TRACK)
         device_flip_da_path = PathManager.get_db_path(result_dir, DBNameConstant.DB_STEP_TRACE)
         if not os.path.exists(host_flip_da_path) or not os.path.exists(device_flip_da_path):
@@ -502,34 +499,6 @@ class ExportCommand:
             return False
         return True
 
-    def _prepare_for_export(self: any, result_dir: str) -> None:
-        LoadInfoManager.load_info(result_dir)
-        self._analyse_sample_config(result_dir)
-        self._analyse_data(result_dir)
-        if not self._is_host_export(result_dir):
-            self._check_model_id(result_dir)
-            self._check_all_report(result_dir)
-            self._check_index_id(result_dir)
-            self._set_iteration_info(result_dir)
-            self._update_device_list()
-        MsprofTimeline().init_export_data()
-        sample_json = self._get_sample_json(result_dir)
-        file_dispatch = FileDispatch(sample_json)
-        file_dispatch.dispatch_calculator()
-
-        if self.command_type == MsProfCommonConstant.DB:
-            return
-
-        self._add_export_type(result_dir)
-        if not self._has_data_to_export():
-            print_info(self.FILE_NAME, 'There is no %s data to export for "%s"' % (self.command_type, result_dir))
-            return
-
-        if self.command_type == MsProfCommonConstant.SUMMARY:
-            check_path_valid(PathManager.get_summary_dir(result_dir), True)
-        else:
-            check_path_valid(PathManager.get_timeline_dir(result_dir), True)
-
     def _handle_export_data(self: any, params: dict) -> None:
         result = json.loads(MsProfExportDataUtils.export_data(params))
         if result.get('status', NumberConstant.EXCEPTION) == NumberConstant.SKIP:
@@ -592,15 +561,6 @@ class ExportCommand:
             self._export_data(event, int(device_id), result_dir)
 
     def _handle_export(self: any, result_dir: str) -> None:
-        try:
-            self._prepare_export(result_dir)
-        except ProfException as err:
-            if err.message:
-                err.callback(MsProfCommonConstant.COMMON_FILE_NAME, err.message)
-            else:
-                warn(MsProfCommonConstant.COMMON_FILE_NAME,
-                     'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
-            return
         processes = []
         export_mode = ProfilingScene().get_mode()
         try:
@@ -621,10 +581,6 @@ class ExportCommand:
                 warn(MsProfCommonConstant.COMMON_FILE_NAME,
                      'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
         self._clear_dir(result_dir)
-
-    def _prepare_export(self: any, result_dir: str) -> None:
-        prepare_for_parse(result_dir)
-        self._prepare_for_export(result_dir)
 
     def _export_data(self: any, event: dict, device_id: str, result_dir: str) -> None:
         export_data_type = event.get('export_type', ExportDataType.INVALID).name.lower()
@@ -666,31 +622,124 @@ class ExportCommand:
         if sub_path:
             collect_path = os.path.join(self.collection_path, sub_path)
         sub_dirs = sorted(get_path_dir(collect_path), reverse=True)
+        path_table = {StrConstant.HOST_PATH: "", StrConstant.DEVICE_PATH: []}
         for sub_dir in sub_dirs:  # result_dir
-            if sub_dir != StrConstant.TIMELINE_PATH:
-                sub_path = get_valid_sub_path(collect_path, sub_dir, False)
-                if DataCheckManager.contain_info_json_data(sub_path):
-                    self._update_cluster_params(sub_path, is_cluster)
-                    InfoConfReader().load_info(sub_path)
-                    self._handle_export(sub_path)
-                    GeLogicStreamSingleton().load_info(sub_path)
-                elif sub_path and is_cluster:
-                    warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
-                                         'such as PROF_XXX_XXX_XXX' % collect_path)
+            sub_path = get_valid_sub_path(collect_path, sub_dir, False)
+            if DataCheckManager.contain_info_json_data(sub_path):
+                self._update_cluster_params(sub_path, is_cluster)
+                # 统一收集合法路径 后续统一处理
+                if sub_dir == StrConstant.HOST_PATH:
+                    path_table[StrConstant.HOST_PATH] = sub_path
                 else:
-                    self._process_sub_dirs(sub_dir, is_cluster=True)
-                self.list_map['devices_list'] = ''
-        if self.command_type != MsProfCommonConstant.DB:
-            profiler = MsprofOutputSummary(collect_path, self.export_format)
-            profiler.export(self.command_type)
+                    path_table[StrConstant.DEVICE_PATH].append(sub_path)
+                path_table.setdefault("collection_path", collect_path)
+            elif sub_path and is_cluster:
+                warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
+                                     'such as PROF_XXX_XXX_XXX' % collect_path)
+            else:
+                self._process_sub_dirs(sub_dir, is_cluster=True)
+            self.list_map['devices_list'] = ''
+        self._process_data(path_table)
 
-            PathManager.del_summary_and_timeline_dir(collect_path, sub_dirs)
-
-    def _run_unified_db_manager(self):
-        if not ProfilingScene().is_cpp_parse_enable():
-            logging.warning("Does not support exporting the msprof.db!")
+    def _process_data(self, path_table: dict):
+        if not path_table.get(StrConstant.HOST_PATH) and not path_table.get(StrConstant.DEVICE_PATH):
+            warn(self.FILE_NAME, 'Invalid parsing dir("%s"), no valid dir. ' % self.collection_path)
             return
-        sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib64")))
-        logging.info("Data will be parsed by msprof_analysis.so!")
-        msprof_analysis_module = importlib.import_module("msprof_analysis")
-        msprof_analysis_module.parser.export_unified_db(self.collection_path)
+        # start parse
+        self._start_parse(path_table)
+        # start calculate
+        self._start_calculate(path_table)
+        # start view
+        self._start_view(path_table)
+
+    def _start_parse(self, path_table: dict):
+        # host
+        host_path = path_table.get(StrConstant.HOST_PATH)
+        is_data_analyzed = False
+        if host_path:
+            if FileManager.is_analyzed_data(host_path):
+                is_data_analyzed = True
+            self._parse_data(host_path)
+            # host parse 后初始化logicStream模块
+            GeLogicStreamSingleton().load_info(host_path)
+        # device
+        for device_path in path_table.get(StrConstant.DEVICE_PATH):
+            if FileManager.is_analyzed_data(device_path):
+                is_data_analyzed = True
+            self._parse_data(device_path)
+        # device 执行完后执行device c化
+        # path_table使用前明确校验host或device中必不为空,不存在越界情况
+        if not is_data_analyzed:
+            dump_device_data(host_path if host_path else path_table.get(StrConstant.DEVICE_PATH)[0])
+
+    def _parse_data(self, device_path: str):
+        if not device_path:
+            return
+        prepare_for_parse(device_path)
+        LoadInfoManager.load_info(device_path)
+        self._analyse_sample_config(device_path)
+        self._analyse_data(device_path)
+
+    def _start_calculate(self, path_table: dict):
+        # host
+        host_path = path_table.get(StrConstant.HOST_PATH)
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
+        self._calculate_data(host_path)
+        # device
+        for device_path in path_table.get(StrConstant.DEVICE_PATH, []):
+            self._calculate_data(device_path)
+
+    def _calculate_data(self, device_path: str):
+        if not device_path:
+            return
+        prepare_for_parse(device_path)
+        LoadInfoManager.load_info(device_path)
+        self._update_list_map(device_path)
+        file_dispatch = FileDispatch(self._get_sample_json(device_path))
+        file_dispatch.dispatch_calculator()
+
+    def _start_view(self, path_table: dict):
+        if self.command_type == MsProfCommonConstant.DB:
+            export_unified_db(path_table.get("collection_path"))
+            return
+
+        # host
+        host_path = path_table.get(StrConstant.HOST_PATH)
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
+        self._view_data(host_path)
+        # device
+        device_paths_list = path_table.get(StrConstant.DEVICE_PATH, [])
+        for device_path in device_paths_list:
+            self._view_data(device_path)
+
+        device_paths_list.append(host_path)
+        profiler = MsprofOutputSummary(path_table.get("collection_path"), self.export_format)
+        profiler.export(self.command_type)
+        PathManager.del_summary_and_timeline_dir(device_paths_list)
+
+    def _view_data(self, device_path: str):
+        if not device_path:
+            return
+        LoadInfoManager.load_info(device_path)
+        self._update_list_map(device_path)
+        MsprofTimeline().init_export_data()
+
+        self._add_export_type(device_path)
+        if not self._has_data_to_export():
+            print_info(self.FILE_NAME, 'There is no %s data to export for "%s"' % (self.command_type, device_path))
+            return
+
+        if self.command_type == MsProfCommonConstant.SUMMARY:
+            check_path_valid(PathManager.get_summary_dir(device_path), True)
+        else:
+            check_path_valid(PathManager.get_timeline_dir(device_path), True)
+
+        self._handle_export(device_path)
+
+    def _update_list_map(self, device_path: str):
+        self._update_device_list()
+        if not device_path.endswith(StrConstant.HOST_PATH):
+            self._check_model_id(device_path)
+            self._check_all_report(device_path)
+            self._check_index_id(device_path)
+            self._set_iteration_info(device_path)

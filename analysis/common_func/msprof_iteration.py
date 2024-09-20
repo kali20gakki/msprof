@@ -84,7 +84,8 @@ class MsprofIteration:
         """
         the time range within the iteration range.
         """
-        with self._track_model as _trace:
+        with TsTrackModel(self._result_dir, DBNameConstant.DB_STEP_TRACE,
+                          [DBNameConstant.TABLE_STEP_TRACE_DATA]) as _trace:
             time_range = _trace.get_step_syscnt_range_by_iter_range(iter_range)
         return [time_range.step_start, time_range.step_end] if time_range else []
 
@@ -92,7 +93,8 @@ class MsprofIteration:
         """
         return step trace dto with the mapping of index_id and step_end
         """
-        with self._track_model as _trace:
+        with TsTrackModel(self._result_dir, DBNameConstant.DB_STEP_TRACE,
+                          [DBNameConstant.TABLE_STEP_TRACE_DATA]) as _trace:
             return _trace.get_step_end_list_with_iter_range(iter_range)
 
     def get_iter_interval(self: any, iter_range: IterationRange, time_fmt: int = NumberConstant.NANO_SECOND) -> list:

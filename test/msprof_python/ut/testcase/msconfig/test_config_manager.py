@@ -12,7 +12,7 @@ class TestConfigManager(unittest.TestCase):
         config = ConfigManager.get(ConfigManager.PROF_CONDITION)
         self.assertEqual(len(config.get_data()), 29)
         config = ConfigManager.get(ConfigManager.DATA_PARSERS)
-        self.assertEqual(len(config.sections()), 57)
+        self.assertEqual(len(config.sections()), 56)
         config = ConfigManager.get(ConfigManager.STARS)
         self.assertEqual(config.has_section('AA'), False)
         config = ConfigManager.get(ConfigManager.TABLES)

@@ -20,6 +20,13 @@ class TestClusterLinkCalculate(unittest.TestCase):
         with mock.patch(NAMESPACE + '.CANNCalculator.calculate'),\
                 mock.patch(NAMESPACE + '.CANNCalculator.save'):
             CANNCalculator({}, CONFIG).ms_run()
+            with mock.patch('os.path.isfile', return_value=True), \
+                mock.patch('os.path.islink', return_value=False), \
+                mock.patch('os.access', return_value=True), \
+                mock.patch('common_func.file_manager.is_other_writable', return_value=False), \
+                mock.patch('common_func.file_manager.check_file_owner', return_value=True), \
+                mock.patch('importlib.import_module'):
+                CANNCalculator({}, CONFIG).ms_run()
 
     def test_calculate(self):
         InfoConfReader()._info_json = {'pid': '0'}

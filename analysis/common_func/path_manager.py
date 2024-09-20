@@ -189,10 +189,9 @@ class PathManager:
         return device_count
 
     @classmethod
-    def del_summary_and_timeline_dir(cls: any, collect_path: str, sub_dirs: list):
+    def del_summary_and_timeline_dir(cls: any, sub_dirs: list):
         for sub_dir in sub_dirs:
-            joined_path = os.path.join(collect_path, sub_dir)
-            sub_path = os.path.realpath(joined_path)
+            sub_path = os.path.realpath(sub_dir)
             summary_dir = PathManager.get_summary_dir(sub_path)
             timeline_dir = PathManager.get_timeline_dir(sub_path)
             PathManager.del_dir(summary_dir)

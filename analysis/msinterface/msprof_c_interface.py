@@ -1,0 +1,59 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
+
+import importlib
+import logging
+import os
+import sys
+
+from common_func.config_mgr import ConfigMgr
+from common_func.info_conf_reader import InfoConfReader
+from common_func.platform.chip_manager import ChipManager
+from common_func.profiling_scene import ProfilingScene
+
+SO_DIR = os.path.join(os.path.dirname(__file__), "..", "lib64")
+
+
+def dump_cann_trace(project_path: str):
+    """
+    调用host c化
+    """
+    sys.path.append(os.path.realpath(SO_DIR))
+    logging.info("Data will be parsed by msprof_analysis.so!")
+    msprof_analysis_module = importlib.import_module("msprof_analysis")
+    msprof_analysis_module.parser.dump_cann_trace(project_path)
+
+
+def dump_device_data(device_path) -> None:
+    """
+    调用device c化
+    """
+    if not ChipManager().is_chip_v4():
+        logging.info("Do not support parsing by msprof_analysis.so!")
+        return
+    if ConfigMgr.is_ai_core_sample_based(device_path):
+        logging.warning("Device Data in sample-based will not be parsed by msprof_analysis.so!")
+        return
+    all_export_flag = ProfilingScene().is_all_export() and InfoConfReader().is_all_export_version()
+    if ProfilingScene().is_cpp_parse_enable() and all_export_flag:
+        sys.path.append(os.path.realpath(SO_DIR))
+        logging.info("Device Data will be parsed by msprof_analysis.so!")
+        msprof_analysis_module = importlib.import_module("msprof_analysis")
+        msprof_analysis_module.parser.dump_device_data(os.path.dirname(device_path))
+    else:
+        logging.warning("Device Data will not be parsed by msprof_analysis.so!")
+    return
+
+
+def export_unified_db(project_path: str):
+    """
+    调用统一db
+    """
+    if not ProfilingScene().is_cpp_parse_enable():
+        logging.warning("Does not support exporting the msprof.db!")
+        return
+    sys.path.append(os.path.realpath(SO_DIR))
+    logging.info("Data will be parsed by msprof_analysis.so!")
+    msprof_analysis_module = importlib.import_module("msprof_analysis")
+    msprof_analysis_module.parser.export_unified_db(project_path)

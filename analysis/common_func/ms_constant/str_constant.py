@@ -99,6 +99,8 @@ class StrConstant:
     HOST_DISK_FREQ = "host_disk_freq"
     DATA_PATH = "data"
     TIMELINE_PATH = "timeline"
+    HOST_PATH = "host"
+    DEVICE_PATH = "device"
     AIC_TASK_BASED_MODE = "task-based"
     AIC_SAMPLE_BASED_MODE = "sample-based"
 
