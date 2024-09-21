@@ -212,7 +212,7 @@ class MsprofEntrance:
         self._add_collect_path_argument(analyze_parser)
         analyze_parser.add_argument(
             '--rule', '-r', type=str, help='Specify the rule that is used for analyzing prased profiling data',
-            required=True)
+            required=True, choices=['communication', 'communication_matrix'])
         analyze_parser.add_argument(
             '--clear', dest='clear_mode', action='store_true',
             default=False, help='<Optional> the clear mode flag')
