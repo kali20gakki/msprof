@@ -65,6 +65,7 @@ public:
     static std::string RealPath(const std::string& path);
     static std::string RelativeToAbsPath(const std::string& path);
     static bool FileExist(const std::string &path);
+    static bool FileReadable(const std::string &path);
 };
 
 }  // Common

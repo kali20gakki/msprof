@@ -112,5 +112,13 @@ bool Utils::FileExist(const std::string &path)
     return (access(path.c_str(), F_OK) == 0) ? true : false;
 }
 
+bool Utils::FileReadable(const std::string &path)
+{
+    if (path.empty() || path.size() > PATH_MAX) {
+        return false;
+    }
+    return (access(path.c_str(), R_OK) == 0) ? true : false;
+}
+
 }  // Common
 }  // Mspti

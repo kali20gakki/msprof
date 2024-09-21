@@ -12,6 +12,7 @@
 #include "common/function_loader.h"
 
 #include <dlfcn.h>
+#include <iostream>
 #include <set>
 
 #include "common/utils.h"
@@ -36,7 +37,7 @@ void FunctionLoader::Set(const std::string& funcName)
     registry_[funcName] = nullptr;
 }
 
-std::string FunctionLoader::CanonicalSoPath(const std::string& soName)
+std::string FunctionLoader::CanonicalSoPath()
 {
     static const std::set<std::string> soNameList = {
         "libascend_hal.so",
@@ -45,29 +46,29 @@ std::string FunctionLoader::CanonicalSoPath(const std::string& soName)
         "libhccl.so",
         "libprofapi.so",
     };
-    if (soNameList.find(soName) == soNameList.end()) {
-        printf("%s was invalid.\n", soName.c_str());
+    if (soNameList.find(soName_) == soNameList.end()) {
+        std::cout << soName_ << " was invalid." << std::endl;
         return "";
     }
     char *ascendHomePath = std::getenv("ASCEND_HOME_PATH");
-    if (ascendHomePath == nullptr) {
-        return soName;
+    if (ascendHomePath == nullptr || ascendHomePath[0] == '\0') {
+        return soName_;
     }
-    auto soPath = std::string(ascendHomePath) + "/lib64/" + soName;
+    auto soPath = std::string(ascendHomePath) + "/lib64/" + soName_;
     auto canonicalPath = Utils::RealPath(Utils::RelativeToAbsPath(soPath));
-    return Utils::FileExist(canonicalPath) ? canonicalPath : soName;
+    return Utils::FileExist(canonicalPath) && Utils::FileReadable(canonicalPath) ? canonicalPath : soName_;
 }
 
 void *FunctionLoader::Get(const std::string& funcName)
 {
     if (!handle_) {
-        auto soPath = CanonicalSoPath(soName_);
+        auto soPath = CanonicalSoPath();
         if (soPath.empty()) {
             return nullptr;
         }
         auto handle = dlopen(soPath.c_str(), RTLD_LAZY);
         if (handle == nullptr) {
-            printf("%s\n", dlerror());
+            std::cout << dlerror() << std::endl;
             return nullptr;
         }
         handle_ = handle;
@@ -75,7 +76,7 @@ void *FunctionLoader::Get(const std::string& funcName)
 
     auto itr = registry_.find(funcName);
     if (itr == registry_.end()) {
-        printf("function(\"%s\") is not registered.\n", funcName.c_str());
+        std::cout << "function(\"" << funcName << "\") is not registered." << std::endl;
         return nullptr;
     }
 
@@ -105,7 +106,7 @@ void FunctionRegister::RegisteFunction(const std::string& soName, const std::str
         std::unique_ptr<FunctionLoader> func_loader = nullptr;
         Mspti::Common::MsptiMakeUniquePtr(func_loader, soName);
         if (!func_loader) {
-            printf("Failed to init FunctionLoader.\n");
+            std::cout << "Failed to init FunctionLoader." << std::endl;
             return;
         }
 
