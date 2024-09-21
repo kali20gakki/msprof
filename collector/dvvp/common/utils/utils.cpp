@@ -508,25 +508,7 @@ void Utils::RemoveDir(const std::string &dir, bool rmTopDir)
 
 bool Utils::IsSoftLink(const std::string &path)
 {
-#if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
-    return false;   // not soft-link
-#else
-    if (path.empty()) {
-        return false;
-    }
-    struct stat fileStat;
-    if (memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat)) != EOK) {
-        MSPROF_LOGE("memset failed");
-        return false;
-    }
-    if (lstat(path.c_str(), &fileStat) != 0) {
-        return false;
-    }
-    if (!S_ISLNK(fileStat.st_mode)) {
-        return false;
-    }
-    return true;
-#endif
+    return MmIsSoftLink(path);
 }
 
 bool Utils::IsSocketFile(const std::string &path)
