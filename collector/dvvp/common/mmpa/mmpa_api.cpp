@@ -328,30 +328,49 @@ static int32_t LocalRmDirPreCheck(const std::string &pathName)
     return PROFILING_SUCCESS;
 }
 
-static int32_t LocalFillPathName(char *buf, size_t bufSize, const std::string &pathName, const struct dirent *entry)
+bool MmIsSoftLink(const std::string &path)
 {
-    int32_t ret = memset_s(buf, bufSize, 0, bufSize);
-    if (ret == PROFILING_FAILED) {
-        return ret;
+#if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
+    return false;   // not soft-link
+#else
+    if (path.empty()) {
+        return false;
     }
-    ret = snprintf_s(buf, bufSize, bufSize - 1U, "%s/%s", pathName.c_str(), entry->d_name);
-    if (ret == PROFILING_FAILED) {
-        return ret;
+    struct stat fileStat;
+    if (memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat)) != EOK) {
+        MSPROF_LOGE("memset failed");
+        return false;
     }
-    return PROFILING_SUCCESS;
+    if (lstat(path.c_str(), &fileStat) != 0) {
+        return false;
+    }
+    return S_ISLNK(fileStat.st_mode);
+#endif
 }
 
-int32_t MmRmdir(const std::string &pathName)
+int32_t MmRmdir(const std::string &pathName, uint32_t depth)
 {
-    int32_t ret = LocalRmDirPreCheck(pathName);
-    if (ret != PROFILING_SUCCESS) {
+    const uint32_t depthLimit = 5;
+    if (depth > depthLimit) {
+        MSPROF_LOGE("Recursion depth exceeds limit! Path is %s.", pathName.c_str());
         return PROFILING_INVALID_PARAM;
     }
-    const int num = 2;
-    size_t bufSize = pathName.size() + static_cast<size_t>(MMPA_MAX_PATH + num);
+
+    if (LocalRmDirPreCheck(pathName) != PROFILING_SUCCESS) {
+        MSPROF_LOGW("Path name: %s, is invalid.", pathName.c_str());
+        return PROFILING_INVALID_PARAM;
+    }
+
+    // 校验软链 暂时只有一处使用 且传入路径已经是绝对路径 暂时不做绝对路径转换
+    if (MmIsSoftLink(pathName)) {
+        (void)unlink(pathName.c_str());
+        MSPROF_LOGE("Path: %s, is soft link.", pathName.c_str());
+        return PROFILING_INVALID_PARAM;
+    }
 
     DIR *dir = opendir(pathName.c_str());
     if (dir == nullptr) {
+        MSPROF_LOGW("open dir failed, path is %s.", pathName.c_str());
         return PROFILING_INVALID_PARAM;
     }
 
@@ -360,35 +379,21 @@ int32_t MmRmdir(const std::string &pathName)
         if ((strcmp(".", entry->d_name) == 0) || (strcmp("..", entry->d_name) == 0)) {
             continue;
         }
-        char *buf = (char *)malloc(bufSize);
-        if (buf == nullptr) {
-            break;
-        }
-        ret = LocalFillPathName(buf, bufSize, pathName, entry);
-        if (ret != PROFILING_SUCCESS) {
-            FREE_BUF(buf);
-            break;
-        }
-
-        DIR *childDir = opendir(buf);
+        std::string currentPath = pathName + "/" + std::string(entry->d_name);
+        DIR *childDir = opendir(currentPath.c_str());
         if (childDir != nullptr) {
             (void)closedir(childDir);
-            (void)MmRmdir(std::string(buf));
-            FREE_BUF(buf);
+            (void)MmRmdir(currentPath, depth + 1);
             continue;
         } else {
-            ret = unlink(buf);
-            if (ret == PROFILING_SUCCESS) {
-                FREE_BUF(buf);
+            if (unlink(currentPath.c_str()) == PROFILING_SUCCESS) {
                 continue;
             }
         }
-        FREE_BUF(buf);
     }
     (void)closedir(dir);
 
-    ret = rmdir(pathName.c_str());
-    if (ret == PROFILING_FAILED) {
+    if (rmdir(pathName.c_str()) == PROFILING_FAILED) {
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;

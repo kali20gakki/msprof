@@ -4,6 +4,7 @@
  * Author: Huawei Technologies Co., Ltd.
  * Create: 2023-07-01
  */
+#include <string>
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "mmpa_api.h"
@@ -98,4 +99,44 @@ TEST_F(MmpaUtest, MmWaitPid)
     // waitpid return success, ret is 2, ret != pid, status2 > 0
     MmProcess pid2 = 3;
     EXPECT_EQ(PROFILING_SUCCESS, MmWaitPid(pid2, &status2, options));
+}
+
+TEST_F(MmpaUtest, MmRmdir)
+{
+    // 超出递归深度限制
+    EXPECT_EQ(PROFILING_INVALID_PARAM, MmRmdir("mmpaTest", 6)); // 6是递归深度
+
+    uint32_t depth = 0;
+    // 指定删除目录文件名为空
+    EXPECT_EQ(PROFILING_INVALID_PARAM, MmRmdir("", depth));
+
+    MOCKER_CPP(&MmIsSoftLink).stubs().will(returnValue(true)).then(returnValue(false));
+    EXPECT_EQ(PROFILING_INVALID_PARAM, MmRmdir("testtesttest", depth));
+
+    // 指定删除文件名不存在，opendir拿到空指针
+    EXPECT_EQ(PROFILING_INVALID_PARAM, MmRmdir("mmpaTestjdflsaihhgepaihglehgllhgelahl", depth));
+
+    // 递归删除真实目录
+    std::string dirName = Utils::RelativePathToAbsolutePath("mmpaTestTest");
+    EXPECT_EQ(Utils::CreateDir(dirName), PROFILING_SUCCESS);
+    EXPECT_EQ(Utils::CreateDir(dirName + "/test"), PROFILING_SUCCESS);
+    EXPECT_EQ(PROFILING_SUCCESS, MmRmdir(dirName, depth));
+
+    MOCKER_CPP(&MmIsSoftLink).reset();
+}
+
+TEST_F(MmpaUtest, MmIsSoftLink)
+{
+    // 路径名空
+    EXPECT_FALSE(MmIsSoftLink(""));
+    // memset_s 失败
+    MOCKER_CPP(&memset_s).stubs().will(returnValue(1)).then(returnValue(0));
+    EXPECT_FALSE(MmIsSoftLink("mmpaTest"));
+    // lstat 失败
+    MOCKER_CPP(&lstat).stubs().will(returnValue(1)).then(returnValue(0));
+    EXPECT_FALSE(MmIsSoftLink("mmpaTest"));
+    // 执行 S_ISLNK
+    EXPECT_FALSE(MmIsSoftLink("mmpaTest"));
+    MOCKER_CPP(&lstat).reset();
+    MOCKER_CPP(&memset_s).reset();
 }
