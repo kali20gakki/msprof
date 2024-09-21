@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
+#include <unistd.h>
 
 #include "params_adapter_msprof.h"
 #include "param_validation.h"
@@ -203,5 +204,43 @@ TEST_F(ParamsAdapterMsprofUtest, AnalysisParamsAdapt)
     MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
     MsprofParamAdapterMgr->params_ = params;
     EXPECT_EQ(PROFILING_SUCCESS, MsprofParamAdapterMgr->AnalysisParamsAdapt(argsMap));
+    Utils::RemoveDir("./result");
+}
+
+TEST_F(ParamsAdapterMsprofUtest, AnalysisParamsAdaptSoftLink)
+{
+    // 测试软链接
+    GlobalMockObject::verify();
+
+    const char* symlinkPath = "./result_symlink";
+    const char* outputPath = "./result";
+
+    std::shared_ptr<ParamsAdapterMsprof> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, ParamsAdapterMsprof);
+    struct MsprofCmdInfo cmdInfo = {{nullptr}};
+    cmdInfo.args[ARGS_EXPORT] = "on";
+    cmdInfo.args[ARGS_OUTPUT] = "./result_symlink";
+    cmdInfo.args[ARGS_EXPORT_ITERATION_ID] = "1";
+    cmdInfo.args[ARGS_SUMMARY_FORMAT] = "csv";
+
+    const std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argsMap = {
+        {ARGS_EXPORT, std::make_pair(cmdInfo, "--export=on")},
+        {ARGS_OUTPUT, std::make_pair(cmdInfo, "--output=./result_symlink")},
+        {ARGS_EXPORT_ITERATION_ID, std::make_pair(cmdInfo, "--iteration-id=1")},
+        {ARGS_SUMMARY_FORMAT, std::make_pair(cmdInfo, "--summary-format=csv")}
+    };
+    Utils::CreateDir("./result");
+
+    unlink(symlinkPath);
+    symlink(outputPath, symlinkPath); // 创建软链接
+
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+
+    MsprofParamAdapterMgr->params_ = params;
+    EXPECT_EQ(PROFILING_FAILED, MsprofParamAdapterMgr->AnalysisParamsAdapt(argsMap));
+
+    unlink(symlinkPath);
+    Utils::RemoveDir("./result_symlink");
     Utils::RemoveDir("./result");
 }

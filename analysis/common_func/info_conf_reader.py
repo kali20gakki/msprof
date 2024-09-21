@@ -458,7 +458,6 @@ class InfoConfReader:
             self.get_conf_file_path(result_path, get_info_json_compiles()))
         self._sample_json = self.__get_json_data(
             self.get_conf_file_path(result_path, get_sample_json_compiles()))
-
         self._start_info = self.__get_json_data(
             self.get_conf_file_path(result_path, get_start_info_compiles()))
         self._end_info = self.__get_json_data(

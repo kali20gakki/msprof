@@ -15,7 +15,7 @@ class TestMsProfBasicInfo(unittest.TestCase):
         args_co = Namespace(**collection_path)
         with mock.patch('sys.argv', args), \
              mock.patch('argparse.ArgumentParser.parse_args', return_value=args_co), \
-             mock.patch(NAMESPACE + '.MsprofInfoConstruct.load_basic_info_model'),\
+             mock.patch(NAMESPACE + '.MsprofInfoConstruct.load_basic_info_model'), \
              mock.patch('sys.exit'):
             check = MsprofInfoConstruct()
             result = check.main()

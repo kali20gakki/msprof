@@ -165,6 +165,13 @@ bool ParamValidation::CheckAnalysisOutputIsPathValid(const std::string &outputPa
         CMD_LOGE("Analysis output path is invalid.");
         return false;
     }
+
+    if (Utils::IsSoftLink(outputPath)) {
+        MSPROF_LOGE("Analysis output path is soft link.");
+        CMD_LOGE("Analysis output path is soft link.");
+        return false;
+    }
+
     if (!Utils::IsFileExist(outputPath)) {
         MSPROF_LOGE("Argument --output is invalid because of %s does not exist.", outputPath.c_str());
         CMD_LOGE("Argument --output is invalid because of %s does not exist.", outputPath.c_str());
