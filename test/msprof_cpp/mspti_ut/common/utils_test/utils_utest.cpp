@@ -99,4 +99,10 @@ TEST_F(UtilsUtest, ShouldGetFalseWhenFileNotExist)
     EXPECT_EQ(false, Mspti::Common::Utils::FileExist(stubPath));
 }
 
+TEST_F(UtilsUtest, FileReadableShouldGetFalseWhenFileEmpty)
+{
+    std::string path = "";
+    EXPECT_EQ(false, Mspti::Common::Utils::FileReadable(path));
+}
+
 }
