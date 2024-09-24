@@ -26,6 +26,8 @@
 #define END_PACKED_ALIGNMENT
 #endif
 
+#include <stddef.h>
+#include <stdint.h>
 #include "mspti_result.h"
 
 #if defined(__cplusplus)
