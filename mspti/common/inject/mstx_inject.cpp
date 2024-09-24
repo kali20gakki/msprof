@@ -74,9 +74,20 @@ int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
         MSPTI_LOGE("Failed to init mstx funcs.");
         return 1; // 1 : init failed
     }
-    *(outTable[MSTX_FUNC_MARKA]) = (MstxFuncPointer)MsptiMstxApi::MstxMarkAFunc;
-    *(outTable[MSTX_FUNC_RANGE_STARTA]) = (MstxFuncPointer)MsptiMstxApi::MstxRangeStartAFunc;
-    *(outTable[MSTX_FUNC_RANGE_END]) = (MstxFuncPointer)MsptiMstxApi::MstxRangeEndFunc;
+    if (outSize >= static_cast<unsigned int>(MstxImplCoreFuncId::MSTX_API_CORE_MARK_A)) {
+        *outTable[static_cast<int>(MstxImplCoreFuncId::MSTX_API_CORE_MARK_A)] =
+                reinterpret_cast<MstxFuncPointer>(MsptiMstxApi::MstxRangeStartAFunc);
+    }
+
+    if (outSize >= static_cast<unsigned int>(MstxImplCoreFuncId::MSTX_API_CORE_RANGE_START_A)) {
+        *outTable[static_cast<int>(MstxImplCoreFuncId::MSTX_API_CORE_RANGE_START_A)] =
+                reinterpret_cast<MstxFuncPointer>(MsptiMstxApi::MstxRangeStartAFunc);
+    }
+
+    if (outSize >= static_cast<unsigned int>(MstxImplCoreFuncId::MSTX_API_CORE_RANGE_END)) {
+        *outTable[static_cast<int>(MstxImplCoreFuncId::MSTX_API_CORE_RANGE_END)] =
+                reinterpret_cast<MstxFuncPointer>(MsptiMstxApi::MstxRangeEndFunc);
+    }
     return MSPTI_SUCCESS;
 }
 

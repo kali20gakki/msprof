@@ -127,9 +127,20 @@ extern "C" int __attribute__((visibility("default"))) InitInjectionMstx(MstxGetM
         MSPROF_LOGE("Failed to call getFuncTable");
         return MSTX_FAIL;
     }
-    *(outTable[MSTX_FUNC_MARKA]) = (MstxFuncPointer)MstxMarkAFunc;
-    *(outTable[MSTX_FUNC_RANGE_STARTA]) = (MstxFuncPointer)MstxRangeStartAFunc;
-    *(outTable[MSTX_FUNC_RANGE_END]) = (MstxFuncPointer)MstxRangeEndFunc;
+    if (outSize >= static_cast<unsigned int>(MstxImplCoreFuncId::MSTX_API_CORE_MARK_A)) {
+        *outTable[static_cast<int>(MstxImplCoreFuncId::MSTX_API_CORE_MARK_A)] =
+                reinterpret_cast<MstxFuncPointer>(MstxRangeStartAFunc);
+    }
+
+    if (outSize >= static_cast<unsigned int>(MstxImplCoreFuncId::MSTX_API_CORE_RANGE_START_A)) {
+        *outTable[static_cast<int>(MstxImplCoreFuncId::MSTX_API_CORE_RANGE_START_A)] =
+                reinterpret_cast<MstxFuncPointer>(MstxRangeStartAFunc);
+    }
+
+    if (outSize >= static_cast<unsigned int>(MstxImplCoreFuncId::MSTX_API_CORE_RANGE_END)) {
+        *outTable[static_cast<int>(MstxImplCoreFuncId::MSTX_API_CORE_RANGE_END)] =
+                reinterpret_cast<MstxFuncPointer>(MstxRangeEndFunc);
+    }
     return MSTX_SUCCESS;
 }
 
