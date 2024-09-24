@@ -33,15 +33,6 @@ typedef enum {
     MSTX_API_MODULE_FORCE_INT               = 0x7fffffff
 } MstxFuncModule;
 
-typedef enum  {
-    MSTX_API_CORE_INVALID                   =  0,
-    MSTX_API_CORE_MARK_A                    =  1,
-    MSTX_API_CORE_RANGE_START_A             =  2,
-    MSTX_API_CORE_RANGE_END                 =  3,
-    MSTX_API_CORE_SIZE,                     // end of the enum, new enum items must be added before this
-    MSTX_API_CORE_FORCE_INT                 = 0x7fffffff
-} MstxImplCoreFuncId;
-
 typedef void* aclrtStream;
 typedef void (*MstxFuncPointer)(void);
 typedef MstxFuncPointer** MstxFuncTable;
