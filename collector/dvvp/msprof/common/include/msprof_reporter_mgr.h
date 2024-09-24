@@ -72,6 +72,7 @@ private:
     void FillFileChunkData(const std::string &saveHashData, SHARED_PTR_ALIA<ProfileFileChunk> fileChunk,
                            bool isLastChunk) const;
     void SaveTypeInfo(bool isLastChunk);
+    void FlushMstxData();
 
 private:
     std::unordered_map<uint16_t, std::unordered_map<uint32_t, std::string>> reportTypeInfoMap_;

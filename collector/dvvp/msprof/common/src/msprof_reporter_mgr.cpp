@@ -11,12 +11,14 @@
 #include "errno/error_code.h"
 #include "hash_data.h"
 #include "uploader_mgr.h"
+#include "mstx_data_handler.h"
  
 namespace Msprof {
 namespace Engine {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::transport;
+using namespace Collector::Dvvp::Mstx;
 MsprofReporterMgr::MsprofReporterMgr() : isStarted_(false), isUploadStarted_(false), isSyncReporter_(false)
 {
     indexMap_ = {
@@ -256,6 +258,11 @@ void MsprofReporterMgr::NotifyQuit()
     cv_.notify_one();
 }
 
+void MsprofReporterMgr::FlushMstxData()
+{
+    MstxDataHandler::instance()->Stop();
+}
+
 int32_t MsprofReporterMgr::StopReporters()
 {
     std::lock_guard<std::mutex> lk(startMtx_);
@@ -268,8 +275,8 @@ int32_t MsprofReporterMgr::StopReporters()
         Stop();
     }
     MSPROF_LOGI("ProfReporterMgr stop reporters");
-    isStarted_ = false;
     SaveTypeInfo(true);
+    FlushMstxData();
     try {
         for (auto &report : reporters_) {
             if (report.StopReporter() != PROFILING_SUCCESS) {
@@ -285,6 +292,7 @@ int32_t MsprofReporterMgr::StopReporters()
         index.second = 0;
     }
     reporters_.clear();
+    isStarted_ = false;
     return PROFILING_SUCCESS;
 }
 }

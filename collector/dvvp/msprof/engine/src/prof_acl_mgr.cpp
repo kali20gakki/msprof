@@ -418,7 +418,6 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
             return ACL_ERROR_PROF_NOT_RUN;
         }
     }
-    MstxDataHandler::instance()->Stop();
     PlatformAdapter::instance()->Uninit();
     // stop devices
     int ret = CancelHostAndDevTasks(profStopCfg->devNums, profStopCfg->devIdList);
@@ -1490,7 +1489,6 @@ int32_t ProfAclMgr::MsprofFinalizeHandle(void)
         return MSPROF_ERROR_NONE;
     }
     HashData::instance()->SaveHashData();
-    MstxDataHandler::instance()->Stop();
     for (auto iter = devTasks_.begin(); iter != devTasks_.end(); iter++) {
         if (iter->second.params->is_cancel) {
             continue;
