@@ -58,7 +58,7 @@ msptiResult CallbackManager::Init(msptiSubscriberHandle *subscriber, msptiCallba
         MSPTI_LOGE("subscriber cannot be nullptr.");
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
-    if (init_.load() || *subscriber == subscriber_ptr_.get()) {
+    if (init_.load()) {
         MSPTI_LOGE("subscriber cannot be register repeat.");
         return MSPTI_ERROR_MULTIPLE_SUBSCRIBERS_NOT_SUPPORTED;
     }
@@ -86,6 +86,7 @@ msptiResult CallbackManager::UnInit(msptiSubscriberHandle subscriber)
     }
     subscriber_ptr_.reset(nullptr);
     cbid_map_.clear();
+    init_.store(false);
     MSPTI_LOGI("CallbackManager UnInit success.");
     return MSPTI_SUCCESS;
 }

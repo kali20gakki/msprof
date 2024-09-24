@@ -49,4 +49,7 @@ TEST_F(CallbackUtest, CallbackExternalApiTestWithRuntimeDomain)
         MSPTI_CBID_RUNTIME_CONTEXT_CREATED_EX, MSPTI_API_EXIT, "rtCtxCreateEx");
     EXPECT_EQ(MSPTI_SUCCESS, msptiEnableDomain(0, subscriber, MSPTI_CB_DOMAIN_RUNTIME));
     EXPECT_EQ(MSPTI_SUCCESS, msptiUnsubscribe(subscriber));
+    msptiSubscriberHandle subscriberNul{nullptr};
+    EXPECT_EQ(MSPTI_SUCCESS, msptiSubscribe(&subscriberNul, nullptr, nullptr));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiUnsubscribe(subscriberNul));
 }
