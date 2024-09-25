@@ -74,6 +74,11 @@ int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
         MSPTI_LOGE("Failed to init mstx funcs.");
         return 1; // 1 : init failed
     }
+
+    if (outSize != static_cast<unsigned int>(MSTX_FUNC_END)) {
+        MSPTI_LOGE("outSize is not equal to MSTX_FUNC_END, Failed to init mstx funcs.");
+        return 1; // 1 : init failed
+    }
     *(outTable[MSTX_FUNC_MARKA]) = (MstxFuncPointer)MsptiMstxApi::MstxMarkAFunc;
     *(outTable[MSTX_FUNC_RANGE_STARTA]) = (MstxFuncPointer)MsptiMstxApi::MstxRangeStartAFunc;
     *(outTable[MSTX_FUNC_RANGE_END]) = (MstxFuncPointer)MsptiMstxApi::MstxRangeEndFunc;
