@@ -127,6 +127,11 @@ extern "C" int __attribute__((visibility("default"))) InitInjectionMstx(MstxGetM
         MSPROF_LOGE("Failed to call getFuncTable");
         return MSTX_FAIL;
     }
+
+    if (outSize != static_cast<unsigned int>(MSTX_FUNC_END)) {
+        MSPROF_LOGE("outSize is not equal to MSTX_FUNC_END, Failed to init mstx funcs.");
+        return MSTX_FAIL; // 1 : init failed
+    }
     *(outTable[MSTX_FUNC_MARKA]) = (MstxFuncPointer)MstxMarkAFunc;
     *(outTable[MSTX_FUNC_RANGE_STARTA]) = (MstxFuncPointer)MstxRangeStartAFunc;
     *(outTable[MSTX_FUNC_RANGE_END]) = (MstxFuncPointer)MstxRangeEndFunc;

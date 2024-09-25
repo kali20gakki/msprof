@@ -30,6 +30,7 @@ typedef enum {
     MSTX_API_MODULE_SIZE,                   // end of the enum, new enum items must be added before this
     MSTX_API_MODULE_FORCE_INT               = 0x7fffffff
 } MstxFuncModule;
+
 typedef void (*MstxFuncPointer)(void);
 typedef MstxFuncPointer** MstxFuncTable;
 typedef int (*MstxGetModuleFuncTableFunc)(MstxFuncModule module, MstxFuncTable *outTable, unsigned int *outSize);
