@@ -26,6 +26,9 @@ using ProfCommand = MsprofCommandHandle;
 using namespace Msprof::Engine;
 using namespace Analysis::Dvvp::Common::Config;
 
+static std::mutex mtx;
+static bool g_profInit = false;
+
 int32_t SetCommandHandleProf(ProfCommand &command)
 {
     // msprof param
@@ -45,6 +48,10 @@ int32_t SetCommandHandleProf(ProfCommand &command)
 
 int32_t CommandHandleProfInit()
 {
+    std::unique_lock<std::mutex> lock(mtx);
+    if (g_profInit) {
+        return ACL_SUCCESS;
+    }
     ProfCommand command;
     auto ret = memset_s(&command, sizeof(command), 0, sizeof(command));
     FUNRET_CHECK_FAIL_RET_VALUE(ret, EOK, PROFILING_FAILED);
@@ -54,6 +61,7 @@ int32_t CommandHandleProfInit()
         MSPROF_INNER_ERROR("EK9999", "ProfInit CommandHandle set failed");
         return ACL_ERROR_PROFILING_FAILURE;
     }
+    g_profInit = true;
     MSPROF_LOGI("CommandHandleProfInit, type:%u", command.type);
     return ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
 }
@@ -151,6 +159,10 @@ int32_t CommandHandleProfStop(const uint32_t devIdList[], uint32_t devNums, uint
 
 int32_t CommandHandleProfFinalize()
 {
+    std::unique_lock<std::mutex> lock(mtx);
+    if (!g_profInit) {
+        return ACL_SUCCESS;
+    }
     ProfCommand command;
     auto ret = memset_s(&command, sizeof(command), 0, sizeof(command));
     FUNRET_CHECK_FAIL_RET_VALUE(ret, EOK, PROFILING_FAILED);
@@ -160,6 +172,7 @@ int32_t CommandHandleProfFinalize()
         MSPROF_INNER_ERROR("EK9999", "ProfFinalize CommandHandle set failed");
         return ACL_ERROR_PROFILING_FAILURE;
     }
+    g_profInit = false;
     MSPROF_LOGI("CommandHandleProfFinalize, type:%u", command.type);
     return ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
 }

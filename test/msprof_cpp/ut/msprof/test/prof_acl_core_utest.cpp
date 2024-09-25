@@ -2097,20 +2097,85 @@ protected:
     }
 };
 
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfInitWillReturnSuccWhileSetProfCommandSucc)
+{
+    GlobalMockObject::verify();
+    std::string jsonStr = "{}";
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
+        .stubs()
+        .will(returnValue(jsonStr));
+    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfInit());
+    // repeat init
+    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfInit());
+    CommandHandleProfFinalize();
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfInitWillReturnFailureWhileSetCommandHandleProfFail)
+{
+    GlobalMockObject::verify();
+    std::string jsonStr(PARAM_LEN_MAX + 1, 'a');
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
+        .stubs()
+        .will(returnValue(jsonStr));
+    EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, CommandHandleProfInit());
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfInitWillReturnFailureWhileSetProfCommandFail)
+{
+    GlobalMockObject::verify();
+    std::string jsonStr = "{}";
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
+        .stubs()
+        .will(returnValue(jsonStr));
+    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, CommandHandleProfInit());
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfFinalizeWillReturnSuccWhileInitSucc)
+{
+    GlobalMockObject::verify();
+    std::string jsonStr = "{}";
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
+        .stubs()
+        .will(returnValue(jsonStr));
+    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    CommandHandleProfInit();
+    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfFinalize());
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfFinalizeWillReturnSuccWhileNotCallInit)
+{
+    GlobalMockObject::verify();
+    std::string jsonStr = "{}";
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
+        .stubs()
+        .will(returnValue(jsonStr));
+    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfFinalize());
+}
+
 TEST_F(COMMANDHANDLE_TEST, commandHandle_api) {
     GlobalMockObject::verify();
 
-    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfInit());
-    std::string retStr(4099,'a');
-    std::string zeroStr = "{}";
+    std::string jsonStr = "{}";
     MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
         .stubs()
-        .will(returnValue(retStr))
-        .then(returnValue(zeroStr));
+        .will(returnValue(jsonStr));
+    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
     MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
         .stubs()
         .will(returnValue(false));
-    EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, CommandHandleProfInit());
     uint32_t devList[] = {0, 1};
     uint32_t devNums = 2;
     MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StartReporters)
@@ -2119,6 +2184,7 @@ TEST_F(COMMANDHANDLE_TEST, commandHandle_api) {
     MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StopReporters)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfInit());
     EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStart(devList, devNums, 0));
     EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStart(nullptr, 0, 0));
     EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStop(devList, devNums, 0));
