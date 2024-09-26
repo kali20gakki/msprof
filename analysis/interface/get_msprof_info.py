@@ -2,15 +2,14 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
+# 该类会涉及到外部调用，因此如果基于相对路径引入其他文件的函数，可能在实际调用的时候报错找不到对应模块，因此涉及到新增引入的函数时，要将import
+# 放在main函数调用内部，或者将设置路径的代码移到import最上面
+
 import argparse
 import importlib
 import logging
 import os
 import sys
-
-from common_func.msprof_common import check_path_valid
-from common_func.msprof_common import check_path_char_valid
-from common_func.msprof_exception import ProfException
 
 
 class MsprofInfoConstruct:
@@ -72,6 +71,9 @@ class MsprofInfoConstruct:
         :return:None
         """
         from common_func.common import error
+        from common_func.msprof_common import check_path_valid
+        from common_func.msprof_common import check_path_char_valid
+        from common_func.msprof_exception import ProfException
 
         parser = self.construct_argument_parser()
 
