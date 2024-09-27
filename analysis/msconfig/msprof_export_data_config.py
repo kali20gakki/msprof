@@ -208,8 +208,8 @@ class MsProfExportDataConfig(MetaConfig):
         'msprof_tx': [
             ('handler', '_get_msproftx_data'),
             ('headers',
-             'pid, tid, category, event_type, payload_type, payload_value, Start_time(us), '
-             'End_time(us), message_type, message')
+             'pid,tid,category,event_type,payload_type,payload_value,Start_time(us),'
+             'End_time(us),message_type,message')
         ],
         'sio': [
             ('handler', '_get_sio_data'),
