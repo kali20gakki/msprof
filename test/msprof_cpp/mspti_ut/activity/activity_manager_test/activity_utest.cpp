@@ -116,7 +116,7 @@ TEST_F(ActivityUtest, ShouleRetSuccessWhenSetAllKindWithCorrectApiInvocationSequ
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_MARKER));
     auto instance = Mspti::Activity::ActivityManager::GetInstance();
     EXPECT_EQ(MSPTI_SUCCESS, instance ->SetDevice(0));
-    EXPECT_EQ(MSPTI_SUCCESS, instance ->DeviceReset(0));
+    EXPECT_EQ(MSPTI_SUCCESS, instance ->ResetAllDevice());
     msptiActivityMarker activity;
     constexpr uint64_t timeStamp = 1614659207688700;
     constexpr uint32_t markNum = 10;

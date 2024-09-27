@@ -73,56 +73,60 @@ msptiResult DevTaskManager::StopAllDevKindProfTask(std::vector<std::unique_ptr<D
     return ret;
 }
 
-msptiResult DevTaskManager::StartDevProfTask(uint32_t deviceId, msptiActivityKind kind)
+msptiResult DevTaskManager::StartDevProfTask(uint32_t deviceId, const std::set<msptiActivityKind>& kinds)
 {
     if (!CheckDeviceOnline(deviceId)) {
         MSPTI_LOGE("Device: %u is offline.", deviceId);
         return MSPTI_ERROR_INNER;
     }
-    MSPTI_LOGI("Start DevProfTask, deviceId: %u, kind: %d", deviceId, kind);
+    MSPTI_LOGI("Start DevProfTask, deviceId: %u.", deviceId);
     if (Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->GetAllChannels(deviceId) != MSPTI_SUCCESS) {
         MSPTI_LOGE("Get device: %u channels failed.", deviceId);
         return MSPTI_ERROR_INNER;
     }
     Mspti::Common::ContextManager::GetInstance()->InitDevTimeInfo(deviceId);
     // 根据DeviceId配置项，开启CANN软件栈的Profiling任务
-    if (StartCannProfTask(deviceId, kind) != MSPTI_SUCCESS) {
-        MSPTI_LOGE("Start CannProfTask failed. deviceId: %u, kind: %d", deviceId, static_cast<int>(kind));
+    if (StartCannProfTask(deviceId, kinds) != MSPTI_SUCCESS) {
+        MSPTI_LOGE("Start CannProfTask failed. deviceId: %u", deviceId);
         return MSPTI_ERROR_INNER;
     }
     std::lock_guard<std::mutex> lk(task_map_mtx_);
-    auto iter = task_map_.find({deviceId, kind});
-    if (iter == task_map_.end()) {
-        auto profTasks = Mspti::Ascend::DevProfTaskFactory::CreateTasks(deviceId, kind);
-        auto ret = StartAllDevKindProfTask(profTasks);
-        if (ret != MSPTI_SUCCESS) {
-            MSPTI_LOGE("The device %u start DevProfTask failed.", deviceId);
-            return ret;
+    for (const auto& kind : kinds) {
+        auto iter = task_map_.find({deviceId, kind});
+        if (iter == task_map_.end()) {
+            auto profTasks = Mspti::Ascend::DevProfTaskFactory::CreateTasks(deviceId, kind);
+            auto ret = StartAllDevKindProfTask(profTasks);
+            if (ret != MSPTI_SUCCESS) {
+                MSPTI_LOGE("The device %u start DevProfTask failed.", deviceId);
+                return ret;
+            }
+            task_map_.insert({{deviceId, kind}, std::move(profTasks)});
+        } else {
+            MSPTI_LOGW("The device: %u, kind: %d is already running.", deviceId, kind);
         }
-        task_map_.insert({{deviceId, kind}, std::move(profTasks)});
-    } else {
-        MSPTI_LOGW("The device: %u, kind: %d is already running.", deviceId, kind);
     }
     return MSPTI_SUCCESS;
 }
 
-msptiResult DevTaskManager::StopDevProfTask(uint32_t deviceId, msptiActivityKind kind)
+msptiResult DevTaskManager::StopDevProfTask(uint32_t deviceId, const std::set<msptiActivityKind>& kinds)
 {
     if (!CheckDeviceOnline(deviceId)) {
         MSPTI_LOGE("Device: %u is offline.", deviceId);
         return MSPTI_ERROR_INNER;
     }
-    MSPTI_LOGI("Stop DevProfTask, deviceId: %u, kind: %d", deviceId, kind);
-    if (StopCannProfTask(deviceId, kind) != MSPTI_SUCCESS) {
-        MSPTI_LOGE("Stop CannProfTask failed. deviceId: %u, kind: %d", deviceId, static_cast<int>(kind));
+    MSPTI_LOGI("Stop DevProfTask, deviceId: %u", deviceId);
+    if (StopCannProfTask(deviceId) != MSPTI_SUCCESS) {
+        MSPTI_LOGE("Stop CannProfTask failed. deviceId: %u", deviceId);
         return MSPTI_ERROR_INNER;
     }
     msptiResult ret = MSPTI_SUCCESS;
     std::lock_guard<std::mutex> lk(task_map_mtx_);
-    auto iter = task_map_.find({deviceId, kind});
-    if (iter != task_map_.end()) {
-        ret = StopAllDevKindProfTask(iter->second);
-        task_map_.erase(iter);
+    for (const auto& kind : kinds) {
+        auto iter = task_map_.find({deviceId, kind});
+        if (iter != task_map_.end()) {
+            ret = StopAllDevKindProfTask(iter->second);
+            task_map_.erase(iter);
+        }
     }
     return ret;
 }
@@ -182,11 +186,19 @@ void DevTaskManager::RegisterReportCallback()
     }
 }
 
-msptiResult DevTaskManager::StartCannProfTask(uint32_t deviceId, msptiActivityKind kind)
+msptiResult DevTaskManager::StartCannProfTask(uint32_t deviceId, const std::set<msptiActivityKind>& kinds)
 {
-    auto cfg_iter = datatype_config_map_.find(kind);
-    if (cfg_iter == datatype_config_map_.end()) {
-        MSPTI_LOGW("Device: %u, kind: %d don't need to start cann profiling task.", deviceId, static_cast<int>(kind));
+    for (const auto& kind : kinds) {
+        auto cfg_iter = datatype_config_map_.find(kind);
+        if (cfg_iter == datatype_config_map_.end()) {
+            MSPTI_LOGW("Device: %u, kind: %d don't need to start cann profiling task.",
+                deviceId, static_cast<int>(kind));
+            continue;
+        }
+        profSwitch_ |= cfg_iter->second;
+    }
+    if (profSwitch_ == 0) {
+        MSPTI_LOGW("profswitch is zero, don't need to enable cann prof.");
         return MSPTI_SUCCESS;
     }
     CommandHandle command;
@@ -194,7 +206,7 @@ msptiResult DevTaskManager::StartCannProfTask(uint32_t deviceId, msptiActivityKi
         MSPTI_LOGE("memset CommandHandle failed.");
         return MSPTI_ERROR_INNER;
     }
-    command.profSwitch = cfg_iter->second;
+    command.profSwitch = profSwitch_;
     command.profSwitchHi = 0;
     command.devNums = 1;
     command.devIdList[0] = deviceId;
@@ -208,19 +220,18 @@ msptiResult DevTaskManager::StartCannProfTask(uint32_t deviceId, msptiActivityKi
     return MSPTI_SUCCESS;
 }
 
-msptiResult DevTaskManager::StopCannProfTask(uint32_t deviceId, msptiActivityKind kind)
+msptiResult DevTaskManager::StopCannProfTask(uint32_t deviceId)
 {
-    auto cfg_iter = datatype_config_map_.find(kind);
-    if (cfg_iter == datatype_config_map_.end()) {
-        MSPTI_LOGW("Device: %u, kind: %d don't need to stop cann profiling task.", deviceId, static_cast<int>(kind));
-        return MSPTI_SUCCESS;
-    }
     CommandHandle command;
     if (memset_s(&command, sizeof(command), 0, sizeof(command)) != EOK) {
         MSPTI_LOGE("memset CommandHandle failed.");
         return MSPTI_ERROR_INNER;
     }
-    command.profSwitch = cfg_iter->second;
+    if (profSwitch_ == 0) {
+        MSPTI_LOGW("profswitch is zero, don't need to disable cann prof.");
+        return MSPTI_SUCCESS;
+    }
+    command.profSwitch = profSwitch_;
     command.profSwitchHi = 0;
     command.devNums = 1;
     command.devIdList[0] = deviceId;

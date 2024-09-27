@@ -30,8 +30,8 @@ namespace Ascend {
 class DevTaskManager {
 public:
     static DevTaskManager* GetInstance();
-    msptiResult StartDevProfTask(uint32_t deviceId, msptiActivityKind kind);
-    msptiResult StopDevProfTask(uint32_t deviceId, msptiActivityKind kind);
+    msptiResult StartDevProfTask(uint32_t deviceId, const std::set<msptiActivityKind>& kinds);
+    msptiResult StopDevProfTask(uint32_t deviceId, const std::set<msptiActivityKind>& kinds);
     bool CheckDeviceOnline(uint32_t deviceId);
 
 private:
@@ -45,8 +45,8 @@ private:
     msptiResult StartAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks);
     msptiResult StopAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks);
     void RegisterReportCallback();
-    msptiResult StartCannProfTask(uint32_t deviceId, msptiActivityKind kind);
-    msptiResult StopCannProfTask(uint32_t deviceId, msptiActivityKind kind);
+    msptiResult StartCannProfTask(uint32_t deviceId, const std::set<msptiActivityKind>& kinds);
+    msptiResult StopCannProfTask(uint32_t deviceId);
 
 private:
     std::set<uint32_t> device_set_;
@@ -55,6 +55,7 @@ private:
 
     std::map<std::pair<uint32_t, msptiActivityKind>, std::vector<std::unique_ptr<DevProfTask>>> task_map_;
     std::mutex task_map_mtx_;
+    std::atomic<uint64_t> profSwitch_{0};
 };
 }  // Ascend
 }  // Mspti

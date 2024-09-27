@@ -151,15 +151,12 @@ msptiResult ActivityManager::Register(msptiActivityKind kind)
             return MSPTI_SUCCESS;
         }
         activity_set_.insert(kind);
+        append_only_activity_set_.insert(kind);
         MSPTI_LOGI("Register Activity kind: %d", static_cast<int>(kind));
     }
-    std::unordered_set<uint32_t> devices;
-    {
-        std::lock_guard<std::mutex> lk(devices_mtx_);
-        devices.insert(devices_.begin(), devices_.end());
-    }
-    for (auto device : devices) {
-        Mspti::Ascend::DevTaskManager::GetInstance()->StartDevProfTask(device, kind);
+    std::lock_guard<std::mutex> lk(devices_mtx_);
+    for (auto device : devices_) {
+        Mspti::Ascend::DevTaskManager::GetInstance()->StartDevProfTask(device, {kind});
     }
     return MSPTI_SUCCESS;
 }
@@ -177,14 +174,6 @@ msptiResult ActivityManager::UnRegister(msptiActivityKind kind)
         }
         activity_set_.erase(kind);
         MSPTI_LOGI("UnRegister Activity kind: %d", static_cast<int>(kind));
-    }
-    std::unordered_set<uint32_t> devices;
-    {
-        std::lock_guard<std::mutex> lk(devices_mtx_);
-        devices.insert(devices_.begin(), devices_.end());
-    }
-    for (auto device : devices) {
-        Mspti::Ascend::DevTaskManager::GetInstance()->StopDevProfTask(device, kind);
     }
     return MSPTI_SUCCESS;
 }
@@ -312,42 +301,22 @@ msptiResult ActivityManager::SetDevice(uint32_t deviceId)
         }
         devices_.insert(deviceId);
     }
-    std::unordered_set<msptiActivityKind> activity_set;
-    {
-        std::lock_guard<std::mutex> lk(activity_mtx_);
-        activity_set.insert(activity_set_.begin(), activity_set_.end());
+    std::lock_guard<std::mutex> lk(activity_mtx_);
+    if (activity_set_.empty()) {
+        return MSPTI_SUCCESS;
     }
-    msptiResult ret = MSPTI_SUCCESS;
-    for (auto activity : activity_set) {
-        if (Mspti::Ascend::DevTaskManager::GetInstance()->StartDevProfTask(deviceId, activity) != MSPTI_SUCCESS) {
-            MSPTI_LOGE("Start Device prof task failed, Device: %u, kind: %d", deviceId, activity);
-            ret = MSPTI_ERROR_INNER;
-        }
-    }
-    return ret;
+    return Mspti::Ascend::DevTaskManager::GetInstance()->StartDevProfTask(deviceId, activity_set_);
 }
 
-msptiResult ActivityManager::DeviceReset(uint32_t deviceId)
+msptiResult ActivityManager::ResetAllDevice()
 {
-    MSPTI_LOGI("Reset device: %u", deviceId);
-    {
-        std::lock_guard<std::mutex> lk(devices_mtx_);
-        if (devices_.find(deviceId) == devices_.end()) {
-            MSPTI_LOGW("Device: %u is not set.", deviceId);
-            return MSPTI_SUCCESS;
-        }
-        devices_.erase(deviceId);
-    }
-    std::unordered_set<msptiActivityKind> activity_set;
-    {
-        std::lock_guard<std::mutex> lk(activity_mtx_);
-        activity_set.insert(activity_set_.begin(), activity_set_.end());
-    }
-    msptiResult ret = MSPTI_SUCCESS;
-    for (auto activity : activity_set) {
-        if (Mspti::Ascend::DevTaskManager::GetInstance()->StopDevProfTask(deviceId, activity) != MSPTI_SUCCESS) {
-            MSPTI_LOGE("Stop Device prof task failed, Device: %u, kind: %d", deviceId, activity);
-            ret = MSPTI_ERROR_INNER;
+    auto ret = MSPTI_SUCCESS;
+    std::lock_guard<std::mutex> lk(devices_mtx_);
+    for (const auto& device : devices_) {
+        MSPTI_LOGI("Reset device: %u", device);
+        auto temp = Mspti::Ascend::DevTaskManager::GetInstance()->StopDevProfTask(device, append_only_activity_set_);
+        if (temp != MSPTI_SUCCESS) {
+            ret = temp;
         }
     }
     return ret;

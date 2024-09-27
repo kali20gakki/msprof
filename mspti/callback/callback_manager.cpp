@@ -13,6 +13,7 @@
 
 #include <memory>
 
+#include "activity/activity_manager.h"
 #include "common/plog_manager.h"
 #include "common/utils.h"
 
@@ -195,6 +196,9 @@ msptiResult msptiSubscribe(msptiSubscriberHandle *subscriber, msptiCallbackFunc 
 
 msptiResult msptiUnsubscribe(msptiSubscriberHandle subscriber)
 {
+    if (Mspti::Activity::ActivityManager::GetInstance()->ResetAllDevice() != MSPTI_SUCCESS) {
+        MSPTI_LOGE("Reset all device failed.");
+    }
     return Mspti::Callback::CallbackManager::GetInstance()->UnInit(subscriber);
 }
 

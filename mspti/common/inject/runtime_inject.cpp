@@ -92,7 +92,6 @@ RtErrorT rtDeviceReset(int32_t device)
     int32_t visibleDevice = 0;
     uint32_t realDevice = rtGetVisibleDeviceIdByLogicDeviceId(device, &visibleDevice) == MSPTI_SUCCESS ?
         static_cast<uint32_t>(visibleDevice) : static_cast<uint32_t>(device);
-    Mspti::Activity::ActivityManager::GetInstance()->DeviceReset(realDevice);
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_DEVICE_RESET, __FUNCTION__);
     return func(device);
 }

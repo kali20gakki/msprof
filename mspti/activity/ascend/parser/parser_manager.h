@@ -86,7 +86,7 @@ private:
     static constexpr uint32_t MARK_TAG_ID{11};
     std::mutex rangeInfoMtx_;;
     std::unordered_map<uint64_t, RtStreamT> rangeInfo_;
-    static std::set<std::shared_ptr<std::string>> markMsg_;
+    static std::map<std::uint64_t, std::shared_ptr<std::string>> markMsg_;
     static std::mutex markMsgMtx_;
 };
 }  // Parser

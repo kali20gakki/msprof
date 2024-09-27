@@ -54,7 +54,7 @@ public:
     static msptiResult GetNextRecord(uint8_t *buffer, size_t validBufferSizeBytes, msptiActivity **record);
     msptiResult FlushAll();
     msptiResult SetDevice(uint32_t deviceId);
-    msptiResult DeviceReset(uint32_t deviceId);
+    msptiResult ResetAllDevice();
     msptiResult Register(msptiActivityKind kind);
     msptiResult UnRegister(msptiActivityKind kind);
 
@@ -71,7 +71,8 @@ private:
 private:
     const static std::set<msptiActivityKind> supportActivityKinds_;
     // Replace map with bitest
-    std::unordered_set<msptiActivityKind> activity_set_;
+    std::set<msptiActivityKind> activity_set_;
+    std::set<msptiActivityKind> append_only_activity_set_;
     std::mutex activity_mtx_;
     std::unordered_set<uint32_t> devices_;
     std::mutex devices_mtx_;
