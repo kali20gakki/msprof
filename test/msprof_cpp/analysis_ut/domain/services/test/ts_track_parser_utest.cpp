@@ -40,6 +40,7 @@ class TsTrackParserUtest : public Test {
 protected:
     void SetUp() override
     {
+        GlobalMockObject::verify();
         EXPECT_TRUE(File::CreateDir(TS_TRACK_PATH));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({TS_TRACK_PATH, "data"})));
     }
@@ -258,5 +259,16 @@ TEST_F(TsTrackParserUtest, ShouldReturnBlockDimDataWhenParser)
     for (int i = 0; i < data->size(); i++) {
         ASSERT_EQ(expectTimestamp[i], data->data()[i].hd.timestamp);
     }
+}
+
+TEST_F(TsTrackParserUtest, ShouldAnalyzeErrorWhenFilesSizeMoreThan10GB)
+{
+    TsTrackParser tsTrackParser;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = TS_TRACK_PATH;
+    std::vector<StepTrace> taskFlip1{CreateStepTrace(0x0A, 1, 1, 10, 1), CreateStepTrace(0x0A, 1, 1, 20, 2)};
+    WriteBin(taskFlip1, File::PathJoin({TS_TRACK_PATH, "data"}), "ts_track.data.0.slice_0");
+    MOCKER_CPP(&Parser::GetFilesSize).stubs().will(returnValue(10737418241)); // 超过10GB, 10737418241
+    ASSERT_EQ(Analysis::PARSER_READ_DATA_ERROR, tsTrackParser.Run(dataInventory_, context));
 }
 }

@@ -20,6 +20,7 @@ namespace Domain {
 using namespace Infra;
 namespace {
 const long INVALID_FILE_SIZE = -1;
+const uint64_t MAX_FILE_SIZE = 10737418240; // 10 * 1024 *1024 *1024, means 10GB
 }
 
 uint32_t Parser::GetFileSize(const char *filePath)
@@ -135,7 +136,11 @@ uint32_t Parser::ReadDataEntry(const DeviceContext &deviceContext)
 
     // 读取所有文件大小
     auto fileSize = this->GetFilesSize(files);
-
+    // 同一类二进制文件总大小不能超过10GB
+    if (fileSize > MAX_FILE_SIZE) {
+        ERROR("FileSize is too large, more than 10 GB");
+        return ANALYSIS_ERROR;
+    }
     // 计算处理块个数
     size_t structCount = fileSize / trunkSize;
     size_t firstFileOffset = fileSize % trunkSize;
