@@ -26,7 +26,7 @@ std::unordered_map<uint64_t, std::string> ParserManager::hashInfo_map_;
 std::mutex ParserManager::hashMutex_;
 std::unordered_map<uint16_t, std::unordered_map<uint32_t, std::string>> ParserManager::typeInfo_map_;
 std::mutex ParserManager::typeInfoMutex_;
-std::set<std::shared_ptr<std::string>> ParserManager::markMsg_;
+std::map<uint64_t, std::shared_ptr<std::string>> ParserManager::markMsg_;
 std::mutex ParserManager::markMsgMtx_;
 
 ParserManager *ParserManager::GetInstance()
@@ -277,8 +277,12 @@ std::shared_ptr<std::string> ParserManager::TryCacheMarkMsg(const char* msg)
         MSPTI_LOGE("Failed to malloc memory for mark msg.");
         return nullptr;
     }
-    markMsg_.insert(msgPtr);
-    return msgPtr;
+    uint64_t hashId = GetHashIdImple(*msgPtr);
+    auto iter = markMsg_.find(hashId);
+    if (iter == markMsg_.end()) {
+        iter = markMsg_.insert({hashId, msgPtr}).first;
+    }
+    return iter->second;
 }
 
 msptiResult ParserManager::ReportMark(const char* msg, RtStreamT stream)

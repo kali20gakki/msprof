@@ -88,11 +88,11 @@ TEST_F(DevProfTaskUtest, ShouleRetSuccessWhenUseDevTaskManagerNormal)
         .will(returnValue(MSPTI_SUCCESS));
     auto instance = Mspti::Ascend::DevTaskManager::GetInstance();
     uint32_t deviceId = 0;
-    msptiActivityKind kind = MSPTI_ACTIVITY_KIND_KERNEL;
-    auto ret = instance -> StartDevProfTask(deviceId, kind);
+    std::set<msptiActivityKind> kinds = {MSPTI_ACTIVITY_KIND_KERNEL};
+    auto ret = instance -> StartDevProfTask(deviceId, kinds);
     EXPECT_EQ(MSPTI_SUCCESS, ret);
 
-    ret = instance -> StopDevProfTask(deviceId, kind);
+    ret = instance -> StopDevProfTask(deviceId, kinds);
     EXPECT_EQ(MSPTI_SUCCESS, ret);
 }
 
@@ -104,11 +104,11 @@ TEST_F(DevProfTaskUtest, ShouleRetErrorWhenDeviceOffline)
         .will(returnValue(false));
     auto instance = Mspti::Ascend::DevTaskManager::GetInstance();
     uint32_t deviceId = 0;
-    msptiActivityKind kind = MSPTI_ACTIVITY_KIND_KERNEL;
-    auto ret = instance -> StartDevProfTask(deviceId, kind);
+    std::set<msptiActivityKind> kinds = {MSPTI_ACTIVITY_KIND_KERNEL};
+    auto ret = instance -> StartDevProfTask(deviceId, kinds);
     EXPECT_EQ(MSPTI_ERROR_INNER, ret);
 
-    ret = instance -> StopDevProfTask(deviceId, kind);
+    ret = instance -> StopDevProfTask(deviceId, kinds);
     EXPECT_EQ(MSPTI_ERROR_INNER, ret);
 }
 
@@ -119,9 +119,9 @@ TEST_F(DevProfTaskUtest, ShouleRetErrorWhenGetChannelsError)
         .stubs()
         .will(returnValue(MSPTI_ERROR_INNER));
     uint32_t deviceId = 0;
-    msptiActivityKind kind = MSPTI_ACTIVITY_KIND_KERNEL;
+    std::set<msptiActivityKind> kinds = {MSPTI_ACTIVITY_KIND_KERNEL};
     auto instance = Mspti::Ascend::DevTaskManager::GetInstance();
-    auto ret = instance -> StartDevProfTask(deviceId, kind);
+    auto ret = instance -> StartDevProfTask(deviceId, kinds);
     EXPECT_EQ(MSPTI_ERROR_INNER, ret);
 }
 
@@ -139,11 +139,11 @@ TEST_F(DevProfTaskUtest, ShouleRetErrorWhenStartOrStopCannProfTaskFailed)
         .will(returnValue(static_cast<int32_t>(MSPTI_ERROR_INNER)));
     auto instance = Mspti::Ascend::DevTaskManager::GetInstance();
     uint32_t deviceId = 0;
-    msptiActivityKind kind = MSPTI_ACTIVITY_KIND_KERNEL;
-    auto ret = instance -> StartDevProfTask(deviceId, kind);
+    std::set<msptiActivityKind> kinds = {MSPTI_ACTIVITY_KIND_KERNEL};
+    auto ret = instance -> StartDevProfTask(deviceId, kinds);
     EXPECT_EQ(MSPTI_ERROR_INNER, ret);
 
-    ret = instance -> StopDevProfTask(deviceId, kind);
+    ret = instance -> StopDevProfTask(deviceId, kinds);
     EXPECT_EQ(MSPTI_ERROR_INNER, ret);
 }
 
@@ -156,10 +156,10 @@ TEST_F(DevProfTaskUtest, ShouleRetSuccessWhenCannProfNotSupport)
     auto instance = Mspti::Ascend::DevTaskManager::GetInstance();
     uint32_t deviceId = 0;
     msptiActivityKind kind = MSPTI_ACTIVITY_KIND_MARKER;
-    auto ret = instance -> StartCannProfTask(deviceId, kind);
+    auto ret = instance -> StartCannProfTask(deviceId, {kind});
     EXPECT_EQ(MSPTI_SUCCESS, ret);
 
-    ret = instance -> StopDevProfTask(deviceId, kind);
+    ret = instance -> StopCannProfTask(deviceId);
     EXPECT_EQ(MSPTI_SUCCESS, ret);
 }
 

@@ -1,10 +1,22 @@
-add_executable(callback_utest 
-    ${TOP_DIR}/mspti/callback/callback_manager.cpp
-    ${TOP_DIR}/mspti/common/function_loader.cpp
-    ${TOP_DIR}/mspti/common/inject/plog_inject.cpp
-    ${TOP_DIR}/mspti/common/utils.cpp
+file(GLOB_RECURSE SRC_FILE
+    ${TOP_DIR}/mspti/activity/*.cpp
+    ${TOP_DIR}/mspti/callback/*.cpp
+    ${TOP_DIR}/mspti/common/*.cpp
+)
+
+file(GLOB_RECURSE REMOVE_SOURCES
+    ${TOP_DIR}/mspti/common/inject/*.cpp
+)
+
+list(REMOVE_ITEM SRC_FILE ${REMOVE_SOURCES})
+
+add_executable(callback_utest
+    ${SRC_FILE}
     main.cpp
     callback_utest.cpp
+    ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
+    ${UT_TOP_DIR}/stub/inject/profapi_inject_stub.cpp
+    ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
 )
 
 set_target_properties(callback_utest
