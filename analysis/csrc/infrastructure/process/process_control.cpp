@@ -253,7 +253,7 @@ void RecordProcessStat(const ExecuteProcessStat& stat, const std::string& subDir
 }
 
 ProcessControl::ProcessControl(ProcessCollection& processes)
-    : impl_(new Impl(processes)) {}
+    : impl_(new(std::nothrow) Impl(processes)) {}
 
 ProcessControl::~ProcessControl() = default;
 

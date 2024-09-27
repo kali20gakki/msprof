@@ -76,7 +76,7 @@ ProcessCollection ProcessTopo::BuildProcessControlTopoByChip(uint32_t chipId) co
 }
 
 ProcessTopo::ProcessTopo(const ProcessCollection& processCollection)
-    : impl_(new Impl(processCollection))
+    : impl_(new(std::nothrow) Impl(processCollection))
 {
 }
 
