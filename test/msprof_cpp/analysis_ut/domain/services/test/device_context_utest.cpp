@@ -12,15 +12,20 @@
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 
 #include <dirent.h>
+#include <unordered_map>
+#include <typeindex>
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "nlohmann/json.hpp"
 #include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/infrastructure/process/process_topo.h"
+#include "analysis/csrc/infrastructure/process/include/process_control.h"
 
 
 namespace Analysis {
 namespace Domain {
 using namespace Analysis::Utils;
+using namespace Analysis::Infra;
 
 const auto PROF_DIR = "./PROF_0";
 const auto DEVICE_DIR = "device_0";
@@ -71,6 +76,9 @@ protected:
 
 TEST_F(DeviceContextUTest, TestDeviceContextEntryShouldReturn1DataInventoryWhenInfoJsonInvalid)
 {
+    std::unordered_map<std::type_index, RegProcessInfo> processCollection;
+    ProcessControl processControl(processCollection);
+    ProcessTopo processTopo(processCollection);
     EXPECT_EQ(1, DeviceContextEntry(PROF_DIR, "").size());
 }
 

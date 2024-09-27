@@ -28,7 +28,7 @@ namespace Infra {
 template <typename P>
 std::unique_ptr<Infra::Process> TCreator()
 {
-    std::unique_ptr<Infra::Process> ptr{new P};
+    std::unique_ptr<Infra::Process> ptr{new(std::nothrow) P};
     return ptr;
 }
 class ProcessRegister {
