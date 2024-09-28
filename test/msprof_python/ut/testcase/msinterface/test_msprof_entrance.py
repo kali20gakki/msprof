@@ -5,7 +5,7 @@ function:
 Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
 import unittest
-from argparse import Namespace
+from argparse import Namespace, ArgumentTypeError
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
@@ -68,11 +68,30 @@ class TestMsprofEntrance(unittest.TestCase):
                 MsprofEntrance().main()
 
     def test_main_should_raise_system_exit_when_dir_len_is_over_1024(self):
-        args = ["msprof.py", "export", "summary", "-dir", "t"*1025]
+        args = ["msprof.py", "export", "summary", "-dir", "t" * 1025]
         with mock.patch('sys.argv', args), \
                 mock.patch('common_func.common.error'), \
                 mock.patch(NAMESPACE + '.check_path_valid'), \
                 mock.patch(NAMESPACE + '.check_path_char_valid'), \
+                mock.patch(NAMESPACE + '.ExportCommand.process'):
+            with self.assertRaises(SystemExit):
+                MsprofEntrance().main()
+
+    def test_main_should_success_when_analyze_args_is_valid(self):
+        # 只能满足覆盖率要求，无法校验功能
+        args = ["msprof.py", "analyze", "--rule", "communication", "--clear", "--type", "text", "-dir", "test"]
+        with mock.patch('sys.argv', args), \
+                mock.patch(NAMESPACE + '.check_path_valid'), \
+                mock.patch(NAMESPACE + '.ExportCommand.process'):
+            with self.assertRaises(SystemExit):
+                MsprofEntrance().main()
+
+        args = [
+            "msprof.py", "analyze", "--rule", "communication,communication_matrix",
+            "--clear", "--type", "db", "-dir", "test"
+        ]
+        with mock.patch('sys.argv', args), \
+                mock.patch(NAMESPACE + '.check_path_valid'), \
                 mock.patch(NAMESPACE + '.ExportCommand.process'):
             with self.assertRaises(SystemExit):
                 MsprofEntrance().main()
@@ -84,3 +103,23 @@ class TestMsprofEntrance(unittest.TestCase):
         args = Namespace(**args_dic)
         with mock.patch('sys.argv', args):
             MsprofEntrance()._set_export_mode(args)
+
+    def test_validate_analyze_rule_should_return_valid_str_when_str_is_valid(self):
+        analyze_rule = "communication"
+        self.assertEqual(analyze_rule, MsprofEntrance()._validate_analyze_rule(analyze_rule))
+
+        analyze_rule = "communication_matrix"
+        self.assertEqual(analyze_rule, MsprofEntrance()._validate_analyze_rule(analyze_rule))
+
+        analyze_rule = "communication,communication_matrix"
+        self.assertEqual(analyze_rule, MsprofEntrance()._validate_analyze_rule(analyze_rule))
+
+    def test_validate_analyze_rule_should_raise_error_when_type_is_invalid(self):
+        analyze_rule = "xxx,communication_matrix"
+        with self.assertRaises(ArgumentTypeError):
+            self.assertEqual(analyze_rule, MsprofEntrance()._validate_analyze_rule(analyze_rule))
+
+        analyze_rule = "xxx"
+        with self.assertRaises(ArgumentTypeError):
+            self.assertEqual(analyze_rule, MsprofEntrance()._validate_analyze_rule(analyze_rule))
+

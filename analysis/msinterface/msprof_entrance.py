@@ -71,6 +71,14 @@ class MsprofEntrance:
                 # 按子图导出
                 ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
 
+    @staticmethod
+    def _validate_analyze_rule(value: str):
+        elements = value.split(",")
+        valid_elements = ['communication', 'communication_matrix']  # 后续可自行添加有效元素
+        if not all(element in valid_elements for element in elements):
+            raise argparse.ArgumentTypeError("Invalid elements in rule.")
+        return value
+
     def main(self: any) -> None:
         """
         parse argument and run command
@@ -211,8 +219,10 @@ class MsprofEntrance:
     def _analyze_parser(self: any, analyze_parser: any) -> None:
         self._add_collect_path_argument(analyze_parser)
         analyze_parser.add_argument(
-            '--rule', '-r', type=str, help='Specify the rule that is used for analyzing prased profiling data',
-            required=True, choices=['communication', 'communication_matrix'])
+            '--rule', '-r', type=self._validate_analyze_rule, required=True,
+            help='Switch specified rule for using msprof to analyze collecting data. '
+                 'The options are: [communication, communication_matrix], they can be set at the same time '
+                 'and separated by a comma (,), for example, :--rule=communication,communication_matrix.')
         analyze_parser.add_argument(
             '--clear', dest='clear_mode', action='store_true',
             default=False, help='<Optional> the clear mode flag')
