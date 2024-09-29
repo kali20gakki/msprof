@@ -15,13 +15,19 @@
 #include <cstring>
 #include <mutex>
 
+#include "activity/activity_manager.h"
 #include "activity/ascend/parser/parser_manager.h"
 #include "common/config.h"
 #include "common/plog_manager.h"
 
+using namespace Mspti::Activity;
+
 namespace MsptiMstxApi {
 void MstxMarkAFunc(const char* msg, RtStreamT stream)
 {
+    if (!ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER)) {
+        return;
+    }
     if (msg == nullptr) {
         MSPTI_LOGE("Input params msg is nullptr.");
         return;
@@ -38,6 +44,9 @@ void MstxMarkAFunc(const char* msg, RtStreamT stream)
  
 uint64_t MstxRangeStartAFunc(const char* msg, RtStreamT stream)
 {
+    if (!ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER)) {
+        return 0;
+    }
     if (msg == nullptr) {
         MSPTI_LOGE("Input params msg is nullptr.");
         return 0;
@@ -57,6 +66,9 @@ uint64_t MstxRangeStartAFunc(const char* msg, RtStreamT stream)
  
 void MstxRangeEndFunc(uint64_t rangeId)
 {
+    if (!ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER)) {
+        return;
+    }
     if (Mspti::Parser::ParserManager::GetInstance()->ReportRangeEnd(rangeId) != MSPTI_SUCCESS) {
         MSPTI_LOGE("Report RangeEnd data failed.");
     }

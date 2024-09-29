@@ -178,6 +178,12 @@ msptiResult ActivityManager::UnRegister(msptiActivityKind kind)
     return MSPTI_SUCCESS;
 }
 
+bool ActivityManager::IsActivityKindEnable(msptiActivityKind kind)
+{
+    std::lock_guard<std::mutex> lk(activity_mtx_);
+    return activity_set_.find(kind) != activity_set_.end();
+}
+
 msptiResult ActivityManager::GetNextRecord(uint8_t *buffer, size_t validBufferSizeBytes, msptiActivity **record)
 {
     if (buffer == nullptr) {

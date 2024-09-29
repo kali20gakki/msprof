@@ -149,4 +149,17 @@ TEST_F(ActivityUtest, ShouldRetInvalidParameterErrorWhenSetWrongParam)
     msptiActivity* activity;
     EXPECT_EQ(MSPTI_ERROR_INVALID_PARAMETER, msptiActivityGetNextRecord(nullptr, 0, &activity));
 }
+
+TEST_F(ActivityUtest, IsActivityKindEnableWillReturnTrueWhenEnableMarkerKind)
+{
+    msptiActivityEnable(MSPTI_ACTIVITY_KIND_MARKER);
+    EXPECT_EQ(true, Mspti::Activity::ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER));
+    msptiActivityDisable(MSPTI_ACTIVITY_KIND_MARKER);
+}
+
+TEST_F(ActivityUtest, IsActivityKindEnableWillReturnFalseWhenNotEnableMarkerKind)
+{
+    msptiActivityDisable(MSPTI_ACTIVITY_KIND_MARKER);
+    EXPECT_EQ(false, Mspti::Activity::ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER));
+}
 }
