@@ -57,6 +57,7 @@ public:
     msptiResult ResetAllDevice();
     msptiResult Register(msptiActivityKind kind);
     msptiResult UnRegister(msptiActivityKind kind);
+    bool IsActivityKindEnable(msptiActivityKind kind);
 
 private:
     ActivityManager() = default;
