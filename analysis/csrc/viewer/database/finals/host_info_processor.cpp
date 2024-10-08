@@ -51,7 +51,7 @@ void HostInfoProcessor::UpdateHostData(const std::string &fileDir, const std::st
                                        HostInfoDataFormat &hostInfoData)
 {
     INFO("HostInfoProcessor UpdateHostData, dir is %", fileDir);
-    uint64_t hostUid = Context::GetInstance().GetHostUid(Parser::Environment::HOST_ID, fileDir);
+    std::string hostUid = Context::GetInstance().GetHostUid(Parser::Environment::HOST_ID, fileDir);
     std::string hostName = Context::GetInstance().GetHostName(Parser::Environment::HOST_ID, fileDir);
     hostInfoData.emplace_back(hostUid, hostName);
 }

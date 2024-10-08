@@ -35,7 +35,7 @@ namespace {
     };
 
     const TableColumns HOST_INFO = {
-        {"hostUid", SQL_INTEGER_TYPE},
+        {"hostUid", SQL_TEXT_TYPE},
         {"hostName", SQL_TEXT_TYPE}
     };
 

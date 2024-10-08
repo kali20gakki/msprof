@@ -21,7 +21,7 @@
 using namespace Analysis::Viewer::Database;
 using namespace Parser::Environment;
 using namespace Analysis::Utils;
-using HostInfoDataFormat = std::vector<std::tuple<uint64_t, std::string>>;
+using HostInfoDataFormat = std::vector<std::tuple<std::string, std::string>>;
 
 const std::string HOST_INFO_DIR = "./host_info";
 const std::string MSPROF = "msprof.db";
@@ -54,7 +54,7 @@ protected:
 TEST_F(HostInfoProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
     std::vector<std::string> hostDirs = {"host"};
-    uint64_t hostUid = 123456789;
+    std::string hostUid = "16446744073709551615";
     std::string hostName = "localhost";
     MOCKER_CPP(&File::GetFilesWithPrefix).stubs().will(returnValue(hostDirs));
     MOCKER_CPP(&Context::GetHostUid).stubs().will(returnValue(hostUid));
@@ -85,7 +85,7 @@ TEST_F(HostInfoProcessorUTest, TestRunShouldReturnTrueWhenNoHost)
 TEST_F(HostInfoProcessorUTest, TestRunShouldReturnFalseWhenOneProcessFailInMultithreading)
 {
     std::vector<std::string> hostDirs = {"host"};
-    uint64_t hostUid = 34123456789;
+    std::string hostUid = "16137761922582644485";
     std::string hostName = "localhost.localhost";
     MOCKER_CPP(&File::GetFilesWithPrefix).stubs().will(returnValue(hostDirs));
     MOCKER_CPP(&Context::GetHostUid).stubs().will(returnValue(hostUid));

@@ -21,7 +21,7 @@ namespace Database {
 // 该类用于落盘Host侧信息
 class HostInfoProcessor : public TableProcessor {
 // hostuid, hostname
-using HostInfoDataFormat = std::vector<std::tuple<uint64_t, std::string>>;
+using HostInfoDataFormat = std::vector<std::tuple<std::string, std::string>>;
 public:
     HostInfoProcessor() = default;
     HostInfoProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);

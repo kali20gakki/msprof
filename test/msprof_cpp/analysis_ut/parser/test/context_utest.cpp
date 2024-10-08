@@ -861,7 +861,7 @@ TEST_F(ContextUTest, TestGetClockMonotonicRawShouldReturnFalseWhenDataError)
 TEST_F(ContextUTest, TestGetGetHostUidShouldReturnRightValueWhenGetSuccess)
 {
     EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON})));
-    uint64_t testHostUid = 11223787031976889944;
+    std::string testHostUid = "11223787031976889944";
     // info.json
     nlohmann::json info = {
         {"drvVersion", 467732},
@@ -870,13 +870,13 @@ TEST_F(ContextUTest, TestGetGetHostUidShouldReturnRightValueWhenGetSuccess)
         {"CPU", {{{"Frequency", "abc"}}}},
         {"DeviceInfo", {{{"hwts_frequency", "abc"}, {"aic_frequency", "1850"}}}},
         {"hostname", "localhost"},
-        {"hostUid", std::to_string(testHostUid)}
+        {"hostUid", testHostUid}
     };
     FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON}));
     infoWriter.WriteText(info.dump());
 
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
-    uint64_t hostUid = Context::GetInstance().GetHostUid(HOST_ID, {File::PathJoin({CONTEXT_DIR, TEST_DIR})});
+    std::string hostUid = Context::GetInstance().GetHostUid(HOST_ID, {File::PathJoin({CONTEXT_DIR, TEST_DIR})});
     EXPECT_EQ(hostUid, testHostUid);
 }
 
@@ -896,8 +896,8 @@ TEST_F(ContextUTest, TestGetHostUidShouldReturnDefaultValueWhenGetFailed)
     infoWriter.WriteText(info.dump());
 
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
-    uint64_t hostUid = Context::GetInstance().GetHostUid(HOST_ID, {File::PathJoin({CONTEXT_DIR, TEST_DIR})});
-    EXPECT_EQ(hostUid, 0);
+    std::string hostUid = Context::GetInstance().GetHostUid(HOST_ID, {File::PathJoin({CONTEXT_DIR, TEST_DIR})});
+    EXPECT_EQ(hostUid, "0");
 }
 
 TEST_F(ContextUTest, TestGetHostNameShouldReturnRightValueWhenGetSuccess)

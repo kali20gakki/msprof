@@ -341,7 +341,7 @@ db命名：msprof_{时间戳}.db
 
 | 字段名      | 类型      | 索引  | 含义                  |
 |----------|---------|-----|---------------------|
-| hostUid  | INTEGER |     | 标识host的唯一id         |
+| hostUid  | TEXT    |     | 标识host的唯一id         |
 | hostName | TEXT    |     | host主机名称，如localhost |
 
 
@@ -350,6 +350,7 @@ db命名：msprof_{时间戳}.db
 | 日期        | 内容      |
 |-----------|---------|
 | 2024/5/10 | 630首次上线 |
+| 2024/9/29 | hostUid字段变更为TEXT类型 |
 
 
 ### TASK
