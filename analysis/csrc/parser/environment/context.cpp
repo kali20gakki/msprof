@@ -27,6 +27,7 @@ using namespace Viewer::Database;
 
 namespace {
 const uint32_t ALL_EXPORT_VERSION = 0x072211;  // 2023年10月30号之后支持全导的驱动版本号 0x072211 = 467473
+const std::string DEFAULT_HOST_UID = "0";
 // 需要用到的json 和 log的文件名（前缀）
 const std::string INFO_JSON = "info.json";
 const std::string SAMPLE_JSON = "sample.json";
@@ -459,19 +460,14 @@ bool Context::GetClockMonotonicRaw(uint64_t &monotonicRaw, bool isHost, uint16_t
     return true;
 }
 
-uint64_t Context::GetHostUid(uint16_t deviceId, const std::string &profPath)
+std::string Context::GetHostUid(uint16_t deviceId, const std::string &profPath)
 {
     const auto &info = GetInfoByDeviceId(deviceId, profPath);
     if (info.empty()) {
         ERROR("GetHostUid InfoJson info is empty, input path %, deviceId %", profPath, deviceId);
-        return 0;
+        return DEFAULT_HOST_UID;
     }
-    uint64_t hostUid = 0;
-    if (StrToU64(hostUid, info.value("hostUid", "0")) != ANALYSIS_OK) {
-        ERROR("HostUid to uint64_t failed, input path %, deviceId %", profPath, deviceId);
-        return 0;
-    }
-    return hostUid;
+    return info.value("hostUid", DEFAULT_HOST_UID);
 }
 
 std::string Context::GetHostName(uint16_t deviceId, const std::string &profPath)
