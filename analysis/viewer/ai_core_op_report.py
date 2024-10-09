@@ -190,9 +190,9 @@ class AiCoreOpReport:
         :param configs: info config
         :return: headers and data
         """
-        data = cls.get_ai_core_op_summary_data(project_path, db_path, configs)
-        data.extend(cls.get_hccl_op_data(project_path, configs))
-        headers = configs.get('headers')
+        headers = cls.get_op_summary_header(configs)
+        data, headers = cls.get_ai_core_op_summary_data_with_headers(project_path, db_path, headers)
+        data.extend(cls.get_hccl_op_data(project_path, len(headers)))
         cls.delete_useless_cols(headers, data)
         cls.sort_summary_data(headers, data)
         task_data = cls._format_summary_data(*format_pmu_data_by_headers(headers, data))
@@ -206,7 +206,7 @@ class AiCoreOpReport:
             data.sort(key=lambda x: float(x[task_start_index]))
 
     @classmethod
-    def get_hccl_op_data(cls, project_path: str, configs: dict) -> list:
+    def get_hccl_op_data(cls, project_path: str, header_length: int) -> list:
         """
         get hccl op summary data
         """
@@ -222,7 +222,6 @@ class AiCoreOpReport:
 
         model_name = []
         index_id = []
-        header_length = len(configs.get('headers', []))
         model_name_and_id_dict = get_ge_model_name_dict(project_path)
         hccl_data = [0] * len(hccl_comunication_data)
         # hccl data for op summary
@@ -264,7 +263,7 @@ class AiCoreOpReport:
             i += 1
 
     @classmethod
-    def get_ai_core_op_summary_data(cls: any, project_path: str, db_path: str, configs: dict) -> list:
+    def get_ai_core_op_summary_data_with_headers(cls: any, project_path: str, db_path: str, headers: list) -> tuple:
         """
         get ai core op summary data
         :param project_path:
@@ -273,14 +272,15 @@ class AiCoreOpReport:
         :return:
         """
         conn, curs = DBManager.check_connect_db_path(db_path)
-        if not cls._check_op_summary_task_time_table(conn, curs):
-            return []
-        headers = cls.get_op_summary_header(configs)
+        if not cls._check_op_summary_table(conn, curs, headers):
+            cls.clear_no_ge_data_headers(headers)
+            headers.append(cls.ADDITION_HEADER[0])
+            return [], headers
         try:
-            return cls._get_op_summary_data(project_path, curs, headers)
+            return cls._get_op_summary_data_with_headers(project_path, curs, headers)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as op_err:
             logging.error(str(op_err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return []
+            return [], headers
         finally:
             DBManager.destroy_db_connect(conn, curs)
 
@@ -352,14 +352,23 @@ class AiCoreOpReport:
         return True
 
     @classmethod
-    def _check_op_summary_task_time_table(cls: any, conn: any, curs: any) -> bool:
-        if not (conn and curs) or not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_SUMMARY_TASK_TIME):
+    def _check_op_summary_table(cls: any, conn: any, curs: any, headers: list) -> bool:
+        """
+        1. conn, curs 不存在,返回False
+        2. TASK_TIME表不存在,返回False.无device task数据理应不呈现
+        3. GE_SUMMARY(TASK_INTO)表不存在,返回False.
+        """
+        if not (conn and curs):
+            return False
+        if not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_SUMMARY_TASK_TIME) or \
+                not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_SUMMARY_GE):
+            logging.warning("No device task info or op desc found.")
             return False
         return True
 
     @classmethod
-    def _get_op_summary_data(cls: any, project_path: str, curs: any, headers: list) -> list:
-        union_sql, headers = cls._get_sql_and_headers(curs, headers)
+    def _get_op_summary_data_with_headers(cls: any, project_path: str, curs: any, headers: list) -> tuple:
+        union_sql, headers = cls._get_sql_and_headers(headers)
         headers.append(cls.ADDITION_HEADER[0])
         ai_core_group_dict, headers = cls._get_aicore_data(curs, headers)
         filter_params = (
@@ -367,14 +376,14 @@ class AiCoreOpReport:
         )
         data = DBManager.fetch_all_data(curs, union_sql, filter_params)
         if not data:
-            return []
+            return [], headers
         data = cls._union_task_ge_ai_core_data(data, ai_core_group_dict)
         data = cls._update_op_name_from_hash(project_path, data)
         if ProfilingScene().is_graph_export():
             data = cls._update_model_name_and_infer_id(project_path, data)
         DataManager.add_memory_bound(headers, data)
         DataManager.add_cube_usage(headers, data)
-        return data
+        return data, headers
 
     @classmethod
     def _update_model_name_and_infer_id(cls: any, project_path: str, ai_core_data: list) -> list:
@@ -473,31 +482,8 @@ class AiCoreOpReport:
         return index_info
 
     @classmethod
-    def _get_table_sql_and_headers_without_ge(cls: any, headers: list) -> tuple:
-        cls.clear_no_ge_data_headers(headers)
-        model_id = 'model_id, '
-        if not ProfilingScene().is_graph_export():
-            model_id = "{0}, ".format(NumberConstant.DEFAULT_MODEL_ID)
-        sql = "select {model_id} task_id, stream_id, {index_info} 'N/A', 'N/A', 'N/A', " \
-              "task_type, start_time, duration_time, wait_time, " \
-              "(case when {0}.subtask_id={context_id} then 'N/A' else {0}.subtask_id end), " \
-              "batch_id " \
-              "from {0} where task_type!=? " \
-              "and task_type!=? order by start_time" \
-            .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
-                    NS_TO_US=NumberConstant.NS_TO_US,
-                    index_info=cls._get_index_id_sql_condition(),
-                    local_time_offset=InfoConfReader().get_local_time_offset(),
-                    context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
-                    model_id=model_id)
-        return sql, headers
-
-    @classmethod
-    def _get_sql_and_headers(cls: any, curs: any, headers: list) -> tuple:
-        if DBManager.judge_table_exist(curs, DBNameConstant.TABLE_SUMMARY_GE):
-            return cls._get_tensor_table_sql_and_headers(headers)
-
-        return cls._get_table_sql_and_headers_without_ge(headers)
+    def _get_sql_and_headers(cls: any, headers: list) -> tuple:
+        return cls._get_tensor_table_sql_and_headers(headers)
 
 
 class ReportOPCounter:
