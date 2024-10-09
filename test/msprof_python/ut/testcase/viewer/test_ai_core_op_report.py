@@ -17,7 +17,7 @@ from viewer.ai_core_op_report import AiCoreOpReport
 from viewer.ai_core_op_report import ReportOPCounter
 
 NAMESPACE = 'viewer.ai_core_op_report'
-config = {'handler': '_get_op_summary_data',
+config = {'handler': '_get_op_summary_data_with_headers',
           'headers': ['Model Name', 'Model ID', 'Task ID', 'Stream ID', 'Infer ID', 'Op Name', 'OP Type', 'OP State',
                       'Task Type', 'Task Start Time(us)', 'Task Duration(us)', 'Task Wait Time(us)', 'Block Dim'],
           'db': 'ai_core_op_summary.db', 'unused_cols': []}
@@ -25,52 +25,63 @@ config = {'handler': '_get_op_summary_data',
 
 class TestAiCoreOpReport(unittest.TestCase):
     def test_get_op_summary_data1(self):
-        with mock.patch(NAMESPACE + '.AiCoreOpReport.get_ai_core_op_summary_data', return_value=[]), \
-                mock.patch("os.path.exists", return_value=True), \
+        with mock.patch("os.path.exists", return_value=True), \
                 mock.patch(NAMESPACE + '.HcclViewModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + '.HcclViewModel.get_hccl_op_data_by_group', return_value=[]):
             check = AiCoreOpReport()
+            ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
             res = check.get_op_summary_data("0", "", config)
         expect_res = [
             'Model Name', 'Model ID', 'Task ID', 'Stream ID', 'Infer ID', 'Op Name', 'OP Type', 'OP State',
-            'Task Type', 'Task Start Time(us)', 'Task Duration(us)', 'Task Wait Time(us)', 'Block Dim'
+            'Task Type', 'Task Start Time(us)', 'Task Duration(us)', 'Task Wait Time(us)'
         ]
         self.assertEqual(res[0], expect_res)
         self.assertEqual(res[1], [])
         self.assertEqual(res[2], 0)
+        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
     def test_get_ai_core_op_summary_data(self):
-        with mock.patch(NAMESPACE + '.AiCoreOpReport._get_op_summary_data', return_value=[]):
+        with mock.patch(NAMESPACE + '.AiCoreOpReport._get_op_summary_data_with_headers', return_value=[]):
             check = AiCoreOpReport()
             ProfilingScene()._scene = Constant.SINGLE_OP
-            res = check.get_ai_core_op_summary_data('', '', {})
-        self.assertEqual(res, [])
+            res = check.get_ai_core_op_summary_data_with_headers('', '', [])
+        self.assertEqual(res, ([], ['Context ID']))
 
-        with mock.patch(NAMESPACE + '.AiCoreOpReport._get_op_summary_data', return_value=[]):
+        with mock.patch(NAMESPACE + '.AiCoreOpReport._get_op_summary_data_with_headers', return_value=[]):
             check = AiCoreOpReport()
             ProfilingScene().init('')
             ProfilingScene()._scene = Constant.STEP_INFO
-            res = check.get_ai_core_op_summary_data('', '', {})
-        self.assertEqual(res, [])
+            res = check.get_ai_core_op_summary_data_with_headers('', '', [])
+        self.assertEqual(res, ([], ['Context ID']))
 
     def test_get_ai_core_op_summary_data_1(self):
-        with mock.patch(NAMESPACE + '.AiCoreOpReport._get_op_summary_data', side_effect=TypeError):
-            res = AiCoreOpReport.get_ai_core_op_summary_data('', '', {})
-        self.assertEqual(res, [])
+        res = AiCoreOpReport.get_ai_core_op_summary_data_with_headers('', '', [])
+        self.assertEqual(res, ([], ['Context ID']))
+
+        with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(1, 2)), \
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
+                mock.patch(NAMESPACE + '.AiCoreOpReport._get_op_summary_data_with_headers', side_effect=TypeError):
+            res = AiCoreOpReport.get_ai_core_op_summary_data_with_headers('', '', [])
+        self.assertEqual(res, ([], []))
+
+        with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(1, 2)), \
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
+            res = AiCoreOpReport.get_ai_core_op_summary_data_with_headers('', '', [])
+        self.assertEqual(res, ([], ['Context ID']))
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
-            res = AiCoreOpReport.get_ai_core_op_summary_data('', '', {})
-        self.assertEqual(res, [])
+            res = AiCoreOpReport.get_ai_core_op_summary_data_with_headers('', '', [])
+        self.assertEqual(res, ([], ['Context ID']))
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(1, 2)), \
-                mock.patch(NAMESPACE + '.AiCoreOpReport._get_op_summary_data', return_value=[]), \
+                mock.patch(NAMESPACE + '.AiCoreOpReport._get_op_summary_data_with_headers', return_value=([], [])), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             ProfilingScene().init('')
             ProfilingScene()._scene = Constant.STEP_INFO
             ProfilingScene().set_mode(ExportMode.GRAPH_EXPORT)
-            res = AiCoreOpReport.get_ai_core_op_summary_data('', '', {})
-        self.assertEqual(res, [])
+            res = AiCoreOpReport.get_ai_core_op_summary_data_with_headers('', '', [])
+        self.assertEqual(res, ([], []))
         ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
 
     def test_update_model_name_and_infer_id(self):
@@ -108,15 +119,8 @@ class TestAiCoreOpReport(unittest.TestCase):
     def test_get_sql_and_headers(self):
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
                 mock.patch(NAMESPACE + '.AiCoreOpReport._get_tensor_table_sql_and_headers', return_value=(1, 2)):
-            headers = config.get("headers")
-            res = AiCoreOpReport._get_sql_and_headers('', headers)
+            res = AiCoreOpReport._get_sql_and_headers(config.get("headers"))
         self.assertEqual(res[0], 1)
-
-        with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False), \
-                mock.patch(NAMESPACE + '.AiCoreOpReport._get_table_sql_and_headers_without_ge', return_value=1):
-            headers = config.get("headers")
-            res = AiCoreOpReport._get_sql_and_headers('', headers)
-        self.assertEqual(res, 1)
 
     def test_get_op_summary_data(self):
         create_ge_sql = "CREATE TABLE IF NOT EXISTS ge_summary(model_name text,model_id INTEGER,task_id INTEGER," \
@@ -140,8 +144,8 @@ class TestAiCoreOpReport(unittest.TestCase):
                 headers = config.get("headers")
                 ProfilingScene().init('')
                 ProfilingScene()._scene = Constant.SINGLE_OP
-                res = AiCoreOpReport._get_op_summary_data('', db_open.db_curs, headers)
-            self.assertEqual(res, [])
+                res = AiCoreOpReport._get_op_summary_data_with_headers('', db_open.db_curs, headers)
+            self.assertEqual(res, ([], []))
 
     def test_union_task_ge_ai_core_data(self):
         op_state = "static"
@@ -262,21 +266,6 @@ class TestAiCoreOpReport(unittest.TestCase):
         headers = ["mac_exe_ratio", "vec_exe_ratio", "mte2_exe_ratio"]
         data = [[1, 2, 3], [5, 6, 2]]
         DataManager.add_memory_bound(headers, data)
-
-    def test_get_table_sql_and_headers_without_ge(self):
-        InfoConfReader()._local_time_offset = 10.0
-        res_data = (
-            "select -1,  task_id, stream_id,  'N/A', 'N/A', 'N/A', task_type, start_time, duration_time, "
-            "wait_time, (case when task_time.subtask_id=4294967295 then 'N/A' else task_time.subtask_id end), "
-            "batch_id "
-            "from task_time where task_type!=? and task_type!=? order by start_time",
-            ['Op Name', 'stream_id']
-        )
-        ProfilingScene().init('')
-        ProfilingScene()._scene = Constant.SINGLE_OP
-        ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
-        res = AiCoreOpReport._get_table_sql_and_headers_without_ge(["Op Name", "stream_id", "Block Dim"])
-        self.assertEqual(res, res_data)
 
 
 class TestReportOPCounter(unittest.TestCase):
