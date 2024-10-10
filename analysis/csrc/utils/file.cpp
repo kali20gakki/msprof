@@ -15,6 +15,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <set>
+#include <cstring>
 
 #include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/dfx/log.h"
@@ -74,7 +75,7 @@ bool File::IsSoftLink(const std::string &path)
     }
     struct stat fileStat;
     if (lstat(path.c_str(), &fileStat) != 0) {
-        ERROR("The file lstat failed.");
+        ERROR("The file lstat failed. The Error code is %", strerror(errno));
         return false;
     }
     return S_ISLNK(fileStat.st_mode);
@@ -102,7 +103,7 @@ uint64_t File::Size(const std::string &filePath)
     }
     struct stat fileStat;
     if (lstat(filePath.c_str(), &fileStat) != 0) {
-        ERROR("The file lstat failed.");
+        ERROR("The file lstat failed. The Error code is %", strerror(errno));
         return 0;
     }
     return fileStat.st_size;
