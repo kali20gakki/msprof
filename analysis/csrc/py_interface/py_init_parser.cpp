@@ -91,7 +91,7 @@ PyObject *WrapExportUnifiedDB(PyObject *self, PyObject *args)
         PyErr_SetString(PyExc_TypeError, "parser.export_unified_db path is invalid!");
         return NULL;
     }
-    Log::GetInstance().Init(Utils::File::PathJoin({parseFilePath, "mindstudio_profiler_log"}));
+    Log::GetInstance().Init(parseFilePath);
     auto unifiedDbManager = Analysis::Viewer::Database::UnifiedDBManager(parseFilePath);
     if (!unifiedDbManager.Init()) {
         ERROR("UnifiedDB init failed.");

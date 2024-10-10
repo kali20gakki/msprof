@@ -6,8 +6,6 @@ import importlib
 import logging
 import os
 import sys
-import multiprocessing
-from functools import wraps
 
 from common_func.config_mgr import ConfigMgr
 from common_func.info_conf_reader import InfoConfReader
@@ -17,20 +15,6 @@ from common_func.profiling_scene import ProfilingScene
 SO_DIR = os.path.join(os.path.dirname(__file__), "..", "lib64")
 
 
-def run_in_subprocess(func):
-    """
-    装饰器形式拉起多进程，确保每个python调c进程均为独立进程
-    """
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        proc = multiprocessing.Process(target=func, args=args, kwargs=kwargs)
-        proc.start()
-        proc.join()
-
-    return wrapper
-
-
-@run_in_subprocess
 def dump_cann_trace(project_path: str):
     """
     调用host c化
@@ -41,8 +25,7 @@ def dump_cann_trace(project_path: str):
     msprof_analysis_module.parser.dump_cann_trace(project_path)
 
 
-@run_in_subprocess
-def dump_device_data(device_path: str) -> None:
+def dump_device_data(device_path) -> None:
     """
     调用device c化
     """
@@ -63,7 +46,6 @@ def dump_device_data(device_path: str) -> None:
     return
 
 
-@run_in_subprocess
 def export_unified_db(project_path: str):
     """
     调用统一db
