@@ -14,7 +14,6 @@
 
 #include <iostream>
 #include <sys/syscall.h>
-#include <cstring>
 
 #include "analysis/csrc/dfx/error_code.h"
 
