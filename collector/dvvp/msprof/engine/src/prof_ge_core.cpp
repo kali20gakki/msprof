@@ -61,6 +61,11 @@ struct SafeUnorderedSet {
 
 static SafeUnorderedSet g_devRecord;
 
+void EraseDevRecord(const uint32_t devId)
+{
+    g_devRecord.FindAndErase(devId);
+}
+
 int aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeConfig *profSubscribeConfig)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {

@@ -1464,6 +1464,9 @@ int32_t ProfAclMgr::MsprofResetDeviceHandle(uint32_t devId)
         MSPROF_LOGI("Device %u task not find", devId);
         return MSPROF_ERROR_NONE;
     }
+    if (devTask->second.params->is_cancel) {
+        return MSPROF_ERROR_NONE;
+    }
     devTask->second.params->is_cancel = true;
     if (ProfManager::instance()->IdeCloudProfileProcess(devTask->second.params) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to stop profiling on device %u", devId);
@@ -1516,7 +1519,7 @@ int32_t ProfAclMgr::MsprofSetDeviceImpl(uint32_t devId)
 {
     MSPROF_EVENT("MsprofSetDeviceImpl, devId:%u", devId);
     auto iterDev = devTasks_.find(devId);
-    if (iterDev != devTasks_.end()) {
+    if (iterDev != devTasks_.end() && !iterDev->second.params->is_cancel) {
         if (devId == DEFAULT_HOST_ID) {
             MSPROF_LOGI("MsprofSetDeviceImpl, the host process is already in use.");
             return PROFILING_SUCCESS;
