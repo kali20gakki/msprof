@@ -6,6 +6,7 @@ import importlib
 import logging
 import os
 import sys
+import multiprocessing
 
 from common_func.config_mgr import ConfigMgr
 from common_func.info_conf_reader import InfoConfReader
@@ -15,17 +16,44 @@ from common_func.profiling_scene import ProfilingScene
 SO_DIR = os.path.join(os.path.dirname(__file__), "..", "lib64")
 
 
-def dump_cann_trace(project_path: str):
+def run_in_subprocess(func, *args: any):
     """
-    调用host c化
+    拉起多进程，确保每个python调c进程均为独立进程
     """
+    proc = multiprocessing.Process(target=func, args=args)
+    proc.start()
+    proc.join()
+
+
+def _dump_cann_trace(project_path: str):
     sys.path.append(os.path.realpath(SO_DIR))
     logging.info("Data will be parsed by msprof_analysis.so!")
     msprof_analysis_module = importlib.import_module("msprof_analysis")
     msprof_analysis_module.parser.dump_cann_trace(project_path)
 
 
-def dump_device_data(device_path) -> None:
+def _dump_device_data(device_path: str):
+    sys.path.append(os.path.realpath(SO_DIR))
+    logging.info("Device Data will be parsed by msprof_analysis.so!")
+    msprof_analysis_module = importlib.import_module("msprof_analysis")
+    msprof_analysis_module.parser.dump_device_data(os.path.dirname(device_path))
+
+
+def _export_unified_db(project_path: str):
+    sys.path.append(os.path.realpath(SO_DIR))
+    logging.info("Data will be parsed by msprof_analysis.so!")
+    msprof_analysis_module = importlib.import_module("msprof_analysis")
+    msprof_analysis_module.parser.export_unified_db(project_path)
+
+
+def dump_cann_trace(project_path: str):
+    """
+    调用host c化
+    """
+    run_in_subprocess(_dump_cann_trace, project_path)
+
+
+def dump_device_data(device_path: str) -> None:
     """
     调用device c化
     """
@@ -37,10 +65,7 @@ def dump_device_data(device_path) -> None:
         return
     all_export_flag = ProfilingScene().is_all_export() and InfoConfReader().is_all_export_version()
     if ProfilingScene().is_cpp_parse_enable() and all_export_flag:
-        sys.path.append(os.path.realpath(SO_DIR))
-        logging.info("Device Data will be parsed by msprof_analysis.so!")
-        msprof_analysis_module = importlib.import_module("msprof_analysis")
-        msprof_analysis_module.parser.dump_device_data(os.path.dirname(device_path))
+        run_in_subprocess(_dump_device_data, device_path)
     else:
         logging.warning("Device Data will not be parsed by msprof_analysis.so!")
     return
@@ -53,7 +78,4 @@ def export_unified_db(project_path: str):
     if not ProfilingScene().is_cpp_parse_enable():
         logging.warning("Does not support exporting the msprof.db!")
         return
-    sys.path.append(os.path.realpath(SO_DIR))
-    logging.info("Data will be parsed by msprof_analysis.so!")
-    msprof_analysis_module = importlib.import_module("msprof_analysis")
-    msprof_analysis_module.parser.export_unified_db(project_path)
+    run_in_subprocess(_export_unified_db, project_path)

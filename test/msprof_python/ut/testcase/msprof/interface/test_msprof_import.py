@@ -29,13 +29,13 @@ class TestImportCommand(unittest.TestCase):
             args_dic = {"collection_path": "test", "cluster_flag": False}
             args = Namespace(**args_dic)
             with mock.patch(NAMESPACE + '.LoadInfoManager.load_info'), \
+                    mock.patch(NAMESPACE + '.ImportCommand._parse_data'), \
                     mock.patch(NAMESPACE + '.get_path_dir', return_value=['host', 'device_1', 'device_2']), \
                     mock.patch(NAMESPACE + '.get_valid_sub_path', return_value='host'), \
                     mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True), \
                     mock.patch('os.path.join', return_value=True), \
                     mock.patch('os.path.realpath', return_value='home\\process'), \
                     mock.patch('msinterface.msprof_c_interface.dump_device_data'), \
-                    mock.patch(NAMESPACE + '.ImportCommand._start_parse'), \
                     mock.patch('os.listdir', return_value=['123']):
                 ChipManager().chip_id = 5
                 key = ImportCommand(args)
