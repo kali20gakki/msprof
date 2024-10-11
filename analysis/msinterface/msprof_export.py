@@ -682,10 +682,12 @@ class ExportCommand:
 
     def _start_calculate(self, path_table: dict):
         # host
-        host_path = path_table.get(StrConstant.HOST_PATH)
+        mode = ProfilingScene().get_mode()
         ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
+        host_path = path_table.get(StrConstant.HOST_PATH)
         self._calculate_data(host_path)
         # device
+        ProfilingScene().set_mode(mode)
         for device_path in path_table.get(StrConstant.DEVICE_PATH, []):
             self._calculate_data(device_path)
 
@@ -704,10 +706,12 @@ class ExportCommand:
             return
 
         # host
-        host_path = path_table.get(StrConstant.HOST_PATH)
+        mode = ProfilingScene().get_mode()
         ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
+        host_path = path_table.get(StrConstant.HOST_PATH)
         self._view_data(host_path)
         # device
+        ProfilingScene().set_mode(mode)
         device_paths_list = path_table.get(StrConstant.DEVICE_PATH, [])
         for device_path in device_paths_list:
             self._view_data(device_path)
