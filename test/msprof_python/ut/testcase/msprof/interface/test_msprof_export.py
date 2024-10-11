@@ -460,6 +460,7 @@ class TestExportCommand(unittest.TestCase):
                 mock.patch('os.access', return_value=True), \
                 mock.patch('common_func.file_manager.is_other_writable', return_value=False), \
                 mock.patch('common_func.file_manager.check_file_owner', return_value=True), \
+                mock.patch('msinterface.msprof_c_interface.run_in_subprocess'), \
                 mock.patch('importlib.import_module'):
                 # 调用so
                 test = ExportCommand("db", args)
@@ -481,7 +482,7 @@ class TestExportCommand(unittest.TestCase):
                     mock.patch(NAMESPACE + '.ExportCommand._analyse_sample_config'), \
                     mock.patch(NAMESPACE + '.ExportCommand._analyse_data'), \
                     mock.patch(NAMESPACE + '.ExportCommand._add_export_type'), \
-                    mock.patch(NAMESPACE + '.ExportCommand._handle_export'),  \
+                    mock.patch(NAMESPACE + '.ExportCommand._handle_export'), \
                     mock.patch('msinterface.msprof_output_summary.MsprofOutputSummary.export'), \
                     mock.patch('common_func.config_mgr.ConfigMgr.is_ai_core_sample_based'), \
                     mock.patch('common_func.db_manager.DBManager.check_tables_in_db', return_value=False), \
