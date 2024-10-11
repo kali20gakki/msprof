@@ -319,6 +319,11 @@ TEST_F(MSPROF_ACL_CORE_UTEST, GeOpenDeviceHandle) {
     ge::GeOpenDeviceHandle(1);
 }
 
+TEST_F(MSPROF_ACL_CORE_UTEST, TestEraseDevRecordShouldDeleteElement)
+{
+    EraseDevRecord(0);
+}
+
 TEST_F(MSPROF_ACL_CORE_UTEST, aclgrphProfInit_failed) {
     GlobalMockObject::verify();
 
@@ -932,6 +937,21 @@ TEST_F(MSPROF_ACL_CORE_UTEST,
     uint32_t devId = 0;
     int32_t ret = Msprofiler::Api::ProfAclMgr::instance()->MsprofResetDeviceHandle(devId);
     EXPECT_EQ(MSPROF_ERROR, ret);
+    ProfAclMgr::instance()->devTasks_.clear();
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, TestMsprofResetDeviceHandleShouldReturnErrorNoneWhenDevTaskIsCancel)
+{
+    GlobalMockObject::verify();
+    using namespace Msprofiler::Api;
+    using namespace analysis::dvvp::message;
+    std::shared_ptr<ProfileParams> params = std::make_shared<ProfileParams>();
+    params->is_cancel = true;
+    ProfAclMgr::ProfAclTaskInfo taskInfo = {1, 0, params};
+    ProfAclMgr::instance()->devTasks_[0] = taskInfo;
+    uint32_t devId = 0;
+    int32_t ret = Msprofiler::Api::ProfAclMgr::instance()->MsprofResetDeviceHandle(devId);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
     ProfAclMgr::instance()->devTasks_.clear();
 }
 

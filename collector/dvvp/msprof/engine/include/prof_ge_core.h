@@ -17,5 +17,6 @@ int32_t GeOpenDeviceHandle(const uint32_t devId);
 void GeFinalizeHandle();
 size_t aclprofGetGraphId(CONST_VOID_PTR opInfo, size_t opInfoLen, uint32_t index);
 }
+void EraseDevRecord(const uint32_t devId);
 
 #endif  // MSPROF_ENGINE_GE_CORE_H
