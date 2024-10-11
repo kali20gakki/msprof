@@ -1526,7 +1526,7 @@ int32_t Utils::GetRankId()
 {
     constexpr int32_t invalidRankId = -1;
     std::string rankStr = Utils::GetEnvString(RANK_ENV);
-    if (!rankStr.empty() && CheckStringIsValidNatureNum(rankStr)) {
+    if (!rankStr.empty() && CheckStringIsNonNegativeIntNum(rankStr)) {
         MSPROF_LOGI("Environment variable RANK = %s", rankStr.c_str());
         return std::stoi(rankStr);
     }
@@ -1535,7 +1535,7 @@ int32_t Utils::GetRankId()
     }
     std::string rankIdStr = Utils::GetEnvString(RANK_ID_ENV);
     MSPROF_LOGI("Environment variable RANK_ID = %s", rankIdStr.c_str());
-    if (!CheckStringIsValidNatureNum(rankIdStr)) {
+    if (!CheckStringIsNonNegativeIntNum(rankIdStr)) {
         return invalidRankId;
     }
     return std::stoi(rankIdStr);

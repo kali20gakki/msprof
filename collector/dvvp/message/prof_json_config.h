@@ -81,7 +81,7 @@ struct ProfGeOptionsConfig {
         std::string intValueFromJson;                                                                       \
         if ((json).contains(inputSwitch)) {                                                                 \
             (json).at(inputSwitch).get_to(intValueFromJson);                                                \
-            if (!(intValueFromJson).empty() && Utils::CheckStringIsValidNatureNum(intValueFromJson)) {      \
+            if (!(intValueFromJson).empty() && Utils::CheckStringIsNonNegativeIntNum(intValueFromJson)) {      \
                 (dataStruct)->field = static_cast<uint32_t>(std::stoi(intValueFromJson));                   \
             }                                                                                               \
         }                                                                                                   \
