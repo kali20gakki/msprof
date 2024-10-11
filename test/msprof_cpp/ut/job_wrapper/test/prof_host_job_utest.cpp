@@ -8,6 +8,8 @@
 #include "uploader_mgr.h"
 #include "utils/utils.h"
 #include "thread/thread.h"
+#include "info_json.h"
+#include <cstdlib>
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
@@ -15,6 +17,7 @@ using namespace Analysis::Dvvp::JobWrapper;
 using namespace analysis::dvvp::common::utils;
 using namespace Analysis::Dvvp::MsprofErrMgr;
 using namespace Analysis::Dvvp::JobWrapper;
+using namespace analysis::dvvp::host;
 class JOB_WRAPPER_PROF_HOST_CPU_JOB_TEST : public testing::Test {
 protected:
     virtual void SetUp()
@@ -1198,4 +1201,23 @@ TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, WaitCollectToolStart) {
 
     EXPECT_EQ(PROFILING_SUCCESS, profHostService->WaitCollectToolStart());
     EXPECT_EQ(PROFILING_FAILED, profHostService->WaitCollectToolStart());
+}
+
+TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, InfoJsonTest)
+{
+    GlobalMockObject::verify();
+
+    std::string job_info = ("host_info");
+    std::string devices = ("0");
+    InfoJson infoJson(job_info, devices, 0);
+    std::string cont;
+
+    MOCKER_CPP(&analysis::dvvp::common::utils::Utils::IsClusterRunEnv)
+        .stubs()
+        .will(returnValue(true));
+
+    setenv("RANK", "RANK_ENV", 1);
+    setenv("RANK_ID", "1", 1);
+    // init device ids failed
+    EXPECT_EQ(PROFILING_SUCCESS, infoJson.Generate(cont));
 }
