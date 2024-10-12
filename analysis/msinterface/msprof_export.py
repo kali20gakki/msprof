@@ -650,7 +650,16 @@ class ExportCommand:
         # start calculate
         self._start_calculate(path_table)
         # start view
-        self._start_view(path_table)
+        try:
+            self._start_view(path_table)
+        finally:
+            rm_list = []
+            if path_table.get(StrConstant.HOST_PATH):
+                rm_list.append(path_table.get(StrConstant.HOST_PATH))
+            if path_table.get(StrConstant.DEVICE_PATH):
+                rm_list.extend(path_table.get(StrConstant.DEVICE_PATH))
+            if rm_list:
+                PathManager.del_summary_and_timeline_dir(rm_list)
 
     def _start_parse(self, path_table: dict):
         # host
@@ -716,10 +725,8 @@ class ExportCommand:
         for device_path in device_paths_list:
             self._view_data(device_path)
 
-        device_paths_list.append(host_path)
         profiler = MsprofOutputSummary(path_table.get("collection_path"), self.export_format)
         profiler.export(self.command_type)
-        PathManager.del_summary_and_timeline_dir(device_paths_list)
 
     def _view_data(self, device_path: str):
         if not device_path:
