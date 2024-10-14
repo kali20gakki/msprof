@@ -321,7 +321,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, GeOpenDeviceHandle) {
 
 TEST_F(MSPROF_ACL_CORE_UTEST, TestEraseDevRecordShouldDeleteElement)
 {
-    EraseDevRecord(0);
+    ge::EraseDevRecord(0);
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, aclgrphProfInit_failed) {
@@ -828,6 +828,13 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofSetDeviceCallbackImpl)
         sizeof(ProfSetDevPara)));
     EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
         sizeof(ProfSetDevPara)));
+    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
+        sizeof(ProfSetDevPara)));
+    data.isOpen = false;
+    MOCKER_CPP(&ge::EraseDevRecord).stubs();
+        MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofResetDeviceHandle)
+        .stubs()
+        .will(returnValue(0));
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
         sizeof(ProfSetDevPara)));
 }

@@ -61,11 +61,6 @@ struct SafeUnorderedSet {
 
 static SafeUnorderedSet g_devRecord;
 
-void EraseDevRecord(const uint32_t devId)
-{
-    g_devRecord.FindAndErase(devId);
-}
-
 int aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeConfig *profSubscribeConfig)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
@@ -563,5 +558,10 @@ void GeFinalizeHandle()
         MSPROF_INNER_ERROR("EK9999", "Failed to CommandHandleProfFinalize");
     }
     Msprof::Engine::FlushAllModule();
+}
+
+void EraseDevRecord(const uint32_t devId)
+{
+    g_devRecord.FindAndErase(devId);
 }
 } // namespace ge

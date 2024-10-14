@@ -180,7 +180,7 @@ int32_t MsprofSetDeviceCallbackImpl(VOID_PTR data, uint32_t len)
             return MSPROF_ERROR;
         }
     } else {
-        EraseDevRecord(setCfg->deviceId);
+        ge::EraseDevRecord(setCfg->deviceId);
         return Msprofiler::Api::ProfAclMgr::instance()->MsprofResetDeviceHandle(setCfg->deviceId);
     }
     return MSPROF_ERROR_NONE;
