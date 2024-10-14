@@ -67,7 +67,12 @@ protected:
         nlohmann::json sample = {
             {"ai_core_profiling", "on"},
             {"ai_core_metrics", "PipeUtilization"},
-            {"ai_core_profiling_events", "0x416,0x417,0x9,0x302,0xc,0x303,0x54,0x55"}
+            {"ai_core_profiling_events", "0x416,0x417,0x9,0x302,0xc,0x303,0x54,0x55"},
+            {"ai_core_profiling_mode", "task-based"},
+            {"aicore_sampling_interval", 10},
+            {"aiv_profiling", "on"},
+            {"aiv_metrics", "PipeUtilization"},
+            {"aiv_profiling_events", "0x416,0x417, "}
         };
         FileWriter sampleWriter(File::PathJoin({filePath, SAMPLE_JSON}));
         sampleWriter.WriteText(sample.dump());
