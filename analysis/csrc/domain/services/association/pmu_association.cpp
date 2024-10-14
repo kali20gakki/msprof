@@ -189,13 +189,17 @@ uint32_t PmuAssociation::ProcessEntry(Infra::DataInventory& dataInventory, const
     auto& deviceContext = dynamic_cast<const DeviceContext&>(context);
     SampleInfo sampleInfo;
     deviceContext.Getter(sampleInfo);
-    aicCalculator_ = MetricCalculatorFactory::GetAicCalculator(sampleInfo.aiCoreMetrics);
-    aivCalculator_ = MetricCalculatorFactory::GetAivCalculator(sampleInfo.aivMetrics);
     auto deviceTask = dataInventory.GetPtr<std::map<TaskId, std::vector<DeviceTask>>>();
     auto pmuData = dataInventory.GetPtr<std::vector<HalPmuData>>();
     if (deviceTask->empty() || !pmuData || pmuData->empty()) {
         WARN("There is no deviceTask or PMUData, don't need to associate!");
         return ANALYSIS_OK;
+    }
+    aicCalculator_ = MetricCalculatorFactory::GetAicCalculator(sampleInfo.aiCoreMetrics);
+    aivCalculator_ = MetricCalculatorFactory::GetAivCalculator(sampleInfo.aivMetrics);
+    if (aicCalculator_ == nullptr || aivCalculator_ == nullptr) {
+        ERROR("The value of aiv_metrics or ai_core_metrics is invalid!");
+        return ANALYSIS_ERROR;
     }
     SplitPmu(*pmuData);
     if (deviceContext.GetChipID() != CHIP_V4_1_0) {
