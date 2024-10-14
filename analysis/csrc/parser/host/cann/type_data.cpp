@@ -28,7 +28,7 @@ bool TypeData::Load(const std::string &path)
 {
     auto files = File::GetOriginData(path, filePrefix_, fileFilter_);
     if (files.empty()) {
-        ERROR("No type data found.");
+        WARN("No type data found.");
         return false;
     }
     return ReadFiles(files);

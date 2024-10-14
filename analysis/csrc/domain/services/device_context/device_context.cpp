@@ -94,12 +94,16 @@ std::vector<DataInventory> DeviceContextEntry(const char *targetDir, const char 
 {
     Utils::TimeLogger t{"DeviceContextEntry "};
     std::vector<std::string> subdirs = GetDeviceDirectories(targetDir);
+    std::vector<DataInventory> processDataVec(subdirs.size());
+    std::vector<std::string> processStats(subdirs.size());
+    if (subdirs.empty()) {
+        WARN("No valid device directory, the file name should start with 'device'.");
+        return processDataVec;
+    }
 
     std::function<void()> func;
 
     ThreadPool tp(subdirs.size());
-    std::vector<DataInventory> processDataVec(subdirs.size());
-    std::vector<std::string> processStats(subdirs.size());
     size_t i = 0;
     for (const auto &subdir: subdirs) {
         auto &processStat = processStats[i];
