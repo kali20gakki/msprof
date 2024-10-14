@@ -69,7 +69,7 @@ bool UnifiedDBManager::CheckProfDirsValid(const std::string &output)
         profFolderPaths_.insert(output);
     }
     if (profFolderPaths_.empty()) {
-        ERROR("Can't find any PROF file.");
+        ERROR("Can't find any PROF file, the file name should start with 'PROF'.");
         return false;
     }
     return true;

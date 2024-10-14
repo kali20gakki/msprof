@@ -108,6 +108,16 @@ TEST_F(DeviceContextUTest, TestGetDeviceDirectoriesShouldPrintErrorLogWhenReadDi
     EXPECT_TRUE(subdirs.empty());
     GlobalMockObject::verify();
 }
+
+TEST_F(DeviceContextUTest, TestDeviceContextEntryShouldReturnEmptyVectorWhenNoProfDir)
+{
+    MOCKER_CPP(opendir).stubs().will(returnValue((DIR*)nullptr));
+    const char *stopAt = "";
+    auto processDataVec = DeviceContextEntry(PROF_DIR, stopAt);
+    EXPECT_TRUE(processDataVec.empty());
+    GlobalMockObject::verify();
+}
+
 }  // Domain
 }  // Analysis
 
