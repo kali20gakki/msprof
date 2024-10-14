@@ -152,31 +152,8 @@ class HostToDevice:
             tmp_list.append(connect_dict)
         traces.extend(tmp_list)
 
-    def add_hccl_start_points(self, api_traces: List[Dict[str, Any]],
-                         conn_to_ctxes: Dict[int, List[int]], hccl_conn_ids: Set[int]) -> None:
-        """
-        add start points to api traces for host to device connection
-        to do this, we need task info from host side
-        this is bad design BTW
-        :param api_traces: api traces as json list
-        :param conn_to_ctxes: connection id to ctx_ids map
-        :param hccl_conn_ids: hccl ops connection id set
-        :return: None
-        """
-        if not isinstance(api_traces, list):
-            return
-        tmp_list = []
-        for api_trace in api_traces:
-            # only add start point for hccl op
-            if HostToDevice.is_node_launch(api_trace) and \
-                    HostToDevice.is_hccl_trace(api_trace, hccl_conn_ids):
-                start_point = self.get_start_points(api_trace, conn_to_ctxes)
-                tmp_list.extend(start_point)
-        api_traces.extend(tmp_list)
-
-    def add_msproftx_ex_start_points(self: any, traces: List[Dict[str, Any]]) -> None:
-        if self._result_dir and not self._result_dir.endswith('host'):
-            return
+    @staticmethod
+    def add_msproftx_ex_start_points(traces: List[Dict[str, Any]]) -> None:
         if not isinstance(traces, list):
             return
         tmp_list = []
@@ -200,6 +177,28 @@ class HostToDevice:
             }
             tmp_list.append(connect_dict)
         traces.extend(tmp_list)
+
+    def add_hccl_start_points(self, api_traces: List[Dict[str, Any]],
+                         conn_to_ctxes: Dict[int, List[int]], hccl_conn_ids: Set[int]) -> None:
+        """
+        add start points to api traces for host to device connection
+        to do this, we need task info from host side
+        this is bad design BTW
+        :param api_traces: api traces as json list
+        :param conn_to_ctxes: connection id to ctx_ids map
+        :param hccl_conn_ids: hccl ops connection id set
+        :return: None
+        """
+        if not isinstance(api_traces, list):
+            return
+        tmp_list = []
+        for api_trace in api_traces:
+            # only add start point for hccl op
+            if HostToDevice.is_node_launch(api_trace) and \
+                    HostToDevice.is_hccl_trace(api_trace, hccl_conn_ids):
+                start_point = self.get_start_points(api_trace, conn_to_ctxes)
+                tmp_list.extend(start_point)
+        api_traces.extend(tmp_list)
 
     def add_connect_line(self, traces: List[Dict[str, Any]], data_type: str) -> None:
         """
