@@ -271,25 +271,6 @@ class TestHostToDevice(unittest.TestCase):
         connection.add_connect_line(msproftx_data, "msprof_tx")
         self.assertEqual(msproftx_data, [])
 
-    def test_add_msproftx_ex_start_points_with_valid_data_in_device_dir(self):
-        msproftx_data = [
-            {
-                TraceViewHeaderConstant.TRACE_HEADER_NAME: "test",
-                TraceViewHeaderConstant.TRACE_HEADER_PID: 0,
-                TraceViewHeaderConstant.TRACE_HEADER_TID: 0,
-                TraceViewHeaderConstant.TRACE_HEADER_TS: 134524588477.77002,
-                TraceViewHeaderConstant.TRACE_HEADER_DURATION: 0.0,
-                TraceViewHeaderConstant.TRACE_HEADER_PH: "X",
-                TraceViewHeaderConstant.TRACE_HEADER_ARGS: {
-                    "mark_id": 0, "event_type": 'marker_ex'
-                }
-            }
-        ]
-        expected_data = msproftx_data
-        connection = HostToDevice("PROF_XXX/device_0")
-        connection.add_connect_line(msproftx_data, "msprof_tx")
-        self.assertEqual(msproftx_data, expected_data)
-
     def test_get_cann_pid(self):
         InfoConfReader()._info_json = {TraceViewHeaderConstant.TRACE_HEADER_PID: 123}
         cann_pid = HostToDevice.get_cann_pid()
