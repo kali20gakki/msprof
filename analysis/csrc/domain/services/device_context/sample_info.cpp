@@ -24,8 +24,10 @@ using namespace Analysis::Domain;
 namespace Analysis {
 
 namespace Domain {
-
+namespace {
 const std::string SAMPLE_JSON = "sample.json";
+const char EVENT_SEPARATOR = ',';
+}
 
 // 分割字符串，提取十六进制数
 void HexStrToInt(std::string &jsonStr, std::vector<uint32_t>& intValues)
@@ -35,7 +37,14 @@ void HexStrToInt(std::string &jsonStr, std::vector<uint32_t>& intValues)
     while (!ss.eof()) {
         char comma;
         uint32_t value;
-        ss >> std::hex >> value >> comma;
+        ss >> std::hex >> value;
+        if (ss.fail()) {
+            ERROR("The MetricEventsStr error, please check!");
+            break;
+        }
+        if (ss.peek() == EVENT_SEPARATOR) {
+            ss >> comma;
+        }
         if (index < DEFAULT_PMU_LENGTH) {
             intValues[index] = value;
         } else {
@@ -99,7 +108,9 @@ struct adl_serializer<SampleInfo> {
         infoData.aiCoreMetrics = GetAicMetricsEventsTypeFromStr(aiCoreMetricsStr);
 
         jsonData.at("ai_core_profiling_events").get_to(infoData.aiCoreProfilingEventsStr);
-        HexStrToInt(infoData.aiCoreProfilingEventsStr, infoData.aiCoreProfilingEvents);
+        if (infoData.aiCoreProfilingEventsStr != "") {
+            HexStrToInt(infoData.aiCoreProfilingEventsStr, infoData.aiCoreProfilingEvents);
+        }
 
         std::string profilingStr = jsonData.at("ai_core_profiling_mode").get<std::string>();
         infoData.aiCoreProfilingMode = GetProfilingModeFromStr(profilingStr);
@@ -113,7 +124,9 @@ struct adl_serializer<SampleInfo> {
         infoData.aivMetrics = GetAivMetricsEventsTypeFromStr(aivMetricsStr);
 
         jsonData.at("aiv_profiling_events").get_to(infoData.aivProfilingEventsStr);
-        HexStrToInt(infoData.aivProfilingEventsStr, infoData.aivProfilingEvents);
+        if (infoData.aivProfilingEventsStr != "") {
+            HexStrToInt(infoData.aivProfilingEventsStr, infoData.aivProfilingEvents);
+        }
 
         std::string aivProfilingMode = jsonData.at("aiv_profiling_mode").get<std::string>();
         infoData.aivProfilingMode = GetProfilingModeFromStr(aivProfilingMode);
