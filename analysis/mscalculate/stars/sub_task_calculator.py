@@ -62,6 +62,7 @@ class SubTaskCalculator(MsMultiProcess):
         with FftsLogModel(self.result_dir, DBNameConstant.DB_SOC_LOG, [DBNameConstant.TABLE_FFTS_LOG]) as ffts_model:
             ffts_log_data = ffts_model.get_ffts_log_data()
         task_map = {}
+        ffts_log_data.sort(key=lambda x: x.task_time)
         for data in ffts_log_data:
             task_key = "{0}-{1}-{2}-{3}".format(data.stream_id, data.task_id, data.subtask_id, data.thread_id)
             task_map.setdefault(task_key, {}).setdefault(data.task_type, deque([])).append(data)

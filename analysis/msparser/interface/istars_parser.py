@@ -10,7 +10,7 @@ class IStarsParser:
     parser interface
     """
 
-    MAX_DATA_LEN = 10000
+    MAX_DATA_LEN = 1000000000
 
     def __init__(self: any) -> None:
         self._model = None

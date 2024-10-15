@@ -63,6 +63,9 @@ void LogModeling::SplitLogGroups(std::vector<HalLogData>& logData,
                                  std::shared_ptr<std::vector<HalTrackData>>& flipTrack)
 {
     Utils::TimeLogger t{"LogModeling::SplitLogGroups "};
+    std::sort(logData.begin(), logData.end(), [](HalLogData &ld, HalLogData &rd) {
+        return ld.hd.timestamp < rd.hd.timestamp;
+    });
     for (auto& halLog : logData) {
         if (halLog.type == ACSQ_LOG) {
             if (halLog.acsq.isEndTimestamp) {
