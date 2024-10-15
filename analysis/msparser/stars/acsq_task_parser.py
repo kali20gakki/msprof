@@ -39,6 +39,7 @@ class AcsqTaskParser(IStarsParser):
         """
         task_map = {}
         # task id stream id func type
+        self._data_list.sort(key=lambda x: x.sys_cnt)
         for data in self._data_list:
             task_key = "{0},{1}".format(str(data.task_id), str(data.stream_id))
             task_map.setdefault(task_key, {}).setdefault(data.func_type, deque([])).append(data)

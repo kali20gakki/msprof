@@ -88,7 +88,7 @@ protected:
 
 TEST_F(StarsSocParserUtest, ShouldReturnAcsqLogDataWhenParserRun)
 {
-    std::vector<int> expectTimestamp{100, INVALID_TIMESTAMP, 100};
+    std::vector<int> expectTimestamp{100, 120, 100};
     StarsSocParser starsSocParser;
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = SOC_LOG_PATH;
@@ -106,7 +106,7 @@ TEST_F(StarsSocParserUtest, ShouldReturnAcsqLogDataWhenParserRun)
 
 TEST_F(StarsSocParserUtest, ShouldReturnFftsPlusLogDataWhenParserRun)
 {
-    std::vector<int> expectTimestamp{200, INVALID_TIMESTAMP};
+    std::vector<int> expectTimestamp{200, 220};
     StarsSocParser starsSocParser;
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = SOC_LOG_PATH;
@@ -122,7 +122,7 @@ TEST_F(StarsSocParserUtest, ShouldReturnFftsPlusLogDataWhenParserRun)
 
 TEST_F(StarsSocParserUtest, ShouldReturnAcsqLogDataAndFftsPlusLogDataWhenParserRun)
 {
-    std::vector<int> expectTimestamp{100, INVALID_TIMESTAMP, 200, INVALID_TIMESTAMP};
+    std::vector<int> expectTimestamp{100, 120, 200, 220};
     StarsSocParser starsSocParser;
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = SOC_LOG_PATH;
@@ -141,12 +141,12 @@ TEST_F(StarsSocParserUtest, ShouldReturnAcsqLogDataAndFftsPlusLogDataWhenParserR
 
 TEST_F(StarsSocParserUtest, ShouldReturnAcsqLogDataAndFftsPlusLogDataWhenMultiDataAndParserRun)
 {
-    std::vector<int> expectTimestamp{100, INVALID_TIMESTAMP, 200, INVALID_TIMESTAMP, 100,
-                                     INVALID_TIMESTAMP, 200, INVALID_TIMESTAMP};
+    std::vector<int> expectTimestamp{100, 120, 200, 220, 100,
+                                     120, 200, 220};
     StarsSocParser starsSocParser;
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = SOC_LOG_PATH;
-    std::vector<AcsqLog> acsqLog{CreateAcsqLog(0b000000, 1, 1, 1, 100), CreateAcsqLog(0b000001, 2, 1, 1, 120)};
+    std::vector<AcsqLog> acsqLog{CreateAcsqLog(0b000000, 1, 1, 1, 100), CreateAcsqLog(0b000001, 4, 1, 1, 120)};
     std::vector<AcsqLog> acsqLog2{CreateAcsqLog(0b000000, 5, 1, 1, 100), CreateAcsqLog(0b000001, 6, 1, 1, 120)};
     EXPECT_TRUE(WriteBin(acsqLog, File::PathJoin({SOC_LOG_PATH, "data"}), "stars_soc.data.0.slice_0"));
     EXPECT_TRUE(WriteBin(acsqLog2, File::PathJoin({SOC_LOG_PATH, "data"}), "stars_soc.data.0.slice_1"));

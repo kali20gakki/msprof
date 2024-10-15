@@ -29,7 +29,7 @@ class TestAcsqTaskParser(unittest.TestCase):
         args_end_2 = [1, 5, 67, 7, 91, 47, 8, 99]
         key = AcsqTaskParser(result_dir, db, table_list)
         InfoJsonReaderManager(info_json=InfoJson(DeviceInfo=[DeviceInfo(hwts_frequency=50).device_info])).process()
-        key._data_list = (AcsqTask(args_begin_1), AcsqTask(args_end_1), AcsqTask(args_begin_2), AcsqTask(args_end_2))
+        key._data_list = [AcsqTask(args_begin_1), AcsqTask(args_end_1), AcsqTask(args_begin_2), AcsqTask(args_end_2)]
         ret = key.get_task_time()
         expect_ret = (
             [
@@ -51,10 +51,10 @@ class TestAcsqTaskParser(unittest.TestCase):
         args_end_3 = [1, 5, 67, 7, 93, 47, 8, 99]
         key = AcsqTaskParser(result_dir, db, table_list)
         InfoJsonReaderManager(info_json=InfoJson(DeviceInfo=[DeviceInfo(hwts_frequency=50).device_info])).process()
-        key._data_list = (
+        key._data_list = [
             AcsqTask(args_begin_1), AcsqTask(args_end_1), AcsqTask(args_begin_2),
             AcsqTask(args_end_2), AcsqTask(args_end_3)
-        )
+        ]
         ret = key.get_task_time()
         expect_ret = (
             [
@@ -76,10 +76,10 @@ class TestAcsqTaskParser(unittest.TestCase):
         args_begin_3 = [0, 5, 67, 1000, 93, 47, 8, 99]
         key = AcsqTaskParser(result_dir, db, table_list)
         InfoJsonReaderManager(info_json=InfoJson(DeviceInfo=[DeviceInfo(hwts_frequency=50).device_info])).process()
-        key._data_list = (
+        key._data_list = [
             AcsqTask(args_begin_1), AcsqTask(args_end_1), AcsqTask(args_begin_2),
             AcsqTask(args_end_2), AcsqTask(args_begin_3)
-        )
+        ]
         ret = key.get_task_time()
         expect_ret = [
             [3, 4, 25, 'AI_CORE', 1120.0, 1160.0, 40.0],
@@ -101,10 +101,10 @@ class TestAcsqTaskParser(unittest.TestCase):
         args_begin_4 = [0, 5, 67, 1000, 95, 47, 8, 99]
         key = AcsqTaskParser(result_dir, db, table_list)
         InfoJsonReaderManager(info_json=InfoJson(DeviceInfo=[DeviceInfo(hwts_frequency=50).device_info])).process()
-        key._data_list = (
+        key._data_list = [
             AcsqTask(args_begin_1), AcsqTask(args_end_1), AcsqTask(args_begin_2),
             AcsqTask(args_end_2), AcsqTask(args_begin_3), AcsqTask(args_begin_4)
-        )
+        ]
         ret = key.get_task_time()
         expect_ret = (
             [
@@ -127,10 +127,10 @@ class TestAcsqTaskParser(unittest.TestCase):
         args_begin_4 = [0, 5, 67, 1000, 95, 47, 8, 99]
         key = AcsqTaskParser(result_dir, db, table_list)
         InfoJsonReaderManager(info_json=InfoJson(DeviceInfo=[DeviceInfo(hwts_frequency=50).device_info])).process()
-        key._data_list = (
+        key._data_list = [
             AcsqTask(args_begin_1), AcsqTask(args_end_1), AcsqTask(args_begin_2),
             AcsqTask(args_end_2), AcsqTask(args_begin_3), AcsqTask(args_begin_4)
-        )
+        ]
         ret = key.get_task_time()
         expect_ret = (
             [
@@ -154,10 +154,10 @@ class TestAcsqTaskParser(unittest.TestCase):
         args_begin_4 = [0, 5, 67, 1000, 95, 47, 8, 99]
         key = AcsqTaskParser(result_dir, db, table_list)
         InfoJsonReaderManager(info_json=InfoJson(DeviceInfo=[DeviceInfo(hwts_frequency=50).device_info])).process()
-        key._data_list = (
+        key._data_list = [
             AcsqTask(args_end_0), AcsqTask(args_begin_1), AcsqTask(args_end_1), AcsqTask(args_begin_2),
             AcsqTask(args_end_2), AcsqTask(args_begin_3), AcsqTask(args_begin_4)
-        )
+        ]
         ret = key.get_task_time()
         expect_ret = (
             [

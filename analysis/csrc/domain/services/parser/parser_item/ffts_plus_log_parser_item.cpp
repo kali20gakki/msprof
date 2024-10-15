@@ -42,13 +42,11 @@ int FftsPlusLogParseItem(uint8_t *binaryData, uint32_t binaryDataSize,
 
     if (log->funcType == PARSER_ITEM_FFTS_PLUS_LOG_START) {
         unionData->ffts.isEndTimestamp = false;
-        unionData->hd.timestamp = log->timestamp;
     } else {
         unionData->ffts.isEndTimestamp = true;
-        unionData->hd.timestamp = INVALID_TIMESTAMP;
     }
     unionData->ffts.timestamp = log->timestamp;
-
+    unionData->hd.timestamp = log->timestamp;
     unionData->ffts.fftsType = log->fftsType;
     unionData->ffts.subTaskType = log->subTaskType;
     unionData->ffts.threadId = log->threadId;

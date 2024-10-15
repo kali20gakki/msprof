@@ -61,7 +61,7 @@ uint32_t StarsSocParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDataS
         return ANALYSIS_OK;
     }
     if (currentCnt != cnt_ + 1 && cnt_ - currentCnt != VALID_CNT) {
-        ERROR("CNT verification failed. prevCnt: %; nowCnt: %", cnt_, currentCnt);
+        WARN("CNT verification failed. prevCnt: %; nowCnt: %", cnt_, currentCnt);
     }
     cnt_ = currentCnt;
     return ANALYSIS_OK;

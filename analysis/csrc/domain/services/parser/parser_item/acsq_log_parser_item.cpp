@@ -41,11 +41,10 @@ int AcsqLogParseItem(uint8_t *binaryData, uint32_t binaryDataSize,
 
     if (log->funcType == PARSER_ITEM_ACSQ_LOG_START) {
         unionData->acsq.isEndTimestamp = false;
-        unionData->hd.timestamp = log->timestamp;
     } else {
         unionData->acsq.isEndTimestamp = true;
-        unionData->hd.timestamp = INVALID_TIMESTAMP;
     }
+    unionData->hd.timestamp = log->timestamp;
     unionData->acsq.taskType = log->taskType;
     unionData->acsq.timestamp = log->timestamp;
     return log->cnt;
