@@ -4,8 +4,9 @@
  * Author: Huawei Technologies Co., Ltd.
  * Create: 2022-06-09
  */
- 
+
 #include "mmpa_api.h"
+#include <algorithm>
 #include "msprof_dlog.h"
 #include "errno/error_code.h"
 
@@ -328,6 +329,14 @@ static int32_t LocalRmDirPreCheck(const std::string &pathName)
     return PROFILING_SUCCESS;
 }
 
+std::string Rsplit(const std::string &str, char ch)
+{
+    std::string result = str;
+    result.erase(std::find_if(result.rbegin(), result.rend(), [ch](unsigned char c) { return c != ch;}).base(),
+        result.end());
+    return result;
+}
+
 bool MmIsSoftLink(const std::string &path)
 {
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
@@ -336,12 +345,13 @@ bool MmIsSoftLink(const std::string &path)
     if (path.empty()) {
         return false;
     }
+    std::string tmpPath = Rsplit(path, '/');
     struct stat fileStat;
     if (memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat)) != EOK) {
         MSPROF_LOGE("memset failed");
         return false;
     }
-    if (lstat(path.c_str(), &fileStat) != 0) {
+    if (lstat(tmpPath.c_str(), &fileStat) != 0) {
         return false;
     }
     return S_ISLNK(fileStat.st_mode);

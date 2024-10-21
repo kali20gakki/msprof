@@ -20,6 +20,7 @@ from common_func.common import error
 from common_func.constant import Constant
 from common_func.file_manager import FdOpen
 from common_func.file_manager import check_path_valid
+from common_func.file_manager import is_link
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
@@ -148,7 +149,7 @@ def _do_change_file_mod(file_path: str) -> None:
     for lists in os.listdir(file_path):
         path = os.path.join(file_path, lists)
         files_list.append(path)
-        if not os.path.islink(path) and os.path.isdir(path):
+        if not is_link(path) and os.path.isdir(path):
             files_chmod(path)
     for data_file in files_list:
         if not os.path.isdir(data_file):

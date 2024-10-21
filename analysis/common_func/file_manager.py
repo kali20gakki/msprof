@@ -176,6 +176,16 @@ class FdOpen:
             os.close(self.fd)
 
 
+def is_link(path: str) -> bool:
+    """
+    软链接校验漏洞，在最后加一个/可以绕过软链接校验,所以这里封装一层
+    """
+    if not path:
+        return False
+    path = path.rstrip("/")
+    return os.path.islink(path)
+
+
 def check_path_valid(path: str, is_file: bool, max_size: int = Constant.MAX_READ_FILE_BYTES) -> None:
     """
     check the path is valid or not
@@ -193,7 +203,7 @@ def check_path_valid(path: str, is_file: bool, max_size: int = Constant.MAX_READ
         if not os.path.isfile(path):
             raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
                                 f"The path \"{path}\" is not a file. Please check the path.")
-        if os.path.islink(path):
+        if is_link(path):
             raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
                                 f"The path \"{path}\" is link. Please check the path.")
         if os.path.getsize(path) > max_size:
@@ -203,7 +213,7 @@ def check_path_valid(path: str, is_file: bool, max_size: int = Constant.MAX_READ
         if not os.path.isdir(path):
             raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
                                 f"The path \"{path}\" is not a directory. Please check the path.")
-        if os.path.islink(path):
+        if is_link(path):
             raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
                                 f"The path \"{path}\" is link. Please check the path.")
     if not os.access(path, os.R_OK):
@@ -213,7 +223,7 @@ def check_path_valid(path: str, is_file: bool, max_size: int = Constant.MAX_READ
 
 
 def check_db_path_valid(path: str, is_create: bool = False, max_size: int = Constant.MAX_READ_DB_FILE_BYTES) -> None:
-    if os.path.islink(path):
+    if is_link(path):
         ReturnCodeCheck.print_and_return_status(json.dumps(
             {'status': NumberConstant.ERROR,
              'info': "The db file '%s' is link. Please check the "
@@ -296,7 +306,7 @@ def check_so_valid(path: str) -> bool:
     if not os.path.isfile(path):
         logging.warning("The path %s is not a file. Please check the path.", path)
         return False
-    elif os.path.islink(path):
+    elif is_link(path):
         logging.warning("The path %s is link. Please check the path.", path)
         return False
     elif not os.access(path, os.R_OK):
