@@ -17,6 +17,7 @@ from common_func.file_manager import check_file_readable
 from common_func.file_manager import check_file_writable
 from common_func.file_manager import check_path_valid
 from common_func.file_manager import check_so_valid
+from common_func.file_manager import is_link
 from common_func.file_name_manager import FileNameManagerConstant
 from common_func.msprof_exception import ProfException
 
@@ -236,3 +237,7 @@ class TestFileManager(unittest.TestCase):
              mock.patch('os.access', return_value=True), \
              mock.patch('os.stat', return_value=StatInfo(0o001, 3, 4)):
             self.assertFalse(check_so_valid(path))
+
+    def test_is_link_should_return_false_when_path_is_empty_str(self):
+        path = ""
+        self.assertFalse(is_link(path))

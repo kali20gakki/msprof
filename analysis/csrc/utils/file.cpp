@@ -75,8 +75,9 @@ bool File::IsSoftLink(const std::string &path)
         ERROR("The file path is empty.");
         return false;
     }
+    std::string tmpPath = Rsplit(path, '/');
     struct stat fileStat;
-    if (lstat(path.c_str(), &fileStat) != 0) {
+    if (lstat(tmpPath.c_str(), &fileStat) != 0) {
         ERROR("The file lstat failed. The Error code is %", strerror(errno));
         return false;
     }

@@ -23,6 +23,7 @@ from common_func.msvp_common import files_chmod
 from common_func.file_manager import check_dir_readable
 from common_func.file_manager import check_dir_writable
 from common_func.file_manager import check_file_writable
+from common_func.file_manager import is_link
 from common_func.path_manager import PathManager
 from framework.collection_engine import AI
 from framework.file_dispatch import FileDispatch
@@ -257,5 +258,5 @@ def get_valid_sub_path(collect_path: str, sub_dir: str, is_file: bool) -> str:
 
 
 def _path_dir_filter_func(sub_path, root_dir):
-    return sub_path not in Constant.FILTER_DIRS and not os.path.islink(
+    return sub_path not in Constant.FILTER_DIRS and not is_link(
         os.path.join(root_dir, sub_path)) and os.path.isdir(os.path.realpath(os.path.join(root_dir, sub_path)))
