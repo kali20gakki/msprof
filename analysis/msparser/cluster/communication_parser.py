@@ -55,11 +55,13 @@ class CommunicationParser(MetaParser):
         """
         hccl data use master's plane_id for ffts+;
         Should be changed with hccl's algorithms!
+        now judged by "is_master"
         """
-        plane_id_set = sorted(set([event.plane_id for event in events if event.plane_id != -1]))
-        if len(plane_id_set) == 1:
-            return plane_id_set[0]
-        return 0 if any([event.transport_type == StrConstant.RDMA for event in events if event.plane_id == 0]) else 1
+        for event in events:
+            if event.is_master == 1:
+                return event.plane_id
+        logging.error("Fail to get master events info, communication parser is interrupted")
+        raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
 
     def run(self: any) -> dict:
         self.parse()
@@ -185,8 +187,8 @@ class CommunicationParser(MetaParser):
                     op_time_dict[OpAnalysisType.SYNCHRONIZATION_TIME] += wait_time
                 op_time_dict[OpAnalysisType.WAIT_TIME] += wait_time
             idx += 1
-        latest_event = max(events, key=lambda x: x.timestamp + x.duration)
-        earliest_event = min(events, key=lambda x: x.timestamp)
+        latest_event = max(master_events, key=lambda x: x.timestamp + x.duration)
+        earliest_event = min(master_events, key=lambda x: x.timestamp)
         op_time_dict[OpAnalysisType.ELAPSE_TIME] = \
             (latest_event.timestamp + latest_event.duration -
              earliest_event.timestamp) / NumberConstant.NS_TO_MS
