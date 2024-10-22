@@ -6,7 +6,6 @@
  */
 
 #include "mmpa_api.h"
-#include <algorithm>
 #include "msprof_dlog.h"
 #include "errno/error_code.h"
 
@@ -329,12 +328,10 @@ static int32_t LocalRmDirPreCheck(const std::string &pathName)
     return PROFILING_SUCCESS;
 }
 
-std::string Rsplit(const std::string &str, char ch)
+std::string Rstrip(const std::string &str1, const std::string &str2)
 {
-    std::string result = str;
-    result.erase(std::find_if(result.rbegin(), result.rend(), [ch](unsigned char c) { return c != ch;}).base(),
-        result.end());
-    return result;
+    size_t end = str1.find_last_not_of(str2);
+    return (end == std::string::npos) ? "" : str1.substr(0, end + 1);
 }
 
 bool MmIsSoftLink(const std::string &path)
@@ -345,7 +342,7 @@ bool MmIsSoftLink(const std::string &path)
     if (path.empty()) {
         return false;
     }
-    std::string tmpPath = Rsplit(path, '/');
+    std::string tmpPath = Rstrip(path, "./");
     struct stat fileStat;
     if (memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat)) != EOK) {
         MSPROF_LOGE("memset failed");

@@ -10,7 +10,6 @@
  * *****************************************************************************
  */
 
-#include <algorithm>
 #include <unordered_set>
 #include "analysis/csrc/utils/utils.h"
 
@@ -63,12 +62,10 @@ std::vector<std::string> Split(const std::string &str, const std::string &delimi
     return res;
 }
 
-std::string Rsplit(const std::string &str, char ch)
+std::string Rstrip(const std::string &str1, const std::string &str2)
 {
-    std::string result = str;
-    result.erase(std::find_if(result.rbegin(), result.rend(), [ch](unsigned char c) { return c != ch;}).base(),
-        result.end());
-    return result;
+    size_t end = str1.find_last_not_of(str2);
+    return (end == std::string::npos) ? "" : str1.substr(0, end + 1);
 }
 
 int StrToU16(uint16_t &dest, const std::string &numStr)
