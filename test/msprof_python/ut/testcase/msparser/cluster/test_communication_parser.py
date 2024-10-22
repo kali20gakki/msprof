@@ -113,7 +113,7 @@ class TestCommunicationParser(unittest.TestCase):
         with mock.patch(NAMESPACE + '.CommunicationParser.op_bandwidth_parser'):
             hccl_data_ffts = [
                 HcclTask(plane_id=0, hccl_name="0", duration=0, timestamp=0,
-                         group_name="1")
+                         group_name="1", is_master=1)
             ]
             CommunicationParser({}).parse_ops({-1: hccl_data_ffts}, 'hcom_broadcast__752_0_1@9577302986659220752')
         with pytest.raises(ProfException) as err:
@@ -143,43 +143,43 @@ class TestCommunicationParser(unittest.TestCase):
         events = [
             HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='Memcpy', rdma_type='INVALID_TYPE',
                      timestamp=63888072593921.055, duration=319959.1875, transport_type='SDMA', task_id=1,
-                     size=209715200, bandwidth=0.65544359466158, link_type='ON_CHIP'),
+                     size=209715200, bandwidth=0.65544359466158, link_type='ON_CHIP', is_master=1),
             HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='RDMASend', rdma_type='RDMA_SEND_NOTIFY',
                      timestamp=63888072915640.34, duration=320.0234375, transport_type='RDMA', task_id=1, size=4,
-                     bandwidth=0.00001249908454, link_type=ROCE),
+                     bandwidth=0.00001249908454, link_type=ROCE, is_master=1),
             HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name=Notify_Wait, rdma_type='RDMA_PAYLOAD_PREPARE',
                      timestamp=63888072917700.47, duration=20, transport_type=LOCAL, task_id=1, size=0, bandwidth=0,
-                     link_type='INVALID_TYPE'),
+                     link_type='INVALID_TYPE', is_master=1),
             HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='RDMASend', rdma_type='RDMA_SEND_PAYLOAD',
                      timestamp=63888072919960.61, duration=320.015625, transport_type='RDMA', task_id=1, size=104857600,
-                     bandwidth=24.28991694888519, link_type=ROCE),
+                     bandwidth=24.28991694888519, link_type=ROCE, is_master=1),
             HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='RDMASend', rdma_type='RDMA_SEND_NOTIFY',
                      timestamp=63888072921720.71, duration=320.0234375, transport_type='RDMA', task_id=1, size=4,
-                     bandwidth=0.00001249908454, link_type=ROCE),
+                     bandwidth=0.00001249908454, link_type=ROCE, is_master=1),
             HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name=Notify_Wait, rdma_type='RDMA_PAYLOAD_CHECK',
                      timestamp=63888072923480.82, duration=4310758.46875, transport_type=LOCAL, task_id=1, size=0,
-                     bandwidth=0, link_type='INVALID_TYPE'),
+                     bandwidth=0, link_type='INVALID_TYPE', is_master=1),
             HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='RDMASend', rdma_type='RDMA_SEND_NOTIFY',
                      timestamp=63888077234799.32, duration=320.0234375, transport_type='RDMA', task_id=1, size=4,
-                     bandwidth=0.00001249908454, link_type=ROCE),
+                     bandwidth=0.00001249908454, link_type=ROCE, is_master=1),
             HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name=Notify_Wait, rdma_type='RDMA_PAYLOAD_ACK',
                      timestamp=63888077236859.445, duration=20, transport_type=LOCAL, task_id=1, size=0,
-                     bandwidth=-1, link_type='INVALID_TYPE'),
+                     bandwidth=-1, link_type='INVALID_TYPE', is_master=1),
             HcclTask(op_name='hcom_allReduce__721_0_1', hccl_name='Memcpy', rdma_type='INVALID_TYPE',
                      timestamp=63888077238999.58, duration=160429.6171875, transport_type='SDMA', task_id=1,
-                     size=104857600, bandwidth=0.65360500036255, link_type='ON_CHIP'),
+                     size=104857600, bandwidth=0.65360500036255, link_type='ON_CHIP', is_master=1),
             HcclTask(op_name=OP_NAME, hccl_name=RDMASEND, rdma_type=RDMA_SEND_PAYLOAD,
                      timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
                      size=104857600,
-                     bandwidth=-1),
+                     bandwidth=-1, is_master=1),
             HcclTask(op_name=OP_NAME, hccl_name=RDMASEND, rdma_type=RDMA_SEND_PAYLOAD,
                      timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
                      size=104857600,
-                     bandwidth=-1),
+                     bandwidth=-1, is_master=1),
             HcclTask(op_name=OP_NAME, hccl_name=RDMASEND, rdma_type=RDMA_SEND_PAYLOAD,
                      timestamp=63888072919960.61, duration=320.015625, transport_type=RDMA, task_id=1,
                      size=104857600,
-                     bandwidth=-1),
+                     bandwidth=-1, is_master=1),
         ]
 
         op_time_dict = CommunicationParser({}).op_time_parser(events)
