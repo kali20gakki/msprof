@@ -178,11 +178,11 @@ class FdOpen:
 
 def is_link(path: str) -> bool:
     """
-    软链接校验漏洞，在最后加一个/可以绕过软链接校验,所以这里封装一层
+    软链接校验漏洞，在最后加一个/或者./可以获取到绝对路径进行校验
     """
     if not path:
         return False
-    path = path.rstrip("/")
+    path = os.path.abspath(path)
     return os.path.islink(path)
 
 
