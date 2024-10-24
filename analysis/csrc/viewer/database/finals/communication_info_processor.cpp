@@ -65,6 +65,18 @@ CommunicationInfoProcessor::OriTaskDataFormat CommunicationInfoProcessor::GetTas
     return oriTaskData;
 }
 
+CommunicationInfoProcessor::OriTaskDataFormat CommunicationInfoProcessor::GetKfcTaskData(const DBInfo &kfcTask)
+{
+    OriTaskDataFormat oriTaskData;
+    std::string sql{"SELECT model_id, op_name, hccl_name, group_name, plane_id, stream_id, task_id, local_rank, "
+                    "remote_rank, transport_type, size, data_type, link_type, context_id, notify_id, batch_id, "
+                    "rdma_type, timestamp, duration, -1 as connection_id FROM " + kfcTask.tableName};
+    if (!kfcTask.dbRunner->QueryData(sql, oriTaskData)) {
+        ERROR("Failed to obtain data from the % table.", kfcTask.tableName);
+    }
+    return oriTaskData;
+}
+
 CommunicationInfoProcessor::OriOpDataFormat CommunicationInfoProcessor::GetOpData(const DBInfo &opSingleDevice)
 {
     OriOpDataFormat oriOpData;
@@ -76,15 +88,23 @@ CommunicationInfoProcessor::OriOpDataFormat CommunicationInfoProcessor::GetOpDat
     return oriOpData;
 }
 
-bool CommunicationInfoProcessor::FormatData(const OriTaskDataFormat &oriTaskData, const OriOpDataFormat &oriOpData,
+CommunicationInfoProcessor::OriKfcOpDataFormat CommunicationInfoProcessor::GetKfcOpData(const DBInfo &kfcOp)
+{
+    OriKfcOpDataFormat oriOpData;
+    std::string sql{"SELECT connection_id, op_name, -1 as relay, -1 as retry, 'N/A' as data_type, "
+                    "'N/A' as alg_type, " + std::to_string(UINT64_MAX) + " as count, group_name, "
+                    "op_type, timestamp, duration FROM " + kfcOp.tableName};
+    if (!kfcOp.dbRunner->QueryData(sql, oriOpData)) {
+        ERROR("Failed to obtain data from the % table.", kfcOp.tableName);
+    }
+    return oriOpData;
+}
+
+void CommunicationInfoProcessor::FormatData(const OriTaskDataFormat &oriTaskData, const OriOpDataFormat &oriOpData,
                                             CommunicationTaskDataFormat &processedTaskData,
                                             CommunicationOpDataFormat &processedOpData,
                                             const ThreadData &threadData, GeHashMap &hashMap)
 {
-    if (!Utils::Reserve(processedTaskData, oriTaskData.size())) {
-        ERROR("Reserve for communication task data failed.");
-        return false;
-    }
     CommunicationTaskData taskData;
     HcclTaskSingleDeviceData hcclData;
     std::unordered_map<uint32_t, CommunicationOpData> opData;
@@ -125,7 +145,55 @@ bool CommunicationInfoProcessor::FormatData(const OriTaskDataFormat &oriTaskData
         processedOpData.emplace_back(data.opName, data.start, data.end, data.connectionId, data.groupName, data.opId,
                                      data.relay, data.retry, data.dataType, data.algType, data.count, data.opType);
     }
-    return true;
+}
+
+void CommunicationInfoProcessor::FormatKfcTaskData(const OriTaskDataFormat &oriTaskData,
+                                                   CommunicationTaskDataFormat &processedTaskData,
+                                                   const ThreadData &threadData, GeHashMap &hashMap)
+{
+    CommunicationTaskData taskData;
+    HcclTaskSingleDeviceData hcclData;
+    for (auto &row: oriTaskData) {
+        Update(row, hcclData, taskData, threadData.deviceId, hashMap);
+        processedTaskData.emplace_back(taskData.opName, taskData.globalTaskId, taskData.taskType, taskData.planeId,
+                                       taskData.groupName, taskData.notifyId, taskData.rdmaType, taskData.srcRank,
+                                       taskData.dstRank, taskData.transportType, taskData.size, taskData.dataType,
+                                       taskData.linkType, taskData.opId);
+    }
+}
+
+void CommunicationInfoProcessor::FormatKfcOpData(const OriKfcOpDataFormat &oriOpData,
+                                                 CommunicationOpDataFormat &processedOpData,
+                                                 const ThreadData &threadData, GeHashMap &hashMap)
+{
+    uint32_t connectionId;
+    std::string opName;
+    int32_t relay = 0;
+    int32_t retry = 0;
+    std::string dataType;
+    std::string algType;
+    uint64_t count = UINT64_MAX;
+    std::string groupName;
+    std::string opType;
+    double timestamp;
+    double duration;
+    for (auto &data: oriOpData) {
+        std::tie(connectionId, opName, relay, retry, dataType, algType,
+                 count, groupName, opType, timestamp, duration) = data;
+        HPFloat start{timestamp};
+        HPFloat end = start + HPFloat(duration);
+        auto startTime = Utils::GetLocalTime(start, threadData.timeRecord).Uint64();
+        auto endTime = Utils::GetLocalTime(end, threadData.timeRecord).Uint64();
+        auto opId = IdPool::GetInstance().GetUint32Id(Utils::Join("_", opName, groupName, threadData.deviceId));
+        auto opNameId = IdPool::GetInstance().GetUint64Id(opName);
+        auto groupNameValue = GetGroupNameValue(groupName, hashMap);
+        auto dataTypeValue = GetEnumTypeValue(dataType, NAME_STR(HCCL_DATA_TYPE_TABLE), HCCL_DATA_TYPE_TABLE);
+        auto algTypeValue = IdPool::GetInstance().GetUint64Id(algType);
+        auto opTypeValue = IdPool::GetInstance().GetUint64Id(opType);
+        processedOpData.emplace_back(opNameId, startTime, endTime,
+                                     Utils::Contact(threadData.profId, connectionId), groupNameValue, opId,
+                                     relay, retry, dataTypeValue, algTypeValue, count, opTypeValue);
+    }
 }
 
 void CommunicationInfoProcessor::Update(const HcclTaskFormat &oriData, HcclTaskSingleDeviceData &hcclData,
@@ -186,19 +254,36 @@ bool CommunicationInfoProcessor::Process(const std::string &fileDir)
     ThreadData threadData;
     DBInfo taskDBInfo("hccl_single_device.db", "HCCLTaskSingleDevice");
     DBInfo opDBInfo("hccl_single_device.db", "HCCLOpSingleDevice");
+    DBInfo kfcTaskDBInfo("hccl_single_device.db", "KfcTask");
+    DBInfo kfcOpDBInfo("hccl_single_device.db", "KfcOP");
     threadData.profId = IdPool::GetInstance().GetUint32Id(fileDir);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     bool flag = true;
     for (const auto& devicePath: deviceList) {
-        if (!ProcessOneDevice(devicePath, threadData, taskDBInfo, opDBInfo, fileDir)) {
+        OriTaskDataFormat oriTaskData;
+        OriOpDataFormat oriOpData;
+        if (!ProcessOneDeviceHccl(devicePath, taskDBInfo, opDBInfo, oriTaskData, oriOpData)) {
+            ERROR("ProcessOneDeviceHccl failed.");
+            flag = false;
+        }
+        OriTaskDataFormat oriKfcTaskData;
+        OriKfcOpDataFormat oriKfcOpData;
+        if (!ProcessOneDeviceKfc(devicePath, kfcTaskDBInfo, kfcOpDBInfo, oriKfcTaskData, oriKfcOpData)) {
+            ERROR("ProcessOneDeviceKfc failed.");
+            flag = false;
+        }
+        threadData.deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
+        if (!SaveCommData(threadData, oriTaskData, oriOpData, oriKfcTaskData, oriKfcOpData, fileDir)) {
+            ERROR("Save communication data failed.");
             flag = false;
         }
     }
     return flag;
 }
 
-bool CommunicationInfoProcessor::ProcessOneDevice(const std::string &devicePath, ThreadData &threadData,
-                                                  DBInfo &taskDBInfo, DBInfo &opDBInfo, const std::string &fileDir)
+bool CommunicationInfoProcessor::ProcessOneDeviceHccl(const std::string &devicePath, DBInfo &taskDBInfo,
+                                                      DBInfo &opDBInfo, OriTaskDataFormat &oriTaskData,
+                                                      OriOpDataFormat &oriOpData)
 {
     std::string taskDBPath = Utils::File::PathJoin({devicePath, SQLITE, taskDBInfo.dbName});
     std::string opDBPath = Utils::File::PathJoin({devicePath, SQLITE, opDBInfo.dbName});
@@ -207,49 +292,97 @@ bool CommunicationInfoProcessor::ProcessOneDevice(const std::string &devicePath,
     // 并不是所有场景都有hccl数据
     auto status = CheckPathAndTable(taskDBPath, taskDBInfo);
     if (status != CHECK_SUCCESS) {
+        INFO("Check % data exit in %.", taskDBInfo.tableName, taskDBPath);
         return status != CHECK_FAILED;
     }
     status = CheckPathAndTable(opDBPath, opDBInfo);
     if (status != CHECK_SUCCESS) {
+        INFO("Check % data exit in %.", opDBInfo.tableName, opDBPath);
         return status != CHECK_FAILED;
+    }
+    oriTaskData = GetTaskData(taskDBInfo);
+    if (oriTaskData.empty()) {
+        ERROR("Get % data failed in %.", taskDBInfo.tableName, taskDBPath);
+        return false;
+    }
+    oriOpData = GetOpData(opDBInfo);
+    return true;
+}
+
+bool CommunicationInfoProcessor::ProcessOneDeviceKfc(const std::string &devicePath, DBInfo &kfcTaskDBInfo,
+                                                     DBInfo &kfcOpDBInfo, OriTaskDataFormat &oriKfcTaskData,
+                                                     OriKfcOpDataFormat &oriKfcOpData)
+{
+    std::string kfcTaskDBPath = Utils::File::PathJoin({devicePath, SQLITE, kfcTaskDBInfo.dbName});
+    std::string kfcOpDBPath = Utils::File::PathJoin({devicePath, SQLITE, kfcOpDBInfo.dbName});
+    MAKE_SHARED_RETURN_VALUE(kfcTaskDBInfo.dbRunner, DBRunner, false, kfcOpDBPath);
+    MAKE_SHARED_RETURN_VALUE(kfcOpDBInfo.dbRunner, DBRunner, false, kfcOpDBPath);
+    auto status = CheckPathAndTable(kfcTaskDBPath, kfcTaskDBInfo);
+    if (status == CHECK_SUCCESS) {
+        oriKfcTaskData = GetKfcTaskData(kfcTaskDBInfo);
+    } else if (status == CHECK_FAILED) {
+        ERROR("Check % data failed in %.", kfcTaskDBInfo.tableName, kfcTaskDBPath);
+        return false;
+    } else {
+        INFO("Not exist KfcTask table");
+    }
+    status = CheckPathAndTable(kfcOpDBPath, kfcOpDBInfo);
+    if (status == CHECK_SUCCESS) {
+        oriKfcOpData = GetKfcOpData(kfcOpDBInfo);
+    } else if (status == CHECK_FAILED) {
+        ERROR("Check % data failed in %.", kfcOpDBInfo.tableName, kfcOpDBPath);
+        return false;
+    } else {
+        INFO("Not exist KfcOP table");
+    }
+    return true;
+}
+
+bool CommunicationInfoProcessor::SaveCommData(ThreadData &threadData, OriTaskDataFormat &oriTaskData,
+                                              OriOpDataFormat &oriOpData, OriTaskDataFormat &oriKfcTaskData,
+                                              OriKfcOpDataFormat &oriKfcOpData, const std::string &fileDir)
+{
+    if (oriTaskData.empty() && oriOpData.empty() && oriKfcTaskData.empty() && oriKfcOpData.empty()) {
+        INFO("No communication data");
+        return true;
     }
     GeHashMap hashMap;
     if (!GetGeHashMap(hashMap, fileDir)) {
         ERROR("Can't get hash data.");
         return false;
     }
-    CommunicationTaskDataFormat taskData;
-    CommunicationOpDataFormat opData;
-    threadData.deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
     if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir)) {
         ERROR("Failed to obtain the time in start_info and end_info.");
         return false;
     }
-    auto oriTaskData = GetTaskData(taskDBInfo);
-    if (oriTaskData.empty()) {
-        ERROR("Get % data failed in %.", taskDBInfo.tableName, taskDBPath);
+    CommunicationTaskDataFormat taskData;
+    CommunicationOpDataFormat opData;
+    if (!Utils::Reserve(taskData, oriTaskData.size() + oriKfcTaskData.size())) {
+        ERROR("Reserve for communication task data failed.");
         return false;
     }
-    auto oriOpData = GetOpData(opDBInfo);
-    if (!FormatData(oriTaskData, oriOpData, taskData, opData, threadData, hashMap)) {
-        ERROR("Save % data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO, taskDBPath);
+    if (!Utils::Reserve(opData, oriOpData.size() + oriKfcOpData.size())) {
+        ERROR("Reserve for communication op data failed.");
         return false;
     }
-    if (!SaveData(taskData, TABLE_NAME_COMMUNICATION_TASK_INFO)) {
-        ERROR("Save % data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO, taskDBPath);
+    FormatData(oriTaskData, oriOpData, taskData, opData, threadData, hashMap);
+    FormatKfcTaskData(oriKfcTaskData, taskData, threadData, hashMap);
+    FormatKfcOpData(oriKfcOpData, opData, threadData, hashMap);
+    if (!taskData.empty() && !SaveData(taskData, TABLE_NAME_COMMUNICATION_TASK_INFO)) {
+        ERROR("Save % data failed.", TABLE_NAME_COMMUNICATION_TASK_INFO);
         return false;
     }
-    if (!CreateTableIndex(TABLE_NAME_COMMUNICATION_TASK_INFO, INDEX_NAME, COMMUNICATION_TASK_INDEX_COL_NAMES)) {
+    if (!taskData.empty() &&
+        !CreateTableIndex(TABLE_NAME_COMMUNICATION_TASK_INFO, INDEX_NAME, COMMUNICATION_TASK_INDEX_COL_NAMES)) {
         ERROR("Create table index failed.");
         return false;
     }
-    if (!SaveData(opData, TABLE_NAME_COMMUNICATION_OP)) {
-        ERROR("Save % data failed, %.", TABLE_NAME_COMMUNICATION_OP, taskDBPath);
+    if (!opData.empty() && !SaveData(opData, TABLE_NAME_COMMUNICATION_OP)) {
+        ERROR("Save % data failed.", TABLE_NAME_COMMUNICATION_OP);
         return false;
     }
     return true;
 }
-
 }
 }
 }

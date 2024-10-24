@@ -27,11 +27,11 @@ using namespace Analysis::Parser;
 namespace {
 const int DEPTH = 0;
 const uint16_t OP_NUM = 4;
-const uint16_t OP_NAME_NUM = 3;
-const uint16_t CONNECTION_ID_NUM = 3;
-const uint16_t OP_ID_NUM = 3;
-const uint16_t OP_DATATYPE_NUM = 3;
-const uint16_t OP_TYPE_NUM = 2;
+const uint16_t OP_NAME_NUM = 4;
+const uint16_t CONNECTION_ID_NUM = 4;
+const uint16_t OP_ID_NUM = 4;
+const uint16_t OP_DATATYPE_NUM = 4;
+const uint16_t OP_TYPE_NUM = 3;
 const std::string COMMUNICATION_TASK_PATH = "./task_path";
 const std::string DB_PATH = File::PathJoin({COMMUNICATION_TASK_PATH, "msprof.db"});
 const std::string DEVICE_SUFFIX = "device_0";
@@ -43,6 +43,8 @@ const std::string PROF_PATH_B = File::PathJoin({COMMUNICATION_TASK_PATH,
 const std::set<std::string> PROF_PATHS = {PROF_PATH_A, PROF_PATH_B};
 const std::string TASK_TABLE_NAME = "HCCLTaskSingleDevice";
 const std::string OP_TABLE_NAME = "HCCLOpSingleDevice";
+const std::string KFC_TASK_TABLE_NAME = "KfcTask";
+const std::string KFC_OP_TABLE_NAME = "KfcOP";
 
 using HcclTaskSingleDeviceFormat = std::vector<std::tuple<uint32_t, int32_t, std::string, uint32_t, std::string,
                                                       std::string, double, int32_t, double, double, double,
@@ -53,6 +55,13 @@ using HcclTaskSingleDeviceFormat = std::vector<std::tuple<uint32_t, int32_t, std
 using HcclOpSingleDeviceFormat = std::vector<std::tuple<uint32_t, std::string, std::string, std::string,
                                                         double, int32_t, int32_t, std::string, std::string,
                                                         uint64_t, std::string, uint32_t>>;
+using KfcTaskFormat = std::vector<std::tuple<uint32_t, uint32_t, std::string, double, double, uint32_t, std::string,
+                                             std::string, uint32_t, double, double, uint32_t, uint32_t, uint32_t,
+                                             uint32_t, uint32_t, std::string, uint32_t, std::string, std::string,
+                                             double, uint32_t, std::string, uint32_t, std::string>>;
+
+using KfcOpFormat = std::vector<std::tuple<uint32_t, uint32_t, std::string, double, double,
+                                           std::string, uint32_t, std::string>>;
 
 const HcclTaskSingleDeviceFormat DATA_A{{4294967295, -1, "hcom_allReduce__360_0_1", 0, "Memcpy", "10652832407468360",
                                      78180470736653, 0, 781687236999151, 2994.875, 1, "HCCL", "hcom_allReduce_", 125,
@@ -64,6 +73,11 @@ const HcclTaskSingleDeviceFormat DATA_A{{4294967295, -1, "hcom_allReduce__360_0_
                                      "HCCS", 87.530865228098, 4294967295, 8, 1, "INVALID_TYPE"}};
 const HcclOpSingleDeviceFormat DATA_OP_A {{4294967295, "hcom_allReduce_", "HCCL", "hcom_allReduce_",
                                            821026362976, 0, 1, "INT16",	"HD-NB", 3021, "10652832407468360", 125}};
+const KfcTaskFormat DATA_KFC_A {{4294967295, -1, "MatmulAllReduceAicpu_724_2_1", 229762691053930, 162334520, 0,
+                                 "Memcpy", "7939241045454381724", 0, 229762691262190, 134380, 50, 1, 0, 0, 0,
+                                 "SDMA", 0, "INT8", "INVALID_TYPE", 590.71, 4294967295, "0", 0, "INVALID_TYPE"}};
+const KfcOpFormat DATA_KFC_OP_A {{4294967295, -1, "AllGatherMatmulAicpu_903_0_1", 157145504371260, 4764660,
+                                  "12713090737648878903", 67270, "AllGatherMatmulAicpu"}};
 const HcclTaskSingleDeviceFormat DATA_B{{4294967295, -1, "hcom_allReduce__233_0_2", 0, "Memcpy23", "10653832407468233",
                                      78180470736653, 0, 781687236999153, 2994.875, 3, "HCCL", "hcom_allReduce_", 125,
                                      1, 11, 3, 14.1825906735751, 1, 4, "SDMA", 262144, "INVALID_TYPE",
@@ -94,6 +108,8 @@ protected:
         CreateHcclTaskSingleDevice(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_A);
         CreateHcclTaskSingleDevice(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_B);
         CreateHcclOpSingleDevice(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_OP_A);
+        CreateKfcTask(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_KFC_A);
+        CreateKfcOp(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_KFC_OP_A);
         CreateHcclOpSingleDevice(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_OP_B);
         MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
             .stubs()
@@ -128,6 +144,26 @@ protected:
         dbRunner->CreateTable(OP_TABLE_NAME, cols);
         dbRunner->InsertData(OP_TABLE_NAME, data);
     }
+    static void CreateKfcTask(const std::string& dbPath, KfcTaskFormat data)
+    {
+        std::shared_ptr<HCCLSingleDeviceDB> database;
+        MAKE_SHARED0_RETURN_VOID(database, HCCLSingleDeviceDB);
+        std::shared_ptr<DBRunner> dbRunner;
+        MAKE_SHARED_RETURN_VOID(dbRunner, DBRunner, dbPath);
+        auto cols = database->GetTableCols(KFC_TASK_TABLE_NAME);
+        dbRunner->CreateTable(KFC_TASK_TABLE_NAME, cols);
+        dbRunner->InsertData(KFC_TASK_TABLE_NAME, data);
+    }
+    static void CreateKfcOp(const std::string& dbPath, KfcOpFormat data)
+    {
+        std::shared_ptr<HCCLSingleDeviceDB> database;
+        MAKE_SHARED0_RETURN_VOID(database, HCCLSingleDeviceDB);
+        std::shared_ptr<DBRunner> dbRunner;
+        MAKE_SHARED_RETURN_VOID(dbRunner, DBRunner, dbPath);
+        auto cols = database->GetTableCols(KFC_OP_TABLE_NAME);
+        dbRunner->CreateTable(KFC_OP_TABLE_NAME, cols);
+        dbRunner->InsertData(KFC_OP_TABLE_NAME, data);
+    }
 };
 
 void CheckGlobalTaskId(CommunicationInfoProcessor::CommunicationTaskDataFormat data)
@@ -148,7 +184,8 @@ void CheckStringId(CommunicationInfoProcessor::CommunicationTaskDataFormat data)
     const uint16_t nameIndex = 0;
     const std::set<uint64_t> nameSet = {IdPool::GetInstance().GetUint64Id("hcom_allReduce__360_0_1"),
                                         IdPool::GetInstance().GetUint64Id("hcom_allReduce__233_0_2"),
-                                        IdPool::GetInstance().GetUint64Id("hcom_allReduce__832_0_1")};
+                                        IdPool::GetInstance().GetUint64Id("hcom_allReduce__832_0_1"),
+                                        IdPool::GetInstance().GetUint64Id("MatmulAllReduceAicpu_724_2_1")};
     const uint16_t taskTypeIndex = 2;
     const std::set<uint64_t> taskTypeSet = {IdPool::GetInstance().GetUint64Id("Memcpy"),
                                             IdPool::GetInstance().GetUint64Id("Memcpy23"),
@@ -164,10 +201,12 @@ void CheckStringId(CommunicationInfoProcessor::CommunicationTaskDataFormat data)
     const uint16_t dataTypeIndex = 11;
     const std::set<uint64_t> dataTypeSet = {HCCL_DATA_TYPE_TABLE.find("FP16")->second,
                                             HCCL_DATA_TYPE_TABLE.find("FP32")->second,
-                                            HCCL_DATA_TYPE_TABLE.find("INVALID_TYPE")->second};
+                                            HCCL_DATA_TYPE_TABLE.find("INVALID_TYPE")->second,
+                                            HCCL_DATA_TYPE_TABLE.find("INT8")->second};
     const uint16_t linkTypeIndex = 12;
     const std::set<uint64_t> linkTypeSet = {HCCL_LINK_TYPE_TABLE.find("HCCS")->second,
-                                            HCCL_LINK_TYPE_TABLE.find("ON_CHIP")->second};
+                                            HCCL_LINK_TYPE_TABLE.find("ON_CHIP")->second,
+                                            HCCL_LINK_TYPE_TABLE.find("INVALID_TYPE")->second};
     std::set<uint64_t> stringIdsSet;
     std::vector<uint64_t> stringIds;
     for (auto item : data) {

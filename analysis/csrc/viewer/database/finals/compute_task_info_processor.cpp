@@ -71,8 +71,20 @@ ComputeTaskInfoProcessor::OriDataFormat ComputeTaskInfoProcessor::GetData(const 
     return oriData;
 }
 
-ComputeTaskInfoProcessor::ProcessedDataFormat ComputeTaskInfoProcessor::FormatData(const OriDataFormat &oriData,
-                                                                                   GeHashMap &hashMap)
+ComputeTaskInfoProcessor::OriMc2CommFormat ComputeTaskInfoProcessor::GetMc2CommData(const DBInfo &mc2CommInfoDB)
+{
+    OriMc2CommFormat oriData;
+    std::string sql{"SELECT * FROM " + mc2CommInfoDB.tableName};
+    if (!mc2CommInfoDB.dbRunner->QueryData(sql, oriData)) {
+        ERROR("Failed to obtain data from the % table.", mc2CommInfoDB.tableName);
+    }
+    return oriData;
+}
+
+ComputeTaskInfoProcessor::ProcessedDataFormat ComputeTaskInfoProcessor::FormatData(
+    const OriDataFormat &oriData,
+    GeHashMap &hashMap,
+    std::unordered_set<uint32_t> &kfcStreamIds)
 {
     ProcessedDataFormat processedData;
     ComputeTaskInfoData data;
@@ -95,6 +107,10 @@ ComputeTaskInfoProcessor::ProcessedDataFormat ComputeTaskInfoProcessor::FormatDa
                  data.maxBlockDim, oriTaskType, oriOpType, std::ignore, data.batchId, oriInputFormats,
                  oriInputDataTypes, oriInputShapes, oriOutputFormats, oriOutputDataTypes,
                  oriOutputShapes, data.deviceId, data.contextId, orihashId) = row;
+        if (kfcStreamIds.find(data.streamId) != kfcStreamIds.end()) {
+            // kfc大算子通信流，需要过滤
+            continue;
+        }
         data.opName = IdPool::GetInstance().GetUint64Id(oriOpName);
         data.taskType = IdPool::GetInstance().GetUint64Id(oriTaskType);
         data.opType = IdPool::GetInstance().GetUint64Id(oriOpType);
@@ -117,6 +133,31 @@ ComputeTaskInfoProcessor::ProcessedDataFormat ComputeTaskInfoProcessor::FormatDa
     return processedData;
 }
 
+std::unordered_set<uint32_t> ComputeTaskInfoProcessor::GetKfcStreamIds(const std::string &fileDir)
+{
+    std::unordered_set<uint32_t> aicpuKfcStreamIds;
+    DBInfo mc2CommInfoDB("mc2_comm_info.db", "Mc2CommInfo");
+    MAKE_SHARED0_RETURN_VALUE(mc2CommInfoDB.database, Mc2CommInfoDB, aicpuKfcStreamIds);
+    std::string dbPath = Utils::File::PathJoin({fileDir, HOST, SQLITE, mc2CommInfoDB.dbName});
+    auto status = CheckPath(dbPath);
+    if (status != CHECK_SUCCESS) {
+        return aicpuKfcStreamIds;
+    }
+    MAKE_SHARED_RETURN_VALUE(mc2CommInfoDB.dbRunner, DBRunner, aicpuKfcStreamIds, dbPath);
+    auto oriMc2Data = GetMc2CommData(mc2CommInfoDB);
+    std::string groupName;
+    uint32_t rankSize;
+    uint32_t rankId;
+    uint32_t usrRankId;
+    uint32_t aicpuKfcStreamId;
+    std::string commStreamIds;
+    for (auto &row: oriMc2Data) {
+        std::tie(groupName, rankSize, rankId, usrRankId, aicpuKfcStreamId, commStreamIds) = row;
+        aicpuKfcStreamIds.insert(aicpuKfcStreamId);
+    }
+    return aicpuKfcStreamIds;
+}
+
 bool ComputeTaskInfoProcessor::Process(const std::string &fileDir)
 {
     DBInfo geInfoDB("ge_info.db", "TaskInfo");
@@ -136,12 +177,13 @@ bool ComputeTaskInfoProcessor::Process(const std::string &fileDir)
         ERROR("Get % data failed in %.", geInfoDB.tableName, dbPath);
         return false;
     }
+    auto aicpuKfcStreamIds = GetKfcStreamIds(fileDir);
     GeHashMap hashMap;
     if (!GetGeHashMap(hashMap, fileDir)) {
         ERROR("Can't get hash data.");
         return false;
     }
-    auto processedData = FormatData(oriData, hashMap);
+    auto processedData = FormatData(oriData, hashMap, aicpuKfcStreamIds);
     if (!SaveData(processedData, TABLE_NAME_COMPUTE_TASK_INFO)) {
         ERROR("Save data failed.");
         return false;

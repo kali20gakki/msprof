@@ -88,3 +88,7 @@ class TestKfcCalculator(unittest.TestCase):
         self.assertEqual(2, len(check._kfc_op_data))
         self.assertEqual(2, len(check._kfc_task_data))
         InfoConfReader()._info_json = {}
+
+    def test_make_default_kfc_info_should_return_len_28_named_tuple(self: any) -> None:
+        default_kfc_info = KfcCalculator.make_default_kfc_info()
+        self.assertEqual(28, len(default_kfc_info))

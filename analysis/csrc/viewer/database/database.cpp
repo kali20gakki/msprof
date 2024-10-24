@@ -573,6 +573,15 @@ namespace {
         {"compute_exe_end_time", SQL_INTEGER_TYPE},
     };
 
+    const TableColumns Mc2CommInfo = {
+        {"group_name", SQL_TEXT_TYPE},
+        {"rank_size", SQL_INTEGER_TYPE},
+        {"rank_id", SQL_INTEGER_TYPE},
+        {"usr_rank_id", SQL_INTEGER_TYPE},
+        {"aicpu_kfc_stream_id", SQL_INTEGER_TYPE},
+        {"comm_stream_ids", SQL_TEXT_TYPE},
+    };
+
     const TableColumns CpuUsage = {
         {"start_time", SQL_NUMERIC_TYPE},
         {"end_time", SQL_NUMERIC_TYPE},
@@ -629,6 +638,7 @@ namespace {
         {"duration", SQL_NUMERIC_TYPE},
         {"group_name", SQL_TEXT_TYPE},
         {"connection_id", SQL_INTEGER_TYPE},
+        {"op_type", SQL_TEXT_TYPE},
     };
 
     const TableColumns KfcTask = {
@@ -907,6 +917,12 @@ KfcInfo::KfcInfo()
     dbName_ = "kfc_info.db";
     tableColNames_["KfcCommTurn"] = KfcCommTurn;
     tableColNames_["KfcComputeTurn"] = KfcComputeTurn;
+}
+
+Mc2CommInfoDB::Mc2CommInfoDB()
+{
+    dbName_ = "mc2_comm_info.db";
+    tableColNames_["Mc2CommInfo"] = Mc2CommInfo;
 }
 
 HostCpuUsage::HostCpuUsage()

@@ -26,7 +26,7 @@ from mscalculate.hccl.hccl_calculator import HcclCalculator
 class KfcCalculator(ICalculator, MsMultiProcess):
     KFC_OP_DATA = CustomizedNamedtupleFactory.enhance_namedtuple(
         namedtuple("KfcOpData",
-                   ["ascend_data", "group_name", "op_name", "first_timestamp", "iter_id"]),
+                   ["ascend_data", "group_name", "op_name", "first_timestamp", "iter_id", "op_type"]),
         {})
     BLACK_KFC_OP = ["NOTIFY_WAIT"]
 
@@ -38,10 +38,17 @@ class KfcCalculator(ICalculator, MsMultiProcess):
         self._kfc_task_data = []
         self._comm_task = []
 
+    @staticmethod
+    def make_default_kfc_info() -> KfcInfoViewModel.KFC_HCCL_INFO_TYPE:
+        default_kfc_info = KfcInfoViewModel.KFC_HCCL_INFO_TYPE(
+            0, "N/A", 'N/A', 'N/A', 4294967295, 4294967295, -1, 0, -1, 4294967295, 'N/A', 'N/A', 'N/A', -1,
+            'N/A', 'N/A', -1, 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', -1, -1, 0, 0, 0, 0
+        )
+        return default_kfc_info
+
     def calculate(self: any) -> None:
         self.calculate_kfc_op()
-        if os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_KFC_INFO)):
-            self.calculate_kfc_task()
+        self.calculate_kfc_task()
 
     def save(self: any) -> None:
         if self._kfc_op_data:
@@ -69,19 +76,18 @@ class KfcCalculator(ICalculator, MsMultiProcess):
         for data in task_data:
             if data.stream_id in kfc_stream_id and data.host_task_type not in self.BLACK_KFC_OP:
                 # kfc大算子流
-                kfc_op_data.append(self.KFC_OP_DATA(data, kfc_stream_id.get(data.stream_id, ""), "", 0, 1))
+                kfc_op_data.append(self.KFC_OP_DATA(data, kfc_stream_id.get(data.stream_id, ""), "", 0, 1, ""))
                 continue
             if data.stream_id in comm_stream_ids:
                 self._comm_task.append(data)  # kfc小算子流
         with GeInfoViewModel(self._project_path, [DBNameConstant.TABLE_GE_TASK]) as model:
             ge_data = model.get_ge_info_by_device_id(DBNameConstant.TABLE_GE_TASK, InfoConfReader().get_device_id())
-        node_name = {}
-        host_timestamp = {}
+        node_name, host_timestamp = {}, {}
         for data in ge_data:
             if data.stream_id not in kfc_stream_id:
                 continue
             node_key = "{0}-{1}-{2}-{3}".format(data.stream_id, data.task_id, data.context_id, data.batch_id)
-            node_name[node_key] = data.op_name
+            node_name[node_key] = [data.op_name, data.op_type]
             host_timestamp[node_key] = data.timestamp
         kfc_op_with_task = set()
         kfc_op_with_task_index = {}
@@ -93,33 +99,26 @@ class KfcCalculator(ICalculator, MsMultiProcess):
                 iter_id = kfc_op_with_task_index.get(node_key, 1) + 1
                 kfc_op_with_task_index[node_key] = iter_id
             kfc_op_with_task.add(node_key)
-            op_name = node_name.get(node_key, None)
+            op_name, op_type = node_name.get(node_key, [None, None])
             if not op_name:
                 logging.error("The kfc op name is None with task type %s", data.host_task_type)
                 continue
             first_timestamp = host_timestamp.get(node_key, 0)
-            kfc_op_data[i] = op_data.replace(op_name=op_name, first_timestamp=first_timestamp, iter_id=iter_id)
+            kfc_op_data[i] = op_data.replace(op_name=op_name,
+                                             first_timestamp=first_timestamp, iter_id=iter_id, op_type=op_type)
         HcclCalculator.update_op_name_by_group_name(kfc_op_data)
         self._kfc_op_data = [[data.ascend_data.model_id, data.ascend_data.index_id, data.op_name,
                               data.ascend_data.start_time, data.ascend_data.duration, data.group_name,
-                              data.ascend_data.connection_id] for data in kfc_op_data]
+                              data.ascend_data.connection_id, data.op_type] for data in kfc_op_data]
 
     def calculate_kfc_task(self: any) -> None:
-        with KfcInfoViewModel(self._project_path,
-                              [DBNameConstant.TABLE_KFC_INFO]) as kfc_info_model:
-            kfc_info_data = kfc_info_model.get_kfc_info_data()
-        if not kfc_info_data:
-            return
-        kfc_info_data = FlipCalculator.set_device_batch_id(kfc_info_data, self._project_path)
-        task_time = {}
-        for data in self._comm_task:
-            node_key = "{0}-{1}-{2}-{3}".format(data.stream_id, data.task_id, data.context_id, data.batch_id)
-            task_time[node_key] = [data.start_time, data.duration]
-        for idx, data in enumerate(kfc_info_data):
-            node_key = "{0}-{1}-{2}-{3}".format(data.stream_id, data.task_id, data.context_id, data.batch_id)
-            node_time = task_time.get(node_key, [0, 0])
-            kfc_info_data[idx] = data.replace(start_time=node_time[0], duration=node_time[1])
-        HcclCalculator.update_bandwidth(kfc_info_data)
+        # 由于mc2没有上报翻转flip信息，所以不呈现hccl小算子
+        kfc_info_data = [None] * len(self._comm_task)
+        for idx, data in enumerate(self._comm_task):
+            kfc_info_data[idx] = self.make_default_kfc_info()
+            kfc_info_data[idx] = kfc_info_data[idx].replace(start_time=data.start_time, duration=data.duration,
+                                                            stream_id=data.stream_id, task_id=data.task_id,
+                                                            context_id=data.context_id, batch_id=data.batch_id)
         idx = 0
         match_num = 0
         self._kfc_task_data = [None] * len(kfc_info_data)
@@ -130,8 +129,10 @@ class KfcCalculator(ICalculator, MsMultiProcess):
             # kfc_op[3]: kfc op start time; kfc_op[4]: kfc op duration
             while idx < len(kfc_info_data) and kfc_info_data[idx].start_time <= kfc_op[3] + kfc_op[4]:
                 data = kfc_info_data[idx]
+                group_name = data.group_name if data.group_name != "N/A" else kfc_op[5]
                 self._kfc_task_data[match_num] = [
-                    *kfc_op[:-2], 0, data.op_name, data.group_name, data.plane_id, data.start_time, data.duration,
+                    # kfc op的前5个字段: model_id, index_id, op_name, start_time, duration
+                    *kfc_op[:5], 0, data.op_name, group_name, data.plane_id, data.start_time, data.duration,
                     data.stream_id, data.task_id, data.duration_estimated, data.local_rank, data.remote_rank,
                     data.transport_type, data.size, data.data_type, data.link_type, data.bandwidth, data.context_id,
                     data.notify_id, data.batch_id, data.rdma_type
