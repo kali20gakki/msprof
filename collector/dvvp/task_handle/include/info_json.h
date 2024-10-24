@@ -62,7 +62,6 @@ private:
     void AddSysTime(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
     void AddMemTotal(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
     void AddNetCardInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
-    void AddCycleToTimeInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
     void SetRankId(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
     void SetVersionInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain) const;
     void SetDrvVersion(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain) const;

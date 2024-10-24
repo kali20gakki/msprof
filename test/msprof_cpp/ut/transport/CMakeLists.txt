@@ -21,6 +21,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_cloudv2.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_cloud.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/mini/ai_drv_dsmi_api.cpp  
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp 
@@ -39,6 +40,8 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/info_json.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/task_relationship_mgr.cpp 
     ${CppPath}
 )
 
@@ -48,6 +51,7 @@ set(localSrcFiles
     test/uploader_utest.cpp 
     test/prof_channel_utest.cpp
     test/hash_data_test.cpp
+    test/info_json_utest.cpp
     ../stub/hdc-api-stub.cpp 
     ../stub/hdc-log-stub.cpp 
     ../stub/devdrv_runtime_api_stub.cpp 
