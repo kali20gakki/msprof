@@ -240,19 +240,6 @@ void InfoJson::AddNetCardInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
 #endif
 }
 
-void InfoJson::AddCycleToTimeInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
-{
-#if (defined(linux) || defined(__linux__))
-    double freq = Utils::StatCpuRealFreq();
-    uint64_t cycleCnt = Utils::GetCPUCycleCounter();
-    uint64_t monotonicRaw = Utils::GetClockMonotonicRaw();
-
-    auto cycleToTime = infoMain->add_cycletotime();
-    cycleToTime->set_realcpufreq(freq);
-    cycleToTime->set_calibration(static_cast<uint64_t>(cycleCnt / freq) - monotonicRaw);
-#endif
-}
-
 void InfoJson::SetRankId(SHARED_PTR_ALIA<InfoMain> infoMain)
 {
 #if (defined(linux) || defined(__linux__))
@@ -293,7 +280,6 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
     AddSysConf(infoMain);
     AddSysTime(infoMain);
     AddNetCardInfo(infoMain);
-    AddCycleToTimeInfo(infoMain);
 
     // fetch and set cpu infos
     MmCpuDesc *cpuInfo = nullptr;
