@@ -196,6 +196,11 @@ public:
     KfcInfo();
 };
 
+class Mc2CommInfoDB : public Database {
+public:
+    Mc2CommInfoDB();
+};
+
 class HostCpuUsage : public Database {
 public:
     HostCpuUsage();

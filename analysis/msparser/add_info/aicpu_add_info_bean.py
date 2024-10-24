@@ -235,7 +235,8 @@ class KfcHcclInfoBean:
 
     @property
     def group_name(self: any) -> str:
-        return str(self._group_name)
+        # 标记mc2算子通信域，避免与hccl通信域相同
+        return "mc2_" + str(self._group_name)
 
     @property
     def local_rank(self: any) -> int:

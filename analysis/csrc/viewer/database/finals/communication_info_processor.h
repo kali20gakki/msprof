@@ -31,7 +31,10 @@ public:
     // connection_id, op_name, relay, retry, data_type, alg_type, count, group_name, op_type
     using HcclOpFormat = std::tuple<uint32_t, std::string, int32_t, int32_t, std::string, std::string, uint64_t,
                                     std::string, std::string>;
+    using KfcOpFormat = std::tuple<uint32_t, std::string, int32_t, int32_t, std::string, std::string, uint64_t,
+                                   std::string, std::string, double, double>;
     using OriOpDataFormat = std::vector<HcclOpFormat>;
+    using OriKfcOpDataFormat = std::vector<KfcOpFormat>;
     // name, globalTaskId, taskType, planeId, groupName, notifyId, rdmaType, srcRank, dstRank, transportType,
     // size, dataType, linkType, opId
     using CommunicationTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t,
@@ -98,16 +101,29 @@ protected:
 private:
     static OriTaskDataFormat GetTaskData(const DBInfo &hcclSingleDeviceDB);
     static OriOpDataFormat GetOpData(const DBInfo &hcclSingleDeviceDB);
-    bool ProcessOneDevice(const std::string &devicePath, ThreadData &threadData,
-                          DBInfo &taskDBInfo, DBInfo &opDBInfo, const std::string &fileDir);
-    bool FormatData(const OriTaskDataFormat &oriTaskData, const OriOpDataFormat &oriOpData,
+    static OriTaskDataFormat GetKfcTaskData(const DBInfo &kfcTask);
+    static OriKfcOpDataFormat GetKfcOpData(const DBInfo &kfcOp);
+    bool ProcessOneDeviceHccl(const std::string &devicePath, DBInfo &taskDBInfo, DBInfo &opDBInfo,
+                              OriTaskDataFormat &oriTaskData, OriOpDataFormat &oriOpData);
+    bool ProcessOneDeviceKfc(const std::string &devicePath, DBInfo &kfcTaskDBInfo, DBInfo &kfcOpDBInfo,
+                             OriTaskDataFormat &oriKfcTaskData, OriKfcOpDataFormat &oriKfcOpData);
+    void FormatData(const OriTaskDataFormat &oriTaskData, const OriOpDataFormat &oriOpData,
                     CommunicationTaskDataFormat &taskData, CommunicationOpDataFormat &opData,
                     const ThreadData &threadData, GeHashMap &hashMap);
+    void FormatKfcTaskData(const OriTaskDataFormat &oriTaskData,
+                           CommunicationTaskDataFormat &processedTaskData,
+                           const ThreadData &threadData, GeHashMap &hashMap);
+    void FormatKfcOpData(const OriKfcOpDataFormat &oriOpData,
+                         CommunicationOpDataFormat &processedOpData,
+                         const ThreadData &threadData, GeHashMap &hashMap);
     void Update(const HcclTaskFormat &oriData, HcclTaskSingleDeviceData &hcclData, CommunicationTaskData &taskData,
                 uint16_t deviceId, GeHashMap &hashMap);
     void UpdateOpInfo(CommunicationOpData &opData, uint32_t connectionId,
                       const std::unordered_map<uint32_t, size_t> &opInfoIdxMap,
                       const OriOpDataFormat &oriOpData, GeHashMap &hashMap);
+    bool SaveCommData(ThreadData &threadData, OriTaskDataFormat &oriTaskData, OriOpDataFormat &oriOpData,
+                      OriTaskDataFormat &oriKfcTaskData, OriKfcOpDataFormat &oriKfcOpData,
+                      const std::string &fileDir);
     std::unordered_map<uint32_t, size_t> GenOpInfoIdxmap(const OriOpDataFormat &oriOpData);
 };
 

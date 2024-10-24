@@ -1453,6 +1453,7 @@ class TablesConfig(MetaConfig):
             ('duration', 'NUMERIC,null'),
             ('group_name', 'TEXT,null'),
             ('connection_id', 'INTEGER,null'),
+            ('op_type', 'TEXT,null'),
         ],
         'KfcTaskMap': [
             ('model_id', 'INTEGER,null'),

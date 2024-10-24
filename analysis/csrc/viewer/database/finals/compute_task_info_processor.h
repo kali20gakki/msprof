@@ -12,6 +12,8 @@
 #ifndef ANALYSIS_VIEWER_DATABASE_COMPUTE_TASK_INFO_PROCESSOR_H
 #define ANALYSIS_VIEWER_DATABASE_COMPUTE_TASK_INFO_PROCESSOR_H
 
+#include <unordered_set>
+
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
 
 namespace Analysis {
@@ -26,6 +28,8 @@ class ComputeTaskInfoProcessor : public TableProcessor {
                                                  std::string, std::string, double, uint32_t, std::string,
                                                  std::string, std::string, std::string, std::string, std::string,
                                                  int32_t, uint32_t, std::string>>;
+    using OriMc2CommFormat = std::vector<std::tuple<std::string, uint32_t, uint32_t,
+                                                    uint32_t, uint32_t, std::string>>;
     // name, globalTaskId, block_dim, mixBlockDim, taskType, opType, inputFormats, inputDataTypes, inputShapes,
     // outputFormats, outputDataTypes, outputShapes, hashid
     using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t,
@@ -40,7 +44,10 @@ protected:
     bool Process(const std::string &fileDir) override;
 private:
     static OriDataFormat GetData(const DBInfo &geInfo);
-    static ProcessedDataFormat FormatData(const OriDataFormat &oriData, GeHashMap &hashMap);
+    static OriMc2CommFormat GetMc2CommData(const DBInfo &mc2CommInfoDB);
+    static ProcessedDataFormat FormatData(const OriDataFormat &oriData, GeHashMap &hashMap,
+                                          std::unordered_set<uint32_t> &kfcStreamIds);
+    std::unordered_set<uint32_t> GetKfcStreamIds(const std::string &fileDir);
 };
 
 } // Database
