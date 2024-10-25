@@ -18,6 +18,7 @@
 #include <map>
 #include <set>
 #include <functional>
+#include <algorithm>
 #include "analysis/csrc/utils/utils.h"
 #include "analysis/csrc/domain/entities/metric/include/metric.h"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
@@ -53,7 +54,7 @@ using IntPtrType = std::vector<uint64_t>;
 
 class Calculator {
 public:
-    Calculator(std::vector<int> registers, std::function<double(CalculationElements &params, size_t index)> func)
+    Calculator(std::vector<uint32_t> registers, std::function<double(CalculationElements &params, size_t index)> func)
     : registers(std::move(registers)), calculatorFunc(std::move(func)) {}
     static double CalculatorMetricByNothing(CalculationElements &allParams, size_t index);
     static double CalculatorMetricByAdditions(CalculationElements &allParams, size_t index);
@@ -64,7 +65,7 @@ public:
     static double CalculatorVectorFops(CalculationElements &allParams, size_t index);
     static double CalculatorTotalTime(uint64_t totalCycle, uint64_t blockDim, uint64_t coreNum, uint64_t freq);
 public:
-    std::vector<int> registers;
+    std::vector<uint32_t> registers;
     std::function<double(CalculationElements &params, size_t index)> calculatorFunc;
 };
 
@@ -104,10 +105,26 @@ public:
         return res;
     }
 
+    template<typename K, typename V>
+    bool CheckMetricEventBySubType(const std::map<K, V> &mapTable, std::vector<uint32_t> &event)
+    {
+        bool flag = true;
+        for (const auto &it : mapTable) {
+            flag = std::all_of(it.second.registers.begin(), it.second.registers.end(), [&event](uint32_t elem) {
+                return std::find(event.begin(), event.end(), elem) != event.end();
+            });
+            if (!flag) { // 如果有元素找不到，直接退出，不再继续判断
+                return flag;
+            }
+        }
+        return flag;
+    }
+
     std::vector<double> CalculatePmuMetric(DataInventory& dataInventory, const DeviceContext& context,
                                            CalculationElements& allParams, HalPmuData& pmuData, DeviceTask& task);
     virtual ~MetricCalculator() = default;
     virtual std::vector<std::string> GetPmuHeader() = 0;
+    virtual bool CheckMetricEventValid(std::vector<uint32_t> &event) = 0;
 private:
     virtual std::vector<double> SetAllParamsAndCalculator(CalculationElements& allParams, const DeviceContext& context,
                                                           HalPmuData& pmuData) = 0;

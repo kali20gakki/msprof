@@ -25,6 +25,11 @@ public:
         auto res = GetPmuHeaderBySubType(pipeLineUtTable);
         return res;
     }
+
+    bool CheckMetricEventValid(std::vector<uint32_t> &event) override
+    {
+        return CheckMetricEventBySubType(pipeLineUtTable, event);
+    }
 private:
     std::vector<double> SetAllParamsAndCalculator(CalculationElements& allParams, const DeviceContext& context,
                                                   HalPmuData& pmuData) override

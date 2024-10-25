@@ -201,6 +201,16 @@ uint32_t PmuAssociation::ProcessEntry(Infra::DataInventory& dataInventory, const
         ERROR("The value of aiv_metrics or ai_core_metrics is invalid!");
         return ANALYSIS_ERROR;
     }
+    if (!aicCalculator_->CheckMetricEventValid(sampleInfo.aiCoreProfilingEvents) ||
+        !aivCalculator_->CheckMetricEventValid(sampleInfo.aivProfilingEvents)) {
+        ERROR("The PMU event does not meet the calculation requirements, please check");
+        return ANALYSIS_ERROR;
+    }
+    if (pmuData->back().pmu.pmuList.size() != sampleInfo.aiCoreProfilingEvents.size() ||
+        pmuData->back().pmu.pmuList.size() != sampleInfo.aivProfilingEvents.size()) {
+        ERROR("The size of PMU event is not equal with pmu data size, please check");
+        return ANALYSIS_ERROR;
+    }
     SplitPmu(*pmuData);
     if (deviceContext.GetChipID() != CHIP_V4_1_0) {
         // 非MIX算子不需要计算block级别数据
