@@ -13,6 +13,7 @@
 #include "errno/error_code.h"
 #include "utils/utils.h"
 #include "config/config_manager.h"
+#include "config/config.h"
 #include "mockcpp/mockcpp.hpp"
 #include "info_json.h"
 #include "mmpa_api.h"
@@ -25,8 +26,9 @@ using namespace analysis::dvvp::host;
 using namespace analysis::dvvp::driver;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
+using namespace analysis::dvvp::common::config;
 
-const int TEST_HOST_PID = 161947;
+const int TEST_HOST_PID = 1;
 
 class InfoJsonUTest : public testing::Test {
 public:
@@ -243,4 +245,32 @@ TEST_F(InfoJsonUTest, GetDevInfoCheckAiCpuCoreNum)
     EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
     dev_info.ai_cpu_core_num = 0;
     EXPECT_EQ(PROFILING_SUCCESS, infoJson.GetDevInfo(0, dev_info));
+}
+
+TEST_F(InfoJsonUTest, SetPidInfo)
+{
+    GlobalMockObject::verify();
+    InfoJson infoJson(jobInfo, devices, hostpid);
+    std::shared_ptr<InfoMain> infoMain = std::make_shared<InfoMain>();
+
+    int invalidPid = -1;
+    int validPid = 1; // system pid
+    // input pid is invalid
+    infoJson.SetPidInfo(infoMain, invalidPid);
+    EXPECT_EQ("NA", infoMain->pid_name());
+    EXPECT_EQ("NA", infoMain->pid());
+
+    // proc file size is invalid
+    MOCKER_CPP(&analysis::dvvp::common::utils::Utils::GetFileSize)
+        .stubs()
+        .will(returnValue(MSVP_LARGE_FILE_MAX_LEN + 1))
+        .then(returnValue(MSVP_LARGE_FILE_MAX_LEN));
+    infoJson.SetPidInfo(infoMain, validPid);
+    EXPECT_EQ("NA", infoMain->pid_name());
+    EXPECT_EQ("1", infoMain->pid());
+
+    // proc file size is valid
+    infoJson.SetPidInfo(infoMain, validPid);
+    EXPECT_NE("NA", infoMain->pid_name());
+    EXPECT_EQ("1", infoMain->pid());
 }

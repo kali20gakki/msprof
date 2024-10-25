@@ -487,20 +487,25 @@ void InfoJson::SetPidInfo(SHARED_PTR_ALIA<InfoMain> infoMain, int pid)
         pidtmp = std::to_string(pid);
 #if (defined(linux) || defined(__linux__))
         processInfoPath = "/proc/" + pidtmp + "/status";
-        std::ifstream processInfo(processInfoPath);
-        if (processInfo.is_open()) {
-            std::getline(processInfo, pidName);
+        long long len = Utils::GetFileSize(processInfoPath);
+        if (len < 0 || len > MSVP_LARGE_FILE_MAX_LEN) {
+            MSPROF_LOGW("[SetPidInfo] Proc file(%s) size(%lld)", processInfoPath.c_str(), len);
         } else {
-            MSPROF_LOGE("Set pid_name failed(failed to open the file for pid_name info), pid=%d", pid);
-        }
-        processInfo.close();
-        // The length of searching tag "Name:\t" is 6. This constant is used to locate the position of pid_name.
-        constexpr size_t searchTagLength = 6;
-        size_t pidNamePos = pidName.find("Name:\t") + searchTagLength;
-        if ((pidNamePos - searchTagLength) != std::string::npos) {
-            pidName = pidName.substr(pidNamePos, pidName.size() - pidNamePos);
-        } else {
-            MSPROF_LOGE("Set pid_name failed, pid=%d", pid);
+            std::ifstream processInfo(processInfoPath);
+            if (processInfo.is_open()) {
+                std::getline(processInfo, pidName);
+            } else {
+                MSPROF_LOGE("Set pid_name failed(failed to open the file for pid_name info), pid=%d", pid);
+            }
+            processInfo.close();
+            // The length of searching tag "Name:\t" is 6. This constant is used to locate the position of pid_name.
+            constexpr size_t searchTagLength = 6;
+            size_t pidNamePos = pidName.find("Name:\t") + searchTagLength;
+            if ((pidNamePos - searchTagLength) != std::string::npos) {
+                pidName = pidName.substr(pidNamePos, pidName.size() - pidNamePos);
+            } else {
+                MSPROF_LOGE("Set pid_name failed, pid=%d", pid);
+            }
         }
 #endif
     }

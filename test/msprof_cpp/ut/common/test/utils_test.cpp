@@ -45,6 +45,11 @@ private:
     std::string _log_file;
 };
 
+void GetChildDirsStub(const std::string &dir, bool isRecur, std::vector<std::string> &childDirs, unsigned int depthCnt)
+{
+    childDirs.push_back(dir + "/" + "1");
+}
+
 TEST_F(COMMON_UTILS_UTILS_TEST, GetCPUCycleCounter) {
     GlobalMockObject::verify();
     EXPECT_NE((unsigned long long)0, Utils::GetCPUCycleCounter());
@@ -1422,4 +1427,24 @@ TEST_F(COMMON_UTILS_UTILS_TEST, GetHostMacStr)
 {
     std::string macStr = analysis::dvvp::common::utils::Utils::GetHostMacStr();
     EXPECT_TRUE(macStr.length() > 0);
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, GetChildPid)
+{
+    GlobalMockObject::verify();
+    MOCKER(&Utils::GetChildDirs)
+        .stubs()
+        .will(invoke(GetChildDirsStub));
+    
+    // file size invalid
+    MOCKER_CPP(&Utils::GetFileSize)
+        .stubs()
+        .will(returnValue(MSVP_LARGE_FILE_MAX_LEN + 1))
+        .then(returnValue(MSVP_LARGE_FILE_MAX_LEN));
+    std::vector<int> ret = analysis::dvvp::common::utils::Utils::GetChildPid(1);
+    EXPECT_EQ(0, ret.size());
+
+    // file size valid
+    ret = analysis::dvvp::common::utils::Utils::GetChildPid(1);
+    EXPECT_NE(0, ret.size());
 }
