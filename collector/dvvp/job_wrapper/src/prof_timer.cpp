@@ -557,6 +557,9 @@ void ProcPidStatFileHandler::ParseProcFile(std::ifstream &ifs, std::string &data
         data += processName;
         data += "\n";
         std::string buf;
+        if (!CheckFileSize(PROF_PROC_STAT)) {
+            return;
+        }
         ifStat_.open(PROF_PROC_STAT, std::ifstream::in);
         if (!ifStat_.is_open()) {
             MSPROF_LOGW("Open file %s failed", PROF_PROC_STAT);

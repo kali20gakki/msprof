@@ -975,8 +975,14 @@ std::vector<int> Utils::GetChildPid(int pid)
     constexpr int base = 10;
     std::ifstream ifs;
     for (auto &tdir : threadDirs) {
+        std::string childrenPath = tdir + "/children";
+        long long len = Utils::GetFileSize(childrenPath);
+        if (len < 0 || len > MSVP_LARGE_FILE_MAX_LEN) {
+            MSPROF_LOGW("Invalid file(%s) size(%lld)", childrenPath.c_str(), len);
+            continue;
+        }
         std::string lineBuf;
-        ifs.open(tdir + "/children", std::ifstream::in);
+        ifs.open(childrenPath, std::ifstream::in);
         if (!ifs.is_open()) {
             MSPROF_LOGW("Open file %s/children failed", tdir.c_str());
             continue;
