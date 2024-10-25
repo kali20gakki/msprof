@@ -51,6 +51,11 @@ int ProfChannelPoll(struct ProfPollInfo* outBuf, int num, int timeout)
 
 int ProfChannelRead(unsigned int deviceId, unsigned int channelId, char *outBuf, unsigned int bufSize)
 {
+    constexpr unsigned int maxBufferSize = 1024 * 1024 * 2;
+    constexpr unsigned int maxChannelId = 160;
+    if (channelId == maxChannelId) {
+        return maxBufferSize;
+    }
     if (channelId == PROF_CHANNEL_TS_FW) {
         static bool reportFlag = true;
         if (reportFlag) {

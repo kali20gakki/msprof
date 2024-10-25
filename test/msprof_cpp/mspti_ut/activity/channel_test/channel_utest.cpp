@@ -45,4 +45,16 @@ TEST_F(ChannelUtest, ShouldRetSuccessWhenExecChannelReaderCorrectly)
     reader.SetChannelStopped();
     EXPECT_EQ(MSPTI_SUCCESS, reader.Uinit());
 }
+
+TEST_F(ChannelUtest, ExecuteShouleBreakWhenGetInvalidDataLenFromDriver)
+{
+    constexpr unsigned int maxChannelId = 160;
+    uint32_t deviceId = 0;
+    AI_DRV_CHANNEL channelId = static_cast<AI_DRV_CHANNEL>(maxChannelId);
+    auto reader = Mspti::Ascend::Channel::ChannelReader(deviceId, channelId);
+    EXPECT_EQ(MSPTI_SUCCESS, reader.Init());
+    EXPECT_EQ(MSPTI_SUCCESS, reader.Execute());
+    reader.SetChannelStopped();
+    EXPECT_EQ(MSPTI_SUCCESS, reader.Uinit());
+}
 }
