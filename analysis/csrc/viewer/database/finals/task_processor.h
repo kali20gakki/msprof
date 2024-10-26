@@ -36,8 +36,7 @@ public:
     bool Run() override;
 protected:
     bool Process(const std::string &fileDir) override;
-    bool ProcessWithMsprofTxTaskData(const std::string &fileDir, uint32_t pid,
-                                     std::vector<std::string> &deviceList, ThreadData &threadData);
+    bool ProcessWithMsprofTxTaskData(const std::string &fileDir);
 private:
     static OriDataFormat GetData(DBInfo &ascendTaskDB);
     static ProcessedDataFormat FormatData(const OriDataFormat &oriData, const ThreadData &threadData,
