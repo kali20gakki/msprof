@@ -1423,6 +1423,16 @@ TEST_F(COMMON_UTILS_UTILS_TEST, StrToLongLong)
               analysis::dvvp::common::utils::Utils::StrToLongLong(retValue, "9999999999999999999999999999999"));
 }
 
+TEST_F(COMMON_UTILS_UTILS_TEST, StrToDouble)
+{
+    GlobalMockObject::verify();
+    double retValue;
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::StrToDouble(retValue, ""));
+    EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::common::utils::Utils::StrToDouble(retValue, "3.14"));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::StrToDouble(retValue, "abcd"));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::StrToDouble(retValue, "11tt.1"));
+}
+
 TEST_F(COMMON_UTILS_UTILS_TEST, GetHostMacStr)
 {
     std::string macStr = analysis::dvvp::common::utils::Utils::GetHostMacStr();

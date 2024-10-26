@@ -162,8 +162,12 @@ void ConfigManager::InitFrequency()
 {
     std::string frequency;
     std::string aicFrq;
-    std::string type = configMap_[TYPE_CONFIG];
-    auto platType  = static_cast<PlatformType>(std::stoi(type));
+    int type;
+    if (Utils::StrToInt(type, configMap_[TYPE_CONFIG]) == PROFILING_FAILED ||
+        type >= static_cast<int>(PlatformType::END_TYPE)) {
+        return;
+    }
+    auto platType  = static_cast<PlatformType>(type);
     auto iterator = FREQUENCY_TYPE.find(platType);
     if (iterator != FREQUENCY_TYPE.end()) {
         frequency = iterator->second;

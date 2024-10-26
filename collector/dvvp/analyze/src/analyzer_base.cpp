@@ -58,10 +58,14 @@ void AnalyzerBase::BufferRemainingData(uint32_t offset)
 
 int32_t AnalyzerBase::InitFrequency()
 {
-    std::string freq = Analysis::Dvvp::Common::Config::ConfigManager::instance()->GetFrequency();
-    frequency_ = std::stod(freq) / 1000;   // 1000: mhz to ghz, syscnt * (1 / ghz) = ns
+    double freq;
+    if (Utils::StrToDouble(freq,
+        Analysis::Dvvp::Common::Config::ConfigManager::instance()->GetFrequency()) == PROFILING_FAILED) {
+        return PROFILING_FAILED;
+    }
+    frequency_ = freq / 1000;   // 1000: mhz to ghz, syscnt * (1 / ghz) = ns
     if (frequency_ <= 0) {
-        MSPROF_LOGE("init freqency failed. freq %s, frequency_ %f", freq.c_str(), frequency_);
+        MSPROF_LOGE("init freqency failed. freq %f", freq);
         return PROFILING_FAILED;
     } else {
         MSPROF_EVENT("InitFrequency success. freqency: %f", frequency_);

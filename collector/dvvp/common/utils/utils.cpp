@@ -1718,6 +1718,26 @@ int Utils::StrToLongLong(long long &dest, const std::string &numStr)
     return PROFILING_SUCCESS;
 }
 
+int Utils::StrToDouble(double &dest, const std::string &numStr)
+{
+    if (numStr.empty()) {
+        MSPROF_LOGE("StrToDouble failed, the input string is empty.");
+        return PROFILING_FAILED;
+    }
+    size_t pos = 0;
+    try {
+        dest = std::stod(numStr, &pos);
+    } catch (...) {
+        MSPROF_LOGE("StrToDouble failed, the input string is '%s'.", numStr.c_str());
+        return PROFILING_FAILED;
+    }
+    if (pos != numStr.size()) {
+        MSPROF_LOGE("StrToDouble failed, the input string is '%s'.", numStr.c_str());
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
+}
+
 int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile, const std::string &profName)
 {
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))

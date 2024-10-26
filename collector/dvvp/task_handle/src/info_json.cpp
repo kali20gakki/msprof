@@ -158,6 +158,7 @@ void InfoJson::AddMemTotal(SHARED_PTR_ALIA<InfoMain> infoMain)
 #if (defined(linux) || defined(__linux__))
     std::string line;
     std::ifstream fin;
+    uint32_t memoryTotal;
 
     long long len = Utils::GetFileSize(PROF_PROC_MEM);
     if (len < 0 || len > MSVP_LARGE_FILE_MAX_LEN) {
@@ -194,8 +195,8 @@ void InfoJson::AddMemTotal(SHARED_PTR_ALIA<InfoMain> infoMain)
             break;
         }
         std::string result = line.substr(start, end - start + 1);
-        if (Utils::CheckStringIsNonNegativeIntNum(result)) {
-            infoMain->set_memorytotal(std::stoi(result));
+        if (Utils::StrToUint32(memoryTotal, result) == PROFILING_SUCCESS) {
+            infoMain->set_memorytotal(memoryTotal);
         }
         break;
     }
@@ -208,6 +209,7 @@ void InfoJson::AddNetCardInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
 #if (defined(linux) || defined(__linux__))
     std::string line;
     std::ifstream fin;
+    uint32_t speed;
 
     std::vector<std::string> netCards;
     Utils::GetChildFilenames(PROF_NET_CARD, netCards);
@@ -229,11 +231,11 @@ void InfoJson::AddNetCardInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
             MSPROF_LOGW("Open file %s failed.", srcFile.c_str());
             continue;
         }
-        if (std::getline(fin, line) && (line.length() > 0 && line[0] != '-')
-                && Utils::CheckStringIsNonNegativeIntNum(line)) {
+        if (std::getline(fin, line) && (line.length() > 0 && line[0] != '-') &&
+            Utils::StrToUint32(speed, line) == PROFILING_SUCCESS) {
             auto netCardInfo = infoMain->add_netcard();
             netCardInfo->set_netcardname(*it);
-            netCardInfo->set_speed(std::stoi(line));
+            netCardInfo->set_speed(speed);
         }
         fin.close();
     }
