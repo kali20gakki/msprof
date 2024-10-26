@@ -514,6 +514,7 @@ public:
     static int StrToInt(int &dest, const std::string &numStr);
     static int StrToLongLong(long long &dest, const std::string &numStr);
     static int StrToUint32(uint32_t &dest, const std::string &numStr);
+    static int StrToDouble(double &dest, const std::string &numStr);
     static std::string GetInfoPrefix(const std::string &fileName);
     static std::string GetInfoSuffix(const std::string &fileName);
     static std::string PackDotInfo(const std::string &leftPattern, const std::string &rightPattern);

@@ -703,7 +703,12 @@ int AppMode::RunModeTasks()
 
     if (jobResultDirList_.empty()) {
         auto duration = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
-        if (!params_->delayTime.empty() && static_cast<size_t>(duration.count()) <= std::stoul(params_->delayTime)) {
+        uint32_t delayTime;
+        if (Utils::StrToUint32(delayTime, params_->delayTime) == PROFILING_FAILED) {
+            MSPROF_LOGE("[App Mode] Param delayTime StrToUint32 failed.");
+            return PROFILING_FAILED;
+        }
+        if (static_cast<uint32_t>(duration.count()) <= delayTime) {
             MSPROF_LOGW("[App Mode] Before delay time, the app process has exited.");
             return PROFILING_SUCCESS;
         }
