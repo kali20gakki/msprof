@@ -52,6 +52,12 @@ class TestInfoConfReader(unittest.TestCase):
             InfoConfReader().get_host_freq()
             self.assertEqual(error.value, 0)
 
+    def test_get_host_freq_should_return_error_when_data_format_is_invalid(self):
+        InfoConfReader()._info_json = {'CPU': 1}
+        with pytest.raises(ProfException) as error:
+            InfoConfReader().get_host_freq()
+            self.assertEqual(error.value, 0)
+
     def test_get_host_freq_should_return_host_freq_when_host_freq_is_invalid(self):
         InfoConfReader()._info_json = {'CPU': [{'Frequency': "str"}]}
         self.assertEqual(InfoConfReader().get_host_freq(), 1000000000.0)
@@ -99,7 +105,7 @@ class TestInfoConfReader(unittest.TestCase):
             InfoConfReader().get_device_list()
         InfoConfReader()._sample_json = {}
 
-    def test_get_device_list_when_devices_is_invald(self):
+    def test_get_device_list_when_devices_is_invalid(self):
         InfoConfReader()._sample_json = {'devices': "5,abc"}
         with pytest.raises(ProfException) as err:
             InfoConfReader().get_device_list()
@@ -109,6 +115,22 @@ class TestInfoConfReader(unittest.TestCase):
             InfoConfReader().get_device_list()
 
         InfoConfReader()._sample_json = {}
+
+    def test_get_data_under_device_when_devices_is_valid(self):
+        InfoConfReader()._info_json = {'DeviceInfo': [{"test_type": "expected_res", }]}
+        self.assertEqual("expected_res", InfoConfReader().get_data_under_device('test_type'))
+
+        InfoConfReader()._info_json = {}
+
+    def test_get_data_under_device_when_devices_is_invalid(self):
+        InfoConfReader()._info_json = {'DeviceInfo': "str"}
+        self.assertEqual("", InfoConfReader().get_data_under_device('test_type'))
+
+        InfoConfReader()._info_json = {'DeviceInfo': []}
+        self.assertEqual("", InfoConfReader().get_data_under_device('test_type'))
+
+        InfoConfReader()._info_json = {}
+        self.assertEqual("", InfoConfReader().get_data_under_device('test_type'))
 
 
 if __name__ == '__main__':

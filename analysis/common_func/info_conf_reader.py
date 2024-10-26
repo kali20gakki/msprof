@@ -372,7 +372,7 @@ class InfoConfReader:
             logging.error("unable to get DeviceInfo from info.json")
             return ""
 
-        if device_items and device_items[0]:
+        if isinstance(device_items, list) and device_items and device_items[0]:
             return device_items[0].get(data_type, "")
         return ""
 
@@ -401,7 +401,7 @@ class InfoConfReader:
         if self._host_freq is not None:
             return self._host_freq
         host_cpu_info = self._info_json.get('CPU', [])
-        if host_cpu_info:
+        if host_cpu_info and isinstance(host_cpu_info, list) and host_cpu_info[0]:
             freq = host_cpu_info[0].get('Frequency')
             if is_number(freq) and float(freq) > 0.0:
                 self._host_freq = float(freq) * NumberConstant.FREQ_TO_MHz
