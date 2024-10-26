@@ -32,7 +32,7 @@ struct CommunicationOpEndpointsTime {
 // groupName 依据hash进行转换，对于无hash的数据，直接取用hash值（即groupName）进行转换
 uint64_t GetGroupNameValue(const std::string &groupName, GeHashMap &hashMap)
 {
-    if (groupName != NA && Utils::IsNumber(groupName) == ANALYSIS_OK) {
+    if (groupName != NA && Utils::IsNumber(groupName)) {
         if (hashMap.find(groupName) != hashMap.end()) {
             return IdPool::GetInstance().GetUint64Id(hashMap[groupName]);
         }
