@@ -125,16 +125,16 @@ enum PROFILE_MODE {
 };
 
 typedef struct rtHostInputInfo {
-    uint16_t addrOffset;
-    uint16_t dataOffset;
+    uint32_t addrOffset;
+    uint32_t dataOffset;
 } RtHostInputInfoT;
 
 typedef struct tagRtArgsEx {
     void *args;                     // args host mem addr
     RtHostInputInfoT *hostInputInfoPtr;     // nullptr means no host mem input
     uint32_t argsSize;              // input + output + tiling addr size + tiling data size + host mem
-    uint16_t tilingAddrOffset;      // tiling addr offset
-    uint16_t tilingDataOffset;      // tiling data offset
+    uint32_t tilingAddrOffset;      // tiling addr offset
+    uint32_t tilingDataOffset;      // tiling data offset
     uint16_t hostInputInfoNum;      // hostInputInfo num
     uint8_t hasTiling;              // if has tiling: 0 means no tiling
     uint8_t isNoNeedH2DCopy;        // is no need host to device copy: 0 means need H2D copy,
@@ -149,8 +149,8 @@ typedef struct tagRtAicpuArgsEx {
     uint32_t argsSize;
     uint16_t hostInputInfoNum; // hostInputInfo num
     uint16_t kernelOffsetInfoNum; // KernelOffsetInfo num
-    uint16_t soNameAddrOffset; // just for CCE Kernel, default value is 0xffff for FWK kernel
-    uint16_t kernelNameAddrOffset; // just for CCE Kernel, default value is 0xffff for FWK kernel
+    uint32_t soNameAddrOffset; // just for CCE Kernel, default value is 0xffff for FWK kernel
+    uint32_t kernelNameAddrOffset; // just for CCE Kernel, default value is 0xffff for FWK kernel
     bool isNoNeedH2DCopy; // is no need host to device copy: 0 means need H2D copy,
                                // other means doesn't need H2D copy.
     uint8_t reserved[3];
