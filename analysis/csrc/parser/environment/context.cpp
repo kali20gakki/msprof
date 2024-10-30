@@ -491,7 +491,7 @@ std::vector<std::string> Context::GetQosEvents(uint16_t deviceId, const std::str
         ERROR("GetQosEvents device info is empty.");
         return {};
     }
-    std::string qosEvents = info.at("qosEvents");
+    std::string qosEvents = info.value("qosEvents", "");
     if (qosEvents.empty()) {
         INFO("Check qosProfiling is on or off, if it is on, maybe some mistakes have happened");
         return {};
