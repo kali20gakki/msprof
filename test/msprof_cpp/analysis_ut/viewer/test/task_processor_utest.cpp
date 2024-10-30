@@ -33,9 +33,9 @@ const uint64_t START_TIME_NS = 1700902984041176000;
 const uint64_t END_TIME_NS = 1700902986330096000;
 const uint64_t BASE_TIME_NS = 8719641548578;
 const uint16_t OP_NUM = 16;
-const uint16_t TX_OP_NUM = 4;
+const uint16_t TX_OP_NUM = 6;
 const uint16_t STRING_NUM = 8;
-const uint16_t TX_STRING_ID_NUM = 1;
+const uint16_t TX_STRING_NUM = 1;
 const std::string TASK_PATH = "./task_path";
 const std::string DB_PATH = File::PathJoin({TASK_PATH, "msprof.db"});
 const std::string DEVICE_SUFFIX = "device_0";
@@ -205,8 +205,8 @@ TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenAscendTaskProcessRunSucce
     auto processor = TaskProcessor(DB_PATH, PROF_PATHS);
     EXPECT_FALSE(processor.Run());
     MsprofDBRunner->QueryData(sql, result);
-    CheckGlobalTaskId(result, OP_NUM - 6); // 6: tx data
-    CheckStringId(result, STRING_NUM - 1); // 1: tx string
+    CheckGlobalTaskId(result, OP_NUM - TX_OP_NUM);
+    CheckStringId(result, STRING_NUM - TX_STRING_NUM);
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
     MOCKER_CPP(&Analysis::Viewer::Database::TaskProcessor::ProcessWithMsprofTxTaskData).reset();
 }
@@ -376,5 +376,29 @@ TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenGetParamsFail)
     .will(returnValue(false));
     auto processor = TaskProcessor(DB_PATH, PROF_PATHS);
     EXPECT_FALSE(processor.Run());
+    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
+}
+
+TEST_F(TaskProcessorUTest, TestRunShouldReturnTrueWhenMsproftxTaskProcessSuccWithNoAscendtaskData)
+{
+    ProcessedDataFormat result;
+    MAKE_SHARED0_NO_OPERATION(MsprofDBRunner, DBRunner, DB_PATH);
+    std::string sql{"SELECT * FROM " + TARGET_TABLE_NAME};
+    
+    // delete ascend task db as prof level none
+    File::DeleteFile(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE_SUFFIX, DB_SUFFIX}));
+    File::DeleteFile(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE_SUFFIX, DB_SUFFIX}));
+ 
+    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
+    .stubs()
+    .will(returnValue(true));
+    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetSyscntConversionParams)
+    .stubs()
+    .will(returnValue(true));
+    auto processor = TaskProcessor(DB_PATH, PROF_PATHS);
+    EXPECT_TRUE(processor.Run());
+    MsprofDBRunner->QueryData(sql, result);
+    CheckGlobalTaskId(result, TX_OP_NUM);
+    CheckStringId(result, TX_STRING_NUM);
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
 }
