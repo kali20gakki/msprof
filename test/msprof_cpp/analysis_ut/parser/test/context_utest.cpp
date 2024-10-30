@@ -919,3 +919,42 @@ TEST_F(ContextUTest, TestGetHostNameShouldReturnRightValueWhenGetSuccess)
     std::string hostname = Context::GetInstance().GetHostName(HOST_ID, {File::PathJoin({CONTEXT_DIR, TEST_DIR})});
     EXPECT_EQ(hostname, "localhost");
 }
+
+TEST_F(ContextUTest, TestGetQosEventsShouldReturnEmptyWhenDeviceIdIsHostId)
+{
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
+    auto res = Context::GetInstance().GetQosEvents(HOST_ID, File::PathJoin({CONTEXT_DIR, LOCAL_DIR}));
+    EXPECT_TRUE(res.empty());
+}
+
+TEST_F(ContextUTest, TestGetQosEventsShouldReturnEmptyWhenInfoIsEmpty)
+{
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
+    auto res = Context::GetInstance().GetQosEvents(0, File::PathJoin({CONTEXT_DIR, "test"}));
+    EXPECT_TRUE(res.empty());
+}
+
+TEST_F(ContextUTest, TestGetQosEventsShouldReturnEmptyWhenqosEventsIsLost)
+{
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
+    auto res = Context::GetInstance().GetQosEvents(0, File::PathJoin({CONTEXT_DIR, LOCAL_DIR}));
+    EXPECT_TRUE(res.empty());
+}
+
+TEST_F(ContextUTest, TestGetQosEventsShouldReturnFalseWhenFreqToDoubleFailed)
+{
+    EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", SAMPLE_JSON})));
+    // sample.json
+    nlohmann::json sampleJson = {
+        {"qosEvents", "DVPP,AICORE"},
+    };
+    sampleJson["llc_profiling"] = "read";
+    sampleJson["ai_core_profiling_mode"] = "task-based";
+    FileWriter infoWriter(File::PathJoin({CONTEXT_DIR, TEST_DIR, DEVICE_PREFIX + "0", SAMPLE_JSON}));
+    infoWriter.WriteText(sampleJson.dump());
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, TEST_DIR})}));
+    auto res = Context::GetInstance().GetQosEvents(0, File::PathJoin({CONTEXT_DIR, TEST_DIR}));
+    ASSERT_EQ(res.size(), 2); // qosEvents大小，预期是2
+    ASSERT_EQ(res[0], "DVPP");
+    ASSERT_EQ(res[1], "AICORE");
+}

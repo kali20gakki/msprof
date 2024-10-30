@@ -15,6 +15,7 @@
 #include "analysis/csrc/worker/kernel_parser_worker.h"
 #include "analysis/csrc/viewer/database/drafts/hash_db_dumper.h"
 #include "analysis/csrc/viewer/database/drafts/type_info_db_dumper.h"
+#include "analysis/csrc/parser/environment/context.h"
 #include "analysis/csrc/parser/host/cann/hash_data.h"
 #include "analysis/csrc/parser/host/cann/type_data.h"
 #include "analysis/csrc/worker/host_trace_worker.h"
@@ -78,6 +79,14 @@ TEST_F(KernelParserWorkerUtest, TestKernalParserWorkerShouldReturnFailedWhenType
 {
     KernelParserWorker kernelParserWorker(TEST_HOST_FILE_PATH);
     MOCKER_CPP(&DBRunner::CreateTable).stubs().will(returnValue(false));
+    auto res = kernelParserWorker.Run();
+    EXPECT_EQ(res, 1);
+}
+
+TEST_F(KernelParserWorkerUtest, TestKernalParserWorkerShouldReturnErrorWhenContextLoadFailed)
+{
+    KernelParserWorker kernelParserWorker(TEST_HOST_FILE_PATH);
+    MOCKER_CPP(&Analysis::Parser::Environment::Context::Load).stubs().will(returnValue(false));
     auto res = kernelParserWorker.Run();
     EXPECT_EQ(res, 1);
 }

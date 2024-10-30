@@ -37,7 +37,10 @@ KernelParserWorker::KernelParserWorker(std::string hostFilePath) : hostFilePath_
 int KernelParserWorker::Run()
 {
     std::set<std::string> profPaths {Utils::File::PathJoin({hostFilePath_, ".."})};
-    Context::GetInstance().Load(profPaths);
+    if (!Context::GetInstance().Load(profPaths)) {
+        ERROR("Context load failed.");
+        return ANALYSIS_ERROR;
+    }
     INFO("Start run KernelParserWorker");
     // 先创建目录
     std::string sqlBaseDir = Utils::File::PathJoin({hostFilePath_, "sqlite"});
