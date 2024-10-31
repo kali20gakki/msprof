@@ -150,7 +150,7 @@ bool MsprofTxProcessor::FormatTxData(const MsprofTxDataFormat &msprofTxData, Pro
         processedData.emplace_back(Utils::GetLocalTime(startTimestamp, record).Uint64(),
                                    Utils::GetLocalTime(endTimestamp, record).Uint64(),
                                    eventType, UINT32_MAX, tmpData.category, message,
-                                   globalTid, globalTid, UINT16_MAX, UINT32_MAX);
+                                   globalTid, globalTid, UINT16_MAX, DEFAULT_CONNECTION_ID_MSTX);
     }
     if (processedData.empty()) {
         ERROR("MsprofTx data processing error.");
@@ -163,8 +163,6 @@ bool MsprofTxProcessor::FormatTxExData(const MsprofTxExDataFormat &txExData, Pro
                                        const std::string &fileDir, Utils::SyscntConversionParams &params,
                                        Utils::ProfTimeRecord &record)
 {
-    // 使用connection_id里的40亿作为tx数据的connection_id起点
-    static constexpr uint32_t START_CONNECTION_ID_MSTX = 4000000000;
     INFO("MsprofTxExProcessor FormatTxData");
     if (txExData.empty()) {
         WARN("MsprofTxEx original data is empty");

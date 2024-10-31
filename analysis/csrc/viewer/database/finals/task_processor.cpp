@@ -282,8 +282,6 @@ TaskProcessor::ProcessedDataFormat TaskProcessor::FormatMsprofTxTaskData(const O
                                                                          Utils::SyscntConversionParams &params,
                                                                          const uint32_t pid)
 {
-    // 使用connection_id里的40亿作为tx数据的connection_id起点
-    static constexpr uint32_t START_CONNECTION_ID_MSTX = 4000000000;
     uint64_t taskType = IdPool::GetInstance().GetUint64Id("MsTx");
     ProcessedDataFormat processedData;
     if (!Utils::Reserve(processedData, oriData.size())) {
