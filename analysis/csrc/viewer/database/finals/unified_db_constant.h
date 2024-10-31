@@ -34,6 +34,11 @@ const uint16_t BYTE_SIZE = 1024;
 const uint16_t PERCENTAGE = 100;
 const std::string NA = "N/A";
 
+// mstx数据 host侧无device连线的默认connection_id值
+constexpr uint32_t DEFAULT_CONNECTION_ID_MSTX = 4000000000;
+// 以DEFAULT_CONNECTION_ID_MSTX + 1 作为mstx连线connection_id起点
+constexpr uint32_t START_CONNECTION_ID_MSTX = DEFAULT_CONNECTION_ID_MSTX + 1;
+
 // db name
 const std::string DB_NAME_MSPROF_DB = "msprof";
 
