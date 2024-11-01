@@ -78,6 +78,19 @@ class TestFileManager(unittest.TestCase):
         self.assertEqual(str(context.exception),
                          "The path is empty. Please enter a valid path.")
 
+    def test_check_path_valid_should_return_error_when_dir_path_is_too_long(self):
+        def custom_len(obj):
+            return 2048
+        path = '/path/prof_0'
+        is_file = False
+        with mock.patch('os.path.exists', return_value=True), \
+             mock.patch(NAMESPACE + '.len', custom_len):
+            with self.assertRaises(ProfException) as context:
+                check_path_valid(path, is_file)
+        self.assertEqual(context.exception.code, ProfException.PROF_INVALID_PATH_ERROR)
+        self.assertEqual(str(context.exception),
+                         "Please ensure the length of input path \"/path/prof_0\" less than 1024")
+
     def test_check_path_valid_should_return_error_when_file_path_is_empty(self):
         path = ''
         is_file = True
