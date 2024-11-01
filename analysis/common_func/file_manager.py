@@ -199,13 +199,17 @@ def check_path_valid(path: str, is_file: bool, max_size: int = Constant.MAX_READ
     if not os.path.exists(path):
         raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
                             f"The path \"{path}\" does not exist. Please check that the path exists.")
+    if is_link(path):
+        raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
+                            f"The path \"{path}\" is link. Please check the path.")
+    if len(path) > NumberConstant.PROF_PATH_MAX_LEN:
+        raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
+                            f"Please ensure the length of input path \"{path}\" less than "
+                            f"{NumberConstant.PROF_PATH_MAX_LEN}")
     if is_file:
         if not os.path.isfile(path):
             raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
                                 f"The path \"{path}\" is not a file. Please check the path.")
-        if is_link(path):
-            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
-                                f"The path \"{path}\" is link. Please check the path.")
         if os.path.getsize(path) > max_size:
             raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
                                 f"The path \"{path}\" is too large to read. Please check the path.")
@@ -213,9 +217,6 @@ def check_path_valid(path: str, is_file: bool, max_size: int = Constant.MAX_READ
         if not os.path.isdir(path):
             raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
                                 f"The path \"{path}\" is not a directory. Please check the path.")
-        if is_link(path):
-            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
-                                f"The path \"{path}\" is link. Please check the path.")
     if not os.access(path, os.R_OK):
         raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
                             f"The path \"{path}\" does not have permission to read. "
