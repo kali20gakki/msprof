@@ -51,8 +51,10 @@ const int MAX_EVENT_SIZE = 8;  // every batch event size
 const int MAX_CORE_ID_SIZE = 50;  // ai core or aiv core id size
 const int BASE_HEX = 16;  // hex to int
 const std::unordered_map<std::string, std::string> INVALID_CHAR = {
-    {"\n", "\\n"}, {"\f", "\\f"}, {"\r", "\\r"}, {"\b", "\\b"},
-    {"\t", "\\t"}, {"\v", "\\v"}, {"\u007F", "\\u007F"}
+    {"\n", "\\n"}, {"\f", "\\f"}, {"\r", "\\r"}, {"\b", "\\b"}, {"\t", "\\t"},
+    {"\v", "\\v"}, {"\u007F", "\\u007F"}, {"\"", "\\\""}, {"'", "\'"},
+    {"\\", "\\\\"}, {"%", "\\%"}, {">", "\\>"}, {"<", "\\<"}, {"|", "\\|"},
+    {"&", "\\&"}, {"$", "\\$"}, {";", "\\;"}, {"`", "\\`"}
 };
 
 namespace {
@@ -490,6 +492,11 @@ bool ParamValidation::CheckPythonPathIsValid(const std::string &pythonPath) cons
     if (Utils::IsSoftLink(Utils::RelativePathToAbsolutePath(pythonPath))) {
         MSPROF_LOGE("Argument --python-path=%s is soft link, not support!", pythonPath.c_str());
         CMD_LOGE("Argument --python-path=%s is soft link, not support!", pythonPath.c_str());
+        return false;
+    }
+    if (!CheckPathCharValid(pythonPath)) {
+        MSPROF_LOGE("python-path has invalid characters.");
+        CMD_LOGE("python-path has invalid characters.");
         return false;
     }
     std::string absolutePythonPath = Utils::CanonicalizePath(pythonPath);

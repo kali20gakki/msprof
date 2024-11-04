@@ -4,6 +4,7 @@
 
 import logging
 import os
+import platform
 import re
 from functools import partial
 
@@ -114,8 +115,12 @@ def check_path_valid(path: str, is_output: bool) -> None:
 def check_path_char_valid(path: str) -> None:
     invalid_char = {
         "\n": "\\n", "\f": "\\f", "\r": "\\r", "\b": "\\b", "\t": "\\t", "\v": "\\v",
-        "\u007F": "\\u007F",
+        "\u007F": "\\u007F", "\"": "\\\"", "'": "\'", "%": "\\%", ">": "\\>", "<": "\\<", "|": "\\|",
+        "&": "\\&", "$": "\\$", ";": "\\;", "`": "\\`"
     }
+    # 如果不是Windows系统，增加反斜杠检查
+    if platform.system() != 'Windows':
+        invalid_char["\\"] = "\\\\"
     for key, value in invalid_char.items():
         if key in path:
             message = f"The path contains invalid character: '{value}'."

@@ -32,8 +32,10 @@ const uint32_t MAX_SUB_FILES_SIZE = 100000;
 constexpr int DIR_CHECK_MODE = R_OK | W_OK | X_OK; // rwx
 const int MAX_DEPTH = 20;
 const std::unordered_map<std::string, std::string> INVALID_CHAR = {
-    {"\n", "\\n"}, {"\f", "\\f"}, {"\r", "\\r"}, {"\b", "\\b"},
-    {"\t", "\\t"}, {"\v", "\\v"}, {"\u007F", "\\u007F"}
+    {"\n", "\\n"}, {"\f", "\\f"}, {"\r", "\\r"}, {"\b", "\\b"}, {"\t", "\\t"},
+    {"\v", "\\v"}, {"\u007F", "\\u007F"}, {"\"", "\\\""}, {"'", "\'"},
+    {"\\", "\\\\"}, {"%", "\\%"}, {">", "\\>"}, {"<", "\\<"}, {"|", "\\|"},
+    {"&", "\\&"}, {"$", "\\$"}
 };
 }
 
