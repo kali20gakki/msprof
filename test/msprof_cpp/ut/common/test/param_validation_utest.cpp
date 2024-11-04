@@ -641,7 +641,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckPythonPathIsValid)
     pythonPath = std::string(1025, 'c'); // 1025 = MAX_PATH_LENGTH + 1;
     EXPECT_EQ(false, entry->CheckPythonPathIsValid(pythonPath));
 
-    pythonPath = "@";
+    pythonPath = "@SUM(cmd|'/c calc'!A0)";
     EXPECT_EQ(false, entry->CheckPythonPathIsValid(pythonPath));
     
     Utils::CreateDir("TestPython");
