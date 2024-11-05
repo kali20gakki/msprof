@@ -49,6 +49,8 @@ test_obj=(
     device_modeling_utest
     device_parser_utest
     device_persistence_utest
+    data_process_utest
+    timeline_assemble_utest
     activity_utest
     dev_prof_task_utest
     callback_utest
