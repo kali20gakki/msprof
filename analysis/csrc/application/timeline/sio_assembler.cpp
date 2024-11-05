@@ -1,0 +1,95 @@
+/* ******************************************************************************
+            版权所有 (c) 华为技术有限公司 2024-2024
+            Copyright, 2024, Huawei Tech. Co., Ltd.
+****************************************************************************** */
+/* ******************************************************************************
+ * File Name          : sio_assembler.cpp
+ * Description        : 组合SIO层数据
+ * Author             : msprof team
+ * Creation Date      : 2024/8/29
+ * *****************************************************************************
+ */
+
+#include "analysis/csrc/application/timeline/sio_assembler.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/sio_data.h"
+#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+
+namespace Analysis {
+namespace Application {
+using namespace Analysis::Parser::Environment;
+using namespace Analysis::Viewer::Database;
+using namespace Analysis::Infra;
+namespace {
+const std::vector<std::string> COUNTERS {"req_rx", "rsp_rx", "snp_rx", "dat_rx",
+                                         "req_tx", "rsp_tx", "snp_tx", "dat_tx"};
+const std::unordered_map<uint16_t, std::string> SERIES_MAP {
+    {0, "die 0"},
+    {1, "die 1"}
+};
+}
+
+SioAssembler::SioAssembler() : JsonAssembler(PROCESS_SIO, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
+
+void GenerateSioTrace(std::vector<SioData> &sioData, const std::unordered_map<uint16_t, uint32_t> &pidMap,
+                      std::vector<std::shared_ptr<TraceEvent>> &res)
+{
+    std::shared_ptr<CounterEvent> event;
+    std::string time;
+    std::string seriesName;
+    uint32_t pid;
+    std::unordered_map<std::string, std::shared_ptr<CounterEvent>> eventMap;
+    for (const auto &data : sioData) {
+        time = std::to_string(data.localTime / NS_TO_US);
+        seriesName = SERIES_MAP.at(data.dieId);
+        pid = pidMap.at(data.deviceId);
+        std::vector<double> bandwidth {data.reqRxBandwidth, data.rspRxBandwidth, data.snpRxBandwidth,
+            data.datRxBandwidth, data.reqTxBandwidth, data.rspTxBandwidth, data.snpTxBandwidth, data.datTxBandwidth};
+        for (size_t i = 0; i < bandwidth.size(); i++) {
+            std::string tmpKey = COUNTERS[i] + time;
+            auto it = eventMap.find(tmpKey);
+            if (it != eventMap.end()) {
+                it->second->SetSeriesValue(seriesName, bandwidth[i]);
+            } else {
+                MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, COUNTERS[i]);
+                event->SetSeriesValue(seriesName, bandwidth[i]);
+                eventMap[tmpKey] = event;
+            }
+        }
+    }
+    for (auto &counterEvent: eventMap) {
+        res.push_back(counterEvent.second);
+    }
+}
+
+uint8_t SioAssembler::AssembleData(DataInventory &dataInventory, JsonWriter &ostream, const std::string &profPath)
+{
+    auto sioData = dataInventory.GetPtr<std::vector<SioData>>();
+    if (sioData == nullptr) {
+        WARN("Can't get sioData from dataInventory");
+        return DATA_NOT_EXIST;
+    }
+    std::unordered_map<uint16_t, uint32_t> pidMap;
+    auto layerInfo = GetLayerInfo(PROCESS_SIO);
+    auto deviceList = File::GetFilesWithPrefix(profPath, DEVICE_PREFIX);
+    for (const auto& devicePath: deviceList) {
+        auto deviceId = GetDeviceIdByDevicePath(devicePath);
+        auto pid = Context::GetInstance().GetPidFromInfoJson(deviceId, profPath);
+        uint32_t formatPid = JsonAssembler::GetFormatPid(pid, layerInfo.sortIndex, deviceId);
+        pidMap[deviceId] = formatPid;
+    }
+    GenerateHWMetaData(pidMap, layerInfo, res_);
+    GenerateSioTrace(*sioData, pidMap, res_);
+    if (res_.empty()) {
+        ERROR("Can't Generate any SIO process data");
+        return ASSEMBLE_FAILED;
+    }
+    for (const auto &node : res_) {
+        node->DumpJson(ostream);
+    }
+    // 为了让下一个写入的内容形成正确的JSON格式，需要补一个","
+    ostream << ",";
+    return ASSEMBLE_SUCCESS;
+}
+}
+}

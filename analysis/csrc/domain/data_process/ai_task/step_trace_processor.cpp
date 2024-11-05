@@ -1,0 +1,167 @@
+/* ******************************************************************************
+            版权所有 (c) 华为技术有限公司 2024-2024
+            Copyright, 2024, Huawei Tech. Co., Ltd.
+****************************************************************************** */
+/* ******************************************************************************
+ * File Name          : step_trace_processor.cpp
+ * Description        : step_trace processor，处理trace.db表的数据
+ * Author             : msprof team
+ * Creation Date      : 2024/8/12
+ * *****************************************************************************
+ */
+
+#include "analysis/csrc/domain/data_process/ai_task/step_trace_processor.h"
+#include "analysis/csrc/parser/environment/context.h"
+
+namespace Analysis {
+namespace Domain {
+
+StepTraceProcessor::StepTraceProcessor(const std::string &profPath) : DataProcessor(profPath) {}
+
+std::vector<TrainTraceData> GenerateTraceData(const DBInfo &dbInfo, LocaltimeContext &allParams, bool &errFlag,
+                                              SyscntConversionParams &params)
+{
+    OriTrace oriData;
+    std::vector<TrainTraceData> processedData;
+    std::string sql{"SELECT model_id, iteration_id, FP_start, BP_end, iteration_end, iteration_time, fp_bp_time,"
+                    " grad_refresh_bound, data_aug_bound FROM " + dbInfo.tableName};
+    if (!dbInfo.dbRunner->QueryData(sql, oriData)) {
+        ERROR("Failed to obtain data from the % table.", dbInfo.tableName);
+        errFlag = true;
+        return processedData;
+    }
+    if (!Utils::Reserve(processedData, oriData.size())) {
+        ERROR("Reserve for Training trace data failed.");
+        errFlag = true;
+        return processedData;
+    }
+    TrainTraceData tmp;
+    tmp.deviceId = allParams.deviceId;
+    for (const auto &row : oriData) {
+        std::tie(tmp.modelId, tmp.indexId, tmp.fpStart, tmp.bpEnd, tmp.iterEnd, tmp.iterTime, tmp.fpBpTime,
+                 tmp.gradRefreshBound, tmp.dataAugBound) = row;
+        if (tmp.fpStart != 0) {
+            HPFloat fp = GetTimeFromSyscnt(tmp.fpStart, params);
+            tmp.fpStart = GetLocalTime(fp, allParams.timeRecord).Uint64();
+        }
+        if (tmp.bpEnd != 0) {
+            HPFloat bp = GetTimeFromSyscnt(tmp.bpEnd, params);
+            tmp.bpEnd = GetLocalTime(bp, allParams.timeRecord).Uint64();
+        }
+        HPFloat iterEnd = GetTimeFromSyscnt(tmp.iterEnd, params);
+        tmp.iterEnd = GetLocalTime(iterEnd, allParams.timeRecord).Uint64();
+        tmp.iterTime = GetDurTimeFromSyscnt(tmp.iterTime, params).Uint64();
+        tmp.fpBpTime = GetDurTimeFromSyscnt(tmp.fpBpTime, params).Uint64();
+        tmp.gradRefreshBound = GetDurTimeFromSyscnt(tmp.gradRefreshBound, params).Uint64();
+        tmp.dataAugBound = GetDurTimeFromSyscnt(tmp.dataAugBound, params).Uint64();
+        processedData.push_back(tmp);
+    }
+    return processedData;
+}
+
+std::vector<GetNextData> GenerateNextData(const DBInfo &dbInfo, LocaltimeContext &allParams, bool &errFlag,
+                                          SyscntConversionParams &params)
+{
+    OriGetNext oriData;
+    std::vector<GetNextData> processedData;
+    std::string sql{"SELECT model_id, index_id, start_time, end_time FROM " + dbInfo.tableName};
+    if (!dbInfo.dbRunner->QueryData(sql, oriData)) {
+        ERROR("Failed to obtain data from the % table.", dbInfo.tableName);
+        errFlag = true;
+        return processedData;
+    }
+    if (!Utils::Reserve(processedData, oriData.size())) {
+        ERROR("Reserve for GetNext data failed.");
+        errFlag = true;
+        return processedData;
+    }
+    GetNextData tmp;
+    tmp.deviceId = allParams.deviceId;
+    for (const auto &row : oriData) {
+        std::tie(tmp.modelId, tmp.indexId, tmp.start, tmp.end) = row;
+        HPFloat start = GetTimeFromSyscnt(tmp.start, params);
+        tmp.start = GetLocalTime(start, allParams.timeRecord).Uint64();
+        HPFloat end = GetTimeFromSyscnt(tmp.end, params);
+        tmp.end = GetLocalTime(end, allParams.timeRecord).Uint64();
+        processedData.push_back(tmp);
+    }
+    return processedData;
+}
+
+std::vector<AllReduceData> GenerateAllReduceData(const DBInfo &dbInfo, LocaltimeContext &allParams, bool &errFlag,
+                                                 SyscntConversionParams &params)
+{
+    OriAllReduce oriData;
+    std::vector<AllReduceData> processedData;
+    std::string sql{"SELECT model_id, index_id, iteration_end, start, end FROM " + dbInfo.tableName};
+    if (!dbInfo.dbRunner->QueryData(sql, oriData)) {
+        ERROR("Failed to obtain data from the % table.", dbInfo.tableName);
+        errFlag = true;
+        return processedData;
+    }
+    if (!Utils::Reserve(processedData, oriData.size())) {
+        ERROR("Reserve for AllReduce data failed.");
+        errFlag = true;
+        return processedData;
+    }
+    AllReduceData tmp;
+    tmp.deviceId = allParams.deviceId;
+    for (const auto &row : oriData) {
+        std::tie(tmp.modelId, tmp.indexId, tmp.iterEnd, tmp.start, tmp.end) = row;
+        HPFloat iterEnd = GetTimeFromSyscnt(tmp.iterEnd, params);
+        tmp.iterEnd = GetLocalTime(iterEnd, allParams.timeRecord).Uint64();
+        HPFloat start = GetTimeFromSyscnt(tmp.start, params);
+        tmp.start = GetLocalTime(start, allParams.timeRecord).Uint64();
+        HPFloat end = GetTimeFromSyscnt(tmp.end, params);
+        tmp.end = GetLocalTime(end, allParams.timeRecord).Uint64();
+        processedData.push_back(tmp);
+    }
+    return processedData;
+}
+
+bool StepTraceProcessor::Process(DataInventory &dataInventory)
+{
+    LocaltimeContext allParams;
+    if (!Context::GetInstance().GetProfTimeRecordInfo(allParams.timeRecord, profPath_)) {
+        ERROR("GetProfTimeRecordInfo failed, profPath is %.", profPath_);
+        return false;
+    }
+    bool flag = true;
+    auto deviceList = Utils::File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
+    std::vector<TrainTraceData> resTrace;
+    std::vector<GetNextData> resNext;
+    std::vector<AllReduceData> resAllReduce;
+    for (const auto& devPath : deviceList) {
+        allParams.deviceId = GetDeviceIdByDevicePath(devPath);
+        if (allParams.deviceId == Parser::Environment::HOST_ID) {
+            ERROR("the invalid deviceId cannot to be identified.");
+            flag = false;
+            continue;
+        }
+        OriTrace traceData;
+        DBInfo traceDb("trace.db", "training_trace");
+        flag = ProcessData<TrainTraceData>(traceDb, allParams, resTrace, GenerateTraceData, devPath) && flag;
+        OriGetNext nextData;
+        DBInfo nextDb("trace.db", "get_next");
+        flag = ProcessData<GetNextData>(nextDb, allParams, resNext, GenerateNextData, devPath) && flag;
+        OriAllReduce reduceData;
+        DBInfo reduceDb("trace.db", "all_reduce");
+        flag = ProcessData<AllReduceData>(reduceDb, allParams, resAllReduce, GenerateAllReduceData, devPath) && flag;
+    }
+    if (!SaveStepTraceData(resTrace, resNext, resAllReduce, dataInventory)) {
+        ERROR("Save data failed, %.", PROCESSOR_NAME_STEP_TRACE);
+        flag = false;
+    }
+    return flag;
+}
+
+bool StepTraceProcessor::SaveStepTraceData(std::vector<TrainTraceData> &trace, std::vector<GetNextData> &next,
+                                           std::vector<AllReduceData> &reduce, DataInventory &dataInventory)
+{
+    auto traceFlag = SaveToDataInventory<TrainTraceData>(std::move(trace), dataInventory, PROCESSOR_NAME_STEP_TRACE);
+    auto nextFlag = SaveToDataInventory<GetNextData>(std::move(next), dataInventory, PROCESSOR_NAME_STEP_TRACE);
+    auto reduceFlag = SaveToDataInventory<AllReduceData>(std::move(reduce), dataInventory, PROCESSOR_NAME_STEP_TRACE);
+    return traceFlag && nextFlag && reduceFlag;
+}
+}
+}
