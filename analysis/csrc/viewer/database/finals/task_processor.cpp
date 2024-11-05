@@ -251,8 +251,7 @@ bool TaskProcessor::ProcessWithMsprofTxTaskData(const std::string &fileDir)
         MAKE_SHARED_RETURN_VALUE(stepTraceDB.dbRunner, DBRunner, false, dbPath);
         auto oriData = GetMsprofTxTaskData(stepTraceDB);
         if (oriData.empty()) {
-            flag = false;
-            ERROR("Get % data failed in %.", stepTraceDB.tableName, dbPath);
+            WARN("Get % data failed in %.", stepTraceDB.tableName, dbPath);
             continue;
         }
         auto processedData = FormatMsprofTxTaskData(oriData, threadData, params, pid);
