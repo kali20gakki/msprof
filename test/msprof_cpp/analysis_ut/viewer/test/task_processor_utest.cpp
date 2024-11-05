@@ -191,6 +191,26 @@ TEST_F(TaskProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
 }
 
+TEST_F(TaskProcessorUTest, TestRunShouldReturnTrueWhenMsprofTxTaskDataEmpty)
+{
+    ProcessedDataFormat result;
+    MAKE_SHARED0_NO_OPERATION(MsprofDBRunner, DBRunner, DB_PATH);
+    std::string sql{"SELECT * FROM " + TARGET_TABLE_NAME};
+    TaskProcessor::OriMsprofTxDataFormat oriData;
+    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
+    .stubs()
+    .will(returnValue(true));
+    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetSyscntConversionParams)
+    .stubs()
+    .will(returnValue(true));
+    MOCKER_CPP(&Analysis::Viewer::Database::TaskProcessor::GetMsprofTxTaskData)
+    .stubs()
+    .will(returnValue(oriData));
+    auto processor = TaskProcessor(DB_PATH, PROF_PATHS);
+    EXPECT_TRUE(processor.Run());
+    GlobalMockObject::verify();
+}
+
 TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenAscendTaskProcessRunSuccessWithMsprofTxTaskDataProcessFail)
 {
     ProcessedDataFormat result;
