@@ -28,6 +28,27 @@ using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::DynProf;
 using namespace Msprof::Engine;
 
+namespace {
+inline int32_t MsprofilerFinalize()
+{
+    DynProfMgr::instance()->StopDynProf();
+    return Msprofiler::Api::ProfAclMgr::instance()->MsprofFinalizeHandle();
+}
+
+struct FinalizeGuard {
+    ~FinalizeGuard() noexcept
+    {
+        MSPROF_EVENT("FinalizeGuard execute");
+        (void)MsprofilerFinalize();
+    }
+};
+
+void InitFinalizeGuard()
+{
+    static FinalizeGuard guard;
+}
+}
+
 inline int32_t InternalErrorCodeToExternal(int32_t internalErrorCode)
 {
     if (internalErrorCode == PROFILING_NOTSUPPORT) {
@@ -89,8 +110,7 @@ int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len)
     MSPROF_EVENT("MsprofCtrlCallback called, type: %u", type);
     Platform::instance()->Init();
     if (type == MSPROF_CTRL_FINALIZE) {
-        DynProfMgr::instance()->StopDynProf();
-        return Msprofiler::Api::ProfAclMgr::instance()->MsprofFinalizeHandle();
+        return MsprofilerFinalize();
     }
 
     if (Utils::IsDynProfMode()) {
@@ -179,6 +199,7 @@ int32_t MsprofSetDeviceCallbackImpl(VOID_PTR data, uint32_t len)
             MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceCallbackImpl, GeOpenDeviceHandle failed");
             return MSPROF_ERROR;
         }
+        InitFinalizeGuard();
     } else {
         ge::EraseDevRecord(setCfg->deviceId);
         return Msprofiler::Api::ProfAclMgr::instance()->MsprofResetDeviceHandle(setCfg->deviceId);
