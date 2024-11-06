@@ -15,12 +15,21 @@
 #include <ctime>
 #include <sys/prctl.h>
 #include <unistd.h>
+#include <unordered_map>
 #include <sys/syscall.h>
 #include <linux/limits.h>
 #include "securec.h"
+#include "common/plog_manager.h"
 
 namespace Mspti {
 namespace Common {
+
+const std::unordered_map<std::string, std::string> INVALID_CHAR = {
+    {"\n", "\\n"}, {"\f", "\\f"}, {"\r", "\\r"}, {"\b", "\\b"}, {"\t", "\\t"},
+    {"\v", "\\v"}, {"\u007F", "\\u007F"}, {"\"", "\\\""}, {"'", "\'"},
+    {"\\", "\\\\"}, {"%", "\\%"}, {">", "\\>"}, {"<", "\\<"}, {"|", "\\|"},
+    {"&", "\\&"}, {"$", "\\$"}, {";", "\\;"}, {"`", "\\`"}
+};
 
 uint64_t Utils::GetClockMonotonicRawNs()
 {
@@ -118,6 +127,17 @@ bool Utils::FileReadable(const std::string &path)
         return false;
     }
     return (access(path.c_str(), R_OK) == 0) ? true : false;
+}
+
+bool Utils::CheckCharValid(const std::string &str)
+{
+    for (auto &item: INVALID_CHAR) {
+        if (str.find(item.first) != std::string::npos) {
+            MSPTI_LOGE("The path contains invalid character: %s.", item.second);
+            return false;
+        }
+    }
+    return true;
 }
 
 }  // Common

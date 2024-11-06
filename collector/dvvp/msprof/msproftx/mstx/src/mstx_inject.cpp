@@ -15,10 +15,12 @@
 #include "errno/error_code.h"
 #include "runtime_plugin.h"
 #include "mstx_data_handler.h"
+#include "utils/utils.h"
 
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mstx;
 using namespace analysis::dvvp::common::error;
+using namespace analysis::dvvp::common::utils;
 
 static std::mutex g_mutex;
 static std::unordered_map<uint64_t, aclrtStream> g_eventIdsWithStream;
@@ -36,6 +38,10 @@ void MstxMarkAFunc(const char* msg, aclrtStream stream)
     }
     if (msg == nullptr || strnlen(msg, MAX_MESSAGE_LEN) == MAX_MESSAGE_LEN) {
         MSPROF_LOGE("Input msg for %s is invalid", __func__);
+        return;
+    }
+    if (!Utils::CheckCharValid(msg)) {
+        MSPROF_LOGE("msg has invalid characters.");
         return;
     }
     uint64_t mstxEventId = MsprofTxManager::instance()->GetEventId();

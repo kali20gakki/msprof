@@ -8,6 +8,7 @@
 #include "mockcpp/mockcpp.hpp"
 #include "prof_callback.h"
 #include "mstx_data_handler.h"
+#include "mstx_inject.h"
 #include "msprof_tx_manager.h"
 
 using namespace Collector::Dvvp::Mstx;
@@ -71,4 +72,13 @@ TEST_F(MstxUtest, MstxDataHandlerReturnFailWhileSaveInvalidRangeEndId)
     uint64_t invaildId = 10;
     EXPECT_EQ(PROFILING_FAILED, MstxDataHandler::instance()->SaveMstxData("test", invaildId,
         MstxDataType::DATA_RANGE_END));
+}
+
+TEST_F(MstxUtest, MstxMarkAFuncReturnWhileMsgContainsSpecialCharacter)
+{
+    GlobalMockObject::verify();
+    MstxDataHandler::instance()->Start();
+    aclrtStream stream;
+    const char* msg = "record&";
+    MsprofMstxApi::MstxMarkAFunc(msg, stream);
 }
