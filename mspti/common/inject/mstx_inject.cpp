@@ -21,6 +21,7 @@
 #include "common/plog_manager.h"
 
 using namespace Mspti::Activity;
+using namespace Mspti::Common;
 
 namespace MsptiMstxApi {
 void MstxMarkAFunc(const char* msg, RtStreamT stream)
@@ -30,6 +31,10 @@ void MstxMarkAFunc(const char* msg, RtStreamT stream)
     }
     if (msg == nullptr) {
         MSPTI_LOGE("Input params msg is nullptr.");
+        return;
+    }
+    if (!Utils::CheckCharValid(msg)) {
+        MSPTI_LOGE("msg has invalid characters.");
         return;
     }
     // [0, 255]

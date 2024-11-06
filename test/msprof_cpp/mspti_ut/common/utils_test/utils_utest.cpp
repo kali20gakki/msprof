@@ -105,4 +105,10 @@ TEST_F(UtilsUtest, FileReadableShouldGetFalseWhenFileEmpty)
     EXPECT_EQ(false, Mspti::Common::Utils::FileReadable(path));
 }
 
+TEST_F(UtilsUtest, CheckCharValidShouldReturnFalseWhileMsgContainsSpecialCharacter)
+{
+    const char* msg = "record&";
+    EXPECT_FALSE(Mspti::Common::Utils::CheckCharValid(msg));
+}
+
 }

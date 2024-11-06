@@ -18,6 +18,7 @@
 #include <string>
 #include <ctime>
 #include <set>
+#include <unordered_map>
 #include <vector>
 #include "config/config.h"
 #include "config/config_manager.h"
@@ -46,6 +47,12 @@ std::mutex g_envMtx;
 const unsigned long long CHANGE_FROM_S_TO_NS = 1000000000;
 const unsigned int MAX_FUNC_DEPTH = 20;
 const unsigned int MAX_FILES_NUM = 100000;
+const std::unordered_map<std::string, std::string> INVALID_CHAR = {
+    {"\n", "\\n"}, {"\f", "\\f"}, {"\r", "\\r"}, {"\b", "\\b"}, {"\t", "\\t"},
+    {"\v", "\\v"}, {"\u007F", "\\u007F"}, {"\"", "\\\""}, {"'", "\'"},
+    {"\\", "\\\\"}, {"%", "\\%"}, {">", "\\>"}, {"<", "\\<"}, {"|", "\\|"},
+    {"&", "\\&"}, {"$", "\\$"}, {";", "\\;"}, {"`", "\\`"}
+};
 
 // For MAC (a.k.a. IEEE 802, or EUI-48) addresses, the second least significant
 // bit of the first octet signifies whether the MAC address is universally (0)
@@ -1865,6 +1872,17 @@ std::string Utils::GetHostMacStr()
     std::sort(macAddrs.begin(), macAddrs.end());
     UtilsStringBuilder<std::string> builder;
     return builder.Join(macAddrs, "-");
+}
+
+bool Utils::CheckCharValid(const std::string &str)
+{
+    for (auto &item: INVALID_CHAR) {
+        if (str.find(item.first) != std::string::npos) {
+            MSPROF_LOGE("The path contains invalid character: %s.", item.second);
+            return false;
+        }
+    }
+    return true;
 }
 
 }  // namespace utils
