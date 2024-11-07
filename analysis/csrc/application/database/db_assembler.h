@@ -25,9 +25,8 @@ class DBAssembler {
 public:
     DBAssembler() = default;
     DBAssembler(const std::string &msprofDBPath, const std::string &profPath);
-    DBAssembler(const std::string &msprofDBPath);
     virtual ~DBAssembler() = default;
-    bool Run(DataInventory &dataInventory, const std::string &profPath);
+    bool Run(DataInventory &dataInventory);
 private:
     std::string profPath_;
     std::string msprofDBPath_;
