@@ -64,14 +64,16 @@ bool CheckPathAndTableExists(const std::string &path, DBRunner& dbRunner, const 
 uint32_t ReadHostGeinfo(DataInventory& dataInventory, const DeviceContext& deviceContext)
 {
     GEInfoDB geInfoDb;
+    DeviceInfo deviceInfo{};
+    deviceContext.Getter(deviceInfo);
     auto hostPath = deviceContext.GetDeviceFilePath();
     std::string hostDbDirectory = Utils::File::PathJoin({hostPath, "../", "/host", "/sqlite", geInfoDb.GetDBName()});
     DBRunner hostGeInfoDBRunner(hostDbDirectory);
     if (!CheckPathAndTableExists(hostDbDirectory, hostGeInfoDBRunner, TASK_INFO_TABLE)) {
         return ANALYSIS_OK;
     }
-    std::string sql{"SELECT stream_id, batch_id, task_id, context_id, "
-                    "block_dim, mix_block_dim FROM TaskInfo"};
+    std::string sql{"SELECT stream_id, batch_id, task_id, context_id, block_dim, "
+                    "mix_block_dim FROM TaskInfo where device_id = " + std::to_string(deviceInfo.deviceId)};
     OriDataFormat result;
     bool rc =  hostGeInfoDBRunner.QueryData(sql, result);
     if (!rc) {
