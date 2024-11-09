@@ -1244,6 +1244,29 @@ TEST_F(JOB_WRAPPER_PROF_AICPU_JOB_TEST, Init)
     EXPECT_EQ(PROFILING_FAILED, profAicpuJob->Init(collectionJobCfg_));
 }
 
+TEST_F(JOB_WRAPPER_PROF_AICPU_JOB_TEST, TsetCheckMC2SwitchShouldReturnTrueWhenMc2)
+{
+    GlobalMockObject::verify();
+    auto profAicpuJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfAicpuJob>();
+    collectionJobCfg_->comParams->params->dataTypeConfig = 0x00000000ULL;
+    collectionJobCfg_->comParams->devId = 0;
+    collectionJobCfg_->comParams->params->profLevel = MSVP_PROF_L1;
+    MOCKER(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
+    MOCKER(analysis::dvvp::driver::DrvGetApiVersion)
+        .stubs()
+        .will(returnValue(SUPPORT_ADPROF_VERSION));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER(&analysis::dvvp::driver::DrvIsSupportAdprof)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(PROFILING_SUCCESS, profAicpuJob->Init(collectionJobCfg_));
+    EXPECT_TRUE(profAicpuJob->CheckMC2Switch());
+}
+
 TEST_F(JOB_WRAPPER_PROF_AICPU_JOB_TEST, Init_dataTypeConfig_check)
 {
     GlobalMockObject::verify();

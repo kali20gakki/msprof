@@ -1582,11 +1582,8 @@ int ProfAicpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
                     collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
         return PROFILING_FAILED;
     }
-    const auto &profLevel = collectionJobCfg_->comParams->params->profLevel;
-    if (!(collectionJobCfg_->comParams->params->dataTypeConfig & PROF_AICPU_TRACE)
-            && (profLevel.empty() || profLevel == MSVP_PROF_L0)) {
-        // aicpu开关关闭并且L0级别，不开启aicpu驱动通道
-        MSPROF_LOGI("AICPU not enable or L0, devId:%d, channelId:%d",
+    if (!CheckChannelSwitch()) {
+        MSPROF_LOGI("Aicpu not start, devId:%d, channelId:%d",
                     collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
         return PROFILING_FAILED;
     }
@@ -1607,6 +1604,52 @@ int ProfAicpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
         eventAttr_.isChannelValid = true;
     }
     return PROFILING_SUCCESS;
+}
+
+bool ProfAicpuJob::CheckAicpuSwitch()
+{
+    if (collectionJobCfg_->comParams->params->dataTypeConfig & PROF_AICPU_TRACE) {
+        // 开启aicpu开关
+        MSPROF_LOGI("AICPU switch enable, devId:%d, channelId:%d",
+                    collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
+        return true;
+    }
+    MSPROF_LOGI("AICPU switch not enable, devId:%d, channelId:%d",
+                collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
+    return false;
+}
+
+bool ProfAicpuJob::CheckMC2Switch()
+{
+    const auto &profLevel = collectionJobCfg_->comParams->params->profLevel;
+    auto platform = ConfigManager::instance()->GetPlatformType();
+    if ((platform == PlatformType::DC_TYPE || platform == PlatformType::CHIP_V4_1_0) && profLevel == MSVP_PROF_L1) {
+        // mc2，并且L1级别
+        MSPROF_LOGI("mc2 enable, devId:%d, channelId:%d",
+                    collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
+        return true;
+    }
+    if (platform == PlatformType::CHIP_V4_1_0 && (!profLevel.empty() || profLevel != MSVP_PROF_OFF)) {
+        // hccl aicpu，并且L0级别以上
+        MSPROF_LOGI("hccl aicpu enable, devId:%d, channelId:%d",
+                    collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
+        return true;
+    }
+    MSPROF_LOGI("Check aicpu switch not support, devId:%d, channelId:%d",
+                collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
+    return false;
+}
+
+bool ProfAicpuJob::CheckChannelSwitch()
+{
+    if (CheckAicpuSwitch() || CheckMC2Switch()) {
+        MSPROF_LOGI("Open ProfAicpuJob channel, devId:%d, channelId:%d",
+                    collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
+        return true;
+    }
+    MSPROF_LOGI("Close ProfAicpuJob channel, devId:%d, channelId:%d",
+                collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
+    return false;
 }
  
 int ProfAicpuJob::Process()
@@ -1683,6 +1726,12 @@ ProfAiCustomCpuJob::ProfAiCustomCpuJob()
 
 ProfAiCustomCpuJob::~ProfAiCustomCpuJob()
 {
+}
+
+bool ProfAiCustomCpuJob::CheckChannelSwitch()
+{
+    // cp2不支持mc2和hccl aicpu下发
+    return CheckAicpuSwitch();
 }
 
 PerfExtraTask::PerfExtraTask(unsigned int bufSize, const std::string& retDir,

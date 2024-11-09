@@ -37,7 +37,7 @@
                                      PROF_HCCL_TRACE | PROF_TASK_TIME_L0 | PROF_TASK_TIME_L1)
 
 // profSwitchHi
-#define PROF_DEV_MC2                0x01000000000000ULL
+#define PROF_DEV_AICPU_CHANNEL       0x01000000000000ULL
 
 // System
 #define PROF_INSTR_PROFILING         0x000000800000ULL
