@@ -28,7 +28,7 @@ class KfcCalculator(ICalculator, MsMultiProcess):
         namedtuple("KfcOpData",
                    ["ascend_data", "group_name", "op_name", "first_timestamp", "iter_id", "op_type"]),
         {})
-    BLACK_KFC_OP = ["NOTIFY_WAIT"]
+    BLACK_KFC_OP = ["NOTIFY_WAIT", "MEMCPY_ASYNC"]
 
     def __init__(self, file_list, sample_config):
         super().__init__(sample_config)
