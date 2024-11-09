@@ -80,9 +80,16 @@ void ProcessDeviceList(ProfCommand &command, const uint32_t devIdList[], uint32_
 uint64_t GetProfSwitchHi(const uint64_t &dataTypeConfig)
 {
     uint64_t profSwitchHi = 0U;
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::CHIP_V4_1_0 &&
-        (dataTypeConfig & PROF_TASK_TIME_L1_MASK) != 0) {
-        profSwitchHi |= PROF_DEV_MC2;
+    auto platform = ConfigManager::instance()->GetPlatformType();
+    // mc2, L1级别开启
+    if ((platform == PlatformType::DC_TYPE || platform == PlatformType::CHIP_V4_1_0)
+        && (dataTypeConfig & PROF_TASK_TIME_L1_MASK) != 0) {
+        profSwitchHi |= PROF_DEV_AICPU_CHANNEL;
+        return profSwitchHi;
+    }
+    // hccl aicpu下发, L0级别开启
+    if (platform == PlatformType::CHIP_V4_1_0 && (dataTypeConfig & PROF_TASK_TIME_L0_MASK) != 0) {
+        profSwitchHi |= PROF_DEV_AICPU_CHANNEL;
     }
     return profSwitchHi;
 }

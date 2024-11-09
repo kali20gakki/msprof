@@ -342,17 +342,27 @@ public:
     int Uninit() override;
 
 protected:
+    bool CheckAicpuSwitch();
+    bool CheckMC2Switch();
+
+protected:
     analysis::dvvp::driver::AI_DRV_CHANNEL channelId_;
     std::string eventGrpName_;
     TaskEventAttr eventAttr_;
     std::atomic<uint8_t> processCount_;
     ProfDrvEvent profDrvEvent_;
+
+private:
+    virtual bool CheckChannelSwitch();
 };
 
 class ProfAiCustomCpuJob : public ProfAicpuJob {
 public:
     ProfAiCustomCpuJob();
     ~ProfAiCustomCpuJob() override;
+
+private:
+    bool CheckChannelSwitch() override;
 };
 
 constexpr int INSTR_GROUP_MAX_NUM = 25;       // instr profiling group id 0 ~ 24
