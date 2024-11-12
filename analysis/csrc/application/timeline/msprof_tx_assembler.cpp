@@ -22,7 +22,6 @@ using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
 namespace {
 const uint32_t SORT_INDEX = 6;
-const std::string MSPROF_TX_ASSEMBLER = "MSPROF_TX";
 const std::string TX_LABEL = "CPU";
 }
 
@@ -51,7 +50,7 @@ void MsprofTxExTraceEvent::ProcessArgs(JsonWriter& ostream)
 }
 
 MsprofTxAssembler::MsprofTxAssembler()
-    : JsonAssembler(MSPROF_TX_ASSEMBLER, {{MSPROF_FILE, FileCategory::MSPROF},
+    : JsonAssembler(PROCESS_MSPROFTX, {{MSPROF_JSON_FILE, FileCategory::MSPROF},
                     {MSPROF_TX_FILE, FileCategory::MSPROF_TX}})
 {}
 
@@ -72,7 +71,7 @@ void MsprofTxAssembler::GenerateTxTrace(const std::vector<MsprofTxHostData>& txD
     for (const auto &data : txData) {
         eventTypeStr = GetEventTypeStr(data.eventType);
         pidTidSet_.insert({pid, data.tid});
-        if (data.connectionId == UINT64_MAX) {  // tx数据没有connectionId
+        if (data.connectionId == DEFAULT_CONNECTION_ID_MSTX) {  // tx数据没有connectionId
             std::shared_ptr<MsprofTxTraceEvent> tx;
             MAKE_SHARED_RETURN_VOID(tx, MsprofTxTraceEvent, pid, data.tid, (data.end - data.start) / NS_TO_US,
                                     std::to_string(data.start / NS_TO_US), data.message, data.category,

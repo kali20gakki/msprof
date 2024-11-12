@@ -49,10 +49,10 @@ void GenerateSioTrace(std::vector<SioData> &sioData, const std::unordered_map<ui
             std::string tmpKey = COUNTERS[i] + time;
             auto it = eventMap.find(tmpKey);
             if (it != eventMap.end()) {
-                it->second->SetSeriesValue(seriesName, bandwidth[i]);
+                it->second->SetSeriesDValue(seriesName, bandwidth[i]);
             } else {
                 MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, COUNTERS[i]);
-                event->SetSeriesValue(seriesName, bandwidth[i]);
+                event->SetSeriesDValue(seriesName, bandwidth[i]);
                 eventMap[tmpKey] = event;
             }
         }

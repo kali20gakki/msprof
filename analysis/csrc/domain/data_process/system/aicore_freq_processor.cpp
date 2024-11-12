@@ -10,7 +10,8 @@
  * *****************************************************************************
  */
 
-#include "aicore_freq_processor.h"
+#include "analysis/csrc/domain/data_process/system/aicore_freq_processor.h"
+#include <algorithm>
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/parser/environment/context.h"
 
@@ -51,7 +52,7 @@ bool AicoreFreqProcessor::Process(DataInventory& dataInventory)
             flag = false;
             continue;
         }
-        OriDataFormat freqData;
+        OriFreqDataFormat freqData;
         if (!ProcessData(devicePath, freqData)) {
             ERROR("Get original data failed.");
             flag = false;
@@ -63,6 +64,9 @@ bool AicoreFreqProcessor::Process(DataInventory& dataInventory)
             flag = false;
             continue;
         }
+        std::sort(processedData.begin(), processedData.end(), [](const AicoreFreqData &ld, const AicoreFreqData &rd) {
+            return ld.timestamp < rd.timestamp;
+        });
         res.insert(res.end(), processedData.begin(), processedData.end());
     }
     if (!SaveToDataInventory<AicoreFreqData>(std::move(res), dataInventory, PROCESSOR_NAME_AICORE_FREQ)) {
@@ -72,7 +76,7 @@ bool AicoreFreqProcessor::Process(DataInventory& dataInventory)
     return flag;
 }
 
-bool AicoreFreqProcessor::ProcessData(const std::string& devicePath, OriDataFormat& oriData)
+bool AicoreFreqProcessor::ProcessData(const std::string& devicePath, OriFreqDataFormat& oriData)
 {
     DBInfo dbInfo("freq.db", "FreqParse");
     std::string dbPath = File::PathJoin({devicePath, SQLITE, dbInfo.dbName});
@@ -82,18 +86,19 @@ bool AicoreFreqProcessor::ProcessData(const std::string& devicePath, OriDataForm
     auto status = CheckPathAndTable(dbPath, dbInfo);
     if (status == CHECK_FAILED) {
         return false;
+    } else if (status == CHECK_SUCCESS) {
+        oriData = LoadData(dbPath, dbInfo);
     }
-    oriData = LoadData(dbPath, dbInfo);
     if (oriData.empty()) {
-        ERROR("Original data is empty. DBPath is %", dbPath);
+        WARN("Original data is empty. DBPath is %", dbPath);
     }
     return true;
 }
 
-OriDataFormat AicoreFreqProcessor::LoadData(const std::string& dbPath, DBInfo& freqDB)
+OriFreqDataFormat AicoreFreqProcessor::LoadData(const std::string& dbPath, DBInfo& freqDB)
 {
     INFO("AicoreFreqProcessor GetData, dir is %", dbPath);
-    OriDataFormat oriData;
+    OriFreqDataFormat oriData;
     if (freqDB.dbRunner == nullptr) {
         ERROR("Create % connection failed.", dbPath);
         return oriData;
@@ -108,7 +113,7 @@ OriDataFormat AicoreFreqProcessor::LoadData(const std::string& dbPath, DBInfo& f
 
 bool AicoreFreqProcessor::FormatData(const uint16_t& deviceId, const ProfTimeRecord& timeRecord,
                                      const Utils::SyscntConversionParams& params,
-                                     const OriDataFormat& freqData,
+                                     const OriFreqDataFormat& freqData,
                                      std::vector<AicoreFreqData>& processedData)
 {
     INFO("AicoreFreqProcessor FormatData.");

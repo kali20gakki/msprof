@@ -22,7 +22,6 @@ using namespace Analysis::Utils;
 
 namespace {
 const int DEPTH = 0;
-const std::string PROCESSOR_NAME_SIO = "SIO";
 const std::string SIO_DIR = "./sio";
 const std::string DEVICE_SUFFIX = "device_0";
 const std::string DB_SUFFIX = "sio.db";

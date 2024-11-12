@@ -18,7 +18,7 @@ namespace Domain {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Utils;
 namespace {
-const uint32_t START_CONNECTION_ID_MSTX = 4000000000;
+
 }
 MsprofTxHostProcessor::MsprofTxHostProcessor(const std::string &profPath) : DataProcessor(profPath) {}
 

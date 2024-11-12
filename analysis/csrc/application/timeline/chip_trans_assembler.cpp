@@ -26,6 +26,8 @@ const std::vector<std::string> PA_LINK_COUNTERS {"PA Link Rx", "PA Link Tx"};
 const std::vector<std::string> PCIE_COUNTERS {"PCIE Read Bandwidth", "PCIE Write Bandwidth"};
 const std::string PA_ID = "PA Link ID";
 const std::string PCIE_ID = "PCIE ID";
+const int STARS_PA = 111111;  // 这两个值按照二进制的func_type对数据类型做区分，Python使用的是字符串，实测类型无影响
+const int STARS_PCIE = 100010;
 }
 
 ChipTransAssembler::ChipTransAssembler() : JsonAssembler(PROCESS_STARS_CHIP_TRANS, {
@@ -36,36 +38,22 @@ void GeneratePaLinkInfoTrace(std::vector<PaLinkInfoData> &paLinkInfoData,
 {
     std::shared_ptr<CounterEvent> event;
     std::string time;
-    std::string id;
-    double paLinkId;
-    double value;
+    uint64_t value;
     uint32_t pid;
-    std::unordered_map<std::string, std::shared_ptr<CounterEvent>> eventMap;
     for (const auto &data : paLinkInfoData) {
         time = std::to_string(data.local_time / NS_TO_US);
         pid = pidMap.at(data.deviceId);
-        id = std::to_string(data.pa_link_id);
-        paLinkId = static_cast<double>(data.pa_link_id);
         std::vector<std::string> level {data.pa_link_traffic_monit_rx, data.pa_link_traffic_monit_tx};
         for (size_t i = 0; i < level.size(); ++i) {
-            std::string tmpKey = PA_LINK_COUNTERS[i] + time + id;
-            if (StrToDouble(value, level[i]) != ANALYSIS_OK) {
+            if (StrToU64(value, level[i]) != ANALYSIS_OK) {
                 ERROR("paLinkInfoData is invalid");
                 continue;
             }
-            if (eventMap.find(tmpKey) != eventMap.end()) {
-                eventMap[tmpKey]->SetSeriesValue(PA_ID, paLinkId);
-                eventMap[tmpKey]->SetSeriesValue(PA_LINK_COUNTERS[i], value);
-            } else {
-                MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, PA_LINK_COUNTERS[i]);
-                event->SetSeriesValue(PA_ID, paLinkId);
-                event->SetSeriesValue(PA_LINK_COUNTERS[i], value);
-                eventMap[tmpKey] = event;
-            }
+            MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, STARS_PA, time, PA_LINK_COUNTERS[i]);
+            event->SetSeriesIValue(PA_ID, data.pa_link_id);
+            event->SetSeriesIValue(PA_LINK_COUNTERS[i], value);
+            res.push_back(event);
         }
-    }
-    for (auto &counterEvent: eventMap) {
-        res.push_back(counterEvent.second);
     }
 }
 
@@ -74,31 +62,17 @@ void GeneratePcieInfoTrace(std::vector<PcieInfoData> &pcieInfoData,
 {
     std::shared_ptr<CounterEvent> event;
     std::string time;
-    std::string id;
-    double paLinkId;
     uint32_t pid;
-    std::unordered_map<std::string, std::shared_ptr<CounterEvent>> eventMap;
     for (const auto &data : pcieInfoData) {
         time = std::to_string(data.local_time / NS_TO_US);
         pid = pidMap.at(data.deviceId);
-        id = std::to_string(data.pcie_id);
-        paLinkId = static_cast<double>(data.pcie_id);
         std::vector<uint64_t> level {data.pcie_read_bandwidth, data.pcie_write_bandwidth};
         for (size_t i = 0; i < level.size(); i++) {
-            std::string tmpKey = PCIE_COUNTERS[i] + time + id;
-            if (eventMap.find(tmpKey) != eventMap.end()) {
-                eventMap[tmpKey]->SetSeriesValue(PA_ID, paLinkId);
-                eventMap[tmpKey]->SetSeriesValue(PCIE_COUNTERS[i], data.pcie_read_bandwidth);
-            } else {
-                MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, PCIE_COUNTERS[i]);
-                event->SetSeriesValue(PA_ID, paLinkId);
-                event->SetSeriesValue(PCIE_COUNTERS[i], data.pcie_write_bandwidth);
-                eventMap[tmpKey] = event;
-            }
+            MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, STARS_PCIE, time, PCIE_COUNTERS[i]);
+            event->SetSeriesIValue(PCIE_ID, data.pcie_id);
+            event->SetSeriesIValue(PCIE_COUNTERS[i], level[i]);
+            res.push_back(event);
         }
-    }
-    for (auto &counterEvent: eventMap) {
-        res.push_back(counterEvent.second);
     }
 }
 

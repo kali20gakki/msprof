@@ -26,7 +26,7 @@ const std::string TASK_TYPE_UNKNOWN = "UNKNOWN";
 }
 
 AscendHardwareAssembler::AscendHardwareAssembler()
-    : JsonAssembler(ASCEND_ASSEMBLER, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
+    : JsonAssembler(PROCESS_TASK, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
 
 void TaskTraceEvent::ProcessArgs(JsonWriter& ostream)
 {
@@ -45,7 +45,13 @@ void DeviceTxTraceEvent::ProcessArgs(JsonWriter& ostream)
     ostream["Task Id"] << taskId_;
 }
 
-void AscendHardwareAssembler::InitData(DataInventory &dataInventory)
+void KfcTurnTraceEvent::ProcessArgs(JsonWriter& ostream)
+{
+    ostream["Physic Stream Id"] << streamId_;
+    ostream["Task Id"] << taskId_;
+}
+
+void AscendHardwareAssembler::InitData(DataInventory &dataInventory, std::vector<AscendTaskData> &taskData)
 {
     logicStream_ = dataInventory.GetPtr<std::unordered_map<uint32_t, uint32_t>>();
     auto taskInfo = dataInventory.GetPtr<std::vector<TaskInfoData>>();
@@ -53,6 +59,12 @@ void AscendHardwareAssembler::InitData(DataInventory &dataInventory)
         for (const auto &node : *taskInfo) {
             opName_.emplace(TaskId{static_cast<uint16_t >(node.streamId), static_cast<uint16_t >(node.batchId),
                 static_cast<uint16_t >(node.taskId), node.contextId, node.deviceId}, node.opName);
+        }
+    }
+    for (const auto& data : taskData) {
+        if (data.contextId != UINT32_MAX) {
+            ffts_.emplace(TaskId{static_cast<uint16_t>(data.streamId), static_cast<uint16_t>(data.batchId),
+                                 static_cast<uint16_t>(data.taskId), UINT32_MAX, data.deviceId});
         }
     }
 }
@@ -71,16 +83,16 @@ std::string AscendHardwareAssembler::GetOpName(const AscendTaskData& data)
     return data.hostType;
 }
 
-uint32_t AscendHardwareAssembler::GetPhysicStreamId(const AscendTaskData& data)
+uint32_t AscendHardwareAssembler::GetPhysicStreamId(const uint32_t streamId)
 {
     if (logicStream_ == nullptr) {
-        return data.streamId;
+        return streamId;
     }
-    auto it = logicStream_->find(data.streamId);
+    auto it = logicStream_->find(streamId);
     if (it != logicStream_->end()) {
         return it->second;
     }
-    return data.streamId;
+    return streamId;
 }
 
 void AscendHardwareAssembler::GenerateTaskTrace(const std::vector<AscendTaskData> &taskData,
@@ -89,10 +101,16 @@ void AscendHardwareAssembler::GenerateTaskTrace(const std::vector<AscendTaskData
 {
     uint32_t formatPid;
     std::string traceName;
+    TaskId id;
     for (const auto &data : taskData) {
+        id = {static_cast<uint16_t>(data.streamId), static_cast<uint16_t>(data.batchId),
+              static_cast<uint16_t>(data.taskId), data.contextId, data.deviceId};
+        if (ffts_.find(id) != ffts_.end()) { // 当前task存在ffts+任务，只呈现ffts+任务即可
+            continue;
+        }
         traceName = GetOpName(data);
         formatPid = GetDevicePid(pidMap, data.deviceId, profPath, SORT_INDEX);
-        int tid = static_cast<int>(GetPhysicStreamId(data));
+        int tid = static_cast<int>(GetPhysicStreamId(data.streamId));
         // 存储pid，tid组合的最小集
         pidTidSet_.insert({formatPid, tid});
         std::shared_ptr<TaskTraceEvent> event;
@@ -100,6 +118,7 @@ void AscendHardwareAssembler::GenerateTaskTrace(const std::vector<AscendTaskData
                                 std::to_string(data.start / NS_TO_US), traceName, data.modelId, data.streamId,
                                 data.taskId, data.batchId, data.contextId, data.connectionId, data.deviceType);
         res_.push_back(event);
+        GenerateTaskConnectionTrace(data, formatPid, id);
     }
 }
 
@@ -123,27 +142,36 @@ void AscendHardwareAssembler::GenerateTxTrace(const std::vector<MsprofTxDeviceDa
     }
 }
 
-void AscendHardwareAssembler::GenerateTaskConnectionTrace(const std::vector<AscendTaskData> &taskData,
-                                                          std::unordered_map<uint16_t, uint32_t> &pidMap)
+void AscendHardwareAssembler::GenerateKfcTrace(const std::vector<KfcTurnData> &kfcData, const std::string &profPath,
+                                               std::unordered_map<uint16_t, uint32_t> &pidMap)
+{
+    uint32_t formatPid;
+    for (const auto &datum: kfcData) {
+        std::string traceName = datum.opName;
+        formatPid = GetDevicePid(pidMap, datum.deviceId, profPath, SORT_INDEX);
+        int formatTid = static_cast<int>(GetPhysicStreamId(datum.streamId));
+        // 存储pid，tid组合的最小集
+        pidTidSet_.insert({formatPid, formatTid});
+        std::shared_ptr<KfcTurnTraceEvent> event;
+        MAKE_SHARED_RETURN_VOID(event, KfcTurnTraceEvent, formatPid, formatTid, datum.duration / NS_TO_US,
+                                std::to_string(datum.startTime / NS_TO_US), traceName, datum.streamId, datum.taskId);
+        res_.push_back(event);
+    }
+}
+
+void AscendHardwareAssembler::GenerateTaskConnectionTrace(const AscendTaskData &data, uint32_t formatPid, TaskId &id)
 {
     std::string connId;
     std::string name;
-    TaskId id;
-    uint32_t formatPid;
     int tid;
-    for (const auto &data : taskData) {
-        id = {static_cast<uint16_t>(data.streamId), static_cast<uint16_t>(data.batchId),
-            static_cast<uint16_t>(data.taskId), data.contextId, data.deviceId};
-        if (opName_.find(id) != opName_.end()) {
-            connId = ConnectionIdPool::GetConnectionId(data.connectionId, ConnectionCategory::GENERAL);
-            name = HOST_TO_DEVICE + connId;
-            formatPid = pidMap[data.deviceId];
-            tid = static_cast<int>(GetPhysicStreamId(data));
-            std::shared_ptr<FlowEvent> end;
-            MAKE_SHARED_RETURN_VOID(end, FlowEvent, formatPid, tid, std::to_string(data.start / NS_TO_US),
-                                    HOST_TO_DEVICE, connId, name, FLOW_END, FLOW_BP);
-            res_.push_back(end);
-        }
+    if (opName_.find(id) != opName_.end()) {
+        connId = ConnectionIdPool::GetConnectionId(data.connectionId, ConnectionCategory::GENERAL);
+        name = HOST_TO_DEVICE + connId;
+        tid = static_cast<int>(GetPhysicStreamId(data.streamId));
+        std::shared_ptr<FlowEvent> end;
+        MAKE_SHARED_RETURN_VOID(end, FlowEvent, formatPid, tid, std::to_string(data.start / NS_TO_US),
+                                HOST_TO_DEVICE, connId, name, FLOW_END, FLOW_BP);
+        res_.push_back(end);
     }
 }
 
@@ -199,19 +227,22 @@ uint8_t  AscendHardwareAssembler::AssembleData(DataInventory& dataInventory, Jso
 {
     auto taskData = dataInventory.GetPtr<std::vector<AscendTaskData>>();
     auto deviceTxData = dataInventory.GetPtr<std::vector<MsprofTxDeviceData>>();
-    InitData(dataInventory);
-    if (taskData == nullptr && deviceTxData == nullptr) {
+    auto kfcTurnData = dataInventory.GetPtr<std::vector<KfcTurnData>>();
+    if (taskData == nullptr && deviceTxData == nullptr && kfcTurnData == nullptr) {
         WARN("Can't get task data from dataInventory");
         return DATA_NOT_EXIST;
     }
     std::unordered_map<uint16_t, uint32_t> devicePid;
     if (taskData != nullptr) {
+        InitData(dataInventory, *taskData);
         GenerateTaskTrace(*taskData, profPath, devicePid);
-        GenerateTaskConnectionTrace(*taskData, devicePid);
     }
     if (deviceTxData != nullptr) {
         GenerateTxTrace(*deviceTxData, profPath, devicePid);
         GenerateTxConnectionTrace(*deviceTxData, devicePid);
+    }
+    if (kfcTurnData != nullptr) {
+        GenerateKfcTrace(*kfcTurnData, profPath, devicePid);
     }
     GenerateMetaData(devicePid);
     if (res_.empty()) {

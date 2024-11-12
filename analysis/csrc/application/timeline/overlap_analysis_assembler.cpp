@@ -327,7 +327,8 @@ void OverlapAnalysisAssembler::SepCompTaskAndKFCCommSections(
         if (it != allTaskPool.end()) {
             SepOneTask(it->second, mc2StreamsTable, task, compSections, kfcCommSections);
         } else {
-            ERROR("Find comp task not in all tasks");
+            WARN("Find comp task not in all tasks, s-t-b-c is %-%-%-%", id.streamId, id.taskId, id.batchId,
+                 id.contextId);
             continue;
         }
     }

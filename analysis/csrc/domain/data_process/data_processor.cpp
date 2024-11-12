@@ -32,7 +32,7 @@ bool DataProcessor::Run(DataInventory& dataInventory, const std::string &process
     return retFlag;
 }
 
-uint8_t DataProcessor::CheckPathAndTable(const std::string& path, const DBInfo& dbInfo)
+uint8_t DataProcessor::CheckPathAndTable(const std::string& path, const DBInfo& dbInfo, bool enableStrictCheck)
 {
     if (!Utils::File::Exist(path) || Utils::File::Size(path) == INVALID_DB_SIZE) {
         WARN("Can't find the db, the path is %.", path);
@@ -43,8 +43,13 @@ uint8_t DataProcessor::CheckPathAndTable(const std::string& path, const DBInfo& 
         return CHECK_FAILED;
     }
     if (!dbInfo.dbRunner->CheckTableExists(dbInfo.tableName)) {
-        ERROR("Check % not exists", dbInfo.tableName);
-        return CHECK_FAILED;
+        if (enableStrictCheck) {
+            ERROR("Check % not exists", dbInfo.tableName);
+            return CHECK_FAILED;
+        } else {
+            WARN("Check % not exists", dbInfo.tableName);
+            return NOT_EXIST;
+        }
     }
     INFO("Check % and % success.", path, dbInfo.tableName);
     return CHECK_SUCCESS;

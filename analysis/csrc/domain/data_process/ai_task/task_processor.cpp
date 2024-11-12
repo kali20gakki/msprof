@@ -81,10 +81,7 @@ OriAscendTaskData TaskProcessor::LoadData(const DBInfo &ascendTaskDB, const std:
     }
     std::string sql{"SELECT a.start_time, a.duration, a.model_id, a.index_id, a.stream_id, a.task_id, a.context_id,"
                     "a.batch_id, a.connection_id, a.host_task_type, a.device_task_type FROM " + ascendTaskDB.tableName +
-                    " a LEFT JOIN (SELECT DISTINCT stream_id, task_id, batch_id FROM " + ascendTaskDB.tableName +
-                    " WHERE context_id <> 4294967295) b ON a.stream_id = b.stream_id AND a.task_id = b.task_id "
-                    "AND a.batch_id = b.batch_id WHERE (a.context_id <> 4294967295 OR b.batch_id IS NULL) "
-                    "and a.device_task_type != 'UNKNOWN'"};
+                    " a WHERE a.device_task_type != 'UNKNOWN'"};
     if (!ascendTaskDB.dbRunner->QueryData(sql, oriData)) {
         ERROR("Failed to obtain data from the % table.", ascendTaskDB.tableName);
     }

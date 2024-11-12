@@ -95,12 +95,19 @@ static std::vector<CommunicationTaskData> GenerateTaskData()
     data.size = 3200; // size 3200
     data.dataType = UINT16_MAX;
     data.linkType = UINT16_MAX;
-    data.notifyId = 456; // notifyId 456
+    data.notifyId = "456";
     data.rdmaType = UINT16_MAX;
     data.start = 1717575960213957957; // start 1717575960213957957
     data.duration = 1000000.0; // dur 1000000.0
     data.duration_estimated = 20.0; // es_dur 20.0
     data.bandwidth = 0.0; // bw 0.0
+    res.push_back(data);
+    data.planeId = 1; // planeId 1
+    data.modelId = 4294967295; // modelId 4294967295
+    data.streamId = 1; // streamId 1
+    data.taskId = 1; // taskId 1
+    data.contextId = 2; // contextId 2
+    data.batchId = 1; // batchId 1
     res.push_back(data);
     return res;
 }
@@ -130,24 +137,32 @@ TEST_F(HcclAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
     std::string expectStr = "{\"name\":\"Notify_Wait\",\"pid\":10327520,\"tid\":1,\"ts\":\"1717575960213958.000000\","
-                            "\"dur\":1000.0,\"ph\":\"X\",\"args\":{\"notify_id\":456,\"duration estimated(us)\":0.02,"
-                            "\"stream id\":1,\"task id\":1,\"context id\":1,\"task type\":\"Notify_Wait\",\"src rank\""
-                            ":0,\"dst rank\":1,\"transport type\":\"LOCAL\",\"size(Byte)\":3200,\"data type\":"
-                            "\"INVALID_TYPE\",\"link type\":\"INVALID_TYPE\",\"bandwidth(GB/s)\":0.0,\"model id\""
-                            ":4294967295}},{\"name\":\"hcom_broadcast__674_0_1\",\"pid\":10327520,\"tid\":0,\"ts\":"
-                            "\"1717575960213958.000000\",\"dur\":1000.0,\"ph\":\"X\",\"args\":{\"connection_id\":2762,"
-                            "\"model id\":4294967295,\"data_type\":\"INT16\",\"alg_type\":\"MESH-RING\",\"count\":5}},"
-                            "{\"name\":\"HostToDevice11862699671552\",\"pid\":10327520,\"tid\":0,\"ph\":\"f\",\"cat\":"
-                            "\"HostToDevice\",\"id\":\"11862699671552\",\"ts\":\"1717575960213958.000000\",\"bp\":"
-                            "\"e\"},{\"name\":\"process_name\",\"pid\":10327520,\"tid\":0,\"ph\":\"M\",\"args\":{"
-                            "\"name\":\"HCCL\"}},{\"name\":\"process_labels\",\"pid\":10327520,\"tid\":0,\"ph\":"
-                            "\"M\",\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":10327520,"
-                            "\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":15}},{\"name\":\"thread_name\",\"pid\":"
-                            "10327520,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Group 0 Communication\"}},{\"name\":"
-                            "\"thread_sort_index\",\"pid\":10327520,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":"
-                            "0}},{\"name\":\"thread_name\",\"pid\":10327520,\"tid\":1,\"ph\":\"M\",\"args\":{\"name\""
-                            ":\"Plane 1\"}},{\"name\":\"thread_sort_index\",\"pid\":10327520,\"tid\":1,\"ph\":\"M\","
-                            "\"args\":{\"sort_index\":1}},";
+                            "\"dur\":1000.0,\"ph\":\"X\",\"args\":{\"notify_id\":\"456\",\"duration estimated(us)\":"
+                            "20.0,\"stream id\":1,\"task id\":1,\"context id\":1,\"task type\":\"Notify_Wait\",\""
+                            "src rank\":0,\"dst rank\":1,\"transport type\":\"LOCAL\",\"size(Byte)\":3200,\"data type"
+                            "\":\"INVALID_TYPE\",\"link type\":\"INVALID_TYPE\",\"bandwidth(GB/s)\":0.0,\"model id\":"
+                            "4294967295}},{\"name\":\"Notify_Wait\",\"pid\":10327520,\"tid\":2,\"ts\":\""
+                            "1717575960213958.000000\",\"dur\":1000.0,\"ph\":\"X\",\"args\":{\"notify_id\":\"456\",\""
+                            "duration estimated(us)\":20.0,\"stream id\":1,\"task id\":1,\"context id\":2,\"task type"
+                            "\":\"Notify_Wait\",\"src rank\":0,\"dst rank\":1,\"transport type\":\"LOCAL\",\""
+                            "size(Byte)\":3200,\"data type\":\"INVALID_TYPE\",\"link type\":\"INVALID_TYPE\",\""
+                            "bandwidth(GB/s)\":0.0,\"model id\":4294967295}},{\"name\":\"hcom_broadcast__674_0_1\",\""
+                            "pid\":10327520,\"tid\":0,\"ts\":\"1717575960213958.000000\",\"dur\":1000.0,\"ph\":\"X\","
+                            "\"args\":{\"connection_id\":2762,\"model id\":4294967295,\"data_type\":\"INT16\",\""
+                            "alg_type\":\"MESH-RING\",\"count\":5}},{\"name\":\"HostToDevice11862699671552\",\"pid\""
+                            ":10327520,\"tid\":0,\"ph\":\"f\",\"cat\":\"HostToDevice\",\"id\":\"11862699671552\",\"ts"
+                            "\":\"1717575960213958.000000\",\"bp\":\"e\"},{\"name\":\"process_name\",\"pid\":10327520,"
+                            "\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"HCCL\"}},{\"name\":\"process_labels\",\"pid\""
+                            ":10327520,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},{\"name\":\""
+                            "process_sort_index\",\"pid\":10327520,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":"
+                            "15}},{\"name\":\"thread_name\",\"pid\":10327520,\"tid\":0,\"ph\":\"M\",\"args\":{\"name"
+                            "\":\"Group 0 Communication\"}},{\"name\":\"thread_sort_index\",\"pid\":10327520,\"tid\":0"
+                            ",\"ph\":\"M\",\"args\":{\"sort_index\":0}},{\"name\":\"thread_name\",\"pid\":10327520,\""
+                            "tid\":1,\"ph\":\"M\",\"args\":{\"name\":\"Plane 1\"}},{\"name\":\"thread_sort_index\",\""
+                            "pid\":10327520,\"tid\":1,\"ph\":\"M\",\"args\":{\"sort_index\":1}},{\"name\":\""
+                            "thread_name\",\"pid\":10327520,\"tid\":2,\"ph\":\"M\",\"args\":{\"name\":\"Plane 2\"}},{"
+                            "\"name\":\"thread_sort_index\",\"pid\":10327520,\"tid\":2,\"ph\":\"M\",\"args\":{\""
+                            "sort_index\":2}},";
     EXPECT_EQ(expectStr, res.back());
 }
 

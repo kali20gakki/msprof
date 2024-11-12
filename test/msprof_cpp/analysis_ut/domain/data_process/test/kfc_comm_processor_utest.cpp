@@ -126,7 +126,7 @@ TEST_F(KfcCommProcessorUtest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
     }
 }
 
-TEST_F(KfcCommProcessorUtest, TestRunShouldReturnFalseWhenSourceTableNotExist)
+TEST_F(KfcCommProcessorUtest, TestRunShouldReturnTrueWhenSourceTableNotExist)
 {
     auto dbPath = File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE_SUFFIX, DB_SUFFIX});
     std::shared_ptr<DBRunner> dbRunner;
@@ -140,7 +140,7 @@ TEST_F(KfcCommProcessorUtest, TestRunShouldReturnFalseWhenSourceTableNotExist)
     for (auto path: PROF_PATHS) {
         auto processor = KfcCommProcessor(path);
         auto dataInventory = DataInventory();
-        EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
+        EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
     }
 }
 

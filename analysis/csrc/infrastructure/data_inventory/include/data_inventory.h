@@ -83,6 +83,11 @@ public:
      */
     std::set<std::type_index> RemoveRestData(const std::set<std::type_index>& keepingDataType);
 
+    bool Empty()
+    {
+        return data_.empty();
+    }
+
     DataInventory() = default;
     ~DataInventory() = default;
     DataInventory(const DataInventory&) = delete;

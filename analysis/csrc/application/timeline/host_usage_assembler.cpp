@@ -38,7 +38,7 @@ uint8_t NetworkUsageAssembler::GenerateDataTrace(DataInventory &dataInventory, u
     for (const auto &data : *usageData) {
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, ASSEMBLE_FAILED, pid, DEFAULT_TID,
                                  std::to_string(data.start / NS_TO_US), "Network Usage");
-        event->SetSeriesValue(USAGE, data.usage);
+        event->SetSeriesDValue(USAGE, data.usage);
         res_.push_back(event);
     }
     return ASSEMBLE_SUCCESS;
@@ -56,7 +56,7 @@ uint8_t DiskUsageAssembler::GenerateDataTrace(DataInventory &dataInventory, uint
     for (const auto &data : *usageData) {
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, ASSEMBLE_FAILED, pid, DEFAULT_TID,
                                  std::to_string(data.start / NS_TO_US), "Disk Usage");
-        event->SetSeriesValue(USAGE, data.usage);
+        event->SetSeriesDValue(USAGE, data.usage);
         res_.push_back(event);
     }
     return ASSEMBLE_SUCCESS;
@@ -74,7 +74,7 @@ uint8_t MemUsageAssembler::GenerateDataTrace(DataInventory &dataInventory, uint3
     for (const auto &data : *usageData) {
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, ASSEMBLE_FAILED, pid, DEFAULT_TID,
                                  std::to_string(data.start / NS_TO_US), "Memory Usage");
-        event->SetSeriesValue(USAGE, data.usage);
+        event->SetSeriesDValue(USAGE, data.usage);
         res_.push_back(event);
     }
     return ASSEMBLE_SUCCESS;
@@ -92,7 +92,7 @@ uint8_t CpuUsageAssembler::GenerateDataTrace(DataInventory &dataInventory, uint3
     for (const auto &data : *usageData) {
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, ASSEMBLE_FAILED, pid, DEFAULT_TID,
                                  std::to_string(data.start / NS_TO_US), "CPU " + data.cpuNo);
-        event->SetSeriesValue(USAGE, data.usage);
+        event->SetSeriesDValue(USAGE, data.usage);
         res_.push_back(event);
     }
     return ASSEMBLE_SUCCESS;

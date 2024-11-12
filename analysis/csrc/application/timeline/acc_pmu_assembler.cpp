@@ -35,27 +35,16 @@ void GenerateAccPmuTrace(std::vector<AccPmuData> &accPmuData, const std::unorder
     std::string time;
     std::string accId;
     uint32_t pid;
-    std::unordered_map<std::string, std::shared_ptr<CounterEvent>> eventMap;
     for (const auto &data : accPmuData) {
         time = std::to_string(data.timestampNs / NS_TO_US);
         pid = pidMap.at(data.deviceId);
-        accId = std::to_string(data.accId);
         std::vector<uint32_t> level {data.readBwLevel, data.readOstLevel, data.writeBwLevel, data.writeOstLevel};
         for (size_t i = 0; i < level.size(); i++) {
-            std::string tmpKey = COUNTERS[i] + time + accId;
-            if (eventMap.find(tmpKey) != eventMap.end()) {
-                eventMap[tmpKey]->SetSeriesValue(ACC_ID, data.accId);
-                eventMap[tmpKey]->SetSeriesValue(VALUE, level[i]);
-            } else {
-                MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, COUNTERS[i]);
-                event->SetSeriesValue(ACC_ID, data.accId);
-                event->SetSeriesValue(VALUE, level[i]);
-                eventMap[tmpKey] = event;
-            }
+            MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, COUNTERS[i]);
+            event->SetSeriesIValue(ACC_ID, data.accId);
+            event->SetSeriesIValue(VALUE, level[i]);
+            res.push_back(event);
         }
-    }
-    for (auto &counterEvent: eventMap) {
-        res.push_back(counterEvent.second);
     }
 }
 
@@ -75,8 +64,8 @@ uint8_t AccPmuAssembler::AssembleData(DataInventory &dataInventory, JsonWriter &
         uint32_t formatPid = JsonAssembler::GetFormatPid(pid, layerInfo.sortIndex, deviceId);
         pidMap[deviceId] = formatPid;
     }
-    GenerateHWMetaData(pidMap, layerInfo, res_);
     GenerateAccPmuTrace(*accPmuData, pidMap, res_);
+    GenerateHWMetaData(pidMap, layerInfo, res_);
     if (res_.empty()) {
         ERROR("Can't Generate any Acc PMU process data");
         return ASSEMBLE_FAILED;

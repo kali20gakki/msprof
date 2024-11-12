@@ -23,7 +23,7 @@ using GeHashMap = std::unordered_map<std::string, std::string>;
 // connection_id, duration_estimated, bandwidth
 using HcclTaskFormat = std::tuple<uint32_t, std::string, std::string, std::string, int32_t, uint64_t, uint32_t,
     uint32_t, uint32_t, std::string, uint64_t, std::string, std::string, uint32_t,
-    uint64_t, uint32_t, std::string, double, double, uint32_t, double, double>;
+    std::string, uint32_t, std::string, double, double, uint32_t, double, double>;
 using OriTaskDataFormat = std::vector<HcclTaskFormat>;
 // connection_id, op_name, relay, retry, data_type, alg_type, count, group_name, op_type, model_id
 using HcclOpFormat = std::tuple<uint32_t, std::string, int32_t, int32_t, std::string, std::string, uint64_t,

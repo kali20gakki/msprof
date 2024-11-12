@@ -18,11 +18,8 @@ namespace Analysis {
 namespace Application {
 using namespace Analysis::Viewer::Database;
 namespace {
-const uint32_t SORT_INDEX = 15;
-const std::string HCCL_ASSEMBLER = "HCCL";
-const std::string HCCL_LABEL = "NPU";
 const int32_t INVALID_PLANE = -1;
-const int INDEX_LENGTH = 9;  // plane id 最多 8 个 + group 栏的预留位
+const int32_t PLAIN_OFFSET = 2;
 }
 
 std::string TransEnumToType(uint64_t key, const std::unordered_map<std::string, uint16_t > &enumTable)
@@ -35,7 +32,7 @@ std::string TransEnumToType(uint64_t key, const std::unordered_map<std::string, 
     return "";
 }
 
-HcclAssembler::HcclAssembler() : JsonAssembler(HCCL_ASSEMBLER, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
+HcclAssembler::HcclAssembler() : JsonAssembler(PROCESS_HCCL, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
 
 void HcclOpTraceEvent::ProcessArgs(JsonWriter& ostream)
 {
@@ -65,7 +62,7 @@ void HcclTaskTraceEvent::ProcessArgs(JsonWriter& ostream)
 }
 
 void HcclAssembler::GenerateHcclTaskTrace(const std::vector<CommunicationTaskData>& task, const std::string &profPath,
-                                          std::unordered_map<uint16_t, uint32_t>& pidMap)
+                                          std::unordered_map<uint16_t, uint32_t>& pidMap, const LayerInfo &layerInfo)
 {
     uint32_t formatPid;
     int tid;
@@ -73,10 +70,14 @@ void HcclAssembler::GenerateHcclTaskTrace(const std::vector<CommunicationTaskDat
     std::string dataType;
     std::string linkType;
     for (auto &data : task) {
-        formatPid = GetDevicePid(pidMap, data.deviceId, profPath, SORT_INDEX);
+        // L0场景不需要呈现小算子数据
+        if (data.planeId == INVALID_PLANE) {
+            return;
+        }
+        formatPid = GetDevicePid(pidMap, data.deviceId, profPath, layerInfo.sortIndex);
         auto it = groupIndex_.find(data.groupName);
         if (it == groupIndex_.end()) {
-            auto tmpId = groupIndex_.size() * INDEX_LENGTH;
+            auto tmpId = groupIndex_.size() * this->maxPlainId_;
             groupIndex_[data.groupName] = static_cast<int>(tmpId);
             tid = static_cast<int>(tmpId + data.planeId + 1);
         } else {
@@ -90,23 +91,23 @@ void HcclAssembler::GenerateHcclTaskTrace(const std::vector<CommunicationTaskDat
         MAKE_SHARED_RETURN_VOID(event, HcclTaskTraceEvent, formatPid, tid, data.duration / NS_TO_US,
                                 std::to_string(data.start / NS_TO_US), data.taskType, data.srcRank, data.dstRank,
                                 data.streamId, data.taskId, data.contextId, data.modelId, data.size,
-                                data.duration_estimated / NS_TO_US, data.bandwidth, data.notifyId, transport,
+                                data.duration_estimated, data.bandwidth, data.notifyId, transport,
                                 data.taskType, dataType, linkType);
         res_.push_back(event);
     }
 }
 
 void HcclAssembler::GenerateHcclOpTrace(const std::vector<CommunicationOpData>& opData, const std::string& profPath,
-                                        std::unordered_map<uint16_t, uint32_t>& pidMap)
+                                        std::unordered_map<uint16_t, uint32_t>& pidMap, const LayerInfo &layerInfo)
 {
     uint32_t formatPid;
     int tid;
     std::string dataType;
     for (auto &data : opData) {
-        formatPid = GetDevicePid(pidMap, data.deviceId, profPath, SORT_INDEX);
+        formatPid = GetDevicePid(pidMap, data.deviceId, profPath, layerInfo.sortIndex);
         auto it = groupIndex_.find(data.groupName);
         if (it == groupIndex_.end()) {
-            tid = static_cast<int>(groupIndex_.size() * INDEX_LENGTH);
+            tid = static_cast<int>(groupIndex_.size() * this->maxPlainId_);
             groupIndex_[data.groupName] = tid;
         } else {
             tid = it->second;
@@ -132,29 +133,29 @@ void HcclAssembler::GenerateConnectionTrace(const CommunicationOpData& data, uin
     res_.push_back(flow);
 }
 
-void HcclAssembler::GenerateMetaDataEvent(std::unordered_map<uint16_t, uint32_t>& pidMap)
+void HcclAssembler::GenerateMetaDataEvent(std::unordered_map<uint16_t, uint32_t>& pidMap, const LayerInfo &layerInfo)
 {
     for (const auto &it : pidMap) {
         std::shared_ptr<MetaDataNameEvent> processName;
         MAKE_SHARED_RETURN_VOID(processName, MetaDataNameEvent, it.second, DEFAULT_TID, META_DATA_PROCESS_NAME,
-                                HCCL_ASSEMBLER);
+                                layerInfo.component);
         res_.push_back(processName);
         std::shared_ptr<MetaDataLabelEvent> processLabel;
         MAKE_SHARED_RETURN_VOID(processLabel, MetaDataLabelEvent, it.second, DEFAULT_TID, META_DATA_PROCESS_LABEL,
-                                HCCL_LABEL);
+                                layerInfo.label);
         res_.push_back(processLabel);
         std::shared_ptr<MetaDataIndexEvent> processIndex;
         MAKE_SHARED_RETURN_VOID(processIndex, MetaDataIndexEvent, it.second, DEFAULT_TID, META_DATA_PROCESS_INDEX,
-                                SORT_INDEX);
+                                layerInfo.sortIndex);
         res_.push_back(processIndex);
     }
     int planeId;
     std::string traceName;
     for (const auto &it : pidTidSet_) {
-        planeId = it.second % INDEX_LENGTH;
+        planeId = it.second % this->maxPlainId_;
         traceName = {"Plane " + std::to_string(planeId)};
         if (planeId == 0) {
-            traceName = {"Group " + std::to_string(it.second / INDEX_LENGTH) + " Communication"};
+            traceName = {"Group " + std::to_string(it.second / this->maxPlainId_) + " Communication"};
         }
         std::shared_ptr<MetaDataNameEvent> threadName;
         MAKE_SHARED_RETURN_VOID(threadName, MetaDataNameEvent, it.first, it.second, META_DATA_THREAD_NAME, traceName);
@@ -175,13 +176,21 @@ uint8_t HcclAssembler::AssembleData(DataInventory& dataInventory, JsonWriter& os
         return DATA_NOT_EXIST;
     }
     std::unordered_map<uint16_t, uint32_t> devicePid;
+    auto layerInfo = GetLayerInfo(PROCESS_HCCL);
     if (taskData != nullptr) {
-        GenerateHcclTaskTrace(*taskData, profPath, devicePid);
+        auto maxTask = std::max_element(taskData->begin(), taskData->end(), [](const CommunicationTaskData &ld,
+                const CommunicationTaskData &rd) {
+            return ld.planeId < rd.planeId;
+        });
+        if (maxTask != taskData->end() && maxTask->planeId != INVALID_PLANE) {
+            this->maxPlainId_ = maxTask->planeId + PLAIN_OFFSET;  // plainId自身加1，group分组再加1
+        }
+        GenerateHcclTaskTrace(*taskData, profPath, devicePid, layerInfo);
     }
     if (opData != nullptr) {
-        GenerateHcclOpTrace(*opData, profPath, devicePid);
+        GenerateHcclOpTrace(*opData, profPath, devicePid, layerInfo);
     }
-    GenerateMetaDataEvent(devicePid);
+    GenerateMetaDataEvent(devicePid, layerInfo);
     if (res_.empty()) {
         ERROR("Can't Generate any Ascend process data");
         return ASSEMBLE_FAILED;

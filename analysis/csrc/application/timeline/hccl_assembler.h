@@ -24,15 +24,16 @@ public:
 private:
     uint8_t AssembleData(DataInventory& dataInventory, JsonWriter &ostream, const std::string &profPath) override;
     void GenerateHcclTaskTrace(const std::vector<CommunicationTaskData> &task, const std::string &profPath,
-                               std::unordered_map<uint16_t, uint32_t> &pidMap);
+                               std::unordered_map<uint16_t, uint32_t> &pidMap, const LayerInfo &layerInfo);
     void GenerateHcclOpTrace(const std::vector<CommunicationOpData> &opData, const std::string &profPath,
-                             std::unordered_map<uint16_t, uint32_t> &pidMap);
+                             std::unordered_map<uint16_t, uint32_t> &pidMap, const LayerInfo &layerInfo);
     void GenerateConnectionTrace(const CommunicationOpData &data, uint32_t formatPid, int tid);
-    void GenerateMetaDataEvent(std::unordered_map<uint16_t, uint32_t> &pidMap);
+    void GenerateMetaDataEvent(std::unordered_map<uint16_t, uint32_t> &pidMap, const LayerInfo &layerInfo);
 private:
     std::vector<std::shared_ptr<TraceEvent>> res_;
     std::unordered_map<std::string, int> groupIndex_;
     std::set<std::pair<uint32_t, int>> pidTidSet_;
+    int32_t maxPlainId_ = 1;
 };
 
 class HcclOpTraceEvent : public DurationEvent {
@@ -56,7 +57,7 @@ class HcclTaskTraceEvent : public DurationEvent {
 public:
     HcclTaskTraceEvent(uint32_t pid, int tid, double dur, const std::string &ts, const std::string &name, uint32_t src,
                        uint32_t dst, uint32_t streamId, uint32_t taskId, uint32_t contextId, uint32_t modelId,
-                       uint64_t size, double esDur, double bw, uint64_t notifyId, const std::string &tsType,
+                       uint64_t size, double esDur, double bw, const std::string notifyId, const std::string &tsType,
                        const std::string &taskType, const std::string &dataType, const std::string &linkType)
         : DurationEvent(pid, tid, dur, ts, name), srcRank_(src), dstRank_(dst), streamId_(streamId), taskId_(taskId),
         contextId_(contextId), modelId_(modelId), size_(size), esDur_(esDur), bandwidth_(bw), notifyId_(notifyId),
@@ -73,7 +74,7 @@ private:
     uint64_t size_;
     double esDur_;
     double bandwidth_;
-    uint64_t notifyId_;
+    std::string notifyId_;
     std::string transportType_;
     std::string taskType;
     std::string dataType_;

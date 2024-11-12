@@ -18,12 +18,6 @@
 
 namespace Analysis {
 namespace Domain {
-namespace {
-const std::string PROCESSOR_NAME_CPU_USAGE = "CPU_USAGE";
-const std::string PROCESSOR_NAME_MEM_USAGE = "MEM_USAGE";
-const std::string PROCESSOR_NAME_DISK_USAGE = "DISK_USAGE";
-const std::string PROCESSOR_NAME_NETWORK_USAGE = "NETWORK_USAGE";
-}
 using namespace Analysis::Utils;
 // start_time, cpu_no, usage
 using OriCpuUsage = std::vector<std::tuple<uint64_t, std::string, double>>;

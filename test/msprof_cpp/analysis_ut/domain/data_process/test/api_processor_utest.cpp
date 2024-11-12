@@ -22,7 +22,7 @@ using namespace Parser::Environment;
 using namespace Analysis::Utils;
 using namespace Analysis::Viewer::Database;
 
-const std::string API_DIR = "./api";
+const std::string API_DIR = "./api_data";
 const std::string PROF0 = File::PathJoin({API_DIR, "PROF_0"});
 const std::string PROF1 = File::PathJoin({API_DIR, "PROF_1"});
 const std::string PROF2 = File::PathJoin({API_DIR, "PROF_2"});
@@ -49,6 +49,9 @@ class ApiProcessorUTest : public testing::Test {
 protected:
     static void SetUpTestCase()
     {
+        if (File::Check(API_DIR)) {
+            File::RemoveDir(API_DIR, 0);
+        }
         EXPECT_TRUE(File::CreateDir(API_DIR));
         EXPECT_TRUE(File::CreateDir(PROF0));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF0, HOST})));
@@ -124,9 +127,8 @@ TEST_F(ApiProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
     size_t i = 0;
     for (const auto& profPath : PROF_PATHS) {
         auto processor = ApiProcessor(profPath);
-        auto &dataInventory = res[i];
+        EXPECT_TRUE(processor.Run(res[i], PROCESSOR_NAME_API));
         ++i;
-        EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_API));
     }
     for (auto& node : res) {
         auto checkData = node.GetPtr<std::vector<ApiData>>();

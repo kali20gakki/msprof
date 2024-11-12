@@ -20,7 +20,7 @@
 namespace Analysis {
 namespace Domain {
 // syscnt, freq
-using OriDataFormat = std::vector<std::tuple<uint64_t, double>>;
+using OriFreqDataFormat = std::vector<std::tuple<uint64_t, double>>;
 
 // 该类用于定义处理freq.db中FreqParse表
 class AicoreFreqProcessor : public DataProcessor {
@@ -29,10 +29,10 @@ public:
     explicit AicoreFreqProcessor(const std::string& profPath);
 private:
     bool Process(DataInventory& dataInventory);
-    bool ProcessData(const std::string& devicePath, OriDataFormat& oriData);
-    OriDataFormat LoadData(const std::string& dbPath, DBInfo& freqDB);
+    bool ProcessData(const std::string& devicePath, OriFreqDataFormat& oriData);
+    OriFreqDataFormat LoadData(const std::string& dbPath, DBInfo& freqDB);
     bool FormatData(const uint16_t& deviceId, const Utils::ProfTimeRecord& timeRecord,
-                    const Utils::SyscntConversionParams& params, const OriDataFormat& freqData,
+                    const Utils::SyscntConversionParams& params, const OriFreqDataFormat& freqData,
                     std::vector<AicoreFreqData>& processedData);
 };
 } // Viewer

@@ -30,7 +30,7 @@ std::unordered_map<uint16_t, uint32_t> AicoreFreqAssembler::GenerateFreqTrace(
         auto pid =  GetDevicePid(pidMap, data.deviceId, profPath, sortIndex);
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, pidMap, pid, DEFAULT_TID,
                                  std::to_string(data.timestamp / NS_TO_US), "AI Core Freq");
-        event->SetSeriesValue("MHz", data.freq);
+        event->SetSeriesIValue("MHz", static_cast<uint64_t>(data.freq));
         res_.push_back(event);
     }
     return pidMap;

@@ -31,10 +31,9 @@ bool JsonAssembler::Run(DataInventory& dataInventory, const std::string& profPat
     if (ASSEMBLE_SUCCESS == res) {
         INFO("Assemble % data success, begin to export", processorName_);
         // 处理成功，将写入数据落盘
-        FlushToFile(ostream, profPath);
-        return true;
+        return FlushToFile(ostream, profPath);
     } else if (DATA_NOT_EXIST == res) {
-        WARN("No % data, don't export deliverable!");
+        WARN("No % data, don't export deliverable!", processorName_);
         return true;
     } else {
         ERROR("Assemble % data failed, can't export deliverable!");
@@ -64,12 +63,15 @@ bool JsonAssembler::FlushToFile(JsonWriter& ostream, const std::string& profPath
 {
     // 写msprof.json的时候是并行的，每一层JSON都有一个[],需要在写入的时候去掉
     std::string filePath;
+    bool flag = true;
     for (auto &it : fileMap_) {
         auto fileName = it.first;
         fileName.append("_").append(timestampStr).append(JSON_SUFFIX);
         filePath = File::PathJoin({profPath, OUTPUT_PATH, fileName});
-        DumpTool::WriteToFile(filePath, ostream.GetString() + 1, ostream.GetSize() - FILE_CONTENT_SUFFIX, it.second);
+        flag = DumpTool::WriteToFile(filePath, ostream.GetString() + 1, ostream.GetSize() - FILE_CONTENT_SUFFIX,
+                                     it.second) && flag;
     }
+    return flag;
 }
 
 void JsonAssembler::GenerateHWMetaData(const std::unordered_map<uint16_t, uint32_t> &pidMap,
