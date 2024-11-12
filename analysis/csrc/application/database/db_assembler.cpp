@@ -107,6 +107,7 @@ bool SaveCommTaskData(DataInventory& dataInventory, DBInfo& msprofDB, const std:
         ERROR("Reserved for communication task failed.");
         return false;
     }
+    uint64_t notifyId;
     for (const auto& item : *taskData) {
         uint64_t groupName = IdPool::GetInstance().GetUint64Id(item.groupName);
         uint64_t opName = IdPool::GetInstance().GetUint64Id(item.opName);
@@ -114,8 +115,11 @@ bool SaveCommTaskData(DataInventory& dataInventory, DBInfo& msprofDB, const std:
         uint64_t globalTaskId = IdPool::GetInstance().GetId(
             std::make_tuple(item.deviceId, item.streamId, item.taskId, item.contextId, item.batchId));
         uint32_t opId = IdPool::GetInstance().GetUint32Id(item.opKey);
+        if (StrToU64(notifyId, item.notifyId) != ANALYSIS_OK) {
+            notifyId = UINT64_MAX;
+        }
         processedTaskData.emplace_back(opName, globalTaskId, taskType, item.planeId,
-                                       groupName, item.notifyId, item.rdmaType, item.srcRank,
+                                       groupName, notifyId, item.rdmaType, item.srcRank,
                                        item.dstRank, item.transportType, item.size, item.dataType,
                                        item.linkType, opId);
     }

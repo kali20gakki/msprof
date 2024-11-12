@@ -39,10 +39,10 @@ void GenerateDDRTrace(std::vector<DDRData> &ddrData, const std::unordered_map<ui
         time = std::to_string(data.timestamp / NS_TO_US);
         pid = pidMap.at(data.deviceId);
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, READ_COUNTER);
-        event->SetSeriesValue(READ_SERIES, data.fluxRead);
+        event->SetSeriesDValue(READ_SERIES, data.fluxRead);
         res.push_back(event);
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, WRITE_COUNTER);
-        event->SetSeriesValue(WRITE_SERIES, data.fluxWrite);
+        event->SetSeriesDValue(WRITE_SERIES, data.fluxWrite);
         res.push_back(event);
     }
 }

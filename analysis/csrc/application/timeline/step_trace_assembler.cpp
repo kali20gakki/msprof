@@ -94,7 +94,8 @@ void NextTraceEvent::ProcessArgs(Analysis::Infra::JsonWriter& ostream)
 }
 
 StepTraceAssembler::StepTraceAssembler()
-    : JsonAssembler(PROCESS_STEP_TRACE, {{MSPROF_FILE, FileCategory::MSPROF}, {STEP_TRACE_FILE, FileCategory::STEP}})
+    : JsonAssembler(PROCESS_STEP_TRACE, {
+    {MSPROF_JSON_FILE, FileCategory::MSPROF}, {STEP_TRACE_FILE, FileCategory::STEP}})
 {}
 
 void StepTraceAssembler::GenerateTrainTrace(const std::vector<TrainTraceData>& trainData, const std::string& profPath,

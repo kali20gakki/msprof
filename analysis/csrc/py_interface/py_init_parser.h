@@ -26,6 +26,8 @@ PyObject *WrapDumpCANNTrace(PyObject *self, PyObject *args);
 PyObject *WrapDumpDeviceData(PyObject *self, PyObject *args);
 // 统一db入口功能的外层包装，解析python侧传入的路径后调用unifiedDbManager启动导出流程，获取返回状态码后返回python侧
 PyObject *WrapExportUnifiedDB(PyObject *self, PyObject *args);
+// timeline导出入口的外层包装，解析Python侧传入路径后调用timelineManager启动导出流程，获取返回状态码后返回python侧
+PyObject *WrapExportTimeline(PyObject *self, PyObject *args);
 } // PyInterface
 } // Analyzer
 

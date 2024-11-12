@@ -48,7 +48,7 @@ void GenerateQosTrace(std::vector<QosData> &qosData, const std::unordered_map<ui
             counter.clear();
             counter.append(QOS).append(" ").append(it->second[i]);
             MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, counter);
-            event->SetSeriesValue(SERIES, bandwidth[i]);
+            event->SetSeriesIValue(SERIES, bandwidth[i]);
             res.push_back(event);
         }
     }

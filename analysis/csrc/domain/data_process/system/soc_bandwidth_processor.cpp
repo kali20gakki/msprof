@@ -21,9 +21,9 @@ using namespace Analysis::Utils;
 SocBandwidthProcessor::SocBandwidthProcessor(const std::string& profPaths) : DataProcessor(profPaths)
 {}
 
-OriDataFormat SocBandwidthProcessor::LoadData(const DBInfo& socProfilerDB, const std::string& dbPath)
+OriSocDataFormat SocBandwidthProcessor::LoadData(const DBInfo& socProfilerDB, const std::string& dbPath)
 {
-    OriDataFormat oriData;
+    OriSocDataFormat oriData;
     if (socProfilerDB.dbRunner == nullptr) {
         ERROR("Create % connection failed.", dbPath);
         return oriData;
@@ -36,7 +36,7 @@ OriDataFormat SocBandwidthProcessor::LoadData(const DBInfo& socProfilerDB, const
     return oriData;
 }
 
-std::vector<SocBandwidthData> SocBandwidthProcessor::FormatData(const OriDataFormat& oriData,
+std::vector<SocBandwidthData> SocBandwidthProcessor::FormatData(const OriSocDataFormat& oriData,
                                                                 const Utils::ProfTimeRecord& timeRecord,
                                                                 const uint16_t deviceId)
 {
@@ -112,6 +112,7 @@ bool SocBandwidthProcessor::ProcessSingleDevice(const std::string& devicePath, U
         return false;
     }
     res.insert(res.end(), formatData.begin(), formatData.end());
+    return true;
 }
 }
 }

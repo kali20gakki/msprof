@@ -18,7 +18,6 @@ namespace Domain {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Utils;
 constexpr double TMP_UINT = NANO_SECOND / (BYTE_SIZE * BYTE_SIZE);
-const std::string PROCESSOR_NAME_HBM = "QoS";
 
 QosProcessor::QosProcessor(const std::string &profPath) : DataProcessor(profPath) {}
 
@@ -36,7 +35,7 @@ bool QosProcessor::Process(DataInventory &dataInventory)
         localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
         flag = ProcessSingleDevice(devicePath, localtimeContext, allProcessedData) && flag;
     }
-    if (!SaveToDataInventory<QosData>(std::move(allProcessedData), dataInventory, PROCESSOR_NAME_HBM)) {
+    if (!SaveToDataInventory<QosData>(std::move(allProcessedData), dataInventory, PROCESSOR_NAME_QOS)) {
             flag = false;
             ERROR("Save HBM Data To DataInventory failed, profPath is %.", profPath_);
     }

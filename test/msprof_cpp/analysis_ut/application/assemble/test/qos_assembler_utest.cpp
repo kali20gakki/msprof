@@ -126,18 +126,18 @@ TEST_F(QosAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
     std::string expectStr = "{\"name\":\"process_name\",\"pid\":2383960960,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":"
-                            "\"QoS\"}},{\"name\":\"process_labels\",\"pid\":2383960960,\"tid\":0,\"ph\":\"M\",\"args"
-                            "\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960960,\"tid\":0,"
-                            "\"ph\":\"M\",\"args\":{\"sort_index\":28}},{\"name\":\"QoS OTHERS\",\"pid\":2383960960,"
-                            "\"tid\":0,\"ts\":\"1724405892226599.500000\",\"ph\":\"C\",\"args\":{\"value\":10.0}},"
-                            "{\"name\":\"QoS DVPP\",\"pid\":2383960960,\"tid\":0,\"ts\":\"1724405892226599.500000\","
-                            "\"ph\":\"C\",\"args\":{\"value\":10.0}},{\"name\":\"QoS OTHERS\",\"pid\":2383960960,"
-                            "\"tid\":0,\"ts\":\"1724405892227599.250000\",\"ph\":\"C\",\"args\":{\"value\":20.0}},{"
-                            "\"name\":\"QoS DVPP\",\"pid\":2383960960,\"tid\":0,\"ts\":\"1724405892227599.250000\","
-                            "\"ph\":\"C\",\"args\":{\"value\":20.0}},{\"name\":\"QoS OTHERS\",\"pid\":2383960960,"
-                            "\"tid\":0,\"ts\":\"1724405892228599.500000\",\"ph\":\"C\",\"args\":{\"value\":30.0}},"
-                            "{\"name\":\"QoS DVPP\",\"pid\":2383960960,\"tid\":0,\"ts\":\"1724405892228599.500000\""
-                            ",\"ph\":\"C\",\"args\":{\"value\":30.0}},";
+                            "\"QoS\"}},{\"name\":\"process_labels\",\"pid\":2383960960,\"tid\":0,\"ph\":\"M\",\"args\""
+                            ":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960960,\"tid\":0,\"ph"
+                            "\":\"M\",\"args\":{\"sort_index\":28}},{\"name\":\"QoS OTHERS\",\"pid\":2383960960,\"tid"
+                            "\":0,\"ts\":\"1724405892226599.500000\",\"ph\":\"C\",\"args\":{\"value\":10}},{\"name\":"
+                            "\"QoS DVPP\",\"pid\":2383960960,\"tid\":0,\"ts\":\"1724405892226599.500000\",\"ph\":\"C\""
+                            ",\"args\":{\"value\":10}},{\"name\":\"QoS OTHERS\",\"pid\":2383960960,\"tid\":0,\"ts\":\""
+                            "1724405892227599.250000\",\"ph\":\"C\",\"args\":{\"value\":20}},{\"name\":\"QoS DVPP\",\""
+                            "pid\":2383960960,\"tid\":0,\"ts\":\"1724405892227599.250000\",\"ph\":\"C\",\"args\":{\""
+                            "value\":20}},{\"name\":\"QoS OTHERS\",\"pid\":2383960960,\"tid\":0,\"ts\":\""
+                            "1724405892228599.500000\",\"ph\":\"C\",\"args\":{\"value\":30}},{\"name\":\"QoS DVPP\",\""
+                            "pid\":2383960960,\"tid\":0,\"ts\":\"1724405892228599.500000\",\"ph\":\"C\",\"args\":"
+                            "{\"value\":30}},";
     EXPECT_EQ(expectStr, res.back());
 }
 

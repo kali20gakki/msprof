@@ -40,7 +40,7 @@ const std::string JSON_SUFFIX = ".json";
 const std::string MSPROF_JSON_FILE = "msprof";
 const double NS_TO_US = 1000.0;
 const int CONN_OFFSET = 32;
-const std::string MSPROF_FILE = "msprof";
+const double B_TO_KB = 1024.0;
 const std::string STEP_TRACE_FILE = "step_trace";
 const std::string MSPROF_TX_FILE = "msprof_tx";
 /*

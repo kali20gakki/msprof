@@ -39,10 +39,10 @@ void GenerateHccsTrace(std::vector<HccsData> &hccsData, const std::unordered_map
         time = std::to_string(data.localTime / NS_TO_US);
         pid = pidMap.at(data.deviceId);
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, RX_COUNTER);
-        event->SetSeriesValue(RX_SERIES, data.rxThroughput);
+        event->SetSeriesDValue(RX_SERIES, data.rxThroughput);
         res.push_back(event);
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, TX_COUNTER);
-        event->SetSeriesValue(TX_SERIES, data.txThroughput);
+        event->SetSeriesDValue(TX_SERIES, data.txThroughput);
         res.push_back(event);
     }
 }

@@ -23,6 +23,7 @@ using namespace Analysis::Infra;
 namespace {
 const std::string HIT_RATE_SERIES = "Hit Rate(%)";
 const std::string THROUGHPUT_SERIES = "Throughput(MB/s)";
+const int8_t PERCENT_FACTOR = 100;
 struct CounterName {
     std::string hitRate;
     std::string throughput;
@@ -51,13 +52,13 @@ void GenerateLLcTrace(const std::vector<LLcData> &llcData, const std::unordered_
         counterName.clear();
         counterName.append("LLC ").append(llcId).append(" ").append(CounterNameMap.at(data.mode).hitRate);
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, counterName);
-        event->SetSeriesValue(HIT_RATE_SERIES, data.hitRate);
+        event->SetSeriesDValue(HIT_RATE_SERIES, data.hitRate / PERCENT_FACTOR);
         res.push_back(event);
         // throughput
         counterName.clear();
         counterName.append("LLC ").append(llcId).append(" ").append(CounterNameMap.at(data.mode).throughput);
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, counterName);
-        event->SetSeriesValue(THROUGHPUT_SERIES, data.throughput);
+        event->SetSeriesDValue(THROUGHPUT_SERIES, data.throughput);
         res.push_back(event);
     }
 }

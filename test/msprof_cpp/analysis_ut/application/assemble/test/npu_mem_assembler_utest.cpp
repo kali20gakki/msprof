@@ -98,7 +98,7 @@ TEST_F(NpuMemAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
                             ":0,\"ph\":\"M\",\"args\":{\"sort_index\":16}},{\"name\":\"APP/DDR\",\"pid\":2383960576,"
                             "\"tid\":0,\"ts\":\"1724405892226599.500000\",\"ph\":\"C\",\"args\":{\"KB\":0.0}},{\"name"
                             "\":\"APP/HBM\",\"pid\":2383960576,\"tid\":0,\"ts\":\"1724405892226599.500000\",\"ph\""
-                            ":\"C\",\"args\":{\"KB\":106848256.0}},{\"name\":\"APP/Memory\",\"pid\":2383960576,\"tid\":"
+                            ":\"C\",\"args\":{\"KB\":104344.0}},{\"name\":\"APP/Memory\",\"pid\":2383960576,\"tid\":"
                             "0,\"ts\":\"1724405892226599.500000\",\"ph\":\"C\",\"args\":{\"KB\":0.0}},";
     EXPECT_EQ(expectStr, res.back());
 }

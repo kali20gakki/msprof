@@ -68,6 +68,8 @@ static std::vector<AscendTaskData> GenerateTaskData()
     data.hostType = "KERNEL_AICORE";
     data.deviceType = "AI_CORE";
     res.push_back(data);
+    data.contextId = UINT32_MAX;
+    res.push_back(data);
     return res;
 }
 
@@ -81,6 +83,8 @@ static std::vector<TaskInfoData> GenerateTaskInfoData()
     data.contextId = 1; // contextId 1
     data.batchId = 1; // batchId 1
     data.opName = "MatMulV3";
+    res.push_back(data);
+    data.contextId = UINT32_MAX;
     res.push_back(data);
     return res;
 }
@@ -98,6 +102,20 @@ static std::vector<MsprofTxDeviceData> GenerateDeviceTxData()
     return res;
 }
 
+
+static std::vector<KfcTurnData> GenerateKfcTurnData()
+{
+    std::vector<KfcTurnData> res;
+    KfcTurnData data;
+    data.opName = "WaitExecute";
+    data.deviceId = 0; // device id 0
+    data.streamId = 1; // streamId 1
+    data.taskId = 15; // taskId 15
+    data.startTime = 1717575960208020758; // start 1717575960208020758
+    res.push_back(data);
+    return res;
+}
+
 TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataNotExists)
 {
     AscendHardwareAssembler assembler;
@@ -110,15 +128,19 @@ TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     std::shared_ptr<std::vector<AscendTaskData>> taskS;
     std::shared_ptr<std::vector<MsprofTxDeviceData>> txS;
     std::shared_ptr<std::vector<TaskInfoData>> infoS;
+    std::shared_ptr<std::vector<KfcTurnData>> kfcDatas;
     auto task = GenerateTaskData();
     auto tx = GenerateDeviceTxData();
     auto info = GenerateTaskInfoData();
+    auto kfcData = GenerateKfcTurnData();
     MAKE_SHARED_NO_OPERATION(taskS, std::vector<AscendTaskData>, task);
     MAKE_SHARED_NO_OPERATION(txS, std::vector<MsprofTxDeviceData>, tx);
     MAKE_SHARED_NO_OPERATION(infoS, std::vector<TaskInfoData>, info);
+    MAKE_SHARED_NO_OPERATION(kfcDatas, std::vector<KfcTurnData>, kfcData);
     dataInventory_.Inject(taskS);
     dataInventory_.Inject(txS);
     dataInventory_.Inject(infoS);
+    dataInventory_.Inject(kfcDatas);
     MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(10086)); // pid 10086
     EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
     auto files = File::GetOriginData(RESULT_PATH, {"msprof"}, {});
@@ -126,22 +148,24 @@ TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"MatMulV3\",\"pid\":10328480,\"tid\":1,\"ts\":\"1717575960208020.750000\","
-                            "\"dur\":0.45077999999999996,\"ph\":\"X\",\"args\":{\"Model Id\":4294967295,\"Task Type\":"
-                            "\"AI_CORE\",\"Physic Stream Id\":1,\"Task Id\":10,\"Batch Id\":1,\"Subtask Id\":1,"
-                            "\"connection_id\":2345}},{\"name\":\"HostToDevice10071698309120\",\"pid\":10328480,"
-                            "\"tid\":1,\"ph\":\"f\",\"cat\":\"HostToDevice\",\"id\":\"10071698309120\",\"ts\":"
-                            "\"1717575960208020.750000\",\"bp\":\"e\"},{\"name\":\"MsTx_2147483647\",\"pid\":10328480,"
-                            "\"tid\":1,\"ts\":\"18446744073709552.000000\",\"dur\":0.0,\"ph\":\"X\",\"args\":"
-                            "{\"Physic Stream Id\":1,\"Task Id\":13}},{\"name\":\"MsTx_7890\",\"pid\":10328480,\"tid"
-                            "\":1,\"ph\":\"f\",\"cat\":\"MsTx\",\"id\":\"7890\",\"ts\":\"18446744073709552.000000\","
-                            "\"bp\":\"e\"},{\"name\":\"process_name\",\"pid\":10328480,\"tid\":0,\"ph\":\"M\",\"args"
-                            "\":{\"name\":\"Ascend Hardware\"}},{\"name\":\"process_labels\",\"pid\":10328480,\"tid\""
-                            ":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\""
-                            ":10328480,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":13}},{\"name\":\"thread_name\","
-                            "\"pid\":10328480,\"tid\":1,\"ph\":\"M\",\"args\":{\"name\":\"Stream 1\"}},{\"name\":"
-                            "\"thread_sort_index\",\"pid\":10328480,\"tid\":1,\"ph\":\"M\",\"args\":"
-                            "{\"sort_index\":1}},";
+    std::string expectStr = "{\"name\":\"MatMulV3\",\"pid\":10328480,\"tid\":1,\"ts\":\"1717575960208020.750000\",\""
+                            "dur\":0.45077999999999996,\"ph\":\"X\",\"args\":{\"Model Id\":4294967295,\"Task Type\":\""
+                            "AI_CORE\",\"Physic Stream Id\":1,\"Task Id\":10,\"Batch Id\":1,\"Subtask Id\":1,\""
+                            "connection_id\":2345}},{\"name\":\"HostToDevice10071698309120\",\"pid\":10328480,\"tid\":"
+                            "1,\"ph\":\"f\",\"cat\":\"HostToDevice\",\"id\":\"10071698309120\",\"ts\":\""
+                            "1717575960208020.750000\",\"bp\":\"e\"},{\"name\":\"MsTx_2147483647\",\"pid\":10328480,\""
+                            "tid\":1,\"ts\":\"18446744073709552.000000\",\"dur\":0.0,\"ph\":\"X\",\"args\":{\""
+                            "Physic Stream Id\":1,\"Task Id\":13}},{\"name\":\"MsTx_7890\",\"pid\":10328480,\"tid\":1,"
+                            "\"ph\":\"f\",\"cat\":\"MsTx\",\"id\":\"7890\",\"ts\":\"18446744073709552.000000\",\"bp\":"
+                            "\"e\"},{\"name\":\"WaitExecute\",\"pid\":10328480,\"tid\":1,\"ts\":\""
+                            "1717575960208020.750000\",\"dur\":0.0,\"ph\":\"X\",\"args\":{\"Physic Stream Id\":1,\""
+                            "Task Id\":15}},{\"name\":\"process_name\",\"pid\":10328480,\"tid\":0,\"ph\":\"M\",\"args"
+                            "\":{\"name\":\"Ascend Hardware\"}},{\"name\":\"process_labels\",\"pid\":10328480,\"tid\":"
+                            "0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":"
+                            "10328480,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":13}},{\"name\":\"thread_name\","
+                            "\"pid\":10328480,\"tid\":1,\"ph\":\"M\",\"args\":{\"name\":\"Stream 1\"}},{\"name\":\""
+                            "thread_sort_index\",\"pid\":10328480,\"tid\":1,\"ph\":\"M\",\"args\":{\"sort_index\":1}}"
+                            ",";
     EXPECT_EQ(expectStr, res.back());
 }
 
@@ -151,15 +175,19 @@ TEST_F(AscendHardwareAssemblerUTest, ShouldReturnFalseWhenDataAssembleFail)
     std::shared_ptr<std::vector<AscendTaskData>> taskS;
     std::shared_ptr<std::vector<MsprofTxDeviceData>> txS;
     std::shared_ptr<std::vector<TaskInfoData>> infoS;
+    std::shared_ptr<std::vector<KfcTurnData>> kfcDatas;
     auto task = GenerateTaskData();
     auto tx = GenerateDeviceTxData();
     auto info = GenerateTaskInfoData();
+    auto kfcData = GenerateKfcTurnData();
     MAKE_SHARED_NO_OPERATION(taskS, std::vector<AscendTaskData>, task);
     MAKE_SHARED_NO_OPERATION(txS, std::vector<MsprofTxDeviceData>, tx);
     MAKE_SHARED_NO_OPERATION(infoS, std::vector<TaskInfoData>, info);
+    MAKE_SHARED_NO_OPERATION(kfcDatas, std::vector<KfcTurnData>, kfcData);
     dataInventory_.Inject(taskS);
     dataInventory_.Inject(txS);
     dataInventory_.Inject(infoS);
+    dataInventory_.Inject(kfcDatas);
     MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(10087)); // pid 10087
     MOCKER_CPP(&std::vector<std::shared_ptr<TraceEvent>>::empty).stubs().will(returnValue(true));
     EXPECT_FALSE(assembler.Run(dataInventory_, PROF_PATH));

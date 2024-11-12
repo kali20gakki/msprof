@@ -99,20 +99,20 @@ TEST_F(StarsSocAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"process_name\",\"pid\":2383960832,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\""
-                            ":\"Stars Soc Info\"}},{\"name\":\"process_labels\",\"pid\":2383960832,\"tid\":0,\"ph\""
-                            ":\"M\",\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960832"
-                            ",\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":24}},{\"name\":\"L2 Buffer Bw Level\","
-                            "\"pid\":2383960832,\"tid\":0,\"ts\":\"1724405892226599.500000\",\"ph\":\"C\",\"args\":{"
-                            "\"L2 Buffer Bw Level\":7.0}},{\"name\":\"Mata Bw Level\",\"pid\":2383960832,\"tid\":0,"
-                            "\"ts\":\"1724405892226599.500000\",\"ph\":\"C\",\"args\":{\"Mata Bw Level\":4.0}},{\"name"
-                            "\":\"L2 Buffer Bw Level\",\"pid\":2383960832,\"tid\":0,\"ts\":\"1724405892226699.500000\""
-                            ",\"ph\":\"C\",\"args\":{\"L2 Buffer Bw Level\":4.0}},{\"name\":\"Mata Bw Level\",\"pid\":"
-                            "2383960832,\"tid\":0,\"ts\":\"1724405892226699.500000\",\"ph\":\"C\",\"args\":{\"Mata Bw "
-                            "Level\":3.0}},{\"name\":\"L2 Buffer Bw Level\",\"pid\":2383960832,\"tid\":0,\"ts\":\""
-                            "1724405892226799.250000\",\"ph\":\"C\",\"args\":{\"L2 Buffer Bw Level\":5.0}},{\"name\":"
-                            "\"Mata Bw Level\",\"pid\":2383960832,\"tid\":0,\"ts\":\"1724405892226799.250000\",\"ph\""
-                            ":\"C\",\"args\":{\"Mata Bw Level\":1.0}},";
+    std::string expectStr = "{\"name\":\"process_name\",\"pid\":2383960832,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":"
+                            "\"Stars Soc Info\"}},{\"name\":\"process_labels\",\"pid\":2383960832,\"tid\":0,\"ph\":\"M"
+                            "\",\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960832,\""
+                            "tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":24}},{\"name\":\"L2 Buffer Bw Level\",\"pid"
+                            "\":2383960832,\"tid\":0,\"ts\":\"1724405892226599.500000\",\"ph\":\"C\",\"args\":{\""
+                            "L2 Buffer Bw Level\":7}},{\"name\":\"Mata Bw Level\",\"pid\":2383960832,\"tid\":0,\"ts\":"
+                            "\"1724405892226599.500000\",\"ph\":\"C\",\"args\":{\"Mata Bw Level\":4}},{\"name\":\""
+                            "L2 Buffer Bw Level\",\"pid\":2383960832,\"tid\":0,\"ts\":\"1724405892226699.500000\",\"ph"
+                            "\":\"C\",\"args\":{\"L2 Buffer Bw Level\":4}},{\"name\":\"Mata Bw Level\",\"pid\":"
+                            "2383960832,\"tid\":0,\"ts\":\"1724405892226699.500000\",\"ph\":\"C\",\"args\":{\""
+                            "Mata Bw Level\":3}},{\"name\":\"L2 Buffer Bw Level\",\"pid\":2383960832,\"tid\":0,\"ts\":"
+                            "\"1724405892226799.250000\",\"ph\":\"C\",\"args\":{\"L2 Buffer Bw Level\":5}},{\"name\":"
+                            "\"Mata Bw Level\",\"pid\":2383960832,\"tid\":0,\"ts\":\"1724405892226799.250000\",\"ph\":"
+                            "\"C\",\"args\":{\"Mata Bw Level\":1}},";
     EXPECT_EQ(expectStr, res.back());
 }
 

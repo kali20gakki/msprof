@@ -43,17 +43,17 @@ void GenerateNpuMemTrace(std::vector<NpuMemData> &npuMemData, const std::unorder
     for (const auto &data : npuMemData) {
         time = std::to_string(data.localTime / NS_TO_US);
         pid = pidMap.at(data.deviceId);
-        double hbmValue = static_cast<double >(data.hbm);
-        double ddrValue = static_cast<double >(data.ddr);
-        double memoryValue = static_cast<double >(data.memory);
+        double hbmValue = static_cast<double>(data.hbm) / B_TO_KB;
+        double ddrValue = static_cast<double>(data.ddr) / B_TO_KB;
+        double memoryValue = static_cast<double>(data.memory) / B_TO_KB;
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, CounterNameMap.at(data.event).ddr);
-        event->SetSeriesValue("KB", ddrValue);
+        event->SetSeriesDValue("KB", ddrValue);
         res.push_back(event);
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, CounterNameMap.at(data.event).hbm);
-        event->SetSeriesValue("KB", hbmValue);
+        event->SetSeriesDValue("KB", hbmValue);
         res.push_back(event);
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, CounterNameMap.at(data.event).memory);
-        event->SetSeriesValue("KB", memoryValue);
+        event->SetSeriesDValue("KB", memoryValue);
         res.push_back(event);
     }
 }

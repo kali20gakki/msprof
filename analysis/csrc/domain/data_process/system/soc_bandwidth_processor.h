@@ -18,7 +18,7 @@
 namespace Analysis {
 namespace Domain {
 // l2_buffer_bw_level, mata_bw_level, sys_time
-using OriDataFormat = std::vector<std::tuple<uint32_t, uint32_t, double>>;
+using OriSocDataFormat = std::vector<std::tuple<uint32_t, uint32_t, double>>;
 
 // 该类用于生成SOC_BANDWIDTH_LEVEL表
 class SocBandwidthProcessor : public DataProcessor {
@@ -29,8 +29,8 @@ private:
     bool Process(DataInventory& dataInventory) override;
     bool ProcessSingleDevice(const std::string& devicePath, Utils::ProfTimeRecord& timeRecord,
                              std::vector<SocBandwidthData>& res);
-    OriDataFormat LoadData(const DBInfo& socProfilerDB, const std::string& dbPath);
-    std::vector<SocBandwidthData> FormatData(const OriDataFormat& oriData,
+    OriSocDataFormat LoadData(const DBInfo& socProfilerDB, const std::string& dbPath);
+    std::vector<SocBandwidthData> FormatData(const OriSocDataFormat& oriData,
                                              const Utils::ProfTimeRecord& timeRecord,
                                              const uint16_t deviceId);
 };

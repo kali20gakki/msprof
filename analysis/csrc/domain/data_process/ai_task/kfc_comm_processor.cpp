@@ -35,8 +35,8 @@ bool KfcCommProcessor::Process(DataInventory& dataInventory)
             continue;
         }
 
-        auto commStatus = CheckPathAndTable(dbPath, KfcOPTable);
-        auto computeStatus = CheckPathAndTable(dbPath, KfcTaksTable);
+        auto commStatus = CheckPathAndTable(dbPath, KfcOPTable, false);
+        auto computeStatus = CheckPathAndTable(dbPath, KfcTaksTable, false);
         if (commStatus != CHECK_SUCCESS && computeStatus != CHECK_SUCCESS) {
             if (commStatus == CHECK_FAILED || computeStatus == CHECK_FAILED) {
                 flag = false;

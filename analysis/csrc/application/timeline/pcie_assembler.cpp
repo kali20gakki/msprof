@@ -39,26 +39,26 @@ std::unordered_map<uint16_t, uint32_t> PCIeAssembler::GeneratePCIeTrace(
         // 时延单位为us, 带宽单位为MB/s
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, pidMap, pid, DEFAULT_TID,
                                  std::to_string(data.timestamp / NS_TO_US), CPL);
-        event->SetSeriesValue(TX, data.txCpl.avg / BYTE_SIZE / BYTE_SIZE);
-        event->SetSeriesValue(EX, data.rxCpl.avg / BYTE_SIZE / BYTE_SIZE);
+        event->SetSeriesDValue(TX, static_cast<double>(data.txCpl.avg) / BYTE_SIZE / BYTE_SIZE);
+        event->SetSeriesDValue(EX, static_cast<double>(data.rxCpl.avg) / BYTE_SIZE / BYTE_SIZE);
         res_.push_back(event);
 
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, pidMap, pid, DEFAULT_TID,
                                  std::to_string(data.timestamp / NS_TO_US), NONPOST);
-        event->SetSeriesValue(TX, data.txNonpost.avg / BYTE_SIZE / BYTE_SIZE);
-        event->SetSeriesValue(EX, data.rxNonpost.avg / BYTE_SIZE / BYTE_SIZE);
+        event->SetSeriesDValue(TX, static_cast<double>(data.txNonpost.avg) / BYTE_SIZE / BYTE_SIZE);
+        event->SetSeriesDValue(EX, static_cast<double>(data.rxNonpost.avg) / BYTE_SIZE / BYTE_SIZE);
         res_.push_back(event);
 
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, pidMap, pid, DEFAULT_TID,
                                  std::to_string(data.timestamp / NS_TO_US), NONPOST_LATENCY);
-        event->SetSeriesValue(TX, data.txNonpostLatency.avg / MILLI_SECOND);
-        event->SetSeriesValue(EX, 0);
+        event->SetSeriesDValue(TX, static_cast<double>(data.txNonpostLatency.avg) / MILLI_SECOND);
+        event->SetSeriesDValue(EX, 0);
         res_.push_back(event);
 
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, pidMap, pid, DEFAULT_TID,
                                  std::to_string(data.timestamp / NS_TO_US), POST);
-        event->SetSeriesValue(TX, data.txPost.avg / BYTE_SIZE / BYTE_SIZE);
-        event->SetSeriesValue(EX, data.rxPost.avg / BYTE_SIZE / BYTE_SIZE);
+        event->SetSeriesDValue(TX, static_cast<double>(data.txPost.avg) / BYTE_SIZE / BYTE_SIZE);
+        event->SetSeriesDValue(EX, static_cast<double>(data.rxPost.avg) / BYTE_SIZE / BYTE_SIZE);
         res_.push_back(event);
     }
     return pidMap;

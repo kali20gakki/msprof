@@ -17,33 +17,11 @@
 #include "analysis/csrc/application/timeline/json_assembler.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ascend_task_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/task_info_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/kfc_turn_data.h"
 #include "analysis/csrc/domain/valueobject/include/task_id.h"
 
 namespace Analysis {
 namespace Application {
-class AscendHardwareAssembler : public JsonAssembler {
-public:
-    AscendHardwareAssembler();
-private:
-    uint8_t AssembleData(DataInventory& dataInventory, JsonWriter &ostream, const std::string &profPath) override;
-    void GenerateTaskTrace(const std::vector<AscendTaskData> &taskData, const std::string &profPath,
-                           std::unordered_map<uint16_t, uint32_t> &pidMap);
-    void GenerateTxTrace(const std::vector<MsprofTxDeviceData> &txData, const std::string &profPath,
-                         std::unordered_map<uint16_t, uint32_t> &pidMap);
-    void InitData(DataInventory &dataInventory);
-    std::string GetOpName(const AscendTaskData& data);
-    uint32_t GetPhysicStreamId(const AscendTaskData &data);
-    void GenerateTaskConnectionTrace(const std::vector<AscendTaskData> &taskData,
-                                     std::unordered_map<uint16_t, uint32_t> &pidMap);
-    void GenerateTxConnectionTrace(const std::vector<MsprofTxDeviceData> &txData,
-                                   std::unordered_map<uint16_t, uint32_t> &pidMap);
-    void GenerateMetaData(std::unordered_map<uint16_t, uint32_t> &pidMap);
-private:
-    std::vector<std::shared_ptr<TraceEvent>> res_;
-    std::shared_ptr<std::unordered_map<uint32_t, uint32_t>> logicStream_;
-    std::map<TaskId, std::string> opName_;
-    std::set<std::pair<uint32_t, int>> pidTidSet_;
-};
 
 class TaskTraceEvent : public DurationEvent {
 public:
@@ -74,6 +52,45 @@ private:
 private:
     uint32_t streamId_;
     uint32_t taskId_;
+};
+
+
+class KfcTurnTraceEvent : public DurationEvent {
+public:
+    KfcTurnTraceEvent(int pid, int tid, double dur, const std::string &ts, const std::string &name, uint32_t streamId,
+                      uint32_t taskId)
+        : DurationEvent(pid, tid, dur, ts, name), streamId_(streamId), taskId_(taskId) {}
+private:
+    void ProcessArgs(JsonWriter &ostream) override;
+private:
+    uint32_t streamId_;
+    uint32_t taskId_;
+};
+
+class AscendHardwareAssembler : public JsonAssembler {
+public:
+    AscendHardwareAssembler();
+private:
+    uint8_t AssembleData(DataInventory& dataInventory, JsonWriter &ostream, const std::string &profPath) override;
+    void GenerateTaskTrace(const std::vector<AscendTaskData> &taskData, const std::string &profPath,
+                           std::unordered_map<uint16_t, uint32_t> &pidMap);
+    void GenerateTxTrace(const std::vector<MsprofTxDeviceData> &txData, const std::string &profPath,
+                         std::unordered_map<uint16_t, uint32_t> &pidMap);
+    void InitData(DataInventory &dataInventory, std::vector<AscendTaskData> &taskData);
+    std::string GetOpName(const AscendTaskData& data);
+    uint32_t GetPhysicStreamId(const uint32_t streamId);
+    void GenerateTaskConnectionTrace(const AscendTaskData &data, uint32_t formatPid, TaskId &id);
+    void GenerateTxConnectionTrace(const std::vector<MsprofTxDeviceData> &txData,
+                                   std::unordered_map<uint16_t, uint32_t> &pidMap);
+    void GenerateMetaData(std::unordered_map<uint16_t, uint32_t> &pidMap);
+    void GenerateKfcTrace(const std::vector<KfcTurnData>& kfcData, const std::string &profPath,
+                          std::unordered_map<uint16_t, uint32_t> &pidMap);
+private:
+    std::vector<std::shared_ptr<TraceEvent>> res_;
+    std::shared_ptr<std::unordered_map<uint32_t, uint32_t>> logicStream_;
+    std::map<TaskId, std::string> opName_;
+    std::set<std::pair<uint32_t, int>> pidTidSet_;
+    std::set<TaskId> ffts_;
 };
 }
 }

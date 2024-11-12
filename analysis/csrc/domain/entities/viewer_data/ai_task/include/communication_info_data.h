@@ -32,11 +32,11 @@ struct CommunicationTaskData {
     std::string opName;
     std::string taskType;
     std::string groupName;
+    std::string notifyId;
     uint64_t transportType = UINT64_MAX;
     uint64_t size = UINT64_MAX;
     uint64_t dataType = UINT64_MAX;
     uint64_t linkType = UINT64_MAX;
-    uint64_t notifyId = UINT64_MAX;
     uint64_t rdmaType = UINT64_MAX;
     uint64_t start = UINT64_MAX;
     double duration = 0.0;

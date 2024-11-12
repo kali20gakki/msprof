@@ -43,7 +43,7 @@ void GenerateHbmTrace(std::vector<HbmData> &hbmData, const std::unordered_map<ui
         series.append(CounterNameMap.at(data.eventType)).append("(MB/s)");
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pidMap.at(data.deviceId), DEFAULT_TID,
             std::to_string(data.localTime / NS_TO_US), counterName);
-        event->SetSeriesValue(series, data.bandWidth);
+        event->SetSeriesDValue(series, data.bandWidth);
         res.push_back(event);
     }
 }

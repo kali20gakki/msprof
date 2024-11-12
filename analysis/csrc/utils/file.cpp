@@ -29,6 +29,7 @@ namespace Utils {
 namespace {
 const uint16_t MAX_PATH_SIZE = 1024;
 const uint32_t MAX_SUB_FILES_SIZE = 100000;
+const uint64_t MAX_JSON_FILE_READ_SIZE = 21474836480; // 20GB
 constexpr int DIR_CHECK_MODE = R_OK | W_OK | X_OK; // rwx
 const int MAX_DEPTH = 20;
 const std::unordered_map<std::string, std::string> INVALID_CHAR = {
@@ -390,13 +391,13 @@ void FileReader::Close()
 
 bool FileWriter::Check(const std::string &path, uint64_t maxReadFileBytes)
 {
+    if (!File::Exist(path)) {
+        INFO("The file not exists: %.", path);
+        return true;
+    }
     if (!File::Check(path, maxReadFileBytes)) {
         ERROR("The FileWriter check failed: '%'.", path);
         return false;
-    }
-    if (!File::Exist(path)) {
-        INFO("The file exists: %.", path);
-        return true;
     }
     if (!File::IsFile(path)) {
         ERROR("The write path '%' is not a file.", path);
@@ -411,7 +412,7 @@ bool FileWriter::Check(const std::string &path, uint64_t maxReadFileBytes)
 
 void FileWriter::Open(const std::string &path, const std::ios_base::openmode &mode)
 {
-    if (!Check(path)) {
+    if (!Check(path, MAX_JSON_FILE_READ_SIZE)) {
         ERROR("The FileWriter open check failed: '%'.", path);
         return;
     }
@@ -440,6 +441,19 @@ void FileWriter::WriteText(const char *content, std::size_t len)
 {
     if (IsOpen()) {
         outStream_.write(content, len);
+        outStream_.flush();
+    }
+}
+
+void FileWriter::WriteTextBack(const std::string &content, int back)
+{
+    if (IsOpen()) {
+        outStream_.seekp(back, std::ios_base::end);
+        if (outStream_.fail()) {
+            ERROR("The offset is over file's range");
+            return;
+        }
+        outStream_ << content;
         outStream_.flush();
     }
 }

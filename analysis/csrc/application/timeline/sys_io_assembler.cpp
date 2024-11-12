@@ -53,18 +53,18 @@ void GenerateSysIOTrace(const std::vector<SysIOReceiveSendData> &sysIOReceiveSen
         counterName.clear();
         counterName.append("Port ").append(funId).append("/").append(RX_COUNTER);
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, counterName);
-        event->SetSeriesValue(RX_DROPPED_RATE, data.rxDroppedRate);
-        event->SetSeriesValue(RX_ERROR_RATE, data.rxErrorRate);
-        event->SetSeriesValue(RX_PACKET_RATE, data.rxPacketRate);
-        event->SetSeriesValue(RX_BANDWIDTH_EFFICIENCY, data.rxBandwidthEfficiency);
+        event->SetSeriesDValue(RX_DROPPED_RATE, data.rxDroppedRate);
+        event->SetSeriesDValue(RX_ERROR_RATE, data.rxErrorRate);
+        event->SetSeriesDValue(RX_PACKET_RATE, data.rxPacketRate);
+        event->SetSeriesDValue(RX_BANDWIDTH_EFFICIENCY, data.rxBandwidthEfficiency);
         res.push_back(event);
         counterName.clear();
         counterName.append("Port ").append(funId).append("/").append(TX_COUNTER);
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, counterName);
-        event->SetSeriesValue(TX_DROPPED_RATE, data.txDroppedRate);
-        event->SetSeriesValue(TX_ERROR_RATE, data.txErrorRate);
-        event->SetSeriesValue(TX_PACKET_RATE, data.txPacketRate);
-        event->SetSeriesValue(TX_BANDWIDTH_EFFICIENCY, data.txBandwidthEfficiency);
+        event->SetSeriesDValue(TX_DROPPED_RATE, data.txDroppedRate);
+        event->SetSeriesDValue(TX_ERROR_RATE, data.txErrorRate);
+        event->SetSeriesDValue(TX_PACKET_RATE, data.txPacketRate);
+        event->SetSeriesDValue(TX_BANDWIDTH_EFFICIENCY, data.txBandwidthEfficiency);
         res.push_back(event);
     }
 }

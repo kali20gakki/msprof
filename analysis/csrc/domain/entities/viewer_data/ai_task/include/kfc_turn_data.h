@@ -75,6 +75,7 @@ struct KfcOpData {
     std::string groupName;
     uint64_t connectionId;
     uint32_t modelId;
+    KfcOpData() = default;
     KfcOpData(uint16_t _deviceId, std::string _opName, uint64_t _timestamp, double _duration, std::string _groupName,
               uint64_t _connectionId, uint32_t _modelId)
         : deviceId(_deviceId), opName(_opName), timestamp(_timestamp), duration(_duration), groupName(_groupName),

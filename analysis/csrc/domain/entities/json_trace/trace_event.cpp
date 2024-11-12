@@ -57,14 +57,22 @@ void CounterEvent::ToJson(JsonWriter &ostream)
 
 void CounterEvent::ProcessArgs(JsonWriter &ostream)
 {
-    for (const auto &kv: seriesValue_) {
+    for (const auto &kv: seriesDValue_) {
+        ostream[kv.first.c_str()] << kv.second;
+    }
+    for (const auto &kv: seriesIValue_) {
         ostream[kv.first.c_str()] << kv.second;
     }
 }
 
-void CounterEvent::SetSeriesValue(const std::string &key, const double &value)
+void CounterEvent::SetSeriesDValue(const std::string &key, const double &value)
 {
-    seriesValue_[key] = value;
+    seriesDValue_[key] = value;
+}
+
+void CounterEvent::SetSeriesIValue(const std::string &key, const uint64_t &value)
+{
+    seriesIValue_[key] = value;
 }
 
 FlowEvent::FlowEvent(uint32_t pid, int tid, const std::string &ts, const std::string &cat, const std::string &id,

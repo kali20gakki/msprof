@@ -37,7 +37,7 @@ public:
     virtual ~DataProcessor() = default;
 
 protected:
-    static uint8_t CheckPathAndTable(const std::string& path, const DBInfo& dbInfo);
+    static uint8_t CheckPathAndTable(const std::string& path, const DBInfo& dbInfo, bool enableStrictCheck = true);
     static uint16_t GetEnumTypeValue(const std::string &key, const std::string &tableName,
                                      const std::unordered_map<std::string, uint16_t> &enumTable);
     template<typename Tp>

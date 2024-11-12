@@ -289,7 +289,7 @@ TEST_F(FileUTest, TestReadJsonShouleReturnOKWhenParseJsonSuccess)
 
 TEST_F(FileUTest, TestFileWriterCheckShouldReturnTrueWhenFileNotExist)
 {
-    EXPECT_FALSE(FileWriter::Check(""));
+    EXPECT_TRUE(FileWriter::Check(""));
     EXPECT_TRUE(FileWriter::Check("test_file_not_exist"));
 }
 
@@ -342,6 +342,15 @@ TEST_F(FileUTest, TestWriteText)
     FileWriter fd("test_file");
     ASSERT_TRUE(fd.IsOpen());
     fd.WriteText("test");
+}
+
+TEST_F(FileUTest, TestWriteTextBack)
+{
+    FileWriter fd("test_file");
+    ASSERT_TRUE(fd.IsOpen());
+    fd.WriteText("test");
+    fd.WriteTextBack("test", 1);  // 往回覆盖1位
+    fd.WriteTextBack("test", 100);  // 往回覆盖100位
 }
 
 TEST_F(FileUTest, TestGetOriginDataShouldReturn2ValidFileWhen2ValidAnd2Invalid)

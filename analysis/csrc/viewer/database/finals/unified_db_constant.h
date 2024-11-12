@@ -132,6 +132,16 @@ const std::string TABLE_NAME_MSTX_EVENT_TYPE = "ENUM_MSTX_EVENT_TYPE";
 const std::string PROCESSOR_NAME_CHIP_TRAINS = "CHIP_TRAINS";
 const std::string TABLE_NAME_PA_LINK_INFO = "PA_LINK_INFO";
 const std::string TABLE_NAME_PCIE_INFO = "ENUM_PCIE_INFO";
+const std::string PROCESSOR_NAME_KFC_TASK = "KFC_TASK";
+const std::string PROCESSOR_NAME_KFC_COMM = "KFC_COMM";
+const std::string PROCESSOR_NAME_DEVICE_TX = "DEVICE_MSTX";
+const std::string PROCESSOR_NAME_SIO = "SIO";
+const std::string PROCESSOR_NAME_CPU_USAGE = "CPU_USAGE";
+const std::string PROCESSOR_NAME_MEM_USAGE = "MEM_USAGE";
+const std::string PROCESSOR_NAME_DISK_USAGE = "DISK_USAGE";
+const std::string PROCESSOR_NAME_NETWORK_USAGE = "NETWORK_USAGE";
+const std::string PROCESSOR_NAME_HASH = "HASH_INIT";
+const std::string PROCESSOR_NAME_QOS = "QOS";
 
 // mstx event type
 const std::unordered_map<std::string, uint16_t> MSTX_EVENT_TYPE_TABLE = {
