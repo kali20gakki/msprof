@@ -180,5 +180,7 @@ class ModuleName(Enum):
     ATRACE = 71
     RTC = 72
     SYSMONITOR = 73
-    MBUFF = 74
-    CUSTOM = 75
+    AML = 74
+    ADETECT = 75
+    MBUFF = 76
+    CUSTOM = 77
