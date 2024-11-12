@@ -8,6 +8,7 @@ from msparser.data_struct_size_constant import StructFmt
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from profiling_bean.stars.stars_common import StarsCommon
+from msparser.compact_info.hccl_op_info_bean import HcclOpInfoBean
 
 
 class AicpuNodeBean:
@@ -235,8 +236,7 @@ class KfcHcclInfoBean:
 
     @property
     def group_name(self: any) -> str:
-        # 标记mc2算子通信域，避免与hccl通信域相同
-        return "mc2_" + str(self._group_name)
+        return str(self._group_name)
 
     @property
     def local_rank(self: any) -> int:
@@ -441,6 +441,30 @@ class KfcComputeTurnBean:
         return self._compute_exe_end_time
 
 
+class DeviceHcclOpInfoBean(HcclOpInfoBean):
+
+    def __init__(self: any, *args) -> None:
+        data = args[0]
+        self._relay = (data[6] >> self.RELAY_FLAG_BIT) & 0x1
+        self._retry = (data[6] >> self.RETRY_FLAG_BIT) & 0x1
+        self._data_type = data[7]
+        self._alg_type = data[8]
+        self._count = data[9]
+        self._group_name = data[10]
+        self._rank_size = data[11]
+        self._stream_id = StarsCommon.set_stream_id(data[12], data[13])
+        self._task_id = StarsCommon.set_task_id(data[12], data[13])
+        self.convert_alg_type()
+
+    @property
+    def stream_id(self: any) -> int:
+        return self._stream_id
+
+    @property
+    def task_id(self: any) -> int:
+        return self._task_id
+
+
 class AicpuAddInfoBean(AddInfoBean):
     """
     aicpu data info bean
@@ -452,6 +476,7 @@ class AicpuAddInfoBean(AddInfoBean):
     KFC_COMM_TURN = 4
     KFC_COMPUTE_TURN = 5
     KFC_HCCL_INFO = 6
+    HCCL_OP_INFO = 10
 
     STRUCT_FMT = {
         AICPU_NODE: StructFmt.AI_CPU_NODE_ADD_FMT,
@@ -461,6 +486,7 @@ class AicpuAddInfoBean(AddInfoBean):
         KFC_COMM_TURN: StructFmt.KFC_COMM_TURN_FMT,
         KFC_COMPUTE_TURN: StructFmt.KFC_COMPUTE_TURN_FMT,
         KFC_HCCL_INFO: StructFmt.KFC_HCCL_INFO_FMT,
+        HCCL_OP_INFO: StructFmt.DEVICE_HCCL_OP_INFO_FMT,
     }
 
     AICPU_BEAN = {
@@ -471,6 +497,7 @@ class AicpuAddInfoBean(AddInfoBean):
         KFC_COMM_TURN: KfcCommTurnBean,
         KFC_COMPUTE_TURN: KfcComputeTurnBean,
         KFC_HCCL_INFO: KfcHcclInfoBean,
+        HCCL_OP_INFO: DeviceHcclOpInfoBean,
     }
 
     def __init__(self: any, *args) -> None:

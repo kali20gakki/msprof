@@ -27,6 +27,7 @@ class HcclOps:
     alg_type: str = Constant.NA
     count: int = Constant.DEFAULT_INVALID_VALUE
     group_name: str = Constant.NA
+    source: int = Constant.DEFAULT_INVALID_VALUE
 
 
 @dataclass

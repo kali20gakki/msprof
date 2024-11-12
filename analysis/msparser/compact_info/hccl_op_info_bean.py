@@ -70,6 +70,10 @@ class HcclOpInfoBean(CompactInfoBean):
         """
         return str(self._group_name)
 
+    @property
+    def rank_size(self: any) -> int:
+        return self._rank_size
+
     def convert_alg_type(self):
         """
         hccl算法最多有4个阶段,每个阶段4bit,共16bit,第一阶段放在12-15位,第二阶段放在8-11位,以此类推

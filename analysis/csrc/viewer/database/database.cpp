@@ -639,6 +639,13 @@ namespace {
         {"group_name", SQL_TEXT_TYPE},
         {"connection_id", SQL_INTEGER_TYPE},
         {"op_type", SQL_TEXT_TYPE},
+        {"relay", SQL_INTEGER_TYPE},
+        {"retry", SQL_INTEGER_TYPE},
+        {"data_type", SQL_TEXT_TYPE},
+        {"alg_type", SQL_TEXT_TYPE},
+        {"count", SQL_NUMERIC_TYPE},
+        {"rank_size", SQL_INTEGER_TYPE},
+        {"source", SQL_INTEGER_TYPE},
     };
 
     const TableColumns KfcTask = {

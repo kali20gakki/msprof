@@ -384,3 +384,37 @@ TEST_F(TreeBuilderUTest, TestBuildTreeShouldBuildCorrectTreeWhenCANNWarehouseNot
         EXPECT_EQ(ans[i], levelStr[i]);
     }
 }
+
+TEST_F(TreeBuilderUTest, TestGetEventOffsetShouldReturnOffset2WhenNodeNested)
+{
+    // hccl aicpu下发场景, 会出现2层node嵌套, 需要计算offset, 关联至准确的node api
+    // [=======================Node(hcom_allReduce_)==============================]
+    //   [===Node(hcomAicpuInit)==]     [===Node(allreduceAicpuKernel)==]
+    std::shared_ptr<MsprofCompactInfo> compactEvent;
+    uint16_t level = 3;
+    uint64_t eventTime = 100;
+    EventInfo nodeBasicInfo(EventType::EVENT_TYPE_NODE_BASIC_INFO, level, eventTime, eventTime);
+    std::shared_ptr<Event> event = std::make_shared<Event>(compactEvent, nodeBasicInfo);
+
+    std::shared_ptr<MsprofApi> apiEvent;
+    uint64_t startTime1 = 10;
+    uint64_t endTime1 = 200;
+    EventInfo apiEventInfo1(EventType::EVENT_TYPE_API, level, startTime1, endTime1);
+    std::shared_ptr<Event> event1 = std::make_shared<Event>(apiEvent, apiEventInfo1);
+    std::shared_ptr<TreeNode> levelNode1 = std::make_shared<TreeNode>(event1);
+    uint64_t startTime2 = 30;
+    uint64_t endTime2 = 40;
+    EventInfo apiEventInfo2(EventType::EVENT_TYPE_API, level, startTime2, endTime2);
+    std::shared_ptr<Event> event2 = std::make_shared<Event>(apiEvent, apiEventInfo2);
+    std::shared_ptr<TreeNode> levelNode2 = std::make_shared<TreeNode>(event2);
+    uint64_t startTime3 = 80;
+    uint64_t endTime3 = 120;
+    EventInfo apiEventInfo3(EventType::EVENT_TYPE_API, level, startTime3, endTime3);
+    std::shared_ptr<Event> event3 = std::make_shared<Event>(apiEvent, apiEventInfo3);
+    std::shared_ptr<TreeNode> levelNode3 = std::make_shared<TreeNode>(event3);
+    std::vector<std::shared_ptr<TreeNode>> levelNodes {levelNode1, levelNode2, levelNode3};
+
+    auto offset = TreeBuilder::GetEventOffset(0, event, levelNodes, EventType::EVENT_TYPE_NODE_BASIC_INFO);
+    uint16_t expectResult = 2;
+    EXPECT_EQ(expectResult, offset);
+}

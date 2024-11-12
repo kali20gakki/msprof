@@ -67,6 +67,8 @@ private:
     // 建树时记录各个Level的TreeNode
     void RecordTreeNode(const std::shared_ptr<TreeNode> &treeNode, const uint16_t &eventLevel);
     std::shared_ptr<TreeNode> GenerateRoot();
+    static size_t GetEventOffset(size_t idx, std::shared_ptr<Event> &event,
+                                 std::vector<std::shared_ptr<TreeNode>> &levelNodes, EventType eventType);
 private:
     // 用于建树的Model、Node、HCCL Level的Api Type Events
     std::shared_ptr<EventQueue> kernelEvents_ = nullptr;

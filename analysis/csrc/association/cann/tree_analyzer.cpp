@@ -83,6 +83,9 @@ void TreeAnalyzer::DeepFirstSearch(const std::shared_ptr<TreeNode> &node)
     // DFS
     for (const auto &child: node->children) {
         DeepFirstSearch(child);
+        if (node->event->info.level == child->event->info.level) {
+            path_[node->event->info.level] = node;
+        }
     }
     path_.erase(node->event->info.level);
 }
