@@ -226,8 +226,10 @@ const std::unordered_map<std::string, uint16_t> MODULE_NAME_TABLE = {
     {"ATRACE",  71},
     {"RTC", 72},
     {"SYSMONITOR", 73},
-    {"MBUFF", 74},
-    {"CUSTOM", 75}
+    {"AMP", 74},
+    {"ADETECT", 75},
+    {"MBUFF", 76},
+    {"CUSTOM", 77}
 };
 
 // hccl info DataType

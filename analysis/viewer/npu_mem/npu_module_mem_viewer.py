@@ -47,7 +47,7 @@ class NpuModuleMemViewer:
                 module_name = ModuleName(datum.module_id).name
             except ValueError:
                 logging.warning("Invalid module id, please check!")
-                module_name = datum.module_id
+                module_name = 'other'
             if datum.total_size > 0:
                 total_size = round(datum.total_size / NumberConstant.KILOBYTE, NumberConstant.ROUND_THREE_DECIMAL)
             else:
