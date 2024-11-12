@@ -448,6 +448,10 @@ void FileWriter::WriteText(const char *content, std::size_t len)
 void FileWriter::WriteTextBack(const std::string &content, int back)
 {
     if (IsOpen()) {
+        if (content.size() < static_cast<std::size_t>(std::abs(back))) {
+            ERROR("The length of the overwritten content exceeds the length of the written content.");
+            return;
+        }
         outStream_.seekp(back, std::ios_base::end);
         if (outStream_.fail()) {
             ERROR("The offset is over file's range");
