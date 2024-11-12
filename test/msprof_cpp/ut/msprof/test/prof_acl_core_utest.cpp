@@ -732,6 +732,20 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_json) {
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_FINALIZE, nullptr, 0));
 }
 
+TEST_F(MSPROF_ACL_CORE_UTEST, acl_json_WillReturnErrorNoneWhenSwitchIsOff)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofInitAclJson)
+        .stubs()
+        .will(returnValue(static_cast<int>(MSPROF_ERROR_ACL_JSON_OFF)));
+
+    std::string aclJson("{\"switch\": \"off\"}");
+    auto data = (void *)(const_cast<CHAR_PTR>(aclJson.c_str()));
+
+    auto ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_INIT_ACL_JSON, data, aclJson.size());
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+}
+
 TEST_F(MSPROF_ACL_CORE_UTEST, MsprofGetHashIdImpl)
 {
     GlobalMockObject::verify();

@@ -89,7 +89,7 @@ int32_t MsprofCtrlCallbackImplHandle(uint32_t type, VOID_PTR data, uint32_t len)
         }
     }
     if (ret == MSPROF_ERROR_ACL_JSON_OFF) {
-        return MSPROF_ERROR_NONE;
+        return MSPROF_ERROR_ACL_JSON_OFF;
     }
     if (ret != MSPROF_ERROR_NONE) {
         return ret;
@@ -133,10 +133,11 @@ int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len)
         return MSPROF_ERROR_NONE;
     }
     int32_t ret = MsprofCtrlCallbackImplHandle(type, data, len);
-    if (ret != MSPROF_ERROR_NONE) {
+    if (ret == MSPROF_ERROR_ACL_JSON_OFF) {
+        return MSPROF_ERROR_NONE;
+    } else if (ret != MSPROF_ERROR_NONE) {
         return ret;
     }
-
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         if (RegisterReporterCallback() != PROFILING_SUCCESS) {
             MSPROF_LOGE("MsprofSetDeviceCallbackImpl, RegisterReporterCallback failed");
