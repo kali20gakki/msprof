@@ -160,6 +160,26 @@ EventQueuePair TreeBuilder::GroupCtxIdEvents(std::shared_ptr<EventQueue> &ctxIdE
     return std::make_pair(nodeCtxIdEvent, hcclCtxIdEvent);
 }
 
+size_t TreeBuilder::GetEventOffset(size_t idx, std::shared_ptr<Event> &event,
+                                   std::vector<std::shared_ptr<TreeNode>> &levelNodes, EventType eventType)
+{
+    // hccl aicpu下发场景, 会出现2层node嵌套, 需要计算offset, 关联至准确的node api
+    // [=======================Node(hcom_allReduce_)==============================]
+    //   [===Node(hcomAicpuInit)==]     [===Node(allreduceAicpuKernel)==]
+    if (eventType != EventType::EVENT_TYPE_NODE_BASIC_INFO) {
+        // hccl aicpu下发场景暂时只有node basic info上报
+        return 0;
+    }
+    size_t offset = 1;
+    while ((idx + offset) < levelNodes.size() && levelNodes[idx + offset]->event->info.start <= event->info.start) {
+        if (event->info.start <= levelNodes[idx + offset]->event->info.end) {
+            return offset;
+        }
+        ++offset;
+    }
+    return 0;
+}
+
 // 双指针遍历向Model Node HCCL Level的TreeNode中添加events
 bool TreeBuilder::AddLevelEvents(std::shared_ptr<EventQueue> &events,
                                  std::vector<std::shared_ptr<TreeNode>> &levelNodes,
@@ -178,11 +198,14 @@ bool TreeBuilder::AddLevelEvents(std::shared_ptr<EventQueue> &events,
     uint64_t matchCnt = 0; // 在时间片范围内的数量
     uint64_t mismatchCnt = 0; // 在时间片范围外的数量
     auto it = levelNodes.begin();
+    size_t idx = 0;
     while (!events->Empty() && it != levelNodes.end()) {
         auto event = events->Top();
         if (event->info.start > (*it)->event->info.start && event->info.start <= (*it)->event->info.end) {
             // event在TreeNode时间片内：(start, end]，将event记录在TreeNode的附加信息中
-            (*it)->records.emplace_back(event);
+            // hccl aicpu下发场景, 计算offset, 关联至准确的node api
+            auto offset = GetEventOffset(idx, event, levelNodes, eventType);
+            (*(it + offset))->records.emplace_back(event);
             events->Pop();
             matchCnt++;
         } else if (event->info.start > (*it)->event->info.end) {
@@ -195,6 +218,7 @@ bool TreeBuilder::AddLevelEvents(std::shared_ptr<EventQueue> &events,
                       static_cast<int>(eventType));
             }
             it++;
+            idx++;
         } else {
             // event小于TreeNode的开始时间，此event对应的TreeNode丢失
             events->Pop(); // 丢掉此event

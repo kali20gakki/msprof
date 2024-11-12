@@ -133,5 +133,5 @@ class TestOpSummaryModel(TestDirCRBaseModel):
     def test_separate_kfc_stream_should_return_empty_when_db_not_exist(self):
         data = []
         check = OpSummaryModel(SAMPLE_CONFIG)
-        data, _ = check.separate_kfc_stream(data)
+        data = check.separate_kfc_stream(data)
         self.assertEqual([], data)

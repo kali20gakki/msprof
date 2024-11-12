@@ -91,8 +91,8 @@ CommunicationInfoProcessor::OriOpDataFormat CommunicationInfoProcessor::GetOpDat
 CommunicationInfoProcessor::OriKfcOpDataFormat CommunicationInfoProcessor::GetKfcOpData(const DBInfo &kfcOp)
 {
     OriKfcOpDataFormat oriOpData;
-    std::string sql{"SELECT connection_id, op_name, -1 as relay, -1 as retry, 'N/A' as data_type, "
-                    "'N/A' as alg_type, " + std::to_string(UINT64_MAX) + " as count, group_name, "
+    std::string sql{"SELECT connection_id, op_name, relay, retry, data_type, "
+                    "alg_type, count, group_name, "
                     "op_type, timestamp, duration FROM " + kfcOp.tableName};
     if (!kfcOp.dbRunner->QueryData(sql, oriOpData)) {
         ERROR("Failed to obtain data from the % table.", kfcOp.tableName);

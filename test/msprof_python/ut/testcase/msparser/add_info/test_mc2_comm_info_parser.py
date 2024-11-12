@@ -51,4 +51,4 @@ class TestMc2CommInfoParser(unittest.TestCase):
             check.parse()
             check.save()
         self.assertEqual(1, len(check._communication_info))
-        self.assertEqual("mc2_7466789422691968299", check._communication_info[0].group_name)
+        self.assertEqual("7466789422691968299", check._communication_info[0].group_name)

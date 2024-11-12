@@ -176,6 +176,21 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         self.assertEqual(4294967295, data[0][9])
         InfoConfReader()._info_json = {}
 
+    def test_parse_should_return_device_hccl_op_info_data_when_type_10(self):
+        InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}]}
+        aicpu_data = [23130, 6000, 10, 1, 128, 20000,
+                      0, 0, 0, 1, 12345, 8, 6, 1] + [0] * 202
+        struct_data = struct.pack(StructFmt.DEVICE_HCCL_OP_INFO_FMT, *aicpu_data)
+        data = AicpuAddInfoBean.decode(struct_data)
+        with mock.patch(NAMESPACE + '.AicpuAddInfoParser.parse_bean_data', return_value=[data]):
+            check = AicpuAddInfoParser(self.file_list, self.CONFIG)
+            check.parse()
+            check.save()
+        data = check._aicpu_data.get(AicpuAddInfoBean.HCCL_OP_INFO, [])
+        self.assertEqual(1, len(data))
+        self.assertEqual("INT8", data[0][3])
+        InfoConfReader()._info_json = {}
+
 
 if __name__ == '__main__':
     unittest.main()

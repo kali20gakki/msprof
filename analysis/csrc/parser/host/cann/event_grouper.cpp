@@ -139,6 +139,10 @@ bool EventGrouper::isKernelApiEvent(const std::shared_ptr<MsprofApi> &trace)
                   trace->threadId, trace->level, trace->beginTime, trace->endTime);
             return false;
         }
+        if (trace->level == MSPROF_REPORT_NODE_LEVEL) {
+            INFO("Nested node level");
+            return true;
+        }
         // 判断区间相交则为冗余数据
         auto lastPair = lastKernelTimes_[trace->threadId][trace->level];
         if (lastPair.second < trace->beginTime or trace->endTime < lastPair.first) {

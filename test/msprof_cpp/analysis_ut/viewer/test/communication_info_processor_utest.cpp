@@ -61,7 +61,8 @@ using KfcTaskFormat = std::vector<std::tuple<uint32_t, uint32_t, std::string, do
                                              double, uint32_t, std::string, uint32_t, std::string>>;
 
 using KfcOpFormat = std::vector<std::tuple<uint32_t, uint32_t, std::string, double, double,
-                                           std::string, uint32_t, std::string>>;
+                                           std::string, uint32_t, std::string, uint32_t, uint32_t,
+                                           std::string, std::string, uint64_t, uint32_t, uint32_t>>;
 
 const HcclTaskSingleDeviceFormat DATA_A{{4294967295, -1, "hcom_allReduce__360_0_1", 0, "Memcpy", "10652832407468360",
                                      78180470736653, 0, 781687236999151, 2994.875, 1, "HCCL", "hcom_allReduce_", 125,
@@ -77,7 +78,8 @@ const KfcTaskFormat DATA_KFC_A {{4294967295, -1, "MatmulAllReduceAicpu_724_2_1",
                                  "Memcpy", "7939241045454381724", 0, 229762691262190, 134380, 50, 1, 0, 0, 0,
                                  "SDMA", 0, "INT8", "INVALID_TYPE", 590.71, 4294967295, "0", 0, "INVALID_TYPE"}};
 const KfcOpFormat DATA_KFC_OP_A {{4294967295, -1, "AllGatherMatmulAicpu_903_0_1", 157145504371260, 4764660,
-                                  "12713090737648878903", 67270, "AllGatherMatmulAicpu"}};
+                                  "12713090737648878903", 67270, "AllGatherMatmulAicpu",
+                                  0, 0, "FP32", "RING", 0, 8, 0}};
 const HcclTaskSingleDeviceFormat DATA_B{{4294967295, -1, "hcom_allReduce__233_0_2", 0, "Memcpy23", "10653832407468233",
                                      78180470736653, 0, 781687236999153, 2994.875, 3, "HCCL", "hcom_allReduce_", 125,
                                      1, 11, 3, 14.1825906735751, 1, 4, "SDMA", 262144, "INVALID_TYPE",

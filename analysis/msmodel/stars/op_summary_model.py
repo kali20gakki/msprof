@@ -44,26 +44,22 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
     def get_timeline_data(self: any) -> str:
         return self.__module__
 
-    def separate_kfc_stream(self: any, data_list: list) -> tuple:
+    def separate_kfc_stream(self: any, data_list: list) -> list:
         if not os.path.exists(PathManager.get_db_path(self.result_dir, DBNameConstant.DB_MC2_COMM_INFO)):
-            return data_list, []
+            return data_list
         with Mc2CommInfoViewModel(self.result_dir, [DBNameConstant.TABLE_MC2_COMM_INFO]) as model:
             comm_info = model.get_kfc_stream(DBNameConstant.TABLE_MC2_COMM_INFO)
         if not comm_info:
-            return data_list, []
+            return data_list
         kfc_stream_id = []
         for info in comm_info:
             kfc_stream_id.append(info[0])  # 0-aicpu_kfc_stream_id
         compute_data = []
-        kfc_data = []
         for data in data_list:
-            if data.stream_id in kfc_stream_id:
-                communication_data = self.COMMUNICATION_TIME_SECTION_TYPE()
-                communication_data = communication_data.replace(start_time=data.start_time, end_time=data.end_time)
-                kfc_data.append(communication_data)
-            else:
-                compute_data.append(data)
-        return compute_data, kfc_data
+            if data.stream_id in kfc_stream_id or data.op_name.endswith("AicpuKernel"):
+                continue
+            compute_data.append(data)
+        return compute_data
 
     def get_operator_data_by_task_type(self: any, task_type: tuple = COMPUTED_TASK_TYPE) -> list:
         db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_AICORE_OP_SUMMARY)

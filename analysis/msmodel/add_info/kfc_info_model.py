@@ -50,6 +50,12 @@ class KfcInfoViewModel(ViewModel):
                     "compute_start_time", "compute_exe_end_time"]),
         {})
 
+    HCCL_OP_INFO_TYPE = CustomizedNamedtupleFactory.enhance_namedtuple(
+        namedtuple("HcclOpInfo",
+                   ["timestamp", "relay", "retry", "data_type", "alg_type", "count",
+                    "group_name", "stream_id", "task_id", "rank_size", "source"]),
+        {})
+
     def __init__(self, result_dir: str, table_list: list):
         super().__init__(result_dir, DBNameConstant.DB_KFC_INFO, table_list)
 
@@ -76,6 +82,15 @@ class KfcInfoViewModel(ViewModel):
               "from {}".format(DBNameConstant.TABLE_KFC_COMPUTE_TURN)
         kfc_info_data = self.get_sql_data(sql)
         return [self.KFC_COMPUTE_TURN_TYPE(*data) for data in kfc_info_data]
+
+    def get_hccl_op_info_data(self: any) -> list:
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_DEVICE_HCCL_OP_INFO):
+            return []
+        sql = "select timestamp, relay, retry, data_type, alg_type, " \
+              "count, group_name, stream_id, task_id, rank_size, source" \
+              " from {} order by timestamp".format(DBNameConstant.TABLE_DEVICE_HCCL_OP_INFO)
+        hccl_op_info = self.get_sql_data(sql)
+        return [self.HCCL_OP_INFO_TYPE(*data) for data in hccl_op_info]
 
 
 @dataclass

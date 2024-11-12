@@ -10,6 +10,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.profiling_scene import ProfilingScene
+from common_func.hccl_info_common import DeviceHcclOpSource
 from mscalculate.hccl.hccl_task import HcclOps
 from mscalculate.hccl.hccl_task import HcclTask
 from msmodel.interface.parser_model import ParserModel
@@ -142,10 +143,21 @@ class HcclViewModel(ViewModel):
         return {hccl_op.connection_id: hccl_op for hccl_op in hccl_op_data}
 
     def get_hccl_op_time_section(self):
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE):
+            return []
         sql = f'select min(timestamp) as start_time, max(timestamp + duration) as end_time ' \
               f'from {DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE} ' \
               f"WHERE is_master = 1 " \
               f'group by op_name, first_timestamp'
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=CommunicationTimeSection)
+
+    def get_kfc_op_time_section(self):
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_KFC_OP):
+            return []
+        hccl_source = DeviceHcclOpSource.HCCL.value
+        sql = f'select timestamp as start_time, timestamp + duration as end_time ' \
+              f'from {DBNameConstant.TABLE_KFC_OP} ' \
+              f"WHERE source != {hccl_source}"
         return DBManager.fetch_all_data(self.cur, sql, dto_class=CommunicationTimeSection)
 
     def create_table_by_name(self, table_name):

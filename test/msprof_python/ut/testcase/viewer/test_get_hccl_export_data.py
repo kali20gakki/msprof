@@ -73,7 +73,7 @@ class TestHCCLExport(unittest.TestCase):
                            return_value=op_info_data), \
                 mock.patch('os.path.exists', return_value=False):
             hccl = HCCLExport(PARAMS)
-            hccl._get_meta_data(hccl_data)
+            hccl._get_meta_data(hccl_data, [])
             hccl._format_hccl_data(hccl_data)
             self.assertEqual(len(hccl.result), 9)
         with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_data_by_group', return_value=op_data), \
@@ -81,7 +81,7 @@ class TestHCCLExport(unittest.TestCase):
                            return_value=op_info_data), \
                 mock.patch('os.path.exists', return_value=True):
             hccl = HCCLExport(PARAMS)
-            hccl._get_meta_data(hccl_data)
+            hccl._get_meta_data(hccl_data, [])
             hccl._format_hccl_data(hccl_data)
             # 1 + 3 * 2 + 3
             self.assertEqual(len(hccl.result), 10)
@@ -113,28 +113,28 @@ class TestHCCLExport(unittest.TestCase):
         ]
 
         hccl = HCCLExport(PARAMS)
-        groups = hccl._init_hccl_group(hccl_data)
-        self.assertEqual(groups['1'].group_name, "1")
-        self.assertEqual(groups['1'].planes, {0, 1})
-        self.assertEqual(groups['1'].id, 0)
-        self.assertEqual(groups['2'].group_name, "2")
-        self.assertEqual(groups['2'].planes, {0, 1})
-        self.assertEqual(groups['2'].id, 1)
-        self.assertEqual(groups['3'].group_name, "3")
-        self.assertEqual(groups['3'].planes, {0})
-        self.assertEqual(groups['3'].id, 2)
+        groups = hccl._init_hccl_group(hccl_data, [])
+        self.assertEqual(groups['1'][0].group_name, "1")
+        self.assertEqual(groups['1'][0].planes, {0, 1})
+        self.assertEqual(groups['1'][0].id, 0)
+        self.assertEqual(groups['2'][0].group_name, "2")
+        self.assertEqual(groups['2'][0].planes, {0, 1})
+        self.assertEqual(groups['2'][0].id, 1)
+        self.assertEqual(groups['3'][0].group_name, "3")
+        self.assertEqual(groups['3'][0].planes, {0})
+        self.assertEqual(groups['3'][0].id, 2)
 
     def test__add_group_threads_should_return_comm_op_group_and_index_3_when_comm_op_in_2_plane(self):
         hccl = HCCLExport(PARAMS)
-        group = hccl.HcclGroup("1", {0, 1}, 0, -1)
+        group = hccl.HcclGroup("hccl_word", {0, 1}, 0, -1, False)
         index = hccl._add_group_threads(group, 0, True)
         self.assertEqual(index, 3)
         self.assertEqual(len(hccl.result), 6)
-        self.assertEqual(hccl.result[0].get('args').get('name'), 'Group 0 Communication')
+        self.assertEqual(hccl.result[0].get('args').get('name'), 'Group hccl_word Communication')
 
     def test__add_group_threads_should_return_comm_and_index_3_when_comm_op_in_2_plane_invalid_group(self):
         hccl = HCCLExport(PARAMS)
-        group = hccl.HcclGroup("1", {0, 1}, 0, -1)
+        group = hccl.HcclGroup("1", {0, 1}, 0, -1, False)
         index = hccl._add_group_threads(group, 0, False)
         self.assertEqual(index, 3)
         self.assertEqual(len(hccl.result), 6)
@@ -148,7 +148,7 @@ class TestHCCLExport(unittest.TestCase):
             HcclTask(group_name="2", plane_id=1), HcclTask(group_name="3", plane_id=0)
         ]
         hccl = HCCLExport(PARAMS)
-        hccl._get_meta_data(hccl_data)
+        hccl._get_meta_data(hccl_data, [])
         # 1 + (3+5)*2=17
         self.assertEqual(len(hccl.result), 17)
 

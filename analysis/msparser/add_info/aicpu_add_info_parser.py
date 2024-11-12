@@ -16,6 +16,7 @@ from common_func.hccl_info_common import DataType
 from common_func.hccl_info_common import LinkType
 from common_func.hccl_info_common import TransPortType
 from common_func.hccl_info_common import RdmaType
+from common_func.hccl_info_common import DeviceHcclOpSource
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from msmodel.step_trace.ts_track_model import TsTrackModel
 from msmodel.ai_cpu.data_preparation_model import DataPreparationModel
@@ -46,6 +47,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
             AicpuAddInfoBean.KFC_COMM_TURN: [],
             AicpuAddInfoBean.KFC_COMPUTE_TURN: [],
             AicpuAddInfoBean.KFC_HCCL_INFO: [],
+            AicpuAddInfoBean.HCCL_OP_INFO: [],
         }
         self._get_data_func = {
             AicpuAddInfoBean.AICPU_NODE: self.get_aicpu_node_data,
@@ -55,6 +57,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
             AicpuAddInfoBean.KFC_COMM_TURN: self.get_kfc_comm_turn_data,
             AicpuAddInfoBean.KFC_COMPUTE_TURN: self.get_kfc_compute_turn_data,
             AicpuAddInfoBean.KFC_HCCL_INFO: self.get_kfc_hccl_info_data,
+            AicpuAddInfoBean.HCCL_OP_INFO: self.get_hccl_op_info_data,
         }
 
     @staticmethod
@@ -131,6 +134,25 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
             aicpu_info.data.compute_exe_end_time,
         ]
 
+    @staticmethod
+    def get_hccl_op_info_data(aicpu_info: AicpuAddInfoBean) -> list:
+        source = DeviceHcclOpSource.INVALID
+        if aicpu_info.struct_type == str(AicpuAddInfoBean.HCCL_OP_INFO):
+            source = DeviceHcclOpSource.HCCL
+        return [
+            InfoConfReader().time_from_syscnt(aicpu_info.timestamp),
+            aicpu_info.data.relay,
+            aicpu_info.data.retry,
+            trans_enum_name(DataType, aicpu_info.data.data_type),
+            aicpu_info.data.alg_type,
+            aicpu_info.data.count,
+            aicpu_info.data.group_name,
+            aicpu_info.data.stream_id,
+            aicpu_info.data.task_id,
+            aicpu_info.data.rank_size,
+            source.value,
+        ]
+
     def get_kfc_hccl_info_data(self: any, aicpu_info: AicpuAddInfoBean) -> list:
         role = trans_enum_name(RoleType, aicpu_info.data.role)
         op_type = trans_enum_name(OpType, aicpu_info.data.op_type)
@@ -191,6 +213,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
         kfc_comm_turn = self._aicpu_data.get(AicpuAddInfoBean.KFC_COMM_TURN, [])
         kfc_compute_turn = self._aicpu_data.get(AicpuAddInfoBean.KFC_COMPUTE_TURN, [])
         kfc_hccl_info = self._aicpu_data.get(AicpuAddInfoBean.KFC_HCCL_INFO, [])
+        hccl_op_info = self._aicpu_data.get(AicpuAddInfoBean.HCCL_OP_INFO, [])
         if aicpu_node_data:
             with AiCpuModel(self.project_path, [DBNameConstant.TABLE_AI_CPU]) as model:
                 model.flush(aicpu_node_data, DBNameConstant.TABLE_AI_CPU)
@@ -214,6 +237,9 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
         if kfc_compute_turn:
             with KfcInfoModel(self.project_path, [DBNameConstant.TABLE_KFC_COMPUTE_TURN]) as model:
                 model.flush(kfc_compute_turn, DBNameConstant.TABLE_KFC_COMPUTE_TURN)
+        if hccl_op_info:
+            with KfcInfoModel(self.project_path, [DBNameConstant.TABLE_DEVICE_HCCL_OP_INFO]) as model:
+                model.flush(hccl_op_info, DBNameConstant.TABLE_DEVICE_HCCL_OP_INFO)
 
     def ms_run(self: any) -> None:
         """

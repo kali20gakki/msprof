@@ -11,6 +11,7 @@ from common_func.info_conf_reader import InfoConfReader
 from mscalculate.hccl.kfc_calculator import KfcCalculator
 from mscalculate.ascend_task.ascend_task import TopDownTask
 from msmodel.add_info.mc2_comm_info_model import Mc2CommInfoViewModel
+from msmodel.task_time.ascend_task_model import AscendTaskViewModel
 
 NAMESPACE = 'mscalculate.hccl.kfc_calculator'
 
@@ -48,12 +49,19 @@ class TestKfcCalculator(unittest.TestCase):
         InfoConfReader()._info_json = {
             "devices": 0
         }
-        task_data = [
-            TopDownTask(0, 0, 19, 0, 4294967295, 0, 38140478700000, 1500, "KERNEL_AICPU", "AI_CPU", 0),
-            TopDownTask(0, 0, 19, 1, 4294967295, 0, 38140478800000, 2000, "KERNEL_AICPU", "AI_CPU", 0),
-            TopDownTask(0, 0, 52, 0, 4294967295, 0, 38140478600000, 1000, "UNKNOWN", "C_CORE_SQE", 0),
-            TopDownTask(0, 0, 52, 1, 4294967295, 0, 38140478700010, 1000, "KERNEL_AICORE", "C_CORE_SQE", 0),
-            TopDownTask(0, 0, 54, 0, 4294967295, 0, 38140478800010, 500, "KERNEL_AICORE", "WRITE_VALUE_SQE", 0),
+        kfc_op_data = [
+            AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 19, 0, 4294967295, 0, 38140478700000,
+                                                 1500, "KERNEL_AICPU", "AI_CPU", 0, "MatmulAllReduceAicpu"),
+            AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 19, 2, 4294967295, 0, 38140478800000,
+                                                 2000, "KERNEL_AICPU", "AI_CPU", 0, "MatmulAllReduceAicpu"),
+        ]
+        kfc_task_data = [
+            AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 52, 0, 4294967295, 0, 38140478600000,
+                                                 1000, "UNKNOWN", "C_CORE_SQE", 0, "NOTIFY_RECORD"),
+            AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 52, 1, 4294967295, 0, 38140478700010,
+                                                 1000, "KERNEL_AICORE", "C_CORE_SQE", 0, "NOTIFY_RECORD"),
+            AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 54, 0, 4294967295, 0, 38140478800010,
+                                                 500, "KERNEL_AICORE", "WRITE_VALUE_SQE", 0, "NOTIFY_WAIT"),
         ]
         comm_info = [
             Mc2CommInfoViewModel.MC2_COMM_INFO_TYPE(19, "52,53,54,55,56,57,58,59", group_name),
@@ -74,10 +82,20 @@ class TestKfcCalculator(unittest.TestCase):
             (1, "Notify_Wait", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0, 266, 0, 0, 0, 54, 0,
              0, 0, 0, 0),
         ]
-        with mock.patch(NAMESPACE + ".AscendTaskModel.get_ascend_task_data_without_unknown", return_value=task_data), \
+        kfc_op_info_data = [
+            (38140478600000, 0, 0, 0, 90, 0, group_name, 19, 0, 8, 0),
+            (38140478702000, 0, 0, 0, 90, 0, group_name, 19, 1, 8, 0),
+            (38140478801000, 0, 0, 0, 90, 0, group_name, 19, 2, 8, 0),
+            (38140478803000, 0, 0, 0, 90, 0, group_name, 19, 3, 8, 0),
+        ]
+        with mock.patch(NAMESPACE + ".AscendTaskViewModel.get_ascend_task_data_with_op_name_pattern_and_stream_id",
+                        return_value=kfc_op_data), \
+                mock.patch(NAMESPACE + ".AscendTaskViewModel.get_ascend_task_data_with_stream_id",
+                           return_value=kfc_task_data), \
                 mock.patch(NAMESPACE + ".Mc2CommInfoViewModel.get_kfc_stream", return_value=comm_info), \
                 mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=ge_data), \
-                mock.patch(NAMESPACE + ".KfcInfoViewModel.get_sql_data", return_value=kfc_info_data), \
+                mock.patch(NAMESPACE + ".KfcInfoViewModel.get_sql_data",
+                           side_effect=(kfc_op_info_data, kfc_info_data)), \
                 mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=True), \
                 mock.patch("os.path.exists", return_value=True), \
                 mock.patch("msmodel.step_trace.ts_track_model.TsTrackModel.get_task_flip_data", return_value=[]), \
@@ -85,8 +103,8 @@ class TestKfcCalculator(unittest.TestCase):
             check = KfcCalculator([], CONFIG)
             check.calculate()
             check.save()
-        self.assertEqual(2, len(check._kfc_op_data))
-        self.assertEqual(2, len(check._kfc_task_data))
+        self.assertEqual(2, len(check._kfc_op_data.get(group_name, [])))
+        self.assertEqual(2, len(check._kfc_task_data.get(group_name, [])))
         InfoConfReader()._info_json = {}
 
     def test_make_default_kfc_info_should_return_len_28_named_tuple(self: any) -> None:

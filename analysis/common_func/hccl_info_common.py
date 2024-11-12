@@ -77,6 +77,12 @@ class AlgType(Enum):
     INVALID = 4294967295
 
 
+class DeviceHcclOpSource(Enum):
+    HCCL = 0
+    MC2 = 1
+    INVALID = 4294967295
+
+
 def trans_enum_name(enum_class, value):
     try:
         return enum_class(int(value)).name

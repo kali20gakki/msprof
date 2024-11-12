@@ -182,6 +182,8 @@ class StructFmt:
     KFC_COMM_TURN_SIZE = struct.calcsize(BYTE_ORDER_CHAR + KFC_COMM_TURN_FMT)
     KFC_COMPUTE_TURN_FMT = "HHIII5QIHH8B46I"
     KFC_COMPUTE_TURN_SIZE = struct.calcsize(BYTE_ORDER_CHAR + KFC_COMPUTE_TURN_FMT)
+    DEVICE_HCCL_OP_INFO_FMT = "HHIIIQBBHQQIHI" + "202B"
+    DEVICE_HCCL_OP_INFO_FMT_SIZE = struct.calcsize(BYTE_ORDER_CHAR + DEVICE_HCCL_OP_INFO_FMT)
 
     @staticmethod
     def class_name() -> str:
