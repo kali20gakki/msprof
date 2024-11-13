@@ -507,9 +507,14 @@ class MsProfExportDataUtils:
 
     @staticmethod
     def _get_msproftx_data(configs: dict, params: dict) -> any:
-        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.SUMMARY:
-            return MsprofTxViewer(configs, params).get_summary_data()
-        return MsprofTxViewer(configs, params).get_timeline_data()
+        if params.get("project").endswith('host'):
+            if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.SUMMARY:
+                return MsprofTxViewer(configs, params).get_summary_data()
+            return MsprofTxViewer(configs, params).get_timeline_data()
+        else:
+            if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.SUMMARY:
+                return MsprofTxViewer(configs, params).get_device_summary_data()
+            return MsprofTxViewer(configs, params).get_device_timeline_data()
 
     @staticmethod
     def _get_stars_soc_data(configs: dict, params: dict) -> any:

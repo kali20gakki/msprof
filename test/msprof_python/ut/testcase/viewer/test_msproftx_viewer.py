@@ -17,40 +17,50 @@ class TestMsprofTxViewer(unittest.TestCase):
     TRACE_HEADER_TID = 'tid'
     TRACE_HEADER_PH = 'ph'
     TRACE_HEADER_NAME = 'name'
+    TRACE_HEADER_ID = 'id'
     TEST_MSPROF_TX_MSG = 'test'
+    MSPROFTX_DEVICE_HEADERS = ['index_id', 'start_time(us)', 'end_time(us)']
     configs = {'handler': '_get_msproftx_data',
                'headers': ['pid', ' tid', ' category', ' event_type', ' payload_type', ' payload_value', ' Start_time',
-                           ' End_time', ' message_type', ' message'], 'db': 'msproftx.db',
-               'unused_cols': []}
+                           ' End_time', ' message_type', ' message', 'mark_id'], 'db': 'msproftx.db', 'unused_cols': []}
     params = {'data_type': 'msprof_tx', 'project': 'D:\\Job\\analyzer_testcase\\origin_data\\1910_mini_no_ai_core',
               'device_id': '0', 'job_id': 'job_default', 'export_type': 'summary', 'iter_id': 1, 'export_format': 'csv',
               'model_id': 1}
 
-    def test_get_summary_data_return_vaild_data_with_get_summary_from_model(self):
-        valid_start_time = '10.001'
+
+    def setUp(self):
         InfoConfReader()._host_freq = None
-        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         InfoConfReader()._local_time_offset = 10.0
         InfoConfReader()._host_local_time_offset = 10.0
+        InfoConfReader()._local_time_offset = 10.0
+        InfoConfReader()._dev_cnt = 0.0
+        InfoConfReader()._host_mon = 0.0
+        InfoConfReader()._info_json = {
+            'devices': '0', "pid": '1000', 'DeviceInfo': [{"hwts_frequency": "100"}], 'CPU': [{'Frequency': "1000"}]
+        }
+
+    def tearDown(self):
+        InfoConfReader()._info_json = None
+
+    def test_get_summary_data_return_vaild_data_with_get_summary_from_model(self):
+        valid_start_time = '10.001\t'
         with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxModel.get_summary_data',
                         return_value=((0, 0, 0, 0, 0, 0, 0, 5, 0, 'test'), (0, 1, 0, 0, 1, 0, 1, 7, 0, 'test'))), \
                 mock.patch('msmodel.msproftx.msproftx_model.MsprofTxExModel.get_summary_data',
-                           return_value=((0, 0, 3, 1, 1, 'test'), (0, 1, 3, 2, 11, 'test'))):
+                           return_value=((0, 0, 3, 1, 1, 'test', 0), (0, 1, 3, 2, 11, 'test', 1))):
             result = MsprofTxViewer(self.configs, self.params).get_summary_data()
             self.assertEqual(result, (['pid', ' tid', ' category', ' event_type', ' payload_type',
-                                       ' payload_value', ' Start_time', ' End_time', ' message_type', ' message'],
-                                      [(0, 0, 0, 0, 0, 0, '10.000', '10.005', 0, 'test'),
-                                       (0, 1, 0, 0, 1, 0, valid_start_time, '10.007', 0, 'test'),
+                                       ' payload_value', ' Start_time', ' End_time', ' message_type', ' message',
+                                        'mark_id'],
+                                      [(0, 0, 0, 0, 0, 0, '10.000\t', '10.005\t', 0, 'test', Constant.NA,),
+                                       (0, 1, 0, 0, 1, 0, valid_start_time, '10.007\t', 0, 'test', Constant.NA,),
                                        (0, 0, Constant.NA, 3, Constant.NA, Constant.NA,
-                                        valid_start_time, valid_start_time, Constant.NA, 'test'),
+                                        valid_start_time, valid_start_time, Constant.NA,
+                                        'test', 0),
                                        (0, 1, Constant.NA, 3, Constant.NA, Constant.NA,
-                                        '10.002', '10.011', Constant.NA, 'test')],
-                                      4))
+                                        '10.002\t', '10.011\t', Constant.NA, 'test', 1)], 4))
 
     def test_get_summary_data_return_empty_data_with_get_none_summary_from_model(self):
-        InfoConfReader()._host_freq = None
-        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
-        InfoConfReader()._local_time_offset = 10.0
         with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxModel.get_summary_data',
                         return_value=()), \
                 mock.patch('msmodel.msproftx.msproftx_model.MsprofTxExModel.get_summary_data',
@@ -64,7 +74,7 @@ class TestMsprofTxViewer(unittest.TestCase):
                 mock.patch('msmodel.msproftx.msproftx_model.MsprofTxExModel.get_timeline_data',
                            return_value=[]):
             result = MsprofTxViewer(self.configs, self.params).get_timeline_data()
-            self.assertEqual(result, '[]')
+            self.assertEqual(result, [])
 
     def test_get_timeline_data_return_valid_data_with_get_data_from_model(self):
         expect_timeline_data = [
@@ -112,6 +122,67 @@ class TestMsprofTxViewer(unittest.TestCase):
                        return_value=[msproftx_ex_dto]):
             result = MsprofTxViewer(self.configs, self.params).get_timeline_data()
             self.assertEqual(result, expect_timeline_data)
+
+    def test_get_device_summary_data_return_vaild_data_with_get_device_summary_from_model(self):
+        with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxExModel.get_device_data',
+                        return_value=[(0, 1, 0, 0, 0), (1, 2, 0, 0, 10)]):
+            check = MsprofTxViewer(self.configs, self.params)
+            res = check.get_device_summary_data()
+            self.assertEqual(res, (self.MSPROFTX_DEVICE_HEADERS,
+                                   [(0, '10.010\t', '10.010\t'), (1, '10.020\t', '10.120\t')], 2))
+
+    def test_get_device_summary_data_return_empty_data_with_get_none_device_summary_from_model(self):
+        with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxExModel.get_device_data',
+                        return_value=[]):
+            check = MsprofTxViewer(self.configs, self.params)
+            res = check.get_device_summary_data()
+            self.assertEqual(res, (self.MSPROFTX_DEVICE_HEADERS, [], 0))
+
+    def test_get_device_timeline_data_return_empty_data_with_get_none_device_data_from_model(self):
+        with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxExModel.get_device_data',
+                        reture_value=[]):
+            check = MsprofTxViewer(self.configs, self.params)
+            res = check.get_device_timeline_data()
+            self.assertEqual(res, [])
+
+    def test_get_device_timeline_data_return_valid_data_with_get_device_data_from_model(self):
+        expected_trace_data = [
+            OrderedDict([
+                (self.TRACE_HEADER_NAME, 'process_name'),
+                (self.TRACE_HEADER_PID, 1000), (self.TRACE_HEADER_TID, 0),
+                (self.TRACE_HEADER_ARGS, OrderedDict([
+                    (self.TRACE_HEADER_NAME, 'Task Scheduler')])),
+                (self.TRACE_HEADER_PH, 'M')
+            ]),
+            OrderedDict([
+                (self.TRACE_HEADER_NAME, 'thread_name'),
+                (self.TRACE_HEADER_PID, 1000), (self.TRACE_HEADER_TID, 0),
+                (self.TRACE_HEADER_ARGS, OrderedDict([
+                    (self.TRACE_HEADER_NAME, 'Stream 0')])),
+                (self.TRACE_HEADER_PH, 'M')
+            ]),
+            OrderedDict([
+                (self.TRACE_HEADER_NAME, 'thread_sort_index'),
+                (self.TRACE_HEADER_PID, 1000), (self.TRACE_HEADER_TID, 0),
+                (self.TRACE_HEADER_ARGS, OrderedDict([('sort_index', 0)])),
+                (self.TRACE_HEADER_PH, 'M')
+            ]),
+            OrderedDict([
+                (self.TRACE_HEADER_NAME, Constant.NA), (self.TRACE_HEADER_PID, 1000),
+                (self.TRACE_HEADER_TID, 0), ('ts', '431145779385.630'), ('dur', 0.0),
+                (self.TRACE_HEADER_ARGS, {'Physic Stream Id': 0, 'Task Id': 0}),
+                (self.TRACE_HEADER_PH, 'X')]),
+            {
+                self.TRACE_HEADER_NAME: 'MsTx_0', self.TRACE_HEADER_PH: 'f', 'id': '0',
+                'ts': '431145779385.630', 'cat': 'MsTx', self.TRACE_HEADER_PID: 1000,
+                'tid': 0, 'bp': 'e'
+            }
+        ]
+        with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxExModel.get_device_data') as MockMsprofTxExModel:
+            MockMsprofTxExModel.return_value = [[0, 43114577937563, 0, 0, 0]]
+            check = MsprofTxViewer(self.configs, self.params)
+            res = check.get_device_timeline_data()
+            self.assertEqual(res, expected_trace_data)
 
 if __name__ == '__main__':
     unittest.main()

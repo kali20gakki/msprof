@@ -30,6 +30,7 @@ import multiprocessing
 import os
 import re
 import shutil
+import csv
 
 from common_func.common import print_info
 from common_func.common import warn
@@ -66,12 +67,17 @@ class MsprofOutputSummary:
     JSON_LIST = [
         "msprof", "step_trace", "msprof_tx"
     ]
+    MSPROF_TX = "msprof_tx"
+    MSPROFTX_DEVICE_START_TIME_HEADER = "Device Start_time(us)"
+    MSPROFTX_DEVICE_END_TIME_HEADER = "Device End_time(us)"
 
     def __init__(self: any, output: str, export_format: str) -> None:
         self._output = output
         self._export_format = export_format
         self._output_dir = ""
         self._log_dir = ""
+        self._msproftx_device_data_dict = {}
+        self._insert_match_summary_list = {"msprof_tx": self._insert_msproftx_summary_data}
 
     @staticmethod
     def _valid_pos(underscore_pos: int, point_pos: int, filename: str) -> bool:
@@ -273,7 +279,7 @@ class MsprofOutputSummary:
             StrConstant.PARAM_EXPORT_DUMP_FOLDER: PathManager.MINDSTUDIO_PROFILER_OUTPUT
         }
         helper = FileSliceHelper(params, [], [])
-        for sub_dir in sub_dirs:
+        for sub_dir in sorted(sub_dirs):
             sub_path = get_valid_sub_path(self._output, sub_dir, False)
             if not DataCheckManager.contain_info_json_data(sub_path):
                 continue
@@ -290,8 +296,69 @@ class MsprofOutputSummary:
                 if not file_name.startswith(targe_name) or (targe_name == "aicpu" and file_name.startswith("aicpu_mi")):
                     continue
                 file_name_path = os.path.join(summary_path, file_name)
-                self._insert_summary_data(file_name_path, device_id, helper)
+                if targe_name in self._insert_match_summary_list:
+                    self._insert_match_summary_list[targe_name](file_name_path, device_id, helper, sub_dir)
+                else:
+                    self._insert_summary_data(file_name_path, device_id, helper)
         helper.dump_csv_data(force=True)
+
+    def _insert_msproftx_summary_data(self, file_name_path: str, device_id: str, helper: FileSliceHelper, sub_dir: str):
+        if sub_dir == self.MSPROF_HOST:
+            self._update_msproftx_host_data(file_name_path, helper)
+        else:
+            self._update_msproftx_device_data(file_name_path, device_id)
+
+    def _update_msproftx_device_data(self, file_name_path: str, device_id: str):
+        cnt = 0
+        with FileOpen(file_name_path, mode='r', max_size=self.FILE_MAX_SIZE) as _csv_file:
+            header = _csv_file.file_reader.readline()
+            line_num = 0
+            all_data = [''] * FileSliceHelper.CSV_LIMIT
+            for index, row in enumerate(self.read_file(_csv_file.file_reader)):
+                line_num = index + 1
+                if line_num > FileSliceHelper.CSV_LIMIT:
+                    logging.error("The CSV file size limit is %d rows, and the size of the %s file "
+                                  "has exceeded the limit. ", FileSliceHelper.CSV_LIMIT, file_name_path)
+                    self._msproftx_device_data_dict = {}
+                    return
+                data = row.split(',')
+                if len(data) < 3:
+                    cnt += 1
+                    continue
+                self._msproftx_device_data_dict[data[0]] = {"start_time": data[1], "end_time": data[2],
+                                                       "device_id": device_id}
+            if cnt != 0:
+                logging.error("The MSPROF_TX_DEVICE_CSV file contains %d lines whose length is "
+                              "less than 3. ", cnt)
+
+    def _update_msproftx_host_data(self, file_name_path: str, helper: FileSliceHelper):
+        with FileOpen(file_name_path, mode='r', max_size=self.FILE_MAX_SIZE) as _csv_file:
+            header = _csv_file.file_reader.readline()
+            if header and helper.check_header_is_empty():
+                csv_header = [self.DEVICE_ID, *list(header.strip().split(','))[:-1],
+                              self.MSPROFTX_DEVICE_START_TIME_HEADER, self.MSPROFTX_DEVICE_END_TIME_HEADER]
+                csv_header[-1] += '\n'
+                helper.set_header(csv_header)
+
+            line_num = 0
+            all_data = [''] * FileSliceHelper.CSV_LIMIT
+            for index, row in enumerate(self.read_file(_csv_file.file_reader)):
+                line_num = index + 1
+                if line_num > FileSliceHelper.CSV_LIMIT:
+                    logging.error("The CSV file size limit is %d rows, and the size of the %s file "
+                                  "has exceeded the limit. ", FileSliceHelper.CSV_LIMIT, file_name_path)
+                    return
+                mark_id = row.strip().split(',')[-1]
+                row = row.rsplit(',', 1)[0]
+                if self._msproftx_device_data_dict.get(mark_id):
+                    row = ','.join([row, self._msproftx_device_data_dict[mark_id]["start_time"],
+                                    self._msproftx_device_data_dict[mark_id]["end_time"]])
+                    device_id = self._msproftx_device_data_dict[mark_id]["device_id"]
+                else:
+                    row = ','.join([row, Constant.NA, Constant.NA + '\n'])
+                    device_id = "host"
+                all_data[index] = f'{device_id},{row}'
+            helper.insert_data(all_data[:line_num])
 
     def _insert_summary_data(self, file_name_path: str, device_id: str,
                              helper: FileSliceHelper):

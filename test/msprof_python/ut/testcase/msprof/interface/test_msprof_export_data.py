@@ -642,14 +642,25 @@ class TestMsProfExportDataUtils(unittest.TestCase):
 
     def test_get_msproftx_data(self):
         sample_configs = {"test": 2}
-        params = {"export_type": "summary"}
+        params = {"export_type": "summary", "project": "host"}
         with mock.patch(NAMESPACE + '.MsprofTxViewer.get_summary_data', return_value=('test', [1], 1)):
             key = MsProfExportDataUtils()
             result = key._get_msproftx_data(sample_configs, params)
         self.assertEqual(result, ('test', [1], 1))
         with mock.patch(NAMESPACE + '.MsprofTxViewer.get_timeline_data', return_value=''):
             key = MsProfExportDataUtils()
-            result = key._get_msproftx_data(sample_configs, {"export_type": "timeline"})
+            result = key._get_msproftx_data(sample_configs, {"export_type": "timeline", "project": "host"})
+        self.assertEqual(result, '')
+
+        device_headers = ['index_id', 'start_time(us)', 'end_time(us)']
+        device_params = {"export_type": "summary", "project": "device"}
+        with mock.patch(NAMESPACE + '.MsprofTxViewer.get_device_summary_data', return_value=(device_headers, [1], 1)):
+            key = MsProfExportDataUtils()
+            result = key._get_msproftx_data(sample_configs, device_params)
+        self.assertEqual(result, (device_headers, [1], 1))
+        with mock.patch(NAMESPACE + '.MsprofTxViewer.get_device_timeline_data', return_value=''):
+            key = MsProfExportDataUtils()
+            result = key._get_msproftx_data(sample_configs, {"export_type": "timeline", "project": "device"})
         self.assertEqual(result, '')
 
     def test_get_stars_soc_data(self):

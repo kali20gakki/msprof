@@ -66,7 +66,8 @@ class MsprofTxParser(IParser, MsMultiProcess):
                                [DBNameConstant.TABLE_MSPROFTX]) as tx_model:
                 tx_model.flush(self._msproftx_data)
         if self._msproftx_ex_data:
-            with MsprofTxExModel(self._project_path) as tx_ex_model:
+            with MsprofTxExModel(self._project_path, DBNameConstant.DB_MSPROFTX,
+                             [DBNameConstant.TABLE_MSPROFTX_EX]) as tx_ex_model:
                 tx_ex_model.flush(self._msproftx_ex_data)
 
     def ms_run(self: any) -> None:
