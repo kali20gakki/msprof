@@ -54,7 +54,7 @@ const std::vector<std::string> ASSEMBLER_LIST{
 
 bool TimelineManager::ProcessTimeLine(Analysis::Infra::DataInventory& dataInventory)
 {
-    const uint16_t tableProcessors = 10; // 最多有五个线程
+    const uint16_t tableProcessors = 10; // 最多有10个线程
     Analysis::Utils::ThreadPool pool(tableProcessors);
     pool.Start();
     std::atomic<bool> retFlag(true);
@@ -80,12 +80,12 @@ bool TimelineManager::ProcessTimeLine(Analysis::Infra::DataInventory& dataInvent
     return true;
 }
 
-void TimelineManager::WriteFile(const std::string &filePrefix, FileCategory category, const char *content)
+void TimelineManager::WriteFile(const std::string &filePrefix, FileCategory category)
 {
     auto tempFile = filePrefix;
     tempFile.append("_").append(timestampStr).append(JSON_SUFFIX);
     auto filePath = File::PathJoin({outputPath_, tempFile});
-    DumpTool::WriteToFile(filePath, content, PREFIX_CONTEXT.size(), category);
+    DumpTool::WriteToFile(filePath, PREFIX_CONTEXT.c_str(), PREFIX_CONTEXT.size(), category);
     fileType_.emplace(category, filePath);
 }
 
@@ -94,12 +94,12 @@ bool TimelineManager::PreDumpJson(DataInventory &dataInventory)
     if (dataInventory.Empty()) {
         return false;
     }
-    WriteFile(MSPROF_JSON_FILE, FileCategory::MSPROF, PREFIX_CONTEXT.c_str());
+    WriteFile(MSPROF_JSON_FILE, FileCategory::MSPROF);
     if (dataInventory.GetPtr<std::vector<TrainTraceData>>()) {
-        WriteFile(STEP_TRACE_FILE, FileCategory::STEP, PREFIX_CONTEXT.c_str());
+        WriteFile(STEP_TRACE_FILE, FileCategory::STEP);
     }
     if (dataInventory.GetPtr<std::vector<MsprofTxHostData>>()) {
-        WriteFile(MSPROF_TX_FILE, FileCategory::MSPROF_TX, PREFIX_CONTEXT.c_str());
+        WriteFile(MSPROF_TX_FILE, FileCategory::MSPROF_TX);
     }
     return true;
 }
