@@ -213,6 +213,81 @@ class TestMsprofOutputSummary(unittest.TestCase):
             MsprofOutputSummary(PROF_DIR, CSV_FORMAT)._save_summary_data("aicpu",
                                                                          [HOST_DIR, DEVICE_DIR_1, 'device_1'])
 
+    def test_save_msproftx_summary_data_when_normal_then_pass(self):
+        with mock.patch('os.path.join', return_value="test"), \
+                mock.patch('os.path.realpath', return_value="test"), \
+                mock.patch(NAMESPACE + '.get_valid_sub_path'), \
+                mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True), \
+                mock.patch('os.path.exists', return_value=True), \
+                mock.patch('os.listdir', return_value=["op_summary.csv", "msprof_tx.csv", "aicpu.csv"]), \
+                mock.patch('os.path.basename', return_value="0"), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary.get_newest_file_list',
+                           return_value=["msprof_tx_0_0_1_20241107020650.csv", "msprof_tx_0_0_2_20241107020650.csv"]), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary._insert_msproftx_summary_data'), \
+                mock.patch('common_func.file_slice_helper.FileSliceHelper.dump_csv_data'):
+            MsprofOutputSummary(PROF_DIR, CSV_FORMAT)._save_summary_data("msprof_tx",
+                                                                         [HOST_DIR, DEVICE_DIR_1, 'device_1'])
+
+    def test_insert_msproftx_summary_data_when_host_then_pass(self):
+        params = {
+            StrConstant.PARAM_DATA_TYPE: "msprof_tx",
+            StrConstant.PARAM_EXPORT_TYPE: "summary",
+            StrConstant.PARAM_EXPORT_FORMAT: CSV_FORMAT,
+            StrConstant.PARAM_RESULT_DIR: "test",
+            StrConstant.PARAM_EXPORT_DUMP_FOLDER: "summary"
+        }
+        helper = FileSliceHelper(params, [], [])
+        with mock.patch(NAMESPACE + '.MsprofOutputSummary._update_msproftx_host_data'):
+            check = MsprofOutputSummary(PROF_DIR, CSV_FORMAT)
+            check._insert_msproftx_summary_data("msprof_tx", "host", helper, HOST_DIR)
+
+    def test_insert_msproftx_summary_data_when_device_then_pass(self):
+        params = {
+            StrConstant.PARAM_DATA_TYPE: "msprof_tx",
+            StrConstant.PARAM_EXPORT_TYPE: "summary",
+            StrConstant.PARAM_EXPORT_FORMAT: CSV_FORMAT,
+            StrConstant.PARAM_RESULT_DIR: "test",
+            StrConstant.PARAM_EXPORT_DUMP_FOLDER: "summary"
+        }
+        helper = FileSliceHelper(params, [], [])
+        with mock.patch(NAMESPACE + '.MsprofOutputSummary._update_msproftx_device_data'):
+            check = MsprofOutputSummary(PROF_DIR, CSV_FORMAT)
+            check._insert_msproftx_summary_data("msprof_tx", "device", helper, DEVICE_DIR_1)
+
+    def test_update_msproftx_device_data_when_more_than_1000000_then_pass(self):
+        mock_iterator = MagicMock()
+        mock_iterator.__iter__.return_value = iter(['1,2,10'] * 1000001)
+        with mock.patch(NAMESPACE + '.FileOpen'), \
+                mock.patch('common_func.file_manager.check_path_valid'), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary.read_file', return_value=mock_iterator), \
+                mock.patch('common_func.file_slice_helper.FileSliceHelper.check_header_is_empty',
+                           return_value=True), \
+                mock.patch('common_func.msvp_common.create_normal_writer'):
+            check = MsprofOutputSummary(PROF_DIR, CSV_FORMAT)
+            check._update_msproftx_device_data("msprof_tx", '0')
+            self.assertEqual(len(check._msproftx_device_data_dict), 0)
+
+    def test_update_msproftx_host_data_when_more_than_1000000_then_pass(self):
+        params = {
+            StrConstant.PARAM_DATA_TYPE: "msprof_tx",
+            StrConstant.PARAM_EXPORT_TYPE: "summary",
+            StrConstant.PARAM_EXPORT_FORMAT: CSV_FORMAT,
+            StrConstant.PARAM_RESULT_DIR: "test",
+            StrConstant.PARAM_EXPORT_DUMP_FOLDER: "summary"
+        }
+        helper = FileSliceHelper(params, [], [])
+        mock_iterator = MagicMock()
+        mock_iterator.__iter__.return_value = iter(['1'] * 1000001)
+        with mock.patch(NAMESPACE + '.FileOpen'), \
+                mock.patch('common_func.file_manager.check_path_valid'), \
+                mock.patch(NAMESPACE + '.MsprofOutputSummary.read_file', return_value=mock_iterator), \
+                mock.patch('common_func.file_slice_helper.FileSliceHelper.check_header_is_empty',
+                           return_value=True), \
+                mock.patch('common_func.msvp_common.create_normal_writer'):
+            check = MsprofOutputSummary(PROF_DIR, CSV_FORMAT)
+            check._update_msproftx_host_data("msprof_tx", helper)
+            self.assertEqual(len(helper.data_list), 0)
+
     def test_insert_summary_data_when_more_than_1000000_then_insert_data(self):
         params = {
             StrConstant.PARAM_DATA_TYPE: "op_summary",

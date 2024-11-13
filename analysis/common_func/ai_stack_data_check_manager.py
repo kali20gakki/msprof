@@ -210,7 +210,11 @@ class AiStackDataCheckManager(DataCheckManager):
         :param device_id: device id
         :return: if contained msproftx data, true or false
         """
-        return cls.check_data_exist(result_dir, file_name_manager.get_msproftx_compiles(),)
+        return cls.check_data_exist(result_dir, file_name_manager.get_msproftx_compiles(),) \
+                or DBManager.check_tables_in_db(
+                        PathManager.get_db_path(result_dir, DBNameConstant.DB_STEP_TRACE),
+                        DBNameConstant.TABLE_STEP_TRACE)
+
 
     @classmethod
     def contain_stars_soc_profiler_data(cls: any, result_dir: str, device_id: int = None) -> bool:
