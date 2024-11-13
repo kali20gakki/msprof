@@ -30,7 +30,7 @@ private:
     bool ProcessTimeLine(DataInventory &dataInventory);
     bool PreDumpJson(DataInventory &dataInventory);
     void PostDumpJson();
-    void WriteFile(const std::string &filePrefix, FileCategory category, const char *content);
+    void WriteFile(const std::string &filePrefix, FileCategory category);
 private:
     std::string profPath_;
     std::string outputPath_;

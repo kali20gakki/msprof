@@ -61,7 +61,7 @@ bool ExportManager::ProcessData(DataInventory &dataInventory)
     // hash数据作为其他流程的依赖数据，需要优先加载
     HashInitProcessor hashProcessor(profPath_);
     hashProcessor.Run(dataInventory, PROCESSOR_NAME_HASH);
-    const uint16_t tableProcessors = 10; // 最多有五个线程
+    const uint16_t tableProcessors = 10; // 最多有10个线程
     Analysis::Utils::ThreadPool pool(tableProcessors);
     pool.Start();
     std::atomic<bool> retFlag(true);
