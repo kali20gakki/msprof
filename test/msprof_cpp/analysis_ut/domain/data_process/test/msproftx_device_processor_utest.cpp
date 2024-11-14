@@ -28,7 +28,7 @@ const std::string DB_SUFFIX = "step_trace.db";
 const std::string PROF_PATH_A = File::PathJoin({DEVICE_TX_PATH, "./PROF_0"});
 const std::string TABLE_NAME = "StepTrace";
 
-using DbDataType = std::vector<std::tuple<uint32_t, uint32_t, double, uint32_t, uint32_t, uint32_t>>;
+using DbDataType = std::vector<std::tuple<uint32_t, uint32_t, uint64_t, uint32_t, uint32_t, uint32_t>>;
 
 DbDataType DATA_A{{0, 4294967295, 26248923229230, 2, 10, 11},
                   {0, 4294967295, 26248923229240, 2, 10, 11},

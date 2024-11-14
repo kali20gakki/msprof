@@ -19,7 +19,7 @@
 namespace Analysis {
 namespace Domain {
 // model_id, index_id, stream_id, task_id, timestamp
-using TxDeviceData = std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, double>;
+using TxDeviceData = std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, uint64_t>;
 using OriMsprofTxDeviceData = std::vector<TxDeviceData>;
 
 class MsprofTxDeviceProcessor : public DataProcessor {
