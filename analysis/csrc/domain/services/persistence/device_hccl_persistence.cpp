@@ -50,7 +50,7 @@ bool SaveHcclOpData(DataInventory& dataInventory, const std::string& devicePath)
     }
     DBInfo hcclDB("hccl_single_device.db", "HCCLOpSingleDevice");
     MAKE_SHARED0_RETURN_VALUE(hcclDB.database, HCCLSingleDeviceDB, false);
-    std::string dbPath = Utils::GetDBPath({devicePath, SQLITE, hcclDB.dbName});
+    std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, hcclDB.dbName});
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(hcclDB.dbRunner, DBRunner, false, dbPath);
     HcclOpDataFormat saveData;
@@ -78,7 +78,7 @@ bool SaveHcclTaskData(DataInventory& dataInventory, const std::string& devicePat
     }
     DBInfo hcclDB("hccl_single_device.db", "HCCLTaskSingleDevice");
     MAKE_SHARED0_RETURN_VALUE(hcclDB.database, HCCLSingleDeviceDB, false);
-    std::string dbPath = Utils::GetDBPath({devicePath, SQLITE, hcclDB.dbName});
+    std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, hcclDB.dbName});
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(hcclDB.dbRunner, DBRunner, false, dbPath);
     HcclTaskDataFormat saveData;
@@ -110,7 +110,7 @@ bool SaveHcclStatisticsData(DataInventory& dataInventory, const std::string& dev
     }
     DBInfo hcclDB("hccl_single_device.db", "HcclOpReport");
     MAKE_SHARED0_RETURN_VALUE(hcclDB.database, HCCLSingleDeviceDB, false);
-    std::string dbPath = Utils::GetDBPath({devicePath, SQLITE, hcclDB.dbName});
+    std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, hcclDB.dbName});
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(hcclDB.dbRunner, DBRunner, false, dbPath);
     HcclStatisticsFormat saveData;

@@ -190,9 +190,5 @@ std::string AddQuotation(std::string str)
 {
     return Join({"\"", str, "\""}, "");
 }
-std::string GetDBPath(const std::vector<std::string>& paths)
-{
-    return Utils::File::PathJoin(paths);
-}
 }  // namespace Utils
 }  // namespace Analysis

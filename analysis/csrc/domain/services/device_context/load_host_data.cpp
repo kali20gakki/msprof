@@ -110,7 +110,7 @@ uint32_t ReadHostRuntime(DataInventory& dataInventory, const DeviceContext& devi
     DeviceInfo deviceInfo{};
     deviceContext.Getter(deviceInfo);
     auto hostPath = deviceContext.GetDeviceFilePath();
-    std::string hostDbDirectory = Utils::GetDBPath({hostPath, "../", "/host", "/sqlite", runtimeDb.GetDBName()});
+    std::string hostDbDirectory = Utils::File::PathJoin({hostPath, "../", "/host", "/sqlite", runtimeDb.GetDBName()});
     DBRunner hostRuntimeDBRunner(hostDbDirectory);
     std::shared_ptr<DeviceId2HostRunTime> data;
     DeviceId2HostRunTime hostRuntime;
@@ -159,7 +159,7 @@ uint32_t ReadHcclOp(DataInventory& dataInventory, const DeviceContext& deviceCon
 {
     HCCLDB hcclDb;
     auto hostPath = deviceContext.GetDeviceFilePath();
-    std::string hostDbDirectory = Utils::GetDBPath({hostPath, "../", "/host", "/sqlite", hcclDb.GetDBName()});
+    std::string hostDbDirectory = Utils::File::PathJoin({hostPath, "../", "/host", "/sqlite", hcclDb.GetDBName()});
     DBRunner hostHcclDBRunner(hostDbDirectory);
     std::string sql{"SELECT device_id, model_id, index_id, thread_id, op_name, task_type, op_type, begin, "
                     "end - begin, is_dynamic, connection_id, relay, retry, data_type, alg_type, count, "
@@ -199,7 +199,7 @@ uint32_t ReadHcclTask(DataInventory& dataInventory, const DeviceContext& deviceC
 {
     HCCLDB hcclDb;
     auto hostPath = deviceContext.GetDeviceFilePath();
-    std::string hostDbDirectory = Utils::GetDBPath({hostPath, "../", "/host", "/sqlite", hcclDb.GetDBName()});
+    std::string hostDbDirectory = Utils::File::PathJoin({hostPath, "../", "/host", "/sqlite", hcclDb.GetDBName()});
     DBRunner hostHcclDBRunner(hostDbDirectory);
     std::string sql{"SELECT model_id, index_id, name, group_name, plane_id, timestamp , duration, stream_id, task_id, "
                     "context_id, batch_id, device_id, is_master , local_rank, remote_rank, transport_type, size, "
