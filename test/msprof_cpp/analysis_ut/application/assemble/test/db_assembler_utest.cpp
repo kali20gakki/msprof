@@ -64,19 +64,19 @@ protected:
     {
         nlohmann::json record = {
             {"startCollectionTimeBegin", "1715760307197379"},
-            {"endCollectionTimeEnd", "1715760313397397"},
-            {"startClockMonotonicRaw", "9691377159398230"},
-            {"hostMonotonic", "9691377161797070"},
-            {"platform_version", "5"},
-            {"CPU", {{{"Frequency", "100.000000"}}}},
-            {"DeviceInfo", {{{"hwts_frequency", "50"}, {"aic_frequency", "1650"}}}},
-            {"devCntvct", "484576969200418"},
-            {"hostCntvctDiff", "0"},
-            {"hostname", "localhost"},
-            {"hostCntvctDiff", "0"},
-            {"pid", "1"},
-            {"llc_profiling", "read"},
-            {"ai_core_profiling_mode", "task-based"},
+            {"endCollectionTimeEnd",     "1715760313397397"},
+            {"startClockMonotonicRaw",   "9691377159398230"},
+            {"hostMonotonic",            "9691377161797070"},
+            {"platform_version",         "5"},
+            {"CPU",                      {{{"Frequency",      "100.000000"}}}},
+            {"DeviceInfo",               {{{"hwts_frequency", "50"}, {"aic_frequency", "1650"}}}},
+            {"devCntvct",                "484576969200418"},
+            {"hostCntvctDiff",           "0"},
+            {"hostname",                 "localhost"},
+            {"hostCntvctDiff",           "0"},
+            {"pid",                      "1"},
+            {"llc_profiling",            "read"},
+            {"ai_core_profiling_mode",   "task-based"},
         };
         MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
         IdPool::GetInstance().Clear();
@@ -286,7 +286,7 @@ static std::vector<SocBandwidthData> GenerateSocData()
     return res;
 }
 
-static std::vector<SysIOOriginalData> GenerateSysIOData()
+static std::vector<NicOriginalData> GenerateNicData()
 {
     std::vector<SysIOOriginalData> res;
     SysIOOriginalData data;
@@ -296,7 +296,28 @@ static std::vector<SysIOOriginalData> GenerateSysIOData()
     data.rxPacketRate = 1200.0; // rxPacketRate 1200.0
     data.rxByteRate = 1300.0; // rxByteRate 1300.0
     res.push_back(data);
-    return res;
+    NicOriginalData nicOriginal;
+    nicOriginal.sysIOOriginalData = res;
+    std::vector<NicOriginalData> nicOriginalData;
+    nicOriginalData.push_back(nicOriginal);
+    return nicOriginalData;
+}
+
+static std::vector<RoceOriginalData> GenerateRoceData()
+{
+    std::vector<SysIOOriginalData> res;
+    SysIOOriginalData data;
+    data.deviceId = 2; // deviceId 2
+    data.localTime = 236368325746666; // timestamp 236368325746666
+    data.bandwidth = 12345; // bandwidth 12345.0
+    data.rxPacketRate = 1200.0; // rxPacketRate 1200.0
+    data.rxByteRate = 1300.0; // rxByteRate 1300.0
+    res.push_back(data);
+    RoceOriginalData roceOriginal;
+    roceOriginal.sysIOOriginalData = res;
+    std::vector<RoceOriginalData> roceOriginalData;
+    roceOriginalData.push_back(roceOriginal);
+    return roceOriginalData;
 }
 
 static void InjectHcclData(DataInventory& dataInventory)
@@ -311,8 +332,8 @@ static void InjectHcclData(DataInventory& dataInventory)
     dataInventory.Inject(dataTaskS);
 }
 
-static void CheckEnumValueByTableName(const std::shared_ptr<DBRunner> &dbRunner, const std::string &tableName,
-                               const std::unordered_map<std::string, uint16_t> &enumTable)
+static void CheckEnumValueByTableName(const std::shared_ptr<DBRunner>& dbRunner, const std::string& tableName,
+                                      const std::unordered_map<std::string, uint16_t>& enumTable)
 {
     using EnumDataFormat = std::vector<std::tuple<uint32_t, std::string>>;
     EnumDataFormat checkData;
@@ -896,6 +917,56 @@ TEST_F(DBAssemblerUTest, TestRunStringIdsShouldReturnFalseWhenReserveFailedThenD
     auto assembler = DBAssembler(DB_PATH, PROF);
     EXPECT_FALSE(assembler.Run(dataInventory));
     MOCKER_CPP(&ProcessedDataFormat::reserve).reset();
+}
+
+TEST_F(DBAssemblerUTest, TestRunSysIOShouldReturnTrueWhenProcessorRunSuccess)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto nicData = GenerateNicData();
+    auto roceData = GenerateRoceData();
+    std::shared_ptr<std::vector<NicOriginalData>> nicDataS;
+    std::shared_ptr<std::vector<RoceOriginalData>> roceDataS;
+    MAKE_SHARED0_NO_OPERATION(nicDataS, std::vector<NicOriginalData>, nicData);
+    MAKE_SHARED0_NO_OPERATION(roceDataS, std::vector<RoceOriginalData>, roceData);
+    dataInventory.Inject(nicDataS);
+    dataInventory.Inject(roceDataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+
+    std::shared_ptr<DBRunner> dbRunner;
+    MAKE_SHARED_NO_OPERATION(dbRunner, DBRunner, DB_PATH);
+    std::string sqlStrNic = "SELECT deviceId, timestampNs FROM " + TABLE_NAME_NIC;
+    std::string sqlStrRoce = "SELECT deviceId, timestampNs FROM " + TABLE_NAME_ROCE;
+    ASSERT_NE(dbRunner, nullptr);
+    std::vector<std::tuple<uint16_t, uint64_t>> resNic;
+    std::vector<std::tuple<uint16_t, uint64_t>> resRoce;
+    std::vector<std::tuple<uint16_t, uint64_t>> expectNic = {{1, 236368325745555}};
+    std::vector<std::tuple<uint16_t, uint64_t>> expectRoce = {{2, 236368325746666}};
+
+    EXPECT_TRUE(dbRunner->QueryData(sqlStrNic, resNic));
+    EXPECT_EQ(expectNic, resNic);
+
+    EXPECT_TRUE(dbRunner->QueryData(sqlStrRoce, resRoce));
+    EXPECT_EQ(expectRoce, resRoce);
+}
+
+TEST_F(DBAssemblerUTest, TestRunSysIOShouldReturnFalseWhenGetTimeFailed)
+{
+    // deviceId, timestamp, bandwidth, rxPacketRate, rxByteRate, rxPackets, rxBytes, rxErrors, rxDropped
+    // txPacketRate, txByteRate, txPackets, txBytes, txErrors, txDropped, funcId
+    using SysIODataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, double, double, uint32_t,
+        uint32_t, uint32_t, uint32_t, double, double, uint32_t, uint32_t, uint32_t, uint32_t, uint16_t>>;
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto nicData = GenerateNicData();
+    std::shared_ptr<std::vector<NicOriginalData>> nicDataS;
+    MAKE_SHARED0_NO_OPERATION(nicDataS, std::vector<NicOriginalData>, nicData);
+    dataInventory.Inject(nicDataS);
+
+    // Reserve failed
+    MOCKER_CPP(&SysIODataFormat::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    MOCKER_CPP(&SysIODataFormat::reserve).reset();
 }
 
 TEST_F(DBAssemblerUTest, TestRunShouldReturnTrueWhenDataIsEmpty)

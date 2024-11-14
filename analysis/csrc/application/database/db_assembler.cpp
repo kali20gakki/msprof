@@ -503,6 +503,47 @@ bool SaveStringIdsData(DataInventory& dataInventory, DBInfo& msprofDB, const std
     return SaveData(res, TABLE_NAME_STRING_IDS, msprofDB);
 }
 
+template<typename T>
+bool SaveSysIOData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& tableName)
+{
+    // deviceId, timestamp, bandwidth, rxPacketRate, rxByteRate, rxPackets, rxBytes, rxErrors, rxDropped
+    // txPacketRate, txByteRate, txPackets, txBytes, txErrors, txDropped, funcId
+    using SysIODataFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, double, double, uint32_t,
+        uint32_t, uint32_t, uint32_t, double, double, uint32_t, uint32_t, uint32_t, uint32_t, uint16_t>>;
+    auto sysIOMemData = dataInventory.GetPtr<std::vector<T>>();
+    if (sysIOMemData == nullptr) {
+        WARN("SysIO % data not exist.", tableName);
+        return true;
+    }
+    SysIODataFormat res;
+    // sysIOMemData不为nullptr时，一定有一个元素
+    auto sysIOOriginalData = sysIOMemData->back().sysIOOriginalData;
+    if (!Reserve(res, sysIOOriginalData.size())) {
+        ERROR("Reserved for SysIO % data failed.", tableName);
+        return false;
+    }
+    for (const auto& item : sysIOOriginalData) {
+        res.emplace_back(item.deviceId,
+                         item.localTime,
+                         item.bandwidth, // MB/s -> B/s
+                         item.rxPacketRate, item.rxByteRate, item.rxPackets,
+                         item.rxBytes, item.rxErrors, item.rxDropped,
+                         item.txPacketRate, item.txByteRate, item.txPackets, item.txBytes,
+                         item.txErrors, item.txDropped, item.funcId);
+    }
+    SaveData(res, tableName, msprofDB);
+}
+
+bool SaveNicData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    return SaveSysIOData<NicOriginalData>(dataInventory, msprofDB, TABLE_NAME_NIC);
+}
+
+bool SaveRoCEData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    return SaveSysIOData<RoceOriginalData>(dataInventory, msprofDB, TABLE_NAME_ROCE);
+}
+
 // 创建 SaveData 的函数类型
 using SaveDataFunc = std::function<bool(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)>;
 const std::unordered_map<std::string, SaveDataFunc> DATA_SAVER = {
@@ -523,6 +564,8 @@ const std::unordered_map<std::string, SaveDataFunc> DATA_SAVER = {
     {Viewer::Database::PROCESSOR_NAME_PCIE,              SavePCIeData},
     {Viewer::Database::PROCESSOR_NAME_SESSION_TIME_INFO, SaveSessionTimeInfoData},
     {Viewer::Database::PROCESSOR_NAME_SOC,               SaveSocData},
+    {Viewer::Database::PROCESSOR_NAME_NIC,               SaveNicData},
+    {Viewer::Database::PROCESSOR_NAME_ROCE,              SaveRoCEData},
 };
 }
 
