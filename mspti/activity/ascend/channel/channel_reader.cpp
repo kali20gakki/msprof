@@ -81,12 +81,12 @@ msptiResult ChannelReader::Execute()
             }
             break;
         }
-        if (currLen >= (MAX_BUFFER_SIZE - cur_pos)) {
-            MSPTI_LOGE("Read invalid data len [%d] from driver", currLen);
+        auto uint_currLen = static_cast<size_t>(currLen);
+        if (uint_currLen >= (MAX_BUFFER_SIZE - cur_pos)) {
+            MSPTI_LOGE("Read invalid data len [%zu] from driver", uint_currLen);
             break;
         }
-        size_t last_pos = TransDataToActivityBuffer(buf, cur_pos + currLen, deviceId_, channelId_);
-        size_t uint_currLen = static_cast<size_t>(currLen);
+        size_t last_pos = TransDataToActivityBuffer(buf, cur_pos + uint_currLen, deviceId_, channelId_);
         if (last_pos < cur_pos + uint_currLen) {
             if (memcpy_s(buf, MAX_BUFFER_SIZE, buf + last_pos, cur_pos + uint_currLen - last_pos) != EOK) {
                 break;
