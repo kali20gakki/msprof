@@ -157,7 +157,7 @@ msptiResult ParserManager::ReportRtTaskTrack(const MsprofRuntimeTrack& track)
         }
         kernel->kind = MSPTI_ACTIVITY_KIND_KERNEL;
         kernel->correlationId = Mspti::Common::ContextManager::GetInstance()->CorrelationId();
-        kernel->name = "";
+        kernel->name = GetHashInfo(track.kernelName).c_str();
         kernel->type = typeIter->second.c_str();
         {
             std::lock_guard<std::mutex> lk(flip_map_mtx_);

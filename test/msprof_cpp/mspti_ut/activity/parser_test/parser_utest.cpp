@@ -114,4 +114,24 @@ TEST_F(ParserUtest, ShouldRetErrorWhenTryCacheMarkmsgFailed)
     uint64_t markId;
     EXPECT_EQ(MSPTI_ERROR_INNER, instance->ReportRangeStartA(message, nullptr, markId));
 }
+
+TEST_F(ParserUtest, ShouldRecordKernelNameWhenReportRtTaskTrack)
+{
+    auto instance = Mspti::Parser::ParserManager::GetInstance();
+    constexpr uint16_t flipId = 0;
+    constexpr uint16_t taskId = 1;
+    constexpr uint32_t deviceId = 0;
+    constexpr uint32_t streamId = 3;
+    constexpr uint32_t BIT_NUM = 16;
+    const std::string kernelName = "test_kernalName";
+    auto kernelNameHash = instance->GenHashId(kernelName);
+    MsprofRuntimeTrack data;
+    (void)memset_s(&data, sizeof(data), 0, sizeof(data));
+    data.deviceId = deviceId;
+    data.streamId = streamId;
+    data.taskInfo = static_cast<uint32_t>(flipId) << BIT_NUM | static_cast<uint32_t>(taskId);
+    data.taskType = TS_TASK_TYPE_KERNEL_AIVEC;
+    data.kernelName = kernelNameHash;
+    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRtTaskTrack(data));
+}
 }

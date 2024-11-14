@@ -76,6 +76,7 @@ struct MsprofRuntimeTrack {
     uint16_t streamId;
     uint32_t taskInfo;
     uint64_t taskType;
+    uint64_t kernelName;
 };
 
 struct MsprofNodeBasicInfo {
