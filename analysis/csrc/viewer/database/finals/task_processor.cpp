@@ -179,7 +179,7 @@ bool TaskProcessor::Process(const std::string &fileDir)
         flag = false;
     }
     for (const auto& devicePath: deviceList) {
-        std::string dbPath = Utils::GetDBPath({devicePath, SQLITE, ascendTaskDB.dbName});
+        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, ascendTaskDB.dbName});
         // 并不是所有场景都有ascend task数据
         auto status = CheckPath(dbPath);
         if (status != CHECK_SUCCESS) {
@@ -231,7 +231,7 @@ bool TaskProcessor::ProcessWithMsprofTxTaskData(const std::string &fileDir)
         return false;
     }
     for (auto& devicePath: deviceList) {
-        std::string dbPath = Utils::GetDBPath({devicePath, SQLITE, stepTraceDB.dbName});
+        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, stepTraceDB.dbName});
         // 并不是所有场景都有msproftx 打点 task数据
         auto status = CheckPath(dbPath);
         if (status != CHECK_SUCCESS) {

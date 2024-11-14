@@ -182,7 +182,7 @@ uint32_t ProcessAllReduceEntry(DataInventory &dataInventory, const DeviceContext
         WARN("StepTraceTasks is empty.");
         return ANALYSIS_OK;
     }
-    std::string dbPath = Utils::GetDBPath({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
+    std::string dbPath = Utils::File::PathJoin({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
     DeviceInfo deviceInfo{};
     context.Getter(deviceInfo);
     auto data = GenerateAllReduce(*stepTraceTask, deviceInfo.deviceId);
@@ -206,7 +206,7 @@ uint32_t ProcessGetNextEntry(DataInventory &dataInventory, const DeviceContext &
         WARN("StepTraceTasks is empty.");
         return ANALYSIS_OK;
     }
-    std::string dbPath = Utils::GetDBPath({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
+    std::string dbPath = Utils::File::PathJoin({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
     auto data = GenerateGetNext(*stepTraceTask);
     if (data.empty()) {
         WARN("GetNext data is empty.");
@@ -229,7 +229,7 @@ uint32_t ProcessTrainingTraceEntry(DataInventory &dataInventory, const DeviceCon
         WARN("HalTrackDatas is empty.");
         return ANALYSIS_OK;
     }
-    std::string dbPath = Utils::GetDBPath({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
+    std::string dbPath = Utils::File::PathJoin({context.GetDeviceFilePath(), SQLITE, stepTraceDB.dbName});
     DeviceInfo deviceInfo{};
     context.Getter(deviceInfo);
     TrainingTraceFormat processedData;
@@ -256,7 +256,7 @@ uint32_t TracePersistence::ProcessEntry(DataInventory &dataInventory, const Cont
     const auto &deviceContext = dynamic_cast<const DeviceContext &>(context);
     DBInfo stepTraceInfo("trace.db", "all_reduce");
     MAKE_SHARED0_NO_OPERATION(stepTraceInfo.database, TraceDB);
-    std::string dbPath = Utils::GetDBPath({deviceContext.GetDeviceFilePath(), SQLITE, stepTraceInfo.dbName});
+    std::string dbPath = Utils::File::PathJoin({deviceContext.GetDeviceFilePath(), SQLITE, stepTraceInfo.dbName});
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(stepTraceInfo.dbRunner, DBRunner, ANALYSIS_ERROR, dbPath);
     bool res = ANALYSIS_OK;

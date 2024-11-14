@@ -36,7 +36,8 @@ int Log::Init(const std::string &logDir)
         PRINT_ERROR("Create log dir failed.");
         return ANALYSIS_ERROR;
     }
-    std::string logFile = File::PathJoin({logDir, Format("msprof_analysis_%.log", pid_)});
+    std::string logName = Format("msprof_analysis_%.log", pid_);
+    std::string logFile = File::PathJoin({logDir, logName});
     logWriter_.Open(logFile, std::ios::out | std::ios::app);
     if (!logWriter_.IsOpen()) {
         PRINT_ERROR("Log file open failed.");

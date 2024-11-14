@@ -43,7 +43,7 @@ uint32_t FreqPersistence::ProcessEntry(DataInventory& dataInventory, const Conte
     }
     DBInfo freqDB("freq.db", "FreqParse");
     MAKE_SHARED0_RETURN_VALUE(freqDB.database, FreqDB, ANALYSIS_ERROR);
-    std::string dbPath = Utils::GetDBPath({deviceContext.GetDeviceFilePath(), SQLITE, freqDB.dbName});
+    std::string dbPath = Utils::File::PathJoin({deviceContext.GetDeviceFilePath(), SQLITE, freqDB.dbName});
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(freqDB.dbRunner, DBRunner, ANALYSIS_ERROR, dbPath);
     auto data = GenerateFreqData(*freqData);

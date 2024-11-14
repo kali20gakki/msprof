@@ -29,7 +29,7 @@ bool MsprofTxDeviceProcessor::ProcessOneDevice(const ProfTimeRecord &record, std
                                                const std::string &devPath)
 {
     DBInfo stepTraceDB("step_trace.db", "StepTrace");
-    std::string dbPath = Utils::GetDBPath({devPath, SQLITE, stepTraceDB.dbName});
+    std::string dbPath = Utils::File::PathJoin({devPath, SQLITE, stepTraceDB.dbName});
     if (!stepTraceDB.ConstructDBRunner(dbPath)) {
         return false;
     }
