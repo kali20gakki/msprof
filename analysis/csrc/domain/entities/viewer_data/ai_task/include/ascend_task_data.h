@@ -37,7 +37,7 @@ struct AscendTaskData {
 struct MsprofTxDeviceData {
     uint16_t deviceId = UINT16_MAX;
     uint32_t modelId = UINT32_MAX;
-    int32_t indexId = INT32_MAX;
+    uint32_t indexId = UINT32_MAX;
     uint32_t streamId = UINT32_MAX;
     uint32_t taskId = UINT32_MAX;
     uint32_t contextId = UINT32_MAX;
