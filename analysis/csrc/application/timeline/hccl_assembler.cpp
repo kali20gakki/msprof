@@ -64,6 +64,7 @@ void HcclTaskTraceEvent::ProcessArgs(JsonWriter& ostream)
 void HcclAssembler::GenerateHcclTaskTrace(const std::vector<CommunicationTaskData>& task, const std::string &profPath,
                                           std::unordered_map<uint16_t, uint32_t>& pidMap, const LayerInfo &layerInfo)
 {
+    INFO("Start GenerateHcclTaskTrace");
     uint32_t formatPid;
     int tid;
     std::string transport;
@@ -77,9 +78,9 @@ void HcclAssembler::GenerateHcclTaskTrace(const std::vector<CommunicationTaskDat
         formatPid = GetDevicePid(pidMap, data.deviceId, profPath, layerInfo.sortIndex);
         auto it = groupIndex_.find(data.groupName);
         if (it == groupIndex_.end()) {
-            auto tmpId = groupIndex_.size() * this->maxPlainId_;
-            groupIndex_[data.groupName] = static_cast<int>(tmpId);
-            tid = static_cast<int>(tmpId + data.planeId + 1);
+            auto tmpId = static_cast<int>(groupIndex_.size()) * this->maxPlainId_;
+            groupIndex_[data.groupName] = tmpId;
+            tid = tmpId + static_cast<int>(data.planeId) + 1;
         } else {
             tid = it->second + static_cast<int>(data.planeId) + 1;
         }
@@ -100,6 +101,7 @@ void HcclAssembler::GenerateHcclTaskTrace(const std::vector<CommunicationTaskDat
 void HcclAssembler::GenerateHcclOpTrace(const std::vector<CommunicationOpData>& opData, const std::string& profPath,
                                         std::unordered_map<uint16_t, uint32_t>& pidMap, const LayerInfo &layerInfo)
 {
+    INFO("Start GenerateHcclOpTrace");
     uint32_t formatPid;
     int tid;
     std::string dataType;
@@ -107,7 +109,7 @@ void HcclAssembler::GenerateHcclOpTrace(const std::vector<CommunicationOpData>& 
         formatPid = GetDevicePid(pidMap, data.deviceId, profPath, layerInfo.sortIndex);
         auto it = groupIndex_.find(data.groupName);
         if (it == groupIndex_.end()) {
-            tid = static_cast<int>(groupIndex_.size() * this->maxPlainId_);
+            tid = static_cast<int>(groupIndex_.size()) * this->maxPlainId_;
             groupIndex_[data.groupName] = tid;
         } else {
             tid = it->second;

@@ -109,7 +109,7 @@ std::vector<MsprofTxDeviceData> MsprofTxDeviceProcessor::FormatData(
         return processedData;
     }
     MsprofTxDeviceData data;
-    double start;
+    uint64_t start;
     data.deviceId = deviceId;
     std::sort(oriData.begin(), oriData.end(), [](TxDeviceData &lData, TxDeviceData rData) {
         return std::get<4>(lData) < std::get<4>(rData); // 第4位为timestamp
