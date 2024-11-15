@@ -127,6 +127,20 @@ def check_path_char_valid(path: str) -> None:
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
 
 
+def get_all_subdir(path, max_depth=4, current_depth=0):
+    paths = []
+    if current_depth > max_depth:
+        return paths
+    with os.scandir(path) as entries:
+        for entry in entries:
+            if entry.is_dir():
+                full_path = entry.path
+                paths.append(full_path)
+                # 递归调用以获取子目录和文件路径
+                paths.extend(get_all_subdir(full_path, max_depth, current_depth + 1))
+    return paths
+
+
 def prepare_for_parse(output_path: str) -> None:
     """
     create data and corresponding directories
