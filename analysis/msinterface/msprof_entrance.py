@@ -6,9 +6,10 @@ import argparse
 import os
 import sys
 
-from common_func.common import call_sys_exit
+from common_func.common import call_sys_exit, print_info
 from common_func.common import error
-from common_func.msprof_common import check_path_valid
+from common_func.file_manager import check_parent_dir_invalid
+from common_func.msprof_common import check_path_valid, get_all_subdir, MsProfCommonConstant
 from common_func.msprof_common import check_path_char_valid
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
@@ -97,8 +98,11 @@ class MsprofEntrance:
             if err.message:
                 error(self.FILE_NAME, err)
             call_sys_exit(err.code)
-
-        path_len = len(os.path.realpath(args.collection_path))
+        real_path = os.path.realpath(args.collection_path)
+        if check_parent_dir_invalid(get_all_subdir(real_path)):
+            error(self.FILE_NAME, "Please ensure subdir under '%s' can't be write by others" % real_path)
+            call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
+        path_len = len(real_path)
         if path_len > NumberConstant.PROF_PATH_MAX_LEN:
             error(self.FILE_NAME,
                   "Please ensure the length of input dir absolute path(%s) less than %s" %

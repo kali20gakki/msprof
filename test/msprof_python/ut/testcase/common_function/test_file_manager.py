@@ -242,14 +242,15 @@ class TestFileManager(unittest.TestCase):
              mock.patch('os.stat', return_value=StatInfo(0o022)):
             self.assertFalse(check_so_valid(path))
 
-    def test_check_so_valid_should_return_false_when_file_owner_is_not_root_or_current_user(self):
+    def test_check_so_valid_should_return_true_when_not_linux(self):
         path = "/path/host/msprof_analysis.so"
         StatInfo = namedtuple("StatInfo", ["st_mode", "st_uid", "st_gid"])
         with mock.patch('os.path.isfile', return_value=True), \
              mock.patch('os.path.islink', return_value=False), \
              mock.patch('os.access', return_value=True), \
-             mock.patch('os.stat', return_value=StatInfo(0o001, 3, 4)):
-            self.assertFalse(check_so_valid(path))
+             mock.patch('os.stat', return_value=StatInfo(0o001, 3, 4)), \
+             mock.patch(NAMESPACE + '.is_linux', return_value=False):
+            self.assertTrue(check_so_valid(path))
 
     def test_is_link_should_return_false_when_path_is_empty_str(self):
         path = ""

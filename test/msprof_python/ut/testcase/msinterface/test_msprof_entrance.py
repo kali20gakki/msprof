@@ -4,6 +4,7 @@
 function:
 Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
+import os
 import unittest
 from argparse import Namespace, ArgumentTypeError
 from unittest import mock
@@ -18,9 +19,21 @@ NAMESPACE = 'msinterface.msprof_entrance'
 
 class TestMsprofEntrance(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        if os.path.exists("test_entrance_dir"):
+            import shutil
+            shutil.rmtree("test_entrance_dir")
+        os.makedirs("test_entrance_dir/subdir", exist_ok=True)
+
+    @classmethod
+    def tearDownClass(cls):
+        import shutil
+        shutil.rmtree("test_entrance_dir")
+
     def test_main(self):
-        args = ["msprof_entrance.py", "query", "-dir", "test"]
-        collection_path = {"collection_path": "test"}
+        args = ["msprof_entrance.py", "query", "-dir", "test_entrance_dir"]
+        collection_path = {"collection_path": "test_entrance_dir"}
         args_co = Namespace(**collection_path)
         with mock.patch('sys.argv', args), \
                 mock.patch('argparse.ArgumentParser.parse_args', return_value=args_co), \
@@ -30,7 +43,7 @@ class TestMsprofEntrance(unittest.TestCase):
             MsprofEntrance().main()
 
     def test_main_should_set_all_export_false_when_set_model_id_and_iteration_id(self):
-        args = ["msprof.py", "export", "summary", "-dir", "test", "--model-id", "1", "--iteration-id", "2"]
+        args = ["msprof.py", "export", "summary", "-dir", "test_entrance_dir", "--model-id", "1", "--iteration-id", "2"]
         with mock.patch('sys.argv', args), \
                 mock.patch(NAMESPACE + '.check_path_valid'), \
                 mock.patch(NAMESPACE + '.ExportCommand.process'), \
@@ -39,7 +52,7 @@ class TestMsprofEntrance(unittest.TestCase):
             self.assertFalse(ProfilingScene().is_all_export())
 
     def test_main_should_print_error_when_set_model_id_but_no_iteration_id(self):
-        args = ["msprof.py", "export", "summary", "-dir", "test", "--model-id", "1"]
+        args = ["msprof.py", "export", "summary", "-dir", "test_entrance_dir", "--model-id", "1"]
         with mock.patch('sys.argv', args), \
                 mock.patch('common_func.common.error'), \
                 mock.patch(NAMESPACE + '.check_path_valid'), \
@@ -73,13 +86,16 @@ class TestMsprofEntrance(unittest.TestCase):
                 mock.patch('common_func.common.error'), \
                 mock.patch(NAMESPACE + '.check_path_valid'), \
                 mock.patch(NAMESPACE + '.check_path_char_valid'), \
-                mock.patch(NAMESPACE + '.ExportCommand.process'):
+                mock.patch(NAMESPACE + '.ExportCommand.process'), \
+                mock.patch(NAMESPACE + '.get_all_subdir'), \
+                mock.patch(NAMESPACE + '.check_parent_dir_invalid', return_value=False):
             with self.assertRaises(SystemExit):
                 MsprofEntrance().main()
 
     def test_main_should_success_when_analyze_args_is_valid(self):
         # 只能满足覆盖率要求，无法校验功能
-        args = ["msprof.py", "analyze", "--rule", "communication", "--clear", "--type", "text", "-dir", "test"]
+        args = ["msprof.py", "analyze", "--rule", "communication", "--clear", "--type", "text", "-dir",
+                "test_entrance_dir"]
         with mock.patch('sys.argv', args), \
                 mock.patch(NAMESPACE + '.check_path_valid'), \
                 mock.patch(NAMESPACE + '.ExportCommand.process'):
@@ -88,7 +104,7 @@ class TestMsprofEntrance(unittest.TestCase):
 
         args = [
             "msprof.py", "analyze", "--rule", "communication,communication_matrix",
-            "--clear", "--type", "db", "-dir", "test"
+            "--clear", "--type", "db", "-dir", "test_entrance_dir"
         ]
         with mock.patch('sys.argv', args), \
                 mock.patch(NAMESPACE + '.check_path_valid'), \
@@ -97,7 +113,8 @@ class TestMsprofEntrance(unittest.TestCase):
                 MsprofEntrance().main()
 
     def test_set_export_mode(self):
-        args_dic = {"collection_path": "test", "iteration_id": 1, "model_id": 4294967295, "iteration_count": None}
+        args_dic = {"collection_path": "test_entrance_dir", "iteration_id": 1, "model_id": 4294967295,
+                    "iteration_count": None}
         InfoConfReader()._info_json = {"drvVersion": 0}
         ProfilingScene().set_mode(ExportMode.STEP_EXPORT)
         args = Namespace(**args_dic)

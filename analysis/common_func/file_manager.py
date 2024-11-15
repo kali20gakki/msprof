@@ -5,10 +5,12 @@ import json
 import logging
 import os
 import re
+import stat
 
 from common_func.common import CommonConstant, print_info
 from common_func.common import error
 from common_func.common import is_linux
+from common_func.common import print_msg
 from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
 from common_func.file_name_manager import FileNameManagerConstant
@@ -291,13 +293,20 @@ def check_file_owner(path: str) -> bool:
     Check the file owner is the root user or the current user.
     """
     if not is_linux():
-        return False
+        return True
     stat_info = os.stat(path)
     if stat_info.st_uid == 0:  # so的所有者为root用户
         return True
     else:
         current_uid = os.geteuid()
         return current_uid == stat_info.st_uid
+
+
+def check_parent_dir_invalid(paths: list) -> bool:
+    for path in paths:
+        if not check_file_owner(path) or is_other_writable(path):
+            return True
+    return False
 
 
 def check_so_valid(path: str) -> bool:
