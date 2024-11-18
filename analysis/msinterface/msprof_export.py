@@ -236,6 +236,7 @@ class ExportCommand:
         self.iteration_range = None
         self._cluster_params = {'is_cluster_scene': False, 'cluster_path': []}
         self.clear_mode = getattr(args, "clear_mode", False)
+        self.is_data_analyzed = False
 
     @staticmethod
     def get_model_id_set(result_dir: str, db_name: str, table_name: str) -> any:
@@ -419,8 +420,11 @@ class ExportCommand:
         if not is_data_analyzed:
             analyze_collect_data(result_dir, self.sample_config)
         else:
-            print_info(self.FILE_NAME, 'The data in "%s" has been analyzed.'
-                       % result_dir)
+            print_info(self.FILE_NAME, 'The data in "%s" has been analyzed. '
+                                       'Parsing phase will be skipped.' % result_dir)
+            logging.warning("File all_file.complete already exists. All data will be exported from db in sqlite. "
+                            "Path is %s ", result_dir)
+            self.is_data_analyzed = True
 
     def _check_model_id(self: any, result_dir: str) -> None:
         """
@@ -664,21 +668,16 @@ class ExportCommand:
     def _start_parse(self, path_table: dict):
         # host
         host_path = path_table.get(StrConstant.HOST_PATH)
-        is_data_analyzed = False
         if host_path:
-            if FileManager.is_analyzed_data(host_path):
-                is_data_analyzed = True
             self._parse_data(host_path)
             # host parse 后初始化logicStream模块
             GeLogicStreamSingleton().load_info(host_path)
         # device
         for device_path in path_table.get(StrConstant.DEVICE_PATH):
-            if FileManager.is_analyzed_data(device_path):
-                is_data_analyzed = True
             self._parse_data(device_path)
         # device 执行完后执行device c化
         # path_table使用前明确校验host或device中必不为空,不存在越界情况
-        if not is_data_analyzed:
+        if not self.is_data_analyzed:
             dump_device_data(host_path if host_path else path_table.get(StrConstant.DEVICE_PATH)[0])
 
     def _parse_data(self, device_path: str):
