@@ -84,6 +84,8 @@ class FileManager:
             all_file_name = os.path.join(data_dir, FileNameManagerConstant.ALL_FILE_TAG)
             if os.path.exists(all_file_name):
                 is_analyse = True
+                logging.warning("Data has been analyzed, path is %s, "
+                                "there are %s in sqlite.", project_path, sqlite_list)
         return is_analyse
 
     @classmethod
