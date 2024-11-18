@@ -135,8 +135,21 @@ TEST_F(MmpaUtest, MmIsSoftLink)
     // lstat 失败
     MOCKER_CPP(&lstat).stubs().will(returnValue(1)).then(returnValue(0));
     EXPECT_FALSE(MmIsSoftLink("mmpaTest"));
-    // 执行 S_ISLNK
-    EXPECT_FALSE(MmIsSoftLink("mmpaTest"));
+
     MOCKER_CPP(&lstat).reset();
     MOCKER_CPP(&memset_s).reset();
+
+    // 新建目录 校验结果预期非软链
+    const std::string trueDirName = "./MmIsSoftLink";
+    EXPECT_EQ(Utils::CreateDir(trueDirName), PROFILING_SUCCESS);
+    EXPECT_FALSE(MmIsSoftLink(trueDirName));
+    uint32_t depth = 0;
+    EXPECT_EQ(PROFILING_SUCCESS, MmRmdir(trueDirName, depth));
+
+    // 创建假的软链并校验
+    const std::string softLinkDirName = "./MmIsSoftLink_soft_link";
+    EXPECT_EQ(0, symlink(trueDirName.c_str(), softLinkDirName.c_str()));  // 创建软连接
+    EXPECT_TRUE(MmIsSoftLink(softLinkDirName));
+    // 利用unlink删除软链
+    EXPECT_EQ(0, unlink(softLinkDirName.c_str()));
 }
