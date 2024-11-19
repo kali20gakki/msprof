@@ -377,18 +377,21 @@ void ArgsManager::AddDynProfArgs()
 {
     if (driverOnline_ &&
         (platform_ != PlatformType::CLOUD_TYPE && platform_ != PlatformType::CHIP_V4_1_0 &&
-            platform_ != PlatformType::CHIP_V4_2_0)) {
+            platform_ != PlatformType::CHIP_V4_2_0 && platform_ != PlatformType::DC_TYPE)) {
         return;
     }
-    Args dynamic = {"dynamic",
-        "Dynamic profiling switch, the default value is off.(Ascend910, Ascend910B, Ascend910_93, Ascend310B)", OFF};
-    Args pid = {"pid", "Dynamic profiling pid of the target process.(Ascend910, Ascend910B, Ascend910_93, Ascend310B)",
-        "0"};
+    Args dynamic = {"dynamic", "Dynamic profiling switch, the default value is off."
+                    "(Ascend910, Ascend910B, Ascend910_93, Ascend310B, Ascend310P)",
+                    OFF};
+    Args pid = {"pid", "Dynamic profiling pid of the target process."
+                "(Ascend910, Ascend910B, Ascend910_93, Ascend310B, Ascend310P)",
+                "0"};
     Args delay = {"delay",
-        "Collect start delay time in seconds, range 1 ~ 4294967295s.(Ascend910, Ascend910B, Ascend910_93, "
-        "Ascend310B)"};
+        "Collect start delay time in seconds, range 1 ~ 4294967295s."
+            "(Ascend910, Ascend910B, Ascend910_93, Ascend310B, Ascend310P)"};
     Args duration = {"duration",
-        "Collection duration in seconds, range 1 ~ 4294967295s.(Ascend910, Ascend910B, Ascend910_93, Ascend310B)"};
+        "Collection duration in seconds, range 1 ~ 4294967295s."
+            "(Ascend910, Ascend910B, Ascend910_93, Ascend310B, Ascend310P)"};
     argsList_.push_back(dynamic);
     argsList_.push_back(pid);
     argsList_.push_back(delay);
