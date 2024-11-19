@@ -28,12 +28,14 @@ DevProfTaskFactory::kindToChannel_map_ = {
         Mspti::Common::PlatformType::CHIP_910B, {
             {MSPTI_ACTIVITY_KIND_MARKER, {PROF_CHANNEL_TS_FW}},
             {MSPTI_ACTIVITY_KIND_KERNEL, {PROF_CHANNEL_TS_FW, PROF_CHANNEL_STARS_SOC_LOG}},
+            {MSPTI_ACTIVITY_KIND_HCCL, {PROF_CHANNEL_TS_FW}},
         }
     },
     {
         Mspti::Common::PlatformType::CHIP_310B, {
             {MSPTI_ACTIVITY_KIND_MARKER, {PROF_CHANNEL_TS_FW}},
             {MSPTI_ACTIVITY_KIND_KERNEL, {PROF_CHANNEL_TS_FW, PROF_CHANNEL_STARS_SOC_LOG}},
+            {MSPTI_ACTIVITY_KIND_HCCL, {PROF_CHANNEL_TS_FW}},
         }
     }
 };

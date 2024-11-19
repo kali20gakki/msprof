@@ -9,28 +9,35 @@
  * Creation Date      : 2024/08/17
  * *****************************************************************************
 */
+#include "hccl_inject.h"
+
 #include <functional>
+#include <utility>
+#include <string>
 
 #include "callback/callback_manager.h"
 #include "common/function_loader.h"
-#include "hccl_inject.h"
+#include "hccl_range_mark.h"
+#include "common/context_manager.h"
 
 class HcclInject {
 public:
     HcclInject() noexcept
     {
-        Mspti::Common::RegisterFunction("libhccl", "HcclAllReduce"),
-        Mspti::Common::RegisterFunction("libhccl", "HcclBroadcast"),
-        Mspti::Common::RegisterFunction("libhccl", "HcclAllGather"),
-        Mspti::Common::RegisterFunction("libhccl", "HcclReduceScatter"),
-        Mspti::Common::RegisterFunction("libhccl", "HcclReduce"),
-        Mspti::Common::RegisterFunction("libhccl", "HcclAlltoAll"),
-        Mspti::Common::RegisterFunction("libhccl", "HcclAlltoAllV"),
-        Mspti::Common::RegisterFunction("libhccl", "HcclBarrier"),
-        Mspti::Common::RegisterFunction("libhccl", "HcclScatter"),
-        Mspti::Common::RegisterFunction("libhccl", "HcclSend"),
-        Mspti::Common::RegisterFunction("libhccl", "HcclRecv"),
+        Mspti::Common::RegisterFunction("libhccl", "HcclAllReduce");
+        Mspti::Common::RegisterFunction("libhccl", "HcclBroadcast");
+        Mspti::Common::RegisterFunction("libhccl", "HcclAllGather");
+        Mspti::Common::RegisterFunction("libhccl", "HcclReduceScatter");
+        Mspti::Common::RegisterFunction("libhccl", "HcclReduce");
+        Mspti::Common::RegisterFunction("libhccl", "HcclAlltoAll");
+        Mspti::Common::RegisterFunction("libhccl", "HcclAlltoAllV");
+        Mspti::Common::RegisterFunction("libhccl", "HcclBarrier");
+        Mspti::Common::RegisterFunction("libhccl", "HcclScatter");
+        Mspti::Common::RegisterFunction("libhccl", "HcclSend");
+        Mspti::Common::RegisterFunction("libhccl", "HcclRecv");
         Mspti::Common::RegisterFunction("libhccl", "HcclBatchSendRecv");
+        Mspti::Common::RegisterFunction("libhccl", "HcclGetCommName");
+        Mspti::Common::RegisterFunction("libhccl", "HcclGetRankSize");
     };
     ~HcclInject() = default;
 };
@@ -48,6 +55,14 @@ HcclResult HcclAllReduce(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t count, Hcc
         aclrtStream>("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
+
+    std::shared_ptr<P2pOpDesc> hcclOpDesc;
+    Mspti::Common::MsptiMakeSharedPtr(hcclOpDesc);
+    hcclOpDesc->dataType = dataType;
+    hcclOpDesc->count = count;
+    hcclOpDesc->opName = __FUNCTION__;
+    auto marker = Mspti::Parser::HcclMarkFactory::createMarker(stream, comm, hcclOpDesc);
+
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_HCCL, MSPTI_CBID_HCCL_ALLREDUCE, __FUNCTION__);
     return func(sendBuf, recvBuf, count, dataType, op, comm, stream);
 }
@@ -63,6 +78,14 @@ HcclResult HcclBroadcast(VOID_PTR buf, uint64_t count, HcclDataType dataType, ui
             aclrtStream>("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
+
+    std::shared_ptr<P2pOpDesc> hcclOpDesc;
+    Mspti::Common::MsptiMakeSharedPtr(hcclOpDesc);
+    hcclOpDesc->dataType = dataType;
+    hcclOpDesc->count = count;
+    hcclOpDesc->opName = __FUNCTION__;
+    auto marker = Mspti::Parser::HcclMarkFactory::createMarker(stream, comm, hcclOpDesc);
+
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_HCCL, MSPTI_CBID_HCCL_BROADCAST, __FUNCTION__);
     return func(buf, count, dataType, root, comm, stream);
 }
@@ -78,6 +101,15 @@ HcclResult HcclAllGather(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t sendCount,
             aclrtStream>("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
+
+    std::shared_ptr<CollectiveOpDesc> hcclOpDesc;
+    Mspti::Common::MsptiMakeSharedPtr(hcclOpDesc);
+    hcclOpDesc->dataType = dataType;
+    hcclOpDesc->count = sendCount;
+    HcclGetRankSize(comm, static_cast<uint32_t *>(&hcclOpDesc->rankSize));
+    hcclOpDesc->opName = __FUNCTION__;
+    auto marker = Mspti::Parser::HcclMarkFactory::createMarker(stream, comm, hcclOpDesc);
+
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_HCCL, MSPTI_CBID_HCCL_ALLGATHER, __FUNCTION__);
     return func(sendBuf, recvBuf, sendCount, dataType, comm, stream);
 }
@@ -93,6 +125,15 @@ HcclResult HcclReduceScatter(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t recvCo
             aclrtStream>("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
+
+    std::shared_ptr<CollectiveOpDesc> hcclOpDesc;
+    Mspti::Common::MsptiMakeSharedPtr(hcclOpDesc);
+    hcclOpDesc->dataType = dataType;
+    hcclOpDesc->count = recvCount;
+    HcclGetRankSize(comm, static_cast<uint32_t *>(&hcclOpDesc->rankSize));
+    hcclOpDesc->opName = __FUNCTION__;
+    auto marker = Mspti::Parser::HcclMarkFactory::createMarker(stream, comm, hcclOpDesc);
+
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_HCCL, MSPTI_CBID_HCCL_REDUCE_SCATTER, __FUNCTION__);
     return func(sendBuf, recvBuf, recvCount, dataType, op, comm, stream);
 }
@@ -108,6 +149,14 @@ HcclResult HcclReduce(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t count, HcclDa
             HcclComm, aclrtStream>("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
+
+    std::shared_ptr<P2pOpDesc> hcclOpDesc;
+    Mspti::Common::MsptiMakeSharedPtr(hcclOpDesc);
+    hcclOpDesc->dataType = dataType;
+    hcclOpDesc->count = count;
+    hcclOpDesc->opName = __FUNCTION__;
+    auto marker = Mspti::Parser::HcclMarkFactory::createMarker(stream, comm, hcclOpDesc);
+
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_HCCL, MSPTI_CBID_HCCL_REDUCE, __FUNCTION__);
     return func(sendBuf, recvBuf, count, dataType, op, root, comm, stream);
 }
@@ -123,6 +172,15 @@ HcclResult HcclAlltoAll(const VOID_PTR sendBuf, uint64_t sendCount, HcclDataType
             HcclDataType, HcclComm, aclrtStream>("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
+
+    std::shared_ptr<CollectiveOpDesc> hcclOpDesc;
+    Mspti::Common::MsptiMakeSharedPtr(hcclOpDesc);
+    hcclOpDesc->dataType = sendType;
+    hcclOpDesc->count = sendCount;
+    HcclGetRankSize(comm, static_cast<uint32_t *>(&hcclOpDesc->rankSize));
+    hcclOpDesc->opName = __FUNCTION__;
+    auto marker = Mspti::Parser::HcclMarkFactory::createMarker(stream, comm, hcclOpDesc);
+
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_HCCL, MSPTI_CBID_HCCL_ALL_TO_ALL, __FUNCTION__);
     return func(sendBuf, sendCount, sendType, recvBuf, recvCount, recvType, comm, stream);
 }
@@ -140,6 +198,17 @@ HcclResult HcclAlltoAllV(const VOID_PTR sendBuf, const VOID_PTR sendCounts, cons
             aclrtStream>("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
+
+    std::shared_ptr<All2AllVOpDesc> hcclOpDesc;
+    Mspti::Common::MsptiMakeSharedPtr(hcclOpDesc);
+    hcclOpDesc->sendType = sendType;
+    hcclOpDesc->sendCounts = sendCounts;
+    hcclOpDesc->recvType = recvType;
+    hcclOpDesc->recvCounts = recvCounts;
+    HcclGetRankSize(comm, static_cast<uint32_t *>(&hcclOpDesc->rankSize));
+    hcclOpDesc->opName = __FUNCTION__;
+    auto marker = Mspti::Parser::HcclMarkFactory::createMarker(stream, comm, hcclOpDesc);
+
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_HCCL, MSPTI_CBID_HCCL_ALL_TO_ALLV, __FUNCTION__);
     return func(sendBuf, sendCounts, sdispls, sendType, recvBuf, recvCounts, rdispls, recvType, comm, stream);
 }
@@ -167,6 +236,14 @@ HcclResult HcclScatter(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t recvCount, H
             HcclComm, aclrtStream>("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
+
+    std::shared_ptr<CollectiveOpDesc> hcclOpDesc;
+    Mspti::Common::MsptiMakeSharedPtr(hcclOpDesc);
+    hcclOpDesc->dataType = dataType;
+    hcclOpDesc->count = recvCount;
+    hcclOpDesc->opName = __FUNCTION__;
+    auto marker = Mspti::Parser::HcclMarkFactory::createMarker(stream, comm, hcclOpDesc);
+
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_HCCL, MSPTI_CBID_HCCL_SCATTER, __FUNCTION__);
     return func(sendBuf, recvBuf, recvCount, dataType, root, comm, stream);
 }
@@ -181,6 +258,14 @@ HcclResult HcclSend(VOID_PTR  sendBuf, uint64_t count, HcclDataType dataType, ui
             aclrtStream>("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
+
+    std::shared_ptr<P2pOpDesc> hcclOpDesc;
+    Mspti::Common::MsptiMakeSharedPtr(hcclOpDesc);
+    hcclOpDesc->dataType = dataType;
+    hcclOpDesc->count = count;
+    hcclOpDesc->opName = __FUNCTION__;
+    auto marker = Mspti::Parser::HcclMarkFactory::createMarker(stream, comm, hcclOpDesc);
+
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_HCCL, MSPTI_CBID_HCCL_SEND, __FUNCTION__);
     return func(sendBuf, count, dataType, destRank, comm, stream);
 }
@@ -195,6 +280,14 @@ HcclResult HcclRecv(VOID_PTR  recvBuf, uint64_t count, HcclDataType dataType, ui
             aclrtStream>("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
+
+    std::shared_ptr<P2pOpDesc> hcclOpDesc;
+    Mspti::Common::MsptiMakeSharedPtr(hcclOpDesc);
+    hcclOpDesc->dataType = dataType;
+    hcclOpDesc->count = count;
+    hcclOpDesc->opName = __FUNCTION__;
+    auto marker = Mspti::Parser::HcclMarkFactory::createMarker(stream, comm, hcclOpDesc);
+
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_HCCL, MSPTI_CBID_HCCL_RECV, __FUNCTION__);
     return func(recvBuf, count, dataType, srcRank, comm, stream);
 }
@@ -208,6 +301,38 @@ HcclResult HcclBatchSendRecv(HcclSendRecvItem* sendRecvInfo, uint32_t itemNum, H
             aclrtStream>("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
+
+    std::shared_ptr<BatchSendRecvOp> hcclOpDesc;
+    Mspti::Common::MsptiMakeSharedPtr(hcclOpDesc);
+    for (uint32_t i = 0; i < itemNum; i++) {
+        P2pOpDesc batchSendRecvItemDesc;
+        batchSendRecvItemDesc.dataType = sendRecvInfo[i].dataType;
+        batchSendRecvItemDesc.count = sendRecvInfo[i].count;
+        hcclOpDesc->batchSendRecvItem.emplace_back(batchSendRecvItemDesc);
+    }
+    auto marker = Mspti::Parser::HcclMarkFactory::createMarker(stream, comm, hcclOpDesc);
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_HCCL, MSPTI_CBID_HCCL_SENDRECV, __FUNCTION__);
     return func(sendRecvInfo, itemNum, comm, stream);
+}
+
+HcclResult HcclGetCommName(HcclComm comm, char* commName)
+{
+    using HcclGetCommNameFunc = std::function<HcclResult(HcclComm, char*)>;
+    static HcclGetCommNameFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<HcclResult, HcclComm, char*>("libhccl", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
+    return func(comm, commName);
+}
+
+HcclResult HcclGetRankSize(HcclComm comm, uint32_t *rankSize)
+{
+    using HcclGetRankSizeFunc = std::function<HcclResult(HcclComm comm, uint32_t *rankSize)>;
+    static HcclGetRankSizeFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction<HcclResult, HcclComm, uint32_t *>("libhccl", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
+    return func(comm, rankSize);
 }

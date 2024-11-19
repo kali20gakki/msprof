@@ -19,10 +19,12 @@
 #include <memory>
 #include <set>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "common/inject/profapi_inject.h"
 #include "common/inject/runtime_inject.h"
+#include "common/inject/hccl_inject.h"
 #include "activity/ascend/channel/channel_data.h"
 #include "external/mspti_activity.h"
 
@@ -56,6 +58,11 @@ public:
     msptiResult ReportRangeStartA(const char* msg, RtStreamT stream, uint64_t& markId);
     msptiResult ReportRangeEnd(uint64_t rangeId);
 
+    // Inner Mark
+    bool isInnerMarker(uint64_t markId);
+    msptiResult InnerDeviceStartA(const char* msg, RtStreamT stream, uint64_t& markId);
+    msptiResult InnerDeviceEndA(uint64_t rangeId);
+
 private:
     ParserManager() = default;
     explicit ParserManager(const ParserManager &obj) = delete;
@@ -68,7 +75,7 @@ private:
     // map<<deviceId, streamId, taskId>, msptiActivityKernel*>
     std::map<DstType, std::shared_ptr<msptiActivityKernel>> kernel_map_;
     std::mutex kernel_mtx_;
-    
+
     // map<<deviceId, streamId, flipId>, vector<dstKey>>
     std::map<DsfType, std::vector<DstType>> flip_dst_map_;
     std::mutex flip_map_mtx_;
@@ -84,10 +91,14 @@ private:
     // Marker
     std::atomic<uint64_t> gMarkId_{0};
     static constexpr uint32_t MARK_TAG_ID{11};
-    std::mutex rangeInfoMtx_;;
+    std::mutex rangeInfoMtx_;
     std::unordered_map<uint64_t, RtStreamT> rangeInfo_;
     static std::map<std::uint64_t, std::shared_ptr<std::string>> markMsg_;
     static std::mutex markMsgMtx_;
+
+    // Inner Marker
+    static std::mutex innerMarkerMutex_;
+    static std::unordered_map<uint64_t, RtStreamT> innerMarkIds;
 };
 }  // Parser
 }  // Mspti

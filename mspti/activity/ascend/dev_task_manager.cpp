@@ -25,7 +25,7 @@ namespace Ascend {
 
 std::map<msptiActivityKind, uint64_t> DevTaskManager::datatype_config_map_ = {
     {MSPTI_ACTIVITY_KIND_KERNEL, MSPTI_CONFIG_KERNEL},
-    {MSPTI_ACTIVITY_KIND_API, MSPTI_CONFIG_API},
+    {MSPTI_ACTIVITY_KIND_API, MSPTI_CONFIG_API}
 };
 
 DevTaskManager *DevTaskManager::GetInstance()

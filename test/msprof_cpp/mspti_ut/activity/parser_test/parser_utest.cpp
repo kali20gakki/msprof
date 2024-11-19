@@ -134,4 +134,62 @@ TEST_F(ParserUtest, ShouldRecordKernelNameWhenReportRtTaskTrack)
     data.kernelName = kernelNameHash;
     EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRtTaskTrack(data));
 }
+
+TEST_F(ParserUtest, ShouldRetErrorWhenMarkFail)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<std::string> nullPtr{nullptr};
+    MOCKER_CPP(rtProfilerTraceEx)
+        .stubs()
+        .will(returnValue(static_cast<RtErrorT>(MSPTI_ERROR_INNER)));
+    const char* message = "UserMark";
+    uint64_t markId = 0;
+    RtStreamT stream = (void*)0x1234567;
+    auto instance = Mspti::Parser::ParserManager::GetInstance();
+    EXPECT_EQ(MSPTI_ERROR_INNER, instance->InnerDeviceStartA(message, stream, markId));
+    EXPECT_EQ(MSPTI_SUCCESS, instance->InnerDeviceEndA(markId));
+}
+
+TEST_F(ParserUtest, ShouldRetErrorWhenStreamNull)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<std::string> nullPtr{nullptr};
+    const char* message = "UserMark";
+    uint64_t markId = 0;
+    RtStreamT stream = (void*)0x1234567;
+    auto instance = Mspti::Parser::ParserManager::GetInstance();
+    EXPECT_EQ(MSPTI_SUCCESS, instance->InnerDeviceStartA(message, stream, markId));
+    MOCKER_CPP(rtProfilerTraceEx)
+    .stubs()
+    .will(returnValue(static_cast<RtErrorT>(MSPTI_ERROR_INNER)));
+    EXPECT_EQ(MSPTI_ERROR_INNER, instance->InnerDeviceEndA(markId));
+}
+
+TEST_F(ParserUtest, ShouldRetSuccessWhenInnerMark)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<std::string> nullPtr{nullptr};
+    MOCKER_CPP(rtProfilerTraceEx)
+        .stubs()
+        .will(returnValue(static_cast<RtErrorT>(MSPTI_SUCCESS)));
+    const char* message = "InnerMark";
+    RtStreamT stream = (void*)0x1234567;
+    uint64_t markId = 0;
+    auto instance = Mspti::Parser::ParserManager::GetInstance();
+    EXPECT_EQ(MSPTI_SUCCESS, instance->InnerDeviceStartA(message, stream, markId));
+    EXPECT_EQ(MSPTI_SUCCESS, instance->InnerDeviceEndA(markId));
+    MOCKER_CPP(rtProfilerTraceEx)
+    .stubs()
+    .will(returnValue(static_cast<RtErrorT>(MSPTI_ERROR_INNER)));
+    uint64_t modelId = 0;
+    uint64_t timestamp = 100;
+    uint16_t streamId = 1;
+    StepTrace* stepTrace = new StepTrace();
+    stepTrace->timestamp = timestamp;
+    stepTrace->indexId = markId;
+    stepTrace->modelId = modelId;
+    stepTrace->streamId = streamId;
+    stepTrace->tagId = STEP_TRACE_TAG_MARKEX;
+    instance->ReportStepTrace(0, stepTrace);
+}
 }

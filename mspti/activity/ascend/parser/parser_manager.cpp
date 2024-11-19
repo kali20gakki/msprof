@@ -17,8 +17,7 @@
 #include "common/context_manager.h"
 #include "common/plog_manager.h"
 #include "common/utils.h"
-
-#include <set>
+#include "hccl_reporter.h"
 
 namespace Mspti {
 namespace Parser {
@@ -28,6 +27,10 @@ std::unordered_map<uint16_t, std::unordered_map<uint32_t, std::string>> ParserMa
 std::mutex ParserManager::typeInfoMutex_;
 std::map<uint64_t, std::shared_ptr<std::string>> ParserManager::markMsg_;
 std::mutex ParserManager::markMsgMtx_;
+
+// InnerDeviceMarker
+std::mutex ParserManager::innerMarkerMutex_;
+std::unordered_map<uint64_t, RtStreamT> ParserManager::innerMarkIds;
 
 ParserManager *ParserManager::GetInstance()
 {
@@ -227,6 +230,11 @@ static void ReportMarkDataToActivity(uint32_t deviceId, const StepTrace* stepTra
     mark.objectId.ds.streamId = static_cast<uint32_t>(stepTrace->streamId);
     mark.name = "";
     mark.domain = "";
+    if (ParserManager::GetInstance()->isInnerMarker(mark.id)) {
+        // 上报的hccl的计算里面
+        HcclReporter::GetInstance()->RecordHcclMarker(&mark);
+        return;
+    }
     Mspti::Activity::ActivityManager::GetInstance()->Record(
         reinterpret_cast<msptiActivity*>(&mark), sizeof(msptiActivityMarker));
 }
@@ -382,5 +390,45 @@ msptiResult ParserManager::ReportRangeEnd(uint64_t rangeId)
         reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
 }
 
+bool ParserManager::isInnerMarker(uint64_t markId)
+{
+    std::lock_guard<std::mutex> lock(innerMarkerMutex_);
+    return innerMarkIds.count(markId);
+}
+
+msptiResult ParserManager::InnerDeviceStartA(const char *msg, RtStreamT stream, uint64_t& markId)
+{
+    markId = gMarkId_++;
+    if (stream != nullptr && rtProfilerTraceEx(markId,
+                                               static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_START_WITH_DEVICE),
+                                               MARK_TAG_ID, stream) != MSPTI_SUCCESS) {
+        MSPTI_LOGE("Failed to run range startA func.");
+        return MSPTI_ERROR_INNER;
+    }
+    {
+        std::lock_guard<std::mutex> lock(innerMarkerMutex_);
+        innerMarkIds.insert({markId, stream});
+    }
+    return MSPTI_SUCCESS;
+}
+
+msptiResult ParserManager::InnerDeviceEndA(uint64_t rangeId)
+{
+    {
+        std::lock_guard<std::mutex> lock(innerMarkerMutex_);
+        auto iter = innerMarkIds.find(rangeId);
+        if (iter == innerMarkIds.end()) {
+            MSPTI_LOGW("Input rangeId[%lu] is invalid.", rangeId);
+            return MSPTI_SUCCESS;
+        }
+        if (iter->second && rtProfilerTraceEx(rangeId,
+                                              static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_END_WITH_DEVICE),
+                                              MARK_TAG_ID, iter->second) != MSPTI_SUCCESS) {
+            MSPTI_LOGE("Failed to run range end func.");
+            return MSPTI_ERROR_INNER;
+        }
+    }
+    return MSPTI_SUCCESS;
+}
 }  // Parser
 }  // Mspti
