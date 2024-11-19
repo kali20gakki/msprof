@@ -11,13 +11,18 @@
  */
 
 #include "analysis/csrc/parser/host/cann/event_grouper.h"
+#include "analysis/csrc/parser/host/cann/type_data.h"
 
 using namespace Analysis::Utils;
+using TypeData = Analysis::Parser::Host::Cann::TypeData;
 
 namespace Analysis {
 namespace Parser {
 namespace Host {
 namespace Cann {
+namespace {
+const std::string RECORD_EVENT = "aclrtRecordEvent";
+}
 
 CANNWarehouses &EventGrouper::GetGroupEvents()
 {
@@ -122,6 +127,7 @@ void EventGrouper::InitLastKernelTimes(const std::set<uint32_t> &threadIds)
 {
     for (auto threadId: threadIds) {
         lastKernelTimes_[threadId] = {
+            {MSPROF_REPORT_ACL_LEVEL, {0, 0}},
             {MSPROF_REPORT_MODEL_LEVEL, {0, 0}},
             {MSPROF_REPORT_NODE_LEVEL, {0, 0}},
             {MSPROF_REPORT_HCCL_NODE_LEVEL, {0, 0}}
@@ -129,18 +135,27 @@ void EventGrouper::InitLastKernelTimes(const std::set<uint32_t> &threadIds)
     }
 }
 
+bool EventGrouper::IsBuildTreeWithAcl(const std::shared_ptr<MsprofApi> &trace)
+{
+    if (trace->level == MSPROF_REPORT_ACL_LEVEL) {
+        auto id = TypeData::GetInstance().Get(trace->level, trace->type);
+        if (RECORD_EVENT == id) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool EventGrouper::isKernelApiEvent(const std::shared_ptr<MsprofApi> &trace)
 {
-    if (trace->level == MSPROF_REPORT_MODEL_LEVEL ||
-        trace->level == MSPROF_REPORT_NODE_LEVEL ||
-        trace->level == MSPROF_REPORT_HCCL_NODE_LEVEL) {
-        if (trace->beginTime <= 0 || trace->beginTime == trace->endTime) {
+    if (IsBuildTreeWithAcl(trace) || trace->level == MSPROF_REPORT_MODEL_LEVEL ||
+        trace->level == MSPROF_REPORT_NODE_LEVEL || trace->level == MSPROF_REPORT_HCCL_NODE_LEVEL) {
+        if (trace->beginTime == trace->endTime) {
             ERROR("Invaild api event, threadId = %, level = %, begin = %, end = %",
                   trace->threadId, trace->level, trace->beginTime, trace->endTime);
             return false;
         }
         if (trace->level == MSPROF_REPORT_NODE_LEVEL) {
-            INFO("Nested node level");
             return true;
         }
         // 判断区间相交则为冗余数据

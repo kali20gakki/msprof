@@ -104,7 +104,7 @@ void GenerateConnectionTrace(std::vector<ApiData> &apiData, uint32_t pid, std::v
     std::string connId;
     std::string name;
     for (auto &data : apiData) {
-        if (MSPROF_REPORT_NODE_LEVEL == data.level) {
+        if (MSPROF_REPORT_NODE_LEVEL == data.level || RECORD_EVENT == data.id) {
             connId = ConnectionIdPool::GetConnectionId(data.connectionId, ConnectionCategory::GENERAL);
             name = HOST_TO_DEVICE + connId;
             std::shared_ptr<FlowEvent> start;

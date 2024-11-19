@@ -43,6 +43,7 @@ const int CONN_OFFSET = 32;
 const double B_TO_KB = 1024.0;
 const std::string STEP_TRACE_FILE = "step_trace";
 const std::string MSPROF_TX_FILE = "msprof_tx";
+const std::string RECORD_EVENT = "aclrtRecordEvent";
 /*
  * json格式要求多个对象使用[]包装，再每一层json后添加了","分割，最终会形成[{},true]的结果，因此需要写入内容的时候过滤掉
  * [ true],共6位长度
