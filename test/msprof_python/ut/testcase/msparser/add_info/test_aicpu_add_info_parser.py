@@ -179,7 +179,7 @@ class TestAicpuAddInfoParser(unittest.TestCase):
     def test_parse_should_return_device_hccl_op_info_data_when_type_10(self):
         InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}]}
         aicpu_data = [23130, 6000, 10, 1, 128, 20000,
-                      0, 0, 0, 1, 12345, 8, 6, 1] + [0] * 202
+                      0, 0, 0, 1, 12345, 8, 6, 1] + [0] * 196
         struct_data = struct.pack(StructFmt.DEVICE_HCCL_OP_INFO_FMT, *aicpu_data)
         data = AicpuAddInfoBean.decode(struct_data)
         with mock.patch(NAMESPACE + '.AicpuAddInfoParser.parse_bean_data', return_value=[data]):

@@ -134,8 +134,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
             aicpu_info.data.compute_exe_end_time,
         ]
 
-    @staticmethod
-    def get_hccl_op_info_data(aicpu_info: AicpuAddInfoBean) -> list:
+    def get_hccl_op_info_data(self: any, aicpu_info: AicpuAddInfoBean) -> list:
         source = DeviceHcclOpSource.INVALID
         if aicpu_info.struct_type == str(AicpuAddInfoBean.HCCL_OP_INFO):
             source = DeviceHcclOpSource.HCCL
@@ -144,7 +143,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
             aicpu_info.data.relay,
             aicpu_info.data.retry,
             trans_enum_name(DataType, aicpu_info.data.data_type),
-            aicpu_info.data.alg_type,
+            self.hash_data.get(aicpu_info.data.alg_type, aicpu_info.data.alg_type),
             aicpu_info.data.count,
             aicpu_info.data.group_name,
             aicpu_info.data.stream_id,

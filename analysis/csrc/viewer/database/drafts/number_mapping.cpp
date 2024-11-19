@@ -208,18 +208,6 @@ namespace {
         {3,          "MIN"},
         {4294967295, "INVALID_TYPE"}
     };
-    const std::unordered_map<uint32_t, std::string> hcclAlgTypeMap {
-        {0,          "NONE"},
-        {1,          "MESH"},
-        {2,          "RING"},
-        {3,          "NB"},
-        {4,          "HD"},
-        {5,          "NHR"},
-        {6,          "PIPELINE"},
-        {7,          "PAIRWISE"},
-        {8,          "STAR"},
-        {4294967295, "INVALID_TYPE"}
-    };
     const std::unordered_map<uint32_t, std::string> levelMap {
         {30000, "pytorch"},
         {25000, "pta"},
@@ -247,7 +235,7 @@ namespace {
                                                                     hcclDataTypeMap, hcclLinkTypeMap,
                                                                     hcclTransportTypeMap, hcclRdmaTypeMap,
                                                                     hcclOpTypeMap, levelMap,
-                                                                    aclApiTagMap, hcclAlgTypeMap};
+                                                                    aclApiTagMap};
 
 }
 

@@ -44,34 +44,10 @@ using GeFusionOpsDumpData = std::vector<std::tuple<uint64_t, std::string, uint32
                                         std::string, std::string, std::string, std::string>>;
 
 namespace {
-const uint32_t UNDEFINED_INT_VALUE = 4294967295;
 const int32_t INVALID_VALUE = -1;
 const std::string NA = "N/A";
 const uint32_t INPUT_FORMAT_INDEX = 0;
 const uint32_t OUTPUT_FORMAT_INDEX = 1;
-
-const uint32_t ALG_TYPE_PHASE_CNT = 4;
-const uint32_t ALG_TYPE_BIT_CNT = 4;
-const uint16_t ALG_TYPE_BIT_MASK = 0b1111;
-const uint16_t ALG_TYPE_NONE = static_cast<uint16_t>(AlgType::HCCL_ALG_NONE);
-
-std::string ConvertHcclOpAlgTypeToStr(uint16_t algType)
-{
-    std::vector<std::string> algPhaseList;
-    for (uint32_t i = 0; i < ALG_TYPE_PHASE_CNT; ++i) {
-        uint16_t algPhase = algType & ALG_TYPE_BIT_MASK;
-        if (algPhase == ALG_TYPE_NONE) {
-            break;
-        }
-        algPhaseList.emplace_back(
-            NumberMapping::Get(NumberMapping::MappingType::HCCL_ALG_TYPE, algPhase));
-        algType >>= ALG_TYPE_BIT_CNT;
-    }
-    if (algPhaseList.empty()) {
-        return NumberMapping::Get(NumberMapping::MappingType::HCCL_ALG_TYPE, ALG_TYPE_NONE);
-    }
-    return Utils::Join(algPhaseList, "-");
-}
 
 void AddHcclOpDumpData(HCCLOpsDumpData& data, const std::shared_ptr<Analysis::Entities::Operator> &op)
 {
@@ -103,7 +79,7 @@ void AddHcclOpDumpData(HCCLOpsDumpData& data, const std::shared_ptr<Analysis::En
         retry = opInfoDesc->data.hcclopInfo.retry;
         dataType = NumberMapping::Get(NumberMapping::MappingType::HCCL_DATA_TYPE,
                                       opInfoDesc->data.hcclopInfo.dataType);
-        algType = ConvertHcclOpAlgTypeToStr(opInfoDesc->data.hcclopInfo.algType);
+        algType = HashData::GetInstance().Get(opInfoDesc->data.hcclopInfo.algType);
         count = opInfoDesc->data.hcclopInfo.count;
         groupName = std::to_string(opInfoDesc->data.hcclopInfo.groupName);
     }

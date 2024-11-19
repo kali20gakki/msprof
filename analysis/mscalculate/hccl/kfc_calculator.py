@@ -84,6 +84,7 @@ class KfcCalculator(ICalculator, MsMultiProcess):
             for stream_id in comm_stream_list:
                 comm_stream_ids[stream_id] = info.group_name
         kfc_op_task_data = []
+        kfc_comm_task_data = []
         conn, curs = DBManager.check_connect_db(self._project_path, DBNameConstant.DB_ASCEND_TASK)
         if conn and curs:
             DBManager.destroy_db_connect(conn, curs)

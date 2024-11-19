@@ -454,7 +454,6 @@ class DeviceHcclOpInfoBean(HcclOpInfoBean):
         self._rank_size = data[11]
         self._stream_id = StarsCommon.set_stream_id(data[12], data[13])
         self._task_id = StarsCommon.set_task_id(data[12], data[13])
-        self.convert_alg_type()
 
     @property
     def stream_id(self: any) -> int:
