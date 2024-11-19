@@ -31,6 +31,7 @@
 #include "analysis/csrc/application/timeline/llc_assembler.h"
 #include "analysis/csrc/application/timeline/sys_io_assembler.h"
 #include "analysis/csrc/application/timeline/qos_assembler.h"
+#include "analysis/csrc/application/timeline/device_tx_assembler.h"
 
 namespace Analysis {
 namespace Application {
@@ -82,7 +83,9 @@ std::unordered_map<std::string, AssemblerCreator> TimelineFactory::assemblerTabl
     {PROCESS_ROCE, [](std::shared_ptr<JsonAssembler> &assembler) {
         MAKE_SHARED0_NO_OPERATION(assembler, RoCEAssembler);}},
     {PROCESS_QOS, [](std::shared_ptr<JsonAssembler> &assembler) {
-        MAKE_SHARED0_NO_OPERATION(assembler, QosAssembler);}}
+        MAKE_SHARED0_NO_OPERATION(assembler, QosAssembler);}},
+    {PROCESS_DEVICE_TX, [](std::shared_ptr<JsonAssembler> &assembler) {
+        MAKE_SHARED0_NO_OPERATION(assembler, DeviceTxAssembler);}}
 };
 
 std::shared_ptr<JsonAssembler> TimelineFactory::GetAssemblerByName(const std::string& processName)

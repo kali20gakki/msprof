@@ -48,7 +48,8 @@ const std::vector<std::string> ASSEMBLER_LIST{
     PROCESS_LLC,
     PROCESS_NIC,
     PROCESS_ROCE,
-    PROCESS_QOS
+    PROCESS_QOS,
+    PROCESS_DEVICE_TX
 };
 }
 

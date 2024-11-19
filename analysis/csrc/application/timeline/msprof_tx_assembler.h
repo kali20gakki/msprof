@@ -25,10 +25,11 @@ private:
     uint8_t AssembleData(DataInventory& dataInventory, JsonWriter &ostream, const std::string &profPath) override;
     void GenerateTxTrace(const std::vector<MsprofTxHostData> &txData, uint32_t pid);
     void GenerateTxExConnectionTrace(const MsprofTxHostData &data, uint32_t pid);
-    void GenerateMetaDataEvent(const std::string traceName, uint32_t pid);
+    void GenerateHMetaDataEvent(const LayerInfo &layer, uint32_t pid);
+
 private:
     std::vector<std::shared_ptr<TraceEvent>> res_;
-    std::set<std::pair<uint32_t, int>> pidTidSet_;
+    std::set<std::pair<uint32_t, int>> hPidTidSet_;
 };
 
 class MsprofTxTraceEvent : public DurationEvent {
@@ -50,7 +51,7 @@ private:
 class MsprofTxExTraceEvent : public DurationEvent {
 public:
     MsprofTxExTraceEvent(int pid, int tid, double dur, const std::string &ts, const std::string &name,
-                         const std::string eventType)
+                         const std::string &eventType)
         : DurationEvent(pid, tid, dur, ts, name), eventType_(eventType) {}
 private:
     void ProcessArgs(JsonWriter &ostream) override;

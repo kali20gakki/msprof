@@ -89,6 +89,7 @@ const std::string PROCESS_STARS_CHIP_TRANS = "Stars Chip Trans";
 const std::string PROCESS_LLC = "LLC";
 const std::string PROCESS_SIO = "SIO";
 const std::string PROCESS_QOS = "QoS";
+const std::string PROCESS_DEVICE_TX = "DEVICE_TX";
 
 struct LayerInfo {
     std::string component;

@@ -17,9 +17,7 @@ namespace Analysis {
 namespace Domain {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Utils;
-namespace {
 
-}
 MsprofTxHostProcessor::MsprofTxHostProcessor(const std::string &profPath) : DataProcessor(profPath) {}
 
 OriMsprofTxHostData LoadTxData(const DBInfo &msprofTxDB, const std::string &dbPath)
@@ -30,7 +28,7 @@ OriMsprofTxHostData LoadTxData(const DBInfo &msprofTxDB, const std::string &dbPa
         return data;
     }
     std::string sql{"SELECT pid, tid, category, payload_type, message_type, payload_value, start_time, end_time, "
-                    "event_type, message FROM " + msprofTxDB.tableName + " MsprofTx WHERE file_tag = 36"};
+                    "event_type, message FROM " + msprofTxDB.tableName};
     if (!msprofTxDB.dbRunner->QueryData(sql, data)) {
         ERROR("Query msproftx data failed, db path is %.", dbPath);
         return data;

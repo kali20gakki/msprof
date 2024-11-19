@@ -54,8 +54,7 @@ private:
         }
         oriData = func(info, dbPath);
         if (oriData.empty()) {
-            ERROR("original data is empty. DBPath is %", dbPath);
-            return false;
+            WARN("original data is empty. DBPath is %", dbPath);
         }
         return true;
     }
