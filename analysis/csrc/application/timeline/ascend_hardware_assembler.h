@@ -73,6 +73,7 @@ private:
     std::map<TaskId, std::string> opName_;
     std::set<std::pair<uint32_t, int>> pidTidSet_;
     std::set<TaskId> ffts_;
+    std::set<uint64_t> recordEvent_;
 };
 }
 }

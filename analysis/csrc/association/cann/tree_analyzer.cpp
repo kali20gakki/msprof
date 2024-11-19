@@ -489,8 +489,6 @@ std::shared_ptr<HostTask> TreeAnalyzer::GetOtherTaskDesc(const std::shared_ptr<T
 {
     auto modelNode = path_.find(MSPROF_REPORT_MODEL_LEVEL) != path_.end() ?
                      path_[MSPROF_REPORT_MODEL_LEVEL] : nullptr;
-    auto nodeNode = path_.find(MSPROF_REPORT_NODE_LEVEL) != path_.end() ?
-                    path_[MSPROF_REPORT_NODE_LEVEL] : nullptr;
     auto modelApi = modelNode != nullptr ?
                     modelNode->event->apiPtr : nullptr;
     auto tracks = GetNodeRecordsByType(node, EventType::EVENT_TYPE_TASK_TRACK);
@@ -499,9 +497,9 @@ std::shared_ptr<HostTask> TreeAnalyzer::GetOtherTaskDesc(const std::shared_ptr<T
         return nullptr;
     }
     auto track = tracks.back()->compactPtr;
-
+    // 使用父节点的id作为connection_id，主要是为了将record_event的api与task_track关联起来
     auto task = GenHostTask(track, modelApi, nullptr, DEFAULT_CONTEXT_ID,
-                            track->data.runtimeTrack.taskType, INVALID_VALUE);
+                            track->data.runtimeTrack.taskType, node->parent->event->id);
     return task;
 }
 

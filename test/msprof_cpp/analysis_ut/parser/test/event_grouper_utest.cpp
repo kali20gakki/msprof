@@ -25,17 +25,33 @@
 #include "analysis/csrc/utils/file.h"
 #include "collector/inc/toolchain/prof_common.h"
 #include "test/msprof_cpp/analysis_ut/fake/fake_trace_generator.h"
+#include "analysis/csrc/parser/host/cann/type_data.h"
 
 using namespace Analysis::Utils;
 using namespace Analysis::Parser::Host::Cann;
+const std::string TEST_FILE = "./unaging.additional.type_info_dic.slice_0";
 
 class EventGrouperUTest : public testing::Test {
 protected:
-    virtual void SetUp()
+    // 所有测试用例之前执行
+    static void SetUpTestCase()
     {
+        if (File::Exist(TEST_FILE)) {
+            File::DeleteFile(TEST_FILE);  // 删除test_file文件
+        }
+        // 创建test_file文件
+        FileWriter fw(TEST_FILE);
+        // 有效输入
+        fw.WriteText("20000_655361:isGraphNeedRebuild\n");
+        fw.WriteText("20000_196625:aclrtRecordEvent\n");
+        fw.WriteText("5000_1125:CpuKernelLaunchExWithArgs_Big\n");
+        fw.WriteText("5000_1077:MemCopy2DAsync\n");
+        fw.Close();
     }
-    virtual void TearDown()
+    // 所有测试用例之后执行
+    static void TearDownTestCase()
     {
+        File::DeleteFile(TEST_FILE);  // 删除test_file文件
     }
 };
 
@@ -43,7 +59,7 @@ void GenApiEventsBin(const std::string &fakeDataDir, const int num)
 {
     std::vector<MsprofApi> apiTrace;
     const int n = 2;
-    for (int i = n; i < num + n; i++) {
+    for (int i = n; i < num + n - 1; i++) {
         auto tmp = MsprofApi{};
         tmp.magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
         tmp.level = MSPROF_REPORT_MODEL_LEVEL;
@@ -56,6 +72,16 @@ void GenApiEventsBin(const std::string &fakeDataDir, const int num)
 
         apiTrace.emplace_back(tmp);
     }
+    auto tmp = MsprofApi{};
+    tmp.magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
+    tmp.level = MSPROF_REPORT_ACL_LEVEL;
+    tmp.type = 196625;  // 196625为构造的aclrtRecordEvent对应的type值
+    tmp.threadId = static_cast<uint32_t>(num + n - 1);
+    tmp.reserve = static_cast<uint32_t>(num + n - 1);
+    tmp.beginTime = static_cast<uint64_t>(n * (num + n - 1));
+    tmp.endTime = static_cast<uint64_t>(n * (num + n - 1) + 1);
+    tmp.itemId = static_cast<uint32_t>(num + n - 1);
+    apiTrace.emplace_back(tmp);
     // 补充不正常的api
     for (int i = n; i < num + n; i++) {
         auto tmp = MsprofApi{};
@@ -178,6 +204,7 @@ TEST_F(EventGrouperUTest, TestGroupShouldReturnEmptyWhenDataOnlyHasApiBin)
 
     const std::string hostDataDir = fakeDataDir + "/host/data";
     const int MaxNum = 10000;
+    TypeData::GetInstance().Load(TEST_FILE);
     GenApiEventsBin(fakeDataDir, MaxNum);
     auto grouper = std::make_shared<EventGrouper>(hostDataDir);
     grouper->Group();

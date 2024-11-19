@@ -13,6 +13,7 @@
 #include "analysis/csrc/application/timeline/ascend_hardware_assembler.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/application/timeline/connection_id_pool.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
 
 namespace Analysis {
 namespace Application {
@@ -50,6 +51,14 @@ void AscendHardwareAssembler::InitData(DataInventory &dataInventory, std::vector
         for (const auto &node : *taskInfo) {
             opName_.emplace(TaskId{static_cast<uint16_t >(node.streamId), static_cast<uint16_t >(node.batchId),
                 static_cast<uint16_t >(node.taskId), node.contextId, node.deviceId}, node.opName);
+        }
+    }
+    auto apiData = dataInventory.GetPtr<std::vector<ApiData>>();
+    if (apiData != nullptr) {
+        for (const auto &node : *apiData) {
+            if (RECORD_EVENT == node.id) {
+                recordEvent_.emplace(node.connectionId);
+            }
         }
     }
     for (const auto& data : taskData) {
@@ -135,7 +144,7 @@ void AscendHardwareAssembler::GenerateTaskConnectionTrace(const AscendTaskData &
     std::string connId;
     std::string name;
     int tid;
-    if (opName_.find(id) != opName_.end()) {
+    if (opName_.find(id) != opName_.end() || recordEvent_.find(data.connectionId) != recordEvent_.end()) {
         connId = ConnectionIdPool::GetConnectionId(data.connectionId, ConnectionCategory::GENERAL);
         name = HOST_TO_DEVICE + connId;
         tid = static_cast<int>(GetPhysicStreamId(data.streamId));

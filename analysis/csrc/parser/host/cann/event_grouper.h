@@ -61,6 +61,8 @@ public:
     std::vector<std::shared_ptr<Event>> &GetApiTraces();
     // 获取FlipTask数据
     std::vector<std::shared_ptr<Adapter::FlipTask>> &GetFlipTasks();
+    // ACL层建树白名单
+    bool IsBuildTreeWithAcl(const std::shared_ptr<MsprofApi> &trace);
 private:
     bool isKernelApiEvent(const std::shared_ptr<MsprofApi> &trace);
     void InitLastKernelTimes(const std::set<uint32_t> &threadIds);

@@ -278,6 +278,7 @@ bool TreeBuilder::AddTaskTrackEvents(std::shared_ptr<TreeNode> &treeNode,
             if (!dummyNode) {
                 return false;
             }
+            dummyNode->parent = treeNode;
             treeNode->children.emplace_back(dummyNode);
         }
         // event在当前子节点的时间范围内情况
@@ -297,6 +298,7 @@ bool TreeBuilder::AddTaskTrackEvents(std::shared_ptr<TreeNode> &treeNode,
         if (!dummyNode) {
             return false;
         }
+        dummyNode->parent = treeNode;
         treeNode->children.emplace_back(dummyNode);
     }
     LogTreeNode(treeNode);
