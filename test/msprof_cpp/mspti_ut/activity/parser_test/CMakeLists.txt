@@ -2,8 +2,12 @@ add_executable(mspti_parser_utest
     ${SRC_FILE}
     main.cpp
     parser_utest.cpp
+    hccl_calculator_utest.cpp
+    hccl_reporter_utest.cpp
     ${TOP_DIR}/mspti/activity/activity_manager.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/parser_manager.cpp
+    ${TOP_DIR}/mspti/activity/ascend/parser/hccl_calculator.cpp
+    ${TOP_DIR}/mspti/activity/ascend/parser/hccl_reporter.cpp
     ${TOP_DIR}/mspti/common/context_manager.cpp
     ${TOP_DIR}/mspti/common/utils.cpp
     ${TOP_DIR}/mspti/common/thread_pool.cpp
@@ -15,6 +19,7 @@ add_executable(mspti_parser_utest
     ${UT_TOP_DIR}/stub/inject/profapi_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
+    ${UT_TOP_DIR}/stub/inject/hccl_inject_stub.cpp
 )
 
 target_include_directories(mspti_parser_utest PRIVATE

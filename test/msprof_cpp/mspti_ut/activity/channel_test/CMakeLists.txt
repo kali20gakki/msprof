@@ -12,6 +12,7 @@ set(SRC_FILE
     ${COMMOM_FILE}
     ${TOP_DIR}/mspti/activity/ascend/channel/channel_reader.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/parser_manager.cpp
+    ${TOP_DIR}/mspti/activity/ascend/parser/hccl_calculator.cpp
     ${TOP_DIR}/mspti/activity/activity_manager.cpp
     ${TOP_DIR}/mspti/activity/ascend/dev_task_manager.cpp
     ${TOP_DIR}/mspti/activity/ascend/dev_prof_task.cpp
@@ -26,6 +27,7 @@ add_executable(mspti_channel_utest
     ${UT_TOP_DIR}/stub/inject/profapi_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
+    ${UT_TOP_DIR}/stub/inject/hccl_inject_stub.cpp
 )
 
 target_include_directories(mspti_channel_utest PRIVATE

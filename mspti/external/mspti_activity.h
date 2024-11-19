@@ -53,6 +53,7 @@ typedef enum {
     MSPTI_ACTIVITY_KIND_MARKER = 1,
     MSPTI_ACTIVITY_KIND_KERNEL = 2,
     MSPTI_ACTIVITY_KIND_API = 3,
+    MSPTI_ACTIVITY_KIND_HCCL = 4,
     MSPTI_ACTIVITY_KIND_COUNT,
     MSPTI_ACTIVITY_KIND_FORCE_INT = 0x7fffffff
 } msptiActivityKind;
@@ -263,6 +264,46 @@ typedef struct PACKED_ALIGNMENT {
     */
     const char *name;
 } msptiActivityKernel;
+
+typedef struct PACKED_ALIGNMENT {
+    /**
+    * The activity record kind, must be MSPTI_ACTIVITY_KIND_HCCL.
+    */
+    msptiActivityKind kind;
+
+    /**
+    * The start timestamp for the hccl, in ns.
+    */
+    uint64_t start;
+
+    /**
+    * The end timestamp for the hccl, in ns.
+    */
+    uint64_t end;
+
+    /**
+    * A stream object requires that we identify device and stream ID.
+    */
+    struct {
+        uint32_t deviceId;
+        uint32_t streamId;
+    } ds;
+
+    /**
+    * The bandWidth the hccl op, in GB/S
+    */
+    double bandWidth;
+
+    /**
+    * The hccl op name.
+    */
+    const char *name;
+
+    /**
+    * The comm name.
+    */
+    const char *commName;
+} msptiActivityHccl;
 
 END_PACKED_ALIGNMENT
 

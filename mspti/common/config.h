@@ -23,5 +23,5 @@ constexpr uint32_t MAX_MARK_MSG_LEN = std::numeric_limits<uint8_t>::max();
 
 #define CHANNEL_PROF_ERROR (-1)
 #define CHANNEL_PROF_STOPPED_ALREADY (-4)
-
+#define COMM_NAME_MAX_LENGTH 128
 #endif
