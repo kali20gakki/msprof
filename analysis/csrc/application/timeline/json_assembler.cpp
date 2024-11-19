@@ -93,5 +93,36 @@ void JsonAssembler::GenerateHWMetaData(const std::unordered_map<uint16_t, uint32
         res.push_back(processIndex);
     }
 }
+
+void JsonAssembler::GenerateTaskMetaData(const std::unordered_map<uint16_t, uint32_t> &pidMap,
+                                         const struct LayerInfo &layer,
+                                         std::vector<std::shared_ptr<TraceEvent>> &res,
+                                         std::set<std::pair<uint32_t, int>> &pidTidSet)
+{
+    for (const auto &it : pidMap) {
+        std::shared_ptr<MetaDataNameEvent> processName;
+        MAKE_SHARED_RETURN_VOID(processName, MetaDataNameEvent, it.second, DEFAULT_TID, META_DATA_PROCESS_NAME,
+                                layer.component);
+        res.push_back(processName);
+        std::shared_ptr<MetaDataLabelEvent> processLabel;
+        MAKE_SHARED_RETURN_VOID(processLabel, MetaDataLabelEvent, it.second, DEFAULT_TID, META_DATA_PROCESS_LABEL,
+                                layer.label);
+        res.push_back(processLabel);
+        std::shared_ptr<MetaDataIndexEvent> processIndex;
+        MAKE_SHARED_RETURN_VOID(processIndex, MetaDataIndexEvent, it.second, DEFAULT_TID, META_DATA_PROCESS_INDEX,
+                                layer.sortIndex);
+        res.push_back(processIndex);
+    }
+    for (const auto &it : pidTidSet) {
+        std::string argName{"Stream " + std::to_string(it.second)};
+        std::shared_ptr<MetaDataNameEvent> threadName;
+        MAKE_SHARED_RETURN_VOID(threadName, MetaDataNameEvent, it.first, it.second, META_DATA_THREAD_NAME, argName);
+        res.push_back(threadName);
+        std::shared_ptr<MetaDataIndexEvent> threadIndex;
+        MAKE_SHARED_RETURN_VOID(threadIndex, MetaDataIndexEvent, it.first, it.second, META_DATA_THREAD_INDEX,
+                                it.second);
+        res.push_back(threadIndex);
+    }
+}
 }
 }

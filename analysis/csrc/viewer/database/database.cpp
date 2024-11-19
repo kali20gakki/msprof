@@ -510,7 +510,6 @@ namespace {
         {"end_time", SQL_INTEGER_TYPE},
         {"message_type", SQL_INTEGER_TYPE},
         {"message", SQL_TEXT_TYPE},
-        {"file_tag", SQL_INTEGER_TYPE}
     };
 
     const TableColumns MsprofTxEx = {

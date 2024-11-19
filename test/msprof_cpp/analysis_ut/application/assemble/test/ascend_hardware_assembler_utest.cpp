@@ -89,20 +89,6 @@ static std::vector<TaskInfoData> GenerateTaskInfoData()
     return res;
 }
 
-static std::vector<MsprofTxDeviceData> GenerateDeviceTxData()
-{
-    std::vector<MsprofTxDeviceData> res;
-    MsprofTxDeviceData data;
-    data.deviceId = 0; // device id 0
-    data.indexId = 2147483647; // indexId 2147483647
-    data.streamId = 1; // streamId 1
-    data.taskId = 13; // taskId 13
-    data.connectionId = 7890; // connectionId 7890
-    res.push_back(data);
-    return res;
-}
-
-
 static std::vector<KfcTurnData> GenerateKfcTurnData()
 {
     std::vector<KfcTurnData> res;
@@ -126,19 +112,15 @@ TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
 {
     AscendHardwareAssembler assembler;
     std::shared_ptr<std::vector<AscendTaskData>> taskS;
-    std::shared_ptr<std::vector<MsprofTxDeviceData>> txS;
     std::shared_ptr<std::vector<TaskInfoData>> infoS;
     std::shared_ptr<std::vector<KfcTurnData>> kfcDatas;
     auto task = GenerateTaskData();
-    auto tx = GenerateDeviceTxData();
     auto info = GenerateTaskInfoData();
     auto kfcData = GenerateKfcTurnData();
     MAKE_SHARED_NO_OPERATION(taskS, std::vector<AscendTaskData>, task);
-    MAKE_SHARED_NO_OPERATION(txS, std::vector<MsprofTxDeviceData>, tx);
     MAKE_SHARED_NO_OPERATION(infoS, std::vector<TaskInfoData>, info);
     MAKE_SHARED_NO_OPERATION(kfcDatas, std::vector<KfcTurnData>, kfcData);
     dataInventory_.Inject(taskS);
-    dataInventory_.Inject(txS);
     dataInventory_.Inject(infoS);
     dataInventory_.Inject(kfcDatas);
     MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(10086)); // pid 10086
@@ -153,19 +135,15 @@ TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
                             "AI_CORE\",\"Physic Stream Id\":1,\"Task Id\":10,\"Batch Id\":1,\"Subtask Id\":1,\""
                             "connection_id\":2345}},{\"name\":\"HostToDevice10071698309120\",\"pid\":10328480,\"tid\":"
                             "1,\"ph\":\"f\",\"cat\":\"HostToDevice\",\"id\":\"10071698309120\",\"ts\":\""
-                            "1717575960208020.750000\",\"bp\":\"e\"},{\"name\":\"MsTx_2147483647\",\"pid\":10328480,\""
-                            "tid\":1,\"ts\":\"18446744073709552.000000\",\"dur\":0.0,\"ph\":\"X\",\"args\":{\""
-                            "Physic Stream Id\":1,\"Task Id\":13}},{\"name\":\"MsTx_7890\",\"pid\":10328480,\"tid\":1,"
-                            "\"ph\":\"f\",\"cat\":\"MsTx\",\"id\":\"7890\",\"ts\":\"18446744073709552.000000\",\"bp\":"
-                            "\"e\"},{\"name\":\"WaitExecute\",\"pid\":10328480,\"tid\":1,\"ts\":\""
-                            "1717575960208020.750000\",\"dur\":0.0,\"ph\":\"X\",\"args\":{\"Physic Stream Id\":1,\""
-                            "Task Id\":15}},{\"name\":\"process_name\",\"pid\":10328480,\"tid\":0,\"ph\":\"M\",\"args"
-                            "\":{\"name\":\"Ascend Hardware\"}},{\"name\":\"process_labels\",\"pid\":10328480,\"tid\":"
-                            "0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":"
-                            "10328480,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":13}},{\"name\":\"thread_name\","
-                            "\"pid\":10328480,\"tid\":1,\"ph\":\"M\",\"args\":{\"name\":\"Stream 1\"}},{\"name\":\""
-                            "thread_sort_index\",\"pid\":10328480,\"tid\":1,\"ph\":\"M\",\"args\":{\"sort_index\":1}}"
-                            ",";
+                            "1717575960208020.750000\",\"bp\":\"e\"},{\"name\":\"WaitExecute\",\"pid\":10328480,\"tid"
+                            "\":1,\"ts\":\"1717575960208020.750000\",\"dur\":0.0,\"ph\":\"X\",\"args\":{\""
+                            "Physic Stream Id\":1,\"Task Id\":15}},{\"name\":\"process_name\",\"pid\":10328480,\"tid\""
+                            ":0,\"ph\":\"M\",\"args\":{\"name\":\"Ascend Hardware\"}},{\"name\":\"process_labels\",\""
+                            "pid\":10328480,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},{\"name\":\""
+                            "process_sort_index\",\"pid\":10328480,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":13}"
+                            "},{\"name\":\"thread_name\",\"pid\":10328480,\"tid\":1,\"ph\":\"M\",\"args\":{\"name\":\""
+                            "Stream 1\"}},{\"name\":\"thread_sort_index\",\"pid\":10328480,\"tid\":1,\"ph\":\"M\",\""
+                            "args\":{\"sort_index\":1}},";
     EXPECT_EQ(expectStr, res.back());
 }
 
@@ -173,19 +151,15 @@ TEST_F(AscendHardwareAssemblerUTest, ShouldReturnFalseWhenDataAssembleFail)
 {
     AscendHardwareAssembler assembler;
     std::shared_ptr<std::vector<AscendTaskData>> taskS;
-    std::shared_ptr<std::vector<MsprofTxDeviceData>> txS;
     std::shared_ptr<std::vector<TaskInfoData>> infoS;
     std::shared_ptr<std::vector<KfcTurnData>> kfcDatas;
     auto task = GenerateTaskData();
-    auto tx = GenerateDeviceTxData();
     auto info = GenerateTaskInfoData();
     auto kfcData = GenerateKfcTurnData();
     MAKE_SHARED_NO_OPERATION(taskS, std::vector<AscendTaskData>, task);
-    MAKE_SHARED_NO_OPERATION(txS, std::vector<MsprofTxDeviceData>, tx);
     MAKE_SHARED_NO_OPERATION(infoS, std::vector<TaskInfoData>, info);
     MAKE_SHARED_NO_OPERATION(kfcDatas, std::vector<KfcTurnData>, kfcData);
     dataInventory_.Inject(taskS);
-    dataInventory_.Inject(txS);
     dataInventory_.Inject(infoS);
     dataInventory_.Inject(kfcDatas);
     MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(10087)); // pid 10087

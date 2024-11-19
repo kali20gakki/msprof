@@ -20,10 +20,6 @@ namespace Application {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
-namespace {
-const uint32_t SORT_INDEX = 6;
-const std::string TX_LABEL = "CPU";
-}
 
 std::string GetEventTypeStr(uint16_t eventType)
 {
@@ -59,10 +55,10 @@ void MsprofTxAssembler::GenerateTxExConnectionTrace(const MsprofTxHostData& data
     auto connId = ConnectionIdPool::GetConnectionId(data.connectionId, ConnectionCategory::MSPROF_TX);
     auto name = MS_TX;
     name.append("_").append(connId);
-    std::shared_ptr<FlowEvent> end;
-    MAKE_SHARED_RETURN_VOID(end, FlowEvent, pid, data.tid, std::to_string(data.start / NS_TO_US), MS_TX, connId,
-                            name, FLOW_END, FLOW_BP);
-    res_.push_back(end);
+    std::shared_ptr<FlowEvent> start;
+    MAKE_SHARED_RETURN_VOID(start, FlowEvent, pid, data.tid, std::to_string(data.start / NS_TO_US), MS_TX, connId,
+                            name, FLOW_START);
+    res_.push_back(start);
 }
 
 void MsprofTxAssembler::GenerateTxTrace(const std::vector<MsprofTxHostData>& txData, uint32_t pid)
@@ -70,7 +66,7 @@ void MsprofTxAssembler::GenerateTxTrace(const std::vector<MsprofTxHostData>& txD
     std::string eventTypeStr;
     for (const auto &data : txData) {
         eventTypeStr = GetEventTypeStr(data.eventType);
-        pidTidSet_.insert({pid, data.tid});
+        hPidTidSet_.insert({pid, data.tid});
         if (data.connectionId == DEFAULT_CONNECTION_ID_MSTX) {  // tx数据没有connectionId
             std::shared_ptr<MsprofTxTraceEvent> tx;
             MAKE_SHARED_RETURN_VOID(tx, MsprofTxTraceEvent, pid, data.tid, (data.end - data.start) / NS_TO_US,
@@ -87,19 +83,19 @@ void MsprofTxAssembler::GenerateTxTrace(const std::vector<MsprofTxHostData>& txD
     }
 }
 
-void MsprofTxAssembler::GenerateMetaDataEvent(const std::string traceName, uint32_t pid)
+void MsprofTxAssembler::GenerateHMetaDataEvent(const LayerInfo &layer, uint32_t pid)
 {
     std::shared_ptr<MetaDataNameEvent> processName;
-    MAKE_SHARED_RETURN_VOID(processName, MetaDataNameEvent, pid, DEFAULT_TID, META_DATA_PROCESS_NAME, traceName);
+    MAKE_SHARED_RETURN_VOID(processName, MetaDataNameEvent, pid, DEFAULT_TID, META_DATA_PROCESS_NAME, layer.component);
     res_.push_back(processName);
     std::shared_ptr<MetaDataLabelEvent> processLabel;
-    MAKE_SHARED_RETURN_VOID(processLabel, MetaDataLabelEvent, pid, DEFAULT_TID, META_DATA_PROCESS_LABEL, TX_LABEL);
+    MAKE_SHARED_RETURN_VOID(processLabel, MetaDataLabelEvent, pid, DEFAULT_TID, META_DATA_PROCESS_LABEL, layer.label);
     res_.push_back(processLabel);
     std::shared_ptr<MetaDataIndexEvent> proIndex;
-    MAKE_SHARED_RETURN_VOID(proIndex, MetaDataIndexEvent, pid, DEFAULT_TID, META_DATA_PROCESS_INDEX, SORT_INDEX);
+    MAKE_SHARED_RETURN_VOID(proIndex, MetaDataIndexEvent, pid, DEFAULT_TID, META_DATA_PROCESS_INDEX, layer.sortIndex);
     res_.push_back(proIndex);
     std::string thName;
-    for (const auto &it : pidTidSet_) {
+    for (const auto &it : hPidTidSet_) {
         thName = "Thread " + std::to_string(it.second);
         std::shared_ptr<MetaDataNameEvent> threadName;
         MAKE_SHARED_RETURN_VOID(threadName, MetaDataNameEvent, it.first, it.second, META_DATA_THREAD_NAME, thName);
@@ -118,11 +114,13 @@ uint8_t MsprofTxAssembler::AssembleData(DataInventory& dataInventory, JsonWriter
         WARN("Can't get msprof_host_tx data from dataInventory");
         return DATA_NOT_EXIST;
     }
+    auto hostLayer = GetLayerInfo(PROCESS_MSPROFTX);
     auto traceName = Context::GetInstance().GetPidNameFromInfoJson(HOST_ID, profPath);
+    hostLayer.component = traceName;
     auto pid = Context::GetInstance().GetPidFromInfoJson(HOST_ID, profPath);
-    auto formatPid = JsonAssembler::GetFormatPid(pid, SORT_INDEX);
+    auto formatPid = JsonAssembler::GetFormatPid(pid, hostLayer.sortIndex);
     GenerateTxTrace(*txData, formatPid);
-    GenerateMetaDataEvent(traceName, formatPid);
+    GenerateHMetaDataEvent(hostLayer, formatPid);
     if (res_.empty()) {
         ERROR("Can't Generate any msprof tx process data");
         return ASSEMBLE_FAILED;

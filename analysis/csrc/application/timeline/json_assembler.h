@@ -36,6 +36,9 @@ protected:
                           const std::string &profPath, uint32_t index);
     void GenerateHWMetaData(const std::unordered_map<uint16_t, uint32_t> &pidMap, const struct LayerInfo &layerInfo,
                           std::vector<std::shared_ptr<TraceEvent>> &res);
+    void GenerateTaskMetaData(const std::unordered_map<uint16_t, uint32_t> &pidMap, const struct LayerInfo &layer,
+                              std::vector<std::shared_ptr<TraceEvent>> &res,
+                              std::set<std::pair<uint32_t, int>> &pidTidSet);
 protected:
     std::string processorName_;
     std::unordered_map<std::string, FileCategory> fileMap_;

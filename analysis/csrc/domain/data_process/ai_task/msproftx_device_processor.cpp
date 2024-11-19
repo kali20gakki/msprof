@@ -20,9 +20,6 @@ namespace Analysis {
 namespace Domain {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Utils;
-namespace {
-const uint32_t START_CONNECTION_ID_MSTX = 4000000000;
-}
 MsprofTxDeviceProcessor::MsprofTxDeviceProcessor(const std::string &profPath) : DataProcessor(profPath) {}
 
 bool MsprofTxDeviceProcessor::ProcessOneDevice(const ProfTimeRecord &record, std::vector<MsprofTxDeviceData> &res,
@@ -112,7 +109,11 @@ std::vector<MsprofTxDeviceData> MsprofTxDeviceProcessor::FormatData(
     uint64_t start;
     data.deviceId = deviceId;
     std::sort(oriData.begin(), oriData.end(), [](TxDeviceData &lData, TxDeviceData rData) {
-        return std::get<4>(lData) < std::get<4>(rData); // 第4位为timestamp
+        if (std::get<1>(lData) != std::get<1>(rData)) { // 按照index_id、timestamp排序，即第1、4位
+            return std::get<1>(lData) < std::get<1>(rData);  // 第1为为index_id
+        } else {
+            return std::get<4>(lData) < std::get<4>(rData); // 第4位为timestamp
+        }
     });
     for (const auto& row : oriData) {
         std::tie(data.modelId, data.indexId, data.streamId, data.taskId, start) = row;

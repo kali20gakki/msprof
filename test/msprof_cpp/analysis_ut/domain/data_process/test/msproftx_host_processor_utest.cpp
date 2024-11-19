@@ -27,15 +27,15 @@ const std::string DB_SUFFIX = "msproftx.db";
 const std::string PROF_PATH_A = File::PathJoin({HOST_TX_PATH, "./PROF_0"});
 // MsprofTx table data format
 using MsprofTxDataFormat = std::vector<std::tuple<uint32_t, uint32_t, uint32_t,
-    std::string, int32_t, uint64_t, uint64_t, uint64_t, int32_t, std::string, uint16_t>>;
+    std::string, int32_t, uint64_t, uint64_t, uint64_t, int32_t, std::string>>;
 // MsprofTxEx table data format
 using MsprofTxExDataFormat = std::vector<std::tuple<uint32_t, uint32_t,
     std::string, uint64_t, uint64_t, uint64_t, std::string>>;
 
 const MsprofTxDataFormat MSPROFTX_DATA = {
-    {0, 0, 0, "marker", 0, 0, 19627611986845096, 19627611986845096, 0, "test", 36},
-    {0, 0, 0, "push/pop", 0, 0, 19627611986854415, 19627611986854415, 0, "test", 36},
-    {0, 0, 0, "start/end", 0, 0, 19627611986858995, 19627611993981237, 0, "test", 36},
+    {0, 0, 0, "marker", 0, 0, 19627611986845096, 19627611986845096, 0, "test"},
+    {0, 0, 0, "push/pop", 0, 0, 19627611986854415, 19627611986854415, 0, "test"},
+    {0, 0, 0, "start/end", 0, 0, 19627611986858995, 19627611993981237, 0, "test"},
 };
 
 const MsprofTxExDataFormat MSPROFTX_EX_DATA = {
