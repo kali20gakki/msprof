@@ -332,7 +332,7 @@ struct MsprofHcclOPInfo {  // for MsprofReportCompactInfo buffer data
     uint8_t relay : 1;
     uint8_t retry : 1;
     uint8_t dataType;
-    uint16_t algType;     // 通信算子使用的算法,每4bit表示一个阶段,最多4个阶段
+    uint64_t algType;     // 通信算子使用的算法,hash的key,其值是以"-"分隔的字符串
     uint64_t count;
     uint64_t groupName;
 };

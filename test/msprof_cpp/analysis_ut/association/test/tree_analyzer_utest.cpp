@@ -30,38 +30,6 @@ using namespace Analysis::Utils;
 
 const std::string TEST_FILE = "./aging.additional.type_info_dic.slice_0";
 
-std::string ConvertHcclOpAlgTypeToStr(uint16_t algType)
-{
-    const uint32_t algTypePhaseCnt = 4;
-    const uint32_t algTypeBitCnt = 4;
-    const uint16_t algTypeBitMask = 0b1111;
-    const uint16_t algTypeNone = static_cast<uint16_t>(AlgType::HCCL_ALG_NONE);
-    std::unordered_map<uint16_t, std::string> hcclAlgTypeMap {
-        {0,          "NONE"},
-        {1,          "MESH"},
-        {2,          "RING"},
-        {3,          "NB"},
-        {4,          "HD"},
-        {5,          "NHR"},
-        {6,          "PIPELINE"},
-        {7,          "PAIRWISE"},
-        {8,          "STAR"}
-    };
-    std::vector<std::string> algPhaseList;
-    for (uint32_t i = 0; i < algTypePhaseCnt; ++i) {
-        uint16_t algPhase = algType & algTypeBitMask;
-        if (algPhase == algTypeNone) {
-            break;
-        }
-        algPhaseList.emplace_back(hcclAlgTypeMap[algPhase]);
-        algType >>= algTypeBitCnt;
-    }
-    if (algPhaseList.empty()) {
-        return "NONE";
-    }
-    return Join(algPhaseList, "-");
-}
-
 class TreeAnalyzerUTest : public testing::Test {
 protected:
     // 所有测试用例之前执行
@@ -523,8 +491,6 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L0)
 
     for (uint16_t i = 0; i < bigOPs.size(); i++) {
         EXPECT_EQ(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.count, expectbigOPsCount[i]);
-        EXPECT_EQ(ConvertHcclOpAlgTypeToStr(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.algType),
-                  expectbigOPsAlgType[i]);
     }
 }
 
@@ -674,8 +640,6 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L2)
 
     for (uint16_t i = 0; i < bigOPs.size(); i++) {
         EXPECT_EQ(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.count, expectbigOPsCount[i]);
-        EXPECT_EQ(ConvertHcclOpAlgTypeToStr(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.algType),
-                  expectbigOPsAlgType[i]);
     }
 
     uint32_t specialComputeTaskStart = 9;
@@ -795,8 +759,6 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L0)
 
     for (uint16_t i = 0; i < bigOPs.size(); i++) {
         EXPECT_EQ(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.count, expectbigOPsCount[i]);
-        EXPECT_EQ(ConvertHcclOpAlgTypeToStr(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.algType),
-                  expectbigOPsAlgType[i]);
     }
 }
 
@@ -955,8 +917,6 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L2)
 
     for (uint16_t i = 0; i < bigOPs.size(); i++) {
         EXPECT_EQ(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.count, expectbigOPsCount[i]);
-        EXPECT_EQ(ConvertHcclOpAlgTypeToStr(bigOPs[i]->hcclBigOpDesc->opInfoDesc->data.hcclopInfo.algType),
-                  expectbigOPsAlgType[i]);
     }
 }
 std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenarioEmptyPath()

@@ -35,12 +35,14 @@ class HcclOpInfoParser(DataParser, MsMultiProcess):
         transform bean to data
         """
         type_info_data = HashDictData(self._project_path).get_type_hash_dict().get("node", {})
+        ge_hash_dict = HashDictData(self._project_path).get_ge_hash_dict()
         self._hccl_op_info_data = []
         for data in bean_data:
             data_type = trans_enum_name(DataType, data.data_type)
             self._hccl_op_info_data.append(
                 [data.level, type_info_data.get(data.struct_type, data.struct_type), data.thread_id, data.timestamp,
-                 data.relay, data.retry, data_type, data.alg_type, data.count, data.group_name])
+                 data.relay, data.retry, data_type, ge_hash_dict.get(data.alg_type, data.alg_type),
+                 data.count, data.group_name])
 
     def save(self: any) -> None:
         """
