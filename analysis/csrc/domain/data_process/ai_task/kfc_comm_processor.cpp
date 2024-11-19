@@ -19,6 +19,17 @@ namespace Analysis {
 namespace Domain {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Utils;
+namespace {
+std::string GetGroupNameValue(const std::string& groupName, std::unordered_map<std::string, std::string>& hashMap)
+{
+    if (groupName != NA && Utils::IsNumber(groupName)) {
+        if (hashMap.find(groupName) != hashMap.end()) {
+            return hashMap[groupName];
+        }
+    }
+    return groupName;
+}
+}
 
 KfcCommProcessor::KfcCommProcessor(const std::string &profPath) : DataProcessor(profPath) {}
 
@@ -26,6 +37,13 @@ bool KfcCommProcessor::Process(DataInventory& dataInventory)
 {
     bool flag = true;
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
+    std::vector<KfcTaskData> resTask;
+    std::vector<KfcOpData> resOp;
+    auto hashMap = dataInventory.GetPtr<std::unordered_map<std::string, std::string>>();
+    if (hashMap == nullptr) {
+        ERROR("Can't get hash data.");
+        return false;
+    }
     for (const auto& devicePath : deviceList) {
         DBInfo KfcOPTable("hccl_single_device.db", "KfcOP");
         DBInfo KfcTaksTable("hccl_single_device.db", "KfcTask");
@@ -48,18 +66,19 @@ bool KfcCommProcessor::Process(DataInventory& dataInventory)
         uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
         auto taskData = LoadTaskData(KfcTaksTable, dbPath);
         auto opData = LoadOPData(KfcOPTable, dbPath);
-        auto formatKfcTask = FormatTaskData(taskData, deviceId);
-        auto formatOpData = FormatOPData(opData, deviceId);
+        auto formatKfcTask = FormatTaskData(taskData, *hashMap, deviceId);
+        auto formatOpData = FormatOPData(opData, *hashMap, deviceId);
+        resOp.insert(resOp.end(), formatOpData.begin(), formatOpData.end());
+        resTask.insert(resTask.end(), formatKfcTask.begin(), formatKfcTask.end());
+    }
+    if (!SaveToDataInventory<KfcTaskData>(std::move(resTask), dataInventory, PROCESSOR_NAME_KFC_COMM)) {
+        ERROR("Save data failed, %.", PROCESSOR_NAME_KFC_COMM);
+        flag = false;
+    }
 
-        if (!SaveToDataInventory<KfcTaskData>(std::move(formatKfcTask), dataInventory, PROCESSOR_NAME_TASK)) {
-            ERROR("Save data failed, %.", PROCESSOR_NAME_TASK);
-            flag = false;
-        }
-
-        if (!SaveToDataInventory<KfcOpData>(std::move(formatOpData), dataInventory, PROCESSOR_NAME_TASK)) {
-            ERROR("Save data failed, %.", PROCESSOR_NAME_TASK);
-            flag = false;
-        }
+    if (!SaveToDataInventory<KfcOpData>(std::move(resOp), dataInventory, PROCESSOR_NAME_KFC_COMM)) {
+        ERROR("Save data failed, %.", PROCESSOR_NAME_KFC_COMM);
+        flag = false;
     }
     return flag;
 }
@@ -93,61 +112,71 @@ std::vector<KfcOPDto> KfcCommProcessor::LoadOPData(const DBInfo &kfcDB, const st
 {
     OriKfcOPData oriOpData;
     std::vector<KfcOPDto> result;
-    std::string sql{"SELECT model_id, index_id, op_name, timestamp, duration, group_name, connection_id "
-                    "FROM " + kfcDB.tableName};
+    std::string sql{"SELECT model_id, index_id, op_name, timestamp, duration, group_name, connection_id, data_type, "
+                    "alg_type, count, rank_size FROM " + kfcDB.tableName};
     if (!kfcDB.dbRunner->QueryData(sql, oriOpData)) {
         ERROR("Failed to obtain data from the % table.", kfcDB.tableName);
     }
     for (const auto &row: oriOpData) {
         KfcOPDto kfcOp{};
-        std::tie(kfcOp.modelId, kfcOp.indexId, kfcOp.opName, kfcOp.timestamp, kfcOp.duration,
-                 kfcOp.groupName, kfcOp.connectionId) = row;
+        std::tie(kfcOp.modelId, kfcOp.indexId, kfcOp.opName, kfcOp.timestamp, kfcOp.duration, kfcOp.groupName,
+                 kfcOp.connectionId, kfcOp.dataType, kfcOp.algType, kfcOp.count, kfcOp.rankSize) = row;
         result.push_back(kfcOp);
     }
 
     return result;
 }
 
-std::vector<KfcTaskData> KfcCommProcessor::FormatTaskData(const std::vector<KfcTaskDto> &oriCommData, uint16_t deviceId)
+std::vector<KfcTaskData> KfcCommProcessor::FormatTaskData(const std::vector<KfcTaskDto> &oriCommData,
+    std::unordered_map<std::string, std::string>& hashMap, uint16_t deviceId)
 {
-    SyscntConversionParams params;
     ProfTimeRecord profTimeRecord;
-    Context::GetInstance().GetProfTimeRecordInfo(profTimeRecord, profPath_);
-    if (!Context::GetInstance().GetSyscntConversionParams(params, deviceId, profPath_)) {
-        ERROR("GetSyscntConversionParams failed, profPath is %.", profPath_);
+    if (!Context::GetInstance().GetProfTimeRecordInfo(profTimeRecord, profPath_)) {
+        ERROR("Failed to obtain the time in start_info and end_info. Prof path is %", profPath_);
         return {};
     }
-
     std::vector<KfcTaskData> result;
+    uint64_t transportType;
+    uint64_t dataType;
+    uint64_t linkType;
+    std::string groupName;
     for (const auto &oriData: oriCommData) {
-        HPFloat timeStamp = Utils::GetTimeFromSyscnt(oriData.timestamp, params);
+        HPFloat timeStamp = {oriData.timestamp};
+        transportType = GetEnumTypeValue(oriData.transportType, NAME_STR(HCCL_TRANSPORT_TYPE_TABLE),
+                                         HCCL_TRANSPORT_TYPE_TABLE);
+        dataType = GetEnumTypeValue(oriData.dataType, NAME_STR(HCCL_DATA_TYPE_TABLE), HCCL_DATA_TYPE_TABLE);
+        linkType = GetEnumTypeValue(oriData.linkType, NAME_STR(HCCL_LINK_TYPE_TABLE), HCCL_LINK_TYPE_TABLE);
+        groupName = GetGroupNameValue(oriData.groupName, hashMap);
         result.emplace_back(deviceId, oriData.modelId, oriData.hcclName,
-                            GetLocalTime(timeStamp, profTimeRecord).Uint64(), oriData.duration / NS_TO_US,
-                            oriData.notifyId, oriData.durationEstimated, oriData.streamId, oriData.taskId,
-                            oriData.contextId, "", oriData.localRank, oriData.remoteRank, oriData.transportType,
-                            oriData.size, oriData.linkType, oriData.bandwidth, oriData.groupName, oriData.planeId,
-                            oriData.dataType);
+                            GetLocalTime(timeStamp, profTimeRecord).Uint64(),
+                            static_cast<double>(oriData.duration), oriData.notifyId,
+                            static_cast<double>(oriData.durationEstimated), oriData.streamId, oriData.taskId,
+                            oriData.contextId, " ", oriData.localRank, oriData.remoteRank, transportType,
+                            oriData.size, linkType, oriData.bandwidth, groupName, oriData.planeId, dataType);
     }
     return result;
 }
 
-std::vector<KfcOpData> KfcCommProcessor::FormatOPData(const std::vector<KfcOPDto> &oriOpData, uint16_t deviceId)
+std::vector<KfcOpData> KfcCommProcessor::FormatOPData(const std::vector<KfcOPDto> &oriOpData,
+    std::unordered_map<std::string, std::string>& hashMap,  uint16_t deviceId)
 {
-    SyscntConversionParams params;
     ProfTimeRecord profTimeRecord;
-
-    Context::GetInstance().GetProfTimeRecordInfo(profTimeRecord, profPath_);
-    if (!Context::GetInstance().GetSyscntConversionParams(params, deviceId, profPath_)) {
-        ERROR("GetSyscntConversionParams failed, profPath is %.", profPath_);
+    if (!Context::GetInstance().GetProfTimeRecordInfo(profTimeRecord, profPath_)) {
+        ERROR("Failed to obtain the time in start_info and end_info. Prof path is %", profPath_);
         return {};
     }
-
     std::vector<KfcOpData> result;
+    uint64_t dataType;
+    std::string groupName;
+    uint64_t start;
     for (const auto &opData : oriOpData) {
-        HPFloat timeStamp = Utils::GetTimeFromSyscnt(opData.timestamp, params);
+        dataType = GetEnumTypeValue(opData.dataType, NAME_STR(HCCL_DATA_TYPE_TABLE), HCCL_DATA_TYPE_TABLE);
+        groupName = GetGroupNameValue(opData.groupName, hashMap);
+        HPFloat timeStamp = {opData.timestamp};
+        start = GetLocalTime(timeStamp, profTimeRecord).Uint64();
         // start_index需要
-        result.emplace_back(deviceId, opData.opName, GetLocalTime(timeStamp, profTimeRecord).Uint64(),
-                            opData.duration / NS_TO_US, opData.groupName, opData.connectionId, opData.modelId);
+        result.emplace_back(deviceId, opData.opName, start, start + opData.duration, groupName, opData.connectionId,
+                            opData.modelId, dataType, opData.count, opData.algType, opData.rankSize);
     }
     return result;
 }

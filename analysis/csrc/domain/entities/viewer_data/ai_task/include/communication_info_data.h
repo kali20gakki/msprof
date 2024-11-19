@@ -40,7 +40,7 @@ struct CommunicationTaskData {
     uint64_t rdmaType = UINT64_MAX;
     uint64_t start = UINT64_MAX;
     double duration = 0.0;
-    double duration_estimated = 0.0;
+    double durationEstimated = 0.0;
     double bandwidth = 0.0;
 };
 struct CommunicationOpData {

@@ -28,14 +28,12 @@ const std::vector<uint32_t> TIDS = {static_cast<uint32_t>(OverlapType::COMMUNICA
                                     static_cast<uint32_t>(OverlapType::FREE)};
 const std::vector<uint32_t> THREAD_INDEXES = TIDS;
 void SepOneTask(
-    std::vector<TimeDuration> &times, std::unordered_map<uint16_t, std::set<uint16_t>> &mc2StreamsTable,
+    std::vector<TimeDuration> &times, std::set<uint16_t> &mc2StreamsTable,
     TaskInfoData &task, std::unordered_map<uint16_t, std::vector<TimeDuration>> &compSections,
     std::unordered_map<uint16_t, std::vector<TimeDuration>> &kfcCommSections)
 {
     for (auto &timeDur: times) {
-        auto it = mc2StreamsTable.find(task.deviceId);
-        if (it != mc2StreamsTable.end() &&
-            it->second.find(task.streamId) != it->second.end()) {
+        if (mc2StreamsTable.find(task.streamId) != mc2StreamsTable.end()) {
             kfcCommSections[task.deviceId].emplace_back(timeDur);
         } else {
             compSections[task.deviceId].emplace_back(timeDur);
@@ -308,10 +306,10 @@ void OverlapAnalysisAssembler::SepCompTaskAndKFCCommSections(
     if (!compTasks) {
         return;
     }
-    std::unordered_map<uint16_t, std::set<uint16_t>> mc2StreamsTable;
+    std::set<uint16_t> mc2StreamsTable;
     if (mc2CommInfos) {
         for (auto &mc2CommInfo : *mc2CommInfos) {
-            mc2StreamsTable[mc2CommInfo.deviceId].insert(mc2CommInfo.aiCpuKfcStreamId);
+            mc2StreamsTable.insert(mc2CommInfo.aiCpuKfcStreamId);
         }
     }
     std::set<TaskId> usedTaskIds;

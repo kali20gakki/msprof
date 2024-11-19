@@ -22,6 +22,7 @@ using namespace Analysis::Domain;
 using namespace Parser::Environment;
 using namespace Analysis::Utils;
 using namespace Analysis::Viewer::Database;
+using HashMap = std::unordered_map<std::string, std::string>;
 
 const std::string BASE_PATH = "./hccl_single_device";
 const std::string DEVICE_SUFFIX = "device_0";
@@ -34,18 +35,29 @@ const std::string OP_TABLE_NAME = "KfcOP";
 const std::set<std::string> PROF_PATHS = {PROF_PATH_A, PROF_PATH_B};
 
 const OriKfcOPData KFC_OP_DATA = {
-    {4294967295, 1, "MatmulAllReduceAddRmsNormAicpu_448_0_1", 58983469236240, 76305740, "6727616873621928448", 2},
-    {4294967295, 1, "MatmulAllReduceAddRmsNormAicpu_448_1_1", 58983545542040, 24515440, "6727616873621928448", 9}
+    {4294967295, 1, "MatmulAllReduceAddRmsNormAicpu_448_0_1", 58983469236240, 76305740, "6727616873621928448",
+     2, NA, NA, -1, 0},
+    {4294967295, 1, "MatmulAllReduceAddRmsNormAicpu_448_1_1", 58983545542040, 24515440, "6727616873621928448",
+     9,  NA, NA, -1, 0}
 };
 
 const OriKfcTaskData KFC_TASK_DATA = {
     {4294967295, 1, "MatmulAllReduceAddRmsNormAicpu_448_0_1", 58983469236240, 76305740, 0,
      "Inter_Processor_Sync", "6727616873621928448", 0, 58983473419360, 2269800, 50, 600, 500, 0, 0,
-     "3", 0, "195", "INVALID_TYPE", 0, 4294967295, 0, 0, "RDMA_SEND_NOTIFY"},
+     "3", 0, "195", "INVALID_TYPE", 0, 4294967295, "0", 0, "RDMA_SEND_NOTIFY"},
     {4294967295, 1, "MatmulAllReduceAddRmsNormAicpu_448_0_1", 58983469236240, 76305740, 0,
      "Notify_Record", "6727616873621928448", 0, 58983475689180, 20, 50, 601, 500, 0, 0,
-     "3", 0, "195", "INVALID_TYPE", 0, 4294967295, 249, 0, "RDMA_SEND_NOTIFY"}
+     "3", 0, "195", "INVALID_TYPE", 0, 4294967295, "249", 0, "RDMA_SEND_NOTIFY"}
 };
+
+static void InitHashMap(DataInventory& dataInventory)
+{
+    HashMap hashMap;
+    hashMap.emplace("111", "TEST");
+    std::shared_ptr<std::unordered_map<std::string, std::string>> res;
+    MAKE_SHARED_RETURN_VOID(res, HashMap, std::move(hashMap));
+    dataInventory.Inject(res);
+}
 
 class KfcCommProcessorUtest : public testing::Test {
 protected:
@@ -122,6 +134,7 @@ TEST_F(KfcCommProcessorUtest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
     for (auto path: PROF_PATHS) {
         auto processor = KfcCommProcessor(path);
         auto dataInventory = DataInventory();
+        InitHashMap(dataInventory);
         EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
     }
 }
@@ -140,6 +153,7 @@ TEST_F(KfcCommProcessorUtest, TestRunShouldReturnTrueWhenSourceTableNotExist)
     for (auto path: PROF_PATHS) {
         auto processor = KfcCommProcessor(path);
         auto dataInventory = DataInventory();
+        InitHashMap(dataInventory);
         EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
     }
 }
@@ -150,6 +164,7 @@ TEST_F(KfcCommProcessorUtest, TestRunShouldReturnFalseWhenCheckPathNotExist)
     for (auto path: PROF_PATHS) {
         auto processor = KfcCommProcessor(path);
         auto dataInventory = DataInventory();
+        InitHashMap(dataInventory);
         EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
     }
     MOCKER_CPP(&Analysis::Utils::File::Exist).reset();
@@ -161,6 +176,7 @@ TEST_F(KfcCommProcessorUtest, TestRunShouldReturnTrueWhenNoDb)
     MOCKER_CPP(&Utils::File::GetFilesWithPrefix).stubs().will(returnValue(deviceList));
     auto processor = KfcCommProcessor({File::PathJoin({BASE_PATH, "test"})});
     auto dataInventory = DataInventory();
+    InitHashMap(dataInventory);
     EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
     MOCKER_CPP(&Utils::File::GetFilesWithPrefix).reset();
 }

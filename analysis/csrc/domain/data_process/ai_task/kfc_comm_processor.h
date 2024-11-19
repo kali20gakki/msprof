@@ -26,10 +26,11 @@ namespace Domain {
 // "size", "data_type", "link_type", "bandwidth", "context_id", "notify_id", "batch_id", "rdma_type",
 using OriKfcTaskData = std::vector<std::tuple<uint32_t, uint32_t, std::string, uint64_t, uint64_t, uint32_t,
         std::string, std::string, int32_t, uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint32_t, uint32_t,
-        std::string, uint32_t, std::string, std::string, double, uint32_t, uint64_t, uint32_t, std::string>>;
-// "model_id", "index_id", "op_name", "timestamp", "duration", "group_name", "connection_id",
+        std::string, uint32_t, std::string, std::string, double, uint32_t, std::string, uint32_t, std::string>>;
+// "model_id", "index_id", "op_name", "timestamp", "duration", "group_name", "connection_id", "data_type", "alg_type",
+// "count", "rank_size
 using OriKfcOPData = std::vector<std::tuple<uint32_t, uint32_t, std::string, uint64_t, uint64_t, std::string,
-uint64_t>>;
+uint64_t, std::string, std::string, uint64_t, uint64_t>>;
 
 struct KfcTaskDto {
     uint32_t modelId;
@@ -54,7 +55,7 @@ struct KfcTaskDto {
     std::string linkType;
     double bandwidth;
     uint32_t contextId;
-    uint64_t notifyId;
+    std::string notifyId;
     uint32_t batchId;
     std::string rdmaType;
 };
@@ -67,6 +68,10 @@ struct KfcOPDto {
     uint64_t duration;
     std::string groupName;
     uint64_t connectionId;
+    std::string dataType;
+    std::string algType;
+    uint64_t count;
+    uint64_t rankSize;
 };
 
 class KfcCommProcessor : public DataProcessor {
@@ -77,8 +82,10 @@ private:
     bool Process(DataInventory& dataInventory) override;
     std::vector<KfcTaskDto> LoadTaskData(const DBInfo &kfcDB, const std::string &dbPath);
     std::vector<KfcOPDto> LoadOPData(const DBInfo &kfcDB, const std::string &dbPath);
-    std::vector<KfcTaskData> FormatTaskData(const std::vector<KfcTaskDto> &oriCommData, uint16_t deviceId);
-    std::vector<KfcOpData> FormatOPData(const std::vector<KfcOPDto> &oriComputeData, uint16_t deviceId);
+    std::vector<KfcTaskData> FormatTaskData(const std::vector<KfcTaskDto> &oriCommData,
+                                            std::unordered_map<std::string, std::string>& hashMap, uint16_t deviceId);
+    std::vector<KfcOpData> FormatOPData(const std::vector<KfcOPDto> &oriComputeData,
+                                        std::unordered_map<std::string, std::string>& hashMap, uint16_t deviceId);
 };
 }
 }

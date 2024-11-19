@@ -23,7 +23,7 @@ struct KfcTurnData {
     uint16_t deviceId = UINT16_MAX;
     uint16_t streamId = UINT16_MAX;
     uint16_t taskId = UINT16_MAX;
-    uint64_t startTime;
+    uint64_t startTime = UINT64_MAX;
     double duration = 0.0;
 public:
     KfcTurnData() = default;
@@ -34,12 +34,12 @@ public:
 };
 
 struct KfcTaskData {
-    uint16_t deviceId;
-    uint32_t modelId;
+    uint16_t deviceId = UINT16_MAX;
+    uint32_t modelId = UINT32_MAX;
     std::string hcclName;
-    uint64_t timestamp;
-    double duration;
-    uint64_t notifyId;
+    uint64_t start = UINT64_MAX;
+    double duration = 0.0;
+    std::string notifyId;
     double durationEstimated;
     uint32_t streamId = UINT32_MAX;
     uint32_t taskId = UINT32_MAX;
@@ -47,20 +47,20 @@ struct KfcTaskData {
     std::string taskType;
     uint32_t srcRank = UINT32_MAX;
     uint32_t dstRank = UINT32_MAX;
-    std::string transportType;
+    uint64_t transportType = UINT64_MAX;
     uint64_t size = UINT64_MAX; // Byte
-    std::string linkType;
-    double bandwidth; // GB/S
+    uint64_t linkType = UINT64_MAX;
+    double bandwidth = 0.0; // GB/S
     std::string groupName;
-    int32_t planeId;
-    std::string dataType;
+    int32_t planeId = INT32_MAX;
+    uint64_t dataType = UINT64_MAX;
     KfcTaskData() = default;
-    KfcTaskData(uint16_t _deviceId, uint32_t _modelId, std::string _hcclName, uint64_t _timestamp, double _duration,
-                uint64_t _notifyId, double _durationEstimated, uint32_t _streamId, uint32_t _taskId,
-                uint32_t _contextId, std::string _taskType, uint32_t _srcRank, uint32_t _dstRank,
-                std::string _transportType, uint64_t _size, std::string _linkType, double _bandwidth,
-                std::string _groupName, int _planeId, std::string _dataType)
-        : deviceId(_deviceId), modelId(_modelId), hcclName(_hcclName), timestamp(_timestamp), duration(_duration),
+    KfcTaskData(uint16_t _deviceId, uint32_t _modelId, const std::string &_hcclName, uint64_t _timestamp,
+                double _duration, const std::string &_notifyId, double _durationEstimated, uint32_t _streamId,
+                uint32_t _taskId, uint32_t _contextId, const std::string &_taskType, uint32_t _srcRank,
+                uint32_t _dstRank, uint64_t _transportType, uint64_t _size, uint64_t _linkType,
+                double _bandwidth, const std::string &_groupName, int _planeId, uint64_t _dataType)
+        : deviceId(_deviceId), modelId(_modelId), hcclName(_hcclName), start(_timestamp), duration(_duration),
         notifyId(_notifyId), durationEstimated(_durationEstimated), streamId(_streamId), taskId(_taskId),
         contextId(_contextId), taskType(_taskType), srcRank(_srcRank), dstRank(_dstRank),
         transportType(_transportType), size(_size), linkType(_linkType), bandwidth(_bandwidth),
@@ -68,18 +68,24 @@ struct KfcTaskData {
 };
 
 struct KfcOpData {
-    uint16_t deviceId;
-    std::string opName;
-    uint64_t timestamp;
-    double duration;
+    uint16_t deviceId = UINT16_MAX;
+    uint32_t modelId = UINT32_MAX;
+    uint64_t start = UINT64_MAX;
+    uint64_t connectionId = UINT64_MAX;
+    uint64_t dataType = UINT64_MAX;
+    uint64_t count = UINT64_MAX;
+    uint64_t end = UINT64_MAX;
+    uint64_t rankSize = UINT64_MAX;
     std::string groupName;
-    uint64_t connectionId;
-    uint32_t modelId;
+    std::string opName;
+    std::string algType;
     KfcOpData() = default;
-    KfcOpData(uint16_t _deviceId, std::string _opName, uint64_t _timestamp, double _duration, std::string _groupName,
-              uint64_t _connectionId, uint32_t _modelId)
-        : deviceId(_deviceId), opName(_opName), timestamp(_timestamp), duration(_duration), groupName(_groupName),
-        connectionId(_connectionId), modelId(_modelId) {};
+    KfcOpData(uint16_t _deviceId, const std::string &_opName, uint64_t _timestamp, uint64_t _end,
+              const std::string &_groupName, uint64_t _connectionId, uint32_t _modelId, uint64_t _dataType,
+              uint64_t _count, const std::string &_algType, uint64_t _rankSize)
+        : deviceId(_deviceId), opName(_opName), start(_timestamp), end(_end), groupName(_groupName),
+        connectionId(_connectionId), modelId(_modelId), dataType(_dataType), count(_count), algType(_algType),
+        rankSize(_rankSize) {};
 };
 }
 }

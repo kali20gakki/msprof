@@ -146,7 +146,7 @@ TEST_F(KfcProcessorUtest, TestRunShouldReturnTRUEWhenSourceTableNotExist)
     for (auto path: PROF_PATHS) {
         auto processor = KfcTaskProcessor(path);
         auto dataInventory = DataInventory();
-        EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
+        EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
     }
 }
 

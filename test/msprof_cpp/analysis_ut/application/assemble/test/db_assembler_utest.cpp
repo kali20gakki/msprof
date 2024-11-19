@@ -156,7 +156,7 @@ static std::vector<CommunicationTaskData> GenerateTaskData()
     data.rdmaType = UINT16_MAX;
     data.start = 1717575960213957957; // start 1717575960213957957
     data.duration = 1000000.0; // dur 1000000.0
-    data.duration_estimated = 20.0; // es_dur 20.0
+    data.durationEstimated = 20.0; // es_dur 20.0
     data.bandwidth = 0.0; // bw 0.0
     res.push_back(data);
     return res;

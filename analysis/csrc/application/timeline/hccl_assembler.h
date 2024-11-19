@@ -15,25 +15,28 @@
 
 #include "analysis/csrc/application/timeline/json_assembler.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/communication_info_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/kfc_turn_data.h"
+#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/application/timeline/connection_id_pool.h"
 
 namespace Analysis {
 namespace Application {
-class HcclAssembler : public JsonAssembler {
-public:
-    HcclAssembler();
-private:
-    uint8_t AssembleData(DataInventory& dataInventory, JsonWriter &ostream, const std::string &profPath) override;
-    void GenerateHcclTaskTrace(const std::vector<CommunicationTaskData> &task, const std::string &profPath,
-                               std::unordered_map<uint16_t, uint32_t> &pidMap, const LayerInfo &layerInfo);
-    void GenerateHcclOpTrace(const std::vector<CommunicationOpData> &opData, const std::string &profPath,
-                             std::unordered_map<uint16_t, uint32_t> &pidMap, const LayerInfo &layerInfo);
-    void GenerateConnectionTrace(const CommunicationOpData &data, uint32_t formatPid, int tid);
-    void GenerateMetaDataEvent(std::unordered_map<uint16_t, uint32_t> &pidMap, const LayerInfo &layerInfo);
-private:
-    std::vector<std::shared_ptr<TraceEvent>> res_;
-    std::unordered_map<std::string, int> groupIndex_;
-    std::set<std::pair<uint32_t, int>> pidTidSet_;
-    int32_t maxPlainId_ = 1;
+using namespace Analysis::Viewer::Database;
+const int32_t INVALID_PLANE = -1;
+enum class HcclType {
+    HCCL = 0,
+    MC2,
+    INVALID
+};
+
+struct HcclGroup {
+    int32_t startIndex = 0;
+    std::string groupName;
+    HcclType type;
+    std::set<int32_t> planes;
+    HcclGroup() = default;
+    HcclGroup(const std::string &groupName_, HcclType &&type_, const std::set<int32_t> &planes_)
+        : groupName(groupName_), type(type_), planes(planes_) {}
 };
 
 class HcclOpTraceEvent : public DurationEvent {
@@ -79,6 +82,91 @@ private:
     std::string taskType;
     std::string dataType_;
     std::string linkType_;
+};
+class HcclAssembler : public JsonAssembler {
+public:
+    HcclAssembler();
+private:
+    uint8_t AssembleData(DataInventory& dataInventory, JsonWriter &ostream, const std::string &profPath) override;
+    std::string TransEnumToType(uint64_t key, const std::unordered_map<std::string, uint16_t > &enumTable);
+    void GenerateMetaDataEvent(std::unordered_map<uint16_t, uint32_t>& pidMap, const LayerInfo &layerInfo,
+                               const std::string &profPath);
+    void GenerateTMetaDataEvent(std::vector<HcclGroup> &group, int32_t &index, uint32_t formatPid);
+    int32_t GetTid(const std::string groupName, const uint16_t deviceId, const HcclType &type);
+    std::unordered_map<uint16_t, std::unordered_map<std::string, std::vector<HcclGroup>>> InitHcclGroup(
+        std::shared_ptr<std::vector<CommunicationTaskData>> &hcclData,
+        std::shared_ptr<std::vector<KfcTaskData>> &kfcData);
+
+    template<typename T>
+    void GenerateCommTaskTrace(const std::vector<T> &task, const std::string &profPath, HcclType &&type,
+                               std::unordered_map<uint16_t, uint32_t> &pidMap, const LayerInfo &layerInfo)
+    {
+        INFO("Start GenerateCommTaskTrace");
+        uint32_t formatPid;
+        int tid;
+        std::string transport;
+        std::string dataType;
+        std::string linkType;
+        for (auto &data : task) {
+            // L0场景不需要呈现小算子数据
+            if (data.planeId == INVALID_PLANE) {
+                return;
+            }
+            formatPid = GetDevicePid(pidMap, data.deviceId, profPath, layerInfo.sortIndex);
+            tid = GetTid(data.groupName, data.deviceId, type);
+            if (tid == -1) {
+                continue;
+            }
+            transport = TransEnumToType(data.transportType, HCCL_TRANSPORT_TYPE_TABLE);
+            dataType = TransEnumToType(data.dataType, HCCL_DATA_TYPE_TABLE);
+            linkType = TransEnumToType(data.linkType, HCCL_LINK_TYPE_TABLE);
+            std::shared_ptr<HcclTaskTraceEvent> event;
+            MAKE_SHARED_RETURN_VOID(event, HcclTaskTraceEvent, formatPid, tid, data.duration / NS_TO_US,
+                                    std::to_string(data.start / NS_TO_US), data.taskType, data.srcRank, data.dstRank,
+                                    data.streamId, data.taskId, data.contextId, data.modelId, data.size,
+                                    data.durationEstimated, data.bandwidth, data.notifyId, transport,
+                                    data.taskType, dataType, linkType);
+            res_.push_back(event);
+        }
+    }
+
+    template<typename T>
+    void GenerateConnectionTrace(const T& data, uint32_t formatPid, int tid)
+    {
+        auto connId = ConnectionIdPool::GetConnectionId(data.connectionId, ConnectionCategory::GENERAL);
+        auto traceName = HOST_TO_DEVICE + connId;
+        std::shared_ptr<FlowEvent> flow;
+        MAKE_SHARED_RETURN_VOID(flow, FlowEvent, formatPid, tid, std::to_string(data.start / NS_TO_US), HOST_TO_DEVICE,
+                                connId, traceName, FLOW_END, FLOW_BP);
+        res_.push_back(flow);
+    }
+
+    template<typename T>
+    void GenerateCommOpTrace(const std::vector<T> &opData, const std::string &profPath, HcclType &&type,
+                             std::unordered_map<uint16_t, uint32_t> &pidMap, const LayerInfo &layerInfo)
+    {
+        INFO("Start GenerateCommOpTrace");
+        uint32_t formatPid;
+        int tid;
+        std::string dataType;
+        for (auto &data : opData) {
+            formatPid = GetDevicePid(pidMap, data.deviceId, profPath, layerInfo.sortIndex);
+            tid = GetTid(data.groupName, data.deviceId, type);
+            if (tid == -1) {
+                continue;
+            }
+            dataType = TransEnumToType(data.dataType, HCCL_DATA_TYPE_TABLE);
+            std::shared_ptr<HcclOpTraceEvent> event;
+            MAKE_SHARED_RETURN_VOID(event, HcclOpTraceEvent, formatPid, tid, (data.end - data.start) / NS_TO_US,
+                                    std::to_string(data.start / NS_TO_US), data.opName, data.modelId, data.count,
+                                    data.connectionId, dataType, data.algType);
+            res_.push_back(event);
+            GenerateConnectionTrace(data, formatPid, tid);
+        }
+    }
+private:
+    std::vector<std::shared_ptr<TraceEvent>> res_;
+    std::unordered_map<uint16_t, std::unordered_map<std::string, std::vector<HcclGroup>>> groupIndex_;
 };
 }
 }

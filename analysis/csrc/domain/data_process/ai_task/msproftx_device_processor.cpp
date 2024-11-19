@@ -30,7 +30,7 @@ bool MsprofTxDeviceProcessor::ProcessOneDevice(const ProfTimeRecord &record, std
     if (!stepTraceDB.ConstructDBRunner(dbPath)) {
         return false;
     }
-    auto status = CheckPathAndTable(dbPath, stepTraceDB);
+    auto status = CheckPathAndTable(dbPath, stepTraceDB, false);
     if (status != CHECK_SUCCESS) {
         if (status == CHECK_FAILED) {
             return false;
