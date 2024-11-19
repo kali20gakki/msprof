@@ -40,28 +40,27 @@ bool KfcTaskProcessor::Process(DataInventory& dataInventory)
             continue;
         }
 
-        auto commStatus = CheckPathAndTable(dbPath, kfcCommTurnDB);
-        auto computeStatus = CheckPathAndTable(dbPath, kfcComputeTurnDB);
-        if (commStatus != CHECK_SUCCESS && computeStatus != CHECK_SUCCESS) {
-            if (commStatus == CHECK_FAILED || computeStatus == CHECK_FAILED) {
-                flag = false;
-            }
-            continue;
-        }
-
-        // db取出所有的数据
-        auto commData = LoadCommData(kfcCommTurnDB, dbPath);
-        auto computeData = LoadComputeData(kfcComputeTurnDB, dbPath);
+        auto commStatus = CheckPathAndTable(dbPath, kfcCommTurnDB, false);
+        auto computeStatus = CheckPathAndTable(dbPath, kfcComputeTurnDB, false);
         uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-        // 完成format
-        std::vector<KfcTurnData> kfcCommTurnData = FormatCommData(commData, deviceId);
-        result.insert(result.end(), kfcCommTurnData.begin(), kfcCommTurnData.end());
-        std::vector<KfcTurnData> kfcComputeTurnData = FormatComputeData(computeData, deviceId);
-        result.insert(result.end(), kfcComputeTurnData.begin(), kfcComputeTurnData.end());
+        if (computeStatus == CHECK_SUCCESS) {
+            auto computeData = LoadComputeData(kfcComputeTurnDB, dbPath);
+            std::vector<KfcTurnData> kfcComputeTurnData = FormatComputeData(computeData, deviceId);
+            result.insert(result.end(), kfcComputeTurnData.begin(), kfcComputeTurnData.end());
+        } else {
+            flag = (computeStatus == NOT_EXIST) && flag;
+        }
+        if (commStatus == CHECK_SUCCESS) {
+            auto commData = LoadCommData(kfcCommTurnDB, dbPath);
+            std::vector<KfcTurnData> kfcCommTurnData = FormatCommData(commData, deviceId);
+            result.insert(result.end(), kfcCommTurnData.begin(), kfcCommTurnData.end());
+        } else {
+            flag = (commStatus == NOT_EXIST) && flag;
+        }
     }
 
-    if (!SaveToDataInventory<KfcTurnData>(std::move(result), dataInventory, PROCESSOR_NAME_TASK)) {
-        ERROR("Save data failed, %.", PROCESSOR_NAME_TASK);
+    if (!SaveToDataInventory<KfcTurnData>(std::move(result), dataInventory, PROCESSOR_NAME_KFC_TASK)) {
+        ERROR("Save data failed, %.", PROCESSOR_NAME_KFC_TASK);
         flag = false;
     }
     return flag;
@@ -126,30 +125,41 @@ std::vector<KfcTurnData> KfcTaskProcessor::FormatCommData(const std::vector<KfcC
         ERROR("GetSyscntConversionParams failed, profPath is %.", profPath_);
         return {};
     }
+    ProfTimeRecord record;
+    if (!Context::GetInstance().GetProfTimeRecordInfo(record, profPath_)) {
+        ERROR("GetProfTimeRecordInfo failed, profPath is %.", profPath_);
+        return {};
+    }
     std::vector<KfcTurnData> ans;
-
+    HPFloat startTimestamp;
     for (const auto& commData : oriCommData) {
-        ans.emplace_back("WaitNotify " + commData.currentTurn, commData.deviceId, commData.streamId,
-                         commData.taskId, GetTimeFromSyscnt(commData.waitNotifyStartTime, params).Uint64(),
+        startTimestamp = GetTimeFromSyscnt(commData.waitNotifyStartTime, params);
+        ans.emplace_back("WaitNotify " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
+                         commData.taskId, GetLocalTime(startTimestamp, record).Uint64(),
                          GetDurTimeFromSyscnt(commData.kfcAlgExeStartTime - commData.waitNotifyStartTime, params)
                          .Double());
-        ans.emplace_back("KfcAlgExe " + commData.currentTurn, commData.deviceId, commData.streamId,
-                         commData.taskId, GetTimeFromSyscnt(commData.kfcAlgExeStartTime, params).Uint64(),
+        startTimestamp = GetTimeFromSyscnt(commData.kfcAlgExeStartTime, params);
+        ans.emplace_back("KfcAlgExe " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
+                         commData.taskId, GetLocalTime(startTimestamp, record).Uint64(),
                          GetDurTimeFromSyscnt(commData.sendTaskStartTime - commData.kfcAlgExeStartTime, params)
                          .Double());
-        ans.emplace_back("SendTask " + commData.currentTurn, commData.deviceId, commData.streamId,
-                         commData.taskId, GetTimeFromSyscnt(commData.sendTaskStartTime, params).Uint64(),
+        startTimestamp = GetTimeFromSyscnt(commData.sendTaskStartTime, params);
+        ans.emplace_back("SendTask " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
+                         commData.taskId, GetLocalTime(startTimestamp, record).Uint64(),
                          GetDurTimeFromSyscnt(commData.waitActiveStartTime - commData.sendTaskStartTime, params)
                          .Double());
-        ans.emplace_back("WaitActive " + commData.currentTurn, commData.deviceId, commData.streamId,
-                         commData.taskId, GetTimeFromSyscnt(commData.waitActiveStartTime, params).Uint64(),
+        startTimestamp = GetTimeFromSyscnt(commData.waitActiveStartTime, params);
+        ans.emplace_back("WaitActive " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
+                         commData.taskId, GetLocalTime(startTimestamp, record).Uint64(),
                          GetDurTimeFromSyscnt(commData.activeStartTime - commData.sendTaskStartTime, params).Double());
-        ans.emplace_back("Active " + commData.currentTurn, commData.deviceId, commData.streamId, commData.taskId,
-                         GetTimeFromSyscnt(commData.activeStartTime, params).Uint64(),
-                         GetDurTimeFromSyscnt(commData.waitExeEndStartTime - commData.activeStartTime, params)
-                         .Double());
-        ans.emplace_back("WaitExeEnd " + commData.currentTurn, commData.deviceId, commData.streamId,
-                         commData.taskId, GetTimeFromSyscnt(commData.waitExeEndStartTime, params).Uint64(),
+        startTimestamp = GetTimeFromSyscnt(commData.activeStartTime, params);
+        ans.emplace_back("Active " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
+                         commData.taskId, GetLocalTime(startTimestamp, record).Uint64(),
+                         GetDurTimeFromSyscnt(commData.waitExeEndStartTime - commData.activeStartTime, params).
+                         Double());
+        startTimestamp = GetTimeFromSyscnt(commData.waitExeEndStartTime, params);
+        ans.emplace_back("WaitExeEnd " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
+                         commData.taskId, GetLocalTime(startTimestamp, record).Uint64(),
                          GetDurTimeFromSyscnt(commData.rtsqExeEndTime - commData.waitExeEndStartTime, params)
                          .Double());
     }
@@ -164,13 +174,21 @@ std::vector<KfcTurnData> KfcTaskProcessor::FormatComputeData(const std::vector<K
         ERROR("GetSyscntConversionParams failed, profPath is %.", profPath_);
         return {};
     }
+    ProfTimeRecord record;
+    if (!Context::GetInstance().GetProfTimeRecordInfo(record, profPath_)) {
+        ERROR("GetProfTimeRecordInfo failed, profPath is %.", profPath_);
+        return {};
+    }
     std::vector<KfcTurnData> ans;
+    HPFloat startTimestamp;
     for (auto& data : oriComputeData) {
-        ans.emplace_back("WaitCompute " + data.currentTurn, deviceId, data.streamId,
-                         data.taskId, GetTimeFromSyscnt(data.waitComputeStartTime, params).Uint64(),
+        startTimestamp = GetTimeFromSyscnt(data.waitComputeStartTime, params);
+        ans.emplace_back("WaitCompute " + std::to_string(data.currentTurn), deviceId, data.streamId,
+                         data.taskId, GetLocalTime(startTimestamp, record).Uint64(),
                          GetDurTimeFromSyscnt(data.computeStartTime - data.waitComputeStartTime, params).Double());
-        ans.emplace_back("Compute " + data.currentTurn, deviceId, data.streamId,
-                         data.taskId, GetTimeFromSyscnt(data.computeStartTime, params).Uint64(),
+        startTimestamp = GetTimeFromSyscnt(data.computeStartTime, params);
+        ans.emplace_back("Compute " + std::to_string(data.currentTurn), deviceId, data.streamId,
+                         data.taskId, GetLocalTime(startTimestamp, record).Uint64(),
                          GetDurTimeFromSyscnt(data.computeExeEndTime - data.computeStartTime, params).Double());
     }
     return ans;

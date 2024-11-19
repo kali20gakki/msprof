@@ -149,7 +149,7 @@ void CommunicationInfoProcessor::Update(const HcclTaskFormat& oriData, HcclTaskS
              hcclData.transportType, taskData.size, hcclData.dataType, hcclData.linkType,
              taskData.contextId, taskData.notifyId, taskData.batchId, hcclData.rdmaType,
              hcclData.timestamp, hcclData.duration, hcclData.connectionId,
-             taskData.duration_estimated, taskData.bandwidth) = oriData;
+             taskData.durationEstimated, taskData.bandwidth) = oriData;
     taskData.opName = hcclData.opName;
     taskData.deviceId = communicationData.deviceId;
     taskData.taskType = hcclData.HCCLName;
@@ -208,11 +208,11 @@ bool CommunicationInfoProcessor::ProcessOneDevice(const std::string& devicePath,
     if (!taskDBInfo.ConstructDBRunner(taskDBPath) || !opDBInfo.ConstructDBRunner(opDBPath)) {
         return false;
     }
-    auto status = CheckPathAndTable(taskDBPath, taskDBInfo);
+    auto status = CheckPathAndTable(taskDBPath, taskDBInfo, false);
     if (status != CHECK_SUCCESS) {
         return status != CHECK_FAILED;
     }
-    status = CheckPathAndTable(opDBPath, opDBInfo);
+    status = CheckPathAndTable(opDBPath, opDBInfo, false);
     if (status != CHECK_SUCCESS) {
         return status != CHECK_FAILED;
     }

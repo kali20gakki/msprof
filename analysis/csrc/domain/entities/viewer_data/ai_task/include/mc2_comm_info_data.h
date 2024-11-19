@@ -16,9 +16,8 @@
 namespace Analysis {
 namespace Domain {
 struct MC2CommInfoData {
-    uint16_t deviceId = UINT16_MAX;
     uint16_t aiCpuKfcStreamId = UINT16_MAX;   // 通信大算子所在stream
-    std::vector<uint16_t> commStreamIds{};    // 通信小算子所在stream
+    std::string commStreamIds;    // 通信小算子所在stream
 };
 }
 }

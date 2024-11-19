@@ -206,7 +206,7 @@ TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunS
     CheckStringId(taskRes);
 }
 
-TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnFalseWhenSourceTableNotExist)
+TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnTrueWhenSourceTableNotExist)
 {
     auto dbPath = File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX});
     std::shared_ptr<DBRunner> dbRunner;
@@ -219,7 +219,7 @@ TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnFalseWhenSourceTableN
     for (auto path : PROF_PATHS) {
         auto processor = CommunicationInfoProcessor(path);
         auto dataInventory = DataInventory();
-        EXPECT_FALSE(processor.Run(dataInventory, processorName));
+        EXPECT_TRUE(processor.Run(dataInventory, processorName));
     }
 }
 

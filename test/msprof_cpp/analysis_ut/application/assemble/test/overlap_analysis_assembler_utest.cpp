@@ -360,7 +360,6 @@ static std::vector<MC2CommInfoData> GenerateMC2CommInfoS1ByDeviceId(uint16_t dev
 {
     uint16_t kfcStream = 1;
     MC2CommInfoData data;
-    data.deviceId = deviceId;
     data.aiCpuKfcStreamId = kfcStream;
     return {data};
 }

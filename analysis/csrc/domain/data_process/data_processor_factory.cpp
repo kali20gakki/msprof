@@ -34,6 +34,7 @@
 #include "analysis/csrc/domain/data_process/system/soc_bandwidth_processor.h"
 #include "analysis/csrc/domain/data_process/system/sys_io_processor.h"
 #include "analysis/csrc/domain/data_process/system/qos_processor.h"
+#include "analysis/csrc/domain/data_process/ai_task/mc2_comm_info_processor.h"
 
 namespace Analysis {
 namespace Domain {
@@ -91,7 +92,9 @@ std::unordered_map<std::string, ProcessorCreator> DataProcessorFactory::processo
     {PROCESSOR_NAME_ROCE, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
         MAKE_SHARED_RETURN_VOID(processor, RoCEProcessor, profPath);}},
     {PROCESSOR_NAME_QOS, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
-        MAKE_SHARED_RETURN_VOID(processor, QosProcessor, profPath);}}
+        MAKE_SHARED_RETURN_VOID(processor, QosProcessor, profPath);}},
+    {PROCESSOR_MC2_COMM_INFO, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
+        MAKE_SHARED_RETURN_VOID(processor, Mc2CommInfoProcessor, profPath);}}
 };
 
 std::shared_ptr<DataProcessor> DataProcessorFactory::GetDataProcessByName(const std::string &profPath,

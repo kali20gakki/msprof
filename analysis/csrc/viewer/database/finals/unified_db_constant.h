@@ -142,6 +142,7 @@ const std::string PROCESSOR_NAME_DISK_USAGE = "DISK_USAGE";
 const std::string PROCESSOR_NAME_NETWORK_USAGE = "NETWORK_USAGE";
 const std::string PROCESSOR_NAME_HASH = "HASH_INIT";
 const std::string PROCESSOR_NAME_QOS = "QOS";
+const std::string PROCESSOR_MC2_COMM_INFO = "MC2_COMM_INFO";
 
 // mstx event type
 const std::unordered_map<std::string, uint16_t> MSTX_EVENT_TYPE_TABLE = {
