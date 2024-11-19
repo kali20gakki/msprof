@@ -1,0 +1,101 @@
+/* ******************************************************************************
+            版权所有 (c) 华为技术有限公司 2024-2024
+            Copyright, 2024, Huawei Tech. Co., Ltd.
+****************************************************************************** */
+/* ******************************************************************************
+ * File Name          : hccl_repoter.cpp
+ * Description        : 上报记录hccl数据
+ * Author             : msprof team
+ * Creation Date      : 2024/11/18
+ * *****************************************************************************
+*/
+#include "hccl_reporter.h"
+#include "activity/activity_manager.h"
+#include "common/plog_manager.h"
+#include "hccl_calculator.h"
+
+namespace Mspti {
+namespace Parser {
+
+HcclReporter* HcclReporter::GetInstance()
+{
+    static HcclReporter instance;
+    return &instance;
+}
+
+msptiResult HcclReporter::RecordHcclMarker(const msptiActivityMarker *markActivity)
+{
+    if (markActivity == nullptr) {
+        MSPTI_LOGE("markActivity is nullptr, record fail");
+        return MSPTI_ERROR_INNER;
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(markMutex_);
+        // 如果markId2HcclOp_中没有这个算子, 认为是新增的, 需要补充start,
+        if (markActivity->flag == MSPTI_ACTIVITY_FLAG_MARKER_START_WITH_DEVICE) {
+            return RecordStartMarker(markActivity);
+        }
+
+        if (markActivity->flag == MSPTI_ACTIVITY_FLAG_MARKER_END_WITH_DEVICE) {
+            return ReportHcclData(markActivity);
+        }
+    }
+    MSPTI_LOGE("mark isn't target kind, markId: %lu, kind: %d", markActivity->id, markActivity->kind);
+    return MSPTI_ERROR_INNER;
+}
+
+msptiResult HcclReporter::RecordHcclOp(uint32_t markId, std::shared_ptr<HcclOpDesc> opDesc)
+{
+    std::lock_guard<std::mutex> lock(markMutex_);
+    markId2HcclOp_[markId] = std::move(opDesc);
+    return MSPTI_SUCCESS;
+}
+
+msptiResult HcclReporter::ReportHcclActivity(std::shared_ptr<HcclOpDesc> hcclOpDesc)
+{
+    msptiActivityHccl activityHccl{};
+    activityHccl.kind = MSPTI_ACTIVITY_KIND_HCCL;
+    activityHccl.name = hcclOpDesc->opName.c_str();
+    activityHccl.ds.streamId = hcclOpDesc->streamId;
+    activityHccl.ds.deviceId = hcclOpDesc->deviceId;
+    activityHccl.bandWidth = hcclOpDesc->bandWidth;
+    activityHccl.start = hcclOpDesc->start;
+    activityHccl.end = hcclOpDesc->end;
+    activityHccl.commName = hcclOpDesc->commName.c_str();
+    if (Mspti::Activity::ActivityManager::GetInstance()->Record(
+        reinterpret_cast<msptiActivity *>(&activityHccl), sizeof(msptiActivityHccl)) != MSPTI_SUCCESS) {
+        MSPTI_LOGE("ReportHcclActivity fail, please check buffer");
+        return MSPTI_ERROR_INNER;
+    }
+    return MSPTI_SUCCESS;
+}
+
+msptiResult HcclReporter::RecordStartMarker(const msptiActivityMarker *markActivity)
+{
+    auto it = markId2HcclOp_.find(markActivity->id);
+    if (it == markId2HcclOp_.end()) {
+        MSPTI_LOGW("The corresponding start mark is not cached, id is %lu", markActivity->id);
+        return MSPTI_ERROR_INNER;
+    }
+    it->second->start = markActivity->timestamp;
+    it->second->deviceId = markActivity->objectId.ds.deviceId;
+    it->second->streamId = markActivity->objectId.ds.streamId;
+    return MSPTI_SUCCESS;
+}
+
+msptiResult HcclReporter::ReportHcclData(const msptiActivityMarker *markActivity)
+{
+    auto it = markId2HcclOp_.find(markActivity->id);
+    if (it == markId2HcclOp_.end()) {
+        MSPTI_LOGW("The corresponding end mark is not cached, id is %lu", markActivity->id);
+        return MSPTI_ERROR_INNER;
+    }
+    it->second->end = markActivity->timestamp;
+    HcclCalculator::CalculateBandWidth(it->second.get());
+    ReportHcclActivity(it->second);
+    markId2HcclOp_.erase(it);
+    return MSPTI_SUCCESS;
+}
+}
+}
