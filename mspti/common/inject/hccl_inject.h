@@ -118,6 +118,9 @@ MSPTI_API HcclResult HcclRecv(VOID_PTR recvBuf, uint64_t count, HcclDataType dat
                               aclrtStream stream);
 MSPTI_API HcclResult HcclBatchSendRecv(HcclSendRecvItem* sendRecvInfo, uint32_t itemNum, HcclComm comm,
                                        aclrtStream stream);
+// Inner
+HcclResult HcclGetCommName(HcclComm comm, char* commName);
+HcclResult HcclGetRankSize(HcclComm comm, uint32_t *rankSize);
 
 #if defined(__cplusplus)
 }

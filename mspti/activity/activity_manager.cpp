@@ -78,7 +78,7 @@ size_t ActivityBuffer::ValidSize()
 }
 
 const std::set<msptiActivityKind> ActivityManager::supportActivityKinds_ = {
-    MSPTI_ACTIVITY_KIND_MARKER, MSPTI_ACTIVITY_KIND_KERNEL, MSPTI_ACTIVITY_KIND_API,
+    MSPTI_ACTIVITY_KIND_MARKER, MSPTI_ACTIVITY_KIND_KERNEL, MSPTI_ACTIVITY_KIND_API, MSPTI_ACTIVITY_KIND_HCCL
 };
 
 ActivityManager *ActivityManager::GetInstance()
@@ -209,6 +209,10 @@ msptiResult ActivityManager::GetNextRecord(uint8_t *buffer, size_t validBufferSi
         case MSPTI_ACTIVITY_KIND_API:
             *record = reinterpret_cast<msptiActivity*>(buffer + pos);
             pos += sizeof(msptiActivityApi);
+            break;
+        case MSPTI_ACTIVITY_KIND_HCCL:
+            *record = reinterpret_cast<msptiActivity*>(buffer + pos);
+            pos += sizeof(msptiActivityHccl);
             break;
         default:
             MSPTI_LOGE("GetNextRecord failed, invalid kind: %d", *pKind);

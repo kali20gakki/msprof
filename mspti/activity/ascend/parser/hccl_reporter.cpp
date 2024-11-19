@@ -12,7 +12,9 @@
 #include "hccl_reporter.h"
 #include "activity/activity_manager.h"
 #include "common/plog_manager.h"
+#include "common/utils.h"
 #include "hccl_calculator.h"
+#include "securec.h"
 
 namespace Mspti {
 namespace Parser {
@@ -62,7 +64,7 @@ msptiResult HcclReporter::ReportHcclActivity(std::shared_ptr<HcclOpDesc> hcclOpD
     activityHccl.bandWidth = hcclOpDesc->bandWidth;
     activityHccl.start = hcclOpDesc->start;
     activityHccl.end = hcclOpDesc->end;
-    activityHccl.commName = hcclOpDesc->commName.c_str();
+    activityHccl.commName = GetSharedHcclName(hcclOpDesc->commName);
     if (Mspti::Activity::ActivityManager::GetInstance()->Record(
         reinterpret_cast<msptiActivity *>(&activityHccl), sizeof(msptiActivityHccl)) != MSPTI_SUCCESS) {
         MSPTI_LOGE("ReportHcclActivity fail, please check buffer");
@@ -96,6 +98,17 @@ msptiResult HcclReporter::ReportHcclData(const msptiActivityMarker *markActivity
     ReportHcclActivity(it->second);
     markId2HcclOp_.erase(it);
     return MSPTI_SUCCESS;
+}
+
+const char* HcclReporter::GetSharedHcclName(std::string& hcclName)
+{
+    std::lock_guard<std::mutex> lock(nameMutex_);
+    if (!commNameCache_.count(hcclName)) {
+        std::shared_ptr<std::string> ptr;
+        Mspti::Common::MsptiMakeSharedPtr(ptr, hcclName);
+        commNameCache_.insert({hcclName, ptr});
+    }
+    return commNameCache_[hcclName]->c_str();
 }
 }
 }
