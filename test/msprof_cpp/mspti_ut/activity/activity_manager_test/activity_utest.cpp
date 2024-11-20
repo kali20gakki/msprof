@@ -162,4 +162,49 @@ TEST_F(ActivityUtest, IsActivityKindEnableWillReturnFalseWhenNotEnableMarkerKind
     msptiActivityDisable(MSPTI_ACTIVITY_KIND_MARKER);
     EXPECT_EQ(false, Mspti::Activity::ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER));
 }
+
+TEST_F(ActivityUtest, ShouleRetSuccessWhenSetPeriodFlushTime)
+{
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StartDevProfTask)
+        .stubs()
+        .will(returnValue(MSPTI_SUCCESS));
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StopDevProfTask)
+        .stubs()
+        .will(returnValue(MSPTI_SUCCESS));
+
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityRegisterCallbacks(UserBufferRequest, UserBufferComplete));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_MARKER));
+    auto instance = Mspti::Activity::ActivityManager::GetInstance();
+    EXPECT_EQ(MSPTI_SUCCESS, instance ->SetDevice(0));
+
+    msptiActivityMarker activity;
+    constexpr uint64_t timeStamp = 1614659207688700;
+    constexpr uint32_t markNum = 10;
+    constexpr uint32_t testPeriodFlushTime = 1000;
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityFlushPeriod(testPeriodFlushTime));
+    for (size_t i = 0; i < markNum ; ++i) {
+        activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
+        activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
+        activity.timestamp = timeStamp;
+        activity.id = i;
+        activity.objectId.pt.processId = 0;
+        activity.objectId.pt.threadId = 0;
+        activity.name = "UserMark";
+        instance->Record(reinterpret_cast<msptiActivity*>(&activity), sizeof(activity));
+    }
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityFlushPeriod(0));
+        for (size_t i = 0; i < markNum ; ++i) {
+        activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
+        activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
+        activity.timestamp = timeStamp;
+        activity.id = i + markNum;
+        activity.objectId.pt.processId = 0;
+        activity.objectId.pt.threadId = 0;
+        activity.name = "UserMark";
+        instance->Record(reinterpret_cast<msptiActivity*>(&activity), sizeof(activity));
+    }
+    EXPECT_EQ(MSPTI_SUCCESS, instance ->ResetAllDevice());
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityDisable(MSPTI_ACTIVITY_KIND_MARKER));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityFlushAll(1));
+}
 }

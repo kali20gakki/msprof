@@ -20,6 +20,7 @@ constexpr uint32_t HOST_ID = 64;
 constexpr uint32_t MSTONS = 1000000;
 constexpr uint32_t MARK_MAX_CACHE_NUM = std::numeric_limits<uint32_t>::max();
 constexpr uint32_t MAX_MARK_MSG_LEN = std::numeric_limits<uint8_t>::max();
+constexpr uint32_t DEFAULT_PERIOD_FLUSH_TIME = 60000;
 
 #define CHANNEL_PROF_ERROR (-1)
 #define CHANNEL_PROF_STOPPED_ALREADY (-4)

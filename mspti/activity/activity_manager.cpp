@@ -235,6 +235,20 @@ msptiResult ActivityManager::FlushAll()
     return MSPTI_SUCCESS;
 }
 
+msptiResult ActivityManager::FlushPeriod(uint32_t time)
+{
+    std::unique_lock<std::mutex> lck(cv_mtx_);
+    if (time == 0) {
+        flush_period_time_ = DEFAULT_PERIOD_FLUSH_TIME;
+        flush_period_ = false;
+    } else {
+        flush_period_time_ = time;
+        flush_period_ = true;
+        cv_.notify_one();
+    }
+    return MSPTI_SUCCESS;
+}
+
 msptiResult ActivityManager::Record(msptiActivity *activity, size_t size)
 {
     if (activity == nullptr) {
@@ -284,9 +298,16 @@ void ActivityManager::Run()
     while (true) {
         {
             std::unique_lock<std::mutex> lk(cv_mtx_);
-            cv_.wait(lk, [&] () {return buf_full_ || !thread_run_.load();});
+            bool serveForWaitFor = true;
+            cv_.wait_for(lk, std::chrono::milliseconds(flush_period_time_), [&]() {
+                serveForWaitFor = !serveForWaitFor;
+                return (serveForWaitFor && flush_period_) || buf_full_ || !thread_run_.load();
+            });
             if (!thread_run_.load()) {
                 break;
+            }
+            if (cur_buf_ && flush_period_) {
+                co_activity_buffers_.emplace_back(std::move(cur_buf_));
             }
             for (auto& activity_buffer : co_activity_buffers_) {
                 work_thread_.emplace_back(std::thread([this] (std::unique_ptr<ActivityBuffer> activity_buffer) {
@@ -359,4 +380,9 @@ msptiResult msptiActivityGetNextRecord(uint8_t *buffer, size_t validBufferSizeBy
 msptiResult msptiActivityFlushAll(uint32_t flag)
 {
     return Mspti::Activity::ActivityManager::GetInstance()->FlushAll();
+}
+
+msptiResult msptiActivityFlushPeriod(uint32_t time)
+{
+    return Mspti::Activity::ActivityManager::GetInstance()->FlushPeriod(time);
 }
