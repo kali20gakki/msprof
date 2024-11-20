@@ -91,6 +91,7 @@ bool DDRProcessor::ProcessOneDevice(const std::string& devicePath, LocaltimeCont
         return false;
     }
     res.insert(res.end(), formatData.begin(), formatData.end());
+    return true;
 }
 
 bool DDRProcessor::Process(DataInventory& dataInventory)
