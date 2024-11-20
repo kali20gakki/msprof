@@ -23,6 +23,7 @@
 #include <unordered_set>
 
 #include "external/mspti_activity.h"
+#include "common/config.h"
 
 namespace Mspti {
 namespace Activity {
@@ -50,6 +51,7 @@ public:
     msptiResult RegisterCallbacks(
         msptiBuffersCallbackRequestFunc funcBufferRequested,
         msptiBuffersCallbackCompleteFunc funcBufferCompleted);
+    msptiResult FlushPeriod(uint32_t time);
     msptiResult Record(msptiActivity *activity, size_t size);
     static msptiResult GetNextRecord(uint8_t *buffer, size_t validBufferSizeBytes, msptiActivity **record);
     msptiResult FlushAll();
@@ -83,6 +85,8 @@ private:
     std::condition_variable cv_;
     std::mutex cv_mtx_;
     bool buf_full_{false};
+    bool flush_period_{false};
+    uint32_t flush_period_time_{DEFAULT_PERIOD_FLUSH_TIME};
     std::vector<std::thread> work_thread_;
 
     std::deque<std::unique_ptr<ActivityBuffer>> co_activity_buffers_;

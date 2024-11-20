@@ -427,6 +427,24 @@ msptiResult msptiActivityGetNextRecord(uint8_t *buffer, size_t validBufferSizeBy
  */
 msptiResult msptiActivityFlushAll(uint32_t flag);
 
+/**
+ * @brief Periodically Request to deliver activity records via the buffer completion callback.
+ *
+ * This function periodically returns the activity records associated with
+ * all contexts/streams (and the global buffers not associated with any stream)
+ * to the MSPTI client using the callback registered in msptiActivityRegisterCallbacks.
+ * It periodically return all activity buffers that contain completed activity records,
+ * even if these buffers are not completely filled when call this function with param.
+ *
+ * Before calling this function, the buffer handling callback api must be activated
+ * by calling msptiActivityRegisterCallbacks.
+ *
+ * @param time Period flush time.Disable period flush when time is set to 0.
+ *
+ * @retval MSPTI_SUCCESS
+ */
+msptiResult msptiActivityFlushPeriod(uint32_t time);
+
 #if defined(__GNUC__) && defined(MSPTI_LIB)
 #pragma GCC visibility pop
 #endif
