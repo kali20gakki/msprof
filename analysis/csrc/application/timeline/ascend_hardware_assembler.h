@@ -67,6 +67,7 @@ private:
     void GenerateTaskConnectionTrace(const AscendTaskData &data, uint32_t formatPid, TaskId &id);
     void GenerateKfcTrace(const std::vector<KfcTurnData>& kfcData, const std::string &profPath,
                           const LayerInfo &layer, std::unordered_map<uint16_t, uint32_t> &pidMap);
+    std::string ConvertNs2UsWithDouble(uint64_t value);
 private:
     std::vector<std::shared_ptr<TraceEvent>> res_;
     std::shared_ptr<std::unordered_map<uint32_t, uint32_t>> logicStream_;

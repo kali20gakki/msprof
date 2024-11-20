@@ -49,8 +49,8 @@ bool MsprofTxDeviceProcessor::ProcessOneDevice(const ProfTimeRecord &record, std
     }
     auto oriData = LoadData(stepTraceDB, dbPath);
     if (oriData.empty()) {
-        ERROR("StepTrace for msprofTx original data is empty. DBPath is %", dbPath);
-        return false;
+        WARN("StepTrace for msprofTx original data is empty. DBPath is %", dbPath);
+        return true;
     }
     auto formatData = FormatData(oriData, record, deviceId, params);
     if (formatData.empty()) {

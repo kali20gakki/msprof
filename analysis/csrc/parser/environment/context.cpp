@@ -247,9 +247,9 @@ uint16_t Context::GetPlatformVersion(uint16_t deviceId, const std::string &profP
     return platformVersion;
 }
 
-bool Context::GetProfTimeRecordInfo(Utils::ProfTimeRecord &record, const std::string &profPath)
+bool Context::GetProfTimeRecordInfo(Utils::ProfTimeRecord &record, const std::string &profPath, uint16_t device_id)
 {
-    auto info = GetInfoByDeviceId(HOST_ID, profPath);
+    auto info = GetInfoByDeviceId(device_id, profPath);
     if (info.empty()) {
         WARN("There is no host time log in %, it will use device time log!", profPath);
         info = GetInfoByDeviceId(DEFAULT_DEVICE_ID, profPath);
