@@ -23,15 +23,11 @@ TaskProcessor::TaskProcessor(const std::string &profPath) : DataProcessor(profPa
 
 bool TaskProcessor::Process(DataInventory &dataInventory)
 {
-    ProfTimeRecord record;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(record, profPath_)) {
-        ERROR("GetProfTimeRecordInfo failed, profPath is %.", profPath_);
-        return false;
-    }
     bool flag = true;
     auto deviceList = Utils::File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     std::vector<AscendTaskData> res;
     for (const auto& devicePath: deviceList) {
+        ProfTimeRecord record;
         DBInfo ascendTaskDB("ascend_task.db", "AscendTask");
         std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, ascendTaskDB.dbName});
         if (!ascendTaskDB.ConstructDBRunner(dbPath)) {
@@ -50,6 +46,10 @@ bool TaskProcessor::Process(DataInventory &dataInventory)
             ERROR("the invalid deviceId cannot to be identified.");
             flag = false;
             continue;
+        }
+        if (!Context::GetInstance().GetProfTimeRecordInfo(record, profPath_, deviceId)) {
+            ERROR("GetProfTimeRecordInfo failed, profPath is %.", profPath_);
+            return false;
         }
         auto oriData = LoadData(ascendTaskDB, dbPath);
         if (oriData.empty()) {
