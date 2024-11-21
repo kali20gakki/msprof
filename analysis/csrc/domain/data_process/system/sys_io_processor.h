@@ -19,8 +19,6 @@
 namespace Analysis {
 namespace Domain {
 using namespace Analysis::Utils;
-const std::string PROCESSOR_NAME_NIC_TIMELINE = "NIC_TIMELINE";
-const std::string PROCESSOR_NAME_ROCE_TIMELINE = "ROCE_TIMELINE";
 // timestamp, bandwidth, rxpacket, rxbyte, rxpackets, rxbytes, rxerrors, rxdropped,
 // txpacket, txbyte, txpackets, txbytes, txerrors, txdropped, funcid
 using OriSysIOData = std::vector<std::tuple<double, uint32_t, double, double, uint32_t,

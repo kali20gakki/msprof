@@ -234,7 +234,7 @@ bool SysIOTimelineProcessor::Process(DataInventory &dataInventory)
         localtimeContext.deviceId= GetDeviceIdByDevicePath(devicePath);
         flag = ProcessSingleDevice(devicePath, localtimeContext, allProcessedData) && flag;
     }
-    if (processorName_ == PROCESSOR_NAME_NIC) {
+    if (processorName_ == PROCESSOR_NAME_NIC_TIMELINE) {
         std::vector<NicReceiveSendData> allNicReceiveSendData;
         NicReceiveSendData nicReceiveSendData;
         nicReceiveSendData.sysIOReceiveSendData = std::move(allProcessedData);

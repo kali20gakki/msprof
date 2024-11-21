@@ -71,19 +71,11 @@ bool ChipTransProcessor::ProcessOneDevice(const std::string& devicePath, ChipTra
         return status != CHECK_FAILED;
     }
     chipTransData.oriPaData = LoadPaData(paLinkInfo);
-    if (chipTransData.oriPaData.empty()) {
-        WARN("Get % data failed in %.", paLinkInfo.tableName, paLinkDBPath);
-        return true;
-    }
     chipTransData.oriPcieData = LoadPcieData(pcieInfo);
-    if (chipTransData.oriPcieData.empty()) {
-        WARN("Get % data failed in %.", pcieInfo.tableName, pcieDBPath);
-        return true;
-    }
     std::vector<PaLinkInfoData> paData;
     std::vector<PcieInfoData> pcieData;
     if (!FormatData(paData, pcieData, chipTransData, deviceId)) {
-        ERROR("Format data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO);
+        ERROR("Format data failed, %.", PROCESSOR_NAME_CHIP_TRAINS);
         return false;
     }
     chipTransData.resPaData.insert(chipTransData.resPaData.end(), paData.begin(), paData.end());
