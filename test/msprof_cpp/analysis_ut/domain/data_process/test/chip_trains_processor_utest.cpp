@@ -153,3 +153,20 @@ TEST_F(ChipTrainsProcessorUTest, TestRunShouldReturnFalseWhenConstructDBRunnerFa
     MOCKER_CPP(&DBInfo::ConstructDBRunner).reset();
 }
 
+TEST_F(ChipTrainsProcessorUTest, TestRunShouldReturnTrueWhenNoData)
+{
+    auto dbPath = File::PathJoin({PROF_PATH, DEVICE_SUFFIX, SQLITE, DB_SUFFIX});
+    std::shared_ptr<DBRunner> dbRunner;
+    MAKE_SHARED0_NO_OPERATION(dbRunner, DBRunner, dbPath);
+    MOCKER_CPP(&OriPaFormat::empty).stubs().will(returnValue(true));
+    auto processor = ChipTransProcessor(PROF_PATH);
+    auto dataInventory = DataInventory();
+    EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_CHIP_TRAINS));
+    MOCKER_CPP(&OriPaFormat::empty).reset();
+
+    MOCKER_CPP(&OriPcieFormat::empty).stubs().will(returnValue(true));
+    auto processor1 = ChipTransProcessor(PROF_PATH);
+    auto dataInventory1 = DataInventory();
+    EXPECT_TRUE(processor1.Run(dataInventory1, PROCESSOR_NAME_CHIP_TRAINS));
+    MOCKER_CPP(&OriPcieFormat::empty).reset();
+}

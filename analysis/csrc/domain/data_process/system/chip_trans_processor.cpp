@@ -72,13 +72,13 @@ bool ChipTransProcessor::ProcessOneDevice(const std::string& devicePath, ChipTra
     }
     chipTransData.oriPaData = LoadPaData(paLinkInfo);
     if (chipTransData.oriPaData.empty()) {
-        ERROR("Get % data failed in %.", paLinkInfo.tableName, paLinkDBPath);
-        return false;
+        WARN("Get % data failed in %.", paLinkInfo.tableName, paLinkDBPath);
+        return true;
     }
     chipTransData.oriPcieData = LoadPcieData(pcieInfo);
     if (chipTransData.oriPcieData.empty()) {
-        ERROR("Get % data failed in %.", pcieInfo.tableName, pcieDBPath);
-        return false;
+        WARN("Get % data failed in %.", pcieInfo.tableName, pcieDBPath);
+        return true;
     }
     std::vector<PaLinkInfoData> paData;
     std::vector<PcieInfoData> pcieData;

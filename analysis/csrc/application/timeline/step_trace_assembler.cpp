@@ -157,7 +157,7 @@ void StepTraceAssembler::GenerateDataAugTrace(const Analysis::Domain::TrainTrace
     MAKE_SHARED_RETURN_VOID(aug0Event, DataAug0TraceEvent, pid, tid, std::to_string(data.fpStart / NS_TO_US),
                             name, DATA_AUG, id, data.indexId);
     res_.push_back(aug0Event);
-    auto ts = data.bpEnd + data.dataAugBound / 2;
+    auto ts = (data.bpEnd + data.dataAugBound / 2) / NS_TO_US;
     std::shared_ptr<DataAug1TraceEvent> aug1Event;
     name = "Data_aug Bound " + std::to_string(data.indexId);
     MAKE_SHARED_RETURN_VOID(aug1Event, DataAug1TraceEvent, pid, tid, std::to_string(ts), name, DATA_AUG, id,
