@@ -43,6 +43,7 @@ from framework.file_dispatch import FileDispatch
 from framework.load_info_manager import LoadInfoManager
 from msinterface.msprof_c_interface import export_unified_db
 from msinterface.msprof_c_interface import dump_device_data
+from msinterface.msprof_c_interface import export_timeline
 from msinterface.msprof_export_data import MsProfExportDataUtils
 from msinterface.msprof_output_summary import MsprofOutputSummary
 from msinterface.msprof_timeline import MsprofTimeline
@@ -708,6 +709,15 @@ class ExportCommand:
         file_dispatch = FileDispatch(self._get_sample_json(device_path))
         file_dispatch.dispatch_calculator()
 
+    def _check_export_timeline_with_so(self, path_table: dict):
+        """
+        有so文件，且是task-based场景下导出timeline时会返回true
+        """
+        host_path = path_table.get(StrConstant.HOST_PATH)
+        valid_path = host_path if host_path else path_table.get(StrConstant.DEVICE_PATH)[0]
+        return ProfilingScene().is_cpp_parse_enable() and self.command_type == MsProfCommonConstant.TIMELINE \
+            and not ConfigMgr.is_ai_core_sample_based(valid_path)
+
     def _start_view(self, path_table: dict):
         if self.command_type == MsProfCommonConstant.DB:
             export_unified_db(path_table.get("collection_path"))
@@ -718,6 +728,10 @@ class ExportCommand:
         ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
         host_path = path_table.get(StrConstant.HOST_PATH)
         self._view_data(host_path)
+        # viewer timeline
+        if self._check_export_timeline_with_so(path_table):
+            export_timeline(path_table.get("collection_path"))
+            return
         # device
         ProfilingScene().set_mode(mode)
         device_paths_list = path_table.get(StrConstant.DEVICE_PATH, [])

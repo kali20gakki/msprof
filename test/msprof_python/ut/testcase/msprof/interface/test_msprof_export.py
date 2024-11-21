@@ -681,6 +681,16 @@ class TestExportCommand(unittest.TestCase):
                 event = {'export_type': ExportDataType.TASK_TIME}
                 test._multiprocessing_handle_export_data(event, "test", "summary")
 
+    def test__start_view_export_timeline_with_so(self) -> None:
+        path_table = {"collection_path": "test", "host": "test/host", "device": ["test/device_0"]}
+        args_dic = {"collection_path": "test", "iteration_id": None, "model_id": None, "iteration_count": None}
+        args = Namespace(**args_dic)
+        with mock.patch(NAMESPACE + '.ExportCommand._view_data'), \
+                mock.patch(NAMESPACE + '.ExportCommand._check_export_timeline_with_so', return_value=True), \
+                mock.patch('importlib.import_module'):
+            test = ExportCommand("timeline", args)
+            test._start_view(path_table)
+
 
 if __name__ == '__main__':
     unittest.main()
