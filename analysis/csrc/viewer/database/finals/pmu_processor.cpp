@@ -75,8 +75,8 @@ bool PmuProcessor::Process(const std::string &fileDir)
     }
     if (metricMode == TASK_BASED) {
         // 对于task-based pmu数据,目前只支持stars芯片(仅stars支持获取globalTaskId)
-        auto version = Context::GetInstance().GetPlatformVersion(Parser::Environment::DEFAULT_DEVICE_ID, fileDir);
-        if (!Context::GetInstance().IsStarsChip(version)) {
+        version_ = Context::GetInstance().GetPlatformVersion(Parser::Environment::DEFAULT_DEVICE_ID, fileDir);
+        if (!Context::GetInstance().IsStarsChip(version_)) {
             WARN("This platformVersion does not support the processing of pmu data.");
             return true;
         }
@@ -174,8 +174,14 @@ PmuProcessor::OTFormat PmuProcessor::GetTaskBasedData(const std::string &dbPath,
         ERROR("Create % connection failed.", dbPath);
         return oriData;
     }
-    std::string sql = "SELECT stream_id, task_id, subtask_id, batch_id, " + columnName + " "
-                      "FROM " + metricDB.tableName;
+    std::string subtask_id_sql;
+    if (Context::GetInstance().IsChipV1(version_)) {
+        subtask_id_sql = std::to_string(UINT32_MAX) + " AS subtask_id, ";
+    } else {
+        subtask_id_sql = "subtask_id, ";
+    }
+    std::string sql = "SELECT stream_id, task_id, ";
+    sql.append(subtask_id_sql).append(" batch_id, ").append(columnName).append(" FROM ").append(metricDB.tableName);
     if (!metricDB.dbRunner->QueryData(sql, oriData)) {
         ERROR("Query task-based % data failed, db path is %.", columnName, dbPath);
         return oriData;

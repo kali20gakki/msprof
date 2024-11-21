@@ -68,6 +68,8 @@ private:
     OSSFormat GetSampleBasedSummaryData(const std::string &dbPath);
     bool FormatSampleBasedSummaryData(const OSSFormat &oriData, PSSFormat &processedData, const uint16_t deviceId,
                                       const uint64_t coreType);
+private:
+    uint16_t version_;
 };
 
 
