@@ -18,8 +18,10 @@
 #include "analysis/csrc/parser/environment/context.h"
 #include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ascend_task_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/communication_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/msprof_tx_host_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/task_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/acc_pmu_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/aicore_freq_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/ddr_data.h"
@@ -27,6 +29,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/system/include/hccs_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/llc_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/npu_mem_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/npu_op_mem_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/pcie_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/soc_bandwidth_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
@@ -419,6 +422,34 @@ bool SaveNpuMemData(DataInventory& dataInventory, DBInfo& msprofDB, const std::s
     return SaveData(res, TABLE_NAME_NPU_MEM, msprofDB);
 }
 
+bool SaveNpuOpMemData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    // operatorName, addr, type, size, timestamp, globalTid, totalAllocate, totalReserve,  component, deviceId
+    using NpuOpMemDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
+                                                      uint64_t, uint64_t, uint64_t, uint16_t>>;
+    auto npuOpMemData = dataInventory.GetPtr<std::vector<NpuOpMemData>>();
+    if (npuOpMemData == nullptr) {
+        WARN("NpuOpMem data not exist.");
+        return true;
+    }
+    NpuOpMemDataFormat res;
+    if (!Reserve(res, npuOpMemData->size())) {
+        ERROR("Reserved for NpuOpMem data failed.");
+        return false;
+    }
+    uint64_t stringGeId = IdPool::GetInstance().GetUint64Id("GE");
+    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, profPath);
+    uint64_t operatorNameId;
+    uint64_t globalTid;
+    for (const auto& item : *npuOpMemData) {
+        operatorNameId = IdPool::GetInstance().GetUint64Id(item.operatorName);
+        globalTid = Utils::Contact(pid, item.threadId);
+        res.emplace_back(operatorNameId, item.addr, item.type, item.size, item.localTime, globalTid,
+                         item.totalAllocateMemory, item.totalReserveMemory, stringGeId, item.deviceId);
+    }
+    return SaveData(res, TABLE_NAME_NPU_OP_MEM, msprofDB);
+}
+
 bool SavePCIeData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
 {
     // deviceId, timestampNs, txPostMin, txPostMax, txPostAvg, txNonpostMin, txNonpostMax, txNonpostAvg,
@@ -481,6 +512,82 @@ bool SaveSocData(DataInventory& dataInventory, DBInfo& msprofDB, const std::stri
         res.emplace_back(item.l2_buffer_bw_level, item.mata_bw_level, item.timestamp, item.deviceId);
     }
     return SaveData(res, TABLE_NAME_SOC, msprofDB);
+}
+
+bool SaveComputeTaskInfo(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    // name, globalTaskId, block_dim, mixBlockDim, taskType, opType, inputFormats, inputDataTypes, inputShapes,
+    // outputFormats, outputDataTypes, outputShapes, hashid
+    using ComputeTaskInfoFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t,
+                                                       uint64_t, uint64_t, uint64_t, uint64_t,
+                                                       uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+    auto computeTaskInfo = dataInventory.GetPtr<std::vector<TaskInfoData>>();
+    if (computeTaskInfo == nullptr) {
+        WARN("ComputeTaskInfo data not exist.");
+        return true;
+    }
+    ComputeTaskInfoFormat res;
+    if (!Reserve(res, computeTaskInfo->size())) {
+        ERROR("Reserved for ComputeTaskInfo data failed.");
+        return false;
+    }
+    uint64_t opName;
+    uint64_t globalTaskId;
+    uint64_t taskType;
+    uint64_t opType;
+    uint64_t inputFormats;
+    uint64_t inputDataTypes;
+    uint64_t inputShapes;
+    uint64_t outputFormats;
+    uint64_t outputDataTypes;
+    uint64_t outputShapes;
+    uint64_t hashId;  // 对应attrInfo
+    for (const auto& item : *computeTaskInfo) {
+        opName = IdPool::GetInstance().GetUint64Id(item.opName);
+        globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(item.deviceId, item.streamId, item.taskId,
+                                                                   item.contextId, item.batchId));
+        taskType = IdPool::GetInstance().GetUint64Id(item.taskType);
+        opType = IdPool::GetInstance().GetUint64Id(item.opType);
+        inputFormats = IdPool::GetInstance().GetUint64Id(item.inputFormats);
+        inputDataTypes = IdPool::GetInstance().GetUint64Id(item.inputDataTypes);
+        inputShapes = IdPool::GetInstance().GetUint64Id(item.inputShapes);
+        outputFormats = IdPool::GetInstance().GetUint64Id(item.outputFormats);
+        outputDataTypes = IdPool::GetInstance().GetUint64Id(item.outputDataTypes);
+        outputShapes = IdPool::GetInstance().GetUint64Id(item.outputShapes);
+        hashId = IdPool::GetInstance().GetUint64Id(item.hashId);
+        res.emplace_back(opName, globalTaskId, item.blockDim, item.mixBlockDim, taskType, opType, inputFormats,
+                         inputDataTypes, inputShapes, outputFormats, outputDataTypes, outputShapes, hashId);
+    }
+    return SaveData(res, TABLE_NAME_COMPUTE_TASK_INFO, msprofDB);
+}
+
+bool SaveAscendTaskData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    // start, end, deviceId, connectionId, globalTaskId, globalPid, taskType, contextId, streamId, taskId,
+    // modelId
+    using ascendTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, int64_t, uint64_t,
+                                                       uint32_t, uint32_t, uint32_t, int32_t, uint32_t, uint32_t>>;
+    auto ascendTaskData = dataInventory.GetPtr<std::vector<AscendTaskData>>();
+    if (ascendTaskData == nullptr) {
+        WARN("AscendTaskData data not exist.");
+        return true;
+    }
+    ascendTaskDataFormat res;
+    if (!Reserve(res, ascendTaskData->size())) {
+        ERROR("Reserved for AscendTaskData data failed.");
+        return false;
+    }
+    uint64_t globalTaskId;
+    uint32_t globalPid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, profPath);
+    uint64_t taskType;
+    for (const auto& item : *ascendTaskData) {
+        globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(item.deviceId, item.streamId, item.taskId,
+                                                                   item.contextId, item.batchId));
+        taskType = IdPool::GetInstance().GetUint64Id(item.taskType);
+        res.emplace_back(item.start, item.end, item.deviceId, item.connectionId, globalTaskId, globalPid,
+                         taskType, item.contextId, item.streamId, item.taskId, item.taskId);
+    }
+    return SaveData(res, TABLE_NAME_TASK, msprofDB);
 }
 
 bool SaveStringIdsData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
@@ -561,11 +668,14 @@ const std::unordered_map<std::string, SaveDataFunc> DATA_SAVER = {
     {Viewer::Database::PROCESSOR_NAME_MSTX,              SaveMsprofTxData},
     {Viewer::Database::PROCESSOR_NAME_NPU_INFO,          SaveNpuInfoData},
     {Viewer::Database::PROCESSOR_NAME_NPU_MEM,           SaveNpuMemData},
+    {Viewer::Database::PROCESSOR_NAME_NPU_OP_MEM,        SaveNpuOpMemData},
     {Viewer::Database::PROCESSOR_NAME_PCIE,              SavePCIeData},
     {Viewer::Database::PROCESSOR_NAME_SESSION_TIME_INFO, SaveSessionTimeInfoData},
     {Viewer::Database::PROCESSOR_NAME_SOC,               SaveSocData},
     {Viewer::Database::PROCESSOR_NAME_NIC,               SaveNicData},
     {Viewer::Database::PROCESSOR_NAME_ROCE,              SaveRoCEData},
+    {Viewer::Database::PROCESSOR_NAME_TASK,              SaveAscendTaskData},
+    {Viewer::Database::PROCESSOR_NAME_COMPUTE_TASK_INFO, SaveComputeTaskInfo},
 };
 }
 

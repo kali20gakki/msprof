@@ -18,15 +18,18 @@
 #include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ascend_task_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/communication_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/msprof_tx_host_data.h"
-#include "analysis/csrc/domain/entities/viewer_data/system//include/acc_pmu_data.h"
-#include "analysis/csrc/domain/entities/viewer_data/system//include/aicore_freq_data.h"
-#include "analysis/csrc/domain/entities/viewer_data/system//include/ddr_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/task_info_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/acc_pmu_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/aicore_freq_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/ddr_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/hbm_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/hccs_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/llc_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/npu_mem_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/npu_op_mem_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/pcie_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/soc_bandwidth_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
@@ -318,6 +321,63 @@ static std::vector<RoceOriginalData> GenerateRoceData()
     std::vector<RoceOriginalData> roceOriginalData;
     roceOriginalData.push_back(roceOriginal);
     return roceOriginalData;
+}
+
+
+static std::vector<NpuOpMemData> GenerateNpuOpMemData()
+{
+    std::vector<NpuOpMemData> res;
+    NpuOpMemData data;
+    data.deviceId = 2; // deviceId 2
+    data.operatorName = "NonZero57";
+    data.addr = 20618011344896; // addr 20618011344896
+    data.size = 1638400; // size 1638400
+    data.localTime = 1717575960208020750; // localTime 1717575960208020750
+    data.threadId = 87144; // threadId 87144
+    data.totalAllocateMemory = 1703936; // totalAllocateMemory 1703936
+    data.totalReserveMemory = 625213440; // totalReserveMemory 625213440
+    data.type = 100; // type 100
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<AscendTaskData> GenerateAscendTaskData()
+{
+    std::vector<AscendTaskData> res;
+    AscendTaskData data;
+    data.deviceId = 0;  // device id 0
+    data.indexId = -1; // index_id -1
+    data.streamId = 1; // streamId 1
+    data.taskId = 10; // taskId 10
+    data.contextId = 1; // contextId 1
+    data.batchId = 1; // batchId 1
+    data.connectionId = 2345; // connectionId 2345
+    data.start = 1717575960208020758; // start 1717575960208020758
+    data.duration = 450.78; // dur 450.78
+    data.start = 1717575960208020759; // end 1717575960208020759
+    data.hostType = "KERNEL_AICORE";
+    data.deviceType = "AI_CORE";
+    data.taskType = "KERNEL_AICORE";
+    res.push_back(data);
+    data.contextId = UINT32_MAX;
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<TaskInfoData> GenerateComputeTaskInfo()
+{
+    std::vector<TaskInfoData> res;
+    TaskInfoData data;
+    data.deviceId = 0; // deviceId 0
+    data.streamId = 1; // streamId 1
+    data.taskId = 10; // taskId 10
+    data.contextId = 1; // contextId 1
+    data.batchId = 1; // batchId 1
+    data.opName = "MatMulV3";
+    res.push_back(data);
+    data.contextId = UINT32_MAX;
+    res.push_back(data);
+    return res;
 }
 
 static void InjectHcclData(DataInventory& dataInventory)
@@ -977,3 +1037,35 @@ TEST_F(DBAssemblerUTest, TestRunShouldReturnTrueWhenDataIsEmpty)
     EXPECT_TRUE(assembler.Run(dataInventory));
 }
 
+TEST_F(DBAssemblerUTest, TestRunSaveNpuOpMemDataShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateNpuOpMemData();
+    std::shared_ptr<std::vector<NpuOpMemData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<NpuOpMemData>, data);
+    dataInventory.Inject<std::vector<NpuOpMemData>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveAscendTaskDataShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateAscendTaskData();
+    std::shared_ptr<std::vector<AscendTaskData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<AscendTaskData>, data);
+    dataInventory.Inject<std::vector<AscendTaskData>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveComputeTaskInfoShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateComputeTaskInfo();
+    std::shared_ptr<std::vector<TaskInfoData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<TaskInfoData>, data);
+    dataInventory.Inject<std::vector<TaskInfoData>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}

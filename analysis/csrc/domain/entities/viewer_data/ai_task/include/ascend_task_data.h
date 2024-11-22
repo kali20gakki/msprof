@@ -29,9 +29,11 @@ struct AscendTaskData {
     uint32_t batchId = UINT32_MAX;
     uint64_t connectionId = UINT64_MAX;
     uint64_t start = UINT64_MAX;
+    uint64_t end = UINT64_MAX;
     double duration = 0.0;
     std::string hostType;
     std::string deviceType;
+    std::string taskType;
 };
 
 struct MsprofTxDeviceData {

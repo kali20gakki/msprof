@@ -32,6 +32,8 @@ private:
     std::vector<AscendTaskData> FormatData(const OriAscendTaskData &oriData,
                                            const Utils::ProfTimeRecord &timeRecord,
                                            const uint16_t deviceId);
+
+    std::string GetTaskType(const std::string &hostType, const std::string &deviceType, uint16_t platformVersion);
 };
 }
 }

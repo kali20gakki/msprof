@@ -98,15 +98,46 @@ std::vector<AscendTaskData> TaskProcessor::FormatData(
     }
     AscendTaskData data;
     data.deviceId = deviceId;
-    double start;
+    double tmpStart;
+    uint16_t platformVersion = Context::GetInstance().GetPlatformVersion(deviceId, profPath_);
     for (const auto &row: oriData) {
-        std::tie(start, data.duration, data.modelId, data.indexId, data.streamId, data.taskId, data.contextId,
+        std::tie(tmpStart, data.duration, data.modelId, data.indexId, data.streamId, data.taskId, data.contextId,
                  data.batchId, data.connectionId, data.hostType, data.deviceType) = row;
-        HPFloat timestamp{start};
-        data.start = GetLocalTime(timestamp, timeRecord).Uint64();
+        HPFloat start{tmpStart};
+        HPFloat end = start + HPFloat(data.duration);
+        data.start = GetLocalTime(start, timeRecord).Uint64();
+        data.end = GetLocalTime(end, timeRecord).Uint64();
+        data.taskType = GetTaskType(data.hostType, data.deviceType, platformVersion);
         processedData.push_back(data);
     }
     return processedData;
+}
+
+std::string TaskProcessor::GetTaskType(const std::string& hostType, const std::string& deviceType,
+                                       uint16_t platformVersion)
+{
+    std::string taskType;
+    std::map<std::string, std::string> sqeType;
+    if (Context::IsStarsChip(platformVersion)) {
+        sqeType = STARS_SQE_TYPE_TABLE;
+    } else {
+        sqeType = HW_SQE_TYPE_TABLE;
+    }
+    if (hostType != "FFTS_PLUS" && hostType != "UNKNOWN") {
+        taskType = hostType;
+    } else if (hostType == "FFTS_PLUS") {
+        taskType = deviceType;
+    } else {
+        if (!Utils::IsNumber(deviceType)) {
+            taskType = deviceType;
+        } else if (platformVersion != static_cast<int>(Chip::CHIP_V2_1_0) &&
+        sqeType.find(deviceType) != sqeType.end()) {
+            taskType = sqeType[deviceType];
+        } else {
+            taskType = "Other";
+        }
+    }
+    return taskType;
 }
 }
 }
