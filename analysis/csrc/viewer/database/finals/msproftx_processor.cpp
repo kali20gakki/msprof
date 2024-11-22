@@ -57,22 +57,13 @@ bool MsprofTxProcessor::Run()
 bool MsprofTxProcessor::Process(const std::string &fileDir)
 {
     INFO("MsprofTxProcessor Process, dir is %", fileDir);
-
     std::string dbPath = Utils::File::PathJoin({fileDir, HOST, SQLITE, "msproftx.db"});
     // 并不是所有场景都有msproftx数据
     auto status = CheckPath(dbPath);
     if (status != CHECK_SUCCESS) {
         return status != CHECK_FAILED;
     }
-    MsprofTxDataFormat msprofTxData = GetTxData(fileDir);
-    MsprofTxExDataFormat msprofTxExData = GetTxExData(fileDir);
-    ProcessedDataFormat processedData;
-    if (!Utils::Reserve(processedData, msprofTxData.size() + msprofTxExData.size())) {
-        ERROR("Reserve for % data failed.", TABLE_NAME_MSTX);
-        return false;
-    }
-    uint32_t profId = IdPool::GetInstance().GetUint32Id(fileDir);
-    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, fileDir);
+
     Utils::SyscntConversionParams params;
     if (!Context::GetInstance().GetSyscntConversionParams(params, Parser::Environment::HOST_ID, fileDir)) {
         ERROR("GetSyscntConversionParams failed, profPath is %.", fileDir);
@@ -83,20 +74,69 @@ bool MsprofTxProcessor::Process(const std::string &fileDir)
         ERROR("GetProfTimeRecordInfo failed, profPath is %.", fileDir);
         return false;
     }
-    if (!FormatTxData(msprofTxData, processedData, pid, params, record) ||
-        !FormatTxExData(msprofTxExData, processedData, fileDir, params, record)) {
-        ERROR("FormatData failed, fileDir is %.", fileDir);
+
+    bool processFlag = ProcessTxData(fileDir, params, record);
+    processFlag = ProcessTxExData(fileDir, params, record) && processFlag;
+    return processFlag;
+}
+
+bool MsprofTxProcessor::ProcessTxData(const std::string &fileDir, Utils::SyscntConversionParams &params,
+                                      Utils::ProfTimeRecord &record)
+{
+    INFO("Process Tx data, dir is %", fileDir);
+
+    std::string dbPath = Utils::File::PathJoin({fileDir, HOST, SQLITE, "msproftx.db"});
+    DBInfo msprofTxDb("msproftx.db", "MsprofTx");
+    // 并不是所有场景都有msproftx数据
+    MAKE_SHARED_RETURN_VALUE(msprofTxDb.dbRunner, DBRunner, false, dbPath);
+    auto status = CheckPathAndTable(dbPath, msprofTxDb);
+    if (status != CHECK_SUCCESS) {
+        return status != CHECK_FAILED;
+    }
+    MsprofTxDataFormat msprofTxData = GetTxData(fileDir, msprofTxDb);
+    ProcessedDataFormat processedData;
+    if (!Utils::Reserve(processedData, msprofTxData.size())) {
+        ERROR("Reserve for % data failed.", TABLE_NAME_MSTX);
+        return false;
+    }
+    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, fileDir);
+    if (!FormatTxData(msprofTxData, processedData, pid, params, record)) {
+        ERROR("Format Tx data failed, fileDir is %.", fileDir);
         return false;
     }
     return SaveData(processedData, TABLE_NAME_MSTX);
 }
 
-MsprofTxProcessor::MsprofTxDataFormat MsprofTxProcessor::GetTxData(const std::string &fileDir)
+bool MsprofTxProcessor::ProcessTxExData(const std::string &fileDir, Utils::SyscntConversionParams &params,
+                                        Utils::ProfTimeRecord &record)
 {
-    DBInfo msprofTxDb("msproftx.db", "MsprofTx");
+    INFO("Process TxEx data, dir is %", fileDir);
+
+    std::string dbPath = Utils::File::PathJoin({fileDir, HOST, SQLITE, "msproftx.db"});
+    DBInfo msprofTxExDb("msproftx.db", "MsprofTxEx");
+    // 并不是所有场景都有msproftx数据
+    MAKE_SHARED_RETURN_VALUE(msprofTxExDb.dbRunner, DBRunner, false, dbPath);
+    auto status = CheckPathAndTable(dbPath, msprofTxExDb);
+    if (status != CHECK_SUCCESS) {
+        return status != CHECK_FAILED;
+    }
+    MsprofTxExDataFormat msprofTxExData = GetTxExData(fileDir, msprofTxExDb);
+    ProcessedDataFormat processedData;
+    if (!Utils::Reserve(processedData, msprofTxExData.size())) {
+        ERROR("Reserve for % data failed.", TABLE_NAME_MSTX);
+        return false;
+    }
+    if (!FormatTxExData(msprofTxExData, processedData, fileDir, params, record)) {
+        ERROR("Format TxEx data failed, fileDir is %.", fileDir);
+        return false;
+    }
+    return SaveData(processedData, TABLE_NAME_MSTX);
+}
+
+MsprofTxProcessor::MsprofTxDataFormat MsprofTxProcessor::GetTxData(const std::string &fileDir, DBInfo &msprofTxDb)
+{
     std::string dbPath = Utils::File::PathJoin({fileDir, HOST, SQLITE, msprofTxDb.dbName});
     MsprofTxDataFormat data;
-    MAKE_SHARED_RETURN_VALUE(msprofTxDb.dbRunner, DBRunner, data, dbPath);
     if (msprofTxDb.dbRunner == nullptr) {
         ERROR("Create % connection failed.", dbPath);
         return data;
@@ -110,12 +150,10 @@ MsprofTxProcessor::MsprofTxDataFormat MsprofTxProcessor::GetTxData(const std::st
     return data;
 }
 
-MsprofTxProcessor::MsprofTxExDataFormat MsprofTxProcessor::GetTxExData(const std::string &fileDir)
+MsprofTxProcessor::MsprofTxExDataFormat MsprofTxProcessor::GetTxExData(const std::string &fileDir, DBInfo &msprofTxExDb)
 {
-    DBInfo msprofTxExDb("msproftx.db", "MsprofTxEx");
     std::string dbPath = Utils::File::PathJoin({fileDir, HOST, SQLITE, msprofTxExDb.dbName});
     MsprofTxExDataFormat data;
-    MAKE_SHARED_RETURN_VALUE(msprofTxExDb.dbRunner, DBRunner, data, dbPath);
     if (msprofTxExDb.dbRunner == nullptr) {
         ERROR("Create % connection failed.", dbPath);
         return data;

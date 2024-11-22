@@ -40,9 +40,13 @@ public:
     bool Run() override;
 protected:
     bool Process(const std::string &fileDir) override;
+    bool ProcessTxData(const std::string &fileDir, Utils::SyscntConversionParams &params,
+                       Utils::ProfTimeRecord &record);
+    bool ProcessTxExData(const std::string &fileDir, Utils::SyscntConversionParams &params,
+                         Utils::ProfTimeRecord &record);
 private:
-    MsprofTxDataFormat GetTxData(const std::string &fileDir);
-    MsprofTxExDataFormat GetTxExData(const std::string &fileDir);
+    MsprofTxDataFormat GetTxData(const std::string &fileDir, DBInfo &msprofTxDb);
+    MsprofTxExDataFormat GetTxExData(const std::string &fileDir, DBInfo &msprofTxExDb);
     bool FormatTxData(const MsprofTxDataFormat &msprofTxData, ProcessedDataFormat &processedData,
                       uint32_t pid, Utils::SyscntConversionParams &params, Utils::ProfTimeRecord &record);
     bool FormatTxExData(const MsprofTxExDataFormat &txExData, ProcessedDataFormat &processedData,

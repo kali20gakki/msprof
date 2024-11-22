@@ -144,5 +144,17 @@ TEST_F(MsprofTxProcessorUtest, TestProcessShouldReturnFalseWhenProcessFailed)
     auto processor4 = MsprofTxProcessor(DB_PATH, {PROF});
     EXPECT_FALSE(processor4.Run());
     MOCKER_CPP(&MsprofTxProcessor::FormatTxData).reset();
+
+    MOCKER_CPP(&MsprofTxProcessor::FormatTxExData).stubs().will(returnValue(false));
+    auto processor5 = MsprofTxProcessor(DB_PATH, {PROF});
+    EXPECT_FALSE(processor4.Run());
+    MOCKER_CPP(&MsprofTxProcessor::FormatTxExData).reset();
 }
 
+TEST_F(MsprofTxProcessorUtest, TestRunShouldReturnTrueWhenTableNotExist)
+{
+    MOCKER_CPP(&TableProcessor::CheckPathAndTable).stubs().will(returnValue(NOT_EXIST));
+    auto processor1 = MsprofTxProcessor(DB_PATH, {PROF});
+    EXPECT_TRUE(processor1.Run());
+    MOCKER_CPP(&TableProcessor::CheckPathAndTable).reset();
+}
