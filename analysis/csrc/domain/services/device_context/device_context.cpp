@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <dirent.h>
 #include <cstring>
+#include <sys/stat.h>
 #include "nlohmann/json.hpp"
 #include "analysis/csrc/utils/utils.h"
 #include "analysis/csrc/utils/file.h"
@@ -60,31 +61,27 @@ bool DeviceContext::Init(const std::string &devicePath)
 std::vector<std::string> GetDeviceDirectories(const std::string &path)
 {
     std::vector<std::string> subdirs;
-    DIR *dir = opendir(path.c_str());
+    DIR* dir = opendir(path.c_str());
     if (dir == nullptr) {
         ERROR("Error opening directory: %, errorCode: %, errorInfo: %", path, errno, strerror(errno));
         return subdirs;
     }
     struct dirent *entry;
-    errno = 0;
+    std::string subdirPath;
     while ((entry = readdir(dir)) != nullptr) {
         std::string subdirName = entry->d_name;
-        if (entry->d_type == DT_DIR) { // Check if it's a directory
-            std::string subdirPath = File::PathJoin({path, subdirName});
-            if (subdirName.size() > MIN_SUB_DIR_NBAME_LEN &&
-                subdirName.substr(0, MIN_SUB_DIR_NBAME_LEN) == "device" &&
-                subdirName.back() >= '0' && subdirName.back() <= '9') {
-                INFO("Directory: %", subdirPath);
-                subdirs.push_back(subdirPath);
-            } else {
-                INFO("Directory: %, is not device directory.", subdirPath);
-            }
-        } else {
-            INFO("In %, % is not a directory.", path, subdirName);
+        if (subdirName == "." || subdirName == "..") {
+            continue;
         }
-    }
-    if (errno != 0) {
-        ERROR("Error reading directory: %, errorCode: %, errorInfo: %", path, errno, strerror(errno));
+        subdirPath = File::PathJoin({path, subdirName});
+        struct stat fileStat;
+        if (lstat(subdirPath.c_str(), &fileStat) == -1) {
+            ERROR("The % file lstat failed. The Error code is %", subdirName, strerror(errno));
+            continue;
+        }
+        if (S_ISDIR(fileStat.st_mode) && subdirName.find("device") == 0) {
+            subdirs.push_back(subdirPath);
+        }
     }
     closedir(dir);
     return subdirs;
