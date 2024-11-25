@@ -24,8 +24,8 @@ HcclInnerMark::HcclInnerMark(aclrtStream stream, HcclComm comm, std::shared_ptr<
     char commName[COMM_NAME_MAX_LENGTH];
     HcclGetCommName(comm, commName);
     opDesc->commName.assign(commName);
+    Mspti::Parser::ParserManager::GetInstance()->InnerDeviceStartA(markMsg, stream, markId);
     Mspti::Parser::HcclReporter::GetInstance()->RecordHcclOp(markId, opDesc);
-    markId = Mspti::Parser::ParserManager::GetInstance()->InnerDeviceStartA(markMsg, stream, markId);
 };
 
 HcclInnerMark::~HcclInnerMark()

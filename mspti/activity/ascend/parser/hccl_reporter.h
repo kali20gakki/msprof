@@ -33,12 +33,12 @@ public:
 private:
     msptiResult RecordStartMarker(const msptiActivityMarker *markActivity);
     msptiResult ReportHcclData(const msptiActivityMarker *markActivity);
-    const char* GetSharedHcclName(std::string& hcclName);
+    const char* GetSharedHcclName(const std::string& hcclName);
 private:
     std::mutex markMutex_;
     std::mutex nameMutex_;
-    std::unordered_map<std::string, std::shared_ptr<std::string>> commNameCache_;   // 缓存通信域名称，用于延长生命周期
-    std::unordered_map<uint64_t, std::shared_ptr<HcclOpDesc>> markId2HcclOp_;
+    static std::unordered_map<std::string, std::string> commNameCache_;   // 缓存通信域名称，用于延长生命周期
+    static std::unordered_map<uint64_t, std::shared_ptr<HcclOpDesc>> markId2HcclOp_;
 };
 }
 }

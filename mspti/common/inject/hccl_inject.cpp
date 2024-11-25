@@ -19,6 +19,7 @@
 #include "common/function_loader.h"
 #include "hccl_range_mark.h"
 #include "common/context_manager.h"
+#include "common/plog_manager.h"
 
 class HcclInject {
 public:
@@ -301,15 +302,19 @@ HcclResult HcclBatchSendRecv(HcclSendRecvItem* sendRecvInfo, uint32_t itemNum, H
             aclrtStream>("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
-
     std::shared_ptr<BatchSendRecvOp> hcclOpDesc;
     Mspti::Common::MsptiMakeSharedPtr(hcclOpDesc);
-    for (uint32_t i = 0; i < itemNum; i++) {
-        P2pOpDesc batchSendRecvItemDesc;
-        batchSendRecvItemDesc.dataType = sendRecvInfo[i].dataType;
-        batchSendRecvItemDesc.count = sendRecvInfo[i].count;
-        hcclOpDesc->batchSendRecvItem.emplace_back(batchSendRecvItemDesc);
+    if (sendRecvInfo != nullptr) {
+        for (uint32_t i = 0; i < itemNum; i++) {
+            P2pOpDesc batchSendRecvItemDesc;
+            batchSendRecvItemDesc.dataType = sendRecvInfo[i].dataType;
+            batchSendRecvItemDesc.count = sendRecvInfo[i].count;
+            hcclOpDesc->batchSendRecvItem.emplace_back(batchSendRecvItemDesc);
+        }
+    } else {
+        MSPTI_LOGE("op HcclBatchSendRecv, sendRecvInfo is nullptr");
     }
+    hcclOpDesc->opName = __FUNCTION__;
     auto marker = Mspti::Parser::HcclMarkFactory::createMarker(stream, comm, hcclOpDesc);
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_HCCL, MSPTI_CBID_HCCL_SENDRECV, __FUNCTION__);
     return func(sendRecvInfo, itemNum, comm, stream);
