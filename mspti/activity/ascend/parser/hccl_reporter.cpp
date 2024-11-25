@@ -19,6 +19,9 @@
 namespace Mspti {
 namespace Parser {
 
+std::unordered_map<std::string, std::string> HcclReporter::commNameCache_;   // 缓存通信域名称，用于延长生命周期
+std::unordered_map<uint64_t, std::shared_ptr<HcclOpDesc>> HcclReporter::markId2HcclOp_;
+
 HcclReporter* HcclReporter::GetInstance()
 {
     static HcclReporter instance;
@@ -58,7 +61,7 @@ msptiResult HcclReporter::ReportHcclActivity(std::shared_ptr<HcclOpDesc> hcclOpD
 {
     msptiActivityHccl activityHccl{};
     activityHccl.kind = MSPTI_ACTIVITY_KIND_HCCL;
-    activityHccl.name = hcclOpDesc->opName.c_str();
+    activityHccl.name = GetSharedHcclName(hcclOpDesc->opName);
     activityHccl.ds.streamId = hcclOpDesc->streamId;
     activityHccl.ds.deviceId = hcclOpDesc->deviceId;
     activityHccl.bandWidth = hcclOpDesc->bandWidth;
@@ -100,15 +103,13 @@ msptiResult HcclReporter::ReportHcclData(const msptiActivityMarker *markActivity
     return MSPTI_SUCCESS;
 }
 
-const char* HcclReporter::GetSharedHcclName(std::string& hcclName)
+const char* HcclReporter::GetSharedHcclName(const std::string& hcclName)
 {
     std::lock_guard<std::mutex> lock(nameMutex_);
     if (!commNameCache_.count(hcclName)) {
-        std::shared_ptr<std::string> ptr;
-        Mspti::Common::MsptiMakeSharedPtr(ptr, hcclName);
-        commNameCache_.insert({hcclName, ptr});
+        commNameCache_[hcclName] = hcclName;
     }
-    return commNameCache_[hcclName]->c_str();
+    return commNameCache_[hcclName].c_str();
 }
 }
 }

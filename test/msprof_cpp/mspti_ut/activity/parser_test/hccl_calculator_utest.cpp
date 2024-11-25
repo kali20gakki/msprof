@@ -126,6 +126,10 @@ TEST_F(HcclCalculatorUtest, All2AllVOpDescShouldRetSuccessAndFailWhenBandWidth)
     double expectBandWidth = (double)(3 * dataTypeSize) / (endTime - startTime);
     EXPECT_EQ(expectBandWidth, hcclOpDesc->bandWidth);
 
+    hcclOpDesc->sendCounts = nullptr;
+    Mspti::Parser::HcclCalculator::CalculateBandWidth((HcclOpDesc*)hcclOpDesc);
+    EXPECT_EQ(expectBandWidth, hcclOpDesc->bandWidth);
+
     All2AllVOpDesc* hcclTypeNull = new All2AllVOpDesc();
     hcclTypeNull->opName = "HcclAlltoAllV";
     hcclTypeNull->streamId = 1;

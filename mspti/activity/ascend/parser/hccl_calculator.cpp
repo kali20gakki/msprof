@@ -54,6 +54,10 @@ msptiResult CalculateP2pBandWidth(HcclOpDesc* hcclOpDesc)
 msptiResult CalculateAll2AllVBandWidth(HcclOpDesc* hcclOpDesc)
 {
     auto all2AllVOpDesc = static_cast<All2AllVOpDesc*>(hcclOpDesc);
+    if (all2AllVOpDesc->sendCounts == nullptr || all2AllVOpDesc->recvCounts == nullptr) {
+        MSPTI_LOGW("sendCounts or recvCounts in op is nullptr, cannot calculate bandwidth");
+        return MSPTI_ERROR_INNER;
+    }
     const auto& sendType = dataType2Size.find(all2AllVOpDesc->sendType);
     if (sendType == dataType2Size.end()) {
         MSPTI_LOGW("unknow all2Allv op sendType, cannot calculate bandwidth");
