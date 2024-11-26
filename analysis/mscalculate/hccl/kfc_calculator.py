@@ -32,6 +32,7 @@ class KfcCalculator(ICalculator, MsMultiProcess):
         {})
     BLACK_KFC_OP = ["NOTIFY_WAIT", "MEMCPY_ASYNC"]
     INVALID_GROUP = "N/A"
+    MC2_MAIN_STREAM_TASK_TYPE = "C_CORE_SQE"
 
     def __init__(self, file_list, sample_config):
         super().__init__(sample_config)
@@ -42,6 +43,7 @@ class KfcCalculator(ICalculator, MsMultiProcess):
         self._kfc_small_task = {}
         self._kfc_stream_id = {}
         self._plane_id = {}
+        self._main_stream = set()
 
     @staticmethod
     def make_default_kfc_info() -> KfcInfoViewModel.KFC_HCCL_INFO_TYPE:
@@ -68,6 +70,11 @@ class KfcCalculator(ICalculator, MsMultiProcess):
                 kfc_task_data.extend(data)
             with HCCLModel(self._project_path, [DBNameConstant.TABLE_KFC_TASK]) as model:
                 model.flush(kfc_task_data, DBNameConstant.TABLE_KFC_TASK)
+
+    def set_main_stream(self: any, comm_task_data: list) -> None:
+        for data in comm_task_data:
+            if data.device_task_type == self.MC2_MAIN_STREAM_TASK_TYPE:
+                self._main_stream.add(data.stream_id)
 
     def get_kfc_op_data(self: any) -> dict:
         with Mc2CommInfoViewModel(self._project_path, [DBNameConstant.TABLE_MC2_COMM_INFO]) as model:
@@ -106,6 +113,7 @@ class KfcCalculator(ICalculator, MsMultiProcess):
                                  -1, -1, "N/A", "N/A", -1, -1, DeviceHcclOpSource.INVALID.value)
             )
         task_stream_ids = {}
+        self.set_main_stream(kfc_comm_task_data)
         for data in kfc_comm_task_data:
             # kfc小算子流
             group_name = comm_stream_ids.get(data.stream_id, self.INVALID_GROUP)
@@ -233,8 +241,9 @@ class KfcCalculator(ICalculator, MsMultiProcess):
                     data = kfc_info_data[idx]
                     plane_id = data.plane_id if data.plane_id == -1 \
                         else self._plane_id.get(group_name, {}).get(data.stream_id, -1)
+                    is_master = 1 if data.stream_id in self._main_stream else 0
                     self._kfc_task_data[group_name][match_num] = [
-                        *kfc_op[:5], 0, data.op_name, group_name, plane_id, data.start_time, data.duration,
+                        *kfc_op[:5], 0, data.op_name, group_name, plane_id, data.start_time, data.duration, is_master,
                         data.stream_id, data.task_id, data.duration_estimated, data.local_rank, data.remote_rank,
                         data.transport_type, data.size, data.data_type, data.link_type, data.bandwidth, data.context_id,
                         data.notify_id, data.batch_id, data.rdma_type
