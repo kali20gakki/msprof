@@ -1487,6 +1487,7 @@ class TablesConfig(MetaConfig):
             ('plane_id', 'INTEGER,null'),
             ('timestamp', 'NUMERIC,null'),
             ('duration', 'REAL,null'),
+            ('is_master', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('duration_estimated', 'INTEGER,null'),

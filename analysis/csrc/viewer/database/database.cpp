@@ -659,6 +659,7 @@ namespace {
         {"plane_id", SQL_INTEGER_TYPE},
         {"timestamp", SQL_NUMERIC_TYPE},
         {"duration", SQL_REAL_TYPE},
+        {"is_master", SQL_INTEGER_TYPE},
         {"stream_id", SQL_INTEGER_TYPE},
         {"task_id", SQL_INTEGER_TYPE},
         {"duration_estimated", SQL_INTEGER_TYPE},
