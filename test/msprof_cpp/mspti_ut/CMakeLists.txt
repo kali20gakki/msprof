@@ -56,3 +56,4 @@ link_libraries(
 add_subdirectory(activity)
 add_subdirectory(callback)
 add_subdirectory(common)
+add_subdirectory(whl)

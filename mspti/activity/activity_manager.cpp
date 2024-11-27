@@ -269,7 +269,7 @@ msptiResult ActivityManager::Record(msptiActivity *activity, size_t size)
             return MSPTI_ERROR_INNER;
         }
         cur_buf_->Init(bufferRequested_handle_);
-    } else if (cur_buf_->ValidSize() > ACTIVITY_BUFFER_THRESHOLD * cur_buf_->BufSize()) {
+    } else if (cur_buf_->ValidSize() >= ACTIVITY_BUFFER_THRESHOLD * cur_buf_->BufSize()) {
         {
             std::unique_lock<std::mutex> lck(cv_mtx_);
             buf_full_ = true;

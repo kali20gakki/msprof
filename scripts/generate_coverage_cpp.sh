@@ -59,6 +59,7 @@ test_obj=(
     mspti_channel_utest
     mspti_parser_utest
     function_loader_utest
+    mspti_adapter_utest
 )
 
 str_test=""
