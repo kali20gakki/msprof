@@ -234,6 +234,10 @@ bool SysIOTimelineProcessor::Process(DataInventory &dataInventory)
         localtimeContext.deviceId= GetDeviceIdByDevicePath(devicePath);
         flag = ProcessSingleDevice(devicePath, localtimeContext, allProcessedData) && flag;
     }
+    if (allProcessedData.empty()) {
+        WARN("No % data to save into dataInventory", processorName_);
+        return flag;
+    }
     if (processorName_ == PROCESSOR_NAME_NIC_TIMELINE) {
         std::vector<NicReceiveSendData> allNicReceiveSendData;
         NicReceiveSendData nicReceiveSendData;

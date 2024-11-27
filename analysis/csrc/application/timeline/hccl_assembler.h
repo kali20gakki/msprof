@@ -117,6 +117,7 @@ private:
             if (tid == -1) {
                 continue;
             }
+            tid += (data.planeId + 1);
             transport = TransEnumToType(data.transportType, HCCL_TRANSPORT_TYPE_TABLE);
             dataType = TransEnumToType(data.dataType, HCCL_DATA_TYPE_TABLE);
             linkType = TransEnumToType(data.linkType, HCCL_LINK_TYPE_TABLE);
