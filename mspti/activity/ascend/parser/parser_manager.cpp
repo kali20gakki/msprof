@@ -317,7 +317,7 @@ msptiResult ParserManager::ReportMark(const char* msg, RtStreamT stream)
     activity.objectId.pt.processId = Mspti::Common::Utils::GetPid();
     activity.objectId.pt.threadId = Mspti::Common::Utils::GetTid();
     activity.name = msgPtr->c_str();
-    activity.name = msg;
+    activity.domain = "";
     activity.timestamp = timestamp;
     return Mspti::Activity::ActivityManager::GetInstance()->Record(
         reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
@@ -346,6 +346,7 @@ msptiResult ParserManager::ReportRangeStartA(const char* msg, RtStreamT stream, 
     activity.objectId.pt.processId = Mspti::Common::Utils::GetPid();
     activity.objectId.pt.threadId = Mspti::Common::Utils::GetTid();
     activity.name = msgPtr->c_str();
+    activity.domain = "";
     activity.timestamp = timestamp;
     auto ret = Mspti::Activity::ActivityManager::GetInstance()->Record(
         reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
@@ -385,6 +386,7 @@ msptiResult ParserManager::ReportRangeEnd(uint64_t rangeId)
     activity.objectId.pt.processId = Mspti::Common::Utils::GetPid();
     activity.objectId.pt.threadId = Mspti::Common::Utils::GetTid();
     activity.name = "";
+    activity.domain = "";
     activity.timestamp = timestamp;
     return Mspti::Activity::ActivityManager::GetInstance()->Record(
         reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
