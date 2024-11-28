@@ -7,8 +7,9 @@ real_path=$(readlink -f "$0")
 script_dir=$(dirname "$real_path")
 output_dir="${script_dir}/../test/build_llt/output/python_coverage"
 src_code="${script_dir}/../analysis"
+mspti_src_code="${script_dir}/../mspti/whl"
 test_code="${script_dir}/../test/msprof_python/ut/testcase"
-export PYTHONPATH=${src_code}:${test_code}:${PYTHONPATH}
+export PYTHONPATH=${src_code}:${mspti_src_code}:${test_code}:${PYTHONPATH}
 mkdir -p "${output_dir}"
 cd "${output_dir}"
 rm -f .coverage
