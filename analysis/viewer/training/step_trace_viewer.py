@@ -244,7 +244,8 @@ class StepTraceViewer:
             [["process_name", InfoConfReader().get_json_pid_data(),
               InfoConfReader().get_json_tid_data(), "Step Trace"]]))
         for i, model_id in enumerate(model_ids):
-            StepTraceViewer.model_to_pid[model_id] = InfoConfReader().get_json_pid_data() + i
+            StepTraceViewer.model_to_pid[model_id] = InfoConfReader().get_json_pid_data() + i + \
+                                                     StepTraceViewer.SORT_INDEX_OFFSET
             result_data.extend(TraceViewManager.metadata_event(
                 [["thread_name", InfoConfReader().get_json_pid_data(),
                   StepTraceViewer.model_to_pid.get(model_id), "Model ID:{}".format(model_id)],

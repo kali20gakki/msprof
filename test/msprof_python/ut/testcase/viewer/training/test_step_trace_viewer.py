@@ -191,7 +191,7 @@ class TestStepTraceViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + '.StepTraceViewer.transfer_trace_unit'), \
                 mock.patch(NAMESPACE + '.StepTraceConstant.syscnt_to_micro', return_value=1):
             res = StepTraceViewer.get_trace_timeline_data(EmptyClass(""), values)
-            self.assertEqual(len(json.dumps(res)), 1830)
+            self.assertEqual(len(json.dumps(res)), 1874)
 
 
 if __name__ == '__main__':
