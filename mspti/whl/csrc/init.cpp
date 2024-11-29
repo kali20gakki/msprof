@@ -107,6 +107,35 @@ PyMethodDef *GetKernelMethods()
     return methodMstx;
 }
 } // Kernel
+
+namespace Hccl {
+PyObject *RegisterCB(PyObject *self, PyObject *args)
+{
+    PyObject *callback = nullptr;
+    if (!PyArg_ParseTuple(args, "O", &callback)) {
+        PyErr_SetString(PyExc_TypeError, "hccl register callback args parse failed!");
+        return nullptr;
+    }
+    auto ret = MsptiAdapter::GetInstance()->RegisterHcclCallback(callback);
+    return Py_BuildValue("i", ret);
+}
+
+PyObject *UnregisterCB(PyObject *self, PyObject *args)
+{
+    auto ret = MsptiAdapter::GetInstance()->UnregisterHcclCallback();
+    return Py_BuildValue("i", ret);
+}
+
+PyMethodDef *GetHcclMethods()
+{
+    static PyMethodDef methodHccl[] = {
+        {"registerCB", RegisterCB, METH_VARARGS, ""},
+        {"unregisterCB", UnregisterCB, METH_NOARGS, ""},
+        {nullptr, nullptr, METH_VARARGS, ""}
+    };
+    return methodHccl;
+}
+} // Hccl
 } // Adapter
 } // Mspti
 
@@ -158,6 +187,7 @@ PyMODINIT_FUNC PyInit_libmspti_C()
     PyObject *m = PyModule_Create(&g_libMethods);
     AddSubModule(m, "mstx", Mspti::Adapter::Mstx::GetMstxMethods());
     AddSubModule(m, "kernel", Mspti::Adapter::Kernel::GetKernelMethods());
+    AddSubModule(m, "hccl", Mspti::Adapter::Hccl::GetHcclMethods());
     return m;
 }
 

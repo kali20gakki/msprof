@@ -22,6 +22,7 @@ protected:
         std::ofstream file(PYTHON_FILE);
         file << "def kernel_data_callback(data): print(data)" << std::endl;
         file << "def marker_data_callback(data): print(data)" << std::endl;
+        file << "def hccl_data_callback(data): print(data)" << std::endl;
         file.close();
         Py_Initialize();
     }
@@ -158,6 +159,53 @@ TEST_F(MsptiAdapterUtest, PythonMstxCallbackWillRunSuccess)
     EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->UnregisterMstxCallback());
 }
 
+TEST_F(MsptiAdapterUtest, RegisterHcclCallbackWillSuccess)
+{
+    PyObject *hcclCallback = GetMsptiPyCallback("hccl_data_callback");
+    EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->RegisterHcclCallback(hcclCallback));
+    EXPECT_EQ(hcclCallback, MsptiAdapter::GetInstance()->GetHcclCallback());
+    EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->UnregisterHcclCallback());
+}
+
+TEST_F(MsptiAdapterUtest, PythonHcclCallbackWillRunSuccess)
+{
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StartDevProfTask)
+        .stubs()
+        .will(returnValue(MSPTI_SUCCESS));
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StopDevProfTask)
+        .stubs()
+        .will(returnValue(MSPTI_SUCCESS));
+
+    EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->Start());
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_HCCL));
+    PyObject *hcclCallback = GetMsptiPyCallback("hccl_data_callback");
+    EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->RegisterHcclCallback(hcclCallback));
+    auto instance = Mspti::Activity::ActivityManager::GetInstance();
+    EXPECT_EQ(MSPTI_SUCCESS, instance->SetDevice(0));
+    EXPECT_EQ(MSPTI_SUCCESS, instance->ResetAllDevice());
+
+    constexpr uint64_t start = 1614659207688700;
+    constexpr uint64_t end = 1614659207688710;
+    msptiActivityHccl hccl;
+    hccl.kind = MSPTI_ACTIVITY_KIND_HCCL;
+    hccl.start = start;
+    hccl.end = end;
+    hccl.ds.deviceId = 0;
+    hccl.ds.streamId = 0;
+    hccl.name = "UserMark";
+    hccl.commName = "TestCase";
+    hccl.bandWidth = 0;
+    instance->Record(reinterpret_cast<msptiActivity*>(&hccl), sizeof(hccl));
+
+    // invalid kind
+    hccl.kind = MSPTI_ACTIVITY_KIND_INVALID;
+    instance->Record(reinterpret_cast<msptiActivity*>(&hccl), sizeof(hccl));
+
+    EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->Stop());
+    EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->FlushAll());
+    EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->UnregisterHcclCallback());
+}
+
 TEST_F(MsptiAdapterUtest, ConsumeFailedWhenNotRegisterCallback)
 {
     MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StartDevProfTask)
@@ -170,6 +218,7 @@ TEST_F(MsptiAdapterUtest, ConsumeFailedWhenNotRegisterCallback)
     EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->Start());
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_MARKER));
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_KERNEL));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_HCCL));
     auto instance = Mspti::Activity::ActivityManager::GetInstance();
     EXPECT_EQ(MSPTI_SUCCESS, instance->SetDevice(0));
     EXPECT_EQ(MSPTI_SUCCESS, instance->ResetAllDevice());
@@ -180,6 +229,9 @@ TEST_F(MsptiAdapterUtest, ConsumeFailedWhenNotRegisterCallback)
     msptiActivityKernel kernel;
     kernel.kind = MSPTI_ACTIVITY_KIND_KERNEL;
     instance->Record(reinterpret_cast<msptiActivity*>(&kernel), sizeof(kernel));
+    msptiActivityHccl hccl;
+    hccl.kind = MSPTI_ACTIVITY_KIND_HCCL;
+    instance->Record(reinterpret_cast<msptiActivity*>(&hccl), sizeof(hccl));
 
     EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->Stop());
     EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->FlushAll());

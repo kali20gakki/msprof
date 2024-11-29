@@ -67,4 +67,5 @@ install(TARGETS mspti_shared OPTIONAL
 )
 
 # **************************************************** mspti whl ********************************************
-
+set(MSPTI_WHL_CSRC_DIR ${CMAKE_SOURCE_DIR}/whl/csrc)
+add_subdirectory(${MSPTI_WHL_CSRC_DIR})

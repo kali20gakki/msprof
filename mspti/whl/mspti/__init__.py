@@ -8,15 +8,17 @@ Functions and data structures used to declare public of mspti
 
 __all__ = [
     "KernelMonitor", "KernelData",
-    "MstxMonitor", "MarkerData", "MsptiObjectId",
-    "MsptiResult", "MsptiActivityKind", "MsptiActivityFlag", "MsptiActivitySourceKind"
+    "MstxMonitor", "MarkerData",
+    "HcclMonitor", "HcclData",
+    "MsptiObjectId", "MsptiResult", "MsptiActivityKind", "MsptiActivityFlag", "MsptiActivitySourceKind"
 ]
 
 from .monitor.kernel_monitor import KernelMonitor
 from .monitor.mstx_monitor import MstxMonitor
+from .monitor.hccl_monitor import HcclMonitor
 from .constant import (
     MsptiResult, MsptiActivityKind, MsptiActivityFlag, MsptiActivitySourceKind
 )
 from .activity_data import (
-    KernelData, MarkerData, MsptiObjectId
+    KernelData, MarkerData, HcclData, MsptiObjectId
 )

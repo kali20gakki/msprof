@@ -22,3 +22,7 @@ _mstx_unregister_cb = mspti_C_mstx_module.unregisterCB
 mspti_C_kernel_module = importlib.import_module("libmspti_C.kernel")
 _kernel_register_cb = mspti_C_kernel_module.registerCB
 _kernel_unregister_cb = mspti_C_kernel_module.unregisterCB
+
+mspti_C_hccl_module = importlib.import_module("libmspti_C.hccl")
+_hccl_register_cb = mspti_C_hccl_module.registerCB
+_hccl_unregister_cb = mspti_C_hccl_module.unregisterCB
