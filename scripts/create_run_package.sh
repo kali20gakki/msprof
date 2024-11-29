@@ -70,6 +70,14 @@ function parse_script_args() {
     done
 }
 
+# build python whl
+function build_python_whl() {
+  cd ${TOP_DIR}/build/build
+  python3  ${TOP_DIR}/build/setup_mspti.py bdist_wheel --python-tag=py3 --py-limited-api=cp37
+  rm -rf ${TOP_DIR}/mspti.egg-info
+  cd -
+}
+
 # create temp dir for product
 function create_temp_dir() {
     local temp_dir=${1}
@@ -80,6 +88,7 @@ function create_temp_dir() {
     cp -r ${collector_dir}/stub ${temp_dir}
     cp ${collector_dir}/bin/msprof ${temp_dir}
     cp ${mspti_dir}/libmspti.so ${temp_dir}
+    cp ${TOP_DIR}/build/build/dist/mspti-0.0.1-py3-none-any.whl ${temp_dir}
     cp ${TOP_DIR}/collector/inc/external/acl/acl_prof.h ${temp_dir}
     cp ${TOP_DIR}/mspti/external/mspti.h ${temp_dir}
     cp ${TOP_DIR}/mspti/external/mspti_activity.h ${temp_dir}
@@ -160,7 +169,7 @@ function sed_param() {
     local main_script=${1}
     sed -i "2i VERSION=$version" "${RUN_SCRIPT_DIR}/${main_script}"
     sed -i "2i package_arch=$(arch)" "${RUN_SCRIPT_DIR}/${main_script}"
-
+    build_python_whl
     if [ "${main_script}" = "${MAIN_SCRIPT}" ]; then
         sed -i "2i package_arch=$(arch)" "${RUN_SCRIPT_DIR}/${UNINSTALL}"
     fi
@@ -193,6 +202,7 @@ check_file_exist() {
   check_package ${temp_dir}/msprof ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/libmsprofiler.so ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/libmsprofiler.so ${PKG_LIMIT_SIZE}
+  check_package ${temp_dir}/mspti-0.0.1-py3-none-any.whl ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/analysis
   check_package ${temp_dir}/analysis/lib64/msprof_analysis.so
   check_package ${temp_dir}/${MAIN_SCRIPT}

@@ -59,6 +59,8 @@ const char *ID              = "id";
 const char *PROCESS_ID      = "processId";
 const char *THREAD_ID       = "threadId";
 const char *DOMAIN_NAME     = "domain";
+const char *BANDWIDTH       = "bandWidth";
+const char *COMMNAME        = "commName";
 
 void CallKernelCallback(PyObject *kernelCallback, const msptiActivityKernel *kernel)
 {
@@ -131,6 +133,41 @@ void CallMstxCallback(PyObject *mstxCallback, const msptiActivityMarker *marker)
     }
     Py_DECREF(mstxCallback);
     Py_XDECREF(markerData);
+}
+
+void CallHcclCallback(PyObject *hcclCallback, const msptiActivityHccl* hccl)
+{
+    if (hcclCallback == nullptr) {
+        MSPTI_LOGW("Hccl callback is nullptr");
+        return;
+    }
+    if (hccl == nullptr) {
+        MSPTI_LOGE("Hccl data is nullptr");
+        return;
+    }
+    PyObject *hcclData = Py_BuildValue("{sIsKsKsIsIsdssss}",
+        KIND, static_cast<uint32_t>(hccl->kind),
+        START, hccl->start,
+        END, hccl->end,
+        DEVICE_ID, hccl->ds.deviceId,
+        STREAM_ID, hccl->ds.streamId,
+        BANDWIDTH, hccl->bandWidth,
+        NAME, hccl->name,
+        COMMNAME, hccl->commName);
+    if (hcclData == nullptr) {
+        MSPTI_LOGE("Build python hccl data failed");
+        return;
+    }
+    /* make sure callback doesn't go away */
+    Py_INCREF(hcclCallback);
+    auto ret = PyObject_CallFunction(hcclCallback, "O", hcclData);
+    if (ret == nullptr) {
+        MSPTI_LOGE("Call hccl callback failed");
+    } else {
+        Py_DECREF(ret);
+    }
+    Py_DECREF(hcclCallback);
+    Py_XDECREF(hcclData);
 }
 
 struct PyGILGuard {
@@ -219,6 +256,9 @@ void MsptiAdapter::UserBufferConsume(msptiActivity *record)
     } else if (record->kind == MSPTI_ACTIVITY_KIND_MARKER) {
         msptiActivityMarker* marker = ReinterpretConvert<msptiActivityMarker*>(record);
         CallMstxCallback(GetInstance()->GetMstxCallback(), marker);
+    } else if (record->kind == MSPTI_ACTIVITY_KIND_HCCL) {
+        msptiActivityHccl* hccl = ReinterpretConvert<msptiActivityHccl *>(record);
+        CallHcclCallback(GetInstance()->GetHcclCallback(), hccl);
     } else {
         MSPTI_LOGW("Not supported mspti activity kind");
     }
@@ -298,6 +338,27 @@ msptiResult MsptiAdapter::UnregisterKernelCallback()
     Py_XDECREF(kernelCallback_);
     kernelCallback_ = nullptr;
     return msptiActivityDisable(MSPTI_ACTIVITY_KIND_KERNEL);
+}
+
+msptiResult MsptiAdapter::RegisterHcclCallback(PyObject *hcclCallback)
+{
+    std::lock_guard<std::mutex> lk(mtx_);
+    Py_XINCREF(hcclCallback);
+    hcclCallback_ = hcclCallback;
+    return msptiActivityEnable(MSPTI_ACTIVITY_KIND_HCCL);
+}
+
+PyObject* MsptiAdapter::GetHcclCallback() const
+{
+    return hcclCallback_;
+}
+
+msptiResult MsptiAdapter::UnregisterHcclCallback()
+{
+    std::lock_guard<std::mutex> lk(mtx_);
+    Py_XDECREF(hcclCallback_);
+    hcclCallback_ = nullptr;
+    return MSPTI_SUCCESS;
 }
 } // Adapter
 } // Mspti

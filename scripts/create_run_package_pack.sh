@@ -70,6 +70,7 @@ function create_temp_dir() {
     cp ${collector_dir}/bin/msprof ${temp_dir}
     cp ${mspti_dir}/libmspti.so ${temp_dir}
     cp ${TOP_DIR}/build/build/dist/msprof-0.0.1-py3-none-any.whl ${temp_dir}
+    cp ${TOP_DIR}/build/build/dist/mspti-0.0.1-py3-none-any.whl ${temp_dir}
     cp ${TOP_DIR}/collector/inc/external/acl/acl_prof.h ${temp_dir}
     cp ${TOP_DIR}/mspti/external/mspti.h ${temp_dir}
     cp ${TOP_DIR}/mspti/external/mspti_activity.h ${temp_dir}
@@ -97,6 +98,7 @@ function copy_script() {
 function build_python_whl() {
   cd ${TOP_DIR}/build/build
   python3  ${TOP_DIR}/build/setup.py bdist_wheel --python-tag=py3 --py-limited-api=cp37
+  python3  ${TOP_DIR}/build/setup_mspti.py bdist_wheel --python-tag=py3 --py-limited-api=cp37
   rm -rf ${TOP_DIR}/msprof.egg-info
   cd -
 }
@@ -135,6 +137,7 @@ check_file_exist() {
   local temp_dir=${1}
   check_package ${temp_dir}/acl_prof.h ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/msprof-0.0.1-py3-none-any.whl ${PKG_LIMIT_SIZE}
+  check_package ${temp_dir}/mspti-0.0.1-py3-none-any.whl ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/msprof ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/libmsprofiler.so ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/stub ${PKG_LIMIT_SIZE}

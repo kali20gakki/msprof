@@ -80,3 +80,32 @@ class MarkerData:
         self.name: str = origin_data.get(self.NAME, "")
         # Name of the domain to which this marker belongs to
         self.domain: str = origin_data.get(self.DOMAIN, "")
+
+
+class HcclData:
+    KIND = "kind"
+    START = "start"
+    END = "end"
+    DEVICE_ID = "deviceId"
+    STREAM_ID = "streamId"
+    BANDWIDTH = "bandWidth"
+    NAME = "name"
+    COMMNAME = "commName"
+
+    def __init__(self, origin_data: dict):
+        # Activity record kind, must be MSPTI_ACTIVITY_KIND_HCCL
+        self.kind: MsptiActivityKind = MsptiActivityKind(origin_data.get(self.KIND, 0))
+        # Start timestamp for the hccl, in ns
+        self.start: int = origin_data.get(self.START, 0)
+        # End timestamp for the hccl, in ns
+        self.end: int = origin_data.get(self.END, 0)
+        # device_id
+        self.device_id: int = origin_data.get(self.DEVICE_ID, 0)
+        # stream_id
+        self.stream_id: int = origin_data.get(self.STREAM_ID, 0)
+        # bandwidth for hccl, in GB/S
+        self.bandwidth: float = origin_data.get(self.BANDWIDTH, 0)
+        # name
+        self.name: str = origin_data.get(self.NAME, "")
+        # commName
+        self.comm_name: str = origin_data.get(self.COMMNAME, "")

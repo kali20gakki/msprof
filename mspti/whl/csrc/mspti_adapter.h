@@ -45,6 +45,11 @@ public:
     msptiResult UnregisterKernelCallback();
     PyObject* GetKernelCallback() const;
 
+    // Hccl
+    msptiResult RegisterHcclCallback(PyObject *hcclCallback);
+    msptiResult UnregisterHcclCallback();
+    PyObject* GetHcclCallback() const;
+
 private:
     static void UserBufferRequest(uint8_t **buffer, size_t *size, size_t *maxNumRecords);
     static void UserBufferComplete(uint8_t *buffer, size_t size, size_t validSize);
@@ -60,6 +65,8 @@ private:
     PyObject *kernelCallback_{nullptr};
     // mstx callback
     PyObject *mstxCallback_{nullptr};
+    // hccl callback
+    PyObject *hcclCallback_{nullptr};
 };
 } // Adapter
 } // Mspti
