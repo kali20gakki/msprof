@@ -14,6 +14,7 @@ add_library(mspti_wrapper SHARED
 set_target_properties(mspti_wrapper
     PROPERTIES
     OUTPUT_NAME mspti_C
+    PREFIX  ""
 )
 
 target_include_directories(mspti_wrapper PRIVATE
@@ -57,7 +58,6 @@ target_link_libraries(mspti_wrapper PRIVATE
     mspti
     c_sec
 )
-
 
 install(TARGETS mspti_wrapper OPTIONAL
     LIBRARY DESTINATION ${CMAKE_SOURCE_DIR}/whl/mspti/lib64
