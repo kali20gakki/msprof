@@ -30,8 +30,7 @@ public:
 
 private:
     bool Process(DataInventory& dataInventory) override;
-    bool ProcessOneDevice(const std::string& devicePath, LocaltimeContext& localtimeContext,
-                          std::vector<DDRData>& res);
+    bool ProcessOneDevice(const std::string& devicePath, std::vector<DDRData>& res);
     OriDataFormat LoadData(const DBInfo& DDRDB);
     std::vector<DDRData> FormatData(const OriDataFormat& oriData, const LocaltimeContext& localtimeContext);
 };

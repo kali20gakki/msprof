@@ -21,32 +21,31 @@ NpuMemProcessor::NpuMemProcessor(const std::string &profPath) : DataProcessor(pr
 
 bool NpuMemProcessor::Process(DataInventory &dataInventory)
 {
-    LocaltimeContext localtimeContext;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_)) {
-        ERROR("Failed to obtain the time in start_info and end_info, profPath is %.", profPath_);
-        return false;
-    }
-    DBInfo npuMemDB("npu_mem.db", "NpuMem");
     bool flag = true;
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     std::vector<NpuMemData> allProcessedData;
     for (const auto& devicePath: deviceList) {
-        localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
-        flag = ProcessSingleDevice(devicePath, localtimeContext, allProcessedData) && flag;
+        flag = ProcessSingleDevice(devicePath, allProcessedData) && flag;
     }
     if (!SaveToDataInventory<NpuMemData>(std::move(allProcessedData), dataInventory, PROCESSOR_NAME_NPU_MEM)) {
-            flag = false;
-            ERROR("Save NpuMem Data To DataInventory failed, profPath is %.", profPath_);
+        flag = false;
+        ERROR("Save NpuMem Data To DataInventory failed, profPath is %.", profPath_);
     }
     return flag;
 }
 
-bool NpuMemProcessor::ProcessSingleDevice(const std::string &devicePath, LocaltimeContext &localtimeContext,
-                                          std::vector<NpuMemData> &allProcessedData)
+bool NpuMemProcessor::ProcessSingleDevice(const std::string &devicePath, std::vector<NpuMemData> &allProcessedData)
 {
-    DBInfo npuMemDB("npu_mem.db", "NpuMem");
-    if (localtimeContext.deviceId == Parser::Environment::HOST_ID) {
+    LocaltimeContext localtimeContext;
+    localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
+    if (localtimeContext.deviceId == Parser::Environment::INVALID_DEVICE_ID) {
         ERROR("the invalid deviceId cannot to be identified, profPath is %", profPath_);
+        return false;
+    }
+    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_,
+                                                      localtimeContext.deviceId)) {
+        ERROR("Failed to obtain the time in start_info and end_info, "
+              "profPath is %, device id is %.", profPath_, localtimeContext.deviceId);
         return false;
     }
     if (!Context::GetInstance().GetClockMonotonicRaw(localtimeContext.hostMonotonic, true, localtimeContext.deviceId,
@@ -54,6 +53,7 @@ bool NpuMemProcessor::ProcessSingleDevice(const std::string &devicePath, Localti
         ERROR("GetClockMonotonicRaw failed, profPath is %, deviceId is %.", profPath_, localtimeContext.deviceId);
         return false;
     }
+    DBInfo npuMemDB("npu_mem.db", "NpuMem");
     std::string dbPath = File::PathJoin({devicePath, SQLITE, npuMemDB.dbName});
     if (!npuMemDB.ConstructDBRunner(dbPath) || npuMemDB.dbRunner == nullptr) {
         ERROR("Create % connection failed.", dbPath);

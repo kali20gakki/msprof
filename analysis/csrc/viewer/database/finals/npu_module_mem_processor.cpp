@@ -95,8 +95,8 @@ bool NpuModuleMemProcessor::Process(const std::string &fileDir)
         }
         uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
         INFO("Start to process %, deviceId:%.", dbPath, deviceId);
-        if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir)) {
-            ERROR("Failed to obtain the time in start_info and end_info.");
+        if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir, deviceId)) {
+            ERROR("Failed to obtain the time in start_info and end_info. Path is %, device id is %", fileDir, deviceId);
             flag = false;
             continue;
         }

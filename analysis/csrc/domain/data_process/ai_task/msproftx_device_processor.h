@@ -29,8 +29,7 @@ public:
 private:
     bool Process(DataInventory& dataInventory) override;
     OriMsprofTxDeviceData LoadData(const DBInfo &stepTraceDB, const std::string &dbPath);
-    bool ProcessOneDevice(const Utils::ProfTimeRecord &record, std::vector<MsprofTxDeviceData> &res,
-                          const std::string &devPath);
+    bool ProcessOneDevice(std::vector<MsprofTxDeviceData> &res, const std::string &devPath);
     std::vector<MsprofTxDeviceData> FormatData(OriMsprofTxDeviceData &oriData,
                                                const Utils::ProfTimeRecord &record,
                                                const uint16_t deviceId,

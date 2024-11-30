@@ -54,7 +54,7 @@ bool NpuModuleMemProcessor::ProcessSingleDevice(const std::string& devicePath, L
                                                 SyscntConversionParams& params)
 {
     DBInfo npuModuleMemDB("npu_module_mem.db", "NpuModuleMem");
-    if (localtimeContext.deviceId == Parser::Environment::HOST_ID) {
+    if (localtimeContext.deviceId == Parser::Environment::INVALID_DEVICE_ID) {
         ERROR("the invalid deviceId cannot to be identified, profPath is %", profPath_);
         return false;
     }

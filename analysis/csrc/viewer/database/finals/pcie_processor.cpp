@@ -53,12 +53,11 @@ bool PCIeProcessor::Run()
 bool PCIeProcessor::Process(const std::string &fileDir)
 {
     INFO("PCIeProcessor Process, dir is %", fileDir);
-    ThreadData threadData;
     auto deviceList = File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     DBInfo pcieDB("pcie.db", "PcieOriginalData");
     bool flag = true;
-    bool timeFlag = Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir);
     for (const auto& devicePath: deviceList) {
+        ThreadData threadData;
         std::string dbPath = File::PathJoin({devicePath, SQLITE, pcieDB.dbName});
         // 并不是所有场景都有PCIe数据
         auto status = CheckPath(dbPath);
@@ -68,11 +67,11 @@ bool PCIeProcessor::Process(const std::string &fileDir)
             }
             continue;
         }
-        if (!timeFlag) {
-            ERROR("Failed to GetProfTimeRecordInfo, fileDir is %.", fileDir);
+        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
+        if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir, deviceId)) {
+            ERROR("Failed to GetProfTimeRecordInfo, fileDir is %, device id is %.", fileDir, deviceId);
             return false;
         }
-        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
         if (!Context::GetInstance().GetClockMonotonicRaw(threadData.hostMonotonic, true, deviceId, fileDir) ||
             !Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, false, deviceId, fileDir)) {
             ERROR("Device MonotonicRaw is invalid in path: %., device id is %", fileDir, deviceId);

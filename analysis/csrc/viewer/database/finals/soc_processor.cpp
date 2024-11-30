@@ -76,7 +76,6 @@ bool SocProcessor::Process(const std::string &fileDir)
     DBInfo socProfilerDB("soc_profiler.db", "InterSoc");
     bool flag = true;
     MAKE_SHARED0_NO_OPERATION(socProfilerDB.database, SocProfilerDB);
-    bool timeFlag = Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
         std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, socProfilerDB.dbName});
@@ -89,14 +88,14 @@ bool SocProcessor::Process(const std::string &fileDir)
             continue;
         }
         uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (deviceId == Parser::Environment::HOST_ID) {
+        if (deviceId == Parser::Environment::INVALID_DEVICE_ID) {
             ERROR("the invalid deviceId cannot to be identified.");
             flag = false;
             continue;
         }
         INFO("Start to process device data in %, deviceId:[%].", dbPath, deviceId);
-        if (!timeFlag) {
-            ERROR("Failed to obtain the time in start_info and end_info.");
+        if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir, deviceId)) {
+            ERROR("Failed to obtain the time in start_info and end_info. Path is %, device id is %", fileDir, deviceId);
             flag = false;
             continue;
         }

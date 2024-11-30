@@ -28,10 +28,6 @@ bool ChipTransProcessor::Process(DataInventory& dataInventory)
 {
     ChipTransData chipTransData;
     auto deviceList = Utils::File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
-    if (!Context::GetInstance().GetProfTimeRecordInfo(chipTransData.timeRecord, profPath_)) {
-        ERROR("Failed to obtain the time in start_info and end_info.");
-        return false;
-    }
     bool flag = true;
     for (const auto& devicePath : deviceList) {
         if (!ProcessOneDevice(devicePath, chipTransData)) {
@@ -55,6 +51,10 @@ bool ChipTransProcessor::Process(DataInventory& dataInventory)
 bool ChipTransProcessor::ProcessOneDevice(const std::string& devicePath, ChipTransData& chipTransData)
 {
     auto deviceId = GetDeviceIdByDevicePath(devicePath);
+    if (!Context::GetInstance().GetProfTimeRecordInfo(chipTransData.timeRecord, profPath_, deviceId)) {
+        ERROR("Failed to obtain the time in start_info and end_info. Path is %, device id is %.", profPath_, deviceId);
+        return false;
+    }
     DBInfo paLinkInfo("chip_trans.db", "PaLinkInfo");
     DBInfo pcieInfo("chip_trans.db", "PcieInfo");
     std::string paLinkDBPath = Utils::File::PathJoin({devicePath, SQLITE, paLinkInfo.dbName});
@@ -62,16 +62,21 @@ bool ChipTransProcessor::ProcessOneDevice(const std::string& devicePath, ChipTra
     if (!paLinkInfo.ConstructDBRunner(paLinkDBPath) || !pcieInfo.ConstructDBRunner(pcieDBPath)) {
         return false;
     }
+    bool flag = true;
     auto status = CheckPathAndTable(paLinkDBPath, paLinkInfo);
-    if (status != CHECK_SUCCESS) {
-        return status != CHECK_FAILED;
+    if (status == CHECK_SUCCESS) {
+        chipTransData.oriPaData = LoadPaData(paLinkInfo);
+    } else if (status == CHECK_FAILED) {
+        flag = false;
     }
+
     status = CheckPathAndTable(pcieDBPath, pcieInfo);
-    if (status != CHECK_SUCCESS) {
-        return status != CHECK_FAILED;
+    if (status == CHECK_SUCCESS) {
+        chipTransData.oriPcieData = LoadPcieData(pcieInfo);
+    } else if (status == CHECK_FAILED) {
+        flag = false;
     }
-    chipTransData.oriPaData = LoadPaData(paLinkInfo);
-    chipTransData.oriPcieData = LoadPcieData(pcieInfo);
+
     std::vector<PaLinkInfoData> paData;
     std::vector<PcieInfoData> pcieData;
     if (!FormatData(paData, pcieData, chipTransData, deviceId)) {
@@ -80,7 +85,7 @@ bool ChipTransProcessor::ProcessOneDevice(const std::string& devicePath, ChipTra
     }
     chipTransData.resPaData.insert(chipTransData.resPaData.end(), paData.begin(), paData.end());
     chipTransData.resPcieData.insert(chipTransData.resPcieData.end(), pcieData.begin(), pcieData.end());
-    return true;
+    return flag;
 }
 
 OriPaFormat ChipTransProcessor::LoadPaData(const DBInfo& paLinkInfo)

@@ -155,10 +155,10 @@ uint16_t GetDeviceIdByDevicePath(const std::string &filePath)
         tempStr.pop_back();
     }
     // 默认host的deviceId为64
-    uint16_t deviceId = Parser::Environment::HOST_ID;
+    uint16_t deviceId = Parser::Environment::INVALID_DEVICE_ID;
     auto dirName = Split(tempStr, "/").back();
     if (dirName == "host") {
-        return deviceId;
+        return Parser::Environment::HOST_ID;
     }
     if (StrToU16(deviceId, Split(dirName, "_").back()) != ANALYSIS_OK) {
         ERROR("DeviceId to uint16_t failed.");

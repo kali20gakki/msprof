@@ -110,8 +110,8 @@ bool NpuMemProcessor::Process(const std::string &fileDir)
             ERROR("GetClockMonotonicRaw failed, profPath is %.", fileDir);
             return false;
         }
-        if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir)) {
-            ERROR("Failed to obtain the time in start_info and end_info.");
+        if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir, deviceId)) {
+            ERROR("Failed to obtain the time in start_info and end_info. Path is %, device id is %", fileDir, deviceId);
             flag = false;
             continue;
         }

@@ -22,15 +22,22 @@ AccPmuProcessor::AccPmuProcessor(const std::string &profPath) : DataProcessor(pr
 
 bool AccPmuProcessor::Process(DataInventory &dataInventory)
 {
-    Utils::ProfTimeRecord timeRecord;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, profPath_)) {
-        ERROR("Failed to obtain the time in start_info and end_info.");
-        return false;
-    }
     bool flag = true;
     auto deviceList = Utils::File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     std::vector<AccPmuData> res;
     for (const auto& devicePath: deviceList) {
+        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
+        if (deviceId == Parser::Environment::INVALID_DEVICE_ID) {
+            ERROR("the invalid deviceId cannot to be identified.");
+            flag = false;
+            continue;
+        }
+        Utils::ProfTimeRecord timeRecord;
+        if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, profPath_, deviceId)) {
+            ERROR("Failed to get time record info data. Path is %, device id is %", profPath_, deviceId);
+            flag = false;
+            continue;
+        }
         DBInfo accPmuDB("acc_pmu.db", "AccPmu");
         std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, accPmuDB.dbName});
         if (!accPmuDB.ConstructDBRunner(dbPath)) {
@@ -42,12 +49,6 @@ bool AccPmuProcessor::Process(DataInventory &dataInventory)
             if (status == CHECK_FAILED) {
                 flag = false;
             }
-            continue;
-        }
-        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (deviceId == Parser::Environment::HOST_ID) {
-            ERROR("the invalid deviceId cannot to be identified.");
-            flag = false;
             continue;
         }
         auto oriData = LoadData(accPmuDB, dbPath);

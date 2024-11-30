@@ -166,22 +166,29 @@ TaskProcessor::ProcessedDataFormat TaskProcessor::FormatData(const OriDataFormat
 
 bool TaskProcessor::Process(const std::string &fileDir)
 {
-    INFO("Start to process %.", fileDir);
+    INFO("Start to task process %.", fileDir);
     ThreadData threadData;
-    DBInfo ascendTaskDB("ascend_task.db", "AscendTask");
-    bool flag = true;
-    MAKE_SHARED0_NO_OPERATION(ascendTaskDB.database, AscendTaskDB);
     threadData.profId = IdPool::GetInstance().GetUint32Id(fileDir);
     uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, fileDir);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
-    if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir)) {
-        ERROR("Failed to obtain the time in start_info and end_info.");
-        flag = false;
-    }
+
+    bool processFlag = ProcessTaskData(fileDir, deviceList, threadData, pid);
+    processFlag = ProcessMsprofTxData(fileDir, deviceList, threadData, pid) && processFlag;
+    return processFlag;
+}
+
+bool TaskProcessor::ProcessTaskData(const std::string &fileDir, const std::vector<std::string> &deviceList,
+                                    ThreadData threadData, uint32_t pid)
+{
+    INFO("Start to task data process %.", fileDir);
+    bool flag = true;
     for (const auto& devicePath: deviceList) {
+        DBInfo ascendTaskDB("ascend_task.db", "AscendTask");
         std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, ascendTaskDB.dbName});
+        MAKE_SHARED0_NO_OPERATION(ascendTaskDB.database, AscendTaskDB);
+        MAKE_SHARED_RETURN_VALUE(ascendTaskDB.dbRunner, DBRunner, false, dbPath);
         // 并不是所有场景都有ascend task数据
-        auto status = CheckPath(dbPath);
+        auto status = CheckPathAndTable(dbPath, ascendTaskDB);
         if (status != CHECK_SUCCESS) {
             if (status == CHECK_FAILED) {
                 flag = false;
@@ -189,19 +196,24 @@ bool TaskProcessor::Process(const std::string &fileDir)
             continue;
         }
         threadData.deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
+        if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir, threadData.deviceId)) {
+            ERROR("Failed to obtain the time in start_info and end_info. "
+                  "Path is %, device id is %.", fileDir, threadData.deviceId);
+            flag = false;
+            continue;
+        }
         uint16_t platformVersion = Context::GetInstance().GetPlatformVersion(threadData.deviceId, fileDir);
         INFO("Start to process %, pid:%, deviceId:%.", dbPath, pid, threadData.deviceId);
-        MAKE_SHARED_RETURN_VALUE(ascendTaskDB.dbRunner, DBRunner, false, dbPath);
         auto oriData = GetData(ascendTaskDB);
         if (oriData.empty()) {
-            flag = false;
             ERROR("Get % data failed in %.", ascendTaskDB.tableName, dbPath);
+            flag = false;
             continue;
         }
         auto processedData = FormatData(oriData, threadData, platformVersion, pid);
         if (!SaveData(processedData, TABLE_NAME_TASK)) {
-            flag = false;
             ERROR("Save data failed, %.", dbPath);
+            flag = false;
             continue;
         }
         if (!CreateTableIndex(TABLE_NAME_TASK, INDEX_NAME, TASK_INDEX_COL_NAMES)) {
@@ -210,30 +222,22 @@ bool TaskProcessor::Process(const std::string &fileDir)
         }
         INFO("process %, pid:%, deviceId:% ends.", dbPath, pid, threadData.deviceId);
     }
-    INFO("start msprof tx process");
-    flag &= ProcessWithMsprofTxTaskData(fileDir);
     INFO("process % ends.", fileDir);
     return flag;
 }
 
-bool TaskProcessor::ProcessWithMsprofTxTaskData(const std::string &fileDir)
+bool TaskProcessor::ProcessMsprofTxData(const std::string &fileDir, const std::vector<std::string> &deviceList,
+                                        ThreadData threadData, uint32_t pid)
 {
-    INFO("in msprof tx process");
-    DBInfo stepTraceDB("step_trace.db", "StepTrace");
-    MAKE_SHARED0_NO_OPERATION(stepTraceDB.database, StepTraceDB);
+    INFO("start msprof tx process");
     bool flag = true;
-    ThreadData threadData;
-    threadData.profId = IdPool::GetInstance().GetUint32Id(fileDir);
-    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, fileDir);
-    auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
-    if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir)) {
-        ERROR("Failed to obtain the time in start_info and end_info.");
-        return false;
-    }
     for (auto& devicePath: deviceList) {
+        DBInfo stepTraceDB("step_trace.db", "StepTrace");
         std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, stepTraceDB.dbName});
+        MAKE_SHARED0_NO_OPERATION(stepTraceDB.database, StepTraceDB);
+        MAKE_SHARED_RETURN_VALUE(stepTraceDB.dbRunner, DBRunner, false, dbPath);
         // 并不是所有场景都有msproftx 打点 task数据
-        auto status = CheckPath(dbPath);
+        auto status = CheckPathAndTable(dbPath, stepTraceDB);
         if (status != CHECK_SUCCESS) {
             if (status == CHECK_FAILED) {
                 flag = false;
@@ -241,6 +245,12 @@ bool TaskProcessor::ProcessWithMsprofTxTaskData(const std::string &fileDir)
             continue;
         }
         threadData.deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
+        if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir, threadData.deviceId)) {
+            ERROR("Failed to obtain the time in start_info and end_info. "
+                  "Path is %, device id is %.", fileDir, threadData.deviceId);
+            flag = false;
+            continue;
+        }
         Utils::SyscntConversionParams params;
         if (!Context::GetInstance().GetSyscntConversionParams(params, threadData.deviceId, fileDir)) {
             ERROR("GetSyscntConversionParams failed, profPath is %.", fileDir);
@@ -248,7 +258,6 @@ bool TaskProcessor::ProcessWithMsprofTxTaskData(const std::string &fileDir)
             continue;
         }
         INFO("Start to process %, pid:%, deviceId:%.", dbPath, pid, threadData.deviceId);
-        MAKE_SHARED_RETURN_VALUE(stepTraceDB.dbRunner, DBRunner, false, dbPath);
         auto oriData = GetMsprofTxTaskData(stepTraceDB);
         if (oriData.empty()) {
             WARN("Get % data failed in %.", stepTraceDB.tableName, dbPath);
@@ -256,9 +265,13 @@ bool TaskProcessor::ProcessWithMsprofTxTaskData(const std::string &fileDir)
         }
         auto processedData = FormatMsprofTxTaskData(oriData, threadData, params, pid);
         if (!SaveData(processedData, TABLE_NAME_TASK)) {
-            flag = false;
             ERROR("Save data failed, %.", dbPath);
+            flag = false;
             continue;
+        }
+        if (!CreateTableIndex(TABLE_NAME_TASK, INDEX_NAME, TASK_INDEX_COL_NAMES)) {
+            ERROR("Create table index failed.");
+            flag = false;
         }
         INFO("process %, pid:%, deviceId:% ends.", dbPath, pid, threadData.deviceId);
     }

@@ -131,8 +131,9 @@ std::vector<KfcTaskData> KfcCommProcessor::FormatTaskData(const std::vector<KfcT
     std::unordered_map<std::string, std::string>& hashMap, uint16_t deviceId)
 {
     ProfTimeRecord profTimeRecord;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(profTimeRecord, profPath_)) {
-        ERROR("Failed to obtain the time in start_info and end_info. Prof path is %", profPath_);
+    if (!Context::GetInstance().GetProfTimeRecordInfo(profTimeRecord, profPath_, deviceId)) {
+        ERROR("Failed to obtain the time in start_info and end_info. "
+              "Prof path is %, device id is %.", profPath_, deviceId);
         return {};
     }
     std::vector<KfcTaskData> result;
@@ -161,8 +162,9 @@ std::vector<KfcOpData> KfcCommProcessor::FormatOPData(const std::vector<KfcOPDto
     std::unordered_map<std::string, std::string>& hashMap,  uint16_t deviceId)
 {
     ProfTimeRecord profTimeRecord;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(profTimeRecord, profPath_)) {
-        ERROR("Failed to obtain the time in start_info and end_info. Prof path is %", profPath_);
+    if (!Context::GetInstance().GetProfTimeRecordInfo(profTimeRecord, profPath_, deviceId)) {
+        ERROR("Failed to obtain the time in start_info and end_info. "
+              "Prof path is %, device id is %.", profPath_, deviceId);
         return {};
     }
     std::vector<KfcOpData> result;

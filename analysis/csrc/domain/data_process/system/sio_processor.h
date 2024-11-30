@@ -30,8 +30,7 @@ public:
 
 private:
     bool Process(DataInventory& dataInventory) override;
-    bool ProcessSingleDevice(const std::string &devicePath, LocaltimeContext &localtimeContext,
-                             std::vector<SioData> &allProcessedData);
+    bool ProcessSingleDevice(const std::string &devicePath, std::vector<SioData> &allProcessedData);
     OriSioData LoadData(const DBInfo &sioDB);
     std::vector<SioData> FormatData(const OriSioData &oriData, const LocaltimeContext &localtimeContext);
 };

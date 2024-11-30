@@ -24,33 +24,34 @@ SioProcessor::SioProcessor(const std::string &profPath) : DataProcessor(profPath
 
 bool SioProcessor::Process(DataInventory &dataInventory)
 {
-    LocaltimeContext localtimeContext;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_)) {
-        ERROR("Failed to obtain the time in start_info and end_info, profPath is %.", profPath_);
-        return false;
-    }
     bool flag = true;
     std::vector<SioData> allProcessedData;
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
-        localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
-        flag = ProcessSingleDevice(devicePath, localtimeContext, allProcessedData) && flag;
+        flag = ProcessSingleDevice(devicePath, allProcessedData) && flag;
     }
     if (!SaveToDataInventory<SioData>(std::move(allProcessedData), dataInventory, PROCESSOR_NAME_HBM)) {
-            flag = false;
-            ERROR("Save HBM Data To DataInventory failed, profPath is %.", profPath_);
+        flag = false;
+        ERROR("Save sio Data To DataInventory failed, profPath is %.", profPath_);
     }
     return flag;
 }
 
-bool SioProcessor::ProcessSingleDevice(const std::string &devicePath, LocaltimeContext &localtimeContext,
-    std::vector<SioData> &allProcessedData)
+bool SioProcessor::ProcessSingleDevice(const std::string &devicePath, std::vector<SioData> &allProcessedData)
 {
-    DBInfo sioDB("sio.db", "Sio");
-    if (localtimeContext.deviceId == Parser::Environment::HOST_ID) {
+    LocaltimeContext localtimeContext;
+    localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
+    if (localtimeContext.deviceId == Parser::Environment::INVALID_DEVICE_ID) {
         ERROR("the invalid deviceId cannot to be identified, profPath is %.", profPath_);
         return false;
     }
+    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_,
+                                                      localtimeContext.deviceId)) {
+        ERROR("Failed to obtain the time in start_info and end_info, "
+              "profPath is %, device id is %.", profPath_, localtimeContext.deviceId);
+        return false;
+    }
+    DBInfo sioDB("sio.db", "Sio");
     std::string dbPath = File::PathJoin({devicePath, SQLITE, sioDB.dbName});
     if (!sioDB.ConstructDBRunner(dbPath) || sioDB.dbRunner == nullptr) {
         ERROR("Create % connection failed.", dbPath);
@@ -71,7 +72,7 @@ bool SioProcessor::ProcessSingleDevice(const std::string &devicePath, LocaltimeC
     }
     auto processedData = FormatData(oriData, localtimeContext);
     if (processedData.empty()) {
-        ERROR("Format HBM data error, dbPath is %.", dbPath);
+        ERROR("Format sio data error, dbPath is %.", dbPath);
         return false;
     }
     allProcessedData.insert(allProcessedData.end(), processedData.begin(), processedData.end());
@@ -93,7 +94,7 @@ std::vector<SioData> SioProcessor::FormatData(const OriSioData &oriData, const L
 {
     std::vector<SioData> formatData;
     if (!Reserve(formatData, oriData.size())) {
-        ERROR("Reserve for HBM data failed, profPath is %, deviceId is %.", profPath_, localtimeContext.deviceId);
+        ERROR("Reserve for sio data failed, profPath is %, deviceId is %.", profPath_, localtimeContext.deviceId);
         return formatData;
     }
     SioData tempData;

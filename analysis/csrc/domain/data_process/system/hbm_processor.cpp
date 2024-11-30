@@ -22,41 +22,43 @@ HBMProcessor::HBMProcessor(const std::string &profPath) : DataProcessor(profPath
 
 bool HBMProcessor::Process(DataInventory &dataInventory)
 {
-    LocaltimeContext localtimeContext;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_)) {
-        ERROR("Failed to obtain the time in start_info and end_info, profPath is %.", profPath_);
-        return false;
-    }
     bool flag = true;
     std::vector<HbmData> allProcessedData;
     std::vector<HbmSummaryData> allSumaryData;
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
-        localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
-        flag = ProcessSingleDevice(devicePath, localtimeContext, allProcessedData, allSumaryData) && flag;
+        flag = ProcessSingleDevice(devicePath, allProcessedData, allSumaryData) && flag;
     }
     if (!SaveToDataInventory<HbmData>(std::move(allProcessedData), dataInventory, PROCESSOR_NAME_HBM) ||
         !SaveToDataInventory<HbmSummaryData>(std::move(allSumaryData), dataInventory, PROCESSOR_NAME_HBM)) {
-            flag = false;
-            ERROR("Save HBM Data To DataInventory failed, profPath is %.", profPath_);
+        flag = false;
+        ERROR("Save memory on chip Data To DataInventory failed, profPath is %.", profPath_);
     }
     return flag;
 }
 
-bool HBMProcessor::ProcessSingleDevice(const std::string &devicePath, LocaltimeContext &localtimeContext,
+bool HBMProcessor::ProcessSingleDevice(const std::string &devicePath,
     std::vector<HbmData> &allProcessedData, std::vector<HbmSummaryData> &allSummaryData)
 {
-    DBInfo hbmDB("hbm.db", "HBMbwData");
-    if (localtimeContext.deviceId == Parser::Environment::HOST_ID) {
+    LocaltimeContext localtimeContext;
+    localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
+    if (localtimeContext.deviceId == Parser::Environment::INVALID_DEVICE_ID) {
         ERROR("the invalid deviceId cannot to be identified, profPath is %.", profPath_);
         return false;
     }
+    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_,
+                                                      localtimeContext.deviceId)) {
+        ERROR("Failed to obtain the time in start_info and end_info, "
+              "profPath is %, device id is %.", profPath_, localtimeContext.deviceId);
+        return false;
+    }
+    DBInfo hbmDB("hbm.db", "HBMbwData");
     std::string dbPath = File::PathJoin({devicePath, SQLITE, hbmDB.dbName});
     if (!hbmDB.ConstructDBRunner(dbPath) || hbmDB.dbRunner == nullptr) {
         ERROR("Create % connection failed.", dbPath);
         return false;
     }
-    // 并不是所有场景都有HBM数据
+    // 并不是所有场景都有memory on chip数据
     auto status = CheckPathAndTable(dbPath, hbmDB);
     if (status != CHECK_SUCCESS) {
         if (status == CHECK_FAILED) {
@@ -66,12 +68,12 @@ bool HBMProcessor::ProcessSingleDevice(const std::string &devicePath, LocaltimeC
     }
     auto processedData = ProcessData(hbmDB, localtimeContext);
     if (processedData.empty()) {
-        ERROR("Format HBM data error, dbPath is %.", dbPath);
+        ERROR("Format memory on chip data error, dbPath is %.", dbPath);
         return false;
     }
     auto summaryData = ProcessSummaryData(localtimeContext.deviceId, hbmDB);
     if (summaryData.empty()) {
-        ERROR("Process HBM summary data error, dbPath is %.", dbPath);
+        ERROR("Process memory on chip summary data error, dbPath is %.", dbPath);
         return false;
     }
     allProcessedData.insert(allProcessedData.end(), processedData.begin(), processedData.end());
@@ -115,7 +117,7 @@ std::vector<HbmSummaryData> HBMProcessor::ProcessSummaryData(const uint16_t &dev
           "AVG(CASE WHEN event_type = 'write' THEN bandwidth END) AS write_bandwidth FROM "
           + hbmDB.tableName + " GROUP BY hbmid";
     if (!hbmDB.dbRunner->QueryData(sql, avgHbmIdData) || avgHbmIdData.empty()) {
-        ERROR("Failed to obtain avg hbmid bandwidth from the % table, profPath is %, deviceId is %",
+        ERROR("Failed to obtain avg bandwidth from the % table, profPath is %, deviceId is %",
               hbmDB.tableName, profPath_, deviceId);
         return processedData;
     }
@@ -147,7 +149,8 @@ std::vector<HbmData> HBMProcessor::FormatData(const OriHbmData &oriData, const L
 {
     std::vector<HbmData> formatData;
     if (!Reserve(formatData, oriData.size())) {
-        ERROR("Reserve for HBM data failed, profPath is %, deviceId is %.", profPath_, localtimeContext.deviceId);
+        ERROR("Reserve for memory on chip data failed, profPath is %, deviceId is %.",
+              profPath_, localtimeContext.deviceId);
         return formatData;
     }
     HbmData tempData;

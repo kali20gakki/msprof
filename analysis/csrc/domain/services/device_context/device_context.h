@@ -20,7 +20,6 @@
 namespace Analysis {
 namespace Domain {
 using namespace Analysis::Infra;
-constexpr uint32_t MIN_SUB_DIR_NBAME_LEN = 6;
 constexpr int DEFAULT_PMU_LENGTH = 8;
 
 enum class AicMetricsEventsType {

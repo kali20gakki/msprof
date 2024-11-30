@@ -122,10 +122,6 @@ std::vector<AllReduceData> GenerateAllReduceData(const DBInfo &dbInfo, Localtime
 bool StepTraceProcessor::Process(DataInventory &dataInventory)
 {
     LocaltimeContext allParams;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(allParams.timeRecord, profPath_)) {
-        ERROR("GetProfTimeRecordInfo failed, profPath is %.", profPath_);
-        return false;
-    }
     bool flag = true;
     auto deviceList = Utils::File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     std::vector<TrainTraceData> resTrace;
@@ -133,8 +129,13 @@ bool StepTraceProcessor::Process(DataInventory &dataInventory)
     std::vector<AllReduceData> resAllReduce;
     for (const auto& devPath : deviceList) {
         allParams.deviceId = GetDeviceIdByDevicePath(devPath);
-        if (allParams.deviceId == Parser::Environment::HOST_ID) {
+        if (allParams.deviceId == Parser::Environment::INVALID_DEVICE_ID) {
             ERROR("the invalid deviceId cannot to be identified.");
+            flag = false;
+            continue;
+        }
+        if (!Context::GetInstance().GetProfTimeRecordInfo(allParams.timeRecord, profPath_, allParams.deviceId)) {
+            ERROR("GetProfTimeRecordInfo failed, profPath is %, device id is %.", profPath_, allParams.deviceId);
             flag = false;
             continue;
         }

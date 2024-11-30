@@ -52,6 +52,10 @@ bool SessionTimeInfoProcessor::Process(const std::string &fileDir)
         ERROR("GetProfTimeRecordInfo failed, profPath is %.", fileDir);
         return false;
     }
+    if (tempRecord.endTimeNs == Utils::DEFAULT_END_TIME_NS) {
+        ERROR("No end_info.json, can't get session time info.");
+        return false;
+    }
     // 开始时间取最早的，结束时间取最晚的
     record_.startTimeNs = std::min(record_.startTimeNs, tempRecord.startTimeNs);
     record_.endTimeNs = std::max(record_.endTimeNs, tempRecord.endTimeNs);

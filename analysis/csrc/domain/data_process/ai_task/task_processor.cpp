@@ -42,7 +42,7 @@ bool TaskProcessor::Process(DataInventory &dataInventory)
             continue;
         }
         uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (deviceId == Parser::Environment::HOST_ID) {
+        if (deviceId == Parser::Environment::INVALID_DEVICE_ID) {
             ERROR("the invalid deviceId cannot to be identified.");
             flag = false;
             continue;

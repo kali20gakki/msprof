@@ -22,9 +22,23 @@ using namespace Analysis::Parser::Environment;
 using namespace Analysis::Utils;
 MsprofTxDeviceProcessor::MsprofTxDeviceProcessor(const std::string &profPath) : DataProcessor(profPath) {}
 
-bool MsprofTxDeviceProcessor::ProcessOneDevice(const ProfTimeRecord &record, std::vector<MsprofTxDeviceData> &res,
-                                               const std::string &devPath)
+bool MsprofTxDeviceProcessor::ProcessOneDevice(std::vector<MsprofTxDeviceData> &res, const std::string &devPath)
 {
+    uint16_t deviceId = GetDeviceIdByDevicePath(devPath);
+    if (deviceId == Parser::Environment::INVALID_DEVICE_ID) {
+        ERROR("the invalid deviceId cannot to be identified.");
+        return false;
+    }
+    ProfTimeRecord record;
+    if (!Context::GetInstance().GetProfTimeRecordInfo(record, profPath_, deviceId)) {
+        ERROR("GetProfTimeRecordInfo failed, profPath is %, device id is %.", profPath_, deviceId);
+        return false;
+    }
+    Utils::SyscntConversionParams params;
+    if (!Context::GetInstance().GetSyscntConversionParams(params, deviceId, profPath_)) {
+        ERROR("GetSyscntConversionParams failed, profPath is %.", profPath_);
+        return false;
+    }
     DBInfo stepTraceDB("step_trace.db", "StepTrace");
     std::string dbPath = Utils::File::PathJoin({devPath, SQLITE, stepTraceDB.dbName});
     if (!stepTraceDB.ConstructDBRunner(dbPath)) {
@@ -36,16 +50,6 @@ bool MsprofTxDeviceProcessor::ProcessOneDevice(const ProfTimeRecord &record, std
             return false;
         }
         return true;
-    }
-    uint16_t deviceId = GetDeviceIdByDevicePath(devPath);
-    if (deviceId == Parser::Environment::HOST_ID) {
-        ERROR("the invalid deviceId cannot to be identified.");
-        return false;
-    }
-    Utils::SyscntConversionParams params;
-    if (!Context::GetInstance().GetSyscntConversionParams(params, deviceId, profPath_)) {
-        ERROR("GetSyscntConversionParams failed, profPath is %.", profPath_);
-        return false;
     }
     auto oriData = LoadData(stepTraceDB, dbPath);
     if (oriData.empty()) {
@@ -63,16 +67,11 @@ bool MsprofTxDeviceProcessor::ProcessOneDevice(const ProfTimeRecord &record, std
 
 bool MsprofTxDeviceProcessor::Process(DataInventory &dataInventory)
 {
-    ProfTimeRecord record;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(record, profPath_)) {
-        ERROR("GetProfTimeRecordInfo failed, profPath is %.", profPath_);
-        return false;
-    }
     bool flag = true;
     auto deviceList = Utils::File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     std::vector<MsprofTxDeviceData> res;
     for (const auto& devicePath : deviceList) {
-        flag = ProcessOneDevice(record, res, devicePath) && flag;
+        flag = ProcessOneDevice(res, devicePath) && flag;
     }
     if (!SaveToDataInventory<MsprofTxDeviceData>(std::move(res), dataInventory, PROCESSOR_NAME_TASK)) {
         ERROR("Save data failed, %.", PROCESSOR_NAME_TASK);

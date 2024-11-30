@@ -48,8 +48,10 @@ bool CommunicationInfoProcessor::Process(DataInventory& dataInventory)
     bool flag = true;
     for (const auto& devicePath : deviceList) {
         communicationData.deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
-        if (!Context::GetInstance().GetProfTimeRecordInfo(communicationData.timeRecord, profPath_)) {
-            ERROR("Failed to obtain the time in start_info and end_info.");
+        if (!Context::GetInstance().GetProfTimeRecordInfo(communicationData.timeRecord, profPath_,
+                                                          communicationData.deviceId)) {
+            ERROR("Failed to obtain the time in start_info and end_info. "
+                  "Path is %, device id is %.", profPath_, communicationData.deviceId);
             flag = false;
         }
         if (!ProcessOneDevice(devicePath, communicationData, dataInventory)) {

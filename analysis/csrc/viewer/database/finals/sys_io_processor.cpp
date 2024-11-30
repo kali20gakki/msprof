@@ -69,7 +69,6 @@ bool SysIOProcessor::Process(const std::string &fileDir)
     std::tie(oriDbName, oriTableName, targetTableName) = ORI_DB_INFO_TABLE.find(processorName_)->second;
     DBInfo sysIODB(oriDbName, oriTableName);
     bool flag = true;
-    bool timeFlag = Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir);
     for (const auto& devicePath: deviceList) {
         std::string dbPath = File::PathJoin({devicePath, SQLITE, sysIODB.dbName});
         // 并不是所有场景都有sys io数据
@@ -80,11 +79,11 @@ bool SysIOProcessor::Process(const std::string &fileDir)
             }
             continue;
         }
-        if (!timeFlag) {
-            ERROR("Failed to GetProfTimeRecordInfo, fileDir is %.", fileDir);
+        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
+        if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir, deviceId)) {
+            ERROR("Failed to GetProfTimeRecordInfo, fileDir is %, device id is %.", fileDir, deviceId);
             return false;
         }
-        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
         if (!Context::GetInstance().GetClockMonotonicRaw(threadData.hostMonotonic, true, deviceId, fileDir) ||
             !Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, false, deviceId, fileDir)) {
             ERROR("Device MonotonicRaw is invalid in path: %., device id is %", fileDir, deviceId);

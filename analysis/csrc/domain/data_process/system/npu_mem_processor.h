@@ -29,8 +29,7 @@ public:
 
 private:
     bool Process(DataInventory& dataInventory) override;
-    bool ProcessSingleDevice(const std::string &devicePath, LocaltimeContext &localtimeContext,
-                             std::vector<NpuMemData> &allProcessedData);
+    bool ProcessSingleDevice(const std::string &devicePath, std::vector<NpuMemData> &allProcessedData);
     OriNpuMemData LoadData(const DBInfo &npuMemDB);
     std::vector<NpuMemData> FormatData(const OriNpuMemData &oriData, const LocaltimeContext &localtimeContext);
 };

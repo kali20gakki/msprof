@@ -27,6 +27,7 @@ using namespace Viewer::Database;
 
 namespace {
 const uint32_t ALL_EXPORT_VERSION = 0x072211;  // 2023年10月30号之后支持全导的驱动版本号 0x072211 = 467473
+const uint64_t DEFAULT_END_TIME_US = DEFAULT_END_TIME_NS / MILLI_SECOND;
 const std::string DEFAULT_HOST_UID = "0";
 // 需要用到的json 和 log的文件名（前缀）
 const std::string INFO_JSON = "info.json";
@@ -38,7 +39,7 @@ const std::string DEVICE_START_LOG = "dev_start.log";
 // CHECK_VALUES存放一定存在的字段,字段不存在Load失败。
 // 已经校验过的字段,可直接使用.at();未被校验过的字段则使用.value(),来设置默认值。确保读取正常
 const std::set<std::string> CHECK_VALUES = {
-    "platform_version", "startCollectionTimeBegin", "endCollectionTimeEnd",
+    "platform_version", "startCollectionTimeBegin",
     "startClockMonotonicRaw", "pid", "CPU", "DeviceInfo", "llc_profiling", "ai_core_profiling_mode", "hostname"
 };
 }
@@ -69,6 +70,9 @@ bool Context::LoadJsonData(const std::string &profPath, const std::string &devic
         std::vector<std::string> files = File::GetOriginData(deviceDir, {fileName}, {"done"});
         if (files.size() != 1) {
             ERROR("The number of % in % is invalid, file num is: %.", fileName, deviceDir, files.size());
+            if (fileName == END_INFO) {
+                continue;
+            }
             return false;
         }
         FileReader fd(files.back());
@@ -254,28 +258,28 @@ bool Context::GetProfTimeRecordInfo(Utils::ProfTimeRecord &record, const std::st
         WARN("There is no host time log in %, it will use device time log!", profPath);
         info = GetInfoByDeviceId(DEFAULT_DEVICE_ID, profPath);
         if (info.empty()) {
-            ERROR("No device time log in %.", profPath);
+            ERROR("No device time log in %, device id is %.", profPath, device_id);
             return false;
         }
     }
     uint64_t startTimeUs = UINT64_MAX;
     if (StrToU64(startTimeUs, info.at("startCollectionTimeBegin")) != ANALYSIS_OK) {
-        ERROR("StartTime to uint64_t failed.");
+        ERROR("StartTime to uint64_t failed. Prof path is %, device id is %.", profPath, device_id);
         return false;
     }
     uint64_t endTimeUs = 0;
-    if (StrToU64(endTimeUs, info.at("endCollectionTimeEnd")) != ANALYSIS_OK) {
-        ERROR("EndTime to uint64_t failed.");
+    if (StrToU64(endTimeUs, info.value("endCollectionTimeEnd", std::to_string(DEFAULT_END_TIME_US))) != ANALYSIS_OK) {
+        ERROR("EndTime to uint64_t failed. Prof path is %, device id is %.", profPath, device_id);
         return false;
     }
     uint64_t baseTimeNs = UINT64_MAX;
     if (StrToU64(baseTimeNs, info.at("startClockMonotonicRaw")) != ANALYSIS_OK) {
-        ERROR("BaseTime to uint64_t failed.");
+        ERROR("BaseTime to uint64_t failed. Prof path is %, device id is %.", profPath, device_id);
         return false;
     }
     // 先判断时间之间的大小关系，确保后续计算时整数不回绕
     if ((startTimeUs * MILLI_SECOND < baseTimeNs)) {
-        ERROR("The value of startTimeUs and baseTimeNs is invalid.");
+        ERROR("The value of startTimeUs and baseTimeNs is invalid. Path is %, device id is %.", profPath, device_id);
         return false;
     }
     // startInfo endInfo 里的 collectionTime的单位是us，需要转换成ns

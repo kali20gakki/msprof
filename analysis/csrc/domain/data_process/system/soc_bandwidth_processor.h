@@ -27,8 +27,7 @@ public:
     explicit SocBandwidthProcessor(const std::string& profPaths);
 private:
     bool Process(DataInventory& dataInventory) override;
-    bool ProcessSingleDevice(const std::string& devicePath, Utils::ProfTimeRecord& timeRecord,
-                             std::vector<SocBandwidthData>& res);
+    bool ProcessSingleDevice(const std::string& devicePath, std::vector<SocBandwidthData>& res);
     OriSocDataFormat LoadData(const DBInfo& socProfilerDB, const std::string& dbPath);
     std::vector<SocBandwidthData> FormatData(const OriSocDataFormat& oriData,
                                              const Utils::ProfTimeRecord& timeRecord,
