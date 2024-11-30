@@ -36,17 +36,20 @@ public:
     bool Run() override;
 protected:
     bool Process(const std::string &fileDir) override;
-    bool ProcessWithMsprofTxTaskData(const std::string &fileDir);
 private:
+    bool ProcessTaskData(const std::string &fileDir, const std::vector<std::string> &deviceList,
+                         ThreadData threadData, uint32_t pid);
     static OriDataFormat GetData(DBInfo &ascendTaskDB);
     static ProcessedDataFormat FormatData(const OriDataFormat &oriData, const ThreadData &threadData,
-                                          const uint16_t platformVersion, const uint32_t pid);
+                                          uint16_t platformVersion, uint32_t pid);
     static uint64_t GetTaskType(const std::string &hostType, const std::string &deviceType, uint16_t platformVersion);
+    bool ProcessMsprofTxData(const std::string &fileDir, const std::vector<std::string> &deviceList,
+                             ThreadData threadData, uint32_t pid);
     static OriMsprofTxDataFormat GetMsprofTxTaskData(DBInfo &stepTraceDB);
     static ProcessedDataFormat FormatMsprofTxTaskData(const OriMsprofTxDataFormat &oriData,
                                                       const ThreadData &threadData,
                                                       Utils::SyscntConversionParams &params,
-                                                      const uint32_t pid);
+                                                      uint32_t pid);
 };
 
 } // Database

@@ -286,18 +286,18 @@ bool PmuProcessor::SampleBasedTimelineProcess(
 {
     INFO("SampleBasedTimeline");
     bool flag = true;
-    ThreadData threadData;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir)) {
-        ERROR("GetProfTimeRecordInfo failed, profPath is %.", fileDir);
-        return false;
-    }
     for (const auto& pair : dbPathTable) {
+        ThreadData threadData;
         // 0 deviceId, 1 coreType
         threadData.deviceId = std::get<0>(pair.second);
         double freq;
         if (!Context::GetInstance().GetPmuFreq(freq, threadData.deviceId, fileDir) ||
                 IsDoubleEqual(freq, DOUBLE_ZERO)) {
             ERROR("GetPmuFreq failed or aic freq is invalid, profPath is %.", fileDir);
+            return false;
+        }
+        if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir, threadData.deviceId)) {
+            ERROR("GetProfTimeRecordInfo failed, profPath is %, device id is %.", fileDir, threadData.deviceId);
             return false;
         }
         auto oriData = GetSampleBasedTimelineData(pair.first);

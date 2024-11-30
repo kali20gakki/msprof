@@ -59,20 +59,11 @@ std::vector<SocBandwidthData> SocBandwidthProcessor::FormatData(const OriSocData
 
 bool SocBandwidthProcessor::Process(DataInventory& dataInventory)
 {
-    ProfTimeRecord timeRecord;
     bool flag = true;
     std::vector<SocBandwidthData> res;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, profPath_)) {
-        ERROR("GetProfTimeRecordInfo failed, profPath is %.", profPath_);
-        return false;
-    }
     auto deviceList = Utils::File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
-    if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, profPath_)) {
-        ERROR("Failed to obtain the time in start_info and end_info.");
-        return false;
-    }
     for (const auto& devicePath : deviceList) {
-        flag = ProcessSingleDevice(devicePath, timeRecord, res) && flag;
+        flag = ProcessSingleDevice(devicePath, res) && flag;
     }
     if (!SaveToDataInventory(std::move(res), dataInventory, PROCESSOR_NAME_SOC)) {
         ERROR("Save data failed, %.", PROCESSOR_NAME_SOC);
@@ -81,9 +72,19 @@ bool SocBandwidthProcessor::Process(DataInventory& dataInventory)
     return flag;
 }
 
-bool SocBandwidthProcessor::ProcessSingleDevice(const std::string& devicePath, Utils::ProfTimeRecord& timeRecord,
-                                                std::vector<SocBandwidthData>& res)
+bool SocBandwidthProcessor::ProcessSingleDevice(const std::string& devicePath, std::vector<SocBandwidthData>& res)
 {
+    uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
+    if (deviceId == Parser::Environment::INVALID_DEVICE_ID) {
+        ERROR("the invalid deviceId cannot to be identified.");
+        return false;
+    }
+    ProfTimeRecord timeRecord;
+    if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, profPath_, deviceId)) {
+        ERROR("Failed to obtain the time in start_info and end_info. "
+              "Prof path is %, device id is %.", profPath_, deviceId);
+        return false;
+    }
     DBInfo socProfilerDB("soc_profiler.db", "InterSoc");
     std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, socProfilerDB.dbName});
     if (!socProfilerDB.ConstructDBRunner(dbPath)) {
@@ -95,11 +96,6 @@ bool SocBandwidthProcessor::ProcessSingleDevice(const std::string& devicePath, U
             return false;
         }
         return true;
-    }
-    uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-    if (deviceId == Parser::Environment::HOST_ID) {
-        ERROR("the invalid deviceId cannot to be identified.");
-        return false;
     }
     auto oriData = LoadData(socProfilerDB, dbPath);
     if (oriData.empty()) {

@@ -34,35 +34,37 @@ bool LLcProcessor::Process(DataInventory &dataInventory)
         WARN("Skip llc processing in path: %.", profPath_);
         return true;
     }
-    LocaltimeContext localtimeContext;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_)) {
-        ERROR("Failed to obtain the time in start_info and end_info, profPath is %.", profPath_);
-        return false;
-    }
     bool flag = true;
     std::vector<LLcData> allProcessedData;
     std::vector<LLcSummaryData> allSumaryData;
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
-        localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
-        flag = ProcessSingleDevice(devicePath, localtimeContext, allProcessedData, allSumaryData) && flag;
+        flag = ProcessSingleDevice(devicePath, allProcessedData, allSumaryData) && flag;
     }
     if (!SaveToDataInventory<LLcData>(std::move(allProcessedData), dataInventory, PROCESSOR_NAME_LLC) ||
         !SaveToDataInventory<LLcSummaryData>(std::move(allSumaryData), dataInventory, PROCESSOR_NAME_LLC)) {
-            flag = false;
-            ERROR("Save LLC Data To DataInventory failed, profPath is %.", profPath_);
+        flag = false;
+        ERROR("Save LLC Data To DataInventory failed, profPath is %.", profPath_);
     }
     return flag;
 }
 
-bool LLcProcessor::ProcessSingleDevice(const std::string &devicePath, LocaltimeContext &localtimeContext,
+bool LLcProcessor::ProcessSingleDevice(const std::string &devicePath,
     std::vector<LLcData> &allProcessedData, std::vector<LLcSummaryData> &allSummaryData)
 {
-    DBInfo llcDB("llc.db", "LLCMetrics");
-    if (localtimeContext.deviceId == Parser::Environment::HOST_ID) {
+    LocaltimeContext localtimeContext;
+    localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
+    if (localtimeContext.deviceId == Parser::Environment::INVALID_DEVICE_ID) {
         ERROR("the invalid deviceId cannot to be identified, profPath is %.", profPath_);
         return false;
     }
+    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_,
+                                                      localtimeContext.deviceId)) {
+        ERROR("Failed to obtain the time in start_info and end_info, "
+              "profPath is %, device id is %.", profPath_, localtimeContext.deviceId);
+        return false;
+    }
+    DBInfo llcDB("llc.db", "LLCMetrics");
     std::string dbPath = File::PathJoin({devicePath, SQLITE, llcDB.dbName});
     if (!llcDB.ConstructDBRunner(dbPath) || llcDB.dbRunner == nullptr) {
         ERROR("Create % connection failed.", dbPath);

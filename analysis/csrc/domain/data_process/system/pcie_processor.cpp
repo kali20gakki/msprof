@@ -46,28 +46,19 @@ PCIeProcessor::PCIeProcessor(const std::string& profPaths) : DataProcessor(profP
 bool PCIeProcessor::Process(DataInventory& dataInventory)
 {
     INFO("PCIeProcessor Process, dir is %", profPath_);
-    LocaltimeContext localtimeContext;
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     std::vector<PCIeData> res;
     bool flag = true;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_)) {
-        ERROR("Failed to GetProfTimeRecordInfo, fileDir is %.", profPath_);
-        return false;
-    }
     for (const auto& devicePath : deviceList) {
-        DBInfo pcieDB("pcie.db", "PcieOriginalData");
-        std::string dbPath = File::PathJoin({devicePath, SQLITE, pcieDB.dbName});
-        pcieDB.ConstructDBRunner(dbPath);
-        auto status = CheckPathAndTable(dbPath, pcieDB);
-        if (status != CHECK_SUCCESS) {
-            if (status == CHECK_FAILED) {
-                flag = false;
-            }
+        LocaltimeContext localtimeContext;
+        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
+        if (deviceId == Parser::Environment::INVALID_DEVICE_ID) {
+            ERROR("the invalid deviceId cannot to be identified.");
+            flag = false;
             continue;
         }
-        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (deviceId == Parser::Environment::HOST_ID) {
-            ERROR("the invalid deviceId cannot to be identified.");
+        if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_, deviceId)) {
+            ERROR("Failed to GetProfTimeRecordInfo, fileDir is %, device id is %.", profPath_, deviceId);
             flag = false;
             continue;
         }
@@ -76,6 +67,16 @@ bool PCIeProcessor::Process(DataInventory& dataInventory)
                                                          profPath_)) {
             ERROR("Device MonotonicRaw is invalid in path: %., device id is %", profPath_, deviceId);
             flag = false;
+            continue;
+        }
+        DBInfo pcieDB("pcie.db", "PcieOriginalData");
+        std::string dbPath = File::PathJoin({devicePath, SQLITE, pcieDB.dbName});
+        pcieDB.ConstructDBRunner(dbPath);
+        auto status = CheckPathAndTable(dbPath, pcieDB);
+        if (status != CHECK_SUCCESS) {
+            if (status == CHECK_FAILED) {
+                flag = false;
+            }
             continue;
         }
         PCIeDataFormat pcieData = LoadData(dbPath, pcieDB);

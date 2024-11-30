@@ -40,13 +40,12 @@ public:
 
 private:
     bool Process(DataInventory& dataInventory) override;
-    bool ProcessSingleDevice(const std::string &devicePath, LocaltimeContext &localtimeContext,
-        std::vector<SysIOOriginalData> &allProcessedData, std::vector<SysIOReportData> &allSummaryData);
-    std::vector<SysIOOriginalData> ProcessData(const DBInfo &sysIODB, LocaltimeContext &localtimeContext);
-    std::vector<SysIOReportData> ProcessSummaryData(const DBInfo &sysIODB, const LocaltimeContext &localtimeContext);
-    OriSysIOData LoadData(const DBInfo &sysIODB);
-    std::vector<SysIOOriginalData> FormatData(const OriSysIOData &oriData, const LocaltimeContext &localtimeContext);
-
+    bool ProcessSingleDevice(const std::string &devicePath,
+        std::vector<SysIOOriginalData> &timelineData, std::vector<SysIOReportData> &summaryData);
+    bool ProcessTimelineData(const DBInfo &sysIODB, LocaltimeContext &localtimeContext,
+                             std::vector<SysIOOriginalData> &timelineData);
+    bool ProcessSummaryData(const DBInfo &sysIODB, const LocaltimeContext &localtimeContext,
+                            std::vector<SysIOReportData> &summaryData);
 private:
     std::string processorName_;
 };
@@ -76,8 +75,7 @@ public:
 
 private:
     bool Process(DataInventory& dataInventory) override;
-    bool ProcessSingleDevice(const std::string &devicePath, LocaltimeContext &localtimeContext,
-                             std::vector<SysIOReceiveSendData> &allProcessedData);
+    bool ProcessSingleDevice(const std::string &devicePath, std::vector<SysIOReceiveSendData> &allProcessedData);
     OriSysIOReceiveSendData LoadData(const DBInfo &sysIOReceiveSendDB);
     std::vector<SysIOReceiveSendData> FormatData(const OriSysIOReceiveSendData &oriData,
                                                  const LocaltimeContext &localtimeContext);

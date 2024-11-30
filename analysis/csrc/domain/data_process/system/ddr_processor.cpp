@@ -55,9 +55,23 @@ std::vector<DDRData> DDRProcessor::FormatData(const OriDataFormat& oriData, cons
     return processedData;
 }
 
-bool DDRProcessor::ProcessOneDevice(const std::string& devicePath, LocaltimeContext& localtimeContext,
-                                    std::vector<DDRData>& res)
+bool DDRProcessor::ProcessOneDevice(const std::string& devicePath, std::vector<DDRData>& res)
 {
+    LocaltimeContext localtimeContext;
+    uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
+    if (deviceId == Parser::Environment::INVALID_DEVICE_ID) {
+        ERROR("The invalid deviceId cannot to be identified.");
+        return false;
+    }
+    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_, deviceId)) {
+        ERROR("Failed to obtain the time in start_info and end_info. Path is %, device id is %.", profPath_, deviceId);
+        return false;
+    }
+    if (!Context::GetInstance().GetClockMonotonicRaw(localtimeContext.hostMonotonic, true, deviceId, profPath_) ||
+        !Context::GetInstance().GetClockMonotonicRaw(localtimeContext.deviceMonotonic, false, deviceId, profPath_)) {
+        ERROR("Device MonotonicRaw is invalid in path: %., device id is %", profPath_, deviceId);
+        return false;
+    }
     DBInfo ddrDB("ddr.db", "DDRMetricData");
     std::string dbPath = File::PathJoin({devicePath, SQLITE, ddrDB.dbName});
     if (!ddrDB.ConstructDBRunner(dbPath)) {
@@ -69,16 +83,6 @@ bool DDRProcessor::ProcessOneDevice(const std::string& devicePath, LocaltimeCont
             return false;
         }
         return true;
-    }
-    uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-    if (deviceId == Parser::Environment::HOST_ID) {
-        ERROR("The invalid deviceId cannot to be identified.");
-        return false;
-    }
-    if (!Context::GetInstance().GetClockMonotonicRaw(localtimeContext.hostMonotonic, true, deviceId, profPath_) ||
-        !Context::GetInstance().GetClockMonotonicRaw(localtimeContext.deviceMonotonic, false, deviceId, profPath_)) {
-        ERROR("Device MonotonicRaw is invalid in path: %., device id is %", profPath_, deviceId);
-        return false;
     }
     auto oriData = LoadData(ddrDB);
     if (oriData.empty()) {
@@ -96,16 +100,11 @@ bool DDRProcessor::ProcessOneDevice(const std::string& devicePath, LocaltimeCont
 
 bool DDRProcessor::Process(DataInventory& dataInventory)
 {
-    LocaltimeContext localtimeContext;
     bool flag = true;
     std::vector<DDRData> res;
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
-    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_)) {
-        ERROR("Failed to obtain the time in start_info and end_info.");
-        return false;
-    }
     for (const auto& devicePath : deviceList) {
-        flag = ProcessOneDevice(devicePath, localtimeContext, res);
+        flag = ProcessOneDevice(devicePath, res) && flag;
     }
     if (!SaveToDataInventory<DDRData>(std::move(res), dataInventory, PROCESSOR_NAME_DDR)) {
         flag = false;

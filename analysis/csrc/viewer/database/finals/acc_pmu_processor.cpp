@@ -77,11 +77,9 @@ AccPmuProcessor::ProcessedDataFormat AccPmuProcessor::FormatData(const OriDataFo
 bool AccPmuProcessor::Process(const std::string &fileDir)
 {
     INFO("Start to process %.", fileDir);
-    Utils::ProfTimeRecord timeRecord;
     DBInfo accPmuDB("acc_pmu.db", "AccPmu");
     bool flag = true;
     MAKE_SHARED0_NO_OPERATION(accPmuDB.database, AccPmuDB);
-    bool timeFlag = Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
         std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, accPmuDB.dbName});
@@ -94,14 +92,15 @@ bool AccPmuProcessor::Process(const std::string &fileDir)
             continue;
         }
         uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (deviceId == Parser::Environment::HOST_ID) {
+        if (deviceId == Parser::Environment::INVALID_DEVICE_ID) {
             ERROR("the invalid deviceId cannot to be identified.");
             flag = false;
             continue;
         }
         INFO("Start to process device data in %, deviceId:[%].", dbPath, deviceId);
-        if (!timeFlag) {
-            ERROR("Failed to obtain the time in start_info and end_info.");
+        Utils::ProfTimeRecord timeRecord;
+        if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, fileDir, deviceId)) {
+            ERROR("Failed to obtain the time in start_info and end_info. Path is %, device id is %", fileDir, deviceId);
             flag = false;
             continue;
         }

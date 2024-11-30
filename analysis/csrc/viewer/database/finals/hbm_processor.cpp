@@ -75,12 +75,11 @@ HBMProcessor::ProcessedDataFormat HBMProcessor::FormatData(const OriDataFormat &
 bool HBMProcessor::Process(const std::string &fileDir)
 {
     INFO("Start to process %.", fileDir);
-    ThreadData threadData;
     DBInfo hbmDB("hbm.db", "HBMbwData");
     bool flag = true;
     auto deviceList = File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
-    bool timeFlag = Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir);
     for (const auto& devicePath: deviceList) {
+        ThreadData threadData;
         std::string dbPath = File::PathJoin({devicePath, SQLITE, hbmDB.dbName});
         // 并不是所有场景都有hbm数据
         auto status = CheckPath(dbPath);
@@ -91,12 +90,12 @@ bool HBMProcessor::Process(const std::string &fileDir)
             continue;
         }
         INFO("Start to process dbpath: %.", dbPath);
-        if (!timeFlag) {
-            ERROR("Failed to obtain the time in start_info and end_info.");
+        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
+        if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir, deviceId)) {
+            ERROR("Failed to obtain the time in start_info and end_info. Path is %, device id is %", fileDir, deviceId);
             flag = false;
             continue;
         }
-        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
         if (!Context::GetInstance().GetClockMonotonicRaw(threadData.hostMonotonic, true, deviceId, fileDir) ||
             !Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, false, deviceId, fileDir)) {
             ERROR("Device MonotonicRaw is invalid in path: %., device id is %", fileDir, deviceId);

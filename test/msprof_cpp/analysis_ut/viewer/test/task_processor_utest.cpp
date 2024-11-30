@@ -219,7 +219,7 @@ TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenAscendTaskProcessRunSucce
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
     .stubs()
     .will(returnValue(true));
-    MOCKER_CPP(&Analysis::Viewer::Database::TaskProcessor::ProcessWithMsprofTxTaskData)
+    MOCKER_CPP(&Analysis::Viewer::Database::TaskProcessor::ProcessMsprofTxData)
     .stubs()
     .will(returnValue(false));
     auto processor = TaskProcessor(DB_PATH, PROF_PATHS);
@@ -228,7 +228,7 @@ TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenAscendTaskProcessRunSucce
     CheckGlobalTaskId(result, OP_NUM - TX_OP_NUM);
     CheckStringId(result, STRING_NUM - TX_STRING_NUM);
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
-    MOCKER_CPP(&Analysis::Viewer::Database::TaskProcessor::ProcessWithMsprofTxTaskData).reset();
+    MOCKER_CPP(&Analysis::Viewer::Database::TaskProcessor::ProcessMsprofTxData).reset();
 }
 
 TEST_F(TaskProcessorUTest, TestRunShouldReturnTrueWhenAscendTaskProcessRunSuccessWithMsprofTxTaskDataProcessSucc)
@@ -236,13 +236,13 @@ TEST_F(TaskProcessorUTest, TestRunShouldReturnTrueWhenAscendTaskProcessRunSucces
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
     .stubs()
     .will(returnValue(true));
-    MOCKER_CPP(&Analysis::Viewer::Database::TaskProcessor::ProcessWithMsprofTxTaskData)
+    MOCKER_CPP(&Analysis::Viewer::Database::TaskProcessor::ProcessMsprofTxData)
     .stubs()
     .will(returnValue(true));
     auto processor = TaskProcessor(DB_PATH, PROF_PATHS);
     EXPECT_TRUE(processor.Run());
     MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
-    MOCKER_CPP(&Analysis::Viewer::Database::TaskProcessor::ProcessWithMsprofTxTaskData).reset();
+    MOCKER_CPP(&Analysis::Viewer::Database::TaskProcessor::ProcessMsprofTxData).reset();
 }
 
 TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenCreateIndexFailed)

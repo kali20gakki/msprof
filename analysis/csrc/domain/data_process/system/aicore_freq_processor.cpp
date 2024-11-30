@@ -31,18 +31,19 @@ bool AicoreFreqProcessor::Process(DataInventory& dataInventory)
         WARN("This platformVersion: % does not support the processing of aicore freq data.", version);
         return true;
     }
-    ProfTimeRecord timeRecord;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, profPath_)) {
-        ERROR("Failed to GetProfTimeRecordInfo, fileDir is %.", profPath_);
-        return false;
-    }
     bool flag = true;
     std::vector<AicoreFreqData> res;
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     for (const auto& devicePath : deviceList) {
         auto deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (deviceId == Parser::Environment::HOST_ID) {
+        if (deviceId == Parser::Environment::INVALID_DEVICE_ID) {
             ERROR("The invalid deviceId cannot to be identified.");
+            flag = false;
+            continue;
+        }
+        ProfTimeRecord timeRecord;
+        if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, profPath_, deviceId)) {
+            ERROR("Failed to GetProfTimeRecordInfo, fileDir is %, device id is %.", profPath_, deviceId);
             flag = false;
             continue;
         }
@@ -64,9 +65,6 @@ bool AicoreFreqProcessor::Process(DataInventory& dataInventory)
             flag = false;
             continue;
         }
-        std::sort(processedData.begin(), processedData.end(), [](const AicoreFreqData &ld, const AicoreFreqData &rd) {
-            return ld.timestamp < rd.timestamp;
-        });
         res.insert(res.end(), processedData.begin(), processedData.end());
     }
     if (!SaveToDataInventory<AicoreFreqData>(std::move(res), dataInventory, PROCESSOR_NAME_AICORE_FREQ)) {
@@ -145,13 +143,18 @@ bool AicoreFreqProcessor::FormatData(const uint16_t& deviceId, const ProfTimeRec
         }
         processedData.push_back(aicoreFreqData);
     }
-    aicoreFreqData.timestamp = timeRecord.endTimeNs;
-    // 结束时间的freq为最后一条记录的freq
-    processedData.push_back(aicoreFreqData);
+    if (timeRecord.endTimeNs != DEFAULT_END_TIME_NS) {
+        aicoreFreqData.timestamp = timeRecord.endTimeNs;
+        // 结束时间的freq为最后一条记录的freq
+        processedData.push_back(aicoreFreqData);
+    }
     // 如果开始时间前无记录，则使用默认freq；如果有记录，则使用开始时间前的freq(此时添加 db里的数据将为乱序，但不影响数据读取)
     aicoreFreqData.timestamp = timeRecord.startTimeNs;
     aicoreFreqData.freq = freq;
     processedData.push_back(aicoreFreqData);
+    std::sort(processedData.begin(), processedData.end(), [](const AicoreFreqData &ld, const AicoreFreqData &rd) {
+        return ld.timestamp < rd.timestamp;
+    });
     return true;
 }
 }

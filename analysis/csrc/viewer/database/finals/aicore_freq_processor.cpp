@@ -50,10 +50,6 @@ bool AicoreFreqProcessor::Process(const std::string &fileDir)
     DBInfo freqDB("freq.db", "FreqParse");
     bool flag = true;
     auto deviceList = File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
-    if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir)) {
-        ERROR("Failed to GetProfTimeRecordInfo, fileDir is %.", fileDir);
-        return false;
-    }
     for (const auto& devicePath: deviceList) {
         std::string dbPath = File::PathJoin({devicePath, SQLITE, freqDB.dbName});
         // 仅db校验失败时返回，如果无db继续流程
@@ -63,6 +59,10 @@ bool AicoreFreqProcessor::Process(const std::string &fileDir)
             continue;
         }
         threadData.deviceId = GetDeviceIdByDevicePath(devicePath);
+        if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir, threadData.deviceId)) {
+            ERROR("Failed to GetProfTimeRecordInfo, fileDir is %, device id is %.", fileDir, threadData.deviceId);
+            return false;
+        }
         Utils::SyscntConversionParams params;
         if (!Context::GetInstance().GetSyscntConversionParams(params, threadData.deviceId, fileDir)) {
             ERROR("GetSyscntConversionParams failed, profPath is %.", fileDir);
@@ -138,8 +138,10 @@ bool AicoreFreqProcessor::FormatData(const std::string fileDir, const ThreadData
     }
     // 如果开始时间前无记录，则使用默认freq；如果有记录，则使用开始时间前的freq(此时添加 db里的数据将为乱序，但不影响数据读取)
     processedData.emplace_back(threadData.deviceId, threadData.timeRecord.startTimeNs, freq);
-    // 结束时间的freq为最后一条记录的freq
-    processedData.emplace_back(threadData.deviceId, threadData.timeRecord.endTimeNs, tempData.freq);
+    // 结束时间的freq为最后一条记录的freq. 如果endTime为DEFAULT_END_TIME_US * MILLI_SECOND,说明无end_info,不使用非法值
+    if (threadData.timeRecord.endTimeNs != DEFAULT_END_TIME_NS) {
+        processedData.emplace_back(threadData.deviceId, threadData.timeRecord.endTimeNs, tempData.freq);
+    }
     return true;
 }
 

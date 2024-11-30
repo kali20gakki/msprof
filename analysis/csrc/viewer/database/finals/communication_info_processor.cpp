@@ -351,8 +351,9 @@ bool CommunicationInfoProcessor::SaveCommData(ThreadData &threadData, OriTaskDat
         ERROR("Can't get hash data.");
         return false;
     }
-    if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir)) {
-        ERROR("Failed to obtain the time in start_info and end_info.");
+    if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir, threadData.deviceId)) {
+        ERROR("Failed to obtain the time in start_info and end_info. "
+              "Path is %, device id is %.", fileDir, threadData.deviceId);
         return false;
     }
     CommunicationTaskDataFormat taskData;

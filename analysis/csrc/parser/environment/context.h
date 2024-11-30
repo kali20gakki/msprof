@@ -26,7 +26,9 @@ namespace Analysis {
 namespace Parser {
 namespace Environment {
 const uint16_t HOST_ID = 64;
-const uint16_t DEFAULT_DEVICE_ID = UINT16_MAX;
+// UINT16_MAX为非法device id, HOST_ID + 1 为默认device id
+const uint16_t INVALID_DEVICE_ID = UINT16_MAX;
+const uint16_t DEFAULT_DEVICE_ID = HOST_ID + 1;
 enum class Chip : uint16_t {
     CHIP_V1_1_0 = 0,
     CHIP_V2_1_0 = 1,

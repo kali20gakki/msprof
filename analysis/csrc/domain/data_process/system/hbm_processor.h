@@ -30,7 +30,7 @@ public:
 
 private:
     bool Process(DataInventory& dataInventory) override;
-    bool ProcessSingleDevice(const std::string &devicePath, LocaltimeContext &localtimeContext,
+    bool ProcessSingleDevice(const std::string &devicePath,
                              std::vector<HbmData> &allProcessedData, std::vector<HbmSummaryData> &allSummaryData);
     std::vector<HbmData> ProcessData(const DBInfo &hbmDB, LocaltimeContext &localtimeContext);
     std::vector<HbmSummaryData> ProcessSummaryData(const uint16_t &deviceId, const DBInfo &hbmDB);

@@ -104,11 +104,10 @@ bool LLCProcessor::Process(const std::string &fileDir)
 bool LLCProcessor::ProcessData(const std::string &fileDir)
 {
     bool flag = true;
-    ThreadData threadData;
     DBInfo llcDB("llc.db", "LLCMetrics");
     auto deviceList = File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
-    bool timeFlag = Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir);
     for (const auto &devicePath: deviceList) {
+        ThreadData threadData;
         std::string dbPath = File::PathJoin({devicePath, SQLITE, llcDB.dbName});
         auto status = CheckPath(dbPath);
         if (status != CHECK_SUCCESS) {
@@ -117,11 +116,13 @@ bool LLCProcessor::ProcessData(const std::string &fileDir)
             }
             continue;
         }
-        if (!timeFlag) {
-            ERROR("get time record flag: %, in path %.", timeFlag, fileDir);
-            return false;
-        }
         threadData.deviceId = GetDeviceIdByDevicePath(devicePath);
+        if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir, threadData.deviceId)) {
+            ERROR("Failed to obtain the time in start_info and end_info. "
+                  "Path is %, device is id %.", fileDir, threadData.deviceId);
+            flag = false;
+            continue;
+        }
         if (!Context::GetInstance().GetClockMonotonicRaw(threadData.hostMonotonic, true,
                                                          threadData.deviceId, fileDir) ||
             !Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, false,

@@ -213,13 +213,13 @@ TEST_F(UtilsUTest, TestGetDeviceIdByDevicePathShouldReturnHostIdWhenPathIsHostOr
     EXPECT_EQ(GetDeviceIdByDevicePath(hostPath), hostId);
 
     std::string errorPath = "abc_123/efg_789/PROF_XXX/jkl";
-    EXPECT_EQ(GetDeviceIdByDevicePath(errorPath), hostId);
+    EXPECT_EQ(GetDeviceIdByDevicePath(errorPath), Parser::Environment::INVALID_DEVICE_ID);
 
     std::string hostSlash = "abc_123/efg_789/PROF_XXX/host/////";
     EXPECT_EQ(GetDeviceIdByDevicePath(hostSlash), hostId);
 
     std::string strToU16FailPath = "abc_123/efg_789/PROF_XXX/device_a";
-    EXPECT_EQ(GetDeviceIdByDevicePath(strToU16FailPath), hostId);
+    EXPECT_EQ(GetDeviceIdByDevicePath(strToU16FailPath), Parser::Environment::INVALID_DEVICE_ID);
 }
 
 TEST_F(UtilsUTest, TestGetDeviceIdByDevicePathShouldReturnDeviceIdWhenPathIsDevice)

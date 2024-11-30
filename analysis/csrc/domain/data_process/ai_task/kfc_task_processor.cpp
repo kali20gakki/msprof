@@ -126,8 +126,8 @@ std::vector<KfcTurnData> KfcTaskProcessor::FormatCommData(const std::vector<KfcC
         return {};
     }
     ProfTimeRecord record;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(record, profPath_)) {
-        ERROR("GetProfTimeRecordInfo failed, profPath is %.", profPath_);
+    if (!Context::GetInstance().GetProfTimeRecordInfo(record, profPath_, deviceId)) {
+        ERROR("GetProfTimeRecordInfo failed, profPath is %, device id is %.", profPath_, deviceId);
         return {};
     }
     std::vector<KfcTurnData> ans;
@@ -175,8 +175,8 @@ std::vector<KfcTurnData> KfcTaskProcessor::FormatComputeData(const std::vector<K
         return {};
     }
     ProfTimeRecord record;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(record, profPath_)) {
-        ERROR("GetProfTimeRecordInfo failed, profPath is %.", profPath_);
+    if (!Context::GetInstance().GetProfTimeRecordInfo(record, profPath_, deviceId)) {
+        ERROR("GetProfTimeRecordInfo failed, profPath is %, device id is %.", profPath_, deviceId);
         return {};
     }
     std::vector<KfcTurnData> ans;

@@ -81,7 +81,7 @@ TEST_F(AccPmuProcessorUTest, ShouldReturnFalseWhenCheckFailed)
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).reset();
 
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
-    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(HOST_ID));
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(INVALID_DEVICE_ID));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_ACC_PMU));
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).reset();
     MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).reset();

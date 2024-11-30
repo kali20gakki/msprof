@@ -41,12 +41,11 @@ bool HCCSProcessor::Run()
 bool HCCSProcessor::Process(const std::string &fileDir)
 {
     INFO("Start to process %.", fileDir);
-    ThreadData threadData;
     DBInfo hccsDB("hccs.db", "HCCSEventsData");
     bool flag = true;
     auto deviceList = File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
-    bool timeFlag = Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir);
     for (const auto& devicePath: deviceList) {
+        ThreadData threadData;
         std::string dbPath = File::PathJoin({devicePath, SQLITE, hccsDB.dbName});
         // 并不是所有场景都有hccs数据
         auto status = CheckPath(dbPath);
@@ -56,11 +55,12 @@ bool HCCSProcessor::Process(const std::string &fileDir)
             }
             continue;
         }
-        if (!timeFlag) {
-            ERROR("Failed to obtain the time in start_info and end_info.");
-            return false;
-        }
         uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
+        if (!Context::GetInstance().GetProfTimeRecordInfo(threadData.timeRecord, fileDir, deviceId)) {
+            ERROR("Failed to obtain the time in start_info and end_info. Path is %, device is id %", fileDir, deviceId);
+            flag = false;
+            continue;
+        }
         if (!Context::GetInstance().GetClockMonotonicRaw(threadData.hostMonotonic, true, deviceId, fileDir) ||
             !Context::GetInstance().GetClockMonotonicRaw(threadData.deviceMonotonic, false, deviceId, fileDir)) {
             ERROR("Device MonotonicRaw is invalid in path: %., device id is %", fileDir, deviceId);

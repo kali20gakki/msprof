@@ -35,18 +35,12 @@ SysIOProcessor::SysIOProcessor(const std::string &profPath, const std::string &p
 
 bool SysIOProcessor::Process(DataInventory &dataInventory)
 {
-    LocaltimeContext localtimeContext;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_)) {
-        ERROR("Failed to obtain the time in start_info and end_info, profPath is %", profPath_);
-        return false;
-    }
     bool flag = true;
     std::vector<SysIOOriginalData> allProcessedData;
     std::vector<SysIOReportData> allSummaryData;
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
-        localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
-        flag = ProcessSingleDevice(devicePath, localtimeContext, allProcessedData, allSummaryData) && flag;
+        flag = ProcessSingleDevice(devicePath, allProcessedData, allSummaryData) && flag;
     }
     if (processorName_ == PROCESSOR_NAME_NIC) {
         std::vector<NicOriginalData> allNicOriginalData;
@@ -59,10 +53,10 @@ bool SysIOProcessor::Process(DataInventory &dataInventory)
         allNicReportData.push_back(nicReportData);
         if (!SaveToDataInventory<NicOriginalData>(std::move(allNicOriginalData), dataInventory, processorName_) ||
             !SaveToDataInventory<SysIOReportData>(std::move(allSummaryData), dataInventory, processorName_)) {
-                flag = false;
-                ERROR("Save % Data To DataInventory failed, profPath is %", processorName_, profPath_);
+            flag = false;
+            ERROR("Save % Data To DataInventory failed, profPath is %", processorName_, profPath_);
         }
-    } else {
+    } else if (processorName_ == PROCESSOR_NAME_ROCE) {
         std::vector<RoceOriginalData> allRoceOriginalData;
         RoceOriginalData roceOriginalData;
         roceOriginalData.sysIOOriginalData = std::move(allProcessedData);
@@ -80,119 +74,76 @@ bool SysIOProcessor::Process(DataInventory &dataInventory)
     return flag;
 }
 
-bool SysIOProcessor::ProcessSingleDevice(const std::string &devicePath, LocaltimeContext &localtimeContext,
-    std::vector<SysIOOriginalData> &allProcessedData, std::vector<SysIOReportData> &allSummaryData)
+bool SysIOProcessor::ProcessSingleDevice(const std::string &devicePath,
+    std::vector<SysIOOriginalData> &timelineData, std::vector<SysIOReportData> &summaryData)
 {
-    std::string oriDbName;
-    std::string oriTableName;
-    std::string reportTableName;
-    std::tie(oriDbName, oriTableName, reportTableName) = ORI_DB_INFO_TABLE.find(processorName_)->second;
-    DBInfo sysIODB(oriDbName, oriTableName);
-    if (localtimeContext.deviceId == Parser::Environment::HOST_ID) {
+    LocaltimeContext localtimeContext;
+    localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
+    if (localtimeContext.deviceId == Parser::Environment::INVALID_DEVICE_ID) {
         ERROR("the invalid deviceId cannot to be identified, profPath is %", profPath_);
         return false;
     }
-    std::string dbPath = File::PathJoin({devicePath, SQLITE, sysIODB.dbName});
-    if (!sysIODB.ConstructDBRunner(dbPath) || sysIODB.dbRunner == nullptr) {
+    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_,
+                                                      localtimeContext.deviceId)) {
+        ERROR("Failed to obtain the time in start_info and end_info, "
+              "profPath is %, device id is %.", profPath_, localtimeContext.deviceId);
+        return false;
+    }
+    std::string dbName;
+    std::string oriTableName;
+    std::string reportTableName;
+    std::tie(dbName, oriTableName, reportTableName) = ORI_DB_INFO_TABLE.find(processorName_)->second;
+    std::string dbPath = File::PathJoin({devicePath, SQLITE, dbName});
+    DBInfo timelineDb(dbName, oriTableName);
+    if (!timelineDb.ConstructDBRunner(dbPath) || timelineDb.dbRunner == nullptr) {
         ERROR("Create % connection failed.", dbPath);
         return false;
     }
-    // 并不是所有场景都有sys io数据
-    sysIODB.tableName = oriTableName;
-    auto status = CheckPathAndTable(dbPath, sysIODB);
-    if (status != CHECK_SUCCESS) {
-        if (status == CHECK_FAILED) {
-            return false;
-        }
-        return true;
+    bool flag = true;
+    auto status = CheckPathAndTable(dbPath, timelineDb);
+    if (status == CHECK_SUCCESS) {
+        flag = ProcessTimelineData(timelineDb, localtimeContext, timelineData) && flag;
+    } else if (status == CHECK_FAILED) {
+        flag = false;
     }
-    auto processedData = ProcessData(sysIODB, localtimeContext);
-    if (processedData.empty()) {
-        ERROR("Process % OriginalData error, dbPath is %", processorName_, dbPath);
+
+    DBInfo summaryDb(dbName, reportTableName);
+    if (!summaryDb.ConstructDBRunner(dbPath) || summaryDb.dbRunner == nullptr) {
+        ERROR("Create % connection failed.", dbPath);
         return false;
     }
-    sysIODB.tableName = reportTableName;
-    status = CheckPathAndTable(dbPath, sysIODB);
-    if (status != CHECK_SUCCESS) {
-        if (status == CHECK_FAILED) {
-            return false;
-        }
-        return true;
+    status = CheckPathAndTable(dbPath, summaryDb);
+    if (status == CHECK_SUCCESS) {
+        flag = ProcessSummaryData(summaryDb, localtimeContext, summaryData) && flag;
+    } else if (status == CHECK_FAILED) {
+        flag = false;
     }
-    auto summaryData = ProcessSummaryData(sysIODB, localtimeContext);
-    if (summaryData.empty()) {
-        ERROR("Process % ReportData error, dbPath is %", processorName_, dbPath);
-        return false;
-    }
-    allProcessedData.insert(allProcessedData.end(), processedData.begin(), processedData.end());
-    allSummaryData.insert(allSummaryData.end(), summaryData.begin(), summaryData.end());
-    return true;
+    return flag;
 }
 
-std::vector<SysIOOriginalData> SysIOProcessor::ProcessData(const DBInfo &sysIODB, LocaltimeContext &localtimeContext)
+bool SysIOProcessor::ProcessTimelineData(const DBInfo &sysIODB, LocaltimeContext &localtimeContext,
+                                         std::vector<SysIOOriginalData> &timelineData)
 {
     if (!Context::GetInstance().GetClockMonotonicRaw(localtimeContext.hostMonotonic, true, localtimeContext.deviceId,
                                                      profPath_) ||
         !Context::GetInstance().GetClockMonotonicRaw(localtimeContext.deviceMonotonic, false, localtimeContext.deviceId,
                                                      profPath_)) {
         ERROR("Device MonotonicRaw is invalid in path: %., device id is %", profPath_, localtimeContext.deviceId);
-        return {};
+        return false;
     }
-    OriSysIOData oriData = LoadData(sysIODB);
-    if (oriData.empty()) {
-        ERROR("Get % data failed, profPath is %, device is %", sysIODB.tableName, profPath_, localtimeContext.deviceId);
-        return {};
-    }
-    return FormatData(oriData, localtimeContext);
-}
-
-std::vector<SysIOReportData> SysIOProcessor::ProcessSummaryData(const DBInfo &sysIODB,
-                                                                const LocaltimeContext &localtimeContext)
-{
-    SysIOReportData tempData;
-    OriSysIOReportData reportData;
-    std::vector<SysIOReportData> processedData;
-    std::string sql{"SELECT duration, bandwidth, rxbandwidth, rxpacket, rxerrorrate, rxdroppedrate, "
-                    "txbandwidth, txpacket, txerrorrate, txdroppedrate, funcid FROM " + sysIODB.tableName};
-    if (!sysIODB.dbRunner->QueryData(sql, reportData) || reportData.empty()) {
-        ERROR("Failed to obtain throughput data from the % table, profPath is %, deviceId is %.",
-              sysIODB.tableName, profPath_, localtimeContext.deviceId);
-        return {};
-    }
-    tempData.deviceId = localtimeContext.deviceId;
-    double duration;
-    for (const auto& row : reportData) {
-        std::tie(duration, tempData.bandwidth, tempData.rxBandwidthEfficiency,
-                 tempData.rxPacketRate, tempData.rxErrorRate, tempData.rxDroppedRate,
-                 tempData.txBandwidthEfficiency, tempData.txPacketRate,
-                 tempData.txErrorRate, tempData.txDroppedRate, tempData.funcId) = row;
-        HPFloat timestamp = HPFloat(duration);
-        tempData.localTime = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
-        processedData.push_back(tempData);
-    }
-    return processedData;
-}
-
-OriSysIOData SysIOProcessor::LoadData(const DBInfo &sysIODB)
-{
     OriSysIOData oriData;
     std::string sql = "SELECT timestamp, bandwidth, rxpacket, rxbyte, rxpackets, rxbytes, rxerrors, "
                       "rxdropped, txpacket, txbyte, txpackets, txbytes, txerrors, txdropped, funcid "
                       "FROM " + sysIODB.tableName;
-    if (!sysIODB.dbRunner->QueryData(sql, oriData)) {
+    if (!sysIODB.dbRunner->QueryData(sql, oriData) || oriData.empty()) {
         ERROR("Failed to obtain data from the % table.", sysIODB.tableName);
+        return false;
     }
-    return oriData;
-}
-
-std::vector<SysIOOriginalData> SysIOProcessor::FormatData(const OriSysIOData &oriData,
-                                                          const LocaltimeContext &localtimeContext)
-{
     std::vector<SysIOOriginalData> formatData;
     if (!Reserve(formatData, oriData.size())) {
         ERROR("Reserve for % data failed, profPath is %, deviceId is %.",
               processorName_, profPath_, localtimeContext.deviceId);
-        return formatData;
+        return false;
     }
     SysIOOriginalData tempData;
     tempData.deviceId = localtimeContext.deviceId;
@@ -206,9 +157,38 @@ std::vector<SysIOOriginalData> SysIOProcessor::FormatData(const OriSysIOData &or
                                                        localtimeContext.deviceMonotonic);
         tempData.localTime = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
         tempData.bandwidth = tempData.bandwidth * BYTE_SIZE * BYTE_SIZE, // MB/s -> B/s
-        formatData.push_back(tempData);
+                formatData.push_back(tempData);
     }
-    return formatData;
+    timelineData.insert(timelineData.end(), formatData.begin(), formatData.end());
+    return true;
+}
+
+bool SysIOProcessor::ProcessSummaryData(const DBInfo &sysIODB, const LocaltimeContext &localtimeContext,
+                                        std::vector<SysIOReportData> &summaryData)
+{
+    SysIOReportData tempData;
+    OriSysIOReportData reportData;
+    std::vector<SysIOReportData> processedData;
+    std::string sql{"SELECT duration, bandwidth, rxbandwidth, rxpacket, rxerrorrate, rxdroppedrate, "
+                    "txbandwidth, txpacket, txerrorrate, txdroppedrate, funcid FROM " + sysIODB.tableName};
+    if (!sysIODB.dbRunner->QueryData(sql, reportData) || reportData.empty()) {
+        ERROR("Failed to obtain throughput data from the % table, profPath is %, deviceId is %.",
+              sysIODB.tableName, profPath_, localtimeContext.deviceId);
+        return false;
+    }
+    tempData.deviceId = localtimeContext.deviceId;
+    double duration;
+    for (const auto& row : reportData) {
+        std::tie(duration, tempData.bandwidth, tempData.rxBandwidthEfficiency,
+                 tempData.rxPacketRate, tempData.rxErrorRate, tempData.rxDroppedRate,
+                 tempData.txBandwidthEfficiency, tempData.txPacketRate,
+                 tempData.txErrorRate, tempData.txDroppedRate, tempData.funcId) = row;
+        HPFloat timestamp = HPFloat(duration);
+        tempData.localTime = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
+        processedData.push_back(tempData);
+    }
+    summaryData.insert(summaryData.end(), summaryData.begin(), summaryData.end());
+    return true;
 }
 
 NicProcessor::NicProcessor(const std::string &profPath)
@@ -222,17 +202,11 @@ SysIOTimelineProcessor::SysIOTimelineProcessor(const std::string &profPath, cons
 
 bool SysIOTimelineProcessor::Process(DataInventory &dataInventory)
 {
-    LocaltimeContext localtimeContext;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_)) {
-        ERROR("Failed to obtain the time in start_info and end_info, profPath is %.", profPath_);
-        return false;
-    }
     bool flag = true;
     std::vector<SysIOReceiveSendData> allProcessedData;
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     for (const auto& devicePath: deviceList) {
-        localtimeContext.deviceId= GetDeviceIdByDevicePath(devicePath);
-        flag = ProcessSingleDevice(devicePath, localtimeContext, allProcessedData) && flag;
+        flag = ProcessSingleDevice(devicePath, allProcessedData) && flag;
     }
     if (allProcessedData.empty()) {
         WARN("No % data to save into dataInventory", processorName_);
@@ -244,30 +218,34 @@ bool SysIOTimelineProcessor::Process(DataInventory &dataInventory)
         nicReceiveSendData.sysIOReceiveSendData = std::move(allProcessedData);
         allNicReceiveSendData.push_back(nicReceiveSendData);
         if (!SaveToDataInventory<NicReceiveSendData>(std::move(allNicReceiveSendData), dataInventory, processorName_)) {
-                flag = false;
-                ERROR("Save % Data To DataInventory failed, profPath is %", processorName_, profPath_);
+            flag = false;
+            ERROR("Save % Data To DataInventory failed, profPath is %", processorName_, profPath_);
         }
-    } else {
+    } else if (processorName_ == PROCESSOR_NAME_ROCE_TIMELINE) {
         std::vector<RoceReceiveSendData> allRoceReceiveSendData;
         RoceReceiveSendData roceReceiveSendData;
         roceReceiveSendData.sysIOReceiveSendData = std::move(allProcessedData);
         allRoceReceiveSendData.push_back(roceReceiveSendData);
         if (!SaveToDataInventory<RoceReceiveSendData>(std::move(allRoceReceiveSendData),
                                                       dataInventory, processorName_)) {
-                flag = false;
-                ERROR("Save % Data To DataInventory failed, profPath is %", processorName_, profPath_);
+            flag = false;
+            ERROR("Save % Data To DataInventory failed, profPath is %", processorName_, profPath_);
         }
     }
     return flag;
 }
 
-bool SysIOTimelineProcessor::ProcessSingleDevice(const std::string &devicePath, LocaltimeContext &localtimeContext,
+bool SysIOTimelineProcessor::ProcessSingleDevice(const std::string &devicePath,
                                                  std::vector<SysIOReceiveSendData> &allProcessedData)
 {
-    std::string oriDbName;
-    std::string oriTableName;
-    std::tie(oriDbName, oriTableName) = RECEIVE_SEND_DB_INFO_TABLE.find(processorName_)->second;
-    DBInfo sysIOReceiveSendDB(oriDbName, oriTableName);
+    LocaltimeContext localtimeContext;
+    localtimeContext.deviceId= GetDeviceIdByDevicePath(devicePath);
+    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_,
+                                                      localtimeContext.deviceId)) {
+        ERROR("Failed to obtain the time in start_info and end_info, "
+              "profPath is %, device id is %.", profPath_, localtimeContext.deviceId);
+        return false;
+    }
     if (!Context::GetInstance().GetClockMonotonicRaw(localtimeContext.hostMonotonic, true, localtimeContext.deviceId,
                                                      profPath_) ||
         !Context::GetInstance().GetClockMonotonicRaw(localtimeContext.deviceMonotonic, false, localtimeContext.deviceId,
@@ -275,6 +253,10 @@ bool SysIOTimelineProcessor::ProcessSingleDevice(const std::string &devicePath, 
         ERROR("Device MonotonicRaw is invalid in path: %., device id is %", profPath_, localtimeContext.deviceId);
         return false;
     }
+    std::string oriDbName;
+    std::string oriTableName;
+    std::tie(oriDbName, oriTableName) = RECEIVE_SEND_DB_INFO_TABLE.find(processorName_)->second;
+    DBInfo sysIOReceiveSendDB(oriDbName, oriTableName);
     std::string dbPath = File::PathJoin({devicePath, SQLITE, sysIOReceiveSendDB.dbName});
     if (!sysIOReceiveSendDB.ConstructDBRunner(dbPath) || sysIOReceiveSendDB.dbRunner == nullptr) {
         ERROR("Create % connection failed.", dbPath);
