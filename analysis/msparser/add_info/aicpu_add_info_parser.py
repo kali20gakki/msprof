@@ -16,7 +16,7 @@ from common_func.hccl_info_common import DataType
 from common_func.hccl_info_common import LinkType
 from common_func.hccl_info_common import TransPortType
 from common_func.hccl_info_common import RdmaType
-from common_func.hccl_info_common import DeviceHcclOpSource
+from common_func.hccl_info_common import DeviceHcclSource
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from msmodel.step_trace.ts_track_model import TsTrackModel
 from msmodel.ai_cpu.data_preparation_model import DataPreparationModel
@@ -48,6 +48,8 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
             AicpuAddInfoBean.KFC_COMPUTE_TURN: [],
             AicpuAddInfoBean.KFC_HCCL_INFO: [],
             AicpuAddInfoBean.HCCL_OP_INFO: [],
+            AicpuAddInfoBean.AICPU_FLIP_TASK: [],
+            AicpuAddInfoBean.AICPU_MASTER_STREAM_HCCL_TASK: [],
         }
         self._get_data_func = {
             AicpuAddInfoBean.AICPU_NODE: self.get_aicpu_node_data,
@@ -58,6 +60,16 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
             AicpuAddInfoBean.KFC_COMPUTE_TURN: self.get_kfc_compute_turn_data,
             AicpuAddInfoBean.KFC_HCCL_INFO: self.get_kfc_hccl_info_data,
             AicpuAddInfoBean.HCCL_OP_INFO: self.get_hccl_op_info_data,
+            AicpuAddInfoBean.AICPU_FLIP_TASK: self.get_aicpu_flip_task_data,
+            AicpuAddInfoBean.AICPU_MASTER_STREAM_HCCL_TASK: self.get_aicpu_master_stream_hccl_tank_data,
+        }
+        self._aicpu_table = {
+            AicpuAddInfoBean.KFC_COMM_TURN: DBNameConstant.TABLE_KFC_COMM_TURN,
+            AicpuAddInfoBean.KFC_COMPUTE_TURN: DBNameConstant.TABLE_KFC_COMPUTE_TURN,
+            AicpuAddInfoBean.KFC_HCCL_INFO: DBNameConstant.TABLE_KFC_INFO,
+            AicpuAddInfoBean.HCCL_OP_INFO: DBNameConstant.TABLE_DEVICE_HCCL_OP_INFO,
+            AicpuAddInfoBean.AICPU_FLIP_TASK: DBNameConstant.TABLE_AICPU_TASK_FLIP,
+            AicpuAddInfoBean.AICPU_MASTER_STREAM_HCCL_TASK: DBNameConstant.TABLE_AICPU_MASTER_STREAM_HCCL_TASK,
         }
 
     @staticmethod
@@ -134,10 +146,30 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
             aicpu_info.data.compute_exe_end_time,
         ]
 
+    @staticmethod
+    def get_aicpu_flip_task_data(aicpu_info: AicpuAddInfoBean) -> list:
+        return [
+            aicpu_info.data.stream_id,
+            InfoConfReader().time_from_syscnt(aicpu_info.timestamp),
+            aicpu_info.data.task_id,
+            aicpu_info.data.flip_num,
+        ]
+
+    @staticmethod
+    def get_aicpu_master_stream_hccl_tank_data(aicpu_info: AicpuAddInfoBean) -> list:
+        return [
+            InfoConfReader().time_from_syscnt(aicpu_info.timestamp),
+            aicpu_info.data.aicpu_stream_id,
+            aicpu_info.data.aicpu_task_id,
+            aicpu_info.data.stream_id,
+            aicpu_info.data.task_id,
+            aicpu_info.data.type,
+        ]
+
     def get_hccl_op_info_data(self: any, aicpu_info: AicpuAddInfoBean) -> list:
-        source = DeviceHcclOpSource.INVALID
+        source = DeviceHcclSource.INVALID
         if aicpu_info.struct_type == str(AicpuAddInfoBean.HCCL_OP_INFO):
-            source = DeviceHcclOpSource.HCCL
+            source = DeviceHcclSource.HCCL
         return [
             InfoConfReader().time_from_syscnt(aicpu_info.timestamp),
             aicpu_info.data.relay,
@@ -209,10 +241,6 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
         aicpu_dp_data = self._aicpu_data.get(AicpuAddInfoBean.AICPU_DP, [])
         aicpu_model_data = self._aicpu_data.get(AicpuAddInfoBean.AICPU_MODEL, [])
         aicpu_mi_data = self._aicpu_data.get(AicpuAddInfoBean.AICPU_MI, [])
-        kfc_comm_turn = self._aicpu_data.get(AicpuAddInfoBean.KFC_COMM_TURN, [])
-        kfc_compute_turn = self._aicpu_data.get(AicpuAddInfoBean.KFC_COMPUTE_TURN, [])
-        kfc_hccl_info = self._aicpu_data.get(AicpuAddInfoBean.KFC_HCCL_INFO, [])
-        hccl_op_info = self._aicpu_data.get(AicpuAddInfoBean.HCCL_OP_INFO, [])
         if aicpu_node_data:
             with AiCpuModel(self.project_path, [DBNameConstant.TABLE_AI_CPU]) as model:
                 model.flush(aicpu_node_data, DBNameConstant.TABLE_AI_CPU)
@@ -227,18 +255,12 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
         if aicpu_mi_data:
             with DataPreparationModel(self.project_path, [DBNameConstant.TABLE_DATA_QUEUE]) as model:
                 model.flush(aicpu_mi_data)
-        if kfc_hccl_info:
-            with KfcInfoModel(self.project_path, [DBNameConstant.TABLE_KFC_INFO]) as model:
-                model.flush(kfc_hccl_info, DBNameConstant.TABLE_KFC_INFO)
-        if kfc_comm_turn:
-            with KfcInfoModel(self.project_path, [DBNameConstant.TABLE_KFC_COMM_TURN]) as model:
-                model.flush(kfc_comm_turn, DBNameConstant.TABLE_KFC_COMM_TURN)
-        if kfc_compute_turn:
-            with KfcInfoModel(self.project_path, [DBNameConstant.TABLE_KFC_COMPUTE_TURN]) as model:
-                model.flush(kfc_compute_turn, DBNameConstant.TABLE_KFC_COMPUTE_TURN)
-        if hccl_op_info:
-            with KfcInfoModel(self.project_path, [DBNameConstant.TABLE_DEVICE_HCCL_OP_INFO]) as model:
-                model.flush(hccl_op_info, DBNameConstant.TABLE_DEVICE_HCCL_OP_INFO)
+        for aicpu_type, aicpu_table in self._aicpu_table.items():
+            aicpu_data = self._aicpu_data.get(aicpu_type, [])
+            if not aicpu_data:
+                continue
+            with KfcInfoModel(self.project_path, [aicpu_table]) as model:
+                model.flush(aicpu_data, aicpu_table)
 
     def ms_run(self: any) -> None:
         """

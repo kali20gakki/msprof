@@ -15,6 +15,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from common_func.path_manager import PathManager
+from common_func.hccl_info_common import DeviceHcclSource
 from mscalculate.hccl.hccl_task import HcclOps
 from mscalculate.hccl.hccl_task import HcclTask
 from msmodel.hccl.hccl_model import HcclViewModel
@@ -29,8 +30,6 @@ class HCCLExport:
     INVALID_PLANE = -1
     DEFAULT_PLANE = 0
     INVALID_GROUP = 'N/A'
-    HCCL_GROUP = 0
-    AICPU_GROUP = 1
 
     @dataclass
     class HcclGroup:
@@ -72,25 +71,22 @@ class HCCLExport:
         get data for hccl timeline
         """
         hccl_data = []
-        kfc_task = []
-        kfc_op = []
+        mc2_hccl_task = []
         if os.path.exists(PathManager.get_db_path(self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
             with HcclViewModel(self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
                                [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE]) as hccl_model:
-                hccl_data = hccl_model.get_all_data(DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE, dto_class=HcclTask)
-            with HcclViewModel(self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
-                                  [DBNameConstant.TABLE_KFC_TASK]) as model:
-                kfc_task = model.get_all_data(DBNameConstant.TABLE_KFC_TASK, dto_class=HcclTask)
-        if not hccl_data and (not kfc_op and not kfc_task):
+                hccl_data = hccl_model.get_hccl_task()
+                mc2_hccl_task = hccl_model.get_kfc_task()
+        if not hccl_data and not mc2_hccl_task:
             logging.error("get hccl data failed, may be the hccl file not completed or hccl parser "
                           "failed. please check data file.")
             return []
         self._hash_data = HashDictData(self.project_path).get_ge_hash_dict()
-        self._get_meta_data(hccl_data, kfc_task)
+        self._get_meta_data(hccl_data, mc2_hccl_task)
         if hccl_data:
-            self._format_hccl_data(hccl_data)
-        if kfc_task:
-            self._format_kfc_data(kfc_task)
+            self._format_hccl_data(hccl_data, DeviceHcclSource.HCCL.value)
+        if mc2_hccl_task:
+            self._format_hccl_data(mc2_hccl_task, DeviceHcclSource.MC2.value)
         return self.result
 
     def _add_hccl_bar(self):
@@ -109,7 +105,7 @@ class HCCLExport:
         group.start_index = start_sort_index
         group_name = self._hash_data.get(group.group_name, group.group_name)
         if group.is_aicpu:
-            thread_name = f"Group {group_name} Communication Aicpu" if valid_group else "Communication Aicpu"
+            thread_name = f"Group {group_name} Aicpu Communication" if valid_group else "Aicpu Communication"
         else:
             thread_name = f"Group {group_name} Communication" if valid_group else "Communication"
         self.result.extend(TraceViewManager.metadata_event(
@@ -158,26 +154,24 @@ class HCCLExport:
             for group in groups:
                 index_now = self._add_group_threads(group, index_now, group.group_name != self.INVALID_GROUP)
 
-    def _format_hccl_data(self: any, hccl_data: list) -> None:
-        _hccl_format_data = self._format_hccl_communication_data(hccl_data, self.HCCL_GROUP)
-        _hccl_format_op_data = self._format_hccl_op_data()
+    def _format_hccl_data(self: any, hccl_data: list, group_type: int = 0) -> None:
+        _hccl_format_data = self._format_hccl_communication_data(hccl_data, group_type)
+        _hccl_format_op_data = self._format_hccl_op_data(group_type)
         self.result.extend(TraceViewManager.time_graph_trace(
             TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, _hccl_format_data + _hccl_format_op_data))
 
-    def _format_kfc_data(self: any, kfc_task: list) -> None:
-        _kfc_format_data = self._format_hccl_communication_data(kfc_task, self.AICPU_GROUP)
-        _kfc_format_op_data = self._format_kfc_op_data()
-        self.result.extend(TraceViewManager.time_graph_trace(
-            TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, _kfc_format_data + _kfc_format_op_data))
-
-    def _format_hccl_op_data(self):
+    def _format_hccl_op_data(self, group_type: int = 0):
         if not os.path.exists(PathManager.get_db_path(self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
             return []
         with HcclViewModel(
                 self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE,
                 DBNameConstant.TABLE_HCCL_OP_SINGLE_DEVICE]) as hccl_model:
-            hccl_op_data_from_group = hccl_model.get_hccl_op_data_by_group()
-            hccl_op_info_from_table = hccl_model.get_hccl_op_info_from_table()
+            if group_type == DeviceHcclSource.HCCL.value:
+                hccl_op_data_from_group = hccl_model.get_hccl_op_data_by_group()
+                hccl_op_info_from_table = hccl_model.get_hccl_op_info_from_table()
+            else:
+                hccl_op_data_from_group = hccl_model.get_kfc_op_data_by_group()
+                hccl_op_info_from_table = hccl_model.get_hccl_op_info_from_table(DBNameConstant.TABLE_KFC_OP)
             hccl_format_op_data = [None] * len(hccl_op_data_from_group)
             for idx, hccl_op in enumerate(hccl_op_data_from_group):
                 if hccl_op.group_name not in self.hccl_groups:
@@ -194,36 +188,13 @@ class HCCLExport:
 
                 hccl_format_op_data[idx] = [
                     hccl_op.op_name, self.pid_value,
-                    self.hccl_groups.get(hccl_op.group_name)[self.HCCL_GROUP].start_index,
+                    self.hccl_groups.get(hccl_op.group_name)[group_type].start_index,
                     InfoConfReader().trans_into_local_time(raw_timestamp=hccl_op.timestamp),
                     hccl_op.duration / NumberConstant.NS_TO_US, args
                 ]
         return hccl_format_op_data
 
-    def _format_kfc_op_data(self: any) -> list:
-        with HcclViewModel(
-                self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_KFC_OP]) as model:
-            kfc_op = model.get_all_data(DBNameConstant.TABLE_KFC_OP, dto_class=HcclOps)
-        kfc_format_op_data = [None] * len(kfc_op)
-        for idx, hccl_op in enumerate(kfc_op):
-            if hccl_op.group_name not in self.hccl_groups:
-                logging.error("The group name %s not exists", hccl_op.group_name)
-                continue
-            args = {
-                "connection_id": hccl_op.connection_id,
-                "model id": hccl_op.model_id,
-                "data_type": hccl_op.data_type,
-                "alg_type": hccl_op.alg_type,
-                "count": hccl_op.count
-            }
-            kfc_format_op_data[idx] = [
-                hccl_op.op_name, self.pid_value, self.hccl_groups.get(hccl_op.group_name)[self.AICPU_GROUP].start_index,
-                InfoConfReader().trans_into_local_time(raw_timestamp=hccl_op.timestamp),
-                hccl_op.duration / NumberConstant.NS_TO_US, args
-            ]
-        return kfc_format_op_data
-
-    def _format_hccl_communication_data(self, hccl_data: List[HcclTask], group_idx: int = 0):
+    def _format_hccl_communication_data(self, hccl_data: List[HcclTask], group_type: int = 0):
         # for L0 collect, plane id will be filled -1
         if not hccl_data or hccl_data[0].plane_id == self.INVALID_PLANE:
             return []
@@ -232,9 +203,9 @@ class HCCLExport:
             hccl_args = HCCLExport.get_hccl_arg(_hccl_data)
             hccl_args["model id"] = _hccl_data.model_id
             if _hccl_data.group_name not in self.hccl_groups:
-                logging.error("The group name %s not exists: group idx: %d", _hccl_data.group_name, group_idx)
+                logging.error("The group name %s not exists: group idx: %d", _hccl_data.group_name, group_type)
                 continue
-            thread_id = self.hccl_groups.get(_hccl_data.group_name)[group_idx].start_index + _hccl_data.plane_id + 1
+            thread_id = self.hccl_groups.get(_hccl_data.group_name)[group_type].start_index + _hccl_data.plane_id + 1
             _hccl_data_pice = [
                 _hccl_data.hccl_name, self.pid_value, thread_id,
                 InfoConfReader().trans_into_local_time(raw_timestamp=_hccl_data.timestamp),

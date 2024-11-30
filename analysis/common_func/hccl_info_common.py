@@ -77,10 +77,10 @@ class AlgType(Enum):
     INVALID = 4294967295
 
 
-class DeviceHcclOpSource(Enum):
+class DeviceHcclSource(Enum):
     HCCL = 0
     MC2 = 1
-    INVALID = 4294967295
+    INVALID = 65535
 
 
 def trans_enum_name(enum_class, value):

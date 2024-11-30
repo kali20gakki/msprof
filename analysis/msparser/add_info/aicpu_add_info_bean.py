@@ -464,6 +464,56 @@ class DeviceHcclOpInfoBean(HcclOpInfoBean):
         return self._task_id
 
 
+class AicpuFlipTaskBean:
+    def __init__(self: any, *args) -> None:
+        data = args[0]
+        self._stream_id = StarsCommon.set_stream_id(data[6], data[7])
+        self._task_id = StarsCommon.set_task_id(data[6], data[7])
+        self._flip_num = data[8]
+
+    @property
+    def stream_id(self: any) -> int:
+        return self._stream_id
+
+    @property
+    def task_id(self: any) -> int:
+        return self._task_id
+
+    @property
+    def flip_num(self: any) -> int:
+        return self._flip_num
+
+
+class AicpuMasterStreamHcclTaskBean:
+    def __init__(self: any, *args) -> None:
+        data = args[0]
+        self._aicpu_stream_id = StarsCommon.set_stream_id(data[6], data[7])
+        self._aicpu_task_id = StarsCommon.set_task_id(data[6], data[7])
+        self._stream_id = StarsCommon.set_stream_id(data[8], data[9])
+        self._task_id = StarsCommon.set_task_id(data[8], data[9])
+        self._type = data[10]
+
+    @property
+    def aicpu_stream_id(self: any) -> int:
+        return self._aicpu_stream_id
+
+    @property
+    def aicpu_task_id(self: any) -> int:
+        return self._aicpu_task_id
+
+    @property
+    def stream_id(self: any) -> int:
+        return self._stream_id
+
+    @property
+    def task_id(self: any) -> int:
+        return self._task_id
+
+    @property
+    def type(self: any) -> int:
+        return self._type
+
+
 class AicpuAddInfoBean(AddInfoBean):
     """
     aicpu data info bean
@@ -476,6 +526,8 @@ class AicpuAddInfoBean(AddInfoBean):
     KFC_COMPUTE_TURN = 5
     KFC_HCCL_INFO = 6
     HCCL_OP_INFO = 10
+    AICPU_FLIP_TASK = 11
+    AICPU_MASTER_STREAM_HCCL_TASK = 12
 
     STRUCT_FMT = {
         AICPU_NODE: StructFmt.AI_CPU_NODE_ADD_FMT,
@@ -486,6 +538,8 @@ class AicpuAddInfoBean(AddInfoBean):
         KFC_COMPUTE_TURN: StructFmt.KFC_COMPUTE_TURN_FMT,
         KFC_HCCL_INFO: StructFmt.KFC_HCCL_INFO_FMT,
         HCCL_OP_INFO: StructFmt.DEVICE_HCCL_OP_INFO_FMT,
+        AICPU_FLIP_TASK: StructFmt.AICPU_FLIP_TASK_FMT,
+        AICPU_MASTER_STREAM_HCCL_TASK: StructFmt.AICPU_MASTER_STREAM_HCCL_TASK_FMT,
     }
 
     AICPU_BEAN = {
@@ -497,6 +551,8 @@ class AicpuAddInfoBean(AddInfoBean):
         KFC_COMPUTE_TURN: KfcComputeTurnBean,
         KFC_HCCL_INFO: KfcHcclInfoBean,
         HCCL_OP_INFO: DeviceHcclOpInfoBean,
+        AICPU_FLIP_TASK: AicpuFlipTaskBean,
+        AICPU_MASTER_STREAM_HCCL_TASK: AicpuMasterStreamHcclTaskBean,
     }
 
     def __init__(self: any, *args) -> None:

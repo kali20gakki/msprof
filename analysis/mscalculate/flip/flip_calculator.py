@@ -25,7 +25,8 @@ class FlipCalculator:
 
     @staticmethod
     def compute_batch_id(task_data: List[Union[TaskTrackBean, DeviceTask]],
-                         flip_data: List[Union[TaskTrackBean, TaskFlip]]) -> List:
+                         flip_data: List[Union[TaskTrackBean, TaskFlip]],
+                         is_flip_num: bool = False) -> List:
         if not task_data:
             return []
         task_data_bin = FlipCalculator.sep_data_by_device_stream(task_data)
@@ -37,14 +38,15 @@ class FlipCalculator:
             data.sort(key=lambda x: x.timestamp)
             flip_data_stream.sort(key=lambda x: x.timestamp)
             flip_data_stream.append(InfDataHelper())  # avoid overflow
-            batch_id = 0  # flip index
+            batch_id = 0
             task_index = 0
+            flip_index = 0
             while task_index < len(data):
                 task = data[task_index]
-                flip = flip_data_stream[batch_id]
-                if task.timestamp > flip.timestamp:
-                    batch_id += 1  # next flip
-                    FlipCalculator.calibrate_when_flip_task_id_not_zero(data, flip, task_index, batch_id)
+                flip = flip_data_stream[flip_index]
+                if task.timestamp >= flip.timestamp:
+                    batch_id = FlipCalculator.get_next_batch_id(data, flip, task_index, batch_id, is_flip_num)
+                    flip_index += 1
                     continue
                 if isinstance(task, tuple):
                     data[task_index] = task.replace(batch_id=batch_id)
@@ -54,6 +56,21 @@ class FlipCalculator:
                 task_index += 1  # next task
                 new_task_index += 1
         return new_task_data
+
+    @staticmethod
+    def get_next_batch_id(
+            data: List[Union[TaskTrackBean, DeviceTask]],
+            flip: Union[TaskTrackBean, TaskFlip],
+            task_index: int,
+            batch_id: int,
+            is_flip_num: bool,
+    ):
+        if is_flip_num:
+            batch_id = flip.flip_num
+        else:
+            batch_id += 1  # next flip
+            FlipCalculator.calibrate_when_flip_task_id_not_zero(data, flip, task_index, batch_id)
+        return batch_id
 
     @staticmethod
     def calibrate_when_flip_task_id_not_zero(
@@ -83,9 +100,9 @@ class FlipCalculator:
         return sep_data
 
     @staticmethod
-    def set_device_batch_id(data: list, result_dir: str) -> List:
+    def set_device_batch_id(data: list, result_dir: str, is_flip_num: bool = False) -> List:
         with TsTrackModel(result_dir,
                           DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_DEVICE_TASK_FLIP]) as model:
             task_flip = model.get_task_flip_data()
-        device_tasks = FlipCalculator.compute_batch_id(data, task_flip)
+        device_tasks = FlipCalculator.compute_batch_id(data, task_flip, is_flip_num)
         return device_tasks

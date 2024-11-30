@@ -10,7 +10,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.profiling_scene import ProfilingScene
-from common_func.hccl_info_common import DeviceHcclOpSource
+from common_func.hccl_info_common import DeviceHcclSource
 from mscalculate.hccl.hccl_task import HcclOps
 from mscalculate.hccl.hccl_task import HcclTask
 from msmodel.interface.parser_model import ParserModel
@@ -131,34 +131,59 @@ class HcclViewModel(ViewModel):
               f"group by op_name, first_timestamp"
         return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclTask)
 
-    def get_hccl_op_info_from_table(self):
+    def get_kfc_op_data_by_group(self):
+        """
+        get the real execution of the kfc op
+        """
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_KFC_TASK):
+            return []
+        sql = f"select model_id, index_id, op_name, group_name, min(timestamp) as timestamp, " \
+              f"max(timestamp + duration) - min(timestamp) as duration, connection_id " \
+              f"from {DBNameConstant.TABLE_KFC_TASK} " \
+              f"WHERE is_master = 1 and source != {DeviceHcclSource.HCCL.value} " \
+              f"group by op_name, first_timestamp"
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclTask)
+
+    def get_hccl_op_info_from_table(self: any, table_name: str = DBNameConstant.TABLE_HCCL_OP_SINGLE_DEVICE):
         """
         get hccl op info from HCCLOpSingleDevice
         """
-        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_HCCL_OP_SINGLE_DEVICE):
+        if not DBManager.judge_table_exist(self.cur, table_name):
             return []
         sql = f"select relay, retry, data_type, alg_type, count, group_name, connection_id " \
-              f"from {DBNameConstant.TABLE_HCCL_OP_SINGLE_DEVICE}"
+              f"from {table_name}"
         hccl_op_data = DBManager.fetch_all_data(self.cur, sql, dto_class=HcclOps)
         return {hccl_op.connection_id: hccl_op for hccl_op in hccl_op_data}
 
-    def get_hccl_op_time_section(self):
-        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE):
+    def get_hccl_op_time_section(self: any, table_name: str = DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE):
+        if not DBManager.judge_table_exist(self.cur, table_name):
             return []
         sql = f'select min(timestamp) as start_time, max(timestamp + duration) as end_time ' \
-              f'from {DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE} ' \
+              f'from {table_name} ' \
               f"WHERE is_master = 1 " \
               f'group by op_name, first_timestamp'
         return DBManager.fetch_all_data(self.cur, sql, dto_class=CommunicationTimeSection)
 
-    def get_kfc_op_time_section(self):
+    def get_kfc_op(self: any):
         if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_KFC_OP):
             return []
-        hccl_source = DeviceHcclOpSource.HCCL.value
-        sql = f'select timestamp as start_time, timestamp + duration as end_time ' \
-              f'from {DBNameConstant.TABLE_KFC_OP} ' \
-              f"WHERE source != {hccl_source}"
-        return DBManager.fetch_all_data(self.cur, sql, dto_class=CommunicationTimeSection)
+        sql = f'select * from {DBNameConstant.TABLE_KFC_OP} ' \
+              f"WHERE source != {DeviceHcclSource.HCCL.value}"
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclOps)
+
+    def get_kfc_task(self: any) -> list:
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_KFC_TASK):
+            return []
+        sql = f'select * from {DBNameConstant.TABLE_KFC_TASK} where source != {DeviceHcclSource.HCCL.value}'
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclTask)
+
+    def get_hccl_task(self: any) -> list:
+        hccl_data = self.get_all_data(DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE, dto_class=HcclTask)
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_KFC_TASK):
+            return hccl_data
+        sql = f"select * from {DBNameConstant.TABLE_KFC_TASK} where source = {DeviceHcclSource.HCCL.value}"
+        hccl_data += DBManager.fetch_all_data(self.cur, sql, dto_class=HcclTask)
+        return hccl_data
 
     def create_table_by_name(self, table_name):
         if DBManager.judge_table_exist(self.cur, table_name):

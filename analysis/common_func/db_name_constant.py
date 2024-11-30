@@ -328,6 +328,8 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_KFC_OP = "KfcOP"
     TABLE_KFC_TASK = "KfcTask"
     TABLE_DEVICE_HCCL_OP_INFO = "DeviceHcclOpInfo"
+    TABLE_AICPU_TASK_FLIP = "AicpuTaskFlip"
+    TABLE_AICPU_MASTER_STREAM_HCCL_TASK = "AicpuMasterStreamHcclTask"
 
     @abstractmethod
     def get_db_name(self: any) -> str:

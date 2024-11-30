@@ -9,6 +9,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.path_manager import PathManager
 from common_func.profiling_scene import ProfilingScene
 from common_func.msprof_object import CustomizedNamedtupleFactory
+from common_func.ms_constant.str_constant import StrConstant
 from msmodel.interface.ianalysis_model import IAnalysisModel
 from msmodel.interface.view_model import ViewModel
 from msmodel.add_info.mc2_comm_info_model import Mc2CommInfoViewModel
@@ -56,7 +57,7 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
             kfc_stream_id.append(info[0])  # 0-aicpu_kfc_stream_id
         compute_data = []
         for data in data_list:
-            if data.stream_id in kfc_stream_id or data.op_name.endswith("AicpuKernel"):
+            if data.stream_id in kfc_stream_id or data.op_name.endswith(StrConstant.AICPU_KERNEL):
                 continue
             compute_data.append(data)
         return compute_data

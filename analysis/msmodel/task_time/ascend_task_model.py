@@ -39,7 +39,7 @@ class AscendTaskViewModel(ViewModel):
     """
     ASCEND_TASK_TYPE = CustomizedNamedtupleFactory.enhance_namedtuple(
         namedtuple("AscendTask",
-                   ["model_id", "index_id", "stream_id", "task_id", "context_id", "batch_id", "start_time",
+                   ["model_id", "index_id", "stream_id", "task_id", "context_id", "batch_id", "timestamp",
                     "duration", "host_task_type", "device_task_type", "connection_id", "op_name"]),
         {})
 
