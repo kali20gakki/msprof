@@ -11,6 +11,8 @@ add_library(mspti_wrapper SHARED
     ${CMAKE_SOURCE_DIR}/common/utils.cpp
 )
 
+add_dependencies(mspti_wrapper mspti_stub)
+
 set_target_properties(mspti_wrapper
     PROPERTIES
     OUTPUT_NAME mspti_C

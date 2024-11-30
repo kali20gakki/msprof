@@ -148,7 +148,7 @@ static PyMethodDef g_moduleMethods[] = {
 };
 
 static PyModuleDef g_libMethods = {
-    PyModuleDef_HEAD_INIT, "libmspti_C",
+    PyModuleDef_HEAD_INIT, "mspti_C",
     "",
     -1,
     g_moduleMethods,
@@ -162,7 +162,7 @@ static void AddSubModule(PyObject *root, const char *name, PyMethodDef *methods)
 {
     PyObject *d = PyModule_GetDict(root);
     std::string subModuleName = name;
-    std::string moduleName = "libmspti_C." + subModuleName;
+    std::string moduleName = "mspti_C." + subModuleName;
     PyObject *subModule = PyDict_GetItemString(d, name);
     if (subModule == nullptr) {
         subModule = PyImport_AddModule(moduleName.c_str());
@@ -182,7 +182,7 @@ static void AddSubModule(PyObject *root, const char *name, PyMethodDef *methods)
 extern "C" {
 #endif
 
-PyMODINIT_FUNC PyInit_libmspti_C()
+PyMODINIT_FUNC PyInit_mspti_C()
 {
     PyObject *m = PyModule_Create(&g_libMethods);
     AddSubModule(m, "mstx", Mspti::Adapter::Mstx::GetMstxMethods());
@@ -191,7 +191,7 @@ PyMODINIT_FUNC PyInit_libmspti_C()
     return m;
 }
 
-__attribute__ ((visibility("default"))) PyObject* PyInit_libmspti_C();
+__attribute__ ((visibility("default"))) PyObject* PyInit_mspti_C();
 
 #if defined(__cplusplus)
 }
