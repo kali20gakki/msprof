@@ -9,6 +9,7 @@ from common_func.msprof_object import CustomizedNamedtupleFactory
 from common_func.db_manager import DBManager
 from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.view_model import ViewModel
+from mscalculate.flip.flip_calculator import FlipCalculator
 
 
 class KfcInfoModel(ParserModel):
@@ -56,6 +57,23 @@ class KfcInfoViewModel(ViewModel):
                     "group_name", "stream_id", "task_id", "rank_size", "source"]),
         {})
 
+    HCCL_OP_MASTER_STREAM_TYPE = CustomizedNamedtupleFactory.enhance_namedtuple(
+        namedtuple("HcclOpMasterStreamType",
+                   ["timestamp", "stream_id", "task_id", "hccl_stream_id", "hccl_task_id",
+                    "batch_id", "hccl_batch_id", "task_type"]),
+        {})
+
+    MASTER_STREAM_HCCL_TASK_TYPE = CustomizedNamedtupleFactory.enhance_namedtuple(
+        namedtuple("MasterStreamHcclTaskType",
+                   ["timestamp", "aicpu_stream_id", "aicpu_task_id", "stream_id", "task_id",
+                    "aicpu_batch_id", "batch_id", "task_type"]),
+        {})
+
+    AICPU_TASK_FLIP = CustomizedNamedtupleFactory.enhance_namedtuple(
+        namedtuple("AicpuTaskFlip",
+                   ["stream_id", "timestamp", "task_id", "flip_num"]),
+        {})
+
     def __init__(self, result_dir: str, table_list: list):
         super().__init__(result_dir, DBNameConstant.DB_KFC_INFO, table_list)
 
@@ -91,6 +109,26 @@ class KfcInfoViewModel(ViewModel):
               " from {} order by timestamp".format(DBNameConstant.TABLE_DEVICE_HCCL_OP_INFO)
         hccl_op_info = self.get_sql_data(sql)
         return [self.HCCL_OP_INFO_TYPE(*data) for data in hccl_op_info]
+
+    def get_aicpu_master_stream_hccl_task(self: any) -> list:
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_AICPU_MASTER_STREAM_HCCL_TASK):
+            return []
+        sql = "select timestamp, aicpu_stream_id, aicpu_task_id, stream_id, task_id, " \
+              "0 as aicpu_batch_id, 0 as batch_id, type " \
+              "from {}".format(DBNameConstant.TABLE_AICPU_MASTER_STREAM_HCCL_TASK)
+        aicpu_master_stream_hccl_task = self.get_sql_data(sql)
+        aicpu_master_stream_hccl_task = [self.HCCL_OP_MASTER_STREAM_TYPE(*data)
+                                         for data in aicpu_master_stream_hccl_task]
+        aicpu_master_stream_hccl_task = FlipCalculator.set_device_batch_id(aicpu_master_stream_hccl_task,
+                                                                           self.result_dir)
+        return [self.MASTER_STREAM_HCCL_TASK_TYPE(*data) for data in aicpu_master_stream_hccl_task]
+
+    def get_aicpu_task_flip(self: any) -> list:
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_AICPU_TASK_FLIP):
+            return []
+        sql = "select stream_id, timestamp, task_id, flip_num from {}".format(DBNameConstant.TABLE_AICPU_TASK_FLIP)
+        aicpu_task_flip = self.get_sql_data(sql)
+        return [self.AICPU_TASK_FLIP(*data) for data in aicpu_task_flip]
 
 
 @dataclass

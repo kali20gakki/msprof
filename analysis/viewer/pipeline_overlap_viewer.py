@@ -59,8 +59,8 @@ class PipelineOverlapViewer:
         if os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
             with HcclViewModel(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
                                [DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE]) as _model:
-                communication_data = _model.get_hccl_op_time_section()
-                communication_data += _model.get_kfc_op_time_section()
+                communication_data = _model.get_hccl_op_time_section(DBNameConstant.TABLE_HCCL_TASK_SINGLE_DEVICE)
+                communication_data += _model.get_hccl_op_time_section(DBNameConstant.TABLE_KFC_TASK)
         communication_data = SectionCalculator.merge_continuous_intervals(communication_data)
         result.extend(
             self._format_timeline_data(OverlapType.COMMUNICATION_TIME, data)

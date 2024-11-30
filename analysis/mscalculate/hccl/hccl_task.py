@@ -4,6 +4,7 @@
 
 from dataclasses import dataclass
 from common_func.constant import Constant
+from common_func.hccl_info_common import DeviceHcclSource
 
 
 @dataclass
@@ -27,7 +28,7 @@ class HcclOps:
     alg_type: str = Constant.NA
     count: int = Constant.DEFAULT_INVALID_VALUE
     group_name: str = Constant.NA
-    source: int = Constant.DEFAULT_INVALID_VALUE
+    source: int = DeviceHcclSource.INVALID.value
 
 
 @dataclass
