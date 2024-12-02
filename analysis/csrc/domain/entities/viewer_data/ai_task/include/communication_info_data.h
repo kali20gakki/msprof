@@ -42,6 +42,7 @@ struct CommunicationTaskData {
     double duration = 0.0;
     double durationEstimated = 0.0;
     double bandwidth = 0.0;
+    uint16_t isMaster = 0;
 };
 struct CommunicationOpData {
     std::string opName;
@@ -58,6 +59,7 @@ struct CommunicationOpData {
     std::string opType;
     uint32_t modelId = 0;
     uint16_t deviceId = UINT16_MAX;
+    uint16_t rankSize = 0;
 };
 }
 }

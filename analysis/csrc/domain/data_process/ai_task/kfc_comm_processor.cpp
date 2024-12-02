@@ -13,25 +13,13 @@
 #include "analysis/csrc/domain/data_process/ai_task/kfc_comm_processor.h"
 #include "analysis/csrc/parser/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/domain/services/constant/time_unit_constant.h"
 
 namespace Analysis {
 namespace Domain {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Utils;
-namespace {
-std::string GetGroupNameValue(const std::string& groupName, std::unordered_map<std::string, std::string>& hashMap)
-{
-    if (groupName != NA && Utils::IsNumber(groupName)) {
-        if (hashMap.find(groupName) != hashMap.end()) {
-            return hashMap[groupName];
-        }
-    }
-    return groupName;
-}
-}
 
-KfcCommProcessor::KfcCommProcessor(const std::string &profPath) : DataProcessor(profPath) {}
+KfcCommProcessor::KfcCommProcessor(const std::string &profPath) : CommunicationInfoProcessor(profPath) {}
 
 bool KfcCommProcessor::Process(DataInventory& dataInventory)
 {
@@ -39,12 +27,19 @@ bool KfcCommProcessor::Process(DataInventory& dataInventory)
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     std::vector<KfcTaskData> resTask;
     std::vector<KfcOpData> resOp;
-    auto hashMap = dataInventory.GetPtr<std::unordered_map<std::string, std::string>>();
+    CommunicationData communicationData;
+    auto hashMap = dataInventory.GetPtr<GeHashMap>();
     if (hashMap == nullptr) {
         ERROR("Can't get hash data.");
         return false;
     }
+    communicationData.hashMap = *hashMap;
+    if (!Context::GetInstance().GetProfTimeRecordInfo(communicationData.timeRecord, profPath_)) {
+        ERROR("Failed to obtain the time in start_info and end_info. Prof path is %", profPath_);
+        return false;
+    }
     for (const auto& devicePath : deviceList) {
+        communicationData.deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
         DBInfo KfcOPTable("hccl_single_device.db", "KfcOP");
         DBInfo KfcTaksTable("hccl_single_device.db", "KfcTask");
         std::string dbPath = File::PathJoin({devicePath, SQLITE, KfcOPTable.dbName});
@@ -52,7 +47,6 @@ bool KfcCommProcessor::Process(DataInventory& dataInventory)
             flag = false;
             continue;
         }
-
         auto commStatus = CheckPathAndTable(dbPath, KfcOPTable, false);
         auto computeStatus = CheckPathAndTable(dbPath, KfcTaksTable, false);
         if (commStatus != CHECK_SUCCESS && computeStatus != CHECK_SUCCESS) {
@@ -61,126 +55,92 @@ bool KfcCommProcessor::Process(DataInventory& dataInventory)
             }
             continue;
         }
-
         // db取出所有的数据
-        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-        auto taskData = LoadTaskData(KfcTaksTable, dbPath);
-        auto opData = LoadOPData(KfcOPTable, dbPath);
-        auto formatKfcTask = FormatTaskData(taskData, *hashMap, deviceId);
-        auto formatOpData = FormatOPData(opData, *hashMap, deviceId);
-        resOp.insert(resOp.end(), formatOpData.begin(), formatOpData.end());
-        resTask.insert(resTask.end(), formatKfcTask.begin(), formatKfcTask.end());
+        communicationData.oriTaskData = LoadTaskData(KfcTaksTable);
+        communicationData.oriOpData = LoadOpData(KfcOPTable);
+        std::vector<CommunicationTaskData> taskData;
+        std::vector<CommunicationOpData> opData;
+        if (!FormatData(taskData, opData, communicationData)) {
+            ERROR("Format data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO);
+            return false;
+        }
+        ConvertTaskData(resTask, taskData);
+        ConvertOpData(resOp, opData);
     }
-    if (!SaveToDataInventory<KfcTaskData>(std::move(resTask), dataInventory, PROCESSOR_NAME_KFC_COMM)) {
-        ERROR("Save data failed, %.", PROCESSOR_NAME_KFC_COMM);
-        flag = false;
-    }
-
-    if (!SaveToDataInventory<KfcOpData>(std::move(resOp), dataInventory, PROCESSOR_NAME_KFC_COMM)) {
-        ERROR("Save data failed, %.", PROCESSOR_NAME_KFC_COMM);
+    if (!SaveData(resTask, resOp, dataInventory)) {
+        ERROR("Save kfc data failed, %.", PROCESSOR_NAME_KFC_COMM);
         flag = false;
     }
     return flag;
 }
 
-std::vector<KfcTaskDto> KfcCommProcessor::LoadTaskData(const DBInfo &kfcDB, const std::string &dbPath)
+bool KfcCommProcessor::SaveData(std::vector<KfcTaskData> &resTask, std::vector<KfcOpData> &resOp,
+                                DataInventory &dataInventory)
 {
-    std::vector<KfcTaskDto> result;
-    OriKfcTaskData oriTaskData;
-    std::string sql{"SELECT model_id, index_id, op_name, op_timestamp, op_duration, iteration, hccl_name, group_name, "
-                    "plane_id, timestamp, duration, stream_id, task_id, duration_estimated, local_rank, remote_rank, "
-                    "transport_type, size, data_type, link_type, bandwidth, context_id, notify_id, batch_id, rdma_type "
-                    "FROM " + kfcDB.tableName};
-    if (!kfcDB.dbRunner->QueryData(sql, oriTaskData)) {
-        ERROR("Failed to obtain data from the % table.", kfcDB.tableName);
+    if (!SaveToDataInventory<KfcTaskData>(std::move(resTask), dataInventory, PROCESSOR_NAME_KFC_COMM)) {
+        ERROR("Save data failed, %.", PROCESSOR_NAME_KFC_COMM);
+        return false;
     }
-
-    for (const auto &row: oriTaskData) {
-        KfcTaskDto kfcTask{};
-        std::tie(kfcTask.modelId, kfcTask.indexId, kfcTask.opName, kfcTask.opTimestamp, kfcTask.opDuration,
-                 kfcTask.iteration, kfcTask.hcclName, kfcTask.groupName, kfcTask.planeId, kfcTask.timestamp,
-                 kfcTask.duration, kfcTask.streamId, kfcTask.taskId, kfcTask.durationEstimated, kfcTask.localRank,
-                 kfcTask.remoteRank, kfcTask.transportType, kfcTask.size, kfcTask.dataType, kfcTask.linkType,
-                 kfcTask.bandwidth, kfcTask.contextId, kfcTask.notifyId, kfcTask.batchId, kfcTask.rdmaType) = row;
-        result.push_back(kfcTask);
+    if (!SaveToDataInventory<KfcOpData>(std::move(resOp), dataInventory, PROCESSOR_NAME_KFC_COMM)) {
+        ERROR("Save data failed, %.", PROCESSOR_NAME_KFC_COMM);
+        return false;
     }
-
-    return result;
+    return true;
 }
 
-std::vector<KfcOPDto> KfcCommProcessor::LoadOPData(const DBInfo &kfcDB, const std::string &dbPath)
+OriOpDataFormat KfcCommProcessor::LoadOpData(const DBInfo &kfcDB)
 {
-    OriKfcOPData oriOpData;
-    std::vector<KfcOPDto> result;
-    std::string sql{"SELECT model_id, index_id, op_name, timestamp, duration, group_name, connection_id, data_type, "
-                    "alg_type, count, rank_size FROM " + kfcDB.tableName};
+    OriOpDataFormat oriOpData;
+    std::string sql{"SELECT connection_id, op_name, relay, retry, data_type, alg_type, count, group_name, op_type, "
+                    "model_id, rank_size FROM " + kfcDB.tableName + " WHERE source != "
+                    + std::to_string(static_cast<int>(DeviceHcclOpSource::HCCL))};
     if (!kfcDB.dbRunner->QueryData(sql, oriOpData)) {
         ERROR("Failed to obtain data from the % table.", kfcDB.tableName);
     }
-    for (const auto &row: oriOpData) {
-        KfcOPDto kfcOp{};
-        std::tie(kfcOp.modelId, kfcOp.indexId, kfcOp.opName, kfcOp.timestamp, kfcOp.duration, kfcOp.groupName,
-                 kfcOp.connectionId, kfcOp.dataType, kfcOp.algType, kfcOp.count, kfcOp.rankSize) = row;
-        result.push_back(kfcOp);
-    }
-
-    return result;
+    return oriOpData;
 }
 
-std::vector<KfcTaskData> KfcCommProcessor::FormatTaskData(const std::vector<KfcTaskDto> &oriCommData,
-    std::unordered_map<std::string, std::string>& hashMap, uint16_t deviceId)
+OriTaskDataFormat KfcCommProcessor::LoadTaskData(const DBInfo& taskSingleDevice)
 {
-    ProfTimeRecord profTimeRecord;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(profTimeRecord, profPath_, deviceId)) {
-        ERROR("Failed to obtain the time in start_info and end_info. "
-              "Prof path is %, device id is %.", profPath_, deviceId);
-        return {};
+    OriTaskDataFormat oriTaskData;
+    std::string sql{"SELECT model_id, op_name, hccl_name, group_name, plane_id, stream_id, task_id, local_rank, "
+                    "remote_rank, transport_type, size, data_type, link_type, context_id, notify_id, batch_id, "
+                    "rdma_type, timestamp, duration, connection_id, duration_estimated, bandwidth, is_master "
+                    "FROM " + taskSingleDevice.tableName + " WHERE source != "
+                    + std::to_string(static_cast<int>(DeviceHcclOpSource::HCCL))};
+    if (!taskSingleDevice.dbRunner->QueryData(sql, oriTaskData)) {
+        ERROR("Failed to obtain data from the % table.", taskSingleDevice.tableName);
     }
-    std::vector<KfcTaskData> result;
-    uint64_t transportType;
-    uint64_t dataType;
-    uint64_t linkType;
-    std::string groupName;
-    for (const auto &oriData: oriCommData) {
-        HPFloat timeStamp = {oriData.timestamp};
-        transportType = GetEnumTypeValue(oriData.transportType, NAME_STR(HCCL_TRANSPORT_TYPE_TABLE),
-                                         HCCL_TRANSPORT_TYPE_TABLE);
-        dataType = GetEnumTypeValue(oriData.dataType, NAME_STR(HCCL_DATA_TYPE_TABLE), HCCL_DATA_TYPE_TABLE);
-        linkType = GetEnumTypeValue(oriData.linkType, NAME_STR(HCCL_LINK_TYPE_TABLE), HCCL_LINK_TYPE_TABLE);
-        groupName = GetGroupNameValue(oriData.groupName, hashMap);
-        result.emplace_back(deviceId, oriData.modelId, oriData.hcclName,
-                            GetLocalTime(timeStamp, profTimeRecord).Uint64(),
-                            static_cast<double>(oriData.duration), oriData.notifyId,
-                            static_cast<double>(oriData.durationEstimated), oriData.streamId, oriData.taskId,
-                            oriData.contextId, " ", oriData.localRank, oriData.remoteRank, transportType,
-                            oriData.size, linkType, oriData.bandwidth, groupName, oriData.planeId, dataType);
-    }
-    return result;
+    return oriTaskData;
 }
 
-std::vector<KfcOpData> KfcCommProcessor::FormatOPData(const std::vector<KfcOPDto> &oriOpData,
-    std::unordered_map<std::string, std::string>& hashMap,  uint16_t deviceId)
+bool KfcCommProcessor::ConvertTaskData(std::vector<KfcTaskData> &resTask,
+                                       const std::vector<CommunicationTaskData> &taskData)
 {
-    ProfTimeRecord profTimeRecord;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(profTimeRecord, profPath_, deviceId)) {
-        ERROR("Failed to obtain the time in start_info and end_info. "
-              "Prof path is %, device id is %.", profPath_, deviceId);
-        return {};
+    if (!Reserve(resTask, taskData.size())) {
+        ERROR("Reserve for kfc task data failed.");
+        return false;
     }
-    std::vector<KfcOpData> result;
-    uint64_t dataType;
-    std::string groupName;
-    uint64_t start;
-    for (const auto &opData : oriOpData) {
-        dataType = GetEnumTypeValue(opData.dataType, NAME_STR(HCCL_DATA_TYPE_TABLE), HCCL_DATA_TYPE_TABLE);
-        groupName = GetGroupNameValue(opData.groupName, hashMap);
-        HPFloat timeStamp = {opData.timestamp};
-        start = GetLocalTime(timeStamp, profTimeRecord).Uint64();
-        // start_index需要
-        result.emplace_back(deviceId, opData.opName, start, start + opData.duration, groupName, opData.connectionId,
-                            opData.modelId, dataType, opData.count, opData.algType, opData.rankSize);
+    for (const auto &data : taskData) {
+        resTask.emplace_back(data.deviceId, data.modelId, data.taskType, data.start, data.duration, data.notifyId,
+                             data.durationEstimated, data.streamId, data.taskId, data.contextId, data.taskType,
+                             data.srcRank, data.dstRank, data.transportType, data.size, data.linkType,
+                             data.bandwidth, data.groupName, data.planeId, data.dataType, data.isMaster);
     }
-    return result;
+    return true;
+}
+
+bool KfcCommProcessor::ConvertOpData(std::vector<KfcOpData> &resOp, const std::vector<CommunicationOpData> &opData)
+{
+    if (!Reserve(resOp, opData.size())) {
+        ERROR("Reserve for kfc task data failed.");
+        return false;
+    }
+    for (const auto &data : opData) {
+        resOp.emplace_back(data.deviceId, data.opName, data.start, data.end, data.groupName, data.connectionId,
+                           data.modelId, data.dataType, data.count, data.algType, data.rankSize);
+    }
+    return true;
 }
 }
 }

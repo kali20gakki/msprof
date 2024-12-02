@@ -140,7 +140,7 @@ TEST_F(HcclAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
                             "HCCL\"}},{\"name\":\"process_labels\",\"pid\":10327520,\"tid\":0,\"ph\":\"M\",\"args\":{"
                             "\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":10327520,\"tid\":0,\"ph\":"
                             "\"M\",\"args\":{\"sort_index\":15}},{\"name\":\"thread_name\",\"pid\":10327520,\"tid\":0,"
-                            "\"ph\":\"M\",\"args\":{\"name\":\"Group 16898834563344171674 Communication \"}},{\"name\""
+                            "\"ph\":\"M\",\"args\":{\"name\":\"Group 16898834563344171674 Communication\"}},{\"name\""
                             ":\"thread_sort_index\",\"pid\":10327520,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":0"
                             "}},{\"name\":\"thread_name\",\"pid\":10327520,\"tid\":1,\"ph\":\"M\",\"args\":{\"name\":"
                             "\"Plane 0\"}},{\"name\":\"thread_sort_index\",\"pid\":10327520,\"tid\":1,\"ph\":\"M\",\""

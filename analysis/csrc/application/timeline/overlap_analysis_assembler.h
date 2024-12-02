@@ -18,6 +18,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/task_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/communication_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/mc2_comm_info_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/kfc_turn_data.h"
 #include "analysis/csrc/domain/valueobject/include/task_id.h"
 #include "analysis/csrc/domain/entities/time/time_duration.h"
 
@@ -31,16 +32,17 @@ private:
     void RecordCompAndCommTaskTime(const std::shared_ptr<std::vector<AscendTaskData>> &ascendTasks,
                                    const std::shared_ptr<std::vector<TaskInfoData>> &compTasks,
                                    const std::shared_ptr<std::vector<CommunicationOpData>> &commOps,
+                                   const std::shared_ptr<std::vector<KfcOpData>> &kfcOps,
                                    const std::shared_ptr<std::vector<MC2CommInfoData>> &mc2CommInfos);
     void AssembleOneDevice(uint16_t deviceId, JsonWriter &ostream);
     static void SepCompTaskAndKFCCommSections(
         std::map<TaskId, std::vector<TimeDuration>> &allTaskPool,
         const std::shared_ptr<std::vector<TaskInfoData>> &compTasks,
         const std::shared_ptr<std::vector<MC2CommInfoData>> &mc2CommInfos,
-        std::unordered_map<uint16_t, std::vector<TimeDuration>> &compSections,
-        std::unordered_map<uint16_t, std::vector<TimeDuration>> &kfcCommSections);
-    std::unordered_map<uint16_t, std::vector<TimeDuration>> GetCommTaskSections(
-        const std::shared_ptr<std::vector<CommunicationOpData>> &commOps);
+        std::unordered_map<uint16_t, std::vector<TimeDuration>> &compSections);
+    template<typename T>
+    void GetCommTaskSections(std::unordered_map<uint16_t, std::vector<TimeDuration>> &commOpSections,
+                             const std::shared_ptr<std::vector<T>> &commOps);
     std::vector<std::shared_ptr<TraceEvent>> GenerateComputeEvents(
         std::vector<TimeDuration> &compSections, uint16_t deviceId);
     std::vector<std::shared_ptr<TraceEvent>> GenerateCommEvents(
@@ -70,7 +72,6 @@ private:
 private:
     std::unordered_map<uint16_t, std::vector<TimeDuration>> compTaskRecords_;
     std::unordered_map<uint16_t, std::vector<TimeDuration>> commTaskRecords_;
-    std::unordered_map<uint16_t, std::vector<TimeDuration>> kfcCommRecords_;
     std::unordered_map<uint16_t, uint64_t> begin_;
     std::unordered_map<uint16_t, uint64_t> end_;
     std::set<uint16_t> deviceIds_;

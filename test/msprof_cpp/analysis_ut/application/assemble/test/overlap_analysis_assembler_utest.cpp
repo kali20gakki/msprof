@@ -377,6 +377,19 @@ static std::vector<CommunicationOpData> GenerateCommOpDataS1ByDevice(uint16_t de
     }
     return res;
 }
+static std::vector<KfcOpData> GenerateKfcOpDataS1ByDevice(uint16_t deviceId)
+{
+    std::vector<std::pair<uint64_t, uint64_t>> times{{6, 9}, {20, 22}, {32, 34}};
+    std::vector<KfcOpData> res;
+    for (auto &time : times) {
+        KfcOpData data;
+        data.start = time.first;
+        data.end = time.second;
+        data.deviceId = deviceId;
+        res.emplace_back(data);
+    }
+    return res;
+}
 TEST_F(OverlapAnalysisAssemblerUTest, UnionOneSetShouldReturnContinuousSections)
 {
     std::vector<TimeDuration> originData1 = {{1, 3}, {2, 6}, {8, 10}, {15, 18}};
@@ -454,6 +467,7 @@ TEST_F(OverlapAnalysisAssemblerUTest, AssembleDataShouldContainCompleteDataInSce
     // *HCCL*
     // Group1                      [4,   8] [9,13]                                 [21,22]       [26,             39]
     // Group2                       [5, 7]                [14,17]                 [20,  24]     [25,  27]       [38,41]
+    // Group3 Aicpu                   [6,  9],                                    [20, 22]             [32, 34]
 
     // 合并后：
     // Communication:                      [4,13] [14,17] [20,24] [25,41]
@@ -463,12 +477,14 @@ TEST_F(OverlapAnalysisAssemblerUTest, AssembleDataShouldContainCompleteDataInSce
     std::shared_ptr<std::vector<AscendTaskData>> tasksPtr;
     std::shared_ptr<std::vector<TaskInfoData>> compTasksPtr;
     std::shared_ptr<std::vector<CommunicationOpData>> commOpsPtr;
+    std::shared_ptr<std::vector<KfcOpData>> kfcOpsPtr;
     std::shared_ptr<std::vector<MC2CommInfoData>> mc2CommInfoPtr;
 
     std::vector<uint16_t> devices = {0, 1};
     std::vector<AscendTaskData> taskData;
     std::vector<TaskInfoData> compTaskData;
     std::vector<CommunicationOpData> commOpData;
+    std::vector<KfcOpData> kfcOpData;
     std::vector<MC2CommInfoData> mc2CommInfoData;
     for (auto &id : devices) {
         auto ascendTasks = GenerateAscendTaskDataS1ByDevice(id);
@@ -477,16 +493,20 @@ TEST_F(OverlapAnalysisAssemblerUTest, AssembleDataShouldContainCompleteDataInSce
         compTaskData.insert(compTaskData.end(), compTasks.begin(), compTasks.end());
         auto commOps = GenerateCommOpDataS1ByDevice(id);
         commOpData.insert(commOpData.end(), commOps.begin(), commOps.end());
+        auto kfcOps = GenerateKfcOpDataS1ByDevice(id);
+        kfcOpData.insert(kfcOpData.end(), kfcOps.begin(), kfcOps.end());
         auto mc2CommInfos = GenerateMC2CommInfoS1ByDeviceId(id);
         mc2CommInfoData.insert(mc2CommInfoData.end(), mc2CommInfos.begin(), mc2CommInfos.end());
     }
     MAKE_SHARED_NO_OPERATION(tasksPtr, std::vector<AscendTaskData>, taskData);
     MAKE_SHARED_NO_OPERATION(compTasksPtr, std::vector<TaskInfoData>, compTaskData);
     MAKE_SHARED_NO_OPERATION(commOpsPtr, std::vector<CommunicationOpData>, commOpData);
+    MAKE_SHARED_NO_OPERATION(kfcOpsPtr, std::vector<KfcOpData>, kfcOpData);
     MAKE_SHARED_NO_OPERATION(mc2CommInfoPtr, std::vector<MC2CommInfoData>, mc2CommInfoData);
     dataInventory_.Inject(tasksPtr);
     dataInventory_.Inject(compTasksPtr);
     dataInventory_.Inject(commOpsPtr);
+    dataInventory_.Inject(kfcOpsPtr);
     dataInventory_.Inject(mc2CommInfoPtr);
     CheckScenarios1Data(dataInventory_);
 }

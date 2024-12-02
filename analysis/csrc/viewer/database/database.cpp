@@ -651,8 +651,7 @@ namespace {
         {"model_id", SQL_INTEGER_TYPE},
         {"index_id", SQL_INTEGER_TYPE},
         {"op_name", SQL_TEXT_TYPE},
-        {"op_timestamp", SQL_NUMERIC_TYPE},
-        {"op_duration", SQL_NUMERIC_TYPE},
+        {"first_timestamp", SQL_NUMERIC_TYPE},
         {"iteration", SQL_INTEGER_TYPE},
         {"hccl_name", SQL_TEXT_TYPE},
         {"group_name", SQL_TEXT_TYPE},
@@ -674,6 +673,8 @@ namespace {
         {"notify_id", SQL_TEXT_TYPE},
         {"batch_id", SQL_INTEGER_TYPE},
         {"rdma_type", SQL_TEXT_TYPE},
+        {"connection_id", SQL_INTEGER_TYPE},
+        {"source", SQL_INTEGER_TYPE},
     };
 
     const TableColumns Sio = {
