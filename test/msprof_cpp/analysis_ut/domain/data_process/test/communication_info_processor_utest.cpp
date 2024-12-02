@@ -43,6 +43,7 @@ const std::string PROF_PATH_B = File::PathJoin({COMMUNICATION_TASK_PATH,
 const std::set<std::string> PROF_PATHS = {PROF_PATH_A, PROF_PATH_B};
 const std::string TASK_TABLE_NAME = "HCCLTaskSingleDevice";
 const std::string OP_TABLE_NAME = "HCCLOpSingleDevice";
+const std::string KFC_TASK_TABLE_NAME = "KfcTask";
 
 using HcclTaskSingleDeviceFormat = std::vector<std::tuple<uint32_t, int32_t, std::string, uint32_t, std::string,
     std::string, double, int32_t, double, double, double,
@@ -53,6 +54,10 @@ using HcclTaskSingleDeviceFormat = std::vector<std::tuple<uint32_t, int32_t, std
 using HcclOpSingleDeviceFormat = std::vector<std::tuple<uint32_t, std::string, std::string, std::string,
     double, int32_t, int32_t, std::string, std::string,
     uint64_t, std::string, uint32_t>>;
+
+using KfcTaskFormat = std::vector<std::tuple<uint32_t, int32_t, std::string, uint64_t, uint32_t, std::string,
+    std::string, uint32_t, uint64_t, double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, std::string,
+    uint32_t, std::string, std::string, double, uint32_t, std::string, uint32_t, std::string, uint32_t, uint32_t>>;
 
 const HcclTaskSingleDeviceFormat DATA_A{
     {4294967295, -1, "hcom_allReduce__360_0_1", 0, "Memcpy",   "10652832407468360",
@@ -82,6 +87,12 @@ const HcclOpSingleDeviceFormat DATA_OP_B{
     {4294967295, "hcom_allReduce_", "HCCL", "hcom_allReduce_",
         821026362976, 1, 1, "INT32", "HD-NHR", 4921, "10652853832407468832", 126}
 };
+
+const KfcTaskFormat DATA_KFC_A{
+    {4294967295, -1, "allreduceAicpuKernel_360_1_1", 41683029923680, 0, "Notify_Wait", "10652832407468360",
+     1, 41683029923680, 20, 0, 69, 0, 0, 5, 6, "SDMA", 4, "INT8", "HCCS", 3.12, 4294967295, "102", 0,
+     "INVALID_TYPE", 405, 0}
+};
 }
 
 class CommunicationInfoProcessorUTest : public testing::Test {
@@ -102,6 +113,7 @@ protected:
         CreateHcclTaskSingleDevice(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_B);
         CreateHcclOpSingleDevice(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_OP_A);
         CreateHcclOpSingleDevice(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_OP_B);
+        CreateKfcTask(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_KFC_A);
         MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
             .stubs()
             .will(returnValue(true));
@@ -131,20 +143,30 @@ protected:
         dbRunner->CreateTable(OP_TABLE_NAME, cols);
         dbRunner->InsertData(OP_TABLE_NAME, data);
     }
+    static void CreateKfcTask(const std::string& dbPath, KfcTaskFormat data)
+    {
+        std::shared_ptr<HCCLSingleDeviceDB> database;
+        MAKE_SHARED0_RETURN_VOID(database, HCCLSingleDeviceDB);
+        std::shared_ptr<DBRunner> dbRunner;
+        MAKE_SHARED_RETURN_VOID(dbRunner, DBRunner, dbPath);
+        auto cols = database->GetTableCols(KFC_TASK_TABLE_NAME);
+        dbRunner->CreateTable(KFC_TASK_TABLE_NAME, cols);
+        dbRunner->InsertData(KFC_TASK_TABLE_NAME, data);
+    }
 };
 
 static void CheckStringId(std::vector<CommunicationTaskData> data)
 {
     const std::set<std::string> nameSet = {"hcom_allReduce__360_0_1", "hcom_allReduce__233_0_2",
-        "hcom_allReduce__832_0_1"};
-    const std::set<std::string> taskTypeSet = {"Memcpy", "Memcpy23", "Reduce23"};
+        "hcom_allReduce__832_0_1", "allreduceAicpuKernel_360_1_1"};
+    const std::set<std::string> taskTypeSet = {"Memcpy", "Memcpy23", "Reduce23", "Notify_Wait"};
     const uint64_t rdmaTypeHashId = HCCL_RDMA_TYPE_TABLE.find("INVALID_TYPE")->second;
-    const std::set<uint64_t> srcRankSet = {0, 1, 4};
-    const std::set<uint64_t> dstRankSet = {0, 2, 4};
+    const std::set<uint64_t> srcRankSet = {0, 1, 4, 5};
+    const std::set<uint64_t> dstRankSet = {0, 2, 4, 6};
     const uint64_t transportTypeHashId = HCCL_TRANSPORT_TYPE_TABLE.find("SDMA")->second;
     const std::set<uint64_t> dataTypeSet = {HCCL_DATA_TYPE_TABLE.find("FP16")->second,
         HCCL_DATA_TYPE_TABLE.find("FP32")->second,
-        HCCL_DATA_TYPE_TABLE.find("INVALID_TYPE")->second};
+        HCCL_DATA_TYPE_TABLE.find("INVALID_TYPE")->second, HCCL_DATA_TYPE_TABLE.find("INT8")->second};
     const std::set<uint64_t> linkTypeSet = {HCCL_LINK_TYPE_TABLE.find("HCCS")->second,
         HCCL_LINK_TYPE_TABLE.find("ON_CHIP")->second};
     std::set<uint64_t> stringIdsSet;
@@ -216,9 +238,13 @@ TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnTrueWhenSourceTableNo
     MAKE_SHARED0_NO_OPERATION(dbRunner, DBRunner, dbPath);
     dbRunner->DropTable(TASK_TABLE_NAME);
     std::string processorName = "COMMUNICATION_TASK_INFO";
+    GeHashMap geHashMap = {{"key1", "value1"}};
+    std::shared_ptr<GeHashMap> geHashMapPtr;
+    MAKE_SHARED0_NO_OPERATION(geHashMapPtr, GeHashMap, std::move(geHashMap));
     for (auto path : PROF_PATHS) {
         auto processor = CommunicationInfoProcessor(path);
         auto dataInventory = DataInventory();
+        dataInventory.Inject(geHashMapPtr);
         EXPECT_TRUE(processor.Run(dataInventory, processorName));
     }
 }
@@ -277,9 +303,23 @@ TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnTrueWhenNoDb)
     MOCKER_CPP(&Utils::File::GetFilesWithPrefix)
     .stubs()
     .will(returnValue(deviceList));
+    GeHashMap geHashMap = {{"key1", "value1"}};
+    std::shared_ptr<GeHashMap> geHashMapPtr;
+    MAKE_SHARED0_NO_OPERATION(geHashMapPtr, GeHashMap, std::move(geHashMap));
     auto processor = CommunicationInfoProcessor({File::PathJoin({COMMUNICATION_TASK_PATH, "test"})});
     auto dataInventory = DataInventory();
+    dataInventory.Inject(geHashMapPtr);
     std::string processorName = "COMMUNICATION_TASK_INFO";
     EXPECT_TRUE(processor.Run(dataInventory, processorName));
     MOCKER_CPP(&Utils::File::GetFilesWithPrefix).reset();
+}
+
+TEST_F(CommunicationInfoProcessorUTest, TestFormatKfcDataShouldReturnFalseWhenReserveFailed)
+{
+    std::vector<CommunicationTaskData> taskData;
+    CommunicationInfoProcessor::CommunicationData communicationData;
+    auto processor = CommunicationInfoProcessor({File::PathJoin({COMMUNICATION_TASK_PATH, "test"})});
+    MOCKER_CPP(&Utils::Reserve<CommunicationTaskData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.FormatKfcData(taskData, communicationData));
+    MOCKER_CPP(&Utils::Reserve<CommunicationTaskData>).reset();
 }

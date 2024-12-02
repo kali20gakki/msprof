@@ -54,17 +54,18 @@ struct KfcTaskData {
     std::string groupName;
     int32_t planeId = INT32_MAX;
     uint64_t dataType = UINT64_MAX;
+    uint16_t isMaster = 0;
     KfcTaskData() = default;
     KfcTaskData(uint16_t _deviceId, uint32_t _modelId, const std::string &_hcclName, uint64_t _timestamp,
                 double _duration, const std::string &_notifyId, double _durationEstimated, uint32_t _streamId,
                 uint32_t _taskId, uint32_t _contextId, const std::string &_taskType, uint32_t _srcRank,
                 uint32_t _dstRank, uint64_t _transportType, uint64_t _size, uint64_t _linkType,
-                double _bandwidth, const std::string &_groupName, int _planeId, uint64_t _dataType)
+                double _bandwidth, const std::string &_groupName, int _planeId, uint64_t _dataType, uint16_t _isMaster)
         : deviceId(_deviceId), modelId(_modelId), hcclName(_hcclName), start(_timestamp), duration(_duration),
         notifyId(_notifyId), durationEstimated(_durationEstimated), streamId(_streamId), taskId(_taskId),
         contextId(_contextId), taskType(_taskType), srcRank(_srcRank), dstRank(_dstRank),
         transportType(_transportType), size(_size), linkType(_linkType), bandwidth(_bandwidth),
-        groupName(_groupName), planeId(_planeId), dataType(_dataType) {};
+        groupName(_groupName), planeId(_planeId), dataType(_dataType), isMaster(_isMaster) {};
 };
 
 struct KfcOpData {

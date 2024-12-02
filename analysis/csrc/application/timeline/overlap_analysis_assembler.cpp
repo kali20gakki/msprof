@@ -12,10 +12,12 @@
 #include "analysis/csrc/application/timeline/overlap_analysis_assembler.h"
 #include "analysis/csrc/utils/time_logger.h"
 #include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 namespace Analysis {
 namespace Application {
 using namespace Analysis::Domain;
+using namespace Analysis::Viewer::Database;
 namespace {
 const std::string COMP_NAME = "Computing";
 const std::string COMM_NAME = "Communication";
@@ -27,17 +29,24 @@ const std::vector<uint32_t> TIDS = {static_cast<uint32_t>(OverlapType::COMMUNICA
                                     static_cast<uint32_t>(OverlapType::COMPUTE),
                                     static_cast<uint32_t>(OverlapType::FREE)};
 const std::vector<uint32_t> THREAD_INDEXES = TIDS;
+
+bool endsWith(const std::string &str, const std::string &suffix)
+{
+    if (suffix.size() > str.size()) {
+        return false;
+    }
+    return str.substr(str.size() - suffix.size()) == suffix;
+}
+
 void SepOneTask(
     std::vector<TimeDuration> &times, std::set<uint16_t> &mc2StreamsTable,
-    TaskInfoData &task, std::unordered_map<uint16_t, std::vector<TimeDuration>> &compSections,
-    std::unordered_map<uint16_t, std::vector<TimeDuration>> &kfcCommSections)
+    TaskInfoData &task, std::unordered_map<uint16_t, std::vector<TimeDuration>> &compSections)
 {
+    if (mc2StreamsTable.find(task.streamId) != mc2StreamsTable.end() || endsWith(task.opName, AICPU_KERNEL)) {
+        return;
+    }
     for (auto &timeDur: times) {
-        if (mc2StreamsTable.find(task.streamId) != mc2StreamsTable.end()) {
-            kfcCommSections[task.deviceId].emplace_back(timeDur);
-        } else {
-            compSections[task.deviceId].emplace_back(timeDur);
-        }
+        compSections[task.deviceId].emplace_back(timeDur);
     }
 }
 }
@@ -131,6 +140,7 @@ void OverlapAnalysisAssembler::RecordCompAndCommTaskTime(
     const std::shared_ptr<std::vector<AscendTaskData>> &ascendTasks,
     const std::shared_ptr<std::vector<TaskInfoData>> &compTasks,
     const std::shared_ptr<std::vector<CommunicationOpData>> &commOps,
+    const std::shared_ptr<std::vector<KfcOpData>> &kfcOps,
     const std::shared_ptr<std::vector<MC2CommInfoData>> &mc2CommInfos)
 {
     // 覆盖单算子和图模式场景
@@ -163,22 +173,17 @@ void OverlapAnalysisAssembler::RecordCompAndCommTaskTime(
     }
 
     std::unordered_map<uint16_t, std::vector<TimeDuration>> compSections;
-    std::unordered_map<uint16_t, std::vector<TimeDuration>> kfcCommSections;
     SepCompTaskAndKFCCommSections(
-        allTaskPool, compTasks, mc2CommInfos, compSections, kfcCommSections);
-    auto tradCommSections = GetCommTaskSections(commOps);
+        allTaskPool, compTasks, mc2CommInfos, compSections);
+    std::unordered_map<uint16_t, std::vector<TimeDuration>> tradCommSections;
+    GetCommTaskSections(tradCommSections, commOps);
+    GetCommTaskSections(tradCommSections, kfcOps);
 
     for (auto &pair : tradCommSections) {
         TimeLogger logger(
             "sort and union all trad comm task in overlap analysis for device " + std::to_string(pair.first));
         std::sort(pair.second.begin(), pair.second.end());
         commTaskRecords_[pair.first] = UnionOneSet(pair.second);
-    }
-    for (auto &pair : kfcCommSections) {
-        TimeLogger logger(
-            "sort and union all kfc comm task in overlap analysis for device " + std::to_string(pair.first));
-        std::sort(pair.second.begin(), pair.second.end());
-        kfcCommRecords_[pair.first] = UnionOneSet(pair.second);
     }
     for (auto &pair : compSections) {
         TimeLogger logger("sort and union all comp task in overlap analysis for device " + std::to_string(pair.first));
@@ -300,8 +305,7 @@ void OverlapAnalysisAssembler::SepCompTaskAndKFCCommSections(
     std::map<TaskId, std::vector<TimeDuration>> &allTaskPool,
     const std::shared_ptr<std::vector<TaskInfoData>> &compTasks,
     const std::shared_ptr<std::vector<MC2CommInfoData>> &mc2CommInfos,
-    std::unordered_map<uint16_t, std::vector<TimeDuration>> &compSections,
-    std::unordered_map<uint16_t, std::vector<TimeDuration>> &kfcCommSections)
+    std::unordered_map<uint16_t, std::vector<TimeDuration>> &compSections)
 {
     if (!compTasks) {
         return;
@@ -323,7 +327,7 @@ void OverlapAnalysisAssembler::SepCompTaskAndKFCCommSections(
         usedTaskIds.insert(id);
         auto it = allTaskPool.find(id);
         if (it != allTaskPool.end()) {
-            SepOneTask(it->second, mc2StreamsTable, task, compSections, kfcCommSections);
+            SepOneTask(it->second, mc2StreamsTable, task, compSections);
         } else {
             WARN("Find comp task not in all tasks, s-t-b-c is %-%-%-%", id.streamId, id.taskId, id.batchId,
                  id.contextId);
@@ -331,13 +335,15 @@ void OverlapAnalysisAssembler::SepCompTaskAndKFCCommSections(
         }
     }
 }
-std::unordered_map<uint16_t, std::vector<TimeDuration>> OverlapAnalysisAssembler::GetCommTaskSections(
-    const std::shared_ptr<std::vector<CommunicationOpData>> &commOps)
+
+template<typename T>
+void OverlapAnalysisAssembler::GetCommTaskSections(
+    std::unordered_map<uint16_t, std::vector<TimeDuration>> &commOpSections,
+    const std::shared_ptr<std::vector<T>> &commOps)
 {
     if (!commOps) {
-        return {};
+        return;
     }
-    std::unordered_map<uint16_t, std::vector<TimeDuration>> commOpSections;
     std::set<TaskId> usedTaskIds;
     for (auto &op : *commOps) {
         // 更新标记
@@ -353,10 +359,8 @@ std::unordered_map<uint16_t, std::vector<TimeDuration>> OverlapAnalysisAssembler
         } else {
             end_[op.deviceId] = std::max(end_[op.deviceId], op.end);
         }
-
         commOpSections[op.deviceId].emplace_back(op.start, op.end);
     }
-    return commOpSections;
 }
 std::vector<std::shared_ptr<TraceEvent>> OverlapAnalysisAssembler::GenerateMetaData(uint16_t deviceId)
 {
@@ -395,7 +399,10 @@ uint8_t OverlapAnalysisAssembler::AssembleData(DataInventory &dataInventory,
     if (!commOpData) {
         WARN("No comm task data found");
     }
-
+    auto kfcOpData = dataInventory.GetPtr<std::vector<KfcOpData>>();
+    if (!kfcOpData) {
+        WARN("No kfc op data found");
+    }
     auto mc2CommInfoData = dataInventory.GetPtr<std::vector<MC2CommInfoData>>();
     if (!mc2CommInfoData) {
         WARN("No kfc comm info found");
@@ -403,7 +410,7 @@ uint8_t OverlapAnalysisAssembler::AssembleData(DataInventory &dataInventory,
 
     profPath_ = profPath;
 
-    RecordCompAndCommTaskTime(taskData, computeTaskData, commOpData, mc2CommInfoData);
+    RecordCompAndCommTaskTime(taskData, computeTaskData, commOpData, kfcOpData, mc2CommInfoData);
     // init pid map
     auto layerInfo = GetLayerInfo(PROCESS_OVERLAP_ANALYSE);
     for (auto &deviceId : deviceIds_) {
@@ -428,11 +435,6 @@ void OverlapAnalysisAssembler::AssembleOneDevice(uint16_t deviceId, JsonWriter &
     std::vector<TimeDuration> commSections =
         commTaskRecords_.find(deviceId) == commTaskRecords_.end() ? std::vector<TimeDuration>()
                                                                   : commTaskRecords_[deviceId];
-    std::vector<TimeDuration> kfcCommSections =
-        kfcCommRecords_.find(deviceId) == kfcCommRecords_.end() ? std::vector<TimeDuration>()
-                                                                : kfcCommRecords_[deviceId];
-    // 合并通信类时间
-    commSections = UnionTwoSet(commSections, kfcCommSections);
 
     auto compEvents = GenerateComputeEvents(compSections, deviceId);
     auto commEvents = GenerateCommEvents(commSections, deviceId);

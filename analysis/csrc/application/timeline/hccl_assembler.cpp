@@ -86,8 +86,8 @@ void HcclAssembler::GenerateTMetaDataEvent(std::vector<HcclGroup> &groupInfo, in
     std::string traceNameSuffix;
     for (auto &group : groupInfo) {
         auto startIndex = index;
-        traceNameSuffix = HcclType::HCCL == group.type ? " Communication " : " Communication Aicpu ";
-        traceName = group.groupName != NA ? ("Group " + group.groupName + traceNameSuffix) : traceNameSuffix;
+        traceNameSuffix = HcclType::HCCL == group.type ? "Communication" : "Aicpu Communication";
+        traceName = group.groupName != NA ? ("Group " + group.groupName + " " + traceNameSuffix) : traceNameSuffix;
         group.startIndex = index;
         std::shared_ptr<MetaDataNameEvent> threadName;
         MAKE_SHARED_RETURN_VOID(threadName, MetaDataNameEvent, formatPid, index, META_DATA_THREAD_NAME, traceName);

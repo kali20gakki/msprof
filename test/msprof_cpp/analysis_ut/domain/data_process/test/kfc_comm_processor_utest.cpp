@@ -24,6 +24,19 @@ using namespace Analysis::Utils;
 using namespace Analysis::Viewer::Database;
 using HashMap = std::unordered_map<std::string, std::string>;
 
+// "model_id", "index_id", "op_name", "op_timestamp", "op_duration", "iteration", "hccl_name",
+// "group_name", "plane_id", "timestamp", "duration", "stream_id", "task_id", "duration_estimated", "local_rank",
+// "remote_rank", "transport_type",
+// "size", "data_type", "link_type", "bandwidth", "context_id", "notify_id", "batch_id", "rdma_type",
+using OriKfcTaskData = std::vector<std::tuple<uint32_t, uint32_t, std::string, uint64_t, uint64_t, uint32_t,
+        std::string, std::string, int32_t, uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint32_t, uint32_t,
+        std::string, uint32_t, std::string, std::string, double, uint32_t, std::string, uint32_t, std::string>>;
+
+// "model_id", "index_id", "op_name", "timestamp", "duration", "group_name", "connection_id", "data_type", "alg_type",
+// "count", "rank_size
+using OriKfcOPData = std::vector<std::tuple<uint32_t, uint32_t, std::string, uint64_t, uint64_t, std::string,
+uint64_t, std::string, std::string, uint64_t, uint64_t>>;
+
 const std::string BASE_PATH = "./hccl_single_device";
 const std::string DEVICE_SUFFIX = "device_0";
 const std::string SQLITE_SUFFIX = "sqlite";
@@ -187,7 +200,44 @@ TEST_F(KfcCommProcessorUtest, TestRunShouldReturnFalseWhenConstructDBRunnerFaile
     for (auto path: PROF_PATHS) {
         auto processor = KfcCommProcessor(path);
         auto dataInventory = DataInventory();
+        InitHashMap(dataInventory);
         EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
     }
     MOCKER_CPP(&DBInfo::ConstructDBRunner).reset();
+}
+
+TEST_F(KfcCommProcessorUtest, TestConvertTaskDataShouldReturnTrueWhenConvertSuccess)
+{
+    const uint16_t num = 10;
+    std::vector<CommunicationTaskData> taskData (num, CommunicationTaskData());
+    std::vector<KfcTaskData> resTask;
+    EXPECT_TRUE(KfcCommProcessor::ConvertTaskData(resTask, taskData));
+    EXPECT_EQ(num, resTask.size());
+}
+
+TEST_F(KfcCommProcessorUtest, TestConvertTaskDataShouldReturnFalseWhenReserveFailed)
+{
+    std::vector<CommunicationTaskData> taskData;
+    std::vector<KfcTaskData> resTask;
+    MOCKER_CPP(&Utils::Reserve<KfcTaskData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(KfcCommProcessor::ConvertTaskData(resTask, taskData));
+    MOCKER_CPP(&Utils::Reserve<KfcTaskData>).reset();
+}
+
+TEST_F(KfcCommProcessorUtest, TestConvertOpDataShouldReturnTrueWhenConvertSuccess)
+{
+    const uint16_t num = 10;
+    std::vector<CommunicationOpData> opData (num, CommunicationOpData());
+    std::vector<KfcOpData> resOp;
+    EXPECT_TRUE(KfcCommProcessor::ConvertOpData(resOp, opData));
+    EXPECT_EQ(num, resOp.size());
+}
+
+TEST_F(KfcCommProcessorUtest, TestConvertOpDataShouldReturnFalseWhenReserveFailed)
+{
+    std::vector<CommunicationOpData> opData;
+    std::vector<KfcOpData> resOp;
+    MOCKER_CPP(&Utils::Reserve<KfcOpData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(KfcCommProcessor::ConvertOpData(resOp, opData));
+    MOCKER_CPP(&Utils::Reserve<KfcOpData>).reset();
 }
