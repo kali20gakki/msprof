@@ -224,6 +224,7 @@ msptiResult ActivityManager::GetNextRecord(uint8_t *buffer, size_t validBufferSi
 
 msptiResult ActivityManager::FlushAll()
 {
+    std::lock_guard<std::mutex> lk(buf_mtx_);
     if (cur_buf_) {
         co_activity_buffers_.emplace_back(std::move(cur_buf_));
     }
