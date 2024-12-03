@@ -31,8 +31,10 @@ class TestCANNAnalysisChain(unittest.TestCase):
     def test_start(self):
         chain = CANNAnalysisChain(1, CANNThreadDB(1, EventQueue(1), ApiDataDatabase(1), AdditionalRecordDatabase(1)),
                                   {Constant.ROOT_LEVEL: RootGear("")})
+        tree = TreeNode(Event(Constant.ROOT_LEVEL, 1, 0, 300, 'root'))
+        tree.children.append(TreeNode(Event(Constant.ROOT_LEVEL, 1, 100, 200, 'root')))
         with mock.patch(NAMESPACE + '.CANNAnalysisChain.build_tree',
-                        return_value=TreeNode(Event(Constant.ROOT_LEVEL, 1, 0, 300, 'root'))):
+                        return_value=tree):
             chain.start()
 
     def test_build_tree(self):
@@ -73,10 +75,13 @@ class TestCANNAnalysisChain(unittest.TestCase):
             add_api_event(q, api_db, self.event_col('model', 1, 100, 200, 'ModelLoad'))
             add_api_event(q, api_db, self.event_col('node', 1, 110, 130, 'node1'))
             add_api_event(q, api_db, self.event_col('node', 1, 150, 170, 'node2'))
+            add_api_event(q, api_db, self.event_col('node', 1, 121, 127, 'node3'))
             add_node_basic_record_event(q, record_db, self.event_col(
                 'node', 1, 130, 130, 'node_basic_info1'))
             add_node_basic_record_event(q, record_db, self.event_col(
                 'node', 1, 170, 170, 'node_basic_info2'))
+            add_node_basic_record_event(q, record_db, self.event_col(
+                'node', 1, 127, 127, 'node_basic_info3'))
             add_api_event(q, api_db, self.event_col("runtime", 1, 116, 120, 'task1'))
             add_api_event(q, api_db, self.event_col("runtime", 1, 152, 160, 'task2'))
             add_task_track_record_event(q, record_db, self.event_col(
@@ -105,11 +110,13 @@ class TestCANNAnalysisChain(unittest.TestCase):
         self.assertEqual(len(tree.children[0].children[0].event.additional_record), 1)
         self.assertEqual(len(tree.children[0].children[1].event.additional_record), 1)
         # check level3
-        self.assertEqual(len(tree.children[0].children[0].children), 1)
+        self.assertEqual(len(tree.children[0].children[0].children), 2)
         self.assertEqual(len(tree.children[0].children[1].children), 1)
         self.assertEqual(tree.children[0].children[0].children[0].event.struct_type, "task1")
+        self.assertEqual(tree.children[0].children[0].children[1].event.struct_type, "node3")
         self.assertEqual(tree.children[0].children[1].children[0].event.struct_type, "task2")
         self.assertEqual(len(tree.children[0].children[0].children[0].event.additional_record), 1)
+        self.assertEqual(len(tree.children[0].children[0].children[1].event.additional_record), 1)
         self.assertEqual(len(tree.children[0].children[1].children[0].event.additional_record), 1)
 
         # 超出递归深度

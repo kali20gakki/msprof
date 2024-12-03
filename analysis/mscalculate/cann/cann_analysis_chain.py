@@ -62,6 +62,11 @@ class CANNAnalysisChain:
         self.now_stack[node.event.cann_level] = node.event
         for child in node.children:
             self.run(child, depth)
+            if child.event.cann_level == Constant.NODE_LEVEL and node.event.cann_level == child.event.cann_level:
+                # hccl aicpu下发场景, 会出现2层node嵌套
+                # [=======================Node(hcom_allReduce_)==============================]
+                #      [===Node(hcomAicpuInit)==]     [===Node(allreduceAicpuKernel)==]
+                self.now_stack[node.event.cann_level] = node.event
         self.now_stack[node.event.cann_level] = Event.invalid_event()
 
     def build_tree(self, parent: TreeNode, depth: int = 0) -> TreeNode:
@@ -77,7 +82,7 @@ class CANNAnalysisChain:
             event = self.event_q.top()
 
             # the current level has been processed.
-            if not event.is_additional() and event.cann_level <= parent.event.cann_level:
+            if not event.is_additional() and event.cann_level < parent.event.cann_level:
                 return parent
             # Some data in parent level is lost or not be uploaded.
             if event.bound > parent.event.bound:
@@ -106,4 +111,9 @@ class CANNAnalysisChain:
             self.last_event_record[event.cann_level] = event
             child_node = TreeNode(event)
             child_tree = self.build_tree(child_node, depth)
+            if event.cann_level == Constant.NODE_LEVEL and event.cann_level == parent.event.cann_level:
+                # hccl aicpu下发场景, 会出现2层node嵌套
+                # [=======================Node(hcom_allReduce_)==============================]
+                #      [===Node(hcomAicpuInit)==]     [===Node(allreduceAicpuKernel)==]
+                self.last_event_record[event.cann_level] = parent.event
             parent.add_child(child_tree)
