@@ -23,6 +23,8 @@ namespace {
 const std::string PREFIX_CONTEXT = "[";
 const std::string SUFFIX_CONTEXT = "]";
 const int JSON_FILE_OFFSET = -1;
+// 数据中心中最少也会有hash类数据
+const size_t MIN_NUM_FOR_IOC = std::set<std::string>{PROCESSOR_NAME_HASH}.size();
 
 const std::vector<std::string> ASSEMBLER_LIST{
     PROCESS_TASK,
@@ -92,7 +94,7 @@ void TimelineManager::WriteFile(const std::string &filePrefix, FileCategory cate
 
 bool TimelineManager::PreDumpJson(DataInventory &dataInventory)
 {
-    if (dataInventory.Empty()) {
+    if (dataInventory.Size() <= MIN_NUM_FOR_IOC) {
         return false;
     }
     WriteFile(MSPROF_JSON_FILE, FileCategory::MSPROF);
@@ -119,9 +121,9 @@ bool TimelineManager::Run(DataInventory &dataInventory)
     INFO("Start exporting timeline!");
     PRINT_INFO("Start exporting the timeline!");
     if (!PreDumpJson(dataInventory)) {
-        ERROR("Can't Get data from dataInventory after data process");
-        PRINT_ERROR("Can't export timeline, msprof_analysis_log in outputPath for more info");
-        return false;
+        WARN("Can't Get data from dataInventory after data process");
+        PRINT_WARN("Can't export timeline, msprof_analysis_log in outputPath for more info");
+        return true;
     }
     bool runFlag = ProcessTimeLine(dataInventory);
     PostDumpJson();
