@@ -182,7 +182,8 @@ void StepTraceAssembler::GenerateMetaData(std::unordered_map<uint16_t, uint32_t>
         res_.push_back(processIndex);
     }
     for (const auto &it : pidTidSet_) {
-        std::string argName = "Step Trace(Model ID):" + std::to_string(it.second - SORT_INDEX_OFFSET);
+        std::string argName = std::string("Step Trace(Model ID:").append(std::to_string(it.second - SORT_INDEX_OFFSET))
+                                                                 .append(")");
         std::shared_ptr<MetaDataNameEvent> threadName;
         MAKE_SHARED_RETURN_VOID(threadName, MetaDataNameEvent, it.first, it.second, META_DATA_THREAD_NAME, argName);
         res_.push_back(threadName);

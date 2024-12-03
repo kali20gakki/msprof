@@ -51,13 +51,14 @@ HPFloat GetTimeFromSyscnt(uint64_t syscnt, const SyscntConversionParams &params)
         // 当freq为默认值时,默认数据为 monotonic,直接返回即可
         return {syscnt};
     }
-    if (syscnt < params.sysCnt) {
-        ERROR("The base syscnt's value % greater than the task syscnt's value % .", params.sysCnt, syscnt);
-        return {syscnt};
-    }
-    HPFloat res = (syscnt - params.sysCnt) / params.freq;
+    uint64_t timeDiff = (syscnt >= params.sysCnt) ? (syscnt - params.sysCnt) : (params.sysCnt - syscnt);
+    HPFloat res = static_cast<double>(timeDiff) / params.freq;
     res = res << NS_US;
-    res += HPFloat(params.hostMonotonic);
+    if (syscnt >= params.sysCnt) {
+        res = HPFloat(params.hostMonotonic) + res;
+    } else {
+        res = HPFloat(params.hostMonotonic) - res;
+    }
     return res;
 }
 
