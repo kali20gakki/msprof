@@ -42,11 +42,19 @@ TEST_F(TimeUtilsUTest, TestGetTimeFromSyscntShouldReturnOriSysCntWhenFreqIsDefau
     EXPECT_DOUBLE_EQ(GetTimeFromSyscnt(taskSysCnt, params).Double(), expectRes);
 }
 
-TEST_F(TimeUtilsUTest, TestGetTimeFromSyscntShouldReturnTimestamp)
+TEST_F(TimeUtilsUTest, TestGetTimeFromSyscntShouldReturnTimestampWhenSyscntGraterBaseThenTimePlus)
 {
     SyscntConversionParams params{100.0, 3666503140109, 36471130547330};
     uint64_t taskSysCnt = 3666510676667;
     double expectRes = 36471205912910.000;
+    EXPECT_DOUBLE_EQ(GetTimeFromSyscnt(taskSysCnt, params).Double(), expectRes);
+}
+
+TEST_F(TimeUtilsUTest, TestGetTimeFromSyscntShouldReturnTimestampWhenSyscntSmallerBaseThenTimeMinus)
+{
+    SyscntConversionParams params{100.0, 3666503140109, 36471130547330};
+    uint64_t taskSysCnt = 3666503100000;
+    double expectRes = 36471130146240.000;
     EXPECT_DOUBLE_EQ(GetTimeFromSyscnt(taskSysCnt, params).Double(), expectRes);
 }
 

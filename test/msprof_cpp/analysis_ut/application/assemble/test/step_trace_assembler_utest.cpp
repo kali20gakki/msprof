@@ -47,7 +47,7 @@ std::string expectStr = "{\"name\":\"Iteration 1\",\"pid\":10248608,\"tid\":7001
                         "name\":\"Ascend Hardware\"}},{\"name\":\"process_labels\",\"pid\":10248608,\"tid\":0,\"ph\":"
                         "\"M\",\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":10248608,\"tid"
                         "\":0,\"ph\":\"M\",\"args\":{\"sort_index\":13}},{\"name\":\"thread_name\",\"pid\":10248608,\""
-                        "tid\":70013,\"ph\":\"M\",\"args\":{\"name\":\"Step Trace(Model ID):13\"}},{\"name\":\""
+                        "tid\":70013,\"ph\":\"M\",\"args\":{\"name\":\"Step Trace(Model ID:13)\"}},{\"name\":\""
                         "thread_sort_index\",\"pid\":10248608,\"tid\":70013,\"ph\":\"M\",\"args\":{\"sort_index\":"
                         "70013}},{\"name\":\"Reduce_1_0\",\"pid\":10248608,\"tid\":70013,\"ts\":\"830082637.434000\","
                         "\"dur\":30.312,\"ph\":\"X\",\"cat\":\"Reduce\",\"args\":{\"Iteration ID\":1,\"Reduce End 0\":"
