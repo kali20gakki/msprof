@@ -66,10 +66,10 @@ static std::vector<MsprofTxHostData> GenerateHostTxData()
     return res;
 }
 
-TEST_F(TimelineManagerUTest, ShouldReturnFalseWhenNoDataInDataInventory)
+TEST_F(TimelineManagerUTest, ShouldReturnTrueWhenNoDataInDataInventory)
 {
     TimelineManager manager(PROF_PATH, RESULT_PATH);
-    EXPECT_FALSE(manager.Run(dataInventory_));
+    EXPECT_TRUE(manager.Run(dataInventory_));
 }
 
 TEST_F(TimelineManagerUTest, ShouldReturnTrueWhenDataProcessSuccess)
