@@ -61,7 +61,7 @@ protected:
             {"platform_version", "7"},
             {"pid", "2376271"},
             {"CPU", {{{"Frequency", "100.000000"}}}},
-            {"DeviceInfo", {{{"hwts_frequency", "49.000000"}, {"aic_frequency", "1850"}}}},
+            {"DeviceInfo", {{{"hwts_frequency", "49.000000"}, {"aic_frequency", "1850"}, {"ai_core_num", 20}}}},
             {"hostname", "localhost"}
         };
         FileWriter infoWriter(File::PathJoin({filePath, INFO_JSON}));
@@ -957,4 +957,25 @@ TEST_F(ContextUTest, TestGetQosEventsShouldReturnFalseWhenFreqToDoubleFailed)
     ASSERT_EQ(res.size(), 2); // qosEvents大小，预期是2
     ASSERT_EQ(res[0], "DVPP");
     ASSERT_EQ(res[1], "AICORE");
+}
+
+TEST_F(ContextUTest, TestGetAiCoreNumShouldReturn0WhenDeviceIdIsHostId)
+{
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
+    auto res = Context::GetInstance().GetAiCoreNum(HOST_ID, File::PathJoin({CONTEXT_DIR, LOCAL_DIR}));
+    ASSERT_EQ(0l, res);
+}
+
+TEST_F(ContextUTest, TestGetAiCoreNumShouldReturn0WhenInfoIsEmpty)
+{
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
+    auto res = Context::GetInstance().GetAiCoreNum(0, File::PathJoin({CONTEXT_DIR, "test"}));
+    ASSERT_EQ(0l, res);
+}
+
+TEST_F(ContextUTest, TestGetAiCoreNumShouldReturnActualValueWhenInfoIsCorrect)
+{
+    EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
+    auto res = Context::GetInstance().GetAiCoreNum(0, File::PathJoin({CONTEXT_DIR, LOCAL_DIR}));
+    ASSERT_EQ(20l, res);
 }

@@ -26,6 +26,7 @@ struct TaskInfoData {
     uint32_t mixBlockDim = UINT32_MAX;
     uint32_t batchId = UINT32_MAX;
     uint32_t contextId = UINT32_MAX;
+    std::string opState;
     std::string hashId;
     std::string opName;
     std::string taskType;

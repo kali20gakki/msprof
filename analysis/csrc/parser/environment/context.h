@@ -78,6 +78,8 @@ public:
     std::string GetHostName(uint16_t deviceId = DEFAULT_DEVICE_ID, const std::string &profPath = "");
     // 获取sample.json中的qosEvents
     std::vector<std::string> GetQosEvents(uint16_t deviceId = DEFAULT_DEVICE_ID, const std::string &profPath = "");
+    // 获取ai_core_num
+    uint16_t GetAiCoreNum(uint16_t deviceId, const std::string &profPath);
 public:
     // 获取对应device的芯片型号
     uint16_t GetPlatformVersion(uint16_t deviceId = DEFAULT_DEVICE_ID, const std::string &profPath = "");

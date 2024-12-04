@@ -1,0 +1,298 @@
+/* ******************************************************************************
+            版权所有 (c) 华为技术有限公司 2024-2024
+            Copyright, 2024, Huawei Tech. Co., Ltd.
+****************************************************************************** */
+/* ******************************************************************************
+ * File Name          : op_summary_assembler.cpp
+ * Description        : 组合op_summary数据
+ * Author             : msprof team
+ * Creation Date      : 2024/11/30
+ * *****************************************************************************
+ */
+
+#include "analysis/csrc/application/summary/op_summary_assembler.h"
+#include <algorithm>
+#include <sstream>
+#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dump_tools/include/sync_utils.h"
+#include "analysis/csrc/parser/environment/context.h"
+
+namespace Analysis {
+namespace Application {
+using namespace Analysis::Utils;
+using namespace Analysis::Parser::Environment;
+using namespace Analysis::Viewer::Database;
+namespace {
+const int PERCENTAGE_FACTOR = 100;
+// WRITE_BACK与INVALID类型不需要处理，针对helper场景, 去除运行在AI_CPU的HCCL小算子不生成op_summary,
+// 运行在AI_CORE上的HCCL小算子也不呈现在op_summary,因此这四个类型都不生成数据即可，直接排除掉
+const std::vector<std::string> INVALID_TASK_TYPE{"WRITE_BACK", "INVALID", "HCCL_AI_CPU", "HCCL"};
+const std::vector<std::string> BASE_HEADER{
+    "Device_id", "Model ID", "Task ID", "Stream ID", "Op Name", "OP Type", "OP State", "Task Type",
+    "Task Start Time(us)", "Task Duration(us)", "Task Wait Time(us)"
+};
+const std::vector<std::string> ADDITIONAL_TENSOR_HEADER{
+    "Block Dim", "Mix Block Dim", "HF32 Eligible", "Input Shapes", "Input Data Types", "Input Formats",
+    "Output Shapes", "Output Data Types", "Output Formats", "Context ID"
+};
+const std::string CONTEXT_ID = "Context ID";
+
+int GetIndexForVec(const std::vector<std::string> &vec, std::string &&key)
+{
+    auto it = std::find(vec.begin(), vec.end(), key);
+    if (it != vec.end()) {
+        return std::distance(vec.begin(), it);
+    }
+    return INVALID_INDEX;
+}
+
+int GetColumnIndex(const std::vector<std::string> &headers, std::vector<std::string> &&possibleNames)
+{
+    for (auto &name : possibleNames) {
+        auto idx = GetIndexForVec(headers, std::move(name));
+        if (idx != INVALID_INDEX) {
+            return idx;
+        }
+    }
+    return INVALID_INDEX;
+}
+}
+
+OpSummaryAssembler::OpSummaryAssembler(const std::string &name, const std::string &profPath)
+    : SummaryAssembler(name, profPath) {}
+
+void OpSummaryAssembler::GenerateHcclBody(std::vector<CommunicationOpData> &opData)
+{
+    auto len = headers_.size();
+    for (const auto &data : opData) {
+        std::vector<std::string> row = {std::to_string(data.deviceId), std::to_string(data.modelId), NA, NA,
+                                        data.opName, data.opType, NA, "HCCL",
+                                        DivideByPowersOfTenWithPrecision(data.start),
+                                        DivideByPowersOfTenWithPrecision(data.end - data.start), "0", "0"};
+        // 业务可以保证headers的长度会超过hcclOp数据的长度
+        row.insert(row.end(), len - row.size(), NA);
+        res_.emplace_back(row);
+    }
+}
+
+void OpSummaryAssembler::SplitDataByTaskId(std::vector<TaskInfoData> &taskInfo)
+{
+    for (auto &data : taskInfo) {
+        TaskId id{static_cast<uint16_t>(data.streamId), static_cast<uint16_t>(data.batchId),
+                  static_cast<uint16_t>(data.taskId), data.contextId, data.deviceId};
+        computeTask_[id] = &data;
+    }
+}
+
+std::vector<std::string> OpSummaryAssembler::GenerateOneTaskRow(const TaskInfoData &computeTask,
+                                                                const AscendTaskData &task)
+{
+    std::string ctxId = std::to_string(computeTask.contextId);
+    if (computeTask.contextId == UINT32_MAX) {
+        ctxId = NA;
+    }
+    return {std::to_string(task.deviceId), std::to_string(computeTask.modelId), std::to_string(task.taskId),
+            std::to_string(task.streamId), computeTask.opName, computeTask.opType, computeTask.opState,
+            computeTask.taskType, DivideByPowersOfTenWithPrecision(task.start),
+            DivideByPowersOfTenWithPrecision(task.end - task.start), "0",
+            std::to_string(computeTask.blockDim), std::to_string(computeTask.mixBlockDim), computeTask.opFlag,
+            computeTask.inputShapes, computeTask.inputDataTypes, computeTask.inputFormats, computeTask.outputShapes,
+            computeTask.outputDataTypes, computeTask.outputFormats, ctxId};
+}
+
+void OpSummaryAssembler::MergeTaskAndPmu(std::shared_ptr<MetricSummary> &pmu, std::vector<std::string> &row,
+                                         const TaskId &id, std::unordered_map<std::string, int> &indexTable)
+{
+    if (pmu == nullptr) {
+        return;
+    }
+    // pmu的结构为map<TaskId, vector<vector<string>>>
+    auto it = (*pmu).data.find(id);
+    if (it != (*pmu).data.end() && !it->second.empty()) {
+        // 队列匹配，取出第一个元素
+        auto data = it->second.front();
+        for (const auto &pair : data) {
+            row.emplace_back(pair);
+        }
+        AddCubeUsage(row, indexTable);
+        // 删除第一个元素
+        it->second.erase(it->second.begin());
+        // 判断vector中是否还有元素，如果没有就直接删除整个键值对<TaskId, vector<vector<string>>>
+        if (it->second.empty()) {
+            pmu->data.erase(it);
+        }
+    } else {
+        row.insert(row.end(), headers_.size() - row.size(), NA);
+    }
+}
+
+void OpSummaryAssembler::GenerateOpBody(std::vector<AscendTaskData> &taskData, std::shared_ptr<MetricSummary> &pmu)
+{
+    if (pmu != nullptr) {
+        headers_.insert(headers_.end(), pmu->labels.begin(), pmu->labels.end());
+    }
+    std::unordered_map<std::string, int> indexTable{
+        {"deviceIdx", GetIndexForVec(headers_, "Device_id")},
+        {"ratioIdx", GetColumnIndex(headers_, {"mac_ratio", "aic_mac_ratio"})},
+        {"cycleIdx", GetColumnIndex(headers_, {"total_cycles", "aic_total_cycles"})},
+        {"durIdx", GetIndexForVec(headers_, "Task Duration(us)")}
+    };
+    for (const auto &task : taskData) {
+        TaskId id{static_cast<uint16_t>(task.streamId), static_cast<uint16_t>(task.batchId),
+                  static_cast<uint16_t>(task.taskId), task.contextId, task.deviceId};
+        auto it = computeTask_.find(id);
+        if (it != computeTask_.end() && std::find(INVALID_TASK_TYPE.begin(), INVALID_TASK_TYPE.end(),
+                                                  it->second->taskType) == INVALID_TASK_TYPE.end()) {
+            auto row = GenerateOneTaskRow(*it->second, task);
+            MergeTaskAndPmu(pmu, row, id, indexTable);
+            res_.emplace_back(row);
+        }
+    }
+}
+
+void OpSummaryAssembler::AddCubeUsage(std::vector<std::string> &data, std::unordered_map<std::string, int> &indexTable)
+{
+    // 业务可以保证headers_有值的情况下，device_id的下标是有效的
+    const auto deviceIndex = indexTable.at("deviceIdx");
+    auto deviceIdStr = data[deviceIndex];
+    uint16_t deviceId = 0;
+    if (StrToU16(deviceId, deviceIdStr) != ANALYSIS_OK) {
+        ERROR("device id is invalid");
+        return;
+    }
+    double freq = 0.0;
+    uint16_t coreNum = Context::GetInstance().GetAiCoreNum(deviceId, profPath_);
+    if (!Context::GetInstance().GetPmuFreq(freq, deviceId, profPath_) != ANALYSIS_OK ||
+        Utils::IsDoubleEqual(freq, 0.0) || coreNum == 0) {
+        ERROR("freq or ai core num is invalid");
+        return;
+    }
+    const auto ratioIdx = indexTable.at("ratioIdx");
+    const auto cycleIdx = indexTable.at("cycleIdx");
+    const auto durIdx = indexTable.at("durIdx");
+    if (ratioIdx == INVALID_INDEX || cycleIdx == INVALID_INDEX || durIdx == INVALID_INDEX) {
+        return;
+    }
+    if (std::find(headers_.begin(), headers_.end(), "cube_utilization(%)") == headers_.end()) {
+        headers_.emplace_back("cube_utilization(%)");
+    }
+    auto dur = 0.0;
+    uint64_t cycle;
+    if (data[ratioIdx] == NA) {
+        data.emplace_back(NA);
+    } else if (StrToDouble(dur, data[durIdx]) == ANALYSIS_OK && !Utils::IsDoubleEqual(dur, 0.0) &&
+            StrToU64(cycle, data[cycleIdx]) == ANALYSIS_OK) {
+        const double cubeUsage = cycle / (freq * coreNum * dur) * PERCENTAGE_FACTOR;
+        std::ostringstream ss;
+        ss << std::fixed << std::setprecision(ACCURACY_THREE) << cubeUsage;
+        data.emplace_back(ss.str());
+    } else {
+        data.emplace_back("0");
+    }
+}
+
+void OpSummaryAssembler::CalculateWaitTime()
+{
+    // 业务可以保证headers_有值的情况下，device_id与start_time的下标是有效的
+    const auto deviceIndex = GetIndexForVec(headers_, "Device_id");
+    const auto timeIndex = GetIndexForVec(headers_, "Task Start Time(us)");
+    using rowType = std::vector<std::string>;
+    std::sort(res_.begin(), res_.end(), [deviceIndex, timeIndex](const rowType& lv, const rowType& rv) {
+        if (lv.at(deviceIndex) == rv.at(deviceIndex)) {
+            return lv.at(timeIndex) < rv.at(timeIndex);
+        }
+        return lv.at(deviceIndex) < rv.at(deviceIndex);
+    });
+    const auto durIndex = GetIndexForVec(headers_, "Task Duration(us)");
+    const auto waitIndex = GetIndexForVec(headers_, "Task Wait Time(us)");
+    double currStart = 0.0;
+    double preStart = 0.0;
+    double preDur = 0.0;
+    for (std::size_t i = 1; i < res_.size(); ++i) {
+        if (StrToDouble(currStart, res_.at(i).at(timeIndex)) == ANALYSIS_OK &&
+            StrToDouble(preStart, res_.at(i - 1).at(timeIndex)) == ANALYSIS_OK &&
+            StrToDouble(preDur, res_.at(i - 1).at(durIndex)) == ANALYSIS_OK) {
+            const auto waitTime = std::max(0.0, currStart - preStart - preDur);
+            res_.at(i).at(waitIndex) = std::to_string(waitTime);
+        }
+    }
+}
+
+bool OpSummaryAssembler::WriteToFile(std::string &fileName)
+{
+    const auto platVersion = Context::GetInstance().GetPlatformVersion(DEFAULT_DEVICE_ID, profPath_);
+    std::set<int> invalidIdx;
+    std::vector<std::string> STARS_HEADER{"Context ID", "Mix Block Dim", "aiv_time(us)", "aiv_total_time(us)"};
+    if (!Context::GetInstance().IsStarsChip(platVersion)) {
+        for (auto &name : STARS_HEADER) {
+            auto idx = GetIndexForVec(headers_, std::move(name));
+            if (idx != INVALID_INDEX) {
+                invalidIdx.insert(idx);
+            }
+        }
+    }
+    fileName = File::PathJoin({profPath_, OUTPUT_PATH, fileName}).append(SUMMARY_SUFFIX);
+    FileWriter fileWriter(fileName);
+    for (size_t i = 0; i < headers_.size(); ++i) {
+        if (invalidIdx.find(i) != invalidIdx.end()) {
+            continue;
+        }
+        if (i != 0) {
+            fileWriter.WriteText("," + headers_[i]);
+        } else {
+            fileWriter.WriteText(headers_[i]);
+        }
+    }
+    fileWriter.WriteText("\n");
+    auto timeIndex = GetIndexForVec(headers_, "Task Start Time(us)");
+    for (const auto& row : res_) {
+        for (size_t i = 0; i < row.size(); ++i) {
+            if (invalidIdx.find(i) != invalidIdx.end()) {
+                continue;
+            }
+            if (i != 0) {
+                fileWriter.WriteText("," + row[i]);
+            } else {
+                fileWriter.WriteText(row[i]);
+            }
+            if (static_cast<int>(i) == timeIndex) {
+                fileWriter.WriteText("\t");
+            }
+        }
+        fileWriter.WriteText("\n");
+    }
+    return true;
+}
+
+uint8_t OpSummaryAssembler::AssembleData(DataInventory &dataInventory)
+{
+    auto taskInfoData = dataInventory.GetPtr<std::vector<TaskInfoData>>();
+    auto ascendTaskData = dataInventory.GetPtr<std::vector<AscendTaskData>>();
+    auto hcclOpData = dataInventory.GetPtr<std::vector<CommunicationOpData>>();
+    auto metricData = dataInventory.GetPtr<MetricSummary>();
+    if ((taskInfoData == nullptr || ascendTaskData == nullptr) && hcclOpData == nullptr) {
+        WARN("No data to export op summary");
+        return DATA_NOT_EXIST;
+    }
+    headers_ = BASE_HEADER;
+    // 当没有ascendTask或者没有taskInfo数据时，只生成hccl数据
+    if (taskInfoData != nullptr && ascendTaskData != nullptr) {
+        headers_.insert(headers_.end(), ADDITIONAL_TENSOR_HEADER.begin(), ADDITIONAL_TENSOR_HEADER.end());
+        SplitDataByTaskId(*taskInfoData);
+        GenerateOpBody(*ascendTaskData, metricData);
+    } else {
+        headers_.emplace_back(CONTEXT_ID);
+    }
+    if (hcclOpData != nullptr) {
+        GenerateHcclBody(*hcclOpData);
+    }
+    CalculateWaitTime();
+    auto fileName = OP_SUMMARY_NAME + timestampStr;
+    if (WriteToFile(fileName)) {
+        return ASSEMBLE_SUCCESS;
+    }
+    return ASSEMBLE_FAILED;
+}
+
+}
+}

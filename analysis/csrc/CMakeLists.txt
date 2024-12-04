@@ -52,6 +52,7 @@ aux_source_directory(${CMAKE_SOURCE_DIR}/domain/services/association/calculator/
 aux_source_directory(${CMAKE_SOURCE_DIR}/domain/services/persistence SOURCES)
 aux_source_directory(${CMAKE_SOURCE_DIR}/application SOURCES)
 aux_source_directory(${CMAKE_SOURCE_DIR}/application/timeline SOURCES)
+aux_source_directory(${CMAKE_SOURCE_DIR}/application/summary SOURCES)
 aux_source_directory(${CMAKE_SOURCE_DIR}/domain/data_process SOURCES)
 aux_source_directory(${CMAKE_SOURCE_DIR}/domain/data_process/ai_task SOURCES)
 aux_source_directory(${CMAKE_SOURCE_DIR}/domain/data_process/system SOURCES)
@@ -60,7 +61,6 @@ aux_source_directory(${CMAKE_SOURCE_DIR}/infrastructure/db SOURCES)
 aux_source_directory(${CMAKE_SOURCE_DIR}/infrastructure/dump_tools/json_tool SOURCES)
 
 add_library(msprof_analysis SHARED ${SOURCES})
-
 find_package(Python REQUIRED COMPONENTS Development)
 target_include_directories(msprof_analysis PRIVATE
     /usr/local/include/

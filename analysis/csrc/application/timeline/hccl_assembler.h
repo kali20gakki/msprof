@@ -18,10 +18,12 @@
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/kfc_turn_data.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/application/timeline/connection_id_pool.h"
+#include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
 namespace Application {
 using namespace Analysis::Viewer::Database;
+using namespace Analysis::Utils;
 const int32_t INVALID_PLANE = -1;
 enum class HcclType {
     HCCL = 0,
@@ -123,8 +125,8 @@ private:
             linkType = TransEnumToType(data.linkType, HCCL_LINK_TYPE_TABLE);
             std::shared_ptr<HcclTaskTraceEvent> event;
             MAKE_SHARED_RETURN_VOID(event, HcclTaskTraceEvent, formatPid, tid, data.duration / NS_TO_US,
-                                    std::to_string(data.start / NS_TO_US), data.taskType, data.srcRank, data.dstRank,
-                                    data.streamId, data.taskId, data.contextId, data.modelId, data.size,
+                                    DivideByPowersOfTenWithPrecision(data.start), data.taskType, data.srcRank,
+                                    data.dstRank, data.streamId, data.taskId, data.contextId, data.modelId, data.size,
                                     data.durationEstimated, data.bandwidth, data.notifyId, transport,
                                     data.taskType, dataType, linkType);
             res_.push_back(event);
@@ -137,8 +139,8 @@ private:
         auto connId = ConnectionIdPool::GetConnectionId(data.connectionId, ConnectionCategory::GENERAL);
         auto traceName = HOST_TO_DEVICE + connId;
         std::shared_ptr<FlowEvent> flow;
-        MAKE_SHARED_RETURN_VOID(flow, FlowEvent, formatPid, tid, std::to_string(data.start / NS_TO_US), HOST_TO_DEVICE,
-                                connId, traceName, FLOW_END, FLOW_BP);
+        MAKE_SHARED_RETURN_VOID(flow, FlowEvent, formatPid, tid, DivideByPowersOfTenWithPrecision(data.start),
+                                HOST_TO_DEVICE, connId, traceName, FLOW_END, FLOW_BP);
         res_.push_back(flow);
     }
 
@@ -159,8 +161,8 @@ private:
             dataType = TransEnumToType(data.dataType, HCCL_DATA_TYPE_TABLE);
             std::shared_ptr<HcclOpTraceEvent> event;
             MAKE_SHARED_RETURN_VOID(event, HcclOpTraceEvent, formatPid, tid, (data.end - data.start) / NS_TO_US,
-                                    std::to_string(data.start / NS_TO_US), data.opName, data.modelId, data.count,
-                                    data.connectionId, dataType, data.algType);
+                                    DivideByPowersOfTenWithPrecision(data.start), data.opName, data.modelId,
+                                    data.count, data.connectionId, dataType, data.algType);
             res_.push_back(event);
             GenerateConnectionTrace(data, formatPid, tid);
         }
