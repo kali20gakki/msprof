@@ -307,9 +307,6 @@ void ActivityManager::Run()
             if (!thread_run_.load()) {
                 break;
             }
-            if (cur_buf_ && flush_period_) {
-                co_activity_buffers_.emplace_back(std::move(cur_buf_));
-            }
             for (auto& activity_buffer : co_activity_buffers_) {
                 work_thread_.emplace_back(std::thread([this] (std::unique_ptr<ActivityBuffer> activity_buffer) {
                     activity_buffer->UnInit(this->bufferCompleted_handle_);
