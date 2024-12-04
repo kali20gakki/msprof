@@ -12,6 +12,7 @@
 
 #include "mspti_adapter.h"
 #include "common/plog_manager.h"
+#include "common/utils.h"
 
 namespace {
 // mspti adapter buffer alloc and free
@@ -179,12 +180,6 @@ struct PyGILGuard {
 
     PyGILState_STATE gilState;
 };
-
-template<typename T, typename V>
-inline T ReinterpretConvert(V ptr)
-{
-    return reinterpret_cast<T>(ptr);
-}
 }
 
 namespace Mspti {
@@ -204,7 +199,7 @@ void MsptiAdapter::UserBufferRequest(uint8_t **buffer, size_t *size, size_t *max
         *size = 0;
         return;
     }
-    uint8_t *pBuffer = ReinterpretConvert<uint8_t*>(MsptiMalloc(DEFAULT_BUFFER_SIZE, ALIGN_SIZE));
+    uint8_t *pBuffer = Mspti::Common::ReinterpretConvert<uint8_t*>(MsptiMalloc(DEFAULT_BUFFER_SIZE, ALIGN_SIZE));
     if (pBuffer == nullptr) {
         MSPTI_LOGE("Mspti adapter alloc buffer failed");
         *buffer = nullptr;
@@ -251,13 +246,13 @@ void MsptiAdapter::UserBufferConsume(msptiActivity *record)
         return;
     }
     if (record->kind == MSPTI_ACTIVITY_KIND_KERNEL) {
-        msptiActivityKernel *kernel = ReinterpretConvert<msptiActivityKernel*>(record);
+        msptiActivityKernel *kernel = Mspti::Common::ReinterpretConvert<msptiActivityKernel*>(record);
         CallKernelCallback(GetInstance()->GetKernelCallback(), kernel);
     } else if (record->kind == MSPTI_ACTIVITY_KIND_MARKER) {
-        msptiActivityMarker* marker = ReinterpretConvert<msptiActivityMarker*>(record);
+        msptiActivityMarker* marker = Mspti::Common::ReinterpretConvert<msptiActivityMarker*>(record);
         CallMstxCallback(GetInstance()->GetMstxCallback(), marker);
     } else if (record->kind == MSPTI_ACTIVITY_KIND_HCCL) {
-        msptiActivityHccl* hccl = ReinterpretConvert<msptiActivityHccl *>(record);
+        msptiActivityHccl* hccl = Mspti::Common::ReinterpretConvert<msptiActivityHccl *>(record);
         CallHcclCallback(GetInstance()->GetHcclCallback(), hccl);
     } else {
         MSPTI_LOGW("Not supported mspti activity kind");

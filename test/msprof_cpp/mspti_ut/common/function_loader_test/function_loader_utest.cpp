@@ -18,7 +18,12 @@
 namespace {
 class FunctionLoaderUtest : public testing::Test {
 protected:
-    virtual void SetUp() {}
+    virtual void SetUp()
+    {
+        std::string soPath = "libruntime";
+        std::string funcName = "rtFree";
+        Mspti::Common::RegisterFunction(soPath, funcName);
+    }
     virtual void TearDown() {}
 };
 
@@ -98,4 +103,12 @@ TEST_F(FunctionLoaderUtest, FunctionLoaderGetNullptrWhenDlopenFail)
     EXPECT_EQ(loader.Get("ProfSetProfCommand"), nullptr);
 }
 
+TEST_F(FunctionLoaderUtest, FunctionRegisterGetSuccess)
+{
+    std::string soPath = "libruntime";
+    std::string funcName = "rtFree";
+    auto instance = Mspti::Common::FunctionRegister::GetInstance();
+    auto func = Mspti::Common::RegisterFunction(soPath, funcName);
+    EXPECT_EQ(instance->Get(soPath, funcName), func);
+}
 }

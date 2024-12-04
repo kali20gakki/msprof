@@ -55,6 +55,12 @@ inline void MsptiMakeUniquePtr(std::unique_ptr<Types> &ptr, Args&&... args)
     }
 }
 
+template<typename T, typename V>
+inline T ReinterpretConvert(V ptr)
+{
+    return reinterpret_cast<T>(ptr);
+}
+
 class Utils {
 public:
     static uint64_t GetClockMonotonicRawNs();

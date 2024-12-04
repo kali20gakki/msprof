@@ -10,23 +10,23 @@
  * *****************************************************************************
 */
 #include "common/inject/plog_inject.h"
-
-class PlogInject {
-public:
-    PlogInject() noexcept
-    {
-        Mspti::Common::RegisterFunction("libascendalog", "CheckLogLevelForC");
-        Mspti::Common::RegisterFunction("libascendalog", "DlogInnerForC");
-    }
-    ~PlogInject() = default;
+#include "common/utils.h"
+enum PlogFunctionIndex {
+    FUNC_CHECK_LOG_LEVEL_FOR_C,
+    FUNC_DLOG_INNER_FOR_C,
+    FUNC_PLOG_COUNT
 };
 
-PlogInject g_plogInject;
+void* g_plogFuncArray[FUNC_PLOG_COUNT] = {
+    Mspti::Common::RegisterFunction("libascendalog", "CheckLogLevelForC"),
+    Mspti::Common::RegisterFunction("libascendalog", "DlogInnerForC")
+};
 
 int CheckLogLevelForC(int moduleId, int level)
 {
+    void* voidFunc = g_plogFuncArray[FUNC_CHECK_LOG_LEVEL_FOR_C];
     using checkLogLevelForCFunc = std::function<int(int, int)>;
-    static checkLogLevelForCFunc func = nullptr;
+    checkLogLevelForCFunc func = Mspti::Common::ReinterpretConvert<int (*)(int, int)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<int, int, int>("libascendalog", __FUNCTION__, func);
     }

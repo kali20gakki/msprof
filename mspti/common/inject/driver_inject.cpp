@@ -12,32 +12,39 @@
 #include "common/inject/driver_inject.h"
 
 #include <functional>
-
+#include "common/utils.h"
 #include "common/function_loader.h"
 
-class DriverInject {
-public:
-    DriverInject() noexcept
-    {
-        Mspti::Common::RegisterFunction("libascend_hal", "prof_drv_get_channels");
-        Mspti::Common::RegisterFunction("libascend_hal", "drvGetDevIDs");
-        Mspti::Common::RegisterFunction("libascend_hal", "drvGetDevNum");
-        Mspti::Common::RegisterFunction("libascend_hal", "prof_drv_start");
-        Mspti::Common::RegisterFunction("libascend_hal", "prof_stop");
-        Mspti::Common::RegisterFunction("libascend_hal", "prof_channel_read");
-        Mspti::Common::RegisterFunction("libascend_hal", "prof_channel_poll");
-        Mspti::Common::RegisterFunction("libascend_hal", "halGetDeviceInfo");
-        Mspti::Common::RegisterFunction("libascend_hal", "halGetAPIVersion");
-    }
-    ~DriverInject() = default;
+enum DriverFunctionIndex {
+    FUNC_PROF_DRV_GET_CHANNELS,
+    FUNC_DRV_GET_DEV_IDS,
+    FUNC_DRV_GET_DEV_NUM,
+    FUNC_PROF_DRV_START,
+    FUNC_PROF_STOP,
+    FUNC_PROF_CHANNEL_READ,
+    FUNC_PROF_CHANNEL_POLL,
+    FUNC_HAL_GET_DEVICE_INFO,
+    FUNC_HAL_GET_API_VERSION,
+    FUNC_DRIVER_COUNT
 };
 
-DriverInject g_drvInject;
+void* g_driverFuncArray[FUNC_DRIVER_COUNT] = {
+    Mspti::Common::RegisterFunction("libascend_hal", "prof_drv_get_channels"),
+    Mspti::Common::RegisterFunction("libascend_hal", "drvGetDevIDs"),
+    Mspti::Common::RegisterFunction("libascend_hal", "drvGetDevNum"),
+    Mspti::Common::RegisterFunction("libascend_hal", "prof_drv_start"),
+    Mspti::Common::RegisterFunction("libascend_hal", "prof_stop"),
+    Mspti::Common::RegisterFunction("libascend_hal", "prof_channel_read"),
+    Mspti::Common::RegisterFunction("libascend_hal", "prof_channel_poll"),
+    Mspti::Common::RegisterFunction("libascend_hal", "halGetDeviceInfo"),
+    Mspti::Common::RegisterFunction("libascend_hal", "halGetAPIVersion")
+};
 
 int ProfDrvGetChannels(unsigned int deviceId, ChannelListT* channelList)
 {
+    void* voidFunc = g_driverFuncArray[FUNC_PROF_DRV_GET_CHANNELS];
     using ProfDrvGetChannelsFunc = std::function<int(unsigned int, ChannelListT*)>;
-    static ProfDrvGetChannelsFunc func = nullptr;
+    ProfDrvGetChannelsFunc func = Mspti::Common::ReinterpretConvert<int (*)(unsigned int, ChannelListT*)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<int, unsigned int, ChannelListT*>("libascend_hal", "prof_drv_get_channels", func);
     }
@@ -47,8 +54,9 @@ int ProfDrvGetChannels(unsigned int deviceId, ChannelListT* channelList)
 
 DrvError DrvGetDevIDs(uint32_t* devices, uint32_t len)
 {
+    void* voidFunc = g_driverFuncArray[FUNC_DRV_GET_DEV_IDS];
     using DrvGetDevIDsFunc = std::function<DrvError(uint32_t*, uint32_t)>;
-    static DrvGetDevIDsFunc func = nullptr;
+    DrvGetDevIDsFunc func = Mspti::Common::ReinterpretConvert<DrvError (*)(uint32_t*, uint32_t)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<DrvError, uint32_t*, uint32_t>("libascend_hal", "drvGetDevIDs", func);
     }
@@ -58,8 +66,9 @@ DrvError DrvGetDevIDs(uint32_t* devices, uint32_t len)
 
 DrvError DrvGetDevNum(uint32_t* count)
 {
+    void* voidFunc = g_driverFuncArray[FUNC_DRV_GET_DEV_NUM];
     using DrvGetDevNumFunc = std::function<DrvError(uint32_t*)>;
-    static DrvGetDevNumFunc func = nullptr;
+    DrvGetDevNumFunc func = Mspti::Common::ReinterpretConvert<DrvError (*)(uint32_t*)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<DrvError, uint32_t*>("libascend_hal", "drvGetDevNum", func);
     }
@@ -69,8 +78,10 @@ DrvError DrvGetDevNum(uint32_t* count)
 
 int ProfDrvStart(unsigned int deviceId, unsigned int channelId, struct ProfStartPara* startPara)
 {
+    void* voidFunc = g_driverFuncArray[FUNC_PROF_DRV_START];
     using ProfDrvStartFunc = std::function<int(unsigned int, unsigned int, struct ProfStartPara*)>;
-    static ProfDrvStartFunc func = nullptr;
+    ProfDrvStartFunc func = Mspti::Common::ReinterpretConvert<int (*)(unsigned int, unsigned int,
+        struct ProfStartPara*)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<int, unsigned int, unsigned int, struct ProfStartPara*>("libascend_hal",
             "prof_drv_start", func);
@@ -81,8 +92,9 @@ int ProfDrvStart(unsigned int deviceId, unsigned int channelId, struct ProfStart
 
 int ProfStop(unsigned int deviceId, unsigned int channelId)
 {
+    void* voidFunc = g_driverFuncArray[FUNC_PROF_STOP];
     using ProfStopFunc = std::function<int(unsigned int, unsigned int)>;
-    static ProfStopFunc func = nullptr;
+    ProfStopFunc func = Mspti::Common::ReinterpretConvert<int (*)(unsigned int, unsigned int)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<int, unsigned int, unsigned int>("libascend_hal", "prof_stop", func);
     }
@@ -92,8 +104,10 @@ int ProfStop(unsigned int deviceId, unsigned int channelId)
 
 int ProfChannelRead(unsigned int deviceId, unsigned int channelId, char *outBuf, unsigned int bufSize)
 {
+    void* voidFunc = g_driverFuncArray[FUNC_PROF_CHANNEL_READ];
     using ProfChannelReadFunc = std::function<int(unsigned int, unsigned int, char*, unsigned int)>;
-    static ProfChannelReadFunc func = nullptr;
+    ProfChannelReadFunc func = Mspti::Common::ReinterpretConvert<int (*)(unsigned int, unsigned int, char*,
+        unsigned int)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<int, unsigned int, unsigned int, char*, unsigned int>("libascend_hal",
             "prof_channel_read", func);
@@ -104,8 +118,9 @@ int ProfChannelRead(unsigned int deviceId, unsigned int channelId, char *outBuf,
 
 int ProfChannelPoll(struct ProfPollInfo* outBuf, int num, int timeout)
 {
+    void* voidFunc = g_driverFuncArray[FUNC_PROF_CHANNEL_POLL];
     using ProfChannelPollFunc = std::function<int(struct ProfPollInfo*, int, int)>;
-    static ProfChannelPollFunc func = nullptr;
+    ProfChannelPollFunc func = Mspti::Common::ReinterpretConvert<int (*)(struct ProfPollInfo*, int, int)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<int, struct ProfPollInfo*, int, int>("libascend_hal", "prof_channel_poll", func);
     }
@@ -115,8 +130,10 @@ int ProfChannelPoll(struct ProfPollInfo* outBuf, int num, int timeout)
 
 DrvError HalGetDeviceInfo(uint32_t deviceId, int32_t moduleType, int32_t infoType, int64_t* value)
 {
+    void* voidFunc = g_driverFuncArray[FUNC_HAL_GET_DEVICE_INFO];
     using HalGetDeviceInfoFunc = std::function<DrvError(uint32_t, int32_t, int32_t, int64_t*)>;
-    static HalGetDeviceInfoFunc func = nullptr;
+    HalGetDeviceInfoFunc func = Mspti::Common::ReinterpretConvert<DrvError (*)(uint32_t, int32_t, int32_t,
+        int64_t*)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<DrvError, uint32_t, int32_t, int32_t, int64_t*>("libascend_hal",
             "halGetDeviceInfo", func);
@@ -127,8 +144,9 @@ DrvError HalGetDeviceInfo(uint32_t deviceId, int32_t moduleType, int32_t infoTyp
 
 DrvError halGetAPIVersion(int32_t* apiVersion)
 {
+    void* voidFunc = g_driverFuncArray[FUNC_HAL_GET_API_VERSION];
     using halGetAPIVersionFunc = std::function<DrvError(int32_t*)>;
-    static halGetAPIVersionFunc func = nullptr;
+    halGetAPIVersionFunc func = Mspti::Common::ReinterpretConvert<DrvError (*)(int32_t*)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<DrvError, int32_t*>("libascend_hal", __FUNCTION__, func);
     }
