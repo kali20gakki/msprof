@@ -61,7 +61,9 @@ std::vector<TaskInfoData> ComputeTaskInfoProcessor::LoadData(
     std::string sql{"SELECT hashid, model_id, op_name, stream_id, task_id, block_dim, mix_block_dim, task_type, "
                     "op_type, op_flag, batch_id, IFNULL(input_formats, 'NULL'), IFNULL(input_data_types, 'NULL'), "
                     "IFNULL(input_shapes, 'NULL'), IFNULL(output_formats, 'NULL'), IFNULL(output_data_types, 'NULL'), "
-                    "IFNULL(output_shapes, 'NULL'), device_id, context_id FROM " + taskInfoDB.tableName};
+                    "IFNULL(output_shapes, 'NULL'), device_id, context_id, (case when op_state is 'N/A' then 'N/A' "
+                    "when op_state is '1' then 'dynamic' when op_state is '0' then 'static' end) FROM " +
+                    taskInfoDB.tableName};
     if (!taskInfoDB.dbRunner->QueryData(sql, oriData)) {
         ERROR("Failed to obtain data from the % table.", taskInfoDB.tableName);
     }
@@ -79,7 +81,7 @@ std::vector<TaskInfoData> ComputeTaskInfoProcessor::LoadData(
         std::tie(hashId, data.modelId, data.opName, data.streamId, data.taskId, data.blockDim, data.mixBlockDim,
                  data.taskType, data.opType, data.opFlag, data.batchId, data.inputFormats, data.inputDataTypes,
                  data.inputShapes, data.outputFormats, data.outputDataTypes, data.outputShapes,
-                 data.deviceId, data.contextId) = node;
+                 data.deviceId, data.contextId, data.opState) = node;
         if (hashMap.find(hashId) != hashMap.end()) {
             data.hashId = hashMap[hashId];
         }

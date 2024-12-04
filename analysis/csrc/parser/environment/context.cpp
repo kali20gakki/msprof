@@ -533,6 +533,20 @@ bool Context::IsFirstChipV1(uint16_t platformVersion)
     return platformVersion == static_cast<int>(Chip::CHIP_V1_1_0);
 }
 
+uint16_t Context::GetAiCoreNum(uint16_t deviceId, const std::string &profPath)
+{
+    if (deviceId == HOST_ID) {
+        ERROR("Host do not have ai core num!");
+        return 0;
+    }
+    auto info = GetInfoByDeviceId(deviceId, profPath);
+    if (info.empty()) {
+        ERROR("GetAiCoreNum device info is empty, input path %, deviceId %", profPath, deviceId);
+        return 0;
+    }
+    return info.at("DeviceInfo").back().value("ai_core_num", 0);
+}
+
 }  // namespace Environment
 }  // namespace Parser
 }  // namespace Analysis

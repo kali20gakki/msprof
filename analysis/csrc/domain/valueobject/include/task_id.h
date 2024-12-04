@@ -48,6 +48,17 @@ struct TaskId {
                std::tie(other.deviceId, other.taskId, other.streamId, other.contextId, other.batchId);
     }
 };
+
+// 自定义哈希函数
+struct IDHasher {
+    std::size_t operator()(const TaskId& id) const
+    {
+        using std::hash;
+        return ((hash<uint16_t>()(id.deviceId) ^ (hash<uint16_t>()(id.streamId) << 1)) >> 1) ^
+        ((hash<uint16_t >()(id.taskId) << 1) ^ (hash<uint16_t >()(id.batchId) << 1)) ^
+        (hash<uint32_t>()(id.contextId) << 1);
+    }
+};
 }
 }
 #endif // MSPROF_ANALYSIS_TASK_ID_H

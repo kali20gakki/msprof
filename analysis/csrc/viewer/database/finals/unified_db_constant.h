@@ -32,6 +32,7 @@ const uint64_t MILLI_SECOND = 1000;
 constexpr const uint64_t MAX_DB_BYTES = 10ULL * 1024 * 1024 * 1024;
 const uint16_t BYTE_SIZE = 1024;
 const uint16_t PERCENTAGE = 100;
+const std::size_t ACCURACY_THREE = 3;
 const std::string NA = "N/A";
 
 // mstx数据 host侧无device连线的默认connection_id值
@@ -146,6 +147,7 @@ const std::string PROCESSOR_MC2_COMM_INFO = "MC2_COMM_INFO";
 const std::string PROCESSOR_NAME_NIC_TIMELINE = "NIC_TIMELINE";
 const std::string PROCESSOR_NAME_ROCE_TIMELINE = "ROCE_TIMELINE";
 const std::string AICPU_KERNEL = "AicpuKernel";
+const std::string PROCESSOR_OP_SUMMARY = "OP_SUMMARY";
 
 // mstx event type
 const std::unordered_map<std::string, uint16_t> MSTX_EVENT_TYPE_TABLE = {

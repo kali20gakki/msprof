@@ -21,9 +21,6 @@ using namespace Analysis::Viewer::Database;
 namespace {
 const std::string TASK_TYPE_FFTS_PLUS = "FFTS_PLUS";
 const std::string TASK_TYPE_UNKNOWN = "UNKNOWN";
-const int NS_TO_US_INT = 1000;
-const int HUNDRED_DIGIT_FLAG = 100;
-const int TEN_DIGIT_FLAG = 100;
 }
 
 AscendHardwareAssembler::AscendHardwareAssembler()
@@ -98,18 +95,6 @@ uint32_t AscendHardwareAssembler::GetPhysicStreamId(const uint32_t streamId)
     return streamId;
 }
 
-std::string AscendHardwareAssembler::ConvertNs2UsWithDouble(uint64_t value)
-{
-    // 提取整数部分和小数部分
-    uint64_t integer_part = value / NS_TO_US_INT;
-    uint64_t fractional_part = value % NS_TO_US_INT;
-    // 构造字符串结果
-    std::string result = std::to_string(integer_part) + "." + (fractional_part < HUNDRED_DIGIT_FLAG ? "0" : "") +
-            (fractional_part < TEN_DIGIT_FLAG ? "0" : "") + std::to_string(fractional_part);
-
-    return result;
-}
-
 void AscendHardwareAssembler::GenerateTaskTrace(const std::vector<AscendTaskData> &taskData,
                                                 const std::string &profPath, const LayerInfo &layer,
                                                 std::unordered_map<uint16_t, uint32_t> &pidMap)
@@ -130,7 +115,7 @@ void AscendHardwareAssembler::GenerateTaskTrace(const std::vector<AscendTaskData
         pidTidSet_.insert({formatPid, tid});
         std::shared_ptr<TaskTraceEvent> event;
         MAKE_SHARED_RETURN_VOID(event, TaskTraceEvent, formatPid, tid, data.duration / NS_TO_US,
-                                ConvertNs2UsWithDouble(data.start), traceName,
+                                DivideByPowersOfTenWithPrecision(data.start), traceName,
                                 data.modelId, data.streamId,
                                 data.taskId, data.batchId, data.contextId, data.connectionId, data.deviceType);
         res_.push_back(event);
@@ -165,7 +150,7 @@ void AscendHardwareAssembler::GenerateTaskConnectionTrace(const AscendTaskData &
         name = HOST_TO_DEVICE + connId;
         tid = static_cast<int>(GetPhysicStreamId(data.streamId));
         std::shared_ptr<FlowEvent> end;
-        MAKE_SHARED_RETURN_VOID(end, FlowEvent, formatPid, tid,  ConvertNs2UsWithDouble(data.start),
+        MAKE_SHARED_RETURN_VOID(end, FlowEvent, formatPid, tid,  DivideByPowersOfTenWithPrecision(data.start),
                                 HOST_TO_DEVICE, connId, name, FLOW_END, FLOW_BP);
         res_.push_back(end);
     }

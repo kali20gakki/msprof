@@ -11,6 +11,7 @@ aux_source_directory(${TOP_DIR}/analysis/csrc/domain/entities/viewer_data/ai_tas
 aux_source_directory(${TOP_DIR}/analysis/csrc/viewer/database SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/viewer/database/finals SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/application/timeline SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/application/summary SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/application/database SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/association/credential SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/application SOURCES)

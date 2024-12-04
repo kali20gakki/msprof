@@ -231,3 +231,25 @@ TEST_F(UtilsUTest, TestGetDeviceIdByDevicePathShouldReturnDeviceIdWhenPathIsDevi
     std::string deviceSlash = "abc_123/efg_789/PROF_XXX/device_5/////";
     EXPECT_EQ(GetDeviceIdByDevicePath(deviceSlash), expectId);
 }
+
+TEST_F(UtilsUTest, TestDivideByPowersOfTenWithPrecisionShouldReturnTrueValue)
+{
+    // 长度超过3位,移动3位，精度3位
+    uint64_t value = 123456; // 入参123456
+    EXPECT_EQ("123.456", DivideByPowersOfTenWithPrecision(value));
+    // 长度低于3位，移动3位，精度3位
+    value = 12;  // 入参12
+    EXPECT_EQ("0.012", DivideByPowersOfTenWithPrecision(value));
+
+    value = 23456;  // 入参23456
+    EXPECT_EQ("23.4560", DivideByPowersOfTenWithPrecision(value, 4, 3)); // 长度高于3位，移动3位，精度4位
+
+    value = 58;  // 入参58
+    EXPECT_EQ("0.0580", DivideByPowersOfTenWithPrecision(value, 4, 3)); // 长度低于3位，移动3位，精度4位
+
+    value = 1234567;  // 入参1234567
+    EXPECT_EQ("1234.56", DivideByPowersOfTenWithPrecision(value, 2, 3));  // 长度高于3位，移动3位，精度2位
+
+    value = 78; // 入参78
+    EXPECT_EQ("0.07", DivideByPowersOfTenWithPrecision(value, 2, 3)); // 长度小于3位，移动3位，精度2位
+}
