@@ -19,53 +19,84 @@
 #include "common/function_loader.h"
 #include "rt_ffts.h"
 
-class RuntimeInject {
-public:
-    RuntimeInject() noexcept
-    {
-        Mspti::Common::RegisterFunction("libruntime", "rtSetDevice");
-        Mspti::Common::RegisterFunction("libruntime", "rtDeviceReset");
-        Mspti::Common::RegisterFunction("libruntime", "rtSetDeviceEx");
-        Mspti::Common::RegisterFunction("libruntime", "rtGetDevice");
-        Mspti::Common::RegisterFunction("libruntime", "rtCtxCreateEx");
-        Mspti::Common::RegisterFunction("libruntime", "rtCtxCreate");
-        Mspti::Common::RegisterFunction("libruntime", "rtCtxDestroy");
-        Mspti::Common::RegisterFunction("libruntime", "rtStreamCreate");
-        Mspti::Common::RegisterFunction("libruntime", "rtStreamDestroy");
-        Mspti::Common::RegisterFunction("libruntime", "rtStreamSynchronize");
-        Mspti::Common::RegisterFunction("libruntime", "rtGetStreamId");
-        Mspti::Common::RegisterFunction("libruntime", "rtProfilerTraceEx");
-        Mspti::Common::RegisterFunction("libruntime", "rtKernelLaunch");
-        Mspti::Common::RegisterFunction("libruntime", "rtKernelLaunchWithFlagV2");
-        Mspti::Common::RegisterFunction("libruntime", "rtKernelLaunchWithHandleV2");
-        Mspti::Common::RegisterFunction("libruntime", "rtAicpuKernelLaunchExWithArgs");
-        Mspti::Common::RegisterFunction("libruntime", "rtLaunchKernelByFuncHandle");
-        Mspti::Common::RegisterFunction("libruntime", "rtLaunchKernelByFuncHandleV2");
-        Mspti::Common::RegisterFunction("libruntime", "rtVectorCoreKernelLaunch");
-        Mspti::Common::RegisterFunction("libruntime", "rtVectorCoreKernelLaunchWithHandle");
-        Mspti::Common::RegisterFunction("libruntime", "rtBinaryGetFunction");
-        Mspti::Common::RegisterFunction("libruntime", "rtProfSetProSwitch");
-        Mspti::Common::RegisterFunction("libruntime", "rtLaunch");
-        Mspti::Common::RegisterFunction("libruntime", "rtKernelLaunchWithFlag");
-        Mspti::Common::RegisterFunction("libruntime", "rtLaunchKernelByFuncHandleV3");
-        Mspti::Common::RegisterFunction("libruntime", "rtCpuKernelLaunch");
-        Mspti::Common::RegisterFunction("libruntime", "rtCpuKernelLaunchWithFlag");
-        Mspti::Common::RegisterFunction("libruntime", "rtAicpuKernelLaunchWithFlag");
-        Mspti::Common::RegisterFunction("libruntime", "rtAicpuKernelLaunch");
-        Mspti::Common::RegisterFunction("libruntime", "rtFftsPlusTaskLaunch");
-        Mspti::Common::RegisterFunction("libruntime", "rtFftsTaskLaunch");
-        Mspti::Common::RegisterFunction("libruntime", "rtFftsTaskLaunchWithFlag");
-        Mspti::Common::RegisterFunction("libruntime", "rtGetVisibleDeviceIdByLogicDeviceId");
-    }
-    ~RuntimeInject() = default;
+enum RuntimeFuncIndex {
+    FUNC_RT_SET_DEVICE,
+    FUNC_RT_DEVICE_RESET,
+    FUNC_RT_SET_DEVICE_EX,
+    FUNC_RT_GET_DEVICE,
+    FUNC_RT_CTX_CREATE_EX,
+    FUNC_RT_CTX_CREATE,
+    FUNC_RT_CTX_DESTROY,
+    FUNC_RT_STREAM_CREATE,
+    FUNC_RT_STREAM_DESTROY,
+    FUNC_RT_STREAM_SYNCHRONIZE,
+    FUNC_RT_GET_STREAM_ID,
+    FUNC_RT_PROFILER_TRACE_EX,
+    FUNC_RT_KERNEL_LAUNCH,
+    FUNC_RT_KERNEL_LAUNCH_WITH_FLAG_V2,
+    FUNC_RT_KERNEL_LAUNCH_WITH_HANDLE_V2,
+    FUNC_RT_AICPU_KERNEL_LAUNCH_EX_WITH_ARGS,
+    FUNC_RT_LAUNCH_KERNEL_BY_FUNC_HANDLE,
+    FUNC_RT_LAUNCH_KERNEL_BY_FUNC_HANDLE_V2,
+    FUNC_RT_VECTOR_CORE_KERNEL_LAUNCH,
+    FUNC_RT_VECTOR_CORE_KERNEL_LAUNCH_WITH_HANDLE,
+    FUNC_RT_BINARY_GET_FUNCTION,
+    FUNC_RT_PROF_SET_PRO_SWITCH,
+    FUNC_RT_LAUNCH,
+    FUNC_RT_KERNEL_LAUNCH_WITH_FLAG,
+    FUNC_RT_LAUNCH_KERNEL_BY_FUNC_HANDLE_V3,
+    FUNC_RT_CPU_KERNEL_LAUNCH,
+    FUNC_RT_CPU_KERNEL_LAUNCH_WITH_FLAG,
+    FUNC_RT_AICPU_KERNEL_LAUNCH_WITH_FLAG,
+    FUNC_RT_AICPU_KERNEL_LAUNCH,
+    FUNC_RT_FFTS_PLUS_TASK_LAUNCH,
+    FUNC_RT_FFTS_TASK_LAUNCH,
+    FUNC_RT_FFTS_TASK_LAUNCH_WITH_FLAG,
+    FUNC_RT_GET_VISIBLE_DEVICE_ID_BY_LOGIC_DEVICEID,
+    FUNC_RUNTIME_COUNT
 };
 
-RuntimeInject g_rtInject;
+void* g_runtimeFuncArray[FUNC_RUNTIME_COUNT] = {
+    Mspti::Common::RegisterFunction("libruntime", "rtSetDevice"),
+    Mspti::Common::RegisterFunction("libruntime", "rtDeviceReset"),
+    Mspti::Common::RegisterFunction("libruntime", "rtSetDeviceEx"),
+    Mspti::Common::RegisterFunction("libruntime", "rtGetDevice"),
+    Mspti::Common::RegisterFunction("libruntime", "rtCtxCreateEx"),
+    Mspti::Common::RegisterFunction("libruntime", "rtCtxCreate"),
+    Mspti::Common::RegisterFunction("libruntime", "rtCtxDestroy"),
+    Mspti::Common::RegisterFunction("libruntime", "rtStreamCreate"),
+    Mspti::Common::RegisterFunction("libruntime", "rtStreamDestroy"),
+    Mspti::Common::RegisterFunction("libruntime", "rtStreamSynchronize"),
+    Mspti::Common::RegisterFunction("libruntime", "rtGetStreamId"),
+    Mspti::Common::RegisterFunction("libruntime", "rtProfilerTraceEx"),
+    Mspti::Common::RegisterFunction("libruntime", "rtKernelLaunch"),
+    Mspti::Common::RegisterFunction("libruntime", "rtKernelLaunchWithFlagV2"),
+    Mspti::Common::RegisterFunction("libruntime", "rtKernelLaunchWithHandleV2"),
+    Mspti::Common::RegisterFunction("libruntime", "rtAicpuKernelLaunchExWithArgs"),
+    Mspti::Common::RegisterFunction("libruntime", "rtLaunchKernelByFuncHandle"),
+    Mspti::Common::RegisterFunction("libruntime", "rtLaunchKernelByFuncHandleV2"),
+    Mspti::Common::RegisterFunction("libruntime", "rtVectorCoreKernelLaunch"),
+    Mspti::Common::RegisterFunction("libruntime", "rtVectorCoreKernelLaunchWithHandle"),
+    Mspti::Common::RegisterFunction("libruntime", "rtBinaryGetFunction"),
+    Mspti::Common::RegisterFunction("libruntime", "rtProfSetProSwitch"),
+    Mspti::Common::RegisterFunction("libruntime", "rtLaunch"),
+    Mspti::Common::RegisterFunction("libruntime", "rtKernelLaunchWithFlag"),
+    Mspti::Common::RegisterFunction("libruntime", "rtLaunchKernelByFuncHandleV3"),
+    Mspti::Common::RegisterFunction("libruntime", "rtCpuKernelLaunch"),
+    Mspti::Common::RegisterFunction("libruntime", "rtCpuKernelLaunchWithFlag"),
+    Mspti::Common::RegisterFunction("libruntime", "rtAicpuKernelLaunchWithFlag"),
+    Mspti::Common::RegisterFunction("libruntime", "rtAicpuKernelLaunch"),
+    Mspti::Common::RegisterFunction("libruntime", "rtFftsPlusTaskLaunch"),
+    Mspti::Common::RegisterFunction("libruntime", "rtFftsTaskLaunch"),
+    Mspti::Common::RegisterFunction("libruntime", "rtFftsTaskLaunchWithFlag"),
+    Mspti::Common::RegisterFunction("libruntime", "rtGetVisibleDeviceIdByLogicDeviceId")
+};
 
 RtErrorT rtSetDevice(int32_t device)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_SET_DEVICE];
     using rtSetDeviceFunc = std::function<RtErrorT(int32_t)>;
-    static rtSetDeviceFunc func = nullptr;
+    rtSetDeviceFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(int32_t)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, int32_t>("libruntime", __FUNCTION__, func);
     }
@@ -83,8 +114,9 @@ RtErrorT rtSetDevice(int32_t device)
 
 RtErrorT rtDeviceReset(int32_t device)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_DEVICE_RESET];
     using rtDeviceResetFunc = std::function<RtErrorT(int32_t)>;
-    static rtDeviceResetFunc func = nullptr;
+    rtDeviceResetFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(int32_t)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, int32_t>("libruntime", __FUNCTION__, func);
     }
@@ -98,8 +130,9 @@ RtErrorT rtDeviceReset(int32_t device)
 
 RtErrorT rtSetDeviceEx(int32_t device)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_SET_DEVICE_EX];
     using rtSetDeviceExFunc = std::function<RtErrorT(int32_t)>;
-    static rtSetDeviceExFunc func = nullptr;
+    rtSetDeviceExFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(int32_t)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, int32_t>("libruntime", __FUNCTION__, func);
     }
@@ -117,8 +150,9 @@ RtErrorT rtSetDeviceEx(int32_t device)
 
 RtErrorT rtGetDevice(int32_t* devId)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_GET_DEVICE];
     using rtGetDeviceFunc = std::function<RtErrorT(int32_t*)>;
-    static rtGetDeviceFunc func = nullptr;
+    rtGetDeviceFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(int32_t*)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, int32_t*>("libruntime", __FUNCTION__, func);
     }
@@ -128,8 +162,9 @@ RtErrorT rtGetDevice(int32_t* devId)
 
 RtErrorT rtCtxCreateEx(void **ctx, uint32_t flags, int32_t device)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_CTX_CREATE_EX];
     using rtCtxCreateExFunc = std::function<RtErrorT(void **, uint32_t, int32_t)>;
-    static rtCtxCreateExFunc func = nullptr;
+    rtCtxCreateExFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(void **, uint32_t, int32_t)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, void **, uint32_t, int32_t>("libruntime", __FUNCTION__, func);
     }
@@ -140,8 +175,9 @@ RtErrorT rtCtxCreateEx(void **ctx, uint32_t flags, int32_t device)
 
 RtErrorT rtCtxCreate(void **ctx, int32_t device)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_CTX_CREATE];
     using rtCtxCreateFunc = std::function<RtErrorT(void **, int32_t)>;
-    static rtCtxCreateFunc func = nullptr;
+    rtCtxCreateFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(void **ctx, int32_t device)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, void **, int32_t>("libruntime", __FUNCTION__, func);
     }
@@ -152,8 +188,9 @@ RtErrorT rtCtxCreate(void **ctx, int32_t device)
 
 RtErrorT rtCtxDestroy(void **ctx)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_CTX_DESTROY];
     using rtCtxDestroyFunc = std::function<RtErrorT(void **)>;
-    static rtCtxDestroyFunc func = nullptr;
+    rtCtxDestroyFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(void **ctx)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, void **>("libruntime", __FUNCTION__, func);
     }
@@ -164,8 +201,9 @@ RtErrorT rtCtxDestroy(void **ctx)
 
 RtErrorT rtStreamCreate(RtStreamT* stream, int32_t priority)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_STREAM_CREATE];
     using rtStreamCreateFunc = std::function<RtErrorT(RtStreamT*, int32_t)>;
-    static rtStreamCreateFunc func = nullptr;
+    rtStreamCreateFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(RtStreamT*, int32_t)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, RtStreamT*, int32_t>("libruntime", __FUNCTION__, func);
     }
@@ -176,8 +214,9 @@ RtErrorT rtStreamCreate(RtStreamT* stream, int32_t priority)
 
 RtErrorT rtStreamDestroy(RtStreamT stream)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_STREAM_DESTROY];
     using rtStreamDestroyFunc = std::function<RtErrorT(RtStreamT)>;
-    static rtStreamDestroyFunc func = nullptr;
+    rtStreamDestroyFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(RtStreamT)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, RtStreamT>("libruntime", __FUNCTION__, func);
     }
@@ -188,8 +227,9 @@ RtErrorT rtStreamDestroy(RtStreamT stream)
 
 RtErrorT rtStreamSynchronize(RtStreamT stream)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_STREAM_SYNCHRONIZE];
     using rtStreamSynchronizeFunc = std::function<RtErrorT(RtStreamT)>;
-    static rtStreamSynchronizeFunc func = nullptr;
+    rtStreamSynchronizeFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(RtStreamT)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, RtStreamT>("libruntime", __FUNCTION__, func);
     }
@@ -201,8 +241,9 @@ RtErrorT rtStreamSynchronize(RtStreamT stream)
 
 RtErrorT rtGetStreamId(RtStreamT stm, int32_t *streamId)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_GET_STREAM_ID];
     using rtGetStreamIdFunc = std::function<RtErrorT(RtStreamT, int32_t*)>;
-    static rtGetStreamIdFunc func = nullptr;
+    rtGetStreamIdFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(RtStreamT, int32_t*)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, RtStreamT, int32_t*>("libruntime", __FUNCTION__, func);
     }
@@ -213,8 +254,10 @@ RtErrorT rtGetStreamId(RtStreamT stm, int32_t *streamId)
 
 RtErrorT rtProfilerTraceEx(uint64_t id, uint64_t eventType, uint16_t tagId, RtStreamT stm)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_PROFILER_TRACE_EX];
     using rtProfilerTraceExFunc = std::function<RtErrorT(uint64_t, uint64_t, uint16_t, RtStreamT)>;
-    static rtProfilerTraceExFunc func = nullptr;
+    rtProfilerTraceExFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(uint64_t, uint64_t, uint16_t,
+        RtStreamT)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, uint64_t, uint64_t, uint16_t, RtStreamT>("libruntime",
                                                                                       __FUNCTION__, func);
@@ -226,9 +269,11 @@ RtErrorT rtProfilerTraceEx(uint64_t id, uint64_t eventType, uint16_t tagId, RtSt
 RtErrorT rtKernelLaunch(const void* stubFunc, uint32_t blockDim, void* args,
                         uint32_t argsSize, RtSmDescT* smDesc, RtStreamT stream)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_KERNEL_LAUNCH];
     using rtKernelLaunchFunc = std::function<RtErrorT(const void*, uint32_t, void*, uint32_t,
                                                       RtSmDescT*, RtStreamT)>;
-    static rtKernelLaunchFunc func = nullptr;
+    rtKernelLaunchFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(const void*, uint32_t, void*, uint32_t,
+                                                            RtSmDescT*, RtStreamT)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, const void*, uint32_t, void*, uint32_t,
             RtSmDescT*, RtStreamT>("libruntime", __FUNCTION__, func);
@@ -242,10 +287,12 @@ RtErrorT rtKernelLaunch(const void* stubFunc, uint32_t blockDim, void* args,
 RtErrorT rtKernelLaunchWithFlagV2(const void* stubFunc, uint32_t blockDim, RtArgsExT* argsInfo, RtSmDescT* smDesc,
                                   RtStreamT stream, uint32_t flags, const RtTaskCfgInfoT* cfgInfo)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_KERNEL_LAUNCH_WITH_FLAG_V2];
     using rtKernelLaunchWithFlagV2Func = std::function<RtErrorT(const void*, uint32_t, RtArgsExT*,
                                                                 RtSmDescT*, RtStreamT, uint32_t,
                                                                 const RtTaskCfgInfoT*)>;
-    static rtKernelLaunchWithFlagV2Func func = nullptr;
+    rtKernelLaunchWithFlagV2Func func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(const void*, uint32_t,
+        RtArgsExT*, RtSmDescT*, RtStreamT, uint32_t, const RtTaskCfgInfoT*)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, const void*, uint32_t, RtArgsExT*, RtSmDescT*, RtStreamT,
             uint32_t, const RtTaskCfgInfoT*>("libruntime", __FUNCTION__, func);
@@ -259,9 +306,11 @@ RtErrorT rtKernelLaunchWithFlagV2(const void* stubFunc, uint32_t blockDim, RtArg
 RtErrorT rtKernelLaunchWithHandleV2(void *handle, const uint64_t tilingkey, uint32_t blockDim, RtArgsExT *argsInfo,
                                     RtSmDescT *smDesc, RtStreamT stream, const RtTaskCfgInfoT *cfgInfo)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_KERNEL_LAUNCH_WITH_HANDLE_V2];
     using rtKernelLaunchWithHandleV2Func = std::function<RtErrorT(void*, uint64_t, uint32_t, RtArgsExT*,
                                                                   RtSmDescT*, RtStreamT, const RtTaskCfgInfoT*)>;
-    static rtKernelLaunchWithHandleV2Func func = nullptr;
+    rtKernelLaunchWithHandleV2Func func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(void*, uint64_t, uint32_t,
+        RtArgsExT*, RtSmDescT*, RtStreamT, const RtTaskCfgInfoT*)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, void*, uint64_t, uint32_t, RtArgsExT*, RtSmDescT*,
             RtStreamT, const RtTaskCfgInfoT*>("libruntime", __FUNCTION__, func);
@@ -276,10 +325,12 @@ RtErrorT rtAicpuKernelLaunchExWithArgs(const uint32_t kernelType, const char* co
                                        const uint32_t blockDim, const RtAicpuArgsExT *argsInfo,
                                        RtSmDescT * const smDesc, const RtStreamT stm, const uint32_t flags)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_AICPU_KERNEL_LAUNCH_EX_WITH_ARGS];
     using rtAicpuKernelLaunchExWithArgsFunc = std::function<RtErrorT(uint32_t, const char*, uint32_t,
                                                                      const RtAicpuArgsExT*, RtSmDescT*,
                                                                      const RtStreamT, uint32_t)>;
-    static rtAicpuKernelLaunchExWithArgsFunc func = nullptr;
+    rtAicpuKernelLaunchExWithArgsFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(uint32_t, const char*,
+        uint32_t, const RtAicpuArgsExT*, RtSmDescT*, const RtStreamT, uint32_t)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, uint32_t, const char*, uint32_t, const RtAicpuArgsExT*,
             RtSmDescT*, RtStreamT, uint32_t>("libruntime", __FUNCTION__, func);
@@ -293,9 +344,11 @@ RtErrorT rtAicpuKernelLaunchExWithArgs(const uint32_t kernelType, const char* co
 RtErrorT rtLaunchKernelByFuncHandle(rtFuncHandle funcHandle, uint32_t blockDim, rtLaunchArgsHandle argsHandle,
                                     RtStreamT stm)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_LAUNCH_KERNEL_BY_FUNC_HANDLE];
     using rtLaunchKernelByFuncHandleFunc = std::function<RtErrorT(rtFuncHandle, uint32_t, rtLaunchArgsHandle,
                                                                   RtStreamT)>;
-    static rtLaunchKernelByFuncHandleFunc func = nullptr;
+    rtLaunchKernelByFuncHandleFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(rtFuncHandle, uint32_t,
+        rtLaunchArgsHandle, RtStreamT)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, rtFuncHandle, uint32_t, rtLaunchArgsHandle, RtStreamT>("libruntime",
                                                                                                     __FUNCTION__, func);
@@ -308,9 +361,12 @@ RtErrorT rtLaunchKernelByFuncHandle(rtFuncHandle funcHandle, uint32_t blockDim, 
 RtErrorT rtLaunchKernelByFuncHandleV2(rtFuncHandle funcHandle, uint32_t blockDim, rtLaunchArgsHandle argsHandle,
                                       RtStreamT stm, const RtTaskCfgInfoT *cfgInfo)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_LAUNCH_KERNEL_BY_FUNC_HANDLE_V2];
     using rtLaunchKernelByFuncHandleV2Func = std::function<RtErrorT(rtFuncHandle, uint32_t, rtLaunchArgsHandle,
                                                                     RtStreamT, const RtTaskCfgInfoT*)>;
-    static rtLaunchKernelByFuncHandleV2Func func = nullptr;
+    rtLaunchKernelByFuncHandleV2Func func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(rtFuncHandle, uint32_t,
+                                                                          rtLaunchArgsHandle, RtStreamT,
+                                                                          const RtTaskCfgInfoT*)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, rtFuncHandle, uint32_t, rtLaunchArgsHandle, RtStreamT,
             const RtTaskCfgInfoT*>("libruntime", __FUNCTION__, func);
@@ -324,10 +380,13 @@ RtErrorT rtLaunchKernelByFuncHandleV2(rtFuncHandle funcHandle, uint32_t blockDim
 RtErrorT rtVectorCoreKernelLaunch(const VOID_PTR stubFunc, uint32_t blockDim, RtArgsExT *argsInfo,
                                   RtSmDescT *smDesc, RtStreamT stm, uint32_t flags, const RtTaskCfgInfoT *cfgInfo)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_VECTOR_CORE_KERNEL_LAUNCH];
     using rtVectorCoreKernelLaunchFunc = std::function<RtErrorT(VOID_PTR, uint32_t, RtArgsExT*,
                                                                 RtSmDescT*, RtStreamT, uint32_t,
                                                                 const RtTaskCfgInfoT*)>;
-    static rtVectorCoreKernelLaunchFunc func = nullptr;
+    rtVectorCoreKernelLaunchFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(VOID_PTR, uint32_t, RtArgsExT*,
+                                                                      RtSmDescT*, RtStreamT, uint32_t,
+                                                                      const RtTaskCfgInfoT*)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, VOID_PTR, uint32_t, RtArgsExT*, RtSmDescT*, RtStreamT,
             uint32_t, const RtTaskCfgInfoT*>("libruntime", __FUNCTION__, func);
@@ -342,10 +401,12 @@ RtErrorT rtVectorCoreKernelLaunchWithHandle(VOID_PTR hdl, const uint64_t tilingK
                                             RtArgsExT *argsInfo, RtSmDescT *smDesc, RtStreamT stm,
                                             const RtTaskCfgInfoT *cfgInfo)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_VECTOR_CORE_KERNEL_LAUNCH_WITH_HANDLE];
     using rtVectorCoreKernelLaunchWithHandleFunc = std::function<RtErrorT(VOID_PTR, uint64_t, uint32_t,
                                                                           RtArgsExT*, RtSmDescT*, RtStreamT,
                                                                           const RtTaskCfgInfoT*)>;
-    static rtVectorCoreKernelLaunchWithHandleFunc func = nullptr;
+    rtVectorCoreKernelLaunchWithHandleFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(VOID_PTR, uint64_t,
+        uint32_t, RtArgsExT*, RtSmDescT*, RtStreamT, const RtTaskCfgInfoT*)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, VOID_PTR, uint64_t, uint32_t, RtArgsExT*, RtSmDescT*,
             RtStreamT, const RtTaskCfgInfoT*>("libruntime", __FUNCTION__, func);
@@ -358,8 +419,10 @@ RtErrorT rtVectorCoreKernelLaunchWithHandle(VOID_PTR hdl, const uint64_t tilingK
 
 RtErrorT rtBinaryGetFunction(VOID_PTR binHandle, uint64_t tilingKey, VOID_PTR_PTR funcHandle)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_BINARY_GET_FUNCTION];
     using rtBinaryGetFunctionFunc = std::function<RtErrorT(VOID_PTR, uint64_t, VOID_PTR_PTR)>;
-    static rtBinaryGetFunctionFunc func = nullptr;
+    rtBinaryGetFunctionFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(VOID_PTR, uint64_t,
+        VOID_PTR_PTR)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, VOID_PTR, uint64_t, VOID_PTR_PTR>("libruntime", __FUNCTION__, func);
     }
@@ -369,8 +432,9 @@ RtErrorT rtBinaryGetFunction(VOID_PTR binHandle, uint64_t tilingKey, VOID_PTR_PT
 
 RtErrorT rtProfSetProSwitch(VOID_PTR data, uint32_t len)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_PROF_SET_PRO_SWITCH];
     using rtProfSetProSwitchFunc = std::function<RtErrorT(VOID_PTR, uint32_t)>;
-    static rtProfSetProSwitchFunc func = nullptr;
+    rtProfSetProSwitchFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(VOID_PTR, uint32_t)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, VOID_PTR, uint32_t>("libruntime", __FUNCTION__, func);
     }
@@ -380,8 +444,10 @@ RtErrorT rtProfSetProSwitch(VOID_PTR data, uint32_t len)
 
 RtErrorT rtGetVisibleDeviceIdByLogicDeviceId(const int32_t logicDeviceId, int32_t * const visibleDeviceId)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_GET_VISIBLE_DEVICE_ID_BY_LOGIC_DEVICEID];
     using rtGetVisibleDeviceIdByLogicDeviceIdFunc = std::function<RtErrorT(int32_t, int32_t *)>;
-    static rtGetVisibleDeviceIdByLogicDeviceIdFunc func = nullptr;
+    rtGetVisibleDeviceIdByLogicDeviceIdFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(int32_t,
+        int32_t *)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, int32_t, int32_t *>("libruntime", __FUNCTION__, func);
     }
@@ -391,8 +457,9 @@ RtErrorT rtGetVisibleDeviceIdByLogicDeviceId(const int32_t logicDeviceId, int32_
 
 RtErrorT rtLaunch(const void *stubFunc)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_LAUNCH];
     using rtLaunchFunc = std::function<RtErrorT(const void *)>;
-    static rtLaunchFunc func = nullptr;
+    rtLaunchFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(const void *)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, const void *>("libruntime", __FUNCTION__, func);
     }
@@ -405,9 +472,11 @@ RtErrorT rtLaunch(const void *stubFunc)
 RtErrorT rtKernelLaunchWithFlag(const void *stubFunc, uint32_t blockDim, RtArgsExT *argsInfo, RtSmDescT *smDesc,
                                 RtStreamT stm, uint32_t flags)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_KERNEL_LAUNCH_WITH_FLAG];
     using rtKernelLaunchWithFlagFunc = std::function<RtErrorT(const void *, uint32_t, RtArgsExT *, RtSmDescT *,
                                                               RtStreamT, uint32_t)>;
-    static rtKernelLaunchWithFlagFunc func = nullptr;
+    rtKernelLaunchWithFlagFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(const void *, uint32_t,
+        RtArgsExT *, RtSmDescT *, RtStreamT, uint32_t)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, const void *, uint32_t, RtArgsExT *, RtSmDescT *, RtStreamT,
             uint32_t>("libruntime", __FUNCTION__, func);
@@ -421,9 +490,11 @@ RtErrorT rtKernelLaunchWithFlag(const void *stubFunc, uint32_t blockDim, RtArgsE
 RtErrorT rtLaunchKernelByFuncHandleV3(rtFuncHandle funcHandle, uint32_t blockDim, const RtArgsExT * const argsInfo,
                                       RtStreamT stm, const RtTaskCfgInfoT * const cfgInfo)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_LAUNCH_KERNEL_BY_FUNC_HANDLE_V3];
     using rtLaunchKernelByFuncHandleV3Func = std::function<RtErrorT(rtFuncHandle, uint32_t, const RtArgsExT *,
                                                                     RtStreamT, const RtTaskCfgInfoT *)>;
-    static rtLaunchKernelByFuncHandleV3Func func = nullptr;
+    rtLaunchKernelByFuncHandleV3Func func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(rtFuncHandle, uint32_t,
+        const RtArgsExT *, RtStreamT, const RtTaskCfgInfoT *)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, rtFuncHandle, uint32_t, const RtArgsExT *, RtStreamT,
             const RtTaskCfgInfoT *>("libruntime", __FUNCTION__, func);
@@ -437,9 +508,11 @@ RtErrorT rtLaunchKernelByFuncHandleV3(rtFuncHandle funcHandle, uint32_t blockDim
 RtErrorT rtCpuKernelLaunch(const void *soName, const void *kernelName, uint32_t blockDim, const void *args,
                            uint32_t argsSize, RtSmDescT *smDesc, RtStreamT stm)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_CPU_KERNEL_LAUNCH];
     using rtCpuKernelLaunchFunc = std::function<RtErrorT(const void *, const void *, uint32_t, const void *,
                                                          uint32_t, RtSmDescT *, RtStreamT)>;
-    static rtCpuKernelLaunchFunc func = nullptr;
+    rtCpuKernelLaunchFunc func =  Mspti::Common::ReinterpretConvert<RtErrorT (*)(const void *, const void *, uint32_t,
+        const void *, uint32_t, RtSmDescT *, RtStreamT)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, const void *, const void *, uint32_t, const void *, uint32_t,
             RtSmDescT *, RtStreamT>("libruntime", __FUNCTION__, func);
@@ -453,10 +526,12 @@ RtErrorT rtCpuKernelLaunch(const void *soName, const void *kernelName, uint32_t 
 RtErrorT rtCpuKernelLaunchWithFlag(const void *soName, const void *kernelName, uint32_t blockDim,
                                    const RtArgsExT *argsInfo, RtSmDescT *smDesc, RtStreamT stm, uint32_t flags)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_CPU_KERNEL_LAUNCH_WITH_FLAG];
     using rtCpuKernelLaunchWithFlagFunc =
             std::function<RtErrorT(const void *, const void *, uint32_t, const RtArgsExT *, RtSmDescT *,
                                    RtStreamT, uint32_t)>;
-    static rtCpuKernelLaunchWithFlagFunc func = nullptr;
+    rtCpuKernelLaunchWithFlagFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(const void *, const void *,
+        uint32_t, const RtArgsExT *, RtSmDescT *, RtStreamT, uint32_t)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, const void *, const void *, uint32_t, const RtArgsExT *, RtSmDescT *,
             RtStreamT, uint32_t>("libruntime", __FUNCTION__, func);
@@ -470,10 +545,12 @@ RtErrorT rtCpuKernelLaunchWithFlag(const void *soName, const void *kernelName, u
 RtErrorT rtAicpuKernelLaunchWithFlag(const RtKernelLaunchNamesT *launchNames, uint32_t blockDim,
                                      const RtArgsExT *argsInfo, RtSmDescT *smDesc, RtStreamT stm, uint32_t flags)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_AICPU_KERNEL_LAUNCH_WITH_FLAG];
     using rtAicpuKernelLaunchWithFlagFunc =
             std::function<RtErrorT(const RtKernelLaunchNamesT *, uint32_t, const RtArgsExT *, RtSmDescT *,
                                    RtStreamT, uint32_t)>;
-    static rtAicpuKernelLaunchWithFlagFunc func = nullptr;
+    rtAicpuKernelLaunchWithFlagFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(const RtKernelLaunchNamesT *,
+        uint32_t, const RtArgsExT *, RtSmDescT *, RtStreamT, uint32_t)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, const RtKernelLaunchNamesT *, uint32_t, const RtArgsExT *, RtSmDescT *,
             RtStreamT, uint32_t>("libruntime", __FUNCTION__, func);
@@ -487,9 +564,11 @@ RtErrorT rtAicpuKernelLaunchWithFlag(const RtKernelLaunchNamesT *launchNames, ui
 RtErrorT rtAicpuKernelLaunch(const RtKernelLaunchNamesT *launchNames, uint32_t blockDim, const void *args,
                              uint32_t argsSize, RtSmDescT *smDesc, RtStreamT stm)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_AICPU_KERNEL_LAUNCH];
     using rtAicpuKernelLaunchFunc = std::function<RtErrorT(const RtKernelLaunchNamesT *, uint32_t, const void *,
                                                            uint32_t, RtSmDescT *, RtStreamT)>;
-    static rtAicpuKernelLaunchFunc func = nullptr;
+    rtAicpuKernelLaunchFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(const RtKernelLaunchNamesT *,
+        uint32_t, const void *, uint32_t, RtSmDescT *, RtStreamT)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, const RtKernelLaunchNamesT *, uint32_t, const void *, uint32_t,
             RtSmDescT *, RtStreamT>("libruntime", __FUNCTION__, func);
@@ -502,8 +581,10 @@ RtErrorT rtAicpuKernelLaunch(const RtKernelLaunchNamesT *launchNames, uint32_t b
 
 RtErrorT rtFftsPlusTaskLaunch(RtFftsPlusTaskInfoT *fftsPlusTaskInfo, RtStreamT stm)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_FFTS_PLUS_TASK_LAUNCH];
     using rtFftsPlusTaskLaunchFunc = std::function<RtErrorT(RtFftsPlusTaskInfoT *, RtStreamT)>;
-    static rtFftsPlusTaskLaunchFunc func = nullptr;
+    rtFftsPlusTaskLaunchFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(RtFftsPlusTaskInfoT *,
+        RtStreamT)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, RtFftsPlusTaskInfoT *, RtStreamT>("libruntime", __FUNCTION__, func);
     }
@@ -515,8 +596,9 @@ RtErrorT rtFftsPlusTaskLaunch(RtFftsPlusTaskInfoT *fftsPlusTaskInfo, RtStreamT s
 
 RtErrorT rtFftsTaskLaunch(RtFftsTaskInfoT *fftsTaskInfo, RtStreamT stm)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_FFTS_TASK_LAUNCH];
     using rtFftsTaskLaunchFunc = std::function<RtErrorT(RtFftsTaskInfoT *, RtStreamT)>;
-    static rtFftsTaskLaunchFunc func = nullptr;
+    rtFftsTaskLaunchFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(RtFftsTaskInfoT *, RtStreamT)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, RtFftsTaskInfoT *, RtStreamT>("libruntime", __FUNCTION__, func);
     }
@@ -528,8 +610,10 @@ RtErrorT rtFftsTaskLaunch(RtFftsTaskInfoT *fftsTaskInfo, RtStreamT stm)
 
 RtErrorT rtFftsTaskLaunchWithFlag(RtFftsTaskInfoT *fftsTaskInfo, RtStreamT stm, uint32_t flag)
 {
+    void* voidFunc = g_runtimeFuncArray[FUNC_RT_FFTS_TASK_LAUNCH_WITH_FLAG];
     using rtFftsTaskLaunchWithFlagFunc = std::function<RtErrorT(RtFftsTaskInfoT *, RtStreamT, uint32_t)>;
-    static rtFftsTaskLaunchWithFlagFunc func = nullptr;
+    rtFftsTaskLaunchWithFlagFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(RtFftsTaskInfoT *, RtStreamT,
+        uint32_t)>(voidFunc);
     if (func == nullptr) {
         Mspti::Common::GetFunction<RtErrorT, RtFftsTaskInfoT *, RtStreamT,
             uint32_t>("libruntime", __FUNCTION__, func);

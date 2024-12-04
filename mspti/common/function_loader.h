@@ -57,11 +57,6 @@ private:
     mutable std::unordered_map<std::string, std::unique_ptr<FunctionLoader>> registry_;
 };
 
-static void RegisterFunction(const std::string& soName, const std::string& funcName)
-{
-    FunctionRegister::GetInstance()->RegisteFunction(soName, funcName);
-}
-
 template <typename R, typename... Types>
 void GetFunction(const std::string& soName, const std::string& funcName, std::function<R(Types...)>& func)
 {
@@ -69,6 +64,7 @@ void GetFunction(const std::string& soName, const std::string& funcName, std::fu
     func = (R(*)(Types...))func_ptr;
 }
 
+void* RegisterFunction(const std::string& soName, const std::string& funcName);
 }  // Common
 }  // Mspti
 

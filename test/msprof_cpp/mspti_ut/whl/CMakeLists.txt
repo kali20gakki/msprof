@@ -16,6 +16,7 @@ add_executable(mspti_adapter_utest
     ${SRC_FILE}
     main.cpp
     mspti_adapter_utest.cpp
+    ${TOP_DIR}/mspti/common/utils.cpp
     ${TOP_DIR}/mspti/whl/csrc/mspti_adapter.cpp
     ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/profapi_inject_stub.cpp

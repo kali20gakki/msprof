@@ -119,12 +119,18 @@ void FunctionRegister::RegisteFunction(const std::string& soName, const std::str
 
 FunctionHandle FunctionRegister::Get(const std::string &soName, const std::string &funcName)
 {
-    // 业务逻辑保证Get时不会有其它线程写
+    std::lock_guard<std::mutex> lock(mu_);
     auto itr = registry_.find(soName);
     if (itr != registry_.end()) {
         return itr->second->Get(funcName);
     }
     return nullptr;
+}
+
+void* RegisterFunction(const std::string& soName, const std::string& funcName)
+{
+    FunctionRegister::GetInstance()->RegisteFunction(soName, funcName);
+    return FunctionRegister::GetInstance()->Get(soName, funcName);
 }
 }  // Common
 }  // Mspti
