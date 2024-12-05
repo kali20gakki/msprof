@@ -20,6 +20,7 @@ namespace Application {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
+using namespace Analysis::Utils;
 namespace {
 const std::string READ_COUNTER = "DDR/Read";
 const std::string WRITE_COUNTER = "DDR/Write";
@@ -36,7 +37,7 @@ void GenerateDDRTrace(std::vector<DDRData> &ddrData, const std::unordered_map<ui
     std::string time;
     uint32_t pid;
     for (const auto &data : ddrData) {
-        time = std::to_string(data.timestamp / NS_TO_US);
+        time = DivideByPowersOfTenWithPrecision(data.timestamp);
         pid = pidMap.at(data.deviceId);
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, READ_COUNTER);
         event->SetSeriesDValue(READ_SERIES, data.fluxRead);

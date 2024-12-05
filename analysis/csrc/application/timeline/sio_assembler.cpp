@@ -20,6 +20,7 @@ namespace Application {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
+using namespace Analysis::Utils;
 namespace {
 const std::vector<std::string> COUNTERS {"req_rx", "rsp_rx", "snp_rx", "dat_rx",
                                          "req_tx", "rsp_tx", "snp_tx", "dat_tx"};
@@ -40,7 +41,7 @@ void GenerateSioTrace(std::vector<SioData> &sioData, const std::unordered_map<ui
     uint32_t pid;
     std::unordered_map<std::string, std::shared_ptr<CounterEvent>> eventMap;
     for (const auto &data : sioData) {
-        time = std::to_string(data.localTime / NS_TO_US);
+        time = DivideByPowersOfTenWithPrecision(data.localTime);
         seriesName = SERIES_MAP.at(data.dieId);
         pid = pidMap.at(data.deviceId);
         std::vector<double> bandwidth {data.reqRxBandwidth, data.rspRxBandwidth, data.snpRxBandwidth,

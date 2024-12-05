@@ -20,6 +20,7 @@ namespace Application {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
+using namespace Analysis::Utils;
 namespace {
 const std::string QOS = "QoS";
 const std::string SERIES = "value";
@@ -40,7 +41,7 @@ void GenerateQosTrace(std::vector<QosData> &qosData, const std::unordered_map<ui
         if (it == qosEventsMap.end()) {
             continue;
         }
-        time = std::to_string(data.localTime / NS_TO_US);
+        time = DivideByPowersOfTenWithPrecision(data.localTime);
         pid = pidMap.at(data.deviceId);
         std::vector<uint32_t> bandwidth {data.bw1, data.bw2, data.bw3, data.bw4, data.bw5, data.bw6, data.bw7,
             data.bw8, data.bw9, data.bw10};

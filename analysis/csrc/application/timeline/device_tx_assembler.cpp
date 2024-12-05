@@ -19,6 +19,7 @@ namespace Analysis {
 namespace Application {
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
+using namespace Analysis::Utils;
 
 void DeviceTxTraceEvent::ProcessArgs(JsonWriter& ostream)
 {
@@ -48,7 +49,7 @@ void DeviceTxAssembler::GenerateDeviceTxTrace(const std::vector<MsprofTxDeviceDa
         dPidTidSet_.insert({formatPid, tid});
         std::shared_ptr<DeviceTxTraceEvent> event;
         MAKE_SHARED_RETURN_VOID(event, DeviceTxTraceEvent, formatPid, tid, data.duration / NS_TO_US,
-                                std::to_string(data.start / NS_TO_US), traceName, data.streamId, data.taskId);
+                                DivideByPowersOfTenWithPrecision(data.start), traceName, data.streamId, data.taskId);
         res_.push_back(event);
         GenerateTxConnectionTrace(data, formatPid);
     }
@@ -61,7 +62,7 @@ void DeviceTxAssembler::GenerateTxConnectionTrace(const MsprofTxDeviceData &data
     name.append("_").append(connId);
     int tid = static_cast<int>(data.streamId);
     std::shared_ptr<FlowEvent> end;
-    MAKE_SHARED_RETURN_VOID(end, FlowEvent, formatPid, tid, std::to_string(data.start / NS_TO_US),
+    MAKE_SHARED_RETURN_VOID(end, FlowEvent, formatPid, tid, DivideByPowersOfTenWithPrecision(data.start),
                             MS_TX, connId, name, FLOW_END, FLOW_BP);
     res_.push_back(end);
 }

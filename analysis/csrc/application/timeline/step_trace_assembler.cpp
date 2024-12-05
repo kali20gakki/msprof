@@ -16,6 +16,7 @@
 
 namespace Analysis {
 namespace Application {
+using namespace Analysis::Utils;
 namespace {
 const int SORT_INDEX_OFFSET = 70000;
 const std::string ITER_CAT = "Iteration Time";
@@ -106,17 +107,17 @@ void StepTraceAssembler::GenerateTrainTrace(const std::vector<TrainTraceData>& t
     std::string fpStart;
     std::string bpEnd;
     for (const auto &data : trainData) {
-        fpStart = data.fpStart == 0 ? DEFAULT_ARG_NA : std::to_string(data.fpStart / NS_TO_US);
-        bpEnd = data.bpEnd == 0 ? DEFAULT_ARG_NA : std::to_string(data.bpEnd / NS_TO_US);
+        fpStart = data.fpStart == 0 ? DEFAULT_ARG_NA : DivideByPowersOfTenWithPrecision(data.fpStart);
+        bpEnd = data.bpEnd == 0 ? DEFAULT_ARG_NA : DivideByPowersOfTenWithPrecision(data.bpEnd);
         traceName = "Iteration " + std::to_string(data.indexId);
         formatPid = GetDevicePid(pidMap, data.deviceId, profPath, layer.sortIndex);
         int tid = static_cast<int>(data.modelId) + SORT_INDEX_OFFSET;
         pidTidSet_.insert({formatPid, tid});
         std::shared_ptr<StepTraceEvent> event;
         MAKE_SHARED_RETURN_VOID(event, StepTraceEvent, formatPid, tid, data.iterTime / NS_TO_US,
-                                std::to_string((data.iterEnd - data.iterTime) / NS_TO_US), traceName, ITER_CAT,
+                                DivideByPowersOfTenWithPrecision(data.iterEnd - data.iterTime), traceName, ITER_CAT,
                                 data.indexId, data.iterTime / NS_TO_US, fpStart, bpEnd,
-                                std::to_string(data.iterEnd / NS_TO_US));
+                                DivideByPowersOfTenWithPrecision(data.iterEnd));
         res_.push_back(event);
         if (data.fpStart != 0 && data.bpEnd != 0) {
             GenerateFpBpTrace(data, formatPid, tid);
@@ -131,9 +132,9 @@ void StepTraceAssembler::GenerateFpBpTrace(const Analysis::Domain::TrainTraceDat
     std::shared_ptr<FpBpTraceEvent> fpEvent;
     std::string name = "FP_BP Time " + std::to_string(data.indexId);
     MAKE_SHARED_RETURN_VOID(fpEvent, FpBpTraceEvent, pid, tid, data.fpBpTime / NS_TO_US,
-                            std::to_string(data.fpStart / NS_TO_US), name, FP_BP_CAT, data.indexId,
-                            data.fpBpTime / NS_TO_US, std::to_string(data.fpStart / NS_TO_US),
-                            std::to_string(data.bpEnd / NS_TO_US));
+                            DivideByPowersOfTenWithPrecision(data.fpStart), name, FP_BP_CAT, data.indexId,
+                            data.fpBpTime / NS_TO_US, DivideByPowersOfTenWithPrecision(data.fpStart),
+                            DivideByPowersOfTenWithPrecision(data.bpEnd));
     res_.push_back(fpEvent);
 }
 
@@ -142,9 +143,9 @@ void StepTraceAssembler::GenerateRefreshTrace(const Analysis::Domain::TrainTrace
     std::shared_ptr<RefreshTraceEvent> refreshEvent;
     std::string name = "Iteration Refresh " + std::to_string(data.indexId);
     MAKE_SHARED_RETURN_VOID(refreshEvent, RefreshTraceEvent, pid, tid, (data.gradRefreshBound) / NS_TO_US,
-                            std::to_string(data.bpEnd / NS_TO_US), name, REFRESH_CAT, data.indexId,
-                            data.gradRefreshBound / NS_TO_US, std::to_string(data.bpEnd / NS_TO_US),
-                            std::to_string(data.iterEnd / NS_TO_US));
+                            DivideByPowersOfTenWithPrecision(data.bpEnd), name, REFRESH_CAT, data.indexId,
+                            data.gradRefreshBound / NS_TO_US, DivideByPowersOfTenWithPrecision(data.bpEnd),
+                            DivideByPowersOfTenWithPrecision(data.iterEnd));
     res_.push_back(refreshEvent);
 }
 
@@ -154,14 +155,14 @@ void StepTraceAssembler::GenerateDataAugTrace(const Analysis::Domain::TrainTrace
     id.append(std::to_string(pid)).append("_").append(std::to_string(tid));
     std::string name = "Data_aug Bound " + std::to_string(data.indexId - 1);
     std::shared_ptr<DataAug0TraceEvent> aug0Event;
-    MAKE_SHARED_RETURN_VOID(aug0Event, DataAug0TraceEvent, pid, tid, std::to_string(data.fpStart / NS_TO_US),
+    MAKE_SHARED_RETURN_VOID(aug0Event, DataAug0TraceEvent, pid, tid, DivideByPowersOfTenWithPrecision(data.fpStart),
                             name, DATA_AUG, id, data.indexId);
     res_.push_back(aug0Event);
-    auto ts = (data.bpEnd + data.dataAugBound / 2) / NS_TO_US;
+    uint64_t ts = data.bpEnd + data.dataAugBound / 2;
     std::shared_ptr<DataAug1TraceEvent> aug1Event;
     name = "Data_aug Bound " + std::to_string(data.indexId);
-    MAKE_SHARED_RETURN_VOID(aug1Event, DataAug1TraceEvent, pid, tid, std::to_string(ts), name, DATA_AUG, id,
-                            data.dataAugBound / NS_TO_US);
+    MAKE_SHARED_RETURN_VOID(aug1Event, DataAug1TraceEvent, pid, tid, DivideByPowersOfTenWithPrecision(ts),
+                            name, DATA_AUG, id, data.dataAugBound / NS_TO_US);
     res_.push_back(aug1Event);
 }
 
@@ -215,7 +216,8 @@ void StepTraceAssembler::GenerateReduceTrace(const std::vector<AllReduceData>& r
         formatPid = GetDevicePid(pidMap, data.deviceId, profPath, layer.sortIndex);
         int tid = static_cast<int>(data.modelId) + SORT_INDEX_OFFSET;
         MAKE_SHARED_RETURN_VOID(reduceEvent, ReduceTraceEvent, formatPid, tid, (data.end - data.start) / NS_TO_US,
-                                std::to_string(data.start / NS_TO_US), traceName, REDUCE_CAT, data.indexId, args);
+                                DivideByPowersOfTenWithPrecision(data.start), traceName, REDUCE_CAT, data.indexId,
+                                args);
         res_.push_back(reduceEvent);
         ++count;
     }
@@ -235,9 +237,9 @@ void StepTraceAssembler::GenerateNextTrace(const std::vector<GetNextData>& nextD
         formatPid = GetDevicePid(pidMap, data.deviceId, profPath, layer.sortIndex);
         int tid = static_cast<int>(data.modelId) + SORT_INDEX_OFFSET;
         MAKE_SHARED_RETURN_VOID(event, NextTraceEvent, formatPid, tid, (data.end - data.start) / NS_TO_US,
-                                std::to_string(data.start / NS_TO_US), traceName, GET_NEXT_CAT,
-                                std::to_string(data.start / NS_TO_US), std::to_string(data.end / NS_TO_US),
-                                (data.end - data.start) / NS_TO_US);
+                                DivideByPowersOfTenWithPrecision(data.start), traceName, GET_NEXT_CAT,
+                                DivideByPowersOfTenWithPrecision(data.start),
+                                DivideByPowersOfTenWithPrecision(data.end), (data.end - data.start) / NS_TO_US);
         res_.push_back(event);
     }
 }

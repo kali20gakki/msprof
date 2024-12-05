@@ -21,6 +21,7 @@ namespace Application {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
+using namespace Analysis::Utils;
 namespace {
 const std::vector<std::string> PA_LINK_COUNTERS {"PA Link Rx", "PA Link Tx"};
 const std::vector<std::string> PCIE_COUNTERS {"PCIE Read Bandwidth", "PCIE Write Bandwidth"};
@@ -41,7 +42,7 @@ void GeneratePaLinkInfoTrace(std::vector<PaLinkInfoData> &paLinkInfoData,
     uint64_t value;
     uint32_t pid;
     for (const auto &data : paLinkInfoData) {
-        time = std::to_string(data.local_time / NS_TO_US);
+        time = DivideByPowersOfTenWithPrecision(data.local_time);
         pid = pidMap.at(data.deviceId);
         std::vector<std::string> level {data.pa_link_traffic_monit_rx, data.pa_link_traffic_monit_tx};
         for (size_t i = 0; i < level.size(); ++i) {
@@ -64,7 +65,7 @@ void GeneratePcieInfoTrace(std::vector<PcieInfoData> &pcieInfoData,
     std::string time;
     uint32_t pid;
     for (const auto &data : pcieInfoData) {
-        time = std::to_string(data.local_time / NS_TO_US);
+        time = DivideByPowersOfTenWithPrecision(data.local_time);
         pid = pidMap.at(data.deviceId);
         std::vector<uint64_t> level {data.pcie_read_bandwidth, data.pcie_write_bandwidth};
         for (size_t i = 0; i < level.size(); i++) {

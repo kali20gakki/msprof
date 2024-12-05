@@ -20,6 +20,7 @@ namespace Application {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
+using namespace Analysis::Utils;
 namespace {
 struct CounterName {
     std::string hbm;
@@ -41,7 +42,7 @@ void GenerateNpuMemTrace(std::vector<NpuMemData> &npuMemData, const std::unorder
     std::string time;
     uint32_t pid;
     for (const auto &data : npuMemData) {
-        time = std::to_string(data.localTime / NS_TO_US);
+        time = DivideByPowersOfTenWithPrecision(data.localTime);
         pid = pidMap.at(data.deviceId);
         double hbmValue = static_cast<double>(data.hbm) / B_TO_KB;
         double ddrValue = static_cast<double>(data.ddr) / B_TO_KB;

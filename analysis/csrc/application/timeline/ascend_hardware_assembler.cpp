@@ -18,6 +18,7 @@
 namespace Analysis {
 namespace Application {
 using namespace Analysis::Viewer::Database;
+using namespace Analysis::Utils;
 namespace {
 const std::string TASK_TYPE_FFTS_PLUS = "FFTS_PLUS";
 const std::string TASK_TYPE_UNKNOWN = "UNKNOWN";
@@ -135,7 +136,8 @@ void AscendHardwareAssembler::GenerateKfcTrace(const std::vector<KfcTurnData> &k
         pidTidSet_.insert({formatPid, formatTid});
         std::shared_ptr<KfcTurnTraceEvent> event;
         MAKE_SHARED_RETURN_VOID(event, KfcTurnTraceEvent, formatPid, formatTid, datum.duration / NS_TO_US,
-                                std::to_string(datum.startTime / NS_TO_US), traceName, datum.streamId, datum.taskId);
+                                DivideByPowersOfTenWithPrecision(datum.startTime),
+                                traceName, datum.streamId, datum.taskId);
         res_.push_back(event);
     }
 }

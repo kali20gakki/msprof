@@ -20,6 +20,7 @@ namespace Application {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
+using namespace Analysis::Utils;
 namespace {
 const std::string L2_BUFFER_BW_LEVEL = "L2 Buffer Bw Level";
 const std::string MATA_BW_LEVEL = "Mata Bw Level";
@@ -34,7 +35,7 @@ void GenerateStarsSocTrace(std::vector<SocBandwidthData> &socBandwidthData,
     std::string time;
     uint32_t pid;
     for (const auto &data : socBandwidthData) {
-        time = std::to_string(data.timestamp / NS_TO_US);
+        time = DivideByPowersOfTenWithPrecision(data.timestamp);
         pid = pidMap.at(data.deviceId);
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, L2_BUFFER_BW_LEVEL);
         event->SetSeriesIValue(L2_BUFFER_BW_LEVEL, data.l2_buffer_bw_level);
