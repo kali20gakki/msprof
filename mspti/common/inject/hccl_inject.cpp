@@ -21,6 +21,7 @@
 #include "common/context_manager.h"
 #include "common/plog_manager.h"
 
+namespace {
 enum HcclFunctionIndex {
     FUNC_HCCL_ALL_REDUCE,
     FUNC_HCCL_BROADCAST,
@@ -39,26 +40,32 @@ enum HcclFunctionIndex {
     FUNC_HCCL_COUNT
 };
 
-void* g_hcclFuncArray[FUNC_HCCL_COUNT] = {
-    Mspti::Common::RegisterFunction("libhccl", "HcclAllReduce"),
-    Mspti::Common::RegisterFunction("libhccl", "HcclBroadcast"),
-    Mspti::Common::RegisterFunction("libhccl", "HcclAllGather"),
-    Mspti::Common::RegisterFunction("libhccl", "HcclReduceScatter"),
-    Mspti::Common::RegisterFunction("libhccl", "HcclReduce"),
-    Mspti::Common::RegisterFunction("libhccl", "HcclAlltoAll"),
-    Mspti::Common::RegisterFunction("libhccl", "HcclAlltoAllV"),
-    Mspti::Common::RegisterFunction("libhccl", "HcclBarrier"),
-    Mspti::Common::RegisterFunction("libhccl", "HcclScatter"),
-    Mspti::Common::RegisterFunction("libhccl", "HcclSend"),
-    Mspti::Common::RegisterFunction("libhccl", "HcclRecv"),
-    Mspti::Common::RegisterFunction("libhccl", "HcclBatchSendRecv"),
-    Mspti::Common::RegisterFunction("libhccl", "HcclGetCommName"),
-    Mspti::Common::RegisterFunction("libhccl", "HcclGetRankSize")
-};
+pthread_once_t g_once;
+void* g_hcclFuncArray[FUNC_HCCL_COUNT];
+
+void LoadHcclFunction()
+{
+    g_hcclFuncArray[FUNC_HCCL_ALL_REDUCE] = Mspti::Common::RegisterFunction("libhccl", "HcclAllReduce");
+    g_hcclFuncArray[FUNC_HCCL_BROADCAST] = Mspti::Common::RegisterFunction("libhccl", "HcclBroadcast");
+    g_hcclFuncArray[FUNC_HCCL_ALL_GATHER] = Mspti::Common::RegisterFunction("libhccl", "HcclAllGather");
+    g_hcclFuncArray[FUNC_HCCL_REDUCE_SCATTER] = Mspti::Common::RegisterFunction("libhccl", "HcclReduceScatter");
+    g_hcclFuncArray[FUNC_HCCL_REDUCE] = Mspti::Common::RegisterFunction("libhccl", "HcclReduce");
+    g_hcclFuncArray[FUNC_HCCL_ALL_TO_ALL] = Mspti::Common::RegisterFunction("libhccl", "HcclAlltoAll");
+    g_hcclFuncArray[FUNC_HCCL_ALL_TO_ALL_V] = Mspti::Common::RegisterFunction("libhccl", "HcclAlltoAllV");
+    g_hcclFuncArray[FUNC_HCCL_BARRIER] = Mspti::Common::RegisterFunction("libhccl", "HcclBarrier");
+    g_hcclFuncArray[FUNC_HCCL_SCATTER] = Mspti::Common::RegisterFunction("libhccl", "HcclScatter");
+    g_hcclFuncArray[FUNC_HCCL_SEND] = Mspti::Common::RegisterFunction("libhccl", "HcclSend");
+    g_hcclFuncArray[FUNC_HCCL_RECV] = Mspti::Common::RegisterFunction("libhccl", "HcclRecv");
+    g_hcclFuncArray[FUNC_HCCL_BATCH_SEND_RECV] = Mspti::Common::RegisterFunction("libhccl", "HcclBatchSendRecv");
+    g_hcclFuncArray[FUNC_HCCL_GET_COMM_NAME] = Mspti::Common::RegisterFunction("libhccl", "HcclGetCommName");
+    g_hcclFuncArray[FUNC_HCCL_GET_RANK_SIZE] = Mspti::Common::RegisterFunction("libhccl", "HcclGetRankSize");
+}
+}
 
 HcclResult HcclAllReduce(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t count, HcclDataType dataType, HcclReduceOp op,
                          HcclComm comm, aclrtStream stream)
 {
+    pthread_once(&g_once, LoadHcclFunction);
     void* voidFunc = g_hcclFuncArray[FUNC_HCCL_ALL_REDUCE];
     using HcclAllReduceFunc = std::function<HcclResult(VOID_PTR, VOID_PTR, uint64_t, HcclDataType, HcclReduceOp,
                                                        HcclComm, aclrtStream)>;
@@ -84,6 +91,7 @@ HcclResult HcclAllReduce(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t count, Hcc
 HcclResult HcclBroadcast(VOID_PTR buf, uint64_t count, HcclDataType dataType, uint32_t root, HcclComm comm,
                          aclrtStream stream)
 {
+    pthread_once(&g_once, LoadHcclFunction);
     void* voidFunc = g_hcclFuncArray[FUNC_HCCL_BROADCAST];
     using HcclBroadcastFunc = std::function<HcclResult(VOID_PTR, uint64_t, HcclDataType, uint32_t, HcclComm,
         aclrtStream)>;
@@ -109,6 +117,7 @@ HcclResult HcclBroadcast(VOID_PTR buf, uint64_t count, HcclDataType dataType, ui
 HcclResult HcclAllGather(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t sendCount, HcclDataType dataType, HcclComm comm,
                          aclrtStream stream)
 {
+    pthread_once(&g_once, LoadHcclFunction);
     void* voidFunc = g_hcclFuncArray[FUNC_HCCL_ALL_GATHER];
     using HcclAllGatherFunc =
             std::function<HcclResult(VOID_PTR, VOID_PTR, uint64_t, HcclDataType, HcclComm, aclrtStream)>;
@@ -135,6 +144,7 @@ HcclResult HcclAllGather(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t sendCount,
 HcclResult HcclReduceScatter(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t recvCount, HcclDataType dataType,
                              HcclReduceOp op, HcclComm comm, aclrtStream stream)
 {
+    pthread_once(&g_once, LoadHcclFunction);
     void* voidFunc = g_hcclFuncArray[FUNC_HCCL_REDUCE_SCATTER];
     using HcclReduceScatterFunc = std::function<HcclResult(VOID_PTR, VOID_PTR, uint64_t, HcclDataType, HcclReduceOp,
                                                            HcclComm, aclrtStream)>;
@@ -161,6 +171,7 @@ HcclResult HcclReduceScatter(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t recvCo
 HcclResult HcclReduce(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t count, HcclDataType dataType, HcclReduceOp op,
                       uint32_t root, HcclComm comm, aclrtStream stream)
 {
+    pthread_once(&g_once, LoadHcclFunction);
     void* voidFunc = g_hcclFuncArray[FUNC_HCCL_REDUCE];
     using HcclReduceFunc = std::function<HcclResult(VOID_PTR, VOID_PTR, uint64_t, HcclDataType, HcclReduceOp, uint32_t,
         HcclComm, aclrtStream)>;
@@ -186,6 +197,7 @@ HcclResult HcclReduce(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t count, HcclDa
 HcclResult HcclAlltoAll(const VOID_PTR sendBuf, uint64_t sendCount, HcclDataType sendType, const VOID_PTR recvBuf,
                         uint64_t recvCount, HcclDataType recvType, HcclComm comm, aclrtStream stream)
 {
+    pthread_once(&g_once, LoadHcclFunction);
     void* voidFunc = g_hcclFuncArray[FUNC_HCCL_ALL_TO_ALL];
     using HcclAlltoAllFunc = std::function<HcclResult(const void*, uint64_t, HcclDataType, const void*, uint64_t,
                                                       HcclDataType, HcclComm, aclrtStream)>;
@@ -213,6 +225,7 @@ HcclResult HcclAlltoAllV(const VOID_PTR sendBuf, const VOID_PTR sendCounts, cons
                          HcclDataType sendType, const VOID_PTR recvBuf, const VOID_PTR recvCounts,
                          const VOID_PTR rdispls, HcclDataType recvType, HcclComm comm, aclrtStream stream)
 {
+    pthread_once(&g_once, LoadHcclFunction);
     void* voidFunc = g_hcclFuncArray[FUNC_HCCL_ALL_TO_ALL_V];
     using HcclAlltoAllVFunc = std::function<HcclResult(const void*, const void*, const void*, HcclDataType,
         const void*, const void*, const void*, HcclDataType, HcclComm, aclrtStream)>;
@@ -241,6 +254,7 @@ HcclResult HcclAlltoAllV(const VOID_PTR sendBuf, const VOID_PTR sendCounts, cons
 
 HcclResult HcclBarrier(HcclComm comm, aclrtStream stream)
 {
+    pthread_once(&g_once, LoadHcclFunction);
     void* voidFunc = g_hcclFuncArray[FUNC_HCCL_BARRIER];
     using HcclBarrierFunc = std::function<HcclResult(HcclComm, aclrtStream)>;
     HcclBarrierFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(HcclComm, aclrtStream)>(voidFunc);
@@ -255,6 +269,7 @@ HcclResult HcclBarrier(HcclComm comm, aclrtStream stream)
 HcclResult HcclScatter(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t recvCount, HcclDataType dataType, uint32_t root,
                        HcclComm comm, aclrtStream stream)
 {
+    pthread_once(&g_once, LoadHcclFunction);
     void* voidFunc = g_hcclFuncArray[FUNC_HCCL_SCATTER];
     using HcclScatterFunc = std::function<HcclResult(VOID_PTR, VOID_PTR, uint64_t, HcclDataType, uint32_t,
                                                             HcclComm, aclrtStream)>;
@@ -280,6 +295,7 @@ HcclResult HcclScatter(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t recvCount, H
 HcclResult HcclSend(VOID_PTR  sendBuf, uint64_t count, HcclDataType dataType, uint32_t destRank, HcclComm comm,
                     aclrtStream stream)
 {
+    pthread_once(&g_once, LoadHcclFunction);
     void* voidFunc = g_hcclFuncArray[FUNC_HCCL_SEND];
     using HcclSendFunc = std::function<HcclResult(VOID_PTR, uint64_t, HcclDataType, uint32_t, HcclComm, aclrtStream)>;
     HcclSendFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(VOID_PTR, uint64_t, HcclDataType, uint32_t,
@@ -304,6 +320,7 @@ HcclResult HcclSend(VOID_PTR  sendBuf, uint64_t count, HcclDataType dataType, ui
 HcclResult HcclRecv(VOID_PTR  recvBuf, uint64_t count, HcclDataType dataType, uint32_t srcRank, HcclComm comm,
                     aclrtStream stream)
 {
+    pthread_once(&g_once, LoadHcclFunction);
     void* voidFunc = g_hcclFuncArray[FUNC_HCCL_RECV];
     using HcclRecvFunc = std::function<HcclResult(VOID_PTR, uint64_t, HcclDataType, uint32_t, HcclComm, aclrtStream)>;
     HcclRecvFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(VOID_PTR, uint64_t, HcclDataType, uint32_t,
@@ -327,6 +344,7 @@ HcclResult HcclRecv(VOID_PTR  recvBuf, uint64_t count, HcclDataType dataType, ui
 
 HcclResult HcclBatchSendRecv(HcclSendRecvItem* sendRecvInfo, uint32_t itemNum, HcclComm comm, aclrtStream stream)
 {
+    pthread_once(&g_once, LoadHcclFunction);
     void* voidFunc = g_hcclFuncArray[FUNC_HCCL_BATCH_SEND_RECV];
     using HcclBatchSendRecvFunc = std::function<HcclResult(HcclSendRecvItem*, uint32_t, HcclComm, aclrtStream)>;
     HcclBatchSendRecvFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(HcclSendRecvItem*, uint32_t, HcclComm,
@@ -356,6 +374,7 @@ HcclResult HcclBatchSendRecv(HcclSendRecvItem* sendRecvInfo, uint32_t itemNum, H
 
 HcclResult HcclGetCommName(HcclComm comm, char* commName)
 {
+    pthread_once(&g_once, LoadHcclFunction);
     void* voidFunc = g_hcclFuncArray[FUNC_HCCL_GET_COMM_NAME];
     using HcclGetCommNameFunc = std::function<HcclResult(HcclComm, char*)>;
     HcclGetCommNameFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(HcclComm, char*)>(voidFunc);
@@ -368,6 +387,7 @@ HcclResult HcclGetCommName(HcclComm comm, char* commName)
 
 HcclResult HcclGetRankSize(HcclComm comm, uint32_t *rankSize)
 {
+    pthread_once(&g_once, LoadHcclFunction);
     void* voidFunc = g_hcclFuncArray[FUNC_HCCL_GET_RANK_SIZE];
     using HcclGetRankSizeFunc = std::function<HcclResult(HcclComm comm, uint32_t *rankSize)>;
     HcclGetRankSizeFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(HcclComm comm,

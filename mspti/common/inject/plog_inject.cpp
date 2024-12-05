@@ -11,19 +11,27 @@
 */
 #include "common/inject/plog_inject.h"
 #include "common/utils.h"
+
+namespace {
 enum PlogFunctionIndex {
     FUNC_CHECK_LOG_LEVEL_FOR_C,
     FUNC_DLOG_INNER_FOR_C,
     FUNC_PLOG_COUNT
 };
 
-void* g_plogFuncArray[FUNC_PLOG_COUNT] = {
-    Mspti::Common::RegisterFunction("libascendalog", "CheckLogLevelForC"),
-    Mspti::Common::RegisterFunction("libascendalog", "DlogInnerForC")
-};
+pthread_once_t g_once;
+void* g_plogFuncArray[FUNC_PLOG_COUNT];
+
+void LoadPlogFunction()
+{
+    g_plogFuncArray[FUNC_CHECK_LOG_LEVEL_FOR_C] = Mspti::Common::RegisterFunction("libascendalog", "CheckLogLevelForC");
+    g_plogFuncArray[FUNC_DLOG_INNER_FOR_C] = Mspti::Common::RegisterFunction("libascendalog", "DlogInnerForC");
+}
+}
 
 int CheckLogLevelForC(int moduleId, int level)
 {
+    pthread_once(&g_once, LoadPlogFunction);
     void* voidFunc = g_plogFuncArray[FUNC_CHECK_LOG_LEVEL_FOR_C];
     using checkLogLevelForCFunc = std::function<int(int, int)>;
     checkLogLevelForCFunc func = Mspti::Common::ReinterpretConvert<int (*)(int, int)>(voidFunc);
