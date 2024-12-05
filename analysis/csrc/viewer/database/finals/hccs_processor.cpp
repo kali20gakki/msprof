@@ -122,7 +122,7 @@ bool HCCSProcessor::FormatData(const ThreadData &threadData,
         processedData.emplace_back(static_cast<uint16_t>(tempData.deviceId),
                                    GetLocalTime(timestamp, threadData.timeRecord).Uint64(),
                                    static_cast<uint64_t>(tempData.txThroughput * BYTE_SIZE * BYTE_SIZE), // MB/s -> B/s
-                                   static_cast<uint64_t>(tempData.txThroughput * BYTE_SIZE * BYTE_SIZE));
+                                   static_cast<uint64_t>(tempData.rxThroughput * BYTE_SIZE * BYTE_SIZE));
     }
     if (processedData.empty()) {
         ERROR("Hccs data processing error.");
