@@ -191,22 +191,22 @@ std::string AddQuotation(std::string str)
     return Join({"\"", str, "\""}, "");
 }
 
-std::string DivideByPowersOfTenWithPrecision(uint64_t value, int scale, int accuracy)
+std::string DivideByPowersOfTenWithPrecision(uint64_t value, int accuracy, int scale)
 {
-    // accuracy代表除以10的多少次幂，比如3就是除以10^3，scale代表保留位数
+    // scale代表除以10的多少次幂，比如3就是除以10^3，accuracy代表保留位数
     std::string numStr = std::to_string(value);
     // 在位置前插入小数点
-    if (static_cast<int>(numStr.size()) <= accuracy) {
-        numStr.insert(0, accuracy - numStr.size() + 1, '0');
+    if (static_cast<int>(numStr.size()) <= scale) {
+        numStr.insert(0, scale - numStr.size() + 1, '0');
     }
-    numStr.insert(numStr.size() - accuracy, ".");
+    numStr.insert(numStr.size() - scale, ".");
     if (scale == accuracy) { // 精度与移位数相等，直接返回即可
         return numStr;
-    } else if (scale > accuracy) { // 精度比移位数大，需要末尾补0
-        numStr.insert(numStr.end(), scale - accuracy, '0');
+    } else if (accuracy > scale) { // 精度比移位数大，需要末尾补0
+        numStr.insert(numStr.end(),  accuracy - scale, '0');
         return numStr;
-    } else {  // 精度比移位数小，需要截取numStr.size() - (accuracy - scale)长个字符串
-        return numStr.substr(0, numStr.size() - accuracy + scale);
+    } else {  // 精度比移位数小，需要截取numStr.size() - (scale - accuracy)长个字符串
+        return numStr.substr(0, numStr.size() + accuracy - scale);
     }
 }
 }  // namespace Utils
