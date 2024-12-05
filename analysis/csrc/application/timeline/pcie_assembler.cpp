@@ -17,6 +17,7 @@ namespace Analysis {
 namespace Application {
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
+using namespace Analysis::Utils;
 namespace {
 const std::string PCIe_PREFIX = "PCIe_";
 const std::string CPL = PCIe_PREFIX + "cpl";
@@ -38,25 +39,25 @@ std::unordered_map<uint16_t, uint32_t> PCIeAssembler::GeneratePCIeTrace(
         auto pid =  GetDevicePid(pidMap, data.deviceId, profPath, sortIndex);
         // 时延单位为us, 带宽单位为MB/s
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, pidMap, pid, DEFAULT_TID,
-                                 std::to_string(data.timestamp / NS_TO_US), CPL);
+                                 DivideByPowersOfTenWithPrecision(data.timestamp), CPL);
         event->SetSeriesDValue(TX, static_cast<double>(data.txCpl.avg) / BYTE_SIZE / BYTE_SIZE);
         event->SetSeriesDValue(RX, static_cast<double>(data.rxCpl.avg) / BYTE_SIZE / BYTE_SIZE);
         res_.push_back(event);
 
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, pidMap, pid, DEFAULT_TID,
-                                 std::to_string(data.timestamp / NS_TO_US), NONPOST);
+                                 DivideByPowersOfTenWithPrecision(data.timestamp), NONPOST);
         event->SetSeriesDValue(TX, static_cast<double>(data.txNonpost.avg) / BYTE_SIZE / BYTE_SIZE);
         event->SetSeriesDValue(RX, static_cast<double>(data.rxNonpost.avg) / BYTE_SIZE / BYTE_SIZE);
         res_.push_back(event);
 
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, pidMap, pid, DEFAULT_TID,
-                                 std::to_string(data.timestamp / NS_TO_US), NONPOST_LATENCY);
+                                 DivideByPowersOfTenWithPrecision(data.timestamp), NONPOST_LATENCY);
         event->SetSeriesDValue(TX, static_cast<double>(data.txNonpostLatency.avg) / MILLI_SECOND);
         event->SetSeriesDValue(RX, 0);
         res_.push_back(event);
 
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, pidMap, pid, DEFAULT_TID,
-                                 std::to_string(data.timestamp / NS_TO_US), POST);
+                                 DivideByPowersOfTenWithPrecision(data.timestamp), POST);
         event->SetSeriesDValue(TX, static_cast<double>(data.txPost.avg) / BYTE_SIZE / BYTE_SIZE);
         event->SetSeriesDValue(RX, static_cast<double>(data.rxPost.avg) / BYTE_SIZE / BYTE_SIZE);
         res_.push_back(event);

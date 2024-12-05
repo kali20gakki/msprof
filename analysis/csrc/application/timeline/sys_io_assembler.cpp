@@ -20,6 +20,7 @@ namespace Application {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
+using namespace Analysis::Utils;
 namespace {
 const std::string RX_COUNTER = "Rx";
 const std::string TX_COUNTER = "Tx";
@@ -47,7 +48,7 @@ void GenerateSysIOTrace(const std::vector<SysIOReceiveSendData> &sysIOReceiveSen
     std::string funId;
     uint32_t pid;
     for (const auto &data : sysIOReceiveSendData) {
-        time = std::to_string(data.localTime / NS_TO_US);
+        time = DivideByPowersOfTenWithPrecision(data.localTime);
         funId = std::to_string(data.funcId);
         pid = pidMap.at(data.deviceId);
         counterName.clear();

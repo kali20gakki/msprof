@@ -22,6 +22,7 @@ namespace Application {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
+using namespace Analysis::Utils;
 namespace {
 const uint32_t SORT_INDEX = 7;
 const std::string CANN_ASSEMBLER = "CANN";
@@ -93,9 +94,9 @@ void GenerateApiTrace(std::vector<ApiData> &apiData, std::vector<std::shared_ptr
         traceName = GetTraceName(data.level, data.apiName);
         dur = static_cast<double>(data.end - data.start) / NS_TO_US;
         std::shared_ptr<ApiTraceEvent> event;
-        MAKE_SHARED_RETURN_VOID(event, ApiTraceEvent, pid, data.threadId, dur, std::to_string(data.start / NS_TO_US),
-                                traceName, data.threadId, data.connectionId, data.structType, levelStr, data.id,
-                                data.itemId);
+        MAKE_SHARED_RETURN_VOID(event, ApiTraceEvent, pid, data.threadId, dur,
+                                DivideByPowersOfTenWithPrecision(data.start), traceName, data.threadId,
+                                data.connectionId, data.structType, levelStr, data.id, data.itemId);
         res.push_back(event);
     }
 }
@@ -108,7 +109,7 @@ void GenerateConnectionTrace(std::vector<ApiData> &apiData, uint32_t pid, std::v
             connId = ConnectionIdPool::GetConnectionId(data.connectionId, ConnectionCategory::GENERAL);
             name = HOST_TO_DEVICE + connId;
             std::shared_ptr<FlowEvent> start;
-            MAKE_SHARED_RETURN_VOID(start, FlowEvent, pid, data.threadId, std::to_string(data.start / NS_TO_US),
+            MAKE_SHARED_RETURN_VOID(start, FlowEvent, pid, data.threadId, DivideByPowersOfTenWithPrecision(data.start),
                                     HOST_TO_DEVICE, connId, name, FLOW_START);
             res.push_back(start);
         }

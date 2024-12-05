@@ -18,6 +18,7 @@ namespace Analysis {
 namespace Application {
 using namespace Analysis::Domain;
 using namespace Analysis::Viewer::Database;
+using namespace Analysis::Utils;
 namespace {
 const std::string COMP_NAME = "Computing";
 const std::string COMM_NAME = "Communication";
@@ -68,7 +69,7 @@ std::vector<std::shared_ptr<TraceEvent>> OverlapAnalysisAssembler::GenerateCompu
         auto formatPid = pidMap_[deviceId];
         MAKE_SHARED_RETURN_VALUE(event, OverlapEvent, computeEvents, formatPid, static_cast<int>(OverlapType::COMPUTE),
                                  (task.end - task.start) / NS_TO_US,
-                                 std::to_string(task.start / NS_TO_US), COMP_NAME,
+                                 DivideByPowersOfTenWithPrecision(task.start), COMP_NAME,
                                  OverlapType::COMPUTE);
         computeEvents.emplace_back(event);
     }
@@ -88,7 +89,7 @@ std::vector<std::shared_ptr<TraceEvent>> OverlapAnalysisAssembler::GenerateCommE
         auto formatPid = pidMap_[deviceId];
         MAKE_SHARED_RETURN_VALUE(event, OverlapEvent, commEvents,
                                  formatPid, static_cast<int>(OverlapType::COMMUNICATION),
-                                 (task.end - task.start) / NS_TO_US, std::to_string(task.start / NS_TO_US),
+                                 (task.end - task.start) / NS_TO_US, DivideByPowersOfTenWithPrecision(task.start),
                                  COMM_NAME, OverlapType::COMMUNICATION);
         commEvents.emplace_back(event);
     }
@@ -109,7 +110,7 @@ std::vector<std::shared_ptr<TraceEvent>> OverlapAnalysisAssembler::GenerateCommN
         std::shared_ptr<OverlapEvent> event;
         MAKE_SHARED_RETURN_VALUE(event, OverlapEvent, commNotOverlapCompEvents, formatPid,
                                  static_cast<int>(OverlapType::COMM_NOT_OVERLAP_COMP),
-                                 (task.end - task.start) / NS_TO_US, std::to_string(task.start / NS_TO_US),
+                                 (task.end - task.start) / NS_TO_US, DivideByPowersOfTenWithPrecision(task.start),
                                  COMM_NOT_OVERLAP_COMP_NAME,
                                  OverlapType::COMM_NOT_OVERLAP_COMP);
         commNotOverlapCompEvents.emplace_back(event);
@@ -130,7 +131,7 @@ std::vector<std::shared_ptr<TraceEvent>> OverlapAnalysisAssembler::GenerateFreeE
         std::shared_ptr<OverlapEvent> event;
         MAKE_SHARED_RETURN_VALUE(event, OverlapEvent, freeEvents, formatPid, static_cast<int>(OverlapType::FREE),
                                  (task.end - task.start) / NS_TO_US,
-                                 std::to_string(task.start / NS_TO_US), FREE_NAME,
+                                 DivideByPowersOfTenWithPrecision(task.start), FREE_NAME,
                                  OverlapType::FREE);
         freeEvents.emplace_back(event);
     }

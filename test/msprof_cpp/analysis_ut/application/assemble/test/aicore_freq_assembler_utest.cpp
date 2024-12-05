@@ -105,12 +105,12 @@ TEST_F(AicoreFreqAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"AI Core Freq\",\"pid\":2383960512,\"tid\":0,\"ts\":\"1719621074669030.500000"
+    std::string expectStr = "{\"name\":\"AI Core Freq\",\"pid\":2383960512,\"tid\":0,\"ts\":\"1719621074669030.430"
                             "\",\"ph\":\"C\",\"args\":{\"MHz\":800}},{\"name\":\"AI Core Freq\",\"pid\":2383960512,\""
-                            "tid\":0,\"ts\":\"1719621074688865.250000\",\"ph\":\"C\",\"args\":{\"MHz\":1850}},{\"name"
-                            "\":\"AI Core Freq\",\"pid\":2383960512,\"tid\":0,\"ts\":\"1719621074688867.750000\",\"ph"
+                            "tid\":0,\"ts\":\"1719621074688865.380\",\"ph\":\"C\",\"args\":{\"MHz\":1850}},{\"name"
+                            "\":\"AI Core Freq\",\"pid\":2383960512,\"tid\":0,\"ts\":\"1719621074688867.780\",\"ph"
                             "\":\"C\",\"args\":{\"MHz\":1800}},{\"name\":\"AI Core Freq\",\"pid\":2383960512,\"tid\":"
-                            "0,\"ts\":\"1719621074688868.750000\",\"ph\":\"C\",\"args\":{\"MHz\":1800}},{\"name\":\""
+                            "0,\"ts\":\"1719621074688868.780\",\"ph\":\"C\",\"args\":{\"MHz\":1800}},{\"name\":\""
                             "process_name\",\"pid\":2383960512,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\""
                             "AI Core Freq\"}},{\"name\":\"process_labels\",\"pid\":2383960512,\"tid\":0,\"ph\":\"M\","
                             "\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960512,\"tid"

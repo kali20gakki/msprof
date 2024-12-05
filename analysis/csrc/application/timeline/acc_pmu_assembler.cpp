@@ -20,6 +20,7 @@ namespace Application {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
+using namespace Analysis::Utils;
 namespace {
 const std::vector<std::string> COUNTERS {"read_bandwidth", "read_ost", "write_bandwidth", "write_ost"};
 const std::string ACC_ID = "acc_id";
@@ -36,7 +37,7 @@ void GenerateAccPmuTrace(std::vector<AccPmuData> &accPmuData, const std::unorder
     std::string accId;
     uint32_t pid;
     for (const auto &data : accPmuData) {
-        time = std::to_string(data.timestampNs / NS_TO_US);
+        time = DivideByPowersOfTenWithPrecision(data.timestampNs);
         pid = pidMap.at(data.deviceId);
         std::vector<uint32_t> level {data.readBwLevel, data.readOstLevel, data.writeBwLevel, data.writeOstLevel};
         for (size_t i = 0; i < level.size(); i++) {

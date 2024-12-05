@@ -130,7 +130,7 @@ TEST_F(HostUsageAssemblerUTest, ShouldReturnTrueWhenCpuSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"CPU 1\",\"pid\":2383960351,\"tid\":0,\"ts\":\"1719621074669030.500000\","
+    std::string expectStr = "{\"name\":\"CPU 1\",\"pid\":2383960351,\"tid\":0,\"ts\":\"1719621074669030.430\","
                             "\"ph\":\"C\",\"args\":{\"Usage(%)\":30.0}},{\"name\":\"process_name\",\"pid\":2383960351,"
                             "\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"CPU Usage\"}},{\"name\":\"process_labels\","
                             "\"pid\":2383960351,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"CPU\"}},{\"name\":"
@@ -150,7 +150,7 @@ TEST_F(HostUsageAssemblerUTest, ShouldReturnTrueWhenMemSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"Memory Usage\",\"pid\":2383960383,\"tid\":0,\"ts\":\"1719621074669030.500000"
+    std::string expectStr = "{\"name\":\"Memory Usage\",\"pid\":2383960383,\"tid\":0,\"ts\":\"1719621074669030.430"
                             "\",\"ph\":\"C\",\"args\":{\"Usage(%)\":26.0}},{\"name\":\"process_name\","
                             "\"pid\":2383960383,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Memory Usage\"}},"
                             "{\"name\":\"process_labels\",\"pid\":2383960383,\"tid\":0,\"ph\":\"M\",\"args\":"
@@ -170,7 +170,7 @@ TEST_F(HostUsageAssemblerUTest, ShouldReturnTrueWhenDiskSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"Disk Usage\",\"pid\":2383960447,\"tid\":0,\"ts\":\"1719621074669030.500000"
+    std::string expectStr = "{\"name\":\"Disk Usage\",\"pid\":2383960447,\"tid\":0,\"ts\":\"1719621074669030.430"
                             "\",\"ph\":\"C\",\"args\":{\"Usage(%)\":25.0}},{\"name\":\"process_name\","
                             "\"pid\":2383960447,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Disk Usage\"}},"
                             "{\"name\":\"process_labels\",\"pid\":2383960447,\"tid\":0,\"ph\":\"M\",\"args\":"
@@ -190,7 +190,7 @@ TEST_F(HostUsageAssemblerUTest, ShouldReturnTrueWhenNetworkSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"Network Usage\",\"pid\":2383960415,\"tid\":0,\"ts\":\"1719621074669030.500000"
+    std::string expectStr = "{\"name\":\"Network Usage\",\"pid\":2383960415,\"tid\":0,\"ts\":\"1719621074669030.430"
                             "\",\"ph\":\"C\",\"args\":{\"Usage(%)\":20.0}},{\"name\":\"process_name\","
                             "\"pid\":2383960415,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Network Usage\"}},"
                             "{\"name\":\"process_labels\",\"pid\":2383960415,\"tid\":0,\"ph\":\"M\",\"args\":"

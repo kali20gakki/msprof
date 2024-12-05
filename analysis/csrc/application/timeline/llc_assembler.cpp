@@ -20,6 +20,7 @@ namespace Application {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
+using namespace Analysis::Utils;
 namespace {
 const std::string HIT_RATE_SERIES = "Hit Rate(%)";
 const std::string THROUGHPUT_SERIES = "Throughput(MB/s)";
@@ -45,7 +46,7 @@ void GenerateLLcTrace(const std::vector<LLcData> &llcData, const std::unordered_
     std::string counterName;
     uint32_t pid;
     for (const auto &data : llcData) {
-        time = std::to_string(data.localTime / NS_TO_US);
+        time = DivideByPowersOfTenWithPrecision(data.localTime);
         llcId = std::to_string(data.llcID);
         pid = pidMap.at(data.deviceId); // 业务可以保证此处一定可以找到
         // hitRate

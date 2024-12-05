@@ -17,6 +17,7 @@ namespace Analysis {
 namespace Application {
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
+using namespace Analysis::Utils;
 
 AicoreFreqAssembler::AicoreFreqAssembler()
     : JsonAssembler(PROCESS_AI_CORE_FREQ, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
@@ -29,7 +30,7 @@ std::unordered_map<uint16_t, uint32_t> AicoreFreqAssembler::GenerateFreqTrace(
     for (const auto &data : freqData) {
         auto pid =  GetDevicePid(pidMap, data.deviceId, profPath, sortIndex);
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, pidMap, pid, DEFAULT_TID,
-                                 std::to_string(data.timestamp / NS_TO_US), "AI Core Freq");
+                                 DivideByPowersOfTenWithPrecision(data.timestamp), "AI Core Freq");
         event->SetSeriesIValue("MHz", static_cast<uint64_t>(data.freq));
         res_.push_back(event);
     }

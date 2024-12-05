@@ -105,10 +105,10 @@ TEST_F(DeviceTxAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"N/A\",\"pid\":416,\"tid\":1,\"ts\":\"18446744073709552.000000\",\"dur\":0.0,"
+    std::string expectStr = "{\"name\":\"N/A\",\"pid\":416,\"tid\":1,\"ts\":\"18446744073709551.615\",\"dur\":0.0,"
                             "\"ph\":\"X\",\"args\":{\"Physic Stream Id\":1,\"Task Id\":13}},{\"name\":\"MsTx_7890\",\""
                             "pid\":416,\"tid\":1,\"ph\":\"f\",\"cat\":\"MsTx\",\"id\":\"7890\",\"ts\":\""
-                            "18446744073709552.000000\",\"bp\":\"e\"},{\"name\":\"process_name\",\"pid\":416,\"tid\":0"
+                            "18446744073709551.615\",\"bp\":\"e\"},{\"name\":\"process_name\",\"pid\":416,\"tid\":0"
                             ",\"ph\":\"M\",\"args\":{\"name\":\"Ascend Hardware\"}},{\"name\":\"process_labels\",\"pid"
                             "\":416,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},{\"name\":\""
                             "process_sort_index\",\"pid\":416,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":13}},{\""

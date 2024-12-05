@@ -20,6 +20,7 @@ namespace Application {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
+using namespace Analysis::Utils;
 
 std::string GetEventTypeStr(uint16_t eventType)
 {
@@ -56,8 +57,8 @@ void MsprofTxAssembler::GenerateTxExConnectionTrace(const MsprofTxHostData& data
     auto name = MS_TX;
     name.append("_").append(connId);
     std::shared_ptr<FlowEvent> start;
-    MAKE_SHARED_RETURN_VOID(start, FlowEvent, pid, data.tid, std::to_string(data.start / NS_TO_US), MS_TX, connId,
-                            name, FLOW_START);
+    MAKE_SHARED_RETURN_VOID(start, FlowEvent, pid, data.tid, DivideByPowersOfTenWithPrecision(data.start),
+                            MS_TX, connId, name, FLOW_START);
     res_.push_back(start);
 }
 
@@ -70,13 +71,13 @@ void MsprofTxAssembler::GenerateTxTrace(const std::vector<MsprofTxHostData>& txD
         if (data.connectionId == DEFAULT_CONNECTION_ID_MSTX) {  // tx数据没有connectionId
             std::shared_ptr<MsprofTxTraceEvent> tx;
             MAKE_SHARED_RETURN_VOID(tx, MsprofTxTraceEvent, pid, data.tid, (data.end - data.start) / NS_TO_US,
-                                    std::to_string(data.start / NS_TO_US), data.message, data.category,
+                                    DivideByPowersOfTenWithPrecision(data.start), data.message, data.category,
                                     data.payloadType, data.messageType, data.payloadValue, eventTypeStr);
             res_.push_back(tx);
         } else { // tx ex数据有markId字段可以作为connectionId
             std::shared_ptr<MsprofTxExTraceEvent> txEx;
             MAKE_SHARED_RETURN_VOID(txEx, MsprofTxExTraceEvent, pid, data.tid, (data.end - data.start) / NS_TO_US,
-                                    std::to_string(data.start / NS_TO_US), data.message, eventTypeStr);
+                                    DivideByPowersOfTenWithPrecision(data.start), data.message, eventTypeStr);
             res_.push_back(txEx);
             GenerateTxExConnectionTrace(data, pid);
         }

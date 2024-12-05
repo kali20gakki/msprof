@@ -22,6 +22,7 @@ namespace Application {
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
 using namespace Analysis::Parser::Environment;
+using namespace Analysis::Utils;
 namespace {
 const std::string USAGE = "Usage(%)";
 }
@@ -37,7 +38,7 @@ uint8_t NetworkUsageAssembler::GenerateDataTrace(DataInventory &dataInventory, u
     std::shared_ptr<CounterEvent> event;
     for (const auto &data : *usageData) {
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, ASSEMBLE_FAILED, pid, DEFAULT_TID,
-                                 std::to_string(data.start / NS_TO_US), "Network Usage");
+                                 DivideByPowersOfTenWithPrecision(data.start), "Network Usage");
         event->SetSeriesDValue(USAGE, data.usage);
         res_.push_back(event);
     }
@@ -55,7 +56,7 @@ uint8_t DiskUsageAssembler::GenerateDataTrace(DataInventory &dataInventory, uint
     std::shared_ptr<CounterEvent> event;
     for (const auto &data : *usageData) {
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, ASSEMBLE_FAILED, pid, DEFAULT_TID,
-                                 std::to_string(data.start / NS_TO_US), "Disk Usage");
+                                 DivideByPowersOfTenWithPrecision(data.start), "Disk Usage");
         event->SetSeriesDValue(USAGE, data.usage);
         res_.push_back(event);
     }
@@ -73,7 +74,7 @@ uint8_t MemUsageAssembler::GenerateDataTrace(DataInventory &dataInventory, uint3
     std::shared_ptr<CounterEvent> event;
     for (const auto &data : *usageData) {
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, ASSEMBLE_FAILED, pid, DEFAULT_TID,
-                                 std::to_string(data.start / NS_TO_US), "Memory Usage");
+                                 DivideByPowersOfTenWithPrecision(data.start), "Memory Usage");
         event->SetSeriesDValue(USAGE, data.usage);
         res_.push_back(event);
     }
@@ -91,7 +92,7 @@ uint8_t CpuUsageAssembler::GenerateDataTrace(DataInventory &dataInventory, uint3
     std::shared_ptr<CounterEvent> event;
     for (const auto &data : *usageData) {
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, ASSEMBLE_FAILED, pid, DEFAULT_TID,
-                                 std::to_string(data.start / NS_TO_US), "CPU " + data.cpuNo);
+                                 DivideByPowersOfTenWithPrecision(data.start), "CPU " + data.cpuNo);
         event->SetSeriesDValue(USAGE, data.usage);
         res_.push_back(event);
     }

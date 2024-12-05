@@ -20,6 +20,7 @@ namespace Application {
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
+using namespace Analysis::Utils;
 namespace {
 const std::string RX_COUNTER = "Rx";
 const std::string TX_COUNTER = "Tx";
@@ -36,7 +37,7 @@ void GenerateHccsTrace(std::vector<HccsData> &hccsData, const std::unordered_map
     std::string time;
     uint32_t pid;
     for (const auto &data : hccsData) {
-        time = std::to_string(data.localTime / NS_TO_US);
+        time = DivideByPowersOfTenWithPrecision(data.localTime);
         pid = pidMap.at(data.deviceId);
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, RX_COUNTER);
         event->SetSeriesDValue(RX_SERIES, data.rxThroughput);
