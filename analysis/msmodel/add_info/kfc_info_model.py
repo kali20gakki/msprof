@@ -37,7 +37,7 @@ class KfcInfoViewModel(ViewModel):
                     "rank_size", "work_flow_mode", "plane_id", "context_id", "notify_id", "stage", "role",
                     "duration_estimated", "src_addr", "dst_addr", "size", "op_type", "data_type",
                     "link_type", "transport_type", "rdma_type", "stream_id", "task_id", "batch_id",
-                    "start_time", "duration", "bandwidth"]),
+                    "start_time", "duration", "bandwidth", "device_task_type"]),
         {})
     KFC_COMM_TURN_TYPE = CustomizedNamedtupleFactory.enhance_namedtuple(
         namedtuple("KfcCommTurn",
@@ -80,7 +80,10 @@ class KfcInfoViewModel(ViewModel):
     def get_kfc_info_data(self: any) -> list:
         if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_KFC_INFO):
             return []
-        sql = "select *, 0 as batch_id, 0 as start_time, 0 as duration, 0 as bandwidth " \
+        sql = "select timestamp, op_name, ccl_tag, group_name, local_rank, remote_rank, rank_size, work_flow_mode, " \
+              "plane_id, context_id, notify_id, stage, role, duration_estimated, src_addr, dst_addr, size, op_type, " \
+              "data_type, link_type, transport_type, rdma_type, stream_id, task_id, " \
+              "0 as batch_id, 0 as start_time, 0 as duration, 0 as bandwidth, 'N/A' as device_task_type " \
               "from {}".format(DBNameConstant.TABLE_KFC_INFO)
         kfc_info_data = self.get_sql_data(sql)
         return [self.KFC_HCCL_INFO_TYPE(*data) for data in kfc_info_data]
@@ -115,7 +118,7 @@ class KfcInfoViewModel(ViewModel):
             return []
         sql = "select timestamp, aicpu_stream_id, aicpu_task_id, stream_id, task_id, " \
               "0 as aicpu_batch_id, 0 as batch_id, type " \
-              "from {}".format(DBNameConstant.TABLE_AICPU_MASTER_STREAM_HCCL_TASK)
+              "from {} order by timestamp".format(DBNameConstant.TABLE_AICPU_MASTER_STREAM_HCCL_TASK)
         aicpu_master_stream_hccl_task = self.get_sql_data(sql)
         aicpu_master_stream_hccl_task = [self.HCCL_OP_MASTER_STREAM_TYPE(*data)
                                          for data in aicpu_master_stream_hccl_task]

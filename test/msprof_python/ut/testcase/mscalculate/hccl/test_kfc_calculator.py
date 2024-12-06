@@ -124,41 +124,41 @@ class TestKfcCalculator(unittest.TestCase):
         ]
         hccl_info_data = [
             (38140478701100, "NOTIFY_WAIT_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 0, 0, 0, 0, 0),
+             266, 0, 0, 0, 52, 0, 0, 0, 0, 0, 'NA'),
             (38140478702000, "SDMA_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 1, 0, 0, 0, 0),
+             266, 0, 0, 0, 52, 1, 0, 0, 0, 0, 'NA'),
             (38140478703300, "NOTIFY_RECORD_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 2, 0, 0, 0, 0),
+             266, 0, 0, 0, 52, 2, 0, 0, 0, 0, 'NA'),
             # taskid翻转
             (38140478705000, "NOTIFY_WAIT_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 1, 0, 0, 0, 0),
+             266, 0, 0, 0, 52, 1, 0, 0, 0, 0, 'NA'),
             (38140478706000, "SDMA_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 2, 0, 0, 0, 0),
+             266, 0, 0, 0, 52, 2, 0, 0, 0, 0, 'NA'),
             # taskid翻转
             (38140478707200, "SDMA_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 1, 0, 0, 0, 0),
+             266, 0, 0, 0, 52, 1, 0, 0, 0, 0, 'NA'),
             (38140478708000, "NOTIFY_RECORD_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 2, 0, 0, 0, 0),
+             266, 0, 0, 0, 52, 2, 0, 0, 0, 0, 'NA'),
             (38140478711000, "SDMA_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 5, 0, 0, 0, 0),
+             266, 0, 0, 0, 52, 5, 0, 0, 0, 0, 'NA'),
             (38140478712100, "SDMA_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 1, 0, 0, 0, 0),
+             266, 0, 0, 0, 52, 1, 0, 0, 0, 0, 'NA'),
             (38140478712200, "NOTIFY_RECORD_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 2, 0, 0, 0, 0),
+             266, 0, 0, 0, 52, 2, 0, 0, 0, 0, 'NA'),
 
             (38140478702000, "NOTIFY_RECORD_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 53, 0, 0, 0, 0, 0),
+             266, 0, 0, 0, 53, 0, 0, 0, 0, 0, 'NA'),
             (38140478703000, "SDMA_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 53, 1, 0, 0, 0, 0),
+             266, 0, 0, 0, 53, 1, 0, 0, 0, 0, 'NA'),
             (38140478704000, "NOTIFY_RECORD_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 53, 2, 0, 0, 0, 0),
+             266, 0, 0, 0, 53, 2, 0, 0, 0, 0, 'NA'),
 
             (38140478901000, "C_CORE_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 54, 0, 0, 0, 0, 0),
+             266, 0, 0, 0, 54, 0, 0, 0, 0, 0, 'NA'),
             (38140478922000, "SDMA_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 54, 1, 0, 0, 0, 0),
+             266, 0, 0, 0, 54, 1, 0, 0, 0, 0, 'NA'),
             (38140478941000, "NOTIFY_WAIT_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 54, 2, 0, 0, 0, 0),
+             266, 0, 0, 0, 54, 2, 0, 0, 0, 0, 'NA'),
         ]
         hccl_op_info_data = [
             (38140478600000, 0, 0, 0, 90, 1, group_name, 19, 0, 8, 0),
@@ -173,7 +173,7 @@ class TestKfcCalculator(unittest.TestCase):
                 mock.patch(NAMESPACE + ".Mc2CommInfoViewModel.get_kfc_stream", return_value=comm_info), \
                 mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=ge_data), \
                 mock.patch(NAMESPACE + ".KfcInfoViewModel.get_sql_data",
-                           side_effect=(master_stream_hccl_task, aicpu_task_flip, hccl_op_info_data, hccl_info_data)), \
+                           side_effect=(aicpu_task_flip, hccl_info_data, master_stream_hccl_task, hccl_op_info_data)), \
                 mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=True), \
                 mock.patch("os.path.exists", return_value=True), \
                 mock.patch("msmodel.step_trace.ts_track_model.TsTrackModel.get_task_flip_data",
@@ -188,4 +188,4 @@ class TestKfcCalculator(unittest.TestCase):
 
     def test_make_default_kfc_info_should_return_len_28_named_tuple(self: any) -> None:
         default_kfc_info = KfcCalculator.make_default_kfc_info()
-        self.assertEqual(28, len(default_kfc_info))
+        self.assertEqual(29, len(default_kfc_info))
