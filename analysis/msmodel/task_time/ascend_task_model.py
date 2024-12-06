@@ -64,7 +64,8 @@ class AscendTaskViewModel(ViewModel):
               "and a.context_id = b.context_id " \
               "and a.device_id = {device_id} " \
               "and b.start_time != {invalid_start} " \
-              "and (a.op_name like '%{pattern}' or {stream_id_condition})" \
+              "and (a.op_name like '%{pattern}' or {stream_id_condition}) " \
+              "order by start_time" \
             .format(DBNameConstant.TABLE_GE_TASK, DBNameConstant.TABLE_ASCEND_TASK, device_id=device_id,
                     invalid_start=NumberConstant.INVALID_TASK_TIME, pattern=op_name_pattern,
                     stream_id_condition=stream_id_condition)

@@ -41,12 +41,15 @@ class FlipCalculator:
             batch_id = 0
             task_index = 0
             flip_index = 0
+            stream_destroy_num = 0
             while task_index < len(data):
                 task = data[task_index]
                 flip = flip_data_stream[flip_index]
                 if task.timestamp >= flip.timestamp:
-                    batch_id = FlipCalculator.get_next_batch_id(data, flip, task_index, batch_id, is_flip_num)
+                    batch_id, stream_destroy_num = FlipCalculator.get_next_batch_id(flip, batch_id,
+                                                                                    is_flip_num, stream_destroy_num)
                     flip_index += 1
+                    FlipCalculator.calibrate_when_flip_task_id_not_zero(data, flip, task_index, batch_id, is_flip_num)
                     continue
                 if isinstance(task, tuple):
                     data[task_index] = task.replace(batch_id=batch_id)
@@ -59,18 +62,20 @@ class FlipCalculator:
 
     @staticmethod
     def get_next_batch_id(
-            data: List[Union[TaskTrackBean, DeviceTask]],
             flip: Union[TaskTrackBean, TaskFlip],
-            task_index: int,
             batch_id: int,
             is_flip_num: bool,
+            stream_destroy_num: int,
     ):
+        if flip.flip_num == FlipCalculator.STREAM_DESTROY_FLIP:
+            stream_destroy_num += 1
+            batch_id += 1
+            return batch_id, stream_destroy_num
         if is_flip_num:
-            batch_id = flip.flip_num
+            batch_id = flip.flip_num + stream_destroy_num
         else:
             batch_id += 1  # next flip
-            FlipCalculator.calibrate_when_flip_task_id_not_zero(data, flip, task_index, batch_id)
-        return batch_id
+        return batch_id, stream_destroy_num
 
     @staticmethod
     def calibrate_when_flip_task_id_not_zero(
@@ -78,8 +83,9 @@ class FlipCalculator:
             flip: Union[TaskTrackBean, TaskFlip],
             task_index: int,
             batch_id: int,
+            is_flip_num: int
     ) -> None:
-        if flip.flip_num == FlipCalculator.STREAM_DESTROY_FLIP:  # do not calibrate when stream destroy
+        if flip.flip_num == FlipCalculator.STREAM_DESTROY_FLIP or is_flip_num:  # do not calibrate when stream destroy
             return
         # Because tasks in multi-threads will apply for task id 0 simultaneously,
         # the flip may not get the task_id 0, we should search backward to calibrate the task
