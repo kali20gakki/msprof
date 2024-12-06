@@ -387,7 +387,7 @@ struct channel_info {
 };
 
 typedef struct channel_list {
-    unsigned int chip_type;  /* 1910/1980/1951 */
+    unsigned int chip_type;
     unsigned int channel_num;
     struct channel_info channel[PROF_CHANNEL_NUM_MAX];
 } channel_list_t;
