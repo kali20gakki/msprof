@@ -32,7 +32,8 @@ class KfcCalculator(ICalculator, MsMultiProcess):
                    ["ascend_data", "group_name", "op_name", "first_timestamp", "iter_id", "op_type",
                     "relay", "retry", "data_type", "alg_type", "count", "rank_size", "source"]),
         {})
-    BLACK_KFC_OP = ["NOTIFY_WAIT", "MEMCPY_ASYNC"]
+    BLACK_KFC_OP_TYPE = ["NOTIFY_WAIT", "MEMCPY_ASYNC"]
+    BLACK_KFC_OP_NAME = ["hcomAicpuInit"]
     MC2_MASTER_STREAM_TASK_TYPE = "C_CORE_SQE"
     FIRST_TASK_TYPE = 0
     LAST_TASK_TYPE = 1
@@ -175,7 +176,7 @@ class KfcCalculator(ICalculator, MsMultiProcess):
         kfc_op_data_stream_id_table = {}
         for data in kfc_op_data:
             # kfc大算子流
-            if data.host_task_type in self.BLACK_KFC_OP:
+            if data.host_task_type in self.BLACK_KFC_OP_TYPE or data.op_name in self.BLACK_KFC_OP_NAME:
                 continue
             group_name = kfc_stream_id_group_table.get(data.stream_id, "N/A")
             kfc_op_data_stream_id_table.setdefault(data.stream_id, []).append(
@@ -282,9 +283,6 @@ class KfcCalculator(ICalculator, MsMultiProcess):
                                                      rank_size=curr_hccl_op_info.rank_size,
                                                      source=source, group_name=curr_hccl_op_info.group_name)
                 else:
-                    logging.error("There is no hccl op info with stream id: %d, task id: %d,"
-                                  " context_id: %d, batch_id: %d", data.stream_id, data.task_id,
-                                  data.context_id, data.batch_id)
                     kfc_op_data[i] = op_data.replace(op_name=op_name, group_name=op_data.group_name, source=source,
                                                      first_timestamp=first_timestamp, iter_id=iter_id, op_type=op_type)
             self.update_op_name_by_group(kfc_op_data)
