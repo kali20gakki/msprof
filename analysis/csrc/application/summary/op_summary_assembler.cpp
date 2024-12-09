@@ -287,7 +287,7 @@ uint8_t OpSummaryAssembler::AssembleData(DataInventory &dataInventory)
         GenerateHcclBody(*hcclOpData);
     }
     CalculateWaitTime();
-    auto fileName = OP_SUMMARY_NAME + timestampStr;
+    auto fileName = OP_SUMMARY_NAME + "_" + timestampStr;
     if (WriteToFile(fileName)) {
         return ASSEMBLE_SUCCESS;
     }

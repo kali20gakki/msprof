@@ -28,6 +28,7 @@ const std::vector<std::string> DATA_PROCESS_LIST{
         PROCESSOR_NAME_COMMUNICATION,
         PROCESSOR_NAME_COMPUTE_TASK_INFO,
         PROCESSOR_NAME_TASK,
+        PROCESSOR_PMU,
 };
 }
 bool ExportSummary::ProcessData(DataInventory &dataInventory)

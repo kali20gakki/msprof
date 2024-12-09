@@ -84,12 +84,12 @@ TEST_F(ExportSummaryUTest, ShouldReturnFalseWhenContextInitFail)
     EXPECT_FALSE(manager.Run());
 }
 
-TEST_F(ExportSummaryUTest, ShouldReturnTrueWhenProcessFail)
+TEST_F(ExportSummaryUTest, ShouldReturnFalseWhenProcessFail)
 {
     ExportSummary manager(PROF_PATH);
     MOCKER_CPP(&Context::Load).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
-    EXPECT_TRUE(manager.Run());
+    EXPECT_FALSE(manager.Run());
 }

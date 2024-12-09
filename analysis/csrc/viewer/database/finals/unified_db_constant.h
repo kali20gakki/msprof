@@ -63,6 +63,9 @@ const std::string TABLE_NAME_TASK = "TASK";
 const std::string PROCESSOR_NAME_COMPUTE_TASK_INFO = "COMPUTE_TASK_INFO";
 const std::string TABLE_NAME_COMPUTE_TASK_INFO = "COMPUTE_TASK_INFO";
 
+const std::string PROCESSOR_NAME_METRIC_SUMMARY = "METRIC_SUMMARY";
+const std::string TABLE_NAME_METRIC_SUMMARY = "METRIC_SUMMARY";
+
 const std::string PROCESSOR_NAME_COMMUNICATION = "COMMUNICATION";
 const std::string PROCESSOR_NAME_COMM_STATISTIC = "COMMUNICATION_STATISTIC";
 const std::string TABLE_NAME_COMMUNICATION_TASK_INFO = "COMMUNICATION_TASK_INFO";
@@ -148,6 +151,7 @@ const std::string PROCESSOR_NAME_NIC_TIMELINE = "NIC_TIMELINE";
 const std::string PROCESSOR_NAME_ROCE_TIMELINE = "ROCE_TIMELINE";
 const std::string AICPU_KERNEL = "AicpuKernel";
 const std::string PROCESSOR_OP_SUMMARY = "OP_SUMMARY";
+const std::string PROCESSOR_PMU = "PMU";
 
 // mstx event type
 const std::unordered_map<std::string, uint16_t> MSTX_EVENT_TYPE_TABLE = {

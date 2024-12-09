@@ -9,6 +9,7 @@ from msinterface.msprof_c_interface import _dump_cann_trace
 from msinterface.msprof_c_interface import _dump_device_data
 from msinterface.msprof_c_interface import _export_unified_db
 from msinterface.msprof_c_interface import _export_timeline
+from msinterface.msprof_c_interface import _export_op_summary
 
 NAMESPACE = 'msinterface.msprof_c_interface'
 
@@ -29,3 +30,7 @@ class TestMsprofCInterface(unittest.TestCase):
     def test_export_timeline(self):
         with mock.patch('importlib.import_module'):
             _export_timeline("")
+
+    def test_export_op_summary(self):
+        with mock.patch('importlib.import_module'):
+            _export_op_summary("")
