@@ -53,6 +53,13 @@ def _export_timeline(project_path: str):
     msprof_analysis_module.parser.export_timeline(project_path)
 
 
+def _export_op_summary(project_path: str):
+    sys.path.append(os.path.realpath(SO_DIR))
+    logging.info("Op Summary will be export by msprof_analysis.so!")
+    msprof_analysis_module = importlib.import_module("msprof_analysis")
+    msprof_analysis_module.parser.export_op_summary(project_path)
+
+
 def dump_cann_trace(project_path: str):
     """
     调用host c化
@@ -65,6 +72,10 @@ def export_timeline(project_path: str):
     调用viewer C化导出
     """
     run_in_subprocess(_export_timeline, project_path)
+
+
+def export_op_summary(project_path: str):
+    run_in_subprocess(_export_op_summary, project_path)
 
 
 def dump_device_data(device_path: str) -> None:

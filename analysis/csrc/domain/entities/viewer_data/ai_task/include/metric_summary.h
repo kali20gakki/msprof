@@ -15,6 +15,7 @@
 
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 #include "analysis/csrc/domain/valueobject/include/task_id.h"
 
@@ -23,6 +24,10 @@ namespace Domain {
 struct MetricSummary {
     std::vector<std::string> labels;
     std::map<TaskId, std::vector<std::vector<std::string>>> data;
+    MetricSummary() = default;
+    MetricSummary(std::vector<std::string> _labels,
+                  std::map<TaskId, std::vector<std::vector<std::string>>> _data)
+        : labels(std::move(_labels)), data(std::move(_data)) {}
 };
 }
 }

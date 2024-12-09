@@ -35,6 +35,7 @@
 #include "analysis/csrc/domain/data_process/system/sys_io_processor.h"
 #include "analysis/csrc/domain/data_process/system/qos_processor.h"
 #include "analysis/csrc/domain/data_process/ai_task/mc2_comm_info_processor.h"
+#include "analysis/csrc/domain/data_process/ai_task/metric_processor.h"
 
 namespace Analysis {
 namespace Domain {
@@ -94,7 +95,9 @@ std::unordered_map<std::string, ProcessorCreator> DataProcessorFactory::processo
     {PROCESSOR_NAME_QOS, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
         MAKE_SHARED_RETURN_VOID(processor, QosProcessor, profPath);}},
     {PROCESSOR_MC2_COMM_INFO, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
-        MAKE_SHARED_RETURN_VOID(processor, Mc2CommInfoProcessor, profPath);}}
+        MAKE_SHARED_RETURN_VOID(processor, Mc2CommInfoProcessor, profPath);}},
+    {PROCESSOR_PMU, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
+        MAKE_SHARED_RETURN_VOID(processor, MetricProcessor, profPath);}}
 };
 
 std::shared_ptr<DataProcessor> DataProcessorFactory::GetDataProcessByName(const std::string &profPath,
@@ -107,5 +110,6 @@ std::shared_ptr<DataProcessor> DataProcessorFactory::GetDataProcessByName(const 
     }
     return processor;
 }
-}
-}
+
+} // Domain
+} // Analysis

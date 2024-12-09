@@ -44,6 +44,7 @@ from framework.load_info_manager import LoadInfoManager
 from msinterface.msprof_c_interface import export_unified_db
 from msinterface.msprof_c_interface import dump_device_data
 from msinterface.msprof_c_interface import export_timeline
+from msinterface.msprof_c_interface import export_op_summary
 from msinterface.msprof_export_data import MsProfExportDataUtils
 from msinterface.msprof_output_summary import MsprofOutputSummary
 from msinterface.msprof_timeline import MsprofTimeline
@@ -290,6 +291,14 @@ class ExportCommand:
         message = "The model_id obtained from the GE doesn't overlap that in the step_trace. The reported data " \
                   "may be lost and the profiling will stop. Check whether the reported data is correct."
         raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
+
+    @staticmethod
+    def _check_export_op_summary_with_so():
+        """
+        有so文件，且是全导，可以使用C++来导出op_summary, 现在暂只支持910B
+        """
+        return (ProfilingScene().is_cpp_parse_enable() and ProfilingScene().is_all_export() and
+                ChipManager().is_chip_v4())
 
     def process(self: any) -> None:
         """
@@ -734,6 +743,9 @@ class ExportCommand:
             return
         # device
         ProfilingScene().set_mode(mode)
+        # viewer op_summary
+        if self._check_export_op_summary_with_so():
+            export_op_summary(path_table.get("collection_path"))
         device_paths_list = path_table.get(StrConstant.DEVICE_PATH, [])
         for device_path in device_paths_list:
             self._view_data(device_path)
