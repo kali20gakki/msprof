@@ -178,6 +178,9 @@ struct ProfileParams : BaseInfo {
     // delay and duration time
     std::string delayTime;
     std::string durationTime;
+
+    // dynamic
+    std::string dynamic;
     bool isSubscribe;
 
     ProfileParams()
@@ -214,7 +217,7 @@ struct ProfileParams : BaseInfo {
           exportType(DEFAULT_PROFILING_EXPORT_TYPE),
           exportSummaryFormat(PROFILING_SUMMARY_FORMAT), exportIterationId(DEFAULT_INTERATION_ID),
           exportModelId(DEFAULT_MODEL_ID), usedParams(), dataTypeConfig(0), npuAppMemProfiling("on"),
-          npuModuleMemProfiling("on"), analyzeSwitch("off"), delayTime(""), durationTime(""),
+          npuModuleMemProfiling("on"), analyzeSwitch("off"), delayTime(""), durationTime(""), dynamic("off"),
           analyzeRuleSwitch("communication,communication_matrix"), is_shell(FALSE), isSubscribe(false)
     {
     }
@@ -384,6 +387,7 @@ struct ProfileParams : BaseInfo {
         SetUint64Value(object, MSG_STR(dataTypeConfig), dataTypeConfig);
         SET_VALUE(object, delayTime);
         SET_VALUE(object, durationTime);
+        SET_VALUE(object, dynamic);
         SET_VALUE(object, qosProfiling);
         SET_VALUE(object, qosEvents);
         SET_VALUE(object, isSubscribe);
@@ -520,6 +524,7 @@ struct ProfileParams : BaseInfo {
         GetUint64Value(object, MSG_STR(dataTypeConfig), dataTypeConfig, 0);
         FROM_STRING_VALUE(object, delayTime);
         FROM_STRING_VALUE(object, durationTime);
+        FROM_STRING_VALUE(object, dynamic);
         FROM_BOOL_VALUE(object, isSubscribe);
     }
 

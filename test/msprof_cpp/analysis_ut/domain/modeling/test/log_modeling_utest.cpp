@@ -334,6 +334,146 @@ TEST_F(LogModelingUTest, ShouldGetRightDeviceTaskDataWhenInputFlippedTasks)
     CheckFilppedTasks(dataInventory_);
 }
 
+/*
+ * 测试log匹配存在开始和结束task数量不一致的情况，测试两种场景：
+ * 当开始的任务和结束的任务数量不一致时，按照相同streamId-taskId-contextId的数据，先执行的任务结束时间比后续执行任务的开始
+ * 时间小的规则进行匹配。例如；
+ * start:  [1, 4, 5, 9, 13, 25]                   [4, 6, 9, 13]
+ * end:    [3, 7, 10, 15]                      [3, 5, 8, 10, 15]
+ * res:    [1-3, 5-7, 9-10, 13-15]             [4-5, 6-8, 9-10, 13-15]
+ */
+static std::vector<HalLogData> GenerateStartMoreThanEndLogData()
+{
+    constexpr size_t startSize = 6;
+    constexpr size_t endSize = 4;
+    static const uint64_t S_TIME_SQE[startSize] = {100, 400, 500, 900, 1300, 2500};
+    static const uint64_t E_TIME_SQE[endSize] = {300, 700, 1000, 1500};
+    std::vector<HalLogData> res;
+    HalLogData logIns{};
+    for (size_t i = 0; i < startSize; ++i) {
+        logIns.hd.taskId.streamId = 1;
+        logIns.hd.taskId.taskId = 1;
+        logIns.hd.taskId.contextId = 1;
+        logIns.hd.timestamp = S_TIME_SQE[i];
+        logIns.type = ACSQ_LOG;
+        logIns.acsq.isEndTimestamp = false;
+        logIns.acsq.timestamp = S_TIME_SQE[i];
+        logIns.acsq.taskType = 3; // 测试任务类型为3
+        res.push_back(logIns);
+        logIns.type = FFTS_LOG;
+        logIns.ffts.isEndTimestamp = false;
+        logIns.ffts.subTaskType = 10; // 测试ffts+任务类型为10
+        logIns.ffts.timestamp = S_TIME_SQE[i];
+        logIns.hd.taskId.contextId = UINT32_MAX;
+        res.push_back(logIns);
+    }
+
+    for (size_t j = 0; j < endSize; ++j) {
+        logIns.hd.taskId.streamId = 1;
+        logIns.hd.taskId.taskId = 1;
+        logIns.hd.taskId.contextId = 1;
+        logIns.hd.timestamp = E_TIME_SQE[j];
+        logIns.type = ACSQ_LOG;
+        logIns.acsq.isEndTimestamp = true;
+        logIns.acsq.timestamp = E_TIME_SQE[j];
+        logIns.acsq.taskType = 3; // 测试任务类型为3
+        res.push_back(logIns);
+        logIns.type = FFTS_LOG;
+        logIns.ffts.isEndTimestamp = true;
+        logIns.ffts.subTaskType = 10; // 测试ffts+任务类型为10
+        logIns.ffts.timestamp = E_TIME_SQE[j];
+        logIns.hd.taskId.contextId = UINT32_MAX;
+        res.push_back(logIns);
+    }
+    return res;
+}
+
+TEST_F(LogModelingUTest, ShouldGetDeviceTaskTheSameAsEndTaskWhenStartTaskMoreThanEndTask)
+{
+    std::vector<HalLogData> logData = GenerateStartMoreThanEndLogData();
+    auto logDataS = dataInventory_.GetPtr<std::vector<HalLogData>>();
+    logDataS->swap(logData);
+    Domain::LogModeling modeling;
+    DeviceContext context;
+    ASSERT_EQ(modeling.Run(dataInventory_, context), Analysis::ANALYSIS_OK);
+    auto deviceTask = dataInventory_.GetPtr<std::map<TaskId, std::vector<DeviceTask>>>();
+    EXPECT_EQ(2ul, deviceTask->size());
+    std::vector<uint64_t> expectStart{100, 500, 900, 1300};
+    std::vector<uint64_t> expectEnd{300, 700, 1000, 1500};
+    for (const auto& it : *deviceTask) {
+        for (size_t i = 0; i < it.second.size(); ++i) {
+            EXPECT_EQ(expectStart[i], it.second[i].taskStart);
+            EXPECT_EQ(expectEnd[i], it.second[i].taskEnd);
+        }
+    }
+}
+
+static std::vector<HalLogData> GenerateStartLessThanEnd()
+{
+    constexpr size_t startSize = 4;
+    constexpr size_t endSize = 5;
+    static const uint64_t S_TIME_SQE[startSize] = {400, 600, 900, 1300};
+    static const uint64_t E_TIME_SQE[endSize] = {300, 500, 800, 1000, 1500};
+    std::vector<HalLogData> res;
+    HalLogData logIns{};
+    for (size_t i = 0; i < startSize; ++i) {
+        logIns.hd.taskId.streamId = 1;
+        logIns.hd.taskId.taskId = 1;
+        logIns.hd.taskId.contextId = 1;
+        logIns.hd.timestamp = S_TIME_SQE[i];
+        logIns.type = ACSQ_LOG;
+        logIns.acsq.isEndTimestamp = false;
+        logIns.acsq.timestamp = S_TIME_SQE[i];
+        logIns.acsq.taskType = 3; // 测试任务类型为3
+        res.push_back(logIns);
+        logIns.type = FFTS_LOG;
+        logIns.ffts.isEndTimestamp = false;
+        logIns.ffts.subTaskType = 10; // 测试ffts+任务类型为10
+        logIns.ffts.timestamp = S_TIME_SQE[i];
+        logIns.hd.taskId.contextId = UINT32_MAX;
+        res.push_back(logIns);
+    }
+
+    for (size_t j = 0; j < endSize; ++j) {
+        logIns.hd.taskId.streamId = 1;
+        logIns.hd.taskId.taskId = 1;
+        logIns.hd.taskId.contextId = 1;
+        logIns.hd.timestamp = E_TIME_SQE[j];
+        logIns.type = ACSQ_LOG;
+        logIns.acsq.isEndTimestamp = true;
+        logIns.acsq.timestamp = E_TIME_SQE[j];
+        logIns.acsq.taskType = 3; // 测试任务类型为3
+        res.push_back(logIns);
+        logIns.type = FFTS_LOG;
+        logIns.ffts.isEndTimestamp = true;
+        logIns.ffts.subTaskType = 10; // 测试ffts+任务类型为10
+        logIns.ffts.timestamp = E_TIME_SQE[j];
+        logIns.hd.taskId.contextId = UINT32_MAX;
+        res.push_back(logIns);
+    }
+    return res;
+}
+
+TEST_F(LogModelingUTest, ShouldGetDeviceTaskTheSameAsStartTaskWhenStartTaskLessThanEndTask)
+{
+    std::vector<HalLogData> logData = GenerateStartLessThanEnd();
+    auto logDataS = dataInventory_.GetPtr<std::vector<HalLogData>>();
+    logDataS->swap(logData);
+    Domain::LogModeling modeling;
+    DeviceContext context;
+    ASSERT_EQ(modeling.Run(dataInventory_, context), Analysis::ANALYSIS_OK);
+    auto deviceTask = dataInventory_.GetPtr<std::map<TaskId, std::vector<DeviceTask>>>();
+    EXPECT_EQ(2ul, deviceTask->size());
+    std::vector<uint64_t> expectStart{400, 600, 900, 1300};
+    std::vector<uint64_t> expectEnd{500, 800, 1000, 1500};
+    for (const auto& it : *deviceTask) {
+        for (size_t i = 0; i < it.second.size(); ++i) {
+            EXPECT_EQ(expectStart[i], it.second[i].taskStart);
+            EXPECT_EQ(expectEnd[i], it.second[i].taskEnd);
+        }
+    }
+}
+
 }
 
 }

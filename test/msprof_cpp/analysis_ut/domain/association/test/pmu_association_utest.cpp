@@ -53,7 +53,7 @@ static std::vector<HalPmuData> GenerateHalPmuData()
     constexpr size_t SEQ_NUM = 20;
     static const uint16_t TASK_ID_SEQ[SEQ_NUM]{1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
     static const uint16_t BATCH_ID_SEQ[SEQ_NUM]{1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 1, 1, 1, 1, 1, 1};
-    static const uint64_t TIMESTAMP_SEQ[SEQ_NUM]{100, 150, 200, 250, 300, 110, 110, 110, 160, 160, 160, 210, 210, 210,
+    static const uint64_t TIMESTAMP_SEQ[SEQ_NUM]{100, 150, 200, 250, 300, 110, 110, 110, 160, 160, 160, 260, 260, 260,
                                                  310, 310, 310, 310, 310, 310};
     static const HalPmuType PMU_TYPE_SEQ[SEQ_NUM]{PMU, PMU, PMU, PMU, PMU, BLOCK_PMU, BLOCK_PMU, BLOCK_PMU, BLOCK_PMU,
                                                   BLOCK_PMU, BLOCK_PMU, BLOCK_PMU, BLOCK_PMU, BLOCK_PMU, BLOCK_PMU,
@@ -88,21 +88,31 @@ static std::map<TaskId, std::vector<DeviceTask>> GenerateDeviceTask()
     res1.emplace_back();
     res1.back().mixBlockDim = 3;  // 3为从核数
     res1.back().blockDim = 8;  // 8为主核数
+    res1.back().taskStart = 100; // 第一个task开始时间为100
+    res1.back().taskEnd = 130;  // 第一个task结束时间为130
     res1.emplace_back();
     res1.back().mixBlockDim = 3;  // 3为从核数
     res1.back().blockDim = 8;  // 8为主核数
+    res1.back().taskStart = 150; // 第2个task开始时间为150
+    res1.back().taskEnd = 170;  // 第2个task结束时间为170
     auto& res2 = deviceTask[{1, 2, 1, 1}];
     res2.emplace_back();
     res2.back().mixBlockDim = 3;  // 3为从核数
     res2.back().blockDim = 8;  // 8为主核数
+    res2.back().taskStart = 200; // 第3个task开始时间为200
+    res2.back().taskEnd = 230;  // 第3个task结束时间为230
     auto& res3 = deviceTask[{1, 3, 1, 1}];
     res3.emplace_back();
     res3.back().mixBlockDim = 3;  // 3为从核数
     res3.back().blockDim = 8;  // 8为主核数
+    res3.back().taskStart = 250; // 第4个task开始时间为250
+    res3.back().taskEnd = 270; // 第4个task结束时间为270
     auto& res4 = deviceTask[{1, 1, 2, 1}];
     res4.emplace_back();
     res4.back().mixBlockDim = 3;  // 3为从核数
     res4.back().blockDim = 8;  // 8为主核数
+    res4.back().taskStart = 300; // 第5个task开始时间为300
+    res4.back().taskEnd = 330; // 第5个task结束时间为330
     return deviceTask;
 }
 
@@ -329,6 +339,132 @@ TEST_F(PmuAssociationUTest, ShouldReturnErrorWhenEventSizeNotEqualWithPmuSize)
     auto deviceTaskS = dataInventory_.GetPtr<std::map<TaskId, std::vector<Domain::DeviceTask>>>();
     deviceTaskS->swap(deviceTask);
     ASSERT_EQ(ANALYSIS_ERROR, pmuAssociation.Run(dataInventory_, context));
+}
+
+/*
+ * 测试PMU数据比task数据多，例如：
+ * pmu   [100, 500, 800]
+ * task  [480-600, 800-900]
+ * res   [480-600(500), 800-900(800)]
+ */
+static std::vector<HalPmuData> GeneratePMUMoreThanTask()
+{
+    std::vector<HalPmuData> pmuData;
+    constexpr size_t pmuSize = 3;
+    static const uint64_t TIME_SQE[pmuSize]{100, 500, 800};
+    HalPmuData pmuInfo{};
+    for (size_t i = 0; i < pmuSize; ++i) {
+        pmuInfo.type = PMU;
+        pmuInfo.hd.taskId.streamId = TEST_ID;
+        pmuInfo.hd.taskId.taskId = TEST_ID;
+        pmuInfo.hd.taskId.batchId = TEST_ID;
+        pmuInfo.hd.taskId.contextId = TEST_ID;
+        pmuInfo.hd.timestamp = TIME_SQE[i];
+        pmuInfo.pmu.acceleratorType = AIC;
+        pmuInfo.pmu.coreType = 0;
+        pmuInfo.pmu.totalCycle = 100 * (i + 1);  // 100为测试cycle倍数
+        for (size_t j = 0; j < DEFAULT_PMU_LENGTH; ++j) {
+            pmuInfo.pmu.pmuList[j] = j;
+        }
+        pmuData.push_back(pmuInfo);
+    }
+    return pmuData;
+}
+
+static std::map<TaskId, std::vector<DeviceTask>> GenerateDeviceTaskForQueue()
+{
+    std::map<TaskId, std::vector<DeviceTask>> deviceTask;
+    auto& res1 = deviceTask[{1, 1, 1, 1}];
+    res1.emplace_back();
+    res1.back().mixBlockDim = 3;  // 3为从核数
+    res1.back().blockDim = 8;  // 8为主核数
+    res1.back().taskStart = 480; // 第一个task开始时间为480
+    res1.back().taskEnd = 600;  // 第一个task结束时间为600
+    res1.emplace_back();
+    res1.back().mixBlockDim = 3;  // 3为从核数
+    res1.back().blockDim = 8;  // 8为主核数
+    res1.back().taskStart = 800; // 第2个task开始时间为800
+    res1.back().taskEnd = 900;  // 第2个task结束时间为900
+    return deviceTask;
+}
+
+TEST_F(PmuAssociationUTest, ShouldMergeRightPmuWhenPmuMoreThanTask)
+{
+    PmuAssociation pmuAssociation;
+    DeviceContext context;
+    SetDeviceContext(context);
+    auto pmuData = GeneratePMUMoreThanTask();
+    auto pmuDataS = dataInventory_.GetPtr<std::vector<HalPmuData>>();
+    pmuDataS->swap(pmuData);
+    auto deviceTask = GenerateDeviceTaskForQueue();
+    auto deviceTaskS = dataInventory_.GetPtr<std::map<TaskId, std::vector<Domain::DeviceTask>>>();
+    deviceTaskS->swap(deviceTask);
+    ASSERT_EQ(ANALYSIS_OK, pmuAssociation.Run(dataInventory_, context));
+    auto result = dataInventory_.GetPtr<std::map<TaskId, std::vector<Domain::DeviceTask>>>();
+    ASSERT_EQ(1ul, result->size());
+    std::vector<uint64_t> expectCycle{200, 300};
+    for (const auto& it : *result) {
+        int i = 0;
+        for (const auto& data : it.second) {
+            auto res = dynamic_cast<PmuInfoSingleAccelerator *>(data.pmuInfo.get());
+            EXPECT_EQ(expectCycle[i], res->totalCycles);
+            i++;
+        }
+    }
+}
+
+/*
+ * 测试PMU数据比task数据少，例如：
+ * pmu   [800]
+ * task  [480-600, 800-900]
+ * res   [800-900(800)]
+ */
+static std::vector<HalPmuData> GeneratePMULessThanTask()
+{
+    std::vector<HalPmuData> pmuData;
+    HalPmuData pmuInfo{};
+    pmuInfo.type = PMU;
+    pmuInfo.hd.taskId.streamId = TEST_ID;
+    pmuInfo.hd.taskId.taskId = TEST_ID;
+    pmuInfo.hd.taskId.batchId = TEST_ID;
+    pmuInfo.hd.taskId.contextId = TEST_ID;
+    pmuInfo.hd.timestamp = 800; // pmu时间为800
+    pmuInfo.pmu.acceleratorType = AIC;
+    pmuInfo.pmu.coreType = 0;
+    pmuInfo.pmu.totalCycle = 100; // totalCycle为100
+    for (size_t j = 0; j < DEFAULT_PMU_LENGTH; ++j) {
+        pmuInfo.pmu.pmuList[j] = j;
+    }
+    pmuData.push_back(pmuInfo);
+    return pmuData;
+}
+
+TEST_F(PmuAssociationUTest, ShouldGetDeviceTaskWithPmuTheSameAsPmuCount)
+{
+    PmuAssociation pmuAssociation;
+    DeviceContext context;
+    SetDeviceContext(context);
+    auto pmuData = GeneratePMULessThanTask();
+    auto pmuDataS = dataInventory_.GetPtr<std::vector<HalPmuData>>();
+    pmuDataS->swap(pmuData);
+    auto deviceTask = GenerateDeviceTaskForQueue();
+    auto deviceTaskS = dataInventory_.GetPtr<std::map<TaskId, std::vector<Domain::DeviceTask>>>();
+    deviceTaskS->swap(deviceTask);
+    ASSERT_EQ(ANALYSIS_OK, pmuAssociation.Run(dataInventory_, context));
+    auto result = dataInventory_.GetPtr<std::map<TaskId, std::vector<Domain::DeviceTask>>>();
+    ASSERT_EQ(1ul, result->size());
+    for (const auto& it : *result) {
+        int i = 0;
+        for (const auto& data : it.second) {
+            auto res = dynamic_cast<PmuInfoSingleAccelerator *>(data.pmuInfo.get());
+            if (i == 0) {
+                EXPECT_EQ(AcceleratorType::INVALID, data.acceleratorType);
+            } else {
+                EXPECT_EQ(100ul, res->totalCycles);
+            }
+            i++;
+        }
+    }
 }
 }
 }

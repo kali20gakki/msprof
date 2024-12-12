@@ -110,6 +110,9 @@ struct SampleInfo {
     ProfilingMode aivProfilingMode = ProfilingMode::PROFILING_UNKOWN;
     uint32_t aivSamplingInterval = 0;
 
+    // dynamic
+    bool dynamic = false;
+
     SampleInfo() : aiCoreProfilingEvents(DEFAULT_PMU_LENGTH), aivProfilingEvents(DEFAULT_PMU_LENGTH) {}
 };
 

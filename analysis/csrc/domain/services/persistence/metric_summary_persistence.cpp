@@ -165,13 +165,20 @@ uint32_t MetricSummaryPersistence::GenerateAndSavePmuData(std::map<TaskId, std::
     ids.reserve(CHIP4_DEFAULT_COLUMN_NUM);
     std::unordered_map<PmuHeaderType, std::vector<uint64_t>> idMap;
     std::unordered_map<PmuHeaderType, std::vector<double>> resultMap;
+    uint64_t count;
     for (auto& it : deviceTask) {
+        count = 0;
         ids.clear();
         ids.push_back(it.first.taskId);
         ids.push_back(it.first.streamId);
         ids.push_back(it.first.contextId);
         ids.push_back(it.first.batchId);
         for (auto& task : it.second) {
+            if (dynamicFlag && count == 0 && it.second.size() > 1) { // 动态profiling第一个算子的PMU不落盘
+                count++;
+                continue;
+            }
+            count++;
             idMap[TASK_ID] = ids;
             sqlite3_reset(stmt_);
             if (!ConstructData(idMap, resultMap, task, aicLength_, aivLength_)) {
@@ -252,6 +259,7 @@ uint32_t MetricSummaryPersistence::ProcessEntry(DataInventory& dataInventory, co
     }
     SampleInfo sampleInfo;
     deviceContext.Getter(sampleInfo);
+    dynamicFlag = sampleInfo.dynamic;
     aicCalculator_ = MetricCalculatorFactory::GetAicCalculator(sampleInfo.aiCoreMetrics);
     aivCalculator_ = MetricCalculatorFactory::GetAivCalculator(sampleInfo.aivMetrics);
     if (aicCalculator_ == nullptr || aivCalculator_ == nullptr) {

@@ -26,10 +26,13 @@ using namespace Viewer::Database;
 using ProcessedDataFormat = std::vector<std::tuple<uint64_t, int32_t, uint32_t, uint16_t, uint32_t, uint32_t, double,
         double, std::string, std::string, int64_t>>;
 
-ProcessedDataFormat GenerateAscendTaskData(std::vector<TopDownTask>& ascendTask)
+ProcessedDataFormat GenerateAscendTaskData(std::vector<TopDownTask>& ascendTask, bool dynamicFlag)
 {
     ProcessedDataFormat processedData;
     for (auto& task : ascendTask) {
+        if (dynamicFlag && task.isFirst) { // 动态profiling且标识位true的数据不落盘
+            continue;
+        }
         double start_time = 0.0;
         double duration = 0.0;
         if (IsDoubleEqual(task.startTime, INVALID_TIME)) {
@@ -53,6 +56,8 @@ uint32_t AscendTaskPersistence::ProcessEntry(DataInventory& dataInventory, const
 {
     const DeviceContext& deviceContext = static_cast<const DeviceContext&>(context);
     auto ascendTask = dataInventory.GetPtr<std::vector<TopDownTask>>();
+    SampleInfo info;
+    deviceContext.Getter(info);
     if (!ascendTask) {
         ERROR("ascend task data is null.");
         return ANALYSIS_ERROR;
@@ -66,7 +71,11 @@ uint32_t AscendTaskPersistence::ProcessEntry(DataInventory& dataInventory, const
     std::string dbPath = Utils::File::PathJoin({deviceContext.GetDeviceFilePath(), SQLITE, ascendTaskDB.dbName});
     INFO("Start to process %.", dbPath);
     MAKE_SHARED_RETURN_VALUE(ascendTaskDB.dbRunner, DBRunner, ANALYSIS_ERROR, dbPath);
-    auto data = GenerateAscendTaskData(*ascendTask);
+    auto data = GenerateAscendTaskData(*ascendTask, info.dynamic);
+    if (data.empty() && info.dynamic) {
+        WARN("The first task in dynamic is unbelievably, so remove the first data");
+        return ANALYSIS_OK;
+    }
     auto res = SaveData(data, ascendTaskDB, dbPath);
     if (res) {
         INFO("Process % done!", ascendTaskDB.tableName);

@@ -51,6 +51,7 @@ private:
     int aivLength_ = 0;
     sqlite3 *db_ = nullptr;
     sqlite3_stmt *stmt_ = nullptr;
+    bool dynamicFlag = false;
 };
 
 class MetricSummaryDB : public Database {
