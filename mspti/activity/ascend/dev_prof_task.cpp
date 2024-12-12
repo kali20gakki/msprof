@@ -80,6 +80,7 @@ std::vector<std::unique_ptr<DevProfTask>> DevProfTaskFactory::CreateTasks(uint32
 msptiResult DevProfTask::Start()
 {
     if (!t_.joinable()) {
+        StartTask();
         t_ = std::thread(std::bind(&DevProfTask::Run, this));
     }
     return MSPTI_SUCCESS;
@@ -101,7 +102,6 @@ msptiResult DevProfTask::Stop()
 void DevProfTask::Run()
 {
     pthread_setname_np(pthread_self(), "DevProfTsak");
-    StartTask();
     {
         std::unique_lock<std::mutex> lk(cv_mtx_);
         cv_.wait(lk, [&] () {
