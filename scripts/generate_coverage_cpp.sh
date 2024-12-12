@@ -8,6 +8,8 @@ TOP_DIR=${CUR_DIR}/..
 COV_DIR=${TOP_DIR}/test/build_llt/output/cpp_coverage
 BUILD_DIR=${TOP_DIR}/test/build_llt
 
+LCOV_RC="--rc lcov_branch_coverage=1 --rc geninfo_no_exception_branch=1"
+
 if [ ! -d ${COV_DIR} ] ; then
     mkdir -p ${COV_DIR}
 fi
@@ -15,14 +17,14 @@ fi
 # coverage function
 generate_coverage(){
     echo "********************** Generate $2 Coverage Start.************************"
-    lcov -c -d $1 -o ${COV_DIR}/lcov_$2.info --rc lcov_branch_coverage=1
-    lcov -r ${COV_DIR}/lcov_$2.info '*c++*' -o ${COV_DIR}/lcov_$2.info --rc lcov_branch_coverage=1
-    lcov -r ${COV_DIR}/lcov_$2.info '*msprof_llt*' -o ${COV_DIR}/lcov_$2.info --rc lcov_branch_coverage=1
-    lcov -r ${COV_DIR}/lcov_$2.info '*msprof_cpp*' -o ${COV_DIR}/lcov_$2.info --rc lcov_branch_coverage=1
-    lcov -r ${COV_DIR}/lcov_$2.info '*ascend_protobuf*' -o ${COV_DIR}/lcov_$2.info --rc lcov_branch_coverage=1
-    lcov -r ${COV_DIR}/lcov_$2.info '*gtest*' -o ${COV_DIR}/lcov_$2.info --rc lcov_branch_coverage=1
-    lcov -r ${COV_DIR}/lcov_$2.info '*opensource*' -o ${COV_DIR}/lcov_$2.info --rc lcov_branch_coverage=1
-    lcov -r ${COV_DIR}/lcov_$2.info '*proto*' -o ${COV_DIR}/lcov_$2.info --rc lcov_branch_coverage=1
+    lcov -c -d $1 -o ${COV_DIR}/lcov_$2.info $LCOV_RC
+    lcov -r ${COV_DIR}/lcov_$2.info '*c++*' -o ${COV_DIR}/lcov_$2.info $LCOV_RC
+    lcov -r ${COV_DIR}/lcov_$2.info '*msprof_llt*' -o ${COV_DIR}/lcov_$2.info $LCOV_RC
+    lcov -r ${COV_DIR}/lcov_$2.info '*msprof_cpp*' -o ${COV_DIR}/lcov_$2.info $LCOV_RC
+    lcov -r ${COV_DIR}/lcov_$2.info '*ascend_protobuf*' -o ${COV_DIR}/lcov_$2.info $LCOV_RC
+    lcov -r ${COV_DIR}/lcov_$2.info '*gtest*' -o ${COV_DIR}/lcov_$2.info $LCOV_RC
+    lcov -r ${COV_DIR}/lcov_$2.info '*opensource*' -o ${COV_DIR}/lcov_$2.info $LCOV_RC
+    lcov -r ${COV_DIR}/lcov_$2.info '*proto*' -o ${COV_DIR}/lcov_$2.info $LCOV_RC
     echo "********************** Generate $2 Coverage Stop.*************************"
 }
 #----------------------------------------------------------
@@ -72,7 +74,7 @@ for test in ${test_obj[@]} ; do
 done
 
 echo "${str_test}"
-lcov ${str_test} -o ${COV_DIR}/ut_report.info --rc lcov_branch_coverage=1
+lcov ${str_test} -o ${COV_DIR}/ut_report.info $LCOV_RC
 genhtml ${COV_DIR}/ut_report.info -o ${COV_DIR}/result --branch-coverage
 echo "report: ${COV_DIR}"
 
