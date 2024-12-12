@@ -708,6 +708,7 @@ class TablesConfig(MetaConfig):
             ('end', 'REAL, null'),
             ('is_dynamic', 'TEXT, null'),
             ('connection_id', 'INTEGER, null'),
+            ('kfc_connection_id', 'INTEGER, null'),
             ('relay', 'INTEGER, null'),
             ('retry', 'INTEGER, null'),
             ('data_type', 'TEXT, null'),

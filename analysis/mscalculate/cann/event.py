@@ -26,6 +26,7 @@ class Event:
         # additional record
         self.additional_record: List[AdditionalRecord] = list()
         self.id = self._ID
+        self.kfc_node_event = None
         Event._ID += 1
 
     def __lt__(self, other):

@@ -132,7 +132,7 @@ protected:
         hcclOpCompactInfo->data.hcclopInfo = *hcclOp;
 
         auto desc = std::make_shared<HcclBigOpDesc>(1, 1, 1, 1, 1, 1, 1, std::shared_ptr<MsprofCompactInfo>(trace),
-                                                    std::shared_ptr<MsprofCompactInfo>(hcclOpCompactInfo));
+                                                    std::shared_ptr<MsprofCompactInfo>(hcclOpCompactInfo), -1);
         auto op = std::make_shared<Operator>(desc, 0, Entities::OpType::OPTYPE_HCCL_BIG);
         auto hcclBigOps = std::make_shared<HCCLBigOpDescs>();
         hcclBigOps->emplace_back(op);

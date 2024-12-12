@@ -237,12 +237,18 @@ void TreeAnalyzer::UpdateHcclBigOpDescs(const std::shared_ptr<TreeNode> &node)
     } else {
         ERROR("Not report hccl op info for api: %", model_id);
     }
+    int64_t kfcConnectionId = INVALID_VALUE;
+    for (const auto &child: nodeNode->children) {
+        if (child->event->info.level == MSPROF_REPORT_NODE_LEVEL) {
+            kfcConnectionId = child->event->id;
+        }
+    }
 
     auto nodeApi = nodeNode->event->apiPtr;
     std::shared_ptr<HcclBigOpDesc> desc;
     MAKE_SHARED_RETURN_VOID(desc, HcclBigOpDesc, nodeApi->beginTime,
                             nodeApi->endTime, deviceId, model_id, index_id,
-                            connectionId, track->threadId, nodeDesc, hcclOpDesc);
+                            connectionId, track->threadId, nodeDesc, hcclOpDesc, kfcConnectionId);
     std::shared_ptr<Operator> op;
     MAKE_SHARED_RETURN_VOID(op, Operator, desc, nodeApi->itemId, OpType::OPTYPE_HCCL_BIG);
     hcclBigOpDescs_.emplace_back(op);

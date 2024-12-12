@@ -5,11 +5,10 @@
 import logging
 
 from common_func.constant import Constant
-from common_func.msprof_exception import ProfException
 from mscalculate.cann.cann_event_generator import CANNThreadDB
 from mscalculate.cann.event import Event
 from mscalculate.cann.tree import TreeNode
-from profiling_bean.db_dto.api_data_dto import ApiDataDto, invalid_dto
+from profiling_bean.db_dto.api_data_dto import invalid_dto
 
 
 class CANNAnalysisChain:
@@ -116,4 +115,5 @@ class CANNAnalysisChain:
                 # [=======================Node(hcom_allReduce_)==============================]
                 #      [===Node(hcomAicpuInit)==]     [===Node(allreduceAicpuKernel)==]
                 self.last_event_record[event.cann_level] = parent.event
+                parent.event.kfc_node_event = event
             parent.add_child(child_tree)

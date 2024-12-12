@@ -141,15 +141,15 @@ class TestHCCLModel(TestDirCRBaseModel):
         # relay, retry, data_type, alg_type, count, group_name
         hccl_op_data = [
             (0, 1, 1, 1, broadcast_op_name, task_type, broadcast_op_name, 1, 1, 1, 1,
-             1, 0, "INT8", alg_type, 123, group_name),
+             1, 0, "INT8", alg_type, 123, group_name, -1),
             (0, 1, 1, 1, broadcast_op_name, task_type, broadcast_op_name, 2, 1, 1, 1,
-             1, 0, "INT16", alg_type, 489, group_name),
+             1, 0, "INT16", alg_type, 489, group_name, -1),
             (0, 1, 1, 1, broadcast_op_name, task_type, broadcast_op_name, 3, 1, 1, 1,
-             1, 0, "INT32", alg_type, 984, group_name),
+             1, 0, "INT32", alg_type, 984, group_name, -1),
             (1, 1, 1, 1, broadcast_op_name, task_type, broadcast_op_name, 3, 1, 1, 1,
-             1, 0, "INT64", alg_type, 892, group_name),
+             1, 0, "INT64", alg_type, 892, group_name, -1),
             (2, 1, 1, 1, broadcast_op_name, task_type, broadcast_op_name, 4, 1, 1, 1,
-             1, 0, "FP16", alg_type, 369, group_name),
+             1, 0, "FP16", alg_type, 369, group_name, -1),
         ]
 
         model = HcclViewModel(self.PROF_DEVICE_DIR, DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_OP])
@@ -185,15 +185,15 @@ class TestHCCLModel(TestDirCRBaseModel):
         # relay, retry, data_type, alg_type, count, group_name
         hccl_op_data = [
             (0, 1, 1, 1, broadcast_op_name, task_type, broadcast_op_name, 1, 1, 1, 1,
-             1, 0, "INT8", alg_type, 123, group_name),
+             1, 0, "INT8", alg_type, 123, group_name, -1),
             (0, 2, 2, 1, broadcast_op_name, task_type, broadcast_op_name, 2, 1, 1, 1,
-             1, 0, "INT16", alg_type, 146, group_name),
+             1, 0, "INT16", alg_type, 146, group_name, -1),
             (0, 2, 2, 1, broadcast_op_name, task_type, broadcast_op_name, 3, 1, 1, 1,
-             1, 0, "INT32", alg_type, 692, group_name),
+             1, 0, "INT32", alg_type, 692, group_name, -1),
             (1, 1, 1, 1, broadcast_op_name, task_type, broadcast_op_name, 3, 1, 1, 1,
-             1, 0, "INT64", alg_type, 437, group_name),
+             1, 0, "INT64", alg_type, 437, group_name, -1),
             (2, 3, 3, 1, broadcast_op_name, task_type, broadcast_op_name, 4, 1, 1, 1,
-             1, 0, "FP16", alg_type, 831, group_name),
+             1, 0, "FP16", alg_type, 831, group_name, -1),
         ]
 
         model = HcclViewModel(self.PROF_DEVICE_DIR, DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_OP])

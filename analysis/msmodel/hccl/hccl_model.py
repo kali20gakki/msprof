@@ -111,7 +111,7 @@ class HcclViewModel(ViewModel):
 
         sql = "SELECT model_id, index_id, op_name, task_type, op_type, connection_id, begin as timestamp, " \
               "end - begin as duration, is_dynamic, " \
-              "relay, retry, data_type, alg_type, count, group_name from {0} " \
+              "relay, retry, data_type, alg_type, count, group_name, kfc_connection_id from {0} " \
               "WHERE device_id = {device_id} " \
               "{where_condition} " \
               "order by timestamp" \

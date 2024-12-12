@@ -24,6 +24,7 @@ from msmodel.hccl.hccl_model import HCCLModel
 from mscalculate.interface.icalculator import ICalculator
 from mscalculate.flip.flip_calculator import FlipCalculator
 from mscalculate.hccl.hccl_calculator import HcclCalculator
+from msmodel.hccl.hccl_model import HcclViewModel
 
 
 class KfcCalculator(ICalculator, MsMultiProcess):
@@ -202,6 +203,17 @@ class KfcCalculator(ICalculator, MsMultiProcess):
             node_info[node_key] = [data.op_name, data.op_type, data.timestamp]
         return node_info
 
+    def get_kfc_host_hccl_op(self: any) -> dict:
+        iter_range = self.sample_config.get(StrConstant.PARAM_ITER_ID)
+        with HcclViewModel(self._project_path, DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_OP]) as model:
+            if not model.check_table():
+                return dict()
+            hccl_ops = model.get_hccl_ops(iter_range.model_id, iter_range.iteration_id)
+        kfc_hccl_op_map = {}
+        for data in hccl_ops:
+            kfc_hccl_op_map[data.kfc_connection_id] = data
+        return kfc_hccl_op_map
+
     def get_hccl_op_info_data(self: any) -> dict:
         with KfcInfoViewModel(self._project_path,
                               [DBNameConstant.TABLE_DEVICE_HCCL_OP_INFO]) as kfc_info_model:
@@ -250,6 +262,7 @@ class KfcCalculator(ICalculator, MsMultiProcess):
     def calculate_kfc_op(self: any) -> None:
         kfc_op_data_stream_id_table, master_stream_task = self.get_kfc_op_data()
         node_info = self.get_host_task_info(kfc_op_data_stream_id_table)
+        kfc_hccl_op_map = self.get_kfc_host_hccl_op()
         hccl_op_info_data = self.get_hccl_op_info_data()
         # 考虑到不同流可能出现并行，所以在每条流上卡时间关联DeviceHcclOpInfo
         for stream_id, kfc_op_data in kfc_op_data_stream_id_table.items():
@@ -274,6 +287,9 @@ class KfcCalculator(ICalculator, MsMultiProcess):
                     logging.error("The kfc op name is None with task type %s", data.host_task_type)
                     continue
                 source = self._source.get(stream_id, DeviceHcclSource.INVALID.value)
+                host_hccl_op = kfc_hccl_op_map.get(data.connection_id, None)
+                if source == DeviceHcclSource.HCCL.value and host_hccl_op:
+                    op_name = host_hccl_op.op_name
                 if curr_hccl_op_info:
                     kfc_op_data[i] = op_data.replace(op_name=op_name, first_timestamp=first_timestamp,
                                                      iter_id=iter_id, op_type=op_type,
