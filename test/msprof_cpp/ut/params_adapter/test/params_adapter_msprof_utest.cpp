@@ -106,7 +106,10 @@ TEST_F(ParamsAdapterMsprofUtest, ParamsCheckDynProf)
 {
     GlobalMockObject::verify();
     std::shared_ptr<ParamsAdapterMsprof> MsprofParamAdapterMgr;
+    std::shared_ptr<ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, ProfileParams);
     MSVP_MAKE_SHARED0_VOID(MsprofParamAdapterMgr, ParamsAdapterMsprof);
+    MsprofParamAdapterMgr->params_ = params;
     int ret = MsprofParamAdapterMgr->ParamsCheckDynProf();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 

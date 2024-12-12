@@ -53,48 +53,60 @@ void BlockPmuResultAccumulate(std::vector<uint64_t> &dstVec, std::vector<uint64_
 void PmuAssociation::MergeContextPmuToDeviceTask(std::vector<HalPmuData*>& pmuVec, std::vector<DeviceTask>& deviceVec,
                                                  DataInventory& dataInventory, const DeviceContext& context)
 {
-    int missCount = abs(static_cast<int>(pmuVec.size() - deviceVec.size()));
-    size_t matchSize = std::min(pmuVec.size(), deviceVec.size());
-    for (std::size_t index = 0; index < matchSize; index++) {
-        deviceVec[index].acceleratorType = pmuVec[index]->pmu.acceleratorType;
-        CalculationElements params;
-        if (deviceVec[index].acceleratorType == MIX_AIC || deviceVec[index].acceleratorType == MIX_AIV) {
-            PmuInfoMixAccelerator pmuInfoMix;
-            if (pmuVec[index]->pmu.acceleratorType == MIX_AIC) {
-                pmuInfoMix.aicTotalCycles = pmuVec[index]->pmu.totalCycle;
-                auto res = aicCalculator_->CalculatePmuMetric(dataInventory, context, params, *pmuVec[index],
-                                                              deviceVec[index]);
-                pmuInfoMix.aicPmuResult.swap(res);
-                pmuInfoMix.aiCoreTime = params.totalTime;
-            } else {
-                pmuInfoMix.aivTotalCycles = pmuVec[index]->pmu.totalCycle;
-                auto res = aivCalculator_->CalculatePmuMetric(dataInventory, context, params, *pmuVec[index],
-                                                              deviceVec[index]);
-                pmuInfoMix.aivPmuResult.swap(res);
-                pmuInfoMix.aivTime = params.totalTime;
-            }
-            pmuInfoMix.mainTimestamp = pmuVec[index]->pmu.timeList[1];
-            deviceVec[index].pmuInfo = MAKE_UNIQUE_PTR<PmuInfoMixAccelerator>(pmuInfoMix);
-        } else {
-            PmuInfoSingleAccelerator pmuInfoNormal;
-            pmuInfoNormal.totalCycles = pmuVec[index]->pmu.totalCycle;
-            std::vector<double> res;
-            if (pmuVec[index]->pmu.acceleratorType == AIC) {
-                res = aicCalculator_->CalculatePmuMetric(dataInventory, context, params, *pmuVec[index],
-                                                         deviceVec[index]);
-            } else {
-                res = aivCalculator_->CalculatePmuMetric(dataInventory, context, params, *pmuVec[index],
-                                                         deviceVec[index]);
-            }
-            pmuInfoNormal.totalTime = params.totalTime;
-            pmuInfoNormal.pmuResult.swap(res);
-            deviceVec[index].pmuInfo = MAKE_UNIQUE_PTR<PmuInfoSingleAccelerator>(pmuInfoNormal);
+    size_t pmuIndex = 0;
+    size_t taskIndex = 0;
+    while (pmuIndex < pmuVec.size() && taskIndex < deviceVec.size()) {
+        if (pmuVec[pmuIndex]->hd.timestamp < deviceVec[taskIndex].taskStart) { // pmu的时间比task开始小，取下一个pmu
+            WARN("The pmu in % is earlier than task in %, taskId is %, streamId is %, contextId is %, batchId is %",
+                 pmuIndex, taskIndex, pmuVec[pmuIndex]->hd.taskId.taskId, pmuVec[pmuIndex]->hd.taskId.streamId,
+                 pmuVec[pmuIndex]->hd.taskId.contextId, pmuVec[pmuIndex]->hd.taskId.batchId);
+            pmuIndex++;
+            continue;
+        } else if (pmuVec[pmuIndex]->hd.timestamp > deviceVec[taskIndex].taskEnd) { // pmu时间比task结束大，取下一个task
+            WARN("The pmu in % is later than task in %, taskId is %, streamId is %, contextId is %, batchId is %",
+                 pmuIndex, taskIndex, pmuVec[pmuIndex]->hd.taskId.taskId, pmuVec[pmuIndex]->hd.taskId.streamId,
+                 pmuVec[pmuIndex]->hd.taskId.contextId, pmuVec[pmuIndex]->hd.taskId.batchId);
+            taskIndex++;
+            continue;
         }
+        CalculateContextPmu(*pmuVec[pmuIndex], deviceVec[taskIndex], dataInventory, context);
+        taskIndex++;
+        pmuIndex++;
     }
-    if (missCount != 0) {
-        ERROR("There has missMatch % pmu to deviceTask, taskId is %, streamId is %, contextId is %, batchId is %",
-              missCount, pmuVec[0]->hd.taskId.taskId, pmuVec[0]->hd.taskId.streamId, pmuVec[0]->hd.taskId.contextId,
-              pmuVec[0]->hd.taskId.batchId);
+}
+
+void PmuAssociation::CalculateContextPmu(HalPmuData &pmuData, DeviceTask &task, DataInventory &dataInventory,
+                                         const DeviceContext &context)
+{
+    task.acceleratorType = pmuData.pmu.acceleratorType;
+    CalculationElements params;
+    if (task.acceleratorType == MIX_AIC || task.acceleratorType == MIX_AIV) {
+        PmuInfoMixAccelerator pmuInfoMix;
+        if (pmuData.pmu.acceleratorType == MIX_AIC) {
+            pmuInfoMix.aicTotalCycles = pmuData.pmu.totalCycle;
+            auto res = aicCalculator_->CalculatePmuMetric(dataInventory, context, params, pmuData, task);
+            pmuInfoMix.aicPmuResult.swap(res);
+            pmuInfoMix.aiCoreTime = params.totalTime;
+        } else {
+            pmuInfoMix.aivTotalCycles = pmuData.pmu.totalCycle;
+            auto res = aivCalculator_->CalculatePmuMetric(dataInventory, context, params, pmuData, task);
+            pmuInfoMix.aivPmuResult.swap(res);
+            pmuInfoMix.aivTime = params.totalTime;
+        }
+        pmuInfoMix.mainTimestamp = pmuData.pmu.timeList[1];
+        task.pmuInfo = MAKE_UNIQUE_PTR<PmuInfoMixAccelerator>(pmuInfoMix);
+    } else {
+        PmuInfoSingleAccelerator pmuInfoNormal;
+        pmuInfoNormal.totalCycles = pmuData.pmu.totalCycle;
+        std::vector<double> res;
+        if (pmuData.pmu.acceleratorType == AIC) {
+            res = aicCalculator_->CalculatePmuMetric(dataInventory, context, params, pmuData, task);
+        } else {
+            res = aivCalculator_->CalculatePmuMetric(dataInventory, context, params, pmuData, task);
+        }
+        pmuInfoNormal.totalTime = params.totalTime;
+        pmuInfoNormal.pmuResult.swap(res);
+        task.pmuInfo = MAKE_UNIQUE_PTR<PmuInfoSingleAccelerator>(pmuInfoNormal);
     }
 }
 
@@ -116,7 +128,9 @@ size_t PmuAssociation::MergeBlockPmuToDeviceTask(std::vector<HalPmuData*>& pmuDa
     tempPmuData.type = BLOCK_PMU;
     auto res = dynamic_cast<PmuInfoMixAccelerator *>(deviceTask.pmuInfo.get());
     for (auto it = pmuData.begin(); it != pmuData.end();) {
-        if ((*it)->pmu.acceleratorType == deviceTask.acceleratorType && (*it)->pmu.coreType == core_type) {
+        auto validFlag = (*it)->hd.timestamp >= deviceTask.taskStart && (*it)->hd.timestamp <= deviceTask.taskEnd;
+        if ((*it)->pmu.acceleratorType == deviceTask.acceleratorType && (*it)->pmu.coreType == core_type &&
+            validFlag) {
             if (res->totalBlockCount >= mixCount) {
                 break;
             }
@@ -153,6 +167,9 @@ void PmuAssociation::AssociationByPmuType(std::map<TaskId, std::vector<DeviceTas
     for (auto& pmu : contextPmuTask_) {
         auto it = deviceTask.find(pmu.first);
         if (it != deviceTask.end()) {
+            std::sort(pmu.second.begin(), pmu.second.end(), [](HalPmuData* ld, HalPmuData* rd) {
+                return ld->hd.timestamp < rd->hd.timestamp;
+            });
             MergeContextPmuToDeviceTask(pmu.second, it->second, dataInventory, context);
         } else {
             ERROR("contextPmu has no matched log taskId is %, streamId is %, contextId is %, batchId is %",

@@ -132,6 +132,8 @@ struct adl_serializer<SampleInfo> {
         infoData.aivProfilingMode = GetProfilingModeFromStr(aivProfilingMode);
 
         jsonData.at("aiv_sampling_interval").get_to(infoData.aivSamplingInterval);
+        std::string dynamicStr = jsonData.value("dynamic", "off");
+        infoData.dynamic = (dynamicStr == "on");
     }
 };
 

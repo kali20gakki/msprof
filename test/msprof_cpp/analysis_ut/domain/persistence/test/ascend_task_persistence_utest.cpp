@@ -51,10 +51,10 @@ protected:
 static std::vector<TopDownTask> GenerateTopDownTask()
 {
     std::vector<TopDownTask> res;
-    res.emplace_back(TEST_ID, TEST_ID, TEST_ID, UINT32_MAX, TEST_ID, "AI_CORE", "AIC", UINT32_MAX, TEST_ID, TEST_ID,
-                     TEST_ID);
-    res.emplace_back(TEST_ID, TEST_ID, TEST_ID, UINT32_MAX, TEST_ID, "AI_CPU", "AI_CPU", UINT32_MAX, TEST_ID, TEST_ID,
-                     TEST_ID);
+    res.emplace_back(true, TEST_ID, TEST_ID, TEST_ID, UINT32_MAX, TEST_ID, "AI_CORE", "AIC", UINT32_MAX, TEST_ID,
+                     TEST_ID, TEST_ID);
+    res.emplace_back(false, TEST_ID, TEST_ID, TEST_ID, UINT32_MAX, TEST_ID, "AI_CPU", "AI_CPU", UINT32_MAX, TEST_ID,
+                     TEST_ID, TEST_ID);
     return res;
 }
 
@@ -84,6 +84,22 @@ TEST_F(AscendTaskPersistenceUTest, TestShouldReturnOKWhenDataIsEmpty)
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = DEVICE_PATH;
     ASSERT_EQ(ANALYSIS_OK, taskPersistence.Run(dataInventory_, context));
+}
+
+TEST_F(AscendTaskPersistenceUTest, ShouldReturnSuccessButNotSaveDataWhenDynamicWithOnlyTask)
+{
+    AscendTaskPersistence taskPersistence;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = DEVICE_PATH;
+    context.deviceContextInfo.sampleInfo.dynamic = true;
+    auto ascendTaskS = dataInventory_.GetPtr<std::vector<TopDownTask>>();
+    auto ascendTask = GenerateTopDownTask();
+    ascendTask.pop_back();
+    ascendTaskS->swap(ascendTask);
+    ASSERT_EQ(ANALYSIS_OK, taskPersistence.Run(dataInventory_, context));
+    auto path = File::PathJoin({DEVICE_PATH, "sqlite"});
+    auto files = File::GetOriginData(path, {"ascend_task.db"}, {});
+    EXPECT_EQ(0, files.size());
 }
 }
 }

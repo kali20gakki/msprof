@@ -32,6 +32,8 @@ private:
                                      DataInventory& dataInventory, const DeviceContext& context);
     void AssociationByPmuType(std::map<TaskId, std::vector<DeviceTask>>& deviceTask, DataInventory& dataInventory,
                               const DeviceContext& context);
+    void CalculateContextPmu(HalPmuData &pmu, DeviceTask &task, DataInventory &dataInventory,
+                              const DeviceContext &context);
     uint32_t ProcessEntry(Infra::DataInventory& dataInventory, const Infra::Context& context) override;
 private:
     std::map<TaskId, std::vector<HalPmuData*>> contextPmuTask_;

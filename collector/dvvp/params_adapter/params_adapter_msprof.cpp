@@ -195,6 +195,7 @@ int ParamsAdapterMsprof::ParamsCheckDynProf() const
         DynProfMngCli::instance()->SetAppPid(pid);
     }
     DynProfMngCli::instance()->EnableMode();
+    params_->dynamic = "on";
     return PROFILING_SUCCESS;
 }
 

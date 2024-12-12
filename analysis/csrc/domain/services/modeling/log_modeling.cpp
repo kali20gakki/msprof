@@ -24,39 +24,81 @@ namespace Analysis {
 namespace Domain {
 using namespace Infra;
 namespace {
-
+const int CONTEXT_OFFSET = 32;
+const int TASK_OFFSET = 16;
 constexpr uint32_t LOW_16BIT_MASK = 0xffff;
 
 inline uint64_t MakeKey(uint64_t contextId, uint32_t taskId, uint16_t streamId)
 {
-    uint64_t key = (contextId << 32) | (taskId << 16) | streamId;
+    uint64_t key = (contextId << CONTEXT_OFFSET) | (taskId << TASK_OFFSET) | streamId;
     return key;
 }
 
-void MergeStartAndEnd(const std::map<uint64_t, std::vector<HalLogData*>>& logStart,
-                      std::map<uint64_t, std::vector<HalLogData*>>& logEnd,
-                      std::map<TaskId, std::vector<DeviceTask>>& deviceTaskMap,
-                      std::function<void(Domain::DeviceTask&, const HalLogData&, const HalLogData&)> mergeFunc)
+/*
+ * 当开始的任务和结束的任务数量不一致时，按照相同streamId-taskId-contextId的数据，先执行的任务结束时间比后续执行任务的开始
+ * 时间小的规则进行匹配。例如；
+ * start:  [1, 5, 9, 13, 25]                   [4, 6, 9, 13]
+ * end:    [3, 7, 10, 15]                      [3, 5, 8, 10, 15]
+ * res:    [1-3, 5-7, 9-10, 13-15]             [4-5, 6-8, 9-10, 13-15]
+ */
+void MergeStartAndEndByQueue(std::vector<HalLogData *> &start, std::vector<HalLogData *> &end,
+                             std::map<TaskId, std::vector<DeviceTask>> &deviceTaskMap,
+                             std::function<void(Domain::DeviceTask&, const HalLogData&, const HalLogData&)> mergeFunc)
 {
-    for (const auto& startPair : logStart) {
+    size_t sIndex = 0;
+    size_t eIndex = 0;
+    while (sIndex < start.size() && eIndex < end.size()) {
+        if (end[eIndex]->hd.timestamp >= start[sIndex]->hd.timestamp &&
+            (sIndex + 1 == start.size() || end[eIndex]->hd.timestamp < start[sIndex + 1]->hd.timestamp)) {
+            auto &vec = deviceTaskMap[start[sIndex]->hd.taskId];
+            vec.emplace_back();
+            mergeFunc(vec.back(), *start[sIndex], *end[eIndex]);
+            sIndex++;
+            eIndex++;
+        } else { // end task对应的不是当前索引位置的start task,继续找下一个
+            WARN("Start task in % doesn't match end task in %, streamId is %, taskId is %", sIndex, eIndex,
+                 start[sIndex]->hd.taskId.streamId, start[sIndex]->hd.taskId.taskId);
+            if (end[eIndex]->hd.timestamp >= start[sIndex]->hd.timestamp) {
+                sIndex++;
+            } else {
+                eIndex++;
+            }
+        }
+    }
+}
+
+void MergeStartAndEnd(std::map<uint64_t, std::vector<HalLogData *>> &logStart,
+                      std::map<uint64_t, std::vector<HalLogData *>> &logEnd,
+                      std::map<TaskId, std::vector<DeviceTask>> &deviceTaskMap,
+                      std::function<void(Domain::DeviceTask &, const HalLogData &, const HalLogData &)> mergeFunc)
+{
+    uint64_t key;
+    uint32_t contextId;
+    uint16_t taskId;
+    uint16_t streamId;
+    for (auto &startPair: logStart) {
+        key = startPair.first;
+        contextId = key >> CONTEXT_OFFSET;
+        taskId = (key >> TASK_OFFSET) & LOW_16BIT_MASK;
+        streamId = key & LOW_16BIT_MASK;
         auto it = logEnd.find(startPair.first);
-        if (it == logEnd.end() || startPair.second.size() != it->second.size()) {
-            uint64_t key = startPair.first;
-            uint32_t contextId = key >> 32;
-            uint16_t taskId = (key >> 16) & LOW_16BIT_MASK;
-            uint16_t streamId = key & LOW_16BIT_MASK;
+        if (it == logEnd.end()) {
             WARN("Start log size(%) not same as End log size(%); context:%, task:%, stream:%",
-                 startPair.second.size(), it != logEnd.end() ? it->second.size() : 0, contextId, taskId, streamId);
+                 startPair.second.size(), 0, contextId, taskId, streamId);
+            continue;
+        } else if (startPair.second.size() != it->second.size()) {
+            MergeStartAndEndByQueue(startPair.second, it->second, deviceTaskMap, mergeFunc);
+            WARN("Start log size(%) not same as End log size(%); context:%, task:%, stream:%",
+                 startPair.second.size(), it->second.size(), contextId, taskId, streamId);
             continue;
         }
         for (size_t i = 0; i < startPair.second.size(); ++i) {
-            auto& vec = deviceTaskMap[startPair.second[i]->hd.taskId];
+            auto &vec = deviceTaskMap[startPair.second[i]->hd.taskId];
             vec.emplace_back();
             mergeFunc(vec.back(), *startPair.second[i], *it->second[i]);
         }
     }
 }
-
 }
 
 void LogModeling::SplitLogGroups(std::vector<HalLogData>& logData,
@@ -145,6 +187,8 @@ void LogModeling::AddToDeviceTask(std::unordered_map<uint16_t, std::vector<HalLo
             ERROR("start exist but end not exist, stream:%", streamId);
             continue;
         }
+        std::sort(itE->second.begin(), itE->second.end(),
+                  [](HalLogData* lhs, HalLogData* rhs) {return lhs->hd.timestamp < rhs->hd.timestamp;});
         for (auto& node : itE->second) {
             acsqTaskE[MakeKey(node->hd.taskId.contextId, node->hd.taskId.taskId, streamId)].push_back(node);
         }

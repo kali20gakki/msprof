@@ -113,5 +113,26 @@ TEST_F(MetricSummaryPersistenceUTest, TestRunShouldReturnErrorWhenDataIsNull)
     context.deviceContextInfo.deviceInfo.chipID = CHIP_V4_1_0;
     ASSERT_EQ(ANALYSIS_ERROR, persistence.Run(dataInventory_, context));
 }
+
+TEST_F(MetricSummaryPersistenceUTest, ShouldReturnOkWhenDynamic)
+{
+    MetricSummaryPersistence persistence;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = DEVICE_PATH;
+    context.deviceContextInfo.deviceInfo.chipID = CHIP_V4_1_0;
+    context.deviceContextInfo.sampleInfo.aiCoreMetrics = AicMetricsEventsType::AIC_PIPE_UTILIZATION_EXCT;
+    context.deviceContextInfo.sampleInfo.aivMetrics = AivMetricsEventsType::AIV_PIPE_UTILIZATION;
+    context.deviceContextInfo.sampleInfo.dynamic = true;
+    auto deviceTaskS = dataInventory_.GetPtr<std::map<TaskId, std::vector<DeviceTask>>>();
+    auto deviceTask = GenerateDeviceTask();
+    deviceTaskS->swap(deviceTask);
+    ASSERT_EQ(ANALYSIS_OK, persistence.Run(dataInventory_, context));
+    std::string sql = "SELECT COUNT(*) FROM MetricSummary";
+    std::string dbPath = File::PathJoin({DEVICE_PATH, "sqlite", "metric_summary.db"});
+    DBRunner runner(dbPath);
+    std::vector<std::tuple<uint64_t>> res;
+    runner.QueryData(sql, res);
+    EXPECT_EQ(2ul, std::get<0>(res.back()));
+}
 }
 }

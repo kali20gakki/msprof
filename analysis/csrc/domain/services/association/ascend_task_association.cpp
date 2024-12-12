@@ -117,19 +117,22 @@ std::string GetDeviceTaskTypeStr(const DeviceTask& task)
 void MergeByHostAndDeviceTask(std::vector<TopDownTask>& res, HostTask& hostTask, std::vector<DeviceTask>& deviceTask,
                               SyscntConversionParams& params)
 {
+    uint64_t count = 0;
     for (auto& task : deviceTask) {
         auto start = GetTimeFromSyscnt(task.taskStart, params);
         auto end = GetTimeFromSyscnt(task.taskEnd, params);
-        res.emplace_back(hostTask.taskId, hostTask.batchId, hostTask.streamId, hostTask.contextId, hostTask.requestId,
-                         GetDeviceTaskTypeStr(task), hostTask.taskTypeStr, hostTask.modelId, hostTask.connection_id,
-                         start.Double(), end.Double());
+        // 有多个deviceTask且是第一个算子，标记记为true
+        res.emplace_back((count == 0 && deviceTask.size() > 1), hostTask.taskId, hostTask.batchId, hostTask.streamId,
+                         hostTask.contextId, hostTask.requestId, GetDeviceTaskTypeStr(task), hostTask.taskTypeStr,
+                         hostTask.modelId, hostTask.connection_id, start.Double(), end.Double());
+        count++;
     }
 }
 
 void MergeByOnlyHostTask(std::vector<TopDownTask>& res, std::vector<HostTask>& hostTask)
 {
     for (auto& task : hostTask) {
-        res.emplace_back(task.taskId, task.batchId, task.streamId, task.contextId, task.requestId,
+        res.emplace_back(false, task.taskId, task.batchId, task.streamId, task.contextId, task.requestId,
                          UNKNOWN_STRING, task.taskTypeStr, task.modelId, task.connection_id, INVALID_TIME,
                          INVALID_TIME);
     }
@@ -141,7 +144,7 @@ void MergeByOnlyDeviceTask(std::vector<TopDownTask>& res, std::vector<DeviceTask
     for (auto& task : deviceTask) {
         auto start = GetTimeFromSyscnt(task.taskStart, params);
         auto end = GetTimeFromSyscnt(task.taskEnd, params);
-        res.emplace_back(key.taskId, key.batchId, key.streamId, key.contextId, DEFAULT_INDEX_ID,
+        res.emplace_back(false, key.taskId, key.batchId, key.streamId, key.contextId, DEFAULT_INDEX_ID,
                          GetDeviceTaskTypeStr(task), UNKNOWN_STRING, DEFAULT_MODEL_ID,
                          DEFAULT_CONNECTION_ID, start.Double(), end.Double());
     }
