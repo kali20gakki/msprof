@@ -425,6 +425,14 @@ class TaskGear(CANNGear):
             ]
         self.hccl_task_info.extend(hccl_tasks)
 
+    def get_kfc_connection_id(self: any, node_event: Event):
+        if node_event is None:
+            return Constant.DEFAULT_INVALID_VALUE
+        kfc_node_event = node_event.kfc_node_event
+        node_dto: ApiDataDto = self.db.get_api(kfc_node_event)
+        connection_id = node_dto.connection_id if node_dto.connection_id is not None else Constant.DEFAULT_INVALID_VALUE
+        return connection_id
+
     def add_hccl_op(self, call_stack: dict, task_track_dto: TaskTrackDto):
         node_event: Event = call_stack.get(Constant.NODE_LEVEL)
         node_dto: ApiDataDto = self.db.get_api(node_event)
@@ -443,11 +451,12 @@ class TaskGear(CANNGear):
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
         model_id = NumberConstant.INVALID_MODEL_ID if model_dto.item_id is None else model_dto.item_id
         connection_id = node_dto.connection_id if node_dto.connection_id is not None else Constant.DEFAULT_INVALID_VALUE
+        kfc_connection_id = self.get_kfc_connection_id(node_event)
 
         node_basic_info = [
             task_track_dto.device_id, model_id, request_id, task_track_dto.thread_id, node_dto.item_id,
             self.HCCL_TASK_TYPE, Constant.NA, node_dto.start, node_dto.end,
-            Constant.NA, connection_id
+            Constant.NA, connection_id, kfc_connection_id
         ]
         hccl_op_info = [
             Constant.DEFAULT_INVALID_VALUE, Constant.DEFAULT_INVALID_VALUE,
@@ -464,7 +473,7 @@ class TaskGear(CANNGear):
                 node_basic_info = [
                     task_track_dto.device_id, model_id, request_id, node_dto.thread_id, node_dto.item_id,
                     record.dto.task_type, record.dto.op_type, node_dto.start, node_dto.end,
-                    record.dto.is_dynamic, connection_id
+                    record.dto.is_dynamic, connection_id, kfc_connection_id
                 ]
             if isinstance(record.dto, HCCLOpInfoDto):
                 hccl_op_info = [

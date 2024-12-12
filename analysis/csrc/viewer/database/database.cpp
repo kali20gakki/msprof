@@ -141,6 +141,7 @@ namespace {
         {"end", SQL_REAL_TYPE},
         {"is_dynamic", SQL_TEXT_TYPE},
         {"connection_id", SQL_INTEGER_TYPE},
+        {"kfc_connection_id", SQL_INTEGER_TYPE},
         {"relay", SQL_INTEGER_TYPE},
         {"retry", SQL_INTEGER_TYPE},
         {"data_type", SQL_TEXT_TYPE},

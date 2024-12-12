@@ -28,7 +28,7 @@ using HashData = Analysis::Parser::Host::Cann::HashData;
 using TypeData = Analysis::Parser::Host::Cann::TypeData;
 
 using HCCLOpsDumpData = std::vector<std::tuple<uint32_t, uint64_t, int32_t, uint32_t, std::string, std::string,
-                                               std::string, uint64_t, uint64_t, std::string, int64_t,
+                                               std::string, uint64_t, uint64_t, std::string, int64_t, int64_t,
                                                int32_t, int32_t, std::string, std::string, uint64_t, std::string>>;
 
 using HostTasksDumpData =
@@ -57,6 +57,7 @@ void AddHcclOpDumpData(HCCLOpsDumpData& data, const std::shared_ptr<Analysis::En
     int32_t indexId = bigOpDesc->indexId;
     std::string isDynamic = NA;
     int64_t connectionId = bigOpDesc->connectionId;
+    int64_t kfcConnectionId = bigOpDesc->kfcConnectionId;
     uint32_t thread_id = bigOpDesc->thread_id;
     std::string taskType = "HCCL";
     std::string opType = NA;
@@ -86,7 +87,7 @@ void AddHcclOpDumpData(HCCLOpsDumpData& data, const std::shared_ptr<Analysis::En
     data.emplace_back(bigOpDesc->deviceId, modelId, indexId, thread_id,
                       HashData::GetInstance().Get(op->name),
                       taskType, opType, bigOpDesc->beginTime, bigOpDesc->endTime, isDynamic, connectionId,
-                      relay, retry, dataType, algType, count, groupName);
+                      kfcConnectionId, relay, retry, dataType, algType, count, groupName);
 }
 }
 CANNTraceDBDumper::CANNTraceDBDumper(std::string hostFilePath) : hostFilePath_(std::move(hostFilePath)),

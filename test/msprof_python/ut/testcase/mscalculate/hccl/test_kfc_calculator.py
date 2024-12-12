@@ -171,7 +171,7 @@ class TestKfcCalculator(unittest.TestCase):
                 mock.patch(NAMESPACE + ".AscendTaskViewModel.get_ascend_task_data_with_stream_id",
                            return_value=kfc_task_data), \
                 mock.patch(NAMESPACE + ".Mc2CommInfoViewModel.get_kfc_stream", return_value=comm_info), \
-                mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=ge_data), \
+                mock.patch(NAMESPACE + ".DBManager.fetch_all_data", side_effect=(ge_data, [])), \
                 mock.patch(NAMESPACE + ".KfcInfoViewModel.get_sql_data",
                            side_effect=(aicpu_task_flip, hccl_info_data, master_stream_hccl_task, hccl_op_info_data)), \
                 mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=True), \

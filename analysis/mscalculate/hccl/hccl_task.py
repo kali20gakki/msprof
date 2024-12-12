@@ -29,6 +29,7 @@ class HcclOps:
     count: int = Constant.DEFAULT_INVALID_VALUE
     group_name: str = Constant.NA
     source: int = DeviceHcclSource.INVALID.value
+    kfc_connection_id: int = Constant.DEFAULT_INVALID_VALUE
 
 
 @dataclass
