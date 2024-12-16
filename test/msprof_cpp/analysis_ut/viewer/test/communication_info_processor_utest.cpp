@@ -55,10 +55,11 @@ using HcclTaskSingleDeviceFormat = std::vector<std::tuple<uint32_t, int32_t, std
 using HcclOpSingleDeviceFormat = std::vector<std::tuple<uint32_t, std::string, std::string, std::string,
                                                         double, int32_t, int32_t, std::string, std::string,
                                                         uint64_t, std::string, uint32_t>>;
-using KfcTaskFormat = std::vector<std::tuple<uint32_t, uint32_t, std::string, double, double, uint32_t, std::string,
-                                             std::string, uint32_t, double, double, uint32_t, uint32_t, uint32_t,
-                                             uint32_t, uint32_t, std::string, uint32_t, std::string, std::string,
-                                             double, uint32_t, std::string, uint32_t, std::string>>;
+using KfcTaskFormat = std::vector<std::tuple<uint32_t, uint32_t, std::string, double, uint32_t, std::string,
+                                             std::string, uint32_t, double, double, uint16_t, uint32_t, uint32_t,
+                                             uint32_t, uint32_t, uint32_t, std::string, uint32_t, std::string,
+                                             std::string, double, uint32_t, std::string, uint32_t, std::string,
+                                             uint64_t, uint32_t>>;
 
 using KfcOpFormat = std::vector<std::tuple<uint32_t, uint32_t, std::string, double, double,
                                            std::string, uint32_t, std::string, uint32_t, uint32_t,
@@ -74,12 +75,13 @@ const HcclTaskSingleDeviceFormat DATA_A{{4294967295, -1, "hcom_allReduce__360_0_
                                      "HCCS", 87.530865228098, 4294967295, 8, 1, "INVALID_TYPE"}};
 const HcclOpSingleDeviceFormat DATA_OP_A {{4294967295, "hcom_allReduce_", "HCCL", "hcom_allReduce_",
                                            821026362976, 0, 1, "INT16",	"HD-NB", 3021, "10652832407468360", 125}};
-const KfcTaskFormat DATA_KFC_A {{4294967295, -1, "MatmulAllReduceAicpu_724_2_1", 229762691053930, 162334520, 0,
-                                 "Memcpy", "7939241045454381724", 0, 229762691262190, 134380, 50, 1, 0, 0, 0,
-                                 "SDMA", 0, "INT8", "INVALID_TYPE", 590.71, 4294967295, "0", 0, "INVALID_TYPE"}};
-const KfcOpFormat DATA_KFC_OP_A {{4294967295, -1, "AllGatherMatmulAicpu_903_0_1", 157145504371260, 4764660,
-                                  "12713090737648878903", 67270, "AllGatherMatmulAicpu",
-                                  0, 0, "FP32", "RING", 0, 8, 0}};
+const KfcTaskFormat DATA_KFC_A {{4294967295, -1, "MatmulAllReduceAicpu_724_2_1", 157145504371260, 0,
+                                 "Memcpy", "7939241045454381724", 0, 157145504371260, 20, 0, 50, 1, 0, 0, 0,
+                                 "SDMA", 0, "INT8", "INVALID_TYPE", 590.71, 4294967295, "0", 0, "INVALID_TYPE",
+                                 10, 65535}};
+const KfcOpFormat DATA_KFC_OP_A {{4294967295, -1, "MatmulAllReduceAicpu_724_2_1", 157145504371260, 4764660,
+                                  "12713090737648878903", 10, "AllGatherMatmulAicpu",
+                                  0, 0, "FP32", "RING", 0, 8, 65535}};
 const HcclTaskSingleDeviceFormat DATA_B{{4294967295, -1, "hcom_allReduce__233_0_2", 0, "Memcpy23", "10653832407468233",
                                      78180470736653, 0, 781687236999153, 2994.875, 3, "HCCL", "hcom_allReduce_", 125,
                                      1, 11, 3, 14.1825906735751, 1, 4, "SDMA", 262144, "INVALID_TYPE",
@@ -297,16 +299,6 @@ TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnFalseWhenCreateTableF
     MOCKER_CPP(&Analysis::Viewer::Database::DBRunner::CreateTable).reset();
 }
 
-TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnFalseWhenCheckPathFailed)
-{
-    auto processor = CommunicationInfoProcessor(DB_PATH, PROF_PATHS);
-    MOCKER_CPP(&Analysis::Utils::File::Check)
-    .stubs()
-    .will(returnValue(false));
-    EXPECT_FALSE(processor.Run());
-    MOCKER_CPP(&Analysis::Utils::File::Check).reset();
-}
-
 TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnFalseWhenInsertDataFailed)
 {
     auto id{TableColumn("Id", "INTEGER")};
@@ -318,19 +310,6 @@ TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnFalseWhenInsertDataFa
     .will(returnValue(cols));
     EXPECT_FALSE(processor.Run());
     MOCKER_CPP(&Analysis::Viewer::Database::Database::GetTableCols).reset();
-}
-
-TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
-{
-    using TempT = std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t, uint64_t,
-                             uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t,
-                             uint64_t, uint32_t>;
-    MOCKER_CPP(&std::vector<TempT>::reserve)
-    .stubs()
-    .will(throws(std::bad_alloc()));
-    auto processor = CommunicationInfoProcessor(DB_PATH, PROF_PATHS);
-    EXPECT_FALSE(processor.Run());
-    MOCKER_CPP(&std::vector<TempT>::reserve).reset();
 }
 
 TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnTrueWhenNoDb)

@@ -35,6 +35,8 @@ class ComputeTaskInfoProcessor : public TableProcessor {
     using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t,
                                                        uint64_t, uint64_t, uint64_t, uint64_t,
                                                        uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+    using CommScheduleDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t>>;
+
 public:
     ComputeTaskInfoProcessor() = default;
     ComputeTaskInfoProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths);
@@ -45,8 +47,8 @@ protected:
 private:
     static OriDataFormat GetData(const DBInfo &geInfo);
     static OriMc2CommFormat GetMc2CommData(const DBInfo &mc2CommInfoDB);
-    static ProcessedDataFormat FormatData(const OriDataFormat &oriData, GeHashMap &hashMap,
-                                          std::unordered_set<uint32_t> &kfcStreamIds);
+    static bool FormatData(ProcessedDataFormat &processedData, CommScheduleDataFormat &scheduleData,
+        const OriDataFormat &oriData, GeHashMap &hashMap, std::unordered_set<uint32_t> &kfcStreamIds);
     std::unordered_set<uint32_t> GetKfcStreamIds(const std::string &fileDir);
 };
 

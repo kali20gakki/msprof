@@ -69,6 +69,13 @@ namespace {
         {"attrInfo", SQL_INTEGER_TYPE}
     };
 
+    const TableColumns COMMUNICATION_SCHEDULE_TASK_INFO = {
+        {"name", SQL_INTEGER_TYPE},
+        {"globalTaskId", SQL_INTEGER_TYPE, true},
+        {"taskType", SQL_INTEGER_TYPE},
+        {"opType", SQL_INTEGER_TYPE}
+    };
+
     const TableColumns COMMUNICATION_TASK_INFO = {
         {"name", SQL_INTEGER_TYPE},
         {"globalTaskId", SQL_INTEGER_TYPE},
@@ -295,6 +302,7 @@ MsprofDB::MsprofDB()
         {TABLE_NAME_HOST_INFO, HOST_INFO},
         {TABLE_NAME_TASK, TASK},
         {TABLE_NAME_COMPUTE_TASK_INFO, COMPUTE_TASK_INFO},
+        {TABLE_NAME_COMMUNICATION_SCHEDULE_TASK_INFO, COMMUNICATION_SCHEDULE_TASK_INFO},
         {TABLE_NAME_COMMUNICATION_TASK_INFO, COMMUNICATION_TASK_INFO},
         {TABLE_NAME_COMMUNICATION_OP, COMMUNICATION_OP},
         {TABLE_NAME_CANN_API, CANN_API},

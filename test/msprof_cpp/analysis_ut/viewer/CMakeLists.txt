@@ -11,6 +11,10 @@ aux_source_directory(${TOP_DIR}/analysis/csrc/parser/host/cann SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/parser SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/parser/environment SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/parser/adapter SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/data_inventory SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/domain/data_process SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/domain/data_process/ai_task SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/domain/data_process/system SOURCES)
 aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/viewer/test SOURCES)
 
 add_executable(viewer_utest

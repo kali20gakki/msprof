@@ -12,6 +12,7 @@
 #include "analysis/csrc/viewer/database/finals/compute_task_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/association/credential/id_pool.h"
+#include "analysis/csrc/utils/utils.h"
 
 namespace Analysis {
 namespace Viewer {
@@ -81,12 +82,13 @@ ComputeTaskInfoProcessor::OriMc2CommFormat ComputeTaskInfoProcessor::GetMc2CommD
     return oriData;
 }
 
-ComputeTaskInfoProcessor::ProcessedDataFormat ComputeTaskInfoProcessor::FormatData(
+bool ComputeTaskInfoProcessor::FormatData(
+    ProcessedDataFormat &processedData,
+    CommScheduleDataFormat &scheduleData,
     const OriDataFormat &oriData,
     GeHashMap &hashMap,
     std::unordered_set<uint32_t> &kfcStreamIds)
 {
-    ProcessedDataFormat processedData;
     ComputeTaskInfoData data;
     std::string oriOpName;
     std::string oriTaskType;
@@ -100,17 +102,13 @@ ComputeTaskInfoProcessor::ProcessedDataFormat ComputeTaskInfoProcessor::FormatDa
     std::string orihashId;
     if (!Utils::Reserve(processedData, oriData.size())) {
         ERROR("Reserve for compute task data failed.");
-        return processedData;
+        return false;
     }
     for (auto &row: oriData) {
         std::tie(data.modelId, oriOpName, data.streamId, data.taskId, data.blockDim,
                  data.maxBlockDim, oriTaskType, oriOpType, std::ignore, data.batchId, oriInputFormats,
                  oriInputDataTypes, oriInputShapes, oriOutputFormats, oriOutputDataTypes,
                  oriOutputShapes, data.deviceId, data.contextId, orihashId) = row;
-        if (kfcStreamIds.find(data.streamId) != kfcStreamIds.end()) {
-            // kfc大算子通信流，需要过滤
-            continue;
-        }
         data.opName = IdPool::GetInstance().GetUint64Id(oriOpName);
         data.taskType = IdPool::GetInstance().GetUint64Id(oriTaskType);
         data.opType = IdPool::GetInstance().GetUint64Id(oriOpType);
@@ -126,11 +124,16 @@ ComputeTaskInfoProcessor::ProcessedDataFormat ComputeTaskInfoProcessor::FormatDa
         data.outputFormats = IdPool::GetInstance().GetUint64Id(oriOutputFormats);
         data.outputDataTypes = IdPool::GetInstance().GetUint64Id(oriOutputDataTypes);
         data.outputShapes = IdPool::GetInstance().GetUint64Id(oriOutputShapes);
+        if (kfcStreamIds.find(data.streamId) != kfcStreamIds.end() || Utils::EndsWith(oriOpName, AICPU_KERNEL)) {
+            // aicpu通信schedule
+            scheduleData.emplace_back(data.opName, data.globalTaskId, data.taskType, data.opType);
+            continue;
+        }
         processedData.emplace_back(data.opName, data.globalTaskId, data.blockDim, data.maxBlockDim, data.taskType,
                                    data.opType, data.inputFormats, data.inputDataTypes, data.inputShapes,
                                    data.outputFormats, data.outputDataTypes, data.outputShapes, data.hashid);
     }
-    return processedData;
+    return true;
 }
 
 std::unordered_set<uint32_t> ComputeTaskInfoProcessor::GetKfcStreamIds(const std::string &fileDir)
@@ -183,9 +186,18 @@ bool ComputeTaskInfoProcessor::Process(const std::string &fileDir)
         ERROR("Can't get hash data.");
         return false;
     }
-    auto processedData = FormatData(oriData, hashMap, aicpuKfcStreamIds);
-    if (!SaveData(processedData, TABLE_NAME_COMPUTE_TASK_INFO)) {
+    ProcessedDataFormat processedData;
+    CommScheduleDataFormat scheduleData;
+    if (!FormatData(processedData, scheduleData, oriData, hashMap, aicpuKfcStreamIds)) {
+        ERROR("FormatData failed.");
+        return false;
+    }
+    if (!processedData.empty() && !SaveData(processedData, TABLE_NAME_COMPUTE_TASK_INFO)) {
         ERROR("Save data failed.");
+        return false;
+    }
+    if (!scheduleData.empty() && !SaveData(scheduleData, TABLE_NAME_COMMUNICATION_SCHEDULE_TASK_INFO)) {
+        ERROR("Save % data failed.", TABLE_NAME_COMMUNICATION_SCHEDULE_TASK_INFO);
         return false;
     }
     return true;

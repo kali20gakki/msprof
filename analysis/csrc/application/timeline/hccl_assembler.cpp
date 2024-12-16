@@ -83,10 +83,9 @@ void HcclAssembler::GenerateMetaDataEvent(std::unordered_map<uint16_t, uint32_t>
 void HcclAssembler::GenerateTMetaDataEvent(std::vector<HcclGroup> &groupInfo, int32_t &index, uint32_t formatPid)
 {
     std::string traceName;
-    std::string traceNameSuffix;
+    std::string traceNameSuffix = "Communication";
     for (auto &group : groupInfo) {
         auto startIndex = index;
-        traceNameSuffix = HcclType::HCCL == group.type ? "Communication" : "Aicpu Communication";
         traceName = group.groupName != NA ? ("Group " + group.groupName + " " + traceNameSuffix) : traceNameSuffix;
         group.startIndex = index;
         std::shared_ptr<MetaDataNameEvent> threadName;

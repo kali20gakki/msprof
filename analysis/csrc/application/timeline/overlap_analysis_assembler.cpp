@@ -31,19 +31,11 @@ const std::vector<uint32_t> TIDS = {static_cast<uint32_t>(OverlapType::COMMUNICA
                                     static_cast<uint32_t>(OverlapType::FREE)};
 const std::vector<uint32_t> THREAD_INDEXES = TIDS;
 
-bool endsWith(const std::string &str, const std::string &suffix)
-{
-    if (suffix.size() > str.size()) {
-        return false;
-    }
-    return str.substr(str.size() - suffix.size()) == suffix;
-}
-
 void SepOneTask(
     std::vector<TimeDuration> &times, std::set<uint16_t> &mc2StreamsTable,
     TaskInfoData &task, std::unordered_map<uint16_t, std::vector<TimeDuration>> &compSections)
 {
-    if (mc2StreamsTable.find(task.streamId) != mc2StreamsTable.end() || endsWith(task.opName, AICPU_KERNEL)) {
+    if (mc2StreamsTable.find(task.streamId) != mc2StreamsTable.end() || EndsWith(task.opName, AICPU_KERNEL)) {
         return;
     }
     for (auto &timeDur: times) {
