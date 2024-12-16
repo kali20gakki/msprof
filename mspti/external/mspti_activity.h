@@ -30,6 +30,10 @@
 #include <stdint.h>
 #include "mspti_result.h"
 
+#define MSPTI_INVALID_DEVICE_ID ((uint32_t) 0xFFFFFFFFU)
+#define MSPTI_INVALID_STREAM_ID ((uint32_t) 0xFFFFFFFFU)
+#define MSPTI_INVALID_CORRELATION_ID ((uint64_t) 0)
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -54,6 +58,9 @@ typedef enum {
     MSPTI_ACTIVITY_KIND_KERNEL = 2,
     MSPTI_ACTIVITY_KIND_API = 3,
     MSPTI_ACTIVITY_KIND_HCCL = 4,
+    MSPTI_ACTIVITY_KIND_MEMORY = 5,
+    MSPTI_ACTIVITY_KIND_MEMSET = 6,
+    MSPTI_ACTIVITY_KIND_MEMCPY = 7,
     MSPTI_ACTIVITY_KIND_COUNT,
     MSPTI_ACTIVITY_KIND_FORCE_INT = 0x7fffffff
 } msptiActivityKind;
@@ -111,6 +118,55 @@ typedef enum {
     */
     MSPTI_ACTIVITY_FLAG_MARKER_END_WITH_DEVICE = 1 << 5
 } msptiActivityFlag;
+
+typedef enum {
+    /**
+    * Memory is allocated.
+    */
+    MSPTI_ACTIVITY_MEMORY_OPERATION_TYPE_ALLOCATION = 0,
+    /**
+    * Memory is released.
+    */
+    MSPTI_ACTIVITY_MEMORY_OPERATION_TYPE_RELEASE = 1
+} msptiActivityMemoryOperationType;
+
+typedef enum {
+    /**
+    * The memory kind is unknown.
+    */
+    MSPTI_ACTIVITY_MEMORY_UNKNOWN = 0,
+    /**
+    * The memory is on the device.
+    */
+    MSPTI_ACTIVITY_MEMORY_DEVICE = 1
+} msptiActivityMemoryKind;
+
+typedef enum {
+    /**
+    * The memory copy kind is not known.
+    */
+    MSPTI_ACTIVITY_MEMCPY_KIND_UNKNOWN = 0,
+    /**
+    * A host to host memory copy.
+    */
+    MSPTI_ACTIVITY_MEMCPY_KIND_HTOH = 1,
+    /**
+    * A host to device memory copy.
+    */
+    MSPTI_ACTIVITY_MEMCPY_KIND_HTOD = 2,
+    /**
+    * A device to host memory copy.
+    */
+    MSPTI_ACTIVITY_MEMCPY_KIND_DTOH = 3,
+    /**
+    * A device to device memory copy.
+    */
+    MSPTI_ACTIVITY_MEMCPY_KIND_DTOD = 4,
+    /**
+    * A system-determined memory copy by address.
+    */
+    MSPTI_ACTIVITY_MEMCPY_KIND_DEFAULT = 5
+} msptiActivityMemcpyKind;
 
 START_PACKED_ALIGNMENT
 
@@ -304,6 +360,181 @@ typedef struct PACKED_ALIGNMENT {
     */
     const char *commName;
 } msptiActivityHccl;
+
+/**
+ * @brief The activity record for memory.
+ *
+ * This activity record represents a memory allocation and release operation
+ * (MSPTI_ACTIVITY_KIND_MEMORY).
+ * This activity record provides separate records for memory allocation and
+ * memory release operations.
+ */
+typedef struct PACKED_ALIGNMENT {
+    /**
+    * The activity record kind, must be MSPTI_ACTIVITY_KIND_MEMORY.
+    */
+    msptiActivityKind kind;
+
+    /**
+    * The memory operation requested by the user.
+    * @see msptiActivityMemoryOperationType
+    */
+    msptiActivityMemoryOperationType memoryOperationType;
+
+    /**
+    * The memory kind requested by the user.
+    * @see msptiActivityMemoryKind
+    */
+    msptiActivityMemoryKind memoryKind;
+
+    /**
+    * The correlation ID of the memory operation.
+    */
+    uint64_t correlationId;
+
+    /**
+    * The start timestamp for the memory operation, in ns.
+    */
+    uint64_t start;
+
+    /**
+    * The end timestamp for the memory operation, in ns.
+    */
+    uint64_t end;
+
+    /**
+    * The virtual device address of the memory operation.
+    */
+    uint64_t address;
+
+    /**
+    * The count of bytes of the memory operation.
+    */
+    uint64_t bytes;
+
+    /**
+    * The process ID to which this operation belongs to.
+    */
+    uint32_t processId;
+
+    /**
+    * The device ID where this operation is taking place.
+    */
+    uint32_t deviceId;
+
+    /**
+    * The ID of the stream. If memory operation is not async,
+    * streamId is set to MSPTI_INVALID_STREAM_ID.
+    */
+    uint32_t streamId;
+} msptiActivityMemory;
+
+/**
+ * @brief The activity record for memset.
+ *
+ * This activity record represents a memory set operation
+ * (MSPTI_ACTIVITY_KIND_MEMSET).
+ */
+typedef struct PACKED_ALIGNMENT {
+    /**
+    * The activity record kind, must be MSPTI_ACTIVITY_KIND_MEMSET.
+    */
+    msptiActivityKind kind;
+
+    /**
+    * The value being set to memory.
+    */
+    uint32_t value;
+
+    /**
+    * The count of bytes being set.
+    */
+    uint64_t bytes;
+
+    /**
+    * The start timestamp for the memory set operation, in ns.
+    */
+    uint64_t start;
+
+    /**
+    * The end timestamp for the memory set operation, in ns.
+    */
+    uint64_t end;
+
+    /**
+    * The device ID where this operation is occurring.
+    */
+    uint32_t deviceId;
+
+    /**
+    * The stream ID where this operation is occurring.
+    */
+    uint32_t streamId;
+
+    /**
+    * The correlation ID of the memory set operation.
+    */
+    uint64_t correlationId;
+    
+    /**
+    * Whether the memory set operation happens through async memory APIs.
+    */
+    uint8_t isAsync;
+} msptiActivityMemset;
+
+/**
+ * @brief The activity record for memory copies.
+ *
+ * This activity record represents a memory copy
+ * (MSPTI_ACTIVITY_KIND_MEMCPY).
+ */
+typedef struct PACKED_ALIGNMENT {
+    /**
+    * The activity record kind, must be MSPTI_ACTIVITY_KIND_MEMCPY.
+    */
+    msptiActivityKind kind;
+
+    /**
+    * The kind of the memory copy operation.
+    * @see msptiActivityMemcpyKind
+    */
+    msptiActivityMemcpyKind copyKind;
+
+    /**
+    * The count of bytes transferred by the memory copy operation.
+    */
+    uint64_t bytes;
+
+    /**
+    * The start timestamp for the memory copy operation, in ns.
+    */
+    uint64_t start;
+
+    /**
+    * The end timestamp for the memory copy operation, in ns.
+    */
+    uint64_t end;
+
+    /**
+    * The device ID where this operation is occurring.
+    */
+    uint32_t deviceId;
+
+    /**
+    * The stream ID where this operation is occurring.
+    */
+    uint32_t streamId;
+
+    /**
+    * The correlation ID of the memory copy operation.
+    */
+    uint64_t correlationId;
+
+    /**
+    * Whether memory operation happens through async memory APIs.
+    */
+    uint8_t isAsync;
+} msptiActivityMemcpy;
 
 END_PACKED_ALIGNMENT
 

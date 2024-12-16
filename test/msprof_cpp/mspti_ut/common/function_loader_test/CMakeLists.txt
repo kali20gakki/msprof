@@ -13,6 +13,7 @@ add_executable(function_loader_utest
     function_loader_utest.cpp
     ${TOP_DIR}/mspti/common/utils.cpp
     ${TOP_DIR}/mspti/common/function_loader.cpp
+    ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
 )
 
 set_target_properties(function_loader_utest

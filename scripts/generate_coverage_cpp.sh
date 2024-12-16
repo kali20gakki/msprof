@@ -60,6 +60,7 @@ test_obj=(
     mspti_utils_utest
     mspti_channel_utest
     mspti_parser_utest
+    mspti_reporter_utest
     function_loader_utest
     mspti_adapter_utest
 )

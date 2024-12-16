@@ -5,6 +5,7 @@ add_executable(context_manager_utest
     ${TOP_DIR}/mspti/common/context_manager.cpp
     ${TOP_DIR}/mspti/common/utils.cpp
     ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
+    ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
 )
 
 set_target_properties(context_manager_utest

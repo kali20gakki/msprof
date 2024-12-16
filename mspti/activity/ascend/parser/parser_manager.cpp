@@ -21,6 +21,16 @@
 
 namespace Mspti {
 namespace Parser {
+namespace {
+msptiActivityApi CreateDefaultApiActivityStruct()
+{
+    msptiActivityApi activityApi{};
+    activityApi.kind = MSPTI_ACTIVITY_KIND_API;
+    activityApi.pt.processId = Mspti::Common::Utils::GetPid();
+    return activityApi;
+}
+}
+
 std::unordered_map<uint64_t, std::string> ParserManager::hashInfo_map_;
 std::mutex ParserManager::hashMutex_;
 std::unordered_map<uint16_t, std::unordered_map<uint32_t, std::string>> ParserManager::typeInfo_map_;
@@ -115,16 +125,15 @@ msptiResult ParserManager::ReportApi(const MsprofApi* const data)
         MSPTI_LOGW("Get HashInfo failed. HashId: %lu", data->itemId);
         return MSPTI_SUCCESS;
     }
-    msptiActivityApi api;
-    api.kind = MSPTI_ACTIVITY_KIND_API;
+
+    static thread_local msptiActivityApi api = CreateDefaultApiActivityStruct();
     api.name = name.data();
-    api.pt.processId = Mspti::Common::Utils::GetPid();
     api.pt.threadId = data->threadId;
     api.start = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(data->beginTime);
     api.end = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(data->endTime);
-    api.correlationId = Mspti::Common::ContextManager::GetInstance()->CorrelationId();
+    api.correlationId = Mspti::Common::ContextManager::GetInstance()->GetCorrelationId(data->threadId);
     if (Mspti::Activity::ActivityManager::GetInstance()->Record(
-        reinterpret_cast<msptiActivity*>(&api), sizeof(msptiActivityApi)) != MSPTI_SUCCESS) {
+        Common::ReinterpretConvert<msptiActivity*>(&api), sizeof(msptiActivityApi)) != MSPTI_SUCCESS) {
         return MSPTI_ERROR_INNER;
     }
     return MSPTI_SUCCESS;
@@ -159,7 +168,7 @@ msptiResult ParserManager::ReportRtTaskTrack(const MsprofRuntimeTrack& track)
             return MSPTI_ERROR_INNER;
         }
         kernel->kind = MSPTI_ACTIVITY_KIND_KERNEL;
-        kernel->correlationId = Mspti::Common::ContextManager::GetInstance()->CorrelationId();
+        kernel->correlationId = Mspti::Common::ContextManager::GetInstance()->GetCorrelationId();
         kernel->name = GetHashInfo(track.kernelName).c_str();
         kernel->type = typeIter->second.c_str();
         {
@@ -206,7 +215,8 @@ msptiResult ParserManager::ReportStarsSocLog(uint32_t deviceId, const StarsSocLo
             kernel->end = static_cast<uint64_t>(socLog->sysCntH) << BIT_OFFSET | socLog->sysCntL;
             kernel->end = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId, kernel->end);
             if (Mspti::Activity::ActivityManager::GetInstance()->Record(
-                reinterpret_cast<msptiActivity*>(kernel.get()), sizeof(msptiActivityKernel)) != MSPTI_SUCCESS) {
+                Common::ReinterpretConvert<msptiActivity*>(kernel.get()),
+                sizeof(msptiActivityKernel)) != MSPTI_SUCCESS) {
                 return MSPTI_ERROR_INNER;
             }
         }
@@ -236,7 +246,7 @@ static void ReportMarkDataToActivity(uint32_t deviceId, const StepTrace* stepTra
         return;
     }
     Mspti::Activity::ActivityManager::GetInstance()->Record(
-        reinterpret_cast<msptiActivity*>(&mark), sizeof(msptiActivityMarker));
+        Common::ReinterpretConvert<msptiActivity*>(&mark), sizeof(msptiActivityMarker));
 }
 
 void ParserManager::ReportStepTrace(uint32_t deviceId, const StepTrace* stepTrace)
@@ -320,8 +330,9 @@ msptiResult ParserManager::ReportMark(const char* msg, RtStreamT stream)
     activity.domain = "";
     activity.timestamp = timestamp;
     return Mspti::Activity::ActivityManager::GetInstance()->Record(
-        reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
+        Common::ReinterpretConvert<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
 }
+
 msptiResult ParserManager::ReportRangeStartA(const char* msg, RtStreamT stream, uint64_t& markId)
 {
     uint64_t timestamp = Mspti::Common::ContextManager::GetInstance()->GetHostTimeStampNs();
@@ -349,7 +360,7 @@ msptiResult ParserManager::ReportRangeStartA(const char* msg, RtStreamT stream, 
     activity.domain = "";
     activity.timestamp = timestamp;
     auto ret = Mspti::Activity::ActivityManager::GetInstance()->Record(
-        reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
+        Common::ReinterpretConvert<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
     {
         std::lock_guard<std::mutex> lock(rangeInfoMtx_);
         rangeInfo_.insert({markId, stream});
@@ -389,7 +400,7 @@ msptiResult ParserManager::ReportRangeEnd(uint64_t rangeId)
     activity.domain = "";
     activity.timestamp = timestamp;
     return Mspti::Activity::ActivityManager::GetInstance()->Record(
-        reinterpret_cast<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
+        Common::ReinterpretConvert<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
 }
 
 bool ParserManager::isInnerMarker(uint64_t markId)

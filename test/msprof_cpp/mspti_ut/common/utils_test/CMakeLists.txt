@@ -2,6 +2,9 @@ add_executable(mspti_utils_utest
     main.cpp
     utils_utest.cpp
     ${TOP_DIR}/mspti/common/utils.cpp
+    ${TOP_DIR}/mspti/common/runtime_utils.cpp
+    ${TOP_DIR}/mspti/common/function_loader.cpp
+    ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
 )
 
 target_include_directories(mspti_utils_utest PRIVATE
