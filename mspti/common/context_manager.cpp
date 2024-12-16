@@ -16,6 +16,7 @@
 #include "common/plog_manager.h"
 #include "common/inject/driver_inject.h"
 #include "common/utils.h"
+#include "external/mspti_activity.h"
 
 namespace Mspti {
 namespace Common {
@@ -101,9 +102,9 @@ static uint64_t GetDevStartSysCnt(uint32_t device)
 void ContextManager::InitDevTimeInfo(uint32_t deviceId)
 {
     static constexpr uint32_t AVE_NUM = 2;
-    std::lock_guard<std::mutex> lk(dev_time_mtx_);
-    auto iter = dev_time_info_.find(deviceId);
-    if (iter == dev_time_info_.end()) {
+    std::lock_guard<std::mutex> lk(devTimeMtx_);
+    auto iter = devTimeInfo_.find(deviceId);
+    if (iter == devTimeInfo_.end()) {
         std::unique_ptr<DevTimeInfo> dev_ptr = nullptr;
         Mspti::Common::MsptiMakeUniquePtr(dev_ptr);
         if (!dev_ptr) {
@@ -114,7 +115,7 @@ void ContextManager::InitDevTimeInfo(uint32_t deviceId)
         dev_ptr->startSysCnt = GetDevStartSysCnt(deviceId);
         auto t2 = Mspti::Common::Utils::GetClockRealTimeNs();
         dev_ptr->startRealTime = (t2 + t1) / AVE_NUM;
-        dev_time_info_.insert({deviceId, std::move(dev_ptr)});
+        devTimeInfo_.insert({deviceId, std::move(dev_ptr)});
     }
 }
 
@@ -126,27 +127,27 @@ bool ContextManager::HostFreqIsEnable()
 
 void ContextManager::InitHostTimeInfo()
 {
-    host_time_info_ = nullptr;
+    hostTimeInfo_ = nullptr;
     static constexpr uint32_t AVE_NUM = 2;
     if (!HostFreqIsEnable()) {
         return;
     }
-    Mspti::Common::MsptiMakeUniquePtr(host_time_info_);
-    if (!host_time_info_) {
+    Mspti::Common::MsptiMakeUniquePtr(hostTimeInfo_);
+    if (!hostTimeInfo_) {
         return;
     }
-    host_time_info_->freq = GetHostFreq();
+    hostTimeInfo_->freq = GetHostFreq();
     auto t1 = Mspti::Common::Utils::GetClockRealTimeNs();
-    host_time_info_->startSysCnt = Mspti::Common::Utils::GetHostSysCnt();
+    hostTimeInfo_->startSysCnt = Mspti::Common::Utils::GetHostSysCnt();
     auto t2 = Mspti::Common::Utils::GetClockRealTimeNs();
-    host_time_info_->startRealTime = (t2 + t1) / AVE_NUM;
+    hostTimeInfo_->startRealTime = (t2 + t1) / AVE_NUM;
 }
 
 uint64_t ContextManager::GetRealTimeFromSysCnt(uint32_t deviceId, uint64_t sysCnt)
 {
-    std::lock_guard<std::mutex> lk(dev_time_mtx_);
-    auto iter = dev_time_info_.find(deviceId);
-    if (iter == dev_time_info_.end() || iter->second->freq == 0) {
+    std::lock_guard<std::mutex> lk(devTimeMtx_);
+    auto iter = devTimeInfo_.find(deviceId);
+    if (iter == devTimeInfo_.end() || iter->second->freq == 0) {
         return sysCnt;
     }
     uint64_t real_time = MSTONS * (sysCnt - iter->second->startSysCnt) / iter->second->freq +
@@ -156,11 +157,11 @@ uint64_t ContextManager::GetRealTimeFromSysCnt(uint32_t deviceId, uint64_t sysCn
 
 uint64_t ContextManager::GetRealTimeFromSysCnt(uint64_t sysCnt)
 {
-    if (!host_time_info_ || host_time_info_->freq == 0) {
+    if (!hostTimeInfo_ || hostTimeInfo_->freq == 0) {
         return sysCnt;
     }
-    return MSTONS * (sysCnt - host_time_info_->startSysCnt) / host_time_info_->freq +
-        host_time_info_->startRealTime;
+    return MSTONS * (sysCnt - hostTimeInfo_->startSysCnt) / hostTimeInfo_->freq +
+        hostTimeInfo_->startRealTime;
 }
 
 uint64_t ContextManager::GetHostTimeStampNs()
@@ -174,14 +175,30 @@ PlatformType ContextManager::GetChipType(uint32_t deviceId)
     return GetChipTypeImpl(deviceId);
 }
 
-uint64_t ContextManager::CorrelationId()
+uint64_t ContextManager::GetCorrelationId(uint32_t threadId)
 {
-    return correlation_id_.load();
+    std::lock_guard<std::mutex> lk(correlationIdMtx_);
+    uint32_t tid = (threadId > 0 ? threadId : Common::Utils::GetTid());
+    auto iter = threadCorrelationIdInfo_.find(tid);
+    if (iter == threadCorrelationIdInfo_.end()) {
+        MSPTI_LOGE("Thread %u get correlation id failed.", tid);
+        return MSPTI_INVALID_CORRELATION_ID;
+    } else {
+        return iter->second;
+    }
 }
 
 void ContextManager::UpdateCorrelationId()
 {
-    correlation_id_++;
+    std::lock_guard<std::mutex> lk(correlationIdMtx_);
+    correlationId_++;
+    uint32_t tid = Common::Utils::GetTid();
+    auto iter = threadCorrelationIdInfo_.find(tid);
+    if (iter == threadCorrelationIdInfo_.end()) {
+        threadCorrelationIdInfo_.insert({tid, correlationId_});
+    } else {
+        iter->second = correlationId_;
+    }
 }
 
 }  // Common

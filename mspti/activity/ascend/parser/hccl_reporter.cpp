@@ -18,6 +18,14 @@
 
 namespace Mspti {
 namespace Parser {
+namespace {
+msptiActivityHccl CreateDefaultHcclActivityStruct()
+{
+    msptiActivityHccl activityHccl{};
+    activityHccl.kind = MSPTI_ACTIVITY_KIND_HCCL;
+    return activityHccl;
+}
+}
 
 std::unordered_map<std::string, std::string> HcclReporter::commNameCache_;   // 缓存通信域名称，用于延长生命周期
 std::unordered_map<uint64_t, std::shared_ptr<HcclOpDesc>> HcclReporter::markId2HcclOp_;
@@ -59,8 +67,7 @@ msptiResult HcclReporter::RecordHcclOp(uint32_t markId, std::shared_ptr<HcclOpDe
 
 msptiResult HcclReporter::ReportHcclActivity(std::shared_ptr<HcclOpDesc> hcclOpDesc)
 {
-    msptiActivityHccl activityHccl{};
-    activityHccl.kind = MSPTI_ACTIVITY_KIND_HCCL;
+    static thread_local msptiActivityHccl activityHccl = CreateDefaultHcclActivityStruct();
     activityHccl.name = GetSharedHcclName(hcclOpDesc->opName);
     activityHccl.ds.streamId = hcclOpDesc->streamId;
     activityHccl.ds.deviceId = hcclOpDesc->deviceId;

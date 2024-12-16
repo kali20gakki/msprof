@@ -78,7 +78,8 @@ size_t ActivityBuffer::ValidSize()
 }
 
 const std::set<msptiActivityKind> ActivityManager::supportActivityKinds_ = {
-    MSPTI_ACTIVITY_KIND_MARKER, MSPTI_ACTIVITY_KIND_KERNEL, MSPTI_ACTIVITY_KIND_API, MSPTI_ACTIVITY_KIND_HCCL
+    MSPTI_ACTIVITY_KIND_MARKER, MSPTI_ACTIVITY_KIND_KERNEL, MSPTI_ACTIVITY_KIND_API, MSPTI_ACTIVITY_KIND_HCCL,
+    MSPTI_ACTIVITY_KIND_MEMORY, MSPTI_ACTIVITY_KIND_MEMSET, MSPTI_ACTIVITY_KIND_MEMCPY
 };
 
 ActivityManager *ActivityManager::GetInstance()
@@ -195,31 +196,26 @@ msptiResult ActivityManager::GetNextRecord(uint8_t *buffer, size_t validBufferSi
         pos = 0;
         return MSPTI_ERROR_MAX_LIMIT_REACHED;
     }
-    msptiResult ret = MSPTI_SUCCESS;
-    msptiActivityKind *pKind = reinterpret_cast<msptiActivityKind*>(buffer + pos);
-    switch (*pKind) {
-        case MSPTI_ACTIVITY_KIND_MARKER:
-            *record = reinterpret_cast<msptiActivity*>(buffer + pos);
-            pos += sizeof(msptiActivityMarker);
-            break;
-        case MSPTI_ACTIVITY_KIND_KERNEL:
-            *record = reinterpret_cast<msptiActivity*>(buffer + pos);
-            pos += sizeof(msptiActivityKernel);
-            break;
-        case MSPTI_ACTIVITY_KIND_API:
-            *record = reinterpret_cast<msptiActivity*>(buffer + pos);
-            pos += sizeof(msptiActivityApi);
-            break;
-        case MSPTI_ACTIVITY_KIND_HCCL:
-            *record = reinterpret_cast<msptiActivity*>(buffer + pos);
-            pos += sizeof(msptiActivityHccl);
-            break;
-        default:
-            MSPTI_LOGE("GetNextRecord failed, invalid kind: %d", *pKind);
-            ret = MSPTI_ERROR_INNER;
-            break;
+
+    static const std::unordered_map<msptiActivityKind, size_t> activityKindDataSize = {
+        {MSPTI_ACTIVITY_KIND_MARKER,    sizeof(msptiActivityMarker)},
+        {MSPTI_ACTIVITY_KIND_KERNEL,    sizeof(msptiActivityKernel)},
+        {MSPTI_ACTIVITY_KIND_API,       sizeof(msptiActivityApi)},
+        {MSPTI_ACTIVITY_KIND_HCCL,      sizeof(msptiActivityHccl)},
+        {MSPTI_ACTIVITY_KIND_MEMORY,    sizeof(msptiActivityMemory)},
+        {MSPTI_ACTIVITY_KIND_MEMSET,    sizeof(msptiActivityMemset)},
+        {MSPTI_ACTIVITY_KIND_MEMCPY,    sizeof(msptiActivityMemcpy)},
+    };
+
+    msptiActivityKind *pKind = Common::ReinterpretConvert<msptiActivityKind*>(buffer + pos);
+    auto iter = activityKindDataSize.find(*pKind);
+    if (iter == activityKindDataSize.end()) {
+        MSPTI_LOGE("GetNextRecord failed, invalid kind: %d", *pKind);
+        return MSPTI_ERROR_INNER;
     }
-    return ret;
+    *record = Common::ReinterpretConvert<msptiActivity*>(buffer + pos);
+    pos += iter->second;
+    return MSPTI_SUCCESS;
 }
 
 msptiResult ActivityManager::FlushAll()

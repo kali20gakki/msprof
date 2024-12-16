@@ -21,9 +21,9 @@ protected:
 
 TEST_F(ContextManagerUtest, ShouldGetOneAfterUpdateCorrelationID)
 {
-    EXPECT_EQ(0UL, Mspti::Common::ContextManager::GetInstance()->CorrelationId());
+    EXPECT_EQ(0UL, Mspti::Common::ContextManager::GetInstance()->GetCorrelationId());
     Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
-    EXPECT_EQ(1UL, Mspti::Common::ContextManager::GetInstance()->CorrelationId());
+    EXPECT_EQ(1UL, Mspti::Common::ContextManager::GetInstance()->GetCorrelationId());
 }
 
 TEST_F(ContextManagerUtest, ShouldInitDeviceFreqWithDefaultValueWhenDrvFailed)

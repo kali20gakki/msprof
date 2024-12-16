@@ -44,7 +44,7 @@ public:
     uint64_t GetRealTimeFromSysCnt(uint64_t sysCnt);
     uint64_t GetHostTimeStampNs();
     PlatformType GetChipType(uint32_t deviceId);
-    uint64_t CorrelationId();
+    uint64_t GetCorrelationId(uint32_t threadId = 0);
     void UpdateCorrelationId();
 
 private:
@@ -55,11 +55,13 @@ private:
     ContextManager& operator=(ContextManager &&obj) = delete;
 
 private:
-    std::unordered_map<uint32_t, std::unique_ptr<DevTimeInfo>> dev_time_info_;
-    std::mutex dev_time_mtx_;
-    std::unique_ptr<DevTimeInfo> host_time_info_;
+    std::unordered_map<uint32_t, std::unique_ptr<DevTimeInfo>> devTimeInfo_;
+    std::mutex devTimeMtx_;
+    std::unique_ptr<DevTimeInfo> hostTimeInfo_;
 
-    std::atomic<uint64_t> correlation_id_{0};
+    std::mutex correlationIdMtx_;
+    uint64_t correlationId_{0};
+    std::unordered_map<uint32_t, uint64_t> threadCorrelationIdInfo_;
 };
 }  // Common
 }  // Mspti

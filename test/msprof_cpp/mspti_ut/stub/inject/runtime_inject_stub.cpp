@@ -10,3 +10,19 @@ RtErrorT rtProfilerTraceEx(uint64_t id, uint64_t modelId, uint16_t tagId, RtStre
 {
     return 0;
 }
+
+RtErrorT rtGetDevice(int32_t* devId)
+{
+    if (devId != nullptr) {
+        *devId = 0;
+    }
+    return 0;
+}
+
+RtErrorT rtGetStreamId(RtStreamT stm, int32_t *streamId)
+{
+    if (streamId != nullptr) {
+        *streamId = 0;
+    }
+    return 0;
+}

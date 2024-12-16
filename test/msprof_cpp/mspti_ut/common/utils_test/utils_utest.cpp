@@ -10,6 +10,7 @@
 
 #include "gtest/gtest.h"
 #include "common/utils.h"
+#include "common/runtime_utils.h"
 
 namespace {
 class UtilsUtest : public testing::Test {
@@ -65,6 +66,19 @@ TEST_F(UtilsUtest, GetTidTest)
 {
     auto tid = Mspti::Common::Utils::GetTid();
     EXPECT_EQ(tid, static_cast<uint32_t>(syscall(SYS_gettid)));
+}
+
+TEST_F(UtilsUtest, GetDeviceIdTest)
+{
+    const uint32_t expectDeviceId = 0U;
+    EXPECT_EQ(expectDeviceId, Mspti::Common::GetDeviceId());
+}
+
+TEST_F(UtilsUtest, GetStreamIdTest)
+{
+    const uint32_t expectStreamId = 0U;
+    RtStreamT stm = nullptr;
+    EXPECT_EQ(expectStreamId, Mspti::Common::GetStreamId(stm));
 }
 
 TEST_F(UtilsUtest, RelativeToAbsPathTest)

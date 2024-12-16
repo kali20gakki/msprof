@@ -14,7 +14,9 @@
 #include <functional>
 
 #include "activity/activity_manager.h"
+#include "activity/ascend/reporter/memory_reporter.h"
 #include "callback/callback_manager.h"
+#include "common/context_manager.h"
 #include "common/function_loader.h"
 
 namespace {
@@ -95,7 +97,10 @@ RtErrorT rtMalloc(void **devPtr, uint64_t size, RtMemTypeT type, const uint16_t 
                                                                                       func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_MALLOC, __FUNCTION__);
+    auto record = Mspti::Reporter::MemoryRecord(
+        devPtr, size, MSPTI_ACTIVITY_MEMORY_DEVICE, MSPTI_ACTIVITY_MEMORY_OPERATION_TYPE_ALLOCATION);
     return func(devPtr, size, type, moduleId);
 }
 
@@ -109,7 +114,10 @@ RtErrorT rtFree(void *devPtr)
         Mspti::Common::GetFunction<RtErrorT, void *>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_FREE, __FUNCTION__);
+    auto record = Mspti::Reporter::MemoryRecord(
+        &devPtr, 0, MSPTI_ACTIVITY_MEMORY_DEVICE, MSPTI_ACTIVITY_MEMORY_OPERATION_TYPE_RELEASE);
     return func(devPtr);
 }
 
@@ -153,7 +161,10 @@ RtErrorT rtMallocCached(void **devPtr, uint64_t size, RtMemTypeT type, const uin
                                                                                       func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_MALLOC_CACHED, __FUNCTION__);
+    auto record = Mspti::Reporter::MemoryRecord(
+        devPtr, size, MSPTI_ACTIVITY_MEMORY_DEVICE, MSPTI_ACTIVITY_MEMORY_OPERATION_TYPE_ALLOCATION);
     return func(devPtr, size, type, moduleId);
 }
 
@@ -197,7 +208,9 @@ RtErrorT rtMemcpy(void *dst, uint64_t destMax, const void *src, uint64_t cnt, Rt
         RtMemcpyKindT>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_MEMCPY, __FUNCTION__);
+    auto record = Mspti::Reporter::MemcpyRecord(kind, cnt, nullptr, 0);
     return func(dst, destMax, src, cnt, kind);
 }
 
@@ -213,7 +226,9 @@ RtErrorT rtMemcpyEx(void *dst, uint64_t destMax, const void *src, uint64_t cnt, 
         RtMemcpyKindT>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_MEMCPY, __FUNCTION__);
+    auto record = Mspti::Reporter::MemcpyRecord(kind, cnt, nullptr, 0);
     return func(dst, destMax, src, cnt, kind);
 }
 
@@ -231,7 +246,9 @@ RtErrorT rtMemcpyHostTask(void * const dst, const uint64_t destMax, const void *
             "libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_MEMCPY_HOST, __FUNCTION__);
+    auto record = Mspti::Reporter::MemcpyRecord(kind, cnt, stm, 0);
     return func(dst, destMax, src, cnt, kind, stm);
 }
 
@@ -248,7 +265,9 @@ RtErrorT rtMemcpyAsync(void *dst, uint64_t destMax, const void *src, uint64_t cn
             "libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_MEMCPY_ASYNC, __FUNCTION__);
+    auto record = Mspti::Reporter::MemcpyRecord(kind, cnt, stm, 1);
     return func(dst, destMax, src, cnt, kind, stm);
 }
 
@@ -266,7 +285,9 @@ RtErrorT rtMemcpy2d(void *dst, uint64_t dstPitch, const void *src, uint64_t srcP
             RtMemcpyKindT>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_MEM_CPY2D, __FUNCTION__);
+    auto record = Mspti::Reporter::MemcpyRecord(kind, width * height, nullptr, 0);
     return func(dst, dstPitch, src, srcPitch, width, height, kind);
 }
 
@@ -284,7 +305,9 @@ RtErrorT rtMemcpy2dAsync(void *dst, uint64_t dstPitch, const void *src, uint64_t
             RtMemcpyKindT, RtStreamT>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_MEM_CPY2D_ASYNC, __FUNCTION__);
+    auto record = Mspti::Reporter::MemcpyRecord(kind, width * height, stm, 1);
     return func(dst, dstPitch, src, srcPitch, width, height, kind, stm);
 }
 
@@ -298,7 +321,9 @@ RtErrorT rtMemset(void *devPtr, uint64_t destMax, uint32_t val, uint64_t cnt)
         Mspti::Common::GetFunction<RtErrorT, void *, uint64_t, uint32_t, uint64_t>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_MEM_SET, __FUNCTION__);
+    auto record = Mspti::Reporter::MemsetRecord(val, cnt, nullptr, 0);
     return func(devPtr, destMax, val, cnt);
 }
 
@@ -314,7 +339,9 @@ RtErrorT rtMemsetAsync(void *ptr, uint64_t destMax, uint32_t val, uint64_t cnt, 
                                                                                               __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_MEM_SET_ASYNC, __FUNCTION__);
+    auto record = Mspti::Reporter::MemsetRecord(val, cnt, stm, 1);
     return func(ptr, destMax, val, cnt, stm);
 }
 
@@ -359,7 +386,10 @@ RtErrorT rtReserveMemAddress(void **devPtr, size_t size, size_t alignment, void 
                                                                                         func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_RESERVE_MEM_ADDRESS, __FUNCTION__);
+    auto record = Mspti::Reporter::MemoryRecord(
+        devPtr, size, MSPTI_ACTIVITY_MEMORY_DEVICE, MSPTI_ACTIVITY_MEMORY_OPERATION_TYPE_ALLOCATION);
     return func(devPtr, size, alignment, devAddr, flags);
 }
 
@@ -373,7 +403,10 @@ RtErrorT rtReleaseMemAddress(void *devPtr)
         Mspti::Common::GetFunction<RtErrorT, void *>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
+    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_RELEASE_MEM_ADDRESS, __FUNCTION__);
+    auto record = Mspti::Reporter::MemoryRecord(
+        &devPtr, 0, MSPTI_ACTIVITY_MEMORY_DEVICE, MSPTI_ACTIVITY_MEMORY_OPERATION_TYPE_RELEASE);
     return func(devPtr);
 }
 
