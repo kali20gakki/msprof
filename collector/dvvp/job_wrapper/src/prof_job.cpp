@@ -1629,7 +1629,7 @@ bool ProfAicpuJob::CheckMC2Switch()
                     collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
         return true;
     }
-    if (platform == PlatformType::CHIP_V4_1_0 && (!profLevel.empty() || profLevel != MSVP_PROF_OFF)) {
+    if (platform == PlatformType::CHIP_V4_1_0 && (!profLevel.empty() && profLevel != MSVP_PROF_OFF)) {
         // hccl aicpu，并且L0级别以上
         MSPROF_LOGI("hccl aicpu enable, devId:%d, channelId:%d",
                     collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));

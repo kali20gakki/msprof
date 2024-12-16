@@ -38,6 +38,7 @@ const std::string PROF_PATH_B = File::PathJoin({COMPUTE_TASK_PATH,
 const std::set<std::string> PROF_PATHS = {PROF_PATH_A, PROF_PATH_B};
 const std::string TABLE_NAME = "TaskInfo";
 const std::string TARGET_TABLE_NAME = "COMPUTE_TASK_INFO";
+const std::string TABLE_COMMUNICATION_SCHEDULE_TASK_INFO = "COMMUNICATION_SCHEDULE_TASK_INFO";
 
 using GeInfoFormat = std::vector<std::tuple<uint32_t, std::string, int32_t, int32_t, uint32_t, uint32_t, std::string,
                                               std::string, std::string, int32_t, uint32_t, double, uint32_t, uint32_t,
@@ -47,13 +48,17 @@ using GeInfoFormat = std::vector<std::tuple<uint32_t, std::string, int32_t, int3
 using PROCESSED_DATA_FORMAT = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t,
                                                      uint64_t, uint64_t, uint64_t, uint64_t,
                                                      uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+using CommScheduleDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t>>;
 
 GeInfoFormat DATA_A{{4294967295, "aclnnMm_MatMulCommon_MatMulV2", 2, 1, 20, 40, "1", "MIX_AIC", "MatMulV2", -1,
                        3391981, 453148218443103, 0, 3, "FORMAT_ND;FORMAT_ND", "FLOAT16;FLOAT16",
                        "\"10000,10000;10000,10000\"", "FORMAT_ND", "FLOAT16", "\"10000,10000\"", 0, 0, "NO", "N/A"},
                       {4294967295, "trans_TransData_0", 2, 2, 35, 0, "1", "AI_CORE", "TransData", -1,
                        250512, 569402956566, 0, 2, "FORMAT_ND", "FLOAT",
-                       "\"3072,768\"", "FRACTAL_NZ", "FLOAT", "\"48,192,16,16\"", 0, 4294967295, "NO", "N/A"}};
+                       "\"3072,768\"", "FRACTAL_NZ", "FLOAT", "\"48,192,16,16\"", 0, 4294967295, "NO", "N/A"},
+                      {4294967295, "allreduceAicpuKernel", 2, 3, 0, 0, "1", "AI_CPU", "allreduceAicpuKernel", -1,
+                       250512, 569402956569, 0, 0, "N/A", "N/A",
+                       "N/A", "N/A", "N/A", "N/A", 0, 4294967295, "NO", "N/A"}};
 GeInfoFormat DATA_B{{4294967295, "Add", 2, 3, 20, 40, "1", "MIX_AIC", "MatMulV2", -1,
                        3391981, 453148218443103, 0, 3, "FORMAT_ND;FORMAT_ND", "FLOAT16;FLOAT16",
                        "\"10000,10000;10000,10000\"", "FORMAT_ND", "FLOAT16", "\"10000,10000\"", 0, 0, "NO", "N/A"},
@@ -153,6 +158,12 @@ TEST_F(ComputeTaskInfoProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuc
     MsprofDBRunner->QueryData(sql, result);
     CheckGlobalTaskId(result);
     CheckStringId(result);
+    CommScheduleDataFormat scheduleRes;
+    std::string sql2{"SELECT * FROM " + TABLE_COMMUNICATION_SCHEDULE_TASK_INFO};
+    MsprofDBRunner->QueryData(sql2, scheduleRes);
+    ASSERT_EQ(1, scheduleRes.size());
+    const uint16_t scheduleTaskGlobalTaskId = 4;
+    EXPECT_EQ(scheduleTaskGlobalTaskId, std::get<1>(scheduleRes[0]));
 }
 
 TEST_F(ComputeTaskInfoProcessorUTest, TestRunShouldReturnFalseWhenSourceTableNotExist)

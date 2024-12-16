@@ -209,5 +209,13 @@ std::string DivideByPowersOfTenWithPrecision(uint64_t value, int accuracy, int s
         return numStr.substr(0, numStr.size() + accuracy - scale);
     }
 }
+
+bool EndsWith(const std::string &str, const std::string &suffix)
+{
+    if (suffix.size() > str.size()) {
+        return false;
+    }
+    return str.substr(str.size() - suffix.size()) == suffix;
+}
 }  // namespace Utils
 }  // namespace Analysis

@@ -21,21 +21,11 @@
 #include "analysis/csrc/utils/time_utils.h"
 #include "analysis/csrc/viewer/database/db_runner.h"
 #include "analysis/csrc/viewer/database/finals/msprof_db.h"
+#include "analysis/csrc/infrastructure/db/include/db_info.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-// 该结构体用于区分原始db和msprof db 所需的对象和属性
-// 规定了 db名字， table名字，和对应的database和dbRunner对象
-struct DBInfo {
-    std::string dbName;
-    std::string tableName;
-    std::shared_ptr<Database> database;
-    std::shared_ptr<DBRunner> dbRunner;
-    DBInfo() = default;
-    DBInfo(std::string dbName, std::string tableName) : dbName(dbName), tableName(tableName) {};
-};
-
 // 存放各processor中的各线程数据
 struct ThreadData {
     uint16_t deviceId = UINT16_MAX;
@@ -47,6 +37,7 @@ struct ThreadData {
 
 // GeHash表映射map结构
 using GeHashMap = std::unordered_map<std::string, std::string>;
+using DBInfo = Analysis::Infra::DBInfo;
 const uint8_t CHECK_SUCCESS = 0;
 const uint8_t NOT_EXIST = 1;
 const uint8_t CHECK_FAILED = 2;

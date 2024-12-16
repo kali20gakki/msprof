@@ -41,6 +41,7 @@ bool IsDoubleEqual(double checkDouble, double standard);
 std::string AddQuotation(std::string str);
 std::string DivideByPowersOfTenWithPrecision(uint64_t value, int scale = ACCURACY_THREE,
                                              int accuracy = ACCURACY_THREE);
+bool EndsWith(const std::string &str, const std::string &suffix);
 
 // make_shared参数个数为0，异常操作为return void
 #define MAKE_SHARED0_RETURN_VOID(instance, type) \

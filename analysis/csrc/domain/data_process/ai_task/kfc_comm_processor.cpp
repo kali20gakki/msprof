@@ -122,10 +122,12 @@ bool KfcCommProcessor::ConvertTaskData(std::vector<KfcTaskData> &resTask,
         return false;
     }
     for (const auto &data : taskData) {
+        auto groupName = data.groupName + " Aicpu";
         resTask.emplace_back(data.deviceId, data.modelId, data.taskType, data.start, data.duration, data.notifyId,
-                             data.durationEstimated, data.streamId, data.taskId, data.contextId, data.taskType,
-                             data.srcRank, data.dstRank, data.transportType, data.size, data.linkType,
-                             data.bandwidth, data.groupName, data.planeId, data.dataType, data.isMaster);
+                             data.durationEstimated, data.streamId, data.taskId, data.contextId, data.batchId,
+                             data.taskType, data.srcRank, data.dstRank, data.transportType, data.size, data.linkType,
+                             data.bandwidth, groupName, data.planeId, data.dataType, data.isMaster, data.opName,
+                             data.opKey, data.rdmaType);
     }
     return true;
 }
@@ -137,8 +139,10 @@ bool KfcCommProcessor::ConvertOpData(std::vector<KfcOpData> &resOp, const std::v
         return false;
     }
     for (const auto &data : opData) {
-        resOp.emplace_back(data.deviceId, data.opName, data.start, data.end, data.groupName, data.connectionId,
-                           data.modelId, data.dataType, data.count, data.algType, data.rankSize);
+        auto groupName = data.groupName + " Aicpu";
+        resOp.emplace_back(data.deviceId, data.opName, data.start, data.end, groupName, data.connectionId,
+                           data.modelId, data.dataType, data.count, data.algType, data.rankSize, data.relay,
+                           data.retry, data.opType, data.opKey);
     }
     return true;
 }
