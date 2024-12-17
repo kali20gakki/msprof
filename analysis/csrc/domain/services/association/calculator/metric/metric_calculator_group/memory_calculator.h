@@ -49,11 +49,13 @@ private:
         {MemoryIndex::L1WriteBw, {{0x32}, Calculator::CalculatorMetricByAdditionsWithFreq}},
         {MemoryIndex::MainMemReadBw, {{0x12}, Calculator::CalculatorMetricByAdditionsWithFreq}},
         {MemoryIndex::MainMemWriteBw, {{0x13}, Calculator::CalculatorMetricByAdditionsWithFreq}},
+        {MemoryIndex::L2ReadBw, {{0xf}, Calculator::CalculatorMetricByAdditionsWithFreq}},
+        {MemoryIndex::L2WriteBw, {{0x10}, Calculator::CalculatorMetricByAdditionsWithFreq}},
     };
 
-    const std::vector<double> floatBitVec{1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
-    const std::vector<double> pipeSizeVec{256.0, 256.0, 256.0, 128.0, 8.0, 8.0};
-    const std::vector<double> scalarVec{4.0, 4.0, 16.0, 8.0, 8.0, 8.0};
+    const std::vector<double> floatBitVec{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    const std::vector<double> pipeSizeVec{256.0, 256.0, 256.0, 128.0, 8.0, 8.0, 256.0, 256.0};
+    const std::vector<double> scalarVec{4.0, 4.0, 16.0, 8.0, 8.0, 8.0, 8.0, 8.0};
 };
 }
 }

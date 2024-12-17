@@ -31,7 +31,8 @@ std::vector<std::string> PipeUtHeaderString{
 };
 
 std::vector<std::string> MemoryHeaderString{
-    "ub_read_bw", "ub_write_bw", "l1_read_bw", "l1_write_bw", "main_mem_read_bw", "main_mem_write_bw"
+    "ub_read_bw", "ub_write_bw", "l1_read_bw", "l1_write_bw", "main_mem_read_bw", "main_mem_write_bw", "l2_read_bw",
+    "l2_write_bw"
 };
 
 std::vector<std::string> MemoryL0HeaderString{

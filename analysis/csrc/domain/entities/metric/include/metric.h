@@ -73,6 +73,8 @@ enum class MemoryIndex {
     L1WriteBw,
     MainMemReadBw,
     MainMemWriteBw,
+    L2ReadBw,
+    L2WriteBw,
 };
 
 enum class MemoryL0Index {
@@ -121,7 +123,7 @@ enum class MemoryAccessIndex {
 class Metric {
 public:
     template<typename T>
-    static const std::string &GetMetricHeaderString(T enumType)
+    static const std::string GetMetricHeaderString(T enumType)
     {
         auto it = metricMappingStringTable.find(typeid(enumType));
         if (it == metricMappingStringTable.end()) {
