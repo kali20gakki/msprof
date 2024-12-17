@@ -109,7 +109,7 @@ bool InputParser::CheckInstrAndTaskParamBothSet(std::unordered_map<int, std::pai
             comflictStr += " aic-metrics";
         }
     }
-    
+
     if (!comflictStr.empty()) {
         CmdLog::instance()->CmdErrorLog(" Profiling fails to start because instr_profiling is on,"
             " Params %s not allowed to set in single operator model if instr_profiling is on.",
@@ -354,7 +354,8 @@ void ArgsManager::AddBasicArgs()
             "\t\t\t\t\t\t   In sample-based mode, profiling data will be collected in a specific interval.\n"
             "\t\t\t\t\t\t   The default value is task-based.", TASK_BASED},
         {"aic-freq", "The aic sampling frequency in hertz, the default value is 100 Hz, the range is\n"
-            "\t\t\t\t\t\t   1 to 100 Hz.(full-platform)", "100"}
+            "\t\t\t\t\t\t   1 to 100 Hz.(full-platform)", "100"},
+        {"task-memory", "Show operator memory data, the default value is off.(full-platform)", OFF}
     };
     std::string defaultOption = (platform_ == PlatformType::CHIP_V4_2_0) ? "PipelineExecuteUtilization" :
                                 "PipeUtilization";
