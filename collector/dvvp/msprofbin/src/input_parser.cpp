@@ -363,7 +363,7 @@ void ArgsManager::AddBasicArgs()
     if (!driverOnline_ || platform_ == PlatformType::CHIP_V4_2_0) {
         addOptions = ", L2Cache, PipelineExecuteUtilization";
     } else if (platform_ == PlatformType::CHIP_V4_1_0) {
-        addOptions = ", L2Cache";
+        addOptions = ", L2Cache, MemoryAccess";
     }
     Args aicMetrics = {"aic-metrics",
                        "The aic metrics groups, include ArithmeticUtilization, PipeUtilization, Memory,\n"

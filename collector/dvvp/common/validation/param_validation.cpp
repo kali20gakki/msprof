@@ -891,7 +891,7 @@ bool ParamValidation::CheckAiCoreEventsIsValid(const std::vector<std::string> &e
         return false;
     }
     const int minEvent = 1;  // min ai core event is 0x1
-    const int maxEvent = 1290;  // max ai core event is 0x50A
+    const int maxEvent = 1294;  // max ai core event is 0x50E
     for (unsigned int i = 0; i < events.size(); ++i) {
         int eventVal = strtol(events[i].c_str(), nullptr, BASE_HEX);
         if (eventVal < minEvent || eventVal > maxEvent) {

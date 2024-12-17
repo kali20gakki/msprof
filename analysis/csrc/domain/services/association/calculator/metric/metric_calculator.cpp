@@ -116,6 +116,30 @@ double Calculator::CalculatorVectorFops(CalculationElements& allParams, size_t i
     return res;
 }
 
+double Calculator::CalculateMetricWithoutCycByAdd(CalculationElements &allParams, size_t index)
+{
+    double res = 0.0;
+    for (size_t i = 0; i < allParams.pmuList.size(); ++i) {
+        res += (*allParams.floatBit)[index] * static_cast<double>(allParams.pmuList[i]);
+    }
+    return res;
+}
+
+double Calculator::CalculateMetricWithoutCycBySub(CalculationElements &allParams, size_t index)
+{
+    double res = 0.0;
+    double tmpRes;
+    for (size_t i = 0; i < allParams.pmuList.size(); ++i) {
+        tmpRes = (*allParams.floatBit)[index] * static_cast<double>(allParams.pmuList[i]);
+        if (i == 0) {
+            res += tmpRes;
+        } else {
+            res -= tmpRes;
+        }
+    }
+    return res;
+}
+
 std::unordered_map<uint32_t, uint64_t> MetricCalculator::GetValueMappingOffset(CalculationElements& params,
                                                                                HalPmuData& pmuData)
 {

@@ -51,6 +51,7 @@ typedef enum {
     ACL_AICORE_MEMORY_UB = 5,
     ACL_AICORE_L2_CACHE = 6,
     ACL_AICORE_PIPE_EXECUTE_UTILIZATION = 7,
+    ACL_AICORE_MEMORY_ACCESS = 8,
     ACL_AICORE_NONE = 0xFF
 } aclprofAicoreMetrics;
 

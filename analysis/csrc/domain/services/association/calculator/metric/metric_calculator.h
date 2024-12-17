@@ -64,6 +64,8 @@ public:
     static double CalculatorCubeFops(CalculationElements &allParams, size_t index);
     static double CalculatorVectorFops(CalculationElements &allParams, size_t index);
     static double CalculatorTotalTime(uint64_t totalCycle, uint64_t blockDim, uint64_t coreNum, uint64_t freq);
+    static double CalculateMetricWithoutCycByAdd(CalculationElements &allParams, size_t index);
+    static double CalculateMetricWithoutCycBySub(CalculationElements &allParams, size_t index);
 public:
     std::vector<uint32_t> registers;
     std::function<double(CalculationElements &params, size_t index)> calculatorFunc;
