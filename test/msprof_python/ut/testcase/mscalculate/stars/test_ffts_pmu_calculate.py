@@ -136,6 +136,20 @@ class TestFftsPmuCalculator(TestCase):
             mixCalcute.save()
             InfoConfReader()._info_json = {}
 
+    def test__get_pmu_decode_data_when_pmu_ov_is_1_then_return_empty(self):
+        data_byte = b'\xa8\x03\xd3k\x03\x00 \x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00' \
+                                     b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00g%\x03:\x01\x00\x00\x00' \
+                                     b'\x10L\\\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf8G\x00' \
+                                     b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x006b\xdc\x13\x00\x00\x00\x00' \
+                                     b'\x0b\xf6:\x00\x00\x00\x00\x00A\xdc\x919\x00\x00\x00\x00\x02\x00\x00\x00\x00' \
+                                     b'\x00\x00\x00\xa9\xa5\x07\x00\x00\x00\x00\x00:\x04\xd1\xc2\x0b\x00\x00\x007' \
+                                     b'\xf8!\xcf\x0b\x00\x00\x00'
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
+                mock.patch("os.path.exists", return_value=True):
+            check = FftsPmuCalculator(self.file_list, CONFIG)
+            check._get_pmu_decode_data(data_byte)
+            self.assertEqual(check._data_list, {})
+
     def test_calculate_all_file(self):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.Utils.get_scene', return_value=Constant.SINGLE_OP), \

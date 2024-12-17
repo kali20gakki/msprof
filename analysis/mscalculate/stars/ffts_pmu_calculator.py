@@ -526,7 +526,14 @@ class FftsPmuCalculator(PmuCalculator, MsMultiProcess):
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
             raise ProfException(ProfException.PROF_INVALID_DATA_ERROR) from err
         if Utils.get_func_type(func_type) == StarsConstant.FFTS_PMU_TAG:
-            self._data_list.setdefault(StrConstant.CONTEXT_PMU_TYPE, []).append(FftsPmuBean.decode(bin_data))
+            context_pmu = FftsPmuBean.decode(bin_data)
+            # 仅处理context级别数据 block数据不受ov影响
+            if context_pmu.ov_flag:
+                logging.warning(
+                    "An overflow in the operator (stream id = %d, task id = %d) count has been detected."
+                    "Total_cycle value is invalid!", context_pmu.stream_id, context_pmu.task_id)
+                return
+            self._data_list.setdefault(StrConstant.CONTEXT_PMU_TYPE, []).append(context_pmu)
         elif Utils.get_func_type(func_type) == StarsConstant.FFTS_BLOCK_PMU_TAG:
             self._data_list.setdefault(StrConstant.BLOCK_PMU_TYPE, []).append(FftsBlockPmuBean.decode(bin_data))
         else:

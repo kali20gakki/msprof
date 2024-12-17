@@ -19,14 +19,13 @@ class FftsPmuBean(StructDecoder):
         filed = args[0]
         self._stream_id = StarsCommon.set_stream_id(filed[2], filed[3])
         self._task_id = StarsCommon.set_task_id(filed[2], filed[3])
-        self._ov_flag = filed[5] & 0x400
+        self._ov_flag = (filed[5] >> 10) & 1  # 0 / 1
         self._subtask_id = filed[6]
         self._ffts_type = filed[7] >> 13
         self._subtask_type = filed[5] & int(b'11111111')
         self._total_cycle = filed[10]
         self._pmu_list = filed[12:20]
         self._time_list = filed[20:]
-
 
     @property
     def stream_id(self: any) -> int:
@@ -76,10 +75,6 @@ class FftsPmuBean(StructDecoder):
         get total_cycle
         :return: total_cycle
         """
-        if self._ov_flag:
-            logging.warning("An overflow in the operator (stream id = %d, task id = %d) count has been detected and "
-                            "the total_cycle value is not credible!", self._stream_id, self._task_id)
-            return self._total_cycle + 4294967296 # 2**32 == 4294967296
         return self._total_cycle
 
     @property
@@ -97,6 +92,14 @@ class FftsPmuBean(StructDecoder):
         :return: time_list
         """
         return self._time_list
+
+    @property
+    def ov_flag(self: any) -> bool:
+        """
+        get ov_flag
+        :return: ov_flag status
+        """
+        return self._ov_flag == 1
 
     def is_aic_data(self):
         """
