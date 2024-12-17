@@ -20,6 +20,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ascend_task_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/communication_info_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/memcpy_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/msprof_tx_host_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/task_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/acc_pmu_data.h"
@@ -62,6 +63,26 @@ bool SaveApiData(DataInventory& dataInventory, DBInfo& msprofDB, const std::stri
         res.emplace_back(item.start, item.end, item.level, globalTid, item.connectionId, name);
     }
     return SaveData(res, TABLE_NAME_CANN_API, msprofDB);
+}
+
+bool SaveMemcpyInfoData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, profPath);
+    auto memcpyInfoData = dataInventory.GetPtr<std::vector<MemcpyInfoData>>();
+    if (memcpyInfoData == nullptr) {
+        WARN("MemcpyInfo data not exist.");
+        return true;
+    }
+    std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t>> res;
+    if (!Reserve(res, memcpyInfoData->size())) {
+        ERROR("Reserved for api data failed.");
+        return false;
+    }
+    for (const auto& item : *memcpyInfoData) {
+        uint64_t direction = IdPool::GetInstance().GetUint64Id(item.memcpyDirection);
+        res.emplace_back(item.connectionId, item.dataSize, item.maxSize, direction);
+    }
+    return SaveData(res, TABLE_NAME_MEMCPY_INFO, msprofDB);
 }
 
 bool SaveCommOpData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
@@ -680,6 +701,7 @@ const std::unordered_map<std::string, SaveDataFunc> DATA_SAVER = {
     {Viewer::Database::PROCESSOR_NAME_ROCE,              SaveRoCEData},
     {Viewer::Database::PROCESSOR_NAME_TASK,              SaveAscendTaskData},
     {Viewer::Database::PROCESSOR_NAME_COMPUTE_TASK_INFO, SaveComputeTaskInfo},
+    {Viewer::Database::PROCESSOR_NAME_MEMCPY_INFO,       SaveMemcpyInfoData},
 };
 }
 
