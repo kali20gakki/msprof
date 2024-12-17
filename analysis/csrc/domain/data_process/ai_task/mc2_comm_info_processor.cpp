@@ -36,6 +36,10 @@ bool Mc2CommInfoProcessor::Process(Analysis::Infra::DataInventory &dataInventory
         return true;
     }
     auto mc2Data = LoadOriData(mc2DB, dbPath);
+    if (mc2Data.empty()) {
+        ERROR("LoadOriData failed, %.", PROCESSOR_MC2_COMM_INFO);
+        return false;
+    }
     if (!SaveToDataInventory<MC2CommInfoData>(std::move(mc2Data), dataInventory, PROCESSOR_MC2_COMM_INFO)) {
         ERROR("Save data failed, %.", PROCESSOR_MC2_COMM_INFO);
         return false;

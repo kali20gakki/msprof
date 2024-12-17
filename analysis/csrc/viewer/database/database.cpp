@@ -711,6 +711,18 @@ namespace {
         {"bw9", SQL_NUMERIC_TYPE},
         {"bw10", SQL_NUMERIC_TYPE},
     };
+
+    const TableColumns MemcpyInfo = {
+        {"struct_type", SQL_TEXT_TYPE},
+        {"level", SQL_TEXT_TYPE},
+        {"thread_id", SQL_NUMERIC_TYPE},
+        {"data_len", SQL_NUMERIC_TYPE},
+        {"timestamp", SQL_NUMERIC_TYPE},
+        {"data_size", SQL_NUMERIC_TYPE},
+        {"memcpy_direction", SQL_NUMERIC_TYPE},
+        {"max_size", SQL_NUMERIC_TYPE},
+        {"connection_id", SQL_NUMERIC_TYPE}
+    };
 }
 
 std::string Database::GetDBName() const
@@ -738,6 +750,7 @@ RuntimeDB::RuntimeDB()
 {
     dbName_ = "runtime.db";
     tableColNames_["HostTask"] = HostTask;
+    tableColNames_["MemcpyInfo"] = MemcpyInfo;
 }
 
 GEInfoDB::GEInfoDB()

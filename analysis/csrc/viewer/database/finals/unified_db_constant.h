@@ -134,6 +134,9 @@ const std::string PROCESSOR_NAME_MSTX = "MSTX";
 const std::string TABLE_NAME_MSTX = "MSTX_EVENTS";
 const std::string TABLE_NAME_MSTX_EVENT_TYPE = "ENUM_MSTX_EVENT_TYPE";
 
+const std::string PROCESSOR_NAME_MEMCPY_INFO = "MEMCPY_INFO";
+const std::string TABLE_NAME_MEMCPY_INFO = "MEMCPY_INFO";
+
 const std::string PROCESSOR_NAME_CHIP_TRAINS = "CHIP_TRAINS";
 const std::string TABLE_NAME_PA_LINK_INFO = "PA_LINK_INFO";
 const std::string TABLE_NAME_PCIE_INFO = "ENUM_PCIE_INFO";

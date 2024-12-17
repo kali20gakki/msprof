@@ -338,6 +338,12 @@ struct MsprofHcclOPInfo {  // for MsprofReportCompactInfo buffer data
 };
 #pragma pack()
 
+struct MsprofMemcpyInfo {  // for MsprofReportCompactInfo buffer data
+    uint64_t dataSize;  // 数据量大小， 字节
+    uint64_t maxSize;  // 单个task拷贝的最大数据量
+    uint16_t memcpyDirection; // memcpy的方向
+};
+
 const uint16_t MSPROF_AICPU_DATA_RESERVE_BYTES = 9;
 struct MsprofAicpuNodeAdditionalData {
     uint16_t streamId;
@@ -411,6 +417,7 @@ struct MsprofCompactInfo {  // for MsprofReportCompactInfo buffer data
         MsprofNodeBasicInfo nodeBasicInfo;
         MsprofAttrInfo nodeAttrInfo;
         MsprofHcclOPInfo hcclopInfo;
+        MsprofMemcpyInfo memcpyInfo;
     } data;
 };
 

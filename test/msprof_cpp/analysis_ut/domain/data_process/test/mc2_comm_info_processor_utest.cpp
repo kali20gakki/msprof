@@ -91,6 +91,6 @@ TEST_F(Mc2CommInfoProcessorUTest, GetDataShouldReturnFalseWhenDataReserveFail)
     MOCKER_CPP(&std::vector<MC2CommInfoData>::reserve)
     .stubs()
     .will(throws(std::bad_alloc()));
-    EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_MC2_COMM_INFO));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_MC2_COMM_INFO));
     EXPECT_FALSE(dataInventory.GetPtr<std::vector<MC2CommInfoData>>());
 }

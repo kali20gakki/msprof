@@ -101,13 +101,15 @@ std::shared_ptr<EventQueue> GenKernelEventQueueWithTradComm()
     return GenKernelEventQueue(apiEvents);
 }
 
-// 生成建树所需的三层节点
+// 生成建树所需的四层节点
 std::shared_ptr<EventQueue> GenKernelEventQueueWithFFtsComm()
 {
+    // Acl   :  [1，                                               800]  [801,  900]
     // Model :  [1,            200]  [201,             400]  [401, 800]
     // Node  :  [2, 99]  [100, 150]  [202,  300] [302, 399]
     // Hccl  :                       [202,  300] [302, 399]
     std::unordered_map<std::string, std::vector<std::pair<uint64_t, uint64_t>>> apiEvents{
+        {"Acl", {{1, 800}, {801, 900}}},
         {"Model", {{1, 200}, {201, 400}, {401, 800}}},
         {"Node", {{2, 99}, {100, 150}, {160, 195}, {202, 300}, {302, 399}}},
         {"Hccl", {{202, 300}, {302, 399}}},
@@ -780,6 +782,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L2()
 {
     // 逻辑树如下，其中[n]标识每个event中带几个context id
     // 其中tk(110),tk(120),tk(168)为计算任务
+    // Acl:     [1,                                                               800] [801, 900]
     // Model :  [1,                          200]  [201,              400]  [401, 800]
     //                    f(125)                                               f(600)
     // Node  :  [2, 99]  [100, 150]   [160, 195]   [202,  300] [302,  399]
@@ -788,7 +791,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L2()
     // Hccl  :                                     [202,  300] [302,  399]
     //                                               c(230)[3]  c(310)[3]
     //                                            hInfo(230)[3] hInfo(310)[3]
-    // Runtime:  tk(50)   tk(105)       tk(165)       tk(220)     tk(330)
+    // Runtime:  tk(50)   tk(105)       tk(165)       tk(220)     tk(330)                tk(850)
     //                    tk(110)       tk(168)
     //                    tk(120)
     auto kernelEvents = GenKernelEventQueueWithFFtsComm();
@@ -810,6 +813,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L2()
         {168, 52}, // Runtime FFTS_PLUS
         {220, 52}, // Runtime FFTS_PLUS
         {330, 52}, // Runtime FFTS_PLUS
+        {850, 5},  // Runtime MEMCPY_ASYNC
     };
     auto taskTrackEvents = GenTaskTrackEventQueue(items);
     std::vector<std::vector<uint16_t>> algList{
@@ -857,12 +861,13 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario2L2)
     std::vector<uint64_t> expectHcclTaskTimes{220, 220, 220, 330, 330, 330};
     std::vector<uint64_t> expectHcclTaskCtxIds{0, 0, 1, 1, 2, 2};
     // 多出的一个220，一个330分别标识ffts+大任务, 多出的一个168标识MIX算子
-    std::vector<uint64_t> expectTaskTimes{50, 105, 110, 120, 165, 168, 168, 220, 220, 220, 220, 330, 330, 330, 330};
+    std::vector<uint64_t> expectTaskTimes{50, 105, 110, 120, 165, 168, 168, 220, 220, 220, 220, 330, 330, 330, 330,
+                                          850};
     // DEFAULT_CONTEXT_ID分别代表一个tk,
     std::vector<uint64_t> expectTaskCtxIds{0, 0, 0, 1, 1, 2, 2,
                                            DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
                                            DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
-                                           DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID};
+                                           DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID};
     const uint64_t expectbigOPsNum = 2;
     std::vector<uint64_t> expectbigOPsCount{410, 610};
     std::vector<std::string> expectbigOPsAlgType{"PAIRWISE-NB-HD-RING", "STAR-NHR-PIPELINE-NB"};

@@ -12,7 +12,9 @@
 
 #include "analysis/csrc/application/timeline/cann_assembler.h"
 #include <algorithm>
+#include <unordered_set>
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ascend_task_data.h"
 #include "analysis/csrc/parser/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/application/timeline/connection_id_pool.h"
@@ -84,6 +86,22 @@ std::string GetTraceName(uint16_t level, std::string &name)
     return PROCESS_API + "@" + name;
 }
 
+std::unordered_set<uint64_t> GetMemcpyAsyncConnectionIds(DataInventory& dataInventory)
+{
+    std::unordered_set<uint64_t> connectionIds;
+    auto taskData = dataInventory.GetPtr<std::vector<AscendTaskData>>();
+    if (taskData == nullptr) {
+        WARN("Can't get task data from dataInventory");
+        return connectionIds;
+    }
+    for (const auto& task: *taskData) {
+        if (task.hostType == MEMCPY_ASYNC) {
+            connectionIds.emplace(task.connectionId);
+        }
+    }
+    return connectionIds;
+}
+
 void GenerateApiTrace(std::vector<ApiData> &apiData, std::vector<std::shared_ptr<TraceEvent>> &res, uint32_t pid)
 {
     std::string levelStr;
@@ -100,12 +118,14 @@ void GenerateApiTrace(std::vector<ApiData> &apiData, std::vector<std::shared_ptr
         res.push_back(event);
     }
 }
-void GenerateConnectionTrace(std::vector<ApiData> &apiData, uint32_t pid, std::vector<std::shared_ptr<TraceEvent>> &res)
+void GenerateConnectionTrace(std::vector<ApiData> &apiData, uint32_t pid, std::vector<std::shared_ptr<TraceEvent>> &res,
+                             std::unordered_set<uint64_t> memcpyAsyncConnectionIds)
 {
     std::string connId;
     std::string name;
     for (auto &data : apiData) {
-        if (MSPROF_REPORT_NODE_LEVEL == data.level || RECORD_EVENT == data.id) {
+        if (MSPROF_REPORT_NODE_LEVEL == data.level || RECORD_EVENT == data.id ||
+            memcpyAsyncConnectionIds.find(data.connectionId) != memcpyAsyncConnectionIds.end()) {
             connId = ConnectionIdPool::GetConnectionId(data.connectionId, ConnectionCategory::GENERAL);
             name = HOST_TO_DEVICE + connId;
             std::shared_ptr<FlowEvent> start;
@@ -127,7 +147,8 @@ uint8_t CannAssembler::AssembleData(DataInventory &dataInventory, JsonWriter &os
     auto formatPid = JsonAssembler::GetFormatPid(pid, SORT_INDEX);
     GenerateMetaData(*apiData, formatPid, res_);
     GenerateApiTrace(*apiData, res_, formatPid);
-    GenerateConnectionTrace(*apiData, formatPid, res_);
+    auto memcpyAsyncConnectionIds = GetMemcpyAsyncConnectionIds(dataInventory);
+    GenerateConnectionTrace(*apiData, formatPid, res_, memcpyAsyncConnectionIds);
     if (res_.empty()) {
         ERROR("Can't Generate any CANN process data");
         return ASSEMBLE_FAILED;

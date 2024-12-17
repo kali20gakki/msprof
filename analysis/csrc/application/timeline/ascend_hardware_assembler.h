@@ -14,6 +14,7 @@
 #define ANALYSIS_APPLICATION_ASCEND_ASSEMBLER_H
 
 #include <map>
+#include <unordered_set>
 #include "analysis/csrc/application/timeline/json_assembler.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ascend_task_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/task_info_data.h"
@@ -30,8 +31,10 @@ public:
                    const std::string taskType)
         : DurationEvent(pid, tid, dur, ts, name), modelId_(modelId), streamId_(streamId), taskId_(taskId),
         batchId_(batchId), contextId_(contextId), connectionId_(connectionId), taskType_(taskType) {}
-private:
+
+protected:
     void ProcessArgs(JsonWriter &ostream) override;
+
 private:
     uint32_t modelId_;
     uint32_t streamId_;
@@ -40,6 +43,24 @@ private:
     uint32_t contextId_;
     uint64_t connectionId_;
     std::string taskType_;
+};
+
+class MemcpyAsyncEvent : public TaskTraceEvent {
+public:
+    MemcpyAsyncEvent(uint32_t pid, int tid, double dur, const std::string &ts, const std::string &name,
+                     uint32_t modelId, uint32_t streamId, uint32_t taskId, uint32_t batchId, uint32_t contextId,
+                     uint64_t connectionId, const std::string taskType, uint64_t dataSize, double bandwidth,
+                     std::string memcpyDirection, bool showFlag)
+        : TaskTraceEvent(pid, tid, dur, ts, name, modelId, streamId, taskId, batchId, contextId, connectionId,
+          taskType), dataSize_(dataSize), bandwidth_(bandwidth), memcpyDirection_(memcpyDirection),
+          showFlag_(showFlag) {}
+private:
+    void ProcessArgs(JsonWriter &ostream) override;
+private:
+    uint64_t dataSize_;
+    double bandwidth_;
+    std::string memcpyDirection_;
+    bool showFlag_;
 };
 
 class KfcTurnTraceEvent : public DurationEvent {
@@ -67,6 +88,9 @@ private:
     void GenerateTaskConnectionTrace(const AscendTaskData &data, uint32_t formatPid, TaskId &id);
     void GenerateKfcTrace(const std::vector<KfcTurnData>& kfcData, const std::string &profPath,
                           const LayerInfo &layer, std::unordered_map<uint16_t, uint32_t> &pidMap);
+    void GenerateMemcpyAsyncTrace(DataInventory &dataInventory, const std::string &profPath, const LayerInfo &layer,
+                                  std::unordered_map<uint16_t, uint32_t> &pidMap);
+    void GenerateMemcpyAsyncConnectionTrace(const AscendTaskData &data, uint32_t formatPid);
 private:
     std::vector<std::shared_ptr<TraceEvent>> res_;
     std::shared_ptr<std::unordered_map<uint32_t, uint32_t>> logicStream_;
@@ -74,6 +98,8 @@ private:
     std::set<std::pair<uint32_t, int>> pidTidSet_;
     std::set<TaskId> ffts_;
     std::set<uint64_t> recordEvent_;
+    std::vector<AscendTaskData> memcpyAsyncDeviceTasks_;
+    std::unordered_set<uint64_t> memcpyAsyncConnectionIds_;
 };
 }
 }

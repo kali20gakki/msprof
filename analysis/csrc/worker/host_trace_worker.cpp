@@ -14,16 +14,14 @@
 #include "analysis/csrc/worker/host_trace_worker.h"
 #include "analysis/csrc/utils/time_logger.h"
 #include "analysis/csrc/utils/utils.h"
-#include "analysis/csrc/parser/host/cann/event_grouper.h"
 #include "analysis/csrc/association/cann/tree_builder.h"
 #include "analysis/csrc/association/cann/tree_analyzer.h"
 #include "analysis/csrc/viewer/database/drafts/cann_trace_db_dumper.h"
 #include "analysis/csrc/viewer/database/drafts/api_event_db_dumper.h"
 #include "analysis/csrc/viewer/database/drafts/flip_task_db_dumper.h"
+#include "analysis/csrc/viewer/database/drafts/memcpy_info_dumper.h"
 #include "analysis/csrc/viewer/database/drafts/model_name_db_dumper.h"
 
-using namespace Analysis::Utils;
-using namespace Analysis::Parser::Host::Cann;
 using namespace Analysis::Association::Cann;
 using namespace Analysis::Viewer::Database::Drafts;
 
@@ -43,43 +41,10 @@ bool HostTraceWorker::Run()
     threadIds_ = grouper->GetThreadIdSet();
     ThreadPool pool(poolSize_);
     pool.Start();
-    pool.AddTask([this, &grouper]() {
-        TimeLogger t{"Dump api data start"};
-        // api event 数据落盘
-        auto apiTraces = grouper->GetApiTraces();
-        std::shared_ptr<ApiEventDBDumper> apiDumper;
-        MAKE_SHARED_RETURN_VOID(apiDumper, ApiEventDBDumper, hostPath_);
-        auto ret = apiDumper->DumpData(apiTraces);
-        if (!ret) {
-            ERROR("Dump api traces data failed");
-        }
-    });
+    DumpApiEvent(pool, grouper);
     if (!cannWarehouses_.Empty()) {
-        pool.AddTask([this, &grouper]() {
-            TimeLogger t{"Dump flip tasks data start"};
-            // flip tasks 数据落盘
-            auto flipTasks = grouper->GetFlipTasks();
-            std::shared_ptr<FlipTaskDBDumper> flipDumper;
-            MAKE_SHARED_RETURN_VOID(flipDumper, FlipTaskDBDumper, hostPath_);
-            auto ret = flipDumper->DumpData(flipTasks);
-            if (!ret) {
-                ERROR("Dump flip tasks data failed");
-            }
-        });
-        pool.AddTask([this, &hostDataPath]() {
-            TimeLogger t{"Dump model name data start"};
-            std::shared_ptr<GraphIdParser> parser;
-            MAKE_SHARED_RETURN_VOID(parser, GraphIdParser, hostDataPath);
-            auto traces = parser->ParseData<MsprofAdditionalInfo>();
-            // ModelName 数据落盘
-            std::shared_ptr<ModelNameDBDumper> modelNameDumper;
-            MAKE_SHARED_RETURN_VOID(modelNameDumper, ModelNameDBDumper, hostPath_);
-            auto ret = modelNameDumper->DumpData(traces);
-            if (!ret) {
-                ERROR("Dump model name data failed");
-            }
-        });
-
+        DumpFlipTask(pool, grouper);
+        DumpModelName(pool, hostDataPath);
         pool.AddTask([this]() {
             // 建树
             // 建树前已经对KernelEvents排序
@@ -88,9 +53,9 @@ bool HostTraceWorker::Run()
             MultiThreadAnalyzeTreeDumpData();
         });
     }
-
     pool.WaitAllTasks();
     pool.Stop();
+    DumpMemcpyInfo(hostDataPath);  // 依赖runtime.db中的HostTask, 不能放在pool中
     return true;
 }
 
@@ -144,6 +109,68 @@ void HostTraceWorker::MultiThreadAnalyzeTreeDumpData()
 
     pool.WaitAllTasks();
     pool.Stop();
+}
+
+void HostTraceWorker::DumpApiEvent(ThreadPool &pool, const std::shared_ptr<EventGrouper> &grouper)
+{
+    pool.AddTask([this, &grouper]() {
+        TimeLogger t{"Dump api data start"};
+        // api event 数据落盘
+        auto apiTraces = grouper->GetApiTraces();
+        std::shared_ptr<ApiEventDBDumper> apiDumper;
+        MAKE_SHARED_RETURN_VOID(apiDumper, ApiEventDBDumper, hostPath_);
+        auto ret = apiDumper->DumpData(apiTraces);
+        if (!ret) {
+            ERROR("Dump api traces data failed");
+        }
+    });
+}
+
+void HostTraceWorker::DumpFlipTask(ThreadPool &pool, const std::shared_ptr<EventGrouper> &grouper)
+{
+    pool.AddTask([this, &grouper]() {
+        TimeLogger t{"Dump flip tasks data start"};
+        // flip tasks 数据落盘
+        auto flipTasks = grouper->GetFlipTasks();
+        std::shared_ptr<FlipTaskDBDumper> flipDumper;
+        MAKE_SHARED_RETURN_VOID(flipDumper, FlipTaskDBDumper, hostPath_);
+        auto ret = flipDumper->DumpData(flipTasks);
+        if (!ret) {
+            ERROR("Dump flip tasks data failed");
+        }
+    });
+}
+
+void HostTraceWorker::DumpModelName(ThreadPool &pool, const std::string &hostDataPath)
+{
+    pool.AddTask([this, &hostDataPath]() {
+        TimeLogger t{"Dump model name data start"};
+        std::shared_ptr<GraphIdParser> parser;
+        MAKE_SHARED_RETURN_VOID(parser, GraphIdParser, hostDataPath);
+        auto traces = parser->ParseData<MsprofAdditionalInfo>();
+        // ModelName 数据落盘
+        std::shared_ptr<ModelNameDBDumper> modelNameDumper;
+        MAKE_SHARED_RETURN_VOID(modelNameDumper, ModelNameDBDumper, hostPath_);
+        auto ret = modelNameDumper->DumpData(traces);
+        if (!ret) {
+            ERROR("Dump model name data failed");
+        }
+    });
+}
+
+void HostTraceWorker::DumpMemcpyInfo(const std::string &hostDataPath)
+{
+    TimeLogger t{"Dump memcpy info data start"};
+    std::shared_ptr<MemcpyInfoParser> parser;
+    MAKE_SHARED_RETURN_VOID(parser, MemcpyInfoParser, hostDataPath);
+    auto traces = parser->ParseData<MsprofCompactInfo>();
+    // MemcpyInfo 数据落盘
+    std::shared_ptr<MemcpyInfoDumper> memcpyInfoDumper;
+    MAKE_SHARED_RETURN_VOID(memcpyInfoDumper, MemcpyInfoDumper, hostPath_);
+    auto ret = memcpyInfoDumper->DumpData(traces);
+    if (!ret) {
+        ERROR("Dump memcpy info data failed");
+    }
 }
 } // namespace Worker
 } // namespace Analysis
