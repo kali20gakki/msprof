@@ -135,20 +135,9 @@ void EventGrouper::InitLastKernelTimes(const std::set<uint32_t> &threadIds)
     }
 }
 
-bool EventGrouper::IsBuildTreeWithAcl(const std::shared_ptr<MsprofApi> &trace)
-{
-    if (trace->level == MSPROF_REPORT_ACL_LEVEL) {
-        auto id = TypeData::GetInstance().Get(trace->level, trace->type);
-        if (RECORD_EVENT == id) {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool EventGrouper::isKernelApiEvent(const std::shared_ptr<MsprofApi> &trace)
 {
-    if (IsBuildTreeWithAcl(trace) || trace->level == MSPROF_REPORT_MODEL_LEVEL ||
+    if (trace->level == MSPROF_REPORT_ACL_LEVEL || trace->level == MSPROF_REPORT_MODEL_LEVEL ||
         trace->level == MSPROF_REPORT_NODE_LEVEL || trace->level == MSPROF_REPORT_HCCL_NODE_LEVEL) {
         if (trace->beginTime == trace->endTime) {
             ERROR("Invaild api event, threadId = %, level = %, begin = %, end = %",

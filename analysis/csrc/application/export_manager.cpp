@@ -53,7 +53,8 @@ const std::vector<std::string> DATA_PROCESS_LIST{
         PROCESSOR_NAME_NIC,
         PROCESSOR_NAME_ROCE,
         PROCESSOR_NAME_QOS,
-        PROCESSOR_MC2_COMM_INFO
+        PROCESSOR_MC2_COMM_INFO,
+        PROCESSOR_NAME_MEMCPY_INFO
 };
 }
 

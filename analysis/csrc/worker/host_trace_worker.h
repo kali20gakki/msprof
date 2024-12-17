@@ -17,11 +17,15 @@
 #include <utility>
 #include <set>
 #include "analysis/csrc/parser/host/cann/cann_warehouse.h"
+#include "analysis/csrc/parser/host/cann/event_grouper.h"
 #include "analysis/csrc/utils/safe_unordered_map.h"
 #include "analysis/csrc/entities/tree.h"
+#include "analysis/csrc/utils/thread_pool.h"
 
 namespace Analysis {
 namespace Worker {
+using namespace Analysis::Utils;
+using namespace Analysis::Parser::Host::Cann;
 
 // HostTraceWorker负责控制CANN Host侧数据解析->EventQueue->建树->分析树->Dump 流程
 // 此流程由Worker拉起
@@ -39,6 +43,10 @@ public:
 private:
     void MultiThreadBuildTree();
     void MultiThreadAnalyzeTreeDumpData();
+    void DumpApiEvent(ThreadPool &pool, const std::shared_ptr<EventGrouper> &grouper);
+    void DumpFlipTask(ThreadPool &pool, const std::shared_ptr<EventGrouper> &grouper);
+    void DumpModelName(ThreadPool &pool, const std::string &hostDataPath);
+    void DumpMemcpyInfo(const std::string &hostDataPath);
 private:
     const uint32_t poolSize_ = 10;
     std::mutex mutex_;

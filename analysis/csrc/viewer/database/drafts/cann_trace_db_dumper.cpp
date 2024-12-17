@@ -13,11 +13,9 @@
 #include "analysis/csrc/viewer/database/drafts/cann_trace_db_dumper.h"
 
 #include "analysis/csrc/parser/host/cann/hash_data.h"
-#include "analysis/csrc/parser/host/cann/type_data.h"
 #include "analysis/csrc/utils/thread_pool.h"
 #include "analysis/csrc/utils/time_logger.h"
 #include "analysis/csrc/viewer/database/drafts/number_mapping.h"
-#include "collector/inc/toolchain/prof_common.h"
 
 namespace Analysis {
 namespace Viewer {

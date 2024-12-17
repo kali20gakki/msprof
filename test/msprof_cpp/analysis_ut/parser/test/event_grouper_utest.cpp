@@ -83,7 +83,7 @@ void GenApiEventsBin(const std::string &fakeDataDir, const int num)
     tmp.itemId = static_cast<uint32_t>(num + n - 1);
     apiTrace.emplace_back(tmp);
     // 补充不正常的api
-    for (int i = n; i < num + n; i++) {
+    for (int i = n; i < num + n - 1; i++) {
         auto tmp = MsprofApi{};
         tmp.magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
         tmp.level = MSPROF_REPORT_MODEL_LEVEL;
@@ -204,7 +204,7 @@ TEST_F(EventGrouperUTest, TestGroupShouldReturnEmptyWhenDataOnlyHasApiBin)
 
     const std::string hostDataDir = fakeDataDir + "/host/data";
     const int MaxNum = 10000;
-    TypeData::GetInstance().Load(TEST_FILE);
+    TypeData::GetInstance().Load("./");
     GenApiEventsBin(fakeDataDir, MaxNum);
     auto grouper = std::make_shared<EventGrouper>(hostDataDir);
     grouper->Group();

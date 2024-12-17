@@ -161,13 +161,15 @@ std::shared_ptr<EventQueue> GenHcclInfoEvents()
 std::shared_ptr<EventQueue> GenKernelEvents()
 {
     auto kernelEvents = std::make_shared<EventQueue>(1, 100);
-    std::vector<std::string> levels{"Model", "Node", "Hccl"};
+    std::vector<std::string> levels{"Acl", "Model", "Node", "Hccl"};
     std::unordered_map<std::string, uint16_t> levelNum{
+        {"Acl", MSPROF_REPORT_ACL_LEVEL},
         {"Model", MSPROF_REPORT_MODEL_LEVEL},
         {"Node", MSPROF_REPORT_NODE_LEVEL},
         {"Hccl", MSPROF_REPORT_HCCL_NODE_LEVEL},
     };
     std::unordered_map<std::string, std::vector<std::pair<uint64_t, uint64_t>>> apiEvents{
+        {"Acl", {{10, 50}, {100, 215}}},
         {"Model", {{110, 200}}},
         {"Node", {{110, 130}, {150, 170}, {175, 180}}},
         {"Hccl", {{115, 125}, {155, 165}}},
@@ -189,7 +191,7 @@ std::shared_ptr<EventQueue> GenTaskTrackEvents()
     auto taskTrackEvents = std::make_shared<EventQueue>(1, 100);
     std::unordered_map<std::string, std::vector<uint64_t>> ttEvents{
         /*    Index        0    1    2    3    4    5    6    7    8    9    10   11  12 */
-        {"Runtime", {114, 115, 120, 125, 130, 155, 160, 165, 170, 175, 180, 190, 210}},
+        {"Runtime", {11, 114, 115, 120, 125, 130, 155, 160, 165, 170, 175, 180, 190, 210}},
     };
     int cnt = 0;
     for (auto dot: ttEvents["Runtime"]) {
@@ -329,10 +331,12 @@ TEST_F(TreeBuilderUTest, TestBuildTreeShouldBuildCorrectTreeWhenCANNWarehouseNot
      * GraphIdMap(start = 5, end = 5)可表示为: Api1_10 [GraphIdMap2_2] [GraphIdMap5_5]
      * */
     // 核心event：
+    // Acl,   [10, 50], [100, 215]
     // Model, [110, 200],
     // Node,  [110, 130], [150, 170], [175, 180],
     // Hccl,  [115, 125], [155, 165],
     // 逻辑树如下，其中[n]标识每个context id event中带几个context id
+    // Acl : [10, 50]  [100,                                                                               215]
     // Model :  [110,                                                                                    200]
     // g(105)g(110)             g(115) g(200)                                                                   g(210)
     // f(104)f(110)             f(116) f(200)                                                                   f(220)
@@ -349,9 +353,11 @@ TEST_F(TreeBuilderUTest, TestBuildTreeShouldBuildCorrectTreeWhenCANNWarehouseNot
     // h(103) h(110) h(115) h(120)  h(125)       h(130)  h(155)       h(160) h(165)        h(170)
     //  c(115)             c(117) c(125)         c(130)               c(160)
     // Runtime: tk(114) tk(115) tk(120) tk(125) tk(130)       tk(155) tk(160) tk(165)tk(170)tk(175) tk(180) tk(190,210)
+    //  tk(11)
     std::vector<std::string> ans{
-        "Api0_211 ", // 第一层
-        "Api110_200 [FusionOpInfo116_116] "
+        "Api0_216 ", // 第0层
+        "Api10_50 Api100_215 ", // 第1层
+        "Dummy11_11 [TaskTrack11_11] Api110_200 [FusionOpInfo116_116] "
         "[FusionOpInfo200_200] Dummy210_210 [TaskTrack210_210] ",  // 第二层
         "Api110_130 [NodeBasicInfo115_115] [NodeBasicInfo115_115] [NodeBasicInfo130_130] "
         "[NodeAttrInfo115_115] [NodeAttrInfo115_115] [NodeAttrInfo130_130] "

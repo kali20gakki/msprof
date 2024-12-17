@@ -14,6 +14,7 @@
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/application/timeline/cann_assembler.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ascend_task_data.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/parser/environment/context.h"
 #include "analysis/csrc/dfx/error_code.h"
@@ -69,6 +70,33 @@ static std::vector<ApiData> GenerateApiData()
     return res;
 }
 
+static std::vector<ApiData> GenerateMemcpyAsyncApiData()
+{
+    std::vector<ApiData> res;
+    ApiData data;
+    data.apiName = "aclrtMemcpyAsync";
+    data.connectionId = 22; // connectionId 22
+    data.id = "aclrtMemcpyAsync";
+    data.start = 1717575960208020750; // start 1717575960208020750
+    data.itemId = "0";
+    data.level = MSPROF_REPORT_ACL_LEVEL;
+    data.threadId = 2816340; // threadId 2816340
+    data.end = 1717575960209010750; // end 1717575960209010750
+    data.structType = "ACL_RTS";
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<AscendTaskData> GenerateAscendTaskData()
+{
+    std::vector<AscendTaskData> res;
+    AscendTaskData data;
+    data.hostType = "MEMCPY_ASYNC";
+    data.connectionId = 22;  // connectionId 22
+    res.push_back(data);
+    return res;
+}
+
 TEST_F(CannAssemblerUTest, ShouldReturnTrueWhenDataNotExists)
 {
     CannAssembler assembler;
@@ -113,4 +141,37 @@ TEST_F(CannAssemblerUTest, ShouldReturnFalseWhenDataAssembleFail)
     MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(1000)); // pid 1000
     MOCKER_CPP(&std::vector<std::shared_ptr<TraceEvent>>::empty).stubs().will(returnValue(true));
     EXPECT_FALSE(assembler.Run(dataInventory_, PROF_PATH));
+}
+
+TEST_F(CannAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccessCaseMemcpyAsync)
+{
+    CannAssembler assembler;
+    std::shared_ptr<std::vector<ApiData>> dataS;
+    auto data = GenerateMemcpyAsyncApiData();
+    MAKE_SHARED_NO_OPERATION(dataS, std::vector<ApiData>, data);
+    std::shared_ptr<std::vector<AscendTaskData>> dataS1;
+    auto data1 = GenerateAscendTaskData();
+    MAKE_SHARED_NO_OPERATION(dataS1, std::vector<AscendTaskData>, data1);
+    dataInventory_.Inject(dataS);
+    dataInventory_.Inject(dataS1);
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(1000)); // pid 1000
+    EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
+    auto files = File::GetOriginData(RESULT_PATH, {"msprof"}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    std::string expectStr = "{\"name\":\"process_name\",\"pid\":1024255,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":"
+                            "\"CANN\"}},{\"name\":\"process_labels\",\"pid\":1024255,\"tid\":0,\"ph\":\"M\",\"args"
+                            "\":{\"labels\":\"CPU\"}},{\"name\":\"process_sort_index\",\"pid\":1024255,\"tid\":0,"
+                            "\"ph\":\"M\",\"args\":{\"sort_index\":7}},{\"name\":\"thread_name\",\"pid\":1024255,"
+                            "\"tid\":2816340,\"ph\":\"M\",\"args\":{\"name\":\"Thread 2816340\"}},{\"name\":\"thr"
+                            "ead_sort_index\",\"pid\":1024255,\"tid\":2816340,\"ph\":\"M\",\"args\":{\"sort_index"
+                            "\":2816340}},{\"name\":\"AscendCL@aclrtMemcpyAsync\",\"pid\":1024255,\"tid\":2816340,"
+                            "\"ts\":\"1717575960208020.750\",\"dur\":990.0,\"ph\":\"X\",\"args\":{\"Thread Id\":"
+                            "2816340,\"Mode\":\"ACL_RTS\",\"level\":\"acl\",\"id\":\"aclrtMemcpyAsync\",\"item_id"
+                            "\":\"0\",\"connection_id\":22}},{\"name\":\"HostToDevice94489280512\",\"pid\":1024255,"
+                            "\"tid\":2816340,\"ph\":\"s\",\"cat\":\"HostToDevice\",\"id\":\"94489280512\",\"ts\":"
+                            "\"1717575960208020.750\"},";
+    EXPECT_EQ(expectStr, res.back());
 }
