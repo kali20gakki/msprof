@@ -51,6 +51,11 @@ std::vector<std::string> L2CacheHeaderString{
     "write_cache_hit", "write_cache_miss_allocate", "r0_read_cache_hit", "r0_read_cache_miss_allocate",
     "r1_read_cache_hit", "r1_read_cache_miss_allocate"
 };
+
+std::vector<std::string> MemoryAccessString{
+    "read_main_memory_datas", "write_main_memory_datas", "GM_to_L1_datas", "L0C_to_L1_datas", "L0C_to_GM_datas",
+    "GM_to_UB_datas", "UB_to_GM_datas"
+};
 }
 std::unordered_map<std::type_index, std::vector<std::string>> Metric::metricMappingStringTable{
     {typeid(PipeUtilizationExctIndex), PipeUtExHeaderString},
@@ -61,6 +66,7 @@ std::unordered_map<std::type_index, std::vector<std::string>> Metric::metricMapp
     {typeid(ResourceConflictIndex), ResourceHeaderString},
     {typeid(MemoryUBIndex), MemoryUBHeaderString},
     {typeid(L2CacheIndex), L2CacheHeaderString},
+    {typeid(MemoryAccessIndex), MemoryAccessString}
 };
 }
 }

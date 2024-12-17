@@ -32,6 +32,7 @@ enum class AicMetricsEventsType {
     AIC_MEMORY_UB,
     AIC_L2_CACHE,
     AIC_PIPELINE_EXECUTE_UTILIZATION,
+    AIC_MEMORY_ACCESS,
     AIC_METRICS_UNKNOWN
 };
 const std::unordered_map<std::string, AicMetricsEventsType> aicMetricsMap = {
@@ -43,7 +44,8 @@ const std::unordered_map<std::string, AicMetricsEventsType> aicMetricsMap = {
     {"ResourceConflictRatio", AicMetricsEventsType::AIC_RESOURCE_CONFLICT_RATIO},
     {"MemoryUB", AicMetricsEventsType::AIC_MEMORY_UB},
     {"L2Cache", AicMetricsEventsType::AIC_L2_CACHE},
-    {"PipelineExecuteUtilization", AicMetricsEventsType::AIC_PIPELINE_EXECUTE_UTILIZATION}
+    {"PipelineExecuteUtilization", AicMetricsEventsType::AIC_PIPELINE_EXECUTE_UTILIZATION},
+    {"MemoryAccess", AicMetricsEventsType::AIC_MEMORY_ACCESS}
 };
 
 enum class AivMetricsEventsType {
@@ -55,6 +57,7 @@ enum class AivMetricsEventsType {
     AIV_MEMORY_UB,
     AIV_L2_CACHE,
     AIV_PIPELINE_EXECUTE_UTILIZATION,
+    AIV_MEMORY_ACCESS,
     AIV_METRICS_UNKNOWN
 };
 const std::unordered_map<std::string, AivMetricsEventsType> aivMetricsMap = {
@@ -65,7 +68,8 @@ const std::unordered_map<std::string, AivMetricsEventsType> aivMetricsMap = {
     {"ResourceConflictRatio", AivMetricsEventsType::AIV_RESOURCE_CONFLICT_RATIO},
     {"MemoryUB", AivMetricsEventsType::AIV_MEMORY_UB},
     {"L2Cache", AivMetricsEventsType::AIV_L2_CACHE},
-    {"PipelineExecuteUtilization", AivMetricsEventsType::AIV_PIPELINE_EXECUTE_UTILIZATION}
+    {"PipelineExecuteUtilization", AivMetricsEventsType::AIV_PIPELINE_EXECUTE_UTILIZATION},
+    {"MemoryAccess", AivMetricsEventsType::AIV_MEMORY_ACCESS}
 };
 
 enum class ProfilingMode {

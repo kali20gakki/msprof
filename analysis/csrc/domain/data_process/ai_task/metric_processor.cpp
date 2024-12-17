@@ -421,6 +421,10 @@ std::vector<std::string> MetricProcessor::ModifySummaryHeaders(const std::vector
             metricSummaryHeaders.emplace_back(oriHeader + "(GB/s)");
             continue;
         }
+        if (oriHeader.find("datas") != std::string::npos && oriHeader.find("(KB)") == std::string::npos) {
+            metricSummaryHeaders.emplace_back(oriHeader + "(KB)");
+            continue;
+        }
         metricSummaryHeaders.emplace_back(oriHeader);
     }
     return metricSummaryHeaders;

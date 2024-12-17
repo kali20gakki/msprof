@@ -20,6 +20,7 @@ namespace {
 // featureName, compatibility, featureVersion, affectedComponent, affectedComponentVersion, infoLog
 static FeatureRecord g_features[] = {
     {"ATTR\0", "0\0", "1\0", "all\0", "all\0", "It not support feature: ATTR!\0"},
+    {"MemoryAccess\0", "0\0", "1\0", "all\0", "all\0", "It not support feature: MemoryAccess!\0"},
 };
 static const std::string FILE_NAME = "incompatible_features.json";
 }

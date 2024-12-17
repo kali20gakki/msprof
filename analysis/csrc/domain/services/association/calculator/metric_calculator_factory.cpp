@@ -19,6 +19,7 @@
 #include "analysis/csrc/domain/services/association/calculator/metric/metric_calculator_group/pipeut_calculator.h"
 #include "analysis/csrc/domain/services/association/calculator/metric/metric_calculator_group/pipeutext_calculator.h"
 #include "analysis/csrc/domain/services/association/calculator/metric/metric_calculator_group/resource_conflict_calculator.h"
+#include "analysis/csrc/domain/services/association/calculator/metric/metric_calculator_group/memory_access_calculator.h"
 
 namespace Analysis {
 namespace Domain {
@@ -48,6 +49,9 @@ std::unordered_map<AicMetricsEventsType, Creator> MetricCalculatorFactory::aicEv
     {AicMetricsEventsType::AIC_L2_CACHE, []() {
         return MAKE_UNIQUE_PTR<L2CacheCalculator>();
     }},
+    {AicMetricsEventsType::AIC_MEMORY_ACCESS, []() {
+        return MAKE_UNIQUE_PTR<MemoryAccessCalculator>();
+    }},
 };
 
 std::unordered_map<AivMetricsEventsType, Creator> MetricCalculatorFactory::aivEvent{
@@ -71,6 +75,9 @@ std::unordered_map<AivMetricsEventsType, Creator> MetricCalculatorFactory::aivEv
     }},
     {AivMetricsEventsType::AIV_L2_CACHE, []() {
         return MAKE_UNIQUE_PTR<L2CacheCalculator>();
+    }},
+    {AivMetricsEventsType::AIV_MEMORY_ACCESS, []() {
+        return MAKE_UNIQUE_PTR<MemoryAccessCalculator>();
     }},
 };
 }

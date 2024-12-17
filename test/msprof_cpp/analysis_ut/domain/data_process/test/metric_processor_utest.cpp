@@ -25,7 +25,7 @@ using namespace Analysis::Domain;
 
 const std::string METRIC_DIR = "./metric";
 const std::string METRIC_SUMMARY_DB = "metric_summary.db";
-const std::string PROF_PATH = File::PathJoin({METRIC_DIR, "./PROF_114514"});
+const std::string PROF_PATH = File::PathJoin({METRIC_DIR, "PROF_114514"});
 const std::string DB_PATH = File::PathJoin({PROF_PATH, DEVICE_PREFIX + "0", SQLITE, METRIC_SUMMARY_DB});
 const std::string TASK_BASED = "task-based";
 const std::string SAMPLE_BASED = "sample-based";
@@ -276,6 +276,73 @@ TEST_F(MetricProcessorUTest, TestTaskRunShouldReturnTrueWhenNoMetricSummaryDB)
     };
     EXPECT_TRUE(File::RemoveDir(File::PathJoin({PROF_PATH, DEVICE_PREFIX + "0"}), 0));
 
+    MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
+    DataInventory dataInventory;
+    auto processor = MetricProcessor(PROF_PATH);
+    EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_METRIC_SUMMARY));
+    MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
+}
+
+const TableColumns MEMORY_ACCESS_METRIC_SUMMARY = {
+    {"aicore_time", SQL_NUMERIC_TYPE},
+    {"aic_total_cycles", SQL_NUMERIC_TYPE},
+    {"aic_read_main_memory_datas", SQL_NUMERIC_TYPE},
+    {"aic_write_main_memory_datas", SQL_NUMERIC_TYPE},
+    {"aic_GM_to_L1_datas", SQL_NUMERIC_TYPE},
+    {"aic_L0C_to_L1_datas", SQL_NUMERIC_TYPE},
+    {"aic_L0C_to_GM_datas", SQL_NUMERIC_TYPE},
+    {"aic_GM_to_UB_datas", SQL_NUMERIC_TYPE},
+    {"aic_UB_to_GM_datas", SQL_NUMERIC_TYPE},
+    {"aiv_total_time", SQL_NUMERIC_TYPE},
+    {"aiv_total_cycles", SQL_NUMERIC_TYPE},
+    {"aiv_read_main_memory_datas", SQL_NUMERIC_TYPE},
+    {"aiv_write_main_memory_datas", SQL_NUMERIC_TYPE},
+    {"aiv_GM_to_L1_datas", SQL_NUMERIC_TYPE},
+    {"aiv_L0C_to_L1_datas", SQL_NUMERIC_TYPE},
+    {"aiv_L0C_to_GM_datas", SQL_NUMERIC_TYPE},
+    {"aiv_GM_to_UB_datas", SQL_NUMERIC_TYPE},
+    {"aiv_UB_to_GM_datas", SQL_NUMERIC_TYPE},
+    {"task_id", SQL_INTEGER_TYPE},
+    {"stream_id", SQL_INTEGER_TYPE},
+    {"subtask_id", SQL_INTEGER_TYPE},
+    {"start_time", SQL_NUMERIC_TYPE},
+    {"end_time", SQL_NUMERIC_TYPE},
+    {"batch_id", SQL_INTEGER_TYPE}
+};
+
+using MS_TYPE = std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double,
+    double, double, double, double, double, double, double, double, uint32_t, uint32_t, uint32_t, double, double,
+    uint16_t>>;
+
+const MS_TYPE MS_DATA = {
+    {3.515, 2812, 1.125, 0.125, 0.5, 0, 0.125, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, UINT32_MAX, 21203781495130.004,
+     21203812838010.004, 0},
+    {3.515, 2812, 1.125, 0.125, 0.5, 0, 0.125, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, UINT32_MAX, 21203781497130.004,
+     21203812738010.004, 0}
+};
+
+TEST_F(MetricProcessorUTest, TestTaskRunShouldReturnTrueWhenRunMemoryAccessSuccess)
+{
+    nlohmann::json record = {
+        {"startCollectionTimeBegin", "1701069323851824"},
+        {"endCollectionTimeEnd", "1701069338041681"},
+        {"startClockMonotonicRaw", "36470610791630"},
+        {"DeviceInfo", {{{"aic_frequency", "1000"}}}},
+        {"ai_core_profiling_mode", TASK_BASED},
+        {"platform_version", "5"},
+    };
+    auto path = File::PathJoin({PROF_PATH, DEVICE_PREFIX + "0", SQLITE});
+    std::shared_ptr<DBRunner> metricRunner;
+    MAKE_SHARED_NO_OPERATION(metricRunner, DBRunner, File::PathJoin({path, "metric_summary.db"}));
+    if (File::Check(METRIC_DIR)) {
+        EXPECT_TRUE(File::RemoveDir(METRIC_DIR, 0));
+    }
+    EXPECT_TRUE(File::CreateDir(METRIC_DIR));
+    EXPECT_TRUE(File::CreateDir(PROF_PATH));
+    EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH, DEVICE_PREFIX + "0"})));
+    EXPECT_TRUE(File::CreateDir(path));
+    EXPECT_TRUE(metricRunner->CreateTable("MetricSummary", MEMORY_ACCESS_METRIC_SUMMARY));
+    EXPECT_TRUE(metricRunner->InsertData("MetricSummary", MS_DATA));
     MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
     DataInventory dataInventory;
     auto processor = MetricProcessor(PROF_PATH);

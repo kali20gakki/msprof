@@ -108,6 +108,16 @@ enum class L2CacheIndex {
     R1ReadCacheMissAllocate,
 };
 
+enum class MemoryAccessIndex {
+    ReadMainMemoryData = 0,
+    WriteMainMemoryData,
+    GmToL1Data,
+    L0CToL1Data,
+    L0CToGmData,
+    GmToUbData,
+    UbToGmData,
+};
+
 class Metric {
 public:
     template<typename T>

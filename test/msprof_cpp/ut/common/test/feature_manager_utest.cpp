@@ -82,7 +82,7 @@ TEST_F(FeatureManagerUtest, TestGetIncompatibleFeaturesSuccessWhenPointerNotNull
 {
     auto featureManger = FeatureManager::instance();
     size_t dataSize = 0;
-    size_t expectDataSize = 1;
+    size_t expectDataSize = 2;
     EXPECT_NE(nullptr, featureManger->GetIncompatibleFeatures(&dataSize));
     EXPECT_EQ(expectDataSize, dataSize);
 }

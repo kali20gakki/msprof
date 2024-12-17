@@ -466,5 +466,27 @@ TEST_F(PmuAssociationUTest, ShouldGetDeviceTaskWithPmuTheSameAsPmuCount)
         }
     }
 }
+
+TEST_F(PmuAssociationUTest, ShouldReturnOKWhenPMUISMemoryAccess)
+{
+    PmuAssociation pmuAssociation;
+    DeviceContext context;
+    context.deviceContextInfo.sampleInfo.aiCoreMetrics = AicMetricsEventsType::AIC_MEMORY_ACCESS;
+    context.deviceContextInfo.sampleInfo.aivMetrics = AivMetricsEventsType::AIV_MEMORY_ACCESS;
+    context.deviceContextInfo.deviceInfo.chipID = CHIP_V4_1_0;
+    uint32_t arr1[8]{0x32, 0x3d, 0x3e, 0x206, 0x20c, 0x50c, 0x50d, 0x50e};
+    context.deviceContextInfo.deviceInfo.aicFrequency = 100;  // 100为aic频率，单位：MHZ
+    for (size_t i = 0; i < DEFAULT_PMU_LENGTH; i++) {
+    context.deviceContextInfo.sampleInfo.aivProfilingEvents[i] = arr1[i];
+    context.deviceContextInfo.sampleInfo.aiCoreProfilingEvents[i] = arr1[i];
+    }
+    auto pmuData = GenerateHalPmuData();
+    auto pmuDataS = dataInventory_.GetPtr<std::vector<HalPmuData>>();
+    pmuDataS->swap(pmuData);
+    auto deviceTask = GenerateDeviceTask();
+    auto deviceTaskS = dataInventory_.GetPtr<std::map<TaskId, std::vector<Domain::DeviceTask>>>();
+    deviceTaskS->swap(deviceTask);
+    ASSERT_EQ(ANALYSIS_OK, pmuAssociation.Run(dataInventory_, context));
+}
 }
 }

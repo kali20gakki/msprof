@@ -90,6 +90,7 @@ function create_temp_dir() {
     cp ${mspti_dir}/libmspti.so ${temp_dir}
     cp ${TOP_DIR}/build/build/dist/mspti-0.0.1-py3-none-any.whl ${temp_dir}
     cp ${TOP_DIR}/collector/inc/external/acl/acl_prof.h ${temp_dir}
+    cp ${TOP_DIR}/collector/inc/external/ge/ge_prof.h ${temp_dir}
     cp ${TOP_DIR}/mspti/external/mspti.h ${temp_dir}
     cp ${TOP_DIR}/mspti/external/mspti_activity.h ${temp_dir}
     cp ${TOP_DIR}/mspti/external/mspti_callback.h ${temp_dir}
@@ -199,6 +200,7 @@ function sed_main_param() {
 check_file_exist() {
   local temp_dir=${1}
   check_package ${temp_dir}/acl_prof.h ${PKG_LIMIT_SIZE}
+  check_package ${temp_dir}/ge_prof.h ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/msprof ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/libmsprofiler.so ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/libmsprofiler.so ${PKG_LIMIT_SIZE}
