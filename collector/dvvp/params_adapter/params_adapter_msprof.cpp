@@ -67,7 +67,8 @@ int ParamsAdapterMsprof::Init()
         INPUT_CFG_COM_SYS_CPU, INPUT_CFG_COM_SYS_HARDWARE_MEM, INPUT_CFG_COM_SYS_IO,
         INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_DVPP, INPUT_CFG_COM_POWER,
         INPUT_CFG_COM_INSTR_PROFILING, INPUT_CFG_COM_INSTR_PROFILING_FREQ, INPUT_CFG_HOST_SYS, INPUT_CFG_HOST_SYS_PID,
-        INPUT_CFG_MSPROF_DYNAMIC, INPUT_CFG_MSPROF_DYNAMIC_PID, INPUT_CFG_MSPROF_DELAY, INPUT_CFG_MSPROF_DURATION
+        INPUT_CFG_MSPROF_DYNAMIC, INPUT_CFG_MSPROF_DYNAMIC_PID, INPUT_CFG_MSPROF_DELAY, INPUT_CFG_MSPROF_DURATION,
+        INPUT_CFG_COM_TASK_MEMORY
         }).swap(msprofConfig_);
     return PROFILING_SUCCESS;
 }
@@ -82,7 +83,7 @@ int ParamsAdapterMsprof::ParamsCheckMsprof()
         {INPUT_CFG_COM_SYS_HARDWARE_MEM, "sys-hardware-mem"}, {INPUT_CFG_COM_SYS_IO, "sys-io-profiling"},
         {INPUT_CFG_COM_SYS_INTERCONNECTION, "sys-interconnection-profiling"}, {INPUT_CFG_COM_DVPP, "dvpp-profiling"},
         {INPUT_CFG_COM_POWER, "power"}, {INPUT_CFG_COM_INSTR_PROFILING, "instr-profiling"},
-        {INPUT_CFG_MSPROF_DYNAMIC, "dynamic"},
+        {INPUT_CFG_MSPROF_DYNAMIC, "dynamic"}, {INPUT_CFG_COM_TASK_MEMORY, "task-memory"},
     };
     for (auto inputCfg : msprofConfig_) {
         if (setConfig_.find(inputCfg) == setConfig_.end()) {
@@ -107,6 +108,7 @@ int ParamsAdapterMsprof::ParamsCheckMsprof()
             case INPUT_CFG_COM_POWER:
             case INPUT_CFG_COM_INSTR_PROFILING:
             case INPUT_CFG_MSPROF_DYNAMIC:
+            case INPUT_CFG_COM_TASK_MEMORY:
                 ret = ParamValidation::instance()->IsValidInputCfgSwitch(switchNameMap[inputCfg], cfgValue);
                 break;
             default:
@@ -626,6 +628,7 @@ void ParamsAdapterMsprof::CreateCfgMap()
         {ARGS_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE}, {ARGS_HOST_SYS_USAGE_FREQ, INPUT_CFG_HOST_SYS_USAGE_FREQ},
         {ARGS_DYNAMIC_PROF, INPUT_CFG_MSPROF_DYNAMIC}, {ARGS_DYNAMIC_PROF_PID, INPUT_CFG_MSPROF_DYNAMIC_PID},
         {ARGS_PROFILING_DELAY, INPUT_CFG_MSPROF_DELAY}, {ARGS_PROFILING_DURATION, INPUT_CFG_MSPROF_DURATION},
+        {ARGS_TASK_MEMORY, INPUT_CFG_COM_TASK_MEMORY}
         }).swap(cfgMap_);
 }
 } // ParamsAdapter
