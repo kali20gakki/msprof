@@ -290,6 +290,13 @@ namespace {
         {"domainId", SQL_INTEGER_TYPE},
         {"connectionId", SQL_INTEGER_TYPE}
     };
+
+    const TableColumns MEMCPY_INFO = {
+        {"connectionId", SQL_NUMERIC_TYPE},
+        {"dataSize", SQL_NUMERIC_TYPE},
+        {"memcpyDirection ", SQL_NUMERIC_TYPE},
+        {"maxSize", SQL_NUMERIC_TYPE}
+    };
 }
 
 MsprofDB::MsprofDB()
@@ -324,6 +331,7 @@ MsprofDB::MsprofDB()
         {TABLE_NAME_META_DATA, META_DATA},
         {TABLE_NAME_AICORE_FREQ, AICORE_FREQ},
         {TABLE_NAME_MSTX, MSTX},
+        {TABLE_NAME_MEMCPY_INFO, MEMCPY_INFO},
         // ENUM
         {TABLE_NAME_ENUM_API_TYPE, ENUM_TABLE},
         {TABLE_NAME_ENUM_MODULE, ENUM_TABLE},
