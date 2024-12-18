@@ -148,6 +148,8 @@ class AICoreConfig(MetaConfig):
             ('0x191', 'ub_write_bw_vector(GB/s)'),
             ('0x1a5', 'ub_read_bw_mte(GB/s)'),
             ('0x1a6', 'ub_write_bw_mte(GB/s)'),
+            ('0x206', 'l0c_to_l1_datas'),
+            ('0x20c', 'l0c_to_gm_datas'),
             ('0x302', 'mte1_cycles_extra'),
             ('0x303', 'fixpipe_cycles'),
             ('0x416', 'mac_fp_ratio'),
@@ -157,7 +159,10 @@ class AICoreConfig(MetaConfig):
             ('0x504', 'r0_read_cache_hit'),
             ('0x506', 'r0_read_cache_miss_allocate'),
             ('0x508', 'r1_read_cache_hit'),
-            ('0x50a', 'r1_read_cache_miss_allocate')
+            ('0x50a', 'r1_read_cache_miss_allocate'),
+            ('0x50c', 'write_main_memory_datas'),
+            ('0x50d', 'read_main_memory'),
+            ('0x50e', 'read_main_memory_datas')
         ],
         'metrics': [
             ('total_time(ms)', '(task_cyc*1000000/(freq))/block_num*((block_num+core_num-1)/core_num)'),
@@ -413,7 +418,14 @@ class AICoreConfig(MetaConfig):
             ('r0_read_cache_hit', '1.0 * SUM(r504)'),
             ('r0_read_cache_miss_allocate', '1.0 * SUM(r506)'),
             ('r1_read_cache_hit', '1.0 * SUM(r508)'),
-            ('r1_read_cache_miss_allocate', '1.0 * SUM(r50a)')
+            ('r1_read_cache_miss_allocate', '1.0 * SUM(r50a)'),
+            ('read_main_memory_datas(KB)', '128.0/1024*(SUM(r50d)+SUM(r50e))'),
+            ('write_main_memory_datas(KB)', '128.0/1024*SUM(r50c)'),
+            ('gm_to_l1_datas(KB)', '256.0/1024*(SUM(r32)-SUM(r206))'),
+            ('l0c_to_l1_datas(KB)', '128.0/1024*SUM(r206)'),
+            ('l0c_to_gm_datas(KB)', '128.0/1024*(SUM(r20c)-SUM(r206))'),
+            ('gm_to_ub_datas(KB)', '128.0/1024*SUM(r3e)'),
+            ('ub_to_gm_datas(KB)', '128.0/1024*SUM(r3d)')
         ],
         'event2metric': [
             ('0x8', 'vec_ratio'),

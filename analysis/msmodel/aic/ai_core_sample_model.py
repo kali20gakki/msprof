@@ -139,7 +139,8 @@ class AiCoreSampleModel(BaseModel):
         DBManager.execute_sql(self.conn, sql)
         core_id = DBManager.fetch_all_data(self.cur, "select distinct(coreid) from EventCount;")
         for core in core_id:
-            data.extend([key.replace("(gb/s)", "(GB/s)"), None, core[0]] for key in list(metrics_config.keys()))
+            data.extend([key.replace("(gb/s)", "(GB/s)").replace("(kb)", "(KB)"), None,
+                         core[0]] for key in list(metrics_config.keys()))
 
         DBManager.insert_data_into_table(self.conn, "MetricSummary", data)
         return NumberConstant.SUCCESS
@@ -157,7 +158,7 @@ class AiCoreSampleModel(BaseModel):
         field_dict = read_cpu_cfg(self.TYPE, 'formula')
         res = []
         for metric in metrics:
-            replaced_metric = metric.replace("(GB/s)", "(gb/s)")
+            replaced_metric = metric.lower()
             field_val = field_dict.get(replaced_metric, replaced_metric).replace(
                 '/block_num*((block_num+core_num-1)/core_num)', '')
             res.append((replaced_metric, field_val))
