@@ -80,6 +80,24 @@ namespace {
         return true;
     }
 
+    bool CheckJsonPathValid(const std::string &path, std::string &errReason)
+    {
+        if (path.size() > MAX_PATH_LENGTH) {
+            errReason = "Argument --reports is invalid because of exceeds the maximum length of " +
+                std::to_string(MAX_PATH_LENGTH) + ".";
+            return false;
+        }
+        if (MmAccess2(path, M_W_OK) != PROFILING_SUCCESS) {
+            errReason = "Argument --reports=" + path + " permission denied.";
+            return false;
+        }
+        if (Utils::CanonicalizePath(path).empty()) {
+            errReason = "Argument --reports is invalid because of get the canonicalized absolute pathname failed";
+            return false;
+        }
+        return true;
+    }
+
     bool CheckPathCharValid(const std::string path)
     {
         for (auto &item: INVALID_CHAR) {
@@ -188,6 +206,41 @@ bool ParamValidation::CheckAnalysisOutputIsPathValid(const std::string &outputPa
         CMD_LOGE("profiling error %s", errReason.c_str());
         MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
                            std::vector<std::string>({"output", outputPath, errReason}));
+        return false;
+    }
+
+    return true;
+}
+
+bool ParamValidation::CheckReportsJsonIsPathValid(const std::string &jsonPath) const
+{
+    std::string errReason;
+    if (!CheckPathCharValid(jsonPath)) {
+        MSPROF_LOGE("Reports Json path is invalid.");
+        CMD_LOGE("Reports Json path is invalid.");
+        return false;
+    }
+
+    if (Utils::IsSoftLink(jsonPath)) {
+        MSPROF_LOGE("Reports Json path is soft link.");
+        CMD_LOGE("Reports Json path is soft link.");
+        return false;
+    }
+
+    if (!Utils::IsFileExist(jsonPath)) {
+        MSPROF_LOGE("Argument --reports is invalid because of %s does not exist.", jsonPath.c_str());
+        CMD_LOGE("Argument --reports is invalid because of %s does not exist.", jsonPath.c_str());
+        errReason = "Argument --reports is invalid because of " + jsonPath + " does not exist.";
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+                           std::vector<std::string>({"reports", jsonPath, errReason}));
+        return false;
+    }
+
+    if (!CheckJsonPathValid(jsonPath, errReason)) {
+        MSPROF_LOGE("profiling error %s", errReason.c_str());
+        CMD_LOGE("profiling error %s", errReason.c_str());
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+                           std::vector<std::string>({"reports", jsonPath, errReason}));
         return false;
     }
 

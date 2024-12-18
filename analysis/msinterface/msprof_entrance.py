@@ -37,6 +37,14 @@ class MsprofEntrance:
                            'creating data collection results.', required=True)
 
     @staticmethod
+    def _add_reports_argument(parser: any) -> None:
+        parser.add_argument(
+            '-reports', dest='reports_path',
+            default='', metavar='reports',
+            type=str, help='<Optional> Path of the reports JSON configuration file, '
+                           'which is used to control the export scope of collection results.', required=False)
+
+    @staticmethod
     def _handle_export_command(parser: any, args: any) -> None:
         if len(sys.argv) < 3:
             parser.print_help()
@@ -210,6 +218,7 @@ class MsprofEntrance:
             metavar='<export_format>', choices=['csv', 'json'],
             type=str, help='<Optional> the format for export, supports csv and json.')
         self._add_export_argument(timeline_parser)
+        self._add_reports_argument(timeline_parser)
         db_parser = subparsers.add_parser('db', help='Get db data.')
         self._add_collect_path_argument(db_parser)
 

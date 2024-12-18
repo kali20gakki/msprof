@@ -520,6 +520,9 @@ int RunningMode::RunExportTimelineTask(const ExecCmdParams &execCmdParams,
     if (params_->exportIterationId != DEFAULT_INTERATION_ID) {
         argsTimelineV.emplace_back("--iteration-id=" + params_->exportIterationId);
     }
+    if (!params_->reportsPath.empty()) {
+        argsTimelineV.emplace_back("-reports=" + params_->reportsPath);
+    }
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsTimelineV, envsV, exitCode, taskPid_);
     if (ret == PROFILING_FAILED) {
         MSPROF_LOGE("Failed to launch export timeline task, data path: %s", Utils::BaseName(jobResultDir_).c_str());
@@ -1502,7 +1505,8 @@ ExportMode::ExportMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams
 {
     whiteSet_ = {
         ARGS_OUTPUT, ARGS_EXPORT, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_TYPE,
-        ARGS_EXPORT_MODEL_ID, ARGS_SUMMARY_FORMAT, ARGS_PYTHON_PATH, ARGS_CLEAR
+        ARGS_EXPORT_MODEL_ID, ARGS_SUMMARY_FORMAT, ARGS_PYTHON_PATH, ARGS_CLEAR,
+        ARGS_REPORTS
     };
     neccessarySet_ = {ARGS_OUTPUT, ARGS_EXPORT};
     blackSet_ = {ARGS_QUERY, ARGS_PARSE, ARGS_ANALYZE, ARGS_RULE};
@@ -1524,7 +1528,7 @@ int ExportMode::ModeParamsCheck()
         neccessarySet_ = {ARGS_OUTPUT, ARGS_EXPORT, ARGS_EXPORT_TYPE};
         blackSet_ = {ARGS_QUERY, ARGS_PARSE, ARGS_ANALYZE, ARGS_RULE,
                      ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID,
-                     ARGS_SUMMARY_FORMAT, ARGS_CLEAR};
+                     ARGS_SUMMARY_FORMAT, ARGS_CLEAR, ARGS_REPORTS};
     }
     if (CheckForbiddenParams() != PROFILING_SUCCESS ||
         CheckNeccessaryParams() != PROFILING_SUCCESS) {

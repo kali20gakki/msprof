@@ -12,6 +12,7 @@
 
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
+#include "nlohmann/json.hpp"
 #include "analysis/csrc/application/include/export_manager.h"
 #include "analysis/csrc/application/timeline/json_constant.h"
 #include "analysis/csrc/utils/file.h"
@@ -32,6 +33,7 @@ const std::string DEVICE = "device_0";
 const std::string DB_NAME = "trace.db";
 const std::string PROF_PATH = File::PathJoin({BASE_PATH, "PROF_0"});
 const std::string RESULT_PATH = File::PathJoin({PROF_PATH, OUTPUT_PATH});
+const std::string REPORTS_JSON = "reports.json";
 }
 using ReduceDataType = std::vector<std::tuple<uint16_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t>>;
 using GetNextDataType = std::vector<std::tuple<uint32_t, uint32_t, uint64_t, uint64_t>>;
@@ -102,6 +104,11 @@ protected:
         dbRunner->InsertData(tableName, data);
         return true;
     }
+    static void CreateReportsJson(nlohmann::json &reports)
+    {
+        FileWriter reportsWriter(File::PathJoin({BASE_PATH, REPORTS_JSON}));
+        reportsWriter.WriteText(reports.dump());
+    }
 protected:
     DataInventory dataInventory_;
 };
@@ -122,6 +129,73 @@ TEST_F(ExportManagerUTest, ShouldReturnFalseWhenContextInitFail)
 TEST_F(ExportManagerUTest, ShouldReturnTrueWhenProcessFail)
 {
     ExportManager manager(PROF_PATH);
+    MOCKER_CPP(&Context::Load).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
+    EXPECT_TRUE(manager.Run());
+}
+
+TEST_F(ExportManagerUTest, ShouldReturnTrueWhenProcessSuccessWithReportJson)
+{
+    nlohmann::json reports = {
+        {"json_process", {
+            {"cann", true},
+            {"ascend", true},
+            {"freq", true},
+            {"hbm", false}}
+        }};
+    CreateReportsJson(reports);
+    auto jsonPath = File::PathJoin({BASE_PATH, REPORTS_JSON});
+    ExportManager manager(PROF_PATH, jsonPath);
+    MOCKER_CPP(&Context::Load).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
+    EXPECT_TRUE(manager.Run());
+}
+
+TEST_F(ExportManagerUTest, ShouldReturnTrueWhenReportJsonValueError)
+{
+    nlohmann::json reports = {
+        {"json_process", {
+            {"cann", "true"},
+            {"ascend", true},
+            {"freq", true},
+            {"hbm", false}}
+        }};
+    CreateReportsJson(reports);
+    auto jsonPath = File::PathJoin({BASE_PATH, REPORTS_JSON});
+    ExportManager manager(PROF_PATH, jsonPath);
+    // mock Init()
+    MOCKER_CPP(&Context::Load).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
+    EXPECT_TRUE(manager.Run());
+}
+
+TEST_F(ExportManagerUTest, ShouldReturnTrueWhenReportJsonProcessNotExist)
+{
+    nlohmann::json reports = {
+        {"json_processxxxx", {}
+        }};
+    CreateReportsJson(reports);
+    auto jsonPath = File::PathJoin({BASE_PATH, REPORTS_JSON});
+    ExportManager manager(PROF_PATH, jsonPath);
+    // mock Init()
+    MOCKER_CPP(&Context::Load).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
+    EXPECT_TRUE(manager.Run());
+}
+
+TEST_F(ExportManagerUTest, ShouldReturnTrueWhenReportJsonPathNotExist)
+{
+    auto jsonPath = File::PathJoin({BASE_PATH, REPORTS_JSON});
+    ExportManager manager(PROF_PATH, jsonPath);
+    // mock Init()
     MOCKER_CPP(&Context::Load).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));

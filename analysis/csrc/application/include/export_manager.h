@@ -15,6 +15,7 @@
 
 #include <string>
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
+#include "json_process_enum.h"
 
 namespace Analysis {
 namespace Application {
@@ -22,13 +23,19 @@ using namespace Analysis::Infra;
 class ExportManager {
 public:
     explicit ExportManager(const std::string &profPath) : profPath_(profPath) {}
+    ExportManager(const std::string& profPath, const std::string& jsonPath) : profPath_(profPath),
+        jsonPath_(jsonPath)
+    {}
     bool Run();
 private:
     bool Init();
     bool CheckProfDirsValid();
     bool ProcessData(DataInventory &dataInventory);
+    std::vector<JsonProcess> GetProcessEnum();
+
 private:
     std::string profPath_;
+    std::string jsonPath_;
 };
 }
 }

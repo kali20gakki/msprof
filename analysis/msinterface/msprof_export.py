@@ -56,6 +56,7 @@ from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from profiling_bean.prof_enum.export_data_type import ExportDataType
 from tuning.cluster.cluster_tuning_facade import ClusterTuningFacade
 from tuning.cluster_tuning import ClusterTuning
+from common_func.file_manager import check_file_readable
 
 
 class ExportCommand:
@@ -239,6 +240,7 @@ class ExportCommand:
         self._cluster_params = {'is_cluster_scene': False, 'cluster_path': []}
         self.clear_mode = getattr(args, "clear_mode", False)
         self.is_data_analyzed = False
+        self.reports_path = getattr(args, "reports_path", "")
 
     @staticmethod
     def get_model_id_set(result_dir: str, db_name: str, table_name: str) -> any:
@@ -306,6 +308,8 @@ class ExportCommand:
         :return: None
         """
         check_path_valid(self.collection_path, False)
+        if self.reports_path:
+            check_file_readable(self.reports_path)
         self._process_sub_dirs()
         if self._cluster_params.get('is_cluster_scene', False):
             self._show_cluster_tuning()
@@ -739,7 +743,7 @@ class ExportCommand:
         self._view_data(host_path)
         # viewer timeline
         if self._check_export_timeline_with_so(path_table):
-            export_timeline(path_table.get("collection_path"))
+            export_timeline(path_table.get("collection_path"), self.reports_path)
             return
         # device
         ProfilingScene().set_mode(mode)

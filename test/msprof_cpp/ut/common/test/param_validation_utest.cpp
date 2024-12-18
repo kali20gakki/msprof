@@ -965,3 +965,44 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST,
     const std::string path = "/test/profiling\n/a";
     EXPECT_FALSE(ParamValidation::instance()->CheckAnalysisOutputIsPathValid(path));
 }
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckReportsJsonIsPathValidShouldReturnFalseWhenCheckFailed)
+{
+    GlobalMockObject::verify();
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    // Json path not exist
+    std::string reportsJson;
+    EXPECT_EQ(false, entry->CheckReportsJsonIsPathValid(reportsJson));
+
+    MOCKER(&Utils::IsFileExist).stubs().will(returnValue(true));
+    // Path length > max length
+    reportsJson = std::string(1025, 'x'); // 1025 = MAX_PATH_LENGTH + 1;
+    EXPECT_EQ(false, entry->CheckReportsJsonIsPathValid(reportsJson));
+    // Soft link
+    MOCKER(Utils::IsSoftLink).stubs().will(returnValue(true)).then(returnValue(false));
+    EXPECT_EQ(false, entry->CheckReportsJsonIsPathValid(reportsJson));
+    // permission denied
+    reportsJson = "./reports.json";
+    MOCKER(&MmAccess2).stubs().will(returnValue(1)).then(returnValue(0));
+    EXPECT_EQ(false, entry->CheckReportsJsonIsPathValid(reportsJson));
+    // canonicalized absolute pathname failed
+    std::string empty = "";
+    MOCKER(&Utils::CanonicalizePath).stubs().will(returnValue(empty));
+    EXPECT_EQ(false, entry->CheckReportsJsonIsPathValid(reportsJson));
+    // Path Char Valid
+    reportsJson = "./reports%.json";
+    EXPECT_EQ(false, entry->CheckReportsJsonIsPathValid(reportsJson));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckReportsJsonIsPathValidShouldReturnTrueWhenCheckSuccess)
+{
+    std::string reportsJson = "./reports.json";
+    std::ofstream ftest(reportsJson);
+    ftest << "test" << std::endl;
+    ftest.close();
+
+    GlobalMockObject::verify();
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    EXPECT_EQ(true, entry->CheckReportsJsonIsPathValid(reportsJson));
+    remove(reportsJson.c_str());
+}

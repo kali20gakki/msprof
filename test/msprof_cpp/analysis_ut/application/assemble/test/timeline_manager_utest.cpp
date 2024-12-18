@@ -69,7 +69,8 @@ static std::vector<MsprofTxHostData> GenerateHostTxData()
 TEST_F(TimelineManagerUTest, ShouldReturnTrueWhenNoDataInDataInventory)
 {
     TimelineManager manager(PROF_PATH, RESULT_PATH);
-    EXPECT_TRUE(manager.Run(dataInventory_));
+    std::vector<JsonProcess> jsonProcess;
+    EXPECT_TRUE(manager.Run(dataInventory_, jsonProcess));
 }
 
 TEST_F(TimelineManagerUTest, ShouldReturnTrueWhenDataProcessSuccess)
@@ -82,6 +83,23 @@ TEST_F(TimelineManagerUTest, ShouldReturnTrueWhenDataProcessSuccess)
     auto tx = GenerateHostTxData();
     MAKE_SHARED_NO_OPERATION(txS, std::vector<MsprofTxHostData>, tx);
     dataInventory_.Inject(txS);
+    std::vector<JsonProcess> jsonProcess;
     TimelineManager manager(PROF_PATH, RESULT_PATH);
-    EXPECT_TRUE(manager.Run(dataInventory_));
+    EXPECT_TRUE(manager.Run(dataInventory_, jsonProcess));
+}
+
+TEST_F(TimelineManagerUTest, ShouldReturnTrueWhenDataProcessSuccessWithJsonProcessList)
+{
+    std::shared_ptr<std::vector<TrainTraceData>> traceS;
+    auto trace = GenerateStepTraceData();
+    MAKE_SHARED_NO_OPERATION(traceS, std::vector<TrainTraceData>, trace);
+    dataInventory_.Inject(traceS);
+    std::shared_ptr<std::vector<MsprofTxHostData>> txS;
+    auto tx = GenerateHostTxData();
+    MAKE_SHARED_NO_OPERATION(txS, std::vector<MsprofTxHostData>, tx);
+    dataInventory_.Inject(txS);
+    // jsonProcess is not empty
+    std::vector<JsonProcess> jsonProcess = {JsonProcess::ASCEND, JsonProcess::CANN, JsonProcess::FREQ};
+    TimelineManager manager(PROF_PATH, RESULT_PATH);
+    EXPECT_TRUE(manager.Run(dataInventory_, jsonProcess));
 }

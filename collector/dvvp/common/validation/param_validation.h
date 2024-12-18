@@ -37,6 +37,7 @@ public:
     int Uninit() const;
     bool CheckCollectOutputIsValid(const std::string &outputPath) const;
     bool CheckAnalysisOutputIsPathValid(const std::string &outputPath) const;
+    bool CheckReportsJsonIsPathValid(const std::string &jsonPath) const;
     bool CheckLlcModeIsValid(const std::string &llcMode) const;
     bool CheckFreqIsValid(const std::string &cfgName, const std::string &freq, const int rangeMin,
         const int rangeMax) const;
