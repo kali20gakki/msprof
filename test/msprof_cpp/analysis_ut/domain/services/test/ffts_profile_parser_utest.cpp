@@ -43,6 +43,27 @@ protected:
         EXPECT_TRUE(File::RemoveDir(FFTS_PROFILE_PATH, 0));
     }
 
+    ContextPmu GenerateInvaidPmu()
+    {
+        ContextPmu contextPmu;
+        contextPmu.funcType = 39; // 39为异常funcType
+        contextPmu.streamId = 32; // 32 streamId
+        contextPmu.taskId = 1000;  // 1000 taskId
+        contextPmu.subTaskType = 6;  // 6 subTaskType
+        contextPmu.ovFlag = 1; // 1 ovFlag
+        contextPmu.subTaskId = 1; // 1 即contextId
+        contextPmu.fftsType = 4; // 4 与subTaskType组合标识MIX_AIC
+        contextPmu.totalCycle = 10000; // 10000 totalCycle
+        contextPmu.cnt = 0; // 0 校验位（0-15）
+        for (int i = 0; i < PMU_COUNT; ++i) {
+            contextPmu.pmuList[i] = i + 1;  // PMU值
+        }
+        for (int i = 0; i < TIME_COUNT; ++i) {
+            contextPmu.timeList[i] = (i + 1) * 100;  // 100构造时间字段值
+        }
+        return contextPmu;
+    }
+
     ContextPmu GenerateContextPmu()
     {
         ContextPmu contextPmu;
@@ -90,6 +111,22 @@ protected:
 protected:
     DataInventory dataInventory_;
 };
+
+TEST_F(FftsProfileParserUTest, TestParseShouldReturnNoDataWhenDataFuncTypeIsInvalid)
+{
+    FftsProfileParser parser;
+    DeviceContext context;
+    context.deviceContextInfo.deviceFilePath = FFTS_PROFILE_PATH;
+    std::vector<ContextPmu> pmu{GenerateInvaidPmu()};
+    WriteBin(pmu, File::PathJoin({FFTS_PROFILE_PATH, "data"}), "ffts_profile.data.0.slice_0");
+    ASSERT_EQ(ANALYSIS_OK, parser.Run(dataInventory_, context));
+    auto pmuData = dataInventory_.GetPtr<std::vector<HalPmuData>>();
+    // 虽然数据没有解析 但是resize了数据大小,结构体中将填充默认值数据
+    ASSERT_EQ(1ul, pmuData->size());
+    TaskId defaultTaskId;
+    ASSERT_EQ(pmuData->data()[0].hd.taskId, defaultTaskId);
+    ASSERT_EQ(pmuData->data()[0].pmu.acceleratorType, AcceleratorType::INVALID);
+}
 
 TEST_F(FftsProfileParserUTest, ShouldReturnContextPmuWhenParserRun)
 {
