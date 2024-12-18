@@ -28,7 +28,7 @@ class AiCoreReport:
             headers.pop("ub_read_bw_mte(GB/s)")
             headers.pop("ub_write_bw_mte(GB/s)")
 
-        if not ChipManager().is_chip_v1() and \
+        if not (ChipManager().is_chip_v1() or ChipManager().is_chip_v4()) and \
                 "l2_read_bw(GB/s)" in headers and \
                 "l2_write_bw(GB/s)" in headers:
             headers.pop("l2_read_bw(GB/s)")

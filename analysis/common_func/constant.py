@@ -312,6 +312,7 @@ class Constant:
     PMU_RESOURCE = 'ResourceConflictRatio'
     PMU_MEM_UB = 'MemoryUB'
     PMU_L2_CACHE = 'L2Cache'
+    PMU_MEM_ACCESS = 'MemoryAccess'
     PMU_PIPE_STALL_CYCLE = 'PipeStallCycle'
     PMU_SCALAR_RATIO = 'ScalarRatio'
 
@@ -416,7 +417,9 @@ class Constant:
                     "ub_read_bw_scalar(GB/s),ub_write_bw_scalar(GB/s)",
         PMU_L2_CACHE: "write_cache_hit,write_cache_miss_allocate,"
                       "r0_read_cache_hit,r0_read_cache_miss_allocate,"
-                      "r1_read_cache_hit,r1_read_cache_miss_allocate"
+                      "r1_read_cache_hit,r1_read_cache_miss_allocate",
+        PMU_MEM_ACCESS: "read_main_memory_datas(KB),write_main_memory_datas(KB),gm_to_l1_datas(KB),"
+                        "l0c_to_l1_datas(KB),l0c_to_gm_datas(KB),gm_to_ub_datas(KB),ub_to_gm_datas(KB)"
     }
 
     # add default limit for reader buffer size ->8196  * 1024 Byte
