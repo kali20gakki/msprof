@@ -53,8 +53,8 @@ uint32_t FftsProfileParser::ParseDataItem(uint8_t* binaryData, uint32_t binaryDa
     std::function<int(uint8_t *, uint32_t, uint8_t *)> parser =
             ParserItemFactory::GetParseItem(PMU_PARSER, header->funcType);
     if (parser == nullptr) {
-        ERROR("There is no Parser function to handle data! funcType is %", header->funcType);
-        return ANALYSIS_ERROR;
+        WARN("There is no Parser function to handle data! funcType is %", header->funcType);
+        return ANALYSIS_OK;
     }
     int currentCnt = parser(binaryData, binaryDataSize, data);
     if (cnt_ == DEFAULT_CNT) {
