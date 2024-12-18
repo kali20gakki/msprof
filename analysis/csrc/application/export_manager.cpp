@@ -19,6 +19,7 @@
 #include "analysis/csrc/utils/thread_pool.h"
 #include "analysis/csrc/application/timeline/timeline_manager.h"
 #include "analysis/csrc/application/timeline/json_constant.h"
+#include "analysis/csrc/dfx/error_code.h"
 
 
 namespace Analysis {
@@ -131,8 +132,50 @@ bool ExportManager::Run()
         return false;
     }
     TimelineManager timelineManager(profPath_, outputPath);
-    runFlag = timelineManager.Run(dataInventory) && runFlag;
+    std::vector<JsonProcess> jsonProcesses = GetProcessEnum();
+    runFlag = timelineManager.Run(dataInventory, jsonProcesses) && runFlag;
     return runFlag;
 }
+
+std::vector<JsonProcess> ExportManager::GetProcessEnum()
+{
+    if (jsonPath_.empty()) {
+        INFO("The report parameter is not used.");
+        PRINT_INFO("The report parameter is not used.");
+        return allProcesses;
+    }
+    FileReader fd(jsonPath_);
+    nlohmann::json config;
+    if (fd.ReadJson(config) != ANALYSIS_OK) {
+        ERROR("Load report config failed: '%'.", jsonPath_);
+        PRINT_ERROR("Load report config failed: '%'.", jsonPath_);
+        return allProcesses;
+    }
+    auto jsonProcessConfig = config["json_process"];
+    if (jsonProcessConfig.is_null() || !jsonProcessConfig.is_object() || jsonProcessConfig.empty()) {
+        INFO("The json_process is not exist.");
+        PRINT_INFO("The json_process is not exist.");
+        return allProcesses;
+    }
+    std::vector<JsonProcess> jsonProcesses;
+    for (nlohmann::json::iterator it = jsonProcessConfig.begin(); it != jsonProcessConfig.end(); ++it) {
+        if (strToJsonProcess.find(it.key()) == strToJsonProcess.end()) {
+            ERROR("Json process contains invalid: '%'.", it.key());
+            PRINT_ERROR("Json process contains invalid: '%'.", it.key());
+            return allProcesses;
+        }
+        if (!it.value().is_boolean()) {
+            ERROR("Json contains invalid value: '%', only the bool type is supported.", it.value());
+            PRINT_ERROR("Json contains invalid value: '%', only the bool type is supported.", it.value());
+            return allProcesses;
+        }
+        if (it.value()) {
+            auto processEnum = strToJsonProcess.at(it.key());
+            jsonProcesses.push_back(processEnum);
+        }
+    }
+    return std::move(jsonProcesses);
+}
+
 }
 }

@@ -29,7 +29,7 @@ class TestMsprofCInterface(unittest.TestCase):
 
     def test_export_timeline(self):
         with mock.patch('importlib.import_module'):
-            _export_timeline("")
+            _export_timeline("", "")
 
     def test_export_op_summary(self):
         with mock.patch('importlib.import_module'):

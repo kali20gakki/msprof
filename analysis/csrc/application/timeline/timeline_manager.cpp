@@ -26,42 +26,43 @@ const int JSON_FILE_OFFSET = -1;
 // 数据中心中最少也会有hash类数据
 const size_t MIN_NUM_FOR_IOC = std::set<std::string>{PROCESSOR_NAME_HASH}.size();
 
-const std::vector<std::string> ASSEMBLER_LIST{
-    PROCESS_TASK,
-    PROCESS_ACC_PMU,
-    PROCESS_API,
-    PROCESS_DDR,
-    PROCESS_STARS_CHIP_TRANS,
-    PROCESS_HBM,
-    PROCESS_HCCL,
-    PROCESS_HCCS,
-    PROCESS_NETWORK_USAGE,
-    PROCESS_DISK_USAGE,
-    PROCESS_MEMORY_USAGE,
-    PROCESS_CPU_USAGE,
-    PROCESS_MSPROFTX,
-    PROCESS_NPU_MEM,
-    PROCESS_OVERLAP_ANALYSE,
-    PROCESS_PCIE,
-    PROCESS_SIO,
-    PROCESS_STARS_SOC,
-    PROCESS_STEP_TRACE,
-    PROCESS_AI_CORE_FREQ,
-    PROCESS_LLC,
-    PROCESS_NIC,
-    PROCESS_ROCE,
-    PROCESS_QOS,
-    PROCESS_DEVICE_TX
+const std::unordered_map<JsonProcess, std::string> JSON_TO_ASSEMBLER_TABLE{
+    {JsonProcess::ASCEND,           PROCESS_TASK},
+    {JsonProcess::ACC_PMU,          PROCESS_ACC_PMU},
+    {JsonProcess::CANN,             PROCESS_API},
+    {JsonProcess::DDR,              PROCESS_DDR},
+    {JsonProcess::STARS_CHIP_TRANS, PROCESS_STARS_CHIP_TRANS},
+    {JsonProcess::HBM,              PROCESS_HBM},
+    {JsonProcess::HCCL,             PROCESS_HCCL},
+    {JsonProcess::HCCS,             PROCESS_HCCS},
+    {JsonProcess::NETWORK_USAGE,    PROCESS_NETWORK_USAGE},
+    {JsonProcess::DISK_USAGE,       PROCESS_DISK_USAGE},
+    {JsonProcess::MEMORY_USAGE,     PROCESS_MEMORY_USAGE},
+    {JsonProcess::CPU_USAGE,        PROCESS_CPU_USAGE},
+    {JsonProcess::MSPROFTX,         PROCESS_MSPROFTX},
+    {JsonProcess::NPU_MEM,          PROCESS_NPU_MEM},
+    {JsonProcess::OVERLAP_ANALYSE,  PROCESS_OVERLAP_ANALYSE},
+    {JsonProcess::PCIE,             PROCESS_PCIE},
+    {JsonProcess::SIO,              PROCESS_SIO},
+    {JsonProcess::STARS_SOC,        PROCESS_STARS_SOC},
+    {JsonProcess::STEP_TRACE,       PROCESS_STEP_TRACE},
+    {JsonProcess::FREQ,             PROCESS_AI_CORE_FREQ},
+    {JsonProcess::LLC,              PROCESS_LLC},
+    {JsonProcess::NIC,              PROCESS_NIC},
+    {JsonProcess::ROCE,             PROCESS_ROCE},
+    {JsonProcess::QOS,              PROCESS_QOS},
+    {JsonProcess::DEVICE_TX,        PROCESS_DEVICE_TX},
 };
 }
 
-bool TimelineManager::ProcessTimeLine(Analysis::Infra::DataInventory& dataInventory)
+bool TimelineManager::ProcessTimeLine(DataInventory& dataInventory, const std::vector<JsonProcess>& jsonProcess)
 {
     const uint16_t tableProcessors = 10; // 最多有10个线程
     Analysis::Utils::ThreadPool pool(tableProcessors);
     pool.Start();
     std::atomic<bool> retFlag(true);
-    for (const auto &name : ASSEMBLER_LIST) {
+    std::vector<std::string> assemblerList = GetAssemblerList(jsonProcess);
+    for (const auto& name : assemblerList) {
         pool.AddTask([this, &name, &retFlag, &dataInventory]() {
             auto assembler = TimelineFactory::GetAssemblerByName(name);
             if (assembler == nullptr) {
@@ -116,7 +117,7 @@ void TimelineManager::PostDumpJson()
     }
 }
 
-bool TimelineManager::Run(DataInventory &dataInventory)
+bool TimelineManager::Run(DataInventory &dataInventory, const std::vector<JsonProcess>& jsonProcess)
 {
     INFO("Start exporting timeline!");
     PRINT_INFO("Start exporting the timeline!");
@@ -125,7 +126,7 @@ bool TimelineManager::Run(DataInventory &dataInventory)
         PRINT_WARN("Can't export timeline, msprof_analysis_log in outputPath for more info");
         return true;
     }
-    bool runFlag = ProcessTimeLine(dataInventory);
+    bool runFlag = ProcessTimeLine(dataInventory, jsonProcess);
     PostDumpJson();
     if (!runFlag) {
         ERROR("The unified timeline process failed to be executed.");
@@ -136,6 +137,16 @@ bool TimelineManager::Run(DataInventory &dataInventory)
     PRINT_INFO("End exporting timeline output_file. The file is stored in the PROF file.");
     return true;
 }
+
+std::vector<std::string> TimelineManager::GetAssemblerList(const std::vector<JsonProcess>& jsonProcess)
+{
+    std::vector<std::string> assemblerList;
+    for (const auto& jsonEnum : jsonProcess) {
+        assemblerList.push_back(JSON_TO_ASSEMBLER_TABLE.at(jsonEnum));
+    }
+    return assemblerList;
+}
+
 }
 }
 

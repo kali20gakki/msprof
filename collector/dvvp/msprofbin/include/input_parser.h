@@ -47,6 +47,7 @@ enum MsprofArgsType {
     ARGS_PYTHON_PATH,
     ARGS_EXPORT_TYPE,
     ARGS_SUMMARY_FORMAT,
+    ARGS_REPORTS,
     // switch
     ARGS_ASCENDCL,
     ARGS_AI_CORE,
@@ -122,6 +123,7 @@ const MmStructOption longOptions[] = {
     {"python-path", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_PYTHON_PATH},
     {"type", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_EXPORT_TYPE},
     {"summary-format", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_SUMMARY_FORMAT},
+    {"reports", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_REPORTS},
     // switch
     {"ascendcl", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_ASCENDCL},             // the default value is on
     {"ai-core", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AI_CORE},

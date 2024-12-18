@@ -32,14 +32,14 @@ namespace {
     std::set<MsprofArgsType> ALALYSIS_ARGS = {
         ARGS_OUTPUT, ARGS_PYTHON_PATH, ARGS_EXPORT_TYPE, ARGS_SUMMARY_FORMAT, ARGS_PARSE,
         ARGS_QUERY, ARGS_EXPORT, ARGS_CLEAR,
-        ARGS_ANALYZE, ARGS_RULE, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID};
+        ARGS_ANALYZE, ARGS_RULE, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID, ARGS_REPORTS};
     std::unordered_map<int, InputCfg> ARGS_TRANS_MAP = {
         {ARGS_OUTPUT, INPUT_CFG_COM_OUTPUT}, {ARGS_PYTHON_PATH, INPUT_CFG_PYTHON_PATH},
         {ARGS_EXPORT_TYPE, INPUT_CFG_EXPORT_TYPE},
         {ARGS_SUMMARY_FORMAT, INPUT_CFG_SUMMARY_FORMAT}, {ARGS_PARSE, INPUT_CFG_PARSE},
         {ARGS_QUERY, INPUT_CFG_QUERY}, {ARGS_EXPORT, INPUT_CFG_EXPORT}, {ARGS_CLEAR, INPUT_CFG_CLEAR},
         {ARGS_EXPORT_ITERATION_ID, INPUT_CFG_ITERATION_ID}, {ARGS_EXPORT_MODEL_ID, INPUT_CFG_MODEL_ID},
-        {ARGS_ANALYZE, INPUT_CFG_ANALYZE}, {ARGS_RULE, INPUT_CFG_RULE}
+        {ARGS_ANALYZE, INPUT_CFG_ANALYZE}, {ARGS_RULE, INPUT_CFG_RULE}, {ARGS_REPORTS, INPUT_CFG_COM_REPORTS}
     };
 }
 
@@ -362,6 +362,8 @@ void ParamsAdapterMsprof::SetAnalysisParams()
         params_->exportIterationId : paramContainer_[INPUT_CFG_ITERATION_ID];
     params_->exportModelId = paramContainer_[INPUT_CFG_MODEL_ID].empty() ?
         params_->exportModelId : paramContainer_[INPUT_CFG_MODEL_ID];
+    params_->reportsPath = paramContainer_[INPUT_CFG_COM_REPORTS].empty() ?
+        params_->reportsPath : paramContainer_[INPUT_CFG_COM_REPORTS];
 }
 
 int ParamsAdapterMsprof::SystemToolsIsExist() const
@@ -448,6 +450,9 @@ bool ParamsAdapterMsprof::CheckAnalysisConfig(MsprofArgsType arg, const std::str
     switch (arg) {
         case ARGS_OUTPUT:
             ret = ParamValidation::instance()->CheckAnalysisOutputIsPathValid(argsValue);
+            break;
+        case ARGS_REPORTS:
+            ret = ParamValidation::instance()->CheckReportsJsonIsPathValid(argsValue);
             break;
         case ARGS_PYTHON_PATH:
             ret = ParamValidation::instance()->CheckPythonPathIsValid(argsValue);
@@ -628,7 +633,7 @@ void ParamsAdapterMsprof::CreateCfgMap()
         {ARGS_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE}, {ARGS_HOST_SYS_USAGE_FREQ, INPUT_CFG_HOST_SYS_USAGE_FREQ},
         {ARGS_DYNAMIC_PROF, INPUT_CFG_MSPROF_DYNAMIC}, {ARGS_DYNAMIC_PROF_PID, INPUT_CFG_MSPROF_DYNAMIC_PID},
         {ARGS_PROFILING_DELAY, INPUT_CFG_MSPROF_DELAY}, {ARGS_PROFILING_DURATION, INPUT_CFG_MSPROF_DURATION},
-        {ARGS_TASK_MEMORY, INPUT_CFG_COM_TASK_MEMORY}
+        {ARGS_TASK_MEMORY, INPUT_CFG_COM_TASK_MEMORY}, {ARGS_REPORTS, INPUT_CFG_COM_REPORTS}
         }).swap(cfgMap_);
 }
 } // ParamsAdapter

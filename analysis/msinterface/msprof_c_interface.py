@@ -46,11 +46,11 @@ def _export_unified_db(project_path: str):
     msprof_analysis_module.parser.export_unified_db(project_path)
 
 
-def _export_timeline(project_path: str):
+def _export_timeline(project_path: str, report_json_path: str):
     sys.path.append(os.path.realpath(SO_DIR))
     logging.info("Data will be export by msprof_analysis.so!")
     msprof_analysis_module = importlib.import_module("msprof_analysis")
-    msprof_analysis_module.parser.export_timeline(project_path)
+    msprof_analysis_module.parser.export_timeline(project_path, report_json_path)
 
 
 def _export_op_summary(project_path: str):
@@ -67,11 +67,11 @@ def dump_cann_trace(project_path: str):
     run_in_subprocess(_dump_cann_trace, project_path)
 
 
-def export_timeline(project_path: str):
+def export_timeline(project_path: str, report_json_path: str):
     """
     调用viewer C化导出
     """
-    run_in_subprocess(_export_timeline, project_path)
+    run_in_subprocess(_export_timeline, project_path, report_json_path)
 
 
 def export_op_summary(project_path: str):

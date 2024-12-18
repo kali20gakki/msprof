@@ -17,6 +17,7 @@
 #include <utility>
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
 #include "analysis/csrc/infrastructure/dump_tools/include/dump_tool.h"
+#include "analysis/csrc/application/include/json_process_enum.h"
 
 namespace Analysis {
 namespace Application {
@@ -25,12 +26,13 @@ class TimelineManager {
 public:
     explicit TimelineManager(const std::string &profPath, const std::string &outputPath)
         : profPath_(profPath), outputPath_(outputPath) {};
-    bool Run(DataInventory &dataInventory);
+    bool Run(DataInventory &dataInventory, const std::vector<JsonProcess>& jsonProcess);
 private:
-    bool ProcessTimeLine(DataInventory &dataInventory);
+    bool ProcessTimeLine(DataInventory &dataInventory, const std::vector<JsonProcess> &jsonEnum);
     bool PreDumpJson(DataInventory &dataInventory);
     void PostDumpJson();
     void WriteFile(const std::string &filePrefix, FileCategory category);
+    std::vector<std::string> GetAssemblerList(const std::vector<JsonProcess>& jsonProcess);
 private:
     std::string profPath_;
     std::string outputPath_;

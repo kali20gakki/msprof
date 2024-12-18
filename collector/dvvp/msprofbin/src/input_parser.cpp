@@ -332,6 +332,7 @@ void ArgsManager::AddBasicArgs()
 {
     argsList_ = {
         {"output", "Specify the directory that is used for storing data results.(full-platform)"},
+        {"reports", "Specify the path that is used for controlling the export scope of collection results."},
         {"storage-limit", "Specify the output directory volume. range 200MB ~ 4294967295MB.(full-platform)"},
         {"application", "Specify application path, considering the risk of privilege escalation,\n"
             "\t\t\t\t\t\t   please pay attention to the group of the application and \n"

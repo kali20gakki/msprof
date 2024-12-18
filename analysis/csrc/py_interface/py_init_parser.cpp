@@ -105,7 +105,8 @@ PyObject *WrapExportTimeline(PyObject *self, PyObject *args)
 {
     // parseFilePath为PROF*目录
     const char *parseFilePath = NULL;
-    if (!PyArg_ParseTuple(args, "s", &parseFilePath)) {
+    const char *reportJsonPath = NULL;
+    if (!PyArg_ParseTuple(args, "ss", &parseFilePath, &reportJsonPath)) {
         PyErr_SetString(PyExc_TypeError, "parser.export_timeline args parse failed!");
         return NULL;
     }
@@ -113,8 +114,12 @@ PyObject *WrapExportTimeline(PyObject *self, PyObject *args)
         PyErr_SetString(PyExc_TypeError, "parser.export_timeline path is invalid!");
         return NULL;
     }
+    if (*reportJsonPath != '\0' && !File::Check(reportJsonPath)) {
+        PyErr_SetString(PyExc_TypeError, "parser.export_timeline reports json path is invalid!");
+        return NULL;
+    }
     Log::GetInstance().Init(Utils::File::PathJoin({parseFilePath, "mindstudio_profiler_log"}));
-    auto exportManager = Analysis::Application::ExportManager(parseFilePath);
+    auto exportManager = Analysis::Application::ExportManager(parseFilePath, reportJsonPath);
     if (!exportManager.Run()) {
         ERROR("Timeline run failed.");
         return Py_BuildValue("i", ANALYSIS_ERROR);

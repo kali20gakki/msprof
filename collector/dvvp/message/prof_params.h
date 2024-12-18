@@ -43,6 +43,7 @@ struct ProfileParams : BaseInfo {
     std::string stream_enabled;
     std::string profiling_options;
     std::string jobInfo;
+    std::string reportsPath;
     // app
     std::string cmdPath;
     std::string app;
@@ -219,7 +220,8 @@ struct ProfileParams : BaseInfo {
           exportSummaryFormat(PROFILING_SUMMARY_FORMAT), exportIterationId(DEFAULT_INTERATION_ID),
           exportModelId(DEFAULT_MODEL_ID), usedParams(), dataTypeConfig(0), npuAppMemProfiling("on"),
           npuModuleMemProfiling("on"), analyzeSwitch("off"), delayTime(""), durationTime(""), dynamic("off"),
-          analyzeRuleSwitch("communication,communication_matrix"), is_shell(FALSE), isSubscribe(false)
+          analyzeRuleSwitch("communication,communication_matrix"), is_shell(FALSE), isSubscribe(false),
+          reportsPath("")
     {
     }
 
@@ -278,6 +280,7 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, app_parameters);
         SET_VALUE(object, app_env);
         SET_VALUE(object, cmdPath);
+        SET_VALUE(object, reportsPath);
         // ai core
         SET_VALUE(object, ai_core_profiling);
         SET_VALUE(object, ai_core_profiling_mode);
@@ -414,6 +417,7 @@ struct ProfileParams : BaseInfo {
         FROM_STRING_VALUE(object, app_parameters);
         FROM_STRING_VALUE(object, app_env);
         FROM_STRING_VALUE(object, cmdPath);
+        FROM_STRING_VALUE(object, reportsPath);
         // ai core
         FROM_STRING_VALUE(object, ai_core_profiling);
         FROM_STRING_VALUE(object, ai_core_profiling_mode);
