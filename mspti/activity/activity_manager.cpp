@@ -17,6 +17,7 @@
 #include "securec.h"
 
 #include "activity/ascend/dev_task_manager.h"
+#include "activity/ascend/reporter/external_correlation_reporter.h"
 #include "common/plog_manager.h"
 #include "common/utils.h"
 
@@ -79,7 +80,8 @@ size_t ActivityBuffer::ValidSize()
 
 const std::set<msptiActivityKind> ActivityManager::supportActivityKinds_ = {
     MSPTI_ACTIVITY_KIND_MARKER, MSPTI_ACTIVITY_KIND_KERNEL, MSPTI_ACTIVITY_KIND_API, MSPTI_ACTIVITY_KIND_HCCL,
-    MSPTI_ACTIVITY_KIND_MEMORY, MSPTI_ACTIVITY_KIND_MEMSET, MSPTI_ACTIVITY_KIND_MEMCPY
+    MSPTI_ACTIVITY_KIND_MEMORY, MSPTI_ACTIVITY_KIND_MEMSET, MSPTI_ACTIVITY_KIND_MEMCPY,
+    MSPTI_ACTIVITY_KIND_EXTERNAL_CORRELATION
 };
 
 ActivityManager *ActivityManager::GetInstance()
@@ -198,13 +200,14 @@ msptiResult ActivityManager::GetNextRecord(uint8_t *buffer, size_t validBufferSi
     }
 
     static const std::unordered_map<msptiActivityKind, size_t> activityKindDataSize = {
-        {MSPTI_ACTIVITY_KIND_MARKER,    sizeof(msptiActivityMarker)},
-        {MSPTI_ACTIVITY_KIND_KERNEL,    sizeof(msptiActivityKernel)},
-        {MSPTI_ACTIVITY_KIND_API,       sizeof(msptiActivityApi)},
-        {MSPTI_ACTIVITY_KIND_HCCL,      sizeof(msptiActivityHccl)},
-        {MSPTI_ACTIVITY_KIND_MEMORY,    sizeof(msptiActivityMemory)},
-        {MSPTI_ACTIVITY_KIND_MEMSET,    sizeof(msptiActivityMemset)},
-        {MSPTI_ACTIVITY_KIND_MEMCPY,    sizeof(msptiActivityMemcpy)},
+        {MSPTI_ACTIVITY_KIND_MARKER,                sizeof(msptiActivityMarker)},
+        {MSPTI_ACTIVITY_KIND_KERNEL,                sizeof(msptiActivityKernel)},
+        {MSPTI_ACTIVITY_KIND_API,                   sizeof(msptiActivityApi)},
+        {MSPTI_ACTIVITY_KIND_HCCL,                  sizeof(msptiActivityHccl)},
+        {MSPTI_ACTIVITY_KIND_MEMORY,                sizeof(msptiActivityMemory)},
+        {MSPTI_ACTIVITY_KIND_MEMSET,                sizeof(msptiActivityMemset)},
+        {MSPTI_ACTIVITY_KIND_MEMCPY,                sizeof(msptiActivityMemcpy)},
+        {MSPTI_ACTIVITY_KIND_EXTERNAL_CORRELATION,  sizeof(msptiActivityExternalCorrelation)}
     };
 
     msptiActivityKind *pKind = Common::ReinterpretConvert<msptiActivityKind*>(buffer + pos);
@@ -379,4 +382,14 @@ msptiResult msptiActivityFlushAll(uint32_t flag)
 msptiResult msptiActivityFlushPeriod(uint32_t time)
 {
     return Mspti::Activity::ActivityManager::GetInstance()->FlushPeriod(time);
+}
+
+msptiResult msptiActivityPushExternalCorrelationId(msptiExternalCorrelationKind kind, uint64_t id)
+{
+    return Mspti::Reporter::ExternalCorrelationReporter::GetInstance()->PushExternalCorrelationId(kind, id);
+}
+
+msptiResult msptiActivityPopExternalCorrelationId(msptiExternalCorrelationKind kind, uint64_t *lastId)
+{
+    return Mspti::Reporter::ExternalCorrelationReporter::GetInstance()->PopExternalCorrelationId(kind, lastId);
 }

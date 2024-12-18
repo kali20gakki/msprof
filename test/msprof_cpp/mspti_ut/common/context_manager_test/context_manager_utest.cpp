@@ -19,10 +19,10 @@ protected:
     virtual void TearDown() {}
 };
 
-TEST_F(ContextManagerUtest, ShouldGetOneAfterUpdateCorrelationID)
+TEST_F(ContextManagerUtest, ShouldGetOneAfterUpdateAndReportCorrelationId)
 {
     EXPECT_EQ(0UL, Mspti::Common::ContextManager::GetInstance()->GetCorrelationId());
-    Mspti::Common::ContextManager::GetInstance()->UpdateCorrelationId();
+    Mspti::Common::ContextManager::GetInstance()->UpdateAndReportCorrelationId();
     EXPECT_EQ(1UL, Mspti::Common::ContextManager::GetInstance()->GetCorrelationId());
 }
 
