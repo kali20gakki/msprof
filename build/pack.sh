@@ -92,7 +92,6 @@ for DIR in ${OUT_DIR}/platform/Tuscany/*$(lsb_release -i | awk '{print $3}' | tr
     cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/msprof/msprof-0.0.1-py3-none-any.whl \
     ${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT}/toolkit/tools/profiler/profiler_tool/msprof-0.0.1-py3-none-any.whl
     cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/msprof/acl_prof.h ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/acl/acl_prof.h
-    cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/msprof/ge_prof.h ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/ge/ge_prof.h
 
     mkdir -p ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/mspti
     cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/mspti/include/mspti.h ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/mspti/mspti.h
