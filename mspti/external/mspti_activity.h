@@ -61,6 +61,7 @@ typedef enum {
     MSPTI_ACTIVITY_KIND_MEMORY = 5,
     MSPTI_ACTIVITY_KIND_MEMSET = 6,
     MSPTI_ACTIVITY_KIND_MEMCPY = 7,
+    MSPTI_ACTIVITY_KIND_EXTERNAL_CORRELATION = 8,
     MSPTI_ACTIVITY_KIND_COUNT,
     MSPTI_ACTIVITY_KIND_FORCE_INT = 0x7fffffff
 } msptiActivityKind;
@@ -74,6 +75,21 @@ typedef enum {
     MSPTI_ACTIVITY_SOURCE_KIND_HOST = 0,
     MSPTI_ACTIVITY_SOURCE_KIND_DEVICE = 1
 } msptiActivitySourceKind;
+
+/**
+ * @brief The kind of external APIs supported for correlation.
+ *
+ * Custom correlation kinds are reserved for usage in external tools.
+ */
+typedef enum {
+    MSPTI_EXTERNAL_CORRELATION_KIND_INVALID = 0,
+    MSPTI_EXTERNAL_CORRELATION_KIND_UNKNOWN = 1,
+    MSPTI_EXTERNAL_CORRELATION_KIND_CUSTOM0 = 2,
+    MSPTI_EXTERNAL_CORRELATION_KIND_CUSTOM1 = 3,
+    MSPTI_EXTERNAL_CORRELATION_KIND_CUSTOM2 = 4,
+    MSPTI_EXTERNAL_CORRELATION_KIND_SIZE,
+    MSPTI_EXTERNAL_CORRELATION_KIND_FORCE_INT = 0x7fffffff,
+} msptiExternalCorrelationKind;
 
 /**
  * @brief Flags linked to activity records.
@@ -475,7 +491,6 @@ typedef struct PACKED_ALIGNMENT {
     * The correlation ID of the memory set operation.
     */
     uint64_t correlationId;
-    
     /**
     * Whether the memory set operation happens through async memory APIs.
     */
@@ -535,6 +550,25 @@ typedef struct PACKED_ALIGNMENT {
     */
     uint8_t isAsync;
 } msptiActivityMemcpy;
+
+typedef struct PACKED_ALIGNMENT {
+    /**
+    * The activity record kind, must be MSPTI_ACTIVITY_KIND_EXTERNAL_CORRELATION.
+    */
+    msptiActivityKind kind;
+    /**
+    * The kind of external API this record correlated to.
+    */
+    msptiExternalCorrelationKind externalKind;
+    /**
+    * The exact field in the associated external record depends on that record’s activity kind
+    */
+    uint64_t externalId;
+    /**
+    * The correlation ID of the associated MSPTI runtime API record.
+    */
+    uint64_t correlationId;
+} msptiActivityExternalCorrelation;
 
 END_PACKED_ALIGNMENT
 
@@ -664,8 +698,7 @@ msptiResult msptiActivityFlushAll(uint32_t flag);
  * This function periodically returns the activity records associated with
  * all contexts/streams (and the global buffers not associated with any stream)
  * to the MSPTI client using the callback registered in msptiActivityRegisterCallbacks.
- * It periodically return all activity buffers that contain completed activity records,
- * even if these buffers are not completely filled when call this function with param.
+ * Periodic flush can return only those activity buffers which are full.
  *
  * Before calling this function, the buffer handling callback api must be activated
  * by calling msptiActivityRegisterCallbacks.
@@ -675,6 +708,37 @@ msptiResult msptiActivityFlushAll(uint32_t flag);
  * @retval MSPTI_SUCCESS
  */
 msptiResult msptiActivityFlushPeriod(uint32_t time);
+
+/**
+ * @brief Push an external correlation id for the calling thread.
+ *
+ * This function notifies MSPTI that the calling thread is entering an external API region.
+ * When a MSPTI activity API record is created while within an external API region and
+ * MSPTI_ACTIVITY_KIND_EXTERNAL_CORRELATION is enabled, the activity API record will
+ * be preceded by a msptiActivityExternalCorrelation record for each msptiExternalCorrelationKind.
+ *
+ * @param kind The kind of external API activities should be correlated with.
+ * @param id External correlation id.
+ *
+ * @retval MSPTI_SUCCESS
+ * @retval MSPTI_ERROR_INVALID_PARAMETER
+ */
+msptiResult msptiActivityPushExternalCorrelationId(msptiExternalCorrelationKind kind, uint64_t id);
+
+/**
+ * @brief Pop an external correlation id for the calling thread.
+ *
+ * This function notifies MSPTI that the calling thread is leaving an external API region.
+ *
+ * @param kind The kind of external API activities should be correlated with.
+ * @param lastId If the function returns successful, contains the last external correlation id for this kind,
+ * can be NULL.
+ *
+ * @retval MSPTI_SUCCESS
+ * @retval MSPTI_ERROR_INVALID_PARAMETER
+ * @retval MSPTI_ERROR_QUEUE_EMPTY
+ */
+msptiResult msptiActivityPopExternalCorrelationId(msptiExternalCorrelationKind kind, uint64_t *lastId);
 
 #if defined(__GNUC__) && defined(MSPTI_LIB)
 #pragma GCC visibility pop

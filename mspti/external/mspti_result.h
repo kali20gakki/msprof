@@ -22,6 +22,7 @@ typedef enum {
     MSPTI_ERROR_MULTIPLE_SUBSCRIBERS_NOT_SUPPORTED      = 2,
     MSPTI_ERROR_MAX_LIMIT_REACHED                       = 3,
     MSPTI_ERROR_DEVICE_OFFLINE                          = 4,
+    MSPTI_ERROR_QUEUE_EMPTY                             = 5,
     MSPTI_ERROR_INNER                                   = 999,
     MSPTI_ERROR_FOECE_INT                               = 0x7fffffff
 } msptiResult;

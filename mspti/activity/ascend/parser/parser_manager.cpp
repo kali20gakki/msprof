@@ -13,6 +13,7 @@
 #include "activity/ascend/parser/parser_manager.h"
 
 #include "activity/activity_manager.h"
+#include "activity/ascend/reporter/external_correlation_reporter.h"
 #include "common/config.h"
 #include "common/context_manager.h"
 #include "common/plog_manager.h"
@@ -132,6 +133,7 @@ msptiResult ParserManager::ReportApi(const MsprofApi* const data)
     api.start = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(data->beginTime);
     api.end = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(data->endTime);
     api.correlationId = Mspti::Common::ContextManager::GetInstance()->GetCorrelationId(data->threadId);
+    Mspti::Reporter::ExternalCorrelationReporter::GetInstance()->ReportExternalCorrelationId(api.correlationId);
     if (Mspti::Activity::ActivityManager::GetInstance()->Record(
         Common::ReinterpretConvert<msptiActivity*>(&api), sizeof(msptiActivityApi)) != MSPTI_SUCCESS) {
         return MSPTI_ERROR_INNER;

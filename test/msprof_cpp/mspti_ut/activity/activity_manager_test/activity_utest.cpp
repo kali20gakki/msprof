@@ -11,6 +11,8 @@
 
 #include "activity/activity_manager.h"
 #include "activity/ascend/dev_task_manager.h"
+#include "activity/ascend/parser/parser_manager.h"
+#include "activity/ascend/reporter/external_correlation_reporter.h"
 
 #include "mspti.h"
 
@@ -204,6 +206,39 @@ TEST_F(ActivityUtest, ShouleRetSuccessWhenSetPeriodFlushTime)
         instance->Record(reinterpret_cast<msptiActivity*>(&activity), sizeof(activity));
     }
     EXPECT_EQ(MSPTI_SUCCESS, instance ->ResetAllDevice());
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityDisable(MSPTI_ACTIVITY_KIND_MARKER));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityFlushAll(1));
+}
+
+TEST_F(ActivityUtest, ShouleRetSuccessWhenPushAndPopExternalCorrelationId)
+{
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StartDevProfTask).stubs().will(returnValue(MSPTI_SUCCESS));
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StopDevProfTask).stubs().will(returnValue(MSPTI_SUCCESS));
+
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityRegisterCallbacks(UserBufferRequest, UserBufferComplete));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_MARKER));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_EXTERNAL_CORRELATION));
+    auto instance = Mspti::Activity::ActivityManager::GetInstance();
+    EXPECT_EQ(MSPTI_SUCCESS, instance->SetDevice(0));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityPushExternalCorrelationId(MSPTI_EXTERNAL_CORRELATION_KIND_CUSTOM0, 0));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityPushExternalCorrelationId(MSPTI_EXTERNAL_CORRELATION_KIND_CUSTOM0, 1));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityPushExternalCorrelationId(MSPTI_EXTERNAL_CORRELATION_KIND_UNKNOWN, 1));
+
+    EXPECT_EQ(
+        MSPTI_SUCCESS, Mspti::Reporter::ExternalCorrelationReporter::GetInstance()->ReportExternalCorrelationId(1));
+
+    uint64_t value = 12345678901234567890; // 一个具体的uint64_t类型的变量
+    uint64_t *test = &value;
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityPopExternalCorrelationId(MSPTI_EXTERNAL_CORRELATION_KIND_CUSTOM0, test));
+    EXPECT_EQ(1, *test);
+
+    EXPECT_EQ(
+        MSPTI_SUCCESS, Mspti::Reporter::ExternalCorrelationReporter::GetInstance()->ReportExternalCorrelationId(1));
+
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityPopExternalCorrelationId(MSPTI_EXTERNAL_CORRELATION_KIND_UNKNOWN, test));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityPopExternalCorrelationId(MSPTI_EXTERNAL_CORRELATION_KIND_CUSTOM0, test));
+    EXPECT_EQ(MSPTI_SUCCESS, instance->ResetAllDevice());
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityDisable(MSPTI_ACTIVITY_KIND_EXTERNAL_CORRELATION));
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityDisable(MSPTI_ACTIVITY_KIND_MARKER));
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityFlushAll(1));
 }

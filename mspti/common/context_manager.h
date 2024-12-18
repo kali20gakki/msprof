@@ -45,7 +45,7 @@ public:
     uint64_t GetHostTimeStampNs();
     PlatformType GetChipType(uint32_t deviceId);
     uint64_t GetCorrelationId(uint32_t threadId = 0);
-    void UpdateCorrelationId();
+    void UpdateAndReportCorrelationId();
 
 private:
     ContextManager() = default;

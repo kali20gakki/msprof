@@ -16,7 +16,8 @@
 #include "common/plog_manager.h"
 #include "common/inject/driver_inject.h"
 #include "common/utils.h"
-#include "external/mspti_activity.h"
+#include "activity/activity_manager.h"
+#include "activity/ascend/reporter/external_correlation_reporter.h"
 
 namespace Mspti {
 namespace Common {
@@ -188,10 +189,11 @@ uint64_t ContextManager::GetCorrelationId(uint32_t threadId)
     }
 }
 
-void ContextManager::UpdateCorrelationId()
+void ContextManager::UpdateAndReportCorrelationId()
 {
     std::lock_guard<std::mutex> lk(correlationIdMtx_);
     correlationId_++;
+    Mspti::Reporter::ExternalCorrelationReporter::GetInstance()->ReportExternalCorrelationId(correlationId_);
     uint32_t tid = Common::Utils::GetTid();
     auto iter = threadCorrelationIdInfo_.find(tid);
     if (iter == threadCorrelationIdInfo_.end()) {
