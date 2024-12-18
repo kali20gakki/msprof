@@ -84,9 +84,9 @@ void MemcpyAsyncEvent::ProcessArgs(JsonWriter& ostream)
 {
     TaskTraceEvent::ProcessArgs(ostream);
     if (showFlag_) {
-        ostream["dataSize(B)"] << dataSize_;
+        ostream["size(B)"] << dataSize_;
         ostream["bandwidth(GB/s)"] << bandwidth_;
-        ostream["direction"] << memcpyDirection_;
+        ostream["operation"] << memcpyDirection_;
     }
 }
 

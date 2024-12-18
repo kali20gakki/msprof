@@ -22,6 +22,10 @@ using namespace Association::Credential;
 using namespace Analysis::Parser::Environment;
 using namespace Analysis::Utils;
 namespace {
+// connection_id, data_size, memcpy_direction, max_size
+using MemcpyInfoFormat = std::vector<std::tuple<uint64_t, uint64_t, uint16_t, uint64_t>>;
+const std::string MEMCPY_ASYNC = "MEMCPY_ASYNC";
+const uint16_t VALID_MEMCPY_OPERATION = 7;
 const std::string INDEX_NAME = "TaskIndex";
 const std::vector<std::string> TASK_INDEX_COL_NAMES = {"startNs", "globalTaskId"};
 struct TaskData {
@@ -80,6 +84,68 @@ struct MsprofTxTableData {
         this->endTime = endTime;
     }
 };
+}
+
+void TaskProcessor::GenerateMemcpyRecordMap(const std::string &fileDir)
+{
+    DBInfo runtimeDB("runtime.db", "MemcpyInfo");
+    std::string dbPath = Utils::File::PathJoin({fileDir, HOST, SQLITE, runtimeDB.dbName});
+    MAKE_SHARED_RETURN_VOID(runtimeDB.dbRunner, DBRunner, dbPath);
+    // 并不是所有场景都有memcpyInfo数据
+    auto status = CheckPathAndTable(dbPath, runtimeDB);
+    if (status == NOT_EXIST) {
+        INFO("Check % data exit in %.", runtimeDB.tableName, dbPath);
+        return;
+    } else if (status == CHECK_FAILED) {
+        ERROR("Check failed: %", dbPath);
+        return;
+    }
+    MemcpyInfoFormat memcpyInfoData;
+    if (runtimeDB.dbRunner == nullptr) {
+        ERROR("Create % connection failed.", dbPath);
+        return;
+    }
+    std::string sql = "SELECT connection_id, data_size, memcpy_direction, max_size FROM " + runtimeDB.tableName;
+    if (!runtimeDB.dbRunner->QueryData(sql, memcpyInfoData)) {
+        ERROR("Query memcpyInfo data failed, db path is %.", dbPath);
+        return;
+    }
+    if (memcpyInfoData.empty()) {
+        ERROR("MemcpyInfo original data is empty.");
+        return;
+    }
+    uint64_t connectionId;
+    uint64_t dataSize;
+    uint16_t operation;
+    uint64_t maxSize;
+    auto profId = IdPool::GetInstance().GetUint32Id(fileDir);
+    for (const auto& data : memcpyInfoData) {
+        std::tie(connectionId, dataSize, operation, maxSize) = data;
+        memcpyRecordMap_[Utils::Contact(profId, connectionId)] = {dataSize, maxSize, dataSize, operation};
+    }
+}
+
+MemcpyRecord GenerateMemcpyRecordByConnectionId(MEMCPY_ASYNC_FORMAT &memcpyRecordMap, const uint64_t &connectionId)
+{
+    MemcpyRecord tmpMemcpyRecord {0, 0, 0, UINT16_MAX};
+    auto it = memcpyRecordMap.find(connectionId);
+    if (it == memcpyRecordMap.end()) {
+        ERROR("MEMCPY_ASYNC task lost memcpyInfo, connectionId is %", connectionId);
+    } else {
+        if (it->second.remainSize == 0) {
+            ERROR("Redundant memcpyAsync task, connectionId is %", connectionId);
+        } else if (it->second.remainSize <= it->second.maxSize) {
+            tmpMemcpyRecord.dataSize = it->second.remainSize;
+            it->second.remainSize = 0;
+        } else if (it->second.remainSize > it->second.maxSize) {
+            tmpMemcpyRecord.dataSize = it->second.maxSize;
+            it->second.remainSize = it->second.remainSize - tmpMemcpyRecord.dataSize;
+        }
+        if (it->second.operation <= VALID_MEMCPY_OPERATION) {
+            tmpMemcpyRecord.operation = it->second.operation;
+        }
+    }
+    return tmpMemcpyRecord;
 }
 
 TaskProcessor::TaskProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths)
@@ -141,9 +207,13 @@ TaskProcessor::ProcessedDataFormat TaskProcessor::FormatData(const OriDataFormat
     std::string oriHostTaskType;
     std::string oriDeviceTaskType;
     uint32_t oriConnectionId;
+    bool memcpyFalg = true;
     if (!Utils::Reserve(processedData, oriData.size())) {
         ERROR("Reserve for ascend task data failed.");
         return processedData;
+    }
+    if (memcpyRecordMap_.empty()) {
+        memcpyFalg = false;
     }
     for (auto &row: oriData) {
         std::tie(data.modelId, std::ignore, data.streamId, data.taskId, data.contextId, data.batchId,
@@ -160,6 +230,10 @@ TaskProcessor::ProcessedDataFormat TaskProcessor::FormatData(const OriDataFormat
             Utils::GetLocalTime(end, threadData.timeRecord).Uint64(),
             threadData.deviceId, data.connectionId, data.globalTaskId, pid, data.taskType,
             data.contextId, data.streamId, data.taskId, data.modelId);
+        if (memcpyFalg && oriHostTaskType == MEMCPY_ASYNC) {
+            MemcpyRecord tmpMemcpyRecord = GenerateMemcpyRecordByConnectionId(memcpyRecordMap_, data.connectionId);
+            processedMemcpyInfo_.emplace_back(data.globalTaskId, tmpMemcpyRecord.dataSize, tmpMemcpyRecord.operation);
+        }
     }
     return processedData;
 }
@@ -171,9 +245,12 @@ bool TaskProcessor::Process(const std::string &fileDir)
     threadData.profId = IdPool::GetInstance().GetUint32Id(fileDir);
     uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, fileDir);
     auto deviceList = Utils::File::GetFilesWithPrefix(fileDir, DEVICE_PREFIX);
-
+    GenerateMemcpyRecordMap(fileDir);
     bool processFlag = ProcessTaskData(fileDir, deviceList, threadData, pid);
     processFlag = ProcessMsprofTxData(fileDir, deviceList, threadData, pid) && processFlag;
+    if (!processedMemcpyInfo_.empty()) {
+        processFlag = SaveData(processedMemcpyInfo_, TABLE_NAME_MEMCPY_INFO) && processFlag;
+    }
     return processFlag;
 }
 

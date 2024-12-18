@@ -292,10 +292,9 @@ namespace {
     };
 
     const TableColumns MEMCPY_INFO = {
-        {"connectionId", SQL_NUMERIC_TYPE},
-        {"dataSize", SQL_NUMERIC_TYPE},
-        {"memcpyDirection ", SQL_NUMERIC_TYPE},
-        {"maxSize", SQL_NUMERIC_TYPE}
+        {"globalTaskId", SQL_NUMERIC_TYPE},
+        {"size", SQL_NUMERIC_TYPE},
+        {"memcpyOperation", SQL_NUMERIC_TYPE}
     };
 }
 
@@ -340,6 +339,7 @@ MsprofDB::MsprofDB()
         {TABLE_NAME_ENUM_HCCL_TRANSPORT_TYPE, ENUM_TABLE},
         {TABLE_NAME_ENUM_HCCL_RDMA_TYPE, ENUM_TABLE},
         {TABLE_NAME_MSTX_EVENT_TYPE, ENUM_TABLE},
+        {TABLE_NAME_ENUM_MEMCPY_OPERATION, ENUM_TABLE}
     };
 }
 
