@@ -17,6 +17,15 @@
 namespace Analysis {
 namespace Viewer {
 namespace Database {
+struct MemcpyRecord {
+    uint64_t dataSize;  // memcpy的数据量
+    uint64_t maxSize;  // 每个task能拷贝的最大数据量
+    uint64_t remainSize;  // 还剩下多少数据量需要后面的task去拷贝
+    uint16_t operation;  // 拷贝类型
+};
+using MEMCPY_ASYNC_FORMAT = std::unordered_map<uint64_t, MemcpyRecord>;
+// globalTaskId, datasize, memcpy_operation
+using ProcessedMemcpyInfoFormat = std::vector<std::tuple<uint64_t, uint64_t, uint16_t>>;
 // 该类用于生成TASK表
 class TaskProcessor : public TableProcessor {
     // model_id, index_id, stream_id, task_id, context_id, batch_id, start_time, duration, host_task_type,
@@ -40,7 +49,7 @@ private:
     bool ProcessTaskData(const std::string &fileDir, const std::vector<std::string> &deviceList,
                          ThreadData threadData, uint32_t pid);
     static OriDataFormat GetData(DBInfo &ascendTaskDB);
-    static ProcessedDataFormat FormatData(const OriDataFormat &oriData, const ThreadData &threadData,
+    ProcessedDataFormat FormatData(const OriDataFormat &oriData, const ThreadData &threadData,
                                           uint16_t platformVersion, uint32_t pid);
     static uint64_t GetTaskType(const std::string &hostType, const std::string &deviceType, uint16_t platformVersion);
     bool ProcessMsprofTxData(const std::string &fileDir, const std::vector<std::string> &deviceList,
@@ -50,6 +59,10 @@ private:
                                                       const ThreadData &threadData,
                                                       Utils::SyscntConversionParams &params,
                                                       uint32_t pid);
+    void GenerateMemcpyRecordMap(const std::string &fileDir);
+private:
+    MEMCPY_ASYNC_FORMAT memcpyRecordMap_;  // 存储connectionId与memcpy_info数据的映射
+    ProcessedMemcpyInfoFormat processedMemcpyInfo_;
 };
 
 } // Database

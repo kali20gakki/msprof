@@ -289,6 +289,35 @@ db命名：msprof_{时间戳}.db
 | 2024/5/19 | 630新增,同时增加新的type字段（2-5） |
 | 2024/7/11 | 新增NA字段，避免L0场景下异常日志记录 |
 
+### ENUM_MEMCPY_OPERATION
+
+格式：
+
+| 字段名  | 类型      | 索引  | 含义               |
+|------|---------|-----|------------------|
+| id   | INTEGER | 主键  | id               |
+| name | TEXT    |     | 拷贝类型 |
+
+内容：
+
+| id    | name                 |
+|-------|----------------------|
+| 0     | host to host     |
+| 1     | host to device    |
+| 2     | device to host |
+| 3     | device to device   |
+| 4     | managed memory     |
+| 5     | addr device to device         |
+| 6     | host to device ex    |
+| 7     | device to host ex         |
+| 65535 | other  
+
+变更记录：
+
+| 日期        | 内容                      |
+|-----------|-------------------------|
+| 2024/12/18 | 新增              |
+
 ### STRING_IDS
 
 格式：
@@ -950,6 +979,22 @@ timeline计算公式：
 | 日期       | 内容      |
 |----------|---------|
 | 2024/5/31 | 630首次上线，用于保存host侧tx打点数据event 类型 |
+
+### MEMCPY_INFO
+
+格式
+
+| 字段名          | 类型      | 索引  | 含义  |
+|--------------|---------|-----|------------------------|
+| globalTaskId | NUMERIC | 主键 | 全局算子任务id，用于关联TASK  |
+| size     | NUMERIC |     | 拷贝的数据量  |
+| memcpyOperation| NUMERIC |    | 拷贝类型，STRING_IDS(memcpyDirection)|
+
+变更记录：
+
+| 日期       | 内容      |
+|----------|---------|
+| 2024/12/17 | 1230首次上线，为MEMCPY_ASYNC类型的task提供数据量、拷贝方向等数据 |
 
 
 ## 2. pytorch框架数据db格式表结构
