@@ -988,7 +988,7 @@ timeline计算公式：
 |--------------|---------|-----|------------------------|
 | globalTaskId | NUMERIC | 主键 | 全局算子任务id，用于关联TASK  |
 | size     | NUMERIC |     | 拷贝的数据量  |
-| memcpyOperation| NUMERIC |    | 拷贝类型，STRING_IDS(memcpyDirection)|
+| memcpyOperation| NUMERIC |    | 拷贝类型，ENUM_MEMCPY_OPERATION(memcpyOperation)|
 
 变更记录：
 
