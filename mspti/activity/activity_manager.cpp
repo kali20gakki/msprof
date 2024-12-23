@@ -109,7 +109,6 @@ ActivityManager::~ActivityManager()
         }
     }
     JoinWorkThreads();
-    FlushAll();
     activity_set_.clear();
     devices_.clear();
     MSPTI_LOGI("Total activity record: %lu. Total activity drop: %lu",
@@ -306,13 +305,16 @@ void ActivityManager::Run()
             if (!thread_run_.load()) {
                 break;
             }
-            for (auto& activity_buffer : co_activity_buffers_) {
-                work_thread_.emplace_back(std::thread([this] (std::unique_ptr<ActivityBuffer> activity_buffer) {
-                    activity_buffer->UnInit(this->bufferCompleted_handle_);
-                }, std::move(activity_buffer)));
+            {
+                std::lock_guard<std::mutex> lk(buf_mtx_);
+                for (auto& activity_buffer : co_activity_buffers_) {
+                    work_thread_.emplace_back(std::thread([this] (std::unique_ptr<ActivityBuffer> activity_buffer) {
+                        activity_buffer->UnInit(this->bufferCompleted_handle_);
+                    }, std::move(activity_buffer)));
+                }
+                co_activity_buffers_.clear();
+                buf_full_ = false;
             }
-            co_activity_buffers_.clear();
-            buf_full_ = false;
         }
     }
     JoinWorkThreads();

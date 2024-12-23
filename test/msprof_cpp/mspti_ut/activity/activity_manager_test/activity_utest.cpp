@@ -37,6 +37,15 @@ void UserBufferRequest(uint8_t **buffer, size_t *size, size_t *maxNumRecords)
     *maxNumRecords = 0;
 }
 
+void UserLittleBufferRequest(uint8_t **buffer, size_t *size, size_t *maxNumRecords)
+{
+    printf("========== UserBufferRequest ============\n");
+    constexpr uint32_t bufSize = 1024;
+    *buffer = static_cast<uint8_t*>(malloc(bufSize));
+    *size = bufSize;
+    *maxNumRecords = 0;
+}
+
 static void ActivityParser(msptiActivity *pRecord)
 {
     g_records++;
@@ -174,7 +183,7 @@ TEST_F(ActivityUtest, ShouleRetSuccessWhenSetPeriodFlushTime)
         .stubs()
         .will(returnValue(MSPTI_SUCCESS));
 
-    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityRegisterCallbacks(UserBufferRequest, UserBufferComplete));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityRegisterCallbacks(UserLittleBufferRequest, UserBufferComplete));
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_MARKER));
     auto instance = Mspti::Activity::ActivityManager::GetInstance();
     EXPECT_EQ(MSPTI_SUCCESS, instance ->SetDevice(0));
@@ -182,9 +191,11 @@ TEST_F(ActivityUtest, ShouleRetSuccessWhenSetPeriodFlushTime)
     msptiActivityMarker activity;
     constexpr uint64_t timeStamp = 1614659207688700;
     constexpr uint32_t markNum = 10;
-    constexpr uint32_t testPeriodFlushTime = 1000;
+    constexpr uint32_t testPeriodFlushTime = 1;
+    constexpr uint32_t sleepTime = 100000;
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityFlushPeriod(testPeriodFlushTime));
     for (size_t i = 0; i < markNum ; ++i) {
+        usleep(sleepTime);
         activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
         activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
         activity.timestamp = timeStamp;
@@ -196,6 +207,7 @@ TEST_F(ActivityUtest, ShouleRetSuccessWhenSetPeriodFlushTime)
     }
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityFlushPeriod(0));
         for (size_t i = 0; i < markNum ; ++i) {
+        usleep(sleepTime);
         activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
         activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
         activity.timestamp = timeStamp;
