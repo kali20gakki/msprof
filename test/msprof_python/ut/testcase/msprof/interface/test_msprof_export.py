@@ -340,7 +340,7 @@ class TestExportCommand(unittest.TestCase):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
         args = Namespace(**args_dic)
         test = ExportCommand("timeline", args)
-        test._clear_dir("")
+        test._clear_dir([""])
 
     def test_clear_dir_with_set_clear_mode_false(self):
         args_dic = {
@@ -352,7 +352,7 @@ class TestExportCommand(unittest.TestCase):
         }
         args = Namespace(**args_dic)
         test = ExportCommand("timeline", args)
-        test._clear_dir("")
+        test._clear_dir([""])
 
     def test_clear_dir_with_set_clear_mode_True(self):
         args_dic = {
@@ -364,11 +364,13 @@ class TestExportCommand(unittest.TestCase):
         }
         args = Namespace(**args_dic)
         test = ExportCommand("timeline", args)
+        with mock.patch('os.path.exists', return_value=False):
+            test._clear_dir([""])
+
         with mock.patch('os.path.exists', return_value=True), \
-                mock.patch('os.path.exists', return_value=True), \
                 mock.patch(NAMESPACE + '.check_dir_writable'), \
                 mock.patch('shutil.rmtree'):
-            test._clear_dir("")
+            test._clear_dir([""])
 
     def test_handle_export_without_set_clear_mode(self):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1}
