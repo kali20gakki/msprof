@@ -76,15 +76,17 @@ std::vector<TaskInfoData> ComputeTaskInfoProcessor::LoadData(
         return res;
     }
     TaskInfoData data;
+    ShapeInfo info;
     std::string hashId;
     for (auto& node : oriData) {
         std::tie(hashId, data.modelId, data.opName, data.streamId, data.taskId, data.blockDim, data.mixBlockDim,
-                 data.taskType, data.opType, data.opFlag, data.batchId, data.inputFormats, data.inputDataTypes,
-                 data.inputShapes, data.outputFormats, data.outputDataTypes, data.outputShapes,
+                 data.taskType, data.opType, data.opFlag, data.batchId, info.inputFormats, info.inputDataTypes,
+                 info.inputShapes, info.outputFormats, info.outputDataTypes, info.outputShapes,
                  data.deviceId, data.contextId, data.opState) = node;
         if (hashMap.find(hashId) != hashMap.end()) {
             data.hashId = hashMap[hashId];
         }
+        data = info;
         res.push_back(data);
     }
     return res;
