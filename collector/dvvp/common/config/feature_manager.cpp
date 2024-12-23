@@ -4,7 +4,7 @@
  * Create: 2024-04-22
  */
 #include "feature_manager.h"
-
+#include "config_manager.h"
 #include "errno/error_code.h"
 #include "utils/utils.h"
 #include "transport/uploader_mgr.h"
@@ -17,12 +17,27 @@ namespace Config {
 using namespace analysis::dvvp::common::error;
 
 namespace {
-// featureName, compatibility, featureVersion, affectedComponent, affectedComponentVersion, infoLog
-static FeatureRecord g_features[] = {
-    {"ATTR\0", "0\0", "1\0", "all\0", "all\0", "It not support feature: ATTR!\0"},
-    {"MemoryAccess\0", "0\0", "1\0", "all\0", "all\0", "It not support feature: MemoryAccess!\0"},
+const std::string FILE_NAME = "incompatible_features.json";
+// Platform: featureName, compatibility, featureVersion, affectedComponent, affectedComponentVersion, infoLog
+std::unordered_map<PlatformType, std::vector<FeatureRecord>> FEATURE_MAP = {
+    {
+        PlatformType::CHIP_V4_1_0, {
+            {"ATTR\0", "1\0", "2\0", "all\0", "all\0", "It not support feature: ATTR!\0"},
+            {"MemoryAccess\0", "1\0", "2\0", "all\0", "all\0", "It not support feature: MemoryAccess!\0"}
+        }
+    }
 };
-static const std::string FILE_NAME = "incompatible_features.json";
+std::vector<FeatureRecord> DEFAULT_FEATURE = {
+    {"ATTR\0", "1\0", "2\0", "all\0", "all\0", "It not support feature: ATTR!\0"},
+    {"MemoryAccess\0", "0\0", "2\0", "all\0", "all\0", "It not support feature: MemoryAccess!\0"}
+};
+
+std::vector<FeatureRecord>& GetCurPlatformFeature()
+{
+    PlatformType platform = ConfigManager::instance()->GetPlatformType();
+    auto iter = FEATURE_MAP.find(platform);
+    return (iter == FEATURE_MAP.end() ? DEFAULT_FEATURE : iter->second);
+}
 }
 
 FeatureManager::FeatureManager() {}
@@ -47,7 +62,8 @@ int FeatureManager::Init()
 
 int FeatureManager::CheckCreateFeatures()
 {
-    for (const auto& feature : g_features) {
+    auto& features = GetCurPlatformFeature();
+    for (const auto& feature : features) {
         if (feature.featureName[0] == '\0' || feature.info.affectedComponent[0] == '\0' ||
             feature.info.affectedComponentVersion[0] == '\0' || feature.info.compatibility[0] == '\0' ||
             feature.info.featureVersion[0] == '\0' || feature.info.infoLog[0] == '\0') {
@@ -64,8 +80,9 @@ FeatureRecord* FeatureManager::GetIncompatibleFeatures(size_t* featuresSize)
         MSPROF_LOGE("featuresSize for GetIncompatibleFeatures is nullptr.");
         return nullptr;
     }
-    *featuresSize = sizeof(g_features) / sizeof(FeatureRecord);
-    return &g_features[0];
+    auto& features = GetCurPlatformFeature();
+    *featuresSize = features.size();
+    return features.data();
 }
 
 int FeatureManager::CreateIncompatibleFeatureJsonFile(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
@@ -75,7 +92,8 @@ int FeatureManager::CreateIncompatibleFeatureJsonFile(SHARED_PTR_ALIA<analysis::
         return PROFILING_FAILED;
     }
     nlohmann::json root;
-    for (auto& feature : g_features) {
+    auto& features = GetCurPlatformFeature();
+    for (auto& feature : features) {
         feature.ToObject(root);
     }
     std::string featureStr = root.dump();

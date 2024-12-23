@@ -6,6 +6,7 @@
 #include <iostream>
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
+#include "config_manager.h"
 #include "feature_manager.h"
 #include "error_code.h"
 #include "uploader_mgr.h"
@@ -92,4 +93,20 @@ TEST_F(FeatureManagerUtest, TestGetIncompatibleFeaturesFailedWhenPointerIsNullpt
     auto featureManger = FeatureManager::instance();
     size_t* dataSizeptr = nullptr;
     EXPECT_EQ(nullptr, featureManger->GetIncompatibleFeatures(dataSizeptr));
+}
+
+TEST_F(FeatureManagerUtest, TestMemoryAccessCompatibleOnlyOnCHIPV410)
+{
+    auto featureManger = FeatureManager::instance();
+    MOCKER_CPP(&ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(PlatformType::CHIP_V4_1_0))
+        .then(returnValue(PlatformType::CHIP_V4_2_0));
+    size_t dataSize = 0;
+    size_t expectDataSize = 2;
+    auto chipV410Feature = featureManger->GetIncompatibleFeatures(&dataSize);
+    EXPECT_EQ(expectDataSize, dataSize);
+    auto otherFeature = featureManger->GetIncompatibleFeatures(&dataSize);
+    EXPECT_EQ(expectDataSize, dataSize);
+    EXPECT_NE(0, std::strcmp(chipV410Feature[1].info.compatibility, otherFeature[1].info.compatibility));
 }
