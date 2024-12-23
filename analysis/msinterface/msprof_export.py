@@ -549,16 +549,16 @@ class ExportCommand:
                                                           data)
         print_info(self.FILE_NAME, export_info)
 
-    def _clear_dir(self, result_dir: str) -> None:
+    def _clear_dir(self, rm_list: list) -> None:
         if not self.clear_mode:
             return
-        if not os.path.exists(result_dir):
-            return
-        clear_dir = 'sqlite'
-        dir_name = os.path.join(result_dir, clear_dir)
-        if os.path.exists(dir_name):
-            check_dir_writable(dir_name)
-            shutil.rmtree(dir_name)
+        for result_dir in rm_list:
+            if not os.path.exists(result_dir):
+                return
+            sqlite_path = PathManager.get_sql_dir(result_dir)
+            if os.path.exists(sqlite_path):
+                check_dir_writable(sqlite_path)
+                shutil.rmtree(sqlite_path)
 
     def _multiprocessing_handle_export_data(self: any, event, result_dir, export_mode):
         ExportCommand._process_init(result_dir, export_mode)
@@ -598,7 +598,6 @@ class ExportCommand:
             else:
                 warn(MsProfCommonConstant.COMMON_FILE_NAME,
                      'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
-        self._clear_dir(result_dir)
 
     def _export_data(self: any, event: dict, device_id: str, result_dir: str) -> None:
         export_data_type = event.get('export_type', ExportDataType.INVALID).name.lower()
@@ -678,6 +677,7 @@ class ExportCommand:
                 rm_list.extend(path_table.get(StrConstant.DEVICE_PATH))
             if rm_list:
                 PathManager.del_summary_and_timeline_dir(rm_list)
+                self._clear_dir(rm_list)
 
     def _start_parse(self, path_table: dict):
         # host
