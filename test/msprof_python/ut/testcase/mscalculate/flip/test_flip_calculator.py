@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 import unittest
+from collections import namedtuple
 
 from mscalculate.flip.flip_calculator import FlipCalculator
 from msparser.compact_info.task_track_bean import TaskTrackBean
+from common_func.msprof_object import CustomizedNamedtupleFactory
 from msparser.step_trace.ts_binary_data_reader.task_flip_bean import TaskFlip
 
 NAMESPACE = 'mscalculate.flip.flip_calculator'
@@ -61,13 +63,17 @@ class TestFlipCalculator(unittest.TestCase):
         self.assertEqual([data.batch_id for data in task_data[8:10]], [2, 2])
 
     def test_compute_batch_id_should_set_proper_batch_id_when_flip_task_id_is_not_0(self):
+        device_task_type = CustomizedNamedtupleFactory.enhance_namedtuple(
+            namedtuple("DeviceTask",
+                       ["stream_id", "task_id", "batch_id", "timestamp"]),
+            {})
         task_data = [
             TaskTrackBean([0, '0', '0', 0, 0, 111111, 0, 1, 1, 0, 1]),  # stream id 1
             TaskTrackBean([0, '0', '0', 0, 0, 111112, 0, 1, 2, 0, 1]),
             TaskTrackBean([0, '0', '0', 0, 0, 111116, 0, 1, 65534, 0, 1]),
             # real flip 1
             TaskTrackBean([0, '0', '0', 0, 0, 111120, 0, 1, 0, 0, 1]),
-            TaskTrackBean([0, '0', '0', 0, 0, 111130, 0, 1, 1, 0, 1]),  # report flip 1
+            device_task_type(1, 1, 0, 111130),  # report flip 1
             TaskTrackBean([0, '0', '0', 0, 0, 111140, 0, 1, 3, 0, 1]),
             TaskTrackBean([0, '0', '0', 0, 0, 111141, 0, 1, 4, 0, 1]),
             TaskTrackBean([0, '0', '0', 0, 0, 111142, 0, 1, 10, 0, 1]),
