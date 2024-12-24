@@ -49,7 +49,8 @@ class FlipCalculator:
                     batch_id, stream_destroy_num = FlipCalculator.get_next_batch_id(flip, batch_id,
                                                                                     is_flip_num, stream_destroy_num)
                     flip_index += 1
-                    FlipCalculator.calibrate_when_flip_task_id_not_zero(data, flip, task_index, batch_id, is_flip_num)
+                    FlipCalculator.calibrate_when_flip_task_id_not_zero(new_task_data, flip, new_task_index,
+                                                                        batch_id, is_flip_num)
                     continue
                 if isinstance(task, tuple):
                     data[task_index] = task.replace(batch_id=batch_id)
@@ -91,8 +92,12 @@ class FlipCalculator:
         # the flip may not get the task_id 0, we should search backward to calibrate the task
         # which task id is less than flip's task_id, and set these tasks the next batch id.
         task_index_backward = task_index - 1
-        while task_index_backward >= 0 and task_data[task_index_backward].task_id < flip.task_id:
-            task_data[task_index_backward].batch_id = batch_id
+        while task_index_backward >= 0 and task_data[task_index_backward].stream_id == flip.stream_id \
+                and task_data[task_index_backward].task_id < flip.task_id:
+            if isinstance(task_data[task_index_backward], tuple):
+                task_data[task_index_backward] = task_data[task_index_backward].replace(batch_id=batch_id)
+            else:
+                task_data[task_index_backward].batch_id = batch_id
             task_index_backward -= 1
 
     @staticmethod
