@@ -294,14 +294,6 @@ class ExportCommand:
                   "may be lost and the profiling will stop. Check whether the reported data is correct."
         raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
 
-    @staticmethod
-    def _check_export_op_summary_with_so():
-        """
-        有so文件，且是全导，可以使用C++来导出op_summary
-        """
-        return (ProfilingScene().is_cpp_parse_enable() and ProfilingScene().is_all_export() and
-                ChipManager().is_chip_v4())
-
     def process(self: any) -> None:
         """
         handle export command
@@ -730,6 +722,13 @@ class ExportCommand:
         valid_path = host_path if host_path else path_table.get(StrConstant.DEVICE_PATH)[0]
         return ProfilingScene().is_cpp_parse_enable() and self.command_type == MsProfCommonConstant.TIMELINE \
             and not ConfigMgr.is_ai_core_sample_based(valid_path) and ChipManager().is_chip_v4()
+
+    def _check_export_op_summary_with_so(self):
+        """
+        有so文件，且是全导，可以使用C++来导出op_summary
+        """
+        return (ProfilingScene().is_cpp_parse_enable() and ProfilingScene().is_all_export() and
+                ChipManager().is_chip_v4() and self.command_type == MsProfCommonConstant.SUMMARY)
 
     def _start_view(self, path_table: dict):
         if self.command_type == MsProfCommonConstant.DB:
