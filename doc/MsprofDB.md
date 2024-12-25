@@ -997,6 +997,22 @@ timeline计算公式：
 | 2024/12/17 | 1230首次上线，为MEMCPY_ASYNC类型的task提供数据量、拷贝方向等数据 |
 
 
+### AICORE_FREQ
+
+格式
+
+| 字段名          | 类型      | 索引  | 含义              |
+|--------------|---------|-----|-----------------|
+| deviceId | INTEGER |  | deviceId        |
+| timestampNs     | NUMERIC |     | 频率变化时的本地时间      |
+| freq| INTEGER |    | aicore频率值，单位MHz |
+
+变更记录：
+
+| 日期         | 内容                         |
+|------------|----------------------------|
+| 2024/12/25 | 630已上线，1225补充AICORE_FREQ内容 |
+
 ## 2. pytorch框架数据db格式表结构
 db命名：ascend_pytorch_profiler_{rankId}.db
 （无rankId时：ascend_pytorch_profiler.db）
