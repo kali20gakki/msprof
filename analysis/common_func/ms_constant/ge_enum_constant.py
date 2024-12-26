@@ -44,7 +44,15 @@ class GeDataType(Enum):
     DT_INT2 = 31
     DT_UINT2 = 32
     DT_COMPLEX32 = 33
-    DT_MAX = 34
+    DT_HIFLOAT8 = 34
+    DT_FLOAT8_E5M2 = 35
+    DT_FLOAT8_E4M3FN = 36
+    DT_FLOAT8_E8M0 = 37
+    DT_FLOAT6_E3M2 = 38
+    DT_FLOAT6_E2M3 = 39
+    DT_FLOAT4_E2M1 = 40
+    DT_FLOAT4_E1M2 = 41
+    DT_MAX = 42
     NUMBER_TYPE_BEGIN_ = 229
     BOOL_ = 230
     INT_ = 231
@@ -127,7 +135,8 @@ class GeDataFormat(Enum):
     NYUV_A = 46
     NCL = 47
     FRACTAL_Z_WINO = 48
-    END = 49
+    C1HWC0 = 49
+    END = 50
     MAX = 0xff
     UNKNOWN_ = 200
     DEFAULT_ = 201
