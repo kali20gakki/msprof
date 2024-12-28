@@ -20,6 +20,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ascend_task_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/communication_info_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/memcpy_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/msprof_tx_host_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/task_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/acc_pmu_data.h"
@@ -360,6 +361,17 @@ static std::vector<AscendTaskData> GenerateAscendTaskData()
     data.taskType = "KERNEL_AICORE";
     res.push_back(data);
     data.contextId = UINT32_MAX;
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<MemcpyInfoData> GenerateMemcpyInfoData()
+{
+    std::vector<MemcpyInfoData> res;
+    MemcpyInfoData data;
+    data.globalTaskId = 1;  // globalTaskId 1
+    data.dataSize = 5;  // dataSize 5
+    data.memcpyOperation = 0; // memcpyOperation 0
     res.push_back(data);
     return res;
 }
@@ -1068,4 +1080,29 @@ TEST_F(DBAssemblerUTest, TestRunSaveComputeTaskInfoShouldReturnTrueWhenRunSucces
     MAKE_SHARED0_NO_OPERATION(dataS, std::vector<TaskInfoData>, data);
     dataInventory.Inject<std::vector<TaskInfoData>>(dataS);
     EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveMemcpyInfoDataShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateMemcpyInfoData();
+    std::shared_ptr<std::vector<MemcpyInfoData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<MemcpyInfoData>, data);
+    dataInventory.Inject<std::vector<MemcpyInfoData>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveMemcpyInfoDataShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
+{
+    using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint16_t>>;
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateMemcpyInfoData();
+    std::shared_ptr<std::vector<MemcpyInfoData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<MemcpyInfoData>, data);
+    dataInventory.Inject<std::vector<MemcpyInfoData>>(dataS);
+    MOCKER_CPP(&ProcessedDataFormat::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    MOCKER_CPP(&ProcessedDataFormat::reserve).reset();
 }

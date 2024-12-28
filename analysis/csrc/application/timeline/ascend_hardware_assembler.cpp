@@ -11,6 +11,8 @@
  */
 
 #include "analysis/csrc/application/timeline/ascend_hardware_assembler.h"
+#include <unordered_map>
+#include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/application/timeline/connection_id_pool.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/memcpy_info_data.h"
@@ -19,52 +21,35 @@ namespace Analysis {
 namespace Application {
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Utils;
+using IdPool = Analysis::Association::Credential::IdPool;
 namespace {
-struct MemcpyRecord {
-    uint64_t dataSize;  // memcpy的数据量
-    uint64_t maxSize;  // 每个task能拷贝的最大数据量
-    uint64_t remainSize;  // 还剩下多少数据量需要后面的task去拷贝
-    std::string memcpyDirection;
-};
-using MEMCPY_ASYNC_FORMAT = std::unordered_map<uint64_t, MemcpyRecord>;
+using MEMCPY_INFO_FORMAT = std::unordered_map<uint64_t, MemcpyInfoData>;
 const std::string TASK_TYPE_FFTS_PLUS = "FFTS_PLUS";
 const std::string TASK_TYPE_UNKNOWN = "UNKNOWN";
+const std::vector<std::string> MEMCPY_OPERATIONS {
+    "host to host",
+    "host to device",
+    "device to host",
+    "device to device",
+    "managed memory",
+    "addr device to device",
+    "host to device ex",
+    "device to host ex"
+};
+const std::string OTHER_DIRECTION = "other";
 }
 
-MEMCPY_ASYNC_FORMAT GetMemcpyRecordMap(DataInventory& dataInventory)
+MEMCPY_INFO_FORMAT GenerateMemcpyInfoDataMap(const std::shared_ptr<std::vector<MemcpyInfoData>> &res)
 {
-    MEMCPY_ASYNC_FORMAT memcpyRecordMap;
-    auto memcpyInfoData = dataInventory.GetPtr<std::vector<MemcpyInfoData>>();
-    if (memcpyInfoData == nullptr) {
-        WARN("Can't get memcpyInfo data from dataInventory");
-        return memcpyRecordMap;
-    }
-    for (const auto& data: *memcpyInfoData) {
-        memcpyRecordMap[data.connectionId] = {data.dataSize, data.maxSize, data.dataSize, data.memcpyDirection};
-    }
-    return memcpyRecordMap;
-}
-
-MemcpyRecord GenerateMemcpyRecordByConnectionId(MEMCPY_ASYNC_FORMAT &memcpyRecordMap, const uint64_t &connectionId)
-{
-    MemcpyRecord tmpMemcpyRecord {0, 0, 0, "other"};
-    auto it = memcpyRecordMap.find(connectionId);
-    if (it == memcpyRecordMap.end()) {
-        ERROR("MEMCPY_ASYNC task lost memcpyInfo, connectionId is %", connectionId);
-    } else {
-        if (it->second.remainSize == 0) {
-            ERROR("Redundant memcpyAsync task, connectionId is %", connectionId);
-        } else if (it->second.remainSize <= it->second.maxSize) {
-            tmpMemcpyRecord.dataSize = it->second.remainSize;
-            it->second.remainSize = 0;
-        } else if (it->second.remainSize > it->second.maxSize) {
-            tmpMemcpyRecord.dataSize = it->second.maxSize;
-            it->second.remainSize = it->second.remainSize - tmpMemcpyRecord.dataSize;
+    MEMCPY_INFO_FORMAT memcpyInfoDataMap;
+    if (res != nullptr) {
+        for (const auto &item: *res) {
+            memcpyInfoDataMap[item.globalTaskId] = std::move(item);
         }
-        tmpMemcpyRecord.memcpyDirection = it->second.memcpyDirection;
     }
-    return tmpMemcpyRecord;
+    return memcpyInfoDataMap;
 }
+
 
 AscendHardwareAssembler::AscendHardwareAssembler()
     : JsonAssembler(PROCESS_TASK, {{MSPROF_JSON_FILE, FileCategory::MSPROF}}) {}
@@ -210,17 +195,15 @@ void AscendHardwareAssembler::GenerateMemcpyAsyncTrace(DataInventory &dataInvent
     double bandwidth;
     std::string memcpyDirection;
     bool showFlag = true;
-    // 为了处理Memcpy数据量过大时rutnime track会拆分成多条，而memcpy info只有一条的情况
-    MEMCPY_ASYNC_FORMAT memcpyRecordMap = GetMemcpyRecordMap(dataInventory);
-    if (memcpyRecordMap.empty()) {
+    auto memcpyInfo = dataInventory.GetPtr<std::vector<MemcpyInfoData>>();
+    if (memcpyInfo == nullptr) {
         showFlag = false;
     }
-    auto comp =
-    [](AscendTaskData &data1, AscendTaskData &data2) {
-        return data1.start < data2.start;
-    };
-    std::sort(memcpyAsyncDeviceTasks_.begin(), memcpyAsyncDeviceTasks_.end(), comp);  // 按照时间戳排序
+    MEMCPY_INFO_FORMAT memcpyInfoDataMap = GenerateMemcpyInfoDataMap(memcpyInfo);
     for (const auto &data : memcpyAsyncDeviceTasks_) {
+        dataSize = 0;
+        memcpyDirection = OTHER_DIRECTION;
+        bandwidth = 0.0;
         formatPid = GetDevicePid(pidMap, data.deviceId, profPath, layer.sortIndex);
         int tid = static_cast<int>(GetPhysicStreamId(data.streamId));
         // 存储pid，tid组合的最小集
@@ -228,11 +211,18 @@ void AscendHardwareAssembler::GenerateMemcpyAsyncTrace(DataInventory &dataInvent
         std::shared_ptr<MemcpyAsyncEvent> event;
         // 计算拷贝数据量和带宽
         if (showFlag) {
-            MemcpyRecord tmpMemcpyRecord = GenerateMemcpyRecordByConnectionId(memcpyRecordMap, data.connectionId);
-            dataSize = tmpMemcpyRecord.dataSize;
-            memcpyDirection = tmpMemcpyRecord.memcpyDirection;
+            uint64_t globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(data.deviceId, data.streamId,
+                data.taskId, data.contextId, data.batchId));
+            auto it = memcpyInfoDataMap.find(globalTaskId);
+            if (it != memcpyInfoDataMap.end()) {
+                dataSize = it->second.dataSize;
+                memcpyDirection = it->second.memcpyOperation > VALID_MEMCPY_OPERATION ?
+                    OTHER_DIRECTION : MEMCPY_OPERATIONS[it->second.memcpyOperation];
+            } else {
+                ERROR("MEMCPY_ASYNC task lost memcpyInfo, connectionId is %", data.connectionId);
+            }
             if (data.duration > 0) {
-                bandwidth = static_cast<double>(tmpMemcpyRecord.dataSize) / data.duration;  // GB/s, 全部按照1000计算
+                bandwidth = static_cast<double>(dataSize) / data.duration;  // GB/s, 全部按照1000计算
             }
         }
         MAKE_SHARED_RETURN_VOID(event, MemcpyAsyncEvent, formatPid, tid, data.duration / NS_TO_US,
