@@ -51,7 +51,7 @@ std::unordered_map<uint64_t, int64_t> MemcpyInfoDumper::GetConnectionId()
     std::string runtimeDbPath = Utils::File::PathJoin({dbPath_, runtimeDb.GetDBName()});
     DBRunner hostRuntimeDBRunner(runtimeDbPath);
     if (!CheckPathAndTableExists(runtimeDbPath, hostRuntimeDBRunner, HOST_TASK_TABLE)) {
-        ERROR("% not existed", HOST_TASK_TABLE);
+        WARN("% not existed", HOST_TASK_TABLE);
         return connectionIdMap;
     }
     std::string sql{"SELECT DISTINCT timestamp, connection_id FROM HostTask;"};
@@ -78,11 +78,13 @@ MemcpyInfoData MemcpyInfoDumper::GenerateData(const MemcpyInfos &memcpyInfos)
         return data;
     }
     auto connectionIdMap = GetConnectionId();
-    int64_t connectionId = -1;
+    int64_t connectionId;
     for (auto &memcpyInfo: memcpyInfos) {
         auto it = connectionIdMap.find(memcpyInfo->timeStamp);
         if (it != connectionIdMap.end()) {
             connectionId = it->second;
+        } else {
+            connectionId = -1;
         }
         data.emplace_back(
             TypeData::GetInstance().Get(MSPROF_REPORT_RUNTIME_LEVEL, memcpyInfo->type),

@@ -67,20 +67,18 @@ bool SaveApiData(DataInventory& dataInventory, DBInfo& msprofDB, const std::stri
 
 bool SaveMemcpyInfoData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
 {
-    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, profPath);
     auto memcpyInfoData = dataInventory.GetPtr<std::vector<MemcpyInfoData>>();
     if (memcpyInfoData == nullptr) {
         WARN("MemcpyInfo data not exist.");
         return true;
     }
-    std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t>> res;
+    std::vector<std::tuple<uint64_t, uint64_t, uint16_t>> res;
     if (!Reserve(res, memcpyInfoData->size())) {
-        ERROR("Reserved for api data failed.");
+        ERROR("Reserved for memcpyInfo data failed.");
         return false;
     }
     for (const auto& item : *memcpyInfoData) {
-        uint64_t direction = IdPool::GetInstance().GetUint64Id(item.memcpyDirection);
-        res.emplace_back(item.connectionId, item.dataSize, item.maxSize, direction);
+        res.emplace_back(item.globalTaskId, item.dataSize, item.memcpyOperation);
     }
     return SaveData(res, TABLE_NAME_MEMCPY_INFO, msprofDB);
 }

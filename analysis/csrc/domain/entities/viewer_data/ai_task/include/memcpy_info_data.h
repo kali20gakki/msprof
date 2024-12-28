@@ -18,11 +18,12 @@
 
 namespace Analysis {
 namespace Domain {
+const std::string MEMCPY_ASYNC = "MEMCPY_ASYNC";
+const uint16_t VALID_MEMCPY_OPERATION = 7;
 struct MemcpyInfoData {
+    uint64_t globalTaskId = UINT64_MAX;
     uint64_t dataSize = UINT64_MAX;
-    uint64_t maxSize = UINT64_MAX;
-    uint64_t connectionId = UINT64_MAX;
-    std::string memcpyDirection;
+    uint16_t memcpyOperation = UINT16_MAX;
 };
 }
 }

@@ -16,7 +16,6 @@
 #include "analysis/csrc/domain/data_process/ai_task/compute_task_info_processor.h"
 #include "analysis/csrc/domain/data_process/ai_task/kfc_comm_processor.h"
 #include "analysis/csrc/domain/data_process/ai_task/kfc_task_processor.h"
-#include "analysis/csrc/domain/data_process/ai_task/memcpy_info_processor.h"
 #include "analysis/csrc/domain/data_process/ai_task/msproftx_device_processor.h"
 #include "analysis/csrc/domain/data_process/ai_task/msproftx_host_processor.h"
 #include "analysis/csrc/domain/data_process/ai_task/step_trace_processor.h"
@@ -98,9 +97,7 @@ std::unordered_map<std::string, ProcessorCreator> DataProcessorFactory::processo
     {PROCESSOR_MC2_COMM_INFO, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
         MAKE_SHARED_RETURN_VOID(processor, Mc2CommInfoProcessor, profPath);}},
     {PROCESSOR_PMU, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
-        MAKE_SHARED_RETURN_VOID(processor, MetricProcessor, profPath);}},
-    {PROCESSOR_NAME_MEMCPY_INFO, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
-        MAKE_SHARED_RETURN_VOID(processor, MemcpyInfoProcessor, profPath);}}
+        MAKE_SHARED_RETURN_VOID(processor, MetricProcessor, profPath);}}
 };
 
 std::shared_ptr<DataProcessor> DataProcessorFactory::GetDataProcessByName(const std::string &profPath,

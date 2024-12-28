@@ -144,13 +144,15 @@ static std::vector<MemcpyInfoData> GenerateMemcpyInfoData()
 {
     std::vector<MemcpyInfoData> res;
     MemcpyInfoData data;
-    data.dataSize = 83886080;  // dataSize 83886080
-    data.maxSize = 67108864;  // maxSize 67108864
-    data.connectionId = 181;  // connectionId 181
-    data.memcpyDirection = "host to device";
+    data.globalTaskId = 0;  // globalTaskId 0
+    data.dataSize = 67108864;  // dataSize 67108864
+    data.memcpyOperation = 1;
     res.push_back(data);
+    data.globalTaskId = 1;  // globalTaskId 1
+    data.dataSize = 16777216;  // dataSize 16777216
+    res.push_back(data);
+    data.globalTaskId = 2;  // globalTaskId 2
     data.dataSize = 35651584;  // dataSize 35651584
-    data.connectionId = 189;  // connectionId 189
     res.push_back(data);
     return res;
 }
