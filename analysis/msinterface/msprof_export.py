@@ -740,12 +740,12 @@ class ExportCommand:
         ProfilingScene().set_mode(ExportMode.ALL_EXPORT)
         host_path = path_table.get(StrConstant.HOST_PATH)
         self._view_data(host_path)
+        # device
         # viewer timeline
-        if self._check_export_timeline_with_so(path_table):
+        ProfilingScene().set_mode(mode)
+        if self._check_export_timeline_with_so(path_table) and ProfilingScene().is_all_export():
             export_timeline(path_table.get("collection_path"), self.reports_path)
             return
-        # device
-        ProfilingScene().set_mode(mode)
         # viewer op_summary
         if self._check_export_op_summary_with_so():
             export_op_summary(path_table.get("collection_path"))
