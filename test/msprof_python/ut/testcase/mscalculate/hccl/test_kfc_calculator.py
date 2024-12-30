@@ -52,16 +52,16 @@ class TestKfcCalculator(unittest.TestCase):
         kfc_op_data = [
             # hccl aicpu kernel, 异步
             AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 19, 0, 4294967295, 0, 38140478700000,
-                                                 100000, "KERNEL_AICPU", "AI_CPU", 0, "allgatherAicpuKernel"),
+                                                 100000, "KERNEL_AICPU", "AI_CPU", 0, "allgatherAicpuKernel", -1),
             # mc2 aicpu kernel, 同步
             AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 19, 2, 4294967295, 0, 38140478900000,
-                                                 200000, "KERNEL_AICPU", "AI_CPU", 0, "MatmulAllReduceAicpu"),
+                                                 200000, "KERNEL_AICPU", "AI_CPU", 0, "MatmulAllReduceAicpu", -1),
         ]
         kfc_task_data = [
             AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 52, 0, 4294967295, 0, 38140478800000,  # stream 52,hccl aicpu主流
-                                                 1000, "UNKNOWN", "NOTIFY_WAIT_SQE", 0, ""),
+                                                 1000, "UNKNOWN", "NOTIFY_WAIT_SQE", 0, "", -1),
             AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 52, 1, 4294967295, 0, 38140478802000,
-                                                 1000, "UNKNOWN", "SDMA_SQE", 0, ""),
+                                                 1000, "UNKNOWN", "SDMA_SQE", 0, "", -1),
             # 发生重执行, task将不被执行 ===============================================================================
             # AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 52, 2, 4294967295, 0, 38140478803000,
             #                                      1000, "UNKNOWN", "NOTIFY_RECORD_SQE", 0, ""),
@@ -76,25 +76,25 @@ class TestKfcCalculator(unittest.TestCase):
             # =======================================================================================
             # 开始重执行，上报重执行flip
             AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 52, 5, 4294967295, 0, 38140478860000,
-                                                 1000, "UNKNOWN", "SDMA_SQE", 0, ""),
+                                                 1000, "UNKNOWN", "SDMA_SQE", 0, "", -1),
             AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 52, 1, 4294967295, 0, 38140478870000,  # task id 翻转
-                                                 1000, "UNKNOWN", "SDMA_SQE", 0, ""),
+                                                 1000, "UNKNOWN", "SDMA_SQE", 0, "", -1),
             AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 52, 2, 4294967295, 0, 38140478880000,
-                                                 1000, "UNKNOWN", "NOTIFY_RECORD_SQE", 0, ""),
+                                                 1000, "UNKNOWN", "NOTIFY_RECORD_SQE", 0, "", -1),
 
             AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 53, 0, 4294967295, 0, 38140478830000,  # stream 53,hccl aicpu从流
-                                                 500, "UNKNOWN", "NOTIFY_WAIT_SQE", 0, ""),
+                                                 500, "UNKNOWN", "NOTIFY_WAIT_SQE", 0, "", -1),
             AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 53, 1, 4294967295, 0, 38140478840010,
-                                                 500, "UNKNOWN", "SDMA_SQE", 0, ""),
+                                                 500, "UNKNOWN", "SDMA_SQE", 0, "", -1),
             AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 53, 2, 4294967295, 0, 38140478870010,
-                                                 500, "UNKNOWN", "NOTIFY_RECORD_SQE", 0, ""),
+                                                 500, "UNKNOWN", "NOTIFY_RECORD_SQE", 0, "", -1),
 
             AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 54, 0, 4294967295, 0, 38140478900010,  # stream 54, mc2主流
-                                                 500, "UNKNOWN", "C_CORE_SQE", 0, ""),
+                                                 500, "UNKNOWN", "C_CORE_SQE", 0, "", -1),
             AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 54, 1, 4294967295, 0, 38140478920010,
-                                                 500, "UNKNOWN", "SDMA_SQE", 0, ""),
+                                                 500, "UNKNOWN", "SDMA_SQE", 0, "", -1),
             AscendTaskViewModel.ASCEND_TASK_TYPE(0, 0, 54, 2, 4294967295, 0, 38140478940010,
-                                                 500, "UNKNOWN", "NOTIFY_WAIT", 0, ""),
+                                                 500, "UNKNOWN", "NOTIFY_WAIT", 0, "", -1),
         ]
         master_stream_hccl_task = [
             (38140478700010, 19, 0, 52, 0, 0, 0, 0),  # batch_id = 0
@@ -124,41 +124,41 @@ class TestKfcCalculator(unittest.TestCase):
         ]
         hccl_info_data = [
             (38140478701100, "NOTIFY_WAIT_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 0, 0, 0, 0, 0, 'NA'),
+             266, 0, 0, 0, 52, 0, 0, 0, 0, 0, 'NA', -1),
             (38140478702000, "SDMA_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 1, 0, 0, 0, 0, 'NA'),
+             266, 0, 0, 0, 52, 1, 0, 0, 0, 0, 'NA', -1),
             (38140478703300, "NOTIFY_RECORD_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 2, 0, 0, 0, 0, 'NA'),
+             266, 0, 0, 0, 52, 2, 0, 0, 0, 0, 'NA', -1),
             # taskid翻转
             (38140478705000, "NOTIFY_WAIT_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 1, 0, 0, 0, 0, 'NA'),
+             266, 0, 0, 0, 52, 1, 0, 0, 0, 0, 'NA', -1),
             (38140478706000, "SDMA_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 2, 0, 0, 0, 0, 'NA'),
+             266, 0, 0, 0, 52, 2, 0, 0, 0, 0, 'NA', -1),
             # taskid翻转
             (38140478707200, "SDMA_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 1, 0, 0, 0, 0, 'NA'),
+             266, 0, 0, 0, 52, 1, 0, 0, 0, 0, 'NA', -1),
             (38140478708000, "NOTIFY_RECORD_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 2, 0, 0, 0, 0, 'NA'),
+             266, 0, 0, 0, 52, 2, 0, 0, 0, 0, 'NA', -1),
             (38140478711000, "SDMA_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 5, 0, 0, 0, 0, 'NA'),
+             266, 0, 0, 0, 52, 5, 0, 0, 0, 0, 'NA', -1),
             (38140478712100, "SDMA_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 1, 0, 0, 0, 0, 'NA'),
+             266, 0, 0, 0, 52, 1, 0, 0, 0, 0, 'NA', -1),
             (38140478712200, "NOTIFY_RECORD_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 52, 2, 0, 0, 0, 0, 'NA'),
+             266, 0, 0, 0, 52, 2, 0, 0, 0, 0, 'NA', -1),
 
             (38140478702000, "NOTIFY_RECORD_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 53, 0, 0, 0, 0, 0, 'NA'),
+             266, 0, 0, 0, 53, 0, 0, 0, 0, 0, 'NA', -1),
             (38140478703000, "SDMA_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 53, 1, 0, 0, 0, 0, 'NA'),
+             266, 0, 0, 0, 53, 1, 0, 0, 0, 0, 'NA', -1),
             (38140478704000, "NOTIFY_RECORD_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 53, 2, 0, 0, 0, 0, 'NA'),
+             266, 0, 0, 0, 53, 2, 0, 0, 0, 0, 'NA', -1),
 
             (38140478901000, "C_CORE_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 54, 0, 0, 0, 0, 0, 'NA'),
+             266, 0, 0, 0, 54, 0, 0, 0, 0, 0, 'NA', -1),
             (38140478922000, "SDMA_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 54, 1, 0, 0, 0, 0, 'NA'),
+             266, 0, 0, 0, 54, 1, 0, 0, 0, 0, 'NA', -1),
             (38140478941000, "NOTIFY_WAIT_SQE", 0, group_name, 0, 0, 8, 0, 0, 4294967295, 2, 0, 0, 0.1, 0, 0, 1, 0,
-             266, 0, 0, 0, 54, 2, 0, 0, 0, 0, 'NA'),
+             266, 0, 0, 0, 54, 2, 0, 0, 0, 0, 'NA', -1),
         ]
         hccl_op_info_data = [
             (38140478600000, 0, 0, 0, 90, 1, group_name, 19, 0, 8, 0),
@@ -188,4 +188,4 @@ class TestKfcCalculator(unittest.TestCase):
 
     def test_make_default_kfc_info_should_return_len_28_named_tuple(self: any) -> None:
         default_kfc_info = KfcCalculator.make_default_kfc_info()
-        self.assertEqual(29, len(default_kfc_info))
+        self.assertEqual(30, len(default_kfc_info))

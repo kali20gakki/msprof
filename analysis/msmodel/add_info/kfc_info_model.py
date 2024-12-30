@@ -37,7 +37,7 @@ class KfcInfoViewModel(ViewModel):
                     "rank_size", "work_flow_mode", "plane_id", "context_id", "notify_id", "stage", "role",
                     "duration_estimated", "src_addr", "dst_addr", "size", "op_type", "data_type",
                     "link_type", "transport_type", "rdma_type", "stream_id", "task_id", "batch_id",
-                    "start_time", "duration", "bandwidth", "device_task_type"]),
+                    "start_time", "duration", "bandwidth", "device_task_type", "ts_virtual_batch_id"]),
         {})
     KFC_COMM_TURN_TYPE = CustomizedNamedtupleFactory.enhance_namedtuple(
         namedtuple("KfcCommTurn",
@@ -83,8 +83,8 @@ class KfcInfoViewModel(ViewModel):
         sql = "select timestamp, op_name, ccl_tag, group_name, local_rank, remote_rank, rank_size, work_flow_mode, " \
               "plane_id, context_id, notify_id, stage, role, duration_estimated, src_addr, dst_addr, size, op_type, " \
               "data_type, link_type, transport_type, rdma_type, stream_id, task_id, " \
-              "0 as batch_id, 0 as start_time, 0 as duration, 0 as bandwidth, 'N/A' as device_task_type " \
-              "from {}".format(DBNameConstant.TABLE_KFC_INFO)
+              "0 as batch_id, 0 as start_time, 0 as duration, 0 as bandwidth, 'N/A' as device_task_type, " \
+              "-1 as ts_virtual_batch_id from {}".format(DBNameConstant.TABLE_KFC_INFO)
         kfc_info_data = self.get_sql_data(sql)
         return [self.KFC_HCCL_INFO_TYPE(*data) for data in kfc_info_data]
 

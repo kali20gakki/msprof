@@ -40,7 +40,8 @@ class AscendTaskViewModel(ViewModel):
     ASCEND_TASK_TYPE = CustomizedNamedtupleFactory.enhance_namedtuple(
         namedtuple("AscendTask",
                    ["model_id", "index_id", "stream_id", "task_id", "context_id", "batch_id", "timestamp",
-                    "duration", "host_task_type", "device_task_type", "connection_id", "op_name"]),
+                    "duration", "host_task_type", "device_task_type", "connection_id", "op_name",
+                    "ts_virtual_batch_id"]),
         {})
 
     def __init__(self: any, result_dir: str, table_list: list) -> None:
@@ -56,8 +57,8 @@ class AscendTaskViewModel(ViewModel):
             return []
         stream_id_condition = "b.stream_id in ({})".format(",".join(map(str, stream_ids)))
         sql = "SELECT b.model_id, b.index_id, b.stream_id, b.task_id, b.context_id, b.batch_id, b.start_time, " \
-              "b.duration, b.host_task_type, b.device_task_type, b.connection_id, a.op_name as op_name from {0} as a " \
-              "inner join {1} as b " \
+              "b.duration, b.host_task_type, b.device_task_type, b.connection_id, a.op_name as op_name, " \
+              "-1 as ts_virtual_batch_id from {0} as a inner join {1} as b " \
               "on a.stream_id = b.stream_id " \
               "and a.task_id = b.task_id " \
               "and a.batch_id = b.batch_id " \
@@ -77,7 +78,7 @@ class AscendTaskViewModel(ViewModel):
             return []
         stream_id_condition = "stream_id in ({})".format(",".join(map(str, stream_ids)))
         sql = "SELECT model_id, index_id, stream_id, task_id, context_id, batch_id, start_time, duration, " \
-              "host_task_type, device_task_type, connection_id, 'N/A' as op_name " \
+              "host_task_type, device_task_type, connection_id, 'N/A' as op_name, batch_id as ts_virtual_batch_id " \
               "from {0} where {stream_id_condition} " \
             .format(DBNameConstant.TABLE_ASCEND_TASK, stream_id_condition=stream_id_condition)
         ascend_task_data = DBManager.fetch_all_data(self.cur, sql)
