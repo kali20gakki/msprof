@@ -55,7 +55,7 @@ class KfcCalculator(ICalculator, MsMultiProcess):
     def make_default_kfc_info() -> KfcInfoViewModel.KFC_HCCL_INFO_TYPE:
         default_kfc_info = KfcInfoViewModel.KFC_HCCL_INFO_TYPE(
             0, "N/A", 'N/A', 'N/A', 4294967295, 4294967295, -1, 0, -1, 4294967295, 'N/A', 'N/A', 'N/A', -1,
-            'N/A', 'N/A', -1, 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', -1, -1, 0, 0, 0, 0, 'N/A'
+            'N/A', 'N/A', -1, 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', -1, -1, 0, 0, 0, 0, 'N/A', -1
         )
         return default_kfc_info
 
@@ -321,7 +321,8 @@ class KfcCalculator(ICalculator, MsMultiProcess):
                 kfc_info_data[idx] = kfc_info_data[idx].replace(start_time=data.timestamp, duration=data.duration,
                                                                 stream_id=data.stream_id, task_id=data.task_id,
                                                                 context_id=data.context_id, batch_id=data.batch_id,
-                                                                device_task_type=data.device_task_type)
+                                                                device_task_type=data.device_task_type,
+                                                                ts_virtual_batch_id=data.ts_virtual_batch_id)
             return kfc_info_data
         task_time = {}
         for data in kfc_task:
@@ -333,7 +334,8 @@ class KfcCalculator(ICalculator, MsMultiProcess):
             if not task_data:
                 continue
             kfc_info_data[idx] = data.replace(start_time=task_data.timestamp, duration=task_data.duration,
-                                              device_task_type=task_data.device_task_type)
+                                              device_task_type=task_data.device_task_type,
+                                              ts_virtual_batch_id=task_data.ts_virtual_batch_id)
         HcclCalculator.update_bandwidth(kfc_info_data)
         return kfc_info_data
 
@@ -384,7 +386,7 @@ class KfcCalculator(ICalculator, MsMultiProcess):
                         data.stream_id, data.task_id, data.duration_estimated, data.local_rank, data.remote_rank,
                         data.transport_type, data.size, data.data_type, data.link_type, data.bandwidth, data.context_id,
                         # kfc_op[6]是connection_id
-                        data.notify_id, data.batch_id, data.rdma_type, kfc_op[6], source
+                        data.notify_id, data.ts_virtual_batch_id, data.rdma_type, kfc_op[6], source
                     ]
                     match_num += 1
                     idx += 1
