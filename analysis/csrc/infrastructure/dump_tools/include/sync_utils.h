@@ -14,10 +14,6 @@
 #define ANALYSIS_INFRASTRUCTURE_SYNC_UTILS_H
 
 #include <string>
-#include <iomanip>
-#include <ctime>
-#include <sstream>
-#include <chrono>
 #include <vector>
 #include <algorithm>
 #include <unordered_map>
@@ -32,15 +28,8 @@ enum class FileCategory {
     STEP,
     DEFAULT = 3
 };
-const static std::string timestampStr = []() -> std::string {
-    auto now = std::chrono::system_clock::now();
-    auto time = std::chrono::system_clock::to_time_t(now);
-    auto tm = std::localtime(&time);
 
-    std::ostringstream oss;
-    oss << std::put_time(tm, "%Y%m%d%H%M%S");
-    return oss.str();
-}();
+const std::string& GetTimeStampStr();
 
 struct BaseMutex {
     mutable std::mutex fileMutex_;
