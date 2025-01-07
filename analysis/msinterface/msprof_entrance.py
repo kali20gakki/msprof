@@ -6,7 +6,7 @@ import argparse
 import os
 import sys
 
-from common_func.common import call_sys_exit, print_info
+from common_func.common import call_sys_exit, print_info, is_linux
 from common_func.common import error
 from common_func.file_manager import check_parent_dir_invalid
 from common_func.msprof_common import check_path_valid, get_all_subdir, MsProfCommonConstant
@@ -107,7 +107,7 @@ class MsprofEntrance:
                 error(self.FILE_NAME, err)
             call_sys_exit(err.code)
         real_path = os.path.realpath(args.collection_path)
-        if check_parent_dir_invalid(get_all_subdir(real_path)):
+        if is_linux() and check_parent_dir_invalid(get_all_subdir(real_path)):
             error(self.FILE_NAME, "Please ensure subdir under '%s' can't be write by others" % real_path)
             call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
         path_len = len(real_path)
