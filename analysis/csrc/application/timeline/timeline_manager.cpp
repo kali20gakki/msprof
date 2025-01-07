@@ -87,7 +87,7 @@ bool TimelineManager::ProcessTimeLine(DataInventory& dataInventory, const std::v
 void TimelineManager::WriteFile(const std::string &filePrefix, FileCategory category)
 {
     auto tempFile = filePrefix;
-    tempFile.append("_").append(timestampStr).append(JSON_SUFFIX);
+    tempFile.append("_").append(GetTimeStampStr()).append(JSON_SUFFIX);
     auto filePath = File::PathJoin({outputPath_, tempFile});
     DumpTool::WriteToFile(filePath, PREFIX_CONTEXT.c_str(), PREFIX_CONTEXT.size(), category);
     fileType_.emplace(category, filePath);

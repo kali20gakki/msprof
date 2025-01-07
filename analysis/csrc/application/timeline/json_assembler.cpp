@@ -66,7 +66,7 @@ bool JsonAssembler::FlushToFile(JsonWriter& ostream, const std::string& profPath
     bool flag = true;
     for (auto &it : fileMap_) {
         auto fileName = it.first;
-        fileName.append("_").append(timestampStr).append(JSON_SUFFIX);
+        fileName.append("_").append(GetTimeStampStr()).append(JSON_SUFFIX);
         filePath = File::PathJoin({profPath, OUTPUT_PATH, fileName});
         flag = DumpTool::WriteToFile(filePath, ostream.GetString() + 1, ostream.GetSize() - FILE_CONTENT_SUFFIX,
                                      it.second) && flag;
