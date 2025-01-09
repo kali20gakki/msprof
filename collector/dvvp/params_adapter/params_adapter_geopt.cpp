@@ -157,7 +157,6 @@ void ParamsAdapterGeOpt::GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConf
     paramContainer_[INPUT_CFG_COM_RUNTIME_API] = geCfg->runtimeApi;
     paramContainer_[INPUT_CFG_COM_AIC_METRICS] = geCfg->aicMetrics;
     paramContainer_[INPUT_CFG_COM_AIV_METRICS] = geCfg->aivMetrics;
-    paramContainer_[INPUT_CFG_COM_POWER] = geCfg->power;
     paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = (geCfg->sysHardwareMemFreq <= 0) ? "" :
         std::to_string(geCfg->sysHardwareMemFreq);
     paramContainer_[INPUT_CFG_COM_LLC_MODE] = geCfg->llcProfiling;
