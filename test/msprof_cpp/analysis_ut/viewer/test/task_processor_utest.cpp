@@ -32,7 +32,7 @@ const uint64_t PID = 233;
 const uint64_t START_TIME_NS = 1700902984041176000;
 const uint64_t END_TIME_NS = 1700902986330096000;
 const uint64_t BASE_TIME_NS = 8719641548578;
-const uint16_t OP_NUM = 19;
+const uint16_t OP_NUM = 16;
 const uint16_t TX_OP_NUM = 6;
 const uint16_t STRING_NUM = 8;
 const uint16_t TX_STRING_NUM = 1;
@@ -46,23 +46,14 @@ const std::string PROF_PATH_A = File::PathJoin({TASK_PATH, "./PROF_000001_202311
 const std::string PROF_PATH_B = File::PathJoin({TASK_PATH, "./PROF_000001_20231125090304037_012333MBJNQLKJ"});
 const std::set<std::string> PROF_PATHS = {PROF_PATH_A, PROF_PATH_B};
 const std::string TABLE_NAME = "AscendTask";
-const std::string MEMCPY_INFO_TABLE_NAME = "MemcpyInfo";
 const std::string STEP_TRACE_TABLE_NAME = "StepTrace";
 const std::string TARGET_TABLE_NAME = "TASK";
 
-// struct_type, level, thread_id, data_len, timestamp, data_size, memcpy_direction, max_size, connection_id
-using MemcpyInfoFormat = std::vector<std::tuple<std::string, std::string, uint32_t, uint32_t, uint64_t,
-                                       uint64_t, uint16_t, uint64_t, int64_t>>;
 using AscendTaskFormat = std::vector<std::tuple<uint32_t, int32_t, int32_t, uint32_t, uint32_t, uint32_t, double,
                                                   double, std::string, std::string, int64_t>>;
 using MsprofTxDeviceTaskFormat = std::vector<std::tuple<uint32_t, uint32_t, double, uint32_t, uint32_t, uint32_t>>;
 using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, int64_t, uint64_t,
                                                    uint64_t, uint32_t, uint32_t, int32_t, uint32_t, uint32_t>>;
-
-const MemcpyInfoFormat MEMCPY_INFO_DATA = {
-    {"memcpy_info", "runtime", 1534794, 24, 22101334093972, 8, 1, 67108864, 37},
-    {"memcpy_info", "runtime", 1534794, 24, 22101334108563, 83886080, 1, 67108864, 181}
-};
 
 AscendTaskFormat DATA_A{{4294967295, -1, 37, 1, 3, 0, 8719911184665.1, 680.013671875,
                            "UNKNOWN", "MIX_AIC", 14991},
@@ -73,14 +64,7 @@ AscendTaskFormat DATA_A{{4294967295, -1, 37, 1, 3, 0, 8719911184665.1, 680.01367
                           {4294967295, -1, 37, 4, 5, 0, 8719911184665.1, 680.013671875,
                            "UNKNOWN", "88", 14991},
                           {4294967295, -1, 37, 5, 7, 0, 8719911184965.11, 680.013671875,
-                           "KERNEL_AICORE", "AI_CORE", 14991},
-                          {4294967295, -1, 37, 6, 4294967295, 0, 8719911185265.1, 680.013671875,
-                           "MEMCPY_ASYNC", "PCIE_DMA_SQE", 37},
-                          {4294967295, -1, 37, 7, 4294967295, 0, 8719911185565.1, 680.013671875,
-                           "MEMCPY_ASYNC", "PCIE_DMA_SQE", 181},
-                          {4294967295, -1, 37, 8, 4294967295, 0, 8719911186565.1, 680.013671875,
-                           "MEMCPY_ASYNC", "PCIE_DMA_SQE", 181},
-                           };
+                           "KERNEL_AICORE", "AI_CORE", 14991}};
 MsprofTxDeviceTaskFormat TX_DATA_A{{0, 4294967295, 26248923229230, 2, 10, 11},
                                    {1, 4294967295, 26248923229240, 2, 11, 11},
                                    {2, 4294967295, 26248923229250, 2, 12, 11}};
@@ -110,8 +94,6 @@ protected:
         EXPECT_TRUE(File::CreateDir(TASK_PATH));
         EXPECT_TRUE(File::CreateDir(PROF_PATH_A));
         EXPECT_TRUE(File::CreateDir(PROF_PATH_B));
-        EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_A, HOST})));
-        EXPECT_TRUE(CreateRuntimeDB(File::PathJoin({PROF_PATH_A, HOST, SQLITE}), MEMCPY_INFO_DATA));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX})));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX})));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE_SUFFIX})));
@@ -157,18 +139,6 @@ protected:
         auto cols = database->GetTableCols(STEP_TRACE_TABLE_NAME);
         dbRunner->CreateTable(STEP_TRACE_TABLE_NAME, cols);
         dbRunner->InsertData(STEP_TRACE_TABLE_NAME, data);
-    }
-
-    static bool CreateRuntimeDB(const std::string& sqlitePath, MemcpyInfoFormat data)
-    {
-        EXPECT_TRUE(File::CreateDir(sqlitePath));
-        std::shared_ptr<RuntimeDB> database;
-        MAKE_SHARED0_RETURN_VALUE(database, RuntimeDB, false);
-        std::shared_ptr<DBRunner> dbRunner;
-        MAKE_SHARED_RETURN_VALUE(dbRunner, DBRunner, false, File::PathJoin({sqlitePath, database->GetDBName()}));
-        EXPECT_TRUE(dbRunner->CreateTable(MEMCPY_INFO_TABLE_NAME, database->GetTableCols(MEMCPY_INFO_TABLE_NAME)));
-        EXPECT_TRUE(dbRunner->InsertData(MEMCPY_INFO_TABLE_NAME, data));
-        return true;
     }
 };
 

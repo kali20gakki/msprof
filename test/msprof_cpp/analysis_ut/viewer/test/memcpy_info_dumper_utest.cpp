@@ -16,58 +16,107 @@
 
 using namespace Analysis::Utils;
 using namespace Analysis::Viewer::Database::Drafts;
-using namespace Analysis::Viewer::Database;
 using namespace Analysis::Entities;
 using ApiData = std::vector<std::shared_ptr<Event>>;
-const std::string TEST_DB_FILE_PATH = "./sqlite";
+using HostTaskData = std::vector<
+        std::tuple<
+            uint32_t,
+            int32_t,
+            uint32_t,
+            uint32_t,
+            uint32_t,
+            uint32_t,
+            std::string,
+            uint32_t,
+            uint64_t,
+            int64_t,
+            uint32_t>>;
+const std::string MEMCPY_INFO_DIR = "./memcpy_info";
+const std::string PROF0 = File::PathJoin({MEMCPY_INFO_DIR, "PROF_0"});
+const std::string HOST_PATH = File::PathJoin({PROF0, "host"});
+const std::string SQLITE_PATH = File::PathJoin({HOST_PATH, "sqlite"});
+const std::string HOST_TASK_TABLE_NAME = "HostTask";
 const uint32_t RUNTIME_LEVEL_NUMBER = 5000;
+const HostTaskData DATA_A{{4294967295, -1, 30, 4, 4294967295, 0, "MEMCPY_ASYNC", 0, 52851917869135, 2000, 1},
+                          {4294967295, -1, 30, 3, 4294967295, 0, "MEMCPY_ASYNC", 0, 52851917869135, 2000, 1},
+                          {4294967295, -1, 30, 10, 4294967295, 0, "MEMCPY_ASYNC", 0, 52851917869135, 2000, 2}
+};
 class MemcpyInfoDumperUtest : public testing::Test {
 protected:
     virtual void SetUp()
     {
-        File::CreateDir(TEST_DB_FILE_PATH);
+        EXPECT_TRUE(File::CreateDir(MEMCPY_INFO_DIR));
+        EXPECT_TRUE(File::CreateDir(PROF0));
+        EXPECT_TRUE(File::CreateDir(HOST_PATH));
+        EXPECT_TRUE(File::CreateDir(SQLITE_PATH));
+        EXPECT_TRUE(CreateRuntimeDB(SQLITE_PATH, DATA_A));
     }
 
     virtual void TearDown()
     {
         GlobalMockObject::verify();
-        File::RemoveDir(TEST_DB_FILE_PATH, 0);
+        File::RemoveDir(MEMCPY_INFO_DIR, 0);
+    }
+
+    static bool CreateRuntimeDB(const std::string &sqlitePath, const HostTaskData &data)
+    {
+        std::shared_ptr<RuntimeDB> database;
+        MAKE_SHARED0_RETURN_VALUE(database, RuntimeDB, false);
+        std::shared_ptr<DBRunner> dbRunner;
+        MAKE_SHARED_RETURN_VALUE(dbRunner, DBRunner, false, File::PathJoin({sqlitePath, database->GetDBName()}));
+        auto cols = database->GetTableCols(HOST_TASK_TABLE_NAME);
+        EXPECT_TRUE(dbRunner->CreateTable(HOST_TASK_TABLE_NAME, cols));
+        EXPECT_TRUE(dbRunner->InsertData(HOST_TASK_TABLE_NAME, data));
+        return true;
     }
 };
 
 TEST_F(MemcpyInfoDumperUtest, TestMemcpyInfoDumperShouldInsertDataCorrectly)
 {
-    MemcpyInfoDumper memcpyInfoDumper(".");
-    auto info = std::make_shared<MsprofCompactInfo>();
-    info->level = RUNTIME_LEVEL_NUMBER;
-    info->threadId = 1; // threadId 1
-    info->timeStamp = 1;
-    info->dataLen = 18;  // dataLen 18
-    info->data.memcpyInfo.dataSize = 2048;  // dataSize 2048
-    info->data.memcpyInfo.memcpyDirection = 0;
-    info->data.memcpyInfo.maxSize = 4096;  // maxSize 4096
+    MemcpyInfoDumper memcpyInfoDumper(HOST_PATH);
+    auto info1 = std::make_shared<MsprofCompactInfo>();
+    info1->level = RUNTIME_LEVEL_NUMBER;
+    info1->threadId = 1; // threadId 1
+    info1->timeStamp = 52851917869135;  // 时间戳 52851917869135
+    info1->dataLen = 24;  // dataLen 24
+    info1->data.memcpyInfo.dataSize = 83886080;  // dataSize 83886080
+    info1->data.memcpyInfo.memcpyDirection = 0;
+    info1->data.memcpyInfo.maxSize = 67108864;  // maxSize 67108864
+    auto info2 = std::make_shared<MsprofCompactInfo>();
+    info2->level = RUNTIME_LEVEL_NUMBER;
+    info2->threadId = 2;  // threadId 2
+    info2->timeStamp = 52851917869135;  // 时间戳 52851917869135
+    info2->dataLen = 24;  // dataLen 24
+    info2->data.memcpyInfo.dataSize = 22282240;  // dataSize 22282240
+    info2->data.memcpyInfo.memcpyDirection = 0;
+    info2->data.memcpyInfo.maxSize = 67108864;  // maxSize 67108864
     std::vector<std::shared_ptr<MsprofCompactInfo>> memcpyInfos;
-    memcpyInfos.push_back(info);
+    memcpyInfos.push_back(info1);
+    memcpyInfos.push_back(info2);
     auto res = memcpyInfoDumper.DumpData(memcpyInfos);
     EXPECT_TRUE(res);
     RuntimeDB runtimeDB;
-    std::string runtimeDBPath = Utils::File::PathJoin({TEST_DB_FILE_PATH, runtimeDB.GetDBName()});
+    std::string runtimeDBPath = Utils::File::PathJoin({SQLITE_PATH, runtimeDB.GetDBName()});
     DBRunner runtimeDBRunner(runtimeDBPath);
     MemcpyInfoData data;
     runtimeDBRunner.QueryData("select * from MemcpyInfo", data);
-    EXPECT_EQ(std::get<1>(data[0]), "runtime");
-    EXPECT_EQ(std::get<2>(data[0]), 1);  // 第2列 2
-    EXPECT_EQ(std::get<3>(data[0]), 18);  // 第3列 3, 18
-    EXPECT_EQ(std::get<4>(data[0]), 1);  // 第4列 4
-    EXPECT_EQ(std::get<5>(data[0]), 2048);  // 第5列 5, 2048
-    EXPECT_EQ(std::get<6>(data[0]), 0);  // 第5列 6
-    EXPECT_EQ(std::get<7>(data[0]), 4096);  // 第5列 7, 4096
+    ASSERT_EQ(data.size(), 3);  // 表里面生成数据的数量 3
+    EXPECT_EQ(std::get<0>(data[0]), 30);  // streamId: 30
+    EXPECT_EQ(std::get<1>(data[0]), 0);  // 第1列
+    EXPECT_EQ(std::get<2>(data[0]), 3);  // 第2列, taskid是3
+    EXPECT_EQ(std::get<4>(data[0]), 0);  // 第4列
+    EXPECT_EQ(std::get<5>(data[0]), 67108864);  // 第5列, 67108864
+    EXPECT_EQ(std::get<6>(data[0]), 0);  // 第6列
+    EXPECT_EQ(std::get<2>(data[1]), 4);  // 第2列, taskid是4
+    EXPECT_EQ(std::get<5>(data[1]), 16777216);  // 第5列, 16777216
+    EXPECT_EQ(std::get<2>(data[2]), 10);  // taskid是10
+    EXPECT_EQ(std::get<5>(data[2]), 22282240);  // 第5列, 22282240
 }
 
 TEST_F(MemcpyInfoDumperUtest, TestMemcpyInfoDumperShouldReturnFalseWhenDBNotCreated)
 {
     MOCKER_CPP(&DBRunner::CreateTable).stubs().will(returnValue(false));
-    MemcpyInfoDumper memcpyInfoDumper(".");
+    MemcpyInfoDumper memcpyInfoDumper(HOST_PATH);
     auto info = std::make_shared<MsprofCompactInfo>();
     std::vector<std::shared_ptr<MsprofCompactInfo>> memcpyInfos;
     memcpyInfos.push_back(info);
@@ -78,7 +127,7 @@ TEST_F(MemcpyInfoDumperUtest, TestMemcpyInfoDumperShouldReturnFalseWhenDBNotCrea
 TEST_F(MemcpyInfoDumperUtest, TestMemcpyInfoDumperShouldReturnFalseWhenCannotInsertTable)
 {
     MOCKER_CPP(&DBRunner::CreateTable).stubs().will(returnValue(true));
-    MemcpyInfoDumper memcpyInfoDumper(".");
+    MemcpyInfoDumper memcpyInfoDumper(HOST_PATH);
     std::vector<std::shared_ptr<MsprofCompactInfo>> memcpyInfos;
     auto info = std::make_shared<MsprofCompactInfo>();
     memcpyInfos.push_back(info);

@@ -23,7 +23,7 @@ struct MemcpyRecord {
     uint64_t remainSize;  // 还剩下多少数据量需要后面的task去拷贝
     uint16_t operation;  // 拷贝类型
 };
-using MEMCPY_ASYNC_FORMAT = std::unordered_map<uint64_t, MemcpyRecord>;
+using MEMCPY_ASYNC_FORMAT = std::unordered_map<std::string, MemcpyRecord>;
 // globalTaskId, datasize, memcpy_operation
 using ProcessedMemcpyInfoFormat = std::vector<std::tuple<uint64_t, uint64_t, uint16_t>>;
 // 该类用于生成TASK表
@@ -31,7 +31,7 @@ class TaskProcessor : public TableProcessor {
     // model_id, index_id, stream_id, task_id, context_id, batch_id, start_time, duration, host_task_type,
     // device_task_type, connection_id
     using OriDataFormat = std::vector<std::tuple<uint32_t, int32_t, int32_t, uint32_t, uint32_t, uint32_t, double,
-                                                   double, std::string, std::string, uint32_t>>;
+                                                   double, std::string, std::string, int64_t>>;
     // start, end, deviceId, connectionId, globalTaskId, globalPid, taskType, contextId, streamId, taskId,
     // modelId
     using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, int64_t, uint64_t,

@@ -144,14 +144,17 @@ static std::vector<MemcpyInfoData> GenerateMemcpyInfoData()
 {
     std::vector<MemcpyInfoData> res;
     MemcpyInfoData data;
-    data.globalTaskId = 0;  // globalTaskId 0
+    TaskId taskId1{1, 0, 0, UINT32_MAX, 0};  // streamId:1, taskId:0
+    TaskId taskId2{1, 0, 1, UINT32_MAX, 0};  // streamId:1, taskId:1
+    TaskId taskId3{1, 0, 2, UINT32_MAX, 0};  // streamId:1, taskId:2
+    data.taskId = taskId1;
     data.dataSize = 67108864;  // dataSize 67108864
     data.memcpyOperation = 1;
     res.push_back(data);
-    data.globalTaskId = 1;  // globalTaskId 1
+    data.taskId = taskId2;
     data.dataSize = 16777216;  // dataSize 16777216
     res.push_back(data);
-    data.globalTaskId = 2;  // globalTaskId 2
+    data.taskId = taskId3;
     data.dataSize = 35651584;  // dataSize 35651584
     res.push_back(data);
     return res;

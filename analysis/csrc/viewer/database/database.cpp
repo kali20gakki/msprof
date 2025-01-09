@@ -39,7 +39,8 @@ namespace {
         {"task_type", SQL_TEXT_TYPE},
         {"device_id", SQL_INTEGER_TYPE},
         {"timestamp", SQL_NUMERIC_TYPE},
-        {"connection_id", SQL_INTEGER_TYPE}
+        {"connection_id", SQL_INTEGER_TYPE},
+        {"thread_id", SQL_NUMERIC_TYPE},
     };
 
     const TableColumns TaskInfo = {
@@ -714,15 +715,13 @@ namespace {
     };
 
     const TableColumns MemcpyInfo = {
-        {"struct_type", SQL_TEXT_TYPE},
-        {"level", SQL_TEXT_TYPE},
-        {"thread_id", SQL_NUMERIC_TYPE},
-        {"data_len", SQL_NUMERIC_TYPE},
-        {"timestamp", SQL_NUMERIC_TYPE},
+        {"stream_id", SQL_NUMERIC_TYPE},
+        {"batch_id", SQL_NUMERIC_TYPE},
+        {"task_id", SQL_NUMERIC_TYPE},
+        {"context_id", SQL_NUMERIC_TYPE},
+        {"device_id", SQL_NUMERIC_TYPE},
         {"data_size", SQL_NUMERIC_TYPE},
         {"memcpy_direction", SQL_NUMERIC_TYPE},
-        {"max_size", SQL_NUMERIC_TYPE},
-        {"connection_id", SQL_NUMERIC_TYPE}
     };
 }
 
