@@ -158,11 +158,11 @@ class TestCANNAnalysisGear(unittest.TestCase):
 
     def test_task_gear(self):
         '''
-        Node(thread 1):                   event3 event6 event8 event11
-                                            |      |      |       |
-        Hccl(thread 1):                   event4   |    event9 event12
-                                            |      |      |       |
-        Runtime(thread 1): event1 event2 event5 event7 event10    |
+        Node(thread 1):                   event3 event6 event8 event11 event14 event17
+                                            |      |      |       |      |        |
+        Hccl(thread 1):                   event4   |    event9 event12 event15    |
+                                            |      |      |       |      |        |
+        Runtime(thread 1): event1 event2 event5 event7 event10    |    event16 event18
         Runtime(thread 2):                                     event13
         '''
         gear = TaskGear(self.PROF_HOST_DIR)
@@ -262,6 +262,47 @@ class TestCANNAnalysisGear(unittest.TestCase):
             self.create_addition_record(task_dto5, 415, record_db)
         ]
 
+        # Lcal
+        # lccl 纯通信算子
+        event14 = self.create_api_event(
+            self.event_col(Constant.NODE_LEVEL, 1, 450, 500, "launch", "LcclAllReduce"), api_db)
+        event15 = self.create_api_event(
+            self.event_col(Constant.HCCL_LEVEL, 1, 450, 500, "master", "LcclAllReduce"), api_db)
+        node_basic_info_dto = NodeBasicInfoDto()
+        node_basic_info_dto.op_type = "LcclAllReduce"
+        node_basic_info_dto.task_type = 'AI_CORE'
+        node_basic_info_dto.op_name = "LcclAllReduce"
+        node_basic_info_dto.timestamp = 500
+        hccl_op_info = HCCLOpInfoDto(data_type="FP16", alg_type="NA", count=100)
+        event14.additional_record = [
+            self.create_addition_record(node_basic_info_dto, 500, record_db),
+            self.create_addition_record(hccl_op_info, 451, record_db)
+        ]
+        event16 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 460, 490, "api7", 0), api_db)
+        task_dto4 = TaskTrackDto()
+        task_dto4.task_id = 18
+        task_dto4.struct_type = "task_track"
+        task_dto4.task_type = "KERNEL_AIVEC"
+        event16.additional_record = [self.create_addition_record(task_dto4, 470, record_db)]
+
+        # lcoc 通算融合
+        event17 = self.create_api_event(
+            self.event_col(Constant.NODE_LEVEL, 1, 520, 600, "launch", "LcocMatmulAllReduce"), api_db)
+        node_basic_info_dto = NodeBasicInfoDto()
+        node_basic_info_dto.op_type = "LcocMatmulAllReduce"
+        node_basic_info_dto.task_type = 'AI_CORE'
+        node_basic_info_dto.op_name = "LcocMatmulAllReduce"
+        node_basic_info_dto.timestamp = 600
+        event17.additional_record = [
+            self.create_addition_record(node_basic_info_dto, 600, record_db),
+        ]
+        event18 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 530, 590, "api8", 0), api_db)
+        task_dto5 = TaskTrackDto()
+        task_dto5.task_id = 20
+        task_dto5.struct_type = "task_track"
+        task_dto5.task_type = "KERNEL_AIVEC"
+        event18.additional_record = [self.create_addition_record(task_dto5, 550, record_db)]
+
         gear.run(event1, {})
         gear.run(event2, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: Event.invalid_event(),
                           Constant.HCCL_LEVEL: Event.invalid_event()})
@@ -273,11 +314,15 @@ class TestCANNAnalysisGear(unittest.TestCase):
                            Constant.HCCL_LEVEL: event9})
         gear.run(event13, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: Event.invalid_event(),
                            Constant.HCCL_LEVEL: event12})
+        gear.run(event16, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event14,
+                           Constant.HCCL_LEVEL: event15})
+        gear.run(event18, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event17,
+                           Constant.HCCL_LEVEL: Event.invalid_event()})
         gear.flush_data()
 
         self.assertEqual(
             DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
-                                           DBNameConstant.TABLE_GE_TASK), 3)
+                                           DBNameConstant.TABLE_GE_TASK), 4)
         self.assertTrue(
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
                                           DBNameConstant.TABLE_GE_TASK, 'op_type', "1"))
@@ -288,7 +333,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
 
         self.assertEqual(
             DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
-                                           DBNameConstant.TABLE_HCCL_TASK), 3)
+                                           DBNameConstant.TABLE_HCCL_TASK), 4)
 
         self.assertTrue(
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),

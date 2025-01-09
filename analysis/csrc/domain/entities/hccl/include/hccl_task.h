@@ -53,6 +53,7 @@ struct HcclTask {
     uint16_t isMaster;
     uint32_t localRank;
     uint32_t remoteRank;
+    uint32_t threadId;
     std::string transportType;
     double size;
     std::string dataType;

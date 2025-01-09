@@ -82,9 +82,9 @@ class HcclViewModel(ViewModel):
         sql = "SELECT a.model_id as model_id, a.index_id as index_id, a.name as hccl_name, a.plane_id as plane_id, " \
               "a.timestamp as host_timestamp,a.group_name as group_name, b.start_time as timestamp, " \
               "a.is_master as is_master, a.stream_id as stream_id, a.task_id as task_id, " \
-              "a.duration as duration_estimated, a.local_rank as local_rank, a.remote_rank as remote_rank," \
-              "a.transport_type as transport_type, a.size as size, a.data_type as data_type," \
-              " a.link_type as link_type," \
+              "a.duration as duration_estimated, a.local_rank as local_rank, a.remote_rank as remote_rank, " \
+              "a.transport_type as transport_type, a.size as size, a.data_type as data_type, " \
+              "a.link_type as link_type, a.thread_id as thread_id, " \
               "a.context_id as context_id, a.notify_id as notify_id, a.batch_id as batch_id, " \
               "a.rdma_type as rdma_type, b.connection_id as connection_id, b.duration as duration from {0} as a " \
               "inner join {1} as b on " \
@@ -110,7 +110,7 @@ class HcclViewModel(ViewModel):
             where_condition = f'and model_id={model_id} and (index_id={index_id} or index_id=0)'
 
         sql = "SELECT model_id, index_id, op_name, task_type, op_type, connection_id, begin as timestamp, " \
-              "end - begin as duration, is_dynamic, " \
+              "end - begin as duration, is_dynamic, thread_id, " \
               "relay, retry, data_type, alg_type, count, group_name, kfc_connection_id from {0} " \
               "WHERE device_id = {device_id} " \
               "{where_condition} " \

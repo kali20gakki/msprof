@@ -22,34 +22,45 @@
 #include "analysis/csrc/association/cann/tree_builder.h"
 #include "analysis/csrc/association/cann/tree_analyzer.h"
 #include "collector/inc/toolchain/prof_common.h"
+#include "analysis/csrc/parser/host/cann/hash_data.h"
 
 using namespace Analysis::Parser::Host::Cann;
 using namespace Analysis::Association::Cann;
 using namespace Analysis::Entities;
 using namespace Analysis::Utils;
 
-const std::string TEST_FILE = "./aging.additional.type_info_dic.slice_0";
+const std::string TYPE_INFO_FILE = "./aging.additional.type_info_dic.slice_0";
+const std::string HASH_INFO_FILE = "./unaging.additional.hash_dic.slice_0";
 
 class TreeAnalyzerUTest : public testing::Test {
 protected:
     // 所有测试用例之前执行
     static void SetUpTestCase()
     {
-        // 创建test_file文件
-        FileWriter fw(TEST_FILE);
-        fw.WriteText("5000_2:EVENT_RECORD\n");    // Runtime level other
-        fw.WriteText("5000_52:FFTS_PLUS\n");      // Runtime level ffts+
-        fw.WriteText("5000_50:STARS_COMMON\n");   // Runtime level stars common
-        fw.WriteText("5000_5:MEMCPY_ASYNC\n");    // Runtime level memcpy
-        fw.WriteText("5000_0:KERNEL_AICORE\n");   // Runtime level aicore
-        fw.WriteText("5000_1:KERNEL_AICPU\n");   // Runtime level aicpu
-        fw.WriteText("5000_1045:NotifyRecord\n"); // Runtime level hccl
-        fw.Close();
+        // 创建typeInfo文件
+        FileWriter typeInfo(TYPE_INFO_FILE);
+        typeInfo.WriteText("5000_2:EVENT_RECORD\n");    // Runtime level other
+        typeInfo.WriteText("5000_52:FFTS_PLUS\n");      // Runtime level ffts+
+        typeInfo.WriteText("5000_50:STARS_COMMON\n");   // Runtime level stars common
+        typeInfo.WriteText("5000_5:MEMCPY_ASYNC\n");    // Runtime level memcpy
+        typeInfo.WriteText("5000_0:KERNEL_AICORE\n");   // Runtime level aicore
+        typeInfo.WriteText("5000_1:KERNEL_AICPU\n");   // Runtime level aicpu
+        typeInfo.WriteText("5000_1045:NotifyRecord\n"); // Runtime level hccl
+        typeInfo.Close();
+
+        // 创建hashInfo文件
+        FileWriter hashInfo(HASH_INFO_FILE);
+        hashInfo.WriteText("11111:LcclAllReduce\n");    // LcclAllReduce
+        hashInfo.WriteText("22222:Matmul\n");           // Matmul
+        hashInfo.WriteText("33333:hcom_allReduce_\n");  // hcom_allReduce_
+        hashInfo.WriteText("44444:NA\n");               // NA
+        hashInfo.Close();
     }
     // 所有测试用例之后执行
     static void TearDownTestCase()
     {
-        File::DeleteFile(TEST_FILE);  // 删除test_file文件
+        File::DeleteFile(TYPE_INFO_FILE);  // 删除typeInfo文件
+        File::DeleteFile(HASH_INFO_FILE);  // 删除hashInfo文件
     }
 };
 
@@ -88,14 +99,15 @@ std::shared_ptr<EventQueue> GenKernelEventQueue(std::unordered_map<
 // 生成建树所需的三层节点
 std::shared_ptr<EventQueue> GenKernelEventQueueWithTradComm()
 {
-    // Model :  [1,            200]  [201,                                                          400]  [401,   800]
-    // Node  :  [2, 99]  [100, 150]  [202,                                 250] [251,  301] [329, 351]     [410, 500]
-    // Node:                          [204,208]          [221, 223]
-    // Hccl  :                                  [210, 220]           [230, 250]  [252, 300] [330, 350]
+    // Model :  [1,          200][201,                                                        400][401,  800]
+    // Node  :  [2,99]  [100,150][202,                                250] [251,  301] [329,351]   [410,500][1020, 1160]
+    // Node:                      [204,208]          [221,223]
+    // Hccl  :                             [210,220]           [230, 250]  [252, 300] [330,350]             [1020, 1160]
     std::unordered_map<std::string, std::vector<std::pair<uint64_t, uint64_t>>> apiEvents{
         {"Model", {{1, 200}, {201, 400}, {401, 800}}},
-        {"Node", {{2, 99}, {100, 150}, {202, 250}, {204, 208}, {221, 223}, {251, 301}, {329, 351}, {410, 500}}},
-        {"Hccl", {{210, 220}, {230, 250}, {252, 300}, {330, 350}}},
+        {"Node", {{2, 99}, {100, 150}, {202, 250}, {204, 208}, {221, 223}, {251, 301}, {329, 351}, {410, 500},
+                  {1020, 1160}}},
+        {"Hccl", {{210, 220}, {230, 250}, {252, 300}, {330, 350}, {1020, 1160}}},
     };
 
     return GenKernelEventQueue(apiEvents);
@@ -104,15 +116,15 @@ std::shared_ptr<EventQueue> GenKernelEventQueueWithTradComm()
 // 生成建树所需的四层节点
 std::shared_ptr<EventQueue> GenKernelEventQueueWithFFtsComm()
 {
-    // Acl   :  [1，                                               800]  [801,  900]
+    // Acl   :  [1，                                               800]  [801,  900]  [1000,    1200]
     // Model :  [1,            200]  [201,             400]  [401, 800]
-    // Node  :  [2, 99]  [100, 150]  [202,  300] [302, 399]
-    // Hccl  :                       [202,  300] [302, 399]
+    // Node  :  [2, 99]  [100, 150]  [202,  300] [302, 399]                            [1020, 1160]
+    // Hccl  :                       [202,  300] [302, 399]                            [1020, 1160]
     std::unordered_map<std::string, std::vector<std::pair<uint64_t, uint64_t>>> apiEvents{
-        {"Acl", {{1, 800}, {801, 900}}},
+        {"Acl", {{1, 800}, {801, 900}, {1000, 1200}}},
         {"Model", {{1, 200}, {201, 400}, {401, 800}}},
-        {"Node", {{2, 99}, {100, 150}, {160, 195}, {202, 300}, {302, 399}}},
-        {"Hccl", {{202, 300}, {302, 399}}},
+        {"Node", {{2, 99}, {100, 150}, {160, 195}, {202, 300}, {302, 399}, {1020, 1160}}},
+        {"Hccl", {{202, 300}, {302, 399}, {1020, 1160}}},
     };
 
     return GenKernelEventQueue(apiEvents);
@@ -196,7 +208,7 @@ std::shared_ptr<EventQueue> GenNodeCtxIdEventQueue()
 
 std::shared_ptr<EventQueue> GenTaskTrackEventQueue(const std::vector<std::pair<uint64_t, uint64_t>> &runtimeDescs)
 {
-    auto taskTrackEvents = std::make_shared<EventQueue>(1, 11);
+    auto taskTrackEvents = std::make_shared<EventQueue>(1, runtimeDescs.size());
     for (auto item : runtimeDescs) {
         FakeEventGenerator::AddTaskTrackEvent(taskTrackEvents, item.first, item.second);
     }
@@ -332,6 +344,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForNoKernelEventsScenario()
 
     // 分析树
     TypeData::GetInstance().Load("./");
+    HashData::GetInstance().Load("./");
     auto ana = std::make_shared<TreeAnalyzer>(treeNode, 1);
     return ana;
 }
@@ -373,14 +386,14 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerForNoKernelEventsScenario)
 std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L0()
 {
     // 逻辑树如下，其中[n]标识每个context id event中带几个context id
-    // Model :  [1,            200]  [201,                                                         400] [401,  800]
-    // Node  :  [2, 99]  [100, 150]  [202,                                250]  [251,  301] [329, 351]   [410,500]
+    // Model :  [1,            200]  [201,                                                  400][401, 800]
+    // Node  :  [2, 99]  [100, 150]  [202,                               250][251,301][329,351] [410,500]   [1020, 1160]
     //                  c(125,126)[2]
     //                  c(127,128)[2]
-    // Node  :                        [204, 208]         [221, 223]
-    //                                          hop(210)                         hop(253)    hop(330)
-    // Hccl  :                                  [210, 220]          [230, 250]   [252, 300]  [330, 350]
-    // Runtime:  tk(50)    tk(110)     tk(205)    tk(220) tk(222) tk(225)tk(240)   tk(260)    tk(340)    tk(430) tk(880)
+    // Node  :                       [204, 208]        [221, 223]
+    //                                         hop(210)                      hop(253)   hop(330)
+    // Hccl  :                                 [210, 220]         [230, 250] [252,300][330,350]             [1020, 1160]
+    // Runtime:  tk(50)    tk(110)    tk(205)   tk(220)tk(222)tk(225)tk(240) tk(260) tk(340) tk(430) tk(880) tk(1050)
     auto kernelEvents = GenKernelEventQueueWithTradComm();
     auto contextIdEvents = GenNodeCtxIdEventQueue();
     std::vector<std::pair<uint64_t, uint64_t>> items{
@@ -395,15 +408,16 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L0()
         {340, 1},    // Runtime KERNEL_AICPU
         {430, 1},    // Runtime KERNEL_AICPU 注意： 非计算类算子
         {880, 1},    // Runtime KERNEL_AICPU 注意： 非计算类算子
+        {1050, 11111},   // Runtime KERNEL_AIVEC lccl 纯通信算子
     };
     auto taskTrackEvents = GenTaskTrackEventQueue(items);
     std::vector<std::vector<uint16_t>> algList{
         {AlgType::HCCL_ALG_HD, AlgType::HCCL_ALG_MESH, AlgType::HCCL_ALG_NB, AlgType::HCCL_ALG_RING},
         {AlgType::HCCL_ALG_NHR, AlgType::HCCL_ALG_STAR, AlgType::HCCL_ALG_NB, AlgType::HCCL_ALG_HD},
-        {AlgType::HCCL_ALG_MESH, AlgType::HCCL_ALG_RING, AlgType::HCCL_ALG_HD, AlgType::HCCL_ALG_PIPELINE}
+        {AlgType::HCCL_ALG_MESH, AlgType::HCCL_ALG_RING, AlgType::HCCL_ALG_HD, AlgType::HCCL_ALG_PIPELINE},
+        {AlgType::HCCL_ALG_NONE},
     };
-    auto hcclOpInfoEvents = GenHcclOpInfoEventQueue({210, 253, 330}, algList);
-
+    auto hcclOpInfoEvents = GenHcclOpInfoEventQueue({210, 253, 330, 1040}, algList);
     auto cannWarehouse = std::make_shared<CANNWarehouse>();
     cannWarehouse->kernelEvents = kernelEvents;
     cannWarehouse->taskTrackEvents = taskTrackEvents;
@@ -416,6 +430,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L0()
 
     // 分析树
     TypeData::GetInstance().Load("./");
+    HashData::GetInstance().Load("./");
     auto ana = std::make_shared<TreeAnalyzer>(treeNode, 1);
     return ana;
 }
@@ -433,30 +448,34 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L0)
 
     std::sort(computeTasks.begin(), computeTasks.end(), HostTaskCompCtx());
 
-    std::vector<uint64_t> expectComputeTaskTimes{110, 110, 110, 110, 110, 110, 110, 110, 205, 222, 225, 260, 340, 430};
-    std::vector<uint64_t> expectComputeTaskCtxIds{0, 1, 2, 3, 4, 5, 6, 7, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
-                                              DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
-                                              DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID};
-    std::vector<uint64_t> expectHcclTaskTimes{220, 240, 260, 340};
+    std::vector<uint64_t> expectComputeTaskTimes{110, 110, 110, 110, 110, 110, 110, 110, 205, 222,
+                                                 225, 260, 340, 430};
+    std::vector<uint64_t> expectComputeTaskCtxIds{
+        0, 1, 2, 3, 4, 5, 6, 7, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
+        DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID
+    };
+    std::vector<uint64_t> expectHcclTaskTimes{220, 240, 260, 340, 1050};
     // 110中多一条是ffts+大任务的标记
-    std::vector<uint64_t>
-        expectTaskTimes{50, 110, 110, 110, 110, 110, 110, 110, 110, 110, 205, 220, 222, 240, 225, 260, 340, 430, 880};
+    // 1050 在 880 前面,是因为建树时候task添加流程是 compute - hccl - others,
+    std::vector<uint64_t> expectTaskTimes{50, 110, 110, 110, 110, 110, 110, 110, 110, 110,
+                                          205, 220, 222, 240, 225, 260, 340, 430, 1050, 880};
     // DEFAULT_CONTEXT_ID分别代表一个tk,
     std::vector<uint64_t> expectTaskCtxIds{0, 1, 2, 3, 4, 5, 6, 7, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
                                            DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
                                            DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
-                                           DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID};
+                                           DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
+                                           DEFAULT_CONTEXT_ID};
 
     std::vector<uint64_t> expectModelIds{200, 200, 200, 200, 200, 200, 200, 200, 200, 200,
-                                         400, 400, 400, 400, 400, 400, 400, 800, UINT32_MAX};
+                                         400, 400, 400, 400, 400, 400, 400, 800, UINT32_MAX, UINT32_MAX};
     std::vector<int64_t> expectRequestIds{200, 200, 200, 200, 200, 200, 200, 200, 200, 200,
-                                          400, 400, 400, 400, 400, 400, 400, 800, -1};
+                                          400, 400, 400, 400, 400, 400, 400, 800, -1, -1};
     // 特殊场景校验分别代表AI_CORE和HCCL_AICPU
     std::vector<uint64_t> expectHcclComputeTaskTaskType{9, 11};
-    const uint64_t expectbigOPsNum = 3;
-    std::vector<uint64_t> expectbigOPsCount{420, 506, 660};
-    std::vector<int64_t> expectKfcConnectionId{19, -1, -1};
-    std::vector<std::string> expectbigOPsAlgType{"HD-MESH-NB-RING", "NHR-STAR-NB-HD", "MESH-RING-HD-PIPELINE"};
+    const uint64_t expectbigOPsNum = 4;
+    std::vector<uint64_t> expectbigOPsCount{420, 506, 660, 2080};
+    std::vector<int64_t> expectKfcConnectionId{19, -1, -1, -1};
+    std::vector<std::string> expectbigOPsAlgType{"HD-MESH-NB-RING", "NHR-STAR-NB-HD", "MESH-RING-HD-PIPELINE", "NA"};
     // 先检查个数正确
     EXPECT_EQ(computeTasks.size(), expectComputeTaskTimes.size());
     EXPECT_EQ(hcclTasks.size(), expectHcclTaskTimes.size());
@@ -505,30 +524,30 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L0)
 
 std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L2()
 {
-    // 逻辑树如下，其中c-n-a-t表示ctxId, nodeBasicInfo, nodeAttrInfo, tensorInfo,
-    // 【d】表示异常情况，[n]标识每个context id event中带几个context id
-    // ng表示图的nodeBasic数据
-    // tk(260)    tk(340)为aicpu的hccl和aicore的hccl（reduce tbe）任务
-    // Model :  [1,            200]  [201,                                                         400]   [401,   800]
-    // Node  :  [2, 99]  [100, 150]  [202,                                250] [251,  301] [329,  351]     [410, 500]
-    //                 c-n-a-t(125)[2]                         n(224)           n(255)         n(340)        n(430)
-    //                 c-n-a-t(126)[2]
-    //                 c-n-a-t(127)[2]
-    //                 c-n-a-t(128)[2]
-    //                    ng(129)
-    //                   t(144【d】)
-    // Node:                          [204,208]         [221, 223]
-    //                                         hop(211)                           hop(252)   hop(330)
-    // Hccl  :                                 [210, 220]           [230, 250]    [252, 300] [330, 350]
-    //                                         hI(211)              hI(231)        hI(253)    hI(331)
-    // Runtime:  tk(50)    tk(110)     tk(205)  tk(220) tk(222)  tK(225) tk(240)        tk(260)    tk(340)      tk(430)
+// 逻辑树如下，其中c-n-a-t表示ctxId, nodeBasicInfo, nodeAttrInfo, tensorInfo,
+// 【d】表示异常情况，[n]标识每个context id event中带几个context id
+// ng表示图的nodeBasic数据
+// tk(260)    tk(340)为aicpu的hccl和aicore的hccl（reduce tbe）任务
+// Model :  [1,            200]  [201,                                                       400][401,   800]
+// Node  :  [2, 99]  [100, 150]  [202,                               250] [251,  301] [329, 351] [410, 500][1020, 1160]
+//                 c-n-a-t(125)[2]                         n(224)          n(255)        n(340)    n(430)
+//                 c-n-a-t(126)[2]
+//                 c-n-a-t(127)[2]
+//                 c-n-a-t(128)[2]
+//                    ng(129)
+//                   t(144【d】)
+// Node:                          [204,208]         [221, 223]
+//                                         hop(211)                         hop(252)  hop(330)
+// Hccl  :                                 [210, 220]          [230, 250]   [252, 300][330, 350]           [1020, 1160]
+//                                         hI(211)             hI(231)        hI(253)   hI(331)
+// Runtime:  tk(50)    tk(110)     tk(205)  tk(220) tk(222) tK(225) tk(240)    tk(260)   tk(340)    tk(430)  tk(1050)
     auto kernelEvents = GenKernelEventQueueWithTradComm();
     auto hcclInfoEvents = GenHcclInfoEventQueue({211, 231, 253, 331}, {DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID});
     auto nodeBasicInfoEvents = GenNodeBasicInfoEventQueue({{125, 1, 0}, {126, 2, 0}, {127, 1, 1},
                                                            {128, 0, 1}, {129, 100, 6}, {224, 6, 9},
-                                                           {255, 7, 9}, {340, 8, 9}, {430, 8, 9}});
+                                                           {255, 7, 9}, {340, 8, 9}, {430, 8, 9}, {1050, 8, 9}});
     auto nodeAttrInfoEvents = GenNodeAttrInfoEventQueue({{125, 1}, {126, 2}, {127, 1}, {128, 0}, {129, 100},
-                                                         {224, 6}, {255, 7}, {340, 8}, {430, 8}});
+                                                         {224, 6}, {255, 7}, {340, 8}, {430, 8}, {1050, 8}});
     auto tensorInfoEvents = GenTensorInfoEventQueue({125, 126, 127, 128, 144});
     auto contextIdEvents = GenNodeCtxIdEventQueue();
     std::vector<std::pair<uint64_t, uint64_t>> items{
@@ -542,14 +561,16 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L2()
         {260, 0},    // Runtime KERNEL_AICORE
         {340, 1},    // Runtime KERNEL_AICPU
         {430, 1},    // Runtime KERNEL_AICPU
+        {1050, 11111},   // Runtime KERNEL_AIVEC lccl 纯通信算子
     };
     auto taskTrackEvents = GenTaskTrackEventQueue(items);
     std::vector<std::vector<uint16_t>> algList{
         {AlgType::HCCL_ALG_PAIRWISE, AlgType::HCCL_ALG_NB, AlgType::HCCL_ALG_HD, AlgType::HCCL_ALG_RING},
         {AlgType::HCCL_ALG_STAR, AlgType::HCCL_ALG_NHR, AlgType::HCCL_ALG_PIPELINE, AlgType::HCCL_ALG_NB},
-        {AlgType::HCCL_ALG_MESH, AlgType::HCCL_ALG_NB, AlgType::HCCL_ALG_HD, AlgType::HCCL_ALG_STAR}
+        {AlgType::HCCL_ALG_MESH, AlgType::HCCL_ALG_NB, AlgType::HCCL_ALG_HD, AlgType::HCCL_ALG_STAR},
+        {AlgType::HCCL_ALG_NONE},
     };
-    auto hcclOpInfoEvents = GenHcclOpInfoEventQueue({211, 252, 330}, algList);
+    auto hcclOpInfoEvents = GenHcclOpInfoEventQueue({211, 252, 330, 1040}, algList);
 
     auto cannWarehouse = std::make_shared<CANNWarehouse>();
     cannWarehouse->kernelEvents = kernelEvents;
@@ -567,6 +588,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario1L2()
 
     // 分析树
     TypeData::GetInstance().Load("./");
+    HashData::GetInstance().Load("./");
     auto ana = std::make_shared<TreeAnalyzer>(treeNode, 1);
     return ana;
 }
@@ -589,26 +611,28 @@ TEST_F(TreeAnalyzerUTest, TestTreeAnalyzerWhenScenario1L2)
                                                  205, 222, 225, 260, 340, 430};
     std::vector<uint64_t> expectComputeTaskCtxIds{0, 1, 2, 3, 4, 5, 6, 7,
                                                   DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
-                                                  DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
+                                                  DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
                                                   DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID};
-    std::vector<uint64_t> expectHcclTaskTimes{220, 240, 260, 340};
+    std::vector<uint64_t> expectHcclTaskTimes{220, 240, 260, 340, 1050};
     // 110中多一条是ffts+大任务的标记
     std::vector<uint64_t> expectTaskTimes{50, 110, 110, 110, 110, 110, 110, 110, 110, 110, 110, 205, 220,
-                                          222, 240, 225, 260, 340, 430};
+                                          222, 240, 225, 260, 340, 430, 1050};
     // DEFAULT_CONTEXT_ID分别代表一个tk,
     std::vector<uint64_t> expectTaskCtxIds{0, 1, 2, 3, 4, 5, 6, 7, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
                                            DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
                                            DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
-                                           DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID};
+                                           DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID, DEFAULT_CONTEXT_ID,
+                                           DEFAULT_CONTEXT_ID};
     std::vector<uint64_t> expectComputeTaskOpTypes{1, 1, 2, 2, 1, 1, 0, 0, 0, 0};
     std::vector<uint64_t> expectComputeTaskHashIds{1, 1, 2, 2, 1, 1, 0, 0, 0, 0};
     std::vector<uint64_t> expectComputeTaskTensorTimes{125, 125, 126, 126, 127, 127, 128, 128, 144};
     // 特殊场景校验分别代表AI_CORE，AI_CPU和HCCL_AICPU
     std::vector<uint64_t> expectHcclComputeTaskTaskType{1, 9, 11, 1};
-    const uint64_t expectbigOPsNum = 3;
-    std::vector<uint64_t> expectbigOPsCount{422, 504, 660};
-    std::vector<int64_t> expectKfcConnectionId{64, -1, -1};
-    std::vector<std::string> expectbigOPsAlgType{"PAIRWISE-NB-HD-RING", "STAR-NHR-PIPELINE-NB", "MESH-NB-HD-STAR"};
+    const uint64_t expectbigOPsNum = 4;
+    std::vector<uint64_t> expectbigOPsCount{422, 504, 660, 2080};
+    std::vector<int64_t> expectKfcConnectionId{69, -1, -1, -1};
+    std::vector<std::string> expectbigOPsAlgType{"PAIRWISE-NB-HD-RING", "STAR-NHR-PIPELINE-NB", "MESH-NB-HD-STAR",
+                                                 "NA"};
     // 先检查个数正确
     EXPECT_EQ(computeTasks.size(), expectComputeTaskTimes.size());
     EXPECT_EQ(hcclTasks.size(), expectHcclTaskTimes.size());
@@ -715,6 +739,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L0()
 
     // 分析树
     TypeData::GetInstance().Load("./");
+    HashData::GetInstance().Load("./");
     auto ana = std::make_shared<TreeAnalyzer>(treeNode, 1);
     return ana;
 }
@@ -839,6 +864,7 @@ std::shared_ptr<TreeAnalyzer> GetAnalyzerForScenario2L2()
 
     // 分析树
     TypeData::GetInstance().Load("./");
+    HashData::GetInstance().Load("./");
     auto ana = std::make_shared<TreeAnalyzer>(treeNode, 1);
     return ana;
 }

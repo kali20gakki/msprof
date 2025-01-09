@@ -44,7 +44,7 @@ using RuntimeOriDataFormat = std::vector<std::tuple<uint32_t, int32_t, uint16_t,
                              std::string, int64_t>>;
 using HcclTaskOriDataFormat = std::vector<std::tuple<uint64_t, int32_t, std::string, std::string, int32_t, uint64_t,
                               double, uint32_t, uint16_t, uint32_t, uint16_t, uint16_t, uint16_t, uint32_t, uint32_t,
-                              std::string, double, std::string, std::string, std::string, std::string>>;
+                              uint32_t, std::string, double, std::string, std::string, std::string, std::string>>;
 using HcclOpOriDataFormat = std::vector<std::tuple<uint16_t, uint64_t, int32_t, uint32_t, std::string, std::string,
                             std::string, uint64_t, uint64_t, std::string, int64_t, int32_t, int32_t, std::string,
                             std::string, uint64_t, std::string>>;
@@ -158,12 +158,15 @@ uint32_t ReadHostRuntime(DataInventory& dataInventory, const DeviceContext& devi
 uint32_t ReadHcclOp(DataInventory& dataInventory, const DeviceContext& deviceContext)
 {
     HCCLDB hcclDb;
+    DeviceInfo deviceInfo{};
+    deviceContext.Getter(deviceInfo);
     auto hostPath = deviceContext.GetDeviceFilePath();
     std::string hostDbDirectory = Utils::File::PathJoin({hostPath, "../", "/host", "/sqlite", hcclDb.GetDBName()});
     DBRunner hostHcclDBRunner(hostDbDirectory);
     std::string sql{"SELECT device_id, model_id, index_id, thread_id, op_name, task_type, op_type, begin, "
                     "end - begin, is_dynamic, connection_id, relay, retry, data_type, alg_type, count, "
-                    "group_name from HCCLOP"};
+                    "group_name from HCCLOP where device_id = "};
+    sql += std::to_string(deviceInfo.deviceId);
     std::vector<HcclOp> ans;
     std::shared_ptr<std::vector<HcclOp>> data;
     if (!CheckPathAndTableExists(hostDbDirectory, hostHcclDBRunner, HCCL_OP_TABLE)) {
@@ -198,12 +201,15 @@ uint32_t ReadHcclOp(DataInventory& dataInventory, const DeviceContext& deviceCon
 uint32_t ReadHcclTask(DataInventory& dataInventory, const DeviceContext& deviceContext)
 {
     HCCLDB hcclDb;
+    DeviceInfo deviceInfo{};
+    deviceContext.Getter(deviceInfo);
     auto hostPath = deviceContext.GetDeviceFilePath();
     std::string hostDbDirectory = Utils::File::PathJoin({hostPath, "../", "/host", "/sqlite", hcclDb.GetDBName()});
     DBRunner hostHcclDBRunner(hostDbDirectory);
     std::string sql{"SELECT model_id, index_id, name, group_name, plane_id, timestamp , duration, stream_id, task_id, "
-                    "context_id, batch_id, device_id, is_master , local_rank, remote_rank, transport_type, size, "
-                    "data_type, link_type, notify_id, rdma_type from HCCLTask"};
+                    "context_id, batch_id, device_id, is_master, local_rank, remote_rank, thread_id, transport_type, "
+                    "size, data_type, link_type, notify_id, rdma_type from HCCLTask where device_id = "};
+    sql += std::to_string(deviceInfo.deviceId);
     std::vector<HcclTask> ans;
     std::shared_ptr<std::vector<HcclTask>> data;
     if (!CheckPathAndTableExists(hostDbDirectory, hostHcclDBRunner, HCCL_TASK_TABLE)) {
@@ -222,13 +228,13 @@ uint32_t ReadHcclTask(DataInventory& dataInventory, const DeviceContext& deviceC
         int32_t indexId, planeId;
         std::string name, groupName, transportType, dataType, linkType, rdmaType, notifyId;
         double duration, size;
-        uint32_t streamId, contextId, localRank, remoteRank;
+        uint32_t streamId, contextId, localRank, remoteRank, threadId;
         uint16_t taskId, batchId, deviceId, isMaster;
         std::tie(modelId, indexId, name, groupName, planeId, timestamp, duration, streamId, taskId,
-                 contextId, batchId, deviceId, isMaster, localRank, remoteRank, transportType, size, dataType,
+                 contextId, batchId, deviceId, isMaster, localRank, remoteRank, threadId, transportType, size, dataType,
                  linkType, notifyId, rdmaType) = row;
         HcclTask hcclTask{modelId, indexId, name, groupName, planeId, timestamp, duration, streamId, taskId,
-                          contextId, batchId, deviceId, isMaster, localRank, remoteRank, transportType, size,
+                          contextId, batchId, deviceId, isMaster, localRank, remoteRank, threadId, transportType, size,
                           dataType, linkType, notifyId, rdmaType};
         ans.emplace_back(std::move(hcclTask));
     }

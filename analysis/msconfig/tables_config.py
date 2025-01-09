@@ -738,6 +738,7 @@ class TablesConfig(MetaConfig):
             ('link_type', 'TEXT, null'),
             ('notify_id', 'TEXT, null'),
             ('rdma_type', 'TEXT', 'null'),
+            ('thread_id', 'INTEGER, null'),
         ],
         'MsprofTxMap': [
             ('pid', 'INTEGER, null'),

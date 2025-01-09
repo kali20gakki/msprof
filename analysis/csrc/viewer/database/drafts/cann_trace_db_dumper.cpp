@@ -36,7 +36,7 @@ using HostTasksDumpData =
 using HcclTasksDumpData = std::vector<
     std::tuple<uint32_t, int64_t, std::string, std::string, int64_t, std::string,
                double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
-               std::string, double, std::string, std::string, std::string, std::string>>;
+               std::string, double, std::string, std::string, std::string, std::string, uint32_t>>;
 
 using GeFusionOpsDumpData = std::vector<std::tuple<uint64_t, std::string, uint32_t, std::string, std::string,
                                         std::string, std::string, std::string, std::string>>;
@@ -356,7 +356,7 @@ void CANNTraceDBDumper::DumpHcclTasks(const HostTasks &hcclTasks)
             data.emplace_back(task->modelId, task->requestId, NA, NA, INVALID_VALUE, std::to_string(task->timeStamp),
                               INVALID_VALUE, task->streamId, task->taskId, task->contextId, task->batchId,
                               task->deviceId, desc->isMaster, INVALID_VALUE, INVALID_VALUE, NA, INVALID_VALUE,
-                              NA, NA, NA, NA);
+                              NA, NA, NA, NA, task->thread_id);
             continue;
         }
         auto hcclTrace = Utils::ReinterpretConvert<MsprofHcclInfo *>(desc->hcclInfo->data);
@@ -369,7 +369,8 @@ void CANNTraceDBDumper::DumpHcclTasks(const HostTasks &hcclTasks)
                           NumberMapping::Get(NumberMapping::MappingType::HCCL_DATA_TYPE, hcclTrace->dataType),
                           NumberMapping::Get(NumberMapping::MappingType::HCCL_LINK_TYPE, hcclTrace->linkType),
                           std::to_string(hcclTrace->notifyID),
-                          NumberMapping::Get(NumberMapping::MappingType::HCCL_RDMA_TYPE, hcclTrace->rdmaType));
+                          NumberMapping::Get(NumberMapping::MappingType::HCCL_RDMA_TYPE, hcclTrace->rdmaType),
+                          task->thread_id);
     }
     if (!hcclTaskDBRunner.InsertData("HCCLTask", data)) {
         result_ = false;

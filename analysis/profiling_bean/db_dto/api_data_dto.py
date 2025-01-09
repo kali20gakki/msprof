@@ -14,12 +14,12 @@ INVALID_THREAD = -1
 class ApiDataDto(metaclass=InstanceCheckMeta):
     connection_id: int = None
     end: int = None
-    id: str = None
-    item_id: str = None
-    level: str = None
+    id: str = ""
+    item_id: str = ""
+    level: str = ""
     request_id: int = None
     start: int = None
-    struct_type: str = None
+    struct_type: str = ""
     thread_id: int = None
 
 

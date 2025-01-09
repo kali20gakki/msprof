@@ -126,7 +126,8 @@ namespace {
         {"data_type", SQL_TEXT_TYPE},
         {"link_type", SQL_TEXT_TYPE},
         {"notify_id", SQL_TEXT_TYPE},
-        {"rdma_type", SQL_TEXT_TYPE}
+        {"rdma_type", SQL_TEXT_TYPE},
+        {"thread_id", SQL_INTEGER_TYPE},
     };
 
     const TableColumns HCCLOP = {
