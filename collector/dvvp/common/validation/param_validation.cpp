@@ -236,6 +236,15 @@ bool ParamValidation::CheckReportsJsonIsPathValid(const std::string &jsonPath) c
         return false;
     }
 
+    if (Utils::GetFileSize(jsonPath) > MSVP_CFG_MAX_SIZE) {
+        MSPROF_LOGE("Argument --reports is invalid because of %s bigger than 64MB.", jsonPath.c_str());
+        CMD_LOGE("Argument --reports is invalid because of %s bigger than 64MB.", jsonPath.c_str());
+        errReason = "Argument --reports is invalid because of " + jsonPath + " bigger than 64MB.";
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+                           std::vector<std::string>({"reports", jsonPath, errReason}));
+        return false;
+    }
+
     if (!CheckJsonPathValid(jsonPath, errReason)) {
         MSPROF_LOGE("profiling error %s", errReason.c_str());
         CMD_LOGE("profiling error %s", errReason.c_str());
