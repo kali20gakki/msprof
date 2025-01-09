@@ -19,15 +19,26 @@ namespace Analysis {
 namespace Viewer {
 namespace Database {
 namespace Drafts {
-using MemcpyInfoData = std::vector<std::tuple<std::string, std::string, uint32_t, uint32_t, uint64_t,
-                                       uint64_t, uint16_t, uint64_t, int64_t>>;
+using MemcpyInfoData = std::vector<std::tuple<uint32_t, uint16_t, uint16_t, uint32_t, uint16_t, int64_t, uint16_t>>;
+using MemcpyInfos = std::vector<std::shared_ptr<MsprofCompactInfo>>;
+struct MemcpyAsyncTask {
+    uint32_t threadId;
+    uint64_t timestamp;
+    uint32_t streamId;
+    uint16_t taskId;
+    uint16_t batchId;
+    uint16_t deviceId;
+    MemcpyAsyncTask() : threadId(UINT32_MAX), timestamp(0), streamId(UINT32_MAX), taskId(UINT16_MAX),
+        batchId(UINT16_MAX), deviceId(UINT16_MAX)
+    {}
+};
+
 class MemcpyInfoDumper : public BaseDumper<MemcpyInfoDumper> {
-    using MemcpyInfos = std::vector<std::shared_ptr<MsprofCompactInfo>>;
 public:
     explicit MemcpyInfoDumper(const std::string &hostPath);
     MemcpyInfoData GenerateData(const MemcpyInfos &memcpyInfos);
 private:
-    std::unordered_map<uint64_t, int64_t> GetConnectionId();
+    std::vector<MemcpyAsyncTask> GetMemcpyAsyncTasks();
 };
 } // Drafts
 } // Database

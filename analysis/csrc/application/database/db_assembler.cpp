@@ -78,7 +78,10 @@ bool SaveMemcpyInfoData(DataInventory& dataInventory, DBInfo& msprofDB, const st
         return false;
     }
     for (const auto& item : *memcpyInfoData) {
-        res.emplace_back(item.globalTaskId, item.dataSize, item.memcpyOperation);
+        uint64_t globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(item.taskId.deviceId, item.taskId.streamId,
+                                                                            item.taskId.taskId, item.taskId.contextId,
+                                                                            item.taskId.batchId));
+        res.emplace_back(globalTaskId, item.dataSize, item.memcpyOperation);
     }
     return SaveData(res, TABLE_NAME_MEMCPY_INFO, msprofDB);
 }

@@ -99,7 +99,6 @@ private:
     std::set<TaskId> ffts_;
     std::set<uint64_t> recordEvent_;
     std::vector<AscendTaskData> memcpyAsyncDeviceTasks_;
-    std::unordered_set<uint64_t> memcpyAsyncConnectionIds_;
 };
 }
 }

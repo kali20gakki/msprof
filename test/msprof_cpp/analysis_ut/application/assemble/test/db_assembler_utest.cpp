@@ -369,9 +369,6 @@ static std::vector<MemcpyInfoData> GenerateMemcpyInfoData()
 {
     std::vector<MemcpyInfoData> res;
     MemcpyInfoData data;
-    data.globalTaskId = 1;  // globalTaskId 1
-    data.dataSize = 5;  // dataSize 5
-    data.memcpyOperation = 0; // memcpyOperation 0
     res.push_back(data);
     return res;
 }

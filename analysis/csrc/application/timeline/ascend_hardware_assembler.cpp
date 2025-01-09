@@ -11,7 +11,6 @@
  */
 
 #include "analysis/csrc/application/timeline/ascend_hardware_assembler.h"
-#include <unordered_map>
 #include "analysis/csrc/association/credential/id_pool.h"
 #include "analysis/csrc/application/timeline/connection_id_pool.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
@@ -21,9 +20,10 @@ namespace Analysis {
 namespace Application {
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Utils;
+using namespace Analysis::Domain;
 using IdPool = Analysis::Association::Credential::IdPool;
 namespace {
-using MEMCPY_INFO_FORMAT = std::unordered_map<uint64_t, MemcpyInfoData>;
+using MEMCPY_INFO_FORMAT = std::map<TaskId, MemcpyInfoData>;
 const std::string TASK_TYPE_FFTS_PLUS = "FFTS_PLUS";
 const std::string TASK_TYPE_UNKNOWN = "UNKNOWN";
 const std::vector<std::string> MEMCPY_OPERATIONS {
@@ -44,7 +44,7 @@ MEMCPY_INFO_FORMAT GenerateMemcpyInfoDataMap(const std::shared_ptr<std::vector<M
     MEMCPY_INFO_FORMAT memcpyInfoDataMap;
     if (res != nullptr) {
         for (const auto &item: *res) {
-            memcpyInfoDataMap[item.globalTaskId] = std::move(item);
+            memcpyInfoDataMap[item.taskId] = std::move(item);
         }
     }
     return memcpyInfoDataMap;
@@ -105,7 +105,6 @@ void AscendHardwareAssembler::InitData(DataInventory &dataInventory, std::vector
                                  static_cast<uint16_t>(data.taskId), UINT32_MAX, data.deviceId});
         }
         if (data.hostType == MEMCPY_ASYNC) {
-            memcpyAsyncConnectionIds_.emplace(data.connectionId);
             memcpyAsyncDeviceTasks_.push_back(data);
         }
     }
@@ -145,7 +144,7 @@ void AscendHardwareAssembler::GenerateTaskTrace(const std::vector<AscendTaskData
     std::string traceName;
     TaskId id;
     for (const auto &data : taskData) {
-        if (memcpyAsyncConnectionIds_.find(data.connectionId) != memcpyAsyncConnectionIds_.end()) {
+        if (data.hostType == MEMCPY_ASYNC) {
             continue;  // MEMCPY_ASYNC类型的task有新增args,需要单独处理
         }
         id = {static_cast<uint16_t>(data.streamId), static_cast<uint16_t>(data.batchId),
@@ -211,9 +210,8 @@ void AscendHardwareAssembler::GenerateMemcpyAsyncTrace(DataInventory &dataInvent
         std::shared_ptr<MemcpyAsyncEvent> event;
         // 计算拷贝数据量和带宽
         if (showFlag) {
-            uint64_t globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(data.deviceId, data.streamId,
-                data.taskId, data.contextId, data.batchId));
-            auto it = memcpyInfoDataMap.find(globalTaskId);
+            TaskId taskId(data.streamId, data.batchId, data.taskId, data.contextId, data.deviceId);
+            auto it = memcpyInfoDataMap.find(taskId);
             if (it != memcpyInfoDataMap.end()) {
                 dataSize = it->second.dataSize;
                 memcpyDirection = it->second.memcpyOperation > VALID_MEMCPY_OPERATION ?
