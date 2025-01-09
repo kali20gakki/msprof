@@ -116,7 +116,8 @@ using HcclTaskOriDataFormat = std::vector<
             std::string,
             std::string,
             std::string,
-            std::string
+            std::string,
+            uint32_t
         >>;
 
 const uint64_t START_TIME = 100;
@@ -138,7 +139,7 @@ const HcclOpOriDataFormat DATA_HCCL_OP{{0, 3, 0, 121639, "Default/network/AllRed
                                         9897897351791, 9897916800504, "", 33558, -1, -1, -1, "", "", 1, ""}};
 const HcclTaskOriDataFormat DATA_HCCL_TASK{{3, 0, "Memcpy", "7415574198778220483", 3, 9897976501291, 307.45316062176164,
                                             29, 386, 4294967295, 1, 0, 0, 0, 4, "SDMA", 5904896, "INVALID_TYPE", "PCIE",
-                                            "18446744073709551615", "INVALID_TYPE"}};
+                                            "18446744073709551615", "INVALID_TYPE", 123}};
 }
 
 class LoadHostDataUtest : public testing::Test {

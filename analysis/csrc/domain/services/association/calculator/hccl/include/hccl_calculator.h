@@ -19,6 +19,7 @@
 #include "analysis/csrc/domain/entities/hal/include/top_down_task.h"
 #include "analysis/csrc/domain/entities/hccl/include/hccl_task.h"
 #include "analysis/csrc/infrastructure/process/include/process.h"
+#include "analysis/csrc/domain/valueobject/include/task_id.h"
 
 namespace Analysis {
 namespace Domain {
@@ -38,6 +39,7 @@ struct DeviceHcclTask {
     uint32_t localRank = 0;
     uint32_t remoteRank = 0;
     uint32_t contextId = 0;
+    uint32_t threadId = 0;
     int64_t connectionId = 0;
     double timestamp = 0;
     double duration = 0;
@@ -76,6 +78,8 @@ private:
                            const std::shared_ptr<std::vector<HcclTask>>& hcclTasks,
                            std::vector<DeviceHcclTask>& deviceHcclTasks);
     DeviceHcclTask InitHcclTaskData(const TopDownTask& topDownTask, const HcclTask& hcclTask);
+    void MergeOpDataByThreadId(std::vector<HcclOp>& hcclOps, std::vector<DeviceHcclTask>& hcclTasks,
+                               std::map<TaskId, uint16_t>& opCount);
     bool MergeHcclOpData(const std::shared_ptr<std::vector<HcclOp>>& hcclOps,
                          const std::vector<DeviceHcclTask>& deviceHcclTasks);
     DeviceHcclTask GetCompleteHcclTaskData(const HcclOp &op, const DeviceHcclTask &hcclTask, uint16_t count);

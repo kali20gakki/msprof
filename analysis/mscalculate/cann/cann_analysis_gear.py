@@ -421,7 +421,8 @@ class TaskGear(CANNGear):
                 task_track_dto.stream_id, task_track_dto.task_id, context_id,
                 task_track_dto.batch_id, task_track_dto.device_id, is_master,
                 hccl_info_dto.local_rank, hccl_info_dto.remote_rank, hccl_info_dto.transport_type, hccl_info_dto.size,
-                hccl_info_dto.data_type, hccl_info_dto.link_type, notify_id, hccl_info_dto.rdma_type
+                hccl_info_dto.data_type, hccl_info_dto.link_type, notify_id, hccl_info_dto.rdma_type,
+                task_track_dto.thread_id
             ]
         self.hccl_task_info.extend(hccl_tasks)
 
@@ -444,7 +445,7 @@ class TaskGear(CANNGear):
         hccl_node_key = node_dto.item_id + str(node_dto.end)
         if hccl_node_key in self.hccl_node_keys:
             return
-        self.hccl_node_keys.add(node_dto.item_id + str(node_dto.end))
+        self.hccl_node_keys.add(hccl_node_key)
 
         model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
         model_dto: ApiDataDto = self.db.get_api(model_event)
@@ -488,6 +489,7 @@ class TaskGear(CANNGear):
     def is_kernel_task(self, task_track_dto: TaskTrackDto, is_not_hccl_task: bool) -> bool:
         if task_track_dto.struct_type is None:
             return False
+
         # In these scene, tasks are thought to be kernel tasks
         # traditional core task
         if task_track_dto.task_type.startswith(self.KERNEL_TASK_PREFIX):
@@ -519,6 +521,9 @@ class TaskGear(CANNGear):
         if not node_dto.item_id and not hccl_dto.item_id:
             # this happens when runtime task is not respond to a op
             logging.warning("task with timestamp %d is not respond to a op.", add_dto.timestamp)
+            return
+
+        if node_dto.item_id.startswith("Lccl"):
             return
 
         model_dto: ApiDataDto = self.db.get_api(call_stack.get(Constant.MODEL_LEVEL))
@@ -601,7 +606,14 @@ class TaskGear(CANNGear):
                                    "YES" if node_basic_info_dto.op_flag else "NO",
                                    "N/A" if not node_attr_info.hashid else node_attr_info.hashid])
 
+    def clear(self):
+        """
+        每次处理前清除前一次的hccl key值，避免数据被错误过滤。
+        """
+        self.hccl_node_keys.clear()
+
     def run(self, event: Event, call_stack: dict):
+        self.clear()
         # pure runtime api
         if not event.is_invalid() and not event.additional_record:
             return

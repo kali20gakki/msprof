@@ -9,11 +9,12 @@
  * Creation Date      : 2023/11/2
  * *****************************************************************************
  */
+#include "analysis/csrc/association/cann/tree_analyzer.h"
 
 #include <string>
 #include <memory>
 #include <set>
-#include "analysis/csrc/association/cann/tree_analyzer.h"
+#include "analysis/csrc/parser/host/cann/hash_data.h"
 
 namespace Analysis {
 namespace Association {
@@ -21,6 +22,7 @@ namespace Cann {
 
 using namespace Analysis::Entities;
 using namespace Analysis::Utils;
+using namespace Analysis::Parser::Host::Cann;
 
 namespace {
 const uint32_t VALID_CTXID_NUM = 2;
@@ -32,6 +34,8 @@ const uint16_t AICPU_TASK_TYPE = 1;
 const uint64_t INVALID_MODEL_ID = 4294967295;
 const uint64_t PLACEHOLDER_OP_NAME = UINT64_MAX;
 const std::string KERNEL_TASK_PREFIX = "KERNEL";
+const std::string LCCL_PREFIX = "Lccl";
+const std::string GE_STEP_INFO_API_TYPE = "step_info";
 const uint32_t FFTS_PLUS_TASK_TYPE = 6;
 const uint32_t HCCL_TASK_TYPE = 9;
 const uint32_t HCCL_AI_CPU_TASK_TYPE = 11;
@@ -179,10 +183,22 @@ bool TreeAnalyzer::IsComputeTask(const std::shared_ptr<TreeNode> &node)
     if (path_.find(MSPROF_REPORT_NODE_LEVEL) == path_.end()) {
         return false;
     }
+
+    // 临时规避 lccl算子过滤,后续依据lccl 特征独立判定
+    auto node_api = path_[MSPROF_REPORT_NODE_LEVEL]->event->apiPtr;
+    if (!node_api || TypeData::GetInstance().Get(node_api->level, node_api->type) == GE_STEP_INFO_API_TYPE) {
+        return false;
+    }
+    std::string itemId = HashData::GetInstance().Get(node_api->itemId);
+    if (itemId.substr(0, LCCL_PREFIX.size()) == LCCL_PREFIX) {
+        return false;
+    }
+
     for (const auto &record: node->records) {
         if (record->info.type != EventType::EVENT_TYPE_TASK_TRACK) {
             continue;
         }
+
         auto trace = record->compactPtr;
         auto taskType = TypeData::GetInstance().Get(node->event->info.level,
                                                     trace->data.runtimeTrack.taskType);

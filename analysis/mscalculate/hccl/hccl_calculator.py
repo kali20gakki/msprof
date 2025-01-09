@@ -340,42 +340,48 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             logging.error("No Hccl ops or Hccl tasks found")
             return []
 
+        task_thread_map = defaultdict(lambda: deque())
+        for task in hccl_tasks:
+            task_thread_map[task.thread_id].append(task)
+
+        op_thread_map = defaultdict(lambda: deque())
+        for op in hccl_ops:
+            op_thread_map[op.thread_id].append(op)
+
         idx = 0
         res = [None] * len(hccl_tasks)
-        ops_queue = deque(hccl_ops)
-        task_queue = deque(hccl_tasks)
-        hccl_op_with_task = set()
-        hccl_op_with_task_index = {}
+        hccl_op_with_task_index = defaultdict(lambda: 0)
+        # 取数的sql语句已经order by过了
+        for thread_id, ops_queue in op_thread_map.items():
+            if thread_id not in task_thread_map.keys():
+                logging.error("Op data can't match any task, thread id is %.", thread_id)
+                continue
+            task_queue = task_thread_map[thread_id]
 
-        while ops_queue and task_queue:
-            op = ops_queue.popleft()
-            # check corner case: task time between last op end time and next op start time
-            if task_queue and task_queue[0].host_timestamp < op.timestamp:
-                logging.error('Hccl Task (context_id=%d, stream_id=%d, task_id=%d) timestamp not in Ops time range',
-                              task_queue[0].context_id, task_queue[0].stream_id, task_queue[0].task_id)
+            while ops_queue and task_queue:
+                op = ops_queue.popleft()
+                # check corner case: task time between last op end time and next op start time
+                if task_queue and task_queue[0].host_timestamp < op.timestamp:
+                    logging.error('Hccl Task (context_id=%d, stream_id=%d, task_id=%d) timestamp not in Ops time range',
+                                  task_queue[0].context_id, task_queue[0].stream_id, task_queue[0].task_id)
 
-            while task_queue and task_queue[0].host_timestamp <= (op.timestamp + op.duration):
-                task = task_queue.popleft()
-                key = f'{task.stream_id}-{task.task_id}-{task.context_id}-{task.batch_id}'
-                count = 1
-                if key in hccl_op_with_task:
-                    count = hccl_op_with_task_index.get(key, 1) + 1
-                    hccl_op_with_task_index[key] = count
-                hccl_op_with_task.add(key)
-                task = update_task_desc_with_hccl_op(op, task, count)
-                res[idx] = task
-                idx += 1
+                while task_queue and task_queue[0].host_timestamp <= (op.timestamp + op.duration):
+                    task = task_queue.popleft()
+                    key = f'{task.stream_id}-{task.task_id}-{task.context_id}-{task.batch_id}'
+                    hccl_op_with_task_index[key] += 1
+                    res[idx] = update_task_desc_with_hccl_op(op, task, hccl_op_with_task_index[key])
+                    idx += 1
 
-            self._hccl_op_data.append([op.model_id, op.op_name, op.task_type, op.op_type, op.timestamp,
-                                       op.relay, op.retry, op.data_type, op.alg_type, op.count,
-                                       op.group_name, op.connection_id])
+                self._hccl_op_data.append([op.model_id, op.op_name, op.task_type, op.op_type, op.timestamp,
+                                           op.relay, op.retry, op.data_type, op.alg_type, op.count,
+                                           op.group_name, op.connection_id])
 
-        if ops_queue:
-            if ProfilingScene().is_step_export():
-                logging.warning('ops_queue is not empty (len=%d)', len(ops_queue))
-            else:
-                logging.error('ops_queue is not empty (len=%d)', len(ops_queue))
-        if task_queue:
-            logging.error('task_queue is not empty (len=%d)', len(task_queue))
+            if ops_queue:
+                if ProfilingScene().is_step_export():
+                    logging.warning('ops_queue is not empty (len=%d)', len(ops_queue))
+                else:
+                    logging.error('ops_queue is not empty (len=%d)', len(ops_queue))
+            if task_queue:
+                logging.error('task_queue is not empty (len=%d)', len(task_queue))
 
         return res[:idx]

@@ -18,7 +18,6 @@
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/domain/services/device_context/load_host_data.h"
 #include "analysis/csrc/dfx/error_code.h"
-#include "analysis/csrc/domain/entities/hal/include/hal.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 
 
@@ -149,6 +148,7 @@ DeviceHcclTask HcclCalculator::InitHcclTaskData(const TopDownTask &topDownTask, 
     task.dataType = hcclTask.dataType;
     task.linkType = hcclTask.linkType;
     task.contextId = hcclTask.contextId;
+    task.threadId = hcclTask.threadId;
     task.notifyId = hcclTask.notifyId;
     task.batchId = hcclTask.batchId;
     task.rdmaType = hcclTask.rdmaType;
@@ -156,6 +156,40 @@ DeviceHcclTask HcclCalculator::InitHcclTaskData(const TopDownTask &topDownTask, 
     task.connectionId = topDownTask.connectionId;
     task.duration = topDownTask.endTime - topDownTask.startTime;
     return task;
+}
+
+void HcclCalculator::MergeOpDataByThreadId(std::vector<HcclOp>& hcclOps, std::vector<DeviceHcclTask>& hcclTasks,
+                                           std::map<TaskId, uint16_t>& opCount)
+{
+    std::sort(hcclOps.begin(), hcclOps.end(), [](const HcclOp& op1, const HcclOp& op2) {
+        return op1.timestamp < op2.timestamp;
+    });
+    std::sort(hcclTasks.begin(), hcclTasks.end(), [](const DeviceHcclTask& task1, const DeviceHcclTask& task2) {
+        return task1.timestamp < task2.timestamp;
+    });
+    size_t taskIdx = 0;
+    for (const auto& op : hcclOps) {
+        while (taskIdx < hcclTasks.size() && hcclTasks[taskIdx].hostTimestamp < op.timestamp) {
+            ERROR("Hccl task time not in ops time range, streamId is: %, taskId is: %, contextId is: %, batchId is: %",
+                  hcclTasks[taskIdx].streamId, hcclTasks[taskIdx].taskId,
+                  hcclTasks[taskIdx].contextId, hcclTasks[taskIdx].batchId);
+            taskIdx++;
+        }
+
+        while ((taskIdx < hcclTasks.size())
+                && (hcclTasks[taskIdx].hostTimestamp <= (op.timestamp + op.duration))) {
+            TaskId tempId(hcclTasks[taskIdx].streamId, hcclTasks[taskIdx].batchId,
+                          hcclTasks[taskIdx].taskId, hcclTasks[taskIdx].contextId);
+            uint16_t count = (opCount.find(tempId) == opCount.end()) ? 1 : (opCount[tempId] + 1);
+            opCount[tempId] = count;
+            taskData_.emplace_back(GetCompleteHcclTaskData(op, hcclTasks[taskIdx], count));
+            taskIdx++;
+        }
+        opData_.emplace_back(GetCompleteHcclOpData(op));
+    }
+    if (taskIdx != 0 && taskIdx < hcclTasks.size() -1) {
+        ERROR("Task_queue is not empty, len is: %", hcclTasks.size());
+    }
 }
 
 bool HcclCalculator::MergeHcclOpData(const std::shared_ptr<std::vector<HcclOp>> &hcclOps,
@@ -170,32 +204,24 @@ bool HcclCalculator::MergeHcclOpData(const std::shared_ptr<std::vector<HcclOp>> 
         ERROR("Reserve for hccl task failed.");
         return false;
     }
-    std::sort(hcclOps->begin(), hcclOps->end(), [](const HcclOp& op1, const HcclOp& op2) {
-        return op1.timestamp < op2.timestamp;
-    });
-    size_t taskIdx = 0;
-    std::map<TaskId, uint16_t> opCount;
-    for (const auto& op : *hcclOps) {
-        while (taskIdx < deviceHcclTasks.size() && deviceHcclTasks[taskIdx].hostTimestamp < op.timestamp) {
-            ERROR("Hccl task time not in ops time range, streamId is: %, taskId is: %, contextId is: %, batchId is: %",
-                  deviceHcclTasks[taskIdx].streamId, deviceHcclTasks[taskIdx].taskId,
-                  deviceHcclTasks[taskIdx].contextId, deviceHcclTasks[taskIdx].batchId);
-            taskIdx++;
-        }
 
-        while ((taskIdx < deviceHcclTasks.size())
-                && (deviceHcclTasks[taskIdx].hostTimestamp < (op.timestamp + op.duration))) {
-            TaskId tempId(deviceHcclTasks[taskIdx].streamId, deviceHcclTasks[taskIdx].batchId,
-                          deviceHcclTasks[taskIdx].taskId, deviceHcclTasks[taskIdx].contextId);
-            uint16_t count = (opCount.find(tempId) == opCount.end()) ? 1 : (opCount[tempId] + 1);
-            opCount[tempId] = count;
-            taskData_.emplace_back(GetCompleteHcclTaskData(op, deviceHcclTasks[taskIdx], count));
-            taskIdx++;
-        }
-        opData_.emplace_back(GetCompleteHcclOpData(op));
+    std::unordered_map<uint32_t, std::vector<HcclOp>> hcclOpThreadMap;
+    for (const auto& op : *hcclOps) {
+        hcclOpThreadMap[op.threadId].emplace_back(op);
     }
-    if (taskIdx != 0 && taskIdx < deviceHcclTasks.size() -1) {
-        ERROR("Task_queue is not empty, len is: %", deviceHcclTasks.size());
+
+    std::unordered_map<uint32_t, std::vector<DeviceHcclTask>> hcclTaskThreadMap;
+    for (const auto& task : deviceHcclTasks) {
+        hcclTaskThreadMap[task.threadId].emplace_back(task);
+    }
+
+    std::map<TaskId, uint16_t> opCount;
+    for (auto& pair : hcclOpThreadMap) {
+        if (hcclTaskThreadMap.find(pair.first) == hcclTaskThreadMap.end()) {
+            ERROR("Op data can't match any task, thread id is %.", pair.first);
+        } else {
+            MergeOpDataByThreadId(pair.second, hcclTaskThreadMap[pair.first], opCount);
+        }
     }
     return true;
 }
@@ -352,7 +378,7 @@ bool HcclCalculator::GetHcclStatisticsData()
         }
         auto key = Utils::Join("-", task.opName, std::to_string(task.firstTimestamp), task.opType);
         if (groupedData.find(key) == groupedData.end()) {
-            OpTypeInfo info(task.timestamp, task.timestamp, task.opType);
+            OpTypeInfo info(task.timestamp + task.duration, task.timestamp, task.opType);
             groupedData[key] = info;
         } else {
             auto& temp = groupedData[key];
