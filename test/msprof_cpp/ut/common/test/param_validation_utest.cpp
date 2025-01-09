@@ -989,6 +989,10 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckReportsJsonIsPathValidShoul
     std::string empty = "";
     MOCKER(&Utils::CanonicalizePath).stubs().will(returnValue(empty));
     EXPECT_EQ(false, entry->CheckReportsJsonIsPathValid(reportsJson));
+    // File bigger than 64MB
+    auto len = 65 * 1024 * 1024;  // 65 * 1024 *1024 means 65mb
+    MOCKER(&Utils::GetFileSize).stubs().will(returnValue(static_cast<long long>(len)));
+    EXPECT_EQ(false, entry->CheckReportsJsonIsPathValid(reportsJson));
     // Path Char Valid
     reportsJson = "./reports%.json";
     EXPECT_EQ(false, entry->CheckReportsJsonIsPathValid(reportsJson));
