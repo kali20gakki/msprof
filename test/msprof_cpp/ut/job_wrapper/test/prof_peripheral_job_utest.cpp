@@ -500,9 +500,10 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, SendData) {
     auto profLlcJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfLlcJob>();
 
     std::ofstream outfile;
-	outfile.open("./llc.data.0");
-	outfile << "Writing to the file" << std::endl;
-	outfile.close();
+    std::string fileName = "./llc.data.0";
+    outfile.open(fileName.c_str());
+    outfile << "Writing to the file" << std::endl;
+    outfile.close();
     collectionJobCfg_->comParams->params->llc_profiling = "on";
     profLlcJob->collectionJobCfg_ = collectionJobCfg_;
     profLlcJob->collectionJobCfg_->jobParams.dataPath = "./llc.data";
@@ -523,6 +524,7 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, SendData) {
         .then(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(PROFILING_FAILED, profLlcJob->GetCollectLlcEventsCmd(0, events,profLLc));
     EXPECT_EQ(PROFILING_FAILED, profLlcJob->GetCollectLlcEventsCmd(0, events,profLLc));
+    std::remove(fileName.c_str());
 }
 
 TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, Process) {

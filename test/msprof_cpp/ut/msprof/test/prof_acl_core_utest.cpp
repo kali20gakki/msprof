@@ -1222,7 +1222,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitGeOptions) {
     strcpy(options.options, ge_json.c_str());
     EXPECT_EQ(MSPROF_ERROR_CONFIG_INVALID, ProfAclMgr::instance()->MsprofInitGeOptions((void *)&options, sizeof(options)));
 
-    analysis::dvvp::common::utils::Utils::RemoveDir(result);
+    std::remove(result.c_str());
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, MsprofHostHandle) {

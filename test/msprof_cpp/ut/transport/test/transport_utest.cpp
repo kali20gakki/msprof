@@ -109,6 +109,7 @@ TEST_F(TRANSPORT_TRANSPORT_ITRANSPORT_TEST, SendFile) {
     //relative success
     EXPECT_EQ(PROFILING_FAILED, trans->SendFile(path, "TRANSPORT_TRANSPORT_ITRANSPORT_TEST-SendFile-file_existing", ""));
     EXPECT_EQ(PROFILING_SUCCESS, trans->SendFile(path, "TRANSPORT_TRANSPORT_ITRANSPORT_TEST-SendFile-file_existing", ""));
+    std::move(path.c_str());
 }
 
 ///////////////////////////////////////////////////////////////////
