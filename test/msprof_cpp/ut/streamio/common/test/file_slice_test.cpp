@@ -38,6 +38,10 @@ protected:
     }
     virtual void TearDown() {
         GlobalMockObject::verify();
+        std::move("hwts.log.slice_0");
+        std::move("hwts.log.slice_1");
+        std::move("hwts.log.slice_2");
+        std::move("hwts.log.slice_.done");
     }
 private:
 };

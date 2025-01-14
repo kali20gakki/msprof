@@ -503,7 +503,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckAppParamValid)
     system("ln -s ./CheckAppValid/CheckAppValid");
     app = "./CheckAppValid/CheckAppValid";
     EXPECT_EQ(PROFILING_FAILED, entry->MsprofCheckAppParamValid(app));
-    system("rm ./CheckAppValid/CheckAppValid");
+    std::remove("./CheckAppValid");
 }
 
 TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckL2CacheEventsValid) {
