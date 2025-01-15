@@ -603,6 +603,10 @@ int RunningMode::WaitRunningProcess(std::string processUsage) const
         if (isExited) {
             MSPROF_EVENT("%s process %d exited, exit code:%d", processUsage.c_str(),
                 reinterpret_cast<int>(taskPid_), exitCode);
+            if (exitCode != 0 && processUsage == "App") {
+                CmdLog::instance()->CmdWarningLog("The specified program cannot exit normally, "
+                    "exitCode:%d. Please check your code or make sure that the operation is valid.", exitCode);
+            }
             return PROFILING_SUCCESS;
         }
         analysis::dvvp::common::utils::Utils::UsleepInterupt(sleepIntevalUs);
