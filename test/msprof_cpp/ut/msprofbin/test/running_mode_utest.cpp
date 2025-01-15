@@ -399,7 +399,7 @@ TEST_F(RUNNING_MODE_UTEST, StartExportTask){
     EXPECT_EQ(PROFILING_SUCCESS, rMode.StartExportTask());
 }
 
-static int _wait_process(int taskPid_, bool &isExited, int exitCode, bool s){
+static int _wait_process(int taskPid_, bool &isExited, int &exitCode, bool s){
     static int phase2 = 0;
     if (phase2 == 0){
         phase2++;
@@ -418,6 +418,7 @@ static int _wait_process(int taskPid_, bool &isExited, int exitCode, bool s){
 
     if (phase2 == 1){
         isExited = true;
+        exitCode = 6;  // 构造6标识非正常退出
         phase2++;
         return PROFILING_SUCCESS;
     }
@@ -433,9 +434,9 @@ TEST_F(RUNNING_MODE_UTEST, WaitRunningProcess){
     MOCKER(Utils::WaitProcess)
         .stubs()
         .will(invoke(_wait_process));
-    EXPECT_EQ(PROFILING_FAILED, rMode.WaitRunningProcess("a"));
-    EXPECT_EQ(PROFILING_SUCCESS, rMode.WaitRunningProcess("a"));
-    EXPECT_EQ(PROFILING_SUCCESS, rMode.WaitRunningProcess("a"));
+    EXPECT_EQ(PROFILING_FAILED, rMode.WaitRunningProcess("App"));
+    EXPECT_EQ(PROFILING_SUCCESS, rMode.WaitRunningProcess("App"));
+    EXPECT_EQ(PROFILING_SUCCESS, rMode.WaitRunningProcess("App"));
 }
 
 TEST_F(RUNNING_MODE_UTEST, GetRunningTask){
