@@ -187,7 +187,7 @@ TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, SendBufferForProfileFileChunk)
     EXPECT_EQ(PROFILING_SUCCESS, trans->SendBuffer(fileChunkReq));
 }
 
-TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, RecvPacket) {
+TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, RecvPacketWillReturnFailWhenInputNullPacket) {
     GlobalMockObject::verify();
 
     HDC_SESSION session = (HDC_SESSION)0x12345678;
@@ -196,22 +196,207 @@ TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, RecvPacket) {
 
     std::shared_ptr<HDCTransport> trans(new HDCTransport(session));
     EXPECT_EQ(PROFILING_FAILED, trans->RecvPacket(nullptr));
+}
 
-    char containerNotSupport[] = "MESSAGE_CONTAINER_NO_SUPPORT";
-    CONST_CHAR_PTR containerPtr = &containerNotSupport[0];
-    char invalidMsg[sizeof(struct tlv_req)] = {0};
-    CONST_CHAR_PTR invalidMsgPtr = &invalidMsg[0];
+TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, RecvPacketWillReturnCloseWhenReadClose)
+{
+    GlobalMockObject::verify();
 
-    MOCKER(HdcRead)
+    TLV_REQ_PTR packet = nullptr;
+    std::string value = "xxx";
+    size_t totalSize = value.size() + sizeof(struct tlv_req);
+    TLV_REQ_PTR req = (TLV_REQ_PTR)malloc(totalSize);
+    if (req == nullptr) {
+        std::cout << "Failed to malloc";
+        return;
+    }
+    req->type = static_cast<cmd_class>(0);
+    req->dev_id = 0;
+    req->len = value.size();
+    (void)memcpy_s(req->value, req->len, value.c_str(), value.size());
+
+    HDC_SESSION session = (HDC_SESSION)0x12345678;
+    SHARED_PTR_ALIA<HDCTransport> trans;
+    MSVP_MAKE_SHARED1_VOID(trans, HDCTransport, session);
+    MOCKER(AdxHdcRead)
         .stubs()
-        .with(any(), outBoundP((void **)&invalidMsgPtr), outBoundP(&buf_len))
-        .will(returnValue(IDE_DAEMON_ERROR))
-        .then(returnValue(IDE_DAEMON_OK))
-        .then(returnValue(IDE_DAEMON_SOCK_CLOSE));
-
-    EXPECT_EQ(PROFILING_FAILED, trans->RecvPacket(&packet));
-    EXPECT_EQ(buf_len, trans->RecvPacket(&packet));
+        .with(any(), outBoundP((void **)&req), outBoundP((int *)&totalSize))
+        .will(returnValue(IDE_DAEMON_SOCK_CLOSE));
     EXPECT_EQ(IDE_DAEMON_SOCK_CLOSE, trans->RecvPacket(&packet));
+    free(req);
+}
+
+TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, RecvPacketWillReturnFailWhenReadErr)
+{
+    GlobalMockObject::verify();
+
+    TLV_REQ_PTR packet = nullptr;
+    std::string value = "xxx";
+    size_t totalSize = value.size() + sizeof(struct tlv_req);
+    TLV_REQ_PTR req = (TLV_REQ_PTR)malloc(totalSize);
+    if (req == nullptr) {
+        std::cout << "Failed to malloc";
+        return;
+    }
+    req->type = static_cast<cmd_class>(0);
+    req->dev_id = 0;
+    req->len = value.size();
+    (void)memcpy_s(req->value, req->len, value.c_str(), value.size());
+
+    HDC_SESSION session = (HDC_SESSION)0x12345678;
+    SHARED_PTR_ALIA<HDCTransport> trans;
+    MSVP_MAKE_SHARED1_VOID(trans, HDCTransport, session);
+    MOCKER(AdxHdcRead)
+        .stubs()
+        .with(any(), outBoundP((void **)&req), outBoundP((int *)&totalSize))
+        .will(returnValue(IDE_DAEMON_ERROR));
+    EXPECT_EQ(PROFILING_FAILED, trans->RecvPacket(&packet));
+    free(req);
+}
+
+TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, RecvPacketWillReturnFailWhenReadBuffLenLessThanTlvSize)
+{
+    GlobalMockObject::verify();
+
+    TLV_REQ_PTR packet = nullptr;
+    std::string value = "xxx";
+    size_t totalSize = value.size() + sizeof(struct tlv_req);
+    int invalidBuffLen = static_cast<int>(sizeof(struct tlv_req)) - 1;
+    TLV_REQ_PTR req = (TLV_REQ_PTR)malloc(totalSize);
+    if (req == nullptr) {
+        std::cout << "Failed to malloc";
+        return;
+    }
+    req->type = static_cast<cmd_class>(0);
+    req->dev_id = 0;
+    req->len = value.size();
+    (void)memcpy_s(req->value, req->len, value.c_str(), value.size());
+
+    HDC_SESSION session = (HDC_SESSION)0x12345678;
+    SHARED_PTR_ALIA<HDCTransport> trans;
+    MSVP_MAKE_SHARED1_VOID(trans, HDCTransport, session);
+    MOCKER(AdxHdcRead)
+        .stubs()
+        .with(any(), outBoundP((void **)&req), outBoundP(&invalidBuffLen))
+        .will(returnValue(IDE_DAEMON_OK));
+    EXPECT_EQ(PROFILING_FAILED, trans->RecvPacket(&packet));
+    free(req);
+}
+
+TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, RecvPacketWillReturnFailWhenReadInvalidPacketLen)
+{
+    GlobalMockObject::verify();
+
+    TLV_REQ_PTR packet = nullptr;
+    std::string value = "xxx";
+    size_t totalSize = value.size() + sizeof(struct tlv_req);
+    int invalidBuffLen = static_cast<int>(totalSize) - 1;
+    TLV_REQ_PTR req = (TLV_REQ_PTR)malloc(totalSize);
+    if (req == nullptr) {
+        std::cout << "Failed to malloc";
+        return;
+    }
+    req->type = static_cast<cmd_class>(0);
+    req->dev_id = 0;
+    req->len = value.size() - 1; // invalid len
+    (void)memcpy_s(req->value, req->len, value.c_str(), value.size());
+
+    HDC_SESSION session = (HDC_SESSION)0x12345678;
+    SHARED_PTR_ALIA<HDCTransport> trans;
+    MSVP_MAKE_SHARED1_VOID(trans, HDCTransport, session);
+    MOCKER(AdxHdcRead)
+        .stubs()
+        .with(any(), outBoundP((void **)&req), outBoundP((int *)&totalSize))
+        .will(returnValue(IDE_DAEMON_OK));
+    EXPECT_EQ(PROFILING_FAILED, trans->RecvPacket(&packet));
+    free(req);
+}
+
+TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, RecvPacketWillReturnNotSupportWhenReadNotSupportMsg)
+{
+    GlobalMockObject::verify();
+
+    TLV_REQ_PTR packet = nullptr;
+    std::string value = "MESSAGE_CONTAINER_NO_SUPPORT";
+    size_t totalSize = value.size() + sizeof(struct tlv_req);
+    int invalidBuffLen = static_cast<int>(totalSize) - 1;
+    TLV_REQ_PTR req = (TLV_REQ_PTR)malloc(totalSize);
+    if (req == nullptr) {
+        std::cout << "Failed to malloc";
+        return;
+    }
+    req->type = static_cast<cmd_class>(0);
+    req->dev_id = 0;
+    req->len = value.size(); // invalid len
+    (void)memcpy_s(req->value, req->len, value.c_str(), value.size());
+
+    HDC_SESSION session = (HDC_SESSION)0x12345678;
+    SHARED_PTR_ALIA<HDCTransport> trans;
+    MSVP_MAKE_SHARED1_VOID(trans, HDCTransport, session);
+    MOCKER(AdxHdcRead)
+        .stubs()
+        .with(any(), outBoundP((void **)&req), outBoundP((int *)&totalSize))
+        .will(returnValue(IDE_DAEMON_OK));
+    EXPECT_EQ(PROFILING_NOTSUPPORT, trans->RecvPacket(&packet));
+    free(req);
+}
+
+TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, RecvPacketWillReturnBufLenWhenReadValidMsgWithNotSupportSize)
+{
+    GlobalMockObject::verify();
+
+    TLV_REQ_PTR packet = nullptr;
+    std::string value = "MESSAGE_CONTAINER_NO_xxxxxxx";
+    size_t totalSize = value.size() + sizeof(struct tlv_req);
+    int invalidBuffLen = static_cast<int>(totalSize) - 1;
+    TLV_REQ_PTR req = (TLV_REQ_PTR)malloc(totalSize);
+    if (req == nullptr) {
+        std::cout << "Failed to malloc";
+        return;
+    }
+    req->type = static_cast<cmd_class>(0);
+    req->dev_id = 0;
+    req->len = value.size(); // invalid len
+    (void)memcpy_s(req->value, req->len, value.c_str(), value.size());
+
+    HDC_SESSION session = (HDC_SESSION)0x12345678;
+    SHARED_PTR_ALIA<HDCTransport> trans;
+    MSVP_MAKE_SHARED1_VOID(trans, HDCTransport, session);
+    MOCKER(AdxHdcRead)
+        .stubs()
+        .with(any(), outBoundP((void **)&req), outBoundP((int *)&totalSize))
+        .will(returnValue(IDE_DAEMON_OK));
+    EXPECT_EQ(totalSize, trans->RecvPacket(&packet));
+    free(req);
+}
+
+TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, RecvPacketWillReturnBufLenWhenReadValidPacketLen)
+{
+    GlobalMockObject::verify();
+
+    TLV_REQ_PTR packet = nullptr;
+    std::string value = "xxx";
+    size_t totalSize = value.size() + sizeof(struct tlv_req);
+    int invalidBuffLen = static_cast<int>(totalSize) - 1;
+    TLV_REQ_PTR req = (TLV_REQ_PTR)malloc(totalSize);
+    if (req == nullptr) {
+        std::cout << "Failed to malloc";
+        return;
+    }
+    req->type = static_cast<cmd_class>(0);
+    req->dev_id = 0;
+    req->len = value.size(); // invalid len
+    (void)memcpy_s(req->value, req->len, value.c_str(), value.size());
+
+    HDC_SESSION session = (HDC_SESSION)0x12345678;
+    SHARED_PTR_ALIA<HDCTransport> trans;
+    MSVP_MAKE_SHARED1_VOID(trans, HDCTransport, session);
+    MOCKER(AdxHdcRead)
+        .stubs()
+        .with(any(), outBoundP((void **)&req), outBoundP((int *)&totalSize))
+        .will(returnValue(IDE_DAEMON_OK));
+    EXPECT_EQ(totalSize, trans->RecvPacket(&packet));
+    free(req);
 }
 
 TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, DestroyPacket) {
@@ -262,8 +447,6 @@ TEST_F(TRANSPORT_TRANSPORT_TRANSPORTFACTORY_TEST, TransportFactory) {
     fac.reset();
 }
 
-
-
 TEST_F(TRANSPORT_TRANSPORT_TRANSPORTFACTORY_TEST, create_hdc_transport_session) {
     GlobalMockObject::verify();
 
@@ -281,11 +464,14 @@ TEST_F(TRANSPORT_TRANSPORT_TRANSPORTFACTORY_TEST, create_hdc_transport_session) 
     EXPECT_EQ((ITransport*)NULL, trans.get());
 }
 
-TEST_F(TRANSPORT_TRANSPORT_TRANSPORTFACTORY_TEST, create_hdc_transport_client) {
+TEST_F(TRANSPORT_TRANSPORT_TRANSPORTFACTORY_TEST, create_hdc_transport_client)
+{
     GlobalMockObject::verify();
 
-    HDC_CLIENT client = (HDC_CLIENT)0x12345678;
     int dev_id = 0;
+    EXPECT_EQ(nullptr, HDCTransportFactory().CreateHdcTransport(nullptr, dev_id));
+
+    HDC_CLIENT client = (HDC_CLIENT)0x12345678;
 
     MOCKER(HdcSessionConnect)
         .stubs()
