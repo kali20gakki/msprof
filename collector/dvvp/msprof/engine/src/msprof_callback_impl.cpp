@@ -242,12 +242,14 @@ int32_t MsprofSetDeviceCallbackForDynProfImpl(VOID_PTR data, uint32_t len)
 int32_t MsprofReporterCallbackImpl(uint32_t moduleId, uint32_t type, VOID_PTR data, uint32_t len)
 {
     switch (moduleId) {
-        case MSPROF_MODULE_DATA_PREPROCESS:
         case MSPROF_MODULE_HCCL:
         case MSPROF_MODULE_ACL:
         case MSPROF_MODULE_FRAMEWORK:
         case MSPROF_MODULE_RUNTIME:
         case MSPROF_MODULE_MSPROF:
+            MSPROF_LOGW("Module id %d will no longer be used.", moduleId);
+            return PROFILING_SUCCESS;
+        case MSPROF_MODULE_DATA_PREPROCESS:
             return InternalErrorCodeToExternal(
                 Msprof::Engine::MsprofCallbackHandler::reporters_[moduleId].HandleMsprofRequest(type, data, len));
         default:
