@@ -16,6 +16,7 @@
 #include "analysis/csrc/application/timeline/json_constant.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/step_trace_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/msprof_tx_host_data.h"
+#include "analysis/csrc/application/timeline/timeline_factory.h"
 
 using namespace Analysis::Application;
 using namespace Analysis::Domain;
@@ -102,4 +103,22 @@ TEST_F(TimelineManagerUTest, ShouldReturnTrueWhenDataProcessSuccessWithJsonProce
     std::vector<JsonProcess> jsonProcess = {JsonProcess::ASCEND, JsonProcess::CANN, JsonProcess::FREQ};
     TimelineManager manager(PROF_PATH, RESULT_PATH);
     EXPECT_TRUE(manager.Run(dataInventory_, jsonProcess));
+}
+
+TEST_F(TimelineManagerUTest, ShouldReturnFalseWhenProcessTimeLineGetAssemblerByNameFailed)
+{
+    std::shared_ptr<std::vector<TrainTraceData>> traceS;
+    auto trace = GenerateStepTraceData();
+    MAKE_SHARED_NO_OPERATION(traceS, std::vector<TrainTraceData>, trace);
+    dataInventory_.Inject(traceS);
+    std::shared_ptr<std::vector<MsprofTxHostData>> txS;
+    auto tx = GenerateHostTxData();
+    MAKE_SHARED_NO_OPERATION(txS, std::vector<MsprofTxHostData>, tx);
+    dataInventory_.Inject(txS);
+    std::vector<JsonProcess> jsonProcess = {JsonProcess::ASCEND, JsonProcess::CANN, JsonProcess::FREQ};
+    TimelineManager manager(PROF_PATH, RESULT_PATH);
+    std::shared_ptr<JsonAssembler> assembler{nullptr};
+    MOCKER_CPP(&TimelineFactory::GetAssemblerByName).stubs().will(returnValue(assembler));
+    EXPECT_FALSE(manager.Run(dataInventory_, jsonProcess));
+    MOCKER_CPP(&TimelineFactory::GetAssemblerByName).reset();
 }

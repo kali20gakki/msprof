@@ -19,6 +19,7 @@
 #include "analysis/csrc/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
 
 using namespace Analysis::Domain;
 using namespace Analysis::Association::Credential;
@@ -322,4 +323,70 @@ TEST_F(CommunicationInfoProcessorUTest, TestFormatKfcDataShouldReturnFalseWhenRe
     MOCKER_CPP(&Utils::Reserve<CommunicationTaskData>).stubs().will(returnValue(false));
     EXPECT_FALSE(processor.FormatKfcData(taskData, communicationData));
     MOCKER_CPP(&Utils::Reserve<CommunicationTaskData>).reset();
+}
+
+TEST_F(CommunicationInfoProcessorUTest, TestShouldReturnFalseWhenHashMapIsNullptr)
+{
+    std::vector<std::string> deviceList = {File::PathJoin({COMMUNICATION_TASK_PATH, "test", "device_1"})};
+    MOCKER_CPP(&Utils::File::GetFilesWithPrefix)
+    .stubs()
+    .will(returnValue(deviceList));
+    std::shared_ptr<GeHashMap> geHashMapPtr;
+    auto processor = CommunicationInfoProcessor({File::PathJoin({COMMUNICATION_TASK_PATH, "test"})});
+    auto dataInventory = DataInventory();
+    dataInventory.Inject(geHashMapPtr);
+    std::string processorName = "COMMUNICATION_TASK_INFO";
+    EXPECT_FALSE(processor.Run(dataInventory, processorName));
+    MOCKER_CPP(&Utils::File::GetFilesWithPrefix).reset();
+}
+
+TEST_F(CommunicationInfoProcessorUTest, TestShouldReturnFalseWhenReserveTaskFormatDataFailed)
+{
+    std::vector<CommunicationTaskData> taskData;
+    CommunicationInfoProcessor::CommunicationData communicationData;
+    std::vector<CommunicationOpData> communicationOpData;
+    auto processor = CommunicationInfoProcessor({File::PathJoin({COMMUNICATION_TASK_PATH, "test"})});
+    MOCKER_CPP(&Utils::Reserve<CommunicationTaskData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.FormatData(taskData, communicationOpData, communicationData));
+    MOCKER_CPP(&Utils::Reserve<CommunicationTaskData>).reset();
+}
+
+TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnTrueWhenSaveCommunicationTaskDataFailed)
+{
+    std::vector<CommunicationTaskData> taskResult;
+    std::vector<CommunicationOpData> opResult;
+    std::string processorName = "COMMUNICATION_TASK_INFO";
+    std::vector<CommunicationTaskData> taskRes;
+    std::vector<CommunicationOpData> opRes;
+    GeHashMap geHashMap = {{"key1", "value1"}};
+    std::shared_ptr<GeHashMap> geHashMapPtr;
+    MAKE_SHARED0_NO_OPERATION(geHashMapPtr, GeHashMap, std::move(geHashMap));
+    auto processor = CommunicationInfoProcessor(PROF_PATH_A);
+    auto dataInventory = DataInventory();
+    dataInventory.Inject(geHashMapPtr);
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<CommunicationTaskData>)
+    .stubs()
+    .will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, processorName));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<CommunicationTaskData>).reset();
+}
+
+TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnTrueWhenSaveCommunicationOpDataFailed)
+{
+    std::vector<CommunicationTaskData> taskResult;
+    std::vector<CommunicationOpData> opResult;
+    std::string processorName = "COMMUNICATION_TASK_INFO";
+    std::vector<CommunicationTaskData> taskRes;
+    std::vector<CommunicationOpData> opRes;
+    GeHashMap geHashMap = {{"key1", "value1"}};
+    std::shared_ptr<GeHashMap> geHashMapPtr;
+    MAKE_SHARED0_NO_OPERATION(geHashMapPtr, GeHashMap, std::move(geHashMap));
+    auto processor = CommunicationInfoProcessor(PROF_PATH_A);
+    auto dataInventory = DataInventory();
+    dataInventory.Inject(geHashMapPtr);
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<CommunicationOpData>)
+    .stubs()
+    .will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, processorName));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<CommunicationOpData>).reset();
 }

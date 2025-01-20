@@ -316,3 +316,85 @@ TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleWithoutApi)
                             "1,\"ph\":\"M\",\"args\":{\"sort_index\":1}},";
     EXPECT_EQ(expectStr, res.back());
 }
+
+TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleWithLogicStreamSuccess)
+{
+    AscendHardwareAssembler assembler;
+    using LogicStreamFormat = std::unordered_map<uint32_t, uint32_t>;
+    std::shared_ptr<std::vector<AscendTaskData>> taskS;
+    std::shared_ptr<std::vector<TaskInfoData>> infoS;
+    std::shared_ptr<std::vector<KfcTurnData>> kfcDatas;
+    std::shared_ptr<std::vector<ApiData>> apiS;
+    std::shared_ptr<std::vector<MemcpyInfoData>> memcpyS;
+    std::shared_ptr<LogicStreamFormat> logicStreamS;
+    auto api = GenerateApiData();
+    auto task = GenerateTaskData();
+    auto info = GenerateTaskInfoData();
+    auto kfcData = GenerateKfcTurnData();
+    auto memcpyInfoData = GenerateMemcpyInfoData();
+    LogicStreamFormat logicStream = {{1, 1337}};
+    MAKE_SHARED_NO_OPERATION(taskS, std::vector<AscendTaskData>, task);
+    MAKE_SHARED_NO_OPERATION(infoS, std::vector<TaskInfoData>, info);
+    MAKE_SHARED_NO_OPERATION(kfcDatas, std::vector<KfcTurnData>, kfcData);
+    MAKE_SHARED_NO_OPERATION(apiS, std::vector<ApiData>, api);
+    MAKE_SHARED_NO_OPERATION(memcpyS, std::vector<MemcpyInfoData>, memcpyInfoData);
+    MAKE_SHARED_NO_OPERATION(logicStreamS, LogicStreamFormat, logicStream);
+    dataInventory_.Inject(taskS);
+    dataInventory_.Inject(infoS);
+    dataInventory_.Inject(kfcDatas);
+    dataInventory_.Inject(apiS);
+    dataInventory_.Inject(memcpyS);
+    dataInventory_.Inject(logicStreamS);
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(10086)); // pid 10086
+    EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
+    auto files = File::GetOriginData(RESULT_PATH, {"msprof"}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    std::string expStr = "{\"name\":\"MatMulV3\",\"pid\":10328480,\"tid\":1337,\"ts\":\"1717575960208020.758\","
+                         "\"dur\":0.45077999999999996,\"ph\":\"X\",\"args\":{\"Model Id\":4294967295,"
+                         "\"Task Type\":\"AI_CORE\",\"Physic Stream Id\":1,\"Task Id\":10,\"Batch Id\":1,"
+                         "\"Subtask Id\":1,\"connection_id\":2345}},{\"name\":\"HostToDevice10071698309120\","
+                         "\"pid\":10328480,\"tid\":1337,\"ph\":\"f\",\"cat\":\"HostToDevice\","
+                         "\"id\":\"10071698309120\",\"ts\":\"1717575960208020.758\",\"bp\":\"e\"},"
+                         "{\"name\":\"EVENT_RECORD\",\"pid\":10328480,\"tid\":1337,\"ts\":\"1717575960208020.758\","
+                         "\"dur\":0.45077999999999996,\"ph\":\"X\",\"args\":{\"Model Id\":4294967295,"
+                         "\"Task Type\":\"EVENT_RECORD_SQE\",\"Physic Stream Id\":1,\"Task Id\":11,\"Batch Id\":1,"
+                         "\"Subtask Id\":4294967295,\"connection_id\":1234}},{\"name\":\"HostToDevice5299989643264\","
+                         "\"pid\":10328480,\"tid\":1337,\"ph\":\"f\",\"cat\":\"HostToDevice\","
+                         "\"id\":\"5299989643264\",\"ts\":\"1717575960208020.758\",\"bp\":\"e\"},"
+                         "{\"name\":\"MEMCPY_ASYNC\",\"pid\":10328480,\"tid\":1337,\"ts\":\"1717575960208021.758\","
+                         "\"dur\":4241.26,\"ph\":\"X\",\"args\":{\"Model Id\":4294967295,"
+                         "\"Task Type\":\"PCIE_DMA_SQE\",\"Physic Stream Id\":1,\"Task Id\":0,\"Batch Id\":0,"
+                         "\"Subtask Id\":4294967295,\"connection_id\":181,\"size(B)\":67108864,"
+                         "\"bandwidth(GB/s)\":15.822860187774388,\"operation\":\"host to device\"}},"
+                         "{\"name\":\"HostToDevice777389080576\",\"pid\":10328480,\"tid\":1337,\"ph\":\"f\","
+                         "\"cat\":\"HostToDevice\",\"id\":\"777389080576\",\"ts\":\"1717575960208021.758\","
+                         "\"bp\":\"e\"},{\"name\":\"MEMCPY_ASYNC\",\"pid\":10328480,\"tid\":1337,"
+                         "\"ts\":\"1717575960213021.758\",\"dur\":1202.5,\"ph\":\"X\","
+                         "\"args\":{\"Model Id\":4294967295,\"Task Type\":\"PCIE_DMA_SQE\","
+                         "\"Physic Stream Id\":1,\"Task Id\":1,\"Batch Id\":0,\"Subtask Id\":4294967295,"
+                         "\"connection_id\":181,\"size(B)\":16777216,\"bandwidth(GB/s)\":13.951946777546777,"
+                         "\"operation\":\"host to device\"}},{\"name\":\"HostToDevice777389080576\","
+                         "\"pid\":10328480,\"tid\":1337,\"ph\":\"f\",\"cat\":\"HostToDevice\","
+                         "\"id\":\"777389080576\",\"ts\":\"1717575960213021.758\",\"bp\":\"e\"},"
+                         "{\"name\":\"MEMCPY_ASYNC\",\"pid\":10328480,\"tid\":1337,\"ts\":\"1717575960215021.758\","
+                         "\"dur\":3036.9,\"ph\":\"X\",\"args\":{\"Model Id\":4294967295,"
+                         "\"Task Type\":\"PCIE_DMA_SQE\",\"Physic Stream Id\":1,\"Task Id\":2,\"Batch Id\":0,"
+                         "\"Subtask Id\":4294967295,\"connection_id\":189,\"size(B)\":35651584,"
+                         "\"bandwidth(GB/s)\":11.739465902729757,\"operation\":\"host to device\"}},"
+                         "{\"name\":\"HostToDevice811748818944\",\"pid\":10328480,\"tid\":1337,\"ph\":\"f\","
+                         "\"cat\":\"HostToDevice\",\"id\":\"811748818944\","
+                         "\"ts\":\"1717575960215021.758\",\"bp\":\"e\"},{\"name\":\"WaitExecute\","
+                         "\"pid\":10328480,\"tid\":1337,\"ts\":\"1717575960208020.758\",\"dur\":0.0,\"ph\":\"X\","
+                         "\"args\":{\"Physic Stream Id\":1,\"Task Id\":15}},{\"name\":\"process_name\","
+                         "\"pid\":10328480,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Ascend Hardware\"}},"
+                         "{\"name\":\"process_labels\",\"pid\":10328480,\"tid\":0,\"ph\":\"M\","
+                         "\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":10328480,\"tid\":0,"
+                         "\"ph\":\"M\",\"args\":{\"sort_index\":13}},{\"name\":\"thread_name\",\"pid\":10328480,"
+                         "\"tid\":1337,\"ph\":\"M\",\"args\":{\"name\":\"Stream 1337\"}},"
+                         "{\"name\":\"thread_sort_index\",\"pid\":10328480,\"tid\":1337,\"ph\":\"M\","
+                         "\"args\":{\"sort_index\":1337}},";
+    EXPECT_EQ(expStr, res.back());
+}

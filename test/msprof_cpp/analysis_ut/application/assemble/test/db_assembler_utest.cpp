@@ -34,6 +34,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/system/include/pcie_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/soc_bandwidth_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/npu_op_mem_data.h"
 
 using namespace Analysis::Application;
 using namespace Analysis::Utils;
@@ -1103,3 +1104,73 @@ TEST_F(DBAssemblerUTest, TestRunSaveMemcpyInfoDataShouldReturnFalseWhenReserveFa
     EXPECT_FALSE(assembler.Run(dataInventory));
     MOCKER_CPP(&ProcessedDataFormat::reserve).reset();
 }
+
+TEST_F(DBAssemblerUTest, TestRunAssemblerShouldReturnFalseWhenProfPathIsEmpty)
+{
+    auto assembler = DBAssembler(DB_PATH, "");
+    auto dataInventory = DataInventory();
+    EXPECT_FALSE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestSaveMetaDataShouldReturnFalseWhenReserveFailed)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    using DataFormat = std::vector<std::tuple<std::string, std::string>>;
+    MOCKER_CPP(&DataFormat::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    MOCKER_CPP(&DataFormat::reserve).reset();
+}
+
+TEST_F(DBAssemblerUTest, TestSaveNpuOpMemDataShouldReturnFalseWhenReserveFailed)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    using NpuOpMemDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
+                                                      uint64_t, uint64_t, uint64_t, uint16_t>>;
+    std::vector<NpuOpMemData> res;
+    NpuOpMemData data;
+    res.push_back(data);
+    std::shared_ptr<std::vector<NpuOpMemData>> dataSave;
+    MAKE_SHARED0_NO_OPERATION(dataSave, std::vector<NpuOpMemData>, res);
+    dataInventory.Inject<std::vector<NpuOpMemData>>(dataSave);
+    MOCKER_CPP(&NpuOpMemDataFormat::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    MOCKER_CPP(&NpuOpMemDataFormat::reserve).reset();
+}
+
+TEST_F(DBAssemblerUTest, TestSaveComputeTaskInfoShouldReturnFalseWhenReserveFailed)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    using ComputeTaskInfoFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t,
+                                                       uint64_t, uint64_t, uint64_t, uint64_t,
+                                                       uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+    std::vector<TaskInfoData> res;
+    TaskInfoData data;
+    res.push_back(data);
+    std::shared_ptr<std::vector<TaskInfoData>> dataSave;
+    MAKE_SHARED0_NO_OPERATION(dataSave, std::vector<TaskInfoData>, res);
+    dataInventory.Inject<std::vector<TaskInfoData>>(dataSave);
+    MOCKER_CPP(&ComputeTaskInfoFormat::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    MOCKER_CPP(&ComputeTaskInfoFormat::reserve).reset();
+}
+
+TEST_F(DBAssemblerUTest, TestSaveAscendTaskDataShouldReturnFalseWhenReserveFailed)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    using ascendTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, int64_t, uint64_t,
+                                                       uint32_t, uint32_t, uint32_t, int32_t, uint32_t, uint32_t>>;
+    std::vector<AscendTaskData> res;
+    AscendTaskData data;
+    res.push_back(data);
+    std::shared_ptr<std::vector<AscendTaskData>> dataSave;
+    MAKE_SHARED0_NO_OPERATION(dataSave, std::vector<AscendTaskData>, res);
+    dataInventory.Inject<std::vector<AscendTaskData>>(dataSave);
+    MOCKER_CPP(&ascendTaskDataFormat::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    MOCKER_CPP(&ascendTaskDataFormat::reserve).reset();
+}
+

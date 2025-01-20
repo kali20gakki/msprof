@@ -230,3 +230,54 @@ TEST_F(OpSummaryAssemblerUTest, ShouldReturnTrueWhenTaskAndHcclAndPmuExistWithSt
                              "17.645,0.126,0.006,0.0,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,92.785"};
     EXPECT_EQ(expectRowOne, res[1]);
 }
+
+TEST_F(OpSummaryAssemblerUTest, ShouldReturnTrueWhenTaskAndHcclAndPmuExistWithStarsAndAddCubeUsuageFailed)
+{
+    DataInventory dataInventory;
+    std::shared_ptr<std::vector<AscendTaskData>> taskS;
+    std::shared_ptr<std::vector<TaskInfoData>> infoS;
+    std::shared_ptr<std::vector<CommunicationOpData>> opDataS;
+    std::shared_ptr<MetricSummary> metricDataS;
+    auto task = GenerateTaskData();
+    auto info = GenerateTaskInfoData();
+    auto opData = GenerateOpData();
+    auto metricSummary = GenerateMetricSummary();
+    MAKE_SHARED_NO_OPERATION(taskS, std::vector<AscendTaskData>, task);
+    MAKE_SHARED_NO_OPERATION(infoS, std::vector<TaskInfoData>, info);
+    MAKE_SHARED_NO_OPERATION(opDataS, std::vector<CommunicationOpData>, opData);
+    MAKE_SHARED_NO_OPERATION(metricDataS, MetricSummary, metricSummary);
+    dataInventory.Inject(taskS);
+    dataInventory.Inject(infoS);
+    dataInventory.Inject(opDataS);
+    dataInventory.Inject(metricDataS);
+    OpSummaryAssembler assembler(PROCESSOR_OP_SUMMARY, PROF_PATH);
+    nlohmann::json record = {
+        {"DeviceInfo", {{{"hwts_frequency", "1800"}, {"aic_frequency", "1800"}, {"ai_core_num", 20}}}},
+        {"platform_version", "5"},
+    };
+    MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
+    uint16_t zeroCoreNum = 0;
+    MOCKER_CPP(&Context::GetAiCoreNum).stubs().will(returnValue(zeroCoreNum));
+    EXPECT_TRUE(assembler.Run(dataInventory));
+    auto files = File::GetOriginData(RESULT_PATH, {"op_summary"}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    EXPECT_EQ(4ul, res.size());
+    std::string expectHeader{"Device_id,Model ID,Task ID,Stream ID,Op Name,OP Type,OP State,Task Type,"
+                             "Task Start Time(us),Task Duration(us),Task Wait Time(us),Block Dim,Mix Block Dim,"
+                             "HF32 Eligible,Input Shapes,Input Data Types,Input Formats,Output Shapes,"
+                             "Output Data Types,Output Formats,Context ID,aicore_time(us),aic_total_cycles,"
+                             "aic_mac_time(us),aic_mac_ratio,aic_scalar_time(us),aic_scalar_ratio,aic_mte1_time(us),"
+                             "aic_mte1_ratio,aic_mte2_time(us),aic_mte2_ratio,aic_fixpipe_time(us),aic_fixpipe_ratio,"
+                             "aic_icache_miss_rate,aiv_time(us),aiv_total_cycles,aiv_vec_time(us),aiv_vec_ratio,"
+                             "aiv_scalar_time(us),aiv_scalar_ratio,aiv_mte2_time(us),aiv_mte2_ratio,aiv_mte3_time(us),"
+                             "aiv_mte3_ratio,aiv_icache_miss_rate"};
+    EXPECT_EQ(expectHeader, res[0]);
+    std::string expectRowOne{"0,4294967295,10,1,MatMulV3,,,,1717575960208020.758\t,151.000,0,4294967295"
+                             ",4294967295,,,,,,,,1,140.106,5043798,33.09,0.236,7.419,0.053,81.861,0.584,83.023,0.593,"
+                             "17.645,0.126,0.006,0.0,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0"};
+    EXPECT_EQ(expectRowOne, res[1]);
+    MOCKER_CPP(&Context::GetAiCoreNum).reset();
+}
