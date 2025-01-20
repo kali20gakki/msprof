@@ -63,6 +63,12 @@ const char *DOMAIN_NAME     = "domain";
 const char *BANDWIDTH       = "bandWidth";
 const char *COMMNAME        = "commName";
 
+// default value
+const int64_t INVALID_PROCESSID = -1L;
+const int64_t INVALID_THREADID = -1L;
+const int64_t INVALID_DEVICEID = -1L;
+const int64_t INVALID_STERAMID = -1L;
+
 void CallKernelCallback(PyObject *kernelCallback, const msptiActivityKernel *kernel)
 {
     if (kernelCallback == nullptr) {
@@ -108,18 +114,20 @@ void CallMstxCallback(PyObject *mstxCallback, const msptiActivityMarker *marker)
         MSPTI_LOGE("Marker data is nullptr");
         return;
     }
-    PyObject *markerData = Py_BuildValue("{sIsIsIsKsKsIsIsIsIssss}",
+    auto sourceKind = marker->sourceKind;
+    PyObject *markerData = Py_BuildValue("{sIsIsIsKsKsLsLsLsLssss}",
         KIND, static_cast<uint32_t>(marker->kind),
         FLAG, static_cast<uint32_t>(marker->flag),
         SOURCE_KIND, static_cast<uint32_t>(marker->sourceKind),
         TIMESTAMP, marker->timestamp,
         ID, marker->id,
-        PROCESS_ID, marker->objectId.pt.processId,
-        THREAD_ID, marker->objectId.pt.threadId,
-        DEVICE_ID, marker->objectId.ds.deviceId,
-        STREAM_ID, marker->objectId.ds.streamId,
+        PROCESS_ID, sourceKind == MSPTI_ACTIVITY_SOURCE_KIND_HOST ? marker->objectId.pt.processId : INVALID_PROCESSID,
+        THREAD_ID, sourceKind == MSPTI_ACTIVITY_SOURCE_KIND_HOST ? marker->objectId.pt.threadId : INVALID_THREADID,
+        DEVICE_ID, sourceKind == MSPTI_ACTIVITY_SOURCE_KIND_DEVICE ? marker->objectId.ds.deviceId : INVALID_DEVICEID,
+        STREAM_ID, sourceKind == MSPTI_ACTIVITY_SOURCE_KIND_DEVICE ? marker->objectId.ds.streamId : INVALID_STERAMID,
         NAME, marker->name,
         DOMAIN_NAME, marker->domain);
+
     if (markerData == nullptr) {
         MSPTI_LOGE("Build python marker data failed");
         return;

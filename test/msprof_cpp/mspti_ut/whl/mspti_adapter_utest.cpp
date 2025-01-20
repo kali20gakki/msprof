@@ -150,6 +150,9 @@ TEST_F(MsptiAdapterUtest, PythonMstxCallbackWillRunSuccess)
     marker.domain = "TestCase";
     instance->Record(reinterpret_cast<msptiActivity*>(&marker), sizeof(marker));
 
+    marker.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_DEVICE;
+    instance->Record(reinterpret_cast<msptiActivity*>(&marker), sizeof(marker));
+
     // invalid kind
     marker.kind = MSPTI_ACTIVITY_KIND_INVALID;
     instance->Record(reinterpret_cast<msptiActivity*>(&marker), sizeof(marker));
