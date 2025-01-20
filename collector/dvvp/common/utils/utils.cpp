@@ -1883,7 +1883,7 @@ bool Utils::CheckCharValid(const std::string &str)
 {
     for (auto &item: INVALID_CHAR) {
         if (str.find(item.first) != std::string::npos) {
-            MSPROF_LOGE("The path contains invalid character: %s.", item.second);
+            MSPROF_LOGE("The path contains invalid character: %s.", item.second.c_str());
             return false;
         }
     }

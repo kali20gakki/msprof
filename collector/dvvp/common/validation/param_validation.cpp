@@ -102,7 +102,7 @@ namespace {
     {
         for (auto &item: INVALID_CHAR) {
             if (path.find(item.first) != std::string::npos) {
-                MSPROF_LOGE("The path contains invalid character: %s.", item.second);
+                MSPROF_LOGE("The path contains invalid character: %s.", item.second.c_str());
                 return false;
             }
         }

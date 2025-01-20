@@ -30,8 +30,7 @@ int HDCTransport::SendAdxBuffer(IdeBuffT out, int outLen)
 {
     int ret = Analysis::Dvvp::Adx::AdxHdcWrite(session_, out, outLen);
     if (ret != IDE_DAEMON_OK) {
-        MSPROF_LOGE("hdc write failed, outLen=%d, err=%d.",
-                    outLen, ret);
+        MSPROF_LOGE("hdc write failed, outLen=%d, err=%d.", outLen, ret);
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
