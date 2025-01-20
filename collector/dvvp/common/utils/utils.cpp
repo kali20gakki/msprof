@@ -1211,16 +1211,20 @@ std::string Utils::IdeGetHomedir()
 
 std::string Utils::IdeReplaceWaveWithHomedir(const std::string &path)
 {
-    if (path.size() < 2) { // 2 : path begin with ~/, so size >= 2
-        return std::string(path);
+    std::string tmpStr = path;
+    if (path == "~") {
+        tmpStr.append("/");
+    }
+    if (tmpStr.size() < 2) { // 2 : path begin with ~/, so size >= 2
+        return tmpStr;
     }
 
-    if (path[0] == '~' && path[1] == '/') {
+    if (tmpStr[0] == '~' && tmpStr[1] == '/') {
         std::string homedir = IdeGetHomedir();
         homedir.append(path.substr(1));
         return homedir;
     } else {
-        return std::string(path);
+        return tmpStr;
     }
 }
 

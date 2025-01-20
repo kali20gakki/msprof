@@ -309,6 +309,7 @@ int ParamsAdapterAclJson::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> ac
         return PROFILING_FAILED;
     }
     GenAclJsonContainer(aclCfg);
+    ConvertOutputParam(paramContainer_);
     ret = PlatformAdapterInit(params_);
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;

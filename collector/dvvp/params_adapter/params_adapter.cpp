@@ -209,6 +209,13 @@ void ParamsAdapter::SetDefaultLlcMode(std::array<std::string, INPUT_CFG_MAX> &pa
     }
 }
 
+void ParamsAdapter::ConvertOutputParam(std::array<std::string, INPUT_CFG_MAX> &paramContainer) const
+{
+    if (!paramContainer[INPUT_CFG_COM_OUTPUT].empty()) {
+        paramContainer[INPUT_CFG_COM_OUTPUT] = Utils::IdeReplaceWaveWithHomedir(paramContainer[INPUT_CFG_COM_OUTPUT]);
+    }
+}
+
 std::string ParamsAdapter::SetDefaultAicMetricsType() const
 {
     return (platformType_ == PlatformType::CHIP_V4_2_0) ? PIPE_EXECUTION_UTILIZATION : PIPE_UTILIZATION;

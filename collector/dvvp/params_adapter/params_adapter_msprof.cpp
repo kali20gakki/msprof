@@ -302,7 +302,8 @@ void ParamsAdapterMsprof::SpliteAppPath(const std::string &appParams)
     if (index != std::string::npos) {
         tmpAppParamers = appParams.substr(index + 1);
     }
-    cmdPath_ = appParams.substr(0, index);
+    auto tmpCmdPath = appParams.substr(0, index);
+    cmdPath_ = Utils::IdeReplaceWaveWithHomedir(tmpCmdPath);
     if (Utils::IsPythonOrBash(cmdPath_)) {
         // bash xxx.sh args...
         if (cmdPath_.find('/') != std::string::npos) {
@@ -420,6 +421,9 @@ int ParamsAdapterMsprof::AnalysisParamsAdapt(
             return PROFILING_FAILED;
         }
         std::string argsValue = std::string(argvMap.at(arg).first.args[arg]);
+        if (arg == ARGS_OUTPUT) {
+            argsValue = Utils::IdeReplaceWaveWithHomedir(argsValue);
+        }
         if (!CheckAnalysisConfig(arg, argsValue)) {
             return PROFILING_FAILED;
         }
@@ -518,6 +522,7 @@ int ParamsAdapterMsprof::GetParamFromInputCfg(
         MSPROF_LOGE("[GetParamFromInputCfg]generate container for msprof failed.");
         return PROFILING_FAILED;
     }
+    ConvertOutputParam(paramContainer_);
     if (PlatformAdapterInit(params_) != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
