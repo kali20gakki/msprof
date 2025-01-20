@@ -232,6 +232,7 @@ int ParamsAdapterAclApi::GetParamFromInputCfg(const ProfConfig *apiCfg,
     }
     if (!params_->result_dir.empty()) {
         paramContainer_[INPUT_CFG_COM_OUTPUT] = params_->result_dir;
+        ConvertOutputParam(paramContainer_);
         setConfig_.insert(INPUT_CFG_COM_OUTPUT);
     }
     ProfCfgToContainer(apiCfg, argsArr);

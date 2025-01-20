@@ -300,6 +300,7 @@ int ParamsAdapterGeOpt::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig
         return PROFILING_FAILED;
     }
     GenGeOptionsContainer(geCfg);
+    ConvertOutputParam(paramContainer_);
     ret = PlatformAdapterInit(params_);
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;

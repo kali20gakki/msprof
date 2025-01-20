@@ -33,16 +33,16 @@ class MsprofEntrance:
         parser.add_argument(
             '-dir', '--collection-dir', dest='collection_path',
             default='', metavar='<dir>',
-            type=str, help='<Mandatory> Specify the directory that is used for '
-                           'creating data collection results.', required=True)
+            type=MsprofEntrance._expanduser_for_argument_path, help='<Mandatory> Specify the directory that is used'
+            ' for creating data collection results.', required=True)
 
     @staticmethod
     def _add_reports_argument(parser: any) -> None:
         parser.add_argument(
             '-reports', dest='reports_path',
             default='', metavar='reports',
-            type=str, help='<Optional> Path of the reports JSON configuration file, '
-                           'which is used to control the export scope of collection results.', required=False)
+            type=MsprofEntrance._expanduser_for_argument_path, help='<Optional> Path of the reports JSON configuration'
+            ' file, which is used to control the export scope of collection results.', required=False)
 
     @staticmethod
     def _handle_export_command(parser: any, args: any) -> None:
@@ -87,6 +87,10 @@ class MsprofEntrance:
         if not all(element in valid_elements for element in elements):
             raise argparse.ArgumentTypeError("Invalid elements in rule.")
         return value
+
+    @staticmethod
+    def _expanduser_for_argument_path(str_name: str):
+        return os.path.expanduser(str_name.lstrip('='))
 
     def main(self: any) -> None:
         """
