@@ -16,6 +16,8 @@
 #include "analysis/csrc/dfx/error_code.h"
 #include "analysis/csrc/parser/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/domain/data_process/data_processor.h";
+#include "analysis/csrc/viewer/database/db_runner.h";
 
 using namespace Analysis::Domain;
 using namespace Parser::Environment;
@@ -179,4 +181,19 @@ TEST_F(ApiProcessorUTest, TestRunShouldReturnFalseWhenFileOverMaxSize)
     .will(returnValue(false));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_API));
     MOCKER_CPP(&FileReader::Check).reset();
+}
+
+TEST_F(ApiProcessorUTest, TestRunShouldFalseWhenApiDataIsEmpty)
+{
+    auto processor = ApiProcessor(PROF0);
+    DataInventory dataInventory;
+    OriApiDataFormat emptyApiData;
+
+    MOCKER_CPP(&ApiProcessor::LoadData)
+    .stubs()
+    .will(returnValue(emptyApiData));
+
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_API));
+    MOCKER_CPP(&ApiProcessor::LoadData)
+    .reset();
 }

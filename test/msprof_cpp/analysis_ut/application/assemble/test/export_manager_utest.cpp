@@ -20,11 +20,13 @@
 #include "analysis/csrc/viewer/database/database.h"
 #include "analysis/csrc/viewer/database/db_runner.h"
 #include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/data_process/include/data_processor_factory.h"
 
 using namespace Analysis::Application;
 using namespace Analysis::Utils;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain;
 
 namespace {
 const int DEPTH = 0;
@@ -201,4 +203,68 @@ TEST_F(ExportManagerUTest, ShouldReturnTrueWhenReportJsonPathNotExist)
     MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
     EXPECT_TRUE(manager.Run());
+}
+
+TEST_F(ExportManagerUTest, ShouldReturnFalseWhenProcessDataGetDataProcessByNameFailed)
+{
+    ExportManager manager(PROF_PATH, REPORTS_JSON);
+    // mock Init()
+    MOCKER_CPP(&Context::Load).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
+    std::shared_ptr<DataProcessor> processor = nullptr;
+    MOCKER_CPP(&DataProcessorFactory::GetDataProcessByName).stubs().will(returnValue(processor));
+    EXPECT_FALSE(manager.Run());
+    MOCKER_CPP(&DataProcessorFactory::GetDataProcessByName).reset();
+}
+
+TEST_F(ExportManagerUTest, ShouldReturnFalseWhenCheckOutputPathFailed)
+{
+    ExportManager manager(PROF_PATH, REPORTS_JSON);
+    // mock Init()
+    MOCKER_CPP(&Context::Load).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
+
+    MOCKER_CPP(&File::Exist).
+    stubs()
+    .will(returnValue(false));
+
+    MOCKER_CPP(&File::CreateDir)
+    .stubs()
+    .will(returnValue(false));
+
+    EXPECT_FALSE(manager.Run());
+    MOCKER_CPP(&File::Exist).reset();
+    MOCKER_CPP(&File::CreateDir).reset();
+}
+
+TEST_F(ExportManagerUTest, ShouldReturnTrueWhenAnalysisReportJsonFailed)
+{
+    nlohmann::json reports = {
+        {"json_process", {
+            {"cann", true},
+            {"ascend", true},
+            {"freq", true},
+            {"hbm", false}}
+        }};
+    CreateReportsJson(reports);
+    auto jsonPath = File::PathJoin({BASE_PATH, REPORTS_JSON});
+    ExportManager manager(PROF_PATH, jsonPath);
+    // mock Init()
+    MOCKER_CPP(&Context::Load).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
+    const int analysisError = 1;
+
+    MOCKER_CPP(&FileReader::ReadJson)
+    .stubs()
+    .will(returnValue(analysisError));
+
+    EXPECT_TRUE(manager.Run());
+
+    MOCKER_CPP(&FileReader::ReadJson).reset();
 }

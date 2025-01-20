@@ -19,11 +19,14 @@
 #include "analysis/csrc/viewer/database/database.h"
 #include "analysis/csrc/viewer/database/db_runner.h"
 #include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/data_process/data_processor.h"
+#include "analysis/csrc/domain/data_process/include/data_processor_factory.h"
 
 using namespace Analysis::Application;
 using namespace Analysis::Utils;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain;
 
 namespace {
 const int DEPTH = 0;
@@ -92,4 +95,33 @@ TEST_F(ExportSummaryUTest, ShouldReturnFalseWhenProcessFail)
     MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
     EXPECT_FALSE(manager.Run());
+}
+
+TEST_F(ExportSummaryUTest, ShouldReturnFalseWhenProcessDataGetDataProcessByNameFailed)
+{
+    ExportSummary manager(PROF_PATH);
+    // mock Init()
+    MOCKER_CPP(&Context::Load).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
+    std::shared_ptr<DataProcessor> processor = nullptr;
+    MOCKER_CPP(&DataProcessorFactory::GetDataProcessByName).stubs().will(returnValue(processor));
+    EXPECT_FALSE(manager.Run());
+    MOCKER_CPP(&DataProcessorFactory::GetDataProcessByName).reset();
+}
+
+TEST_F(ExportSummaryUTest, ShouldReturnFalseWhenCheckOutputPathFailed)
+{
+    ExportSummary manager(PROF_PATH);
+    // mock Init()
+    MOCKER_CPP(&Context::Load).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
+    MOCKER_CPP(&File::Exist).stubs().will(returnValue(false));
+    MOCKER_CPP(&File::CreateDir).stubs().will(returnValue(false));
+    EXPECT_FALSE(manager.Run());
+    MOCKER_CPP(&File::Exist).reset();
+    MOCKER_CPP(&File::CreateDir).reset();
 }
