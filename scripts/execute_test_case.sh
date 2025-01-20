@@ -16,10 +16,12 @@ function add_gcov_excl_line_for_analysis() {
 }
 
 function add_gcov_excl_line_for_collector() {
-    find ${TOP_DIR}/collector/dvvp -name "*.cpp" -type f ! -name "op_desc_parser.cpp" -exec sed -i -e 's/^[[:blank:]]*MSPROF_.*;/& \/\/ LCOV_EXCL_LINE/g' -e '/^[[:blank:]]*MSPROF_.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' {} \;
-    find ${TOP_DIR}/collector/dvvp -name "*.cpp" -type f -exec sed -i -e 's/^[[:blank:]]*MSVP_MAKE_.*;/& \/\/ LCOV_EXCL_LINE/g' -e '/^[[:blank:]]*MSVP_MAKE_.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' {} \;
-    sed -i -e 's/^[[:blank:]]*CHECK_.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/analyze/src/op_desc_parser.cpp
+    find ${TOP_DIR}/collector/dvvp \( -name "*.cpp" -o -name "*.h" \) -type f ! -name "op_desc_parser.cpp" -exec sed -i -e 's/^[[:blank:]]*MSPROF_.*;$/& \/\/ LCOV_EXCL_LINE/g' -e '/^[[:blank:]]*MSPROF_.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' {} \;
+    find ${TOP_DIR}/collector/dvvp \( -name "*.cpp" -o -name "*.h" \) -type f -exec sed -i -e 's/^[[:blank:]]*MSVP_MAKE_.*;$/& \/\/ LCOV_EXCL_LINE/g' -e '/^[[:blank:]]*MSVP_MAKE_.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' {} \;
+    sed -i -e 's/^[[:blank:]]*CHECK_.*;/& \/\/ LCOV_EXCL_LINE/g' -e 's/^[[:blank:]]*MSPROF_.*;$/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/analyze/src/op_desc_parser.cpp
     find ${TOP_DIR}/collector/dvvp -name "*.cpp" -type f -exec sed -i -e 's/^[[:blank:]]*FUNRET_.*;/& \/\/ LCOV_EXCL_LINE/g' -e '/^[[:blank:]]*FUNRET_.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' {} \;
+    sed -i -e 's/^[[:blank:]]*static.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/common/singleton/singleton.h
+    sed -i 's/$/\/\/LCOV_EXCL_LINE/' ${TOP_DIR}/collector/dvvp/depend/inc/plugin/slog_plugin.h
 }
 
 function add_gcov_excl_line_for_mspti() {

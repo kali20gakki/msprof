@@ -123,8 +123,7 @@ bool DrvChannelsMgr::ChannelIsValid(int devId, AI_DRV_CHANNEL channelId)
 
 int DrvPeripheralStart(DrvPeripheralProfileCfg &peripheralCfg)
 {
-    MSPROF_EVENT("Begin to start profiling DrvPeripheralStart, profDeviceId=%d,"
-        " profChannel=%d, profSamplePeriod=%d",
+    MSPROF_EVENT("Begin to start profiling DrvPeripheralStart, profDeviceId=%d, profChannel=%d, profSamplePeriod=%d",
         peripheralCfg.profDeviceId, static_cast<int>(peripheralCfg.profChannel), peripheralCfg.profSamplePeriod);
     prof_start_para_t profStartPara;
     profStartPara.channel_type = PROF_PERIPHERAL_TYPE;
@@ -173,8 +172,7 @@ int DoProfTsCpuStart(const DrvPeripheralProfileCfg &peripheralCfg,
         configP->event[i] = (uint32_t)strtol(profEvents[i].c_str(), nullptr, STRING_TO_LONG_WEIGHT);
         eventStr.append(profEvents[i] + ",");
     }
-    MSPROF_EVENT("Begin to start profiling DoProfTsCpuStart, profDeviceId=%d,"
-        " profChannel=%d, profSamplePeriod=%d",
+    MSPROF_EVENT("Begin to start profiling DoProfTsCpuStart, profDeviceId=%d, profChannel=%d, profSamplePeriod=%d",
         profDeviceId, static_cast<int>(profChannel), profSamplePeriod);
     MSPROF_EVENT("DoProfTsCpuStart, period=%d, event_num=%d, events=%s", configP->period,
         configP->event_num, eventStr.c_str());
@@ -192,8 +190,7 @@ int DoProfTsCpuStart(const DrvPeripheralProfileCfg &peripheralCfg,
         return ret;
     }
 
-    MSPROF_EVENT("Succeeded to start profiling DoProfTsCpuStart, profDeviceId=%d,"
-        " profChannel=%d, profSamplePeriod=%d",
+    MSPROF_EVENT("Succeeded to start profiling DoProfTsCpuStart, profDeviceId=%d, profChannel=%d, profSamplePeriod=%d",
         profDeviceId, static_cast<int>(profChannel), profSamplePeriod);
     return PROFILING_SUCCESS;
 }
@@ -317,14 +314,12 @@ int DrvAicoreTaskBasedStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const 
     FREE_BUF(configP);
 
     if (ret != PROF_OK) {
-        MSPROF_LOGE("Failed to start profiling DrvAicoreTaskBasedStart, profDeviceId=%d,"
-            " profChannel=%d, ret=%d",
+        MSPROF_LOGE("Failed to start profiling DrvAicoreTaskBasedStart, profDeviceId=%d, profChannel=%d, ret=%d",
             profDeviceId, static_cast<int>(profChannel), ret);
         return PROFILING_FAILED;
     }
 
-    MSPROF_EVENT("Succeeded to start profiling DrvAicoreTaskBasedStart,"
-        " profDeviceId=%d, profChannel=%d",
+    MSPROF_EVENT("Succeeded to start profiling DrvAicoreTaskBasedStart, profDeviceId=%d, profChannel=%d",
         profDeviceId, static_cast<int>(profChannel));
 
     return PROFILING_SUCCESS;
@@ -381,8 +376,7 @@ int DrvL2CacheTaskStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const std:
     int ret = DriverPlugin::instance()->MsprofDrvStart((uint32_t)profDeviceId, profChannel, &profStartPara);
     FREE_BUF(configP);
     if (ret != PROF_OK) {
-        MSPROF_LOGE("Failed to start profiling DrvL2CacheTaskStart, profDeviceId=%d,"
-            " profChannel=%d, ret=%d",
+        MSPROF_LOGE("Failed to start profiling DrvL2CacheTaskStart, profDeviceId=%d, profChannel=%d, ret=%d",
             profDeviceId, static_cast<int>(profChannel), ret);
         return PROFILING_FAILED;
     }
@@ -433,10 +427,8 @@ int DrvTsFwStart(const DrvPeripheralProfileCfg &peripheralCfg,
     }
     MSPROF_EVENT("Begin to start profiling DrvTsFwStart, profDeviceId=%d, profChannel=%d",
         profDeviceId, static_cast<int>(profChannel));
-    MSPROF_LOGI("DrvTsFwStart profDeviceId=%d, profChannel=%d, timeLine=%u,"
-        " keyPoint=%u, memCpy=%u", profDeviceId, static_cast<int>(profChannel),
-        configP.ts_timeline,
-        configP.ts_keypoint, configP.ts_memcpy);
+    MSPROF_LOGI("DrvTsFwStart profDeviceId=%d, profChannel=%d, timeLine=%u, keyPoint=%u, memCpy=%u",
+        profDeviceId, static_cast<int>(profChannel), configP.ts_timeline, configP.ts_keypoint, configP.ts_memcpy);
     prof_start_para_t profStartPara;
     profStartPara.channel_type = PROF_TS_TYPE;
     profStartPara.sample_period = (unsigned int)peripheralCfg.profSamplePeriod;
@@ -600,8 +592,7 @@ int DrvHwtsLogStart(int profDeviceId, AI_DRV_CHANNEL profChannel)
     profStartPara.user_data_size = static_cast<unsigned int>(configSize);
     int ret = DriverPlugin::instance()->MsprofDrvStart((uint32_t)profDeviceId, profChannel, &profStartPara);
     if (ret != PROF_OK) {
-        MSPROF_LOGE("Failed to start profiling DrvHwtsLogStart, profDeviceId=%d,"
-            " profChannel=%d, ret=%d",
+        MSPROF_LOGE("Failed to start profiling DrvHwtsLogStart, profDeviceId=%d, profChannel=%d, ret=%d",
             profDeviceId, static_cast<int>(profChannel), ret);
         return PROFILING_FAILED;
     }
