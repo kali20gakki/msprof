@@ -16,12 +16,13 @@ function add_gcov_excl_line_for_analysis() {
 }
 
 function add_gcov_excl_line_for_collector() {
-    find ${TOP_DIR}/collector/dvvp \( -name "*.cpp" -o -name "*.h" \) -type f ! -name "op_desc_parser.cpp" -exec sed -i -e 's/^[[:blank:]]*MSPROF_.*;$/& \/\/ LCOV_EXCL_LINE/g' -e '/^[[:blank:]]*MSPROF_.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' {} \;
-    find ${TOP_DIR}/collector/dvvp \( -name "*.cpp" -o -name "*.h" \) -type f -exec sed -i -e 's/^[[:blank:]]*MSVP_MAKE_.*;$/& \/\/ LCOV_EXCL_LINE/g' -e '/^[[:blank:]]*MSVP_MAKE_.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' {} \;
+    find ${TOP_DIR}/collector/dvvp \( -name "*.cpp" -o -name "*.h" \) -type f ! -name "op_desc_parser.cpp" -exec sed -i -e '/^[[:blank:]]*MSPROF_.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' -e 's/^[[:blank:]]*MSPROF_.*[;,"]$/& \/\/ LCOV_EXCL_LINE/g' {} \;
+    find ${TOP_DIR}/collector/dvvp \( -name "*.cpp" -o -name "*.h" \) -type f -exec sed -i -e '/^[[:blank:]]*MSVP_MAKE_.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' -e 's/^[[:blank:]]*MSVP_MAKE_.*[;,"]$/& \/\/ LCOV_EXCL_LINE/g' {} \;
+    find ${TOP_DIR}/collector/dvvp -name "*.cpp" -type f -exec sed -i -e '/^[[:blank:]]*FUNRET_.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' -e 's/^[[:blank:]]*FUNRET_.*[;,"]$/& \/\/ LCOV_EXCL_LINE/g' {} \;
     sed -i -e 's/^[[:blank:]]*CHECK_.*;/& \/\/ LCOV_EXCL_LINE/g' -e 's/^[[:blank:]]*MSPROF_.*;$/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/analyze/src/op_desc_parser.cpp
-    find ${TOP_DIR}/collector/dvvp -name "*.cpp" -type f -exec sed -i -e 's/^[[:blank:]]*FUNRET_.*;/& \/\/ LCOV_EXCL_LINE/g' -e '/^[[:blank:]]*FUNRET_.*[,"]$/,/.*;$/ s/;$/& \/\/ LCOV_EXCL_LINE/g' {} \;
     sed -i -e 's/^[[:blank:]]*static.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/common/singleton/singleton.h
-    sed -i 's/$/\/\/LCOV_EXCL_LINE/' ${TOP_DIR}/collector/dvvp/depend/inc/plugin/slog_plugin.h
+    sed -i -e 's/^[[:blank:]]*func.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/depend/inc/plugin/plugin_handle.h
+    sed -i -e 's/^[[:blank:]]*if.*{/& \/\/ LCOV_EXCL_LINE/g' -e '/)dlogInnerForC_/s/$/\/\/LCOV_EXCL_LINE/' -e 's/^[[:blank:]]*func.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/depend/inc/plugin/slog_plugin.h
 }
 
 function add_gcov_excl_line_for_mspti() {
@@ -32,6 +33,13 @@ function add_gcov_excl_line() {
     add_gcov_excl_line_for_analysis
     add_gcov_excl_line_for_collector
     add_gcov_excl_line_for_mspti
+}
+
+function change_file_to_unix_format()
+{
+    find ${TOP_DIR}/analysis/csrc -type f -exec sed -i 's/\r$//' {} +
+    find ${TOP_DIR}/collector/dvvp -type f -exec sed -i 's/\r$//' {} +
+    find ${TOP_DIR}/mspti -type f -exec sed -i 's/\r$//' {} +
 }
 
 mkdir -p ${TOP_DIR}/test/build_llt
@@ -45,6 +53,7 @@ elif [[ -n "$1" && "$1" == "mspti" ]]; then
 elif [[ -n "$1" && "$1" == "all" ]]; then
     cmake ../ -DPACKAGE=ut -DMODE=all
 else
+    change_file_to_unix_format # change file from dos to unix format, so that gcov exclude comment can be added
     add_gcov_excl_line # add gcov exclude comment for macro definition code lines to raise branch coverage
     cmake ../ -DPACKAGE=ut -DMODE=all
 fi

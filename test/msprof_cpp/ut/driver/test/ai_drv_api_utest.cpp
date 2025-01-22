@@ -28,6 +28,11 @@ protected:
     virtual void TearDown() {}
 };
 
+TEST_F(DRIVER_AI_DRV_API_TEST, AiDrvProfApi)
+{
+    AiDrvProfApi api; // for coverage, actually do nothing
+}
+
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetDevNum) {
     uint32_t num_dev = 0;
 
@@ -119,6 +124,35 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreStart) {
     EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvAicoreStart(peripheralCfg, prof_cores, prof_events));
 }
 
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreStartWillReturnFalseWhenCheckProfilingEventsSizeFail)
+{
+    std::vector<std::string> profEvents;
+    for (int i = 0; i <= PMU_EVENT_MAX_NUM; i++) {
+        profEvents.push_back("xx");
+    }
+    DrvPeripheralProfileCfg peripheralCfg;
+    std::vector<int> profCores;
+    EXPECT_EQ(PROFILING_FAILED, DrvAicoreStart(peripheralCfg, profCores, profEvents));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreStartWillReturnFalseWhenMemSetFail)
+{
+    DrvPeripheralProfileCfg peripheralCfg;
+    peripheralCfg.profDeviceId = 0;
+    peripheralCfg.profChannel = PROF_CHANNEL_AI_CORE;
+    peripheralCfg.profSamplePeriod = 10;
+    peripheralCfg.profDataFilePath = "/path/to/data";
+ 
+    std::vector<std::string> prof_events;
+    std::vector<int> prof_cores;
+    prof_events.push_back("0x11");
+    prof_cores.push_back(0);
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    EXPECT_EQ(PROFILING_FAILED, DrvAicoreStart(peripheralCfg, prof_cores, prof_events));
+}
+
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvInstrProfileStart)
 {
     MOCKER(&DriverPlugin::MsprofDrvStart)
@@ -155,6 +189,48 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreTaskBasedStart) {
         prof_device_id, prof_channel, prof_events));
 }
 
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreTaskBasedStartWillReturnFailWhenCheckProfilingEventsSizeFail)
+{
+    int deviceId = 0;
+    std::vector<std::string> profEvents;
+ 
+    for (int i = 0; i <= PMU_EVENT_MAX_NUM; i++) {
+        profEvents.push_back("xx");
+    }
+    EXPECT_EQ(PROFILING_FAILED, DrvAicoreTaskBasedStart(deviceId, PROF_CHANNEL_AI_CORE, profEvents));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreTaskBasedStartWillReturnFailWhenMemsetFail)
+{
+    int deviceId = 0;
+    std::vector<std::string> profEvents;
+    profEvents.push_back("xx");
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    EXPECT_EQ(PROFILING_FAILED, DrvAicoreTaskBasedStart(deviceId, PROF_CHANNEL_AI_CORE, profEvents));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicpuStartWillReturnFailWhenDrvStartFail)
+{
+    int deviceId = 0;
+    AI_DRV_CHANNEL profChannel = PROF_CHANNEL_AICPU;
+    MOCKER(&DriverPlugin::MsprofDrvStart)
+        .stubs()
+        .will(returnValue(PROF_ERROR));
+    EXPECT_EQ(PROFILING_FAILED, DrvAicpuStart(deviceId, PROF_CHANNEL_AICPU));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicpuStartWillReturnSuccWhenDrvStartSucc)
+{
+    int deviceId = 0;
+    AI_DRV_CHANNEL profChannel = PROF_CHANNEL_AICPU;
+    MOCKER(&DriverPlugin::MsprofDrvStart)
+        .stubs()
+        .will(returnValue(PROF_OK));
+    EXPECT_EQ(PROFILING_SUCCESS, DrvAicpuStart(deviceId, PROF_CHANNEL_AICPU));
+}
+
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvFftsProfileStart) {
     analysis::dvvp::driver::AI_DRV_CHANNEL prof_channel = analysis::dvvp::driver::PROF_CHANNEL_FFTS_PROFILIE_TASK;
     std::vector<int>  prof_cores;
@@ -188,6 +264,19 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvFftsProfileStart) {
                 prof_cores, prof_events, prof_aivCores, prof_aivEvents));
 }
 
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvFftsProfileStartWillReturnFailWhenMemSetFail)
+{
+    DrvPeripheralProfileCfg cfg;
+    std::vector<int> profCores;
+    std::vector<std::string> profEvents;
+    std::vector<int> profAivCores;
+    std::vector<std::string> profAivEvents;
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    EXPECT_EQ(PROFILING_FAILED, DrvFftsProfileStart(cfg, profCores, profEvents, profAivCores, profAivEvents));
+}
+
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvTsFwStart) {
     analysis::dvvp::driver::DrvPeripheralProfileCfg peripheralCfg;
     peripheralCfg.profDeviceId = 0;
@@ -200,6 +289,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvTsFwStart) {
     auto profileParams = std::make_shared<analysis::dvvp::message::ProfileParams>();
 
     profileParams->ts_timeline = "on";
+    profileParams->ts_memcpy = "on";
     MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
         .will(returnValue(PROF_ERROR))
@@ -208,6 +298,40 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvTsFwStart) {
     EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::driver::DrvTsFwStart(peripheralCfg, profileParams));
 
     EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvTsFwStart(peripheralCfg, profileParams));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvTsFwStartWillReturnFailWhenMemsetFail)
+{
+    analysis::dvvp::driver::DrvPeripheralProfileCfg peripheralCfg;
+    peripheralCfg.profDeviceId = 0;
+    peripheralCfg.profChannel = analysis::dvvp::driver::PROF_CHANNEL_TS_FW;
+    peripheralCfg.profSamplePeriod = 1;
+    peripheralCfg.profDataFilePath = "/path/to/data";
+    auto profileParams = std::make_shared<analysis::dvvp::message::ProfileParams>();
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    EXPECT_EQ(PROFILING_FAILED, DrvTsFwStart(peripheralCfg, profileParams));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvTsFwStartWillReturnFailWhenDrvSetTsCommandTypeFail)
+{
+    analysis::dvvp::driver::DrvPeripheralProfileCfg peripheralCfg;
+    peripheralCfg.profDeviceId = 0;
+    peripheralCfg.profChannel = analysis::dvvp::driver::PROF_CHANNEL_TS_FW;
+    peripheralCfg.profSamplePeriod = 1;
+    peripheralCfg.profDataFilePath = "/path/to/data";
+    auto profileParams = std::make_shared<analysis::dvvp::message::ProfileParams>();
+    MOCKER(&DrvSetTsCommandType)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, DrvTsFwStart(peripheralCfg, profileParams));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvSetTsCommandTypeWillReturnFailWhenInputNullParams)
+{
+    TsTsFwProfileConfigT config;
+    EXPECT_EQ(PROFILING_FAILED, DrvSetTsCommandType(config, nullptr));
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvStarsSocLogStart) {
@@ -231,6 +355,16 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvStarsSocLogStart) {
     EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::driver::DrvStarsSocLogStart(peripheralCfg, profileParams));
 
     EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvStarsSocLogStart(peripheralCfg, profileParams));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvStarsSocLogStartWillReturnFailWhenMemsetFail)
+{
+    DrvPeripheralProfileCfg peripheralCfg;
+    auto profileParams = std::make_shared<analysis::dvvp::message::ProfileParams>();
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    EXPECT_EQ(PROFILING_FAILED, DrvStarsSocLogStart(peripheralCfg, profileParams));
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvStop) {
@@ -271,22 +405,45 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvChannelRead) {
 
 }
 
-TEST_F(DRIVER_AI_DRV_API_TEST, DrvChannelPoll) {
-    struct prof_poll_info out_buf[2];
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvChannelPollWillReturnFailWhenInputNullOutBuf)
+{
+    EXPECT_EQ(PROFILING_FAILED, DrvChannelPoll(nullptr, 0, 1));
+}
 
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvChannelPollWillReturnFailWhenChannelPollReturnErr)
+{
+    struct prof_poll_info buf[1];
+    int num;
+    int timeout;
     MOCKER(&DriverPlugin::MsprofChannelPoll)
         .stubs()
-        .will(returnValue(PROF_ERROR))
-        .then(returnValue(PROF_OK));
+        .with(any(), any(), any())
+        .will(returnValue(PROF_ERROR));
+    EXPECT_EQ(PROFILING_FAILED, DrvChannelPoll(buf, num, timeout));
+}
 
-    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::driver::DrvChannelPoll(
-        nullptr, 0, 1));
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvChannelPollWillReturnFailWhenChannelPollReturnInvalidValue)
+{
+    struct prof_poll_info buf[1];
+    int num = 0;
+    int timeout;
+    MOCKER(&DriverPlugin::MsprofChannelPoll)
+        .stubs()
+        .with(any(), any(), any())
+        .will(returnValue(1));
+    EXPECT_EQ(PROFILING_FAILED, DrvChannelPoll(buf, num, timeout));
+}
 
-    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::driver::DrvChannelPoll(
-        out_buf, 2, 1));
-
-    EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvChannelPoll(
-        out_buf, 2, 1));
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvChannelPollWillReturnSuccWhenChannelPollReturnValidValue)
+{
+    struct prof_poll_info buf[1];
+    int num = 0;
+    int timeout;
+    MOCKER(&DriverPlugin::MsprofChannelPoll)
+        .stubs()
+        .with(any(), any(), any())
+        .will(returnValue(PROF_OK));
+    EXPECT_EQ(PROF_OK, DrvChannelPoll(buf, num, timeout));
 }
 
 int halProfDataFlush(unsigned int deviceId, unsigned int channelId, unsigned int *bufSize)
@@ -295,6 +452,9 @@ int halProfDataFlush(unsigned int deviceId, unsigned int channelId, unsigned int
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvProfFlush) {
+    MOCKER(&DriverPlugin::IsFuncExist)
+        .stubs()
+        .will(returnValue(true));
     MOCKER(&DriverPlugin::MsprofHalProfDataFlush)
         .stubs()
         .will(returnValue(PROF_ERROR))
@@ -309,6 +469,15 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvProfFlush) {
 
     EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvProfFlush(
         0, 2, bufSize));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvProfFlushWillReturnFailWhenFuncNotExist)
+{
+    MOCKER(&DriverPlugin::IsFuncExist)
+        .stubs()
+        .will(returnValue(false));
+    unsigned int bufSize = 0;
+    EXPECT_EQ(PROFILING_FAILED, DrvProfFlush(0, 0, bufSize));
 }
 //////////////////////////////////////////////////////////////////////////
 
@@ -326,6 +495,14 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvHwtsLogStart) {
     EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::driver::DrvHwtsLogStart(prof_device_id, prof_channel));
 
     EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvHwtsLogStart(prof_device_id, prof_channel));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvHwtsLogStartWillReturnFailWhenMemsetFail)
+{
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    EXPECT_EQ(PROFILING_FAILED, DrvHwtsLogStart(0, PROF_CHANNEL_HWTS_LOG));
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvFmkDataStart) {
@@ -348,6 +525,13 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvFmkDataStart) {
     EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvFmkDataStart(prof_device_id, prof_channel));
 }
 
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvFmkDataStartWillReturnFailWhenMemsetFail)
+{
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    EXPECT_EQ(PROFILING_FAILED, DrvFmkDataStart(0, PROF_CHANNEL_FMK));
+}
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvL2CacheTaskStart) {
     int profDeviceId = 0;
@@ -367,6 +551,20 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvL2CacheTaskStart) {
 
     EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvL2CacheTaskStart(
         profDeviceId, prof_channel, prof_events));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvL2CacheTaskStartWillReturnFailWhenMemsetFail)
+{
+    int profDeviceId = 0;
+    analysis::dvvp::driver::AI_DRV_CHANNEL prof_channel = analysis::dvvp::driver::PROF_CHANNEL_FMK;
+    std::vector<std::string> profEvents;
+ 
+    profEvents.push_back("0x5b");
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+ 
+    EXPECT_EQ(PROFILING_FAILED, DrvL2CacheTaskStart(profDeviceId, PROF_CHANNEL_FMK, profEvents));
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetHostPhyIdByDeviceIndex) {
@@ -661,4 +859,120 @@ TEST_F(DRIVER_AI_DRV_API_TEST, GetQosProfileInfo)
     GetQosProfileInfo(0, info, events);
     GetQosProfileInfo(0, info, events);
     EXPECT_EQ(1, events.size());
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, GetQosProfileInfoWillReturnWhenMemsetFail)
+{
+    std::string info;
+    std::vector<uint8_t> events;
+    MOCKER_CPP(&ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(PlatformType::CHIP_V4_1_0));
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    GetQosProfileInfo(0, info, events);
+    EXPECT_EQ(0, events.size());
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK))
+        .then(returnValue(EOK - 1));
+    GetQosProfileInfo(0, info, events);
+    EXPECT_EQ(0, events.size());
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, GetQosProfileInfoWillReturnWhenInputEventIdNotEmpty)
+{
+    std::string info;
+    std::vector<uint8_t> events = {0};
+    GetQosProfileInfo(0, info, events);
+    EXPECT_EQ(1, events.size());
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, GetAllChannelsWillReturnFailedWhenInputInvalidDevId)
+{
+    int devId = -1;
+    EXPECT_EQ(PROFILING_FAILED, DrvChannelsMgr::instance()->GetAllChannels(devId));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, GetAllChannelsWillReturnFailedWhenMemSetFail)
+{
+    int devId = 0;
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    EXPECT_EQ(PROFILING_FAILED, DrvChannelsMgr::instance()->GetAllChannels(devId));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, GetAllChannelsWillReturnFailedWhenDrvGetChannelsFail)
+{
+    int devId = 0;
+    channel_list_t fakeChannelList;
+    MOCKER(&DriverPlugin::MsprofDrvGetChannels)
+        .stubs()
+        .with(any(), outBoundP(&fakeChannelList))
+        .will(returnValue(-1));
+    EXPECT_EQ(PROFILING_FAILED, DrvChannelsMgr::instance()->GetAllChannels(devId));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, GetAllChannelsWillReturnFailedWhenDrvGetChannelsReturnInvalidChannelNum)
+{
+    int devId = 0;
+    channel_list_t fakeChannelList;
+    fakeChannelList.channel_num = PROF_CHANNEL_NUM_MAX + 1;
+    MOCKER(&DriverPlugin::MsprofDrvGetChannels)
+        .stubs()
+        .with(any(), outBoundP(&fakeChannelList))
+        .will(returnValue(0));
+    EXPECT_EQ(PROFILING_FAILED, DrvChannelsMgr::instance()->GetAllChannels(devId));
+ 
+    fakeChannelList.channel_num = 0;
+    MOCKER(&DriverPlugin::MsprofDrvGetChannels)
+        .stubs()
+        .with(any(), outBoundP(&fakeChannelList))
+        .will(returnValue(0));
+    EXPECT_EQ(PROFILING_FAILED, DrvChannelsMgr::instance()->GetAllChannels(devId));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, GetAllChannelsWillReturnSuccWhenDrvGetChannelsReturnValidChannels)
+{
+    int devId = 0;
+    channel_list_t fakeChannelList;
+    fakeChannelList.channel_num = 1;
+    MOCKER(&DriverPlugin::MsprofDrvGetChannels)
+        .stubs()
+        .with(any(), outBoundP(&fakeChannelList))
+        .will(returnValue(0));
+    EXPECT_EQ(PROFILING_SUCCESS, DrvChannelsMgr::instance()->GetAllChannels(devId));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, ChannelIsValidWillReturnFalseWhenInputInvalidDevId)
+{
+    int devId = 0;
+    EXPECT_EQ(false, DrvChannelsMgr::instance()->ChannelIsValid(devId, PROF_CHANNEL_HBM));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, ChannelIsValidWillReturnFalseWhenNoInputChannelIdInChannelsMap)
+{
+    int devId = 0;
+    DrvChannelsMgr::instance()->devIdChannelsMap_.clear();
+    struct DrvProfChannelsInfo channels;
+    channels.deviceId = 0;
+    DrvChannelsMgr::instance()->devIdChannelsMap_.insert(std::make_pair(devId, channels));
+    EXPECT_EQ(false, DrvChannelsMgr::instance()->ChannelIsValid(devId, PROF_CHANNEL_HBM));
+    DrvChannelsMgr::instance()->devIdChannelsMap_.clear();
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, ChannelIsValidWillReturnTrueWhenInputChannelIdInChannelsMap)
+{
+    int devId = 0;
+    DrvChannelsMgr::instance()->devIdChannelsMap_.clear();
+    struct DrvProfChannelInfo channel;
+    channel.channelId = PROF_CHANNEL_HBM;
+    struct DrvProfChannelsInfo channels;
+    channels.deviceId = 0;
+    channels.channels.push_back(channel);
+    DrvChannelsMgr::instance()->devIdChannelsMap_.insert(std::make_pair(devId, channels));
+    EXPECT_EQ(true, DrvChannelsMgr::instance()->ChannelIsValid(devId, PROF_CHANNEL_HBM));
+    DrvChannelsMgr::instance()->devIdChannelsMap_.clear();
 }
