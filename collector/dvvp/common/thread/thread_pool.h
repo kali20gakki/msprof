@@ -74,8 +74,7 @@ private:
 
         int Start() override
         {
-            MSVP_MAKE_SHARED1_RET(queue_, TaskQueue, queueSize_,
-                                  analysis::dvvp::common::error::PROFILING_FAILED);
+            MSVP_MAKE_SHARED1_RET(queue_, TaskQueue, queueSize_, analysis::dvvp::common::error::PROFILING_FAILED);
             auto threadName = GetThreadName();
             queue_->SetQueueName(threadName);
             int ret = Thread::Start();

@@ -568,3 +568,70 @@ TEST_F(HDC_API_UTEST, IdeXrmalloc)
 
     EXPECT_EQ(nullptr, IdeXrmalloc((void *)ptr, 4, 4));
 }
+
+TEST_F(HDC_API_UTEST, IdeXrmallocWillReturnNullWhenInputZeroSize)
+{
+    char ptr[4] = "aa";
+    EXPECT_EQ(nullptr, IdeXrmalloc(static_cast<void *>(ptr), 0, 0));
+}
+
+TEST_F(HDC_API_UTEST, IdeXrmallocWillReturnNotNullWhenInputNullptr)
+{
+    auto ret = IdeXrmalloc(nullptr, 0, 1);
+    EXPECT_NE(nullptr, ret);
+    IdeXfree(ret);
+}
+
+TEST_F(HDC_API_UTEST, IdeXrmallocWillReturnNullWhenIdexMallocReturnNull)
+{
+    char ptr[4] = "aa";
+    MOCKER(IdeXmalloc)
+        .stubs()
+        .will(returnValue((void*)nullptr));
+    EXPECT_EQ(nullptr, IdeXrmalloc(static_cast<void *>(ptr), 0, 1));
+}
+
+TEST_F(HDC_API_UTEST, IdeXrmallocWillReturnNullWhenMemcpyReturnFail)
+{
+    char ptr[4] = "aa";
+    MOCKER(memcpy_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    EXPECT_EQ(nullptr, IdeXrmalloc(static_cast<void *>(ptr), 0, 1));
+}
+
+TEST_F(HDC_API_UTEST, IdeXrmallocWillReturnNotWhenMemcpyReturnSucc)
+{
+    char ptr[4] = "aa";
+    auto ret = IdeXrmalloc(static_cast<void *>(ptr), 0, 1);
+    EXPECT_NE(nullptr, ret);
+    IdeXfree(ret);
+}
+
+TEST_F(HDC_API_UTEST, IdeXmallocWillReturnNullWhenInputZeroSize)
+{
+    EXPECT_EQ(nullptr, IdeXmalloc(0));
+}
+
+TEST_F(HDC_API_UTEST, IdeXmallocWillReturnNullWhenMemsetFail)
+{
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    EXPECT_EQ(nullptr, IdeXmalloc(1));
+}
+
+TEST_F(HDC_API_UTEST, IdeXfreeWillDoNothingWhenInputNull)
+{
+    IdeMemHandle ptr = nullptr;
+    IdeXfree(ptr);
+    EXPECT_EQ(nullptr, ptr);
+}
+
+TEST_F(HDC_API_UTEST, IdeXfreeWillFreeMemWhenInputValidPtr)
+{
+    IdeMemHandle ptr = nullptr;
+    ptr = IdeXmalloc(1);
+    EXPECT_NE(nullptr, ptr);
+    IdeXfree(ptr);
+}
