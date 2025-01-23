@@ -148,6 +148,82 @@ drvError_t HalQueryDevpid(struct halQueryDevpidInfo pidInfo, pid_t *pid)
     return DRV_ERROR_NONE;
 }
 
+drvError_t DrvGetPlatformInfo(uint32_t *info)
+{
+    *info = 1;
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DrvHdcClientCreate(HDC_CLIENT *client, int maxSessionNum, int serviceType, int flag)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DrvHdcClientDestroy(HDC_CLIENT client)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DrvHdcServerCreate(int devid, int serviceType, HDC_SERVER *pServer)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DrvHdcServerDestroy(HDC_SERVER pServer)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DrvHdcSessionAccept(HDC_SERVER server, HDC_SESSION *session)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DrvHdcGetMsgBuffer(struct drvHdcMsg *msg, int index, CHAR_PTR_PTR pBuf, int *pLen)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DrvHdcAllocMsg(HDC_SESSION session, struct drvHdcMsg **ppMsg, int count)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DrvHdcFreeMsg(struct drvHdcMsg *msg)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DrvHdcReuseMsg(struct drvHdcMsg *msg)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DrvHdcAddMsgBuffer(struct drvHdcMsg *msg, CHAR_PTR pBuf, int len)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DrvHdcSessionConnect(int peer_node, int peer_devid, HDC_CLIENT client, HDC_SESSION *session)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DrvHdcSessionClose(HDC_SESSION session)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t DrvHdcGetCapacity(struct drvHdcCapacity *capacity)
+{
+    return DRV_ERROR_NONE;
+}
+
+drvError_t HalGetDeviceInfoByBuff(uint32_t devId, int32_t moduleType, int32_t infoType, VOID_PTR buf, int32_t *size)
+{
+    return DRV_ERROR_NONE;
+}
+
 class DriverPluginUtest : public testing::Test {
 protected:
     virtual void SetUp() {
@@ -155,6 +231,70 @@ protected:
     virtual void TearDown() {
     }
 };
+
+TEST_F(DriverPluginUtest, LoadDriverSoWillCreatePluginHandleWhenFirstLoad)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    MOCKER_CPP(&DriverPlugin::GetAllFunction)
+        .stubs();
+    MOCKER_CPP(&PluginHandle::HasLoad)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(nullptr, driverPlugin->pluginHandle_);
+    driverPlugin->LoadDriverSo();
+    EXPECT_NE(nullptr, driverPlugin->pluginHandle_);
+    driverPlugin->pluginHandle_ = nullptr;
+}
+
+TEST_F(DriverPluginUtest, LoadDriverSoWillReturnWhenOpenPluginFromEnvAndOpenPluginFromLdcfgFail)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    MOCKER_CPP(&PluginHandle::HasLoad)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&PluginHandle::OpenPluginFromEnv)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    MOCKER_CPP(&PluginHandle::OpenPluginFromLdcfg)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    driverPlugin->LoadDriverSo();
+    EXPECT_EQ(nullptr, driverPlugin->halHdcRecv_);
+    driverPlugin->pluginHandle_ = nullptr;
+}
+
+TEST_F(DriverPluginUtest, LoadDriverSoWillGetFunctionWhenOpenPluginFromEnvSucc)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    MOCKER_CPP(&PluginHandle::HasLoad)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&PluginHandle::OpenPluginFromEnv)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    driverPlugin->LoadDriverSo();
+    driverPlugin->pluginHandle_ = nullptr;
+}
+
+TEST_F(DriverPluginUtest, LoadDriverSoWillGetFunctionWhenOpenPluginFromLdcfgSucc)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    MOCKER_CPP(&PluginHandle::HasLoad)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&PluginHandle::OpenPluginFromEnv)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    MOCKER_CPP(&PluginHandle::OpenPluginFromLdcfg)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    driverPlugin->LoadDriverSo();
+    driverPlugin->pluginHandle_ = nullptr;
+}
 
 TEST_F(DriverPluginUtest, LoadDriverSo)
 {
@@ -186,6 +326,21 @@ TEST_F(DriverPluginUtest, IsFuncExist)
     EXPECT_EQ(true, driverPlugin->IsFuncExist(funcName));
 }
 
+TEST_F(DriverPluginUtest, MsprofHalHdcRecv)
+{
+    GlobalMockObject::verify();
+    int session = 0;
+    drvHdcMsg msg;
+    uint64_t flag = 0;
+    uint32_t timeout = 0;
+    int bufLen = 0;
+    int recvBufCount = 0;
+    auto driverPlugin = DriverPlugin::instance();
+    driverPlugin->halHdcRecv_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofHalHdcRecv((HDC_SESSION)&session, &msg,
+        bufLen, flag, &recvBufCount, timeout));
+}
+
 TEST_F(DriverPluginUtest, MsprofHalHdcSend)
 {
     GlobalMockObject::verify();
@@ -198,6 +353,24 @@ TEST_F(DriverPluginUtest, MsprofHalHdcSend)
     EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofHalHdcSend((HDC_SESSION)&session, &msg, flag, timeout));
     driverPlugin->halHdcSend_ = HalHdcSend;
     EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofHalHdcSend((HDC_SESSION)&session, &msg, flag, timeout));
+}
+
+TEST_F(DriverPluginUtest, MsprofHalHdcSessionConnectEx)
+{
+    GlobalMockObject::verify();
+    int peerNode = 0;
+    int peerDeviceId = 0;
+    int peerPid = 0;
+    int client = 0;
+    int session = 0;
+    HDC_SESSION psession = static_cast<HDC_SESSION>(&session);
+    auto driverPlugin = DriverPlugin::instance();
+    driverPlugin->halHdcSessionConnectEx_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofHalHdcSessionConnectEx(peerNode, peerDeviceId,
+        peerPid, static_cast<HDC_CLIENT>(&client), &psession));
+    driverPlugin->halHdcSessionConnectEx_ = HalHdcSessionConnectEx;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofHalHdcSessionConnectEx(peerNode, peerDeviceId,
+        peerPid, static_cast<HDC_CLIENT>(&client), &psession));
 }
 
 TEST_F(DriverPluginUtest, MsprofDrvHdcSetSessionReference)
@@ -492,4 +665,211 @@ TEST_F(DriverPluginUtest, MsprofHalQueryDevpid)
     EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofHalQueryDevpid(hostpidinfo, &devPid));
     driverPlugin->halQueryDevpid_ = HalQueryDevpid;
     EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofHalQueryDevpid(hostpidinfo, &devPid));
+}
+
+TEST_F(DriverPluginUtest, MsprofDrvGetPlatformInfo)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    uint32_t info = 0;
+    driverPlugin->drvGetPlatformInfo_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofDrvGetPlatformInfo(&info));
+    driverPlugin->drvGetPlatformInfo_ = DrvGetPlatformInfo;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofDrvGetPlatformInfo(&info));
+    EXPECT_EQ(1, info);
+}
+
+TEST_F(DriverPluginUtest, MsprofDrvHdcClientCreate)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    int client = 0;
+    HDC_CLIENT clientPtr = static_cast<HDC_CLIENT>(&client);
+    int maxSessionNum = 1;
+    int serviceType = 0;
+    int flag = 0;
+    driverPlugin->drvHdcClientCreate_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofDrvHdcClientCreate(&clientPtr,
+        maxSessionNum, serviceType, flag));
+    driverPlugin->drvHdcClientCreate_ = DrvHdcClientCreate;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofDrvHdcClientCreate(&clientPtr,
+        maxSessionNum, serviceType, flag));
+}
+
+TEST_F(DriverPluginUtest, MsprofDrvHdcClientDestroy)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    int client = 0;
+    HDC_CLIENT clientPtr = static_cast<HDC_CLIENT>(&client);
+    driverPlugin->drvHdcClientDestroy_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofDrvHdcClientDestroy(clientPtr));
+    driverPlugin->drvHdcClientDestroy_ = DrvHdcClientDestroy;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofDrvHdcClientDestroy(clientPtr));
+}
+
+TEST_F(DriverPluginUtest, MsprofDrvHdcServerCreate)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    int devid = 0;
+    int serviceType = 0;
+    int server = 0;
+    HDC_SERVER serverPtr = static_cast<HDC_SERVER>(&server);
+    driverPlugin->drvHdcServerCreate_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofDrvHdcServerCreate(devid, serviceType, &serverPtr));
+    driverPlugin->drvHdcServerCreate_ = DrvHdcServerCreate;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofDrvHdcServerCreate(devid, serviceType, &serverPtr));
+}
+
+TEST_F(DriverPluginUtest, MsprofDrvHdcServerDestroy)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    int server = 0;
+    HDC_SERVER serverPtr = static_cast<HDC_SERVER>(&server);
+    driverPlugin->drvHdcServerDestroy_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofDrvHdcServerDestroy(serverPtr));
+    driverPlugin->drvHdcServerDestroy_ = DrvHdcServerDestroy;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofDrvHdcServerDestroy(serverPtr));
+}
+
+TEST_F(DriverPluginUtest, MsprofDrvHdcSessionAccept)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    int server = 0;
+    HDC_SERVER serverPtr = static_cast<HDC_SERVER>(&server);
+    int session = 0;
+    HDC_SESSION sessionPtr = static_cast<HDC_SESSION>(&session);
+    driverPlugin->drvHdcSessionAccept_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofDrvHdcSessionAccept(serverPtr, &sessionPtr));
+    driverPlugin->drvHdcSessionAccept_ = DrvHdcSessionAccept;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofDrvHdcSessionAccept(serverPtr, &sessionPtr));
+}
+
+TEST_F(DriverPluginUtest, MsprofDrvHdcGetMsgBuffer)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    struct drvHdcMsg pmsg;
+    int index = 0;
+    char buffer;
+    analysis::dvvp::common::utils::CHAR_PTR fakeBuf = &buffer;
+    int bufLen = 0;
+    driverPlugin->drvHdcGetMsgBuffer_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofDrvHdcGetMsgBuffer(&pmsg, index, &fakeBuf, &bufLen));
+    driverPlugin->drvHdcGetMsgBuffer_ = DrvHdcGetMsgBuffer;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofDrvHdcGetMsgBuffer(&pmsg, index, &fakeBuf, &bufLen));
+}
+
+TEST_F(DriverPluginUtest, MsprofDrvHdcAllocMsg)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    int session = 0;
+    HDC_SESSION sessionPtr = static_cast<HDC_SESSION>(&session);
+    struct drvHdcMsg pmsg;
+    struct drvHdcMsg *pmsgPtr = &pmsg;
+    int count = 0;
+    driverPlugin->drvHdcAllocMsg_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofDrvHdcAllocMsg(sessionPtr, &pmsgPtr, count));
+    driverPlugin->drvHdcAllocMsg_ = DrvHdcAllocMsg;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofDrvHdcAllocMsg(sessionPtr, &pmsgPtr, count));
+}
+
+TEST_F(DriverPluginUtest, MsprofDrvHdcFreeMsg)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    struct drvHdcMsg pmsg;
+    struct drvHdcMsg *pmsgPtr = &pmsg;
+    driverPlugin->drvHdcFreeMsg_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofDrvHdcFreeMsg(pmsgPtr));
+    driverPlugin->drvHdcFreeMsg_ = DrvHdcFreeMsg;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofDrvHdcFreeMsg(pmsgPtr));
+}
+
+TEST_F(DriverPluginUtest, MsprofDrvHdcReuseMsg)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    struct drvHdcMsg pmsg;
+    struct drvHdcMsg *pmsgPtr = &pmsg;
+    driverPlugin->drvHdcReuseMsg_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofDrvHdcReuseMsg(pmsgPtr));
+    driverPlugin->drvHdcReuseMsg_ = DrvHdcReuseMsg;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofDrvHdcReuseMsg(pmsgPtr));
+}
+
+TEST_F(DriverPluginUtest, MsprofDrvHdcAddMsgBuffer)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    struct drvHdcMsg pmsg;
+    struct drvHdcMsg *pmsgPtr = &pmsg;
+    char pbuf;
+    int len;
+    driverPlugin->drvHdcAddMsgBuffer_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofDrvHdcAddMsgBuffer(pmsgPtr, &pbuf, len));
+    driverPlugin->drvHdcAddMsgBuffer_ = DrvHdcAddMsgBuffer;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofDrvHdcAddMsgBuffer(pmsgPtr, &pbuf, len));
+}
+
+TEST_F(DriverPluginUtest, MsprofDrvHdcSessionConnect)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    int peerNode = 0;
+    int peerDevid = 0;
+    int client = 0;
+    HDC_CLIENT clientPtr = static_cast<HDC_CLIENT>(&client);
+    int session = 0;
+    HDC_SESSION sessionPtr = static_cast<HDC_SESSION>(&session);
+    driverPlugin->drvHdcSessionConnect_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofDrvHdcSessionConnect(peerNode, peerDevid,
+        clientPtr, &sessionPtr));
+    driverPlugin->drvHdcSessionConnect_ = DrvHdcSessionConnect;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofDrvHdcSessionConnect(peerNode, peerDevid,
+        clientPtr, &sessionPtr));
+}
+
+TEST_F(DriverPluginUtest, MsprofDrvHdcSessionClose)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    int session = 0;
+    HDC_SESSION sessionPtr = static_cast<HDC_SESSION>(&session);
+    driverPlugin->drvHdcSessionClose_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofDrvHdcSessionClose(sessionPtr));
+    driverPlugin->drvHdcSessionClose_ = DrvHdcSessionClose;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofDrvHdcSessionClose(sessionPtr));
+}
+
+TEST_F(DriverPluginUtest, MsprofDrvHdcGetCapacity)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    struct drvHdcCapacity capacity;
+    driverPlugin->drvHdcGetCapacity_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_INVALID_HANDLE, driverPlugin->MsprofDrvHdcGetCapacity(&capacity));
+    driverPlugin->drvHdcGetCapacity_ = DrvHdcGetCapacity;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofDrvHdcGetCapacity(&capacity));
+}
+
+TEST_F(DriverPluginUtest, MsprofHalGetDeviceInfoByBuff)
+{
+    GlobalMockObject::verify();
+    auto driverPlugin = DriverPlugin::instance();
+    uint32_t devId = 0;
+    int32_t moduleType = 0;
+    int32_t infoType = 0;
+    int32_t size;
+    VOID_PTR buf = nullptr;
+    driverPlugin->halGetDeviceInfoByBuff_ = nullptr;
+    EXPECT_EQ(DRV_ERROR_NOT_SUPPORT, driverPlugin->MsprofHalGetDeviceInfoByBuff(devId, moduleType,
+        infoType, buf, &size));
+    driverPlugin->halGetDeviceInfoByBuff_ = HalGetDeviceInfoByBuff;
+    EXPECT_EQ(DRV_ERROR_NONE, driverPlugin->MsprofHalGetDeviceInfoByBuff(devId, moduleType,
+        infoType, buf, &size));
 }
