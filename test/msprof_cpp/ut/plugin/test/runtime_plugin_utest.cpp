@@ -35,22 +35,83 @@ protected:
     }
 };
 
-TEST_F(RuntimePluginUtest, LoadProfApiSo)
+TEST_F(RuntimePluginUtest, LoadRuntimeSoWillCreatePluginHandleWhenFirstLoad)
 {
     GlobalMockObject::verify();
     auto runtimePlugin = RuntimePlugin::instance();
+    MOCKER_CPP(&RuntimePlugin::GetAllFunction)
+        .stubs();
+    MOCKER_CPP(&PluginHandle::HasLoad)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(nullptr, runtimePlugin->pluginHandle_);
+    runtimePlugin->LoadRuntimeSo();
+    EXPECT_NE(nullptr, runtimePlugin->pluginHandle_);
+    runtimePlugin->pluginHandle_ = nullptr;
+}
+
+TEST_F(RuntimePluginUtest, LoadRuntimeSoWillReturnWhenOpenPluginFromEnvAndOpenPluginFromLdcfgFail)
+{
+    GlobalMockObject::verify();
+    auto runtimePlugin = RuntimePlugin::instance();
+    MOCKER_CPP(&PluginHandle::HasLoad)
+        .stubs()
+        .will(returnValue(false));
     MOCKER_CPP(&PluginHandle::OpenPluginFromEnv)
         .stubs()
-        .will(returnValue(PROFILING_FAILED))
-        .then(returnValue(PROFILING_SUCCESS));
+        .will(returnValue(PROFILING_FAILED));
     MOCKER_CPP(&PluginHandle::OpenPluginFromLdcfg)
         .stubs()
-        .will(returnValue(PROFILING_FAILED))
-        .then(returnValue(PROFILING_SUCCESS));
+        .will(returnValue(PROFILING_FAILED));
     runtimePlugin->LoadRuntimeSo();
     EXPECT_EQ(nullptr, runtimePlugin->rtGetVisibleDeviceIdByLogicDeviceIdFunc_);
+    runtimePlugin->pluginHandle_ = nullptr;
+}
+
+TEST_F(RuntimePluginUtest, LoadRuntimeSoWillGetFunctionWhenOpenPluginFromEnvSucc)
+{
+    GlobalMockObject::verify();
+    auto runtimePlugin = RuntimePlugin::instance();
+    MOCKER_CPP(&PluginHandle::HasLoad)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&PluginHandle::OpenPluginFromEnv)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
     runtimePlugin->LoadRuntimeSo();
-    EXPECT_EQ(nullptr, runtimePlugin->rtGetVisibleDeviceIdByLogicDeviceIdFunc_);
+    runtimePlugin->pluginHandle_ = nullptr;
+}
+
+TEST_F(RuntimePluginUtest, LoadRuntimeSoWillGetFunctionWhenOpenPluginFromLdcfgSucc)
+{
+    GlobalMockObject::verify();
+    auto runtimePlugin = RuntimePlugin::instance();
+    MOCKER_CPP(&PluginHandle::HasLoad)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&PluginHandle::OpenPluginFromEnv)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    MOCKER_CPP(&PluginHandle::OpenPluginFromLdcfg)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    runtimePlugin->LoadRuntimeSo();
+    runtimePlugin->pluginHandle_ = nullptr;
+}
+
+TEST_F(RuntimePluginUtest, LoadRuntimeSo)
+{
+    GlobalMockObject::verify();
+    auto runtimePlugin = RuntimePlugin::instance();
+    MOCKER_CPP(&PluginHandle::HasLoad)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&PluginHandle::OpenPluginFromEnv)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&PluginHandle::OpenPluginFromLdcfg)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
     runtimePlugin->LoadRuntimeSo();
 }
 
@@ -60,9 +121,11 @@ TEST_F(RuntimePluginUtest, IsFuncExist)
     auto runtimePlugin = RuntimePlugin::instance();
     MOCKER_CPP(&PluginHandle::IsFuncExist)
         .stubs()
-        .will(returnValue(true));
+        .will(returnValue(true))
+        .then(returnValue(false));
     std::string funcName = "rtGetVisibleDeviceIdByLogicDeviceId";
     EXPECT_EQ(true, runtimePlugin->IsFuncExist(funcName));
+    EXPECT_EQ(false, runtimePlugin->IsFuncExist(funcName));
 }
 
 TEST_F(RuntimePluginUtest, MsprofRtGetVisibleDeviceIdByLogicDeviceId)
