@@ -102,6 +102,7 @@ TEST_F(DynProfThreadUtest, DynProfThread_StopAfterDelay)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     dynProfThread_->Start(); // thread sleep 1s, then return
+    EXPECT_EQ(PROFILING_SUCCESS, dynProfThread_->Start()); // repeat start
 
     // sleep 2s
     std::chrono::seconds sleepTime(2); // 2 sleep 2s as real task time
@@ -218,6 +219,24 @@ TEST_F(DynProfThreadUtest, StartProfTaskWillReturnFailWhileHandleDevProfTaskFail
     EXPECT_EQ(PROFILING_FAILED, dynProfThread_->StartProfTask());
 }
 
+TEST_F(DynProfThreadUtest, StartProfTaskWillReturnFailWhileProfAclMgrInitFail)
+{
+    GlobalMockObject::verify();
+    SHARED_PTR_ALIA<DynProfThread> dynProfThread_;
+    MSVP_MAKE_SHARED0_VOID(dynProfThread_, DynProfThread);
+    ProfSetDevPara data;
+    dynProfThread_->SaveDevicesInfo(data);
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofInitAclEnv)
+        .stubs()
+        .will(returnValue(0));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::Init)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofHostHandle)
+        .stubs();
+    EXPECT_EQ(PROFILING_FAILED, dynProfThread_->StartProfTask());
+}
+
 TEST_F(DynProfThreadUtest, StartProfTaskWillReturnSuccWhileHandleDevProfTaskSucc)
 {
     GlobalMockObject::verify();
@@ -237,6 +256,47 @@ TEST_F(DynProfThreadUtest, StartProfTaskWillReturnSuccWhileHandleDevProfTaskSucc
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(PROFILING_SUCCESS, dynProfThread_->StartProfTask());
+}
+
+TEST_F(DynProfThreadUtest, StopProfTaskWillReturnFailWhenMsprofFinalizeHandleReturnFail)
+{
+    GlobalMockObject::verify();
+    SHARED_PTR_ALIA<DynProfThread> dynProfThread_;
+    MSVP_MAKE_SHARED0_VOID(dynProfThread_, DynProfThread);
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofFinalizeHandle)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, dynProfThread_->StopProfTask());
+}
+
+TEST_F(DynProfThreadUtest, StopProfTaskWillReturnSuccWhenMsprofFinalizeHandleReturnSucc)
+{
+    GlobalMockObject::verify();
+    SHARED_PTR_ALIA<DynProfThread> dynProfThread_;
+    MSVP_MAKE_SHARED0_VOID(dynProfThread_, DynProfThread);
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofFinalizeHandle)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_SUCCESS, dynProfThread_->StopProfTask());
+}
+
+TEST_F(DynProfThreadUtest, DynProfThreadWillStartDeviceCollectWhileProfHasStart)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Collector::Dvvp::DynProf::DynProfThread::HandleDevProfTask)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS))
+        .then(returnValue(PROFILING_FAILED));
+    SHARED_PTR_ALIA<DynProfThread> dynProfThread_;
+    MSVP_MAKE_SHARED0_VOID(dynProfThread_, DynProfThread);
+    ProfSetDevPara data;
+    data.deviceId = 0;
+    data.isOpen = true;
+    dynProfThread_->profHasStarted_ = true;
+    dynProfThread_->SaveDevicesInfo(data);
+    EXPECT_EQ(1, dynProfThread_->deviceInfos_.size());
+    dynProfThread_->SaveDevicesInfo(data);
+    EXPECT_EQ(1, dynProfThread_->deviceInfos_.size());
 }
 
 TEST_F(DynProfThreadUtest, DynProfThreadWillInsertDeviceWhileSetNewDevice)
@@ -360,6 +420,39 @@ protected:
     }
 };
 
+size_t RecvReturnInvalidReqStub(int fd, VOID_PTR msg, size_t msgSize, int flags)
+{
+    return 0;
+}
+
+size_t RecvReturnTestReqStub(int fd, VOID_PTR msg, size_t msgSize, int flags)
+{
+    auto reqMsg = reinterpret_cast<DynProfReqMsg *>(msg);
+    reqMsg->msgType = DynProfMsgType::TEST_REQ;
+    return sizeof(DynProfReqMsg);
+}
+
+size_t RecvReturnStartReqStub(int fd, VOID_PTR msg, size_t msgSize, int flags)
+{
+    auto reqMsg = reinterpret_cast<DynProfReqMsg *>(msg);
+    reqMsg->msgType = DynProfMsgType::START_REQ;
+    return sizeof(DynProfReqMsg);
+}
+
+size_t RecvReturnStopReqStub(int fd, VOID_PTR msg, size_t msgSize, int flags)
+{
+    auto reqMsg = reinterpret_cast<DynProfReqMsg *>(msg);
+    reqMsg->msgType = DynProfMsgType::STOP_REQ;
+    return sizeof(DynProfReqMsg);
+}
+
+size_t RecvReturnQuitReqStub(int fd, VOID_PTR msg, size_t msgSize, int flags)
+{
+    auto reqMsg = reinterpret_cast<DynProfReqMsg *>(msg);
+    reqMsg->msgType = DynProfMsgType::QUIT_REQ;
+    return sizeof(DynProfReqMsg);
+}
+
 TEST_F(DynProfSrvUtest, DynProfServerStart)
 {
     GlobalMockObject::verify();
@@ -373,6 +466,8 @@ TEST_F(DynProfSrvUtest, DynProfServerStart)
     dynProfSrv->srvStarted_ = false;
     EXPECT_EQ(PROFILING_FAILED, dynProfSrv->Start());
 
+    EXPECT_EQ(PROFILING_SUCCESS, dynProfSrv->Start());
+    // repeat start server
     EXPECT_EQ(PROFILING_SUCCESS, dynProfSrv->Start());
     dynProfSrv->Stop();
     dynProfSrv->Join();
@@ -445,9 +540,85 @@ TEST_F(DynProfSrvUtest, IdleConnectOverTime)
     EXPECT_EQ(true, dynProfSrv->IdleConnectOverTime(time));
 }
 
-TEST_F(DynProfSrvUtest, DynProfServerProcMsg)
+TEST_F(DynProfSrvUtest, DynProfServerProcMsgWillReturnWhenRecvReturnTestReqAndDynProfServerRsqMsgReturnFail)
 {
-    MOCKER(close)
+    MOCKER(recv)
+        .stubs()
+        .will(invoke(RecvReturnTestReqStub));
+    MOCKER_CPP(&DynProfServer::DynProfServerRsqMsg)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    MOCKER_CPP(&DynProfServer::DynProfSrvProcQuit)
+        .stubs();
+    SHARED_PTR_ALIA<DynProfServer> dynProfSrv;
+    dynProfSrv = std::make_shared<DynProfServer>();
+    dynProfSrv->srvStarted_ = true;
+    dynProfSrv->DynProfServerProcMsg();
+}
+
+TEST_F(DynProfSrvUtest, DynProfServerProcMsgWillReturnWhenRecvReturnTestReqAndDynProfServerRsqMsgReturnSucc)
+{
+    SHARED_PTR_ALIA<DynProfServer> dynProfSrv;
+    dynProfSrv = std::make_shared<DynProfServer>();
+    MOCKER(recv)
+        .stubs()
+        .will(invoke(RecvReturnTestReqStub));
+    MOCKER_CPP(&DynProfServer::DynProfServerRsqMsg)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&DynProfServer::DynProfSrvProcQuit)
+        .stubs();
+    dynProfSrv->srvStarted_ = true;
+    for (uint32_t i = 0; i <= DYN_PROF_SERVER_PROC_MSG_MAX_NUM; i++) {
+        dynProfSrv->DynProfServerProcMsg();
+    }
+}
+
+TEST_F(DynProfSrvUtest, DynProfServerProcMsgWillReturnWhenRecvReturnStartReq)
+{
+    MOCKER(recv)
+        .stubs()
+        .will(invoke(RecvReturnStartReqStub));
+    MOCKER_CPP(&DynProfServer::DynProfSrvProcStart)
+        .stubs();
+    SHARED_PTR_ALIA<DynProfServer> dynProfSrv;
+    dynProfSrv = std::make_shared<DynProfServer>();
+    dynProfSrv->srvStarted_ = true;
+    dynProfSrv->DynProfServerProcMsg();
+}
+
+TEST_F(DynProfSrvUtest, DynProfServerProcMsgWillReturnWhenRecvReturnStopReq)
+{
+    MOCKER(recv)
+        .stubs()
+        .will(invoke(RecvReturnStopReqStub));
+    MOCKER_CPP(&DynProfServer::DynProfSrvProcStop)
+        .stubs();
+    SHARED_PTR_ALIA<DynProfServer> dynProfSrv;
+    dynProfSrv = std::make_shared<DynProfServer>();
+    dynProfSrv->srvStarted_ = true;
+    dynProfSrv->DynProfServerProcMsg();
+}
+
+TEST_F(DynProfSrvUtest, DynProfServerProcMsgWillReturnWhenRecvReturnQuitReq)
+{
+    MOCKER(recv)
+        .stubs()
+        .will(invoke(RecvReturnQuitReqStub));
+    MOCKER_CPP(&DynProfServer::DynProfSrvProcStop)
+        .stubs();
+    SHARED_PTR_ALIA<DynProfServer> dynProfSrv;
+    dynProfSrv = std::make_shared<DynProfServer>();
+    dynProfSrv->srvStarted_ = true;
+    dynProfSrv->DynProfServerProcMsg();
+}
+
+TEST_F(DynProfSrvUtest, DynProfServerProcMsgWillReturnWhenRecvReturnInvalidReq)
+{
+    MOCKER(recv)
+        .stubs()
+        .will(invoke(RecvReturnInvalidReqStub));
+    MOCKER_CPP(&DynProfServer::DynProfSrvProcStop)
         .stubs();
     SHARED_PTR_ALIA<DynProfServer> dynProfSrv;
     dynProfSrv = std::make_shared<DynProfServer>();
@@ -491,10 +662,26 @@ TEST_F(DynProfSrvUtest, DynProfSrvProcStartWillSuccWhileStartDeviceSucc)
  
     dynProfSrv->DynProfSrvProcStart();
     EXPECT_EQ(false, dynProfSrv->profHasStarted_.load());
- 
+
+    // start for max times
+    for (uint32_t i = 0; i <= DYN_PROF_MAX_STARTABLE_TIMES; i++) {
+        dynProfSrv->DynProfSrvProcStart();
+        EXPECT_EQ(true, dynProfSrv->profHasStarted_.load());
+        dynProfSrv->profHasStarted_.store(false); // set false for next start
+        EXPECT_EQ(i + 1, dynProfSrv->startTimes_);
+    }
     dynProfSrv->DynProfSrvProcStart();
-    EXPECT_EQ(true, dynProfSrv->profHasStarted_.load());
-    EXPECT_EQ(1, dynProfSrv->startTimes_);
+    EXPECT_EQ(DYN_PROF_MAX_STARTABLE_TIMES + 1, dynProfSrv->startTimes_);
+    EXPECT_EQ(false, dynProfSrv->profHasStarted_.load());
+}
+
+TEST_F(DynProfSrvUtest, DynProfSrvProcStartWillReturnWhenProfNotStart)
+{
+    GlobalMockObject::verify();
+    SHARED_PTR_ALIA<DynProfServer> dynProfSrv;
+    dynProfSrv = std::make_shared<DynProfServer>();
+    dynProfSrv->DynProfSrvProcStart();
+    EXPECT_EQ(false, dynProfSrv->profHasStarted_.load());
 }
 
 TEST_F(DynProfSrvUtest, DynProfSrvProcStartWillFailWhileStartDeviceFail)
@@ -663,6 +850,29 @@ TEST_F(DynProfSrvUtest, DynProfServerRsqMsg)
     dynProfSrv->DynProfServerRsqMsg(DynProfMsgType::START_RSP, DynProfMsgProcRes::EXE_FAIL, tips);
 }
 
+TEST_F(DynProfSrvUtest, DynProfServerRsqMsgWillReturnFailWhenInputMsgLongerThanMaxLen)
+{
+    GlobalMockObject::verify();
+    std::string tips(DYN_PROF_RSP_MSG_MAX_LEN, 'x');
+    SHARED_PTR_ALIA<DynProfServer> dynProfSrv;
+    dynProfSrv = std::make_shared<DynProfServer>();
+    EXPECT_EQ(PROFILING_FAILED, dynProfSrv->DynProfServerRsqMsg(DynProfMsgType::START_RSP,
+        DynProfMsgProcRes::EXE_FAIL, tips));
+}
+
+TEST_F(DynProfSrvUtest, DynProfServerRsqMsgWillReturnFailWhenMemCpyFail)
+{
+    GlobalMockObject::verify();
+    std::string tips;
+    SHARED_PTR_ALIA<DynProfServer> dynProfSrv;
+    dynProfSrv = std::make_shared<DynProfServer>();
+    MOCKER(memcpy_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    EXPECT_EQ(PROFILING_FAILED, dynProfSrv->DynProfServerRsqMsg(DynProfMsgType::START_RSP,
+        DynProfMsgProcRes::EXE_FAIL, tips));
+}
+
 class DynProfMgrUtest : public testing::Test {
 protected:
     virtual void SetUp()
@@ -687,6 +897,8 @@ TEST_F(DynProfMgrUtest, StartDynProf_ReturnFailed_WithInvalidProfilingMode)
 TEST_F(DynProfMgrUtest, StartDynProfSrv_WithDynamicProfilingMode)
 {
     GlobalMockObject::verify();
+    ProfSetDevPara data;
+    data.deviceId = 0;
     auto dynProfMgr = DynProfMgr::instance();
     MOCKER_CPP(&Utils::GetEnvString)
         .stubs()
@@ -703,18 +915,23 @@ TEST_F(DynProfMgrUtest, StartDynProfSrv_WithDynamicProfilingMode)
     EXPECT_EQ(PROFILING_FAILED, dynProfMgr->StartDynProf());
     EXPECT_EQ(false, dynProfMgr->IsDynProfStarted());
     dynProfMgr->StopDynProf(); // start failed, just return when StopDynProf is called
-    
+    dynProfMgr->SaveDevicesInfo(data);
+
     EXPECT_EQ(PROFILING_SUCCESS, dynProfMgr->StartDynProf());
     EXPECT_EQ(true, dynProfMgr->IsDynProfStarted());
     // repeat start
     EXPECT_EQ(PROFILING_SUCCESS, dynProfMgr->StartDynProf());
+    dynProfMgr->SaveDevicesInfo(data);
     dynProfMgr->StopDynProf();
     EXPECT_EQ(false, dynProfMgr->IsDynProfStarted()); // success to stop when StopDynProf is called after start succeed
+    dynProfMgr->dynProfSrv_ = nullptr;
 }
 
 TEST_F(DynProfMgrUtest, StartDynProfThread_WithDelayOrDurationProfilingMode)
 {
     GlobalMockObject::verify();
+    ProfSetDevPara data;
+    data.deviceId = 0;
     auto dynProfMgr = DynProfMgr::instance();
     MOCKER_CPP(&Utils::GetEnvString)
         .stubs()
@@ -724,10 +941,13 @@ TEST_F(DynProfMgrUtest, StartDynProfThread_WithDelayOrDurationProfilingMode)
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(PROFILING_FAILED, dynProfMgr->StartDynProf());
+    dynProfMgr->SaveDevicesInfo(data);
     EXPECT_EQ(PROFILING_SUCCESS, dynProfMgr->StartDynProf());
     // repeat start
     EXPECT_EQ(PROFILING_SUCCESS, dynProfMgr->StartDynProf());
     EXPECT_EQ(true, dynProfMgr->IsDynProfStarted());
+    dynProfMgr->SaveDevicesInfo(data);
     dynProfMgr->StopDynProf();
     EXPECT_EQ(false, dynProfMgr->IsDynProfStarted()); // success to stop when StopDynProf is called after start succeed
+    dynProfMgr->dynProfThread_ = nullptr;
 }
