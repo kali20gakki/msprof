@@ -90,7 +90,8 @@ namespace {
         {"size", SQL_INTEGER_TYPE},
         {"dataType", SQL_INTEGER_TYPE},
         {"linkType", SQL_INTEGER_TYPE},
-        {"opId", SQL_INTEGER_TYPE}
+        {"opId", SQL_INTEGER_TYPE},
+        {"isMaster", SQL_INTEGER_TYPE}
     };
 
     const TableColumns COMMUNICATION_OP = {

@@ -118,10 +118,9 @@ bool SaveCommTaskData(DataInventory& dataInventory, DBInfo& msprofDB, const std:
 {
     // 小算子数据
     // name, globalTaskId, taskType, planeId, groupName, notifyId, rdmaType, srcRank, dstRank, transportType,
-    // size, dataType, linkType, opId
+    // size, dataType, linkType, opId, isMaster
     using CommunicationTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t,
-        uint64_t, uint64_t, uint32_t, uint32_t, uint64_t,
-        uint64_t, uint64_t, uint64_t, uint32_t>>;
+        uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t, uint16_t>>;
     auto taskData = dataInventory.GetPtr<std::vector<CommunicationTaskData>>();
     if (taskData == nullptr) {
         WARN("Communication task data not exist.");
@@ -140,13 +139,13 @@ bool SaveCommTaskData(DataInventory& dataInventory, DBInfo& msprofDB, const std:
         uint64_t globalTaskId = IdPool::GetInstance().GetId(
             std::make_tuple(item.deviceId, item.streamId, item.taskId, item.contextId, item.batchId));
         uint32_t opId = IdPool::GetInstance().GetUint32Id(item.opKey);
-        if (StrToU64(notifyId, item.notifyId) != ANALYSIS_OK) {
-            notifyId = UINT64_MAX;
+        if (!IsNumber(item.notifyId) || StrToU64(notifyId, item.notifyId) != ANALYSIS_OK) {
+            notifyId = UINT64_MAX; // UINT64_MAX在db的INTEGER字段中为 -1
         }
         processedTaskData.emplace_back(opName, globalTaskId, taskType, item.planeId,
                                        groupName, notifyId, item.rdmaType, item.srcRank,
                                        item.dstRank, item.transportType, item.size, item.dataType,
-                                       item.linkType, opId);
+                                       item.linkType, opId, item.isMaster);
     }
     return SaveData(processedTaskData, TABLE_NAME_COMMUNICATION_TASK_INFO, msprofDB);
 }

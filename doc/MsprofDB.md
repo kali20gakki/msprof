@@ -461,6 +461,7 @@ db命名：msprof_{时间戳}.db
 | dataType      | INTEGER |                        | 数据格式，ENUM_HCCL_DATA_TYPE(dataType)                                     |
 | linkType      | INTEGER |                        | 链路类型，包含：HCCS、PCIe、RoCE，ENUM_HCCL_LINK_TYPE(linkType)                   |
 | opId          | INTEGER |                        | 对应的大算子Id，用于关联COMMUNICATION_OP表                                         |
+| isMaster      | INTEGER |                        | 标记主流通信算子，以主流算子为准（0：从流，1：主流）                                            |
 
 
 变更记录：
@@ -470,6 +471,7 @@ db命名：msprof_{时间戳}.db
 | 2024/3/7  | 330首次上线                                                                |
 | 2024/3/26 | globalTaskId修改为索引，命名为CommunicationTaskIndex                            |
 | 2024/5/19 | dataType，linkType，transportType，rdmaType字段不再从StringIds里取，而从对应的enum表中获取 |
+| 2025/1/21 | 新增isMaster字段区分主从流算子                                                    |
 
 ### COMMUNICATION_OP
 
@@ -937,9 +939,11 @@ timeline计算公式：
 
 变更记录：
 
-| 日期        | 内容                      |
-|-----------|-------------------------|
-| 2024/5/15 | 新增表，用于存放msprof导出的相关配置信息 |
+| 日期         | 内容                                             |
+|------------|------------------------------------------------|
+| 2024/5/15  | 新增表，用于存放msprof导出的相关配置信息                        |
+| 2024/12/16 | 中版本号变更，用于区分groupName变更事项，版本号1.1.0              |
+| 2025/1/21  | 小版本号变更，用于区分通信表notifyId，isMaster变更事项，版本号1.1.1   |
 
 
 ### MSTX_EVENTS

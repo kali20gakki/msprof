@@ -484,10 +484,9 @@ TEST_F(DBAssemblerUTest, TestRunHcclDataShouldReturnTrueWhenRunSuccess)
     uint64_t expectName = IdPool::GetInstance().GetUint64Id("hcom_broadcast__674_0_1");
     // 小算子数据
     // name, globalTaskId, taskType, planeId, groupName, notifyId, rdmaType, srcRank, dstRank, transportType,
-    // size, dataType, linkType, opId
+    // size, dataType, linkType, opId, isMaster
     using CommunicationTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t,
-        uint64_t, uint64_t, uint32_t, uint32_t, uint64_t,
-        uint64_t, uint64_t, uint64_t, uint32_t>>;
+            uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t, uint16_t>>;
     CommunicationTaskDataFormat taskResult;
     std::string sql{"SELECT * FROM " + TABLE_NAME_COMMUNICATION_TASK_INFO};
     std::shared_ptr<DBRunner> msprofDBRunner;
@@ -511,10 +510,9 @@ TEST_F(DBAssemblerUTest, TestRunHcclDataShouldReturnFalseWhenReserveFailed)
 {
     // 小算子数据
     // name, globalTaskId, taskType, planeId, groupName, notifyId, rdmaType, srcRank, dstRank, transportType,
-    // size, dataType, linkType, opId
+    // size, dataType, linkType, opId, isMaster
     using CommunicationTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t,
-        uint64_t, uint64_t, uint32_t, uint32_t, uint64_t,
-        uint64_t, uint64_t, uint64_t, uint32_t>>;
+            uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t, uint16_t>>;
     // 大算子数据
     // opName, start, end, connectionId, group_name, opId, relay, retry, data_type, alg_type, count, op_type
     using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,

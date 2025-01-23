@@ -22,10 +22,10 @@ namespace Database {
 class CommunicationInfoProcessor : public TableProcessor {
 public:
     // name, globalTaskId, taskType, planeId, groupName, notifyId, rdmaType, srcRank, dstRank, transportType,
-    // size, dataType, linkType, opId
+    // size, dataType, linkType, opId, isMaster
     using CommunicationTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t,
                                                                uint64_t, uint64_t, uint32_t, uint32_t, uint64_t,
-                                                               uint64_t, uint64_t, uint64_t, uint32_t>>;
+                                                               uint64_t, uint64_t, uint64_t, uint32_t, uint16_t>>;
     // opName, start, end, connectionId, group_name, opId, relay, retry, data_type, alg_type, count, op_type
     using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                                                              uint64_t, int32_t, int32_t, uint64_t, uint64_t,
@@ -37,7 +37,7 @@ public:
 protected:
     bool Process(const std::string &fileDir) override;
 private:
-    template<typename T> static bool ConvertTaskData(CommunicationTaskDataFormat &taskData,
+    template<typename T> static void ConvertTaskData(CommunicationTaskDataFormat &taskData,
                                                      const std::vector<T> &commTask);
     template<typename T> static void ConvertOpData(CommunicationOpDataFormat &opData, const std::vector<T> &commOp,
                                                    const std::string &fileDir);
