@@ -127,6 +127,7 @@ bool CommunicationInfoProcessor::FormatData(std::vector<CommunicationTaskData>& 
             endpoints[taskData.opKey].lastTaskDuration = hcclData.duration;
             opDataMap[taskData.opKey].connectionId = hcclData.connectionId;
             opDataMap[taskData.opKey].groupName = taskData.groupName;
+            opDataMap[taskData.opKey].deviceId = taskData.deviceId;
             UpdateOpInfo(opDataMap[taskData.opKey], hcclData.connectionId, opInfoIdxMap, communicationData.oriOpData,
                          communicationData);
             if (taskData.isMaster) {
@@ -144,9 +145,9 @@ bool CommunicationInfoProcessor::FormatData(std::vector<CommunicationTaskData>& 
             }
         }
     }
-    for (auto item = opDataMap.begin(); item != opDataMap.end(); ++item) {
-        auto key = item->first;
-        auto data = item->second;
+    for (auto& item : opDataMap) {
+        auto key = item.first;
+        auto data = item.second;
         HPFloat start{endpoints[key].firstTaskStartTime};
         HPFloat end = HPFloat(endpoints[key].lastTaskStartTime) + HPFloat(endpoints[key].lastTaskDuration);
         data.start = Utils::GetLocalTime(start, communicationData.timeRecord).Uint64();

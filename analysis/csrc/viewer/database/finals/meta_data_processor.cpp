@@ -20,7 +20,7 @@ namespace {
 
 const std::string SCHEMA_VERSION_MAJOR = "1";
 const std::string SCHEMA_VERSION_MINOR = "1";
-const std::string SCHEMA_VERSION_MICRO = "0";
+const std::string SCHEMA_VERSION_MICRO = "1";
 const std::string SCHEMA_VERSION = Utils::Join(".", SCHEMA_VERSION_MAJOR, SCHEMA_VERSION_MINOR, SCHEMA_VERSION_MICRO);
 
 // 版本号相关 SCHEMA_VERSION

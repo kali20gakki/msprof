@@ -28,22 +28,6 @@ using namespace Analysis::Utils;
 namespace {
 const std::string INDEX_NAME = "CommunicationTaskIndex";
 const std::vector<std::string> COMMUNICATION_TASK_INDEX_COL_NAMES = {"globalTaskId"};
-struct CommunicationOpEndpointsTime {
-    double firstTaskStartTime;
-    double lastTaskStartTime;
-    double lastTaskDuration;
-};
-
-// groupName 依据hash进行转换，对于无hash的数据，直接取用hash值（即groupName）进行转换
-uint64_t GetGroupNameValue(const std::string &groupName, GeHashMap &hashMap)
-{
-    if (groupName != NA && Utils::IsNumber(groupName)) {
-        if (hashMap.find(groupName) != hashMap.end()) {
-            return IdPool::GetInstance().GetUint64Id(hashMap[groupName]);
-        }
-    }
-    return IdPool::GetInstance().GetUint64Id(groupName);
-}
 }
 
 CommunicationInfoProcessor::CommunicationInfoProcessor(const std::string &msprofDBPath,
@@ -111,9 +95,9 @@ bool CommunicationInfoProcessor::Process(const std::string &fileDir)
 }
 
 template<typename T>
-bool CommunicationInfoProcessor::ConvertTaskData(CommunicationTaskDataFormat &taskData, const std::vector<T> &commTask)
+void CommunicationInfoProcessor::ConvertTaskData(CommunicationTaskDataFormat &taskData, const std::vector<T> &commTask)
 {
-    bool flag = true;
+    uint64_t notifyId;
     for (const T &data: commTask) {
         auto opName = IdPool::GetInstance().GetUint64Id(data.opName);
         auto globalTaskId = IdPool::GetInstance().GetId(
@@ -121,15 +105,13 @@ bool CommunicationInfoProcessor::ConvertTaskData(CommunicationTaskDataFormat &ta
         auto taskType = IdPool::GetInstance().GetUint64Id(data.taskType);
         auto groupName = IdPool::GetInstance().GetUint64Id(data.groupName);
         auto opId = IdPool::GetInstance().GetUint32Id(data.opKey);
-        uint64_t notifyId;
-        if (StrToU64(notifyId, data.notifyId) != ANALYSIS_OK) {
-            ERROR("notifyId str to uint64_t failed.");
-            flag = false;
+        if (!IsNumber(data.notifyId) || StrToU64(notifyId, data.notifyId) != ANALYSIS_OK) {
+            notifyId = UINT64_MAX; // UINT64_MAX在db的INTEGER字段中为 -1
         }
         taskData.emplace_back(opName, globalTaskId, taskType, data.planeId, groupName, notifyId, data.rdmaType,
-            data.srcRank, data.dstRank, data.transportType, data.size, data.dataType, data.linkType, opId);
+                              data.srcRank, data.dstRank, data.transportType, data.size, data.dataType,
+                              data.linkType, opId, data.isMaster);
     }
-    return flag;
 }
 
 template<typename T>
@@ -145,7 +127,7 @@ void CommunicationInfoProcessor::ConvertOpData(CommunicationOpDataFormat &opData
         auto algType = IdPool::GetInstance().GetUint64Id(data.algType);
         auto opType = IdPool::GetInstance().GetUint64Id(data.opType);
         opData.emplace_back(opName, data.start, data.end, connectionId, groupName, opId, data.relay, data.retry,
-            data.dataType, algType, data.count, opType);
+                            data.dataType, algType, data.count, opType);
     }
 }
 }
