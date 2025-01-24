@@ -40,6 +40,7 @@ test_obj=(
     msprofiler_utest
     transport_utest
     params_adapter_utest
+    stub_file_utest
     entities_utest
     utils_utest
     dfx_utest

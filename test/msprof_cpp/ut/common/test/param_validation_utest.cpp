@@ -19,7 +19,9 @@ using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Mmpa;
 using namespace Analysis::Dvvp::Common::Config;
 using namespace Collector::Dvvp::Common::PlatformAdapter;
-class COMMON_VALIDATION_PARAM_VALIDATION_TEST: public testing::Test {
+using namespace analysis::dvvp::common::validation;
+
+class ParamValidationUtest: public testing::Test {
 protected:
     virtual void SetUp() {
     }
@@ -41,7 +43,7 @@ static int _drv_get_dev_ids(int num_devices, std::vector<int> & dev_ids) {
     }
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckProfilingParams) {
+TEST_F(ParamValidationUtest, CheckProfilingParams) {
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(new analysis::dvvp::message::ProfileParams());
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     params->devices = "all";
@@ -79,7 +81,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckProfilingParams) {
     EXPECT_EQ(true, entry->CheckProfilingParams(params));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckProfilingIntervalIsValid) {
+TEST_F(ParamValidationUtest, CheckProfilingIntervalIsValid) {
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(new analysis::dvvp::message::ProfileParams());
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     EXPECT_EQ(false, entry->CheckProfilingIntervalIsValid(nullptr));
@@ -120,7 +122,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckProfilingIntervalIsValid) {
     EXPECT_EQ(true, entry->CheckProfilingIntervalIsValid(params));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckSystemTraceSwitchProfiling) {
+TEST_F(ParamValidationUtest, CheckSystemTraceSwitchProfiling) {
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(new analysis::dvvp::message::ProfileParams());
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     EXPECT_EQ(false, entry->CheckSystemTraceSwitchProfiling(nullptr));
@@ -160,7 +162,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckSystemTraceSwitchProfiling)
     EXPECT_EQ(true, entry->CheckSystemTraceSwitchProfiling(params));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckPmuSwitchProfiling) {
+TEST_F(ParamValidationUtest, CheckPmuSwitchProfiling) {
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(new analysis::dvvp::message::ProfileParams());
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     params->ai_core_profiling = "asd";
@@ -185,7 +187,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckPmuSwitchProfiling) {
     EXPECT_EQ(true, entry->CheckPmuSwitchProfiling(params));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckAivEventCoresIsValid) {
+TEST_F(ParamValidationUtest, CheckAivEventCoresIsValid) {
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     const std::vector<int> coreId = {0,1,2,3,4,5,6,7,8};
     EXPECT_EQ(true, entry->CheckAivEventCoresIsValid(coreId));
@@ -195,7 +197,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckAivEventCoresIsValid) {
     EXPECT_EQ(true, entry->CheckAivEventCoresIsValid(coreId2));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckTsCpuEventIsValid) {
+TEST_F(ParamValidationUtest, CheckTsCpuEventIsValid) {
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     std::vector<std::string> events = {"read","write","read","write","read", "asd","write","read","write"};
     EXPECT_EQ(false, entry->CheckTsCpuEventIsValid(events));
@@ -205,7 +207,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckTsCpuEventIsValid) {
     EXPECT_EQ(true, entry->CheckTsCpuEventIsValid(events2));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckDdrEventsIsValid) {
+TEST_F(ParamValidationUtest, CheckDdrEventsIsValid) {
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     std::vector<std::string> events = {"read","write","read","write","read","write","read","write","read","write"};
     EXPECT_EQ(false, entry->CheckDdrEventsIsValid(events));
@@ -217,7 +219,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckDdrEventsIsValid) {
     EXPECT_EQ(true, entry->CheckDdrEventsIsValid(events));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHbmEventsIsValid) {
+TEST_F(ParamValidationUtest, CheckHbmEventsIsValid) {
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     std::vector<std::string> events = {"read","write","read","write","read","write","read","write","read","write"};
     EXPECT_EQ(false, entry->CheckHbmEventsIsValid(events));
@@ -227,24 +229,30 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHbmEventsIsValid) {
     EXPECT_EQ(true, entry->CheckHbmEventsIsValid(events));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckAivEventsIsValid) {
+TEST_F(ParamValidationUtest, CheckAivEventsIsValid) {
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     const std::vector<std::string> aiv;
     EXPECT_EQ(true, entry->CheckAivEventsIsValid(aiv));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckAppNameIsValid) {
+TEST_F(ParamValidationUtest, CheckAppNameIsValid) {
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     EXPECT_EQ(false, entry->CheckAppNameIsValid(""));
 
     const std::string appName = "asd0";
     EXPECT_EQ(true, entry->CheckAppNameIsValid(appName));
 
+    const std::string appName2 = ".;";
+    EXPECT_EQ(false, entry->CheckAppNameIsValid(appName2));
+
+    const std::string appName3 = "|";
+    EXPECT_EQ(false, entry->CheckAppNameIsValid(appName3));
+
     const std::string invalidAppName = "$SD";
     EXPECT_EQ(false, entry->CheckAppNameIsValid(invalidAppName));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckProfilingParams1) {
+TEST_F(ParamValidationUtest, CheckProfilingParams1) {
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(new analysis::dvvp::message::ProfileParams());
     std::shared_ptr<analysis::dvvp::proto::JobStartReq> start(new analysis::dvvp::proto::JobStartReq);
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -255,17 +263,17 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckProfilingParams1) {
 
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, Init) {
+TEST_F(ParamValidationUtest, Init) {
     GlobalMockObject::verify();
     EXPECT_EQ(0, analysis::dvvp::common::validation::ParamValidation::instance()->Init());
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, UnInit) {
+TEST_F(ParamValidationUtest, UnInit) {
     GlobalMockObject::verify();
     EXPECT_EQ(0, analysis::dvvp::common::validation::ParamValidation::instance()->Uninit());
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckLlcEventsIsValid) {
+TEST_F(ParamValidationUtest, CheckLlcEventsIsValid) {
     GlobalMockObject::verify();
 
     std::string llcEvents;
@@ -279,7 +287,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckLlcEventsIsValid) {
     EXPECT_EQ(true, entry->CheckLlcEventsIsValid(llcEvents));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckEventsSize)
+TEST_F(ParamValidationUtest, CheckEventsSize)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -287,7 +295,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckEventsSize)
     EXPECT_EQ(PROFILING_FAILED, entry->CheckEventsSize("0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9"));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CovertMetricToHex)
+TEST_F(ParamValidationUtest, CovertMetricToHex)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -314,8 +322,19 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CovertMetricToHex)
     EXPECT_EQ("0x14", event);
 }
 
+TEST_F(ParamValidationUtest, CovertMetricToHexWillReturnFalseWhenInputInvalidEvents)
+{
+    GlobalMockObject::verify();
+    auto entry = ParamValidation::instance();
+    std::string events = "xxx";
+    size_t mode = 1;
+    MOCKER_CPP(&Utils::Trim)
+        .stubs()
+        .will(returnValue(events));
+    EXPECT_EQ(false, entry->CovertMetricToHex(events, mode));
+}
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CustomHexCharConfig)
+TEST_F(ParamValidationUtest, CustomHexCharConfig)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -333,13 +352,13 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CustomHexCharConfig)
     EXPECT_EQ(PROFILING_SUCCESS, entry->CustomHexCharConfig(aicoreEvent, ","));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckProfilingMetricsIsValid) {
+TEST_F(ParamValidationUtest, CheckProfilingMetricsIsValid) {
     GlobalMockObject::verify();
 
     std::string aicoreMetrics;
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
-    int ret = PlatformAdapter::instance()->Init(params, PlatformType::CHIP_V4_2_0);
+    int ret = PlatformAdapter::instance()->Init(params, PlatformType::CHIP_V4_1_0);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     EXPECT_EQ(1, entry->CheckProfilingMetricsIsValid("aic-metrics", aicoreMetrics));
     aicoreMetrics = "/$$}";
@@ -358,7 +377,18 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckProfilingMetricsIsValid) {
     EXPECT_EQ(0, entry->CheckProfilingMetricsIsValid("aic-metrics", aicoreMetrics));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckFreqIsValid)
+TEST_F(ParamValidationUtest, CheckProfilingMetricsIsValidWillReturnFalseWhenGetPlatformDatapterFail)
+{
+    GlobalMockObject::verify();
+    std::string metricsName;
+    std::string metricsVal = "x";
+    MOCKER_CPP(&PlatformAdapter::GetAdapter)
+        .stubs()
+        .will(returnValue((PlatformAdapterInterface *)nullptr));
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingMetricsIsValid(metricsName, metricsVal));
+}
+
+TEST_F(ParamValidationUtest, CheckFreqIsValid)
 {
     GlobalMockObject::verify();
     
@@ -378,7 +408,21 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckFreqIsValid)
     EXPECT_EQ(true, entry->CheckFreqIsValid("freqName", freq, rangeMin, rangeMax));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysPidValid)
+TEST_F(ParamValidationUtest, CheckFreqIsValidWillReturnFalseWhenStrToIntFail)
+{
+    GlobalMockObject::verify();
+    std::string freq;
+    int rangeMin = 1;
+    int rangeMax = 10;
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    freq = "5";
+    MOCKER_CPP(&Utils::StrToInt)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(false, entry->CheckFreqIsValid("freqName", freq, rangeMin, rangeMax));
+}
+
+TEST_F(ParamValidationUtest, CheckHostSysPidValid)
 {
     GlobalMockObject::verify();
     
@@ -395,7 +439,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysPidValid)
     EXPECT_EQ(false, entry->CheckHostSysPidValid(hostSysPid));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckEnvValid)
+TEST_F(ParamValidationUtest, MsprofCheckEnvValid)
 {
     GlobalMockObject::verify();
     
@@ -406,7 +450,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckEnvValid)
     EXPECT_EQ(true, entry->MsprofCheckEnvValid(env));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckAiModeValid)
+TEST_F(ParamValidationUtest, MsprofCheckAiModeValid)
 {
     GlobalMockObject::verify();
     
@@ -422,7 +466,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckAiModeValid)
     EXPECT_EQ(true, entry->MsprofCheckAiModeValid(aiMode, aiModeType));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckSysDeviceValid)
+TEST_F(ParamValidationUtest, MsprofCheckSysDeviceValid)
 {
     GlobalMockObject::verify();
     
@@ -439,7 +483,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckSysDeviceValid)
     EXPECT_EQ(false, entry->MsprofCheckSysDeviceValid(sysDevId));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckExportIdIsValid)
+TEST_F(ParamValidationUtest, CheckExportIdIsValid)
 {
     GlobalMockObject::verify();
     
@@ -454,7 +498,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckExportIdIsValid)
     EXPECT_EQ(true, entry->CheckExportIdIsValid(exportId, ""));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckExportSummaryFormatIsValid)
+TEST_F(ParamValidationUtest, CheckExportSummaryFormatIsValid)
 {
     GlobalMockObject::verify();
     
@@ -469,44 +513,206 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckExportSummaryFormatIsValid)
     EXPECT_EQ(true, entry->CheckExportSummaryFormatIsValid(summaryFormat));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckAppValid)
+TEST_F(ParamValidationUtest, MsprofCheckAppValid)
 {
     GlobalMockObject::verify();
-    
+
     std::string app;
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     EXPECT_EQ(false, entry->MsprofCheckAppValid(app));
     app = "bash";
-    EXPECT_EQ(true, entry->MsprofCheckAppValid(app));
-    app = "main";
+    MOCKER_CPP(&ParamValidation::MsprofCheckNotAppValid)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(false, entry->MsprofCheckAppValid(app));
+    EXPECT_EQ(true, entry->MsprofCheckAppValid(app));
+    app = "main 1 2";
+    std::string empty;
+    std::string notEmpty = "x";
+    MOCKER_CPP(&ParamValidation::MsprofCheckAppParamValid)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Utils::CanonicalizePath)
+        .stubs()
+        .will(returnValue(empty))
+        .then(returnValue(notEmpty));
+    EXPECT_EQ(false, entry->MsprofCheckAppValid(app));
+    EXPECT_EQ(true, entry->MsprofCheckAppValid(app));
+    EXPECT_EQ(true, entry->MsprofCheckAppValid(app));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckAppParamValid)
+TEST_F(ParamValidationUtest, MsprofCheckNotAppValidWillReturnFailWhenCanonicalizePathReturnEmpty)
 {
     GlobalMockObject::verify();
-    
-    std::string app;
-    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
-    EXPECT_EQ(PROFILING_FAILED, entry->MsprofCheckAppParamValid(app));
-    app = "1";
-    EXPECT_EQ(PROFILING_FAILED, entry->MsprofCheckAppParamValid(app));
-    MOCKER(&MmAccess2).stubs().will(returnValue(0));
-    app = "./";
-    EXPECT_EQ(PROFILING_FAILED, entry->MsprofCheckAppParamValid(app));
-    std::remove("./CheckAppValid");
-    std::ofstream file("CheckAppValid");
-    file << "command not found" << std::endl;
-    file.close();
-    app = "./CheckAppValid";
-    EXPECT_EQ(PROFILING_SUCCESS, entry->MsprofCheckAppParamValid(app));
-    system("ln -s ./CheckAppValid/CheckAppValid");
-    app = "./CheckAppValid/CheckAppValid";
-    EXPECT_EQ(PROFILING_FAILED, entry->MsprofCheckAppParamValid(app));
-    std::remove("./CheckAppValid");
+    std::string empty;
+    std::vector<std::string> appParamsList = {"/", "x"};
+    std::string resultAppParam;
+    MOCKER_CPP(&Utils::CanonicalizePath)
+        .stubs()
+        .will(returnValue(empty));
+    EXPECT_EQ(PROFILING_FAILED, ParamValidation::instance()->MsprofCheckNotAppValid(appParamsList, resultAppParam));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckL2CacheEventsValid) {
+TEST_F(ParamValidationUtest, MsprofCheckNotAppValidWillReturnFailWhenMmAccess2Fail)
+{
+    GlobalMockObject::verify();
+    std::string path = "/path";
+    std::vector<std::string> appParamsList = {"/", "x"};
+    std::string resultAppParam;
+    MOCKER_CPP(&Utils::CanonicalizePath)
+        .stubs()
+        .will(returnValue(path));
+    MOCKER_CPP(&MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, ParamValidation::instance()->MsprofCheckNotAppValid(appParamsList, resultAppParam));
+}
+
+TEST_F(ParamValidationUtest, MsprofCheckNotAppValidWillReturnSuccWhenMmAccess2Succ1)
+{
+    GlobalMockObject::verify();
+    std::string path = "/path";
+    std::vector<std::string> appParamsList = {"/", "x"};
+    std::string resultAppParam;
+    MOCKER_CPP(&Utils::CanonicalizePath)
+        .stubs()
+        .will(returnValue(path));
+    MOCKER_CPP(&MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_SUCCESS, ParamValidation::instance()->MsprofCheckNotAppValid(appParamsList, resultAppParam));
+}
+
+TEST_F(ParamValidationUtest, MsprofCheckNotAppValidWillReturnSuccWhenMmAccess2Succ2)
+{
+    GlobalMockObject::verify();
+    std::string path = "/path";
+    std::vector<std::string> appParamsList = {"x", "x"};
+    std::string resultAppParam;
+    EXPECT_EQ(PROFILING_SUCCESS, ParamValidation::instance()->MsprofCheckNotAppValid(appParamsList, resultAppParam));
+}
+
+TEST_F(ParamValidationUtest, MsprofCheckAppParamValidWillReturnFailWhenCanonicalizePathFail)
+{
+    std::string appParam;
+    EXPECT_EQ(PROFILING_FAILED, ParamValidation::instance()->MsprofCheckAppParamValid(appParam));
+}
+
+TEST_F(ParamValidationUtest, MsprofCheckAppParamValidWillReturnFailWhenPathIsSoftLink)
+{
+    GlobalMockObject::verify();
+    std::string path = "x";
+    std::string appParam;
+    MOCKER_CPP(&Utils::CanonicalizePath)
+        .stubs()
+        .will(returnValue(path));
+    MOCKER_CPP(&Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(PROFILING_FAILED, ParamValidation::instance()->MsprofCheckAppParamValid(appParam));
+}
+
+TEST_F(ParamValidationUtest, MsprofCheckAppParamValidWillReturnFailWhenMmAccess2Fail)
+{
+    GlobalMockObject::verify();
+    std::string path = "x";
+    std::string appParam;
+    MOCKER_CPP(&Utils::CanonicalizePath)
+        .stubs()
+        .will(returnValue(path));
+    MOCKER_CPP(&Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Utils::IsDir)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, ParamValidation::instance()->MsprofCheckAppParamValid(appParam));
+}
+
+TEST_F(ParamValidationUtest, MsprofCheckAppParamValidWillReturnFailWhenCheckParamPermissionFail)
+{
+    GlobalMockObject::verify();
+    std::string path = "x";
+    std::string appParam;
+    MOCKER_CPP(&Utils::CanonicalizePath)
+        .stubs()
+        .will(returnValue(path));
+    MOCKER_CPP(&Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Utils::IsDir)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ParamValidation::CheckParamPermission)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, ParamValidation::instance()->MsprofCheckAppParamValid(appParam));
+}
+
+TEST_F(ParamValidationUtest, MsprofCheckAppParamValidWillReturnFailWhenSplitPathFail)
+{
+    GlobalMockObject::verify();
+    std::string path = "x";
+    std::string appParam;
+    MOCKER_CPP(&Utils::CanonicalizePath)
+        .stubs()
+        .will(returnValue(path));
+    MOCKER_CPP(&Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Utils::IsDir)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ParamValidation::CheckParamPermission)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Utils::SplitPath)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, ParamValidation::instance()->MsprofCheckAppParamValid(appParam));
+}
+
+TEST_F(ParamValidationUtest, MsprofCheckAppParamValidWillReturnFailWhenCheckAppNameIsValidFail)
+{
+    GlobalMockObject::verify();
+    std::string path = "x";
+    std::string appParam;
+    MOCKER_CPP(&Utils::CanonicalizePath)
+        .stubs()
+        .will(returnValue(path));
+    MOCKER_CPP(&Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Utils::IsDir)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ParamValidation::CheckParamPermission)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Utils::SplitPath)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ParamValidation::CheckAppNameIsValid)
+        .stubs()
+        .will(returnValue(false));
+    EXPECT_EQ(PROFILING_FAILED, ParamValidation::instance()->MsprofCheckAppParamValid(appParam));
+}
+
+TEST_F(ParamValidationUtest, CheckL2CacheEventsValid) {
     GlobalMockObject::verify();
 
     std::vector<std::string> events = {"0x00","0x01","0x02","0x03","0x04","0x05","0x06","0x07","0x08"};
@@ -522,7 +728,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckL2CacheEventsValid) {
     EXPECT_EQ(1, entry->CheckL2CacheEventsValid(events));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckParamsModeRegexMatch)
+TEST_F(ParamValidationUtest, CheckParamsModeRegexMatch)
 {
     GlobalMockObject::verify();
     std::string paramsMode;
@@ -534,7 +740,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckParamsModeRegexMatch)
     EXPECT_EQ(true, entry->CheckParamsModeRegexMatch(paramsMode));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, IsValidSleepPeriod) {
+TEST_F(ParamValidationUtest, IsValidSleepPeriod) {
     GlobalMockObject::verify();
 
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -542,19 +748,19 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, IsValidSleepPeriod) {
     EXPECT_EQ(1, entry->IsValidSleepPeriod(1));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysOptionsIsValid) {
+TEST_F(ParamValidationUtest, CheckHostSysOptionsIsValid) {
     GlobalMockObject::verify();
 
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     std::string hostSysOptions;
     EXPECT_EQ(false, entry->CheckHostSysOptionsIsValid(hostSysOptions));
-    hostSysOptions = "COMMON_VALIDATION_PARAM_VALIDATION_TEST/CheckHostSysOptionsIsValid";
+    hostSysOptions = "ParamValidationUtest/CheckHostSysOptionsIsValid";
     EXPECT_EQ(false, entry->CheckHostSysOptionsIsValid(hostSysOptions));
     hostSysOptions = "cpu";
     EXPECT_EQ(true, entry->CheckHostSysOptionsIsValid(hostSysOptions));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysPidIsValid) {
+TEST_F(ParamValidationUtest, CheckHostSysPidIsValid) {
     GlobalMockObject::verify();
 
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -566,7 +772,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysPidIsValid) {
     EXPECT_EQ(1, entry->CheckHostSysPidIsValid(hostSysPid));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, ProfStarsAcsqParamIsValid) {
+TEST_F(ParamValidationUtest, ProfStarsAcsqParamIsValid) {
     GlobalMockObject::verify();
 
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -574,7 +780,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, ProfStarsAcsqParamIsValid) {
     EXPECT_EQ(1, entry->ProfStarsAcsqParamIsValid("dsa,vdec"));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckAnalysisOutputIsPathValid)
+TEST_F(ParamValidationUtest, CheckAnalysisOutputIsPathValid)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -587,7 +793,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckAnalysisOutputIsPathValid)
     EXPECT_EQ(true, entry->CheckAnalysisOutputIsPathValid(output));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckLlcModeIsValid1)
+TEST_F(ParamValidationUtest, CheckLlcModeIsValid1)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -604,7 +810,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckLlcModeIsValid1)
     EXPECT_EQ(true, entry->CheckLlcModeIsValid(llcMode));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckLlcModeIsValid2)
+TEST_F(ParamValidationUtest, CheckLlcModeIsValid2)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -621,7 +827,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckLlcModeIsValid2)
     EXPECT_EQ(true, entry->CheckLlcModeIsValid(llcMode));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysUsageValid)
+TEST_F(ParamValidationUtest, CheckHostSysUsageValid)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -631,7 +837,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysUsageValid)
     EXPECT_EQ(true, entry->CheckHostSysUsageValid("mem"));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckPythonPathIsValid)
+TEST_F(ParamValidationUtest, CheckPythonPathIsValid)
 {
     GlobalMockObject::verify();
     std::string pythonPath;
@@ -666,7 +872,18 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckPythonPathIsValid)
     system("rm ./testpython");
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckParamLengthIsValid)
+TEST_F(ParamValidationUtest, CheckPythonPathIsValidWillReturnFalseWhenPathIsSoftlink)
+{
+    GlobalMockObject::verify();
+    std::string pythonPath = "/testpython";
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    MOCKER_CPP(&Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(false));
+    EXPECT_EQ(false, entry->CheckPythonPathIsValid(pythonPath));
+}
+
+TEST_F(ParamValidationUtest, CheckParamLengthIsValid)
 {
     GlobalMockObject::verify();
     std::string paramPath;
@@ -679,7 +896,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckParamLengthIsValid)
     EXPECT_EQ(false, entry->CheckParamLengthIsValid(paramPath));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckParamPermission)
+TEST_F(ParamValidationUtest, CheckParamPermission)
 {
     GlobalMockObject::verify();
     std::string paramPath;
@@ -717,7 +934,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckParamPermission)
     remove(paramPath.c_str());
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckParamsJobIdRegexMatch)
+TEST_F(ParamValidationUtest, CheckParamsJobIdRegexMatch)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -738,7 +955,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckParamsJobIdRegexMatch)
     EXPECT_EQ(false, entry->CheckParamsJobIdRegexMatch(JobId));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckSysPeriodValid)
+TEST_F(ParamValidationUtest, MsprofCheckSysPeriodValid)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -754,7 +971,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckSysPeriodValid)
     EXPECT_EQ(true, entry->MsprofCheckSysPeriodValid(SysPerid));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckHostSysValid)
+TEST_F(ParamValidationUtest, MsprofCheckHostSysValid)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -773,7 +990,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckHostSysValid)
     EXPECT_EQ(true, entry->MsprofCheckHostSysValid(hostSys));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysToolsExit)
+TEST_F(ParamValidationUtest, CheckHostSysToolsExit)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -790,7 +1007,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysToolsExit)
     EXPECT_EQ(true, entry->CheckHostSysToolsExit(hostSys, resultDir, appDir));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysToolsIsExist)
+TEST_F(ParamValidationUtest, CheckHostSysToolsIsExist)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -820,7 +1037,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysToolsIsExist)
     EXPECT_EQ(PROFILING_SUCCESS, entry->CheckHostSysToolsIsExist(tool, resultDir, appDir));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysCmdOutIsExist)
+TEST_F(ParamValidationUtest, CheckHostSysCmdOutIsExist)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -837,7 +1054,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysCmdOutIsExist)
     EXPECT_EQ(PROFILING_FAILED, entry->CheckHostSysCmdOutIsExist(tempFile, toolName, tmpProcess));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostOutString)
+TEST_F(ParamValidationUtest, CheckHostOutString)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -850,7 +1067,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostOutString)
     EXPECT_EQ(PROFILING_SUCCESS, entry->CheckHostOutString(tmpStr, toolName));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, UninitCheckHostSysCmd)
+TEST_F(ParamValidationUtest, UninitCheckHostSysCmd)
 {
     GlobalMockObject::verify();
 
@@ -877,7 +1094,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, UninitCheckHostSysCmd)
     EXPECT_EQ(PROFILING_SUCCESS, entry->UninitCheckHostSysCmd(checkProcess));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckStorageLimit) {
+TEST_F(ParamValidationUtest, CheckStorageLimit) {
     using namespace analysis::dvvp::common::validation;
     bool ret = ParamValidation::instance()->CheckStorageLimit("MB");
     EXPECT_EQ(false, ret);
@@ -907,7 +1124,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckStorageLimit) {
     EXPECT_EQ(true, ret);
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, IsValidTaskTimeSwitch)
+TEST_F(ParamValidationUtest, IsValidTaskTimeSwitch)
 {
     using namespace analysis::dvvp::common::validation;
     int ret = ParamValidation::instance()->IsValidTaskTimeSwitch("");
@@ -929,7 +1146,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, IsValidTaskTimeSwitch)
     EXPECT_EQ(false, ret);
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, IsValidAnalyzeRuleSwitch)
+TEST_F(ParamValidationUtest, IsValidAnalyzeRuleSwitch)
 {
     using namespace analysis::dvvp::common::validation;
     int ret = ParamValidation::instance()->IsValidAnalyzeRuleSwitch("rule", "");
@@ -950,7 +1167,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, IsValidAnalyzeRuleSwitch)
     EXPECT_EQ(false, ret);
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST,
+TEST_F(ParamValidationUtest,
     TestCheckCollectOutputIsValidShouldReturnFalseWhenPathHasEscapeChar)
 {
     using namespace analysis::dvvp::common::validation;
@@ -958,7 +1175,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST,
     EXPECT_FALSE(ParamValidation::instance()->CheckCollectOutputIsValid(path));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST,
+TEST_F(ParamValidationUtest,
     TestCheckAnalysisOutputIsPathValidShouldReturnFalseWhenPathHasEscapeChar)
 {
     using namespace analysis::dvvp::common::validation;
@@ -966,7 +1183,21 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST,
     EXPECT_FALSE(ParamValidation::instance()->CheckAnalysisOutputIsPathValid(path));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckReportsJsonIsPathValidShouldReturnFalseWhenCheckFailed)
+TEST_F(ParamValidationUtest, CheckAnalysisOutputIsPathValidWillReturnFalseWhenCheckDirValidFail)
+{
+    GlobalMockObject::verify();
+    auto entry = ParamValidation::instance();
+    std::string invalidLenPath(1025, 'x'); // 1025 : larger than max len
+    MOCKER_CPP(&Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Utils::IsFileExist)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(false, entry->CheckAnalysisOutputIsPathValid(invalidLenPath));
+}
+
+TEST_F(ParamValidationUtest, CheckReportsJsonIsPathValidShouldReturnFalseWhenCheckFailed)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
@@ -998,7 +1229,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckReportsJsonIsPathValidShoul
     EXPECT_EQ(false, entry->CheckReportsJsonIsPathValid(reportsJson));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckReportsJsonIsPathValidShouldReturnTrueWhenCheckSuccess)
+TEST_F(ParamValidationUtest, CheckReportsJsonIsPathValidShouldReturnTrueWhenCheckSuccess)
 {
     std::string reportsJson = "./reports.json";
     std::ofstream ftest(reportsJson);
@@ -1009,4 +1240,426 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckReportsJsonIsPathValidShoul
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     EXPECT_EQ(true, entry->CheckReportsJsonIsPathValid(reportsJson));
     remove(reportsJson.c_str());
+}
+
+TEST_F(ParamValidationUtest, CheckDirValidWillReturnFalseWhenInputPathSizeLargerThanMaxSize)
+{
+    GlobalMockObject::verify();
+    // use CheckCollectOutputIsValid to run CheckDirValid
+    auto entry = ParamValidation::instance();
+    int invalidLen = 1025;
+    std::string path(invalidLen, 'x');
+    MOCKER_CPP(&Utils::IsFileExist)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(false, entry->CheckCollectOutputIsValid(path));
+}
+
+TEST_F(ParamValidationUtest, CheckDirValidWillReturnFalseWhenInputPathIsNotDir)
+{
+    GlobalMockObject::verify();
+    // use CheckCollectOutputIsValid to run CheckDirValid
+    auto entry = ParamValidation::instance();
+    std::string path = "/proc/stat"; // set /proc/stat as path
+    EXPECT_EQ(false, entry->CheckCollectOutputIsValid(path));
+}
+
+TEST_F(ParamValidationUtest, CheckDirValidWillReturnFalseWhenInputPathIsWriteable)
+{
+    GlobalMockObject::verify();
+    // use CheckCollectOutputIsValid to run CheckDirValid
+    auto entry = ParamValidation::instance();
+    std::string path = "/sys"; // set /sys as path
+    EXPECT_EQ(false, entry->CheckCollectOutputIsValid(path));
+}
+
+TEST_F(ParamValidationUtest, CheckDirValidWillReturnFalseWhenCanonicalizePathReturnEmptyPath)
+{
+    GlobalMockObject::verify();
+    // use CheckCollectOutputIsValid to run CheckDirValid
+    auto entry = ParamValidation::instance();
+    std::string path = "xx";
+    std::string emptyPath = "";
+    MOCKER_CPP(&Utils::IsFileExist)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&Utils::CanonicalizePath)
+        .stubs()
+        .will(returnValue(emptyPath));
+    EXPECT_EQ(false, entry->CheckCollectOutputIsValid(path));
+}
+
+TEST_F(ParamValidationUtest, CheckDirValidWillReturnTrueWhenInputValidPath)
+{
+    GlobalMockObject::verify();
+    // use CheckCollectOutputIsValid to run CheckDirValid
+    auto entry = ParamValidation::instance();
+    std::string path = "./";
+    EXPECT_EQ(true, entry->CheckCollectOutputIsValid(path));
+}
+
+TEST_F(ParamValidationUtest, CheckCollectOutputIsValidWillReturnTrueWhenInputEmptyPath)
+{
+    GlobalMockObject::verify();
+    auto entry = ParamValidation::instance();
+    EXPECT_EQ(true, entry->CheckCollectOutputIsValid(""));
+}
+
+TEST_F(ParamValidationUtest, CheckCollectOutputIsValidWillReturnFalseWhenPathSizeLargerThanMaxLen)
+{
+    GlobalMockObject::verify();
+    auto entry = ParamValidation::instance();
+    std::string path = "x";
+    std::string invalidLenPath(1025, 'x'); // 1025 : larger than max len
+    MOCKER_CPP(&Utils::IsFileExist)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Utils::RelativePathToAbsolutePath)
+        .stubs()
+        .will(returnValue(invalidLenPath));
+    EXPECT_EQ(false, entry->CheckCollectOutputIsValid(path));
+}
+
+TEST_F(ParamValidationUtest, CheckCollectOutputIsValidWillReturnFalseWhenCreateDirFail)
+{
+    GlobalMockObject::verify();
+    auto entry = ParamValidation::instance();
+    std::string path = "x";
+    std::string validLenPath(1, 'x');
+    MOCKER_CPP(&Utils::IsFileExist)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Utils::RelativePathToAbsolutePath)
+        .stubs()
+        .will(returnValue(validLenPath));
+    MOCKER_CPP(&Utils::CreateDir)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(false, entry->CheckCollectOutputIsValid(path));
+}
+
+TEST_F(ParamValidationUtest, CheckCollectOutputIsValidWillReturnTrueWhenCreateDirSucc)
+{
+    GlobalMockObject::verify();
+    auto entry = ParamValidation::instance();
+    std::string path = "x";
+    std::string validLenPath(1, 'x');
+    MOCKER_CPP(&Utils::IsFileExist)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Utils::RelativePathToAbsolutePath)
+        .stubs()
+        .will(returnValue(validLenPath));
+    MOCKER_CPP(&Utils::CreateDir)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(true, entry->CheckCollectOutputIsValid(path));
+}
+
+TEST_F(ParamValidationUtest, CheckProfilingMetricsLengthWillReturnFalseWhenInputLenLargerThenMaxLen)
+{
+    std::string metricsVal(71, 'x'); // 71 larger than max len
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingMetricsLength(metricsVal));
+}
+
+TEST_F(ParamValidationUtest, CheckExportTypeIsValidWillReturnFalseWhenInputEmptyType)
+{
+    EXPECT_EQ(false, ParamValidation::instance()->CheckExportTypeIsValid(""));
+}
+
+TEST_F(ParamValidationUtest, CheckExportTypeIsValidWillReturnFalseWhenInputInvalidType)
+{
+    EXPECT_EQ(false, ParamValidation::instance()->CheckExportTypeIsValid("xx"));
+}
+
+TEST_F(ParamValidationUtest, CheckExportTypeIsValidWillReturnTrueWhenInputValidType)
+{
+    EXPECT_EQ(true, ParamValidation::instance()->CheckExportTypeIsValid("db"));
+}
+
+TEST_F(ParamValidationUtest, CheckProfilingIntervalIsValidTWOWillReturnFalseWhenInputNullPatams)
+{
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingIntervalIsValidTWO(nullptr));
+}
+
+TEST_F(ParamValidationUtest, CheckProfilingIntervalIsValidTWOWillReturnFalseWhenInputInvalidPidSamplingInterVal)
+{
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    params->sys_sampling_interval = 1;
+    params->pid_sampling_interval = 0;
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingIntervalIsValidTWO(params));
+}
+
+TEST_F(ParamValidationUtest, CheckProfilingIntervalIsValidTWOWillReturnFalseWhenInputInvalidIoSamplingInterVal)
+{
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    params->sys_sampling_interval = 1;
+    params->pid_sampling_interval = 1;
+    params->hardware_mem_sampling_interval = 1;
+    params->io_sampling_interval = 0;
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingIntervalIsValidTWO(params));
+}
+
+TEST_F(ParamValidationUtest, CheckProfilingIntervalIsValidTWOWillReturnFalseWhenInputInvalidInterSamplingInterVal)
+{
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    params->sys_sampling_interval = 1;
+    params->pid_sampling_interval = 1;
+    params->hardware_mem_sampling_interval = 1;
+    params->io_sampling_interval = 1;
+    params->interconnection_sampling_interval = 0;
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingIntervalIsValidTWO(params));
+}
+
+TEST_F(ParamValidationUtest, CheckProfilingIntervalIsValidTWOWillReturnFalseWhenInputInvalidDvppSamplingInterVal)
+{
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    params->sys_sampling_interval = 1;
+    params->pid_sampling_interval = 1;
+    params->hardware_mem_sampling_interval = 1;
+    params->io_sampling_interval = 1;
+    params->interconnection_sampling_interval = 1;
+    params->dvpp_sampling_interval = 0;
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingIntervalIsValidTWO(params));
+}
+
+TEST_F(ParamValidationUtest, CheckProfilingIntervalIsValidTWOWillReturnFalseWhenInputInvalidNicSamplingInterVal)
+{
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    params->sys_sampling_interval = 1;
+    params->pid_sampling_interval = 1;
+    params->hardware_mem_sampling_interval = 1;
+    params->io_sampling_interval = 1;
+    params->interconnection_sampling_interval = 1;
+    params->dvpp_sampling_interval = 1;
+    params->nicInterval = 0;
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingIntervalIsValidTWO(params));
+}
+
+TEST_F(ParamValidationUtest, CheckProfilingIntervalIsValidTWOWillReturnFalseWhenInputInvalidRoceSamplingInterVal)
+{
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    params->sys_sampling_interval = 1;
+    params->pid_sampling_interval = 1;
+    params->hardware_mem_sampling_interval = 1;
+    params->io_sampling_interval = 1;
+    params->interconnection_sampling_interval = 1;
+    params->dvpp_sampling_interval = 1;
+    params->nicInterval = 1;
+    params->roceInterval = 0;
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingIntervalIsValidTWO(params));
+}
+
+TEST_F(ParamValidationUtest, CheckProfilingSwitchIsValidWillReturnFalseWhenInputNullParams)
+{
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingSwitchIsValid(nullptr));
+}
+
+TEST_F(ParamValidationUtest, CheckProfilingSwitchIsValidWillReturnFalseWhenCheckTsSwitchFail)
+{
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    params->ts_timeline = "x";
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingSwitchIsValid(params));
+    params->ts_timeline = "";
+    params->ts_keypoint = "x";
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingSwitchIsValid(params));
+    params->ts_keypoint = "";
+    params->ts_fw_training = "x";
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingSwitchIsValid(params));
+    params->ts_fw_training = "";
+    params->hwts_log = "x";
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingSwitchIsValid(params));
+    params->hwts_log = "";
+    params->hwts_log1 = "x";
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingSwitchIsValid(params));
+    params->hwts_log1 = "";
+    params->ts_memcpy = "x";
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingSwitchIsValid(params));
+}
+
+TEST_F(ParamValidationUtest, CheckProfilingSwitchIsValidWillReturnFalseWhenCheckPmuSwitchFail)
+{
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    MOCKER_CPP(&ParamValidation::CheckPmuSwitchProfiling)
+        .stubs()
+        .will(returnValue(false));
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingSwitchIsValid(params));
+}
+
+TEST_F(ParamValidationUtest, CheckProfilingSwitchIsValidWillReturnFalseWhenCheckSysTraceSwitchFail)
+{
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    MOCKER_CPP(&ParamValidation::CheckSystemTraceSwitchProfiling)
+        .stubs()
+        .will(returnValue(false));
+    EXPECT_EQ(false, ParamValidation::instance()->CheckProfilingSwitchIsValid(params));
+}
+
+TEST_F(ParamValidationUtest, CheckDeviceIdIsValidWillReturnFalseWhenStrToIntFail)
+{
+    MOCKER_CPP(&Utils::StrToInt)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(false, ParamValidation::instance()->CheckDeviceIdIsValid("0"));
+}
+
+TEST_F(ParamValidationUtest, CheckAiCoreEventsIsValidWillReturnFalseWhenInputInvalidSizePmuEvents)
+{
+    size_t size = 9;
+    std::vector<std::string> events;
+    for (size_t i = 0; i < size; i++) {
+        events.push_back("x");
+    }
+    EXPECT_EQ(false, ParamValidation::instance()->CheckAiCoreEventsIsValid(events));
+}
+
+TEST_F(ParamValidationUtest, CheckAiCoreEventsIsValidWillReturnFalseWhenInputInvalidPmuEvents)
+{
+    size_t size = 8;
+    std::vector<std::string> events;
+    for (size_t i = 0; i < size; i++) {
+        events.push_back("0");
+    }
+    EXPECT_EQ(false, ParamValidation::instance()->CheckAiCoreEventsIsValid(events));
+    for (size_t i = 0; i < size; i++) {
+        events[i] = "2000";
+    }
+    EXPECT_EQ(false, ParamValidation::instance()->CheckAiCoreEventsIsValid(events));
+}
+
+TEST_F(ParamValidationUtest, CheckProfilingParamsWillReturnTrueWhenDevicesAndAppEmptyWithHostSysNotEmpty)
+{
+    EXPECT_EQ(true, ParamValidation::instance()->CheckParamsDevices("", "", "x"));
+}
+
+TEST_F(ParamValidationUtest, CheckProfilingParamsWillReturnFalseWhenDevicesAndAppEmptyWithHostSysEmpty)
+{
+    EXPECT_EQ(false, ParamValidation::instance()->CheckParamsDevices("", "", ""));
+}
+
+TEST_F(ParamValidationUtest, CheckMsopprofBinValidWillReturnFailWhenCanonicalizaPathFail)
+{
+    GlobalMockObject::verify();
+    std::string emptyPath;
+    MOCKER_CPP(&Utils::CanonicalizePath)
+        .stubs()
+        .will(returnValue(emptyPath));
+    std::string binpath = "/path/to/bin";
+    EXPECT_EQ(PROFILING_FAILED, ParamValidation::instance()->CheckMsopprofBinValid(binpath));
+}
+
+TEST_F(ParamValidationUtest, CheckMsopprofBinValidWillReturnFailWhenPathIsSoftLink)
+{
+    GlobalMockObject::verify();
+    std::string binpath = "/path/to/bin";
+    MOCKER_CPP(&Utils::CanonicalizePath)
+        .stubs()
+        .will(returnValue(binpath));
+    MOCKER_CPP(&Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(PROFILING_FAILED, ParamValidation::instance()->CheckMsopprofBinValid(binpath));
+}
+
+TEST_F(ParamValidationUtest, CheckMsopprofBinValidWillReturnFailWhenPathIsDir)
+{
+    GlobalMockObject::verify();
+    std::string binpath = "/path/to/bin";
+    MOCKER_CPP(&Utils::CanonicalizePath)
+        .stubs()
+        .will(returnValue(binpath));
+    MOCKER_CPP(&Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Utils::IsDir)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(PROFILING_FAILED, ParamValidation::instance()->CheckMsopprofBinValid(binpath));
+}
+
+TEST_F(ParamValidationUtest, CheckMsopprofBinValidWillReturnFailWhenPathIsNotExecutable)
+{
+    GlobalMockObject::verify();
+    std::string binpath = "/path/to/bin";
+    MOCKER_CPP(&Utils::CanonicalizePath)
+        .stubs()
+        .will(returnValue(binpath));
+    MOCKER_CPP(&Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Utils::IsDir)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, ParamValidation::instance()->CheckMsopprofBinValid(binpath));
+}
+
+TEST_F(ParamValidationUtest, CheckMsopprofBinValidWillReturnFailWhenCheckParamPermissionFail)
+{
+    GlobalMockObject::verify();
+    std::string binpath = "/path/to/bin";
+    MOCKER_CPP(&Utils::CanonicalizePath)
+        .stubs()
+        .will(returnValue(binpath));
+    MOCKER_CPP(&Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Utils::IsDir)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ParamValidation::CheckParamPermission)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, ParamValidation::instance()->CheckMsopprofBinValid(binpath));
+}
+
+TEST_F(ParamValidationUtest, CheckMsopprofBinValidWillReturnSuccWhenCheckParamPermissionSucc)
+{
+    GlobalMockObject::verify();
+    std::string binpath = "/path/to/bin";
+    MOCKER_CPP(&Utils::CanonicalizePath)
+        .stubs()
+        .will(returnValue(binpath));
+    MOCKER_CPP(&Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Utils::IsDir)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ParamValidation::CheckParamPermission)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_SUCCESS, ParamValidation::instance()->CheckMsopprofBinValid(binpath));
+}
+
+TEST_F(ParamValidationUtest, CheckDelayAndDurationValidWillReturnFalseWhenInputInvalidNum)
+{
+    EXPECT_EQ(false, ParamValidation::instance()->CheckDelayAndDurationValid("x", ""));
+}
+
+TEST_F(ParamValidationUtest, CheckDelayAndDurationValidWillReturnFalseWhenInputZeroNum)
+{
+    EXPECT_EQ(false, ParamValidation::instance()->CheckDelayAndDurationValid("0", ""));
+}
+
+TEST_F(ParamValidationUtest, CheckDelayAndDurationValidWillReturnTrueWhenInputValidNum)
+{
+    EXPECT_EQ(true, ParamValidation::instance()->CheckDelayAndDurationValid("1", ""));
 }
