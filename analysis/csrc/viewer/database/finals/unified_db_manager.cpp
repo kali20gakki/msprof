@@ -11,21 +11,18 @@
  */
 
 #include "analysis/csrc/viewer/database/finals/unified_db_manager.h"
-
 #include <atomic>
 #include <vector>
-
-#include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/dfx/log.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/application/credential/id_pool.h"
+#include "analysis/csrc/infrastructure/dfx/log.h"
+#include "analysis/csrc/domain/services/environment/context.h"
+#include "analysis/csrc/infrastructure/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/table_processor_factory.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using Context = Parser::Environment::Context;
+using Context = Domain::Environment::Context;
 
 namespace {
     const std::vector<std::string> PROCESSOR_NAME = {
@@ -89,8 +86,8 @@ bool UnifiedDBManager::Init()
                     "Please check msprof_analysis_log in outputPath for more info.", outputPath_);
         return false;
     }
-    Analysis::Association::Credential::IdPool::GetInstance();
-    if (!Analysis::Parser::Environment::Context::GetInstance().Load(profFolderPaths_)) {
+    Analysis::Application::Credential::IdPool::GetInstance();
+    if (!Analysis::Domain::Environment::Context::GetInstance().Load(profFolderPaths_)) {
         ERROR("JSON parameter loading failed. Please check if the JSON data is complete.");
         PRINT_ERROR("JSON parameter loading failed. Please check if the JSON data is complete. "
                     "Please check msprof_analysis_log in outputPath for more info.");

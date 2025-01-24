@@ -13,13 +13,13 @@
  
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "analysis/csrc/utils/file.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/infrastructure/utils/file.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 using namespace Analysis::Utils;
 using namespace Analysis::Viewer::Database;
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 
 // MsprofTx table data format
 using MsprofTxDataFormat = std::vector<std::tuple<uint32_t, uint32_t, uint32_t,

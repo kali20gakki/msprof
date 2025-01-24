@@ -14,18 +14,18 @@
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/application/include/export_summary.h"
 #include "analysis/csrc/application/summary/summary_constant.h"
-#include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/infrastructure/utils/file.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/viewer/database/database.h"
-#include "analysis/csrc/viewer/database/db_runner.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/infrastructure/db/include/database.h"
+#include "analysis/csrc/infrastructure/db/include/db_runner.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/domain/data_process/data_processor.h"
 #include "analysis/csrc/domain/data_process/include/data_processor_factory.h"
 
 using namespace Analysis::Application;
 using namespace Analysis::Utils;
 using namespace Analysis::Viewer::Database;
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Domain;
 
 namespace {

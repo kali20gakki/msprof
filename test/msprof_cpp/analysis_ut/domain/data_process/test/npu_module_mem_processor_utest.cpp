@@ -13,10 +13,10 @@
 #include "analysis/csrc/domain/data_process/system/npu_module_mem_processor.h"
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 using namespace Analysis::Domain;
-using namespace Parser::Environment;
+using namespace Domain::Environment;
 using namespace Analysis::Utils;
 using namespace Analysis::Viewer::Database;
 namespace {
@@ -67,10 +67,10 @@ protected:
 
 TEST_F(NpuModuleMemProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo)
         .stubs()
         .will(returnValue(true));
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetSyscntConversionParams)
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetSyscntConversionParams)
         .stubs()
         .will(returnValue(true));
     auto processor = NpuModuleMemProcessor(PROF_PATH);
@@ -78,8 +78,8 @@ TEST_F(NpuModuleMemProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSucces
     DataInventory dataInventory;
     EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MODULE_MEM));
 
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetSyscntConversionParams).reset();
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo).reset();
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetSyscntConversionParams).reset();
 }
 
 TEST_F(NpuModuleMemProcessorUTest, TestRunShouldReturnFalseWhenProcessorFail)
@@ -91,7 +91,7 @@ TEST_F(NpuModuleMemProcessorUTest, TestRunShouldReturnFalseWhenProcessorFail)
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).reset();
     // Mock ProfTimeRecord and SyscntConversionParams
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetSyscntConversionParams).stubs().will(returnValue(true));
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetSyscntConversionParams).stubs().will(returnValue(true));
     // Construct DBRunner Failed
     MOCKER_CPP(&DBInfo::ConstructDBRunner).stubs().will(returnValue(false));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MODULE_MEM));
@@ -104,12 +104,12 @@ TEST_F(NpuModuleMemProcessorUTest, TestRunShouldReturnFalseWhenProcessorFail)
     MOCKER_CPP(&DataProcessor::CheckPathAndTable).stubs().will(returnValue(NOT_EXIST));
     EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MODULE_MEM));
     MOCKER_CPP(&DataProcessor::CheckPathAndTable).reset();
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetSyscntConversionParams).reset();
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetSyscntConversionParams).reset();
     // GetSyscntConversionParams Failed
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetSyscntConversionParams).stubs().will(returnValue(false));
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetSyscntConversionParams).stubs().will(returnValue(false));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MODULE_MEM));
     // Reset Mock ProfTimeRecord and SyscntConversionParams
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetSyscntConversionParams).reset();
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetSyscntConversionParams).reset();
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).reset();
 }
 

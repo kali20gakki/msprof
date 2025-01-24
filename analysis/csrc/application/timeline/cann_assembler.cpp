@@ -15,13 +15,12 @@
 #include <unordered_set>
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ascend_task_data.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/application/timeline/connection_id_pool.h"
 
 namespace Analysis {
 namespace Application {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
 using namespace Analysis::Utils;

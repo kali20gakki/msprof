@@ -10,20 +10,18 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/viewer/database/finals/communication_info_processor.h"
-#include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/application/credential/id_pool.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
 #include "analysis/csrc/domain/data_process/ai_task/communication_info_processor.h"
 #include "analysis/csrc/domain/data_process/ai_task/kfc_comm_processor.h"
-#include "analysis/csrc/domain/data_process/data_processor.h"
-#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/communication_info_data.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using namespace Association::Credential;
-using namespace Parser::Environment;
+using namespace Application::Credential;
+using namespace Domain::Environment;
 using namespace Analysis::Utils;
 namespace {
 const std::string INDEX_NAME = "CommunicationTaskIndex";

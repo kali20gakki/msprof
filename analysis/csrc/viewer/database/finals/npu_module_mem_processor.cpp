@@ -10,13 +10,12 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/viewer/database/finals/npu_module_mem_processor.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
 namespace {
 struct NpuModuleMemData {

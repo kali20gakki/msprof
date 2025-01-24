@@ -15,16 +15,15 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/domain/data_process/ai_task/communication_info_processor.h"
-#include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/application/credential/id_pool.h"
+#include "analysis/csrc/infrastructure/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
 
 using namespace Analysis::Domain;
-using namespace Analysis::Association::Credential;
+using namespace Analysis::Application::Credential;
 using namespace Analysis::Utils;
-using namespace Analysis::Parser;
 namespace {
 const int DEPTH = 0;
 const uint16_t OP_NUM = 4;
@@ -115,14 +114,14 @@ protected:
         CreateHcclOpSingleDevice(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_OP_A);
         CreateHcclOpSingleDevice(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_OP_B);
         CreateKfcTask(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_KFC_A);
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
+        MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo)
             .stubs()
             .will(returnValue(true));
     }
     virtual void TearDown()
     {
         EXPECT_TRUE(File::RemoveDir(COMMUNICATION_TASK_PATH, DEPTH));
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
+        MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo).reset();
     }
     static void CreateHcclTaskSingleDevice(const std::string& dbPath, HcclTaskSingleDeviceFormat data)
     {
@@ -269,7 +268,7 @@ TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnFalseWhenInsertDataFa
     auto id{TableColumn("Id", "INTEGER")};
     auto name{TableColumn("Name", "INTEGER")};
     std::vector<TableColumn> cols{id, name};
-    MOCKER_CPP(&Analysis::Viewer::Database::Database::GetTableCols)
+    MOCKER_CPP(&Analysis::Domain::Database::GetTableCols)
     .stubs()
     .will(returnValue(cols));
     std::string processorName = "COMMUNICATION_TASK_INFO";
@@ -278,7 +277,7 @@ TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnFalseWhenInsertDataFa
         auto dataInventory = DataInventory();
         EXPECT_FALSE(processor.Run(dataInventory, processorName));
     }
-    MOCKER_CPP(&Analysis::Viewer::Database::Database::GetTableCols).reset();
+    MOCKER_CPP(&Analysis::Domain::Database::GetTableCols).reset();
 }
 
 TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnFalseWhenReserveFailedThenDataIsEmpty)

@@ -10,16 +10,15 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/viewer/database/finals/hbm_processor.h"
-#include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/application/credential/id_pool.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
-using namespace Association::Credential;
+using namespace Application::Credential;
 namespace {
 struct HBMData {
     uint32_t deviceId = 0; // 这里使用uint32是因为db_runner的QueryData方法不支持存储精度低于uint32的数据

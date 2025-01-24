@@ -16,15 +16,15 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 
-#include "analysis/csrc/utils/thread_pool.h"
-#include "analysis/csrc/viewer/database/drafts/cann_trace_db_dumper.h"
+#include "analysis/csrc/infrastructure/utils/thread_pool.h"
+#include "analysis/csrc/domain/services/persistence/host/cann_trace_db_dumper.h"
 
 
 using namespace Analysis::Utils;
-using namespace Analysis::Viewer::Database::Drafts;
+using namespace Analysis::Infra;
 using namespace Analysis::Viewer::Database;
-using namespace  Analysis::Entities;
-using namespace Analysis::Association::Cann;
+using namespace  Analysis::Domain;
+using namespace Analysis::Domain::Cann;
 const std::string TEST_DB_FILE_PATH = "./sqlite";
 const uint32_t INPUT_DATA_TYPE_POSITION = 15;
 const uint32_t GROUP_NAME_POSITION = 3;
@@ -47,14 +47,14 @@ protected:
     static void MockGetHCCLTasks()
     {
         HostTask hcclHostTask;
-        auto pMiniOpDesc = std::make_shared<Analysis::Entities::HcclSmallOpDesc>(0, 0, nullptr);
+        auto pMiniOpDesc = std::make_shared<HcclSmallOpDesc>(0, 0, nullptr);
         pMiniOpDesc->ctxId = 0;
         auto hcclTrace = MsprofHcclInfo{};
         hcclTrace.opType = 1;
         auto hcclInfo = MsprofAdditionalInfo();
         std::memcpy(hcclInfo.data, &hcclTrace, sizeof(hcclTrace));
         pMiniOpDesc->hcclInfo = std::make_shared<MsprofAdditionalInfo>(hcclInfo);
-        auto hcclTaskPp = std::make_shared<Operator>(pMiniOpDesc, 0, Analysis::Entities::OpType::OPTYPE_COMPUTE);
+        auto hcclTaskPp = std::make_shared<Operator>(pMiniOpDesc, 0, OpType::OPTYPE_COMPUTE);
         hcclHostTask.op = hcclTaskPp;
         std::shared_ptr<HostTask> hostTaskPointer = std::make_shared<HostTask>(hcclHostTask);
         auto hcclTasks = std::make_shared<HostTasks>();
@@ -77,7 +77,7 @@ protected:
         kernelDesc->nodeDesc->data.nodeBasicInfo = msprofNodeBasicInfo;
         kernelDesc->nodeDesc->data.nodeAttrInfo = msprofNodeAttrInfo;
         kernelDesc->ctxId = std::make_shared<MsprofAdditionalInfo>();
-        auto kernelOp = std::make_shared<Operator>(kernelDesc, 0, Analysis::Entities::OpType::OPTYPE_COMPUTE);
+        auto kernelOp = std::make_shared<Operator>(kernelDesc, 0, OpType::OPTYPE_COMPUTE);
         kernelTask->op = kernelOp;
         std::shared_ptr<HostTask> computeTaskPointer = kernelTask;
         auto kernelTasks = std::make_shared<HostTasks>();
@@ -95,7 +95,7 @@ protected:
         auto tensorDesc = std::make_shared<ConcatTensorInfo>();
         tensorDesc->tensorNum = 1;
         auto kernelDesc = std::make_shared<OpDesc>();
-        auto kernelOp = std::make_shared<Operator>(kernelDesc, 0, Analysis::Entities::OpType::OPTYPE_COMPUTE);
+        auto kernelOp = std::make_shared<Operator>(kernelDesc, 0, OpType::OPTYPE_COMPUTE);
         kernelTask->op = kernelOp;
         std::shared_ptr<HostTask> computeTaskPointer = kernelTask;
         auto kernelTasks = std::make_shared<HostTasks>();
@@ -105,9 +105,8 @@ protected:
 
     static void MockGetTasks()
     {
-        auto pMiniOpDesc = std::make_shared<Entities::HcclSmallOpDesc>(0, 0, nullptr);
-        std::shared_ptr<Operator> pointer = std::make_shared<Operator>(pMiniOpDesc, 0,
-                                                                       Entities::OpType::OPTYPE_HCCL_SMALL);
+        auto pMiniOpDesc = std::make_shared<HcclSmallOpDesc>(0, 0, nullptr);
+        std::shared_ptr<Operator> pointer = std::make_shared<Operator>(pMiniOpDesc, 0, OpType::OPTYPE_HCCL_SMALL);
         HostTask task;
         task.op = pointer;
         std::shared_ptr<HostTask> taskPointer = std::make_shared<HostTask>(task);
@@ -133,7 +132,7 @@ protected:
 
         auto desc = std::make_shared<HcclBigOpDesc>(1, 1, 1, 1, 1, 1, 1, std::shared_ptr<MsprofCompactInfo>(trace),
                                                     std::shared_ptr<MsprofCompactInfo>(hcclOpCompactInfo), -1);
-        auto op = std::make_shared<Operator>(desc, 0, Entities::OpType::OPTYPE_HCCL_BIG);
+        auto op = std::make_shared<Operator>(desc, 0, OpType::OPTYPE_HCCL_BIG);
         auto hcclBigOps = std::make_shared<HCCLBigOpDescs>();
         hcclBigOps->emplace_back(op);
         MOCKER_CPP(&TreeAnalyzer::GetHcclBigOps).stubs().will(returnValue(*hcclBigOps));

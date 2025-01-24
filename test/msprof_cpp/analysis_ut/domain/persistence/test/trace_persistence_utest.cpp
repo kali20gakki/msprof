@@ -15,10 +15,10 @@
 #include <iostream>
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/domain/services/modeling/step_trace/include/step_trace_process.h"
-#include "analysis/csrc/domain/services/persistence/step_trace_persistence.h"
-#include "analysis/csrc/domain/services/persistence/trace_persistence.h"
-#include "analysis/csrc/dfx/error_code.h"
-#include "analysis/csrc/viewer/database/database.h"
+#include "analysis/csrc/domain/services/persistence/device/step_trace_persistence.h"
+#include "analysis/csrc/domain/services/persistence/device/trace_persistence.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/db/include/database.h"
 
 
 namespace Analysis {

@@ -16,18 +16,17 @@
 #include "analysis/csrc/domain/entities/hal/include/hal.h"
 #include "analysis/csrc/domain/entities/hal/include/device_task.h"
 #include "analysis/csrc/domain/entities/hal/include/top_down_task.h"
-#include "analysis/csrc/entities/ascend_obj.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/domain/entities/hal/include/ascend_obj.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 #include "analysis/csrc/domain/services/constant/default_value_constant.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
 #include "analysis/csrc/domain/services/device_context/load_host_data.h"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
-#include "analysis/csrc/utils/time_utils.h"
+#include "analysis/csrc/infrastructure/utils/time_utils.h"
 
 namespace Analysis {
 namespace Domain {
-using namespace Analysis::Entities;
 using namespace Utils;
 namespace {
 const uint64_t DEFAULT_MODEL_ID = UINT32_MAX;

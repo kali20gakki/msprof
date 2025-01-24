@@ -14,9 +14,9 @@
 #include "analysis/csrc/application/database/db_assembler.h"
 #include <functional>
 #include "analysis/csrc/application/database/db_constant.h"
-#include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/application/credential/id_pool.h"
+#include "analysis/csrc/domain/services/environment/context.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ascend_task_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/communication_info_data.h"
@@ -40,13 +40,13 @@ namespace Analysis {
 namespace Application {
 using namespace Analysis::Domain;
 using namespace Analysis::Utils;
-using namespace Analysis::Parser::Environment;
-using IdPool = Analysis::Association::Credential::IdPool;
+using namespace Analysis::Domain::Environment;
+using IdPool = Analysis::Application::Credential::IdPool;
 
 namespace {
 bool SaveApiData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
 {
-    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, profPath);
+    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(HOST_ID, profPath);
     auto apiData = dataInventory.GetPtr<std::vector<ApiData>>();
     if (apiData == nullptr) {
         WARN("Api data not exist.");
@@ -300,8 +300,8 @@ bool SaveHostInfoData(DataInventory& dataInventory, DBInfo& msprofDB, const std:
     // hostuid, hostname
     using HostInfoDataFormat = std::vector<std::tuple<std::string, std::string>>;
     HostInfoDataFormat hostInfoData;
-    std::string hostUid = Context::GetInstance().GetHostUid(Parser::Environment::HOST_ID, profPath);
-    std::string hostName = Context::GetInstance().GetHostName(Parser::Environment::HOST_ID, profPath);
+    std::string hostUid = Context::GetInstance().GetHostUid(HOST_ID, profPath);
+    std::string hostName = Context::GetInstance().GetHostName(HOST_ID, profPath);
     hostInfoData.emplace_back(hostUid, hostName);
     if (hostInfoData.empty()) {
         // 无host目录 无数据时，避免saveData因数据为空 导致error
@@ -362,7 +362,7 @@ bool SaveMsprofTxData(DataInventory& dataInventory, DBInfo& msprofDB, const std:
         ERROR("Reserved for MsprofTx data failed.");
         return false;
     }
-    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, profPath);
+    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(HOST_ID, profPath);
     for (const auto& item : *msprofTxData) {
         uint64_t message = IdPool::GetInstance().GetUint64Id(item.message);
         uint64_t globalTid = Utils::Contact(pid, item.tid);
@@ -459,7 +459,7 @@ bool SaveNpuOpMemData(DataInventory& dataInventory, DBInfo& msprofDB, const std:
         return false;
     }
     uint64_t stringGeId = IdPool::GetInstance().GetUint64Id("GE");
-    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, profPath);
+    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(HOST_ID, profPath);
     uint64_t operatorNameId;
     uint64_t globalTid;
     for (const auto& item : *npuOpMemData) {
@@ -603,7 +603,7 @@ bool SaveAscendTaskData(DataInventory& dataInventory, DBInfo& msprofDB, const st
         return false;
     }
     uint64_t globalTaskId;
-    uint32_t globalPid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, profPath);
+    uint32_t globalPid = Context::GetInstance().GetPidFromInfoJson(HOST_ID, profPath);
     uint64_t taskType;
     for (const auto& item : *ascendTaskData) {
         globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(item.deviceId, item.streamId, item.taskId,

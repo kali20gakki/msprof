@@ -14,7 +14,7 @@
 
 #include "analysis/csrc/domain/data_process/data_processor.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
-#include "analysis/csrc/utils/time_utils.h"
+#include "analysis/csrc/infrastructure/utils/time_utils.h"
 
 namespace Analysis {
 namespace Domain {

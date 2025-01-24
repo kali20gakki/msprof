@@ -11,16 +11,17 @@
  */
 #include <gtest/gtest.h>
 #include "mockcpp/mockcpp.hpp"
-#include "analysis/csrc/domain/services/persistence/device_hccl_persistence.h"
+#include "analysis/csrc/domain/services/persistence/device/device_hccl_persistence.h"
 #include "analysis/csrc/domain/services/association/calculator/hccl/include/hccl_calculator.h"
-#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/infrastructure/utils/utils.h"
 #include "analysis/csrc/domain/entities/hal/include/top_down_task.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
-#include "analysis/csrc/viewer/database/db_runner.h"
+#include "analysis/csrc/infrastructure/db/include/db_runner.h"
 
 using namespace Analysis::Utils;
 using namespace Analysis::Viewer::Database;
+using namespace Analysis::Infra;
 
 const std::string LOCAL_DIR = "./hccl_persistence";
 const std::string DEVICE_DIR = File::PathJoin({LOCAL_DIR, "device_0"});

@@ -12,9 +12,9 @@
 #include <atomic>
 
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/dfx/error_code.h"
-#include "analysis/csrc/utils/file.h"
-#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/utils/file.h"
+#include "analysis/csrc/infrastructure/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
 
 namespace Analysis {

@@ -15,19 +15,19 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
-#include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/infrastructure/utils/file.h"
 #include "analysis/csrc/domain/services/device_context/load_host_data.h"
-#include "analysis/csrc/viewer/database/database.h"
-#include "analysis/csrc/dfx/error_code.h"
-#include "analysis/csrc/entities/ascend_obj.h"
+#include "analysis/csrc/infrastructure/db/include/database.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
+#include "analysis/csrc/domain/entities/hal/include/ascend_obj.h"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
-#include "analysis/csrc/viewer/database/db_runner.h"
+#include "analysis/csrc/infrastructure/db/include/db_runner.h"
 #include "analysis/csrc/domain/valueobject/include/task_id.h"
 #include "analysis/csrc/domain/entities/hal/include/device_task.h"
 
 namespace Analysis {
 using namespace Analysis;
-using namespace Analysis::Entities;
+using namespace Analysis::Domain;
 using namespace Analysis::Infra;
 using namespace Analysis::Domain;
 using namespace Analysis::Utils;

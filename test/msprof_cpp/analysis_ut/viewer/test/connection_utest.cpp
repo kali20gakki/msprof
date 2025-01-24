@@ -12,10 +12,10 @@
 #include <memory>
 #include <string>
 #include "gtest/gtest.h"
-#include "analysis/csrc/viewer/database/connection.h"
+#include "analysis/csrc/infrastructure/db/include/connection.h"
 
 using DATA_FORMAT = std::vector<std::tuple<int32_t, uint32_t, int64_t, double, double, std::string>>;
-using namespace Analysis::Viewer::Database;
+using namespace Analysis::Infra;
 using namespace Analysis::Utils;
 
 class ConnectionUtest : public testing::Test {

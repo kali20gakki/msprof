@@ -10,14 +10,12 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/viewer/database/finals/compute_task_info_processor.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/application/credential/id_pool.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using namespace Association::Credential;
+using namespace Application::Credential;
 
 struct ComputeTaskInfoData {
     int32_t deviceId;

@@ -13,7 +13,7 @@
 #include "analysis/csrc/domain/services/modeling/include/pmu_modeling.h"
 #include <algorithm>
 #include "analysis/csrc/domain/services/modeling/batch_id/batch_id.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/domain/services/parser/pmu/include/ffts_profile_parser.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"

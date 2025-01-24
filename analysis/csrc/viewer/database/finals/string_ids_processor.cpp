@@ -11,13 +11,12 @@
  */
 
 #include "analysis/csrc/viewer/database/finals/string_ids_processor.h"
-#include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/application/credential/id_pool.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using namespace Association::Credential;
+using namespace Application::Credential;
 
 StringIdsProcessor::StringIdsProcessor(const std::string &msprofDBPath)
     : TableProcessor(msprofDBPath) {}

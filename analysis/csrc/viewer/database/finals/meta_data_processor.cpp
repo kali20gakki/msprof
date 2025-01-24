@@ -11,8 +11,6 @@
  */
 #include "analysis/csrc/viewer/database/finals/meta_data_processor.h"
 
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-
 namespace Analysis {
 namespace Viewer {
 namespace Database {

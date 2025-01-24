@@ -13,11 +13,11 @@
 
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 using namespace Analysis::Viewer::Database;
-using namespace Parser::Environment;
+using namespace Domain::Environment;
 using namespace Analysis::Utils;
 
 // device_id, timestamp, txthroughput, rxthroughput

@@ -12,22 +12,20 @@
 
 #include "analysis/csrc/domain/services/device_context/load_host_data.h"
 #include <string>
-#include "analysis/csrc/viewer/database/database.h"
-#include "analysis/csrc/viewer/database/db_runner.h"
-#include "analysis/csrc/viewer/database/drafts/number_mapping.h"
+#include "analysis/csrc/infrastructure/db/include/database.h"
+#include "analysis/csrc/infrastructure/db/include/db_runner.h"
+#include "analysis/csrc/domain/services/persistence/host/number_mapping.h"
 #include "analysis/csrc/domain/entities/hccl/include/hccl_task.h"
 #include "analysis/csrc/domain/entities/hal/include/device_task.h"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/domain/services/modeling/include/log_modeling.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/domain/services/constant/default_value_constant.h"
-#include "analysis/csrc/entities/ascend_obj.h"
+#include "analysis/csrc/domain/entities/hal/include/ascend_obj.h"
 
 using namespace Analysis;
-using namespace Analysis::Entities;
 using namespace Analysis::Viewer::Database;
-using namespace Analysis::Viewer::Database::Drafts;
 using namespace Analysis::Infra;
 using namespace Utils;
 

@@ -11,11 +11,11 @@
  */
 
 #include "analysis/csrc/application/timeline/json_assembler.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Application {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 JsonAssembler::JsonAssembler(const std::string &name, std::unordered_map<std::string, FileCategory> &&files)
     : fileMap_(files), processorName_(name) {}
 

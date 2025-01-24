@@ -13,14 +13,15 @@
 #include "analysis/csrc/application/summary/op_summary_assembler.h"
 #include <algorithm>
 #include <sstream>
-#include "analysis/csrc/dfx/error_code.h"
+#include <iomanip>
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/infrastructure/dump_tools/include/sync_utils.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Application {
 using namespace Analysis::Utils;
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Viewer::Database;
 namespace {
 const int PERCENTAGE_FACTOR = 100;

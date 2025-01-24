@@ -11,8 +11,8 @@
  */
 #include <vector>
 #include <gtest/gtest.h>
-#include "sample/sample_types.h"
-#include "sample/json_sample.h"
+#include "test/msprof_cpp/analysis_ut/infrastructure/dump_tools/sample/sample_types.h"
+#include "test/msprof_cpp/analysis_ut/infrastructure/dump_tools/sample/json_sample.h"
 #include "analysis/csrc/infrastructure/dump_tools/json_tool/include/json_writer.h"
 
 using namespace std;

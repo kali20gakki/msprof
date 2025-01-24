@@ -11,7 +11,6 @@
  */
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
 #include <algorithm>
-#include "analysis/csrc/dfx/log.h"
 
 using namespace Analysis;
 

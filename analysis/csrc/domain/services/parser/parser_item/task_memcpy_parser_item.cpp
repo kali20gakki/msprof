@@ -11,7 +11,7 @@
  */
 
 #include "analysis/csrc/domain/services/parser/parser_item/task_memcpy_parser_item.h"
-#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/infrastructure/utils/utils.h"
 #include "analysis/csrc/domain/entities/hal/include/hal_track.h"
 #include "analysis/csrc/domain/services/parser/parser_error_code.h"
 #include "analysis/csrc/domain/services/parser/parser_item_factory.h"

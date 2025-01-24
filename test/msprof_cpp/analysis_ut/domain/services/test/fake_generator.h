@@ -13,8 +13,8 @@
 #ifndef TEST_MSPROF_CPP_ANALYSIS_UT_DOMAIN_PARSER_TEST_FAKE_GENERATOR_H
 #define TEST_MSPROF_CPP_ANALYSIS_UT_DOMAIN_PARSER_TEST_FAKE_GENERATOR_H
 
-#include "analysis/csrc/utils/file.h"
-#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/infrastructure/utils/file.h"
+#include "analysis/csrc/infrastructure/utils/utils.h"
 
 template<typename T>
 bool WriteBin(std::vector<T> &datas, const std::string &path, std::string name)

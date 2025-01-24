@@ -10,13 +10,12 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/viewer/database/finals/aicore_freq_processor.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
 
 namespace {
@@ -40,7 +39,7 @@ bool AicoreFreqProcessor::Run()
 bool AicoreFreqProcessor::Process(const std::string &fileDir)
 {
     INFO("AicoreFreqProcessor Process, dir is %", fileDir);
-    auto version = Context::GetInstance().GetPlatformVersion(Parser::Environment::DEFAULT_DEVICE_ID, fileDir);
+    auto version = Context::GetInstance().GetPlatformVersion(DEFAULT_DEVICE_ID, fileDir);
     if (version != static_cast<int>(Chip::CHIP_V4_1_0) && version != static_cast<int>(Chip::CHIP_V1_1_1)) {
         // 当前仅支持910b 和 310b处理低功耗变频数据
         WARN("This platformVersion: % does not support the processing of aicore freq data.", version);

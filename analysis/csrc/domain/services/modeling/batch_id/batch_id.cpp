@@ -11,7 +11,7 @@
  */
 #include "batch_id.h"
 #include <climits>
-#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/infrastructure/dfx/log.h"
 
 namespace Analysis {
 

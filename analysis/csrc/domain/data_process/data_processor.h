@@ -24,6 +24,7 @@ const uint8_t NOT_EXIST = 1;
 const uint8_t CHECK_FAILED = 2;
 
 using namespace Analysis::Infra;
+using namespace Analysis::Viewer::Database;
 // 该类用于定义处理父类
 // 主要包括以下特性：用于规范各db处理流程
 // 1、Run拉起processor整体流程

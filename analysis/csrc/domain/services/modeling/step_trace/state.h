@@ -15,7 +15,7 @@
 
 #include "analysis/csrc/domain/entities/hal/include/hal_track.h"
 #include "analysis/csrc/domain/entities/step_trace/include/step_trace_tasks.h"
-#include "analysis/csrc/utils/singleton.h"
+#include "analysis/csrc/infrastructure/utils/singleton.h"
 
 namespace Analysis {
 namespace Domain {

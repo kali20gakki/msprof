@@ -15,8 +15,8 @@
 
 #include "analysis/csrc/infrastructure/dump_tools/include/serialization_helper.h"
 #include "analysis/csrc/infrastructure/dump_tools/include/sync_utils.h"
-#include "analysis/csrc/dfx/log.h"
-#include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/infrastructure/dfx/log.h"
+#include "analysis/csrc/infrastructure/utils/file.h"
 
 namespace Analysis {
 

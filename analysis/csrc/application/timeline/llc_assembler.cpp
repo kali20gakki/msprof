@@ -12,12 +12,11 @@
 
 #include "analysis/csrc/application/timeline/llc_assembler.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/llc_data.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Application {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Infra;
 using namespace Analysis::Utils;

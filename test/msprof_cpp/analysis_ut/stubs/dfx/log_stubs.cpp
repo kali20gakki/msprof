@@ -9,7 +9,7 @@
  * Creation Date      : 2024/4/12
  * *****************************************************************************
  */
-#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/infrastructure/dfx/log.h"
 
 namespace Analysis {
 

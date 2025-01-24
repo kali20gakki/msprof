@@ -20,7 +20,7 @@
 #include <unordered_map>
 #include <typeindex>
 #include <mutex>
-#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/infrastructure/utils/utils.h"
 
 using Analysis::Log;
 using Analysis::Format;

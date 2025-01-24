@@ -10,14 +10,13 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/viewer/database/finals/host_info_processor.h"
-
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using Context = Parser::Environment::Context;
+using Context = Domain::Environment::Context;
+using namespace Domain::Environment;
 
 HostInfoProcessor::HostInfoProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths)
     : TableProcessor(msprofDBPath, profPaths) {}
@@ -51,8 +50,8 @@ void HostInfoProcessor::UpdateHostData(const std::string &fileDir, const std::st
                                        HostInfoDataFormat &hostInfoData)
 {
     INFO("HostInfoProcessor UpdateHostData, dir is %", fileDir);
-    std::string hostUid = Context::GetInstance().GetHostUid(Parser::Environment::HOST_ID, fileDir);
-    std::string hostName = Context::GetInstance().GetHostName(Parser::Environment::HOST_ID, fileDir);
+    std::string hostUid = Context::GetInstance().GetHostUid(HOST_ID, fileDir);
+    std::string hostName = Context::GetInstance().GetHostName(HOST_ID, fileDir);
     hostInfoData.emplace_back(hostUid, hostName);
 }
 

@@ -18,12 +18,11 @@
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/domain/entities/hal/include/device_task.h"
 #include "analysis/csrc/domain/entities/hal/include/top_down_task.h"
-#include "analysis/csrc/entities/ascend_obj.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/domain/entities/hal/include/ascend_obj.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 
 using namespace testing;
 using namespace Analysis::Infra;
-using namespace Analysis::Entities;
 
 namespace Analysis {
 namespace Domain {

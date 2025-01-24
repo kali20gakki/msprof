@@ -12,11 +12,11 @@
 
 #include "data_processor.h"
 #include <unordered_map>
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 
 namespace Analysis {
 namespace Domain {
+using namespace Analysis::Viewer::Database;
 namespace {
 const uint64_t INVALID_DB_SIZE = 0;
 }

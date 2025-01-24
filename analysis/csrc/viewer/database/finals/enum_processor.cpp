@@ -11,8 +11,6 @@
  */
 #include "analysis/csrc/viewer/database/finals/enum_processor.h"
 
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-
 namespace Analysis {
 namespace Viewer {
 namespace Database {

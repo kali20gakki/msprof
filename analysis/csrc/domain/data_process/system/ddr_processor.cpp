@@ -10,12 +10,11 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/domain/data_process/system/ddr_processor.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Domain {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
 DDRProcessor::DDRProcessor(const std::string& profPaths) : DataProcessor(profPaths)
 {}
@@ -59,7 +58,7 @@ bool DDRProcessor::ProcessOneDevice(const std::string& devicePath, std::vector<D
 {
     LocaltimeContext localtimeContext;
     uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-    if (deviceId == Parser::Environment::INVALID_DEVICE_ID) {
+    if (deviceId == INVALID_DEVICE_ID) {
         ERROR("The invalid deviceId cannot to be identified.");
         return false;
     }

@@ -18,7 +18,7 @@
 #include <memory>
 
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
-#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/infrastructure/utils/thread_pool.h"
 
 namespace Analysis {
 

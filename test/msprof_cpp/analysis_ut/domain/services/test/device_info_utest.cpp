@@ -14,7 +14,7 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "nlohmann/json.hpp"
-#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/infrastructure/utils/utils.h"
 
 namespace Analysis {
 namespace Domain {

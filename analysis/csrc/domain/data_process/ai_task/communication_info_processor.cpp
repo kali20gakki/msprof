@@ -10,13 +10,11 @@
  * *****************************************************************************
  */
 #include "communication_info_processor.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
-
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Domain {
-using namespace Parser::Environment;
+using namespace Environment;
 using namespace Analysis::Utils;
 namespace {
 struct CommunicationOpEndpointsTime {

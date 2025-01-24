@@ -15,15 +15,15 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/viewer/database/finals/npu_op_mem_processor.h"
-#include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/application/credential/id_pool.h"
+#include "analysis/csrc/infrastructure/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 using namespace Analysis::Viewer::Database;
-using namespace Analysis::Association::Credential;
+using namespace Analysis::Application::Credential;
 using namespace Analysis::Utils;
-using namespace Analysis::Parser;
+using namespace Analysis::Domain;
 namespace {
 const int DEPTH = 0;
 const uint16_t STRING_NUM = 4;
@@ -76,10 +76,10 @@ protected:
         CreateNpuOpMem(File::PathJoin({PROF_PATH_B, HOST_SUFFIX, SQLITE, DB_SUFFIX}), DATA_B);
         CreateHash(File::PathJoin({PROF_PATH_A, HOST_SUFFIX, SQLITE, DB_HASH_SUFFIX}), HASH_DATA);
         CreateHash(File::PathJoin({PROF_PATH_B, HOST_SUFFIX, SQLITE, DB_HASH_SUFFIX}), HASH_DATA);
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
+        MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo)
             .stubs()
             .will(returnValue(true));
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetSyscntConversionParams)
+        MOCKER_CPP(&Analysis::Domain::Environment::Context::GetSyscntConversionParams)
             .stubs()
             .will(returnValue(true));
     }

@@ -10,18 +10,17 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/viewer/database/finals/pmu_processor.h"
-
-#include "analysis/csrc/dfx/error_code.h"
-#include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
+#include "analysis/csrc/application/credential/id_pool.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using Context = Parser::Environment::Context;
-using namespace Association::Credential;
+using Context = Domain::Environment::Context;
+using namespace Application::Credential;
 using namespace Analysis::Utils;
+using namespace Domain::Environment;
 
 namespace {
 const std::string AI_VECTOR_CORE_DB = "ai_vector_core.db";
@@ -75,7 +74,7 @@ bool PmuProcessor::Process(const std::string &fileDir)
     }
     if (metricMode == TASK_BASED) {
         // 对于task-based pmu数据,目前只支持stars芯片(仅stars支持获取globalTaskId)
-        version_ = Context::GetInstance().GetPlatformVersion(Parser::Environment::DEFAULT_DEVICE_ID, fileDir);
+        version_ = Context::GetInstance().GetPlatformVersion(DEFAULT_DEVICE_ID, fileDir);
         if (!Context::GetInstance().IsStarsChip(version_)) {
             WARN("This platformVersion does not support the processing of pmu data.");
             return true;

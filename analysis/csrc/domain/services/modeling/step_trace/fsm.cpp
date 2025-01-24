@@ -11,7 +11,7 @@
  */
 
 #include "analysis/csrc/domain/services/modeling/step_trace/fsm.h"
-#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/infrastructure/dfx/log.h"
 
 namespace Analysis {
 namespace Domain {

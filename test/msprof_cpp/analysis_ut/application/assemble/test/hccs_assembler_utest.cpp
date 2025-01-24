@@ -15,14 +15,14 @@
 #include "analysis/csrc/application/timeline/hccs_assembler.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/hccs_data.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/domain/services/environment/context.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 
 using namespace Analysis::Application;
 using namespace Analysis::Utils;
 using namespace Analysis::Domain;
 using namespace Analysis::Viewer::Database;
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 
 namespace {
 const int DEPTH = 0;

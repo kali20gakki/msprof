@@ -13,13 +13,14 @@
 #ifndef ANALYSIS_INFRASTRUCTURE_DB_DB_INFO_H
 #define ANALYSIS_INFRASTRUCTURE_DB_DB_INFO_H
 
-#include "analysis/csrc/viewer/database/db_runner.h"
-#include "analysis/csrc/viewer/database/database.h"
-#include "analysis/csrc/utils/time_utils.h"
+#include <utility>
+
+#include "analysis/csrc/infrastructure/db/include/db_runner.h"
+#include "analysis/csrc/infrastructure/db/include/database.h"
+#include "analysis/csrc/infrastructure/utils/time_utils.h"
 
 namespace Analysis {
 namespace Infra {
-using namespace Analysis::Viewer::Database;
 // 该结构体用于区分原始db和msprof db 所需的对象和属性
 // 规定了 db名字， table名字，和对应的database和dbRunner对象
 struct DBInfo {
@@ -28,7 +29,7 @@ struct DBInfo {
     std::shared_ptr<Database> database;
     std::shared_ptr<DBRunner> dbRunner;
     DBInfo() = default;
-    DBInfo(std::string dbName, std::string tableName) : dbName(dbName), tableName(tableName) {};
+    DBInfo(std::string dbName, std::string tableName) : dbName(std::move(dbName)), tableName(std::move(tableName)) {};
 
     bool ConstructDBRunner(std::string& dbPath)
     {

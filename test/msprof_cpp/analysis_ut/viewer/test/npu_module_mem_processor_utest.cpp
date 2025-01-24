@@ -15,15 +15,15 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/viewer/database/finals/npu_module_mem_processor.h"
-#include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/application/credential/id_pool.h"
+#include "analysis/csrc/infrastructure/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 using namespace Analysis::Viewer::Database;
-using namespace Analysis::Association::Credential;
+using namespace Analysis::Application::Credential;
 using namespace Analysis::Utils;
-using namespace Analysis::Parser;
+using namespace Analysis::Domain;
 namespace {
 const int DEPTH = 0;
 const std::string NPU_MODULE_MEM_PATH = "./npu_module_mem_path";
@@ -58,18 +58,18 @@ protected:
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE})));
         CreateNpuModuleMem(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_A);
         CreateNpuModuleMem(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_B);
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
+        MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo)
             .stubs()
             .will(returnValue(true));
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetSyscntConversionParams)
+        MOCKER_CPP(&Analysis::Domain::Environment::Context::GetSyscntConversionParams)
             .stubs()
             .will(returnValue(true));
     }
     virtual void TearDown()
     {
         EXPECT_TRUE(File::RemoveDir(NPU_MODULE_MEM_PATH, DEPTH));
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetSyscntConversionParams).reset();
+        MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo).reset();
+        MOCKER_CPP(&Analysis::Domain::Environment::Context::GetSyscntConversionParams).reset();
     }
     static void CreateNpuModuleMem(const std::string &dbPath, OriDataFormat data)
     {

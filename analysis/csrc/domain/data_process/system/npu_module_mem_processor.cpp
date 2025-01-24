@@ -11,13 +11,12 @@
  */
 
 #include "analysis/csrc/domain/data_process/system/npu_module_mem_processor.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Domain {
 using namespace Analysis::Utils;
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 
 NpuModuleMemProcessor::NpuModuleMemProcessor(const std::string& profPath) : DataProcessor(profPath)
 {}
@@ -30,7 +29,7 @@ bool NpuModuleMemProcessor::Process(DataInventory& dataInventory)
         return false;
     }
     SyscntConversionParams params;
-    if (!Context::GetInstance().GetSyscntConversionParams(params, Parser::Environment::HOST_ID, profPath_)) {
+    if (!Context::GetInstance().GetSyscntConversionParams(params, HOST_ID, profPath_)) {
         ERROR("GetSyscntConversionParams failed, profPath is %.", profPath_);
         return false;
     }
@@ -54,7 +53,7 @@ bool NpuModuleMemProcessor::ProcessSingleDevice(const std::string& devicePath, L
                                                 SyscntConversionParams& params)
 {
     DBInfo npuModuleMemDB("npu_module_mem.db", "NpuModuleMem");
-    if (localtimeContext.deviceId == Parser::Environment::INVALID_DEVICE_ID) {
+    if (localtimeContext.deviceId == INVALID_DEVICE_ID) {
         ERROR("the invalid deviceId cannot to be identified, profPath is %", profPath_);
         return false;
     }

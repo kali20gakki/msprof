@@ -11,13 +11,12 @@
  */
 #include "analysis/csrc/domain/data_process/system/llc_processor.h"
 #include <unordered_set>
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 #include "collector/dvvp/common/config/config.h"
 
 namespace Analysis {
 namespace Domain {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
 using namespace analysis::dvvp::common::config;
 
@@ -54,7 +53,7 @@ bool LLcProcessor::ProcessSingleDevice(const std::string &devicePath,
 {
     LocaltimeContext localtimeContext;
     localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
-    if (localtimeContext.deviceId == Parser::Environment::INVALID_DEVICE_ID) {
+    if (localtimeContext.deviceId == INVALID_DEVICE_ID) {
         ERROR("the invalid deviceId cannot to be identified, profPath is %.", profPath_);
         return false;
     }

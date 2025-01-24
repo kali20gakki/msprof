@@ -11,15 +11,14 @@
  */
 #include "analysis/csrc/viewer/database/finals/memcpy_info_processor.h"
 
-#include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/application/credential/id_pool.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using IdPool = Analysis::Association::Credential::IdPool;
-using Context = Parser::Environment::Context;
+using IdPool = Analysis::Application::Credential::IdPool;
+using Context = Domain::Environment::Context;
 
 MemcpyInfoProcessor::MemcpyInfoProcessor(const std::string &msprofDBPath, const std::set<std::string> &profPaths)
     : TableProcessor(msprofDBPath, profPaths) {}

@@ -15,10 +15,10 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/viewer/database/finals/string_ids_processor.h"
-#include "analysis/csrc/association/credential/id_pool.h"
+#include "analysis/csrc/application/credential/id_pool.h"
 
 using namespace Analysis::Viewer::Database;
-using namespace Analysis::Association::Credential;
+using namespace Analysis::Application::Credential;
 using namespace Analysis::Utils;
 namespace {
 const int DEPTH = 0;
