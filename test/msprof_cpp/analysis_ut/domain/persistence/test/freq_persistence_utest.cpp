@@ -12,10 +12,10 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "analysis/csrc/domain/services/persistence/freq_persistence.h"
+#include "analysis/csrc/domain/services/persistence/device/freq_persistence.h"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/domain/entities/hal/include/hal_freq.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 
 using namespace testing;
 using namespace Analysis::Infra;

@@ -12,12 +12,11 @@
 
 #include "analysis/csrc/domain/data_process/system/aicore_freq_processor.h"
 #include <algorithm>
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Domain {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
 
 AicoreFreqProcessor::AicoreFreqProcessor(const std::string& profPath) : DataProcessor(profPath)
@@ -25,7 +24,7 @@ AicoreFreqProcessor::AicoreFreqProcessor(const std::string& profPath) : DataProc
 
 bool AicoreFreqProcessor::Process(DataInventory& dataInventory)
 {
-    auto version = Context::GetInstance().GetPlatformVersion(Parser::Environment::DEFAULT_DEVICE_ID, profPath_);
+    auto version = Context::GetInstance().GetPlatformVersion(DEFAULT_DEVICE_ID, profPath_);
     if (version != static_cast<int>(Chip::CHIP_V4_1_0) && version != static_cast<int>(Chip::CHIP_V1_1_1)) {
         // 当前仅支持910b 和 310b处理低功耗变频数据
         WARN("This platformVersion: % does not support the processing of aicore freq data.", version);
@@ -36,7 +35,7 @@ bool AicoreFreqProcessor::Process(DataInventory& dataInventory)
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     for (const auto& devicePath : deviceList) {
         auto deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (deviceId == Parser::Environment::INVALID_DEVICE_ID) {
+        if (deviceId == INVALID_DEVICE_ID) {
             ERROR("The invalid deviceId cannot to be identified.");
             flag = false;
             continue;

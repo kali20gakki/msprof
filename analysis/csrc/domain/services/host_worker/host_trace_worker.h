@@ -1,0 +1,61 @@
+/* ******************************************************************************
+            版权所有 (c) 华为技术有限公司 2023-2023
+            Copyright, 2023, Huawei Tech. Co., Ltd.
+****************************************************************************** */
+/* ******************************************************************************
+ * File Name          : host_trace_worker.h
+ * Description        : HostTraceWorker模块：
+ *                      负责拉起数据解析->EventQueue->建树->分析树->Dump 流程
+ * Author             : msprof team
+ * Creation Date      : 2023/11/2
+ * *****************************************************************************
+ */
+
+#ifndef ANALYSIS_WORKER_HOST_TRACE_THREAD_H
+#define ANALYSIS_WORKER_HOST_TRACE_THREAD_H
+#include <string>
+#include <utility>
+#include <set>
+#include "analysis/csrc/domain/services/parser/host/cann/cann_warehouse.h"
+#include "analysis/csrc/domain/services/parser/host/cann/event_grouper.h"
+#include "analysis/csrc/infrastructure/utils/safe_unordered_map.h"
+#include "analysis/csrc/domain/entities/tree/include/tree.h"
+#include "analysis/csrc/infrastructure/utils/thread_pool.h"
+
+namespace Analysis {
+namespace Domain {
+using namespace Analysis::Utils;
+using namespace Analysis::Domain::Host::Cann;
+
+// HostTraceWorker负责控制CANN Host侧数据解析->EventQueue->建树->分析树->Dump 流程
+// 此流程由Worker拉起
+class HostTraceWorker {
+    using TreeNode = Analysis::Domain::TreeNode;
+    using CANNWarehouse = Analysis::Domain::Host::Cann::CANNWarehouse;
+    using CANNWarehouses = Analysis::Utils::SafeUnorderedMap<uint32_t, CANNWarehouse>;
+public:
+    // hostPath为采集侧落盘host二进制数据路径
+    explicit HostTraceWorker(const std::string &hostPath)
+        : hostPath_(hostPath)
+    {}
+    // 启动整个流程
+    bool Run();
+private:
+    void MultiThreadBuildTree();
+    void MultiThreadAnalyzeTreeDumpData();
+    void DumpApiEvent(ThreadPool &pool, const std::shared_ptr<EventGrouper> &grouper);
+    void DumpFlipTask(ThreadPool &pool, const std::shared_ptr<EventGrouper> &grouper);
+    void DumpModelName(ThreadPool &pool, const std::string &hostDataPath);
+    void DumpMemcpyInfo(const std::string &hostDataPath);
+private:
+    const uint32_t poolSize_ = 10;
+    std::mutex mutex_;
+    std::vector<std::pair<uint32_t, std::shared_ptr<TreeNode>>> treeNodes_;
+    std::set<uint32_t> threadIds_;
+    std::string hostPath_;
+    CANNWarehouses cannWarehouses_;
+};
+
+} // namespace Domain
+} // namespace Analysis
+#endif // ANALYSIS_WORKER_HOST_TRACE_THREAD_H

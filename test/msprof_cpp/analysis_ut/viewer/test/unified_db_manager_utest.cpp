@@ -10,18 +10,18 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/viewer/database/finals/unified_db_manager.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 #include <cstdlib>
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 
-#include "analysis/csrc/dfx/error_code.h"
-#include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/utils/file.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 using namespace Analysis::Utils;
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Viewer::Database;
 
 const std::string UNIFIED_DB_DIR = "./unifiedDBManagerUTest";

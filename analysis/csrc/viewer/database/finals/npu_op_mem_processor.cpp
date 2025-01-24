@@ -10,17 +10,16 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/viewer/database/finals/npu_op_mem_processor.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/domain/services/environment/context.h"
+#include "analysis/csrc/application/credential/id_pool.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
-using namespace Analysis::Association::Credential;
+using namespace Analysis::Application::Credential;
 namespace {
 struct NpuOpMemData {
     uint32_t threadId = 0;
@@ -103,7 +102,7 @@ NpuOpMemProcessor::ProcessedDataFormat NpuOpMemProcessor::FormatData(const OriDa
 bool NpuOpMemProcessor::Process(const std::string &fileDir)
 {
     INFO("Start to process %.", fileDir);
-    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, fileDir);
+    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(HOST_ID, fileDir);
     Utils::ProfTimeRecord timeRecord;
     Utils::SyscntConversionParams params;
     DBInfo npuOpMemDB("task_memory.db", "NpuOpMemRaw");

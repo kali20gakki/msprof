@@ -13,13 +13,13 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/viewer/database/finals/llc_processor.h"
-#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/infrastructure/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Utils;
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 
 namespace {
     const std::string LLC_PATH = "./llc_path";
@@ -118,18 +118,18 @@ TEST_F(LLCProcessorUTest, TestRunShouldReturnFalseWhenLLCProfilingInvalid)
 {
     auto processor = LLCProcessor(DB_PATH, PROF_PATHS);
     std::string llcProfiling = "readwrite";
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetLLCProfiling).stubs()
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetLLCProfiling).stubs()
         .will(returnValue(llcProfiling));
     EXPECT_FALSE(processor.Run());
     llcProfiling = "read";
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetLLCProfiling).stubs()
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetLLCProfiling).stubs()
         .will(returnValue(llcProfiling));
 }
 
 TEST_F(LLCProcessorUTest, TestRunShouldReturnFalseWhenGetTimeRecordFailed)
 {
     auto processor = LLCProcessor(DB_PATH, PROF_PATHS);
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).stubs()
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo).stubs()
         .will(returnValue(false));
     EXPECT_FALSE(processor.Run());
 }
@@ -146,10 +146,10 @@ TEST_F(LLCProcessorUTest, TestRunShouldReturnFalseWhenCheckPathFailed)
 TEST_F(LLCProcessorUTest, TestRunShouldReturnTrueWhenChipV1_1_0)
 {
     auto processor = LLCProcessor(DB_PATH, PROF_PATHS);
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::IsFirstChipV1).stubs()
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::IsFirstChipV1).stubs()
         .will(returnValue(true));
     EXPECT_TRUE(processor.Run());
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::IsFirstChipV1).reset();
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::IsFirstChipV1).reset();
 }
 
 TEST_F(LLCProcessorUTest, TestRunShouldReturnTrueWhenNoDb)

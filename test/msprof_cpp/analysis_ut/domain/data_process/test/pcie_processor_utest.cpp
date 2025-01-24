@@ -13,11 +13,11 @@
 
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 using namespace Analysis::Domain;
-using namespace Parser::Environment;
+using namespace Domain::Environment;
 using namespace Analysis::Utils;
 const std::string PCIE_DIR = "./pcie";
 const std::string MSPROF = "msprof.db";
@@ -141,7 +141,7 @@ TEST_F(PCIeProcessorUTest, TestFormatDataShouldReturnFalseWhenGetDeviceIdByDevic
 {
     DataInventory dataInventory = DataInventory();
     // GetDeviceIdByDevicePath get HOST_ID
-    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(Parser::Environment::HOST_ID));
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(HOST_ID));
     auto processor = PCIeProcessor(PROF);
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_PCIE));
     MOCKER_CPP(&ProcessedDataFormat::empty).reset();

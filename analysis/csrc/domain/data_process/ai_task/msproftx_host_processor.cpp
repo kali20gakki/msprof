@@ -11,11 +11,11 @@
  */
 
 #include "analysis/csrc/domain/data_process/ai_task/msproftx_host_processor.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Domain {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
 
 MsprofTxHostProcessor::MsprofTxHostProcessor(const std::string &profPath) : DataProcessor(profPath) {}

@@ -11,12 +11,11 @@
  */
 
 #include "analysis/csrc/domain/data_process/ai_task/api_processor.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Domain {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
 
 ApiProcessor::ApiProcessor(const std::string &profPath) : DataProcessor(profPath) {}
@@ -46,7 +45,7 @@ bool ApiProcessor::Process(DataInventory &dataInventory)
         return false;
     }
     SyscntConversionParams params;
-    if (!Context::GetInstance().GetSyscntConversionParams(params, Parser::Environment::HOST_ID, profPath_)) {
+    if (!Context::GetInstance().GetSyscntConversionParams(params, HOST_ID, profPath_)) {
         ERROR("GetSyscntConversionParams failed, profPath is %.", profPath_);
         return false;
     }

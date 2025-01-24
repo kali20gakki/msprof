@@ -13,7 +13,7 @@
 #include "analysis/csrc/domain/services/modeling/step_trace/include/step_trace_process.h"
 #include <algorithm>
 #include <deque>
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/domain/services/modeling/step_trace/model_step_trace.h"
 #include "analysis/csrc/domain/services/parser/track/include/ts_track_parser.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"

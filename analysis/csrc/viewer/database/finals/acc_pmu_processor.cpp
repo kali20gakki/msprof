@@ -10,14 +10,12 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/viewer/database/finals/acc_pmu_processor.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
 namespace {
 struct AccPmuData {
@@ -92,7 +90,7 @@ bool AccPmuProcessor::Process(const std::string &fileDir)
             continue;
         }
         uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (deviceId == Parser::Environment::INVALID_DEVICE_ID) {
+        if (deviceId == INVALID_DEVICE_ID) {
             ERROR("the invalid deviceId cannot to be identified.");
             flag = false;
             continue;

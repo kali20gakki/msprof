@@ -11,9 +11,8 @@
  */
 #include "analysis/csrc/domain/services/association/include/pmu_association.h"
 #include <map>
-#include <cstdlib>
 #include <algorithm>
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
 #include "analysis/csrc/domain/services/device_context/load_host_data.h"

@@ -11,7 +11,7 @@
  */
 
 #include "analysis/csrc/domain/data_process/ai_task/step_trace_processor.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Domain {
@@ -129,7 +129,7 @@ bool StepTraceProcessor::Process(DataInventory &dataInventory)
     std::vector<AllReduceData> resAllReduce;
     for (const auto& devPath : deviceList) {
         allParams.deviceId = GetDeviceIdByDevicePath(devPath);
-        if (allParams.deviceId == Parser::Environment::INVALID_DEVICE_ID) {
+        if (allParams.deviceId == INVALID_DEVICE_ID) {
             ERROR("the invalid deviceId cannot to be identified.");
             flag = false;
             continue;

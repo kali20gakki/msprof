@@ -15,7 +15,7 @@
 
 #include <string>
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
-#include "json_process_enum.h"
+#include "analysis/csrc/application/include/json_process_enum.h"
 
 namespace Analysis {
 namespace Application {

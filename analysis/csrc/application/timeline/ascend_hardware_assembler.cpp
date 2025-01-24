@@ -11,7 +11,7 @@
  */
 
 #include "analysis/csrc/application/timeline/ascend_hardware_assembler.h"
-#include "analysis/csrc/association/credential/id_pool.h"
+#include "analysis/csrc/application//credential/id_pool.h"
 #include "analysis/csrc/application/timeline/connection_id_pool.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/memcpy_info_data.h"
@@ -21,7 +21,7 @@ namespace Application {
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Utils;
 using namespace Analysis::Domain;
-using IdPool = Analysis::Association::Credential::IdPool;
+using IdPool = Analysis::Application::Credential::IdPool;
 namespace {
 using MEMCPY_INFO_FORMAT = std::map<TaskId, MemcpyInfoData>;
 const std::string TASK_TYPE_FFTS_PLUS = "FFTS_PLUS";

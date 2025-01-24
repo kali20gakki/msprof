@@ -13,7 +13,7 @@
 #ifndef ANALYSIS_DOMAIN_SERVICE_PARSER_PARSER_ERROR_CODE_H
 #define ANALYSIS_DOMAIN_SERVICE_PARSER_PARSER_ERROR_CODE_H
 
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 
 namespace Analysis {
 enum {

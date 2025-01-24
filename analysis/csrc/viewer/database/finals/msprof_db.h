@@ -13,14 +13,14 @@
 #ifndef ANALYSIS_VIEWER_DATABASE_MSPROF_DB_H
 #define ANALYSIS_VIEWER_DATABASE_MSPROF_DB_H
 
-#include "analysis/csrc/viewer/database/database.h"
-
+#include "analysis/csrc/infrastructure/db/include/database.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
+using namespace Infra;
 
-class MsprofDB : public Database {
+class MsprofDB : public Infra::Database {
 public:
     MsprofDB();
 };

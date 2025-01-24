@@ -17,7 +17,7 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "nlohmann/json.hpp"
-#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/infrastructure/utils/utils.h"
 #include "analysis/csrc/infrastructure/process/process_topo.h"
 #include "analysis/csrc/infrastructure/process/include/process_control.h"
 

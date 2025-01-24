@@ -14,7 +14,7 @@
 #ifndef ANALYSIS_DOMAIN_SERVICES_DEVICE_CONTEXT_ERROR_CODE_H
 #define ANALYSIS_DOMAIN_SERVICES_DEVICE_CONTEXT_ERROR_CODE_H
 
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 
 namespace Analysis {
 constexpr uint32_t DEVICE_CONTEXT_OPEN_DIR_ERROR = ERROR_NO(SERVICE_ID_CONTEXT, 0, 0x1);

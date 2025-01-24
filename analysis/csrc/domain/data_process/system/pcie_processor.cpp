@@ -11,12 +11,11 @@
  */
 #include "analysis/csrc/domain/data_process/system/pcie_processor.h"
 
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Domain {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
 namespace {
 // 将 BandwidthData 的所有 uint32_t 属性乘以 1000
@@ -52,7 +51,7 @@ bool PCIeProcessor::Process(DataInventory& dataInventory)
     for (const auto& devicePath : deviceList) {
         LocaltimeContext localtimeContext;
         uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (deviceId == Parser::Environment::INVALID_DEVICE_ID) {
+        if (deviceId == INVALID_DEVICE_ID) {
             ERROR("the invalid deviceId cannot to be identified.");
             flag = false;
             continue;

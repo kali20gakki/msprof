@@ -17,7 +17,7 @@
 #include "analysis/csrc/domain/entities/hal/include/hal_pmu.h"
 #include "analysis/csrc/domain/entities/hal/include/device_task.h"
 #include "analysis/csrc/domain/services/association/include/pmu_association.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 #include "analysis/csrc/domain/services/association/calculator/metric/metric_calculator_group/l2_cache_calculator.h"
 

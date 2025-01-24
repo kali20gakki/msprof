@@ -15,14 +15,14 @@
 
 #include <functional>
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/domain/data_process/data_processor.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/step_trace_data.h"
 
 namespace Analysis {
 namespace Domain {
 using namespace Analysis::Utils;
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 
 // model_id, index_id, FP_start, BP_end, iter_end, iter_time, fp_bp_time, grad_refresh_bound, data_aug_bound
 using OriTrace = std::vector<std::tuple<uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,

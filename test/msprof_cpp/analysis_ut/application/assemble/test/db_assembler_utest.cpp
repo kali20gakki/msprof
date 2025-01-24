@@ -14,9 +14,9 @@
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/application/database/db_assembler.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/dfx/error_code.h"
-#include "analysis/csrc/association/credential/id_pool.h"
+#include "analysis/csrc/domain/services/environment/context.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
+#include "analysis/csrc/application/credential/id_pool.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/api_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ascend_task_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/communication_info_data.h"
@@ -40,8 +40,8 @@ using namespace Analysis::Application;
 using namespace Analysis::Utils;
 using namespace Analysis::Domain;
 using namespace Analysis::Viewer::Database;
-using namespace Analysis::Parser::Environment;
-using IdPool = Analysis::Association::Credential::IdPool;
+using namespace Analysis::Domain::Environment;
+using IdPool = Analysis::Application::Credential::IdPool;
 
 namespace {
 const int DEPTH = 0;

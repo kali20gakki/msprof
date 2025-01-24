@@ -11,12 +11,13 @@
  */
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "analysis/csrc/viewer/database/drafts/flip_task_db_dumper.h"
+#include "analysis/csrc/domain/services/persistence/host/flip_task_db_dumper.h"
 
 using namespace Analysis::Utils;
-using namespace Analysis::Viewer::Database::Drafts;
+using namespace Analysis::Infra;
 using namespace Analysis::Viewer::Database;
-using FlipTask = Analysis::Parser::Adapter::FlipTask;
+using namespace Analysis::Domain;
+using FlipTask = Analysis::Domain::Adapter::FlipTask;
 using FlipTasks = std::vector<std::shared_ptr<FlipTask>>;
 const std::string TEST_DB_FILE_PATH = "./sqlite";
 const uint32_t ACL_LEVEL_NUMBER = 20000;

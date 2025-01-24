@@ -10,9 +10,8 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/application/timeline/overlap_analysis_assembler.h"
-#include "analysis/csrc/utils/time_logger.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/infrastructure/utils/time_logger.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Application {
@@ -407,7 +406,7 @@ uint8_t OverlapAnalysisAssembler::AssembleData(DataInventory &dataInventory,
     // init pid map
     auto layerInfo = GetLayerInfo(PROCESS_OVERLAP_ANALYSE);
     for (auto &deviceId : deviceIds_) {
-        auto pid = Analysis::Parser::Environment::Context::GetInstance().GetPidFromInfoJson(deviceId, profPath_);
+        auto pid = Analysis::Domain::Environment::Context::GetInstance().GetPidFromInfoJson(deviceId, profPath_);
         uint32_t formatPid = JsonAssembler::GetFormatPid(pid, layerInfo.sortIndex, deviceId);
         pidMap_[deviceId] = formatPid;
     }

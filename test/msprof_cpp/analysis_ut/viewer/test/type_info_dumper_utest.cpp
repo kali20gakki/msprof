@@ -12,13 +12,14 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 
-#include "analysis/csrc/dfx/error_code.h"
-#include "analysis/csrc/utils/utils.h"
-#include "analysis/csrc/viewer/database/drafts/type_info_db_dumper.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/utils/utils.h"
+#include "analysis/csrc/domain/services/persistence/host/type_info_db_dumper.h"
 
 using namespace Analysis::Utils;
 using namespace Analysis::Viewer::Database;
-using namespace Analysis::Viewer::Database::Drafts;
+using namespace Analysis::Infra;
+using namespace Analysis::Domain;
 using TypeInfoData = std::unordered_map<uint16_t, std::unordered_map<uint64_t, std::string>>;
 using HashData = std::unordered_map<uint64_t, std::string>;
 const std::string TEST_DB_FILE_PATH = "./sqlite";

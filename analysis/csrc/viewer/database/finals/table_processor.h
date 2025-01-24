@@ -17,15 +17,16 @@
 #include <vector>
 #include <set>
 
-#include "analysis/csrc/utils/utils.h"
-#include "analysis/csrc/utils/time_utils.h"
-#include "analysis/csrc/viewer/database/db_runner.h"
+#include "analysis/csrc/infrastructure/utils/utils.h"
+#include "analysis/csrc/infrastructure/utils/time_utils.h"
+#include "analysis/csrc/infrastructure/db/include/db_runner.h"
 #include "analysis/csrc/viewer/database/finals/msprof_db.h"
 #include "analysis/csrc/infrastructure/db/include/db_info.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
+using namespace Infra;
 // 存放各processor中的各线程数据
 struct ThreadData {
     uint16_t deviceId = UINT16_MAX;

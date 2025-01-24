@@ -20,10 +20,10 @@
 #include <cstring>
 #include <sys/stat.h>
 #include "nlohmann/json.hpp"
-#include "analysis/csrc/utils/utils.h"
-#include "analysis/csrc/utils/file.h"
-#include "analysis/csrc/utils/time_logger.h"
-#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/infrastructure/utils/utils.h"
+#include "analysis/csrc/infrastructure/utils/file.h"
+#include "analysis/csrc/infrastructure/utils/time_logger.h"
+#include "analysis/csrc/infrastructure/utils/thread_pool.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
 #include "analysis/csrc/infrastructure/process/include/process_control.h"
 #include "device_context_error_code.h"

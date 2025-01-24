@@ -13,8 +13,8 @@
 #include "gtest/gtest.h"
 #include "analysis/csrc/viewer/database/finals/memcpy_info_processor.h"
 #include "mockcpp/mockcpp.hpp"
-#include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/application/credential/id_pool.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 using namespace Analysis::Viewer::Database;

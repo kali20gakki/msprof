@@ -43,14 +43,14 @@ test_obj=(
     stub_file_utest
     entities_utest
     utils_utest
+    device_init_utest
     dfx_utest
     association_utest
     viewer_utest
-    parser_utest
-    device_association_utest
-    device_entities_utest
-    device_modeling_utest
+    host_worker_utest
+    host_parser_utest
     device_parser_utest
+    device_modeling_utest
     device_persistence_utest
     data_process_utest
     export_assemble_utest

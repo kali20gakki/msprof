@@ -11,10 +11,10 @@
  */
 #include <gtest/gtest.h>
 #include "analysis/csrc/domain/services/association/calculator/hccl/include/hccl_calculator.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/domain/entities/hal/include/top_down_task.h"
 #include "analysis/csrc/infrastructure/context/include/device_context.h"
-#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/infrastructure/utils/utils.h"
 #include "mockcpp/mockcpp.hpp"
 
 using namespace Analysis::Domain;

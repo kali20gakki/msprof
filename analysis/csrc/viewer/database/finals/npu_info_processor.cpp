@@ -10,14 +10,12 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/viewer/database/finals/npu_info_processor.h"
-
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using Context = Parser::Environment::Context;
+using Context = Domain::Environment::Context;
 namespace {
     const std::unordered_map<uint16_t, std::string> CHIP_TABLE = {
         {0, "Ascend310"},

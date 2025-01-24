@@ -10,12 +10,11 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/domain/data_process/system/hbm_processor.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Domain {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
 
 HBMProcessor::HBMProcessor(const std::string &profPath) : DataProcessor(profPath) {}
@@ -42,7 +41,7 @@ bool HBMProcessor::ProcessSingleDevice(const std::string &devicePath,
 {
     LocaltimeContext localtimeContext;
     localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
-    if (localtimeContext.deviceId == Parser::Environment::INVALID_DEVICE_ID) {
+    if (localtimeContext.deviceId == INVALID_DEVICE_ID) {
         ERROR("the invalid deviceId cannot to be identified, profPath is %.", profPath_);
         return false;
     }

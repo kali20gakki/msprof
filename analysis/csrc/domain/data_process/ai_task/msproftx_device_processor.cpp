@@ -12,20 +12,18 @@
 
 #include "analysis/csrc/domain/data_process/ai_task/msproftx_device_processor.h"
 #include <algorithm>
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
-
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Domain {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
 MsprofTxDeviceProcessor::MsprofTxDeviceProcessor(const std::string &profPath) : DataProcessor(profPath) {}
 
 bool MsprofTxDeviceProcessor::ProcessOneDevice(std::vector<MsprofTxDeviceData> &res, const std::string &devPath)
 {
     uint16_t deviceId = GetDeviceIdByDevicePath(devPath);
-    if (deviceId == Parser::Environment::INVALID_DEVICE_ID) {
+    if (deviceId == INVALID_DEVICE_ID) {
         ERROR("the invalid deviceId cannot to be identified.");
         return false;
     }

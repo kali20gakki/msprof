@@ -13,7 +13,7 @@
 #include "analysis/csrc/application/timeline/timeline_manager.h"
 #include <atomic>
 #include "analysis/csrc/application/timeline/timeline_factory.h"
-#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/infrastructure/utils/thread_pool.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/step_trace_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/msprof_tx_host_data.h"
 

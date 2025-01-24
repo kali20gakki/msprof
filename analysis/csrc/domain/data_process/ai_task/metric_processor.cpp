@@ -10,16 +10,16 @@
 #include <algorithm>
 #include <unordered_set>
 
-#include "analysis/csrc/dfx/error_code.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/association/credential/id_pool.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
+#include "analysis/csrc/domain/services/environment/context.h"
+#include "analysis/csrc/application/credential/id_pool.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/metric_summary.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ascend_task_data.h"
 
 
 namespace Analysis {
 namespace Domain {
-
+using namespace Environment;
 namespace {
     const uint64_t INVALID_DB_SIZE = 0;
     const std::unordered_set<std::string> INVALID_COLUMN_NAMES = {
@@ -60,7 +60,7 @@ MetricProcessor::MetricProcessor(const std::string &profPath) : DataProcessor(pr
 bool MetricProcessor::Process(DataInventory &dataInventory)
 {
     std::string metricMode;
-    if (!Parser::Environment::Context::GetInstance().GetMetricMode(metricMode, profPath_)) {
+    if (!Context::GetInstance().GetMetricMode(metricMode, profPath_)) {
         ERROR("Get Metric Mode device info failed.");
         return false;
     }
@@ -85,7 +85,7 @@ bool MetricProcessor::TaskBasedProcess(DataInventory& dataInventory)
     // check DB
     for (const auto& devicePath : deviceList) {
         auto deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
-        if (deviceId == Parser::Environment::INVALID_DEVICE_ID) {
+        if (deviceId == INVALID_DEVICE_ID) {
             ERROR("the invalid deviceId cannot to be identified.");
             return false;
         }
@@ -217,9 +217,8 @@ std::vector<std::vector<std::string>> MetricProcessor::GetTaskBasedData(const st
 {
     std::vector<std::vector<std::string>> oriData;
     std::vector<std::tuple<std::string>> lineData;
-    auto version = Parser::Environment::Context::GetInstance().GetPlatformVersion(
-        Parser::Environment::DEFAULT_DEVICE_ID, profPath_);
-    const bool IS_CHIP_V1 = Parser::Environment::Context::GetInstance().IsChipV1(version);
+    auto version = Context::GetInstance().GetPlatformVersion(DEFAULT_DEVICE_ID, profPath_);
+    const bool IS_CHIP_V1 = Context::GetInstance().IsChipV1(version);
 
     MAKE_SHARED_RETURN_VALUE(metricDB.dbRunner, DBRunner, oriData, dbPath);
     if (metricDB.dbRunner == nullptr) {
@@ -252,7 +251,7 @@ std::vector<std::vector<std::string>> MetricProcessor::GetTaskBasedData(const st
 
     std::vector<std::string> taskIdColumns = {"stream_id", "task_id", "batch_id"};
     std::string subtask_id_format =  "subtask_id";
-    if (!Parser::Environment::Context::GetInstance().IsChipV4(version)) {
+    if (!Context::GetInstance().IsChipV4(version)) {
         subtask_id_format = "(case when subtask_id=" + std::to_string(UINT32_MAX) + " then 'N/A' else subtask_id end)";
     }
     taskIdColumns.insert(taskIdColumns.begin(), subtask_id_format);

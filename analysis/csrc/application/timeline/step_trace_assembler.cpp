@@ -11,8 +11,6 @@
  */
 
 #include "analysis/csrc/application/timeline/step_trace_assembler.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/application/timeline/connection_id_pool.h"
 
 namespace Analysis {
 namespace Application {

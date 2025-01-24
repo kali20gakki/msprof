@@ -12,13 +12,13 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/viewer/database/finals/soc_processor.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/domain/services/environment/context.h"
+#include "analysis/csrc/infrastructure/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Utils;
-using namespace Analysis::Parser;
+using namespace Analysis::Domain;
 namespace {
 const int DEPTH = 0;
 const std::string BASE_PATH = "./soc_path";
@@ -57,11 +57,11 @@ protected:
             {"endCollectionTimeEnd", "1701069338041681"},
             {"startClockMonotonicRaw", "36470610791630"},
         };
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetInfoByDeviceId).stubs().will(returnValue(record));
+        MOCKER_CPP(&Analysis::Domain::Environment::Context::GetInfoByDeviceId).stubs().will(returnValue(record));
     }
     virtual void TearDown()
     {
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetInfoByDeviceId).reset();
+        MOCKER_CPP(&Analysis::Domain::Environment::Context::GetInfoByDeviceId).reset();
         EXPECT_TRUE(File::RemoveDir(BASE_PATH, DEPTH));
     }
     static void CreateSocMetricData(const std::string& dbPath, OriDataFormat data)

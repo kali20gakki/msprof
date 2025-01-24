@@ -14,9 +14,9 @@
 #include "analysis/csrc/domain/services/parser/log/include/stars_soc_parser.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/domain/services/modeling/batch_id/batch_id.h"
-#include "analysis/csrc/utils/time_logger.h"
+#include "analysis/csrc/infrastructure/utils/time_logger.h"
 #include "analysis/csrc/domain/services/parser/track/include/ts_track_parser.h"
 
 namespace Analysis {

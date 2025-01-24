@@ -3,7 +3,7 @@ aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/process DEVICE_MODE
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/entities/hal DEVICE_MODELING_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/modeling DEVICE_MODELING_SOURCE)
 aux_source_directory(${TOP_DIR}/analysis/csrc/domain/services/modeling/batch_id DEVICE_MODELING_SOURCE)
-aux_source_directory(${TOP_DIR}/analysis/csrc/utils DEVICE_MODELING_SOURCE)
+aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/utils DEVICE_MODELING_SOURCE)
 
 aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/stubs/dfx DEVICE_MODELING_SOURCE)
 aux_source_directory(${TOP_DIR}/test/msprof_cpp/analysis_ut/domain/modeling/test DEVICE_MODELING_SOURCE)

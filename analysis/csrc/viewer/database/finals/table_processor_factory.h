@@ -16,7 +16,7 @@
 #include <string>
 #include <memory>
 
-#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/infrastructure/utils/utils.h"
 #include "analysis/csrc/viewer/database/finals/msprof_db.h"
 #include "analysis/csrc/viewer/database/finals/table_processor.h"
 

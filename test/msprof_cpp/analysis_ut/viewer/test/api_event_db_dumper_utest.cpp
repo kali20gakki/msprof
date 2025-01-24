@@ -11,13 +11,13 @@
  */
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "analysis/csrc/entities/event.h"
-#include "analysis/csrc/viewer/database/drafts/api_event_db_dumper.h"
+#include "analysis/csrc/domain/entities/tree/include/event.h"
+#include "analysis/csrc/domain/services/persistence/host/api_event_db_dumper.h"
 
 using namespace Analysis::Utils;
-using namespace Analysis::Viewer::Database::Drafts;
+using namespace Analysis::Infra;
 using namespace Analysis::Viewer::Database;
-using namespace Analysis::Entities;
+using namespace Analysis::Domain;
 using ApiData = std::vector<std::shared_ptr<Event>>;
 const std::string TEST_DB_FILE_PATH = "./sqlite";
 const uint32_t ACL_LEVEL_NUMBER = 20000;

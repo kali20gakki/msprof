@@ -15,7 +15,6 @@
 
 #include <cstdint>
 
-
 namespace Analysis {
 namespace Domain {
 struct NpuModuleMemData {

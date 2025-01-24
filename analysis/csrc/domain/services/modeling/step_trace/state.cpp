@@ -13,7 +13,7 @@
 #include "analysis/csrc/domain/services/modeling/step_trace/state.h"
 #include <functional>
 #include <unordered_map>
-#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/infrastructure/dfx/log.h"
 #include "analysis/csrc/domain/services/modeling/step_trace/step_trace_constant.h"
 
 namespace Analysis {

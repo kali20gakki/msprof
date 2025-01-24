@@ -11,12 +11,11 @@
  */
 
 #include "analysis/csrc/domain/services/parser/log/include/stars_soc_parser.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/domain/services/parser/parser_item_factory.h"
 #include "analysis/csrc/infrastructure/resource/binary_struct_info.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
-#include "analysis/csrc/domain/services/parser/parser_error_code.h"
 
 namespace Analysis {
 namespace Domain {

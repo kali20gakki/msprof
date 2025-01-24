@@ -10,20 +10,17 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/viewer/database/finals/llc_processor.h"
-
 #include <unordered_set>
-
-#include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/application/credential/id_pool.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 #include "collector/dvvp/common/config/config.h"
 
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using namespace Association::Credential;
-using namespace Analysis::Parser::Environment;
+using namespace Application::Credential;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
 using namespace analysis::dvvp::common::config;
 namespace {

@@ -14,11 +14,10 @@
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/domain/data_process/system/chip_trans_processor.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 using namespace Analysis::Domain;
 using namespace Analysis::Utils;
-using namespace Analysis::Parser;
 namespace {
 const int DEPTH = 0;
 const std::string CHIP_TRAINS_PATH = "./chip_trains";
@@ -64,14 +63,14 @@ protected:
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH, DEVICE_SUFFIX, SQLITE})));
         CreatePaLinkInfo(File::PathJoin({PROF_PATH, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_PA);
         CreatePcieInfo(File::PathJoin({PROF_PATH, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_PCIE);
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
+        MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo)
             .stubs()
             .will(returnValue(true));
     }
     virtual void TearDown()
     {
         EXPECT_TRUE(File::RemoveDir(CHIP_TRAINS_PATH, DEPTH));
-        MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
+        MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo).reset();
     }
     static void CreatePaLinkInfo(const std::string& dbPath, OriPaFormat data)
     {

@@ -10,11 +10,11 @@
  * *****************************************************************************
  */
 
-#include "hash_init_processor.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/domain/data_process/ai_task/hash_init_processor.h"
 
 namespace Analysis {
 namespace Domain {
+using namespace Analysis::Viewer::Database;
 using GeHashFormat = std::vector<std::tuple<std::string, std::string>>;
 using LogicStream = std::vector<std::tuple<uint32_t, uint32_t>>;
 HashInitProcessor::HashInitProcessor(const std::string &profPath) : DataProcessor(profPath) {}

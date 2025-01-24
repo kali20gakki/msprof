@@ -13,12 +13,11 @@
 #include "analysis/csrc/domain/data_process/ai_task/kfc_task_processor.h"
 #include <string>
 #include <functional>
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Domain {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
 
 // 创建 KfcTurnData 的函数类型

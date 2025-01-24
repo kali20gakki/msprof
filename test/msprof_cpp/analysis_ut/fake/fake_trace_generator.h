@@ -24,17 +24,17 @@
 #include <string>
 #include <fstream>
 
-#include "analysis/csrc/dfx/log.h"
-#include "analysis/csrc/entities/event.h"
-#include "analysis/csrc/entities/event_queue.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/utils/file.h"
-#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/infrastructure/dfx/log.h"
+#include "analysis/csrc/domain/entities/tree/include/event.h"
+#include "analysis/csrc/domain/entities/tree/include/event_queue.h"
+#include "analysis/csrc/domain/services/environment/context.h"
+#include "analysis/csrc/infrastructure/utils/file.h"
+#include "analysis/csrc/infrastructure/utils/utils.h"
 
-using EventType = Analysis::Entities::EventType;
-using EventInfo = Analysis::Entities::EventInfo;
-using Event = Analysis::Entities::Event;
-using EventQueue = Analysis::Entities::EventQueue;
+using EventType = Analysis::Domain::EventType;
+using EventInfo = Analysis::Domain::EventInfo;
+using Event = Analysis::Domain::Event;
+using EventQueue = Analysis::Domain::EventQueue;
 
 // 伪造生成EventQueue相关公用函数
 class FakeEventGenerator {
@@ -247,7 +247,7 @@ public:
 
     template<typename T>
     void WriteBin(std::vector<T> &traces, EventType eventType, bool isAging,
-                  const int deviceId = Analysis::Parser::Environment::HOST_ID)
+                  const int deviceId = Analysis::Domain::Environment::HOST_ID)
     {
         auto saveDir = CreateFakeDataDir(eventType, deviceId); // 创建PROF_XXX/host or device_<deviceId>/data
         if (saveDir.empty()) {

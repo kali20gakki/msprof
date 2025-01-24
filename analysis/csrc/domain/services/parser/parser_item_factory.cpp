@@ -12,7 +12,7 @@
 
 #include "analysis/csrc/domain/services/parser/parser_item_factory.h"
 #include <unordered_map>
-#include "analysis/csrc/dfx/log.h"
+#include "analysis/csrc/infrastructure/dfx/log.h"
 
 namespace Analysis {
 namespace Domain {

@@ -10,8 +10,7 @@
  * *****************************************************************************
  */
 
-#include "analysis/csrc/utils/utils.h"
-#include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/infrastructure/utils/utils.h"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/domain/services/device_context/device_context_error_code.h"
 

@@ -14,7 +14,7 @@
 
 #include <unordered_map>
 
-#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/infrastructure/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/acc_pmu_processor.h"
 #include "analysis/csrc/viewer/database/finals/aicore_freq_processor.h"
 #include "analysis/csrc/viewer/database/finals/api_processor.h"

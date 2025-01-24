@@ -21,7 +21,7 @@
 #include "analysis/csrc/domain/entities/hal/include/hal_log.h"
 #include "analysis/csrc/domain/entities/hal/include/hal_track.h"
 #include "analysis/csrc/domain/entities/hal/include/device_task.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 
 using namespace testing;
 

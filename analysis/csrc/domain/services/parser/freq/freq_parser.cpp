@@ -17,7 +17,6 @@
 #include "analysis/csrc/infrastructure/process/include/process_register.h"
 #include "analysis/csrc/infrastructure/resource/binary_struct_info.h"
 #include "analysis/csrc/domain/services/parser/parser_item/freq_lpm_parser_item.h"
-#include "analysis/csrc/domain/services/constant/time_unit_constant.h"
 
 namespace Analysis {
 namespace Domain {

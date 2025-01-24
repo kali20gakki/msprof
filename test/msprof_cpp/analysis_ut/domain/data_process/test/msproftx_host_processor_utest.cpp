@@ -12,14 +12,13 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/domain/data_process/ai_task/msproftx_host_processor.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Domain;
 using namespace Analysis::Utils;
-using namespace Analysis::Parser;
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 namespace {
 const int DEPTH = 0;
 const std::string HOST_TX_PATH = "./msprof_tx_host";

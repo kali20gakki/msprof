@@ -12,8 +12,8 @@
 #include <iostream>
 #include <sstream>
 #include "nlohmann/json.hpp"
-#include "analysis/csrc/utils/utils.h"
-#include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/infrastructure/utils/utils.h"
+#include "analysis/csrc/infrastructure/utils/file.h"
 #include "device_context.h"
 #include "device_context_error_code.h"
 

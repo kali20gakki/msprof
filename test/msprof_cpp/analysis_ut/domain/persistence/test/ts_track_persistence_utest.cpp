@@ -12,12 +12,12 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "analysis/csrc/domain/services/persistence/ts_track_persistence.h"
+#include "analysis/csrc/domain/services/persistence/device/ts_track_persistence.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 #include "analysis/csrc/domain/services/parser/track/include/ts_track_parser.h"
 #include "analysis/csrc/domain/services/constant/default_value_constant.h"
-#include "analysis/csrc/domain/services/persistence/persistence_utils.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/domain/services/persistence/device/persistence_utils.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 
 using namespace testing;
 using namespace Analysis::Utils;

@@ -12,14 +12,13 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/domain/data_process/system/ddr_processor.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/utils/thread_pool.h"
+#include "analysis/csrc/domain/services/environment/context.h"
+#include "analysis/csrc/infrastructure/utils/thread_pool.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 using namespace Analysis::Domain;
 using namespace Analysis::Utils;
-using namespace Analysis::Parser;
-using namespace Parser::Environment;
+using namespace Domain::Environment;
 namespace {
 const int DEPTH = 0;
 const std::string BASE_PATH = "./ddr_path";

@@ -12,10 +12,10 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "analysis/csrc/domain/services/persistence/metric_summary_persistence.h"
+#include "analysis/csrc/domain/services/persistence/device/metric_summary_persistence.h"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/domain/entities/hal/include/device_task.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/infrastructure/resource/chip_id.h"
 
 using namespace testing;

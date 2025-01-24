@@ -15,13 +15,12 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/domain/data_process/ai_task/task_processor.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Domain;
 using namespace Analysis::Utils;
-using namespace Analysis::Parser;
 namespace {
 const int DEPTH = 0;
 const std::string TASK_PATH = "./task_path";
@@ -78,17 +77,17 @@ TEST_F(TaskProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
 {
     DataInventory dataInventory;
     auto processor = TaskProcessor(PROF_PATH_A);
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo)
     .stubs()
     .will(returnValue(true));
     EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_TASK));
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo).reset();
 }
 
 TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenSourceTableNotExist)
 {
     DataInventory dataInventory;
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo)
     .stubs()
     .will(returnValue(true));
     MOCKER_CPP(&DBRunner::CheckTableExists).stubs().will(returnValue(false));
@@ -100,7 +99,7 @@ TEST_F(TaskProcessorUTest, TestRunShouldReturnTrueWhenCheckPathNotExists)
 {
     DataInventory dataInventory;
     auto processor = TaskProcessor(PROF_PATH_A);
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo)
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo)
     .stubs()
     .will(returnValue(true));
     MOCKER_CPP(&Analysis::Utils::File::Exist)
@@ -108,7 +107,7 @@ TEST_F(TaskProcessorUTest, TestRunShouldReturnTrueWhenCheckPathNotExists)
     .will(returnValue(false));
     EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_TASK));
     MOCKER_CPP(&Analysis::Utils::File::Exist).reset();
-    MOCKER_CPP(&Analysis::Parser::Environment::Context::GetProfTimeRecordInfo).reset();
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo).reset();
 }
 
 TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenReserveFailed)

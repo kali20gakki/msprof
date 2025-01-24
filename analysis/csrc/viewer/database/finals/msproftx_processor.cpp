@@ -11,17 +11,15 @@
  */
 
 #include "analysis/csrc/viewer/database/finals/msproftx_processor.h"
-#include "analysis/csrc/utils/utils.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/domain/services/environment/context.h"
+#include "analysis/csrc/application/credential/id_pool.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using IdPool = Analysis::Association::Credential::IdPool;
-using Context = Parser::Environment::Context;
-using namespace Analysis::Parser::Environment;
+using IdPool = Analysis::Application::Credential::IdPool;
+using Context = Domain::Environment::Context;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
 namespace {
 struct MsprofTxData {
@@ -65,7 +63,7 @@ bool MsprofTxProcessor::Process(const std::string &fileDir)
     }
 
     Utils::SyscntConversionParams params;
-    if (!Context::GetInstance().GetSyscntConversionParams(params, Parser::Environment::HOST_ID, fileDir)) {
+    if (!Context::GetInstance().GetSyscntConversionParams(params, HOST_ID, fileDir)) {
         ERROR("GetSyscntConversionParams failed, profPath is %.", fileDir);
         return false;
     }
@@ -99,7 +97,7 @@ bool MsprofTxProcessor::ProcessTxData(const std::string &fileDir, Utils::SyscntC
         ERROR("Reserve for % data failed.", TABLE_NAME_MSTX);
         return false;
     }
-    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, fileDir);
+    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(HOST_ID, fileDir);
     if (!FormatTxData(msprofTxData, processedData, pid, params, record)) {
         ERROR("Format Tx data failed, fileDir is %.", fileDir);
         return false;
@@ -207,7 +205,7 @@ bool MsprofTxProcessor::FormatTxExData(const MsprofTxExDataFormat &txExData, Pro
         return true;
     }
     uint32_t profId = IdPool::GetInstance().GetUint32Id(fileDir);
-    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, fileDir);
+    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(HOST_ID, fileDir);
     MsprofTxExData tmpData;
     for (const auto &data : txExData) {
         std::tie(tmpData.tid, tmpData.eventType, tmpData.startTime, tmpData.endTime,

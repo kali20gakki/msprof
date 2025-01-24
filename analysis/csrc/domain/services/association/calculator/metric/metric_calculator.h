@@ -19,7 +19,7 @@
 #include <set>
 #include <functional>
 #include <algorithm>
-#include "analysis/csrc/utils/utils.h"
+#include "analysis/csrc/infrastructure/utils/utils.h"
 #include "analysis/csrc/domain/entities/metric/include/metric.h"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/infrastructure/process/include/process.h"

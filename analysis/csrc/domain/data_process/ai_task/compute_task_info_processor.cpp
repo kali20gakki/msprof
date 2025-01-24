@@ -11,10 +11,10 @@
  */
 
 #include "analysis/csrc/domain/data_process/ai_task/compute_task_info_processor.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 namespace Analysis {
 namespace Domain {
+using namespace Analysis::Viewer::Database;
 ComputeTaskInfoProcessor::ComputeTaskInfoProcessor(const std::string &profPath) : DataProcessor(profPath) {}
 
 bool ComputeTaskInfoProcessor::Process(DataInventory &dataInventory)

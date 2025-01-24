@@ -13,7 +13,7 @@
 #include "analysis/csrc/domain/services/init/include/device_task_process.h"
 #include <map>
 #include <vector>
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/domain/services/constant/default_value_constant.h"
 #include "analysis/csrc/domain/valueobject/include/task_id.h"

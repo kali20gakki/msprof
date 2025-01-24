@@ -10,15 +10,13 @@
  * *****************************************************************************
  */
 #include "analysis/csrc/viewer/database/finals/sys_io_processor.h"
-
-#include "analysis/csrc/dfx/error_code.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using namespace Analysis::Parser::Environment;
+using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
 
 namespace {

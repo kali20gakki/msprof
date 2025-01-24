@@ -11,15 +11,15 @@
  */
 #include "analysis/csrc/viewer/database/finals/api_processor.h"
 
-#include "analysis/csrc/association/credential/id_pool.h"
-#include "analysis/csrc/parser/environment/context.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/application/credential/id_pool.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Viewer {
 namespace Database {
-using IdPool = Analysis::Association::Credential::IdPool;
-using Context = Parser::Environment::Context;
+using IdPool = Analysis::Application::Credential::IdPool;
+using Context = Domain::Environment::Context;
+using namespace Domain::Environment;
 
 namespace {
 struct ApiData {
@@ -91,10 +91,10 @@ bool ApiProcessor::FormatData(const std::string &fileDir, const ApiDataFormat &a
 {
     INFO("ApiProcessor FormatData, dir is %", fileDir);
     uint32_t profId = IdPool::GetInstance().GetUint32Id(fileDir);
-    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(Parser::Environment::HOST_ID, fileDir);
+    uint32_t pid = Context::GetInstance().GetPidFromInfoJson(HOST_ID, fileDir);
     Utils::SyscntConversionParams params;
     Utils::ProfTimeRecord record;
-    if (!Context::GetInstance().GetSyscntConversionParams(params, Parser::Environment::HOST_ID, fileDir)) {
+    if (!Context::GetInstance().GetSyscntConversionParams(params, HOST_ID, fileDir)) {
         ERROR("GetSyscntConversionParams failed, profPath is %.", fileDir);
         return false;
     }

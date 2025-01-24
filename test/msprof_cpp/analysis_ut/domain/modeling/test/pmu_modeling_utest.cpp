@@ -18,7 +18,7 @@
 #include "analysis/csrc/domain/entities/hal/include/hal_track.h"
 #include "analysis/csrc/domain/entities/hal/include/hal_pmu.h"
 #include "analysis/csrc/domain/services/modeling/include/pmu_modeling.h"
-#include "analysis/csrc/dfx/error_code.h"
+#include "analysis/csrc/infrastructure/dfx/error_code.h"
 
 using namespace testing;
 using namespace Analysis::Utils;

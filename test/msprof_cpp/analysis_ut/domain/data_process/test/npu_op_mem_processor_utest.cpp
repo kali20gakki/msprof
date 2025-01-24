@@ -13,10 +13,10 @@
 #include "analysis/csrc/domain/data_process/system/npu_op_mem_processor.h"
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/parser/environment/context.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 using namespace Analysis::Domain;
-using namespace Parser::Environment;
+using namespace Domain::Environment;
 using namespace Analysis::Utils;
 using namespace Analysis::Viewer::Database;
 namespace {

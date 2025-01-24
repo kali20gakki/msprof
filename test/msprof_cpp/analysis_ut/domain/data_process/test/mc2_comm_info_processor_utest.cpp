@@ -14,7 +14,7 @@
 #include "mockcpp/mockcpp.hpp"
 #include "analysis/csrc/domain/data_process/ai_task/mc2_comm_info_processor.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
-#include "analysis/csrc/utils/file.h"
+#include "analysis/csrc/infrastructure/utils/file.h"
 
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Domain;
