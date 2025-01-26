@@ -62,6 +62,22 @@ class TestMsptiMonitor(unittest.TestCase):
             self.assertEqual(MsptiResult.MSPTI_SUCCESS, monitor.stop())
             self.assertEqual(MsptiResult.MSPTI_SUCCESS, monitor.flush_all())
 
+    def test_range_mstx_monitor(self):
+        with mock.patch('importlib.import_module', return_value=MsptiCMock):
+            from mspti import utils, MstxMonitor, MsptiResult, RangeMarkerData
+
+            def check_range_data(range_data: RangeMarkerData):
+                self.assertEqual(50, range_data.start)
+                self.assertEqual(100, range_data.end)
+
+            monitor = MstxMonitor()
+            self.assertEqual(MsptiResult.MSPTI_SUCCESS, monitor.start(range_cb=check_range_data))
+            origin_data1 = {"id": 1, "flag": 1 << 2, "timestamp": 100}
+            origin_data2 = {"id": 1, "flag": 1 << 1, "timestamp": 50}
+            monitor.callback(origin_data1)
+            monitor.callback(origin_data2)
+
+
 
 if __name__ == '__main__':
     unittest.main()

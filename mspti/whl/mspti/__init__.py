@@ -8,7 +8,7 @@ Functions and data structures used to declare public of mspti
 
 __all__ = [
     "KernelMonitor", "KernelData",
-    "MstxMonitor", "MarkerData",
+    "MstxMonitor", "MarkerData", "RangeMarkerData",
     "HcclMonitor", "HcclData",
     "MsptiObjectId", "MsptiResult", "MsptiActivityKind", "MsptiActivityFlag", "MsptiActivitySourceKind"
 ]
@@ -20,5 +20,5 @@ from .constant import (
     MsptiResult, MsptiActivityKind, MsptiActivityFlag, MsptiActivitySourceKind
 )
 from .activity_data import (
-    KernelData, MarkerData, HcclData, MsptiObjectId
+    KernelData, MarkerData, RangeMarkerData, HcclData, MsptiObjectId
 )
