@@ -82,6 +82,26 @@ class MarkerData:
         self.domain: str = origin_data.get(self.DOMAIN, "")
 
 
+class RangeMarkerData:
+    def __init__(self):
+        # Activity record kind, must be MSPTI_ACTIVITY_KIND_MARKER
+        self.kind: MsptiActivityKind = MsptiActivityKind.MSPTI_ACTIVITY_KIND_MARKER
+        # Source kinds of mark data
+        self.source_kind: MsptiActivitySourceKind = MsptiActivitySourceKind.MSPTI_ACTIVITY_SOURCE_KIND_HOST
+        # Marker id
+        self.id: int = 0
+        # Identifier for the activity object associated with the marker
+        self.object_id: MsptiObjectId = MsptiObjectId({})
+        # Marker name for an instantaneous or start marker
+        self.name: str = ""
+        # Name of the domain to which this marker belongs to
+        self.domain: str = ""
+        # range start timestamp(ns)
+        self.start: int = 0
+        # range end timestamp(ns)
+        self.end: int = 0
+
+
 class HcclData:
     KIND = "kind"
     START = "start"
