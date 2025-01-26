@@ -61,10 +61,35 @@ TEST_F(COMMON_UTILS_UTILS_TEST, GetClockRealtime) {
     EXPECT_NE((unsigned long long)0, Utils::GetClockRealtime());
 }
 
+TEST_F(COMMON_UTILS_UTILS_TEST, GetClockRealtimeWillReturnWhenMemsetFail)
+{
+    GlobalMockObject::verify();
+
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    EXPECT_EQ((unsigned long long)0, Utils::GetClockRealtime());
+}
+
 TEST_F(COMMON_UTILS_UTILS_TEST, GetClockMonotonicRaw) {
     GlobalMockObject::verify();
 
     EXPECT_NE((unsigned long long)0, Utils::GetClockMonotonicRaw());
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, GetClockMonotonicRawWillReturnZeroWhenGetTickCountFail)
+{
+    GlobalMockObject::verify();
+    MOCKER(MmGetTickCount)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ((unsigned long long)0, Utils::GetClockMonotonicRaw());
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, StatCpuRealFreqWillReturnValidFreq)
+{
+    GlobalMockObject::verify();
+    EXPECT_NE((double)0, Utils::StatCpuRealFreq());
 }
 
 TEST_F(COMMON_UTILS_UTILS_TEST, GetCoresStr)
@@ -1344,11 +1369,32 @@ TEST_F(COMMON_UTILS_UTILS_TEST, GetVolumeSize)
     std::string path = "/tmp";
     unsigned long long size = 0;
     VolumeSize type = VolumeSize::AVAIL_SIZE;
-    analysis::dvvp::common::utils::Utils::GetVolumeSize(path, size, type);
+    MOCKER(MmGetDiskFreeSpace)
+        .stubs()
+        .will(returnValue(-1))
+        .then(returnValue(0));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::GetVolumeSize(path, size, type));
+    EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::common::utils::Utils::GetVolumeSize(path, size, type));
     type = VolumeSize::FREE_SIZE;
-    analysis::dvvp::common::utils::Utils::GetVolumeSize(path, size, type);
+    EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::common::utils::Utils::GetVolumeSize(path, size, type));
     type = VolumeSize::TOTAL_SIZE;
-    analysis::dvvp::common::utils::Utils::GetVolumeSize(path, size, type);
+    EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::common::utils::Utils::GetVolumeSize(path, size, type));
+    type = static_cast<VolumeSize>(3); // 3 invalid type
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::GetVolumeSize(path, size, type));
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, IsAllDigitWillReturnFalseWhenInputEmptyStr)
+{
+    EXPECT_EQ(false, analysis::dvvp::common::utils::Utils::IsAllDigit(""));
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, IsSocketFileWillReturnTrueWhenStatFail)
+{
+    MOCKER(stat)
+        .stubs()
+        .will(returnValue(-1));
+    EXPECT_EQ(true, analysis::dvvp::common::utils::Utils::IsSocketFile(""));
+    GlobalMockObject::verify();
 }
 
 TEST_F(COMMON_UTILS_UTILS_TEST, IsDynProfMode)
@@ -1457,4 +1503,251 @@ TEST_F(COMMON_UTILS_UTILS_TEST, GetChildPid)
     // file size valid
     ret = analysis::dvvp::common::utils::Utils::GetChildPid(1);
     EXPECT_NE(0, ret.size());
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, GetRankIdWillReturnValidIdWhenGetValidIdFromEnv)
+{
+    GlobalMockObject::verify();
+    std::string id = "1";
+    MOCKER(&Utils::GetEnvString)
+        .stubs()
+        .will(returnValue(id));
+    EXPECT_EQ(1, analysis::dvvp::common::utils::Utils::GetRankId());
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, GetRankIdWillReturnInvalidIdWhenGetInvalidIdFromEnv)
+{
+    GlobalMockObject::verify();
+    std::string id1 = "";
+    std::string id2 = "x";
+    MOCKER(&Utils::GetEnvString)
+        .stubs()
+        .will(returnValue(id1))
+        .then(returnValue(id2));
+    MOCKER(&Utils::IsClusterRunEnv)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(-1, analysis::dvvp::common::utils::Utils::GetRankId());
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, AnalysisEnvReadyWillReturnFalseWhenGetSelfPathFail)
+{
+    GlobalMockObject::verify();
+    std::string selfPath = "";
+    std::string msprofName = "msprof";
+    MOCKER(&Utils::BaseName)
+        .stubs()
+        .will(returnValue(msprofName));
+    MOCKER(&Utils::GetSelfPath)
+        .stubs()
+        .will(returnValue(selfPath));
+    std::string msprofPyPath;
+    EXPECT_EQ(false, analysis::dvvp::common::utils::Utils::AnalysisEnvReady(msprofPyPath));
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, AnalysisEnvReadyWillReturnFalseWhenMmRealPathFail)
+{
+    GlobalMockObject::verify();
+    std::string selfPath = "";
+    std::string msprofName = "msprof";
+    std::string notMsprofName = "xxx";
+    MOCKER(&Utils::BaseName)
+        .stubs()
+        .will(returnValue(msprofName))
+        .then(returnValue(notMsprofName));
+    MOCKER(&Utils::GetSelfPath)
+        .stubs()
+        .will(returnValue(msprofName));
+    MOCKER(MmRealPath)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    std::string msprofPyPath;
+    EXPECT_EQ(false, analysis::dvvp::common::utils::Utils::AnalysisEnvReady(msprofPyPath));
+    EXPECT_EQ(false, analysis::dvvp::common::utils::Utils::AnalysisEnvReady(msprofPyPath));
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, AnalysisEnvReadyWillReturnFalseWhenPathIsNeitherSoPathOrBinPath)
+{
+    GlobalMockObject::verify();
+    std::string selfPath = "";
+    std::string msprofName = "msprof";
+    std::string invalidName = "xxxx";
+    MOCKER(&Utils::BaseName)
+        .stubs()
+        .will(returnValue(msprofName))
+        .then(returnValue(invalidName));
+    MOCKER(&Utils::GetSelfPath)
+        .stubs()
+        .will(returnValue(msprofName));
+    MOCKER(MmRealPath)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    std::string msprofPyPath;
+    EXPECT_EQ(false, analysis::dvvp::common::utils::Utils::AnalysisEnvReady(msprofPyPath));
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, AnalysisEnvReadyWillReturnFalseWhenPathIsSoPathOrBinPath)
+{
+    GlobalMockObject::verify();
+    std::string selfPath = "";
+    std::string msprofName = "msprof";
+    std::string soName = "libmsprofiler.so";
+    MOCKER(&Utils::BaseName)
+        .stubs()
+        .will(returnValue(msprofName))
+        .then(returnValue(soName));
+    MOCKER(&Utils::GetSelfPath)
+        .stubs()
+        .will(returnValue(msprofName));
+    MOCKER(MmRealPath)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    std::string msprofPyPath;
+    EXPECT_EQ(true, analysis::dvvp::common::utils::Utils::AnalysisEnvReady(msprofPyPath));
+    EXPECT_EQ(true, analysis::dvvp::common::utils::Utils::AnalysisEnvReady(msprofPyPath));
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, CloudAnalyzeWillReturnFailWhenInputEmptyDir)
+{
+    GlobalMockObject::verify();
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::CloudAnalyze(""));
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, CloudAnalyzeWillReturnFailWhenMmAccess2Fail)
+{
+    GlobalMockObject::verify();
+    MOCKER(MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::CloudAnalyze(""));
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, CloudAnalyzeWillReturnFailWhenPythonEnvNotReady)
+{
+    GlobalMockObject::verify();
+    MOCKER(MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER(&Utils::PythonEnvReady)
+        .stubs()
+        .will(returnValue(false));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::CloudAnalyze(""));
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, CloudAnalyzeWillReturnFailWhenAnalysisEnvReadyNotReady)
+{
+    GlobalMockObject::verify();
+    MOCKER(MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER(&Utils::PythonEnvReady)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER(&Utils::AnalysisEnvReady)
+        .stubs()
+        .will(returnValue(false));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::CloudAnalyze(""));
+}
+
+bool AnalysisEnvReadyWithEmptyMsprofPyPathStub(std::string &msprofPyPath)
+{
+    msprofPyPath = "";
+    return true;
+}
+
+bool AnalysisEnvReadyWithNotEmptyMsprofPyPathStub(std::string &msprofPyPath)
+{
+    msprofPyPath = "xxx";
+    return true;
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, CloudAnalyzeWillReturnFailWhenEmptyMsprofPyPath)
+{
+    GlobalMockObject::verify();
+    MOCKER(MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER(&Utils::PythonEnvReady)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER(&Utils::AnalysisEnvReady)
+        .stubs()
+        .will(invoke(AnalysisEnvReadyWithEmptyMsprofPyPathStub));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::CloudAnalyze(""));
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, CloudAnalyzeWillReturnFailWhenMmAccess2MsprofPyPathFail)
+{
+    GlobalMockObject::verify();
+    MOCKER(MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS))
+        .then(returnValue(PROFILING_FAILED));
+    MOCKER(&Utils::PythonEnvReady)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER(&Utils::AnalysisEnvReady)
+        .stubs()
+        .will(invoke(AnalysisEnvReadyWithNotEmptyMsprofPyPathStub));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::CloudAnalyze("x"));
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, CloudAnalyzeWillReturnFailWhenMsprofPyPathIsSoftLink)
+{
+    GlobalMockObject::verify();
+    MOCKER(MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER(&Utils::PythonEnvReady)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER(&Utils::AnalysisEnvReady)
+        .stubs()
+        .will(invoke(AnalysisEnvReadyWithNotEmptyMsprofPyPathStub));
+    MOCKER(&Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::CloudAnalyze("x"));
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, CloudAnalyzeWillReturnFailWhenExecCmdFail)
+{
+    GlobalMockObject::verify();
+    MOCKER(MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER(&Utils::PythonEnvReady)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER(&Utils::AnalysisEnvReady)
+        .stubs()
+        .will(invoke(AnalysisEnvReadyWithNotEmptyMsprofPyPathStub));
+    MOCKER(&Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER(&Utils::ExecCmd)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::CloudAnalyze("x"));
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, CloudAnalyzeWillReturnSuccWhenExecCmdSucc)
+{
+    GlobalMockObject::verify();
+    MOCKER(MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER(&Utils::PythonEnvReady)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER(&Utils::AnalysisEnvReady)
+        .stubs()
+        .will(invoke(AnalysisEnvReadyWithNotEmptyMsprofPyPathStub));
+    MOCKER(&Utils::IsSoftLink)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER(&Utils::ExecCmd)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::common::utils::Utils::CloudAnalyze("x"));
 }

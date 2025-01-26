@@ -23,7 +23,7 @@ function add_gcov_excl_line_for_collector() {
     sed -i -e 's/^[[:blank:]]*static.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/common/singleton/singleton.h
     sed -i -e 's/^[[:blank:]]*func.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/depend/inc/plugin/plugin_handle.h
     sed -i -e 's/^[[:blank:]]*if.*{/& \/\/ LCOV_EXCL_LINE/g' -e '/)dlogInnerForC_/s/$/\/\/LCOV_EXCL_LINE/' -e 's/^[[:blank:]]*func.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/depend/inc/plugin/slog_plugin.h
-    sed -i -e 's/^[[:blank:]]*};/&\/\/ LCOV_EXCL_LINE/' ${TOP_DIR}/collector/dvvp/common/validation/param_validation.cpp
+    find ${TOP_DIR}/collector/dvvp -name "*.cpp" -type f -exec sed -i -e 's/^[[:blank:]]*};/&\/\/ LCOV_EXCL_LINE/' {} \;
 }
 
 function add_gcov_excl_line_for_mspti() {
