@@ -274,3 +274,86 @@ TEST_F(InfoJsonUTest, SetPidInfo)
     EXPECT_NE("NA", infoMain->pid_name());
     EXPECT_EQ("1", infoMain->pid());
 }
+
+TEST_F(InfoJsonUTest, InitDeviceIdsWillReturnFailWhenStrToIntFail)
+{
+    GlobalMockObject::verify();
+    std::vector<std::string> deviceIds{"0"};
+    InfoJson infoJson(jobInfo, devices, hostpid);
+    MOCKER_CPP(&Utils::Split)
+        .stubs()
+        .will(returnValue(deviceIds));
+    MOCKER_CPP(&Utils::StrToInt)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, infoJson.InitDeviceIds());
+}
+ 
+TEST_F(InfoJsonUTest, AddSysTimeWillReturnWhenGetFileSizeReturnInvalidSize)
+{
+    GlobalMockObject::verify();
+    InfoJson infoJson(jobInfo, devices, hostpid);
+    long long size1 = -1;
+    long long size2 = 512 * 1024 * 1024 + 1;
+    MOCKER_CPP(&Utils::GetFileSize)
+        .stubs()
+        .will(returnValue(size1))
+        .then(returnValue(size2));
+    std::shared_ptr<InfoMain> infoMain = std::make_shared<InfoMain>();
+    infoJson.AddSysTime(infoMain);
+    EXPECT_EQ("", infoMain->uptime());
+    infoJson.AddSysTime(infoMain);
+    EXPECT_EQ("", infoMain->uptime());
+}
+
+TEST_F(InfoJsonUTest, AddMemTotalWillReturnWhenGetFileSizeReturnInvalidSize)
+{
+    GlobalMockObject::verify();
+    InfoJson infoJson(jobInfo, devices, hostpid);
+    long long size1 = -1;
+    long long size2 = 512 * 1024 * 1024 + 1;
+    MOCKER_CPP(&Utils::GetFileSize)
+        .stubs()
+        .will(returnValue(size1))
+        .then(returnValue(size2));
+    std::shared_ptr<InfoMain> infoMain = std::make_shared<InfoMain>();
+    infoJson.AddMemTotal(infoMain);
+    EXPECT_EQ(0, infoMain->memorytotal());
+    infoJson.AddMemTotal(infoMain);
+    EXPECT_EQ(0, infoMain->memorytotal());
+}
+ 
+TEST_F(InfoJsonUTest, AddHostInfoWillReturnFailWhenMemSetFail)
+{
+    GlobalMockObject::verify();
+    InfoJson infoJson(jobInfo, devices, hostpid);
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    std::shared_ptr<InfoMain> infoMain = std::make_shared<InfoMain>();
+    EXPECT_EQ(PROFILING_FAILED, infoJson.AddHostInfo(infoMain));
+}
+ 
+TEST_F(InfoJsonUTest, GetCtrlCpuInfoWillReturnFailWhenGetCtrlCouInfoFail)
+{
+    GlobalMockObject::verify();
+    InfoJson infoJson(jobInfo, devices, hostpid);
+    MOCKER(DrvGetCtrlCpuId)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER(DrvGetCtrlCpuCoreNum)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER(DrvGetCtrlCpuEndianLittle)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    uint32_t dev = 0;
+    struct analysis::dvvp::host::DeviceInfo devInfo;
+    EXPECT_EQ(PROFILING_FAILED, infoJson.GetCtrlCpuInfo(dev, devInfo));
+    EXPECT_EQ(PROFILING_FAILED, infoJson.GetCtrlCpuInfo(dev, devInfo));
+    EXPECT_EQ(PROFILING_FAILED, infoJson.GetCtrlCpuInfo(dev, devInfo));
+    EXPECT_EQ(PROFILING_SUCCESS, infoJson.GetCtrlCpuInfo(dev, devInfo));
+}
