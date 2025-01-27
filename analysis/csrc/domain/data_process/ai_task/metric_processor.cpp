@@ -379,7 +379,7 @@ bool MetricProcessor::CheckAndGetMemoryBoundRelatedDataIndex(const std::vector<s
         mac_exe_ratio, vec_exe_ratio, mte2_exe_ratio};
     int count = 0;
     neededDataIndex = {0, 0, 0};
-    const int neededDataSize = 3;
+    const uint16_t neededDataSize = 3;
     for (unsigned index = 0; index < neededData.size(); ++index) {
         for (unsigned headersIndex = 0; headersIndex < headers.size(); ++headersIndex) {
             if (neededData[index] == headers[headersIndex]) {
