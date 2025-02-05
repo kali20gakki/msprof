@@ -340,7 +340,7 @@ bool MetricProcessor::AddMemoryBound(std::map<TaskId, std::vector<std::vector<st
                                      std::vector<std::string> &headers)
 {
     INFO("Calculating memory bound...");
-    std::vector<int> needDataIndex;
+    std::vector<uint32_t> needDataIndex;
     if (!CheckAndGetMemoryBoundRelatedDataIndex(headers, needDataIndex)) {
         INFO("can't find memory bound needed column, no memory bound data added.");
         return false;
@@ -364,7 +364,7 @@ bool MetricProcessor::AddMemoryBound(std::map<TaskId, std::vector<std::vector<st
     return true;
 }
 bool MetricProcessor::CheckAndGetMemoryBoundRelatedDataIndex(const std::vector<std::string> &headers,
-                                                             std::vector<int> &neededDataIndex)
+                                                             std::vector<uint32_t> &neededDataIndex)
 {
     // 先检查计算memory_bound所需的字段在不在....
     std::string mac_ratio = "mac_ratio";

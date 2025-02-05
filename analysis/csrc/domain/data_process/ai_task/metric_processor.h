@@ -46,7 +46,7 @@ private:
                         std::vector<std::string> &headers);
 
     bool CheckAndGetMemoryBoundRelatedDataIndex(const std::vector<std::string> &headers,
-                                                std::vector<int> &neededDataIndex);
+                                                std::vector<uint32_t> &neededDataIndex);
 
     bool ProcessData(const std::unordered_map<std::string, uint16_t> &dbPathAndDeviceID, DBInfo &metricDB,
                      std::vector<std::string> &headers, DataInventory &dataInventory);
