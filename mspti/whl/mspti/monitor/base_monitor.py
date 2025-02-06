@@ -19,11 +19,11 @@ class BaseMonitor(metaclass=ABCMeta):
         super().__init__()
 
     @classmethod
-    def start(cls) -> MsptiResult:
+    def start_monitor(cls) -> MsptiResult:
         return MsptiResult(_start())
 
     @classmethod
-    def stop(cls) -> MsptiResult:
+    def stop_monitor(cls) -> MsptiResult:
         try:
             ret = MsptiResult(_stop())
             if ret == MsptiResult.MSPTI_SUCCESS:

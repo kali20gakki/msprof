@@ -23,14 +23,14 @@ class KernelMonitor(BaseMonitor):
         if not callable(cb):
             print_error_msg("Kernel callback is invalid")
             return MsptiResult.MSPTI_ERROR_INVALID_PARAMETER
-        ret = BaseMonitor.start()
+        ret = BaseMonitor.start_monitor()
         if ret == MsptiResult.MSPTI_SUCCESS:
             self.user_cb = cb
             return MsptiResult(_kernel_register_cb(self.callback))
         return ret
 
     def stop(self) -> MsptiResult:
-        ret = BaseMonitor.stop()
+        ret = BaseMonitor.stop_monitor()
         if ret == MsptiResult.MSPTI_SUCCESS:
             self.user_cb = None
             return MsptiResult(_kernel_unregister_cb())
