@@ -23,14 +23,14 @@ class HcclMonitor(BaseMonitor):
         if not callable(cb):
             print_error_msg("Hccl callback is invalid")
             return MsptiResult.MSPTI_ERROR_INVALID_PARAMETER
-        ret = BaseMonitor.start()
+        ret = BaseMonitor.start_monitor()
         if ret == MsptiResult.MSPTI_SUCCESS:
             self.user_cb = cb
             return MsptiResult(_hccl_register_cb(self.callback))
         return ret
 
     def stop(self) -> MsptiResult:
-        ret = BaseMonitor.stop()
+        ret = BaseMonitor.stop_monitor()
         if ret == MsptiResult.MSPTI_SUCCESS:
             self.user_cb = None
             return MsptiResult(_hccl_unregister_cb())

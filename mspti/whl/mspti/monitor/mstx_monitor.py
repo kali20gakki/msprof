@@ -34,7 +34,7 @@ class MstxMonitor(BaseMonitor):
         if not callable(mark_cb) and not callable(range_cb):
             print_error_msg("Mstx callback is invalid")
             return MsptiResult.MSPTI_ERROR_INVALID_PARAMETER
-        ret = BaseMonitor.start()
+        ret = BaseMonitor.start_monitor()
         if ret == MsptiResult.MSPTI_SUCCESS:
             self.mark_user_cb = mark_cb
             self.range_user_cb = range_cb
@@ -42,7 +42,7 @@ class MstxMonitor(BaseMonitor):
         return ret
 
     def stop(self) -> MsptiResult:
-        ret = BaseMonitor.stop()
+        ret = BaseMonitor.stop_monitor()
         if ret == MsptiResult.MSPTI_SUCCESS:
             self.mark_user_cb = None
             self.range_user_cb = None
