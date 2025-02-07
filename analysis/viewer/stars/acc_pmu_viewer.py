@@ -52,7 +52,7 @@ class AccPmuViewer(BaseViewer, ABC):
             local_time = InfoConfReader().trans_into_local_time(raw_timestamp=data.timestamp, use_us=True)
             result.append(["read_bandwidth", local_time,
                            {'value': data.read_bandwidth, 'acc_id': data.acc_id}])
-            result.append(["write_band_width", local_time,
+            result.append(["write_bandwidth", local_time,
                            {'value': data.write_bandwidth, 'acc_id': data.acc_id}])
             result.append(["read_ost", local_time,
                            {'value': data.read_ost, 'acc_id': data.acc_id}])
