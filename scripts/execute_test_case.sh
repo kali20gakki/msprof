@@ -26,6 +26,7 @@ function add_gcov_excl_line_for_collector() {
     find ${TOP_DIR}/collector/dvvp -name "*.cpp" -type f -exec sed -i -e 's/^[[:blank:]]*};/&\/\/ LCOV_EXCL_LINE/' {} \;
     sed -i -e 's/^[[:blank:]]*GET_JSON_STRING_VALUE.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/message/prof_json_config.cpp
     sed -i -e 's/^[[:blank:]]*GET_JSON_INT_VALUE.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/message/prof_json_config.cpp
+    find ${TOP_DIR}/collector/dvvp/params_adapter -name "*.cpp" -type f -exec sed -i -e 's/^[[:blank:]]*}).swap.*;/& \/\/ LCOV_EXCL_LINE/g' {} \;
 }
 
 function add_gcov_excl_line_for_mspti() {

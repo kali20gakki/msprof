@@ -56,14 +56,37 @@ TEST_F(ParamsAdapterUtest, CheckListInit)
     EXPECT_EQ(PROFILING_FAILED, ParamsAdapterMgr->CheckListInit());
 }
 
+TEST_F(ParamsAdapterUtest, BlackSwitchCheck)
+{
+    std::shared_ptr<ParamsAdapter> ParamsAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(ParamsAdapterMgr, ParamsAdapter);
+    EXPECT_EQ(false, ParamsAdapterMgr->BlackSwitchCheck(static_cast<InputCfg>(-1)));
+    EXPECT_EQ(false, ParamsAdapterMgr->BlackSwitchCheck(INPUT_CFG_MAX));
+    ParamsAdapterMgr->blackSwitch_.clear();
+    EXPECT_EQ(true, ParamsAdapterMgr->BlackSwitchCheck(INPUT_CFG_COM_TASK_TIME));
+    ParamsAdapterMgr->blackSwitch_.emplace_back(INPUT_CFG_COM_TASK_TIME);
+    EXPECT_EQ(false, ParamsAdapterMgr->BlackSwitchCheck(INPUT_CFG_COM_TASK_TIME));
+}
+
 TEST_F(ParamsAdapterUtest, SetDefaultAivParams)
 {
     GlobalMockObject::verify();
     std::shared_ptr<ParamsAdapter> ParamsAdapterMgr;
     MSVP_MAKE_SHARED0_BREAK(ParamsAdapterMgr, ParamsAdapter);
     std::array<std::string, INPUT_CFG_MAX> paramContainer;
+    paramContainer[INPUT_CFG_COM_AI_CORE] = "on";
+    paramContainer[INPUT_CFG_COM_AI_VECTOR] = "off";
     ParamsAdapterMgr->platformType_ = PlatformType::CHIP_V4_1_0;
     ParamsAdapterMgr->SetDefaultAivParams(paramContainer);
+    EXPECT_EQ("on", paramContainer[INPUT_CFG_COM_AI_VECTOR]);
+    paramContainer[INPUT_CFG_COM_AI_VECTOR] = "off";
+    ParamsAdapterMgr->platformType_ = PlatformType::CHIP_V4_2_0;
+    ParamsAdapterMgr->SetDefaultAivParams(paramContainer);
+    EXPECT_EQ("on", paramContainer[INPUT_CFG_COM_AI_VECTOR]);
+    paramContainer[INPUT_CFG_COM_AI_VECTOR] = "off";
+    ParamsAdapterMgr->platformType_ = PlatformType::CLOUD_TYPE;
+    ParamsAdapterMgr->SetDefaultAivParams(paramContainer);
+    EXPECT_EQ("off", paramContainer[INPUT_CFG_COM_AI_VECTOR]);
 }
 
 TEST_F(ParamsAdapterUtest, SetDefaultAicMetricsType)
@@ -98,9 +121,14 @@ TEST_F(ParamsAdapterUtest, TransToParam)
     ParamsAdapterMgr->CheckListInit();
     std::array<std::string, INPUT_CFG_MAX> paramContainer;
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    EXPECT_EQ(PROFILING_FAILED, ParamsAdapterMgr->PlatformAdapterInit(nullptr));
     MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
     ParamsAdapterMgr->PlatformAdapterInit(params);
+    EXPECT_EQ(PROFILING_SUCCESS, ParamsAdapterMgr->TransToParam(paramContainer, params));
     paramContainer[INPUT_CFG_COM_TASK_TRACE] = "on";
+    paramContainer[INPUT_CFG_COM_MODEL_EXECUTION] = "on";
+    paramContainer[INPUT_CFG_COM_TASK_MEMORY] = "on";
+    paramContainer[INPUT_CFG_COM_OP_ATTR] = "on";
     paramContainer[INPUT_CFG_COM_TRAINING_TRACE] = "on";
     paramContainer[INPUT_CFG_COM_HCCL] = "on";
     paramContainer[INPUT_CFG_COM_SYS_USAGE] = "on";
@@ -112,6 +140,7 @@ TEST_F(ParamsAdapterUtest, TransToParam)
     paramContainer[INPUT_CFG_COM_INSTR_PROFILING] = "on";
     paramContainer[INPUT_CFG_HOST_SYS] = "cpu,mem,disk,osrt,network";
     paramContainer[INPUT_CFG_HOST_SYS_USAGE] = "cpu,mem";
+    EXPECT_EQ(PROFILING_FAILED, ParamsAdapterMgr->TransToParam(paramContainer, nullptr));
     int ret = ParamsAdapterMgr->TransToParam(paramContainer, params);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 }
@@ -123,6 +152,10 @@ TEST_F(ParamsAdapterUtest, SetHostSysUsageParams)
     MSVP_MAKE_SHARED0_BREAK(ParamsAdapterMgr, ParamsAdapter);
     std::array<std::string, INPUT_CFG_MAX> paramContainer;
     paramContainer[INPUT_CFG_HOST_SYS_PID] = "0";
+    paramContainer[INPUT_CFG_HOST_SYS_USAGE] = "cpu,mem";
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    ParamsAdapterMgr->PlatformAdapterInit(params);
     ParamsAdapterMgr->SetHostSysUsageParams(paramContainer);
 }
 
