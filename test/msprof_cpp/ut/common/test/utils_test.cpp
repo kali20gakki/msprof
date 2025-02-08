@@ -1128,8 +1128,10 @@ TEST_F(COMMON_UTILS_UTILS_TEST, IdeReplaceWaveWithHomedir){
     std::string str = "~/profiler-app";
     std::string result;
     result = Utils::IdeReplaceWaveWithHomedir(str);
-    EXPECT_NE(str, result);
-    std::cout << result << std::endl;
+    EXPECT_STRNE(str.c_str(), result.c_str());
+    str = "~";
+    result = Utils::IdeReplaceWaveWithHomedir(str);
+    EXPECT_STRNE(str.c_str(), result.c_str());
 }
 
 TEST_F(COMMON_UTILS_UTILS_TEST, ProfMalloc){
@@ -1619,7 +1621,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, CloudAnalyzeWillReturnFailWhenMmAccess2Fail)
     MOCKER(MmAccess2)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
-    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::CloudAnalyze(""));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::CloudAnalyze("x"));
 }
 
 TEST_F(COMMON_UTILS_UTILS_TEST, CloudAnalyzeWillReturnFailWhenPythonEnvNotReady)
@@ -1631,7 +1633,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, CloudAnalyzeWillReturnFailWhenPythonEnvNotReady)
     MOCKER(&Utils::PythonEnvReady)
         .stubs()
         .will(returnValue(false));
-    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::CloudAnalyze(""));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::CloudAnalyze("x"));
 }
 
 TEST_F(COMMON_UTILS_UTILS_TEST, CloudAnalyzeWillReturnFailWhenAnalysisEnvReadyNotReady)
@@ -1646,7 +1648,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, CloudAnalyzeWillReturnFailWhenAnalysisEnvReadyNo
     MOCKER(&Utils::AnalysisEnvReady)
         .stubs()
         .will(returnValue(false));
-    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::CloudAnalyze(""));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::CloudAnalyze("x"));
 }
 
 bool AnalysisEnvReadyWithEmptyMsprofPyPathStub(std::string &msprofPyPath)
@@ -1673,7 +1675,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, CloudAnalyzeWillReturnFailWhenEmptyMsprofPyPath)
     MOCKER(&Utils::AnalysisEnvReady)
         .stubs()
         .will(invoke(AnalysisEnvReadyWithEmptyMsprofPyPathStub));
-    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::CloudAnalyze(""));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::Utils::CloudAnalyze("x"));
 }
 
 TEST_F(COMMON_UTILS_UTILS_TEST, CloudAnalyzeWillReturnFailWhenMmAccess2MsprofPyPathFail)
@@ -1750,4 +1752,50 @@ TEST_F(COMMON_UTILS_UTILS_TEST, CloudAnalyzeWillReturnSuccWhenExecCmdSucc)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::common::utils::Utils::CloudAnalyze("x"));
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, ChangeWorkDirWillReturnFailWhenInputEmptyFileName)
+{
+    GlobalMockObject::verify();
+    EXPECT_EQ(PROFILING_FAILED, Utils::ChangeWorkDir(""));
+}
+ 
+TEST_F(COMMON_UTILS_UTILS_TEST, ChangeWorkDirWillReturnFailWhenStrdupReturnNull)
+{
+    GlobalMockObject::verify();
+    MOCKER(strdup)
+        .stubs()
+        .will(returnValue((CHAR_PTR)nullptr));
+    EXPECT_EQ(PROFILING_FAILED, Utils::ChangeWorkDir("xxx"));
+}
+ 
+TEST_F(COMMON_UTILS_UTILS_TEST, CheckStringIsValidNatureNumWillReturnFalseWhenInputEmptyNum)
+{
+    GlobalMockObject::verify();
+    EXPECT_EQ(false, Utils::CheckStringIsValidNatureNum(""));
+}
+ 
+TEST_F(COMMON_UTILS_UTILS_TEST, CheckStringIsValidNatureNumWillReturnFalseWhenInputNumSizeLargerThanMaxSize)
+{
+    GlobalMockObject::verify();
+    std::string maxUintValStr = std::to_string(UINT32_MAX);
+    std::string num(maxUintValStr.size() + 1, 'x');
+    EXPECT_EQ(false, Utils::CheckStringIsValidNatureNum(num));
+}
+ 
+TEST_F(COMMON_UTILS_UTILS_TEST, CheckStringIsValidNatureNumWillReturnFalseWhenInputNumBiggerThanUint32)
+{
+    GlobalMockObject::verify();
+    std::string maxUintValStr = std::to_string(UINT32_MAX);
+    std::string num(maxUintValStr.size(), '9');
+    EXPECT_EQ(false, Utils::CheckStringIsValidNatureNum(num));
+}
+ 
+TEST_F(COMMON_UTILS_UTILS_TEST, CheckStringIsValidNatureNumWillReturnTrueWhenInputValidNum)
+{
+    GlobalMockObject::verify();
+    std::string maxUintValStr = std::to_string(UINT32_MAX);
+    EXPECT_EQ(true, Utils::CheckStringIsValidNatureNum(maxUintValStr));
+    maxUintValStr = std::to_string(UINT32_MAX - 1);
+    EXPECT_EQ(true, Utils::CheckStringIsValidNatureNum(maxUintValStr));
 }

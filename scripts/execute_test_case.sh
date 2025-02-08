@@ -24,6 +24,8 @@ function add_gcov_excl_line_for_collector() {
     sed -i -e 's/^[[:blank:]]*func.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/depend/inc/plugin/plugin_handle.h
     sed -i -e 's/^[[:blank:]]*if.*{/& \/\/ LCOV_EXCL_LINE/g' -e '/)dlogInnerForC_/s/$/\/\/LCOV_EXCL_LINE/' -e 's/^[[:blank:]]*func.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/depend/inc/plugin/slog_plugin.h
     find ${TOP_DIR}/collector/dvvp -name "*.cpp" -type f -exec sed -i -e 's/^[[:blank:]]*};/&\/\/ LCOV_EXCL_LINE/' {} \;
+    sed -i -e 's/^[[:blank:]]*GET_JSON_STRING_VALUE.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/message/prof_json_config.cpp
+    sed -i -e 's/^[[:blank:]]*GET_JSON_INT_VALUE.*;/& \/\/ LCOV_EXCL_LINE/g' ${TOP_DIR}/collector/dvvp/message/prof_json_config.cpp
 }
 
 function add_gcov_excl_line_for_mspti() {

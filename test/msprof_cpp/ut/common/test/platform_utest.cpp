@@ -13,6 +13,7 @@
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::driver;
+using namespace Analysis::Dvvp::Common::Platform;
 
 class PlatformUtest : public testing::Test {
 protected:
@@ -46,6 +47,13 @@ TEST_F(PlatformUtest, Init)
     EXPECT_EQ(true, platform->PlatformIsHelperHostSide());
 }
 
+TEST_F(PlatformUtest, Uninit)
+{
+    // for coverage
+    auto platform = Analysis::Dvvp::Common::Platform::Platform::instance();
+    EXPECT_EQ(PROFILING_SUCCESS, platform->Uninit());
+}
+
 TEST_F(PlatformUtest, PlatformGetDeviceOscFreq)
 {
     GlobalMockObject::verify();
@@ -60,4 +68,44 @@ TEST_F(PlatformUtest, PlatformGetDeviceOscFreq)
             .with(any(), outBound(deviceOscFreq))
             .will(returnValue(true));
     EXPECT_EQ(deviceOscFreq, platform->PlatformGetDeviceOscFreq(0, freq));
+}
+
+TEST_F(PlatformUtest, PlatformIsSocSideWillReturnTrueWhenPlatformIsDeviceType)
+{
+    GlobalMockObject::verify();
+    auto platform = Analysis::Dvvp::Common::Platform::Platform::instance();
+    platform->platformType_ = SysPlatformType::DEVICE;
+    EXPECT_EQ(true, platform->PlatformIsSocSide());
+}
+
+TEST_F(PlatformUtest, PlatformIsSocSideWillReturnTrueWhenPlatformIsLhisiType)
+{
+    GlobalMockObject::verify();
+    auto platform = Analysis::Dvvp::Common::Platform::Platform::instance();
+    platform->platformType_ = SysPlatformType::LHISI;
+    EXPECT_EQ(true, platform->PlatformIsSocSide());
+}
+
+TEST_F(PlatformUtest, PlatformIsSocSideWillReturnFalseWhenPlatformIsNotDeviceOrLhisiType)
+{
+    GlobalMockObject::verify();
+    auto platform = Analysis::Dvvp::Common::Platform::Platform::instance();
+    platform->platformType_ = SysPlatformType::HOST;
+    EXPECT_EQ(false, platform->PlatformIsSocSide());
+}
+
+TEST_F(PlatformUtest, PlatformIsRpcSideWillReturnTrueWhenPlatformIsHostType)
+{
+    GlobalMockObject::verify();
+    auto platform = Analysis::Dvvp::Common::Platform::Platform::instance();
+    platform->platformType_ = SysPlatformType::HOST;
+    EXPECT_EQ(true, platform->PlatformIsRpcSide());
+}
+
+TEST_F(PlatformUtest, PlatformIsRpcSideWillReturnFalseWhenPlatformIsNotHostType)
+{
+    GlobalMockObject::verify();
+    auto platform = Analysis::Dvvp::Common::Platform::Platform::instance();
+    platform->platformType_ = SysPlatformType::DEVICE;
+    EXPECT_EQ(false, platform->PlatformIsRpcSide());
 }

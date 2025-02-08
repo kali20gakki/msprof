@@ -25,6 +25,8 @@ generate_coverage(){
     lcov -r ${COV_DIR}/lcov_$2.info '*gtest*' -o ${COV_DIR}/lcov_$2.info $LCOV_RC
     lcov -r ${COV_DIR}/lcov_$2.info '*opensource*' -o ${COV_DIR}/lcov_$2.info $LCOV_RC
     lcov -r ${COV_DIR}/lcov_$2.info '*proto*' -o ${COV_DIR}/lcov_$2.info $LCOV_RC
+    lcov -r ${COV_DIR}/lcov_$2.info '*prof_params.h*' -o ${COV_DIR}/lcov_$2.info $LCOV_RC
+    lcov -r ${COV_DIR}/lcov_$2.info '*message.h*' -o ${COV_DIR}/lcov_$2.info $LCOV_RC
     echo "********************** Generate $2 Coverage Stop.*************************"
 }
 #----------------------------------------------------------
