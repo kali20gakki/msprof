@@ -24,6 +24,7 @@
 
 using namespace Collector::Dvvp::Common::PlatformAdapter;
 using namespace analysis::dvvp::common::error;
+using namespace analysis::dvvp::common::config;
 
 class PlatformAdapterUtest : public testing::Test {
 protected:
@@ -56,6 +57,8 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterModule)
         int ret = PlatformAdapter::instance()->Init(params, type);
         EXPECT_EQ(PROFILING_SUCCESS, ret);
     }
+    PlatformType invalidType = static_cast<PlatformType>(100); // 100 : invalid platform
+    EXPECT_EQ(PROFILING_FAILED, PlatformAdapter::instance()->Init(params, invalidType));
 }
 
 TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule1)
@@ -83,7 +86,8 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule1)
     struct CommonParams comParams;
     mgr->SetParamsForGlobal(comParams);
     mgr->SetParamsForStorageLimit(comParams);
-    mgr->SetParamsForTaskTimeL1();
+    mgr->SetParamsForTaskTime(MSVP_PROF_L0);
+    mgr->SetParamsForTaskTime(MSVP_PROF_L1);
     mgr->SetParamsForTaskTrace();
     mgr->SetParamsForTrainingTrace();
     mgr->SetParamsForAscendCL();
@@ -294,4 +298,34 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterMdcModule)
 
     ret = PlatformAdapterMdcMgr->Uninit();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(PlatformAdapterUtest, SetParamsForDelayTime)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<PlatformAdapterCloudV2> PlatformAdapterCloudv2Mgr;
+    MSVP_MAKE_SHARED0_BREAK(PlatformAdapterCloudv2Mgr, PlatformAdapterCloudV2);
+
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    int ret = PlatformAdapterCloudv2Mgr->Init(params, PlatformType::CHIP_V4_1_0);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    std::string delayTime = "1";
+    PlatformAdapterCloudv2Mgr->SetParamsForDelayTime(delayTime);
+    EXPECT_STREQ(delayTime.c_str(), params->delayTime.c_str());
+}
+
+TEST_F(PlatformAdapterUtest, SetParamsForDurationTime)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<PlatformAdapterCloudV2> PlatformAdapterCloudv2Mgr;
+    MSVP_MAKE_SHARED0_BREAK(PlatformAdapterCloudv2Mgr, PlatformAdapterCloudV2);
+
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    int ret = PlatformAdapterCloudv2Mgr->Init(params, PlatformType::CHIP_V4_1_0);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    std::string durationTime = "1";
+    PlatformAdapterCloudv2Mgr->SetParamsForDurationTime(durationTime);
+    EXPECT_STREQ(durationTime.c_str(), params->durationTime.c_str());
 }
