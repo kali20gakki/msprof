@@ -28,7 +28,7 @@ fi
 
 mkdir -p ${OPENSOURCE_DIR} && cd ${OPENSOURCE_DIR}
 git clone ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/protobuf.git protobuf -b v3.13.0
-git clone ssh://git@szv-open.codehub.huawei.com:2222/OpenSourceCenter/nlohmann/json.git json -b v3.11.2
+git clone ssh://git@szv-open.codehub.huawei.com:2222/OpenSourceCenter/nlohmann/json.git json -b v3.11.3
 git clone ssh://git@szv-open.codehub.huawei.com:2222/OpenSourceCenter/Tencent/rapidjson.git -b 6089180ecb704cb2b136777798fa1be303618975-htrunk1
 git clone ssh://git@szv-open.codehub.huawei.com:2222/OpenSourceCenter/megastep/makeself.git -b 2.5.0-h0.computing.cann.r2
 
