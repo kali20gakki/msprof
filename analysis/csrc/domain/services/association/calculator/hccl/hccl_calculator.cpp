@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cctype>
 #include <utility>
+#include <tuple>
 #include "analysis/csrc/domain/services/association/include/ascend_task_association.h"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/domain/services/device_context/load_host_data.h"
@@ -165,7 +166,7 @@ void HcclCalculator::MergeOpDataByThreadId(std::vector<HcclOp>& hcclOps, std::ve
         return op1.timestamp < op2.timestamp;
     });
     std::sort(hcclTasks.begin(), hcclTasks.end(), [](const DeviceHcclTask& task1, const DeviceHcclTask& task2) {
-        return task1.timestamp < task2.timestamp;
+        return std::tie(task1.hostTimestamp, task1.timestamp) < std::tie(task2.hostTimestamp, task2.timestamp);
     });
     size_t taskIdx = 0;
     for (const auto& op : hcclOps) {
