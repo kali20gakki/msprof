@@ -79,7 +79,8 @@ TEST_F(ParamsAdapterAclapiUtest, ParamsCheckAclApi)
     MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, ParamsAdapterAclApi);
     
     AclApiParamAdapterMgr->Init();
-    AclApiParamAdapterMgr->setConfig_ = {INPUT_CFG_COM_TRAINING_TRACE, INPUT_CFG_COM_SYS_DEVICES, INPUT_CFG_HOST_SYS};
+    AclApiParamAdapterMgr->setConfig_ = {INPUT_CFG_COM_TRAINING_TRACE, INPUT_CFG_COM_SYS_DEVICES,
+                                         INPUT_CFG_HOST_SYS, INPUT_CFG_COM_OUTPUT};
     MOCKER_CPP(&ParamValidation::IsValidSwitch)
         .stubs()
         .will(returnValue(true));
@@ -88,9 +89,11 @@ TEST_F(ParamsAdapterAclapiUtest, ParamsCheckAclApi)
         .will(returnValue(true));
     MOCKER_CPP(&ParamsAdapterAclApi::CheckHostSysAclApiValid)
         .stubs()
-        .will(returnValue(true));
+        .will(returnValue(true))
+        .then(returnValue(false));
     int ret = AclApiParamAdapterMgr->ParamsCheckAclApi();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
+    EXPECT_EQ(PROFILING_FAILED, AclApiParamAdapterMgr->ParamsCheckAclApi());
 }
 
 TEST_F(ParamsAdapterAclapiUtest, ProfTaskCfgToContainer)
@@ -190,4 +193,28 @@ TEST_F(ParamsAdapterAclapiUtest, GetParamFromInputCfg)
     EXPECT_EQ(PROFILING_FAILED, AclApiParamAdapterMgr->GetParamFromInputCfg(&cfg, argsArr, params));
     EXPECT_EQ(PROFILING_FAILED, AclApiParamAdapterMgr->GetParamFromInputCfg(&cfg, argsArr, params));
     EXPECT_EQ(PROFILING_SUCCESS, AclApiParamAdapterMgr->GetParamFromInputCfg(&cfg, argsArr, params));
+}
+
+TEST_F(ParamsAdapterAclapiUtest, ProfCfgToContainer)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapterAclApi> AclApiParamAdapterMgr;
+    MSVP_MAKE_SHARED0_VOID(AclApiParamAdapterMgr, ParamsAdapterAclApi);
+    ProfConfig cfg;
+    cfg.dataTypeConfig = PROF_ACL_API_MASK | PROF_TASK_TIME_L0_MASK;
+    cfg.devNums = 0;
+    cfg.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
+    std::array<std::string, ACL_PROF_ARGS_MAX> argsArr;
+    argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ] = "1";
+    argsArr[ACL_PROF_AIV_METRICS] = "x";
+    argsArr[ACL_PROF_HOST_SYS] = "x";
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    AclApiParamAdapterMgr->ProfCfgToContainer(&cfg, argsArr);
+    EXPECT_EQ("on", AclApiParamAdapterMgr->paramContainer_[INPUT_CFG_COM_ASCENDCL]);
+    EXPECT_EQ("l0", AclApiParamAdapterMgr->paramContainer_[INPUT_CFG_COM_TASK_TIME]);
+    EXPECT_EQ("on", AclApiParamAdapterMgr->paramContainer_[INPUT_CFG_COM_AI_VECTOR]);
+    EXPECT_EQ("x", AclApiParamAdapterMgr->paramContainer_[INPUT_CFG_HOST_SYS]);
+    EXPECT_EQ("on", AclApiParamAdapterMgr->paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM]);
+    EXPECT_EQ("1", AclApiParamAdapterMgr->paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ]);
 }

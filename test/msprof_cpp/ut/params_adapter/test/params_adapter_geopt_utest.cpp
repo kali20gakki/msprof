@@ -57,7 +57,36 @@ TEST_F(ParamsAdapterGeoptUtest, GeOptParamAdapterModule)
     MSVP_MAKE_SHARED0_VOID(geCfg, ProfGeOptionsConfig);
     geCfg->storageLimit = "200MB";
     geCfg->instrProfilingFreq = 1;
+    geCfg->sysHardwareMemFreq = 0;
     GeOptParamAdapterMgr->GenGeOptionsContainer(geCfg);
+    EXPECT_EQ("", GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ]);
+    geCfg->sysHardwareMemFreq = 1;
+    GeOptParamAdapterMgr->GenGeOptionsContainer(geCfg);
+    EXPECT_EQ("1", GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ]);
+    geCfg->sysIoSamplingFreq = 0;
+    GeOptParamAdapterMgr->GenGeOptionsContainer(geCfg);
+    EXPECT_EQ("", GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ]);
+    geCfg->sysIoSamplingFreq = 1;
+    GeOptParamAdapterMgr->GenGeOptionsContainer(geCfg);
+    EXPECT_EQ("1", GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ]);
+    geCfg->sysInterconnectionFreq = 0;
+    GeOptParamAdapterMgr->GenGeOptionsContainer(geCfg);
+    EXPECT_EQ("", GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ]);
+    geCfg->sysInterconnectionFreq = 1;
+    GeOptParamAdapterMgr->GenGeOptionsContainer(geCfg);
+    EXPECT_EQ("1", GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ]);
+    geCfg->dvppFreq = 0;
+    GeOptParamAdapterMgr->GenGeOptionsContainer(geCfg);
+    EXPECT_EQ("", GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_COM_DVPP_FREQ]);
+    geCfg->dvppFreq = 1;
+    GeOptParamAdapterMgr->GenGeOptionsContainer(geCfg);
+    EXPECT_EQ("1", GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_COM_DVPP_FREQ]);
+    geCfg->hostSysUsageFreq = 0;
+    GeOptParamAdapterMgr->GenGeOptionsContainer(geCfg);
+    EXPECT_EQ("", GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_HOST_SYS_USAGE_FREQ]);
+    geCfg->hostSysUsageFreq = 1;
+    GeOptParamAdapterMgr->GenGeOptionsContainer(geCfg);
+    EXPECT_EQ("1", GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_HOST_SYS_USAGE_FREQ]);
 }
 
 TEST_F(ParamsAdapterGeoptUtest, ParamsCheckGeOpt)
@@ -83,7 +112,7 @@ TEST_F(ParamsAdapterGeoptUtest, ParamsCheckGeOpt)
     }
 }
 
-TEST_F(ParamsAdapterGeoptUtest, SetGeOptionsContainerDefaultValue)
+TEST_F(ParamsAdapterGeoptUtest, SetGeOptionsContainerDefaultValueWillFailWhenSetOutputDirFailInHelperHostSide)
 {
     GlobalMockObject::verify();
     std::shared_ptr<ParamsAdapterGeOpt> GeOptParamAdapterMgr;
@@ -91,14 +120,38 @@ TEST_F(ParamsAdapterGeoptUtest, SetGeOptionsContainerDefaultValue)
 
     GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_COM_AIC_METRICS] = "ArithmeticUtilization";
     GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_COM_AIV_METRICS] = "ArithmeticUtilization";
-    int ret = GeOptParamAdapterMgr->SetGeOptionsContainerDefaultValue();
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::SetOutputDir)
-        .stubs()
-        .will(returnValue(PROFILING_FAILED));
     MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
         .stubs()
         .will(returnValue(false));
-    EXPECT_EQ(PROFILING_FAILED, ret);
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::SetOutputDir)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, GeOptParamAdapterMgr->SetGeOptionsContainerDefaultValue());
+}
+
+TEST_F(ParamsAdapterGeoptUtest, SetGeOptionsContainerDefaultValueWillSuccWhenSetOutputDirSuccInHelperHostSide)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapterGeOpt> GeOptParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, ParamsAdapterGeOpt);
+ 
+    GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_COM_AIC_METRICS] = "ArithmeticUtilization";
+    GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_COM_AIV_METRICS] = "ArithmeticUtilization";
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapter::SetDefaultAivParams)
+        .stubs();
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::SetGeOptContainerSysValue)
+        .stubs();
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapter::SetDefaultLlcMode)
+        .stubs();
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::SetOutputDir)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_SUCCESS, GeOptParamAdapterMgr->SetGeOptionsContainerDefaultValue());
+    GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_COM_INSTR_PROFILING_FREQ] = "x";
+    EXPECT_EQ(PROFILING_SUCCESS, GeOptParamAdapterMgr->SetGeOptionsContainerDefaultValue());
 }
 
 TEST_F(ParamsAdapterGeoptUtest, GeOptionsSetOutputDir)

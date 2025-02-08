@@ -56,7 +56,38 @@ TEST_F(ParamsAdapterAcljsonUtest, GenAclJsonContainer)
     MSVP_MAKE_SHARED0_VOID(aclCfg, ProfAclConfig);
     aclCfg->storageLimit = "200MB";
     aclCfg->l2 = "on";
+    aclCfg->instrProfilingFreq = 1;
     AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
+    aclCfg->sysHardwareMemFreq = 0;
+    AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
+    EXPECT_EQ("", AclJsonParamAdapterMgr->paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ]);
+    aclCfg->sysHardwareMemFreq = 1;
+    AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
+    EXPECT_EQ("1", AclJsonParamAdapterMgr->paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ]);
+    aclCfg->sysIoSamplingFreq = 0;
+    AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
+    EXPECT_EQ("", AclJsonParamAdapterMgr->paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ]);
+    aclCfg->sysIoSamplingFreq = 1;
+    AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
+    EXPECT_EQ("1", AclJsonParamAdapterMgr->paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ]);
+    aclCfg->sysInterconnectionFreq = 0;
+    AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
+    EXPECT_EQ("", AclJsonParamAdapterMgr->paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ]);
+    aclCfg->sysInterconnectionFreq = 1;
+    AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
+    EXPECT_EQ("1", AclJsonParamAdapterMgr->paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ]);
+    aclCfg->dvppFreq = 0;
+    AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
+    EXPECT_EQ("", AclJsonParamAdapterMgr->paramContainer_[INPUT_CFG_COM_DVPP_FREQ]);
+    aclCfg->dvppFreq = 1;
+    AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
+    EXPECT_EQ("1", AclJsonParamAdapterMgr->paramContainer_[INPUT_CFG_COM_DVPP_FREQ]);
+    aclCfg->hostSysUsageFreq = 0;
+    AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
+    EXPECT_EQ("", AclJsonParamAdapterMgr->paramContainer_[INPUT_CFG_HOST_SYS_USAGE_FREQ]);
+    aclCfg->hostSysUsageFreq = 1;
+    AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
+    EXPECT_EQ("1", AclJsonParamAdapterMgr->paramContainer_[INPUT_CFG_HOST_SYS_USAGE_FREQ]);
 }
 
 TEST_F(ParamsAdapterAcljsonUtest, ParamsCheckAclJson)
@@ -181,4 +212,45 @@ TEST_F(ParamsAdapterAcljsonUtest, GetParamFromInputCfg)
     EXPECT_EQ(PROFILING_FAILED, AclJsonParamAdapterMgr->GetParamFromInputCfg(inputCfgPb, params));
     EXPECT_EQ(PROFILING_FAILED, AclJsonParamAdapterMgr->GetParamFromInputCfg(inputCfgPb, params));
     EXPECT_EQ(PROFILING_SUCCESS, AclJsonParamAdapterMgr->GetParamFromInputCfg(inputCfgPb, params));
+}
+
+TEST_F(ParamsAdapterAcljsonUtest, CheckInstrAndTaskParamBothSetWillReturnFalseWhenNotSetInstrSwitch)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapterAclJson> AclJsonParamAdapterMgr;
+    MSVP_MAKE_SHARED0_VOID(AclJsonParamAdapterMgr, ParamsAdapterAclJson);
+    SHARED_PTR_ALIA<ProfAclConfig> inputCfgPb;
+    MSVP_MAKE_SHARED0_VOID(inputCfgPb, ProfAclConfig);
+    inputCfgPb->instrProfilingFreq = 0;
+    EXPECT_EQ(false, AclJsonParamAdapterMgr->CheckInstrAndTaskParamBothSet(inputCfgPb));
+}
+
+TEST_F(ParamsAdapterAcljsonUtest, CheckInstrAndTaskParamBothSetWillFalseWhenSetInstrSwitchAndNotSetTaskSwitch)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapterAclJson> AclJsonParamAdapterMgr;
+    MSVP_MAKE_SHARED0_VOID(AclJsonParamAdapterMgr, ParamsAdapterAclJson);
+    SHARED_PTR_ALIA<ProfAclConfig> inputCfgPb;
+    MSVP_MAKE_SHARED0_VOID(inputCfgPb, ProfAclConfig);
+    inputCfgPb->instrProfilingFreq = 1;
+    EXPECT_EQ(false, AclJsonParamAdapterMgr->CheckInstrAndTaskParamBothSet(inputCfgPb));
+}
+
+TEST_F(ParamsAdapterAcljsonUtest, CheckInstrAndTaskParamBothSetWillReturnTrueWhenSetInstrSwitchAndSetTaskSwitch)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapterAclJson> AclJsonParamAdapterMgr;
+    MSVP_MAKE_SHARED0_VOID(AclJsonParamAdapterMgr, ParamsAdapterAclJson);
+    SHARED_PTR_ALIA<ProfAclConfig> inputCfgPb;
+    MSVP_MAKE_SHARED0_VOID(inputCfgPb, ProfAclConfig);
+    inputCfgPb->instrProfilingFreq = 1;
+    inputCfgPb->taskTime = "on";
+    EXPECT_EQ(true, AclJsonParamAdapterMgr->CheckInstrAndTaskParamBothSet(inputCfgPb));
+    inputCfgPb->taskTime = "l0";
+    EXPECT_EQ(true, AclJsonParamAdapterMgr->CheckInstrAndTaskParamBothSet(inputCfgPb));
+    inputCfgPb->taskTime = "l1";
+    EXPECT_EQ(true, AclJsonParamAdapterMgr->CheckInstrAndTaskParamBothSet(inputCfgPb));
+    inputCfgPb->taskTime = "off";
+    inputCfgPb->aicpu = "on";
+    EXPECT_EQ(true, AclJsonParamAdapterMgr->CheckInstrAndTaskParamBothSet(inputCfgPb));
 }

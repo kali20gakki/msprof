@@ -329,3 +329,39 @@ TEST_F(PlatformAdapterUtest, SetParamsForDurationTime)
     PlatformAdapterCloudv2Mgr->SetParamsForDurationTime(durationTime);
     EXPECT_STREQ(durationTime.c_str(), params->durationTime.c_str());
 }
+
+TEST_F(PlatformAdapterUtest, SetParamsForStorageLimitWillSetStorageLimitWhenInputValidLimit)
+{
+    std::shared_ptr<PlatformAdapterInterface> mgr;
+    MSVP_MAKE_SHARED0_VOID(mgr, PlatformAdapterInterface);
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    mgr->Init(params, PlatformType::MINI_TYPE);
+    struct CommonParams commParams;
+    commParams.storageLimit = "20MB";
+    mgr->SetParamsForStorageLimit(commParams);
+    EXPECT_STREQ(commParams.storageLimit.c_str(), params->storageLimit.c_str());
+ 
+    commParams.storageLimit = "0MB";
+    mgr->SetParamsForStorageLimit(commParams);
+    EXPECT_EQ(true, params->storageLimit.empty());
+}
+
+TEST_F(PlatformAdapterUtest, SetParamsForStorageLimitWillSetEmptyWhenNotSetLimitAndGetVolumnSizeNotAvaiable)
+{
+    std::shared_ptr<PlatformAdapterInterface> mgr;
+    MSVP_MAKE_SHARED0_VOID(mgr, PlatformAdapterInterface);
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    mgr->Init(params, PlatformType::MINI_TYPE);
+    struct CommonParams commParams;
+    commParams.storageLimit = "";
+    unsigned long long dirAvailSize = 1;
+    MOCKER(analysis::dvvp::common::utils::Utils::GetVolumeSize)
+        .stubs()
+        .with(any(), outBound(dirAvailSize), any())
+        .will(returnValue(PROFILING_SUCCESS));
+    mgr->SetParamsForStorageLimit(commParams);
+    EXPECT_STREQ(commParams.storageLimit.c_str(), params->storageLimit.c_str());
+    GlobalMockObject::verify();
+}
