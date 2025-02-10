@@ -190,6 +190,7 @@ void PlatformAdapterInterface::SetParamsForTaskMemory()
     bool ret = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_MEMORY) != supportSwitch_.end()) {
         params_->dataTypeConfig |= PROF_TASK_MEMORY;
+        params_->taskMemory = MSVP_PROF_ON;
         ret = true;
     }
     if (!ret) {
@@ -607,7 +608,7 @@ void PlatformAdapterInterface::SetParamsForDelayTime(const std::string &delayTim
 {
     params_->delayTime = delayTime;
 }
- 
+
 void PlatformAdapterInterface::SetParamsForDurationTime(const std::string &durationTime)
 {
     params_->durationTime = durationTime;
