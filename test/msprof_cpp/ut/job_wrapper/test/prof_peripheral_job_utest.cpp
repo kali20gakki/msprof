@@ -31,9 +31,10 @@ using namespace analysis::dvvp::message;
 using namespace Analysis::Dvvp::JobWrapper;
 using namespace Collector::Dvvp::Plugin;
 
-class JOB_WRAPPER_PROF_PERIPHERAL_JOB_TEST: public testing::Test {
+class ProfPeripheralJobUtest : public testing::Test {
 protected:
-    virtual void SetUp() {
+    virtual void SetUp()
+    {
         GlobalMockObject::verify();
         collectionJobCfg_ = std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCfg>();
         std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
@@ -48,14 +49,16 @@ protected:
         collectionJobCfg_->jobParams.events = std::make_shared<std::vector<std::string> >(0);
         collectionJobCfg_->jobParams.cores = std::make_shared<std::vector<int> >(0);
     }
-    virtual void TearDown() {
+    virtual void TearDown()
+    {
         collectionJobCfg_.reset();
     }
 private:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
 };
 
-TEST_F(JOB_WRAPPER_PROF_PERIPHERAL_JOB_TEST, Init) {
+TEST_F(ProfPeripheralJobUtest, Init)
+{
     MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
         .stubs()
         .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
@@ -67,7 +70,8 @@ TEST_F(JOB_WRAPPER_PROF_PERIPHERAL_JOB_TEST, Init) {
     EXPECT_EQ(PROFILING_SUCCESS, profPeripheralJob->Init(collectionJobCfg_));
 }
 
-TEST_F(JOB_WRAPPER_PROF_PERIPHERAL_JOB_TEST, Process) {
+TEST_F(ProfPeripheralJobUtest, Process)
+{
     auto profPeripheralJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfPeripheralJob>();
     profPeripheralJob->Init(collectionJobCfg_);
 
@@ -84,7 +88,8 @@ TEST_F(JOB_WRAPPER_PROF_PERIPHERAL_JOB_TEST, Process) {
     EXPECT_EQ(PROFILING_SUCCESS, profPeripheralJob->Process());
 }
 
-TEST_F(JOB_WRAPPER_PROF_PERIPHERAL_JOB_TEST, Uninit) {
+TEST_F(ProfPeripheralJobUtest, Uninit)
+{
     auto profPeripheralJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfPeripheralJob>();
     collectionJobCfg_->comParams->params->nicProfiling = "on";
     collectionJobCfg_->comParams->params->dvpp_profiling = "on";
@@ -94,6 +99,9 @@ TEST_F(JOB_WRAPPER_PROF_PERIPHERAL_JOB_TEST, Uninit) {
         .will(returnValue(false))
         .then(returnValue(true));
     EXPECT_EQ(PROFILING_SUCCESS, profPeripheralJob->Uninit());
+    profPeripheralJob->peripheralCfg_.startSuccess = true;
+    EXPECT_EQ(PROFILING_SUCCESS, profPeripheralJob->Uninit());
+    profPeripheralJob->peripheralCfg_.startSuccess = false;
     EXPECT_EQ(PROFILING_SUCCESS, profPeripheralJob->Uninit());
 }
 
@@ -444,11 +452,12 @@ TEST_F(JOB_WRAPPER_PROF_NPU_MODULE_MEM_JOB_TEST, SetPeripheralConfig)
     EXPECT_EQ(PROFILING_SUCCESS, profNpuModuleJob->SetPeripheralConfig());
 }
 
-class JOB_WRAPPER_PROF_LLC_JOB_TEST: public testing::Test {
+class JOB_WRAPPER_PROF_LLC_JOB_TEST : public testing::Test {
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
 protected:
-    virtual void SetUp() {
+    virtual void SetUp()
+    {
         GlobalMockObject::verify();
         collectionJobCfg_ = std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCfg>();
         std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
@@ -461,7 +470,8 @@ protected:
         collectionJobCfg_->comParams = comParams;
         collectionJobCfg_->jobParams.events = std::make_shared<std::vector<std::string> >(0);
     }
-    virtual void TearDown() {
+    virtual void TearDown()
+    {
         collectionJobCfg_.reset();
     }
 };
@@ -483,6 +493,7 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, Init) {
     collectionJobCfg_->jobParams.events = nullptr;
     EXPECT_EQ(PROFILING_FAILED, profLlcJob->Init(collectionJobCfg_));
     EXPECT_EQ(PROFILING_SUCCESS, profLlcJob->Uninit());
+    GlobalMockObject::verify();
 }
 
 TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, IsGlobalJobLevel) {
@@ -494,6 +505,7 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, IsGlobalJobLevel) {
     auto profLlcJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfLlcJob>();
     EXPECT_EQ(false, profLlcJob->IsGlobalJobLevel());
     EXPECT_EQ(true, profLlcJob->IsGlobalJobLevel());
+    GlobalMockObject::verify();
 }
 
 TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, SendData) {
@@ -525,18 +537,37 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, SendData) {
     EXPECT_EQ(PROFILING_FAILED, profLlcJob->GetCollectLlcEventsCmd(0, events,profLLc));
     EXPECT_EQ(PROFILING_FAILED, profLlcJob->GetCollectLlcEventsCmd(0, events,profLLc));
     std::remove(fileName.c_str());
+    GlobalMockObject::verify();
 }
 
 TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, Process) {
     auto profLlcJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfLlcJob>();
-    profLlcJob->Init(collectionJobCfg_);
-    collectionJobCfg_->jobParams.events->push_back("read");
+    // invalid collectionJobCfg
+    EXPECT_EQ(PROFILING_FAILED, profLlcJob->Process());
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
+        .stubs()
+        .will(returnValue(true));
     MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
         .stubs()
-        .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE))
-        .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::MINI_TYPE));
+        .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::MINI_TYPE));
 
-    profLlcJob->Process();
+    collectionJobCfg_->comParams->params->host_profiling = false;
+    collectionJobCfg_->comParams->params->msprof_llc_profiling = "on";
+    collectionJobCfg_->jobParams.events->push_back("read");
+    profLlcJob->Init(collectionJobCfg_);
+
+    std::string fakeLlcCmd = "read";
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfLlcJob::GetCollectLlcEventsCmd)
+        .stubs()
+        .with(any(), any(), outBound(fakeLlcCmd))
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER(analysis::dvvp::common::utils::Utils::ExecCmd)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_FAILED, profLlcJob->Process());
+    EXPECT_EQ(PROFILING_SUCCESS, profLlcJob->Process());
+    GlobalMockObject::verify();
 }
 
 TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, SetPeripheralConfig) {
@@ -557,7 +588,9 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, SetPeripheralConfig) {
     EXPECT_EQ(PROFILING_SUCCESS, profLlcJob->SetPeripheralConfig());
     collectionJobCfg_->jobParams.events = nullptr;
     EXPECT_EQ(PROFILING_FAILED, profLlcJob->SetPeripheralConfig());
+    GlobalMockObject::verify();
 }
+
 TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, Uninit) {
     MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
         .stubs()
@@ -581,6 +614,7 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, Uninit) {
     profLlcJob->llcProcess_ = 1;
     EXPECT_EQ(PROFILING_FAILED, profLlcJob->Uninit());
     EXPECT_EQ(PROFILING_SUCCESS, profLlcJob->Uninit());
+    GlobalMockObject::verify();
 }
 
 class JOB_WRAPPER_PROF_HCCS_JOB_TEST : public testing::Test {
@@ -755,7 +789,7 @@ protected:
     virtual void SetUp()
     {
         GlobalMockObject::verify();
-        collectionJobCfg_ = std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCfg>();\
+        collectionJobCfg_ = std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCfg>();
         std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
             new analysis::dvvp::message::ProfileParams);
         std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx(
@@ -775,74 +809,81 @@ protected:
     }
 };
 
-TEST_F(JOB_WRAPPER_PROF_DVPP_JOB_TEST, Init) {
-    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
-        .stubs()
-        .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
-
-    MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
-        .stubs()
-        .will(returnValue(true));
-
-
+TEST_F(JOB_WRAPPER_PROF_DVPP_JOB_TEST, Init)
+{
     auto profJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfDvppJob>();
     collectionJobCfg_->jobParams.events = nullptr;
     profJob->Init(collectionJobCfg_);
     collectionJobCfg_->jobParams.events = std::make_shared<std::vector<std::string> >(0);
     EXPECT_EQ(PROFILING_FAILED, profJob->Init(nullptr));
+    collectionJobCfg_->comParams->params->host_profiling = true;
+    EXPECT_EQ(PROFILING_FAILED, profJob->Init(collectionJobCfg_));
+    collectionJobCfg_->comParams->params->host_profiling = false;
     collectionJobCfg_->jobParams.events->push_back("write");
     collectionJobCfg_->jobParams.events->push_back("read");
     EXPECT_EQ(PROFILING_FAILED, profJob->Init(collectionJobCfg_));
     collectionJobCfg_->comParams->params->dvpp_profiling = "on";
     MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
         .stubs()
-        .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::LHISI_TYPE));
-    EXPECT_EQ(PROFILING_SUCCESS, profJob->Init(collectionJobCfg_));
-    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
-        .stubs()
-        .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::CHIP_V4_1_0));
-    EXPECT_EQ(PROFILING_SUCCESS, profJob->Init(collectionJobCfg_));
-
-    collectionJobCfg_->comParams->params->host_profiling = true;
+        .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::LHISI_TYPE))
+        .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::MINI_TYPE))
+        .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::CLOUD_TYPE))
+        .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE))
+        .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::MDC_TYPE))
+        .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::CHIP_V4_1_0))
+        .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::CHIP_V4_2_0));
+    // lsihi: return fail
     EXPECT_EQ(PROFILING_FAILED, profJob->Init(collectionJobCfg_));
+    // other: return succ
+    EXPECT_EQ(PROFILING_SUCCESS, profJob->Init(collectionJobCfg_));
+    EXPECT_EQ(PROFILING_SUCCESS, profJob->Init(collectionJobCfg_));
+    EXPECT_EQ(PROFILING_SUCCESS, profJob->Init(collectionJobCfg_));
+    EXPECT_EQ(PROFILING_SUCCESS, profJob->Init(collectionJobCfg_));
+    EXPECT_EQ(PROFILING_SUCCESS, profJob->Init(collectionJobCfg_));
+    EXPECT_EQ(PROFILING_SUCCESS, profJob->Init(collectionJobCfg_));
+    GlobalMockObject::verify();
 }
 
-TEST_F(JOB_WRAPPER_PROF_DVPP_JOB_TEST, Process) {
-     MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
-        .stubs()
-        .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
-
+TEST_F(JOB_WRAPPER_PROF_DVPP_JOB_TEST, Process)
+{
+    auto proJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfDvppJob>();
+    EXPECT_EQ(PROFILING_FAILED, proJob->Process());
+    collectionJobCfg_->comParams->params->host_profiling = false;
+    collectionJobCfg_->jobParams.events->push_back("write");
+    collectionJobCfg_->jobParams.events->push_back("read");
     MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
         .stubs()
         .will(returnValue(true));
-
-    //MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfPeripheralJob::SetPeripheralConfig)
-    //    .stubs()
-    //    .will(returnValue(PROFILING_FAILED))
-    //    .then(returnValue(PROFILING_SUCCESS));
-
-    auto proJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfDvppJob>();
+    MOCKER_CPP(&analysis::dvvp::driver::DrvPeripheralStart)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
     proJob->Init(collectionJobCfg_);
     EXPECT_EQ(PROFILING_SUCCESS, proJob->Process());
-    EXPECT_EQ(PROFILING_SUCCESS, proJob->Process());
-
-    MOCKER(&analysis::dvvp::driver::DrvPeripheralStart)
-        .stubs()
-        .will(returnValue(PROFILING_FAILED));
-    EXPECT_EQ(PROFILING_SUCCESS, proJob->Process());
+    GlobalMockObject::verify();
 }
 
-TEST_F(JOB_WRAPPER_PROF_DVPP_JOB_TEST, Uninit) {
-    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
-        .stubs()
-        .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
-
+TEST_F(JOB_WRAPPER_PROF_DVPP_JOB_TEST, Uninit)
+{
+    collectionJobCfg_->comParams->params->host_profiling = false;
+    collectionJobCfg_->jobParams.events->push_back("write");
+    collectionJobCfg_->jobParams.events->push_back("read");
     MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
         .stubs()
         .will(returnValue(true));
+    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
+    MOCKER_CPP(&analysis::dvvp::driver::DrvStop)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
     auto proJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfDvppJob>();
-    EXPECT_EQ(PROFILING_FAILED, proJob->Init(collectionJobCfg_));
+
+    proJob->Init(collectionJobCfg_);
     EXPECT_EQ(PROFILING_SUCCESS, proJob->Uninit());
+    GlobalMockObject::verify();
 }
 
 class JOB_WRAPPER_PROF_ROCE_JOB_TEST : public testing::Test {
@@ -956,4 +997,73 @@ TEST_F(JOB_WRAPPER_PROF_QOS_JOB_TEST, Uninit)
     auto profQosJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfQosJob>();
     EXPECT_EQ(PROFILING_FAILED, profQosJob->Init(collectionJobCfg_));
     EXPECT_EQ(PROFILING_SUCCESS, profQosJob->Uninit());
+}
+
+class JOB_WRAPPER_PROF_STARS_SOC_JOB_TEST : public testing::Test {
+public:
+    std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
+protected:
+    virtual void SetUp()
+    {
+        GlobalMockObject::verify();
+        collectionJobCfg_ = std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCfg>();
+        std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
+            new analysis::dvvp::message::ProfileParams);
+        std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx(
+            new analysis::dvvp::message::JobContext);
+        auto comParams = std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCommonParams>();
+        comParams->params = params;
+        comParams->jobCtx = jobCtx;
+        collectionJobCfg_->comParams = comParams;
+        int samplingInterval = 20;
+        collectionJobCfg_->comParams->params->hardware_mem_sampling_interval = samplingInterval;
+    }
+    virtual void TearDown()
+    {
+        collectionJobCfg_.reset();
+    }
+};
+
+TEST_F(JOB_WRAPPER_PROF_STARS_SOC_JOB_TEST, Init)
+{
+    auto profStarsSocProfileJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfStarsSocProfileJob>();
+    EXPECT_EQ(PROFILING_FAILED, profStarsSocProfileJob->Init(nullptr));
+    collectionJobCfg_->comParams->params->host_profiling = true;
+    EXPECT_EQ(PROFILING_FAILED, profStarsSocProfileJob->Init(collectionJobCfg_));
+    collectionJobCfg_->comParams->params->host_profiling = false;
+    EXPECT_EQ(PROFILING_FAILED, profStarsSocProfileJob->Init(collectionJobCfg_));
+    collectionJobCfg_->comParams->params->interconnection_profiling = "on";
+    EXPECT_EQ(PROFILING_SUCCESS, profStarsSocProfileJob->Init(collectionJobCfg_));
+    collectionJobCfg_->comParams->params->interconnection_profiling = "off";
+    collectionJobCfg_->comParams->params->hardware_mem = "on";
+    EXPECT_EQ(PROFILING_SUCCESS, profStarsSocProfileJob->Init(collectionJobCfg_));
+    collectionJobCfg_->comParams->params->hardware_mem = "off";
+    collectionJobCfg_->comParams->params->low_power = "on";
+    EXPECT_EQ(PROFILING_SUCCESS, profStarsSocProfileJob->Init(collectionJobCfg_));
+}
+
+TEST_F(JOB_WRAPPER_PROF_STARS_SOC_JOB_TEST, SetPeripheralConfig)
+{
+    auto profStarsSocProfileJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfStarsSocProfileJob>();
+    analysis::dvvp::driver::StarsSocProfileConfigT *nullConfig = nullptr;
+    analysis::dvvp::driver::StarsSocProfileConfigT validConfig;
+    MOCKER(analysis::dvvp::common::utils::Utils::ProfMalloc)
+        .stubs()
+        .will(returnValue(static_cast<VOID_PTR>(nullConfig)))
+        .then(returnValue(static_cast<VOID_PTR>(&validConfig)));
+    profStarsSocProfileJob->Init(collectionJobCfg_);
+    EXPECT_EQ(PROFILING_FAILED, profStarsSocProfileJob->SetPeripheralConfig());
+    collectionJobCfg_->comParams->params->interconnection_profiling = "on";
+    collectionJobCfg_->comParams->params->hardware_mem = "on";
+    collectionJobCfg_->comParams->params->low_power = "on";
+    collectionJobCfg_->comParams->params->interconnection_sampling_interval = 0;
+    collectionJobCfg_->comParams->params->hardware_mem_sampling_interval = 0;
+    EXPECT_EQ(PROFILING_SUCCESS, profStarsSocProfileJob->SetPeripheralConfig());
+    collectionJobCfg_->comParams->params->interconnection_sampling_interval = 1;
+    collectionJobCfg_->comParams->params->hardware_mem_sampling_interval = 1;
+    EXPECT_EQ(PROFILING_SUCCESS, profStarsSocProfileJob->SetPeripheralConfig());
+    collectionJobCfg_->comParams->params->interconnection_profiling = "off";
+    collectionJobCfg_->comParams->params->hardware_mem = "off";
+    collectionJobCfg_->comParams->params->low_power = "off";
+    EXPECT_EQ(PROFILING_SUCCESS, profStarsSocProfileJob->SetPeripheralConfig());
 }

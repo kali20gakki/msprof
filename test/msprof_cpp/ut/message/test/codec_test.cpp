@@ -69,6 +69,7 @@ TEST_F(MESSAGE_CODEC_TEST, AppendMessage) {
         new analysis::dvvp::proto::JobStartReq);
 
     EXPECT_TRUE(analysis::dvvp::message::AppendMessage(out, message));
+    EXPECT_FALSE(analysis::dvvp::message::AppendMessage(out, nullptr));
 }
 
 TEST_F(MESSAGE_CODEC_TEST, EncodeMessage) {
@@ -87,6 +88,13 @@ TEST_F(MESSAGE_CODEC_TEST, EncodeMessage) {
 
     EXPECT_EQ(0, (int)analysis::dvvp::message::EncodeMessage(message).size());
     EXPECT_NE(0, (int)analysis::dvvp::message::EncodeMessage(message).size());
+}
+
+TEST_F(MESSAGE_CODEC_TEST, EncodeJsonWillReturnEmptyWhenInputNull)
+{
+    std::shared_ptr<google::protobuf::Message> message_null;
+    bool format = false;
+    EXPECT_EQ("", analysis::dvvp::message::EncodeJson(message_null, format));
 }
 
 TEST_F(MESSAGE_CODEC_TEST, EncodeMessageShared) {

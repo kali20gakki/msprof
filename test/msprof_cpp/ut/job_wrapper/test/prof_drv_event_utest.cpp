@@ -92,10 +92,15 @@ TEST_F(ProfDrvEventUtest, TestQueryGroupId)
     uint32_t grpId = 0;
     ProfDrvEvent profDrvEvent;
 
+    MOCKER(strcpy_s)
+        .stubs()
+        .will(returnValue(EOK - 1))
+        .then(returnValue(EOK));
     MOCKER_CPP(&DriverPlugin::MsprofHalEschedQueryInfo)
         .stubs()
         .will(returnValue(DRV_ERROR_NONE))
         .then(returnValue(DRV_ERROR_INVALID_HANDLE));
+    EXPECT_EQ(PROFILING_FAILED, profDrvEvent.QueryGroupId(devId, grpId, "aicpu"));
     EXPECT_EQ(PROFILING_SUCCESS, profDrvEvent.QueryGroupId(devId, grpId, "aicpu"));
     EXPECT_EQ(PROFILING_FAILED, profDrvEvent.QueryGroupId(devId, grpId, "aicpu"));
 }
@@ -107,6 +112,10 @@ TEST_F(ProfDrvEventUtest, TestQueryDevPid)
     TaskEventAttr eventAttr {0, PROF_CHANNEL_AICPU, AICPU_COLLECTION_JOB, false, false, false, false, 0, false, ""};
     ProfDrvEvent profDrvEvent;
 
+    eventAttr.channelId = PROF_CHANNEL_MAX; // not aicpu channel
+    EXPECT_EQ(PROFILING_SUCCESS, profDrvEvent.QueryDevPid(&eventAttr));
+ 
+    eventAttr.channelId = PROF_CHANNEL_AICPU;
     MOCKER_CPP(&DriverPlugin::MsprofHalQueryDevpid)
         .stubs()
         .will(repeat(DRV_ERROR_INVALID_HANDLE, WAIT_COUNT))
