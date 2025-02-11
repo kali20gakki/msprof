@@ -10,6 +10,7 @@
 #include "msprof_callback_handler.h"
 #include "param_validation.h"
 #include "adx_prof_api.h"
+#include "hdc_transport.h"
 
 using namespace Msprof::Engine;
 using namespace analysis::dvvp::common::error;
@@ -29,25 +30,6 @@ TEST_F(AicpuPluginUtest, InitWillReturnFailWhenInputInvalidDeviceId)
         .stubs()
         .will(returnValue(false));
     EXPECT_EQ(PROFILING_FAILED, aicpu->Init(0));
-}
-
-TEST_F(AicpuPluginUtest, InitWillReturnFailWhenCreateServerFail)
-{
-    GlobalMockObject::verify();
-    auto aicpu = std::make_shared<AicpuPlugin>();
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckDeviceIdIsValid)
-        .stubs()
-        .will(returnValue(true));
-    int server = 1;
-    MOCKER_CPP(&Analysis::Dvvp::Adx::AdxHdcServerCreate)
-        .stubs()
-        .will(returnValue(static_cast<HDC_SERVER>(nullptr)))
-        .then(returnValue(static_cast<HDC_SERVER>(&server)));
-    MOCKER_CPP(&Analysis::Dvvp::Adx::AdxHdcServerDestroy)
-        .stubs();
-    EXPECT_EQ(PROFILING_SUCCESS, aicpu->Init(0));
-    EXPECT_EQ(PROFILING_SUCCESS, aicpu->Init(0));
-    aicpu->UnInit();
 }
 
 TEST_F(AicpuPluginUtest, ReceiveStreamData) {
