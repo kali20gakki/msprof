@@ -120,6 +120,7 @@ set(profilerSrcFile
     test/msproftx_utest.cpp
     test/mstx_utest.cpp
     test/dyn_prof_utest.cpp
+    test/prof_manager_utest.cpp
     ../stub/ge_stub.cpp
     ../stub/hdc-log-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
@@ -184,6 +185,7 @@ target_include_directories(msprofiler_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
 	${MSPROF_SOURCE_DIR}/dvvp/message
 	${MSPROF_SOURCE_DIR}/dvvp/transport
+	${MSPROF_SOURCE_DIR}/dvvp/transport/hdc
 	${MSPROF_SOURCE_DIR}/dvvp/common/memory/
 	${MSPROF_SOURCE_DIR}/dvvp/streamio/client/include
 	${MSPROF_SOURCE_DIR}/dvvp/streamio/common/include

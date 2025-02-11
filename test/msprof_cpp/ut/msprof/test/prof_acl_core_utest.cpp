@@ -61,6 +61,262 @@ using namespace Collector::Dvvp::Mmpa;
 
 const int RECEIVE_CHUNK_SIZE = 1024; // chunk size:1024
 
+class ProfAclCoreUtest : public testing::Test {
+protected:
+    virtual void SetUp() {}
+    virtual void TearDown() {}
+};
+
+class COMMANDHANDLE_TEST : public testing::Test {
+protected:
+    virtual void SetUp() {}
+    virtual void TearDown() {}
+};
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfInitWillReturnFailWhenMemSetFail)
+{
+    GlobalMockObject::verify();
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    EXPECT_EQ(PROFILING_FAILED, CommandHandleProfInit());
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfInitWillReturnSuccWhileSetProfCommandSucc)
+{
+    GlobalMockObject::verify();
+    std::string jsonStr = "{}";
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
+        .stubs()
+        .will(returnValue(jsonStr));
+    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfInit());
+    // repeat init
+    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfInit());
+    CommandHandleProfFinalize();
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfInitWillReturnFailureWhileSetCommandHandleProfFail)
+{
+    GlobalMockObject::verify();
+    std::string jsonStr(PARAM_LEN_MAX + 1, 'a');
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
+        .stubs()
+        .will(returnValue(jsonStr));
+    EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, CommandHandleProfInit());
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfInitWillReturnFailureWhileSetProfCommandFail)
+{
+    GlobalMockObject::verify();
+    std::string jsonStr = "{}";
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
+        .stubs()
+        .will(returnValue(jsonStr));
+    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, CommandHandleProfInit());
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfFinalizeWillReturnFailWhileMemSetOrStrcpyFail)
+{
+    GlobalMockObject::verify();
+    std::string jsonStr = "{}";
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
+        .stubs()
+        .will(returnValue(jsonStr));
+    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    CommandHandleProfInit();
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK - 1))
+        .then(returnValue(EOK));
+    MOCKER(strncpy_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    EXPECT_EQ(PROFILING_FAILED, CommandHandleProfFinalize());
+    EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, CommandHandleProfFinalize());
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfFinalizeWillReturnSuccWhileInitSucc)
+{
+    GlobalMockObject::verify();
+    std::string jsonStr = "{}";
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
+        .stubs()
+        .will(returnValue(jsonStr));
+    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    CommandHandleProfInit();
+    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfFinalize());
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfFinalizeWillReturnSuccWhileNotCallInit)
+{
+    GlobalMockObject::verify();
+    std::string jsonStr = "{}";
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
+        .stubs()
+        .will(returnValue(jsonStr));
+    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfFinalize());
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStart_will_return_err_while_StartReporter_return_fail)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StartReporters)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    uint32_t devList[] = {0};
+    uint32_t devNums = 1;
+    EXPECT_EQ(ACL_ERROR, CommandHandleProfStart(devList, devNums, 0));
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStart_will_return_success_while_zero_profSwitch_and_msproftx_on)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StartReporters)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsMsprofTxSwitchOn)
+        .stubs()
+        .will(returnValue(true));
+    uint32_t devList[] = {0, 1};
+    uint32_t devNums = 2;
+    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStart(devList, devNums, 0));
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStartWillReturnFailWhenMemsetOrStrcpyFail)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StartReporters)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsMsprofTxSwitchOn)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsSubscribeMode)
+        .stubs()
+        .will(returnValue(false));
+    uint32_t devList[] = {0};
+    uint32_t devNums = 1;
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK - 1))
+        .then(returnValue(EOK));
+    MOCKER(strncpy_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    EXPECT_EQ(PROFILING_FAILED, CommandHandleProfStart(devList, devNums, 1));
+    EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, CommandHandleProfStart(devList, devNums, 1));
+}
+
+TEST_F(COMMANDHANDLE_TEST, GetProfSwitchHiWillNotSetProfSwitchHiWhenInNotSupportPlatform)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(PlatformType::MINI_TYPE));
+    EXPECT_EQ(0, GetProfSwitchHi(0));
+}
+
+TEST_F(COMMANDHANDLE_TEST, GetProfSwitchHiWillSetProfSwitchHiWhenInSupportPlatformForMc2)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(PlatformType::DC_TYPE))
+        .then(returnValue(PlatformType::DC_TYPE))
+        .then(returnValue(PlatformType::CHIP_V4_1_0));
+    EXPECT_EQ(0, GetProfSwitchHi(0));
+    EXPECT_EQ(PROF_DEV_AICPU_CHANNEL, GetProfSwitchHi(PROF_TASK_TIME_L1));
+    EXPECT_EQ(PROF_DEV_AICPU_CHANNEL, GetProfSwitchHi(PROF_TASK_TIME_L1));
+}
+
+TEST_F(COMMANDHANDLE_TEST, GetProfSwitchHiWillSetProfSwitchHiWhenInSupportPlatformForHcclAicpu)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(PlatformType::CHIP_V4_1_0));
+    EXPECT_EQ(0, GetProfSwitchHi(0));
+    EXPECT_EQ(PROF_DEV_AICPU_CHANNEL, GetProfSwitchHi(PROF_TASK_TIME_L0));
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStop_will_not_send_command_while_zero_profSwitch_and_msproftx_on)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StopReporters)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsMsprofTxSwitchOn)
+        .stubs()
+        .will(returnValue(true));
+    uint32_t devList[] = {0, 1};
+    uint32_t devNums = 2;
+    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStop(devList, devNums, 0));
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStop_will_send_command_to_cann_while_none_zero_profSwitch)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsMsprofTxSwitchOn)
+        .stubs()
+        .will(returnValue(true));
+    std::string zeroStr = "{}";
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
+        .stubs()
+        .will(returnValue(zeroStr));
+    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StopReporters)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS))
+        .then(returnValue(PROFILING_FAILED));
+    uint32_t devList[] = {0, 1};
+    uint32_t devNums = 2;
+    uint64_t profSwitch = 0x1;
+    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStop(devList, devNums, profSwitch));
+    EXPECT_EQ(ACL_ERROR, CommandHandleProfStop(devList, devNums, profSwitch));
+}
+
+TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStopWillReturnFailWhenMemSetOrStrcpyFail)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StopReporters)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsMsprofTxSwitchOn)
+        .stubs()
+        .will(returnValue(true));
+    std::string zeroStr = "{}";
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
+        .stubs()
+        .will(returnValue(zeroStr));
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(EOK - 1))
+        .then(returnValue(EOK));
+    MOCKER(strncpy_s)
+        .stubs()
+        .will(returnValue(EOK - 1));
+    uint32_t devList[] = {0, 1};
+    uint32_t devNums = 2;
+    uint64_t profSwitch = 0x1;
+    EXPECT_EQ(PROFILING_FAILED, CommandHandleProfStop(devList, devNums, profSwitch));
+    EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, CommandHandleProfStop(devList, devNums, profSwitch));
+}
+
 class MSPROF_ACL_CORE_UTEST: public testing::Test {
 protected:
     virtual void SetUp() {
@@ -319,6 +575,48 @@ TEST_F(MSPROF_ACL_CORE_UTEST, GeOpenDeviceHandle) {
     ge::GeOpenDeviceHandle(1);
 }
 
+TEST_F(MSPROF_ACL_CORE_UTEST, aclgrphProfInitWillReturnFailWhenInputInvalidParam)
+{
+    GlobalMockObject::verify();
+    std::string path = "./aclgrphProfInitTest";
+    MOCKER_CPP(&analysis::dvvp::common::utils::Utils::IsDynProfMode)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
+        .stubs()
+        .will(returnValue(false));
+    EXPECT_EQ(ge::FAILED, ge::aclgrphProfInit(nullptr, 0));
+    EXPECT_EQ(ge::FAILED, ge::aclgrphProfInit(path.c_str(), static_cast<uint32_t>(path.size() + 1)));
+    size_t aclGrphProfPathMaxLen = 4096;
+    std::string longPath(aclGrphProfPathMaxLen + 1, 'x');
+    EXPECT_EQ(ge::FAILED, ge::aclgrphProfInit(longPath.c_str(), static_cast<uint32_t>(longPath.size())));
+    MOCKER_CPP(&analysis::dvvp::common::utils::Utils::RelativePathToAbsolutePath)
+        .stubs()
+        .will(returnValue(longPath));
+    EXPECT_EQ(ACL_ERROR_INVALID_PARAM, ge::aclgrphProfInit(path.c_str(), static_cast<uint32_t>(path.size())));
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, aclgrphProfInitWillReturnFailWhenProfAclMgrFail)
+{
+    GlobalMockObject::verify();
+    std::string path = "./aclgrphProfInitTest";
+    MOCKER_CPP(&analysis::dvvp::common::utils::Utils::IsDynProfMode)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::ProfInitPrecheck)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::Init)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(ge::FAILED, ge::aclgrphProfInit(path.c_str(), static_cast<uint32_t>(path.size() + 1)));
+    EXPECT_EQ(ge::FAILED, ge::aclgrphProfInit(path.c_str(), static_cast<uint32_t>(path.size() + 1)));
+}
+
 TEST_F(MSPROF_ACL_CORE_UTEST, TestEraseDevRecordShouldDeleteElement)
 {
     ge::EraseDevRecord(0);
@@ -561,6 +859,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_init_failed) {
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
     analysis::dvvp::common::utils::Utils::CreateDir(result);
     EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, aclprofInit(result.c_str(), result.size()));
+    rmdir(result.c_str());
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, aclprofCreateSubscribeConfig) {
@@ -1172,7 +1471,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofCheckAndGetChar) {
     std::string test1;
     EXPECT_EQ(test1, ProfAclMgr::instance()->MsprofCheckAndGetChar(const_cast<char *>(test.c_str()), test.size()));
 }
-
 
 TEST_F(MSPROF_ACL_CORE_UTEST, MsprofGeOptionsResultPathAdapter) {
     GlobalMockObject::verify();
@@ -2128,171 +2426,4 @@ TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofRangeStop) {
 
     aclError ret = aclprofRangeStop(0);
     EXPECT_EQ(ACL_SUCCESS, ret);
-}
-
-class COMMANDHANDLE_TEST: public testing::Test {
-protected:
-    virtual void SetUp() {
-    }
-    virtual void TearDown() {
-    }
-};
-
-TEST_F(COMMANDHANDLE_TEST, CommandHandleProfInitWillReturnSuccWhileSetProfCommandSucc)
-{
-    GlobalMockObject::verify();
-    std::string jsonStr = "{}";
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
-        .stubs()
-        .will(returnValue(jsonStr));
-    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfInit());
-    // repeat init
-    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfInit());
-    CommandHandleProfFinalize();
-}
-
-TEST_F(COMMANDHANDLE_TEST, CommandHandleProfInitWillReturnFailureWhileSetCommandHandleProfFail)
-{
-    GlobalMockObject::verify();
-    std::string jsonStr(PARAM_LEN_MAX + 1, 'a');
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
-        .stubs()
-        .will(returnValue(jsonStr));
-    EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, CommandHandleProfInit());
-}
-
-TEST_F(COMMANDHANDLE_TEST, CommandHandleProfInitWillReturnFailureWhileSetProfCommandFail)
-{
-    GlobalMockObject::verify();
-    std::string jsonStr = "{}";
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
-        .stubs()
-        .will(returnValue(jsonStr));
-    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
-        .stubs()
-        .will(returnValue(PROFILING_FAILED));
-    EXPECT_EQ(PROFILING_FAILED, CommandHandleProfInit());
-}
-
-TEST_F(COMMANDHANDLE_TEST, CommandHandleProfFinalizeWillReturnSuccWhileInitSucc)
-{
-    GlobalMockObject::verify();
-    std::string jsonStr = "{}";
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
-        .stubs()
-        .will(returnValue(jsonStr));
-    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    CommandHandleProfInit();
-    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfFinalize());
-}
-
-TEST_F(COMMANDHANDLE_TEST, CommandHandleProfFinalizeWillReturnSuccWhileNotCallInit)
-{
-    GlobalMockObject::verify();
-    std::string jsonStr = "{}";
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
-        .stubs()
-        .will(returnValue(jsonStr));
-    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfFinalize());
-}
-
-TEST_F(COMMANDHANDLE_TEST, commandHandle_api) {
-    GlobalMockObject::verify();
-
-    std::string jsonStr = "{}";
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
-        .stubs()
-        .will(returnValue(jsonStr));
-    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
-        .stubs()
-        .will(returnValue(false));
-    uint32_t devList[] = {0, 1};
-    uint32_t devNums = 2;
-    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StartReporters)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StopReporters)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfInit());
-    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStart(devList, devNums, 0));
-    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStart(nullptr, 0, 0));
-    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStop(devList, devNums, 0));
-    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStart(nullptr, 0, 0));
-    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfFinalize());
-    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfSubscribe(0, 0));
-    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfUnSubscribe(0));
-}
-
-TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStart_will_return_err_while_StartReporter_return_fail)
-{
-    GlobalMockObject::verify();
-    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StartReporters)
-        .stubs()
-        .will(returnValue(PROFILING_FAILED));
-    uint32_t devList[] = {0};
-    uint32_t devNums = 1;
-    EXPECT_EQ(ACL_ERROR, CommandHandleProfStart(devList, devNums, 0));
-}
-
-TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStart_will_return_success_while_zero_profSwitch_and_msproftx_on)
-{
-    GlobalMockObject::verify();
-    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StartReporters)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsMsprofTxSwitchOn)
-        .stubs()
-        .will(returnValue(true));
-    uint32_t devList[] = {0, 1};
-    uint32_t devNums = 2;
-    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStart(devList, devNums, 0));
-}
-
-TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStop_will_not_send_command_while_zero_profSwitch_and_msproftx_on)
-{
-    GlobalMockObject::verify();
-    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StopReporters)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsMsprofTxSwitchOn)
-        .stubs()
-        .will(returnValue(true));
-    uint32_t devList[] = {0, 1};
-    uint32_t devNums = 2;
-    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStop(devList, devNums, 0));
-}
-
-
-TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStop_will_send_command_to_cann_while_none_zero_profSwitch)
-{
-    GlobalMockObject::verify();
-    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StopReporters)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsMsprofTxSwitchOn)
-        .stubs()
-        .will(returnValue(true));
-    std::string zeroStr = "{}";
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
-        .stubs()
-        .will(returnValue(zeroStr));
-    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    uint32_t devList[] = {0, 1};
-    uint32_t devNums = 2;
-    uint64_t profSwitch = 0x1;
-    EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStop(devList, devNums, profSwitch));
 }
