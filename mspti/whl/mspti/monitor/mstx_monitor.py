@@ -70,7 +70,8 @@ class MstxMonitor(BaseMonitor):
         return range_mark_data
 
     def append_data(self, mark_data: MarkerData):
-        if mark_data.flag == MsptiActivityFlag.MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS:
+        if (mark_data.flag == MsptiActivityFlag.MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS or
+                mark_data.flag == MsptiActivityFlag.MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS_WITH_DEVICE):
             self.mark_user_cb(mark_data)
 
         unique_id = (mark_data.ID, mark_data.source_kind)
