@@ -93,11 +93,12 @@ TEST_F(ParserUtest, ShouldRetSccessWhenReportMstxData)
     auto instance = Mspti::Parser::ParserManager::GetInstance();
     const char* message = "UserMark";
     RtStreamT stream = (void*)0x1234567;
-    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportMark(message, stream));
-    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportMark(message, nullptr));
+    const char* domain = "UserDomain";
+    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportMark(message, stream, domain));
+    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportMark(message, nullptr, domain));
     uint64_t markId;
-    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRangeStartA(message, stream, markId));
-    EXPECT_EQ(2UL, markId);
+    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRangeStartA(message, stream, markId, domain));
+    EXPECT_EQ(3UL, markId);
     EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRangeEnd(markId));
 }
 
@@ -109,10 +110,11 @@ TEST_F(ParserUtest, ShouldRetErrorWhenTryCacheMarkmsgFailed)
         .stubs()
         .will(returnValue(nullPtr));
     const char* message = "UserMark";
+    const char* domain = "UserDomain";
     auto instance = Mspti::Parser::ParserManager::GetInstance();
-    EXPECT_EQ(MSPTI_ERROR_INNER, instance->ReportMark(message, nullptr));
+    EXPECT_EQ(MSPTI_ERROR_INNER, instance->ReportMark(message, nullptr, domain));
     uint64_t markId;
-    EXPECT_EQ(MSPTI_ERROR_INNER, instance->ReportRangeStartA(message, nullptr, markId));
+    EXPECT_EQ(MSPTI_ERROR_INNER, instance->ReportRangeStartA(message, nullptr, markId, domain));
 }
 
 TEST_F(ParserUtest, ShouldRecordKernelNameWhenReportRtTaskTrack)
