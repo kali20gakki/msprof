@@ -13,23 +13,46 @@
 #ifndef MSPTI_COMMON_INJECT_MSPROFTX_INJECT_H
 #define MSPTI_COMMON_INJECT_MSPROFTX_INJECT_H
 
+#include <map>
+#include <memory>
+#include <mutex>
 #include "common/inject/inject_base.h"
 #include "external/mspti_result.h"
 
+#define MSTX_FAIL 1
+#define MSTX_SUCCESS 0
+
+#define MSTX_INVALID_RANGE_ID 0
+
 typedef enum {
-    MSTX_FUNC_START = 0,
-    MSTX_FUNC_MARKA = 1,
+    MSTX_FUNC_START        = 0,
+    MSTX_FUNC_MARKA        = 1,
     MSTX_FUNC_RANGE_STARTA = 2,
-    MSTX_FUNC_RANGE_END = 3,
+    MSTX_FUNC_RANGE_END    = 3,
     MSTX_FUNC_END
-} MstxFuncSeq;
+} MstxCoreFuncId;
+
+typedef enum {
+    MSTX_FUNC_DOMAIN_START        = 0,
+    MSTX_FUNC_DOMAIN_CREATEA      = 1,
+    MSTX_FUNC_DOMAIN_DESTROY      = 2,
+    MSTX_FUNC_DOMAIN_MARKA        = 3,
+    MSTX_FUNC_DOMAIN_RANGE_STARTA = 4,
+    MSTX_FUNC_DOMAIN_RANGE_END    = 5,
+    MSTX_FUNC_DOMAIN_END
+} MstxCore2FuncId;
  
 typedef enum {
     MSTX_API_MODULE_INVALID                 = 0,
     MSTX_API_MODULE_CORE                    = 1,
+    MSTX_API_MODULE_CORE2                   = 2,
     MSTX_API_MODULE_SIZE,                   // end of the enum, new enum items must be added before this
     MSTX_API_MODULE_FORCE_INT               = 0x7fffffff
 } MstxFuncModule;
+
+struct MstxDomainRegistrationSt {};
+typedef struct MstxDomainRegistrationSt MstxDomainHandle;
+typedef MstxDomainHandle* mstxDomainHandle_t;
 
 typedef void (*MstxFuncPointer)(void);
 typedef MstxFuncPointer** MstxFuncTable;
@@ -38,6 +61,41 @@ typedef int (*MstxGetModuleFuncTableFunc)(MstxFuncModule module, MstxFuncTable *
 void MstxMarkAFunc(const char* msg, RtStreamT stream);
 uint64_t MstxRangeStartAFunc(const char* msg, RtStreamT stream);
 void MstxRangeEndFunc(uint64_t rangeId);
+
+namespace Mspti {
+class MstxInject {};
+
+struct MstxDomainAttr {
+    MstxDomainAttr() = default;
+    ~MstxDomainAttr() = default;
+
+    std::shared_ptr<MstxDomainHandle> handle{nullptr};
+    std::shared_ptr<std::string> name{nullptr};
+    bool isDestroyed{false};
+};
+
+class MstxDomainMgr {
+public:
+    static MstxDomainMgr* GetInstance();
+
+    mstxDomainHandle_t CreateDomainHandle(const char* name);
+    void DestroyDomainHandle(mstxDomainHandle_t);
+
+    std::shared_ptr<std::string> GetDomainNameByHandle(mstxDomainHandle_t domain);
+
+private:
+    MstxDomainMgr() = default;
+    explicit MstxDomainMgr(const MstxDomainMgr &obj) = delete;
+    MstxDomainMgr& operator=(const MstxDomainMgr &obj) = delete;
+    explicit MstxDomainMgr(MstxDomainMgr &&obj) = delete;
+    MstxDomainMgr& operator=(MstxDomainMgr &&obj) = delete;
+
+private:
+    // domainHandle, domainStatus
+    static std::map<mstxDomainHandle_t, std::shared_ptr<MstxDomainAttr>> domainHandleMap_;
+    std::mutex domainMutex_;
+};
+};
 
 #if defined(__cplusplus)
 extern "C" {

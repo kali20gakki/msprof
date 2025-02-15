@@ -54,8 +54,8 @@ public:
     std::string& GetTypeName(uint16_t level, uint32_t typeId);
 
     // User
-    msptiResult ReportMark(const char* msg, RtStreamT stream);
-    msptiResult ReportRangeStartA(const char* msg, RtStreamT stream, uint64_t& markId);
+    msptiResult ReportMark(const char* msg, RtStreamT stream, const char* domain);
+    msptiResult ReportRangeStartA(const char* msg, RtStreamT stream, uint64_t& markId, const char* domain);
     msptiResult ReportRangeEnd(uint64_t rangeId);
 
     // Inner Mark

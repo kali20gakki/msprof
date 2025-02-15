@@ -23,26 +23,95 @@
 using namespace Mspti::Activity;
 using namespace Mspti::Common;
 
+namespace Mspti {
+
+static std::string g_defaultDomainName = "default";
+std::map<mstxDomainHandle_t, std::shared_ptr<MstxDomainAttr>> MstxDomainMgr::domainHandleMap_;
+
+MstxDomainMgr* MstxDomainMgr::GetInstance()
+{
+    static MstxDomainMgr instance;
+    return &instance;
+}
+
+mstxDomainHandle_t MstxDomainMgr::CreateDomainHandle(const char* name)
+{
+    std::lock_guard<std::mutex> lk(domainMutex_);
+    if (domainHandleMap_.size() > MARK_MAX_CACHE_NUM) {
+        MSPTI_LOGE("Cache domain name failed, current size: %u, limit size: %u",
+            domainHandleMap_.size(), MARK_MAX_CACHE_NUM);
+        return nullptr;
+    }
+    for (const auto &iter : domainHandleMap_) {
+        if (strncmp(iter.second->name->c_str(), name, iter.second->name->size()) == 0) {
+            iter.second->isDestroyed = false;
+            return iter.first;
+        }
+    }
+    std::shared_ptr<MstxDomainAttr> domainHandlePtr;
+    Mspti::Common::MsptiMakeSharedPtr(domainHandlePtr);
+    if (domainHandlePtr == nullptr) {
+        MSPTI_LOGE("Failed to malloc memory for domain attribute.");
+        return nullptr;
+    }
+    Mspti::Common::MsptiMakeSharedPtr(domainHandlePtr->handle);
+    if (domainHandlePtr->handle == nullptr) {
+        MSPTI_LOGE("Failed to malloc memory for domain handle.");
+        return nullptr;
+    }
+    Mspti::Common::MsptiMakeSharedPtr(domainHandlePtr->name, name);
+    if (domainHandlePtr->name == nullptr) {
+        MSPTI_LOGE("Failed to malloc memory for domain %s.", name);
+        return nullptr;
+    }
+    domainHandleMap_.insert(std::make_pair(domainHandlePtr->handle.get(), domainHandlePtr));
+    return domainHandlePtr->handle.get();
+}
+
+void MstxDomainMgr::DestroyDomainHandle(mstxDomainHandle_t domain)
+{
+    std::lock_guard<std::mutex> lk(domainMutex_);
+    auto iter = domainHandleMap_.find(domain);
+    if (iter == domainHandleMap_.end() || iter->second->isDestroyed) {
+        MSPTI_LOGW("Input domain is invalid");
+        return;
+    }
+    iter->second->isDestroyed = true;
+}
+
+std::shared_ptr<std::string> MstxDomainMgr::GetDomainNameByHandle(mstxDomainHandle_t domain)
+{
+    std::lock_guard<std::mutex> lk(domainMutex_);
+    auto iter = domainHandleMap_.find(domain);
+    if (iter == domainHandleMap_.end() || iter->second->isDestroyed) {
+        MSPTI_LOGW("Input domain is invalid.");
+        return nullptr;
+    }
+    return iter->second->name;
+}
+}
+
 namespace MsptiMstxApi {
+
+static bool IsMsgValid(const char* msg)
+{
+    if (msg == nullptr || !Utils::CheckCharValid(msg) || strnlen(msg, MAX_MARK_MSG_LEN + 1) > MAX_MARK_MSG_LEN) {
+        MSPTI_LOGE("Input Params msg is invalid");
+        return false;
+    }
+    return true;
+}
+
 void MstxMarkAFunc(const char* msg, RtStreamT stream)
 {
     if (!ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER)) {
         return;
     }
-    if (msg == nullptr) {
-        MSPTI_LOGE("Input params msg is nullptr.");
+    if (!IsMsgValid(msg)) {
         return;
     }
-    if (!Utils::CheckCharValid(msg)) {
-        MSPTI_LOGE("msg has invalid characters.");
-        return;
-    }
-    // [0, 255]
-    if (strnlen(msg, MAX_MARK_MSG_LEN + 1) > MAX_MARK_MSG_LEN) {
-        MSPTI_LOGE("The len of msg is invalid.");
-        return;
-    }
-    if (Mspti::Parser::ParserManager::GetInstance()->ReportMark(msg, stream) != MSPTI_SUCCESS) {
+    if (Mspti::Parser::ParserManager::GetInstance()->ReportMark(msg, stream, Mspti::g_defaultDomainName.c_str()) !=
+        MSPTI_SUCCESS) {
         MSPTI_LOGE("Report Mark data failed.");
     }
 }
@@ -50,21 +119,16 @@ void MstxMarkAFunc(const char* msg, RtStreamT stream)
 uint64_t MstxRangeStartAFunc(const char* msg, RtStreamT stream)
 {
     if (!ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER)) {
-        return 0;
+        return MSTX_INVALID_RANGE_ID;
     }
-    if (msg == nullptr) {
-        MSPTI_LOGE("Input params msg is nullptr.");
-        return 0;
+    if (!IsMsgValid(msg)) {
+        return MSTX_INVALID_RANGE_ID;
     }
-    // [0, 255]
-    if (strnlen(msg, MAX_MARK_MSG_LEN + 1) > MAX_MARK_MSG_LEN) {
-        MSPTI_LOGE("The len of msg is invalid.");
-        return 0;
-    }
-    uint64_t markId = 0;
-    if (Mspti::Parser::ParserManager::GetInstance()->ReportRangeStartA(msg, stream, markId) != MSPTI_SUCCESS) {
+    uint64_t markId = MSTX_INVALID_RANGE_ID;
+    if (Mspti::Parser::ParserManager::GetInstance()->ReportRangeStartA(msg, stream,
+        markId, Mspti::g_defaultDomainName.c_str()) != MSPTI_SUCCESS) {
         MSPTI_LOGE("Report RangeStart data failed.");
-        return 0;
+        return MSTX_INVALID_RANGE_ID;
     }
     return markId;
 }
@@ -78,27 +142,133 @@ void MstxRangeEndFunc(uint64_t rangeId)
         MSPTI_LOGE("Report RangeEnd data failed.");
     }
 }
+
+mstxDomainHandle_t MstxDomainCreateAFunc(const char* name)
+{
+    if (!IsMsgValid(name)) {
+        return nullptr;
+    }
+    return Mspti::MstxDomainMgr::GetInstance()->CreateDomainHandle(name);
+}
+
+void MstxDomainDestroyFunc(mstxDomainHandle_t domain)
+{
+    Mspti::MstxDomainMgr::GetInstance()->DestroyDomainHandle(domain);
+}
+
+void MstxDomainMarkAFunc(mstxDomainHandle_t domain, const char* msg, RtStreamT stream)
+{
+    if (!ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER)) {
+        return;
+    }
+    if ((!IsMsgValid(msg))) {
+        return;
+    }
+    auto namePtr = Mspti::MstxDomainMgr::GetInstance()->GetDomainNameByHandle(domain);
+    if (namePtr == nullptr) {
+        return;
+    }
+    if (Mspti::Parser::ParserManager::GetInstance()->ReportMark(msg, stream, namePtr->c_str()) !=
+        MSPTI_SUCCESS) {
+        MSPTI_LOGE("Report Mark data failed.");
+    }
+}
+
+uint64_t MstxDomainRangeStartAFunc(mstxDomainHandle_t domain, const char* msg, RtStreamT stream)
+{
+    if (!ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER)) {
+        return MSTX_INVALID_RANGE_ID;
+    }
+    if ((!IsMsgValid(msg))) {
+        return MSTX_INVALID_RANGE_ID;
+    }
+    auto namePtr = Mspti::MstxDomainMgr::GetInstance()->GetDomainNameByHandle(domain);
+    if (namePtr == nullptr) {
+        return MSTX_INVALID_RANGE_ID;
+    }
+    uint64_t markId = MSTX_INVALID_RANGE_ID;
+    if (Mspti::Parser::ParserManager::GetInstance()->ReportRangeStartA(msg, stream, markId, namePtr->c_str()) !=
+        MSPTI_SUCCESS) {
+        MSPTI_LOGE("Report RangeStart data failed.");
+        return MSTX_INVALID_RANGE_ID;
+    }
+    return markId;
+}
+
+void MstxDomainRangeEndFunc(mstxDomainHandle_t domain, uint64_t rangeId)
+{
+    if (!ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER)) {
+        return;
+    }
+    if (Mspti::MstxDomainMgr::GetInstance()->GetDomainNameByHandle(domain) == nullptr) {
+        return;
+    }
+    if (Mspti::Parser::ParserManager::GetInstance()->ReportRangeEnd(rangeId) != MSPTI_SUCCESS) {
+        MSPTI_LOGE("Report RangeEnd data failed.");
+    }
+}
+
+int GetModuleTableFunc(MstxGetModuleFuncTableFunc getFuncTable)
+{
+    int retVal = MSTX_SUCCESS;
+    unsigned int outSize = 0;
+    MstxFuncTable outTable;
+    static std::vector<unsigned int> CheckOutTableSizes = {
+        0,
+        MSTX_FUNC_END,
+        MSTX_FUNC_DOMAIN_END,
+        0
+    };
+    for (size_t i = MSTX_API_MODULE_CORE; i < MSTX_API_MODULE_SIZE; i++) {
+        if (getFuncTable(static_cast<MstxFuncModule>(i), &outTable, &outSize) != MSPTI_SUCCESS) {
+            MSPTI_LOGE("Failed to get func table for module %d", i);
+            retVal = MSTX_FAIL;
+            break;
+        }
+        if (outSize != CheckOutTableSizes[i]) {
+            MSPTI_LOGE("outSize is invalid, Failed to init mstx funcs.");
+            retVal = MSTX_FAIL;
+            break;
+        }
+        switch (i) {
+            case MSTX_API_MODULE_CORE:
+                *(outTable[MSTX_FUNC_MARKA]) = (MstxFuncPointer)MstxMarkAFunc;
+                *(outTable[MSTX_FUNC_RANGE_STARTA]) = (MstxFuncPointer)MstxRangeStartAFunc;
+                *(outTable[MSTX_FUNC_RANGE_END]) = (MstxFuncPointer)MstxRangeEndFunc;
+                break;
+            case MSTX_API_MODULE_CORE2:
+                *(outTable[MSTX_FUNC_DOMAIN_CREATEA]) = (MstxFuncPointer)MstxDomainCreateAFunc;
+                *(outTable[MSTX_FUNC_DOMAIN_DESTROY]) = (MstxFuncPointer)MstxDomainDestroyFunc;
+                *(outTable[MSTX_FUNC_DOMAIN_MARKA]) = (MstxFuncPointer)MstxDomainMarkAFunc;
+                *(outTable[MSTX_FUNC_DOMAIN_RANGE_STARTA]) = (MstxFuncPointer)MstxDomainRangeStartAFunc;
+                *(outTable[MSTX_FUNC_DOMAIN_RANGE_END]) = (MstxFuncPointer)MstxDomainRangeEndFunc;
+                break;
+            default:
+                MSPTI_LOGE("Invalid func module type");
+                retVal = MSTX_FAIL;
+                break;
+        }
+        if (retVal == MSTX_FAIL) {
+            break;
+        }
+    }
+    return retVal;
+}
+
 }
 
 using namespace MsptiMstxApi;
 
 int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
 {
-    unsigned int outSize = 0;
-    MstxFuncTable outTable;
-    if (getFuncTable == nullptr || getFuncTable(MSTX_API_MODULE_CORE, &outTable, &outSize) != MSPTI_SUCCESS ||
-        outTable == nullptr) {
+    if (getFuncTable == nullptr) {
+        MSPTI_LOGE("Input null mstx getfunctable pointer");
+        return MSTX_FAIL;
+    }
+    if (MsptiMstxApi::GetModuleTableFunc(getFuncTable) != MSPTI_SUCCESS) {
         MSPTI_LOGE("Failed to init mstx funcs.");
-        return 1; // 1 : init failed
+        return MSTX_FAIL;
     }
-
-    if (outSize != static_cast<unsigned int>(MSTX_FUNC_END)) {
-        MSPTI_LOGE("outSize is not equal to MSTX_FUNC_END, Failed to init mstx funcs.");
-        return 1; // 1 : init failed
-    }
-    *(outTable[MSTX_FUNC_MARKA]) = (MstxFuncPointer)MsptiMstxApi::MstxMarkAFunc;
-    *(outTable[MSTX_FUNC_RANGE_STARTA]) = (MstxFuncPointer)MsptiMstxApi::MstxRangeStartAFunc;
-    *(outTable[MSTX_FUNC_RANGE_END]) = (MstxFuncPointer)MsptiMstxApi::MstxRangeEndFunc;
     return MSPTI_SUCCESS;
 }
 

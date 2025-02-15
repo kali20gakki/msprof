@@ -305,7 +305,7 @@ std::shared_ptr<std::string> ParserManager::TryCacheMarkMsg(const char* msg)
     return iter->second;
 }
 
-msptiResult ParserManager::ReportMark(const char* msg, RtStreamT stream)
+msptiResult ParserManager::ReportMark(const char* msg, RtStreamT stream, const char* domain)
 {
     uint64_t timestamp = Mspti::Common::ContextManager::GetInstance()->GetHostTimeStampNs();
     auto msgPtr = TryCacheMarkMsg(msg);
@@ -313,7 +313,7 @@ msptiResult ParserManager::ReportMark(const char* msg, RtStreamT stream)
         MSPTI_LOGE("Try Cache Mark msg failed.");
         return MSPTI_ERROR_INNER;
     }
-    uint64_t markId = gMarkId_++;
+    uint64_t markId = ++gMarkId_;
     if (stream != nullptr && rtProfilerTraceEx(markId,
         static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS_WITH_DEVICE), MARK_TAG_ID, stream) !=
         MSPTI_SUCCESS) {
@@ -329,13 +329,13 @@ msptiResult ParserManager::ReportMark(const char* msg, RtStreamT stream)
     activity.objectId.pt.processId = Mspti::Common::Utils::GetPid();
     activity.objectId.pt.threadId = Mspti::Common::Utils::GetTid();
     activity.name = msgPtr->c_str();
-    activity.domain = "";
+    activity.domain = domain;
     activity.timestamp = timestamp;
     return Mspti::Activity::ActivityManager::GetInstance()->Record(
         Common::ReinterpretConvert<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
 }
 
-msptiResult ParserManager::ReportRangeStartA(const char* msg, RtStreamT stream, uint64_t& markId)
+msptiResult ParserManager::ReportRangeStartA(const char* msg, RtStreamT stream, uint64_t& markId, const char* domain)
 {
     uint64_t timestamp = Mspti::Common::ContextManager::GetInstance()->GetHostTimeStampNs();
     auto msgPtr = TryCacheMarkMsg(msg);
@@ -343,7 +343,7 @@ msptiResult ParserManager::ReportRangeStartA(const char* msg, RtStreamT stream, 
         MSPTI_LOGE("Try Cache Mark msg failed.");
         return MSPTI_ERROR_INNER;
     }
-    markId = gMarkId_++;
+    markId = ++gMarkId_;
     if (stream != nullptr && rtProfilerTraceEx(markId,
         static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_START_WITH_DEVICE),
         MARK_TAG_ID, stream) != MSPTI_SUCCESS) {
@@ -359,7 +359,7 @@ msptiResult ParserManager::ReportRangeStartA(const char* msg, RtStreamT stream, 
     activity.objectId.pt.processId = Mspti::Common::Utils::GetPid();
     activity.objectId.pt.threadId = Mspti::Common::Utils::GetTid();
     activity.name = msgPtr->c_str();
-    activity.domain = "";
+    activity.domain = domain;
     activity.timestamp = timestamp;
     auto ret = Mspti::Activity::ActivityManager::GetInstance()->Record(
         Common::ReinterpretConvert<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
