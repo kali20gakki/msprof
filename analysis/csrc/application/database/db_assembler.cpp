@@ -34,6 +34,8 @@
 #include "analysis/csrc/domain/entities/viewer_data/system/include/pcie_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/soc_bandwidth_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/mc2_comm_info_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/kfc_turn_data.h"
 
 
 namespace Analysis {
@@ -44,6 +46,36 @@ using namespace Analysis::Domain::Environment;
 using IdPool = Analysis::Application::Credential::IdPool;
 
 namespace {
+const std::string TASK_INDEX_NAME = "TaskIndex";
+const std::vector<std::string> TASK_INDEX_COL_NAMES = {"startNs", "globalTaskId"};
+const std::string COMM_INDEX_NAME = "CommunicationTaskIndex";
+const std::vector<std::string> COMM_TASK_INDEX_COLS = {"globalTaskId"};
+using CommScheduleDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t>>;
+using ComputeTaskInfoFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t,
+        uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+// 大算子数据
+// opName, start, end, connectionId, group_name, opId, relay, retry, data_type, alg_type, count, op_type
+using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
+        int32_t, int32_t, int32_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+// 小算子数据
+// name, globalTaskId, taskType, planeId, groupName, notifyId, rdmaType, srcRank, dstRank, transportType,
+// size, dataType, linkType, opId, isMaster
+using CommunicationTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t,
+        uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t, uint16_t>>;
+bool CreateTableIndex(const std::string &tableName, const std::string &indexName, const DBInfo &msprofDB,
+                      const std::vector<std::string> &colNames)
+{
+    INFO("Processor CreateTableIndex, table is % , indexName is %.", tableName, indexName);
+    if (msprofDB.dbRunner == nullptr) {
+        ERROR("Report db runner is nullptr.");
+        return false;
+    }
+    if (!msprofDB.dbRunner->CreateIndex(tableName, indexName, colNames)) {
+        ERROR("Create table index failed, table is % , indexName is %.", tableName, indexName);
+        return false;
+    }
+    return true;
+}
 bool SaveApiData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
 {
     uint32_t pid = Context::GetInstance().GetPidFromInfoJson(HOST_ID, profPath);
@@ -86,23 +118,10 @@ bool SaveMemcpyInfoData(DataInventory& dataInventory, DBInfo& msprofDB, const st
     return SaveData(res, TABLE_NAME_MEMCPY_INFO, msprofDB);
 }
 
-bool SaveCommOpData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+template<typename T>
+void ConvertOpData(CommunicationOpDataFormat &processedOpData, const std::vector<T> &opData)
 {
-    // 大算子数据
-    // opName, start, end, connectionId, group_name, opId, relay, retry, data_type, alg_type, count, op_type
-    using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
-        int32_t, int32_t, int32_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
-    auto opData = dataInventory.GetPtr<std::vector<CommunicationOpData>>();
-    if (opData == nullptr) {
-        WARN("Communication op data not exist.");
-        return true;
-    }
-    CommunicationOpDataFormat processedOpData;
-    if (!Reserve(processedOpData, opData->size())) {
-        ERROR("Reserved for communication op data failed.");
-        return false;
-    }
-    for (const auto& item : *opData) {
+    for (const T &item : opData) {
         uint64_t groupName = IdPool::GetInstance().GetUint64Id(item.groupName);
         uint64_t opName = IdPool::GetInstance().GetUint64Id(item.opName);
         int32_t opId = IdPool::GetInstance().GetUint32Id(item.opKey);
@@ -111,28 +130,36 @@ bool SaveCommOpData(DataInventory& dataInventory, DBInfo& msprofDB, const std::s
         processedOpData.emplace_back(opName, item.start, item.end, item.connectionId, groupName, opId, item.relay,
                                      item.retry, item.dataType, algType, item.count, opType);
     }
+}
+
+bool SaveCommOpData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    auto opData = dataInventory.GetPtr<std::vector<CommunicationOpData>>();
+    auto kfcData = dataInventory.GetPtr<std::vector<KfcOpData>>();
+    if (opData == nullptr && kfcData == nullptr) {
+        WARN("Communication op data not exist.");
+        return true;
+    }
+    CommunicationOpDataFormat processedOpData;
+    auto dataSize = (opData ? opData->size() : 0) + (kfcData ? kfcData->size() : 0);
+    if (!Reserve(processedOpData, dataSize)) {
+        ERROR("Reserved for communication op data failed.");
+        return false;
+    }
+    if (opData) {
+        ConvertOpData<CommunicationOpData>(processedOpData, *opData);
+    }
+    if (kfcData) {
+        ConvertOpData<KfcOpData>(processedOpData, *kfcData);
+    }
     return SaveData(processedOpData, TABLE_NAME_COMMUNICATION_OP, msprofDB);
 }
 
-bool SaveCommTaskData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+template<typename T>
+void ConvertTaskData(CommunicationTaskDataFormat &processedTaskData, const std::vector<T> &taskData)
 {
-    // 小算子数据
-    // name, globalTaskId, taskType, planeId, groupName, notifyId, rdmaType, srcRank, dstRank, transportType,
-    // size, dataType, linkType, opId, isMaster
-    using CommunicationTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t,
-        uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t, uint16_t>>;
-    auto taskData = dataInventory.GetPtr<std::vector<CommunicationTaskData>>();
-    if (taskData == nullptr) {
-        WARN("Communication task data not exist.");
-        return true;
-    }
-    CommunicationTaskDataFormat processedTaskData;
-    if (!Reserve(processedTaskData, taskData->size())) {
-        ERROR("Reserved for communication task failed.");
-        return false;
-    }
     uint64_t notifyId;
-    for (const auto& item : *taskData) {
+    for (const T &item : taskData) {
         uint64_t groupName = IdPool::GetInstance().GetUint64Id(item.groupName);
         uint64_t opName = IdPool::GetInstance().GetUint64Id(item.opName);
         uint64_t taskType = IdPool::GetInstance().GetUint64Id(item.taskType);
@@ -147,7 +174,30 @@ bool SaveCommTaskData(DataInventory& dataInventory, DBInfo& msprofDB, const std:
                                        item.dstRank, item.transportType, item.size, item.dataType,
                                        item.linkType, opId, item.isMaster);
     }
-    return SaveData(processedTaskData, TABLE_NAME_COMMUNICATION_TASK_INFO, msprofDB);
+}
+
+bool SaveCommTaskData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    auto taskData = dataInventory.GetPtr<std::vector<CommunicationTaskData>>();
+    auto kfcTask = dataInventory.GetPtr<std::vector<KfcTaskData>>();
+    if (taskData == nullptr && kfcTask == nullptr) {
+        WARN("Communication task data not exist.");
+        return true;
+    }
+    CommunicationTaskDataFormat processedTaskData;
+    auto dataSize = (taskData ? taskData->size() : 0) + (kfcTask ? kfcTask->size() : 0);
+    if (!Reserve(processedTaskData, dataSize)) {
+        ERROR("Reserved for communication task failed.");
+        return false;
+    }
+    if (taskData) {
+        ConvertTaskData<CommunicationTaskData>(processedTaskData, *taskData);
+    }
+    if (kfcTask) {
+        ConvertTaskData<KfcTaskData>(processedTaskData, *kfcTask);
+    }
+    return SaveData(processedTaskData, TABLE_NAME_COMMUNICATION_TASK_INFO, msprofDB) &&
+            CreateTableIndex(TABLE_NAME_COMMUNICATION_TASK_INFO, COMM_INDEX_NAME, msprofDB, COMM_TASK_INDEX_COLS);
 }
 
 bool SaveCommunicationData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
@@ -541,17 +591,14 @@ bool SaveSocData(DataInventory& dataInventory, DBInfo& msprofDB, const std::stri
 
 bool SaveComputeTaskInfo(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
 {
-    // name, globalTaskId, block_dim, mixBlockDim, taskType, opType, inputFormats, inputDataTypes, inputShapes,
-    // outputFormats, outputDataTypes, outputShapes, hashid
-    using ComputeTaskInfoFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t,
-                                                       uint64_t, uint64_t, uint64_t, uint64_t,
-                                                       uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
     auto computeTaskInfo = dataInventory.GetPtr<std::vector<TaskInfoData>>();
+    auto kfcStream = dataInventory.GetPtr<std::vector<MC2CommInfoData>>();
     if (computeTaskInfo == nullptr) {
         WARN("ComputeTaskInfo data not exist.");
         return true;
     }
     ComputeTaskInfoFormat res;
+    CommScheduleDataFormat scheduleData;
     if (!Reserve(res, computeTaskInfo->size())) {
         ERROR("Reserved for ComputeTaskInfo data failed.");
         return false;
@@ -573,6 +620,12 @@ bool SaveComputeTaskInfo(DataInventory& dataInventory, DBInfo& msprofDB, const s
                                                                    item.contextId, item.batchId));
         taskType = IdPool::GetInstance().GetUint64Id(item.taskType);
         opType = IdPool::GetInstance().GetUint64Id(item.opType);
+        if ((kfcStream && std::find_if(kfcStream->begin(), kfcStream->end(), [item](const MC2CommInfoData &mc) {
+            return mc.aiCpuKfcStreamId == item.streamId;
+        }) != kfcStream->end()) || Utils::EndsWith(item.opName, AICPU_KERNEL)) {
+            scheduleData.emplace_back(opName, globalTaskId, taskType, opType);
+            continue;
+        }
         inputFormats = IdPool::GetInstance().GetUint64Id(item.inputFormats);
         inputDataTypes = IdPool::GetInstance().GetUint64Id(item.inputDataTypes);
         inputShapes = IdPool::GetInstance().GetUint64Id(item.inputShapes);
@@ -583,7 +636,14 @@ bool SaveComputeTaskInfo(DataInventory& dataInventory, DBInfo& msprofDB, const s
         res.emplace_back(opName, globalTaskId, item.blockDim, item.mixBlockDim, taskType, opType, inputFormats,
                          inputDataTypes, inputShapes, outputFormats, outputDataTypes, outputShapes, hashId);
     }
-    return SaveData(res, TABLE_NAME_COMPUTE_TASK_INFO, msprofDB);
+    bool flag = true;
+    if (!res.empty()) {
+        flag = SaveData(res, TABLE_NAME_COMPUTE_TASK_INFO, msprofDB);
+    }
+    if (!kfcStream->empty()) {
+        flag = SaveData(scheduleData, TABLE_NAME_COMMUNICATION_SCHEDULE_TASK_INFO, msprofDB) && flag;
+    }
+    return flag;
 }
 
 bool SaveAscendTaskData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
@@ -593,26 +653,41 @@ bool SaveAscendTaskData(DataInventory& dataInventory, DBInfo& msprofDB, const st
     using ascendTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, int64_t, uint64_t,
                                                        uint32_t, uint32_t, uint32_t, int32_t, uint32_t, uint32_t>>;
     auto ascendTaskData = dataInventory.GetPtr<std::vector<AscendTaskData>>();
-    if (ascendTaskData == nullptr) {
-        WARN("AscendTaskData data not exist.");
+    auto deviceTxData = dataInventory.GetPtr<std::vector<MsprofTxDeviceData>>();
+    if (ascendTaskData == nullptr && deviceTxData == nullptr) {
+        WARN("AscendTaskData data and device tx data not exist.");
         return true;
     }
     ascendTaskDataFormat res;
-    if (!Reserve(res, ascendTaskData->size())) {
+    auto dataSize = (ascendTaskData ? ascendTaskData->size() : 0) + (deviceTxData ? deviceTxData->size() : 0);
+    if (!Reserve(res, dataSize)) {
         ERROR("Reserved for AscendTaskData data failed.");
         return false;
     }
     uint64_t globalTaskId;
     uint32_t globalPid = Context::GetInstance().GetPidFromInfoJson(HOST_ID, profPath);
     uint64_t taskType;
-    for (const auto& item : *ascendTaskData) {
-        globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(item.deviceId, item.streamId, item.taskId,
-                                                                   item.contextId, item.batchId));
-        taskType = IdPool::GetInstance().GetUint64Id(item.taskType);
-        res.emplace_back(item.start, item.end, item.deviceId, item.connectionId, globalTaskId, globalPid,
-                         taskType, item.contextId, item.streamId, item.taskId, item.taskId);
+    if (ascendTaskData != nullptr) {
+        for (const auto &item : *ascendTaskData) {
+            globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(item.deviceId, item.streamId, item.taskId,
+                                                                       item.contextId, item.batchId));
+            taskType = IdPool::GetInstance().GetUint64Id(item.taskType);
+            res.emplace_back(item.start, item.end, item.deviceId, item.connectionId, globalTaskId, globalPid,
+                             taskType, item.contextId, item.streamId, item.taskId, item.modelId);
+        }
     }
-    return SaveData(res, TABLE_NAME_TASK, msprofDB);
+    if (deviceTxData != nullptr) {
+        for (const auto &txData : *deviceTxData) {
+            globalTaskId = IdPool ::GetInstance().GetId(std::make_tuple(txData.deviceId, txData.streamId,
+                txData.taskId, UINT32_MAX, txData.connectionId));
+            taskType = IdPool::GetInstance().GetUint64Id(txData.taskType);
+            res.emplace_back(txData.start, txData.start + static_cast<uint64_t>(txData.duration), txData.deviceId,
+                             txData.connectionId, globalTaskId, globalPid, taskType, UINT32_MAX, txData.streamId,
+                             txData.taskId, txData.modelId);
+        }
+    }
+    return SaveData(res, TABLE_NAME_TASK, msprofDB) &&
+        CreateTableIndex(TABLE_NAME_TASK, TASK_INDEX_NAME, msprofDB, TASK_INDEX_COL_NAMES);
 }
 
 bool SaveStringIdsData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
