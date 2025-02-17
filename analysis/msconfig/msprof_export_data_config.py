@@ -209,7 +209,7 @@ class MsProfExportDataConfig(MetaConfig):
             ('handler', '_get_msproftx_data'),
             ('headers',
              'pid,tid,category,event_type,payload_type,payload_value,Start_time(us),'
-             'End_time(us),message_type,message,mark_id')
+             'End_time(us),message_type,message,domain,mark_id')
         ],
         'sio': [
             ('handler', '_get_sio_data'),

@@ -31,6 +31,7 @@ struct MsprofTxHostData {
     uint64_t start = UINT64_MAX;
     uint64_t end = UINT64_MAX;
     uint64_t connectionId = DEFAULT_CONNECTION_ID_MSTX;
+    std::string domain;
     std::string message;
 };
 }

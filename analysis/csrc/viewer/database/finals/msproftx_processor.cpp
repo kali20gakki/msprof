@@ -37,6 +37,7 @@ struct MsprofTxExData {
     uint64_t startTime = UINT64_MAX;
     uint64_t endTime = UINT64_MAX;
     std::string message;
+    std::string domain;
     uint64_t markId = UINT64_MAX;
 };
 }
@@ -102,6 +103,9 @@ bool MsprofTxProcessor::ProcessTxData(const std::string &fileDir, Utils::SyscntC
         ERROR("Format Tx data failed, fileDir is %.", fileDir);
         return false;
     }
+    if (processedData.empty()) {
+        return true;
+    }
     return SaveData(processedData, TABLE_NAME_MSTX);
 }
 
@@ -127,6 +131,9 @@ bool MsprofTxProcessor::ProcessTxExData(const std::string &fileDir, Utils::Syscn
     if (!FormatTxExData(msprofTxExData, processedData, fileDir, params, record)) {
         ERROR("Format TxEx data failed, fileDir is %.", fileDir);
         return false;
+    }
+    if (processedData.empty()) {
+        return true;
     }
     return SaveData(processedData, TABLE_NAME_MSTX);
 }
@@ -156,7 +163,7 @@ MsprofTxProcessor::MsprofTxExDataFormat MsprofTxProcessor::GetTxExData(const std
         ERROR("Create % connection failed.", dbPath);
         return data;
     }
-    std::string sql = "SELECT tid, event_type, start_time, end_time, message, mark_id FROM " +
+    std::string sql = "SELECT tid, event_type, start_time, end_time, message, domain, mark_id FROM " +
                       msprofTxExDb.tableName;
     if (!msprofTxExDb.dbRunner->QueryData(sql, data)) {
         ERROR("Query msproftx data failed, db path is %.", dbPath);
@@ -209,9 +216,10 @@ bool MsprofTxProcessor::FormatTxExData(const MsprofTxExDataFormat &txExData, Pro
     MsprofTxExData tmpData;
     for (const auto &data : txExData) {
         std::tie(tmpData.tid, tmpData.eventType, tmpData.startTime, tmpData.endTime,
-                 tmpData.message, tmpData.markId) = data;
+                 tmpData.message, tmpData.domain, tmpData.markId) = data;
         uint64_t globalTid = Utils::Contact(pid, tmpData.tid);
         uint64_t message = IdPool::GetInstance().GetUint64Id(tmpData.message);
+        uint64_t domain = IdPool::GetInstance().GetUint64Id(tmpData.domain);
         Utils::HPFloat startTimestamp = Utils::GetTimeFromSyscnt(tmpData.startTime, params);
         Utils::HPFloat endTimestamp = Utils::GetTimeFromSyscnt(tmpData.endTime, params);
         uint16_t eventType = GetEnumTypeValue(tmpData.eventType,
@@ -220,7 +228,7 @@ bool MsprofTxProcessor::FormatTxExData(const MsprofTxExDataFormat &txExData, Pro
         processedData.emplace_back(Utils::GetLocalTime(startTimestamp, record).Uint64(),
                                    Utils::GetLocalTime(endTimestamp, record).Uint64(),
                                    eventType, UINT32_MAX, UINT32_MAX, message, globalTid,
-                                   globalTid, UINT16_MAX, connectionId);
+                                   globalTid, domain, connectionId);
     }
     if (processedData.empty()) {
         ERROR("MsprofTxEx data processing error.");

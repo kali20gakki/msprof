@@ -26,8 +26,9 @@ class MsprofTxDecoder(StructDecoder):
         self._start_time = filed[17]
         self._end_time = filed[18]
         self._mark_id = filed[19]
-        self._message_type = filed[20]
-        self._message = self.decode_byte(filed[21])
+        self._domain = filed[20]
+        self._message_type = filed[21]
+        self._message = self.decode_byte(filed[22])
 
     @property
     def magic(self: any) -> int:
@@ -76,6 +77,10 @@ class MsprofTxDecoder(StructDecoder):
     @property
     def mark_id(self) -> int:
         return self._mark_id
+
+    @property
+    def domain(self) -> int:
+        return self._domain
 
     @property
     def message_type(self: any) -> int:

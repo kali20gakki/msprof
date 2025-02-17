@@ -520,6 +520,7 @@ namespace {
         {"start_time", SQL_INTEGER_TYPE},
         {"end_time", SQL_INTEGER_TYPE},
         {"mark_id", SQL_INTEGER_TYPE},
+        {"domain", SQL_TEXT_TYPE},
         {"message", SQL_TEXT_TYPE},
     };
 

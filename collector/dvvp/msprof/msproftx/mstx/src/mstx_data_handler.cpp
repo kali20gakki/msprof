@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2024-2024
+            版权所有 (c) 华为技术有限公司 2024-2025
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -112,7 +112,7 @@ void MstxDataHandler::ReportData()
     }
 }
 
-int MstxDataHandler::SaveMarkData(const char* msg, uint64_t mstxEventId)
+int MstxDataHandler::SaveMarkData(const char* msg, uint64_t mstxEventId, uint64_t domainNameHash)
 {
     static thread_local uint32_t tid = static_cast<uint32_t>(MmGetTid());
     MsprofTxInfo info;
@@ -123,6 +123,7 @@ int MstxDataHandler::SaveMarkData(const char* msg, uint64_t mstxEventId)
     info.value.stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
     info.value.stampInfo.endTime = info.value.stampInfo.startTime;
     info.value.stampInfo.markId = mstxEventId;
+    info.value.stampInfo.domain = domainNameHash;
     if (memcpy_s(info.value.stampInfo.message, MAX_MESSAGE_LEN - 1, msg, strlen(msg)) != EOK) {
         MSPROF_LOGE("memcpy message [%s] failed", msg);
         return PROFILING_FAILED;
@@ -135,7 +136,7 @@ int MstxDataHandler::SaveMarkData(const char* msg, uint64_t mstxEventId)
     return PROFILING_SUCCESS;
 }
 
-int MstxDataHandler::SaveRangeData(const char* msg, uint64_t mstxEventId, MstxDataType type)
+int MstxDataHandler::SaveRangeData(const char* msg, uint64_t mstxEventId, MstxDataType type, uint64_t domainNameHash)
 {
     static thread_local uint32_t tid = static_cast<uint32_t>(MmGetTid());
     if (type == MstxDataType::DATA_RANGE_START) {
@@ -146,6 +147,7 @@ int MstxDataHandler::SaveRangeData(const char* msg, uint64_t mstxEventId, MstxDa
         info.value.stampInfo.threadId = tid;
         info.value.stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
         info.value.stampInfo.markId = mstxEventId;
+        info.value.stampInfo.domain = domainNameHash;
         if (memcpy_s(info.value.stampInfo.message, MAX_MESSAGE_LEN - 1, msg, strlen(msg)) != EOK) {
             MSPROF_LOGE("memcpy message [%s] failed", msg);
             return PROFILING_FAILED;
@@ -171,9 +173,10 @@ int MstxDataHandler::SaveRangeData(const char* msg, uint64_t mstxEventId, MstxDa
     }
 }
 
-int MstxDataHandler::SaveMstxData(const char* msg, uint64_t mstxEventId, MstxDataType type)
+int MstxDataHandler::SaveMstxData(const char* msg, uint64_t mstxEventId, MstxDataType type, uint64_t domainNameHash)
 {
-    return type == MstxDataType::DATA_MARK ? SaveMarkData(msg, mstxEventId) : SaveRangeData(msg, mstxEventId, type);
+    return type == MstxDataType::DATA_MARK ? SaveMarkData(msg, mstxEventId, domainNameHash) :
+        SaveRangeData(msg, mstxEventId, type, domainNameHash);
 }
 
 bool MstxDataHandler::IsStart()

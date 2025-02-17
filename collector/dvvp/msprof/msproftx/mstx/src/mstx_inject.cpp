@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2024-2024
+            版权所有 (c) 华为技术有限公司 2024-2025
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -16,18 +16,156 @@
 #include "runtime_plugin.h"
 #include "mstx_data_handler.h"
 #include "utils/utils.h"
+#include "transport/hash_data.h"
 
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mstx;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
+using namespace analysis::dvvp::transport;
 
 static std::mutex g_mutex;
 static std::unordered_map<uint64_t, aclrtStream> g_eventIdsWithStream;
 
+namespace Collector {
+namespace Dvvp {
+namespace Mstx {
+
+std::map<mstxDomainHandle_t, std::shared_ptr<MstxDomainAttr>> MstxDomainMgr::domainHandleMap_;
+
+mstxDomainHandle_t MstxDomainMgr::CreateDomainHandle(const char* name)
+{
+    std::lock_guard<std::mutex> lk(domainMutex_);
+    if (domainHandleMap_.size() > MARK_MAX_CACHE_NUM) {
+        MSPROF_LOGE("Cache domain name failed, current size: %u, limit size: %u",
+            domainHandleMap_.size(), MARK_MAX_CACHE_NUM);
+        return nullptr;
+    }
+    std::string nameStr(name);
+    uint64_t hashId = HashData::instance()->GenHashId(nameStr);
+    for (const auto &iter : domainHandleMap_) {
+        if (iter.second->nameHash == hashId) {
+            return iter.first;
+        }
+    }
+    SHARED_PTR_ALIA<MstxDomainAttr> domainAttrPtr;
+    MSVP_MAKE_SHARED0_RET(domainAttrPtr, MstxDomainAttr, nullptr);
+    if (domainAttrPtr == nullptr) {
+        MSPROF_LOGE("Failed to malloc for domain attr for %s", name);
+        return nullptr;
+    }
+    MSVP_MAKE_SHARED0_RET(domainAttrPtr->handle, MstxDomainHandle, nullptr);
+    if (domainAttrPtr->handle == nullptr) {
+        MSPROF_LOGE("Failed to malloc for domain handle for %s", name);
+        return nullptr;
+    }
+    domainAttrPtr->nameHash = hashId;
+    domainHandleMap_.insert(std::make_pair(domainAttrPtr->handle.get(), domainAttrPtr));
+    return domainAttrPtr->handle.get();
+}
+
+void MstxDomainMgr::DestroyDomainHandle(mstxDomainHandle_t domain)
+{
+    std::lock_guard<std::mutex> lk(domainMutex_);
+    domainHandleMap_.erase(domain);
+}
+
+bool MstxDomainMgr::GetDomainNameHashByHandle(mstxDomainHandle_t domain, uint64_t &name)
+{
+    std::lock_guard<std::mutex> lk(domainMutex_);
+    auto iter = domainHandleMap_.find(domain);
+    if (iter == domainHandleMap_.end()) {
+        MSPROF_LOGW("input domain is invalid");
+        return false;
+    }
+    name = iter->second->nameHash;
+    return true;
+}
+
+uint64_t MstxDomainMgr::GetDefaultDomainNameHash()
+{
+    static uint64_t defaultDomainNameHash = HashData::instance()->GenHashId("default");
+    return defaultDomainNameHash;
+}
+
+}
+}
+}
+
 namespace MsprofMstxApi {
 constexpr uint64_t MSTX_MODEL_ID = 0xFFFFFFFFU;
 constexpr uint16_t MSTX_TAG_ID = 11;
+
+static bool IsMsgValid(const char* msg)
+{
+    if (msg == nullptr || strnlen(msg, MAX_MESSAGE_LEN) == MAX_MESSAGE_LEN || !Utils::CheckCharValid(msg)) {
+        MSPROF_LOGE("Input Params msg is invalid");
+        return false;
+    }
+    return true;
+}
+
+static void MsTxMarkAImpl(const char* msg, aclrtStream stream, uint64_t domainName)
+{
+    uint64_t mstxEventId = MsprofTxManager::instance()->GetEventId();
+    if (stream && RuntimePlugin::instance()->MsprofRtProfilerTraceEx(mstxEventId, MSTX_MODEL_ID,
+        MSTX_TAG_ID, stream) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to run mstx task for mark");
+        return;
+    }
+    if (MstxDataHandler::instance()->SaveMstxData(msg, mstxEventId, MstxDataType::DATA_MARK, domainName) !=
+        PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to save data for mark, msg: %s", msg);
+        return;
+    }
+    MSPROF_LOGI("Successfully to execute mark");
+}
+
+static uint64_t MsTxRangeStartAImpl(const char* msg, aclrtStream stream, uint64_t domainName)
+{
+    uint64_t mstxEventId = MsprofTxManager::instance()->GetEventId();
+    if (stream && RuntimePlugin::instance()->MsprofRtProfilerTraceEx(mstxEventId, MSTX_MODEL_ID,
+        MSTX_TAG_ID, stream) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to run mstx task for range start");
+        return MSTX_INVALID_RANGE_ID;
+    }
+    if (MstxDataHandler::instance()->SaveMstxData(msg, mstxEventId, MstxDataType::DATA_RANGE_START, domainName) !=
+        PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to save data for range start, msg: %s", msg);
+        return MSTX_INVALID_RANGE_ID;
+    }
+    if (stream) {
+        std::lock_guard<std::mutex> lock(g_mutex);
+        g_eventIdsWithStream[mstxEventId] = stream;
+    }
+    MSPROF_LOGI("Successfully to execute range start, range id %lu", mstxEventId);
+    return mstxEventId;
+}
+
+static void MstxRangeEndImpl(uint64_t id)
+{
+    {
+        std::lock_guard<std::mutex> lock(g_mutex);
+        auto it = g_eventIdsWithStream.find(id);
+        if (it != g_eventIdsWithStream.end()) {
+            if (it->second == nullptr) {
+                MSPROF_LOGE("Stream for range id %lu is null", id);
+                return;
+            }
+            if (RuntimePlugin::instance()->MsprofRtProfilerTraceEx(id, MSTX_MODEL_ID, MSTX_TAG_ID, it->second) !=
+                PROFILING_SUCCESS) {
+                MSPROF_LOGE("Failed to run mstx task for range end, range id %lu", id);
+                return;
+            }
+            g_eventIdsWithStream.erase(it);
+        }
+    }
+    if (MstxDataHandler::instance()->SaveMstxData(nullptr, id, MstxDataType::DATA_RANGE_END) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to save data for range end, range id %lu", id);
+        return;
+    }
+    MSPROF_LOGI("Successfully to execute range end, range id %lu", id);
+}
 
 void MstxMarkAFunc(const char* msg, aclrtStream stream)
 {
@@ -36,26 +174,11 @@ void MstxMarkAFunc(const char* msg, aclrtStream stream)
         MSPROF_LOGW("Mstx data handler is not started");
         return;
     }
-    if (msg == nullptr || strnlen(msg, MAX_MESSAGE_LEN) == MAX_MESSAGE_LEN) {
-        MSPROF_LOGE("Input msg for %s is invalid", __func__);
+    if (!IsMsgValid(msg)) {
         return;
     }
-    if (!Utils::CheckCharValid(msg)) {
-        MSPROF_LOGE("msg has invalid characters.");
-        return;
-    }
-    uint64_t mstxEventId = MsprofTxManager::instance()->GetEventId();
-    if (stream && RuntimePlugin::instance()->MsprofRtProfilerTraceEx(mstxEventId, MSTX_MODEL_ID,
-        MSTX_TAG_ID, stream) != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Failed to run mstx task for %s", __func__);
-        return;
-    }
-    if (MstxDataHandler::instance()->SaveMstxData(msg, mstxEventId, MstxDataType::DATA_MARK) !=
-        PROFILING_SUCCESS) {
-        MSPROF_LOGE("Failed to save data for %s, msg: %s", __func__, msg);
-        return;
-    }
-    MSPROF_LOGI("Successfully to execute %s", __func__);
+    auto domainNameHash = MstxDomainMgr::instance()->GetDefaultDomainNameHash();
+    MsTxMarkAImpl(msg, stream, domainNameHash);
 }
 
 uint64_t MstxRangeStartAFunc(const char* msg, aclrtStream stream)
@@ -65,8 +188,7 @@ uint64_t MstxRangeStartAFunc(const char* msg, aclrtStream stream)
         MSPROF_LOGW("Mstx data handler is not started");
         return MSTX_INVALID_RANGE_ID;
     }
-    if (msg == nullptr || strnlen(msg, MAX_MESSAGE_LEN) == MAX_MESSAGE_LEN) {
-        MSPROF_LOGE("input for %s is nullptr", __func__);
+    if (!IsMsgValid(msg)) {
         return MSTX_INVALID_RANGE_ID;
     }
     uint64_t mstxEventId = MsprofTxManager::instance()->GetEventId();
@@ -75,17 +197,8 @@ uint64_t MstxRangeStartAFunc(const char* msg, aclrtStream stream)
         MSPROF_LOGE("Failed to run mstx task for %s", __func__);
         return MSTX_INVALID_RANGE_ID;
     }
-    if (MstxDataHandler::instance()->SaveMstxData(msg, mstxEventId, MstxDataType::DATA_RANGE_START) !=
-        PROFILING_SUCCESS) {
-        MSPROF_LOGE("Failed to save data for %s, msg: %s", __func__, msg);
-        return MSTX_INVALID_RANGE_ID;
-    }
-    if (stream) {
-        std::lock_guard<std::mutex> lock(g_mutex);
-        g_eventIdsWithStream[mstxEventId] = stream;
-    }
-    MSPROF_LOGI("Successfully to execute %s, range id %lu", __func__, mstxEventId);
-    return mstxEventId;
+    auto domainNameHash = MstxDomainMgr::instance()->GetDefaultDomainNameHash();
+    return MsTxRangeStartAImpl(msg, stream, domainNameHash);
 }
 
 void MstxRangeEndFunc(uint64_t id)
@@ -98,27 +211,119 @@ void MstxRangeEndFunc(uint64_t id)
     if (id == MSTX_INVALID_RANGE_ID) {
         return;
     }
-    {
-        std::lock_guard<std::mutex> lock(g_mutex);
-        auto it = g_eventIdsWithStream.find(id);
-        if (it != g_eventIdsWithStream.end()) {
-            if (it->second == nullptr) {
-                MSPROF_LOGE("Stream for range id %lu is null", id);
-                return;
-            }
-            if (RuntimePlugin::instance()->MsprofRtProfilerTraceEx(id, MSTX_MODEL_ID, MSTX_TAG_ID, it->second) !=
-                PROFILING_SUCCESS) {
-                MSPROF_LOGE("Failed to run mstx task for %s, range id %lu", __func__, id);
-                return;
-            }
-            g_eventIdsWithStream.erase(it);
-        }
+    MstxRangeEndImpl(id);
+}
+
+mstxDomainHandle_t MstxDomainCreateAFunc(const char* name)
+{
+    if (!IsMsgValid(name)) {
+        return nullptr;
     }
-    if (MstxDataHandler::instance()->SaveMstxData(nullptr, id,  MstxDataType::DATA_RANGE_END) != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Failed to save data for %s, range id %lu", __func__, id);
+    return MstxDomainMgr::instance()->CreateDomainHandle(name);
+}
+
+void MstxDomainDestroyFunc(mstxDomainHandle_t domain)
+{
+    MstxDomainMgr::instance()->DestroyDomainHandle(domain);
+}
+
+void MstxDomainMarkAFunc(mstxDomainHandle_t domain, const char* msg, aclrtStream stream)
+{
+    if (!MstxDataHandler::instance()->IsStart()) {
+        MSPROF_LOGW("Mstx data handler is not started");
         return;
     }
-    MSPROF_LOGI("Successfully to execute %s, range id %lu", __func__, id);
+    if ((!IsMsgValid(msg))) {
+        return;
+    }
+    uint64_t domainNameHash = 0;
+    if (!MstxDomainMgr::instance()->GetDomainNameHashByHandle(domain, domainNameHash)) {
+        MSPROF_LOGE("Failed to find domain name for %s", __func__);
+        return;
+    }
+    MsTxMarkAImpl(msg, stream, domainNameHash);
+}
+
+uint64_t MstxDomainRangeStartAFunc(mstxDomainHandle_t domain, const char* msg, aclrtStream stream)
+{
+    if (!MstxDataHandler::instance()->IsStart()) {
+        MSPROF_LOGW("Mstx data handler is not started");
+        return MSTX_INVALID_RANGE_ID;
+    }
+    if ((!IsMsgValid(msg))) {
+        return MSTX_INVALID_RANGE_ID;
+    }
+    uint64_t domainNameHash = 0;
+    if (!MstxDomainMgr::instance()->GetDomainNameHashByHandle(domain, domainNameHash)) {
+        MSPROF_LOGE("Failed to find domain name for %s", __func__);
+        return MSTX_INVALID_RANGE_ID;
+    }
+    return MsTxRangeStartAImpl(msg, stream, domainNameHash);
+}
+
+void MstxDomainRangeEndFunc(mstxDomainHandle_t domain, uint64_t id)
+{
+    MSPROF_LOGI("Start to execute %s", __func__);
+    if (!MstxDataHandler::instance()->IsStart()) {
+        MSPROF_LOGW("Mstx data handler is not started");
+        return;
+    }
+    if (id == MSTX_INVALID_RANGE_ID) {
+        return;
+    }
+    uint64_t domainNameHash = 0;
+    if (!MstxDomainMgr::instance()->GetDomainNameHashByHandle(domain, domainNameHash)) {
+        MSPROF_LOGE("Failed to find domain name for %s", __func__);
+        return;
+    }
+    MstxRangeEndImpl(id);
+}
+
+int GetModuleTableFunc(MstxGetModuleFuncTableFunc getFuncTable)
+{
+    int retVal = MSTX_SUCCESS;
+    unsigned int outSize = 0;
+    MstxFuncTable outTable;
+    static std::vector<unsigned int> CheckOutTableSizes = {
+        0,
+        MSTX_FUNC_END,
+        MSTX_FUNC_DOMAIN_END,
+        0
+    };
+    for (size_t i = MSTX_API_MODULE_CORE; i < MSTX_API_MODULE_SIZE; i++) {
+        if (getFuncTable(static_cast<MstxFuncModule>(i), &outTable, &outSize) != MSTX_SUCCESS) {
+            MSPROF_LOGE("Failed to get func table for module %d", i);
+            retVal = MSTX_FAIL;
+            break;
+        }
+        if (outSize != CheckOutTableSizes[i]) {
+            MSPROF_LOGE("outSize is invalid, Failed to init mstx funcs.");
+            retVal = MSTX_FAIL;
+            break;
+        }
+        switch (i) {
+            case MSTX_API_MODULE_CORE:
+                *(outTable[MSTX_FUNC_MARKA]) = (MstxFuncPointer)MstxMarkAFunc;
+                *(outTable[MSTX_FUNC_RANGE_STARTA]) = (MstxFuncPointer)MstxRangeStartAFunc;
+                *(outTable[MSTX_FUNC_RANGE_END]) = (MstxFuncPointer)MstxRangeEndFunc;
+                break;
+            case MSTX_API_MODULE_CORE2:
+                *(outTable[MSTX_FUNC_DOMAIN_CREATEA]) = (MstxFuncPointer)MstxDomainCreateAFunc;
+                *(outTable[MSTX_FUNC_DOMAIN_DESTROY]) = (MstxFuncPointer)MstxDomainDestroyFunc;
+                *(outTable[MSTX_FUNC_DOMAIN_MARKA]) = (MstxFuncPointer)MstxDomainMarkAFunc;
+                *(outTable[MSTX_FUNC_DOMAIN_RANGE_STARTA]) = (MstxFuncPointer)MstxDomainRangeStartAFunc;
+                *(outTable[MSTX_FUNC_DOMAIN_RANGE_END]) = (MstxFuncPointer)MstxDomainRangeEndFunc;
+                break;
+            default:
+                MSPROF_LOGE("Invalid func module type");
+                retVal = MSTX_FAIL;
+                break;
+        }
+        if (retVal == MSTX_FAIL) {
+            break;
+        }
+    }
+    return retVal;
 }
 }
 
@@ -126,21 +331,14 @@ using namespace MsprofMstxApi;
 
 extern "C" int __attribute__((visibility("default"))) InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
 {
-    unsigned int outSize = 0;
-    MstxFuncTable outTable;
-    if (getFuncTable == nullptr || getFuncTable(MSTX_API_MODULE_CORE, &outTable, &outSize) != MSTX_SUCCESS ||
-        outTable == nullptr) {
-        MSPROF_LOGE("Failed to call getFuncTable");
+    if (getFuncTable == nullptr) {
+        MSPROF_LOGE("Input null mstx getfunctable pointer");
         return MSTX_FAIL;
     }
-
-    if (outSize != static_cast<unsigned int>(MSTX_FUNC_END)) {
-        MSPROF_LOGE("outSize is not equal to MSTX_FUNC_END, Failed to init mstx funcs.");
-        return MSTX_FAIL; // 1 : init failed
+    if (MsprofMstxApi::GetModuleTableFunc(getFuncTable) != MSTX_SUCCESS) {
+        MSPROF_LOGE("Failed to init mstx funcs");
+        return MSTX_FAIL;
     }
-    *(outTable[MSTX_FUNC_MARKA]) = (MstxFuncPointer)MstxMarkAFunc;
-    *(outTable[MSTX_FUNC_RANGE_STARTA]) = (MstxFuncPointer)MstxRangeStartAFunc;
-    *(outTable[MSTX_FUNC_RANGE_END]) = (MstxFuncPointer)MstxRangeEndFunc;
     return MSTX_SUCCESS;
 }
 

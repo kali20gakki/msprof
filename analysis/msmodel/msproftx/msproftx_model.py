@@ -69,7 +69,7 @@ class MsprofTxExModel(ParserModel):
         if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_MSPROFTX_EX):
             return []
         all_data_sql = f"select pid, tid, event_type, start_time, (end_time-start_time) as dur_time, " \
-                       f"mark_id, message from {DBNameConstant.TABLE_MSPROFTX_EX}"
+                       f"mark_id, message, domain from {DBNameConstant.TABLE_MSPROFTX_EX}"
         return DBManager.fetch_all_data(self.cur, all_data_sql, dto_class=MsprofTxExDto)
 
     def get_summary_data(self) -> list:
@@ -79,7 +79,7 @@ class MsprofTxExModel(ParserModel):
         if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_MSPROFTX_EX):
             return []
         all_data_sql = f"select pid, tid, event_type, start_time, end_time, " \
-                       f"message, mark_id from {DBNameConstant.TABLE_MSPROFTX_EX}"
+                       f"message, domain, mark_id from {DBNameConstant.TABLE_MSPROFTX_EX}"
         return DBManager.fetch_all_data(self.cur, all_data_sql)
 
     def get_device_data(self) -> list:

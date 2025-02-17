@@ -29,7 +29,7 @@ using MsprofTxDataFormat = std::vector<std::tuple<uint32_t, uint32_t, uint32_t,
     std::string, int32_t, uint64_t, uint64_t, uint64_t, int32_t, std::string>>;
 // MsprofTxEx table data format
 using MsprofTxExDataFormat = std::vector<std::tuple<uint32_t, uint32_t,
-    std::string, uint64_t, uint64_t, uint64_t, std::string>>;
+    std::string, uint64_t, uint64_t, uint64_t, std::string, std::string>>;
 
 const MsprofTxDataFormat MSPROFTX_DATA = {
     {0, 0, 0, "marker", 0, 0, 19627611986845096, 19627611986845096, 0, "test"},
@@ -38,7 +38,7 @@ const MsprofTxDataFormat MSPROFTX_DATA = {
 };
 
 const MsprofTxExDataFormat MSPROFTX_EX_DATA = {
-    {0, 0, "marker_ex", 19627611986934385, 19627611986941564, 0, "test"}
+    {0, 0, "marker_ex", 19627611986934385, 19627611986941564, 0, "domain", "test"}
 };
 }
 

@@ -1,5 +1,5 @@
 /* ******************************************************************************
-            版权所有 (c) 华为技术有限公司 2024-2024
+            版权所有 (c) 华为技术有限公司 2024-2025
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
@@ -45,13 +45,13 @@ public:
     int Stop();
     void Run(const struct error_message::Context &errorContext) override;
     bool IsStart();
-    int SaveMstxData(const char* msg, uint64_t mstxEventId, MstxDataType type);
+    int SaveMstxData(const char* msg, uint64_t mstxEventId, MstxDataType type, uint64_t domainNameHash = 0);
 
 private:
     void Init();
     void Uninit();
-    int SaveMarkData(const char* msg, uint64_t mstxEventId);
-    int SaveRangeData(const char* msg, uint64_t mstxEventId, MstxDataType type);
+    int SaveMarkData(const char* msg, uint64_t mstxEventId, uint64_t domainNameHash);
+    int SaveRangeData(const char* msg, uint64_t mstxEventId, MstxDataType type, uint64_t domainNameHash);
 
     void Flush();
     void ReportData();
