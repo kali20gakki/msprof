@@ -23,6 +23,8 @@
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/memcpy_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/msprof_tx_host_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/task_info_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/kfc_turn_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/mc2_comm_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/acc_pmu_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/aicore_freq_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/ddr_data.h"
@@ -136,6 +138,28 @@ static std::vector<CommunicationOpData> GenerateOpData()
     return res;
 }
 
+static std::vector<KfcOpData> GenerateKfcOpData()
+{
+    std::vector<KfcOpData> res;
+    KfcOpData data;
+    data.opName = "hcom_allReduce__654_0_1";
+    data.groupName = "1334992688230612654";
+    data.connectionId = 1234; // connectionId 1234
+    data.opKey = "1334992688230612654-0-1-1-1";
+    data.start = 1717575960213957958; // start 1717575960213957958
+    data.end = 1717575960214957958; // end 1717575960214957958
+    data.relay = 0; // relay 0
+    data.retry = 0; // retry 0
+    data.dataType = 1; // dataType 1
+    data.algType = "MESH-RING";
+    data.count = 5; // count 5
+    data.opType = "allreduceAicpuKernel";
+    data.modelId = 4294967295; // modelId 4294967295
+    data.deviceId = 0; // device 0
+    res.push_back(data);
+    return res;
+}
+
 static std::vector<CommunicationTaskData> GenerateTaskData()
 {
     std::vector<CommunicationTaskData> res;
@@ -160,6 +184,37 @@ static std::vector<CommunicationTaskData> GenerateTaskData()
     data.notifyId = 456; // notifyId 456
     data.rdmaType = UINT16_MAX;
     data.start = 1717575960213957957; // start 1717575960213957957
+    data.duration = 1000000.0; // dur 1000000.0
+    data.durationEstimated = 20.0; // es_dur 20.0
+    data.bandwidth = 0.0; // bw 0.0
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<KfcTaskData> GenerateKfcTaskData()
+{
+    std::vector<KfcTaskData> res;
+    KfcTaskData data;
+    data.planeId = 1; // planeId 1
+    data.modelId = 4294967295; // modelId 4294967295
+    data.streamId = 69; // streamId 69
+    data.taskId = 1; // taskId 1
+    data.contextId = 4294967295; // contextId 4294967295
+    data.batchId = 1; // batchId 1
+    data.srcRank = 0; // src 0
+    data.dstRank = 1; // dst 1
+    data.opKey = "1334992688230612654-1-1-1-1";
+    data.deviceId = 0; // device 0
+    data.opName = "hcom_allReduce__654_0_1";
+    data.taskType = "Memcpy";
+    data.groupName = "1334992688230612654";
+    data.transportType = 2; // transport 2
+    data.size = 3200; // size 3200
+    data.dataType = UINT16_MAX;
+    data.linkType = UINT16_MAX;
+    data.notifyId = 456; // notifyId 456
+    data.rdmaType = UINT16_MAX;
+    data.start = 1717575960213957958; // start 1717575960213957958
     data.duration = 1000000.0; // dur 1000000.0
     data.durationEstimated = 20.0; // es_dur 20.0
     data.bandwidth = 0.0; // bw 0.0
@@ -356,12 +411,27 @@ static std::vector<AscendTaskData> GenerateAscendTaskData()
     data.connectionId = 2345; // connectionId 2345
     data.start = 1717575960208020758; // start 1717575960208020758
     data.duration = 450.78; // dur 450.78
-    data.start = 1717575960208020759; // end 1717575960208020759
+    data.end = 1717575960208020759; // end 1717575960208020759
     data.hostType = "KERNEL_AICORE";
     data.deviceType = "AI_CORE";
     data.taskType = "KERNEL_AICORE";
     res.push_back(data);
     data.contextId = UINT32_MAX;
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<MsprofTxDeviceData> GenerateDeviceTxData()
+{
+    std::vector<MsprofTxDeviceData> res;
+    MsprofTxDeviceData data;
+    data.deviceId = 0; // deviceId 0
+    data.streamId = 2; // streamId 2
+    data.taskId = 10; // taskId 10
+    data.connectionId = 2346; // connectionId 2346
+    data.start = 1717575960208020759; // start 1717575960208020759
+    data.duration = 450.78; // dur 450.78
+    data.modelId = 1; // modelId 1
     res.push_back(data);
     return res;
 }
@@ -387,6 +457,18 @@ static std::vector<TaskInfoData> GenerateComputeTaskInfo()
     res.push_back(data);
     data.contextId = UINT32_MAX;
     res.push_back(data);
+    data.streamId = 2; // streamId 2
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<MC2CommInfoData> GenerateKfcStreamData()
+{
+    std::vector<MC2CommInfoData> res;
+    MC2CommInfoData data;
+    data.aiCpuKfcStreamId = 2; // kfcStreamId 2
+    data.commStreamIds = "3, 4, 5";
+    res.push_back(data);
     return res;
 }
 
@@ -394,12 +476,20 @@ static void InjectHcclData(DataInventory& dataInventory)
 {
     std::shared_ptr<std::vector<CommunicationTaskData>> dataTaskS;
     std::shared_ptr<std::vector<CommunicationOpData>> dataOpS;
+    std::shared_ptr<std::vector<KfcTaskData>> kfcTaskS;
+    std::shared_ptr<std::vector<KfcOpData>> kfcOpS;
     auto dataOp = GenerateOpData();
     auto dataTask = GenerateTaskData();
+    auto kfcOp = GenerateKfcOpData();
+    auto kfcTask = GenerateKfcTaskData();
     MAKE_SHARED_NO_OPERATION(dataOpS, std::vector<CommunicationOpData>, dataOp);
     MAKE_SHARED_NO_OPERATION(dataTaskS, std::vector<CommunicationTaskData>, dataTask);
+    MAKE_SHARED_NO_OPERATION(kfcTaskS, std::vector<KfcTaskData>, kfcTask);
+    MAKE_SHARED_NO_OPERATION(kfcOpS, std::vector<KfcOpData>, kfcOp);
     dataInventory.Inject(dataOpS);
     dataInventory.Inject(dataTaskS);
+    dataInventory.Inject(kfcOpS);
+    dataInventory.Inject(kfcTaskS);
 }
 
 static void CheckEnumValueByTableName(const std::shared_ptr<DBRunner>& dbRunner, const std::string& tableName,
@@ -1061,9 +1151,13 @@ TEST_F(DBAssemblerUTest, TestRunSaveAscendTaskDataShouldReturnTrueWhenRunSuccess
     auto assembler = DBAssembler(DB_PATH, PROF);
     auto dataInventory = DataInventory();
     auto data = GenerateAscendTaskData();
+    auto deviceTx = GenerateDeviceTxData();
+    std::shared_ptr<std::vector<MsprofTxDeviceData>> txDataS;
     std::shared_ptr<std::vector<AscendTaskData>> dataS;
     MAKE_SHARED0_NO_OPERATION(dataS, std::vector<AscendTaskData>, data);
+    MAKE_SHARED0_NO_OPERATION(txDataS, std::vector<MsprofTxDeviceData>, deviceTx);
     dataInventory.Inject<std::vector<AscendTaskData>>(dataS);
+    dataInventory.Inject<std::vector<MsprofTxDeviceData>>(txDataS);
     EXPECT_TRUE(assembler.Run(dataInventory));
 }
 
@@ -1072,9 +1166,13 @@ TEST_F(DBAssemblerUTest, TestRunSaveComputeTaskInfoShouldReturnTrueWhenRunSucces
     auto assembler = DBAssembler(DB_PATH, PROF);
     auto dataInventory = DataInventory();
     auto data = GenerateComputeTaskInfo();
+    auto kfcStream = GenerateKfcStreamData();
+    std::shared_ptr<std::vector<MC2CommInfoData>> kfcStreamS;
     std::shared_ptr<std::vector<TaskInfoData>> dataS;
     MAKE_SHARED0_NO_OPERATION(dataS, std::vector<TaskInfoData>, data);
+    MAKE_SHARED0_NO_OPERATION(kfcStreamS, std::vector<MC2CommInfoData>, kfcStream);
     dataInventory.Inject<std::vector<TaskInfoData>>(dataS);
+    dataInventory.Inject(kfcStreamS);
     EXPECT_TRUE(assembler.Run(dataInventory));
 }
 

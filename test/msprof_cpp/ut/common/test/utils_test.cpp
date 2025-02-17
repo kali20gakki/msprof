@@ -1759,7 +1759,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, ChangeWorkDirWillReturnFailWhenInputEmptyFileNam
     GlobalMockObject::verify();
     EXPECT_EQ(PROFILING_FAILED, Utils::ChangeWorkDir(""));
 }
- 
+
 TEST_F(COMMON_UTILS_UTILS_TEST, ChangeWorkDirWillReturnFailWhenStrdupReturnNull)
 {
     GlobalMockObject::verify();
@@ -1768,13 +1768,13 @@ TEST_F(COMMON_UTILS_UTILS_TEST, ChangeWorkDirWillReturnFailWhenStrdupReturnNull)
         .will(returnValue((CHAR_PTR)nullptr));
     EXPECT_EQ(PROFILING_FAILED, Utils::ChangeWorkDir("xxx"));
 }
- 
+
 TEST_F(COMMON_UTILS_UTILS_TEST, CheckStringIsValidNatureNumWillReturnFalseWhenInputEmptyNum)
 {
     GlobalMockObject::verify();
     EXPECT_EQ(false, Utils::CheckStringIsValidNatureNum(""));
 }
- 
+
 TEST_F(COMMON_UTILS_UTILS_TEST, CheckStringIsValidNatureNumWillReturnFalseWhenInputNumSizeLargerThanMaxSize)
 {
     GlobalMockObject::verify();
@@ -1782,7 +1782,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, CheckStringIsValidNatureNumWillReturnFalseWhenIn
     std::string num(maxUintValStr.size() + 1, 'x');
     EXPECT_EQ(false, Utils::CheckStringIsValidNatureNum(num));
 }
- 
+
 TEST_F(COMMON_UTILS_UTILS_TEST, CheckStringIsValidNatureNumWillReturnFalseWhenInputNumBiggerThanUint32)
 {
     GlobalMockObject::verify();
@@ -1790,7 +1790,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, CheckStringIsValidNatureNumWillReturnFalseWhenIn
     std::string num(maxUintValStr.size(), '9');
     EXPECT_EQ(false, Utils::CheckStringIsValidNatureNum(num));
 }
- 
+
 TEST_F(COMMON_UTILS_UTILS_TEST, CheckStringIsValidNatureNumWillReturnTrueWhenInputValidNum)
 {
     GlobalMockObject::verify();
