@@ -114,7 +114,8 @@ class MsprofTxViewer:
         for data in msproftx_ex_data:
             trace_data_args = OrderedDict([
                 ('mark_id', data.mark_id),
-                ("event_type", data.event_type)
+                ('event_type', data.event_type),
+                ('domain', data.domain)
             ])
             trace_data_msproftx_ex = [
                 data.message, data.pid, data.tid,
@@ -140,7 +141,7 @@ class MsprofTxViewer:
                 InfoConfReader().trans_into_local_time(
                     InfoConfReader().time_from_host_syscnt(data[7], NumberConstant.MICRO_SECOND),
                     use_us=True, is_host=True)),
-                data[8], data[9], Constant.NA
+                data[8], data[9], Constant.NA, Constant.NA
             ) for data in summary_data
         ]
 
@@ -156,7 +157,7 @@ class MsprofTxViewer:
              InfoConfReader().trans_into_local_time(
                  InfoConfReader().time_from_host_syscnt(data[4], NumberConstant.MICRO_SECOND),
                  use_us=True, is_host=True)),
-             Constant.NA, f'{data[5]}', data[6]
+             Constant.NA, f'{data[5]}', data[6], data[7]
              ) for data in summary_data
         ]
 

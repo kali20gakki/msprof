@@ -51,6 +51,7 @@ class TestImportCommand(unittest.TestCase):
         args_dic = {"collection_path": "test", "cluster_flag": False}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + '.LoadInfoManager.load_info'), \
+                mock.patch('os.path.join', return_value='test\\path'), \
                 mock.patch(NAMESPACE + '.get_path_dir', return_value=['host', 'device_1', 'device_2', 'device_3']), \
                 mock.patch(NAMESPACE + '.get_valid_sub_path'), \
                 mock.patch('common_func.msprof_common.prepare_log'), \

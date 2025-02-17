@@ -167,6 +167,7 @@ struct MsprofStampInfo {
     uint64_t startTime;
     uint64_t endTime;
     uint64_t markId;
+    uint64_t domain;
     int32_t messageType;
     char message[MAX_MESSAGE_LEN];
 };

@@ -23,9 +23,9 @@ namespace Domain {
 // pid, tid, category, payload_type, message_type, payload_value, start, end, event_type, message
 using OriMsprofTxHostData = std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t,
                                         uint64_t, std::string, std::string>>;
-// pid, tid, mark_id, start, end, event_type, message
-using OriMsprofTxExHostData = std::vector<std::tuple<uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, std::string,
-                                                     std::string>>;
+// pid, tid, mark_id, start, end, event_type, domain, message
+using OriMsprofTxExHostData = std::vector<std::tuple<uint32_t, uint32_t, uint64_t, uint64_t, uint64_t,
+                                                     std::string, std::string, std::string>>;
 class MsprofTxHostProcessor : public DataProcessor {
 public:
     MsprofTxHostProcessor() = default;

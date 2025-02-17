@@ -30,4 +30,5 @@ class MsprofTxExDto(metaclass=InstanceCheckMeta):
     start_time: int = 0
     dur_time: int = 0
     mark_id: int = 0
+    domain: str = Constant.NA
     message: str = Constant.NA

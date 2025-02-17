@@ -21,8 +21,10 @@ class TestMsprofTxViewer(unittest.TestCase):
     TEST_MSPROF_TX_MSG = 'test'
     MSPROFTX_DEVICE_HEADERS = ['index_id', 'start_time(us)', 'end_time(us)']
     configs = {'handler': '_get_msproftx_data',
-               'headers': ['pid', ' tid', ' category', ' event_type', ' payload_type', ' payload_value', ' Start_time',
-                           ' End_time', ' message_type', ' message', 'mark_id'], 'db': 'msproftx.db', 'unused_cols': []}
+               'headers': ['pid', 'tid', 'category', 'event_type', 'payload_type', 'payload_value', 'Start_time',
+                           'End_time', 'message_type', 'message', 'domain', 'mark_id'],
+               'db': 'msproftx.db',
+               'unused_cols': []}
     params = {'data_type': 'msprof_tx', 'project': 'D:\\Job\\analyzer_testcase\\origin_data\\1910_mini_no_ai_core',
               'device_id': '0', 'job_id': 'job_default', 'export_type': 'summary', 'iter_id': 1, 'export_format': 'csv',
               'model_id': 1}
@@ -47,18 +49,18 @@ class TestMsprofTxViewer(unittest.TestCase):
         with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxModel.get_summary_data',
                         return_value=((0, 0, 0, 0, 0, 0, 0, 5, 0, 'test'), (0, 1, 0, 0, 1, 0, 1, 7, 0, 'test'))), \
                 mock.patch('msmodel.msproftx.msproftx_model.MsprofTxExModel.get_summary_data',
-                           return_value=((0, 0, 3, 1, 1, 'test', 0), (0, 1, 3, 2, 11, 'test', 1))):
+                           return_value=((0, 0, 3, 1, 1, 'test', 'domain', 0), (0, 1, 3, 2, 11, 'test', 'domain', 1))):
             result = MsprofTxViewer(self.configs, self.params).get_summary_data()
-            self.assertEqual(result, (['pid', ' tid', ' category', ' event_type', ' payload_type',
-                                       ' payload_value', ' Start_time', ' End_time', ' message_type', ' message',
-                                        'mark_id'],
-                                      [(0, 0, 0, 0, 0, 0, '10.000\t', '10.005\t', 0, 'test', Constant.NA,),
-                                       (0, 1, 0, 0, 1, 0, valid_start_time, '10.007\t', 0, 'test', Constant.NA,),
-                                       (0, 0, Constant.NA, 3, Constant.NA, Constant.NA,
-                                        valid_start_time, valid_start_time, Constant.NA,
-                                        'test', 0),
-                                       (0, 1, Constant.NA, 3, Constant.NA, Constant.NA,
-                                        '10.002\t', '10.011\t', Constant.NA, 'test', 1)], 4))
+            self.assertEqual(result,
+                             (['pid', 'tid', 'category', 'event_type', 'payload_type', 'payload_value',
+                               'Start_time', 'End_time', 'message_type', 'message', 'domain', 'mark_id'],
+                              [(0, 0, 0, 0, 0, 0, '10.000\t', '10.005\t', 0, 'test', Constant.NA, Constant.NA),
+                               (0, 1, 0, 0, 1, 0, valid_start_time, '10.007\t', 0, 'test', Constant.NA, Constant.NA),
+                               (0, 0, Constant.NA, 3, Constant.NA, Constant.NA,
+                                valid_start_time, valid_start_time, Constant.NA, 'test', 'domain', 0),
+                               (0, 1, Constant.NA, 3, Constant.NA, Constant.NA,
+                                '10.002\t', '10.011\t', Constant.NA, 'test', 'domain', 1)],
+                              4))
 
     def test_get_summary_data_return_empty_data_with_get_none_summary_from_model(self):
         with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxModel.get_summary_data',
@@ -95,7 +97,8 @@ class TestMsprofTxViewer(unittest.TestCase):
             OrderedDict([(self.TRACE_HEADER_NAME, self.TEST_MSPROF_TX_MSG), (self.TRACE_HEADER_PID, 0),
                          (self.TRACE_HEADER_TID, 0), ('ts', '10.020'), ('dur', 0.0),
                          (self.TRACE_HEADER_ARGS,
-                          OrderedDict([('mark_id', 0), ('event_type', 'marker_ex')])), (self.TRACE_HEADER_PH, 'X')])
+                          OrderedDict([('mark_id', 0), ('event_type', 'marker_ex'), ('domain', 'domain')])),
+                         (self.TRACE_HEADER_PH, 'X')])
         ]
         msproftx_dto = MsprofTxDto()
         msproftx_dto.pid = 0
@@ -115,6 +118,7 @@ class TestMsprofTxViewer(unittest.TestCase):
         msproftx_ex_dto.start_time = 20
         msproftx_ex_dto.dur_time = 0
         msproftx_ex_dto.mark_id = 0
+        msproftx_ex_dto.domain = "domain"
         msproftx_ex_dto.message = self.TEST_MSPROF_TX_MSG
         with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxModel.get_timeline_data',
                         return_value=[msproftx_dto]), \

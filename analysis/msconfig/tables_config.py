@@ -759,6 +759,7 @@ class TablesConfig(MetaConfig):
             ('start_time', 'INTEGER, null'),
             ('end_time', 'INTEGER, null'),
             ('mark_id', 'INTEGER, null'),
+            ('domain', 'TEXT', 'null'),
             ('message', 'TEXT, null')
         ],
         'SioMap': [

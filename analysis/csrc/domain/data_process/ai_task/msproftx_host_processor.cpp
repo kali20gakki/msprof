@@ -43,7 +43,7 @@ OriMsprofTxExHostData LoadTxExData(const DBInfo &msprofTxExDB, const std::string
         ERROR("Create % connection failed.", dbPath);
         return data;
     }
-    std::string sql{"SELECT pid, tid, mark_id, start_time, end_time, event_type, message FROM " +
+    std::string sql{"SELECT pid, tid, mark_id, start_time, end_time, event_type, domain, message FROM " +
                     msprofTxExDB.tableName};
     if (!msprofTxExDB.dbRunner->QueryData(sql, data)) {
         ERROR("Query msproftx data failed, db path is %.", dbPath);
@@ -118,7 +118,8 @@ void MsprofTxHostProcessor::FormatTxExData(const OriMsprofTxExHostData &oriTxExD
     std::string eventType;
     uint64_t markId;
     for (const auto& row : oriTxExData) {
-        std::tie(tmpData.pid, tmpData.tid, markId, tmpData.start, tmpData.end, eventType, tmpData.message) = row;
+        std::tie(tmpData.pid, tmpData.tid, markId, tmpData.start,
+            tmpData.end, eventType, tmpData.domain, tmpData.message) = row;
         Utils::HPFloat start = Utils::GetTimeFromSyscnt(tmpData.start, params);
         Utils::HPFloat end = Utils::GetTimeFromSyscnt(tmpData.end, params);
         tmpData.eventType = GetEnumTypeValue(eventType, NAME_STR(MSTX_EVENT_TYPE_TABLE), MSTX_EVENT_TYPE_TABLE);

@@ -25,9 +25,9 @@ using MsprofTxDataFormat = std::vector<std::tuple<uint32_t, uint32_t, std::strin
         uint64_t, uint64_t, std::string>>;
 
 // MsprofTxEx表字段数据类型
-// tid, event_type, start_time, end_time, message, mark_id
+// tid, event_type, start_time, end_time, message, domain, mark_id
 using MsprofTxExDataFormat = std::vector<std::tuple<uint32_t, std::string,
-        uint64_t, uint64_t, std::string, uint64_t>>;
+        uint64_t, uint64_t, std::string, std::string, uint64_t>>;
 
 // startNs, endNs, eventType, rangeId, category, message, globalTid, endGlobalTid, domainId, connectionId
 using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint16_t,
