@@ -31,6 +31,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/system/include/llc_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/npu_mem_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/npu_op_mem_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/npu_module_mem_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/pcie_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/soc_bandwidth_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
@@ -522,6 +523,26 @@ bool SaveNpuOpMemData(DataInventory& dataInventory, DBInfo& msprofDB, const std:
     return SaveData(res, TABLE_NAME_NPU_OP_MEM, msprofDB);
 }
 
+bool SaveNpuModuleMemData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    // module_id, timestamp, totalReserved, deviceId
+    using NpuModuleMemDataFormat = std::vector<std::tuple<uint32_t, uint64_t, uint64_t, uint16_t>>;
+    auto npuModuleMemData = dataInventory.GetPtr<std::vector<NpuModuleMemData>>();
+    if (npuModuleMemData == nullptr) {
+        WARN("NpuModuleMem data not exist.");
+        return true;
+    }
+    NpuModuleMemDataFormat res;
+    if (!Reserve(res, npuModuleMemData->size())) {
+        ERROR("Reserved for NpuModuleMem data failed.");
+        return false;
+    }
+    for (const auto& item : *npuModuleMemData) {
+        res.emplace_back(item.moduleId, item.timestamp, item.totalReserved, item.deviceId);
+    }
+    return SaveData(res, TABLE_NAME_NPU_MODULE_MEM, msprofDB);
+}
+
 bool SavePCIeData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
 {
     // deviceId, timestampNs, txPostMin, txPostMax, txPostAvg, txNonpostMin, txNonpostMax, txNonpostAvg,
@@ -641,7 +662,7 @@ bool SaveComputeTaskInfo(DataInventory& dataInventory, DBInfo& msprofDB, const s
     if (!res.empty()) {
         flag = SaveData(res, TABLE_NAME_COMPUTE_TASK_INFO, msprofDB);
     }
-    if (!kfcStream->empty()) {
+    if (!scheduleData.empty()) {
         flag = SaveData(scheduleData, TABLE_NAME_COMMUNICATION_SCHEDULE_TASK_INFO, msprofDB) && flag;
     }
     return flag;
@@ -842,6 +863,7 @@ const std::unordered_map<std::string, SaveDataFunc> DATA_SAVER = {
     {Viewer::Database::PROCESSOR_NAME_NPU_INFO,            SaveNpuInfoData},
     {Viewer::Database::PROCESSOR_NAME_NPU_MEM,             SaveNpuMemData},
     {Viewer::Database::PROCESSOR_NAME_NPU_OP_MEM,          SaveNpuOpMemData},
+    {Viewer::Database::PROCESSOR_NAME_NPU_MODULE_MEM,      SaveNpuModuleMemData},
     {Viewer::Database::PROCESSOR_NAME_PCIE,                SavePCIeData},
     {Viewer::Database::PROCESSOR_NAME_SESSION_TIME_INFO,   SaveSessionTimeInfoData},
     {Viewer::Database::PROCESSOR_NAME_SOC,                 SaveSocData},
@@ -866,16 +888,18 @@ DBAssembler::DBAssembler(const std::string& msprofDBPath, const std::string& pro
 
 bool DBAssembler::Run(DataInventory& dataInventory)
 {
-    bool flag = true;
+    bool retFlag = true;
     for (const auto& saveFunc : DATA_SAVER) {
         INFO("Begin to save % data.", saveFunc.first);
-        flag = saveFunc.second(dataInventory, msprofDB_, profPath_) && flag;
+        auto flag = saveFunc.second(dataInventory, msprofDB_, profPath_);
         if (!flag) {
             ERROR("Save % data failed.", saveFunc.first);
         }
+        retFlag = flag && retFlag;
     }
-    flag = SaveStringIdsData(dataInventory, msprofDB_, profPath_) && flag;
-    return flag;
+    // StringIds为id到name映射表，需要最后落盘
+    retFlag = SaveStringIdsData(dataInventory, msprofDB_, profPath_) && retFlag;
+    return retFlag;
 }
 
 }

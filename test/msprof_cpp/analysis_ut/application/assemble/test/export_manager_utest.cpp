@@ -21,6 +21,8 @@
 #include "analysis/csrc/infrastructure/db/include/db_runner.h"
 #include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/domain/data_process/include/data_processor_factory.h"
+#include "analysis/csrc/application/include/export_mode_enum.h"
+
 
 using namespace Analysis::Application;
 using namespace Analysis::Utils;
@@ -119,13 +121,13 @@ TEST_F(ExportManagerUTest, ShouldReturnFalseWhenPathIsInvalid)
 {
     std::string path = "/home/prof_0";
     ExportManager manager(path);
-    EXPECT_FALSE(manager.Run());
+    EXPECT_FALSE(manager.Run(Analysis::Application::ExportMode::TIMELINE));
 }
 
 TEST_F(ExportManagerUTest, ShouldReturnFalseWhenContextInitFail)
 {
     ExportManager manager(PROF_PATH);
-    EXPECT_FALSE(manager.Run());
+    EXPECT_FALSE(manager.Run(Analysis::Application::ExportMode::TIMELINE));
 }
 
 TEST_F(ExportManagerUTest, ShouldReturnTrueWhenProcessFail)
@@ -136,7 +138,18 @@ TEST_F(ExportManagerUTest, ShouldReturnTrueWhenProcessFail)
     MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetMetricMode).stubs().will(returnValue(true));
-    EXPECT_TRUE(manager.Run());
+    EXPECT_TRUE(manager.Run(Analysis::Application::ExportMode::TIMELINE));
+}
+
+TEST_F(ExportManagerUTest, ShouldReturnTrueWhenProcessSuccessWithDB)
+{
+    ExportManager manager(PROF_PATH);
+    MOCKER_CPP(&Context::Load).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetMetricMode).stubs().will(returnValue(true));
+    EXPECT_TRUE(manager.Run(Analysis::Application::ExportMode::DB));
 }
 
 TEST_F(ExportManagerUTest, ShouldReturnTrueWhenProcessSuccessWithReportJson)
@@ -156,7 +169,7 @@ TEST_F(ExportManagerUTest, ShouldReturnTrueWhenProcessSuccessWithReportJson)
     MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetMetricMode).stubs().will(returnValue(true));
-    EXPECT_TRUE(manager.Run());
+    EXPECT_TRUE(manager.Run(Analysis::Application::ExportMode::TIMELINE));
 }
 
 TEST_F(ExportManagerUTest, ShouldReturnTrueWhenReportJsonValueError)
@@ -177,7 +190,7 @@ TEST_F(ExportManagerUTest, ShouldReturnTrueWhenReportJsonValueError)
     MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetMetricMode).stubs().will(returnValue(true));
-    EXPECT_TRUE(manager.Run());
+    EXPECT_TRUE(manager.Run(Analysis::Application::ExportMode::TIMELINE));
 }
 
 TEST_F(ExportManagerUTest, ShouldReturnTrueWhenReportJsonProcessNotExist)
@@ -194,7 +207,7 @@ TEST_F(ExportManagerUTest, ShouldReturnTrueWhenReportJsonProcessNotExist)
     MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetMetricMode).stubs().will(returnValue(true));
-    EXPECT_TRUE(manager.Run());
+    EXPECT_TRUE(manager.Run(Analysis::Application::ExportMode::TIMELINE));
 }
 
 TEST_F(ExportManagerUTest, ShouldReturnTrueWhenReportJsonPathNotExist)
@@ -207,7 +220,7 @@ TEST_F(ExportManagerUTest, ShouldReturnTrueWhenReportJsonPathNotExist)
     MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetMetricMode).stubs().will(returnValue(true));
-    EXPECT_TRUE(manager.Run());
+    EXPECT_TRUE(manager.Run(Analysis::Application::ExportMode::TIMELINE));
 }
 
 TEST_F(ExportManagerUTest, ShouldReturnFalseWhenProcessDataGetDataProcessByNameFailed)
@@ -220,7 +233,7 @@ TEST_F(ExportManagerUTest, ShouldReturnFalseWhenProcessDataGetDataProcessByNameF
     MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
     std::shared_ptr<DataProcessor> processor = nullptr;
     MOCKER_CPP(&DataProcessorFactory::GetDataProcessByName).stubs().will(returnValue(processor));
-    EXPECT_FALSE(manager.Run());
+    EXPECT_FALSE(manager.Run(Analysis::Application::ExportMode::TIMELINE));
     MOCKER_CPP(&DataProcessorFactory::GetDataProcessByName).reset();
 }
 
@@ -241,7 +254,7 @@ TEST_F(ExportManagerUTest, ShouldReturnFalseWhenCheckOutputPathFailed)
     .stubs()
     .will(returnValue(false));
 
-    EXPECT_FALSE(manager.Run());
+    EXPECT_FALSE(manager.Run(Analysis::Application::ExportMode::TIMELINE));
     MOCKER_CPP(&File::Exist).reset();
     MOCKER_CPP(&File::CreateDir).reset();
 }
@@ -270,7 +283,7 @@ TEST_F(ExportManagerUTest, ShouldReturnTrueWhenAnalysisReportJsonFailed)
     .stubs()
     .will(returnValue(analysisError));
 
-    EXPECT_TRUE(manager.Run());
+    EXPECT_TRUE(manager.Run(Analysis::Application::ExportMode::TIMELINE));
 
     MOCKER_CPP(&FileReader::ReadJson).reset();
 }

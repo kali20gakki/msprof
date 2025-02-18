@@ -12,6 +12,7 @@
 
 #include "analysis/csrc/application/include/export_manager.h"
 #include <atomic>
+#include "analysis/csrc/application/database/db_assembler.h"
 #include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/domain/data_process/include/data_processor_factory.h"
 #include "analysis/csrc/domain/data_process/ai_task/hash_init_processor.h"
@@ -20,7 +21,6 @@
 #include "analysis/csrc/application/timeline/timeline_manager.h"
 #include "analysis/csrc/application/timeline/json_constant.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
-
 
 namespace Analysis {
 namespace Application {
@@ -56,8 +56,16 @@ const std::vector<std::string> DATA_PROCESS_LIST{
         PROCESSOR_NAME_QOS,
         PROCESSOR_MC2_COMM_INFO,
         PROCESSOR_NAME_MEMCPY_INFO,
+        PROCESSOR_NAME_NPU_OP_MEM,
+        PROCESSOR_NAME_NPU_MODULE_MEM,
         PROCESSOR_NAME_UNIFIED_PMU
 };
+
+std::string GetDBPath(const std::string& outputDir)
+{
+    return Utils::File::PathJoin(
+        {outputDir, DB_NAME_MSPROF_DB + "_" + Analysis::Utils::GetFormatLocalTime() + ".db"});
+}
 }
 
 bool ExportManager::ProcessData(DataInventory &dataInventory)
@@ -117,7 +125,7 @@ bool ExportManager::Init()
     return true;
 }
 
-bool ExportManager::Run()
+bool ExportManager::Run(ExportMode exportMode)
 {
     INFO("Start to load data!");
     PRINT_INFO("Start to load data!");
@@ -132,9 +140,22 @@ bool ExportManager::Run()
         PRINT_ERROR("Create mindstudio_profiler_output error, can't export data");
         return false;
     }
-    TimelineManager timelineManager(profPath_, outputPath);
-    std::vector<JsonProcess> jsonProcesses = GetProcessEnum();
-    runFlag = timelineManager.Run(dataInventory, jsonProcesses) && runFlag;
+    const std::map<ExportMode, std::function<bool(const std::string&, DataInventory&)>> operationMap = {
+        {ExportMode::DB,       [this](const std::string& outputPath, DataInventory& dataInventory) -> bool {
+            auto dbPath = GetDBPath(profPath_);
+            DBAssembler dbAssembler(dbPath, profPath_);
+            return dbAssembler.Run(dataInventory);
+        }},
+        {ExportMode::TIMELINE, [this](const std::string& outputPath, DataInventory& dataInventory) -> bool {
+            TimelineManager timelineManager(profPath_, outputPath);
+            std::vector<JsonProcess> jsonProcesses = GetProcessEnum();
+            return timelineManager.Run(dataInventory, jsonProcesses);
+        }}
+    };
+    auto iter = operationMap.find(exportMode);
+    if (iter != operationMap.end()) {
+        runFlag = iter->second(outputPath, dataInventory) && runFlag;
+    }
     return runFlag;
 }
 

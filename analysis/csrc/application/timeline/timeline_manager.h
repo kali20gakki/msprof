@@ -17,7 +17,7 @@
 #include <utility>
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
 #include "analysis/csrc/infrastructure/dump_tools/include/dump_tool.h"
-#include "analysis/csrc/application/include/json_process_enum.h"
+#include "analysis/csrc/application/timeline/json_process_enum.h"
 
 namespace Analysis {
 namespace Application {

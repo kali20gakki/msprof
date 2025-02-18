@@ -33,44 +33,51 @@ bool KfcCommProcessor::Process(DataInventory& dataInventory)
         return false;
     }
     communicationData.hashMap = *hashMap;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(communicationData.timeRecord, profPath_)) {
-        ERROR("Failed to obtain the time in start_info and end_info. Prof path is %", profPath_);
-        return false;
-    }
     for (const auto& devicePath : deviceList) {
-        communicationData.deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
-        DBInfo KfcOPTable("hccl_single_device.db", "KfcOP");
-        DBInfo KfcTaksTable("hccl_single_device.db", "KfcTask");
-        std::string dbPath = File::PathJoin({devicePath, SQLITE, KfcOPTable.dbName});
-        if (!KfcOPTable.ConstructDBRunner(dbPath) || !KfcTaksTable.ConstructDBRunner(dbPath)) {
-            flag = false;
-            continue;
-        }
-        auto commStatus = CheckPathAndTable(dbPath, KfcOPTable, false);
-        auto computeStatus = CheckPathAndTable(dbPath, KfcTaksTable, false);
-        if (commStatus != CHECK_SUCCESS && computeStatus != CHECK_SUCCESS) {
-            if (commStatus == CHECK_FAILED || computeStatus == CHECK_FAILED) {
-                flag = false;
-            }
-            continue;
-        }
-        // db取出所有的数据
-        communicationData.oriTaskData = LoadTaskData(KfcTaksTable);
-        communicationData.oriOpData = LoadOpData(KfcOPTable);
-        std::vector<CommunicationTaskData> taskData;
-        std::vector<CommunicationOpData> opData;
-        if (!FormatData(taskData, opData, communicationData)) {
-            ERROR("Format data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO);
-            return false;
-        }
-        ConvertTaskData(resTask, taskData);
-        ConvertOpData(resOp, opData);
+        flag = ProcessSingleDevice(communicationData, devicePath, resTask, resOp) && flag;
     }
     if (!SaveData(resTask, resOp, dataInventory)) {
         ERROR("Save kfc data failed, %.", PROCESSOR_NAME_KFC_COMM);
         flag = false;
     }
     return flag;
+}
+
+bool KfcCommProcessor::ProcessSingleDevice(CommunicationInfoProcessor::CommunicationData& communicationData,
+                                           const std::string& devicePath, std::vector<KfcTaskData>& resTask,
+                                           std::vector<KfcOpData>& resOp)
+{
+    communicationData.deviceId = GetDeviceIdByDevicePath(devicePath);
+    if (!Context::GetInstance().GetProfTimeRecordInfo(communicationData.timeRecord, profPath_,
+                                                      communicationData.deviceId)) {
+        ERROR("Failed to obtain the time in start_info and end_info. Prof path is %, device id is %.", profPath_,
+              communicationData.deviceId);
+        return false;
+    }
+    DBInfo KfcOPTable("hccl_single_device.db", "KfcOP");
+    DBInfo KfcTaksTable("hccl_single_device.db", "KfcTask");
+    std::string dbPath = File::PathJoin({devicePath, SQLITE, KfcOPTable.dbName});
+    if (!KfcOPTable.ConstructDBRunner(dbPath) || !KfcTaksTable.ConstructDBRunner(dbPath)) {
+        return false;
+    }
+    auto commStatus = CheckPathAndTable(dbPath, KfcOPTable, false);
+    auto computeStatus = CheckPathAndTable(dbPath, KfcTaksTable, false);
+    if (commStatus != CHECK_SUCCESS && computeStatus != CHECK_SUCCESS) {
+        if (commStatus == CHECK_FAILED || computeStatus == CHECK_FAILED) {
+            return false;
+        }
+        return true;
+    }
+    // db取出所有的数据
+    communicationData.oriTaskData = LoadTaskData(KfcTaksTable);
+    communicationData.oriOpData = LoadOpData(KfcOPTable);
+    std::vector<CommunicationTaskData> taskData;
+    std::vector<CommunicationOpData> opData;
+    if (!FormatData(taskData, opData, communicationData)) {
+        ERROR("Format data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO);
+        return false;
+    }
+    return ConvertTaskData(resTask, taskData) & ConvertOpData(resOp, opData);
 }
 
 bool KfcCommProcessor::SaveData(std::vector<KfcTaskData> &resTask, std::vector<KfcOpData> &resOp,
