@@ -17,6 +17,7 @@
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/application/include/export_manager.h"
 #include "analysis/csrc/application/include/export_summary.h"
+#include "analysis/csrc/application/include/export_mode_enum.h"
 
 namespace Analysis {
 namespace Interface {
@@ -86,16 +87,11 @@ PyObject *WrapExportUnifiedDB(PyObject *self, PyObject *args)
         return NULL;
     }
     Log::GetInstance().Init(Utils::File::PathJoin({parseFilePath, "mindstudio_profiler_log"}));
-    auto unifiedDbManager = Analysis::Viewer::Database::UnifiedDBManager(parseFilePath);
-    if (!unifiedDbManager.Init()) {
-        ERROR("UnifiedDB init failed.");
-        return Py_BuildValue("i", ANALYSIS_ERROR);
-    }
-    if (!unifiedDbManager.Run()) {
+    auto exportManager = Analysis::Application::ExportManager(parseFilePath);
+    if (!exportManager.Run(Analysis::Application::ExportMode::DB)) {
         ERROR("UnifiedDB run failed.");
         return Py_BuildValue("i", ANALYSIS_ERROR);
     }
-
     return Py_BuildValue("i", ANALYSIS_OK);
 }
 
@@ -118,7 +114,7 @@ PyObject *WrapExportTimeline(PyObject *self, PyObject *args)
     }
     Log::GetInstance().Init(Utils::File::PathJoin({parseFilePath, "mindstudio_profiler_log"}));
     auto exportManager = Analysis::Application::ExportManager(parseFilePath, reportJsonPath);
-    if (!exportManager.Run()) {
+    if (!exportManager.Run(Analysis::Application::ExportMode::TIMELINE)) {
         ERROR("Timeline run failed.");
         return Py_BuildValue("i", ANALYSIS_ERROR);
     }

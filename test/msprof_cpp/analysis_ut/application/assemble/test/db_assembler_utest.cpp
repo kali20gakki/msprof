@@ -33,6 +33,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/system/include/llc_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/npu_mem_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/npu_op_mem_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/npu_module_mem_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/pcie_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/soc_bandwidth_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
@@ -395,6 +396,18 @@ static std::vector<NpuOpMemData> GenerateNpuOpMemData()
     data.totalAllocateMemory = 1703936; // totalAllocateMemory 1703936
     data.totalReserveMemory = 625213440; // totalReserveMemory 625213440
     data.type = 100; // type 100
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<NpuModuleMemData> GenerateNpuModuleMemData()
+{
+    std::vector<NpuModuleMemData> res;
+    NpuModuleMemData data;
+    data.deviceId = 2; // deviceId 2
+    data.moduleId = 5; // moduleId 5
+    data.timestamp = 236368325745555; // timestamp 236368325745555
+    data.totalReserved = 1638400; // size 1638400
     res.push_back(data);
     return res;
 }
@@ -1187,6 +1200,17 @@ TEST_F(DBAssemblerUTest, TestRunSaveNpuOpMemDataShouldReturnTrueWhenRunSuccess)
     std::shared_ptr<std::vector<NpuOpMemData>> dataS;
     MAKE_SHARED0_NO_OPERATION(dataS, std::vector<NpuOpMemData>, data);
     dataInventory.Inject<std::vector<NpuOpMemData>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveNpuModuleMemDataShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateNpuModuleMemData();
+    std::shared_ptr<std::vector<NpuModuleMemData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<NpuModuleMemData>, data);
+    dataInventory.Inject<std::vector<NpuModuleMemData>>(dataS);
     EXPECT_TRUE(assembler.Run(dataInventory));
 }
 

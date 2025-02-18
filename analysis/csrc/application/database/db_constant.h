@@ -34,7 +34,7 @@ const std::unordered_map<std::string, std::unordered_map<std::string, uint16_t>>
 
 const std::string SCHEMA_VERSION_MAJOR = "1";
 const std::string SCHEMA_VERSION_MINOR = "1";
-const std::string SCHEMA_VERSION_MICRO = "0";
+const std::string SCHEMA_VERSION_MICRO = "1";
 const std::string SCHEMA_VERSION = Utils::Join(".", SCHEMA_VERSION_MAJOR, SCHEMA_VERSION_MINOR, SCHEMA_VERSION_MICRO);
 // 版本号相关 SCHEMA_VERSION
 // SCHEMA_VERSION_MAJOR，对于数据库的整体格式，只有在整体db格式发生重大重写或重构时，进行更改

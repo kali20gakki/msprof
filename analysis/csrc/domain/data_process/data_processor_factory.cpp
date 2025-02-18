@@ -36,6 +36,8 @@
 #include "analysis/csrc/domain/data_process/system/sys_io_processor.h"
 #include "analysis/csrc/domain/data_process/system/qos_processor.h"
 #include "analysis/csrc/domain/data_process/ai_task/mc2_comm_info_processor.h"
+#include "analysis/csrc/domain/data_process/system/npu_op_mem_processor.h"
+#include "analysis/csrc/domain/data_process/system/npu_module_mem_processor.h"
 #include "analysis/csrc/domain/data_process/ai_task/metric_processor.h"
 #include "analysis/csrc/domain/data_process/ai_task/unified_pmu_processor.h"
 
@@ -102,6 +104,10 @@ std::unordered_map<std::string, ProcessorCreator> DataProcessorFactory::processo
         MAKE_SHARED_RETURN_VOID(processor, MetricProcessor, profPath);}},
     {PROCESSOR_NAME_MEMCPY_INFO, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
         MAKE_SHARED_RETURN_VOID(processor, MemcpyInfoProcessor, profPath);}},
+    {PROCESSOR_NAME_NPU_OP_MEM, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
+        MAKE_SHARED_RETURN_VOID(processor, NpuOpMemProcessor, profPath);}},
+    {PROCESSOR_NAME_NPU_MODULE_MEM, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
+        MAKE_SHARED_RETURN_VOID(processor, NpuModuleMemProcessor, profPath);}},
     {PROCESSOR_NAME_UNIFIED_PMU, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
         MAKE_SHARED_RETURN_VOID(processor, UnifiedPmuProcessor, profPath);}}
 };

@@ -15,7 +15,8 @@
 
 #include <string>
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
-#include "analysis/csrc/application/include/json_process_enum.h"
+#include "analysis/csrc/application/timeline/json_process_enum.h"
+#include "analysis/csrc/application/include/export_mode_enum.h"
 
 namespace Analysis {
 namespace Application {
@@ -26,7 +27,7 @@ public:
     ExportManager(const std::string& profPath, const std::string& jsonPath) : profPath_(profPath),
         jsonPath_(jsonPath)
     {}
-    bool Run();
+    bool Run(ExportMode exportMode);
 private:
     bool Init();
     bool CheckProfDirsValid();

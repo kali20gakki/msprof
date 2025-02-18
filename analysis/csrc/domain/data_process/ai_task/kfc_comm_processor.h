@@ -31,6 +31,8 @@ private:
     OriOpDataFormat LoadOpData(const DBInfo &hcclSingleDeviceDB) override;
     OriTaskDataFormat LoadTaskData(const DBInfo& hcclSingleDeviceDB) override;
     bool SaveData(std::vector<KfcTaskData> &resTask, std::vector<KfcOpData> &resOp, DataInventory& dataInventory);
+    bool ProcessSingleDevice(CommunicationData& communicationData, const std::string& devicePath,
+                             std::vector<KfcTaskData>& resTask, std::vector<KfcOpData>& resOp);
 };
 }
 }

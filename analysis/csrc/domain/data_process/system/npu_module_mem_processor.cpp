@@ -24,10 +24,6 @@ NpuModuleMemProcessor::NpuModuleMemProcessor(const std::string& profPath) : Data
 bool NpuModuleMemProcessor::Process(DataInventory& dataInventory)
 {
     LocaltimeContext localtimeContext;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_)) {
-        ERROR("Failed to obtain the time in start_info and end_info, profPath is %.", profPath_);
-        return false;
-    }
     SyscntConversionParams params;
     if (!Context::GetInstance().GetSyscntConversionParams(params, HOST_ID, profPath_)) {
         ERROR("GetSyscntConversionParams failed, profPath is %.", profPath_);
@@ -55,6 +51,11 @@ bool NpuModuleMemProcessor::ProcessSingleDevice(const std::string& devicePath, L
     DBInfo npuModuleMemDB("npu_module_mem.db", "NpuModuleMem");
     if (localtimeContext.deviceId == INVALID_DEVICE_ID) {
         ERROR("the invalid deviceId cannot to be identified, profPath is %", profPath_);
+        return false;
+    }
+    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_,
+                                                      localtimeContext.deviceId)) {
+        ERROR("Failed to obtain the time in start_info and end_info, profPath is %.", profPath_);
         return false;
     }
     std::string dbPath = File::PathJoin({devicePath, SQLITE, npuModuleMemDB.dbName});
