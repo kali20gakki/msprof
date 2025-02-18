@@ -36,6 +36,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/mc2_comm_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/kfc_turn_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/unified_pmu_data.h"
 
 
 namespace Analysis {
@@ -751,32 +752,107 @@ bool SaveRoCEData(DataInventory& dataInventory, DBInfo& msprofDB, const std::str
     return SaveSysIOData<RoceOriginalData>(dataInventory, msprofDB, TABLE_NAME_ROCE);
 }
 
+bool SaveTaskPmuData(DataInventory &dataInventory, DBInfo &msprofDB, const std::string& profPath)
+{
+    // UnifiedTaskPMU deviceId, streamId, taskId, subtaskId, batchId, header, value
+    // ProcessedTaskFormat globalTaskId, header(uint64id), value
+    using PTFormat = std::vector<std::tuple<uint64_t, uint64_t, double>>;
+    PTFormat res;
+    auto unifiedTaskPmuData = dataInventory.GetPtr<std::vector<UnifiedTaskPmu>>();
+    if (unifiedTaskPmuData == nullptr) {
+        WARN("unifiedTaskPmuData data not exist.");
+        return true;
+    }
+
+    if (!Reserve(res, unifiedTaskPmuData->size())) {
+        ERROR("Reserved for AscendTaskData data failed.");
+        return false;
+    }
+    for (const auto& item : *unifiedTaskPmuData) {
+        uint64_t globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(static_cast<uint16_t>(item.deviceId),
+                                                                            item.streamId, item.taskId,
+                                                                            item.subtaskId, item.batchId));
+        res.emplace_back(globalTaskId, IdPool::GetInstance().GetUint64Id(item.header), item.value);
+    }
+    return SaveData(res, TABLE_NAME_TASK_PMU_INFO, msprofDB);
+}
+
+bool SaveSamplePmuTimelineData(DataInventory &dataInventory, DBInfo &msprofDB, const std::string& profPath)
+{
+    // deviceId, timestamp, totalCycle, usage, freq, coreId, coreType
+    using PSTFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, double, double, uint16_t, uint64_t>>;
+    PSTFormat res;
+    auto unifiedSamplePmuTimelineData = dataInventory.GetPtr<std::vector<UnifiedSampleTimelinePmu>>();
+    if (unifiedSamplePmuTimelineData == nullptr) {
+        WARN("unifiedTaskPmuData data not exist.");
+        return true;
+    }
+
+    if (!Reserve(res, unifiedSamplePmuTimelineData->size())) {
+        ERROR("Reserved for AscendTaskData data failed.");
+        return false;
+    }
+
+    for (const auto& item : *unifiedSamplePmuTimelineData) {
+        res.emplace_back(item.deviceId, item.timestamp, item.totalCycle, item.usage, item.freq, item.coreId,
+                         item.coreType);
+    }
+    return SaveData(res, TABLE_NAME_SAMPLE_PMU_TIMELINE, msprofDB);
+}
+
+bool SaveSamplePmuSummaryData(DataInventory &dataInventory, DBInfo &msprofDB, const std::string& profPath)
+{
+    // Processed Sample Summary Format
+    // deviceId, metric, value, coreId, coreType
+    using PSSFormat = std::vector<std::tuple<uint16_t, uint64_t, double, uint16_t, uint64_t>>;
+    PSSFormat res;
+    auto unifiedSamplePmuSummaryData = dataInventory.GetPtr<std::vector<UnifiedSampleSummaryPmu>>();
+    if (unifiedSamplePmuSummaryData == nullptr) {
+        WARN("unifiedTaskPmuData data not exist.");
+        return true;
+    }
+
+    if (!Reserve(res, unifiedSamplePmuSummaryData->size())) {
+        ERROR("Reserved for AscendTaskData data failed.");
+        return false;
+    }
+    // deviceId, metric, value, coreId, coreType
+    for (const auto& item : *unifiedSamplePmuSummaryData) {
+        res.emplace_back(item.deviceId, IdPool::GetInstance().GetUint64Id(item.metric), item.value, item.coreId,
+                         item.coreType);
+    }
+    return SaveData(res, TABLE_NAME_SAMPLE_PMU_SUMMARY, msprofDB);
+}
+
 // 创建 SaveData 的函数类型
 using SaveDataFunc = std::function<bool(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)>;
 const std::unordered_map<std::string, SaveDataFunc> DATA_SAVER = {
-    {Viewer::Database::PROCESSOR_NAME_API,               SaveApiData},
-    {Viewer::Database::PROCESSOR_NAME_COMMUNICATION,     SaveCommunicationData},
-    {Viewer::Database::PROCESSOR_NAME_ACC_PMU,           SaveAccPmuData},
-    {Viewer::Database::PROCESSOR_NAME_AICORE_FREQ,       SaveAicoreFreqData},
-    {Viewer::Database::PROCESSOR_NAME_DDR,               SaveDDRData},
-    {Viewer::Database::PROCESSOR_NAME_ENUM,              SaveEnumData},
-    {Viewer::Database::PROCESSOR_NAME_HBM,               SaveHbmData},
-    {Viewer::Database::PROCESSOR_NAME_HOST_INFO,         SaveHostInfoData},
-    {Viewer::Database::PROCESSOR_NAME_HCCS,              SaveHccsData},
-    {Viewer::Database::PROCESSOR_NAME_LLC,               SaveLlcData},
-    {Viewer::Database::PROCESSOR_NAME_META_DATA,         SaveMetaData},
-    {Viewer::Database::PROCESSOR_NAME_MSTX,              SaveMsprofTxData},
-    {Viewer::Database::PROCESSOR_NAME_NPU_INFO,          SaveNpuInfoData},
-    {Viewer::Database::PROCESSOR_NAME_NPU_MEM,           SaveNpuMemData},
-    {Viewer::Database::PROCESSOR_NAME_NPU_OP_MEM,        SaveNpuOpMemData},
-    {Viewer::Database::PROCESSOR_NAME_PCIE,              SavePCIeData},
-    {Viewer::Database::PROCESSOR_NAME_SESSION_TIME_INFO, SaveSessionTimeInfoData},
-    {Viewer::Database::PROCESSOR_NAME_SOC,               SaveSocData},
-    {Viewer::Database::PROCESSOR_NAME_NIC,               SaveNicData},
-    {Viewer::Database::PROCESSOR_NAME_ROCE,              SaveRoCEData},
-    {Viewer::Database::PROCESSOR_NAME_TASK,              SaveAscendTaskData},
-    {Viewer::Database::PROCESSOR_NAME_COMPUTE_TASK_INFO, SaveComputeTaskInfo},
-    {Viewer::Database::PROCESSOR_NAME_MEMCPY_INFO,       SaveMemcpyInfoData},
+    {Viewer::Database::PROCESSOR_NAME_API,                 SaveApiData},
+    {Viewer::Database::PROCESSOR_NAME_COMMUNICATION,       SaveCommunicationData},
+    {Viewer::Database::PROCESSOR_NAME_ACC_PMU,             SaveAccPmuData},
+    {Viewer::Database::PROCESSOR_NAME_AICORE_FREQ,         SaveAicoreFreqData},
+    {Viewer::Database::PROCESSOR_NAME_DDR,                 SaveDDRData},
+    {Viewer::Database::PROCESSOR_NAME_ENUM,                SaveEnumData},
+    {Viewer::Database::PROCESSOR_NAME_HBM,                 SaveHbmData},
+    {Viewer::Database::PROCESSOR_NAME_HOST_INFO,           SaveHostInfoData},
+    {Viewer::Database::PROCESSOR_NAME_HCCS,                SaveHccsData},
+    {Viewer::Database::PROCESSOR_NAME_LLC,                 SaveLlcData},
+    {Viewer::Database::PROCESSOR_NAME_META_DATA,           SaveMetaData},
+    {Viewer::Database::PROCESSOR_NAME_MSTX,                SaveMsprofTxData},
+    {Viewer::Database::PROCESSOR_NAME_NPU_INFO,            SaveNpuInfoData},
+    {Viewer::Database::PROCESSOR_NAME_NPU_MEM,             SaveNpuMemData},
+    {Viewer::Database::PROCESSOR_NAME_NPU_OP_MEM,          SaveNpuOpMemData},
+    {Viewer::Database::PROCESSOR_NAME_PCIE,                SavePCIeData},
+    {Viewer::Database::PROCESSOR_NAME_SESSION_TIME_INFO,   SaveSessionTimeInfoData},
+    {Viewer::Database::PROCESSOR_NAME_SOC,                 SaveSocData},
+    {Viewer::Database::PROCESSOR_NAME_NIC,                 SaveNicData},
+    {Viewer::Database::PROCESSOR_NAME_ROCE,                SaveRoCEData},
+    {Viewer::Database::PROCESSOR_NAME_TASK,                SaveAscendTaskData},
+    {Viewer::Database::PROCESSOR_NAME_COMPUTE_TASK_INFO,   SaveComputeTaskInfo},
+    {Viewer::Database::PROCESSOR_NAME_MEMCPY_INFO,         SaveMemcpyInfoData},
+    {Viewer::Database::PROCESSOR_NAME_TASK_PMU_INFO,       SaveTaskPmuData},
+    {Viewer::Database::PROCESSOR_NAME_SAMPLE_PMU_TIMELINE, SaveSamplePmuTimelineData},
+    {Viewer::Database::PROCESSOR_NAME_SAMPLE_PMU_SUMMARY,  SaveSamplePmuSummaryData},
 };
 }
 

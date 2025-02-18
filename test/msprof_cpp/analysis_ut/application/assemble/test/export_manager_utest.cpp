@@ -135,6 +135,7 @@ TEST_F(ExportManagerUTest, ShouldReturnTrueWhenProcessFail)
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetMetricMode).stubs().will(returnValue(true));
     EXPECT_TRUE(manager.Run());
 }
 
@@ -154,6 +155,7 @@ TEST_F(ExportManagerUTest, ShouldReturnTrueWhenProcessSuccessWithReportJson)
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetMetricMode).stubs().will(returnValue(true));
     EXPECT_TRUE(manager.Run());
 }
 
@@ -174,6 +176,7 @@ TEST_F(ExportManagerUTest, ShouldReturnTrueWhenReportJsonValueError)
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetMetricMode).stubs().will(returnValue(true));
     EXPECT_TRUE(manager.Run());
 }
 
@@ -190,6 +193,7 @@ TEST_F(ExportManagerUTest, ShouldReturnTrueWhenReportJsonProcessNotExist)
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetMetricMode).stubs().will(returnValue(true));
     EXPECT_TRUE(manager.Run());
 }
 
@@ -202,6 +206,7 @@ TEST_F(ExportManagerUTest, ShouldReturnTrueWhenReportJsonPathNotExist)
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetMetricMode).stubs().will(returnValue(true));
     EXPECT_TRUE(manager.Run());
 }
 
@@ -258,6 +263,7 @@ TEST_F(ExportManagerUTest, ShouldReturnTrueWhenAnalysisReportJsonFailed)
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
     MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(true));
+    MOCKER_CPP(&Context::GetMetricMode).stubs().will(returnValue(true));
     const int analysisError = 1;
 
     MOCKER_CPP(&FileReader::ReadJson)
