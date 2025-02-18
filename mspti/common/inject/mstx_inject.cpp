@@ -95,7 +95,7 @@ namespace MsptiMstxApi {
 
 static bool IsMsgValid(const char* msg)
 {
-    if (msg == nullptr || !Utils::CheckCharValid(msg) || strnlen(msg, MAX_MARK_MSG_LEN + 1) > MAX_MARK_MSG_LEN) {
+    if (msg == nullptr || strnlen(msg, MAX_MARK_MSG_LEN + 1) > MAX_MARK_MSG_LEN) {
         MSPTI_LOGE("Input Params msg is invalid");
         return false;
     }
@@ -221,9 +221,8 @@ int GetModuleTableFunc(MstxGetModuleFuncTableFunc getFuncTable)
     };
     for (size_t i = MSTX_API_MODULE_CORE; i < MSTX_API_MODULE_SIZE; i++) {
         if (getFuncTable(static_cast<MstxFuncModule>(i), &outTable, &outSize) != MSPTI_SUCCESS) {
-            MSPTI_LOGE("Failed to get func table for module %d", i);
-            retVal = MSTX_FAIL;
-            break;
+            MSPTI_LOGW("Failed to get func table for module %zu", i);
+            continue;
         }
         if (outSize != CheckOutTableSizes[i]) {
             MSPTI_LOGE("outSize is invalid, Failed to init mstx funcs.");
@@ -251,6 +250,7 @@ int GetModuleTableFunc(MstxGetModuleFuncTableFunc getFuncTable)
         if (retVal == MSTX_FAIL) {
             break;
         }
+        MSPTI_LOGI("Succeed to get func table for module %zu", i);
     }
     return retVal;
 }

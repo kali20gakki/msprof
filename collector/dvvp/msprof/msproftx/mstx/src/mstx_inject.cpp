@@ -98,7 +98,7 @@ constexpr uint16_t MSTX_TAG_ID = 11;
 
 static bool IsMsgValid(const char* msg)
 {
-    if (msg == nullptr || strnlen(msg, MAX_MESSAGE_LEN) == MAX_MESSAGE_LEN || !Utils::CheckCharValid(msg)) {
+    if (msg == nullptr || strnlen(msg, MAX_MESSAGE_LEN) == MAX_MESSAGE_LEN) {
         MSPROF_LOGE("Input Params msg is invalid");
         return false;
     }
@@ -292,9 +292,8 @@ int GetModuleTableFunc(MstxGetModuleFuncTableFunc getFuncTable)
     };
     for (size_t i = MSTX_API_MODULE_CORE; i < MSTX_API_MODULE_SIZE; i++) {
         if (getFuncTable(static_cast<MstxFuncModule>(i), &outTable, &outSize) != MSTX_SUCCESS) {
-            MSPROF_LOGE("Failed to get func table for module %d", i);
-            retVal = MSTX_FAIL;
-            break;
+            MSPROF_LOGW("Failed to get func table for module %zu", i);
+            continue;
         }
         if (outSize != CheckOutTableSizes[i]) {
             MSPROF_LOGE("outSize is invalid, Failed to init mstx funcs.");
@@ -322,6 +321,7 @@ int GetModuleTableFunc(MstxGetModuleFuncTableFunc getFuncTable)
         if (retVal == MSTX_FAIL) {
             break;
         }
+        MSPROF_LOGI("Succeed to get func table for module %zu", i);
     }
     return retVal;
 }
