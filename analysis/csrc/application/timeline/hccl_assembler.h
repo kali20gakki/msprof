@@ -45,9 +45,9 @@ class HcclOpTraceEvent : public DurationEvent {
 public:
     HcclOpTraceEvent(uint32_t pid, int tid, double dur, const std::string &ts, const std::string &name,
                      uint32_t modelId, uint32_t count, uint64_t connectionId, const std::string &dataType,
-                     const std::string &algType)
+                     const std::string &algType, const std::string &relay, const std::string &retry)
         : DurationEvent(pid, tid, dur, ts, name), modelId_(modelId), count_(count), connectionId_(connectionId),
-        dataType_(dataType), algType_(algType) {}
+        dataType_(dataType), algType_(algType), relay_(relay), retry_(retry) {}
 private:
     void ProcessArgs(JsonWriter &ostream) override;
 private:
@@ -56,6 +56,8 @@ private:
     uint64_t connectionId_;
     std::string dataType_;
     std::string algType_;
+    std::string relay_;
+    std::string retry_;
 };
 
 class HcclTaskTraceEvent : public DurationEvent {
@@ -152,6 +154,8 @@ private:
         uint32_t formatPid;
         int tid;
         std::string dataType;
+        std::string retry;
+        std::string relay;
         for (auto &data : opData) {
             formatPid = GetDevicePid(pidMap, data.deviceId, profPath, layerInfo.sortIndex);
             tid = GetTid(data.groupName, data.deviceId, type);
@@ -160,9 +164,11 @@ private:
             }
             dataType = TransEnumToType(data.dataType, HCCL_DATA_TYPE_TABLE);
             std::shared_ptr<HcclOpTraceEvent> event;
+            retry = (data.retry == 1) ? "yes" : "no";
+            relay = (data.relay == 1) ? "yes" : "no";
             MAKE_SHARED_RETURN_VOID(event, HcclOpTraceEvent, formatPid, tid, (data.end - data.start) / NS_TO_US,
                                     DivideByPowersOfTenWithPrecision(data.start), data.opName, data.modelId,
-                                    data.count, data.connectionId, dataType, data.algType);
+                                    data.count, data.connectionId, dataType, data.algType, relay, retry);
             res_.push_back(event);
             GenerateConnectionTrace(data, formatPid, tid);
         }

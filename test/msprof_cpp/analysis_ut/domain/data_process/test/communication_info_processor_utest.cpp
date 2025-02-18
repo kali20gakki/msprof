@@ -44,6 +44,7 @@ const std::set<std::string> PROF_PATHS = {PROF_PATH_A, PROF_PATH_B};
 const std::string TASK_TABLE_NAME = "HCCLTaskSingleDevice";
 const std::string OP_TABLE_NAME = "HCCLOpSingleDevice";
 const std::string KFC_TASK_TABLE_NAME = "KfcTask";
+const std::string KFC_OP_TABLE_NAME = "KfcOP";
 
 using HcclTaskSingleDeviceFormat = std::vector<std::tuple<uint32_t, int32_t, std::string, uint32_t, std::string,
     std::string, double, int32_t, double, double, double,
@@ -58,6 +59,10 @@ using HcclOpSingleDeviceFormat = std::vector<std::tuple<uint32_t, std::string, s
 using KfcTaskFormat = std::vector<std::tuple<uint32_t, int32_t, std::string, uint64_t, uint32_t, std::string,
     std::string, uint32_t, uint64_t, double, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, std::string,
     uint32_t, std::string, std::string, double, uint32_t, std::string, uint32_t, std::string, uint32_t, uint32_t>>;
+
+using KfcOpFormat = std::vector<std::tuple<uint32_t, uint32_t, std::string, double, double,
+                                           std::string, uint32_t, std::string, uint32_t, uint32_t,
+                                           std::string, std::string, uint64_t, uint32_t, uint32_t>>;
 
 const HcclTaskSingleDeviceFormat DATA_A{
     {4294967295, -1, "hcom_allReduce__360_0_1", 0, "Memcpy",   "10652832407468360",
@@ -93,6 +98,10 @@ const KfcTaskFormat DATA_KFC_A{
      1, 41683029923680, 20, 0, 69, 0, 0, 5, 6, "SDMA", 4, "INT8", "HCCS", 3.12, 4294967295, "102", 0,
      "INVALID_TYPE", 405, 0}
 };
+const KfcOpFormat DATA_KFC_OP_A{
+    {4294967295, -1, "hcom_allReduce__360_0_1", 781687236999151, 35092402526.203125, "10652832407468360", 125,
+     "AicpuKernel", 0, 1, "INT16", "HD-NB", 3021, 2, 0}
+};
 }
 
 class CommunicationInfoProcessorUTest : public testing::Test {
@@ -114,6 +123,7 @@ protected:
         CreateHcclOpSingleDevice(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_OP_A);
         CreateHcclOpSingleDevice(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_OP_B);
         CreateKfcTask(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_KFC_A);
+        CreateKfcOP(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_KFC_OP_A);
         MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo)
             .stubs()
             .will(returnValue(true));
@@ -152,6 +162,16 @@ protected:
         auto cols = database->GetTableCols(KFC_TASK_TABLE_NAME);
         dbRunner->CreateTable(KFC_TASK_TABLE_NAME, cols);
         dbRunner->InsertData(KFC_TASK_TABLE_NAME, data);
+    }
+    static void CreateKfcOP(const std::string& dbPath, KfcOpFormat data)
+    {
+        std::shared_ptr<HCCLSingleDeviceDB> database;
+        MAKE_SHARED0_RETURN_VOID(database, HCCLSingleDeviceDB);
+        std::shared_ptr<DBRunner> dbRunner;
+        MAKE_SHARED_RETURN_VOID(dbRunner, DBRunner, dbPath);
+        auto cols = database->GetTableCols(KFC_OP_TABLE_NAME);
+        dbRunner->CreateTable(KFC_OP_TABLE_NAME, cols);
+        dbRunner->InsertData(KFC_OP_TABLE_NAME, data);
     }
 };
 
@@ -195,6 +215,9 @@ static void CheckOpInfo(std::vector<CommunicationOpData> data)
         opKeySet.insert(item.opKey);
         opDataTypeSet.insert(item.dataType);
         opTypeSet.insert(item.opType);
+        if (item.opName == "hcom_allReduce__360_0_1") {
+            EXPECT_EQ(item.retry, 1);  // 重执行
+        }
     }
     EXPECT_EQ(opNameSet.size(), OP_NAME_NUM);
     EXPECT_EQ(connectionIdSet.size(), CONNECTION_ID_NUM);
@@ -317,10 +340,11 @@ TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnTrueWhenNoDb)
 TEST_F(CommunicationInfoProcessorUTest, TestFormatKfcDataShouldReturnFalseWhenReserveFailed)
 {
     std::vector<CommunicationTaskData> taskData;
+    std::vector<CommunicationOpData> opData;
     CommunicationInfoProcessor::CommunicationData communicationData;
     auto processor = CommunicationInfoProcessor({File::PathJoin({COMMUNICATION_TASK_PATH, "test"})});
     MOCKER_CPP(&Utils::Reserve<CommunicationTaskData>).stubs().will(returnValue(false));
-    EXPECT_FALSE(processor.FormatKfcData(taskData, communicationData));
+    EXPECT_FALSE(processor.FormatKfcData(taskData, opData, communicationData));
     MOCKER_CPP(&Utils::Reserve<CommunicationTaskData>).reset();
 }
 

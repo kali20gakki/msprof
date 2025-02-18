@@ -159,7 +159,8 @@ TEST_F(HcclAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
                             "INVALID_TYPE\",\"link type\":\"INVALID_TYPE\",\"bandwidth(GB/s)\":0.0,\"model id\":"
                             "4294967295}},{\"name\":\"hcom_broadcast__674_0_1\",\"pid\":10327520,\"tid\":0,\"ts\":\""
                             "1717575960213957.957\",\"dur\":1000.0,\"ph\":\"X\",\"args\":{\"connection_id\":2762,\""
-                            "model id\":4294967295,\"data_type\":\"INT16\",\"alg_type\":\"MESH-RING\",\"count\":5}},{"
+                            "model id\":4294967295,\"data_type\":\"INT16\",\"alg_type\":\"MESH-RING\",\"count\":5,"
+                            "\"relay\":\"no\",\"retry\":\"no\"}},{"
                             "\"name\":\"HostToDevice11862699671552\",\"pid\":10327520,\"tid\":0,\"ph\":\"f\",\"cat\":"
                             "\"HostToDevice\",\"id\":\"11862699671552\",\"ts\":\"1717575960213957.957\",\"bp\":"
                             "\"e\"},";
