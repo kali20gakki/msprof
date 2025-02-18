@@ -37,6 +37,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/system/include/soc_bandwidth_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/npu_op_mem_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/unified_pmu_data.h"
 
 using namespace Analysis::Application;
 using namespace Analysis::Utils;
@@ -468,6 +469,49 @@ static std::vector<MC2CommInfoData> GenerateKfcStreamData()
     MC2CommInfoData data;
     data.aiCpuKfcStreamId = 2; // kfcStreamId 2
     data.commStreamIds = "3, 4, 5";
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<UnifiedTaskPmu> GenerateUnifiedTaskPmuData()
+{
+    std::vector<UnifiedTaskPmu> res;
+    UnifiedTaskPmu data;
+    data.deviceId = 0; // deviceId 0
+    data.streamId = 68; // streamId 68
+    data.taskId = 22; // taskId 22
+    data.subtaskId = 2344; // subtaskID 2344
+    data.batchId = 4294967295; // batchId 4294967295
+    data.header = "aic_total_time";
+    data.value = 318360.0; // value 318360.0
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<UnifiedSampleTimelinePmu> GenerateUnifiedSampleTimelinePmuData()
+{
+    std::vector<UnifiedSampleTimelinePmu> res;
+    UnifiedSampleTimelinePmu data;
+    data.deviceId = 0; // deviceId 0
+    data.timestamp = 1701121739053206820; // timestamp 1701121739053206820
+    data.totalCycle = 0; // totalCycle 0
+    data.usage = 0.0; // usage 0.0
+    data.freq = 1000.0; // freq 1000.0
+    data.coreId = 0; // coreId 0
+    data.coreType = 2;  // coreType 2
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<UnifiedSampleSummaryPmu> GenerateUnifiedSampleSummaryPmuData()
+{
+    std::vector<UnifiedSampleSummaryPmu> res;
+    UnifiedSampleSummaryPmu data;
+    data.deviceId = 0; // deviceId 0
+    data.metric = "total_time";
+    data.value = 734951000.0; // value 734951000.0
+    data.coreId = 0; // coreId 0
+    data.coreType = 2; // coreType 2
     res.push_back(data);
     return res;
 }
@@ -1270,3 +1314,98 @@ TEST_F(DBAssemblerUTest, TestSaveAscendTaskDataShouldReturnFalseWhenReserveFaile
     MOCKER_CPP(&ascendTaskDataFormat::reserve).reset();
 }
 
+TEST_F(DBAssemblerUTest, TestRunSaveTaskPmuDataShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateUnifiedTaskPmuData();
+    std::shared_ptr<std::vector<UnifiedTaskPmu>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<UnifiedTaskPmu>, data);
+    dataInventory.Inject<std::vector<UnifiedTaskPmu>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveSamplePmuTimelineDataShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateUnifiedSampleTimelinePmuData();
+    std::shared_ptr<std::vector<UnifiedSampleTimelinePmu>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<UnifiedSampleTimelinePmu>, data);
+    dataInventory.Inject<std::vector<UnifiedSampleTimelinePmu>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveSamplePmuSummaryDataShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateUnifiedSampleSummaryPmuData();
+    std::shared_ptr<std::vector<UnifiedSampleSummaryPmu>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<UnifiedSampleSummaryPmu>, data);
+    dataInventory.Inject<std::vector<UnifiedSampleSummaryPmu>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveTaskPmuDataShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
+{
+    using PTFormat = std::vector<std::tuple<uint64_t, uint64_t, double>>;
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateUnifiedTaskPmuData();
+    std::shared_ptr<std::vector<UnifiedTaskPmu>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<UnifiedTaskPmu>, data);
+    dataInventory.Inject<std::vector<UnifiedTaskPmu>>(dataS);
+    MOCKER_CPP(&PTFormat::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    MOCKER_CPP(&PTFormat::reserve).reset();
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveSamplePmuTimelineDataShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
+{
+    using PSTFormat = std::vector<std::tuple<uint16_t, uint64_t, uint64_t, double, double, uint16_t, uint64_t>>;
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateUnifiedSampleTimelinePmuData();
+    std::shared_ptr<std::vector<UnifiedSampleTimelinePmu>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<UnifiedSampleTimelinePmu>, data);
+    dataInventory.Inject<std::vector<UnifiedSampleTimelinePmu>>(dataS);
+    MOCKER_CPP(&PSTFormat::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    MOCKER_CPP(&PSTFormat::reserve).reset();
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveSamplePmuSummaryDataShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
+{
+    using PSSFormat = std::vector<std::tuple<uint16_t, uint64_t, double, uint16_t, uint64_t>>;
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateUnifiedSampleSummaryPmuData();
+    std::shared_ptr<std::vector<UnifiedSampleSummaryPmu>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<UnifiedSampleSummaryPmu>, data);
+    dataInventory.Inject<std::vector<UnifiedSampleSummaryPmu>>(dataS);
+    MOCKER_CPP(&PSSFormat::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    MOCKER_CPP(&PSSFormat::reserve).reset();
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveTaskPmuDataShouldReturnTrueWhenTaskPmuDataIsNotExist)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveSamplePmuTimelineDataShouldReturnTrueWhenSamplePmuTimelineDataIsNotExist)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveSamplePmuSummaryDataShouldReturnTrueWhenSamplePmuSummaryDataIsNotExist)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
