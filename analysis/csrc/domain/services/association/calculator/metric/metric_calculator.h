@@ -55,7 +55,7 @@ using IntPtrType = std::vector<uint64_t>;
 class Calculator {
 public:
     Calculator(std::vector<uint32_t> registers, std::function<double(CalculationElements &params, size_t index)> func)
-    : registers(std::move(registers)), calculatorFunc(std::move(func)) {}
+        : registers(std::move(registers)), calculatorFunc(std::move(func)) {}
     static double CalculatorMetricByNothing(CalculationElements &allParams, size_t index);
     static double CalculatorMetricByAdditions(CalculationElements &allParams, size_t index);
     static double CalculatorMetricByDivision(CalculationElements &allParams, size_t index);
