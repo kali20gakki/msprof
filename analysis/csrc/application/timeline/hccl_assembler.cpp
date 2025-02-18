@@ -34,6 +34,8 @@ void HcclOpTraceEvent::ProcessArgs(JsonWriter& ostream)
     ostream["data_type"] << dataType_;
     ostream["alg_type"] << algType_;
     ostream["count"] << count_;
+    ostream["relay"] << relay_;
+    ostream["retry"] << retry_;
 }
 
 void HcclTaskTraceEvent::ProcessArgs(JsonWriter& ostream)

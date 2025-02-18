@@ -39,6 +39,7 @@ public:
         OriTaskDataFormat oriTaskData;
         OriOpDataFormat oriOpData;
         OriTaskDataFormat oriKfcTaskData;
+        OriOpDataFormat oriKfcOpData;
         uint16_t deviceId = UINT16_MAX;
         Utils::ProfTimeRecord timeRecord;
         GeHashMap hashMap;
@@ -79,11 +80,12 @@ private:
     void UpdateOpInfo(CommunicationOpData& opData, uint32_t connectionId,
                       const std::unordered_map<uint32_t, size_t>& opInfoIdxMap, const OriOpDataFormat& oriOpData,
                       CommunicationData& communicationData);
-    bool FormatKfcData(std::vector<CommunicationTaskData>& taskFormatData, CommunicationData& communicationData);
+    bool FormatKfcData(std::vector<CommunicationTaskData>& taskFormatData,
+                       std::vector<CommunicationOpData> &opFormatData, CommunicationData& communicationData);
     bool ProcessHcclData(const std::string& devicePath, std::vector<CommunicationTaskData> &taskData,
                          std::vector<CommunicationOpData> &opData, CommunicationData &communicationData);
     bool ProcessKfcData(const std::string& devicePath, std::vector<CommunicationTaskData> &taskData,
-                        CommunicationData &communicationData);
+                        std::vector<CommunicationOpData> &opFormatData, CommunicationData &communicationData);
 };
 } // Domain
 } // Analysis

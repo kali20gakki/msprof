@@ -17,6 +17,9 @@ namespace Domain {
 using namespace Environment;
 using namespace Analysis::Utils;
 namespace {
+const size_t OPNAME_INDEX = 1;
+const size_t RELAY_INDEX = 2;
+const size_t RETRY_INDEX = 3;
 struct CommunicationOpEndpointsTime {
     double firstTaskStartTime;
     double lastTaskStartTime;
@@ -32,6 +35,16 @@ std::string GetGroupNameValue(const std::string& groupName, GeHashMap& hashMap)
         }
     }
     return groupName;
+}
+
+std::unordered_map<std::string, std::pair<int32_t, int32_t>> GetkfcOpInfoMap(const OriOpDataFormat &oriKfcOpData)
+{
+    std::unordered_map<std::string, std::pair<int32_t, int32_t>> kfcOpInfoMap;
+    for (auto& row : oriKfcOpData) {
+        kfcOpInfoMap.emplace(std::get<OPNAME_INDEX>(row),
+                             std::make_pair(std::get<RELAY_INDEX>(row), std::get<RETRY_INDEX>(row)));
+    }
+    return kfcOpInfoMap;
 }
 }
 
@@ -95,6 +108,9 @@ OriOpDataFormat CommunicationInfoProcessor::LoadOpData(const DBInfo& opSingleDev
     OriOpDataFormat oriOpData;
     std::string sql{"SELECT connection_id, op_name, relay, retry, data_type, alg_type, count, group_name, op_type, "
                     "model_id, 0 as rank_size FROM " + opSingleDevice.tableName};
+    if (opSingleDevice.tableName == "KfcOP") {
+        sql.append(" WHERE source = " + std::to_string(static_cast<int>(DeviceHcclOpSource::HCCL)));
+    }
     if (!opSingleDevice.dbRunner->QueryData(sql, oriOpData)) {
         ERROR("Failed to obtain data from the % table.", opSingleDevice.tableName);
     }
@@ -156,6 +172,7 @@ bool CommunicationInfoProcessor::FormatData(std::vector<CommunicationTaskData>& 
 }
 
 bool CommunicationInfoProcessor::FormatKfcData(std::vector<CommunicationTaskData>& taskFormatData,
+                                               std::vector<CommunicationOpData> &opFormatData,
                                                CommunicationData& communicationData)
 {
     if (!Utils::Reserve(taskFormatData, communicationData.oriKfcTaskData.size())) {
@@ -167,6 +184,17 @@ bool CommunicationInfoProcessor::FormatKfcData(std::vector<CommunicationTaskData
     for (auto& row : communicationData.oriKfcTaskData) {
         Update(row, hcclData, taskData, communicationData);
         taskFormatData.emplace_back(taskData);
+    }
+    // 替换通信大算子的retry字段为KfcOp表里面的对应值
+    auto kfcOpInfoMap = GetkfcOpInfoMap(communicationData.oriKfcOpData);
+    for (auto& row : opFormatData) {
+        auto it = kfcOpInfoMap.find(row.opName);
+        if (it != kfcOpInfoMap.end()) {
+            row.relay = it->second.first;
+            row.retry = it->second.second;
+        } else {
+            WARN("% is not exist in KfcOP", row.opName);
+        }
     }
     return true;
 }
@@ -230,11 +258,14 @@ std::unordered_map<uint32_t, size_t> CommunicationInfoProcessor::GenOpInfoIdxMap
 
 bool CommunicationInfoProcessor::ProcessKfcData(const std::string &devicePath,
                                                 std::vector<CommunicationTaskData> &taskData,
+                                                std::vector<CommunicationOpData> &opData,
                                                 CommunicationData &communicationData)
 {
     DBInfo kfcTaskDBInfo("hccl_single_device.db", "KfcTask");
+    DBInfo kfcOpDBInfo("hccl_single_device.db", "KfcOP");
     std::string kfcTaskDBPath = Utils::File::PathJoin({devicePath, SQLITE, kfcTaskDBInfo.dbName});
-    if (!kfcTaskDBInfo.ConstructDBRunner(kfcTaskDBPath)) {
+    std::string kfcOpDBPath = Utils::File::PathJoin({devicePath, SQLITE, kfcOpDBInfo.dbName});
+    if (!kfcTaskDBInfo.ConstructDBRunner(kfcTaskDBPath) || !kfcOpDBInfo.ConstructDBRunner(kfcOpDBPath)) {
         ERROR("Construct KfcTask table failed.");
         return false;
     }
@@ -242,8 +273,16 @@ bool CommunicationInfoProcessor::ProcessKfcData(const std::string &devicePath,
     if (status != CHECK_SUCCESS) {
         return status != CHECK_FAILED;
     }
+    status = CheckPathAndTable(kfcOpDBPath, kfcOpDBInfo, false);
+    if (status != CHECK_SUCCESS) {
+        return status != CHECK_FAILED;
+    }
     communicationData.oriKfcTaskData = LoadTaskData(kfcTaskDBInfo);
-    if (!FormatKfcData(taskData, communicationData)) {
+    communicationData.oriKfcOpData = LoadOpData(kfcOpDBInfo);
+    if (communicationData.oriKfcTaskData.empty() || communicationData.oriKfcOpData.empty()) {
+        return true;
+    }
+    if (!FormatKfcData(taskData, opData, communicationData)) {
         ERROR("Format kfc task data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO);
         return false;
     }
@@ -297,7 +336,7 @@ bool CommunicationInfoProcessor::ProcessOneDevice(const std::string& devicePath,
         ERROR("Process hccl data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO);
         flag = false;
     }
-    if (!ProcessKfcData(devicePath, taskData, communicationData)) {
+    if (!ProcessKfcData(devicePath, taskData, opData, communicationData)) {
         ERROR("Process kfc data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO);
         flag = false;
     }
