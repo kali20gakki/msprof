@@ -128,9 +128,6 @@ TableColumns PmuProcessor::GetAndCheckTableColumns(const std::unordered_map<std:
     TableColumns tableColumns;
     for (const auto& pair : dbPathTable) {
         MAKE_SHARED_RETURN_VALUE(metricDB.dbRunner, DBRunner, tableColumns, pair.first);
-        if (metricDB.dbRunner == nullptr) {
-            ERROR("Create % connection failed.", pair.first);
-        }
         if (tableColumns.empty()) {
             tableColumns = metricDB.dbRunner->GetTableColumns(metricDB.tableName);
         } else if (tableColumns != metricDB.dbRunner->GetTableColumns(metricDB.tableName)) {
