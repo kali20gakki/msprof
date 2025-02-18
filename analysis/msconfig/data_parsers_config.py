@@ -120,7 +120,7 @@ class DataParsersConfig(MetaConfig):
         'MsprofTxParser': [
             ('path', 'msparser.msproftx.msproftx_parser'),
             ('chip_model', '0,1,2,3,4,5,7,8,11'),
-            ('level', '2'),
+            ('level', '4'),
             ('position', 'H')
         ],
         'AicpuBinDataParser': [
