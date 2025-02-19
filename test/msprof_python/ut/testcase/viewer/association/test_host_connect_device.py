@@ -152,7 +152,7 @@ class TestHostToDevice(unittest.TestCase):
                 mock.patch(NAMESPACE + ".HostToDevice.get_connection_id_to_context_ids_mapping",
                            return_value={14983: [4294967295]}):
             connection = HostToDevice("")
-            connection.add_connect_line(hccl_data, "hccl")
+            connection.add_connect_line(hccl_data, "communication")
             self.assertEqual(hccl_data, expected_data)
 
     def test_add_connect_line_should_add_two_line_when_input_one_node_has_two_task(self):

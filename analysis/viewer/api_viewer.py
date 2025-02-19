@@ -20,7 +20,7 @@ class ApiViewer:
     Viewer for api data
     """
     ACL_LEVEL = 'acl'
-    HCCL_LEVEL = 'hccl'
+    HCCL_LEVEL = 'communication'
 
     def __init__(self: any, configs: dict, params: dict) -> None:
         self._configs = configs

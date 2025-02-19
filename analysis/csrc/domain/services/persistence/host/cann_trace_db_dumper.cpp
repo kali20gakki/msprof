@@ -55,12 +55,10 @@ void AddHcclOpDumpData(HCCLOpsDumpData& data, const std::shared_ptr<Analysis::Do
     int64_t connectionId = bigOpDesc->connectionId;
     int64_t kfcConnectionId = bigOpDesc->kfcConnectionId;
     uint32_t thread_id = bigOpDesc->thread_id;
-    std::string taskType = "HCCL";
+    std::string taskType = "COMMUNICATION";
     std::string opType = NA;
     auto nodeDesc = bigOpDesc->nodeDesc;
     if (nodeDesc != nullptr) {
-        taskType = NumberMapping::Get(NumberMapping::MappingType::GE_TASK_TYPE,
-                                      nodeDesc->data.nodeBasicInfo.taskType),
         opType = HashData::GetInstance().Get(nodeDesc->data.nodeBasicInfo.opType);
         isDynamic = std::to_string(nodeDesc->data.nodeBasicInfo.opState);
     }

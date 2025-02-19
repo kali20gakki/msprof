@@ -34,7 +34,7 @@ const std::unordered_map<uint16_t, std::string> LEVEL_MAP{
     {MSPROF_REPORT_RUNTIME_LEVEL, "Runtime"},
     {MSPROF_REPORT_MODEL_LEVEL, "Model"},
     {MSPROF_REPORT_NODE_LEVEL, "Node"},
-    {MSPROF_REPORT_HCCL_NODE_LEVEL, "Hccl"}
+    {MSPROF_REPORT_HCCL_NODE_LEVEL, "Communication"}
 };
 }
 

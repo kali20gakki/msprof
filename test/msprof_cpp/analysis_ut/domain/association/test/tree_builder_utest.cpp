@@ -99,7 +99,7 @@ std::shared_ptr<EventQueue> GenCtxIdEvents()
     std::unordered_map<std::string, std::vector<uint64_t>> hcclLevelEvents{
         // HcclLevel: {"Hccl", {{115, 125}, {155, 165}}},
         //  Index      0     1    2    3    4
-        {"Hccl", {115, 117, 125, 130, 160}}
+        {"Communication", {115, 117, 125, 130, 160}}
     };
 
     int nodeCnt = 0;
@@ -109,7 +109,7 @@ std::shared_ptr<EventQueue> GenCtxIdEvents()
     }
 
     int hcclCnt = 0;
-    for (auto dot: hcclLevelEvents["Hccl"]) {
+    for (auto dot: hcclLevelEvents["Communication"]) {
         FakeEventGenerator::AddHcclCtxIdEvent(contextIdEvents, dot, dot, dot);
         hcclCnt++;
     }
@@ -140,10 +140,10 @@ std::shared_ptr<EventQueue> GenHcclInfoEvents()
     std::unordered_map<std::string, std::vector<uint64_t>> Events{
         // HcclLevel: {"Hccl", {{115, 125}, {155, 165}}},
         //  Index       0     1    2    3    4   5     6    7    8   9
-        {"Hccl", {103, 110, 115, 120, 125, 130, 155, 160, 165, 170}}
+        {"Communication", {103, 110, 115, 120, 125, 130, 155, 160, 165, 170}}
     };
     int cnt = 0;
-    for (auto dot: Events["Hccl"]) {
+    for (auto dot: Events["Communication"]) {
         FakeEventGenerator::AddHcclInfoEvent(hcclInfoEvents, dot, cnt);
         cnt++;
     }
@@ -161,18 +161,18 @@ std::shared_ptr<EventQueue> GenHcclInfoEvents()
 std::shared_ptr<EventQueue> GenKernelEvents()
 {
     auto kernelEvents = std::make_shared<EventQueue>(1, 100);
-    std::vector<std::string> levels{"Acl", "Model", "Node", "Hccl"};
+    std::vector<std::string> levels{"Acl", "Model", "Node", "Communication"};
     std::unordered_map<std::string, uint16_t> levelNum{
         {"Acl", MSPROF_REPORT_ACL_LEVEL},
         {"Model", MSPROF_REPORT_MODEL_LEVEL},
         {"Node", MSPROF_REPORT_NODE_LEVEL},
-        {"Hccl", MSPROF_REPORT_HCCL_NODE_LEVEL},
+        {"Communication", MSPROF_REPORT_HCCL_NODE_LEVEL},
     };
     std::unordered_map<std::string, std::vector<std::pair<uint64_t, uint64_t>>> apiEvents{
         {"Acl", {{10, 50}, {100, 215}}},
         {"Model", {{110, 200}}},
         {"Node", {{110, 130}, {150, 170}, {175, 180}}},
-        {"Hccl", {{115, 125}, {155, 165}}},
+        {"Communication", {{115, 125}, {155, 165}}},
     };
 
     for (const auto &le: levels) {

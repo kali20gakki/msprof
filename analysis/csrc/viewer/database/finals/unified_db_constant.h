@@ -175,7 +175,7 @@ const std::unordered_map<std::string, uint16_t> API_LEVEL_TABLE = {
     {"acl", MSPROF_REPORT_ACL_LEVEL},
     {"model", MSPROF_REPORT_MODEL_LEVEL},
     {"node", MSPROF_REPORT_NODE_LEVEL},
-    {"hccl",  MSPROF_REPORT_HCCL_NODE_LEVEL},
+    {"communication",  MSPROF_REPORT_HCCL_NODE_LEVEL},
     {"runtime",  MSPROF_REPORT_RUNTIME_LEVEL}
 };
 

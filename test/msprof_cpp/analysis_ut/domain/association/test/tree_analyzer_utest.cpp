@@ -76,11 +76,11 @@ std::shared_ptr<EventQueue> GenKernelEventQueue(std::unordered_map<
     std::string, std::vector<std::pair<uint64_t, uint64_t>>> &apiEvents)
 {
     auto kernelEvents = std::make_shared<EventQueue>(1, 100);
-    std::vector<std::string> levels{"Model", "Node", "Hccl"};
+    std::vector<std::string> levels{"Model", "Node", "Communication"};
     std::unordered_map<std::string, uint16_t> levelNum{
         {"Model", MSPROF_REPORT_MODEL_LEVEL},
         {"Node", MSPROF_REPORT_NODE_LEVEL},
-        {"Hccl", MSPROF_REPORT_HCCL_NODE_LEVEL},
+        {"Communication", MSPROF_REPORT_HCCL_NODE_LEVEL},
     };
     for (const auto &le: levels) {
         for (auto range: apiEvents[le]) {
@@ -107,7 +107,7 @@ std::shared_ptr<EventQueue> GenKernelEventQueueWithTradComm()
         {"Model", {{1, 200}, {201, 400}, {401, 800}}},
         {"Node", {{2, 99}, {100, 150}, {202, 250}, {204, 208}, {221, 223}, {251, 301}, {329, 351}, {410, 500},
                   {1020, 1160}}},
-        {"Hccl", {{210, 220}, {230, 250}, {252, 300}, {330, 350}, {1020, 1160}}},
+        {"Communication", {{210, 220}, {230, 250}, {252, 300}, {330, 350}, {1020, 1160}}},
     };
 
     return GenKernelEventQueue(apiEvents);
@@ -124,7 +124,7 @@ std::shared_ptr<EventQueue> GenKernelEventQueueWithFFtsComm()
         {"Acl", {{1, 800}, {801, 900}, {1000, 1200}}},
         {"Model", {{1, 200}, {201, 400}, {401, 800}}},
         {"Node", {{2, 99}, {100, 150}, {160, 195}, {202, 300}, {302, 399}, {1020, 1160}}},
-        {"Hccl", {{202, 300}, {302, 399}, {1020, 1160}}},
+        {"Communication", {{202, 300}, {302, 399}, {1020, 1160}}},
     };
 
     return GenKernelEventQueue(apiEvents);

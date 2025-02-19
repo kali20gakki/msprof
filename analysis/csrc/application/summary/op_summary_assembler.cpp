@@ -27,7 +27,7 @@ namespace {
 const int PERCENTAGE_FACTOR = 100;
 // WRITE_BACK与INVALID类型不需要处理，针对helper场景, 去除运行在AI_CPU的HCCL小算子不生成op_summary,
 // 运行在AI_CORE上的HCCL小算子也不呈现在op_summary,因此这四个类型都不生成数据即可，直接排除掉
-const std::vector<std::string> INVALID_TASK_TYPE{"WRITE_BACK", "INVALID", "HCCL_AI_CPU", "HCCL"};
+const std::vector<std::string> INVALID_TASK_TYPE{"WRITE_BACK", "INVALID", "HCCL_AI_CPU", "COMMUNICATION"};
 const std::vector<std::string> BASE_HEADER{
     "Device_id", "Model ID", "Task ID", "Stream ID", "Op Name", "OP Type", "OP State", "Task Type",
     "Task Start Time(us)", "Task Duration(us)", "Task Wait Time(us)"
@@ -67,7 +67,7 @@ void OpSummaryAssembler::GenerateHcclBody(std::vector<CommunicationOpData> &opDa
     auto len = headers_.size();
     for (const auto &data : opData) {
         std::vector<std::string> row = {std::to_string(data.deviceId), std::to_string(data.modelId), NA, NA,
-                                        data.opName, data.opType, NA, "HCCL",
+                                        data.opName, data.opType, NA, "COMMUNICATION",
                                         DivideByPowersOfTenWithPrecision(data.start),
                                         DivideByPowersOfTenWithPrecision(data.end - data.start), "0", "0"};
         // 业务可以保证headers的长度会超过hcclOp数据的长度

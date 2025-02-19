@@ -22,7 +22,7 @@ class HostToDevice:
     API_TYPE = 'api'
     MODULE_MSPROFTX = 'msprof_tx'
     MODULE_TASK_TIME = 'task_time'
-    MODULE_HCCL = 'hccl'
+    MODULE_HCCL = 'communication'
     NODE_LAUNCH = "Node@launch"
 
     def __init__(self, result_dir: str) -> None:

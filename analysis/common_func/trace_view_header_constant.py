@@ -59,7 +59,7 @@ class TraceViewHeaderConstant:
     PROCESS_DISK_USAGE = "Disk Usage"
     PROCESS_OS_RUNTIME_API = "OS Runtime API"
     PROCESS_AI_CORE_FREQ = "AI Core Freq"
-    PROCESS_HCCL = "HCCL"
+    PROCESS_HCCL = "Communication"
 
     # trace general layer
     GENERAL_LAYER_CPU = "CPU"
@@ -75,7 +75,7 @@ class TraceViewHeaderConstant:
     COMPONENT_LAYER_DISK_USAGE = "Disk Usage"
     COMPONENT_LAYER_OS_RUNTIME_API = "OS Runtime API"
     COMPONENT_LAYER_AICORE_FREQ = "AI Core Freq"
-    COMPONENT_LAYER_HCCL = "HCCL"
+    COMPONENT_LAYER_HCCL = "Communication"
 
     # filtering msprof timeline trace
     MSPROF_TIMELINE_FILTER_LIST = (PROCESS_ALL_REDUCE, PROCESS_AI_CPU)

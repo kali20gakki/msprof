@@ -223,7 +223,7 @@ class TaskGear(CANNGear):
     INVALID_MODEL_ID = 4294967295
     HCCL_CONTEXT_ID_NUM = 2
     KERNEL_TASK_PREFIX = "KERNEL"
-    HCCL_TASK_TYPE = "HCCL"
+    HCCL_TASK_TYPE = "COMMUNICATION"
     FFTS_PLUS_TASK_TYPE = "FFTS_PLUS"
     KERNEL_FFTS_PLUS_TASK_TYPE = "FFTS_PLUS"
     KERNEL_STARS_COMMON_TASK_TYPE = "STARS_COMMON"
@@ -473,7 +473,7 @@ class TaskGear(CANNGear):
             if isinstance(record.dto, NodeBasicInfoDto):
                 node_basic_info = [
                     task_track_dto.device_id, model_id, request_id, node_dto.thread_id, node_dto.item_id,
-                    record.dto.task_type, record.dto.op_type, node_dto.start, node_dto.end,
+                    self.HCCL_TASK_TYPE, record.dto.op_type, node_dto.start, node_dto.end,
                     record.dto.is_dynamic, connection_id, kfc_connection_id
                 ]
             if isinstance(record.dto, HCCLOpInfoDto):
