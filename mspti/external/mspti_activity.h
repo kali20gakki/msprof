@@ -658,6 +658,34 @@ msptiResult msptiActivityEnable(msptiActivityKind kind);
 msptiResult msptiActivityDisable(msptiActivityKind kind);
 
 /**
+ * @brief Enable collection of Domain marker.
+ *
+ * Enable collection of Domain mark. Multiple
+ * Domain can be enabled by calling this function multiple times.
+ * By default, the Domain of all activity types is inactive.
+ *
+ * @param name The name of domain to collect
+ *
+ * @retval MSPTI_SUCCESS
+ * @retval MSPTI_ERROR_INVALID_PARAMETER if @p name is NULL
+ */
+msptiResult msptiActivityEnableMarkerDomain(const char* name);
+
+/**
+ * @brief Disable collection of Domain marker.
+ *
+ * Disable collection of Domain mark. Multiple
+ * Domain can be enabled by calling this function multiple times.
+ * By default, the Domain of all activity types is inactive.
+ *
+ * @param name The name of domain to collect
+ *
+ * @retval MSPTI_SUCCESS
+ * @retval MSPTI_ERROR_INVALID_PARAMETER if @p name is NULL
+ */
+msptiResult msptiActivityDisableMarkerDomain(const char* name);
+
+/**
  * @brief Iterate over the activity records in a buffer.
  *
  * This is a function to iterate over the activity records in buffer.

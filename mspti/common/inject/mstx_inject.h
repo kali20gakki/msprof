@@ -13,11 +13,13 @@
 #ifndef MSPTI_COMMON_INJECT_MSPROFTX_INJECT_H
 #define MSPTI_COMMON_INJECT_MSPROFTX_INJECT_H
 
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include <mutex>
+#include <unordered_set>
 #include "common/inject/inject_base.h"
 #include "external/mspti_result.h"
+#include "external/mspti_activity.h"
 
 #define MSTX_FAIL 1
 #define MSTX_SUCCESS 0
@@ -50,14 +52,14 @@ typedef enum {
     MSTX_API_MODULE_FORCE_INT               = 0x7fffffff
 } MstxFuncModule;
 
-struct MstxDomainRegistrationSt {};
-typedef struct MstxDomainRegistrationSt MstxDomainHandle;
+struct mstxDomainRegistration_st {};
+typedef struct mstxDomainRegistration_st MstxDomainHandle;
 typedef MstxDomainHandle* mstxDomainHandle_t;
 
 typedef void (*MstxFuncPointer)(void);
 typedef MstxFuncPointer** MstxFuncTable;
 typedef int (*MstxGetModuleFuncTableFunc)(MstxFuncModule module, MstxFuncTable *outTable, unsigned int *outSize);
- 
+
 void MstxMarkAFunc(const char* msg, RtStreamT stream);
 uint64_t MstxRangeStartAFunc(const char* msg, RtStreamT stream);
 void MstxRangeEndFunc(uint64_t rangeId);
@@ -82,6 +84,10 @@ public:
     void DestroyDomainHandle(mstxDomainHandle_t);
 
     std::shared_ptr<std::string> GetDomainNameByHandle(mstxDomainHandle_t domain);
+    bool isDomainEnable(mstxDomainHandle_t domainHandle);
+    bool isDomainEnable(const char* name);
+    msptiResult SetMstxDomainEnableStatus(const char* name, bool flag);
+    mstxDomainHandle_t GetDefaultDomainHandle() { return defaultDomainHandle_t; }
 
 private:
     MstxDomainMgr() = default;
@@ -91,8 +97,12 @@ private:
     MstxDomainMgr& operator=(MstxDomainMgr &&obj) = delete;
 
 private:
+    static std::once_flag onceFlag;
+    static mstxDomainHandle_t defaultDomainHandle_t;
     // domainHandle, domainStatus
-    static std::map<mstxDomainHandle_t, std::shared_ptr<MstxDomainAttr>> domainHandleMap_;
+    static std::unordered_map<mstxDomainHandle_t, std::shared_ptr<MstxDomainAttr>> domainHandleMap_;
+    // domainName
+    static std::unordered_set<std::string> domainSwitchs_;
     std::mutex domainMutex_;
 };
 };

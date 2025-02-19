@@ -11,7 +11,6 @@
 */
 #include "common/inject/mstx_inject.h"
 
-#include <atomic>
 #include <cstring>
 #include <mutex>
 
@@ -26,16 +25,44 @@ using namespace Mspti::Common;
 namespace Mspti {
 
 static std::string g_defaultDomainName = "default";
-std::map<mstxDomainHandle_t, std::shared_ptr<MstxDomainAttr>> MstxDomainMgr::domainHandleMap_;
+std::once_flag MstxDomainMgr::onceFlag;
+mstxDomainHandle_t MstxDomainMgr::defaultDomainHandle_t;
+std::unordered_set<std::string> MstxDomainMgr::domainSwitchs_;
+std::unordered_map<mstxDomainHandle_t, std::shared_ptr<MstxDomainAttr>> MstxDomainMgr::domainHandleMap_;
 
 MstxDomainMgr* MstxDomainMgr::GetInstance()
 {
     static MstxDomainMgr instance;
+    std::call_once(onceFlag, [] {
+        domainSwitchs_.insert(g_defaultDomainName);
+        std::shared_ptr<MstxDomainAttr> domainHandlePtr;
+        Mspti::Common::MsptiMakeSharedPtr(domainHandlePtr);
+        if (domainHandlePtr == nullptr) {
+            MSPTI_LOGE("Failed to malloc memory for domain attribute, Init DomainMgr Fail");
+            return;
+        }
+        Mspti::Common::MsptiMakeSharedPtr(domainHandlePtr->handle);
+        if (domainHandlePtr->handle == nullptr) {
+            MSPTI_LOGE("Failed to malloc memory for domain handle, Init DomainMgr Fail");
+            return;
+        }
+        Mspti::Common::MsptiMakeSharedPtr(domainHandlePtr->name, g_defaultDomainName);
+        if (domainHandlePtr->name == nullptr) {
+            MSPTI_LOGE("Failed to malloc memory for domain %s, Init DomainMgr Fail", g_defaultDomainName);
+            return;
+        }
+        defaultDomainHandle_t = domainHandlePtr->handle.get();
+        domainHandleMap_.insert(std::make_pair(domainHandlePtr->handle.get(), domainHandlePtr));
+    });
     return &instance;
 }
 
 mstxDomainHandle_t MstxDomainMgr::CreateDomainHandle(const char* name)
 {
+    if (strcmp(g_defaultDomainName.c_str(), name) == 0) {
+        MSPTI_LOGE("domain name can not be 'default'!");
+        return nullptr;
+    }
     std::lock_guard<std::mutex> lk(domainMutex_);
     if (domainHandleMap_.size() > MARK_MAX_CACHE_NUM) {
         MSPTI_LOGE("Cache domain name failed, current size: %u, limit size: %u",
@@ -89,6 +116,40 @@ std::shared_ptr<std::string> MstxDomainMgr::GetDomainNameByHandle(mstxDomainHand
     }
     return iter->second->name;
 }
+
+msptiResult MstxDomainMgr::SetMstxDomainEnableStatus(const char* name, bool flag)
+{
+    std::string nameStr(name);
+    std::lock_guard<std::mutex> lk(domainMutex_);
+    if (flag) {
+        domainSwitchs_.insert(nameStr);
+    } else {
+        domainSwitchs_.erase(nameStr);
+    }
+    return MSPTI_SUCCESS;
+}
+
+bool MstxDomainMgr::isDomainEnable(mstxDomainHandle_t domainHandle)
+{
+    auto namePtr = GetDomainNameByHandle(domainHandle);
+    if (namePtr) {
+        std::lock_guard<std::mutex> lk(domainMutex_);
+        return domainSwitchs_.count(*namePtr);
+    }
+    return false;
+}
+
+bool MstxDomainMgr::isDomainEnable(const char* name)
+{
+    if (!name) {
+        return false;
+    }
+    std::string nameStr(name);
+    {
+        std::lock_guard<std::mutex> lk(domainMutex_);
+        return domainSwitchs_.count(nameStr);
+    }
+}
 }
 
 namespace MsptiMstxApi {
@@ -110,6 +171,9 @@ void MstxMarkAFunc(const char* msg, RtStreamT stream)
     if (!IsMsgValid(msg)) {
         return;
     }
+    if (!Mspti::MstxDomainMgr::GetInstance()->isDomainEnable(Mspti::g_defaultDomainName.c_str())) {
+        return;
+    }
     if (Mspti::Parser::ParserManager::GetInstance()->ReportMark(msg, stream, Mspti::g_defaultDomainName.c_str()) !=
         MSPTI_SUCCESS) {
         MSPTI_LOGE("Report Mark data failed.");
@@ -124,6 +188,9 @@ uint64_t MstxRangeStartAFunc(const char* msg, RtStreamT stream)
     if (!IsMsgValid(msg)) {
         return MSTX_INVALID_RANGE_ID;
     }
+    if (!Mspti::MstxDomainMgr::GetInstance()->isDomainEnable((Mspti::g_defaultDomainName.c_str()))) {
+        return MSTX_INVALID_RANGE_ID;
+    }
     uint64_t markId = MSTX_INVALID_RANGE_ID;
     if (Mspti::Parser::ParserManager::GetInstance()->ReportRangeStartA(msg, stream,
         markId, Mspti::g_defaultDomainName.c_str()) != MSPTI_SUCCESS) {
@@ -136,6 +203,9 @@ uint64_t MstxRangeStartAFunc(const char* msg, RtStreamT stream)
 void MstxRangeEndFunc(uint64_t rangeId)
 {
     if (!ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER)) {
+        return;
+    }
+    if (!Mspti::MstxDomainMgr::GetInstance()->isDomainEnable((Mspti::g_defaultDomainName.c_str()))) {
         return;
     }
     if (Mspti::Parser::ParserManager::GetInstance()->ReportRangeEnd(rangeId) != MSPTI_SUCCESS) {
@@ -161,6 +231,9 @@ void MstxDomainMarkAFunc(mstxDomainHandle_t domain, const char* msg, RtStreamT s
     if (!ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER)) {
         return;
     }
+    if (!Mspti::MstxDomainMgr::GetInstance()->isDomainEnable(domain)) {
+        return;
+    }
     if ((!IsMsgValid(msg))) {
         return;
     }
@@ -177,6 +250,9 @@ void MstxDomainMarkAFunc(mstxDomainHandle_t domain, const char* msg, RtStreamT s
 uint64_t MstxDomainRangeStartAFunc(mstxDomainHandle_t domain, const char* msg, RtStreamT stream)
 {
     if (!ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER)) {
+        return MSTX_INVALID_RANGE_ID;
+    }
+    if (!Mspti::MstxDomainMgr::GetInstance()->isDomainEnable(domain)) {
         return MSTX_INVALID_RANGE_ID;
     }
     if ((!IsMsgValid(msg))) {
@@ -198,6 +274,10 @@ uint64_t MstxDomainRangeStartAFunc(mstxDomainHandle_t domain, const char* msg, R
 void MstxDomainRangeEndFunc(mstxDomainHandle_t domain, uint64_t rangeId)
 {
     if (!ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_MARKER)) {
+        return;
+    }
+    if (!Mspti::MstxDomainMgr::GetInstance()->isDomainEnable(domain)) {
+        MSPTI_LOGW("Domain is disable, range end will not take effect");
         return;
     }
     if (Mspti::MstxDomainMgr::GetInstance()->GetDomainNameByHandle(domain) == nullptr) {
@@ -272,3 +352,20 @@ int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
     return MSPTI_SUCCESS;
 }
 
+msptiResult msptiActivityEnableMarkerDomain(const char* name)
+{
+    if (!name) {
+        MSPTI_LOGE("domainHandle is nullptr, check your input params");
+        return MSPTI_ERROR_INVALID_PARAMETER;
+    }
+    return Mspti::MstxDomainMgr::GetInstance()->SetMstxDomainEnableStatus(name, true);
+}
+
+msptiResult msptiActivityDisableMarkerDomain(const char* name)
+{
+    if (!name) {
+        MSPTI_LOGE("domainHandle is nullptr, check your input params");
+        return MSPTI_ERROR_INVALID_PARAMETER;
+    }
+    return Mspti::MstxDomainMgr::GetInstance()->SetMstxDomainEnableStatus(name, false);
+}

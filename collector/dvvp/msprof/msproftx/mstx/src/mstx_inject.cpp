@@ -35,6 +35,10 @@ std::map<mstxDomainHandle_t, std::shared_ptr<MstxDomainAttr>> MstxDomainMgr::dom
 
 mstxDomainHandle_t MstxDomainMgr::CreateDomainHandle(const char* name)
 {
+    if (strcmp("default", name) == 0) {
+        MSPROF_LOGE("domain name can not be 'default'!");
+        return nullptr;
+    }
     std::lock_guard<std::mutex> lk(domainMutex_);
     if (domainHandleMap_.size() > MARK_MAX_CACHE_NUM) {
         MSPROF_LOGE("Cache domain name failed, current size: %u, limit size: %u",
