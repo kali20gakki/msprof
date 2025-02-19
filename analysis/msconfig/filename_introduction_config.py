@@ -17,7 +17,7 @@ class FilenameIntroductionConfig(MetaConfig):
                        "components (such as AscendCL and Runtime) and nodes (operators).\n"
                        "\t3 Ascend Hardware Layer: Bottom-layer NPU data, including the time consumption data and "
                        "iteration trace data of each task stream under Ascend Hardware, "
-                       "HCCL and Overlap Analysis communication data, and other system data.\n"
+                       "Communication and Overlap Analysis communication data, and other system data.\n"
                        "\t4 Overlap Analysis Layer: In cluster or multi-device scenarios, computation and "
                        "communication are sometimes parallel. You can check the pipeline overlapping time "
                        "(time when computation and communication are parallel) to determine "
@@ -79,8 +79,9 @@ class FilenameIntroductionConfig(MetaConfig):
             ('process_mem', "System memory usage on the host.\n"),
             ('api_statistic', "Time spent by AscendCL API, is used to collect statistics on the time spent "
                               "by API execution at the CANN layer.\n"
-                              "\tLevel: Level of an API, including AscendCL, Runtime, Node, Model, and HCCL.\n"),
-            ('op_summary', "AI Core, AI CPU, AI Vector and Hccl communication operator data,"
+                              "\tLevel: Level of an API, including AscendCL, Runtime, Node, Model, and"
+                              " Communication.\n"),
+            ('op_summary', "AI Core, AI CPU, AI Vector and COMMUNICATION communication operator data,"
                            "is used to collect statistics on operator details and time consumptions.\n"
                            "\tOp Name: Operator name.\n"
                            "\tOP Type: Operator type. \n"
@@ -132,9 +133,10 @@ class FilenameIntroductionConfig(MetaConfig):
                            "the default segmentation policy. Reduce Start indicates the start time, and Reduce "
                            "Duration indicates the duration (μs) from the start to the end. Note that the Reduce "
                            "columns are not available in a single-device environment.\n"),
-            ('hccl_statistic', "HCCL operator statistics, through which you can learn the time consumption of "
-                               "this operator type and the time consumption ratio of each HCCL operator in "
-                               "collective communication to determine whether an operator can be optimized.\n"),
+            ('communication_statistic', "Communication operator statistics, through which you can learn the time"
+                                        " consumption of this operator type and the time consumption ratio of each"
+                                        " Communication operator in collective communication to determine whether an"
+                                        " operator can be optimized.\n"),
             ('aicpu', "AI CPU summary.This file collects AI CPU data reported by data preprocessing. "
                       "Other files involving AI CPU data collect full AI CPU data.\n"),
             ('fusion_op', "Operator fusion summary.\n"),

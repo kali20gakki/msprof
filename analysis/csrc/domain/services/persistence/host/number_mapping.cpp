@@ -165,7 +165,7 @@ namespace {
         {6,  "FFTS_PLUS"},
         {7,  "DSA_SQE"},
         {8,  "DVPP"},
-        {9,  "HCCL"},
+        {9,  "COMMUNICATION"},
         {10, "INVALID"},
         {11, "HCCL_AI_CPU"}
     };
@@ -225,7 +225,7 @@ namespace {
         {20000, "acl"},
         {15000, "model"},
         {10000, "node"},
-        {5500,  "hccl"},
+        {5500,  "communication"},
         {5000,  "runtime"}
     };
     const std::unordered_map<uint32_t, std::string> aclApiTagMap {

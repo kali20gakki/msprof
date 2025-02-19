@@ -17,13 +17,19 @@
 using namespace Analysis::Utils;
 using namespace Analysis::Domain::Host::Cann;
 
-const std::string TEST_FILE = "./unaging.additional.type_info_dic.slice_0";
+const std::string BASE_PATH = "./type_data";
+const std::string TEST_FILE = "./type_data/unaging.additional.type_info_dic.slice_0";
+const int DEPTH = 0;
 
 class TypeDataUTest : public testing::Test {
 protected:
     // 所有测试用例之前执行
     static void SetUpTestCase()
     {
+        if (File::Check(BASE_PATH)) {
+            File::RemoveDir(BASE_PATH, DEPTH);
+        }
+        EXPECT_TRUE(File::CreateDir(BASE_PATH));
         // 创建test_file文件
         FileWriter fw(TEST_FILE);
         // 有效输入
@@ -40,7 +46,7 @@ protected:
     // 所有测试用例之后执行
     static void TearDownTestCase()
     {
-        File::DeleteFile(TEST_FILE);  // 删除test_file文件
+        File::RemoveDir(BASE_PATH, DEPTH);
     }
 };
 
@@ -53,14 +59,14 @@ TEST_F(TypeDataUTest, LoadShouldReturnFalseWhenFileNotExist)
 
 TEST_F(TypeDataUTest, LoadShouldReturnTrueWhenFileIsOK)
 {
-    auto status = TypeData::GetInstance().Load("./");
+    auto status = TypeData::GetInstance().Load(BASE_PATH);
     EXPECT_TRUE(status);
     TypeData::GetInstance().Clear();
 }
 
 TEST_F(TypeDataUTest, GetShouldReturnNumWhenNoTypeInDict)
 {
-    TypeData::GetInstance().Load("./");
+    TypeData::GetInstance().Load(BASE_PATH);
     std::string expectRes = "10";
     auto str = TypeData::GetInstance().Get(100, 10);
     auto str2 = TypeData::GetInstance().Get(5000, 10);
@@ -71,7 +77,7 @@ TEST_F(TypeDataUTest, GetShouldReturnNumWhenNoTypeInDict)
 
 TEST_F(TypeDataUTest, GetShouldReturnStrWhenTypeInDict)
 {
-    TypeData::GetInstance().Load("./");
+    TypeData::GetInstance().Load(BASE_PATH);
     std::string expectRes = "CpuKernelLaunchExWithArgs_Big";
     auto str = TypeData::GetInstance().Get(5000, 1125);
     EXPECT_STREQ(str.c_str(), expectRes.c_str());
@@ -80,7 +86,7 @@ TEST_F(TypeDataUTest, GetShouldReturnStrWhenTypeInDict)
 
 TEST_F(TypeDataUTest, GetAllShouldReturn3ValidResInFile)
 {
-    TypeData::GetInstance().Load("./");
+    TypeData::GetInstance().Load(BASE_PATH);
     int expectResSize = 2;
     int expect5000ResSize = 2;
     int expect20000ResSize = 1;

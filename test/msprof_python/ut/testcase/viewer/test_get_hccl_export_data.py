@@ -98,7 +98,7 @@ class TestHCCLExport(unittest.TestCase):
                     ('name', 'process_name'),
                     ('pid', 1),
                     ('tid', 0),
-                    ('args', OrderedDict([('name', 'HCCL')])),
+                    ('args', OrderedDict([('name', 'Communication')])),
                     ('ph', 'M')
                 ]
             )

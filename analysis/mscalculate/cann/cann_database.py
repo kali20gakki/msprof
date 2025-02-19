@@ -14,7 +14,7 @@ class CANNDatabase:
         "acl": Constant.ACL_LEVEL,
         "model": Constant.MODEL_LEVEL,
         "node": Constant.NODE_LEVEL,
-        "hccl": Constant.HCCL_LEVEL,
+        "communication": Constant.HCCL_LEVEL,
         "runtime": Constant.TASK_LEVEL,
     }
 

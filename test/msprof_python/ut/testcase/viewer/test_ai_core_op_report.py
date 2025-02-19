@@ -190,12 +190,12 @@ class TestAiCoreOpReport(unittest.TestCase):
             (1, 2, 3, 11, 16, op_state, "AI_CPU", 0),
             (4, 5, 6, 11, 16, op_state, "AI_CPU", 0),
             (7, 8, 9, 11, 16, op_state, 10, 0),
-            (1, 2, 3, 11, 16, op_state, "HCCL", 0),
+            (1, 2, 3, 11, 16, op_state, "COMMUNICATION", 0),
             (1, 3, 3, 11, 16, op_state, "HCCL_AI_CPU", 0)
         ]
         ai_core_group_dict = {
             (0, 2, 3, "AI_CPU"): deque([(10,)]), (0, 5, 6, "AI_CPU"): deque([(40,)]),
-            (0, 10, 11, 12): deque([(20,)]), (0, 2, 3, "HCCL"): deque([(50,)])
+            (0, 10, 11, 12): deque([(20,)]), (0, 2, 3, "COMMUNICATION"): deque([(50,)])
         }
         res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
         self.assertEqual(res, expect_res)
@@ -211,7 +211,7 @@ class TestAiCoreOpReport(unittest.TestCase):
             (1, 2, 3, 11, 16, op_state, "AI_CPU", 0),
             (4, 5, 6, 11, 16, op_state, "AI_CPU", 0),
             (7, 8, 9, 11, 16, op_state, 10, 0),
-            (1, 2, 3, 11, 16, op_state, "HCCL", 0),
+            (1, 2, 3, 11, 16, op_state, "COMMUNICATION", 0),
             (1, 3, 3, 11, 16, op_state, "HCCL_AI_CPU", 0)
         ]
         ai_core_group_dict = {}

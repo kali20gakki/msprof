@@ -19,7 +19,7 @@ class LevelDataType(Enum):
     MODEL = 15000
     NODE = 10000
     AICPU = 6000
-    HCCL = 5500
+    COMMUNICATION = 5500
     RUNTIME = 5000
 
     @classmethod

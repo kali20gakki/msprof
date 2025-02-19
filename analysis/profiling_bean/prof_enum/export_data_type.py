@@ -37,7 +37,7 @@ class ExportDataType(Enum):
     OS_RUNTIME_STATISTIC = 28
     ACSQ_TASK_STATISTIC = 30
     FFTS_SUB_TASK_TIME = 31
-    HCCL = 32
+    COMMUNICATION = 32
     CPU_USAGE = 33
     PROCESS_CPU_USAGE = 34
     SYS_MEM = 35
@@ -63,7 +63,7 @@ class ExportDataType(Enum):
     MEMORY_RECORD = 58
     EVENT = 59
     API = 60
-    HCCL_STATISTIC = 61
+    COMMUNICATION_STATISTIC = 61
     API_STATISTIC = 62
     NPU_MODULE_MEM = 63
     SIO = 64

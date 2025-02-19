@@ -202,7 +202,7 @@ class MsProfExportDataConfig(MetaConfig):
             ('db', DBNameConstant.DB_SOC_LOG),
             ('table', DBNameConstant.TABLE_FFTS_LOG)
         ],
-        'hccl': [
+        'communication': [
             ('handler', '_get_hccl_timeline'),
         ],
         'msprof_tx': [
@@ -271,7 +271,7 @@ class MsProfExportDataConfig(MetaConfig):
         'api': [
             ('handler', '_get_api_data'),
         ],
-        'hccl_statistic': [
+        'communication_statistic': [
             ('handler', '_get_hccl_statistic_data'),
             ('headers',
              'OP Type,Count,Total Time(us),Min Time(us),Avg Time(us),Max Time(us),Ratio(%)'),

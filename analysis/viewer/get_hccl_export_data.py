@@ -91,7 +91,7 @@ class HCCLExport:
 
     def _add_hccl_bar(self):
         self.result = TraceViewManager.metadata_event(
-            [["process_name", self.pid_value, InfoConfReader().get_json_tid_data(), "HCCL"]])
+            [["process_name", self.pid_value, InfoConfReader().get_json_tid_data(), "Communication"]])
 
     def _add_group_threads(self, group: HcclGroup, start_sort_index: int, valid_group: bool) -> int:
         """
