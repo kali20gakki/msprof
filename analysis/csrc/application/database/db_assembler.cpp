@@ -58,7 +58,7 @@ using ComputeTaskInfoFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_
 // 大算子数据
 // opName, start, end, connectionId, group_name, opId, relay, retry, data_type, alg_type, count, op_type
 using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
-        int32_t, int32_t, int32_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+        uint32_t, int32_t, int32_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
 // 小算子数据
 // name, globalTaskId, taskType, planeId, groupName, notifyId, rdmaType, srcRank, dstRank, transportType,
 // size, dataType, linkType, opId, isMaster
@@ -126,7 +126,7 @@ void ConvertOpData(CommunicationOpDataFormat &processedOpData, const std::vector
     for (const T &item : opData) {
         uint64_t groupName = IdPool::GetInstance().GetUint64Id(item.groupName);
         uint64_t opName = IdPool::GetInstance().GetUint64Id(item.opName);
-        int32_t opId = IdPool::GetInstance().GetUint32Id(item.opKey);
+        uint32_t opId = IdPool::GetInstance().GetUint32Id(item.opKey);
         uint64_t algType = IdPool::GetInstance().GetUint64Id(item.algType);
         uint64_t opType = IdPool::GetInstance().GetUint64Id(item.opType);
         processedOpData.emplace_back(opName, item.start, item.end, item.connectionId, groupName, opId, item.relay,

@@ -48,7 +48,7 @@ uint64_t IdPool::GetUint64Id(const std::string& key)
 }
 
 // 获取string格式map的key对应value(32位)，如果不存在则添加(key, value)并返回value
-uint64_t IdPool::GetUint32Id(const std::string& key)
+uint32_t IdPool::GetUint32Id(const std::string& key)
 {
     std::lock_guard<std::mutex> lock(uint32Mutex_);
     if (uint32Ids_.find(key) == uint32Ids_.end()) {
