@@ -27,7 +27,7 @@ public:
     void Clear();
     uint64_t GetId(const CorrelationTuple& key);
     uint64_t GetUint64Id(const std::string& key);
-    uint64_t GetUint32Id(const std::string& key);
+    uint32_t GetUint32Id(const std::string& key);
     std::unordered_map<std::string, uint64_t>& GetAllUint64Ids();
 private:
     uint64_t correlationIndex_ = 0;
