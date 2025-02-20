@@ -92,6 +92,7 @@ mstxDomainHandle_t MstxDomainMgr::CreateDomainHandle(const char* name)
         return nullptr;
     }
     domainHandleMap_.insert(std::make_pair(domainHandlePtr->handle.get(), domainHandlePtr));
+    domainSwitchs_.insert(*(domainHandlePtr->name));
     return domainHandlePtr->handle.get();
 }
 
@@ -288,6 +289,38 @@ void MstxDomainRangeEndFunc(mstxDomainHandle_t domain, uint64_t rangeId)
     }
 }
 
+void SetMstxModuleCoreApi(MstxFuncTable outTable, unsigned int size)
+{
+    if (size >= static_cast<unsigned int>(MSTX_FUNC_MARKA)) {
+        *(outTable[MSTX_FUNC_MARKA]) = (MstxFuncPointer)MstxMarkAFunc;
+    }
+    if (size >= static_cast<unsigned int>(MSTX_FUNC_RANGE_STARTA)) {
+        *(outTable[MSTX_FUNC_RANGE_STARTA]) = (MstxFuncPointer)MstxRangeStartAFunc;
+    }
+    if (size >= static_cast<unsigned int>(MSTX_FUNC_RANGE_END)) {
+        *(outTable[MSTX_FUNC_RANGE_END]) = (MstxFuncPointer)MstxRangeEndFunc;
+    }
+}
+
+void SetMstxModuleCoreDomainApi(MstxFuncTable outTable, unsigned int size)
+{
+    if (size >= static_cast<unsigned int>(MSTX_FUNC_DOMAIN_CREATEA)) {
+        *(outTable[MSTX_FUNC_DOMAIN_CREATEA]) = (MstxFuncPointer)MstxDomainCreateAFunc;
+    }
+    if (size >= static_cast<unsigned int>(MSTX_FUNC_DOMAIN_DESTROY)) {
+        *(outTable[MSTX_FUNC_DOMAIN_DESTROY]) = (MstxFuncPointer)MstxDomainDestroyFunc;
+    }
+    if (size >= static_cast<unsigned int>(MSTX_FUNC_DOMAIN_MARKA)) {
+        *(outTable[MSTX_FUNC_DOMAIN_MARKA]) = (MstxFuncPointer)MstxDomainMarkAFunc;
+    }
+    if (size >= static_cast<unsigned int>(MSTX_FUNC_DOMAIN_RANGE_STARTA)) {
+        *(outTable[MSTX_FUNC_DOMAIN_RANGE_STARTA]) = (MstxFuncPointer)MstxDomainRangeStartAFunc;
+    }
+    if (size >= static_cast<unsigned int>(MSTX_FUNC_DOMAIN_RANGE_END)) {
+        *(outTable[MSTX_FUNC_DOMAIN_RANGE_END]) = (MstxFuncPointer)MstxDomainRangeEndFunc;
+    }
+}
+
 int GetModuleTableFunc(MstxGetModuleFuncTableFunc getFuncTable)
 {
     int retVal = MSTX_SUCCESS;
@@ -304,23 +337,12 @@ int GetModuleTableFunc(MstxGetModuleFuncTableFunc getFuncTable)
             MSPTI_LOGW("Failed to get func table for module %zu", i);
             continue;
         }
-        if (outSize != CheckOutTableSizes[i]) {
-            MSPTI_LOGE("outSize is invalid, Failed to init mstx funcs.");
-            retVal = MSTX_FAIL;
-            break;
-        }
         switch (i) {
             case MSTX_API_MODULE_CORE:
-                *(outTable[MSTX_FUNC_MARKA]) = (MstxFuncPointer)MstxMarkAFunc;
-                *(outTable[MSTX_FUNC_RANGE_STARTA]) = (MstxFuncPointer)MstxRangeStartAFunc;
-                *(outTable[MSTX_FUNC_RANGE_END]) = (MstxFuncPointer)MstxRangeEndFunc;
+                SetMstxModuleCoreApi(outTable, outSize);
                 break;
-            case MSTX_API_MODULE_CORE2:
-                *(outTable[MSTX_FUNC_DOMAIN_CREATEA]) = (MstxFuncPointer)MstxDomainCreateAFunc;
-                *(outTable[MSTX_FUNC_DOMAIN_DESTROY]) = (MstxFuncPointer)MstxDomainDestroyFunc;
-                *(outTable[MSTX_FUNC_DOMAIN_MARKA]) = (MstxFuncPointer)MstxDomainMarkAFunc;
-                *(outTable[MSTX_FUNC_DOMAIN_RANGE_STARTA]) = (MstxFuncPointer)MstxDomainRangeStartAFunc;
-                *(outTable[MSTX_FUNC_DOMAIN_RANGE_END]) = (MstxFuncPointer)MstxDomainRangeEndFunc;
+            case MSTX_API_MODULE_CORE_DOMAIN:
+                SetMstxModuleCoreDomainApi(outTable, outSize);
                 break;
             default:
                 MSPTI_LOGE("Invalid func module type");
