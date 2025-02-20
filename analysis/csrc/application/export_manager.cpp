@@ -58,7 +58,9 @@ const std::vector<std::string> DATA_PROCESS_LIST{
         PROCESSOR_NAME_MEMCPY_INFO,
         PROCESSOR_NAME_NPU_OP_MEM,
         PROCESSOR_NAME_NPU_MODULE_MEM,
-        PROCESSOR_NAME_UNIFIED_PMU
+        PROCESSOR_NAME_UNIFIED_PMU,
+        PROCESSOR_NAME_NIC_TIMELINE,
+        PROCESSOR_NAME_ROCE_TIMELINE
 };
 
 std::string GetDBPath(const std::string& outputDir)

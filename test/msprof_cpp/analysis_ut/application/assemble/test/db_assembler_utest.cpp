@@ -382,6 +382,15 @@ static std::vector<RoceOriginalData> GenerateRoceData()
     return roceOriginalData;
 }
 
+static std::vector<RoceOriginalData> GenerateEmptyRoceData()
+{
+    std::vector<SysIOOriginalData> res = {};
+    RoceOriginalData roceOriginal;
+    roceOriginal.sysIOOriginalData = res;
+    std::vector<RoceOriginalData> roceOriginalData;
+    roceOriginalData.push_back(roceOriginal);
+    return roceOriginalData;
+}
 
 static std::vector<NpuOpMemData> GenerateNpuOpMemData()
 {
@@ -1144,6 +1153,7 @@ TEST_F(DBAssemblerUTest, TestRunSysIOShouldReturnTrueWhenProcessorRunSuccess)
     std::shared_ptr<std::vector<RoceOriginalData>> roceDataS;
     MAKE_SHARED0_NO_OPERATION(nicDataS, std::vector<NicOriginalData>, nicData);
     MAKE_SHARED0_NO_OPERATION(roceDataS, std::vector<RoceOriginalData>, roceData);
+
     dataInventory.Inject(nicDataS);
     dataInventory.Inject(roceDataS);
     EXPECT_TRUE(assembler.Run(dataInventory));
@@ -1164,6 +1174,19 @@ TEST_F(DBAssemblerUTest, TestRunSysIOShouldReturnTrueWhenProcessorRunSuccess)
     EXPECT_TRUE(dbRunner->QueryData(sqlStrRoce, resRoce));
     EXPECT_EQ(expectRoce, resRoce);
 }
+
+TEST_F(DBAssemblerUTest, TestRunSysIOShouldReturnTrueWhenRoceDataExistButSysIOOriginalDataEmpty)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto emptyData = GenerateEmptyRoceData();
+    std::shared_ptr<std::vector<RoceOriginalData>> emptyDataS;
+    MAKE_SHARED0_NO_OPERATION(emptyDataS, std::vector<RoceOriginalData>, emptyData);
+    // test Run when roceData exist but sysIOOriginalData is empty
+    dataInventory.Inject(emptyDataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
 
 TEST_F(DBAssemblerUTest, TestRunSysIOShouldReturnFalseWhenGetTimeFailed)
 {
