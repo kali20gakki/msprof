@@ -64,6 +64,49 @@ using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uin
 // size, dataType, linkType, opId, isMaster
 using CommunicationTaskDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint32_t, uint64_t,
         uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t, uint16_t>>;
+
+struct ComputeTaskInfoData {
+    uint64_t opName;
+    uint64_t globalTaskId;
+    uint64_t taskType;
+    uint64_t opType;
+    uint64_t inputFormats;
+    uint64_t inputDataTypes;
+    uint64_t inputShapes;
+    uint64_t outputFormats;
+    uint64_t outputDataTypes;
+    uint64_t outputShapes;
+    uint64_t hashId;  // 对应attrInfo
+};
+
+std::string ReplaceQuotes(const std::string& input)
+{
+    std::string res = input;
+    std::string::size_type pos = 0;
+    while ((pos = res.find(CSV_OPERATOR, pos)) != std::string::npos) {
+        res.replace(pos, CSV_OPERATOR.length(), SINGLE_OPERATOR);
+        pos += SINGLE_OPERATOR.length();
+    }
+    return res;
+}
+
+void ProcessShapeInfo(ComputeTaskInfoData& taskInfoData, const TaskInfoData& item)
+{
+    std::string inputFormats = ReplaceQuotes(item.inputFormats);
+    std::string inputDataTypes = ReplaceQuotes(item.inputDataTypes);
+    std::string inputShapes = ReplaceQuotes(item.inputShapes);
+    std::string outputFormats = ReplaceQuotes(item.outputFormats);
+    std::string outputDataTypes = ReplaceQuotes(item.outputDataTypes);
+    std::string outputShapes = ReplaceQuotes(item.outputShapes);
+
+    taskInfoData.inputFormats = IdPool::GetInstance().GetUint64Id(inputFormats);
+    taskInfoData.inputDataTypes = IdPool::GetInstance().GetUint64Id(inputDataTypes);
+    taskInfoData.inputShapes = IdPool::GetInstance().GetUint64Id(inputShapes);
+    taskInfoData.outputFormats = IdPool::GetInstance().GetUint64Id(outputFormats);
+    taskInfoData.outputDataTypes = IdPool::GetInstance().GetUint64Id(outputDataTypes);
+    taskInfoData.outputShapes = IdPool::GetInstance().GetUint64Id(outputShapes);
+}
+
 bool CreateTableIndex(const std::string &tableName, const std::string &indexName, const DBInfo &msprofDB,
                       const std::vector<std::string> &colNames)
 {
@@ -625,38 +668,27 @@ bool SaveComputeTaskInfo(DataInventory& dataInventory, DBInfo& msprofDB, const s
         ERROR("Reserved for ComputeTaskInfo data failed.");
         return false;
     }
-    uint64_t opName;
-    uint64_t globalTaskId;
-    uint64_t taskType;
-    uint64_t opType;
-    uint64_t inputFormats;
-    uint64_t inputDataTypes;
-    uint64_t inputShapes;
-    uint64_t outputFormats;
-    uint64_t outputDataTypes;
-    uint64_t outputShapes;
-    uint64_t hashId;  // 对应attrInfo
+    ComputeTaskInfoData taskInfoData{};
     for (const auto& item : *computeTaskInfo) {
-        opName = IdPool::GetInstance().GetUint64Id(item.opName);
-        globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(item.deviceId, item.streamId, item.taskId,
-                                                                   item.contextId, item.batchId));
-        taskType = IdPool::GetInstance().GetUint64Id(item.taskType);
-        opType = IdPool::GetInstance().GetUint64Id(item.opType);
-        if ((kfcStream && std::find_if(kfcStream->begin(), kfcStream->end(), [item](const MC2CommInfoData &mc) {
+        taskInfoData.opName = IdPool::GetInstance().GetUint64Id(item.opName);
+        taskInfoData.globalTaskId = IdPool::GetInstance().GetId(
+            std::make_tuple(item.deviceId, item.streamId, item.taskId,
+                            item.contextId, item.batchId));
+        taskInfoData.taskType = IdPool::GetInstance().GetUint64Id(item.taskType);
+        taskInfoData.opType = IdPool::GetInstance().GetUint64Id(item.opType);
+        if ((kfcStream && std::find_if(kfcStream->begin(), kfcStream->end(), [item](const MC2CommInfoData& mc) {
             return mc.aiCpuKfcStreamId == item.streamId;
         }) != kfcStream->end()) || Utils::EndsWith(item.opName, AICPU_KERNEL)) {
-            scheduleData.emplace_back(opName, globalTaskId, taskType, opType);
+            scheduleData.emplace_back(taskInfoData.opName, taskInfoData.globalTaskId,
+                                      taskInfoData.taskType, taskInfoData.opType);
             continue;
         }
-        inputFormats = IdPool::GetInstance().GetUint64Id(item.inputFormats);
-        inputDataTypes = IdPool::GetInstance().GetUint64Id(item.inputDataTypes);
-        inputShapes = IdPool::GetInstance().GetUint64Id(item.inputShapes);
-        outputFormats = IdPool::GetInstance().GetUint64Id(item.outputFormats);
-        outputDataTypes = IdPool::GetInstance().GetUint64Id(item.outputDataTypes);
-        outputShapes = IdPool::GetInstance().GetUint64Id(item.outputShapes);
-        hashId = IdPool::GetInstance().GetUint64Id(item.hashId);
-        res.emplace_back(opName, globalTaskId, item.blockDim, item.mixBlockDim, taskType, opType, inputFormats,
-                         inputDataTypes, inputShapes, outputFormats, outputDataTypes, outputShapes, hashId);
+        ProcessShapeInfo(taskInfoData, item);
+        taskInfoData.hashId = IdPool::GetInstance().GetUint64Id(item.hashId);
+        res.emplace_back(taskInfoData.opName, taskInfoData.globalTaskId, item.blockDim, item.mixBlockDim,
+                         taskInfoData.taskType, taskInfoData.opType, taskInfoData.inputFormats,
+                         taskInfoData.inputDataTypes, taskInfoData.inputShapes, taskInfoData.outputFormats,
+                         taskInfoData.outputDataTypes, taskInfoData.outputShapes, taskInfoData.hashId);
     }
     bool flag = true;
     if (!res.empty()) {
@@ -747,6 +779,10 @@ bool SaveSysIOData(DataInventory& dataInventory, DBInfo& msprofDB, const std::st
     SysIODataFormat res;
     // sysIOMemData不为nullptr时，一定有一个元素
     auto sysIOOriginalData = sysIOMemData->back().sysIOOriginalData;
+    if (sysIOOriginalData.empty()) {
+        WARN("SysIO % data not exist.", tableName);
+        return true;
+    }
     if (!Reserve(res, sysIOOriginalData.size())) {
         ERROR("Reserved for SysIO % data failed.", tableName);
         return false;
@@ -760,7 +796,7 @@ bool SaveSysIOData(DataInventory& dataInventory, DBInfo& msprofDB, const std::st
                          item.txPacketRate, item.txByteRate, item.txPackets, item.txBytes,
                          item.txErrors, item.txDropped, item.funcId);
     }
-    SaveData(res, tableName, msprofDB);
+    return SaveData(res, tableName, msprofDB);
 }
 
 bool SaveNicData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
