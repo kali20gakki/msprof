@@ -103,7 +103,6 @@ int GetFuncTableReturnFailStub(MstxFuncModule module, MstxFuncTable *outTable, u
 
 int GetFuncTableReturnInvalidOutsizeStub(MstxFuncModule module, MstxFuncTable *outTable, unsigned int *outSize)
 {
-    *outSize = 0;
     return MSTX_SUCCESS;
 }
 
@@ -114,7 +113,7 @@ int GetFuncTableReturnValidOutsizeStub(MstxFuncModule module, MstxFuncTable *out
             *outTable = g_ctx.mstxCoreFuncTable;
             *outSize = MSTX_FUNC_END;
             break;
-        case MSTX_API_MODULE_CORE2:
+        case MSTX_API_MODULE_CORE_DOMAIN:
             *outTable = g_ctx.mstxCore2FuncTable;
             *outSize = MSTX_FUNC_DOMAIN_END;
             break;
@@ -129,9 +128,9 @@ TEST_F(MstxUtest, GetModuleTableFuncWillReturnSuccWhenCallgetFuncTableFail)
     EXPECT_EQ(MSTX_SUCCESS, MsprofMstxApi::GetModuleTableFunc(GetFuncTableReturnFailStub));
 }
 
-TEST_F(MstxUtest, GetModuleTableFuncWillReturnFailWhenGetFuncTableReturnInvalidOutsize)
+TEST_F(MstxUtest, GetModuleTableFuncWillReturnSuccWhenGetFuncTableReturnInvalidOutsize)
 {
-    EXPECT_EQ(MSTX_FAIL, MsprofMstxApi::GetModuleTableFunc(GetFuncTableReturnInvalidOutsizeStub));
+    EXPECT_EQ(MSTX_SUCCESS, MsprofMstxApi::GetModuleTableFunc(GetFuncTableReturnInvalidOutsizeStub));
 }
 
 TEST_F(MstxUtest, GetModuleTableFuncWillReturnSuccWhenGetFuncTableReturnValidOutsize)

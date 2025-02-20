@@ -27,10 +27,14 @@
 #define MSTX_INVALID_RANGE_ID 0
 
 typedef enum {
-    MSTX_FUNC_START        = 0,
-    MSTX_FUNC_MARKA        = 1,
-    MSTX_FUNC_RANGE_STARTA = 2,
-    MSTX_FUNC_RANGE_END    = 3,
+    MSTX_FUNC_START                         = 0,
+    MSTX_FUNC_MARKA                         = 1,
+    MSTX_FUNC_RANGE_STARTA                  = 2,
+    MSTX_FUNC_RANGE_END                     = 3,
+    MSTX_API_CORE_MEMHEAP_REGISTER          = 4,
+    MSTX_API_CORE_MEMHEAP_UNREGISTER        = 5,
+    MSTX_API_CORE_MEM_REGIONS_REGISTER      = 6,
+    MSTX_API_CORE_MEM_REGIONS_UNREGISTER    = 7,
     MSTX_FUNC_END
 } MstxCoreFuncId;
 
@@ -47,7 +51,7 @@ typedef enum {
 typedef enum {
     MSTX_API_MODULE_INVALID                 = 0,
     MSTX_API_MODULE_CORE                    = 1,
-    MSTX_API_MODULE_CORE2                   = 2,
+    MSTX_API_MODULE_CORE_DOMAIN             = 2,
     MSTX_API_MODULE_SIZE,                   // end of the enum, new enum items must be added before this
     MSTX_API_MODULE_FORCE_INT               = 0x7fffffff
 } MstxFuncModule;
