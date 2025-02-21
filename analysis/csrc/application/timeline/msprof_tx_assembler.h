@@ -51,12 +51,13 @@ private:
 class MsprofTxExTraceEvent : public DurationEvent {
 public:
     MsprofTxExTraceEvent(int pid, int tid, double dur, const std::string &ts, const std::string &name,
-                         const std::string &eventType)
-        : DurationEvent(pid, tid, dur, ts, name), eventType_(eventType) {}
+                         const std::string &eventType, const std::string &domain)
+        : DurationEvent(pid, tid, dur, ts, name), eventType_(eventType), domain_(domain) {}
 private:
     void ProcessArgs(JsonWriter &ostream) override;
 private:
     std::string eventType_;
+    std::string domain_;
 };
 }
 }

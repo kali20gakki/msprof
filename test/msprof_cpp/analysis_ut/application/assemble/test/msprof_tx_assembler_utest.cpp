@@ -74,6 +74,7 @@ static std::vector<MsprofTxHostData> GenerateTxAndExData()
     exData.start = 1717575960208126869; // start 1717575960208126869
     exData.end = 1717575960208226869; // start 1717575960208226869
     exData.connectionId = 4000000001;  // connId 4000000001
+    exData.domain = "domain";
     exData.message = "ex";
     res.push_back(exData);
     return res;
@@ -98,18 +99,19 @@ TEST_F(MsprofTxAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     FileReader reader(files.back());
     std::vector<std::string> res;
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
-    std::string expectStr = "{\"name\":\"tx\",\"pid\":223,\"tid\":1024,\"ts\":\"1717575960208020.758\",\"dur\":"
-                            "6.111,\"ph\":\"X\",\"args\":{\"Category\":\"23438457\",\"Payload_type\":0,\"Payload_value"
-                            "\":283728437,\"Message_type\":1,\"event_type\":\"marker\"}},{\"name\":\"ex\",\"pid\":223,"
-                            "\"tid\":1024,\"ts\":\"1717575960208126.869\",\"dur\":100.0,\"ph\":\"X\",\"args\":{\""
-                            "event_type\":\"marker\"}},{\"name\":\"MsTx_4000000001\",\"pid\":223,\"tid\":1024,\"ph\":"
-                            "\"s\",\"cat\":\"MsTx\",\"id\":\"4000000001\",\"ts\":\"1717575960208126.869\"},{\"name"
-                            "\":\"process_name\",\"pid\":223,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"\"}},{\"name"
-                            "\":\"process_labels\",\"pid\":223,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"CPU\"}},{"
-                            "\"name\":\"process_sort_index\",\"pid\":223,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index"
-                            "\":6}},{\"name\":\"thread_name\",\"pid\":223,\"tid\":1024,\"ph\":\"M\",\"args\":{\"name\""
-                            ":\"Thread 1024\"}},{\"name\":\"thread_sort_index\",\"pid\":223,\"tid\":1024,\"ph\":\"M\","
-                            "\"args\":{\"sort_index\":1024}},";
+    std::string expectStr = "{\"name\":\"tx\",\"pid\":223,\"tid\":1024,\"ts\":\"1717575960208020.758\","
+                            "\"dur\":6.111,\"ph\":\"X\",\"args\":{\"Category\":\"23438457\",\"Payload_type\":0,"
+                            "\"Payload_value\":283728437,\"Message_type\":1,\"event_type\":\"marker\"}},"
+                            "{\"name\":\"ex\",\"pid\":223,\"tid\":1024,\"ts\":\"1717575960208126.869\",\"dur\":100.0,"
+                            "\"ph\":\"X\",\"args\":{\"event_type\":\"marker\",\"domain\":\"domain\"}},"
+                            "{\"name\":\"MsTx_4000000001\",\"pid\":223,\"tid\":1024,\"ph\":\"s\",\"cat\":\"MsTx\","
+                            "\"id\":\"4000000001\",\"ts\":\"1717575960208126.869\"},{\"name\":\"process_name\","
+                            "\"pid\":223,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"\"}},{\"name\":\"process_labels\","
+                            "\"pid\":223,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"CPU\"}},"
+                            "{\"name\":\"process_sort_index\",\"pid\":223,\"tid\":0,\"ph\":\"M\",\"args\":"
+                            "{\"sort_index\":6}},{\"name\":\"thread_name\",\"pid\":223,\"tid\":1024,\"ph\":\"M\","
+                            "\"args\":{\"name\":\"Thread 1024\"}},{\"name\":\"thread_sort_index\",\"pid\":223,"
+                            "\"tid\":1024,\"ph\":\"M\",\"args\":{\"sort_index\":1024}},";
     EXPECT_EQ(expectStr, res.back());
 }
 

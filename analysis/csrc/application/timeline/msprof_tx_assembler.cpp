@@ -43,6 +43,7 @@ void MsprofTxTraceEvent::ProcessArgs(JsonWriter& ostream)
 void MsprofTxExTraceEvent::ProcessArgs(JsonWriter& ostream)
 {
     ostream["event_type"] << eventType_;
+    ostream["domain"] << domain_;
 }
 
 MsprofTxAssembler::MsprofTxAssembler()
@@ -76,7 +77,8 @@ void MsprofTxAssembler::GenerateTxTrace(const std::vector<MsprofTxHostData>& txD
         } else { // tx ex数据有markId字段可以作为connectionId
             std::shared_ptr<MsprofTxExTraceEvent> txEx;
             MAKE_SHARED_RETURN_VOID(txEx, MsprofTxExTraceEvent, pid, data.tid, (data.end - data.start) / NS_TO_US,
-                                    DivideByPowersOfTenWithPrecision(data.start), data.message, eventTypeStr);
+                                    DivideByPowersOfTenWithPrecision(data.start), data.message, eventTypeStr,
+                                    data.domain);
             res_.push_back(txEx);
             GenerateTxExConnectionTrace(data, pid);
         }
