@@ -446,7 +446,7 @@ bool SaveMsprofTxData(DataInventory& dataInventory, DBInfo& msprofDB, const std:
 {
     // startNs, endNs, eventType, rangeId, category, message, globalTid, endGlobalTid, domainId, connectionId
     using MsprofTxDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint16_t,
-        uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint16_t, uint64_t>>;
+        uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
     auto msprofTxData = dataInventory.GetPtr<std::vector<MsprofTxHostData>>();
     if (msprofTxData == nullptr) {
         WARN("MsprofTx data not exist.");
@@ -460,9 +460,10 @@ bool SaveMsprofTxData(DataInventory& dataInventory, DBInfo& msprofDB, const std:
     uint32_t pid = Context::GetInstance().GetPidFromInfoJson(HOST_ID, profPath);
     for (const auto& item : *msprofTxData) {
         uint64_t message = IdPool::GetInstance().GetUint64Id(item.message);
+        uint64_t domain = IdPool::GetInstance().GetUint64Id(item.domain);
         uint64_t globalTid = Utils::Contact(pid, item.tid);
         res.emplace_back(item.start, item.end, item.eventType, UINT32_MAX, item.category, message,
-                         globalTid, globalTid, UINT16_MAX, item.connectionId);
+                         globalTid, globalTid, domain, item.connectionId);
     }
     return SaveData(res, TABLE_NAME_MSTX, msprofDB);
 }
