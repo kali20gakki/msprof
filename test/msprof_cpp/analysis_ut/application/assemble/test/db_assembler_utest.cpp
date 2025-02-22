@@ -939,7 +939,7 @@ TEST_F(DBAssemblerUTest, TestRunMsprofTxDataShouldReturnFalseWhenReserveFailed)
 {
     // startNs, endNs, eventType, rangeId, category, message, globalTid, endGlobalTid, domainId, connectionId
     using SaveDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint16_t,
-        uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint16_t, uint64_t>>;
+        uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
     auto assembler = DBAssembler(DB_PATH, PROF);
     auto dataInventory = DataInventory();
     auto data = GenerateMsprofTxData();

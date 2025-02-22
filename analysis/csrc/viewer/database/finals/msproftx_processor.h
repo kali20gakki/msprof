@@ -31,7 +31,7 @@ using MsprofTxExDataFormat = std::vector<std::tuple<uint32_t, std::string,
 
 // startNs, endNs, eventType, rangeId, category, message, globalTid, endGlobalTid, domainId, connectionId
 using ProcessedDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint16_t,
-        uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint16_t, uint64_t>>;
+        uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
 
 public:
     MsprofTxProcessor() = default;
