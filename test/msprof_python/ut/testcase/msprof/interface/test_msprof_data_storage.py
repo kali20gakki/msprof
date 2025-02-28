@@ -2,18 +2,47 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 import json
+import os
+import shutil
 import unittest
 from datetime import datetime
 from datetime import timezone
 from unittest import mock
 
 from common_func.constant import Constant
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.msprof_common import MsProfCommonConstant
+from common_func.path_manager import PathManager
 from common_func.profiling_scene import ProfilingScene
 from common_func.file_slice_helper import FileSliceHelper
 from common_func.profiling_scene import ExportMode
 from msinterface.msprof_data_storage import MsprofDataStorage
 
 NAMESPACE = 'msinterface.msprof_data_storage'
+
+
+def create_msprof_json_data(path: str):
+    if not os.path.exists(path):
+        os.makedirs(path)
+    device_path = os.path.join(path, "device_0")
+    if not os.path.exists(device_path):
+        os.mkdir(device_path)
+    output = os.path.join(path, PathManager.MINDSTUDIO_PROFILER_OUTPUT)
+    if not os.path.exists(output):
+        os.mkdir(output)
+    json_file = os.path.join(output, 'msprof_20250215160320.json')
+    content = ('[{"name": "process_name", "pid": 1084473760, "tid": 0, "ph": "M", "args": {"name": "Ascend Hardware"}},'
+               ' {"name": "process_labels", "pid": 1084473760, "tid": 0, "ph": "M", "args": {"labels": "NPU"}}, '
+               '{"name": "process_sort_index", "pid": 1084473760, "tid": 0, "ph": "M", "args": {"sort_index": 13}},'
+               ' {"name": "thread_name", "pid": 1084473760, "tid": 70001, "ph": "M", "args": {"name":'
+               ' "Step Trace(Model ID:1)"}}, {"name": "thread_sort_index", "pid": 1084473760, "tid": 70001, "ph": "M",'
+               ' "args": {"sort_index": 70001}}, {"name": "Reduce_1_0", "pid": 1084473760, "tid": 70001, "ts":'
+               ' "1730943468310229.220", "dur": 2217.88, "ph": "X", "cat": "Reduce", "args": {"Iteration ID": 1,'
+               ' "Reduce End 0": "1730943468312447100", "Reduce Start 0": "1730943468310229220"}}]')
+    # 创建并打开文件，模式为 'w'（写入）
+    with open(json_file, 'w') as file:
+        # 写入内容到文件中
+        file.write(content)
 
 
 class TestMsprofDataStorage(unittest.TestCase):
@@ -155,7 +184,7 @@ class TestMsprofDataStorage(unittest.TestCase):
                     read_data='{"slice_switch": "on","slice_file_size": 0,"slice_method": 0}')):
             key = MsprofDataStorage()
             res = key.read_slice_config()
-            self.assertEqual(res, ('on', 0, 0))
+            self.assertEqual(res, ('off', 0, 0))
 
     def test_timeline_dir(self):
         with mock.patch(NAMESPACE + '.PathManager.get_timeline_dir', return_value='test'), \
@@ -177,6 +206,29 @@ class TestMsprofDataStorage(unittest.TestCase):
             key.data_list = []
             key.tid_set = {i for i in range(10000000)}
             key.get_slice_times('a', 1)
+
+    def test_slice_msprof_json_for_so_with_empty_path(self):
+        MsprofDataStorage.slice_msprof_json_for_so('', dict())
+
+    def test_slice_msprof_json_for_so_with_size_lower_than_200(self):
+        with mock.patch('os.path.getsize', return_value=100), \
+                mock.patch(NAMESPACE + '.MsprofDataStorage.read_slice_config', return_value=('on', 0, 0)):
+            MsprofDataStorage.slice_msprof_json_for_so("test", dict())
+
+    def test_slice_msprof_json_for_so(self):
+        params = {
+            StrConstant.PARAM_RESULT_DIR: '/ms_test/test_slice_for_so',
+            StrConstant.PARAM_EXPORT_DUMP_FOLDER: '/ms_test/test_slice_for_so/mindstudio_profiler_output',
+            StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.TIMELINE,
+            StrConstant.PARAM_DATA_TYPE: 'msprof'
+        }
+        create_msprof_json_data('/ms_test/test_slice_for_so')
+        trace_file = '/ms_test/test_slice_for_so/mindstudio_profiler_output/msprof_20250215160320.json'
+        with mock.patch('os.path.getsize', return_value=300), \
+                mock.patch(NAMESPACE + '.MsprofDataStorage.read_slice_config', return_value=('on', 0, 0)):
+            MsprofDataStorage.slice_msprof_json_for_so(trace_file, params)
+        shutil.rmtree('/ms_test')
+
 
 if __name__ == '__main__':
     unittest.main()

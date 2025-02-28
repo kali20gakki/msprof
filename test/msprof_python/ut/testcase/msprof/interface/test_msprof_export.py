@@ -1,4 +1,7 @@
+import os.path
+import shutil
 import sqlite3
+import json
 import unittest
 from argparse import Namespace
 from unittest import mock
@@ -8,8 +11,10 @@ import pytest
 from common_func.common import print_info, warn, error
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
+from common_func.file_slice_helper import FileSliceHelper
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
+from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
 from common_func.profiling_scene import ExportMode
@@ -45,6 +50,35 @@ def create_trace_db():
     res[0].close()
 
     return db_manager
+
+
+def create_msprof_json_data(path: str):
+    if not os.path.exists(path):
+        os.makedirs(path)
+    output = os.path.join(path, PathManager.MINDSTUDIO_PROFILER_OUTPUT)
+    if not os.path.exists(output):
+        os.mkdir(output)
+    json_file = os.path.join(output, ('msprof_' + FileSliceHelper.get_current_time_str() + '.json'))
+    tmp_dict = {
+        "name": "Iteration 1",
+        "pid": 1084473760,
+        "tid": 70001,
+        "ts": "1730943468307942.060",
+        "dur": 4548.2,
+        "ph": "X",
+        "cat": "Iteration Time",
+        "args": {
+            "Iteration ID": 1,
+            "FP Start": "1730943468310195.800",
+            "BP End": "1730943468310216.360",
+            "Iteration End": "1730943468312490.260",
+            "Iteration Time(us)": 4548.2
+        }
+    }
+    # 创建并打开文件，模式为 'w'（写入）
+    with open(json_file, 'w') as file:
+        # 写入内容到文件中
+        json.dump([tmp_dict], file)
 
 
 class DtoData:
@@ -84,10 +118,10 @@ class TestExportCommand(unittest.TestCase):
         args = Namespace(**args_dic)
         sample_config = {'helper_profiling': ''}
         with mock.patch(NAMESPACE + '.DataCheckManager.check_data_exist', return_value=True), \
-             mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=sample_config), \
-             mock.patch(NAMESPACE + '.ExportCommand._is_host_export', return_value=True), \
-             mock.patch(NAMESPACE + '.AiStackDataCheckManager._is_device_exist', return_value=True), \
-             mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=sample_config), \
+                mock.patch(NAMESPACE + '.ExportCommand._is_host_export', return_value=True), \
+                mock.patch(NAMESPACE + '.AiStackDataCheckManager._is_device_exist', return_value=True), \
+                mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
             test = ExportCommand('timeline', args)
             test.sample_config = {'devices': '64'}
             InfoConfReader()._sample_json = {"devices": '64'}
@@ -101,10 +135,10 @@ class TestExportCommand(unittest.TestCase):
         InfoConfReader()._sample_json = {"devices": '64'}
         sample_config = {'helper_profiling': ''}
         with mock.patch(NAMESPACE + '.DataCheckManager.check_data_exist', return_value=True), \
-             mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=sample_config), \
-             mock.patch(NAMESPACE + '.ExportCommand._is_host_export', return_value=True), \
-             mock.patch(NAMESPACE + '.AiStackDataCheckManager._is_device_exist', return_value=True), \
-             mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=sample_config), \
+                mock.patch(NAMESPACE + '.ExportCommand._is_host_export', return_value=True), \
+                mock.patch(NAMESPACE + '.AiStackDataCheckManager._is_device_exist', return_value=True), \
+                mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
             test = ExportCommand('summary', args)
             test.sample_config = {'devices': '64'}
             test._add_export_type(result_dir + "host")
@@ -116,10 +150,10 @@ class TestExportCommand(unittest.TestCase):
         args = Namespace(**args_dic)
         sample_config = {'helper_profiling': ''}
         with mock.patch(NAMESPACE + '.DataCheckManager.check_data_exist', return_value=True), \
-             mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=sample_config), \
-             mock.patch(NAMESPACE + '.ExportCommand._is_host_export', return_value=False), \
-             mock.patch(NAMESPACE + '.AiStackDataCheckManager._is_device_exist', return_value=True), \
-             mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=sample_config), \
+                mock.patch(NAMESPACE + '.ExportCommand._is_host_export', return_value=False), \
+                mock.patch(NAMESPACE + '.AiStackDataCheckManager._is_device_exist', return_value=True), \
+                mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
             test = ExportCommand('timeline', args)
             InfoConfReader()._sample_json = {"devices": '0'}
             test.sample_config = {'devices': '0'}
@@ -132,10 +166,10 @@ class TestExportCommand(unittest.TestCase):
         args = Namespace(**args_dic)
         sample_config = {'helper_profiling': ''}
         with mock.patch(NAMESPACE + '.DataCheckManager.check_data_exist', return_value=True), \
-             mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=sample_config), \
-             mock.patch(NAMESPACE + '.ExportCommand._is_host_export', return_value=True), \
-             mock.patch(NAMESPACE + '.AiStackDataCheckManager._is_device_exist', return_value=False), \
-             mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=sample_config), \
+                mock.patch(NAMESPACE + '.ExportCommand._is_host_export', return_value=True), \
+                mock.patch(NAMESPACE + '.AiStackDataCheckManager._is_device_exist', return_value=False), \
+                mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
             test = ExportCommand('timeline', args)
             test.sample_config = {'devices': '64'}
             InfoConfReader()._sample_json = {"devices": '0'}
@@ -148,10 +182,10 @@ class TestExportCommand(unittest.TestCase):
         args = Namespace(**args_dic)
         sample_config = {'helper_profiling': ''}
         with mock.patch(NAMESPACE + '.DataCheckManager.check_data_exist', return_value=True), \
-             mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=sample_config), \
-             mock.patch(NAMESPACE + '.ExportCommand._is_host_export', return_value=True), \
-             mock.patch(NAMESPACE + '.AiStackDataCheckManager._is_device_exist', return_value=False), \
-             mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=sample_config), \
+                mock.patch(NAMESPACE + '.ExportCommand._is_host_export', return_value=True), \
+                mock.patch(NAMESPACE + '.AiStackDataCheckManager._is_device_exist', return_value=False), \
+                mock.patch(NAMESPACE + '.AiStackDataCheckManager._check_output', return_value=True):
             test = ExportCommand('summary', args)
             test.sample_config = {'devices': '64'}
             InfoConfReader()._sample_json = {"devices": '64'}
@@ -448,22 +482,22 @@ class TestExportCommand(unittest.TestCase):
         args_dic = {"collection_path": "test"}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + '.check_path_valid'), \
-            mock.patch(NAMESPACE + '.get_path_dir', return_value=['host', 'device_1', 'device_2']), \
-            mock.patch(NAMESPACE + '.get_valid_sub_path', return_value='host'), \
-            mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True), \
-            mock.patch(NAMESPACE + '.ExportCommand._start_parse'), \
-            mock.patch(NAMESPACE + '.ExportCommand._start_calculate'), \
-            mock.patch(NAMESPACE + '.LoadInfoManager.load_info'):
+                mock.patch(NAMESPACE + '.get_path_dir', return_value=['host', 'device_1', 'device_2']), \
+                mock.patch(NAMESPACE + '.get_valid_sub_path', return_value='host'), \
+                mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True), \
+                mock.patch(NAMESPACE + '.ExportCommand._start_parse'), \
+                mock.patch(NAMESPACE + '.ExportCommand._start_calculate'), \
+                mock.patch(NAMESPACE + '.LoadInfoManager.load_info'):
             # 无法调用so
             test = ExportCommand("db", args)
             test.process()
             with mock.patch('os.path.isfile', return_value=True), \
-                mock.patch('os.path.islink', return_value=False), \
-                mock.patch('os.access', return_value=True), \
-                mock.patch('common_func.file_manager.is_other_writable', return_value=False), \
-                mock.patch('common_func.file_manager.check_file_owner', return_value=True), \
-                mock.patch('msinterface.msprof_c_interface.run_in_subprocess'), \
-                mock.patch('importlib.import_module'):
+                    mock.patch('os.path.islink', return_value=False), \
+                    mock.patch('os.access', return_value=True), \
+                    mock.patch('common_func.file_manager.is_other_writable', return_value=False), \
+                    mock.patch('common_func.file_manager.check_file_owner', return_value=True), \
+                    mock.patch('msinterface.msprof_c_interface.run_in_subprocess'), \
+                    mock.patch('importlib.import_module'):
                 # 调用so
                 test = ExportCommand("db", args)
                 test.process()
@@ -472,8 +506,8 @@ class TestExportCommand(unittest.TestCase):
         args_dic = {"collection_path": "test"}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + '.check_path_valid'), \
-            mock.patch(NAMESPACE + '.get_path_dir', return_value=['host', 'device_1', 'device_2']), \
-            mock.patch(NAMESPACE + '.get_valid_sub_path', return_value='host'):
+                mock.patch(NAMESPACE + '.get_path_dir', return_value=['host', 'device_1', 'device_2']), \
+                mock.patch(NAMESPACE + '.get_valid_sub_path', return_value='host'):
             # 无info_json
             test = ExportCommand("timeline", args)
             test.process()
@@ -703,6 +737,15 @@ class TestExportCommand(unittest.TestCase):
                 mock.patch('msinterface.msprof_output_summary.MsprofOutputSummary.export'):
             test = ExportCommand("summary", args)
             test._start_view(path_table)
+
+    def test__check_and_split_json_trace(self) -> None:
+        create_msprof_json_data("/ms_test/test_export_so")
+        args_dic = {"collection_path": "test_export_so", "iteration_id": None, "model_id": None,
+                    "iteration_count": None}
+        args = Namespace(**args_dic)
+        test = ExportCommand("timeline", args)
+        test._check_and_split_json_trace("/ms_test/test_export_so")
+        shutil.rmtree("/ms_test")
 
 
 if __name__ == '__main__':
