@@ -10,6 +10,7 @@ import re
 from datetime import datetime
 from datetime import timezone
 
+from common_func.common import warn
 from common_func.constant import Constant
 from common_func.file_manager import FdOpen
 from common_func.file_manager import FileOpen
@@ -34,9 +35,10 @@ class MsprofDataStorage:
     """
     SLICE_CONFIG_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'msprof_slice.json')
     DATA_TO_FILE = 1024 * 1024
-    DEFAULT_SETTING = ('on', 0, 0)
+    DEFAULT_SETTING = ('off', 0, 0)
     SETTING = None
-    AVERAGE_DATA_SIZE = 300  # bytes
+    DEFAULT_SLICE_SIZE = 200 * 1024 * 1024  # MB
+    MAX_JSON_FILE_SIZE = 20 * 1024 * 1024 * 1024  # 20G
 
     def __init__(self: any) -> None:
         self.tid_set = set()
@@ -44,6 +46,28 @@ class MsprofDataStorage:
         self.timeline_head = []
         self.slice_data = []
         self.data_list = None
+
+    @staticmethod
+    def slice_msprof_json_for_so(trace_file: str, params: dict) -> None:
+        if not trace_file:
+            return
+        if not MsprofDataStorage.SETTING:
+            MsprofDataStorage.SETTING = MsprofDataStorage().read_slice_config()
+        slice_switch, limit_size, method = MsprofDataStorage.SETTING
+        data_size = os.path.getsize(trace_file)
+        if slice_switch == 'off':
+            return
+        if data_size < limit_size or data_size < MsprofDataStorage.DEFAULT_SLICE_SIZE:
+            warn(MsProfCommonConstant.COMMON_FILE_NAME, "Data can be sliced only when the data size "
+                 "exceeds 200 MB. The current data size is less than 200 MB or the threshold you set in the "
+                 "configuration file, won't be sliced.")
+            return
+        device_count = PathManager.get_device_count(params.get(StrConstant.PARAM_EXPORT_DUMP_FOLDER))
+        with FileOpen(trace_file, 'r', MsprofDataStorage.MAX_JSON_FILE_SIZE) as fr:
+            data = json.load(fr.file_reader)
+        sliced_timeline_data = MsprofDataStorage().slice_data_list(data, device_count, data_size)
+        MsprofDataStorage.write_json_files(sliced_timeline_data, params, False)
+        os.remove(trace_file)
 
     @staticmethod
     def export_timeline_data_to_json(timeline_data: json, params: dict) -> str:
@@ -71,14 +95,16 @@ class MsprofDataStorage:
                            'data': data_path})
 
     @staticmethod
-    def write_json_files(json_data: tuple, params: dict) -> tuple:
+    def write_json_files(json_data: tuple, params: dict, is_clear: bool = True) -> tuple:
         """
         write json data  to file
         :param json_data:
         :param params:
+        :param is_clear: whether clear timeline dir
         :return:
         """
-        MsprofDataStorage.clear_timeline_dir(params)
+        if is_clear:
+            MsprofDataStorage.clear_timeline_dir(params)
         data_path = []
         for slice_time in range(len(json_data[1])):
             timeline_file_path = FileSliceHelper.make_export_file_name(params, slice_time, json_data[0])
@@ -168,7 +194,7 @@ class MsprofDataStorage:
         self.set_tid()
         self._update_timeline_head()
 
-    def slice_data_list(self: any, data_list: list, device_count: int = 1) -> tuple:
+    def slice_data_list(self: any, data_list: list, device_count: int = 1, data_size: int = 0) -> tuple:
         """
         split data to slices
         return: tuple (slice count, slice data)
@@ -183,7 +209,7 @@ class MsprofDataStorage:
         slice_switch, limit_size, method = MsprofDataStorage.SETTING
         if slice_switch == 'off':
             return False, [self.timeline_head + data_list]
-        slice_count = self.get_slice_times(limit_size, method, device_count)
+        slice_count = self.get_slice_times(limit_size, method, device_count, data_size)
         if not slice_count:
             return False, [self.timeline_head + data_list]
         slice_point = len(data_list) // slice_count
@@ -230,15 +256,15 @@ class MsprofDataStorage:
             return self.DEFAULT_SETTING
         return slice_switch, limit_size, method
 
-    def get_slice_times(self: any, limit_size: int = 0, method: int = 0, device_count: int = 1) -> int:
+    def get_slice_times(self: any, limit_size: int = 0, method: int = 0, device_count: int = 1, data_size: int = 0):
         """
         read the configuration file
         :return: slice times: int
         """
         list_length = len(self.data_list)
-        str_length = list_length * self.AVERAGE_DATA_SIZE
+        str_length = data_size if data_size else len(json.dumps(self.data_list))
         # str_length / (list_length * 80) simplify formula
-        coefficient = math.ceil(self.AVERAGE_DATA_SIZE / 80) if list_length else 0
+        coefficient = math.ceil(str_length / list_length / 80) if list_length else 0
         # If an exception occurs, continue the calculation logic.
         try:
             if isinstance(limit_size, int) and limit_size >= 200:

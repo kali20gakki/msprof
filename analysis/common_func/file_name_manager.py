@@ -192,6 +192,7 @@ class FileNameManagerConstant:
     MSPROFTX_FILE_PATTERN = r"^(unaging|aging)\.additional\.msproftx\.slice_\d+"
     MSPROF_JSON_FILE_PATTERN = r"^msprof(_\d+)?(_\d+)?(_\d+)?(_\d+)?(_slice_\d+)?.json"
     MSPROFTX_JSON_FILE_PATTERN = r"^msprof_tx_?\d?_?\d?.json"
+    MSPROF_JSON_WITHOUT_SLICE_PATTERN = r"^msprof_(\d+)\.json"
 
     # helper
     MODEL_WITH_Q_FILE_PATTERN = r"^DATA_PREPROCESS\.AICPU_MODEL\.(\d+)\.slice_\d+"
@@ -769,6 +770,14 @@ def get_msprof_json_compiles() -> tuple:
     :return: msprof json files regex
     """
     return (re.compile(FileNameManagerConstant.MSPROF_JSON_FILE_PATTERN),)
+
+
+def get_msprof_json_without_slice_compiles() -> tuple:
+    """
+    get msprof json files without slice regex compiles
+    :retuen: msprof json files regex
+    """
+    return (re.compile(FileNameManagerConstant.MSPROF_JSON_WITHOUT_SLICE_PATTERN),)
 
 
 def get_msprof_tx_json_compiles() -> tuple:

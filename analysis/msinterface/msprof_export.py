@@ -20,6 +20,7 @@ from common_func.data_check_manager import DataCheckManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager
+from common_func.file_name_manager import get_msprof_json_without_slice_compiles
 from common_func.host_data_check_manager import HostDataCheckManager
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
@@ -45,6 +46,7 @@ from msinterface.msprof_c_interface import export_unified_db
 from msinterface.msprof_c_interface import dump_device_data
 from msinterface.msprof_c_interface import export_timeline
 from msinterface.msprof_c_interface import export_op_summary
+from msinterface.msprof_data_storage import MsprofDataStorage
 from msinterface.msprof_export_data import MsProfExportDataUtils
 from msinterface.msprof_output_summary import MsprofOutputSummary
 from msinterface.msprof_timeline import MsprofTimeline
@@ -293,6 +295,20 @@ class ExportCommand:
         message = "The model_id obtained from the GE doesn't overlap that in the step_trace. The reported data " \
                   "may be lost and the profiling will stop. Check whether the reported data is correct."
         raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
+
+    @staticmethod
+    def _get_sorted_json_file(output_path: str) -> str:
+        res_file = []
+        for file in os.listdir(output_path):
+            for pattern in get_msprof_json_without_slice_compiles():
+                match = pattern.match(file)
+                if match:
+                    timestamp = int(match.group(1))
+                    res_file.append((timestamp, os.path.join(output_path, file)))
+        if res_file:
+            res_file.sort(key=lambda x: x[0], reverse=True)
+            return res_file[0][1]
+        return ''
 
     def process(self: any) -> None:
         """
@@ -730,6 +746,19 @@ class ExportCommand:
         return (ProfilingScene().is_cpp_parse_enable() and ProfilingScene().is_all_export() and
                 ChipManager().is_chip_v4() and self.command_type == MsProfCommonConstant.SUMMARY)
 
+    def _check_and_split_json_trace(self, result_dir: str) -> None:
+        output_path = os.path.join(result_dir, PathManager.MINDSTUDIO_PROFILER_OUTPUT)
+        if not os.path.exists(output_path):
+            return
+        expect_file = self._get_sorted_json_file(output_path)
+        params = {
+            StrConstant.PARAM_RESULT_DIR: result_dir,
+            StrConstant.PARAM_EXPORT_DUMP_FOLDER: output_path,
+            StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.TIMELINE,
+            StrConstant.PARAM_DATA_TYPE: 'msprof'
+        }
+        MsprofDataStorage().slice_msprof_json_for_so(expect_file, params)
+
     def _start_view(self, path_table: dict):
         if self.command_type == MsProfCommonConstant.DB:
             export_unified_db(path_table.get("collection_path"))
@@ -745,6 +774,7 @@ class ExportCommand:
         ProfilingScene().set_mode(mode)
         if self._check_export_timeline_with_so(path_table) and ProfilingScene().is_all_export():
             export_timeline(path_table.get("collection_path"), self.reports_path)
+            self._check_and_split_json_trace(path_table.get("collection_path"))
             return
         # viewer op_summary
         if self._check_export_op_summary_with_so():
