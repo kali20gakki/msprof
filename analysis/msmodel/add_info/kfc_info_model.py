@@ -41,9 +41,9 @@ class KfcInfoViewModel(ViewModel):
         {})
     KFC_COMM_TURN_TYPE = CustomizedNamedtupleFactory.enhance_namedtuple(
         namedtuple("KfcCommTurn",
-                   ["device_id", "stream_id", "task_id", "comm_turn", "current_turn", "wait_notify_start_time",
-                    "kfc_alg_exe_start_time", "send_task_start_time", "wait_active_start_time",
-                    "active_start_time", "wait_exe_end_start_time", "rtsq_exe_end_time"]),
+                   ["device_id", "stream_id", "task_id", "comm_turn", "current_turn", "server_start_time",
+                    "wait_msg_start_time", "kfc_alg_exe_start_time", "send_task_start_time",
+                    "send_sqe_finish_time", "rtsq_exe_end_time", "server_end_time"]),
         {})
     KFC_COMPUTE_TURN_TYPE = CustomizedNamedtupleFactory.enhance_namedtuple(
         namedtuple("KfcComputeTurn",

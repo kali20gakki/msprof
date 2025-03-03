@@ -73,19 +73,19 @@ std::vector<KfcCommTurn> KfcTaskProcessor::LoadCommData(const DBInfo &kfcDB, con
         ERROR("Create % connection failed.", dbPath);
         return kfcCommTurnData;
     }
-    std::string sql = "SELECT device_id, stream_id, task_id, comm_turn, current_turn, wait_notify_start_time, "
-                      "kfc_alg_exe_start_time, send_task_start_time,wait_active_start_time,active_start_time, "
-                      "wait_exe_end_start_time, rtsq_exe_end_time "
+    std::string sql = "SELECT device_id, stream_id, task_id, comm_turn, current_turn, server_start_time, "
+                      "wait_msg_start_time, kfc_alg_exe_start_time, send_task_start_time, send_sqe_finish_time, "
+                      "rtsq_exe_end_time, server_end_time "
                       "FROM " + kfcDB.tableName;
     if (!kfcDB.dbRunner->QueryData(sql, oriData)) {
-        ERROR("Query api data failed, db path is %.", dbPath);
+        ERROR("Query KfcCommTurn data failed, db path is %.", dbPath);
         return kfcCommTurnData;
     }
     for (auto row : oriData) {
         KfcCommTurn data{};
-        std::tie(data.deviceId, data.streamId, data.taskId, data.commTurn, data.currentTurn, data.waitNotifyStartTime,
-                 data.kfcAlgExeStartTime, data.sendTaskStartTime, data.waitActiveStartTime, data.activeStartTime,
-                 data.waitExeEndStartTime, data.rtsqExeEndTime) = row;
+        std::tie(data.deviceId, data.streamId, data.taskId, data.commTurn, data.currentTurn, data.serverStartTime,
+                 data.waitMsgStartTime, data.kfcAlgExeStartTime, data.sendTaskStartTime, data.sendSqeFinishTime,
+                 data.rtsqExeEndTime, data.serverEndTime) = row;
         kfcCommTurnData.push_back(data);
     }
 
@@ -132,34 +132,35 @@ std::vector<KfcTurnData> KfcTaskProcessor::FormatCommData(const std::vector<KfcC
     std::vector<KfcTurnData> ans;
     HPFloat startTimestamp;
     for (const auto& commData : oriCommData) {
-        startTimestamp = GetTimeFromSyscnt(commData.waitNotifyStartTime, params);
-        ans.emplace_back("WaitNotify " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
+        startTimestamp = GetTimeFromSyscnt(commData.serverStartTime, params);
+        ans.emplace_back("StartServer " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
                          commData.taskId, GetLocalTime(startTimestamp, record).Uint64(),
-                         GetDurTimeFromSyscnt(commData.kfcAlgExeStartTime - commData.waitNotifyStartTime, params)
+                         GetDurTimeFromSyscnt(commData.waitMsgStartTime - commData.serverStartTime, params)
+                         .Double());
+        startTimestamp = GetTimeFromSyscnt(commData.waitMsgStartTime, params);
+        ans.emplace_back("TaskWaitRequest " + std::to_string(commData.currentTurn), commData.deviceId,
+                         commData.streamId, commData.taskId, GetLocalTime(startTimestamp, record).Uint64(),
+                         GetDurTimeFromSyscnt(commData.kfcAlgExeStartTime - commData.waitMsgStartTime, params)
                          .Double());
         startTimestamp = GetTimeFromSyscnt(commData.kfcAlgExeStartTime, params);
-        ans.emplace_back("KfcAlgExe " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
-                         commData.taskId, GetLocalTime(startTimestamp, record).Uint64(),
+        ans.emplace_back("TaskOrchestration " + std::to_string(commData.currentTurn), commData.deviceId,
+                         commData.streamId, commData.taskId, GetLocalTime(startTimestamp, record).Uint64(),
                          GetDurTimeFromSyscnt(commData.sendTaskStartTime - commData.kfcAlgExeStartTime, params)
                          .Double());
         startTimestamp = GetTimeFromSyscnt(commData.sendTaskStartTime, params);
-        ans.emplace_back("SendTask " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
+        ans.emplace_back("TaskLaunch " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
                          commData.taskId, GetLocalTime(startTimestamp, record).Uint64(),
-                         GetDurTimeFromSyscnt(commData.waitActiveStartTime - commData.sendTaskStartTime, params)
+                         GetDurTimeFromSyscnt(commData.sendSqeFinishTime - commData.sendTaskStartTime, params)
                          .Double());
-        startTimestamp = GetTimeFromSyscnt(commData.waitActiveStartTime, params);
-        ans.emplace_back("WaitActive " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
+        startTimestamp = GetTimeFromSyscnt(commData.sendSqeFinishTime, params);
+        ans.emplace_back("TaskExecute " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
                          commData.taskId, GetLocalTime(startTimestamp, record).Uint64(),
-                         GetDurTimeFromSyscnt(commData.activeStartTime - commData.sendTaskStartTime, params).Double());
-        startTimestamp = GetTimeFromSyscnt(commData.activeStartTime, params);
-        ans.emplace_back("Active " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
-                         commData.taskId, GetLocalTime(startTimestamp, record).Uint64(),
-                         GetDurTimeFromSyscnt(commData.waitExeEndStartTime - commData.activeStartTime, params).
+                         GetDurTimeFromSyscnt(commData.rtsqExeEndTime - commData.sendSqeFinishTime, params).
                          Double());
-        startTimestamp = GetTimeFromSyscnt(commData.waitExeEndStartTime, params);
-        ans.emplace_back("WaitExeEnd " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
+        startTimestamp = GetTimeFromSyscnt(commData.rtsqExeEndTime, params);
+        ans.emplace_back("Finalize " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
                          commData.taskId, GetLocalTime(startTimestamp, record).Uint64(),
-                         GetDurTimeFromSyscnt(commData.rtsqExeEndTime - commData.waitExeEndStartTime, params)
+                         GetDurTimeFromSyscnt(commData.serverEndTime - commData.rtsqExeEndTime, params)
                          .Double());
     }
     return ans;

@@ -34,13 +34,13 @@ struct KfcCommTurn {
     uint32_t taskId = UINT32_MAX;
     uint16_t commTurn = UINT16_MAX;
     uint16_t currentTurn = UINT16_MAX;
-    uint64_t waitNotifyStartTime = UINT64_MAX;
+    uint64_t serverStartTime = UINT64_MAX;
+    uint64_t waitMsgStartTime = UINT64_MAX;
     uint64_t kfcAlgExeStartTime = UINT64_MAX;
     uint64_t sendTaskStartTime = UINT64_MAX;
-    uint64_t waitActiveStartTime = UINT64_MAX;
-    uint64_t activeStartTime = UINT64_MAX;
-    uint64_t waitExeEndStartTime = UINT64_MAX;
+    uint64_t sendSqeFinishTime = UINT64_MAX;
     uint64_t rtsqExeEndTime = UINT64_MAX;
+    uint64_t serverEndTime = UINT64_MAX;
 };
 
 struct KfcComputeTurn {

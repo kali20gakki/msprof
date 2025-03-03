@@ -450,6 +450,26 @@ struct ConcatTensorInfo {
     uint32_t tensorNum = 0;
     std::vector<MsrofTensorData> tensorData{MSPROF_GE_TENSOR_DATA_NUM};
 };
+
+// AICPU kfc算子执行时间
+struct AicpuKfcProfCommTurn {
+    uint64_t serverStartTime;      // 进入KFC流程
+    uint64_t waitMsgStartTime;     // 开始等待客户端消息
+    uint64_t kfcAlgExeStartTime;   // 开始通信算法执行
+    uint64_t sendTaskStartTime;    // 开始下发task
+    uint64_t sendSqeFinishTime;    // task下发完成
+    uint64_t rtsqExeEndTime;       // sq执行结束时间
+    uint64_t serverEndTime;        // KFC流程结束时间
+    uint64_t dataLen;              // 本轮通信数据长度
+    uint32_t deviceId;
+    uint16_t streamId;
+    uint16_t taskId;
+    uint8_t version;
+    uint8_t commTurn;  // 总通信轮次
+    uint8_t currentTurn;
+    uint8_t reserve[5];
+};
+
 #ifdef __cplusplus
 }
 #endif

@@ -322,13 +322,13 @@ class KfcHcclInfoBean:
 class KfcCommTurnBean:
     def __init__(self: any, *args) -> None:
         data = args[0]
-        self._wait_notify_start_time = data[6]
-        self._kfc_alg_exe_start_time = data[7]
-        self._send_task_start_time = data[8]
-        self._wait_active_start_time = data[9]
-        self._active_start_time = data[10]
-        self._wait_exe_end_start_time = data[11]
-        self._rtsq_exe_end_time = data[12]
+        self._server_start_time = data[6]  # 进入KFC流程
+        self._wait_msg_start_time = data[7]  # 开始等待客户端消息
+        self._kfc_alg_exe_start_time = data[8]  # 开始通信算法执行
+        self._send_task_start_time = data[9]  # 开始下发task
+        self._send_sqe_finish_time = data[10]  # task下发完成
+        self._rtsq_exe_end_time = data[11]  # sq执行结束时间
+        self._server_end_time = data[12]  # KFC流程结束时间
         self._data_len = data[13]
         self._device_id = data[14]
         self._stream_id = StarsCommon.set_stream_id(data[15], data[16])
@@ -362,8 +362,12 @@ class KfcCommTurnBean:
         return self._comm_turn
 
     @property
-    def wait_notify_start_time(self: any) -> int:
-        return self._wait_notify_start_time
+    def server_start_time(self: any) -> int:
+        return self._server_start_time
+
+    @property
+    def wait_msg_start_time(self: any) -> int:
+        return self._wait_msg_start_time
 
     @property
     def kfc_alg_exe_start_time(self: any) -> int:
@@ -374,20 +378,16 @@ class KfcCommTurnBean:
         return self._send_task_start_time
 
     @property
-    def wait_active_start_time(self: any) -> int:
-        return self._wait_active_start_time
-
-    @property
-    def active_start_time(self: any) -> int:
-        return self._active_start_time
-
-    @property
-    def wait_exe_end_start_time(self: any) -> int:
-        return self._wait_exe_end_start_time
+    def send_sqe_finish_time(self: any) -> int:
+        return self._send_sqe_finish_time
 
     @property
     def rtsq_exe_end_time(self: any) -> int:
         return self._rtsq_exe_end_time
+
+    @property
+    def server_end_time(self: any) -> int:
+        return self._server_end_time
 
 
 class KfcComputeTurnBean:

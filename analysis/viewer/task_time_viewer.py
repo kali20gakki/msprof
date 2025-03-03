@@ -132,29 +132,29 @@ class TaskTimeViewer(BaseViewer):
         for data in kfc_comm_turn_time:
             kfc_comm_turn_data += [
                 KfcTurnData(
-                    "WaitNotify {}".format(data.current_turn), data.stream_id, data.task_id,
-                    InfoConfReader().trans_syscnt_into_local_time(data.wait_notify_start_time),
-                    InfoConfReader().duration_from_syscnt(data.kfc_alg_exe_start_time - data.wait_notify_start_time)),
+                    "StartServer {}".format(data.current_turn), data.stream_id, data.task_id,
+                    InfoConfReader().trans_syscnt_into_local_time(data.server_start_time),
+                    InfoConfReader().duration_from_syscnt(data.wait_msg_start_time - data.server_start_time)),
                 KfcTurnData(
-                    "KfcAlgExe {}".format(data.current_turn), data.stream_id, data.task_id,
+                    "TaskWaitRequest {}".format(data.current_turn), data.stream_id, data.task_id,
+                    InfoConfReader().trans_syscnt_into_local_time(data.wait_msg_start_time),
+                    InfoConfReader().duration_from_syscnt(data.kfc_alg_exe_start_time - data.wait_msg_start_time)),
+                KfcTurnData(
+                    "TaskOrchestration {}".format(data.current_turn), data.stream_id, data.task_id,
                     InfoConfReader().trans_syscnt_into_local_time(data.kfc_alg_exe_start_time),
                     InfoConfReader().duration_from_syscnt(data.send_task_start_time - data.kfc_alg_exe_start_time)),
                 KfcTurnData(
-                    "SendTask {}".format(data.current_turn), data.stream_id, data.task_id,
+                    "TaskLaunch {}".format(data.current_turn), data.stream_id, data.task_id,
                     InfoConfReader().trans_syscnt_into_local_time(data.send_task_start_time),
-                    InfoConfReader().duration_from_syscnt(data.wait_active_start_time - data.send_task_start_time)),
+                    InfoConfReader().duration_from_syscnt(data.send_sqe_finish_time - data.send_task_start_time)),
                 KfcTurnData(
-                    "WaitActive {}".format(data.current_turn), data.stream_id, data.task_id,
-                    InfoConfReader().trans_syscnt_into_local_time(data.wait_active_start_time),
-                    InfoConfReader().duration_from_syscnt(data.active_start_time - data.wait_active_start_time)),
+                    "TaskExecute {}".format(data.current_turn), data.stream_id, data.task_id,
+                    InfoConfReader().trans_syscnt_into_local_time(data.send_sqe_finish_time),
+                    InfoConfReader().duration_from_syscnt(data.rtsq_exe_end_time - data.send_sqe_finish_time)),
                 KfcTurnData(
-                    "Active {}".format(data.current_turn), data.stream_id, data.task_id,
-                    InfoConfReader().trans_syscnt_into_local_time(data.active_start_time),
-                    InfoConfReader().duration_from_syscnt(data.wait_exe_end_start_time - data.active_start_time)),
-                KfcTurnData(
-                    "WaitExeEnd {}".format(data.current_turn), data.stream_id, data.task_id,
-                    InfoConfReader().trans_syscnt_into_local_time(data.wait_exe_end_start_time),
-                    InfoConfReader().duration_from_syscnt(data.rtsq_exe_end_time - data.wait_exe_end_start_time)),
+                    "Finalize {}".format(data.current_turn), data.stream_id, data.task_id,
+                    InfoConfReader().trans_syscnt_into_local_time(data.rtsq_exe_end_time),
+                    InfoConfReader().duration_from_syscnt(data.server_end_time - data.rtsq_exe_end_time)),
             ]
         for data in kfc_compute_turn_time:
             kfc_compute_turn_data += [
