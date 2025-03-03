@@ -124,13 +124,13 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
             aicpu_info.data.task_id,
             aicpu_info.data.comm_turn,
             aicpu_info.data.current_turn,
-            aicpu_info.data.wait_notify_start_time,
+            aicpu_info.data.server_start_time,
+            aicpu_info.data.wait_msg_start_time,
             aicpu_info.data.kfc_alg_exe_start_time,
             aicpu_info.data.send_task_start_time,
-            aicpu_info.data.wait_active_start_time,
-            aicpu_info.data.active_start_time,
-            aicpu_info.data.wait_exe_end_start_time,
+            aicpu_info.data.send_sqe_finish_time,
             aicpu_info.data.rtsq_exe_end_time,
+            aicpu_info.data.server_end_time,
         ]
 
     @staticmethod
