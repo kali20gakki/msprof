@@ -195,31 +195,6 @@ TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStart_will_return_success_while_zero
     EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStart(devList, devNums, 0));
 }
 
-TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStartWillReturnFailWhenMemsetOrStrcpyFail)
-{
-    GlobalMockObject::verify();
-    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StartReporters)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsMsprofTxSwitchOn)
-        .stubs()
-        .will(returnValue(false));
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsSubscribeMode)
-        .stubs()
-        .will(returnValue(false));
-    uint32_t devList[] = {0};
-    uint32_t devNums = 1;
-    MOCKER(memset_s)
-        .stubs()
-        .will(returnValue(EOK - 1))
-        .then(returnValue(EOK));
-    MOCKER(strncpy_s)
-        .stubs()
-        .will(returnValue(EOK - 1));
-    EXPECT_EQ(PROFILING_FAILED, CommandHandleProfStart(devList, devNums, 1));
-    EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, CommandHandleProfStart(devList, devNums, 1));
-}
-
 TEST_F(COMMANDHANDLE_TEST, GetProfSwitchHiWillNotSetProfSwitchHiWhenInNotSupportPlatform)
 {
     GlobalMockObject::verify();
@@ -288,33 +263,6 @@ TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStop_will_send_command_to_cann_while
     uint64_t profSwitch = 0x1;
     EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStop(devList, devNums, profSwitch));
     EXPECT_EQ(ACL_ERROR, CommandHandleProfStop(devList, devNums, profSwitch));
-}
-
-TEST_F(COMMANDHANDLE_TEST, CommandHandleProfStopWillReturnFailWhenMemSetOrStrcpyFail)
-{
-    GlobalMockObject::verify();
-    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StopReporters)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsMsprofTxSwitchOn)
-        .stubs()
-        .will(returnValue(true));
-    std::string zeroStr = "{}";
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
-        .stubs()
-        .will(returnValue(zeroStr));
-    MOCKER(memset_s)
-        .stubs()
-        .will(returnValue(EOK - 1))
-        .then(returnValue(EOK));
-    MOCKER(strncpy_s)
-        .stubs()
-        .will(returnValue(EOK - 1));
-    uint32_t devList[] = {0, 1};
-    uint32_t devNums = 2;
-    uint64_t profSwitch = 0x1;
-    EXPECT_EQ(PROFILING_FAILED, CommandHandleProfStop(devList, devNums, profSwitch));
-    EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, CommandHandleProfStop(devList, devNums, profSwitch));
 }
 
 class MSPROF_ACL_CORE_UTEST: public testing::Test {

@@ -75,6 +75,10 @@ TEST_F(ProfPeripheralJobUtest, Process)
     auto profPeripheralJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfPeripheralJob>();
     profPeripheralJob->Init(collectionJobCfg_);
 
+    profPeripheralJob->collectionJobCfg_ = nullptr;
+    EXPECT_EQ(PROFILING_FAILED, profPeripheralJob->Process());
+
+    profPeripheralJob->collectionJobCfg_ = collectionJobCfg_;
     collectionJobCfg_->comParams->params->nicProfiling = "NIaC";
     EXPECT_EQ(PROFILING_SUCCESS, profPeripheralJob->Process());
     collectionJobCfg_->comParams->params->nicProfiling = "on";
@@ -94,6 +98,11 @@ TEST_F(ProfPeripheralJobUtest, Uninit)
     collectionJobCfg_->comParams->params->nicProfiling = "on";
     collectionJobCfg_->comParams->params->dvpp_profiling = "on";
     profPeripheralJob->Init(collectionJobCfg_);
+
+    profPeripheralJob->collectionJobCfg_ = nullptr;
+    EXPECT_EQ(PROFILING_SUCCESS, profPeripheralJob->Uninit());
+
+    profPeripheralJob->collectionJobCfg_ = collectionJobCfg_;
     MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
         .stubs()
         .will(returnValue(false))
@@ -354,7 +363,7 @@ protected:
 TEST_F(JOB_WRAPPER_PROF_NPU_APP_MEM_JOB_TEST, Init)
 {
     auto proNpuAppJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfNpuAppMemJob>();
-    proNpuAppJob->Init(collectionJobCfg_);
+    EXPECT_EQ(PROFILING_FAILED, proNpuAppJob->Init(nullptr));
     EXPECT_EQ(PROFILING_FAILED, proNpuAppJob->Init(collectionJobCfg_));
     collectionJobCfg_->comParams->params->hardware_mem = "on";
     collectionJobCfg_->comParams->params->profiling_mode = "app";
@@ -395,7 +404,7 @@ protected:
 TEST_F(JOB_WRAPPER_PROF_NPU_MEM_JOB_TEST, Init)
 {
     auto proNpuAppJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfNpuMemJob>();
-    proNpuAppJob->Init(collectionJobCfg_);
+    EXPECT_EQ(PROFILING_FAILED, proNpuAppJob->Init(nullptr));
     EXPECT_EQ(PROFILING_FAILED, proNpuAppJob->Init(collectionJobCfg_));
     collectionJobCfg_->comParams->params->hardware_mem = "on";
     EXPECT_EQ(PROFILING_SUCCESS, proNpuAppJob->Init(collectionJobCfg_));
@@ -437,7 +446,7 @@ protected:
 TEST_F(JOB_WRAPPER_PROF_NPU_MODULE_MEM_JOB_TEST, Init)
 {
     auto profNpuModuleJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfNpuModuleMemJob>();
-    profNpuModuleJob->Init(collectionJobCfg_);
+    EXPECT_EQ(PROFILING_FAILED, profNpuModuleJob->Init(nullptr));
     EXPECT_EQ(PROFILING_FAILED, profNpuModuleJob->Init(collectionJobCfg_));
     collectionJobCfg_->comParams->params->hardware_mem = "on";
     EXPECT_EQ(PROFILING_SUCCESS, profNpuModuleJob->Init(collectionJobCfg_));
@@ -482,10 +491,12 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, Init) {
         .will(returnValue(true));
 
     auto profLlcJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfLlcJob>();
-    collectionJobCfg_->jobParams.events->push_back("read");
+    EXPECT_EQ(PROFILING_FAILED, profLlcJob->Init(nullptr));
     EXPECT_EQ(PROFILING_FAILED, profLlcJob->Init(collectionJobCfg_));
     collectionJobCfg_->comParams->params->llc_profiling = "on";
     collectionJobCfg_->comParams->params->msprof_llc_profiling = "on";
+    EXPECT_EQ(PROFILING_FAILED, profLlcJob->Init(collectionJobCfg_));
+    collectionJobCfg_->jobParams.events->push_back("read");
     EXPECT_EQ(PROFILING_SUCCESS, profLlcJob->Init(collectionJobCfg_));
     collectionJobCfg_->comParams->params->host_profiling = true;
     EXPECT_EQ(PROFILING_FAILED, profLlcJob->Init(collectionJobCfg_));
@@ -849,14 +860,17 @@ TEST_F(JOB_WRAPPER_PROF_DVPP_JOB_TEST, Process)
     auto proJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfDvppJob>();
     EXPECT_EQ(PROFILING_FAILED, proJob->Process());
     collectionJobCfg_->comParams->params->host_profiling = false;
+    collectionJobCfg_->comParams->params->dvpp_profiling = "on";
     collectionJobCfg_->jobParams.events->push_back("write");
     collectionJobCfg_->jobParams.events->push_back("read");
     MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
         .stubs()
-        .will(returnValue(true));
+        .will(returnValue(true))
+        .then(returnValue(false));
     MOCKER_CPP(&analysis::dvvp::driver::DrvPeripheralStart)
         .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
+        .will(returnValue(PROFILING_SUCCESS))
+        .then(returnValue(PROFILING_FAILED));
     MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
         .stubs()
         .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
@@ -867,19 +881,23 @@ TEST_F(JOB_WRAPPER_PROF_DVPP_JOB_TEST, Process)
 
 TEST_F(JOB_WRAPPER_PROF_DVPP_JOB_TEST, Uninit)
 {
+    auto proJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfDvppJob>();
+    EXPECT_EQ(PROFILING_SUCCESS, proJob->Uninit());
     collectionJobCfg_->comParams->params->host_profiling = false;
+    collectionJobCfg_->comParams->params->dvpp_profiling = "on";
     collectionJobCfg_->jobParams.events->push_back("write");
     collectionJobCfg_->jobParams.events->push_back("read");
     MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
         .stubs()
-        .will(returnValue(true));
+        .will(returnValue(true))
+        .then(returnValue(false));
     MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
         .stubs()
         .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
     MOCKER_CPP(&analysis::dvvp::driver::DrvStop)
         .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    auto proJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfDvppJob>();
+        .will(returnValue(PROFILING_SUCCESS))
+        .then(returnValue(PROFILING_FAILED));
 
     proJob->Init(collectionJobCfg_);
     EXPECT_EQ(PROFILING_SUCCESS, proJob->Uninit());
