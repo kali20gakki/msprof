@@ -6,15 +6,24 @@
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
+using namespace Analysis::Dvvp::JobWrapper;
 
-class UtestCollectionJob : public Analysis::Dvvp::JobWrapper::ICollectionJob
+static int g_processResult = PROFILING_FAILED;
+static int g_uninitResult = PROFILING_FAILED;
+static int g_globalJobLevel = false;
+
+class UtestCollectionJob : public ICollectionJob
 {
 public:
     UtestCollectionJob();
     virtual ~UtestCollectionJob();
-    int Init(const std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> cfg);
+    int Init(const std::shared_ptr<CollectionJobCfg> cfg);
     int Process();
     int Uninit();
+    bool IsGlobalJobLevel()
+    {
+        return g_globalJobLevel;
+    }
 };
 
 UtestCollectionJob::UtestCollectionJob()
@@ -25,44 +34,270 @@ UtestCollectionJob::~UtestCollectionJob()
 {
 }
 
-int UtestCollectionJob::Init(const std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> cfg)
+int UtestCollectionJob::Init(const std::shared_ptr<CollectionJobCfg> cfg)
 {
     return PROFILING_SUCCESS;
 }
 
 int UtestCollectionJob::Process()
 {
-    return PROFILING_SUCCESS;
+    return g_processResult;
 }
 
 int UtestCollectionJob::Uninit()
 {
-    return PROFILING_SUCCESS;
+    return g_uninitResult;
 }
 
-class JOB_WRAPPER_COLLECTION_REGISTRT_UTEST: public testing::Test {
+class CollectionRegisterUtest: public testing::Test {
 protected:
-    virtual void SetUp() {
-        
-    }
-    virtual void TearDown() {
+    virtual void SetUp() {}
+    virtual void TearDown()
+    {
         GlobalMockObject::verify();
+        g_processResult = PROFILING_FAILED;
+        g_uninitResult = PROFILING_FAILED;
+        g_globalJobLevel = false;
     }
 
 };
 
-TEST_F(JOB_WRAPPER_COLLECTION_REGISTRT_UTEST, CollectionRegisterMgr) {
-    Analysis::Dvvp::JobWrapper::CollectionRegisterMgr mgr;
-    std::shared_ptr<Analysis::Dvvp::JobWrapper::ICollectionJob> instance = std::make_shared<UtestCollectionJob>();
-    //CollectionJobRegisterAndRun param error 
-    int ret = mgr.CollectionJobRegisterAndRun(0, Analysis::Dvvp::JobWrapper::NR_MAX_COLLECTION_JOB, instance);
-    EXPECT_EQ(PROFILING_FAILED, ret);
-    //CollectionJobRegisterAndRun param error 
-    ret = mgr.CollectionJobRegisterAndRun(-1, Analysis::Dvvp::JobWrapper::DDR_DRV_COLLECTION_JOB, instance);
+TEST_F(CollectionRegisterUtest, CollectionJobRegisterAndRunWillReturnFailWhenInputInvalidParams)
+{
+    CollectionRegisterMgr mgr;
+    std::shared_ptr<ICollectionJob> instance = std::make_shared<UtestCollectionJob>();
+
+    int ret = mgr.CollectionJobRegisterAndRun(0, NR_MAX_COLLECTION_JOB, instance);
     EXPECT_EQ(PROFILING_FAILED, ret);
 
-    for (int i = 0; i <= Analysis::Dvvp::JobWrapper::NR_MAX_COLLECTION_JOB; i++) {
-        mgr.CollectionJobRegisterAndRun(0, static_cast<Analysis::Dvvp::JobWrapper::ProfCollectionJobE>(i),
-                                        instance);
-    }
+    ret = mgr.CollectionJobRegisterAndRun(-1, DDR_DRV_COLLECTION_JOB, instance);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+
+    ret = mgr.CollectionJobRegisterAndRun(0, DDR_DRV_COLLECTION_JOB, nullptr);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+}
+
+TEST_F(CollectionRegisterUtest, CollectionJobRegisterAndRunWillReturnFailWhenInsertCollectionJobFail)
+{
+    CollectionRegisterMgr mgr;
+    std::shared_ptr<ICollectionJob> instance = std::make_shared<UtestCollectionJob>();
+
+    MOCKER_CPP(&CollectionRegisterMgr::CheckCollectionJobIsNoRegister)
+        .stubs()
+        .will(returnValue(false));
+    int ret = mgr.CollectionJobRegisterAndRun(0, DDR_DRV_COLLECTION_JOB, instance);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+}
+
+TEST_F(CollectionRegisterUtest, CollectionJobRegisterAndRunWillReturnFailWhenJobProcessFail)
+{
+    CollectionRegisterMgr mgr;
+    std::shared_ptr<ICollectionJob> instance = std::make_shared<UtestCollectionJob>();
+
+    MOCKER_CPP(&CollectionRegisterMgr::CheckCollectionJobIsNoRegister)
+        .stubs()
+        .will(returnValue(true));
+    g_processResult = PROFILING_FAILED;
+    int ret = mgr.CollectionJobRegisterAndRun(0, DDR_DRV_COLLECTION_JOB, instance);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+}
+
+TEST_F(CollectionRegisterUtest, CollectionJobRegisterAndRunWillReturnSuccWhenJobProcessSucc)
+{
+    CollectionRegisterMgr mgr;
+    std::shared_ptr<ICollectionJob> instance = std::make_shared<UtestCollectionJob>();
+
+    MOCKER_CPP(&CollectionRegisterMgr::CheckCollectionJobIsNoRegister)
+        .stubs()
+        .will(returnValue(true));
+    g_processResult = PROFILING_SUCCESS;
+    int ret = mgr.CollectionJobRegisterAndRun(0, DDR_DRV_COLLECTION_JOB, instance);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(CollectionRegisterUtest, CollectionJobRunWillReturnFailWhenInputInvalidParams)
+{
+    CollectionRegisterMgr mgr;
+
+    int ret = mgr.CollectionJobRun(-1, DDR_DRV_COLLECTION_JOB);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+
+    ret = mgr.CollectionJobRun(0, NR_MAX_COLLECTION_JOB);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+}
+
+TEST_F(CollectionRegisterUtest, CollectionJobRunWillReturnFailWhenJobNotRegistered)
+{
+    CollectionRegisterMgr mgr;
+
+    std::map<ProfCollectionJobE, SHARED_PTR_ALIA<ICollectionJob>> fakeJobs;
+    mgr.collectionJobs_[0] = fakeJobs;
+    int ret = mgr.CollectionJobRun(0, DDR_DRV_COLLECTION_JOB);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+}
+
+TEST_F(CollectionRegisterUtest, CollectionJobRunWillReturnFailWhenProcessFail)
+{
+    CollectionRegisterMgr mgr;
+    g_processResult = PROFILING_FAILED;
+    std::shared_ptr<ICollectionJob> instance = std::make_shared<UtestCollectionJob>();
+    std::map<ProfCollectionJobE, SHARED_PTR_ALIA<ICollectionJob>> fakeJobs;
+    fakeJobs[DDR_DRV_COLLECTION_JOB] = instance;
+    mgr.collectionJobs_[0] = fakeJobs;
+    int ret = mgr.CollectionJobRun(0, DDR_DRV_COLLECTION_JOB);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+}
+
+TEST_F(CollectionRegisterUtest, CollectionJobRunWillReturnSuccWhenProcessSucc)
+{
+    CollectionRegisterMgr mgr;
+    g_processResult = PROFILING_SUCCESS;
+    std::shared_ptr<ICollectionJob> instance = std::make_shared<UtestCollectionJob>();
+    std::map<ProfCollectionJobE, SHARED_PTR_ALIA<ICollectionJob>> fakeJobs;
+    fakeJobs[DDR_DRV_COLLECTION_JOB] = instance;
+    mgr.collectionJobs_[0] = fakeJobs;
+    int ret = mgr.CollectionJobRun(0, DDR_DRV_COLLECTION_JOB);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(CollectionRegisterUtest, CollectionJobUnregisterAndStopWillReturnFailWhenInputInvalidParams)
+{
+    CollectionRegisterMgr mgr;
+
+    int ret = mgr.CollectionJobUnregisterAndStop(0, NR_MAX_COLLECTION_JOB);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+
+    ret = mgr.CollectionJobUnregisterAndStop(-1, DDR_DRV_COLLECTION_JOB);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+}
+
+TEST_F(CollectionRegisterUtest, CollectionJobUnregisterAndStopWillReturnFailWhenGetAndDelCollectionJobFail)
+{
+    CollectionRegisterMgr mgr;
+
+    MOCKER_CPP(&CollectionRegisterMgr::GetAndDelCollectionJob)
+        .stubs()
+        .will(returnValue(false));
+    int ret = mgr.CollectionJobUnregisterAndStop(0, DDR_DRV_COLLECTION_JOB);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+}
+
+TEST_F(CollectionRegisterUtest, CollectionJobUnregisterAndStopWillReturnFailWhenUninitFail)
+{
+    CollectionRegisterMgr mgr;
+
+    std::shared_ptr<ICollectionJob> instance = std::make_shared<UtestCollectionJob>();
+    mgr.InsertCollectionJob(0, DDR_DRV_COLLECTION_JOB, instance);
+    int ret = mgr.CollectionJobUnregisterAndStop(0, DDR_DRV_COLLECTION_JOB);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+}
+
+TEST_F(CollectionRegisterUtest, CollectionJobUnregisterAndStopWillReturnSuccWhenUninitSucc)
+{
+    CollectionRegisterMgr mgr;
+
+    std::shared_ptr<ICollectionJob> instance = std::make_shared<UtestCollectionJob>();
+    g_uninitResult = PROFILING_SUCCESS;
+    mgr.InsertCollectionJob(0, DDR_DRV_COLLECTION_JOB, instance);
+    int ret = mgr.CollectionJobUnregisterAndStop(0, DDR_DRV_COLLECTION_JOB);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(CollectionRegisterUtest, InsertCollectionJobWillReturnFalseWhenInputInvalidParams)
+{
+    CollectionRegisterMgr mgr;
+
+    std::shared_ptr<ICollectionJob> instance = std::make_shared<UtestCollectionJob>();
+
+    bool ret = mgr.InsertCollectionJob(-1, DDR_DRV_COLLECTION_JOB, instance);
+    EXPECT_EQ(false, ret);
+
+    ret = mgr.InsertCollectionJob(0, NR_MAX_COLLECTION_JOB, instance);
+    EXPECT_EQ(false, ret);
+
+    ret = mgr.InsertCollectionJob(0, DDR_DRV_COLLECTION_JOB, nullptr);
+    EXPECT_EQ(false, ret);
+}
+
+TEST_F(CollectionRegisterUtest, InsertCollectionJobWillReturnFailWhenJobNotRegistered)
+{
+    CollectionRegisterMgr mgr;
+
+    std::shared_ptr<ICollectionJob> instance = std::make_shared<UtestCollectionJob>();
+    MOCKER_CPP(&CollectionRegisterMgr::CheckCollectionJobIsNoRegister)
+        .stubs()
+        .will(returnValue(false));
+
+    bool ret = mgr.InsertCollectionJob(0, DDR_DRV_COLLECTION_JOB, instance);
+    EXPECT_EQ(false, ret);
+}
+
+TEST_F(CollectionRegisterUtest, InsertCollectionJobWillReturnTrueWhenJobRegistered)
+{
+    CollectionRegisterMgr mgr;
+
+    std::shared_ptr<ICollectionJob> instance = std::make_shared<UtestCollectionJob>();
+    MOCKER_CPP(&CollectionRegisterMgr::CheckCollectionJobIsNoRegister)
+        .stubs()
+        .will(returnValue(true));
+
+    bool ret = mgr.InsertCollectionJob(0, DDR_DRV_COLLECTION_JOB, instance);
+    EXPECT_EQ(true, ret);
+}
+
+TEST_F(CollectionRegisterUtest, GetAndDelCollectionJobWillReturnFalseWhenInputInvalidParams)
+{
+    CollectionRegisterMgr mgr;
+    std::shared_ptr<ICollectionJob> instance = std::make_shared<UtestCollectionJob>();
+    bool ret = mgr.GetAndDelCollectionJob(0, NR_MAX_COLLECTION_JOB, instance);
+    EXPECT_EQ(false, ret);
+
+    ret = mgr.GetAndDelCollectionJob(-1, DDR_DRV_COLLECTION_JOB, instance);
+    EXPECT_EQ(false, ret);
+}
+
+TEST_F(CollectionRegisterUtest, GetAndDelCollectionJobWillReturnFalseWhenCheckCollectionJobNoRegister)
+{
+    CollectionRegisterMgr mgr;
+    std::shared_ptr<ICollectionJob> instance = std::make_shared<UtestCollectionJob>();
+    MOCKER_CPP(&CollectionRegisterMgr::CheckCollectionJobIsNoRegister)
+        .stubs()
+        .will(returnValue(true));
+    bool ret = mgr.GetAndDelCollectionJob(0, DDR_DRV_COLLECTION_JOB, instance);
+    EXPECT_EQ(false, ret);
+}
+
+TEST_F(CollectionRegisterUtest, GetAndDelCollectionJobWillReturnFalseWhenCheckIdNotEqualToInputDevId)
+{
+    CollectionRegisterMgr mgr;
+    std::shared_ptr<ICollectionJob> instance = std::make_shared<UtestCollectionJob>();
+    g_globalJobLevel = true;
+    std::map<ProfCollectionJobE, SHARED_PTR_ALIA<ICollectionJob>> fakeJobs;
+    fakeJobs[DDR_DRV_COLLECTION_JOB] = instance;
+    mgr.collectionJobs_[1] = fakeJobs;
+    bool ret = mgr.GetAndDelCollectionJob(0, DDR_DRV_COLLECTION_JOB, instance);
+    EXPECT_EQ(false, ret);
+}
+
+TEST_F(CollectionRegisterUtest, GetAndDelCollectionJobWillReturnTrueWhenInputValidParams)
+{
+    CollectionRegisterMgr mgr;
+    std::shared_ptr<ICollectionJob> instance = std::make_shared<UtestCollectionJob>();
+    g_globalJobLevel = false;
+    std::map<ProfCollectionJobE, SHARED_PTR_ALIA<ICollectionJob>> fakeJobs;
+    fakeJobs[DDR_DRV_COLLECTION_JOB] = instance;
+    mgr.collectionJobs_[0] = fakeJobs;
+    bool ret = mgr.GetAndDelCollectionJob(0, DDR_DRV_COLLECTION_JOB, instance);
+    EXPECT_EQ(true, ret);
+}
+
+TEST_F(CollectionRegisterUtest, CheckCollectionJobIsNoRegisterWillReturnFalseWhenInputInvalidParams)
+{
+    CollectionRegisterMgr mgr;
+    int devId = 0;
+    bool ret = mgr.CheckCollectionJobIsNoRegister(devId, NR_MAX_COLLECTION_JOB);
+    EXPECT_EQ(false, ret);
+    devId = -1;
+    ret = mgr.CheckCollectionJobIsNoRegister(devId, DDR_DRV_COLLECTION_JOB);
+    EXPECT_EQ(false, ret);
 }

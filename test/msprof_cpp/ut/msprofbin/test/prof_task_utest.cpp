@@ -11,21 +11,38 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Msprof;
 
-class PROF_TASK_UTEST : public testing::Test {
+class ProfTaskUtest : public testing::Test {
 protected:
   virtual void SetUp() {}
   virtual void TearDown() {}
 };
 
-TEST_F(PROF_TASK_UTEST, RpcTaskTest) {
+TEST_F(ProfTaskUtest, RpcTaskTest)
+{
     GlobalMockObject::verify();
 
-    std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
-    new analysis::dvvp::message::ProfileParams);   
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
     SHARED_PTR_ALIA<ProfRpcTask> task(new ProfRpcTask(0, params));
     task->Init();
     task->Stop();
     task->PostSyncDataCtrl();
     task->UnInit();
+}
 
+TEST_F(ProfTaskUtest, SocTaskTest)
+{
+    GlobalMockObject::verify();
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    params->host_profiling = true;
+    SHARED_PTR_ALIA<ProfSocTask> task(new ProfSocTask(0, params));
+    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::UploadCtrlFileData)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_SUCCESS, task->Init());
+    task->Start();
+    task->Stop();
+    task->Wait();
+    EXPECT_EQ(PROFILING_SUCCESS, task->UnInit());
 }
