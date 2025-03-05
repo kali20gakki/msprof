@@ -78,6 +78,7 @@ bool NpuModuleMemProcessor::ProcessSingleDevice(const std::string& devicePath, L
         ERROR("Format NpuModuleMem data error, dbPath is %.", dbPath);
         return false;
     }
+    FilterDataByStartTime(processedData, localtimeContext.timeRecord.startTimeNs, PROCESSOR_NAME_NPU_MODULE_MEM);
     allProcessedData.insert(allProcessedData.end(), processedData.begin(), processedData.end());
     return true;
 }

@@ -66,7 +66,7 @@ static std::vector<HbmData> GenerateHbmData()
     data.deviceId = 0; // device 0
     data.eventType = "read";
     data.bandWidth = 15.31082505328486; // 带宽 15.31082505328486
-    data.localTime = 1724405892226599429; // 本地时间 1724405892226599429
+    data.timestamp = 1724405892226599429; // 本地时间 1724405892226599429
     res.push_back(data);
     return res;
 }

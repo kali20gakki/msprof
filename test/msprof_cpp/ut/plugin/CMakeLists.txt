@@ -33,6 +33,7 @@ add_executable(plugin_utest
 target_include_directories(plugin_utest PRIVATE
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
+	${TOP_DIR}/collector/dvvp/depend/inc/acl
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi

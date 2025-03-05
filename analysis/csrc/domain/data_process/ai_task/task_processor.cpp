@@ -69,6 +69,7 @@ bool TaskProcessor::ProcessSingleDevice(const std::string &devicePath, std::vect
         ERROR("AscendTask format data failed. DBPath is %", dbPath);
         return false;
     }
+    FilterDataByStartTime(formatData, record.startTimeNs, PROCESSOR_NAME_TASK);
     allProcessedData.insert(allProcessedData.end(), formatData.begin(), formatData.end());
     return true;
 }
@@ -106,7 +107,7 @@ std::vector<AscendTaskData> TaskProcessor::FormatData(
                  data.batchId, data.connectionId, data.hostType, data.deviceType) = row;
         HPFloat start{tmpStart};
         HPFloat end = start + HPFloat(data.duration);
-        data.start = GetLocalTime(start, timeRecord).Uint64();
+        data.timestamp = GetLocalTime(start, timeRecord).Uint64();
         data.end = GetLocalTime(end, timeRecord).Uint64();
         data.taskType = GetTaskType(data.hostType, data.deviceType, platformVersion);
         processedData.push_back(data);

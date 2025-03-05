@@ -142,7 +142,7 @@ void OverlapAnalysisAssembler::RecordCompAndCommTaskTime(
         for (auto &task : *ascendTasks) {
             TaskId id{static_cast<uint16_t >(task.streamId), static_cast<uint16_t >(task.batchId),
                       static_cast<uint16_t >(task.taskId), task.contextId, task.deviceId};
-            TimeDuration timePair{task.start, task.start + static_cast<uint64_t>(task.duration)};
+            TimeDuration timePair{task.timestamp, task.timestamp + static_cast<uint64_t>(task.duration)};
             if (allTaskPool.find(id) != allTaskPool.end()) {
                 allTaskPool[id].emplace_back(timePair);
             } else {
@@ -152,15 +152,16 @@ void OverlapAnalysisAssembler::RecordCompAndCommTaskTime(
             // 更新标记
             deviceIds_.insert(task.deviceId);
             if (begin_.find(task.deviceId) == begin_.end()) {
-                begin_[task.deviceId] = task.start;
+                begin_[task.deviceId] = task.timestamp;
             } else {
-                begin_[task.deviceId] = std::min(begin_[task.deviceId], task.start);
+                begin_[task.deviceId] = std::min(begin_[task.deviceId], task.timestamp);
             }
 
             if (end_.find(task.deviceId) == end_.end()) {
-                end_[task.deviceId] = task.start + static_cast<uint64_t>(task.duration);
+                end_[task.deviceId] = task.timestamp + static_cast<uint64_t>(task.duration);
             } else {
-                end_[task.deviceId] = std::max(end_[task.deviceId], task.start + static_cast<uint64_t>(task.duration));
+                end_[task.deviceId] = std::max(end_[task.deviceId],
+                                               task.timestamp + static_cast<uint64_t>(task.duration));
             }
         }
     }
@@ -342,9 +343,9 @@ void OverlapAnalysisAssembler::GetCommTaskSections(
         // 更新标记
         deviceIds_.insert(op.deviceId);
         if (begin_.find(op.deviceId) == begin_.end()) {
-            begin_[op.deviceId] = op.start;
+            begin_[op.deviceId] = op.timestamp;
         } else {
-            begin_[op.deviceId] = std::min(begin_[op.deviceId], op.start);
+            begin_[op.deviceId] = std::min(begin_[op.deviceId], op.timestamp);
         }
 
         if (end_.find(op.deviceId) == end_.end()) {
@@ -352,7 +353,7 @@ void OverlapAnalysisAssembler::GetCommTaskSections(
         } else {
             end_[op.deviceId] = std::max(end_[op.deviceId], op.end);
         }
-        commOpSections[op.deviceId].emplace_back(op.start, op.end);
+        commOpSections[op.deviceId].emplace_back(op.timestamp, op.end);
     }
 }
 std::vector<std::shared_ptr<TraceEvent>> OverlapAnalysisAssembler::GenerateMetaData(uint16_t deviceId)
@@ -433,6 +434,7 @@ void OverlapAnalysisAssembler::AssembleOneDevice(uint16_t deviceId, JsonWriter &
     auto commEvents = GenerateCommEvents(commSections, deviceId);
     auto commNotOverlapCompEvents = GenerateCommNotOverlapCompEvents(compSections, commSections, deviceId);
     auto freeEvents = GenerateFreeEvents(compSections, commSections, deviceId);
+
     {
         TimeLogger logger("Dump overlap analysis events");
         for (const auto &node : metaEvens) {

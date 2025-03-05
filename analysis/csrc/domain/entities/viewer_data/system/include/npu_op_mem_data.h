@@ -13,20 +13,19 @@
 #ifndef ANALYSIS_DOMAIN_NPU_OP_MEM_FORMAT_DATA_H
 #define ANALYSIS_DOMAIN_NPU_OP_MEM_FORMAT_DATA_H
 
-#include <cstdint>
 #include <string>
+#include "analysis/csrc/domain/entities/viewer_data/basic_data.h"
 
 namespace Analysis {
 namespace Domain {
-struct NpuOpMemData {
+struct NpuOpMemData : public BasicData {
     uint16_t deviceId = UINT16_MAX;
     uint32_t threadId = 0;
-    uint64_t addr = UINT64_MAX;
     int64_t size = 0;
-    uint64_t localTime = 0;
     uint64_t totalAllocateMemory = 0;
     uint64_t totalReserveMemory = 0;
     uint64_t type;
+    uint64_t addr = UINT64_MAX;
     std::string operatorName;
 };
 }

@@ -338,6 +338,8 @@ bool UnifiedPmuProcessor::SampleBasedTimelineProcess(const std::unordered_map<st
             flag = false;
             continue;
         }
+        FilterDataByStartTime(processedData, localtimeContext.timeRecord.startTimeNs,
+                              PROCESSOR_NAME_SAMPLE_PMU_TIMELINE);
     }
 
     if (!SaveToDataInventory<UnifiedSampleTimelinePmu>(std::move(processedData), dataInventory,

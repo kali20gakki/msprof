@@ -62,7 +62,7 @@ static std::vector<NicReceiveSendData> GenerateNicReceiveSendData()
     SysIOReceiveSendData data;
     data.deviceId = 0; // device 0
     data.funcId = 0; // port 0
-    data.localTime = 1724405892226599429; // 本地时间 1724405892226599429
+    data.timestamp = 1724405892226599429; // 本地时间 1724405892226599429
     data.rxDroppedRate = 5.6; // 丢包率 5.6
     data.rxErrorRate = 1.2; // 错误率 1.2
     data.rxPacketRate = 60; // 收包速率 60
@@ -72,7 +72,7 @@ static std::vector<NicReceiveSendData> GenerateNicReceiveSendData()
     data.txPacketRate = 50; // 发包速率 50
     data.txBandwidthEfficiency = 0.8; // 带宽利用率 0.8
     nicReceiveSendData.sysIOReceiveSendData.push_back({data});
-    data.localTime = 1724405892226699429; // 本地时间 1724405892226699429
+    data.timestamp = 1724405892226699429; // 本地时间 1724405892226699429
     data.rxDroppedRate = 8.6; // 丢包率 8.6
     data.rxErrorRate = 3.2; // 错误率 3.2
     data.rxPacketRate = 40; // 收包速率 40
@@ -93,7 +93,7 @@ static std::vector<RoceReceiveSendData> GenerateRoceReceiveSendData()
     SysIOReceiveSendData data;
     data.deviceId = 0; // device 0
     data.funcId = 0; // port 0
-    data.localTime = 1724405892226599429; // 本地时间 1724405892226599429
+    data.timestamp = 1724405892226599429; // 本地时间 1724405892226599429
     data.rxDroppedRate = 5.6; // 丢包率 5.6
     data.rxErrorRate = 1.2; // 错误率 1.2
     data.rxPacketRate = 60; // 收包速率 60
@@ -103,7 +103,7 @@ static std::vector<RoceReceiveSendData> GenerateRoceReceiveSendData()
     data.txPacketRate = 50; // 发包速率 50
     data.txBandwidthEfficiency = 0.8; // 带宽利用率 0.8
     roceReceiveSendData.sysIOReceiveSendData.push_back({data});
-    data.localTime = 1724405892226699429; // 本地时间 1724405892226699429
+    data.timestamp = 1724405892226699429; // 本地时间 1724405892226699429
     data.rxDroppedRate = 8.6; // 丢包率 8.6
     data.rxErrorRate = 3.2; // 错误率 3.2
     data.rxPacketRate = 40; // 收包速率 40

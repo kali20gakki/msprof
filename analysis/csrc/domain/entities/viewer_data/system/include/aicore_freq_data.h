@@ -13,13 +13,12 @@
 #ifndef ANALYSIS_DOMAIN_AICORE_FREQ_DATA_H
 #define ANALYSIS_DOMAIN_AICORE_FREQ_DATA_H
 
-#include <cstdint>
+#include "analysis/csrc/domain/entities/viewer_data/basic_data.h"
 
 namespace Analysis {
 namespace Domain {
-struct AicoreFreqData {
+struct AicoreFreqData : public BasicData {
     uint16_t deviceId = UINT16_MAX;
-    uint64_t timestamp = UINT64_MAX;
     double freq = 0.0;
 };
 }

@@ -18,46 +18,53 @@
 #include <utility>
 #include <vector>
 #include "analysis/csrc/domain/valueobject/include/task_id.h"
+#include "analysis/csrc/domain/entities/viewer_data/basic_data.h"
 
+namespace Analysis {
+namespace Domain {
 struct UnifiedTaskPmu {
     uint16_t deviceId = UINT16_MAX;
     uint32_t streamId = UINT32_MAX;
     uint32_t taskId = UINT32_MAX;
     uint32_t subtaskId = UINT32_MAX;
     uint32_t batchId = UINT32_MAX;
-    std::string header;
     double value = 0.0;
+    std::string header;
+
     UnifiedTaskPmu() = default;
-    UnifiedTaskPmu(uint16_t deviceId_, uint32_t streamId_, uint32_t taskId_,  uint32_t subtaskId_, uint32_t batchId_,
-                   std::string header_, double value_) : deviceId(deviceId_), streamId(streamId_), taskId(taskId_),
-                                                         subtaskId(subtaskId_), header(header_), value(value_){};
+    UnifiedTaskPmu(uint16_t deviceId_, uint32_t streamId_, uint32_t taskId_, uint32_t subtaskId_, uint32_t batchId_,
+                   std::string header_, double value_) : deviceId(deviceId_), streamId(streamId_),
+                                                         taskId(taskId_), subtaskId(subtaskId_), batchId(batchId_),
+                                                         header(std::move(header_)), value(value_) {};
 };
 
-struct UnifiedSampleTimelinePmu {
+struct UnifiedSampleTimelinePmu : public BasicData {
     uint16_t deviceId = UINT16_MAX;
-    uint64_t timestamp = UINT64_MAX;
-    uint64_t totalCycle = UINT64_MAX;
+    uint16_t coreId = UINT16_MAX;
     double usage = 0.0;
     double freq = 0.0;
-    uint16_t coreId = UINT16_MAX;
+    uint64_t totalCycle = UINT64_MAX;
     uint64_t coreType = UINT64_MAX;
+
     UnifiedSampleTimelinePmu() = default;
     UnifiedSampleTimelinePmu(uint16_t deviceId_, uint64_t timestamp_, uint64_t totalCycle_, double usage_,
                              double freq_, uint16_t coreId_, uint64_t coreType_)
-        : deviceId(deviceId_), timestamp(timestamp_), totalCycle(totalCycle_), usage(usage_),
-          freq(freq_), coreId(coreId_), coreType(coreType_){};
+        : BasicData(timestamp_), deviceId(deviceId_), totalCycle(totalCycle_), usage(usage_),
+          freq(freq_), coreId(coreId_), coreType(coreType_) {};
 };
 
 struct UnifiedSampleSummaryPmu {
     uint16_t deviceId = UINT16_MAX;
-    std::string metric = "";
-    double value = 0.0;
     uint16_t coreId = UINT16_MAX;
+    double value = 0.0;
     uint64_t coreType = UINT64_MAX;
+    std::string metric;
+
     UnifiedSampleSummaryPmu() = default;
     UnifiedSampleSummaryPmu(uint16_t deviceId_, std::string metric_, double value_, uint16_t coreId_,
-                            uint64_t coreType_) : deviceId(deviceId_), metric(metric_),
-                                                  value(value_), coreId(coreId_), coreType(coreType_){};
+                            uint64_t coreType_) : deviceId(deviceId_), metric(std::move(metric_)),
+                                                  value(value_), coreId(coreId_), coreType(coreType_) {};
 };
-
+}
+}
 #endif // MSPROF_ANALYSIS_UNIFIED_PMU_DATA_H

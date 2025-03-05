@@ -70,12 +70,14 @@ bool HBMProcessor::ProcessSingleDevice(const std::string &devicePath,
         ERROR("Format memory on chip data error, dbPath is %.", dbPath);
         return false;
     }
+    FilterDataByStartTime(processedData, localtimeContext.timeRecord.startTimeNs, PROCESSOR_NAME_HBM);
+    allProcessedData.insert(allProcessedData.end(), processedData.begin(), processedData.end());
+
     auto summaryData = ProcessSummaryData(localtimeContext.deviceId, hbmDB);
     if (summaryData.empty()) {
         ERROR("Process memory on chip summary data error, dbPath is %.", dbPath);
         return false;
     }
-    allProcessedData.insert(allProcessedData.end(), processedData.begin(), processedData.end());
     allSummaryData.insert(allSummaryData.end(), summaryData.begin(), summaryData.end());
     return true;
 }
@@ -159,7 +161,7 @@ std::vector<HbmData> HBMProcessor::FormatData(const OriHbmData &oriData, const L
         std::tie(oriTimestamp, tempData.bandWidth, tempData.hbmId, tempData.eventType) = row;
         HPFloat timestamp = GetTimeBySamplingTimestamp(oriTimestamp, localtimeContext.hostMonotonic,
                                                        localtimeContext.deviceMonotonic);
-        tempData.localTime = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
+        tempData.timestamp = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
         formatData.push_back(tempData);
     }
     return formatData;

@@ -68,8 +68,8 @@ void OpSummaryAssembler::GenerateHcclBody(std::vector<CommunicationOpData> &opDa
     for (const auto &data : opData) {
         std::vector<std::string> row = {std::to_string(data.deviceId), std::to_string(data.modelId), NA, NA,
                                         data.opName, data.opType, NA, "COMMUNICATION",
-                                        DivideByPowersOfTenWithPrecision(data.start),
-                                        DivideByPowersOfTenWithPrecision(data.end - data.start), "0", "0"};
+                                        DivideByPowersOfTenWithPrecision(data.timestamp),
+                                        DivideByPowersOfTenWithPrecision(data.end - data.timestamp), "0", "0"};
         // 业务可以保证headers的长度会超过hcclOp数据的长度
         row.insert(row.end(), len - row.size(), NA);
         res_.emplace_back(row);
@@ -94,8 +94,8 @@ std::vector<std::string> OpSummaryAssembler::GenerateOneTaskRow(const TaskInfoDa
     }
     return {std::to_string(task.deviceId), std::to_string(computeTask.modelId), std::to_string(task.taskId),
             std::to_string(task.streamId), computeTask.opName, computeTask.opType, computeTask.opState,
-            computeTask.taskType, DivideByPowersOfTenWithPrecision(task.start),
-            DivideByPowersOfTenWithPrecision(task.end - task.start), "0",
+            computeTask.taskType, DivideByPowersOfTenWithPrecision(task.timestamp),
+            DivideByPowersOfTenWithPrecision(task.end - task.timestamp), "0",
             std::to_string(computeTask.blockDim), std::to_string(computeTask.mixBlockDim), computeTask.opFlag,
             computeTask.inputShapes, computeTask.inputDataTypes, computeTask.inputFormats, computeTask.outputShapes,
             computeTask.outputDataTypes, computeTask.outputFormats, ctxId};

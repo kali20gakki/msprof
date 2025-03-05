@@ -64,7 +64,7 @@ static std::vector<AscendTaskData> GenerateTaskData()
     data.contextId = 1; // contextId 1
     data.batchId = 1; // batchId 1
     data.connectionId = 2345; // connectionId 2345
-    data.start = 1717575960208020758; // start 1717575960208020758
+    data.timestamp = 1717575960208020758; // start 1717575960208020758
     data.duration = 450.78; // dur 450.78
     data.hostType = "KERNEL_AICORE";
     data.deviceType = "AI_CORE";
@@ -78,18 +78,18 @@ static std::vector<AscendTaskData> GenerateTaskData()
     res.push_back(data);
     data.taskId = 0;
     data.batchId = 0;
-    data.start = 1717575960208021758;  // start 1717575960208021758
+    data.timestamp = 1717575960208021758;  // start 1717575960208021758
     data.duration = 4241260;  // duration 4241260
     data.hostType = "MEMCPY_ASYNC";
     data.deviceType = "PCIE_DMA_SQE";
     data.connectionId = 181;  // connectionId 181
     res.push_back(data);
     data.taskId = 1;
-    data.start = 1717575960213021758;  // start 1717575960213021758
+    data.timestamp = 1717575960213021758;  // start 1717575960213021758
     data.duration = 1202500; // duration 1202500
     res.push_back(data);
     data.taskId = 2;  // taskId 2
-    data.start = 1717575960215021758;  // start 1717575960215021758
+    data.timestamp = 1717575960215021758;  // start 1717575960215021758
     data.duration = 3036900;  // duration 3036900
     data.connectionId = 189;  // connectionId 189
     res.push_back(data);
@@ -120,7 +120,7 @@ static std::vector<KfcTurnData> GenerateKfcTurnData()
     data.deviceId = 0; // device id 0
     data.streamId = 1; // streamId 1
     data.taskId = 15; // taskId 15
-    data.startTime = 1717575960208020758; // start 1717575960208020758
+    data.timestamp = 1717575960208020758; // start 1717575960208020758
     res.push_back(data);
     return res;
 }

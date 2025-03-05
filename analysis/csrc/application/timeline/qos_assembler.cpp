@@ -40,7 +40,7 @@ void GenerateQosTrace(std::vector<QosData> &qosData, const std::unordered_map<ui
         if (it == qosEventsMap.end()) {
             continue;
         }
-        time = DivideByPowersOfTenWithPrecision(data.localTime);
+        time = DivideByPowersOfTenWithPrecision(data.timestamp);
         pid = pidMap.at(data.deviceId);
         std::vector<uint32_t> bandwidth {data.bw1, data.bw2, data.bw3, data.bw4, data.bw5, data.bw6, data.bw7,
             data.bw8, data.bw9, data.bw10};

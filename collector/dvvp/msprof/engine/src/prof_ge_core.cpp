@@ -514,6 +514,7 @@ int32_t GeOpenDeviceHandle(const uint32_t devId)
         MSPROF_LOGE("MsprofSetDeviceImpl failed, devId=%d", devId);
         return PROFILING_FAILED;
     }
+    ProfAclMgr::instance()->MsprofDumpStartInfoFile(devId);
     if (!Utils::IsDynProfMode()) {
         MSPROF_LOGI("CommandHandleProfStart, Allocate config of profiling initialize");
         int32_t ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfInit();

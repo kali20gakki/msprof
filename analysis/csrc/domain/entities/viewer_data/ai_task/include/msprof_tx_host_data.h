@@ -13,14 +13,14 @@
 #ifndef ANALYSIS_DOMAIN_MSPROF_TX_HOST_DATA_H
 #define ANALYSIS_DOMAIN_MSPROF_TX_HOST_DATA_H
 
-#include <cstdint>
 #include <string>
+#include "analysis/csrc/domain/entities/viewer_data/basic_data.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 
 namespace Analysis {
 namespace Domain {
 using namespace Analysis::Viewer::Database;
-struct MsprofTxHostData {
+struct MsprofTxHostData : public BasicData {
     uint16_t eventType = UINT16_MAX;
     uint32_t pid = UINT32_MAX;
     uint32_t tid = UINT32_MAX;
@@ -28,7 +28,6 @@ struct MsprofTxHostData {
     uint32_t payloadType = UINT32_MAX;
     uint32_t messageType = UINT32_MAX;
     uint64_t payloadValue = UINT64_MAX;
-    uint64_t start = UINT64_MAX;
     uint64_t end = UINT64_MAX;
     uint64_t connectionId = DEFAULT_CONNECTION_ID_MSTX;
     std::string domain;

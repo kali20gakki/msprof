@@ -13,18 +13,17 @@
 #ifndef ANALYSIS_DOMAIN_NPU_MEM_FORMAT_DATA_H
 #define ANALYSIS_DOMAIN_NPU_MEM_FORMAT_DATA_H
 
-#include <cstdint>
 #include <string>
+#include "analysis/csrc/domain/entities/viewer_data/basic_data.h"
 
 namespace Analysis {
 namespace Domain {
-struct NpuMemData {
+struct NpuMemData : public BasicData {
     uint16_t deviceId = UINT16_MAX;
-    std::string event;
     uint64_t ddr = 0;
     uint64_t hbm = 0;
     uint64_t memory = 0; // ddr与hbm之和
-    uint64_t localTime = 0;
+    std::string event;
 };
 }
 }

@@ -12,7 +12,7 @@
 #ifndef ANALYSIS_DOMAIN_PCIE_DATA_H
 #define ANALYSIS_DOMAIN_PCIE_DATA_H
 
-#include <cstdint>
+#include "analysis/csrc/domain/entities/viewer_data/basic_data.h"
 
 namespace Analysis {
 namespace Domain {
@@ -23,9 +23,8 @@ struct BandwidthData {
     uint32_t avg = 0;
 };
 
-struct PCIeData {
+struct PCIeData : public BasicData {
     uint16_t deviceId = UINT16_MAX;
-    uint64_t timestamp = UINT64_MAX;
     BandwidthData txPost;
     BandwidthData txNonpost;
     BandwidthData txCpl;

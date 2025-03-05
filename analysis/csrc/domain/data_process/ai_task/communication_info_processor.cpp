@@ -70,6 +70,7 @@ bool CommunicationInfoProcessor::Process(DataInventory& dataInventory)
             ERROR("Failed to obtain the time in start_info and end_info. "
                   "Path is %, device id is %.", profPath_, communicationData.deviceId);
             flag = false;
+            continue;
         }
         flag = ProcessOneDevice(devicePath, communicationData) && flag;
     }
@@ -164,7 +165,7 @@ bool CommunicationInfoProcessor::FormatData(std::vector<CommunicationTaskData>& 
         auto data = item.second;
         HPFloat start{endpoints[key].firstTaskStartTime};
         HPFloat end = HPFloat(endpoints[key].lastTaskStartTime) + HPFloat(endpoints[key].lastTaskDuration);
-        data.start = Utils::GetLocalTime(start, communicationData.timeRecord).Uint64();
+        data.timestamp = Utils::GetLocalTime(start, communicationData.timeRecord).Uint64();
         data.end = Utils::GetLocalTime(end, communicationData.timeRecord).Uint64();
         opFormatData.push_back(data);
     }
@@ -213,7 +214,7 @@ void CommunicationInfoProcessor::Update(const HcclTaskFormat& oriData, HcclTaskS
     taskData.taskType = hcclData.HCCLName;
     taskData.duration = hcclData.duration;
     HPFloat timestamp{hcclData.timestamp};
-    taskData.start = GetLocalTime(timestamp, communicationData.timeRecord).Uint64();
+    taskData.timestamp = GetLocalTime(timestamp, communicationData.timeRecord).Uint64();
     taskData.groupName = GetGroupNameValue(hcclData.groupName, communicationData.hashMap);
     taskData.rdmaType = GetEnumTypeValue(hcclData.rdmaType, NAME_STR(HCCL_RDMA_TYPE_TABLE), HCCL_RDMA_TYPE_TABLE);
     taskData.transportType = GetEnumTypeValue(hcclData.transportType,
@@ -340,7 +341,10 @@ bool CommunicationInfoProcessor::ProcessOneDevice(const std::string& devicePath,
         ERROR("Process kfc data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO);
         flag = false;
     }
+    FilterDataByStartTime(taskData, communicationData.timeRecord.startTimeNs, TABLE_NAME_COMMUNICATION_TASK_INFO);
     communicationData.resTaskData.insert(communicationData.resTaskData.end(), taskData.begin(), taskData.end());
+
+    FilterDataByStartTime(opData, communicationData.timeRecord.startTimeNs, TABLE_NAME_COMMUNICATION_TASK_INFO);
     communicationData.resOpData.insert(communicationData.resOpData.end(), opData.begin(), opData.end());
     return flag;
 }

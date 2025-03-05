@@ -167,6 +167,7 @@ set(msprofilerCpp
     transport/transport.cpp
     transport/uploader.cpp
     transport/uploader_mgr.cpp
+    transport/ctrl_files_dumper.cpp
     transport/hash_data.cpp
 
     ${CppPath}

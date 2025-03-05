@@ -13,14 +13,13 @@
 #ifndef ANALYSIS_DOMAIN_HCCS_FORMAT_DATA_H
 #define ANALYSIS_DOMAIN_HCCS_FORMAT_DATA_H
 
-#include <cstdint>
 #include <string>
+#include "analysis/csrc/domain/entities/viewer_data/basic_data.h"
 
 namespace Analysis {
 namespace Domain {
-struct HccsData {
+struct HccsData : public BasicData {
     uint16_t deviceId = UINT16_MAX;
-    uint64_t localTime = 0; // ns
     double txThroughput = 0; // MB/s
     double rxThroughput = 0; // MB/s
 };

@@ -45,7 +45,7 @@ void GenerateLLcTrace(const std::vector<LLcData> &llcData, const std::unordered_
     std::string counterName;
     uint32_t pid;
     for (const auto &data : llcData) {
-        time = DivideByPowersOfTenWithPrecision(data.localTime);
+        time = DivideByPowersOfTenWithPrecision(data.timestamp);
         llcId = std::to_string(data.llcID);
         pid = pidMap.at(data.deviceId); // 业务可以保证此处一定可以找到
         // hitRate

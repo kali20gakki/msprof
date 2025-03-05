@@ -26,6 +26,7 @@
 #include "profapi_plugin.h"
 #include "platform/platform.h"
 #include "runtime_plugin.h"
+#include "msprof_reporter_mgr.h"
 
 using namespace Analysis::Dvvp::Analyze;
 using namespace analysis::dvvp::common::error;
@@ -36,6 +37,7 @@ using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Plugin;
 using namespace Analysis::Dvvp::Common::Config;
+using namespace Msprof::Engine;
 
 static std::mutex g_aclprofMutex;
 static uint64_t g_indexId = 1;
@@ -357,15 +359,15 @@ static aclError PreCheckProfConfig(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     return ACL_SUCCESS;
 }
 
-aclError aclprofStart(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
+aclError aclprofWarmup(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
         MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
-            std::vector<std::string>({"aclprofStart", "SocCloud"}));
+            std::vector<std::string>({"aclprofWarmup", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
-    MSPROF_LOGI("Start to execute aclprofStartProfiling");
+    MSPROF_LOGI("Start to execute aclprofWarmupProfiling");
     std::lock_guard<std::mutex> lock(g_aclprofMutex);
     aclError aclRet = PreCheckProfConfig(profilerConfig);
     if (aclRet != ACL_SUCCESS) {
@@ -376,24 +378,24 @@ aclError aclprofStart(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     if (ret != ACL_SUCCESS) {
         if (ret == ACL_ERROR_PROF_NOT_RUN) {
             MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf1", "intf2"}),
-                std::vector<std::string>({"aclprofStart", "aclprofInit"}));
+                std::vector<std::string>({"aclprofWarmup", "aclprofInit"}));
         }
         return ret;
     }
 
-    MSPROF_LOGI("Start profiling config by using aclprofStartProfiling");
-    ret = ProfAclMgr::instance()->ProfAclStart(&profilerConfig->config);
+    MSPROF_LOGI("Warmup profiling config by using aclprofWarmupProfiling");
+    ret = ProfAclMgr::instance()->ProfAclWarmup(&profilerConfig->config);
     if (ret != ACL_SUCCESS) {
-        MSPROF_LOGE("Start profiling failed, prof result = %d", ret);
-        MSPROF_INNER_ERROR("EK9999", "Start profiling failed, prof result = %d", ret);
+        MSPROF_LOGE("Warmup profiling failed, prof result = %d", ret);
+        MSPROF_INNER_ERROR("EK9999", "Warmup profiling failed, prof result = %d", ret);
         return ret;
     }
 
-    MSPROF_LOGI("Allocate start profiling config to Acl");
+    MSPROF_LOGI("Allocate warmup profiling config to Acl");
     uint64_t dataTypeConfig = 0;
     ret = ProfAclMgr::instance()->GetDataTypeConfigFromParams(dataTypeConfig);
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("[aclprofStart]get dataTypeConfig from params fail.");
+        MSPROF_LOGE("[aclprofWarmup]get dataTypeConfig from params fail.");
         return ACL_ERROR_PROFILING_FAILURE;
     }
 
@@ -401,9 +403,32 @@ aclError aclprofStart(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig);
     RETURN_IF_NOT_SUCCESS(ret);
 
-    MSPROF_LOGI("Acl has been allocated start profiling config, successfully execute aclprofStartProfiling");
+    MSPROF_LOGI("Acl has been allocated warmup profiling config, successfully execute aclprofStartProfiling");
     return ACL_SUCCESS;
 }
+
+aclError aclprofStart(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
+{
+    MSPROF_LOGI("Start to execute aclprofStartProfiling");
+    int32_t ret = ACL_SUCCESS;
+    if (!MsprofReporterMgr::instance()->IsStart()) {
+        ret = aclprofWarmup(profilerConfig);
+    }
+    if (ret != ACL_SUCCESS) {
+        return ret;
+    }
+
+    std::lock_guard<std::mutex> lock(g_aclprofMutex);
+
+    MSPROF_LOGI("Start profiling config by using ProfAclStart");
+    ret = ProfAclMgr::instance()->ProfAclStart(&profilerConfig->config);
+    if (ret != ACL_SUCCESS) {
+        MSPROF_LOGE("Start profiling device failed, prof result = %d", ret);
+        return ret;
+    }
+    return ret;
+}
+
 
 aclError aclprofStop(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
 {

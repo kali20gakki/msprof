@@ -62,13 +62,13 @@ static std::vector<AscendTaskData> GenerateTaskData()
     data.contextId = 1; // contextId 1
     data.batchId = 1; // batchId 1
     data.connectionId = 2345; // connectionId 2345
-    data.start = 1717575960208020758; // start 1717575960208020758
+    data.timestamp = 1717575960208020758; // start 1717575960208020758
     data.end = 1717575960208171758; // end 1717575960208171758
     data.duration = 151000.0; // dur 151000.0
     data.hostType = "KERNEL_AICORE";
     data.deviceType = "AI_CORE";
     res.push_back(data);
-    data.start = 1717575960208040758; // start 1717575960208040758
+    data.timestamp = 1717575960208040758; // start 1717575960208040758
     data.end = 1717575960208050758; // start 1717575960208050758
     res.push_back(data);
     return res;
@@ -96,7 +96,7 @@ static std::vector<CommunicationOpData> GenerateOpData()
     data.modelId = UINT32_MAX;
     data.opName = "hcom_broadcast__515_1_1";
     data.opType = NA;
-    data.start = 1717575960208030858; // start 1717575960208030858
+    data.timestamp = 1717575960208030858; // start 1717575960208030858
     data.end = 1717575960208031858; // end 1717575960208031858
     res.push_back(data);
     return res;

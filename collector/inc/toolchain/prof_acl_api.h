@@ -102,6 +102,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include "acl_base.h"
 
 namespace Msprofiler {
 namespace Api {
@@ -176,6 +177,20 @@ MSVP_PROF_API int aclprofSetCategoryName(uint32_t category, const char *category
 * @retval void
 */
 MSVP_PROF_API int aclprofSetStampCategory(void *stamp, uint32_t category);
+
+typedef struct aclprofConfig aclprofConfig;
+/**
+ * @ingroup AscendCL
+ * @brief Init profiling modules by profilerConfig
+ *
+ * @param  profilerConfig [IN]  config of profiling
+ *
+ * @retval ACL_SUCCESS The function is successfully executed.
+ * @retval OtherValues Failure
+ *
+ * @see aclprofWarmup
+ */
+MSVP_PROF_API aclError aclprofWarmup(const aclprofConfig *profilerConfig);
 
 /**
 * @ingroup AscendCL

@@ -64,7 +64,7 @@ static std::vector<QosData> GenerateQosData()
     std::vector<QosData> res;
     QosData data;
     data.deviceId = 0; // 0
-    data.localTime = 1724405892226599429; // 1724405892226599429
+    data.timestamp = 1724405892226599429; // 1724405892226599429
     data.bw1 = 10; // 10
     data.bw2 = 10; // 10
     data.bw3 = 10; // 10
@@ -76,7 +76,7 @@ static std::vector<QosData> GenerateQosData()
     data.bw9 = 10; // 10
     data.bw10 = 10; // 10
     res.push_back(data);
-    data.localTime = 1724405892227599429; // 1724405892227599429
+    data.timestamp = 1724405892227599429; // 1724405892227599429
     data.bw1 = 20; // 20
     data.bw2 = 20; // 20
     data.bw3 = 20; // 20
@@ -88,7 +88,7 @@ static std::vector<QosData> GenerateQosData()
     data.bw9 = 20; // 20
     data.bw10 = 20; // 20
     res.push_back(data);
-    data.localTime = 1724405892228599429; // 1724405892228599429
+    data.timestamp = 1724405892228599429; // 1724405892228599429
     data.bw1 = 30; // 30
     data.bw2 = 30; // 30
     data.bw3 = 30; // 30

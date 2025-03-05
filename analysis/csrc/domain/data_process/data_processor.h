@@ -42,6 +42,9 @@ protected:
     static uint16_t GetEnumTypeValue(const std::string &key, const std::string &tableName,
                                      const std::unordered_map<std::string, uint16_t> &enumTable);
     template<typename Tp>
+    void FilterDataByStartTime(std::vector<Tp>& data, uint64_t startTimeNs, const std::string& processorName);
+
+    template<typename Tp>
     bool SaveToDataInventory(std::vector<Tp>&& data, DataInventory& dataInventory, const std::string& processorName);
 
 protected:
@@ -50,6 +53,17 @@ protected:
 private:
     virtual bool Process(DataInventory& dataInventory) = 0;
 };
+
+template<typename Tp>
+void DataProcessor::FilterDataByStartTime(std::vector<Tp>& datas, uint64_t startTimeNs,
+                                          const std::string& processorName)
+{
+    INFO("There are % records before % data filtering, filterTime is %.", datas.size(), processorName, startTimeNs);
+    datas.erase(std::remove_if(datas.begin(), datas.end(),
+                               [startTimeNs](const Tp& data) {return data.timestamp < startTimeNs; }),
+                datas.end());
+    INFO("There are % records after % data filtering.", datas.size(), processorName);
+}
 
 template<typename Tp>
 bool DataProcessor::SaveToDataInventory(std::vector<Tp>&& data, DataInventory& dataInventory,

@@ -13,15 +13,14 @@
 #ifndef ANALYSIS_DOMAIN_API_DATA_H
 #define ANALYSIS_DOMAIN_API_DATA_H
 
-#include <cstdint>
 #include <string>
+#include "analysis/csrc/domain/entities/viewer_data/basic_data.h"
 
 namespace Analysis {
 namespace Domain {
-struct ApiData {
+struct ApiData : public BasicData {
     uint16_t level = UINT16_MAX;
     uint32_t threadId = UINT32_MAX;
-    uint64_t start = UINT64_MAX;
     uint64_t end = UINT64_MAX;
     uint64_t connectionId = UINT64_MAX;
     std::string apiName;

@@ -13,24 +13,22 @@
 #ifndef ANALYSIS_DOMAIN_CHIP_TRANS_DATA_H
 #define ANALYSIS_DOMAIN_CHIP_TRANS_DATA_H
 
-#include <cstdint>
 #include <string>
+#include "analysis/csrc/domain/entities/viewer_data/basic_data.h"
 
 namespace Analysis {
 namespace Domain {
-struct PaLinkInfoData {
+struct PaLinkInfoData : public BasicData {
     uint16_t deviceId = UINT16_MAX;
-    uint32_t pa_link_id;
-    std::string pa_link_traffic_monit_rx;
-    std::string pa_link_traffic_monit_tx;
-    uint64_t local_time;
+    uint32_t paLinkId;
+    std::string paLinkTrafficMonitRx;
+    std::string paLinkTrafficMonitTx;
 };
-struct PcieInfoData {
+struct PcieInfoData : public BasicData {
     uint16_t deviceId = UINT16_MAX;
-    uint32_t pcie_id;
-    uint64_t pcie_write_bandwidth;
-    uint64_t pcie_read_bandwidth;
-    uint64_t local_time;
+    uint32_t pcieId;
+    uint64_t pcieWriteBandwidth;
+    uint64_t pcieReadBandwidth;
 };
 
 }

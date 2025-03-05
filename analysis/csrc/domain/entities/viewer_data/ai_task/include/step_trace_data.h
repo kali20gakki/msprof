@@ -3,8 +3,8 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : api_data.h
- * Description        : api_processor处理api_event表后的格式化数据
+ * File Name          : step_trace_data.h
+ * Description        : 处理step_trace表后的格式化数据
  * Author             : msprof team
  * Creation Date      : 2024/8/16
  * *****************************************************************************
@@ -13,11 +13,11 @@
 #ifndef ANALYSIS_DOMAIN_ENTITIES_STEP_TRACE_DATA_H
 #define ANALYSIS_DOMAIN_ENTITIES_STEP_TRACE_DATA_H
 
-#include <cstdint>
+#include "analysis/csrc/domain/entities/viewer_data/basic_data.h"
 
 namespace Analysis {
 namespace Domain {
-struct TrainTraceData {
+struct TrainTraceData : public BasicData {
     uint16_t deviceId = UINT16_MAX;
     uint32_t modelId = UINT32_MAX;
     uint32_t indexId = UINT32_MAX;
@@ -30,20 +30,18 @@ struct TrainTraceData {
     uint64_t dataAugBound = UINT64_MAX;
 };
 
-struct GetNextData {
+struct GetNextData : public BasicData {
     uint16_t deviceId = UINT16_MAX;
     uint32_t modelId = UINT32_MAX;
     uint32_t indexId = UINT32_MAX;
-    uint64_t start = UINT64_MAX;
     uint64_t end = UINT64_MAX;
 };
 
-struct AllReduceData {
+struct AllReduceData : public BasicData {
     uint16_t deviceId = UINT16_MAX;
     uint32_t modelId = UINT32_MAX;
     uint32_t indexId = UINT32_MAX;
     uint64_t iterEnd = UINT64_MAX;
-    uint64_t start = UINT64_MAX;
     uint64_t end = UINT64_MAX;
 };
 }

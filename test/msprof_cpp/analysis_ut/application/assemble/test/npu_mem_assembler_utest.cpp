@@ -67,7 +67,7 @@ static std::vector<NpuMemData> GenerateNpuMemData()
     data.event = "0";
     data.hbm = 106848256; // hbm 106848256
     data.ddr = 0; // ddr 0
-    data.localTime = 1724405892226599429; // 本地时间 1724405892226599429
+    data.timestamp = 1724405892226599429; // 本地时间 1724405892226599429
     res.push_back(data);
     return res;
 }

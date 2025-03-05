@@ -51,7 +51,7 @@ bool SysIOProcessor::Process(DataInventory &dataInventory)
         nicReportData.sysIOReportData = std::move(allSummaryData);
         allNicReportData.push_back(nicReportData);
         if (!SaveToDataInventory<NicOriginalData>(std::move(allNicOriginalData), dataInventory, processorName_) ||
-            !SaveToDataInventory<SysIOReportData>(std::move(allSummaryData), dataInventory, processorName_)) {
+            !SaveToDataInventory<NicReportData>(std::move(allNicReportData), dataInventory, processorName_)) {
             flag = false;
             ERROR("Save % Data To DataInventory failed, profPath is %", processorName_, profPath_);
         }
@@ -138,8 +138,8 @@ bool SysIOProcessor::ProcessTimelineData(const DBInfo &sysIODB, LocaltimeContext
         ERROR("Failed to obtain data from the % table.", sysIODB.tableName);
         return false;
     }
-    std::vector<SysIOOriginalData> formatData;
-    if (!Reserve(formatData, oriData.size())) {
+    std::vector<SysIOOriginalData> processedData;
+    if (!Reserve(processedData, oriData.size())) {
         ERROR("Reserve for % data failed, profPath is %, deviceId is %.",
               processorName_, profPath_, localtimeContext.deviceId);
         return false;
@@ -154,11 +154,12 @@ bool SysIOProcessor::ProcessTimelineData(const DBInfo &sysIODB, LocaltimeContext
                  tempData.txErrors, tempData.txDropped, tempData.funcId) = row;
         HPFloat timestamp = GetTimeBySamplingTimestamp(oriTimestamp, localtimeContext.hostMonotonic,
                                                        localtimeContext.deviceMonotonic);
-        tempData.localTime = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
+        tempData.timestamp = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
         tempData.bandwidth = tempData.bandwidth * BYTE_SIZE * BYTE_SIZE, // MB/s -> B/s
-                formatData.push_back(tempData);
+                processedData.push_back(tempData);
     }
-    timelineData.insert(timelineData.end(), formatData.begin(), formatData.end());
+    FilterDataByStartTime(processedData, localtimeContext.timeRecord.startTimeNs, processorName_);
+    timelineData.insert(timelineData.end(), processedData.begin(), processedData.end());
     return true;
 }
 
@@ -183,10 +184,11 @@ bool SysIOProcessor::ProcessSummaryData(const DBInfo &sysIODB, const LocaltimeCo
                  tempData.txBandwidthEfficiency, tempData.txPacketRate,
                  tempData.txErrorRate, tempData.txDroppedRate, tempData.funcId) = row;
         HPFloat timestamp = HPFloat(duration);
-        tempData.localTime = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
+        tempData.timestamp = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
         processedData.push_back(tempData);
     }
-    summaryData.insert(summaryData.end(), summaryData.begin(), summaryData.end());
+    FilterDataByStartTime(processedData, localtimeContext.timeRecord.startTimeNs, processorName_);
+    summaryData.insert(summaryData.end(), processedData.begin(), processedData.end());
     return true;
 }
 
@@ -279,6 +281,7 @@ bool SysIOTimelineProcessor::ProcessSingleDevice(const std::string &devicePath,
         ERROR("Format % ReceiveSendData error, dbPath is %.", processorName_, dbPath);
         return false;
     }
+    FilterDataByStartTime(processedData, localtimeContext.timeRecord.startTimeNs, processorName_);
     allProcessedData.insert(allProcessedData.end(), processedData.begin(), processedData.end());
     return true;
 }
@@ -312,7 +315,7 @@ std::vector<SysIOReceiveSendData> SysIOTimelineProcessor::FormatData(const OriSy
                  tempData.txDroppedRate, tempData.funcId) = row;
         HPFloat timestamp = GetTimeBySamplingTimestamp(oriTimestamp, localtimeContext.hostMonotonic,
                                                        localtimeContext.deviceMonotonic);
-        tempData.localTime = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
+        tempData.timestamp = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
         formatData.push_back(tempData);
     }
     return formatData;

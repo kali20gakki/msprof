@@ -70,12 +70,14 @@ bool HCCSProcessor::ProcessSingleDevice(const std::string &devicePath,
         ERROR("Format HCCS data error, dbPath is %.", dbPath);
         return false;
     }
+    FilterDataByStartTime(processedData, localtimeContext.timeRecord.startTimeNs, PROCESSOR_NAME_HCCS);
+    allProcessedData.insert(allProcessedData.end(), processedData.begin(), processedData.end());
+
     auto summaryData = ProcessSummaryData(localtimeContext.deviceId, hccsDB);
     if (summaryData.deviceId == UINT16_MAX) {
         ERROR("Process HCCS summary data error, dbPath is %.", dbPath);
         return false;
     }
-    allProcessedData.insert(allProcessedData.end(), processedData.begin(), processedData.end());
     allSummaryData.push_back(summaryData);
     return true;
 }
@@ -140,7 +142,7 @@ std::vector<HccsData> HCCSProcessor::FormatData(const OriHccsData &oriData, cons
         std::tie(oriTimestamp, tempData.txThroughput, tempData.rxThroughput) = row;
         HPFloat timestamp = GetTimeBySamplingTimestamp(oriTimestamp, localtimeContext.hostMonotonic,
                                                        localtimeContext.deviceMonotonic);
-        tempData.localTime = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
+        tempData.timestamp = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
         formatData.push_back(tempData);
     }
     return formatData;

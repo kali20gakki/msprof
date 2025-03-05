@@ -13,15 +13,14 @@
 #ifndef ANALYSIS_DOMAIN_SIO_FORMAT_DATA_H
 #define ANALYSIS_DOMAIN_SIO_FORMAT_DATA_H
 
-#include <cstdint>
 #include <string>
+#include "analysis/csrc/domain/entities/viewer_data/basic_data.h"
 
 namespace Analysis {
 namespace Domain {
-struct SioData {
+struct SioData : public BasicData {
     uint16_t deviceId = UINT16_MAX;
     uint16_t dieId = UINT16_MAX; // 0 ~ 1
-    uint64_t localTime = 0;
     double reqRxBandwidth = 0; // 请求流通道, MB/s
     double rspRxBandwidth = 0; // 回应流通道, MB/s
     double snpRxBandwidth = 0; // 侦听流通道, MB/s

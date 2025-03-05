@@ -65,7 +65,7 @@ static std::vector<SioData> GenerateSioData()
     SioData data1;
     data1.deviceId = 0; // 0
     data1.dieId = 0; // 0
-    data1.localTime = 1724405892226599429; // 1724405892226599429
+    data1.timestamp = 1724405892226599429; // 1724405892226599429
     data1.reqRxBandwidth = 20.3; // 20.3
     data1.rspRxBandwidth = 19.6; // 19.6
     data1.snpRxBandwidth = 18.6; // 18.6
@@ -76,7 +76,7 @@ static std::vector<SioData> GenerateSioData()
     data1.datTxBandwidth = 25.2; // 25.2
     res.push_back(data1);
     data1.dieId = 1; // 1
-    data1.localTime = 1724405892226599429; // 1724405892226599429
+    data1.timestamp = 1724405892226599429; // 1724405892226599429
     data1.reqRxBandwidth = 15.3; // 15.3
     data1.rspRxBandwidth = 29.6; // 29.6
     data1.snpRxBandwidth = 28.6; // 28.6
@@ -87,7 +87,7 @@ static std::vector<SioData> GenerateSioData()
     data1.datTxBandwidth = 25.2; // 25.2
     res.push_back(data1);
     data1.dieId = 0; // 0
-    data1.localTime = 1724405892226699529; // 1724405892226699529
+    data1.timestamp = 1724405892226699529; // 1724405892226699529
     data1.reqRxBandwidth = 21.3; // 21.3
     data1.rspRxBandwidth = 18.6; // 18.6
     data1.snpRxBandwidth = 16.6; // 16.6
@@ -98,7 +98,7 @@ static std::vector<SioData> GenerateSioData()
     data1.datTxBandwidth = 23.2; // 23.2
     res.push_back(data1);
     data1.dieId = 1; // 1
-    data1.localTime = 1724405892226699529; // 1724405892226699529
+    data1.timestamp = 1724405892226699529; // 1724405892226699529
     data1.reqRxBandwidth = 24.3; // 24.3
     data1.rspRxBandwidth = 12.6; // 12.6
     data1.snpRxBandwidth = 17.6; // 17.6

@@ -36,7 +36,7 @@ uint8_t NetworkUsageAssembler::GenerateDataTrace(DataInventory &dataInventory, u
     std::shared_ptr<CounterEvent> event;
     for (const auto &data : *usageData) {
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, ASSEMBLE_FAILED, pid, DEFAULT_TID,
-                                 DivideByPowersOfTenWithPrecision(data.start), "Network Usage");
+                                 DivideByPowersOfTenWithPrecision(data.timestamp), "Network Usage");
         event->SetSeriesDValue(USAGE, data.usage);
         res_.push_back(event);
     }
@@ -54,7 +54,7 @@ uint8_t DiskUsageAssembler::GenerateDataTrace(DataInventory &dataInventory, uint
     std::shared_ptr<CounterEvent> event;
     for (const auto &data : *usageData) {
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, ASSEMBLE_FAILED, pid, DEFAULT_TID,
-                                 DivideByPowersOfTenWithPrecision(data.start), "Disk Usage");
+                                 DivideByPowersOfTenWithPrecision(data.timestamp), "Disk Usage");
         event->SetSeriesDValue(USAGE, data.usage);
         res_.push_back(event);
     }
@@ -72,7 +72,7 @@ uint8_t MemUsageAssembler::GenerateDataTrace(DataInventory &dataInventory, uint3
     std::shared_ptr<CounterEvent> event;
     for (const auto &data : *usageData) {
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, ASSEMBLE_FAILED, pid, DEFAULT_TID,
-                                 DivideByPowersOfTenWithPrecision(data.start), "Memory Usage");
+                                 DivideByPowersOfTenWithPrecision(data.timestamp), "Memory Usage");
         event->SetSeriesDValue(USAGE, data.usage);
         res_.push_back(event);
     }
@@ -90,7 +90,7 @@ uint8_t CpuUsageAssembler::GenerateDataTrace(DataInventory &dataInventory, uint3
     std::shared_ptr<CounterEvent> event;
     for (const auto &data : *usageData) {
         MAKE_SHARED_RETURN_VALUE(event, CounterEvent, ASSEMBLE_FAILED, pid, DEFAULT_TID,
-                                 DivideByPowersOfTenWithPrecision(data.start), "CPU " + data.cpuNo);
+                                 DivideByPowersOfTenWithPrecision(data.timestamp), "CPU " + data.cpuNo);
         event->SetSeriesDValue(USAGE, data.usage);
         res_.push_back(event);
     }

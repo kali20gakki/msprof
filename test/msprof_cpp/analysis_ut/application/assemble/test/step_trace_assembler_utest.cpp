@@ -100,6 +100,7 @@ static std::vector<TrainTraceData> GenerateTrainData()
     data.fpBpTime = 8112414; // fpBpTime 8112414
     data.gradRefreshBound = 19719; // refresh 19719
     data.dataAugBound = 7134923284; // aug 7134923284
+    data.timestamp = data.iterEnd - data.iterTime; // start time
     res.push_back(data);
     return res;
 }
@@ -111,13 +112,13 @@ static std::vector<GetNextData> GenerateNextData()
     d1.deviceId = 0; // deviceId 0
     d1.modelId = 13; // 13
     d1.indexId = 1; // 1
-    d1.start = 830074693926; // start 830074693926
+    d1.timestamp = 830074693926; // start 830074693926
     d1.end = 830074725527; // end 830074725527
     res.push_back(d1);
-    d1.start = 830074767363; // start 830074767363
+    d1.timestamp = 830074767363; // start 830074767363
     d1.end = 830074787103; // end 830074787103
     res.push_back(d1);
-    d1.start = 830074801783; // start 830074801783
+    d1.timestamp = 830074801783; // start 830074801783
     d1.end = 830074820749; // end 830074820749
     res.push_back(d1);
     return res;
@@ -131,10 +132,10 @@ static std::vector<AllReduceData> GenerateReduceData()
     data.modelId = 13; // modelId 13
     data.indexId = 1; // indexId 1
     data.iterEnd = 830082823198; // iterEnd 830082823198
-    data.start = 830082637434; // start 830082637434
+    data.timestamp = 830082637434; // start 830082637434
     data.end = 830082667746; // end 830082667746
     res.push_back(data);
-    data.start = 830082804063; // start 830082804063
+    data.timestamp = 830082804063; // start 830082804063
     data.end = 830082810619; // end 830082810619
     res.push_back(data);
     return res;

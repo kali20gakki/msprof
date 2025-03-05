@@ -65,16 +65,16 @@ static std::vector<SocBandwidthData> GenerateSocBandwidthData()
     SocBandwidthData data;
     data.deviceId = 0; // device 0
     data.timestamp = 1724405892226599429; // 本地时间 1724405892226599429
-    data.l2_buffer_bw_level = 7; // l2_buffer_bw_level 7
-    data.mata_bw_level = 4; // mata_bw_level 4
+    data.l2BufferBwLevel = 7; // l2_buffer_bw_level 7
+    data.mataBwLevel = 4; // mata_bw_level 4
     res.push_back(data);
     data.timestamp = 1724405892226699429; // 本地时间 1724405892226699429
-    data.l2_buffer_bw_level = 4; // l2_buffer_bw_level 4
-    data.mata_bw_level = 3; // mata_bw_level 3
+    data.l2BufferBwLevel = 4; // l2_buffer_bw_level 4
+    data.mataBwLevel = 3; // mata_bw_level 3
     res.push_back(data);
     data.timestamp = 1724405892226799429; // 本地时间 1724405892226799429
-    data.l2_buffer_bw_level = 5; // l2_buffer_bw_level 5
-    data.mata_bw_level = 1; // mata_bw_level 1
+    data.l2BufferBwLevel = 5; // l2_buffer_bw_level 5
+    data.mataBwLevel = 1; // mata_bw_level 1
     res.push_back(data);
     return res;
 }

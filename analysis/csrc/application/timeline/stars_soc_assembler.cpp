@@ -37,10 +37,10 @@ void GenerateStarsSocTrace(std::vector<SocBandwidthData> &socBandwidthData,
         time = DivideByPowersOfTenWithPrecision(data.timestamp);
         pid = pidMap.at(data.deviceId);
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, L2_BUFFER_BW_LEVEL);
-        event->SetSeriesIValue(L2_BUFFER_BW_LEVEL, data.l2_buffer_bw_level);
+        event->SetSeriesIValue(L2_BUFFER_BW_LEVEL, data.l2BufferBwLevel);
         res.push_back(event);
         MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, DEFAULT_TID, time, MATA_BW_LEVEL);
-        event->SetSeriesIValue(MATA_BW_LEVEL, data.mata_bw_level);
+        event->SetSeriesIValue(MATA_BW_LEVEL, data.mataBwLevel);
         res.push_back(event);
     }
 }

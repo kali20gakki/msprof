@@ -59,6 +59,7 @@ bool MsprofTxDeviceProcessor::ProcessOneDevice(std::vector<MsprofTxDeviceData> &
         ERROR("StepTrace for msprofTx data format failed, DBPath is %", dbPath);
         return false;
     }
+    FilterDataByStartTime(formatData, record.startTimeNs, PROCESSOR_NAME_TASK);
     res.insert(res.end(), formatData.begin(), formatData.end());
     return true;
 }
@@ -116,9 +117,9 @@ std::vector<MsprofTxDeviceData> MsprofTxDeviceProcessor::FormatData(
         std::tie(data.modelId, data.indexId, data.streamId, data.taskId, start) = row;
         data.connectionId = data.indexId + START_CONNECTION_ID_MSTX;
         HPFloat startTimestamp = Utils::GetTimeFromSyscnt(start, params);
-        data.start = GetLocalTime(startTimestamp, record).Uint64();
+        data.timestamp = GetLocalTime(startTimestamp, record).Uint64();
         if (!processedData.empty() && data.indexId == processedData.back().indexId) {
-            processedData.back().duration = static_cast<double>(data.start - processedData.back().start);
+            processedData.back().duration = static_cast<double>(data.timestamp - processedData.back().timestamp);
         } else {
             processedData.push_back(data);
         }

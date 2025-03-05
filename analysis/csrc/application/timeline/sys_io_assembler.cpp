@@ -47,7 +47,7 @@ void GenerateSysIOTrace(const std::vector<SysIOReceiveSendData> &sysIOReceiveSen
     std::string funId;
     uint32_t pid;
     for (const auto &data : sysIOReceiveSendData) {
-        time = DivideByPowersOfTenWithPrecision(data.localTime);
+        time = DivideByPowersOfTenWithPrecision(data.timestamp);
         funId = std::to_string(data.funcId);
         pid = pidMap.at(data.deviceId);
         counterName.clear();

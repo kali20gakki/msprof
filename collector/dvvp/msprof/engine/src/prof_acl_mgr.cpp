@@ -4,7 +4,6 @@
  * Author: zcj
  * Create: 2020-07-18
  */
-
 #include "prof_acl_mgr.h"
 
 #include <iomanip>
@@ -29,6 +28,7 @@
 #include "transport/uploader.h"
 #include "transport/uploader_mgr.h"
 #include "transport/hash_data.h"
+#include "transport/ctrl_files_dumper.h"
 #include "param_validation.h"
 #include "command_handle.h"
 #include "prof_channel_manager.h"
@@ -80,7 +80,7 @@ uint64_t ProfGetOpExecutionTime(CONST_VOID_PTR data, uint32_t len, uint32_t inde
 }
 
 ProfAclMgr::ProfAclMgr() : isReady_(false), mode_(WORK_MODE_OFF), params_(nullptr), dataTypeConfig_(0),
-                           profStratCfg_(nullptr), startIndex_(0) {}
+                           profStratCfg_(nullptr), startIndex_(0), isWarmuped_(false), isStarted_(false) {}
 
 ProfAclMgr::~ProfAclMgr()
 {
@@ -320,14 +320,20 @@ bool ProfAclMgr::IsInited()
 /**
  * Handle ProfStartProfiling
  */
-int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
+int ProfAclMgr::ProfAclWarmup(PROF_CONF_CONST_PTR profStartCfg)
 {
-    MSPROF_EVENT("Received ProfAclStart request from acl");
+    if (isWarmuped_) {
+        MSPROF_LOGE("Profiling has been inited");
+        return ACL_SUCCESS;
+    }
+
+    MSPROF_EVENT("Received ProfAclWarmup request from acl");
     std::lock_guard<std::mutex> lk(mtx_);
     if (profStartCfg == nullptr) {
         MSPROF_LOGE("Startcfg is nullptr");
         return ACL_ERROR_INVALID_PARAM;
     }
+    analysis::dvvp::transport::UploaderMgr::instance()->SetUploaderStatus(false);
     profStratCfg_ = profStartCfg;
 
     if (mode_ != WORK_MODE_API_CTRL) {
@@ -353,19 +359,60 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
     auto paramsAdapter = ParamsAdapterAclApi();
     ret = paramsAdapter.GetParamFromInputCfg(profStartCfg, argsArr_, params_);
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("[ProfAclStart]GetParamFromInputCfg fail.");
+        MSPROF_LOGE("[ProfAclWarmup]GetParamFromInputCfg fail.");
         return ACL_ERROR_PROFILING_FAILURE;
     }
     params_->host_sys_pid = analysis::dvvp::common::utils::Utils::GetPid();
 
     ret = LaunchHostAndDevTasks(profStartCfg->devNums, profStartCfg->devIdList);
     if (ret != ACL_SUCCESS) {
-        MSPROF_LOGE("[ProfAclStart]Launch host and device tasks failed.");
+        MSPROF_LOGE("[ProfAclWarmup]Launch host and device tasks failed.");
         return ret;
     }
     WaitAllDeviceResponse();
+    isWarmuped_ = true;
     return ACL_SUCCESS;
 }
+
+int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
+{
+    if (!isWarmuped_) {
+        if (ProfAclWarmup(profStartCfg) != ACL_SUCCESS) {
+            MSPROF_LOGE("ProfAclWarmup failed.");
+            return ACL_ERROR_PROFILING_FAILURE;
+        }
+    }
+
+    if (isStarted_) {
+        MSPROF_LOGE("ProfAclStart has been start.");
+        return PROFILING_SUCCESS;
+    }
+    // json dump
+    for (uint32_t i = 0; i < profStartCfg->devNums; i++) {
+        uint32_t devId = profStartCfg->devIdList[i];
+        MsprofDumpStartInfoFile(devId);
+    }
+    isStarted_ = true;
+    analysis::dvvp::transport::UploaderMgr::instance()->SetUploaderStatus(true);
+    return PROFILING_SUCCESS;
+}
+
+void ProfAclMgr::MsprofDumpStartInfoFile(uint32_t devId)
+{
+    std::string devIdStr = std::to_string(devId);
+    MSPROF_LOGI("Process dump start info for device %s", devIdStr);
+    if (devId == DEFAULT_HOST_ID) {
+        params_->host_profiling = true;
+    }
+    params_->job_id = devIdStr;
+    params_->devices = devIdStr;
+    params_->result_dir = GenerateDevDirName(devIdStr);
+
+    auto paramsHandled = ProfManager::instance()->HandleProfilingParams(params_->ToString());
+    CtrlFilesDumper::instance()->DumpCollectionTimeInfo(paramsHandled, true);
+    params_->host_profiling = false;
+}
+
 
 int ProfAclMgr::LaunchHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR devIdList)
 {
@@ -425,6 +472,9 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
         MSPROF_LOGE("[ProfAclStop]Cancle host and device tasks failed.");
         return ret;
     }
+
+    isWarmuped_ = false;
+    isStarted_ = false;
 
     return ACL_SUCCESS;
 }
@@ -1455,6 +1505,7 @@ void ProfAclMgr::MsprofHostHandle(void)
         MSPROF_LOGE("[MsprofHostHandle] host profiling handle failed, ret is %d", ret);
         MSPROF_INNER_ERROR("EK9999", "host profiling handle failed, ret is %d", ret);
     }
+    MsprofDumpStartInfoFile(DEFAULT_HOST_ID);
 }
 
 int32_t ProfAclMgr::MsprofResetDeviceHandle(uint32_t devId)

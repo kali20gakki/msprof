@@ -315,10 +315,6 @@ void ProfTask::Run(const struct error_message::Context &errorContext)
     MSPROF_LOGI("Task %s begins to run", params_->job_id.c_str());
 
     if (!params_->isSubscribe) {
-        if (CreateCollectionTimeInfo(GetHostTime(), true) != PROFILING_SUCCESS) {
-            MSPROF_LOGE("ProcessDefMode CreateCollectionTimeInfo failed");
-            MSPROF_INNER_ERROR("EK9999", "ProcessDefMode CreateCollectionTimeInfo failed");
-        }
         if (CreateIncompatibleFeatureJsonFile() != PROFILING_SUCCESS) {
             MSPROF_LOGE("ProcessDefMode CreateIncompatibleFeatureJsonFile failed");
         }

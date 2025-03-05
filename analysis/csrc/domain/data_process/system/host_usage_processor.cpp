@@ -9,7 +9,6 @@
  * Creation Date      : 2024/8/20
  * *****************************************************************************
  */
-
 #include "analysis/csrc/domain/data_process/system/host_usage_processor.h"
 #include "analysis/csrc/domain/services/environment/context.h"
 
@@ -62,11 +61,12 @@ bool HostCpuUsageProcessor::ProcessData(DataInventory &dataInventory, const Prof
     }
     CpuUsageData data;
     for (const auto &row : oriData) {
-        std::tie(data.start, data.cpuNo, data.usage) = row;
-        HPFloat startTimestamp{data.start};
-        data.start = GetLocalTime(startTimestamp, record).Uint64();
+        std::tie(data.timestamp, data.cpuNo, data.usage) = row;
+        HPFloat startTimestamp{data.timestamp};
+        data.timestamp = GetLocalTime(startTimestamp, record).Uint64();
         res.push_back(data);
     }
+    FilterDataByStartTime(res, record.startTimeNs, processorName_);
     if (!SaveToDataInventory<CpuUsageData>(std::move(res), dataInventory, processorName_)) {
         ERROR("Save data failed, %.", processorName_);
         return false;
@@ -96,11 +96,12 @@ bool HostMemUsageProcessor::ProcessData(DataInventory &dataInventory, const Prof
     }
     MemUsageData data;
     for (const auto &row : oriData) {
-        std::tie(data.start, data.usage) = row;
-        HPFloat startTimestamp{data.start};
-        data.start = GetLocalTime(startTimestamp, record).Uint64();
+        std::tie(data.timestamp, data.usage) = row;
+        HPFloat startTimestamp{data.timestamp};
+        data.timestamp = GetLocalTime(startTimestamp, record).Uint64();
         res.push_back(data);
     }
+    FilterDataByStartTime(res, record.startTimeNs, processorName_);
     if (!SaveToDataInventory<MemUsageData>(std::move(res), dataInventory, processorName_)) {
         ERROR("Save data failed, %.", processorName_);
         return false;
@@ -131,11 +132,12 @@ bool HostDiskUsageProcessor::ProcessData(DataInventory &dataInventory, const Pro
     }
     DiskUsageData data;
     for (const auto &row : oriData) {
-        std::tie(data.start, data.usage) = row;
-        HPFloat startTimestamp{data.start};
-        data.start = GetLocalTime(startTimestamp, record).Uint64();
+        std::tie(data.timestamp, data.usage) = row;
+        HPFloat startTimestamp{data.timestamp};
+        data.timestamp = GetLocalTime(startTimestamp, record).Uint64();
         res.push_back(data);
     }
+    FilterDataByStartTime(res, record.startTimeNs, processorName_);
     if (!SaveToDataInventory<DiskUsageData>(std::move(res), dataInventory, processorName_)) {
         ERROR("Save data failed, %.", processorName_);
         return false;
@@ -166,11 +168,12 @@ bool HostNetworkUsageProcessor::ProcessData(DataInventory &dataInventory, const 
     }
     NetWorkUsageData data;
     for (const auto &row : oriData) {
-        std::tie(data.start, data.usage) = row;
-        HPFloat startTimestamp{data.start};
-        data.start = GetLocalTime(startTimestamp, record).Uint64();
+        std::tie(data.timestamp, data.usage) = row;
+        HPFloat startTimestamp{data.timestamp};
+        data.timestamp = GetLocalTime(startTimestamp, record).Uint64();
         res.push_back(data);
     }
+    FilterDataByStartTime(res, record.startTimeNs, processorName_);
     if (!SaveToDataInventory<NetWorkUsageData>(std::move(res), dataInventory, processorName_)) {
         ERROR("Save data failed, %.", processorName_);
         return false;
