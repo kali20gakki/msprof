@@ -78,6 +78,7 @@ public:
     bool IsValidInputCfgSwitch(const std::string &switchName, const std::string &switchVal) const;
     bool IsValidAnalyzeRuleSwitch(const std::string &switchName, const std::string &switchVal) const;
     bool IsValidTaskTimeSwitch(const std::string &switchVal) const;
+    bool IsValidGEApiSwitch(const std::string &switchVal) const;
     bool CheckStorageLimit(const std::string &storageLimit) const;
     bool StorageLimitUnitValid(const std::string &storageLimit) const;
     bool MsprofCheckAppValid(std::string &appParam) const;

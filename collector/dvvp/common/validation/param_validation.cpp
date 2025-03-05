@@ -852,6 +852,17 @@ bool ParamValidation::IsValidTaskTimeSwitch(const std::string &switchVal) const
     return false;
 }
 
+bool ParamValidation::IsValidGEApiSwitch(const std::string &switchVal) const
+{
+    if (switchVal.compare(MSVP_PROF_L0) == 0 || switchVal.compare(MSVP_PROF_L1) == 0 ||
+        switchVal.compare(MSVP_PROF_OFF) == 0) {
+        return true;
+    }
+    MSPROF_LOGE("The switch ge_api should be set in range [l0, l1, off].");
+    CMD_LOGE("Argument --ge-api should be set in range [l0, l1, off].");
+    return false;
+}
+
 bool ParamValidation::IsValidInputCfgSwitch(const std::string &switchName, const std::string &switchVal) const
 {
     if (!IsValidSwitch(switchVal)) {

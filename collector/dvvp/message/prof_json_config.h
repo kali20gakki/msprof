@@ -37,11 +37,12 @@ struct ProfAclConfig {
     std::string storageLimit;
     std::string profSwitch;
     std::string taskTime;
+    std::string geApi;
     ProfAclConfig()
         : dvppFreq(0), hostSysUsageFreq(0), instrProfilingFreq(0), sysHardwareMemFreq(0),
           sysInterconnectionFreq(0), sysIoSamplingFreq(0), aicMetrics(""), aicpu(""), aivMetrics(""),
           ascendcl(""), hccl(""), hostSys(""), hostSysUsage(""), l2(""), llcProfiling(""),
-          msproftx(""), output(""), runtimeApi(""), storageLimit(""), profSwitch(""), taskTime("") {}
+          msproftx(""), output(""), runtimeApi(""), storageLimit(""), profSwitch(""), taskTime(""), geApi("") {}
 };
 
 struct ProfGeOptionsConfig {

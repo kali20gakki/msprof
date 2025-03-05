@@ -137,6 +137,7 @@ struct ProfileParams : BaseInfo {
     std::string msprof;
     std::string msproftx;
     std::string taskMemory;
+    std::string ge_api;
 
     // host sys
     std::string host_sys;
@@ -206,7 +207,7 @@ struct ProfileParams : BaseInfo {
           pcieInterval(DEFAULT_PROFILING_INTERVAL_20MS),
           dvpp_profiling("off"), dvpp_sampling_interval(DEFAULT_PROFILING_INTERVAL_20MS),
           instr_profiling("off"), instr_profiling_freq(DEFAULT_PROFILING_INSTR_PROFILING_FREQ),
-          msprof("off"), msproftx("off"), taskMemory("off"),
+          msprof("off"), msproftx("off"), taskMemory("off"), ge_api("off"),
           host_sys(""), host_sys_pid(HOST_PID_DEFAULT), host_sys_usage(""),
           host_disk_profiling("off"), host_osrt_profiling("off"),
           host_profiling(FALSE), host_one_pid_cpu_profiling("off"), host_all_pid_cpu_profiling("off"),
@@ -396,6 +397,7 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, qosEvents);
         SET_VALUE(object, isSubscribe);
         SET_VALUE(object, taskMemory);
+        SET_VALUE(object, ge_api);
     }
 
     void ToObject(nlohmann::json &object)
@@ -484,6 +486,7 @@ struct ProfileParams : BaseInfo {
         FROM_INT_VALUE(object, roceInterval, DEFAULT_PROFILING_INTERVAL_10MS);
         FROM_INT_VALUE(object, nicInterval, DEFAULT_PROFILING_INTERVAL_10MS);
         FROM_STRING_VALUE(object, taskMemory);
+        FROM_STRING_VALUE(object, ge_api);
         // llc
         FROM_STRING_VALUE(object, llc_profiling);
         FROM_STRING_VALUE(object, msprof_llc_profiling);
