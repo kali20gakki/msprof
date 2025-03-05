@@ -58,6 +58,7 @@ class AiCoreOpReport:
     OPERATOR_UNUSED_HEADERS = ["Model Name", "Infer ID"]
     HEADERS_WITH_NO_GE_DATA = ["Block Dim", "Mix Block Dim", "HF32 Eligible"]
     HARDWARE_OP_LIST = ['AI_CPU', 'DSA', 'DVPP']
+    TASK_START_TIME = 'Task Start Time(us)'
     TASK_DURATION = 'Task Duration(us)'
     TASK_WAIT_TIME = 'Task Wait Time(us)'
     MODEL_NAME_INDEX = 0
@@ -197,8 +198,14 @@ class AiCoreOpReport:
         cls.delete_useless_cols(headers, data)
         cls.sort_summary_data(headers, data)
         task_data = cls._format_summary_data(*format_pmu_data_by_headers(headers, data))
+        start_ts, _ = InfoConfReader().get_collect_time()
+        task_start_index = headers.index(cls.TASK_START_TIME)
+        logging.info("There are %d records before op_summary data filtering, timestamp is %s.",
+                     len(task_data), start_ts)
+        filtered_data = [item for item in task_data if item[task_start_index] > start_ts]
+        logging.info("There are %d records after op_summary data filtering.", len(filtered_data))
         add_aicore_units(headers)
-        return headers, task_data, len(task_data)
+        return headers, filtered_data, len(filtered_data)
 
     @classmethod
     def sort_summary_data(cls, headers, data):

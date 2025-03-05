@@ -43,7 +43,12 @@ class TaskOpViewer:
         DBManager.destroy_db_connect(ge_conn, ge_curs)
         if not data:
             return headers, [], 0
-        data = TaskOpViewer._add_memcpy_data(message.get("result_dir"), data)
+        start_ts, _ = InfoConfReader().get_collect_time()
+        task_start_index = 5
+        logging.info("There are %d records before task_time data filtering, timestamp is %s", len(data), start_ts)
+        filtered_data = [item for item in data if item[task_start_index] > start_ts]
+        logging.info("There are %d records after task_time data filtering.", len(filtered_data))
+        data = TaskOpViewer._add_memcpy_data(message.get("result_dir"), filtered_data)
         return headers, data, len(data)
 
     @staticmethod

@@ -98,8 +98,10 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
         """
         ChipManager().chip_id = ChipModel.CHIP_V4_1_0
         freqs_data = [
-            # freqency INTEGER, syscnt INTEGER
-            [2, 1850]
+            # syscnt INTEGER, freqency INTEGER
+            [10, 1850],
+            [100000, 1600],
+            [150000000, 1600],
         ]
 
         with FreqDataViewModel(self.params) as freq_model, ApiDataViewModel(self.params) as api_model:
@@ -110,10 +112,10 @@ class TestAiCoreFreqViewer(TestDirCRBaseModel):
             api_model.insert_data_to_db(DBNameConstant.TABLE_API_DATA, self.apis_data)
             query_freqs = freq_model.get_data()
             query_api_start_time = api_model.get_earliests_api()
-            self.assertEqual(len(query_freqs), 1)
+            self.assertEqual(len(query_freqs), 3)
             self.assertEqual(query_api_start_time[0].start, 4)
             freqs_list = AiCoreFreqViewer(self.params).get_all_data()
-            self.assertEqual(len(freqs_list), 3)
+            self.assertEqual(len(freqs_list), 30003)
             self.assertEqual(json.dumps(freqs_list[0]),
                 '{"name": "process_name", "pid": 1, "tid": 0, "args": {"name": "AI Core Freq"}, "ph": "M"}')
             self.assertEqual(freqs_list[1]['name'], "AI Core Freq")

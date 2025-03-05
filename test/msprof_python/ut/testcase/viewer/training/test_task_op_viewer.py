@@ -25,8 +25,8 @@ class TestTaskOpViewer(unittest.TestCase):
 
     def test_get_task_op_summary_should_match_2aicore_and_1memcpy(self):
         task_data_summary = [
-            ('trans_TransData_0', 'AI_CORE', 148, 3, '"7.62"', '"155149754006240"', '"155149754013860"'),
-            ('trans_TransData_2', 'AI_CORE', 148, 6, '"2.01"', '"155151161417390"', '"155151161419400"'),
+            ('trans_TransData_0', 'AI_CORE', 148, 3, '"7.62"', '155149754006240', '155149754013860'),
+            ('trans_TransData_2', 'AI_CORE', 148, 6, '"2.01"', '155151161417390', '155151161419400'),
         ]
 
         expect_headers = [
@@ -34,11 +34,13 @@ class TestTaskOpViewer(unittest.TestCase):
             "task_time(us)", "task_start(us)", "task_stop(us)",
         ]
         expect_data = [
-            ('trans_TransData_0', 'AI_CORE', 148, 3, '"7.62"', '"155149754006240"', '"155149754013860"'),
-            ('trans_TransData_2', 'AI_CORE', 148, 6, '"2.01"', '"155151161417390"', '"155151161419400"'),
+            ('trans_TransData_0', 'AI_CORE', 148, 3, '"7.62"', '155149754006240', '155149754013860'),
+            ('trans_TransData_2', 'AI_CORE', 148, 6, '"2.01"', '155151161417390', '155151161419400'),
             ("MemcopyAsync", "other", 11, 12, "100", "2200", "2300"),
         ]
-
+        InfoConfReader()._start_info = {"collectionTimeBegin": '155149754000000'}
+        InfoConfReader()._end_info = {"collectionTimeEnd": '155149754100000'}
+        InfoConfReader()._info_json = {'pid': 1}
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
                 mock.patch(NAMESPACE + '.TaskOpViewer.get_task_data_summary',
                            return_value=(task_data_summary, len(task_data_summary))), \
@@ -49,6 +51,9 @@ class TestTaskOpViewer(unittest.TestCase):
             self.assertEqual(expect_headers, headers)
             self.assertEqual(len(expect_data), count)
             self.assertEqual(expect_data, data)
+        InfoConfReader()._start_info.clear()
+        InfoConfReader()._end_info.clear()
+        InfoConfReader()._info_json.clear()
 
     def test_get_task_data_summary_should_fail(self):
         res = TaskOpViewer.get_task_data_summary(None, None)
