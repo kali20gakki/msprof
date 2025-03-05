@@ -77,6 +77,7 @@ enum MsprofArgsType {
     ARGS_PROFILING_DELAY,
     ARGS_PROFILING_DURATION,
     ARGS_TASK_MEMORY,
+    ARGS_GE_API,
     // number
     ARGS_AIC_FREQ, // 10 10-1000
     ARGS_AIV_FREQ, // 10 10-1000
@@ -152,6 +153,7 @@ const MmStructOption longOptions[] = {
     {"delay", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_PROFILING_DELAY},
     {"duration", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_PROFILING_DURATION},
     {"task-memory", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_TASK_MEMORY},
+    {"ge-api", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_GE_API}, // the default value is off
     // number
     {"aic-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIC_FREQ},
     {"aiv-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIV_FREQ},

@@ -144,6 +144,11 @@ void PlatformAdapterInterface::SetParamsForTaskTime(const std::string taskTimeLe
     taskTimeLevel == MSVP_PROF_L0 ? SetParamsForTaskTimeL0() : SetParamsForTaskTimeL1();
 }
 
+void PlatformAdapterInterface::SetParamsForGEProfiling(const std::string geProfilingLevel)
+{
+    geProfilingLevel == MSVP_PROF_L0 ? SetParamsForGEProfilingL0() : SetParamsForGEProfilingL1();
+}
+
 void PlatformAdapterInterface::SetParamsForTaskTrace()
 {
     bool ret = false;
@@ -218,11 +223,20 @@ void PlatformAdapterInterface::SetParamsForGEL0()
     }
 }
 
-void PlatformAdapterInterface::SetParamsForGEL1()
+void PlatformAdapterInterface::SetParamsForGEProfilingL0()
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_GRAPH_ENGINE) != supportSwitch_.end()) {
-        params_->dataTypeConfig |= PROF_FRAMEWORK_SCHEDULE_L1; // ge profiling data
         params_->dataTypeConfig |= PROF_FRAMEWORK_SCHEDULE_L0; // ge infershape data
+        params_->ge_api = MSVP_PROF_L0;
+    }
+}
+
+void PlatformAdapterInterface::SetParamsForGEProfilingL1()
+{
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_GRAPH_ENGINE) != supportSwitch_.end()) {
+        params_->dataTypeConfig |= PROF_FRAMEWORK_SCHEDULE_L0; // ge infershape data
+        params_->dataTypeConfig |= PROF_FRAMEWORK_SCHEDULE_L1; // ge profiling data
+        params_->ge_api = MSVP_PROF_L1;
     }
 }
 

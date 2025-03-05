@@ -92,7 +92,7 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule1)
     mgr->SetParamsForTrainingTrace();
     mgr->SetParamsForAscendCL();
     mgr->SetParamsForGEL0();
-    mgr->SetParamsForGEL1();
+    mgr->SetParamsForGEProfilingL1();
     mgr->SetParamsForRuntime();
     mgr->SetParamsForAICPU();
     mgr->SetParamsForHCCL();

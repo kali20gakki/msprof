@@ -166,7 +166,7 @@ void ParamsAdapter::SetCommonConfig()
     std::vector<InputCfg>({
         INPUT_CFG_COM_OUTPUT, INPUT_CFG_COM_STORAGE_LIMIT, INPUT_CFG_COM_MSPROFTX, INPUT_CFG_COM_TASK_TIME,
         INPUT_CFG_COM_AIC_METRICS, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_ASCENDCL, INPUT_CFG_COM_RUNTIME_API,
-        INPUT_CFG_COM_HCCL, INPUT_CFG_COM_L2, INPUT_CFG_COM_AICPU, INPUT_CFG_COM_SYS_USAGE_FREQ,
+        INPUT_CFG_COM_HCCL, INPUT_CFG_COM_L2, INPUT_CFG_COM_AICPU, INPUT_CFG_COM_SYS_USAGE_FREQ, INPUT_CFG_COM_GE_API,
         INPUT_CFG_COM_SYS_PID_USAGE_FREQ, INPUT_CFG_COM_SYS_CPU_FREQ, INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ,
         INPUT_CFG_COM_LLC_MODE, INPUT_CFG_COM_SYS_IO_FREQ, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ,
         INPUT_CFG_COM_DVPP_FREQ, INPUT_CFG_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE_FREQ
@@ -286,6 +286,11 @@ void ParamsAdapter::SetTaskParams(std::array<std::string, INPUT_CFG_MAX> paramCo
         paramContainer[INPUT_CFG_COM_TASK_TIME].compare(MSVP_PROF_OFF) != 0) {
         platformAdapter_->SetParamsForTaskTime(paramContainer[INPUT_CFG_COM_TASK_TIME]);
     }
+
+    if (!paramContainer[INPUT_CFG_COM_GE_API].empty() &&
+        paramContainer[INPUT_CFG_COM_GE_API].compare(MSVP_PROF_OFF) != 0) {
+        platformAdapter_->SetParamsForGEProfiling(paramContainer[INPUT_CFG_COM_GE_API]);
+    }
     
     if (paramContainer[INPUT_CFG_COM_TASK_TRACE].compare(MSVP_PROF_ON) == 0) {
         platformAdapter_->SetParamsForTaskTrace();
@@ -298,7 +303,7 @@ void ParamsAdapter::SetTaskParams(std::array<std::string, INPUT_CFG_MAX> paramCo
     }
     if (paramContainer[INPUT_CFG_COM_MODEL_EXECUTION].compare(MSVP_PROF_ON) == 0) {
         platformAdapter_->SetParamsForGEL0();
-        platformAdapter_->SetParamsForGEL1();
+        platformAdapter_->SetParamsForGEProfilingL1();
     }
     if (paramContainer[INPUT_CFG_COM_RUNTIME_API].compare(MSVP_PROF_ON) == 0) {
         platformAdapter_->SetParamsForRuntime();
@@ -448,7 +453,7 @@ int ParamsAdapter::ComCfgCheck(std::array<std::string, INPUT_CFG_MAX> paramConta
             continue;
         }
         std::string cfgValue = paramContainer[inputCfg];
-        if (inputCfg <= INPUT_CFG_COM_AICPU) {
+        if (inputCfg <= INPUT_CFG_COM_GE_API) {
             ret = ComCfgCheck1(inputCfg, cfgValue);
         } else {
             ret = ComCfgCheck2(inputCfg, cfgValue);
@@ -468,6 +473,7 @@ bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfg
         {INPUT_CFG_COM_MSPROFTX, "msproftx"}, {INPUT_CFG_COM_TASK_TIME, "task-time"},
         {INPUT_CFG_COM_ASCENDCL, "ascendcl"}, {INPUT_CFG_COM_RUNTIME_API, "runtime-api"},
         {INPUT_CFG_COM_HCCL, "hccl"}, {INPUT_CFG_COM_L2, "l2"}, {INPUT_CFG_COM_AICPU, "aicpu"},
+        {INPUT_CFG_COM_GE_API, "ge-api"},
     };
     std::map<int, std::string> metricsNameMap = {
         {INPUT_CFG_COM_AIC_METRICS, "aic-metrics"},
@@ -482,6 +488,9 @@ bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfg
             break;
         case INPUT_CFG_COM_TASK_TIME:
             ret = ParamValidation::instance()->IsValidTaskTimeSwitch(cfgValue);
+            break;
+        case INPUT_CFG_COM_GE_API:
+            ret = ParamValidation::instance()->IsValidGEApiSwitch(cfgValue);
             break;
         case INPUT_CFG_COM_MSPROFTX:
         case INPUT_CFG_COM_ASCENDCL:

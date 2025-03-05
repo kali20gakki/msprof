@@ -356,7 +356,9 @@ void ArgsManager::AddBasicArgs()
             "\t\t\t\t\t\t   The default value is task-based.", TASK_BASED},
         {"aic-freq", "The aic sampling frequency in hertz, the default value is 100 Hz, the range is\n"
             "\t\t\t\t\t\t   1 to 100 Hz.(full-platform)", "100"},
-        {"task-memory", "Show operator memory data, the default value is off.(full-platform)", OFF}
+        {"task-memory", "Show operator memory data, the default value is off.(full-platform)", OFF},
+        {"ge-api", "Show GE profiling data, the default value is off.(full-platform), \n"
+            "\t\t\t\t\t\t   The switch can be set in range [l0, l1, off]", OFF}
     };
     std::string defaultOption = (platform_ == PlatformType::CHIP_V4_2_0) ? "PipelineExecuteUtilization" :
                                 "PipeUtilization";

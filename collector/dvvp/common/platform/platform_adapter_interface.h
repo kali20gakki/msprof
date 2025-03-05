@@ -104,13 +104,15 @@ public:
     virtual void SetParamsForGlobal(struct CommonParams &comParams);
     virtual void SetParamsForStorageLimit(struct CommonParams &comParams);
     virtual void SetParamsForTaskTime(const std::string taskTimeLevel);
+    virtual void SetParamsForGEProfiling(const std::string geProfilingLevel);
     virtual void SetParamsForTaskTrace();
     virtual void SetParamsForTrainingTrace();
     virtual void SetParamsForAscendCL();
     virtual void SetParamsForTaskMemory();
     virtual void SetParamsForOpAttr();
     virtual void SetParamsForGEL0();
-    virtual void SetParamsForGEL1();
+    virtual void SetParamsForGEProfilingL0();
+    virtual void SetParamsForGEProfilingL1();
     virtual void SetParamsForRuntime();
     virtual void SetParamsForAICPU();
     virtual void SetParamsForHCCL();
