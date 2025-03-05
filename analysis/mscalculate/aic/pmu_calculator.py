@@ -94,7 +94,7 @@ class PmuCalculator(ICalculator):
 
     def _format_ge_data(self: any, ge_data: list) -> None:
         for data in ge_data:
-            if data.task_type not in (Constant.TASK_TYPE_AI_CORE, Constant.TASK_TYPE_AIV,
+            if data.task_type not in (Constant.TASK_TYPE_AI_CORE, Constant.TASK_TYPE_AIV, Constant.TASK_TYPE_HCCL,
                                       Constant.TASK_TYPE_MIX_AIC, Constant.TASK_TYPE_MIX_AIV):
                 continue
             _key = self.STREAM_TASK_KEY_FMT.format(data.task_id, data.stream_id)

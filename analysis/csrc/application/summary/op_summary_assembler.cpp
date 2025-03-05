@@ -142,11 +142,17 @@ void OpSummaryAssembler::GenerateOpBody(std::vector<AscendTaskData> &taskData, s
         TaskId id{static_cast<uint16_t>(task.streamId), static_cast<uint16_t>(task.batchId),
                   static_cast<uint16_t>(task.taskId), task.contextId, task.deviceId};
         auto it = computeTask_.find(id);
-        if (it != computeTask_.end() && std::find(INVALID_TASK_TYPE.begin(), INVALID_TASK_TYPE.end(),
-                                                  it->second->taskType) == INVALID_TASK_TYPE.end()) {
-            auto row = GenerateOneTaskRow(*it->second, task);
-            MergeTaskAndPmu(pmu, row, id, indexTable);
-            res_.emplace_back(row);
+        if (it != computeTask_.end()) {
+            const std::string& taskType = it->second->taskType;
+            const std::string& opName = it->second->opName;
+            bool isInvalidType = std::find(INVALID_TASK_TYPE.begin(), INVALID_TASK_TYPE.end(), taskType) !=
+                    INVALID_TASK_TYPE.end();
+            bool isCommWithValidSuffix = (taskType == "COMMUNICATION" && EndsWith(opName, AIV_KERNEL));
+            if (!isInvalidType || isCommWithValidSuffix) {
+                auto row = GenerateOneTaskRow(*it->second, task);
+                MergeTaskAndPmu(pmu, row, id, indexTable);
+                res_.emplace_back(row);
+            }
         }
     }
 }

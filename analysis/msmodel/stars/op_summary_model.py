@@ -17,6 +17,15 @@ from profiling_bean.db_dto.time_section_dto import TimeSectionDto
 from profiling_bean.db_dto.time_section_dto import CommunicationTimeSection
 
 
+def filter_aiv_communication(data_list: list) -> list:
+    compute_data = []
+    for data in data_list:
+        if data.op_name.endswith(StrConstant.AIV_KERNEL):
+            continue
+        compute_data.append(data)
+    return compute_data
+
+
 class OpSummaryModel(ViewModel, IAnalysisModel):
     """
     class used to operate summary db
@@ -88,6 +97,6 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
                 unknown=Constant.TASK_TYPE_UNKNOWN)
         return DBManager.fetch_all_data(self.cur, sql, dto_class=TimeSectionDto)
 
-    def get_operator_data_separated_by_kfc_stream(self: any) -> tuple:
+    def get_operator_data_separated_by_kfc_stream(self: any) -> list:
         operator_data = self.get_operator_data_by_task_type()
-        return self.separate_kfc_stream(operator_data)
+        return filter_aiv_communication(self.separate_kfc_stream(operator_data))

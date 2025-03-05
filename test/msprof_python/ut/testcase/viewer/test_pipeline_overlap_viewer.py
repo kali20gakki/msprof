@@ -24,9 +24,9 @@ class TestPipelineOverlapViewer(unittest.TestCase):
     DIR_PATH = os.path.join(os.path.dirname(__file__), 'DT_PipelineOverlapViewer')
 
     @staticmethod
-    def construct_time_section(start, end, class_bean=TimeSectionDto):
+    def construct_time_section(start, end, op_name=None, class_bean=TimeSectionDto):
         class_bean_tuple = CustomizedNamedtupleFactory.generate_named_tuple_from_dto(class_bean, [])
-        return class_bean_tuple(start_time=start, end_time=end)
+        return class_bean_tuple(start_time=start, end_time=end, op_name=op_name)
 
     def setUp(self) -> None:
         os.makedirs(os.path.join(self.DIR_PATH, 'PROF1', 'device_0'))
@@ -48,9 +48,9 @@ class TestPipelineOverlapViewer(unittest.TestCase):
         with mock.patch('os.path.exists', return_value=True), \
                 mock.patch(NAMESPACE + '.HcclViewModel.check_table', return_value=False), \
                 mock.patch(NAMESPACE + '.OpSummaryModel.get_operator_data_by_task_type',
-                           return_value=[self.construct_time_section(1000, 1100),
-                                         self.construct_time_section(1080, 1200),
-                                         self.construct_time_section(1280, 1300)]):
+                           return_value=[self.construct_time_section(1000, 1100, 'aclnnCat_ConcatD_ConcatD'),
+                                         self.construct_time_section(1080, 1200, 'aclnnCos_CosAiCore_Cos'),
+                                         self.construct_time_section(1280, 1300, 'RotaryMul1')]):
             check = PipelineOverlapViewer({}, {
                 StrConstant.PARAM_RESULT_DIR: os.path.join(self.DIR_PATH, 'PROF1', 'device_0')})
             ret = check.get_timeline_data()
@@ -73,9 +73,9 @@ class TestPipelineOverlapViewer(unittest.TestCase):
         InfoConfReader()._local_time_offset = 10.0
         with mock.patch('os.path.exists', return_value=True), \
                 mock.patch(NAMESPACE + '.OpSummaryModel.get_operator_data_by_task_type',
-                           return_value=[self.construct_time_section(1000, 1100),
-                                         self.construct_time_section(1080, 1200),
-                                         self.construct_time_section(1280, 1300)]), \
+                           return_value=[self.construct_time_section(1000, 1100, 'aclnnCat_ConcatD_ConcatD'),
+                                         self.construct_time_section(1080, 1200, 'aclnnCos_CosAiCore_Cos'),
+                                         self.construct_time_section(1280, 1300, 'RotaryMul1')]), \
                 mock.patch(NAMESPACE + '.HcclViewModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + '.HcclViewModel.get_hccl_op_time_section',
                            return_value=[self.construct_time_section(1180, 1250, class_bean=CommunicationTimeSection)]):

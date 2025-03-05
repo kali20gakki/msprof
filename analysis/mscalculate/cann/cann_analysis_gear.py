@@ -442,7 +442,7 @@ class TaskGear(CANNGear):
             self.hccl_node_mismatch += 1
             return
 
-        hccl_node_key = node_dto.item_id + str(node_dto.end)
+        hccl_node_key = node_dto.item_id + str(node_dto.thread_id) + str(node_dto.end)
         if hccl_node_key in self.hccl_node_keys:
             return
         self.hccl_node_keys.add(hccl_node_key)
@@ -606,14 +606,7 @@ class TaskGear(CANNGear):
                                    "YES" if node_basic_info_dto.op_flag else "NO",
                                    "N/A" if not node_attr_info.hashid else node_attr_info.hashid])
 
-    def clear(self):
-        """
-        每次处理前清除前一次的hccl key值，避免数据被错误过滤。
-        """
-        self.hccl_node_keys.clear()
-
     def run(self, event: Event, call_stack: dict):
-        self.clear()
         # pure runtime api
         if not event.is_invalid() and not event.additional_record:
             return
