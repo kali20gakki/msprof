@@ -182,16 +182,16 @@ class TestAiCoreOpReport(unittest.TestCase):
     def test_union_task_ge_ai_core_data_success_when_exist_hardware_op_list(self):
         op_state = "dynamic"
         expect_res = [
-            (1, 2, 3, 11, 16, op_state, "AI_CPU", "N/A"),
-            (4, 5, 6, 11, 16, op_state, "AI_CPU", "N/A"),
-            (7, 8, 9, 11, 16, op_state, 10, "N/A")
+            (1, 2, 3, "11", 16, op_state, "AI_CPU", "N/A"),
+            (4, 5, 6, "11", 16, op_state, "AI_CPU", "N/A"),
+            (7, 8, 9, "11", 16, op_state, 10, "N/A")
         ]
         data = [
-            (1, 2, 3, 11, 16, op_state, "AI_CPU", 0),
-            (4, 5, 6, 11, 16, op_state, "AI_CPU", 0),
-            (7, 8, 9, 11, 16, op_state, 10, 0),
-            (1, 2, 3, 11, 16, op_state, "COMMUNICATION", 0),
-            (1, 3, 3, 11, 16, op_state, "HCCL_AI_CPU", 0)
+            (1, 2, 3, "11", 16, op_state, "AI_CPU", 0),
+            (4, 5, 6, "11", 16, op_state, "AI_CPU", 0),
+            (7, 8, 9, "11", 16, op_state, 10, 0),
+            (1, 2, 3, "11", 16, op_state, "COMMUNICATION", 0),
+            (1, 3, 3, "11", 16, op_state, "HCCL_AI_CPU", 0)
         ]
         ai_core_group_dict = {
             (0, 2, 3, "AI_CPU"): deque([(10,)]), (0, 5, 6, "AI_CPU"): deque([(40,)]),

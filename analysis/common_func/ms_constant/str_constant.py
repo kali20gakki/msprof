@@ -435,6 +435,7 @@ class StrConstant:
     MSG = "msg"
     DATA = "data"
     AICPU_KERNEL = "AicpuKernel"
+    AIV_KERNEL = "AivKernel"
 
     @property
     def accuracy(self: any) -> str:

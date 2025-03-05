@@ -159,6 +159,7 @@ const std::string PROCESSOR_MC2_COMM_INFO = "MC2_COMM_INFO";
 const std::string PROCESSOR_NAME_NIC_TIMELINE = "NIC_TIMELINE";
 const std::string PROCESSOR_NAME_ROCE_TIMELINE = "ROCE_TIMELINE";
 const std::string AICPU_KERNEL = "AicpuKernel";
+const std::string AIV_KERNEL = "AivKernel";
 const std::string PROCESSOR_OP_SUMMARY = "OP_SUMMARY";
 const std::string PROCESSOR_PMU = "PMU";
 
