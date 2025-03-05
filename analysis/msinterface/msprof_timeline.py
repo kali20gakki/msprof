@@ -36,7 +36,7 @@ class MsprofTimeline:
         self._model_id = NumberConstant.DEFAULT_MODEL_ID
         self._result_dir = None
         self._export_data_list = []
-        self._iteration_time = []
+        self._iteration_time = tuple()
         self._default_sort_index = TraceViewHeaderConstant.DEFAULT_LAYER_SORT_START
 
     @classmethod
@@ -132,11 +132,10 @@ class MsprofTimeline:
             if isinstance(export_data, list):
                 self.add_sort_index(export_data)
                 self.add_connect_json_line(export_data, data_type)
-                if not ProfilingScene().is_all_export():
-                    start_time, end_time = self.get_start_end_time()
-                    export_data = filter(
-                        lambda value: value["ph"] == "M" or self.is_in_iteration(value, start_time, end_time),
-                        export_data)
+                start_time, end_time = self.get_start_end_time()
+                export_data = filter(
+                    lambda value: value["ph"] == "M" or self.is_in_iteration(value, start_time, end_time),
+                    export_data)
                 self._export_data_list.extend(export_data)
         except (TypeError, ValueError) as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
@@ -211,7 +210,15 @@ class MsprofTimeline:
         self._result_dir = result_dir
         self._iter_range = iter_range
         self._model_id = iter_range.model_id
-        self._iteration_time = MsprofIteration(result_dir).get_iter_interval(iter_range, NumberConstant.MICRO_SECOND)
+        if ProfilingScene().is_all_export():
+            start_time, end_time = InfoConfReader().get_collect_time()
+            self._iteration_time = (float(start_time), float(end_time))
+        else:
+            start_time, end_time = MsprofIteration(result_dir).get_iter_interval(iter_range,
+                                                                                 NumberConstant.MICRO_SECOND)
+            start_time = Decimal(InfoConfReader().trans_into_local_time(start_time, use_us=True))
+            end_time = Decimal(InfoConfReader().trans_into_local_time(end_time, use_us=True))
+            self._iteration_time = (float(start_time), float(end_time))
 
     def get_layer_info(self: any, process_name: str) -> TraceViewHeaderConstant.LayerInfo:
         """
@@ -226,9 +233,4 @@ class MsprofTimeline:
                                                      self._default_sort_index)
 
     def get_start_end_time(self: any):
-        if not self._iteration_time:
-            return 0, 0
-        start_time, end_time = self._iteration_time
-        start_time = Decimal(InfoConfReader().trans_into_local_time(start_time, use_us=True))
-        end_time = Decimal(InfoConfReader().trans_into_local_time(end_time, use_us=True))
-        return start_time, end_time
+        return self._iteration_time

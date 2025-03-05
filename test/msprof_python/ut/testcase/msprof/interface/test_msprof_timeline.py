@@ -103,14 +103,10 @@ class TestMsprofTimeline(unittest.TestCase):
 
     def test_get_start_end_time(self):
         key = MsprofTimeline()
-        key._iteration_time = [1, 13]
+        key._iteration_time = (1, 13)
         res = key.get_start_end_time()
         self.assertEqual(len(res), 2)
-
-        key._iteration_time = []
-        res = key.get_start_end_time()
-        expect = (0, 0)
-        self.assertEqual(res, expect)
+        self.assertEqual(res, key._iteration_time)
 
 
 if __name__ == '__main__':

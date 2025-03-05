@@ -16,9 +16,9 @@ from msmodel.freq.freq_data_viewer_model import FreqDataViewModel
 
 
 class AiCoreFreqViewer:
-    '''
+    """
     Read aicore freq and generate aicore freq view
-    '''
+    """
 
     def __init__(self, params: dict):
         self._params = params
@@ -27,14 +27,44 @@ class AiCoreFreqViewer:
         self.freq_model = FreqDataViewModel(params)
         self.apidata_model = ApiDataViewModel(params)
 
+    @staticmethod
+    def _split_and_fill_freq(freq_lists):
+        """
+        将freq数据进行填充，填充频率以前一条记录为准
+        """
+        if not freq_lists:
+            return []
+
+        result = [freq_lists[0]]  # 初始化结果列表，包含第一个元素
+
+        for next_item in freq_lists[1:]:
+            current = result[-1]  # 当前处理的元素是结果列表的最后一个元素
+            current_time = float(current[1])
+            next_time = float(next_item[1])
+            time_diff = next_time - current_time
+
+            # 如果时间差超过100，填充中间数据
+            if time_diff > 100:
+                # 确保填充时间不超过next_time
+                num_fill = min(int(time_diff // 100), int((next_time - 1 - current_time) // 100))
+                for slice_time in range(1, num_fill + 1):
+                    fill_time = current_time + slice_time * 100
+                    new_item = copy.deepcopy(current)
+                    new_item[1] = str(fill_time)
+                    result.append(new_item)
+
+            # 将下一个元素添加到结果列表
+            result.append(next_item)
+        return result
+
     def get_all_data(self):
-        '''
+        """
         1、read the fixed aicore freq from info.json
         2、read the floating aicore freq from freq.db
         3、concat 1/2 freq
-        '''
+        """
         result = []
-        if not ChipManager().is_chip_v4() and not ChipManager().is_chip_v1_1_1()\
+        if not ChipManager().is_chip_v4() and not ChipManager().is_chip_v1_1_1() \
                 or InfoConfReader().is_host_profiling():
             return result
 
@@ -65,8 +95,9 @@ class AiCoreFreqViewer:
         # 增加一条记录，时间替换为采集结束时间，截断柱状图
         final_data[1] = end_ts
         freq_lists.append(final_data)
+        filled_freq = self._split_and_fill_freq(freq_lists)
         changed_frequency = TraceViewManager.column_graph_trace(
-            TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, freq_lists)
+            TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, filled_freq)
         result.extend(changed_frequency)
 
         return result
