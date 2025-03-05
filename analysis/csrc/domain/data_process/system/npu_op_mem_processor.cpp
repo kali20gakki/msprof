@@ -71,7 +71,7 @@ std::vector<NpuOpMemData> NpuOpMemProcessor::FormatData(const OriDataFormat &ori
         if (it != hashMap.end()) {
             tempData.operatorName = it->second;
         }
-        tempData.localTime = GetLocalTime(timestamp, timeRecord).Uint64();
+        tempData.timestamp = GetLocalTime(timestamp, timeRecord).Uint64();
         tempData.deviceId = GetDeviceId(deviceType);
         formatData.push_back(tempData);
     }
@@ -119,6 +119,7 @@ bool NpuOpMemProcessor::Process(DataInventory &dataInventory)
         ERROR("Format NpuOpMem data error, dbPath is %.", dbPath);
         return false;
     }
+    FilterDataByStartTime(processedData, timeRecord.startTimeNs, PROCESSOR_NAME_NPU_OP_MEM);
     if (!SaveToDataInventory<NpuOpMemData>(std::move(processedData), dataInventory, PROCESSOR_NAME_NPU_OP_MEM)) {
             ERROR("Save NpuOpMem Data To DataInventory failed, profPath is %.", profPath_);
             return false;

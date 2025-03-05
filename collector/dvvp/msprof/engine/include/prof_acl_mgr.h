@@ -83,6 +83,7 @@ public:
     int ProfAclInit(const std::string& profResultPath);
     bool IsInited();
     int InitUploader(const std::string& devIdStr);
+    int ProfAclWarmup(PROF_CONF_CONST_PTR profStartCfg);
     int ProfAclStart(PROF_CONF_CONST_PTR profStartCfg);
     int ProfAclStop(PROF_CONF_CONST_PTR profStopCfg);
     int ProfAclFinalize();
@@ -119,6 +120,7 @@ public:
     void AddModelLoadConf(uint64_t &dataTypeConfig) const;
     int32_t MsprofSetConfig(aclprofConfigType cfgType, std::string config);
     int32_t MsprofResetDeviceHandle(uint32_t devId);
+    void MsprofDumpStartInfoFile(uint32_t devId);
 
 private:
     int MsprofTxSwitchPrecheck();
@@ -208,6 +210,8 @@ private:
     PROF_CONF_CONST_PTR profStratCfg_;
     uint64_t dataTypeConfig_;
     uint64_t startIndex_;
+    bool isWarmuped_;
+    bool isStarted_;
 };
 } // namespace Api
 } // namespace Msprofiler

@@ -31,6 +31,7 @@ private:
     std::vector<AccPmuData> FormatData(const OriAccPmuData &oriData,
                                        const Utils::ProfTimeRecord &timeRecord,
                                        const uint16_t deviceId);
+    bool ProcessOneDevice(const std::string& devicePath, std::vector<AccPmuData>& res);
 };
 }
 }

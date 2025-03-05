@@ -60,7 +60,7 @@ static std::vector<ApiData> GenerateApiData()
     data.apiName = "launch";
     data.connectionId = 2762; // connectionId 2762
     data.id = "0";
-    data.start = 1717575960208020750; // start 1717575960208020750
+    data.timestamp = 1717575960208020750; // start 1717575960208020750
     data.itemId = "hcom_broadcast_";
     data.level = MSPROF_REPORT_NODE_LEVEL;
     data.threadId = 87144; // threadId 87144
@@ -77,7 +77,7 @@ static std::vector<ApiData> GenerateMemcpyAsyncApiData()
     data.apiName = "aclrtMemcpyAsync";
     data.connectionId = 22; // connectionId 22
     data.id = "aclrtMemcpyAsync";
-    data.start = 1717575960208020750; // start 1717575960208020750
+    data.timestamp = 1717575960208020750; // start 1717575960208020750
     data.itemId = "0";
     data.level = MSPROF_REPORT_ACL_LEVEL;
     data.threadId = 2816340; // threadId 2816340

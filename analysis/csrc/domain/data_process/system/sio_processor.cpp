@@ -16,8 +16,7 @@ namespace Analysis {
 namespace Domain {
 using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
-constexpr double TMP_UINT = NANO_SECOND / (BYTE_SIZE * BYTE_SIZE);
-const std::string PROCESSOR_NAME_HBM = "SIO";
+constexpr double TMP_UINT = static_cast<double>(NANO_SECOND) / (BYTE_SIZE * BYTE_SIZE);
 
 SioProcessor::SioProcessor(const std::string &profPath) : DataProcessor(profPath) {}
 
@@ -29,7 +28,7 @@ bool SioProcessor::Process(DataInventory &dataInventory)
     for (const auto& devicePath: deviceList) {
         flag = ProcessSingleDevice(devicePath, allProcessedData) && flag;
     }
-    if (!SaveToDataInventory<SioData>(std::move(allProcessedData), dataInventory, PROCESSOR_NAME_HBM)) {
+    if (!SaveToDataInventory<SioData>(std::move(allProcessedData), dataInventory, PROCESSOR_NAME_SIO)) {
         flag = false;
         ERROR("Save sio Data To DataInventory failed, profPath is %.", profPath_);
     }
@@ -74,6 +73,7 @@ bool SioProcessor::ProcessSingleDevice(const std::string &devicePath, std::vecto
         ERROR("Format sio data error, dbPath is %.", dbPath);
         return false;
     }
+    FilterDataByStartTime(processedData, localtimeContext.timeRecord.startTimeNs, PROCESSOR_NAME_SIO);
     allProcessedData.insert(allProcessedData.end(), processedData.begin(), processedData.end());
     return true;
 }
@@ -127,7 +127,7 @@ std::vector<SioData> SioProcessor::FormatData(const OriSioData &oriData, const L
             continue;
         }
         HPFloat timestamp = oriTimestamp;
-        tempData.localTime = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
+        tempData.timestamp = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
         formatData.push_back(tempData);
     }
     return formatData;

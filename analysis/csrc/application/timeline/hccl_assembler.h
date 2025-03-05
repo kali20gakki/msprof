@@ -127,7 +127,7 @@ private:
             linkType = TransEnumToType(data.linkType, HCCL_LINK_TYPE_TABLE);
             std::shared_ptr<HcclTaskTraceEvent> event;
             MAKE_SHARED_RETURN_VOID(event, HcclTaskTraceEvent, formatPid, tid, data.duration / NS_TO_US,
-                                    DivideByPowersOfTenWithPrecision(data.start), data.taskType, data.srcRank,
+                                    DivideByPowersOfTenWithPrecision(data.timestamp), data.taskType, data.srcRank,
                                     data.dstRank, data.streamId, data.taskId, data.contextId, data.modelId, data.size,
                                     data.durationEstimated, data.bandwidth, data.notifyId, transport,
                                     data.taskType, dataType, linkType);
@@ -141,7 +141,7 @@ private:
         auto connId = ConnectionIdPool::GetConnectionId(data.connectionId, ConnectionCategory::GENERAL);
         auto traceName = HOST_TO_DEVICE + connId;
         std::shared_ptr<FlowEvent> flow;
-        MAKE_SHARED_RETURN_VOID(flow, FlowEvent, formatPid, tid, DivideByPowersOfTenWithPrecision(data.start),
+        MAKE_SHARED_RETURN_VOID(flow, FlowEvent, formatPid, tid, DivideByPowersOfTenWithPrecision(data.timestamp),
                                 HOST_TO_DEVICE, connId, traceName, FLOW_END, FLOW_BP);
         res_.push_back(flow);
     }
@@ -166,8 +166,8 @@ private:
             std::shared_ptr<HcclOpTraceEvent> event;
             retry = (data.retry == 1) ? "yes" : "no";
             relay = (data.relay == 1) ? "yes" : "no";
-            MAKE_SHARED_RETURN_VOID(event, HcclOpTraceEvent, formatPid, tid, (data.end - data.start) / NS_TO_US,
-                                    DivideByPowersOfTenWithPrecision(data.start), data.opName, data.modelId,
+            MAKE_SHARED_RETURN_VOID(event, HcclOpTraceEvent, formatPid, tid, (data.end - data.timestamp) / NS_TO_US,
+                                    DivideByPowersOfTenWithPrecision(data.timestamp), data.opName, data.modelId,
                                     data.count, data.connectionId, dataType, data.algType, relay, retry);
             res_.push_back(event);
             GenerateConnectionTrace(data, formatPid, tid);

@@ -93,6 +93,7 @@ bool DDRProcessor::ProcessOneDevice(const std::string& devicePath, std::vector<D
         ERROR("DDR Data format data failed. DBPath is %", dbPath);
         return false;
     }
+    FilterDataByStartTime(formatData, localtimeContext.timeRecord.startTimeNs, PROCESSOR_NAME_DDR);
     res.insert(res.end(), formatData.begin(), formatData.end());
     return true;
 }

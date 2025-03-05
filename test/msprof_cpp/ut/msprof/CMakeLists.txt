@@ -107,6 +107,7 @@ set(profilerSrcList
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_server.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_client.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_acl_mgr.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/ctrl_files_dumper.cpp
 	${CppPath}
 )
 
@@ -138,7 +139,6 @@ add_executable(
 
 target_include_directories(msprofiler_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/include
-    ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
     ${TOP_DIR}/abl/msprof/inc/toolchain
 	../stub/

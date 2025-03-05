@@ -124,9 +124,16 @@ protected:
         CreateHcclOpSingleDevice(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_OP_B);
         CreateKfcTask(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_KFC_A);
         CreateKfcOP(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_KFC_OP_A);
-        MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo)
-            .stubs()
-            .will(returnValue(true));
+        nlohmann::json record = {
+            {"startCollectionTimeBegin", "1701069324370978"},
+            {"endCollectionTimeEnd", "1701069338159976"},
+            {"startClockMonotonicRaw", "36471129942580"},
+            {"pid", "10"},
+            {"hostCntvct", "65177261204177"},
+            {"CPU", {{{"Frequency", "100.000000"}}}},
+            {"hostMonotonic", "651599377155020"},
+        };
+        MOCKER_CPP(&Analysis::Domain::Environment::Context::GetInfoByDeviceId).stubs().will(returnValue(record));
     }
     virtual void TearDown()
     {
@@ -237,7 +244,6 @@ TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunS
     std::shared_ptr<GeHashMap> geHashMapPtr;
     MAKE_SHARED0_NO_OPERATION(geHashMapPtr, GeHashMap, std::move(geHashMap));
     for (auto path : PROF_PATHS) {
-        MAKE_SHARED0_NO_OPERATION(geHashMapPtr, GeHashMap, std::move(geHashMap));
         auto processor = CommunicationInfoProcessor(path);
         auto dataInventory = DataInventory();
         dataInventory.Inject(geHashMapPtr);

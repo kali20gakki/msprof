@@ -85,6 +85,7 @@ bool MsprofTxHostProcessor::Process(DataInventory &dataInventory)
     }
     FormatTxData(oriTxData, formatData, params, record);
     FormatTxExData(oriTxExData, formatData, params, record);
+    FilterDataByStartTime(formatData, record.startTimeNs, PROCESSOR_NAME_MSTX);
     if (!SaveToDataInventory<MsprofTxHostData>(std::move(formatData), dataInventory, PROCESSOR_NAME_MSTX)) {
         ERROR("Save data failed, %.", PROCESSOR_NAME_MSTX);
         return false;
@@ -100,11 +101,11 @@ void MsprofTxHostProcessor::FormatTxData(const OriMsprofTxHostData &oriTxData,
     std::string eventType;
     for (const auto& row : oriTxData) {
         std::tie(tmpData.pid, tmpData.tid, tmpData.category, tmpData.payloadType, tmpData.messageType,
-                 tmpData.payloadValue, tmpData.start, tmpData.end, eventType, tmpData.message) = row;
-        HPFloat start = Utils::GetTimeFromSyscnt(tmpData.start, params);
+                 tmpData.payloadValue, tmpData.timestamp, tmpData.end, eventType, tmpData.message) = row;
+        HPFloat start = Utils::GetTimeFromSyscnt(tmpData.timestamp, params);
         HPFloat end = Utils::GetTimeFromSyscnt(tmpData.end, params);
         tmpData.eventType = GetEnumTypeValue(eventType, NAME_STR(MSTX_EVENT_TYPE_TABLE), MSTX_EVENT_TYPE_TABLE);
-        tmpData.start = GetLocalTime(start, record).Uint64();
+        tmpData.timestamp = GetLocalTime(start, record).Uint64();
         tmpData.end = GetLocalTime(end, record).Uint64();
         processedData.push_back(tmpData);
     }
@@ -118,13 +119,13 @@ void MsprofTxHostProcessor::FormatTxExData(const OriMsprofTxExHostData &oriTxExD
     std::string eventType;
     uint64_t markId;
     for (const auto& row : oriTxExData) {
-        std::tie(tmpData.pid, tmpData.tid, markId, tmpData.start,
+        std::tie(tmpData.pid, tmpData.tid, markId, tmpData.timestamp,
             tmpData.end, eventType, tmpData.domain, tmpData.message) = row;
-        Utils::HPFloat start = Utils::GetTimeFromSyscnt(tmpData.start, params);
+        Utils::HPFloat start = Utils::GetTimeFromSyscnt(tmpData.timestamp, params);
         Utils::HPFloat end = Utils::GetTimeFromSyscnt(tmpData.end, params);
         tmpData.eventType = GetEnumTypeValue(eventType, NAME_STR(MSTX_EVENT_TYPE_TABLE), MSTX_EVENT_TYPE_TABLE);
         tmpData.connectionId = markId + START_CONNECTION_ID_MSTX;
-        tmpData.start = GetLocalTime(start, record).Uint64();
+        tmpData.timestamp = GetLocalTime(start, record).Uint64();
         tmpData.end = GetLocalTime(end, record).Uint64();
         processedData.push_back(tmpData);
     }

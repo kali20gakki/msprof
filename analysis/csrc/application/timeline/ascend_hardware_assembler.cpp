@@ -159,7 +159,7 @@ void AscendHardwareAssembler::GenerateTaskTrace(const std::vector<AscendTaskData
         pidTidSet_.insert({formatPid, tid});
         std::shared_ptr<TaskTraceEvent> event;
         MAKE_SHARED_RETURN_VOID(event, TaskTraceEvent, formatPid, tid, data.duration / NS_TO_US,
-                                DivideByPowersOfTenWithPrecision(data.start), traceName,
+                                DivideByPowersOfTenWithPrecision(data.timestamp), traceName,
                                 data.modelId, data.streamId,
                                 data.taskId, data.batchId, data.contextId, data.connectionId, data.deviceType);
         res_.push_back(event);
@@ -179,7 +179,7 @@ void AscendHardwareAssembler::GenerateKfcTrace(const std::vector<KfcTurnData> &k
         pidTidSet_.insert({formatPid, formatTid});
         std::shared_ptr<KfcTurnTraceEvent> event;
         MAKE_SHARED_RETURN_VOID(event, KfcTurnTraceEvent, formatPid, formatTid, datum.duration / NS_TO_US,
-                                DivideByPowersOfTenWithPrecision(datum.startTime),
+                                DivideByPowersOfTenWithPrecision(datum.timestamp),
                                 traceName, datum.streamId, datum.taskId);
         res_.push_back(event);
     }
@@ -224,7 +224,7 @@ void AscendHardwareAssembler::GenerateMemcpyAsyncTrace(DataInventory &dataInvent
             }
         }
         MAKE_SHARED_RETURN_VOID(event, MemcpyAsyncEvent, formatPid, tid, data.duration / NS_TO_US,
-                                DivideByPowersOfTenWithPrecision(data.start), data.hostType,
+                                DivideByPowersOfTenWithPrecision(data.timestamp), data.hostType,
                                 data.modelId, data.streamId, data.taskId, data.batchId, data.contextId,
                                 data.connectionId, data.deviceType, dataSize, bandwidth, memcpyDirection, showFlag);
         res_.push_back(event);
@@ -242,7 +242,7 @@ void AscendHardwareAssembler::GenerateTaskConnectionTrace(const AscendTaskData &
         name = HOST_TO_DEVICE + connId;
         tid = static_cast<int>(GetPhysicStreamId(data.streamId));
         std::shared_ptr<FlowEvent> end;
-        MAKE_SHARED_RETURN_VOID(end, FlowEvent, formatPid, tid,  DivideByPowersOfTenWithPrecision(data.start),
+        MAKE_SHARED_RETURN_VOID(end, FlowEvent, formatPid, tid,  DivideByPowersOfTenWithPrecision(data.timestamp),
                                 HOST_TO_DEVICE, connId, name, FLOW_END, FLOW_BP);
         res_.push_back(end);
     }
@@ -254,7 +254,7 @@ void AscendHardwareAssembler::GenerateMemcpyAsyncConnectionTrace(const AscendTas
     std::string name = HOST_TO_DEVICE + connId;
     int tid = static_cast<int>(GetPhysicStreamId(data.streamId));
     std::shared_ptr<FlowEvent> end;
-    MAKE_SHARED_RETURN_VOID(end, FlowEvent, formatPid, tid,  DivideByPowersOfTenWithPrecision(data.start),
+    MAKE_SHARED_RETURN_VOID(end, FlowEvent, formatPid, tid,  DivideByPowersOfTenWithPrecision(data.timestamp),
                             HOST_TO_DEVICE, connId, name, FLOW_END, FLOW_BP);
     res_.push_back(end);
 }

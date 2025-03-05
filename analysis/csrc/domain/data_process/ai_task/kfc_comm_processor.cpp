@@ -77,6 +77,8 @@ bool KfcCommProcessor::ProcessSingleDevice(CommunicationInfoProcessor::Communica
         ERROR("Format data failed, %.", TABLE_NAME_COMMUNICATION_TASK_INFO);
         return false;
     }
+    FilterDataByStartTime(taskData, communicationData.timeRecord.startTimeNs, TABLE_NAME_COMMUNICATION_TASK_INFO);
+    FilterDataByStartTime(opData, communicationData.timeRecord.startTimeNs, TABLE_NAME_COMMUNICATION_OP);
     return ConvertTaskData(resTask, taskData) & ConvertOpData(resOp, opData);
 }
 
@@ -129,7 +131,7 @@ bool KfcCommProcessor::ConvertTaskData(std::vector<KfcTaskData> &resTask,
     }
     for (const auto &data : taskData) {
         auto groupName = data.groupName + " Aicpu";
-        resTask.emplace_back(data.deviceId, data.modelId, data.taskType, data.start, data.duration, data.notifyId,
+        resTask.emplace_back(data.deviceId, data.modelId, data.taskType, data.timestamp, data.duration, data.notifyId,
                              data.durationEstimated, data.streamId, data.taskId, data.contextId, data.batchId,
                              data.taskType, data.srcRank, data.dstRank, data.transportType, data.size, data.linkType,
                              data.bandwidth, groupName, data.planeId, data.dataType, data.isMaster, data.opName,
@@ -146,7 +148,7 @@ bool KfcCommProcessor::ConvertOpData(std::vector<KfcOpData> &resOp, const std::v
     }
     for (const auto &data : opData) {
         auto groupName = data.groupName + " Aicpu";
-        resOp.emplace_back(data.deviceId, data.opName, data.start, data.end, groupName, data.connectionId,
+        resOp.emplace_back(data.deviceId, data.opName, data.timestamp, data.end, groupName, data.connectionId,
                            data.modelId, data.dataType, data.count, data.algType, data.rankSize, data.relay,
                            data.retry, data.opType, data.opKey);
     }

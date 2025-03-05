@@ -54,8 +54,8 @@ bool ApiProcessor::Process(DataInventory &dataInventory)
         ERROR("format api data error");
         return false;
     }
-    if (!SaveToDataInventory<ApiData>(std::move(processedData), dataInventory,
-            PROCESSOR_NAME_API)) {
+    FilterDataByStartTime(processedData, record.startTimeNs, PROCESSOR_NAME_API);
+    if (!SaveToDataInventory<ApiData>(std::move(processedData), dataInventory, PROCESSOR_NAME_API)) {
         ERROR("Save data failed, %.", PROCESSOR_NAME_API);
         return false;
     }
@@ -90,8 +90,8 @@ std::vector<ApiData> ApiProcessor::FormatData(
     std::string level;
     for (const auto& row : oriData) {
         std::tie(data.structType, data.id, level, data.threadId, data.itemId,
-                 data.start, data.end, data.connectionId) = row;
-        HPFloat startTimestamp = Utils::GetTimeFromSyscnt(data.start, params);
+                 data.timestamp, data.end, data.connectionId) = row;
+        HPFloat startTimestamp = Utils::GetTimeFromSyscnt(data.timestamp, params);
         HPFloat endTimestamp = Utils::GetTimeFromSyscnt(data.end, params);
         data.level = GetEnumTypeValue(level, NAME_STR(API_LEVEL_TABLE), API_LEVEL_TABLE);
         data.apiName = data.structType;
@@ -100,7 +100,7 @@ std::vector<ApiData> ApiProcessor::FormatData(
         } else if (data.level == MSPROF_REPORT_HCCL_NODE_LEVEL) {
             data.apiName = data.itemId;
         }
-        data.start = GetLocalTime(startTimestamp, record).Uint64();
+        data.timestamp = GetLocalTime(startTimestamp, record).Uint64();
         data.end = GetLocalTime(endTimestamp, record).Uint64();
         formatData.push_back(data);
     }

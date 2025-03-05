@@ -11,6 +11,7 @@
 #include "uploader_mgr.h"
 #include "errno/error_code.h"
 #include "proto/msprofiler.pb.h"
+#include "utils.h"
 
 namespace analysis {
 namespace dvvp {
@@ -18,7 +19,7 @@ namespace transport {
 using namespace analysis::dvvp::proto;
 using namespace analysis::dvvp::common::error;
 
-UploaderMgr::UploaderMgr()
+UploaderMgr::UploaderMgr() : isStarted_(true)
 {
 }
 
@@ -155,6 +156,10 @@ int UploaderMgr::UploadData(const std::string &id, CONST_VOID_PTR data, uint32_t
 
 int UploaderMgr::UploadData(const std::string &id, SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
 {
+    if (!IsUploadDataStart(id, fileChunkReq->fileName)) {
+        return PROFILING_SUCCESS;
+    }
+
     SHARED_PTR_ALIA<Uploader> uploader = nullptr;
     GetUploader(id, uploader);
     if (uploader != nullptr) {
@@ -197,6 +202,32 @@ int UploaderMgr::UploadCtrlFileData(const std::string &id,
     fileChunk->chunkStartTime = 0U;
     fileChunk->chunkEndTime = 0U;
     return analysis::dvvp::transport::UploaderMgr::instance()->UploadData(id, fileChunk);
+}
+
+bool UploaderMgr::IsUploadDataStart(const std::string& id, const std::string& fileName)
+{
+    // 仅拦截device数据（均为data开头），同时确保ts_track中的flip相关数据正常落盘解析
+    if (isStarted_) {
+        return true;
+    }
+
+    if (id == std::to_string(common::utils::DEFAULT_HOST_ID)) {
+        return true;
+    }
+
+    if (fileName.rfind("data/ts_track", 0) == 0) {
+        return true;
+    }
+    if (fileName.rfind("data", 0) == 0) {
+        return false;
+    }
+    return true;
+}
+
+void UploaderMgr::SetUploaderStatus(bool status)
+{
+    MSPROF_LOGI("Uploader status will be set %d.", status);
+    isStarted_ = status;
 }
 }
 }

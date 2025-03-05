@@ -13,12 +13,10 @@
 #include "analysis/csrc/domain/data_process/ai_task/kfc_task_processor.h"
 #include <string>
 #include <functional>
-#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Domain {
 using namespace Analysis::Domain::Environment;
-using namespace Analysis::Utils;
 
 // 创建 KfcTurnData 的函数类型
 using CreateKfcTurnDataFunc = std::function<KfcTurnData(const KfcCommTurn&, const SyscntConversionParams&)>;
@@ -39,19 +37,33 @@ bool KfcTaskProcessor::Process(DataInventory& dataInventory)
             continue;
         }
 
-        auto commStatus = CheckPathAndTable(dbPath, kfcCommTurnDB, false);
-        auto computeStatus = CheckPathAndTable(dbPath, kfcComputeTurnDB, false);
         uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
+        SyscntConversionParams params;
+        if (!Context::GetInstance().GetSyscntConversionParams(params, deviceId, profPath_)) {
+            ERROR("GetSyscntConversionParams failed, profPath is %.", profPath_);
+            return {};
+        }
+        ProfTimeRecord record;
+        if (!Context::GetInstance().GetProfTimeRecordInfo(record, profPath_, deviceId)) {
+            ERROR("GetProfTimeRecordInfo failed, profPath is %, device id is %.", profPath_, deviceId);
+            return {};
+        }
+
+        auto computeStatus = CheckPathAndTable(dbPath, kfcComputeTurnDB, false);
         if (computeStatus == CHECK_SUCCESS) {
             auto computeData = LoadComputeData(kfcComputeTurnDB, dbPath);
-            std::vector<KfcTurnData> kfcComputeTurnData = FormatComputeData(computeData, deviceId);
+            std::vector<KfcTurnData> kfcComputeTurnData = FormatComputeData(computeData, deviceId, params, record);
+            FilterDataByStartTime(kfcComputeTurnData, record.startTimeNs, PROCESSOR_NAME_KFC_TASK);
             result.insert(result.end(), kfcComputeTurnData.begin(), kfcComputeTurnData.end());
         } else {
             flag = (computeStatus == NOT_EXIST) && flag;
         }
+
+        auto commStatus = CheckPathAndTable(dbPath, kfcCommTurnDB, false);
         if (commStatus == CHECK_SUCCESS) {
             auto commData = LoadCommData(kfcCommTurnDB, dbPath);
-            std::vector<KfcTurnData> kfcCommTurnData = FormatCommData(commData, deviceId);
+            std::vector<KfcTurnData> kfcCommTurnData = FormatCommData(commData, params, record);
+            FilterDataByStartTime(kfcCommTurnData, record.startTimeNs, PROCESSOR_NAME_KFC_TASK);
             result.insert(result.end(), kfcCommTurnData.begin(), kfcCommTurnData.end());
         } else {
             flag = (commStatus == NOT_EXIST) && flag;
@@ -117,18 +129,9 @@ std::vector<KfcComputeTurn> KfcTaskProcessor::LoadComputeData(const DBInfo &kfcD
 }
 
 std::vector<KfcTurnData> KfcTaskProcessor::FormatCommData(const std::vector<KfcCommTurn> &oriCommData,
-                                                          uint16_t deviceId)
+                                                          const SyscntConversionParams& params,
+                                                          const ProfTimeRecord& record)
 {
-    SyscntConversionParams params;
-    if (!Context::GetInstance().GetSyscntConversionParams(params, deviceId, profPath_)) {
-        ERROR("GetSyscntConversionParams failed, profPath is %.", profPath_);
-        return {};
-    }
-    ProfTimeRecord record;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(record, profPath_, deviceId)) {
-        ERROR("GetProfTimeRecordInfo failed, profPath is %, device id is %.", profPath_, deviceId);
-        return {};
-    }
     std::vector<KfcTurnData> ans;
     HPFloat startTimestamp;
     for (const auto& commData : oriCommData) {
@@ -155,8 +158,8 @@ std::vector<KfcTurnData> KfcTaskProcessor::FormatCommData(const std::vector<KfcC
         startTimestamp = GetTimeFromSyscnt(commData.sendSqeFinishTime, params);
         ans.emplace_back("TaskExecute " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
                          commData.taskId, GetLocalTime(startTimestamp, record).Uint64(),
-                         GetDurTimeFromSyscnt(commData.rtsqExeEndTime - commData.sendSqeFinishTime, params).
-                         Double());
+                         GetDurTimeFromSyscnt(commData.rtsqExeEndTime - commData.sendSqeFinishTime, params)
+                         .Double());
         startTimestamp = GetTimeFromSyscnt(commData.rtsqExeEndTime, params);
         ans.emplace_back("Finalize " + std::to_string(commData.currentTurn), commData.deviceId, commData.streamId,
                          commData.taskId, GetLocalTime(startTimestamp, record).Uint64(),
@@ -167,18 +170,10 @@ std::vector<KfcTurnData> KfcTaskProcessor::FormatCommData(const std::vector<KfcC
 }
 
 std::vector<KfcTurnData> KfcTaskProcessor::FormatComputeData(const std::vector<KfcComputeTurn> &oriComputeData,
-                                                             uint16_t deviceId)
+                                                             uint16_t deviceId,
+                                                             const SyscntConversionParams& params,
+                                                             const ProfTimeRecord& record)
 {
-    SyscntConversionParams params;
-    if (!Context::GetInstance().GetSyscntConversionParams(params, deviceId, profPath_)) {
-        ERROR("GetSyscntConversionParams failed, profPath is %.", profPath_);
-        return {};
-    }
-    ProfTimeRecord record;
-    if (!Context::GetInstance().GetProfTimeRecordInfo(record, profPath_, deviceId)) {
-        ERROR("GetProfTimeRecordInfo failed, profPath is %, device id is %.", profPath_, deviceId);
-        return {};
-    }
     std::vector<KfcTurnData> ans;
     HPFloat startTimestamp;
     for (auto& data : oriComputeData) {

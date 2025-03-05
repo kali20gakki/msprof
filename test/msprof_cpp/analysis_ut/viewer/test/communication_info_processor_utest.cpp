@@ -9,6 +9,7 @@
  * Creation Date      : 2024/1/4
  * *****************************************************************************
  */
+#include <iostream>
 #include <algorithm>
 #include <vector>
 #include <set>
@@ -26,7 +27,7 @@ using namespace Analysis::Utils;
 using namespace Analysis::Domain;
 namespace {
 const int DEPTH = 0;
-const uint16_t OP_NUM = 4;
+const uint16_t OP_NUM = 5;
 const uint16_t OP_NAME_NUM = 4;
 const uint16_t CONNECTION_ID_NUM = 4;
 const uint16_t OP_ID_NUM = 4;
@@ -115,9 +116,16 @@ protected:
         CreateKfcTask(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_KFC_A);
         CreateKfcOp(File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_KFC_OP_A);
         CreateHcclOpSingleDevice(File::PathJoin({PROF_PATH_B, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}), DATA_OP_B);
-        MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo)
-            .stubs()
-            .will(returnValue(true));
+        nlohmann::json record = {
+            {"startCollectionTimeBegin", "1701069324370978"},
+            {"endCollectionTimeEnd", "1701069338159976"},
+            {"startClockMonotonicRaw", "36471129942580"},
+            {"pid", "10"},
+            {"hostCntvct", "65177261204177"},
+            {"CPU", {{{"Frequency", "100.000000"}}}},
+            {"hostMonotonic", "651599377155020"},
+        };
+        MOCKER_CPP(&Analysis::Domain::Environment::Context::GetInfoByDeviceId).stubs().will(returnValue(record));
         MOCKER_CPP(&Analysis::Viewer::Database::TableProcessor::GetGeHashMap)
             .stubs()
             .will(returnValue(true));
@@ -178,6 +186,7 @@ void CheckGlobalTaskId(CommunicationInfoProcessor::CommunicationTaskDataFormat d
         globalTaskIds.emplace_back(std::get<globalTaskIdIndex>(item));
     }
     std::sort(globalTaskIds.begin(), globalTaskIds.end());
+    ASSERT_EQ(globalTaskIds.size(), OP_NUM);
     for (int i = 0; i < OP_NUM; ++i) {
         EXPECT_EQ(globalTaskIds[i], i);
     }

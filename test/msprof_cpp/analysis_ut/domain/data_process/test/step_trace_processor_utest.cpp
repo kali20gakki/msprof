@@ -101,7 +101,16 @@ TEST_F(StepTraceProcessorUTest, ShouldReturnOKWhenProcessRunSuccess)
 {
     DataInventory dataInventory;
     auto processor = StepTraceProcessor(PROF_PATH_A);
-    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
+    nlohmann::json record = {
+        {"startCollectionTimeBegin", "1701069324370978"},
+        {"endCollectionTimeEnd", "1701069338159976"},
+        {"startClockMonotonicRaw", "0"},
+        {"pid", "10"},
+        {"hostCntvct", "65177261204177"},
+        {"CPU", {{{"Frequency", "100.000000"}}}},
+        {"hostMonotonic", "651599377155020"},
+    };
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetInfoByDeviceId).stubs().will(returnValue(record));
     MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(true));
     EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_STEP_TRACE));
     auto resReduce = dataInventory.GetPtr<std::vector<AllReduceData>>();

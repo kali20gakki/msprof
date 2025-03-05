@@ -48,7 +48,7 @@ std::vector<SocBandwidthData> SocBandwidthProcessor::FormatData(const OriSocData
     double oriTimestamp;
     data.deviceId = deviceId;
     for (auto& row : oriData) {
-        std::tie(data.l2_buffer_bw_level, data.mata_bw_level, oriTimestamp) = row;
+        std::tie(data.l2BufferBwLevel, data.mataBwLevel, oriTimestamp) = row;
         HPFloat timestamp{oriTimestamp};
         data.timestamp = GetLocalTime(timestamp, timeRecord).Uint64();
         processedData.push_back(data);
@@ -106,6 +106,7 @@ bool SocBandwidthProcessor::ProcessSingleDevice(const std::string& devicePath, s
         ERROR("Soc data format failed, DBPath is %", dbPath);
         return false;
     }
+    FilterDataByStartTime(formatData, timeRecord.startTimeNs, PROCESSOR_NAME_SOC);
     res.insert(res.end(), formatData.begin(), formatData.end());
     return true;
 }

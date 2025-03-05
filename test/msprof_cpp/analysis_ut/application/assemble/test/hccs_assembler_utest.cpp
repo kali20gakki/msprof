@@ -64,7 +64,7 @@ static std::vector<HccsData> GenerateHccsData()
     std::vector<HccsData> res;
     HccsData data;
     data.deviceId = 0; // device 0
-    data.localTime = 1724405892226599429; // 本地时间 1724405892226599429
+    data.timestamp = 1724405892226599429; // 本地时间 1724405892226599429
     data.rxThroughput = 240125.966; // 接收带宽 240125.966
     data.txThroughput = 3.197; // 发送带宽 3.197
     res.push_back(data);

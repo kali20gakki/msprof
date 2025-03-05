@@ -13,15 +13,14 @@
 #ifndef ANALYSIS_DOMAIN_SOC_DATA_H
 #define ANALYSIS_DOMAIN_SOC_DATA_H
 
-#include <cstdint>
+#include "analysis/csrc/domain/entities/viewer_data/basic_data.h"
 
 namespace Analysis {
 namespace Domain {
-struct SocBandwidthData {
+struct SocBandwidthData : public BasicData {
     uint16_t deviceId = UINT16_MAX;
-    uint32_t l2_buffer_bw_level = 0;
-    uint32_t mata_bw_level = 0;
-    uint64_t timestamp = 0;
+    uint32_t l2BufferBwLevel = 0;
+    uint32_t mataBwLevel = 0;
 };
 }
 }

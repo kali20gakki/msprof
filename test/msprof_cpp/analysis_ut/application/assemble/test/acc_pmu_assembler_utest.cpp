@@ -69,28 +69,28 @@ static std::vector<AccPmuData> GenerateAccPmuData()
     data.readOstLevel = 0; // readOstLevel 0
     data.writeBwLevel = 1; // writeBwLevel 1
     data.writeOstLevel = 0; // writeOstLevel 0
-    data.timestampNs = 1724405892226599429; // 本地时间 1724405892226599429
+    data.timestamp = 1724405892226599429; // 本地时间 1724405892226599429
     res.push_back(data);
     data.accId = 1; // accId 0
     data.readBwLevel = 1; // readBwLevel 1
     data.readOstLevel = 1; // readOstLevel 1
     data.writeBwLevel = 0; // writeBwLevel 0
     data.writeOstLevel = 0; // writeOstLevel 0
-    data.timestampNs = 1724405892226599429; // 本地时间 1724405892226599429
+    data.timestamp = 1724405892226599429; // 本地时间 1724405892226599429
     res.push_back(data);
     data.accId = 0; // accId 0
     data.readBwLevel = 2; // readBwLevel 2
     data.readOstLevel = 3; // readOstLevel 3
     data.writeBwLevel = 1; // writeBwLevel 1
     data.writeOstLevel = 0; // writeOstLevel 0
-    data.timestampNs = 1724405892226699429; // 本地时间 1724405892226699429
+    data.timestamp = 1724405892226699429; // 本地时间 1724405892226699429
     res.push_back(data);
     data.accId = 1; // accId 0
     data.readBwLevel = 1; // readBwLevel 1
     data.readOstLevel = 1; // readOstLevel 1
     data.writeBwLevel = 2; // writeBwLevel 2
     data.writeOstLevel = 0; // writeOstLevel 0
-    data.timestampNs = 1724405892226699429; // 本地时间 1724405892226699429
+    data.timestamp = 1724405892226699429; // 本地时间 1724405892226699429
     res.push_back(data);
     return res;
 }

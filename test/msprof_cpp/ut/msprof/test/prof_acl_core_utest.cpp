@@ -1932,7 +1932,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclStop) {
 
     ProfAclMgr::instance()->mode_ = WORK_MODE_API_CTRL;
     EXPECT_EQ(ACL_SUCCESS, ProfAclMgr::instance()->Init());
-    EXPECT_EQ(ACL_SUCCESS, ProfAclMgr::instance()->ProfAclStart(&config));
+    EXPECT_EQ(ACL_SUCCESS, ProfAclMgr::instance()->ProfAclWarmup(&config));
 
     EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, ProfAclMgr::instance()->ProfAclStop(&config));
     ProfAclMgr::instance()->devTasks_.clear();
@@ -1996,14 +1996,16 @@ TEST_F(MSPROF_ACL_CORE_UTEST, IsSubscribeMode)
 
 TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclStart_failed)
 {
-    EXPECT_EQ(ACL_ERROR_INVALID_PARAM, Msprofiler::Api::ProfAclMgr::instance()->ProfAclStart(nullptr));
+    Msprofiler::Api::ProfAclMgr::instance()->isWarmuped_  = false;
+    Msprofiler::Api::ProfAclMgr::instance()->isStarted_  = false;
+    EXPECT_EQ(ACL_ERROR_INVALID_PARAM, Msprofiler::Api::ProfAclMgr::instance()->ProfAclWarmup(nullptr));
     ProfConfig config;
     config.devNums = 1;
     config.devIdList[0] = 0;
     config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
     config.dataTypeConfig = ACL_PROF_ACL_API|ACL_PROF_AICORE_METRICS|ACL_PROF_AICPU;
     Msprofiler::Api::ProfAclMgr::instance()->mode_  = Msprofiler::Api::WORK_MODE_CMD;
-    EXPECT_EQ(ACL_ERROR_PROF_NOT_RUN, Msprofiler::Api::ProfAclMgr::instance()->ProfAclStart(&config));
+    EXPECT_EQ(ACL_ERROR_PROF_NOT_RUN, Msprofiler::Api::ProfAclMgr::instance()->ProfAclWarmup(&config));
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclStop_failed)

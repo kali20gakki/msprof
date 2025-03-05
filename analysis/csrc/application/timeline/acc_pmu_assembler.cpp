@@ -36,7 +36,7 @@ void GenerateAccPmuTrace(std::vector<AccPmuData> &accPmuData, const std::unorder
     std::string accId;
     uint32_t pid;
     for (const auto &data : accPmuData) {
-        time = DivideByPowersOfTenWithPrecision(data.timestampNs);
+        time = DivideByPowersOfTenWithPrecision(data.timestamp);
         pid = pidMap.at(data.deviceId);
         std::vector<uint32_t> level {data.readBwLevel, data.readOstLevel, data.writeBwLevel, data.writeOstLevel};
         for (size_t i = 0; i < level.size(); i++) {

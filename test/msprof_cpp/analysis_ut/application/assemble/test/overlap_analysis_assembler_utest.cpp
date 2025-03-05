@@ -292,7 +292,7 @@ static std::vector<AscendTaskData> GenerateAscendTaskDataS1ByDevice(uint16_t dev
         data.taskId = ids[i].taskId;
         data.contextId = ids[i].contextId;
         data.batchId = ids[i].batchId;
-        data.start = times[i].first;
+        data.timestamp = times[i].first;
         data.duration = times[i].second;
         res.push_back(data);
     }
@@ -313,7 +313,7 @@ static std::vector<AscendTaskData> GenerateAscendTaskDataS2ByDevice(uint16_t dev
         data.taskId = ids[i].taskId;
         data.contextId = ids[i].contextId;
         data.batchId = ids[i].batchId;
-        data.start = times[i].first;
+        data.timestamp = times[i].first;
         data.duration = times[i].second;
         res.push_back(data);
     }
@@ -370,7 +370,7 @@ static std::vector<CommunicationOpData> GenerateCommOpDataS1ByDevice(uint16_t de
     std::vector<CommunicationOpData> res;
     for (auto &time : times) {
         CommunicationOpData data;
-        data.start = time.first;
+        data.timestamp = time.first;
         data.end = time.second;
         data.deviceId = deviceId;
         res.emplace_back(data);
@@ -383,7 +383,7 @@ static std::vector<KfcOpData> GenerateKfcOpDataS1ByDevice(uint16_t deviceId)
     std::vector<KfcOpData> res;
     for (auto &time : times) {
         KfcOpData data;
-        data.start = time.first;
+        data.timestamp = time.first;
         data.end = time.second;
         data.deviceId = deviceId;
         res.emplace_back(data);
@@ -650,7 +650,7 @@ TEST_F(OverlapAnalysisAssemblerUTest, AssembleDataShouldContainCompleteDataInSce
     AscendTaskData data;
     uint64_t start = 5;
     double dur = 1.0;
-    data.start = start;
+    data.timestamp = start;
     data.duration = dur;
     // 此场景理论上不可能存在一个task都没有的场景
     std::vector<AscendTaskData> taskData = {data};

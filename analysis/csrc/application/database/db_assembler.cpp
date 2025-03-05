@@ -137,7 +137,7 @@ bool SaveApiData(DataInventory& dataInventory, DBInfo& msprofDB, const std::stri
     for (const auto& item : *apiData) {
         uint64_t name = IdPool::GetInstance().GetUint64Id(item.apiName);
         uint64_t globalTid = Utils::Contact(pid, item.threadId);
-        res.emplace_back(item.start, item.end, item.level, globalTid, item.connectionId, name);
+        res.emplace_back(item.timestamp, item.end, item.level, globalTid, item.connectionId, name);
     }
     return SaveData(res, TABLE_NAME_CANN_API, msprofDB);
 }
@@ -172,7 +172,7 @@ void ConvertOpData(CommunicationOpDataFormat &processedOpData, const std::vector
         uint32_t opId = IdPool::GetInstance().GetUint32Id(item.opKey);
         uint64_t algType = IdPool::GetInstance().GetUint64Id(item.algType);
         uint64_t opType = IdPool::GetInstance().GetUint64Id(item.opType);
-        processedOpData.emplace_back(opName, item.start, item.end, item.connectionId, groupName, opId, item.relay,
+        processedOpData.emplace_back(opName, item.timestamp, item.end, item.connectionId, groupName, opId, item.relay,
                                      item.retry, item.dataType, algType, item.count, opType);
     }
 }
@@ -269,7 +269,7 @@ bool SaveAccPmuData(DataInventory& dataInventory, DBInfo& msprofDB, const std::s
     }
     for (const auto& item : *accPmuData) {
         res.emplace_back(item.accId, item.readBwLevel, item.writeBwLevel, item.readOstLevel,
-                         item.writeOstLevel, item.timestampNs, item.deviceId);
+                         item.writeOstLevel, item.timestamp, item.deviceId);
     }
     return SaveData(res, TABLE_NAME_ACC_PMU, msprofDB);
 }
@@ -359,7 +359,7 @@ bool SaveHbmData(DataInventory& dataInventory, DBInfo& msprofDB, const std::stri
     for (const auto& item : *hbmData) {
         uint64_t type = IdPool::GetInstance().GetUint64Id(item.eventType);
         uint64_t bandwidth = static_cast<uint64_t>(item.bandWidth * BYTE_SIZE * BYTE_SIZE); // bandwidth MB/s -> B/s
-        res.emplace_back(item.deviceId, item.localTime, bandwidth, item.hbmId, type);
+        res.emplace_back(item.deviceId, item.timestamp, bandwidth, item.hbmId, type);
     }
     return SaveData(res, TABLE_NAME_HBM, msprofDB);
 }
@@ -381,7 +381,7 @@ bool SaveHccsData(DataInventory& dataInventory, DBInfo& msprofDB, const std::str
     for (const auto& item : *hccsData) {
         uint64_t txThroughput = static_cast<uint64_t>(item.txThroughput * BYTE_SIZE * BYTE_SIZE); // MB/s -> B/s
         uint64_t rxThroughput = static_cast<uint64_t>(item.rxThroughput * BYTE_SIZE * BYTE_SIZE); // MB/s -> B/s
-        res.emplace_back(item.deviceId, item.localTime, txThroughput, rxThroughput);
+        res.emplace_back(item.deviceId, item.timestamp, txThroughput, rxThroughput);
     }
     return SaveData(res, TABLE_NAME_HCCS, msprofDB);
 }
@@ -423,7 +423,7 @@ bool SaveLlcData(DataInventory& dataInventory, DBInfo& msprofDB, const std::stri
     for (const auto& item : *llcData) {
         uint64_t throughput = static_cast<uint64_t>(item.throughput * BYTE_SIZE * BYTE_SIZE);
         uint64_t mode = IdPool::GetInstance().GetUint64Id(item.mode);
-        res.emplace_back(item.deviceId, item.llcID, item.localTime, item.hitRate, throughput, mode);
+        res.emplace_back(item.deviceId, item.llcID, item.timestamp, item.hitRate, throughput, mode);
     }
     return SaveData(res, TABLE_NAME_LLC, msprofDB);
 }
@@ -462,7 +462,7 @@ bool SaveMsprofTxData(DataInventory& dataInventory, DBInfo& msprofDB, const std:
         uint64_t message = IdPool::GetInstance().GetUint64Id(item.message);
         uint64_t domain = IdPool::GetInstance().GetUint64Id(item.domain);
         uint64_t globalTid = Utils::Contact(pid, item.tid);
-        res.emplace_back(item.start, item.end, item.eventType, UINT32_MAX, item.category, message,
+        res.emplace_back(item.timestamp, item.end, item.eventType, UINT32_MAX, item.category, message,
                          globalTid, globalTid, domain, item.connectionId);
     }
     return SaveData(res, TABLE_NAME_MSTX, msprofDB);
@@ -534,7 +534,7 @@ bool SaveNpuMemData(DataInventory& dataInventory, DBInfo& msprofDB, const std::s
         } else if (type == deviceIndex) {
             type = stringDeviceId;
         }
-        res.emplace_back(type, item.ddr, item.hbm, item.localTime, item.deviceId);
+        res.emplace_back(type, item.ddr, item.hbm, item.timestamp, item.deviceId);
     }
     return SaveData(res, TABLE_NAME_NPU_MEM, msprofDB);
 }
@@ -561,7 +561,7 @@ bool SaveNpuOpMemData(DataInventory& dataInventory, DBInfo& msprofDB, const std:
     for (const auto& item : *npuOpMemData) {
         operatorNameId = IdPool::GetInstance().GetUint64Id(item.operatorName);
         globalTid = Utils::Contact(pid, item.threadId);
-        res.emplace_back(operatorNameId, item.addr, item.type, item.size, item.localTime, globalTid,
+        res.emplace_back(operatorNameId, item.addr, item.type, item.size, item.timestamp, globalTid,
                          item.totalAllocateMemory, item.totalReserveMemory, stringGeId, item.deviceId);
     }
     return SaveData(res, TABLE_NAME_NPU_OP_MEM, msprofDB);
@@ -650,7 +650,7 @@ bool SaveSocData(DataInventory& dataInventory, DBInfo& msprofDB, const std::stri
         return false;
     }
     for (const auto& item : *socMemData) {
-        res.emplace_back(item.l2_buffer_bw_level, item.mata_bw_level, item.timestamp, item.deviceId);
+        res.emplace_back(item.l2BufferBwLevel, item.mataBwLevel, item.timestamp, item.deviceId);
     }
     return SaveData(res, TABLE_NAME_SOC, msprofDB);
 }
@@ -727,7 +727,7 @@ bool SaveAscendTaskData(DataInventory& dataInventory, DBInfo& msprofDB, const st
             globalTaskId = IdPool::GetInstance().GetId(std::make_tuple(item.deviceId, item.streamId, item.taskId,
                                                                        item.contextId, item.batchId));
             taskType = IdPool::GetInstance().GetUint64Id(item.taskType);
-            res.emplace_back(item.start, item.end, item.deviceId, item.connectionId, globalTaskId, globalPid,
+            res.emplace_back(item.timestamp, item.end, item.deviceId, item.connectionId, globalTaskId, globalPid,
                              taskType, item.contextId, item.streamId, item.taskId, item.modelId);
         }
     }
@@ -736,9 +736,9 @@ bool SaveAscendTaskData(DataInventory& dataInventory, DBInfo& msprofDB, const st
             globalTaskId = IdPool ::GetInstance().GetId(std::make_tuple(txData.deviceId, txData.streamId,
                 txData.taskId, UINT32_MAX, txData.connectionId));
             taskType = IdPool::GetInstance().GetUint64Id(txData.taskType);
-            res.emplace_back(txData.start, txData.start + static_cast<uint64_t>(txData.duration), txData.deviceId,
-                             txData.connectionId, globalTaskId, globalPid, taskType, UINT32_MAX, txData.streamId,
-                             txData.taskId, txData.modelId);
+            res.emplace_back(txData.timestamp, txData.timestamp + static_cast<uint64_t>(txData.duration),
+                             txData.deviceId, txData.connectionId, globalTaskId, globalPid, taskType,
+                             UINT32_MAX, txData.streamId, txData.taskId, txData.modelId);
         }
     }
     return SaveData(res, TABLE_NAME_TASK, msprofDB) &&
@@ -790,7 +790,7 @@ bool SaveSysIOData(DataInventory& dataInventory, DBInfo& msprofDB, const std::st
     }
     for (const auto& item : sysIOOriginalData) {
         res.emplace_back(item.deviceId,
-                         item.localTime,
+                         item.timestamp,
                          item.bandwidth, // MB/s -> B/s
                          item.rxPacketRate, item.rxByteRate, item.rxPackets,
                          item.rxBytes, item.rxErrors, item.rxDropped,

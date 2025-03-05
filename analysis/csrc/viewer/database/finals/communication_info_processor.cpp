@@ -124,7 +124,7 @@ void CommunicationInfoProcessor::ConvertOpData(CommunicationOpDataFormat &opData
         auto opId = IdPool::GetInstance().GetUint32Id(data.opKey);
         auto algType = IdPool::GetInstance().GetUint64Id(data.algType);
         auto opType = IdPool::GetInstance().GetUint64Id(data.opType);
-        opData.emplace_back(opName, data.start, data.end, connectionId, groupName, opId, data.relay, data.retry,
+        opData.emplace_back(opName, data.timestamp, data.end, connectionId, groupName, opId, data.relay, data.retry,
                             data.dataType, algType, data.count, opType);
     }
 }

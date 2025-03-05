@@ -81,7 +81,10 @@ bool ChipTransProcessor::ProcessOneDevice(const std::string& devicePath, ChipTra
         ERROR("Format data failed, %.", PROCESSOR_NAME_CHIP_TRAINS);
         return false;
     }
+    FilterDataByStartTime(paData, chipTransData.timeRecord.startTimeNs, TABLE_NAME_PA_LINK_INFO);
     chipTransData.resPaData.insert(chipTransData.resPaData.end(), paData.begin(), paData.end());
+
+    FilterDataByStartTime(pcieData, chipTransData.timeRecord.startTimeNs, TABLE_NAME_PCIE_INFO);
     chipTransData.resPcieData.insert(chipTransData.resPcieData.end(), pcieData.begin(), pcieData.end());
     return flag;
 }
@@ -123,18 +126,18 @@ bool ChipTransProcessor::FormatData(std::vector<PaLinkInfoData>& paFormatData,
     }
     for (auto& row : chipTransData.oriPaData) {
         uint64_t sysTime;
-        std::tie(paLinkInfoData.pa_link_id, paLinkInfoData.pa_link_traffic_monit_rx,
-                 paLinkInfoData.pa_link_traffic_monit_tx, sysTime) = row;
+        std::tie(paLinkInfoData.paLinkId, paLinkInfoData.paLinkTrafficMonitRx,
+                 paLinkInfoData.paLinkTrafficMonitTx, sysTime) = row;
         HPFloat timestamp(sysTime);
-        paLinkInfoData.local_time = GetLocalTime(timestamp, chipTransData.timeRecord).Uint64();
+        paLinkInfoData.timestamp = GetLocalTime(timestamp, chipTransData.timeRecord).Uint64();
         paFormatData.push_back(paLinkInfoData);
     }
     for (auto& row : chipTransData.oriPcieData) {
         uint64_t sysTime;
-        std::tie(pcieInfoData.pcie_id, pcieInfoData.pcie_write_bandwidth,
-                 pcieInfoData.pcie_read_bandwidth, sysTime) = row;
+        std::tie(pcieInfoData.pcieId, pcieInfoData.pcieWriteBandwidth,
+                 pcieInfoData.pcieReadBandwidth, sysTime) = row;
         HPFloat timestamp(sysTime);
-        pcieInfoData.local_time = GetLocalTime(timestamp, chipTransData.timeRecord).Uint64();
+        pcieInfoData.timestamp = GetLocalTime(timestamp, chipTransData.timeRecord).Uint64();
         pcieFormatData.push_back(pcieInfoData);
     }
     return true;

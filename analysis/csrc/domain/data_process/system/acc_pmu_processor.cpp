@@ -25,50 +25,49 @@ bool AccPmuProcessor::Process(DataInventory &dataInventory)
     auto deviceList = Utils::File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     std::vector<AccPmuData> res;
     for (const auto& devicePath: deviceList) {
-        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (deviceId == INVALID_DEVICE_ID) {
-            ERROR("the invalid deviceId cannot to be identified.");
-            flag = false;
-            continue;
-        }
-        Utils::ProfTimeRecord timeRecord;
-        if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, profPath_, deviceId)) {
-            ERROR("Failed to get time record info data. Path is %, device id is %", profPath_, deviceId);
-            flag = false;
-            continue;
-        }
-        DBInfo accPmuDB("acc_pmu.db", "AccPmu");
-        std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, accPmuDB.dbName});
-        if (!accPmuDB.ConstructDBRunner(dbPath)) {
-            flag = false;
-            continue;
-        }
-        auto status = CheckPathAndTable(dbPath, accPmuDB);
-        if (status != CHECK_SUCCESS) {
-            if (status == CHECK_FAILED) {
-                flag = false;
-            }
-            continue;
-        }
-        auto oriData = LoadData(accPmuDB, dbPath);
-        if (oriData.empty()) {
-            ERROR("Get acc_pmu original data failed in %.", dbPath);
-            flag = false;
-            continue;
-        }
-        auto processedData = FormatData(oriData, timeRecord, deviceId);
-        if (processedData.empty()) {
-            ERROR("format acc_pmu data failed, dbPath is ", dbPath);
-            flag = false;
-            continue;
-        }
-        res.insert(res.end(), processedData.begin(), processedData.end());
+        flag = ProcessOneDevice(devicePath, res) && flag;
     }
     if (!SaveToDataInventory<AccPmuData>(std::move(res), dataInventory, PROCESSOR_NAME_ACC_PMU)) {
         ERROR("Save data failed, %.", PROCESSOR_NAME_ACC_PMU);
         flag = false;
     }
     return flag;
+}
+
+bool AccPmuProcessor::ProcessOneDevice(const std::string& devicePath, std::vector<AccPmuData>& res)
+{
+    uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
+    if (deviceId == INVALID_DEVICE_ID) {
+        ERROR("the invalid deviceId cannot to be identified.");
+        return false;
+    }
+    Utils::ProfTimeRecord timeRecord;
+    if (!Context::GetInstance().GetProfTimeRecordInfo(timeRecord, profPath_, deviceId)) {
+        ERROR("Failed to get time record info data. Path is %, device id is %", profPath_, deviceId);
+        return false;
+    }
+    DBInfo accPmuDB("acc_pmu.db", "AccPmu");
+    std::string dbPath = Utils::File::PathJoin({devicePath, SQLITE, accPmuDB.dbName});
+    if (!accPmuDB.ConstructDBRunner(dbPath)) {
+        return false;
+    }
+    auto status = CheckPathAndTable(dbPath, accPmuDB);
+    if (status != CHECK_SUCCESS) {
+        return status != CHECK_FAILED;
+    }
+    auto oriData = LoadData(accPmuDB, dbPath);
+    if (oriData.empty()) {
+        ERROR("Get acc_pmu original data failed in %.", dbPath);
+        return false;
+    }
+    auto processedData = FormatData(oriData, timeRecord, deviceId);
+    if (processedData.empty()) {
+        ERROR("format acc_pmu data failed, dbPath is ", dbPath);
+        return false;
+    }
+    FilterDataByStartTime(processedData, timeRecord.startTimeNs, PROCESSOR_NAME_ACC_PMU);
+    res.insert(res.end(), processedData.begin(), processedData.end());
+    return true;
 }
 
 OriAccPmuData AccPmuProcessor::LoadData(const DBInfo &accPmuDB, const std::string &dbPath)
@@ -102,7 +101,7 @@ std::vector<AccPmuData> AccPmuProcessor::FormatData(
         std::tie(accId, data.readBwLevel, data.writeBwLevel, data.readOstLevel, data.writeOstLevel, timestamp) = row;
         HPFloat time{timestamp};
         data.accId = static_cast<uint16_t>(accId);
-        data.timestampNs = GetLocalTime(time, timeRecord).Uint64();
+        data.timestamp = GetLocalTime(time, timeRecord).Uint64();
         processedData.push_back(data);
     }
     return processedData;

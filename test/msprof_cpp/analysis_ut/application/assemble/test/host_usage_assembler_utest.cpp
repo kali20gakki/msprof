@@ -69,7 +69,7 @@ static void GenerateHostUsageData(DataInventory &dataInventory)
     std::shared_ptr<std::vector<CpuUsageData>> cpuResS;
     std::vector<CpuUsageData> cpuRes;
     CpuUsageData cpuData;
-    cpuData.start = 1719621074669030430; // start 1719621074669030430
+    cpuData.timestamp = 1719621074669030430; // start 1719621074669030430
     cpuData.usage = 30; // usage 30
     cpuData.cpuNo = "1"; // cpuNo 1
     cpuRes.push_back(cpuData);
@@ -79,7 +79,7 @@ static void GenerateHostUsageData(DataInventory &dataInventory)
     std::shared_ptr<std::vector<MemUsageData>> memResS;
     std::vector<MemUsageData> memRes;
     MemUsageData memData;
-    memData.start = 1719621074669030430; // start 1719621074669030430
+    memData.timestamp = 1719621074669030430; // start 1719621074669030430
     memData.usage = 26; // usage 26
     memRes.push_back(memData);
     MAKE_SHARED_NO_OPERATION(memResS, std::vector<MemUsageData>, memRes);
@@ -88,7 +88,7 @@ static void GenerateHostUsageData(DataInventory &dataInventory)
     std::shared_ptr<std::vector<DiskUsageData>> diskResS;
     std::vector<DiskUsageData> diskRes;
     DiskUsageData diskData;
-    diskData.start = 1719621074669030430; // start 1719621074669030430
+    diskData.timestamp = 1719621074669030430; // start 1719621074669030430
     diskData.usage = 25; // usage 25
     diskRes.push_back(diskData);
     MAKE_SHARED_NO_OPERATION(diskResS, std::vector<DiskUsageData>, diskRes);
@@ -97,7 +97,7 @@ static void GenerateHostUsageData(DataInventory &dataInventory)
     std::shared_ptr<std::vector<NetWorkUsageData>> networkResS;
     std::vector<NetWorkUsageData> networkRes;
     NetWorkUsageData networkData;
-    networkData.start = 1719621074669030430; // start 1719621074669030430
+    networkData.timestamp = 1719621074669030430; // start 1719621074669030430
     networkData.usage = 20; // usage 20
     networkRes.push_back(networkData);
     MAKE_SHARED_NO_OPERATION(networkResS, std::vector<NetWorkUsageData>, networkRes);

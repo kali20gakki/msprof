@@ -66,7 +66,16 @@ TEST_F(AccPmuProcessorUTest, ShouldReturnTrueWhenProcessRunSuccess)
 {
     DataInventory dataInventory;
     auto processor = AccPmuProcessor(PROF_PATH_A);
-    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
+    nlohmann::json record = {
+        {"startCollectionTimeBegin", "1701069324370978"},
+        {"endCollectionTimeEnd", "1701069338159976"},
+        {"startClockMonotonicRaw", "36471129942580"},
+        {"pid", "10"},
+        {"hostCntvct", "65177261204177"},
+        {"CPU", {{{"Frequency", "100.000000"}}}},
+        {"hostMonotonic", "651599377155020"},
+    };
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetInfoByDeviceId).stubs().will(returnValue(record));
     EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_ACC_PMU));
     auto res = dataInventory.GetPtr<std::vector<AccPmuData>>();
     EXPECT_EQ(2ul, res->size());

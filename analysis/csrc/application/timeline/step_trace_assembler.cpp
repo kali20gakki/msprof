@@ -113,7 +113,7 @@ void StepTraceAssembler::GenerateTrainTrace(const std::vector<TrainTraceData>& t
         pidTidSet_.insert({formatPid, tid});
         std::shared_ptr<StepTraceEvent> event;
         MAKE_SHARED_RETURN_VOID(event, StepTraceEvent, formatPid, tid, data.iterTime / NS_TO_US,
-                                DivideByPowersOfTenWithPrecision(data.iterEnd - data.iterTime), traceName, ITER_CAT,
+                                DivideByPowersOfTenWithPrecision(data.timestamp), traceName, ITER_CAT,
                                 data.indexId, data.iterTime / NS_TO_US, fpStart, bpEnd,
                                 DivideByPowersOfTenWithPrecision(data.iterEnd));
         res_.push_back(event);
@@ -209,12 +209,12 @@ void StepTraceAssembler::GenerateReduceTrace(const std::vector<AllReduceData>& r
         std::unordered_map<std::string, std::string> args;
         start = "Reduce Start " + std::to_string(count);
         end = "Reduce End " + std::to_string(count);
-        args.emplace(start, std::to_string(data.start));
+        args.emplace(start, std::to_string(data.timestamp));
         args.emplace(end, std::to_string(data.end));
         formatPid = GetDevicePid(pidMap, data.deviceId, profPath, layer.sortIndex);
         int tid = static_cast<int>(data.modelId) + SORT_INDEX_OFFSET;
-        MAKE_SHARED_RETURN_VOID(reduceEvent, ReduceTraceEvent, formatPid, tid, (data.end - data.start) / NS_TO_US,
-                                DivideByPowersOfTenWithPrecision(data.start), traceName, REDUCE_CAT, data.indexId,
+        MAKE_SHARED_RETURN_VOID(reduceEvent, ReduceTraceEvent, formatPid, tid, (data.end - data.timestamp) / NS_TO_US,
+                                DivideByPowersOfTenWithPrecision(data.timestamp), traceName, REDUCE_CAT, data.indexId,
                                 args);
         res_.push_back(reduceEvent);
         ++count;
@@ -228,16 +228,16 @@ void StepTraceAssembler::GenerateNextTrace(const std::vector<GetNextData>& nextD
     std::string traceName = "GetNext";
     uint32_t formatPid;
     for (const auto &data : nextData) {
-        if (data.start == 0 || data.end == 0) {
+        if (data.timestamp == 0 || data.end == 0) {
             continue;
         }
         std::shared_ptr<NextTraceEvent> event;
         formatPid = GetDevicePid(pidMap, data.deviceId, profPath, layer.sortIndex);
         int tid = static_cast<int>(data.modelId) + SORT_INDEX_OFFSET;
-        MAKE_SHARED_RETURN_VOID(event, NextTraceEvent, formatPid, tid, (data.end - data.start) / NS_TO_US,
-                                DivideByPowersOfTenWithPrecision(data.start), traceName, GET_NEXT_CAT,
-                                DivideByPowersOfTenWithPrecision(data.start),
-                                DivideByPowersOfTenWithPrecision(data.end), (data.end - data.start) / NS_TO_US);
+        MAKE_SHARED_RETURN_VOID(event, NextTraceEvent, formatPid, tid, (data.end - data.timestamp) / NS_TO_US,
+                                DivideByPowersOfTenWithPrecision(data.timestamp), traceName, GET_NEXT_CAT,
+                                DivideByPowersOfTenWithPrecision(data.timestamp),
+                                DivideByPowersOfTenWithPrecision(data.end), (data.end - data.timestamp) / NS_TO_US);
         res_.push_back(event);
     }
 }

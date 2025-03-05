@@ -13,18 +13,17 @@
 #ifndef ANALYSIS_DOMAIN_ACC_PMU_DATA_H
 #define ANALYSIS_DOMAIN_ACC_PMU_DATA_H
 
-#include <cstdint>
+#include "analysis/csrc/domain/entities/viewer_data/basic_data.h"
 
 namespace Analysis {
 namespace Domain {
-struct AccPmuData {
+struct AccPmuData : public BasicData {
     uint16_t deviceId = UINT16_MAX;
     uint16_t accId = UINT16_MAX;
     uint32_t readBwLevel = UINT32_MAX;
     uint32_t writeBwLevel = UINT32_MAX;
     uint32_t readOstLevel = UINT32_MAX;
     uint32_t writeOstLevel = UINT32_MAX;
-    uint64_t timestampNs = UINT64_MAX;
 };
 }
 }

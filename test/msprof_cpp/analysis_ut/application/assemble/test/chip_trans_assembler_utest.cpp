@@ -64,25 +64,25 @@ static std::vector<PaLinkInfoData> GeneratePaLinkInfoData()
     std::vector<PaLinkInfoData> res;
     PaLinkInfoData data;
     data.deviceId = 0; // device 0
-    data.pa_link_id = 0; // id 0
-    data.pa_link_traffic_monit_rx = "5";
-    data.pa_link_traffic_monit_tx = "2";
-    data.local_time = 1724405892226599429; // 本地时间 1724405892226599429
+    data.paLinkId = 0; // id 0
+    data.paLinkTrafficMonitRx = "5";
+    data.paLinkTrafficMonitTx = "2";
+    data.timestamp = 1724405892226599429; // 本地时间 1724405892226599429
     res.push_back(data);
-    data.pa_link_id = 7; // id 7
-    data.pa_link_traffic_monit_rx = "5";
-    data.pa_link_traffic_monit_tx = "4";
-    data.local_time = 1724405892226599429; // 本地时间 1724405892226599429
+    data.paLinkId = 7; // id 7
+    data.paLinkTrafficMonitRx = "5";
+    data.paLinkTrafficMonitTx = "4";
+    data.timestamp = 1724405892226599429; // 本地时间 1724405892226599429
     res.push_back(data);
-    data.pa_link_id = 0; // id 0
-    data.pa_link_traffic_monit_rx = "4";
-    data.pa_link_traffic_monit_tx = "4";
-    data.local_time = 1724405892226699429; // 本地时间 1724405892226699429
+    data.paLinkId = 0; // id 0
+    data.paLinkTrafficMonitRx = "4";
+    data.paLinkTrafficMonitTx = "4";
+    data.timestamp = 1724405892226699429; // 本地时间 1724405892226699429
     res.push_back(data);
-    data.pa_link_id = 7; // id 7
-    data.pa_link_traffic_monit_rx = "3";
-    data.pa_link_traffic_monit_tx = "3";
-    data.local_time = 1724405892226699429; // 本地时间 1724405892226699429
+    data.paLinkId = 7; // id 7
+    data.paLinkTrafficMonitRx = "3";
+    data.paLinkTrafficMonitTx = "3";
+    data.timestamp = 1724405892226699429; // 本地时间 1724405892226699429
     res.push_back(data);
     return res;
 }
@@ -92,25 +92,25 @@ static std::vector<PcieInfoData> GeneratePcieInfoData()
     std::vector<PcieInfoData> res;
     PcieInfoData data;
     data.deviceId = 0; // device 0
-    data.pcie_id = 0; // id 0
-    data.pcie_read_bandwidth = 3; // level 3
-    data.pcie_write_bandwidth = 4; // level 4
-    data.local_time = 1724405892226599429; // 本地时间 1724405892226599429
+    data.pcieId = 0; // id 0
+    data.pcieReadBandwidth = 3; // level 3
+    data.pcieWriteBandwidth = 4; // level 4
+    data.timestamp = 1724405892226599429; // 本地时间 1724405892226599429
     res.push_back(data);
-    data.pcie_id = 7; // id 7
-    data.pcie_read_bandwidth = 2; // level 2
-    data.pcie_write_bandwidth = 6; // level 6
-    data.local_time = 1724405892226599429; // 本地时间 1724405892226599429
+    data.pcieId = 7; // id 7
+    data.pcieReadBandwidth = 2; // level 2
+    data.pcieWriteBandwidth = 6; // level 6
+    data.timestamp = 1724405892226599429; // 本地时间 1724405892226599429
     res.push_back(data);
-    data.pcie_id = 0; // id 0
-    data.pcie_read_bandwidth = 1; // level 1
-    data.pcie_write_bandwidth = 6; // level 6
-    data.local_time = 1724405892226699429; // 本地时间 1724405892226699429
+    data.pcieId = 0; // id 0
+    data.pcieReadBandwidth = 1; // level 1
+    data.pcieWriteBandwidth = 6; // level 6
+    data.timestamp = 1724405892226699429; // 本地时间 1724405892226699429
     res.push_back(data);
-    data.pcie_id = 7; // id 7
-    data.pcie_read_bandwidth = 5; // level 5
-    data.pcie_write_bandwidth = 5; // level 5
-    data.local_time = 1724405892226699429; // 本地时间 1724405892226699429
+    data.pcieId = 7; // id 7
+    data.pcieReadBandwidth = 5; // level 5
+    data.pcieWriteBandwidth = 5; // level 5
+    data.timestamp = 1724405892226699429; // 本地时间 1724405892226699429
     res.push_back(data);
     return res;
 }

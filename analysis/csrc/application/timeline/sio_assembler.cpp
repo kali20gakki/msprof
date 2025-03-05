@@ -40,7 +40,7 @@ void GenerateSioTrace(std::vector<SioData> &sioData, const std::unordered_map<ui
     uint32_t pid;
     std::unordered_map<std::string, std::shared_ptr<CounterEvent>> eventMap;
     for (const auto &data : sioData) {
-        time = DivideByPowersOfTenWithPrecision(data.localTime);
+        time = DivideByPowersOfTenWithPrecision(data.timestamp);
         seriesName = SERIES_MAP.at(data.dieId);
         pid = pidMap.at(data.deviceId);
         std::vector<double> bandwidth {data.reqRxBandwidth, data.rspRxBandwidth, data.snpRxBandwidth,

@@ -15,6 +15,7 @@
 
 #include "analysis/csrc/domain/data_process/data_processor.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/kfc_turn_data.h"
+#include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
 namespace Domain {
@@ -27,6 +28,8 @@ uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
 // "compute_start_time", "compute_exe_end_time"
 using OriKfcComputeData = std::vector<std::tuple<uint16_t, uint16_t, uint32_t, uint16_t, uint16_t, uint64_t, uint64_t,
 uint64_t>>;
+
+using namespace Analysis::Utils;
 
 struct KfcCommTurn {
     uint16_t deviceId = UINT16_MAX;
@@ -62,8 +65,12 @@ private:
     bool Process(DataInventory& dataInventory) override;
     std::vector<KfcCommTurn> LoadCommData(const DBInfo &kfcDB, const std::string &dbPath);
     std::vector<KfcComputeTurn> LoadComputeData(const DBInfo &kfcDB, const std::string &dbPath);
-    std::vector<KfcTurnData> FormatCommData(const std::vector<KfcCommTurn> &oriCommData, uint16_t deviceId);
-    std::vector<KfcTurnData> FormatComputeData(const std::vector<KfcComputeTurn> &oriComputeData, uint16_t deviceId);
+    std::vector<KfcTurnData> FormatCommData(const std::vector<KfcCommTurn> &oriCommData,
+                                            const SyscntConversionParams& params,
+                                            const ProfTimeRecord& record);
+    std::vector<KfcTurnData> FormatComputeData(const std::vector<KfcComputeTurn> &oriComputeData, uint16_t deviceId,
+                                               const SyscntConversionParams& params,
+                                               const ProfTimeRecord& record);
 };
 }
 }

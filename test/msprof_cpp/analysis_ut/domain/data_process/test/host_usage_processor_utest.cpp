@@ -69,6 +69,19 @@ protected:
     {
         EXPECT_TRUE(File::RemoveDir(BASE_PATH, DEPTH));
     }
+    virtual void SetUp()
+    {
+        nlohmann::json record = {
+            {"startCollectionTimeBegin", "1701069324370978"},
+            {"endCollectionTimeEnd", "1701069338159976"},
+            {"startClockMonotonicRaw", "30001129942580"},
+            {"pid", "10"},
+            {"hostCntvct", "65177261204177"},
+            {"CPU", {{{"Frequency", "100.000000"}}}},
+            {"hostMonotonic", "651599377155020"},
+        };
+        MOCKER_CPP(&Context::GetInfoByDeviceId).stubs().will(returnValue(record));
+    }
     virtual void TearDown()
     {
         GlobalMockObject::verify();
@@ -123,7 +136,6 @@ TEST_F(HostUsageProcessorUTest, ShouldReturnOKWhenCpuUsageProcessRunSuccess)
 {
     DataInventory dataInventory;
     auto processor = HostCpuUsageProcessor(PROF_PATH_A);
-    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
     EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_CPU_USAGE));
     auto res = dataInventory.GetPtr<std::vector<CpuUsageData>>();
     EXPECT_EQ(3ul, res->size());
@@ -165,7 +177,6 @@ TEST_F(HostUsageProcessorUTest, ShouldReturnOKWhenMemUsageProcessRunSuccess)
 {
     DataInventory dataInventory;
     auto processor = HostMemUsageProcessor(PROF_PATH_A);
-    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
     EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_MEM_USAGE));
     auto res = dataInventory.GetPtr<std::vector<MemUsageData>>();
     EXPECT_EQ(2ul, res->size());
@@ -184,9 +195,9 @@ TEST_F(HostUsageProcessorUTest, ShouldReturnOKWhenDiskUsageProcessRunSuccess)
 {
     DataInventory dataInventory;
     auto processor = HostDiskUsageProcessor(PROF_PATH_A);
-    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
     EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_DISK_USAGE));
     auto res = dataInventory.GetPtr<std::vector<DiskUsageData>>();
+    std::cout << "res size is " << res->size() << std::endl;
     EXPECT_EQ(2ul, res->size());
 }
 
@@ -203,7 +214,6 @@ TEST_F(HostUsageProcessorUTest, ShouldReturnOKWhenNetworkUsageProcessRunSuccess)
 {
     DataInventory dataInventory;
     auto processor = HostNetworkUsageProcessor(PROF_PATH_A);
-    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
     EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_NETWORK_USAGE));
     auto res = dataInventory.GetPtr<std::vector<NetWorkUsageData>>();
     EXPECT_EQ(3ul, res->size());

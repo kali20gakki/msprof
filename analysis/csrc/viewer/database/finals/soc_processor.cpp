@@ -19,8 +19,8 @@ using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
 namespace {
 struct SocBandwidthLevelData {
-    uint32_t l2_buffer_bw_level = 0;
-    uint32_t mata_bw_level = 0;
+    uint32_t l2BufferBwLevel = 0;
+    uint32_t mataBwLevel = 0;
     double timestamp = 0.0;
 };
 }
@@ -59,10 +59,10 @@ SocProcessor::ProcessedDataFormat SocProcessor::FormatData(const OriDataFormat &
         return processedData;
     }
     for (auto &row: oriData) {
-        std::tie(data.l2_buffer_bw_level, data.mata_bw_level, data.timestamp) = row;
+        std::tie(data.l2BufferBwLevel, data.mataBwLevel, data.timestamp) = row;
         HPFloat timestamp{data.timestamp};
         processedData.emplace_back(
-            data.l2_buffer_bw_level, data.mata_bw_level, GetLocalTime(timestamp, timeRecord).Uint64(), deviceId);
+            data.l2BufferBwLevel, data.mataBwLevel, GetLocalTime(timestamp, timeRecord).Uint64(), deviceId);
     }
     return processedData;
 }

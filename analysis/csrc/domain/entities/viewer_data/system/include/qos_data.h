@@ -13,14 +13,13 @@
 #ifndef ANALYSIS_DOMAIN_QOS_FORMAT_DATA_H
 #define ANALYSIS_DOMAIN_QOS_FORMAT_DATA_H
 
-#include <cstdint>
 #include <string>
+#include "analysis/csrc/domain/entities/viewer_data/basic_data.h"
 
 namespace Analysis {
 namespace Domain {
-struct QosData {
+struct QosData : public BasicData {
     uint16_t deviceId = UINT16_MAX;
-    uint64_t localTime = 0;
     uint32_t bw1 = 0; // MB/s
     uint32_t bw2 = 0;
     uint32_t bw3 = 0;

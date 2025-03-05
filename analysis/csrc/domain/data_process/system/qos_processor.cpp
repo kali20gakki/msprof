@@ -73,6 +73,7 @@ bool QosProcessor::ProcessSingleDevice(const std::string &devicePath, std::vecto
         ERROR("Format qos data error, dbPath is %.", dbPath);
         return false;
     }
+    FilterDataByStartTime(processedData, localtimeContext.timeRecord.startTimeNs, PROCESSOR_NAME_QOS);
     allProcessedData.insert(allProcessedData.end(), processedData.begin(), processedData.end());
     return true;
 }
@@ -102,7 +103,7 @@ std::vector<QosData> QosProcessor::FormatData(const OriQosData &oriData, const L
         std::tie(oriTimestamp, tempData.bw1, tempData.bw2, tempData.bw3, tempData.bw4, tempData.bw5, tempData.bw6,
                  tempData.bw7, tempData.bw8, tempData.bw9, tempData.bw10) = row;
         HPFloat timestamp = oriTimestamp;
-        tempData.localTime = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
+        tempData.timestamp = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
         formatData.push_back(tempData);
     }
     return formatData;

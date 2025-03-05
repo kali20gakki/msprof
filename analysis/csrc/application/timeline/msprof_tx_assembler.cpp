@@ -57,7 +57,7 @@ void MsprofTxAssembler::GenerateTxExConnectionTrace(const MsprofTxHostData& data
     auto name = MS_TX;
     name.append("_").append(connId);
     std::shared_ptr<FlowEvent> start;
-    MAKE_SHARED_RETURN_VOID(start, FlowEvent, pid, data.tid, DivideByPowersOfTenWithPrecision(data.start),
+    MAKE_SHARED_RETURN_VOID(start, FlowEvent, pid, data.tid, DivideByPowersOfTenWithPrecision(data.timestamp),
                             MS_TX, connId, name, FLOW_START);
     res_.push_back(start);
 }
@@ -70,14 +70,14 @@ void MsprofTxAssembler::GenerateTxTrace(const std::vector<MsprofTxHostData>& txD
         hPidTidSet_.insert({pid, data.tid});
         if (data.connectionId == DEFAULT_CONNECTION_ID_MSTX) {  // tx数据没有connectionId
             std::shared_ptr<MsprofTxTraceEvent> tx;
-            MAKE_SHARED_RETURN_VOID(tx, MsprofTxTraceEvent, pid, data.tid, (data.end - data.start) / NS_TO_US,
-                                    DivideByPowersOfTenWithPrecision(data.start), data.message, data.category,
+            MAKE_SHARED_RETURN_VOID(tx, MsprofTxTraceEvent, pid, data.tid, (data.end - data.timestamp) / NS_TO_US,
+                                    DivideByPowersOfTenWithPrecision(data.timestamp), data.message, data.category,
                                     data.payloadType, data.messageType, data.payloadValue, eventTypeStr);
             res_.push_back(tx);
         } else { // tx ex数据有markId字段可以作为connectionId
             std::shared_ptr<MsprofTxExTraceEvent> txEx;
-            MAKE_SHARED_RETURN_VOID(txEx, MsprofTxExTraceEvent, pid, data.tid, (data.end - data.start) / NS_TO_US,
-                                    DivideByPowersOfTenWithPrecision(data.start), data.message, eventTypeStr,
+            MAKE_SHARED_RETURN_VOID(txEx, MsprofTxExTraceEvent, pid, data.tid, (data.end - data.timestamp) / NS_TO_US,
+                                    DivideByPowersOfTenWithPrecision(data.timestamp), data.message, eventTypeStr,
                                     data.domain);
             res_.push_back(txEx);
             GenerateTxExConnectionTrace(data, pid);

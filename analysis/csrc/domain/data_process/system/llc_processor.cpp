@@ -87,12 +87,14 @@ bool LLcProcessor::ProcessSingleDevice(const std::string &devicePath,
         ERROR("Format LLC data error, dbPath is %.", dbPath);
         return false;
     }
+    FilterDataByStartTime(processedData, localtimeContext.timeRecord.startTimeNs, PROCESSOR_NAME_LLC);
+    allProcessedData.insert(allProcessedData.end(), processedData.begin(), processedData.end());
+
     auto summaryData = ProcessSummaryData(localtimeContext.deviceId, llcDB, mode);
     if (summaryData.empty()) {
         ERROR("Process LLC summary data error, dbPath is %.", dbPath);
         return false;
     }
-    allProcessedData.insert(allProcessedData.end(), processedData.begin(), processedData.end());
     allSummaryData.insert(allSummaryData.end(), summaryData.begin(), summaryData.end());
     return true;
 }
@@ -177,7 +179,7 @@ std::vector<LLcData> LLcProcessor::FormatData(const OriLLcData &oriData, const L
         std::tie(tempData.llcID, oriTimestamp, tempData.hitRate, tempData.throughput) = row;
         HPFloat timestamp = GetTimeBySamplingTimestamp(oriTimestamp, localtimeContext.hostMonotonic,
                                                        localtimeContext.deviceMonotonic);
-        tempData.localTime = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
+        tempData.timestamp = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
         tempData.hitRate = tempData.hitRate * PERCENTAGE;
         formatData.push_back(tempData);
     }

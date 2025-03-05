@@ -9,6 +9,7 @@
 */
 #ifndef ANALYSIS_DVVP_TRANSPORT_UPLOADER_MGR_H
 #define ANALYSIS_DVVP_TRANSPORT_UPLOADER_MGR_H
+#include <atomic>
 #include "cstdint"
 #include "config/config.h"
 #include "message/prof_params.h"
@@ -52,11 +53,16 @@ public:
                        SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx);
     void AddMapByDevIdMode(int devId, const std::string &mode, const std::string &jobId);
     std::string GetJobId(int devId, const std::string &mode);
+    void SetUploaderStatus(bool status);
+
+private:
+    bool IsUploadDataStart(const std::string& id, const std::string& fileName);
 
 private:
     std::map<std::string, SHARED_PTR_ALIA<Uploader>> uploaderMap_;
     std::mutex uploaderMutex_;
     std::map<std::string, std::string> devModeJobMap_;
+    std::atomic<bool> isStarted_;
 };
 }
 }

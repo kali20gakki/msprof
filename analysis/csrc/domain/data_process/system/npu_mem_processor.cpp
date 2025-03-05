@@ -76,6 +76,7 @@ bool NpuMemProcessor::ProcessSingleDevice(const std::string &devicePath, std::ve
         ERROR("Format NpuMem data error, dbPath is %.", dbPath);
         return false;
     }
+    FilterDataByStartTime(processedData, localtimeContext.timeRecord.startTimeNs, PROCESSOR_NAME_NPU_MEM);
     allProcessedData.insert(allProcessedData.end(), processedData.begin(), processedData.end());
     return true;
 }
@@ -105,7 +106,7 @@ std::vector<NpuMemData> NpuMemProcessor::FormatData(const OriNpuMemData &oriData
         std::tie(tempData.event, tempData.ddr, tempData.hbm, oriTimestamp, tempData.memory) = row;
         // 原数据结果还未加device monotonic，无需减去, 且原始时间单位为us
         HPFloat timestamp{GetTimeBySamplingTimestamp(oriTimestamp * MILLI_SECOND, localtimeContext.hostMonotonic, 0)};
-        tempData.localTime = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
+        tempData.timestamp = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
         formatData.push_back(tempData);
     }
     return formatData;

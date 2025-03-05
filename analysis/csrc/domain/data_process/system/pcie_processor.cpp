@@ -49,49 +49,49 @@ bool PCIeProcessor::Process(DataInventory& dataInventory)
     std::vector<PCIeData> res;
     bool flag = true;
     for (const auto& devicePath : deviceList) {
-        LocaltimeContext localtimeContext;
-        uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
-        if (deviceId == INVALID_DEVICE_ID) {
-            ERROR("the invalid deviceId cannot to be identified.");
-            flag = false;
-            continue;
-        }
-        if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_, deviceId)) {
-            ERROR("Failed to GetProfTimeRecordInfo, fileDir is %, device id is %.", profPath_, deviceId);
-            flag = false;
-            continue;
-        }
-        if (!Context::GetInstance().GetClockMonotonicRaw(localtimeContext.hostMonotonic, true, deviceId, profPath_) ||
-            !Context::GetInstance().GetClockMonotonicRaw(localtimeContext.deviceMonotonic, false, deviceId,
-                                                         profPath_)) {
-            ERROR("Device MonotonicRaw is invalid in path: %., device id is %", profPath_, deviceId);
-            flag = false;
-            continue;
-        }
-        DBInfo pcieDB("pcie.db", "PcieOriginalData");
-        std::string dbPath = File::PathJoin({devicePath, SQLITE, pcieDB.dbName});
-        pcieDB.ConstructDBRunner(dbPath);
-        auto status = CheckPathAndTable(dbPath, pcieDB);
-        if (status != CHECK_SUCCESS) {
-            if (status == CHECK_FAILED) {
-                flag = false;
-            }
-            continue;
-        }
-        PCIeDataFormat pcieData = LoadData(dbPath, pcieDB);
-        std::vector<PCIeData> processedData;
-        if (!FormatData(localtimeContext, pcieData, processedData)) {
-            ERROR("FormatData failed, fileDir is %.", profPath_);
-            flag = false;
-            continue;
-        }
-        res.insert(res.end(), processedData.begin(), processedData.end());
+        flag = ProcessOneDevice(devicePath, res) && flag;
     }
     if (!SaveToDataInventory<PCIeData>(std::move(res), dataInventory, PROCESSOR_NAME_PCIE)) {
         flag = false;
         ERROR("Save data failed, %.", PROCESSOR_NAME_PCIE);
     }
     return flag;
+}
+
+bool PCIeProcessor::ProcessOneDevice(const std::string& devicePath, std::vector<PCIeData>& res)
+{
+    LocaltimeContext localtimeContext;
+    uint16_t deviceId = GetDeviceIdByDevicePath(devicePath);
+    if (deviceId == INVALID_DEVICE_ID) {
+        ERROR("the invalid deviceId cannot to be identified.");
+        return false;
+    }
+    if (!Context::GetInstance().GetProfTimeRecordInfo(localtimeContext.timeRecord, profPath_, deviceId)) {
+        ERROR("Failed to GetProfTimeRecordInfo, fileDir is %, device id is %.", profPath_, deviceId);
+        return false;
+    }
+    if (!Context::GetInstance().GetClockMonotonicRaw(localtimeContext.hostMonotonic, true, deviceId, profPath_) ||
+        !Context::GetInstance().GetClockMonotonicRaw(localtimeContext.deviceMonotonic, false, deviceId,
+                                                     profPath_)) {
+        ERROR("Device MonotonicRaw is invalid in path: %., device id is %", profPath_, deviceId);
+        return false;
+    }
+    DBInfo pcieDB("pcie.db", "PcieOriginalData");
+    std::string dbPath = File::PathJoin({devicePath, SQLITE, pcieDB.dbName});
+    pcieDB.ConstructDBRunner(dbPath);
+    auto status = CheckPathAndTable(dbPath, pcieDB);
+    if (status != CHECK_SUCCESS) {
+        return status != CHECK_FAILED;
+    }
+    PCIeDataFormat pcieData = LoadData(dbPath, pcieDB);
+    std::vector<PCIeData> processedData;
+    if (!FormatData(localtimeContext, pcieData, processedData)) {
+        ERROR("FormatData failed, fileDir is %.", profPath_);
+        return false;
+    }
+    FilterDataByStartTime(processedData, localtimeContext.timeRecord.startTimeNs, PROCESSOR_NAME_PCIE);
+    res.insert(res.end(), processedData.begin(), processedData.end());
+    return true;
 }
 
 PCIeDataFormat PCIeProcessor::LoadData(const std::string& dbPath, const Analysis::Infra::DBInfo& pcieDB)
@@ -140,7 +140,7 @@ bool PCIeProcessor::FormatData(const LocaltimeContext& localtimeContext,
                  tempData.rxPost.min, tempData.rxPost.max, tempData.rxPost.avg,
                  tempData.rxNonpost.min, tempData.rxNonpost.max, tempData.rxNonpost.avg,
                  tempData.rxCpl.min, tempData.rxCpl.max, tempData.rxCpl.avg) = data;
-        HPFloat timestamp = GetTimeBySamplingTimestamp(oriTimestamp,
+        HPFloat timestamp = GetTimeBySamplingTimestamp(static_cast<double>(oriTimestamp),
                                                        localtimeContext.hostMonotonic,
                                                        localtimeContext.deviceMonotonic);
         tempData.timestamp = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();

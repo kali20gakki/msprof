@@ -1,3 +1,4 @@
+
 set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}//dvvp/driver/devmgmt/ai_drv_dev_api.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/driver/channel/ai_drv_prof_api.cpp 
@@ -26,6 +27,7 @@ add_executable(driver_utest
 target_include_directories(driver_utest PRIVATE
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
+	${TOP_DIR}/collector/dvvp/depend/inc/acl
     ${TOP_DIR}/collector/inc/toolchain
     ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/opensource/json/include

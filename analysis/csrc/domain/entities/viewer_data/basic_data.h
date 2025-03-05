@@ -3,26 +3,28 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : npu_mem_data.h
- * Description        : npu_mem_processor处理NpuMem表后的格式化数据
+ * File Name          : basic_data.h
+ * Description        : processor通用格式化数据的基类
  * Author             : msprof team
- * Creation Date      : 2024/11/09
+ * Creation Date      : 2025/3/3
  * *****************************************************************************
  */
 
-#ifndef ANALYSIS_DOMAIN_NPU_MODULE_MEM_DATA_H
-#define ANALYSIS_DOMAIN_NPU_MODULE_MEM_DATA_H
+#ifndef ANALYSIS_DOMAIN_BASIC_DATA_H
+#define ANALYSIS_DOMAIN_BASIC_DATA_H
 
-#include "analysis/csrc/domain/entities/viewer_data/basic_data.h"
+#include <cstdint>
 
 namespace Analysis {
 namespace Domain {
-struct NpuModuleMemData : public BasicData {
-    uint16_t deviceId = UINT16_MAX;
-    uint32_t moduleId = UINT32_MAX;
-    uint64_t totalReserved = UINT64_MAX;
+struct BasicData {
+    uint64_t timestamp = UINT64_MAX; // 通常意义指代数据的开始时间 ns
+
+public:
+    BasicData() = default;
+    BasicData(uint64_t timestamp) : timestamp(timestamp) {}
 };
 }
 }
 
-#endif // ANALYSIS_DOMAIN_NPU_MODULE_MEM_DATA_H
+#endif // ANALYSIS_DOMAIN_BASIC_DATA_H

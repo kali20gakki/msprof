@@ -108,7 +108,7 @@ static std::vector<ApiData> GenerateApiData()
     data.apiName = "launch";
     data.connectionId = 2762; // connectionId 2762
     data.id = "0";
-    data.start = 1717575960208020750; // start 1717575960208020750
+    data.timestamp = 1717575960208020750; // start 1717575960208020750
     data.itemId = "hcom_broadcast_";
     data.level = MSPROF_REPORT_NODE_LEVEL;
     data.threadId = 87144; // threadId 87144
@@ -126,7 +126,7 @@ static std::vector<CommunicationOpData> GenerateOpData()
     data.groupName = "16898834563344171674";
     data.connectionId = 2762; // connectionId 2762
     data.opKey = "16898834563344171674-1-1-1-1";
-    data.start = 1717575960213957957; // start 1717575960213957957
+    data.timestamp = 1717575960213957957; // start 1717575960213957957
     data.end = 1717575960214957957; // end 1717575960214957957
     data.relay = 0; // relay 0
     data.retry = 0; // retry 0
@@ -148,7 +148,7 @@ static std::vector<KfcOpData> GenerateKfcOpData()
     data.groupName = "1334992688230612654";
     data.connectionId = 1234; // connectionId 1234
     data.opKey = "1334992688230612654-0-1-1-1";
-    data.start = 1717575960213957958; // start 1717575960213957958
+    data.timestamp = 1717575960213957958; // start 1717575960213957958
     data.end = 1717575960214957958; // end 1717575960214957958
     data.relay = 0; // relay 0
     data.retry = 0; // retry 0
@@ -185,7 +185,7 @@ static std::vector<CommunicationTaskData> GenerateTaskData()
     data.linkType = UINT16_MAX;
     data.notifyId = 456; // notifyId 456
     data.rdmaType = UINT16_MAX;
-    data.start = 1717575960213957957; // start 1717575960213957957
+    data.timestamp = 1717575960213957957; // start 1717575960213957957
     data.duration = 1000000.0; // dur 1000000.0
     data.durationEstimated = 20.0; // es_dur 20.0
     data.bandwidth = 0.0; // bw 0.0
@@ -216,7 +216,7 @@ static std::vector<KfcTaskData> GenerateKfcTaskData()
     data.linkType = UINT16_MAX;
     data.notifyId = 456; // notifyId 456
     data.rdmaType = UINT16_MAX;
-    data.start = 1717575960213957958; // start 1717575960213957958
+    data.timestamp = 1717575960213957958; // start 1717575960213957958
     data.duration = 1000000.0; // dur 1000000.0
     data.durationEstimated = 20.0; // es_dur 20.0
     data.bandwidth = 0.0; // bw 0.0
@@ -229,7 +229,7 @@ static std::vector<AccPmuData> GenerateAccPmuData()
     std::vector<AccPmuData> res;
     AccPmuData data;
     data.accId = 128; // accID 128
-    data.timestampNs = 236368325745670; // timestampNs 236368325745670
+    data.timestamp = 236368325745670; // timestampNs 236368325745670
     res.push_back(data);
     return res;
 }
@@ -262,7 +262,7 @@ static std::vector<HbmData> GenerateHbmData()
     std::vector<HbmData> res;
     HbmData data;
     data.deviceId = 0; // deviceId 0
-    data.localTime = 236368325745670; // localTime 236368325745670
+    data.timestamp = 236368325745670; // localTime 236368325745670
     data.bandWidth = 100.0; // bandWidth 100.0
     data.hbmId = 1; // hbmId 50.0
     res.push_back(data);
@@ -274,7 +274,7 @@ static std::vector<HccsData> GenerateHccsData()
     std::vector<HccsData> res;
     HccsData data;
     data.deviceId = 2; // deviceId 2
-    data.localTime = 236368325745660; // localTime 236368325745660
+    data.timestamp = 236368325745660; // localTime 236368325745660
     data.txThroughput = 100; // txThroughput 100.0
     data.rxThroughput = 200; // rxThroughput 50.0
     res.push_back(data);
@@ -286,7 +286,7 @@ static std::vector<LLcData> GenerateLlcData()
     std::vector<LLcData> res;
     LLcData data;
     data.deviceId = 2; // deviceId 2
-    data.localTime = 236368325745555; // localTime 236368325745555
+    data.timestamp = 236368325745555; // localTime 236368325745555
     data.llcID = 10; // llcID 10
     data.hitRate = 30.5; // hitRate 30.5
     data.throughput = 50.0; // throughput 50.0
@@ -298,7 +298,7 @@ static std::vector<MsprofTxHostData> GenerateMsprofTxData()
 {
     std::vector<MsprofTxHostData> res;
     MsprofTxHostData data;
-    data.start = 236368325741111; // start 236368325741111
+    data.timestamp = 236368325741111; // start 236368325741111
     data.end = 236368325742222; // end 236368325742222
     data.payloadValue = 10; // payloadValue 10
     data.category = 1962761985; // category 1962761985
@@ -316,7 +316,7 @@ static std::vector<NpuMemData> GenerateNpuMemData()
     data.ddr = 10000000000; // ddr 10000000000
     data.hbm = 20000000000; // hbm 20000000000
     data.memory = 30000000000; // memory 30000000000
-    data.localTime = 236368325745555; // localTime 236368325745555
+    data.timestamp = 236368325745555; // localTime 236368325745555
     res.push_back(data);
     return res;
 }
@@ -342,8 +342,8 @@ static std::vector<SocBandwidthData> GenerateSocData()
     SocBandwidthData data;
     data.deviceId = 1; // deviceId 1
     data.timestamp = 236368325745555; // timestamp 236368325745555
-    data.l2_buffer_bw_level = 2; // l2_buffer_bw_level 2
-    data.mata_bw_level = 3; // mata_bw_level 3
+    data.l2BufferBwLevel = 2; // l2_buffer_bw_level 2
+    data.mataBwLevel = 3; // mata_bw_level 3
     res.push_back(data);
     return res;
 }
@@ -353,7 +353,7 @@ static std::vector<NicOriginalData> GenerateNicData()
     std::vector<SysIOOriginalData> res;
     SysIOOriginalData data;
     data.deviceId = 1; // deviceId 1
-    data.localTime = 236368325745555; // timestamp 236368325745555
+    data.timestamp = 236368325745555; // timestamp 236368325745555
     data.bandwidth = 12345; // bandwidth 12345.0
     data.rxPacketRate = 1200.0; // rxPacketRate 1200.0
     data.rxByteRate = 1300.0; // rxByteRate 1300.0
@@ -370,7 +370,7 @@ static std::vector<RoceOriginalData> GenerateRoceData()
     std::vector<SysIOOriginalData> res;
     SysIOOriginalData data;
     data.deviceId = 2; // deviceId 2
-    data.localTime = 236368325746666; // timestamp 236368325746666
+    data.timestamp = 236368325746666; // timestamp 236368325746666
     data.bandwidth = 12345; // bandwidth 12345.0
     data.rxPacketRate = 1200.0; // rxPacketRate 1200.0
     data.rxByteRate = 1300.0; // rxByteRate 1300.0
@@ -400,7 +400,7 @@ static std::vector<NpuOpMemData> GenerateNpuOpMemData()
     data.operatorName = "NonZero57";
     data.addr = 20618011344896; // addr 20618011344896
     data.size = 1638400; // size 1638400
-    data.localTime = 1717575960208020750; // localTime 1717575960208020750
+    data.timestamp = 1717575960208020750; // localTime 1717575960208020750
     data.threadId = 87144; // threadId 87144
     data.totalAllocateMemory = 1703936; // totalAllocateMemory 1703936
     data.totalReserveMemory = 625213440; // totalReserveMemory 625213440
@@ -432,7 +432,7 @@ static std::vector<AscendTaskData> GenerateAscendTaskData()
     data.contextId = 1; // contextId 1
     data.batchId = 1; // batchId 1
     data.connectionId = 2345; // connectionId 2345
-    data.start = 1717575960208020758; // start 1717575960208020758
+    data.timestamp = 1717575960208020758; // start 1717575960208020758
     data.duration = 450.78; // dur 450.78
     data.end = 1717575960208020759; // end 1717575960208020759
     data.hostType = "KERNEL_AICORE";
@@ -452,7 +452,7 @@ static std::vector<MsprofTxDeviceData> GenerateDeviceTxData()
     data.streamId = 2; // streamId 2
     data.taskId = 10; // taskId 10
     data.connectionId = 2346; // connectionId 2346
-    data.start = 1717575960208020759; // start 1717575960208020759
+    data.timestamp = 1717575960208020759; // start 1717575960208020759
     data.duration = 450.78; // dur 450.78
     data.modelId = 1; // modelId 1
     res.push_back(data);

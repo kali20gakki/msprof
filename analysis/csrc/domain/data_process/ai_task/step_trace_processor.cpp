@@ -54,6 +54,7 @@ std::vector<TrainTraceData> GenerateTraceData(const DBInfo &dbInfo, LocaltimeCon
         tmp.fpBpTime = GetDurTimeFromSyscnt(tmp.fpBpTime, params).Uint64();
         tmp.gradRefreshBound = GetDurTimeFromSyscnt(tmp.gradRefreshBound, params).Uint64();
         tmp.dataAugBound = GetDurTimeFromSyscnt(tmp.dataAugBound, params).Uint64();
+        tmp.timestamp = (tmp.iterEnd >= tmp.iterTime) ? (tmp.iterEnd - tmp.iterTime) : 0;
         processedData.push_back(tmp);
     }
     return processedData;
@@ -78,9 +79,9 @@ std::vector<GetNextData> GenerateNextData(const DBInfo &dbInfo, LocaltimeContext
     GetNextData tmp;
     tmp.deviceId = allParams.deviceId;
     for (const auto &row : oriData) {
-        std::tie(tmp.modelId, tmp.indexId, tmp.start, tmp.end) = row;
-        HPFloat start = GetTimeFromSyscnt(tmp.start, params);
-        tmp.start = GetLocalTime(start, allParams.timeRecord).Uint64();
+        std::tie(tmp.modelId, tmp.indexId, tmp.timestamp, tmp.end) = row;
+        HPFloat start = GetTimeFromSyscnt(tmp.timestamp, params);
+        tmp.timestamp = GetLocalTime(start, allParams.timeRecord).Uint64();
         HPFloat end = GetTimeFromSyscnt(tmp.end, params);
         tmp.end = GetLocalTime(end, allParams.timeRecord).Uint64();
         processedData.push_back(tmp);
@@ -107,11 +108,11 @@ std::vector<AllReduceData> GenerateAllReduceData(const DBInfo &dbInfo, Localtime
     AllReduceData tmp;
     tmp.deviceId = allParams.deviceId;
     for (const auto &row : oriData) {
-        std::tie(tmp.modelId, tmp.indexId, tmp.iterEnd, tmp.start, tmp.end) = row;
+        std::tie(tmp.modelId, tmp.indexId, tmp.iterEnd, tmp.timestamp, tmp.end) = row;
         HPFloat iterEnd = GetTimeFromSyscnt(tmp.iterEnd, params);
         tmp.iterEnd = GetLocalTime(iterEnd, allParams.timeRecord).Uint64();
-        HPFloat start = GetTimeFromSyscnt(tmp.start, params);
-        tmp.start = GetLocalTime(start, allParams.timeRecord).Uint64();
+        HPFloat start = GetTimeFromSyscnt(tmp.timestamp, params);
+        tmp.timestamp = GetLocalTime(start, allParams.timeRecord).Uint64();
         HPFloat end = GetTimeFromSyscnt(tmp.end, params);
         tmp.end = GetLocalTime(end, allParams.timeRecord).Uint64();
         processedData.push_back(tmp);
@@ -142,12 +143,17 @@ bool StepTraceProcessor::Process(DataInventory &dataInventory)
         OriTrace traceData;
         DBInfo traceDb("trace.db", "training_trace");
         flag = ProcessData<TrainTraceData>(traceDb, allParams, resTrace, GenerateTraceData, devPath) && flag;
+        FilterDataByStartTime(resTrace, allParams.timeRecord.startTimeNs, PROCESSOR_NAME_STEP_TRACE);
+
         OriGetNext nextData;
         DBInfo nextDb("trace.db", "get_next");
         flag = ProcessData<GetNextData>(nextDb, allParams, resNext, GenerateNextData, devPath) && flag;
+        FilterDataByStartTime(resNext, allParams.timeRecord.startTimeNs, PROCESSOR_NAME_STEP_TRACE);
+
         OriAllReduce reduceData;
         DBInfo reduceDb("trace.db", "all_reduce");
         flag = ProcessData<AllReduceData>(reduceDb, allParams, resAllReduce, GenerateAllReduceData, devPath) && flag;
+        FilterDataByStartTime(resAllReduce, allParams.timeRecord.startTimeNs, PROCESSOR_NAME_STEP_TRACE);
     }
     if (!SaveStepTraceData(resTrace, resNext, resAllReduce, dataInventory)) {
         ERROR("Save data failed, %.", PROCESSOR_NAME_STEP_TRACE);

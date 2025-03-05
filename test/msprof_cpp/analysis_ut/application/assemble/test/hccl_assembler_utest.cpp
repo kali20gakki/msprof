@@ -60,7 +60,7 @@ static std::vector<CommunicationOpData> GenerateOpData()
     data.groupName = "16898834563344171674";
     data.connectionId = 2762; // connectionId 2762
     data.opKey = "16898834563344171674-1-1-1-1";
-    data.start = 1717575960213957957; // start 1717575960213957957
+    data.timestamp = 1717575960213957957; // start 1717575960213957957
     data.end = 1717575960214957957; // end 1717575960214957957
     data.relay = 0; // relay 0
     data.retry = 0; // retry 0
@@ -97,7 +97,7 @@ static std::vector<CommunicationTaskData> GenerateTaskData()
     data.linkType = UINT16_MAX;
     data.notifyId = "456";
     data.rdmaType = UINT16_MAX;
-    data.start = 1717575960213957957; // start 1717575960213957957
+    data.timestamp = 1717575960213957957; // start 1717575960213957957
     data.duration = 1000000.0; // dur 1000000.0
     data.durationEstimated = 20.0; // es_dur 20.0
     data.bandwidth = 0.0; // bw 0.0

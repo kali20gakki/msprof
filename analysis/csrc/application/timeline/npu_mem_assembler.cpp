@@ -41,7 +41,7 @@ void GenerateNpuMemTrace(std::vector<NpuMemData> &npuMemData, const std::unorder
     std::string time;
     uint32_t pid;
     for (const auto &data : npuMemData) {
-        time = DivideByPowersOfTenWithPrecision(data.localTime);
+        time = DivideByPowersOfTenWithPrecision(data.timestamp);
         pid = pidMap.at(data.deviceId);
         double hbmValue = static_cast<double>(data.hbm) / B_TO_KB;
         double ddrValue = static_cast<double>(data.ddr) / B_TO_KB;

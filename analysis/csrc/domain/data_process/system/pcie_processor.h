@@ -37,6 +37,7 @@ private:
     PCIeDataFormat LoadData(const std::string& dbPath, const DBInfo& pcieDB);
     bool FormatData(const Utils::LocaltimeContext& localtimeContext,
                     const PCIeDataFormat& pcieDB, std::vector<PCIeData>& processedData);
+    bool ProcessOneDevice(const std::string& devicePath, std::vector<PCIeData>& res);
 };
 } // Domain
 } // Analysis

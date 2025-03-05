@@ -41,16 +41,16 @@ void GeneratePaLinkInfoTrace(std::vector<PaLinkInfoData> &paLinkInfoData,
     uint64_t value;
     uint32_t pid;
     for (const auto &data : paLinkInfoData) {
-        time = DivideByPowersOfTenWithPrecision(data.local_time);
+        time = DivideByPowersOfTenWithPrecision(data.timestamp);
         pid = pidMap.at(data.deviceId);
-        std::vector<std::string> level {data.pa_link_traffic_monit_rx, data.pa_link_traffic_monit_tx};
+        std::vector<std::string> level {data.paLinkTrafficMonitRx, data.paLinkTrafficMonitTx};
         for (size_t i = 0; i < level.size(); ++i) {
             if (StrToU64(value, level[i]) != ANALYSIS_OK) {
                 ERROR("paLinkInfoData is invalid");
                 continue;
             }
             MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, STARS_PA, time, PA_LINK_COUNTERS[i]);
-            event->SetSeriesIValue(PA_ID, data.pa_link_id);
+            event->SetSeriesIValue(PA_ID, data.paLinkId);
             event->SetSeriesIValue(PA_LINK_COUNTERS[i], value);
             res.push_back(event);
         }
@@ -64,12 +64,12 @@ void GeneratePcieInfoTrace(std::vector<PcieInfoData> &pcieInfoData,
     std::string time;
     uint32_t pid;
     for (const auto &data : pcieInfoData) {
-        time = DivideByPowersOfTenWithPrecision(data.local_time);
+        time = DivideByPowersOfTenWithPrecision(data.timestamp);
         pid = pidMap.at(data.deviceId);
-        std::vector<uint64_t> level {data.pcie_read_bandwidth, data.pcie_write_bandwidth};
+        std::vector<uint64_t> level {data.pcieReadBandwidth, data.pcieWriteBandwidth};
         for (size_t i = 0; i < level.size(); i++) {
             MAKE_SHARED_RETURN_VOID(event, CounterEvent, pid, STARS_PCIE, time, PCIE_COUNTERS[i]);
-            event->SetSeriesIValue(PCIE_ID, data.pcie_id);
+            event->SetSeriesIValue(PCIE_ID, data.pcieId);
             event->SetSeriesIValue(PCIE_COUNTERS[i], level[i]);
             res.push_back(event);
         }

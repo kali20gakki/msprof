@@ -68,11 +68,11 @@ static std::vector<LLcData> GenerateLLcData()
     data.llcID = 0;
     data.hitRate = 50.6; // 百分数 50.6
     data.throughput = 67.5; // 吞吐量 MB/s 67.5
-    data.localTime = 1724405892226599429; // 本地时间 1724405892226599429
+    data.timestamp = 1724405892226599429; // 本地时间 1724405892226599429
     res.push_back(data);
     data.hitRate = 35.6; // 百分数 35.6
     data.throughput = 77.8; // 吞吐量 MB/s 77.8
-    data.localTime = 1724405892226699429; // 本地时间 1724405892226699429
+    data.timestamp = 1724405892226699429; // 本地时间 1724405892226699429
     res.push_back(data);
     return res;
 }
