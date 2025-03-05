@@ -20,8 +20,13 @@ namespace Analysis {
 namespace Domain {
 namespace Host {
 namespace Cann {
-
 using namespace Utils;
+namespace {
+const std::unordered_map<uint64_t, std::string> whiteTypeData{
+    {27, "DYNAMIC_ENABLE"},
+    {28, "DYNAMIC_DISABLE"}
+};
+}
 
 bool TypeData::Load(const std::string &path)
 {
@@ -40,6 +45,10 @@ std::string TypeData::Get(uint16_t level, uint64_t type)
         return std::to_string(type);
     }
     if (typeData_[level].find(type) == typeData_[level].end()) {
+        auto it = whiteTypeData.find(type);
+        if (it != whiteTypeData.end()) {
+            return it->second;
+        }
         ERROR("Failed to found str for type: %", type);
         return std::to_string(type);
     }
