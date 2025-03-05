@@ -32,6 +32,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
     aicpu data parser
     """
     NONE_NODE_NAME = ''
+    INVALID_CONTEXT_ID = 4294967295
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
@@ -185,38 +186,43 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
         ]
 
     def get_kfc_hccl_info_data(self: any, aicpu_info: AicpuAddInfoBean) -> list:
-        role = trans_enum_name(RoleType, aicpu_info.data.role)
-        op_type = trans_enum_name(OpType, aicpu_info.data.op_type)
-        data_type = trans_enum_name(DataType, aicpu_info.data.data_type)
-        link_type = trans_enum_name(LinkType, aicpu_info.data.link_type)
-        transport_type = trans_enum_name(TransPortType, aicpu_info.data.transport_type)
-        rdma_type = trans_enum_name(RdmaType, aicpu_info.data.rdma_type)
-        return [
-            InfoConfReader().time_from_syscnt(aicpu_info.timestamp),
-            self.hash_data.get(aicpu_info.data.item_id, aicpu_info.data.item_id),
-            aicpu_info.data.ccl_tag,
-            aicpu_info.data.group_name,
-            aicpu_info.data.local_rank,
-            aicpu_info.data.remote_rank,
-            aicpu_info.data.rank_size,
-            aicpu_info.data.work_flow_mode,
-            aicpu_info.data.plane_id,
-            aicpu_info.data.context_id,
-            aicpu_info.data.notify_id,
-            aicpu_info.data.stage,
-            role,
-            aicpu_info.data.duration_estimated,
-            aicpu_info.data.src_addr,
-            aicpu_info.data.dst_addr,
-            aicpu_info.data.data_size,
-            op_type,
-            data_type,
-            link_type,
-            transport_type,
-            rdma_type,
-            aicpu_info.data.stream_id,
-            aicpu_info.data.task_id,
-        ]
+        result = []
+        for kfc_hccl_info in [aicpu_info.data.first_hccl_info, aicpu_info.data.second_hccl_info]:
+            if kfc_hccl_info.group_name == 0:
+                continue
+            role = trans_enum_name(RoleType, kfc_hccl_info.role)
+            op_type = trans_enum_name(OpType, kfc_hccl_info.op_type)
+            data_type = trans_enum_name(DataType, kfc_hccl_info.data_type)
+            link_type = trans_enum_name(LinkType, kfc_hccl_info.link_type)
+            transport_type = trans_enum_name(TransPortType, kfc_hccl_info.transport_type)
+            rdma_type = trans_enum_name(RdmaType, kfc_hccl_info.rdma_type)
+            result.append([
+                InfoConfReader().time_from_syscnt(kfc_hccl_info.timestamp),
+                self.hash_data.get(kfc_hccl_info.item_id, kfc_hccl_info.item_id),
+                kfc_hccl_info.ccl_tag,
+                kfc_hccl_info.group_name,
+                kfc_hccl_info.local_rank,
+                kfc_hccl_info.remote_rank,
+                kfc_hccl_info.rank_size,
+                kfc_hccl_info.work_flow_mode,
+                kfc_hccl_info.plane_id,
+                self.INVALID_CONTEXT_ID,
+                kfc_hccl_info.notify_id,
+                kfc_hccl_info.stage,
+                role,
+                kfc_hccl_info.duration_estimated,
+                kfc_hccl_info.src_addr,
+                kfc_hccl_info.dst_addr,
+                kfc_hccl_info.data_size,
+                op_type,
+                data_type,
+                link_type,
+                transport_type,
+                rdma_type,
+                kfc_hccl_info.stream_id,
+                kfc_hccl_info.task_id,
+            ])
+        return result
 
     def parse(self: any) -> None:
         """
@@ -275,11 +281,15 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
 
     def set_aicpu_data(self: any, aicpu_data: list) -> None:
         for aicpu_info in aicpu_data:
-            get_data_func = self._get_data_func.get(int(aicpu_info.struct_type))
+            struct_type = int(aicpu_info.struct_type)
+            get_data_func = self._get_data_func.get(struct_type)
             if not get_data_func:
                 logging.error("The aicpu type %d is invalid.", aicpu_info.struct_type)
                 continue
-            if int(aicpu_info.struct_type) == AicpuAddInfoBean.AICPU_NODE and \
+            if struct_type == AicpuAddInfoBean.AICPU_NODE and \
                     (aicpu_info.data.ai_cpu_task_start_time == 0 or aicpu_info.data.ai_cpu_task_end_time == 0):
                 continue
-            self._aicpu_data.get(int(aicpu_info.struct_type)).append(get_data_func(aicpu_info))
+            if struct_type == AicpuAddInfoBean.KFC_HCCL_INFO:
+                self._aicpu_data.get(struct_type).extend(get_data_func(aicpu_info))
+            else:
+                self._aicpu_data.get(struct_type).append(get_data_func(aicpu_info))

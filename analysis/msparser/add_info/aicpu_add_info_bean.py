@@ -202,29 +202,29 @@ class AicpuMiBean:
 class KfcHcclInfoBean:
     def __init__(self: any, *args) -> None:
         data = args[0]
-        self._item_id = data[6]
-        self._ccl_tag = data[7]
-        self._group_name = data[8]
-        self._local_rank = data[9]
-        self._remote_rank = data[10]
-        self._rank_size = data[11]
-        self._work_flow_mode = data[12]
-        self._plane_id = data[13]
-        self._context_id = data[14]
-        self._notify_id = data[15]
-        self._stage = data[16]
-        self._role = data[17]
-        self._duration_estimated = data[18]
-        self._src_addr = data[19]
-        self._dst_addr = data[20]
-        self._data_size = data[21]
-        self._op_type = data[22]
-        self._data_type = data[23]
-        self._link_type = data[24]
-        self._transport_type = data[25]
-        self._rdma_type = data[26]
-        self._task_id = StarsCommon.set_task_id(data[28], data[27])
-        self._stream_id = StarsCommon.set_stream_id(data[28], data[27])
+        self._item_id = data[0]
+        self._ccl_tag = data[1]
+        self._group_name = data[2]
+        self._local_rank = data[3]
+        self._remote_rank = data[4]
+        self._rank_size = data[5]
+        self._stage = data[6]
+        self._notify_id = data[7]
+        self._timestamp = data[8]
+        self._duration_estimated = data[9]
+        self._src_addr = data[10]
+        self._dst_addr = data[11]
+        self._data_size = data[12]
+        self._task_id = StarsCommon.set_task_id(data[15], data[13])
+        self._stream_id = StarsCommon.set_stream_id(data[15], data[13])
+        self._plane_id = data[16]
+        self._op_type = data[17]
+        self._data_type = data[18]
+        self._link_type = data[19]
+        self._transport_type = data[20]
+        self._rdma_type = data[21]
+        self._role = data[22]
+        self._work_flow_mode = data[23]
 
     @property
     def item_id(self: any) -> str:
@@ -257,10 +257,6 @@ class KfcHcclInfoBean:
     @property
     def plane_id(self: any) -> int:
         return self._plane_id
-
-    @property
-    def context_id(self: any) -> int:
-        return self._context_id
 
     @property
     def notify_id(self: any) -> str:
@@ -317,6 +313,17 @@ class KfcHcclInfoBean:
     @property
     def stream_id(self: any) -> int:
         return self._stream_id
+
+    @property
+    def timestamp(self: any) -> int:
+        return self._timestamp
+
+
+class MergedKfcHcclInfoBean:
+    def __init__(self: any, *args) -> None:
+        data = args[0]
+        self.first_hccl_info = KfcHcclInfoBean(data[6:39])  # 代码保证这里不会发生越界, 第一条数据
+        self.second_hccl_info = KfcHcclInfoBean(data[39:])  # 代码保证这里不会发生越界，第二条数据
 
 
 class KfcCommTurnBean:
@@ -524,7 +531,7 @@ class AicpuAddInfoBean(AddInfoBean):
     AICPU_MI = 3  # MindSpore
     KFC_COMM_TURN = 4
     KFC_COMPUTE_TURN = 5
-    KFC_HCCL_INFO = 6
+    KFC_HCCL_INFO = 13
     HCCL_OP_INFO = 10
     AICPU_FLIP_TASK = 11
     AICPU_MASTER_STREAM_HCCL_TASK = 12
@@ -549,7 +556,7 @@ class AicpuAddInfoBean(AddInfoBean):
         AICPU_MI: AicpuMiBean,
         KFC_COMM_TURN: KfcCommTurnBean,
         KFC_COMPUTE_TURN: KfcComputeTurnBean,
-        KFC_HCCL_INFO: KfcHcclInfoBean,
+        KFC_HCCL_INFO: MergedKfcHcclInfoBean,
         HCCL_OP_INFO: DeviceHcclOpInfoBean,
         AICPU_FLIP_TASK: AicpuFlipTaskBean,
         AICPU_MASTER_STREAM_HCCL_TASK: AicpuMasterStreamHcclTaskBean,
