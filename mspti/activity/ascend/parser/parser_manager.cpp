@@ -19,6 +19,7 @@
 #include "common/plog_manager.h"
 #include "common/utils.h"
 #include "hccl_reporter.h"
+#include "stars_common.h"
 
 namespace Mspti {
 namespace Parser {
@@ -197,8 +198,11 @@ msptiResult ParserManager::ReportStarsSocLog(uint32_t deviceId, const StarsSocLo
         return MSPTI_ERROR_INNER;
     }
     constexpr int32_t BIT_OFFSET = 32;
-    auto dstKey = std::make_tuple(static_cast<uint16_t>(deviceId), static_cast<uint16_t>(socLog->streamId),
-        static_cast<uint16_t>(socLog->taskId));
+    uint16_t streamId = StarsCommon::GetStreamId(static_cast<uint16_t>(socLog->streamId),
+                                                 static_cast<uint16_t>(socLog->taskId));
+    uint16_t taskId = StarsCommon::GetTaskId(static_cast<uint16_t>(socLog->streamId),
+                                             static_cast<uint16_t>(socLog->taskId));
+    auto dstKey = std::make_tuple(static_cast<uint16_t>(deviceId), streamId, taskId);
     std::lock_guard<std::mutex> lk(kernel_mtx_);
     auto iter = kernel_map_.find(dstKey);
     if (iter != kernel_map_.end()) {
@@ -209,7 +213,7 @@ msptiResult ParserManager::ReportStarsSocLog(uint32_t deviceId, const StarsSocLo
         }
         if (socLog->funcType == STARS_FUNC_TYPE_BEGIN) {
             kernel->ds.deviceId = deviceId;
-            kernel->ds.streamId = socLog->streamId;
+            kernel->ds.streamId = streamId;
             kernel->start = static_cast<uint64_t>(socLog->sysCntH) << BIT_OFFSET | socLog->sysCntL;
             kernel->start = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId,
                 kernel->start);
