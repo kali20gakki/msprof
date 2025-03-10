@@ -25,7 +25,7 @@ MSPTI_API RtErrorT rtSetDevice(int32_t device);
 MSPTI_API RtErrorT rtDeviceReset(int32_t device);
 MSPTI_API RtErrorT rtSetDeviceEx(int32_t device);
 MSPTI_API RtErrorT rtCtxCreateEx(void **ctx, uint32_t flags, int32_t device);
-MSPTI_API RtErrorT rtCtxCreate(void **ctx, int32_t device);
+MSPTI_API RtErrorT rtCtxCreate(void **ctx, uint32_t flags, int32_t device);
 MSPTI_API RtErrorT rtCtxDestroy(void **ctx);
 MSPTI_API RtErrorT rtStreamCreate(RtStreamT *stream, int32_t priority);
 MSPTI_API RtErrorT rtStreamDestroy(RtStreamT stream);

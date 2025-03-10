@@ -202,18 +202,19 @@ RtErrorT rtCtxCreateEx(void **ctx, uint32_t flags, int32_t device)
     return func(ctx, flags, device);
 }
 
-RtErrorT rtCtxCreate(void **ctx, int32_t device)
+RtErrorT rtCtxCreate(void **ctx, uint32_t flags, int32_t device)
 {
     pthread_once(&g_once, LoadRuntimeFunction);
     void* voidFunc = g_runtimeFuncArray[FUNC_RT_CTX_CREATE];
-    using rtCtxCreateFunc = std::function<RtErrorT(void **, int32_t)>;
-    rtCtxCreateFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(void **ctx, int32_t device)>(voidFunc);
+    using rtCtxCreateFunc = std::function<RtErrorT(void **, uint32_t, int32_t)>;
+    rtCtxCreateFunc func = Mspti::Common::ReinterpretConvert<RtErrorT (*)(void **ctx, uint32_t flags,
+        int32_t device)>(voidFunc);
     if (func == nullptr) {
-        Mspti::Common::GetFunction<RtErrorT, void **, int32_t>("libruntime", __FUNCTION__, func);
+        Mspti::Common::GetFunction<RtErrorT, void **, uint32_t, int32_t>("libruntime", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_CONTEXT_CREATED, __FUNCTION__);
-    return func(ctx, device);
+    return func(ctx, flags, device);
 }
 
 RtErrorT rtCtxDestroy(void **ctx)
