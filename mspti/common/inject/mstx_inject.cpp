@@ -27,14 +27,13 @@ namespace Mspti {
 static std::string g_defaultDomainName = "default";
 std::once_flag MstxDomainMgr::onceFlag;
 mstxDomainHandle_t MstxDomainMgr::defaultDomainHandle_t;
-std::unordered_set<std::string> MstxDomainMgr::domainSwitchs_;
+std::unordered_set<std::string> MstxDomainMgr::disableDomains_;
 std::unordered_map<mstxDomainHandle_t, std::shared_ptr<MstxDomainAttr>> MstxDomainMgr::domainHandleMap_;
 
 MstxDomainMgr* MstxDomainMgr::GetInstance()
 {
     static MstxDomainMgr instance;
     std::call_once(onceFlag, [] {
-        domainSwitchs_.insert(g_defaultDomainName);
         std::shared_ptr<MstxDomainAttr> domainHandlePtr;
         Mspti::Common::MsptiMakeSharedPtr(domainHandlePtr);
         if (domainHandlePtr == nullptr) {
@@ -92,7 +91,10 @@ mstxDomainHandle_t MstxDomainMgr::CreateDomainHandle(const char* name)
         return nullptr;
     }
     domainHandleMap_.insert(std::make_pair(domainHandlePtr->handle.get(), domainHandlePtr));
-    domainSwitchs_.insert(*(domainHandlePtr->name));
+    // domain默认使能，除非用户提前调用msptiActivityDisableMarkerDomain去使能该domain
+    if (disableDomains_.count(*domainHandlePtr->name) != 0) {
+        domainHandlePtr->isEnabled = false;
+    }
     return domainHandlePtr->handle.get();
 }
 
@@ -123,21 +125,24 @@ msptiResult MstxDomainMgr::SetMstxDomainEnableStatus(const char* name, bool flag
     std::string nameStr(name);
     std::lock_guard<std::mutex> lk(domainMutex_);
     if (flag) {
-        domainSwitchs_.insert(nameStr);
+        disableDomains_.erase(nameStr);
     } else {
-        domainSwitchs_.erase(nameStr);
+        disableDomains_.insert(nameStr);
+    }
+    for (const auto &iter : domainHandleMap_) {
+        if (nameStr == *(iter.second->name)) {
+            iter.second->isEnabled = flag;
+            break;
+        }
     }
     return MSPTI_SUCCESS;
 }
 
 bool MstxDomainMgr::isDomainEnable(mstxDomainHandle_t domainHandle)
 {
-    auto namePtr = GetDomainNameByHandle(domainHandle);
-    if (namePtr) {
-        std::lock_guard<std::mutex> lk(domainMutex_);
-        return domainSwitchs_.count(*namePtr);
-    }
-    return false;
+    std::lock_guard<std::mutex> lk(domainMutex_);
+    auto iter = domainHandleMap_.find(domainHandle);
+    return iter == domainHandleMap_.end() ? false : iter->second->isEnabled;
 }
 
 bool MstxDomainMgr::isDomainEnable(const char* name)
@@ -146,10 +151,8 @@ bool MstxDomainMgr::isDomainEnable(const char* name)
         return false;
     }
     std::string nameStr(name);
-    {
-        std::lock_guard<std::mutex> lk(domainMutex_);
-        return domainSwitchs_.count(nameStr);
-    }
+    std::lock_guard<std::mutex> lk(domainMutex_);
+    return disableDomains_.count(nameStr) == 0 ? true : false;
 }
 }
 

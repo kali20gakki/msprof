@@ -78,6 +78,7 @@ struct MstxDomainAttr {
     std::shared_ptr<MstxDomainHandle> handle{nullptr};
     std::shared_ptr<std::string> name{nullptr};
     bool isDestroyed{false};
+    bool isEnabled{true};
 };
 
 class MstxDomainMgr {
@@ -106,7 +107,7 @@ private:
     // domainHandle, domainStatus
     static std::unordered_map<mstxDomainHandle_t, std::shared_ptr<MstxDomainAttr>> domainHandleMap_;
     // domainName
-    static std::unordered_set<std::string> domainSwitchs_;
+    static std::unordered_set<std::string> disableDomains_;
     std::mutex domainMutex_;
 };
 };
