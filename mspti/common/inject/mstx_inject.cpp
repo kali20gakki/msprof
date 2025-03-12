@@ -157,8 +157,12 @@ namespace MsptiMstxApi {
 
 static bool IsMsgValid(const char* msg)
 {
-    if (msg == nullptr || strnlen(msg, MAX_MARK_MSG_LEN + 1) > MAX_MARK_MSG_LEN) {
-        MSPTI_LOGE("Input Params msg is invalid");
+    if (msg == nullptr) {
+        MSPTI_LOGE("Input Params msg is null");
+        return false;
+    }
+    if (strnlen(msg, MAX_MARK_MSG_LEN) == MAX_MARK_MSG_LEN) {
+        MSPTI_LOGE("Input Params msg length exceeds the maximum value %d", MAX_MARK_MSG_LEN);
         return false;
     }
     return true;

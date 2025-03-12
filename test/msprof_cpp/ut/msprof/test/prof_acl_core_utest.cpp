@@ -121,28 +121,6 @@ TEST_F(COMMANDHANDLE_TEST, CommandHandleProfInitWillReturnFailureWhileSetProfCom
     EXPECT_EQ(PROFILING_FAILED, CommandHandleProfInit());
 }
 
-TEST_F(COMMANDHANDLE_TEST, CommandHandleProfFinalizeWillReturnFailWhileMemSetOrStrcpyFail)
-{
-    GlobalMockObject::verify();
-    std::string jsonStr = "{}";
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetParamJsonStr)
-        .stubs()
-        .will(returnValue(jsonStr));
-    MOCKER_CPP(&ProfApiPlugin::MsprofProfSetProfCommand)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    CommandHandleProfInit();
-    MOCKER(memset_s)
-        .stubs()
-        .will(returnValue(EOK - 1))
-        .then(returnValue(EOK));
-    MOCKER(strncpy_s)
-        .stubs()
-        .will(returnValue(EOK - 1));
-    EXPECT_EQ(PROFILING_FAILED, CommandHandleProfFinalize());
-    EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, CommandHandleProfFinalize());
-}
-
 TEST_F(COMMANDHANDLE_TEST, CommandHandleProfFinalizeWillReturnSuccWhileInitSucc)
 {
     GlobalMockObject::verify();

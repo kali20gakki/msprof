@@ -48,10 +48,10 @@ class TestMsprofTxParser(unittest.TestCase):
     def make_msproftx_data(cls):
         tx_data = [23130] + [0] * 5 + \
                   [0, 0, 0, 0, 0, 153729, 153789, 0, 1, 0, 0, 8675044945407, 8675044945407, 3, 1, 0] + \
-                  [b's' * 127 + b'\0'] + [0] * 28
+                  [b's' * 155 + b'\0']
         tx_ex_data = [23130] + [0] * 5 + \
                      [1, 0, 0, 0, 0, 153729, 153789, 0, 1, 0, 0, 8675044945407, 8675044945407, 3, 1, 0] + \
-                     [b's' * 127 + b'\0'] + [0] * 28
+                     [b's' * 155 + b'\0']
         msproftx_data = [tx_data, tx_ex_data]
         with FdOpen(os.path.join(cls.DATA_PATH, "aging.additional.msproftx.slice_0"), operate="wb") as f:
             for data in msproftx_data:
