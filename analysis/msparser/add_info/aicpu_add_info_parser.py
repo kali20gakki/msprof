@@ -188,7 +188,7 @@ class AicpuAddInfoParser(DataParser, MsMultiProcess):
     def get_kfc_hccl_info_data(self: any, aicpu_info: AicpuAddInfoBean) -> list:
         result = []
         for kfc_hccl_info in [aicpu_info.data.first_hccl_info, aicpu_info.data.second_hccl_info]:
-            if kfc_hccl_info.group_name == 0:
+            if kfc_hccl_info.group_name == "0":
                 continue
             role = trans_enum_name(RoleType, kfc_hccl_info.role)
             op_type = trans_enum_name(OpType, kfc_hccl_info.op_type)
