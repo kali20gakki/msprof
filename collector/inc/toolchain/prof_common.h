@@ -147,7 +147,7 @@ struct MsprofStaticOpMem {
  * @brief struct of data reported by msproftx
  */
 #define UIF_VALUE_LEN 2
-#define MAX_MESSAGE_LEN 128
+#define MAX_MESSAGE_LEN 156
 struct MsprofStampInfo {
     uint16_t magicNumber;
     uint16_t dataTag;

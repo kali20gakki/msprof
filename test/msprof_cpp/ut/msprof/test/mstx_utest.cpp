@@ -196,15 +196,33 @@ TEST_F(MstxUtest, MstxMarkAFuncWillReturnWhenMsgIsLongerThanMaxLen)
     EXPECT_EQ(0, g_txdataList_.size());
 }
 
-TEST_F(MstxUtest, MstxMarkAFuncWillReturnWhenMsgContainsSpecialCharacter)
+TEST_F(MstxUtest, MstxMarkAFuncWillReturnWhenInputCommunicationDataMsgLengthLargerThanMaxValue)
 {
+    // 校验框架内置通信打点数据
     GlobalMockObject::verify();
     MstxDataHandler::instance()->Start();
     aclrtStream stream;
-    const char* msg = "record&";
-    MsprofMstxApi::MstxMarkAFunc(msg, stream);
+    std::string msg = "{\\\"count\\\": \\\"16\\\",\\\"dataType\\\": \\\"fp32\\\",\
+                        \\\"groupName\\\": \\\"hccl_world_groupxxxxxxxxxx\\\",\\\"opName\\\": \\\"HcclSend\\\",\
+                        \\\"DestRank\\\": \\\"10000\\\",\
+                        \\\"streamId\\\": \\\"0\\\"}";
+    MsprofMstxApi::MstxMarkAFunc(msg.c_str(), nullptr);
     MstxDataHandler::instance()->Stop();
     EXPECT_EQ(0, g_txdataList_.size());
+}
+
+TEST_F(MstxUtest, MstxMarkAFuncWillReturnWhenInputCommunicationDataMsgLengthSmallerThanMaxValue)
+{
+    // 校验框架内置通信打点数据
+    GlobalMockObject::verify();
+    MstxDataHandler::instance()->Start();
+    aclrtStream stream;
+    std::string msg = "{\\\"count\\\": \\\"16\\\",\\\"dataType\\\": \\\"fp32\\\",\
+                        \\\"groupName\\\": \\\"group\\\",\\\"opName\\\": \\\"HcclAllreduce\\\",\
+                        \\\"streamId\\\": \\\"0\\\"}";
+    MsprofMstxApi::MstxMarkAFunc(msg.c_str(), nullptr);
+    MstxDataHandler::instance()->Stop();
+    EXPECT_EQ(1, g_txdataList_.size());
 }
 
 TEST_F(MstxUtest, MstxMarkAFuncWillReturnWhenRtProfilerTraceExFail)

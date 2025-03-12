@@ -10,6 +10,7 @@
  * *****************************************************************************
 */
 #include "mstx_inject.h"
+#include <algorithm>
 #include <unordered_map>
 #include "msprof_dlog.h"
 #include "errno/error_code.h"
@@ -100,10 +101,45 @@ namespace MsprofMstxApi {
 constexpr uint64_t MSTX_MODEL_ID = 0xFFFFFFFFU;
 constexpr uint16_t MSTX_TAG_ID = 11;
 
-static bool IsMsgValid(const char* msg)
+static bool GetMsgPtrToSave(const char* oriMsg, SHARED_PTR_ALIA<std::string> &saveMsg)
 {
-    if (msg == nullptr || strnlen(msg, MAX_MESSAGE_LEN) == MAX_MESSAGE_LEN) {
-        MSPROF_LOGE("Input Params msg is invalid");
+    if (oriMsg == nullptr) {
+        MSPROF_LOGE("Input Params msg is null");
+        return false;
+    }
+    /*
+    pytorch/mindspore 内置通信打点数据样例如下:
+    "{\\\"count\\\": \\\"16\\\",\\\"dataType\\\": \\\"fp32\\\",\\\"groupName\\\": \\\"hccl_world_group\\\",
+      \\\"opName\\\": \\\"HcclSend\\\",\\\"destRank\\\": \\\"10000\\\",\\\"streamId\\\": \\\"0\\\"}"
+    长度可能超过MAX_MESSAGE_LEN, 因此需要删除\符号以减小数据长度，保证数据不截断
+    */
+    if (*oriMsg != '{') {
+        if (strnlen(oriMsg, MAX_MESSAGE_LEN) == MAX_MESSAGE_LEN) {
+            MSPROF_LOGE("Input Params msg length exceeds the maximum value %d", MAX_MESSAGE_LEN);
+            return false;
+        }
+        return true;
+    }
+    SHARED_PTR_ALIA<std::string> saveMsgStr;
+    MSVP_MAKE_SHARED1_RET(saveMsgStr, std::string, oriMsg, false);
+    saveMsgStr->erase(std::remove(saveMsgStr->begin(), saveMsgStr->end(), '\\'), saveMsgStr->end());
+    if (strnlen(saveMsgStr->c_str(), MAX_MESSAGE_LEN) == MAX_MESSAGE_LEN) {
+        MSPROF_LOGE("Input Params msg length exceeds the maximum value %d", MAX_MESSAGE_LEN);
+        return false;
+    }
+    saveMsg = std::move(saveMsgStr);
+    return true;
+}
+
+static bool IsDomainNameValid(const char* name)
+{
+    if (name == nullptr) {
+        MSPROF_LOGE("Input Params domain name is null");
+        return false;
+    }
+    constexpr size_t maxDomainNameLen = 1024;
+    if (strnlen(name, maxDomainNameLen) == maxDomainNameLen) {
+        MSPROF_LOGE("Input Params domain name length exceeds the maximum value %d", maxDomainNameLen);
         return false;
     }
     return true;
@@ -178,11 +214,16 @@ void MstxMarkAFunc(const char* msg, aclrtStream stream)
         MSPROF_LOGW("Mstx data handler is not started");
         return;
     }
-    if (!IsMsgValid(msg)) {
+    SHARED_PTR_ALIA<std::string> saveMsg = nullptr;
+    if (!GetMsgPtrToSave(msg, saveMsg)) {
         return;
     }
     auto domainNameHash = MstxDomainMgr::instance()->GetDefaultDomainNameHash();
-    MsTxMarkAImpl(msg, stream, domainNameHash);
+    if (saveMsg != nullptr) {
+        MsTxMarkAImpl(saveMsg->c_str(), stream, domainNameHash);
+    } else {
+        MsTxMarkAImpl(msg, stream, domainNameHash);
+    }
 }
 
 uint64_t MstxRangeStartAFunc(const char* msg, aclrtStream stream)
@@ -192,7 +233,8 @@ uint64_t MstxRangeStartAFunc(const char* msg, aclrtStream stream)
         MSPROF_LOGW("Mstx data handler is not started");
         return MSTX_INVALID_RANGE_ID;
     }
-    if (!IsMsgValid(msg)) {
+    SHARED_PTR_ALIA<std::string> saveMsg = nullptr;
+    if (!GetMsgPtrToSave(msg, saveMsg)) {
         return MSTX_INVALID_RANGE_ID;
     }
     uint64_t mstxEventId = MsprofTxManager::instance()->GetEventId();
@@ -202,7 +244,11 @@ uint64_t MstxRangeStartAFunc(const char* msg, aclrtStream stream)
         return MSTX_INVALID_RANGE_ID;
     }
     auto domainNameHash = MstxDomainMgr::instance()->GetDefaultDomainNameHash();
-    return MsTxRangeStartAImpl(msg, stream, domainNameHash);
+    if (saveMsg != nullptr) {
+        return MsTxRangeStartAImpl(saveMsg->c_str(), stream, domainNameHash);
+    } else {
+        return MsTxRangeStartAImpl(msg, stream, domainNameHash);
+    }
 }
 
 void MstxRangeEndFunc(uint64_t id)
@@ -220,7 +266,7 @@ void MstxRangeEndFunc(uint64_t id)
 
 mstxDomainHandle_t MstxDomainCreateAFunc(const char* name)
 {
-    if (!IsMsgValid(name)) {
+    if (!IsDomainNameValid(name)) {
         return nullptr;
     }
     return MstxDomainMgr::instance()->CreateDomainHandle(name);
@@ -237,7 +283,8 @@ void MstxDomainMarkAFunc(mstxDomainHandle_t domain, const char* msg, aclrtStream
         MSPROF_LOGW("Mstx data handler is not started");
         return;
     }
-    if ((!IsMsgValid(msg))) {
+    SHARED_PTR_ALIA<std::string> saveMsg = nullptr;
+    if (!GetMsgPtrToSave(msg, saveMsg)) {
         return;
     }
     uint64_t domainNameHash = 0;
@@ -245,7 +292,11 @@ void MstxDomainMarkAFunc(mstxDomainHandle_t domain, const char* msg, aclrtStream
         MSPROF_LOGE("Failed to find domain name for %s", __func__);
         return;
     }
-    MsTxMarkAImpl(msg, stream, domainNameHash);
+    if (saveMsg != nullptr) {
+        MsTxMarkAImpl(saveMsg->c_str(), stream, domainNameHash);
+    } else {
+        MsTxMarkAImpl(msg, stream, domainNameHash);
+    }
 }
 
 uint64_t MstxDomainRangeStartAFunc(mstxDomainHandle_t domain, const char* msg, aclrtStream stream)
@@ -254,7 +305,8 @@ uint64_t MstxDomainRangeStartAFunc(mstxDomainHandle_t domain, const char* msg, a
         MSPROF_LOGW("Mstx data handler is not started");
         return MSTX_INVALID_RANGE_ID;
     }
-    if ((!IsMsgValid(msg))) {
+    SHARED_PTR_ALIA<std::string> saveMsg = nullptr;
+    if (!GetMsgPtrToSave(msg, saveMsg)) {
         return MSTX_INVALID_RANGE_ID;
     }
     uint64_t domainNameHash = 0;
@@ -262,7 +314,11 @@ uint64_t MstxDomainRangeStartAFunc(mstxDomainHandle_t domain, const char* msg, a
         MSPROF_LOGE("Failed to find domain name for %s", __func__);
         return MSTX_INVALID_RANGE_ID;
     }
-    return MsTxRangeStartAImpl(msg, stream, domainNameHash);
+    if (saveMsg != nullptr) {
+        return MsTxRangeStartAImpl(saveMsg->c_str(), stream, domainNameHash);
+    } else {
+        return MsTxRangeStartAImpl(msg, stream, domainNameHash);
+    }
 }
 
 void MstxDomainRangeEndFunc(mstxDomainHandle_t domain, uint64_t id)

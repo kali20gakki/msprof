@@ -89,7 +89,7 @@ class StructFmt:
     TASK_NUM_OFFSET = struct.calcsize(BYTE_ORDER_CHAR + API_CALL_FMT[:-1])
 
     # msproftx
-    MSPROFTX_FMT = 'HH3IQ2HI2H4Ii5Qi128s28B'
+    MSPROFTX_FMT = 'HH3IQ2HI2H4Ii5Qi156s'
     MSPROFTX_FMT_SIZE = struct.calcsize(BYTE_ORDER_CHAR + MSPROFTX_FMT)
 
     # ge

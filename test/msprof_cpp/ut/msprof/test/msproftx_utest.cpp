@@ -164,7 +164,7 @@ TEST_F(MsprofTxUtest, MsprofTxManager)
     
     EXPECT_EQ(PROFILING_FAILED, manager->SetStampTraceMessage(nullptr, msg.c_str(), 0));
 
-    EXPECT_EQ(PROFILING_FAILED, manager->SetStampTraceMessage(stamp, msg.c_str(), 129)); // 129 invalid msg len
+    EXPECT_EQ(PROFILING_FAILED, manager->SetStampTraceMessage(stamp, msg.c_str(), 157)); // 157 invalid msg len
 
     EXPECT_EQ(PROFILING_SUCCESS, manager->SetStampTraceMessage(stamp, msg.c_str(), msg.size()));
 
