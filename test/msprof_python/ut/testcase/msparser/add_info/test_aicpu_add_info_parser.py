@@ -160,10 +160,10 @@ class TestAicpuAddInfoParser(unittest.TestCase):
         self.assertEqual(1, len(data))
         self.assertEqual(1000, data[0][5])
 
-    def test_parse_should_return_kfc_hccl_info_data_when_type_6(self):
+    def test_parse_should_return_kfc_hccl_info_data_when_type_13(self):
         InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}]}
         aicpu_data = [23130, 6000, 13, 1, 128, 20000] + \
-                     [12345, 0, 0, 0, 8, 8, 0, 4294967295, 255143588, 0.1, 0, 0, 8, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+                     [12345, 0, 123, 0, 8, 8, 0, 4294967295, 255143588, 0.1, 0, 0, 8, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1,
                       255, 0, 0, 0, 0, 0, 0, 0, 0, 0] + \
                      [12345, 0, 0, 0, 8, 8, 0, 4294967295, 255144588, 0.1, 0, 0, 8, 3, 0, 1, 1, 1, 1, 1, 1, 1, 1,
                       255, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -174,11 +174,9 @@ class TestAicpuAddInfoParser(unittest.TestCase):
             check.parse()
             check.save()
         data = check._aicpu_data.get(AicpuAddInfoBean.KFC_HCCL_INFO, [])
-        self.assertEqual(2, len(data))  # 拆分成了2条数据
+        self.assertEqual(1, len(data))  # 拆分成了2条数据,但是第二条因为groupname是"0",被过滤
         self.assertEqual("MUL", data[0][17])
         self.assertEqual("RDMA_SEND_PAYLOAD", data[0][21])
-        self.assertEqual("MUL", data[1][17])
-        self.assertEqual("RDMA_SEND_PAYLOAD", data[1][21])
         InfoConfReader()._info_json = {}
 
     def test_parse_should_return_device_hccl_op_info_data_when_type_10(self):
