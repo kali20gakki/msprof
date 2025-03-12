@@ -136,19 +136,19 @@ bool ExportManager::Run(ExportMode exportMode)
     }
     DataInventory dataInventory;
     bool runFlag = ProcessData(dataInventory);
-    std::string outputPath = File::PathJoin({profPath_, OUTPUT_PATH});
-    if (!File::Exist(outputPath) && !File::CreateDir(outputPath)) {
-        ERROR("Create mindstudio_profiler_output error, can't export data");
-        PRINT_ERROR("Create mindstudio_profiler_output error, can't export data");
-        return false;
-    }
-    const std::map<ExportMode, std::function<bool(const std::string&, DataInventory&)>> operationMap = {
-        {ExportMode::DB,       [this](const std::string& outputPath, DataInventory& dataInventory) -> bool {
+    const std::map<ExportMode, std::function<bool(DataInventory&)>> operationMap = {
+        {ExportMode::DB,       [this](DataInventory& dataInventory) -> bool {
             auto dbPath = GetDBPath(profPath_);
             DBAssembler dbAssembler(dbPath, profPath_);
             return dbAssembler.Run(dataInventory);
         }},
-        {ExportMode::TIMELINE, [this](const std::string& outputPath, DataInventory& dataInventory) -> bool {
+        {ExportMode::TIMELINE, [this](DataInventory& dataInventory) -> bool {
+            std::string outputPath = File::PathJoin({profPath_, OUTPUT_PATH});
+            if (!File::Exist(outputPath) && !File::CreateDir(outputPath)) {
+                ERROR("Create mindstudio_profiler_output error, can't export data");
+                PRINT_ERROR("Create mindstudio_profiler_output error, can't export data");
+                return false;
+            }
             TimelineManager timelineManager(profPath_, outputPath);
             std::vector<JsonProcess> jsonProcesses = GetProcessEnum();
             return timelineManager.Run(dataInventory, jsonProcesses);
@@ -156,7 +156,7 @@ bool ExportManager::Run(ExportMode exportMode)
     };
     auto iter = operationMap.find(exportMode);
     if (iter != operationMap.end()) {
-        runFlag = iter->second(outputPath, dataInventory) && runFlag;
+        runFlag = iter->second(dataInventory) && runFlag;
     }
     return runFlag;
 }
