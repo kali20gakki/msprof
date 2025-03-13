@@ -24,11 +24,11 @@ public:
     CtrlFilesDumper();
     virtual ~CtrlFilesDumper();
 
-    int DumpCollectionTimeInfo(SHARED_PTR_ALIA <analysis::dvvp::message::ProfileParams> params, bool isStartTime);
+    int DumpCollectionTimeInfo(uint32_t devId, bool isHostProfiling, bool isStartTime);
 
 private:
-    void GenerateCollectionTimeInfoName(bool isStartTime, std::string &filename,
-                                        SHARED_PTR_ALIA <analysis::dvvp::message::ProfileParams> params);
+    void GenerateCollectionTimeInfoName(std::string& filename, const std::string& deviceId,
+                                        bool isHostProfiling, bool isStartTime);
 
     std::string GetHostTime();
 };
