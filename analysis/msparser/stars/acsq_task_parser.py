@@ -46,7 +46,8 @@ class AcsqTaskParser(IStarsParser):
 
         matched_result = []
         remaining_data = []
-        mismatch_count = 0
+        mismatch_start_count = 0
+        mismatch_end_count = 0
         for data_key, data_dict in task_map.items():
             start_que = data_dict.get(StarsConstant.ACSQ_START_FUNCTYPE, [])
             end_que = data_dict.get(StarsConstant.ACSQ_END_FUNCTYPE, [])
@@ -54,7 +55,7 @@ class AcsqTaskParser(IStarsParser):
                 start_task = start_que[0]
                 end_task = end_que[0]
                 if start_task.sys_cnt > end_task.sys_cnt:
-                    mismatch_count += 1
+                    mismatch_end_count += 1
                     _ = end_que.popleft()
                     continue
                 start_task = start_que.popleft()
@@ -67,15 +68,17 @@ class AcsqTaskParser(IStarsParser):
             if len(start_que) > 1 or end_que:
                 logging.debug("Acsq task mismatch happen in %s, start_que size: %d, end_que size: %d",
                               data_key, len(start_que), len(end_que))
-                mismatch_count += len(start_que)
-                mismatch_count += len(end_que)
+                mismatch_start_count += len(start_que)
+                mismatch_end_count += len(end_que)
                 # when mismatched, discards illegal task
                 continue
             while start_que:
                 start_task = start_que.popleft()
                 remaining_data.append(start_task)
-        if mismatch_count > 0:
-            logging.error("There are %d acsq tasks mismatching.", mismatch_count)
+        if mismatch_end_count > 0:
+            logging.warning("There are %d acsq end logs mismatching.", mismatch_end_count)
+        if mismatch_start_count > 0:
+            logging.error("There are %d acsq start logs mismatching.", mismatch_start_count)
 
         return sorted(matched_result, key=lambda data: data[4]), remaining_data
 

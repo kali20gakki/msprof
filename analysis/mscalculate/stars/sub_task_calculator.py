@@ -67,7 +67,8 @@ class SubTaskCalculator(MsMultiProcess):
             task_key = "{0}-{1}-{2}-{3}".format(data.stream_id, data.task_id, data.subtask_id, data.thread_id)
             task_map.setdefault(task_key, {}).setdefault(data.task_type, deque([])).append(data)
         matched_result = []
-        mismatch_count = 0
+        mismatch_start_count = 0
+        mismatch_end_count = 0
         notify_mismatch = 0
         for task_key, data in task_map.items():
             start_que = data.get(StarsConstant.FFTS_LOG_START_TAG, [])
@@ -76,7 +77,7 @@ class SubTaskCalculator(MsMultiProcess):
                 start_task = start_que[0]
                 end_task = end_que[0]
                 if start_task.task_time > end_task.task_time:
-                    mismatch_count += 1
+                    mismatch_end_count += 1
                     _ = end_que.popleft()
                     continue
                 start_task = start_que.popleft()
@@ -97,12 +98,14 @@ class SubTaskCalculator(MsMultiProcess):
             if start_que or end_que:
                 logging.debug("subtask_time task mismatch happen in %s, start_que size: %d, end_que size: %d",
                               task_key, len(start_que), len(end_que))
-                mismatch_count += len(start_que)
-                mismatch_count += len(end_que)
+                mismatch_start_count += len(start_que)
+                mismatch_end_count += len(end_que)
+        if mismatch_end_count > 0:
+            logging.warning("There are %d subtask_time end logs mismatching.", mismatch_end_count)
         if notify_mismatch > 0:
             logging.error("There are %d notify wait mismatching.", notify_mismatch)
-        if mismatch_count > 0:
-            logging.error("There are %d subtask_time tasks mismatching.", mismatch_count)
+        if mismatch_start_count > 0:
+            logging.error("There are %d subtask_time start logs mismatching.", mismatch_start_count)
         return sorted(matched_result, key=lambda data: data[5])  # data[5] represents subtask start time
 
     def ms_run(self: any) -> None:
