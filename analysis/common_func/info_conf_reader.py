@@ -436,6 +436,15 @@ class InfoConfReader:
         res = res.quantize(decimal.Decimal('0.000'))
         return str(res)
 
+    def trans_from_local_time_into_dev_raw_time(self: any, local_time: int, is_host: bool = False) -> int:
+        """
+        transfer local time into raw time(ns)
+        return: raw_timestamp(int)
+        """
+        res = (Decimal(local_time) - Decimal(str(self.get_local_time_offset(is_host)))) * \
+            Decimal(NumberConstant.NS_TO_US)
+        return int(res)
+
     def get_local_time_offset(self: any, is_host: bool = False) -> float:
         """
         get the offset between local time and monotonic raw

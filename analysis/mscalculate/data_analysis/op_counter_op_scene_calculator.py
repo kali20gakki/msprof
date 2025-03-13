@@ -49,15 +49,17 @@ class OpCounterOpSceneCalculator(MsMultiProcess):
 
     @staticmethod
     def _get_op_report_sql() -> str:
+        start_ts, _ = InfoConfReader().get_collect_time()
+        start_time_raw_timestamp = InfoConfReader().trans_from_local_time_into_dev_raw_time(start_ts)
         sql = "select op_type, {0}.task_type, count(op_type), sum(duration) as total_time, " \
               "min(duration) as min, sum(duration)/count(op_type) as avg, max(duration) as max" \
               " from {0}, {1} where {0}.task_id={1}.task_id and {0}.stream_id={1}.stream_id " \
               "and {0}.batch_id={1}.batch_id " \
               "and {0}.context_id={1}.subtask_id " \
-              "and {1}.start_time != {2} " \
+              "and {1}.start_time > {2} " \
               "group by op_type,{0}.task_type" \
             .format(DBNameConstant.TABLE_OP_COUNTER_GE_MERGE, DBNameConstant.TABLE_OP_COUNTER_RTS_TASK,
-                    NumberConstant.INVALID_TASK_TIME)
+                    start_time_raw_timestamp)
         return sql
 
     @staticmethod
