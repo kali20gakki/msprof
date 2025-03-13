@@ -6,6 +6,7 @@ import unittest
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.platform.chip_manager import ChipManager
 from constant.constant import CONFIG
 from mscalculate.data_analysis.op_counter_op_scene_calculator import OpCounterOpSceneCalculator
@@ -17,6 +18,15 @@ NAMESPACE = 'mscalculate.data_analysis.op_counter_op_scene_calculator'
 
 
 class TestOpCounterOpSceneCalculator(unittest.TestCase):
+
+    def setUp(self):
+        InfoConfReader()._info_json = {}
+        InfoConfReader()._start_info = {StrConstant.COLLECT_TIME_BEGIN: "1"}
+        InfoConfReader()._end_info = {}
+        InfoConfReader()._local_time_offset = 0
+
+    def tearDown(self):
+        InfoConfReader()._start_info = {}
 
     def test_process(self):
         setattr(InfoConfReader(), "_info_json", {'devices': '0'})
@@ -167,7 +177,7 @@ class TestOpCounterOpSceneCalculator(unittest.TestCase):
                        "from ge_task_merge, rts_task where ge_task_merge.task_id=rts_task.task_id " \
                        "and ge_task_merge.stream_id=rts_task.stream_id and ge_task_merge.batch_id=rts_task.batch_id " \
                        "and ge_task_merge.context_id=rts_task.subtask_id " \
-                       "and rts_task.start_time != -1 " \
+                       "and rts_task.start_time > 1000 " \
                        "group by op_type,ge_task_merge.task_type"
         self.assertEqual(result, expected_sql)
 

@@ -3,6 +3,8 @@ from unittest import mock
 
 import pytest
 
+from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_exception import ProfException
 from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
@@ -21,6 +23,14 @@ NAMESPACE = 'mscalculate.data_analysis.merge_op_counter_calculator'
 
 
 class TestMergeOpCounterCalculator(unittest.TestCase):
+    def setUp(self):
+        InfoConfReader()._info_json = {}
+        InfoConfReader()._start_info = {StrConstant.COLLECT_TIME_BEGIN: "1"}
+        InfoConfReader()._end_info = {}
+        InfoConfReader()._local_time_offset = 0
+
+    def tearDown(self):
+        InfoConfReader()._start_info = {}
 
     def test_ms_run(self):
         with mock.patch(NAMESPACE + '.MergeOpCounterCalculator.process'):
@@ -144,7 +154,7 @@ class TestMergeOpCounterCalculator(unittest.TestCase):
                          "where ge_task_merge.task_id=rts_task.task_id and ge_task_merge.stream_id=rts_task.stream_id "
                          "and ge_task_merge.batch_id=rts_task.batch_id "
                          "and ge_task_merge.context_id=rts_task.subtask_id "
-                         "and rts_task.start_time != -1 "
+                         "and rts_task.start_time > 1000 "
                          "group by op_type,ge_task_merge.task_type",
                          result)
 
@@ -211,5 +221,3 @@ class TestMergeOpCounterCalculator(unittest.TestCase):
                     db_open.db_curs.execute("select model_name from {}".format(TABLE_OP_COUNTER_OP_REPORT)).fetchone()[
                         0]
                 self.assertEqual("model_1", model_name)
-
-
