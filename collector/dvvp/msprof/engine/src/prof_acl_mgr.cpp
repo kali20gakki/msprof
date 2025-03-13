@@ -399,18 +399,13 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
 
 void ProfAclMgr::MsprofDumpStartInfoFile(uint32_t devId)
 {
-    std::string devIdStr = std::to_string(devId);
-    MSPROF_LOGI("Process dump start info for device %s", devIdStr);
-    if (devId == DEFAULT_HOST_ID) {
-        params_->host_profiling = true;
+    // 订阅模式不需要落盘
+    if (params_->isSubscribe) {
+        return;
     }
-    params_->job_id = devIdStr;
-    params_->devices = devIdStr;
-    params_->result_dir = GenerateDevDirName(devIdStr);
 
-    auto paramsHandled = ProfManager::instance()->HandleProfilingParams(params_->ToString());
-    CtrlFilesDumper::instance()->DumpCollectionTimeInfo(paramsHandled, true);
-    params_->host_profiling = false;
+    MSPROF_LOGI("Process dump start info for device %u", devId);
+    CtrlFilesDumper::instance()->DumpCollectionTimeInfo(devId, (devId == DEFAULT_HOST_ID), true);
 }
 
 

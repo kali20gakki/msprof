@@ -35,12 +35,9 @@ using namespace analysis::dvvp::proto;
 CtrlFilesDumper::CtrlFilesDumper() {}
 CtrlFilesDumper::~CtrlFilesDumper() {}
 
-int CtrlFilesDumper::DumpCollectionTimeInfo(SHARED_PTR_ALIA <analysis::dvvp::message::ProfileParams> params,
-                                            bool isStartTime)
+int CtrlFilesDumper::DumpCollectionTimeInfo(uint32_t devId, bool isHostProfiling, bool isStartTime)
 {
-    if (params->isSubscribe) {
-        return PROFILING_SUCCESS;
-    }
+    std::string devIdStr = std::to_string(devId);
     auto collectionTime = GetHostTime();
     MSPROF_LOGI("[DumpCollectionTimeInfo]collectionTime:%s us, isStartTime:%d", collectionTime.c_str(), isStartTime);
     // time to unix
@@ -59,15 +56,14 @@ int CtrlFilesDumper::DumpCollectionTimeInfo(SHARED_PTR_ALIA <analysis::dvvp::mes
     MSPROF_LOGI("[DumpCollectionTimeInfo]content:%s", content.c_str());
     SHARED_PTR_ALIA <analysis::dvvp::message::JobContext> jobCtx = nullptr;
     MSVP_MAKE_SHARED0_RET(jobCtx, analysis::dvvp::message::JobContext, PROFILING_FAILED);
-    jobCtx->job_id = params->job_id;
+    jobCtx->job_id = devIdStr;
     std::string fileName;
-    GenerateCollectionTimeInfoName(isStartTime, fileName, params);
+    GenerateCollectionTimeInfoName(fileName, devIdStr, isHostProfiling, isStartTime);
     analysis::dvvp::transport::FileDataParams fileDataParams(fileName, true,
                                                              FileChunkDataModule::PROFILING_IS_CTRL_DATA);
-    MSPROF_LOGI("[DumpCollectionTimeInfo]job_id: %s,fileName: %s", params->job_id.c_str(), fileName.c_str());
-    int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadCtrlFileData(params->job_id,
-                                                                                     content, fileDataParams,
-                                                                                     jobCtx);
+    MSPROF_LOGI("[DumpCollectionTimeInfo]job_id: %s,fileName: %s", devIdStr.c_str(), fileName.c_str());
+    int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadCtrlFileData(devIdStr, content,
+                                                                                     fileDataParams, jobCtx);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to upload data for %s", fileName.c_str());
         MSPROF_INNER_ERROR("EK9999", "Failed to upload data for %s", fileName.c_str());
@@ -94,13 +90,13 @@ std::string CtrlFilesDumper::GetHostTime()
     return hostTime;
 }
 
-void CtrlFilesDumper::GenerateCollectionTimeInfoName(bool isStartTime, std::string &filename,
-                                                     SHARED_PTR_ALIA <analysis::dvvp::message::ProfileParams> params)
+void CtrlFilesDumper::GenerateCollectionTimeInfoName(std::string& filename, const std::string& devIdStr,
+                                                     bool isHostProfiling, bool isStartTime)
 {
     std::string filePrefix = (isStartTime) ? "start_info" : "end_info";
     filename.append(filePrefix);
-    if (!(params->host_profiling)) {
-        filename.append(".").append(params->devices);
+    if (!isHostProfiling) {
+        filename.append(".").append(devIdStr);
     }
 }
 
