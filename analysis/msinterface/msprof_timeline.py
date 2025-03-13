@@ -211,8 +211,8 @@ class MsprofTimeline:
         self._iter_range = iter_range
         self._model_id = iter_range.model_id
         if ProfilingScene().is_all_export():
-            start_time, end_time = InfoConfReader().get_collect_time()
-            self._iteration_time = (float(start_time), float(end_time))
+            start_time, _ = InfoConfReader().get_collect_time()
+            self._iteration_time = (float(start_time), float('inf'))  # 结束时间设置为无穷大
         else:
             start_time, end_time = MsprofIteration(result_dir).get_iter_interval(iter_range,
                                                                                  NumberConstant.MICRO_SECOND)

@@ -163,24 +163,31 @@ size_t PmuAssociation::MergeBlockPmuToDeviceTask(std::vector<HalPmuData*>& pmuDa
 void PmuAssociation::AssociationByPmuType(std::map<TaskId, std::vector<DeviceTask>>& deviceTask,
                                           DataInventory& dataInventory, const DeviceContext& context)
 {
+    bool isNeedRecordLost = false;
     for (auto& pmu : contextPmuTask_) {
         auto it = deviceTask.find(pmu.first);
-        if (it != deviceTask.end()) {
-            std::sort(pmu.second.begin(), pmu.second.end(), [](HalPmuData* ld, HalPmuData* rd) {
-                return ld->hd.timestamp < rd->hd.timestamp;
-            });
-            MergeContextPmuToDeviceTask(pmu.second, it->second, dataInventory, context);
-        } else {
-            ERROR("contextPmu has no matched log taskId is %, streamId is %, contextId is %, batchId is %",
-                  pmu.first.taskId, pmu.first.streamId, pmu.first.contextId, pmu.first.batchId);
+        if (it == deviceTask.end()) {
+            if (isNeedRecordLost) {
+                ERROR("contextPmu has no matched log taskId is %, streamId is %, contextId is %, batchId is %",
+                      pmu.first.taskId, pmu.first.streamId, pmu.first.contextId, pmu.first.batchId);
+            }
+            continue;
         }
+        std::sort(pmu.second.begin(), pmu.second.end(), [](HalPmuData* ld, HalPmuData* rd) {
+            return ld->hd.timestamp < rd->hd.timestamp;
+        });
+        MergeContextPmuToDeviceTask(pmu.second, it->second, dataInventory, context);
+        isNeedRecordLost = true;
     }
+    isNeedRecordLost = false;
     INFO("Context PMU has been calculated!");
     for (auto& pmu : blockPmuTask_) {
         auto it = deviceTask.find(pmu.first);
         if (it == deviceTask.end()) {
-            ERROR("blockPmu has no matched log taskId is %, streamId is %, contextId is %, batchId is %",
-                  pmu.first.taskId, pmu.first.streamId, pmu.first.contextId, pmu.first.batchId);
+            if (isNeedRecordLost) {
+                ERROR("blockPmu has no matched log taskId is %, streamId is %, contextId is %, batchId is %",
+                      pmu.first.taskId, pmu.first.streamId, pmu.first.contextId, pmu.first.batchId);
+            }
             continue;
         }
         std::sort(it->second.begin(), it->second.end(), [](DeviceTask& lData, DeviceTask& rData) {
@@ -193,6 +200,7 @@ void PmuAssociation::AssociationByPmuType(std::map<TaskId, std::vector<DeviceTas
                 continue;
             }
             pmuIndex = MergeBlockPmuToDeviceTask(pmu.second, task, dataInventory, context);
+            isNeedRecordLost = true;
             if (pmuIndex == 0) {
                 break;
             }
