@@ -18,6 +18,37 @@ namespace Domain {
 using namespace Analysis::Domain::Environment;
 using namespace Analysis::Utils;
 
+
+bool isContainedInRange(const std::vector<ApiData> &modelLoadDatas, const ApiData &data)
+{
+    for (const auto& modelLoadData : modelLoadDatas) {
+        if (data.threadId == modelLoadData.threadId && data.timestamp >= modelLoadData.timestamp &&
+            data.end <= modelLoadData.end) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void FilterData(std::vector<ApiData> &datas, uint64_t startTimeNs, const std::string &processorName)
+{
+    INFO("There are % records before % data filtering, filterTime is %.", datas.size(), processorName, startTimeNs);
+    std::vector<ApiData> modelLoadDatas;
+    for (const auto& data : datas) {
+        if (data.apiName == "ModelLoad") {
+            modelLoadDatas.push_back(data);
+        }
+    }
+    datas.erase(std::remove_if(datas.begin(), datas.end(),
+                               [&modelLoadDatas, startTimeNs](const ApiData& data) {
+                                   bool inRange = isContainedInRange(modelLoadDatas, data);
+                                   bool isFiltered = data.timestamp >= startTimeNs;
+                                   return !(inRange || isFiltered);
+                               }),
+                datas.end());
+    INFO("There are % records after % data filtering.", datas.size(), processorName);
+}
+
 ApiProcessor::ApiProcessor(const std::string &profPath) : DataProcessor(profPath) {}
 
 bool ApiProcessor::Process(DataInventory &dataInventory)
@@ -54,7 +85,7 @@ bool ApiProcessor::Process(DataInventory &dataInventory)
         ERROR("format api data error");
         return false;
     }
-    FilterDataByStartTime(processedData, record.startTimeNs, PROCESSOR_NAME_API);
+    FilterData(processedData, record.startTimeNs, PROCESSOR_NAME_API); // 保留ModelLoad
     if (!SaveToDataInventory<ApiData>(std::move(processedData), dataInventory, PROCESSOR_NAME_API)) {
         ERROR("Save data failed, %.", PROCESSOR_NAME_API);
         return false;
