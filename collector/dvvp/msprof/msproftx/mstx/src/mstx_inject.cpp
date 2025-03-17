@@ -101,9 +101,16 @@ namespace MsprofMstxApi {
 constexpr uint64_t MSTX_MODEL_ID = 0xFFFFFFFFU;
 constexpr uint16_t MSTX_TAG_ID = 11;
 
+static bool IfStrStartsWithInvalidChar(const char* str)
+{
+    // 为防止tx数据引起csv注入安全问题，要校验首字符
+    static std::set<char> InvalidCharList = {'\0', '=', '+', '-', '@'};
+    return InvalidCharList.count(*str);
+}
+
 static bool GetMsgPtrToSave(const char* oriMsg, SHARED_PTR_ALIA<std::string> &saveMsg)
 {
-    if (oriMsg == nullptr) {
+    if (oriMsg == nullptr || IfStrStartsWithInvalidChar(oriMsg)) {
         MSPROF_LOGE("Input Params msg is null");
         return false;
     }
@@ -133,7 +140,7 @@ static bool GetMsgPtrToSave(const char* oriMsg, SHARED_PTR_ALIA<std::string> &sa
 
 static bool IsDomainNameValid(const char* name)
 {
-    if (name == nullptr) {
+    if (name == nullptr || IfStrStartsWithInvalidChar(name)) {
         MSPROF_LOGE("Input Params domain name is null");
         return false;
     }
