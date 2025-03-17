@@ -182,6 +182,11 @@ void OpSummaryAssembler::AddCubeUsage(std::vector<std::string> &data, std::unord
     }
     if (std::find(headers_.begin(), headers_.end(), "cube_utilization(%)") == headers_.end()) {
         headers_.emplace_back("cube_utilization(%)");
+        for (auto &row : res_) {
+            if (row.size() != headers_.size()) {
+                row.insert(row.end(), headers_.size() - row.size(), NA);
+            }
+        }
     }
     auto dur = 0.0;
     uint64_t cycle;
