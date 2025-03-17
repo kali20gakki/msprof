@@ -196,6 +196,17 @@ TEST_F(MstxUtest, MstxMarkAFuncWillReturnWhenMsgIsLongerThanMaxLen)
     EXPECT_EQ(0, g_txdataList_.size());
 }
 
+TEST_F(MstxUtest, MstxMarkAFuncWillReturnInputDataStartsWithInvalidChar)
+{
+    // 校验框架内置通信打点数据
+    GlobalMockObject::verify();
+    MstxDataHandler::instance()->Start();
+    std::string msg = "+";
+    MsprofMstxApi::MstxMarkAFunc(msg.c_str(), nullptr);
+    MstxDataHandler::instance()->Stop();
+    EXPECT_EQ(0, g_txdataList_.size());
+}
+
 TEST_F(MstxUtest, MstxMarkAFuncWillReturnWhenInputCommunicationDataMsgLengthLargerThanMaxValue)
 {
     // 校验框架内置通信打点数据
@@ -459,7 +470,15 @@ TEST_F(MstxUtest, MstxDomainCreateAFuncWillReturnNullWhenInputInvalidMsg)
 TEST_F(MstxUtest, MstxDomainCreateAFuncWillReturnHandleWhenInputValidMsg)
 {
     GlobalMockObject::verify();
-    auto handle = MsprofMstxApi::MstxDomainCreateAFunc("test");
+    auto handle = MsprofMstxApi::MstxDomainCreateAFunc(nullptr);
+    EXPECT_EQ(nullptr, handle);
+    EXPECT_EQ(0, MstxDomainMgr::domainHandleMap_.size());
+    
+    handle = MsprofMstxApi::MstxDomainCreateAFunc("+");
+    EXPECT_EQ(nullptr, handle);
+    EXPECT_EQ(0, MstxDomainMgr::domainHandleMap_.size());
+
+    handle = MsprofMstxApi::MstxDomainCreateAFunc("test");
     EXPECT_NE(nullptr, handle);
     EXPECT_EQ(1, MstxDomainMgr::domainHandleMap_.size());
 
