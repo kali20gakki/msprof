@@ -296,10 +296,5 @@ int32_t MsprofReporterMgr::StopReporters()
     return PROFILING_SUCCESS;
 }
 
-bool MsprofReporterMgr::IsStart()
-{
-    std::lock_guard<std::mutex> lk(startMtx_);
-    return isStarted_;
-}
 }
 }

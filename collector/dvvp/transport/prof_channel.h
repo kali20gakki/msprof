@@ -55,6 +55,7 @@ private:
     SHARED_PTR_ALIA<unsigned char> buffer_;
     size_t hashId_;
     SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx_;
+    long long warmupSize_;
     long long totalSize_;
     volatile bool isChannelStopped_;
     volatile bool isInited_;

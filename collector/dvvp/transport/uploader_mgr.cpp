@@ -157,7 +157,7 @@ int UploaderMgr::UploadData(const std::string &id, CONST_VOID_PTR data, uint32_t
 int UploaderMgr::UploadData(const std::string &id, SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
 {
     if (!IsUploadDataStart(id, fileChunkReq->fileName)) {
-        return PROFILING_SUCCESS;
+        return PROFILING_IN_WARMUP;
     }
 
     SHARED_PTR_ALIA<Uploader> uploader = nullptr;
