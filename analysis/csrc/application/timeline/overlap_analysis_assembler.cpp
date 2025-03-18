@@ -64,6 +64,8 @@ std::vector<std::shared_ptr<TraceEvent>> OverlapAnalysisAssembler::GenerateCompu
                                  DivideByPowersOfTenWithPrecision(task.start), COMP_NAME,
                                  OverlapType::COMPUTE);
         computeEvents.emplace_back(event);
+        begin_[deviceId] = std::min(begin_[deviceId], task.start);
+        end_[deviceId] = std::max(end_[deviceId], task.end);
     }
     return computeEvents;
 }
@@ -84,6 +86,8 @@ std::vector<std::shared_ptr<TraceEvent>> OverlapAnalysisAssembler::GenerateCommE
                                  (task.end - task.start) / NS_TO_US, DivideByPowersOfTenWithPrecision(task.start),
                                  COMM_NAME, OverlapType::COMMUNICATION);
         commEvents.emplace_back(event);
+        begin_[deviceId] = std::min(begin_[deviceId], task.start);
+        end_[deviceId] = std::max(end_[deviceId], task.end);
     }
     return commEvents;
 }
@@ -151,18 +155,6 @@ void OverlapAnalysisAssembler::RecordCompAndCommTaskTime(
 
             // 更新标记
             deviceIds_.insert(task.deviceId);
-            if (begin_.find(task.deviceId) == begin_.end()) {
-                begin_[task.deviceId] = task.timestamp;
-            } else {
-                begin_[task.deviceId] = std::min(begin_[task.deviceId], task.timestamp);
-            }
-
-            if (end_.find(task.deviceId) == end_.end()) {
-                end_[task.deviceId] = task.timestamp + static_cast<uint64_t>(task.duration);
-            } else {
-                end_[task.deviceId] = std::max(end_[task.deviceId],
-                                               task.timestamp + static_cast<uint64_t>(task.duration));
-            }
         }
     }
 
@@ -342,17 +334,6 @@ void OverlapAnalysisAssembler::GetCommTaskSections(
     for (auto &op : *commOps) {
         // 更新标记
         deviceIds_.insert(op.deviceId);
-        if (begin_.find(op.deviceId) == begin_.end()) {
-            begin_[op.deviceId] = op.timestamp;
-        } else {
-            begin_[op.deviceId] = std::min(begin_[op.deviceId], op.timestamp);
-        }
-
-        if (end_.find(op.deviceId) == end_.end()) {
-            end_[op.deviceId] = op.end;
-        } else {
-            end_[op.deviceId] = std::max(end_[op.deviceId], op.end);
-        }
         commOpSections[op.deviceId].emplace_back(op.timestamp, op.end);
     }
 }
@@ -430,6 +411,8 @@ void OverlapAnalysisAssembler::AssembleOneDevice(uint16_t deviceId, JsonWriter &
         commTaskRecords_.find(deviceId) == commTaskRecords_.end() ? std::vector<TimeDuration>()
                                                                   : commTaskRecords_[deviceId];
 
+    begin_[deviceId] = UINT64_MAX;
+    end_[deviceId] = 0;
     auto compEvents = GenerateComputeEvents(compSections, deviceId);
     auto commEvents = GenerateCommEvents(commSections, deviceId);
     auto commNotOverlapCompEvents = GenerateCommNotOverlapCompEvents(compSections, commSections, deviceId);
