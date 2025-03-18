@@ -67,7 +67,6 @@ public:
     int32_t SendAdditionalInfo(SHARED_PTR_ALIA<ProfileFileChunk> fileChunk);
     void NotifyQuit();
     void SetSyncReporter();
-    bool IsStart();
 
 private:
     void FillFileChunkData(const std::string &saveHashData, SHARED_PTR_ALIA<ProfileFileChunk> fileChunk,

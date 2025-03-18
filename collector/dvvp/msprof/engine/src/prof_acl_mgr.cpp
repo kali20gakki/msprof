@@ -1661,5 +1661,10 @@ int32_t ProfAclMgr::MsprofSetConfig(aclprofConfigType cfgType, std::string confi
     return PROFILING_SUCCESS;
 }
 
+bool ProfAclMgr::IsWarmuped()
+{
+    return isWarmuped_;
+}
+
 }   // namespace Api
 }   // namespace Msprofiler

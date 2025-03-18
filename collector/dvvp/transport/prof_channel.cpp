@@ -38,6 +38,7 @@ ChannelReader::ChannelReader(int deviceId,
       buffer_(nullptr),
       hashId_(0),
       jobCtx_(jobCtx),
+      warmupSize_(0),
       totalSize_(0),
       isChannelStopped_(false),
       isInited_(false),
@@ -74,8 +75,10 @@ int ChannelReader::Init()
 
 int ChannelReader::Uinit()
 {
-    MSPROF_EVENT("device id %d, channel: %d, total_size_channel: %lld, file:%s, job_id:%s, drvChannelReadCont:%lld",
-        deviceId_, static_cast<int>(channelId_), totalSize_,
+    // 业务保证totalSize_ - warmupSize_ 一定大于等于0
+    MSPROF_EVENT("device id %d, channel: %d, warmup_size: %lld, dump_size: %lld, total_size_channel: %lld, file:%s, "
+                 "job_id:%s, drvChannelReadCont:%lld",
+        deviceId_, static_cast<int>(channelId_),  warmupSize_, (totalSize_ - warmupSize_), totalSize_,
         relativeFileName_.c_str(), jobCtx_->job_id.c_str(), drvChannelReadCont_);
     std::string tag = "[" +  jobCtx_->job_id + " : " +
         std::to_string(deviceId_) + " : " + std::to_string(channelId_) + "]";
@@ -185,6 +188,8 @@ void ChannelReader::UploadData()
     if (ret == PROFILING_FAILED) {
         MSPROF_LOGE("Upload data failed, jobId: %s", jobCtx_->job_id.c_str());
         MSPROF_INNER_ERROR("EK9999", "Upload data failed, jobId: %s", jobCtx_->job_id.c_str());
+    } else if (ret == PROFILING_IN_WARMUP) {
+        warmupSize_ += static_cast<long long>(dataSize_);
     }
     dataSize_ = 0;
 }

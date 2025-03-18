@@ -13,6 +13,7 @@
 
 #include <condition_variable>
 #include <string>
+#include <atomic>
 #include "acl/acl_prof.h"
 #include "common/singleton/singleton.h"
 #include "common/thread/thread.h"
@@ -78,6 +79,7 @@ public:
     bool IsCmdMode();
     bool IsModeOff();
     bool IsSubscribeMode() const;
+    bool IsWarmuped();
 
     // api ctrl
     int ProfAclInit(const std::string& profResultPath);
@@ -210,8 +212,8 @@ private:
     PROF_CONF_CONST_PTR profStratCfg_;
     uint64_t dataTypeConfig_;
     uint64_t startIndex_;
-    bool isWarmuped_;
-    bool isStarted_;
+    std::atomic<bool> isWarmuped_;
+    std::atomic<bool> isStarted_;
 };
 } // namespace Api
 } // namespace Msprofiler

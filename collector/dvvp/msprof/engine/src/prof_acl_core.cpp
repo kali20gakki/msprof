@@ -26,7 +26,6 @@
 #include "profapi_plugin.h"
 #include "platform/platform.h"
 #include "runtime_plugin.h"
-#include "msprof_reporter_mgr.h"
 
 using namespace Analysis::Dvvp::Analyze;
 using namespace analysis::dvvp::common::error;
@@ -37,7 +36,6 @@ using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Plugin;
 using namespace Analysis::Dvvp::Common::Config;
-using namespace Msprof::Engine;
 
 static std::mutex g_aclprofMutex;
 static uint64_t g_indexId = 1;
@@ -403,7 +401,7 @@ aclError aclprofWarmup(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig);
     RETURN_IF_NOT_SUCCESS(ret);
 
-    MSPROF_LOGI("Acl has been allocated warmup profiling config, successfully execute aclprofStartProfiling");
+    MSPROF_LOGI("Acl has been allocated warmup profiling config, successfully execute aclprofWarmupProfiling");
     return ACL_SUCCESS;
 }
 
@@ -411,7 +409,7 @@ aclError aclprofStart(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
 {
     MSPROF_LOGI("Start to execute aclprofStartProfiling");
     int32_t ret = ACL_SUCCESS;
-    if (!MsprofReporterMgr::instance()->IsStart()) {
+    if (!ProfAclMgr::instance()->IsWarmuped()) {
         ret = aclprofWarmup(profilerConfig);
     }
     if (ret != ACL_SUCCESS) {
