@@ -823,7 +823,7 @@ bool SaveTaskPmuData(DataInventory &dataInventory, DBInfo &msprofDB, const std::
     }
 
     if (!Reserve(res, unifiedTaskPmuData->size())) {
-        ERROR("Reserved for AscendTaskData data failed.");
+        ERROR("Reserved for unifiedTaskPmuData data failed.");
         return false;
     }
     for (const auto& item : *unifiedTaskPmuData) {
@@ -842,12 +842,12 @@ bool SaveSamplePmuTimelineData(DataInventory &dataInventory, DBInfo &msprofDB, c
     PSTFormat res;
     auto unifiedSamplePmuTimelineData = dataInventory.GetPtr<std::vector<UnifiedSampleTimelinePmu>>();
     if (unifiedSamplePmuTimelineData == nullptr) {
-        WARN("unifiedTaskPmuData data not exist.");
+        WARN("UnifiedSampleTimelinePmu data not exist.");
         return true;
     }
 
     if (!Reserve(res, unifiedSamplePmuTimelineData->size())) {
-        ERROR("Reserved for AscendTaskData data failed.");
+        ERROR("Reserved for UnifiedSampleTimelinePmu data failed.");
         return false;
     }
 
@@ -866,12 +866,12 @@ bool SaveSamplePmuSummaryData(DataInventory &dataInventory, DBInfo &msprofDB, co
     PSSFormat res;
     auto unifiedSamplePmuSummaryData = dataInventory.GetPtr<std::vector<UnifiedSampleSummaryPmu>>();
     if (unifiedSamplePmuSummaryData == nullptr) {
-        WARN("unifiedTaskPmuData data not exist.");
+        WARN("UnifiedSampleSummaryPmu data not exist.");
         return true;
     }
 
     if (!Reserve(res, unifiedSamplePmuSummaryData->size())) {
-        ERROR("Reserved for AscendTaskData data failed.");
+        ERROR("Reserved for UnifiedSampleSummaryPmu data failed.");
         return false;
     }
     // deviceId, metric, value, coreId, coreType
