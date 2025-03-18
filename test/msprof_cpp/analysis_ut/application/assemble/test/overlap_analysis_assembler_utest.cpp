@@ -198,9 +198,6 @@ const std::string SCENARIOS3_JSON =
     "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.024\",\"dur\":0.002,\"ph\":\"X\",\"args\":{}},"
     "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.033\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},";
 const std::string SCENARIOS4_JSON =
-    "{\"name\":\"process_name\",\"pid\":10354687,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
-    "{\"name\":\"process_labels\",\"pid\":10354687,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
-    "{\"name\":\"process_sort_index\",\"pid\":10354687,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":29}},"
     "{\"name\":\"process_name\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
     "{\"name\":\"process_labels\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
     "{\"name\":\"process_sort_index\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":29}},"
@@ -236,23 +233,7 @@ const std::string SCENARIOS4_JSON =
     "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.008\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},"
     "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.013\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},"
     "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.017\",\"dur\":0.003,\"ph\":\"X\",\"args\":{}},"
-    "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.024\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},"
-    "{\"name\":\"process_name\",\"pid\":10354687,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
-    "{\"name\":\"process_labels\",\"pid\":10354687,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
-    "{\"name\":\"process_sort_index\",\"pid\":10354687,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":29}},"
-    "{\"name\":\"process_name\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
-    "{\"name\":\"process_labels\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
-    "{\"name\":\"process_sort_index\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":29}},"
-    "{\"name\":\"thread_name\",\"pid\":10354687,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Communication\"}},"
-    "{\"name\":\"thread_sort_index\",\"pid\":10354687,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":0}},"
-    "{\"name\":\"thread_name\",\"pid\":10354687,\"tid\":1,\"ph\":\"M\","
-    "\"args\":{\"name\":\"Communication(Not Overlapped)\"}},"
-    "{\"name\":\"thread_sort_index\",\"pid\":10354687,\"tid\":1,\"ph\":\"M\",\"args\":{\"sort_index\":1}},"
-    "{\"name\":\"thread_name\",\"pid\":10354687,\"tid\":2,\"ph\":\"M\",\"args\":{\"name\":\"Computing\"}},"
-    "{\"name\":\"thread_sort_index\",\"pid\":10354687,\"tid\":2,\"ph\":\"M\",\"args\":{\"sort_index\":2}},"
-    "{\"name\":\"thread_name\",\"pid\":10354687,\"tid\":3,\"ph\":\"M\",\"args\":{\"name\":\"Free\"}},"
-    "{\"name\":\"thread_sort_index\",\"pid\":10354687,\"tid\":3,\"ph\":\"M\",\"args\":{\"sort_index\":3}},"
-    "{\"name\":\"Free\",\"pid\":10354687,\"tid\":3,\"ts\":\"0.005\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},";
+    "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.024\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},";
 }
 
 class OverlapAnalysisAssemblerUTest : public testing::Test {
@@ -650,9 +631,10 @@ TEST_F(OverlapAnalysisAssemblerUTest, AssembleDataShouldContainCompleteDataInSce
     AscendTaskData data;
     uint64_t start = 5;
     double dur = 1.0;
+    data.deviceId = 0;
     data.timestamp = start;
     data.duration = dur;
-    // 此场景理论上不可能存在一个task都没有的场景
+    // 不可能存在一个 任何task都没有的场景
     std::vector<AscendTaskData> taskData = {data};
     std::vector<CommunicationOpData> commOpData;
     for (auto &id : devices) {
