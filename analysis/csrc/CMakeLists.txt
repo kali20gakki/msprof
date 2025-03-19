@@ -50,7 +50,9 @@ aux_source_directory(${CMAKE_SOURCE_DIR}/interface/py_interface SOURCES)
 aux_source_directory(${CMAKE_SOURCE_DIR}/viewer/database/finals SOURCES)
 
 add_library(msprof_analysis SHARED ${SOURCES})
+
 find_package(Python REQUIRED COMPONENTS Development)
+
 target_include_directories(msprof_analysis PRIVATE
     /usr/local/include/
     ${Python_INCLUDE_DIRS}

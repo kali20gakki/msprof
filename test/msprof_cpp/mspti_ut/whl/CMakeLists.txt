@@ -1,3 +1,5 @@
+cmake_minimum_required (VERSION 3.16)
+
 file(GLOB_RECURSE SRC_FILE
     ${TOP_DIR}/mspti/activity/*.cpp
     ${TOP_DIR}/mspti/callback/*.cpp
