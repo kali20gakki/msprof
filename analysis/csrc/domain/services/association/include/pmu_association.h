@@ -27,9 +27,9 @@ class PmuAssociation : public Process {
 private:
     void SplitPmu(std::vector<HalPmuData>& pmuData);
     void MergeContextPmuToDeviceTask(std::vector<HalPmuData*>& pmuVec, std::vector<DeviceTask>& deviceVec,
-                                     DataInventory& dataInventory, const DeviceContext& context);
+                                     DataInventory& dataInventory, const DeviceContext& context, uint64_t& filterEnd);
     size_t MergeBlockPmuToDeviceTask(std::vector<HalPmuData*>& pmuData, DeviceTask& deviceTask,
-                                     DataInventory& dataInventory, const DeviceContext& context);
+                                     DataInventory& dataInventory, const DeviceContext& context, uint64_t& filterEnd);
     void AssociationByPmuType(std::map<TaskId, std::vector<DeviceTask>>& deviceTask, DataInventory& dataInventory,
                               const DeviceContext& context);
     void CalculateContextPmu(HalPmuData &pmu, DeviceTask &task, DataInventory &dataInventory,
