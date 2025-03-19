@@ -50,7 +50,8 @@ void BlockPmuResultAccumulate(std::vector<uint64_t> &dstVec, std::vector<uint64_
 }
 
 void PmuAssociation::MergeContextPmuToDeviceTask(std::vector<HalPmuData*>& pmuVec, std::vector<DeviceTask>& deviceVec,
-                                                 DataInventory& dataInventory, const DeviceContext& context)
+                                                 DataInventory& dataInventory, const DeviceContext& context,
+                                                 uint64_t& filterEnd)
 {
     size_t pmuIndex = 0;
     size_t taskIndex = 0;
@@ -69,6 +70,7 @@ void PmuAssociation::MergeContextPmuToDeviceTask(std::vector<HalPmuData*>& pmuVe
             continue;
         }
         CalculateContextPmu(*pmuVec[pmuIndex], deviceVec[taskIndex], dataInventory, context);
+        filterEnd = std::min(filterEnd, deviceVec[taskIndex].taskEnd);
         taskIndex++;
         pmuIndex++;
     }
@@ -110,7 +112,8 @@ void PmuAssociation::CalculateContextPmu(HalPmuData &pmuData, DeviceTask &task, 
 }
 
 size_t PmuAssociation::MergeBlockPmuToDeviceTask(std::vector<HalPmuData*>& pmuData, DeviceTask& deviceTask,
-                                                 DataInventory& dataInventory, const DeviceContext& context)
+                                                 DataInventory& dataInventory, const DeviceContext& context,
+                                                 uint64_t& filterEnd)
 {
     if (deviceTask.pmuInfo == nullptr) {
         ERROR("Block Pmu has no context Pmu taskId is %, streamId is %, contextId is",
@@ -142,6 +145,7 @@ size_t PmuAssociation::MergeBlockPmuToDeviceTask(std::vector<HalPmuData*>& pmuDa
             tempPmuData.pmu.coreType = (*it)->pmu.coreType;
             BlockPmuResultAccumulate(tempPmuData.pmu.pmuList, ((*it)->pmu.pmuList));
             it = pmuData.erase(it);
+            filterEnd = std::min(filterEnd, deviceTask.taskStart);
         } else {
             ++it;
         }
@@ -163,11 +167,12 @@ size_t PmuAssociation::MergeBlockPmuToDeviceTask(std::vector<HalPmuData*>& pmuDa
 void PmuAssociation::AssociationByPmuType(std::map<TaskId, std::vector<DeviceTask>>& deviceTask,
                                           DataInventory& dataInventory, const DeviceContext& context)
 {
-    bool isNeedRecordLost = false;
+    // 以匹配上的task的end时间为基准 和pmu的timestamp进行比较
+    uint64_t filterEnd = UINT64_MAX;
     for (auto& pmu : contextPmuTask_) {
         auto it = deviceTask.find(pmu.first);
         if (it == deviceTask.end()) {
-            if (isNeedRecordLost) {
+            if (!pmu.second.empty() && filterEnd < pmu.second[0]->hd.timestamp) {
                 ERROR("contextPmu has no matched log taskId is %, streamId is %, contextId is %, batchId is %",
                       pmu.first.taskId, pmu.first.streamId, pmu.first.contextId, pmu.first.batchId);
             }
@@ -176,15 +181,13 @@ void PmuAssociation::AssociationByPmuType(std::map<TaskId, std::vector<DeviceTas
         std::sort(pmu.second.begin(), pmu.second.end(), [](HalPmuData* ld, HalPmuData* rd) {
             return ld->hd.timestamp < rd->hd.timestamp;
         });
-        MergeContextPmuToDeviceTask(pmu.second, it->second, dataInventory, context);
-        isNeedRecordLost = true;
+        MergeContextPmuToDeviceTask(pmu.second, it->second, dataInventory, context, filterEnd);
     }
-    isNeedRecordLost = false;
     INFO("Context PMU has been calculated!");
     for (auto& pmu : blockPmuTask_) {
         auto it = deviceTask.find(pmu.first);
         if (it == deviceTask.end()) {
-            if (isNeedRecordLost) {
+            if (!pmu.second.empty() && filterEnd < pmu.second[0]->hd.timestamp) {
                 ERROR("blockPmu has no matched log taskId is %, streamId is %, contextId is %, batchId is %",
                       pmu.first.taskId, pmu.first.streamId, pmu.first.contextId, pmu.first.batchId);
             }
@@ -199,8 +202,7 @@ void PmuAssociation::AssociationByPmuType(std::map<TaskId, std::vector<DeviceTas
                 INFO("block pmu is used only by MIX, but context pmu is not MIX! No association is required.");
                 continue;
             }
-            pmuIndex = MergeBlockPmuToDeviceTask(pmu.second, task, dataInventory, context);
-            isNeedRecordLost = true;
+            pmuIndex = MergeBlockPmuToDeviceTask(pmu.second, task, dataInventory, context, filterEnd);
             if (pmuIndex == 0) {
                 break;
             }
