@@ -87,8 +87,10 @@ void AscendHardwareAssembler::InitData(DataInventory &dataInventory, std::vector
     auto taskInfo = dataInventory.GetPtr<std::vector<TaskInfoData>>();
     if (taskInfo != nullptr) {
         for (const auto &node : *taskInfo) {
-            opName_.emplace(TaskId{static_cast<uint16_t >(node.streamId), static_cast<uint16_t >(node.batchId),
-                static_cast<uint16_t >(node.taskId), node.contextId, node.deviceId}, node.opName);
+            const TaskId& taskId = TaskId{static_cast<uint16_t >(node.streamId), static_cast<uint16_t >(node.batchId),
+                static_cast<uint16_t >(node.taskId), node.contextId, node.deviceId};
+            opName_.emplace(taskId, node.opName);
+            taskType_.emplace(taskId, node.taskType);
         }
     }
     auto apiData = dataInventory.GetPtr<std::vector<ApiData>>();
@@ -124,6 +126,17 @@ std::string AscendHardwareAssembler::GetOpName(const AscendTaskData& data)
     return data.hostType;
 }
 
+std::string AscendHardwareAssembler::GetTaskType(const AscendTaskData& data)
+{
+    TaskId id{static_cast<uint16_t>(data.streamId), static_cast<uint16_t>(data.batchId),
+        static_cast<uint16_t>(data.taskId), data.contextId, data.deviceId};
+    auto it = taskType_.find(id);
+    if (it != taskType_.end()) {
+        return it->second;
+    }
+    return data.taskType;
+}
+
 uint32_t AscendHardwareAssembler::GetPhysicStreamId(const uint32_t streamId)
 {
     if (logicStream_ == nullptr) {
@@ -142,6 +155,7 @@ void AscendHardwareAssembler::GenerateTaskTrace(const std::vector<AscendTaskData
 {
     uint32_t formatPid;
     std::string traceName;
+    std::string taskTypeName;
     TaskId id;
     for (const auto &data : taskData) {
         if (data.hostType == MEMCPY_ASYNC) {
@@ -153,6 +167,7 @@ void AscendHardwareAssembler::GenerateTaskTrace(const std::vector<AscendTaskData
             continue;
         }
         traceName = GetOpName(data);
+        taskTypeName = GetTaskType(data);
         formatPid = GetDevicePid(pidMap, data.deviceId, profPath, layer.sortIndex);
         int tid = static_cast<int>(GetPhysicStreamId(data.streamId));
         // 存储pid，tid组合的最小集
@@ -161,7 +176,7 @@ void AscendHardwareAssembler::GenerateTaskTrace(const std::vector<AscendTaskData
         MAKE_SHARED_RETURN_VOID(event, TaskTraceEvent, formatPid, tid, data.duration / NS_TO_US,
                                 DivideByPowersOfTenWithPrecision(data.timestamp), traceName,
                                 data.modelId, data.streamId,
-                                data.taskId, data.batchId, data.contextId, data.connectionId, data.deviceType);
+                                data.taskId, data.batchId, data.contextId, data.connectionId, taskTypeName);
         res_.push_back(event);
         GenerateTaskConnectionTrace(data, formatPid, id);
     }
