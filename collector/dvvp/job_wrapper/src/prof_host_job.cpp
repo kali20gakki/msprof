@@ -806,6 +806,10 @@ int ProfHostService::Uninit()
             MSPROF_INNER_ERROR("EK9999", "Failed to open %s", fileName.c_str());
             return PROFILING_FAILED;
         }
+        if (!Utils::ChangeFileMode(fileName)) {
+            in.close();
+            return PROFILING_FAILED;
+        }
         in << diskIoStartTime;
         in.close();
     }
@@ -1003,6 +1007,10 @@ int ProfHostService::WriteDone()
     if (!in.is_open()) {
         MSPROF_LOGE("Failed to open %s", fileName.c_str());
         MSPROF_INNER_ERROR("EK9999", "Failed to open %s", fileName.c_str());
+        return PROFILING_FAILED;
+    }
+    if (!Utils::ChangeFileMode(fileName)) {
+        in.close();
         return PROFILING_FAILED;
     }
     in << hostWriteDoneInfo_.fileSize << startTime << hostWriteDoneInfo_.endTime;

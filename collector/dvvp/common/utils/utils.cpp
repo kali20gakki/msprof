@@ -1890,6 +1890,15 @@ bool Utils::CheckCharValid(const std::string &str)
     return true;
 }
 
+bool Utils::ChangeFileMode(const std::string &path, MmMode_t mode)
+{
+    if (MmChmod(path, static_cast<int32_t>(mode)) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Chmod %s to mode %d unsuccessfully", BaseName(path).c_str(), static_cast<int32_t>(mode));
+        return false;
+    }
+    return true;
+}
+
 }  // namespace utils
 }  // namespace common
 }  // namespace dvvp

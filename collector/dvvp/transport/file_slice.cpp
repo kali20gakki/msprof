@@ -150,6 +150,10 @@ int FileSlice::WriteToLocalFiles(const std::string &key, CONST_CHAR_PTR data, in
                 errorNo, MmGetErrorFormatMessage(errorNo, errBuf, MAX_ERR_STRING_LEN));
             return PROFILING_FAILED;
         }
+        if (!Utils::ChangeFileMode(absolutePath)) {
+            out.close();
+            return PROFILING_FAILED;
+        }
         if (offset != -1) {
             out.seekp(offset);
         }
@@ -225,6 +229,10 @@ int FileSlice::WriteCtrlDataToFile(const std::string &absolutePath, const std::s
     file.open(absolutePath, std::ios::out | std::ios::trunc | std::ios::binary);
     if (!file.is_open()) {
         MSPROF_LOGE("Failed to open %s", Utils::BaseName(absolutePath).c_str());
+        return PROFILING_FAILED;
+    }
+    if (!Utils::ChangeFileMode(absolutePath)) {
+        file.close();
         return PROFILING_FAILED;
     }
     file.write(data.c_str(), dataLen);
@@ -306,6 +314,10 @@ bool FileSlice::CreateDoneFile(const std::string &absolutePath, const std::strin
         char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
         MSPROF_LOGE("Failed to open %s, ErrorCode:%d, errinfo:%s", Utils::BaseName(tempPath).c_str(), errorNo,
             MmGetErrorFormatMessage(errorNo, errBuf, MAX_ERR_STRING_LEN));
+        return false;
+    }
+    if (!Utils::ChangeFileMode(tempPath)) {
+        file.close();
         return false;
     }
     file << "filesize:" << fileSize << std::endl;

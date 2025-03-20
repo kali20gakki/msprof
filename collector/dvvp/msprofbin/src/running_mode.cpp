@@ -1000,6 +1000,10 @@ int SystemMode::RecordOutPut() const
         MSPROF_LOGE("Failed to open %s", Utils::BaseName(recordFile).c_str());
         return PROFILING_FAILED;
     }
+    if (!Utils::ChangeFileMode(absolutePath)) {
+        file.close();
+        return PROFILING_FAILED;
+    }
     file << baseDir_ << std::endl << std::flush;
     file.close();
 
@@ -1231,6 +1235,10 @@ bool SystemMode::CreateDoneFile(const std::string &absolutePath, const std::stri
         MSPROF_LOGE("Failed to open %s", Utils::BaseName(absolutePath) .c_str());
         return false;
     }
+    if (!Utils::ChangeFileMode(absolutePath)) {
+        file.close();
+        return false;
+    }
     file << "filesize: " << fileSize << std::endl;
     file.flush();
     file.close();
@@ -1259,6 +1267,10 @@ int SystemMode::WriteCtrlDataToFile(const std::string &absolutePath, const std::
     file.open(absolutePath, std::ios::out | std::ios::trunc);
     if (!file.is_open()) {
         MSPROF_LOGE("Failed to open %s", Utils::BaseName(absolutePath).c_str());
+        return PROFILING_FAILED;
+    }
+    if (!Utils::ChangeFileMode(absolutePath)) {
+        file.close();
         return PROFILING_FAILED;
     }
     file.write(data.c_str(), dataLen);
