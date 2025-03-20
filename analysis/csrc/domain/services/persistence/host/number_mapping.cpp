@@ -45,7 +45,7 @@ namespace {
         {25,  "DUAL"},
         {26,  "DT_VARIANT"},
         {27,  "DT_BF16"},
-        {28,  "UNDEFINED"},
+        {28,  "DT_UNDEFINED"},
         {29,  "DT_INT4"},
         {30,  "DT_UINT1"},
         {31,  "DT_INT2"},
@@ -78,6 +78,7 @@ namespace {
         {244, "FLOAT64_"},
         {245, "COMPLEX_"},
         {246, "NUMBER_TYPE_END_"},
+        {UINT32_MAX, "UNDEFINED"},
     };
 
     const std::unordered_map<uint32_t, std::string> geFormatMap {
@@ -154,6 +155,7 @@ namespace {
         {219,  "FRACTAL_Z_3D_"},
         {220,  "DHWNC_"},
         {221,  "DHWCN_"},
+        {UINT32_MAX, "UNDEFINED"},
     };
     const std::unordered_map<uint32_t, std::string> geTaskTypeMap {
         {0,  "AI_CORE"},

@@ -75,6 +75,8 @@ class GeTensorBaseBean(StructDecoder):
         :param tensor_format:
         :return:
         """
+        if tensor_format == GeDataFormat.UNDEFINED.value:
+            return tensor_format, 0
         return tensor_format & 0xff, (tensor_format & 0xffff00) >> 8
 
     @staticmethod
@@ -105,6 +107,6 @@ class GeTensorBaseBean(StructDecoder):
                 continue
             enum_format = enum_dict.get(tensor_format).name
             if tensor_sub_format > 0:
-                enum_format = '{0}:{1}'.format(enum_dict.get(tensor_format).name, str(tensor_sub_format))
+                enum_format = '{0}:{1}'.format(enum_format, str(tensor_sub_format))
             _input_format[index] = enum_format
         return _input_format

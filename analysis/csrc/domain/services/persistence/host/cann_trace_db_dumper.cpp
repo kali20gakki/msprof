@@ -273,8 +273,9 @@ void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInf
 
 std::string CANNTraceDBDumper::GetFormat(uint32_t oriFormat)
 {
-    auto format = oriFormat & 0xff;
-    auto subFormat = (oriFormat & 0xffff00) >> 8;
+    // 若format是默认值(UINT32_MAX) 直接使用枚举UNDEFINED即可 无需换算subFormat
+    auto format = (oriFormat == UINT32_MAX) ? UINT32_MAX : (oriFormat & 0xff);
+    auto subFormat = (oriFormat == UINT32_MAX) ? 0 : (oriFormat & 0xffff00) >> 8;
     std::string enumFormat = NumberMapping::Get(NumberMapping::MappingType::GE_FORMAT, format);
     std::string enumSubFormat = std::to_string(subFormat);
     std::vector<std::string> vec{enumFormat, enumSubFormat};
