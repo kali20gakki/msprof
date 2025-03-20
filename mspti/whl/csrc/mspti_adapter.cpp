@@ -239,6 +239,7 @@ void MsptiAdapter::UserBufferComplete(uint8_t *buffer, size_t size, size_t valid
                 break;
             } else {
                 MSPTI_LOGE("Mspti adapter consume buffer failed, status: %d", status);
+                break;
             }
         } while (true);
         // Minus allocCnt when buffer is not nullptr
