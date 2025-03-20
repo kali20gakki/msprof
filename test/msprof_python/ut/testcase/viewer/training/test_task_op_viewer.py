@@ -84,7 +84,7 @@ class TestTaskOpViewer(unittest.TestCase):
         )
         expect_data = [
             ('N/A', 'AICORE', 4, 0, 2.310, '18870605638.550\t', '18870605640.860\t'),
-            ('Cast', 'AICORE', 4, 1, 0.035, '18870605638.870\t', '18870605638.905\t'),
+            ('Cast', 'AI_VECTOR_CORE', 4, 1, 0.035, '18870605638.870\t', '18870605638.905\t'),
         ]
         InfoConfReader()._local_time_offset = 10.0
 
@@ -101,7 +101,7 @@ class TestTaskOpViewer(unittest.TestCase):
         ge_data = (
             (1, "AI CORE NAME", 0, 3, 4, "0", "static", "cast", 0, 122, 123456, 0, 4294967295),
             (1, "AI CPU NAME", 1, 2, 4, "0", "static", "cast", 0, 122, 123456, 0, 4294967295),
-            (1, "Cast", 4, 1, 32, "0", "static", "cast", 0, 122, 123456, 0, 4294967295),
+            (1, "Cast", 4, 1, 32, "0", "AI_VECTOR_CORE", "cast", 0, 122, 123456, 0, 4294967295),
         )
         insert_ge_sql = "insert into {0} values ({value})".format(
             DBNameConstant.TABLE_GE_TASK, value="?," * (len(ge_data[0]) - 1) + "?")

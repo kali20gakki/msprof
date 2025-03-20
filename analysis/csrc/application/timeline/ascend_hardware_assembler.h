@@ -84,6 +84,7 @@ private:
                            const LayerInfo &layer, std::unordered_map<uint16_t, uint32_t> &pidMap);
     void InitData(DataInventory &dataInventory, std::vector<AscendTaskData> &taskData);
     std::string GetOpName(const AscendTaskData& data);
+    std::string GetTaskType(const AscendTaskData& data);
     uint32_t GetPhysicStreamId(const uint32_t streamId);
     void GenerateTaskConnectionTrace(const AscendTaskData &data, uint32_t formatPid, TaskId &id);
     void GenerateKfcTrace(const std::vector<KfcTurnData>& kfcData, const std::string &profPath,
@@ -95,6 +96,7 @@ private:
     std::vector<std::shared_ptr<TraceEvent>> res_;
     std::shared_ptr<std::unordered_map<uint32_t, uint32_t>> logicStream_;
     std::map<TaskId, std::string> opName_;
+    std::map<TaskId, std::string> taskType_;
     std::set<std::pair<uint32_t, int>> pidTidSet_;
     std::set<TaskId> ffts_;
     std::set<uint64_t> recordEvent_;

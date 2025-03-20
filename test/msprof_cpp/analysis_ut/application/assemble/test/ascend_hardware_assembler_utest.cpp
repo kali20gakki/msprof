@@ -68,12 +68,14 @@ static std::vector<AscendTaskData> GenerateTaskData()
     data.duration = 450.78; // dur 450.78
     data.hostType = "KERNEL_AICORE";
     data.deviceType = "AI_CORE";
+    data.taskType = "KERNEL_AICORE";
     res.push_back(data);
     data.contextId = UINT32_MAX;
     res.push_back(data);
     data.connectionId = 1234; // connectionId 1234
     data.hostType = "EVENT_RECORD";
     data.deviceType = "EVENT_RECORD_SQE";
+    data.taskType = "EVENT_RECORD_SQE";
     data.taskId = 11; // taskId 11
     res.push_back(data);
     data.taskId = 0;
@@ -82,6 +84,7 @@ static std::vector<AscendTaskData> GenerateTaskData()
     data.duration = 4241260;  // duration 4241260
     data.hostType = "MEMCPY_ASYNC";
     data.deviceType = "PCIE_DMA_SQE";
+    data.taskType = "PCIE_DMA_SQE";
     data.connectionId = 181;  // connectionId 181
     res.push_back(data);
     data.taskId = 1;
@@ -106,6 +109,7 @@ static std::vector<TaskInfoData> GenerateTaskInfoData()
     data.contextId = 1; // contextId 1
     data.batchId = 1; // batchId 1
     data.opName = "MatMulV3";
+    data.taskType = "AI_VECTOR_CORE";
     res.push_back(data);
     data.contextId = UINT32_MAX;
     res.push_back(data);
@@ -198,7 +202,7 @@ TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
     std::string expectStr = "{\"name\":\"MatMulV3\",\"pid\":10328480,\"tid\":1,\"ts\":\"1717575960208020.758\",\"dur\""
                             ":0.45077999999999996,\"ph\":\"X\",\"args\":{\"Model Id\":4294967295,\"Task Type\":\""
-                            "AI_CORE\",\"Physic Stream Id\":1,\"Task Id\":10,\"Batch Id\":1,\"Subtask Id\":1,\""
+                            "AI_VECTOR_CORE\",\"Physic Stream Id\":1,\"Task Id\":10,\"Batch Id\":1,\"Subtask Id\":1,\""
                             "connection_id\":2345}},{\"name\":\"HostToDevice10071698309120\",\"pid\":10328480,\"tid\":"
                             "1,\"ph\":\"f\",\"cat\":\"HostToDevice\",\"id\":\"10071698309120\",\"ts\":\""
                             "1717575960208020.758\",\"bp\":\"e\"},{\"name\":\"EVENT_RECORD\",\"pid\":10328480,\"tid\":"
@@ -283,7 +287,7 @@ TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleWithoutApi)
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
     std::string expectStr = "{\"name\":\"MatMulV3\",\"pid\":10328480,\"tid\":1,\"ts\":\"1717575960208020.758\",\"dur\""
                             ":0.45077999999999996,\"ph\":\"X\",\"args\":{\"Model Id\":4294967295,\"Task Type\":\""
-                            "AI_CORE\",\"Physic Stream Id\":1,\"Task Id\":10,\"Batch Id\":1,\"Subtask Id\":1,\""
+                            "AI_VECTOR_CORE\",\"Physic Stream Id\":1,\"Task Id\":10,\"Batch Id\":1,\"Subtask Id\":1,\""
                             "connection_id\":2345}},{\"name\":\"HostToDevice10071698309120\",\"pid\":10328480,\"tid\":"
                             "1,\"ph\":\"f\",\"cat\":\"HostToDevice\",\"id\":\"10071698309120\",\"ts\":\""
                             "1717575960208020.758\",\"bp\":\"e\"},{\"name\":\"EVENT_RECORD\",\"pid\":10328480,\"tid\":"
@@ -354,7 +358,7 @@ TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleWithLogicSt
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
     std::string expStr = "{\"name\":\"MatMulV3\",\"pid\":10328480,\"tid\":1337,\"ts\":\"1717575960208020.758\","
                          "\"dur\":0.45077999999999996,\"ph\":\"X\",\"args\":{\"Model Id\":4294967295,"
-                         "\"Task Type\":\"AI_CORE\",\"Physic Stream Id\":1,\"Task Id\":10,\"Batch Id\":1,"
+                         "\"Task Type\":\"AI_VECTOR_CORE\",\"Physic Stream Id\":1,\"Task Id\":10,\"Batch Id\":1,"
                          "\"Subtask Id\":1,\"connection_id\":2345}},{\"name\":\"HostToDevice10071698309120\","
                          "\"pid\":10328480,\"tid\":1337,\"ph\":\"f\",\"cat\":\"HostToDevice\","
                          "\"id\":\"10071698309120\",\"ts\":\"1717575960208020.758\",\"bp\":\"e\"},"

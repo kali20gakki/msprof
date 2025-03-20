@@ -93,16 +93,21 @@ class TaskOpViewer:
 
     @staticmethod
     def _reformat_task_info(task_data: List, ge_curs: sqlite3.Cursor) -> List:
-        ge_sql = f"SELECT op_name, stream_id, task_id, batch_id from {DBNameConstant.TABLE_GE_TASK}"
+        ge_sql = f"SELECT op_name, task_type, stream_id, task_id, batch_id from {DBNameConstant.TABLE_GE_TASK}"
         op_name_list = DBManager.fetch_all_data(ge_curs, ge_sql, dto_class=GeTaskDto)
-        op_name_dict = {
-            (row.stream_id, row.task_id, row.batch_id): row.op_name
+        op_info_dict = {
+            (row.stream_id, row.task_id, row.batch_id): {
+                "op_name": row.op_name,
+                "task_type": row.task_type
+            }
             for row in op_name_list
         }
         task_info = []
         for stream_id, task_id, batch_id, host_task_type, start_time, duration, device_task_type in task_data:
-            op_name: str = op_name_dict.get((stream_id, task_id, batch_id), "N/A")
+            op_info = op_info_dict.get((stream_id, task_id, batch_id), {})
+            op_name: str = op_info.get("op_name", "N/A")
             task_type: str = TaskTimeViewer.get_task_type(host_task_type, device_task_type)
+            task_type = op_info.get("task_type", task_type)
             task_time: float = round(duration / DBManager.NSTOUS, NumberConstant.ROUND_THREE_DECIMAL)
             task_start = format_high_precision_for_csv(
                 InfoConfReader().trans_into_local_time(start_time))

@@ -71,9 +71,11 @@ class TaskTimeViewer(BaseViewer):
         return host_task_type
 
     @staticmethod
-    def _update_op_name(data, node_name_dict, node_key) -> None:
+    def _update_op_name_and_type(data, node_info_dict, node_key) -> None:
         task_type = TaskTimeViewer.get_task_type(data.host_task_type, data.device_task_type)
-        setattr(data, 'op_name', node_name_dict.get(node_key, task_type))
+        node_info = node_info_dict.get(node_key, {})
+        setattr(data, 'op_name', node_info.get('op_name', task_type))
+        setattr(data, 'task_type', node_info.get('task_type', task_type))
 
     def get_time_timeline_header(self: any, data: list, pid_header=TraceViewHeaderConstant.PROCESS_TASK) -> list:
         """
@@ -202,7 +204,7 @@ class TaskTimeViewer(BaseViewer):
         """
         if not data_list or not any(data_list.values()):
             return []
-        self.add_node_name(data_list)
+        self.add_node_name_and_type(data_list)
         if self.params.get("data_type") == ExportDataType.FFTS_SUB_TASK_TIME.name.lower():
             self.add_thread_id(data_list)
             return self.format_ffts_sub_task_data(data_list)
@@ -240,7 +242,7 @@ class TaskTimeViewer(BaseViewer):
                  data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
                  {"Physic Stream Id": data.stream_id, "Task Id": data.task_id, 'Batch Id': data.batch_id,
                   "Subtask Id": data.context_id,
-                  "Subtask Type": TaskTimeViewer.get_device_task_type(data.device_task_type),
+                  "Subtask Type": data.task_type,
                   "connection_id": data.connection_id, }])
         if not result_list:
             return []
@@ -265,7 +267,7 @@ class TaskTimeViewer(BaseViewer):
                         data.duration / DBManager.NSTOUS if data.duration > 0 else 0,
                         {
                             "Model Id": data.model_id,
-                            "Task Type": TaskTimeViewer.get_device_task_type(data.device_task_type),
+                            "Task Type": data.task_type,
                             "Physic Stream Id": data.stream_id,
                             "Task Id": data.task_id,
                             'Batch Id': data.batch_id,
@@ -321,20 +323,20 @@ class TaskTimeViewer(BaseViewer):
             thread_id_key = "{0}-{1}-{2}-{3}".format(data.task_id, data.stream_id, data.context_id, data.start_time)
             setattr(data, 'thread_id', thread_id_dict.get(thread_id_key))
 
-    def add_node_name(self: any, data_dict: dict) -> None:
-        node_name_dict = self.get_ge_data_dict()
+    def add_node_name_and_type(self: any, data_dict: dict) -> None:
+        node_info_dict = self.get_ge_data_dict()
         ffts_plus_set = set()
         for data in data_dict.get("subtask_data_list", []):
             ffts_plus_set.add("{0}-{1}-{2}-{3}".format(
                 data.task_id, data.stream_id, NumberConstant.DEFAULT_GE_CONTEXT_ID, data.batch_id))
             node_key = "{0}-{1}-{2}-{3}".format(data.task_id, data.stream_id, data.context_id, data.batch_id)
-            self._update_op_name(data, node_name_dict, node_key)
+            self._update_op_name_and_type(data, node_info_dict, node_key)
         tradition_list = []
         for data in data_dict.get("task_data_list", []):
             node_key = "{0}-{1}-{2}-{3}".format(
                 data.task_id, data.stream_id, NumberConstant.DEFAULT_GE_CONTEXT_ID, data.batch_id)
             if node_key not in ffts_plus_set:
-                self._update_op_name(data, node_name_dict, node_key)
+                self._update_op_name_and_type(data, node_info_dict, node_key)
                 tradition_list.append(data)
         data_dict["task_data_list"] = tradition_list
 
@@ -346,5 +348,8 @@ class TaskTimeViewer(BaseViewer):
         ge_data = view_model.get_all_data(DBNameConstant.TABLE_SUMMARY_GE, dto_class=GeTaskDto)
         for data in ge_data:
             node_key = "{0}-{1}-{2}-{3}".format(data.task_id, data.stream_id, data.context_id, data.batch_id)
-            node_dict[node_key] = data.op_name
+            node_dict[node_key] = {
+                "op_name": data.op_name,
+                "task_type": data.task_type
+            }
         return node_dict

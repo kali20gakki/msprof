@@ -71,9 +71,11 @@ class TestTaskTimeViewer(unittest.TestCase):
         }
         setattr(data.get('task_data_list', [])[0], 'op_name', 'Add')
         setattr(data.get('subtask_data_list', [])[0], 'op_name', 'MatMul_1_lxslice1')
+        setattr(data.get('task_data_list', [])[0], 'task_type', 'AI_CORE')
+        setattr(data.get('subtask_data_list', [])[0], 'task_type', 'AI_CORE')
         with mock.patch('common_func.trace_view_manager.TraceViewManager.time_graph_trace', return_value=[]), \
                 mock.patch('common_func.trace_view_manager.TraceViewManager.metadata_event', return_value=[]), \
-                mock.patch(NAMESPACE + '.TaskTimeViewer.add_node_name', return_value=data), \
+                mock.patch(NAMESPACE + '.TaskTimeViewer.add_node_name_and_type', return_value=data), \
                 mock.patch(NAMESPACE + '.TaskTimeViewer.get_time_timeline_header', return_value=()):
             check = TaskTimeViewer(configs, params)
             InfoJsonReaderManager(info_json=InfoJson(devices='0', DeviceInfo=[
@@ -93,10 +95,12 @@ class TestTaskTimeViewer(unittest.TestCase):
         }
         setattr(data.get('task_data_list', [])[0], 'op_name', 'Add')
         setattr(data.get('subtask_data_list', [])[0], 'op_name', 'MatMul_1_lxslice1')
+        setattr(data.get('task_data_list', [])[0], 'task_type', 'AI_CORE')
+        setattr(data.get('subtask_data_list', [])[0], 'task_type', 'AI_CORE')
         setattr(data.get('subtask_data_list', [])[0], 'thread_id', 1)
         with mock.patch('common_func.trace_view_manager.TraceViewManager.time_graph_trace', return_value=[]), \
                 mock.patch('common_func.trace_view_manager.TraceViewManager.metadata_event', return_value=[]), \
-                mock.patch(NAMESPACE + '.TaskTimeViewer.add_node_name'), \
+                mock.patch(NAMESPACE + '.TaskTimeViewer.add_node_name_and_type'), \
                 mock.patch(NAMESPACE + '.TaskTimeViewer.add_thread_id'), \
                 mock.patch(NAMESPACE + '.TaskTimeViewer.get_time_timeline_header', return_value=()):
             check = TaskTimeViewer(configs, params)
@@ -112,7 +116,7 @@ class TestTaskTimeViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + '.ViewModel.get_all_data', return_value=data):
             check = TaskTimeViewer(configs, params)
             ret = check.get_ge_data_dict()
-            self.assertEqual(ret, {'0-1-3-0': 4})
+            self.assertEqual(ret.get('0-1-3-0'), {'op_name': 4, 'task_type': 5})
 
     def test_get_device_task_type_should_return_device_type_when_device_is_not_number(self):
         configs, params = {}, {'data_type': 'ffts_sub_task_time'}
@@ -173,11 +177,17 @@ class TestTaskTimeViewer(unittest.TestCase):
         self.assertEqual(result, "SDMA_SQE")
         InfoConfReader()._info_json = {}
 
-    def test_add_node_name(self):
+    def test_add_node_name_and_type(self):
         configs, params = {}, {}
         node_dict = {
-            '2-36-47-0': 'MatMul_1_lxslice1',
-            '2-27-4294967295-0': 'Add',
+            '2-36-47-0': {
+                'op_name': 'MatMul_1_lxslice1',
+                'task_type': 'AI_CORE'
+            },
+            '2-27-4294967295-0': {
+                'op_name': 'Add',
+                'task_type': 'AI_CORE'
+            },
         }
         data = {
             "task_data_list": [
@@ -189,15 +199,21 @@ class TestTaskTimeViewer(unittest.TestCase):
         }
         with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
-            check.add_node_name(data)
+            check.add_node_name_and_type(data)
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'MatMul_1_lxslice1')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'Add')
 
     def test_add_node_name_should_return_device_when_host_is_ffts_plus(self):
         configs, params = {}, {}
         node_dict = {
-            '3-36-47-0': 'MatMul_1_lxslice1',
-            '3-27-4294967295-0': 'Add',
+            '3-36-47-0': {
+                'op_name': 'MatMul_1_lxslice1',
+                'task_type': 'AI_CORE'
+            },
+            '3-27-4294967295-0': {
+                'op_name': 'Add',
+                'task_type': 'AI_CORE'
+            },
         }
         data = {
             "task_data_list": [
@@ -209,15 +225,21 @@ class TestTaskTimeViewer(unittest.TestCase):
         }
         with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
-            check.add_node_name(data)
+            check.add_node_name_and_type(data)
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'AIV')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'AIV')
 
     def test_add_node_name_should_return_op_name_when_op_name_exists_and_host_is_unknown(self):
         configs, params = {}, {}
         node_dict = {
-            '2-36-47-0': 'MatMul_1_lxslice1',
-            '2-27-4294967295-0': 'MatMul/v2_MemSet',
+            '2-36-47-0': {
+                'op_name': 'MatMul_1_lxslice1',
+                'task_type': 'AI_CORE'
+            },
+            '2-27-4294967295-0': {
+                'op_name': 'MatMul/v2_MemSet',
+                'task_type': 'AI_CORE'
+            },
         }
         data = {
             "task_data_list": [
@@ -229,15 +251,21 @@ class TestTaskTimeViewer(unittest.TestCase):
         }
         with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
-            check.add_node_name(data)
+            check.add_node_name_and_type(data)
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'MatMul_1_lxslice1')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'MatMul/v2_MemSet')
 
     def test_add_node_name_should_return_other_when_host_is_unknown_and_device_not_belongs_to_sqetype(self):
         configs, params = {}, {}
         node_dict = {
-            '3-36-47-0': 'MatMul/v2_MemSet',
-            '3-27-4294967295-0': 'Add',
+            '3-36-47-0': {
+                'op_name': 'MatMul_1_lxslice1',
+                'task_type': 'AI_CORE'
+            },
+            '3-27-4294967295-0': {
+                'op_name': 'Add',
+                'task_type': 'AI_CORE'
+            },
         }
         data = {
             "task_data_list": [
@@ -250,15 +278,21 @@ class TestTaskTimeViewer(unittest.TestCase):
         with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V3_1_0
-            check.add_node_name(data)
+            check.add_node_name_and_type(data)
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'Other')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'KERNEL_AICORE')
 
     def test_add_node_name_should_return_sqetype_when_host_is_unknown_and_device_belongs_to_sqetype(self):
         configs, params = {}, {}
         node_dict = {
-            '3-36-47-0': 'MatMul/v2_MemSet',
-            '3-27-4294967295-0': 'aclnnAdd_AddAiCore_Add',
+            '3-36-47-0': {
+                'op_name': 'MatMul_1_lxslice1',
+                'task_type': 'AI_CORE'
+            },
+            '3-27-4294967295-0': {
+                'op_name': 'Add',
+                'task_type': 'AI_CORE'
+            },
         }
         data = {
             "task_data_list": [
@@ -271,15 +305,21 @@ class TestTaskTimeViewer(unittest.TestCase):
         with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V1_1_0
-            check.add_node_name(data)
+            check.add_node_name_and_type(data)
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'EVENT_WAIT_SQE')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'AI_CPU')
 
     def test_add_node_name_should_return_device_when_v2_1_0_and_host_is_unknown_and_device_is_not_number(self):
         configs, params = {}, {}
         node_dict = {
-            '3-36-47-0': 'MatMul_1_lxslice1',
-            '3-27-4294967295-0': 'aclnnCast_CastAiCore_Cast',
+            '3-36-47-0': {
+                'op_name': 'MatMul_1_lxslice1',
+                'task_type': 'AI_CORE'
+            },
+            '3-27-4294967295-0': {
+                'op_name': 'Add',
+                'task_type': 'AI_CORE'
+            },
         }
         data = {
             "task_data_list": [
@@ -292,15 +332,21 @@ class TestTaskTimeViewer(unittest.TestCase):
         with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V2_1_0
-            check.add_node_name(data)
+            check.add_node_name_and_type(data)
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'AIV')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'AI_CPU')
 
     def test_add_node_name_should_return_device_when_chip_v1_1_0_and_host_is_unknown_and_device_is_not_number(self):
         configs, params = {}, {}
         node_dict = {
-            '3-36-47-0': 'MatMul/v2_MemSet',
-            '3-27-4294967295-0': 'aclnnAny_ReduceAny_MemSet',
+            '3-36-47-0': {
+                'op_name': 'MatMul_1_lxslice1',
+                'task_type': 'AI_CORE'
+            },
+            '3-27-4294967295-0': {
+                'op_name': 'Add',
+                'task_type': 'AI_CORE'
+            },
         }
         data = {
             "task_data_list": [
@@ -313,15 +359,21 @@ class TestTaskTimeViewer(unittest.TestCase):
         with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V1_1_0
-            check.add_node_name(data)
+            check.add_node_name_and_type(data)
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'SDMA')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'AI_CPU')
 
     def test_add_node_name_should_return_device_when_chip_v1_1_0_and_host_is_unknown_and_device_is_not_number(self):
         configs, params = {}, {}
         node_dict = {
-            '3-36-47-0': 'MatMul_1_lxslice1',
-            '3-27-4294967295-0': 'aclnnAdd_AddAiCore_Add',
+            '3-36-47-0': {
+                'op_name': 'MatMul_1_lxslice1',
+                'task_type': 'AI_CORE'
+            },
+            '3-27-4294967295-0': {
+                'op_name': 'Add',
+                'task_type': 'AI_CORE'
+            },
         }
         data = {
             "task_data_list": [
@@ -334,15 +386,21 @@ class TestTaskTimeViewer(unittest.TestCase):
         with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V1_1_0
-            check.add_node_name(data)
+            check.add_node_name_and_type(data)
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'EVENT_WAIT_SQE')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'KERNEL_AICPU')
 
     def test_add_node_name_should_return_other_when_v2_1_0_and_host_is_unknown_and_device_belongs_to_sqetype(self):
         configs, params = {}, {}
         node_dict = {
-            '3-36-47-0': 'aclnnAny_ReduceAny_MemSet',
-            '3-27-4294967295-0': 'aclnnAdd_AddAiCore_Add',
+            '3-36-47-0': {
+                'op_name': 'MatMul_1_lxslice1',
+                'task_type': 'AI_CORE'
+            },
+            '3-27-4294967295-0': {
+                'op_name': 'Add',
+                'task_type': 'AI_CORE'
+            },
         }
         data = {
             "task_data_list": [
@@ -355,15 +413,21 @@ class TestTaskTimeViewer(unittest.TestCase):
         with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V2_1_0
-            check.add_node_name(data)
+            check.add_node_name_and_type(data)
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'Other')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'KERNEL_AICPU')
 
     def test_add_node_name_should_return_other_when_v2_1_0_and_host_is_unknown_and_device_not_belongs_to_sqetype(self):
         configs, params = {}, {}
         node_dict = {
-            '3-36-47-0': 'aclnnAdd_AddAiCore_Add',
-            '3-27-4294967295-0': 'aclnnAny_ReduceAny_MemSet',
+            '3-36-47-0': {
+                'op_name': 'MatMul_1_lxslice1',
+                'task_type': 'AI_CORE'
+            },
+            '3-27-4294967295-0': {
+                'op_name': 'Add',
+                'task_type': 'AI_CORE'
+            },
         }
         data = {
             "task_data_list": [
@@ -376,7 +440,7 @@ class TestTaskTimeViewer(unittest.TestCase):
         with mock.patch(NAMESPACE + '.TaskTimeViewer.get_ge_data_dict', return_value=node_dict):
             check = TaskTimeViewer(configs, params)
             ChipManager().chip_id = ChipModel.CHIP_V2_1_0
-            check.add_node_name(data)
+            check.add_node_name_and_type(data)
             self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'Other')
             self.assertEqual(data.get('task_data_list', [])[0].op_name, 'EVENT_WAIT')
 
