@@ -17,7 +17,6 @@ class HccsModel(BaseModel, ABC):
     """
     acsq task model class
     """
-    CACHE_SIZE = 2 ** 32 - 1
     TABLES_PATH = ConfigManager.TABLES_TRAINING
 
     def __init__(self: any, result_dir: str, db_name: str, table_list: list) -> None:
@@ -60,24 +59,22 @@ class HccsModel(BaseModel, ABC):
 
     def _insert_metrics_data(self: any, device_id: str, original_data: list) -> None:
         for item in zip(original_data[1:] + original_data[:1], original_data):
+            _tx_rate = None
+            _rx_rate = None
             _timestamp = item[0][0]
             time_diff = (item[0][0] - item[1][0]) / Constant.BYTE_NS_TO_MB_S
 
+            # 如果存在数据溢出翻转的异常数据，则过滤这条
             if item[0][1] >= item[1][1]:
                 _tx_throughout = item[0][1] - item[1][1]
-            else:
-                _tx_throughout = self.CACHE_SIZE - item[1][1] + item[0][1]
-
-            _tx_rate = float_calculate([_tx_throughout, time_diff], '/')
+                _tx_rate = float_calculate([_tx_throughout, time_diff], '/')
 
             if item[0][2] >= item[1][2]:
                 _rx_throughput = item[0][2] - item[1][2]
-            else:
-                _rx_throughput = self.CACHE_SIZE - item[1][2] + item[0][2]
+                _rx_rate = float_calculate([_rx_throughput, time_diff], '/')
 
-            _rx_rate = float_calculate([_rx_throughput, time_diff], '/')
-            self.metric_data.append((device_id, _timestamp, _tx_rate,
-                                     _rx_rate))
+            if _tx_rate is not None and _rx_rate is not None:
+                self.metric_data.append((device_id, _timestamp, _tx_rate, _rx_rate))
 
     def _calculate_metrics(self: any, device_id: int) -> None:
         """
