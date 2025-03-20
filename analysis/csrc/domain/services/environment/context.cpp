@@ -199,8 +199,7 @@ bool Context::IsAllExport()
     // 低版本的驱动中不存在drvVersion字段，该字段使用时需要默认值
     auto drvVersion = info.value("drvVersion", 0u);
     if (drvVersion < ALL_EXPORT_VERSION) {
-        WARN("DrvVersion not support all export, drvVersion is %, ALL_EXPORT_VERSION is %",
-             drvVersion, ALL_EXPORT_VERSION);
+        WARN("DrvVersion not support all export, ALL_EXPORT_VERSION is %", ALL_EXPORT_VERSION);
         return false;
     }
     uint16_t chip;
@@ -382,7 +381,7 @@ bool Context::GetSyscntConversionParams(Utils::SyscntConversionParams &params,
     }
     uint64_t diff = 0;
     if (StrToU64(diff, info.value("hostCntvctDiff", "0")) != ANALYSIS_OK) {
-        WARN("HostCntvctDiff to uint64_t failed, invalid str is %.", info.value("hostCntvctDiff", "0"));
+        WARN("HostCntvctDiff to uint64_t failed, input path %, deviceId %", profPath, deviceId);
         // diff 异常不影响数据解析，部分时间存在误差
         return true;
     }
@@ -455,7 +454,7 @@ bool Context::GetClockMonotonicRaw(uint64_t &monotonicRaw, bool isHost, uint16_t
     }
     uint64_t diff = 0;
     if (StrToU64(diff, info.value("hostCntvctDiff", "0")) != ANALYSIS_OK) {
-        WARN("HostCntvctDiff to uint64_t failed, invalid str is %.", info.value("hostCntvctDiff", "0"));
+        WARN("HostCntvctDiff to uint64_t failed, input path %, deviceId %", profPath, deviceId);
         // diff 异常不影响数据解析，部分时间存在误差
         return true;
     }
