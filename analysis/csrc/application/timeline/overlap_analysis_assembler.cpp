@@ -302,6 +302,7 @@ void OverlapAnalysisAssembler::SepCompTaskAndKFCCommSections(
             mc2StreamsTable.insert(mc2CommInfo.aiCpuKfcStreamId);
         }
     }
+    uint64_t mismatchCount = 0;
     std::set<TaskId> usedTaskIds;
     for (auto &task : *compTasks) {
         TaskId id{static_cast<uint16_t >(task.streamId), static_cast<uint16_t >(task.batchId),
@@ -315,11 +316,10 @@ void OverlapAnalysisAssembler::SepCompTaskAndKFCCommSections(
         if (it != allTaskPool.end()) {
             SepOneTask(it->second, mc2StreamsTable, task, compSections);
         } else {
-            WARN("Find comp task not in all tasks, s-t-b-c is %-%-%-%", id.streamId, id.taskId, id.batchId,
-                 id.contextId);
-            continue;
+            mismatchCount++;
         }
     }
+    INFO("Find % comp tasks not in all tasks.", mismatchCount);
 }
 
 template<typename T>

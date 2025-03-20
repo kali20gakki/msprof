@@ -153,6 +153,10 @@ bool EventGrouper::isKernelApiEvent(const std::shared_ptr<MsprofApi> &trace)
             lastKernelTimes_[trace->threadId][trace->level] = {trace->beginTime, trace->endTime};
             return true;
         }
+        if (trace->level == MSPROF_REPORT_ACL_LEVEL &&
+            TypeData::GetInstance().Get(trace->level, trace->type) != RECORD_EVENT) {
+            return false;
+        }
         WARN("Redundant api, level: %, time: [%, %], last valid api time: [%, %], threadId = %",
              trace->level, trace->beginTime, trace->endTime,
              lastKernelTimes_[trace->threadId][trace->level].first,
