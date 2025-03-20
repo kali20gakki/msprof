@@ -75,6 +75,10 @@ bool ProfManager::CreateDoneFile(const std::string &absolutePath, const std::str
         MSPROF_INNER_ERROR("EK9999", "Failed to open %s", Utils::BaseName(absolutePath).c_str());
         return false;
     }
+    if (!Utils::ChangeFileMode(absolutePath)) {
+        file.close();
+        return false;
+    }
     MSPROF_LOGI("ProfManager::CreateDoneFile");
     file << "filesize:" << fileSize << std::endl;
     file.flush();
@@ -103,6 +107,10 @@ int ProfManager::WriteCtrlDataToFile(const std::string &absolutePath, const std:
     if (!file.is_open()) {
         MSPROF_LOGE("[WriteCtrlDataToFile]Failed to open %s", Utils::BaseName(absolutePath).c_str());
         MSPROF_INNER_ERROR("EK9999", "Failed to open %s", Utils::BaseName(absolutePath).c_str());
+        return PROFILING_FAILED;
+    }
+    if (!Utils::ChangeFileMode(absolutePath)) {
+        file.close();
         return PROFILING_FAILED;
     }
     file.write(data.c_str(), dataLen);

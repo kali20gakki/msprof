@@ -1799,3 +1799,25 @@ TEST_F(COMMON_UTILS_UTILS_TEST, CheckStringIsValidNatureNumWillReturnTrueWhenInp
     maxUintValStr = std::to_string(UINT32_MAX - 1);
     EXPECT_EQ(true, Utils::CheckStringIsValidNatureNum(maxUintValStr));
 }
+
+TEST_F(COMMON_UTILS_UTILS_TEST, ChangeFileModeWillReturnFalseWhenChmodFail)
+{
+    GlobalMockObject::verify();
+    std::string path = "xxx";
+    MmMode_t mode = 0640;
+    MOCKER(&MmChmod)
+        .stubs()
+        .will(returnValue(-1));
+    EXPECT_EQ(false, Utils::ChangeFileMode(path, mode));
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, ChangeFileModeWillReturnTrueWhenChmodSucc)
+{
+    GlobalMockObject::verify();
+    std::string path = "xxx";
+    MmMode_t mode = 0640;
+    MOCKER(&MmChmod)
+        .stubs()
+        .will(returnValue(0));
+    EXPECT_EQ(true, Utils::ChangeFileMode(path, mode));
+}

@@ -520,6 +520,7 @@ public:
     static std::string PackDotInfo(const std::string &leftPattern, const std::string &rightPattern);
     static std::string GetHostMacStr();
     static bool CheckCharValid(const std::string &str);
+    static bool ChangeFileMode(const std::string &path, Collector::Dvvp::Mmpa::MmMode_t mode = 0640);
 };
 
 template<class T> class UtilsStringBuilder {
