@@ -662,7 +662,7 @@ msptiResult msptiActivityDisable(msptiActivityKind kind);
  *
  * Enable collection of Domain mark. Multiple
  * Domain can be enabled by calling this function multiple times.
- * By default, the Domain of all activity types is inactive.
+ * By default, the Domain of all activity types is active.
  *
  * @param name The name of domain to collect
  *
@@ -675,8 +675,8 @@ msptiResult msptiActivityEnableMarkerDomain(const char* name);
  * @brief Disable collection of Domain marker.
  *
  * Disable collection of Domain mark. Multiple
- * Domain can be enabled by calling this function multiple times.
- * By default, the Domain of all activity types is inactive.
+ * Domain can be disabled by calling this function multiple times.
+ * By default, the Domain of all activity types is active.
  *
  * @param name The name of domain to collect
  *

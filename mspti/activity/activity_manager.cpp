@@ -43,6 +43,8 @@ void ActivityBuffer::UnInit(msptiBuffersCallbackCompleteFunc func)
         MSPTI_LOGE("The complete callback is nullptr.");
         return;
     }
+    MSPTI_LOGI("CallbackCompleteFunc start, validsize: %d, bufSize: %d, recordsNum: %d",
+               valid_size_, buf_size_, records_num_);
     func(buf_, buf_size_, valid_size_);
 }
 
