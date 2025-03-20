@@ -38,7 +38,7 @@ class GeDataType(Enum):
     DUAL = 25
     DT_VARIANT = 26
     DT_BF16 = 27
-    UNDEFINED = 28
+    DT_UNDEFINED = 28
     DT_INT4 = 29
     DT_UINT1 = 30
     DT_INT2 = 31
@@ -71,6 +71,7 @@ class GeDataType(Enum):
     FLOAT64_ = 244
     COMPLEX_ = 245
     NUMBER_TYPE_END_ = 246
+    UNDEFINED = 0xffffffff  # 4294967295(-1) 默认值
 
     @classmethod
     def member_map(cls: any) -> dict:
@@ -137,7 +138,7 @@ class GeDataFormat(Enum):
     FRACTAL_Z_WINO = 48
     C1HWC0 = 49
     END = 50
-    MAX = 0xff
+    MAX = 0xff  # 256
     UNKNOWN_ = 200
     DEFAULT_ = 201
     NC1KHKWHWC0_ = 202
@@ -160,6 +161,7 @@ class GeDataFormat(Enum):
     FRACTAL_Z_3D_ = 219
     DHWNC_ = 220
     DHWCN_ = 221
+    UNDEFINED = 0xffffffff  # 4294967295(-1) 默认值
 
     @classmethod
     def member_map(cls: any) -> dict:
