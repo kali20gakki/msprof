@@ -38,18 +38,18 @@ private:
                         Utils::SyscntConversionParams &params, Utils::ProfTimeRecord &record);
 
     template<typename T>
-    bool ProcessData(T &oriData, DBInfo& info, bool &existFlag,
+    bool ProcessData(T &oriData, DBInfo& info, bool &notExistFlag,
                      std::function<T(const DBInfo &dbInfo, const std::string &dbPath)> func)
     {
         std::string dbPath = Utils::File::PathJoin({profPath_, HOST, SQLITE, info.dbName});
         if (!info.ConstructDBRunner(dbPath)) {
             return false;
         }
-        auto status = CheckPathAndTable(dbPath, info);
+        auto status = CheckPathAndTable(dbPath, info, false);
         if (status == CHECK_FAILED) {
             return false;
         } else if (status == NOT_EXIST) {
-            existFlag = true;
+            notExistFlag = true;
             return true;
         }
         oriData = func(info, dbPath);
