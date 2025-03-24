@@ -87,7 +87,7 @@ namespace {
                 std::to_string(MAX_PATH_LENGTH) + ".";
             return false;
         }
-        if (MmAccess2(path, M_W_OK) != PROFILING_SUCCESS) {
+        if (MmAccess2(path, M_R_OK) != PROFILING_SUCCESS) {
             errReason = "Argument --reports=" + path + " permission denied.";
             return false;
         }
