@@ -68,13 +68,14 @@ bool MsprofTxHostProcessor::Process(DataInventory &dataInventory)
     DBInfo msprofTxDb("msproftx.db", "MsprofTx");
     OriMsprofTxExHostData oriTxExData;
     DBInfo msprofTxExDb("msproftx.db", "MsprofTxEx");
-    bool existFlag = false;
-    if (!ProcessData<OriMsprofTxExHostData>(oriTxExData, msprofTxExDb, existFlag, LoadTxExData) &
-            !ProcessData<OriMsprofTxHostData>(oriTxData, msprofTxDb, existFlag, LoadTxData)) {
+    bool notExistFlagTx = false;
+    bool notExistFlagTxEx = false;
+    if (!ProcessData<OriMsprofTxExHostData>(oriTxExData, msprofTxExDb, notExistFlagTxEx, LoadTxExData) &
+            !ProcessData<OriMsprofTxHostData>(oriTxData, msprofTxDb, notExistFlagTx, LoadTxData)) {
         ERROR("Get original data failed");
         return false;
     }
-    if (existFlag) {
+    if (notExistFlagTx && notExistFlagTxEx) {
         WARN("msprofTx in % is not exists, return", profPath_);
         return true;
     }
