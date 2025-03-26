@@ -283,11 +283,10 @@ msptiResult MsptiAdapter::Start()
 
 msptiResult MsptiAdapter::Stop()
 {
-    refCnt_--;
-    if (refCnt_ == 0) {
-        return msptiUnsubscribe(subscriber_);
+    if (refCnt_ >= 1) {
+        refCnt_--;
     }
-    return MSPTI_SUCCESS;
+    return (refCnt_ == 0) ? msptiUnsubscribe(subscriber_) : MSPTI_SUCCESS;
 }
 
 msptiResult MsptiAdapter::FlushAll()
