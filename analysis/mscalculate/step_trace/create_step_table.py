@@ -511,6 +511,7 @@ class StepTableBuilder:
 class StepTracePreProcess:
     MODEL_START_TAG = 0
     MODEL_END_TAG = 1
+    MSTX_TAG = 11
     ITERATION_END_TAG = 4
     HCCL_START_TAG = 10000
 
@@ -535,6 +536,8 @@ class StepTracePreProcess:
                     self.current_step_trace_queue[-1]["all_record"].append(record)
             elif record.tag_id >= self.HCCL_START_TAG:
                 self.deal_hccl_tag(record)
+            elif record.tag_id == self.MSTX_TAG:
+                self.current_step_trace_queue.append({"tag": [record], "all_record": [record]})
             else:
                 self.deal_iteration_tag(record)
         if self.current_step_trace_queue:

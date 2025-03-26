@@ -88,8 +88,13 @@ class TestCreateStepTable(unittest.TestCase):
     record_7.model_id = 1
     record_7.timestamp = 7
     record_7.tag_id = 1
-    step_trace = [record_1, record_2, record_3, record_4, record_5, record_6, record_7]
-    ordered_step_trace = [record_1, record_3, record_4, record_5, record_6, record_2, record_7]
+    record_8 = StepTraceOriginDto()
+    record_8.model_id = 1
+    record_8.timestamp = 8
+    record_8.tag_id = 11
+
+    step_trace = [record_1, record_2, record_3, record_4, record_5, record_6, record_7, record_8]
+    ordered_step_trace = [record_1, record_3, record_4, record_5, record_6, record_2, record_7, record_8]
 
     def test_process_step_trace(self):
         with mock.patch(NAMESPACE + '.StepTableBuilder.build_table'):
