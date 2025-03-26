@@ -184,13 +184,13 @@ std::vector<JsonProcess> ExportManager::GetProcessEnum()
     std::vector<JsonProcess> jsonProcesses;
     for (nlohmann::json::iterator it = jsonProcessConfig.begin(); it != jsonProcessConfig.end(); ++it) {
         if (strToJsonProcess.find(it.key()) == strToJsonProcess.end()) {
-            ERROR("Json process contains invalid: '%'.", it.key());
-            PRINT_ERROR("Json process contains invalid: '%'.", it.key());
+            ERROR("Json process contains invalid key.");
+            PRINT_ERROR("Json process contains invalid key.");
             return allProcesses;
         }
         if (!it.value().is_boolean()) {
-            ERROR("Json contains invalid value: '%', only the bool type is supported.", it.value());
-            PRINT_ERROR("Json contains invalid value: '%', only the bool type is supported.", it.value());
+            ERROR("Json contains invalid value, only the bool type is supported.");
+            PRINT_ERROR("Json contains invalid value, only the bool type is supported.");
             return allProcesses;
         }
         if (it.value()) {

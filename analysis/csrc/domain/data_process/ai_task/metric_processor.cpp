@@ -358,6 +358,10 @@ bool MetricProcessor::AddMemoryBound(std::map<TaskId, std::vector<std::vector<st
                 lineData.push_back("N/A");
                 continue;
             }
+            if (Utils::IsDoubleEqual(mac_ratio_double, 0.0) || Utils::IsDoubleEqual(vec_ratio_double, 0.0)) {
+                lineData.push_back("N/A");
+                continue;
+            }
             lineData.push_back(std::to_string(mte2_ratio_double / std::max(mac_ratio_double, vec_ratio_double)));
         }
     }

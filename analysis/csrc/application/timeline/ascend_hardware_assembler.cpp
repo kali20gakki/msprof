@@ -234,7 +234,7 @@ void AscendHardwareAssembler::GenerateMemcpyAsyncTrace(DataInventory &dataInvent
             } else {
                 ERROR("MEMCPY_ASYNC task lost memcpyInfo, connectionId is %", data.connectionId);
             }
-            if (data.duration > 0) {
+            if (!IsDoubleEqual(data.duration, 0.0) && data.duration > 0) {
                 bandwidth = static_cast<double>(dataSize) / data.duration;  // GB/s, 全部按照1000计算
             }
         }

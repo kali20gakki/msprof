@@ -404,7 +404,7 @@ bool HcclCalculator::GetHcclStatisticsData()
         return false;
     }
     for (auto& data : statisticsTable) {
-        if (Utils::IsDoubleEqual(data.second.count, 0) || Utils::IsDoubleEqual(allTaskTime, 0)) {
+        if ((data.second.count == 0) || Utils::IsDoubleEqual(allTaskTime, 0)) {
             ERROR("Division by zero, and data.second.count: %  or allTaskTime: %.", data.second.count, allTaskTime);
             continue;
         }
