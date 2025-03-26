@@ -114,6 +114,7 @@ int TensorInfoParser::ProduceData()
             auto concatTensor = CreateConcatTensorInfo(currTensorInfo);
             if (!concatTensor) {
                 ERROR("%: Create concat tensor failed.");
+                delete currTensorInfo;
                 return ANALYSIS_ERROR;
             }
             concatTensorMap.insert({key, concatTensor});
