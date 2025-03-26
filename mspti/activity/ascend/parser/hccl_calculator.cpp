@@ -137,8 +137,8 @@ msptiResult HcclCalculator::CalculateBandWidth(HcclOpDesc* hcclOpDesc)
         MSPTI_LOGW("bandwidth calculation formula without corresponding operator");
         return MSPTI_ERROR_INNER;
     }
-    if (hcclOpDesc->end - hcclOpDesc->start == 0) {
-        MSPTI_LOGW("duration time is zero, can not calculate bandwidth");
+    if (hcclOpDesc->end <= hcclOpDesc->start) {
+        MSPTI_LOGW("duration time is zero or start time is later than end time, can not calculate bandwidth");
         return MSPTI_ERROR_INNER;
     }
     return it->second(hcclOpDesc);
