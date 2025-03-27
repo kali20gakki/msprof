@@ -185,6 +185,7 @@ namespace {
         {10,         "FP64"},
         {11,         "BFP16"},
         {12,         "INT128"},
+        {255,        "RESERVED"},
         {4294967295, "INVALID_TYPE"},
     };
     const std::unordered_map<uint32_t, std::string> hcclLinkTypeMap {
@@ -195,22 +196,20 @@ namespace {
         {4,          "SIO"},
         {5,          "HCCS_SW"},
         {6,          "STANDARD_ROCE"},
-        {7,          "RESERVED"},
+        {255,        "RESERVED"},
         {4294967295, "INVALID_TYPE"}
     };
     const std::unordered_map<uint32_t, std::string> hcclTransportTypeMap {
         {0,          "SDMA"},
         {1,          "RDMA"},
         {2,          "LOCAL"},
+        {255,        "RESERVED"},
         {4294967295, "INVALID_TYPE"},
     };
     const std::unordered_map<uint32_t, std::string> hcclRdmaTypeMap {
         {0,          "RDMA_SEND_NOTIFY"},
         {1,          "RDMA_SEND_PAYLOAD"},
-        {2,          "RDMA_PAYLOAD_PREPARE"},
-        {3,          "RDMA_PAYLOAD_CHECK"},
-        {4,          "RDMA_PAYLOAD_ACK"},
-        {5,          "RDMA_SEND_OP"},
+        {255,        "RESERVED"},
         {4294967295, "INVALID_TYPE"}
     };
     const std::unordered_map<uint32_t, std::string> hcclOpTypeMap {
@@ -218,6 +217,7 @@ namespace {
         {1,          "MUL"},
         {2,          "MAX"},
         {3,          "MIN"},
+        {255,        "RESERVED"},
         {4294967295, "INVALID_TYPE"}
     };
     const std::unordered_map<uint32_t, std::string> levelMap {

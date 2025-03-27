@@ -277,6 +277,7 @@ const std::unordered_map<std::string, uint16_t> HCCL_DATA_TYPE_TABLE = {
     {"FP64", 10},
     {"BFP16", 11},
     {"INT128", 12},
+    {"RESERVED", 255},
     {NA, UINT16_MAX - 1},
     {"INVALID_TYPE", UINT16_MAX},
 };
@@ -290,7 +291,7 @@ const std::unordered_map<std::string, uint16_t> HCCL_LINK_TYPE_TABLE = {
     {"SIO", 4},
     {"HCCS_SW",  5},
     {"STANDARD_ROCE",  6},
-    {"RESERVED", 7},
+    {"RESERVED", 255},
     {NA, UINT16_MAX - 1},
     {"INVALID_TYPE", UINT16_MAX},
 };
@@ -300,6 +301,7 @@ const std::unordered_map<std::string, uint16_t> HCCL_TRANSPORT_TYPE_TABLE = {
     {"SDMA", 0},
     {"RDMA", 1},
     {"LOCAL", 2},
+    {"RESERVED", 255},
     {NA, UINT16_MAX - 1},
     {"INVALID_TYPE", UINT16_MAX},
 };
@@ -308,10 +310,7 @@ const std::unordered_map<std::string, uint16_t> HCCL_TRANSPORT_TYPE_TABLE = {
 const std::unordered_map<std::string, uint16_t> HCCL_RDMA_TYPE_TABLE = {
     {"RDMA_SEND_NOTIFY", 0},
     {"RDMA_SEND_PAYLOAD", 1},
-    {"RDMA_PAYLOAD_PREPARE", 2},
-    {"RDMA_PAYLOAD_CHECK", 3},
-    {"RDMA_PAYLOAD_ACK", 4},
-    {"RDMA_SEND_OP", 5},
+    {"RESERVED", 255},
     {NA, UINT16_MAX - 1},
     {"INVALID_TYPE", UINT16_MAX},
 };
