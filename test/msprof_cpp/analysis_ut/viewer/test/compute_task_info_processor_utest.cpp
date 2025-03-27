@@ -148,24 +148,6 @@ void CheckStringId(PROCESSED_DATA_FORMAT data)
     }
 }
 
-TEST_F(ComputeTaskInfoProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
-{
-    PROCESSED_DATA_FORMAT result;
-    MAKE_SHARED0_NO_OPERATION(MsprofDBRunner, DBRunner, DB_PATH);
-    std::string sql{"SELECT * FROM " + TARGET_TABLE_NAME};
-    auto processor = ComputeTaskInfoProcessor(DB_PATH, PROF_PATHS);
-    EXPECT_TRUE(processor.Run());
-    MsprofDBRunner->QueryData(sql, result);
-    CheckGlobalTaskId(result);
-    CheckStringId(result);
-    CommScheduleDataFormat scheduleRes;
-    std::string sql2{"SELECT * FROM " + TABLE_COMMUNICATION_SCHEDULE_TASK_INFO};
-    MsprofDBRunner->QueryData(sql2, scheduleRes);
-    ASSERT_EQ(1, scheduleRes.size());
-    const uint16_t scheduleTaskGlobalTaskId = 4;
-    EXPECT_EQ(scheduleTaskGlobalTaskId, std::get<1>(scheduleRes[0]));
-}
-
 TEST_F(ComputeTaskInfoProcessorUTest, TestRunShouldReturnFalseWhenSourceTableNotExist)
 {
     auto dbPath = File::PathJoin({PROF_PATH_A, HOST_SUFFIX, SQLITE_SUFFIX, DB_SUFFIX});

@@ -188,6 +188,7 @@ db命名：msprof_{时间戳}.db
 | 10    | FP64         |
 | 11    | BFP16        |
 | 12    | INT128       |
+| 255   | RESERVED     |
 | 65534 | N/A          |
 | 65535 | INVALID_TYPE |
 
@@ -199,6 +200,7 @@ db命名：msprof_{时间戳}.db
 | 2024/5/19 | 630新增 |
 | 2024/6/25 | 更新HcclDataType |
 | 2024/7/11 | 新增NA字段，避免L0场景下异常日志记录 |
+| 2025/3/24 | 新增RESERVED字段 |
 
 ### ENUM_HCCL_LINK_TYPE
 
@@ -220,7 +222,7 @@ db命名：msprof_{时间戳}.db
 | 4     | SIO           |
 | 5     | HCCS_SW       |
 | 6     | STANDARD_ROCE |
-| 7     | RESERVED      |
+| 255   | RESERVED      |
 | 65534 | N/A          |
 | 65535 | INVALID_TYPE  |
 
@@ -231,6 +233,7 @@ db命名：msprof_{时间戳}.db
 | 2024/3/13 | 计划新增                    |
 | 2024/5/19 | 630新增,同时增加新的type字段（4-7） |
 | 2024/7/11 | 新增NA字段，避免L0场景下异常日志记录 |
+| 2025/3/24 | 新增RESERVED字段 |
 
 ### ENUM_HCCL_TRANSPORT_TYPE
 
@@ -248,6 +251,7 @@ db命名：msprof_{时间戳}.db
 | 0     | SDMA         |
 | 1     | RDMA         |
 | 2     | LOCAL        |
+| 255   | RESERVED     |
 | 65534 | N/A          |
 | 65535 | INVALID_TYPE |
 
@@ -258,6 +262,7 @@ db命名：msprof_{时间戳}.db
 | 2024/3/13 | 计划新增  |
 | 2024/5/19 | 630新增 |
 | 2024/7/11 | 新增NA字段，避免L0场景下异常日志记录 |
+| 2025/3/24 | 新增RESERVED字段 |
 
 
 ### ENUM_HCCL_RDMA_TYPE
@@ -275,10 +280,7 @@ db命名：msprof_{时间戳}.db
 |-------|----------------------|
 | 0     | RDMA_SEND_NOTIFY     |
 | 1     | RDMA_SEND_PAYLOAD    |
-| 2     | RDMA_PAYLOAD_PREPARE |
-| 3     | RDMA_PAYLOAD_CHECK   |
-| 4     | RDMA_PAYLOAD_ACK     |
-| 5     | RDMA_SEND_OP         |
+| 255   | RESERVED             |
 | 65534 | N/A          |
 | 65535 | INVALID_TYPE         |
 
@@ -289,6 +291,7 @@ db命名：msprof_{时间戳}.db
 | 2024/3/13 | 计划新增                    |
 | 2024/5/19 | 630新增,同时增加新的type字段（2-5） |
 | 2024/7/11 | 新增NA字段，避免L0场景下异常日志记录 |
+| 2025/3/24 | 新增RESERVED字段,删除无效type |
 
 ### ENUM_MEMCPY_OPERATION
 

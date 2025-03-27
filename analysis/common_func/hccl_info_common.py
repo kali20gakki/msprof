@@ -7,6 +7,7 @@ from enum import Enum
 class RoleType(Enum):
     DST = 0
     SRC = 1
+    RESERVED = 255
     INVALID_TYPE = 4294967295
 
 
@@ -15,6 +16,7 @@ class OpType(Enum):
     MUL = 1
     MAX = 2
     MIN = 3
+    RESERVED = 255
     INVALID_TYPE = 4294967295
 
 
@@ -32,6 +34,7 @@ class DataType(Enum):
     FP64 = 10
     BFP16 = 11
     INT128 = 12
+    RESERVED = 255
     INVALID_TYPE = 4294967295
 
 
@@ -43,7 +46,7 @@ class LinkType(Enum):
     SIO = 4
     HCCS_SW = 5
     STANDARD_ROCE = 6
-    RESERVED = 7
+    RESERVED = 255
     INVALID_TYPE = 4294967295
 
 
@@ -51,16 +54,14 @@ class TransPortType(Enum):
     SDMA = 0
     RDMA = 1
     LOCAL = 2
+    RESERVED = 255
     INVALID_TYPE = 4294967295
 
 
 class RdmaType(Enum):
     RDMA_SEND_NOTIFY = 0
     RDMA_SEND_PAYLOAD = 1
-    RDMA_PAYLOAD_PREPARE = 2
-    RDMA_PAYLOAD_CHECK = 3
-    RDMA_PAYLOAD_ACK = 4
-    RDMA_SEND_OP = 5
+    RESERVED = 255
     INVALID_TYPE = 4294967295
 
 
