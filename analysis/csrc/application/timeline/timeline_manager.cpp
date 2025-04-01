@@ -33,7 +33,7 @@ const std::unordered_map<JsonProcess, std::string> JSON_TO_ASSEMBLER_TABLE{
     {JsonProcess::DDR,              PROCESS_DDR},
     {JsonProcess::STARS_CHIP_TRANS, PROCESS_STARS_CHIP_TRANS},
     {JsonProcess::HBM,              PROCESS_HBM},
-    {JsonProcess::HCCL,             PROCESS_HCCL},
+    {JsonProcess::COMMUNICATION,    PROCESS_HCCL},
     {JsonProcess::HCCS,             PROCESS_HCCS},
     {JsonProcess::NETWORK_USAGE,    PROCESS_NETWORK_USAGE},
     {JsonProcess::DISK_USAGE,       PROCESS_DISK_USAGE},

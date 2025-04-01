@@ -21,7 +21,7 @@ enum class JsonProcess {
     DDR,
     STARS_CHIP_TRANS,
     HBM,
-    HCCL,
+    COMMUNICATION,
     HCCS,
     NETWORK_USAGE,
     DISK_USAGE,
@@ -49,7 +49,7 @@ const std::unordered_map<std::string, JsonProcess> strToJsonProcess = {
     {"ddr",              JsonProcess::DDR},
     {"stars_chip_trans", JsonProcess::STARS_CHIP_TRANS},
     {"hbm",              JsonProcess::HBM},
-    {"hccl",             JsonProcess::HCCL},
+    {"communication",    JsonProcess::COMMUNICATION},
     {"hccs",             JsonProcess::HCCS},
     {"network_usage",    JsonProcess::NETWORK_USAGE},
     {"disk_usage",       JsonProcess::DISK_USAGE},
@@ -72,10 +72,11 @@ const std::unordered_map<std::string, JsonProcess> strToJsonProcess = {
 
 const std::vector<JsonProcess> allProcesses{
     JsonProcess::ASCEND, JsonProcess::ACC_PMU, JsonProcess::CANN, JsonProcess::DDR, JsonProcess::STARS_CHIP_TRANS,
-    JsonProcess::HBM, JsonProcess::HCCL, JsonProcess::HCCS, JsonProcess::NETWORK_USAGE, JsonProcess::DISK_USAGE,
-    JsonProcess::MEMORY_USAGE, JsonProcess::CPU_USAGE, JsonProcess::MSPROFTX, JsonProcess::NPU_MEM,
-    JsonProcess::OVERLAP_ANALYSE, JsonProcess::PCIE, JsonProcess::SIO, JsonProcess::STARS_SOC, JsonProcess::STEP_TRACE,
-    JsonProcess::FREQ, JsonProcess::LLC, JsonProcess::NIC, JsonProcess::ROCE, JsonProcess::QOS, JsonProcess::DEVICE_TX
+    JsonProcess::HBM, JsonProcess::COMMUNICATION, JsonProcess::HCCS, JsonProcess::NETWORK_USAGE,
+    JsonProcess::DISK_USAGE, JsonProcess::MEMORY_USAGE, JsonProcess::CPU_USAGE, JsonProcess::MSPROFTX,
+    JsonProcess::NPU_MEM, JsonProcess::OVERLAP_ANALYSE, JsonProcess::PCIE, JsonProcess::SIO, JsonProcess::STARS_SOC,
+    JsonProcess::STEP_TRACE, JsonProcess::FREQ, JsonProcess::LLC, JsonProcess::NIC, JsonProcess::ROCE, JsonProcess::QOS,
+    JsonProcess::DEVICE_TX
 };
 }
 }
