@@ -27,7 +27,7 @@ namespace Domain {
 namespace {
 struct GroupData {
     uint64_t firstTimestamp = UINT64_MAX;
-    uint16_t count = 0;
+    uint64_t count = 0;
 };
 
 struct OpTypeInfo {
