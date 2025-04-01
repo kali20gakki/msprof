@@ -6,7 +6,7 @@
     "ddr": true,
     "stars_chip_trans": true,
     "hbm": true,
-    "hccl": true,
+    "communication": true,
     "hccs": true,
     "network_usage": true,
     "disk_usage": true,
