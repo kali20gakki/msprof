@@ -18,14 +18,6 @@
 namespace Mspti {
 namespace Reporter {
 
-
-msptiActivityExternalCorrelation CreateDefaultExternalCorrelationStruct()
-{
-    msptiActivityExternalCorrelation activityExternalCorrelation{};
-    activityExternalCorrelation.kind = MSPTI_ACTIVITY_KIND_EXTERNAL_CORRELATION;
-    return activityExternalCorrelation;
-}
-
 ExternalCorrelationReporter* ExternalCorrelationReporter::GetInstance()
 {
     static ExternalCorrelationReporter instance;
@@ -39,7 +31,8 @@ msptiResult ExternalCorrelationReporter::ReportExternalCorrelationId(uint64_t co
     }
     std::lock_guard<std::mutex> lock(mapMtx_);
     for (const auto &pair : externalCorrelationMap) {
-        static thread_local msptiActivityExternalCorrelation result = CreateDefaultExternalCorrelationStruct();
+        msptiActivityExternalCorrelation result{};
+        result.kind = MSPTI_ACTIVITY_KIND_EXTERNAL_CORRELATION;
         result.externalKind = pair.first;
         result.externalId = pair.second.top();
         result.correlationId = correlationId;

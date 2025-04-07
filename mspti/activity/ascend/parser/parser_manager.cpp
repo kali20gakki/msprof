@@ -23,16 +23,6 @@
 
 namespace Mspti {
 namespace Parser {
-namespace {
-msptiActivityApi CreateDefaultApiActivityStruct()
-{
-    msptiActivityApi activityApi{};
-    activityApi.kind = MSPTI_ACTIVITY_KIND_API;
-    activityApi.pt.processId = Mspti::Common::Utils::GetPid();
-    return activityApi;
-}
-}
-
 std::unordered_map<uint64_t, std::string> ParserManager::hashInfo_map_;
 std::mutex ParserManager::hashMutex_;
 std::unordered_map<uint16_t, std::unordered_map<uint32_t, std::string>> ParserManager::typeInfo_map_;
@@ -128,7 +118,9 @@ msptiResult ParserManager::ReportApi(const MsprofApi* const data)
         return MSPTI_SUCCESS;
     }
 
-    static thread_local msptiActivityApi api = CreateDefaultApiActivityStruct();
+    msptiActivityApi api{};
+    api.kind = MSPTI_ACTIVITY_KIND_API;
+    api.pt.processId = Mspti::Common::Utils::GetPid();
     api.name = name.data();
     api.pt.threadId = data->threadId;
     api.start = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(data->beginTime);
