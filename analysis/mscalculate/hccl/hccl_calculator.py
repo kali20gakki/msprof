@@ -11,6 +11,7 @@ from typing import Union
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
@@ -167,9 +168,11 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         """
         if not communication_data:
             return {}
+        start_ts, _ = InfoConfReader().get_collect_time()
+        start_time_raw_timestamp = InfoConfReader().trans_from_local_time_into_dev_raw_time(start_ts)
         grouped_data = defaultdict(lambda: {"min_timestamp": float("inf"), "max_timestamp": -float("inf")})
         for data in communication_data:
-            if data.is_master == 0:
+            if data.is_master == 0 or data.timestamp < start_time_raw_timestamp:
                 continue
             key = (data.op_name, data.first_timestamp, data.op_type)
             grouped_data[key]["min_timestamp"] = min(grouped_data[key]["min_timestamp"], data.timestamp)

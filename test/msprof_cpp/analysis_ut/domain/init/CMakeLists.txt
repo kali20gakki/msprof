@@ -14,6 +14,7 @@ add_executable(device_init_utest
     ${TOP_DIR}/analysis/csrc/domain/services/device_context/device_info.cpp
     ${TOP_DIR}/analysis/csrc/domain/services/device_context/load_start_log.cpp
     ${TOP_DIR}/analysis/csrc/domain/services/device_context/sample_info.cpp
+    ${TOP_DIR}/analysis/csrc/domain/services/device_context/start_info.cpp
 )
 
 run_test(device_init_utest)

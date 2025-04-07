@@ -50,7 +50,8 @@ bool DeviceContext::Init(const std::string &devicePath)
                                                        [this]() { return this->GetCpuInfo(); },
                                                        [this]() { return this->GetSampleJson(); },
                                                        [this]() { return this->GetHostStart(); },
-                                                       [this]() { return this->GetDeviceStart(); }};
+                                                       [this]() { return this->GetDeviceStart(); },
+                                                       [this]() { return this->GetStartInfo(); }};
         auto ret = std::all_of(funcList.begin(), funcList.end(), [](std::function<bool()> func) {return func();});
         this->isInitialized_ = ret; // 标记已初始化
         return ret;

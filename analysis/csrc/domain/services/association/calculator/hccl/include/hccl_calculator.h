@@ -90,7 +90,7 @@ private:
     uint16_t GetJumpNum(const DeviceHcclTask &task);
     double CalculateBandwidth(double size, double duration);
     uint16_t FindConsecutivePayloadTask(std::vector<DeviceHcclTask*> tasks, size_t idx);
-    bool GetHcclStatisticsData();
+    bool GetHcclStatisticsData(const Context& context);
     bool InjectData(DataInventory &inventory);
 private:
     std::vector<HcclOp> opData_;
