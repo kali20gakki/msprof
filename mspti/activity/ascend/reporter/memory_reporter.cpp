@@ -37,29 +37,6 @@ msptiActivityMemcpyKind GetMsptiMemcpyKind(RtMemcpyKindT rtMemcpykind)
     auto iter = memoryKindMap.find(rtMemcpykind);
     return (iter == memoryKindMap.end() ? MSPTI_ACTIVITY_MEMCPY_KIND_UNKNOWN : iter->second);
 }
-
-msptiActivityMemory CreateDefaultMemoryActivityStruct()
-{
-    msptiActivityMemory activityMemory{};
-    activityMemory.kind = MSPTI_ACTIVITY_KIND_MEMORY;
-    activityMemory.processId = Common::Utils::GetPid();
-    activityMemory.streamId = MSPTI_INVALID_STREAM_ID;
-    return activityMemory;
-}
-
-msptiActivityMemset CreateDefaultMemsetActivityStruct()
-{
-    msptiActivityMemset activityMemset{};
-    activityMemset.kind = MSPTI_ACTIVITY_KIND_MEMSET;
-    return activityMemset;
-}
-
-msptiActivityMemcpy CreateDefaultMemcpyActivityStruct()
-{
-    msptiActivityMemcpy activityMemcpy{};
-    activityMemcpy.kind = MSPTI_ACTIVITY_KIND_MEMCPY;
-    return activityMemcpy;
-}
 }
 
 MemoryRecord::MemoryRecord(VOID_PTR_PTR devPtr, uint64_t size, msptiActivityMemoryKind memKind,
@@ -129,7 +106,10 @@ msptiResult MemoryReporter::ReportMemoryActivity(const MemoryRecord &record)
             }
         }
     }
-    static thread_local msptiActivityMemory activityMemory = CreateDefaultMemoryActivityStruct();
+    msptiActivityMemory activityMemory{};
+    activityMemory.kind = MSPTI_ACTIVITY_KIND_MEMORY;
+    activityMemory.processId = Common::Utils::GetPid();
+    activityMemory.streamId = MSPTI_INVALID_STREAM_ID;
     activityMemory.memoryKind = record.memKind;
     activityMemory.memoryOperationType = record.opType;
     activityMemory.correlationId = Common::ContextManager::GetInstance()->GetCorrelationId();
@@ -148,7 +128,8 @@ msptiResult MemoryReporter::ReportMemoryActivity(const MemoryRecord &record)
 
 msptiResult MemoryReporter::ReportMemsetActivity(const MemsetRecord &record)
 {
-    static thread_local msptiActivityMemset activityMemset = CreateDefaultMemsetActivityStruct();
+    msptiActivityMemset activityMemset{};
+    activityMemset.kind = MSPTI_ACTIVITY_KIND_MEMSET;
     activityMemset.value = record.value;
     activityMemset.bytes = record.bytes;
     activityMemset.start = record.start;
@@ -168,7 +149,8 @@ msptiResult MemoryReporter::ReportMemsetActivity(const MemsetRecord &record)
 
 msptiResult MemoryReporter::ReportMemcpyActivity(const MemcpyRecord &record)
 {
-    static thread_local msptiActivityMemcpy activityMemcpy = CreateDefaultMemcpyActivityStruct();
+    msptiActivityMemcpy activityMemcpy{};
+    activityMemcpy.kind = MSPTI_ACTIVITY_KIND_MEMCPY;
     activityMemcpy.copyKind = GetMsptiMemcpyKind(record.copyKind);
     activityMemcpy.bytes = record.bytes;
     activityMemcpy.start = record.start;
