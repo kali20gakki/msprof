@@ -136,6 +136,11 @@ struct DeviceStartLog {
     uint64_t cntVctDiff{0};  // device.start.log没有该字段，填充值
 };
 
+struct DeviceStartInfo {
+    uint64_t collectionTimeBegin{0};
+    uint64_t clockMonotonicRaw{0};
+};
+
 struct DeviceContextInfo {
     std::string deviceFilePath;
     DeviceInfo deviceInfo;
@@ -144,6 +149,7 @@ struct DeviceContextInfo {
     HostStartLog hostStartLog;
     DeviceStartLog deviceStart;
     CpuInfo cpuInfo;
+    DeviceStartInfo startInfo;
 };
 
 class DeviceContext : public Infra::Context {
@@ -164,6 +170,8 @@ public:
     void Getter(DeviceStartLog &deviceStart) const { deviceStart = this->deviceContextInfo.deviceStart; };
     void Getter(CpuInfo &cpuInfo) const { cpuInfo = this->deviceContextInfo.cpuInfo; };
 
+    void Getter(DeviceStartInfo &startInfo) const { startInfo = this->deviceContextInfo.startInfo; };
+
     uint32_t GetChipID() const override { return deviceContextInfo.deviceInfo.chipID; }
 
     std::string GetDeviceFilePath() const { return this->deviceContextInfo.deviceFilePath; }
@@ -183,6 +191,7 @@ private:
     bool GetDeviceStart();
     bool GetHostStart();
     bool GetCpuInfo();
+    bool GetStartInfo();
 };
 std::vector<DataInventory> DeviceContextEntry(const char *targetDir, const char *stopAt);
 std::vector<std::string> GetDeviceDirectories(const std::string &path);

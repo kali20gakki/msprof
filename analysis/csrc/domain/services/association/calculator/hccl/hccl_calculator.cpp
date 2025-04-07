@@ -55,7 +55,7 @@ uint32_t HcclCalculator::ProcessEntry(DataInventory& dataInventory, const Contex
     }
     UpdateHcclOpNameByGroupName();
     UpdateHcclBandwidth();
-    if (!GetHcclStatisticsData()) {
+    if (!GetHcclStatisticsData(context)) {
         ERROR("Failed to Get hccl statistics data.");
         return ANALYSIS_ERROR;
     }
@@ -365,16 +365,19 @@ uint16_t HcclCalculator::FindConsecutivePayloadTask(std::vector<DeviceHcclTask*>
     return count;
 }
 
-bool HcclCalculator::GetHcclStatisticsData()
+bool HcclCalculator::GetHcclStatisticsData(const Context& context)
 {
     INFO("Start GetHcclStatisticsData.");
     if (!isValidData_) {
         WARN("No op type in hccl data.");
         return true;
     }
+    const auto& deviceContext = dynamic_cast<const DeviceContext&>(context);
+    DeviceStartInfo startInfo;
+    deviceContext.Getter(startInfo);
     std::unordered_map<std::string, OpTypeInfo> groupedData;
     for (const auto& task : taskData_) {
-        if (task.isMaster == 0) {
+        if (task.isMaster == 0 || task.timestamp < startInfo.clockMonotonicRaw) {
             continue;
         }
         auto key = Utils::Join("-", task.opName, std::to_string(task.firstTimestamp), task.opType);

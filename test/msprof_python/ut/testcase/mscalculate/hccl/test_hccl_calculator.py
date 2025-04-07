@@ -50,6 +50,8 @@ class TestHcclCalculator(unittest.TestCase):
                 mock.patch(NAMESPACE + '.HcclCalculator._merge_hccl_ops_and_tasks', return_value=[
                     HcclTask(op_name="hccl_op", timestamp=1, duration=1, op_type="all_reduce")]):
             InfoConfReader()._info_json = {"devices": "0"}
+            InfoConfReader()._start_info = {"collectionTimeBegin": "0"}
+            InfoConfReader()._end_info = {}
             check = HcclCalculator([], CONFIG)
             check.calculate()
             hccl_task_data = check._hccl_task_data
@@ -64,6 +66,8 @@ class TestHcclCalculator(unittest.TestCase):
                 mock.patch(NAMESPACE + '.HcclCalculator._merge_hccl_ops_and_tasks', return_value=[
                     HcclTask(op_name="hccl_op", timestamp=1, duration=1, op_type=Constant.NA)]):
             InfoConfReader()._info_json = {"devices": "0"}
+            InfoConfReader()._start_info = {"collectionTimeBegin": "0"}
+            InfoConfReader()._end_info = {}
             check = HcclCalculator([], CONFIG)
             check.calculate()
             hccl_task_data = check._hccl_task_data
@@ -107,11 +111,14 @@ class TestHcclCalculator(unittest.TestCase):
     def test_get_hccl_op_report_data_should_return_dict_data_when_input_is_hccldto_list(self):
         args = {'stream id': 2, 'task id': 0, 'context id': 4294967295, 'is_master': '1'}
         hccl_data = [
+            HcclTask(op_name="hccl_op1", is_master=1, timestamp=-1, duration=2, op_type="all_reduce"),
             HcclTask(op_name="hccl_op1", is_master=1, timestamp=1, duration=2, op_type="all_reduce"),
             HcclTask(op_name="hccl_op2", is_master=1, timestamp=5, duration=3, op_type="all_reduce"),
             HcclTask(op_name="hccl_op3", is_master=1, timestamp=10, duration=2, op_type="all_gather"),
             HcclTask(op_name="hccl_op4", is_master=1, timestamp=15, duration=3, op_type="all_gather")
         ]
+        InfoConfReader()._start_info = {"collectionTimeBegin": "0"}
+        InfoConfReader()._end_info = {}
         check = HcclCalculator([], CONFIG)
         hccl_op_report_data = check._get_hccl_op_report_data(hccl_data)
         self.assertEqual(hccl_op_report_data,

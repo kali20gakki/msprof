@@ -13,7 +13,7 @@
 #include "analysis/csrc/domain/services/association/calculator/hccl/include/hccl_calculator.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/domain/entities/hal/include/top_down_task.h"
-#include "analysis/csrc/infrastructure/context/include/device_context.h"
+#include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/infrastructure/utils/utils.h"
 #include "mockcpp/mockcpp.hpp"
 
@@ -217,4 +217,23 @@ TEST_F(HcclCalculatorUTest, TestAllTaskTimeIsEqualZeroThenReturnFalse)
     DeviceContext context;
     ASSERT_EQ(Analysis::ANALYSIS_OK, calculator.Run(dataInventory_, context));
     MOCKER(&Analysis::Utils::IsDoubleEqual).reset();
+}
+
+TEST_F(HcclCalculatorUTest, TestGetHcclStatisticsDataShouldBeFilteredWhenProcessSuccessThenReturnOK)
+{
+    HcclCalculator calculator;
+    DeviceContext context;
+    context.deviceContextInfo.startInfo.clockMonotonicRaw = 88512126298900;  // warmup过滤的时间，88512126298900
+    ASSERT_EQ(Analysis::ANALYSIS_OK, calculator.Run(dataInventory_, context));
+
+    auto hcclOpData = dataInventory_.GetPtr<std::vector<HcclOp>>();
+    EXPECT_EQ(HCCL_OP_DATA.size(), hcclOpData->size());
+
+    auto hcclTaskData = dataInventory_.GetPtr<std::vector<DeviceHcclTask>>();
+    // 去除4条时间为-1的非法数据
+    EXPECT_EQ(HCCL_TASK_DATA.size() - 4, hcclTaskData->size());
+
+    auto hcclStatisticsData = dataInventory_.GetPtr<std::vector<HcclStatistics>>();
+    size_t expectStatisticsDataNum = 1;
+    EXPECT_EQ(expectStatisticsDataNum, hcclStatisticsData->size());
 }
