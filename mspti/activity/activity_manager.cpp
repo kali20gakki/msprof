@@ -124,7 +124,6 @@ void ActivityManager::JoinWorkThreads()
             thread.join();
         }
     }
-    work_thread_.clear();
 }
 
 msptiResult ActivityManager::RegisterCallbacks(
@@ -231,11 +230,6 @@ msptiResult ActivityManager::FlushAll()
             auto consumeBuf = std::move(cur_buf_);
             consumeBuf->UnInit(this->bufferCompleted_handle_);
         }
-    }
-    {
-        std::lock_guard<std::mutex> lk(cv_mtx_);
-        buf_full_ = true;
-        cv_.notify_one();
     }
     JoinWorkThreads();
     MSPTI_LOGI("Flush all activity buffer.");
