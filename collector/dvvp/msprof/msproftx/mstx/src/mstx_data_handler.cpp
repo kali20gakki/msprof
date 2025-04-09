@@ -114,12 +114,11 @@ void MstxDataHandler::ReportData()
 
 int MstxDataHandler::SaveMarkData(const char* msg, uint64_t mstxEventId, uint64_t domainNameHash)
 {
-    static thread_local uint32_t tid = static_cast<uint32_t>(MmGetTid());
     MsprofTxInfo info;
     info.infoType = 1; // 0: tx , 1: tx_ex
     info.value.stampInfo.eventType = static_cast<uint16_t>(EventType::MARK);
     info.value.stampInfo.processId = processId_;
-    info.value.stampInfo.threadId = tid;
+    info.value.stampInfo.threadId = static_cast<uint32_t>(MmGetTid());
     info.value.stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
     info.value.stampInfo.endTime = info.value.stampInfo.startTime;
     info.value.stampInfo.markId = mstxEventId;
@@ -138,13 +137,12 @@ int MstxDataHandler::SaveMarkData(const char* msg, uint64_t mstxEventId, uint64_
 
 int MstxDataHandler::SaveRangeData(const char* msg, uint64_t mstxEventId, MstxDataType type, uint64_t domainNameHash)
 {
-    static thread_local uint32_t tid = static_cast<uint32_t>(MmGetTid());
     if (type == MstxDataType::DATA_RANGE_START) {
         MsprofTxInfo info;
         info.infoType = 1; // 0: tx , 1: tx_ex
         info.value.stampInfo.eventType = static_cast<uint16_t>(EventType::START_OR_STOP);
         info.value.stampInfo.processId = processId_;
-        info.value.stampInfo.threadId = tid;
+        info.value.stampInfo.threadId = static_cast<uint32_t>(MmGetTid());
         info.value.stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
         info.value.stampInfo.markId = mstxEventId;
         info.value.stampInfo.domain = domainNameHash;

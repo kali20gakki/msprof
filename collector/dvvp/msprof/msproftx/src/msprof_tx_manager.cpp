@@ -227,7 +227,6 @@ int MsprofTxManager::MarkEx(CONST_CHAR_PTR msg, size_t msgLen, aclrtStream strea
 {
     uint64_t markIdx = GetEventId();
     static uint32_t pid = static_cast<uint32_t>(MmGetPid());
-    static thread_local uint32_t tid = static_cast<uint32_t>(MmGetTid());
     if (!isInit_) {
         MSPROF_LOGE("[MarkEx]MsprofTxManager is not inited yet");
         return PROFILING_FAILED;
@@ -247,7 +246,7 @@ int MsprofTxManager::MarkEx(CONST_CHAR_PTR msg, size_t msgLen, aclrtStream strea
     MsprofTxInfo info;
     info.infoType = 1;
     info.value.stampInfo.processId = pid;
-    info.value.stampInfo.threadId = tid;
+    info.value.stampInfo.threadId = static_cast<uint32_t>(MmGetTid());
     info.value.stampInfo.eventType = static_cast<uint16_t>(EventType::MARK_EX);
     info.value.stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockRealtimeOrCPUCycleCounter());
     info.value.stampInfo.endTime = info.value.stampInfo.startTime;
@@ -353,8 +352,7 @@ int MsprofTxManager::RangeStop(uint32_t rangeId) const
 
 int MsprofTxManager::ReportStampData(MsprofStampInstance *stamp) const
 {
-    static thread_local uint32_t tid = static_cast<uint32_t>(MmGetTid());
-    stamp->txInfo.value.stampInfo.threadId = tid;
+    stamp->txInfo.value.stampInfo.threadId = static_cast<uint32_t>(MmGetTid());
     if (reporter_->Report(stamp->txInfo) != PROFILING_SUCCESS) {
         MSPROF_LOGE("[ReportStampData] report profiling data failed.");
         return PROFILING_FAILED;
