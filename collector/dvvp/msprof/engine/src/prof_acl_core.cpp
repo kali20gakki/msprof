@@ -860,6 +860,20 @@ int aclprofGetSupportedFeatures(size_t* featuresSize, void** featuresData)
         MSPROF_LOGE("Failed to init features list.");
         return ACL_ERROR_UNINITIALIZE;
     }
-    *featuresData = static_cast<void*>(FeatureManager::instance()->GetIncompatibleFeatures(featuresSize));
+    *featuresData = static_cast<void*>(FeatureManager::instance()->GetIncompatibleFeatures(featuresSize, false));
+    return ACL_SUCCESS;
+}
+
+int aclprofGetSupportedFeaturesV2(size_t* featuresSize, void** featuresData)
+{
+    if (featuresData == nullptr || *featuresData != nullptr || featuresSize == nullptr) {
+        MSPROF_LOGE("featuresDataV2 is invalid.");
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    if (FeatureManager::instance()->Init() != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to init features list.");
+        return ACL_ERROR_UNINITIALIZE;
+    }
+    *featuresData = static_cast<void*>(FeatureManager::instance()->GetIncompatibleFeatures(featuresSize, true));
     return ACL_SUCCESS;
 }

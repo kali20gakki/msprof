@@ -17,26 +17,39 @@ namespace Config {
 using namespace analysis::dvvp::common::error;
 
 namespace {
+const char NULL_CHAR = '\0';
 const std::string FILE_NAME = "incompatible_features.json";
 // Platform: featureName, compatibility, featureVersion, affectedComponent, affectedComponentVersion, infoLog
-std::unordered_map<PlatformType, std::vector<FeatureRecord>> FEATURE_MAP = {
+std::unordered_map<PlatformType, std::vector<FeatureRecord>> FEATURE_V2_TABLE = {
     {
         PlatformType::CHIP_V4_1_0, {
             {"ATTR\0", "1\0", "2\0", "all\0", "all\0", "It not support feature: ATTR!\0"},
             {"MemoryAccess\0", "1\0", "2\0", "all\0", "all\0", "It not support feature: MemoryAccess!\0"}
         }
+    },
+    {
+        PlatformType::END_TYPE, {
+            {"ATTR\0", "1\0", "2\0", "all\0", "all\0", "It not support feature: ATTR!\0"}
+        }
     }
 };
-std::vector<FeatureRecord> DEFAULT_FEATURE = {
-    {"ATTR\0", "1\0", "2\0", "all\0", "all\0", "It not support feature: ATTR!\0"},
-    {"MemoryAccess\0", "0\0", "2\0", "all\0", "all\0", "It not support feature: MemoryAccess!\0"}
+
+// 仅V1接口使用 适配PTA代码逻辑 保留维护ATTR特性
+std::vector<FeatureRecord> FEATURE_V1 = {
+    {"ATTR\0", "1\0", "2\0", "all\0", "all\0", "It not support feature: ATTR!\0"}
 };
 
-std::vector<FeatureRecord>& GetCurPlatformFeature()
+std::vector<FeatureRecord>& GetCurPlatformFeature(bool isV2 = true)
 {
+    if (!isV2) {
+        // V1 接口返回 V1 列表
+        MSPROF_LOGI("Get V1 features.");
+        return FEATURE_V1;
+    }
     PlatformType platform = ConfigManager::instance()->GetPlatformType();
-    auto iter = FEATURE_MAP.find(platform);
-    return (iter == FEATURE_MAP.end() ? DEFAULT_FEATURE : iter->second);
+    auto iter = FEATURE_V2_TABLE.find(platform);
+    // 当 非CHIP_V4_1_0 统一返回END_TYPE中的特性列表
+    return ((iter == FEATURE_V2_TABLE.end()) ? FEATURE_V2_TABLE[PlatformType::END_TYPE] : iter->second);
 }
 }
 
@@ -62,25 +75,37 @@ int FeatureManager::Init()
 
 int FeatureManager::CheckCreateFeatures()
 {
-    auto& features = GetCurPlatformFeature();
-    for (const auto& feature : features) {
-        if (feature.featureName[0] == '\0' || feature.info.affectedComponent[0] == '\0' ||
-            feature.info.affectedComponentVersion[0] == '\0' || feature.info.compatibility[0] == '\0' ||
-            feature.info.featureVersion[0] == '\0' || feature.info.infoLog[0] == '\0') {
-                MSPROF_LOGE("Feature init failed.");
+    // 统一对V2 特性校验
+    for (const auto& platformFeatures : FEATURE_V2_TABLE) {
+        for (const auto& feature : platformFeatures.second) {
+            if (feature.featureName[0] == NULL_CHAR || feature.info.affectedComponent[0] == NULL_CHAR ||
+                feature.info.affectedComponentVersion[0] == NULL_CHAR || feature.info.compatibility[0] == NULL_CHAR ||
+                feature.info.featureVersion[0] == NULL_CHAR || feature.info.infoLog[0] == NULL_CHAR) {
+                MSPROF_LOGE("V2 Feature init failed.");
                 return PROFILING_ERROR;
+            }
+        }
+    }
+
+    // 对V1 特性校验
+    for (const auto& feature : FEATURE_V1) {
+        if (feature.featureName[0] == NULL_CHAR || feature.info.affectedComponent[0] == NULL_CHAR ||
+            feature.info.affectedComponentVersion[0] == NULL_CHAR || feature.info.compatibility[0] == NULL_CHAR ||
+            feature.info.featureVersion[0] == NULL_CHAR || feature.info.infoLog[0] == NULL_CHAR) {
+            MSPROF_LOGE("V1 Feature init failed.");
+            return PROFILING_ERROR;
         }
     }
     return PROFILING_SUCCESS;
 }
 
-FeatureRecord* FeatureManager::GetIncompatibleFeatures(size_t* featuresSize)
+FeatureRecord* FeatureManager::GetIncompatibleFeatures(size_t* featuresSize, bool isV2)
 {
     if (featuresSize == nullptr) {
         MSPROF_LOGE("featuresSize for GetIncompatibleFeatures is nullptr.");
         return nullptr;
     }
-    auto& features = GetCurPlatformFeature();
+    auto& features = GetCurPlatformFeature(isV2);
     *featuresSize = features.size();
     return features.data();
 }

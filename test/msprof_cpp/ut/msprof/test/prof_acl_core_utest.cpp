@@ -2020,10 +2020,10 @@ TEST_F(MSPROF_ACL_CORE_UTEST, TestaclprofGetSupportedFeaturesWhenGetFeaturesRetu
     size_t expectDataSize = 0;
     auto expectDatas = FeatureManager::instance()->GetIncompatibleFeatures(&expectDataSize);
     size_t size = 0;
-    void* featureData = nullptr;
-    EXPECT_EQ(aclprofGetSupportedFeatures(&size, &featureData), ACL_SUCCESS);
+    void* featureDataV2 = nullptr;
+    EXPECT_EQ(aclprofGetSupportedFeaturesV2(&size, &featureDataV2), ACL_SUCCESS);
     EXPECT_EQ(expectDataSize, size);
-    FeatureRecord* featuresPtr = static_cast<FeatureRecord*>(featureData);
+    FeatureRecord* featuresPtr = static_cast<FeatureRecord*>(featureDataV2);
     for (size_t i = 0; i < expectDataSize; ++i) {
         // 如果两个指针有一个是nullptr 应该被打断
         ASSERT_FALSE((featuresPtr == nullptr or expectDatas == nullptr));
@@ -2036,6 +2036,9 @@ TEST_F(MSPROF_ACL_CORE_UTEST, TestaclprofGetSupportedFeaturesWhenGetFeaturesRetu
         ++expectDatas;
         ++featuresPtr;
     }
+
+    void* featureData = nullptr;
+    EXPECT_EQ(aclprofGetSupportedFeatures(&size, &featureData), ACL_SUCCESS);
     FeatureManager::instance()->Uninit();
 }
 
