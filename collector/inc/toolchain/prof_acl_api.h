@@ -201,6 +201,15 @@ MSVP_PROF_API aclError aclprofWarmup(const aclprofConfig *profilerConfig);
 */
 MSVP_PROF_API int aclprofGetSupportedFeatures(size_t* featuresSize, void** featuresData);
 
+/**
+* @ingroup AscendCL
+* @brief get prof supported features V2
+* @param featuresSize, pointer to feature's size
+* @param featuresData, featuresData should be nullptr
+* @retval int, status
+*/
+MSVP_PROF_API int aclprofGetSupportedFeaturesV2(size_t* featuresSize, void** featuresData);
+
 typedef enum {
     ACL_SUBSCRIBE_OP = 0,
     ACL_SUBSCRIBE_SUBGRAPH = 1,

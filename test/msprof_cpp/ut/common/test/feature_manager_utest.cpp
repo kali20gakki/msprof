@@ -82,10 +82,22 @@ TEST_F(FeatureManagerUtest, TestInitWhenCheckFeaturesFailedThenReturnFailed)
 TEST_F(FeatureManagerUtest, TestGetIncompatibleFeaturesSuccessWhenPointerNotNullptr)
 {
     auto featureManger = FeatureManager::instance();
+    MOCKER_CPP(&ConfigManager::GetPlatformType)
+    .stubs()
+    .will(returnValue(PlatformType::CHIP_V4_1_0))
+    .then(returnValue(PlatformType::CHIP_V4_2_0));
     size_t dataSize = 0;
     size_t expectDataSize = 2;
-    EXPECT_NE(nullptr, featureManger->GetIncompatibleFeatures(&dataSize));
+    auto chipV410Feature = featureManger->GetIncompatibleFeatures(&dataSize);
     EXPECT_EQ(expectDataSize, dataSize);
+
+    size_t expectDataSizeForOther = 1;
+    auto otherFeature = featureManger->GetIncompatibleFeatures(&dataSize);
+    EXPECT_EQ(expectDataSizeForOther, dataSize);
+
+    size_t expectDataSizeForV1Func = 1;
+    auto v1Feature = featureManger->GetIncompatibleFeatures(&dataSize, false);
+    EXPECT_EQ(expectDataSizeForOther, dataSize);
 }
 
 TEST_F(FeatureManagerUtest, TestGetIncompatibleFeaturesFailedWhenPointerIsNullptr)
@@ -106,7 +118,7 @@ TEST_F(FeatureManagerUtest, TestMemoryAccessCompatibleOnlyOnCHIPV410)
     size_t expectDataSize = 2;
     auto chipV410Feature = featureManger->GetIncompatibleFeatures(&dataSize);
     EXPECT_EQ(expectDataSize, dataSize);
+    size_t expectDataSizeForOther = 1;
     auto otherFeature = featureManger->GetIncompatibleFeatures(&dataSize);
-    EXPECT_EQ(expectDataSize, dataSize);
-    EXPECT_NE(0, std::strcmp(chipV410Feature[1].info.compatibility, otherFeature[1].info.compatibility));
+    EXPECT_EQ(expectDataSizeForOther, dataSize);
 }

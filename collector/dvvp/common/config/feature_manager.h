@@ -79,7 +79,7 @@ public:
     int Init();
     void Uninit();
     int CreateIncompatibleFeatureJsonFile(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
-    FeatureRecord* GetIncompatibleFeatures(size_t* featuresSize);
+    FeatureRecord* GetIncompatibleFeatures(size_t* featuresSize, bool isV2 = true);
 private:
     int CheckCreateFeatures();
 private:
