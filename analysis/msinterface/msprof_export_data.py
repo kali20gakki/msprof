@@ -36,7 +36,6 @@ from viewer.cpu_data_report import get_cpu_hot_function
 from viewer.cpu_data_report import get_ts_pmu_events
 from viewer.cpu_usage_report import get_process_cpu_usage
 from viewer.cpu_usage_report import get_sys_cpu_usage_data
-from viewer.event_viewer import EventViewer
 from viewer.ge_info_report import get_ge_model_data
 from viewer.get_hccl_export_data import HCCLExport
 from viewer.get_l2_cache_data import add_op_name, process_hit_rate
@@ -554,10 +553,6 @@ class MsProfExportDataUtils:
     @staticmethod
     def _get_npu_module_mem_data(configs: dict, params: dict) -> any:
         return NpuModuleMemViewer(configs, params).get_summary_data()
-
-    @staticmethod
-    def _get_event_data(configs: dict, params: dict) -> any:
-        return EventViewer(configs, params).get_timeline_data()
 
     @staticmethod
     def _get_api_data(configs: dict, params: dict) -> any:
