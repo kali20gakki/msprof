@@ -45,6 +45,7 @@ def generate_api_data_from_event(begin_time=None, end_event_data_dto: EventDataD
                                end=end_event_data_dto.timestamp,
                                item_id=end_event_data_dto.item_id,
                                request_id=end_event_data_dto.request_id,
-                               connection_id=end_event_data_dto.connection_id)
+                               connection_id=end_event_data_dto.connection_id,
+                               id=0)
     else:
         return ApiDataDtoTuple()

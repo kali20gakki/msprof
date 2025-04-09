@@ -265,9 +265,6 @@ class MsProfExportDataConfig(MetaConfig):
                         'Allocation Total Allocated(KB),Allocation Total Reserved(KB),'
                         'Release Total Allocated(KB),Release Total Reserved(KB),Device'),
         ],
-        'event': [
-            ('handler', '_get_event_data'),
-        ],
         'api': [
             ('handler', '_get_api_data'),
         ],

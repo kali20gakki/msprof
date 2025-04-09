@@ -119,8 +119,6 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_biu_perf_data},
             {'export_type': ExportDataType.ACC_PMU,
              'handler': AiStackDataCheckManager.contain_acc_pmu_data},
-            {'export_type': ExportDataType.EVENT,
-             'handler': AiStackDataCheckManager.contain_event_data},
             {'export_type': ExportDataType.API,
              'handler': AiStackDataCheckManager.contain_api_data},
             {'export_type': ExportDataType.SIO,
