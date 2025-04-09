@@ -37,7 +37,8 @@ namespace {
         "aic_ub_write_bw_vector", "aiv_mac_fp16_ratio", "aiv_mac_int8_ratio",
         "aic_vec_fp32_ratio", "aic_vec_fp16_ratio", "aic_vec_int32_ratio",
         "aic_vec_misc_ratio", "aic_vec_fp16_128lane_ratio", "aic_vec_fp16_64lane_ratio",
-        "aic_vec_bankgroup_cflt_ratio", "aic_vec_bank_cflt_ratio", "aic_vec_resc_cflt_ratio"};
+        "aic_vec_bankgroup_cflt_ratio", "aic_vec_bank_cflt_ratio", "aic_vec_resc_cflt_ratio",
+        "aic_vector_fops", "aiv_cube_fops"};
     const std::unordered_set<std::string> NOT_SUPPORT_PMU_FOR_CHIP_V1 = {
         "vec_ratio", "vec_time",
         "ub_read_bw", "ub_read_bw(GB/s)",
