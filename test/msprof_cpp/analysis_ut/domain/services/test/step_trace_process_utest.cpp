@@ -56,6 +56,7 @@ protected:
 //  1           3       19          2
 //  1           4       21          2
 //  1           1       25          2
+//  1           11      27          2
 //  2           0       30          2
 //  2           20000   33          2
 //  2           20001   36          2
@@ -98,6 +99,7 @@ TEST_F(StepTraceProcessUtest, ShouldRunSuccessWhenInputDataIsValid)
     data->emplace_back(CreateHalTrackData(2, 10002, 56, 8)); // 2, 10002, 56, 8
     data->emplace_back(CreateHalTrackData(2, 10003, 58, 8)); // 2, 10003, 58, 8
     data->emplace_back(CreateHalTrackData(2, 4, 60)); // 2, 4, 60
+    data->emplace_back(CreateHalTrackData(1, 11, 27)); // 1, 11, 27
     dataInventory_.Inject(data);
     DeviceContext context;
     context.deviceContextInfo.deviceFilePath = "";
