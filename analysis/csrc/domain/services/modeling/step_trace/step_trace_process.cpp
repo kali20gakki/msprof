@@ -39,7 +39,9 @@ public:
             {StepLabel::AllReduceLabel, std::bind(&StepTracePreprocess::HandleAllReduceLabel, this,
                                                   std::placeholders::_1)},
             {StepLabel::TrainingTraceLabel, std::bind(&StepTracePreprocess::HandleIterationLabel, this,
-                                                      std::placeholders::_1)}
+                                                      std::placeholders::_1)},
+            {StepLabel::MstxLabel, std::bind(&StepTracePreprocess::HandleMstxLabel, this,
+                                             std::placeholders::_1)}
         };
     };
 
@@ -74,6 +76,8 @@ private:
             return StepLabel::GetNextLabel;
         } else if (tagId >= ALL_REDUCE_START) {
             return StepLabel::AllReduceLabel;
+        } else if (tagId == MSTX_TAG) {
+            return StepLabel::MstxLabel;
         } else {
             return StepLabel::TrainingTraceLabel;
         }
@@ -139,6 +143,13 @@ private:
             currentStepTraceQueue_.push_back({{record}, {record}});
         }
     }
+
+    // 处理mstx数据
+    void HandleMstxLabel(const HalTrackData& record)
+    {
+        currentStepTraceQueue_.push_back({{record}, {record}});
+    }
+
 private:
     struct StepData {
         std::vector<HalTrackData> tag;

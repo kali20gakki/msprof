@@ -23,6 +23,7 @@ const uint16_t MODEL_END_TAG = 1;
 const uint16_t FP_TAG = 2;
 const uint16_t BP_TAG = 3;
 const uint16_t ITER_END_TAG = 4;
+const uint16_t MSTX_TAG = 11;
 const uint16_t ALL_REDUCE_START = 10000;
 const uint16_t GET_NEXT_START_TAG = 20000;
 const uint16_t STEP_START_TAG = 60000;
@@ -34,6 +35,7 @@ enum class StepLabel {
     TrainingTraceLabel,
     GetNextLabel,
     AllReduceLabel,
+    MstxLabel,
     InvalidLabel = 5
 };
 
