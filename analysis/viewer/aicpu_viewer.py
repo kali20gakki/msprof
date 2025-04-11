@@ -21,6 +21,7 @@ from common_func.profiling_scene import ProfilingScene
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from profiling_bean.db_dto.step_trace_dto import IterationRange
+from profiling_bean.db_dto.task_time_dto import TaskTimeDto
 
 
 @dataclass
@@ -51,15 +52,15 @@ class ParseAiCpuData:
         """
         ai_cpu_results = ParseAiCpuData.get_ai_cpu_data(project_path, iter_range)
         ascend_task_results = ParseAiCpuData.get_ascend_task_ai_cpu_data(project_path)
-        ge_results = ParseAiCpuData.get_ge_summary_aicpu_data(project_path)
-
         res = ParseAiCpuData.get_aicpu_batch_id(ai_cpu_results, ascend_task_results)
+
+        ge_results = ParseAiCpuData.get_ge_summary_aicpu_data(project_path)
         res = ParseAiCpuData.match_aicpu_with_ge_summary(res, ge_results)
         res.sort(key=lambda x: x[0])
         return res
 
     @staticmethod
-    def get_aicpu_batch_id(ai_cpu_data: List[AiCpuData], ascend_task_data: List[GeTaskDto]) -> List[AiCpuData]:
+    def get_aicpu_batch_id(ai_cpu_data: List[AiCpuData], ascend_task_data: List[TaskTimeDto]) -> List[AiCpuData]:
         """
         get ai cpu batch_id from ascend_task data
         """
@@ -73,11 +74,7 @@ class ParseAiCpuData:
         for key in stream_task_set:
             ai_cpu_t = sep_ai_cpu_dict.get(key, [])
             ascend_task_t = seq_ascend_task_dict.get(key, [])
-            match_res = ParseAiCpuData._get_aicpu_batch_id(ai_cpu_t, ascend_task_t)
-            if not match_res:
-                logging.error("Can't match aicpu data batch_id, it's stream_id: %d, task_id: %d",
-                              key[0], key[1])
-                continue
+            match_res = ParseAiCpuData._match_aicpu_data_by_task_time(ai_cpu_t, ascend_task_t)
             res.extend([*match_res])
         return res
 
@@ -86,25 +83,22 @@ class ParseAiCpuData:
         """
         get ai cpu op_name from ge_summary data
         """
+        start_ts_float = float(InfoConfReader().get_collect_time()[0])
         ge_summary_dic = {}
         for dto in ge_summary_data:
-            if (dto.stream_id, dto.task_id, dto.batch_id) in ge_summary_dic:
-                logging.error("There are aicpu data with the same stream_id: %d, task_id: %d, "
-                              "batch_id: %d", dto.stream_id, dto.task_id, dto.batch_id)
-                continue
             ge_summary_dic.setdefault((dto.stream_id, dto.task_id, dto.batch_id), dto.op_name)
         res = [[] for _ in range(len(ai_cpu_data))]
         for i, dto in enumerate(ai_cpu_data):
-            node_name = dto.node_name
-            sys_start = format_high_precision_for_csv(
-                InfoConfReader().trans_into_local_time(dto.sys_start, use_us=True))
+            sys_start = InfoConfReader().trans_into_local_time(dto.sys_start, use_us=True)
+            if start_ts_float > float(sys_start):
+                continue
+            sys_start = format_high_precision_for_csv(sys_start)
             compute_time = round(dto.compute_time, NumberConstant.ROUND_THREE_DECIMAL)
             memcpy_time = round(dto.memcpy_time, NumberConstant.ROUND_THREE_DECIMAL)
             task_time = round(dto.task_time, NumberConstant.ROUND_THREE_DECIMAL)
             dispatch_time = round(dto.dispatch_time, NumberConstant.ROUND_THREE_DECIMAL)
             total_time = round(dto.total_time, NumberConstant.ROUND_THREE_DECIMAL)
-            if (dto.stream_id, dto.task_id, dto.batch_id) in ge_summary_dic:
-                node_name = ge_summary_dic[(dto.stream_id, dto.task_id, dto.batch_id)]
+            node_name = ge_summary_dic.get((dto.stream_id, dto.task_id, dto.batch_id), dto.node_name)
             res[i] = [
                 sys_start, node_name, compute_time, memcpy_time,
                 task_time, dispatch_time, total_time, dto.stream_id, dto.task_id
@@ -185,21 +179,31 @@ class ParseAiCpuData:
         return aicpu_data
 
     @staticmethod
-    def _sep_task_by_stream_task(tasks: Union[List[GeTaskDto], List[AiCpuData]]) -> dict:
+    def _sep_task_by_stream_task(tasks: Union[List[TaskTimeDto], List[AiCpuData]]) -> dict:
         ret = {}
         for task in tasks:
             ret.setdefault((task.stream_id, task.task_id), []).append(task)
         return ret
 
     @staticmethod
-    def _get_aicpu_batch_id(ai_cpu_data: List[AiCpuData], ascend_task_data: List[GeTaskDto]) -> List:
-        if len(ai_cpu_data) != len(ascend_task_data):
-            return []
-        ai_cpu_queue = deque(ai_cpu_data)
-        ascend_task_queue = deque(ascend_task_data)
-        for index, ai_cpu in enumerate(ai_cpu_queue):
-            ai_cpu_queue[index] = ai_cpu.replace(batch_id=ascend_task_queue.popleft().batch_id)
-        return list(ai_cpu_queue)
+    def _match_aicpu_data_by_task_time(ai_cpu_data: List[AiCpuData], ascend_task_data: List[TaskTimeDto]) -> List:
+        aicpu_index = 0
+        task_index = 0
+        # 不强制校验aicpu和ascendTask的aicpu算子数量。aicpu执行时间必定包含于stars调度时间，以此判定aicpu合法性
+        # 无法匹配的aicpu batch_id不做刷新，默认为None，后续默认赋NA
+        while aicpu_index < len(ai_cpu_data) and task_index < len(ascend_task_data):
+            aicpu = ai_cpu_data[aicpu_index]
+            task = ascend_task_data[task_index]
+            if task.start_time <= aicpu.sys_end * NumberConstant.NS_TO_US <= task.end_time:
+                ai_cpu_data[aicpu_index] = aicpu.replace(batch_id=task.batch_id)
+                aicpu_index += 1
+                task_index += 1
+            elif aicpu.sys_end * NumberConstant.NS_TO_US < task.start_time:
+                aicpu_index += 1
+            elif aicpu.sys_end * NumberConstant.NS_TO_US > task.end_time:
+                task_index += 1
+
+        return ai_cpu_data
 
     @staticmethod
     def _get_ge_summary_aicpu_data(ge_summary_conn):
@@ -210,9 +214,10 @@ class ParseAiCpuData:
 
     @staticmethod
     def _get_ascend_task_aicpu_data(ascend_task_conn):
-        sql = "select batch_id, stream_id, task_id from {0} where host_task_type = 'KERNEL_AICPU' " \
+        sql = "select batch_id, stream_id, task_id, start_time, start_time + duration AS end_time " \
+              "from {0} where host_task_type = 'KERNEL_AICPU' " \
               "order by start_time".format(DBNameConstant.TABLE_ASCEND_TASK)
-        return DBManager.fetch_all_data(ascend_task_conn.cursor(), sql, dto_class=GeTaskDto)
+        return DBManager.fetch_all_data(ascend_task_conn.cursor(), sql, dto_class=TaskTimeDto)
 
     @staticmethod
     def _get_aicpu_data(ai_cpu_conn, iter_range, project_path):
@@ -223,7 +228,8 @@ class ParseAiCpuData:
                 where_condition = "where sys_start>={0} " \
                                   "and sys_end<={1}".format(iter_time[0] / NumberConstant.MS_TO_NS,
                                                             iter_time[1] / NumberConstant.MS_TO_NS)
-        sql = "select sys_start*{MS_TO_US} as sys_start,'{node_name}' as node_name," \
+        sql = "select sys_start*{MS_TO_US} as sys_start, sys_end * {MS_TO_US} as sys_end, " \
+              "'{node_name}' as node_name," \
               "compute_time*{MS_TO_US} as compute_time, memcpy_time*{MS_TO_US} as memcpy_time," \
               "task_time*{MS_TO_US} as task_time,dispatch_time*{MS_TO_US} as dispatch_time," \
               "total_time*{MS_TO_US} as total_time, stream_id, task_id from {0} {where_condition} " \

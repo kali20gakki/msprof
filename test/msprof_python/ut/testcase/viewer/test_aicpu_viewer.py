@@ -5,9 +5,11 @@ import unittest
 from unittest import mock
 
 from common_func.constant import Constant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.profiling_scene import ProfilingScene
 from constant.constant import ITER_RANGE
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
+from profiling_bean.db_dto.task_time_dto import TaskTimeDto
 from sqlite.db_manager import DBOpen
 from viewer.aicpu_viewer import AiCpuData
 from viewer.aicpu_viewer import ParseAiCpuData
@@ -39,6 +41,18 @@ class TestAicpuViewer(unittest.TestCase):
             data_dto.batch_id = data[3]
             ge_task_dto.append(data_dto)
         return ge_task_dto
+
+    def get_ascend_task_dto(self, ascend_task: list) -> list:
+        ascend_task_dto = []
+        for data in ascend_task:
+            data_dto = TaskTimeDto()
+            data_dto.stream_id = data[0]
+            data_dto.task_id = data[1]
+            data_dto.batch_id = data[2]
+            data_dto.start_time = data[3]
+            data_dto.end_time = data[4]
+            ascend_task_dto.append(data_dto)
+        return ascend_task_dto
 
     def test_analysis_aicpu_when_noraml_then_pass(self):
         project_path = 'home\\project'
@@ -80,8 +94,8 @@ class TestAicpuViewer(unittest.TestCase):
             unittest.TestCase().assertEqual(result, [])
 
     def test_get_ascend_task_ai_cpu_data_when_connect_success_then_return_data(self):
-        ascend_task_data = [["", 2, 0, 0], ]
-        res = self.get_ge_task_dto(ascend_task_data)
+        ascend_task_data = [[2, 0, 0, 100, 200], ]
+        res = self.get_ascend_task_dto(ascend_task_data)
         with mock.patch(NAMESPACE + '.PathManager.get_db_path'), \
                 mock.patch(NAMESPACE + '.DBManager.check_connect_db_path',
                            return_value=(True, True)), \
@@ -141,18 +155,18 @@ class TestAicpuViewer(unittest.TestCase):
 
     def test_get_aicpu_batch_id_when_data_key_same_then_return_data_with_batch_id(self):
         aicpu_data = [
-            [2, 0, 100, 200, "N/A", 0, 0, 15, 0, 300, 0],
-            [2, 1, 103, 200, "N/A", 0, 0, 15, 0, 300, 0],
-            [2, 1, 106, 200, "N/A", 0, 0, 15, 0, 300, 0],
+            [2, 0, 1, 2, "N/A", 0, 0, 15, 0, 300, 0],
+            [2, 1, 3.5, 4, "N/A", 0, 0, 15, 0, 300, 0],
+            [2, 1, 7, 8, "N/A", 0, 0, 15, 0, 300, 0],
         ]
-        ascend_task_data = [["", 2, 0, 0], ["", 2, 1, 0], ["", 2, 1, 1]]
+        ascend_task_data = [[2, 0, 0, 900, 2100], [2, 1, 0, 3300, 4500], [2, 1, 1, 6300, 9000]]
         target_data = [
-            [2, 0, 100, 200, "N/A", 0, 0, 15, 0, 300, 0],
-            [2, 1, 103, 200, "N/A", 0, 0, 15, 0, 300, 0],
-            [2, 1, 106, 200, "N/A", 0, 0, 15, 0, 300, 1],
+            [2, 0, 1, 2, "N/A", 0, 0, 15, 0, 300, 0],
+            [2, 1, 3.5, 4, "N/A", 0, 0, 15, 0, 300, 0],
+            [2, 1, 7, 8, "N/A", 0, 0, 15, 0, 300, 1],
         ]
         ai_cpu_results = self.get_aicpu_dto(aicpu_data)
-        ascend_task_results = self.get_ge_task_dto(ascend_task_data)
+        ascend_task_results = self.get_ascend_task_dto(ascend_task_data)
         target_result = self.get_aicpu_dto(target_data)
         check = ParseAiCpuData()
         result = check.get_aicpu_batch_id(ai_cpu_results, ascend_task_results)
@@ -160,24 +174,25 @@ class TestAicpuViewer(unittest.TestCase):
         for i, _ in enumerate(target_result):
             unittest.TestCase().assertEqual(target_result[i].batch_id, result[i].batch_id)
 
-    def test_get_aicpu_batch_id_when_aicpu_data_less_than_ascend_task_then_exist_error_log(self):
+    def test_get_aicpu_batch_id_when_aicpu_data_can_not_match_ascend_task_then_return_empty_list(self):
         aicpu_data = [
-            [2, 0, 100, 200, "N/A", 0, 0, 15, 0, 300, 0],
-            [2, 1, 103, 200, "N/A", 0, 0, 15, 0, 300, 0],
+            [2, 0, 5, 8, "N/A", 0, 0, 15, 0, 300, 0],
         ]
-        ascend_task_data = [["", 2, 0, 0], ["", 2, 1, 0], ["", 2, 1, 1]]
-        target_data = [[2, 0, 100, 200, "N/A", 0, 0, 15, 0, 300, 0], ]
+        ascend_task_data = [[2, 0, 0, 1000, 2000], [2, 0, 0, 9000, 10000]]
+        target_data = [[2, 0, 5, 8, "N/A", 0, 0, 15, 0, 300, 0]]
         ai_cpu_results = self.get_aicpu_dto(aicpu_data)
-        ascend_task_results = self.get_ge_task_dto(ascend_task_data)
+        ascend_task_results = self.get_ascend_task_dto(ascend_task_data)
         target_result = self.get_aicpu_dto(target_data)
-        with mock.patch(NAMESPACE + '.logging.error'):
-            check = ParseAiCpuData()
-            result = check.get_aicpu_batch_id(ai_cpu_results, ascend_task_results)
-            unittest.TestCase().assertEqual(len(target_result), len(result))
-            for i, _ in enumerate(target_result):
-                unittest.TestCase().assertEqual(target_result[i].batch_id, result[i].batch_id)
+
+        check = ParseAiCpuData()
+        result = check.get_aicpu_batch_id(ai_cpu_results, ascend_task_results)
+        unittest.TestCase().assertEqual(len(target_result), len(result))
+        for i, _ in enumerate(target_result):
+            unittest.TestCase().assertEqual(target_result[i].batch_id, result[i].batch_id)
 
     def test_match_aicpu_with_ge_summary_when_aicpu_data_more_than_ge_then_return_data_name_is_NA(self):
+        InfoConfReader()._start_info = {"collectionTimeBegin": "0"}
+        InfoConfReader()._end_info = {}
         aicpu_data_with_batch_id = [
             [2, 3, 108, 200, "N/A", 0, 0, 15, 0, 300, 0],
             [2, 2, 112, 200, "N/A", 0, 0, 15, 0, 300, 1],
@@ -212,12 +227,12 @@ class TestAicpuViewer(unittest.TestCase):
             [3, 2, 115, 200, "N/A", 0, 0, 15, 0, 300, 0],
         ]
         ascend_task_data = [
-            ["", 2, 0, 0],
-            ["", 2, 1, 0],
-            ["", 2, 3, 0],
-            ["", 3, 0, 0],
-            ["", 2, 2, 1],
-            ["", 3, 2, 2],
+            [2, 0, 0, 1000, 2000],
+            [2, 1, 0, 2100, 3300],
+            [2, 3, 0, 6000, 7100],
+            [3, 0, 0, 7200, 8200],
+            [2, 2, 1, 10000, 12000],
+            [3, 2, 2, 15000, 20000],
         ]
         ge_task_data = [
             ["2zx", 2, 1, 0],
@@ -227,7 +242,7 @@ class TestAicpuViewer(unittest.TestCase):
         ]
         ai_cpu_results = self.get_aicpu_dto(aicpu_data)
         ge_task_results = self.get_ge_task_dto(ge_task_data)
-        ascend_task_results = self.get_ge_task_dto(ascend_task_data)
+        ascend_task_results = self.get_ascend_task_dto(ascend_task_data)
         check = ParseAiCpuData()
         tasks = check._sep_task_by_stream_task(ai_cpu_results)
         self.assertEqual(len(tasks), 5)
