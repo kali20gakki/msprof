@@ -36,7 +36,7 @@ class MsprofTimeline:
         self._model_id = NumberConstant.DEFAULT_MODEL_ID
         self._result_dir = None
         self._export_data_list = []
-        self._iteration_time = tuple()
+        self._iteration_time = (float('-inf'), float('inf'))
         self._default_sort_index = TraceViewHeaderConstant.DEFAULT_LAYER_SORT_START
 
     @classmethod
