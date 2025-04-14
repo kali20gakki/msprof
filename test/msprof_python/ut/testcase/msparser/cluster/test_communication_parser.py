@@ -86,17 +86,6 @@ class TestHcclAnalysisTool(unittest.TestCase):
         ans = 3
         self.assertAlmostEqual(payload_cnt, ans)
 
-    def test_update_bandwidth_record_should_be_calculated_as_hccs_when_trans_type_is_hccs_sw(self):
-        op_bandwidth_dict = HcclAnalysisTool.init_bandwidth_dict()
-        HcclAnalysisTool.update_bandwidth_record(op_bandwidth_dict, StrConstant.HCCS_SW, 1, 2)
-        self.assertEqual(op_bandwidth_dict["HCCS"]["Transit Size(MB)"], 1)
-        self.assertEqual(op_bandwidth_dict["HCCS"]["Transit Time(ms)"], 2)
-
-    def test_update_bandwidth_record_should_normal_run_when_trans_type_is_unknown(self):
-        op_bandwidth_dict = HcclAnalysisTool.init_bandwidth_dict()
-        HcclAnalysisTool.update_bandwidth_record(op_bandwidth_dict, StrConstant.STANDARD_ROCE, 1, 2)
-        HcclAnalysisTool.update_bandwidth_record(op_bandwidth_dict, "STANDARD_HCCS", 1, 2)
-
 
 class TestCommunicationParser(unittest.TestCase):
     def test_run(self):
@@ -207,6 +196,7 @@ class TestCommunicationParser(unittest.TestCase):
         Transit_Size_MB = 'Transit Size(MB)'
         Transit_Time_ms = 'Transit Time(ms)'
         INVALID_TYPE = 'INVALID_TYPE'
+        RESERVED = "RESERVED"
         standard_bandwidth = {
             StrConstant.RDMA: 12.5,
             StrConstant.HCCS: 18,
@@ -300,6 +290,57 @@ class TestCommunicationParser(unittest.TestCase):
                         return_value=standard_bandwidth):
             op_bandwidth_dict = CommunicationParser({}).op_bandwidth_parser(events)
             self.assertEqual(op_bandwidth_dict, expect_bandwidth_dict)
+        mc2_events = [
+            HcclTask(op_name='AllGatherMatmulMc2AicpuKernel_491_0_1', hccl_name='Memcpy', rdma_type=RESERVED,
+                     timestamp=1832380406858.8928, duration=9680.193359375, transport_type=SDMA, task_id=1,
+                     size=209715200, bandwidth=324.9654095962298, link_type=RESERVED)
+        ]
+        mc2_expect_bandwidth_dict = {
+            'HCCS': {
+                Bandwidth_GB_S: 0,
+                Bandwidth_Utilization: 0.0,
+                Large_Packet_Ratio: 0,
+                Size_Distribution: defaultdict(lambda: [0, 0]),
+                Transit_Size_MB: 0,
+                Transit_Time_ms: 0
+            },
+            'PCIE': {
+                Bandwidth_GB_S: 0,
+                Bandwidth_Utilization: 0.0,
+                Large_Packet_Ratio: 0,
+                Size_Distribution: defaultdict(lambda: [0, 0]),
+                Transit_Size_MB: 0,
+                Transit_Time_ms: 0
+            },
+            'SIO': {
+                Bandwidth_GB_S: 0,
+                Bandwidth_Utilization: 0.0,
+                Large_Packet_Ratio: 0,
+                Size_Distribution: defaultdict(lambda: [0, 0]),
+                Transit_Size_MB: 0,
+                Transit_Time_ms: 0
+            },
+            'RDMA': {
+                Bandwidth_GB_S: 0,
+                Bandwidth_Utilization: 0.0,
+                Large_Packet_Ratio: 0,
+                Size_Distribution: defaultdict(lambda: [0, 0]),
+                Transit_Size_MB: 0,
+                Transit_Time_ms: 0
+            },
+            SDMA: {
+                Bandwidth_GB_S: 21664.3606,
+                Bandwidth_Utilization: 0,
+                Large_Packet_Ratio: 0,
+                Size_Distribution: {209.7152: [1, 0.009680193359375]},
+                Transit_Size_MB: 209.7152,
+                Transit_Time_ms: 0.009680193359375
+            },
+        }
+        with mock.patch("msparser.cluster.meta_parser.HcclAnalysisTool.get_standard_bandwidth",
+                        return_value=standard_bandwidth):
+            op_bandwidth_dict = CommunicationParser({}).op_bandwidth_parser(mc2_events)
+            self.assertEqual(op_bandwidth_dict, mc2_expect_bandwidth_dict)
 
     def test_combine_time(self):
         com = CommunicationParser({})

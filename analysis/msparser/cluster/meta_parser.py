@@ -130,13 +130,6 @@ class HcclAnalysisTool:
         return dic
 
     @classmethod
-    def get_transport_type(cls: any, event):
-        """
-        只适用于transport_type为SDMA且event.name为"Memcpy", "Reduce_Inline"
-        """
-        return StrConstant.LOCAL if event.link_type == StrConstant.ON_CHIP else event.link_type
-
-    @classmethod
     def update_time_ratio(cls: any, op_time_dict: dict, op_name: str) -> None:
         try:
             op_time_dict[OpAnalysisType.WAIT_TIME_RATIO] = \
@@ -153,26 +146,20 @@ class HcclAnalysisTool:
             logging.warning('%s Transit Time and Synchronization Time Time is 0 %s', op_name, err)
 
     @classmethod
-    def update_bandwidth_record(cls: any, bandwidth_dict: dict, trans_type: str, size: float, dur: float) -> None:
-        if trans_type == StrConstant.HCCS_SW:
-            trans_type = StrConstant.HCCS
-        elif trans_type == StrConstant.STANDARD_ROCE:
-            return
-        elif trans_type not in StrConstant.TRANSIT_TYPE:
-            logging.error("Unknown transport_type: %s", trans_type)
-            return
-        bandwidth_dict[trans_type][OpBandWidthType.TRANSIT_SIZE_MB] += size
-        bandwidth_dict[trans_type][OpBandWidthType.TRANSIT_TIME_MS] += dur
-        bandwidth_dict[trans_type][OpBandWidthType.SIZE_DISTRIBUTION][size][0] += 1
-        bandwidth_dict[trans_type][OpBandWidthType.SIZE_DISTRIBUTION][size][1] += dur
+    def update_bandwidth_record(cls: any, bandwidth_dict: dict, bandwidth_info_type: str, size: float,
+                                dur: float) -> None:
+        bandwidth_dict[bandwidth_info_type][OpBandWidthType.TRANSIT_SIZE_MB] += size
+        bandwidth_dict[bandwidth_info_type][OpBandWidthType.TRANSIT_TIME_MS] += dur
+        bandwidth_dict[bandwidth_info_type][OpBandWidthType.SIZE_DISTRIBUTION][size][0] += 1
+        bandwidth_dict[bandwidth_info_type][OpBandWidthType.SIZE_DISTRIBUTION][size][1] += dur
 
     @classmethod
     def combine_sdma_info(cls: any, bandwidth_dict: dict) -> None:
-        bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_SIZE_MB] = \
+        bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_SIZE_MB] += \
             bandwidth_dict[StrConstant.HCCS][OpBandWidthType.TRANSIT_SIZE_MB] + \
             bandwidth_dict[StrConstant.PCIE][OpBandWidthType.TRANSIT_SIZE_MB] + \
             bandwidth_dict[StrConstant.SIO][OpBandWidthType.TRANSIT_SIZE_MB]
-        bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_TIME_MS] = \
+        bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_TIME_MS] += \
             bandwidth_dict[StrConstant.HCCS][OpBandWidthType.TRANSIT_TIME_MS] + \
             bandwidth_dict[StrConstant.PCIE][OpBandWidthType.TRANSIT_TIME_MS] + \
             bandwidth_dict[StrConstant.SIO][OpBandWidthType.TRANSIT_TIME_MS]
