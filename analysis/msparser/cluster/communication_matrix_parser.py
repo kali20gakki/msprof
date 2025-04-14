@@ -67,6 +67,20 @@ class CommunicationMatrixParser(MetaParser):
         link_key = "{}-{}".format(event.local_rank, remote_rank)
         return link_key
 
+    @staticmethod
+    def get_communication_matrix_transport_type(event):
+        """
+        只适用于transport_type为SDMA且event.name为"Memcpy"，"Reduce_Inline"，
+        对应communication_matrix.json里面的"{src_rank}-{dst_rank}"的Transport Type字段，
+        该字段暂时不会影响可视化里面通信矩阵的呈现效果
+        """
+        if event.link_type == StrConstant.ON_CHIP:
+            return StrConstant.LOCAL  # 呈现为LOCAL
+        elif event.link_type == StrConstant.HCCS_SW:
+            return StrConstant.HCCS  # HCCS_SW, 特殊的HCCS
+        else:
+            return event.link_type  # 上报RESERVED或者其他类型，也展示为实际link_type
+
     def run(self: any) -> list:
         self.parse()
         self.combine()
@@ -137,7 +151,7 @@ class CommunicationMatrixParser(MetaParser):
         link_key = self.get_link_key(event)
         if link_key not in link_info:
             link_info[link_key] = [0] * len(MatrixDataType.__members__)
-        trans_type = HcclAnalysisTool.get_transport_type(event)
+        trans_type = self.get_communication_matrix_transport_type(event)
         link_info[link_key][MatrixDataType.TRANSPORT_TYPE] = HcclAnalysisTool.convert_to_enum(trans_type)
         trans_size = HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.COMMUNICATION_B_to_MB
         link_info[link_key][MatrixDataType.TRANS_SIZE] += trans_size

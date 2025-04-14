@@ -44,11 +44,25 @@ class CommunicationParser(MetaParser):
 
     @staticmethod
     def is_transit_sdma_event(event) -> bool:
-        if event.transport_type == StrConstant.SDMA and event.hccl_name in StrConstant.SDMA_TRANSIT_ITEMS and \
-                HcclAnalysisTool.get_transport_type(event) != StrConstant.LOCAL:
-            return True
+        if event.hccl_name in StrConstant.SDMA_TRANSIT_ITEMS and event.transport_type == StrConstant.SDMA and \
+                event.link_type != StrConstant.ON_CHIP:
+            return True  # do not consider local copy
         else:
             return False
+
+    @staticmethod
+    def get_communication_bandwidth_info_type(event):
+        """
+        只适用于transport_type为SDMA且event.name为"Memcpy"，"Reduce_Inline"，
+        对应communication.json里面的"Communication Bandwidth Info"的key值，目前有5种：HCCS，PCIE，SIO，SDMA，RDMA，
+        其中，SDMA的数据为PCIE, HCCS, SIO的和
+        """
+        if event.link_type == StrConstant.HCCS_SW:
+            return StrConstant.HCCS  # HCCS_SW, 特殊的HCCS
+        elif event.link_type in [StrConstant.PCIE, StrConstant.HCCS, StrConstant.SIO]:
+            return event.link_type
+        else:  # 如果link_type上报了RESERVED或者出现INVALID_TYPE，归为SDMA
+            return StrConstant.SDMA
 
     @staticmethod
     def get_master_plane_id(events: list) -> int:
@@ -131,17 +145,21 @@ class CommunicationParser(MetaParser):
         dict_list = [OpBandWidthType.SIZE_DISTRIBUTION]
         # first level combine
         for transport_type, part_transport_dict in part_dict.items():
-            if transport_type == StrConstant.SDMA:
-                continue
             for bandwidth_msg, value in part_transport_dict.items():
                 if bandwidth_msg in add_list:
                     total_dict[transport_type][bandwidth_msg] += value
-                if bandwidth_msg in dict_list:
+                if transport_type != StrConstant.SDMA and bandwidth_msg in dict_list:
                     self.combine_size_distribution(value, total_dict[transport_type][bandwidth_msg])
         # second level combine
         for transport_type in StrConstant.TRANSIT_TYPE:
             if transport_type == StrConstant.SDMA:
-                HcclAnalysisTool.combine_sdma_info(total_dict)
+                if total_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_TIME_MS] != 0:
+                    total_dict[StrConstant.SDMA][OpBandWidthType.BANDWIDTH_GB_S] = round(
+                        (total_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_SIZE_MB] /
+                         NumberConstant.COMMUNICATION_MB_to_GB) /
+                        (total_dict[StrConstant.SDMA][
+                             OpBandWidthType.TRANSIT_TIME_MS] / NumberConstant.CONVERSION_TIME), 4
+                    )
             else:
                 HcclAnalysisTool.analyze_bandwidth_info(total_dict, transport_type)
 
@@ -230,12 +248,9 @@ class CommunicationParser(MetaParser):
         return op_bandwidth_dict
 
     def _calculate_sdma_bw(self, op_bandwidth_dict, event):
-        transport_type = HcclAnalysisTool.get_transport_type(event)
-        # do not consider local copy
-        if transport_type == StrConstant.LOCAL:
-            return
+        bandwidth_info_type = self.get_communication_bandwidth_info_type(event)
         HcclAnalysisTool.update_bandwidth_record(
-            op_bandwidth_dict, transport_type,
+            op_bandwidth_dict, bandwidth_info_type,
             HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.COMMUNICATION_B_to_MB,
             HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS)
 
