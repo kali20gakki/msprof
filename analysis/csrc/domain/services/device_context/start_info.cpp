@@ -19,9 +19,6 @@ using namespace Analysis;
 using namespace Analysis::Utils;
 using namespace Analysis::Domain;
 
-
-const std::string DEVICE_START_INFO = "start_info";
-
 namespace nlohmann {
 
 template <>
@@ -32,18 +29,25 @@ struct adl_serializer<DeviceStartInfo> {
     }
     static void from_json(const json& jsonData, DeviceStartInfo& infoData)
     {
-        int fromJsonResult = 0;
+        uint32_t fromJsonResult = static_cast<uint32_t>(ANALYSIS_OK);
         std::string collectionTimeBeginStr = jsonData.at("collectionTimeBegin").get<std::string>();
-        fromJsonResult |= StrToU64(infoData.collectionTimeBegin, collectionTimeBeginStr);
+        fromJsonResult |= static_cast<uint32_t>(StrToU64(infoData.collectionTimeBegin, collectionTimeBeginStr));
         std::string clockMonotonicRawStr = jsonData.at("clockMonotonicRaw").get<std::string>();
-        fromJsonResult |= StrToU64(infoData.clockMonotonicRaw, clockMonotonicRawStr);
-        if (fromJsonResult != ANALYSIS_OK) {
+        fromJsonResult |= static_cast<uint32_t>(StrToU64(infoData.clockMonotonicRaw, clockMonotonicRawStr));
+        if (fromJsonResult != static_cast<uint32_t>(ANALYSIS_OK)) {
             ERROR("Get device info from json error! The input: collectionTimeBegin= %, clockMonotonicRaw= %",
                   collectionTimeBeginStr, clockMonotonicRawStr);
             throw std::runtime_error("Get info json failed");
         }
     }
 };
+}
+
+
+namespace Analysis {
+namespace Domain {
+namespace {
+const std::string DEVICE_START_INFO = "start_info";
 }
 
 bool DeviceContext::GetStartInfo()
@@ -67,4 +71,6 @@ bool DeviceContext::GetStartInfo()
         return false;
     }
     return true;
+}
+}
 }
