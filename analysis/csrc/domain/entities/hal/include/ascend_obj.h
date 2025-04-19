@@ -106,18 +106,19 @@ struct Operator {
 
 // 用于存储分析树结果，DBDumper将此信息落盘
 struct HostTask {
-    uint64_t modelId = 0;
-    int64_t connection_id = 0; // -1 表示该任务无node直连
-    uint64_t taskType = 0;
-    std::string taskTypeStr;
-    uint64_t timeStamp = 0;
-    uint32_t streamId = 0;
-    uint32_t contextId = 0;
     uint16_t taskId = 0;       // 和采集侧的数据类型不一致，采集侧的高低16位会被分别用作batchId和TaskId
     uint16_t batchId = 0;
     uint16_t deviceId = 0;
     int32_t requestId = 0;
     uint32_t thread_id = 0;
+    uint32_t streamId = 0;
+    uint32_t contextId = 0;
+    int64_t connection_id = 0; // -1 表示该任务无node直连
+    uint64_t modelId = 0;
+    uint64_t taskType = 0;
+    uint64_t timeStamp = 0;
+    uint64_t kernelName = 0;
+    std::string taskTypeStr;
     std::shared_ptr<Operator> op = nullptr;
 };
 

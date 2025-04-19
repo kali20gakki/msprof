@@ -68,7 +68,7 @@ std::vector<TaskInfoData> ComputeTaskInfoProcessor::LoadData(
         ERROR("Failed to obtain data from the % table.", taskInfoDB.tableName);
     }
     if (oriData.empty()) {
-        ERROR("TaskInfo original data is empty, DBPath is &", dbPath);
+        ERROR("TaskInfo original data is empty, DBPath is %", dbPath);
         return res;
     }
     if (!Utils::Reserve(res, oriData.size())) {

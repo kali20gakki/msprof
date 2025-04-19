@@ -17,3 +17,4 @@ class TaskTrackDto(metaclass=InstanceCheckMeta):
     task_type: str = None
     thread_id: int = None
     timestamp: float = None
+    kernel_name: str = None

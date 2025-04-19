@@ -314,6 +314,7 @@ struct MsprofRuntimeTrack {  // for MsprofReportCompactInfo buffer data
     uint16_t streamId;
     uint32_t taskId;
     uint64_t taskType;
+    uint64_t kernelName;
 };
 
 enum AlgType {

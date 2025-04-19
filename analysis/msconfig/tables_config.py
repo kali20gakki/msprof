@@ -1111,6 +1111,7 @@ class TablesConfig(MetaConfig):
             ('struct_type', 'TEXT,null'),
             ('level', 'TEXT,null'),
             ('data_len', 'INTEGER,null'),
+            ('kernel_name', 'TEXT,null'),
         ],
         'MemcpyInfoMap': [
             ('struct_type', 'TEXT,null'),
