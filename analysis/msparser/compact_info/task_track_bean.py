@@ -17,6 +17,7 @@ class TaskTrackBean(CompactInfoBean):
         self._task_id = data[8]
         self._batch_id = data[9]
         self._task_type = data[10]
+        self._kernel_name = data[11]
 
     @property
     def device_id(self: any) -> int:
@@ -47,11 +48,18 @@ class TaskTrackBean(CompactInfoBean):
         return self._batch_id
 
     @property
-    def task_type(self: any) -> int:
+    def task_type(self: any) -> str:
         """
         task track task_type
         """
         return str(self._task_type)
+
+    @property
+    def kernel_name(self: any) -> str:
+        """
+        task track kernel_name
+        """
+        return str(self._kernel_name)
 
     @batch_id.setter
     def batch_id(self: any, batch_id) -> None:

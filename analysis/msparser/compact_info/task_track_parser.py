@@ -5,6 +5,7 @@
 import logging
 from typing import List
 
+from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.hash_dict_constant import HashDictData
 from common_func.ms_constant.str_constant import StrConstant
@@ -40,6 +41,7 @@ class TaskTrackParser(DataParser, MsMultiProcess):
         """
         hash_dict_data = HashDictData(self._project_path)
         type_hash_dict = hash_dict_data.get_type_hash_dict()
+        ge_hash_dict = hash_dict_data.get_ge_hash_dict()
         for data in bean_data:
             if type_hash_dict.get(data.level, {}).get(data.task_type, data.task_type) == self.TASK_FLIP:
                 setattr(data, 'flip_num', data.batch_id)
@@ -62,6 +64,7 @@ class TaskTrackParser(DataParser, MsMultiProcess):
                 type_hash_dict.get(bean.level, {}).get(bean.struct_type, bean.struct_type),  # task track type
                 bean.level,
                 bean.data_len,
+                ge_hash_dict.get(bean.kernel_name, Constant.NA)
             ] for bean in self._task_track_data
         ]
         self._task_flip_data = [

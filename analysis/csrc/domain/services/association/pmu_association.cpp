@@ -116,7 +116,7 @@ size_t PmuAssociation::MergeBlockPmuToDeviceTask(std::vector<HalPmuData*>& pmuDa
                                                  uint64_t& filterEnd)
 {
     if (deviceTask.pmuInfo == nullptr) {
-        ERROR("Block Pmu has no context Pmu taskId is %, streamId is %, contextId is",
+        ERROR("Block Pmu has no context Pmu taskId is %, streamId is %, contextId is %",
               pmuData[0]->hd.taskId.taskId, pmuData[0]->hd.taskId.streamId, pmuData[0]->hd.taskId.contextId);
         return pmuData.size();
     }

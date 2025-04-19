@@ -42,8 +42,16 @@ const uint32_t HCCL_AI_CPU_TASK_TYPE = 11;
 const std::string KERNEL_FFTS_PLUS_TASK_TYPE = "FFTS_PLUS";
 const std::string KERNEL_STARS_COMMON_TASK_TYPE = "STARS_COMMON";
 const std::string KERNEL_AI_CORE_TASK_TYPE = "KERNEL_AICORE";
+const std::string KERNEL_AI_VECTOR_CORE_TASK_TYPE = "KERNEL_AIVEC";
+const std::string KERNEL_MIX_AIC_TASK_TYPE = "KERNEL_MIX_AIC";
+const std::string KERNEL_MIX_AIV_TASK_TYPE = "KERNEL_MIX_AIV";
 const std::string KERNEL_AI_CPU_TASK_TYPE = "KERNEL_AICPU";
-const std::set<std::string> CONTEXT_ID_WHITE_LIST = {"KERNEL_AICORE", "KERNEL_AIVEC", "FFTS_PLUS"};
+const std::set<std::string> CONTEXT_ID_WHITE_LIST = {KERNEL_AI_CORE_TASK_TYPE, KERNEL_AI_VECTOR_CORE_TASK_TYPE,
+                                                     KERNEL_FFTS_PLUS_TASK_TYPE,
+                                                     KERNEL_MIX_AIC_TASK_TYPE, KERNEL_MIX_AIV_TASK_TYPE};
+const std::set<std::string> KERNEL_COMPUTE_WHITE_LIST = {KERNEL_AI_CORE_TASK_TYPE, KERNEL_AI_VECTOR_CORE_TASK_TYPE,
+                                                         KERNEL_AI_CPU_TASK_TYPE,
+                                                         KERNEL_MIX_AIC_TASK_TYPE, KERNEL_MIX_AIV_TASK_TYPE};
 }
 
 void TreeAnalyzer::Analyze()
@@ -106,8 +114,8 @@ void TreeAnalyzer::AnalyzeNode(const std::shared_ptr<TreeNode> &node)
 void TreeAnalyzer::AnalyzeRuntimeNode(const std::shared_ptr<TreeNode> &node)
 {
     auto isHccl = IsHcclTask();
-    auto isCompute = IsComputeTask(node);
-    if (isCompute) {
+    auto isOperateCompute = IsComputeTask(node);
+    if (isOperateCompute) {
         auto computeTasks = GetComputeTaskDescs(node);
         for (auto &task : computeTasks) {
             if (task->op && task->op->type == OpType::OPTYPE_INVALID) {
@@ -132,7 +140,7 @@ void TreeAnalyzer::AnalyzeRuntimeNode(const std::shared_ptr<TreeNode> &node)
         }
 
         for (auto &task : hcclTasks) {
-            if (isCompute) {
+            if (isOperateCompute) {
                 // task已插入，无需再次插入, ffts+模式的通信算子不会进入该分支
                 continue;
             }
@@ -141,10 +149,15 @@ void TreeAnalyzer::AnalyzeRuntimeNode(const std::shared_ptr<TreeNode> &node)
         UpdateHcclBigOpDescs(node);
     }
 
-    if (!isCompute && !isHccl) {
+    if (!isOperateCompute && !isHccl) {
         auto otherTask = GetOtherTaskDesc(node);
         if (otherTask) {
             tasks_.emplace_back(otherTask);
+            auto taskType = TypeData::GetInstance().Get(MSPROF_REPORT_RUNTIME_LEVEL, otherTask->taskType);
+            // 对于纯rts_track数据,只有算子类型在白名单中才生成computeTask数据
+            if (KERNEL_COMPUTE_WHITE_LIST.find(taskType) != KERNEL_COMPUTE_WHITE_LIST.end()) {
+                computeTasks_.emplace_back(otherTask);
+            }
         }
     }
 }
@@ -303,6 +316,7 @@ std::shared_ptr<HostTask> TreeAnalyzer::GenHostTask(const std::shared_ptr<Msprof
     task->deviceId = track->data.runtimeTrack.deviceId;
     task->timeStamp = track->timeStamp;
     task->thread_id = track->threadId;
+    task->kernelName = track->data.runtimeTrack.kernelName;
     return task;
 }
 
@@ -519,8 +533,11 @@ std::shared_ptr<HostTask> TreeAnalyzer::GetOtherTaskDesc(const std::shared_ptr<T
         return nullptr;
     }
     auto track = tracks.back()->compactPtr;
+    auto taskType = TypeData::GetInstance().Get(MSPROF_REPORT_RUNTIME_LEVEL, track->data.runtimeTrack.taskType);
+    uint32_t contextId =
+            (taskType == KERNEL_MIX_AIC_TASK_TYPE || taskType == KERNEL_MIX_AIV_TASK_TYPE) ? 0 : DEFAULT_CONTEXT_ID;
     // 使用父节点的id作为connection_id，主要是为了将record_event的api与task_track关联起来
-    auto task = GenHostTask(track, modelApi, nullptr, DEFAULT_CONTEXT_ID,
+    auto task = GenHostTask(track, modelApi, nullptr, contextId,
                             track->data.runtimeTrack.taskType, node->parent->event->id);
     return task;
 }

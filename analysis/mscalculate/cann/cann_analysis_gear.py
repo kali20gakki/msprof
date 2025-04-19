@@ -10,6 +10,7 @@ from typing import Union
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.ge_enum_constant import GeTaskType
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_object import HighPerfDict
 from mscalculate.cann.additional_record import AdditionalRecord
@@ -229,7 +230,17 @@ class TaskGear(CANNGear):
     KERNEL_STARS_COMMON_TASK_TYPE = "STARS_COMMON"
     KERNEL_AICPU = "KERNEL_AICPU"
     KERNEL_AICORE = "KERNEL_AICORE"
-    CONTEXT_ID_WHITE_LIST = ["KERNEL_AICORE", "KERNEL_AIVEC", "FFTS_PLUS"]
+    KERNEL_AIVEC = "KERNEL_AIVEC"
+    KERNEL_MIX_AIC = "KERNEL_MIX_AIC"
+    KERNEL_MIX_AIV = "KERNEL_MIX_AIV"
+    CONTEXT_ID_WHITE_LIST = [KERNEL_AICORE, KERNEL_AIVEC, KERNEL_FFTS_PLUS_TASK_TYPE, KERNEL_MIX_AIC, KERNEL_MIX_AIV]
+    RTS_TASK_TYPE_MAP = {
+        KERNEL_AICORE: GeTaskType.AI_CORE.name,
+        KERNEL_AIVEC: GeTaskType.AI_VECTOR_CORE.name,
+        KERNEL_MIX_AIC: GeTaskType.MIX_AIC.name,
+        KERNEL_MIX_AIV: GeTaskType.MIX_AIV.name,
+        KERNEL_AICPU: GeTaskType.AI_CPU.name,
+    }
 
     class RuntimeApi:
         def __init__(self, start, end, struct_type, thread_id):
@@ -323,10 +334,13 @@ class TaskGear(CANNGear):
         return ids
 
     @classmethod
-    def get_context_ids(cls, call_stack: dict) -> str:
+    def get_context_ids(cls, call_stack: dict, task_type: str) -> str:
+        default_ids = [str(NumberConstant.DEFAULT_GE_CONTEXT_ID)]
+        if task_type in [cls.KERNEL_MIX_AIC, cls.KERNEL_MIX_AIV]:
+            default_ids.append("0")
         node_context_ids = cls.get_context_ids_in_node(call_stack.get(Constant.NODE_LEVEL))
         hccl_context_ids = cls.get_context_ids_in_hccl(call_stack.get(Constant.HCCL_LEVEL))
-        context_ids = [*node_context_ids, *hccl_context_ids, str(NumberConstant.DEFAULT_GE_CONTEXT_ID)]
+        context_ids = list(OrderedDict.fromkeys(node_context_ids + hccl_context_ids + default_ids))
 
         return ",".join(context_ids)
 
@@ -376,12 +390,12 @@ class TaskGear(CANNGear):
         node_event: Event = call_stack.get(Constant.NODE_LEVEL)
         node_dto: ApiDataDto = self.db.get_api(node_event)
 
-        model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
+        model_id = model_dto.item_id if model_dto.item_id != "" else self.INVALID_MODEL_ID
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
         # 根据task type是否在白名单内对context_ids和connection_id进行处理，以应对Node@Launch下有多个Task的问题
         # 对于在白名单内的task正常生成context_ids，反之使用对应的默认值
         if task_track_dto.task_type in self.CONTEXT_ID_WHITE_LIST:
-            context_ids = self.get_context_ids(call_stack)
+            context_ids = self.get_context_ids(call_stack, task_track_dto.task_type)
         else:
             context_ids = str(NumberConstant.DEFAULT_GE_CONTEXT_ID)
 
@@ -406,7 +420,7 @@ class TaskGear(CANNGear):
         hccl_descs = self.get_hccl_descs(hccl_event)
         model_dto: ApiDataDto = self.db.get_api(model_event)
 
-        model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
+        model_id = model_dto.item_id if model_dto.item_id != "" else self.INVALID_MODEL_ID
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
 
         hccl_tasks = [0] * len(hccl_descs)
@@ -520,14 +534,14 @@ class TaskGear(CANNGear):
 
         if not node_dto.item_id and not hccl_dto.item_id:
             # this happens when runtime task is not respond to a op
-            logging.warning("task with timestamp %d is not respond to a op.", add_dto.timestamp)
+            self.add_kernel_task_only_task_track(add_dto)
             return
 
         if node_dto.item_id.startswith("Lccl"):
             return
 
         model_dto: ApiDataDto = self.db.get_api(call_stack.get(Constant.MODEL_LEVEL))
-        model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
+        model_id = model_dto.item_id if model_dto.item_id != "" else self.INVALID_MODEL_ID
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
 
         node_descs = self.get_node_descs(node_event)
@@ -605,6 +619,18 @@ class TaskGear(CANNGear):
                                    tensor_info_dto.output_shapes, add_dto.device_id, int(cxt_id),
                                    "YES" if node_basic_info_dto.op_flag else "NO",
                                    "N/A" if not node_attr_info.hashid else node_attr_info.hashid])
+
+    def add_kernel_task_only_task_track(self, rts_trk_dto: TaskTrackDto):
+        if rts_trk_dto.kernel_name == Constant.NA:
+            return
+        task_type = self.RTS_TASK_TYPE_MAP.get(rts_trk_dto.task_type, rts_trk_dto.task_type)
+        context_id = 0 if task_type in [GeTaskType.MIX_AIC.name, GeTaskType.MIX_AIV.name] else self.INVALID_CONTEXT_ID
+        self.task_info.append([self.INVALID_MODEL_ID, rts_trk_dto.kernel_name,
+                               rts_trk_dto.stream_id, rts_trk_dto.task_id, 0, 0,
+                               Constant.NA, task_type, rts_trk_dto.kernel_name, -1, rts_trk_dto.thread_id,
+                               rts_trk_dto.timestamp, rts_trk_dto.batch_id,
+                               None, None, None, None, None, None, None,
+                               rts_trk_dto.device_id, context_id, Constant.NA, Constant.NA])
 
     def run(self, event: Event, call_stack: dict):
         # pure runtime api

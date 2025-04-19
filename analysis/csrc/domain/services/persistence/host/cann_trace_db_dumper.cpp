@@ -21,6 +21,7 @@ namespace Domain {
 using ThreadPool = Analysis::Utils::ThreadPool;
 using HashData = Analysis::Domain::Host::Cann::HashData;
 using TypeData = Analysis::Domain::Host::Cann::TypeData;
+using MappingType = NumberMapping::MappingType;
 using namespace Infra;
 
 using HCCLOpsDumpData = std::vector<std::tuple<uint32_t, uint64_t, int32_t, uint32_t, std::string, std::string,
@@ -44,6 +45,20 @@ const int32_t INVALID_VALUE = -1;
 const std::string NA = "N/A";
 const uint32_t INPUT_FORMAT_INDEX = 0;
 const uint32_t OUTPUT_FORMAT_INDEX = 1;
+const std::unordered_map<std::string, uint32_t> RtsTaskTypeMap = {
+    {"KERNEL_AICORE", 0},
+    {"KERNEL_AICPU", 1},
+    {"KERNEL_AIVEC", 2},
+    {"KERNEL_MIX_AIC", 4},
+    {"KERNEL_MIX_AIV", 5},
+};
+
+std::string TransTaskTypeFromRtsToGe(uint64_t rtsTaskType)
+{
+    std::string taskType = TypeData::GetInstance().Get(MSPROF_REPORT_RUNTIME_LEVEL, rtsTaskType);
+    auto it = RtsTaskTypeMap.find(taskType);
+    return (it != RtsTaskTypeMap.end()) ? NumberMapping::Get(MappingType::GE_TASK_TYPE, it->second) : taskType;
+}
 
 void AddHcclOpDumpData(HCCLOpsDumpData& data, const std::shared_ptr<Analysis::Domain::Operator> &op)
 {
@@ -72,8 +87,7 @@ void AddHcclOpDumpData(HCCLOpsDumpData& data, const std::shared_ptr<Analysis::Do
     if (opInfoDesc != nullptr) {
         relay = opInfoDesc->data.hcclopInfo.relay;
         retry = opInfoDesc->data.hcclopInfo.retry;
-        dataType = NumberMapping::Get(NumberMapping::MappingType::HCCL_DATA_TYPE,
-                                      opInfoDesc->data.hcclopInfo.dataType);
+        dataType = NumberMapping::Get(MappingType::HCCL_DATA_TYPE, opInfoDesc->data.hcclopInfo.dataType);
         algType = HashData::GetInstance().Get(opInfoDesc->data.hcclopInfo.algType);
         count = opInfoDesc->data.hcclopInfo.count;
         groupName = std::to_string(opInfoDesc->data.hcclopInfo.groupName);
@@ -209,7 +223,9 @@ void CANNTraceDBDumper::DumpOpDesc(const HostTasks &computeTasks)
         return;
     }
     for (const auto &task: computeTasks) {
-        AddTaskInfo(task, data);
+        if (task) {
+            AddTaskInfo(task, data);
+        }
     }
     if (!opDescDBRunner.InsertData("TaskInfo", data)) {
         result_ = false;
@@ -239,13 +255,11 @@ void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInf
         }
         if (tenosrData.tensorType == INPUT_FORMAT_INDEX) {
             inputFormat.emplace_back(GetFormat(tenosrData.format));
-            inputDataType.emplace_back(
-                NumberMapping::Get(NumberMapping::MappingType::GE_DATA_TYPE, tenosrData.dataType));
+            inputDataType.emplace_back(NumberMapping::Get(MappingType::GE_DATA_TYPE, tenosrData.dataType));
             inputShape.emplace_back(Utils::Join(shapes, ","));
         } else if (tenosrData.tensorType == OUTPUT_FORMAT_INDEX) {
             outputFormat.emplace_back(GetFormat(tenosrData.format));
-            outputDataType.emplace_back(
-                NumberMapping::Get(NumberMapping::MappingType::GE_DATA_TYPE, tenosrData.dataType));
+            outputDataType.emplace_back(NumberMapping::Get(MappingType::GE_DATA_TYPE, tenosrData.dataType));
             outputShape.emplace_back(Utils::Join(shapes, ","));
         }
     }
@@ -264,7 +278,7 @@ void CANNTraceDBDumper::AddTensorShapeInfo(const std::shared_ptr<ConcatTensorInf
     auto outputShapeStr = outputShape.empty() ? NA : Utils::AddQuotation(Utils::Join(outputShape, ";"));
     data.emplace_back(task->modelId, HashData::GetInstance().Get(nodeBasicInfo.opName), task->streamId,
                       task->taskId, blockDim, mixBlockDim, opState,
-                      NumberMapping::Get(NumberMapping::MappingType::GE_TASK_TYPE, nodeBasicInfo.taskType),
+                      NumberMapping::Get(MappingType::GE_TASK_TYPE, nodeBasicInfo.taskType),
                       HashData::GetInstance().Get(nodeBasicInfo.opType), task->requestId, task->thread_id,
                       task->timeStamp, task->batchId, tensorNum, inputFormatStr, inputDataTypeStr, inputShapeStr,
                       outputFormatStr, outputDataTypeStr, outputShapeStr,
@@ -276,7 +290,7 @@ std::string CANNTraceDBDumper::GetFormat(uint32_t oriFormat)
     // 若format是默认值(UINT32_MAX) 直接使用枚举UNDEFINED即可 无需换算subFormat
     auto format = (oriFormat == UINT32_MAX) ? UINT32_MAX : (oriFormat & 0xff);
     auto subFormat = (oriFormat == UINT32_MAX) ? 0 : (oriFormat & 0xffff00) >> 8;
-    std::string enumFormat = NumberMapping::Get(NumberMapping::MappingType::GE_FORMAT, format);
+    std::string enumFormat = NumberMapping::Get(MappingType::GE_FORMAT, format);
     std::string enumSubFormat = std::to_string(subFormat);
     std::vector<std::string> vec{enumFormat, enumSubFormat};
     if (subFormat > 0) {
@@ -287,8 +301,19 @@ std::string CANNTraceDBDumper::GetFormat(uint32_t oriFormat)
 
 void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskInfoData &data)
 {
-    if (!task || !task->op) {
-        ERROR("DumpOpDesc: Empty op or desc");
+    if (!task->op) {
+        // treeAnalyze中通过白名单控制,此时无kernelName算子为非预期算子
+        if (task->kernelName == 0) {
+            WARN("Can't get task's kernel name, streamId is %, taskId is %, batch id is %, timestamp is %.",
+                 task->streamId, task->taskId, task->batchId, task->timeStamp);
+            return;
+        }
+        auto name = HashData::GetInstance().Get(task->kernelName);
+        data.emplace_back(task->modelId, name, task->streamId, task->taskId, 0, 0, NA,
+                          TransTaskTypeFromRtsToGe(task->taskType), name, // opType
+                          task->requestId, task->thread_id, task->timeStamp, task->batchId,
+                          0, NA, NA, NA, NA, NA, NA,
+                          task->deviceId, task->contextId, NA, NA);
         return;
     }
     auto desc = task->op->opDesc;
@@ -312,9 +337,8 @@ void CANNTraceDBDumper::AddTaskInfo(const std::shared_ptr<HostTask> &task, TaskI
     auto opState = std::to_string(nodeBasicInfo.opState);
     if (!tensorDesc) {
         data.emplace_back(task->modelId, HashData::GetInstance().Get(nodeBasicInfo.opName), task->streamId,
-                          task->taskId, blockDim,
-                          mixBlockDim, opState, NumberMapping::Get(NumberMapping::MappingType::GE_TASK_TYPE,
-                                                                   nodeBasicInfo.taskType),
+                          task->taskId, blockDim, mixBlockDim, opState,
+                          NumberMapping::Get(MappingType::GE_TASK_TYPE, nodeBasicInfo.taskType),
                           HashData::GetInstance().Get(nodeBasicInfo.opType),
                           task->requestId, task->thread_id, task->timeStamp, task->batchId,
                           0, NA, NA, NA, NA, NA, NA, task->deviceId, task->contextId, opFlag, hashId);
@@ -361,12 +385,12 @@ void CANNTraceDBDumper::DumpHcclTasks(const HostTasks &hcclTasks)
                           std::to_string(hcclTrace->groupName), hcclTrace->planeID, std::to_string(task->timeStamp),
                           hcclTrace->durationEstimated, task->streamId, task->taskId, task->contextId, task->batchId,
                           task->deviceId, desc->isMaster, hcclTrace->localRank, hcclTrace->remoteRank,
-                          NumberMapping::Get(NumberMapping::MappingType::HCCL_TRANSPORT_TYPE, hcclTrace->transportType),
+                          NumberMapping::Get(MappingType::HCCL_TRANSPORT_TYPE, hcclTrace->transportType),
                           static_cast<double>(hcclTrace->dataSize),
-                          NumberMapping::Get(NumberMapping::MappingType::HCCL_DATA_TYPE, hcclTrace->dataType),
-                          NumberMapping::Get(NumberMapping::MappingType::HCCL_LINK_TYPE, hcclTrace->linkType),
+                          NumberMapping::Get(MappingType::HCCL_DATA_TYPE, hcclTrace->dataType),
+                          NumberMapping::Get(MappingType::HCCL_LINK_TYPE, hcclTrace->linkType),
                           std::to_string(hcclTrace->notifyID),
-                          NumberMapping::Get(NumberMapping::MappingType::HCCL_RDMA_TYPE, hcclTrace->rdmaType),
+                          NumberMapping::Get(MappingType::HCCL_RDMA_TYPE, hcclTrace->rdmaType),
                           task->thread_id);
     }
     if (!hcclTaskDBRunner.InsertData("HCCLTask", data)) {
