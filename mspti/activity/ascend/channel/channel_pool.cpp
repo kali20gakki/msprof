@@ -70,8 +70,8 @@ msptiResult ChannelPool::Start()
     threadPool_->SetThreadPoolQueueSize(CHANNELPOLL_THREAD_QUEUE_SIZE);
     threadPool_->Start();
     if (!thread_.joinable()) {
-        thread_ = std::thread(std::bind(&ChannelPool::Run, this));
         isStarted_ = true;
+        thread_ = std::thread(std::bind(&ChannelPool::Run, this));
     }
     return MSPTI_SUCCESS;
 }

@@ -49,10 +49,11 @@ public:
         if (!queue_) {
             return;
         }
+
+        started_ = true;
         if (!thread_.joinable()) {
             thread_ = std::thread(std::bind(&Thread::Run, this));
         }
-        started_ = true;
     }
 
     void Stop()
