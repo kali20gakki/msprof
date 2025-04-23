@@ -3,9 +3,7 @@
 # CMake lowest version requirement
 cmake_minimum_required(VERSION 3.14)
 
-project(MSPTI_ACTIVITY)
-
-set(CMAKE_SKIP_RPATH TRUE)
+project(MSPTI_HCCL_ACTIVITY)
 
 # Compile options
 add_compile_options(-std=c++11)
@@ -15,8 +13,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY  "./")
 set(CMAKE_CXX_FLAGS_DEBUG "-fPIC -O0 -g -Wall")
 set(CMAKE_CXX_FLAGS_RELEASE "-fPIC -O2 -Wall")
 
-add_executable(mspti_activity_test
-               mspti_activity.cpp) 
+add_executable(mspti_hccl_activity_test
+               mspti_hccl_activity.cpp) 
 
 if(DEFINED ENV{ASCEND_HOME_PATH})
     set(ASCEND_PATH $ENV{ASCEND_HOME_PATH})
@@ -36,24 +34,26 @@ include_directories(
 )
 
 # 设置链接的库文件路径
-target_link_libraries(mspti_activity_test PRIVATE
+target_link_libraries(mspti_hccl_activity_test PRIVATE
                       ${ASCEND_PATH}/lib64/libascendcl.so
                       ${ASCEND_PATH}/lib64/libnnopbase.so
-                      ${ASCEND_PATH}/lib64/libmsprofiler.so
                       ${ASCEND_PATH}/lib64/libopapi.so
-                      ${ASCEND_PATH}/lib64/libmspti.so)
+                      ${ASCEND_PATH}/lib64/libhccl.so
+                      ${ASCEND_PATH}/lib64/libmspti.so
+                      dl
+                      -lpthread)
 
 target_compile_options(
-    mspti_activity_test PRIVATE
+    mspti_hccl_activity_test PRIVATE
     -fPIC
     -fstack-protector-all
     -ftrapv
 )
 
 target_link_options(
-    mspti_activity_test PRIVATE
+    mspti_hccl_activity_test PRIVATE
     -Wl,-z,relro,-z,now,-z,noexecstack
     -s
 )
 
-install(TARGETS mspti_activity_test DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+install(TARGETS mspti_hccl_activity_test DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
