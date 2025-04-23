@@ -10,8 +10,6 @@ set(CMAKE_SKIP_RPATH TRUE)
 # Compile options
 add_compile_options(-std=c++11)
 
-set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
-
 # 设置编译选项
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY  "./")
 set(CMAKE_CXX_FLAGS_DEBUG "-fPIC -O0 -g -Wall")
@@ -21,9 +19,9 @@ add_executable(callback_mstx
                callback_mstx.cpp) 
 
 if(DEFINED ENV{ASCEND_HOME_PATH})
-	set(ASCEND_PATH $ENV{ASCEND_HOME_PATH})
+    set(ASCEND_PATH $ENV{ASCEND_HOME_PATH})
 else()
-	set(ASCEND_PATH "/usr/local/Ascend/ascend-toolkit/latest")
+    set(ASCEND_PATH "/usr/local/Ascend/ascend-toolkit/latest")
 endif()
 
 set(INCLUDE_BASE_DIR ${CMAKE_SOURCE_DIR}/..)
@@ -47,16 +45,16 @@ target_link_libraries(callback_mstx PRIVATE
                       dl)
 
 target_compile_options(
-		callback_mstx PRIVATE
-		-fPIC
-		-fstack-protector-all
-		-ftrapv
+        callback_mstx PRIVATE
+        -fPIC
+        -fstack-protector-all
+        -ftrapv
 )
 
 target_link_options(
-		callback_mstx PRIVATE
-		-Wl,-z,relro,-z,now,-z,noexecstack
-		-s
+        callback_mstx PRIVATE
+        -Wl,-z,relro,-z,now,-z,noexecstack
+        -s
 )
 
 install(TARGETS callback_mstx DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

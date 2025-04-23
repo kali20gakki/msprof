@@ -35,7 +35,7 @@ void UserBufferRequest(uint8_t **buffer, size_t *size, size_t *maxNumRecords)
     uint8_t *pBuffer = reinterpret_cast<uint8_t *>(malloc(DEFAULT_BUFFER_SIZE + ALIGN_SIZE));
     *buffer = ALIGN_BUFFER(pBuffer, ALIGN_SIZE);
     *size = DEFAULT_BUFFER_SIZE;
-    *maxNumRecords = MAX_ALLOC_CNT;
+    *maxNumRecords = 0;
 }
 
 static const char* GetActivityKindString(msptiActivityKind kind)
