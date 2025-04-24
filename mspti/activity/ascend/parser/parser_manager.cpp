@@ -153,6 +153,8 @@ msptiResult ParserManager::ReportRtTaskTrack(const MsprofRuntimeTrack& track)
         {TS_TASK_TYPE_KERNEL_AICORE, "KERNEL_AICORE"},
         {TS_TASK_TYPE_KERNEL_AICPU, "KERNEL_AICPU"},
         {TS_TASK_TYPE_KERNEL_AIVEC, "KERNEL_AIVEC"},
+        {TS_TASK_TYPE_KERNEL_MIX_AIC, "KERNEL_MIX_AIC"},
+        {TS_TASK_TYPE_KERNEL_MIX_AIV, "KERNEL_MIX_AIV"},
     };
     auto typeIter = KERNEL_TYPE.find(static_cast<TsTaskType>(track.taskType));
     if (typeIter != KERNEL_TYPE.end()) {
