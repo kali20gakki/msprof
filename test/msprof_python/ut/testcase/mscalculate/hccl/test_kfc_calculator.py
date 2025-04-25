@@ -112,7 +112,7 @@ class TestKfcCalculator(unittest.TestCase):
             TaskFlip(52, 38140478865000, 0, 3),  # task id翻转
         ]
         comm_info = [
-            Mc2CommInfoViewModel.MC2_COMM_INFO_TYPE(19, "52,53,54,55,56,57,58,59", group_name),
+            Mc2CommInfoViewModel.MC2_COMM_INFO_TYPE(group_name, 8, 0, 0, 19, "52,53,54,55,56,57,58,59"),
         ]
         ge_data = [
             (4294967295, 'allgather', 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

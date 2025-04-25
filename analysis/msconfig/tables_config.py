@@ -72,6 +72,12 @@ class TablesConfig(MetaConfig):
             ('physic_stream', 'INTEGER,null'),
             ('logic_stream', 'INTEGER,null')
         ],
+        'CaptureStreamInfoMap': [
+            ('device_id', 'INTEGER,null'),
+            ('model_id', 'INTEGER,null'),
+            ('original_stream_id', 'INTEGER,null'),
+            ('model_stream_id', 'INTEGER,null')
+        ],
         'OriginalDataMap': [
             ('common', 'TEXT,null'),
             ('pid', 'INT,null'),

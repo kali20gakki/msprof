@@ -7,6 +7,12 @@ from msconfig.meta_config import MetaConfig
 
 class DataParsersConfig(MetaConfig):
     DATA = {
+        'CaptureStreamInfoParser': [
+            ('path', 'msparser.compact_info.capture_stream_info_parser'),
+            ('chip_model', '5'),
+            ('level', '4'),
+            ('position', 'H')
+        ],
         'GeLogicStreamParser': [
             ('path', 'msparser.ge.ge_logic_stream_parser'),
             ('chip_model', '0,1,2,3,4,5,7,8,11'),

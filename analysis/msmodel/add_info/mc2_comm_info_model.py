@@ -32,7 +32,7 @@ class Mc2CommInfoModel(ParserModel):
 class Mc2CommInfoViewModel(ViewModel):
     MC2_COMM_INFO_TYPE = CustomizedNamedtupleFactory.enhance_namedtuple(
         namedtuple("Mc2CommInfo",
-                   ["aicpu_kfc_stream_id", "comm_stream_ids", "group_name"]),
+                   ["group_name", "rank_size", "rank_id", "usr_rank_id", "aicpu_kfc_stream_id", "comm_stream_ids"]),
         {})
 
     def __init__(self, result_dir: str, table_list: list):
@@ -41,6 +41,7 @@ class Mc2CommInfoViewModel(ViewModel):
     def get_kfc_stream(self: any, table_name: str) -> list:
         if not DBManager.judge_table_exist(self.cur, table_name):
             return []
-        sql = "select aicpu_kfc_stream_id, comm_stream_ids, group_name from {0} ".format(table_name)
+        sql = "select group_name, rank_size, rank_id," \
+              "usr_rank_id, aicpu_kfc_stream_id, comm_stream_ids from {0} ".format(table_name)
         mc2_comm_info_data = DBManager.fetch_all_data(self.cur, sql)
         return [self.MC2_COMM_INFO_TYPE(*data) for data in mc2_comm_info_data]

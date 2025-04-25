@@ -317,6 +317,14 @@ struct MsprofRuntimeTrack {  // for MsprofReportCompactInfo buffer data
     uint64_t kernelName;
 };
 
+struct MsprofCaptureStreamInfo {  // for MsprofReportCompactInfo buffer data
+    uint16_t act;               // 标志是否销毁 0记为正常 1记为销毁
+    uint16_t modleStreamId;     // capture stream id 销毁记录的stream id设置为 UINT16_MAX
+    uint16_t originalStreamId;  // ori stream id 销毁记录的stream id设置为 UINT16_MAX
+    uint16_t modelId;           // capture model id与GE无关
+    uint16_t deviceId;
+};
+
 enum AlgType {
     HCCL_ALG_NONE = 0,
     HCCL_ALG_MESH,
@@ -416,6 +424,7 @@ struct MsprofCompactInfo {  // for MsprofReportCompactInfo buffer data
     union {
         uint8_t info[MSPROF_COMPACT_INFO_DATA_LENGTH];
         MsprofRuntimeTrack runtimeTrack;
+        MsprofCaptureStreamInfo captureStreamInfo;
         MsprofNodeBasicInfo nodeBasicInfo;
         MsprofAttrInfo nodeAttrInfo;
         MsprofHcclOPInfo hcclopInfo;

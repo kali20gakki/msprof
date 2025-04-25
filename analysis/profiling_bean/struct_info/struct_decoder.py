@@ -41,6 +41,7 @@ class StructDecoder:
         "GeTensorBean": StructFmt.GE_TENSOR_FMT,
         "GeHostBean": StructFmt.GE_HOST_FMT,
         "GeLogicStreamInfoBean": StructFmt.GE_LOGIC_STREAM_INFO_FMT,
+        "CaptureStreamInfoBean": StructFmt.CAPTURE_STREAM_INFO_FMT,
         "ModelWithQBean": StructFmt.HELPER_MODEL_WITH_Q_FMT,
         "StepTraceReader": StructFmt.STEP_TRACE_FMT,
         "StarsChipTransBean": StructFmt.CHIP_TRANS_FMT,

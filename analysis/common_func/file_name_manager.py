@@ -235,6 +235,9 @@ class FileNameManagerConstant:
     # mc2
     MC2_COMM_INFO_PATTERN = r"^(unaging|aging)\.additional\.mc2_comm_info\.slice_\d+"
 
+    # capture stream info
+    CAPTURE_STREAM_INFO_PATTERN = r"^(unaging|aging)\.compact\.capture_stream_info\.slice_\d+"
+
     def get_file_name_manager_class_name(self: any) -> any:
         """
         get file name manager class name
@@ -992,3 +995,11 @@ def get_mc2_comm_info_compiles() -> tuple:
     :return: mc2 comm info data regex
     """
     return (re.compile(FileNameManagerConstant.MC2_COMM_INFO_PATTERN),)
+
+
+def get_capture_stream_info_compiles() -> tuple:
+    """
+    get capture stream info regex compiles
+    :return: capture stream info data regex
+    """
+    return (re.compile(FileNameManagerConstant.CAPTURE_STREAM_INFO_PATTERN),)
