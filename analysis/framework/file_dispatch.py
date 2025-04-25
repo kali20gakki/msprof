@@ -15,6 +15,7 @@ from common_func.file_name_manager import get_aicpu_compiles
 from common_func.file_name_manager import get_aiv_compiles
 from common_func.file_name_manager import get_api_event_compiles
 from common_func.file_name_manager import get_biu_compiles
+from common_func.file_name_manager import get_capture_stream_info_compiles
 from common_func.file_name_manager import get_ctrl_cpu_compiles
 from common_func.file_name_manager import get_data_preprocess_compiles
 from common_func.file_name_manager import get_ddr_compiles
@@ -158,6 +159,7 @@ class FileDispatch:
         DataTag.HCCL_OP_INFO: get_hccl_op_info_compiles(),
         DataTag.QOS: get_qos_compiles(),
         DataTag.MC2_COMM_INFO: get_mc2_comm_info_compiles(),
+        DataTag.CAPTURE_STREAM_INFO: get_capture_stream_info_compiles(),
     }
 
     def __init__(self: any, sample_config: dict) -> None:

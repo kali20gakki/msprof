@@ -82,6 +82,7 @@ class DataTag(Enum):
     QOS = 75
     STATIC_OP_MEM = 76
     MC2_COMM_INFO = 77
+    CAPTURE_STREAM_INFO = 78
 
 
 @unique
