@@ -12,7 +12,6 @@
 
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/domain/services/environment/context.h"
-#include "analysis/csrc/application/credential/id_pool.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/metric_summary.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/ascend_task_data.h"
 
@@ -21,6 +20,7 @@ namespace Analysis {
 namespace Domain {
 using namespace Environment;
 namespace {
+    const int PERCENTAGE_FACTOR = 100;
     const uint64_t INVALID_DB_SIZE = 0;
     const std::unordered_set<std::string> INVALID_COLUMN_NAMES = {
         "job_id", "host_id", "device_id", "task_id", "stream_id", "index_id",
@@ -143,7 +143,7 @@ std::vector<std::string> MetricProcessor::GetAndCheckTableColumns(
         }
     }
     auto res = RemoveNeedlessColumns(tableColumns);
-    for (auto tableColumn : res) {
+    for (const auto& tableColumn : res) {
         headers.emplace_back(tableColumn.name);
     }
     return headers;
@@ -177,12 +177,16 @@ bool MetricProcessor::ProcessData(const std::unordered_map<std::string, uint16_t
             flag = false;
         }
     }
-    // add memory data, 由于cube_utilization需要task_duration字段, 故放在assembler中计算
-    if (AddMemoryBound(processedData, headers)) {
-        headers.push_back("memory_bound");
+    auto metricSummaryHeaders = ModifySummaryHeaders(headers);
+    // add memory data 当前看A2并不支持memoryBound数据处理 实际为无效代码
+    if (AddMemoryBound(processedData, metricSummaryHeaders)) {
+        metricSummaryHeaders.emplace_back("memory_bound");
+    }
+    // cube_utilization需要task_duration字段, 当前处理dur以外的部分
+    if (AddCubeUsageWithoutDur(processedData, metricSummaryHeaders)) {
+        metricSummaryHeaders.emplace_back("cube_utilization(%)");
     }
 
-    auto metricSummaryHeaders = ModifySummaryHeaders(headers);
     if (metricSummaryHeaders.empty()) {
         ERROR("Processing data: get modified metric Summary failed, no metric data will be reserved.");
         return false;
@@ -253,7 +257,7 @@ std::vector<std::vector<std::string>> MetricProcessor::GetTaskBasedData(const st
     std::vector<std::string> taskIdColumns = {"stream_id", "task_id", "batch_id"};
     std::string subtask_id_format =  "subtask_id";
     if (!Context::GetInstance().IsChipV4(version)) {
-        subtask_id_format = "(case when subtask_id=" + std::to_string(UINT32_MAX) + " then 'N/A' else subtask_id end)";
+        subtask_id_format = "'" + NA + "' AS subtask_id";
     }
     taskIdColumns.insert(taskIdColumns.begin(), subtask_id_format);
     // 获得taskIdColumns的数据, 插入oriData表
@@ -313,7 +317,7 @@ bool MetricProcessor::FormatTaskBasedData(const std::vector<std::vector<std::str
             tmpId.emplace_back(temp);
         }
         TaskId tempTaskId;
-        if (oriData[colSize - DATA_OFFSET][row] == "N/A") {
+        if (oriData[colSize - DATA_OFFSET][row] == NA) {
             tempTaskId = {tmpId[0], tmpId[2], tmpId[1], UINT32_MAX, deviceId};
         } else {
             uint32_t tempContextId;
@@ -347,23 +351,25 @@ bool MetricProcessor::AddMemoryBound(std::map<TaskId, std::vector<std::vector<st
         return false;
     }
     // 若字段存在, 则进行下一步计算, 遍历processedData, lineData用string存储,
-    // needDataIndex[0] = mac_ratio_index, [1]=vec_ratio_index, [2]mte2_ratio_index
-    const int mte2_ratio_index = 2;
+    // needDataIndex[0] mac_ratio_index, [1] vec_ratio_index, [2] mte2_ratio_index
+    const int macRatioIndex = 0;
+    const int vecRatioIndex = 1;
+    const int mte2RatioIndex = 2;
     for (auto &processedDatum : processedData) {
         for (auto &lineData : processedDatum.second) {
-            double mac_ratio_double, vec_ratio_double, mte2_ratio_double;
-            if (Utils::StrToDouble(mac_ratio_double, lineData[needDataIndex[0]]) ||
-                Utils::StrToDouble(vec_ratio_double, lineData[needDataIndex[1]]) ||
-                Utils::StrToDouble(mte2_ratio_double, lineData[needDataIndex[mte2_ratio_index]])) {
+            double macRatioDouble, vecRatioDouble, mte2RatioDouble;
+            if (Utils::StrToDouble(macRatioDouble, lineData[needDataIndex[macRatioIndex]]) ||
+                Utils::StrToDouble(vecRatioDouble, lineData[needDataIndex[vecRatioIndex]]) ||
+                Utils::StrToDouble(mte2RatioDouble, lineData[needDataIndex[mte2RatioIndex]])) {
                 WARN("failed to convert memory bound data to double, set memory bound data N/A");
-                lineData.push_back("N/A");
+                lineData.emplace_back(NA);
                 continue;
             }
-            if (Utils::IsDoubleEqual(mac_ratio_double, 0.0) || Utils::IsDoubleEqual(vec_ratio_double, 0.0)) {
-                lineData.push_back("N/A");
+            if (Utils::IsDoubleEqual(macRatioDouble, 0.0) || Utils::IsDoubleEqual(vecRatioDouble, 0.0)) {
+                lineData.emplace_back(NA);
                 continue;
             }
-            lineData.push_back(std::to_string(mte2_ratio_double / std::max(mac_ratio_double, vec_ratio_double)));
+            lineData.emplace_back(std::to_string(mte2RatioDouble / std::max(macRatioDouble, vecRatioDouble)));
         }
     }
     return true;
@@ -372,17 +378,17 @@ bool MetricProcessor::CheckAndGetMemoryBoundRelatedDataIndex(const std::vector<s
                                                              std::vector<uint32_t> &neededDataIndex)
 {
     // 先检查计算memory_bound所需的字段在不在....
-    std::string mac_ratio = "mac_ratio";
-    std::string vec_ratio = "vec_ratio";
-    std::string mte2_ratio = "mte2_ratio";
-    std::string mac_exe_ratio = "mac_exe_ratio";
-    std::string vec_exe_ratio = "vec_exe_ratio";
-    std::string mte2_exe_ratio = "mte2_exe_ratio";
+    std::string macRatio = "mac_ratio";
+    std::string vecRatio = "vec_ratio";
+    std::string mte2Ratio = "mte2_ratio";
+    std::string macExeRatio = "mac_exe_ratio";
+    std::string vecExeRatio = "vec_exe_ratio";
+    std::string mte2ExeRatio = "mte2_exe_ratio";
     // 计算memory_bound需要的data包括以上六种, 需要前三种或者后三种, 同名_exe_字段仅headers名不同, 计算时字段意义一致
     std::vector<std::string> neededData = {
-        mac_ratio, vec_ratio, mte2_ratio,
-        mac_exe_ratio, vec_exe_ratio, mte2_exe_ratio};
-    int count = 0;
+            macRatio, vecRatio, mte2Ratio,
+            macExeRatio, vecExeRatio, mte2ExeRatio};
+    uint16_t count = 0;
     neededDataIndex = {0, 0, 0};
     const uint16_t neededDataSize = 3;
     for (unsigned index = 0; index < neededData.size(); ++index) {
@@ -397,6 +403,88 @@ bool MetricProcessor::CheckAndGetMemoryBoundRelatedDataIndex(const std::vector<s
         return true;
     }
     return false;
+}
+
+bool MetricProcessor::CheckAndGetCubeUsageRelatedDataIndex(const std::vector<std::string> &headers,
+                                                           std::vector<uint32_t> &neededDataIndex)
+{
+    // 先检查计算cube_utilization所需的字段在不在....
+    std::string macRatio = "mac_ratio";
+    std::string totalCycles = "total_cycles";
+    std::string aicMacRatio = "aic_mac_ratio";
+    std::string aicTotalCycles = "aic_total_cycles";
+
+    // 计算cube_utilization需要的data包括以上四种中的两种
+    std::vector<std::string> neededData = {macRatio, totalCycles, aicMacRatio, aicTotalCycles};
+    uint16_t count = 0;
+    neededDataIndex = {0, 0};
+    const uint16_t neededDataSize = neededDataIndex.size();
+    for (size_t index = 0; index < neededData.size(); ++index) {
+        for (size_t headersIndex = 0; headersIndex < headers.size(); ++headersIndex) {
+            if (neededData[index] == headers[headersIndex]) {
+                neededDataIndex[index % neededDataSize] = headersIndex;
+                count++;
+            }
+        }
+    }
+    return (count == neededDataSize);
+}
+
+std::tuple<double, uint16_t> MetricProcessor::GetCubeUsageByDeviceId(uint16_t deviceId)
+{
+    {
+        if (cubeUsageInfo_.find(deviceId) != cubeUsageInfo_.end()) {
+            return cubeUsageInfo_[deviceId];
+        }
+
+        std::tuple<double, uint16_t> info;
+        double freq = 0.0;
+        uint16_t coreNum = Context::GetInstance().GetAiCoreNum(deviceId, profPath_);
+        if (!Context::GetInstance().GetPmuFreq(freq, deviceId, profPath_)) {
+            ERROR("Get aicore freq failed.");
+        }
+        INFO("Get freq (%) and coreNum (%) for op_summary, path is %, deviceId is %.",
+             freq, coreNum, profPath_, deviceId);
+        cubeUsageInfo_[deviceId] = std::make_tuple(freq, coreNum);
+        return cubeUsageInfo_[deviceId];
+    }
+}
+
+bool MetricProcessor::AddCubeUsageWithoutDur(std::map<TaskId, std::vector<std::vector<std::string>>> &processedData,
+                                             const std::vector<std::string> &headers)
+{
+    INFO("Add cube usage");
+    std::vector<uint32_t> needDataIndex;
+    if (!CheckAndGetCubeUsageRelatedDataIndex(headers, needDataIndex)) {
+        INFO("No need to calculate cube usage.");
+        return false;
+    }
+    // 若字段存在, 则进行下一步计算, 遍历processedData, lineData用string存储,
+    // needDataIndex[0] mac_ratio_index, [1] total_cycle
+    for (auto &processedDatum : processedData) {
+        const auto cubeUsageInfo = GetCubeUsageByDeviceId(processedDatum.first.deviceId);
+        double freq;
+        uint16_t coreNum;
+        std::tie(freq, coreNum) = cubeUsageInfo;
+
+        for (auto &lineData : processedDatum.second) {
+            if (lineData[needDataIndex[0]] == NA || Utils::IsDoubleEqual(freq, 0.0) || coreNum == 0) {
+                lineData.emplace_back(NA);
+                continue;
+            }
+            double macRatioDouble;
+            uint64_t totalCycle;
+            if ((Utils::StrToDouble(macRatioDouble, lineData[needDataIndex[0]]) != ANALYSIS_OK) ||
+                    (Utils::StrToU64(totalCycle, lineData[needDataIndex[1]]) != ANALYSIS_OK)) {
+                WARN("failed to convert cube usage data to double, set usage data N/A");
+                lineData.emplace_back(NA);
+                continue;
+            }
+
+            lineData.push_back(std::to_string(static_cast<double>(totalCycle) / (freq * coreNum) * PERCENTAGE_FACTOR));
+        }
+    }
+    return true;
 }
 
 std::vector<std::string> MetricProcessor::ModifySummaryHeaders(const std::vector<std::string> &oriHeaders)

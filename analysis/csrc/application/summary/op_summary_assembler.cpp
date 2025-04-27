@@ -24,21 +24,49 @@ using namespace Analysis::Utils;
 using namespace Analysis::Domain::Environment;
 using namespace Analysis::Viewer::Database;
 namespace {
-const int PERCENTAGE_FACTOR = 100;
+// headers
+const std::string DEVICE_ID = "Device_id";
+const std::string MODEL_ID = "Model ID";
+const std::string TASK_ID = "Task ID";
+const std::string STREAM_ID = "Stream ID";
+const std::string OP_NAME = "Op Name";
+const std::string OP_TYPE = "OP Type";
+const std::string OP_STATE = "OP State";
+const std::string TASK_TYPE = "Task Type";
+const std::string TASK_START_TIME = "Task Start Time(us)";
+const std::string TASK_DURATION = "Task Duration(us)";
+const std::string TASK_WAIT_TIME = "Task Wait Time(us)";
+const std::string BLOCK_DIM = "Block Dim";
+const std::string MIX_BLOCK_DIM = "Mix Block Dim";
+const std::string HF32_ELIGIBLE = "HF32 Eligible";
+const std::string INPUT_SHAPES = "Input Shapes";
+const std::string INPUT_DATA_TYPES = "Input Data Types";
+const std::string INPUT_FORMATS = "Input Formats";
+const std::string OUTPUT_SHAPES = "Output Shapes";
+const std::string OUTPUT_DATA_TYPES = "Output Data Types";
+const std::string OUTPUT_FORMATS = "Output Formats";
+const std::string CONTEXT_ID = "Context ID";
+const std::string CUBE_UTILIZATION = "cube_utilization(%)";
+const std::string AIV_TIME = "aiv_time(us)";
+const std::string AIV_TOTAL_TIME = "aiv_total_time(us)";
+
+// headers index
+const std::string DUR_IDX = "durIdx";
+const std::string USAGE_IDX = "usageIdx";
+
 // WRITE_BACK与INVALID类型不需要处理，针对helper场景, 去除运行在AI_CPU的HCCL小算子不生成op_summary,
 // 运行在AI_CORE上的HCCL小算子也不呈现在op_summary,因此这四个类型都不生成数据即可，直接排除掉
 const std::vector<std::string> INVALID_TASK_TYPE{"WRITE_BACK", "INVALID", "HCCL_AI_CPU", "COMMUNICATION"};
 const std::vector<std::string> BASE_HEADER{
-    "Device_id", "Model ID", "Task ID", "Stream ID", "Op Name", "OP Type", "OP State", "Task Type",
-    "Task Start Time(us)", "Task Duration(us)", "Task Wait Time(us)"
+    DEVICE_ID, MODEL_ID, TASK_ID, STREAM_ID, OP_NAME, OP_TYPE, OP_STATE, TASK_TYPE,
+    TASK_START_TIME, TASK_DURATION, TASK_WAIT_TIME
 };
 const std::vector<std::string> ADDITIONAL_TENSOR_HEADER{
-    "Block Dim", "Mix Block Dim", "HF32 Eligible", "Input Shapes", "Input Data Types", "Input Formats",
-    "Output Shapes", "Output Data Types", "Output Formats", "Context ID"
+    BLOCK_DIM, MIX_BLOCK_DIM, HF32_ELIGIBLE, INPUT_SHAPES, INPUT_DATA_TYPES, INPUT_FORMATS,
+    OUTPUT_SHAPES, OUTPUT_DATA_TYPES, OUTPUT_FORMATS, CONTEXT_ID
 };
-const std::string CONTEXT_ID = "Context ID";
 
-int GetIndexForVec(const std::vector<std::string> &vec, std::string &&key)
+int GetIndexForVec(const std::vector<std::string> &vec, const std::string &key)
 {
     auto it = std::find(vec.begin(), vec.end(), key);
     if (it != vec.end()) {
@@ -50,7 +78,7 @@ int GetIndexForVec(const std::vector<std::string> &vec, std::string &&key)
 int GetColumnIndex(const std::vector<std::string> &headers, std::vector<std::string> &&possibleNames)
 {
     for (auto &name : possibleNames) {
-        auto idx = GetIndexForVec(headers, std::move(name));
+        auto idx = GetIndexForVec(headers, name);
         if (idx != INVALID_INDEX) {
             return idx;
         }
@@ -133,10 +161,8 @@ void OpSummaryAssembler::GenerateOpBody(std::vector<AscendTaskData> &taskData, s
         headers_.insert(headers_.end(), pmu->labels.begin(), pmu->labels.end());
     }
     std::unordered_map<std::string, int> indexTable{
-        {"deviceIdx", GetIndexForVec(headers_, "Device_id")},
-        {"ratioIdx", GetColumnIndex(headers_, {"mac_ratio", "aic_mac_ratio"})},
-        {"cycleIdx", GetColumnIndex(headers_, {"total_cycles", "aic_total_cycles"})},
-        {"durIdx", GetIndexForVec(headers_, "Task Duration(us)")}
+        {DUR_IDX, GetIndexForVec(headers_, TASK_DURATION)},
+        {USAGE_IDX, GetIndexForVec(headers_, CUBE_UTILIZATION)}
     };
     for (const auto &task : taskData) {
         TaskId id{static_cast<uint16_t>(task.streamId), static_cast<uint16_t>(task.batchId),
@@ -159,55 +185,31 @@ void OpSummaryAssembler::GenerateOpBody(std::vector<AscendTaskData> &taskData, s
 
 void OpSummaryAssembler::AddCubeUsage(std::vector<std::string> &data, std::unordered_map<std::string, int> &indexTable)
 {
-    // 业务可以保证headers_有值的情况下，device_id的下标是有效的
-    const auto deviceIndex = indexTable.at("deviceIdx");
-    auto deviceIdStr = data[deviceIndex];
-    uint16_t deviceId = 0;
-    if (StrToU16(deviceId, deviceIdStr) != ANALYSIS_OK) {
-        ERROR("device id is invalid");
+    const auto usageIdx = indexTable.at(USAGE_IDX);
+    const auto durIdx = indexTable.at(DUR_IDX);
+    if (usageIdx == INVALID_INDEX || durIdx == INVALID_INDEX || data[usageIdx] == NA) {
         return;
     }
-    double freq = 0.0;
-    uint16_t coreNum = Context::GetInstance().GetAiCoreNum(deviceId, profPath_);
-    if (!Context::GetInstance().GetPmuFreq(freq, deviceId, profPath_) != ANALYSIS_OK ||
-        Utils::IsDoubleEqual(freq, 0.0) || coreNum == 0) {
-        ERROR("freq or ai core num is invalid");
-        return;
-    }
-    const auto ratioIdx = indexTable.at("ratioIdx");
-    const auto cycleIdx = indexTable.at("cycleIdx");
-    const auto durIdx = indexTable.at("durIdx");
-    if (ratioIdx == INVALID_INDEX || cycleIdx == INVALID_INDEX || durIdx == INVALID_INDEX) {
-        return;
-    }
-    if (std::find(headers_.begin(), headers_.end(), "cube_utilization(%)") == headers_.end()) {
-        headers_.emplace_back("cube_utilization(%)");
-        for (auto &row : res_) {
-            if (row.size() != headers_.size()) {
-                row.insert(row.end(), headers_.size() - row.size(), NA);
-            }
-        }
-    }
+
     auto dur = 0.0;
     uint64_t cycle;
-    if (data[ratioIdx] == NA) {
-        data.emplace_back(NA);
-    } else if (StrToDouble(dur, data[durIdx]) == ANALYSIS_OK && !Utils::IsDoubleEqual(dur, 0.0) &&
-            StrToU64(cycle, data[cycleIdx]) == ANALYSIS_OK) {
-        const double cubeUsage = cycle / (freq * coreNum * dur) * PERCENTAGE_FACTOR;
+    double usage = 0.0;
+    if (StrToDouble(dur, data[durIdx]) == ANALYSIS_OK && !Utils::IsDoubleEqual(dur, 0.0) &&
+            StrToDouble(usage, data[usageIdx]) == ANALYSIS_OK) {
+        usage = usage / dur;
         std::ostringstream ss;
-        ss << std::fixed << std::setprecision(ACCURACY_THREE) << cubeUsage;
-        data.emplace_back(ss.str());
+        ss << std::fixed << std::setprecision(ACCURACY_THREE) << usage;
+        data[usageIdx] = ss.str();
     } else {
-        data.emplace_back("0");
+        data[usageIdx] = "0";
     }
 }
 
 void OpSummaryAssembler::CalculateWaitTime()
 {
     // 业务可以保证headers_有值的情况下，device_id与start_time的下标是有效的
-    const auto deviceIndex = GetIndexForVec(headers_, "Device_id");
-    const auto timeIndex = GetIndexForVec(headers_, "Task Start Time(us)");
+    const auto deviceIndex = GetIndexForVec(headers_, DEVICE_ID);
+    const auto timeIndex = GetIndexForVec(headers_, TASK_START_TIME);
     using rowType = std::vector<std::string>;
     std::sort(res_.begin(), res_.end(), [deviceIndex, timeIndex](const rowType& lv, const rowType& rv) {
         if (lv.at(deviceIndex) == rv.at(deviceIndex)) {
@@ -215,8 +217,8 @@ void OpSummaryAssembler::CalculateWaitTime()
         }
         return lv.at(deviceIndex) < rv.at(deviceIndex);
     });
-    const auto durIndex = GetIndexForVec(headers_, "Task Duration(us)");
-    const auto waitIndex = GetIndexForVec(headers_, "Task Wait Time(us)");
+    const auto durIndex = GetIndexForVec(headers_, TASK_DURATION);
+    const auto waitIndex = GetIndexForVec(headers_, TASK_WAIT_TIME);
     double currStart = 0.0;
     double preStart = 0.0;
     double preDur = 0.0;
@@ -234,10 +236,10 @@ bool OpSummaryAssembler::WriteToFile(std::string &fileName)
 {
     const auto platVersion = Context::GetInstance().GetPlatformVersion(DEFAULT_DEVICE_ID, profPath_);
     std::set<int> invalidIdx;
-    std::vector<std::string> STARS_HEADER{"Context ID", "Mix Block Dim", "aiv_time(us)", "aiv_total_time(us)"};
+    std::vector<std::string> STARS_HEADER{CONTEXT_ID, MIX_BLOCK_DIM, AIV_TIME, AIV_TOTAL_TIME};
     if (!Context::GetInstance().IsStarsChip(platVersion)) {
         for (auto &name : STARS_HEADER) {
-            auto idx = GetIndexForVec(headers_, std::move(name));
+            auto idx = GetIndexForVec(headers_, name);
             if (idx != INVALID_INDEX) {
                 invalidIdx.insert(idx);
             }
@@ -245,34 +247,34 @@ bool OpSummaryAssembler::WriteToFile(std::string &fileName)
     }
     fileName = File::PathJoin({profPath_, OUTPUT_PATH, fileName}).append(SUMMARY_SUFFIX);
     FileWriter fileWriter(fileName);
+    std::string textStr;
     for (size_t i = 0; i < headers_.size(); ++i) {
         if (invalidIdx.find(i) != invalidIdx.end()) {
             continue;
         }
         if (i != 0) {
-            fileWriter.WriteText("," + headers_[i]);
-        } else {
-            fileWriter.WriteText(headers_[i]);
+            textStr.append(",");
         }
+        textStr.append(headers_[i]);
     }
-    fileWriter.WriteText("\n");
-    auto timeIndex = GetIndexForVec(headers_, "Task Start Time(us)");
+    textStr.append("\n");
+    auto timeIndex = GetIndexForVec(headers_, TASK_START_TIME);
     for (const auto& row : res_) {
         for (size_t i = 0; i < row.size(); ++i) {
             if (invalidIdx.find(i) != invalidIdx.end()) {
                 continue;
             }
             if (i != 0) {
-                fileWriter.WriteText("," + row[i]);
-            } else {
-                fileWriter.WriteText(row[i]);
+                textStr.append(",");
             }
+            textStr.append(row[i]);
             if (static_cast<int>(i) == timeIndex) {
-                fileWriter.WriteText("\t");
+                textStr.append("\t");
             }
         }
-        fileWriter.WriteText("\n");
+        textStr.append("\n");
     }
+    fileWriter.WriteText(textStr);
     return true;
 }
 
