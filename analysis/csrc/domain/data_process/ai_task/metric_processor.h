@@ -12,6 +12,7 @@
 
 #include <utility>
 #include <map>
+#include <unordered_map>
 #include "analysis/csrc/domain/data_process/data_processor.h"
 #include "analysis/csrc/domain/valueobject/include/task_id.h"
 
@@ -42,6 +43,12 @@ private:
 
     std::vector<TableColumn> RemoveNeedlessColumns(std::vector<TableColumn> &tableColumns);
 
+    bool CheckAndGetCubeUsageRelatedDataIndex(const std::vector<std::string> &headers,
+                                              std::vector<uint32_t> &neededDataIndex);
+    std::tuple<double, uint16_t> GetCubeUsageByDeviceId(uint16_t deviceId);
+    bool AddCubeUsageWithoutDur(std::map<TaskId, std::vector<std::vector<std::string>>> &processedData,
+                                const std::vector<std::string> &headers);
+
     bool AddMemoryBound(std::map<TaskId, std::vector<std::vector<std::string>>> &processedData,
                         std::vector<std::string> &headers);
 
@@ -55,6 +62,9 @@ private:
 
     void InsertLineDataToOriData(std::vector<std::vector<std::string>> &oriData,
                                  std::vector<std::tuple<std::string>> &lineData);
+
+private:
+    std::unordered_map<uint16_t, std::tuple<double, uint16_t>> cubeUsageInfo_;
 };
 
 } // Domain

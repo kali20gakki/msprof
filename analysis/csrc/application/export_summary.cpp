@@ -96,6 +96,7 @@ bool ExportSummary::Run()
     }
     DataInventory dataInventory;
     bool runFlag = ProcessData(dataInventory);
+    PRINT_INFO("Start exporting the summary!");
     const auto outputPath = File::PathJoin({profPath_, OUTPUT_PATH});
     if (!File::Exist(outputPath) && !File::CreateDir(outputPath)) {
         ERROR("Create mindstudio_profiler_output error, can't export data");
