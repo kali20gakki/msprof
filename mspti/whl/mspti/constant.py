@@ -5,6 +5,11 @@
 from enum import Enum
 
 
+class Constant:
+    # max activity buffer size (MB)
+    MAX_BUFFER_SIZE = 256
+
+
 class MsptiResult(Enum):
     MSPTI_SUCCESS = 0
     MSPTI_ERROR_INVALID_PARAMETER = 1
