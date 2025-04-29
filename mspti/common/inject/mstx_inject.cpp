@@ -17,6 +17,7 @@
 #include "activity/activity_manager.h"
 #include "activity/ascend/parser/parser_manager.h"
 #include "common/config.h"
+#include "common/utils.h"
 #include "common/plog_manager.h"
 
 using namespace Mspti::Activity;
@@ -383,7 +384,7 @@ int InitInjectionMstx(MstxGetModuleFuncTableFunc getFuncTable)
 
 msptiResult msptiActivityEnableMarkerDomain(const char* name)
 {
-    if (!name) {
+    if (!IsMsgValid(name)) {
         MSPTI_LOGE("domainHandle is nullptr, check your input params");
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
@@ -392,7 +393,7 @@ msptiResult msptiActivityEnableMarkerDomain(const char* name)
 
 msptiResult msptiActivityDisableMarkerDomain(const char* name)
 {
-    if (!name) {
+    if (!IsMsgValid(name)) {
         MSPTI_LOGE("domainHandle is nullptr, check your input params");
         return MSPTI_ERROR_INVALID_PARAMETER;
     }

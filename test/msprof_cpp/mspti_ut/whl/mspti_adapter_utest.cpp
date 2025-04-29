@@ -10,6 +10,7 @@
 #include "activity/activity_manager.h"
 #include "activity/ascend/dev_task_manager.h"
 #include "whl/csrc/mspti_adapter.h"
+#include "common/inject/mstx_inject.h"
 
 namespace {
 using namespace Mspti::Adapter;
@@ -254,5 +255,25 @@ TEST_F(MsptiAdapterUtest, ConsumeFailedWhenNotRegisterCallback)
 
     EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->Stop());
     EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->FlushAll());
+}
+
+TEST_F(MsptiAdapterUtest, DisableDefaultDomainBeforeMark)
+{
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StartDevProfTask)
+        .stubs()
+        .will(returnValue(MSPTI_SUCCESS));
+    MOCKER_CPP(&Mspti::Ascend::DevTaskManager::StopDevProfTask)
+        .stubs()
+        .will(returnValue(MSPTI_SUCCESS));
+
+    EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->Start());
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_MARKER));
+    auto instance = Mspti::Activity::ActivityManager::GetInstance();
+    EXPECT_EQ(MSPTI_SUCCESS, instance->SetDevice(0));
+    EXPECT_EQ(MSPTI_SUCCESS, instance->ResetAllDevice());
+    EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->DisableDomain("default"));
+    EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->EnableDomain("default"));
+    EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->FlushAll());
+    EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->Stop());
 }
 }

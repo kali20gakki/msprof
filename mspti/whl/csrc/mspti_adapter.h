@@ -46,6 +46,8 @@ public:
     msptiResult RegisterMstxCallback(PyObject *mstxCallback);
     msptiResult UnregisterMstxCallback();
     PyObject* GetMstxCallback() const;
+    msptiResult EnableDomain(const char* domain);
+    msptiResult DisableDomain(const char* domain);
 
     // Kernel
     msptiResult RegisterKernelCallback(PyObject *kernelCallback);
