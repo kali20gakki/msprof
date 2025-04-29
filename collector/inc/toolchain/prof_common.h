@@ -1,4 +1,5 @@
 /*
+/*
  * Copyright (c) Huawei Technologies Co., Ltd. 2019-2021. All rights reserved.
  * Description: handle perf data
  * Author: Huawei Technologies Co., Ltd.
@@ -318,8 +319,8 @@ struct MsprofRuntimeTrack {  // for MsprofReportCompactInfo buffer data
 };
 
 struct MsprofCaptureStreamInfo {  // for MsprofReportCompactInfo buffer data
-    uint16_t act;               // 标志是否销毁 0记为正常 1记为销毁
-    uint16_t modleStreamId;     // capture stream id 销毁记录的stream id设置为 UINT16_MAX
+    uint16_t captureStatus;     // 标志是否销毁 0记为正常 1记为销毁
+    uint16_t modelStreamId;     // capture stream id 销毁记录的stream id设置为 UINT16_MAX
     uint16_t originalStreamId;  // ori stream id 销毁记录的stream id设置为 UINT16_MAX
     uint16_t modelId;           // capture model id与GE无关
     uint16_t deviceId;
