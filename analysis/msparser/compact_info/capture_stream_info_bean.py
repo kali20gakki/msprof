@@ -12,18 +12,18 @@ class CaptureStreamInfoBean(CompactInfoBean):
     def __init__(self: any, *args) -> None:
         super().__init__(*args)
         data = args[0]
-        self._act = data[6]
+        self._capture_status = data[6]
         self._model_stream_id = data[7]
         self._original_stream_id = data[8]
         self._model_id = data[9]
         self._device_id = data[10]
 
     @property
-    def act(self: any) -> int:
+    def capture_status(self: any) -> int:
         """
         capture status
         """
-        return self._act
+        return self._capture_status
 
     @property
     def model_stream_id(self: any) -> int:

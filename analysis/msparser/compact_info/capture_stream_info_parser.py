@@ -109,9 +109,9 @@ class CaptureStreamInfoParser(DataParser, MsMultiProcess):
                 continue
 
             # 0 start; 1 end: 记录无需落盘
-            if bean_data.act == 0 and bean_data.model_id not in start_model_set:
+            if bean_data.capture_status == 0 and bean_data.model_id not in start_model_set:
                 start_model_set.add(bean_data.model_id)
-            if bean_data.act == 1 and bean_data.model_id not in end_model_set:
+            if bean_data.capture_status == 1 and bean_data.model_id not in end_model_set:
                 start_model_set.add(bean_data.model_id)
                 continue
             stream_info_set.add(key)
