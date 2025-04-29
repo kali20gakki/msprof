@@ -43,6 +43,14 @@ class MsptiCMock:
         cls.call_back = None
         return 0
 
+    @classmethod
+    def enableDomain(cls, domain_name):
+        return 0
+
+    @classmethod
+    def disableDomain(cls, domain_name):
+        return 0
+
 
 class TestMsptiMonitor(unittest.TestCase):
 

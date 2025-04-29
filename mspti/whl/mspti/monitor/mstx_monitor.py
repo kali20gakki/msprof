@@ -11,7 +11,9 @@ from ..utils import print_error_msg
 from .base_monitor import BaseMonitor
 from ._mspti_c import (
     _mstx_register_cb,
-    _mstx_unregister_cb
+    _mstx_unregister_cb,
+    _mstx_enable_domain,
+    _mstx_disable_domain
 )
 from ..constant import (
     MsptiActivityFlag
@@ -49,13 +51,25 @@ class MstxMonitor(BaseMonitor):
             return MsptiResult(_mstx_unregister_cb())
         return ret
 
+    def enable_domain(self, domain_name: str):
+        if isinstance(domain_name, str) and len(domain_name) != 0:
+            return _mstx_enable_domain(domain_name)
+        print_error_msg(f"domain_name must be a string")
+        return MsptiResult.MSPTI_ERROR_INVALID_PARAMETER
+
+    def disable_domain(self, domain_name: str):
+        if isinstance(domain_name, str) and len(domain_name) != 0:
+            return _mstx_disable_domain(domain_name)
+        print_error_msg(f"domain_name must be a string")
+        return MsptiResult.MSPTI_ERROR_INVALID_PARAMETER
+
     def callback(self, origin_data: dict):
         try:
-            self.append_data(MarkerData(origin_data))
+            self._append_data(MarkerData(origin_data))
         except Exception as ex:
             print_error_msg(f"Call mstx callback failed. Exception: {str(ex)}")
 
-    def assemble_start_end(self, start_data: MarkerData, end_data: MarkerData):
+    def _assemble_start_end(self, start_data: MarkerData, end_data: MarkerData):
         range_mark_data = RangeMarkerData()
         range_mark_data.source_kind = start_data.source_kind
         range_mark_data.id = start_data.id
@@ -69,7 +83,7 @@ class MstxMonitor(BaseMonitor):
         range_mark_data.end = end_data.timestamp
         return range_mark_data
 
-    def append_data(self, mark_data: MarkerData):
+    def _append_data(self, mark_data: MarkerData):
         if (mark_data.flag == MsptiActivityFlag.MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS or
                 mark_data.flag == MsptiActivityFlag.MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS_WITH_DEVICE):
             self.mark_user_cb(mark_data)
@@ -82,7 +96,7 @@ class MstxMonitor(BaseMonitor):
                 MsptiActivityFlag.MSPTI_ACTIVITY_FLAG_MARKER_START_WITH_DEVICE):
             self.data_dict[unique_id]['start'] = mark_data
         if self.data_dict[unique_id]['end'] is not None and self.data_dict[unique_id]['start'] is not None:
-            range_mark_data = self.assemble_start_end(
+            range_mark_data = self._assemble_start_end(
                 self.data_dict[unique_id]['start'], self.data_dict[unique_id]['end'])
             self.range_user_cb(range_mark_data)
             self.data_dict.pop(unique_id)

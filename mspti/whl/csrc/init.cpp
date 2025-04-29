@@ -79,11 +79,35 @@ PyObject *UnregisterCB(PyObject *self, PyObject *args)
     return Py_BuildValue("i", ret);
 }
 
+PyObject *EnableDomain(PyObject *self, PyObject *args)
+{
+    const char* domainName = nullptr;
+    if (!PyArg_ParseTuple(args, "s", &domainName)) {
+        PyErr_SetString(PyExc_TypeError, "EnableDomain: domain must be a string!");
+        return nullptr;
+    }
+    auto ret = MsptiAdapter::GetInstance()->EnableDomain(domainName);
+    return Py_BuildValue("i", ret);
+}
+
+PyObject *DisableDomain(PyObject *self, PyObject *args)
+{
+    const char* domainName = nullptr;
+    if (!PyArg_ParseTuple(args, "s", &domainName)) {
+        PyErr_SetString(PyExc_TypeError, "DisableDomain: domain must be a string!");
+        return nullptr;
+    }
+    auto ret = MsptiAdapter::GetInstance()->DisableDomain(domainName);
+    return Py_BuildValue("i", ret);
+}
+
 PyMethodDef *GetMstxMethods()
 {
     static PyMethodDef methodMstx[] = {
         {"registerCB", RegisterCB, METH_VARARGS, ""},
         {"unregisterCB", UnregisterCB, METH_NOARGS, ""},
+        {"enableDomain", EnableDomain, METH_VARARGS, ""},
+        {"disableDomain", DisableDomain, METH_VARARGS, ""},
         {nullptr, nullptr, METH_VARARGS, ""}
     };
     return methodMstx;

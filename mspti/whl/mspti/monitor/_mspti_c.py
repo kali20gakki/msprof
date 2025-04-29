@@ -19,6 +19,8 @@ _set_buffer_size = mspti_C_module.set_buffer_size
 mspti_C_mstx_module = importlib.import_module("mspti_C.mstx")
 _mstx_register_cb = mspti_C_mstx_module.registerCB
 _mstx_unregister_cb = mspti_C_mstx_module.unregisterCB
+_mstx_enable_domain = mspti_C_mstx_module.enableDomain
+_mstx_disable_domain = mspti_C_mstx_module.disableDomain
 
 mspti_C_kernel_module = importlib.import_module("mspti_C.kernel")
 _kernel_register_cb = mspti_C_kernel_module.registerCB

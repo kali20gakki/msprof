@@ -20,6 +20,10 @@ namespace Mspti {
 namespace Ascend {
 namespace Channel {
 
+namespace {
+    constexpr uint32_t MAX_DEV_NUM = 64;
+}
+
 ChannelPoolManager *ChannelPoolManager::GetInstance()
 {
     static ChannelPoolManager instance;
@@ -42,9 +46,16 @@ msptiResult ChannelPoolManager::Init()
     }
     uint32_t dev_num = 0;
     auto ret = DrvGetDevNum(&dev_num);
-    if (ret != DRV_ERROR_NONE) {
+    if (ret != DRV_ERROR_NONE || dev_num == 0) {
+        MSPTI_LOGE("Failed to get dev num, ret: %d, num: %u", ret, dev_num);
         return MSPTI_ERROR_DEVICE_OFFLINE;
     }
+
+    if (dev_num > MAX_DEV_NUM) {
+        MSPTI_LOGW("dev_num is too big: %u, reset to %u", dev_num, MAX_DEV_NUM);
+        dev_num = MAX_DEV_NUM;
+    }
+
     Mspti::Common::MsptiMakeUniquePtr(drvChannelPoll_, dev_num);
     if (!drvChannelPoll_) {
         MSPTI_LOGE("Failed to init ChannelPool.");

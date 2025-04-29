@@ -356,5 +356,15 @@ msptiResult MsptiAdapter::UnregisterHcclCallback()
     hcclCallback_ = nullptr;
     return MSPTI_SUCCESS;
 }
+
+msptiResult MsptiAdapter::EnableDomain(const char* domain)
+{
+    return msptiActivityEnableMarkerDomain(domain);
+}
+
+msptiResult MsptiAdapter::DisableDomain(const char* domain)
+{
+    return msptiActivityDisableMarkerDomain(domain);
+}
 } // Adapter
 } // Mspti

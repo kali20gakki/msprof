@@ -52,3 +52,13 @@ msptiResult msptiActivityFlushPeriod(uint32_t time)
 {
     return MSPTI_SUCCESS;
 }
+
+msptiResult msptiActivityDisableMarkerDomain(const char* name)
+{
+    return MSPTI_SUCCESS;
+}
+
+msptiResult msptiActivityEnableMarkerDomain(const char* name)
+{
+    return MSPTI_SUCCESS;
+}

@@ -27,7 +27,7 @@ namespace Channel {
 
 size_t ChannelPool::GetChannelIndex(uint32_t devId, AI_DRV_CHANNEL channelId)
 {
-    return std::hash<std::string>()(std::to_string(devId) + std::to_string(channelId));
+    return std::hash<std::string>()(std::to_string(devId) + "_" + std::to_string(channelId));
 }
 
 msptiResult ChannelPool::AddReader(uint32_t devId, AI_DRV_CHANNEL channelId)
