@@ -15,35 +15,6 @@
 #include "common/utils.h"
 
 namespace {
-// mspti adapter buffer alloc and free
-constexpr size_t ALIGN_SIZE = 8;
-constexpr size_t DEFAULT_BUFFER_SIZE = 8 * 1024 * 1024;
-constexpr size_t MAX_BUFFER_SIZE = 256 * 1024 * 1024;
-constexpr uint32_t MAX_ALLOC_CNT = MAX_BUFFER_SIZE / DEFAULT_BUFFER_SIZE;
-
-void *MsptiMalloc(size_t size, size_t alignment)
-{
-    if (alignment > 0) {
-        size = (size + alignment - 1) / alignment * alignment;
-    }
-#if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
-    void *ptr = nullptr;
-    if (posix_memalign(&ptr, alignment, size) != 0) {
-        ptr = nullptr;
-    }
-    return ptr;
-#else
-    return malloc(size);
-#endif
-}
-
-void MsptiFree(uint8_t *ptr)
-{
-    if (ptr != nullptr) {
-        free(ptr);
-    }
-}
-
 // python data keyword
 const char *KIND            = "kind";
 const char *START           = "start";
@@ -192,8 +163,6 @@ struct PyGILGuard {
 
 namespace Mspti {
 namespace Adapter {
-std::atomic<uint32_t> MsptiAdapter::allocCnt{0};
-
 void MsptiAdapter::UserBufferRequest(uint8_t **buffer, size_t *size, size_t *maxNumRecords)
 {
     if (buffer == nullptr || size == nullptr || maxNumRecords == nullptr) {
@@ -201,21 +170,21 @@ void MsptiAdapter::UserBufferRequest(uint8_t **buffer, size_t *size, size_t *max
         return;
     }
     *maxNumRecords = 0;
-    if (allocCnt >= MAX_ALLOC_CNT) {
+    auto instance = GetInstance();
+    if (!instance->bufferPool.CheckCanAllocBuffer()) {
         MSPTI_LOGW("Mspti adapter allocated buffer size exceeds the upper limit");
         *buffer = nullptr;
         *size = 0;
         return;
     }
-    uint8_t *pBuffer = Mspti::Common::ReinterpretConvert<uint8_t*>(MsptiMalloc(DEFAULT_BUFFER_SIZE, ALIGN_SIZE));
+    auto *pBuffer = instance->bufferPool.GetBuffer();
     if (pBuffer == nullptr) {
         MSPTI_LOGE("Mspti adapter alloc buffer failed");
         *buffer = nullptr;
         *size = 0;
     } else {
         *buffer = pBuffer;
-        *size = DEFAULT_BUFFER_SIZE;
-        allocCnt++;
+        *size = instance->bufferSize;
     }
 }
 
@@ -223,7 +192,6 @@ void MsptiAdapter::UserBufferComplete(uint8_t *buffer, size_t size, size_t valid
 {
     if (!Py_IsInitialized()) {
         MSPTI_LOGW("Python interpreter is finalized");
-        MsptiFree(buffer);
         return;
     }
     MSPTI_LOGI("Mspti adapter buffer complete, size: %zu, validSize: %zu", size, validSize);
@@ -242,10 +210,12 @@ void MsptiAdapter::UserBufferComplete(uint8_t *buffer, size_t size, size_t valid
                 break;
             }
         } while (true);
-        // Minus allocCnt when buffer is not nullptr
-        allocCnt--;
     }
-    MsptiFree(buffer);
+    if (buffer != nullptr) {
+        if (!GetInstance()->bufferPool.RecycleBuffer(buffer)) {
+            MSPTI_LOGE("Mspti adapter recycle buffer failed");
+        }
+    }
 }
 
 void MsptiAdapter::UserBufferConsume(msptiActivity *record)
@@ -274,6 +244,11 @@ msptiResult MsptiAdapter::Start()
     if (originCnt == 0) {
         auto ret = msptiSubscribe(&subscriber_, nullptr, nullptr);
         if (ret == MSPTI_SUCCESS) {
+            bufferPool.Clear();
+            if (!(bufferPool.SetBufferSize(bufferSize) && bufferPool.SetPoolSize(MAX_BUFFER_SIZE / bufferSize))) {
+                MSPTI_LOGE("Mspti adapter init buffer pool failed");
+                return MSPTI_ERROR_INNER;
+            }
             return msptiActivityRegisterCallbacks(UserBufferRequest, UserBufferComplete);
         }
         return ret;
@@ -292,13 +267,31 @@ msptiResult MsptiAdapter::Stop()
 msptiResult MsptiAdapter::FlushAll()
 {
     std::lock_guard<std::mutex> lk(mtx_);
-    return msptiActivityFlushAll(1);
+    auto ret = msptiActivityFlushAll(1);
+    if (refCnt_ == 0) {
+        bufferPool.Clear();
+    }
+    return ret;
 }
 
 msptiResult MsptiAdapter::FlushPeriod(uint32_t time)
 {
     std::lock_guard<std::mutex> lk(mtx_);
     return msptiActivityFlushPeriod(time);
+}
+
+msptiResult MsptiAdapter::SetBufferSize(size_t size)
+{
+    std::lock_guard<std::mutex> lk(mtx_);
+    if (size * MB > MAX_BUFFER_SIZE) {
+        MSPTI_LOGW("Set buffer size exceeds the upper limit");
+        return MSPTI_ERROR_INVALID_PARAMETER;
+    }
+    if (refCnt_ > 0) {
+        MSPTI_LOGW("Change buffer size when mspti is running, will not take effect until next start");
+    }
+    bufferSize = size * MB;
+    return MSPTI_SUCCESS;
 }
 
 msptiResult MsptiAdapter::RegisterMstxCallback(PyObject *mstxCallback)

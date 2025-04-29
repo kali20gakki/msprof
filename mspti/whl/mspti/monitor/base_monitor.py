@@ -3,13 +3,14 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
 
 from abc import ABCMeta
-from ..constant import MsptiResult
+from ..constant import MsptiResult, Constant
 from ..utils import print_error_msg
 from ._mspti_c import (
     _start,
     _stop,
     _flush_all,
-    _flush_period
+    _flush_period,
+    _set_buffer_size
 )
 
 
@@ -44,3 +45,13 @@ class BaseMonitor(metaclass=ABCMeta):
     @classmethod
     def flush_period(cls, time_ms: int) -> MsptiResult:
         return MsptiResult(_flush_period(time_ms))
+
+    @classmethod
+    def set_buffer_size(cls, size: int) -> MsptiResult:
+        if not isinstance(size, int) or size <= 0:
+            print_error_msg(f"Invalid buffer size {size}")
+            return MsptiResult.MSPTI_ERROR_INVALID_PARAMETER
+        if size > Constant.MAX_BUFFER_SIZE:
+            print_error_msg(f"Buffer size {size} exceed the upper limit: {Constant.MAX_BUFFER_SIZE}")
+            return MsptiResult.MSPTI_ERROR_INVALID_PARAMETER
+        return MsptiResult(_set_buffer_size(size))

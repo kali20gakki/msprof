@@ -14,6 +14,7 @@ _start = mspti_C_module.start
 _stop = mspti_C_module.stop
 _flush_all = mspti_C_module.flush_all
 _flush_period = mspti_C_module.flush_period
+_set_buffer_size = mspti_C_module.set_buffer_size
 
 mspti_C_mstx_module = importlib.import_module("mspti_C.mstx")
 _mstx_register_cb = mspti_C_mstx_module.registerCB

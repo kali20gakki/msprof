@@ -50,6 +50,17 @@ PyObject *MsptiFlushPeriod(PyObject *self, PyObject *args)
     return Py_BuildValue("i", ret);
 }
 
+PyObject *MsptiSetBufferSize(PyObject *self, PyObject *args)
+{
+    uint32_t size = 0;
+    if (!PyArg_ParseTuple(args, "I", &size)) {
+        PyErr_SetString(PyExc_TypeError, "SetBufferSize size args parse failed!");
+        return nullptr;
+    }
+    auto ret = MsptiAdapter::GetInstance()->SetBufferSize(size);
+    return Py_BuildValue("i", ret);
+}
+
 namespace Mstx {
 PyObject *RegisterCB(PyObject *self, PyObject *args)
 {
@@ -144,6 +155,7 @@ static PyMethodDef g_moduleMethods[] = {
     {"stop", Mspti::Adapter::MsptiStop, METH_NOARGS, ""},
     {"flush_all", Mspti::Adapter::MsptiFlushAll, METH_NOARGS, ""},
     {"flush_period", Mspti::Adapter::MsptiFlushPeriod, METH_VARARGS, ""},
+    {"set_buffer_size", Mspti::Adapter::MsptiSetBufferSize, METH_VARARGS, ""},
     {nullptr, nullptr, METH_VARARGS, ""}
 };
 

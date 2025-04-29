@@ -30,6 +30,10 @@ class MsptiCMock:
         return 0
 
     @classmethod
+    def set_buffer_size(cls, size: int):
+        return 0
+
+    @classmethod
     def registerCB(cls, cb):
         cls.call_back = cb
         return 0
@@ -47,6 +51,7 @@ class TestMsptiMonitor(unittest.TestCase):
             from mspti import utils, KernelMonitor, MsptiResult
 
             monitor = KernelMonitor()
+            self.assertEqual(MsptiResult.MSPTI_SUCCESS, monitor.set_buffer_size(4))
             self.assertEqual(MsptiResult.MSPTI_SUCCESS, monitor.start(print))
             self.assertEqual(MsptiResult.MSPTI_SUCCESS, monitor.flush_period(1024))
             self.assertEqual(MsptiResult.MSPTI_SUCCESS, monitor.stop())
@@ -57,6 +62,7 @@ class TestMsptiMonitor(unittest.TestCase):
             from mspti import utils, MstxMonitor, MsptiResult
 
             monitor = MstxMonitor()
+            self.assertEqual(MsptiResult.MSPTI_SUCCESS, monitor.set_buffer_size(4))
             self.assertEqual(MsptiResult.MSPTI_SUCCESS, monitor.start(print))
             self.assertEqual(MsptiResult.MSPTI_SUCCESS, monitor.flush_period(1024))
             self.assertEqual(MsptiResult.MSPTI_SUCCESS, monitor.stop())

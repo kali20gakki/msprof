@@ -18,9 +18,15 @@
 #include <mutex>
 
 #include "external/mspti.h"
+#include "activity_buffer_pool.h"
 
 namespace Mspti {
 namespace Adapter {
+// default buffer size config
+constexpr size_t MB = 1024 * 1024;
+constexpr size_t DEFAULT_BUFFER_SIZE = 8 * MB;
+constexpr size_t MAX_BUFFER_SIZE = 256 * MB;
+
 class MsptiAdapter {
 public:
     static MsptiAdapter* GetInstance()
@@ -34,6 +40,7 @@ public:
     msptiResult Stop();
     msptiResult FlushAll();
     msptiResult FlushPeriod(uint32_t time);
+    msptiResult SetBufferSize(size_t size);
 
     // Mstx
     msptiResult RegisterMstxCallback(PyObject *mstxCallback);
@@ -50,11 +57,15 @@ public:
     msptiResult UnregisterHcclCallback();
     PyObject* GetHcclCallback() const;
 
+public:
+    // buffer
+    size_t bufferSize{DEFAULT_BUFFER_SIZE};
+    ActivityBufferPool bufferPool;
+
 private:
     static void UserBufferRequest(uint8_t **buffer, size_t *size, size_t *maxNumRecords);
     static void UserBufferComplete(uint8_t *buffer, size_t size, size_t validSize);
     static void UserBufferConsume(msptiActivity *record);
-    static std::atomic<uint32_t> allocCnt;
 
 private:
     msptiSubscriberHandle subscriber_;

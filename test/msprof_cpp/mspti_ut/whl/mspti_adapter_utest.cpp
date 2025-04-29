@@ -14,6 +14,7 @@
 namespace {
 using namespace Mspti::Adapter;
 const char* PYTHON_FILE = "./mspti_callback.py";
+const size_t BUFFER_SIZE = 4;
 
 class MsptiAdapterUtest : public testing::Test {
 protected:
@@ -66,6 +67,17 @@ TEST_F(MsptiAdapterUtest, FlushPeriodWillSuccess)
     EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->FlushPeriod(timeMs));
 }
 
+TEST_F(MsptiAdapterUtest, SetBuferSizeFailedWhenExceedLimit)
+{
+    const size_t size = Mspti::Adapter::MAX_BUFFER_SIZE / Mspti::Adapter::MB + 1;
+    EXPECT_EQ(MSPTI_ERROR_INVALID_PARAMETER, MsptiAdapter::GetInstance()->SetBufferSize(size));
+}
+
+TEST_F(MsptiAdapterUtest, SetBuferSizeWillSuccess)
+{
+    EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->SetBufferSize(BUFFER_SIZE));
+}
+
 TEST_F(MsptiAdapterUtest, RegisterKernelCallbackWillSuccess)
 {
     PyObject *kernelCallback = GetMsptiPyCallback("kernel_data_callback");
@@ -83,6 +95,7 @@ TEST_F(MsptiAdapterUtest, PythonKernelCallbackWillRunSuccess)
         .stubs()
         .will(returnValue(MSPTI_SUCCESS));
 
+    EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->SetBufferSize(BUFFER_SIZE));
     EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->Start());
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_KERNEL));
     PyObject *kernelCallback = GetMsptiPyCallback("kernel_data_callback");
@@ -130,6 +143,7 @@ TEST_F(MsptiAdapterUtest, PythonMstxCallbackWillRunSuccess)
         .stubs()
         .will(returnValue(MSPTI_SUCCESS));
 
+    EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->SetBufferSize(BUFFER_SIZE));
     EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->Start());
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_MARKER));
     PyObject *mstxCallback = GetMsptiPyCallback("marker_data_callback");
@@ -179,6 +193,7 @@ TEST_F(MsptiAdapterUtest, PythonHcclCallbackWillRunSuccess)
         .stubs()
         .will(returnValue(MSPTI_SUCCESS));
 
+    EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->SetBufferSize(BUFFER_SIZE));
     EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->Start());
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_HCCL));
     PyObject *hcclCallback = GetMsptiPyCallback("hccl_data_callback");
@@ -218,6 +233,7 @@ TEST_F(MsptiAdapterUtest, ConsumeFailedWhenNotRegisterCallback)
         .stubs()
         .will(returnValue(MSPTI_SUCCESS));
 
+    EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->SetBufferSize(BUFFER_SIZE));
     EXPECT_EQ(MSPTI_SUCCESS, MsptiAdapter::GetInstance()->Start());
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_MARKER));
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityEnable(MSPTI_ACTIVITY_KIND_KERNEL));

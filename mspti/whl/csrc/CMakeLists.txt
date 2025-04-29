@@ -8,6 +8,7 @@ find_package(Python REQUIRED COMPONENTS Development)
 add_library(mspti_wrapper SHARED
     ${MSPTI_WHL_CSRC_DIR}/init.cpp
     ${MSPTI_WHL_CSRC_DIR}/mspti_adapter.cpp
+    ${MSPTI_WHL_CSRC_DIR}/activity_buffer_pool.cpp
     ${CMAKE_SOURCE_DIR}/common/inject/plog_inject.cpp
     ${CMAKE_SOURCE_DIR}/common/function_loader.cpp
     ${CMAKE_SOURCE_DIR}/common/utils.cpp

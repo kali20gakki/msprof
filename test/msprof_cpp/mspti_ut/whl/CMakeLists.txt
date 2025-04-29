@@ -14,12 +14,14 @@ list(REMOVE_ITEM SRC_FILE ${REMOVE_SOURCES})
 
 find_package(Python REQUIRED COMPONENTS Development)
 
-add_executable(mspti_adapter_utest 
+add_executable(mspti_adapter_utest
     ${SRC_FILE}
     main.cpp
     mspti_adapter_utest.cpp
+    activity_buffer_pool_utest.cpp
     ${TOP_DIR}/mspti/common/utils.cpp
     ${TOP_DIR}/mspti/whl/csrc/mspti_adapter.cpp
+    ${TOP_DIR}/mspti/whl/csrc/activity_buffer_pool.cpp
     ${UT_TOP_DIR}/stub/inject/driver_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/profapi_inject_stub.cpp
     ${UT_TOP_DIR}/stub/inject/runtime_inject_stub.cpp
