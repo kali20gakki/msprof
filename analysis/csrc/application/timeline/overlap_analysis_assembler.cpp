@@ -117,6 +117,10 @@ std::vector<std::shared_ptr<TraceEvent>> OverlapAnalysisAssembler::GenerateFreeE
     std::vector<TimeDuration> &compSections, std::vector<TimeDuration> &commSections, uint16_t deviceId)
 {
     TimeLogger logger{"Generate free events"};
+    if (end_[deviceId] <= begin_[deviceId]) {
+        WARN("There is no compute section or comm section. No need to generate free event.");
+        return {};
+    }
     std::vector<std::shared_ptr<TraceEvent>> freeEvents;
     auto unionRecords = UnionTwoSet(compSections, commSections);
     // 前面业务逻辑可以保证一定有key为deviceId的value

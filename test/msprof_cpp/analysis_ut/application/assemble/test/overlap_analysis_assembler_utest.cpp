@@ -234,6 +234,19 @@ const std::string SCENARIOS4_JSON =
     "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.013\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},"
     "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.017\",\"dur\":0.003,\"ph\":\"X\",\"args\":{}},"
     "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.024\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},";
+const std::string SCENARIOS5_JSON =
+    "{\"name\":\"process_name\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
+    "{\"name\":\"process_labels\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
+    "{\"name\":\"process_sort_index\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":29}},"
+    "{\"name\":\"thread_name\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Communication\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":0}},"
+    "{\"name\":\"thread_name\",\"pid\":10330016,\"tid\":1,\"ph\":\"M\",\"args\":"
+    "{\"name\":\"Communication(Not Overlapped)\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10330016,\"tid\":1,\"ph\":\"M\",\"args\":{\"sort_index\":1}},"
+    "{\"name\":\"thread_name\",\"pid\":10330016,\"tid\":2,\"ph\":\"M\",\"args\":{\"name\":\"Computing\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10330016,\"tid\":2,\"ph\":\"M\",\"args\":{\"sort_index\":2}},"
+    "{\"name\":\"thread_name\",\"pid\":10330016,\"tid\":3,\"ph\":\"M\",\"args\":{\"name\":\"Free\"}},"
+    "{\"name\":\"thread_sort_index\",\"pid\":10330016,\"tid\":3,\"ph\":\"M\",\"args\":{\"sort_index\":3}},";
 }
 
 class OverlapAnalysisAssemblerUTest : public testing::Test {
@@ -646,4 +659,41 @@ TEST_F(OverlapAnalysisAssemblerUTest, AssembleDataShouldContainCompleteDataInSce
     dataInventory_.Inject(tasksPtr);
     dataInventory_.Inject(commOpsPtr);
     CheckScenarios4Data(dataInventory_);
+}
+
+static void CheckScenarios5Data(DataInventory &dataInventory)
+{
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(10087)); // pid 10087
+    OverlapAnalysisAssembler assembler;
+    EXPECT_TRUE(assembler.Run(dataInventory, PROF_PATH));
+    auto files = File::GetOriginData(RESULT_PATH, {"msprof"}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    EXPECT_EQ(SCENARIOS5_JSON, res.back());
+}
+
+TEST_F(OverlapAnalysisAssemblerUTest, AssembleDataShouldContainCompleteDataInScenarios5)
+{
+    // 场景5 只有调度类任务(无taskInfo类) 对齐python逻辑 不生成overlap
+    // 但是会有meta头,不影响呈现
+    // 其中 [A,B]表示三类任务中的某一类，(A,B) 表示非计算非通信的任务, {A, B}表示图模式中一个算子跑多次
+
+    // *Ascend Hardware (device 0)*
+    // S2 (Comp)           (1,3)        (6,8)      (10,12)     (16,  19)          (20,21)        (26,    33)
+    // S3 (Comp)           (1,5)         (7,9)             (15,18)              (19,   24)       (29, 32)    (34, 36)
+
+    // 合并后：
+    std::shared_ptr<std::vector<AscendTaskData>> tasksPtr;
+
+    std::vector<uint16_t> devices = {0};
+    std::vector<AscendTaskData> taskData;
+    for (auto &id : devices) {
+        auto ascendTasks = GenerateAscendTaskDataS2ByDevice(id);
+        taskData.insert(taskData.end(), ascendTasks.begin(), ascendTasks.end());
+    }
+    MAKE_SHARED_NO_OPERATION(tasksPtr, std::vector<AscendTaskData>, taskData);
+    dataInventory_.Inject(tasksPtr);
+    CheckScenarios5Data(dataInventory_);
 }
