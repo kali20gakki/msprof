@@ -23,6 +23,7 @@ namespace Analysis {
 namespace Infra {
 using namespace Analysis::Utils;
 
+// 两种dump接口为初版落盘方案,当前实现未使用此流程
 template<class OStream, class ...Args>
 void DumpInJsonFormat(OStream& oStream, const std::array<const char*, sizeof...(Args)>& columns,
                       const std::tuple<Args...>& tp)

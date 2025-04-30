@@ -48,7 +48,7 @@ protected:
     std::vector<std::string> headers_;
 private:
     virtual uint8_t AssembleData(DataInventory &dataInventory) = 0;
-    virtual bool WriteToFile(std::string &fileName) {}
+    virtual void WriteToFile() {}
 };
 }
 }

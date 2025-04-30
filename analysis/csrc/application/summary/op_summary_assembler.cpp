@@ -15,7 +15,7 @@
 #include <sstream>
 #include <iomanip>
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
-#include "analysis/csrc/infrastructure/dump_tools/include/sync_utils.h"
+#include "analysis/csrc/infrastructure/dump_tools/csv_tool/include/csv_writer.h"
 #include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
@@ -232,50 +232,30 @@ void OpSummaryAssembler::CalculateWaitTime()
     }
 }
 
-bool OpSummaryAssembler::WriteToFile(std::string &fileName)
+void OpSummaryAssembler::WriteToFile()
 {
     const auto platVersion = Context::GetInstance().GetPlatformVersion(DEFAULT_DEVICE_ID, profPath_);
-    std::set<int> invalidIdx;
+    std::set<int> maskCols;
     std::vector<std::string> STARS_HEADER{CONTEXT_ID, MIX_BLOCK_DIM, AIV_TIME, AIV_TOTAL_TIME};
     if (!Context::GetInstance().IsStarsChip(platVersion)) {
         for (auto &name : STARS_HEADER) {
             auto idx = GetIndexForVec(headers_, name);
             if (idx != INVALID_INDEX) {
-                invalidIdx.insert(idx);
+                maskCols.insert(idx);
             }
         }
     }
-    fileName = File::PathJoin({profPath_, OUTPUT_PATH, fileName}).append(SUMMARY_SUFFIX);
-    FileWriter fileWriter(fileName);
-    std::string textStr;
-    for (size_t i = 0; i < headers_.size(); ++i) {
-        if (invalidIdx.find(i) != invalidIdx.end()) {
-            continue;
-        }
-        if (i != 0) {
-            textStr.append(",");
-        }
-        textStr.append(headers_[i]);
-    }
-    textStr.append("\n");
     auto timeIndex = GetIndexForVec(headers_, TASK_START_TIME);
-    for (const auto& row : res_) {
+    for (auto& row : res_) {
         for (size_t i = 0; i < row.size(); ++i) {
-            if (invalidIdx.find(i) != invalidIdx.end()) {
-                continue;
-            }
-            if (i != 0) {
-                textStr.append(",");
-            }
-            textStr.append(row[i]);
             if (static_cast<int>(i) == timeIndex) {
-                textStr.append("\t");
+                row[i].append("\t");
             }
         }
-        textStr.append("\n");
     }
-    fileWriter.WriteText(textStr);
-    return true;
+
+    CsvWriter csvWriter = CsvWriter();
+    csvWriter.WriteCsv(File::PathJoin({profPath_, OUTPUT_PATH, OP_SUMMARY_NAME}), headers_, res_, maskCols);
 }
 
 uint8_t OpSummaryAssembler::AssembleData(DataInventory &dataInventory)
@@ -301,11 +281,12 @@ uint8_t OpSummaryAssembler::AssembleData(DataInventory &dataInventory)
         GenerateHcclBody(*hcclOpData);
     }
     CalculateWaitTime();
-    auto fileName = OP_SUMMARY_NAME + "_" + GetTimeStampStr();
-    if (WriteToFile(fileName)) {
-        return ASSEMBLE_SUCCESS;
+    if (res_.empty()) {
+        ERROR("Can't match any task data, failed to generate op_summary.csv");
+        return ASSEMBLE_FAILED;
     }
-    return ASSEMBLE_FAILED;
+    WriteToFile();
+    return ASSEMBLE_SUCCESS;
 }
 
 }
