@@ -40,7 +40,7 @@ private:
                          std::unordered_map<std::string, int> &indexTable);
     void AddCubeUsage(std::vector<std::string> &data, std::unordered_map<std::string, int> &indexTable);
     void CalculateWaitTime();
-    bool WriteToFile(std::string &fileName) override;
+    void WriteToFile() override;
 private:
     std::map<TaskId, TaskInfoData*> computeTask_;
 };

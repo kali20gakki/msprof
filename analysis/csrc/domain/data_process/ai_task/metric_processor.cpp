@@ -443,8 +443,7 @@ std::tuple<double, uint16_t> MetricProcessor::GetCubeUsageByDeviceId(uint16_t de
         if (!Context::GetInstance().GetPmuFreq(freq, deviceId, profPath_)) {
             ERROR("Get aicore freq failed.");
         }
-        INFO("Get freq (%) and coreNum (%) for op_summary, path is %, deviceId is %.",
-             freq, coreNum, profPath_, deviceId);
+        INFO("Get freq (%) and coreNum (%), path is %, deviceId is %.", freq, coreNum, profPath_, deviceId);
         cubeUsageInfo_[deviceId] = std::make_tuple(freq, coreNum);
         return cubeUsageInfo_[deviceId];
     }

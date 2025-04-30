@@ -24,6 +24,8 @@ const std::string OP_SUMMARY_NAME = "op_summary";
 const int INVALID_INDEX = -1;
 const std::string OUTPUT_PATH = "mindstudio_profiler_output";
 const std::string SUMMARY_SUFFIX = ".csv";
+const std::string SLICE = "slice";
+constexpr uint32_t CSV_LIMIT = 1000000; // csv文件每100w条记录切片一次
 }
 }
 #endif // ANALYSIS_APPLICATION_SUMMARY_CONSTANT_H

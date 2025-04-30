@@ -1,5 +1,6 @@
 aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/data_inventory SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/dump_tools SOURCES)
+aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/dump_tools/csv_tool SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/dump_tools/json_tool SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/utils SOURCES)
 aux_source_directory(${TOP_DIR}/analysis/csrc/infrastructure/dfx SOURCES)
