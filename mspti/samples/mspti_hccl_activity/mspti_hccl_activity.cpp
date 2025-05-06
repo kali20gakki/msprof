@@ -64,7 +64,7 @@ int HcclSample(void *arg)
         ACL_CALL(aclrtMemcpy((void*)resultBuff, mallocSize, (void*)recvBuff, mallocSize, ACL_MEMCPY_DEVICE_TO_HOST));
         float* tmpResBuff = static_cast<float*>(resultBuff);
         for (uint32_t i = 0; i < count; ++i) {
-            LOG_PRINT("rankId: %u, i: %f", ctx->device, tmpResBuff[i]);
+            LOG_PRINT("rankId: %u, i: %f\n", ctx->device, tmpResBuff[i]);
         }
         ACL_CALL(aclrtFreeHost(resultBuff));
     }
