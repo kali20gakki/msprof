@@ -11,6 +11,7 @@
 #include <vector>
 #include <thread>
 #include <cstring>
+#include <string>
 
 // Acl header
 #include "acl/acl.h"
