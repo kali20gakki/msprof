@@ -61,6 +61,8 @@ enum InputCfg {
     INPUT_CFG_COM_OUTPUT = 10,
     INPUT_CFG_COM_STORAGE_LIMIT,
     INPUT_CFG_COM_MSPROFTX,
+    INPUT_CFG_COM_MSTX_DOMAIN_INCLUDE,
+    INPUT_CFG_COM_MSTX_DOMAIN_EXCLUDE,
     INPUT_CFG_COM_REPORTS,
     // Task
     INPUT_CFG_COM_TASK_TIME = 30,
@@ -146,6 +148,8 @@ public:
     int PlatformAdapterInit(SHARED_PTR_ALIA<ProfileParams> params);
 public:
     bool CheckFreqValid(const std::string &freq, const InputCfg freqOpt) const;
+    bool CheckMstxDomainParams(const std::string &mstx, const std::string &mstxDomainInclude,
+        const std::string &mstxDomainExclude) const;
 private:
     void SetMiniBlackSwitch();
     void SetCloudBlackSwitch();

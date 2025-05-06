@@ -310,6 +310,7 @@ void ArgsManager::Init()
         platform_ = ConfigManager::instance()->GetPlatformType();
     }
     AddBasicArgs();
+    AddMstxArgs();
     AddDynProfArgs();
     AddAnalysisArgs();
     AddAicpuArgs();
@@ -375,6 +376,22 @@ void ArgsManager::AddBasicArgs()
                            "\t\t\t\t\t\t   The default value is " + defaultOption + ".(full-platform)",
                        defaultOption};
     argsList_.push_back(aicMetrics);
+}
+
+void ArgsManager::AddMstxArgs()
+{
+    Args mstxDomainInclude = {"mstx-domain-include",
+                              "Choose to only include mstx events from a comma separated list of domains;\n"
+                                  "\t\t\t\t\t\t   \"default\" filters the mstx default domain.(full-platform).\n"
+                                  "\t\t\t\t\t\t   The switch is only applicable when you set msproftx to on,\n"
+                                  "\t\t\t\t\t\t   and it cannot be set with mstx-domain-exclude at the same time."};
+    Args mstxDomainExclude = {"mstx-domain-exclude",
+                              "Choose to only exclude mstx events from a comma separated list of domains;\n"
+                                  "\t\t\t\t\t\t   \"default\" excludes mstx events without a domain.(full-platform).\n"
+                                  "\t\t\t\t\t\t   The switch is only applicable when you set msproftx to on,\n"
+                                  "\t\t\t\t\t\t   and it cannot be set with mstx-domain-include at the same time."};
+    argsList_.push_back(mstxDomainInclude);
+    argsList_.push_back(mstxDomainExclude);
 }
 
 void ArgsManager::AddDynProfArgs()

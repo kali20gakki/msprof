@@ -35,7 +35,7 @@
 #include "msprof_callback_impl.h"
 #include "prof_ge_core.h"
 #include "msprof_tx_manager.h"
-#include "mstx_data_handler.h"
+#include "mstx_manager.h"
 #include "utils/utils.h"
 #include "mmpa_api.h"
 #include "params_adapter_aclapi.h"
@@ -1462,9 +1462,12 @@ int ProfAclMgr::DoHostHandle()
     params_->host_profiling = true;
     if (params_->IsMsprofTx()) {
         Analysis::Dvvp::ProfilerCommon::RegisterMsprofTxReporterCallback();
-        if (MsprofTxManager::instance()->Init() != PROFILING_SUCCESS ||
-            MstxDataHandler::instance()->Start() != PROFILING_SUCCESS) {
+        if (MsprofTxManager::instance()->Init() != PROFILING_SUCCESS) {
             MSPROF_LOGW("MsprofTxManager init failed");
+        }
+        if (MstxManager::instance()->Start(params_->mstxDomainInclude, params_->mstxDomainExclude) !=
+            PROFILING_SUCCESS) {
+            MSPROF_LOGW("MstxManager init failed");
         }
     }
     int ret = MsprofSetDeviceImpl(DEFAULT_HOST_ID);

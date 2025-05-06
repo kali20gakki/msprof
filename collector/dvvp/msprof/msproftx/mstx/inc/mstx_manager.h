@@ -3,14 +3,14 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : mstx_data_handle.h
- * Description        : Common definition of mstx data handle class.
+ * File Name          : mstx_manager.h
+ * Description        : Common definition of mstx manager class.
  * Author             : msprof team
  * Creation Date      : 2024/08/02
  * *****************************************************************************
 */
-#ifndef MSTX_DATA_HANDLER_H
-#define MSTX_DATA_HANDLER_H
+#ifndef MSTX_MANAGER_H
+#define MSTX_MANAGER_H
 
 #include <atomic>
 #include <mutex>
@@ -35,13 +35,13 @@ enum class MstxDataType {
     DATA_INVALID
 };
 
-class MstxDataHandler : public analysis::dvvp::common::singleton::Singleton<MstxDataHandler>,
-                        public analysis::dvvp::common::thread::Thread {
+class MstxManager : public analysis::dvvp::common::singleton::Singleton<MstxManager>,
+                    public analysis::dvvp::common::thread::Thread {
 public:
-    MstxDataHandler();
-    ~MstxDataHandler();
+    MstxManager();
+    ~MstxManager();
 
-    int Start();
+    int Start(const std::string &mstxDomainInclude, const std::string &mstxDomainExclude);
     int Stop();
     void Run(const struct error_message::Context &errorContext) override;
     bool IsStart();

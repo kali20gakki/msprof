@@ -554,25 +554,25 @@ int ParamsAdapterMsprof::GetParamFromInputCfg(
 
 int ParamsAdapterMsprof::ParamsCheck()
 {
-    int ret = ParamsCheckMsprof();
-    if (ret != PROFILING_SUCCESS) {
+    if (ParamsCheckMsprof() != PROFILING_SUCCESS) {
         MSPROF_LOGE("private param check fail.");
         return PROFILING_FAILED;
     }
-    ret = ComCfgCheck(paramContainer_, setConfig_);
-    if (ret != PROFILING_SUCCESS) {
+    if (ComCfgCheck(paramContainer_, setConfig_) != PROFILING_SUCCESS) {
         MSPROF_LOGE("common param check fail.");
         return PROFILING_FAILED;
     }
-    ret = ParamsCheckDynProf();
-    if (ret != PROFILING_SUCCESS) {
+    if (ParamsCheckDynProf() != PROFILING_SUCCESS) {
         MSPROF_LOGE("Dynamic profiling param check fail.");
         return PROFILING_FAILED;
     }
-
-    ret = CheckAnalysisParams();
-    if (ret != PROFILING_SUCCESS) {
+    if (CheckAnalysisParams() != PROFILING_SUCCESS) {
         MSPROF_LOGE("analysis profiling param check fail.");
+        return PROFILING_FAILED;
+    }
+    if (!CheckMstxDomainParams(paramContainer_[INPUT_CFG_COM_MSPROFTX],
+        paramContainer_[INPUT_CFG_COM_MSTX_DOMAIN_INCLUDE], paramContainer_[INPUT_CFG_COM_MSTX_DOMAIN_EXCLUDE])) {
+        MSPROF_LOGE("mstx domain switch params check fail");
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
@@ -640,7 +640,9 @@ void ParamsAdapterMsprof::CreateCfgMap()
         {ARGS_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE}, {ARGS_HOST_SYS_USAGE_FREQ, INPUT_CFG_HOST_SYS_USAGE_FREQ},
         {ARGS_DYNAMIC_PROF, INPUT_CFG_MSPROF_DYNAMIC}, {ARGS_DYNAMIC_PROF_PID, INPUT_CFG_MSPROF_DYNAMIC_PID},
         {ARGS_PROFILING_DELAY, INPUT_CFG_MSPROF_DELAY}, {ARGS_PROFILING_DURATION, INPUT_CFG_MSPROF_DURATION},
-        {ARGS_TASK_MEMORY, INPUT_CFG_COM_TASK_MEMORY}, {ARGS_REPORTS, INPUT_CFG_COM_REPORTS}
+        {ARGS_TASK_MEMORY, INPUT_CFG_COM_TASK_MEMORY}, {ARGS_REPORTS, INPUT_CFG_COM_REPORTS},
+        {ARGS_MSTX_DOMAIN_INCLUDE, INPUT_CFG_COM_MSTX_DOMAIN_INCLUDE},
+        {ARGS_MSTX_DOMAIN_EXCLUDE, INPUT_CFG_COM_MSTX_DOMAIN_EXCLUDE},
         }).swap(cfgMap_);
 }
 } // ParamsAdapter

@@ -1663,3 +1663,26 @@ TEST_F(ParamValidationUtest, CheckDelayAndDurationValidWillReturnTrueWhenInputVa
 {
     EXPECT_EQ(true, ParamValidation::instance()->CheckDelayAndDurationValid("1", ""));
 }
+
+TEST_F(ParamValidationUtest, CheckMstxDomainSwitchValidWillReturnFalseWhenIncludeAndExcludeBothSetWithTxEnabled)
+{
+    EXPECT_EQ(false, ParamValidation::instance()->CheckMstxDomainSwitchValid("on", "xx", "yy"));
+}
+
+TEST_F(ParamValidationUtest, CheckMstxDomainSwitchValidWillReturnTrueWhenIncludeAndExcludeNotBothSetWithTxEnabled)
+{
+    EXPECT_EQ(true, ParamValidation::instance()->CheckMstxDomainSwitchValid("on", "xx", ""));
+    EXPECT_EQ(true, ParamValidation::instance()->CheckMstxDomainSwitchValid("on", "", "yy"));
+}
+
+TEST_F(ParamValidationUtest, CheckMstxDomainSwitchValidWillReturnFalseWhenIncludeOrExcludeSetWithTxNotEnabled)
+{
+    EXPECT_EQ(false, ParamValidation::instance()->CheckMstxDomainSwitchValid("", "xx", "yy"));
+    EXPECT_EQ(false, ParamValidation::instance()->CheckMstxDomainSwitchValid("", "", "yy"));
+    EXPECT_EQ(false, ParamValidation::instance()->CheckMstxDomainSwitchValid("", "xx", ""));
+}
+
+TEST_F(ParamValidationUtest, CheckMstxDomainSwitchValidWillReturnTrueWhenIncludeAndExcludeNotSetWithTxNotEnabled)
+{
+    EXPECT_EQ(true, ParamValidation::instance()->CheckMstxDomainSwitchValid("", "", ""));
+}

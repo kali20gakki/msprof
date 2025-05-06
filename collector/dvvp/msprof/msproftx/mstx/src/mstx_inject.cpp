@@ -15,87 +15,14 @@
 #include "msprof_dlog.h"
 #include "errno/error_code.h"
 #include "runtime_plugin.h"
-#include "mstx_data_handler.h"
-#include "utils/utils.h"
-#include "transport/hash_data.h"
+#include "mstx_manager.h"
+#include "mstx_domain_mgr.h"
 
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mstx;
-using namespace analysis::dvvp::common::error;
-using namespace analysis::dvvp::common::utils;
-using namespace analysis::dvvp::transport;
 
 static std::mutex g_mutex;
 static std::unordered_map<uint64_t, aclrtStream> g_eventIdsWithStream;
-
-namespace Collector {
-namespace Dvvp {
-namespace Mstx {
-
-std::map<mstxDomainHandle_t, std::shared_ptr<MstxDomainAttr>> MstxDomainMgr::domainHandleMap_;
-
-mstxDomainHandle_t MstxDomainMgr::CreateDomainHandle(const char* name)
-{
-    if (strcmp("default", name) == 0) {
-        MSPROF_LOGE("domain name can not be 'default'!");
-        return nullptr;
-    }
-    std::lock_guard<std::mutex> lk(domainMutex_);
-    if (domainHandleMap_.size() > MARK_MAX_CACHE_NUM) {
-        MSPROF_LOGE("Cache domain name failed, current size: %u, limit size: %u",
-            domainHandleMap_.size(), MARK_MAX_CACHE_NUM);
-        return nullptr;
-    }
-    std::string nameStr(name);
-    uint64_t hashId = HashData::instance()->GenHashId(nameStr);
-    for (const auto &iter : domainHandleMap_) {
-        if (iter.second->nameHash == hashId) {
-            return iter.first;
-        }
-    }
-    SHARED_PTR_ALIA<MstxDomainAttr> domainAttrPtr;
-    MSVP_MAKE_SHARED0_RET(domainAttrPtr, MstxDomainAttr, nullptr);
-    if (domainAttrPtr == nullptr) {
-        MSPROF_LOGE("Failed to malloc for domain attr for %s", name);
-        return nullptr;
-    }
-    MSVP_MAKE_SHARED0_RET(domainAttrPtr->handle, MstxDomainHandle, nullptr);
-    if (domainAttrPtr->handle == nullptr) {
-        MSPROF_LOGE("Failed to malloc for domain handle for %s", name);
-        return nullptr;
-    }
-    domainAttrPtr->nameHash = hashId;
-    domainHandleMap_.insert(std::make_pair(domainAttrPtr->handle.get(), domainAttrPtr));
-    return domainAttrPtr->handle.get();
-}
-
-void MstxDomainMgr::DestroyDomainHandle(mstxDomainHandle_t domain)
-{
-    std::lock_guard<std::mutex> lk(domainMutex_);
-    domainHandleMap_.erase(domain);
-}
-
-bool MstxDomainMgr::GetDomainNameHashByHandle(mstxDomainHandle_t domain, uint64_t &name)
-{
-    std::lock_guard<std::mutex> lk(domainMutex_);
-    auto iter = domainHandleMap_.find(domain);
-    if (iter == domainHandleMap_.end()) {
-        MSPROF_LOGW("input domain is invalid");
-        return false;
-    }
-    name = iter->second->nameHash;
-    return true;
-}
-
-uint64_t MstxDomainMgr::GetDefaultDomainNameHash()
-{
-    static uint64_t defaultDomainNameHash = HashData::instance()->GenHashId("default");
-    return defaultDomainNameHash;
-}
-
-}
-}
-}
 
 namespace MsprofMstxApi {
 constexpr uint64_t MSTX_MODEL_ID = 0xFFFFFFFFU;
@@ -160,7 +87,7 @@ static void MsTxMarkAImpl(const char* msg, aclrtStream stream, uint64_t domainNa
         MSPROF_LOGE("Failed to run mstx task for mark");
         return;
     }
-    if (MstxDataHandler::instance()->SaveMstxData(msg, mstxEventId, MstxDataType::DATA_MARK, domainName) !=
+    if (MstxManager::instance()->SaveMstxData(msg, mstxEventId, MstxDataType::DATA_MARK, domainName) !=
         PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to save data for mark, msg: %s", msg);
         return;
@@ -176,7 +103,7 @@ static uint64_t MsTxRangeStartAImpl(const char* msg, aclrtStream stream, uint64_
         MSPROF_LOGE("Failed to run mstx task for range start");
         return MSTX_INVALID_RANGE_ID;
     }
-    if (MstxDataHandler::instance()->SaveMstxData(msg, mstxEventId, MstxDataType::DATA_RANGE_START, domainName) !=
+    if (MstxManager::instance()->SaveMstxData(msg, mstxEventId, MstxDataType::DATA_RANGE_START, domainName) !=
         PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to save data for range start, msg: %s", msg);
         return MSTX_INVALID_RANGE_ID;
@@ -207,7 +134,7 @@ static void MstxRangeEndImpl(uint64_t id)
             g_eventIdsWithStream.erase(it);
         }
     }
-    if (MstxDataHandler::instance()->SaveMstxData(nullptr, id, MstxDataType::DATA_RANGE_END) != PROFILING_SUCCESS) {
+    if (MstxManager::instance()->SaveMstxData(nullptr, id, MstxDataType::DATA_RANGE_END) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to save data for range end, range id %lu", id);
         return;
     }
@@ -217,8 +144,8 @@ static void MstxRangeEndImpl(uint64_t id)
 void MstxMarkAFunc(const char* msg, aclrtStream stream)
 {
     MSPROF_LOGI("Start to execute %s", __func__);
-    if (!MstxDataHandler::instance()->IsStart()) {
-        MSPROF_LOGW("Mstx data handler is not started");
+    if (!MstxManager::instance()->IsStart()) {
+        MSPROF_LOGW("Mstx manager is not started");
         return;
     }
     SHARED_PTR_ALIA<std::string> saveMsg = nullptr;
@@ -226,6 +153,9 @@ void MstxMarkAFunc(const char* msg, aclrtStream stream)
         return;
     }
     auto domainNameHash = MstxDomainMgr::instance()->GetDefaultDomainNameHash();
+    if (!MstxDomainMgr::instance()->IsDomainEnabled(domainNameHash)) {
+        return;
+    }
     if (saveMsg != nullptr) {
         MsTxMarkAImpl(saveMsg->c_str(), stream, domainNameHash);
     } else {
@@ -236,8 +166,8 @@ void MstxMarkAFunc(const char* msg, aclrtStream stream)
 uint64_t MstxRangeStartAFunc(const char* msg, aclrtStream stream)
 {
     MSPROF_LOGI("Start to execute %s", __func__);
-    if (!MstxDataHandler::instance()->IsStart()) {
-        MSPROF_LOGW("Mstx data handler is not started");
+    if (!MstxManager::instance()->IsStart()) {
+        MSPROF_LOGW("Mstx manager is not started");
         return MSTX_INVALID_RANGE_ID;
     }
     SHARED_PTR_ALIA<std::string> saveMsg = nullptr;
@@ -251,6 +181,9 @@ uint64_t MstxRangeStartAFunc(const char* msg, aclrtStream stream)
         return MSTX_INVALID_RANGE_ID;
     }
     auto domainNameHash = MstxDomainMgr::instance()->GetDefaultDomainNameHash();
+    if (!MstxDomainMgr::instance()->IsDomainEnabled(domainNameHash)) {
+        return MSTX_INVALID_RANGE_ID;
+    }
     if (saveMsg != nullptr) {
         return MsTxRangeStartAImpl(saveMsg->c_str(), stream, domainNameHash);
     } else {
@@ -261,8 +194,8 @@ uint64_t MstxRangeStartAFunc(const char* msg, aclrtStream stream)
 void MstxRangeEndFunc(uint64_t id)
 {
     MSPROF_LOGI("Start to execute %s", __func__);
-    if (!MstxDataHandler::instance()->IsStart()) {
-        MSPROF_LOGW("Mstx data handler is not started");
+    if (!MstxManager::instance()->IsStart()) {
+        MSPROF_LOGW("Mstx manager is not started");
         return;
     }
     if (id == MSTX_INVALID_RANGE_ID) {
@@ -286,17 +219,20 @@ void MstxDomainDestroyFunc(mstxDomainHandle_t domain)
 
 void MstxDomainMarkAFunc(mstxDomainHandle_t domain, const char* msg, aclrtStream stream)
 {
-    if (!MstxDataHandler::instance()->IsStart()) {
-        MSPROF_LOGW("Mstx data handler is not started");
-        return;
-    }
-    SHARED_PTR_ALIA<std::string> saveMsg = nullptr;
-    if (!GetMsgPtrToSave(msg, saveMsg)) {
+    if (!MstxManager::instance()->IsStart()) {
+        MSPROF_LOGW("Mstx manager is not started");
         return;
     }
     uint64_t domainNameHash = 0;
     if (!MstxDomainMgr::instance()->GetDomainNameHashByHandle(domain, domainNameHash)) {
         MSPROF_LOGE("Failed to find domain name for %s", __func__);
+        return;
+    }
+    if (!MstxDomainMgr::instance()->IsDomainEnabled(domainNameHash)) {
+        return;
+    }
+    SHARED_PTR_ALIA<std::string> saveMsg = nullptr;
+    if (!GetMsgPtrToSave(msg, saveMsg)) {
         return;
     }
     if (saveMsg != nullptr) {
@@ -308,17 +244,20 @@ void MstxDomainMarkAFunc(mstxDomainHandle_t domain, const char* msg, aclrtStream
 
 uint64_t MstxDomainRangeStartAFunc(mstxDomainHandle_t domain, const char* msg, aclrtStream stream)
 {
-    if (!MstxDataHandler::instance()->IsStart()) {
-        MSPROF_LOGW("Mstx data handler is not started");
-        return MSTX_INVALID_RANGE_ID;
-    }
-    SHARED_PTR_ALIA<std::string> saveMsg = nullptr;
-    if (!GetMsgPtrToSave(msg, saveMsg)) {
+    if (!MstxManager::instance()->IsStart()) {
+        MSPROF_LOGW("Mstx manager is not started");
         return MSTX_INVALID_RANGE_ID;
     }
     uint64_t domainNameHash = 0;
     if (!MstxDomainMgr::instance()->GetDomainNameHashByHandle(domain, domainNameHash)) {
         MSPROF_LOGE("Failed to find domain name for %s", __func__);
+        return MSTX_INVALID_RANGE_ID;
+    }
+    if (!MstxDomainMgr::instance()->IsDomainEnabled(domainNameHash)) {
+        return MSTX_INVALID_RANGE_ID;
+    }
+    SHARED_PTR_ALIA<std::string> saveMsg = nullptr;
+    if (!GetMsgPtrToSave(msg, saveMsg)) {
         return MSTX_INVALID_RANGE_ID;
     }
     if (saveMsg != nullptr) {
@@ -331,8 +270,8 @@ uint64_t MstxDomainRangeStartAFunc(mstxDomainHandle_t domain, const char* msg, a
 void MstxDomainRangeEndFunc(mstxDomainHandle_t domain, uint64_t id)
 {
     MSPROF_LOGI("Start to execute %s", __func__);
-    if (!MstxDataHandler::instance()->IsStart()) {
-        MSPROF_LOGW("Mstx data handler is not started");
+    if (!MstxManager::instance()->IsStart()) {
+        MSPROF_LOGW("Mstx manager is not started");
         return;
     }
     if (id == MSTX_INVALID_RANGE_ID) {
@@ -341,6 +280,9 @@ void MstxDomainRangeEndFunc(mstxDomainHandle_t domain, uint64_t id)
     uint64_t domainNameHash = 0;
     if (!MstxDomainMgr::instance()->GetDomainNameHashByHandle(domain, domainNameHash)) {
         MSPROF_LOGE("Failed to find domain name for %s", __func__);
+        return;
+    }
+    if (!MstxDomainMgr::instance()->IsDomainEnabled(domainNameHash)) {
         return;
     }
     MstxRangeEndImpl(id);

@@ -835,7 +835,7 @@ bool ParamValidation::IsValidSwitch(const std::string &switchStr) const
     if (switchStr.empty()) {
         return true;
     }
-    if (switchStr.compare("on") != 0 && switchStr.compare("off") != 0) {
+    if (switchStr.compare(MSVP_PROF_ON) != 0 && switchStr.compare("off") != 0) {
         return false;
     }
     return true;
@@ -1895,6 +1895,26 @@ bool ParamValidation::CheckDelayAndDurationValid(const std::string &timeValue, c
         return false;
     }
     return true;
+}
+
+bool ParamValidation::CheckMstxDomainSwitchValid(const std::string &mstx, const std::string &mstxDomainInclude,
+                                                 const std::string &mstxDomainExclude) const
+{
+    if (mstx != MSVP_PROF_ON && (!mstxDomainInclude.empty() || !mstxDomainExclude.empty())) {
+        MSPROF_LOGE("Argument --mstx-domain-include or --mstx-domain-exclude cannot be set "
+            "when msproftx not enabled.");
+        CMD_LOGE("Argument --mstx-domain-include or --mstx-domain-exclude cannot be set "
+            "when msproftx not enabled.");
+        return false;
+    } else if (mstx == MSVP_PROF_ON && !mstxDomainInclude.empty() && !mstxDomainExclude.empty()) {
+        MSPROF_LOGE("Argument --mstx-domain-include and --mstx-domain-exclude cannot be set "
+            "at the same time when msproftx enabled.");
+        CMD_LOGE("Argument --mstx-domain-include and --mstx-domain-exclude cannot be set "
+            "at the same time when msproftx enabled.");
+        return false;
+    } else {
+        return true;
+    }
 }
 }
 }

@@ -94,6 +94,8 @@ public:
     int CheckMsopprofBinValid(const std::string &binPath) const;
     int CheckParamPermission(const std::string &paramPath) const;
     bool CheckDelayAndDurationValid(const std::string &timeValue, const std::string &timeType) const;
+    bool CheckMstxDomainSwitchValid(const std::string &mstx, const std::string &mstxDomainInclude,
+        const std::string &mstxDomainExclude) const;
 
 private:
     bool CheckTsSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
@@ -108,7 +110,7 @@ private:
     int CheckHostSysToolsIsExist(const std::string toolName, const std::string &resultDir,
         const std::string &appDir) const;
     int CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::string toolName,
-                                           const MmProcess tmpProcess) const;
+        const MmProcess tmpProcess) const;
     int CheckHostOutString(const std::string tmpStr, const std::string toolName) const;
     int UninitCheckHostSysCmd(const MmProcess checkProcess) const;
     bool CheckHostSysUsageOptionsIsValid(const std::string &hostSysUsageOptions) const;

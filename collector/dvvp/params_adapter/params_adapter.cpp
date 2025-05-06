@@ -169,7 +169,8 @@ void ParamsAdapter::SetCommonConfig()
         INPUT_CFG_COM_HCCL, INPUT_CFG_COM_L2, INPUT_CFG_COM_AICPU, INPUT_CFG_COM_SYS_USAGE_FREQ, INPUT_CFG_COM_GE_API,
         INPUT_CFG_COM_SYS_PID_USAGE_FREQ, INPUT_CFG_COM_SYS_CPU_FREQ, INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ,
         INPUT_CFG_COM_LLC_MODE, INPUT_CFG_COM_SYS_IO_FREQ, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ,
-        INPUT_CFG_COM_DVPP_FREQ, INPUT_CFG_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE_FREQ
+        INPUT_CFG_COM_DVPP_FREQ, INPUT_CFG_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE_FREQ,
+        INPUT_CFG_COM_MSTX_DOMAIN_INCLUDE, INPUT_CFG_COM_MSTX_DOMAIN_EXCLUDE
         }).swap(commonConfig_);
     return;
 }
@@ -272,6 +273,8 @@ void ParamsAdapter::SetCommonParams(std::array<std::string, INPUT_CFG_MAX> param
     commonParams.output = paramContainer[INPUT_CFG_COM_OUTPUT];
     commonParams.storageLimit = paramContainer[INPUT_CFG_COM_STORAGE_LIMIT];
     commonParams.msproftx = paramContainer[INPUT_CFG_COM_MSPROFTX];
+    commonParams.mstxDomainInclude = paramContainer[INPUT_CFG_COM_MSTX_DOMAIN_INCLUDE];
+    commonParams.mstxDomainExclude = paramContainer[INPUT_CFG_COM_MSTX_DOMAIN_EXCLUDE];
     commonParams.hostSysPid = GetStrToIntParam(paramContainer[INPUT_CFG_HOST_SYS_PID], -1, false);
     commonParams.device = (paramContainer[INPUT_CFG_COM_SYS_DEVICES].compare("all") == 0) ?
         DrvGetDevIdsStr() : paramContainer[INPUT_CFG_COM_SYS_DEVICES];
@@ -444,6 +447,12 @@ void ParamsAdapter::SetDelayAndDurationParams(std::array<std::string, INPUT_CFG_
     }
 }
 
+bool ParamsAdapter::CheckMstxDomainParams(const std::string &mstx, const std::string &mstxDomainInclude,
+    const std::string &mstxDomainExclude) const
+{
+    return ParamValidation::instance()->CheckMstxDomainSwitchValid(mstx, mstxDomainInclude, mstxDomainExclude);
+}
+
 int ParamsAdapter::ComCfgCheck(std::array<std::string, INPUT_CFG_MAX> paramContainer,
     std::set<InputCfg> &setArgs) const
 {
@@ -504,6 +513,9 @@ bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfg
         case INPUT_CFG_COM_AIC_METRICS:
         case INPUT_CFG_COM_AIV_METRICS:
             ret = ParamValidation::instance()->CheckProfilingMetricsIsValid(metricsNameMap[inputCfg], cfgValue);
+            break;
+        case INPUT_CFG_COM_MSTX_DOMAIN_INCLUDE:
+        case INPUT_CFG_COM_MSTX_DOMAIN_EXCLUDE:
             break;
         default:
             ret = false;

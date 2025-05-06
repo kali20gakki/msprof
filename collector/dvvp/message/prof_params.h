@@ -136,6 +136,8 @@ struct ProfileParams : BaseInfo {
     std::string modelLoad;
     std::string msprof;
     std::string msproftx;
+    std::string mstxDomainInclude;
+    std::string mstxDomainExclude;
     std::string taskMemory;
     std::string ge_api;
 
@@ -222,7 +224,7 @@ struct ProfileParams : BaseInfo {
           exportModelId(DEFAULT_MODEL_ID), usedParams(), dataTypeConfig(0), npuAppMemProfiling("on"),
           npuModuleMemProfiling("on"), analyzeSwitch("off"), delayTime(""), durationTime(""), dynamic("off"),
           analyzeRuleSwitch("communication,communication_matrix"), is_shell(FALSE), isSubscribe(false),
-          reportsPath("")
+          reportsPath(""), mstxDomainInclude(""), mstxDomainExclude("")
     {
     }
 
@@ -332,6 +334,8 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, modelLoad);
         SET_VALUE(object, msprof);
         SET_VALUE(object, msproftx);
+        SET_VALUE(object, mstxDomainInclude);
+        SET_VALUE(object, mstxDomainExclude);
         SET_VALUE(object, job_id);
         SET_VALUE(object, app);
         SET_VALUE(object, ts_timeline);
@@ -467,6 +471,8 @@ struct ProfileParams : BaseInfo {
         FROM_STRING_VALUE(object, modelLoad);
         FROM_STRING_VALUE(object, msprof);
         FROM_STRING_VALUE(object, msproftx);
+        FROM_STRING_VALUE(object, mstxDomainInclude);
+        FROM_STRING_VALUE(object, mstxDomainExclude);
         FROM_STRING_VALUE(object, job_id);
         FROM_STRING_VALUE(object, app);
         FROM_STRING_VALUE(object, ts_timeline);

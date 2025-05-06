@@ -7,13 +7,16 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "prof_callback.h"
-#include "mstx_data_handler.h"
+#include "mstx_manager.h"
 #include "mstx_inject.h"
+#include "mstx_domain_mgr.h"
 #include "msprof_tx_manager.h"
+#include "transport/hash_data.h"
 
 using namespace Collector::Dvvp::Mstx;
 using namespace Msprof::MsprofTx;
 using namespace analysis::dvvp::common::utils;
+using namespace analysis::dvvp::transport;
 
 std::vector<MsprofAdditionalInfo> g_txdataList_;
 
@@ -36,6 +39,9 @@ protected:
         MsprofTxManager::instance()->UnInit();
         g_txdataList_.clear();
     }
+private:
+    std::string emptyMstxDomainInclude = "";
+    std::string emptyMstxDomainExclude = "";
 };
 
 MstxFuncPointer g_mstxMarkAPtr;
@@ -76,10 +82,10 @@ void MstxApiThreadFunc()
     uint64_t testDomain = 0;
     uint64_t markEventId = 1;
     uint64_t rangeEventId = 2;
-    MstxDataHandler::instance()->SaveMstxData("test_mark", 1, MstxDataType::DATA_MARK, testDomain);
-    MstxDataHandler::instance()->SaveMstxData("test_range_start", rangeEventId,
+    MstxManager::instance()->SaveMstxData("test_mark", 1, MstxDataType::DATA_MARK, testDomain);
+    MstxManager::instance()->SaveMstxData("test_range_start", rangeEventId,
         MstxDataType::DATA_RANGE_START, testDomain);
-    MstxDataHandler::instance()->SaveMstxData(nullptr, rangeEventId, MstxDataType::DATA_RANGE_END);
+    MstxManager::instance()->SaveMstxData(nullptr, rangeEventId, MstxDataType::DATA_RANGE_END);
 }
 
 uint64_t CalculateHash(const std::string &data)
@@ -141,11 +147,11 @@ TEST_F(MstxUtest, GetModuleTableFuncWillReturnSuccWhenGetFuncTableReturnValidOut
 TEST_F(MstxUtest, MstxDataHandlerWillSaveDataWhileRunSucc)
 {
     GlobalMockObject::verify();
-    EXPECT_EQ(PROFILING_SUCCESS, MstxDataHandler::instance()->Start());
-    EXPECT_EQ(true, MstxDataHandler::instance()->IsStart());
+    EXPECT_EQ(PROFILING_SUCCESS, MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude));
+    EXPECT_EQ(true, MstxManager::instance()->IsStart());
     std::thread t(MstxApiThreadFunc);
     t.join();
-    EXPECT_EQ(PROFILING_SUCCESS, MstxDataHandler::instance()->Stop());
+    EXPECT_EQ(PROFILING_SUCCESS, MstxManager::instance()->Stop());
     EXPECT_EQ(2, g_txdataList_.size()); // 2: mstx data size
     for (size_t i = 0; i < g_txdataList_.size(); i++) {
         EXPECT_EQ(MSPROF_REPORT_TX_LEVEL, g_txdataList_[i].level);
@@ -156,16 +162,16 @@ TEST_F(MstxUtest, MstxDataHandlerWillSaveDataWhileRunSucc)
 TEST_F(MstxUtest, MstxDataHandlerStartWillReturnSuccWhileRepeateStart)
 {
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
-    EXPECT_EQ(PROFILING_SUCCESS, MstxDataHandler::instance()->Start());
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
+    EXPECT_EQ(PROFILING_SUCCESS, MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude));
+    MstxManager::instance()->Stop();
 }
 
 TEST_F(MstxUtest, MstxDataHandlerReturnFailWhileSaveInvalidRangeEndId)
 {
     GlobalMockObject::verify();
     uint64_t invaildId = 10;
-    EXPECT_EQ(PROFILING_FAILED, MstxDataHandler::instance()->SaveMstxData("test", invaildId,
+    EXPECT_EQ(PROFILING_FAILED, MstxManager::instance()->SaveMstxData("test", invaildId,
         MstxDataType::DATA_RANGE_END));
 }
 
@@ -180,9 +186,9 @@ TEST_F(MstxUtest, MstxMarkAFuncWillReturnWhenMstxDataHandlerNotStartYet)
 TEST_F(MstxUtest, MstxMarkAFuncWillReturnWhenMsgIsNull)
 {
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     MsprofMstxApi::MstxMarkAFunc(nullptr, nullptr);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(0, g_txdataList_.size());
 }
 
@@ -190,9 +196,9 @@ TEST_F(MstxUtest, MstxMarkAFuncWillReturnWhenMsgIsLongerThanMaxLen)
 {
     GlobalMockObject::verify();
     std::string msg(MAX_MESSAGE_LEN, 'x');
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     MsprofMstxApi::MstxMarkAFunc(msg.c_str(), nullptr);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(0, g_txdataList_.size());
 }
 
@@ -200,10 +206,10 @@ TEST_F(MstxUtest, MstxMarkAFuncWillReturnInputDataStartsWithInvalidChar)
 {
     // 校验框架内置通信打点数据
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     std::string msg = "+";
     MsprofMstxApi::MstxMarkAFunc(msg.c_str(), nullptr);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(0, g_txdataList_.size());
 }
 
@@ -211,14 +217,14 @@ TEST_F(MstxUtest, MstxMarkAFuncWillReturnWhenInputCommunicationDataMsgLengthLarg
 {
     // 校验框架内置通信打点数据
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream;
     std::string msg = "{\\\"count\\\": \\\"16\\\",\\\"dataType\\\": \\\"fp32\\\",\
                         \\\"groupName\\\": \\\"hccl_world_groupxxxxxxxxxx\\\",\\\"opName\\\": \\\"HcclSend\\\",\
                         \\\"DestRank\\\": \\\"10000\\\",\
                         \\\"streamId\\\": \\\"0\\\"}";
     MsprofMstxApi::MstxMarkAFunc(msg.c_str(), nullptr);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(0, g_txdataList_.size());
 }
 
@@ -226,68 +232,68 @@ TEST_F(MstxUtest, MstxMarkAFuncWillReturnWhenInputCommunicationDataMsgLengthSmal
 {
     // 校验框架内置通信打点数据
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream;
     std::string msg = "{\\\"count\\\": \\\"16\\\",\\\"dataType\\\": \\\"fp32\\\",\
                         \\\"groupName\\\": \\\"group\\\",\\\"opName\\\": \\\"HcclAllreduce\\\",\
                         \\\"streamId\\\": \\\"0\\\"}";
     MsprofMstxApi::MstxMarkAFunc(msg.c_str(), nullptr);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(1, g_txdataList_.size());
 }
 
 TEST_F(MstxUtest, MstxMarkAFuncWillReturnWhenRtProfilerTraceExFail)
 {
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream = (aclrtStream)0x12345678;
     const char* msg = "record";
     MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
     MsprofMstxApi::MstxMarkAFunc(msg, stream);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(0, g_txdataList_.size());
 }
 
 TEST_F(MstxUtest, MstxMarkAFuncWillReturnWhenSaveMstxDataFail)
 {
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream = (aclrtStream)0x12345678;
     const char* msg = "record";
     MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&Collector::Dvvp::Mstx::MstxDataHandler::SaveMstxData)
+    MOCKER_CPP(&Collector::Dvvp::Mstx::MstxManager::SaveMstxData)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
     MsprofMstxApi::MstxMarkAFunc(msg, stream);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(0, g_txdataList_.size());
 }
 
 TEST_F(MstxUtest, MstxMarkAFuncWillSaveMstxDataWhenSaveMstxDataSuccWithInputStream)
 {
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream = (aclrtStream)0x12345678;
     const char* msg = "record";
     MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     MsprofMstxApi::MstxMarkAFunc(msg, stream);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(1, g_txdataList_.size());
 }
 
 TEST_F(MstxUtest, MstxMarkAFuncWillSaveMstxDataWhenSaveMstxDataSuccWithNoInputStream)
 {
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     const char* msg = "record";
     MsprofMstxApi::MstxMarkAFunc(msg, nullptr);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(1, g_txdataList_.size());
 }
 
@@ -301,77 +307,77 @@ TEST_F(MstxUtest, MstxRangeStartAFuncWillReturnZeroWhenMstxDataHandlerNotStartYe
 TEST_F(MstxUtest, MstxRangeStartAFuncWillReturnZeroWhenMsgIsNull)
 {
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     EXPECT_EQ(MSTX_INVALID_RANGE_ID, MsprofMstxApi::MstxRangeStartAFunc(nullptr, nullptr));
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
 }
 
 TEST_F(MstxUtest, MstxRangeStartAFuncWillReturnZeroWhenMsgIsLongerThanMaxLen)
 {
     GlobalMockObject::verify();
     std::string msg(MAX_MESSAGE_LEN, 'x');
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     EXPECT_EQ(MSTX_INVALID_RANGE_ID, MsprofMstxApi::MstxRangeStartAFunc(msg.c_str(), nullptr));
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
 }
 
 TEST_F(MstxUtest, MstxRangeStartAFuncWillReturnZeroWhenRtProfilerTraceExFail)
 {
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream = (aclrtStream)0x12345678;
     const char* msg = "record";
     MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
     EXPECT_EQ(MSTX_INVALID_RANGE_ID, MsprofMstxApi::MstxRangeStartAFunc(msg, stream));
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
 }
 
 TEST_F(MstxUtest, MstxRangeStartAFuncWillReturnZeroWhenSaveMstxDataFail)
 {
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream = (aclrtStream)0x12345678;
     const char* msg = "record";
     MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&Collector::Dvvp::Mstx::MstxDataHandler::SaveMstxData)
+    MOCKER_CPP(&Collector::Dvvp::Mstx::MstxManager::SaveMstxData)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
     EXPECT_EQ(MSTX_INVALID_RANGE_ID, MsprofMstxApi::MstxRangeStartAFunc(msg, stream));
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
 }
 
 TEST_F(MstxUtest, MstxRangeStartAFuncWillNotSaveMstxDataWhenMstxRangeEndIsNotCalledWithInputStream)
 {
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream = (aclrtStream)0x12345678;
     const char* msg = "record";
     MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     EXPECT_NE(MSTX_INVALID_RANGE_ID, MsprofMstxApi::MstxRangeStartAFunc(msg, stream));
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(0, g_txdataList_.size());
 }
 
 TEST_F(MstxUtest, MstxRangeStartAFuncWillNotSaveMstxDataWhenMstxRangeEndIsNotCalledWithNotInputStream)
 {
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     const char* msg = "record";
     EXPECT_NE(MSTX_INVALID_RANGE_ID, MsprofMstxApi::MstxRangeStartAFunc(msg, nullptr));
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(0, g_txdataList_.size());
 }
 
 TEST_F(MstxUtest, MstxRangeStartAFuncWillSaveMstxDataWhenMstxRangeEndIsCalledWithInputStream)
 {
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream = (aclrtStream)0x12345678;
     const char* msg = "record";
     MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
@@ -380,19 +386,19 @@ TEST_F(MstxUtest, MstxRangeStartAFuncWillSaveMstxDataWhenMstxRangeEndIsCalledWit
     uint64_t id = MsprofMstxApi::MstxRangeStartAFunc(msg, stream);
     EXPECT_NE(MSTX_INVALID_RANGE_ID, id);
     MsprofMstxApi::MstxRangeEndFunc(id);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(1, g_txdataList_.size());
 }
 
 TEST_F(MstxUtest, MstxRangeStartAFuncWillSaveMstxDataWhenMstxRangeEndIsCalledWithNotInputStream)
 {
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     const char* msg = "record";
     uint64_t id = MsprofMstxApi::MstxRangeStartAFunc(msg, nullptr);
     EXPECT_NE(MSTX_INVALID_RANGE_ID, id);
     MsprofMstxApi::MstxRangeEndFunc(id);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(1, g_txdataList_.size());
 }
 
@@ -408,17 +414,17 @@ TEST_F(MstxUtest, MstxRangeEndFuncWillReturnWhenInputInvalidRangeId)
 {
     GlobalMockObject::verify();
     uint64_t id = 0;
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     MsprofMstxApi::MstxRangeEndFunc(id);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(0, g_txdataList_.size());
 }
 
 TEST_F(MstxUtest, MstxRangeEndFuncWillNotSaveMstxDataWhenSaveMstxDataFail)
 {
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
-    MOCKER_CPP(&Collector::Dvvp::Mstx::MstxDataHandler::SaveMstxData)
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
+    MOCKER_CPP(&Collector::Dvvp::Mstx::MstxManager::SaveMstxData)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS)) // succ for range start
         .then(returnValue(PROFILING_FAILED)); // fail for range end
@@ -427,27 +433,27 @@ TEST_F(MstxUtest, MstxRangeEndFuncWillNotSaveMstxDataWhenSaveMstxDataFail)
     EXPECT_NE(MSTX_INVALID_RANGE_ID, id);
 
     MsprofMstxApi::MstxRangeEndFunc(id);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(0, g_txdataList_.size());
 }
 
 TEST_F(MstxUtest, MstxRangeEndFuncWillSaveMstxDataWhenSaveMstxDataSuccWithNotInputStream)
 {
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     const char* msg = "record";
     uint64_t id = MsprofMstxApi::MstxRangeStartAFunc(msg, nullptr);
     EXPECT_NE(MSTX_INVALID_RANGE_ID, id);
 
     MsprofMstxApi::MstxRangeEndFunc(id);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(1, g_txdataList_.size());
 }
 
 TEST_F(MstxUtest, MstxRangeEndFuncWillSaveMstxDataWhenSaveMstxDataSuccWithInputStream)
 {
     GlobalMockObject::verify();
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     aclrtStream stream = (aclrtStream)0x12345678;
     const char* msg = "record";
     MOCKER_CPP(&Collector::Dvvp::Plugin::RuntimePlugin::MsprofRtProfilerTraceEx)
@@ -457,7 +463,7 @@ TEST_F(MstxUtest, MstxRangeEndFuncWillSaveMstxDataWhenSaveMstxDataSuccWithInputS
     EXPECT_NE(MSTX_INVALID_RANGE_ID, id);
 
     MsprofMstxApi::MstxRangeEndFunc(id);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(1, g_txdataList_.size());
 }
 
@@ -537,31 +543,31 @@ TEST_F(MstxUtest, MstxDomainMarkAFuncWillNotMarkWhenMstxDataHandlerNotStart)
 TEST_F(MstxUtest, MstxDomainMarkAFuncWillNotMarkWhenInputInvalidMsg)
 {
     auto handle = MsprofMstxApi::MstxDomainCreateAFunc("test");
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     MsprofMstxApi::MstxDomainMarkAFunc(handle, nullptr, nullptr);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(0, g_txdataList_.size());
     MsprofMstxApi::MstxDomainDestroyFunc(handle);
 }
 
 TEST_F(MstxUtest, MstxDomainMarkAFuncWillNotMarkWhenInputInvalidDomain)
 {
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     MsprofMstxApi::MstxDomainMarkAFunc(nullptr, "test", nullptr);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(0, g_txdataList_.size());
 }
 
 TEST_F(MstxUtest, MstxDomainMarkAFuncWillNotMarkWhenSaveMstxDataFail)
 {
     GlobalMockObject::verify();
-    MOCKER_CPP(&Collector::Dvvp::Mstx::MstxDataHandler::SaveMstxData)
+    MOCKER_CPP(&Collector::Dvvp::Mstx::MstxManager::SaveMstxData)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
     auto handle = MsprofMstxApi::MstxDomainCreateAFunc("test");
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     MsprofMstxApi::MstxDomainMarkAFunc(handle, "test", nullptr);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(0, g_txdataList_.size());
     MsprofMstxApi::MstxDomainDestroyFunc(handle);
 }
@@ -570,9 +576,9 @@ TEST_F(MstxUtest, MstxDomainMarkAFuncWillMarkWhenSaveMstxDataSucc)
 {
     GlobalMockObject::verify();
     auto handle = MsprofMstxApi::MstxDomainCreateAFunc("test");
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     MsprofMstxApi::MstxDomainMarkAFunc(handle, "test", nullptr);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(1, g_txdataList_.size());
     MsprofMstxApi::MstxDomainDestroyFunc(handle);
 }
@@ -585,9 +591,9 @@ TEST_F(MstxUtest, MstxDomainMarkAFuncWillNotMarkWhenMsprofRtProfilerTraceExFail)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
     auto handle = MsprofMstxApi::MstxDomainCreateAFunc("test");
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     MsprofMstxApi::MstxDomainMarkAFunc(handle, "test", stream);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(0, g_txdataList_.size());
     MsprofMstxApi::MstxDomainDestroyFunc(handle);
 }
@@ -600,9 +606,65 @@ TEST_F(MstxUtest, MstxDomainMarkAFuncWillNotMarkWhenMsprofRtProfilerTraceExSucc)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     auto handle = MsprofMstxApi::MstxDomainCreateAFunc("test");
-    MstxDataHandler::instance()->Start();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
     MsprofMstxApi::MstxDomainMarkAFunc(handle, "test", stream);
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
     EXPECT_EQ(1, g_txdataList_.size());
     MsprofMstxApi::MstxDomainDestroyFunc(handle);
+}
+
+TEST_F(MstxUtest, MstxDomainMgrSetMstxDomainsEnabledWillNotSetDomainWhenIncludeAndExcludeBothSet)
+{
+    MstxDomainMgr::instance()->SetMstxDomainsEnabled("xx", "yy");
+    EXPECT_EQ(false, MstxDomainMgr::instance()->domainSet_.load());
+    size_t setDomainNum = 0;
+    EXPECT_EQ(setDomainNum, MstxDomainMgr::instance()->domainSetting_.setDomains_.size());
+}
+
+TEST_F(MstxUtest, MstxDomainMgrSetMstxDomainsEnabledWillSetDomainEnabledWhenIncludeSet)
+{
+    MstxDomainMgr::instance()->domainHandleMap_.clear();
+    // create domain before set include or exclude
+    auto handleForxx = MstxDomainMgr::instance()->CreateDomainHandle("xx");
+    auto handleForzz = MstxDomainMgr::instance()->CreateDomainHandle("zz");
+
+    MstxDomainMgr::instance()->SetMstxDomainsEnabled("xx,yy", "");
+    EXPECT_EQ(true, MstxDomainMgr::instance()->domainSet_.load());
+    size_t setDomainNum = 2;
+    EXPECT_EQ(true, MstxDomainMgr::instance()->domainSetting_.domainInclude);
+    EXPECT_EQ(setDomainNum, MstxDomainMgr::instance()->domainSetting_.setDomains_.size());
+    uint64_t hashIdForxx = HashData::instance()->GenHashId("xx");
+    uint64_t hashIdForyy = HashData::instance()->GenHashId("yy");
+    EXPECT_EQ(1, MstxDomainMgr::instance()->domainSetting_.setDomains_.count(hashIdForxx));
+    EXPECT_EQ(1, MstxDomainMgr::instance()->domainSetting_.setDomains_.count(hashIdForyy));
+    EXPECT_EQ(true, MstxDomainMgr::instance()->domainHandleMap_[handleForxx]->enabled);
+    EXPECT_EQ(false, MstxDomainMgr::instance()->domainHandleMap_[handleForzz]->enabled);
+
+    // create domain after set include or exclude
+    auto handleForyy = MstxDomainMgr::instance()->CreateDomainHandle("yy");
+    EXPECT_EQ(true, MstxDomainMgr::instance()->domainHandleMap_[handleForyy]->enabled);
+}
+
+TEST_F(MstxUtest, MstxDomainMgrSetMstxDomainsEnabledWillSetDomainDisabledWhenExcludeSet)
+{
+    MstxDomainMgr::instance()->domainHandleMap_.clear();
+    // create domain before set include or exclude
+    auto handleForxx = MstxDomainMgr::instance()->CreateDomainHandle("xx");
+    auto handleForzz = MstxDomainMgr::instance()->CreateDomainHandle("zz");
+
+    MstxDomainMgr::instance()->SetMstxDomainsEnabled("", "xx,yy");
+    EXPECT_EQ(true, MstxDomainMgr::instance()->domainSet_.load());
+    size_t setDomainNum = 2;
+    EXPECT_EQ(false, MstxDomainMgr::instance()->domainSetting_.domainInclude);
+    EXPECT_EQ(setDomainNum, MstxDomainMgr::instance()->domainSetting_.setDomains_.size());
+    uint64_t hashIdForxx = HashData::instance()->GenHashId("xx");
+    uint64_t hashIdForyy = HashData::instance()->GenHashId("yy");
+    EXPECT_EQ(1, MstxDomainMgr::instance()->domainSetting_.setDomains_.count(hashIdForxx));
+    EXPECT_EQ(1, MstxDomainMgr::instance()->domainSetting_.setDomains_.count(hashIdForyy));
+    EXPECT_EQ(false, MstxDomainMgr::instance()->domainHandleMap_[handleForxx]->enabled);
+    EXPECT_EQ(true, MstxDomainMgr::instance()->domainHandleMap_[handleForzz]->enabled);
+
+    // create domain after set include or exclude
+    auto handleForyy = MstxDomainMgr::instance()->CreateDomainHandle("yy");
+    EXPECT_EQ(false, MstxDomainMgr::instance()->domainHandleMap_[handleForyy]->enabled);
 }
