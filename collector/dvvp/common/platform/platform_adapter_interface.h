@@ -80,6 +80,8 @@ struct CommonParams {
     std::string output;
     std::string storageLimit;
     std::string msproftx;
+    std::string mstxDomainInclude;
+    std::string mstxDomainExclude;
     std::string device;
     int profilingPeriod;
     int hostSysPid;

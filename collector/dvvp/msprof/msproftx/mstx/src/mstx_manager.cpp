@@ -3,13 +3,13 @@
             Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
- * File Name          : mstx_data_handle.cpp
- * Description        : Realization of mstx data handle class.
+ * File Name          : mstx_manager.cpp
+ * Description        : Realization of mstx manager class.
  * Author             : msprof team
  * Creation Date      : 2024/08/02
  * *****************************************************************************
 */
-#include "mstx_data_handler.h"
+#include "mstx_manager.h"
 #include "msprof_dlog.h"
 #include "uploader_mgr.h"
 #include "errno/error_code.h"
@@ -17,6 +17,7 @@
 #include "config/config.h"
 #include "mmpa/mmpa_api.h"
 #include "prof_callback.h"
+#include "mstx_domain_mgr.h"
 
 using namespace Collector::Dvvp::Mmpa;
 using namespace analysis::dvvp;
@@ -29,17 +30,17 @@ using namespace analysis::dvvp::transport;
 namespace Collector {
 namespace Dvvp {
 namespace Mstx {
-MstxDataHandler::MstxDataHandler()
+MstxManager::MstxManager()
 {
     Init();
 }
 
-MstxDataHandler::~MstxDataHandler()
+MstxManager::~MstxManager()
 {
     Uninit();
 }
 
-void MstxDataHandler::Init()
+void MstxManager::Init()
 {
     mstxDataBuf_.Init(RING_BUFFER_DEFAULT_CAPACITY);
     mstxDataBuf_.SetName("mstx_data_buf");
@@ -47,7 +48,7 @@ void MstxDataHandler::Init()
     processId_ = static_cast<uint32_t>(MmGetPid());
 }
 
-void MstxDataHandler::Uninit()
+void MstxManager::Uninit()
 {
     Stop();
     if (init_.load()) {
@@ -57,18 +58,19 @@ void MstxDataHandler::Uninit()
     }
 }
 
-int MstxDataHandler::Start()
+int MstxManager::Start(const std::string &mstxDomainInclude, const std::string &mstxDomainExclude)
 {
     if (start_.load()) {
         return PROFILING_SUCCESS;
     }
+    MstxDomainMgr::instance()->SetMstxDomainsEnabled(mstxDomainInclude, mstxDomainExclude);
     Thread::SetThreadName(analysis::dvvp::common::config::MSVP_MSTX_DATA_HANDLE_THREAD_NAME);
     analysis::dvvp::common::thread::Thread::Start();
     start_.store(true);
     return PROFILING_SUCCESS;
 }
 
-int MstxDataHandler::Stop()
+int MstxManager::Stop()
 {
     if (!start_.load()) {
         return PROFILING_SUCCESS;
@@ -79,7 +81,7 @@ int MstxDataHandler::Stop()
     return PROFILING_SUCCESS;
 }
 
-void MstxDataHandler::Run(const struct error_message::Context &errorContext)
+void MstxManager::Run(const struct error_message::Context &errorContext)
 {
     MsprofErrorManager::instance()->SetErrorContext(errorContext);
     MSPROF_LOGI("mstx data handler thread start");
@@ -93,12 +95,12 @@ void MstxDataHandler::Run(const struct error_message::Context &errorContext)
     MSPROF_LOGI("mstx data handler thread stop");
 }
 
-void MstxDataHandler::Flush()
+void MstxManager::Flush()
 {
     ReportData();
 }
 
-void MstxDataHandler::ReportData()
+void MstxManager::ReportData()
 {
     if (mstxDataBuf_.GetUsedSize() == 0) {
         return;
@@ -112,7 +114,7 @@ void MstxDataHandler::ReportData()
     }
 }
 
-int MstxDataHandler::SaveMarkData(const char* msg, uint64_t mstxEventId, uint64_t domainNameHash)
+int MstxManager::SaveMarkData(const char* msg, uint64_t mstxEventId, uint64_t domainNameHash)
 {
     MsprofTxInfo info;
     info.infoType = 1; // 0: tx , 1: tx_ex
@@ -135,7 +137,7 @@ int MstxDataHandler::SaveMarkData(const char* msg, uint64_t mstxEventId, uint64_
     return PROFILING_SUCCESS;
 }
 
-int MstxDataHandler::SaveRangeData(const char* msg, uint64_t mstxEventId, MstxDataType type, uint64_t domainNameHash)
+int MstxManager::SaveRangeData(const char* msg, uint64_t mstxEventId, MstxDataType type, uint64_t domainNameHash)
 {
     if (type == MstxDataType::DATA_RANGE_START) {
         MsprofTxInfo info;
@@ -171,13 +173,13 @@ int MstxDataHandler::SaveRangeData(const char* msg, uint64_t mstxEventId, MstxDa
     }
 }
 
-int MstxDataHandler::SaveMstxData(const char* msg, uint64_t mstxEventId, MstxDataType type, uint64_t domainNameHash)
+int MstxManager::SaveMstxData(const char* msg, uint64_t mstxEventId, MstxDataType type, uint64_t domainNameHash)
 {
     return type == MstxDataType::DATA_MARK ? SaveMarkData(msg, mstxEventId, domainNameHash) :
         SaveRangeData(msg, mstxEventId, type, domainNameHash);
 }
 
-bool MstxDataHandler::IsStart()
+bool MstxManager::IsStart()
 {
     return start_.load();
 }

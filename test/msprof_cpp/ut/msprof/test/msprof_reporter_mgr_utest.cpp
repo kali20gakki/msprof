@@ -146,6 +146,7 @@ TEST_F(MsprofReporterMgrUtest, StopReportersWillReturnFaildWhenThrowsException)
 {
     GlobalMockObject::verify();
     // stop after start
+    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::FlushMstxData).stubs();
     MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsInited).stubs().will(returnValue(true));
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StartReporters());
     MsprofReporterMgr::instance()->RegReportTypeInfo(0, 0, "test");

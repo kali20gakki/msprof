@@ -11,7 +11,7 @@
 #include "errno/error_code.h"
 #include "hash_data.h"
 #include "uploader_mgr.h"
-#include "mstx_data_handler.h"
+#include "mstx_manager.h"
  
 namespace Msprof {
 namespace Engine {
@@ -260,7 +260,7 @@ void MsprofReporterMgr::NotifyQuit()
 
 void MsprofReporterMgr::FlushMstxData()
 {
-    MstxDataHandler::instance()->Stop();
+    MstxManager::instance()->Stop();
 }
 
 int32_t MsprofReporterMgr::StopReporters()

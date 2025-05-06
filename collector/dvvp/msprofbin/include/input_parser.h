@@ -57,6 +57,8 @@ enum MsprofArgsType {
     ARGS_TASK_TIME,
     ARGS_AICPU,
     ARGS_MSPROFTX,
+    ARGS_MSTX_DOMAIN_INCLUDE,
+    ARGS_MSTX_DOMAIN_EXCLUDE,
     ARGS_CPU_PROFILING,
     ARGS_SYS_PROFILING,
     ARGS_PID_PROFILING,
@@ -133,6 +135,8 @@ const MmStructOption longOptions[] = {
     {"task-time", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_TASK_TIME},         // the default value is on
     {"aicpu", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AICPU},
     {"msproftx", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_MSPROFTX},
+    {"mstx-domain-include", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_MSTX_DOMAIN_INCLUDE},
+    {"mstx-domain-exclude", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_MSTX_DOMAIN_EXCLUDE},
     {"sys-cpu-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_CPU_PROFILING},
     {"sys-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_SYS_PROFILING},
     {"sys-pid-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_PID_PROFILING},
@@ -226,6 +230,7 @@ public:
 private:
     void Init();
     void AddBasicArgs();
+    void AddMstxArgs();
     void AddHardWareMemArgs();
     void AddCpuArgs();
     void AddSysArgs();

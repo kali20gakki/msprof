@@ -147,7 +147,8 @@ set(msprofilerCpp
     msprof/msproftx/src/msprof_tx_reporter.cpp
     msprof/msproftx/src/msprof_stamp_pool.cpp
     msprof/msproftx/mstx/src/mstx_inject.cpp
-    msprof/msproftx/mstx/src/mstx_data_handler.cpp
+    msprof/msproftx/mstx/src/mstx_domain_mgr.cpp
+    msprof/msproftx/mstx/src/mstx_manager.cpp
     msprof/dynamic_profiling/src/dyn_prof_server.cpp
     msprof/dynamic_profiling/src/dyn_prof_mgr.cpp
     msprof/dynamic_profiling/src/dyn_prof_thread.cpp
