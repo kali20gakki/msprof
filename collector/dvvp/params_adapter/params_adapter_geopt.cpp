@@ -155,7 +155,7 @@ void ParamsAdapterGeOpt::GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConf
     paramContainer_[INPUT_CFG_COM_AICPU] = geCfg->aicpu;
     paramContainer_[INPUT_CFG_COM_L2] = geCfg->l2;
     paramContainer_[INPUT_CFG_COM_HCCL] = geCfg->hccl;
-    paramContainer_[INPUT_CFG_COM_ASCENDCL] = "off";
+    paramContainer_[INPUT_CFG_COM_ASCENDCL] = "on";
     paramContainer_[INPUT_CFG_COM_RUNTIME_API] = geCfg->runtimeApi;
     paramContainer_[INPUT_CFG_COM_AIC_METRICS] = geCfg->aicMetrics;
     paramContainer_[INPUT_CFG_COM_AIV_METRICS] = geCfg->aivMetrics;
