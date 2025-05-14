@@ -15,6 +15,7 @@
 #include "common/plog_manager.h"
 #include "common/utils.h"
 #include "common/runtime_utils.h"
+#include "common/thread_local.h"
 #include "securec.h"
 
 namespace Mspti {
@@ -36,6 +37,51 @@ msptiActivityMemcpyKind GetMsptiMemcpyKind(RtMemcpyKindT rtMemcpykind)
     };
     auto iter = memoryKindMap.find(rtMemcpykind);
     return (iter == memoryKindMap.end() ? MSPTI_ACTIVITY_MEMCPY_KIND_UNKNOWN : iter->second);
+}
+
+inline Mspti::Common::ThreadLocal<msptiActivityMemory>& GetDefaultMemoryActivity()
+{
+    static Mspti::Common::ThreadLocal<msptiActivityMemory> instance(
+        [] () {
+            auto* activityMemory = new(std::nothrow) msptiActivityMemory();
+            if (UNLIKELY(activityMemory == nullptr)) {
+                MSPTI_LOGE("create default activityMemory failed");
+                return activityMemory;
+            }
+            activityMemory->kind = MSPTI_ACTIVITY_KIND_MEMORY;
+            return activityMemory;
+        });
+    return instance;
+}
+
+inline Mspti::Common::ThreadLocal<msptiActivityMemcpy>& GetDefaultMemcpyActivity()
+{
+    static Mspti::Common::ThreadLocal<msptiActivityMemcpy> instance(
+        [] () {
+            auto* activityMemcpy = new(std::nothrow) msptiActivityMemcpy();
+            if (UNLIKELY(activityMemcpy == nullptr)) {
+                MSPTI_LOGE("create default activityMemcpy failed");
+                return activityMemcpy;
+            }
+            activityMemcpy->kind = MSPTI_ACTIVITY_KIND_MEMCPY;
+            return activityMemcpy;
+        });
+    return instance;
+}
+
+inline Mspti::Common::ThreadLocal<msptiActivityMemset>& GetDefaultMemsetActivity()
+{
+    static Mspti::Common::ThreadLocal<msptiActivityMemset> instance(
+        [] () {
+            auto* activityMemset = new(std::nothrow) msptiActivityMemset();
+            if (UNLIKELY(activityMemset == nullptr)) {
+                MSPTI_LOGE("create default activityMemory failed");
+                return activityMemset;
+            }
+            activityMemset->kind = MSPTI_ACTIVITY_KIND_MEMSET;
+            return activityMemset;
+        });
+    return instance;
 }
 }
 
@@ -106,20 +152,21 @@ msptiResult MemoryReporter::ReportMemoryActivity(const MemoryRecord &record)
             }
         }
     }
-    msptiActivityMemory activityMemory{};
-    activityMemory.kind = MSPTI_ACTIVITY_KIND_MEMORY;
-    activityMemory.processId = Common::Utils::GetPid();
-    activityMemory.streamId = MSPTI_INVALID_STREAM_ID;
-    activityMemory.memoryKind = record.memKind;
-    activityMemory.memoryOperationType = record.opType;
-    activityMemory.correlationId = Common::ContextManager::GetInstance()->GetCorrelationId();
-    activityMemory.start = record.start;
-    activityMemory.end = record.end;
-    activityMemory.address = address;
-    activityMemory.bytes = size;
-    activityMemory.deviceId = Common::GetDeviceId();
+    msptiActivityMemory* activityMemory = GetDefaultMemoryActivity().Get();
+    if (UNLIKELY(activityMemory == nullptr)) {
+        MSPTI_LOGE("Get Default MemoryActivity is nullptr");
+        return MSPTI_ERROR_INNER;
+    }
+    activityMemory->memoryKind = record.memKind;
+    activityMemory->memoryOperationType = record.opType;
+    activityMemory->correlationId = Common::ContextManager::GetInstance()->GetCorrelationId();
+    activityMemory->start = record.start;
+    activityMemory->end = record.end;
+    activityMemory->address = address;
+    activityMemory->bytes = size;
+    activityMemory->deviceId = Common::GetDeviceId();
     if (Activity::ActivityManager::GetInstance()->Record(
-        Common::ReinterpretConvert<msptiActivity *>(&activityMemory), sizeof(msptiActivityMemory)) != MSPTI_SUCCESS) {
+        Common::ReinterpretConvert<msptiActivity *>(activityMemory), sizeof(msptiActivityMemory)) != MSPTI_SUCCESS) {
         MSPTI_LOGE("ReportMemoryActivity fail, please check buffer");
         return MSPTI_ERROR_INNER;
     }
@@ -128,19 +175,23 @@ msptiResult MemoryReporter::ReportMemoryActivity(const MemoryRecord &record)
 
 msptiResult MemoryReporter::ReportMemsetActivity(const MemsetRecord &record)
 {
-    msptiActivityMemset activityMemset{};
-    activityMemset.kind = MSPTI_ACTIVITY_KIND_MEMSET;
-    activityMemset.value = record.value;
-    activityMemset.bytes = record.bytes;
-    activityMemset.start = record.start;
-    activityMemset.end = record.end;
-    activityMemset.deviceId = Common::GetDeviceId();
-    activityMemset.streamId =
+    msptiActivityMemset* activityMemset = GetDefaultMemsetActivity().Get();
+    if (UNLIKELY(activityMemset == nullptr)) {
+        MSPTI_LOGE("Get Default MarkActivity is nullptr");
+        return MSPTI_ERROR_INNER;
+    }
+    activityMemset->kind = MSPTI_ACTIVITY_KIND_MEMSET;
+    activityMemset->value = record.value;
+    activityMemset->bytes = record.bytes;
+    activityMemset->start = record.start;
+    activityMemset->end = record.end;
+    activityMemset->deviceId = Common::GetDeviceId();
+    activityMemset->streamId =
         (record.stream == nullptr ? MSPTI_INVALID_STREAM_ID : Common::GetStreamId(record.stream));
-    activityMemset.correlationId = Common::ContextManager::GetInstance()->GetCorrelationId();
-    activityMemset.isAsync = record.isAsync;
+    activityMemset->correlationId = Common::ContextManager::GetInstance()->GetCorrelationId();
+    activityMemset->isAsync = record.isAsync;
     if (Activity::ActivityManager::GetInstance()->Record(
-        Common::ReinterpretConvert<msptiActivity *>(&activityMemset), sizeof(msptiActivityMemset)) != MSPTI_SUCCESS) {
+        Common::ReinterpretConvert<msptiActivity *>(activityMemset), sizeof(msptiActivityMemset)) != MSPTI_SUCCESS) {
         MSPTI_LOGE("ReportMemsetActivity fail, please check buffer");
         return MSPTI_ERROR_INNER;
     }
@@ -149,19 +200,23 @@ msptiResult MemoryReporter::ReportMemsetActivity(const MemsetRecord &record)
 
 msptiResult MemoryReporter::ReportMemcpyActivity(const MemcpyRecord &record)
 {
-    msptiActivityMemcpy activityMemcpy{};
-    activityMemcpy.kind = MSPTI_ACTIVITY_KIND_MEMCPY;
-    activityMemcpy.copyKind = GetMsptiMemcpyKind(record.copyKind);
-    activityMemcpy.bytes = record.bytes;
-    activityMemcpy.start = record.start;
-    activityMemcpy.end = record.end;
-    activityMemcpy.deviceId = Common::GetDeviceId();
-    activityMemcpy.streamId =
+    msptiActivityMemcpy* activityMemcpy = GetDefaultMemcpyActivity().Get();
+    if (UNLIKELY(activityMemcpy == nullptr)) {
+        MSPTI_LOGE("Get Default MarkActivity is nullptr");
+        return MSPTI_ERROR_INNER;
+    }
+    activityMemcpy->kind = MSPTI_ACTIVITY_KIND_MEMCPY;
+    activityMemcpy->copyKind = GetMsptiMemcpyKind(record.copyKind);
+    activityMemcpy->bytes = record.bytes;
+    activityMemcpy->start = record.start;
+    activityMemcpy->end = record.end;
+    activityMemcpy->deviceId = Common::GetDeviceId();
+    activityMemcpy->streamId =
         (record.stream == nullptr ? MSPTI_INVALID_STREAM_ID : Common::GetStreamId(record.stream));
-    activityMemcpy.correlationId = Common::ContextManager::GetInstance()->GetCorrelationId();
-    activityMemcpy.isAsync = record.isAsync;
+    activityMemcpy->correlationId = Common::ContextManager::GetInstance()->GetCorrelationId();
+    activityMemcpy->isAsync = record.isAsync;
     if (Activity::ActivityManager::GetInstance()->Record(
-        Common::ReinterpretConvert<msptiActivity *>(&activityMemcpy), sizeof(msptiActivityMemcpy)) != MSPTI_SUCCESS) {
+        Common::ReinterpretConvert<msptiActivity *>(activityMemcpy), sizeof(msptiActivityMemcpy)) != MSPTI_SUCCESS) {
         MSPTI_LOGE("ReportMemcpyActivity fail, please check buffer");
         return MSPTI_ERROR_INNER;
     }

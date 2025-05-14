@@ -10,8 +10,8 @@
  * *****************************************************************************
 */
 
-#ifndef MSPTI_PROJECT_HCCL_REPORTER_H
-#define MSPTI_PROJECT_HCCL_REPORTER_H
+#ifndef MSPTI_PARSER_HCCL_REPORTER_H
+#define MSPTI_PARSER_HCCL_REPORTER_H
 
 #include <cstdint>
 #include <memory>
@@ -43,4 +43,4 @@ private:
 }
 }
 
-#endif // MSPTI_PROJECT_HCCL_REPORTER_H
+#endif // MSPTI_PARSER_HCCL_REPORTER_H

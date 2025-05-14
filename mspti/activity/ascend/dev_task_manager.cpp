@@ -73,7 +73,8 @@ msptiResult DevTaskManager::StopAllDevKindProfTask(std::vector<std::unique_ptr<D
     return ret;
 }
 
-msptiResult DevTaskManager::StartDevProfTask(uint32_t deviceId, const std::set<msptiActivityKind>& kinds)
+msptiResult DevTaskManager::StartDevProfTask(uint32_t deviceId,
+                                             const ActivitySwitchType& kinds)
 {
     if (!CheckDeviceOnline(deviceId)) {
         MSPTI_LOGE("Device: %u is offline.", deviceId);
@@ -91,7 +92,11 @@ msptiResult DevTaskManager::StartDevProfTask(uint32_t deviceId, const std::set<m
         return MSPTI_ERROR_INNER;
     }
     std::lock_guard<std::mutex> lk(task_map_mtx_);
-    for (const auto& kind : kinds) {
+    for (int kindIndex = 0; kindIndex < MSPTI_ACTIVITY_KIND_COUNT; kindIndex++) {
+        if (!kinds[kindIndex]) {
+            continue;
+        }
+        auto kind = static_cast<msptiActivityKind>(kindIndex);
         auto iter = task_map_.find({deviceId, kind});
         if (iter == task_map_.end()) {
             auto profTasks = Mspti::Ascend::DevProfTaskFactory::CreateTasks(deviceId, kind);
@@ -108,7 +113,8 @@ msptiResult DevTaskManager::StartDevProfTask(uint32_t deviceId, const std::set<m
     return MSPTI_SUCCESS;
 }
 
-msptiResult DevTaskManager::StopDevProfTask(uint32_t deviceId, const std::set<msptiActivityKind>& kinds)
+msptiResult DevTaskManager::StopDevProfTask(uint32_t deviceId,
+                                            const ActivitySwitchType& kinds)
 {
     if (!CheckDeviceOnline(deviceId)) {
         MSPTI_LOGE("Device: %u is offline.", deviceId);
@@ -121,7 +127,11 @@ msptiResult DevTaskManager::StopDevProfTask(uint32_t deviceId, const std::set<ms
     }
     msptiResult ret = MSPTI_SUCCESS;
     std::lock_guard<std::mutex> lk(task_map_mtx_);
-    for (const auto& kind : kinds) {
+    for (int kindIndex = 0; kindIndex < MSPTI_ACTIVITY_KIND_COUNT; kindIndex++) {
+        if (!kinds[kindIndex]) {
+            continue;
+        }
+        auto kind = static_cast<msptiActivityKind>(kindIndex);
         auto iter = task_map_.find({deviceId, kind});
         if (iter != task_map_.end()) {
             ret = StopAllDevKindProfTask(iter->second);
@@ -186,9 +196,13 @@ void DevTaskManager::RegisterReportCallback()
     }
 }
 
-msptiResult DevTaskManager::StartCannProfTask(uint32_t deviceId, const std::set<msptiActivityKind>& kinds)
+msptiResult DevTaskManager::StartCannProfTask(uint32_t deviceId, const ActivitySwitchType& kinds)
 {
-    for (const auto& kind : kinds) {
+    for (int kindIndex = 0; kindIndex < MSPTI_ACTIVITY_KIND_COUNT; kindIndex++) {
+        if (!kinds[kindIndex]) {
+            continue;
+        }
+        auto kind = static_cast<msptiActivityKind>(kindIndex);
         auto cfg_iter = datatype_config_map_.find(kind);
         if (cfg_iter == datatype_config_map_.end()) {
             MSPTI_LOGW("Device: %u, kind: %d don't need to start cann profiling task.",

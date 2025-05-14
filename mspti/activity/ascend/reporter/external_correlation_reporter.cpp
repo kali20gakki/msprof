@@ -14,9 +14,28 @@
 
 #include "activity/activity_manager.h"
 #include "external/mspti_activity.h"
+#include "common/thread_local.h"
+#include "common/utils.h"
+#include "common/plog_manager.h"
 
 namespace Mspti {
 namespace Reporter {
+namespace {
+inline Mspti::Common::ThreadLocal<msptiActivityExternalCorrelation> GetDefaultExternalCorrelationActivity()
+{
+    static Mspti::Common::ThreadLocal<msptiActivityExternalCorrelation> instance(
+            [] () {
+                auto* activityExternalCorrelation = new(std::nothrow) msptiActivityExternalCorrelation();
+                if (UNLIKELY(activityExternalCorrelation == nullptr)) {
+                    MSPTI_LOGE("create default activityExternalCorrelation failed");
+                    return activityExternalCorrelation;
+                }
+                activityExternalCorrelation->kind = MSPTI_ACTIVITY_KIND_EXTERNAL_CORRELATION;
+                return activityExternalCorrelation;
+            });
+    return instance;
+}
+}
 
 ExternalCorrelationReporter* ExternalCorrelationReporter::GetInstance()
 {
@@ -31,12 +50,16 @@ msptiResult ExternalCorrelationReporter::ReportExternalCorrelationId(uint64_t co
     }
     std::lock_guard<std::mutex> lock(mapMtx_);
     for (const auto &pair : externalCorrelationMap) {
-        msptiActivityExternalCorrelation result{};
-        result.kind = MSPTI_ACTIVITY_KIND_EXTERNAL_CORRELATION;
-        result.externalKind = pair.first;
-        result.externalId = pair.second.top();
-        result.correlationId = correlationId;
-        if (Mspti::Activity::ActivityManager::GetInstance()->Record(reinterpret_cast<msptiActivity *>(&result),
+        msptiActivityExternalCorrelation* result = GetDefaultExternalCorrelationActivity().Get();
+        if (UNLIKELY(result == nullptr)) {
+            MSPTI_LOGE("Get Default ExternalCorrelationActivity is nullptr");
+            return MSPTI_ERROR_INNER;
+        }
+        result->kind = MSPTI_ACTIVITY_KIND_EXTERNAL_CORRELATION;
+        result->externalKind = pair.first;
+        result->externalId = pair.second.top();
+        result->correlationId = correlationId;
+        if (Mspti::Activity::ActivityManager::GetInstance()->Record(reinterpret_cast<msptiActivity *>(result),
             sizeof(msptiActivityExternalCorrelation)) != MSPTI_SUCCESS) {
             return MSPTI_ERROR_INNER;
         }

@@ -53,16 +53,6 @@ public:
     void RegReportTypeInfo(uint16_t level, uint32_t typeId, const std::string& typeName);
     std::string& GetTypeName(uint16_t level, uint32_t typeId);
 
-    // User
-    msptiResult ReportMark(const char* msg, RtStreamT stream, const char* domain);
-    msptiResult ReportRangeStartA(const char* msg, RtStreamT stream, uint64_t& markId, const char* domain);
-    msptiResult ReportRangeEnd(uint64_t rangeId);
-
-    // Inner Mark
-    bool isInnerMarker(uint64_t markId);
-    msptiResult InnerDeviceStartA(const char* msg, RtStreamT stream, uint64_t& markId);
-    msptiResult InnerDeviceEndA(uint64_t rangeId);
-
 private:
     ParserManager() = default;
     explicit ParserManager(const ParserManager &obj) = delete;
@@ -87,18 +77,6 @@ private:
     // <level, <typeid, typename>>
     static std::unordered_map<uint16_t, std::unordered_map<uint32_t, std::string>> typeInfo_map_;
     static std::mutex typeInfoMutex_;
-
-    // Marker
-    std::atomic<uint64_t> gMarkId_{0};
-    static constexpr uint32_t MARK_TAG_ID{11};
-    std::mutex rangeInfoMtx_;
-    std::unordered_map<uint64_t, RtStreamT> rangeInfo_;
-    static std::map<std::uint64_t, std::shared_ptr<std::string>> markMsg_;
-    static std::mutex markMsgMtx_;
-
-    // Inner Marker
-    static std::mutex innerMarkerMutex_;
-    static std::unordered_map<uint64_t, RtStreamT> innerMarkIds;
 };
 }  // Parser
 }  // Mspti
