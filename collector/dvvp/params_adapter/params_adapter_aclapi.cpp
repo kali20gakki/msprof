@@ -74,9 +74,11 @@ bool ParamsAdapterAclApi::CheckHostSysAclApiValid(const std::string &cfgStr) con
     }
     std::vector<std::string> cfgStrVec = Utils::Split(cfgStr, false, "", ",");
     for (auto cfg : cfgStrVec) {
-        if (cfg.compare(HOST_SYS_CPU) != 0 && cfg.compare(HOST_SYS_MEM) != 0) {
+        if (cfg.compare(HOST_SYS_CPU) != 0 && cfg.compare(HOST_SYS_MEM) != 0
+            && cfg.compare(HOST_SYS_DISK) != 0 && cfg.compare(HOST_SYS_NETWORK) != 0
+            && cfg.compare(HOST_SYS_OSRT) != 0) {
             MSPROF_LOGE("The value: %s of ACL_PROF_HOST_SYS is not support. Please input in the range of "
-                "'cpu|mem'.", cfg.c_str());
+                "'cpu|mem|disk|network|osrt'.", cfg.c_str());
             return false;
         }
     }
