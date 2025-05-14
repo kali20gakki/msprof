@@ -10,7 +10,7 @@
  * *****************************************************************************
 */
 #include "hccl_range_mark.h"
-#include "activity/ascend/parser/parser_manager.h"
+#include "activity/ascend/parser/mstx_parser.h"
 #include "common/utils.h"
 #include "activity/activity_manager.h"
 #include "activity/ascend/parser/hccl_reporter.h"
@@ -24,13 +24,13 @@ HcclInnerMark::HcclInnerMark(aclrtStream stream, HcclComm comm, std::shared_ptr<
     char commName[COMM_NAME_MAX_LENGTH];
     HcclGetCommName(comm, commName);
     opDesc->commName.assign(commName);
-    Mspti::Parser::ParserManager::GetInstance()->InnerDeviceStartA(markMsg, stream, markId);
+    Mspti::Parser::MstxParser::GetInstance()->InnerDeviceStartA(markMsg, stream, markId);
     Mspti::Parser::HcclReporter::GetInstance()->RecordHcclOp(markId, opDesc);
 };
 
 HcclInnerMark::~HcclInnerMark()
 {
-    Mspti::Parser::ParserManager::GetInstance()->InnerDeviceEndA(markId);
+    Mspti::Parser::MstxParser::GetInstance()->InnerDeviceEndA(markId);
 }
 
 std::unique_ptr<InnerMark> HcclMarkFactory::createMarker(aclrtStream stream, HcclComm comm,

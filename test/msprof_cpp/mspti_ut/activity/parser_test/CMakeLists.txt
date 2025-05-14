@@ -6,6 +6,7 @@ add_executable(mspti_parser_utest
     hccl_reporter_utest.cpp
     ${TOP_DIR}/mspti/activity/activity_manager.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/parser_manager.cpp
+    ${TOP_DIR}/mspti/activity/ascend/parser/mstx_parser.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/hccl_calculator.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/hccl_reporter.cpp
     ${TOP_DIR}/mspti/activity/ascend/reporter/external_correlation_reporter.cpp

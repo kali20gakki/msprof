@@ -14,9 +14,9 @@
 
 #include <cstring>
 #include <functional>
+#include <algorithm>
 #include "securec.h"
 
-#include "activity/ascend/dev_task_manager.h"
 #include "activity/ascend/reporter/external_correlation_reporter.h"
 #include "common/plog_manager.h"
 #include "common/utils.h"
@@ -111,7 +111,9 @@ ActivityManager::~ActivityManager()
         }
     }
     JoinWorkThreads();
-    activity_set_.clear();
+    for (int kindInidex = 0; kindInidex < MSPTI_ACTIVITY_KIND_COUNT; kindInidex++) {
+        activity_switch_[kindInidex] = false;
+    }
     devices_.clear();
     MSPTI_LOGI("Total activity record: %lu. Total activity drop: %lu",
         total_record_num_.load(), total_drop_num_.load());
@@ -151,17 +153,15 @@ msptiResult ActivityManager::Register(msptiActivityKind kind)
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
     {
-        std::lock_guard<std::mutex> lk(activity_mtx_);
-        if (activity_set_.find(kind) != activity_set_.end()) {
-            return MSPTI_SUCCESS;
-        }
-        activity_set_.insert(kind);
-        append_only_activity_set_.insert(kind);
+        activity_switch_[kind] = true;
+        append_only_activity_switch_[kind] = true;
         MSPTI_LOGI("Register Activity kind: %d", static_cast<int>(kind));
     }
     std::lock_guard<std::mutex> lk(devices_mtx_);
     for (auto device : devices_) {
-        Mspti::Ascend::DevTaskManager::GetInstance()->StartDevProfTask(device, {kind});
+        ActivitySwitchType curOpenSwitch{};
+        curOpenSwitch[kind] = true;
+        Mspti::Ascend::DevTaskManager::GetInstance()->StartDevProfTask(device, curOpenSwitch);
     }
     return MSPTI_SUCCESS;
 }
@@ -172,21 +172,14 @@ msptiResult ActivityManager::UnRegister(msptiActivityKind kind)
         MSPTI_LOGE("The ActivityKind: %d was not support.", static_cast<int>(kind));
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
-    {
-        std::lock_guard<std::mutex> lk(activity_mtx_);
-        if (activity_set_.find(kind) == activity_set_.end()) {
-            return MSPTI_SUCCESS;
-        }
-        activity_set_.erase(kind);
-        MSPTI_LOGI("UnRegister Activity kind: %d", static_cast<int>(kind));
-    }
+    activity_switch_[kind] = false;
+    MSPTI_LOGI("UnRegister Activity kind: %d", static_cast<int>(kind));
     return MSPTI_SUCCESS;
 }
 
 bool ActivityManager::IsActivityKindEnable(msptiActivityKind kind)
 {
-    std::lock_guard<std::mutex> lk(activity_mtx_);
-    return activity_set_.find(kind) != activity_set_.end();
+    return activity_switch_[kind];
 }
 
 msptiResult ActivityManager::GetNextRecord(uint8_t *buffer, size_t validBufferSizeBytes, msptiActivity **record)
@@ -263,11 +256,8 @@ msptiResult ActivityManager::Record(msptiActivity *activity, size_t size)
     if (activity == nullptr) {
         return MSPTI_ERROR_INNER;
     }
-    {
-        std::lock_guard<std::mutex> lk(activity_mtx_);
-        if (activity_set_.find(activity->kind) == activity_set_.end()) {
-            return MSPTI_SUCCESS;
-        }
+    if (!IsActivityKindEnable(activity->kind)) {
+        return MSPTI_SUCCESS;
     }
     static const float ACTIVITY_BUFFER_THRESHOLD = 0.8;
     std::lock_guard<std::mutex> lk(buf_mtx_);
@@ -340,11 +330,10 @@ msptiResult ActivityManager::SetDevice(uint32_t deviceId)
         }
         devices_.insert(deviceId);
     }
-    std::lock_guard<std::mutex> lk(activity_mtx_);
-    if (activity_set_.empty()) {
+    if (!std::find(activity_switch_.begin(), activity_switch_.end(), true)) {
         return MSPTI_SUCCESS;
     }
-    return Mspti::Ascend::DevTaskManager::GetInstance()->StartDevProfTask(deviceId, activity_set_);
+    return Mspti::Ascend::DevTaskManager::GetInstance()->StartDevProfTask(deviceId, activity_switch_);
 }
 
 msptiResult ActivityManager::ResetAllDevice()
@@ -353,7 +342,8 @@ msptiResult ActivityManager::ResetAllDevice()
     std::lock_guard<std::mutex> lk(devices_mtx_);
     for (const auto& device : devices_) {
         MSPTI_LOGI("Reset device: %u", device);
-        auto temp = Mspti::Ascend::DevTaskManager::GetInstance()->StopDevProfTask(device, append_only_activity_set_);
+        auto temp =
+            Mspti::Ascend::DevTaskManager::GetInstance()->StopDevProfTask(device, append_only_activity_switch_);
         if (temp != MSPTI_SUCCESS) {
             ret = temp;
         }

@@ -18,21 +18,35 @@
 #include "common/context_manager.h"
 #include "common/plog_manager.h"
 #include "common/utils.h"
+#include "common/thread_local.h"
 #include "hccl_reporter.h"
 #include "stars_common.h"
+#include "mstx_parser.h"
 
 namespace Mspti {
 namespace Parser {
+namespace {
+inline Mspti::Common::ThreadLocal<msptiActivityApi> GetDefaultApiActivity()
+{
+    static Mspti::Common::ThreadLocal<msptiActivityApi> instance(
+        [] () {
+            auto* activityApi = new(std::nothrow) msptiActivityApi();
+            if (UNLIKELY(activityApi == nullptr)) {
+                MSPTI_LOGE("create activityApi failed");
+                return activityApi;
+            }
+            activityApi->kind = MSPTI_ACTIVITY_KIND_API;
+            activityApi->pt.processId = Mspti::Common::Utils::GetPid();
+            return activityApi;
+        });
+    return instance;
+}
+}
+
 std::unordered_map<uint64_t, std::string> ParserManager::hashInfo_map_;
 std::mutex ParserManager::hashMutex_;
 std::unordered_map<uint16_t, std::unordered_map<uint32_t, std::string>> ParserManager::typeInfo_map_;
 std::mutex ParserManager::typeInfoMutex_;
-std::map<uint64_t, std::shared_ptr<std::string>> ParserManager::markMsg_;
-std::mutex ParserManager::markMsgMtx_;
-
-// InnerDeviceMarker
-std::mutex ParserManager::innerMarkerMutex_;
-std::unordered_map<uint64_t, RtStreamT> ParserManager::innerMarkIds;
 
 ParserManager *ParserManager::GetInstance()
 {
@@ -40,22 +54,10 @@ ParserManager *ParserManager::GetInstance()
     return &instance;
 }
 
-static uint64_t GetHashIdImple(const std::string &hashInfo)
-{
-    static const uint32_t UINT32_BITS = 32;
-    uint32_t prime[2] = {29, 131};
-    uint32_t hash[2] = {0};
-    for (char d : hashInfo) {
-        hash[0] = hash[0] * prime[0] + static_cast<uint32_t>(d);
-        hash[1] = hash[1] * prime[1] + static_cast<uint32_t>(d);
-    }
-    return (((static_cast<uint64_t>(hash[0])) << UINT32_BITS) | hash[1]);
-}
-
 uint64_t ParserManager::GenHashId(const std::string &hashInfo)
 {
     // DoubleHash耗时和map find的耗时比较
-    uint64_t hashId = GetHashIdImple(hashInfo);
+    uint64_t hashId = Common::GetHashIdImple(hashInfo);
     {
         std::lock_guard<std::mutex> lock(hashMutex_);
         const auto iter = hashInfo_map_.find(hashId);
@@ -118,17 +120,21 @@ msptiResult ParserManager::ReportApi(const MsprofApi* const data)
         return MSPTI_SUCCESS;
     }
 
-    msptiActivityApi api{};
-    api.kind = MSPTI_ACTIVITY_KIND_API;
-    api.pt.processId = Mspti::Common::Utils::GetPid();
-    api.name = name.data();
-    api.pt.threadId = data->threadId;
-    api.start = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(data->beginTime);
-    api.end = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(data->endTime);
-    api.correlationId = Mspti::Common::ContextManager::GetInstance()->GetCorrelationId(data->threadId);
-    Mspti::Reporter::ExternalCorrelationReporter::GetInstance()->ReportExternalCorrelationId(api.correlationId);
+    msptiActivityApi* api = GetDefaultApiActivity().Get();
+    if (UNLIKELY(api == nullptr)) {
+        MSPTI_LOGE("Get Default MarkActivity is nullptr");
+        return MSPTI_ERROR_INNER;
+    }
+    api->kind = MSPTI_ACTIVITY_KIND_API;
+    api->pt.processId = Mspti::Common::Utils::GetPid();
+    api->name = name.data();
+    api->pt.threadId = data->threadId;
+    api->start = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(data->beginTime);
+    api->end = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(data->endTime);
+    api->correlationId = Mspti::Common::ContextManager::GetInstance()->GetCorrelationId(data->threadId);
+    Mspti::Reporter::ExternalCorrelationReporter::GetInstance()->ReportExternalCorrelationId(api->correlationId);
     if (Mspti::Activity::ActivityManager::GetInstance()->Record(
-        Common::ReinterpretConvert<msptiActivity*>(&api), sizeof(msptiActivityApi)) != MSPTI_SUCCESS) {
+        Common::ReinterpretConvert<msptiActivity*>(api), sizeof(msptiActivityApi)) != MSPTI_SUCCESS) {
         return MSPTI_ERROR_INNER;
     }
     return MSPTI_SUCCESS;
@@ -224,31 +230,6 @@ msptiResult ParserManager::ReportStarsSocLog(uint32_t deviceId, const StarsSocLo
     return MSPTI_SUCCESS;
 }
 
-static void ReportMarkDataToActivity(uint32_t deviceId, const StepTrace* stepTrace)
-{
-    if (!stepTrace) {
-        return;
-    }
-    msptiActivityMarker mark;
-    mark.kind = MSPTI_ACTIVITY_KIND_MARKER;
-    mark.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_DEVICE;
-    mark.timestamp = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId,
-        stepTrace->timestamp);
-    mark.id = stepTrace->indexId;
-    mark.flag = static_cast<msptiActivityFlag>(stepTrace->modelId);
-    mark.objectId.ds.deviceId = deviceId;
-    mark.objectId.ds.streamId = static_cast<uint32_t>(stepTrace->streamId);
-    mark.name = "";
-    mark.domain = "";
-    if (ParserManager::GetInstance()->isInnerMarker(mark.id)) {
-        // 上报的hccl的计算里面
-        HcclReporter::GetInstance()->RecordHcclMarker(&mark);
-        return;
-    }
-    Mspti::Activity::ActivityManager::GetInstance()->Record(
-        Common::ReinterpretConvert<msptiActivity*>(&mark), sizeof(msptiActivityMarker));
-}
-
 void ParserManager::ReportStepTrace(uint32_t deviceId, const StepTrace* stepTrace)
 {
     if (!stepTrace) {
@@ -256,7 +237,7 @@ void ParserManager::ReportStepTrace(uint32_t deviceId, const StepTrace* stepTrac
     }
     switch (stepTrace->tagId) {
         case STEP_TRACE_TAG_MARKEX:
-            ReportMarkDataToActivity(deviceId, stepTrace);
+            MstxParser::GetInstance()->ReportMarkDataToActivity(deviceId, stepTrace);
             break;
         default:
             break;
@@ -281,167 +262,5 @@ void ParserManager::ReportFlipInfo(uint32_t deviceId, const TaskFlipInfo* flipIn
     flip_dst_map_.erase(dsfKey);
 }
 
-std::shared_ptr<std::string> ParserManager::TryCacheMarkMsg(const char* msg)
-{
-    // msg字符串已在对外接口进行判空和长度判断操作
-    std::lock_guard<std::mutex> lk(markMsgMtx_);
-    if (markMsg_.size() > MARK_MAX_CACHE_NUM) {
-        MSPTI_LOGE("Cache mark msg failed, current size: %u, limit size: %u", markMsg_.size(), MARK_MAX_CACHE_NUM);
-        return nullptr;
-    }
-    std::shared_ptr<std::string> msgPtr{nullptr};
-    Mspti::Common::MsptiMakeSharedPtr(msgPtr, msg);
-    if (msgPtr == nullptr) {
-        MSPTI_LOGE("Failed to malloc memory for mark msg.");
-        return nullptr;
-    }
-    uint64_t hashId = GetHashIdImple(*msgPtr);
-    auto iter = markMsg_.find(hashId);
-    if (iter == markMsg_.end()) {
-        iter = markMsg_.insert({hashId, msgPtr}).first;
-    }
-    return iter->second;
-}
-
-msptiResult ParserManager::ReportMark(const char* msg, RtStreamT stream, const char* domain)
-{
-    uint64_t timestamp = Mspti::Common::ContextManager::GetInstance()->GetHostTimeStampNs();
-    auto msgPtr = TryCacheMarkMsg(msg);
-    if (msgPtr == nullptr) {
-        MSPTI_LOGE("Try Cache Mark msg failed.");
-        return MSPTI_ERROR_INNER;
-    }
-    uint64_t markId = ++gMarkId_;
-    if (stream != nullptr && rtProfilerTraceEx(markId,
-        static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS_WITH_DEVICE), MARK_TAG_ID, stream) !=
-        MSPTI_SUCCESS) {
-        MSPTI_LOGE("Failed to run markA func.");
-        return MSPTI_ERROR_INNER;
-    }
-    msptiActivityMarker activity;
-    activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
-    activity.flag = (stream != nullptr) ? MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS_WITH_DEVICE :
-        MSPTI_ACTIVITY_FLAG_MARKER_INSTANTANEOUS;
-    activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
-    activity.id = markId;
-    activity.objectId.pt.processId = Mspti::Common::Utils::GetPid();
-    activity.objectId.pt.threadId = Mspti::Common::Utils::GetTid();
-    activity.name = msgPtr->c_str();
-    activity.domain = domain;
-    activity.timestamp = timestamp;
-    return Mspti::Activity::ActivityManager::GetInstance()->Record(
-        Common::ReinterpretConvert<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
-}
-
-msptiResult ParserManager::ReportRangeStartA(const char* msg, RtStreamT stream, uint64_t& markId, const char* domain)
-{
-    uint64_t timestamp = Mspti::Common::ContextManager::GetInstance()->GetHostTimeStampNs();
-    auto msgPtr = TryCacheMarkMsg(msg);
-    if (msgPtr == nullptr) {
-        MSPTI_LOGE("Try Cache Mark msg failed.");
-        return MSPTI_ERROR_INNER;
-    }
-    markId = ++gMarkId_;
-    if (stream != nullptr && rtProfilerTraceEx(markId,
-        static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_START_WITH_DEVICE),
-        MARK_TAG_ID, stream) != MSPTI_SUCCESS) {
-        MSPTI_LOGE("Failed to run range startA func.");
-        return MSPTI_ERROR_INNER;
-    }
-    msptiActivityMarker activity;
-    activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
-    activity.flag = (stream != nullptr) ? MSPTI_ACTIVITY_FLAG_MARKER_START_WITH_DEVICE :
-        MSPTI_ACTIVITY_FLAG_MARKER_START;
-    activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
-    activity.id = markId;
-    activity.objectId.pt.processId = Mspti::Common::Utils::GetPid();
-    activity.objectId.pt.threadId = Mspti::Common::Utils::GetTid();
-    activity.name = msgPtr->c_str();
-    activity.domain = domain;
-    activity.timestamp = timestamp;
-    auto ret = Mspti::Activity::ActivityManager::GetInstance()->Record(
-        Common::ReinterpretConvert<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
-    {
-        std::lock_guard<std::mutex> lock(rangeInfoMtx_);
-        rangeInfo_.insert({markId, stream});
-    }
-    return ret;
-}
-
-msptiResult ParserManager::ReportRangeEnd(uint64_t rangeId)
-{
-    uint64_t timestamp = Mspti::Common::ContextManager::GetInstance()->GetHostTimeStampNs();
-    bool withStream = false;
-    {
-        std::lock_guard<std::mutex> lock(rangeInfoMtx_);
-        auto iter = rangeInfo_.find(rangeId);
-        if (iter == rangeInfo_.end()) {
-            MSPTI_LOGW("Input rangeId[%lu] is invalid.", rangeId);
-            return MSPTI_SUCCESS;
-        }
-        if (iter->second) {
-            if (rtProfilerTraceEx(rangeId, static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_END_WITH_DEVICE),
-                MARK_TAG_ID, iter->second) != MSPTI_SUCCESS) {
-                MSPTI_LOGE("Failed to run range end func.");
-                return MSPTI_ERROR_INNER;
-            }
-            withStream = true;
-        }
-        rangeInfo_.erase(iter);
-    }
-    msptiActivityMarker activity;
-    activity.kind = MSPTI_ACTIVITY_KIND_MARKER;
-    activity.flag = withStream ? MSPTI_ACTIVITY_FLAG_MARKER_END_WITH_DEVICE : MSPTI_ACTIVITY_FLAG_MARKER_END;
-    activity.sourceKind = MSPTI_ACTIVITY_SOURCE_KIND_HOST;
-    activity.id = rangeId;
-    activity.objectId.pt.processId = Mspti::Common::Utils::GetPid();
-    activity.objectId.pt.threadId = Mspti::Common::Utils::GetTid();
-    activity.name = "";
-    activity.domain = "";
-    activity.timestamp = timestamp;
-    return Mspti::Activity::ActivityManager::GetInstance()->Record(
-        Common::ReinterpretConvert<msptiActivity*>(&activity), sizeof(msptiActivityMarker));
-}
-
-bool ParserManager::isInnerMarker(uint64_t markId)
-{
-    std::lock_guard<std::mutex> lock(innerMarkerMutex_);
-    return innerMarkIds.count(markId);
-}
-
-msptiResult ParserManager::InnerDeviceStartA(const char *msg, RtStreamT stream, uint64_t& markId)
-{
-    markId = gMarkId_++;
-    if (stream != nullptr && rtProfilerTraceEx(markId,
-                                               static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_START_WITH_DEVICE),
-                                               MARK_TAG_ID, stream) != MSPTI_SUCCESS) {
-        MSPTI_LOGE("Failed to run range startA func.");
-        return MSPTI_ERROR_INNER;
-    }
-    {
-        std::lock_guard<std::mutex> lock(innerMarkerMutex_);
-        innerMarkIds.insert({markId, stream});
-    }
-    return MSPTI_SUCCESS;
-}
-
-msptiResult ParserManager::InnerDeviceEndA(uint64_t rangeId)
-{
-    {
-        std::lock_guard<std::mutex> lock(innerMarkerMutex_);
-        auto iter = innerMarkIds.find(rangeId);
-        if (iter == innerMarkIds.end()) {
-            MSPTI_LOGW("Input rangeId[%lu] is invalid.", rangeId);
-            return MSPTI_SUCCESS;
-        }
-        if (iter->second && rtProfilerTraceEx(rangeId,
-                                              static_cast<uint64_t>(MSPTI_ACTIVITY_FLAG_MARKER_END_WITH_DEVICE),
-                                              MARK_TAG_ID, iter->second) != MSPTI_SUCCESS) {
-            MSPTI_LOGE("Failed to run range end func.");
-            return MSPTI_ERROR_INNER;
-        }
-    }
-    return MSPTI_SUCCESS;
-}
 }  // Parser
 }  // Mspti

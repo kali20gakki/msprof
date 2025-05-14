@@ -137,7 +137,7 @@ static void ShowKernelInfo(msptiActivityKernel* kernel)
     if (!kernel) {
         return;
     }
-    LOG_PRINT("[%s], type: %s, name: %s, start: %lu, end: %lu, deviceId: %u, streamId: %u, correlationId: %lu\n",
+    LOG_PRINT("[%s] type: %s, name: %s, start: %lu, end: %lu, deviceId: %u, streamId: %u, correlationId: %lu\n",
         GetActivityKindString(kernel->kind), kernel->type, kernel->name, kernel->start, kernel->end,
         kernel->ds.deviceId, kernel->ds.streamId, kernel->correlationId);
 }
@@ -168,7 +168,7 @@ static void ShowMarkerInfo(msptiActivityMarker* marker)
         return;
     }
     if (marker->sourceKind == MSPTI_ACTIVITY_SOURCE_KIND_HOST) {
-        LOG_PRINT("[%s] flag: %lu, sourceKind: %s, timestamp: %u, processId: %u, threadId: %u, name: %s, domain: %s\n",
+        LOG_PRINT("[%s] flag: %lu, sourceKind: %s, timestamp: %lu, processId: %u, threadId: %u, name: %s, domain: %s\n",
             GetActivityKindString(marker->kind), marker->flag, GetActivitySourceKindString(marker->sourceKind),
             marker->timestamp, marker->objectId.pt.processId, marker->objectId.pt.threadId, marker->name,
             marker->domain);
@@ -185,7 +185,7 @@ static void ShowMemCpyInfo(msptiActivityMemcpy* data)
     if (!data) {
         return;
     }
-    LOG_PRINT("[%s] copyKind: %s, bytes: %lu, start: %lu, end: %u, deviceId: %u, streamId: %u, correlationId: %lu, "
+    LOG_PRINT("[%s] copyKind: %s, bytes: %lu, start: %lu, end: %lu, deviceId: %u, streamId: %u, correlationId: %lu, "
         "isAsync: %d\n",
         GetActivityKindString(data->kind), GetActivityMemcpyKindString(data->copyKind), data->bytes,
         data->start, data->end, data->deviceId, data->streamId, data->correlationId, data->isAsync);
@@ -196,7 +196,7 @@ static void ShowMemoryInfo(msptiActivityMemory* memory)
     if (!memory) {
         return;
     }
-    LOG_PRINT("[%s] operationType: %s, memoryKind: %lu, correlationId: %lu, start: %u, end: %u, address: %lu, "
+    LOG_PRINT("[%s] operationType: %s, memoryKind: %lu, correlationId: %lu, start: %lu, end: %lu, address: %lu, "
               "bytes:%lu, processId: %u, deviceId: %u, streamId: %u\n",
         GetActivityKindString(memory->kind), GetActivityMemoryOperationTypeString(memory->memoryOperationType),
         GetActivityMemoryKindString(memory->memoryKind), memory->correlationId, memory->start, memory->end,

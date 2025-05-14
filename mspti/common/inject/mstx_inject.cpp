@@ -15,8 +15,7 @@
 #include <mutex>
 
 #include "activity/activity_manager.h"
-#include "activity/ascend/parser/parser_manager.h"
-#include "common/config.h"
+#include "activity/ascend/parser/mstx_parser.h"
 #include "common/utils.h"
 #include "common/plog_manager.h"
 
@@ -183,7 +182,7 @@ void MstxMarkAFunc(const char* msg, RtStreamT stream)
     if (!Mspti::MstxDomainMgr::GetInstance()->isDomainEnable(Mspti::g_defaultDomainName.c_str())) {
         return;
     }
-    if (Mspti::Parser::ParserManager::GetInstance()->ReportMark(msg, stream, Mspti::g_defaultDomainName.c_str()) !=
+    if (Mspti::Parser::MstxParser::GetInstance()->ReportMark(msg, stream, Mspti::g_defaultDomainName.c_str()) !=
         MSPTI_SUCCESS) {
         MSPTI_LOGE("Report Mark data failed.");
     }
@@ -201,7 +200,7 @@ uint64_t MstxRangeStartAFunc(const char* msg, RtStreamT stream)
         return MSTX_INVALID_RANGE_ID;
     }
     uint64_t markId = MSTX_INVALID_RANGE_ID;
-    if (Mspti::Parser::ParserManager::GetInstance()->ReportRangeStartA(msg, stream,
+    if (Mspti::Parser::MstxParser::GetInstance()->ReportRangeStartA(msg, stream,
         markId, Mspti::g_defaultDomainName.c_str()) != MSPTI_SUCCESS) {
         MSPTI_LOGE("Report RangeStart data failed.");
         return MSTX_INVALID_RANGE_ID;
@@ -217,7 +216,7 @@ void MstxRangeEndFunc(uint64_t rangeId)
     if (!Mspti::MstxDomainMgr::GetInstance()->isDomainEnable((Mspti::g_defaultDomainName.c_str()))) {
         return;
     }
-    if (Mspti::Parser::ParserManager::GetInstance()->ReportRangeEnd(rangeId) != MSPTI_SUCCESS) {
+    if (Mspti::Parser::MstxParser::GetInstance()->ReportRangeEnd(rangeId) != MSPTI_SUCCESS) {
         MSPTI_LOGE("Report RangeEnd data failed.");
     }
 }
@@ -250,7 +249,7 @@ void MstxDomainMarkAFunc(mstxDomainHandle_t domain, const char* msg, RtStreamT s
     if (namePtr == nullptr) {
         return;
     }
-    if (Mspti::Parser::ParserManager::GetInstance()->ReportMark(msg, stream, namePtr->c_str()) !=
+    if (Mspti::Parser::MstxParser::GetInstance()->ReportMark(msg, stream, namePtr->c_str()) !=
         MSPTI_SUCCESS) {
         MSPTI_LOGE("Report Mark data failed.");
     }
@@ -272,7 +271,7 @@ uint64_t MstxDomainRangeStartAFunc(mstxDomainHandle_t domain, const char* msg, R
         return MSTX_INVALID_RANGE_ID;
     }
     uint64_t markId = MSTX_INVALID_RANGE_ID;
-    if (Mspti::Parser::ParserManager::GetInstance()->ReportRangeStartA(msg, stream, markId, namePtr->c_str()) !=
+    if (Mspti::Parser::MstxParser::GetInstance()->ReportRangeStartA(msg, stream, markId, namePtr->c_str()) !=
         MSPTI_SUCCESS) {
         MSPTI_LOGE("Report RangeStart data failed.");
         return MSTX_INVALID_RANGE_ID;
@@ -292,7 +291,7 @@ void MstxDomainRangeEndFunc(mstxDomainHandle_t domain, uint64_t rangeId)
     if (Mspti::MstxDomainMgr::GetInstance()->GetDomainNameByHandle(domain) == nullptr) {
         return;
     }
-    if (Mspti::Parser::ParserManager::GetInstance()->ReportRangeEnd(rangeId) != MSPTI_SUCCESS) {
+    if (Mspti::Parser::MstxParser::GetInstance()->ReportRangeEnd(rangeId) != MSPTI_SUCCESS) {
         MSPTI_LOGE("Report RangeEnd data failed.");
     }
 }

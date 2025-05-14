@@ -18,6 +18,14 @@
 #include <memory>
 #include <string>
 
+#ifndef UNLIKELY
+#ifdef _MSC_VER
+#define UNLIKELY(x) (x)
+#else
+#define UNLIKELY(x) __builtin_expect(!!(x), 0)
+#endif
+#endif
+
 constexpr uint32_t SECTONSEC = 1000000000UL;
 
 template<typename T>
@@ -59,6 +67,18 @@ template<typename T, typename V>
 inline T ReinterpretConvert(V ptr)
 {
     return reinterpret_cast<T>(ptr);
+}
+
+static uint64_t GetHashIdImple(const std::string &hashInfo)
+{
+    static const uint32_t UINT32_BITS = 32;
+    uint32_t prime[2] = {29, 131};
+    uint32_t hash[2] = {0};
+    for (char d : hashInfo) {
+        hash[0] = hash[0] * prime[0] + static_cast<uint32_t>(d);
+        hash[1] = hash[1] * prime[1] + static_cast<uint32_t>(d);
+    }
+    return (((static_cast<uint64_t>(hash[0])) << UINT32_BITS) | hash[1]);
 }
 
 class Utils {

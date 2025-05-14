@@ -29,9 +29,11 @@ namespace Ascend {
 // Singleton
 class DevTaskManager {
 public:
+    using ActivitySwitchType = std::array<std::atomic<bool>, MSPTI_ACTIVITY_KIND_COUNT>;
+
     static DevTaskManager* GetInstance();
-    msptiResult StartDevProfTask(uint32_t deviceId, const std::set<msptiActivityKind>& kinds);
-    msptiResult StopDevProfTask(uint32_t deviceId, const std::set<msptiActivityKind>& kinds);
+    msptiResult StartDevProfTask(uint32_t deviceId, const ActivitySwitchType& kinds);
+    msptiResult StopDevProfTask(uint32_t deviceId, const ActivitySwitchType& kinds);
     bool CheckDeviceOnline(uint32_t deviceId);
 
 private:
@@ -45,7 +47,7 @@ private:
     msptiResult StartAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks);
     msptiResult StopAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks);
     void RegisterReportCallback();
-    msptiResult StartCannProfTask(uint32_t deviceId, const std::set<msptiActivityKind>& kinds);
+    msptiResult StartCannProfTask(uint32_t deviceId, const ActivitySwitchType& kinds);
     msptiResult StopCannProfTask(uint32_t deviceId);
 
 private:

@@ -22,6 +22,7 @@
 #include <vector>
 #include <unordered_set>
 
+#include "activity/ascend/dev_task_manager.h"
 #include "external/mspti_activity.h"
 #include "common/config.h"
 
@@ -47,6 +48,7 @@ private:
 // Singleton
 class ActivityManager {
 public:
+    using ActivitySwitchType = Mspti::Ascend::DevTaskManager::ActivitySwitchType;
     static ActivityManager* GetInstance();
     msptiResult RegisterCallbacks(
         msptiBuffersCallbackRequestFunc funcBufferRequested,
@@ -74,8 +76,8 @@ private:
 private:
     const static std::set<msptiActivityKind> supportActivityKinds_;
     // Replace map with bitest
-    std::set<msptiActivityKind> activity_set_;
-    std::set<msptiActivityKind> append_only_activity_set_;
+    ActivitySwitchType activity_switch_;
+    ActivitySwitchType append_only_activity_switch_;
     std::mutex activity_mtx_;
     std::unordered_set<uint32_t> devices_;
     std::mutex devices_mtx_;
