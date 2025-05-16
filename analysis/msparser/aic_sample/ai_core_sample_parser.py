@@ -122,8 +122,8 @@ class ParsingCoreSampleData(MsMultiProcess):
     def _insert_ai_core_data(self: any, file_size: int, ai_core_data: list) -> None:
         delta_dev = InfoConfReader().get_delta_time()
         for _index in range(file_size // StructFmt.AICORE_SAMPLE_FMT_SIZE):
-            binary_data = ai_core_data[_index * StructFmt.AICORE_SAMPLE_FMT_SIZE
-                                       :(_index + 1) * StructFmt.AICORE_SAMPLE_FMT_SIZE]
+            binary_data = ai_core_data[_index * StructFmt.AICORE_SAMPLE_FMT_SIZE:
+                                       (_index + 1) * StructFmt.AICORE_SAMPLE_FMT_SIZE]
 
             if not binary_data[0]:
                 break
@@ -226,8 +226,8 @@ class ParsingFftsAICoreSampleData(ParsingCoreSampleData):
     def _insert_ai_core_data(self: any, file_size: int, ai_core_data: list) -> None:
         delta_dev = InfoConfReader().get_delta_time()
         for _index in range(file_size // StructFmt.AICORE_SAMPLE_FMT_SIZE):
-            binary_data = ai_core_data[_index * StructFmt.AICORE_SAMPLE_FMT_SIZE
-                                       :(_index + 1) * StructFmt.AICORE_SAMPLE_FMT_SIZE]
+            binary_data = ai_core_data[_index * StructFmt.AICORE_SAMPLE_FMT_SIZE:
+                                       (_index + 1) * StructFmt.AICORE_SAMPLE_FMT_SIZE]
 
             if not binary_data[0]:
                 break
