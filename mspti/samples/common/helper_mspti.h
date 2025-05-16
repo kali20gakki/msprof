@@ -28,6 +28,8 @@ struct UserData {
     aclrtStream* stream;
 };
 
+UserData* g_userData;
+
 // mspti 申请内存接口
 void UserBufferRequest(uint8_t **buffer, size_t *size, size_t *maxNumRecords)
 {
@@ -196,7 +198,7 @@ static void ShowMemoryInfo(msptiActivityMemory* memory)
     if (!memory) {
         return;
     }
-    LOG_PRINT("[%s] operationType: %s, memoryKind: %lu, correlationId: %lu, start: %lu, end: %lu, address: %lu, "
+    LOG_PRINT("[%s] operationType: %s, memoryKind: %s, correlationId: %lu, start: %lu, end: %lu, address: %lu, "
               "bytes:%lu, processId: %u, deviceId: %u, streamId: %u\n",
         GetActivityKindString(memory->kind), GetActivityMemoryOperationTypeString(memory->memoryOperationType),
         GetActivityMemoryKindString(memory->memoryKind), memory->correlationId, memory->start, memory->end,
@@ -269,15 +271,20 @@ void UserBufferComplete(uint8_t *buffer, size_t size, size_t validSize)
 msptiSubscriberHandle* InitMspti(void *pCallback, void *pUserData)
 {
     // 订阅mspti
+    g_userData = reinterpret_cast<UserData*>(pUserData);
     msptiSubscribe(&subscriber, (msptiCallbackFunc)pCallback, pUserData);
     msptiActivityRegisterCallbacks(UserBufferRequest, UserBufferComplete);
     return &subscriber;
 }
 
-void DeInitMspti()
+void DeInitMspti(void)
 {
     msptiUnsubscribe(subscriber);
     msptiActivityFlushAll(1);
+    if (g_userData != nullptr) {
+        free(g_userData);
+        g_userData = nullptr;
+    }
 }
 
 #endif // HELPER_MSPTI_H_

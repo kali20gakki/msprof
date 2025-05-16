@@ -28,7 +28,7 @@ class RuntimeHostTaskModel(ParserModel):
         """
         self.insert_data_to_db(table_name, data_list)
 
-    def get_host_tasks(self: any, is_all: bool, model_id: int, iter_id: int, device_id : int) -> list:
+    def get_host_tasks(self: any, is_all: bool, model_id: int, iter_id: int, device_id: int) -> list:
         sql = "select {0}.model_id, {0}.request_id as index_id, {0}.stream_id, {0}.task_id, " \
               "{0}.context_ids, {0}.batch_id, {0}.task_type, {0}.device_id,{0}.timestamp, " \
               "{0}.connection_id from {0} {1} order by {0}.timestamp" \
