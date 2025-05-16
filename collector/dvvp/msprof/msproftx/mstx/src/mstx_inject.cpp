@@ -23,6 +23,7 @@ using namespace Collector::Dvvp::Mstx;
 
 static std::mutex g_mutex;
 static std::unordered_map<uint64_t, aclrtStream> g_eventIdsWithStream;
+static std::unordered_map<uint64_t, std::unordered_set<uint64_t>> g_domainWithEventIds_;
 
 namespace MsprofMstxApi {
 constexpr uint64_t MSTX_MODEL_ID = 0xFFFFFFFFU;
@@ -108,18 +109,27 @@ static uint64_t MsTxRangeStartAImpl(const char* msg, aclrtStream stream, uint64_
         MSPROF_LOGE("Failed to save data for range start, msg: %s", msg);
         return MSTX_INVALID_RANGE_ID;
     }
-    if (stream) {
+    {
         std::lock_guard<std::mutex> lock(g_mutex);
-        g_eventIdsWithStream[mstxEventId] = stream;
+        if (stream) {
+            g_eventIdsWithStream[mstxEventId] = stream;
+        }
+        g_domainWithEventIds_[domainName].insert(mstxEventId);
     }
     MSPROF_LOGI("Successfully to execute range start, range id %lu", mstxEventId);
     return mstxEventId;
 }
 
-static void MstxRangeEndImpl(uint64_t id)
+static void MstxRangeEndImpl(uint64_t id, uint64_t domainName)
 {
     {
         std::lock_guard<std::mutex> lock(g_mutex);
+        auto domainNameIter = g_domainWithEventIds_.find(domainName);
+        if (domainNameIter == g_domainWithEventIds_.end() || domainNameIter->second.count(id) == 0) {
+            MSPROF_LOGE("Domain and range id for mstx range start func and range end func do not match");
+            return;
+        }
+        domainNameIter->second.erase(id);
         auto it = g_eventIdsWithStream.find(id);
         if (it != g_eventIdsWithStream.end()) {
             if (it->second == nullptr) {
@@ -201,7 +211,7 @@ void MstxRangeEndFunc(uint64_t id)
     if (id == MSTX_INVALID_RANGE_ID) {
         return;
     }
-    MstxRangeEndImpl(id);
+    MstxRangeEndImpl(id, MstxDomainMgr::instance()->GetDefaultDomainNameHash());
 }
 
 mstxDomainHandle_t MstxDomainCreateAFunc(const char* name)
@@ -285,7 +295,7 @@ void MstxDomainRangeEndFunc(mstxDomainHandle_t domain, uint64_t id)
     if (!MstxDomainMgr::instance()->IsDomainEnabled(domainNameHash)) {
         return;
     }
-    MstxRangeEndImpl(id);
+    MstxRangeEndImpl(id, domainNameHash);
 }
 
 void SetMstxModuleCoreApi(MstxFuncTable outTable, unsigned int size)

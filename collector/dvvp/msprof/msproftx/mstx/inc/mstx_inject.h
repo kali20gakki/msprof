@@ -22,6 +22,8 @@ void  MstxRangeEndFunc(uint64_t id);
 mstxDomainHandle_t MstxDomainCreateAFunc(const char* name);
 void MstxDomainDestroyFunc(mstxDomainHandle_t domain);
 void MstxDomainMarkAFunc(mstxDomainHandle_t domain, const char* msg, aclrtStream stream);
+uint64_t MstxDomainRangeStartAFunc(mstxDomainHandle_t domain, const char* msg, aclrtStream stream);
+void MstxDomainRangeEndFunc(mstxDomainHandle_t domain, uint64_t id);
 int GetModuleTableFunc(MstxGetModuleFuncTableFunc getFuncTable);
 }
 
