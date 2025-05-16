@@ -467,6 +467,21 @@ TEST_F(MstxUtest, MstxRangeEndFuncWillSaveMstxDataWhenSaveMstxDataSuccWithInputS
     EXPECT_EQ(1, g_txdataList_.size());
 }
 
+TEST_F(MstxUtest, RangeEndFuncWillNotSaveMstxDataWhenInputDomainDifferFromInputDomainForRangeStartFunc)
+{
+    GlobalMockObject::verify();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
+    auto domainHandle = MsprofMstxApi::MstxDomainCreateAFunc("domain");
+    EXPECT_NE(nullptr, domainHandle);
+    std::string msg = "test";
+    uint64_t id = MsprofMstxApi::MstxRangeStartAFunc(msg.c_str(), nullptr);
+    EXPECT_NE(MSTX_INVALID_RANGE_ID, id);
+    MsprofMstxApi::MstxDomainRangeEndFunc(domainHandle, id);
+    MstxManager::instance()->Stop();
+    EXPECT_EQ(0, g_txdataList_.size());
+    MsprofMstxApi::MstxDomainDestroyFunc(domainHandle);
+}
+
 TEST_F(MstxUtest, MstxDomainCreateAFuncWillReturnNullWhenInputInvalidMsg)
 {
     GlobalMockObject::verify();
