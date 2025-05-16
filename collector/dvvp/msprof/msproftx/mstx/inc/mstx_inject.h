@@ -12,6 +12,7 @@
 #ifndef MSTX_INJECT_H
 #define MSTX_INJECT_H
 
+#include <stdint.h>
 #include "mstx_data_type.h"
 
 namespace MsprofMstxApi {

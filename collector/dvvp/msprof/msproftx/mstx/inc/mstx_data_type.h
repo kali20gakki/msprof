@@ -12,9 +12,6 @@
 
 #ifndef MSTX_DATA_TYPE_H
 #define MSTX_DATA_TYPE_H
-
-#include <stdint.h>
-
 #define MSTX_INVALID_RANGE_ID 0
 #define MSTX_SUCCESS 0
 #define MSTX_FAIL 1

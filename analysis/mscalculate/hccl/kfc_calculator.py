@@ -144,7 +144,7 @@ class KfcCalculator(ICalculator, MsMultiProcess):
                 comm_stream_id_group_table.setdefault(stream_id, set()).add(info.group_name)
         return kfc_stream_id_group_table, comm_stream_id_group_table
 
-    def get_kfc_data(self:any, kfc_stream_id: dict, comm_stream_ids: dict) -> tuple:
+    def get_kfc_data(self: any, kfc_stream_id: dict, comm_stream_ids: dict) -> tuple:
         kfc_op_data = []
         kfc_comm_task_data = []
         conn, curs = DBManager.check_connect_db(self._project_path, DBNameConstant.DB_ASCEND_TASK)

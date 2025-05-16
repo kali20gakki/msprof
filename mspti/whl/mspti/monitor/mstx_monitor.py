@@ -31,8 +31,8 @@ class MstxMonitor(BaseMonitor):
         pass
 
     def start(self,
-              mark_cb : Callable[[MarkerData], None] = empty_callback,
-              range_cb : Callable[[RangeMarkerData], None] = empty_callback) -> MsptiResult:
+              mark_cb: Callable[[MarkerData], None] = empty_callback,
+              range_cb: Callable[[RangeMarkerData], None] = empty_callback) -> MsptiResult:
         if not callable(mark_cb) and not callable(range_cb):
             print_error_msg("Mstx callback is invalid")
             return MsptiResult.MSPTI_ERROR_INVALID_PARAMETER

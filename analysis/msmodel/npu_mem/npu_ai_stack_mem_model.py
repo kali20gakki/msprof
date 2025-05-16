@@ -14,25 +14,25 @@ from profiling_bean.db_dto.op_mem_dto import OpMemDto
 
 class NpuAiStackMemTableSelector:
     TableDict = {
-        DBNameConstant.TABLE_NPU_OP_MEM_RAW : {
-            'dto' : NpuOpMemDto,
-            'sql' : "select operator, addr, size, timestamp, thread_id, " \
+        DBNameConstant.TABLE_NPU_OP_MEM_RAW: {
+            'dto': NpuOpMemDto,
+            'sql': "select operator, addr, size, timestamp, thread_id, " \
             "total_allocate_memory, total_reserve_memory, level, type as type_, device_type from {0} " \
             .format(DBNameConstant.TABLE_NPU_OP_MEM_RAW)
         },
-        DBNameConstant.TABLE_NPU_OP_MEM : {
-            'dto' : OpMemDto,
-            'sql' : "select operator, size, allocation_time, release_time, " \
+        DBNameConstant.TABLE_NPU_OP_MEM: {
+            'dto': OpMemDto,
+            'sql': "select operator, size, allocation_time, release_time, " \
                     "duration, allocation_total_allocated, allocation_total_reserved," \
                     "release_total_allocated, release_total_reserved, device_type, name from {0} " \
                     .format(DBNameConstant.TABLE_NPU_OP_MEM)
         },
-        DBNameConstant.TABLE_NPU_OP_MEM_REC : {
+        DBNameConstant.TABLE_NPU_OP_MEM_REC: {
             'dto': NpuOpMemRecDto,
             'sql': "select component, timestamp, total_reserve_memory, total_allocate_memory, device_type from {0} " \
                     .format(DBNameConstant.TABLE_NPU_OP_MEM_REC)
         },
-        DBNameConstant.TABLE_NPU_MODULE_MEM : {
+        DBNameConstant.TABLE_NPU_MODULE_MEM: {
             'dto': NpuModuleMemDto,
             'sql': "select module_id, syscnt, total_size, device_type from {0} order by module_id asc, syscnt asc " \
                     .format(DBNameConstant.TABLE_NPU_MODULE_MEM)

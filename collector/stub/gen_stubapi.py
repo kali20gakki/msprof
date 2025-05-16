@@ -10,22 +10,22 @@ import logging
 PATTERN_FUNCTION = re.compile(r'MSVP_PROF_API\s+\n+.+\w+\([^();]*\);|.+\w+\([^();]*\);')
 PATTERN_RETURN = re.compile(r'([^ ]+[ *])\w+\([^;]+;')
 RETURN_STATEMENTS = {
-    'aclError':                 '    printf("[ERROR]: stub library cannot be'\
-                                     ' used for execution, please '\
-                                     'check your environment variables '\
-                                     'and compilation options to make sure '\
-                                     'you use the correct ACL library.\\n");\n'  \
-                                     '    return static_cast<aclError>(ACL_'\
-                                     'ERROR_COMPILING_STUB_MODE);',
-    'aclprofConfig':            '    return nullptr;',
-    'aclprofSubscribeConfig':   '    return nullptr;',
-    'uint64_t':                 '    return static_cast<uint64_t>(0);',
-    'size_t':                   '    return static_cast<size_t>(0);',
-    'aclprofStepInfo':          '    return nullptr;',
-    'void *':                     '    return nullptr;',
-    'Status':                   '    return SUCCESS;',
-    'aclgrphProfConfig':        '    return nullptr;',
-    'void':                     ''
+    'aclError': '    printf("[ERROR]: stub library cannot be'\
+                     ' used for execution, please '\
+                     'check your environment variables '\
+                     'and compilation options to make sure '\
+                     'you use the correct ACL library.\\n");\n'  \
+                     '    return static_cast<aclError>(ACL_'\
+                     'ERROR_COMPILING_STUB_MODE);',
+    'aclprofConfig': '    return nullptr;',
+    'aclprofSubscribeConfig': '    return nullptr;',
+    'uint64_t': '    return static_cast<uint64_t>(0);',
+    'size_t': '    return static_cast<size_t>(0);',
+    'aclprofStepInfo': '    return nullptr;',
+    'void *': '    return nullptr;',
+    'Status': '    return SUCCESS;',
+    'aclgrphProfConfig': '    return nullptr;',
+    'void': ''
 }
 
 
