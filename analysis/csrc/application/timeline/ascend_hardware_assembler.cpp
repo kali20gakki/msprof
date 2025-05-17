@@ -26,6 +26,7 @@ namespace {
 using MEMCPY_INFO_FORMAT = std::map<TaskId, MemcpyInfoData>;
 const std::string TASK_TYPE_FFTS_PLUS = "FFTS_PLUS";
 const std::string TASK_TYPE_UNKNOWN = "UNKNOWN";
+const std::string TASK_TYPE_NA = "N/A";
 const std::vector<std::string> MEMCPY_OPERATIONS {
     "host to host",
     "host to device",
@@ -131,7 +132,7 @@ std::string AscendHardwareAssembler::GetTaskType(const AscendTaskData& data)
     TaskId id{static_cast<uint16_t>(data.streamId), static_cast<uint16_t>(data.batchId),
         static_cast<uint16_t>(data.taskId), data.contextId, data.deviceId};
     auto it = taskType_.find(id);
-    if (it != taskType_.end()) {
+    if (it != taskType_.end() && it->second != TASK_TYPE_NA) {
         return it->second;
     }
     return data.taskType;

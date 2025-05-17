@@ -105,9 +105,10 @@ class TaskOpViewer:
         task_info = []
         for stream_id, task_id, batch_id, host_task_type, start_time, duration, device_task_type in task_data:
             op_info = op_info_dict.get((stream_id, task_id, batch_id), {})
-            op_name: str = op_info.get("op_name", "N/A")
-            task_type: str = TaskTimeViewer.get_task_type(host_task_type, device_task_type)
-            task_type = op_info.get("task_type", task_type)
+            op_name: str = op_info.get("op_name", Constant.NA)
+            default_task_type = TaskTimeViewer.get_task_type(host_task_type, device_task_type)
+            op_info_task_type = op_info.get("task_type")
+            task_type = op_info_task_type if op_info_task_type not in (None, Constant.NA) else default_task_type
             task_time: float = round(duration / DBManager.NSTOUS, NumberConstant.ROUND_THREE_DECIMAL)
             task_start = format_high_precision_for_csv(
                 InfoConfReader().trans_into_local_time(start_time))

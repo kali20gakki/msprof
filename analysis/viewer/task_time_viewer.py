@@ -72,10 +72,12 @@ class TaskTimeViewer(BaseViewer):
 
     @staticmethod
     def _update_op_name_and_type(data, node_info_dict, node_key) -> None:
-        task_type = TaskTimeViewer.get_task_type(data.host_task_type, data.device_task_type)
+        default_task_type = TaskTimeViewer.get_task_type(data.host_task_type, data.device_task_type)
         node_info = node_info_dict.get(node_key, {})
+        node_info_task_type = node_info.get("task_type")
+        task_type = node_info_task_type if node_info_task_type not in (None, Constant.NA) else default_task_type
         setattr(data, 'op_name', node_info.get('op_name', task_type))
-        setattr(data, 'task_type', node_info.get('task_type', task_type))
+        setattr(data, 'task_type', task_type)
 
     def get_time_timeline_header(self: any, data: list, pid_header=TraceViewHeaderConstant.PROCESS_TASK) -> list:
         """
