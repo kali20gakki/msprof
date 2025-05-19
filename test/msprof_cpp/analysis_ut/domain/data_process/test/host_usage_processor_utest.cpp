@@ -1,6 +1,6 @@
 /* ******************************************************************************
             版权所有 (c) 华为技术有限公司 2024-2024
-            Copyright, 2023, Huawei Tech. Co., Ltd.
+            Copyright, 2024, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
  * File Name          : host_usage_processor_utest.cpp
@@ -22,7 +22,7 @@ using namespace Analysis::Utils;
 using namespace Analysis::Viewer::Database;
 namespace {
 const int DEPTH = 0;
-const std::string BASE_PATH = "./usage";
+const std::string BASE_PATH = "./host_usage_data";
 const std::string PROF_PATH_A = File::PathJoin({BASE_PATH, "PROF_0"});
 const std::string CPU_DB_NAME = "host_cpu_usage.db";
 const std::string CPU_TABLE_NAME = "CpuUsage";
@@ -32,6 +32,8 @@ const std::string DISK_DB_NAME = "host_disk_usage.db";
 const std::string DISK_TABLE_NAME = "DiskUsage";
 const std::string NETWORK_DB_NAME = "host_network_usage.db";
 const std::string NETWORK_TABLE_NAME = "NetworkUsage";
+const std::string RUNTIME_API_DB_NAME = "host_runtime_api.db";
+const std::string RUNTIME_API_TABLE_NAME = "Syscall";
 }
 using CpuUsageDataType = std::vector<std::tuple<uint64_t, uint64_t, std::string, double>>;
 CpuUsageDataType cpuUsage{{3758215093862910, 3758215114581640, "50", 0},
@@ -47,6 +49,16 @@ using NetWorkUsageDataType = std::vector<std::tuple<uint64_t, uint64_t, double, 
 NetWorkUsageDataType networkUsage{{35675490307527, 35675511080960, 0.002465, 3.00865051962984},
                                   {35675531284823, 35675552244520, 0, 0},
                                   {35675697968700, 35675718727140, 0.002466, 3.01082354863434}};
+using RuntimeApiDataType = std::vector<std::tuple<std::string, uint64_t, uint64_t, std::string,
+    uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+RuntimeApiDataType runtimeApiData{
+    {"MSVP_ProfTimer", 206226, 206315, "openat", 35675490307000, 49000, 35675490356000,
+        35675490488000, 35675490492900},
+    {"MSVP_ProfTimer", 206226, 206315, "read", 35675499907000, 20400000, 35675520307000,
+        35675534307000, 35675554707000},
+    {"MSVP_UploaderD", 206226, 206315, "clock_nanosleep", 35675500307000, 50000000, 35675550307000,
+        35675770307000, 35675820307000},
+};
 
 class HostUsageProcessorUTest : public testing::Test {
 protected:
@@ -59,11 +71,12 @@ protected:
         EXPECT_TRUE(File::CreateDir(PROF_PATH_A));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_A, HOST})));
         EXPECT_TRUE(File::CreateDir(File::PathJoin({PROF_PATH_A, HOST, SQLITE})));
-        EXPECT_TRUE(CreateCpuUsageData(File::PathJoin({PROF_PATH_A, HOST, SQLITE, CPU_DB_NAME}), cpuUsage));
-        EXPECT_TRUE(CreateMemUsageData(File::PathJoin({PROF_PATH_A, HOST, SQLITE, MEM_DB_NAME}), memUsage));
-        EXPECT_TRUE(CreateDiskUsageData(File::PathJoin({PROF_PATH_A, HOST, SQLITE, DISK_DB_NAME}), diskUsage));
-        EXPECT_TRUE(CreateNetWorkUsageData(File::PathJoin({PROF_PATH_A, HOST, SQLITE, NETWORK_DB_NAME}),
-                                           networkUsage));
+        std::string sqlitePath = File::PathJoin({PROF_PATH_A, HOST, SQLITE});
+        EXPECT_TRUE(CreateCpuUsageData(File::PathJoin({sqlitePath, CPU_DB_NAME}), cpuUsage));
+        EXPECT_TRUE(CreateMemUsageData(File::PathJoin({sqlitePath, MEM_DB_NAME}), memUsage));
+        EXPECT_TRUE(CreateDiskUsageData(File::PathJoin({sqlitePath, DISK_DB_NAME}), diskUsage));
+        EXPECT_TRUE(CreateNetWorkUsageData(File::PathJoin({sqlitePath, NETWORK_DB_NAME}), networkUsage));
+        EXPECT_TRUE(CreateRuntimeApiData(File::PathJoin({sqlitePath, RUNTIME_API_DB_NAME}), runtimeApiData));
     }
     static void TearDownTestCase()
     {
@@ -128,6 +141,17 @@ protected:
         auto cols = database->GetTableCols(NETWORK_TABLE_NAME);
         dbRunner->CreateTable(NETWORK_TABLE_NAME, cols);
         dbRunner->InsertData(NETWORK_TABLE_NAME, data);
+        return true;
+    }
+    static bool CreateRuntimeApiData(const std::string &dbPath, RuntimeApiDataType &data)
+    {
+        std::shared_ptr<HostRuntimeApi> database;
+        MAKE_SHARED_RETURN_VALUE(database, HostRuntimeApi, false);
+        std::shared_ptr<DBRunner> dbRunner;
+        MAKE_SHARED_RETURN_VALUE(dbRunner, DBRunner, false, dbPath);
+        auto cols = database->GetTableCols(RUNTIME_API_TABLE_NAME);
+        dbRunner->CreateTable(RUNTIME_API_TABLE_NAME, cols);
+        dbRunner->InsertData(RUNTIME_API_TABLE_NAME, data);
         return true;
     }
 };
@@ -226,4 +250,22 @@ TEST_F(HostUsageProcessorUTest, ShouldReturnFalseWhenNetworkUsageProcessReserveE
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
     MOCKER_CPP(&std::vector<NetWorkUsageData>::reserve).stubs().will(throws(std::bad_alloc()));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NETWORK_USAGE));
+}
+
+TEST_F(HostUsageProcessorUTest, ShouldReturnOKWhenRuntimeApiProcessRunSuccess)
+{
+    DataInventory dataInventory;
+    auto processor = OSRuntimeApiProcessor(PROF_PATH_A);
+    EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_OSRT_API));
+    auto res = dataInventory.GetPtr<std::vector<OSRuntimeApiData>>();
+    EXPECT_EQ(3ul, res->size());
+}
+
+TEST_F(HostUsageProcessorUTest, ShouldReturnFalseWhenRuntimeApiProcessReserveException)
+{
+    DataInventory dataInventory;
+    auto processor = OSRuntimeApiProcessor(PROF_PATH_A);
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
+    MOCKER_CPP(&std::vector<OSRuntimeApiData>::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_OSRT_API));
 }

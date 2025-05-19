@@ -35,6 +35,7 @@ const std::unordered_map<JsonProcess, std::string> JSON_TO_ASSEMBLER_TABLE{
     {JsonProcess::HBM,              PROCESS_HBM},
     {JsonProcess::COMMUNICATION,    PROCESS_HCCL},
     {JsonProcess::HCCS,             PROCESS_HCCS},
+    {JsonProcess::OS_RUNTIME_API,   PROCESSOR_NAME_OSRT_API},
     {JsonProcess::NETWORK_USAGE,    PROCESS_NETWORK_USAGE},
     {JsonProcess::DISK_USAGE,       PROCESS_DISK_USAGE},
     {JsonProcess::MEMORY_USAGE,     PROCESS_MEMORY_USAGE},

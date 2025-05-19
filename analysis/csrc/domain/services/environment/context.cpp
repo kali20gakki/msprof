@@ -40,7 +40,8 @@ const std::string DEVICE_START_LOG = "dev_start.log";
 // 已经校验过的字段,可直接使用.at();未被校验过的字段则使用.value(),来设置默认值。确保读取正常
 const std::set<std::string> CHECK_VALUES = {
     "platform_version", "startCollectionTimeBegin",
-    "startClockMonotonicRaw", "pid", "CPU", "DeviceInfo", "llc_profiling", "ai_core_profiling_mode", "hostname"
+    "startClockMonotonicRaw", "pid", "CPU", "DeviceInfo", "llc_profiling", "ai_core_profiling_mode", "hostname",
+    "memoryTotal", "netCard"
 };
 }
 
@@ -544,6 +545,34 @@ uint16_t Context::GetAiCoreNum(uint16_t deviceId, const std::string &profPath)
         return 0;
     }
     return info.at("DeviceInfo").back().value("ai_core_num", 0);
+}
+
+uint64_t Context::GetTotalMem(uint16_t deviceId, const std::string &profPath)
+{
+    auto info = GetInfoByDeviceId(deviceId, profPath);
+    // 这里如果没有host目录 会去取到device的数据 本质上依赖外层路径校验
+    if (info.empty()) {
+        ERROR("info is empty, input path %, deviceId %", profPath, deviceId);
+        return 0;
+    }
+    return info.at("memoryTotal");
+}
+
+uint64_t Context::GetNetCardTotalSpeed(uint16_t deviceId, const std::string &profPath)
+{
+    auto info = GetInfoByDeviceId(deviceId, profPath);
+    // 这里如果没有host目录 会去取到device的数据 本质上依赖外层路径校验
+    if (info.empty()) {
+        ERROR("info is empty, input path %, deviceId %", profPath, deviceId);
+        return 0;
+    }
+    uint64_t totalSpeed = 0;
+    // 负数不计数
+    for (const auto netCard : info.at("netCard")) {
+        auto speed = netCard.value("speed", 0);
+        totalSpeed += (speed < 0) ? 0 : speed;
+    }
+    return totalSpeed;
 }
 
 }  // namespace Environment

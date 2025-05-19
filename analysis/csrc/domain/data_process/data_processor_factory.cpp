@@ -82,6 +82,8 @@ std::unordered_map<std::string, ProcessorCreator> DataProcessorFactory::processo
         MAKE_SHARED_RETURN_VOID(processor, HostDiskUsageProcessor, profPath);}},
     {PROCESSOR_NAME_NETWORK_USAGE, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
         MAKE_SHARED_RETURN_VOID(processor, HostNetworkUsageProcessor, profPath);}},
+    {PROCESSOR_NAME_OSRT_API, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
+        MAKE_SHARED_RETURN_VOID(processor, OSRuntimeApiProcessor, profPath);}},
     {PROCESSOR_NAME_LLC, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
         MAKE_SHARED_RETURN_VOID(processor, LLcProcessor, profPath);}},
     {PROCESSOR_NAME_NPU_MEM, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {

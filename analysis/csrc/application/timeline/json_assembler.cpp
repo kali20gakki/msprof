@@ -78,18 +78,20 @@ void JsonAssembler::GenerateHWMetaData(const std::unordered_map<uint16_t, uint32
                                        const struct LayerInfo &layerInfo,
                                        std::vector<std::shared_ptr<TraceEvent>> &res)
 {
+    std::shared_ptr<MetaDataNameEvent> processName;
+    std::shared_ptr<MetaDataLabelEvent> processLabel;
+    std::shared_ptr<MetaDataIndexEvent> processIndex;
     for (const auto &kv: pidMap) {
-        std::shared_ptr<MetaDataNameEvent> processName;
         MAKE_SHARED_RETURN_VOID(processName, MetaDataNameEvent, kv.second, DEFAULT_TID,
                                 META_DATA_PROCESS_NAME, layerInfo.component);
-        std::shared_ptr<MetaDataLabelEvent> processLabel;
+        res.push_back(processName);
+
         MAKE_SHARED_RETURN_VOID(processLabel, MetaDataLabelEvent, kv.second, DEFAULT_TID,
                                 META_DATA_PROCESS_LABEL, layerInfo.label);
-        std::shared_ptr<MetaDataIndexEvent> processIndex;
+        res.push_back(processLabel);
+
         MAKE_SHARED_RETURN_VOID(processIndex, MetaDataIndexEvent, kv.second, DEFAULT_TID,
                                 META_DATA_PROCESS_INDEX, layerInfo.sortIndex);
-        res.push_back(processName);
-        res.push_back(processLabel);
         res.push_back(processIndex);
     }
 }
@@ -99,26 +101,15 @@ void JsonAssembler::GenerateTaskMetaData(const std::unordered_map<uint16_t, uint
                                          std::vector<std::shared_ptr<TraceEvent>> &res,
                                          std::set<std::pair<uint32_t, int>> &pidTidSet)
 {
-    for (const auto &it : pidMap) {
-        std::shared_ptr<MetaDataNameEvent> processName;
-        MAKE_SHARED_RETURN_VOID(processName, MetaDataNameEvent, it.second, DEFAULT_TID, META_DATA_PROCESS_NAME,
-                                layer.component);
-        res.push_back(processName);
-        std::shared_ptr<MetaDataLabelEvent> processLabel;
-        MAKE_SHARED_RETURN_VOID(processLabel, MetaDataLabelEvent, it.second, DEFAULT_TID, META_DATA_PROCESS_LABEL,
-                                layer.label);
-        res.push_back(processLabel);
-        std::shared_ptr<MetaDataIndexEvent> processIndex;
-        MAKE_SHARED_RETURN_VOID(processIndex, MetaDataIndexEvent, it.second, DEFAULT_TID, META_DATA_PROCESS_INDEX,
-                                layer.sortIndex);
-        res.push_back(processIndex);
-    }
+    GenerateHWMetaData(pidMap, layer, res);
+
+    std::shared_ptr<MetaDataNameEvent> threadName;
+    std::shared_ptr<MetaDataIndexEvent> threadIndex;
     for (const auto &it : pidTidSet) {
-        std::string argName{"Stream " + std::to_string(it.second)};
-        std::shared_ptr<MetaDataNameEvent> threadName;
-        MAKE_SHARED_RETURN_VOID(threadName, MetaDataNameEvent, it.first, it.second, META_DATA_THREAD_NAME, argName);
+        MAKE_SHARED_RETURN_VOID(threadName, MetaDataNameEvent, it.first, it.second, META_DATA_THREAD_NAME,
+                                "Stream " + std::to_string(it.second));
         res.push_back(threadName);
-        std::shared_ptr<MetaDataIndexEvent> threadIndex;
+
         MAKE_SHARED_RETURN_VOID(threadIndex, MetaDataIndexEvent, it.first, it.second, META_DATA_THREAD_INDEX,
                                 it.second);
         res.push_back(threadIndex);

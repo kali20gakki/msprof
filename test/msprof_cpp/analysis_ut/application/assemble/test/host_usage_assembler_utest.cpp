@@ -102,6 +102,18 @@ static void GenerateHostUsageData(DataInventory &dataInventory)
     networkRes.push_back(networkData);
     MAKE_SHARED_NO_OPERATION(networkResS, std::vector<NetWorkUsageData>, networkRes);
     dataInventory.Inject(networkResS);
+
+    std::shared_ptr<std::vector<OSRuntimeApiData>> runtimeApiResS;
+    std::vector<OSRuntimeApiData> runtimeApiRes;
+    OSRuntimeApiData runtimeApiData;
+    runtimeApiData.name = "clock_nanosleep"; // clock_nanosleep
+    runtimeApiData.pid = 20; // pid 20
+    runtimeApiData.tid = 123456; // tid 123456
+    runtimeApiData.timestamp = 1719621074669030430; // start 1719621074669030430
+    runtimeApiData.endTime = 1719621074669040430; // end 1719621074669040430
+    runtimeApiRes.push_back(runtimeApiData);
+    MAKE_SHARED_NO_OPERATION(runtimeApiResS, std::vector<OSRuntimeApiData>, runtimeApiRes);
+    dataInventory.Inject(runtimeApiResS);
 }
 
 TEST_F(HostUsageAssemblerUTest, ShouldReturnTrueWhenDataNotExists)
@@ -117,6 +129,9 @@ TEST_F(HostUsageAssemblerUTest, ShouldReturnTrueWhenDataNotExists)
 
     NetworkUsageAssembler network;
     EXPECT_TRUE(network.Run(dataInventory_, PROF_PATH));
+
+    OSRuntimeApiAssembler runtimeApi;
+    EXPECT_TRUE(runtimeApi.Run(dataInventory_, PROF_PATH));
 }
 
 TEST_F(HostUsageAssemblerUTest, ShouldReturnTrueWhenCpuSuccess)
@@ -196,6 +211,28 @@ TEST_F(HostUsageAssemblerUTest, ShouldReturnTrueWhenNetworkSuccess)
                             "{\"name\":\"process_labels\",\"pid\":2383960415,\"tid\":0,\"ph\":\"M\",\"args\":"
                             "{\"labels\":\"CPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960415,\"tid"
                             "\":0,\"ph\":\"M\",\"args\":{\"sort_index\":10}},";
+    EXPECT_EQ(expectStr, res.back());
+}
+
+TEST_F(HostUsageAssemblerUTest, ShouldReturnTrueWhenRuntimeApiSuccess)
+{
+    OSRuntimeApiAssembler assembler;
+    GenerateHostUsageData(dataInventory_);
+    MOCKER_CPP(&Context::GetPidFromInfoJson).stubs().will(returnValue(2328086)); // pid 2328086
+    EXPECT_TRUE(assembler.Run(dataInventory_, PROF_PATH));
+    auto files = File::GetOriginData(RESULT_PATH, {"msprof"}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    std::string expectStr = "{\"name\":\"clock_nanosleep\",\"pid\":2383960479,\"tid\":123456,\"ts\":"
+                            "\"1719621074669030.430\",\"dur\":10.0,\"ph\":\"X\",\"args\":{}},{\"name\":"
+                            "\"thread_name\",\"pid\":2383960479,\"tid\":123456,\"ph\":\"M\",\"args\":{\"name\":"
+                            "\"Thread 123456\"}},{\"name\":\"process_name\",\"pid\":2383960479,\"tid\":0,\"ph\":"
+                            "\"M\",\"args\":{\"name\":\"OS Runtime API\"}},{\"name\":\"process_labels\","
+                            "\"pid\":2383960479,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"CPU\"}},{\"name\":"
+                            "\"process_sort_index\",\"pid\":2383960479,\"tid\":0,\"ph\":\"M\","
+                            "\"args\":{\"sort_index\":12}},";
     EXPECT_EQ(expectStr, res.back());
 }
 

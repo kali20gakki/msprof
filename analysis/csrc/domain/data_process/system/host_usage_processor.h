@@ -4,7 +4,7 @@
 ****************************************************************************** */
 /* ******************************************************************************
  * File Name          : host_usage_processor.h
- * Description        : 处理CpuUsage,MemUsage,DiskUsage,NetWorkUsage表相关数据
+ * Description        : 处理CpuUsage,MemUsage,DiskUsage,NetWorkUsage, Syscall表相关数据
  * Author             : msprof team
  * Creation Date      : 2024/8/20
  * *****************************************************************************
@@ -23,15 +23,25 @@ using namespace Analysis::Utils;
 using OriCpuUsage = std::vector<std::tuple<uint64_t, std::string, double>>;
 
 // start_time, usage
-using OriTimeUsage = std::vector<std::tuple<uint64_t, double>>;
+using OriMemUsage = std::vector<std::tuple<uint64_t, double>>;
+
+// start_time, usage, disk_read, disk_write
+using OriDiskUsage = std::vector<std::tuple<uint64_t, double, double, double>>;
+
+// start_time, usage, speed
+using OriNetworkUsage = std::vector<std::tuple<uint64_t, double, double>>;
+
+// runtime_api_name, runtime_pid, runtime_tid, runtime_trans_start, runtime_trans_end
+using OriSysCall = std::vector<std::tuple<std::string, uint64_t, uint64_t, uint64_t, uint64_t>>;
 
 class HostUsageProcessor : public DataProcessor {
 public:
     HostUsageProcessor() = default;
-    explicit HostUsageProcessor(const std::string &profPath_, DBInfo &&dbInfo);
+    explicit HostUsageProcessor(const std::string &profPath_, const std::string &processorName, DBInfo &&dbInfo);
     virtual ~HostUsageProcessor() = default;
 protected:
     DBInfo usageDb_;
+    std::string processorName_;
 private:
     bool Process(DataInventory& dataInventory) override;
     virtual bool ProcessData(DataInventory& dataInventory, const ProfTimeRecord &record, const std::string &dbPath) = 0;
@@ -43,8 +53,6 @@ public:
     explicit HostCpuUsageProcessor(const std::string &profPath_);
 private:
     bool ProcessData(DataInventory& dataInventory, const ProfTimeRecord &record, const std::string &dbPath) override;
-private:
-    std::string processorName_;
 };
 
 class HostMemUsageProcessor : public HostUsageProcessor {
@@ -53,8 +61,6 @@ public:
     explicit HostMemUsageProcessor(const std::string &profPath_);
 private:
     bool ProcessData(DataInventory& dataInventory, const ProfTimeRecord &record, const std::string &dbPath) override;
-private:
-    std::string processorName_;
 };
 
 class HostDiskUsageProcessor : public HostUsageProcessor {
@@ -63,8 +69,6 @@ public:
     explicit HostDiskUsageProcessor(const std::string &profPath_);
 private:
     bool ProcessData(DataInventory& dataInventory, const ProfTimeRecord &record, const std::string &dbPath) override;
-private:
-    std::string processorName_;
 };
 
 class HostNetworkUsageProcessor : public HostUsageProcessor {
@@ -73,8 +77,14 @@ public:
     explicit HostNetworkUsageProcessor(const std::string &profPath_);
 private:
     bool ProcessData(DataInventory& dataInventory, const ProfTimeRecord &record, const std::string &dbPath) override;
+};
+
+class OSRuntimeApiProcessor : public HostUsageProcessor {
+public:
+    OSRuntimeApiProcessor() = default;
+    explicit OSRuntimeApiProcessor(const std::string &profPath_);
 private:
-    std::string processorName_;
+    bool ProcessData(DataInventory& dataInventory, const ProfTimeRecord &record, const std::string &dbPath) override;
 };
 }
 }

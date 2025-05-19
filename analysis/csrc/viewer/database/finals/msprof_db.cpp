@@ -296,50 +296,86 @@ namespace {
         {"size", SQL_NUMERIC_TYPE},
         {"memcpyOperation", SQL_NUMERIC_TYPE}
     };
+
+    const TableColumns CPU_USAGE = {
+        {"timestampNs", SQL_NUMERIC_TYPE},
+        {"cpuId", SQL_NUMERIC_TYPE},
+        {"usage", SQL_NUMERIC_TYPE}
+    };
+
+    const TableColumns HOST_MEM_USAGE = {
+        {"timestampNs", SQL_NUMERIC_TYPE},
+        {"usage", SQL_NUMERIC_TYPE}
+    };
+
+    const TableColumns HOST_DISK_USAGE = {
+        {"timestampNs", SQL_NUMERIC_TYPE},
+        {"readRate", SQL_NUMERIC_TYPE},
+        {"writeRate", SQL_NUMERIC_TYPE},
+        {"usage", SQL_NUMERIC_TYPE}
+    };
+
+    const TableColumns HOST_NETWORK_USAGE = {
+        {"timestampNs", SQL_NUMERIC_TYPE},
+        {"usage", SQL_NUMERIC_TYPE},
+        {"speed", SQL_NUMERIC_TYPE}
+    };
+
+    const TableColumns OSRT_API = {
+        {"name", SQL_NUMERIC_TYPE},
+        {"globalTid", SQL_NUMERIC_TYPE},
+        {"startNs", SQL_NUMERIC_TYPE},
+        {"endNs", SQL_NUMERIC_TYPE}
+    };
 }
 
 MsprofDB::MsprofDB()
 {
     dbName_ = "msprof.db";
     tableColNames_ = {
-        {TABLE_NAME_STRING_IDS, STRING_IDS},
-        {TABLE_NAME_SESSION_TIME_INFO, SESSION_TIME_INFO},
-        {TABLE_NAME_NPU_INFO, NPU_INFO},
-        {TABLE_NAME_HOST_INFO, HOST_INFO},
-        {TABLE_NAME_TASK, TASK},
-        {TABLE_NAME_COMPUTE_TASK_INFO, COMPUTE_TASK_INFO},
-        {TABLE_NAME_COMMUNICATION_SCHEDULE_TASK_INFO, COMMUNICATION_SCHEDULE_TASK_INFO},
-        {TABLE_NAME_COMMUNICATION_TASK_INFO, COMMUNICATION_TASK_INFO},
-        {TABLE_NAME_COMMUNICATION_OP, COMMUNICATION_OP},
-        {TABLE_NAME_CANN_API, CANN_API},
-        {TABLE_NAME_NPU_MEM, NPU_MEM},
-        {TABLE_NAME_NPU_MODULE_MEM, NPU_MODULE_MEM},
-        {TABLE_NAME_NPU_OP_MEM, NPU_OP_MEM},
-        {TABLE_NAME_NIC, SYS_IO},
-        {TABLE_NAME_ROCE, SYS_IO},
-        {TABLE_NAME_HBM, HBM},
-        {TABLE_NAME_DDR, DDR},
-        {TABLE_NAME_LLC, LLC},
-        {TABLE_NAME_TASK_PMU_INFO, TASK_PMU_INFO},
-        {TABLE_NAME_SAMPLE_PMU_TIMELINE, SAMPLE_PMU_TIMELINE},
-        {TABLE_NAME_SAMPLE_PMU_SUMMARY, SAMPLE_PMU_SUMMARY},
-        {TABLE_NAME_PCIE, PCIE},
-        {TABLE_NAME_HCCS, HCCS},
-        {TABLE_NAME_ACC_PMU, ACC_PMU},
-        {TABLE_NAME_SOC, SOC_BANDWIDTH_LEVEL},
-        {TABLE_NAME_META_DATA, META_DATA},
-        {TABLE_NAME_AICORE_FREQ, AICORE_FREQ},
-        {TABLE_NAME_MSTX, MSTX},
-        {TABLE_NAME_MEMCPY_INFO, MEMCPY_INFO},
+        {TABLE_NAME_STRING_IDS,                         STRING_IDS},
+        {TABLE_NAME_SESSION_TIME_INFO,                  SESSION_TIME_INFO},
+        {TABLE_NAME_NPU_INFO,                           NPU_INFO},
+        {TABLE_NAME_HOST_INFO,                          HOST_INFO},
+        {TABLE_NAME_TASK,                               TASK},
+        {TABLE_NAME_COMPUTE_TASK_INFO,                  COMPUTE_TASK_INFO},
+        {TABLE_NAME_COMMUNICATION_SCHEDULE_TASK_INFO,   COMMUNICATION_SCHEDULE_TASK_INFO},
+        {TABLE_NAME_COMMUNICATION_TASK_INFO,            COMMUNICATION_TASK_INFO},
+        {TABLE_NAME_COMMUNICATION_OP,                   COMMUNICATION_OP},
+        {TABLE_NAME_CANN_API,                           CANN_API},
+        {TABLE_NAME_NPU_MEM,                            NPU_MEM},
+        {TABLE_NAME_NPU_MODULE_MEM,                     NPU_MODULE_MEM},
+        {TABLE_NAME_NPU_OP_MEM,                         NPU_OP_MEM},
+        {TABLE_NAME_NIC,                                SYS_IO},
+        {TABLE_NAME_ROCE,                               SYS_IO},
+        {TABLE_NAME_HBM,                                HBM},
+        {TABLE_NAME_DDR,                                DDR},
+        {TABLE_NAME_LLC,                                LLC},
+        {TABLE_NAME_TASK_PMU_INFO,                      TASK_PMU_INFO},
+        {TABLE_NAME_SAMPLE_PMU_TIMELINE,                SAMPLE_PMU_TIMELINE},
+        {TABLE_NAME_SAMPLE_PMU_SUMMARY,                 SAMPLE_PMU_SUMMARY},
+        {TABLE_NAME_PCIE,                               PCIE},
+        {TABLE_NAME_HCCS,                               HCCS},
+        {TABLE_NAME_ACC_PMU,                            ACC_PMU},
+        {TABLE_NAME_SOC,                                SOC_BANDWIDTH_LEVEL},
+        {TABLE_NAME_META_DATA,                          META_DATA},
+        {TABLE_NAME_AICORE_FREQ,                        AICORE_FREQ},
+        {TABLE_NAME_MSTX,                               MSTX},
+        {TABLE_NAME_MEMCPY_INFO,                        MEMCPY_INFO},
+        {TABLE_NAME_CPU_USAGE,                          CPU_USAGE},
+        {TABLE_NAME_HOST_MEM_USAGE,                     HOST_MEM_USAGE},
+        {TABLE_NAME_HOST_DISK_USAGE,                    HOST_DISK_USAGE},
+        {TABLE_NAME_HOST_NETWORK_USAGE,                 HOST_NETWORK_USAGE},
+        {TABLE_NAME_OSRT_API,                           OSRT_API},
         // ENUM
-        {TABLE_NAME_ENUM_API_TYPE, ENUM_TABLE},
-        {TABLE_NAME_ENUM_MODULE, ENUM_TABLE},
-        {TABLE_NAME_ENUM_HCCL_DATA_TYPE, ENUM_TABLE},
-        {TABLE_NAME_ENUM_HCCL_LINK_TYPE, ENUM_TABLE},
-        {TABLE_NAME_ENUM_HCCL_TRANSPORT_TYPE, ENUM_TABLE},
-        {TABLE_NAME_ENUM_HCCL_RDMA_TYPE, ENUM_TABLE},
-        {TABLE_NAME_MSTX_EVENT_TYPE, ENUM_TABLE},
-        {TABLE_NAME_ENUM_MEMCPY_OPERATION, ENUM_TABLE}
+        {TABLE_NAME_ENUM_API_TYPE,                      ENUM_TABLE},
+        {TABLE_NAME_ENUM_MODULE,                        ENUM_TABLE},
+        {TABLE_NAME_ENUM_HCCL_DATA_TYPE,                ENUM_TABLE},
+        {TABLE_NAME_ENUM_HCCL_LINK_TYPE,                ENUM_TABLE},
+        {TABLE_NAME_ENUM_HCCL_TRANSPORT_TYPE,           ENUM_TABLE},
+        {TABLE_NAME_ENUM_HCCL_RDMA_TYPE,                ENUM_TABLE},
+        {TABLE_NAME_MSTX_EVENT_TYPE,                    ENUM_TABLE},
+        {TABLE_NAME_ENUM_MEMCPY_OPERATION,              ENUM_TABLE}
     };
 }
 

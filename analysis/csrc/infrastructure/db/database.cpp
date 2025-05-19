@@ -612,6 +612,18 @@ namespace {
         {"speed", SQL_REAL_TYPE}
     };
 
+    const TableColumns Syscall = {
+        {"runtime_comm", SQL_TEXT_TYPE},
+        {"runtime_pid", SQL_INTEGER_TYPE},
+        {"runtime_tid", SQL_INTEGER_TYPE},
+        {"runtime_api_name", SQL_TEXT_TYPE},
+        {"runtime_start_time", SQL_REAL_TYPE},
+        {"runtime_duration", SQL_REAL_TYPE},
+        {"runtime_end_time", SQL_REAL_TYPE},
+        {"runtime_trans_start", SQL_REAL_TYPE},
+        {"runtime_trans_end", SQL_REAL_TYPE}
+    };
+
     const TableColumns PaLinkInfo = {
         {"pa_link_id", SQL_INTEGER_TYPE},
         {"pa_link_traffic_monit_rx", SQL_TEXT_TYPE},
@@ -968,6 +980,12 @@ HostNetworkUsage::HostNetworkUsage()
 {
     dbName_ = "host_network_usage.db";
     tableColNames_["NetworkUsage"] = NetworkUsage;
+}
+
+HostRuntimeApi::HostRuntimeApi()
+{
+    dbName_ = "host_runtime_api.db";
+    tableColNames_["Syscall"] = Syscall;
 }
 
 ChipTransDB::ChipTransDB()

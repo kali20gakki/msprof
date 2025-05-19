@@ -4,7 +4,7 @@
 ****************************************************************************** */
 /* ******************************************************************************
  * File Name          : host_usage_processor.cpp
- * Description        : 处理CpuUsage,MemUsage,DiskUsage,NetWorkUsage表相关数据
+ * Description        : 处理CpuUsage,MemUsage,DiskUsage,NetWorkUsage, SysCall表相关数据
  * Author             : msprof team
  * Creation Date      : 2024/8/20
  * *****************************************************************************
@@ -15,11 +15,12 @@
 namespace Analysis {
 namespace Domain {
 using namespace Analysis::Domain::Environment;
-HostUsageProcessor::HostUsageProcessor(const std::string &profPath_, DBInfo &&dbInfo) : usageDb_(dbInfo),
-    DataProcessor(profPath_) {}
+HostUsageProcessor::HostUsageProcessor(const std::string &profPath_, const std::string &processorName, DBInfo &&dbInfo)
+    : usageDb_(dbInfo), processorName_(processorName), DataProcessor(profPath_) {}
 
 bool HostUsageProcessor::Process(DataInventory &dataInventory)
 {
+    INFO("Start process %.", processorName_);
     ProfTimeRecord record;
     if (!Context::GetInstance().GetProfTimeRecordInfo(record, profPath_)) {
         ERROR("Failed to obtain the time in start_info and end_info.");
@@ -38,8 +39,8 @@ bool HostUsageProcessor::Process(DataInventory &dataInventory)
     return ProcessData(dataInventory, record, dbPath);
 }
 
-HostCpuUsageProcessor::HostCpuUsageProcessor(const std::string &profPath_) : processorName_(PROCESSOR_NAME_CPU_USAGE),
-    HostUsageProcessor(profPath_, DBInfo("host_cpu_usage.db", "CpuUsage")) {}
+HostCpuUsageProcessor::HostCpuUsageProcessor(const std::string &profPath_)
+    : HostUsageProcessor(profPath_, PROCESSOR_NAME_CPU_USAGE, DBInfo("host_cpu_usage.db", "CpuUsage")) {}
 
 bool HostCpuUsageProcessor::ProcessData(DataInventory &dataInventory, const ProfTimeRecord &record,
                                         const std::string &dbPath)
@@ -74,13 +75,13 @@ bool HostCpuUsageProcessor::ProcessData(DataInventory &dataInventory, const Prof
     return true;
 }
 
-HostMemUsageProcessor::HostMemUsageProcessor(const std::string &profPath_) : processorName_(PROCESSOR_NAME_MEM_USAGE),
-    HostUsageProcessor(profPath_, DBInfo("host_mem_usage.db", "MemUsage")) {}
+HostMemUsageProcessor::HostMemUsageProcessor(const std::string &profPath_)
+    : HostUsageProcessor(profPath_, PROCESSOR_NAME_MEM_USAGE, DBInfo("host_mem_usage.db", "MemUsage")) {}
 
 bool HostMemUsageProcessor::ProcessData(DataInventory &dataInventory, const ProfTimeRecord &record,
                                         const std::string &dbPath)
 {
-    OriTimeUsage oriData;
+    OriMemUsage oriData;
     std::vector<MemUsageData> res;
     std::string sql{"SELECT start_time, usage FROM " + usageDb_.tableName};
     if (!usageDb_.dbRunner->QueryData(sql, oriData)) {
@@ -110,15 +111,14 @@ bool HostMemUsageProcessor::ProcessData(DataInventory &dataInventory, const Prof
 }
 
 HostDiskUsageProcessor::HostDiskUsageProcessor(const std::string &profPath_)
-    : processorName_(PROCESSOR_NAME_DISK_USAGE),
-      HostUsageProcessor(profPath_, DBInfo("host_disk_usage.db", "DiskUsage")) {}
+    : HostUsageProcessor(profPath_, PROCESSOR_NAME_DISK_USAGE, DBInfo("host_disk_usage.db", "DiskUsage")) {}
 
 bool HostDiskUsageProcessor::ProcessData(DataInventory &dataInventory, const ProfTimeRecord &record,
                                          const std::string &dbPath)
 {
-    OriTimeUsage oriData;
+    OriDiskUsage oriData;
     std::vector<DiskUsageData> res;
-    std::string sql{"SELECT start_time, usage FROM " + usageDb_.tableName};
+    std::string sql{"SELECT start_time, usage, disk_read, disk_write FROM " + usageDb_.tableName};
     if (!usageDb_.dbRunner->QueryData(sql, oriData)) {
         ERROR("Query disk usage data failed, db path is %.", dbPath);
     }
@@ -132,7 +132,7 @@ bool HostDiskUsageProcessor::ProcessData(DataInventory &dataInventory, const Pro
     }
     DiskUsageData data;
     for (const auto &row : oriData) {
-        std::tie(data.timestamp, data.usage) = row;
+        std::tie(data.timestamp, data.usage, data.readRate, data.writeRate) = row;
         HPFloat startTimestamp{data.timestamp};
         data.timestamp = GetLocalTime(startTimestamp, record).Uint64();
         res.push_back(data);
@@ -146,15 +146,14 @@ bool HostDiskUsageProcessor::ProcessData(DataInventory &dataInventory, const Pro
 }
 
 HostNetworkUsageProcessor::HostNetworkUsageProcessor(const std::string &profPath_)
-    : processorName_(PROCESSOR_NAME_NETWORK_USAGE),
-      HostUsageProcessor(profPath_, DBInfo("host_network_usage.db", "NetworkUsage")) {}
+    : HostUsageProcessor(profPath_, PROCESSOR_NAME_NETWORK_USAGE, DBInfo("host_network_usage.db", "NetworkUsage")) {}
 
 bool HostNetworkUsageProcessor::ProcessData(DataInventory &dataInventory, const ProfTimeRecord &record,
                                             const std::string &dbPath)
 {
-    OriTimeUsage oriData;
+    OriNetworkUsage oriData;
     std::vector<NetWorkUsageData> res;
-    std::string sql{"SELECT start_time, usage FROM " + usageDb_.tableName};
+    std::string sql{"SELECT start_time, usage, speed FROM " + usageDb_.tableName};
     if (!usageDb_.dbRunner->QueryData(sql, oriData)) {
         ERROR("Query network usage data failed, db path is %.", dbPath);
     }
@@ -168,13 +167,51 @@ bool HostNetworkUsageProcessor::ProcessData(DataInventory &dataInventory, const 
     }
     NetWorkUsageData data;
     for (const auto &row : oriData) {
-        std::tie(data.timestamp, data.usage) = row;
+        std::tie(data.timestamp, data.usage, data.speed) = row;
         HPFloat startTimestamp{data.timestamp};
         data.timestamp = GetLocalTime(startTimestamp, record).Uint64();
         res.push_back(data);
     }
     FilterDataByStartTime(res, record.startTimeNs, processorName_);
     if (!SaveToDataInventory<NetWorkUsageData>(std::move(res), dataInventory, processorName_)) {
+        ERROR("Save data failed, %.", processorName_);
+        return false;
+    }
+    return true;
+}
+
+OSRuntimeApiProcessor::OSRuntimeApiProcessor(const std::string &profPath_)
+    : HostUsageProcessor(profPath_, PROCESSOR_NAME_OSRT_API, DBInfo("host_runtime_api.db", "Syscall")) {}
+
+bool OSRuntimeApiProcessor::ProcessData(DataInventory &dataInventory, const ProfTimeRecord &record,
+                                        const std::string &dbPath)
+{
+    OriSysCall oriData;
+    std::vector<OSRuntimeApiData> res;
+    std::string sql{"SELECT runtime_api_name, runtime_pid, runtime_tid, runtime_trans_start, runtime_trans_end "
+                    "FROM " + usageDb_.tableName};
+    if (!usageDb_.dbRunner->QueryData(sql, oriData)) {
+        ERROR("Query os runtime api data failed, db path is %.", dbPath);
+    }
+    if (oriData.empty()) {
+        ERROR("os runtime api original data is empty. db path is %", dbPath);
+        return false;
+    }
+    if (!Reserve(res, oriData.size())) {
+        ERROR("Reserved for runtime api failed.");
+        return false;
+    }
+    OSRuntimeApiData data;
+    for (const auto &row : oriData) {
+        std::tie(data.name, data.pid, data.tid, data.timestamp, data.endTime) = row;
+        HPFloat startTimestamp{data.timestamp};
+        data.timestamp = GetLocalTime(startTimestamp, record).Uint64();
+        HPFloat endTimestamp{data.endTime};
+        data.endTime = GetLocalTime(endTimestamp, record).Uint64();
+        res.push_back(data);
+    }
+    FilterDataByStartTime(res, record.startTimeNs, processorName_);
+    if (!SaveToDataInventory<OSRuntimeApiData>(std::move(res), dataInventory, processorName_)) {
         ERROR("Save data failed, %.", processorName_);
         return false;
     }
