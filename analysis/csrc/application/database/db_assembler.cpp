@@ -23,6 +23,9 @@
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/memcpy_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/msprof_tx_host_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/task_info_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/mc2_comm_info_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/kfc_turn_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/unified_pmu_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/acc_pmu_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/aicore_freq_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/ddr_data.h"
@@ -35,9 +38,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/system/include/pcie_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/soc_bandwidth_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
-#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/mc2_comm_info_data.h"
-#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/kfc_turn_data.h"
-#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/unified_pmu_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/host_usage_data.h"
 
 
 namespace Analysis {
@@ -121,6 +122,7 @@ bool CreateTableIndex(const std::string &tableName, const std::string &indexName
     }
     return true;
 }
+
 bool SaveApiData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
 {
     uint32_t pid = Context::GetInstance().GetPidFromInfoJson(HOST_ID, profPath);
@@ -882,6 +884,118 @@ bool SaveSamplePmuSummaryData(DataInventory &dataInventory, DBInfo &msprofDB, co
     return SaveData(res, TABLE_NAME_SAMPLE_PMU_SUMMARY, msprofDB);
 }
 
+bool SaveCpuUsageData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    auto cpuData = dataInventory.GetPtr<std::vector<CpuUsageData>>();
+    if (cpuData == nullptr) {
+        WARN("Cpu usage data not exist.");
+        return true;
+    }
+    std::vector<std::tuple<uint64_t, uint64_t, double>> res;
+    if (!Reserve(res, cpuData->size())) {
+        ERROR("Reserved for cpu usage data failed.");
+        return false;
+    }
+    const std::string avgStr = "Avg";
+    std::unordered_map<std::string, uint64_t> cpuIds;
+    std::set<std::string> invalidIds {avgStr};
+
+    for (const auto& item : *cpuData) {
+        if (invalidIds.find(item.cpuNo) != invalidIds.end() ||
+            cpuIds.find(item.cpuNo) != cpuIds.end()) {
+            continue;
+        }
+        uint64_t cpuId;
+        if (StrToU64(cpuId, item.cpuNo) == ANALYSIS_OK) {
+            cpuIds[item.cpuNo] = cpuId;
+        } else {
+            invalidIds.insert(item.cpuNo);
+        }
+    }
+    for (const auto& item : *cpuData) {
+        if (invalidIds.find(item.cpuNo) != invalidIds.end()) {
+            continue;
+        }
+        res.emplace_back(item.timestamp, cpuIds[item.cpuNo], item.usage);
+    }
+    return SaveData(res, TABLE_NAME_CPU_USAGE, msprofDB);
+}
+
+bool SaveHostMemUsageData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    auto memData = dataInventory.GetPtr<std::vector<MemUsageData>>();
+    if (memData == nullptr) {
+        WARN("Host mem usage data not exist.");
+        return true;
+    }
+    std::vector<std::tuple<uint64_t, double>> res;
+    if (!Reserve(res, memData->size())) {
+        ERROR("Reserved for mem usage data failed.");
+        return false;
+    }
+    for (const auto& item : *memData) {
+        res.emplace_back(item.timestamp, item.usage);
+    }
+    return SaveData(res, TABLE_NAME_HOST_MEM_USAGE, msprofDB);
+}
+
+bool SaveHostDiskUsageData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    auto diskData = dataInventory.GetPtr<std::vector<DiskUsageData>>();
+    if (diskData == nullptr) {
+        WARN("Host disk usage data not exist.");
+        return true;
+    }
+    std::vector<std::tuple<uint64_t, double, double, double>> res;
+    if (!Reserve(res, diskData->size())) {
+        ERROR("Reserved for disk usage data failed.");
+        return false;
+    }
+    for (const auto& item : *diskData) {
+        res.emplace_back(item.timestamp,
+                         item.readRate * BYTE_SIZE, item.writeRate * BYTE_SIZE, // KB/s -> B/s
+                         item.usage);
+    }
+    return SaveData(res, TABLE_NAME_HOST_DISK_USAGE, msprofDB);
+}
+
+bool SaveHostNetworkUsageData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    auto networkData = dataInventory.GetPtr<std::vector<NetWorkUsageData>>();
+    if (networkData == nullptr) {
+        WARN("Host network usage data not exist.");
+        return true;
+    }
+    std::vector<std::tuple<uint64_t, double, double>> res;
+    if (!Reserve(res, networkData->size())) {
+        ERROR("Reserved for network usage data failed.");
+        return false;
+    }
+    for (const auto& item : *networkData) {
+        res.emplace_back(item.timestamp, item.usage, item.speed * BYTE_SIZE); // KB/s -> B/s
+    }
+    return SaveData(res, TABLE_NAME_HOST_NETWORK_USAGE, msprofDB);
+}
+
+bool SaveOSRuntimeApiData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    auto runtimeApiData = dataInventory.GetPtr<std::vector<OSRuntimeApiData>>();
+    if (runtimeApiData == nullptr) {
+        WARN("OS runtime api data not exist.");
+        return true;
+    }
+    std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t>> res;
+    if (!Reserve(res, runtimeApiData->size())) {
+        ERROR("Reserved for runtime api data failed.");
+        return false;
+    }
+    for (const auto& item : *runtimeApiData) {
+        res.emplace_back(IdPool::GetInstance().GetUint64Id(item.name), Contact(item.pid, item.tid),
+                         item.timestamp, item.endTime);
+    }
+    return SaveData(res, TABLE_NAME_OSRT_API, msprofDB);
+}
+
 // 创建 SaveData 的函数类型
 using SaveDataFunc = std::function<bool(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)>;
 const std::unordered_map<std::string, SaveDataFunc> DATA_SAVER = {
@@ -912,6 +1026,11 @@ const std::unordered_map<std::string, SaveDataFunc> DATA_SAVER = {
     {Viewer::Database::PROCESSOR_NAME_TASK_PMU_INFO,       SaveTaskPmuData},
     {Viewer::Database::PROCESSOR_NAME_SAMPLE_PMU_TIMELINE, SaveSamplePmuTimelineData},
     {Viewer::Database::PROCESSOR_NAME_SAMPLE_PMU_SUMMARY,  SaveSamplePmuSummaryData},
+    {Viewer::Database::PROCESSOR_NAME_CPU_USAGE,           SaveCpuUsageData},
+    {Viewer::Database::PROCESSOR_NAME_MEM_USAGE,           SaveHostMemUsageData},
+    {Viewer::Database::PROCESSOR_NAME_DISK_USAGE,          SaveHostDiskUsageData},
+    {Viewer::Database::PROCESSOR_NAME_NETWORK_USAGE,       SaveHostNetworkUsageData},
+    {Viewer::Database::PROCESSOR_NAME_OSRT_API,            SaveOSRuntimeApiData},
 };
 }
 

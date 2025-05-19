@@ -52,6 +52,8 @@ std::unordered_map<std::string, AssemblerCreator> TimelineFactory::assemblerTabl
         MAKE_SHARED0_NO_OPERATION(assembler, HcclAssembler);}},
     {PROCESS_HCCS, [](std::shared_ptr<JsonAssembler> &assembler) {
         MAKE_SHARED0_NO_OPERATION(assembler, HCCSAssembler);}},
+    {PROCESSOR_NAME_OSRT_API, [](std::shared_ptr<JsonAssembler> &assembler) {
+        MAKE_SHARED0_NO_OPERATION(assembler, OSRuntimeApiAssembler);}},
     {PROCESS_NETWORK_USAGE, [](std::shared_ptr<JsonAssembler> &assembler) {
         MAKE_SHARED0_NO_OPERATION(assembler, NetworkUsageAssembler);}},
     {PROCESS_DISK_USAGE, [](std::shared_ptr<JsonAssembler> &assembler) {

@@ -25,11 +25,13 @@
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/task_info_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/kfc_turn_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/mc2_comm_info_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/unified_pmu_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/acc_pmu_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/aicore_freq_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/ddr_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/hbm_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/hccs_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/host_usage_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/llc_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/npu_mem_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/npu_op_mem_data.h"
@@ -38,7 +40,6 @@
 #include "analysis/csrc/domain/entities/viewer_data/system/include/soc_bandwidth_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/npu_op_mem_data.h"
-#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/unified_pmu_data.h"
 
 using namespace Analysis::Application;
 using namespace Analysis::Utils;
@@ -534,6 +535,78 @@ static std::vector<UnifiedSampleSummaryPmu> GenerateUnifiedSampleSummaryPmuData(
     data.value = 734951000.0; // value 734951000.0
     data.coreId = 0; // coreId 0
     data.coreType = 2; // coreType 2
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<CpuUsageData> GenerateCpuUsageData()
+{
+    std::vector<CpuUsageData> res;
+    CpuUsageData data;
+    data.timestamp = 1719621074669030430; // start 1719621074669030430
+    data.usage = 30; // usage 30
+    data.cpuNo = "0"; // cpuNo 0
+    res.push_back(data);
+
+    data.timestamp = 1719621074669031430; // start 1719621074669031430
+    data.usage = 18; // usage 18
+    data.cpuNo = "Avg"; // cpuNo Avg
+    res.push_back(data);
+
+    data.timestamp = 1719621074669033430; // start 1719621074669033430
+    data.usage = 32; // usage 32
+    data.cpuNo = "Avg"; // cpuNo Avg
+    res.push_back(data);
+
+    data.timestamp = 1719621074669033430; // start 1719621074669033430
+    data.usage = 31; // usage 31
+    data.cpuNo = "sfjie"; // cpuNo sfjie
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<MemUsageData> GenerateHostMemUsageData()
+{
+    std::vector<MemUsageData> res;
+    MemUsageData data;
+    data.timestamp = 1719621074669030430; // start 1719621074669030430
+    data.usage = 30; // usage 30
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<DiskUsageData> GenerateHostDiskUsageData()
+{
+    std::vector<DiskUsageData> res;
+    DiskUsageData data;
+    data.timestamp = 1719621074669030430; // start 1719621074669030430
+    data.usage = 30; // usage 30
+    data.readRate = 10; // readRate 10
+    data.writeRate = 13; // writeRate 13
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<NetWorkUsageData> GenerateHostNetWorkUsageData()
+{
+    std::vector<NetWorkUsageData> res;
+    NetWorkUsageData data;
+    data.timestamp = 1719621074669030430; // start 1719621074669030430
+    data.usage = 30; // usage 30
+    data.speed = 10; // speed 10
+    res.push_back(data);
+    return res;
+}
+
+static std::vector<OSRuntimeApiData> GenerateOSRuntimeApiData()
+{
+    std::vector<OSRuntimeApiData> res;
+    OSRuntimeApiData data;
+    data.timestamp = 1719621074669030430; // start 1719621074669030430
+    data.endTime = 1719621074669040430; // end 1719621074669040430
+    data.pid = 20; // pid 20
+    data.tid = 123456; // tid 123456
+    data.name = "clock_nanosleep"; // clock_nanosleep
     res.push_back(data);
     return res;
 }
@@ -1454,5 +1527,130 @@ TEST_F(DBAssemblerUTest, TestRunSaveSamplePmuSummaryDataShouldReturnTrueWhenSamp
 {
     auto assembler = DBAssembler(DB_PATH, PROF);
     auto dataInventory = DataInventory();
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveCpuUsageDataShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
+{
+    using format = std::vector<std::tuple<uint64_t, uint64_t, double>>;
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateCpuUsageData();
+    std::shared_ptr<std::vector<CpuUsageData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<CpuUsageData>, data);
+    dataInventory.Inject<std::vector<CpuUsageData>>(dataS);
+    MOCKER_CPP(&format::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    MOCKER_CPP(&format::reserve).reset();
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveCpuUsageDataShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateCpuUsageData();
+    std::shared_ptr<std::vector<CpuUsageData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<CpuUsageData>, data);
+    dataInventory.Inject<std::vector<CpuUsageData>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveHostMemUsageDataShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
+{
+    using format = std::vector<std::tuple<uint64_t, double>>;
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateHostMemUsageData();
+    std::shared_ptr<std::vector<MemUsageData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<MemUsageData>, data);
+    dataInventory.Inject<std::vector<MemUsageData>>(dataS);
+    MOCKER_CPP(&format::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    MOCKER_CPP(&format::reserve).reset();
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveHostMemUsageDataShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateHostMemUsageData();
+    std::shared_ptr<std::vector<MemUsageData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<MemUsageData>, data);
+    dataInventory.Inject<std::vector<MemUsageData>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveHostDiskUsageDataShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
+{
+    using format = std::vector<std::tuple<uint64_t, double, double, double>>;
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateHostDiskUsageData();
+    std::shared_ptr<std::vector<DiskUsageData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<DiskUsageData>, data);
+    dataInventory.Inject<std::vector<DiskUsageData>>(dataS);
+    MOCKER_CPP(&format::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    MOCKER_CPP(&format::reserve).reset();
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveHostDiskUsageDataShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateHostDiskUsageData();
+    std::shared_ptr<std::vector<DiskUsageData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<DiskUsageData>, data);
+    dataInventory.Inject<std::vector<DiskUsageData>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveHostNetworkUsageDataShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
+{
+    using format = std::vector<std::tuple<uint64_t, double, double>>;
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateHostNetWorkUsageData();
+    std::shared_ptr<std::vector<NetWorkUsageData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<NetWorkUsageData>, data);
+    dataInventory.Inject<std::vector<NetWorkUsageData>>(dataS);
+    MOCKER_CPP(&format::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    MOCKER_CPP(&format::reserve).reset();
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveHostNetworkUsageDataShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateHostNetWorkUsageData();
+    std::shared_ptr<std::vector<NetWorkUsageData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<NetWorkUsageData>, data);
+    dataInventory.Inject<std::vector<NetWorkUsageData>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveOSRuntimeApiDataShouldReturnFalseWhenReserveFailedThenDataIsEmpty)
+{
+    using format = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t>>;
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateOSRuntimeApiData();
+    std::shared_ptr<std::vector<OSRuntimeApiData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<OSRuntimeApiData>, data);
+    dataInventory.Inject<std::vector<OSRuntimeApiData>>(dataS);
+    MOCKER_CPP(&format::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    MOCKER_CPP(&format::reserve).reset();
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveOSRuntimeApiDataShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateOSRuntimeApiData();
+    std::shared_ptr<std::vector<OSRuntimeApiData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<OSRuntimeApiData>, data);
+    dataInventory.Inject<std::vector<OSRuntimeApiData>>(dataS);
     EXPECT_TRUE(assembler.Run(dataInventory));
 }

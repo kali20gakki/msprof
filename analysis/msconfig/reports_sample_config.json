@@ -8,6 +8,7 @@
     "hbm": true,
     "communication": true,
     "hccs": true,
+    "os_runtime_api": true,
     "network_usage": true,
     "disk_usage": true,
     "memory_usage": true,

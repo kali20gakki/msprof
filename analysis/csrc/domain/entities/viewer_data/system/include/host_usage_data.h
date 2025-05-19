@@ -29,10 +29,20 @@ struct MemUsageData : public BasicData {
 
 struct DiskUsageData : public BasicData {
     double usage = 0.0;
+    double readRate = 0.0;
+    double writeRate = 0.0;
 };
 
 struct NetWorkUsageData : public BasicData {
     double usage = 0.0;
+    double speed = 0.0;
+};
+
+struct OSRuntimeApiData : public BasicData {
+    std::string name;
+    uint64_t pid = 0;
+    uint64_t tid = 0;
+    uint64_t endTime = 0;
 };
 }
 }

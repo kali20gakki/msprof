@@ -62,6 +62,14 @@ private:
     uint8_t GenerateDataTrace(DataInventory &dataInventory, uint32_t pidMap) override;
 };
 
+// 处理os runtime api 数据
+class OSRuntimeApiAssembler : public HostUsageAssembler {
+public:
+    OSRuntimeApiAssembler();
+private:
+    uint8_t GenerateDataTrace(DataInventory &dataInventory, uint32_t pidMap) override;
+};
+
 }
 }
 #endif // ANALYSIS_APPLICATION_HOST_USAGE_ASSEMBLER_H

@@ -219,6 +219,11 @@ public:
     HostNetworkUsage();
 };
 
+class HostRuntimeApi : public Database {
+public:
+    HostRuntimeApi();
+};
+
 class ChipTransDB : public Database {
 public:
     ChipTransDB();

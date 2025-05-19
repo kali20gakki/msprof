@@ -25,6 +25,35 @@ namespace {
 const std::string USAGE = "Usage(%)";
 }
 
+OSRuntimeApiAssembler::OSRuntimeApiAssembler() : HostUsageAssembler(PROCESS_OS_RUNTIME_API) {}
+uint8_t OSRuntimeApiAssembler::GenerateDataTrace(DataInventory &dataInventory, uint32_t pid)
+{
+    auto runtimeApiData = dataInventory.GetPtr<std::vector<OSRuntimeApiData>>();
+    if (runtimeApiData == nullptr) {
+        WARN("Can't get host runtime api data from dataInventory.");
+        return DATA_NOT_EXIST;
+    }
+    std::set<int> tidMap;
+    double dur;
+    std::shared_ptr<DurationEvent> event;
+    for (const auto &data : *runtimeApiData) {
+        dur = static_cast<double>(data.endTime - data.timestamp) / NS_TO_US;
+        MAKE_SHARED_RETURN_VALUE(event, DurationEvent, ASSEMBLE_FAILED,
+                                 pid, static_cast<int>(data.tid), dur,
+                                 DivideByPowersOfTenWithPrecision(data.timestamp), data.name);
+        res_.push_back(event);
+        tidMap.insert(static_cast<int>(data.tid));
+    }
+
+    std::shared_ptr<MetaDataNameEvent> threadNameEvent;
+    for (const auto& tid : tidMap) {
+        MAKE_SHARED_RETURN_VALUE(threadNameEvent, MetaDataNameEvent, ASSEMBLE_FAILED, pid, tid,
+                                 META_DATA_THREAD_NAME, "Thread " + std::to_string(tid));
+        res_.push_back(threadNameEvent);
+    }
+    return ASSEMBLE_SUCCESS;
+}
+
 NetworkUsageAssembler::NetworkUsageAssembler() : HostUsageAssembler(PROCESS_NETWORK_USAGE) {}
 uint8_t NetworkUsageAssembler::GenerateDataTrace(DataInventory &dataInventory, uint32_t pid)
 {
