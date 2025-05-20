@@ -450,6 +450,22 @@ TEST_F(MstxUtest, MstxRangeEndFuncWillSaveMstxDataWhenSaveMstxDataSuccWithNotInp
     EXPECT_EQ(1, g_txdataList_.size());
 }
 
+TEST_F(MstxUtest, MstxRangeENdFuncWillNotSaveDataWhenDefaultDomainIsNotEnabled)
+{
+    GlobalMockObject::verify();
+    MstxManager::instance()->Start(emptyMstxDomainInclude, emptyMstxDomainExclude);
+    const char* msg = "record";
+    uint64_t id = MsprofMstxApi::MstxRangeStartAFunc(msg, nullptr);
+    EXPECT_NE(MSTX_INVALID_RANGE_ID, id);
+
+    MOCKER_CPP(&MstxDomainMgr::IsDomainEnabled)
+        .stubs()
+        .will(returnValue(false));
+    MsprofMstxApi::MstxRangeEndFunc(id);
+    MstxManager::instance()->Stop();
+    EXPECT_EQ(0, g_txdataList_.size());
+}
+
 TEST_F(MstxUtest, MstxRangeEndFuncWillSaveMstxDataWhenSaveMstxDataSuccWithInputStream)
 {
     GlobalMockObject::verify();
