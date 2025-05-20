@@ -158,12 +158,12 @@ void MstxMarkAFunc(const char* msg, aclrtStream stream)
         MSPROF_LOGW("Mstx manager is not started");
         return;
     }
-    SHARED_PTR_ALIA<std::string> saveMsg = nullptr;
-    if (!GetMsgPtrToSave(msg, saveMsg)) {
-        return;
-    }
     auto domainNameHash = MstxDomainMgr::instance()->GetDefaultDomainNameHash();
     if (!MstxDomainMgr::instance()->IsDomainEnabled(domainNameHash)) {
+        return;
+    }
+    SHARED_PTR_ALIA<std::string> saveMsg = nullptr;
+    if (!GetMsgPtrToSave(msg, saveMsg)) {
         return;
     }
     if (saveMsg != nullptr) {
@@ -180,18 +180,12 @@ uint64_t MstxRangeStartAFunc(const char* msg, aclrtStream stream)
         MSPROF_LOGW("Mstx manager is not started");
         return MSTX_INVALID_RANGE_ID;
     }
-    SHARED_PTR_ALIA<std::string> saveMsg = nullptr;
-    if (!GetMsgPtrToSave(msg, saveMsg)) {
-        return MSTX_INVALID_RANGE_ID;
-    }
-    uint64_t mstxEventId = MsprofTxManager::instance()->GetEventId();
-    if (stream && RuntimePlugin::instance()->MsprofRtProfilerTraceEx(mstxEventId, MSTX_MODEL_ID,
-        MSTX_TAG_ID, stream) != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Failed to run mstx task for %s", __func__);
-        return MSTX_INVALID_RANGE_ID;
-    }
     auto domainNameHash = MstxDomainMgr::instance()->GetDefaultDomainNameHash();
     if (!MstxDomainMgr::instance()->IsDomainEnabled(domainNameHash)) {
+        return MSTX_INVALID_RANGE_ID;
+    }
+    SHARED_PTR_ALIA<std::string> saveMsg = nullptr;
+    if (!GetMsgPtrToSave(msg, saveMsg)) {
         return MSTX_INVALID_RANGE_ID;
     }
     if (saveMsg != nullptr) {
@@ -209,6 +203,10 @@ void MstxRangeEndFunc(uint64_t id)
         return;
     }
     if (id == MSTX_INVALID_RANGE_ID) {
+        return;
+    }
+    auto domainNameHash = MstxDomainMgr::instance()->GetDefaultDomainNameHash();
+    if (!MstxDomainMgr::instance()->IsDomainEnabled(domainNameHash)) {
         return;
     }
     MstxRangeEndImpl(id, MstxDomainMgr::instance()->GetDefaultDomainNameHash());
