@@ -71,17 +71,6 @@ struct TaskType {
     uint8_t reserved1[21];
 };
 
-struct TaskFlipInfo {
-    TsTrackHead tsTraceHead;
-    uint8_t reserved1[4];
-    uint64_t timestamp;
-    uint16_t streamId;
-    uint16_t flipId;
-    uint8_t reserved2[2];
-    uint16_t taskId;
-    uint8_t reserved3[16];
-};
-
 struct StarsSocLog {
     uint32_t funcType : 6;
     uint32_t cnt : 4;

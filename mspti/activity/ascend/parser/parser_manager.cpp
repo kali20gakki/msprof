@@ -142,19 +142,10 @@ msptiResult ParserManager::ReportApi(const MsprofApi* const data)
 
 msptiResult ParserManager::ReportRtTaskTrack(const MsprofRuntimeTrack& track)
 {
-    uint16_t flipId = static_cast<uint16_t>(track.taskInfo >> 16);
     uint16_t taskId = static_cast<uint16_t>(track.taskInfo & 0xffff);
     uint16_t streamId = track.streamId;
     uint16_t deviceId = track.deviceId;
     DstType dstKey = std::make_tuple(deviceId, streamId, taskId);
-    DsfType dsfKey = std::make_tuple(deviceId, streamId, flipId);
-    {
-        std::lock_guard<std::mutex> lk(flip_map_mtx_);
-        auto iter = flip_dst_map_.find(dsfKey);
-        if (iter == flip_dst_map_.end()) {
-            flip_dst_map_.insert({dsfKey, {}});
-        }
-    }
     const static std::map<TsTaskType, std::string> KERNEL_TYPE = {
         {TS_TASK_TYPE_KERNEL_AICORE, "KERNEL_AICORE"},
         {TS_TASK_TYPE_KERNEL_AICPU, "KERNEL_AICPU"},
@@ -175,17 +166,13 @@ msptiResult ParserManager::ReportRtTaskTrack(const MsprofRuntimeTrack& track)
         kernel->name = GetHashInfo(track.kernelName).c_str();
         kernel->type = typeIter->second.c_str();
         {
-            std::lock_guard<std::mutex> lk(flip_map_mtx_);
-            auto iter = flip_dst_map_.find(dsfKey);
-            if (iter != flip_dst_map_.end()) {
-                iter->second.emplace_back(dstKey);
-            }
-        }
-        {
             std::lock_guard<std::mutex> lk(kernel_mtx_);
             auto iter = kernel_map_.find(dstKey);
             if (iter == kernel_map_.end()) {
-                kernel_map_.insert({dstKey, kernel});
+                std::list<std::shared_ptr<msptiActivityKernel>> kernelList{kernel};
+                kernel_map_.insert({dstKey, kernelList});
+            } else {
+                iter->second.emplace_back(std::move(kernel));
             }
         }
     }
@@ -206,7 +193,13 @@ msptiResult ParserManager::ReportStarsSocLog(uint32_t deviceId, const StarsSocLo
     std::lock_guard<std::mutex> lk(kernel_mtx_);
     auto iter = kernel_map_.find(dstKey);
     if (iter != kernel_map_.end()) {
-        auto& kernel = iter->second;
+        auto& kernelList = iter->second;
+        if (kernelList.empty()) {
+            MSPTI_LOGE("The cache kernel list data is empty.");
+            kernel_map_.erase(iter);
+            return MSPTI_ERROR_INNER;
+        }
+        auto& kernel = kernelList.front();
         if (!kernel) {
             MSPTI_LOGE("The cache kernel data is nullptr.");
             return MSPTI_ERROR_INNER;
@@ -215,17 +208,22 @@ msptiResult ParserManager::ReportStarsSocLog(uint32_t deviceId, const StarsSocLo
             kernel->ds.deviceId = deviceId;
             kernel->ds.streamId = streamId;
             kernel->start = static_cast<uint64_t>(socLog->sysCntH) << BIT_OFFSET | socLog->sysCntL;
-            kernel->start = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId,
-                kernel->start);
+            kernel->start = Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId, kernel->start);
         } else if (socLog->funcType == STARS_FUNC_TYPE_END) {
             kernel->end = static_cast<uint64_t>(socLog->sysCntH) << BIT_OFFSET | socLog->sysCntL;
-            kernel->end = Mspti::Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId, kernel->end);
+            kernel->end = Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId, kernel->end);
             if (Mspti::Activity::ActivityManager::GetInstance()->Record(
                 Common::ReinterpretConvert<msptiActivity*>(kernel.get()),
                 sizeof(msptiActivityKernel)) != MSPTI_SUCCESS) {
                 return MSPTI_ERROR_INNER;
             }
+            kernelList.pop_front();
+            if (kernelList.empty()) {
+                kernel_map_.erase(iter);
+            }
         }
+    } else {
+        MSPTI_LOGW("The kernel is not found for deviceId: %u, streamId: %u, taskId: %u", deviceId, streamId, taskId);
     }
     return MSPTI_SUCCESS;
 }
@@ -243,24 +241,5 @@ void ParserManager::ReportStepTrace(uint32_t deviceId, const StepTrace* stepTrac
             break;
     }
 }
-
-void ParserManager::ReportFlipInfo(uint32_t deviceId, const TaskFlipInfo* flipInfo)
-{
-    if (!flipInfo) {
-        return;
-    }
-    auto dsfKey = std::make_tuple(static_cast<uint16_t>(deviceId), flipInfo->streamId, flipInfo->flipId);
-    std::lock_guard<std::mutex> lk(flip_map_mtx_);
-    auto iter = flip_dst_map_.find(dsfKey);
-    if (iter != flip_dst_map_.end()) {
-        const auto& dstKeys = iter->second;
-        std::lock_guard<std::mutex> lk(kernel_mtx_);
-        for (const auto dstKey : dstKeys) {
-            kernel_map_.erase(dstKey);
-        }
-    }
-    flip_dst_map_.erase(dsfKey);
-}
-
 }  // Parser
 }  // Mspti

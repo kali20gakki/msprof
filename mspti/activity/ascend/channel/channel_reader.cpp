@@ -121,10 +121,6 @@ size_t ChannelReader::TransTsFwData(char buffer[], size_t valid_size, uint32_t d
                 Mspti::Parser::ParserManager::GetInstance()->ReportStepTrace(deviceId,
                     reinterpret_cast<StepTrace*>(buffer + pos));
                 break;
-            case RTP_TYPE_FLIP_INFO:
-                Mspti::Parser::ParserManager::GetInstance()->ReportFlipInfo(deviceId,
-                    reinterpret_cast<TaskFlipInfo*>(buffer + pos));
-                break;
             default:
                 break;
         }

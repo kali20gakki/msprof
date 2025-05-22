@@ -66,15 +66,8 @@ int ProfChannelRead(unsigned int deviceId, unsigned int channelId, char *outBuf,
             if (ret != EOK) {
                 return 0;
             }
-            TaskFlipInfo taskFlipData;
-            taskFlipData.tsTraceHead.rptType = RTP_TYPE_FLIP_INFO;
-            ret = memcpy_s(outBuf + sizeof(stepTraceData), bufSize - sizeof(stepTraceData),
-                (void*)&taskFlipData, sizeof(taskFlipData));
-            if (ret != EOK) {
-                return 0;
-            }
             reportFlag = false;
-            return sizeof(stepTraceData) + sizeof(taskFlipData);
+            return sizeof(stepTraceData);
         }
         return 0;
     }
