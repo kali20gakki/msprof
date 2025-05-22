@@ -62,6 +62,7 @@ TEST_F(ParserUtest, ShouldRetSccessWhenReportKernelInfo)
     data.taskInfo = static_cast<uint32_t>(flipId) << BIT_NUM | static_cast<uint32_t>(taskId);
     data.taskType = TS_TASK_TYPE_KERNEL_AIVEC;
     EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRtTaskTrack(data));
+    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRtTaskTrack(data));
 
     StarsSocLog socLogStart;
     (void)memset_s(&socLogStart, sizeof(socLogStart), 0, sizeof(socLogStart));
@@ -77,12 +78,8 @@ TEST_F(ParserUtest, ShouldRetSccessWhenReportKernelInfo)
 
     EXPECT_EQ(MSPTI_SUCCESS, instance->ReportStarsSocLog(deviceId, &socLogStart));
     EXPECT_EQ(MSPTI_SUCCESS, instance->ReportStarsSocLog(deviceId, &socLogEnd));
-
-    TaskFlipInfo flipData;
-    (void)memset_s(&flipData, sizeof(flipData), 0, sizeof(flipData));
-    flipData.streamId = streamId;
-    flipData.flipId = flipId;
-    instance->ReportFlipInfo(deviceId, &flipData);
+    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportStarsSocLog(deviceId, &socLogStart));
+    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportStarsSocLog(deviceId, &socLogEnd));
 }
 
 TEST_F(ParserUtest, ShouldRetSccessWhenReportMstxData)

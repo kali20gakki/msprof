@@ -21,7 +21,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
+#include <list>
 #include "common/inject/profapi_inject.h"
 #include "common/inject/runtime_inject.h"
 #include "common/inject/hccl_inject.h"
@@ -43,7 +43,6 @@ public:
     // Device Channel
     msptiResult ReportStarsSocLog(uint32_t deviceId, const StarsSocLog* socLog);
     void ReportStepTrace(uint32_t deviceId, const StepTrace* stepTrace);
-    void ReportFlipInfo(uint32_t deviceId, const TaskFlipInfo* flipInfo);
 
     // CANN
     msptiResult ReportRtTaskTrack(const MsprofRuntimeTrack& track);
@@ -62,13 +61,9 @@ private:
     std::shared_ptr<std::string> TryCacheMarkMsg(const char* msg);
 
 private:
-    // map<<deviceId, streamId, taskId>, msptiActivityKernel*>
-    std::map<DstType, std::shared_ptr<msptiActivityKernel>> kernel_map_;
+    // map<<deviceId, streamId, taskId>, list<msptiActivityKernel*>>
+    std::map<DstType, std::list<std::shared_ptr<msptiActivityKernel>>> kernel_map_;
     std::mutex kernel_mtx_;
-
-    // map<<deviceId, streamId, flipId>, vector<dstKey>>
-    std::map<DsfType, std::vector<DstType>> flip_dst_map_;
-    std::mutex flip_map_mtx_;
 
     // <hashID, hashInfo>
     static std::unordered_map<uint64_t, std::string> hashInfo_map_;
