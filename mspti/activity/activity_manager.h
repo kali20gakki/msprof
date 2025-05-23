@@ -64,7 +64,7 @@ public:
     bool IsActivityKindEnable(msptiActivityKind kind);
 
 private:
-    ActivityManager() = default;
+    ActivityManager();
     ~ActivityManager();
     explicit ActivityManager(const ActivityManager &obj) = delete;
     ActivityManager& operator=(const ActivityManager &obj) = delete;
