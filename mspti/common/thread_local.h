@@ -17,6 +17,8 @@
 #include <utility>
 #include <functional>
 
+#include "common/plog_manager.h"
+
 namespace Mspti {
 namespace Common {
 template<typename T>
@@ -30,10 +32,7 @@ public:
         pthread_key_create(&key_, &ThreadLocal::destructor);
     }
 
-    ~ThreadLocal()
-    {
-        pthread_key_delete(key_);
-    }
+    ~ThreadLocal() = default;
 
     T* Get()
     {
@@ -41,6 +40,12 @@ public:
         if (!ptr) {
             ptr = creator_();
             pthread_setspecific(key_, ptr);
+            auto ret = pthread_setspecific(key_, ptr);
+            if (ret != 0) {
+                MSPTI_LOGE("pthread_setspecific failed: %s (%d)", strerror(ret), ret);
+                delete static_cast<T*>(ptr);
+                return nullptr;
+            }
         }
         return static_cast<T*>(ptr);
     }
@@ -50,7 +55,10 @@ public:
         void* ptr = pthread_getspecific(key_);
         if (ptr) {
             delete static_cast<T*>(ptr);
-            pthread_setspecific(key_, nullptr);
+            auto ret = pthread_setspecific(key_, nullptr);
+            if (ret != 0) {
+                MSPTI_LOGE("pthread_setspecific (clear) failed: %s (%d)", strerror(ret), ret);
+            }
         }
     }
 

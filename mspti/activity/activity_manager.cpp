@@ -351,6 +351,16 @@ msptiResult ActivityManager::ResetAllDevice()
     return ret;
 }
 
+ActivityManager::ActivityManager()
+{
+    for (auto& kindSwitch : activity_switch_) {
+        kindSwitch.store(false);
+    }
+    for (auto& kindSwitch : append_only_activity_switch_) {
+        kindSwitch.store(false);
+    }
+}
+
 }  // Activity
 }  // Mspti
 
