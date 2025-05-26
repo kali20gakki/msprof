@@ -13,7 +13,6 @@
 #include "analysis/csrc/interface/py_interface/py_init_parser.h"
 #include "analysis/csrc/domain/services/device_context/device_context.h"
 #include "analysis/csrc/domain/services/host_worker/kernel_parser_worker.h"
-#include "analysis/csrc/viewer/database/finals/unified_db_manager.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/application/include/export_manager.h"
 #include "analysis/csrc/application/include/export_summary.h"
