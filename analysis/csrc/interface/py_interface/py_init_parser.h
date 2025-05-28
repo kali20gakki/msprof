@@ -29,7 +29,7 @@ PyObject *WrapExportUnifiedDB(PyObject *self, PyObject *args);
 // timeline导出入口的外层包装，解析Python侧传入路径后调用exportManager启动导出流程，获取返回状态码后返回python侧
 PyObject *WrapExportTimeline(PyObject *self, PyObject *args);
 // op_summary导出入口的外层包装，解析Python侧传入路径后调用exportSummary启动导出流程，获取返回状态码后返回Python侧
-PyObject *WrapExportOpSummary(PyObject *self, PyObject *args);
+PyObject *WrapExportSummary(PyObject *self, PyObject *args);
 } // Interface
 } // Analyzer
 

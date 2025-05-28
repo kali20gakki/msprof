@@ -45,7 +45,7 @@ from framework.load_info_manager import LoadInfoManager
 from msinterface.msprof_c_interface import export_unified_db
 from msinterface.msprof_c_interface import dump_device_data
 from msinterface.msprof_c_interface import export_timeline
-from msinterface.msprof_c_interface import export_op_summary
+from msinterface.msprof_c_interface import export_summary
 from msinterface.msprof_data_storage import MsprofDataStorage
 from msinterface.msprof_export_data import MsProfExportDataUtils
 from msinterface.msprof_output_summary import MsprofOutputSummary
@@ -737,9 +737,9 @@ class ExportCommand:
         return ProfilingScene().is_cpp_parse_enable() and self.command_type == MsProfCommonConstant.TIMELINE \
             and not ConfigMgr.is_ai_core_sample_based(valid_path) and ChipManager().is_chip_v4()
 
-    def _check_export_op_summary_with_so(self):
+    def _check_export_summary_with_so(self):
         """
-        有so文件，且是全导，可以使用C++来导出op_summary
+        有so文件，且是全导，可以使用C++来导出summary
         """
         return (ProfilingScene().is_cpp_parse_enable() and ProfilingScene().is_all_export() and
                 ChipManager().is_chip_v4() and self.command_type == MsProfCommonConstant.SUMMARY)
@@ -774,9 +774,9 @@ class ExportCommand:
             export_timeline(path_table.get("collection_path"), self.reports_path)
             self._check_and_split_json_trace(path_table.get("collection_path"))
             return
-        # viewer op_summary
-        if self._check_export_op_summary_with_so():
-            export_op_summary(path_table.get("collection_path"))
+        # viewer summary
+        if self._check_export_summary_with_so():
+            export_summary(path_table.get("collection_path"))
         device_paths_list = path_table.get(StrConstant.DEVICE_PATH, [])
         for device_path in device_paths_list:
             self._view_data(device_path)

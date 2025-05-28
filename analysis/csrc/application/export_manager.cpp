@@ -18,6 +18,7 @@
 #include "analysis/csrc/domain/data_process/ai_task/hash_init_processor.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
 #include "analysis/csrc/infrastructure/utils/thread_pool.h"
+#include "analysis/csrc/application/summary/summary_manager.h"
 #include "analysis/csrc/application/timeline/timeline_manager.h"
 #include "analysis/csrc/application/timeline/json_constant.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
@@ -26,52 +27,25 @@ namespace Analysis {
 namespace Application {
 using namespace Analysis::Domain;
 namespace {
-const std::vector<std::string> DATA_PROCESS_LIST{
-        PROCESSOR_NAME_API,
-        PROCESSOR_NAME_COMMUNICATION,
-        PROCESSOR_NAME_COMPUTE_TASK_INFO,
-        PROCESSOR_NAME_KFC_TASK,
-        PROCESSOR_NAME_KFC_COMM,
-        PROCESSOR_NAME_DEVICE_TX,
-        PROCESSOR_NAME_MSTX,
-        PROCESSOR_NAME_STEP_TRACE,
-        PROCESSOR_NAME_TASK,
-        PROCESSOR_NAME_ACC_PMU,
-        PROCESSOR_NAME_AICORE_FREQ,
-        PROCESSOR_NAME_CHIP_TRAINS,
-        PROCESSOR_NAME_DDR,
-        PROCESSOR_NAME_HBM,
-        PROCESSOR_NAME_HCCS,
-        PROCESSOR_NAME_CPU_USAGE,
-        PROCESSOR_NAME_MEM_USAGE,
-        PROCESSOR_NAME_DISK_USAGE,
-        PROCESSOR_NAME_NETWORK_USAGE,
-        PROCESSOR_NAME_OSRT_API,
-        PROCESSOR_NAME_LLC,
-        PROCESSOR_NAME_NPU_MEM,
-        PROCESSOR_NAME_PCIE,
-        PROCESSOR_NAME_SIO,
-        PROCESSOR_NAME_SOC,
-        PROCESSOR_NAME_NIC,
-        PROCESSOR_NAME_ROCE,
-        PROCESSOR_NAME_QOS,
-        PROCESSOR_MC2_COMM_INFO,
-        PROCESSOR_NAME_MEMCPY_INFO,
-        PROCESSOR_NAME_NPU_OP_MEM,
-        PROCESSOR_NAME_NPU_MODULE_MEM,
-        PROCESSOR_NAME_UNIFIED_PMU,
-        PROCESSOR_NAME_NIC_TIMELINE,
-        PROCESSOR_NAME_ROCE_TIMELINE
-};
-
 std::string GetDBPath(const std::string& outputDir)
 {
     return Utils::File::PathJoin(
         {outputDir, DB_NAME_MSPROF_DB + "_" + Analysis::Utils::GetFormatLocalTime() + ".db"});
 }
+
+std::string CreateOutputPath(const std::string& profPath)
+{
+    std::string outputPath = File::PathJoin({profPath, OUTPUT_PATH});
+    if (!File::Exist(outputPath) && !File::CreateDir(outputPath)) {
+        ERROR("Create mindstudio_profiler_output error, can't export data");
+        PRINT_ERROR("Create mindstudio_profiler_output error, can't export data");
+        return "";
+    }
+    return outputPath;
+}
 }
 
-bool ExportManager::ProcessData(DataInventory &dataInventory)
+bool ExportManager::ProcessData(DataInventory &dataInventory, ExportMode exportMode)
 {
     // hash数据作为其他流程的依赖数据，需要优先加载
     HashInitProcessor hashProcessor(profPath_);
@@ -80,7 +54,19 @@ bool ExportManager::ProcessData(DataInventory &dataInventory)
     Analysis::Utils::ThreadPool pool(tableProcessors);
     pool.Start();
     std::atomic<bool> retFlag(true);
-    for (const auto &name : DATA_PROCESS_LIST) {
+    static const std::unordered_map<ExportMode, std::vector<std::string>(*)()>
+        processListFactory = {
+        {ExportMode::DB,       &DBAssembler::GetProcessList},
+        {ExportMode::TIMELINE, &TimelineManager::GetProcessList},
+        {ExportMode::SUMMARY,  &SummaryManager::GetProcessList}
+    };
+    auto it = processListFactory.find(exportMode);
+    if (it == processListFactory.end()) {
+        ERROR("Unsupported ExportMode: %d", static_cast<int>(exportMode));
+        return false;
+    }
+    std::vector<std::string> dataProcessList = it->second();
+    for (const auto& name : dataProcessList) {
         pool.AddTask([this, &name, &retFlag, &dataInventory]() {
             auto processor = DataProcessorFactory::GetDataProcessByName(profPath_, name);
             if (processor == nullptr) {
@@ -136,7 +122,7 @@ bool ExportManager::Run(ExportMode exportMode)
         return false;
     }
     DataInventory dataInventory;
-    bool runFlag = ProcessData(dataInventory);
+    bool runFlag = ProcessData(dataInventory, exportMode);
     const std::map<ExportMode, std::function<bool(DataInventory&)>> operationMap = {
         {ExportMode::DB,       [this](DataInventory& dataInventory) -> bool {
             auto dbPath = GetDBPath(profPath_);
@@ -144,16 +130,22 @@ bool ExportManager::Run(ExportMode exportMode)
             return dbAssembler.Run(dataInventory);
         }},
         {ExportMode::TIMELINE, [this](DataInventory& dataInventory) -> bool {
-            std::string outputPath = File::PathJoin({profPath_, OUTPUT_PATH});
-            if (!File::Exist(outputPath) && !File::CreateDir(outputPath)) {
-                ERROR("Create mindstudio_profiler_output error, can't export data");
-                PRINT_ERROR("Create mindstudio_profiler_output error, can't export data");
+            std::string outputPath = CreateOutputPath(profPath_);
+            if (outputPath.empty()) {
                 return false;
             }
             TimelineManager timelineManager(profPath_, outputPath);
             std::vector<JsonProcess> jsonProcesses = GetProcessEnum();
             return timelineManager.Run(dataInventory, jsonProcesses);
-        }}
+        }},
+        {ExportMode::SUMMARY, [this](DataInventory& dataInventory) -> bool {
+            std::string outputPath = CreateOutputPath(profPath_);
+            if (outputPath.empty()) {
+                return false;
+            }
+            SummaryManager summaryManager(profPath_, outputPath);
+            return summaryManager.Run(dataInventory);
+        }},
     };
     auto iter = operationMap.find(exportMode);
     if (iter != operationMap.end()) {
@@ -201,6 +193,5 @@ std::vector<JsonProcess> ExportManager::GetProcessEnum()
     }
     return std::move(jsonProcesses);
 }
-
 }
 }

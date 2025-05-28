@@ -16,6 +16,7 @@ namespace Analysis {
 namespace Application {
 enum class ExportMode {
     TIMELINE,
+    SUMMARY,
     DB
 };
 }

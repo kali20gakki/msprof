@@ -15,7 +15,6 @@
 #include "analysis/csrc/domain/services/host_worker/kernel_parser_worker.h"
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
 #include "analysis/csrc/application/include/export_manager.h"
-#include "analysis/csrc/application/include/export_summary.h"
 #include "analysis/csrc/application/include/export_mode_enum.h"
 
 namespace Analysis {
@@ -28,7 +27,7 @@ PyMethodDef g_methodTestSchedule[] = {
     {"dump_device_data", WrapDumpDeviceData, METH_VARARGS, ""},
     {"export_unified_db", WrapExportUnifiedDB, METH_VARARGS, ""},
     {"export_timeline", WrapExportTimeline, METH_VARARGS, ""},
-    {"export_op_summary", WrapExportOpSummary, METH_VARARGS, ""},
+    {"export_summary", WrapExportSummary, METH_VARARGS, ""},
     {NULL, NULL, METH_VARARGS, ""}
 };
 
@@ -120,22 +119,23 @@ PyObject *WrapExportTimeline(PyObject *self, PyObject *args)
     return Py_BuildValue("i", ANALYSIS_OK);
 }
 
-PyObject *WrapExportOpSummary(PyObject *self, PyObject *args)
+PyObject *WrapExportSummary(PyObject *self, PyObject *args)
 {
     // parseFilePath为PROF*目录
     const char *parseFilePath = NULL;
+    const char *reportJsonPath = NULL;
     if (!PyArg_ParseTuple(args, "s", &parseFilePath)) {
-        PyErr_SetString(PyExc_TypeError, "parser.export_op_summary args parse failed!");
+        PyErr_SetString(PyExc_TypeError, "parser.export_summary args parse failed!");
         return NULL;
     }
     if (!File::CheckDir(parseFilePath)) {
-        PyErr_SetString(PyExc_TypeError, "parser.export_op_summary path is invalid!");
+        PyErr_SetString(PyExc_TypeError, "parser.export_summary path is invalid!");
         return NULL;
     }
     Log::GetInstance().Init(Utils::File::PathJoin({parseFilePath, "mindstudio_profiler_log"}));
-    auto exportSummary = Analysis::Application::ExportSummary(parseFilePath);
-    if (!exportSummary.Run()) {
-        ERROR("OpSummary run failed.");
+    auto exportManager = Analysis::Application::ExportManager(parseFilePath, reportJsonPath);
+    if (!exportManager.Run(Analysis::Application::ExportMode::SUMMARY)) {
+        ERROR("Summary run failed.");
         return Py_BuildValue("i", ANALYSIS_ERROR);
     }
     return Py_BuildValue("i", ANALYSIS_OK);
