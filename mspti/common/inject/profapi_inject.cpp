@@ -19,6 +19,7 @@
 #include "common/plog_manager.h"
 #include "common/context_manager.h"
 #include "common/utils.h"
+#include "activity/ascend/parser/cann_hash_cache.h"
 
 namespace Mspti {
 namespace Inject {
@@ -102,7 +103,7 @@ uint64_t MsptiGetHashIdImpl(const char* hashInfo, size_t len)
         MSPTI_LOGE("GenHashId failed. hashInfo is nullptr");
         return 0;
     }
-    return Mspti::Parser::ParserManager::GetInstance()->GenHashId(std::string(hashInfo, len));
+    return Mspti::Parser::CannHashCache::GetInstance().GenHashId(std::string(hashInfo, len));
 }
 
 int8_t MsptiHostFreqIsEnableImpl()

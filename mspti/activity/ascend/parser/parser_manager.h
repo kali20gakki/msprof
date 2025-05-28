@@ -47,8 +47,6 @@ public:
     // CANN
     msptiResult ReportRtTaskTrack(const MsprofRuntimeTrack& track);
     msptiResult ReportApi(const MsprofApi* const data);
-    uint64_t GenHashId(const std::string &hashInfo);
-    std::string& GetHashInfo(uint64_t hashId);
     void RegReportTypeInfo(uint16_t level, uint32_t typeId, const std::string& typeName);
     std::string& GetTypeName(uint16_t level, uint32_t typeId);
 
@@ -64,10 +62,6 @@ private:
     // map<<deviceId, streamId, taskId>, list<msptiActivityKernel*>>
     std::map<DstType, std::list<std::shared_ptr<msptiActivityKernel>>> kernel_map_;
     std::mutex kernel_mtx_;
-
-    // <hashID, hashInfo>
-    static std::unordered_map<uint64_t, std::string> hashInfo_map_;
-    static std::mutex hashMutex_;
 
     // <level, <typeid, typename>>
     static std::unordered_map<uint16_t, std::unordered_map<uint32_t, std::string>> typeInfo_map_;
