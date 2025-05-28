@@ -31,7 +31,7 @@ public:
 private:
     bool Init();
     bool CheckProfDirsValid();
-    bool ProcessData(DataInventory &dataInventory);
+    bool ProcessData(DataInventory &dataInventory, ExportMode exportMode);
     std::vector<JsonProcess> GetProcessEnum();
 
 private:

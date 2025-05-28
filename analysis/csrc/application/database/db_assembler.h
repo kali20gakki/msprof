@@ -27,6 +27,7 @@ public:
     DBAssembler(const std::string &msprofDBPath, const std::string &profPath);
     virtual ~DBAssembler() = default;
     bool Run(DataInventory &dataInventory);
+    static std::vector<std::string> GetProcessList();
 private:
     std::string profPath_;
     std::string msprofDBPath_;
