@@ -62,6 +62,7 @@ typedef enum {
     MSPTI_ACTIVITY_KIND_MEMSET = 6,
     MSPTI_ACTIVITY_KIND_MEMCPY = 7,
     MSPTI_ACTIVITY_KIND_EXTERNAL_CORRELATION = 8,
+    MSPTI_ACTIVITY_KIND_COMMUNICATION = 9,
     MSPTI_ACTIVITY_KIND_COUNT,
     MSPTI_ACTIVITY_KIND_FORCE_INT = 0x7fffffff
 } msptiActivityKind;
@@ -569,6 +570,79 @@ typedef struct PACKED_ALIGNMENT {
     */
     uint64_t correlationId;
 } msptiActivityExternalCorrelation;
+
+typedef enum {
+    MSPTI_ACTIVITY_COMMUNICATION_INT8 = 0,
+    MSPTI_ACTIVITY_COMMUNICATION_INT16 = 1,
+    MSPTI_ACTIVITY_COMMUNICATION_INT32 = 2,
+    MSPTI_ACTIVITY_COMMUNICATION_FP16 = 3,
+    MSPTI_ACTIVITY_COMMUNICATION_FP32 = 4,
+    MSPTI_ACTIVITY_COMMUNICATION_INT64 = 5,
+    MSPTI_ACTIVITY_COMMUNICATION_UINT64 = 6,
+    MSPTI_ACTIVITY_COMMUNICATION_UINT8 = 7,
+    MSPTI_ACTIVITY_COMMUNICATION_UINT16 = 8,
+    MSPTI_ACTIVITY_COMMUNICATION_UINT32 = 9,
+    MSPTI_ACTIVITY_COMMUNICATION_FP64 = 10,
+    MSPTI_ACTIVITY_COMMUNICATION_BFP16 = 11,
+    MSPTI_ACTIVITY_COMMUNICATION_INT128 = 12,
+    MSPTI_ACTIVITY_COMMUNICATION_INVALID_TYPE = 0x0000FFFF
+} msptiCommunicationDataType;
+
+typedef struct PACKED_ALIGNMENT {
+    /**
+    * The activity record kind, must be MSPTI_ACTIVITY_COMMUNICATION_KIND.
+    */
+    msptiActivityKind kind;
+
+    /**
+    * Communication data type, Works with
+    * msptiCommunicationDataType
+    */
+    msptiCommunicationDataType dataType;
+
+    /**
+    * Count of communication data
+    */
+    uint64_t count;
+
+    /**
+    * A stream object requires that we identify device and stream ID.
+    */
+    struct {
+        uint32_t deviceId;
+        uint32_t streamId;
+    } ds;
+
+    /**
+    * The start timestamp on device for the communication, in ns.
+    */
+    uint64_t start;
+
+    /**
+    * The end timestamp on device for the communication, in ns.
+    */
+    uint64_t end;
+
+    /**
+    * The type of algorithm used for communication
+    */
+    const char* algType;
+
+    /**
+    * The communication op name.
+    */
+    const char* name;
+
+    /**
+    * The name of communication group where the communication operator is executed
+    */
+    const char* commName;
+
+    /**
+    * The correlation ID of the communication op.
+    */
+    uint64_t correlationId;
+} msptiActivityCommunication;
 
 END_PACKED_ALIGNMENT
 

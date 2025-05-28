@@ -27,8 +27,10 @@ enum StepTraceTag {
 };
 
 enum StarsFuncType {
-    STARS_FUNC_TYPE_BEGIN = 0,
-    STARS_FUNC_TYPE_END = 1,
+    STARS_FUNC_TYPE_BEGIN = 0b000000,
+    STARS_FUNC_TYPE_END = 0b000001,
+    FFTS_PLUS_TYPE_START = 0b100010,
+    FFTS_PLUS_TYPE_END = 0b100011,
 };
 
 #pragma pack(4)
@@ -71,19 +73,41 @@ struct TaskType {
     uint8_t reserved1[21];
 };
 
+struct StarsSocHeader {
+    uint16_t funcType : 6;
+    uint16_t resv : 4;
+    uint16_t taskType : 6;
+};
+
 struct StarsSocLog {
-    uint32_t funcType : 6;
-    uint32_t cnt : 4;
-    uint32_t sqeType : 6;
-    uint32_t magic : 16;
-    uint32_t streamId : 16;
-    uint32_t taskId : 16;
-    uint32_t sysCntL : 32;
-    uint32_t sysCntH : 32;
-    uint32_t res0 : 16;
-    uint32_t accId : 6;
-    uint32_t acsqId : 10;
-    uint32_t res1[11];
+    uint16_t funcType : 6;
+    uint16_t cnt : 4;
+    uint16_t taskType : 6;
+    uint16_t resv0;
+    uint16_t streamId;
+    uint16_t taskId;
+    uint64_t timestamp;
+    uint16_t resv1;
+    uint16_t accId : 6;
+    uint16_t acsqId : 10;
+    uint32_t resv2[11];
+};
+
+struct FftsPlusLog {
+    uint16_t funcType : 6;
+    uint16_t cnt : 4;
+    uint16_t taskType : 6;
+    uint16_t resv2;
+    uint16_t streamId;
+    uint16_t taskId;
+    uint64_t timestamp;
+    uint16_t subTaskType : 8;
+    uint16_t resv3 : 8;
+    uint16_t subTaskId;
+    uint16_t resv4 : 13;
+    uint16_t fftsType : 3;
+    uint16_t threadId;
+    uint32_t resv5[10];
 };
 #pragma pack()
 

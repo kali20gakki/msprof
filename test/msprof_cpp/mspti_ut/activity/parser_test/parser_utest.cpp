@@ -10,6 +10,7 @@
 #include "mockcpp/mockcpp.hpp"
 
 #include "activity/ascend/parser/parser_manager.h"
+#include "activity/ascend/parser/cann_hash_cache.h"
 #include "activity/ascend/parser/mstx_parser.h"
 #include "common/inject/runtime_inject.h"
 #include "common/utils.h"
@@ -29,8 +30,8 @@ TEST_F(ParserUtest, ShouldRetSuccessWhenReportApiSuccess)
 {
     auto instance = Mspti::Parser::ParserManager::GetInstance();
     const std::string hashInfo = "aclnnAdd_AxpyAiCore_Axpy";
-    auto hashId = instance->GenHashId(hashInfo);
-    EXPECT_STREQ(hashInfo.c_str(), instance->GetHashInfo(hashId).c_str());
+    auto hashId = Mspti::Parser::CannHashCache::GetInstance().GenHashId(hashInfo);
+    EXPECT_STREQ(hashInfo.c_str(), Mspti::Parser::CannHashCache::GetInstance().GetHashInfo(hashId).c_str());
     constexpr uint16_t level = 20000;
     constexpr uint32_t typeId = 1;
     const std::string typeName = "acl_api";
@@ -124,7 +125,7 @@ TEST_F(ParserUtest, ShouldRecordKernelNameWhenReportRtTaskTrack)
     constexpr uint32_t streamId = 3;
     constexpr uint32_t BIT_NUM = 16;
     const std::string kernelName = "test_kernalName";
-    auto kernelNameHash = instance->GenHashId(kernelName);
+    auto kernelNameHash = Mspti::Parser::CannHashCache::GetInstance().GenHashId(kernelName);
     MsprofRuntimeTrack data;
     (void)memset_s(&data, sizeof(data), 0, sizeof(data));
     data.deviceId = deviceId;

@@ -8,7 +8,7 @@
  * Author             : msprof team
  * Creation Date      : 2024/05/07
  * *****************************************************************************
-*/
+ */
 #include "activity/ascend/channel/channel_reader.h"
 
 #include <cstring>
@@ -16,6 +16,7 @@
 #include "activity/activity_manager.h"
 #include "activity/ascend/channel/channel_data.h"
 #include "activity/ascend/parser/parser_manager.h"
+#include "activity/ascend/parser/device_task_calculator.h"
 #include "common/context_manager.h"
 #include "common/inject/driver_inject.h"
 #include "common/inject/inject_base.h"
@@ -98,7 +99,7 @@ msptiResult ChannelReader::Execute()
 }
 
 size_t ChannelReader::TransDataToActivityBuffer(char buffer[], size_t valid_size,
-    uint32_t deviceId, AI_DRV_CHANNEL channelId)
+                                                uint32_t deviceId, AI_DRV_CHANNEL channelId)
 {
     switch (channelId) {
         case PROF_CHANNEL_TS_FW:
@@ -133,12 +134,14 @@ size_t ChannelReader::TransStarsLog(char buffer[], size_t valid_size, uint32_t d
 {
     size_t pos = 0;
     while (valid_size - pos >= sizeof(StarsSocLog)) {
-        StarsSocLog* data = reinterpret_cast<StarsSocLog*>(buffer + pos);
-        Mspti::Parser::ParserManager::GetInstance()->ReportStarsSocLog(deviceId, data);
+        Mspti::Parser::ParserManager::GetInstance()->ReportStarsSocLog(deviceId,
+            reinterpret_cast<StarsSocLog *>(buffer + pos));
+        Mspti::Parser::DeviceTaskCalculator::GetInstance().ReportStarsSocLog(deviceId,
+            reinterpret_cast<StarsSocHeader *>(buffer + pos));
         pos += sizeof(StarsSocLog);
     }
     return pos;
 }
-}  // Channel
-}  // Ascend
-}  // Mspti
+} // Channel
+} // Ascend
+} // Mspti

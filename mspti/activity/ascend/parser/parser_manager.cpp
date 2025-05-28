@@ -22,6 +22,7 @@
 #include "hccl_reporter.h"
 #include "stars_common.h"
 #include "mstx_parser.h"
+#include "cann_hash_cache.h"
 
 namespace Mspti {
 namespace Parser {
@@ -43,8 +44,6 @@ inline Mspti::Common::ThreadLocal<msptiActivityApi> GetDefaultApiActivity()
 }
 }
 
-std::unordered_map<uint64_t, std::string> ParserManager::hashInfo_map_;
-std::mutex ParserManager::hashMutex_;
 std::unordered_map<uint16_t, std::unordered_map<uint32_t, std::string>> ParserManager::typeInfo_map_;
 std::mutex ParserManager::typeInfoMutex_;
 
@@ -52,31 +51,6 @@ ParserManager *ParserManager::GetInstance()
 {
     static ParserManager instance;
     return &instance;
-}
-
-uint64_t ParserManager::GenHashId(const std::string &hashInfo)
-{
-    // DoubleHash耗时和map find的耗时比较
-    uint64_t hashId = Common::GetHashIdImple(hashInfo);
-    {
-        std::lock_guard<std::mutex> lock(hashMutex_);
-        const auto iter = hashInfo_map_.find(hashId);
-        if (iter == hashInfo_map_.end()) {
-            hashInfo_map_.insert({hashId, hashInfo});
-        }
-    }
-    return hashId;
-}
-
-std::string& ParserManager::GetHashInfo(uint64_t hashId)
-{
-    static std::string nullInfo = "";
-    std::lock_guard<std::mutex> lock(hashMutex_);
-    const auto iter = hashInfo_map_.find(hashId);
-    if (iter != hashInfo_map_.end()) {
-        return iter->second;
-    }
-    return nullInfo;
 }
 
 void ParserManager::RegReportTypeInfo(uint16_t level, uint32_t typeId, const std::string& typeName)
@@ -114,7 +88,7 @@ msptiResult ParserManager::ReportApi(const MsprofApi* const data)
     if (!data) {
         return MSPTI_ERROR_INNER;
     }
-    const auto& name = GetHashInfo(data->itemId);
+    const auto& name = CannHashCache::GetInstance().GetHashInfo(data->itemId);
     if (name.empty()) {
         MSPTI_LOGW("Get HashInfo failed. HashId: %lu", data->itemId);
         return MSPTI_SUCCESS;
@@ -163,7 +137,7 @@ msptiResult ParserManager::ReportRtTaskTrack(const MsprofRuntimeTrack& track)
         }
         kernel->kind = MSPTI_ACTIVITY_KIND_KERNEL;
         kernel->correlationId = Mspti::Common::ContextManager::GetInstance()->GetCorrelationId();
-        kernel->name = GetHashInfo(track.kernelName).c_str();
+        kernel->name = CannHashCache::GetInstance().GetHashInfo(track.kernelName).c_str();
         kernel->type = typeIter->second.c_str();
         {
             std::lock_guard<std::mutex> lk(kernel_mtx_);
@@ -207,11 +181,9 @@ msptiResult ParserManager::ReportStarsSocLog(uint32_t deviceId, const StarsSocLo
         if (socLog->funcType == STARS_FUNC_TYPE_BEGIN) {
             kernel->ds.deviceId = deviceId;
             kernel->ds.streamId = streamId;
-            kernel->start = static_cast<uint64_t>(socLog->sysCntH) << BIT_OFFSET | socLog->sysCntL;
-            kernel->start = Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId, kernel->start);
+            kernel->start = Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId, socLog->timestamp);
         } else if (socLog->funcType == STARS_FUNC_TYPE_END) {
-            kernel->end = static_cast<uint64_t>(socLog->sysCntH) << BIT_OFFSET | socLog->sysCntL;
-            kernel->end = Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId, kernel->end);
+            kernel->end = Common::ContextManager::GetInstance()->GetRealTimeFromSysCnt(deviceId, socLog->timestamp);
             if (Mspti::Activity::ActivityManager::GetInstance()->Record(
                 Common::ReinterpretConvert<msptiActivity*>(kernel.get()),
                 sizeof(msptiActivityKernel)) != MSPTI_SUCCESS) {
