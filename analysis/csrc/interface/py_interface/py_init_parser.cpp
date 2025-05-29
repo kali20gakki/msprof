@@ -123,7 +123,6 @@ PyObject *WrapExportSummary(PyObject *self, PyObject *args)
 {
     // parseFilePath为PROF*目录
     const char *parseFilePath = NULL;
-    const char *reportJsonPath = NULL;
     if (!PyArg_ParseTuple(args, "s", &parseFilePath)) {
         PyErr_SetString(PyExc_TypeError, "parser.export_summary args parse failed!");
         return NULL;
@@ -133,7 +132,7 @@ PyObject *WrapExportSummary(PyObject *self, PyObject *args)
         return NULL;
     }
     Log::GetInstance().Init(Utils::File::PathJoin({parseFilePath, "mindstudio_profiler_log"}));
-    auto exportManager = Analysis::Application::ExportManager(parseFilePath, reportJsonPath);
+    auto exportManager = Analysis::Application::ExportManager(parseFilePath, "");
     if (!exportManager.Run(Analysis::Application::ExportMode::SUMMARY)) {
         ERROR("Summary run failed.");
         return Py_BuildValue("i", ANALYSIS_ERROR);
