@@ -7,6 +7,8 @@
 #include "transport/hdc/hdc_transport.h"
 #include "utils/utils.h"
 #include "mmpa_api.h"
+#include "uploader_mgr.h"
+#include "dcmi_plugin.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::JobWrapper;
@@ -741,4 +743,223 @@ TEST_F(PROF_TIMER_TEST, run) {
     ProfTimer timerHandler(timerParam);
     auto errorContext = MsprofErrorManager::instance()->GetErrorManagerContext();
     timerHandler.Run(errorContext);
+}
+
+class NETDEV_STATS_HANDLER_TEST : public testing::Test {
+public:
+    size_t bufSize = 20;
+    uint64_t sampleIntervalNs = 20 * 1000 * 1000;
+    uint64_t timeStamp = 3;
+    std::string retFileName = "retFileName";
+    std::shared_ptr<analysis::dvvp::message::ProfileParams> param;
+    std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx;
+
+    HDC_SESSION session = (HDC_SESSION)0x12345678;
+    std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
+
+    static int DcmiGetCardList(int *cardNum, int *cardList, int listLen)
+    {
+        constexpr int dcmiCardNum = 8;
+        *cardNum = dcmiCardNum;
+        listLen = std::min(*cardNum, listLen);
+        for (int i = 0; i < *cardNum; i++) {
+            cardList[i] = i;
+        }
+        return PROFILING_SUCCESS;
+    }
+
+    static int DcmiGetDeviceNumInCard(int cardId, int *deviceNum)
+    {
+        constexpr int dcmiDeviceNum = 1;
+        *deviceNum = dcmiDeviceNum;
+        return PROFILING_SUCCESS;
+    }
+
+protected:
+    virtual void SetUp()
+    {
+        param = std::make_shared<analysis::dvvp::message::ProfileParams>();
+        jobCtx = std::make_shared<analysis::dvvp::message::JobContext>();
+
+        auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
+                new analysis::dvvp::transport::HDCTransport(session));
+        upLoader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
+
+        auto dcmiPlugin = Collector::Dvvp::Plugin::DcmiPlugin::instance();
+        dcmiPlugin->dcmiGetCardListFunc_ = DcmiGetCardList;
+        dcmiPlugin->dcmiGetDeviceNumInCardFunc_ = DcmiGetDeviceNumInCard;
+    }
+    virtual void TearDown() {}
+};
+
+TEST_F(NETDEV_STATS_HANDLER_TEST, InitAndUinit)
+{
+    GlobalMockObject::verify();
+
+    MOCKER_CPP(&Collector::Dvvp::Plugin::DcmiPlugin::MsprofDcmiInit)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+
+    NetDevStatsHandler handler(PROF_NETDEV_STATS, bufSize, sampleIntervalNs, retFileName, jobCtx);
+    EXPECT_EQ(PROFILING_FAILED, handler.Init());
+    EXPECT_EQ(PROFILING_SUCCESS, handler.Uinit());
+    EXPECT_EQ(PROFILING_SUCCESS, handler.Init());
+    EXPECT_EQ(PROFILING_SUCCESS, handler.Uinit());
+}
+
+TEST_F(NETDEV_STATS_HANDLER_TEST, RegisterDevTask)
+{
+    GlobalMockObject::verify();
+
+    MOCKER_CPP(&analysis::dvvp::common::memory::Chunk::Init)
+        .stubs()
+        .will(returnValue(false))
+        .then(returnValue(true));
+
+    uint32_t devId = 0;
+    NetDevStatsHandler handler(PROF_NETDEV_STATS, bufSize, sampleIntervalNs, retFileName, jobCtx);
+    size_t expectDevTaskCount = 0;
+    EXPECT_EQ(PROFILING_FAILED, handler.RegisterDevTask(devId));
+    EXPECT_EQ(expectDevTaskCount, handler.GetCurDevTaskCount());
+    expectDevTaskCount = 1;
+    EXPECT_EQ(PROFILING_SUCCESS, handler.RegisterDevTask(devId));
+    EXPECT_EQ(expectDevTaskCount, handler.GetCurDevTaskCount());
+    auto dcmiCardIdMap = handler.GetCurDcmiCardDevIdMap();
+    EXPECT_EQ(expectDevTaskCount, dcmiCardIdMap.size());
+    EXPECT_EQ(devId, dcmiCardIdMap.begin()->first);
+}
+
+TEST_F(NETDEV_STATS_HANDLER_TEST, RemoveDevTask)
+{
+    GlobalMockObject::verify();
+
+    MOCKER_CPP(&analysis::dvvp::common::memory::Chunk::Init)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&analysis::dvvp::common::memory::Chunk::GetUsedSize)
+        .stubs()
+        .will(returnValue(bufSize));
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::NetDevStatsHandler::SendData)
+        .stubs();
+
+    uint32_t devId = 0;
+    NetDevStatsHandler handler(PROF_NETDEV_STATS, bufSize, sampleIntervalNs, retFileName, jobCtx);
+    size_t expectDevTaskCount = 1;
+    EXPECT_EQ(PROFILING_SUCCESS, handler.RegisterDevTask(devId));
+    EXPECT_EQ(expectDevTaskCount, handler.GetCurDevTaskCount());
+    uint32_t wrongDevid = 1;
+    EXPECT_EQ(PROFILING_SUCCESS, handler.RemoveDevTask(wrongDevid));
+    EXPECT_EQ(expectDevTaskCount, handler.GetCurDevTaskCount());
+    expectDevTaskCount = 0;
+    EXPECT_EQ(PROFILING_SUCCESS, handler.RemoveDevTask(devId));
+    EXPECT_EQ(expectDevTaskCount, handler.GetCurDevTaskCount());
+}
+
+TEST_F(NETDEV_STATS_HANDLER_TEST, Execute)
+{
+    GlobalMockObject::verify();
+
+    MOCKER(analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw)
+        .stubs()
+        .will(returnValue(static_cast<unsigned long long>(timeStamp)));
+    MOCKER_CPP(&Collector::Dvvp::Plugin::DcmiPlugin::MsprofDcmiInit)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Collector::Dvvp::Plugin::DcmiPlugin::MsprofDcmiGetNetdevPktStatsInfo)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::NetDevStatsHandler::StoreData)
+        .stubs();
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::NetDevStatsHandler::GetDcmiCardDevId)
+        .stubs()
+        .will(returnValue(false))
+        .then(returnValue(true));
+
+    uint32_t devId = 0;
+    NetDevStatsHandler handler(PROF_NETDEV_STATS, bufSize, sampleIntervalNs, retFileName, jobCtx);
+    // not inited
+    EXPECT_EQ(PROFILING_SUCCESS, handler.Execute());
+    EXPECT_EQ(PROFILING_SUCCESS, handler.Init());
+    // prevTimeStamp_ break;
+    handler.prevTimeStamp_ = 1;
+    handler.sampleIntervalNs_= timeStamp;
+    EXPECT_EQ(PROFILING_SUCCESS, handler.Execute());
+    // register task failed when GetDcmiCardDevId failed
+    EXPECT_EQ(PROFILING_FAILED, handler.RegisterDevTask(devId));
+    EXPECT_EQ(PROFILING_SUCCESS, handler.RegisterDevTask(devId));
+    // collet data failed
+    handler.prevTimeStamp_ = 1;
+    handler.sampleIntervalNs_= 1;
+    EXPECT_EQ(PROFILING_SUCCESS, handler.Execute());
+    // collet data succ
+    handler.prevTimeStamp_ = 1;
+    EXPECT_EQ(PROFILING_SUCCESS, handler.Execute());
+    EXPECT_EQ(PROFILING_SUCCESS, handler.Uinit());
+}
+
+TEST_F(NETDEV_STATS_HANDLER_TEST, StoreData)
+{
+    GlobalMockObject::verify();
+
+    MOCKER_CPP(&Collector::Dvvp::Plugin::DcmiPlugin::MsprofDcmiInit)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::NetDevStatsHandler::SendData)
+        .stubs();
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::NetDevStatsHandler::GetDcmiCardDevId)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER(memcpy_s)
+        .stubs()
+        .will(returnValue(EOF))
+        .then(returnValue(EOK));
+
+    uint32_t devId = 0;
+    NetDevStatsHandler handler(PROF_NETDEV_STATS, bufSize, sampleIntervalNs, retFileName, jobCtx);
+
+    EXPECT_EQ(PROFILING_SUCCESS, handler.Init());
+    // empty data
+    std::string data;
+    handler.StoreData(devId, data);
+
+    data = "hello msprof";
+    // device task not reigstered
+    handler.StoreData(devId, data);
+    EXPECT_EQ(PROFILING_SUCCESS, handler.RegisterDevTask(devId));
+    // memcpy_s failed
+    handler.StoreData(devId, data);
+    // free > size; bufSize = 20
+    handler.StoreData(devId, data);
+    // free < size
+    handler.StoreData(devId, data);
+    // free < bufSize / 4
+    data = "hello";
+    handler.StoreData(devId, data);
+    // size > bufSize
+    data = "netdev stats handler of msprof";
+    handler.StoreData(devId, data);
+    EXPECT_EQ(PROFILING_SUCCESS, handler.Uinit());
+}
+
+TEST_F(NETDEV_STATS_HANDLER_TEST, SendData)
+{
+    GlobalMockObject::verify();
+
+    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::GetUploader)
+        .stubs()
+        .with(any(), outBound(upLoader));
+    MOCKER_CPP(&analysis::dvvp::transport::Uploader::UploadData,
+        int(analysis::dvvp::transport::Uploader::*)(std::shared_ptr<analysis::dvvp::ProfileFileChunk>))
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+
+    NetDevStatsHandler handler(PROF_NETDEV_STATS, bufSize, sampleIntervalNs, retFileName, jobCtx);
+    uint32_t devId = 0;
+    std::string buf("test");
+    handler.SendData(devId, nullptr, 0);
+    handler.SendData(devId, (const unsigned char*)buf.c_str(), buf.size());
+    handler.SendData(devId, (const unsigned char*)buf.c_str(), buf.size());
 }

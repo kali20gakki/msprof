@@ -380,5 +380,21 @@ protected:
     std::vector<uint32_t> groupIds_;
     analysis::dvvp::driver::AI_DRV_CHANNEL groupChannelIdMap_[INSTR_GROUP_MAX_NUM][INSTR_GROUP_CHANNEL_NUM];
 };
-}}}
-#endif
+
+class NetDevStatsJob : public ICollectionJob {
+public:
+    NetDevStatsJob() = default;
+    ~NetDevStatsJob() = default;
+    int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
+    int Process() override;
+    int Uninit() override;
+
+protected:
+    static std::mutex jobMtx;
+    SHARED_PTR_ALIA<CollectionJobCfg> collectionJobCfg_{nullptr};
+    uint64_t sampleIntervalNs_{0};
+};
+} // namespace JobWrapper
+} // namespace Dvvp
+} // namespace Analysis
+#endif // ANALYSIS_DVVP_JOB_WRAPPER_PROF_JOB_H

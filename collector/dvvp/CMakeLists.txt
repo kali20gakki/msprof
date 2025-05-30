@@ -119,6 +119,7 @@ set(msprofilerCpp
     depend/src/plugin_handle.cpp
     depend/src/slog_plugin.cpp
     depend/src/profapi_plugin.cpp
+    depend/src/dcmi_plugin.cpp
     driver/channel/ai_drv_prof_api.cpp
     driver/devmgmt/ai_drv_dev_api.cpp
     driver/devmgmt/ai_drv_dsmi_api.cpp

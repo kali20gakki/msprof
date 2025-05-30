@@ -20,11 +20,8 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/common/config/feature_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp	
 	${MSPROF_SOURCE_DIR}/dvvp/common/memory/chunk_pool.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
-    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
 	${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread_pool.cpp
@@ -35,6 +32,7 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/depend/src/runtime_plugin.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/depend/src/dcmi_plugin.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/driver/channel/ai_drv_prof_api.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/mini/ai_drv_dsmi_api.cpp
@@ -140,7 +138,7 @@ add_executable(
 
 target_include_directories(msprofiler_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/include
-    ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
+    ${MSPROF_SOURCE_DIR}/dvvp/common/utils
     ${TOP_DIR}/abl/msprof/inc/toolchain
 	../stub/
 	${GTEST_INCLUDE_DIR}
@@ -197,7 +195,7 @@ target_include_directories(msprofiler_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/task_handle/include
 	${MSPROF_SOURCE_DIR}/dvvp/driver/inc
 	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include
-	${MSPROF_SOURCE_DIR}/dvvp/adx/inc	
+	${MSPROF_SOURCE_DIR}/dvvp/adx/inc
 	${TOP_DIR}/graphengine/inc/external
 	${TOP_DIR}/inc
 	${TOP_DIR}/inc/driver

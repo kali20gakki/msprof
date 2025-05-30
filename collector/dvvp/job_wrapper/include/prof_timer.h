@@ -9,6 +9,7 @@
 
 #include <bitset>
 #include <map>
+#include <unordered_map>
 #include <mutex>
 #include <fstream>
 #include <csignal>
@@ -39,7 +40,8 @@ enum TimerHandlerTag {
     PROF_HOST_SYS_MEM,
     PROF_HOST_ALL_PID_CPU,
     PROF_HOST_ALL_PID_MEM,
-    PROF_HOST_SYS_NETWORK
+    PROF_HOST_SYS_NETWORK,
+    PROF_NETDEV_STATS
 };
 
 class TimerHandler {
@@ -58,7 +60,7 @@ public:
 class ProcTimerHandler : public TimerHandler {
 public:
     ProcTimerHandler(TimerHandlerTag tag, unsigned int devId, unsigned int bufSize,
-            unsigned sampleIntarvalMs, const std::string &srcFileName, const std::string &retFileName,
+            unsigned sampleIntervalMs, const std::string &srcFileName, const std::string &retFileName,
             SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> param,
             SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx,
             SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> upLoader);
@@ -98,7 +100,7 @@ private:
 class ProcHostCpuHandler : public ProcTimerHandler {
 public:
     ProcHostCpuHandler(TimerHandlerTag tag, unsigned int bufSize,
-            unsigned sampleIntarvalMs, const std::string &retFileName,
+            unsigned sampleIntervalMs, const std::string &retFileName,
             SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> param,
             SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx,
             SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> upLoader);
@@ -117,7 +119,7 @@ private:
 class ProcHostMemHandler : public ProcTimerHandler {
 public:
     ProcHostMemHandler(TimerHandlerTag tag, unsigned int bufSize,
-            unsigned sampleIntarvalMs, const std::string &retFileName,
+            unsigned sampleIntervalMs, const std::string &retFileName,
             SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> param,
             SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx,
             SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> upLoader);
@@ -134,7 +136,7 @@ private:
 class ProcHostNetworkHandler : public ProcTimerHandler {
 public:
     ProcHostNetworkHandler(TimerHandlerTag tag, unsigned int bufSize,
-            unsigned sampleIntarvalMs, const std::string &retFileName,
+            unsigned sampleIntervalMs, const std::string &retFileName,
             SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> param,
             SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx,
             SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> upLoader);
@@ -148,7 +150,7 @@ private:
 class ProcStatFileHandler : public ProcTimerHandler {
 public:
     ProcStatFileHandler(TimerHandlerTag tag, unsigned int devId, unsigned int bufSize,
-            unsigned sampleIntarvalMs, const std::string &srcFileName, const std::string &retFileName,
+            unsigned sampleIntervalMs, const std::string &srcFileName, const std::string &retFileName,
             SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> param,
             SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx,
             SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> upLoader);
@@ -161,7 +163,7 @@ private:
 class ProcPidStatFileHandler : public ProcTimerHandler {
 public:
     ProcPidStatFileHandler(TimerHandlerTag tag, unsigned int devId, unsigned int bufSize,
-            unsigned sampleIntarvalMs, const std::string &srcFileName, const std::string &retFileName,
+            unsigned sampleIntervalMs, const std::string &srcFileName, const std::string &retFileName,
             SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> param,
             SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx,
             SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> upLoader,
@@ -179,7 +181,7 @@ private:
 class ProcMemFileHandler : public ProcTimerHandler {
 public:
     ProcMemFileHandler(TimerHandlerTag tag, unsigned int devId, unsigned int bufSize,
-            unsigned sampleIntarvalMs, const std::string &srcFileName, const std::string &retFileName,
+            unsigned sampleIntervalMs, const std::string &srcFileName, const std::string &retFileName,
             SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> param,
             SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx,
             SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> upLoader);
@@ -192,7 +194,7 @@ private:
 class ProcPidMemFileHandler : public ProcTimerHandler {
 public:
     ProcPidMemFileHandler(TimerHandlerTag tag, unsigned int devId, unsigned int bufSize,
-            unsigned sampleIntarvalMs, const std::string &srcFileName, const std::string &retFileName,
+            unsigned sampleIntervalMs, const std::string &srcFileName, const std::string &retFileName,
             SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> param,
             SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx,
             SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> upLoader,
@@ -255,6 +257,37 @@ private:
     std::vector<unsigned int> prevPids_;
 };
 
+class NetDevStatsHandler : public TimerHandler {
+public:
+    NetDevStatsHandler(TimerHandlerTag tag, size_t bufSize, uint64_t sampleIntervalNs,
+        const std::string &retFileName, SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx);
+    ~NetDevStatsHandler() override = default;
+
+    int Execute() override;
+    int Init() override;
+    int Uinit() override;
+    int RegisterDevTask(uint32_t devId);
+    int RemoveDevTask(uint32_t devId);
+    size_t GetCurDevTaskCount();
+
+private:
+    void StoreData(uint32_t devId, std::string data);
+    void SendData(uint32_t devId, CONST_UNSIGNED_CHAR_PTR buf, size_t size);
+    bool GetDcmiCardDevId(uint32_t devId, int &dcmiCardId, int &dcmiDevId);
+    std::unordered_map<uint32_t, std::pair<int, int>> GetCurDcmiCardDevIdMap();
+
+private:
+    volatile bool isInited_;
+    unsigned long long prevTimeStamp_;
+    size_t bufSize_;
+    uint64_t sampleIntervalNs_;
+    std::string retFileName_;
+    SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx_;
+    std::mutex devTaskMtx_;
+    std::unordered_map<uint32_t, std::pair<int, int>> dcmiCardDevIdMap_;
+    std::unordered_map<uint32_t, SHARED_PTR_ALIA<analysis::dvvp::common::memory::Chunk>> devTaskBufs_;
+};
+
 struct TimerParam {
     explicit TimerParam(unsigned long interval)
         : intervalUsec(interval)
@@ -270,6 +303,7 @@ public:
 public:
     int RegisterTimerHandler(TimerHandlerTag tag, SHARED_PTR_ALIA<TimerHandler> handler);
     int RemoveTimerHandler(TimerHandlerTag tag);
+    SHARED_PTR_ALIA<TimerHandler> GetTimerHandler(TimerHandlerTag tag);
 
 public:
     int Init();
@@ -297,6 +331,7 @@ public:
     void StopProfTimer();
     void RegisterProfTimerHandler(TimerHandlerTag tag, SHARED_PTR_ALIA<TimerHandler> handler);
     void RemoveProfTimerHandler(TimerHandlerTag tag);
+    SHARED_PTR_ALIA<TimerHandler> GetProfTimerHandler(TimerHandlerTag tag);
 
 protected:
     TimerManager();
@@ -307,7 +342,7 @@ private:
     std::mutex profTimerMtx_;
     SHARED_PTR_ALIA<Analysis::Dvvp::JobWrapper::ProfTimer> profTimer_;
 };
-}
-}
-}
-#endif
+} // namespace JobWrapper
+} // namespace Dvvp
+} // namespace Analysis
+#endif // ANALYSIS_DVVP_JOB_WRAPPER_PROF_TIMER_H

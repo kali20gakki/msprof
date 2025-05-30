@@ -69,8 +69,9 @@ enum ProfCollectionJobE {
     HOST_SYSCALLS_COLLECTION_JOB,
     HOST_PTHREAD_COLLECTION_JOB,
     HOST_DISKIO_COLLECTION_JOB,
+    // netdev stats
+    NETDEV_STATS_COLLECTION_JOB,
     NR_MAX_COLLECTION_JOB
-    //
 };
 
 static const std::string COLLECTION_JOB_FILENAME[NR_MAX_COLLECTION_JOB] = {
@@ -114,6 +115,7 @@ static const std::string COLLECTION_JOB_FILENAME[NR_MAX_COLLECTION_JOB] = {
     "",
     "",
     "",
+    "data/netdev_stats.data",
     ""
 };
 

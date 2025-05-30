@@ -51,6 +51,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}//dvvp/common/validation/
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/dcmi_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp    
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
     ${commonSrcFiles}

@@ -10,6 +10,7 @@
 #include <cstdio>
 #include <cctype>
 #include <string>
+#include <sstream>
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
 #include <windows.h>
 #else
@@ -19,6 +20,9 @@
 #include "errno/error_code.h"
 #include "msprof_dlog.h"
 #include "utils/utils.h"
+#include "uploader_mgr.h"
+#include "dcmi_plugin.h"
+
 
 namespace Analysis {
 namespace Dvvp {
@@ -45,6 +49,23 @@ const char * const PROF_DATA_TIMER_STAMP = "TimeStamp:";
 const char * const PROF_DATA_INDEX = "\nIndex:";
 const char * const PROF_DATA_LEN = "\nDataLen:";
 const char * const PROF_DATA_PROCESSNAME = "ProcessName:";
+
+constexpr int NETDEV_STATS_DEFAULT_PORT_ID = 0;
+
+inline std::string ConstructNetDevStatsData(const uint64_t timeStamp, const dcmi_network_pkt_stats_info &stat)
+{
+    std::stringstream ss;
+    ss << timeStamp << ' '
+       << stat.mac_tx_pfc_pkt_num << ' ' << stat.mac_rx_pfc_pkt_num << ' '
+       << stat.mac_tx_total_oct_num << ' ' << stat.mac_rx_total_oct_num << ' '
+       << stat.mac_tx_bad_oct_num << ' ' << stat.mac_rx_bad_oct_num << ' '
+       << stat.roce_tx_all_pkt_num << ' ' << stat.roce_rx_all_pkt_num << ' '
+       << stat.roce_tx_err_pkt_num << ' ' << stat.roce_rx_err_pkt_num << ' '
+       << stat.roce_tx_cnp_pkt_num << ' ' << stat.roce_rx_cnp_pkt_num << ' '
+       << stat.roce_new_pkt_rty_num << ' '
+       << stat.nic_tx_all_oct_num << ' ' << stat.nic_rx_all_oct_num << '\n';
+    return ss.str();
+}
 
 TimerHandler::TimerHandler(TimerHandlerTag tag)
     : tag_(tag)
@@ -900,6 +921,246 @@ void ProcAllPidsFileHandler::ParseProcFile(const std::ifstream &ifs /* = ios::in
     UNUSED(data);
 }
 
+NetDevStatsHandler::NetDevStatsHandler(TimerHandlerTag tag, size_t bufSize, uint64_t sampleIntervalNs,
+    const std::string &retFileName, SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx)
+    : TimerHandler(tag),
+      isInited_(false),
+      prevTimeStamp_(0),
+      bufSize_(bufSize),
+      sampleIntervalNs_(sampleIntervalNs),
+      retFileName_("data/" + retFileName),
+      jobCtx_(jobCtx) {}
+
+int NetDevStatsHandler::Init()
+{
+    if (isInited_) {
+        MSPROF_LOGE("NetDevStatsHandler is inited");
+        MSPROF_INNER_ERROR("EK9999", "NetDevStatsHandler is inited");
+        return PROFILING_FAILED;
+    }
+    if (Collector::Dvvp::Plugin::DcmiPlugin::instance()->MsprofDcmiInit() != PROFILING_SUCCESS) {
+        MSPROF_LOGE("NetDevStatsHandler dcmi init failed");
+        MSPROF_INNER_ERROR("EK9999", "NetDevStatsHandler dcmi init failed");
+        return PROFILING_FAILED;
+    }
+    prevTimeStamp_ = 0;
+    isInited_ = true;
+    return PROFILING_SUCCESS;
+}
+
+int NetDevStatsHandler::Uinit()
+{
+    if (!isInited_) {
+        return PROFILING_SUCCESS;
+    }
+
+    isInited_ = false;
+    return PROFILING_SUCCESS;
+}
+
+int NetDevStatsHandler::Execute()
+{
+    if (!isInited_) {
+        MSPROF_LOGE("NetDevStatsHandler is not inited");
+        MSPROF_INNER_ERROR("EK9999", "NetDevStatsHandler is not inited");
+        return PROFILING_SUCCESS;
+    }
+
+    auto curTimeStamp = analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw();
+    if ((curTimeStamp - prevTimeStamp_) < sampleIntervalNs_ && (prevTimeStamp_ != 0)) {
+        return PROFILING_SUCCESS;
+    }
+    prevTimeStamp_ = curTimeStamp;
+    dcmi_network_pkt_stats_info statsInfo;
+
+    auto curDcmiCardDevIdMap = GetCurDcmiCardDevIdMap();
+    for (const auto& iter : curDcmiCardDevIdMap) {
+        auto devId = iter.first;
+        auto dcmiCardId = iter.second.first;
+        auto dcmiDeviceId = iter.second.second;
+        if (Collector::Dvvp::Plugin::DcmiPlugin::instance()->MsprofDcmiGetNetdevPktStatsInfo(
+            dcmiCardId, dcmiDeviceId, NETDEV_STATS_DEFAULT_PORT_ID, &statsInfo) != PROFILING_SUCCESS) {
+            MSPROF_LOGE("NetDevStatsHandler get netdev pkt stats info failed devId %u", devId);
+            MSPROF_INNER_ERROR("EK9999", "NetDevStatsHandler get netdev pkt stats info failed");
+            break;
+        }
+        auto packedData = ConstructNetDevStatsData(curTimeStamp, statsInfo);
+        StoreData(devId, std::move(packedData));
+    }
+    return PROFILING_SUCCESS;
+}
+
+bool NetDevStatsHandler::GetDcmiCardDevId(uint32_t devId, int &dcmiCardId, int &dcmiDevId)
+{
+    constexpr int MAX_CARD_NUM = 64;
+    int cardNum = 0;
+    int cardList[MAX_CARD_NUM] = {0};
+    if (Collector::Dvvp::Plugin::DcmiPlugin::instance()->MsprofDcmiGetCardList(
+        &cardNum, cardList, MAX_CARD_NUM) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("NetDevStatsHandler get card list failed");
+        return false;
+    }
+    if (cardNum == 0 || cardNum > MAX_CARD_NUM) {
+        MSPROF_LOGE("NetDevStatsHandler get card list failed, cardNum is invalid");
+        return false;
+    }
+    int deviceNum = 0;
+    if (Collector::Dvvp::Plugin::DcmiPlugin::instance()->MsprofDcmiGetDeviceNumInCard(
+        cardList[0], &deviceNum) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("NetDevStatsHandler get device num in card failed");
+        return false;
+    }
+    if (deviceNum == 0 || static_cast<int>(devId) / deviceNum >= cardNum) {
+        MSPROF_LOGE("NetDevStatsHandler get device num in card failed, deviceNum is invalid");
+        return false;
+    }
+    dcmiCardId = cardList[devId / deviceNum];
+    dcmiDevId = devId % deviceNum;
+    return true;
+}
+
+void NetDevStatsHandler::StoreData(uint32_t devId, std::string data)
+{
+    if (data.empty()) {
+        return;
+    }
+
+    SHARED_PTR_ALIA<analysis::dvvp::common::memory::Chunk> buf = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(devTaskMtx_);
+        auto iter = devTaskBufs_.find(devId);
+        if (iter == devTaskBufs_.end() || iter->second == nullptr) {
+            MSPROF_LOGE("NetDevStatsHandler find buffer of devId %u failed", devId);
+            return;
+        }
+        buf = iter->second;
+    }
+
+    if (buf->GetFreeSize() < data.size() && buf->GetUsedSize() != 0) {
+        SendData(devId, buf->GetBuffer(), buf->GetUsedSize());
+        buf->SetUsedSize(0);
+    }
+    if (buf->GetFreeSize() < data.size()) {
+        SendData(devId, reinterpret_cast<CONST_UNSIGNED_CHAR_PTR>(data.c_str()), data.size());
+        return;
+    }
+
+    auto dataBuf = buf->GetBuffer();
+    if (dataBuf == nullptr) {
+        return;
+    }
+    size_t usedSize = buf->GetUsedSize();
+    errno_t err = memcpy_s(static_cast<void *>(const_cast<UNSIGNED_CHAR_PTR>(dataBuf + usedSize)),
+                           buf->GetFreeSize(), data.c_str(), data.size());
+    if (err != EOK) {
+        MSPROF_LOGE("memcpy stat data failed: %d", err);
+        MSPROF_INNER_ERROR("EK9999", "memcpy stat data failed: %d", err);
+    } else {
+        buf->SetUsedSize(usedSize + data.size());
+    }
+
+    static constexpr size_t QUARTER = 4;
+    if (buf->GetFreeSize() <= (buf->GetBufferSize() / QUARTER)) {
+        SendData(devId, buf->GetBuffer(), buf->GetUsedSize());
+        buf->SetUsedSize(0);
+    }
+}
+
+void NetDevStatsHandler::SendData(uint32_t devId, CONST_UNSIGNED_CHAR_PTR buf, size_t size)
+{
+    if (buf == nullptr) {
+        MSPROF_LOGE("buf to be sent is nullptr");
+        MSPROF_INNER_ERROR("EK9999", "buf to be sent is nullptr");
+        return;
+    }
+
+    SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> upLoader = nullptr;
+    analysis::dvvp::transport::UploaderMgr::instance()->GetUploader(std::to_string(devId), upLoader);
+    if (upLoader == nullptr) {
+        MSPROF_LOGE("NetDevStatsHandler::SendData upLoader of devId %u is null", devId);
+        MSPROF_INNER_ERROR("EK9999", "upLoader is null");
+        return;
+    }
+
+    SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk;
+    MSVP_MAKE_SHARED0_VOID(fileChunk, analysis::dvvp::ProfileFileChunk);
+
+    fileChunk->fileName = Utils::PackDotInfo(retFileName_, jobCtx_->tag);
+    fileChunk->offset = -1;
+    fileChunk->chunk = std::move(std::string(reinterpret_cast<CONST_CHAR_PTR>(buf), size));
+    fileChunk->chunkSize = size;
+    fileChunk->isLastChunk = false;
+    fileChunk->extraInfo = Utils::PackDotInfo(jobCtx_->job_id, jobCtx_->dev_id);
+    fileChunk->chunkStartTime = 0;
+    fileChunk->chunkEndTime = 0;
+    fileChunk->chunkModule = analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_DEVICE;
+
+    if (upLoader->UploadData(fileChunk) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("NetDevStatsHandler::SendData Upload Data Failed");
+        MSPROF_INNER_ERROR("EK9999", "Upload Data Failed");
+    }
+}
+
+int NetDevStatsHandler::RegisterDevTask(uint32_t devId)
+{
+    std::lock_guard<std::mutex> lock(devTaskMtx_);
+    if (devTaskBufs_.find(devId) == devTaskBufs_.end()) {
+        SHARED_PTR_ALIA<analysis::dvvp::common::memory::Chunk> buf = nullptr;
+        MSVP_MAKE_SHARED1_RET(buf, analysis::dvvp::common::memory::Chunk, bufSize_, PROFILING_FAILED);
+        if (!buf->Init()) {
+            MSPROF_LOGE("NetDevStatsHandler init buffer failed for devId %u", devId);
+            return PROFILING_FAILED;
+        }
+        int dcmiCardId = 0;
+        int dcmiDevId = 0;
+        if (!GetDcmiCardDevId(devId, dcmiCardId, dcmiDevId)) {
+            MSPROF_LOGE("NetDevStatsHandler get dcmi card dev id failed for devId %u", devId);
+            return PROFILING_FAILED;
+        }
+        devTaskBufs_.emplace(devId, std::move(buf));
+        dcmiCardDevIdMap_.emplace(devId, std::make_pair(dcmiCardId, dcmiDevId));
+        MSPROF_LOGI("Netdev stats task is registered for devId %u, dcmiCardId %d, dcmiDevId %d",
+            devId, dcmiCardId, dcmiDevId);
+    } else {
+        MSPROF_LOGW("Netdev stats task is already registered for devId %u", devId);
+    }
+    return PROFILING_SUCCESS;
+}
+
+int NetDevStatsHandler::RemoveDevTask(uint32_t devId)
+{
+    std::lock_guard<std::mutex> lock(devTaskMtx_);
+    auto bufIter = devTaskBufs_.find(devId);
+    if (bufIter != devTaskBufs_.end()) {
+        if (bufIter->second->GetUsedSize() > 0) {
+            SendData(devId, bufIter->second->GetBuffer(), bufIter->second->GetUsedSize());
+            bufIter->second->SetUsedSize(0);
+        }
+        bufIter->second->Uninit();
+        devTaskBufs_.erase(bufIter);
+        auto dcmiIter = dcmiCardDevIdMap_.find(devId);
+        if (dcmiIter != dcmiCardDevIdMap_.end()) {
+            dcmiCardDevIdMap_.erase(dcmiIter);
+        }
+        MSPROF_LOGI("Netdev stats task is removed for devId %u", devId);
+    } else {
+        MSPROF_LOGW("Netdev stats task is not registered for devId %u", devId);
+    }
+    return PROFILING_SUCCESS;
+}
+
+size_t NetDevStatsHandler::GetCurDevTaskCount()
+{
+    std::lock_guard<std::mutex> lock(devTaskMtx_);
+    return devTaskBufs_.size();
+}
+
+std::unordered_map<uint32_t, std::pair<int, int>> NetDevStatsHandler::GetCurDcmiCardDevIdMap()
+{
+    std::lock_guard<std::mutex> lock(devTaskMtx_);
+    return dcmiCardDevIdMap_;
+}
+
 ProfTimer::ProfTimer(SHARED_PTR_ALIA<TimerParam> timerParam)
     : isStarted_(false), timerParam_(timerParam)
 {
@@ -909,7 +1170,6 @@ ProfTimer::~ProfTimer()
 {
     Stop();
 }
-
 
 int ProfTimer::Handler()
 {
@@ -943,6 +1203,13 @@ int ProfTimer::RemoveTimerHandler(TimerHandlerTag tag)
     MSPROF_LOGI("ProfTimer RemoveTimerHandler tag %u succ", tag);
 
     return PROFILING_SUCCESS;
+}
+
+SHARED_PTR_ALIA<TimerHandler> ProfTimer::GetTimerHandler(TimerHandlerTag tag)
+{
+    std::lock_guard<std::mutex> lk(mtx_);
+    auto iter = handlerMap_.find(tag);
+    return iter != handlerMap_.end() ? iter->second : nullptr;
 }
 
 int ProfTimer::Start()
@@ -1068,6 +1335,12 @@ void TimerManager::RemoveProfTimerHandler(TimerHandlerTag tag)
         (void)profTimer_->RemoveTimerHandler(tag);
     }
 }
+
+SHARED_PTR_ALIA<TimerHandler> TimerManager::GetProfTimerHandler(TimerHandlerTag tag)
+{
+    std::lock_guard<std::mutex> lk(profTimerMtx_);
+    return profTimer_ != nullptr ? profTimer_->GetTimerHandler(tag) : nullptr;
 }
-}
-}
+} // namespace JobWrapper
+} // namespace Dvvp
+} // namespace Analysis

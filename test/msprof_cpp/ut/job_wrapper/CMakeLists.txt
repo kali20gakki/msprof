@@ -18,10 +18,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/feature_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp    
     ${MSPROF_SOURCE_DIR}/dvvp/common/memory/chunk_pool.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_interface.cpp
@@ -32,7 +29,6 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_dc.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_cloudv2.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_cloud.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread_pool.cpp
@@ -99,6 +95,7 @@ set(profilerSrcFiles
 	${MSPROF_SOURCE_DIR}/dvvp/transport/ctrl_files_dumper.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/dcmi_plugin.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter.cpp
@@ -166,8 +163,6 @@ target_include_directories(job_wrapper_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
     ${MSPROF_SOURCE_DIR}/../inc
-    ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
-    ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
     ${TOP_DIR}/abl/msprof/inc/toolchain
     ${TOP_DIR}/abl/libc_sec/include
@@ -216,7 +211,7 @@ target_include_directories(job_wrapper_utest PRIVATE
     ${TOP_DIR}/ace/npuruntime/inc
     ${MSPROF_SOURCE_DIR}/dvvp/msprofiler/inc
     ../stub/
-    ${TOP_DIR}/llt/abl/msprof/msprof_cpp/st/stub 
+    ${TOP_DIR}/llt/abl/msprof/msprof_cpp/st/stub
     ${CMAKE_BINARY_DIR}/proto/profiler/
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
 )
@@ -264,4 +259,3 @@ run_llt_test(
     TARGET job_wrapper_utest
     TASK_NUM 1
 )
-
