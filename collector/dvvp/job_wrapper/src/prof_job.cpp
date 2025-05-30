@@ -1562,11 +1562,11 @@ ProfAicpuJob::ProfAicpuJob() : channelId_(PROF_CHANNEL_AICPU), eventGrpName_("pr
     eventAttr_{0, channelId_, AICPU_COLLECTION_JOB, false, false, false, false, 0, false, ""}, processCount_(0)
 {
 }
- 
+
 ProfAicpuJob::~ProfAicpuJob()
 {
 }
- 
+
 int ProfAicpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
     if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
@@ -1651,7 +1651,7 @@ bool ProfAicpuJob::CheckChannelSwitch()
                 collectionJobCfg_->comParams->devId, static_cast<int>(channelId_));
     return false;
 }
- 
+
 int ProfAicpuJob::Process()
 {
     if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
@@ -1672,7 +1672,7 @@ int ProfAicpuJob::Process()
     }
     std::string filePath = BindFileWithChannel(collectionJobCfg_->jobParams.dataPath);
     AddReader(collectionJobCfg_->comParams->params->job_id, collectionJobCfg_->comParams->devId, channelId_, filePath);
- 
+
     int ret = DrvAicpuStart(collectionJobCfg_->comParams->devId, channelId_);
     eventAttr_.isProcessRun = true;
     MSPROF_LOGI("Start profiling aicpu, devId:%d, channelId:%d, ret=%d",
@@ -1680,7 +1680,7 @@ int ProfAicpuJob::Process()
 
     FUNRET_CHECK_RET_VALUE(ret, PROFILING_SUCCESS, PROFILING_SUCCESS, ret);
 }
- 
+
 int ProfAicpuJob::Uninit()
 {
     if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
@@ -1711,7 +1711,7 @@ int ProfAicpuJob::Uninit()
         MSPROF_LOGI("stop profiling Channel %d data, devId:%d, ret=%d",
                     static_cast<int32_t>(channelId_), collectionJobCfg_->comParams->devId, ret);
     }
-    
+
     RemoveReader(collectionJobCfg_->comParams->params->job_id, collectionJobCfg_->comParams->devId, channelId_);
     return ret;
 }
@@ -1934,5 +1934,97 @@ void PerfExtraTask::SetJobCtx(SHARED_PTR_ALIA<analysis::dvvp::message::JobContex
         jobCtx_ = jobCtx;
     }
 }
-}}}
 
+std::mutex NetDevStatsJob::jobMtx;
+
+int NetDevStatsJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+
+    collectionJobCfg_ = cfg;
+    if (collectionJobCfg_->comParams->params->io_profiling.compare(
+        analysis::dvvp::common::config::MSVP_PROF_ON) != 0) {
+        MSPROF_LOGI("Netdev stats profiling not enabled");
+        return PROFILING_FAILED;
+    }
+
+    sampleIntervalNs_ =
+        static_cast<uint64_t>(collectionJobCfg_->comParams->params->io_sampling_interval) * MS_TO_NS;
+
+    std::vector<std::string> profDataFilePathV{collectionJobCfg_->comParams->tmpResultDir,
+                                               "data", PROF_NETDEV_STATS_FILE};
+    collectionJobCfg_->jobParams.dataPath = analysis::dvvp::common::utils::Utils::JoinPath(profDataFilePathV);
+
+    MSPROF_LOGI("Netdev stats profiling enabled, sample interval: %llu ns", sampleIntervalNs_);
+    return PROFILING_SUCCESS;
+}
+
+int NetDevStatsJob::Process()
+{
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+
+    if (collectionJobCfg_->comParams->devId == DEFAULT_HOST_ID) {
+        MSPROF_LOGW("Netdev stats profiling not enabled on host");
+        return PROFILING_SUCCESS;
+    }
+
+    std::lock_guard<std::mutex> lock(jobMtx); // 保证同时只有一个NetDevStatsJob实例向TimerManager注册
+    static constexpr size_t netDevStatsBufSize = (1 << 14); // 1 << 14 = 16KB
+    auto curHandler = TimerManager::instance()->GetProfTimerHandler(PROF_NETDEV_STATS);
+    if (curHandler == nullptr) {
+        SHARED_PTR_ALIA<NetDevStatsHandler> statHandler;
+        MSVP_MAKE_SHARED5_RET(statHandler, NetDevStatsHandler, PROF_NETDEV_STATS, netDevStatsBufSize, sampleIntervalNs_,
+            PROF_NETDEV_STATS_FILE, collectionJobCfg_->comParams->jobCtx, PROFILING_FAILED);
+        if (statHandler->Init() != PROFILING_SUCCESS) {
+            MSPROF_LOGE("NetDevStatsHandler Init Failed");
+            MSPROF_INNER_ERROR("EK9999", "NetDevStatsHandler Init Failed");
+            return PROFILING_FAILED;
+        }
+        MSPROF_LOGI("NetDevStatsHandler Init succ, sampleIntervalNs_:%llu", sampleIntervalNs_);
+        if (statHandler->RegisterDevTask(collectionJobCfg_->comParams->devId) != PROFILING_SUCCESS) {
+            MSPROF_LOGE("NetDevStatsHandler RegisterDevTask Failed");
+            MSPROF_INNER_ERROR("EK9999", "NetDevStatsHandler RegisterDevTask Failed");
+            return PROFILING_FAILED;
+        }
+        TimerManager::instance()->StartProfTimer();
+        TimerManager::instance()->RegisterProfTimerHandler(PROF_NETDEV_STATS, statHandler);
+    } else {
+        SHARED_PTR_ALIA<NetDevStatsHandler> statHandler = std::dynamic_pointer_cast<NetDevStatsHandler>(curHandler);
+        if (statHandler->RegisterDevTask(collectionJobCfg_->comParams->devId) != PROFILING_SUCCESS) {
+            MSPROF_LOGE("NetDevStatsHandler RegisterDevTask Failed");
+            MSPROF_INNER_ERROR("EK9999", "NetDevStatsHandler RegisterDevTask Failed");
+            return PROFILING_FAILED;
+        }
+    }
+    return PROFILING_SUCCESS;
+}
+
+int NetDevStatsJob::Uninit()
+{
+    std::lock_guard<std::mutex> lock(jobMtx); // 保证同时只有一个NetDevStatsJob实例从TimerManager注销
+    auto curHandler = TimerManager::instance()->GetProfTimerHandler(PROF_NETDEV_STATS);
+    if (curHandler == nullptr) {
+        if (collectionJobCfg_->comParams->devId != DEFAULT_HOST_ID) {
+            MSPROF_LOGE("NetDevStatsHandler is not exist");
+        }
+        return PROFILING_SUCCESS;
+    }
+    SHARED_PTR_ALIA<NetDevStatsHandler> statHandler = std::dynamic_pointer_cast<NetDevStatsHandler>(curHandler);
+    if (statHandler->RemoveDevTask(collectionJobCfg_->comParams->devId) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("NetDevStatsHandler RemoveDevTask Failed");
+        MSPROF_INNER_ERROR("EK9999", "NetDevStatsHandler RemoveDevTask Failed");
+        return PROFILING_FAILED;
+    }
+    if (statHandler->GetCurDevTaskCount() == 0) {
+        TimerManager::instance()->RemoveProfTimerHandler(PROF_NETDEV_STATS);
+        TimerManager::instance()->StopProfTimer();
+    }
+    return PROFILING_SUCCESS;
+}
+} // namespace JobWrapper
+} // namespace Dvvp
+} // namespace Analysis

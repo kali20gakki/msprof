@@ -30,6 +30,7 @@ private:
     int CreateCollectionJobArray();
     int SetCollectionJobCfg();
     int CreateDeviceCollectionJobArray();
+    int CreateDeviceCollectionTsJobArray();
     int CreateHostCollectionJobArray();
     int RegisterCollectionJobs() const;
     void UnRegisterCollectionJobs();

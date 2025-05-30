@@ -73,13 +73,13 @@ add_executable(msprofbin
     ../depend/src/slog_plugin.cpp
     ../depend/src/driver_plugin.cpp
     ../depend/src/runtime_plugin.cpp
-    ../common/platform/platform.cpp    
+    ../common/platform/platform.cpp
     ../common/memory/chunk_pool.cpp
     ../common/thread/thread.cpp
     ../common/thread/thread_pool.cpp
     ../common/statistics/perf_count.cpp
     ../common/validation/param_validation.cpp
-    ../driver/devmgmt/ai_drv_dev_api.cpp        
+    ../driver/devmgmt/ai_drv_dev_api.cpp
     ../common/platform/platform.cpp
     ../common/platform/platform_adapter_interface.cpp
     ../common/platform/platform_adapter_mini.cpp
@@ -123,6 +123,7 @@ add_executable(msprofbin
     ../depend/src/driver_plugin.cpp
     ../depend/src/runtime_plugin.cpp
     ../depend/src/slog_plugin.cpp
+    ../depend/src/dcmi_plugin.cpp
     ${hdcCpp}
     ${CppPath}
 )

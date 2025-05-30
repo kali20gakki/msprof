@@ -27,6 +27,7 @@
 #include "mmpa_api.h"
 #include "config_manager.h"
 #include "prof_drv_event.h"
+#include "dcmi_plugin.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
@@ -1877,3 +1878,106 @@ TEST_F(JOB_WRAPPER_PROF_PERF_EXTRA_JOB_TEST, ResolvePerfRecordData) {
     perfExtraTask.ResolvePerfRecordData(fileName);
 }
 
+class JOB_WRAPPER_PROF_NETDEV_STATS_JOB_TEST : public testing::Test {
+public:
+    std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg;
+    int samplingInterval = 20;
+
+protected:
+    virtual void SetUp()
+    {
+        collectionJobCfg = std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCfg>();
+        auto params = std::make_shared<analysis::dvvp::message::ProfileParams>();
+        auto jobCtx = std::make_shared<analysis::dvvp::message::JobContext>();
+        auto comParams = std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCommonParams>();
+        comParams->params = params;
+        comParams->jobCtx = jobCtx;
+        collectionJobCfg->comParams = comParams;
+        collectionJobCfg->jobParams.events = std::make_shared<std::vector<std::string>>(0);
+    }
+
+    virtual void TearDown()
+    {
+        collectionJobCfg.reset();
+    }
+};
+
+TEST_F(JOB_WRAPPER_PROF_NETDEV_STATS_JOB_TEST, Init)
+{
+    GlobalMockObject::verify();
+
+    auto netDevStatsJob = std::make_shared<Analysis::Dvvp::JobWrapper::NetDevStatsJob>();
+
+    EXPECT_EQ(PROFILING_FAILED, netDevStatsJob->Init(nullptr));
+    EXPECT_EQ(PROFILING_FAILED, netDevStatsJob->Init(collectionJobCfg));
+
+    collectionJobCfg->comParams->params->io_profiling = analysis::dvvp::common::config::MSVP_PROF_ON;
+    collectionJobCfg->comParams->params->io_sampling_interval = samplingInterval;
+    EXPECT_EQ(PROFILING_SUCCESS, netDevStatsJob->Init(collectionJobCfg));
+    EXPECT_EQ(PROFILING_SUCCESS, netDevStatsJob->Uninit());
+}
+
+TEST_F(JOB_WRAPPER_PROF_NETDEV_STATS_JOB_TEST, Process)
+{
+    GlobalMockObject::verify();
+
+    MOCKER_CPP(&Collector::Dvvp::Plugin::DcmiPlugin::MsprofDcmiInit)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::NetDevStatsHandler::RegisterDevTask)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+
+    collectionJobCfg->comParams->params->io_profiling = analysis::dvvp::common::config::MSVP_PROF_ON;
+    collectionJobCfg->comParams->params->io_sampling_interval = samplingInterval;
+    auto netDevStatsJob = std::make_shared<Analysis::Dvvp::JobWrapper::NetDevStatsJob>();
+
+    uint32_t devId = DEFAULT_HOST_ID;
+    collectionJobCfg->comParams->devId = devId;
+    EXPECT_EQ(PROFILING_SUCCESS, netDevStatsJob->Init(collectionJobCfg));
+    EXPECT_EQ(PROFILING_SUCCESS, netDevStatsJob->Process());
+
+    devId = 0;
+    collectionJobCfg->comParams->devId = devId;
+    EXPECT_EQ(PROFILING_SUCCESS, netDevStatsJob->Init(collectionJobCfg));
+    // DcmiInit failed
+    EXPECT_EQ(PROFILING_FAILED, netDevStatsJob->Process());
+    // RegisterDevTask failed
+    EXPECT_EQ(PROFILING_FAILED, netDevStatsJob->Process());
+    EXPECT_EQ(PROFILING_SUCCESS, netDevStatsJob->Process());
+    EXPECT_EQ(PROFILING_SUCCESS, netDevStatsJob->Process());
+    EXPECT_EQ(PROFILING_SUCCESS, netDevStatsJob->Uninit());
+}
+
+TEST_F(JOB_WRAPPER_PROF_NETDEV_STATS_JOB_TEST, Uninit)
+{
+    GlobalMockObject::verify();
+
+    MOCKER_CPP(&Collector::Dvvp::Plugin::DcmiPlugin::MsprofDcmiInit)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::NetDevStatsHandler::RegisterDevTask)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::NetDevStatsHandler::RemoveDevTask)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+
+    collectionJobCfg->comParams->params->io_profiling = analysis::dvvp::common::config::MSVP_PROF_ON;
+    collectionJobCfg->comParams->params->io_sampling_interval = samplingInterval;
+    auto netDevStatsJob = std::make_shared<Analysis::Dvvp::JobWrapper::NetDevStatsJob>();
+
+    uint32_t devId = 0;
+    collectionJobCfg->comParams->devId = devId;
+    EXPECT_EQ(PROFILING_SUCCESS, netDevStatsJob->Init(collectionJobCfg));
+    EXPECT_EQ(PROFILING_SUCCESS, netDevStatsJob->Uninit());
+
+    EXPECT_EQ(PROFILING_SUCCESS, netDevStatsJob->Init(collectionJobCfg));
+    EXPECT_EQ(PROFILING_SUCCESS, netDevStatsJob->Process());
+    // RemoveDevTask failed
+    EXPECT_EQ(PROFILING_FAILED, netDevStatsJob->Uninit());
+    EXPECT_EQ(PROFILING_SUCCESS, netDevStatsJob->Uninit());
+}
