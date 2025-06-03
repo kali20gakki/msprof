@@ -1107,6 +1107,41 @@ timeline计算公式：
 | 2025/5/15 | 630首次上线 |
 
 
+### NETDEV_STATS
+
+格式
+
+| 字段名           | 类型    | 索引 | 含义                               |
+|-----------------|---------|------|----------------------------------|
+| deviceId        | INTEGER |      | deviceId               |
+| timestampNs     | INTEGER |      | 采样时的本地时间，单位 ns |
+| macTxPfcPkt     | INTEGER |      | MAC发送的PFC帧数 |
+| macRxPfcPkt     | INTEGER |      | MAC接收的PFC帧数 |
+| macTxByte       | INTEGER |      | MAC发送的字节数 |
+| macTxBandwidth  | NUMERIC |      | MAC发送带宽，单位：B / s |
+| macRxByte       | INTEGER |      | MAC接收的字节数 |
+| macRxBandwidth  | NUMERIC |      | MAC接收带宽，单位：B / s |
+| macTxBadByte    | INTEGER |      | MAC发送的坏包文字节数 |
+| macRxBadByte    | INTEGER |      | MAC接收的坏包文字节数 |
+| roceTxPkt       | INTEGER |      | RoCEE发送的报文数 |
+| roceRxPkt       | INTEGER |      | RoCEE接收的报文数 |
+| roceTxErrPkt    | INTEGER |      | RoCEE发送的坏包报文数 |
+| roceRxErrPkt    | INTEGER |      | RoCEE接收的坏包报文数 |
+| roceTxCnpPkt    | INTEGER |      | RoCEE发送的CNP类型报文数 |
+| roceRxCnpPkt    | INTEGER |      | RoCEE接收的CNP类型报文数 |
+| roceNewPktRty   | INTEGER |      | RoCEE发送的超次重传的数量 |
+| nicTxByte       | INTEGER |      | NIC发送的字节数 |
+| nicTxBandwidth  | NUMERIC |      | NIC发送带宽，单位：B / s |
+| nicRxByte       | INTEGER |      | NIC接收的字节数 |
+| nicRxBandwidth  | NUMERIC |      | NIC接收带宽，单位：B / s |
+
+变更记录：
+
+| 日期       | 内容                        |
+|------------|----------------------------|
+| 2025/5/20  | 630首次上线 |
+
+
 ## 2. pytorch框架数据db格式表结构
 db命名：ascend_pytorch_profiler_{rankId}.db
 （无rankId时：ascend_pytorch_profiler.db）

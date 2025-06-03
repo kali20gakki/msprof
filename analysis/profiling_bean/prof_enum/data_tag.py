@@ -83,6 +83,7 @@ class DataTag(Enum):
     STATIC_OP_MEM = 76
     MC2_COMM_INFO = 77
     CAPTURE_STREAM_INFO = 78
+    NETDEV_STATS = 79
 
 
 @unique

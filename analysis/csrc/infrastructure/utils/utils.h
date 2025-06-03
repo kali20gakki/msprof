@@ -25,6 +25,7 @@ namespace Analysis {
 namespace Utils {
 using namespace Analysis::Viewer::Database;
 using CHAR_PTR = char *;
+constexpr double NS_TO_S = 1000.0 * 1000.0 * 1000.0; // 1s = 10^9ns
 std::string Join(const std::vector<std::string> &str, const std::string &delimiter);
 std::vector<std::string> Split(const std::string &str, const std::string &delimiter, const int &splitPosition = -1);
 std::string Rstrip(const std::string &str1, const std::string &str2);

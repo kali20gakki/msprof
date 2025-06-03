@@ -27,6 +27,7 @@
 #include "analysis/csrc/domain/data_process/system/ddr_processor.h"
 #include "analysis/csrc/domain/data_process/system/hbm_processor.h"
 #include "analysis/csrc/domain/data_process/system/hccs_processor.h"
+#include "analysis/csrc/domain/data_process/system/netdev_stats_processor.h"
 #include "analysis/csrc/domain/data_process/system/host_usage_processor.h"
 #include "analysis/csrc/domain/data_process/system/llc_processor.h"
 #include "analysis/csrc/domain/data_process/system/npu_mem_processor.h"
@@ -74,6 +75,8 @@ std::unordered_map<std::string, ProcessorCreator> DataProcessorFactory::processo
         MAKE_SHARED_RETURN_VOID(processor, HBMProcessor, profPath);}},
     {PROCESSOR_NAME_HCCS, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
         MAKE_SHARED_RETURN_VOID(processor, HCCSProcessor, profPath);}},
+    {PROCESSOR_NAME_NETDEV_STATS, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
+        MAKE_SHARED_RETURN_VOID(processor, NetDevStatsProcessor, profPath);}},
     {PROCESSOR_NAME_CPU_USAGE, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {
         MAKE_SHARED_RETURN_VOID(processor, HostCpuUsageProcessor, profPath);}},
     {PROCESSOR_NAME_MEM_USAGE, [](const std::string &profPath, std::shared_ptr<DataProcessor> &processor) {

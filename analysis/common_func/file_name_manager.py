@@ -238,6 +238,9 @@ class FileNameManagerConstant:
     # capture stream info
     CAPTURE_STREAM_INFO_PATTERN = r"^(unaging|aging)\.compact\.capture_stream_info\.slice_\d+"
 
+    # netdev stats
+    NETDEV_STATS_FILE_PATTERN = r"^netdev_stats\.data\.(\d+)\.slice_\d+"
+
     def get_file_name_manager_class_name(self: any) -> any:
         """
         get file name manager class name
@@ -1003,3 +1006,10 @@ def get_capture_stream_info_compiles() -> tuple:
     :return: capture stream info data regex
     """
     return (re.compile(FileNameManagerConstant.CAPTURE_STREAM_INFO_PATTERN),)
+
+
+def get_netdev_stats_compiles() -> tuple:
+    """
+    get netdev stats compiles
+    """
+    return (re.compile(FileNameManagerConstant.NETDEV_STATS_FILE_PATTERN),)

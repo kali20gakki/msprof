@@ -734,6 +734,25 @@ namespace {
         {"data_size", SQL_NUMERIC_TYPE},
         {"memcpy_direction", SQL_NUMERIC_TYPE},
     };
+
+    const TableColumns NetDevStats = {
+        {"timestamp", SQL_INTEGER_TYPE},
+        {"mac_tx_pfc_pkt", SQL_INTEGER_TYPE},
+        {"mac_rx_pfc_pkt", SQL_INTEGER_TYPE},
+        {"mac_tx_total_oct", SQL_INTEGER_TYPE},
+        {"mac_rx_total_oct", SQL_INTEGER_TYPE},
+        {"mac_tx_bad_oct", SQL_INTEGER_TYPE},
+        {"mac_rx_bad_oct", SQL_INTEGER_TYPE},
+        {"roce_tx_all_pkt", SQL_INTEGER_TYPE},
+        {"roce_rx_all_pkt", SQL_INTEGER_TYPE},
+        {"roce_tx_err_pkt", SQL_INTEGER_TYPE},
+        {"roce_rx_err_pkt", SQL_INTEGER_TYPE},
+        {"roce_tx_cnp_pkt", SQL_INTEGER_TYPE},
+        {"roce_rx_cnp_pkt", SQL_INTEGER_TYPE},
+        {"roce_new_pkt_rty", SQL_INTEGER_TYPE},
+        {"nic_tx_all_oct", SQL_INTEGER_TYPE},
+        {"nic_rx_all_oct", SQL_INTEGER_TYPE}
+    };
 }
 
 std::string Database::GetDBName() const
@@ -919,6 +938,12 @@ HCCSDB::HCCSDB()
 {
     dbName_ = "hccs.db";
     tableColNames_["HCCSEventsData"] = HCCS;
+}
+
+NetDevStatsDB::NetDevStatsDB()
+{
+    dbName_ = "netdev_stats.db";
+    tableColNames_["NetDevStatsOriginalData"] = NetDevStats;
 }
 
 FreqDB::FreqDB()

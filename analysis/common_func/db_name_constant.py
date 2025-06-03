@@ -90,6 +90,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_NAME_TSCPU = "tscpu.db"
     DB_MC2_COMM_INFO = "mc2_comm_info.db"
     DB_KFC_INFO = "kfc_info.db"
+    DB_NETDEV_STATS = "netdev_stats.db"
 
     # DB tables
     TABLE_ACL_DATA = "AclData"
@@ -332,6 +333,9 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_DEVICE_HCCL_OP_INFO = "DeviceHcclOpInfo"
     TABLE_AICPU_TASK_FLIP = "AicpuTaskFlip"
     TABLE_AICPU_MASTER_STREAM_HCCL_TASK = "AicpuMasterStreamHcclTask"
+
+    # netdev stats
+    TABLE_NETDEV_STATS_ORIGIN = 'NetDevStatsOriginalData'
 
     @abstractmethod
     def get_db_name(self: any) -> str:
