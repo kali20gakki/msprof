@@ -14,6 +14,7 @@
 #include <condition_variable>
 #include <string>
 #include <atomic>
+#include <algorithm>
 #include "acl/acl_prof.h"
 #include "common/singleton/singleton.h"
 #include "common/thread/thread.h"
@@ -121,6 +122,7 @@ public:
     int32_t MsprofSetDeviceImpl(uint32_t devId);
     void AddModelLoadConf(uint64_t &dataTypeConfig) const;
     int32_t MsprofSetConfig(aclprofConfigType cfgType, std::string config);
+    void ResetArgsArr();
     int32_t MsprofResetDeviceHandle(uint32_t devId);
     void MsprofDumpStartInfoFile(uint32_t devId);
 

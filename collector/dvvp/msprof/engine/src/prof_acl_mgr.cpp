@@ -522,7 +522,7 @@ int ProfAclMgr::ProfAclFinalize()
     MsprofTxManager::instance()->UnInit();
     PlatformAdapter::instance()->Uninit();
     devTasks_.clear();
-
+    ResetArgsArr();
     mode_ = WORK_MODE_OFF;
     if (Utils::IsClusterRunEnv()) {
         std::string jobDir = resultPath_ + MSVP_SLASH + baseDir_;
@@ -531,6 +531,15 @@ int ProfAclMgr::ProfAclFinalize()
         }
     }
     return ACL_SUCCESS;
+}
+
+/**
+ * Reset Args array
+ */
+void ProfAclMgr::ResetArgsArr()
+{
+    const std::string defaultVal = "";
+    std::fill(argsArr_.begin(), argsArr_.end(), defaultVal);
 }
 
 /**
