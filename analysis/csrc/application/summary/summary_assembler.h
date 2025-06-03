@@ -17,6 +17,7 @@
 #include <map>
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
 #include "analysis/csrc/application/summary/summary_constant.h"
+#include "analysis/csrc/infrastructure/dump_tools/csv_tool/include/csv_writer.h"
 
 namespace Analysis {
 namespace Application {
@@ -46,9 +47,17 @@ protected:
     std::string profPath_;
     std::vector<std::vector<std::string>> res_;
     std::vector<std::string> headers_;
+    /**
+     * write to csv file
+     * @param name file name
+     */
+    virtual void WriteToFile(const std::string &filePath,  const std::set<int>& maskCols) const
+    {
+        CsvWriter csvWriter = CsvWriter();
+        csvWriter.WriteCsv(filePath, headers_, res_, maskCols);
+    }
 private:
     virtual uint8_t AssembleData(DataInventory &dataInventory) = 0;
-    virtual void WriteToFile() {}
 };
 }
 }

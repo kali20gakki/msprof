@@ -11,6 +11,7 @@
  */
 
 #include <unordered_set>
+#include <iomanip>
 #include "utils.h"
 
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
@@ -170,7 +171,9 @@ uint16_t GetDeviceIdByDevicePath(const std::string &filePath)
 bool IsNumber(const std::string& s)
 {
     std::string::const_iterator it = s.begin();
-    while (it != s.end() && std::isdigit(*it)) ++it;
+    while (it != s.end() && std::isdigit(*it)) {
+        ++it;
+    }
     return !s.empty() && it == s.end();
 }
 
@@ -216,6 +219,35 @@ bool EndsWith(const std::string &str, const std::string &suffix)
         return false;
     }
     return str.substr(str.size() - suffix.size()) == suffix;
+}
+
+std::string DoubleToStr(const double &value, const uint16_t &scale)
+{
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(scale) << value;
+    std::string result = oss.str();
+
+    // 去掉末尾的零
+    size_t pos = result.find('.');
+    if (pos != std::string::npos) {
+        // 找到最后一个非零的位置
+        size_t lastNonZero = result.find_last_not_of('0');
+        if (lastNonZero != std::string::npos) {
+            result = result.substr(0, lastNonZero + 1);
+            if (result.back() == '.') {
+                result.pop_back();
+            }
+        } else {
+            result = result.substr(0, pos);
+        }
+    }
+    return result;
+}
+
+double RoundToDecimalPlaces(const double num, int decimalPlaces)
+{
+    double multiplier = std::pow(10.0, decimalPlaces);
+    return std::round(num * multiplier) / multiplier;
 }
 }  // namespace Utils
 }  // namespace Analysis

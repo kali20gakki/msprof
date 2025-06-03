@@ -4,6 +4,7 @@ from unittest import mock
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.ms_constant.number_constant import NumberConstant
 
+
 NAMESPACE = 'common_func.ai_stack_data_check_manager'
 
 
@@ -52,5 +53,12 @@ class TestAiStackDataCheckManager(unittest.TestCase):
             result = AiStackDataCheckManager._check_output('/path/to/result_dir/host', device_id=NumberConstant.HOST_ID)
             self.assertTrue(result)
 
-
-
+    def test_export_summary_csv_with_c_should_return_false_when_so_exist(self):
+        with mock.patch('common_func.data_check_manager.DataCheckManager.check_export_with_so',
+                        return_value=True):
+            result_api_statistic = AiStackDataCheckManager.contain_api_statistic_data('/path/to/result_dir/host',
+                                                                        device_id=NumberConstant.HOST_ID)
+            self.assertFalse(result_api_statistic)
+            result_fusion_op = AiStackDataCheckManager.contain_fusion_op_data('/path/to/result_dir/host',
+                                                                           device_id=NumberConstant.HOST_ID)
+            self.assertFalse(result_fusion_op)

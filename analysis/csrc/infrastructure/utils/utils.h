@@ -17,6 +17,7 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include <cmath>
 
 #include "analysis/csrc/infrastructure/dfx/log.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
@@ -44,6 +45,8 @@ std::string AddQuotation(std::string str);
 std::string DivideByPowersOfTenWithPrecision(uint64_t value, int scale = ACCURACY_THREE,
                                              int accuracy = ACCURACY_THREE);
 bool EndsWith(const std::string &str, const std::string &suffix);
+std::string DoubleToStr(const double &value, const uint16_t &scale = ACCURACY_THREE);
+double RoundToDecimalPlaces(const double num, int decimalPlaces = ACCURACY_THREE);
 
 // make_shared参数个数为0，异常操作为return void
 #define MAKE_SHARED0_RETURN_VOID(instance, type) \

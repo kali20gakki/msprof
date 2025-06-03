@@ -12,6 +12,8 @@
 
 #include "analysis/csrc/application/summary/summary_factory.h"
 #include "analysis/csrc/application/summary/op_summary_assembler.h"
+#include "analysis/csrc/application/summary/api_statistic_assembler.h"
+#include "analysis/csrc/application/summary/fusion_op_assembler.h"
 
 
 namespace Analysis {
@@ -20,6 +22,10 @@ using namespace Utils;
 std::unordered_map<std::string, AssemblerCreator> SummaryFactory::assemblerTable_{
     {PROCESSOR_OP_SUMMARY,          [](const std::string& profPath, std::shared_ptr<SummaryAssembler>& assembler) {
         MAKE_SHARED0_NO_OPERATION(assembler, OpSummaryAssembler, PROCESSOR_OP_SUMMARY, profPath);}},
+    {PROCESSOR_NAME_API,          [](const std::string& profPath, std::shared_ptr<SummaryAssembler>& assembler) {
+        MAKE_SHARED0_NO_OPERATION(assembler, ApiStatisticAssembler, PROCESSOR_NAME_API, profPath);}},
+    {PROCESSOR_NAME_FUSION_OP,          [](const std::string& profPath, std::shared_ptr<SummaryAssembler>& assembler) {
+        MAKE_SHARED0_NO_OPERATION(assembler, FusionOpAssembler, PROCESSOR_NAME_FUSION_OP, profPath);}},
 };
 
 std::shared_ptr<SummaryAssembler> SummaryFactory::GetAssemblerByName(const std::string& processName,
