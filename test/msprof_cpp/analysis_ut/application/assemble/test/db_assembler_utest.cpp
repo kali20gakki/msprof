@@ -39,7 +39,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/system/include/pcie_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/soc_bandwidth_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
-#include "analysis/csrc/domain/entities/viewer_data/system/include/npu_op_mem_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/netdev_stats_data.h"
 
 using namespace Analysis::Application;
 using namespace Analysis::Utils;
@@ -609,6 +609,33 @@ static std::vector<OSRuntimeApiData> GenerateOSRuntimeApiData()
     data.name = "clock_nanosleep"; // clock_nanosleep
     res.push_back(data);
     return res;
+}
+
+static std::vector<NetDevStatsEventData> GenerateNetDevStatsData()
+{
+    NetDevStatsEventData data;
+    data.deviceId = 2; // deviceId 2
+    data.timestamp = 1746706291651036160; // timestamp 1746706291651036160
+    data.macTxPfcPkt = 5; // macTxPfcPkt 5
+    data.macRxPfcPkt = 4; // macRxPfcPkt 4
+    data.macTxByte = 128; // macTxByte 128
+    data.macTxBandwidth = 6180.941; // macTxBandwidth 6180.941
+    data.macRxByte = 64; // macRxByte 64
+    data.macRxBandwidth = 3095.575; // macRxBandwidth 3095.575
+    data.macTxBadByte = 16; // macTxBadByte 16
+    data.macRxBadByte = 32; // macRxBadByte 32
+    data.roceTxPkt = 35790; // roceTxPkt 35790
+    data.roceRxPkt = 35633; // roceRxPkt 35633
+    data.roceTxErrPkt = 10; // roceTxErrPkt 10
+    data.roceRxErrPkt = 20; // roceRxErrPkt 20
+    data.roceTxCnpPkt = 5; // roceTxCnpPkt 5
+    data.roceRxCnpPkt = 5; // roceRxCnpPkt 5
+    data.roceNewPktRty = 3; // roceNewPktRty 3
+    data.nicTxByte = 2180; // nicTxByte 2180
+    data.nicTxBandwidth = 105551.321; // nicTxBandwidth 105551.321
+    data.nicRxByte = 2174; // nicRxByte 2174
+    data.nicRxBandwidth = 105260.813; // nicRxBandwidth 105260.813
+    return {data};
 }
 
 static void InjectHcclData(DataInventory& dataInventory)
@@ -1652,5 +1679,39 @@ TEST_F(DBAssemblerUTest, TestRunSaveOSRuntimeApiDataShouldReturnTrueWhenRunSucce
     std::shared_ptr<std::vector<OSRuntimeApiData>> dataS;
     MAKE_SHARED0_NO_OPERATION(dataS, std::vector<OSRuntimeApiData>, data);
     dataInventory.Inject<std::vector<OSRuntimeApiData>>(dataS);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+}
+
+TEST_F(DBAssemblerUTest, TestRunNetDevStatDataShouldReturnFalseWhenReserveFailed)
+{
+    // deviceId, timestampNs, macTxPfcPkt, macRxPfcPkt, macTxByte, macTxBandwidth,
+    // macRxByte, macRxBandwidth, macTxBadByte, macRxBadByte, roceTxPkt, roceRxPkt, roceTxErrPkt, roceRxErrPkt,
+    // roceTxCnpPkt, roceRxCnpPkt, roceNewPktRty, nicTxByte, nicTxBandwidth, nicRxByte, nicRxBandwidth
+    using NetDevStatEventDataFormat =
+        std::vector<std::tuple<uint16_t, uint64_t, uint64_t, uint64_t, uint64_t, double,
+                               uint64_t, double, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
+                               uint64_t, uint64_t, uint64_t, uint64_t, double, uint64_t, double>>;
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    // Empty data
+    EXPECT_TRUE(assembler.Run(dataInventory));
+    auto data = GenerateNetDevStatsData();
+    std::shared_ptr<std::vector<NetDevStatsEventData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<NetDevStatsEventData>, data);
+    dataInventory.Inject<std::vector<NetDevStatsEventData>>(dataS);
+    // Reserve failed
+    MOCKER_CPP(&NetDevStatEventDataFormat::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(assembler.Run(dataInventory));
+    MOCKER_CPP(&NetDevStatEventDataFormat::reserve).reset();
+}
+
+TEST_F(DBAssemblerUTest, TestRunSaveNetDevStatsDataShouldReturnTrueWhenRunSuccess)
+{
+    auto assembler = DBAssembler(DB_PATH, PROF);
+    auto dataInventory = DataInventory();
+    auto data = GenerateNetDevStatsData();
+    std::shared_ptr<std::vector<NetDevStatsEventData>> dataS;
+    MAKE_SHARED0_NO_OPERATION(dataS, std::vector<NetDevStatsEventData>, data);
+    dataInventory.Inject<std::vector<NetDevStatsEventData>>(dataS);
     EXPECT_TRUE(assembler.Run(dataInventory));
 }

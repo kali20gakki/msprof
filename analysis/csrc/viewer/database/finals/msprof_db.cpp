@@ -245,6 +245,30 @@ namespace {
         {"rxThroughput", SQL_NUMERIC_TYPE}
     };
 
+    const TableColumns NETDEV_STATS = {
+        {"deviceId", SQL_INTEGER_TYPE},
+        {"timestampNs", SQL_INTEGER_TYPE},
+        {"macTxPfcPkt", SQL_INTEGER_TYPE},
+        {"macRxPfcPkt", SQL_INTEGER_TYPE},
+        {"macTxByte", SQL_INTEGER_TYPE},
+        {"macTxBandwidth", SQL_NUMERIC_TYPE},
+        {"macRxByte", SQL_INTEGER_TYPE},
+        {"macRxBandwidth", SQL_NUMERIC_TYPE},
+        {"macTxBadByte",  SQL_INTEGER_TYPE},
+        {"macRxBadByte", SQL_INTEGER_TYPE},
+        {"roceTxPkt", SQL_INTEGER_TYPE},
+        {"roceRxPkt", SQL_INTEGER_TYPE},
+        {"roceTxErrPkt", SQL_INTEGER_TYPE},
+        {"roceRxErrPkt", SQL_INTEGER_TYPE},
+        {"roceTxCnpPkt", SQL_INTEGER_TYPE},
+        {"roceRxCnpPkt", SQL_INTEGER_TYPE},
+        {"roceNewPktRty", SQL_INTEGER_TYPE},
+        {"nicTxByte", SQL_INTEGER_TYPE},
+        {"nicTxBandwidth", SQL_NUMERIC_TYPE},
+        {"nicRxByte", SQL_INTEGER_TYPE},
+        {"nicRxBandwidth", SQL_NUMERIC_TYPE}
+    };
+
     const TableColumns ENUM_TABLE = {
         {"id", SQL_INTEGER_TYPE, true},
         {"name", SQL_TEXT_TYPE}
@@ -356,6 +380,7 @@ MsprofDB::MsprofDB()
         {TABLE_NAME_SAMPLE_PMU_SUMMARY,                 SAMPLE_PMU_SUMMARY},
         {TABLE_NAME_PCIE,                               PCIE},
         {TABLE_NAME_HCCS,                               HCCS},
+        {TABLE_NAME_NETDEV_STATS,                       NETDEV_STATS},
         {TABLE_NAME_ACC_PMU,                            ACC_PMU},
         {TABLE_NAME_SOC,                                SOC_BANDWIDTH_LEVEL},
         {TABLE_NAME_META_DATA,                          META_DATA},

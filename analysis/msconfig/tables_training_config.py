@@ -203,5 +203,24 @@ class TablesTrainingConfig(MetaConfig):
             ('max', 'REAL,null'),
             ('ratio', 'text,null'),
             ('device_id', 'INTEGER,null')
+        ],
+        'NetDevStatsOriginalDataMap': [
+            ('device_id', 'INTEGER,null'),
+            ('timestamp', 'INTEGER,null'),
+            ('mac_tx_pfc_pkt', 'INTEGER,null'),
+            ('mac_rx_pfc_pkt', 'INTEGER,null'),
+            ('mac_tx_total_oct', 'INTEGER,null'),
+            ('mac_rx_total_oct', 'INTEGER,null'),
+            ('mac_tx_bad_oct', 'INTEGER,null'),
+            ('mac_rx_bad_oct', 'INTEGER,null'),
+            ('roce_tx_all_pkt', 'INTEGER,null'),
+            ('roce_rx_all_pkt', 'INTEGER,null'),
+            ('roce_tx_err_pkt', 'INTEGER,null'),
+            ('roce_rx_err_pkt', 'INTEGER,null'),
+            ('roce_tx_cnp_pkt', 'INTEGER,null'),
+            ('roce_rx_cnp_pkt', 'INTEGER,null'),
+            ('roce_new_pkt_rty', 'INTEGER,null'),
+            ('nic_tx_all_oct', 'INTEGER,null'),
+            ('nic_rx_all_oct', 'INTEGER,null')
         ]
     }

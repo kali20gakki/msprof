@@ -122,6 +122,9 @@ const std::string TABLE_NAME_PCIE = "PCIE";
 const std::string PROCESSOR_NAME_HCCS = "HCCS";
 const std::string TABLE_NAME_HCCS = "HCCS";
 
+const std::string PROCESSOR_NAME_NETDEV_STATS = "NETDEV_STATS";
+const std::string TABLE_NAME_NETDEV_STATS = "NETDEV_STATS";
+
 const std::string PROCESSOR_NAME_ACC_PMU = "ACC_PMU";
 const std::string TABLE_NAME_ACC_PMU = "ACC_PMU";
 

@@ -77,6 +77,7 @@ from common_func.file_name_manager import get_ts_track_compiles
 from common_func.file_name_manager import get_hccl_op_info_compiles
 from common_func.file_name_manager import get_qos_compiles
 from common_func.file_name_manager import get_mc2_comm_info_compiles
+from common_func.file_name_manager import get_netdev_stats_compiles
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
 from framework.prof_factory_maker import ProfFactoryMaker
@@ -160,6 +161,7 @@ class FileDispatch:
         DataTag.QOS: get_qos_compiles(),
         DataTag.MC2_COMM_INFO: get_mc2_comm_info_compiles(),
         DataTag.CAPTURE_STREAM_INFO: get_capture_stream_info_compiles(),
+        DataTag.NETDEV_STATS: get_netdev_stats_compiles()
     }
 
     def __init__(self: any, sample_config: dict) -> None:

@@ -39,6 +39,7 @@
 #include "analysis/csrc/domain/entities/viewer_data/system/include/soc_bandwidth_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/sys_io_data.h"
 #include "analysis/csrc/domain/entities/viewer_data/system/include/host_usage_data.h"
+#include "analysis/csrc/domain/entities/viewer_data/system/include/netdev_stats_data.h"
 
 
 namespace Analysis {
@@ -386,6 +387,35 @@ bool SaveHccsData(DataInventory& dataInventory, DBInfo& msprofDB, const std::str
         res.emplace_back(item.deviceId, item.timestamp, txThroughput, rxThroughput);
     }
     return SaveData(res, TABLE_NAME_HCCS, msprofDB);
+}
+
+bool SaveNetDevStatsData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
+{
+    // deviceId, timestampNs, macTxPfcPkt, macRxPfcPkt, macTxByte, macTxBandwidth,
+    // macRxByte, macRxBandwidth, macTxBadByte, macRxBadByte, roceTxPkt, roceRxPkt, roceTxErrPkt, roceRxErrPkt,
+    // roceTxCnpPkt, roceRxCnpPkt, roceNewPktRty, nicTxByte, nicTxBandwidth, nicRxByte, nicRxBandwidth
+    using NetDevStatsEventDataFormat =
+        std::vector<std::tuple<uint16_t, uint64_t, uint64_t, uint64_t, uint64_t, double,
+                               uint64_t, double, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
+                               uint64_t, uint64_t, uint64_t, uint64_t, double, uint64_t, double>>;
+    auto netDevStatsEventData = dataInventory.GetPtr<std::vector<NetDevStatsEventData>>();
+    if (netDevStatsEventData == nullptr) {
+        WARN("NetDevStats data not exist.");
+        return true;
+    }
+    NetDevStatsEventDataFormat res;
+    if (!Reserve(res, netDevStatsEventData->size())) {
+        ERROR("Reserved for NetDevStats data failed.");
+        return false;
+    }
+    for (const auto& item : *netDevStatsEventData) {
+        res.emplace_back(item.deviceId, item.timestamp, item.macTxPfcPkt, item.macRxPfcPkt,
+            item.macTxByte, item.macTxBandwidth, item.macRxByte, item.macRxBandwidth,
+            item.macTxBadByte, item.macRxBadByte, item.roceTxPkt, item.roceRxPkt,
+            item.roceTxErrPkt, item.roceRxErrPkt, item.roceTxCnpPkt, item.roceRxCnpPkt, item.roceNewPktRty,
+            item.nicTxByte, item.nicTxBandwidth, item.nicRxByte, item.nicRxBandwidth);
+    }
+    return SaveData(res, TABLE_NAME_NETDEV_STATS, msprofDB);
 }
 
 bool SaveHostInfoData(DataInventory& dataInventory, DBInfo& msprofDB, const std::string& profPath)
@@ -1008,6 +1038,7 @@ const std::unordered_map<std::string, SaveDataFunc> DATA_SAVER = {
     {Viewer::Database::PROCESSOR_NAME_HBM,                 SaveHbmData},
     {Viewer::Database::PROCESSOR_NAME_HOST_INFO,           SaveHostInfoData},
     {Viewer::Database::PROCESSOR_NAME_HCCS,                SaveHccsData},
+    {Viewer::Database::PROCESSOR_NAME_NETDEV_STATS,        SaveNetDevStatsData},
     {Viewer::Database::PROCESSOR_NAME_LLC,                 SaveLlcData},
     {Viewer::Database::PROCESSOR_NAME_META_DATA,           SaveMetaData},
     {Viewer::Database::PROCESSOR_NAME_MSTX,                SaveMsprofTxData},
@@ -1048,6 +1079,7 @@ const std::vector<std::string> DB_DATA_PROCESS_LIST{
     PROCESSOR_NAME_DDR,
     PROCESSOR_NAME_HBM,
     PROCESSOR_NAME_HCCS,
+    PROCESSOR_NAME_NETDEV_STATS,
     PROCESSOR_NAME_CPU_USAGE,
     PROCESSOR_NAME_MEM_USAGE,
     PROCESSOR_NAME_DISK_USAGE,

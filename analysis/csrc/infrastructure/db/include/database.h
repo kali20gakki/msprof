@@ -173,6 +173,11 @@ public:
     HCCSDB();
 };
 
+class NetDevStatsDB : public Database {
+public:
+    NetDevStatsDB();
+};
+
 class FreqDB : public Database {
 public:
     FreqDB();
