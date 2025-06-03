@@ -11,6 +11,8 @@ from common_func.path_manager import PathManager
 from common_func.config_mgr import ConfigMgr
 from common_func.msprof_common import get_path_dir
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.platform.chip_manager import ChipManager
+from common_func.profiling_scene import ProfilingScene
 
 
 class DataCheckManager:
@@ -32,6 +34,11 @@ class DataCheckManager:
                 sample_config = ConfigMgr.read_sample_config(sub_path)
                 break
         return sample_config.get("profLevel", "") == StrConstant.PROF_LEVEL_0
+
+    @classmethod
+    def check_export_with_so(cls):
+        return (ProfilingScene().is_cpp_parse_enable() and
+                ProfilingScene().is_all_export() and ChipManager().is_chip_v4())
 
     @classmethod
     def check_data_exist(cls: any, result_dir: str, file_patterns: any, device_id: any = None) -> bool:

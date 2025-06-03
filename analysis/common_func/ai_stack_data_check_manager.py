@@ -40,6 +40,8 @@ class AiStackDataCheckManager(DataCheckManager):
 
     @classmethod
     def contain_fusion_op_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        if cls.check_export_with_so():
+            return False
         return AiStackDataCheckManager._check_output(result_dir, device_id) and \
             DBManager.check_connect_db(result_dir, DBNameConstant.DB_GE_MODEL_INFO)[0] and \
             DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_GE_MODEL_INFO),
@@ -153,6 +155,8 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain api data or not
         """
+        if cls.check_export_with_so():
+            return False
         return AiStackDataCheckManager._check_output(result_dir, device_id) \
             and DBManager.check_tables_in_db(
             PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT), DBNameConstant.TABLE_API_DATA)

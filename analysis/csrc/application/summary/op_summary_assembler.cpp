@@ -15,7 +15,6 @@
 #include <sstream>
 #include <iomanip>
 #include "analysis/csrc/infrastructure/dfx/error_code.h"
-#include "analysis/csrc/infrastructure/dump_tools/csv_tool/include/csv_writer.h"
 #include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
@@ -183,6 +182,22 @@ void OpSummaryAssembler::GenerateOpBody(std::vector<AscendTaskData> &taskData, s
     }
 }
 
+std::set<int> OpSummaryAssembler::GetMaskCols()
+{
+    std::set<int> maskCols;
+    const auto platVersion = Context::GetInstance().GetPlatformVersion(DEFAULT_DEVICE_ID, profPath_);
+    std::vector<std::string> STARS_HEADER{CONTEXT_ID, MIX_BLOCK_DIM, AIV_TIME, AIV_TOTAL_TIME};
+    if (!Context::GetInstance().IsStarsChip(platVersion)) {
+        for (auto &name : STARS_HEADER) {
+            auto idx = GetIndexForVec(headers_, name);
+            if (idx != INVALID_INDEX) {
+                maskCols.insert(idx);
+            }
+        }
+    }
+    return maskCols;
+}
+
 void OpSummaryAssembler::AddCubeUsage(std::vector<std::string> &data, std::unordered_map<std::string, int> &indexTable)
 {
     const auto usageIdx = indexTable.at(USAGE_IDX);
@@ -232,30 +247,17 @@ void OpSummaryAssembler::CalculateWaitTime()
     }
 }
 
-void OpSummaryAssembler::WriteToFile()
+void OpSummaryAssembler::WriteToFile(const std::string &fileName, const std::set<int> &maskCols)
 {
-    const auto platVersion = Context::GetInstance().GetPlatformVersion(DEFAULT_DEVICE_ID, profPath_);
-    std::set<int> maskCols;
-    std::vector<std::string> STARS_HEADER{CONTEXT_ID, MIX_BLOCK_DIM, AIV_TIME, AIV_TOTAL_TIME};
-    if (!Context::GetInstance().IsStarsChip(platVersion)) {
-        for (auto &name : STARS_HEADER) {
-            auto idx = GetIndexForVec(headers_, name);
-            if (idx != INVALID_INDEX) {
-                maskCols.insert(idx);
-            }
-        }
-    }
     auto timeIndex = GetIndexForVec(headers_, TASK_START_TIME);
     for (auto& row : res_) {
-        for (size_t i = 0; i < row.size(); ++i) {
-            if (static_cast<int>(i) == timeIndex) {
-                row[i].append("\t");
-            }
+        if (timeIndex < row.size()) {
+            row[timeIndex].append("\t");
         }
     }
 
     CsvWriter csvWriter = CsvWriter();
-    csvWriter.WriteCsv(File::PathJoin({profPath_, OUTPUT_PATH, OP_SUMMARY_NAME}), headers_, res_, maskCols);
+    csvWriter.WriteCsv(fileName, headers_, res_, maskCols);
 }
 
 uint8_t OpSummaryAssembler::AssembleData(DataInventory &dataInventory)
@@ -285,7 +287,7 @@ uint8_t OpSummaryAssembler::AssembleData(DataInventory &dataInventory)
         ERROR("Can't match any task data, failed to generate op_summary.csv");
         return ASSEMBLE_FAILED;
     }
-    WriteToFile();
+    WriteToFile(File::PathJoin({profPath_, OUTPUT_PATH, OP_SUMMARY_NAME}), GetMaskCols());
     return ASSEMBLE_SUCCESS;
 }
 

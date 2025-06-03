@@ -30,6 +30,8 @@ class OpSummaryAssembler : public SummaryAssembler {
 public:
     OpSummaryAssembler() = default;
     OpSummaryAssembler(const std::string &name, const std::string &profPath);
+protected:
+    void WriteToFile(const std::string &fileName, const std::set<int> &maskCols);
 private:
     uint8_t AssembleData(DataInventory &dataInventory);
     void GenerateOpBody(std::vector<AscendTaskData> &taskData, std::shared_ptr<MetricSummary> &pmu);
@@ -40,7 +42,7 @@ private:
                          std::unordered_map<std::string, int> &indexTable);
     void AddCubeUsage(std::vector<std::string> &data, std::unordered_map<std::string, int> &indexTable);
     void CalculateWaitTime();
-    void WriteToFile() override;
+    std::set<int> GetMaskCols();
 private:
     std::map<TaskId, TaskInfoData*> computeTask_;
 };
