@@ -28,13 +28,13 @@
 #include "activity/ascend/channel/channel_data.h"
 #include "external/mspti_activity.h"
 
+#include "cann_track_cache.h"
+
 namespace Mspti {
 namespace Parser {
 
 // <deviceId, streamId, taskId>
-using DstType = std::tuple<int16_t, int16_t, int16_t>;
-// <deviceId, streamId, flipId>
-using DsfType = std::tuple<int16_t, int16_t, int16_t>;
+using DstType = std::tuple<uint16_t, uint16_t, uint16_t>;
 
 class ParserManager final {
 public:
@@ -45,8 +45,19 @@ public:
     void ReportStepTrace(uint32_t deviceId, const StepTrace* stepTrace);
 
     // CANN
-    msptiResult ReportRtTaskTrack(const MsprofRuntimeTrack& track);
+    msptiResult ReportRtTaskTrack(const MsprofCompactInfo* data);
     msptiResult ReportApi(const MsprofApi* const data);
+    msptiResult ReportCommunicationApi(const MsprofApi *const data);
+    msptiResult ReportHcclCompactData(const MsprofCompactInfo* compact);
+
+    // Analysis thread
+    Mspti::Parser::ProfTask* GetAnalysisTask(msptiActivityKind kind);
+    msptiResult StartAnalysisTask(const msptiActivityKind kind);
+    msptiResult StartAnalysisTasks(const std::array<std::atomic<bool>, MSPTI_ACTIVITY_KIND_COUNT> &kinds);
+
+    msptiResult StopAnalysisTask(const msptiActivityKind kind);
+    msptiResult StopAnalysisTasks(const std::array<std::atomic<bool>, MSPTI_ACTIVITY_KIND_COUNT> &kinds);
+
     void RegReportTypeInfo(uint16_t level, uint32_t typeId, const std::string& typeName);
     std::string& GetTypeName(uint16_t level, uint32_t typeId);
 

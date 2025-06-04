@@ -56,14 +56,14 @@ TEST_F(ParserUtest, ShouldRetSccessWhenReportKernelInfo)
     constexpr uint32_t deviceId = 0;
     constexpr uint32_t streamId = 3;
     constexpr uint32_t BIT_NUM = 16;
-    MsprofRuntimeTrack data;
-    (void)memset_s(&data, sizeof(data), 0, sizeof(data));
-    data.deviceId = deviceId;
-    data.streamId = streamId;
-    data.taskInfo = static_cast<uint32_t>(flipId) << BIT_NUM | static_cast<uint32_t>(taskId);
-    data.taskType = TS_TASK_TYPE_KERNEL_AIVEC;
-    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRtTaskTrack(data));
-    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRtTaskTrack(data));
+    MsprofCompactInfo compactInfo;
+    (void)memset_s(&compactInfo, sizeof(compactInfo), 0, sizeof(compactInfo));
+    compactInfo.data.runtimeTrack.deviceId = deviceId;
+    compactInfo.data.runtimeTrack.streamId = streamId;
+    compactInfo.data.runtimeTrack.taskInfo = static_cast<uint32_t>(flipId) << BIT_NUM | static_cast<uint32_t>(taskId);
+    compactInfo.data.runtimeTrack.taskType = TS_TASK_TYPE_KERNEL_AIVEC;
+    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRtTaskTrack(&compactInfo));
+    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRtTaskTrack(&compactInfo));
 
     StarsSocLog socLogStart;
     (void)memset_s(&socLogStart, sizeof(socLogStart), 0, sizeof(socLogStart));
@@ -126,14 +126,14 @@ TEST_F(ParserUtest, ShouldRecordKernelNameWhenReportRtTaskTrack)
     constexpr uint32_t BIT_NUM = 16;
     const std::string kernelName = "test_kernalName";
     auto kernelNameHash = Mspti::Parser::CannHashCache::GetInstance().GenHashId(kernelName);
-    MsprofRuntimeTrack data;
-    (void)memset_s(&data, sizeof(data), 0, sizeof(data));
-    data.deviceId = deviceId;
-    data.streamId = streamId;
-    data.taskInfo = static_cast<uint32_t>(flipId) << BIT_NUM | static_cast<uint32_t>(taskId);
-    data.taskType = TS_TASK_TYPE_KERNEL_AIVEC;
-    data.kernelName = kernelNameHash;
-    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRtTaskTrack(data));
+    MsprofCompactInfo compactInfo;
+    (void)memset_s(&compactInfo, sizeof(compactInfo), 0, sizeof(compactInfo));
+    compactInfo.data.runtimeTrack.deviceId = deviceId;
+    compactInfo.data.runtimeTrack.streamId = streamId;
+    compactInfo.data.runtimeTrack.taskInfo = static_cast<uint32_t>(flipId) << BIT_NUM | static_cast<uint32_t>(taskId);
+    compactInfo.data.runtimeTrack.taskType = TS_TASK_TYPE_KERNEL_AIVEC;
+    compactInfo.data.runtimeTrack.kernelName = kernelNameHash;
+    EXPECT_EQ(MSPTI_SUCCESS, instance->ReportRtTaskTrack(&compactInfo));
 }
 
 TEST_F(ParserUtest, ShouldRetErrorWhenMarkFail)

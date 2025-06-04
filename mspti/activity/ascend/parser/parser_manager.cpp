@@ -24,9 +24,14 @@
 #include "mstx_parser.h"
 #include "cann_hash_cache.h"
 
+#include "communication_calculator.h"
+
 namespace Mspti {
 namespace Parser {
 namespace {
+const std::string LCCL_PREFIX = "Lccl";
+const std::string HCCL_PREFIX = "hcom_";
+
 inline Mspti::Common::ThreadLocal<msptiActivityApi> GetDefaultApiActivity()
 {
     static Mspti::Common::ThreadLocal<msptiActivityApi> instance(
@@ -83,6 +88,17 @@ std::string& ParserManager::GetTypeName(uint16_t level, uint32_t typeId)
     return nullInfo;
 }
 
+bool IsCommunicationNodeLaunch(const std::string& nodeLaunchName)
+{
+    if (nodeLaunchName.substr(0, LCCL_PREFIX.size()) == LCCL_PREFIX) {
+        return true;
+    }
+    if (nodeLaunchName.substr(0, HCCL_PREFIX.size()) == HCCL_PREFIX) {
+        return true;
+    }
+    return false;
+}
+
 msptiResult ParserManager::ReportApi(const MsprofApi* const data)
 {
     if (!data) {
@@ -91,6 +107,14 @@ msptiResult ParserManager::ReportApi(const MsprofApi* const data)
     const auto& name = CannHashCache::GetInstance().GetHashInfo(data->itemId);
     if (name.empty()) {
         MSPTI_LOGW("Get HashInfo failed. HashId: %lu", data->itemId);
+        return MSPTI_SUCCESS;
+    }
+    // 通信算子不走rtKernellaunch下发，会导致correlationId未+1， 此处手动+1
+    if (IsCommunicationNodeLaunch(name)) {
+        Mspti::Common::ContextManager::GetInstance()->UpdateAndReportCorrelationId(data->threadId);
+    }
+
+    if (!Mspti::Activity::ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_API)) {
         return MSPTI_SUCCESS;
     }
 
@@ -114,9 +138,22 @@ msptiResult ParserManager::ReportApi(const MsprofApi* const data)
     return MSPTI_SUCCESS;
 }
 
-msptiResult ParserManager::ReportRtTaskTrack(const MsprofRuntimeTrack& track)
+msptiResult ParserManager::ReportCommunicationApi(const MsprofApi *const data)
 {
-    uint16_t taskId = static_cast<uint16_t>(track.taskInfo & 0xffff);
+    return CannTrackCache::GetInstance().AppendCommunication(data);
+}
+
+msptiResult ParserManager::ReportHcclCompactData(const MsprofCompactInfo* compact)
+{
+    return CommunicationCalculator::GetInstance().AppendCompactInfo(compact);
+}
+
+msptiResult ParserManager::ReportRtTaskTrack(const MsprofCompactInfo* data)
+{
+    CannTrackCache::GetInstance().AppendTsTrack(data);
+
+    auto &track = data->data.runtimeTrack;
+    auto taskId = static_cast<uint16_t>(track.taskInfo & 0xffff);
     uint16_t streamId = track.streamId;
     uint16_t deviceId = track.deviceId;
     DstType dstKey = std::make_tuple(deviceId, streamId, taskId);
@@ -213,5 +250,54 @@ void ParserManager::ReportStepTrace(uint32_t deviceId, const StepTrace* stepTrac
             break;
     }
 }
+
+msptiResult ParserManager::StartAnalysisTask(msptiActivityKind kind)
+{
+    return GetAnalysisTask(kind)->StartTask();
+}
+
+msptiResult ParserManager::StartAnalysisTasks(const std::array<std::atomic<bool>, MSPTI_ACTIVITY_KIND_COUNT> &kinds)
+{
+    for (int kindIndex = 0; kindIndex < MSPTI_ACTIVITY_KIND_COUNT; kindIndex++) {
+        if (!kinds[kindIndex]) {
+            continue;
+        }
+        auto kind = static_cast<msptiActivityKind>(kindIndex);
+        if (StartAnalysisTask(kind) != MSPTI_SUCCESS) {
+            return MSPTI_ERROR_INNER;
+        }
+    }
+    return MSPTI_SUCCESS;
+}
+
+msptiResult ParserManager::StopAnalysisTask(msptiActivityKind kind)
+{
+    return GetAnalysisTask(kind)->StopTask();
+}
+
+msptiResult ParserManager::StopAnalysisTasks(const std::array<std::atomic<bool>, MSPTI_ACTIVITY_KIND_COUNT> &kinds)
+{
+    for (int kindIndex = 0; kindIndex < MSPTI_ACTIVITY_KIND_COUNT; kindIndex++) {
+        if (!kinds[kindIndex]) {
+            continue;
+        }
+        auto kind = static_cast<msptiActivityKind>(kindIndex);
+        if (StopAnalysisTask(kind) != MSPTI_SUCCESS) {
+            return MSPTI_ERROR_INNER;
+        }
+    }
+    return MSPTI_SUCCESS;
+}
+
+Mspti::Parser::ProfTask* ParserManager::GetAnalysisTask(msptiActivityKind kind)
+{
+    switch (kind) {
+        case MSPTI_ACTIVITY_KIND_COMMUNICATION:
+            return &CannTrackCache::GetInstance();
+        default:
+            return &Mspti::Parser::NullProfTask::GetInstance();
+    }
+}
+
 }  // Parser
 }  // Mspti

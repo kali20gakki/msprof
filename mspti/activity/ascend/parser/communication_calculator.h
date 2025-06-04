@@ -1,0 +1,56 @@
+/* ******************************************************************************
+            版权所有 (c) 华为技术有限公司 2025-2025
+            Copyright, 2025, Huawei Tech. Co., Ltd.
+****************************************************************************** */
+/* ******************************************************************************
+ * File Name          : communication_calculator.h
+ * Description        : 解析上报记录通信数据
+ * Author             : msprof team
+ * Creation Date      : 2025/5/18
+ * *****************************************************************************
+ */
+
+#ifndef MSPTI_PARSER_COMMUNICATION_CALCULATOR_H
+#define MSPTI_PARSER_COMMUNICATION_CALCULATOR_H
+
+#include <unordered_map>
+#include <vector>
+#include "common/inject/profapi_inject.h"
+#include "common/bound_queue.h"
+#include "cann_track_cache.h"
+#include "device_task_calculator.h"
+#include "external/mspti_activity.h"
+#include "activity/ascend/entity/communication_op_desc.h"
+
+namespace Mspti {
+namespace Parser {
+class CommunicationCalculator {
+    // <deviceId, streamId, taskId>
+    using DstType = std::tuple<uint16_t, uint16_t, uint16_t>;
+public:
+    msptiResult AppendCompactInfo(const MsprofCompactInfo *data);
+
+    msptiResult AppendApi2TaskInfo(const std::shared_ptr<ApiEvent> ApiEvent);
+
+    static CommunicationCalculator &GetInstance();
+
+    msptiResult ReportCommunication(std::shared_ptr<CommunicationOpDesc> hcclOp);
+
+    msptiResult Record(std::shared_ptr<DeviceTask> taskTime);
+
+private:
+    CommunicationCalculator() = default;
+
+private:
+    std::mutex hcclTaskMutex_;
+    std::map<DstType, std::shared_ptr<CommunicationOpDesc>> firstTask2CommunicationOp_;
+    std::map<DstType, std::shared_ptr<CommunicationOpDesc>> lastTask2CommunicationOp_;
+
+    std::mutex communicationOpInfoMutex_;
+    std::unordered_map<std::uint64_t, std::queue<std::shared_ptr<msptiActivityCommunication>>>
+        communicationOpInfoQueue_;
+};
+}
+}
+
+#endif // MSPTI_PARSER_COMMUNICATION_CALCULATOR_H
