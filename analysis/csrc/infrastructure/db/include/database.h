@@ -248,6 +248,12 @@ class QosDB : public Database {
 public:
     QosDB();
 };
+
+class OpCounterDB : public Database {
+public:
+    OpCounterDB();
+};
+
 } // namespace Infra
 } // namespace Analysis
 #endif // ANALYSIS_VIEWER_DATABASE_DATABASE_H

@@ -29,7 +29,7 @@ public:
 private:
     bool Process(DataInventory& dataInventory) override;
     OriHcclDataFormat LoadData(const DBInfo& dbInfo, const std::string& dbPath);
-    std::vector<HcclStatisticData> FormatData(const OriHcclDataFormat& oriData);
+    std::vector<HcclStatisticData> FormatData(const OriHcclDataFormat& oriData, const uint16_t deviceId);
 };
 } // namespace Domain
 } // namespace Analysis

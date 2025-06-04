@@ -753,6 +753,17 @@ namespace {
         {"nic_tx_all_oct", SQL_INTEGER_TYPE},
         {"nic_rx_all_oct", SQL_INTEGER_TYPE}
     };
+
+    const TableColumns OpReport = {
+        {"op_type", SQL_TEXT_TYPE},
+        {"core_type", SQL_TEXT_TYPE},
+        {"occurrences", SQL_TEXT_TYPE},
+        {"total_time", SQL_NUMERIC_TYPE},
+        {"min", SQL_NUMERIC_TYPE},
+        {"avg", SQL_NUMERIC_TYPE},
+        {"max", SQL_NUMERIC_TYPE},
+        {"ratio", SQL_TEXT_TYPE},
+    };
 }
 
 std::string Database::GetDBName() const
@@ -1036,6 +1047,12 @@ QosDB::QosDB()
 {
     dbName_ = "qos.db";
     tableColNames_["QosBwData"] = QosBwData;
+}
+
+OpCounterDB::OpCounterDB()
+{
+    dbName_ = "op_counter.db";
+    tableColNames_["op_report"] = OpReport;
 }
 } // namespace Infra
 } // namespace Analysis

@@ -147,6 +147,8 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain op summary data or not
         """
+        if cls.check_export_with_so():
+            return False
         return AiStackDataCheckManager._check_output(result_dir, device_id) and \
             DBManager.check_connect_db(result_dir, DBNameConstant.DB_OP_COUNTER)[0]
 
@@ -349,6 +351,8 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain hccl statistic data or not
         """
+        if cls.check_export_with_so():
+            return False
         return AiStackDataCheckManager._check_output(result_dir, device_id) and DBManager.check_tables_in_db(
             PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL_SINGLE_DEVICE),
             DBNameConstant.TABLE_HCCL_OP_REPORT)
