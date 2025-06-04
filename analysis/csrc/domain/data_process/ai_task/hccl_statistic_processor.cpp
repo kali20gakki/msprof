@@ -35,7 +35,8 @@ OriHcclDataFormat HcclStatisticProcessor::LoadData(const DBInfo& dbInfo, const s
     return oriData;
 }
 
-std::vector<HcclStatisticData> HcclStatisticProcessor::FormatData(const OriHcclDataFormat& oriData)
+std::vector<HcclStatisticData> HcclStatisticProcessor::FormatData(const OriHcclDataFormat& oriData,
+                                                                  const uint16_t deviceId)
 {
     std::vector<HcclStatisticData> processedData;
     HcclStatisticData data;
@@ -43,6 +44,7 @@ std::vector<HcclStatisticData> HcclStatisticProcessor::FormatData(const OriHcclD
         ERROR("Reserve for Hccl Statistic data failed.");
         return processedData;
     }
+    data.deviceId = deviceId;
     for (auto& row : oriData) {
         std::tie(data.opType, data.count, data.totalTime, data.min, data.avg, data.max, data.ratio) = row;
         processedData.push_back(data);
@@ -58,6 +60,11 @@ bool HcclStatisticProcessor::Process(Analysis::Infra::DataInventory& dataInvento
     for (const auto& devicePath : deviceList) {
         DBInfo hcclStatisticsDB("hccl_single_device.db", "HcclOpReport");
         std::string dbPath = File::PathJoin({devicePath, SQLITE, hcclStatisticsDB.dbName});
+        auto deviceId = Utils::GetDeviceIdByDevicePath(devicePath);
+        if (deviceId == INVALID_DEVICE_ID) {
+            ERROR("the invalid deviceId cannot to be identified.");
+            return false;
+        }
         if (!hcclStatisticsDB.ConstructDBRunner(dbPath)) {
             flag = false;
             continue;
@@ -75,7 +82,7 @@ bool HcclStatisticProcessor::Process(Analysis::Infra::DataInventory& dataInvento
             ERROR("Hccl Statistics original data is empty. DBPath is %", dbPath);
             continue;
         }
-        auto formatData = FormatData(oriData);
+        auto formatData = FormatData(oriData, deviceId);
         if (formatData.empty()) {
             ERROR("Hccl Statistics data format failed, DBPath is %", dbPath);
             flag = false;

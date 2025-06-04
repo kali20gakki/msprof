@@ -56,6 +56,12 @@ class TestAiStackDataCheckManager(unittest.TestCase):
     def test_export_summary_csv_with_c_should_return_false_when_so_exist(self):
         with mock.patch('common_func.data_check_manager.DataCheckManager.check_export_with_so',
                         return_value=True):
+            result_op_statistic = AiStackDataCheckManager.contain_op_statistic_data('/path/to/result_dir/host',
+                                                                                    device_id=0)
+            self.assertFalse(result_op_statistic)
+            result_hccl_statistic = AiStackDataCheckManager.contain_hccl_statistic_data('/path/to/result_dir/host',
+                                                                                        device_id=0)
+            self.assertFalse(result_hccl_statistic)
             result_api_statistic = AiStackDataCheckManager.contain_api_statistic_data('/path/to/result_dir/host',
                                                                                       device_id=NumberConstant.HOST_ID)
             self.assertFalse(result_api_statistic)
