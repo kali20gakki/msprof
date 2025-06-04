@@ -15,6 +15,8 @@
 #include <functional>
 
 #include "activity/ascend/parser/parser_manager.h"
+#include "activity/ascend/parser/cann_track_cache.h"
+#include "activity/ascend/parser/cann_hash_cache.h"
 #include "common/function_loader.h"
 #include "common/plog_manager.h"
 #include "common/context_manager.h"
@@ -120,12 +122,28 @@ int32_t MsptiApiReporterCallbackImpl(uint32_t agingFlag, const MsprofApi* const 
         MSPTI_LOGE("Report Msprof Api data failed with nullptr.");
         return PROFAPI_ERROR;
     }
-    if (data->level == MSPROF_REPORT_NNOPBASE_LEVEL || data->level == MSPROF_REPORT_ACL_LEVEL) {
+
+    if (data->level == MSPROF_REPORT_NNOPBASE_LEVEL) {
         if (Mspti::Parser::ParserManager::GetInstance()->ReportApi(data) != MSPTI_SUCCESS) {
             MSPTI_LOGE("Report Msprof Api data to ParserManager failed.");
             return PROFAPI_ERROR;
         }
     }
+
+    if (data->level == MSPROF_REPORT_NNOPBASE_LEVEL && data->type == MSPROF_REPORT_NODE_LAUNCH_TYPE) {
+        if (Mspti::Parser::CannTrackCache::GetInstance().AppendNodeLunch(data)!= MSPTI_SUCCESS) {
+            MSPTI_LOGE("Report Msprof Compact data to ParserManager failed.");
+            return PROFAPI_ERROR;
+        }
+    }
+
+    if (data->level == MSPROF_REPORT_HCCL_NODE_LEVEL) {
+        if (Mspti::Parser::ParserManager::GetInstance()->ReportCommunicationApi(data) != MSPTI_SUCCESS) {
+            MSPTI_LOGE("Report Msprof Hccl Api data to ParserManager failed.");
+            return PROFAPI_ERROR;
+        }
+    }
+
     return PROFAPI_ERROR_NONE;
 }
 
@@ -145,8 +163,16 @@ int32_t MsptiCompactInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR 
     }
     const MsprofCompactInfo* compact = reinterpret_cast<const MsprofCompactInfo*>(data);
     if (compact && compact->level == MSPROF_REPORT_RUNTIME_LEVEL && compact->type == RT_PROFILE_TYPE_TASK_TRACK) {
-        if (Mspti::Parser::ParserManager::GetInstance()->ReportRtTaskTrack(
-            compact->data.runtimeTrack)!= MSPTI_SUCCESS) {
+        if (Mspti::Parser::ParserManager::GetInstance()->ReportRtTaskTrack(compact)!= MSPTI_SUCCESS) {
+            MSPTI_LOGE("Report Msprof Compact data to ParserManager failed.");
+            return PROFAPI_ERROR;
+        }
+    }
+
+    if (compact && compact->level == MSPROF_REPORT_NNOPBASE_LEVEL
+        && compact->type == MSPROF_REPORT_NODE_HCCL_OP_INFO_TYPE) {
+        if (Mspti::Parser::ParserManager::GetInstance()->ReportHcclCompactData(
+            compact)!= MSPTI_SUCCESS) {
             MSPTI_LOGE("Report Msprof Compact data to ParserManager failed.");
             return PROFAPI_ERROR;
         }

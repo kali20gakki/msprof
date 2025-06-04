@@ -397,6 +397,7 @@ RtErrorT rtLaunchKernelByFuncHandle(rtFuncHandle funcHandle, uint32_t blockDim, 
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libruntime.so");
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_RUNTIME, MSPTI_CBID_RUNTIME_LAUNCH, __FUNCTION__);
+    Mspti::Common::ContextManager::GetInstance()->UpdateAndReportCorrelationId();
     return func(funcHandle, blockDim, argsHandle, stm);
 }
 

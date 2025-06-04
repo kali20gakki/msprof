@@ -6,6 +6,8 @@ add_executable(mspti_reporter_utest
     ${TOP_DIR}/mspti/activity/ascend/reporter/memory_reporter.cpp
     ${TOP_DIR}/mspti/activity/ascend/reporter/external_correlation_reporter.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/parser_manager.cpp
+    ${TOP_DIR}/mspti/activity/ascend/parser/communication_calculator.cpp
+    ${TOP_DIR}/mspti/activity/ascend/parser/cann_track_cache.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/cann_hash_cache.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/device_task_calculator.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/mstx_parser.cpp

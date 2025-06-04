@@ -42,22 +42,18 @@ struct DeviceTask {
     uint32_t streamId;
     uint32_t taskId;
     uint32_t deviceId;
-    uint64_t flipId;
     std::vector<std::shared_ptr<SubTask>> subTasks;
-    DeviceTask(uint64_t start, uint64_t end, uint32_t streamId, uint32_t taskId, uint32_t deviceId, uint32_t flipId)
-        : start(start), end(end), streamId(streamId), taskId(taskId), deviceId(deviceId), flipId(flipId), isFfts(false)
+    DeviceTask(uint64_t start, uint64_t end, uint32_t streamId, uint32_t taskId, uint32_t deviceId)
+        : start(start), end(end), streamId(streamId), taskId(taskId), deviceId(deviceId), isFfts(false)
     {}
 };
 
 class DeviceTaskCalculator {
     // <deviceId, streamId, taskId>
-    using DstType = std::tuple<int16_t, int16_t, int16_t>;
-
-    // <deviceId, streamId, flipId>
-    using DsfType = std::tuple<int16_t, int16_t, int16_t>;
+    using DstType = std::tuple<uint16_t, uint16_t, uint16_t>;
 
     // <deviceId, streamId, taskId, subTaskId>
-    using DstsType = std::tuple<int16_t, int16_t, int16_t, int16_t>;
+    using DstsType = std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>;
 
 public:
     using CompleteFunc = std::function<msptiResult(std::shared_ptr<DeviceTask>)>;

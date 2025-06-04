@@ -189,18 +189,23 @@ uint64_t ContextManager::GetCorrelationId(uint32_t threadId)
     }
 }
 
-void ContextManager::UpdateAndReportCorrelationId()
+void ContextManager::UpdateAndReportCorrelationId(uint32_t tid)
 {
     std::lock_guard<std::mutex> lk(correlationIdMtx_);
     correlationId_++;
     Mspti::Reporter::ExternalCorrelationReporter::GetInstance()->ReportExternalCorrelationId(correlationId_);
-    uint32_t tid = Common::Utils::GetTid();
     auto iter = threadCorrelationIdInfo_.find(tid);
     if (iter == threadCorrelationIdInfo_.end()) {
         threadCorrelationIdInfo_.insert({tid, correlationId_});
     } else {
         iter->second = correlationId_;
     }
+}
+
+void ContextManager::UpdateAndReportCorrelationId()
+{
+    uint32_t tid = Common::Utils::GetTid();
+    UpdateAndReportCorrelationId(tid);
 }
 
 }  // Common

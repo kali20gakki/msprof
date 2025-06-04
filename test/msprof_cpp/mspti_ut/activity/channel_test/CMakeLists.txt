@@ -14,6 +14,8 @@ set(SRC_FILE
     ${TOP_DIR}/mspti/activity/ascend/parser/parser_manager.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/cann_hash_cache.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/device_task_calculator.cpp
+    ${TOP_DIR}/mspti/activity/ascend/parser/communication_calculator.cpp
+    ${TOP_DIR}/mspti/activity/ascend/parser/cann_track_cache.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/mstx_parser.cpp
     ${TOP_DIR}/mspti/activity/ascend/reporter/external_correlation_reporter.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/hccl_calculator.cpp

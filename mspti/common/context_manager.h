@@ -46,6 +46,7 @@ public:
     PlatformType GetChipType(uint32_t deviceId);
     uint64_t GetCorrelationId(uint32_t threadId = 0);
     void UpdateAndReportCorrelationId();
+    void UpdateAndReportCorrelationId(uint32_t tid);
 
 private:
     ContextManager() = default;

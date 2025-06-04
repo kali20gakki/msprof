@@ -10,8 +10,8 @@
 * *****************************************************************************
 */
 
-#ifndef MSPTI_PROJECT_CANN_HASH_CACHE_H
-#define MSPTI_PROJECT_CANN_HASH_CACHE_H
+#ifndef MSPTI_PARSER_CANN_HASH_CACHE_H
+#define MSPTI_PARSER_CANN_HASH_CACHE_H
 
 #include <unordered_map>
 #include <mutex>
@@ -32,4 +32,4 @@ private:
 }
 }
 
-#endif // MSPTI_PROJECT_CANN_HASH_CACHE_H
+#endif // MSPTI_PARSER_CANN_HASH_CACHE_H

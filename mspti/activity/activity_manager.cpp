@@ -160,11 +160,12 @@ msptiResult ActivityManager::Register(msptiActivityKind kind)
         MSPTI_LOGI("Register Activity kind: %d", static_cast<int>(kind));
     }
     std::lock_guard<std::mutex> lk(devices_mtx_);
+    ActivitySwitchType curOpenSwitch{};
+    curOpenSwitch[kind] = true;
     for (auto device : devices_) {
-        ActivitySwitchType curOpenSwitch{};
-        curOpenSwitch[kind] = true;
         Mspti::Ascend::DevTaskManager::GetInstance()->StartDevProfTask(device, curOpenSwitch);
     }
+    Mspti::Parser::ParserManager::GetInstance()->StartAnalysisTask(kind);
     return MSPTI_SUCCESS;
 }
 
@@ -175,6 +176,7 @@ msptiResult ActivityManager::UnRegister(msptiActivityKind kind)
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
     activity_switch_[kind] = false;
+    Mspti::Parser::ParserManager::GetInstance()->StopAnalysisTask(kind);
     MSPTI_LOGI("UnRegister Activity kind: %d", static_cast<int>(kind));
     return MSPTI_SUCCESS;
 }
