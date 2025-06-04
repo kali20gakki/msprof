@@ -122,7 +122,7 @@ TEST_F(PCIeAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
                             ",\"tid\":0,\"ts\":\"1719621074688865.380\",\"ph\":\"C\",\"args\":{\"Rx\":0.0,\"Tx\":"
                             "73.43292236328125}},{\"name\":\"process_name\",\"pid\":2383960768,\"tid\":0,\"ph\":\"M\","
                             "\"args\":{\"name\":\"PCIe\"}},{\"name\":\"process_labels\",\"pid\":2383960768,\"tid\":0,"
-                            "\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":"
+                            "\"ph\":\"M\",\"args\":{\"labels\":\"NPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":"
                             "2383960768,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":22}},";
     EXPECT_EQ(expectStr, res.back());
 }

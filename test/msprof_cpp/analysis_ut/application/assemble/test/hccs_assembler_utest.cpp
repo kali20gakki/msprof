@@ -93,7 +93,7 @@ TEST_F(HCCSAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
     std::string expectStr = "{\"name\":\"process_name\",\"pid\":2383960672,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":"
                             "\"HCCS\"}},{\"name\":\"process_labels\",\"pid\":2383960672,\"tid\":0,\"ph\":\"M\",\"args"
-                            "\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960672,\"tid\":0,"
+                            "\":{\"labels\":\"NPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":2383960672,\"tid\":0,"
                             "\"ph\":\"M\",\"args\":{\"sort_index\":19}},{\"name\":\"Rx\",\"pid\":2383960672,\"tid\":0,"
                             "\"ts\":\"1724405892226599.429\",\"ph\":\"C\",\"args\":{\"Rx(MB/s)\":240125.966}},"
                             "{\"name\":\"Tx\",\"pid\":2383960672,\"tid\":0,\"ts\":\"1724405892226599.429\",\"ph\":"

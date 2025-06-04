@@ -133,7 +133,7 @@ TEST_F(SioAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
     std::string expectStr = "{\"name\":\"process_name\",\"pid\":2383960928,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":"
                             "\"SIO\"}},{\"name\":\"process_labels\",\"pid\":2383960928,\"tid\":0,\"ph\":\"M\",\"args"
-                            "\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960928,\"tid\":0,"
+                            "\":{\"labels\":\"NPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":2383960928,\"tid\":0,"
                             "\"ph\":\"M\",\"args\":{\"sort_index\":27}},{\"name\":\"snp_tx\",\"pid\":2383960928,\"tid"
                             "\":0,\"ts\":\"1724405892226699.529\",\"ph\":\"C\",\"args\":{\"die 1\":19.7,\"die 0\":15."
                             "7}},{\"name\":\"rsp_tx\",\"pid\":2383960928,\"tid\":0,\"ts\":\"1724405892226699.529\","

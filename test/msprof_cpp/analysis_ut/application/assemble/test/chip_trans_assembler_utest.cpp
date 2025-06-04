@@ -123,7 +123,7 @@ TEST_F(ChipTransAssemblerUTest, ShouldReturnTrueWhenDataNotExists)
 
 std::string expectStr = "{\"name\":\"process_name\",\"pid\":2383960864,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\""
                         "Stars Chip Trans\"}},{\"name\":\"process_labels\",\"pid\":2383960864,\"tid\":0,\"ph\":\"M\","
-                        "\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960864,\"tid\":0"
+                        "\"args\":{\"labels\":\"NPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":2383960864,\"tid\":0"
                         ",\"ph\":\"M\",\"args\":{\"sort_index\":25}},{\"name\":\"PCIE Read Bandwidth\",\"pid\":"
                         "2383960864,\"tid\":100010,\"ts\":\"1724405892226599.429\",\"ph\":\"C\",\"args\":{\""
                         "PCIE Read Bandwidth\":3,\"PCIE ID\":0}},{\"name\":\"PCIE Write Bandwidth\",\"pid\":2383960864"

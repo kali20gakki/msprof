@@ -531,7 +531,7 @@ int32_t GeOpenDeviceHandle(const uint32_t devId)
     if (ret != SUCCESS) {
         MSPROF_LOGE("MsprofSetDeviceImpl, CommandHandleProfStart failed, dataTypeConfig:0x%lx", dataTypeConfig);
         MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceImpl, CommandHandleProfStart failed, dataTypeConfig:0x%lx",
-            dataTypeConfig);
+                           dataTypeConfig);
         return PROFILING_FAILED;
     }
     g_devRecord.Insert(devId);

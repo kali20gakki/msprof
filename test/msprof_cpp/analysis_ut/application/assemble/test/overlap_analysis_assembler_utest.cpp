@@ -32,10 +32,10 @@ const std::string PROF_PATH = File::PathJoin({BASE_PATH, "PROF_0"});
 const std::string RESULT_PATH = File::PathJoin({PROF_PATH, OUTPUT_PATH});
 const std::string SCENARIOS1_JSON =
     "{\"name\":\"process_name\",\"pid\":10330017,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
-    "{\"name\":\"process_labels\",\"pid\":10330017,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
+    "{\"name\":\"process_labels\",\"pid\":10330017,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 1\"}},"
     "{\"name\":\"process_sort_index\",\"pid\":10330017,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":29}},"
     "{\"name\":\"process_name\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
-    "{\"name\":\"process_labels\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
+    "{\"name\":\"process_labels\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 0\"}},"
     "{\"name\":\"process_sort_index\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":29}},"
     "{\"name\":\"thread_name\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Communication\"}},"
     "{\"name\":\"thread_sort_index\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":0}},"
@@ -85,10 +85,10 @@ const std::string SCENARIOS1_JSON =
     "{\"name\":\"process_name\",\"pid\":10330017,\"tid\":0,\"ph\":\"M\","
     "\"args\":{\"name\":\"Overlap Analysis\"}},"
     "{\"name\":\"process_labels\",\"pid\":10330017,\"tid\":0,\"ph\":\"M\","
-    "\"args\":{\"labels\":\"NPU\"}},"
+    "\"args\":{\"labels\":\"NPU 1\"}},"
     "{\"name\":\"process_sort_index\",\"pid\":10330017,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":29}},"
     "{\"name\":\"process_name\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
-    "{\"name\":\"process_labels\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
+    "{\"name\":\"process_labels\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 0\"}},"
     "{\"name\":\"process_sort_index\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":29}},"
     "{\"name\":\"thread_name\",\"pid\":10330017,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Communication\"}},"
     "{\"name\":\"thread_sort_index\",\"pid\":10330017,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":0}},"
@@ -134,7 +134,7 @@ const std::string SCENARIOS1_JSON =
     "{\"name\":\"Free\",\"pid\":10330017,\"tid\":3,\"ts\":\"0.024\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},";
 const std::string SCENARIOS2_JSON =
     "{\"name\":\"process_name\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
-    "{\"name\":\"process_labels\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
+    "{\"name\":\"process_labels\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 0\"}},"
     "{\"name\":\"process_sort_index\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":29}},"
     "{\"name\":\"thread_name\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Communication\"}},"
     "{\"name\":\"thread_sort_index\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":0}},"
@@ -177,7 +177,7 @@ const std::string SCENARIOS2_JSON =
     "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.024\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},";
 const std::string SCENARIOS3_JSON =
     "{\"name\":\"process_name\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
-    "{\"name\":\"process_labels\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
+    "{\"name\":\"process_labels\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 0\"}},"
     "{\"name\":\"process_sort_index\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":29}},"
     "{\"name\":\"thread_name\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Communication\"}},"
     "{\"name\":\"thread_sort_index\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":0}},"
@@ -199,7 +199,7 @@ const std::string SCENARIOS3_JSON =
     "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.033\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},";
 const std::string SCENARIOS4_JSON =
     "{\"name\":\"process_name\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
-    "{\"name\":\"process_labels\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
+    "{\"name\":\"process_labels\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 0\"}},"
     "{\"name\":\"process_sort_index\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":29}},"
     "{\"name\":\"thread_name\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Communication\"}},"
     "{\"name\":\"thread_sort_index\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":0}},"
@@ -236,7 +236,7 @@ const std::string SCENARIOS4_JSON =
     "{\"name\":\"Free\",\"pid\":10330016,\"tid\":3,\"ts\":\"0.024\",\"dur\":0.001,\"ph\":\"X\",\"args\":{}},";
 const std::string SCENARIOS5_JSON =
     "{\"name\":\"process_name\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Overlap Analysis\"}},"
-    "{\"name\":\"process_labels\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},"
+    "{\"name\":\"process_labels\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 0\"}},"
     "{\"name\":\"process_sort_index\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":29}},"
     "{\"name\":\"thread_name\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Communication\"}},"
     "{\"name\":\"thread_sort_index\",\"pid\":10330016,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":0}},"

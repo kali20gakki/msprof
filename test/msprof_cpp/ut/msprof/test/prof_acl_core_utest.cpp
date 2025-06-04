@@ -474,31 +474,39 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api) {
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
 }
 
-TEST_F(MSPROF_ACL_CORE_UTEST, GeOpenDeviceHandle) {
+TEST_F(MSPROF_ACL_CORE_UTEST, GeOpenDeviceHandle)
+{
     GlobalMockObject::verify();
+
     MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofSetDeviceImpl)
-        .stubs()
-        .will(returnValue(PROFILING_FAILED))
-        .then(returnValue(PROFILING_SUCCESS));
+    .stubs()
+    .will(returnValue(PROFILING_FAILED))
+    .then(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_FAILED, ge::GeOpenDeviceHandle(1));
+
+    MOCKER_CPP(&analysis::dvvp::common::utils::Utils::IsDynProfMode)
+    .stubs()
+    .will(returnValue(false));
 
     MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::CommandHandleProfInit)
-        .stubs()
-        .will(returnValue(PROFILING_FAILED))
-        .then(returnValue(PROFILING_SUCCESS));
+    .stubs()
+    .will(returnValue(PROFILING_FAILED))
+    .then(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_FAILED, ge::GeOpenDeviceHandle(1));
 
     MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GetCmdModeDataTypeConfig)
-        .stubs()
-        .will(returnValue((uint64_t)0));
+    .stubs()
+    .will(returnValue((uint64_t)0));
 
     MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart)
-        .stubs()
-        .will(returnValue(PROFILING_FAILED))
-        .then(returnValue(PROFILING_SUCCESS));
+    .stubs()
+    .will(returnValue(PROFILING_FAILED))
+    .then(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_FAILED, ge::GeOpenDeviceHandle(1));
 
-    ge::GeOpenDeviceHandle(1);
-    ge::GeOpenDeviceHandle(1);
-    ge::GeOpenDeviceHandle(1);
-    ge::GeOpenDeviceHandle(1);
+    EXPECT_EQ(PROFILING_SUCCESS, ge::GeOpenDeviceHandle(1));
+    // repeat
+    EXPECT_EQ(PROFILING_SUCCESS, ge::GeOpenDeviceHandle(1));
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, aclgrphProfInitWillReturnFailWhenInputInvalidParam)
@@ -719,6 +727,26 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_api) {
     using namespace Msprofiler::Api;
     ProfAclMgr::instance()->mode_ = WORK_MODE_OFF;
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, TestAclprofRegisterDeviceCallback) {
+    GlobalMockObject::verify();
+
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
+    .stubs()
+    .will(returnValue(true))
+    .then(returnValue(false));
+    EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofRegisterDeviceCallback());
+
+    MOCKER_CPP(&ProfApiPlugin::MsprofProfRegDeviceStateCallback)
+    .stubs()
+    .will(returnValue(PROFILING_FAILED))
+    .then(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, aclprofRegisterDeviceCallback());
+
+    EXPECT_EQ(ACL_SUCCESS, aclprofRegisterDeviceCallback());
+    // 重复调用
+    EXPECT_EQ(ACL_SUCCESS, aclprofRegisterDeviceCallback());
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, prof_acl_api_helper) {
@@ -1038,42 +1066,46 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofSetDeviceCallbackImpl)
         sizeof(ProfSetDevPara) - 1));
     EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl(nullptr,
         sizeof(ProfSetDevPara)));
+    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
+        sizeof(ProfSetDevPara)));
+
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsApiCtrlMode)
+    .stubs()
+    .will(returnValue(true));
+
+    MOCKER_CPP(&analysis::dvvp::host::ProfManager::CheckIfDevicesOnline)
+    .stubs()
+    .will(returnValue(false))
+    .then(returnValue(true));
     EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
         sizeof(ProfSetDevPara)));
 
     data.isOpen = true;
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsCmdMode)
-        .stubs()
-        .will(returnValue(false))
-        .then(returnValue(true));
-    MOCKER_CPP(&analysis::dvvp::host::ProfManager::CheckIfDevicesOnline)
-        .stubs()
-        .will(returnValue(false))
-        .then(returnValue(true));
     MOCKER_CPP(&RegisterReporterCallback)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
+        sizeof(ProfSetDevPara)));
+
     MOCKER_CPP(&ge::GeOpenDeviceHandle)
         .stubs()
-        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    
-    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
-        sizeof(ProfSetDevPara)));
-    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
-        sizeof(ProfSetDevPara)));
-    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
-        sizeof(ProfSetDevPara)));
     EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
         sizeof(ProfSetDevPara)));
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
         sizeof(ProfSetDevPara)));
+
     data.isOpen = false;
     MOCKER_CPP(&ge::EraseDevRecord).stubs();
-        MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofResetDeviceHandle)
-        .stubs()
-        .will(returnValue(0));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofResetDeviceHandle)
+    .stubs()
+    .will(returnValue((int)MSPROF_ERROR))
+    .then(returnValue((int)MSPROF_ERROR_NONE));
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
+        sizeof(ProfSetDevPara)));
+
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl((VOID_PTR)&data,
         sizeof(ProfSetDevPara)));
 }

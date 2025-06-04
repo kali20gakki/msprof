@@ -100,11 +100,17 @@ class MsprofTimeline:
         """
         get layer_label layer_sort headers
         """
-        label_header = [["process_labels", pid, InfoConfReader().get_json_tid_data(), layer_info.general_layer]]
+        general_layer = cls.get_label_name_by_pid(pid, layer_info.general_layer)
+        label_header = [["process_labels", pid, InfoConfReader().get_json_tid_data(), general_layer]]
         sort_header = [["process_sort_index", pid, InfoConfReader().get_json_tid_data(), layer_info.sort_index]]
         process_label = TraceViewManager.metadata_event(label_header)
         process_sort = TraceViewManager.metadata_event(sort_header)
         return process_label + process_sort
+
+    @classmethod
+    def get_label_name_by_pid(cls, pid: int, label_name: str):
+        device_id = TraceViewManager.get_device_id_from_format_pid(pid)
+        return label_name if device_id == TraceViewManager.HOST_ID_FOR_PID else label_name + " " + str(device_id)
 
     @classmethod
     def is_cann_ai_stack_data(cls: any, layer_info: TraceViewHeaderConstant.LayerInfo, value: dict) -> bool:

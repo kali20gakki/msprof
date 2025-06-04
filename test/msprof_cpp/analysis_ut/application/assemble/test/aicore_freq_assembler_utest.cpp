@@ -113,7 +113,7 @@ TEST_F(AicoreFreqAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
                             "0,\"ts\":\"1719621074688868.780\",\"ph\":\"C\",\"args\":{\"MHz\":1800}},{\"name\":\""
                             "process_name\",\"pid\":2383960512,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\""
                             "AI Core Freq\"}},{\"name\":\"process_labels\",\"pid\":2383960512,\"tid\":0,\"ph\":\"M\","
-                            "\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960512,\"tid"
+                            "\"args\":{\"labels\":\"NPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":2383960512,\"tid"
                             "\":0,\"ph\":\"M\",\"args\":{\"sort_index\":14}},";
     EXPECT_EQ(expectStr, res.back());
 }
