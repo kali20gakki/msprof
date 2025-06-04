@@ -180,6 +180,8 @@ const std::string PROCESSOR_PMU = "PMU";
 const std::string PROCESSOR_NAME_FUSION_OP = "FUSION_OP";
 const std::string PROCESSOR_NAME_MODEL_NAME = "MODEL_NAME";
 
+const std::string PROCESSOR_TASK_TIME_SUMMARY = "TASK_TIME_SUMMARY";
+
 // mstx event type
 const std::unordered_map<std::string, uint16_t> MSTX_EVENT_TYPE_TABLE = {
     {"marker", 0},

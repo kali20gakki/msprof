@@ -134,7 +134,7 @@ class ExportCommand:
             {'export_type': ExportDataType.L2_CACHE,
              'handler': AiStackDataCheckManager.contain_l2_cache_data},
             {'export_type': ExportDataType.STEP_TRACE,
-             'handler': AiStackDataCheckManager.contain_training_trace_data_or_step},
+             'handler': AiStackDataCheckManager.contain_step_trace_summary_data},
             {'export_type': ExportDataType.OP_SUMMARY,
              'handler': AiStackDataCheckManager.contain_op_summary_data},
             {'export_type': ExportDataType.OP_STATISTIC,

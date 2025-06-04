@@ -20,6 +20,7 @@ namespace Domain {
 struct TrainTraceData : public BasicData {
     uint16_t deviceId = UINT16_MAX;
     uint32_t modelId = UINT32_MAX;
+    // indexId means iterationId
     uint32_t indexId = UINT32_MAX;
     uint64_t fpStart = UINT64_MAX;
     uint64_t bpEnd = UINT64_MAX;

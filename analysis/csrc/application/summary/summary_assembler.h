@@ -42,6 +42,7 @@ public:
             return false;
         }
     }
+
 protected:
     std::string processorName_;
     std::string profPath_;

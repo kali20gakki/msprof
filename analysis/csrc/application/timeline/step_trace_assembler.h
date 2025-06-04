@@ -10,8 +10,8 @@
  * *****************************************************************************
  */
 
-#ifndef ANALYSIS_APPLICATION_STEP_TRACE_ASSEMBLER_H
-#define ANALYSIS_APPLICATION_STEP_TRACE_ASSEMBLER_H
+#ifndef ANALYSIS_APPLICATION_TIMELINE_STEP_TRACE_ASSEMBLER_H
+#define ANALYSIS_APPLICATION_TIMELINE_STEP_TRACE_ASSEMBLER_H
 
 #include "analysis/csrc/application/timeline/json_assembler.h"
 #include "analysis/csrc/domain/entities/viewer_data/ai_task/include/step_trace_data.h"
@@ -144,4 +144,4 @@ private:
 }
 }
 
-#endif // ANALYSIS_APPLICATION_STEP_TRACE_ASSEMBLER_H
+#endif // ANALYSIS_APPLICATION_TIMELINE_STEP_TRACE_ASSEMBLER_H
