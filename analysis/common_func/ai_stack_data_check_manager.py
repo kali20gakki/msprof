@@ -119,6 +119,8 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain step_trace data or not
         """
+        if cls.check_export_with_so():
+            return False
         return cls.contain_task_time_data(result_dir, device_id) or \
             AiStackDataCheckManager.contain_stars_soc_data(result_dir, device_id)
 
@@ -210,6 +212,18 @@ class AiStackDataCheckManager(DataCheckManager):
         :param device_id: device id
         :return: if contained training trace data or step trace data, true or false
         """
+        return cls.contain_training_trace_data(result_dir, device_id=device_id)
+
+    @classmethod
+    def contain_step_trace_summary_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+        """
+        The data path contain training trace data or step trace data
+        :param result_dir: data dir path
+        :param device_id: device id
+        :return: if contained training trace data or step trace data, true or false
+        """
+        if cls.check_export_with_so():
+            return False
         return cls.contain_training_trace_data(result_dir, device_id=device_id)
 
     @classmethod

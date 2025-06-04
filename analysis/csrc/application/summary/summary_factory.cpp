@@ -14,6 +14,8 @@
 #include "analysis/csrc/application/summary/op_summary_assembler.h"
 #include "analysis/csrc/application/summary/api_statistic_assembler.h"
 #include "analysis/csrc/application/summary/fusion_op_assembler.h"
+#include "analysis/csrc/application/summary/task_time_assembler.h"
+#include "analysis/csrc/application/summary/summary_step_trace_assembler.h"
 
 
 namespace Analysis {
@@ -26,6 +28,10 @@ std::unordered_map<std::string, AssemblerCreator> SummaryFactory::assemblerTable
         MAKE_SHARED0_NO_OPERATION(assembler, ApiStatisticAssembler, PROCESSOR_NAME_API, profPath);}},
     {PROCESSOR_NAME_FUSION_OP,          [](const std::string& profPath, std::shared_ptr<SummaryAssembler>& assembler) {
         MAKE_SHARED0_NO_OPERATION(assembler, FusionOpAssembler, PROCESSOR_NAME_FUSION_OP, profPath);}},
+    {PROCESSOR_TASK_TIME_SUMMARY, [](const std::string& profPath, std::shared_ptr<SummaryAssembler>& assembler) {
+        MAKE_SHARED0_NO_OPERATION(assembler, TaskTimeAssembler, PROCESSOR_TASK_TIME_SUMMARY, profPath);}},
+    {PROCESSOR_NAME_STEP_TRACE, [](const std::string& profPath, std::shared_ptr<SummaryAssembler>& assembler) {
+        MAKE_SHARED0_NO_OPERATION(assembler, SummaryStepTraceAssembler, PROCESSOR_NAME_STEP_TRACE, profPath);}},
 };
 
 std::shared_ptr<SummaryAssembler> SummaryFactory::GetAssemblerByName(const std::string& processName,

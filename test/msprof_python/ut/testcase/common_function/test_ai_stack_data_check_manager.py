@@ -59,6 +59,12 @@ class TestAiStackDataCheckManager(unittest.TestCase):
             result_api_statistic = AiStackDataCheckManager.contain_api_statistic_data('/path/to/result_dir/host',
                                                                         device_id=NumberConstant.HOST_ID)
             self.assertFalse(result_api_statistic)
-            result_fusion_op = AiStackDataCheckManager.contain_fusion_op_data('/path/to/result_dir/host',
-                                                                           device_id=NumberConstant.HOST_ID)
+            result_fusion_op = AiStackDataCheckManager.contain_step_trace_summary_data('/path/to/result_dir/host',
+                                                                                       device_id=NumberConstant.HOST_ID)
             self.assertFalse(result_fusion_op)
+            result_step_trace = AiStackDataCheckManager.contain_training_trace_data_or_step(
+                '/path/to/result_dir/host', device_id=NumberConstant.HOST_ID)
+            self.assertFalse(result_step_trace)
+            result_task_time = AiStackDataCheckManager.contain_task_time_task('/path/to/result_dir/host',
+                                                                              device_id=NumberConstant.HOST_ID)
+            self.assertFalse(result_task_time)
