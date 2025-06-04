@@ -16,6 +16,9 @@ class TraceViewManager:
     """
     Trace view Manager object
     """
+    PID_OFFSET = 10
+    INDEX_OFFSET = 5
+    HOST_ID_FOR_PID = 31
 
     @staticmethod
     def column_graph_trace(trace_header: list, trace_data: list) -> list:
@@ -101,7 +104,8 @@ class TraceViewManager:
                 connect_dict = {
                     'name': 'acl_to_npu', 'ph': 's', 'cat': StrConstant.ASYNC_ACL_NPU,
                     'id': TraceViewManager.get_line_format_pid(data_list[0].get('stream_id'),
-                                data_list[0].get('task_id'), data_list[0].get('batch_id')),
+                                                               data_list[0].get('task_id'),
+                                                               data_list[0].get('batch_id')),
                     'pid': data_dict.get('pid'), 'tid': data_dict.get('tid'), 'ts': start_time
                 }
                 connect_list.append(connect_dict)
@@ -145,10 +149,20 @@ class TraceViewManager:
         else:
             # host device_id is 31, we cannot use NumberConstant.HOST_ID,
             # cause this value is alse been used in record time.
-            device_id = 31
-        format_pid = (pid << 10) | (index_id << 5) | device_id
+            device_id = TraceViewManager.HOST_ID_FOR_PID
+        format_pid = (pid << TraceViewManager.PID_OFFSET) | (index_id << TraceViewManager.INDEX_OFFSET) | device_id
         return format_pid
-    
+
+    @staticmethod
+    def get_device_id_from_format_pid(pid: int) -> int:
+        """
+        get device_id
+        :param pid: int
+        :return: device_id
+        反向从pid中获取对应的device_id
+        """
+        return pid & ((1 << TraceViewManager.INDEX_OFFSET) - 1)
+
     @staticmethod
     def get_line_format_pid(stream_id: int, task_id: int, batch_id: int) -> int:
         """

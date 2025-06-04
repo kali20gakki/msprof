@@ -173,7 +173,7 @@ void StepTraceAssembler::GenerateMetaData(std::unordered_map<uint16_t, uint32_t>
         res_.push_back(processName);
         std::shared_ptr<MetaDataLabelEvent> processLabel;
         MAKE_SHARED_RETURN_VOID(processLabel, MetaDataLabelEvent, it.second, DEFAULT_TID, META_DATA_PROCESS_LABEL,
-                                layer.label);
+                                GetLayerInfoLabelWithDeviceId(layer.label, it.second));
         res_.push_back(processLabel);
         std::shared_ptr<MetaDataIndexEvent> processIndex;
         MAKE_SHARED_RETURN_VOID(processIndex, MetaDataIndexEvent, it.second, DEFAULT_TID, META_DATA_PROCESS_INDEX,

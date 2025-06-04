@@ -235,9 +235,10 @@ TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
                             "dur\":0.0,\"ph\":\"X\",\"args\":{\"Physic Stream Id\":1,\"Task Id\":15}},{\"name\":\""
                             "process_name\",\"pid\":10328480,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\""
                             "Ascend Hardware\"}},{\"name\":\"process_labels\",\"pid\":10328480,\"tid\":0,\"ph\":\"M\","
-                            "\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":10328480,\"tid\":"
-                            "0,\"ph\":\"M\",\"args\":{\"sort_index\":13}},{\"name\":\"thread_name\",\"pid\":10328480,"
-                            "\"tid\":1,\"ph\":\"M\",\"args\":{\"name\":\"Stream 1\"}},{\"name\":\"thread_sort_index\","
+                            "\"args\":{\"labels\":\"NPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":10328480,"
+                            "\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":13}},{\"name\":\"thread_name\","
+                            "\"pid\":10328480,\"tid\":1,\"ph\":\"M\",\"args\":{\"name\":\"Stream 1\"}},"
+                            "{\"name\":\"thread_sort_index\","
                             "\"pid\":10328480,\"tid\":1,\"ph\":\"M\",\"args\":{\"sort_index\":1}},";
     EXPECT_EQ(expectStr, res.back());
 }
@@ -313,7 +314,7 @@ TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleWithoutApi)
                             "WaitExecute\",\"pid\":10328480,\"tid\":1,\"ts\":\"1717575960208020.758\",\"dur\":0.0,"
                             "\"ph\":\"X\",\"args\":{\"Physic Stream Id\":1,\"Task Id\":15}},{\"name\":\"process_name\""
                             ",\"pid\":10328480,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Ascend Hardware\"}},{\"name"
-                            "\":\"process_labels\",\"pid\":10328480,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU"
+                            "\":\"process_labels\",\"pid\":10328480,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 0"
                             "\"}},{\"name\":\"process_sort_index\",\"pid\":10328480,\"tid\":0,\"ph\":\"M\",\"args\":{"
                             "\"sort_index\":13}},{\"name\":\"thread_name\",\"pid\":10328480,\"tid\":1,\"ph\":\"M\",\""
                             "args\":{\"name\":\"Stream 1\"}},{\"name\":\"thread_sort_index\",\"pid\":10328480,\"tid\":"
@@ -395,7 +396,7 @@ TEST_F(AscendHardwareAssemblerUTest, ShouldReturnTrueWhenDataAssembleWithLogicSt
                          "\"args\":{\"Physic Stream Id\":1,\"Task Id\":15}},{\"name\":\"process_name\","
                          "\"pid\":10328480,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":\"Ascend Hardware\"}},"
                          "{\"name\":\"process_labels\",\"pid\":10328480,\"tid\":0,\"ph\":\"M\","
-                         "\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":10328480,\"tid\":0,"
+                         "\"args\":{\"labels\":\"NPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":10328480,\"tid\":0,"
                          "\"ph\":\"M\",\"args\":{\"sort_index\":13}},{\"name\":\"thread_name\",\"pid\":10328480,"
                          "\"tid\":1337,\"ph\":\"M\",\"args\":{\"name\":\"Stream 1337\"}},"
                          "{\"name\":\"thread_sort_index\",\"pid\":10328480,\"tid\":1337,\"ph\":\"M\","

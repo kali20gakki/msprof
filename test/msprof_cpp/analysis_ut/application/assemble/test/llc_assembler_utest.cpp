@@ -99,7 +99,7 @@ TEST_F(LLcAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
     std::string expectStr = "{\"name\":\"process_name\",\"pid\":2383960896,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":"
                             "\"LLC\"}},{\"name\":\"process_labels\",\"pid\":2383960896,\"tid\":0,\"ph\":\"M\",\"args\""
-                            ":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960896,\"tid\":0,"
+                            ":{\"labels\":\"NPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":2383960896,\"tid\":0,"
                             "\"ph\":\"M\",\"args\":{\"sort_index\":26}},{\"name\":\"LLC 0 Read/Hit Rate\",\"pid\":"
                             "2383960896,\"tid\":0,\"ts\":\"1724405892226599.429\",\"ph\":\"C\",\"args\":{"
                             "\"Hit Rate(%)\":0.506}},{\"name\":\"LLC 0 Read/Throughput\",\"pid\":2383960896,\"tid\":"

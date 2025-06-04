@@ -173,10 +173,11 @@ int32_t MsprofSetDeviceCallbackImpl(VOID_PTR data, uint32_t len)
         return MSPROF_ERROR;
     }
     ProfSetDevPara *setCfg = (struct ProfSetDevPara *)data;
-    MSPROF_EVENT("MsprofSetDeviceCallback called, is open: %d", setCfg->isOpen);
-    if (!Msprofiler::Api::ProfAclMgr::instance()->IsCmdMode()) {
-        MSPROF_LOGI("MsprofSetDeviceCallbackImpl, not on cmd mode");
-        return MSPROF_ERROR;
+    MSPROF_EVENT("MsprofSetDeviceCallback called, is open:%d, devId:%u", setCfg->isOpen, setCfg->deviceId);
+    if (!Msprofiler::Api::ProfAclMgr::instance()->IsCmdMode() &&
+        !Msprofiler::Api::ProfAclMgr::instance()->IsApiCtrlMode()) {
+        MSPROF_LOGI("MsprofSetDeviceCallbackImpl, not on cmd mode or api ctrl mode");
+        return MSPROF_ERROR_NONE;
     }
     std::string info;
     if (!(ProfManager::instance()->CheckIfDevicesOnline(std::to_string(setCfg->deviceId), info))) {
@@ -196,7 +197,7 @@ int32_t MsprofSetDeviceCallbackImpl(VOID_PTR data, uint32_t len)
 
         ret = ge::GeOpenDeviceHandle(setCfg->deviceId);
         if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("MsprofSetDeviceCallbackImpl, GeOpenDeviceHandle failed");
+            MSPROF_LOGE("MsprofSetDeviceCallbackImpl, GeOpenDeviceHandle failed, devId:%u", setCfg->deviceId);
             MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceCallbackImpl, GeOpenDeviceHandle failed");
             return MSPROF_ERROR;
         }

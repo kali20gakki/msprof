@@ -39,6 +39,7 @@ using namespace Analysis::Dvvp::Common::Config;
 
 static std::mutex g_aclprofMutex;
 static uint64_t g_indexId = 1;
+static bool g_regSetDeviceCallback = false;
 
 static aclError aclprofInitPreCheck()
 {
@@ -460,12 +461,16 @@ aclError aclprofStop(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
         MSPROF_LOGE("[aclprofStop]get dataTypeConfig from params fail.");
         return ACL_ERROR_PROFILING_FAILURE;
     }
-    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(
-        profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig);
+    std::vector<uint32_t> devIds;
+    Msprofiler::Api::ProfAclMgr::instance()->GetRunningDevices(devIds);
+    uint32_t devIdList[devIds.size()] = {0};
+    std::copy(devIds.begin(), devIds.end(), devIdList);
+    MSPROF_LOGI("[aclprofStop]get running device task success, devTask size: %zu", devIds.size());
+    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(devIdList, devIds.size(), dataTypeConfig);
     RETURN_IF_NOT_SUCCESS(ret);
 
-    for (uint32_t i = 0; i < profilerConfig->config.devNums; i++) {
-        Msprof::Engine::FlushAllModule(std::to_string(profilerConfig->config.devIdList[i]));
+    for (size_t i = 0; i < devIds.size(); i++) {
+        Msprof::Engine::FlushAllModule(std::to_string(devIds[i]));
     }
     ret = ProfAclMgr::instance()->ProfAclStop(&profilerConfig->config);
     if (ret != ACL_SUCCESS) {
@@ -474,6 +479,30 @@ aclError aclprofStop(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     }
 
     MSPROF_LOGI("Acl has been allocated stop config, successfully execute aclprofStopProfiling");
+    return ACL_SUCCESS;
+}
+
+aclError aclprofRegisterDeviceCallback()
+{
+    std::lock_guard<std::mutex> lock(g_aclprofMutex);
+    if (g_regSetDeviceCallback) {
+        MSPROF_LOGI("The callback function has already been registered.");
+        return ACL_SUCCESS;
+    }
+    if (Platform::instance()->PlatformIsHelperHostSide()) {
+        MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+                         std::vector<std::string>({"aclprofRegisterDeviceCallback", "SocCloud"}));
+        return ACL_ERROR_FEATURE_UNSUPPORTED;
+    }
+    MSPROF_LOGI("Start to execute aclprofRegisterDeviceCallback");
+
+    if (ProfApiPlugin::instance()->MsprofProfRegDeviceStateCallback(
+        Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to register device state callback");
+        return ACL_ERROR_PROFILING_FAILURE;
+    }
+    g_regSetDeviceCallback = true;
     return ACL_SUCCESS;
 }
 

@@ -143,7 +143,7 @@ TEST_F(AccPmuAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
                             "write_ost\",\"pid\":2383960640,\"tid\":0,\"ts\":\"1724405892226699.429\",\"ph\":\"C\","
                             "\"args\":{\"value\":0,\"acc_id\":1}},{\"name\":\"process_name\",\"pid\":2383960640,\"tid"
                             "\":0,\"ph\":\"M\",\"args\":{\"name\":\"Acc PMU\"}},{\"name\":\"process_labels\",\"pid\":"
-                            "2383960640,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},{\"name\":\""
+                            "2383960640,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 0\"}},{\"name\":\""
                             "process_sort_index\",\"pid\":2383960640,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":"
                             "18}},";
     EXPECT_EQ(expectStr, res.back());

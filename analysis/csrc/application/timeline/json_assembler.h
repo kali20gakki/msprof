@@ -30,7 +30,6 @@ public:
     JsonAssembler(const std::string &name, std::unordered_map<std::string, FileCategory> &&files);
     virtual ~JsonAssembler() = default;
     bool Run(DataInventory &dataInventory, const std::string &profPath);
-    static uint32_t GetFormatPid(uint32_t pid, uint32_t index, uint32_t deviceId = HOST_PID);
 protected:
     uint32_t GetDevicePid(std::unordered_map<uint16_t, uint32_t> &pidMap, uint16_t deviceId,
                           const std::string &profPath, uint32_t index);
@@ -39,6 +38,9 @@ protected:
     void GenerateTaskMetaData(const std::unordered_map<uint16_t, uint32_t> &pidMap, const struct LayerInfo &layer,
                               std::vector<std::shared_ptr<TraceEvent>> &res,
                               std::set<std::pair<uint32_t, int>> &pidTidSet);
+    static uint32_t GetFormatPid(uint32_t pid, uint32_t index, uint32_t deviceId = HOST_PID);
+    static uint32_t GetDeviceIdFromPid(uint32_t pid);
+    static std::string GetLayerInfoLabelWithDeviceId(const std::string &label, uint32_t pid);
 protected:
     std::string processorName_;
     std::unordered_map<std::string, FileCategory> fileMap_;

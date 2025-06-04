@@ -91,7 +91,8 @@ void MsprofTxAssembler::GenerateHMetaDataEvent(const LayerInfo &layer, uint32_t 
     MAKE_SHARED_RETURN_VOID(processName, MetaDataNameEvent, pid, DEFAULT_TID, META_DATA_PROCESS_NAME, layer.component);
     res_.push_back(processName);
     std::shared_ptr<MetaDataLabelEvent> processLabel;
-    MAKE_SHARED_RETURN_VOID(processLabel, MetaDataLabelEvent, pid, DEFAULT_TID, META_DATA_PROCESS_LABEL, layer.label);
+    MAKE_SHARED_RETURN_VOID(processLabel, MetaDataLabelEvent, pid, DEFAULT_TID, META_DATA_PROCESS_LABEL,
+                            GetLayerInfoLabelWithDeviceId(layer.label, pid));
     res_.push_back(processLabel);
     std::shared_ptr<MetaDataIndexEvent> proIndex;
     MAKE_SHARED_RETURN_VOID(proIndex, MetaDataIndexEvent, pid, DEFAULT_TID, META_DATA_PROCESS_INDEX, layer.sortIndex);

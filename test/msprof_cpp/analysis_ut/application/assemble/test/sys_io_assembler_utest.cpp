@@ -139,7 +139,7 @@ TEST_F(SysIOAssemblerUTest, NicAssemblerShouldReturnTrueWhenDataAssembleSuccess)
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
     std::string expectStr = "{\"name\":\"process_name\",\"pid\":2383960704,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":"
                             "\"NIC\"}},{\"name\":\"process_labels\",\"pid\":2383960704,\"tid\":0,\"ph\":\"M\",\"args"
-                            "\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960704,\"tid\":0,"
+                            "\":{\"labels\":\"NPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":2383960704,\"tid\":0,"
                             "\"ph\":\"M\",\"args\":{\"sort_index\":20}},{\"name\":\"Port 0/Rx\",\"pid\":2383960704,"
                             "\"tid\":0,\"ts\":\"1724405892226599.429\",\"ph\":\"C\",\"args\":{\"Rx Bandwidth "
                             "Efficiency\":0.5,\"Rx Packets\":60.0,\"Rx Error Rate\":1.2,\"Rx Dropped Rate\":5.6}},{"
@@ -182,7 +182,7 @@ TEST_F(SysIOAssemblerUTest, RoCEAssemblerShouldReturnTrueWhenDataAssembleSuccess
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
     std::string expectStr = "{\"name\":\"process_name\",\"pid\":2383960736,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":"
                             "\"RoCE\"}},{\"name\":\"process_labels\",\"pid\":2383960736,\"tid\":0,\"ph\":\"M\",\"args"
-                            "\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960736,\"tid\":0,"
+                            "\":{\"labels\":\"NPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":2383960736,\"tid\":0,"
                             "\"ph\":\"M\",\"args\":{\"sort_index\":21}},{\"name\":\"Port 0/Rx\",\"pid\":2383960736,"
                             "\"tid\":0,\"ts\":\"1724405892226599.429\",\"ph\":\"C\",\"args\":{\"Rx Bandwidth "
                             "Efficiency\":0.5,\"Rx Packets\":60.0,\"Rx Error Rate\":1.2,\"Rx Dropped Rate\":5.6}},"

@@ -45,7 +45,7 @@ std::string expectStr = "{\"name\":\"Iteration 1\",\"pid\":10248608,\"tid\":7001
                         "Data_aug Bound 10248608_70013\",\"ts\":\"833650265.121\",\"args\":{\"Data_aug Bound(us)\":"
                         "7134923.284}},{\"name\":\"process_name\",\"pid\":10248608,\"tid\":0,\"ph\":\"M\",\"args\":{\""
                         "name\":\"Ascend Hardware\"}},{\"name\":\"process_labels\",\"pid\":10248608,\"tid\":0,\"ph\":"
-                        "\"M\",\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":10248608,\"tid"
+                        "\"M\",\"args\":{\"labels\":\"NPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":10248608,\"tid"
                         "\":0,\"ph\":\"M\",\"args\":{\"sort_index\":13}},{\"name\":\"thread_name\",\"pid\":10248608,\""
                         "tid\":70013,\"ph\":\"M\",\"args\":{\"name\":\"Step Trace(Model ID:13)\"}},{\"name\":\""
                         "thread_sort_index\",\"pid\":10248608,\"tid\":70013,\"ph\":\"M\",\"args\":{\"sort_index\":"

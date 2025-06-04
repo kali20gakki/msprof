@@ -209,24 +209,23 @@ void ProfAclMgr::SetModeToOff()
 
 bool ProfAclMgr::IsCmdMode()
 {
-    if (mode_ == WORK_MODE_CMD) {
-        return true;
-    }
-    return false;
+    return mode_ == WORK_MODE_CMD;
 }
 
 bool ProfAclMgr::IsModeOff()
 {
-    if (mode_ == WORK_MODE_OFF) {
-        return true;
-    }
-    return false;
+    return mode_ == WORK_MODE_OFF;
 }
 
 // ge and runtime will not report cached data
 bool ProfAclMgr::IsSubscribeMode() const
 {
     return mode_ == WORK_MODE_SUBSCRIBE;
+}
+
+bool ProfAclMgr::IsApiCtrlMode() const
+{
+    return mode_ == WORK_MODE_API_CTRL;
 }
 
 /**
@@ -462,7 +461,7 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
     }
     PlatformAdapter::instance()->Uninit();
     // stop devices
-    int ret = CancelHostAndDevTasks(profStopCfg->devNums, profStopCfg->devIdList);
+    int ret = CancelHostAndDevTasks();
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("[ProfAclStop]Cancle host and device tasks failed.");
         return ret;
@@ -474,28 +473,37 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
     return ACL_SUCCESS;
 }
 
-int ProfAclMgr::CancelHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR devIdList)
+int ProfAclMgr::CancelHostAndDevTasks()
 {
     HashData::instance()->SaveHashData();
     int ret = ACL_SUCCESS;
+    uint32_t devNums = devTasks_.size();
+    uint32_t cnt = 0;
+    uint32_t devIdList[devNums] = {0};
+    for (const auto& iter : devTasks_) {
+        devIdList[cnt++] = iter.first;
+    }
     for (uint32_t i = 0; i < devNums; i++) {
         uint32_t devId = devIdList[i];
         MSPROF_LOGI("Processing ProfAclStop of device %u", devId);
         auto iter = devTasks_.find(devId);
-        if (iter != devTasks_.end()) {
+        if (iter == devTasks_.end()) {
+            continue;
+        }
+        if (!iter->second.params->is_cancel) {
             iter->second.params->is_cancel = true;
             if (ProfManager::instance()->IdeCloudProfileProcess(iter->second.params) != PROFILING_SUCCESS) {
                 MSPROF_LOGE("Failed to stop profiling on device %u", devId);
                 MSPROF_INNER_ERROR("EK9999", "Failed to stop profiling on device %u", devId);
                 ret = ACL_ERROR_PROFILING_FAILURE;
             }
-            if (devId == DEFAULT_HOST_ID && iter->second.count > 1) {
-                MSPROF_LOGI("The host process still needs to use.");
-                iter->second.count--;
-                continue;
-            }
-            devTasks_.erase(iter);
         }
+        if (devId == DEFAULT_HOST_ID && iter->second.count > 1) {
+            MSPROF_LOGI("The host process still needs to use.");
+            iter->second.count--;
+            continue;
+        }
+        devTasks_.erase(iter);
     }
     return ret;
 }
@@ -1582,10 +1590,10 @@ int32_t ProfAclMgr::MsprofSetDeviceImpl(uint32_t devId)
             MSPROF_LOGI("MsprofSetDeviceImpl, the host process is already in use.");
             return PROFILING_SUCCESS;
         }
-        MSPROF_LOGI("MsprofSetDeviceImpl, device:%u is running", devId);
-        return PROFILING_FAILED;
+        MSPROF_LOGI("MsprofSetDeviceImpl, devId:%u task is running", devId);
+        return PROFILING_SUCCESS;
     }
-    MSPROF_LOGI("MsprofSetDeviceImpl, Process ProfStart of device:%u", devId);
+    MSPROF_LOGI("MsprofSetDeviceImpl, Process ProfStart of devId:%u", devId);
     int ret = StartDeviceTask(devId, params_);
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("MsprofSetDeviceImpl, StartDeviceTask failed, devId:%u, mode:%d", devId, mode_);

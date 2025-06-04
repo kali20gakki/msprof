@@ -110,7 +110,7 @@ TEST_F(DeviceTxAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
                             "pid\":416,\"tid\":1,\"ph\":\"f\",\"cat\":\"MsTx\",\"id\":\"7890\",\"ts\":\""
                             "18446744073709551.615\",\"bp\":\"e\"},{\"name\":\"process_name\",\"pid\":416,\"tid\":0"
                             ",\"ph\":\"M\",\"args\":{\"name\":\"Ascend Hardware\"}},{\"name\":\"process_labels\",\"pid"
-                            "\":416,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU\"}},{\"name\":\""
+                            "\":416,\"tid\":0,\"ph\":\"M\",\"args\":{\"labels\":\"NPU 0\"}},{\"name\":\""
                             "process_sort_index\",\"pid\":416,\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":13}},{\""
                             "name\":\"thread_name\",\"pid\":416,\"tid\":1,\"ph\":\"M\",\"args\":{\"name\":\"Stream 1\""
                             "}},{\"name\":\"thread_sort_index\",\"pid\":416,\"tid\":1,\"ph\":\"M\",\"args\":{\""

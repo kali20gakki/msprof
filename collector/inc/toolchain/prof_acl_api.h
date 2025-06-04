@@ -210,6 +210,17 @@ MSVP_PROF_API int aclprofGetSupportedFeatures(size_t* featuresSize, void** featu
 */
 MSVP_PROF_API int aclprofGetSupportedFeaturesV2(size_t* featuresSize, void** featuresData);
 
+/**
+ * @ingroup AscendCL
+ * @brief profiling respond setDevice function
+ *
+ * @retval ACL_SUCCESS The function is successfully executed.
+ * @retval OtherValues Failure
+ *
+ * @see aclprofRegisterDeviceCallback
+ */
+MSVP_PROF_API aclError aclprofRegisterDeviceCallback();
+
 typedef enum {
     ACL_SUBSCRIBE_OP = 0,
     ACL_SUBSCRIBE_SUBGRAPH = 1,

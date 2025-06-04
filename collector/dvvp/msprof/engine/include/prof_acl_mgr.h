@@ -80,6 +80,7 @@ public:
     bool IsCmdMode();
     bool IsModeOff();
     bool IsSubscribeMode() const;
+    bool IsApiCtrlMode() const;
     bool IsWarmuped();
 
     // api ctrl
@@ -184,7 +185,7 @@ private:
     int32_t MsprofHelperParamConstruct(const std::string &msprofPath, const std::string &paramsJson);
     void MsprofSetMemberValue();
     int LaunchHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR devIdList);
-    int CancelHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR devIdList);
+    int CancelHostAndDevTasks();
     int StartSubscribeDeviceTask(const uint32_t devId, const uint32_t modelId,
         PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
     int CancleSubscribeDeviceTask(const uint32_t devId, const uint32_t modelId);

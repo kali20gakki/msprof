@@ -101,7 +101,7 @@ TEST_F(DDRAssemblerUTest, ShouldReturnTrueWhenDataAssembleSuccess)
     EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
     std::string expectStr = "{\"name\":\"process_name\",\"pid\":2383960608,\"tid\":0,\"ph\":\"M\",\"args\":{\"name\":"
                             "\"DDR\"}},{\"name\":\"process_labels\",\"pid\":2383960608,\"tid\":0,\"ph\":\"M\","
-                            "\"args\":{\"labels\":\"NPU\"}},{\"name\":\"process_sort_index\",\"pid\":2383960608"
+                            "\"args\":{\"labels\":\"NPU 0\"}},{\"name\":\"process_sort_index\",\"pid\":2383960608"
                             ",\"tid\":0,\"ph\":\"M\",\"args\":{\"sort_index\":17}},{\"name\":\"DDR/Read\",\"pid\":"
                             "2383960608,\"tid\":0,\"ts\":\"1724405892226599.429\",\"ph\":\"C\",\"args\":{\"Read("
                             "MB/s)\":38.56}},{\"name\":\"DDR/Write\",\"pid\":2383960608,\"tid\":0,\"ts\":\""
