@@ -2,8 +2,8 @@ import unittest
 from unittest import mock
 
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
+from common_func.system_data_check_manager import SystemDataCheckManager
 from common_func.ms_constant.number_constant import NumberConstant
-
 
 NAMESPACE = 'common_func.ai_stack_data_check_manager'
 
@@ -57,14 +57,26 @@ class TestAiStackDataCheckManager(unittest.TestCase):
         with mock.patch('common_func.data_check_manager.DataCheckManager.check_export_with_so',
                         return_value=True):
             result_api_statistic = AiStackDataCheckManager.contain_api_statistic_data('/path/to/result_dir/host',
-                                                                        device_id=NumberConstant.HOST_ID)
+                                                                                      device_id=NumberConstant.HOST_ID)
             self.assertFalse(result_api_statistic)
-            result_fusion_op = AiStackDataCheckManager.contain_step_trace_summary_data('/path/to/result_dir/host',
-                                                                                       device_id=NumberConstant.HOST_ID)
+            result_fusion_op = AiStackDataCheckManager.contain_fusion_op_data('/path/to/result_dir/host',
+                                                                              device_id=NumberConstant.HOST_ID)
             self.assertFalse(result_fusion_op)
+            result_npu_mem = SystemDataCheckManager.contain_npu_mem_summary_data('/path/to/result_dir/host',
+                                                                                 device_id=NumberConstant.HOST_ID)
+            self.assertFalse(result_npu_mem)
+            result_npu_module = AiStackDataCheckManager.contain_npu_module_mem_data('/path/to/result_dir/host',
+                                                                                    device_id=NumberConstant.HOST_ID)
+            self.assertFalse(result_npu_module)
             result_step_trace = AiStackDataCheckManager.contain_training_trace_data_or_step(
                 '/path/to/result_dir/host', device_id=NumberConstant.HOST_ID)
             self.assertFalse(result_step_trace)
             result_task_time = AiStackDataCheckManager.contain_task_time_task('/path/to/result_dir/host',
                                                                               device_id=NumberConstant.HOST_ID)
             self.assertFalse(result_task_time)
+            with mock.patch('common_func.ai_stack_data_check_manager.AiStackDataCheckManager._check_output',
+                            return_value=True), mock.patch('common_func.db_manager.DBManager.check_connect_db',
+                                                           return_value=(False, None)):
+                result_op_summary = AiStackDataCheckManager.contain_op_summary_data('/path/to/result_dir/host',
+                                                                                    device_id=NumberConstant.HOST_ID)
+                self.assertFalse(result_op_summary)

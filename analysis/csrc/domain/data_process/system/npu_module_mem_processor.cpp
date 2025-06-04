@@ -24,16 +24,16 @@ NpuModuleMemProcessor::NpuModuleMemProcessor(const std::string& profPath) : Data
 bool NpuModuleMemProcessor::Process(DataInventory& dataInventory)
 {
     LocaltimeContext localtimeContext;
-    SyscntConversionParams params;
-    if (!Context::GetInstance().GetSyscntConversionParams(params, HOST_ID, profPath_)) {
-        ERROR("GetSyscntConversionParams failed, profPath is %.", profPath_);
-        return false;
-    }
     bool flag = true;
     auto deviceList = File::GetFilesWithPrefix(profPath_, DEVICE_PREFIX);
     std::vector<NpuModuleMemData> allProcessedData;
     for (const auto& devicePath : deviceList) {
         localtimeContext.deviceId = GetDeviceIdByDevicePath(devicePath);
+        SyscntConversionParams params;
+        if (!Context::GetInstance().GetSyscntConversionParams(params, localtimeContext.deviceId, profPath_)) {
+            ERROR("GetSyscntConversionParams failed, profPath is %.", profPath_);
+            return false;
+        }
         flag = ProcessSingleDevice(devicePath, localtimeContext, allProcessedData, params) && flag;
     }
     if (!SaveToDataInventory<NpuModuleMemData>(std::move(allProcessedData), dataInventory,
@@ -106,9 +106,8 @@ std::vector<NpuModuleMemData> NpuModuleMemProcessor::FormatData(const OriNpuModu
     data.deviceId = localtimeContext.deviceId;
     for (auto& row : oriData) {
         double syscnt = 0.0;
-        std::string deviceType;
-        std::tie(data.moduleId, syscnt, data.totalReserved, deviceType) = row;
-        HPFloat timestamp{GetTimeFromSyscnt(static_cast<uint64_t>(syscnt), params)};
+        std::tie(data.moduleId, syscnt, data.totalReserved, data.deviceType) = row;
+        HPFloat timestamp{GetTimeFromHostCnt(static_cast<uint64_t>(syscnt), params)};
         data.timestamp = GetLocalTime(timestamp, localtimeContext.timeRecord).Uint64();
         processedData.push_back(data);
     }

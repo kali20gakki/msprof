@@ -183,7 +183,7 @@ class ExportCommand:
             {'export_type': ExportDataType.TS_CPU_PMU_EVENTS,
              'handler': SystemDataCheckManager.contain_ts_cpu_data},
             {'export_type': ExportDataType.NPU_MEM,
-             'handler': SystemDataCheckManager.contain_npu_mem_data},
+             'handler': SystemDataCheckManager.contain_npu_mem_summary_data},
             {'export_type': ExportDataType.FUSION_OP,
              'handler': AiStackDataCheckManager.contain_fusion_op_data},
             {'export_type': ExportDataType.AI_CORE_UTILIZATION,

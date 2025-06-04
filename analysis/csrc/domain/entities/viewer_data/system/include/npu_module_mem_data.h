@@ -21,6 +21,7 @@ struct NpuModuleMemData : public BasicData {
     uint16_t deviceId = UINT16_MAX;
     uint32_t moduleId = UINT32_MAX;
     uint64_t totalReserved = UINT64_MAX;
+    std::string deviceType;
 };
 }
 }
