@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <map>
 #include "analysis/csrc/infrastructure/data_inventory/include/data_inventory.h"
+#include "analysis/csrc/infrastructure/dump_tools/csv_tool/include/csv_writer.h"
 #include "analysis/csrc/application/summary/summary_constant.h"
 #include "analysis/csrc/infrastructure/dump_tools/csv_tool/include/csv_writer.h"
 
@@ -52,7 +53,7 @@ protected:
      * write to csv file
      * @param name file name
      */
-    virtual void WriteToFile(const std::string &filePath,  const std::set<int>& maskCols) const
+    virtual void WriteToFile(const std::string &filePath,  const std::set<int>& maskCols)
     {
         CsvWriter csvWriter = CsvWriter();
         csvWriter.WriteCsv(filePath, headers_, res_, maskCols);

@@ -12,8 +12,6 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import path_check
 from common_func.path_manager import PathManager
-from common_func.platform.chip_manager import ChipManager
-from common_func.profiling_scene import ProfilingScene
 
 
 class AiStackDataCheckManager(DataCheckManager):
@@ -132,7 +130,7 @@ class AiStackDataCheckManager(DataCheckManager):
         if not AiStackDataCheckManager._check_output(result_dir, device_id) or \
                 not DBManager.check_connect_db(result_dir, DBNameConstant.DB_AICORE_OP_SUMMARY)[0]:
             return False
-        if ProfilingScene().is_cpp_parse_enable() and ProfilingScene().is_all_export() and ChipManager().is_chip_v4():
+        if cls.check_export_with_so():
             return False
         return True
 
@@ -329,6 +327,8 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain npu module mem data or not
         """
+        if cls.check_export_with_so():
+            return False
         return AiStackDataCheckManager._check_output(result_dir, device_id) and \
             DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_NPU_MODULE_MEM),
                                          DBNameConstant.TABLE_NPU_MODULE_MEM)

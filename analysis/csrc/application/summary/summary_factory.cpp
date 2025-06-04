@@ -12,6 +12,8 @@
 
 #include "analysis/csrc/application/summary/summary_factory.h"
 #include "analysis/csrc/application/summary/op_summary_assembler.h"
+#include "analysis/csrc/application/summary/npu_memory_assembler.h"
+#include "analysis/csrc/application/summary/npu_module_mem_assembler.h"
 #include "analysis/csrc/application/summary/api_statistic_assembler.h"
 #include "analysis/csrc/application/summary/fusion_op_assembler.h"
 #include "analysis/csrc/application/summary/task_time_assembler.h"
@@ -24,6 +26,11 @@ using namespace Utils;
 std::unordered_map<std::string, AssemblerCreator> SummaryFactory::assemblerTable_{
     {PROCESSOR_OP_SUMMARY,          [](const std::string& profPath, std::shared_ptr<SummaryAssembler>& assembler) {
         MAKE_SHARED0_NO_OPERATION(assembler, OpSummaryAssembler, PROCESSOR_OP_SUMMARY, profPath);}},
+    {PROCESSOR_NAME_NPU_MEM,          [](const std::string& profPath, std::shared_ptr<SummaryAssembler>& assembler) {
+        MAKE_SHARED0_NO_OPERATION(assembler, NpuMemoryAssembler, PROCESSOR_NAME_NPU_MEM, profPath);}},
+    {PROCESSOR_NAME_NPU_MODULE_MEM,
+        [](const std::string& profPath, std::shared_ptr<SummaryAssembler>& assembler) {
+            MAKE_SHARED0_NO_OPERATION(assembler, NpuModuleMemAssembler, PROCESSOR_NAME_NPU_MODULE_MEM, profPath);}},
     {PROCESSOR_NAME_API,          [](const std::string& profPath, std::shared_ptr<SummaryAssembler>& assembler) {
         MAKE_SHARED0_NO_OPERATION(assembler, ApiStatisticAssembler, PROCESSOR_NAME_API, profPath);}},
     {PROCESSOR_NAME_FUSION_OP,          [](const std::string& profPath, std::shared_ptr<SummaryAssembler>& assembler) {

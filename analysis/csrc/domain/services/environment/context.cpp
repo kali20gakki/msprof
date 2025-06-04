@@ -369,10 +369,16 @@ bool Context::GetSyscntConversionParams(Utils::SyscntConversionParams &params,
         ERROR("Freq is 0, can't be used to calculate, input path %, deviceId %", profPath, deviceId);
         return false;
     }
+    params.hostFreq = hostFreq;
     // host取host的cnt， device取device的cnt
     std::string cntName = (deviceId == HOST_ID) ? "hostCntvct" : "devCntvct";
     if (StrToU64(params.sysCnt, info.value(cntName, "0")) != ANALYSIS_OK) {
         ERROR("SysCnt to uint64_t failed, input path %, deviceId %", profPath, deviceId);
+        return false;
+    }
+    // hostCnt fetch from the host_start_log file
+    if (StrToU64(params.hostCnt, info.value("hostCntvct", "0")) != ANALYSIS_OK) {
+        ERROR("hostCnt to uint64_t failed, input path %, deviceId %", profPath, deviceId);
         return false;
     }
     // hostMonotonic 来自 host_start_log 的 clock_monotonic_raw
