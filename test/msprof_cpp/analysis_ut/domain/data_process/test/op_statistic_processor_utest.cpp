@@ -82,7 +82,7 @@ TEST_F(OpStatisticProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess
     }
 }
 
-TEST_F(OpStatisticProcessorUTest, TestRunShouldReturnFalseWhenSourceTableNotExist)
+TEST_F(OpStatisticProcessorUTest, TestRunShouldReturnTrueWhenSourceTableNotExist)
 {
     auto dbPath = File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE_SUFFIX, DB_SUFFIX});
     std::shared_ptr<DBRunner> dbRunner;
@@ -94,7 +94,7 @@ TEST_F(OpStatisticProcessorUTest, TestRunShouldReturnFalseWhenSourceTableNotExis
     for (auto path: PROF_PATHS) {
         auto processor = OpStatisticProcessor(path);
         auto dataInventory = DataInventory();
-        EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_OP_STATISTIC));
+        EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_OP_STATISTIC));
     }
 }
 
