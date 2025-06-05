@@ -81,7 +81,7 @@ TEST_F(HcclStatisticProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSucce
     }
 }
 
-TEST_F(HcclStatisticProcessorUTest, TestRunShouldReturnFalseWhenSourceTableNotExist)
+TEST_F(HcclStatisticProcessorUTest, TestRunShouldReturnTrueWhenSourceTableNotExist)
 {
     auto dbPath = File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE_SUFFIX, DB_SUFFIX});
     std::shared_ptr<DBRunner> dbRunner;
@@ -93,7 +93,7 @@ TEST_F(HcclStatisticProcessorUTest, TestRunShouldReturnFalseWhenSourceTableNotEx
     for (auto path: PROF_PATHS) {
         auto processor = HcclStatisticProcessor(path);
         auto dataInventory = DataInventory();
-        EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
+        EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
     }
 }
 

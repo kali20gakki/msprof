@@ -69,7 +69,7 @@ bool HcclStatisticProcessor::Process(Analysis::Infra::DataInventory& dataInvento
             flag = false;
             continue;
         }
-        auto status = CheckPathAndTable(dbPath, hcclStatisticsDB);
+        auto status = CheckPathAndTable(dbPath, hcclStatisticsDB, false);
         if (status != CHECK_SUCCESS) {
             if (status == CHECK_FAILED) {
                 flag = false;

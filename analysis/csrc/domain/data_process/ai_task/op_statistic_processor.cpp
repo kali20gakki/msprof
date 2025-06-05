@@ -74,7 +74,7 @@ bool OpStatisticProcessor::Process(Analysis::Infra::DataInventory& dataInventory
             flag = false;
             continue;
         }
-        auto status = CheckPathAndTable(dbPath, opCounterDB);
+        auto status = CheckPathAndTable(dbPath, opCounterDB, false);
         if (status != CHECK_SUCCESS) {
             if (status == CHECK_FAILED) {
                 flag = false;
@@ -83,8 +83,7 @@ bool OpStatisticProcessor::Process(Analysis::Infra::DataInventory& dataInventory
         }
         auto oriData = LoadData(opCounterDB, dbPath);
         if (oriData.empty()) {
-            flag = false;
-            ERROR("Op Statistics original data is empty. DBPath is %", dbPath);
+            WARN("Op Statistics original data has no valid type data. DBPath is %", dbPath);
             continue;
         }
         auto formatData = FormatData(oriData, deviceId);
