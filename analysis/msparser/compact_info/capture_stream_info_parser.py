@@ -108,7 +108,7 @@ class CaptureStreamInfoParser(DataParser, MsMultiProcess):
                 repeated_num += 1
                 continue
 
-            # 0 start; 1 end: 记录无需落盘
+            # 0 start; 1 end: 记录无需落盘,start 和end对不上属于正常情况（prof stop时 capture流还未被销毁）
             if bean_data.capture_status == 0 and bean_data.model_id not in start_model_set:
                 start_model_set.add(bean_data.model_id)
             if bean_data.capture_status == 1 and bean_data.model_id not in end_model_set:
@@ -117,7 +117,7 @@ class CaptureStreamInfoParser(DataParser, MsMultiProcess):
             stream_info_set.add(key)
 
         if start_model_set != end_model_set:
-            logging.error(f"start model ids are {start_model_set}, end model ids are {end_model_set}.")
+            logging.warning(f"start model ids are {start_model_set}, end model ids are {end_model_set}.")
         if repeated_num:
             logging.warning(f"There are {repeated_num} duplicate records in total.")
 
