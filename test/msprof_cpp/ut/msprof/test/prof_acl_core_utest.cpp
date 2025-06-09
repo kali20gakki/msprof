@@ -481,8 +481,10 @@ TEST_F(MSPROF_ACL_CORE_UTEST, GeOpenDeviceHandle)
     MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofSetDeviceImpl)
     .stubs()
     .will(returnValue(PROFILING_FAILED))
+    .then(returnValue(PROFILING_IN_RUNNING))
     .then(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(PROFILING_FAILED, ge::GeOpenDeviceHandle(1));
+    EXPECT_EQ(PROFILING_SUCCESS, ge::GeOpenDeviceHandle(1));
 
     MOCKER_CPP(&analysis::dvvp::common::utils::Utils::IsDynProfMode)
     .stubs()

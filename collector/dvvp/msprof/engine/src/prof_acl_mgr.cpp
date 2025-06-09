@@ -504,6 +504,7 @@ int ProfAclMgr::CancelHostAndDevTasks()
             continue;
         }
         devTasks_.erase(iter);
+        ge::EraseDevRecord(devId);
     }
     return ret;
 }
@@ -1586,12 +1587,8 @@ int32_t ProfAclMgr::MsprofSetDeviceImpl(uint32_t devId)
     MSPROF_EVENT("MsprofSetDeviceImpl, devId:%u", devId);
     auto iterDev = devTasks_.find(devId);
     if (iterDev != devTasks_.end() && !iterDev->second.params->is_cancel) {
-        if (devId == DEFAULT_HOST_ID) {
-            MSPROF_LOGI("MsprofSetDeviceImpl, the host process is already in use.");
-            return PROFILING_SUCCESS;
-        }
         MSPROF_LOGI("MsprofSetDeviceImpl, devId:%u task is running", devId);
-        return PROFILING_SUCCESS;
+        return PROFILING_IN_RUNNING;
     }
     MSPROF_LOGI("MsprofSetDeviceImpl, Process ProfStart of devId:%u", devId);
     int ret = StartDeviceTask(devId, params_);
