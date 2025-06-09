@@ -507,17 +507,21 @@ Status aclgrphProfStop(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
 int32_t GeOpenDeviceHandle(const uint32_t devId)
 {
     if (g_devRecord.Count(devId) > 0) {
-        MSPROF_LOGI("MsprofSetDeviceImpl devId %u is running", devId);
+        MSPROF_LOGI("MsprofSetDeviceImpl devId %u is in devRecord.", devId);
         return PROFILING_SUCCESS;
     }
-    if (ProfAclMgr::instance()->MsprofSetDeviceImpl(devId) != PROFILING_SUCCESS) {
+    int32_t ret = ProfAclMgr::instance()->MsprofSetDeviceImpl(devId);
+    if (ret == PROFILING_IN_RUNNING) {
+        MSPROF_LOGI("MsprofSetDeviceImpl devId %u is running.", devId);
+        return PROFILING_SUCCESS;
+    } else if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("MsprofSetDeviceImpl failed, devId=%d", devId);
         return PROFILING_FAILED;
     }
     ProfAclMgr::instance()->MsprofDumpStartInfoFile(devId);
     if (!Utils::IsDynProfMode()) {
         MSPROF_LOGI("CommandHandleProfStart, Allocate config of profiling initialize");
-        int32_t ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfInit();
+        ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfInit();
         if (ret != SUCCESS) {
             MSPROF_LOGE("MsprofSetDeviceImpl, CommandHandleProfInit failed, devId:%u", devId);
             MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceImpl, CommandHandleProfInit failed, devId:%u", devId);
@@ -527,7 +531,7 @@ int32_t GeOpenDeviceHandle(const uint32_t devId)
     MSPROF_LOGI("CommandHandleProfStart, Allocate start profiling config");
     uint32_t devIdList[1] = {devId};
     uint64_t dataTypeConfig = ProfAclMgr::instance()->GetCmdModeDataTypeConfig();
-    int32_t ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(devIdList, 1, dataTypeConfig | PROF_OP_DETAIL);
+    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(devIdList, 1, dataTypeConfig | PROF_OP_DETAIL);
     if (ret != SUCCESS) {
         MSPROF_LOGE("MsprofSetDeviceImpl, CommandHandleProfStart failed, dataTypeConfig:0x%lx", dataTypeConfig);
         MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceImpl, CommandHandleProfStart failed, dataTypeConfig:0x%lx",
