@@ -47,7 +47,7 @@ uint8_t NpuMemoryAssembler::AssembleData(Analysis::Infra::DataInventory &dataInv
         ERROR("Can't match any task data, failed to generate npu_mem_*.csv");
         return ASSEMBLE_FAILED;
     }
-    WriteToFile(File::PathJoin({profPath_, OUTPUT_PATH, NPU_MEMORY_NAME + "_" + GetTimeStampStr()}),
+    WriteToFile(File::PathJoin({profPath_, OUTPUT_PATH, NPU_MEMORY_NAME}),
                 {});
     return ASSEMBLE_SUCCESS;
 }
