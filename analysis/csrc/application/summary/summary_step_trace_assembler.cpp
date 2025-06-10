@@ -116,7 +116,7 @@ void SummaryStepTraceAssembler::AssembleStepTraceData(const std::vector<TrainTra
                                         DivideByPowersOfTenWithPrecision(trainTraceDatum.fpStart) + DIVIDE_CHAR,
                                         DivideByPowersOfTenWithPrecision(trainTraceDatum.bpEnd) + DIVIDE_CHAR,
                                         DivideByPowersOfTenWithPrecision(trainTraceDatum.iterEnd) + DIVIDE_CHAR,
-                                        DivideByPowersOfTenWithPrecision(trainTraceDatum.iterTime) + DIVIDE_CHAR,
+                                        DivideByPowersOfTenWithPrecision(trainTraceDatum.iterTime),
                                         DivideByPowersOfTenWithPrecision(trainTraceDatum.fpBpTime),
                                         DivideByPowersOfTenWithPrecision(trainTraceDatum.gradRefreshBound),
                                         DivideByPowersOfTenWithPrecision(trainTraceDatum.dataAugBound),
@@ -126,7 +126,7 @@ void SummaryStepTraceAssembler::AssembleStepTraceData(const std::vector<TrainTra
             int count = 0;
             for (auto &allReduceData : it->second) {
                 row.emplace_back(allReduceData.first + DIVIDE_CHAR);
-                row.emplace_back(allReduceData.second + DIVIDE_CHAR);
+                row.emplace_back(allReduceData.second);
                 ++count;
             }
             row.insert(row.end(), allReduceGroupMaxSize_ - count, NA);

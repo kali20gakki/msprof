@@ -78,23 +78,27 @@ void TaskTimeAssembler::AssembleTaskTime(const std::vector<AscendTaskData> &asce
         return;
     }
 
+    const std::string DIVIDE_CHAR = "\t";
     for (auto &ascendTaskDatum : ascendTaskData) {
         TaskTimeKey taskId{static_cast<uint16_t>(ascendTaskDatum.streamId),
                            static_cast<uint16_t>(ascendTaskDatum.batchId),
                            static_cast<uint16_t>(ascendTaskDatum.taskId)};
         auto it = formatedTaskInfo_.find(taskId);
         std::string opName;
+        std::string taskType;
         if (it != formatedTaskInfo_.end()) {
             opName = it->second.first;
+            taskType = it->second.second;
         } else {
             opName = NA;
+            taskType = ascendTaskDatum.taskType;
         }
         auto row = {std::to_string(ascendTaskDatum.deviceId),
-                    opName, ascendTaskDatum.taskType, std::to_string(taskId.streamId),
+                    opName, taskType, std::to_string(taskId.streamId),
                     std::to_string(taskId.taskId),
                     DivideByPowersOfTenWithPrecision(ascendTaskDatum.duration),
-                    DivideByPowersOfTenWithPrecision(ascendTaskDatum.timestamp),
-                    DivideByPowersOfTenWithPrecision(ascendTaskDatum.end)};
+                    DivideByPowersOfTenWithPrecision(ascendTaskDatum.timestamp) + DIVIDE_CHAR,
+                    DivideByPowersOfTenWithPrecision(ascendTaskDatum.end) + DIVIDE_CHAR};
         // The original code contains a task start time filtering logic, of which is done in processor.
         res_.emplace_back(row);
     }
