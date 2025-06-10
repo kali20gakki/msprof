@@ -118,3 +118,34 @@ TEST_F(SummaryStepTraceAssemblerUTest, ShouldReturnTrueWhenStepTraceAssembleSucc
                              "Reduce Duration(us),Reduce Start(us),Reduce Duration(us)"};
     EXPECT_EQ(expectHeader, res[0]);
 }
+
+TEST_F(SummaryStepTraceAssemblerUTest, ShouldReturnTrueWhenExistTraceAndAllReduce)
+{
+    DataInventory dataInventory;
+    std::shared_ptr<std::vector<TrainTraceData>> trainTraceS;
+    std::shared_ptr<std::vector<AllReduceData>> allReduceS;
+    auto trainData = GenerateTrainData();
+    auto reduceData = GenerateReduceData();
+    MAKE_SHARED_NO_OPERATION(trainTraceS, std::vector<TrainTraceData>, trainData);
+    MAKE_SHARED_NO_OPERATION(allReduceS, std::vector<AllReduceData>, reduceData);
+    dataInventory.Inject(trainTraceS);
+    dataInventory.Inject(allReduceS);
+    SummaryStepTraceAssembler assembler(PROCESSOR_NAME_STEP_TRACE, PROF_PATH);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+    auto files = File::GetOriginData(RESULT_PATH, {"step_trace"}, {});
+
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    EXPECT_EQ(2ul, res.size());
+
+    std::string expectHeader{"Device_id,Iteration ID,FP Start(us),BP End(us),Iteration End(us),Iteration Time(us),"
+                             "FP to BP Time(us),Iteration Refresh(us),Data Aug Bound(us),Model ID,Reduce Start(us),"
+                             "Reduce Duration(us),Reduce Start(us),Reduce Duration(us)"};
+    EXPECT_EQ(expectHeader, res[0]);
+
+    std::string expectOneRow = {"0,1,830074691.065\t,830082803.479\t,830082823.198\t,9598.772,8112.414,19.719,"
+                                "7134923.284,13,830082637.434\t,18446744073709521.304,830082804.063\t,6.556"};
+    EXPECT_EQ(expectOneRow, res[1]);
+}

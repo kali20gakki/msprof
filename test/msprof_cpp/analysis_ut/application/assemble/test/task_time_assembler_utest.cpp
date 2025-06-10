@@ -156,3 +156,31 @@ TEST_F(TaskTimeAssemblerUTest, ShouldReturnTrueWhenTaskTimeDataAssembleSuccess)
                              "task_start(us),task_stop(us)"};
     EXPECT_EQ(expectHeader, res[0]);
 }
+
+TEST_F(TaskTimeAssemblerUTest, ShouldReturnTrueWhenExistTaskInfoAndAscendTask)
+{
+    DataInventory dataInventory;
+    std::shared_ptr<std::vector<AscendTaskData>> taskS;
+    std::shared_ptr<std::vector<TaskInfoData>> infoS;
+    auto task = GenerateTaskData();
+    auto info = GenerateTaskInfoData();
+    MAKE_SHARED_NO_OPERATION(taskS, std::vector<AscendTaskData>, task);
+    MAKE_SHARED_NO_OPERATION(infoS, std::vector<TaskInfoData>, info);
+    dataInventory.Inject(taskS);
+    dataInventory.Inject(infoS);
+    TaskTimeAssembler assembler(PROCESSOR_TASK_TIME_SUMMARY, PROF_PATH);
+    EXPECT_TRUE(assembler.Run(dataInventory));
+    auto files = File::GetOriginData(RESULT_PATH, {"task_time"}, {});
+    EXPECT_EQ(1ul, files.size());
+    FileReader reader(files.back());
+    std::vector<std::string> res;
+    EXPECT_EQ(Analysis::ANALYSIS_OK, reader.ReadText(res));
+    EXPECT_EQ(5ul, res.size());
+
+    std::string expectHeader{"Device_id,kernel_name,kernel_type,stream_id,task_id,task_time(us),"
+                             "task_start(us),task_stop(us)"};
+    EXPECT_EQ(expectHeader, res[0]);
+
+    std::string expectOneRow{"0,MatMulV3,,1,10,151.000,1717575960208020.758\t,1717575960208171.758\t"};
+    EXPECT_EQ(expectOneRow, res[1]);
+}
