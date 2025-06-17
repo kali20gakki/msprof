@@ -1,14 +1,15 @@
 /**
-* @file utils_utest.cpp
-*
-* Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
-*
-*/
+ * @file utils_utest.cpp
+ *
+ * Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
+ *
+ */
 #include <fstream>
 #include <sys/syscall.h>
 #include <linux/limits.h>
-
 #include "gtest/gtest.h"
+#include "securec.h"
+#include "mockcpp/mockcpp.hpp"
 #include "common/utils.h"
 #include "common/runtime_utils.h"
 
@@ -50,10 +51,24 @@ TEST_F(UtilsUtest, GetClockRealTimeNsTest)
     EXPECT_GT(realTime, 0UL);
 }
 
+TEST_F(UtilsUtest, GetClockRealTimeNsMemsetFail)
+{
+    MOCKER_CPP(&memset_s).stubs().will(returnValue(1));
+    uint64_t result = Mspti::Common::Utils::GetClockRealTimeNs();
+    EXPECT_EQ(result, 0);
+}
+
 TEST_F(UtilsUtest, GetHostSysCntTest)
 {
     auto sysCnt = Mspti::Common::Utils::GetHostSysCnt();
     EXPECT_GT(sysCnt, 0UL);
+}
+
+TEST_F(UtilsUtest, GetHostSysCntTestMemsetFail)
+{
+    MOCKER_CPP(&memset_s).stubs().will(returnValue(1));
+    uint64_t result = Mspti::Common::Utils::GetClockRealTimeNs();
+    EXPECT_EQ(result, 0);
 }
 
 TEST_F(UtilsUtest, GetPidTest)
@@ -96,6 +111,19 @@ TEST_F(UtilsUtest, RelativeToAbsPathTest)
     }
 }
 
+TEST_F(UtilsUtest, EmptyPath)
+{
+    std::string result = Mspti::Common::Utils::RelativeToAbsPath("");
+    EXPECT_EQ(result, "");
+}
+
+TEST_F(UtilsUtest, PathTooLong)
+{
+    std::string longPath(PATH_MAX + 1, 'a');
+    std::string result = Mspti::Common::Utils::RelativeToAbsPath(longPath);
+    EXPECT_EQ(result, "");
+}
+
 TEST_F(UtilsUtest, ShouldGetTrueWhenFileExist)
 {
     std::string stubPath = "test.txt";
@@ -121,8 +149,7 @@ TEST_F(UtilsUtest, FileReadableShouldGetFalseWhenFileEmpty)
 
 TEST_F(UtilsUtest, CheckCharValidShouldReturnFalseWhileMsgContainsSpecialCharacter)
 {
-    const char* msg = "record&";
+    const char *msg = "record&";
     EXPECT_FALSE(Mspti::Common::Utils::CheckCharValid(msg));
 }
-
 }
