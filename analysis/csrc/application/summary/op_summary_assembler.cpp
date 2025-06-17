@@ -251,7 +251,7 @@ void OpSummaryAssembler::WriteToFile(const std::string &fileName, const std::set
 {
     auto timeIndex = GetIndexForVec(headers_, TASK_START_TIME);
     for (auto& row : res_) {
-        if (timeIndex < row.size()) {
+        if (timeIndex < static_cast<int>(row.size())) {
             row[timeIndex].append("\t");
         }
     }

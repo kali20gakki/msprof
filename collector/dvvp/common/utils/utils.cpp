@@ -1514,11 +1514,14 @@ bool Utils::IsDynProfMode()
                                                             PlatformType::CHIP_V4_2_0,
                                                             PlatformType::DC_TYPE};
     if (platformSupportDynProfTypeSet.find(platformType) == platformSupportDynProfTypeSet.end()) {
+        MSPROF_LOGI("Dynamic profiling is not supported on this platform, " \
+                    "Supported platforms : Ascend910, Ascend910B, Ascend310B, Ascend310P");
         return false;
     }
     std::string profModeValue = GetEnvString(PROFILING_MODE_ENV);
     if (profModeValue != DAYNAMIC_PROFILING_VALUE &&
         profModeValue != DELAY_DURARION_PROFILING_VALUE) {
+        MSPROF_LOGI("Dynamic profiling is not enable, the current profiling mode value is null");
         return false;
     }
     return true;
