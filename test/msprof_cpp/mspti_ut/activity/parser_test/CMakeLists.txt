@@ -4,6 +4,8 @@ add_executable(mspti_parser_utest
     parser_utest.cpp
     hccl_calculator_utest.cpp
     hccl_reporter_utest.cpp
+    device_task_calculator_utest.cpp
+    communication_calculator_utest.cpp
     ${TOP_DIR}/mspti/activity/activity_manager.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/parser_manager.cpp
     ${TOP_DIR}/mspti/activity/ascend/parser/cann_hash_cache.cpp

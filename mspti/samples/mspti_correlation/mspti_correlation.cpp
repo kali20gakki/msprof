@@ -121,7 +121,6 @@ int PrintCorrelationTrace()
     LOG_PRINT("========== PrintCorrelation ============\n");
     for (const auto& apiIter: g_ApiConnectionMap) {
         uint64_t correlationId = apiIter.second->correlationId;
-        printf("api correlationId %d", correlationId);
         auto it = g_CorrelationMap.find(correlationId);
         if (it == g_CorrelationMap.end()) {
             break;

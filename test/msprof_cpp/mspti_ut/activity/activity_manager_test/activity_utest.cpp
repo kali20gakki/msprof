@@ -8,7 +8,7 @@
 #include "mockcpp/mockcpp.hpp"
 
 #include <atomic>
-
+#include "securec.h"
 #include "activity/activity_manager.h"
 #include "activity/ascend/dev_task_manager.h"
 #include "activity/ascend/parser/parser_manager.h"
@@ -253,5 +253,23 @@ TEST_F(ActivityUtest, ShouleRetSuccessWhenPushAndPopExternalCorrelationId)
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityDisable(MSPTI_ACTIVITY_KIND_EXTERNAL_CORRELATION));
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityDisable(MSPTI_ACTIVITY_KIND_MARKER));
     EXPECT_EQ(MSPTI_SUCCESS, msptiActivityFlushAll(1));
+}
+
+TEST_F(ActivityUtest, GetRecordSuccessWhenBufferNull)
+{
+    size_t validSize = sizeof(msptiActivityMarker);
+    uint8_t* buffer = nullptr;
+    msptiActivity *pRecord = NULL;
+    EXPECT_EQ(MSPTI_ERROR_INVALID_PARAMETER, msptiActivityGetNextRecord(buffer, validSize, &pRecord));
+
+    buffer = static_cast<uint8_t*>(malloc(validSize));
+    msptiActivityMarker* activity = new msptiActivityMarker();
+    activity->kind = MSPTI_ACTIVITY_KIND_MARKER;
+    memcpy_s(buffer, validSize, activity, sizeof(msptiActivityMarker));
+    EXPECT_EQ(MSPTI_SUCCESS, msptiActivityGetNextRecord(buffer, validSize, &pRecord));
+
+    validSize = 1;
+    EXPECT_EQ(MSPTI_ERROR_MAX_LIMIT_REACHED, msptiActivityGetNextRecord(buffer, validSize, &pRecord));
+    free(buffer);
 }
 }

@@ -9,6 +9,11 @@ add_executable(mspti_utils_utest
 
 target_include_directories(mspti_utils_utest PRIVATE
     ${UT_TOP_DIR}/ut_utils/
+    ${MOCKCPP_INCLUDE_DIR}
+)
+
+target_link_libraries(mspti_utils_utest PRIVATE
+        ${MOCKCPP_STATIC_LIBRARY}
 )
 
 set_target_properties(mspti_utils_utest

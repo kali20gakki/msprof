@@ -22,10 +22,12 @@ add_executable(activity_utest
 
 target_include_directories(activity_utest PRIVATE
     ${MOCKCPP_INCLUDE_DIR}
+    ${TOP_DIR}/platform/securec/include
 )
 
 target_link_libraries(activity_utest PRIVATE
     ${MOCKCPP_STATIC_LIBRARY}
+    c_sec_static
 )
 
 set_target_properties(activity_utest

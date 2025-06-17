@@ -44,7 +44,7 @@ def consumer_func(consume_queue):
                 break
             if isinstance(data, RangeMarkerData):
                 logging.info(f'{data.kind}, {data.source_kind}, {data.id}, {data.name}, {data.domain}, {data.start}, '
-                             f'{data.end},{data.object_id.process_id}, {data.object_id.thread_id}, '
+                             f'{data.end}, {data.object_id.process_id}, {data.object_id.thread_id}, '
                              f'{data.object_id.stream_id}, {data.object_id.device_id}')
         else:
             time.sleep(0.1)
