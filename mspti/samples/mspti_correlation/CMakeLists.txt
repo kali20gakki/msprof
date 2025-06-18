@@ -39,7 +39,8 @@ target_link_libraries(mspti_correlation_test PRIVATE
                       ${ASCEND_PATH}/lib64/libnnopbase.so
                       ${ASCEND_PATH}/lib64/libmsprofiler.so
                       ${ASCEND_PATH}/lib64/libopapi.so
-                      ${ASCEND_PATH}/lib64/libmspti.so
+                      ${ASCEND_PATH}/lib64/libmspti.so,
+                      ${ASCEND_PATH}/lib64/libc_sec.so
                       dl)
 
 target_compile_options(

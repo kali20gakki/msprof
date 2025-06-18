@@ -118,7 +118,7 @@ void MstxCallback(void *pUserData, msptiCallbackDomain domain, msptiCallbackId c
                   const msptiCallbackData *pCallbackInfo)
 {
     UserData *userData = (UserData*)pUserData;
-    if (domain != MSPTI_CB_DOMAIN_RUNTIME) {
+    if (domain != MSPTI_CB_DOMAIN_RUNTIME || userData == nullptr) {
         return;
     }
     if (pCallbackInfo->callbackSite == MSPTI_API_ENTER) {
@@ -131,9 +131,11 @@ void MstxCallback(void *pUserData, msptiCallbackDomain domain, msptiCallbackId c
 void SetUpMspti(aclrtContext* context, aclrtStream* stream)
 {
     UserData *pUserData = (UserData *)malloc(sizeof(UserData));
-    memset(pUserData, 0, sizeof(UserData));
-    pUserData->context = context;
-    pUserData->stream = stream;
+    if (pUserData != nullptr) {
+        memset_s(pUserData, sizeof(UserData), 0, sizeof(UserData));
+        pUserData->context = context;
+        pUserData->stream = stream;
+    }
 
     // 初始化订阅mspti
     msptiSubscriberHandle* handle = InitMspti((void *)MstxCallback, pUserData);

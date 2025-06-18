@@ -18,6 +18,7 @@
 // Mspti header
 #include <mspti.h>
 #include "common/util_mspti.h"
+#include "securec.h"
 
 msptiSubscriberHandle subscriber;
 
@@ -35,6 +36,12 @@ void UserBufferRequest(uint8_t **buffer, size_t *size, size_t *maxNumRecords)
 {
     LOG_PRINT("========== UserBufferRequest ============\n");
     uint8_t *pBuffer = reinterpret_cast<uint8_t *>(malloc(DEFAULT_BUFFER_SIZE + ALIGN_SIZE));
+    if (pBuffer == nullptr) {
+        LOG_PRINT("malloc buffer failed");
+        *buffer = nullptr;
+        *size = 0;
+        return;
+    }
     *buffer = ALIGN_BUFFER(pBuffer, ALIGN_SIZE);
     *size = DEFAULT_BUFFER_SIZE;
     *maxNumRecords = 0;
