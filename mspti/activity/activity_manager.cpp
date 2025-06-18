@@ -113,8 +113,8 @@ ActivityManager::~ActivityManager()
         }
     }
     JoinWorkThreads();
-    for (int kindInidex = 0; kindInidex < MSPTI_ACTIVITY_KIND_COUNT; kindInidex++) {
-        activity_switch_[kindInidex] = false;
+    for (int kindIndex = 0; kindIndex < MSPTI_ACTIVITY_KIND_COUNT; kindIndex++) {
+        activity_switch_[kindIndex] = false;
     }
     devices_.clear();
     MSPTI_LOGI("Total activity record: %lu. Total activity drop: %lu",
