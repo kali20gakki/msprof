@@ -44,7 +44,8 @@ static bool g_regSetDeviceCallback = false;
 static aclError aclprofInitPreCheck()
 {
     if (Utils::IsDynProfMode()) {
-        MSPROF_LOGI("Start to execute aclprofInit not support in Dynamic profiling mode");
+        MSPROF_LOGE("Start to execute aclprofInit not support in Dynamic profiling mode!"
+                    "Please unset the environment variable PROFILING_MODE.");
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     if (Platform::instance()->PlatformIsHelperHostSide()) {
