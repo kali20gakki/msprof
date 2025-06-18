@@ -35,7 +35,7 @@ void DlogInnerForC(int moduleId, int level, const char *fmt, T... args)
     using dlogInnerForCFunc = std::function<void(int, int, const char*, T...)>;
     static dlogInnerForCFunc func = nullptr;
     if (func == nullptr) {
-        Mspti::Common::GetFunction<void, int, int, const char*, T...>("libascendalog", "DlogInnerForC", func);
+        Mspti::Common::GetFunction("libascendalog", "DlogInnerForC", func);
     }
     if (func) {
         return func(moduleId, level, fmt, args...);

@@ -33,10 +33,10 @@ int CheckLogLevelForC(int moduleId, int level)
 {
     pthread_once(&g_once, LoadPlogFunction);
     void* voidFunc = g_plogFuncArray[FUNC_CHECK_LOG_LEVEL_FOR_C];
-    using checkLogLevelForCFunc = std::function<int(int, int)>;
-    checkLogLevelForCFunc func = Mspti::Common::ReinterpretConvert<int (*)(int, int)>(voidFunc);
+    using checkLogLevelForCFunc = std::function<decltype(CheckLogLevelForC)>;
+    checkLogLevelForCFunc func = Mspti::Common::ReinterpretConvert<decltype(&CheckLogLevelForC)>(voidFunc);
     if (func == nullptr) {
-        Mspti::Common::GetFunction<int, int, int>("libascendalog", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libascendalog", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libascendalog.so");
     return func(moduleId, level);

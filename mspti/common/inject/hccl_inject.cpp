@@ -8,7 +8,7 @@
  * Author             : msprof team
  * Creation Date      : 2024/08/17
  * *****************************************************************************
-*/
+ */
 #include "hccl_inject.h"
 
 #include <functional>
@@ -41,7 +41,7 @@ enum HcclFunctionIndex {
 };
 
 pthread_once_t g_once;
-void* g_hcclFuncArray[FUNC_HCCL_COUNT];
+void *g_hcclFuncArray[FUNC_HCCL_COUNT];
 
 void LoadHcclFunction()
 {
@@ -63,17 +63,14 @@ void LoadHcclFunction()
 }
 
 HcclResult HcclAllReduce(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t count, HcclDataType dataType, HcclReduceOp op,
-                         HcclComm comm, aclrtStream stream)
+    HcclComm comm, aclrtStream stream)
 {
     pthread_once(&g_once, LoadHcclFunction);
-    void* voidFunc = g_hcclFuncArray[FUNC_HCCL_ALL_REDUCE];
-    using HcclAllReduceFunc = std::function<HcclResult(VOID_PTR, VOID_PTR, uint64_t, HcclDataType, HcclReduceOp,
-                                                       HcclComm, aclrtStream)>;
-    HcclAllReduceFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(VOID_PTR, VOID_PTR, uint64_t,
-        HcclDataType, HcclReduceOp, HcclComm, aclrtStream)>(voidFunc);
+    void *voidFunc = g_hcclFuncArray[FUNC_HCCL_ALL_REDUCE];
+    using HcclAllReduceFunc = std::function<decltype(HcclAllReduce)>;
+    HcclAllReduceFunc func = Mspti::Common::ReinterpretConvert<decltype(&HcclAllReduce)>(voidFunc);
     if (func == nullptr) {
-        Mspti::Common::GetFunction<HcclResult, VOID_PTR, VOID_PTR, uint64_t, HcclDataType, HcclReduceOp, HcclComm,
-        aclrtStream>("libhccl", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
 
@@ -89,17 +86,14 @@ HcclResult HcclAllReduce(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t count, Hcc
 }
 
 HcclResult HcclBroadcast(VOID_PTR buf, uint64_t count, HcclDataType dataType, uint32_t root, HcclComm comm,
-                         aclrtStream stream)
+    aclrtStream stream)
 {
     pthread_once(&g_once, LoadHcclFunction);
-    void* voidFunc = g_hcclFuncArray[FUNC_HCCL_BROADCAST];
-    using HcclBroadcastFunc = std::function<HcclResult(VOID_PTR, uint64_t, HcclDataType, uint32_t, HcclComm,
-        aclrtStream)>;
-    HcclBroadcastFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(VOID_PTR, uint64_t, HcclDataType,
-        uint32_t, HcclComm, aclrtStream)>(voidFunc);
+    void *voidFunc = g_hcclFuncArray[FUNC_HCCL_BROADCAST];
+    using HcclBroadcastFunc = std::function<decltype(HcclBroadcast)>;
+    HcclBroadcastFunc func = Mspti::Common::ReinterpretConvert<decltype(&HcclBroadcast)>(voidFunc);
     if (func == nullptr) {
-        Mspti::Common::GetFunction<HcclResult, VOID_PTR, uint64_t, HcclDataType, uint32_t, HcclComm,
-            aclrtStream>("libhccl", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
 
@@ -115,17 +109,14 @@ HcclResult HcclBroadcast(VOID_PTR buf, uint64_t count, HcclDataType dataType, ui
 }
 
 HcclResult HcclAllGather(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t sendCount, HcclDataType dataType, HcclComm comm,
-                         aclrtStream stream)
+    aclrtStream stream)
 {
     pthread_once(&g_once, LoadHcclFunction);
-    void* voidFunc = g_hcclFuncArray[FUNC_HCCL_ALL_GATHER];
-    using HcclAllGatherFunc =
-            std::function<HcclResult(VOID_PTR, VOID_PTR, uint64_t, HcclDataType, HcclComm, aclrtStream)>;
-    HcclAllGatherFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(VOID_PTR, VOID_PTR, uint64_t,
-        HcclDataType, HcclComm, aclrtStream)>(voidFunc);
+    void *voidFunc = g_hcclFuncArray[FUNC_HCCL_ALL_GATHER];
+    using HcclAllGatherFunc = std::function<decltype(HcclAllGather)>;
+    HcclAllGatherFunc func = Mspti::Common::ReinterpretConvert<decltype(&HcclAllGather)>(voidFunc);
     if (func == nullptr) {
-        Mspti::Common::GetFunction<HcclResult, VOID_PTR, VOID_PTR, uint64_t, HcclDataType, HcclComm,
-            aclrtStream>("libhccl", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
 
@@ -142,17 +133,14 @@ HcclResult HcclAllGather(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t sendCount,
 }
 
 HcclResult HcclReduceScatter(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t recvCount, HcclDataType dataType,
-                             HcclReduceOp op, HcclComm comm, aclrtStream stream)
+    HcclReduceOp op, HcclComm comm, aclrtStream stream)
 {
     pthread_once(&g_once, LoadHcclFunction);
-    void* voidFunc = g_hcclFuncArray[FUNC_HCCL_REDUCE_SCATTER];
-    using HcclReduceScatterFunc = std::function<HcclResult(VOID_PTR, VOID_PTR, uint64_t, HcclDataType, HcclReduceOp,
-                                                           HcclComm, aclrtStream)>;
-    HcclReduceScatterFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(VOID_PTR, VOID_PTR, uint64_t,
-        HcclDataType, HcclReduceOp, HcclComm, aclrtStream)>(voidFunc);
+    void *voidFunc = g_hcclFuncArray[FUNC_HCCL_REDUCE_SCATTER];
+    using HcclReduceScatterFunc = std::function<decltype(HcclReduceScatter)>;
+    HcclReduceScatterFunc func = Mspti::Common::ReinterpretConvert<decltype(&HcclReduceScatter)>(voidFunc);
     if (func == nullptr) {
-        Mspti::Common::GetFunction<HcclResult, VOID_PTR, VOID_PTR, uint64_t, HcclDataType, HcclReduceOp, HcclComm,
-            aclrtStream>("libhccl", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
 
@@ -169,17 +157,14 @@ HcclResult HcclReduceScatter(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t recvCo
 }
 
 HcclResult HcclReduce(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t count, HcclDataType dataType, HcclReduceOp op,
-                      uint32_t root, HcclComm comm, aclrtStream stream)
+    uint32_t root, HcclComm comm, aclrtStream stream)
 {
     pthread_once(&g_once, LoadHcclFunction);
-    void* voidFunc = g_hcclFuncArray[FUNC_HCCL_REDUCE];
-    using HcclReduceFunc = std::function<HcclResult(VOID_PTR, VOID_PTR, uint64_t, HcclDataType, HcclReduceOp, uint32_t,
-        HcclComm, aclrtStream)>;
-    HcclReduceFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(VOID_PTR, VOID_PTR, uint64_t, HcclDataType,
-        HcclReduceOp, uint32_t, HcclComm, aclrtStream)>(voidFunc);
+    void *voidFunc = g_hcclFuncArray[FUNC_HCCL_REDUCE];
+    using HcclReduceFunc = std::function<decltype(HcclReduce)>;
+    HcclReduceFunc func = Mspti::Common::ReinterpretConvert<decltype(&HcclReduce)>(voidFunc);
     if (func == nullptr) {
-        Mspti::Common::GetFunction<HcclResult, VOID_PTR, VOID_PTR, uint64_t, HcclDataType, HcclReduceOp, uint32_t,
-            HcclComm, aclrtStream>("libhccl", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
 
@@ -195,17 +180,14 @@ HcclResult HcclReduce(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t count, HcclDa
 }
 
 HcclResult HcclAlltoAll(const VOID_PTR sendBuf, uint64_t sendCount, HcclDataType sendType, const VOID_PTR recvBuf,
-                        uint64_t recvCount, HcclDataType recvType, HcclComm comm, aclrtStream stream)
+    uint64_t recvCount, HcclDataType recvType, HcclComm comm, aclrtStream stream)
 {
     pthread_once(&g_once, LoadHcclFunction);
-    void* voidFunc = g_hcclFuncArray[FUNC_HCCL_ALL_TO_ALL];
-    using HcclAlltoAllFunc = std::function<HcclResult(const void*, uint64_t, HcclDataType, const void*, uint64_t,
-                                                      HcclDataType, HcclComm, aclrtStream)>;
-    HcclAlltoAllFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(const void*, uint64_t, HcclDataType,
-        const void*, uint64_t, HcclDataType, HcclComm, aclrtStream)>(voidFunc);
+    void *voidFunc = g_hcclFuncArray[FUNC_HCCL_ALL_TO_ALL];
+    using HcclAlltoAllFunc = std::function<decltype(HcclAlltoAll)>;
+    HcclAlltoAllFunc func = Mspti::Common::ReinterpretConvert<decltype(&HcclAlltoAll)>(voidFunc);
     if (func == nullptr) {
-        Mspti::Common::GetFunction<HcclResult, const void*, uint64_t, HcclDataType, const void*, uint64_t,
-            HcclDataType, HcclComm, aclrtStream>("libhccl", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
 
@@ -222,19 +204,15 @@ HcclResult HcclAlltoAll(const VOID_PTR sendBuf, uint64_t sendCount, HcclDataType
 }
 
 HcclResult HcclAlltoAllV(const VOID_PTR sendBuf, const VOID_PTR sendCounts, const VOID_PTR sdispls,
-                         HcclDataType sendType, const VOID_PTR recvBuf, const VOID_PTR recvCounts,
-                         const VOID_PTR rdispls, HcclDataType recvType, HcclComm comm, aclrtStream stream)
+    HcclDataType sendType, const VOID_PTR recvBuf, const VOID_PTR recvCounts, const VOID_PTR rdispls,
+    HcclDataType recvType, HcclComm comm, aclrtStream stream)
 {
     pthread_once(&g_once, LoadHcclFunction);
-    void* voidFunc = g_hcclFuncArray[FUNC_HCCL_ALL_TO_ALL_V];
-    using HcclAlltoAllVFunc = std::function<HcclResult(const void*, const void*, const void*, HcclDataType,
-        const void*, const void*, const void*, HcclDataType, HcclComm, aclrtStream)>;
-    HcclAlltoAllVFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(const void*, const void*, const void*,
-        HcclDataType, const void*, const void*, const void*, HcclDataType, HcclComm, aclrtStream)>(voidFunc);
+    void *voidFunc = g_hcclFuncArray[FUNC_HCCL_ALL_TO_ALL_V];
+    using HcclAlltoAllVFunc = std::function<decltype(HcclAlltoAllV)>;
+    HcclAlltoAllVFunc func = Mspti::Common::ReinterpretConvert<decltype(&HcclAlltoAllV)>(voidFunc);
     if (func == nullptr) {
-        Mspti::Common::GetFunction<HcclResult, const void*, const void*, const void*, HcclDataType,
-            const void*, const void*, const void*, HcclDataType, HcclComm,
-            aclrtStream>("libhccl", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
 
@@ -255,11 +233,11 @@ HcclResult HcclAlltoAllV(const VOID_PTR sendBuf, const VOID_PTR sendCounts, cons
 HcclResult HcclBarrier(HcclComm comm, aclrtStream stream)
 {
     pthread_once(&g_once, LoadHcclFunction);
-    void* voidFunc = g_hcclFuncArray[FUNC_HCCL_BARRIER];
-    using HcclBarrierFunc = std::function<HcclResult(HcclComm, aclrtStream)>;
-    HcclBarrierFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(HcclComm, aclrtStream)>(voidFunc);
+    void *voidFunc = g_hcclFuncArray[FUNC_HCCL_BARRIER];
+    using HcclBarrierFunc = std::function<decltype(HcclBarrier)>;
+    HcclBarrierFunc func = Mspti::Common::ReinterpretConvert<decltype(&HcclBarrier)>(voidFunc);
     if (func == nullptr) {
-        Mspti::Common::GetFunction<HcclResult, HcclComm, aclrtStream>("libhccl", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
     Mspti::Callback::CallbackScope scope(MSPTI_CB_DOMAIN_HCCL, MSPTI_CBID_HCCL_BARRIER, __FUNCTION__);
@@ -267,17 +245,14 @@ HcclResult HcclBarrier(HcclComm comm, aclrtStream stream)
 }
 
 HcclResult HcclScatter(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t recvCount, HcclDataType dataType, uint32_t root,
-                       HcclComm comm, aclrtStream stream)
+    HcclComm comm, aclrtStream stream)
 {
     pthread_once(&g_once, LoadHcclFunction);
-    void* voidFunc = g_hcclFuncArray[FUNC_HCCL_SCATTER];
-    using HcclScatterFunc = std::function<HcclResult(VOID_PTR, VOID_PTR, uint64_t, HcclDataType, uint32_t,
-                                                            HcclComm, aclrtStream)>;
-    HcclScatterFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(VOID_PTR, VOID_PTR, uint64_t, HcclDataType,
-        uint32_t, HcclComm, aclrtStream)>(voidFunc);
+    void *voidFunc = g_hcclFuncArray[FUNC_HCCL_SCATTER];
+    using HcclScatterFunc = std::function<decltype(HcclScatter)>;
+    HcclScatterFunc func = Mspti::Common::ReinterpretConvert<decltype(&HcclScatter)>(voidFunc);
     if (func == nullptr) {
-        Mspti::Common::GetFunction<HcclResult, VOID_PTR, VOID_PTR, uint64_t, HcclDataType, uint32_t,
-            HcclComm, aclrtStream>("libhccl", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
 
@@ -292,17 +267,15 @@ HcclResult HcclScatter(VOID_PTR sendBuf, VOID_PTR recvBuf, uint64_t recvCount, H
     return func(sendBuf, recvBuf, recvCount, dataType, root, comm, stream);
 }
 
-HcclResult HcclSend(VOID_PTR  sendBuf, uint64_t count, HcclDataType dataType, uint32_t destRank, HcclComm comm,
-                    aclrtStream stream)
+HcclResult HcclSend(VOID_PTR sendBuf, uint64_t count, HcclDataType dataType, uint32_t destRank, HcclComm comm,
+    aclrtStream stream)
 {
     pthread_once(&g_once, LoadHcclFunction);
-    void* voidFunc = g_hcclFuncArray[FUNC_HCCL_SEND];
-    using HcclSendFunc = std::function<HcclResult(VOID_PTR, uint64_t, HcclDataType, uint32_t, HcclComm, aclrtStream)>;
-    HcclSendFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(VOID_PTR, uint64_t, HcclDataType, uint32_t,
-        HcclComm, aclrtStream)>(voidFunc);
+    void *voidFunc = g_hcclFuncArray[FUNC_HCCL_SEND];
+    using HcclSendFunc = std::function<decltype(HcclSend)>;
+    HcclSendFunc func = Mspti::Common::ReinterpretConvert<decltype(&HcclSend)>(voidFunc);
     if (func == nullptr) {
-        Mspti::Common::GetFunction<HcclResult, VOID_PTR, uint64_t, HcclDataType, uint32_t, HcclComm,
-            aclrtStream>("libhccl", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
 
@@ -317,17 +290,15 @@ HcclResult HcclSend(VOID_PTR  sendBuf, uint64_t count, HcclDataType dataType, ui
     return func(sendBuf, count, dataType, destRank, comm, stream);
 }
 
-HcclResult HcclRecv(VOID_PTR  recvBuf, uint64_t count, HcclDataType dataType, uint32_t srcRank, HcclComm comm,
-                    aclrtStream stream)
+HcclResult HcclRecv(VOID_PTR recvBuf, uint64_t count, HcclDataType dataType, uint32_t srcRank, HcclComm comm,
+    aclrtStream stream)
 {
     pthread_once(&g_once, LoadHcclFunction);
-    void* voidFunc = g_hcclFuncArray[FUNC_HCCL_RECV];
-    using HcclRecvFunc = std::function<HcclResult(VOID_PTR, uint64_t, HcclDataType, uint32_t, HcclComm, aclrtStream)>;
-    HcclRecvFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(VOID_PTR, uint64_t, HcclDataType, uint32_t,
-        HcclComm, aclrtStream)>(voidFunc);
+    void *voidFunc = g_hcclFuncArray[FUNC_HCCL_RECV];
+    using HcclRecvFunc = std::function<decltype(HcclRecv)>;
+    HcclRecvFunc func = Mspti::Common::ReinterpretConvert<decltype(&HcclRecv)>(voidFunc);
     if (func == nullptr) {
-        Mspti::Common::GetFunction<HcclResult, VOID_PTR, uint64_t, HcclDataType, uint32_t, HcclComm,
-            aclrtStream>("libhccl", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
 
@@ -342,16 +313,14 @@ HcclResult HcclRecv(VOID_PTR  recvBuf, uint64_t count, HcclDataType dataType, ui
     return func(recvBuf, count, dataType, srcRank, comm, stream);
 }
 
-HcclResult HcclBatchSendRecv(HcclSendRecvItem* sendRecvInfo, uint32_t itemNum, HcclComm comm, aclrtStream stream)
+HcclResult HcclBatchSendRecv(HcclSendRecvItem *sendRecvInfo, uint32_t itemNum, HcclComm comm, aclrtStream stream)
 {
     pthread_once(&g_once, LoadHcclFunction);
-    void* voidFunc = g_hcclFuncArray[FUNC_HCCL_BATCH_SEND_RECV];
-    using HcclBatchSendRecvFunc = std::function<HcclResult(HcclSendRecvItem*, uint32_t, HcclComm, aclrtStream)>;
-    HcclBatchSendRecvFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(HcclSendRecvItem*, uint32_t, HcclComm,
-        aclrtStream)>(voidFunc);
+    void *voidFunc = g_hcclFuncArray[FUNC_HCCL_BATCH_SEND_RECV];
+    using HcclBatchSendRecvFunc = std::function<decltype(HcclBatchSendRecv)>;
+    HcclBatchSendRecvFunc func = Mspti::Common::ReinterpretConvert<decltype(&HcclBatchSendRecv)>(voidFunc);
     if (func == nullptr) {
-        Mspti::Common::GetFunction<HcclResult, HcclSendRecvItem*, uint32_t, HcclComm,
-            aclrtStream>("libhccl", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
     std::shared_ptr<BatchSendRecvOp> hcclOpDesc;
@@ -372,14 +341,14 @@ HcclResult HcclBatchSendRecv(HcclSendRecvItem* sendRecvInfo, uint32_t itemNum, H
     return func(sendRecvInfo, itemNum, comm, stream);
 }
 
-HcclResult HcclGetCommName(HcclComm comm, char* commName)
+HcclResult HcclGetCommName(HcclComm comm, char *commName)
 {
     pthread_once(&g_once, LoadHcclFunction);
-    void* voidFunc = g_hcclFuncArray[FUNC_HCCL_GET_COMM_NAME];
-    using HcclGetCommNameFunc = std::function<HcclResult(HcclComm, char*)>;
-    HcclGetCommNameFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(HcclComm, char*)>(voidFunc);
+    void *voidFunc = g_hcclFuncArray[FUNC_HCCL_GET_COMM_NAME];
+    using HcclGetCommNameFunc = std::function<decltype(HcclGetCommName)>;
+    HcclGetCommNameFunc func = Mspti::Common::ReinterpretConvert<decltype(&HcclGetCommName)>(voidFunc);
     if (func == nullptr) {
-        Mspti::Common::GetFunction<HcclResult, HcclComm, char*>("libhccl", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
     return func(comm, commName);
@@ -388,12 +357,11 @@ HcclResult HcclGetCommName(HcclComm comm, char* commName)
 HcclResult HcclGetRankSize(HcclComm comm, uint32_t *rankSize)
 {
     pthread_once(&g_once, LoadHcclFunction);
-    void* voidFunc = g_hcclFuncArray[FUNC_HCCL_GET_RANK_SIZE];
-    using HcclGetRankSizeFunc = std::function<HcclResult(HcclComm comm, uint32_t *rankSize)>;
-    HcclGetRankSizeFunc func = Mspti::Common::ReinterpretConvert<HcclResult (*)(HcclComm comm,
-        uint32_t *rankSize)>(voidFunc);
+    void *voidFunc = g_hcclFuncArray[FUNC_HCCL_GET_RANK_SIZE];
+    using HcclGetRankSizeFunc = std::function<decltype(HcclGetRankSize)>;
+    HcclGetRankSizeFunc func = Mspti::Common::ReinterpretConvert<decltype(&HcclGetRankSize)>(voidFunc);
     if (func == nullptr) {
-        Mspti::Common::GetFunction<HcclResult, HcclComm, uint32_t *>("libhccl", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libhccl", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libhccl.so");
     return func(comm, rankSize);

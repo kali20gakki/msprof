@@ -48,10 +48,10 @@ ProfApiInject g_profApiInject;
 
 int32_t MsprofRegisterProfileCallback(int32_t callbackType, VOID_PTR callback, uint32_t len)
 {
-    using MsprofRegisterProfileCallbackFunc = std::function<int32_t(int32_t, VOID_PTR, uint32_t)>;
+    using MsprofRegisterProfileCallbackFunc = std::function<decltype(MsprofRegisterProfileCallback)>;
     static MsprofRegisterProfileCallbackFunc func = nullptr;
     if (func == nullptr) {
-        Mspti::Common::GetFunction<int32_t, int32_t, VOID_PTR, uint32_t>("libprofapi", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libprofapi", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libprofapi.so");
     return func(callbackType, callback, len);
@@ -59,10 +59,10 @@ int32_t MsprofRegisterProfileCallback(int32_t callbackType, VOID_PTR callback, u
 
 int32_t profRegReporterCallback(ProfReportHandle reporter)
 {
-    using profRegReporterCallbackFunc = std::function<int32_t(ProfReportHandle)>;
+    using profRegReporterCallbackFunc = std::function<decltype(profRegReporterCallback)>;
     static profRegReporterCallbackFunc func = nullptr;
     if (func == nullptr) {
-        Mspti::Common::GetFunction<int32_t, ProfReportHandle>("libprofapi", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libprofapi", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libprofapi.so");
     return func(reporter);
@@ -70,10 +70,10 @@ int32_t profRegReporterCallback(ProfReportHandle reporter)
 
 int32_t profRegCtrlCallback(MsprofCtrlHandle handle)
 {
-    using profRegCtrlCallbackFunc = std::function<int32_t(MsprofCtrlHandle)>;
+    using profRegCtrlCallbackFunc = std::function<decltype(profRegCtrlCallback)>;
     static profRegCtrlCallbackFunc func = nullptr;
     if (func == nullptr) {
-        Mspti::Common::GetFunction<int32_t, MsprofCtrlHandle>("libprofapi", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libprofapi", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libprofapi.so");
     return func(handle);
@@ -81,10 +81,10 @@ int32_t profRegCtrlCallback(MsprofCtrlHandle handle)
 
 int32_t profSetProfCommand(VOID_PTR command, uint32_t len)
 {
-    using profSetProfCommandFunc = std::function<int32_t(VOID_PTR, uint32_t)>;
+    using profSetProfCommandFunc = std::function<decltype(profSetProfCommand)>;
     static profSetProfCommandFunc func = nullptr;
     if (func == nullptr) {
-        Mspti::Common::GetFunction<int32_t, VOID_PTR, uint32_t>("libprofapi", __FUNCTION__, func);
+        Mspti::Common::GetFunction("libprofapi", __FUNCTION__, func);
     }
     THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libprofapi.so");
     return func(command, len);

@@ -57,11 +57,20 @@ private:
     mutable std::unordered_map<std::string, std::unique_ptr<FunctionLoader>> registry_;
 };
 
-template <typename R, typename... Types>
-void GetFunction(const std::string& soName, const std::string& funcName, std::function<R(Types...)>& func)
+template<typename T>
+struct FuncTraits;
+
+template<typename R, typename... Args>
+struct FuncTraits<std::function<R(Args...)>> {
+    using FuncPtr = R(*)(Args...);
+};
+
+template<typename Func>
+void GetFunction(const std::string& soName, const std::string& funcName, Func& func)
 {
-    auto func_ptr = FunctionRegister::GetInstance()->Get(soName, funcName);
-    func = (R(*)(Types...))func_ptr;
+    auto funcPtr = FunctionRegister::GetInstance()->Get(soName, funcName);
+    using FuncPtr = typename FuncTraits<std::remove_reference_t<Func>>::FuncPtr;
+    func = reinterpret_cast<FuncPtr>(funcPtr);
 }
 
 void* RegisterFunction(const std::string& soName, const std::string& funcName);
