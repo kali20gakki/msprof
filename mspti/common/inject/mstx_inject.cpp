@@ -387,6 +387,7 @@ msptiResult msptiActivityEnableMarkerDomain(const char* name)
         MSPTI_LOGE("domainHandle is nullptr, check your input params");
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
+    MSPTI_LOGI("Set domain %s collection on", name);
     return Mspti::MstxDomainMgr::GetInstance()->SetMstxDomainEnableStatus(name, true);
 }
 
@@ -396,5 +397,6 @@ msptiResult msptiActivityDisableMarkerDomain(const char* name)
         MSPTI_LOGE("domainHandle is nullptr, check your input params");
         return MSPTI_ERROR_INVALID_PARAMETER;
     }
+    MSPTI_LOGI("Set domain %s collection off", name);
     return Mspti::MstxDomainMgr::GetInstance()->SetMstxDomainEnableStatus(name, false);
 }

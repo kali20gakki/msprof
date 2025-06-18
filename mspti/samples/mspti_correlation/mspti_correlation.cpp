@@ -131,6 +131,27 @@ int PrintCorrelationTrace()
     }
 }
 
+void HandleKernelRecord(msptiActivityKernel* record)
+{
+    auto* copy = reinterpret_cast<msptiActivity*>(malloc(sizeof(msptiActivityKernel)));
+    if (copy) {
+        memset_s(copy, sizeof(msptiActivityKernel), 0, sizeof(msptiActivityKernel));
+        memcpy_s(copy, sizeof(msptiActivityKernel), record, sizeof(msptiActivityKernel));
+        g_CorrelationMap[record->correlationId] = copy;
+    }
+}
+
+void HandleApiRecord(msptiActivityApi* record)
+{
+    auto* copy = reinterpret_cast<msptiActivityApi*>(malloc(sizeof(msptiActivityApi)));
+    if (copy) {
+        memset_s(copy, sizeof(msptiActivityApi), 0, sizeof(msptiActivityApi));
+        memcpy_s(copy, sizeof(msptiActivityApi), record, sizeof(msptiActivityApi));
+        g_ApiConnectionMap[record->correlationId] = reinterpret_cast<msptiActivityApi*>(copy);
+    }
+}
+
+
 // MSPTI
 void MsptiTrace(uint8_t *buffer, size_t size, size_t validSize)
 {
@@ -145,22 +166,12 @@ void MsptiTrace(uint8_t *buffer, size_t size, size_t validSize)
         if (status == MSPTI_SUCCESS) {
             msptiActivityKind kind = pRecord->kind;
             switch (kind) {
-                case MSPTI_ACTIVITY_KIND_KERNEL: {
-                    msptiActivityKernel* kernelRecord = (msptiActivityKernel*)pRecord;
-                    msptiActivity* pRecordCopy = (msptiActivity *)malloc(sizeof(msptiActivityKernel));
-                    memset(pRecordCopy, 0, sizeof(msptiActivityKernel));
-                    memcpy(pRecordCopy, kernelRecord, sizeof(msptiActivityKernel));
-                    g_CorrelationMap[kernelRecord->correlationId] = pRecordCopy;
+                case MSPTI_ACTIVITY_KIND_KERNEL:
+                    HandleKernelRecord(reinterpret_cast<msptiActivityKernel*>(pRecord));
                     break;
-                }
-                case MSPTI_ACTIVITY_KIND_API: {
-                    msptiActivityApi* apiRecord = (msptiActivityApi*)pRecord;
-                    msptiActivityApi *pRecordCopy = (msptiActivityApi *)malloc(sizeof(msptiActivityApi));
-                    memset(pRecordCopy, 0, sizeof(msptiActivityApi));
-                    memcpy(pRecordCopy, apiRecord, sizeof(msptiActivityApi));
-                    g_ApiConnectionMap[apiRecord->correlationId] = (msptiActivityApi*)pRecordCopy;
+                case MSPTI_ACTIVITY_KIND_API:
+                    HandleApiRecord(reinterpret_cast<msptiActivityApi*>(pRecord));
                     break;
-                }
                 default:
                     break;
             }
