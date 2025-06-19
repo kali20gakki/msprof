@@ -137,7 +137,9 @@ class GeDataFormat(Enum):
     NCL = 47
     FRACTAL_Z_WINO = 48
     C1HWC0 = 49
-    END = 50
+    FRACTAL_NZ_C0_16 = 50
+    FRACTAL_NZ_C0_32 = 51
+    END = 52
     MAX = 0xff  # 256
     UNKNOWN_ = 200
     DEFAULT_ = 201
