@@ -18,6 +18,9 @@ namespace dvvp {
 namespace transport {
 using namespace analysis::dvvp::proto;
 using namespace analysis::dvvp::common::error;
+namespace {
+const std::set<std::string> FLIP_DATA_NAME_SET{"data/ts_track", "data/aicpu.data"};
+}
 
 UploaderMgr::UploaderMgr() : isStarted_(true)
 {
@@ -215,9 +218,12 @@ bool UploaderMgr::IsUploadDataStart(const std::string& id, const std::string& fi
         return true;
     }
 
-    if (fileName.rfind("data/ts_track", 0) == 0) {
-        return true;
+    for (const auto& flipDataName : FLIP_DATA_NAME_SET) {
+        if (fileName.rfind(flipDataName, 0) == 0) {
+            return true;
+        }
     }
+
     if (fileName.rfind("data", 0) == 0) {
         return false;
     }
