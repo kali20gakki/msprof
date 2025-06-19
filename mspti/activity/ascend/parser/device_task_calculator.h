@@ -20,9 +20,9 @@
 #include <memory>
 #include <typeindex>
 #include <mutex>
-#include <unordered_set>
+#include <unordered_map>
 #include "activity/ascend/channel/channel_data.h"
-
+#include "common/utils.h"
 #include "external/mspti_result.h"
 
 namespace Mspti {
@@ -76,9 +76,9 @@ private:
     msptiResult AssembleSubTasksTimeWithFftsLog(uint32_t deviceId, FftsPlusLog *fftsLog);
 
 private:
-    std::map<DstType, std::list<std::shared_ptr<DeviceTask>>> assembleTasks_;
-    std::map<DstsType, std::list<std::shared_ptr<SubTask>>> assembleSubTasks_;
-    std::map<DstType, std::list<CompleteFunc>> completeFunc_;
+    std::unordered_map<DstType, std::list<std::shared_ptr<DeviceTask>>, Common::TupleHash> assembleTasks_;
+    std::unordered_map<DstsType, std::list<std::shared_ptr<SubTask>>, Common::TupleHash> assembleSubTasks_;
+    std::unordered_map<DstType, std::list<CompleteFunc>, Common::TupleHash> completeFunc_;
     std::mutex assembleTaskMutex_;
     std::mutex assembleSubTaskMutex_;
 };

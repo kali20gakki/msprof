@@ -3,12 +3,12 @@
     Copyright, 2025, Huawei Tech. Co., Ltd.
 ****************************************************************************** */
 /* ******************************************************************************
-* File Name          : cann_track_cache.cpp
-* Description        : cann侧解析建树
-* Author             : msprof team
-* Creation Date      : 2025/05/14
-* *****************************************************************************
-*/
+ * File Name          : cann_track_cache.cpp
+ * Description        : cann侧解析建树
+ * Author             : msprof team
+ * Creation Date      : 2025/05/14
+ * *****************************************************************************
+ */
 
 #include "cann_track_cache.h"
 
@@ -22,14 +22,14 @@
 
 namespace Mspti {
 namespace Parser {
-inline bool InApiRange(const MsprofApi &data, const MsprofCompactInfo& runtimeTrack)
+inline bool InApiRange(const MsprofApi &data, const MsprofCompactInfo &runtimeTrack)
 {
-    return runtimeTrack.timeStamp <= data.endTime && runtimeTrack.timeStamp >= data.beginTime;
+    return runtimeTrack.timeStamp <= data.endTime && data.beginTime <= runtimeTrack.timeStamp;
 }
 
-inline bool InApiRange(const MsprofApi &data1, const MsprofApi& data2)
+inline bool InApiRange(const MsprofApi &data1, const MsprofApi &data2)
 {
-    return data1.beginTime <= data2.beginTime && data1.endTime >= data2.endTime;
+    return data1.beginTime <= data2.beginTime && data2.endTime <= data1.endTime;
 }
 
 CannTrackCache::~CannTrackCache()
@@ -61,14 +61,12 @@ msptiResult CannTrackCache::Run()
     pthread_setname_np(pthread_self(), "CannTrackCache");
     while (threadRun_) {
         std::unique_lock<std::mutex> lock(cvMutex_);
-        cv.wait(lock, [this] {
-            return !targetThreadId_.empty() || !threadRun_.load();
-        });
+        cv.wait(lock, [this] { return !targetThreadId_.empty() || !threadRun_.load(); });
         if (!threadRun_.load()) {
             break;
         }
 
-        std::vector<uint64_t> threads(0);
+        std::vector<uint64_t> threads;
         {
             std::lock_guard<std::mutex> lk(targetThreadMutex_);
             threads = std::move(targetThreadId_);
@@ -78,50 +76,61 @@ msptiResult CannTrackCache::Run()
         if (threads.empty()) {
             continue;
         }
+
         for (auto threadId : threads) {
-            std::queue<std::shared_ptr<MsprofApi>> nodeLaunchs;
-            {
-                std::unique_lock<std::mutex> lock(nodeLaunchMutex_);
-                nodeLaunchs = std::move(nodeLaunchQueue_[threadId]);
-            }
-            while (!nodeLaunchs.empty()) {
-                Analysis(*nodeLaunchs.front());
-                nodeLaunchs.pop();
-            }
+            auto cache = GetOrCreateCache(threadId);
+            Analysis(cache);
         }
     }
     return MSPTI_SUCCESS;
 }
 
-msptiResult CannTrackCache::AppendTsTrack(const MsprofCompactInfo* data)
+msptiResult CannTrackCache::AppendTsTrack(const MsprofCompactInfo *data)
 {
     if (!Activity::ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_COMMUNICATION)) {
         return MSPTI_SUCCESS;
     }
-    std::unique_lock<std::mutex> lock(taskMutex_);
-    MsprofCompactInfo* copy = Mspti::Common::ReinterpretConvert<MsprofCompactInfo*>(malloc(sizeof(MsprofCompactInfo)));
-    if (copy == nullptr) {
+    auto cache = GetOrCreateCache(data->threadId);
+    if (cache == nullptr) {
+        MSPTI_LOGE("copy MsprofCompactInfo data failed");
         return MSPTI_ERROR_INNER;
     }
-    memcpy_s(copy, sizeof(MsprofCompactInfo), data, sizeof(MsprofCompactInfo));
-    taskQueue_[data->threadId].emplace_back(copy);
+    auto copy = compactPool_.Get();
+    if (copy == nullptr) {
+        MSPTI_LOGE("copy MsprofCompactInfo data failed");
+        return MSPTI_ERROR_INNER;
+    }
+    errno_t res = memcpy_s(copy.get(), sizeof(MsprofCompactInfo), data, sizeof(MsprofCompactInfo));
+    if (res != EOK) {
+        MSPTI_LOGE("memcpy MsprofCompactInfo failed! threadId is %d", data->threadId);
+        return MSPTI_ERROR_INNER;
+    }
+    cache->taskQueue.Push(copy);
     return MSPTI_SUCCESS;
 }
 
 // Queue的push pop的多线程放最后考虑
-msptiResult CannTrackCache::AppendNodeLunch(const MsprofApi* data)
+msptiResult CannTrackCache::AppendNodeLunch(const MsprofApi *data)
 {
     if (!Activity::ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_COMMUNICATION)) {
         return MSPTI_SUCCESS;
     }
+    auto cache = GetOrCreateCache(data->threadId);
+    if (cache == nullptr) {
+        return MSPTI_ERROR_INNER;
+    }
     {
-        std::lock_guard<std::mutex> lk(nodeLaunchMutex_);
-        MsprofApi* copy = Mspti::Common::ReinterpretConvert<MsprofApi*>(malloc(sizeof(MsprofApi)));
+        auto copy = apiPool_.Get();
         if (copy == nullptr) {
+            MSPTI_LOGE("copy NodeLunch MsprofApi data failed");
             return MSPTI_ERROR_INNER;
         }
-        memcpy_s(copy, sizeof(MsprofApi), data, sizeof(MsprofApi));
-        nodeLaunchQueue_[data->threadId].emplace(copy);
+        errno_t res = memcpy_s(copy.get(), sizeof(MsprofApi), data, sizeof(MsprofApi));
+        if (res != EOK) {
+            MSPTI_LOGE("memcpy nodeLaunch MsprofApi failed! threadId is %d", data->threadId);
+            return MSPTI_ERROR_INNER;
+        }
+        cache->nodeLaunchQueue.Push(copy);
     }
 
     {
@@ -131,60 +140,77 @@ msptiResult CannTrackCache::AppendNodeLunch(const MsprofApi* data)
 
     {
         std::lock_guard<std::mutex> lock(cvMutex_);
-        cv.notify_one();  // 通知消费者有新数据
+        cv.notify_one(); // 通知消费者有新数据
     }
     return MSPTI_SUCCESS;
 }
 
-msptiResult CannTrackCache::AppendCommunication(const MsprofApi* data)
+msptiResult CannTrackCache::AppendCommunication(const MsprofApi *data)
 {
     if (!Activity::ActivityManager::GetInstance()->IsActivityKindEnable(MSPTI_ACTIVITY_KIND_COMMUNICATION)) {
         return MSPTI_SUCCESS;
     }
-    std::lock_guard<std::mutex> lk(communicationMutex_);
-    MsprofApi* copy = Mspti::Common::ReinterpretConvert<MsprofApi*>(malloc(sizeof(MsprofApi)));
-    if (copy == nullptr) {
+    auto cache = GetOrCreateCache(data->threadId);
+    if (cache == nullptr) {
         return MSPTI_ERROR_INNER;
     }
-    memcpy_s(copy, sizeof(MsprofApi), data, sizeof(MsprofApi));
-    communicationQueue_[data->threadId].emplace(copy);
+    auto copy = apiPool_.Get();
+    if (copy == nullptr) {
+        MSPTI_LOGE("copy Communication MsprofApi data failed");
+        return MSPTI_ERROR_INNER;
+    }
+    errno_t res = memcpy_s(copy.get(), sizeof(MsprofApi), data, sizeof(MsprofApi));
+    if (res != EOK) {
+        MSPTI_LOGE("memcpy nodeLaunch MsprofApi failed! threadId is %d", data->threadId);
+        return MSPTI_ERROR_INNER;
+    }
+    cache->communicationQueue.Push(copy);
     return MSPTI_SUCCESS;
 }
 
-bool CannTrackCache::IsCommunicationNode(const MsprofApi &nodeLaunchApi)
+bool CannTrackCache::IsCommunicationNode(const MsprofApi &nodeLaunchApi, const CannThreadCachePtr &cache)
 {
-    std::lock_guard<std::mutex> lk(communicationMutex_);
-    if (!communicationQueue_.count(nodeLaunchApi.threadId) || communicationQueue_[nodeLaunchApi.threadId].empty()) {
+    if (cache->communicationQueue.IsEmpty()) {
         return false;
     }
-    return InApiRange(nodeLaunchApi, *communicationQueue_[nodeLaunchApi.threadId].front());
+    std::shared_ptr<MsprofApi> communication;
+    cache->communicationQueue.Peek(communication);
+    return InApiRange(nodeLaunchApi, *communication);
 }
 
-msptiResult CannTrackCache::Analysis(const MsprofApi &nodeLaunchApi)
+msptiResult CannTrackCache::Analysis(const CannThreadCachePtr &cache)
 {
-    std::shared_ptr<ApiEvent> api2TaskInfo;
-    Mspti::Common::MsptiMakeSharedPtr(api2TaskInfo);
-    if (!UNLIKELY(api2TaskInfo)) {
-        MSPTI_LOGE("fail to malloc api2TaskInfo");
-        return MSPTI_ERROR_INNER;
-    }
-    api2TaskInfo->api = nodeLaunchApi;
-    api2TaskInfo->threadId = nodeLaunchApi.threadId;
-    api2TaskInfo->level = nodeLaunchApi.level;
-    if (IsCommunicationNode(nodeLaunchApi)) {
-        MountCommunicationNode(*api2TaskInfo);
-        CommunicationCalculator::GetInstance().AppendApi2TaskInfo(api2TaskInfo);
-    } else {
-        MountCompactInfo(*api2TaskInfo);
+    while (!cache->nodeLaunchQueue.IsEmpty()) {
+        std::shared_ptr<MsprofApi> nodeLaunchApi;
+        cache->nodeLaunchQueue.Pop(nodeLaunchApi);
+
+        std::shared_ptr<ApiEvent> api2TaskInfo;
+        Mspti::Common::MsptiMakeSharedPtr(api2TaskInfo);
+        if (!UNLIKELY(api2TaskInfo)) {
+            MSPTI_LOGE("fail to malloc api2TaskInfo");
+            return MSPTI_ERROR_INNER;
+        }
+        api2TaskInfo->api = *nodeLaunchApi;
+        api2TaskInfo->threadId = nodeLaunchApi->threadId;
+        api2TaskInfo->level = nodeLaunchApi->level;
+        if (IsCommunicationNode(*nodeLaunchApi, cache)) {
+            MountCommunicationNode(*api2TaskInfo, cache);
+            CommunicationCalculator::GetInstance().AppendApi2TaskInfo(api2TaskInfo);
+        } else {
+            MountCompactInfo(*api2TaskInfo, cache);
+        }
     }
     return MSPTI_SUCCESS;
 }
 
-void CannTrackCache::MountCommunicationNode(ApiEvent& apiEvent)
+void CannTrackCache::MountCommunicationNode(ApiEvent &apiEvent, const CannThreadCachePtr &cache)
 {
-    std::lock_guard<std::mutex> lk(communicationMutex_);
-    while (!communicationQueue_[apiEvent.threadId].empty()
-           && InApiRange(apiEvent.api, *communicationQueue_[apiEvent.threadId].front())) {
+    std::shared_ptr<MsprofApi> frontApi;
+    while (!cache->communicationQueue.IsEmpty()) {
+        cache->communicationQueue.Peek(frontApi);
+        if (!InApiRange(apiEvent.api, *frontApi)) {
+            return;
+        }
         std::shared_ptr<ApiEvent> communicationTask;
         Mspti::Common::MsptiMakeSharedPtr(communicationTask);
         if (!UNLIKELY(communicationTask)) {
@@ -192,44 +218,39 @@ void CannTrackCache::MountCommunicationNode(ApiEvent& apiEvent)
             return;
         }
         communicationTask->threadId = apiEvent.threadId;
-        communicationTask->api = *communicationQueue_[apiEvent.threadId].front();
+        communicationTask->api = *frontApi;
         communicationTask->level = communicationTask->api.level;
-        MountCompactInfo(*communicationTask);
-
+        MountCompactInfo(*communicationTask, cache);
         apiEvent.childs.emplace_back(communicationTask);
-        communicationQueue_[apiEvent.threadId].pop();
+        cache->communicationQueue.Pop(frontApi);
     }
 }
 
-void CannTrackCache::MountCompactInfo(ApiEvent& apiEvent)
+void CannTrackCache::MountCompactInfo(ApiEvent &apiEvent, const CannThreadCachePtr &cache)
 {
-    auto threadId = apiEvent.threadId;
-    std::lock_guard<std::mutex> lk(taskMutex_);
-    auto it = taskQueue_.find(threadId);
-    if (it == taskQueue_.end() || it->second.empty()) {
-        return;
-    }
-
-    std::deque<std::shared_ptr<MsprofCompactInfo>> beforeQueue;
-    auto& queue = it->second;
-    while (!queue.empty() && queue.front()->timeStamp < apiEvent.api.beginTime) {
-        beforeQueue.push_back(queue.front());
-        queue.pop_front();
-    }
-
-    while (!queue.empty()) {
-        auto curTask = queue.front();
-        if (!InApiRange(apiEvent.api, *curTask)) {
-            break;
-        }
+    std::shared_ptr<MsprofCompactInfo> curTask;
+    auto res = cache->taskQueue.PopIf(curTask, [&apiEvent](const std::shared_ptr<MsprofCompactInfo>& item) {
+        return InApiRange(apiEvent.api, *item);
+    });
+    if (res) {
         apiEvent.compactInfo = *curTask;
-        queue.pop_front();
-    }
-
-    if (!beforeQueue.empty()) {
-        queue.insert(queue.end(), beforeQueue.begin(), beforeQueue.end());
     }
 }
 
+CannThreadCachePtr CannTrackCache::GetOrCreateCache(uint64_t threadId)
+{
+    std::lock_guard<std::mutex> lock(threadCachesMutex_);
+    auto it = threadCaches_.find(threadId);
+    if (it != threadCaches_.end()) {
+        return it->second;
+    }
+    std::shared_ptr<CannThreadCache> cache;
+    Mspti::Common::MsptiMakeSharedPtr(cache);
+    if (cache == nullptr) {
+        return nullptr;
+    }
+    threadCaches_[threadId] = cache;
+    return cache;
+}
 }
 }

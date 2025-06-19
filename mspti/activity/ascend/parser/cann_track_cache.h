@@ -19,6 +19,7 @@
 #include "common/task.h"
 #include "common/bound_queue.h"
 #include "unordered_map"
+#include "common/object_pool.h"
 
 namespace Mspti {
 namespace Parser {
@@ -60,6 +61,14 @@ private:
     explicit NullProfTask() = default;
 };
 
+struct CannThreadCache {
+    Mspti::Common::MPSCQueue<std::shared_ptr<MsprofCompactInfo>> taskQueue;
+    Mspti::Common::MPSCQueue<std::shared_ptr<MsprofApi>> nodeLaunchQueue;
+    Mspti::Common::MPSCQueue<std::shared_ptr<MsprofApi>> communicationQueue;
+};
+
+using CannThreadCachePtr = std::shared_ptr<CannThreadCache>;
+
 class CannTrackCache final : public ProfTask {
 public:
     msptiResult AppendTsTrack(const MsprofCompactInfo* data);
@@ -85,26 +94,25 @@ private:
 
     msptiResult StopTask() override;
 
-    msptiResult Analysis(const MsprofApi &data);
+    msptiResult Analysis(const CannThreadCachePtr& cache);
 
-    void MountCompactInfo(ApiEvent& apiEvent);
+    CannThreadCachePtr GetOrCreateCache(uint64_t threadId);
 
-    bool IsCommunicationNode(const MsprofApi &nodeLaunchApi);
+    void MountCompactInfo(ApiEvent& apiEvent, const CannThreadCachePtr& cache);
 
-    void MountCommunicationNode(ApiEvent &apiEvent);
+    bool IsCommunicationNode(const MsprofApi &nodeLaunchApi, const CannThreadCachePtr& cache);
+
+    void MountCommunicationNode(ApiEvent &apiEvent, const CannThreadCachePtr& cache);
 
 private:
-    // taskTrack
-    std::mutex taskMutex_;
-    std::unordered_map<std::uint64_t, std::deque<std::shared_ptr<MsprofCompactInfo>>> taskQueue_;
-    // nodeLaunchApi
-    std::mutex nodeLaunchMutex_;
-    std::unordered_map<std::uint64_t, std::queue<std::shared_ptr<MsprofApi>>> nodeLaunchQueue_;
+    std::mutex threadCachesMutex_;
+    std::unordered_map<std::uint64_t, CannThreadCachePtr> threadCaches_;
+
     std::mutex targetThreadMutex_;
     std::vector<uint64_t> targetThreadId_;
-    // communicationApi
-    std::mutex communicationMutex_;
-    std::unordered_map<std::uint64_t, std::queue<std::shared_ptr<MsprofApi>>> communicationQueue_;
+
+    Common::ObjectPool<MsprofApi, Common::OBJECT_POOL_DEFAULT_SIZE> apiPool_;
+    Common::ObjectPool<MsprofCompactInfo, Common::OBJECT_POOL_DEFAULT_SIZE> compactPool_;
 
     std::mutex cvMutex_;
     std::condition_variable cv;

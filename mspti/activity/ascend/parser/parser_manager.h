@@ -13,7 +13,6 @@
 #define MSPTI_PARSER_PARSER_MANAGER_H
 
 #include <atomic>
-#include <map>
 #include <tuple>
 #include <mutex>
 #include <memory>
@@ -27,7 +26,7 @@
 #include "common/inject/hccl_inject.h"
 #include "activity/ascend/channel/channel_data.h"
 #include "external/mspti_activity.h"
-
+#include "common/utils.h"
 #include "cann_track_cache.h"
 
 namespace Mspti {
@@ -71,7 +70,7 @@ private:
 
 private:
     // map<<deviceId, streamId, taskId>, list<msptiActivityKernel*>>
-    std::map<DstType, std::list<std::shared_ptr<msptiActivityKernel>>> kernel_map_;
+    std::unordered_map<DstType, std::list<std::shared_ptr<msptiActivityKernel>>, Common::TupleHash> kernel_map_;
     std::mutex kernel_mtx_;
 
     // <level, <typeid, typename>>

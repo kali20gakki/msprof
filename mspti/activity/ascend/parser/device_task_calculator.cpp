@@ -76,17 +76,6 @@ msptiResult DeviceTaskCalculator::AssembleTasksTimeWithSocLog(uint32_t deviceId,
             assembleTasks_[dstKey].pop_front();
         }
     }
-
-    {
-        std::lock_guard<std::mutex> lk(assembleSubTaskMutex_);
-        if (socLog->funcType == STARS_FUNC_TYPE_END && deviceTask) {
-            for (auto &subTask : deviceTask->subTasks) {
-                auto dstsKey =
-                        std::make_tuple(static_cast<uint16_t>(deviceId), streamId, taskId, subTask->subTaskId);
-                assembleSubTasks_[dstsKey].pop_front();
-            }
-        }
-    }
     return ans;
 }
 
@@ -114,7 +103,7 @@ msptiResult DeviceTaskCalculator::AssembleSubTasksTimeWithFftsLog(uint32_t devic
                 MSPTI_LOGE("fail to malloc subTask");
                 return MSPTI_ERROR_INNER;
             }
-            assembleSubTasks_[dstsKey].push_back(subTask);
+            assembleSubTasks_[dstsKey].emplace_back(subTask);
         }
         auto subTask = assembleSubTasks_[dstsKey].front();
         if (fftsLog->funcType == FFTS_PLUS_TYPE_START) {
@@ -131,6 +120,7 @@ msptiResult DeviceTaskCalculator::AssembleSubTasksTimeWithFftsLog(uint32_t devic
                 assembleTasks_[dstKey].front()->isFfts = true;
                 assembleTasks_[dstKey].front()->subTasks.emplace_back(subTask);
             }
+            assembleSubTasks_[dstsKey].pop_front();
         }
     }
     return MSPTI_SUCCESS;

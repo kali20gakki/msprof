@@ -17,6 +17,7 @@
 #include <mutex>
 #include <queue>
 #include <vector>
+#include <atomic>
 
 namespace Mspti {
 namespace Common {
@@ -173,6 +174,105 @@ private:
     std::condition_variable cvPush_;
     std::condition_variable cvPop_;
 };
+
+template <typename T>
+class MPSCQueue {
+public:
+    explicit MPSCQueue()
+    {
+        Node* dummy = new Node();
+        head_.store(dummy);
+        tail_ = dummy;
+    }
+
+    ~MPSCQueue()
+    {
+        while (!IsEmpty()) {
+            T ans;
+            Pop(ans);
+        }
+        delete tail_;
+    }
+
+    bool Push(const T& value)
+    {
+        Node* node = new Node(value);
+        Node* prev = head_.exchange(node, std::memory_order_acq_rel);
+        prev->next.store(node, std::memory_order_release);
+        return true;
+    }
+
+    // 仅限单线程调用，非线程安全
+    bool Pop(T& result)
+    {
+        Node* next = tail_->next.load(std::memory_order_acquire);
+        if (!next) return false;
+
+        result = std::move(*next->data);
+        delete tail_;
+        tail_ = next;
+        return true;
+    }
+
+    // 仅限单线程调用，非线程安全
+    bool Peek(T& result)
+    {
+        Node* next = tail_->next.load(std::memory_order_acquire);
+        if (!next) return false;
+
+        result = *next->data;
+        return true;
+    }
+
+    // 仅单线程调用
+    bool IsEmpty() const
+    {
+        return tail_->next.load(std::memory_order_acquire) == nullptr;
+    }
+
+    // 仅单线程调用
+    template<typename Predicate>
+    bool PopIf(T& result, Predicate pred)
+    {
+        Node* prev = tail_;
+        Node* curr = tail_->next.load(std::memory_order_acquire);
+        
+        while (curr != nullptr) {
+            if (pred(*curr->data)) {
+                // 找到满足条件的节点
+                Node* next = curr->next.load(std::memory_order_acquire);
+                prev->next.store(next, std::memory_order_release);
+
+                if (curr == head_.load(std::memory_order_acquire)) {
+                    head_.compare_exchange_strong(curr, prev);
+                }
+
+                result = std::move(*curr->data);
+                delete curr;
+                tail_ = prev;
+                
+                return true;
+            }
+            
+            prev = curr;
+            curr = curr->next.load(std::memory_order_acquire);
+        }
+        return false;
+    }
+
+private:
+    struct Node {
+        std::unique_ptr<T> data;
+        std::atomic<Node*> next;
+
+        Node() : next(nullptr) {}
+        explicit Node(T value) : data(std::make_unique<T>(std::move(value))), next(nullptr) {}
+    };
+
+    std::atomic<Node*> head_{};
+    Node* tail_;  // only used by consumer thread
+};
+
 }  // Common
 }  // Mspti
 

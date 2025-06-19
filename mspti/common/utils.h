@@ -17,6 +17,11 @@
 #include <exception>
 #include <memory>
 #include <string>
+#include <tuple>
+#include <cstddef>
+#include <functional>
+#include <utility>
+#include <initializer_list>
 
 #ifndef UNLIKELY
 #ifdef _MSC_VER
@@ -26,7 +31,12 @@
 #endif
 #endif
 
-constexpr uint32_t SECTONSEC = 1000000000UL;
+namespace {
+    constexpr std::size_t GOLDEN_RATIO = 0x9e3779b9;
+    constexpr int SHIFT_LEFT  = 6;
+    constexpr int SHIFT_RIGHT = 2;
+    constexpr uint32_t SECTONSEC = 1000000000UL;
+}
 
 template<typename T>
 void UNUSED(T&& x)
@@ -80,6 +90,34 @@ static uint64_t GetHashIdImple(const std::string &hashInfo)
     }
     return (((static_cast<uint64_t>(hash[0])) << UINT32_BITS) | hash[1]);
 }
+
+struct TupleHash {
+    template <typename Tuple>
+    std::size_t operator()(const Tuple& t) const
+    {
+        return HashTupleImpl(t, std::make_index_sequence<std::tuple_size<Tuple>::value>{});
+    }
+
+private:
+    template <typename Tuple, std::size_t... I>
+    static std::size_t HashTupleImpl(const Tuple& t, std::index_sequence<I...>)
+    {
+        std::size_t seed = 0;
+        (void)std::initializer_list<int>{
+                (HashCombine(seed, std::get<I>(t)), 0)...
+        };
+        return seed;
+    }
+
+    template <typename T>
+    static void HashCombine(std::size_t& seed, const T& val)
+    {
+        std::size_t h = std::hash<T>{}(val);
+        seed ^= h + GOLDEN_RATIO
+                + (seed << SHIFT_LEFT)
+                + (seed >> SHIFT_RIGHT);
+    }
+};
 
 class Utils {
 public:
