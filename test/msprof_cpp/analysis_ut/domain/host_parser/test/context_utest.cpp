@@ -141,6 +141,15 @@ TEST_F(ContextUTest, TestLoadShouldReturnTrueWhenReadJsonSuccess)
     EXPECT_TRUE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
 }
 
+TEST_F(ContextUTest, TestLoadShouldReturnFalseWhenDeviceIdIsInvalid)
+{
+    MOCKER_CPP(&Analysis::Utils::GetDeviceIdByDevicePath)
+    .stubs()
+    .will(returnValue(INVALID_DEVICE_ID));
+    EXPECT_FALSE(Context::GetInstance().Load({File::PathJoin({CONTEXT_DIR, LOCAL_DIR})}));
+    MOCKER_CPP(&Analysis::Utils::GetDeviceIdByDevicePath).reset();
+}
+
 TEST_F(ContextUTest, TestLoadShouldFalseWhenNoValue)
 {
     EXPECT_TRUE(File::DeleteFile(File::PathJoin({CONTEXT_DIR, TEST_DIR, HOST, INFO_JSON})));

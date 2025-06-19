@@ -61,7 +61,7 @@ bool KfcTaskProcessor::Process(DataInventory& dataInventory)
 
         auto commStatus = CheckPathAndTable(dbPath, kfcCommTurnDB, false);
         if (commStatus == CHECK_SUCCESS) {
-            auto commData = LoadCommData(kfcCommTurnDB, dbPath);
+            auto commData = LoadCommData(kfcCommTurnDB, dbPath, deviceId);
             std::vector<KfcTurnData> kfcCommTurnData = FormatCommData(commData, params, record);
             FilterDataByStartTime(kfcCommTurnData, record.startTimeNs, PROCESSOR_NAME_KFC_TASK);
             result.insert(result.end(), kfcCommTurnData.begin(), kfcCommTurnData.end());
@@ -77,7 +77,8 @@ bool KfcTaskProcessor::Process(DataInventory& dataInventory)
     return flag;
 }
 
-std::vector<KfcCommTurn> KfcTaskProcessor::LoadCommData(const DBInfo &kfcDB, const std::string &dbPath)
+std::vector<KfcCommTurn> KfcTaskProcessor::LoadCommData(const DBInfo &kfcDB, const std::string &dbPath,
+                                                        uint16_t deviceId)
 {
     std::vector<KfcCommTurn> kfcCommTurnData;
     OriKfcCommData oriData;
@@ -85,9 +86,10 @@ std::vector<KfcCommTurn> KfcTaskProcessor::LoadCommData(const DBInfo &kfcDB, con
         ERROR("Create % connection failed.", dbPath);
         return kfcCommTurnData;
     }
-    std::string sql = "SELECT device_id, stream_id, task_id, comm_turn, current_turn, server_start_time, "
-                      "wait_msg_start_time, kfc_alg_exe_start_time, send_task_start_time, send_sqe_finish_time, "
-                      "rtsq_exe_end_time, server_end_time "
+    // 原taskTurn里的deviceId不可用 底层感知不到真实deviceId 上报的是rankId
+    std::string sql = "SELECT " + std::to_string(deviceId) + " AS device_id, stream_id, task_id, comm_turn, "
+                      "current_turn, server_start_time, wait_msg_start_time, kfc_alg_exe_start_time, "
+                      "send_task_start_time, send_sqe_finish_time, rtsq_exe_end_time, server_end_time "
                       "FROM " + kfcDB.tableName;
     if (!kfcDB.dbRunner->QueryData(sql, oriData)) {
         ERROR("Query KfcCommTurn data failed, db path is %.", dbPath);

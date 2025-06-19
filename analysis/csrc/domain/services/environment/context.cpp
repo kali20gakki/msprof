@@ -51,6 +51,10 @@ bool Context::Load(const std::set<std::string> &profPaths)
         std::vector<std::string> deviceDirs = File::GetOriginData(profPath, {HOST, DEVICE_PREFIX}, {});
         for (const auto &deviceDir: deviceDirs) {
             uint16_t deviceId = Utils::GetDeviceIdByDevicePath(deviceDir);
+            if (deviceId == INVALID_DEVICE_ID) {
+                ERROR("The prof path's deviceId is invalid.");
+                return false;
+            }
             if (!LoadJsonData(profPath, deviceDir, deviceId)) {
                 return false;
             }
