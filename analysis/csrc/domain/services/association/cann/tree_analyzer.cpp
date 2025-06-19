@@ -574,6 +574,8 @@ ComputeOpDescs TreeAnalyzer::GetComputeOpDescs(const std::shared_ptr<TreeNode> &
             auto ctxIdNode = ReinterpretConvert<MsprofContextIdInfo *>(trace->data);
             UpdateComputeOpDescs<MsprofAdditionalInfo, &OpDesc::ctxId>(opDescs, trace,
                                                                        ctxIdNode->opName);
+        } else if (record->info.type == EventType::EVENT_TYPE_HCCL_OP_INFO) {
+            continue;
         } else {
             ERROR("Unsupported additional type = %, threadId = %",
                   static_cast<uint16_t>(record->info.type), threadId_);
