@@ -63,7 +63,7 @@ public:
     explicit KfcTaskProcessor(const std::string &profPath);
 private:
     bool Process(DataInventory& dataInventory) override;
-    std::vector<KfcCommTurn> LoadCommData(const DBInfo &kfcDB, const std::string &dbPath);
+    std::vector<KfcCommTurn> LoadCommData(const DBInfo &kfcDB, const std::string &dbPath, uint16_t deviceId);
     std::vector<KfcComputeTurn> LoadComputeData(const DBInfo &kfcDB, const std::string &dbPath);
     std::vector<KfcTurnData> FormatCommData(const std::vector<KfcCommTurn> &oriCommData,
                                             const SyscntConversionParams& params,
