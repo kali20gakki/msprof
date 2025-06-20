@@ -65,7 +65,9 @@ namespace {
         {"outputFormats", SQL_INTEGER_TYPE},
         {"outputDataTypes", SQL_INTEGER_TYPE},
         {"outputShapes", SQL_INTEGER_TYPE},
-        {"attrInfo", SQL_INTEGER_TYPE}
+        {"attrInfo", SQL_INTEGER_TYPE},
+        {"opState", SQL_INTEGER_TYPE},
+        {"hf32Eligible", SQL_INTEGER_TYPE}
     };
 
     const TableColumns COMMUNICATION_SCHEDULE_TASK_INFO = {

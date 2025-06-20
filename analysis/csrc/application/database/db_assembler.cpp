@@ -56,7 +56,7 @@ const std::string COMM_INDEX_NAME = "CommunicationTaskIndex";
 const std::vector<std::string> COMM_TASK_INDEX_COLS = {"globalTaskId"};
 using CommScheduleDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t>>;
 using ComputeTaskInfoFormat = std::vector<std::tuple<uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t,
-        uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
+        uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>>;
 // 大算子数据
 // opName, start, end, connectionId, group_name, opId, relay, retry, data_type, alg_type, count, op_type
 using CommunicationOpDataFormat = std::vector<std::tuple<uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
@@ -79,6 +79,8 @@ struct ComputeTaskInfoData {
     uint64_t outputDataTypes;
     uint64_t outputShapes;
     uint64_t hashId;  // 对应attrInfo
+    uint64_t opState;
+    uint64_t hf32Eligible;  // opFlag
 };
 
 std::string ReplaceQuotes(const std::string& input)
@@ -718,10 +720,13 @@ bool SaveComputeTaskInfo(DataInventory& dataInventory, DBInfo& msprofDB, const s
         }
         ProcessShapeInfo(taskInfoData, item);
         taskInfoData.hashId = IdPool::GetInstance().GetUint64Id(item.hashId);
+        taskInfoData.opState = IdPool::GetInstance().GetUint64Id(item.opState);
+        taskInfoData.hf32Eligible = IdPool::GetInstance().GetUint64Id(item.opFlag);
         res.emplace_back(taskInfoData.opName, taskInfoData.globalTaskId, item.blockDim, item.mixBlockDim,
                          taskInfoData.taskType, taskInfoData.opType, taskInfoData.inputFormats,
                          taskInfoData.inputDataTypes, taskInfoData.inputShapes, taskInfoData.outputFormats,
-                         taskInfoData.outputDataTypes, taskInfoData.outputShapes, taskInfoData.hashId);
+                         taskInfoData.outputDataTypes, taskInfoData.outputShapes, taskInfoData.hashId,
+                         taskInfoData.opState, taskInfoData.hf32Eligible);
     }
     bool flag = true;
     if (!res.empty()) {
@@ -1111,6 +1116,8 @@ DBAssembler::DBAssembler(const std::string& msprofDBPath, const std::string& pro
 
 bool DBAssembler::Run(DataInventory& dataInventory)
 {
+    INFO("Start exporting db!");
+    PRINT_INFO("Start exporting the db!");
     bool retFlag = true;
     for (const auto& saveFunc : DATA_SAVER) {
         INFO("Begin to save % data.", saveFunc.first);
@@ -1122,6 +1129,7 @@ bool DBAssembler::Run(DataInventory& dataInventory)
     }
     // StringIds为id到name映射表，需要最后落盘
     retFlag = SaveStringIdsData(dataInventory, msprofDB_, profPath_) && retFlag;
+    PRINT_INFO("End exporting db output_file. The file is stored in the PROF file.");
     return retFlag;
 }
 
