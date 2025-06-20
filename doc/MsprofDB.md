@@ -420,21 +420,23 @@ db命名：msprof_{时间戳}.db
 
 格式：
 
-| 字段名             | 类型      | 索引  | 含义                                                   |
-|-----------------|---------|-----|------------------------------------------------------|
-| name            | INTEGER |     | 算子名，STRING_IDS(name)                                 |
-| globalTaskId    | INTEGER | 主键  | 全局算子任务id，用于关联TASK表                                   |
-| blockDim        | INTEGER |     | 算子运行切分数量，对应算子运行时核数                                   |
-| mixBlockDim     | INTEGER |     | mix算子从加速器的block_dim值                                 |
-| taskType        | INTEGER |     | host执行该算子的加速器类型，STRING_IDS(taskType)                 |
-| opType          | INTEGER |     | 算子类型，STRING_IDS(opType)                              |
-| inputFormats    | INTEGER |     | 算子输入数据格式，STRING_IDS(inputFormats)                    |
-| inputDataTypes  | INTEGER |     | 算子输入数据类型，STRING_IDS(inputDataTypes)                  |
-| inputShapes     | INTEGER |     | 算子的输入维度，STRING_IDS(inputShapes)                      |
-| outputFormats   | INTEGER |     | 算子输出数据格式，STRING_IDS(outputFormats)                   |
-| outputDataTypes | INTEGER |     | 算子输出数据类型，STRING_IDS(outputDataTypes)                 |
-| outputShapes    | INTEGER |     | 算子输出维度，STRING_IDS(outputShapes)                      |
-| attrInfo        | INTEGER |     | 算子的attr信息，用来映射算子shape，算子自定义的参数等，STRING_IDS(attrInfo) |
+| 字段名             | 类型      | 索引  | 含义                                                                  |
+|-----------------|---------|-----|---------------------------------------------------------------------|
+| name            | INTEGER |     | 算子名，STRING_IDS(name)                                                |
+| globalTaskId    | INTEGER | 主键  | 全局算子任务id，用于关联TASK表                                                  |
+| blockDim        | INTEGER |     | 算子运行切分数量，对应算子运行时核数                                                  |
+| mixBlockDim     | INTEGER |     | mix算子从加速器的block_dim值                                                |
+| taskType        | INTEGER |     | host执行该算子的加速器类型，STRING_IDS(taskType)                                |
+| opType          | INTEGER |     | 算子类型，STRING_IDS(opType)                                             |
+| inputFormats    | INTEGER |     | 算子输入数据格式，STRING_IDS(inputFormats)                                   |
+| inputDataTypes  | INTEGER |     | 算子输入数据类型，STRING_IDS(inputDataTypes)                                 |
+| inputShapes     | INTEGER |     | 算子的输入维度，STRING_IDS(inputShapes)                                     |
+| outputFormats   | INTEGER |     | 算子输出数据格式，STRING_IDS(outputFormats)                                  |
+| outputDataTypes | INTEGER |     | 算子输出数据类型，STRING_IDS(outputDataTypes)                                |
+| outputShapes    | INTEGER |     | 算子输出维度，STRING_IDS(outputShapes)                                     |
+| attrInfo        | INTEGER |     | 算子的attr信息，用来映射算子shape，算子自定义的参数等，STRING_IDS(attrInfo)                |
+| opState        | INTEGER |     | 算子的动静态信息，dynamic表示动态算子，static表示静态算子，N/A表示该场景或该算子不识别，STRING_IDS(opState)    |
+| hf32Eligible        | INTEGER |     | 标识是否使用HF32精度标记，YES表示使用，NO表示未使用，N/A表示该场景或该算子不识别，STRING_IDS(hf32Eligible) |
 
 
 变更记录：
@@ -443,6 +445,7 @@ db命名：msprof_{时间戳}.db
 |-----------|-----------------------------------|
 | 2024/3/7  | 330首次上线                           |
 | 2024/5/19 | 修改原有block_dim为blockDim，统一命名风格为小驼峰 |
+| 2025/6/20 | 新增opState和hf32Eligible            |
 
 
 ### COMMUNICATION_TASK_INFO
