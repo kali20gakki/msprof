@@ -53,6 +53,12 @@ uint32_t HcclCalculator::ProcessEntry(DataInventory& dataInventory, const Contex
         ERROR("Failed to Get hccl task data or op data.");
         return ANALYSIS_ERROR;
     }
+
+    // 前面多线程数据处理 此处的task可能不保序 重新排序
+    std::sort(taskData_.begin(), taskData_.end(), [](const DeviceHcclTask& task1, const DeviceHcclTask& task2) {
+        return std::tie(task1.hostTimestamp, task1.timestamp) < std::tie(task2.hostTimestamp, task2.timestamp);
+    });
+
     UpdateHcclOpNameByGroupName();
     UpdateHcclBandwidth();
     if (!GetHcclStatisticsData(context)) {

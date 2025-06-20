@@ -10,6 +10,7 @@
  * *****************************************************************************
  */
 #include "communication_info_processor.h"
+#include <limits>
 #include "analysis/csrc/domain/services/environment/context.h"
 
 namespace Analysis {
@@ -21,9 +22,9 @@ const size_t OPNAME_INDEX = 1;
 const size_t RELAY_INDEX = 2;
 const size_t RETRY_INDEX = 3;
 struct CommunicationOpEndpointsTime {
-    double firstTaskStartTime;
-    double lastTaskStartTime;
-    double lastTaskDuration;
+    double firstTaskStartTime = std::numeric_limits<double>::max();
+    double lastTaskStartTime = 0.0;
+    double lastTaskDuration = 0.0;
 };
 
 // groupName 依据hash进行转换，对于无hash的数据，直接取用hash值（即groupName）进行转换
@@ -137,20 +138,14 @@ bool CommunicationInfoProcessor::FormatData(std::vector<CommunicationTaskData>& 
         if (opDataMap.find(taskData.opKey) == opDataMap.end()) {
             opDataMap[taskData.opKey].opKey = taskData.opKey;
             opDataMap[taskData.opKey].opName = taskData.opName;
-            endpoints[taskData.opKey].firstTaskStartTime = hcclData.timestamp;
-            endpoints[taskData.opKey].lastTaskStartTime = hcclData.timestamp;
-            endpoints[taskData.opKey].lastTaskDuration = hcclData.duration;
             opDataMap[taskData.opKey].connectionId = hcclData.connectionId;
             opDataMap[taskData.opKey].groupName = taskData.groupName;
             opDataMap[taskData.opKey].deviceId = taskData.deviceId;
             UpdateOpInfo(opDataMap[taskData.opKey], hcclData.connectionId, opInfoIdxMap, communicationData.oriOpData,
                          communicationData);
-            if (taskData.isMaster) {
-                endpoints[taskData.opKey].firstTaskStartTime = hcclData.timestamp;
-                endpoints[taskData.opKey].lastTaskStartTime = hcclData.timestamp;
-                endpoints[taskData.opKey].lastTaskDuration = hcclData.duration;
-            }
-        } else if (taskData.isMaster) {
+        }
+
+        if (taskData.isMaster) {
             endpoints[taskData.opKey].firstTaskStartTime = std::min(endpoints[taskData.opKey].firstTaskStartTime,
                                                                     hcclData.timestamp);
             if (hcclData.timestamp + hcclData.duration > endpoints[taskData.opKey].lastTaskStartTime +
@@ -163,6 +158,10 @@ bool CommunicationInfoProcessor::FormatData(std::vector<CommunicationTaskData>& 
     for (auto& item : opDataMap) {
         auto key = item.first;
         auto data = item.second;
+        if (endpoints.find(key) == endpoints.end()) {
+            ERROR("Can't match any master task in this op, key is %.", key);
+            continue;
+        }
         HPFloat start{endpoints[key].firstTaskStartTime};
         HPFloat end = HPFloat(endpoints[key].lastTaskStartTime) + HPFloat(endpoints[key].lastTaskDuration);
         data.timestamp = Utils::GetLocalTime(start, communicationData.timeRecord).Uint64();

@@ -72,11 +72,16 @@ const HcclTaskSingleDeviceFormat DATA_A{
     {4294967295, -1, "hcom_allReduce__360_0_1", 0, "Reduce23", "10652832407468360",
         78180470736653, 0, 781687236999152, 2994.875, 1, "HCCL", "hcom_allReduce_", 126,
         1, 11, 2, 14.1825906735751, 0, 0, "SDMA", 262144, "FP16",
+        "HCCS",    87.530865228098, 4294967295, 8,          1, "INVALID_TYPE"},
+    // 用于测试无主流通信算子的场景
+    {4294967295, -1, "hcom_allReduce__360_888_1", 0, "Reduce23", "10652832407468360",
+        2000026362976, 0, 2000026362976, 2994.875, 1, "HCCL", "hcom_allReduce_", 126,
+        0, 11, 2, 14.1825906735751, 0, 0, "SDMA", 262144, "FP16",
         "HCCS",    87.530865228098, 4294967295, 8,          1, "INVALID_TYPE"}
 };
 const HcclOpSingleDeviceFormat DATA_OP_A{
     {4294967295, "hcom_allReduce_", "HCCL", "hcom_allReduce_",
-        821026362976, 0, 1, "INT16", "HD-NB", 3021, "10652832407468360", 125}
+        821026362976, 0, 1, "INT16", "HD-NB", 3021, "10652832407468360", 125},
 };
 const HcclTaskSingleDeviceFormat DATA_B{
     {4294967295, -1, "hcom_allReduce__233_0_2", 0, "Memcpy23", "10653832407468233",

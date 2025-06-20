@@ -367,6 +367,7 @@ class KfcCalculator(ICalculator, MsMultiProcess):
             idx = 0
             match_num = 0
             kfc_op_data = self._kfc_op_data.get(group_name, [])
+            kfc_op_data.sort(key=lambda x: x[3])
             self._kfc_task_data[group_name] = [None] * len(hccl_small_task)
             for kfc_op in kfc_op_data:
                 # kfc_op[3]: kfc op start time
