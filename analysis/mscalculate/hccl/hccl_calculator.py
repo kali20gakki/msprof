@@ -217,6 +217,9 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                 logging.error("communication data is empty")
                 return
 
+            # 前面多线程数据处理 此处的task可能不保序 重新排序
+            communication_data.sort(key=lambda x: (x.host_timestamp, x.timestamp))
+
             self.update_op_name_by_group_name(communication_data)
             self.update_bandwidth(communication_data)
             is_hccl_op_type_valid = self._generate_hccl_op_info(communication_data)
