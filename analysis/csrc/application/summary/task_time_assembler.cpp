@@ -96,7 +96,7 @@ void TaskTimeAssembler::AssembleTaskTime(const std::vector<AscendTaskData> &asce
         auto row = {std::to_string(ascendTaskDatum.deviceId),
                     opName, taskType, std::to_string(taskId.streamId),
                     std::to_string(taskId.taskId),
-                    DivideByPowersOfTenWithPrecision(ascendTaskDatum.duration),
+                    DivideByPowersOfTenWithPrecision(static_cast<uint64_t>(ascendTaskDatum.duration)),
                     DivideByPowersOfTenWithPrecision(ascendTaskDatum.timestamp) + DIVIDE_CHAR,
                     DivideByPowersOfTenWithPrecision(ascendTaskDatum.end) + DIVIDE_CHAR};
         // The original code contains a task start time filtering logic, of which is done in processor.

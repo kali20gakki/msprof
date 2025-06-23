@@ -580,7 +580,7 @@ uint64_t Context::GetNetCardTotalSpeed(uint16_t deviceId, const std::string &pro
     // 负数不计数
     for (const auto netCard : info.at("netCard")) {
         auto speed = netCard.value("speed", 0);
-        totalSpeed += (speed < 0) ? 0 : speed;
+        totalSpeed += (speed < 0) ? 0 : static_cast<uint64_t>(speed);
     }
     return totalSpeed;
 }

@@ -39,7 +39,7 @@ bool ThreadPool::Start()
         return false;
     }
 
-    if (threadsNum_ <= 0) {
+    if (threadsNum_ == 0) {
         ERROR("ThreadPool thread number is less than 0");
         return false;
     }
