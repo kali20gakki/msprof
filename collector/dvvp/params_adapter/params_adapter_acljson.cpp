@@ -154,18 +154,18 @@ void ParamsAdapterAclJson::GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> ac
     paramContainer_[INPUT_CFG_COM_RUNTIME_API] = aclCfg->runtimeApi;
     paramContainer_[INPUT_CFG_COM_AIC_METRICS] = aclCfg->aicMetrics;
     paramContainer_[INPUT_CFG_COM_AIV_METRICS] = aclCfg->aivMetrics;
-    paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = (aclCfg->sysHardwareMemFreq <= 0) ? "" :
+    paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = (aclCfg->sysHardwareMemFreq == 0) ? "" :
         std::to_string(aclCfg->sysHardwareMemFreq);
     paramContainer_[INPUT_CFG_COM_LLC_MODE] = aclCfg->llcProfiling;
-    paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = (aclCfg->sysIoSamplingFreq <= 0) ? "" :
+    paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = (aclCfg->sysIoSamplingFreq == 0) ? "" :
         std::to_string(aclCfg->sysIoSamplingFreq);
-    paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = (aclCfg->sysInterconnectionFreq <= 0) ? "" :
+    paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = (aclCfg->sysInterconnectionFreq == 0) ? "" :
         std::to_string(aclCfg->sysInterconnectionFreq);
-    paramContainer_[INPUT_CFG_COM_DVPP_FREQ] = (aclCfg->dvppFreq <= 0) ? "" :
+    paramContainer_[INPUT_CFG_COM_DVPP_FREQ] = (aclCfg->dvppFreq == 0) ? "" :
         std::to_string(aclCfg->dvppFreq);
     paramContainer_[INPUT_CFG_HOST_SYS] = aclCfg->hostSys;
     paramContainer_[INPUT_CFG_HOST_SYS_USAGE] = aclCfg->hostSysUsage;
-    paramContainer_[INPUT_CFG_HOST_SYS_USAGE_FREQ] = (aclCfg->hostSysUsageFreq <= 0) ? "" :
+    paramContainer_[INPUT_CFG_HOST_SYS_USAGE_FREQ] = (aclCfg->hostSysUsageFreq == 0) ? "" :
         std::to_string(aclCfg->hostSysUsageFreq);
     std::string instrFreqParam = std::to_string(aclCfg->instrProfilingFreq);
     if (instrFreqParam.compare("0") != 0) {

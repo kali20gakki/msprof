@@ -278,7 +278,7 @@ int ReceiveData::DoReport(CONST_REPORT_DATA_PTR rData)
         MSPROF_LOGE("module:%s, report failed! started %llu", moduleName_.c_str(), started_);
         return PROFILING_FAILED;
     }
-    if (rData->data == nullptr || rData->dataLen <= 0 || rData->dataLen > RECEIVE_CHUNK_SIZE) {
+    if (rData->data == nullptr || rData->dataLen == 0 || rData->dataLen > RECEIVE_CHUNK_SIZE) {
         MSPROF_LOGE("module:%s, report failed! dataLen %llu", moduleName_.c_str(), rData->dataLen);
         return PROFILING_FAILED;
     }

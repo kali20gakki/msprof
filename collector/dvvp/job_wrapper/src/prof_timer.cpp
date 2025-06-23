@@ -1014,8 +1014,8 @@ bool NetDevStatsHandler::GetDcmiCardDevId(uint32_t devId, int &dcmiCardId, int &
         MSPROF_LOGE("NetDevStatsHandler get device num in card failed, deviceNum is invalid");
         return false;
     }
-    dcmiCardId = cardList[devId / deviceNum];
-    dcmiDevId = devId % deviceNum;
+    dcmiCardId = cardList[static_cast<long>(devId) / deviceNum];
+    dcmiDevId = static_cast<long>(devId) % deviceNum;
     return true;
 }
 

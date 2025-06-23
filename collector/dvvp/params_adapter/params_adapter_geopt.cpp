@@ -159,18 +159,18 @@ void ParamsAdapterGeOpt::GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConf
     paramContainer_[INPUT_CFG_COM_RUNTIME_API] = geCfg->runtimeApi;
     paramContainer_[INPUT_CFG_COM_AIC_METRICS] = geCfg->aicMetrics;
     paramContainer_[INPUT_CFG_COM_AIV_METRICS] = geCfg->aivMetrics;
-    paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = (geCfg->sysHardwareMemFreq <= 0) ? "" :
+    paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = (geCfg->sysHardwareMemFreq == 0) ? "" :
         std::to_string(geCfg->sysHardwareMemFreq);
     paramContainer_[INPUT_CFG_COM_LLC_MODE] = geCfg->llcProfiling;
-    paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = (geCfg->sysIoSamplingFreq <= 0) ? "" :
+    paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = (geCfg->sysIoSamplingFreq == 0) ? "" :
         std::to_string(geCfg->sysIoSamplingFreq);
-    paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = (geCfg->sysInterconnectionFreq <= 0) ? "" :
+    paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = (geCfg->sysInterconnectionFreq == 0) ? "" :
         std::to_string(geCfg->sysInterconnectionFreq);
-    paramContainer_[INPUT_CFG_COM_DVPP_FREQ] = (geCfg->dvppFreq <= 0) ? "" :
+    paramContainer_[INPUT_CFG_COM_DVPP_FREQ] = (geCfg->dvppFreq == 0) ? "" :
         std::to_string(geCfg->dvppFreq);
     paramContainer_[INPUT_CFG_HOST_SYS] = geCfg->hostSys;
     paramContainer_[INPUT_CFG_HOST_SYS_USAGE] = geCfg->hostSysUsage;
-    paramContainer_[INPUT_CFG_HOST_SYS_USAGE_FREQ] = (geCfg->hostSysUsageFreq <= 0) ? "" :
+    paramContainer_[INPUT_CFG_HOST_SYS_USAGE_FREQ] = (geCfg->hostSysUsageFreq == 0) ? "" :
         std::to_string(geCfg->hostSysUsageFreq);
     std::string instrFreqParam = std::to_string(geCfg->instrProfilingFreq);
     if (instrFreqParam.compare("0") != 0) {

@@ -58,7 +58,8 @@ private:
 };
 
 template<typename T>
-struct FuncTraits;
+struct FuncTraits {
+};
 
 template<typename R, typename... Args>
 struct FuncTraits<std::function<R(Args...)>> {

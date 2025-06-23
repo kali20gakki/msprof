@@ -286,7 +286,7 @@ int32_t MmGetErrorCode()
 
 char *MmGetErrorFormatMessage(MmErrorMsg errnum, char *buf, size_t size)
 {
-    if ((buf == nullptr) || (size <= 0)) {
+    if ((buf == nullptr) || (size == 0)) {
         return nullptr;
     }
     return strerror_r(errnum, buf, size);
