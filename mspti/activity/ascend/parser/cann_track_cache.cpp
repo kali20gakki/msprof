@@ -95,7 +95,8 @@ msptiResult CannTrackCache::AppendTsTrack(const MsprofCompactInfo *data)
         MSPTI_LOGE("copy MsprofCompactInfo data failed");
         return MSPTI_ERROR_INNER;
     }
-    auto copy = compactPool_.Get();
+    std::shared_ptr<MsprofCompactInfo> copy;
+    Mspti::Common::MsptiMakeSharedPtr(copy);
     if (copy == nullptr) {
         MSPTI_LOGE("copy MsprofCompactInfo data failed");
         return MSPTI_ERROR_INNER;
@@ -120,7 +121,8 @@ msptiResult CannTrackCache::AppendNodeLunch(const MsprofApi *data)
         return MSPTI_ERROR_INNER;
     }
     {
-        auto copy = apiPool_.Get();
+        std::shared_ptr<MsprofApi> copy;
+        Mspti::Common::MsptiMakeSharedPtr(copy);
         if (copy == nullptr) {
             MSPTI_LOGE("copy NodeLunch MsprofApi data failed");
             return MSPTI_ERROR_INNER;
@@ -154,7 +156,8 @@ msptiResult CannTrackCache::AppendCommunication(const MsprofApi *data)
     if (cache == nullptr) {
         return MSPTI_ERROR_INNER;
     }
-    auto copy = apiPool_.Get();
+    std::shared_ptr<MsprofApi> copy;
+    Mspti::Common::MsptiMakeSharedPtr(copy);
     if (copy == nullptr) {
         MSPTI_LOGE("copy Communication MsprofApi data failed");
         return MSPTI_ERROR_INNER;
