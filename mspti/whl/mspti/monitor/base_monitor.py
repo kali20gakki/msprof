@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
 
+import time
 from abc import ABCMeta
 from ..constant import MsptiResult, Constant
 from ..utils import print_error_msg
@@ -28,6 +29,7 @@ class BaseMonitor(metaclass=ABCMeta):
         try:
             ret = MsptiResult(_stop())
             if ret == MsptiResult.MSPTI_SUCCESS:
+                time.sleep(Constant.FLUSH_SLEEP_TIME)
                 return MsptiResult(_flush_all())
             return ret
         except Exception as ex:
