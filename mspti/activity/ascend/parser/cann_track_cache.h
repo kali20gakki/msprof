@@ -19,7 +19,6 @@
 #include "common/task.h"
 #include "common/bound_queue.h"
 #include "unordered_map"
-#include "common/object_pool.h"
 
 namespace Mspti {
 namespace Parser {
@@ -110,9 +109,6 @@ private:
 
     std::mutex targetThreadMutex_;
     std::vector<uint64_t> targetThreadId_;
-
-    Common::ObjectPool<MsprofApi, Common::OBJECT_POOL_DEFAULT_SIZE> apiPool_;
-    Common::ObjectPool<MsprofCompactInfo, Common::OBJECT_POOL_DEFAULT_SIZE> compactPool_;
 
     std::mutex cvMutex_;
     std::condition_variable cv;
