@@ -8,6 +8,8 @@ from enum import Enum
 class Constant:
     # max activity buffer size (MB)
     MAX_BUFFER_SIZE = 256
+    # monitor flush sleep time (s)
+    FLUSH_SLEEP_TIME = 0.05
 
 
 class MsptiResult(Enum):
