@@ -137,20 +137,24 @@ class TraceViewManager:
         return json_list
 
     @staticmethod
-    def get_format_pid(pid: int, index_id: int) -> int:
+    def get_format_pid(pid: int, layer_info: TraceViewHeaderConstant.LayerInfo) -> int:
         """
         get format_pid
-        :param pid: int, index_id: int
+        :param pid: int,
+        :param layer_info: TraceViewHeaderConstant.LayerInfo
         :return: format_pid: Uint32: pid use high 22bit, index_id use middle 5bit, device_id use low 5bit
         ps: pid_max is 10^22 - 1
         """
-        if is_number(InfoConfReader().get_device_id()):
-            device_id = int(InfoConfReader().get_device_id())
-        else:
+        if layer_info.general_layer == TraceViewHeaderConstant.GENERAL_LAYER_CPU or \
+                not is_number(InfoConfReader().get_device_id()):
             # host device_id is 31, we cannot use NumberConstant.HOST_ID,
             # cause this value is alse been used in record time.
             device_id = TraceViewManager.HOST_ID_FOR_PID
-        format_pid = (pid << TraceViewManager.PID_OFFSET) | (index_id << TraceViewManager.INDEX_OFFSET) | device_id
+        else:
+            device_id = int(InfoConfReader().get_device_id())
+
+        format_pid = (pid << TraceViewManager.PID_OFFSET) | \
+                     (layer_info.sort_index << TraceViewManager.INDEX_OFFSET) | device_id
         return format_pid
 
     @staticmethod

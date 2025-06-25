@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Set, Tuple
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
-from common_func.msvp_common import path_check
+from common_func.msvp_common import path_check, is_number
 from common_func.path_manager import PathManager
 from msmodel.interface.view_model import ViewModel
 from common_func.info_conf_reader import InfoConfReader
@@ -45,7 +45,10 @@ class HostToDevice:
     @staticmethod
     def get_cann_pid():
         pid = InfoConfReader().get_json_pid_data()
-        format_pid = TraceViewManager.get_format_pid(pid, TraceViewHeaderConstant.LAYER_CANN_SORT)
+        # Connection 字段实际未用到
+        layer_info = TraceViewHeaderConstant.LayerInfo("Connection", TraceViewHeaderConstant.GENERAL_LAYER_CPU,
+                                                       TraceViewHeaderConstant.LAYER_CANN_SORT)
+        format_pid = TraceViewManager.get_format_pid(pid, layer_info)
         return format_pid
 
     @staticmethod
@@ -74,7 +77,8 @@ class HostToDevice:
 
     @staticmethod
     def add_task_connection_data(traces: List[Dict[str, Any]], cann_pid: int,
-                                      node_tasks: Dict[Tuple[int, int, int], Tuple[int, int]]) -> None:
+                                 node_tasks: Dict[Tuple[int, int, int, int], Tuple[int, int]],
+                                 device_id: int) -> None:
         if not isinstance(traces, list):
             return
         tmp_list = []
@@ -84,16 +88,16 @@ class HostToDevice:
             task_id = trace_args.get("Task Id")
             batch_id = trace_args.get("Batch Id")
             context_id: int = trace_args.get("Subtask Id", Constant.DEFAULT_INVALID_VALUE)
-            if (stream_id, task_id, batch_id) not in node_tasks:
+            if (device_id, stream_id, task_id, batch_id) not in node_tasks:
                 continue
-            host_task_tid, host_task_ts = node_tasks[(stream_id, task_id, batch_id)]
+            host_task_tid, host_task_ts = node_tasks[(device_id, stream_id, task_id, batch_id)]
             pid = trace.get(TraceViewHeaderConstant.TRACE_HEADER_PID)
             tid = trace.get(TraceViewHeaderConstant.TRACE_HEADER_TID)
 
-            # 由于同一个Node下面可能出现多个Task，使用stream_id、task_id、batch_id、context_id来作为连线的唯一标识
-            # |---16bit--|---16bit---|---16bit---|---32bit---|
-            #  stream_id    task_id     batch_id   context_id
-            connection_id = (stream_id << 64) + (task_id << 48) + (batch_id << 32) + context_id
+            # 由于同一个Node下面可能出现多个Task，使用device_id、 stream_id、task_id、batch_id、context_id来作为连线的唯一标识
+            # |---6bit--|---16bit--|---16bit---|---16bit---|---32bit---|
+            #  device_id  stream_id   task_id     batch_id   context_id
+            connection_id = (device_id << 80) + (stream_id << 64) + (task_id << 48) + (batch_id << 32) + context_id
             host_task_ts = InfoConfReader().trans_into_local_time(
                 InfoConfReader().time_from_host_syscnt(host_task_ts, NumberConstant.MICRO_SECOND),
                 use_us=True, is_host=True)
@@ -179,7 +183,7 @@ class HostToDevice:
         traces.extend(tmp_list)
 
     def add_hccl_start_points(self, api_traces: List[Dict[str, Any]],
-                         conn_to_ctxes: Dict[int, List[int]], hccl_conn_ids: Set[int]) -> None:
+                              conn_to_ctxes: Dict[int, List[int]], hccl_conn_ids: Set[int]) -> None:
         """
         add start points to api traces for host to device connection
         to do this, we need task info from host side
@@ -211,18 +215,22 @@ class HostToDevice:
         if data_type == self.MODULE_MSPROFTX:
             self.add_msproftx_ex_start_points(traces)
             return
+        device_id = InfoConfReader().get_device_id()
+        if not is_number(device_id):
+            return
+        device_id = int(device_id)
         node_tasks = self.get_node_tasks()
         if data_type == self.MODULE_TASK_TIME:
             cann_pid = self.get_cann_pid()
-            self.add_task_connection_data(traces, cann_pid, node_tasks)
+            self.add_task_connection_data(traces, cann_pid, node_tasks, device_id)
         elif data_type == self.API_TYPE:
             hccl_conn_ids = self.get_hccl_op_connection_ids()
-            conn_to_ctxes = self.get_connection_id_to_context_ids_mapping(node_tasks)
+            conn_to_ctxes = self.get_connection_id_to_context_ids_mapping(node_tasks, device_id)
             self.add_hccl_start_points(traces, conn_to_ctxes, hccl_conn_ids)
         elif data_type == self.MODULE_HCCL:
             self.add_hccl_end_points(traces)
 
-    def get_node_tasks(self) -> Dict[Tuple[int, int, int], Tuple[int, int]]:
+    def get_node_tasks(self) -> Dict[Tuple[int, int, int, int], Tuple[int, int]]:
         """
         get node tasks set
         :return: node tasks set
@@ -231,11 +239,13 @@ class HostToDevice:
             return {}
         with ViewModel(self._result_dir, DBNameConstant.DB_GE_INFO,
                        [DBNameConstant.TABLE_GE_TASK]) as task_info_model:
-            sql = f'select stream_id, task_id, batch_id, thread_id, timestamp from {DBNameConstant.TABLE_GE_TASK}'
+            sql = f'select device_id, stream_id, task_id, batch_id, thread_id, timestamp ' \
+                  f'from {DBNameConstant.TABLE_GE_TASK}'
             tasks = task_info_model.get_sql_data(sql)
-        return {task[:3]: task[-2:] for task in tasks}
+        return {task[:4]: task[-2:] for task in tasks}
 
-    def get_connection_id_to_context_ids_mapping(self, node_tasks: Dict[Tuple[int, int, int], Tuple[int, int]]):
+    def get_connection_id_to_context_ids_mapping(self, node_tasks: Dict[Tuple[int, int, int, int], Tuple[int, int]],
+                                                 device_id: int):
         """
         get device tasks
         :return: device tasks
@@ -249,7 +259,7 @@ class HostToDevice:
         ascend_tasks = ascend_task_model.get_sql_data(sql)
         result = defaultdict(list)
         for stream_id, task_id, batch_id, context_id, connection_id in ascend_tasks:
-            if (stream_id, task_id, batch_id) not in node_tasks:
+            if (device_id, stream_id, task_id, batch_id) not in node_tasks:
                 continue
             result[connection_id].append(context_id)
         return result
