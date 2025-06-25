@@ -171,7 +171,7 @@ class MsprofTimeline:
                 pid = filtered_data[0]
                 # get the msprof timeline layer info
                 layer_info = self.get_layer_info(process_name)
-                format_pid = TraceViewManager.get_format_pid(pid, layer_info.sort_index)
+                format_pid = TraceViewManager.get_format_pid(pid, layer_info)
                 for value in json_data:
                     self.modify_timeline_info(process_name, layer_info, format_pid, value)
                 json_list.extend(json_data)

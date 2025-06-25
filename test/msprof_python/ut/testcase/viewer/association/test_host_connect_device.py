@@ -92,7 +92,7 @@ class TestHostToDevice(unittest.TestCase):
                 },
             },
         ]
-        connection_id = (4 << 64) + (33573 << 48) + (23 << 32) + 4294967295
+        connection_id = (0 << 80) + (4 << 64) + (33573 << 48) + (23 << 32) + 4294967295
         expected_data = task_time_data + [
             {
                 TraceViewHeaderConstant.TRACE_HEADER_NAME: f"HostToDevice{connection_id}",
@@ -115,7 +115,7 @@ class TestHostToDevice(unittest.TestCase):
             },
         ]
         with mock.patch(NAMESPACE + '.HostToDevice.get_node_tasks',
-                        return_value={(4, 33573, 23): (2287318, 4294967295)}), \
+                        return_value={(0, 4, 33573, 23): (2287318, 4294967295)}), \
                 mock.patch(NAMESPACE + ".HostToDevice.get_cann_pid", return_value=3), \
                 mock.patch(NAMESPACE + ".HostToDevice.get_connection_id_to_context_ids_mapping",
                            return_value={14983: [4294967295]}):
@@ -184,8 +184,8 @@ class TestHostToDevice(unittest.TestCase):
                 },
             },
         ]
-        task1_conn_id = (4 << 64) + (33573 << 48) + (23 << 32) + 1
-        task2_conn_id = (4 << 64) + (33574 << 48) + (23 << 32) + 2
+        task1_conn_id = (0 << 80) + (4 << 64) + (33573 << 48) + (23 << 32) + 1
+        task2_conn_id = (0 << 80) + (4 << 64) + (33574 << 48) + (23 << 32) + 2
         expected_data = task_time_data + [
             {
                 TraceViewHeaderConstant.TRACE_HEADER_NAME: f"HostToDevice{task1_conn_id}",
@@ -228,7 +228,8 @@ class TestHostToDevice(unittest.TestCase):
         ]
 
         with mock.patch(NAMESPACE + '.HostToDevice.get_node_tasks',
-                        return_value={(4, 33573, 23): (2287318, 10000000), (4, 33574, 23): (2287318, 20000000)}), \
+                        return_value={(0, 4, 33573, 23): (2287318, 10000000),
+                                      (0, 4, 33574, 23): (2287318, 20000000)}), \
                 mock.patch(NAMESPACE + ".HostToDevice.get_cann_pid", return_value=3):
             InfoConfReader()._host_freq = 123456
             connection = HostToDevice("")
