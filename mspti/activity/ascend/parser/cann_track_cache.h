@@ -61,9 +61,10 @@ private:
 };
 
 struct CannThreadCache {
-    Mspti::Common::MPSCQueue<std::shared_ptr<MsprofCompactInfo>> taskQueue;
-    Mspti::Common::MPSCQueue<std::shared_ptr<MsprofApi>> nodeLaunchQueue;
-    Mspti::Common::MPSCQueue<std::shared_ptr<MsprofApi>> communicationQueue;
+    uint32_t threadId;
+    Mspti::Common::MPSCQueue<std::shared_ptr<MsprofCompactInfo>, Mspti::Common::DEFAULT_CAPCAITY> taskQueue;
+    Mspti::Common::MPSCQueue<std::shared_ptr<MsprofApi>, Mspti::Common::DEFAULT_CAPCAITY> nodeLaunchQueue;
+    Mspti::Common::MPSCQueue<std::shared_ptr<MsprofApi>, Mspti::Common::DEFAULT_CAPCAITY> communicationQueue;
 };
 
 using CannThreadCachePtr = std::shared_ptr<CannThreadCache>;

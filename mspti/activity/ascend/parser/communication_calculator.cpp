@@ -101,6 +101,7 @@ msptiResult CommunicationCalculator::AppendApi2TaskInfo(const std::shared_ptr<Ap
     auto commOp = TransApiEvent2CommOpDesc(api2TaskInfo.get());
     if (commOp->tasks.empty()) {
         MSPTI_LOGW("commOp has not communication tasks");
+        return MSPTI_SUCCESS;
     }
     std::sort(commOp->tasks.begin(), commOp->tasks.end(),
         [](const std::shared_ptr<CommunicationTask> a, const std::shared_ptr<CommunicationTask> b) {
