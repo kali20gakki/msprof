@@ -175,102 +175,100 @@ private:
     std::condition_variable cvPop_;
 };
 
-template <typename T>
+constexpr size_t DEFAULT_CAPCAITY = 1024;
+
+template<typename T, size_t Capacity>
 class MPSCQueue {
 public:
-    explicit MPSCQueue()
+    MPSCQueue()
     {
-        Node* dummy = new Node();
-        head_.store(dummy);
-        tail_ = dummy;
-    }
-
-    ~MPSCQueue()
-    {
-        while (!IsEmpty()) {
-            T ans;
-            Pop(ans);
+        for (size_t i = 0; i < Capacity; ++i) {
+            buffer_[i].sequence.store(i, std::memory_order_relaxed);
         }
-        delete tail_;
     }
 
-    bool Push(const T& value)
+    bool Push(const T& item)
     {
-        Node* node = new Node(value);
-        Node* prev = head_.exchange(node, std::memory_order_acq_rel);
-        prev->next.store(node, std::memory_order_release);
+        size_t pos = writeIndex_.fetch_add(1, std::memory_order_acq_rel);
+        Slot& slot = buffer_[pos & mask_];
+
+        size_t expected_seq = pos;
+        if (slot.sequence.load(std::memory_order_acquire) != expected_seq) {
+            return false;
+        }
+
+        slot.data = item;
+        slot.sequence.store(pos + 1, std::memory_order_release);
         return true;
     }
 
-    // 仅限单线程调用，非线程安全
     bool Pop(T& result)
     {
-        Node* next = tail_->next.load(std::memory_order_acquire);
-        if (!next) return false;
+        Slot& slot = buffer_[readIndex_ & mask_];
+        size_t expected_seq = readIndex_ + 1;
 
-        result = std::move(*next->data);
-        delete tail_;
-        tail_ = next;
+        if (slot.sequence.load(std::memory_order_acquire) != expected_seq) {
+            return false; // 无数据
+        }
+
+        result = std::move(slot.data);
+        slot.sequence.store(readIndex_ + Capacity, std::memory_order_release);
+        ++readIndex_;
         return true;
     }
 
-    // 仅限单线程调用，非线程安全
-    bool Peek(T& result)
-    {
-        Node* next = tail_->next.load(std::memory_order_acquire);
-        if (!next) return false;
-
-        result = *next->data;
-        return true;
-    }
-
-    // 仅单线程调用
     bool IsEmpty() const
     {
-        return tail_->next.load(std::memory_order_acquire) == nullptr;
+        return writeIndex_.load(std::memory_order_acquire) == readIndex_;
     }
 
-    // 仅单线程调用
+    bool Peek(T& result) const
+    {
+        const Slot& slot = buffer_[readIndex_ & mask_];
+        size_t expected_seq = readIndex_ + 1;
+
+        if (slot.sequence.load(std::memory_order_acquire) != expected_seq) {
+            return false; // 当前槽位还未写入
+        }
+
+        result = slot.data; // 复制数据，不移动游标
+        return true;
+    }
+
     template<typename Predicate>
     bool PopIf(T& result, Predicate pred)
     {
-        Node* prev = tail_;
-        Node* curr = tail_->next.load(std::memory_order_acquire);
-        
-        while (curr != nullptr) {
-            if (pred(*curr->data)) {
-                // 找到满足条件的节点
-                Node* next = curr->next.load(std::memory_order_acquire);
-                prev->next.store(next, std::memory_order_release);
+        while (true) {
+            Slot& slot = buffer_[readIndex_ & mask_];
+            size_t expected_seq = readIndex_ + 1;
 
-                if (curr == head_.load(std::memory_order_acquire)) {
-                    head_.compare_exchange_strong(curr, prev);
-                }
-
-                result = std::move(*curr->data);
-                delete curr;
-                tail_ = prev;
-                
-                return true;
+            if (slot.sequence.load(std::memory_order_acquire) != expected_seq) {
+                return false;
             }
-            
-            prev = curr;
-            curr = curr->next.load(std::memory_order_acquire);
+
+            if (pred(slot.data)) {
+                result = std::move(slot.data);
+                slot.sequence.store(readIndex_ + Capacity, std::memory_order_release);
+                ++readIndex_;
+                return true;
+            } else {
+                slot.sequence.store(readIndex_ + Capacity, std::memory_order_release);
+                ++readIndex_;
+                continue;
+            }
         }
-        return false;
     }
 
 private:
-    struct Node {
-        std::unique_ptr<T> data;
-        std::atomic<Node*> next;
-
-        Node() : next(nullptr) {}
-        explicit Node(T value) : data(std::make_unique<T>(std::move(value))), next(nullptr) {}
+    struct Slot {
+        T data;
+        std::atomic<size_t> sequence;
     };
 
-    std::atomic<Node*> head_{};
-    Node* tail_;  // only used by consumer thread
+    static constexpr size_t mask_ = Capacity - 1;
+    Slot buffer_[Capacity];
+    std::atomic<size_t> writeIndex_{0};
+    size_t readIndex_{0}; // only consumer touches
 };
 
 }  // Common

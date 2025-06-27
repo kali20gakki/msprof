@@ -186,7 +186,9 @@ msptiResult CannTrackCache::Analysis(const CannThreadCachePtr &cache)
     while (!cache->nodeLaunchQueue.IsEmpty()) {
         std::shared_ptr<MsprofApi> nodeLaunchApi;
         cache->nodeLaunchQueue.Pop(nodeLaunchApi);
-
+        if (!nodeLaunchApi) {
+            continue;
+        }
         std::shared_ptr<ApiEvent> api2TaskInfo;
         Mspti::Common::MsptiMakeSharedPtr(api2TaskInfo);
         if (!UNLIKELY(api2TaskInfo)) {
@@ -232,6 +234,9 @@ void CannTrackCache::MountCommunicationNode(ApiEvent &apiEvent, const CannThread
 void CannTrackCache::MountCompactInfo(ApiEvent &apiEvent, const CannThreadCachePtr &cache)
 {
     std::shared_ptr<MsprofCompactInfo> curTask;
+    if (cache->taskQueue.IsEmpty()) {
+        return;
+    }
     auto res = cache->taskQueue.PopIf(curTask, [&apiEvent](const std::shared_ptr<MsprofCompactInfo>& item) {
         return InApiRange(apiEvent.api, *item);
     });
@@ -252,6 +257,7 @@ CannThreadCachePtr CannTrackCache::GetOrCreateCache(uint64_t threadId)
     if (cache == nullptr) {
         return nullptr;
     }
+    cache->threadId = threadId;
     threadCaches_[threadId] = cache;
     return cache;
 }

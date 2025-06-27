@@ -96,7 +96,7 @@ msptiResult DeviceTaskCalculator::AssembleSubTasksTimeWithFftsLog(uint32_t devic
 
     {
         std::lock_guard<std::mutex> lk(assembleSubTaskMutex_);
-        if (!assembleSubTasks_.count(dstsKey)) {
+        if (!assembleSubTasks_.count(dstsKey) || assembleSubTasks_[dstsKey].empty()) {
             std::shared_ptr<SubTask> subTask;
             Mspti::Common::MsptiMakeSharedPtr(subTask);
             if (!UNLIKELY(subTask)) {
