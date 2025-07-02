@@ -41,33 +41,54 @@ bool SysIOProcessor::Process(DataInventory &dataInventory)
     for (const auto& devicePath: deviceList) {
         flag = ProcessSingleDevice(devicePath, allProcessedData, allSummaryData) && flag;
     }
-    if (processorName_ == PROCESSOR_NAME_NIC) {
-        std::vector<NicOriginalData> allNicOriginalData;
-        NicOriginalData nicOriginalData;
-        nicOriginalData.sysIOOriginalData = std::move(allProcessedData);
-        allNicOriginalData.push_back(nicOriginalData);
-        std::vector<NicReportData> allNicReportData;
-        NicReportData nicReportData;
-        nicReportData.sysIOReportData = std::move(allSummaryData);
-        allNicReportData.push_back(nicReportData);
-        if (!SaveToDataInventory<NicOriginalData>(std::move(allNicOriginalData), dataInventory, processorName_) ||
-            !SaveToDataInventory<NicReportData>(std::move(allNicReportData), dataInventory, processorName_)) {
-            flag = false;
-            ERROR("Save % Data To DataInventory failed, profPath is %", processorName_, profPath_);
-        }
-    } else if (processorName_ == PROCESSOR_NAME_ROCE) {
-        std::vector<RoceOriginalData> allRoceOriginalData;
-        RoceOriginalData roceOriginalData;
-        roceOriginalData.sysIOOriginalData = std::move(allProcessedData);
-        allRoceOriginalData.push_back(roceOriginalData);
-        std::vector<RoceReportData> allRoceReportData;
-        RoceReportData roceReportData;
-        roceReportData.sysIOReportData = std::move(allSummaryData);
-        allRoceReportData.push_back(roceReportData);
-        if (!SaveToDataInventory<RoceOriginalData>(std::move(allRoceOriginalData), dataInventory, processorName_) ||
-            !SaveToDataInventory<RoceReportData>(std::move(allRoceReportData), dataInventory, processorName_)) {
+    return SaveData(allProcessedData, allSummaryData, dataInventory) && flag;
+}
+
+bool SysIOProcessor::SaveData(std::vector<SysIOOriginalData> &timelineData, std::vector<SysIOReportData> &summaryData,
+                              DataInventory& dataInventory)
+{
+    bool flag = true;
+    if (!timelineData.empty()) {
+        if (processorName_ == PROCESSOR_NAME_NIC) {
+            std::vector<NicOriginalData> allNicOriginalData;
+            NicOriginalData nicOriginalData;
+            nicOriginalData.sysIOOriginalData = std::move(timelineData);
+            allNicOriginalData.push_back(nicOriginalData);
+            if (!SaveToDataInventory<NicOriginalData>(std::move(allNicOriginalData), dataInventory, processorName_)) {
                 flag = false;
-                ERROR("Save % Data To DataInventory failed, profPath is %", processorName_, profPath_);
+                ERROR("Save NicOriginalData Data To DataInventory failed, profPath is %", profPath_);
+            }
+        } else if (processorName_ == PROCESSOR_NAME_ROCE) {
+            std::vector<RoceOriginalData> allRoceOriginalData;
+            RoceOriginalData roceOriginalData;
+            roceOriginalData.sysIOOriginalData = std::move(timelineData);
+            allRoceOriginalData.push_back(roceOriginalData);
+            if (!SaveToDataInventory<RoceOriginalData>(std::move(allRoceOriginalData), dataInventory, processorName_)) {
+                flag = false;
+                ERROR("Save RoceOriginalData Data To DataInventory failed, profPath is %", profPath_);
+            }
+        }
+    }
+
+    if (!summaryData.empty()) {
+        if (processorName_ == PROCESSOR_NAME_NIC) {
+            std::vector<NicReportData> allNicReportData;
+            NicReportData nicReportData;
+            nicReportData.sysIOReportData = std::move(summaryData);
+            allNicReportData.push_back(nicReportData);
+            if (!SaveToDataInventory<NicReportData>(std::move(allNicReportData), dataInventory, processorName_)) {
+                flag = false;
+                ERROR("Save NicReportData Data To DataInventory failed, profPath is %", profPath_);
+            }
+        } else if (processorName_ == PROCESSOR_NAME_ROCE) {
+            std::vector<RoceReportData> allRoceReportData;
+            RoceReportData roceReportData;
+            roceReportData.sysIOReportData = std::move(summaryData);
+            allRoceReportData.push_back(roceReportData);
+            if (!SaveToDataInventory<RoceReportData>(std::move(allRoceReportData), dataInventory, processorName_)) {
+                flag = false;
+                ERROR("Save RoceReportData Data To DataInventory failed, profPath is %", profPath_);
+            }
         }
     }
     return flag;
