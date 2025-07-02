@@ -46,6 +46,8 @@ private:
                              std::vector<SysIOOriginalData> &timelineData);
     bool ProcessSummaryData(const DBInfo &sysIODB, const LocaltimeContext &localtimeContext,
                             std::vector<SysIOReportData> &summaryData);
+    bool SaveData(std::vector<SysIOOriginalData> &timelineData, std::vector<SysIOReportData> &summaryData,
+                  DataInventory& dataInventory);
 private:
     std::string processorName_;
 };
