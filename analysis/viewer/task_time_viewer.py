@@ -323,7 +323,7 @@ class TaskTimeViewer(BaseViewer):
             thread_id_dict[key] = data.thread_id
         for data in data_dict.get("subtask_data_list", []):
             thread_id_key = "{0}-{1}-{2}-{3}".format(data.task_id, data.stream_id, data.context_id, data.start_time)
-            setattr(data, 'thread_id', thread_id_dict.get(thread_id_key))
+            setattr(data, 'thread_id', thread_id_dict.get(thread_id_key, 0))  # 给个默认值 避免后面使用thread_id计算出错
 
     def add_node_name_and_type(self: any, data_dict: dict) -> None:
         node_info_dict = self.get_ge_data_dict()

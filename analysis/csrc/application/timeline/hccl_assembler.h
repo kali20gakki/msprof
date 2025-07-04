@@ -112,9 +112,9 @@ private:
         std::string dataType;
         std::string linkType;
         for (auto &data : task) {
-            // L0场景不需要呈现小算子数据
+            // L0场景不应该单纯根据planeId值判定 有数据就应该处理呈现
             if (data.planeId == INVALID_PLANE) {
-                return;
+                continue;
             }
             formatPid = GetDevicePid(pidMap, data.deviceId, profPath, layerInfo.sortIndex);
             tid = GetTid(data.groupName, data.deviceId, type);
