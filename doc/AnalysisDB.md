@@ -152,6 +152,7 @@ db命名：communication_analyzer.db
 ### StepTraceTime
 | 字段名          | 类型     | 索引  | 含义 |
 | -------------- | ------------ | ------------ | ------------ |
+| deviceId       | NUMERIC  |   | deviceId，例：0  |
 | step           | TEXT    |    | step编号，例：12  |
 | computing      | NUMERIC  |   | 计算的时间，单位：ms  |
 | communication  | NUMERIC  |   | 通信的时间，单位：ms  |
@@ -168,3 +169,4 @@ db命名：communication_analyzer.db
 | 日期       | 内容      |
 |----------|---------|
 | 2024/3/11 | 330首次上线 |
+| 2025/6/4  | 增加deviceId |
