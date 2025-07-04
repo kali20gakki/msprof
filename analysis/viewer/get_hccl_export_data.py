@@ -195,15 +195,18 @@ class HCCLExport:
         return hccl_format_op_data
 
     def _format_hccl_communication_data(self, hccl_data: List[HcclTask], group_type: int = 0):
-        # for L0 collect, plane id will be filled -1
-        if not hccl_data or hccl_data[0].plane_id == self.INVALID_PLANE:
+        # for L0 collect, plane id will be filled -1。如果所有的plane id都是非法，则直接返回，否则筛选合法的数据继续处理
+        if not hccl_data or all(hccl_task.plane_id == self.INVALID_PLANE for hccl_task in hccl_data):
             return []
         _hccl_format_data = [0] * len(hccl_data)
-        for index, _hccl_data in enumerate(hccl_data):
+        index = 0
+        for _, _hccl_data in enumerate(hccl_data):
             hccl_args = HCCLExport.get_hccl_arg(_hccl_data)
             hccl_args["model id"] = _hccl_data.model_id
             if _hccl_data.group_name not in self.hccl_groups:
                 logging.error("The group name %s not exists: group idx: %d", _hccl_data.group_name, group_type)
+                continue
+            if _hccl_data.plane_id == self.INVALID_PLANE:
                 continue
             thread_id = self.hccl_groups.get(_hccl_data.group_name)[group_type].start_index + _hccl_data.plane_id + 1
             _hccl_data_pice = [
@@ -212,4 +215,5 @@ class HCCLExport:
                 _hccl_data.duration / NumberConstant.NS_TO_US, hccl_args
             ]
             _hccl_format_data[index] = _hccl_data_pice
-        return _hccl_format_data
+            index += 1
+        return _hccl_format_data[:index]
