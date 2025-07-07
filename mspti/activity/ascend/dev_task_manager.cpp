@@ -48,7 +48,6 @@ DevTaskManager::DevTaskManager()
 {
     Mspti::Ascend::Channel::ChannelPoolManager::GetInstance()->Init();
     Mspti::Common::ContextManager::GetInstance()->InitHostTimeInfo();
-    RegisterReportCallback();
 }
 
 msptiResult DevTaskManager::StartAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks)
@@ -174,8 +173,6 @@ void DevTaskManager::RegisterReportCallback()
         MSPTI_LOGE("Failed to register origin reporter callback");
     }
     static const std::vector<std::pair<int, VOID_PTR>> CALLBACK_FUNC_LIST = {
-        {PROFILE_REPORT_GET_HASH_ID_C_CALLBACK,
-            reinterpret_cast<VOID_PTR>(Mspti::Inject::MsptiGetHashIdImpl)},
         {PROFILE_HOST_FREQ_IS_ENABLE_C_CALLBACK,
             reinterpret_cast<VOID_PTR>(Mspti::Inject::MsptiHostFreqIsEnableImpl)},
         {PROFILE_REPORT_API_C_CALLBACK,
@@ -186,13 +183,31 @@ void DevTaskManager::RegisterReportCallback()
             reinterpret_cast<VOID_PTR>(Mspti::Inject::MsptiCompactInfoReporterCallbackImpl)},
         {PROFILE_REPORT_ADDITIONAL_CALLBACK,
             reinterpret_cast<VOID_PTR>(Mspti::Inject::MsptiAddiInfoReporterCallbackImpl)},
-        {PROFILE_REPORT_REG_TYPE_INFO_C_CALLBACK,
-            reinterpret_cast<VOID_PTR>(Mspti::Inject::MsptiRegReportTypeInfoImpl)},
     };
     for (auto iter : CALLBACK_FUNC_LIST) {
         auto ret = Mspti::Inject::MsprofRegisterProfileCallback(iter.first, iter.second, sizeof(VOID_PTR));
         if (ret != MSPTI_SUCCESS) {
             MSPTI_LOGE("Failed to register reporter callback: %d", static_cast<int32_t>(iter.first));
+        }
+    }
+}
+
+void DevTaskManager::UnRegisterReportCallback()
+{
+    if (Mspti::Inject::profRegReporterCallback(Mspti::Inject::MsprofReporterCallbackImpl) != MSPTI_SUCCESS) {
+        MSPTI_LOGE("Failed to register origin reporter callback");
+    }
+    static const std::vector<std::pair<int, VOID_PTR>> CALLBACK_FUNC_LIST = {
+        {PROFILE_HOST_FREQ_IS_ENABLE_C_CALLBACK, nullptr},
+        {PROFILE_REPORT_API_C_CALLBACK, nullptr},
+        {PROFILE_REPORT_EVENT_C_CALLBACK, nullptr},
+        {PROFILE_REPORT_COMPACT_CALLBACK, nullptr},
+        {PROFILE_REPORT_ADDITIONAL_CALLBACK, nullptr},
+    };
+    for (auto iter : CALLBACK_FUNC_LIST) {
+        auto ret = Mspti::Inject::MsprofRegisterProfileCallback(iter.first, iter.second, sizeof(VOID_PTR));
+        if (ret != MSPTI_SUCCESS) {
+            MSPTI_LOGE("Failed to unregister reporter callback: %d", static_cast<int32_t>(iter.first));
         }
     }
 }

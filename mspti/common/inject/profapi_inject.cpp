@@ -33,6 +33,8 @@ public:
         Mspti::Common::RegisterFunction("libprofapi", "profSetProfCommand");
         Mspti::Common::RegisterFunction("libprofapi", "profRegReporterCallback");
         Mspti::Common::RegisterFunction("libprofapi", "profRegCtrlCallback");
+        Mspti::Common::RegisterFunction("libprofapi", "MsprofGetHashId");
+        Mspti::Common::RegisterFunction("libprofapi", "MsprofRegTypeInfo");
         auto ctrlHandle = [](uint32_t type, VOID_PTR data, uint32_t len) -> int32_t {
             UNUSED(type);
             UNUSED(data);
@@ -198,4 +200,28 @@ int32_t MsptiRegReportTypeInfoImpl(uint16_t level, uint32_t typeId, const char* 
     return PROFAPI_ERROR_NONE;
 }
 }
+}
+
+int32_t MsprofRegTypeInfo(uint16_t level, uint32_t typeId, const char *typeName)
+{
+    using msprofRegTypeInfoFunc = std::function<decltype(MsprofRegTypeInfo)>;
+    static msprofRegTypeInfoFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction("libprofapi", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libprofapi.so");
+    Mspti::Parser::ParserManager::GetInstance()->RegReportTypeInfo(level, typeId, std::string(typeName));
+    return func(level, typeId, typeName);
+}
+
+uint64_t MsprofGetHashId(const char *hashInfo, size_t length)
+{
+    using msprofRegTypeInfoFunc = std::function<decltype(MsprofGetHashId)>;
+    static msprofRegTypeInfoFunc func = nullptr;
+    if (func == nullptr) {
+        Mspti::Common::GetFunction("libprofapi", __FUNCTION__, func);
+    }
+    THROW_FUNC_NOTFOUND(func, __FUNCTION__, "libprofapi.so");
+    Mspti::Parser::CannHashCache::GetInstance().GenHashId(std::string(hashInfo, length));
+    return func(hashInfo, length);
 }
