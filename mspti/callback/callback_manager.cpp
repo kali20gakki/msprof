@@ -14,6 +14,7 @@
 #include <memory>
 
 #include "activity/activity_manager.h"
+#include "activity/ascend/dev_task_manager.h"
 #include "common/plog_manager.h"
 #include "common/utils.h"
 
@@ -73,6 +74,7 @@ msptiResult CallbackManager::Init(msptiSubscriberHandle *subscriber, msptiCallba
     *subscriber = subscriber_ptr_.get();
     init_.store(true);
     MSPTI_LOGI("CallbackManager Init success.");
+    Mspti::Ascend::DevTaskManager::GetInstance()->RegisterReportCallback();
     return MSPTI_SUCCESS;
 }
 
@@ -89,6 +91,7 @@ msptiResult CallbackManager::UnInit(msptiSubscriberHandle subscriber)
     cbid_map_.clear();
     init_.store(false);
     MSPTI_LOGI("CallbackManager UnInit success.");
+    Mspti::Ascend::DevTaskManager::GetInstance()->UnRegisterReportCallback();
     return MSPTI_SUCCESS;
 }
 

@@ -272,9 +272,8 @@ int32_t RegisterReporterCallback()
             MSPROF_CALL_ERROR("EK9999", "Failed to register reporter callback");
             return ret;
         }
-        return RegisterNewReporterCallback();
     }
-    return ACL_SUCCESS;
+    return RegisterNewReporterCallback();
 }
 
 int32_t RegisterNewReporterCallback()

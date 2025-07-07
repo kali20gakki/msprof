@@ -35,6 +35,8 @@ public:
     msptiResult StartDevProfTask(uint32_t deviceId, const ActivitySwitchType& kinds);
     msptiResult StopDevProfTask(uint32_t deviceId, const ActivitySwitchType& kinds);
     bool CheckDeviceOnline(uint32_t deviceId);
+    void RegisterReportCallback();
+    void UnRegisterReportCallback();
 
 private:
     DevTaskManager();
@@ -46,7 +48,7 @@ private:
     void InitDeviceList();
     msptiResult StartAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks);
     msptiResult StopAllDevKindProfTask(std::vector<std::unique_ptr<DevProfTask>>& profTasks);
-    void RegisterReportCallback();
+
     msptiResult StartCannProfTask(uint32_t deviceId, const ActivitySwitchType& kinds);
     msptiResult StopCannProfTask(uint32_t deviceId);
 
