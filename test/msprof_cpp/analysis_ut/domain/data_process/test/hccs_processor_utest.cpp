@@ -122,6 +122,14 @@ TEST_F(HCCSProcessorUTest, TestFormatDataShouldReturnFalseWhenProcessDataFailed)
     MOCKER_CPP(&std::vector<HccsData>::reserve).stubs().will(throws(std::bad_alloc()));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_HCCS));
     MOCKER_CPP(&std::vector<HccsData>::reserve).reset();
+
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<HccsData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_HCCS));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<HccsData>).reset();
+
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(UINT16_MAX));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_HCCS));
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).reset();
 }
 
 TEST_F(HCCSProcessorUTest, TestFormatDataShouldReturnFalseWhenProcessSummaryDataFailed)

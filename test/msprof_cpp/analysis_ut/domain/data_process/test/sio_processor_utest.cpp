@@ -107,9 +107,13 @@ TEST_F(SioProcessorUTest, TestRunShouldReturnFalseWhenProcessorFail)
         .will(returnValue(CHECK_FAILED));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_SIO));
     MOCKER_CPP(&DataProcessor::CheckPathAndTable).reset();
+
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<SioData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_SIO));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<SioData>).reset();
 }
 
-TEST_F(SioProcessorUTest, TestFormatDataShouldReturnFalseWhenProcessDataFailed)
+TEST_F(SioProcessorUTest, TestRunDataShouldReturnFalseWhenProcessDataFailed)
 {
     auto processor = SioProcessor(PROF_DIR);
     DataInventory dataInventory;
@@ -121,4 +125,14 @@ TEST_F(SioProcessorUTest, TestFormatDataShouldReturnFalseWhenProcessDataFailed)
     MOCKER_CPP(&std::vector<SioData>::reserve).stubs().will(throws(std::bad_alloc()));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_SIO));
     MOCKER_CPP(&std::vector<SioData>::reserve).reset();
+}
+
+TEST_F(SioProcessorUTest, TestRunShouldReturnFalseWhenProcessSingleDeviceFailed)
+{
+    auto processor = SioProcessor(PROF_DIR);
+    DataInventory dataInventory;
+
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(INVALID_DEVICE_ID));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_SIO));
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).reset();
 }

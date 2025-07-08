@@ -135,3 +135,23 @@ TEST_F(NetDevStatsProcessorUTest, TestRunShouldReturnFalseWhenComputeEventDataFa
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NETDEV_STATS));
     MOCKER_CPP(&std::vector<NetDevStatsEventData>::empty).reset();
 }
+
+TEST_F(NetDevStatsProcessorUTest, TestRunShouldReturnFalseWhenProcessSingleDeviceFailed)
+{
+    auto processor = NetDevStatsProcessor(PROF_DIR);
+    DataInventory dataInventory;
+
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(UINT16_MAX));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NETDEV_STATS));
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).reset();
+}
+
+TEST_F(NetDevStatsProcessorUTest, TestRunShouldReturnTrueWhenCheckPathAndTableSuccess)
+{
+    auto processor = NetDevStatsProcessor(PROF_DIR);
+    DataInventory dataInventory;
+
+    MOCKER_CPP(&DataProcessor::CheckPathAndTable).stubs().will(returnValue(NOT_EXIST));
+    EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_NETDEV_STATS));
+    MOCKER_CPP(&DataProcessor::CheckPathAndTable).reset();
+}

@@ -165,6 +165,26 @@ TEST_F(HostUsageProcessorUTest, ShouldReturnOKWhenCpuUsageProcessRunSuccess)
     EXPECT_EQ(3ul, res->size());
 }
 
+TEST_F(HostUsageProcessorUTest, TestRunShouldReturnFalseWhenProcessFailed)
+{
+    DataInventory dataInventory;
+    auto processor = HostCpuUsageProcessor(PROF_PATH_A);
+
+    MOCKER_CPP(&DBInfo::ConstructDBRunner).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_CPU_USAGE));
+    MOCKER_CPP(&DBInfo::ConstructDBRunner).reset();
+}
+
+TEST_F(HostUsageProcessorUTest, TestHostCpuUsageProcessorRunShouldReturnFalseWhenProcessDataFailed)
+{
+    DataInventory dataInventory;
+    auto processor = HostCpuUsageProcessor(PROF_PATH_A);
+
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<CpuUsageData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_CPU_USAGE));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<CpuUsageData>).reset();
+}
+
 TEST_F(HostUsageProcessorUTest, ShouldReturnFalseWhenCpuUsageProcessReserveException)
 {
     DataInventory dataInventory;
@@ -206,6 +226,17 @@ TEST_F(HostUsageProcessorUTest, ShouldReturnOKWhenMemUsageProcessRunSuccess)
     EXPECT_EQ(2ul, res->size());
 }
 
+
+TEST_F(HostUsageProcessorUTest, TestHostMemUsageProcessorRunShouldReturnFalseWhenProcessDataFailed)
+{
+    DataInventory dataInventory;
+    auto processor = HostMemUsageProcessor(PROF_PATH_A);
+
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<MemUsageData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_MEM_USAGE));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<MemUsageData>).reset();
+}
+
 TEST_F(HostUsageProcessorUTest, ShouldReturnFalseWhenMemUsageProcessReserveException)
 {
     DataInventory dataInventory;
@@ -223,6 +254,16 @@ TEST_F(HostUsageProcessorUTest, ShouldReturnOKWhenDiskUsageProcessRunSuccess)
     auto res = dataInventory.GetPtr<std::vector<DiskUsageData>>();
     std::cout << "res size is " << res->size() << std::endl;
     EXPECT_EQ(2ul, res->size());
+}
+
+TEST_F(HostUsageProcessorUTest, TestHostDiskUsageProcessorRunShouldReturnFalseWhenProcessDataFailed)
+{
+    DataInventory dataInventory;
+    auto processor = HostDiskUsageProcessor(PROF_PATH_A);
+
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<DiskUsageData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_DISK_USAGE));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<DiskUsageData>).reset();
 }
 
 TEST_F(HostUsageProcessorUTest, ShouldReturnFalseWhenDiskUsageProcessReserveException)
@@ -243,6 +284,16 @@ TEST_F(HostUsageProcessorUTest, ShouldReturnOKWhenNetworkUsageProcessRunSuccess)
     EXPECT_EQ(3ul, res->size());
 }
 
+TEST_F(HostUsageProcessorUTest, TestHostNetworkUsageProcessorRunShouldReturnFalseWhenProcessDataFailed)
+{
+    DataInventory dataInventory;
+    auto processor = HostNetworkUsageProcessor(PROF_PATH_A);
+
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<NetWorkUsageData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NETWORK_USAGE));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<NetWorkUsageData>).reset();
+}
+
 TEST_F(HostUsageProcessorUTest, ShouldReturnFalseWhenNetworkUsageProcessReserveException)
 {
     DataInventory dataInventory;
@@ -259,6 +310,16 @@ TEST_F(HostUsageProcessorUTest, ShouldReturnOKWhenRuntimeApiProcessRunSuccess)
     EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_OSRT_API));
     auto res = dataInventory.GetPtr<std::vector<OSRuntimeApiData>>();
     EXPECT_EQ(3ul, res->size());
+}
+
+TEST_F(HostUsageProcessorUTest, TestOSRuntimeApiProcessorRunShouldReturnFalseWhenProcessDataFailed)
+{
+    DataInventory dataInventory;
+    auto processor = OSRuntimeApiProcessor(PROF_PATH_A);
+
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<OSRuntimeApiData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_OSRT_API));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<OSRuntimeApiData>).reset();
 }
 
 TEST_F(HostUsageProcessorUTest, ShouldReturnFalseWhenRuntimeApiProcessReserveException)

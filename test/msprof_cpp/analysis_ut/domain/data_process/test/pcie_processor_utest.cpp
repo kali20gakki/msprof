@@ -146,3 +146,31 @@ TEST_F(PCIeProcessorUTest, TestFormatDataShouldReturnFalseWhenGetDeviceIdByDevic
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_PCIE));
     MOCKER_CPP(&ProcessedDataFormat::empty).reset();
 }
+
+TEST_F(PCIeProcessorUTest, TestRunShouldReturnFalseWhenProcessFailed)
+{
+    DataInventory dataInventory;
+    auto processor = PCIeProcessor(PROF);
+    // GetDeviceIdByDevicePath get HOST_ID
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<PCIeData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_PCIE));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<PCIeData>).reset();
+}
+
+TEST_F(PCIeProcessorUTest, TestRunShouldReturnFalseWhenProcessOneDeviceFailed)
+{
+    DataInventory dataInventory;
+    auto processor = PCIeProcessor(PROF);
+
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(INVALID_DEVICE_ID));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_PCIE));
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).reset();
+}
+
+TEST_F(PCIeProcessorUTest, TestLoadDataShouldReturnOriDataWhenDbIsNull)
+{
+    auto processor = PCIeProcessor(PROF);
+    DBInfo pcieDB("pcie.db", "PcieOriginalData");
+    pcieDB.dbRunner = nullptr;
+    EXPECT_EQ(processor.LoadData("", pcieDB).size(), 0ul);
+}

@@ -91,6 +91,27 @@ TEST_F(DDRProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
     }
 }
 
+TEST_F(DDRProcessorUTest, TestRunShouldReturnFalseWhenProcessorFail)
+{
+    auto processor = DDRProcessor(PROF_PATH_A);
+    DataInventory dataInventory;
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_DDR));
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).reset();
+
+    MOCKER_CPP(&Context::GetClockMonotonicRaw).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_DDR));
+    MOCKER_CPP(&Context::GetClockMonotonicRaw).reset();
+
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(UINT16_MAX));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_DDR));
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).reset();
+
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<DDRData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_DDR));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<DDRData>).reset();
+}
+
 TEST_F(DDRProcessorUTest, TestRunShouldReturnFalseWhenSourceTableNotExist)
 {
     auto dbPath = File::PathJoin({PROF_PATH_A, DEVICE_SUFFIX, SQLITE_SUFFIX, DB_SUFFIX});

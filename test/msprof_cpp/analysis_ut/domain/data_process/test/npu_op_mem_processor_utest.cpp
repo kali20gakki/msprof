@@ -99,12 +99,13 @@ TEST_F(NpuOpMemProcessorUTest, TestRunShouldReturnFalseWhenProcessorFail)
         .stubs()
         .will(returnValue(false));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_OP_MEM));
-    MOCKER_CPP(&Context::GetProfTimeRecordInfo).reset();
+    MOCKER_CPP(&Context::GetSyscntConversionParams).reset();
     MOCKER_CPP(&Context::GetProfTimeRecordInfo)
         .stubs()
         .will(returnValue(false));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_OP_MEM));
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).reset();
+
     MOCKER_CPP(&OriDataFormat::empty).stubs().will(returnValue(true));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_OP_MEM));
     MOCKER_CPP(&OriDataFormat::empty).reset();
@@ -117,7 +118,24 @@ TEST_F(NpuOpMemProcessorUTest, TestRunShouldReturnFalseWhenFormatDataFail)
 {
     auto processor = NpuOpMemProcessor(PROF0);
     DataInventory dataInventory;
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
     MOCKER_CPP(&std::vector<NpuOpMemData>::reserve).stubs().will(throws(std::bad_alloc()));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_OP_MEM));
     MOCKER_CPP(&std::vector<NpuOpMemData>::reserve).reset();
+}
+
+TEST_F(NpuOpMemProcessorUTest, TestRunShouldReturnTrueWhenCheckPathAndTableSuccess)
+{
+    auto processor = NpuOpMemProcessor(PROF0);
+    DataInventory dataInventory;
+
+    MOCKER_CPP(&DataProcessor::CheckPathAndTable).stubs().will(returnValue(NOT_EXIST));
+    EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_OP_MEM));
+    MOCKER_CPP(&DataProcessor::CheckPathAndTable).reset();
+}
+
+TEST_F(NpuOpMemProcessorUTest, TestGetDeviceIdShouldReturnUINT16_MAXWhenGetDeviceIdFailed)
+{
+    auto processor = NpuOpMemProcessor(PROF0);
+    EXPECT_EQ(processor.GetDeviceId(""), UINT16_MAX);
 }
