@@ -111,6 +111,10 @@ TEST_F(NpuModuleMemProcessorUTest, TestRunShouldReturnFalseWhenProcessorFail)
     // Reset Mock ProfTimeRecord and SyscntConversionParams
     MOCKER_CPP(&Analysis::Domain::Environment::Context::GetSyscntConversionParams).reset();
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).reset();
+
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<NpuModuleMemData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MODULE_MEM));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<NpuModuleMemData>).reset();
 }
 
 TEST_F(NpuModuleMemProcessorUTest, TestRunShouldReturnFalseWhenFormatDataFail)
@@ -120,4 +124,13 @@ TEST_F(NpuModuleMemProcessorUTest, TestRunShouldReturnFalseWhenFormatDataFail)
     MOCKER_CPP(&std::vector<NpuModuleMemData>::reserve).stubs().will(throws(std::bad_alloc()));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MODULE_MEM));
     MOCKER_CPP(&std::vector<NpuModuleMemData>::reserve).reset();
+}
+
+TEST_F(NpuModuleMemProcessorUTest, TestRunShouldReturnFalseWhenReserveException)
+{
+    auto processor = NpuModuleMemProcessor(PROF_PATH);
+    DataInventory dataInventory;
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(true));
+    MOCKER_CPP(&std::vector<NpuModuleMemData>::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_ACC_PMU));
 }

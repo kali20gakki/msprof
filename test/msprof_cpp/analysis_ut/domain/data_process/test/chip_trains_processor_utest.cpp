@@ -101,6 +101,20 @@ TEST_F(ChipTrainsProcessorUTest, TestRunShouldReturnTrueWhenProcessorRunSuccess)
     EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_CHIP_TRAINS));
 }
 
+TEST_F(ChipTrainsProcessorUTest, TestRunShouldReturnFalseWhenProcessFailed)
+{
+    auto processor = ChipTransProcessor(PROF_PATH);
+    auto dataInventory = DataInventory();
+
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<PaLinkInfoData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_CHIP_TRAINS));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<PaLinkInfoData>).reset();
+
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<PcieInfoData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_CHIP_TRAINS));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<PcieInfoData>).reset();
+}
+
 TEST_F(ChipTrainsProcessorUTest, TestRunShouldReturnTrueWhenNoDb)
 {
     if (File::Exist(File::PathJoin({PROF_PATH, DEVICE_SUFFIX, SQLITE, DB_SUFFIX}))) {

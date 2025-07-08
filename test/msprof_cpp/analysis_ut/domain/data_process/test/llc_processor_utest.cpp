@@ -107,6 +107,30 @@ TEST_F(LLcProcessorUTest, TestRunShouldReturnFalseWhenProcessorFail)
         .will(returnValue(CHECK_FAILED));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_LLC));
     MOCKER_CPP(&DataProcessor::CheckPathAndTable).reset();
+
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<LLcData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_LLC));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<LLcData>).reset();
+}
+
+TEST_F(LLcProcessorUTest, TestRunShouldReturnTrueWhenIsFirstChipV1)
+{
+    auto processor = LLcProcessor(PROF_DIR);
+    DataInventory dataInventory;
+
+    MOCKER_CPP(&Context::IsFirstChipV1).stubs().will(returnValue(true));
+    EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_LLC));
+    MOCKER_CPP(&Context::IsFirstChipV1).reset();
+}
+
+TEST_F(LLcProcessorUTest, TestRunShouldReturnFalseWhenProcessSingleDeviceFailed)
+{
+    auto processor = LLcProcessor(PROF_DIR);
+    DataInventory dataInventory;
+
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(UINT16_MAX));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_LLC));
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).reset();
 }
 
 TEST_F(LLcProcessorUTest, TestFormatDataShouldReturnFalseWhenProcessDataFailed)

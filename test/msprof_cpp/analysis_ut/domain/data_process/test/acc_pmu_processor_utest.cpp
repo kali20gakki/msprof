@@ -102,6 +102,29 @@ TEST_F(AccPmuProcessorUTest, ShouldReturnFalseWhenCheckFailed)
     MOCKER_CPP(&Utils::FileReader::Check).reset();
 }
 
+TEST_F(AccPmuProcessorUTest, TestRunShouldReturnFalseWhenProcessFailed)
+{
+    DataInventory dataInventory;
+    auto processor = AccPmuProcessor(PROF_PATH_A);
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<AccPmuData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_ACC_PMU));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<AccPmuData>).reset();
+    MOCKER_CPP(&DBInfo::ConstructDBRunner).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_ACC_PMU));
+    MOCKER_CPP(&DBInfo::ConstructDBRunner).reset();
+    MOCKER_CPP(&AccPmuProcessor::LoadData).stubs().will(returnValue({}));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_ACC_PMU));
+    MOCKER_CPP(&AccPmuProcessor::LoadData).reset();
+}
+
+TEST_F(AccPmuProcessorUTest, TestLoadDataShouldReturnOriDataWhenDbRunnerIsNull)
+{
+    auto processor = AccPmuProcessor(PROF_PATH_A);
+    DBInfo accPmuDB("acc_pmu.db", "AccPmu");
+    accPmuDB.dbRunner = nullptr;
+    EXPECT_EQ(processor.LoadData(accPmuDB, "").size(), 0ul);
+}
+
 TEST_F(AccPmuProcessorUTest, ShouldReturnFalseWhenReserveException)
 {
     DataInventory dataInventory;

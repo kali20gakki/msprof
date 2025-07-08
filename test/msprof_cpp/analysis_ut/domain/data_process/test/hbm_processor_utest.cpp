@@ -108,6 +108,14 @@ TEST_F(HBMProcessorUTest, TestRunShouldReturnFalseWhenProcessorFail)
         .will(returnValue(CHECK_FAILED));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_HBM));
     MOCKER_CPP(&DataProcessor::CheckPathAndTable).reset();
+
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<HbmData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_HBM));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<HbmData>).reset();
+
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(UINT16_MAX));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_HBM));
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).reset();
 }
 
 TEST_F(HBMProcessorUTest, TestFormatDataShouldReturnFalseWhenProcessDataFailed)

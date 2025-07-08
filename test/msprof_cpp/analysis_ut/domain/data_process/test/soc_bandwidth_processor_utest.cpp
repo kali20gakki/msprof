@@ -144,3 +144,37 @@ TEST_F(SocBandwidthProcessorUTest, TestRunShouldReturnFalseWhenConstructDBRunner
     }
     MOCKER_CPP(&DBInfo::ConstructDBRunner).reset();
 }
+
+TEST_F(SocBandwidthProcessorUTest, TestLoadDataShouldReturnOriDataWhenDbIsNull)
+{
+    for (auto path: PROF_PATHS) {
+        auto processor = SocBandwidthProcessor(path);
+        DBInfo socProfilerDB("soc_profiler.db", "InterSoc");
+        socProfilerDB.dbRunner = nullptr;
+        EXPECT_EQ(processor.LoadData(socProfilerDB, "").size(), 0ul);
+    }
+}
+
+TEST_F(SocBandwidthProcessorUTest, TestFormatDataShouldReturnFalseWhenProcessDataFailed)
+{
+    for (auto path: PROF_PATHS) {
+        auto processor = SocBandwidthProcessor(path);
+        auto dataInventory = DataInventory();
+
+        MOCKER_CPP(&DataProcessor::SaveToDataInventory<SocBandwidthData>).stubs().will(returnValue(false));
+        EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_SOC));
+        MOCKER_CPP(&DataProcessor::SaveToDataInventory<SocBandwidthData>).reset();
+    }
+}
+
+TEST_F(SocBandwidthProcessorUTest, TestRunShouldReturnFalseWhenProcessSingleDeviceFailed)
+{
+    for (auto path: PROF_PATHS) {
+        auto processor = SocBandwidthProcessor(path);
+        auto dataInventory = DataInventory();
+
+        MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(UINT16_MAX));
+        EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_SOC));
+        MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).reset();
+    }
+}

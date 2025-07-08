@@ -103,9 +103,13 @@ TEST_F(QosProcessorUTest, TestRunShouldReturnFalseWhenProcessorFail)
         .will(returnValue(CHECK_FAILED));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_QOS));
     MOCKER_CPP(&DataProcessor::CheckPathAndTable).reset();
+
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<QosData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_QOS));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<QosData>).reset();
 }
 
-TEST_F(QosProcessorUTest, TestFormatDataShouldReturnFalseWhenProcessDataFailed)
+TEST_F(QosProcessorUTest, TestRunShouldReturnFalseWhenProcessDataFailed)
 {
     auto processor = QosProcessor(PROF_DIR);
     DataInventory dataInventory;
@@ -117,4 +121,14 @@ TEST_F(QosProcessorUTest, TestFormatDataShouldReturnFalseWhenProcessDataFailed)
     MOCKER_CPP(&std::vector<QosData>::reserve).stubs().will(throws(std::bad_alloc()));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_QOS));
     MOCKER_CPP(&std::vector<QosData>::reserve).reset();
+}
+
+TEST_F(QosProcessorUTest, TestRunShouldReturnFalseWhenProcessSingleDeviceFailed)
+{
+    auto processor = QosProcessor(PROF_DIR);
+    DataInventory dataInventory;
+
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(INVALID_DEVICE_ID));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_QOS));
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).reset();
 }

@@ -100,6 +100,13 @@ TEST_F(NpuMemProcessorUTest, TestRunShouldReturnFalseWhenProcessorFail)
         .will(returnValue(CHECK_FAILED));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MEM));
     MOCKER_CPP(&DataProcessor::CheckPathAndTable).reset();
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(UINT16_MAX));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MEM));
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).reset();
+    // save inventory failed
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<NpuMemData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NPU_MEM));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<NpuMemData>).reset();
 }
 
 TEST_F(NpuMemProcessorUTest, TestRunShouldReturnFalseWhenFormatDataFail)

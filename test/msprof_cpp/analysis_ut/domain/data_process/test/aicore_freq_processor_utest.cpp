@@ -132,22 +132,41 @@ TEST_F(AicoreFreqProcessorUTest, TestProcessShouldReturnTrueWhenChipNotStars)
 
 TEST_F(AicoreFreqProcessorUTest, TestProcessShouldReturnFalseWhenProcessFailed)
 {
-    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(false));
+    auto processor = AicoreFreqProcessor(PROF);
     auto dataInventory = DataInventory();
-    std::string processorName = "AICORE_FREQ";
-    auto processor1 = AicoreFreqProcessor(PROF);
-    EXPECT_FALSE(processor1.Run(dataInventory, processorName));
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_AICORE_FREQ));
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).reset();
 
     MOCKER_CPP(&DataProcessor::CheckPathAndTable).stubs().will(returnValue(CHECK_FAILED));
     auto processor2 = AicoreFreqProcessor(PROF);
-    EXPECT_FALSE(processor2.Run(dataInventory, processorName));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_AICORE_FREQ));
     MOCKER_CPP(&DataProcessor::CheckPathAndTable).reset();
 
     MOCKER_CPP(&Context::GetSyscntConversionParams).stubs().will(returnValue(false));
     auto processor3 = AicoreFreqProcessor(PROF);
-    EXPECT_FALSE(processor3.Run(dataInventory, processorName));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_AICORE_FREQ));
     MOCKER_CPP(&Context::GetSyscntConversionParams).reset();
+
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(UINT16_MAX));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_AICORE_FREQ));
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).reset();
+
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<AicoreFreqData>).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_AICORE_FREQ));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<AicoreFreqData>).reset();
+
+    MOCKER_CPP(&DBInfo::ConstructDBRunner).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_AICORE_FREQ));
+    MOCKER_CPP(&DBInfo::ConstructDBRunner).reset();
+}
+
+TEST_F(AicoreFreqProcessorUTest, TestLoadDataShouldReturnOriDataWhenDbIsNull)
+{
+    auto processor = AicoreFreqProcessor(PROF);
+    DBInfo dbInfo("freq.db", "FreqParse");
+    dbInfo.dbRunner = nullptr;
+    EXPECT_EQ(processor.LoadData("", dbInfo).size(), 0ul);
 }
 
 TEST_F(AicoreFreqProcessorUTest, TestFormatDataShouldReturnFalseWhenFormatDataFailed)

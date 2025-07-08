@@ -244,3 +244,12 @@ TEST_F(SysIOProcessorUTest, TestRunShouldReturnFalseWhenSysIOTimelineProcessorFa
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NIC_TIMELINE));
     MOCKER_CPP(&DataProcessor::CheckPathAndTable).reset();
 }
+
+TEST_F(SysIOProcessorUTest, TestRunShouldReturnFalseWhenFormatDataFail)
+{
+    auto processor = NicTimelineProcessor(PROF_DIR);
+    DataInventory dataInventory;
+    MOCKER_CPP(&std::vector<SysIOReceiveSendData>::reserve).stubs().will(throws(std::bad_alloc()));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_NIC_TIMELINE));
+    MOCKER_CPP(&std::vector<SysIOReceiveSendData>::reserve).reset();
+}
