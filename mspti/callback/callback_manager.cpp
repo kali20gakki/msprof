@@ -91,7 +91,6 @@ msptiResult CallbackManager::UnInit(msptiSubscriberHandle subscriber)
     cbid_map_.clear();
     init_.store(false);
     MSPTI_LOGI("CallbackManager UnInit success.");
-    Mspti::Ascend::DevTaskManager::GetInstance()->UnRegisterReportCallback();
     return MSPTI_SUCCESS;
 }
 
