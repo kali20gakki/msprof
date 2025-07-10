@@ -465,4 +465,52 @@ TEST_F(MetricProcessorUTest, TestTaskRunShouldReturnTrueWhenRunMemoryAccessSucce
     auto processor = MetricProcessor(PROF_PATH_A2);
     EXPECT_TRUE(processor.Run(dataInventory, PROCESSOR_NAME_METRIC_SUMMARY));
     MOCKER_CPP(&Context::GetInfoByDeviceId).reset();
+    MOCKER_CPP(&Context::IsChipV1).stubs().will(returnValue(true));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_METRIC_SUMMARY));
+    MOCKER_CPP(&Context::IsChipV1).reset();
+}
+
+TEST_F(MetricProcessorUTest, TestRunShouldReturnFalseWhenConstructDBRunnerFailed)
+{
+    DataInventory dataInventory;
+    auto processor = MetricProcessor(PROF_PATH_A2);
+    MOCKER_CPP(&DBInfo::ConstructDBRunner).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_METRIC_SUMMARY));
+    MOCKER_CPP(&DBInfo::ConstructDBRunner).reset();
+}
+
+TEST_F(MetricProcessorUTest, TestRemoveNeedlessColumnsShouldReturnEmptyWhenDataIsEmpty)
+{
+    DataInventory dataInventory;
+    auto processor = MetricProcessor(PROF_PATH_A2);
+    std::vector<TableColumn> tableColumns;
+    ASSERT_EQ(processor.RemoveNeedlessColumns(tableColumns).size(), 0ul);
+}
+
+TEST_F(MetricProcessorUTest, TestFormatTaskBasedDataShouldReturnFalseWhenDataIsEmpty)
+{
+    DataInventory dataInventory;
+    auto processor = MetricProcessor(PROF_PATH_A2);
+    std::vector<std::vector<std::string>> oriData;
+    std::map<TaskId, std::vector<std::vector<std::string>>> processedData;
+    uint16_t deviceId;
+    EXPECT_FALSE(processor.FormatTaskBasedData(oriData, processedData, deviceId));
+}
+
+TEST_F(MetricProcessorUTest, TestRunShouldReturnFalseWhenTaskBasedProcessByDeviceFailed)
+{
+    DataInventory dataInventory;
+    auto processor = MetricProcessor(PROF_PATH_A2);
+    MOCKER_CPP(&MetricProcessor::TaskBasedProcessByDevice).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_METRIC_SUMMARY));
+    MOCKER_CPP(&MetricProcessor::TaskBasedProcessByDevice).reset();
+}
+
+TEST_F(MetricProcessorUTest, TestRunShouldReturnFalseWhenFormatTaskBasedDataFailed)
+{
+    DataInventory dataInventory;
+    auto processor = MetricProcessor(PROF_PATH_A2);
+    MOCKER_CPP(&MetricProcessor::FormatTaskBasedData).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_METRIC_SUMMARY));
+    MOCKER_CPP(&MetricProcessor::FormatTaskBasedData).reset();
 }

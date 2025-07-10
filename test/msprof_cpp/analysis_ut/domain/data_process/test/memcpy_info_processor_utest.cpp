@@ -93,3 +93,42 @@ TEST_F(MemcpyInfoProcessorUTest, GetDataShouldReturnFalseWhenDataReserveFail)
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_MEMCPY_INFO));
     EXPECT_FALSE(dataInventory.GetPtr<std::vector<MemcpyInfoData>>());
 }
+
+TEST_F(MemcpyInfoProcessorUTest, TestRunShouldReturnFalseWhenConstructDBRunnerFail)
+{
+    DataInventory dataInventory;
+    auto processor = MemcpyInfoProcessor(PROF_PATH);
+    MOCKER_CPP(&DBInfo::ConstructDBRunner).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_MEMCPY_INFO));
+    MOCKER_CPP(&DBInfo::ConstructDBRunner).reset();
+}
+
+TEST_F(MemcpyInfoProcessorUTest, TestRunShouldReturnFalseWhenCheckPathAndTableFail)
+{
+    DataInventory dataInventory;
+    auto processor = MemcpyInfoProcessor(PROF_PATH);
+    MOCKER_CPP(&Analysis::Utils::File::Check).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_MEMCPY_INFO));
+    MOCKER_CPP(&Analysis::Utils::File::Check).reset();
+}
+
+TEST_F(MemcpyInfoProcessorUTest, TestRunShouldReturnFalseWhenLoadDataFail)
+{
+    DataInventory dataInventory;
+    auto processor = MemcpyInfoProcessor(PROF_PATH);
+    MemcpyInfoFormat oriData;
+    MOCKER_CPP(&MemcpyInfoProcessor::LoadData).stubs().will(returnValue(oriData));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_MEMCPY_INFO));
+    MOCKER_CPP(&MemcpyInfoProcessor::LoadData).reset();
+}
+
+TEST_F(MemcpyInfoProcessorUTest, TestRunShouldReturnFalseWhenSaveToDataInventoryFail)
+{
+    DataInventory dataInventory;
+    auto processor = MemcpyInfoProcessor(PROF_PATH);
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<MemcpyInfoData>)
+    .stubs()
+    .will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_MEMCPY_INFO));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<MemcpyInfoData>).reset();
+}
