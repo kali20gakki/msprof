@@ -36,7 +36,6 @@ public:
     msptiResult StopDevProfTask(uint32_t deviceId, const ActivitySwitchType& kinds);
     bool CheckDeviceOnline(uint32_t deviceId);
     void RegisterReportCallback();
-    void UnRegisterReportCallback();
 
 private:
     DevTaskManager();

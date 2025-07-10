@@ -24,7 +24,7 @@ typedef enum {
     MSPTI_ERROR_DEVICE_OFFLINE                          = 4,
     MSPTI_ERROR_QUEUE_EMPTY                             = 5,
     MSPTI_ERROR_INNER                                   = 999,
-    MSPTI_ERROR_FOECE_INT                               = 0x7fffffff
+    MSPTI_ERROR_FORCE_INT                               = 0x7fffffff
 } msptiResult;
 
 #endif

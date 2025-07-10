@@ -19,7 +19,7 @@ class MsptiResult(Enum):
     MSPTI_ERROR_MAX_LIMIT_REACHED = 3
     MSPTI_ERROR_DEVICE_OFFLINE = 4
     MSPTI_ERROR_INNER = 999
-    MSPTI_ERROR_FOECE_INT = 0x7fffffff
+    MSPTI_ERROR_FORCE_INT = 0x7fffffff
 
 
 class MsptiActivityKind(Enum):

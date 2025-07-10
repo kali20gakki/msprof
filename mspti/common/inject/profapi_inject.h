@@ -227,16 +227,4 @@ int32_t MsptiRegReportTypeInfoImpl(uint16_t level, uint32_t typeId, const char* 
 }
 }
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
-MSPTI_API int32_t MsprofRegTypeInfo(uint16_t level, uint32_t typeId, const char *typeName);
-
-MSPTI_API uint64_t MsprofGetHashId(const char *hashInfo, size_t length);
-
-#if defined(__cplusplus)
-}
-#endif
-
 #endif // MSPTI_COMMON_INJECT_PROFAPI_INJECT_H
