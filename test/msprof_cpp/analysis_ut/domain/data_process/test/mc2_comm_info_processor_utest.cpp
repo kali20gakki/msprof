@@ -94,3 +94,23 @@ TEST_F(Mc2CommInfoProcessorUTest, GetDataShouldReturnFalseWhenDataReserveFail)
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_MC2_COMM_INFO));
     EXPECT_FALSE(dataInventory.GetPtr<std::vector<MC2CommInfoData>>());
 }
+
+TEST_F(Mc2CommInfoProcessorUTest, TestrUNShouldReturnFalseWhenConstructDBRunnerFail)
+{
+    DataInventory dataInventory;
+    auto processor = Mc2CommInfoProcessor(PROF_PATH);
+    MOCKER_CPP(&DBInfo::ConstructDBRunner).stubs().will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_MC2_COMM_INFO));
+    MOCKER_CPP(&DBInfo::ConstructDBRunner).reset();
+}
+
+TEST_F(Mc2CommInfoProcessorUTest, TestRunShouldReturnFalseWhenSaveToDataInventoryFail)
+{
+    DataInventory dataInventory;
+    auto processor = Mc2CommInfoProcessor(PROF_PATH);
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<MC2CommInfoData>)
+    .stubs()
+    .will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_MC2_COMM_INFO));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<MC2CommInfoData>).reset();
+}

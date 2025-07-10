@@ -17,6 +17,7 @@
 #include "analysis/csrc/domain/data_process/ai_task/task_processor.h"
 #include "analysis/csrc/domain/services/environment/context.h"
 #include "analysis/csrc/viewer/database/finals/unified_db_constant.h"
+#include "analysis/csrc/domain/entities/viewer_data/ai_task/include/kfc_turn_data.h"
 
 using namespace Analysis::Viewer::Database;
 using namespace Analysis::Domain;
@@ -119,4 +120,37 @@ TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenReserveFailed)
     .will(throws(std::bad_alloc()));
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_TASK));
     MOCKER_CPP(&std::vector<AscendTaskData>::reserve).reset();
+}
+
+TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenGetProfTimeRecordInfoFailed)
+{
+    DataInventory dataInventory;
+    auto processor = TaskProcessor(PROF_PATH_A);
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo)
+    .stubs()
+    .will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_TASK));
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetProfTimeRecordInfo).reset();
+}
+
+TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenGetSyscntConversionParamsFailed)
+{
+    DataInventory dataInventory;
+    auto processor = TaskProcessor(PROF_PATH_A);
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetSyscntConversionParams)
+    .stubs()
+    .will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_TASK));
+    MOCKER_CPP(&Analysis::Domain::Environment::Context::GetSyscntConversionParams).reset();
+}
+
+TEST_F(TaskProcessorUTest, TestRunShouldReturnFalseWhenSaveToDataInventoryFailed)
+{
+    DataInventory dataInventory;
+    auto processor = TaskProcessor(PROF_PATH_A);
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<KfcTurnData>)
+    .stubs()
+    .will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_TASK));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<KfcTurnData>).reset();
 }

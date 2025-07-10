@@ -42,6 +42,7 @@ const OriApiDataFormat API_DATA = {
     {"HOST_HCCL", "hcom_allReduce_", "acl", 6635, "hcom_allReduce_", 65177264940493, 65177264975485, 245},
     {"master", "0", "hccl", 6635, "hcom_allReduce_", 65177264940493, 65177264975485, 247},
     {"ACL_OTHERS", "262144", "acl", 116, "GraphOperation::Setup", 65177265026179, 65177265048078, 299},
+    {"master", "hccl", "communication", 116, "ModelLoad", 65177262397274, 65177262404692, 7},
 };
 const uint16_t LEVEL_INDEX = 2;
 const uint16_t TID_INDEX = 3;
@@ -159,6 +160,18 @@ TEST_F(ApiProcessorUTest, TestRunShouldReturnFalseWhenProcessorFail)
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_API));
     MOCKER_CPP(&Context::GetSyscntConversionParams).reset();
     MOCKER_CPP(&Context::GetProfTimeRecordInfo).reset();
+
+    MOCKER_CPP(&DBInfo::ConstructDBRunner)
+    .stubs()
+    .will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_API));
+    MOCKER_CPP(&DBInfo::ConstructDBRunner).reset();
+
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<ApiData>)
+    .stubs()
+    .will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_API));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<ApiData>).reset();
 }
 
 TEST_F(ApiProcessorUTest, TestRunShouldReturnFalseWhenFormatDataFail)
@@ -196,4 +209,10 @@ TEST_F(ApiProcessorUTest, TestRunShouldFalseWhenApiDataIsEmpty)
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_API));
     MOCKER_CPP(&ApiProcessor::LoadData)
     .reset();
+
+    DBInfo apiDB("api_event.db", "ApiData");
+    std::string dbPath = Utils::File::PathJoin({PROF0, HOST, SQLITE, apiDB.dbName});
+    apiDB.dbRunner == nullptr;
+    OriApiDataFormat oriData;
+    ASSERT_EQ(processor.LoadData(apiDB, dbPath).size(), oriData.size());
 }

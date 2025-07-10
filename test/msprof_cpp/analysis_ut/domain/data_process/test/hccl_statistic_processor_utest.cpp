@@ -140,3 +140,39 @@ TEST_F(HcclStatisticProcessorUTest, TestRunShouldReturnFalseWhenConstructDBRunne
     }
     MOCKER_CPP(&DBInfo::ConstructDBRunner).reset();
 }
+
+TEST_F(HcclStatisticProcessorUTest, TestRunShouldReturnFalseWhenGetDeviceIdByDevicePathFailed)
+{
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).stubs().will(returnValue(INVALID_DEVICE_ID));
+    for (auto path: PROF_PATHS) {
+        auto processor = HcclStatisticProcessor(path);
+        auto dataInventory = DataInventory();
+        EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
+    }
+    MOCKER_CPP(&Utils::GetDeviceIdByDevicePath).reset();
+}
+
+TEST_F(HcclStatisticProcessorUTest, TestRunShouldReturnFalseWhenSaveToDataInventoryFailed)
+{
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<HcclStatisticData>)
+    .stubs().will(returnValue(false));
+    for (auto path: PROF_PATHS) {
+        auto processor = HcclStatisticProcessor(path);
+        auto dataInventory = DataInventory();
+        EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
+    }
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<HcclStatisticData>).reset();
+}
+
+TEST_F(HcclStatisticProcessorUTest, TestRunShouldReturnFalseWhenLoadDataFailed)
+{
+    OriHcclDataFormat oriData;
+    MOCKER_CPP(&HcclStatisticProcessor::LoadData)
+    .stubs().will(returnValue(oriData));
+    for (auto path: PROF_PATHS) {
+        auto processor = HcclStatisticProcessor(path);
+        auto dataInventory = DataInventory();
+        EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
+    }
+    MOCKER_CPP(&HcclStatisticProcessor::LoadData).reset();
+}

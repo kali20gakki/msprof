@@ -122,3 +122,42 @@ TEST_F(ComputeTaskInfoProcessorUTest, TestRunShouldReturnFalseWhenCheckPathFaile
     EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_COMPUTE_TASK_INFO));
     MOCKER_CPP(&Analysis::Utils::File::Check).reset();
 }
+
+TEST_F(ComputeTaskInfoProcessorUTest, TestRunShouldReturnFalseWhenProcessFailed)
+{
+    auto processor = ComputeTaskInfoProcessor(PROF_PATH_A);
+    DataInventory dataInventory;
+    MOCKER_CPP(&DBInfo::ConstructDBRunner)
+    .stubs()
+    .will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_COMPUTE_TASK_INFO));
+    MOCKER_CPP(&DBInfo::ConstructDBRunner).reset();
+
+    std::vector<TaskInfoData> oriData;
+    MOCKER_CPP(&ComputeTaskInfoProcessor::LoadData)
+    .stubs()
+    .will(returnValue(oriData));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_COMPUTE_TASK_INFO));
+    MOCKER_CPP(&ComputeTaskInfoProcessor::LoadData).reset();
+
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<TaskInfoData>)
+    .stubs()
+    .will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_COMPUTE_TASK_INFO));
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<TaskInfoData>).reset();
+}
+
+TEST_F(ComputeTaskInfoProcessorUTest, TestProcessShouldReturnFalseWhenLoadDataFailed)
+{
+    auto processor = ComputeTaskInfoProcessor(PROF_PATH_A);
+    DataInventory dataInventory;
+    MOCKER_CPP(&std::vector<TaskInfoData>::reserve)
+    .stubs()
+    .will(throws(std::bad_alloc()));
+    EXPECT_FALSE(processor.Process(dataInventory));
+    MOCKER_CPP(&std::vector<TaskInfoData>::reserve).reset();
+
+    DBInfo geInfoDB("ge_info.db", "TaskInfo");
+    geInfoDB.dbRunner = nullptr;
+    EXPECT_FALSE(processor.Process(dataInventory));
+}

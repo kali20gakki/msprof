@@ -120,3 +120,15 @@ TEST_F(HashInitProcessorUTest, ShouldReturnFalseWhenFileOverMaxSize)
     EXPECT_EQ(0ul, res->size());
     EXPECT_FALSE(dataInventory.GetPtr<StreamMap>());
 }
+
+TEST_F(HashInitProcessorUTest, ShouldReturnFalseWhenConstructDBRunnerFailed)
+{
+    DataInventory dataInventory;
+    auto processor = HashInitProcessor(PROF_PATH);
+    MOCKER_CPP(&DBInfo::ConstructDBRunner)
+    .stubs()
+    .will(returnValue(false));
+    EXPECT_FALSE(processor.ProcessLogicStream(dataInventory));
+    EXPECT_FALSE(processor.ProcessHashMap(dataInventory));
+    MOCKER_CPP(&DBInfo::ConstructDBRunner).reset();
+}

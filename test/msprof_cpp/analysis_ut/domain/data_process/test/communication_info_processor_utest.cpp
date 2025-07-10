@@ -24,6 +24,7 @@
 using namespace Analysis::Domain;
 using namespace Analysis::Application::Credential;
 using namespace Analysis::Utils;
+using namespace Domain::Environment;
 namespace {
 const int DEPTH = 0;
 const uint16_t OP_NUM = 4;
@@ -423,4 +424,16 @@ TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnTrueWhenSaveCommunica
     .will(returnValue(false));
     EXPECT_FALSE(processor.Run(dataInventory, processorName));
     MOCKER_CPP(&DataProcessor::SaveToDataInventory<CommunicationOpData>).reset();
+}
+
+TEST_F(CommunicationInfoProcessorUTest, TestRunShouldReturnFalseWhenGetProfTimeRecordInfoFailed)
+{
+    auto processor = CommunicationInfoProcessor(PROF_PATH_A);
+    std::string processorName = "COMMUNICATION_TASK_INFO";
+    auto dataInventory = DataInventory();
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo)
+    .stubs()
+    .will(returnValue(false));
+    EXPECT_FALSE(processor.Run(dataInventory, processorName));
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).reset();
 }

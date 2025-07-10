@@ -241,3 +241,51 @@ TEST_F(KfcCommProcessorUtest, TestConvertOpDataShouldReturnFalseWhenReserveFaile
     EXPECT_FALSE(KfcCommProcessor::ConvertOpData(resOp, opData));
     MOCKER_CPP(&Utils::Reserve<KfcOpData>).reset();
 }
+
+TEST_F(KfcCommProcessorUtest, TestRunShouldReturnFalseWhenCheckPathAndTableFailed)
+{
+    MOCKER_CPP(&Analysis::Utils::File::Check).stubs().will(returnValue(false));
+    for (auto path: PROF_PATHS) {
+        auto processor = KfcCommProcessor(path);
+        auto dataInventory = DataInventory();
+        InitHashMap(dataInventory);
+        EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
+    }
+    MOCKER_CPP(&Analysis::Utils::File::Check).reset();
+}
+
+TEST_F(KfcCommProcessorUtest, TestRunShouldReturnFalseWhenSaveToDataInventoryFailed)
+{
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<KfcTaskData>).stubs().will(returnValue(false));
+    for (auto path: PROF_PATHS) {
+        auto processor = KfcCommProcessor(path);
+        auto dataInventory = DataInventory();
+        InitHashMap(dataInventory);
+        EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
+    }
+    MOCKER_CPP(&DataProcessor::SaveToDataInventory<KfcTaskData>).reset();
+}
+
+TEST_F(KfcCommProcessorUtest, TestRunShouldReturnFalseWhenSaveDataFailed)
+{
+    MOCKER_CPP(&KfcCommProcessor::SaveData).stubs().will(returnValue(false));
+    for (auto path: PROF_PATHS) {
+        auto processor = KfcCommProcessor(path);
+        auto dataInventory = DataInventory();
+        InitHashMap(dataInventory);
+        EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
+    }
+    MOCKER_CPP(&KfcCommProcessor::SaveData).reset();
+}
+
+TEST_F(KfcCommProcessorUtest, TestRunShouldReturnFalseWhenGetProfTimeRecordInfoFailed)
+{
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).stubs().will(returnValue(false));
+    for (auto path: PROF_PATHS) {
+        auto processor = KfcCommProcessor(path);
+        auto dataInventory = DataInventory();
+        InitHashMap(dataInventory);
+        EXPECT_FALSE(processor.Run(dataInventory, PROCESSOR_NAME_COMM_STATISTIC));
+    }
+    MOCKER_CPP(&Context::GetProfTimeRecordInfo).reset();
+}
