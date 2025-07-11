@@ -59,4 +59,13 @@ class MsMultiProcess(multiprocessing.Process):
         except Exception as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
         logging.info("%s process data finished, execute time is %.3f s",
-                      self.__class__.__name__, (time.time() - start_time))
+                     self.__class__.__name__, (time.time() - start_time))
+
+
+def run_in_subprocess(func, *args: any):
+    """
+    拉起多进程，确保每个python调c进程均为独立进程
+    """
+    proc = multiprocessing.Process(target=func, args=args)
+    proc.start()
+    proc.join()

@@ -6,23 +6,14 @@ import importlib
 import logging
 import os
 import sys
-import multiprocessing
 
 from common_func.config_mgr import ConfigMgr
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_multi_process import run_in_subprocess
 from common_func.platform.chip_manager import ChipManager
 from common_func.profiling_scene import ProfilingScene
 
 SO_DIR = os.path.join(os.path.dirname(__file__), "..", "lib64")
-
-
-def run_in_subprocess(func, *args: any):
-    """
-    拉起多进程，确保每个python调c进程均为独立进程
-    """
-    proc = multiprocessing.Process(target=func, args=args)
-    proc.start()
-    proc.join()
 
 
 def _dump_cann_trace(project_path: str):

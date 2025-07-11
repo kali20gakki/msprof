@@ -101,7 +101,7 @@ class ImportCommand:
 
     def _process_data(self, path_table: dict):
         if not path_table.get(StrConstant.HOST_PATH) and not path_table.get(StrConstant.DEVICE_PATH):
-            warn(self.FILE_NAME, 'Invalid parsing dir("%s"), no valid dir. ' % self.collection_path)
+            warn(self.FILE_NAME, 'Can not find any host or device path in dir("%s"). ' % self.collection_path)
             return
         # start parse
         self._start_parse(path_table)

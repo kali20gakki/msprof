@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-import importlib
 import json
 import logging
 import multiprocessing
@@ -26,6 +25,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ge_logic_stream_singleton import GeLogicStreamSingleton
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.ms_multi_process import run_in_subprocess
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_common import analyze_collect_data
 from common_func.msprof_common import check_path_valid
@@ -628,7 +628,7 @@ class ExportCommand:
             "collection_path": self.collection_path,
             "model_id": 0,
             "npu_id": -1,
-            "iteration_id": self.iteration_range.iteration_id
+            "iteration_id": self.iteration_id
         }
         try:
             ClusterTuningFacade(params).process()
@@ -662,11 +662,11 @@ class ExportCommand:
             else:
                 self._process_sub_dirs(sub_dir, is_cluster=True)
             self.list_map['devices_list'] = ''
-        self._process_data(path_table)
+        run_in_subprocess(self._process_data, path_table)
 
     def _process_data(self, path_table: dict):
         if not path_table.get(StrConstant.HOST_PATH) and not path_table.get(StrConstant.DEVICE_PATH):
-            warn(self.FILE_NAME, 'Invalid parsing dir("%s"), no valid dir. ' % self.collection_path)
+            warn(self.FILE_NAME, 'Can not find any host or device path in dir("%s"). ' % self.collection_path)
             return
         # start parse
         self._start_parse(path_table)
