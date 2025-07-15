@@ -88,7 +88,7 @@ void TaskTimeAssembler::AssembleTaskTime(const std::vector<AscendTaskData> &asce
         std::string taskType;
         if (it != formatedTaskInfo_.end()) {
             opName = it->second.first;
-            taskType = it->second.second;
+            taskType = it->second.second == NA ? ascendTaskDatum.taskType : it->second.second;
         } else {
             opName = NA;
             taskType = ascendTaskDatum.taskType;
