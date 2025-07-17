@@ -151,9 +151,8 @@ uint64_t ContextManager::GetRealTimeFromSysCnt(uint32_t deviceId, uint64_t sysCn
     if (iter == devTimeInfo_.end() || iter->second->freq == 0) {
         return sysCnt;
     }
-    uint64_t real_time = MSTONS * (sysCnt - iter->second->startSysCnt) / iter->second->freq +
-        iter->second->startRealTime;
-    return real_time;
+    return (sysCnt - iter->second->startSysCnt) / iter->second->freq * MSTONS +
+           iter->second->startRealTime;
 }
 
 uint64_t ContextManager::GetRealTimeFromSysCnt(uint64_t sysCnt)
@@ -161,8 +160,8 @@ uint64_t ContextManager::GetRealTimeFromSysCnt(uint64_t sysCnt)
     if (!hostTimeInfo_ || hostTimeInfo_->freq == 0) {
         return sysCnt;
     }
-    return MSTONS * (sysCnt - hostTimeInfo_->startSysCnt) / hostTimeInfo_->freq +
-        hostTimeInfo_->startRealTime;
+    return (sysCnt - hostTimeInfo_->startSysCnt) / hostTimeInfo_->freq * MSTONS +
+           hostTimeInfo_->startRealTime;
 }
 
 uint64_t ContextManager::GetHostTimeStampNs()
