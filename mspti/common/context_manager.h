@@ -55,6 +55,7 @@ private:
     explicit ContextManager(ContextManager &&obj) = delete;
     ContextManager& operator=(ContextManager &&obj) = delete;
 
+    uint64_t CalcuateRealTime(uint64_t sysCnt, DevTimeInfo& devTimeInfo);
 private:
     std::unordered_map<uint32_t, std::unique_ptr<DevTimeInfo>> devTimeInfo_;
     std::mutex devTimeMtx_;

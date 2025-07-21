@@ -376,6 +376,13 @@ int32_t MsprofilerInit()
         MSPROF_LOGE("Failed to register enable host freq callback");
         return PROFILING_FAILED;
     }
+    MSPROF_EVENT("Started to register profiling typeId callback.");
+    ret = ProfApiPlugin::instance()->MsprofProfRegProfilerCallback(PROFILE_REPORT_REG_TYPE_INFO_CALLBACK,
+        reinterpret_cast<VOID_PTR>(MsprofRegReportTypeInfoImpl), sizeof(VOID_PTR));
+    if (ret != ACL_SUCCESS) {
+        MSPROF_LOGE("Failed to register enable typeId callback");
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 
