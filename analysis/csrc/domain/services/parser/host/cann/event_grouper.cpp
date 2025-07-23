@@ -275,6 +275,16 @@ bool EventGrouper::SortByTimeAndLevel<MsprofApi>(std::vector<std::shared_ptr<Msp
                 (api1->beginTime == api2->beginTime && api1->level > api2->level);
         };
     std::sort(traces.begin(), traces.end(), comp);
+
+    // 过滤重复数据
+    auto eq_comp =
+        [](std::shared_ptr<MsprofApi> &api1, std::shared_ptr<MsprofApi> &api2) {
+            return (api1->beginTime == api2->beginTime && api1->endTime == api2->endTime &&
+                    api1->level == api2->level && api1->threadId == api2->threadId &&
+                    api1->type == api2->type && api1->itemId == api2->itemId);
+        };
+    auto last = std::unique(traces.begin(), traces.end(), eq_comp);
+    traces.erase(last, traces.end());
 }
 
 } // namespace Cann
