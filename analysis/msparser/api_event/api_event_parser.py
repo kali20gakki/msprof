@@ -36,6 +36,8 @@ class ApiEventParser(DataParser, MsMultiProcess):
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._event_data = []
         self._api_data = []
+        self.unique_api_data = set()
+        self.invalid_api_num = 0
 
     def parse(self: any) -> None:
         """
@@ -80,6 +82,9 @@ class ApiEventParser(DataParser, MsMultiProcess):
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return
+        if self.invalid_api_num:
+            logging.warning("A total of %d api data entries have a start time of 0, or are duplicated.",
+                            self.invalid_api_num)
         self.save()
 
     def _check_reserve_num(self, data: bytes) -> bool:
@@ -91,10 +96,13 @@ class ApiEventParser(DataParser, MsMultiProcess):
             self._event_data.append((self.connection_id, EventDataBean.decode(data)))
         else:
             api_data = ApiDataBean.decode(data)
-            if api_data.start == 0:
-                logging.info("The api data's start time is 0, it will be filtered.")
+            unique_key = (api_data.struct_type, api_data.start, api_data.end,
+                          api_data.thread_id, api_data.item_id, api_data.level)
+            if api_data.start == 0 or unique_key in self.unique_api_data:
+                self.invalid_api_num += 1
                 return
             self._api_data.append((self.connection_id, api_data))
+            self.unique_api_data.add(unique_key)
         self.connection_id += 1
 
     def _read_data(self: any, file_path: str, offset: OffsetCalculator) -> None:

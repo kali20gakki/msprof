@@ -114,6 +114,15 @@ private:
                     (api1->timeStamp == api2->timeStamp && api1->level > api2->level);
             };
         std::sort(traces.begin(), traces.end(), comp);
+
+        // 过滤重复数据
+        auto eq_comp =
+            [](std::shared_ptr<T> &api1, std::shared_ptr<T> &api2) {
+                return (api1->timeStamp == api2->timeStamp && api1->level == api2->level &&
+                        api1->threadId == api2->threadId && api1->type == api2->type);
+            };
+        auto last = std::unique(traces.begin(), traces.end(), eq_comp);
+        traces.erase(last, traces.end());
     }
 
 private:
