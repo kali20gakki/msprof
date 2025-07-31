@@ -478,6 +478,7 @@ static std::vector<TaskInfoData> GenerateComputeTaskInfo()
     data.contextId = 1; // contextId 1
     data.batchId = 1; // batchId 1
     data.opName = "MatMulV3";
+    data.inputFormats = "NC\"\"\"HW";
     res.push_back(data);
     data.contextId = UINT32_MAX;
     res.push_back(data);
