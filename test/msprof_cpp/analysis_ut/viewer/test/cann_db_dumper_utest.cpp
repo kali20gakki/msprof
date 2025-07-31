@@ -332,3 +332,92 @@ TEST_F(CannDBDumperUtest, TestCANNDumperShouldReturnFalseWhenCreateTableFailed)
     bool ret = cannTraceDbDumper.DumpData(treeAnalyzer);
     EXPECT_FALSE(ret);
 }
+
+TEST_F(CannDBDumperUtest, TestAddTensorShapeInfoSuccess)
+{
+    CANNTraceDBDumper cannTraceDbDumper(".");
+    std::shared_ptr<ConcatTensorInfo> tensorDescPtr = std::make_shared<ConcatTensorInfo>();
+    tensorDescPtr->tensorNum = 2; // 2ul
+    MsrofTensorData tensorInput = {
+        0, 1, 1, {1, 2, 3, 0, 4}
+    };
+    MsrofTensorData tensorOutput = {
+        1, 1, 1, {5, 6, 7, 0, 4}
+    };
+    tensorDescPtr->tensorData = {tensorInput, tensorOutput};
+    MsprofNodeBasicInfo nodeBasicInfo;
+    CANNTraceDBDumper::TaskInfoData data;
+    std::shared_ptr<HostTask> hostTaskPtr = std::make_shared<HostTask>();
+    auto kernelDesc = std::make_shared<OpDesc>();
+    auto kernelOp = std::make_shared<Operator>(kernelDesc, 0, OpType::OPTYPE_COMPUTE);
+    hostTaskPtr->op = kernelOp;
+    cannTraceDbDumper.AddTensorShapeInfo(tensorDescPtr, nodeBasicInfo, data, hostTaskPtr);
+    EXPECT_EQ(std::get<13>(data[0]), 2); // 13 2
+    EXPECT_EQ(std::get<16>(data[0]), "\"1,2,3\"");
+    EXPECT_EQ(std::get<19>(data[0]), "\"5,6,7\"");
+}
+
+TEST_F(CannDBDumperUtest, TestGetFormat_UINT32_MAX)
+{
+    uint32_t oriFormat = UINT32_MAX;
+    CANNTraceDBDumper cannTraceDbDumper(TEST_DB_FILE_PATH);
+    std::string result = cannTraceDbDumper.GetFormat(oriFormat);
+    EXPECT_EQ(result, "UNDEFINED");
+}
+
+TEST_F(CannDBDumperUtest, TestGetFormat_SubFormat_Zero)
+{
+    uint32_t oriFormat = 0x00000000;
+    CANNTraceDBDumper cannTraceDbDumper(TEST_DB_FILE_PATH);
+    std::string result = cannTraceDbDumper.GetFormat(oriFormat);
+    EXPECT_EQ(result, "NCHW");
+}
+
+TEST_F(CannDBDumperUtest, TestGetFormat_SubFormat_One)
+{
+    uint32_t oriFormat = 0x000100;
+    CANNTraceDBDumper cannTraceDbDumper(TEST_DB_FILE_PATH);
+    std::string result = cannTraceDbDumper.GetFormat(oriFormat);
+    EXPECT_EQ(result, "NCHW:1");
+}
+
+TEST_F(CannDBDumperUtest, TestAddTaskInfoOpIsNull)
+{
+    CANNTraceDBDumper cannTraceDbDumper(TEST_DB_FILE_PATH);
+    auto hostTaskPtr = std::make_shared<HostTask>();
+    hostTaskPtr->op = nullptr;
+    hostTaskPtr->kernelName = 0;
+    CANNTraceDBDumper::TaskInfoData taskInfoData;
+    cannTraceDbDumper.AddTaskInfo(hostTaskPtr, taskInfoData);
+    hostTaskPtr->kernelName = 1;
+    cannTraceDbDumper.AddTaskInfo(hostTaskPtr, taskInfoData);
+    EXPECT_EQ(taskInfoData.size(), 1ul);
+}
+
+TEST_F(CannDBDumperUtest, TestDumpGeFusionOps)
+{
+    CANNTraceDBDumper cannTraceDbDumper(TEST_DB_FILE_PATH);
+    auto profFusionOpInfoPtr = std::make_shared<ProfFusionOpInfo>(ProfFusionOpInfo{
+        .opName = 12345,
+        .fusionOpNum = 2,
+        .inputMemsize = 1024,
+        .outputMemsize = 2048,
+        .weightMemSize = 4096,
+        .workspaceMemSize = 8192,
+        .totalMemSize = 16384,
+        .fusionOpId = {1, 2}
+    });
+    std::shared_ptr<GeFusionOpInfo> info = std::make_shared<GeFusionOpInfo>(0, profFusionOpInfoPtr);
+    GeFusionOpInfos geFusionOpInfos = {info};
+    cannTraceDbDumper.DumpGeFusionOps(geFusionOpInfos);
+    EXPECT_TRUE(cannTraceDbDumper.result_);
+    MOCKER_CPP(&DBRunner::CreateTable).stubs().will(returnValue(false));
+    cannTraceDbDumper.result_ = true;
+    cannTraceDbDumper.DumpGeFusionOps(geFusionOpInfos);
+    EXPECT_FALSE(cannTraceDbDumper.result_);
+    MOCKER_CPP(&DBRunner::CreateTable).reset();
+    MOCKER_CPP(&DBRunner::InsertData<>).stubs().will(returnValue(false));
+    cannTraceDbDumper.DumpGeFusionOps(geFusionOpInfos);
+    EXPECT_FALSE(cannTraceDbDumper.result_);
+    MOCKER_CPP(&DBRunner::InsertData<>).reset();
+}

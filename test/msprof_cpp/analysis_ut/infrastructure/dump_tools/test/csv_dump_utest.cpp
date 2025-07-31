@@ -116,3 +116,27 @@ TEST(CsvDumpUTest, ShouldGetNullCsvStringWhenColumnSizeWrong)
     std::string expectStr = "";
     EXPECT_EQ(expectStr, csvStream.str());
 }
+TEST(CsvDumpUTest, TestWriteToFileWhenContentIsEmptyThenReturnFalse)
+{
+    std::string fileName = "test_file.txt";
+    const char *content = nullptr;
+    std::size_t len = 100;
+    bool result = DumpTool::WriteToFile(fileName, content, len, FileCategory::MSPROF);
+    EXPECT_FALSE(result);
+}
+TEST(CsvDumpUTest, TestWriteToFileWhenLenIsZeroThenReturnFalse)
+{
+    std::string fileName = "test_file.txt";
+    const char *content = "Test Content";
+    std::size_t len = 0;
+    bool result = DumpTool::WriteToFile(fileName, content, len, FileCategory::MSPROF);
+    EXPECT_FALSE(result);
+}
+TEST(CsvDumpUTest, TestWriteToFileWhenFileCategoryInvalidThenReturnFalse)
+{
+    std::string fileName = "test_file.txt";
+    const char *content = "Test Content";
+    std::size_t len = 0;
+    bool result = DumpTool::WriteToFile(fileName, content, len, FileCategory::DEFAULT);
+    EXPECT_FALSE(result);
+}
