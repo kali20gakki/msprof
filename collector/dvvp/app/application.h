@@ -36,7 +36,6 @@ private:
     static void SetAppEnv(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
         std::vector<std::string> &envsV);
     static std::string GetCmdString(const std::string paramsName);
-    static int CanonicalizeAppParam(std::vector<std::string> &paramsCmd);
 };
 }  // namespace app
 }  // namespace dvvp
