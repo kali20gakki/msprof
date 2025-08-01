@@ -967,7 +967,7 @@ timeline计算公式：
 | message      | INTEGER |     | host侧tx打点数据携带信息在STRING_IDS表里对应的id|
 | globalTid    | INTEGER |     | host侧tx打点数据开始线程的全局tid|
 | endGlobalTid | INTEGER |     | host侧tx打点数据结束线程的全局tid|
-| domainId     | INTEGER |     | host侧tx打点数据所属域的域id(预留)|
+| domainId     | INTEGER |     | host侧tx打点数据携带域信息在STRING_IDS表里对应的id|
 | connectionId | INTEGER |     | host侧tx打点数据与TASK表里npu打点task的关联id |
 
 变更记录：
