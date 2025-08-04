@@ -693,13 +693,13 @@ typedef void(*msptiBuffersCallbackCompleteFunc)(uint8_t *buffer, size_t size, si
  * buffer handling. If registered, activity record buffers are handled using
  * asynchronous requested/completed callbacks from MSPTI.
  *
- * @param funcBufferRequested callback which is invoked when an empty
+ * @param funcBufferRequested [in] callback which is invoked when an empty
  * buffer is requested by MSPTI
- * @param funcBufferCompleted callback which is invoked when a buffer
+ * @param funcBufferCompleted [in] callback which is invoked when a buffer
  * containing activity records is available from MSPTI
  *
- * @retval MSPTI_SUCCESS
- * @retval MSPTI_ERROR_INVALID_PARAMETER if either
+ * @return MSPTI_SUCCESS
+ * @return MSPTI_ERROR_INVALID_PARAMETER if either
  * funcBufferRequested or funcBufferCompleted is NULL
  */
 msptiResult msptiActivityRegisterCallbacks(
@@ -712,9 +712,9 @@ msptiResult msptiActivityRegisterCallbacks(
  * kinds can be enabled by calling this function multiple times.
  * By default, the collection of all activity types is inactive.
  *
- * @param kind The kind of activity record to collect
+ * @param kind [in] The kind of activity record to collect
  *
- * @retval MSPTI_SUCCESS
+ * @return MSPTI_SUCCESS
  */
 msptiResult msptiActivityEnable(msptiActivityKind kind);
 
@@ -725,9 +725,9 @@ msptiResult msptiActivityEnable(msptiActivityKind kind);
  * kinds can be disabled by calling this function multiple times.
  * By default, the collection of all activity types is inactive.
  *
- * @param kind The kind of activity record to stop collecting
+ * @param kind [in] The kind of activity record to stop collecting
  *
- * @retval MSPTI_SUCCESS
+ * @return MSPTI_SUCCESS
  */
 msptiResult msptiActivityDisable(msptiActivityKind kind);
 
@@ -738,10 +738,10 @@ msptiResult msptiActivityDisable(msptiActivityKind kind);
  * Domain can be enabled by calling this function multiple times.
  * By default, the Domain of all activity types is active.
  *
- * @param name The name of domain to collect
+ * @param name [in] The name of domain to collect
  *
- * @retval MSPTI_SUCCESS
- * @retval MSPTI_ERROR_INVALID_PARAMETER if @p name is NULL
+ * @return MSPTI_SUCCESS
+ * @return MSPTI_ERROR_INVALID_PARAMETER if @p name is NULL
  */
 msptiResult msptiActivityEnableMarkerDomain(const char* name);
 
@@ -752,10 +752,10 @@ msptiResult msptiActivityEnableMarkerDomain(const char* name);
  * Domain can be disabled by calling this function multiple times.
  * By default, the Domain of all activity types is active.
  *
- * @param name The name of domain to collect
+ * @param name [in] The name of domain to collect
  *
- * @retval MSPTI_SUCCESS
- * @retval MSPTI_ERROR_INVALID_PARAMETER if @p name is NULL
+ * @return MSPTI_SUCCESS
+ * @return MSPTI_ERROR_INVALID_PARAMETER if @p name is NULL
  */
 msptiResult msptiActivityDisableMarkerDomain(const char* name);
 
@@ -764,16 +764,16 @@ msptiResult msptiActivityDisableMarkerDomain(const char* name);
  *
  * This is a function to iterate over the activity records in buffer.
  *
- * @param buffer The buffer containing activity records
- * @param validBufferSizeBytes The number of valid bytes in the buffer.
- * @param record Inputs the previous record returned by
+ * @param buffer [in] The buffer containing activity records
+ * @param validBufferSizeBytes [in] The number of valid bytes in the buffer.
+ * @param record [in] Inputs the previous record returned by
  * msptiActivityGetNextRecord and returns the next activity record
  * from the buffer. If input value is NULL, returns the first activity
  * record in the buffer.
  *
- * @retval MSPTI_SUCCESS
- * @retval MSPTI_ERROR_MAX_LIMIT_REACHED if no more records in the buffer
- * @retval MSPTI_ERROR_INVALID_PARAMETER if buffer is NULL.
+ * @return MSPTI_SUCCESS
+ * @return MSPTI_ERROR_MAX_LIMIT_REACHED if no more records in the buffer
+ * @return MSPTI_ERROR_INVALID_PARAMETER if buffer is NULL.
  */
 msptiResult msptiActivityGetNextRecord(uint8_t *buffer, size_t validBufferSizeBytes, msptiActivity **record);
 
@@ -788,9 +788,9 @@ msptiResult msptiActivityGetNextRecord(uint8_t *buffer, size_t validBufferSizeBy
  * Before calling this function, the buffer handling callback api must be activated
  * by calling msptiActivityRegisterCallbacks.
  *
- * @param flag Reserved for internal use.
+ * @param flag [in] Reserved for internal use.
  *
- * @retval MSPTI_SUCCESS
+ * @return MSPTI_SUCCESS
  */
 msptiResult msptiActivityFlushAll(uint32_t flag);
 
@@ -805,9 +805,9 @@ msptiResult msptiActivityFlushAll(uint32_t flag);
  * Before calling this function, the buffer handling callback api must be activated
  * by calling msptiActivityRegisterCallbacks.
  *
- * @param time Period flush time.Disable period flush when time is set to 0.
+ * @param time [in] Period flush time.Disable period flush when time is set to 0.
  *
- * @retval MSPTI_SUCCESS
+ * @return MSPTI_SUCCESS
  */
 msptiResult msptiActivityFlushPeriod(uint32_t time);
 
@@ -819,11 +819,11 @@ msptiResult msptiActivityFlushPeriod(uint32_t time);
  * MSPTI_ACTIVITY_KIND_EXTERNAL_CORRELATION is enabled, the activity API record will
  * be preceded by a msptiActivityExternalCorrelation record for each msptiExternalCorrelationKind.
  *
- * @param kind The kind of external API activities should be correlated with.
- * @param id External correlation id.
+ * @param kind [in] The kind of external API activities should be correlated with.
+ * @param id [in] External correlation id.
  *
- * @retval MSPTI_SUCCESS
- * @retval MSPTI_ERROR_INVALID_PARAMETER
+ * @return MSPTI_SUCCESS
+ * @return MSPTI_ERROR_INVALID_PARAMETER
  */
 msptiResult msptiActivityPushExternalCorrelationId(msptiExternalCorrelationKind kind, uint64_t id);
 
@@ -832,13 +832,13 @@ msptiResult msptiActivityPushExternalCorrelationId(msptiExternalCorrelationKind 
  *
  * This function notifies MSPTI that the calling thread is leaving an external API region.
  *
- * @param kind The kind of external API activities should be correlated with.
- * @param lastId If the function returns successful, contains the last external correlation id for this kind,
+ * @param kind [in] The kind of external API activities should be correlated with.
+ * @param lastId [in] If the function returns successful, contains the last external correlation id for this kind,
  * can be NULL.
  *
- * @retval MSPTI_SUCCESS
- * @retval MSPTI_ERROR_INVALID_PARAMETER
- * @retval MSPTI_ERROR_QUEUE_EMPTY
+ * @return MSPTI_SUCCESS
+ * @return MSPTI_ERROR_INVALID_PARAMETER
+ * @return MSPTI_ERROR_QUEUE_EMPTY
  */
 msptiResult msptiActivityPopExternalCorrelationId(msptiExternalCorrelationKind kind, uint64_t *lastId);
 
