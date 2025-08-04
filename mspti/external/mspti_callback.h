@@ -171,15 +171,15 @@ typedef struct msptiSubscriber_st *msptiSubscriberHandle;
  * @note This function does not enable any callbacks.
  * @note @b Thread-safety: this function is thread safe.
  *
- * @param subscriber handle to initialize subscriber
- * @param callback The callback function
- * @param userdata A pointer to user data. This data will be passed to
+ * @param subscriber [in] handle to initialize subscriber
+ * @param callback [in] The callback function
+ * @param userdata [in] A pointer to user data. This data will be passed to
  * the callback function via the @p userdata paramater.
  *
- * @retval MSPTI_SUCCESS on success
- * @retval MSPTI_ERROR_INNER if unable to initialize MSPTI
- * @retval MSPTI_ERROR_MULTIPLE_SUBSCRIBERS_NOT_SUPPORTED if there is already a MSPTI subscriber
- * @retval MSPTI_ERROR_INVALID_PARAMETER if @p subscriber is NULL
+ * @return MSPTI_SUCCESS on success
+ * @return MSPTI_ERROR_INNER if unable to initialize MSPTI
+ * @return MSPTI_ERROR_MULTIPLE_SUBSCRIBERS_NOT_SUPPORTED if there is already a MSPTI subscriber
+ * @return MSPTI_ERROR_INVALID_PARAMETER if @p subscriber is NULL
  */
 msptiResult msptiSubscribe(msptiSubscriberHandle *subscriber, msptiCallbackFunc callback, void* userdata);
 
@@ -189,10 +189,10 @@ msptiResult msptiSubscribe(msptiSubscriberHandle *subscriber, msptiCallbackFunc 
  * Removes a callback subscriber so that no future callbacks will be
  * issued to that subscriber.
  *
- * @param subscriber Handle to the initialize subscriber
+ * @param subscriber [in] Handle to the initialize subscriber
  *
- * @retval MSPTI_SUCCESS on success
- * @retval MSPTI_ERROR_INVALID_PARAMETER if @p subscriber is NULL or not initialized
+ * @return MSPTI_SUCCESS on success
+ * @return MSPTI_ERROR_INVALID_PARAMETER if @p subscriber is NULL or not initialized
  */
 msptiResult msptiUnsubscribe(msptiSubscriberHandle subscriber);
 
@@ -206,14 +206,14 @@ msptiResult msptiUnsubscribe(msptiSubscriberHandle subscriber);
  * @note @b Thread-safety: a subscriber must serialize access to
  * msptiEnableCallback, msptiEnableDomain.
  *
- * @param enable New enable state for the callback. Zero disables the
+ * @param enable [in] New enable state for the callback. Zero disables the
  * callback, non-zero enables the callback.
- * @param subscriber Handle to callback subscription
- * @param domain The domain of the callback
- * @param cbid The ID of the callback
+ * @param subscriber [in] Handle to callback subscription
+ * @param domain [in] The domain of the callback
+ * @param cbid [in] The ID of the callback
  *
- * @retval MSPTI_SUCCESS on success
- * @retval MSPTI_ERROR_INVALID_PARAMETER if @p subscriber, @p domain or @p
+ * @return MSPTI_SUCCESS on success
+ * @return MSPTI_ERROR_INVALID_PARAMETER if @p subscriber, @p domain or @p
  * cbid is invalid.
  */
 msptiResult msptiEnableCallback(
@@ -227,13 +227,13 @@ msptiResult msptiEnableCallback(
  * @note @b Thread-safety: a subscriber must serialize access to
  * msptiEnableCallback, msptiEnableDomain.
  *
- * @param enable New enable state for the callback. Zero disables the
+ * @param enable [in] New enable state for the callback. Zero disables the
  * callback, non-zero enables the callback.
- * @param subscriber Handle to callback subscription
- * @param domain The domain of the callback
+ * @param subscriber [in] Handle to callback subscription
+ * @param domain [in] The domain of the callback
  *
- * @retval MSPTI_SUCCESS on success
- * @retval MSPTI_ERROR_INVALID_PARAMETER if @p subscriber, @p domain is invalid.
+ * @return MSPTI_SUCCESS on success
+ * @return MSPTI_ERROR_INVALID_PARAMETER if @p subscriber, @p domain is invalid.
  */
 msptiResult msptiEnableDomain(
     uint32_t enable, msptiSubscriberHandle subscriber, msptiCallbackDomain domain);
