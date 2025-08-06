@@ -54,6 +54,7 @@ enum ProfCollectionJobE {
     FFTS_PROFILE_COLLECTION_JOB,
     INSTR_PROFILING_COLLECTION_JOB,
     // system
+    ADPROF_COLLECTION_JOB,
     CTRLCPU_PERF_COLLECTION_JOB,
     SYSSTAT_PROC_COLLECTION_JOB,
     SYSMEM_PROC_COLLECTION_JOB,
@@ -106,6 +107,7 @@ static const std::string COLLECTION_JOB_FILENAME[NR_MAX_COLLECTION_JOB] = {
     "data/stars_soc_profile.data",
     "data/ffts_profile.data",
     "data/instr",
+    "data/adprof.data",
     "data/ai_ctrl_cpu.data",
     "",
     "",

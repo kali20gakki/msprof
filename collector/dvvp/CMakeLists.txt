@@ -120,6 +120,7 @@ set(msprofilerCpp
     depend/src/slog_plugin.cpp
     depend/src/profapi_plugin.cpp
     depend/src/dcmi_plugin.cpp
+    depend/src/tsdclient_plugin.cpp
     driver/channel/ai_drv_prof_api.cpp
     driver/devmgmt/ai_drv_dev_api.cpp
     driver/devmgmt/ai_drv_dsmi_api.cpp
@@ -128,6 +129,7 @@ set(msprofilerCpp
     job_wrapper/src/job_factory.cpp
     job_wrapper/src/prof_channel_manager.cpp
     job_wrapper/src/prof_job.cpp
+    job_wrapper/src/prof_adprof_job.cpp
     job_wrapper/src/prof_peripheral_job.cpp
     job_wrapper/src/prof_timer.cpp
     job_wrapper/src/prof_host_job.cpp
@@ -182,12 +184,13 @@ set(msprofilerInc
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef
     ${TOP_DIR}/collector/dvvp/depend/inc/profapi
     ${TOP_DIR}/collector/dvvp/depend/inc/acl
+    ${TOP_DIR}/collector/dvvp/depend/inc/tsdclient
+    ${TOP_DIR}/collector/dvvp/depend/inc/plugin
     ${TOP_DIR}/collector/inc/toolchain
     ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/collector/inc/external/acl
     ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/opensource/json/include
-    ${TOP_DIR}/collector/dvvp/depend/inc/plugin
     ${TOP_DIR}/collector/dvvp/params_adapter
     msprof/engine/include
     msprof/common/include

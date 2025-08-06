@@ -138,7 +138,8 @@ enum AI_DRV_CHANNEL {
     PROF_CHANNEL_DVPP_SCD = CHANNEL_DVPP_SCD, // 141
     PROF_CHANNEL_NPU_MODULE_MEM = CHANNEL_NPU_MODULE_MEM, // 142
     PROF_CHANNEL_AICPU = CHANNEL_AICPU,       // 143 CHANNEL_AICPU
-    PROF_CHANNEL_CUS_AICPU = CHANNEL_CUS_AICPU,
+    PROF_CHANNEL_CUS_AICPU = CHANNEL_CUS_AICPU,     // 144
+    PROF_CHANNEL_ADPROF    = CHANNEL_ADPROF,      // 145
     PROF_CHANNEL_MAX      = CHANNEL_NUM, // 160
 };
 
@@ -384,6 +385,8 @@ int DrvInstrProfileStart(const uint32_t devId, const AI_DRV_CHANNEL channelId, c
 int DrvHwtsLogStart(int profDeviceId, AI_DRV_CHANNEL profChannel);
 
 int DrvFmkDataStart(int devId, AI_DRV_CHANNEL profChannel);
+
+int DrvAdprofStart(int32_t profDeviceId, AI_DRV_CHANNEL profChannel);
 
 int DrvStop(int profDeviceId,
             AI_DRV_CHANNEL profChannel);

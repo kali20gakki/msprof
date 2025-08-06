@@ -41,6 +41,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}//dvvp/job_wrapper/src/collection_register.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/job_wrapper/src/prof_timer.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/job_wrapper/src/prof_job.cpp 
+    ${MSPROF_SOURCE_DIR}//dvvp/job_wrapper/src/prof_adprof_job.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/job_wrapper/src/prof_peripheral_job.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/transport/prof_channel.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/transport/uploader.cpp 

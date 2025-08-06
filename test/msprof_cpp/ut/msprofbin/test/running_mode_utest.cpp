@@ -804,6 +804,7 @@ TEST_F(RUNNING_MODE_UTEST, SystemModeRecordOutPut){
 
 TEST_F(RUNNING_MODE_UTEST, SystemModeStartHostTask){
     GlobalMockObject::verify();
+    uint32_t deviceId = 64;
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
     new analysis::dvvp::message::ProfileParams);
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params2(
@@ -817,26 +818,26 @@ TEST_F(RUNNING_MODE_UTEST, SystemModeStartHostTask){
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
-    EXPECT_EQ(PROFILING_FAILED, rMode.StartHostTask(result_dir, "64"));
+    EXPECT_EQ(PROFILING_FAILED, rMode.StartHostTask(result_dir, deviceId));
     MOCKER_CPP(&SystemMode::CreateUploader)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(PROFILING_FAILED, rMode.StartHostTask(result_dir, "64"));
+    EXPECT_EQ(PROFILING_FAILED, rMode.StartHostTask(result_dir, deviceId));
     SHARED_PTR_ALIA<ProfSocTask> task(new ProfSocTask(1, params));
     MOCKER_CPP_VIRTUAL(task.get(), &ProfSocTask::Init)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(PROFILING_FAILED, rMode.StartHostTask(result_dir, "64"));
+    EXPECT_EQ(PROFILING_FAILED, rMode.StartHostTask(result_dir, deviceId));
     MOCKER_CPP_VIRTUAL((analysis::dvvp::common::thread::Thread*)task.get(), &ProfSocTask::Start)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(PROFILING_FAILED, rMode.StartHostTask(result_dir, "64"));
+    EXPECT_EQ(PROFILING_FAILED, rMode.StartHostTask(result_dir, deviceId));
     params->job_id = "1";
     
-    EXPECT_EQ(PROFILING_SUCCESS, rMode.StartHostTask(result_dir, "1"));
+    EXPECT_EQ(PROFILING_SUCCESS, rMode.StartHostTask(result_dir, 1));
 }
 
 TEST_F(RUNNING_MODE_UTEST, SystemModeStartDeviceTask){

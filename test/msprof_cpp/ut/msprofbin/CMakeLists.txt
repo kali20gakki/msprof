@@ -36,6 +36,7 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/job_factory.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/job_device_rpc.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_job.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_adprof_job.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_peripheral_job.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_timer.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_host_job.cpp
@@ -59,6 +60,7 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/adx/stub/adx_prof_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/dcmi_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/tsdclient_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_msprof.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_aclapi.cpp
@@ -127,6 +129,7 @@ target_include_directories(msprof_bin_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/tsdclient
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
     ${MSPROF_SOURCE_DIR}/../inc
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/include

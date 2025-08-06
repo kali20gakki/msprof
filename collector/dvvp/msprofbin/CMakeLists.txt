@@ -9,19 +9,20 @@ set(msprofBinHeader
     ../
     ../app
     ${TOP_DIR}/platform/securec/include
-    ${TOP_DIR}/collector/dvvp/depend/inc/slog
     ${TOP_DIR}/opensource/json/include
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef/error_manager/error_manager_stub
     ${TOP_DIR}/collector/dvvp/depend/inc
+    ${TOP_DIR}/collector/dvvp/depend/inc/slog
     ${TOP_DIR}/collector/dvvp/depend/inc/driver
     ${TOP_DIR}/collector/dvvp/depend/inc/adump
     ${TOP_DIR}/collector/dvvp/depend/inc/plugin
     ${TOP_DIR}/collector/dvvp/depend/inc/profapi
+    ${TOP_DIR}/collector/dvvp/depend/inc/tsdclient
+    ${TOP_DIR}/collector/dvvp/depend/inc/acl
     ${TOP_DIR}/collector/inc/toolchain
     ${TOP_DIR}/collector/dvvp/common/config
     ${TOP_DIR}/collector/dvvp/params_adapter
     ${TOP_DIR}/collector/inc/external
-    ${TOP_DIR}/collector/dvvp/depend/inc/acl
     ${TOP_DIR}/collector/dvvp/msprof/dynamic_profiling/include/
     ../common/utils
     ../msprof/engine/include
@@ -70,9 +71,12 @@ add_executable(msprofbin
     ../common/config/config_manager.cpp
     ../common/config/feature_manager.cpp
     ../common/logger/cmd_log.cpp
-    ../depend/src/slog_plugin.cpp
+    ../depend/src/tsdclient_plugin.cpp
+    ../depend/src/plugin_handle.cpp
     ../depend/src/driver_plugin.cpp
     ../depend/src/runtime_plugin.cpp
+    ../depend/src/slog_plugin.cpp
+    ../depend/src/dcmi_plugin.cpp
     ../common/platform/platform.cpp
     ../common/memory/chunk_pool.cpp
     ../common/thread/thread.cpp
@@ -99,6 +103,7 @@ add_executable(msprofbin
     ../job_wrapper/src/job_factory.cpp
     ../job_wrapper/src/job_device_rpc.cpp
     ../job_wrapper/src/prof_job.cpp
+    ../job_wrapper/src/prof_adprof_job.cpp
     ../job_wrapper/src/prof_peripheral_job.cpp
     ../job_wrapper/src/prof_timer.cpp
     ../job_wrapper/src/prof_host_job.cpp
@@ -119,11 +124,6 @@ add_executable(msprofbin
     ../transport/hdc/hdc_transport.cpp
     ../transport/hdc/device_transport.cpp
     ../transport/hdc/platform/rpc/dev_mgr_api.cpp
-    ../depend/src/plugin_handle.cpp
-    ../depend/src/driver_plugin.cpp
-    ../depend/src/runtime_plugin.cpp
-    ../depend/src/slog_plugin.cpp
-    ../depend/src/dcmi_plugin.cpp
     ${hdcCpp}
     ${CppPath}
 )

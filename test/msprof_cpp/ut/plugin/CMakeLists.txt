@@ -10,6 +10,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/dcmi_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/tsdclient_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
@@ -25,6 +26,7 @@ set(localSrcFiles
     test/runtime_plugin_utest.cpp
     test/slog_plugin_utest.cpp
     test/dcmi_plugin_utest.cpp
+    test/tsdclient_plugin_utest.cpp
 )
 
 add_executable(plugin_utest
@@ -41,6 +43,7 @@ target_include_directories(plugin_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/dcmi
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/tsdclient
     ${MSPROF_SOURCE_DIR}/dvvp/common
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa

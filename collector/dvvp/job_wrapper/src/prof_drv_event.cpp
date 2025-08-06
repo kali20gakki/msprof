@@ -135,10 +135,11 @@ int ProfDrvEvent::QueryDevPid(struct TaskEventAttr *eventAttr)
     int32_t hostPid = MmGetPid();
     struct halQueryDevpidInfo hostpidinfo = {static_cast<pid_t>(hostPid), eventAttr->deviceId, 0, procType, {0}};
     drvError_t ret = DRV_ERROR_NOT_SUPPORT;
-    for (int32_t i = 0; (i < WAIT_COUNT) && (!eventAttr->isExit); i++) {
+    for (int32_t i = 0; ((i < WAIT_COUNT) && (!eventAttr->isExit)) || eventAttr->isWaitDevPid; i++) {
         ret = DriverPlugin::instance()->MsprofHalQueryDevpid(hostpidinfo, &devPid);
         if (ret == DRV_ERROR_NONE) {
-            MSPROF_LOGI("Query devPid succ, devId:%u, hostPid:%d, devPid:%d", eventAttr->deviceId, hostPid, devPid);
+            MSPROF_LOGI("Query devPid succ, devId:%u, hostPid:%d, devPid:%d, isWaitDevPid:%d", eventAttr->deviceId,
+                hostPid, devPid, eventAttr->isWaitDevPid);
             return PROFILING_SUCCESS;
         }
         MSPROF_LOGD("Query devPid failed, devId:%u, hostPid:%d, ret:%d.", eventAttr->deviceId, hostPid, ret);
@@ -150,7 +151,7 @@ int ProfDrvEvent::QueryDevPid(struct TaskEventAttr *eventAttr)
 void ProfDrvEvent::WaitEvent(struct TaskEventAttr *eventAttr, uint32_t grpId)
 {
     MSPROF_LOGI("Start wait drv event, device id:%u, channel id:%d", eventAttr->deviceId, eventAttr->channelId);
-    struct event_info event;
+    struct event_info event{{EVENT_MAX_NUM, 0, 0, 0, 0, 0, 0}, {0, {0}}};
     bool onceFlag = true;
     int32_t timeout = 1;  // first timeout need to check channel is valid
     drvError_t err;
@@ -159,9 +160,19 @@ void ProfDrvEvent::WaitEvent(struct TaskEventAttr *eventAttr, uint32_t grpId)
         timeout = DRV_EVENT_TIMEOUT;
         if (err == DRV_ERROR_NONE) {
             MSPROF_LOGI("Receive event, devId=%u, event_id=%u", eventAttr->deviceId, event.comm.event_id);
-            if (event.comm.event_id == EVENT_USR_START) {
+            if (event.comm.event_id != EVENT_USR_START) {
+                MSPROF_LOGE("Receive unexpected event, devId:%u, channelId:%d, eventId:%d",
+                    eventAttr->deviceId, eventAttr->channelId, event.comm.event_id);
+                return;
+            }
+            if (DrvChannelsMgr::instance()->GetAllChannels(eventAttr->deviceId) == PROFILING_SUCCESS &&
+                DrvChannelsMgr::instance()->ChannelIsValid(eventAttr->deviceId, eventAttr->channelId)) {
+                MSPROF_LOGI("Channel is valid, channelId=%d", static_cast<int32_t>(eventAttr->channelId));
                 eventAttr->isChannelValid = true;
                 (void)CollectionRegisterMgr::instance()->CollectionJobRun(eventAttr->deviceId, eventAttr->jobTag);
+            } else {
+                MSPROF_LOGE("Receive event but channel is invalid, devId:%u, channel id:%d",
+                    eventAttr->deviceId, static_cast<int32_t>(eventAttr->channelId));
             }
             return;
         } else if ((err == DRV_ERROR_SCHED_WAIT_TIMEOUT) || (err == DRV_ERROR_NO_EVENT)) {

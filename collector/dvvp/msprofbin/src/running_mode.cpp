@@ -942,6 +942,7 @@ int SystemMode::RunModeTasks()
         MSPROF_LOGE("[System Mode] Invalid params!");
         return PROFILING_FAILED;
     }
+    params_->profMode = MSVP_PROF_SYSTEM_MODE;
     int ret = StartSysTask();
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[System Mode] Run system task failed.");
@@ -1011,18 +1012,14 @@ int SystemMode::RecordOutPut() const
     return PROFILING_SUCCESS;
 }
 
-int SystemMode::StartHostTask(const std::string resultDir, const std::string device)
+int SystemMode::StartHostTask(const std::string resultDir, uint32_t devId)
 {
     auto params = GenerateHostParam(params_);
     if (params == nullptr) {
         MSPROF_LOGE("GenerateDeviceParam failed");
         return PROFILING_FAILED;
     }
-    params->devices = device;
-    uint32_t devId;
-    if (Utils::StrToUint32(devId, device) == PROFILING_FAILED) {
-        return PROFILING_FAILED;
-    }
+    params->devices = std::to_string(devId);
     if (devId == DEFAULT_HOST_ID) {
         params->host_profiling = TRUE;
     } else if (params->hardware_mem.compare(MSVP_PROF_ON) == 0) {
@@ -1044,12 +1041,12 @@ int SystemMode::StartHostTask(const std::string resultDir, const std::string dev
     MSVP_MAKE_SHARED2_RET(task, ProfSocTask, devId, params, PROFILING_FAILED);
     ret = task->Init();
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("DeviceTask init failed, deviceId:%s", device.c_str());
+        MSPROF_LOGE("DeviceTask init failed, deviceId:%u", devId);
         return PROFILING_FAILED;
     }
     ret = task->Start();
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("DeviceTask start failed, deviceId:%s", device.c_str());
+        MSPROF_LOGE("DeviceTask start failed, deviceId:%u", devId);
         return PROFILING_FAILED;
     }
     taskMap_[params->job_id] = task;
@@ -1293,14 +1290,19 @@ int SystemMode::StartDeviceJobs(const std::string& device)
     if (ret != PROFILING_SUCCESS) {
         return ret;
     }
+    uint32_t devId = 0;
+    if (Utils::StrToUint32(devId, device) == PROFILING_FAILED) {
+        MSPROF_LOGE("Convert device id:%s to uint32 failed", device.c_str());
+        return PROFILING_FAILED;
+    }
     // this host data is for device mapping(llc, ddr, aicore, etc)
-    ret = StartHostTask(resultDir, device);
+    ret = StartHostTask(resultDir, devId);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("StartHostTask failed");
         StopTask();
         return PROFILING_FAILED;
     }
-    if (IsDeviceJob() && (!Platform::instance()->PlatformIsSocSide())) {
+    if (IsDeviceJob() && (!Platform::instance()->PlatformIsSocSide()) && (!DrvIsSupportAdprof(devId))) {
         ret = StartDeviceTask(resultDir, device);
         if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("StartDeviceTask failed");
@@ -1313,13 +1315,12 @@ int SystemMode::StartDeviceJobs(const std::string& device)
 
 int SystemMode::StartHostJobs()
 {
-    std::string hostId = std::to_string(DEFAULT_HOST_ID);
     std::string resultDir;
-    int ret = CreateJobDir(hostId, resultDir);
+    int ret = CreateJobDir(std::to_string(DEFAULT_HOST_ID), resultDir);
     if (ret != PROFILING_SUCCESS) {
         return ret;
     }
-    ret = StartHostTask(resultDir, hostId);
+    ret = StartHostTask(resultDir, DEFAULT_HOST_ID);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("StartHostTask failed");
         StopTask();

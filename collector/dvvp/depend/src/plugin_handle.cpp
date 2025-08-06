@@ -37,7 +37,8 @@ int32_t PluginHandle::DlopenSo(const std::string& soPath)
     if (soPath.empty()) {
         return PROFILING_FAILED;
     }
-    handle_ = dlopen(soPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
+    int flag = GetSoName() == "libtsdclient.so" ? (RTLD_LAZY | RTLD_NODELETE) : (RTLD_NOW | RTLD_GLOBAL);
+    handle_ = dlopen(soPath.c_str(), flag);
     if (!handle_) {
         return PROFILING_FAILED;
     }

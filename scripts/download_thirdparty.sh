@@ -35,6 +35,7 @@ git clone ssh://git@szv-open.codehub.huawei.com:2222/OpenSourceCenter/megastep/m
 mkdir -p ${LLT_DIR} && cd ${LLT_DIR}
 git clone ssh://git@szv-open.codehub.huawei.com:2222/OpenSourceCenter/google/googletest.git -b release-1.12.1
 git clone ssh://git@szv-y.codehub.huawei.com:2222/mindstudio/MindStudio_Opensource/mock_cpp.git -b msprof
+mv mock_cpp mockcpp
 if [ "$1" == "fuzz" ]; then
     git clone ssh://git@lfg-y.codehub.huawei.com:2222/software-engineering-research-community/fuzz/SecTracy.git
     git clone ssh://git@szv-open.codehub.huawei.com:2222/innersource/Fuzz/secodefuzz.git

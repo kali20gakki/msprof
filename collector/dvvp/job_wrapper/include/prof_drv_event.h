@@ -29,6 +29,7 @@ struct TaskEventAttr {
     bool isThreadStart;
     Collector::Dvvp::Mmpa::MmThread handle;
     bool isAttachDevice;
+    bool isWaitDevPid;
     std::string grpName;
 };
 

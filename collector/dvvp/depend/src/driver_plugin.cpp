@@ -43,6 +43,7 @@ void DriverPlugin::GetAllFunction()
     pluginHandle_->GetFunction<drvError_t, struct drvHdcCapacity *>("drvHdcGetCapacity", drvHdcGetCapacity_);
     pluginHandle_->GetFunction<drvError_t, unsigned int, unsigned int *>(
         "drvGetDeviceSplitMode", drvGetDeviceSplitMode_);
+    pluginHandle_->GetFunction<drvError_t, uint32_t, uint32_t *>("drvDeviceGetPhyIdByIndex", drvDeviceGetPhyIdByIndex_);
     GetHalFunction();
 }
 
@@ -442,6 +443,17 @@ drvError_t DriverPlugin::MsprofDrvHdcGetCapacity(struct drvHdcCapacity *capacity
         return DRV_ERROR_INVALID_HANDLE;
     }
     return drvHdcGetCapacity_(capacity);
+}
+
+// drvDeviceGetPhyIdByIndex
+drvError_t DriverPlugin::MsprofDrvDeviceGetPhyIdByIndex(uint32_t devIndex, uint32_t *phyId)
+{
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvDeviceGetPhyIdByIndex_ == nullptr) {
+        MSPROF_LOGE("DriverPlugin drvDeviceGetPhyIdByIndex function is null.");
+        return DRV_ERROR_INVALID_HANDLE;
+    }
+    return drvDeviceGetPhyIdByIndex_(devIndex, phyId);
 }
 
 // halEschedCreateGrpEx

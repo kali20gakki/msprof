@@ -280,6 +280,11 @@ int ProfStarsSocLogJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
         return PROFILING_FAILED;
     }
 
+    if (cfg->comParams->params->profMode.compare(MSVP_PROF_SYSTEM_MODE) == 0) {
+        MSPROF_LOGI("[ProfStarsSocLogJob]Stars log job not enable in system mode.");
+        return PROFILING_FAILED;
+    }
+
     collectionJobCfg_ = cfg;
     return PROFILING_SUCCESS;
 }
@@ -1559,12 +1564,17 @@ int ProfL2CacheTaskJob::Uninit()
 }
 
 ProfAicpuJob::ProfAicpuJob() : channelId_(PROF_CHANNEL_AICPU), eventGrpName_("prof_aicpu_grp"),
-    eventAttr_{0, channelId_, AICPU_COLLECTION_JOB, false, false, false, false, 0, false, ""}, processCount_(0)
+    eventAttr_{0, channelId_, AICPU_COLLECTION_JOB, false, false, false, false, 0, false, false, ""}, processCount_(0)
 {
 }
 
 ProfAicpuJob::~ProfAicpuJob()
 {
+    eventAttr_.isExit = true;
+    eventAttr_.isWaitDevPid = false;
+    if (eventAttr_.isThreadStart) {
+        (void)MmJoinTask(&eventAttr_.handle);
+    }
 }
 
 int ProfAicpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
@@ -1598,6 +1608,8 @@ int ProfAicpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
             static_cast<int>(channelId_));
         eventAttr_.deviceId = static_cast<uint32_t>(collectionJobCfg_->comParams->devId);
         eventAttr_.grpName = eventGrpName_;
+        eventAttr_.isWaitDevPid =
+            (collectionJobCfg_->comParams->params->profMode.compare(MSVP_PROF_ACLAPI_MODE) == 0) ? true : false;
         int32_t ret = profDrvEvent_.SubscribeEventThreadInit(&eventAttr_);
         return ret;
     } else {
@@ -1687,6 +1699,7 @@ int ProfAicpuJob::Uninit()
         return PROFILING_SUCCESS;
     }
     eventAttr_.isExit = true;
+    eventAttr_.isWaitDevPid = false;
     if (eventAttr_.isThreadStart) {
         if (MmJoinTask(&eventAttr_.handle) != PROFILING_SUCCESS) {
             MSPROF_LOGW("thread not exist tid:%d, devId:%d, channelId:%d",

@@ -362,6 +362,7 @@ int ProfAclMgr::ProfAclWarmup(PROF_CONF_CONST_PTR profStartCfg)
         return ACL_ERROR_PROFILING_FAILURE;
     }
     params_->host_sys_pid = analysis::dvvp::common::utils::Utils::GetPid();
+    params_->profMode = MSVP_PROF_ACLAPI_MODE;
 
     ret = LaunchHostAndDevTasks(profStartCfg->devNums, profStartCfg->devIdList);
     if (ret != ACL_SUCCESS) {
@@ -470,6 +471,7 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
     isWarmuped_ = false;
     isStarted_ = false;
 
+    params_->profMode = "";
     return ACL_SUCCESS;
 }
 
@@ -1174,8 +1176,7 @@ int ProfAclMgr::StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t 
     MSVP_MAKE_SHARED0_RET(params, analysis::dvvp::message::ProfileParams, ACL_ERROR_PROFILING_FAILURE);
 
     auto paramAdapter = ParamsAdapterAclSubscribe();
-    int ret = paramAdapter.GetParamFromInputCfg(profSubscribeConfig, dataTypeConfig, params);
-    if (ret != PROFILING_SUCCESS) {
+    if (paramAdapter.GetParamFromInputCfg(profSubscribeConfig, dataTypeConfig, params) != PROFILING_SUCCESS) {
         MSPROF_LOGE("[ParamsAdapterAclSubscribe]GetParamFromInputCfg fail.");
         return ACL_ERROR_PROFILING_FAILURE;
     }
@@ -1188,8 +1189,9 @@ int ProfAclMgr::StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t 
     params->isSubscribe = true;
     // open host_profiling
     params->host_profiling = (devId == DEFAULT_HOST_ID) ? true : false;
+    params->profMode = MSVP_PROF_SUBSCRIBE_MODE;
 
-    ret = InitSubscribeUploader(devIdStr);
+    int ret = InitSubscribeUploader(devIdStr);
     if (ret != ACL_SUCCESS) {
         return ret;
     }
