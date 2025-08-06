@@ -97,6 +97,8 @@ function create_temp_dir() {
     cp ${TOP_DIR}/mspti/external/mspti_cbid.h ${temp_dir}
     cp ${TOP_DIR}/mspti/external/mspti_result.h ${temp_dir}
     cp -r ${TOP_DIR}/mspti/samples ${temp_dir}
+    mkdir -p ${temp_dir}/mstx_samples
+    cp -r ${TOP_DIR}/samples ${temp_dir}/mstx_samples
     cp -r ${TOP_DIR}/analysis ${temp_dir}
     rm -rf ${temp_dir}/analysis/csrc
     if [ "${package_type}" = "Patch" ]; then
@@ -219,6 +221,7 @@ check_file_exist() {
   check_package ${temp_dir}/mspti_cbid.h ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/mspti_result.h ${PKG_LIMIT_SIZE}
   check_package ${temp_dir}/samples ${PKG_LIMIT_SIZE}
+  check_package ${temp_dir}/mstx_samples/samples ${PKG_LIMIT_SIZE}
 }
 
 function check_package() {
