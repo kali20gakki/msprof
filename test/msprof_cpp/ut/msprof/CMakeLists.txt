@@ -33,6 +33,7 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/depend/src/runtime_plugin.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/depend/src/dcmi_plugin.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/depend/src/tsdclient_plugin.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/driver/channel/ai_drv_prof_api.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/mini/ai_drv_dsmi_api.cpp
@@ -41,6 +42,7 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/job_factory.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_channel_manager.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_job.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_adprof_job.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_peripheral_job.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_timer.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_host_job.cpp
@@ -156,6 +158,7 @@ target_include_directories(msprofiler_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/tsdclient
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
     ${MSPROF_SOURCE_DIR}/../inc
 	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/graphengine/external

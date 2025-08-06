@@ -34,7 +34,8 @@ protected:
 TEST_F(ProfDrvEventUtest, TestSubscribeEventThreadInit)
 {
     GlobalMockObject::verify();
-    TaskEventAttr eventAttr {0, PROF_CHANNEL_AICPU, AICPU_COLLECTION_JOB, false, false, false, false, 0, false, ""};
+    TaskEventAttr eventAttr {0, PROF_CHANNEL_AICPU, AICPU_COLLECTION_JOB, false, false,
+                             false, false, 0, false, false, ""};
     ProfDrvEvent profDrvEvent;
     MOCKER(&MmCreateTaskWithThreadAttr)
         .stubs()
@@ -47,7 +48,8 @@ TEST_F(ProfDrvEventUtest, TestSubscribeEventThreadInit)
 TEST_F(ProfDrvEventUtest, TestEventThreadHandle)
 {
     GlobalMockObject::verify();
-    TaskEventAttr eventAttr {0, PROF_CHANNEL_AICPU, AICPU_COLLECTION_JOB, false, false, false, false, 0, false, ""};
+    TaskEventAttr eventAttr {0, PROF_CHANNEL_AICPU, AICPU_COLLECTION_JOB, false, false,
+                             false, false, 0, false, false, ""};
     ProfDrvEvent profDrvEvent;
 
     EXPECT_EQ(nullptr, profDrvEvent.EventThreadHandle(nullptr));
@@ -109,7 +111,8 @@ TEST_F(ProfDrvEventUtest, TestQueryDevPid)
 {
     GlobalMockObject::verify();
     const int32_t WAIT_COUNT = 80;
-    TaskEventAttr eventAttr {0, PROF_CHANNEL_AICPU, AICPU_COLLECTION_JOB, false, false, false, false, 0, false, ""};
+    TaskEventAttr eventAttr {0, PROF_CHANNEL_AICPU, AICPU_COLLECTION_JOB, false, false,
+                             false, false, 0, false, false, ""};
     ProfDrvEvent profDrvEvent;
 
     eventAttr.channelId = PROF_CHANNEL_MAX; // not aicpu channel
@@ -127,7 +130,8 @@ TEST_F(ProfDrvEventUtest, TestQueryDevPid)
 TEST_F(ProfDrvEventUtest, TestWaitEvent)
 {
     GlobalMockObject::verify();
-    TaskEventAttr eventAttr {0, PROF_CHANNEL_AICPU, AICPU_COLLECTION_JOB, false, false, false, false, 0, false, ""};
+    TaskEventAttr eventAttr {0, PROF_CHANNEL_AICPU, AICPU_COLLECTION_JOB, false, false,
+                             false, false, 0, false, false, ""};
     ProfDrvEvent profDrvEvent;
     uint32_t grpId = 0;
 

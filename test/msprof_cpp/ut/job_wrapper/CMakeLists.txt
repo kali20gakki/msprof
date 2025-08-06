@@ -38,6 +38,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/runtime_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/tsdclient_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/channel/ai_drv_prof_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/mini/ai_drv_dsmi_api.cpp
@@ -46,6 +47,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/job_factory.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_channel_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_job.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_adprof_job.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_peripheral_job.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_timer.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_host_job.cpp

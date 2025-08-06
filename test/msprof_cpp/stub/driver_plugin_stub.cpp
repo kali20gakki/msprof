@@ -242,6 +242,12 @@ drvError_t DriverPlugin::MsprofHalQueryDevpid(struct halQueryDevpidInfo pidInfo,
 {
     return DRV_ERROR_NONE;
 }
+
+drvError_t DriverPlugin::MsprofDrvDeviceGetPhyIdByIndex(uint32_t devIndex, uint32_t *phyId)
+{
+    *phyId = 0;
+    return DRV_ERROR_NONE;
+}
 } // Plugin
 } // Dvvp
 } // Analysis

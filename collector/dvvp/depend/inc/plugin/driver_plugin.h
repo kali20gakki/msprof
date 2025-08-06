@@ -46,6 +46,7 @@ using DrvHdcAddMsgBufferFunc = std::function<drvError_t(struct drvHdcMsg *, char
 using DrvHdcSessionConnectFunc = std::function<drvError_t(int, int, HDC_CLIENT, HDC_SESSION *)>;
 using DrvHdcSessionCloseFunc = std::function<drvError_t(HDC_SESSION)>;
 using DrvHdcGetCapacityFunc = std::function<drvError_t(struct drvHdcCapacity *)>;
+using DrvDeviceGetPhyIdByIndexFunc = std::function<drvError_t(uint32_t, uint32_t *)>;
 using HalEschedCreateGrpExFunc = std::function<drvError_t(uint32_t, struct esched_grp_para *, unsigned int *)>;
 using HalEschedAttachDeviceFunc = std::function<drvError_t(unsigned int)>;
 using HalEschedDettachDeviceFunc = std::function<drvError_t(unsigned int)>;
@@ -159,6 +160,9 @@ public:
     // drvHdcGetCapacity
     drvError_t MsprofDrvHdcGetCapacity(struct drvHdcCapacity *capacity);
 
+    // drvDeviceGetPhyIdByIndex
+    drvError_t MsprofDrvDeviceGetPhyIdByIndex(uint32_t devIndex, uint32_t *phyId);
+
     // halEschedCreateGrpEx
     drvError_t MsprofHalEschedCreateGrpEx(uint32_t devId, struct esched_grp_para *grpPara, unsigned int *grpId);
 
@@ -228,6 +232,7 @@ private:
     DrvHdcSessionConnectFunc drvHdcSessionConnect_ = nullptr;
     DrvHdcSessionCloseFunc drvHdcSessionClose_ = nullptr;
     DrvHdcGetCapacityFunc drvHdcGetCapacity_ = nullptr;
+    DrvDeviceGetPhyIdByIndexFunc drvDeviceGetPhyIdByIndex_ = nullptr;
     HalEschedCreateGrpExFunc halEschedCreateGrpEx_ = nullptr;
     HalEschedAttachDeviceFunc halEschedAttachDevice_ = nullptr;
     HalEschedDettachDeviceFunc halEschedDettachDevice_ = nullptr;

@@ -70,6 +70,9 @@ int FILETransport::SendBuffer(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> 
             MSPROF_LOGE("FileChunk info is empty in SendBuffer.");
             return PROFILING_FAILED;
         }
+        if (fileChunkReq->fileName.find("adprof.data") != std::string::npos) {
+            return ParseTlvChunk(fileChunkReq);
+        }
         std::string devId = Utils::GetInfoSuffix(fileChunkReq->extraInfo);
         std::string jobId = Utils::GetInfoPrefix(fileChunkReq->extraInfo);
         if (UpdateFileName(fileChunkReq, devId) != PROFILING_SUCCESS) {
@@ -119,6 +122,100 @@ int FILETransport::UpdateFileName(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChu
         }
     }
     fileChunkReq->fileName = "data" + std::string(MSVP_SLASH) + fileName;
+    return PROFILING_SUCCESS;
+}
+
+/**
+ * @brief parse data block that contains multiple tlv chunk for adprof, and save to target file
+ * @param [in] fileChunkReq: ProfileFileChunk type shared_ptr
+ * @return 0:SUCCESS, !0:FAILED
+ */
+int32_t FILETransport::ParseTlvChunk(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq)
+{
+    SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk;
+    MSVP_MAKE_SHARED0_RET(fileChunk, analysis::dvvp::ProfileFileChunk, PROFILING_FAILED);
+    fileChunk->extraInfo = fileChunkReq->extraInfo;
+
+    const uint32_t structSize = sizeof(ProfTlv);
+    const char *data = fileChunkReq->chunk.data();
+    std::string &fileName = fileChunkReq->fileName;
+
+    // If there is cached data, some data in front of the chunk belongs to the previous chunk.
+    if (channelBuffer_.find(fileName) != channelBuffer_.end() && channelBuffer_[fileName].size() != 0 &&
+        channelBuffer_[fileName].size() < structSize) {
+        uint32_t prevDataSize = channelBuffer_[fileName].size();
+        uint32_t leftDataSize = structSize - prevDataSize;
+        if (fileChunkReq->chunkSize < leftDataSize) {
+            MSPROF_LOGE("fileChunk size smaller than expected, expected minimum size %u, received size %zu",
+                leftDataSize, fileChunkReq->chunkSize);
+            return PROFILING_FAILED;
+        }
+        channelBuffer_[fileName].append(data, leftDataSize);
+        if (SaveChunk(channelBuffer_[fileName].data(), fileChunk) != PROFILING_SUCCESS) {
+            return PROFILING_FAILED;
+        }
+        channelBuffer_[fileName].clear();
+        data += leftDataSize;
+        fileChunkReq->chunkSize -= leftDataSize;
+    }
+
+    // Store complete struct
+    uint32_t structNum = fileChunkReq->chunkSize / structSize;
+    for (uint32_t i = 0; i < structNum; ++i) {
+        if (SaveChunk(data, fileChunk) != PROFILING_SUCCESS) {
+            return PROFILING_FAILED;
+        }
+        data += structSize;
+    }
+
+    // Cache last truncated struct data
+    const uint32_t dataLeft = fileChunkReq->chunkSize - structNum * structSize;
+    if (dataLeft != 0) {
+        MSPROF_LOGI("Cache truncated data, fileName: %s, cache size: %u", fileName.c_str(), dataLeft);
+        channelBuffer_[fileName].reserve(structSize + 1);
+        channelBuffer_[fileName].append(data, dataLeft);
+    }
+
+    return PROFILING_SUCCESS;
+}
+
+/**
+ * @brief save ProfileFileChunk to local file
+ * @param [in] data: struct data pointer
+ * @param [in] fileChunk: ProfileFileChunk type shared_ptr
+ * @return 0:SUCCESS, !0:FAILED
+ */
+int32_t FILETransport::SaveChunk(const char *data, SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk) const
+{
+    if (data == nullptr) {
+        MSPROF_LOGW("Unable to parse struct data, pointer is null");
+        return PROFILING_SUCCESS;
+    }
+
+    const ProfTlv *packet = reinterpret_cast<const ProfTlv *>(data);
+    if (packet->head != TLV_HEAD) {
+        MSPROF_LOGE("Check tlv head failed");
+        return PROFILING_FAILED;
+    }
+    const ProfTlvValue *tlvValue = reinterpret_cast<const ProfTlvValue *>(packet->value);
+    fileChunk->isLastChunk = tlvValue->isLastChunk;
+    fileChunk->chunkModule = tlvValue->chunkModule;
+    fileChunk->chunkSize = tlvValue->chunkSize;
+    fileChunk->offset = tlvValue->offset;
+    fileChunk->chunk = std::string(tlvValue->chunk, tlvValue->chunkSize);
+    fileChunk->fileName = tlvValue->fileName;
+
+    std::string jobId = Utils::GetInfoPrefix(fileChunk->extraInfo);
+    std::string devId = Utils::GetInfoSuffix(fileChunk->extraInfo);
+    if (UpdateFileName(fileChunk, devId) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to update file name");
+        return PROFILING_FAILED;
+    }
+
+    if (fileSlice_->SaveDataToLocalFiles(fileChunk) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("write data to local files failed, fileName: %s", fileChunk->fileName.c_str());
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 

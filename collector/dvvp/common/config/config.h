@@ -116,6 +116,10 @@ const char * const MSVP_HASH_DATA_UPLOAD_THREAD_NAME = "MSVP_hashDataUpload";
 const char * const MSVP_TYPE_INFO_UPLOAD_THREAD_NAME = "MSVP_typeInfoUpload";
 const char * const MSVP_MSTX_DATA_HANDLE_THREAD_NAME = "MSVP_MstxDataHandle";
 
+const char * const MSVP_PROF_ACLAPI_MODE = "aclapi";
+const char * const MSVP_PROF_SUBSCRIBE_MODE = "subscribe";
+const char * const MSVP_PROF_SYSTEM_MODE = "system";
+
 // cloud prof config
 const std::string SAMPLE_KEY = "sample";
 const std::string FILE_UNDERLINE = "_";
@@ -287,6 +291,32 @@ constexpr int AIV_SAMPLING_FREQ_MIN_NUM = 1;
 constexpr int AIV_SAMPLING_FREQ_MAX_NUM = 100;
 constexpr int L2_SAMPLING_FREQ_MIN_NUM = 1;
 constexpr int L2_SAMPLING_FREQ_MAX_NUM = 100;
+
+constexpr uint32_t TLV_VALUE_MAX_LEN = 1200;
+constexpr uint32_t TLV_VALUE_CHUNK_MAX_LEN = 1032;
+constexpr uint32_t TLV_VALUE_FILENAME_MAX_LEN = 64;
+constexpr uint32_t TLV_VALUE_EXTRAINFO_MAX_LEN = 64;
+constexpr uint32_t TLV_VALUE_ID_MAX_LEN = 16;
+constexpr uint32_t TLV_HEAD = 0x5A5A5A5AU;
+
+struct ProfTlv {
+    uint32_t head;
+    uint32_t version;
+    uint32_t type;
+    uint32_t len;
+    uint8_t value[TLV_VALUE_MAX_LEN];
+};
+
+struct ProfTlvValue {
+    bool isLastChunk;
+    int32_t chunkModule;
+    size_t chunkSize;
+    int64_t offset;
+    char chunk[TLV_VALUE_CHUNK_MAX_LEN];
+    char fileName[TLV_VALUE_FILENAME_MAX_LEN];
+    char extraInfo[TLV_VALUE_EXTRAINFO_MAX_LEN];
+    char id[TLV_VALUE_ID_MAX_LEN];
+};
 }  // namespace config
 }  // namespace common
 }  // namespace dvvp

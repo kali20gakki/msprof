@@ -380,6 +380,19 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvStop) {
     EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvStop(prof_device_id, prof_channel));
 }
 
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvAdprofStart)
+{
+    analysis::dvvp::driver::AI_DRV_CHANNEL profChannel = analysis::dvvp::driver::PROF_CHANNEL_ADPROF;
+
+    MOCKER(&DriverPlugin::MsprofDrvStart)
+        .stubs()
+        .will(returnValue(PROF_ERROR))
+        .then(returnValue(PROF_OK));
+
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::driver::DrvAdprofStart(0, profChannel));
+    EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvAdprofStart(0, profChannel));
+}
+
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvChannelRead) {
     int prof_device_id = 0;
     analysis::dvvp::driver::AI_DRV_CHANNEL prof_channel = analysis::dvvp::driver::PROF_CHANNEL_HBM;

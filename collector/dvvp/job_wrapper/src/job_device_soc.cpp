@@ -17,6 +17,7 @@
 #include "prof_channel_manager.h"
 #include "prof_peripheral_job.h"
 #include "prof_host_job.h"
+#include "prof_adprof_job.h"
 #include "utils/utils.h"
 
 namespace Analysis {
@@ -451,6 +452,8 @@ int JobDeviceSoc::CreateDeviceCollectionJobArray()
     MSVP_MAKE_SHARED0_RET(CollectionJobV_[ALLPID_PROC_COLLECTION_JOB].collectionJob, ProfAllPidsJob, PROFILING_FAILED);
     // for netdev stats
     MSVP_MAKE_SHARED0_RET(CollectionJobV_[NETDEV_STATS_COLLECTION_JOB].collectionJob, NetDevStatsJob, PROFILING_FAILED);
+    // for adprof
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[ADPROF_COLLECTION_JOB].collectionJob, ProfAdprofJob, PROFILING_FAILED);
     return PROFILING_SUCCESS;
 }
 

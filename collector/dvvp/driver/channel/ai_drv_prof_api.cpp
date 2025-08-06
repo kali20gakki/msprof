@@ -632,8 +632,27 @@ int DrvFmkDataStart(int devId, AI_DRV_CHANNEL profChannel)
     return PROFILING_SUCCESS;
 }
 
-int DrvStop(int profDeviceId,
-            AI_DRV_CHANNEL profChannel)
+int DrvAdprofStart(int32_t profDeviceId, AI_DRV_CHANNEL profChannel)
+{
+    constexpr uint32_t adprofDrvSamplePeriod = 40U;
+    struct prof_start_para profStartPara = { .channel_type = PROF_PERIPHERAL_TYPE,
+                                             .sample_period = adprofDrvSamplePeriod,
+                                             .real_time = PROFILE_REAL_TIME,
+                                             .user_data = nullptr,
+                                             .user_data_size = 0 };
+    int ret = DriverPlugin::instance()->MsprofDrvStart(static_cast<uint32_t>(profDeviceId),
+        profChannel, &profStartPara);
+    if (ret != PROF_OK) {
+        MSPROF_LOGE("Failed to start profiling DrvAdprofStart, profDeviceId=%d, profChannel=%d, ret=%d", profDeviceId,
+                    static_cast<int32_t>(profChannel), ret);
+        return PROFILING_FAILED;
+    }
+    MSPROF_EVENT("Succeeded to start profiling DrvAdprofStart, profDeviceId=%d, profChannel=%d", profDeviceId,
+                 static_cast<int32_t>(profChannel));
+    return PROFILING_SUCCESS;
+}
+
+int DrvStop(int profDeviceId, AI_DRV_CHANNEL profChannel)
 {
     MSPROF_EVENT("Begin to stop profiling prof_stop DrvStop, profDeviceId=%d, profChannel=%d",
         profDeviceId, static_cast<int>(profChannel));

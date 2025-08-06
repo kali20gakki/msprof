@@ -43,6 +43,7 @@ struct ProfileParams : BaseInfo {
     std::string stream_enabled;
     std::string profiling_options;
     std::string jobInfo;
+    std::string profMode;
     std::string reportsPath;
     // app
     std::string cmdPath;
@@ -190,7 +191,7 @@ struct ProfileParams : BaseInfo {
 
     ProfileParams()
         : msprofBinPid(MSVP_MMPROCESS), is_cancel(FALSE), profiling_period(-1),
-          stream_enabled("on"), profiling_options(""),
+          stream_enabled("on"), profiling_options(""), profMode(""),
           aicore_sampling_interval(DEFAULT_PROFILING_INTERVAL_10MS),
           aiv_sampling_interval(DEFAULT_PROFILING_INTERVAL_10MS),
           cpu_profiling("off"), cpu_sampling_interval(DEFAULT_PROFILING_INTERVAL_20MS),
@@ -295,9 +296,6 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, aiv_profiling_events);
         SET_VALUE(object, aiv_metrics);
         SET_VALUE(object, aiv_profiling_mode);
-        SET_VALUE(object, is_cancel);
-        SET_VALUE(object, profiling_options);
-        SET_VALUE(object, jobInfo);
         // system trace
         SET_VALUE(object, cpu_profiling);
         SET_VALUE(object, aiCtrlCpuProfiling);
@@ -402,6 +400,11 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, isSubscribe);
         SET_VALUE(object, taskMemory);
         SET_VALUE(object, ge_api);
+        // prof config
+        SET_VALUE(object, is_cancel);
+        SET_VALUE(object, profiling_options);
+        SET_VALUE(object, profMode);
+        SET_VALUE(object, jobInfo);
     }
 
     void ToObject(nlohmann::json &object)
@@ -542,6 +545,7 @@ struct ProfileParams : BaseInfo {
         FROM_STRING_VALUE(object, durationTime);
         FROM_STRING_VALUE(object, dynamic);
         FROM_BOOL_VALUE(object, isSubscribe);
+        FROM_STRING_VALUE(object, profMode);
     }
 
     void FromObject(const nlohmann::json &object)

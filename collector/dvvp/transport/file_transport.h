@@ -31,12 +31,15 @@ public:
 private:
     int UpdateFileName(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq,
         const std::string &devId) const;
+    int32_t ParseTlvChunk(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunkReq);
+    int32_t SaveChunk(const char *data, SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk) const;
 
 private:
     SHARED_PTR_ALIA<FileSlice> fileSlice_;
     std::string storageDir_;
     std::string storageLimit_;
     bool needSlice_;
+    std::map<std::string, std::string> channelBuffer_;
 };
 
 class FileTransportFactory {

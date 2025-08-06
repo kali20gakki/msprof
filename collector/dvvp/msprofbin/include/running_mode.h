@@ -116,7 +116,7 @@ private:
     int StartHostJobs();
     int CreateJobDir(std::string device, std::string &resultDir) const;
     int RecordOutPut() const;
-    int StartHostTask(const std::string resultDir, const std::string device);
+    int StartHostTask(const std::string resultDir, uint32_t devId);
     int StartDeviceTask(const std::string resultDir, const std::string device);
     int CreateUploader(const std::string &jobId, const std::string &resultDir) const;
     bool CreateSampleJsonFile(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
