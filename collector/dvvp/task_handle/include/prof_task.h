@@ -42,7 +42,6 @@ public:
     int WriteStreamData(SHARED_PTR_ALIA<analysis::dvvp::ProfileFileChunk> fileChunk) const;
     void SetIsFinished(bool finished);
     bool GetIsFinished() const;
-    int SendMsgAndHandleResponse(int devId, SHARED_PTR_ALIA<google::protobuf::Message> msg);
 
 private:
     void WriteDone();

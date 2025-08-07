@@ -9,19 +9,11 @@ set(CMAKE_MODULE_PATH
     ${TOP_DIR}/test/cmake/modules
 )
 
-find_package(protoc)
-find_package(ascend_protobuf_shared)
-find_package(ascend_protobuf_static)
 find_package(gtest)
 find_package(mockcpp)
 
 include(${TOP_DIR}/test/cmake/depend.cmake)
 
-protobuf_generate(profiler
-    CppPath
-    HeaderPath
-    ${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler.proto
-)
 set(CMAKE_CXX_FLAGS " -Wno-unused")
 
 add_subdirectory(transport)

@@ -9,9 +9,9 @@ set(CMAKE_MODULE_PATH
     ${TOP_DIR}/cmake/modules
 )
 
-find_package(protoc)
-find_package(ascend_protobuf_shared)
-find_package(ascend_protobuf_static)
+# find_package(protoc)
+# find_package(ascend_protobuf_shared)
+# find_package(ascend_protobuf_static)
 
 if (DEFINED HITEST AND HITEST STREQUAL "on")
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE hitestwrapper)

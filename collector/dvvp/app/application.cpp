@@ -12,10 +12,9 @@
 #include "errno/error_code.h"
 #include "mmpa_api.h"
 #include "msprof_dlog.h"
-#include "proto/msprofiler.pb.h"
 #include "utils/utils.h"
 #include "validation/param_validation.h"
-#include "message/codec.h"
+
 #include "env_manager.h"
 namespace analysis {
 namespace dvvp {

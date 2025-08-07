@@ -36,7 +36,7 @@ namespace message {
 
 #define SET_ARRAY_OBJECT_VALUE(root, vector, name)          \
     do {                                                    \
-        nlohmann::json array_obj;                           \
+        nlohmann::json array_obj = nlohmann::json::array(); \
         for (size_t i = 0; i < (vector).size(); ++i) {      \
             nlohmann::json obj;                             \
             (vector)[i].ToObject(obj);                      \

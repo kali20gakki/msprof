@@ -11,13 +11,12 @@
 #include "config/config.h"
 #include "config/config_manager.h"
 #include "errno/error_code.h"
-#include "message/codec.h"
+
 #include "msprof_dlog.h"
 #include "platform/platform.h"
 #include "platform/platform_adapter.h"
 #include "prof_acl_mgr.h"
 #include "prof_params_adapter.h"
-#include "proto/msprofiler.pb.h"
 #include "uploader_mgr.h"
 #include "utils/utils.h"
 #include "validation/param_validation.h"
@@ -204,32 +203,6 @@ int ProfManager::ProcessHandleFailed(SHARED_PTR_ALIA<analysis::dvvp::message::Pr
     return PROFILING_SUCCESS;
 }
 
-void ProfManager::SendFailedStatusInfo(const analysis::dvvp::message::StatusInfo &statusInfo,
-    const std::string &jobId)
-{
-    if (jobId.empty()) {
-        MSPROF_LOGE("Invalid params, jobId");
-        MSPROF_INNER_ERROR("EK9999", "Invalid params, jobId");
-        return;
-    }
-    analysis::dvvp::message::Status status;
-    status.status = statusInfo.status;
-    status.AddStatusInfo(statusInfo);
-    MSPROF_LOGE("Failed to start profiling task, status=%s", status.ToString().c_str());
-    MSPROF_INNER_ERROR("EK9999", "Failed to start profiling task, status=%s", status.ToString().c_str());
-    SHARED_PTR_ALIA<analysis::dvvp::proto::Response> res;
-    MSVP_MAKE_SHARED0_VOID(res, analysis::dvvp::proto::Response);
-    res->set_jobid(jobId);
-    res->set_status(analysis::dvvp::proto::FAILED);
-    res->set_message(status.ToString());
-    std::string encoded = analysis::dvvp::message::EncodeMessage(res);
-    int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadData(jobId, encoded.c_str(), encoded.size());
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Failed to get transport, key=%s", jobId.c_str());
-        MSPROF_INNER_ERROR("EK9999", "Failed to get transport, key=%s", jobId.c_str());
-    }
-}
-
 int ProfManager::Handle(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
 {
     analysis::dvvp::message::StatusInfo statusInfo;
@@ -241,15 +214,15 @@ int ProfManager::Handle(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> 
     statusInfo.dev_id = params->devices;
 
     if (!isInited_) {
-        statusInfo.info = "Profiling is not inited";
-        SendFailedStatusInfo(statusInfo, params->job_id);
+        MSPROF_LOGE("Profiling is not inited!");
         return PROFILING_FAILED;
     }
     MSPROF_LOGI("Handle profiling task");
 
     // check if device online
     if (!(params->host_profiling) && !(CheckIfDevicesOnline(params->devices, statusInfo.info))) {
-        SendFailedStatusInfo(statusInfo, params->job_id);
+        MSPROF_LOGE("%s", statusInfo.info.c_str());
+        MSPROF_INNER_ERROR("EK9999", "%s", statusInfo.info.c_str());
         return PROFILING_FAILED;
     }
     bool isOk = CheckHandleSuc(params, statusInfo);

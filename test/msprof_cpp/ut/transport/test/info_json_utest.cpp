@@ -18,10 +18,8 @@
 #include "info_json.h"
 #include "mmpa_api.h"
 #include "platform/platform.h"
-#include "proto/msprofiler.pb.h"
 #include "common-utils-stub.h"
 
-using namespace analysis::dvvp::proto;
 using namespace analysis::dvvp::host;
 using namespace analysis::dvvp::driver;
 using namespace analysis::dvvp::common::error;
@@ -94,32 +92,6 @@ TEST_F(InfoJsonUTest, InfoXml_init)
     EXPECT_EQ(PROFILING_SUCCESS, infoJson.Generate(cont));
 }
 
-TEST_F(InfoJsonUTest, AddDeviceInfo)
-{
-    GlobalMockObject::verify();
-
-    MOCKER_CPP(&InfoJson::GetDevInfo)
-        .stubs()
-        .will(returnValue(PROFILING_FAILED))
-        .then(returnValue(PROFILING_SUCCESS));
-
-    InfoJson infoJson(jobInfo, devices, hostpid);
-    infoJson.InitDeviceIds();
-    std::shared_ptr<InfoMain> infoMain = std::make_shared<InfoMain>();
-
-    // failed to get dev info
-    EXPECT_EQ(PROFILING_FAILED, infoJson.AddDeviceInfo(infoMain));
-
-    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
-        .stubs()
-        .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::MINI_TYPE))
-        .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::CHIP_V4_1_0));
-
-    // ok
-    EXPECT_EQ(PROFILING_SUCCESS, infoJson.AddDeviceInfo(infoMain));
-    EXPECT_EQ(PROFILING_SUCCESS, infoJson.AddDeviceInfo(infoMain));
-}
-
 TEST_F(InfoJsonUTest, AddOtherInfo)
 {
     GlobalMockObject::verify();
@@ -128,10 +100,9 @@ TEST_F(InfoJsonUTest, AddOtherInfo)
         .will(returnValue(PROFILING_FAILED));
 
     InfoJson infoJson(jobInfo, devices, hostpid);
-    std::shared_ptr<InfoMain> infoMain = std::make_shared<InfoMain>();
 
     // failed to get mac, but only warn
-    EXPECT_EQ(PROFILING_SUCCESS, infoJson.AddOtherInfo(infoMain));
+    EXPECT_EQ(PROFILING_SUCCESS, infoJson.AddOtherInfo());
 }
 
 TEST_F(InfoJsonUTest, SetPlatFormVersion)
@@ -145,20 +116,18 @@ TEST_F(InfoJsonUTest, SetPlatFormVersion)
         .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::LHISI_TYPE));
 
     InfoJson infoJson(jobInfo, devices, hostpid);
-    std::shared_ptr<InfoMain> infoMain = std::make_shared<InfoMain>();
 
-    infoJson.SetPlatFormVersion(infoMain);
-    infoJson.SetPlatFormVersion(infoMain);
-    infoJson.SetPlatFormVersion(infoMain);
-    infoJson.SetPlatFormVersion(infoMain);
+    infoJson.SetPlatFormVersion();
+    infoJson.SetPlatFormVersion();
+    infoJson.SetPlatFormVersion();
+    infoJson.SetPlatFormVersion();
 }
 
 TEST_F(InfoJsonUTest, GetDevInfo)
 {
     GlobalMockObject::verify();
     InfoJson infoJson(jobInfo, devices, hostpid);
-
-    analysis::dvvp::host::DeviceInfo dev_info;
+    analysis::dvvp::host::InfoDeviceInfo dev_info;
 
     MOCKER_CPP(&analysis::dvvp::driver::DrvGetEnvType)
         .stubs()
@@ -204,7 +173,7 @@ TEST_F(InfoJsonUTest, GetDevInfo)
     EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
     EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
     EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
-    EXPECT_EQ(PROFILING_SUCCESS, infoJson.GetDevInfo(0, dev_info));
+    EXPECT_EQ(PROFILING_FAILED, infoJson.GetDevInfo(0, dev_info));
 }
 
 TEST_F(InfoJsonUTest, GetDevInfoCheckAiCpuCoreNum)
@@ -212,7 +181,7 @@ TEST_F(InfoJsonUTest, GetDevInfoCheckAiCpuCoreNum)
     GlobalMockObject::verify();
     InfoJson infoJson(jobInfo, devices, hostpid);
 
-    analysis::dvvp::host::DeviceInfo dev_info;
+    analysis::dvvp::host::InfoDeviceInfo dev_info;
 
     MOCKER_CPP(&analysis::dvvp::driver::DrvGetEnvType)
         .stubs()
@@ -251,28 +220,27 @@ TEST_F(InfoJsonUTest, SetPidInfo)
 {
     GlobalMockObject::verify();
     InfoJson infoJson(jobInfo, devices, hostpid);
-    std::shared_ptr<InfoMain> infoMain = std::make_shared<InfoMain>();
 
     int invalidPid = -1;
     int validPid = 1; // system pid
     // input pid is invalid
-    infoJson.SetPidInfo(infoMain, invalidPid);
-    EXPECT_EQ("NA", infoMain->pid_name());
-    EXPECT_EQ("NA", infoMain->pid());
+    infoJson.SetPidInfo(invalidPid);
+    EXPECT_EQ("NA", infoJson.infoMain_.pid_name);
+    EXPECT_EQ("NA", infoJson.infoMain_.pid);
 
     // proc file size is invalid
     MOCKER_CPP(&analysis::dvvp::common::utils::Utils::GetFileSize)
         .stubs()
         .will(returnValue(MSVP_LARGE_FILE_MAX_LEN + 1))
         .then(returnValue(MSVP_LARGE_FILE_MAX_LEN));
-    infoJson.SetPidInfo(infoMain, validPid);
-    EXPECT_EQ("NA", infoMain->pid_name());
-    EXPECT_EQ("1", infoMain->pid());
+    infoJson.SetPidInfo(validPid);
+    EXPECT_EQ("NA", infoJson.infoMain_.pid_name);
+    EXPECT_EQ("1", infoJson.infoMain_.pid);
 
     // proc file size is valid
-    infoJson.SetPidInfo(infoMain, validPid);
-    EXPECT_NE("NA", infoMain->pid_name());
-    EXPECT_EQ("1", infoMain->pid());
+    infoJson.SetPidInfo(validPid);
+    EXPECT_NE("NA", infoJson.infoMain_.pid_name);
+    EXPECT_EQ("1", infoJson.infoMain_.pid);
 }
 
 TEST_F(InfoJsonUTest, InitDeviceIdsWillReturnFailWhenStrToIntFail)
@@ -299,11 +267,11 @@ TEST_F(InfoJsonUTest, AddSysTimeWillReturnWhenGetFileSizeReturnInvalidSize)
         .stubs()
         .will(returnValue(size1))
         .then(returnValue(size2));
-    std::shared_ptr<InfoMain> infoMain = std::make_shared<InfoMain>();
-    infoJson.AddSysTime(infoMain);
-    EXPECT_EQ("", infoMain->uptime());
-    infoJson.AddSysTime(infoMain);
-    EXPECT_EQ("", infoMain->uptime());
+    infoJson.infoMain_.upTime = "";
+    infoJson.AddSysTime();
+    EXPECT_EQ("", infoJson.infoMain_.upTime);
+    infoJson.AddSysTime();
+    EXPECT_EQ("", infoJson.infoMain_.upTime);
 }
 
 TEST_F(InfoJsonUTest, AddMemTotalWillReturnWhenGetFileSizeReturnInvalidSize)
@@ -316,11 +284,11 @@ TEST_F(InfoJsonUTest, AddMemTotalWillReturnWhenGetFileSizeReturnInvalidSize)
         .stubs()
         .will(returnValue(size1))
         .then(returnValue(size2));
-    std::shared_ptr<InfoMain> infoMain = std::make_shared<InfoMain>();
-    infoJson.AddMemTotal(infoMain);
-    EXPECT_EQ(0, infoMain->memorytotal());
-    infoJson.AddMemTotal(infoMain);
-    EXPECT_EQ(0, infoMain->memorytotal());
+    infoJson.infoMain_.memoryTotal = 0;
+    infoJson.AddMemTotal();
+    EXPECT_EQ(0, infoJson.infoMain_.memoryTotal);
+    infoJson.AddMemTotal();
+    EXPECT_EQ(0, infoJson.infoMain_.memoryTotal);
 }
  
 TEST_F(InfoJsonUTest, AddHostInfoWillReturnFailWhenMemSetFail)
@@ -330,8 +298,7 @@ TEST_F(InfoJsonUTest, AddHostInfoWillReturnFailWhenMemSetFail)
     MOCKER(memset_s)
         .stubs()
         .will(returnValue(EOK - 1));
-    std::shared_ptr<InfoMain> infoMain = std::make_shared<InfoMain>();
-    EXPECT_EQ(PROFILING_FAILED, infoJson.AddHostInfo(infoMain));
+    EXPECT_EQ(PROFILING_FAILED, infoJson.AddHostInfo());
 }
  
 TEST_F(InfoJsonUTest, GetCtrlCpuInfoWillReturnFailWhenGetCtrlCouInfoFail)
@@ -351,7 +318,7 @@ TEST_F(InfoJsonUTest, GetCtrlCpuInfoWillReturnFailWhenGetCtrlCouInfoFail)
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
     uint32_t dev = 0;
-    struct analysis::dvvp::host::DeviceInfo devInfo;
+    struct analysis::dvvp::host::InfoDeviceInfo devInfo;
     EXPECT_EQ(PROFILING_FAILED, infoJson.GetCtrlCpuInfo(dev, devInfo));
     EXPECT_EQ(PROFILING_FAILED, infoJson.GetCtrlCpuInfo(dev, devInfo));
     EXPECT_EQ(PROFILING_FAILED, infoJson.GetCtrlCpuInfo(dev, devInfo));

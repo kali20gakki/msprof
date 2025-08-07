@@ -15,8 +15,6 @@ set(commonSrcFiles
     ${MSPROF_SOURCE_DIR}//dvvp/common/statistics/perf_count.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/app/application.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_client.cpp
-    ${MSPROF_SOURCE_DIR}//dvvp/message/codec.cpp 
-    ${MSPROF_SOURCE_DIR}//dvvp/message/dispatcher.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/transport/transport.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/transport/file_transport.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/driver/devmgmt/ai_drv_dev_api.cpp 
@@ -66,7 +64,6 @@ set(localSrcFiles
     ../stub/common-utils-stub.cpp 
     ../stub/devdrv_runtime_api_stub.cpp 
     ../stub/profile_drv_user_stub.cpp 
-    test/data_handle_utest.cpp    
     test/prof_host_core_utest.cpp 
     test/prof_manager_utest.cpp 
     test/prof_task_utest.cpp 

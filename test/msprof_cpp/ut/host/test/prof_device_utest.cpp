@@ -1,10 +1,9 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "hdc-log-stub.h"
-#include "proto/msprofiler.pb.h"
 #include "ai_drv_dev_api.h"
 #include "errno/error_code.h"
-#include "message/codec.h"
+
 #include "prof_host_core.h"
 #include "prof_manager.h"
 #include "collect_io_server.h"
@@ -95,9 +94,6 @@ TEST_F(HOST_PROF_DEVICE_TEST, run_online)
     //success
     dev.Run();
 
-    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceRpc::SendMsgAndHandleResponse)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
     MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::UploadFileData)
         .stubs()
         .will(returnValue(PROFILING_FAILED))

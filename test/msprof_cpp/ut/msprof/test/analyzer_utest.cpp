@@ -13,19 +13,20 @@
 #include "data_struct.h"
 #include "errno/error_code.h"
 #include "op_desc_parser.h"
-#include "message/codec.h"
+
 #include "prof_channel_manager.h"
-#include "proto/msprofiler.pb.h"
 #include "uploader.h"
 #include "uploader_mgr.h"
 #include "toolchain/prof_acl_api.h"
 #include "transport/hash_data.h"
 #include "transport/uploader.h"
+#include "utils/utils.h"
 
 using namespace Analysis::Dvvp::Analyze;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::transport;
+using namespace analysis::dvvp;
 
 class AnalyzerUtest : public testing::Test {
 protected:
@@ -586,20 +587,18 @@ TEST_F(AnalyzerHwtsUtest, ParseOptimizeHwtsData)
     hwtsChunk.streamId = 1;
     hwtsChunk.cntRes0Type = HWTS_TASK_START_TYPE;
     hwtsChunk.syscnt = 10000; // 10000 start
-    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> hwts;
-    MSVP_MAKE_SHARED0_BREAK(hwts, analysis::dvvp::proto::FileChunkReq);
-    hwts->set_filename("hwts.data");
-    hwts->set_chunk(reinterpret_cast<CHAR_PTR>(&hwtsChunk), sizeof(HwtsProfileType01));
-    hwts->set_chunksizeinbytes(sizeof(HwtsProfileType01));
-    std::string data = analysis::dvvp::message::EncodeMessage(hwts);
-    analyzerHwts->ParseOptimizeHwtsData(data.c_str(), static_cast<uint32_t>(data.size()));
+    ProfileFileChunk hwts;
+    hwts.fileName = "hwts.data";
+    hwts.chunk = std::string(reinterpret_cast<CHAR_PTR>(&hwtsChunk), sizeof(HwtsProfileType01));
+    hwts.chunkSize = sizeof(HwtsProfileType01);
+
+    analyzerHwts->ParseOptimizeHwtsData(hwts.chunk.c_str(), static_cast<uint32_t>(hwts.chunkSize));
 
     hwtsChunk.cntRes0Type = HWTS_TASK_END_TYPE;
     hwtsChunk.syscnt = 20000; // 20000 end
-    hwts->set_chunk(reinterpret_cast<CHAR_PTR>(&hwtsChunk), sizeof(HwtsProfileType01));
-    hwts->set_chunksizeinbytes(sizeof(HwtsProfileType01));
-    data = analysis::dvvp::message::EncodeMessage(hwts);
-    analyzerHwts->ParseOptimizeHwtsData(data.c_str(), static_cast<uint32_t>(data.size()));
+    hwts.chunk = std::string(reinterpret_cast<CHAR_PTR>(&hwtsChunk), sizeof(HwtsProfileType01));
+    hwts.chunkSize = sizeof(HwtsProfileType01);
+    analyzerHwts->ParseOptimizeHwtsData(hwts.chunk.c_str(), static_cast<uint32_t>(hwts.chunkSize));
 }
 
 class AnalyzerRtUtest : public testing::Test {

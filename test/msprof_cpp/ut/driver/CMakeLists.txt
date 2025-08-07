@@ -12,7 +12,6 @@ set(profilerSrcFiles
 
 set(localSrcFiles
     test/main.cpp 
-    ../stub/hdc-log-stub.cpp 
     ../stub/devdrv_runtime_api_stub.cpp 
     ../stub/profile_drv_user_stub.cpp 
     ../../stub/driver_plugin_stub.cpp
@@ -70,7 +69,6 @@ target_compile_definitions(driver_utest PRIVATE
 )
 
 target_link_libraries(driver_utest PRIVATE
-    ascend_protobuf_static
     c_sec_static
     pthread
     ${GTEST_STATIC_LIBRARY}

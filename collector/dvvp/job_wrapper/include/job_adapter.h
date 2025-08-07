@@ -18,7 +18,7 @@
 #include "errno/error_code.h"
 #include "ai_drv_dev_api.h"
 #include "task_relationship_mgr.h"
-#include "message/codec.h"
+
 #include "uploader_mgr.h"
 
 namespace Analysis {

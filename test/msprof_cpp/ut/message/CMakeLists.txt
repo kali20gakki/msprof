@@ -1,11 +1,4 @@
-protobuf_generate(profiler
-	CppPath
-	HeaderPath
-	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler.proto
-)
 set(profilerSrcFiles
-    ${MSPROF_SOURCE_DIR}//dvvp/message/codec.cpp 
-    ${MSPROF_SOURCE_DIR}//dvvp/message/dispatcher.cpp
     ${MSPROF_SOURCE_DIR}//dvvp/message/prof_json_config.cpp
     ${MSPROF_SOURCE_DIR}//dvvp/common/utils/utils.cpp
     ${MSPROF_SOURCE_DIR}//dvvp/common/mmpa/mmpa_api.cpp
@@ -20,11 +13,8 @@ set(profilerSrcFiles
 
 set(localSrcFiles
     test/main.cpp 
-    test/codec_test.cpp 
-    test/dispatcher_test.cpp 
     test/message_test.cpp 
     test/prof_json_config_test.cpp
-    ../stub/hdc-log-stub.cpp 
 )
 
 add_executable(message_utest 
@@ -53,7 +43,6 @@ target_include_directories(message_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
-    ${CMAKE_BINARY_DIR}/proto/profiler
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
     ${MSPROF_SOURCE_DIR}/dvvp/driver/inc
 )
@@ -83,7 +72,6 @@ target_link_options(message_utest PRIVATE
 )
 
 target_link_libraries(message_utest PRIVATE
-    ascend_protobuf_static
     c_sec_static
     pthread
     ${GTEST_STATIC_LIBRARY}

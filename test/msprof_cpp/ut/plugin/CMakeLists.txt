@@ -1,8 +1,3 @@
-protobuf_generate(profiler
-	CppPath
-	HeaderPath
-	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler.proto
-)
 set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/profapi_plugin.cpp
@@ -52,7 +47,6 @@ target_include_directories(plugin_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils
     ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log
-    ${CMAKE_BINARY_DIR}/proto/profiler/
 	${TOP_DIR}/opensource/json/include
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
     ${MSPROF_SOURCE_DIR}/dvvp/driver/inc/

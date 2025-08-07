@@ -16,6 +16,7 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <set>
 #include <thread>
 #include <functional>
 #include "prof_common.h"
@@ -25,7 +26,6 @@
 #include "prof_reporter.h"
 #include "queue/ring_buffer.h"
 #include "config/config.h"
-#include "proto/msprofiler.pb.h"
 
 namespace Msprof {
 namespace Engine {

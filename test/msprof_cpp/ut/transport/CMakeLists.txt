@@ -1,12 +1,6 @@
-protobuf_generate(profiler
-	CppPath
-	HeaderPath
-	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler.proto
-)
 set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/transport/transport.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/transport/file_transport.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/adx_prof_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
@@ -25,7 +19,6 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp 
-    ${MSPROF_SOURCE_DIR}/dvvp/message/codec.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/uploader.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/uploader_mgr.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/transport/prof_channel.cpp 
@@ -36,7 +29,6 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/transport/file_slice.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/transport/file_ageing.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hash_data.cpp 
-    ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_transport.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
@@ -52,8 +44,6 @@ set(localSrcFiles
     test/prof_channel_utest.cpp
     test/hash_data_test.cpp
     test/info_json_utest.cpp
-    ../stub/hdc-api-stub.cpp 
-    ../stub/hdc-log-stub.cpp 
     ../stub/devdrv_runtime_api_stub.cpp 
     ../stub/profile_drv_user_stub.cpp 
     ../../stub/driver_plugin_stub.cpp
@@ -88,7 +78,6 @@ target_include_directories(transport_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/../inc/toolchain
     ../stub/
     ${MSPROF_SOURCE_DIR}/dvvp 
-    ${MSPROF_SOURCE_DIR}/dvvp/adx/inc    
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger
     ${MSPROF_SOURCE_DIR}/dvvp/common 
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform
@@ -109,7 +98,6 @@ target_include_directories(transport_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/task_handle/include 
     ${MSPROF_SOURCE_DIR}/dvvp/aging 
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/common/include
-    ${CMAKE_BINARY_DIR}/proto/profiler/
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
 )
 
@@ -138,7 +126,6 @@ target_link_options(transport_utest PRIVATE
 )
 
 target_link_libraries(transport_utest PRIVATE
-    ascend_protobuf_static
     c_sec_static
     pthread
     ${GTEST_STATIC_LIBRARY}

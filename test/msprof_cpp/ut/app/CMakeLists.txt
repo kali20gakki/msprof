@@ -1,9 +1,3 @@
-protobuf_generate(profiler
-	CppPath
-	HeaderPath
-	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler.proto
-)
-
 set(profilerSrcList
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
@@ -34,8 +28,6 @@ set(profilerSrcList
 
 set(profilerSrcFile
     test/main.cpp
-    ../stub/hdc-api-stub.cpp
-    ../stub/hdc-log-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
     ../stub/profile_drv_user_stub.cpp
     test/application_utest.cpp
@@ -93,7 +85,6 @@ target_include_directories(application_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/task_handle/include
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/common/include
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
-    ${CMAKE_BINARY_DIR}/proto/profiler/
 )
 
 
@@ -122,7 +113,6 @@ target_link_options(application_utest PRIVATE
 )
 
 target_link_libraries(application_utest PRIVATE
-    ascend_protobuf_static
     c_sec_static
     pthread
     ${GTEST_STATIC_LIBRARY}

@@ -1,18 +1,5 @@
 add_subdirectory(msprofbin)
 
-protobuf_generate(profiler_proto
-    CppPath
-    HeaderPath
-    ${CMAKE_CURRENT_SOURCE_DIR}/proto/msprofiler.proto
-    TARGET
-)
-
-set(hdcCpp
-    adx/stub/adx_prof_api.cpp
-    adx/wrapper/hdc_api.cpp
-    adx/wrapper/memory_utils.cpp
-)
-
 ############################ generate stub file(acl_prof_stub.cpp and ge_prof_stub.cpp) ##############################
 set(MSPROF_STUB_INC ${TOP_DIR}/collector/inc/external)
 set(HI_PYTHON python3)
@@ -134,12 +121,10 @@ set(msprofilerCpp
     job_wrapper/src/prof_timer.cpp
     job_wrapper/src/prof_host_job.cpp
     job_wrapper/src/prof_drv_event.cpp
-    message/codec.cpp
     message/prof_json_config.cpp
     msprof/common/src/receive_data.cpp
     msprof/common/src/msprof_callback_handler.cpp
     msprof/common/src/msprof_reporter_mgr.cpp
-    msprof/engine/src/aicpu_plugin.cpp
     msprof/engine/src/prof_api_common.cpp
     msprof/engine/src/prof_acl_mgr.cpp
     msprof/engine/src/uploader_dumper.cpp
@@ -164,8 +149,6 @@ set(msprofilerCpp
     transport/file_ageing.cpp
     transport/file_slice.cpp
     transport/file_transport.cpp
-    transport/hdc/hdc_transport.cpp
-    transport/hdc/platform/soc/dev_mgr_api.cpp
     transport/parser_transport.cpp
     transport/prof_channel.cpp
     transport/transport.cpp
@@ -221,7 +204,7 @@ set(msprofilerInc
     driver/inc
     job_wrapper/include
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_BINARY_DIR}/proto/profiler_proto/
+    # ${CMAKE_BINARY_DIR}/proto/profiler_proto/
 )
 
 set(msprofilerFwcSrc
@@ -233,7 +216,6 @@ add_library(msprofiler_share SHARED
     ${msprofilerFwcSrc}
     depend/stub/error_manager/msprof_error_manager.cpp
     msprof/engine/src/prof_acl_core.cpp
-    ${hdcCpp}
 )
 
 target_include_directories(msprofiler_share PRIVATE
@@ -282,7 +264,6 @@ target_link_directories(msprofiler_share PRIVATE
 target_link_libraries(msprofiler_share PRIVATE
     -Wl,--no-as-needed
     c_sec
-    ascend_protobuf_shared
     error_manager
     -Wl,--as-needed
     dl
@@ -293,4 +274,3 @@ install(TARGETS msprofiler_share OPTIONAL
 )
 
 ####################### libmsprofiler.so ###########################
-add_dependencies(msprofiler_share profiler_proto)

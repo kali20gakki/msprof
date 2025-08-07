@@ -14,31 +14,141 @@
 #include "ai_drv_dsmi_api.h"
 #include "ai_drv_dev_api.h"
 #include "mmpa_api.h"
-#include "proto/msprofiler.pb.h"
+#include "message/message.h"
 namespace analysis {
 namespace dvvp {
 namespace host {
 const char * const PLATFORM_CLOUD = "cloud";
 const std::string INFO_FILE_NAME = "info.json";
 
-struct DeviceInfo {
-    int64_t env_type; /**< 0, FPGA  1, EMU 2, ESL*/
-    int64_t ctrl_cpu_id;
+struct InfoCpu : analysis::dvvp::message::BaseInfo {
+    uint32_t Id;
+    std::string Name;
+    std::string Frequency;
+    uint32_t Logical_CPU_Count;
+    std::string Type;
+
+    void ToObject(nlohmann::json &object) override
+    {
+        SET_VALUE(object, Id);
+        SET_VALUE(object, Name);
+        SET_VALUE(object, Frequency);
+        SET_VALUE(object, Logical_CPU_Count);
+        SET_VALUE(object, Type);
+    }
+
+    void FromObject(const nlohmann::json &object) override {}
+};
+
+struct InfoDeviceInfo : analysis::dvvp::message::BaseInfo {
+    uint32_t id;
+    int64_t env_type;
+    std::string ctrl_cpu_id;
     int64_t ctrl_cpu_core_num;
     int64_t ctrl_cpu_endian_little;
     int64_t ts_cpu_core_num;
     int64_t ai_cpu_core_num;
     int64_t ai_core_num;
-    int64_t ai_vector_num;
     int64_t ai_cpu_core_id;
     int64_t ai_core_id;
     int64_t aicpu_occupy_bitmap;
-    DeviceInfo()
-        : env_type(0), ctrl_cpu_id(0), ctrl_cpu_core_num(0), ctrl_cpu_endian_little(0),
-          ts_cpu_core_num(0), ai_cpu_core_num(0), ai_core_num(0), ai_vector_num(0),
-          ai_cpu_core_id(0), ai_core_id(0), aicpu_occupy_bitmap(0)
+    std::string ctrl_cpu;
+    std::string ai_cpu;
+    int64_t aiv_num;
+    std::string hwts_frequency;
+    std::string aic_frequency;
+    std::string aiv_frequency;
+
+    void ToObject(nlohmann::json &object) override
     {
+        SET_VALUE(object, id);
+        SET_VALUE(object, env_type);
+        SET_VALUE(object, ctrl_cpu_id);
+        SET_VALUE(object, ctrl_cpu_core_num);
+        SET_VALUE(object, ctrl_cpu_endian_little);
+        SET_VALUE(object, ts_cpu_core_num);
+        SET_VALUE(object, ai_cpu_core_num);
+        SET_VALUE(object, ai_core_num);
+        SET_VALUE(object, ai_cpu_core_id);
+        SET_VALUE(object, ai_core_id);
+        SET_VALUE(object, aicpu_occupy_bitmap);
+        SET_VALUE(object, ctrl_cpu);
+        SET_VALUE(object, ai_cpu);
+        SET_VALUE(object, aiv_num);
+        SET_VALUE(object, hwts_frequency);
+        SET_VALUE(object, aic_frequency);
+        SET_VALUE(object, aiv_frequency);
     }
+
+    void FromObject(const nlohmann::json &object) override {}
+};
+
+struct NetCardInfo : analysis::dvvp::message::BaseInfo {
+    std::string netCardName;
+    int32_t speed;
+
+    void ToObject(nlohmann::json &object) override
+    {
+        SET_VALUE(object, netCardName);
+        SET_VALUE(object, speed);
+    }
+
+    void FromObject(const nlohmann::json &object) override {}
+};
+
+struct InfoMain : analysis::dvvp::message::BaseInfo {
+    std::string jobInfo;
+    std::string version;
+    std::string mac;
+    std::string OS;
+    uint32_t cpuCores;
+    std::string hostname;
+    std::string hwtype;
+    std::string devices;
+    std::string platform;
+    std::vector<struct InfoCpu> CPU;
+    std::vector<struct InfoDeviceInfo> DeviceInfo;
+    std::string platform_version;
+    std::string pid;
+    uint32_t memoryTotal;
+    uint32_t cpuNums;
+    uint32_t sysClockFreq;
+    std::string upTime;
+    uint32_t netCardNums;
+    std::vector<struct NetCardInfo> netCard;
+    int32_t rank_id;
+    std::string pid_name;
+    uint32_t drvVersion;
+    uint64_t hostUid;
+
+    void ToObject(nlohmann::json &object) override
+    {
+        SET_VALUE(object, jobInfo);
+        SET_VALUE(object, version);
+        SET_VALUE(object, mac);
+        SET_VALUE(object, OS);
+        SET_VALUE(object, cpuCores);
+        SET_VALUE(object, hostname);
+        SET_VALUE(object, hwtype);
+        SET_VALUE(object, devices);
+        SET_VALUE(object, platform);
+        SET_VALUE(object, platform_version);
+        SET_VALUE(object, pid);
+        SET_VALUE(object, memoryTotal);
+        SET_VALUE(object, cpuNums);
+        SET_VALUE(object, sysClockFreq);
+        SET_VALUE(object, upTime);
+        SET_VALUE(object, netCardNums);
+        SET_VALUE(object, rank_id);
+        SET_VALUE(object, pid_name);
+        SET_VALUE(object, drvVersion);
+        SET_VALUE(object, hostUid);
+        SET_ARRAY_OBJECT_VALUE(object, CPU, "CPU");
+        SET_ARRAY_OBJECT_VALUE(object, DeviceInfo, "DeviceInfo");
+        SET_ARRAY_OBJECT_VALUE(object, netCard, "netCard");
+    }
+
+    void FromObject(const nlohmann::json &object) override {}
 };
 
 class InfoJson {
@@ -49,22 +159,22 @@ public:
 
 private:
     int InitDeviceIds();
-    int AddHostInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> message);
-    int AddDeviceInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> message);
-    int AddOtherInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> message);
-    void SetHwtsFrequency(uint32_t deviceId, analysis::dvvp::proto::InfoDeviceInfo &message);
-    int GetCtrlCpuInfo(uint32_t devId, struct DeviceInfo &devInfo);
-    int GetDevInfo(int deviceId, struct DeviceInfo &devInfo);
-    void SetPlatFormVersion(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
-    void SetCtrlCpuId(analysis::dvvp::proto::InfoDeviceInfo &infoDeviceInfo, const int64_t cpuId);
-    void SetPidInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain, int pid);
-    void AddSysConf(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
-    void AddSysTime(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
-    void AddMemTotal(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
-    void AddNetCardInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
-    void SetRankId(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
-    void SetVersionInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain) const;
-    void SetDrvVersion(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain) const;
+    int AddHostInfo();
+    int AddDeviceInfo();
+    int AddOtherInfo();
+    void SetHwtsFrequency(uint32_t deviceId, struct InfoDeviceInfo &devInfo);
+    int GetCtrlCpuInfo(uint32_t devId, struct InfoDeviceInfo &devInfo);
+    int GetDevInfo(int deviceId, struct InfoDeviceInfo &devInfo);
+    void SetPlatFormVersion();
+    void SetCtrlCpuId(struct InfoDeviceInfo &devInfo, int64_t ctrlCpuId);
+    void SetPidInfo(int pid);
+    void AddSysConf();
+    void AddSysTime();
+    void AddMemTotal();
+    void AddNetCardInfo();
+    void SetRankId();
+    void SetVersionInfo();
+    void SetDrvVersion();
     std::string GetHostOscFrequency() const;
     std::string GetDeviceOscFrequency(uint32_t deviceId, const std::string &freq);
 
@@ -75,6 +185,7 @@ private:
     std::vector<int> hostIds_;
     std::string hostIdSerial_;
     int hostpid_;
+    struct InfoMain infoMain_;
 };
 }  // namespace host
 }  // namespace dvvp

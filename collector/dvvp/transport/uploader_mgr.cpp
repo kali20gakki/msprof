@@ -10,13 +10,11 @@
 
 #include "uploader_mgr.h"
 #include "errno/error_code.h"
-#include "proto/msprofiler.pb.h"
 #include "utils.h"
 
 namespace analysis {
 namespace dvvp {
 namespace transport {
-using namespace analysis::dvvp::proto;
 using namespace analysis::dvvp::common::error;
 namespace {
 const std::set<std::string> FLIP_DATA_NAME_SET{"data/ts_track", "data/aicpu.data"};

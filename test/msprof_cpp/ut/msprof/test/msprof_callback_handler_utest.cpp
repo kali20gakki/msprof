@@ -6,14 +6,12 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <google/protobuf/util/json_util.h>
 #include "config/config_manager.h"
 #include "errno/error_code.h"
-#include "message/codec.h"
+
 #include "msprof_callback_handler.h"
 #include "msprof_callback_impl.h"
 #include "prof_acl_mgr.h"
-#include "proto/msprofiler.pb.h"
 #include "uploader_mgr.h"
 #include "utils/utils.h"
 #include "dyn_prof_server.h"

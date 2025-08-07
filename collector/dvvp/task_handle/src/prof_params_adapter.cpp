@@ -9,7 +9,6 @@
 */
 
 #include "prof_params_adapter.h"
-#include <google/protobuf/util/json_util.h>
 #include "errno/error_code.h"
 #include "config/config.h"
 #include "config/config_manager.h"
@@ -34,43 +33,6 @@ int ProfParamsAdapter::Init()
     return PROFILING_SUCCESS;
 }
 
-/**
- * @brief  : Update sample config with MsProfStartReq (from msprof)
- * @param  : [in] msprofStartCfg : msprof cfg
- * @param  : [out] params : sample cfg to update
- * @return : PROFILING_FAILED (-1) failed
- *         : PROFILING_SUCCES (0) success
- */
-int ProfParamsAdapter::UpdateSampleConfig(SHARED_PTR_ALIA<analysis::dvvp::proto::MsProfStartReq> feature,
-                                          SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
-{
-    MSPROF_LOGI("Begin to update params with MsProfStartReq");
-    if (params == nullptr || feature == nullptr) {
-        MSPROF_LOGE("ProfileParams or MsProfStartReq is nullptr");
-        return PROFILING_FAILED;
-    }
-
-    params->job_id = feature->job_id();
-    if (!feature->ts_fw_training().empty()) {
-        params->ts_fw_training = feature->ts_fw_training();
-    }
-    if (!feature->hwts_log().empty()) {
-        params->hwts_log = feature->hwts_log();
-    }
-    if (!feature->ts_timeline().empty()) {
-        params->ts_timeline = feature->ts_timeline();
-    }
-    if (!feature->task_trace_conf().empty()) {
-        HandleTaskTraceConf(feature->task_trace_conf(), params);
-    }
-    if (feature->feature_name().compare("system_trace") == 0) { // mdc scene only use system_trace
-        params->hwts_log1 = "off";
-    }
-    params->profiling_options = feature->feature_name();
-
-    return PROFILING_SUCCESS;
-}
-
 void ProfParamsAdapter::ProfStartCfgToParamsCfg(const uint64_t dataTypeConfig,
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
 {
@@ -84,56 +46,6 @@ void ProfParamsAdapter::ProfStartCfgToParamsCfg(const uint64_t dataTypeConfig,
         params->stars_acsq_task = MSVP_PROF_ON;
     }
 }
-
-int ProfParamsAdapter::HandleTaskTraceConf(const std::string &conf,
-    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
-{
-    const int CFG_BUFFER_MAX_LEN = 1024 * 1024;  // 1024 *1024 means 1mb
-    if (params == nullptr || conf.size() > CFG_BUFFER_MAX_LEN) {  // job context size bigger than 1mb
-        return PROFILING_FAILED;
-    }
-    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfilerConf> taskConf = nullptr;
-    MSVP_MAKE_SHARED0_RET(taskConf, analysis::dvvp::proto::ProfilerConf, PROFILING_FAILED);
-    bool ok = google::protobuf::util::JsonStringToMessage(conf, taskConf.get()).ok();
-    MSPROF_LOGI("HandleTaskTraceConf config info: %s", conf.c_str());
-    if (!ok) {
-        MSPROF_LOGE("HandleTaskTraceConf ProfilerConf format error, please check it!");
-        return PROFILING_FAILED;
-    }
-    if (taskConf->aicoremetrics().empty()) {
-        params->ai_core_profiling = "off";
-        MSPROF_LOGI("Ai core profiling turns off");
-        return PROFILING_SUCCESS;
-    }
-    std::string aicoreEvents;
-    std::string aicoreMetrics = taskConf->aicoremetrics();
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::CHIP_V4_1_0 &&
-        aicoreMetrics == PIPE_UTILIZATION) {
-        aicoreMetrics = PIPE_UTILIZATION_EXCT;
-        aicoreEvents = "0x416,0x417,0x9,0x302,0xc,0x303,0x54,0x55";
-    } else {
-        ConfigManager::instance()->GetAicoreEvents(aicoreMetrics, aicoreEvents);
-    }
-    std::string aiVectEvents;
-    ConfigManager::instance()->GetAicoreEvents(taskConf->aicoremetrics(), aicoreEvents);
-    if (!aicoreEvents.empty()) {
-        params->ai_core_profiling = "on";
-        params->ai_core_metrics = aicoreMetrics;
-        params->ai_core_profiling_events = aicoreEvents;
-        params->ai_core_profiling_mode = PROFILING_MODE_TASK_BASED;
-        params->aiv_profiling = "on";
-        params->aiv_profiling_events = aiVectEvents;
-        params->aiv_metrics = taskConf->aicoremetrics();
-        params->aiv_profiling_mode = PROFILING_MODE_TASK_BASED;
-    } else {
-        MSPROF_LOGW("Invalid aicore metrics, aicore data will not be collected");
-        params->ai_core_profiling = "off";
-    }
-    params->l2CacheTaskProfiling = taskConf->l2();
-    ConfigManager::instance()->MsprofL2CacheAdapter(params);
-    return PROFILING_SUCCESS;
-}
-
 
 void ProfParamsAdapter::UpdateHardwareMemParams(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> dstParams,
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> srcParams)

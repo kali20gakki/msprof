@@ -14,7 +14,6 @@
 #include <memory>
 #include "prof_reporter.h"
 #include "data_dumper.h"
-#include "proto/msprofiler.pb.h"
 
 namespace Msprof {
 namespace Engine {

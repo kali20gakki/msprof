@@ -1,12 +1,4 @@
-protobuf_generate(profiler
-	CppPath
-	HeaderPath
-	${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler.proto
-)
-
 set(profilerSrcFiles
-    ${MSPROF_SOURCE_DIR}/dvvp/adx/stub/adx_prof_api.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/memory_utils.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_base.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ge.cpp
@@ -52,12 +44,10 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_timer.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_host_job.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_drv_event.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/message/codec.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/message/prof_json_config.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/common/src/msprof_callback_handler.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/common/src/msprof_reporter_mgr.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/common/src/receive_data.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/aicpu_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_acl_mgr.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_ge_core.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_acljson.cpp
@@ -87,8 +77,6 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/transport/file_ageing.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hash_data.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/file_transport.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_transport.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/platform/soc/dev_mgr_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/parser_transport.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/prof_channel.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/transport.cpp
@@ -115,8 +103,6 @@ set(profilerSrcFiles
 set(localSrcFiles
     test/main.cpp
     ../stub/ge_stub.cpp
-    ../stub/hdc-api-stub.cpp
-    ../stub/hdc-log-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
     ../stub/profile_drv_user_stub.cpp
     ../../stub/driver_plugin_stub.cpp
@@ -128,7 +114,6 @@ set(localSrcFiles
     test/job_factory_utest.cpp
     test/prof_channel_manager_utest.cpp
     test/prof_host_job_utest.cpp
-    test/adx_prof_api_utest.cpp
 	test/prof_drv_event_utest.cpp
 )
 
@@ -193,7 +178,6 @@ target_include_directories(job_wrapper_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/message
     ${MSPROF_SOURCE_DIR}/dvvp/transport
-    ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc
     ${MSPROF_SOURCE_DIR}/dvvp/common/memory/
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/client/include
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/common/include
@@ -202,7 +186,6 @@ target_include_directories(job_wrapper_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/task_handle/include
     ${MSPROF_SOURCE_DIR}/dvvp/driver/inc
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include
-    ${MSPROF_SOURCE_DIR}/dvvp/adx/inc
     ${TOP_DIR}/graphengine/inc/external
     ${TOP_DIR}/inc
     ${TOP_DIR}/inc/driver
@@ -214,7 +197,6 @@ target_include_directories(job_wrapper_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/msprofiler/inc
     ../stub/
     ${TOP_DIR}/llt/abl/msprof/msprof_cpp/st/stub
-    ${CMAKE_BINARY_DIR}/proto/profiler/
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
 )
 
@@ -243,7 +225,6 @@ target_compile_definitions(job_wrapper_utest PRIVATE
 )
 
 target_link_libraries(job_wrapper_utest PRIVATE
-    ascend_protobuf_static
     c_sec_static
     pthread
     ${GTEST_STATIC_LIBRARY}

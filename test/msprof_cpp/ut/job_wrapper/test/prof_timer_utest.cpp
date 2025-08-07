@@ -4,11 +4,11 @@
 #include "thread/thread.h"
 #include "prof_timer.h"
 #include "transport/transport.h"
-#include "transport/hdc/hdc_transport.h"
 #include "utils/utils.h"
 #include "mmpa_api.h"
 #include "uploader_mgr.h"
 #include "dcmi_plugin.h"
+#include "file_transport.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::JobWrapper;
@@ -21,8 +21,8 @@ protected:
         param = std::make_shared<analysis::dvvp::message::ProfileParams>();
         jobCtx = std::make_shared<analysis::dvvp::message::JobContext>();
 
-        auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
-                new analysis::dvvp::transport::HDCTransport(session));
+        auto transport = std::shared_ptr<analysis::dvvp::transport::FILETransport>(
+                new analysis::dvvp::transport::FILETransport("./", "200MB"));
         upLoader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
     }
     virtual void TearDown() {
@@ -36,7 +36,6 @@ public:
     std::shared_ptr<analysis::dvvp::message::ProfileParams> param;
     std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx;
 
-    HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
 };
 
@@ -243,8 +242,8 @@ protected:
         param = std::make_shared<analysis::dvvp::message::ProfileParams>();
         jobCtx = std::make_shared<analysis::dvvp::message::JobContext>();
 
-        auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
-                new analysis::dvvp::transport::HDCTransport(session));
+        auto transport = std::shared_ptr<analysis::dvvp::transport::FILETransport>(
+                new analysis::dvvp::transport::FILETransport("./", "200MB"));
         upLoader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
     }
     virtual void TearDown() {
@@ -258,7 +257,6 @@ public:
     std::shared_ptr<analysis::dvvp::message::ProfileParams> param;
     std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx;
 
-    HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
     unsigned int pid = 1;
 };
@@ -296,8 +294,8 @@ protected:
         param = std::make_shared<analysis::dvvp::message::ProfileParams>();
         jobCtx = std::make_shared<analysis::dvvp::message::JobContext>();
 
-        auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
-                new analysis::dvvp::transport::HDCTransport(session));
+        auto transport = std::shared_ptr<analysis::dvvp::transport::FILETransport>(
+                new analysis::dvvp::transport::FILETransport("./", "200MB"));
         upLoader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
     }
     virtual void TearDown() {
@@ -311,7 +309,6 @@ public:
     std::shared_ptr<analysis::dvvp::message::ProfileParams> param;
     std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx;
 
-    HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
 };
 
@@ -367,8 +364,8 @@ protected:
         param = std::make_shared<analysis::dvvp::message::ProfileParams>();
         jobCtx = std::make_shared<analysis::dvvp::message::JobContext>();
 
-        auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
-                new analysis::dvvp::transport::HDCTransport(session));
+        auto transport = std::shared_ptr<analysis::dvvp::transport::FILETransport>(
+                new analysis::dvvp::transport::FILETransport("./", "200MB"));
         upLoader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
     }
     virtual void TearDown() {
@@ -382,7 +379,6 @@ public:
     std::shared_ptr<analysis::dvvp::message::ProfileParams> param;
     std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx;
 
-    HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
 };
 
@@ -411,8 +407,8 @@ protected:
         param = std::make_shared<analysis::dvvp::message::ProfileParams>();
         jobCtx = std::make_shared<analysis::dvvp::message::JobContext>();
 
-        auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
-                new analysis::dvvp::transport::HDCTransport(session));
+        auto transport = std::shared_ptr<analysis::dvvp::transport::FILETransport>(
+                new analysis::dvvp::transport::FILETransport("./", "200MB"));
         upLoader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
     }
     virtual void TearDown() {
@@ -426,7 +422,6 @@ public:
     std::shared_ptr<analysis::dvvp::message::ProfileParams> param;
     std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx;
 
-    HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
 };
 
@@ -455,8 +450,8 @@ protected:
         param = std::make_shared<analysis::dvvp::message::ProfileParams>();
         jobCtx = std::make_shared<analysis::dvvp::message::JobContext>();
 
-        auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
-                new analysis::dvvp::transport::HDCTransport(session));
+        auto transport = std::shared_ptr<analysis::dvvp::transport::FILETransport>(
+                new analysis::dvvp::transport::FILETransport("./", "200MB"));
         upLoader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
     }
     virtual void TearDown() {
@@ -470,7 +465,6 @@ public:
     std::shared_ptr<analysis::dvvp::message::ProfileParams> param;
     std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx;
 
-    HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
 };
 
@@ -507,8 +501,8 @@ protected:
         param = std::make_shared<analysis::dvvp::message::ProfileParams>();
         jobCtx = std::make_shared<analysis::dvvp::message::JobContext>();
 
-        auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
-                new analysis::dvvp::transport::HDCTransport(session));
+        auto transport = std::shared_ptr<analysis::dvvp::transport::FILETransport>(
+                new analysis::dvvp::transport::FILETransport("./", "200MB"));
         upLoader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
     }
     virtual void TearDown() {
@@ -522,7 +516,6 @@ public:
     std::shared_ptr<analysis::dvvp::message::ProfileParams> param;
     std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx;
 
-    HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
     unsigned int pid = 1;
 };
@@ -560,8 +553,8 @@ protected:
         param = std::make_shared<analysis::dvvp::message::ProfileParams>();
         jobCtx = std::make_shared<analysis::dvvp::message::JobContext>();
 
-        auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
-                new analysis::dvvp::transport::HDCTransport(session));
+        auto transport = std::shared_ptr<analysis::dvvp::transport::FILETransport>(
+                new analysis::dvvp::transport::FILETransport("./", "200MB"));
         upLoader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
     }
     virtual void TearDown() {
@@ -572,7 +565,6 @@ public:
     std::shared_ptr<analysis::dvvp::message::ProfileParams> param;
     std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx;
 
-    HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
 };
 
@@ -657,8 +649,8 @@ protected:
         param = std::make_shared<analysis::dvvp::message::ProfileParams>();
         jobCtx = std::make_shared<analysis::dvvp::message::JobContext>();
 
-        auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
-                new analysis::dvvp::transport::HDCTransport(session));
+        auto transport = std::shared_ptr<analysis::dvvp::transport::FILETransport>(
+                new analysis::dvvp::transport::FILETransport("./", "200MB"));
         upLoader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
     }
     virtual void TearDown() {
@@ -669,7 +661,6 @@ public:
     std::shared_ptr<analysis::dvvp::message::ProfileParams> param;
     std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx;
 
-    HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
 };
 
@@ -754,7 +745,6 @@ public:
     std::shared_ptr<analysis::dvvp::message::ProfileParams> param;
     std::shared_ptr<analysis::dvvp::message::JobContext> jobCtx;
 
-    HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
 
     static int DcmiGetCardList(int *cardNum, int *cardList, int listLen)
@@ -781,8 +771,8 @@ protected:
         param = std::make_shared<analysis::dvvp::message::ProfileParams>();
         jobCtx = std::make_shared<analysis::dvvp::message::JobContext>();
 
-        auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
-                new analysis::dvvp::transport::HDCTransport(session));
+        auto transport = std::shared_ptr<analysis::dvvp::transport::FILETransport>(
+                new analysis::dvvp::transport::FILETransport("./", "200MB"));
         upLoader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
 
         auto dcmiPlugin = Collector::Dvvp::Plugin::DcmiPlugin::instance();

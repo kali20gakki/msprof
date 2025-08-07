@@ -3,7 +3,7 @@
 #include <iostream>
 #include "errno/error_code.h"
 #include "prof_task.h"
-#include "message/codec.h"
+
 #include "config/config.h"
 #include "config/config_manager.h"
 
@@ -16,19 +16,6 @@ protected:
   virtual void SetUp() {}
   virtual void TearDown() {}
 };
-
-TEST_F(ProfTaskUtest, RpcTaskTest)
-{
-    GlobalMockObject::verify();
-
-    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
-    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
-    SHARED_PTR_ALIA<ProfRpcTask> task(new ProfRpcTask(0, params));
-    task->Init();
-    task->Stop();
-    task->PostSyncDataCtrl();
-    task->UnInit();
-}
 
 TEST_F(ProfTaskUtest, SocTaskTest)
 {

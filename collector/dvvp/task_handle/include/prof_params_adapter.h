@@ -14,7 +14,6 @@
 #include <memory>
 #include "singleton/singleton.h"
 #include "message/prof_params.h"
-#include "proto/msprofiler.pb.h"
 #include "utils/utils.h"
 
 namespace Analysis {
@@ -27,13 +26,9 @@ public:
     ~ProfParamsAdapter();
 
     int Init();
-    int UpdateSampleConfig(SHARED_PTR_ALIA<analysis::dvvp::proto::MsProfStartReq> feature,
-                           SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     void ProfStartCfgToParamsCfg(const uint64_t dataTypeConfig,
                            SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     int HandleSystemTraceConf(const std::string &conf,
-        SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
-    int HandleTaskTraceConf(const std::string &conf,
         SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     void SetSystemTraceParams(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> dstParams,
         SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> srcParams);
@@ -42,8 +37,6 @@ public:
 private:
     void UpdateHardwareMemParams(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> dstParams,
         SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> srcParams);
-    void UpdateSysConf(SHARED_PTR_ALIA<analysis::dvvp::proto::ProfilerConf> sysConf,
-        SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     void UpdateCpuProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> dstParams,
         SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> srcParams);
     std::string GenerateCapacityEvents();

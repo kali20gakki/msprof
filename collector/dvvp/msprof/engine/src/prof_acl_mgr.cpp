@@ -8,7 +8,6 @@
 
 #include <iomanip>
 #include <csignal>
-#include <google/protobuf/util/json_util.h>
 
 #include "config/config.h"
 #include "config/config_manager.h"
@@ -250,10 +249,6 @@ int ProfAclMgr::Init()
 
 int ProfAclMgr::UnInit()
 {
-    for (auto iter = enginMap_.begin(); iter != enginMap_.end(); iter++) {
-        (void)iter->second->UnInit();
-    }
-    enginMap_.clear();
     return PROFILING_SUCCESS;
 }
 
@@ -1034,23 +1029,7 @@ int ProfAclMgr::ProfStartAiCpuTrace(const uint64_t dataTypeConfig, const uint32_
         }
         break;
     }
-    for (uint32_t i = 0; i < devNums; i++) {
-        uint32_t devId = devIdList[i];
-        MSPROF_LOGI("Process ProfStartAiCpuTrace of device %u", devId);
-        if (devId == DEFAULT_HOST_ID) {
-            continue;
-        }
-        auto iter = enginMap_.find(devId);
-        if (iter == enginMap_.end()) {
-            SHARED_PTR_ALIA<Msprof::Engine::AicpuPlugin> engin;
-            MSVP_MAKE_SHARED0_RET(engin, Msprof::Engine::AicpuPlugin, ACL_ERROR_PROFILING_FAILURE);
-            int ret = engin->Init(devId);
-            if (ret != PROFILING_SUCCESS) {
-                return ret;
-            }
-            enginMap_[devId] = engin;
-        }
-    }
+    MSPROF_LOGW("Current driver version is too low to support aicpu channel, please update driver version");
     return PROFILING_SUCCESS;
 }
 
