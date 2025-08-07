@@ -1737,10 +1737,6 @@ ProfAiCustomCpuJob::ProfAiCustomCpuJob()
     eventAttr_.jobTag = AICPU_CM_COLLECTION_JOB;
 }
 
-ProfAiCustomCpuJob::~ProfAiCustomCpuJob()
-{
-}
-
 bool ProfAiCustomCpuJob::CheckChannelSwitch()
 {
     // cp2不支持mc2和hccl aicpu下发

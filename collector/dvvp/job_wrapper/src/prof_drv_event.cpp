@@ -91,7 +91,7 @@ void *ProfDrvEvent::EventThreadHandle(void *attr)
     }
  
     WaitEvent(eventAttr, grpId);
- 
+    eventAttr->isThreadStart = false;
     MSPROF_LOGI("Event thread exit, device id:%u, channel id:%d", eventAttr->deviceId, eventAttr->channelId);
     return nullptr;
 }
