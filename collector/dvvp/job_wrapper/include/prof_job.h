@@ -359,7 +359,6 @@ private:
 class ProfAiCustomCpuJob : public ProfAicpuJob {
 public:
     ProfAiCustomCpuJob();
-    ~ProfAiCustomCpuJob() override;
 
 private:
     bool CheckChannelSwitch() override;
